@@ -22,7 +22,7 @@ export const InstallModal: React.FC = () => {
   const [copied, setCopied] = useState<boolean>(false);
 
   const isKm = language === 'km';
-  const apkDownloadTarget = appSettings.apkDownloadUrl || 'https://github.com/igpubinfo-max/Khmer-Food-Tourism/releases/download/v1.3.2/app-debug.apk';
+  const apkDownloadTarget = appSettings.apkDownloadUrl || 'https://github.com/igpubinfo-max/Khmer-Food-Tourism/releases/download/v1.3.3/app-debug.apk';
   const iosWebTarget = window.location.origin || 'https://khmerfoodtourism.com';
 
   useEffect(() => {
@@ -319,7 +319,7 @@ export const InstallModal: React.FC = () => {
 
         {/* Footer */}
         <div className="p-4 bg-slate-50 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 flex justify-between items-center text-xs text-slate-500 font-khmer">
-          <span>{isKm ? 'កំណែចុងក្រោយ (v1.3.2)' : 'Release v1.3.2'}</span>
+          <span>{isKm ? 'កំណែចុងក្រោយ (v1.3.3)' : 'Release v1.3.3'}</span>
           <button
             onClick={() => setIsInstallModalOpen(false)}
             className="px-4 py-1.5 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-xl transition font-medium"

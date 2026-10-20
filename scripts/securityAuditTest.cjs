@@ -33,10 +33,11 @@ const seedRestaurantsContent = fs.readFileSync(path.resolve(__dirname, '../src/d
 const restMatches = seedRestaurantsContent.match(/"id":\s*"rest-/g) || [];
 assert(restMatches.length >= 200, `Restaurant directory contains ${restMatches.length} shops (requirement: >= 200).`);
 
-// TEST 3: Check $4.99 Promotional Fee configuration
+// TEST 3: Check $9.99 Promotional Fee configuration & ABA Chea Kimseng
 const seedDataContent = fs.readFileSync(path.resolve(__dirname, '../src/data/seedData.ts'), 'utf8');
-assert(seedDataContent.includes('promotionalFeeUsd: 4.99'), 'Promotional registration fee configured to $4.99 USD.');
-assert(seedDataContent.includes('Special Promotional Price: $4.99'), 'Promotional notice text in seedData.');
+assert(seedDataContent.includes('promotionalFeeUsd: 9.99'), 'Promotional registration fee configured to $9.99 USD.');
+assert(seedDataContent.includes('Special Promotional Price: $9.99'), 'Promotional notice text in seedData ($9.99 for 365 days).');
+assert(seedDataContent.includes("supportAccountName: 'CHEA KIMSENG'"), 'ABA receiver name configured to CHEA KIMSENG.');
 
 // TEST 4: Check No Admin credentials or personal info exposed in public seed data
 assert(!seedDataContent.includes('CheaSavuth@2026'), 'Zero plaintext passwords in seedData.ts.');
@@ -87,18 +88,25 @@ const appContextContent = fs.readFileSync(path.resolve(__dirname, '../src/contex
 assert(appContextContent.includes('const safeRole: UserRole = role === \'admin\' ? \'user\' : role;'), 'Normal users prevented from self-registering as admin.');
 assert(appContextContent.includes('Duplicate admin accounts are strictly prohibited!'), 'Role promotion to duplicate admin accounts strictly blocked.');
 
-// TEST 11: Free Restaurant Listing ($0) and One-Time $4.99 Premium VIP Membership (365 Days)
+// TEST 11: Free Restaurant Listing ($0) and One-Time $9.99 Premium VIP Membership (365 Days)
 assert(appContextContent.includes('365 * 24 * 60 * 60 * 1000'), 'One-time Premium duration is 365 days (not monthly subscription, no auto-renewal).');
 assert(appContextContent.includes('currentItems.length >= 5'), 'Five-food-item limit strictly enforced in addRestaurantMenuItem.');
 
 const addRestContent = fs.readFileSync(path.resolve(__dirname, '../src/components/AddRestaurantModal.tsx'), 'utf8');
 assert(addRestContent.includes('ឥតគិតថ្លៃ') && addRestContent.includes('$0'), 'Free restaurant listing option ($0) presented.');
-assert(addRestContent.includes('$4.99') && addRestContent.includes('365'), 'One-time $4.99 for 365 days presented without auto-renewal.');
+assert(addRestContent.includes('$9.99') && addRestContent.includes('365'), 'One-time $9.99 for 365 days presented without auto-renewal.');
+assert(addRestContent.includes('CHEA KIMSENG'), 'ABA receiver CHEA KIMSENG in AddRestaurantModal.');
 
 // TEST 12: Zero QR Code for Restaurants
 assert(!addRestContent.includes('QRCodeCanvas') && !addRestContent.includes('qrcode.react'), 'Zero QR code generation or display in AddRestaurantModal.');
 const manageMenuContent = fs.readFileSync(path.resolve(__dirname, '../src/components/ManageMenuModal.tsx'), 'utf8');
 assert(!manageMenuContent.includes('QRCodeCanvas') && !manageMenuContent.includes('qrcode.react'), 'Zero QR code generation or display in ManageMenuModal.');
+assert(manageMenuContent.includes('CHEA KIMSENG'), 'ABA receiver CHEA KIMSENG in ManageMenuModal.');
+assert(manageMenuContent.includes('$9.99') || manageMenuContent.includes('promoPrice'), 'ManageMenuModal uses promotional fee $9.99.');
+
+// TEST 13: Zero Times on Food Picture Cards
+const foodCardContent = fs.readFileSync(path.resolve(__dirname, '../src/components/FoodCard.tsx'), 'utf8');
+assert(!foodCardContent.includes('food.cookTime'), 'Zero times/cookTime on food picture cards (Requirement 11).');
 
 // TEST 13: Firestore Security Rules Enforcing 5 Menu Items & Protected Membership Fields
 const firestoreRules = fs.readFileSync(path.resolve(__dirname, '../firestore.rules'), 'utf8');

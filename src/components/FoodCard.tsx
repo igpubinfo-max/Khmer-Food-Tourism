@@ -1,7 +1,7 @@
 import React from 'react';
 import { FoodItem } from '../types';
 import { useApp } from '../context/AppContext';
-import { Clock, Star, Heart, Flame } from 'lucide-react';
+import { Star, Heart, Flame } from 'lucide-react';
 
 interface FoodCardProps {
   food: FoodItem;
@@ -48,12 +48,6 @@ export const FoodCard: React.FC<FoodCardProps> = ({ food }) => {
         >
           <Heart className={`w-3.5 h-3.5 ${bookmarked ? 'fill-current' : ''}`} />
         </button>
-
-        {/* Cook Time pill */}
-        <div className="absolute bottom-2.5 left-2.5 flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#064E3B]/90 backdrop-blur-sm text-white text-[10px] font-medium font-khmer border border-emerald-400/30">
-          <Clock className="w-3 h-3 text-emerald-300" />
-          <span>{food.cookTime}</span>
-        </div>
 
         {/* Sample / Representative Image Label (រូបតំណាង) */}
         <div className="absolute bottom-2.5 right-2.5 px-1.5 py-0.5 rounded-md bg-black/60 backdrop-blur-xs text-[9px] text-white/90 font-khmer border border-white/20 select-none pointer-events-none shadow-xs">

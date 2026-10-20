@@ -252,9 +252,6 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
                 <div className="absolute top-2 left-2 bg-[#064E3B]/80 backdrop-blur-xs text-emerald-200 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-400/30">
                   {food.categoryKh}
                 </div>
-                <div className="absolute bottom-2 right-2 bg-black/60 backdrop-blur-xs text-emerald-200 text-[10px] font-bold px-2 py-0.5 rounded-full font-mono">
-                  {food.cookTime || '២៥ នាទី'}
-                </div>
               </div>
               <div className="p-3">
                 <h4 className="font-bold text-[#0F172A] dark:text-slate-100 text-xs">

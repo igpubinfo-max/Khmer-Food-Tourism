@@ -131,10 +131,18 @@ export interface Restaurant {
   isVerified: boolean;
   isFeatured?: boolean;
   
-  // Membership & Menu Items ($0 Free Listing vs One-Time $4.99 for 365 Days)
-  membershipTier: MembershipTier; // 'free' ($0) or 'premium' ($4.99)
+  // Membership & Menu Items ($0 Free Listing vs One-Time $9.99 for 365 Days)
+  membershipTier: MembershipTier; // 'free' ($0) or 'premium' ($9.99)
   membershipExpiresAt?: string; // ISO 8601 date timestamp (365 days from activation)
   menuItems?: RestaurantMenuItem[]; // Up to 5 items for active Premium restaurants
+  
+  // 10 VIP Benefits tracking & Analytics
+  analytics?: {
+    views?: number;
+    phoneClicks?: number;
+    mapClicks?: number;
+    shareClicks?: number;
+  };
   
   paymentStatus?: PaymentStatus;
   paymentTransactionId?: string;

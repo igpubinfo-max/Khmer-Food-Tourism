@@ -1,20 +1,47 @@
 import React from 'react';
 import { Restaurant, isRestaurantPremiumActive } from '../types';
 import { useApp } from '../context/AppContext';
-import { MapPin, Phone, Star, Clock, Navigation, CheckCircle2, AlertCircle, Sparkles } from 'lucide-react';
+import { MapPin, Phone, Star, Clock, Navigation, CheckCircle2, AlertCircle, Sparkles, Share2 } from 'lucide-react';
 
 interface RestaurantCardProps {
   restaurant: Restaurant;
 }
 
 export const RestaurantCard: React.FC<RestaurantCardProps> = ({ restaurant }) => {
-  const { language, setSelectedRestaurant } = useApp();
+  const { 
+    language, setSelectedRestaurant, showToast,
+    trackRestaurantView, trackRestaurantCall, trackRestaurantMap, trackRestaurantShare 
+  } = useApp();
   const isKm = language === 'km';
+  const isPremium = isRestaurantPremiumActive(restaurant);
+
+  const handleShare = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    trackRestaurantShare(restaurant.id);
+    const shareUrl = `${window.location.origin}/?restaurant=${restaurant.id}`;
+    if (navigator.share) {
+      navigator.share({
+        title: isKm ? restaurant.nameKh : restaurant.nameEn,
+        text: isKm ? `សូមចូលមើល ${restaurant.nameKh} ក្នុងកម្មវិធី Khmer Food & Tourism!` : `Check out ${restaurant.nameEn}!`,
+        url: shareUrl,
+      }).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(shareUrl);
+      showToast(isKm ? 'បានចម្លងតំណភ្ជាប់ហាងជោគជ័យ!' : 'Restaurant link copied to clipboard!', 'success');
+    }
+  };
 
   return (
     <div 
-      onClick={() => setSelectedRestaurant(restaurant)}
-      className="group bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-xs hover:shadow-md border border-slate-200/90 dark:border-slate-700/80 transition-all duration-200 cursor-pointer flex flex-col"
+      onClick={() => {
+        trackRestaurantView(restaurant.id);
+        setSelectedRestaurant(restaurant);
+      }}
+      className={`group bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-xs hover:shadow-md transition-all duration-200 cursor-pointer flex flex-col ${
+        isPremium 
+          ? 'border-2 border-emerald-500/80 ring-1 ring-emerald-400/30' 
+          : 'border border-slate-200/90 dark:border-slate-700/80'
+      }`}
     >
       {/* Cover image */}
       <div className="relative aspect-16/9 w-full overflow-hidden bg-slate-100 dark:bg-slate-700">
@@ -106,12 +133,15 @@ export const RestaurantCard: React.FC<RestaurantCardProps> = ({ restaurant }) =>
             <span className="text-slate-400 text-[10px]">({restaurant.reviewCount})</span>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             <a
               href={`tel:${restaurant.phone}`}
-              onClick={(e) => e.stopPropagation()}
-              className="p-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-emerald-50 hover:text-[#064E3B] dark:bg-slate-700 dark:text-slate-200 transition"
-              title="ទូរស័ព្ទទៅកាន់ហាង"
+              onClick={(e) => {
+                e.stopPropagation();
+                trackRestaurantCall(restaurant.id);
+              }}
+              className="p-1.5 rounded-lg bg-emerald-50 text-[#064E3B] hover:bg-[#064E3B] hover:text-white dark:bg-emerald-950/40 dark:text-emerald-300 transition"
+              title={isKm ? 'ហៅទូរស័ព្ទទៅហាង' : 'Call restaurant'}
             >
               <Phone className="w-3.5 h-3.5" />
             </a>
@@ -120,12 +150,24 @@ export const RestaurantCard: React.FC<RestaurantCardProps> = ({ restaurant }) =>
               href={restaurant.mapUrl}
               target="_blank"
               rel="noopener noreferrer"
-              onClick={(e) => e.stopPropagation()}
-              className="p-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-emerald-50 hover:text-[#064E3B] dark:bg-slate-700 dark:text-slate-200 transition"
-              title="មើលលើ Google Maps"
+              onClick={(e) => {
+                e.stopPropagation();
+                trackRestaurantMap(restaurant.id);
+              }}
+              className="p-1.5 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-600 hover:text-white dark:bg-blue-950/40 dark:text-blue-300 transition"
+              title={isKm ? 'មើលលើ Google Maps' : 'Open in Google Maps'}
             >
               <Navigation className="w-3.5 h-3.5" />
             </a>
+
+            <button
+              type="button"
+              onClick={handleShare}
+              className="p-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-200 transition"
+              title={isKm ? 'ចែករំលែកតំណភ្ជាប់ហាង' : 'Share restaurant'}
+            >
+              <Share2 className="w-3.5 h-3.5" />
+            </button>
           </div>
         </div>
       </div>

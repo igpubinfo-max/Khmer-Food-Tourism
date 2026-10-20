@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
   X, MapPin, Phone, Star, Clock, ExternalLink, 
-  Send, Share2, UtensilsCrossed, Sparkles, CheckCircle2, AlertCircle
+  Send, Share2, UtensilsCrossed, Sparkles, CheckCircle2, AlertCircle, Copy
 } from 'lucide-react';
 import { isRestaurantPremiumActive } from '../types';
 
@@ -14,8 +14,21 @@ export const RestaurantDetailModal: React.FC = () => {
     showToast,
     currentUser,
     setManagingRestaurant,
-    setIsManageMenuModalOpen
+    setIsManageMenuModalOpen,
+    trackRestaurantView,
+    trackRestaurantCall,
+    trackRestaurantMap,
+    trackRestaurantShare
   } = useApp();
+
+  const [activePhoto, setActivePhoto] = useState<string>('');
+
+  useEffect(() => {
+    if (selectedRestaurant) {
+      setActivePhoto(selectedRestaurant.photoUrl);
+      trackRestaurantView(selectedRestaurant.id);
+    }
+  }, [selectedRestaurant?.id]);
 
   if (!selectedRestaurant) return null;
 
@@ -23,20 +36,30 @@ export const RestaurantDetailModal: React.FC = () => {
   const isPremiumActive = isRestaurantPremiumActive(selectedRestaurant);
   const isOwner = currentUser?.id && selectedRestaurant.ownerId === currentUser.id;
 
-  const handleShareTelegram = () => {
-    const text = encodeURIComponent(`សូមណែនាំហាងអាហារឆ្ងាញ់៖ ${selectedRestaurant.nameKh} (${selectedRestaurant.nameEn})\n📍 ${selectedRestaurant.addressKh}\n📞 ${selectedRestaurant.phone}`);
-    const url = encodeURIComponent(window.location.href);
-    window.open(`https://t.me/share/url?url=${url}&text=${text}`, '_blank');
-  };
+  const allPhotos = [
+    selectedRestaurant.photoUrl,
+    ...(selectedRestaurant.galleryPhotos || [])
+  ].filter((url, index, self) => url && self.indexOf(url) === index);
 
-  const handleShareFacebook = () => {
-    const url = encodeURIComponent(window.location.href);
-    window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
+  const handleShare = () => {
+    trackRestaurantShare(selectedRestaurant.id);
+    const shareUrl = `${window.location.origin}/?restaurant=${selectedRestaurant.id}`;
+    if (navigator.share) {
+      navigator.share({
+        title: isKm ? selectedRestaurant.nameKh : selectedRestaurant.nameEn,
+        text: isKm 
+          ? `សូមណែនាំហាងអាហារឆ្ងាញ់៖ ${selectedRestaurant.nameKh} 📍 ${selectedRestaurant.addressKh} 📞 ${selectedRestaurant.phone}`
+          : `Check out ${selectedRestaurant.nameEn}!`,
+        url: shareUrl,
+      }).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(shareUrl);
+      showToast(isKm ? 'បានចម្លងតំណភ្ជាប់ហាងជោគជ័យ!' : 'Restaurant link copied to clipboard!', 'success');
+    }
   };
 
   const handleCopyLink = () => {
-    navigator.clipboard.writeText(`${selectedRestaurant.nameKh} - ${selectedRestaurant.mapUrl}`);
-    showToast(isKm ? 'បានចម្លងព័ត៌មានហាង!' : 'Restaurant info copied!', 'success');
+    handleShare();
   };
 
   return (
@@ -71,9 +94,9 @@ export const RestaurantDetailModal: React.FC = () => {
           {/* Hero Image */}
           <div className="relative h-60 sm:h-64 w-full bg-slate-800">
             <img 
-              src={selectedRestaurant.photoUrl} 
+              src={activePhoto || selectedRestaurant.photoUrl} 
               alt={selectedRestaurant.nameKh}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover transition-all duration-300"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
             
@@ -86,7 +109,7 @@ export const RestaurantDetailModal: React.FC = () => {
                 {isPremiumActive ? (
                   <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-gradient-to-r from-[#064E3B] to-[#059669] text-white border border-emerald-300/40 shadow-xs flex items-center gap-1 font-khmer">
                     <Sparkles className="w-3 h-3 text-emerald-200" />
-                    <span>⭐ {isKm ? 'សមាជិកភាព VIP Premium' : 'Premium Member'}</span>
+                    <span>⭐ {isKm ? 'សមាជិកភាព VIP Premium (៣៦៥ ថ្ងៃ)' : 'VIP Premium Member (365 Days)'}</span>
                   </span>
                 ) : (
                   <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-800/85 text-slate-100 border border-slate-600/40 shadow-xs font-khmer">
@@ -115,12 +138,12 @@ export const RestaurantDetailModal: React.FC = () => {
                 <div>
                   <div className="font-bold text-xs text-[#064E3B] dark:text-emerald-400 flex items-center gap-1.5">
                     <span>👑</span>
-                    <span>{isKm ? 'លោកអ្នកជាម្ចាស់ហាងនេះ' : 'You are the owner of this restaurant'}</span>
+                    <span>{isKm ? 'ផ្ទាំងគ្រប់គ្រងម្ចាស់ហាង' : 'Owner Management Hub'}</span>
                   </div>
                   <div className="text-[10px] text-slate-600 dark:text-slate-300">
                     {isKm 
-                      ? `មុខម្ហូបក្នុងហាង៖ ${(selectedRestaurant.menuItems || []).length}/5 មុខ (អតិបរមា ៥ មុខ)` 
-                      : `Menu items: ${(selectedRestaurant.menuItems || []).length}/5 (Max 5)`}
+                      ? `មុខម្ហូប៖ ${(selectedRestaurant.menuItems || []).length}/5 មុខ | រូបភាពហាង៖ ${allPhotos.length} សន្លឹក` 
+                      : `Menu: ${(selectedRestaurant.menuItems || []).length}/5 | Photos: ${allPhotos.length}`}
                   </div>
                 </div>
                 <button
@@ -131,32 +154,72 @@ export const RestaurantDetailModal: React.FC = () => {
                   className="px-3.5 py-2 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-xs shadow flex items-center gap-1.5 transition active:scale-95"
                 >
                   <UtensilsCrossed className="w-3.5 h-3.5 text-emerald-200" />
-                  <span>{isKm ? 'គ្រប់គ្រងមុខម្ហូប' : 'Manage Menu'}</span>
+                  <span>{isKm ? 'គ្រប់គ្រងហាង & មុខម្ហូប' : 'Manage Store & Menu'}</span>
                 </button>
               </div>
             )}
 
-            {/* Quick action bar */}
-            <div className="grid grid-cols-2 gap-2.5">
+            {/* Quick action bar: Maps, Call, and Share (Benefit 9) */}
+            <div className="grid grid-cols-3 gap-2">
               <a
                 href={selectedRestaurant.mapUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow transition active:scale-95 font-khmer"
+                onClick={() => trackRestaurantMap(selectedRestaurant.id)}
+                className="flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow transition active:scale-95 font-khmer"
               >
-                <MapPin className="w-4 h-4" />
-                <span>{isKm ? 'នាំផ្លូវលើ Maps' : 'Google Maps'}</span>
-                <ExternalLink className="w-3 h-3 opacity-75" />
+                <MapPin className="w-4 h-4 shrink-0" />
+                <span className="truncate">{isKm ? 'ផែនទី' : 'Maps'}</span>
               </a>
 
               <a
                 href={`tel:${selectedRestaurant.phone}`}
-                className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold shadow transition active:scale-95 font-mono"
+                onClick={() => trackRestaurantCall(selectedRestaurant.id)}
+                className="flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold shadow transition active:scale-95 font-mono"
               >
-                <Phone className="w-4 h-4" />
-                <span>{selectedRestaurant.phone}</span>
+                <Phone className="w-4 h-4 shrink-0" />
+                <span className="truncate">{isKm ? 'ហៅទូរស័ព្ទ' : 'Call'}</span>
               </a>
+
+              <button
+                type="button"
+                onClick={handleShare}
+                className="flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold shadow transition active:scale-95 font-khmer"
+              >
+                <Share2 className="w-4 h-4 shrink-0" />
+                <span className="truncate">{isKm ? 'ចែករំលែក' : 'Share'}</span>
+              </button>
             </div>
+
+            {/* Gallery Photos (Multiple Photos Benefit for Premium VIP) */}
+            {allPhotos.length > 1 && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-bold text-[#0F172A] dark:text-white font-khmer flex items-center gap-1.5">
+                    <span>📸</span>
+                    <span>{isKm ? `រូបភាពបរិយាកាស និងម្ហូប (${allPhotos.length} សន្លឹក)` : `Photo Gallery (${allPhotos.length} photos)`}</span>
+                  </span>
+                  <span className="text-[10px] text-[#059669] font-medium font-khmer">
+                    {isKm ? 'ចុចលើរូបដើម្បីផ្លាស់ប្តូរ' : 'Tap to switch preview'}
+                  </span>
+                </div>
+                <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+                  {allPhotos.map((photo, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setActivePhoto(photo)}
+                      className={`relative w-20 h-16 rounded-xl overflow-hidden shrink-0 border-2 transition ${
+                        (activePhoto || selectedRestaurant.photoUrl) === photo 
+                          ? 'border-[#064E3B] ring-2 ring-[#059669]' 
+                          : 'border-slate-200 dark:border-slate-700 opacity-80 hover:opacity-100'
+                      }`}
+                    >
+                      <img src={photo} alt="gallery" className="w-full h-full object-cover" />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Address & Hours */}
             <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 space-y-2.5 text-xs font-khmer shadow-2xs">

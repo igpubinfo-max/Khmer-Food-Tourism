@@ -65,7 +65,7 @@ export const AdminDashboard: React.FC = () => {
   const [bankName, setBankName] = useState(appSettings.supportBankName);
   const [accountName, setAccountName] = useState(appSettings.supportAccountName);
   const [supportMessageKh, setSupportMessageKh] = useState(appSettings.supportMessageKh);
-  const [promotionalFeeUsd, setPromotionalFeeUsd] = useState(appSettings.promotionalFeeUsd || 4.99);
+  const [promotionalFeeUsd, setPromotionalFeeUsd] = useState(appSettings.promotionalFeeUsd || 9.99);
   const [promotionPeriodKh, setPromotionPeriodKh] = useState(appSettings.promotionPeriodKh || '');
   const [newAdminPass, setNewAdminPass] = useState('');
 
@@ -248,8 +248,8 @@ export const AdminDashboard: React.FC = () => {
               </div>
               <p className="text-xs text-emerald-200 font-khmer">
                 {isKm 
-                  ? 'គ្រប់គ្រងមុខម្ហូប (100) ហាងអាហារ (200+) ទេសចរណ៍ ការទូទាត់ $4.99 និងសន្តិសុខ' 
-                  : 'Manage foods (100), restaurants (200+), destinations, $4.99 transactions, and security'}
+                  ? 'គ្រប់គ្រងមុខម្ហូប (100) ហាងអាហារ (200+) ទេសចរណ៍ ការទូទាត់ VIP និងសន្តិសុខ' 
+                  : 'Manage foods (100), restaurants (200+), destinations, VIP transactions, and security'}
               </p>
             </div>
           </div>
@@ -281,7 +281,7 @@ export const AdminDashboard: React.FC = () => {
             }`}
           >
             <CreditCard className="w-4 h-4" />
-            <span>{isKm ? `ការទូទាត់ $4.99 (${transactions.length})` : `Payments (${transactions.length})`}</span>
+            <span>{isKm ? `ការទូទាត់ VIP (${transactions.length})` : `VIP Payments (${transactions.length})`}</span>
             {pendingTxns.length > 0 && (
               <span className="px-1.5 py-0.2 bg-red-600 text-white rounded-full text-[9px] font-bold">
                 {pendingTxns.length}
@@ -397,7 +397,7 @@ export const AdminDashboard: React.FC = () => {
                 </div>
 
                 <div className="p-4 rounded-2xl bg-white dark:bg-stone-800 border border-slate-200 dark:border-slate-700 dark:border-stone-700 shadow-xs">
-                  <span className="text-stone-400 font-khmer text-xs">ប្រតិបត្តិការ $4.99</span>
+                  <span className="text-stone-400 font-khmer text-xs">ប្រតិបត្តិការ VIP</span>
                   <p className="text-2xl font-bold text-[#064E3B] dark:text-emerald-400 font-mono mt-2">{transactions.length}</p>
                   <span className="text-[10px] text-[#059669] font-bold font-khmer">{pendingTxns.length} រង់ចាំផ្ទៀងផ្ទាត់</span>
                 </div>
@@ -415,7 +415,7 @@ export const AdminDashboard: React.FC = () => {
                   <div className="flex items-center justify-between">
                     <p className="font-bold text-[#0F172A] dark:text-white flex items-center gap-1.5 font-khmer">
                       <CreditCard className="w-4 h-4 text-[#059669]" />
-                      <span>{isKm ? `មានប្រតិបត្តិការចុះបញ្ជីថ្មី ${pendingTxns.length} រង់ចាំការផ្ទៀងផ្ទាត់ធនាគារ!` : `${pendingTxns.length} Pending $4.99 Registrations!`}</span>
+                      <span>{isKm ? `មានប្រតិបត្តិការចុះបញ្ជីថ្មី ${pendingTxns.length} រង់ចាំការផ្ទៀងផ្ទាត់ធនាគារ!` : `${pendingTxns.length} Pending VIP Registrations!`}</span>
                     </p>
                     <button
                       onClick={() => setActiveTab('transactions')}
@@ -429,13 +429,13 @@ export const AdminDashboard: React.FC = () => {
             </div>
           )}
 
-          {/* TRANSACTIONS TAB ($4.99 Promotional Registrations) */}
+          {/* TRANSACTIONS TAB (VIP Registrations) */}
           {activeTab === 'transactions' && (
             <div className="space-y-5">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
                   <h3 className="font-bold text-stone-900 dark:text-stone-100 font-khmer text-base">
-                    {isKm ? 'ការទូទាត់ប្រាក់ចុះបញ្ជីហាង ($4.99 Registration Fee & Transactions)' : '$4.99 Registration Transactions'}
+                    {isKm ? 'ការទូទាត់ប្រាក់ចុះបញ្ជីហាង VIP (VIP Registration Fee & Transactions)' : 'VIP Registration Transactions'}
                   </h3>
                   <p className="text-stone-500 font-khmer text-xs">
                     {isKm ? 'ផ្ទៀងផ្ទាត់លេខកូដប្រតិបត្តិការ (Trx ID) ជាមួយធនាគារ មុននឹងធ្វើឱ្យហាងសកម្ម' : 'Verify bank transaction references before activating promoted restaurant listings'}
@@ -556,7 +556,7 @@ export const AdminDashboard: React.FC = () => {
                       type="number"
                       step="0.01"
                       value={promotionalFeeUsd}
-                      onChange={e => setPromotionalFeeUsd(parseFloat(e.target.value) || 4.99)}
+                      onChange={e => setPromotionalFeeUsd(parseFloat(e.target.value) || 9.99)}
                       className="w-full px-3 py-2 rounded-xl border bg-stone-50 dark:bg-stone-700 font-mono font-bold"
                     />
                   </div>
@@ -568,7 +568,7 @@ export const AdminDashboard: React.FC = () => {
                       type="text"
                       value={promotionPeriodKh}
                       onChange={e => setPromotionPeriodKh(e.target.value)}
-                      placeholder="តម្លៃប្រូម៉ូសិនពិសេស៖ $4.99 USD"
+                      placeholder="តម្លៃប្រូម៉ូសិនពិសេស៖ $9.99 USD"
                       className="w-full px-3 py-2 rounded-xl border bg-stone-50 dark:bg-stone-700 font-khmer"
                     />
                   </div>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { RestaurantCard } from './RestaurantCard';
+import { isRestaurantPremiumActive } from '../types';
 import { Store, Plus, MapPin, Sparkles, PhoneCall, CheckCircle2, AlertCircle } from 'lucide-react';
 
 export const RestaurantView: React.FC = () => {
@@ -56,6 +57,13 @@ export const RestaurantView: React.FC = () => {
       if (!matchName && !matchAddress && !matchDish) return false;
     }
     return true;
+  });
+
+  // Benefit 1: Featured restaurant listing (VIP restaurants placed first)
+  const sortedRestaurants = [...filteredRestaurants].sort((a, b) => {
+    const aVip = isRestaurantPremiumActive(a) ? 1 : 0;
+    const bVip = isRestaurantPremiumActive(b) ? 1 : 0;
+    return bVip - aVip;
   });
 
   const verifiedCount = restaurants.filter(r => r.isVerified).length;
@@ -129,10 +137,10 @@ export const RestaurantView: React.FC = () => {
       <div className="p-3.5 rounded-2xl bg-gradient-to-r from-[#064E3B] via-[#065F46] to-[#047857] text-white shadow-xs flex items-center justify-between border border-emerald-600/30">
         <div className="space-y-0.5">
           <p className="font-bold text-xs text-white font-khmer">
-            {isKm ? '🎁 ចុះបញ្ជីហាងឥតគិតថ្លៃ ($0) ឬ Premium $4.99/ឆ្នាំ' : '🎁 Free Shop Listing ($0) or Premium $4.99/Year'}
+            {isKm ? '🎁 ចុះបញ្ជីហាងឥតគិតថ្លៃ ($0) ឬ VIP $9.99/ឆ្នាំ' : '🎁 Free Shop Listing ($0) or VIP $9.99/Year'}
           </p>
           <p className="text-[10px] text-emerald-200 font-khmer">
-            {isKm ? 'ចុះឈ្មោះហាងរបស់អ្នក និងថែមមុខម្ហូបក្នុងហាងបានរហូតដល់ ៥ មុខ!' : 'List your restaurant and add up to 5 food menu items!'}
+            {isKm ? 'តម្លៃពិសេសត្រឹមដំណាច់ឆ្នាំនេះ ទទួលបានអត្ថប្រយោជន៍ VIP ទាំង ១០ យ៉ាង!' : 'End of year promo: get all 10 VIP membership benefits!'}
           </p>
         </div>
         <button
@@ -168,8 +176,8 @@ export const RestaurantView: React.FC = () => {
 
       {/* Restaurant Cards List */}
       <div className="space-y-3">
-        {filteredRestaurants.length > 0 ? (
-          filteredRestaurants.map((restaurant) => (
+        {sortedRestaurants.length > 0 ? (
+          sortedRestaurants.map((restaurant) => (
             <RestaurantCard key={restaurant.id} restaurant={restaurant} />
           ))
         ) : (

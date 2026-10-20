@@ -35,7 +35,7 @@ export const AddRestaurantModal: React.FC = () => {
   const [photoUrl, setPhotoUrl] = useState('https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80');
   const [descriptionKh, setDescriptionKh] = useState('');
 
-  // Payment Step Fields (One-time $4.99 for 365 Days)
+  // Payment Step Fields (One-time $9.99 for 365 Days)
   const [transactionRef, setTransactionRef] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<'BankTransfer' | 'Bakong' | 'KHQR'>('BankTransfer');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -43,7 +43,7 @@ export const AddRestaurantModal: React.FC = () => {
   if (!isAddRestaurantModalOpen) return null;
 
   const isKm = language === 'km';
-  const promoPrice = appSettings.promotionalFeeUsd || 4.99;
+  const promoPrice = appSettings.promotionalFeeUsd || 9.99;
 
   // Preset photos for quick selection
   const samplePhotos = [
@@ -282,7 +282,7 @@ export const AddRestaurantModal: React.FC = () => {
                   )}
                 </div>
 
-                {/* Premium Membership Card ($4.99 for 365 Days) */}
+                {/* Premium Membership Card ($9.99 for 365 Days) */}
                 <div 
                   onClick={() => setSelectedTier('premium')}
                   className={`p-3.5 rounded-2xl border-2 cursor-pointer transition flex flex-col justify-between ${
@@ -297,23 +297,31 @@ export const AddRestaurantModal: React.FC = () => {
                         <span>⭐</span>
                         <span>{isKm ? 'Premium VIP' : 'Premium VIP'}</span>
                       </span>
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#064E3B] text-white font-mono">
-                        $4.99
-                      </span>
+                      <div className="flex flex-col items-end">
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#064E3B] text-white font-mono">
+                          $9.99
+                        </span>
+                        <span className="text-[8px] text-amber-600 dark:text-amber-400 font-bold">
+                          {isKm ? 'ត្រឹមដំណាច់ឆ្នាំ' : 'End of year promo'}
+                        </span>
+                      </div>
                     </div>
                     <ul className="text-[10px] text-slate-600 dark:text-slate-300 space-y-1">
                       <li className="text-[#064E3B] dark:text-emerald-400 font-bold">
-                        ✓ {isKm ? 'ថែមមុខម្ហូបបានរហូតដល់ ៥ មុខ' : 'Add up to 5 food items'}
+                        ✓ {isKm ? 'មុខម្ហូប ៥ មុខ ជាមួយរូបភាព និងតម្លៃ' : 'Up to 5 food items with photos & prices'}
                       </li>
-                      <li>✓ {isKm ? 'រូបភាព តម្លៃ និងការពិពណ៌នា' : 'Photos, prices, descriptions'}</li>
-                      <li>✓ {isKm ? 'កែប្រែព័ត៌មានបានគ្រប់ពេល' : 'Edit info during membership'}</li>
-                      <li>✓ {isKm ? 'សុពលភាព ១ ឆ្នាំ (៣៦៥ ថ្ងៃ)' : 'One-time for 365 days'}</li>
+                      <li>✓ {isKm ? 'រូបភាពហាងច្រើនសន្លឹក (Gallery)' : 'Multiple restaurant photos'}</li>
+                      <li>✓ {isKm ? 'កែប្រែព័ត៌មានហាងដោយខ្លួនឯង' : 'Self-service editing'}</li>
+                      <li>✓ {isKm ? 'បង្ហាញក្នុងបញ្ជីហាងឆ្នើម & ផ្នែក VIP' : 'Featured listing & VIP section'}</li>
+                      <li>✓ {isKm ? 'ផ្លាក VIP & ស្ថិតិហាង (មើល, ខល, Maps)' : 'VIP badge & analytics (views, calls, maps)'}</li>
+                      <li>✓ {isKm ? 'តំណភ្ជាប់ចែករំលែក & សេវាជំនួយ VIP' : 'Shareable link & member support'}</li>
+                      <li className="text-[#059669] font-medium pt-0.5">✓ {isKm ? 'សុពលភាព ១ ឆ្នាំពេញ (៣៦៥ ថ្ងៃ)' : 'One-time for 365 days'}</li>
                     </ul>
                   </div>
                   {selectedTier === 'premium' && (
                     <div className="mt-2 text-[10px] font-bold text-[#064E3B] dark:text-emerald-400 flex items-center gap-1">
                       <CheckCircle2 className="w-3.5 h-3.5" />
-                      <span>{isKm ? 'បានជ្រើសរើស ($4.99)' : 'Selected ($4.99)'}</span>
+                      <span>{isKm ? 'បានជ្រើសរើស ($9.99)' : 'Selected ($9.99)'}</span>
                     </div>
                   )}
                 </div>
@@ -322,8 +330,8 @@ export const AddRestaurantModal: React.FC = () => {
               {/* No Auto-Renew Guarantee Notice */}
               <p className="text-[10px] text-slate-500 mt-1.5">
                 {isKm 
-                  ? 'ℹ️ ការទូទាត់ Premium គឺជាការបង់តែមួយលើក $4.99 សម្រាប់រយៈពេល ៣៦៥ ថ្ងៃ (គ្មានការកាត់ប្រាក់ប្រចាំខែ និងគ្មានការបន្តស្វ័យប្រវត្តិឡើយ)។' 
-                  : 'ℹ️ Premium is a one-time payment of $4.99 for 365 days. No monthly subscription or automatic renewal.'}
+                  ? 'ℹ️ ការទូទាត់ Premium គឺជាការបង់តែមួយលើក $9.99 សម្រាប់រយៈពេល ៣៦៥ ថ្ងៃ (តម្លៃពិសេសត្រឹមដំណាច់ឆ្នាំនេះប៉ុណ្ណោះ គ្មានការកាត់ប្រាក់ប្រចាំខែ និងគ្មានការបន្តស្វ័យប្រវត្តិឡើយ)។' 
+                  : 'ℹ️ Premium is a one-time payment of $9.99 for 365 days (End of year promo only. No monthly subscription or automatic renewal).'}
               </p>
             </div>
 
@@ -518,24 +526,24 @@ export const AddRestaurantModal: React.FC = () => {
           </form>
         )}
 
-        {/* Step 2: Payment Workflow (One-Time $4.99 USD for 365 Days) — NO QR CODE */}
+        {/* Step 2: Payment Workflow (One-Time $9.99 USD for 365 Days) — NO QR CODE */}
         {step === 2 && (
           <form onSubmit={handleFinalSubmit} className="p-5 space-y-4 overflow-y-auto no-scrollbar flex-1 text-xs font-khmer">
             {/* Promo Price Header Box */}
             <div className="bg-gradient-to-br from-emerald-50 via-white to-emerald-50 dark:from-slate-800 dark:to-emerald-950/40 p-4 rounded-2xl border border-emerald-200 dark:border-emerald-800 text-center relative overflow-hidden">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#064E3B] text-white text-[10px] font-bold rounded-full mb-2 shadow-xs">
                 <Sparkles className="w-3.5 h-3.5 text-emerald-300" />
-                <span>One-Time Payment: ${promoPrice} USD for 365 Days</span>
+                <span>⭐ {isKm ? 'សមាជិកភាព VIP Premium — តម្លៃពិសេសដំណាច់ឆ្នាំ' : 'Premium VIP Membership — End of Year Promo'}</span>
               </div>
               <div className="flex items-center justify-center gap-3">
-                <span className="text-slate-400 line-through text-sm">$19.99 USD</span>
+                <span className="text-slate-400 line-through text-sm">$29.99 USD</span>
                 <span className="text-2xl font-black text-[#064E3B] dark:text-emerald-400 font-mono">${promoPrice} USD</span>
-                <span className="text-xs text-slate-500">(~ ២០,៤០០ រៀល)</span>
+                <span className="text-xs text-slate-500">(~ ៤០,៨០០ រៀល)</span>
               </div>
               <p className="text-[11px] text-slate-600 dark:text-slate-300 mt-1 leading-snug">
                 {isKm 
-                  ? 'ការទូទាត់តែមួយលើក $4.99 សម្រាប់រយៈពេល ៣៦៥ ថ្ងៃពេញ (គ្មានការគិតថ្លៃប្រចាំខែ និងគ្មានការបន្តស្វ័យប្រវត្តិឡើយ)។ លោកអ្នកអាចបន្ថែមមុខម្ហូបក្នុងហាងបានរហូតដល់ ៥ មុខ។' 
-                  : 'One-time payment of $4.99 for 365 days. No monthly subscription or automatic renewal. Add up to 5 food menu items.'}
+                  ? 'ការទូទាត់តែមួយលើក $9.99 សម្រាប់រយៈពេល ៣៦៥ ថ្ងៃពេញ (តម្លៃពិសេសត្រឹមដំណាច់ឆ្នាំនេះប៉ុណ្ណោះ គ្មានការគិតថ្លៃប្រចាំខែ និងគ្មានការបន្តស្វ័យប្រវត្តិឡើយ)។ រួមបញ្ចូលអត្ថប្រយោជន៍ VIP ទាំង ១០ យ៉ាងពេញលេញ។' 
+                  : 'One-time payment of $9.99 for 365 days (End of year promo only. No monthly subscription or automatic renewal). Full access to all 10 VIP benefits.'}
               </p>
             </div>
 
@@ -553,7 +561,7 @@ export const AddRestaurantModal: React.FC = () => {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-500">{isKm ? 'ម្ចាស់គណនី៖' : 'Beneficiary:'}</span>
-                  <span className="font-bold text-[#0F172A] dark:text-slate-100 font-mono">KHMER FOOD TOURISM</span>
+                  <span className="font-bold text-[#0F172A] dark:text-slate-100 font-mono">CHEA KIMSENG</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-500">{isKm ? 'លេខគណនី៖' : 'Account Number:'}</span>
@@ -616,7 +624,7 @@ export const AddRestaurantModal: React.FC = () => {
                 className="py-3 px-4 rounded-2xl bg-[#064E3B] hover:bg-[#047857] text-white text-xs font-bold shadow-md shadow-emerald-950/20 flex items-center justify-center gap-1.5 transition active:scale-[0.98] disabled:opacity-50"
               >
                 <CheckCircle2 className="w-4 h-4" />
-                <span>{isKm ? 'ដាក់ស្នើ និងបង់ប្រាក់' : 'Submit & Pay $4.99'}</span>
+                <span>{isKm ? 'ដាក់ស្នើ និងបង់ប្រាក់' : `Submit & Pay $${promoPrice}`}</span>
               </button>
             </div>
           </form>

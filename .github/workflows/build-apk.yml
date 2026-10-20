@@ -60,21 +60,32 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: v1.3.2
-          name: "Khmer Food & Tourism v1.3.2 (Sample Photo Badges & iOS Direct Download Option)"
+          tag_name: v1.3.3
+          name: "Khmer Food & Tourism v1.3.3 (10 VIP Benefits, $9.99 Promo, Chea Kimseng ABA)"
           overwrite: true
           make_latest: true
           body: |
             ### 🇰🇭 កម្មវិធីទូរស័ព្ទដៃ អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism Mobile App)
             
-            **កំណែថ្មី v1.3.2 (Representative Photo Badges & Direct iOS Option):**
-            - 📷 **បន្ថែមស្លាក "រូបតំណាង" (Sample Photo):** គ្រប់រូបភាពមុខម្ហូបទាំងអស់នៅទូទាំងកម្មវិធី (Food Cards, Food Detail Modal, Restaurant Menu) ត្រូវបានបំពាក់នូវស្លាកអក្សរតូចស្អាត "រូបតំណាង" នៅខាងស្តាំដៃផ្នែកខាងក្រោម ដើម្បីផ្តល់ព័ត៌មានច្បាស់លាស់ដល់អតិថិជន។
-            - 🍎 **ប៊ូតុងដំឡើងសម្រាប់ Apple iOS (iPhone):** បន្ថែមប៊ូតុងដំឡើង iOS ដោយផ្ទាល់នៅក្បែរប៊ូតុងដំឡើង Android APK នៅទំព័រដើម (Hero Banner & Quick Showcase Card) រួមជាមួយការណែនាំដំឡើង Safari Add to Home Screen (PWA) និងតំណភ្ជាប់ Apple TestFlight។
-            - 🛠️ **ដោះស្រាយបញ្ហាផ្ទាំងពណ៌សពេលបើកឡើងវិញ (Fixed Blank Screen on App Reopen):** ការពារ និងជម្រះទិន្នន័យខូចដោយស្វ័យប្រវត្តិកាលណាទូរស័ព្ទបើកកម្មវិធី ព្រមទាំងបំពាក់ប្រព័ន្ធ ErrorBoundary។
-            - 🌿 **ស្ទីលពណ៌ភ្នែកស្រួលមើល (Eye-Friendly Clean White & Deep Emerald):** ផ្ទៃសទន់ភ្លឺស្រឡះ (#F8FAFC) មិនចាំងភ្នែក មិនព្រិលភ្នែក អក្សរខ្មៅដិតច្បាស់ (#0F172A) និងបៃតងត្បូងមរកតចាស់ (#064E3B)។
+            **កំណែថ្មី v1.3.3 (10 Premium VIP Benefits, $9.99 End-of-Year Promo, Chea Kimseng ABA):**
+            - ⭐ **អត្ថប្រយោជន៍ VIP ទាំង ១០ យ៉ាងពេញលេញ (10 VIP Benefits):**
+              1. បង្ហាញក្នុងបញ្ជីហាងឆ្នើម (Featured restaurant listing)
+              2. ដាក់រូបភាពហាងច្រើនសន្លឹក Gallery (Multiple restaurant photos)
+              3. មុខម្ហូប ៥ មុខ ជាមួយរូបភាព និងតម្លៃ (Up to 5 editable food menu items)
+              4. កែប្រែព័ត៌មានហាង រូបភាព និងលេខទូរស័ព្ទដោយខ្លួនឯង (Self-service editing)
+              5. តំណភ្ជាប់ចែករំលែកទំព័រហាងផ្ទាល់ (Shareable restaurant page link)
+              6. ផ្លាកសញ្ញា VIP Premium លើបញ្ជី និងទំព័រហាង (Premium VIP badge)
+              7. ស្ថិតិហាងផ្ទាល់៖ អ្នកមើល ចុចទូរស័ព្ទ ចុច Maps និងចែករំលែក (Restaurant analytics)
+              8. បង្ហាញក្នុងផ្នែកផ្សព្វផ្សាយ VIP ពិសេស (Dedicated VIP promotion section)
+              9. ប៊ូតុងខល ផែនទី និងចែករំលែករហ័ស (Easy-to-access call, map, and share buttons)
+              10. សេវាជំនួយសមាជិក VIP ផ្ទាល់តាម Telegram (VIP member support channel)
+            - 🏷️ **តម្លៃសមាជិកភាព VIP $9.99 សម្រាប់ ៣៦៥ ថ្ងៃ (End of year promo):** បង់តែមួយលើក $9.99 សម្រាប់រយៈពេល ៣៦៥ ថ្ងៃ (តម្លៃពិសេសត្រឹមដំណាច់ឆ្នាំនេះប៉ុណ្ណោះ គ្មានការកាត់ប្រាក់ប្រចាំខែ និងគ្មានការបន្តស្វ័យប្រវត្តិឡើយ)។
+            - 🏦 **ឈ្មោះគណនីទទួលធនាគារ ABA៖** កែសម្រួលឈ្មោះគណនីទទួលធនាគារ ABA ទៅជា **CHEA KIMSENG**។
+            - ⏱️ **លុបម៉ោងលើរូបភាពម្ហូបទាំងអស់ (Removed times from food pictures):** គ្មានការបង្ហាញម៉ោង ឬ cookTime badge ពីលើរូបភាពមុខម្ហូបឡើយ។
+            - 📷 **រក្សាស្លាក "រូបតំណាង" (Sample Photo):** លើគ្រប់កាតមុខម្ហូប និងផ្ទាំងលម្អិតមុខម្ហូបទាំងអស់។
+            - 🍎 **ប៊ូតុងដំឡើងសម្រាប់ iOS (Apple iPhone):** មានប៊ូតុង iOS ផ្ទាល់ និងការណែនាំ Safari Add to Home Screen (PWA) ពេញលេញ។
             - 🎁 **ចុះបញ្ជីហាងឥតគិតថ្លៃ $0 (Free Restaurant Listing):** ម្ចាស់ហាងអាចចុះឈ្មោះហាងដោយឥតគិតថ្លៃ ($0) បង្ហាញក្នុងបញ្ជីហាងទូទៅ។
-            - ⭐ **សមាជិក VIP Premium $4.99 សម្រាប់ ១ ឆ្នាំ (365 ថ្ងៃ):** បង់តែម្តង $4.99 សម្រាប់រយៈពេល ៣៦៥ ថ្ងៃ (មិនមែនប្រចាំខែ គ្មានបន្តស្វ័យប្រវត្តិ) អាចដាក់ម្ហូប ៥ មុខ។
-            - 🚫 **ដកមុខងារ QR Code របស់ភោជនីយដ្ឋានចេញទាំងស្រុង។**
+            - 🚫 **គ្មានមុខងារ QR Code របស់ភោជនីយដ្ឋានឡើយ។**
           draft: false
           prerelease: false
           files: |

@@ -37,15 +37,15 @@ export const initialAppSettings: AppSettings = {
   iosTestFlightUrl: 'https://testflight.apple.com/join/khmerfoodtourism',
   supportQrImageUrl: '/donation-qr.png',
   supportBankName: 'ABA BANK / BAKONG KHQR',
-  supportAccountName: 'KHMER FOOD TOURISM',
+  supportAccountName: 'CHEA KIMSENG',
   supportMessageKh: 'សូមជួយគាំទ្រការអភិវឌ្ឍន៍កម្មវិធី "អាហារ និងទេសចរណ៍ខ្មែរ" ដើម្បីផ្សព្វផ្សាយវប្បធម៌ និងម្ហូបខ្មែរទៅកាន់ពិភពលោក។ រាល់ការបរិច្ចាគស្ម័គ្រចិត្តរបស់លោកអ្នក គឺជាកម្លាំងចិត្តដ៏ធំធេងសម្រាប់ក្រុមការងារ!',
   supportMessageEn: 'Thank you for supporting Khmer Food & Tourism. Your kind voluntary contribution empowers us to continue promoting authentic Cambodian heritage and cuisine worldwide!',
   adminPasswordHash: 'pbkdf2$100000$70fcb2b4c0d7d330e0c35f90e46c1dc4d23d0a6ba9e8bf24d49f9236b54dbcd5$9f4c042b557cce87cacb3a142fef4082cded0ac5bf594f6a0fd167439f53b369',
   isAdminInitialized: true,
-  promotionalFeeUsd: 4.99,
+  promotionalFeeUsd: 9.99,
   promotionalFeeEnabled: true,
-  promotionPeriodKh: 'តម្លៃប្រូម៉ូសិនពិសេស៖ $4.99 USD (បញ្ចុះតម្លៃ ៧៥% ពីតម្លៃដើម $19.99)',
-  promotionPeriodEn: 'Special Promotional Price: $4.99 USD (75% Off Regular $19.99)',
+  promotionPeriodKh: 'តម្លៃប្រូម៉ូសិនពិសេស៖ $9.99 USD សម្រាប់ ៣៦៥ ថ្ងៃ (ត្រឹមដំណាច់ឆ្នាំនេះប៉ុណ្ណោះ)',
+  promotionPeriodEn: 'Special Promotional Price: $9.99 USD for 365 Days (Valid until end of this year only)',
 };
 
 // 100+ Authentic Khmer Dishes

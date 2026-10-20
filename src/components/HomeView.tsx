@@ -3,6 +3,7 @@ import { useApp } from '../context/AppContext';
 import { FoodCard } from './FoodCard';
 import { RestaurantCard } from './RestaurantCard';
 import { TouristCard } from './TouristCard';
+import { isRestaurantPremiumActive } from '../types';
 import { 
   Sparkles, ChevronRight, Utensils, Store, Compass, 
   MapPin, Heart, Flame, QrCode, Download, ShieldCheck,
@@ -19,7 +20,11 @@ export const HomeView: React.FC = () => {
 
   const isKm = language === 'km';
   const featuredFoods = foods.slice(0, 4);
-  const featuredRestaurants = restaurants.slice(0, 3);
+
+  // Benefits 1 & 8: Dedicated Premium VIP Showcase & Featured sorting
+  const premiumVipRestaurants = restaurants.filter(r => isRestaurantPremiumActive(r));
+  const otherRestaurants = restaurants.filter(r => !isRestaurantPremiumActive(r));
+  const featuredRestaurants = [...premiumVipRestaurants, ...otherRestaurants].slice(0, 3);
   const featuredDestinations = destinations.slice(0, 3);
 
   const quickCategories = [
@@ -179,6 +184,40 @@ export const HomeView: React.FC = () => {
           ))}
         </div>
       </div>
+
+      {/* Benefit 8: Dedicated Premium VIP Promotion Section */}
+      {premiumVipRestaurants.length > 0 && (
+        <div className="p-4 rounded-3xl bg-gradient-to-br from-[#064E3B] to-[#047857] text-white border border-emerald-500/40 shadow-sm space-y-3 font-khmer">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="px-2 py-0.5 rounded-lg bg-amber-400 text-stone-900 text-[10px] font-bold shadow-xs">
+                ⭐ VIP
+              </span>
+              <div>
+                <h3 className="font-moul text-xs sm:text-sm text-white">
+                  {isKm ? 'ភោជនីយដ្ឋានឆ្នើម VIP (Featured VIP)' : 'Featured VIP Restaurants'}
+                </h3>
+                <p className="text-[10px] text-emerald-200">
+                  {isKm ? 'ហាងដៃគូឆ្នើមផ្លូវការ និងសមាជិកភាព VIP' : 'Official partner restaurants & active VIP members'}
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => setActiveTab('restaurants')}
+              className="text-xs font-bold text-emerald-200 hover:text-white flex items-center gap-0.5"
+            >
+              <span>{isKm ? 'ទាំងអស់' : 'All'}</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          <div className="space-y-2.5">
+            {premiumVipRestaurants.slice(0, 2).map((r) => (
+              <RestaurantCard key={r.id} restaurant={r} />
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Section 2: Recommended Restaurants */}
       <div className="space-y-3">

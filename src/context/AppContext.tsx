@@ -76,6 +76,12 @@ interface AppContextType {
   deleteRestaurantMenuItem: (restaurantId: string, menuItemId: string) => boolean;
   upgradeRestaurantToPremium: (restaurantId: string, transactionRef: string, paymentMethod?: 'KHQR' | 'Bakong' | 'BankTransfer') => void;
   
+  // Restaurant Analytics (Views, Calls, Maps, Shares)
+  trackRestaurantView: (restaurantId: string) => void;
+  trackRestaurantCall: (restaurantId: string) => void;
+  trackRestaurantMap: (restaurantId: string) => void;
+  trackRestaurantShare: (restaurantId: string) => void;
+  
   // Managing Restaurant Modal
   isManageMenuModalOpen: boolean;
   setIsManageMenuModalOpen: (open: boolean) => void;
@@ -317,7 +323,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const saved = localStorage.getItem('kft_settings_v4') || localStorage.getItem('kft_settings_v3');
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
-        if (parsed && typeof parsed === 'object') return { ...initialAppSettings, ...parsed };
+        if (parsed && typeof parsed === 'object') {
+          return { 
+            ...initialAppSettings, 
+            ...parsed,
+            supportAccountName: 'CHEA KIMSENG',
+            promotionalFeeUsd: 9.99,
+          };
+        }
       }
     } catch (e) {
       console.warn('Failed to parse kft_settings', e);
@@ -853,6 +866,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     setRestaurants(prev => prev.map(r => r.id === updated.id ? safeUpdated : r));
     if (selectedRestaurant?.id === updated.id) setSelectedRestaurant(safeUpdated);
+    if (managingRestaurant?.id === updated.id) setManagingRestaurant(safeUpdated);
     showToast(language === 'km' ? 'បានកែប្រែព័ត៌មានហាងរួចរាល់' : 'Restaurant updated!', 'success');
   };
 
@@ -882,8 +896,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (!isRestaurantPremiumActive(targetRest)) {
       showToast(
         language === 'km' 
-          ? 'ការចុះបញ្ជីឥតគិតថ្លៃមិនអាចបន្ថែមមុខម្ហូបបានទេ។ សូមដំឡើងទៅ Premium ($4.99 សម្រាប់ ៣៦៥ ថ្ងៃ)!' 
-          : 'Free listing cannot add food items. Please upgrade to Premium ($4.99 for 365 days)!',
+          ? 'ការចុះបញ្ជីឥតគិតថ្លៃមិនអាចបន្ថែមមុខម្ហូបបានទេ។ សូមដំឡើងទៅ Premium VIP ($9.99 សម្រាប់ ៣៦៥ ថ្ងៃ)!' 
+          : 'Free listing cannot add food items. Please upgrade to Premium VIP ($9.99 for 365 days)!',
         'warning'
       );
       return false;
@@ -1002,10 +1016,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       ownerId: currentUser?.id || targetRest.ownerId || 'owner-guest',
       ownerName: currentUser?.name || 'Restaurant Owner',
       ownerPhone: targetRest.phone,
-      amountUsd: 4.99,
+      amountUsd: appSettings.promotionalFeeUsd || 9.99,
       paymentMethod,
       transactionRef: transactionRef.trim(),
-      notes: 'One-time $4.99 Premium Membership for 365 days (up to 5 food menu items). No auto-renewal.',
+      notes: 'One-time $9.99 Premium VIP Membership for 365 days (End of year promo). 10 VIP Benefits. No auto-renewal.',
     });
 
     setRestaurants(prev => prev.map(r => {
@@ -1018,10 +1032,67 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     showToast(
       language === 'km' 
-        ? 'បានផ្ញើសំណើដំឡើង Premium ($4.99) រួចរាល់! រដ្ឋបាលនឹងត្រួតពិនិត្យ និងបើកដំណើរការជូន ៣៦៥ ថ្ងៃ។' 
-        : 'Submitted Premium upgrade request ($4.99)! Admin will verify and activate 365-day access.',
+        ? 'បានផ្ញើសំណើដំឡើង Premium VIP ($9.99) រួចរាល់! រដ្ឋបាលនឹងត្រួតពិនិត្យ និងបើកដំណើរការជូន ៣៦៥ ថ្ងៃ។' 
+        : 'Submitted Premium VIP upgrade request ($9.99)! Admin will verify and activate 365-day access.',
       'success'
     );
+  };
+
+  // Restaurant Analytics (Views, Calls, Maps, Shares)
+  const trackRestaurantView = (restaurantId: string) => {
+    setRestaurants(prev => prev.map(r => {
+      if (r.id !== restaurantId) return r;
+      const cur = r.analytics || { views: 0, phoneClicks: 0, mapClicks: 0, shareClicks: 0 };
+      return {
+        ...r,
+        analytics: {
+          ...cur,
+          views: (cur.views || 0) + 1,
+        }
+      };
+    }));
+  };
+
+  const trackRestaurantCall = (restaurantId: string) => {
+    setRestaurants(prev => prev.map(r => {
+      if (r.id !== restaurantId) return r;
+      const cur = r.analytics || { views: 0, phoneClicks: 0, mapClicks: 0, shareClicks: 0 };
+      return {
+        ...r,
+        analytics: {
+          ...cur,
+          phoneClicks: (cur.phoneClicks || 0) + 1,
+        }
+      };
+    }));
+  };
+
+  const trackRestaurantMap = (restaurantId: string) => {
+    setRestaurants(prev => prev.map(r => {
+      if (r.id !== restaurantId) return r;
+      const cur = r.analytics || { views: 0, phoneClicks: 0, mapClicks: 0, shareClicks: 0 };
+      return {
+        ...r,
+        analytics: {
+          ...cur,
+          mapClicks: (cur.mapClicks || 0) + 1,
+        }
+      };
+    }));
+  };
+
+  const trackRestaurantShare = (restaurantId: string) => {
+    setRestaurants(prev => prev.map(r => {
+      if (r.id !== restaurantId) return r;
+      const cur = r.analytics || { views: 0, phoneClicks: 0, mapClicks: 0, shareClicks: 0 };
+      return {
+        ...r,
+        analytics: {
+          ...cur,
+          shareClicks: (cur.shareClicks || 0) + 1,
+        }
+      };
+    }));
   };
 
   const deleteRestaurant = (id: string) => {
@@ -1282,6 +1353,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         updateRestaurantMenuItem,
         deleteRestaurantMenuItem,
         upgradeRestaurantToPremium,
+        trackRestaurantView,
+        trackRestaurantCall,
+        trackRestaurantMap,
+        trackRestaurantShare,
         isManageMenuModalOpen,
         setIsManageMenuModalOpen,
         managingRestaurant,
