@@ -40,7 +40,7 @@ export const initialUsers: User[] = [
 ];
 
 export const initialAppSettings: AppSettings = {
-  apkDownloadUrl: 'https://github.com/igpubinfo-max/Khmer-Food-Tourism/releases/latest',
+  apkDownloadUrl: 'https://github.com/igpubinfo-max/Khmer-Food-Tourism/releases/download/v1.0.0/app-debug.apk',
   playStoreUrl: 'https://play.google.com/store/apps/details?id=com.khmerfood.tourism',
   appStoreUrl: 'https://apps.apple.com/app/khmer-food-tourism/id1234567890',
   supportQrImageUrl: '/donation-qr.png',
