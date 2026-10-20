@@ -122,6 +122,11 @@ assert(firestoreRules.includes('request.resource.data.menuItems.size() <= 5'), '
 assert(firestoreRules.includes('request.resource.data.membershipTier == resource.data.membershipTier'), 'Firestore rules prevent unauthorized membership self-promotion.');
 assert(firestoreRules.includes('request.resource.data.membershipExpiresAt == resource.data.membershipExpiresAt'), 'Firestore rules prevent unauthorized extension of membership expiry.');
 
+// TEST 16: Restaurant Detail Modal Social Share Handlers
+const restDetailContent = fs.readFileSync(path.resolve(__dirname, '../src/components/RestaurantDetailModal.tsx'), 'utf8');
+assert(restDetailContent.includes('const handleShareTelegram ='), 'RestaurantDetailModal defines handleShareTelegram handler.');
+assert(restDetailContent.includes('const handleShareFacebook ='), 'RestaurantDetailModal defines handleShareFacebook handler.');
+
 console.log('\n================================================================');
 console.log(`  AUDIT SUMMARY: ${passCount} PASSED, ${failCount} FAILED`);
 console.log('================================================================\n');

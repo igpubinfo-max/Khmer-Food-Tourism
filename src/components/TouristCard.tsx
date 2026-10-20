@@ -98,7 +98,7 @@ export const TouristCard: React.FC<TouristCardProps> = ({ destination }) => {
 
           <div className="flex items-center gap-1 text-[#064E3B] dark:text-emerald-400 font-medium text-[10px]">
             <Ticket className="w-3 h-3" />
-            <span>{language === 'km' ? (destination.entryFeeKh || 'ឥតគិតថ្លៃ') : (destination.entryFeeEn || 'Free')}</span>
+            <span>{language === 'km' ? (destination.entranceFeeKh || destination.entryFeeKh || 'ឥតគិតថ្លៃ') : (destination.entranceFeeEn || destination.entryFeeEn || 'Free')}</span>
           </div>
         </div>
       </div>

@@ -132,7 +132,7 @@ export interface Restaurant {
   isFeatured?: boolean;
   
   // Membership & Menu Items ($0 Free Listing vs One-Time $9.99 for 365 Days)
-  membershipTier: MembershipTier; // 'free' ($0) or 'premium' ($9.99)
+  membershipTier?: MembershipTier; // 'free' ($0) or 'premium' ($9.99)
   membershipExpiresAt?: string; // ISO 8601 date timestamp (365 days from activation)
   menuItems?: RestaurantMenuItem[]; // Up to 5 items for active Premium restaurants
   
@@ -180,6 +180,8 @@ export interface TouristDestination {
   addressEn: string;
   entranceFeeKh: string;
   entranceFeeEn: string;
+  entryFeeKh?: string;
+  entryFeeEn?: string;
   bestTimeToVisitKh: string;
   bestTimeToVisitEn: string;
   mapUrl: string;

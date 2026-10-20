@@ -62,6 +62,27 @@ export const RestaurantDetailModal: React.FC = () => {
     }
   };
 
+  const handleShareTelegram = () => {
+    trackRestaurantShare(selectedRestaurant.id);
+    const origin = typeof window !== 'undefined' && window.location?.origin ? window.location.origin : 'https://khmerfoodtourism.com';
+    const shareUrl = `${origin}/?restaurant=${selectedRestaurant.id}`;
+    const text = encodeURIComponent(
+      isKm
+        ? `សូមណែនាំហាងអាហារឆ្ងាញ់៖ ${selectedRestaurant.nameKh}\n📍 ${selectedRestaurant.addressKh}\n📞 ${selectedRestaurant.phone}`
+        : `Check out ${selectedRestaurant.nameEn}!\n📍 ${selectedRestaurant.addressEn}\n📞 ${selectedRestaurant.phone}`
+    );
+    const encUrl = encodeURIComponent(shareUrl);
+    window.open(`https://t.me/share/url?url=${encUrl}&text=${text}`, '_blank');
+  };
+
+  const handleShareFacebook = () => {
+    trackRestaurantShare(selectedRestaurant.id);
+    const origin = typeof window !== 'undefined' && window.location?.origin ? window.location.origin : 'https://khmerfoodtourism.com';
+    const shareUrl = `${origin}/?restaurant=${selectedRestaurant.id}`;
+    const encUrl = encodeURIComponent(shareUrl);
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encUrl}`, '_blank');
+  };
+
   const handleCopyLink = () => {
     handleShare();
   };

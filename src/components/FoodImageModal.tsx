@@ -72,7 +72,7 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [photoUrl, setPhotoUrl] = useState('');
-  const [auditStatus, setAuditStatus] = useState<'verified' | 'flagged_review'>('verified');
+  const [auditStatus, setAuditStatus] = useState<'verified' | 'flagged_review' | 'replaced'>('verified');
   const [auditNote, setAuditNote] = useState('');
   const [fitMode, setFitMode] = useState<'cover' | 'contain'>('cover');
   const [urlInput, setUrlInput] = useState('');
