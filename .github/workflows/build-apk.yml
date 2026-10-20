@@ -32,14 +32,13 @@ jobs:
         run: npm run build
 
       - name: 6. Copy Web to Android Assets
-        run: npx cap copy android || true
+        run: npx cap copy android
 
-      - name: 7. Accept Android Licenses and Build APK
+      - name: 7. Build Android Debug APK
         run: |
-          yes | sdkmanager --licenses || true
           cd android
           chmod +x ./gradlew
-          ./gradlew assembleDebug --no-daemon
+          ./gradlew assembleDebug --no-daemon --stacktrace
 
       - name: 8. Upload Android APK File
         uses: actions/upload-artifact@v4
