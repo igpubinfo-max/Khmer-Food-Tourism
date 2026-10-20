@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { 
   User, FoodItem, Restaurant, TouristDestination, CommunityPost, 
-  Language, UserRole, AppSettings, RegistrationTransaction 
+  Language, UserRole, AppSettings, RegistrationTransaction,
+  RestaurantMenuItem, MembershipTier, isRestaurantPremiumActive
 } from '../types';
 import { 
   initialUsers, initialFoods, initialRestaurants, 
@@ -68,6 +69,18 @@ interface AppContextType {
   deleteRestaurant: (id: string) => void;
   approveRestaurant: (id: string) => void;
   toggleVerifyRestaurant: (id: string) => void;
+
+  // Restaurant Menu Items (Max 5 for Active Premium)
+  addRestaurantMenuItem: (restaurantId: string, item: Omit<RestaurantMenuItem, 'id' | 'createdAt' | 'restaurantId'>) => boolean;
+  updateRestaurantMenuItem: (restaurantId: string, item: RestaurantMenuItem) => boolean;
+  deleteRestaurantMenuItem: (restaurantId: string, menuItemId: string) => boolean;
+  upgradeRestaurantToPremium: (restaurantId: string, transactionRef: string, paymentMethod?: 'KHQR' | 'Bakong' | 'BankTransfer') => void;
+  
+  // Managing Restaurant Modal
+  isManageMenuModalOpen: boolean;
+  setIsManageMenuModalOpen: (open: boolean) => void;
+  managingRestaurant: Restaurant | null;
+  setManagingRestaurant: (rest: Restaurant | null) => void;
   
   // Destination Actions
   addDestination: (dest: Omit<TouristDestination, 'id' | 'rating' | 'reviewCount'>) => void;
@@ -153,15 +166,72 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
 
   const [restaurants, setRestaurants] = useState<Restaurant[]>(() => {
-    const saved = localStorage.getItem('kft_restaurants_v4');
+    const saved = localStorage.getItem('kft_restaurants_membership_v1');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length >= 200) return parsed;
       } catch {}
     }
-    return initialRestaurants;
+    try {
+      localStorage.removeItem('kft_restaurants_v3');
+      localStorage.removeItem('kft_restaurants_v4');
+    } catch {}
+    return initialRestaurants.map(r => {
+      if (r.id === 'rest-19') {
+        return {
+          ...r,
+          ownerId: 'owner-1',
+          membershipTier: 'premium' as MembershipTier,
+          membershipExpiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+          menuItems: [
+            {
+              id: 'menu-1',
+              restaurantId: 'rest-19',
+              nameKh: 'ក្តាមសេះឆាម្រេចខ្ចីកំពតពិសេស',
+              nameEn: 'Fried Sea Crab with Fresh Kampot Peppercorns',
+              priceRiel: 40000,
+              priceUsd: 10.0,
+              photoUrl: 'https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80',
+              descriptionKh: 'ក្តាមសេះរស់ស្រង់ពីកន្ត្រកសមុទ្រកែប ឆាជាមួយម្រេចខ្ចីកំពតក្រអូបហឹរ និងខ្ទឹមសឈ្ងុយឆ្ងាញ់។',
+              createdAt: '2026-01-15',
+            },
+            {
+              id: 'menu-2',
+              restaurantId: 'rest-19',
+              nameKh: 'មឹកបំពងខ្ទឹមបំពងស្រួយ',
+              nameEn: 'Crispy Deep-Fried Calamari Squid',
+              priceRiel: 28000,
+              priceUsd: 7.0,
+              photoUrl: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80',
+              descriptionKh: 'មឹកបំពងស្រួយក្រៅទន់ក្នុង ជ្រលក់ជាមួយទឹកត្រីកោះកុងរសជាតិហឹរជូរផ្អែម។',
+              createdAt: '2026-01-15',
+            },
+            {
+              id: 'menu-3',
+              restaurantId: 'rest-19',
+              nameKh: 'សម្លម្ជូរគ្រឿងសមុទ្រដើមចេក',
+              nameEn: 'Khmer Sour Seafood Soup with Banana Stem',
+              priceRiel: 32000,
+              priceUsd: 8.0,
+              photoUrl: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=80',
+              descriptionKh: 'សម្លម្ជូរគ្រឿងបុរាណដាក់បង្គា មឹក និងដើមចេកស្រស់ រសជាតិជូរអែមឆ្ងាញ់ពិសា។',
+              createdAt: '2026-01-15',
+            }
+          ]
+        };
+      }
+      return {
+        ...r,
+        membershipTier: (r.membershipTier || (r.isPromoted ? 'premium' : 'free')) as MembershipTier,
+        membershipExpiresAt: r.membershipExpiresAt || (r.isPromoted ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString() : undefined),
+        menuItems: r.menuItems || [],
+      };
+    });
   });
+
+  const [isManageMenuModalOpen, setIsManageMenuModalOpen] = useState(false);
+  const [managingRestaurant, setManagingRestaurant] = useState<Restaurant | null>(null);
 
   const [transactions, setTransactions] = useState<RegistrationTransaction[]>(() => {
     const saved = localStorage.getItem('kft_transactions_v4');
@@ -240,7 +310,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [foods]);
 
   useEffect(() => {
-    localStorage.setItem('kft_restaurants_v4', JSON.stringify(restaurants));
+    localStorage.setItem('kft_restaurants_membership_v1', JSON.stringify(restaurants));
   }, [restaurants]);
 
   useEffect(() => {
@@ -619,32 +689,220 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Restaurant CRUD
   const addRestaurant = (restData: Omit<Restaurant, 'id' | 'rating' | 'reviewCount' | 'status'> & { status?: 'approved' | 'pending' | 'rejected' }) => {
-    const isOwnerOrAdmin = currentUser?.role === 'admin';
-    const isFreeTrial = restData.isFreeTrial ?? false;
+    const isPremium = restData.membershipTier === 'premium';
     const newRest: Restaurant = {
       ...restData,
       id: `rest-${Date.now()}`,
       rating: 5.0,
       reviewCount: 1,
       ownerId: currentUser?.id,
-      status: (isOwnerOrAdmin || isFreeTrial) ? 'approved' : (restData.status || 'pending'),
-      isVerified: isOwnerOrAdmin || isFreeTrial || (restData.isVerified ?? false),
+      status: 'approved',
+      isVerified: true,
+      membershipTier: isPremium ? 'premium' : 'free',
+      membershipExpiresAt: isPremium 
+        ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString() 
+        : undefined,
+      menuItems: isPremium ? (restData.menuItems || []).slice(0, 5) : [], // Free users cannot add menu items!
     };
     setRestaurants(prev => [newRest, ...prev]);
     showToast(
-      isFreeTrial
-        ? (language === 'km' ? '🎉 ចុះបញ្ជីជោគជ័យ! ហាងទទួលបានការផ្សព្វផ្សាយឥតគិតថ្លៃ ១ ខែ!' : '🎉 Registered! 1-Month Free Promotion activated!')
-        : isOwnerOrAdmin
-        ? (language === 'km' ? 'បានចុះបញ្ជីហាងអាហារបានជោគជ័យ!' : 'Restaurant registered!')
-        : (language === 'km' ? 'បានផ្ញើសំណើចុះបញ្ជីហាង! រង់ចាំការត្រួតពិនិត្យពីរដ្ឋបាល' : 'Submitted for admin approval!'),
+      isPremium
+        ? (language === 'km' ? '🎉 ចុះបញ្ជីហាង Premium រួចរាល់ (៣៦៥ ថ្ងៃ)!' : '🎉 Registered as Premium (365 days)!')
+        : (language === 'km' ? '🎉 បានចុះបញ្ជីហាងឥតគិតថ្លៃ ($0 Free Listing) បានជោគជ័យ!' : '🎉 Free Restaurant Listing registered ($0)!'),
       'success'
     );
   };
 
   const updateRestaurant = (updated: Restaurant) => {
-    setRestaurants(prev => prev.map(r => r.id === updated.id ? updated : r));
-    if (selectedRestaurant?.id === updated.id) setSelectedRestaurant(updated);
+    const original = restaurants.find(r => r.id === updated.id);
+    const isAdmin = currentUser?.role === 'admin';
+    const isOwner = currentUser?.id && original?.ownerId === currentUser.id;
+
+    if (!isAdmin && !isOwner) {
+      showToast(language === 'km' ? 'គ្មានសិទ្ធិកែប្រែហាងនេះទេ!' : 'Unauthorized!', 'warning');
+      return;
+    }
+
+    const safeUpdated: Restaurant = isAdmin ? updated : {
+      ...updated,
+      membershipTier: original?.membershipTier || 'free',
+      membershipExpiresAt: original?.membershipExpiresAt,
+      paymentStatus: original?.paymentStatus,
+      status: original?.status || 'approved',
+      isVerified: original?.isVerified ?? true,
+    };
+
+    setRestaurants(prev => prev.map(r => r.id === updated.id ? safeUpdated : r));
+    if (selectedRestaurant?.id === updated.id) setSelectedRestaurant(safeUpdated);
     showToast(language === 'km' ? 'បានកែប្រែព័ត៌មានហាងរួចរាល់' : 'Restaurant updated!', 'success');
+  };
+
+  // Restaurant Food Menu Items (Max 5 for Active Premium)
+  const addRestaurantMenuItem = (
+    restaurantId: string, 
+    itemData: Omit<RestaurantMenuItem, 'id' | 'createdAt' | 'restaurantId'>
+  ): boolean => {
+    const targetRest = restaurants.find(r => r.id === restaurantId);
+    if (!targetRest) {
+      showToast(language === 'km' ? 'រកមិនឃើញហាងអាហារទេ!' : 'Restaurant not found!', 'warning');
+      return false;
+    }
+
+    const isOwner = currentUser?.id && targetRest.ownerId === currentUser.id;
+    const isAdmin = currentUser?.role === 'admin';
+    if (!isOwner && !isAdmin) {
+      showToast(
+        language === 'km' 
+          ? 'លោកអ្នកគ្មានសិទ្ធិគ្រប់គ្រងមុខម្ហូបនៃហាងនេះទេ!' 
+          : 'Unauthorized: You can only manage your own restaurant!',
+        'warning'
+      );
+      return false;
+    }
+
+    if (!isRestaurantPremiumActive(targetRest)) {
+      showToast(
+        language === 'km' 
+          ? 'ការចុះបញ្ជីឥតគិតថ្លៃមិនអាចបន្ថែមមុខម្ហូបបានទេ។ សូមដំឡើងទៅ Premium ($4.99 សម្រាប់ ៣៦៥ ថ្ងៃ)!' 
+          : 'Free listing cannot add food items. Please upgrade to Premium ($4.99 for 365 days)!',
+        'warning'
+      );
+      return false;
+    }
+
+    const currentItems = targetRest.menuItems || [];
+    if (currentItems.length >= 5) {
+      showToast(
+        language === 'km' 
+          ? 'សមាជិកភាព Premium អនុញ្ញាតឱ្យបន្ថែមមុខម្ហូបអតិបរមាត្រឹម ៥ មុខប៉ុណ្ណោះ!' 
+          : 'Premium membership allows a maximum of 5 food menu items!',
+        'warning'
+      );
+      return false;
+    }
+
+    const newItem: RestaurantMenuItem = {
+      ...itemData,
+      id: `menu-${Date.now()}`,
+      restaurantId,
+      createdAt: new Date().toISOString().split('T')[0],
+    };
+
+    const updatedMenuItems = [...currentItems, newItem];
+    setRestaurants(prev => prev.map(r => {
+      if (r.id !== restaurantId) return r;
+      return {
+        ...r,
+        menuItems: updatedMenuItems,
+      };
+    }));
+
+    if (selectedRestaurant?.id === restaurantId) {
+      setSelectedRestaurant({
+        ...selectedRestaurant,
+        menuItems: updatedMenuItems,
+      });
+    }
+
+    showToast(
+      language === 'km' 
+        ? `បានបន្ថែមមុខម្ហូប "${newItem.nameKh}" ជោគជ័យ (${updatedMenuItems.length}/5)!` 
+        : `Added menu item "${newItem.nameKh}" (${updatedMenuItems.length}/5)!`,
+      'success'
+    );
+    return true;
+  };
+
+  const updateRestaurantMenuItem = (restaurantId: string, updatedItem: RestaurantMenuItem): boolean => {
+    const targetRest = restaurants.find(r => r.id === restaurantId);
+    if (!targetRest) return false;
+
+    const isOwner = currentUser?.id && targetRest.ownerId === currentUser.id;
+    const isAdmin = currentUser?.role === 'admin';
+    if (!isOwner && !isAdmin) {
+      showToast(language === 'km' ? 'គ្មានសិទ្ធិកែប្រែ!' : 'Unauthorized!', 'warning');
+      return false;
+    }
+
+    if (!isRestaurantPremiumActive(targetRest)) {
+      showToast(
+        language === 'km' 
+          ? 'សមាជិកភាព Premium បានផុតកំណត់ហើយ។ សូមបន្តសមាជិកភាពដើម្បីកែប្រែព័ត៌មាន!' 
+          : 'Membership expired. Please renew Premium ($4.99) to edit menu items!',
+        'warning'
+      );
+      return false;
+    }
+
+    const updatedMenuItems = (targetRest.menuItems || []).map(item => 
+      item.id === updatedItem.id ? { ...updatedItem, updatedAt: new Date().toISOString().split('T')[0] } : item
+    );
+
+    setRestaurants(prev => prev.map(r => r.id === restaurantId ? { ...r, menuItems: updatedMenuItems } : r));
+    if (selectedRestaurant?.id === restaurantId) {
+      setSelectedRestaurant({ ...selectedRestaurant, menuItems: updatedMenuItems });
+    }
+
+    showToast(language === 'km' ? 'បានកែប្រែព័ត៌មានមុខម្ហូបជោគជ័យ!' : 'Menu item updated!', 'success');
+    return true;
+  };
+
+  const deleteRestaurantMenuItem = (restaurantId: string, menuItemId: string): boolean => {
+    const targetRest = restaurants.find(r => r.id === restaurantId);
+    if (!targetRest) return false;
+
+    const isOwner = currentUser?.id && targetRest.ownerId === currentUser.id;
+    const isAdmin = currentUser?.role === 'admin';
+    if (!isOwner && !isAdmin) {
+      showToast(language === 'km' ? 'គ្មានសិទ្ធិលុប!' : 'Unauthorized!', 'warning');
+      return false;
+    }
+
+    const updatedMenuItems = (targetRest.menuItems || []).filter(item => item.id !== menuItemId);
+    setRestaurants(prev => prev.map(r => r.id === restaurantId ? { ...r, menuItems: updatedMenuItems } : r));
+    if (selectedRestaurant?.id === restaurantId) {
+      setSelectedRestaurant({ ...selectedRestaurant, menuItems: updatedMenuItems });
+    }
+
+    showToast(language === 'km' ? 'បានលុបមុខម្ហូប!' : 'Menu item removed', 'info');
+    return true;
+  };
+
+  const upgradeRestaurantToPremium = (
+    restaurantId: string, 
+    transactionRef: string, 
+    paymentMethod: 'KHQR' | 'Bakong' | 'BankTransfer' = 'BankTransfer'
+  ) => {
+    const targetRest = restaurants.find(r => r.id === restaurantId);
+    if (!targetRest) return;
+
+    addRegistrationTransaction({
+      restaurantId,
+      restaurantNameKh: targetRest.nameKh,
+      restaurantNameEn: targetRest.nameEn,
+      ownerId: currentUser?.id || targetRest.ownerId || 'owner-guest',
+      ownerName: currentUser?.name || 'Restaurant Owner',
+      ownerPhone: targetRest.phone,
+      amountUsd: 4.99,
+      paymentMethod,
+      transactionRef: transactionRef.trim(),
+      notes: 'One-time $4.99 Premium Membership for 365 days (up to 5 food menu items). No auto-renewal.',
+    });
+
+    setRestaurants(prev => prev.map(r => {
+      if (r.id !== restaurantId) return r;
+      return {
+        ...r,
+        paymentStatus: 'pending_verification',
+      };
+    }));
+
+    showToast(
+      language === 'km' 
+        ? 'បានផ្ញើសំណើដំឡើង Premium ($4.99) រួចរាល់! រដ្ឋបាលនឹងត្រួតពិនិត្យ និងបើកដំណើរការជូន ៣៦៥ ថ្ងៃ។' 
+        : 'Submitted Premium upgrade request ($4.99)! Admin will verify and activate 365-day access.',
+      'success'
+    );
   };
 
   const deleteRestaurant = (id: string) => {
@@ -793,6 +1051,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }));
 
     if (targetRestId) {
+      const now = new Date();
+      const expiresAt = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
       setRestaurants(prev => prev.map(r => {
         if (r.id !== targetRestId) return r;
         return {
@@ -800,16 +1060,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           status: 'approved',
           isVerified: true,
           isPromoted: true,
+          membershipTier: 'premium',
+          membershipExpiresAt: expiresAt.toISOString(),
           paymentStatus: 'verified',
-          paymentDate: new Date().toISOString().split('T')[0],
+          paymentDate: now.toISOString().split('T')[0],
         };
       }));
     }
 
     showToast(
       language === 'km' 
-        ? 'បានផ្ទៀងផ្ទាត់ការទូទាត់ $4.99 និងធ្វើឱ្យហាងសកម្មជោគជ័យ!' 
-        : 'Payment verified and restaurant activated successfully!',
+        ? 'បានផ្ទៀងផ្ទាត់ការទូទាត់ $4.99 និងធ្វើឱ្យសមាជិកភាព Premium សកម្ម ៣៦៥ ថ្ងៃជោគជ័យ!' 
+        : 'Payment verified: 365-day Premium membership activated successfully!',
       'success'
     );
   };
@@ -897,6 +1159,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         deleteRestaurant,
         approveRestaurant,
         toggleVerifyRestaurant,
+        addRestaurantMenuItem,
+        updateRestaurantMenuItem,
+        deleteRestaurantMenuItem,
+        upgradeRestaurantToPremium,
+        isManageMenuModalOpen,
+        setIsManageMenuModalOpen,
+        managingRestaurant,
+        setManagingRestaurant,
         addDestination,
         updateDestination,
         deleteDestination,

@@ -5,21 +5,26 @@ import { TouristCard } from './TouristCard';
 import { PrivacyPolicyModal } from './PrivacyPolicyModal';
 import { 
   User as UserIcon, Heart, Shield, Store, 
-  Globe, LogOut, RefreshCw, KeyRound, Check, Plus, QrCode, ShieldAlert, ShieldCheck
+  Globe, LogOut, RefreshCw, Download, Sparkles, UtensilsCrossed, ShieldCheck 
 } from 'lucide-react';
+import { isRestaurantPremiumActive } from '../types';
 
 export const ProfileView: React.FC = () => {
   const { 
     currentUser, users, login, logout, language, setLanguage, 
     bookmarks, foods, destinations, posts, restaurants,
     setIsAuthModalOpen, setIsAdminOpen, setIsAdminLoginModalOpen,
-    setIsInstallModalOpen, setIsSupportModalOpen,
+    setIsInstallModalOpen, setIsSupportModalOpen, setIsAddRestaurantModalOpen,
+    setManagingRestaurant, setIsManageMenuModalOpen,
     resetAllData, showToast 
   } = useApp();
 
-  const [activeSubTab, setActiveSubTab] = useState<'bookmarks' | 'myposts' | 'settings'>('bookmarks');
-  const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState(false);
   const isKm = language === 'km';
+  const isOwner = currentUser?.role === 'owner';
+  const [activeSubTab, setActiveSubTab] = useState<'bookmarks' | 'myposts' | 'settings' | 'myrestaurant'>(
+    isOwner ? 'myrestaurant' : 'bookmarks'
+  );
+  const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState(false);
 
   // Bookmarked items
   const savedFoods = foods.filter(f => bookmarks.includes(f.id));
@@ -27,6 +32,9 @@ export const ProfileView: React.FC = () => {
 
   // User posts
   const myPosts = posts.filter(p => currentUser && p.authorId === currentUser.id);
+
+  // Owner restaurants
+  const myRestaurants = restaurants.filter(r => currentUser && r.ownerId === currentUser.id);
 
   return (
     <div className="max-w-md mx-auto px-4 py-3 space-y-4 pb-24">
@@ -119,14 +127,14 @@ export const ProfileView: React.FC = () => {
           className="p-3 bg-white dark:bg-stone-800 rounded-2xl border border-amber-200 shadow-xs flex items-center gap-2.5 hover:bg-amber-50 transition text-left"
         >
           <div className="p-2 rounded-xl bg-amber-600 text-white shrink-0">
-            <QrCode className="w-4 h-4" />
+            <Download className="w-4 h-4" />
           </div>
           <div>
             <div className="text-xs font-bold text-stone-800 dark:text-white font-khmer">
               {isKm ? 'ដំឡើង APK' : 'Install App'}
             </div>
             <div className="text-[10px] text-stone-500 font-khmer">
-              {isKm ? 'ស្កេន QR Code' : 'Scan QR Code'}
+              {isKm ? 'ទាញយក APK ផ្ទាល់' : 'Direct APK Download'}
             </div>
           </div>
         </button>
@@ -149,11 +157,24 @@ export const ProfileView: React.FC = () => {
         </button>
       </div>
 
-      {/* Tabs: Bookmarks / My Posts / Settings */}
-      <div className="flex border-b border-stone-200 dark:border-stone-700 text-xs font-khmer">
+      {/* Tabs: My Restaurant (for owners) / Bookmarks / My Posts / Settings */}
+      <div className="flex border-b border-stone-200 dark:border-stone-700 text-xs font-khmer overflow-x-auto no-scrollbar">
+        {isOwner && (
+          <button
+            onClick={() => setActiveSubTab('myrestaurant')}
+            className={`flex-1 py-2.5 font-bold text-center border-b-2 transition whitespace-nowrap px-2 ${
+              activeSubTab === 'myrestaurant'
+                ? 'border-amber-600 text-amber-700 dark:text-amber-400'
+                : 'border-transparent text-stone-400 hover:text-stone-600'
+            }`}
+          >
+            {isKm ? '🏪 ហាងរបស់ខ្ញុំ' : '🏪 My Restaurant'}
+          </button>
+        )}
+
         <button
           onClick={() => setActiveSubTab('bookmarks')}
-          className={`flex-1 py-2.5 font-bold text-center border-b-2 transition ${
+          className={`flex-1 py-2.5 font-bold text-center border-b-2 transition whitespace-nowrap px-2 ${
             activeSubTab === 'bookmarks'
               ? 'border-amber-600 text-amber-700 dark:text-amber-400'
               : 'border-transparent text-stone-400 hover:text-stone-600'
@@ -164,18 +185,18 @@ export const ProfileView: React.FC = () => {
 
         <button
           onClick={() => setActiveSubTab('myposts')}
-          className={`flex-1 py-2.5 font-bold text-center border-b-2 transition ${
+          className={`flex-1 py-2.5 font-bold text-center border-b-2 transition whitespace-nowrap px-2 ${
             activeSubTab === 'myposts'
               ? 'border-amber-600 text-amber-700 dark:text-amber-400'
               : 'border-transparent text-stone-400 hover:text-stone-600'
           }`}
         >
-          {isKm ? `ការបង្ហោះរបស់ខ្ញុំ (${myPosts.length})` : `My Posts (${myPosts.length})`}
+          {isKm ? `ការបង្ហោះ (${myPosts.length})` : `Posts (${myPosts.length})`}
         </button>
 
         <button
           onClick={() => setActiveSubTab('settings')}
-          className={`flex-1 py-2.5 font-bold text-center border-b-2 transition ${
+          className={`flex-1 py-2.5 font-bold text-center border-b-2 transition whitespace-nowrap px-2 ${
             activeSubTab === 'settings'
               ? 'border-amber-600 text-amber-700 dark:text-amber-400'
               : 'border-transparent text-stone-400 hover:text-stone-600'
@@ -185,7 +206,129 @@ export const ProfileView: React.FC = () => {
         </button>
       </div>
 
-      {/* Tab Contents */}
+      {/* Tab: My Restaurant (Shop Owner Portal) */}
+      {activeSubTab === 'myrestaurant' && isOwner && (
+        <div className="space-y-3 font-khmer">
+          {myRestaurants.length === 0 ? (
+            <div className="text-center py-8 bg-white dark:bg-stone-800 rounded-3xl border border-stone-200 dark:border-stone-700 p-6 space-y-3">
+              <Store className="w-10 h-10 mx-auto text-amber-500" />
+              <div>
+                <h4 className="font-bold text-xs text-stone-900 dark:text-stone-100">
+                  {isKm ? 'មិនទាន់មានហាងអាហារដែលបានចុះបញ្ជីនៅឡើយទេ' : 'No registered restaurant found'}
+                </h4>
+                <p className="text-[10px] text-stone-500 mt-1">
+                  {isKm ? 'ចុះបញ្ជីហាងរបស់អ្នកដោយឥតគិតថ្លៃ ($0) ឬ Premium ($4.99 សម្រាប់ ៣៦៥ ថ្ងៃ) ដើម្បីផ្សព្វផ្សាយ!' : 'Register your restaurant for free ($0) or Premium ($4.99)!'}
+                </p>
+              </div>
+              <button
+                onClick={() => setIsAddRestaurantModalOpen(true)}
+                className="px-4 py-2 rounded-xl bg-amber-600 text-white font-bold text-xs shadow hover:bg-amber-500"
+              >
+                {isKm ? '+ ចុះបញ្ជីហាងឥឡូវនេះ' : '+ Register Restaurant Now'}
+              </button>
+            </div>
+          ) : (
+            myRestaurants.map(restaurant => {
+              const isPremium = isRestaurantPremiumActive(restaurant);
+              const isExpired = restaurant.membershipTier === 'premium' && !isPremium;
+              const isFree = restaurant.membershipTier === 'free';
+              const items = restaurant.menuItems || [];
+
+              return (
+                <div key={restaurant.id} className="p-4 bg-white dark:bg-stone-800 rounded-3xl border border-amber-200/60 dark:border-stone-700 shadow-xs space-y-3.5">
+                  <div className="flex items-center gap-3">
+                    <img src={restaurant.photoUrl} alt="restaurant" className="w-16 h-16 rounded-2xl object-cover border border-amber-300 shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-bold text-stone-900 dark:text-stone-100 text-sm truncate">
+                        {isKm ? restaurant.nameKh : restaurant.nameEn}
+                      </h4>
+                      <p className="text-[10px] text-stone-500 truncate">{restaurant.addressKh}</p>
+                      <p className="text-[10px] text-emerald-600 font-mono mt-0.5">📞 {restaurant.phone}</p>
+                    </div>
+                  </div>
+
+                  {/* Membership Card */}
+                  <div className="p-3.5 bg-stone-50 dark:bg-stone-900/60 rounded-2xl border border-stone-200 dark:border-stone-700 space-y-2 text-xs">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1.5">
+                        {isPremium ? (
+                          <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500 text-stone-950 flex items-center gap-1 font-khmer">
+                            <Sparkles className="w-3 h-3" />
+                            <span>⭐ {isKm ? 'សមាជិកភាព VIP Premium (៣៦៥ ថ្ងៃ)' : 'Premium Active (365 Days)'}</span>
+                          </span>
+                        ) : isExpired ? (
+                          <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-red-100 text-red-700">
+                            ⏳ {isKm ? 'Premium បានផុតកំណត់' : 'Premium Expired'}
+                          </span>
+                        ) : (
+                          <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-stone-200 text-stone-700">
+                            🏷️ {isKm ? 'ចុះបញ្ជីឥតគិតថ្លៃ ($0 Free Listing)' : 'Free Listing ($0)'}
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="text-[11px] font-bold text-amber-700 dark:text-amber-300 font-mono">
+                        {items.length} / 5 {isKm ? 'មុខម្ហូប' : 'items'}
+                      </div>
+                    </div>
+
+                    {isPremium && restaurant.membershipExpiresAt && (
+                      <p className="text-[10px] text-stone-600 dark:text-stone-300">
+                        {isKm 
+                          ? `📅 ផុតកំណត់នៅថ្ងៃទី៖ ${new Date(restaurant.membershipExpiresAt).toLocaleDateString()} (ទូទាត់តែមួយលើក $4.99 គ្មានកាត់ប្រចាំខែ)` 
+                          : `Valid until: ${new Date(restaurant.membershipExpiresAt).toLocaleDateString()} (One-time payment, no monthly fee)`}
+                      </p>
+                    )}
+
+                    {isFree && (
+                      <p className="text-[10px] text-stone-500">
+                        {isKm 
+                          ? 'គណនីឥតគិតថ្លៃមិនអាចបន្ថែមមុខម្ហូបបានទេ។ ដំឡើងទៅ Premium ($4.99 សម្រាប់ ៣៦៥ ថ្ងៃ) ដើម្បីបន្ថែមម្ហូបរហូតដល់ ៥ មុខ!' 
+                          : 'Free listing cannot add food items. Upgrade to Premium ($4.99 for 365 days) to add up to 5 food items!'}
+                      </p>
+                    )}
+
+                    {isExpired && (
+                      <p className="text-[10px] text-red-600">
+                        {isKm 
+                          ? 'សមាជិកភាពបានផុតកំណត់ ៣៦៥ ថ្ងៃហើយ។ ទិន្នន័យមុខម្ហូបទាំងអស់ត្រូវបានរក្សាទុកដដែល (គ្មានការលុបឡើយ)។ សូមបន្តសមាជិកភាព $4.99 សម្រាប់ ៣៦៥ ថ្ងៃថ្មី។' 
+                          : 'Premium expired. All food items are retained. Renew Premium ($4.99) for another 365 days.'}
+                      </p>
+                    )}
+
+                    <div className="pt-1 flex items-center gap-2">
+                      <button
+                        onClick={() => {
+                          setManagingRestaurant(restaurant);
+                          setIsManageMenuModalOpen(true);
+                        }}
+                        className="flex-1 py-2 px-3 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs shadow flex items-center justify-center gap-1.5 transition active:scale-95"
+                      >
+                        <UtensilsCrossed className="w-3.5 h-3.5" />
+                        <span>{isKm ? `គ្រប់គ្រងមុខម្ហូប (${items.length}/5)` : `Manage Menu (${items.length}/5)`}</span>
+                      </button>
+
+                      {(!isPremium || isExpired) && (
+                        <button
+                          onClick={() => {
+                            setManagingRestaurant(restaurant);
+                            setIsManageMenuModalOpen(true);
+                          }}
+                          className="py-2 px-3 rounded-xl bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-700 hover:to-amber-700 text-white font-bold text-xs shadow"
+                        >
+                          {isKm ? '⭐ ដំឡើង $4.99' : '⭐ Upgrade $4.99'}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+      )}
+
+      {/* Tab: Bookmarks */}
       {activeSubTab === 'bookmarks' && (
         <div className="space-y-4">
           {savedFoods.length === 0 && savedDestinations.length === 0 ? (
@@ -221,6 +364,7 @@ export const ProfileView: React.FC = () => {
         </div>
       )}
 
+      {/* Tab: My Posts */}
       {activeSubTab === 'myposts' && (
         <div className="space-y-3">
           {myPosts.length === 0 ? (
@@ -243,6 +387,7 @@ export const ProfileView: React.FC = () => {
         </div>
       )}
 
+      {/* Tab: Settings */}
       {activeSubTab === 'settings' && (
         <div className="p-4 bg-white dark:bg-stone-800 rounded-3xl border border-stone-200 dark:border-stone-700 space-y-3 text-xs font-khmer">
           {/* Language Switch */}

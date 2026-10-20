@@ -1,7 +1,7 @@
 import React from 'react';
-import { Restaurant } from '../types';
+import { Restaurant, isRestaurantPremiumActive } from '../types';
 import { useApp } from '../context/AppContext';
-import { MapPin, Phone, Star, Clock, Navigation, CheckCircle2, AlertCircle } from 'lucide-react';
+import { MapPin, Phone, Star, Clock, Navigation, CheckCircle2, AlertCircle, Sparkles } from 'lucide-react';
 
 interface RestaurantCardProps {
   restaurant: Restaurant;
@@ -32,11 +32,16 @@ export const RestaurantCard: React.FC<RestaurantCardProps> = ({ restaurant }) =>
           </span>
         </div>
 
-        {/* Verification Badge */}
+        {/* Verification & Membership Badge */}
         <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5 flex-wrap justify-end">
-          {restaurant.isFreeTrial && (
+          {isRestaurantPremiumActive(restaurant) ? (
             <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow flex items-center gap-1 font-khmer">
-              <span>🎁 {isKm ? 'ឥតគិតថ្លៃ ១ ខែ' : '1 Mo Free'}</span>
+              <Sparkles className="w-3 h-3" />
+              <span>⭐ {isKm ? 'Premium VIP' : 'Premium'}</span>
+            </span>
+          ) : (
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-stone-900/80 backdrop-blur-md text-stone-200 shadow flex items-center gap-1 font-khmer">
+              <span>🏷️ {isKm ? 'ឥតគិតថ្លៃ' : 'Free'}</span>
             </span>
           )}
           <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold backdrop-blur-md shadow flex items-center gap-1 font-khmer ${

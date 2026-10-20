@@ -70,6 +70,22 @@ export type RestaurantPriceLevel = '$' | '$$' | '$$$' | '$$$$';
 
 export type PaymentStatus = 'unpaid' | 'pending_verification' | 'verified' | 'rejected' | 'waived' | 'free_trial';
 
+export type MembershipTier = 'free' | 'premium';
+
+export interface RestaurantMenuItem {
+  id: string;
+  restaurantId: string;
+  nameKh: string;
+  nameEn?: string;
+  priceRiel: number;
+  priceUsd: number;
+  photoUrl: string;
+  descriptionKh?: string;
+  descriptionEn?: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
 export interface RegistrationTransaction {
   id: string; // e.g. "TXN-20261020-001"
   restaurantId: string;
@@ -114,6 +130,12 @@ export interface Restaurant {
   status: 'approved' | 'pending' | 'rejected';
   isVerified: boolean;
   isFeatured?: boolean;
+  
+  // Membership & Menu Items ($0 Free Listing vs One-Time $4.99 for 365 Days)
+  membershipTier: MembershipTier; // 'free' ($0) or 'premium' ($4.99)
+  membershipExpiresAt?: string; // ISO 8601 date timestamp (365 days from activation)
+  menuItems?: RestaurantMenuItem[]; // Up to 5 items for active Premium restaurants
+  
   paymentStatus?: PaymentStatus;
   paymentTransactionId?: string;
   paymentDate?: string;
@@ -122,6 +144,14 @@ export interface Restaurant {
   isFreeTrial?: boolean;
   freeTrialExpiry?: string;
 }
+
+// Helper to determine if a restaurant has an active Premium membership
+export const isRestaurantPremiumActive = (restaurant?: Restaurant | null): boolean => {
+  if (!restaurant) return false;
+  if (restaurant.membershipTier !== 'premium') return false;
+  if (!restaurant.membershipExpiresAt) return false;
+  return new Date(restaurant.membershipExpiresAt).getTime() > Date.now();
+};
 
 export type DestinationCategorySlug = 'temple' | 'nature' | 'mountain' | 'beach' | 'resort';
 

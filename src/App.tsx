@@ -13,6 +13,7 @@ import { RestaurantDetailModal } from './components/RestaurantDetailModal';
 import { TouristDetailModal } from './components/TouristDetailModal';
 import { AuthModal } from './components/AuthModal';
 import { AddRestaurantModal } from './components/AddRestaurantModal';
+import { ManageMenuModal } from './components/ManageMenuModal';
 import { AdminDashboard } from './components/AdminDashboard';
 import { AdminLoginModal } from './components/AdminLoginModal';
 import { InstallModal } from './components/InstallModal';
@@ -44,6 +45,7 @@ const MainScreen: React.FC = () => {
       {/* Creation & Action Modals */}
       <AuthModal />
       <AddRestaurantModal />
+      <ManageMenuModal />
       <AdminDashboard />
       <AdminLoginModal />
       <InstallModal />

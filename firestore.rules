@@ -28,17 +28,22 @@ service cloud.firestore {
     // 2. Restaurant Directory:
     // - Public read for verified restaurants
     // - Authenticated restaurant owners can create and edit their own restaurant
-    // - Status field (verified/pending) can ONLY be modified by Admin
+    // - Status, membershipTier, and membershipExpiresAt can ONLY be modified by Admin
+    // - Premium restaurants can have at most 5 menu items; Free restaurants cannot have menu items
     match /restaurants/{restaurantId} {
       allow read: if resource.data.status == 'verified' || isAdmin() || (isAuthenticated() && resource.data.ownerId == request.auth.uid);
       allow create: if isAuthenticated() && 
                     request.resource.data.ownerId == request.auth.uid &&
-                    request.resource.data.status == 'pending_verification';
+                    request.resource.data.status == 'pending_verification' &&
+                    (!('menuItems' in request.resource.data) || request.resource.data.menuItems.size() <= 5);
       allow update: if (isAdmin()) || (
         isAuthenticated() && 
         resource.data.ownerId == request.auth.uid &&
         request.resource.data.ownerId == request.auth.uid &&
-        request.resource.data.status == resource.data.status // Cannot self-approve status!
+        request.resource.data.status == resource.data.status && // Cannot self-approve status!
+        (!('membershipTier' in resource.data) || request.resource.data.membershipTier == resource.data.membershipTier) && // Cannot self-upgrade membership!
+        (!('membershipExpiresAt' in resource.data) || request.resource.data.membershipExpiresAt == resource.data.membershipExpiresAt) && // Cannot extend expiry!
+        (!('menuItems' in request.resource.data) || request.resource.data.menuItems.size() <= 5) // Enforce max 5 food items!
       );
       allow delete: if isAdmin() || (isAuthenticated() && resource.data.ownerId == request.auth.uid);
     }

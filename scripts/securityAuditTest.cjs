@@ -87,6 +87,25 @@ const appContextContent = fs.readFileSync(path.resolve(__dirname, '../src/contex
 assert(appContextContent.includes('const safeRole: UserRole = role === \'admin\' ? \'user\' : role;'), 'Normal users prevented from self-registering as admin.');
 assert(appContextContent.includes('Duplicate admin accounts are strictly prohibited!'), 'Role promotion to duplicate admin accounts strictly blocked.');
 
+// TEST 11: Free Restaurant Listing ($0) and One-Time $4.99 Premium VIP Membership (365 Days)
+assert(appContextContent.includes('365 * 24 * 60 * 60 * 1000'), 'One-time Premium duration is 365 days (not monthly subscription, no auto-renewal).');
+assert(appContextContent.includes('currentItems.length >= 5'), 'Five-food-item limit strictly enforced in addRestaurantMenuItem.');
+
+const addRestContent = fs.readFileSync(path.resolve(__dirname, '../src/components/AddRestaurantModal.tsx'), 'utf8');
+assert(addRestContent.includes('ឥតគិតថ្លៃ') && addRestContent.includes('$0'), 'Free restaurant listing option ($0) presented.');
+assert(addRestContent.includes('$4.99') && addRestContent.includes('365'), 'One-time $4.99 for 365 days presented without auto-renewal.');
+
+// TEST 12: Zero QR Code for Restaurants
+assert(!addRestContent.includes('QRCodeCanvas') && !addRestContent.includes('qrcode.react'), 'Zero QR code generation or display in AddRestaurantModal.');
+const manageMenuContent = fs.readFileSync(path.resolve(__dirname, '../src/components/ManageMenuModal.tsx'), 'utf8');
+assert(!manageMenuContent.includes('QRCodeCanvas') && !manageMenuContent.includes('qrcode.react'), 'Zero QR code generation or display in ManageMenuModal.');
+
+// TEST 13: Firestore Security Rules Enforcing 5 Menu Items & Protected Membership Fields
+const firestoreRules = fs.readFileSync(path.resolve(__dirname, '../firestore.rules'), 'utf8');
+assert(firestoreRules.includes('request.resource.data.menuItems.size() <= 5'), 'Firestore rules enforce maximum 5 menu items per restaurant.');
+assert(firestoreRules.includes('request.resource.data.membershipTier == resource.data.membershipTier'), 'Firestore rules prevent unauthorized membership self-promotion.');
+assert(firestoreRules.includes('request.resource.data.membershipExpiresAt == resource.data.membershipExpiresAt'), 'Firestore rules prevent unauthorized extension of membership expiry.');
+
 console.log('\n================================================================');
 console.log(`  AUDIT SUMMARY: ${passCount} PASSED, ${failCount} FAILED`);
 console.log('================================================================\n');
