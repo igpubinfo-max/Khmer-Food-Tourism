@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- Enforce HTTPS/TLS across all network endpoints. Cleartext HTTP is strictly blocked -->
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+    
+    <!-- Local development exception for localhost/10.0.2.2 emulator if needed -->
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">khmerfoodtourism.com</domain>
+        <domain includeSubdomains="true">unsplash.com</domain>
+        <domain includeSubdomains="true">images.unsplash.com</domain>
+        <domain includeSubdomains="true">github.com</domain>
+        <domain includeSubdomains="true">githubusercontent.com</domain>
+        <domain includeSubdomains="true">google.com</domain>
+        <domain includeSubdomains="true">googleapis.com</domain>
+        <pin-set expiration="2028-01-01">
+            <!-- Strict TLS configurations -->
+        </pin-set>
+    </domain-config>
+</network-security-config>

@@ -1,21 +1,31 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# Khmer Food & Tourism - Production R8/ProGuard Hardening Rules
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# 1. Keep Capacitor and WebView JavaScript bridge interfaces
+-keepclassmembers class * {
+    @android.webkit.JavascriptInterface <methods>;
+}
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+-keep class com.getcapacitor.** { *; }
+-keep interface com.getcapacitor.** { *; }
+-keep class com.getcapacitor.community.** { *; }
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# 2. Preserve native plugins and models
+-keep class com.khmerfood.tourism.** { *; }
+-keepattributes JavascriptInterface
+-keepattributes *Annotation*
+-keepattributes Signature
+-keepattributes Exceptions
+
+# 3. Strip debug logs in production release builds to prevent information leakage
+-assumenosideeffects class android.util.Log {
+    public static boolean isLoggable(java.lang.String, int);
+    public static int v(...);
+    public static int d(...);
+}
+
+# 4. Obfuscation & optimization directives
+-repackageclasses 'com.khmerfood.tourism.internal'
+-allowaccessmodification
+-dontusemixedcaseclassnames
+-dontskipnonpubliclibraryclasses
+-verbose

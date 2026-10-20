@@ -1623,7 +1623,7 @@ export const generateFull100Foods = (): FoodItem[] => {
     { slug: 'specialty', kh: 'អាហារសម្រន់ & ម្ហូបពិសេស', en: 'Snacks & Specialties' },
   ];
 
-  const photoPool = [
+    const photoPool = [
     'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=80',
     'https://images.unsplash.com/photo-1547592180-85f173990554?w=800&auto=format&fit=crop&q=80',
     'https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80',
@@ -1636,84 +1636,1283 @@ export const generateFull100Foods = (): FoodItem[] => {
     'https://images.unsplash.com/photo-1548946526-f69e2424cf45?w=800&auto=format&fit=crop&q=80',
     'https://images.unsplash.com/photo-1543339308-43e59d6b73a6?w=800&auto=format&fit=crop&q=80',
     'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=800&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1563245372-f21724e3856d?w=800&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1567620832903-9fc6debc209f?w=800&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=800&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1525755662778-989d0524087e?w=800&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1512058564366-18510be2db19?w=800&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1541832676-9b763b0239ab?w=800&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1555126634-323283e090fa?w=800&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?w=800&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1596797038530-2c107229654b?w=800&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?w=800&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1539136788836-5699e78bfc75?w=800&auto=format&fit=crop&q=80'
   ];
 
-  const additionalAuthenticDishes = [
-    { nameKh: 'សម្លម្ជូរត្រីកែវរំដេង', nameEn: 'River Keo Fish Galangal Sour Soup', cat: 'soup', priceR: 16000, priceU: 4.0 },
-    { nameKh: 'សម្លម្ជូរល្ពៅសាច់ជ្រូក', nameEn: 'Pumpkin Pork Rib Sour Soup', cat: 'soup', priceR: 15000, priceU: 3.75 },
-    { nameKh: 'សម្លម្ជូរទំពាំងត្រីឆ្អើរ', nameEn: 'Bamboo Shoot & Smoked Fish Soup', cat: 'soup', priceR: 16000, priceU: 4.0 },
-    { nameKh: 'សម្លប្រហើរននោងបង្គាស្រស់', nameEn: 'Luffa Gourd Fresh Shrimp Herbal Soup', cat: 'soup', priceR: 18000, priceU: 4.5 },
-    { nameKh: 'សម្លស្ងោរម្រះញាត់សាច់ជ្រូក', nameEn: 'Bitter Melon Stuffed with Pork Soup', cat: 'soup', priceR: 14000, priceU: 3.5 },
-    { nameKh: 'សម្លម្ជូរផ្កាកំប្លោកត្រីរ៉ស់', nameEn: 'Water Lily Flower Sour Soup with Fish', cat: 'soup', priceR: 15000, priceU: 3.75 },
-    { nameKh: 'សម្លការីទាស្រែចេកខ្ចី', nameEn: 'Country Duck Red Curry with Green Banana', cat: 'soup', priceR: 24000, priceU: 6.0 },
-    { nameKh: 'សម្លម្ជូរក្រសាំងត្រីពោធិ៍', nameEn: 'Krasang Fruit Sour Soup with River Fish', cat: 'soup', priceR: 17000, priceU: 4.25 },
-    
-    { nameKh: 'ស្លាបមាន់អាំងទឹកឃ្មុំអំបិលម្ទេស', nameEn: 'Honey Glazed Spicy Chicken Wings', cat: 'grilled', priceR: 16000, priceU: 4.0 },
-    { nameKh: 'ត្រីដៀបអាំងទឹកត្រីស្វាយខ្ចី', nameEn: 'Grilled Dieb Fish with Green Mango Dip', cat: 'grilled', priceR: 22000, priceU: 5.5 },
-    { nameKh: 'កោះមាន់អាំងគ្រឿងស្លឹកគ្រៃ', nameEn: 'Grilled Chicken Gizzards with Kroeung', cat: 'grilled', priceR: 12000, priceU: 3.0 },
-    { nameKh: 'សាច់ជ្រូកអាំងពពុះសណ្តែក', nameEn: 'Grilled Pork Strips with Bean Curd', cat: 'grilled', priceR: 18000, priceU: 4.5 },
-    { nameKh: 'ខ្យងស្រែអាំងអំបិលម្ទេស', nameEn: 'Charcoal Grilled River Snails with Chili Salt', cat: 'grilled', priceR: 12000, priceU: 3.0 },
-    { nameKh: 'ត្រីអណ្តែងអាំងទឹកត្រីអំពិលទុំ', nameEn: 'Grilled Catfish with Tamarind Fish Sauce', cat: 'grilled', priceR: 16000, priceU: 4.0 },
-    { nameKh: 'សាច់គោចង្កាក់អាំងគ្រឿងបាត់ដំបង', nameEn: 'Battambang Beef Skewers with Kroeung', cat: 'grilled', priceR: 15000, priceU: 3.75 },
-    { nameKh: 'ត្រីផ្ទក់អាំងអំបិលម្ទេសបាយក្ដៅ', nameEn: 'Grilled Giant Snakehead with Hot Rice', cat: 'grilled', priceR: 25000, priceU: 6.25 },
-
-    { nameKh: 'ឆាត្រកួនប្រហុកខ្ទឹមស', nameEn: 'Wok Morning Glory with Prahok Essence', cat: 'stirfry', priceR: 12000, priceU: 3.0 },
-    { nameKh: 'ឆាផ្កាខាត់ណាបង្គាស្រស់', nameEn: 'Stir-Fried Broccoli with Fresh Prawns', cat: 'stirfry', priceR: 18000, priceU: 4.5 },
-    { nameKh: 'ឆាមឹកស្រស់ម្រេចខ្ចីកំពត', nameEn: 'Fresh Squid Stir-Fried with Kampot Peppercorns', cat: 'stirfry', priceR: 24000, priceU: 6.0 },
-    { nameKh: 'ឆាត្រប់វែងសាច់ជ្រូកចិញ្ច្រាំ', nameEn: 'Eggplant Stir-Fried with Minced Pork', cat: 'stirfry', priceR: 14000, priceU: 3.5 },
-    { nameKh: 'ឆាព្រលិតត្រីឆ្អើរ', nameEn: 'Water Lily Stems Stir-Fried with Smoked Fish', cat: 'stirfry', priceR: 15000, priceU: 3.75 },
-    { nameKh: 'ឆាក្តៅកង្កែបស្រែស្លឹកម្រះព្រៅ', nameEn: 'Spicy Wok-Fried Farm Frog with Holy Basil', cat: 'stirfry', priceR: 18000, priceU: 4.5 },
-    { nameKh: 'ឆាសាច់គោម្រះព្រៅម្ទេសហឹរ', nameEn: 'Fiery Holy Basil Beef Stir-Fry', cat: 'stirfry', priceR: 20000, priceU: 5.0 },
-    { nameKh: 'ឆាស្ពៃក្តោបពងទាខ្មែរ', nameEn: 'Cabbage Stir-Fried with Eggs', cat: 'stirfry', priceR: 10000, priceU: 2.5 },
-    { nameKh: 'ឆាខ្ញីត្រីរ៉ស់រសជាតិដើម', nameEn: 'Snakehead Fish with Ginger & Black Beans', cat: 'stirfry', priceR: 18000, priceU: 4.5 },
-
-    { nameKh: 'ញាំត្រយូងចេកសាច់មាន់ស្រែ', nameEn: 'Banana Blossom Salad with Free-Range Chicken', cat: 'salad', priceR: 18000, priceU: 4.5 },
-    { nameKh: 'ញាំត្រសក់ត្រីឆ្អើរ', nameEn: 'Cucumber Salad with Smoked Fish', cat: 'salad', priceR: 14000, priceU: 3.5 },
-    { nameKh: 'ទឹកគ្រឿងសណ្តែកដីបាត់ដំបង', nameEn: 'Battambang Peanut Fish Dip Platter', cat: 'salad', priceR: 18000, priceU: 4.5 },
-    { nameKh: 'ប្រហុកកប់ស្លឹកចេកអាំង', nameEn: 'Charcoal Pit Prahok in Banana Leaf', cat: 'salad', priceR: 14000, priceU: 3.5 },
-    { nameKh: 'ម៉ាំល្ហុងសាច់ជ្រូកបីជាន់', nameEn: 'Fermented Mudfish Papaya with Pork Belly', cat: 'salad', priceR: 16000, priceU: 4.0 },
-    { nameKh: 'ផ្អកត្រីបំពងពងទា', nameEn: 'Crispy Fermented Fish Cakes with Eggs', cat: 'salad', priceR: 16000, priceU: 4.0 },
-    { nameKh: 'ញាំសណ្តែកបណ្តុះសាច់គោ', nameEn: 'Crisp Bean Sprout Salad with Seared Beef', cat: 'salad', priceR: 16000, priceU: 4.0 },
-    { nameKh: 'ទឹកត្រីជូរអែមអន្លក់ខ្ចី', nameEn: 'Sweet-Sour Garlic Lime Dip with Crudités', cat: 'salad', priceR: 10000, priceU: 2.5 },
-
-    { nameKh: 'នំបញ្ចុកសម្លការីសាច់មាន់', nameEn: 'Nom Banh Chok with Red Chicken Curry', cat: 'noodles', priceR: 12000, priceU: 3.0 },
-    { nameKh: 'នំបញ្ចុកទឹកប្រហុកសៀមរាប', nameEn: 'Siem Reap Spicy Prahok Rice Noodles', cat: 'noodles', priceR: 12000, priceU: 3.0 },
-    { nameKh: 'គុយទាវកាត់ទន្លេបាសាក់', nameEn: 'Steamed Rice Noodle Rolls with Minced Pork', cat: 'noodles', priceR: 10000, priceU: 2.5 },
-    { nameKh: 'គុយទាវឆាខ្មែរពងទាចៀន', nameEn: 'Stir-Fried Rice Noodles with Duck Egg', cat: 'noodles', priceR: 12000, priceU: 3.0 },
-    { nameKh: 'មីសួរស៊ុបប្រហិតសាច់ជ្រូក', nameEn: 'Glass Noodle Clear Soup with Meatballs', cat: 'noodles', priceR: 12000, priceU: 3.0 },
-    { nameKh: 'គុយទាវសាច់គោទឹកស៊ុបថ្លា', nameEn: 'Clear Broth Kuyteav with Tender Beef', cat: 'noodles', priceR: 14000, priceU: 3.5 },
-    { nameKh: 'មីឆាគ្រឿងសមុទ្រកែប', nameEn: 'Kep Seafood Stir-Fried Noodles', cat: 'noodles', priceR: 18000, priceU: 4.5 },
-    { nameKh: 'នំបញ្ចុកសម្លណាំយ៉ាខ្ទិះដូង', nameEn: 'Southern Nam Ya Coconut Fish Vermicelli', cat: 'noodles', priceR: 14000, priceU: 3.5 },
-
-    { nameKh: 'បាយឆាឡុកឡាក់សាច់គោ', nameEn: 'Beef Lok Lak Fried Rice Platter', cat: 'rice', priceR: 20000, priceU: 5.0 },
-    { nameKh: 'បាយឆាម្រះព្រៅសាច់ជ្រូក', nameEn: 'Holy Basil Pork Fried Rice', cat: 'rice', priceR: 14000, priceU: 3.5 },
-    { nameKh: 'បបរមាន់ស្រែស្លឹកខ្ទឹម', nameEn: 'Free-Range Chicken Rice Porridge', cat: 'rice', priceR: 14000, priceU: 3.5 },
-    { nameKh: 'បបរត្រីរ៉ស់ខ្ញីស្រស់', nameEn: 'Snakehead Fish Ginger Rice Congee', cat: 'rice', priceR: 14000, priceU: 3.5 },
-    { nameKh: 'បាយដំណើបសង់ខ្យាខ្មែរ', nameEn: 'Sticky Rice with Rich Coconut Custard', cat: 'rice', priceR: 6000, priceU: 1.5 },
-    { nameKh: 'បាយដំណើបត្រប់ដុត', nameEn: 'Sticky Rice with Charcoal Roasted Eggplant', cat: 'rice', priceR: 8000, priceU: 2.0 },
-    { nameKh: 'បាយក្ដាំងទឹកប្រហុក', nameEn: 'Crispy Rice Cakes with Savory Prahok Dip', cat: 'rice', priceR: 10000, priceU: 2.5 },
-    { nameKh: 'បាយសាច់គោអាំងពងទាចៀន', nameEn: 'Grilled Beef Rice Plate with Fried Egg', cat: 'rice', priceR: 12000, priceU: 3.0 },
-
-    { nameKh: 'នំអន្សមចេកស្ករត្នោត', nameEn: 'Num Ansom Chek (Sweet Banana Sticky Rice Cake)', cat: 'dessert', priceR: 8000, priceU: 2.0 },
-    { nameKh: 'នំគមស្នូលដូងស្ករត្នោត', nameEn: 'Num Kom (Pyramid Sticky Cake with Sweet Coconut)', cat: 'dessert', priceR: 5000, priceU: 1.25 },
-    { nameKh: 'នំកងស្ករត្នោត', nameEn: 'Num Kong (Khmer Glazed Donut Rings)', cat: 'dessert', priceR: 4000, priceU: 1.0 },
-    { nameKh: 'បង្អែមបបរត្នោតខ្ទិះដូង', nameEn: 'Palm Fruit Tapioca Pudding with Coconut Cream', cat: 'dessert', priceR: 6000, priceU: 1.5 },
-    { nameKh: 'បង្អែមពោតខ្ទិះដូង', nameEn: 'Sweet Corn Coconut Pudding', cat: 'dessert', priceR: 5000, priceU: 1.25 },
-    { nameKh: 'នំស្លឹកស្រស់បាត់ដំបង', nameEn: 'Fresh Leaf Wrapped Sweet Rice Cakes', cat: 'dessert', priceR: 6000, priceU: 1.5 },
-    { nameKh: 'បង្អែមបាយដំណើបខ្មៅ', nameEn: 'Black Sticky Rice with Salted Coconut Cream', cat: 'dessert', priceR: 7000, priceU: 1.75 },
-    { nameKh: 'នំចាក់ចុចដូងកោស', nameEn: 'Steamed Layered Pandan Rice Cakes', cat: 'dessert', priceR: 5000, priceU: 1.25 },
-    { nameKh: 'បង្អែមត្រាវខ្ទិះដូង', nameEn: 'Taro Dumplings in Warm Coconut Milk', cat: 'dessert', priceR: 6000, priceU: 1.5 },
-    { nameKh: 'នំទ្រាបបាយដំណើប', nameEn: 'Num Treap (Sticky Rice with Caramelized Coconut)', cat: 'dessert', priceR: 6000, priceU: 1.5 },
-
-    { nameKh: 'សាច់ក្រកសៀមរាបរសជាតិដើម', nameEn: 'Authentic Siem Reap Sweet Pork Sausage', cat: 'specialty', priceR: 20000, priceU: 5.0 },
-    { nameKh: 'ងៀតគោបាត់ដំបងអាំង', nameEn: 'Sun-Dried Battambang Beef Jerky', cat: 'specialty', priceR: 25000, priceU: 6.25 },
-    { nameKh: 'អំបុកស្រូវថ្មីដូងខ្ចី', nameEn: 'Flattened New Rice with Fresh Young Coconut', cat: 'specialty', priceR: 8000, priceU: 2.0 },
-    { nameKh: 'នំគ្រក់ខ្ទិះដូងក្តៅៗ', nameEn: 'Num Krok (Crispy Coconut Rice Pods with Chives)', cat: 'specialty', priceR: 6000, priceU: 1.5 },
-    { nameKh: 'ចេកចៀនម្សៅស្រួយស្ករត្នោត', nameEn: 'Crispy Deep-Fried Bananas with Palm Glaze', cat: 'specialty', priceR: 4000, priceU: 1.0 },
-    { nameKh: 'នំបំពងស្នូលសណ្តែក', nameEn: 'Fried Sesame Balls with Mung Bean Filling', cat: 'specialty', priceR: 4000, priceU: 1.0 },
-    { nameKh: 'ខ្យងស្រែស្ងោរស្លឹកគ្រៃទឹកត្រីកោះកុង', nameEn: 'Poached River Snails with Spicy Lemongrass Dip', cat: 'specialty', priceR: 12000, priceU: 3.0 },
-    { nameKh: 'គល់ស្លឹកគ្រៃញាត់សាច់ជ្រូកបំពង', nameEn: 'Crispy Lemongrass Stalks Stuffed with Pork', cat: 'specialty', priceR: 16000, priceU: 4.0 },
-  ];
+    const additionalAuthenticDishes = [
+  {
+    "nameKh": "សម្លម្ជូរត្រីកែវរំដេង",
+    "nameEn": "River Keo Fish Galangal Sour Soup",
+    "cat": "soup",
+    "priceR": 16000,
+    "priceU": 4
+  },
+  {
+    "nameKh": "សម្លម្ជូរល្ពៅសាច់ជ្រូក",
+    "nameEn": "Pumpkin Pork Rib Sour Soup",
+    "cat": "soup",
+    "priceR": 15000,
+    "priceU": 3.75
+  },
+  {
+    "nameKh": "សម្លម្ជូរទំពាំងត្រីឆ្អើរ",
+    "nameEn": "Bamboo Shoot & Smoked Fish Soup",
+    "cat": "soup",
+    "priceR": 16000,
+    "priceU": 4
+  },
+  {
+    "nameKh": "សម្លប្រហើរននោងបង្គាស្រស់",
+    "nameEn": "Luffa Gourd Fresh Shrimp Herbal Soup",
+    "cat": "soup",
+    "priceR": 18000,
+    "priceU": 4.5
+  },
+  {
+    "nameKh": "សម្លស្ងោរម្រះញាត់សាច់ជ្រូក",
+    "nameEn": "Bitter Melon Stuffed with Pork Soup",
+    "cat": "soup",
+    "priceR": 14000,
+    "priceU": 3.5
+  },
+  {
+    "nameKh": "សម្លម្ជូរផ្កាកំប្លោកត្រីរ៉ស់",
+    "nameEn": "Water Lily Flower Sour Soup with Fish",
+    "cat": "soup",
+    "priceR": 15000,
+    "priceU": 3.75
+  },
+  {
+    "nameKh": "សម្លការីទាស្រែចេកខ្ចី",
+    "nameEn": "Country Duck Red Curry with Green Banana",
+    "cat": "soup",
+    "priceR": 24000,
+    "priceU": 6
+  },
+  {
+    "nameKh": "សម្លម្ជូរក្រសាំងត្រីពោធិ៍",
+    "nameEn": "Krasang Fruit Sour Soup with River Fish",
+    "cat": "soup",
+    "priceR": 17000,
+    "priceU": 4.25
+  },
+  {
+    "nameKh": "សម្លម្ជូរស្រែត្រីឆ្លូញ",
+    "nameEn": "Paddy Keo Fish Country Sour Soup",
+    "cat": "soup",
+    "priceR": 16000,
+    "priceU": 4
+  },
+  {
+    "nameKh": "សម្លម្ជូរម្កាក់ត្រីអណ្តែង",
+    "nameEn": "Ambarella Sour Soup with Catfish",
+    "cat": "soup",
+    "priceR": 16000,
+    "priceU": 4
+  },
+  {
+    "nameKh": "សម្លប្រហើរផ្សិតចំបើង",
+    "nameEn": "Straw Mushroom Herbal Soup",
+    "cat": "soup",
+    "priceR": 14000,
+    "priceU": 3.5
+  },
+  {
+    "nameKh": "សម្លស្ងោរជ្រក់មាន់ស្រែ",
+    "nameEn": "Country Chicken Lime & Lemongrass Soup",
+    "cat": "soup",
+    "priceR": 20000,
+    "priceU": 5
+  },
+  {
+    "nameKh": "សម្លម្ជូរក្តាមស្រែស្លឹកថ្នឹង",
+    "nameEn": "Paddy Crab Sour Soup with Thnoeng Leaves",
+    "cat": "soup",
+    "priceR": 15000,
+    "priceU": 3.75
+  },
+  {
+    "nameKh": "សម្លម្ជូរពងត្រីស្លឹកម្ដេញ",
+    "nameEn": "Fish Roe Sour Soup with Mdenh Leaves",
+    "cat": "soup",
+    "priceR": 22000,
+    "priceU": 5.5
+  },
+  {
+    "nameKh": "សម្លស្ងោរប្រហិតត្រីស្លឹកបាស",
+    "nameEn": "Fish Ball Soup with Ivy Gourd Leaves",
+    "cat": "soup",
+    "priceR": 14000,
+    "priceU": 3.5
+  },
+  {
+    "nameKh": "សម្លម្ជូរត្រកួនសាច់ជ្រូកបីជាន់",
+    "nameEn": "Water Spinach Pork Belly Sour Soup",
+    "cat": "soup",
+    "priceR": 15000,
+    "priceU": 3.75
+  },
+  {
+    "nameKh": "សម្លការីសារ៉ាម៉ាន់សាច់គោ",
+    "nameEn": "Royal Saraman Beef Curry",
+    "cat": "soup",
+    "priceR": 25000,
+    "priceU": 6.25
+  },
+  {
+    "nameKh": "សម្លប្រហើរស្លឹកបាសខ្យងស្រែ",
+    "nameEn": "Ivy Gourd River Snail Herbal Broth",
+    "cat": "soup",
+    "priceR": 14000,
+    "priceU": 3.5
+  },
+  {
+    "nameKh": "សម្លស្ងោរមាន់ត្រឡាច",
+    "nameEn": "Winter Melon Chicken Soup",
+    "cat": "soup",
+    "priceR": 18000,
+    "priceU": 4.5
+  },
+  {
+    "nameKh": "សម្លម្ជូរម្នាស់បង្គាស្រស់",
+    "nameEn": "Pineapple Shrimp Sour Soup",
+    "cat": "soup",
+    "priceR": 18000,
+    "priceU": 4.5
+  },
+  {
+    "nameKh": "សម្លម្ជូរល្មៀតទាស្រែ",
+    "nameEn": "Turmeric Duck Country Sour Soup",
+    "cat": "soup",
+    "priceR": 22000,
+    "priceU": 5.5
+  },
+  {
+    "nameKh": "សម្លទំពាំងស្រស់សាច់ជ្រូកបីជាន់",
+    "nameEn": "Fresh Bamboo Shoot Pork Belly Stew",
+    "cat": "soup",
+    "priceR": 16000,
+    "priceU": 4
+  },
+  {
+    "nameKh": "សម្លស្ងោរឆ្អឹងជំនីរជ្រូកស្ពៃរើស",
+    "nameEn": "Pork Rib Pickled Mustard Green Soup",
+    "cat": "soup",
+    "priceR": 16000,
+    "priceU": 4
+  },
+  {
+    "nameKh": "សម្លប្រហើរត្រាវនិងត្រីអណ្តែង",
+    "nameEn": "Taro Catfish Herbal Soup",
+    "cat": "soup",
+    "priceR": 16000,
+    "priceU": 4
+  },
+  {
+    "nameKh": "សម្លម្ជូរដើមចេកត្រីផ្ទក់",
+    "nameEn": "Banana Stem Sour Soup with Snakehead Fish",
+    "cat": "soup",
+    "priceR": 15000,
+    "priceU": 3.75
+  },
+  {
+    "nameKh": "សម្លស្ងោរមឹកញាត់សាច់ជ្រូក",
+    "nameEn": "Stuffed Squid Clear Broth Soup",
+    "cat": "soup",
+    "priceR": 22000,
+    "priceU": 5.5
+  },
+  {
+    "nameKh": "សម្លការីត្រីពោធិ៍ដំឡូងជ្វា",
+    "nameEn": "River Fish Sweet Potato Yellow Curry",
+    "cat": "soup",
+    "priceR": 18000,
+    "priceU": 4.5
+  },
+  {
+    "nameKh": "ស្លាបមាន់អាំងទឹកឃ្មុំអំបិលម្ទេស",
+    "nameEn": "Honey Glazed Spicy Chicken Wings",
+    "cat": "grilled",
+    "priceR": 16000,
+    "priceU": 4
+  },
+  {
+    "nameKh": "ត្រីដៀបអាំងទឹកត្រីស្វាយខ្ចី",
+    "nameEn": "Grilled Dieb Fish with Green Mango Dip",
+    "cat": "grilled",
+    "priceR": 22000,
+    "priceU": 5.5
+  },
+  {
+    "nameKh": "កោះមាន់អាំងគ្រឿងស្លឹកគ្រៃ",
+    "nameEn": "Grilled Chicken Gizzards with Kroeung",
+    "cat": "grilled",
+    "priceR": 12000,
+    "priceU": 3
+  },
+  {
+    "nameKh": "សាច់ជ្រូកអាំងពពុះសណ្តែក",
+    "nameEn": "Grilled Pork Strips with Bean Curd",
+    "cat": "grilled",
+    "priceR": 18000,
+    "priceU": 4.5
+  },
+  {
+    "nameKh": "ខ្យងស្រែអាំងអំបិលម្ទេស",
+    "nameEn": "Charcoal Grilled River Snails with Chili Salt",
+    "cat": "grilled",
+    "priceR": 12000,
+    "priceU": 3
+  },
+  {
+    "nameKh": "ត្រីអណ្តែងអាំងទឹកត្រីអំពិលទុំ",
+    "nameEn": "Grilled Catfish with Tamarind Fish Sauce",
+    "cat": "grilled",
+    "priceR": 16000,
+    "priceU": 4
+  },
+  {
+    "nameKh": "សាច់គោចង្កាក់អាំងគ្រឿងបាត់ដំបង",
+    "nameEn": "Battambang Beef Skewers with Kroeung",
+    "cat": "grilled",
+    "priceR": 15000,
+    "priceU": 3.75
+  },
+  {
+    "nameKh": "ត្រីផ្ទក់អាំងអំបិលម្ទេសបាយក្ដៅ",
+    "nameEn": "Grilled Giant Snakehead with Hot Rice",
+    "cat": "grilled",
+    "priceR": 25000,
+    "priceU": 6.25
+  },
+  {
+    "nameKh": "ត្រីរ៉ស់អាំងបំពង់ឫស្សី",
+    "nameEn": "Bamboo Tube Charcoal Snakehead Fish",
+    "cat": "grilled",
+    "priceR": 28000,
+    "priceU": 7
+  },
+  {
+    "nameKh": "ពោះតាំងសាច់ជ្រូកអាំងទឹកប្រហុក",
+    "nameEn": "Grilled Pork Chitterlings with Prahok Dip",
+    "cat": "grilled",
+    "priceR": 18000,
+    "priceU": 4.5
+  },
+  {
+    "nameKh": "ឆ្អឹងជំនីរជ្រូកអាំងទឹកឃ្មុំព្រៃ",
+    "nameEn": "Wild Honey Glazed Grilled Pork Ribs",
+    "cat": "grilled",
+    "priceR": 24000,
+    "priceU": 6
+  },
+  {
+    "nameKh": "កង្កែបបោកអាំងគ្រឿង",
+    "nameEn": "Grilled Stuffed Frog with Kroeung & Peanuts",
+    "cat": "grilled",
+    "priceR": 16000,
+    "priceU": 4
+  },
+  {
+    "nameKh": "មាន់ស្រែដុតដីឥដ្ឋ",
+    "nameEn": "Traditional Clay-Baked Country Chicken",
+    "cat": "grilled",
+    "priceR": 35000,
+    "priceU": 8.75
+  },
+  {
+    "nameKh": "ត្រីអណ្តែងបំពង់ឫស្សីអាំង",
+    "nameEn": "Bamboo Charcoal Grilled Catfish",
+    "cat": "grilled",
+    "priceR": 20000,
+    "priceU": 5
+  },
+  {
+    "nameKh": "បង្កងទន្លេអាំងទឹកត្រីកោះកុង",
+    "nameEn": "Charcoal River Prawns with Koh Kong Dip",
+    "cat": "grilled",
+    "priceR": 38000,
+    "priceU": 9.5
+  },
+  {
+    "nameKh": "ពោះគោអាំងទឹកប្រហុកខ្ទឹមស",
+    "nameEn": "Grilled Beef Tripe with Garlic Prahok",
+    "cat": "grilled",
+    "priceR": 18000,
+    "priceU": 4.5
+  },
+  {
+    "nameKh": "សាច់ជ្រូកបីជាន់អាំងទឹកត្រីអំពិលទុំ",
+    "nameEn": "Grilled Pork Belly with Tamarind Dip",
+    "cat": "grilled",
+    "priceR": 18000,
+    "priceU": 4.5
+  },
+  {
+    "nameKh": "ប្រហិតត្រីឆ្លាតអាំងស្លឹកចេក",
+    "nameEn": "Grilled Featherback Fish Paste in Banana Leaf",
+    "cat": "grilled",
+    "priceR": 16000,
+    "priceU": 4
+  },
+  {
+    "nameKh": "មឹកមហាសមុទ្រអាំងអំបិលម្ទេស",
+    "nameEn": "Grilled Ocean Squid with Lime Salt",
+    "cat": "grilled",
+    "priceR": 24000,
+    "priceU": 6
+  },
+  {
+    "nameKh": "ពងមាន់អាំងទឹកដោះគោ",
+    "nameEn": "Seasoned Charcoal Grilled Whole Eggs",
+    "cat": "grilled",
+    "priceR": 8000,
+    "priceU": 2
+  },
+  {
+    "nameKh": "ក្រួចស្រែអាំងទឹកឃ្មុំ",
+    "nameEn": "Grilled Wild Quail with Honey Glaze",
+    "cat": "grilled",
+    "priceR": 14000,
+    "priceU": 3.5
+  },
+  {
+    "nameKh": "ភ្លៅមាន់អាំងទឹកដោះគោខាប់",
+    "nameEn": "Caramelized Sweet Milk Chicken Thighs",
+    "cat": "grilled",
+    "priceR": 16000,
+    "priceU": 4
+  },
+  {
+    "nameKh": "ឆាត្រកួនប្រហុកខ្ទឹមស",
+    "nameEn": "Wok Morning Glory with Prahok Essence",
+    "cat": "stirfry",
+    "priceR": 12000,
+    "priceU": 3
+  },
+  {
+    "nameKh": "ឆាផ្កាខាត់ណាបង្គាស្រស់",
+    "nameEn": "Stir-Fried Broccoli with Fresh Prawns",
+    "cat": "stirfry",
+    "priceR": 18000,
+    "priceU": 4.5
+  },
+  {
+    "nameKh": "ឆាមឹកស្រស់ម្រេចខ្ចីកំពត",
+    "nameEn": "Fresh Squid Stir-Fried with Kampot Peppercorns",
+    "cat": "stirfry",
+    "priceR": 24000,
+    "priceU": 6
+  },
+  {
+    "nameKh": "ឆាត្រប់វែងសាច់ជ្រូកចិញ្ច្រាំ",
+    "nameEn": "Eggplant Stir-Fried with Minced Pork",
+    "cat": "stirfry",
+    "priceR": 14000,
+    "priceU": 3.5
+  },
+  {
+    "nameKh": "ឆាព្រលិតត្រីឆ្អើរ",
+    "nameEn": "Water Lily Stems Stir-Fried with Smoked Fish",
+    "cat": "stirfry",
+    "priceR": 15000,
+    "priceU": 3.75
+  },
+  {
+    "nameKh": "ឆាក្តៅកង្កែបស្រែស្លឹកម្រះព្រៅ",
+    "nameEn": "Spicy Wok-Fried Farm Frog with Holy Basil",
+    "cat": "stirfry",
+    "priceR": 18000,
+    "priceU": 4.5
+  },
+  {
+    "nameKh": "ឆាសាច់គោម្រះព្រៅម្ទេសហឹរ",
+    "nameEn": "Fiery Holy Basil Beef Stir-Fry",
+    "cat": "stirfry",
+    "priceR": 20000,
+    "priceU": 5
+  },
+  {
+    "nameKh": "ឆាស្ពៃក្តោបពងទាខ្មែរ",
+    "nameEn": "Cabbage Stir-Fried with Eggs",
+    "cat": "stirfry",
+    "priceR": 10000,
+    "priceU": 2.5
+  },
+  {
+    "nameKh": "ឆាខ្ញីត្រីរ៉ស់រសជាតិដើម",
+    "nameEn": "Snakehead Fish with Ginger & Black Beans",
+    "cat": "stirfry",
+    "priceR": 18000,
+    "priceU": 4.5
+  },
+  {
+    "nameKh": "ឆាក្តៅសាច់គោស្លឹកម្រះព្រៅ",
+    "nameEn": "Spicy Holy Basil Beef Stir-Fry",
+    "cat": "stirfry",
+    "priceR": 22000,
+    "priceU": 5.5
+  },
+  {
+    "nameKh": "ឆាគ្រឿងសាច់ទាស្រែ",
+    "nameEn": "Duck Stir-Fried with Khmer Lemongrass Paste",
+    "cat": "stirfry",
+    "priceR": 22000,
+    "priceU": 5.5
+  },
+  {
+    "nameKh": "ឆាម្រះសាច់គោពងទា",
+    "nameEn": "Bitter Melon Stir-Fried with Beef & Egg",
+    "cat": "stirfry",
+    "priceR": 16000,
+    "priceU": 4
+  },
+  {
+    "nameKh": "ឆាបន្លែគ្រប់មុខប្រេងខ្យង",
+    "nameEn": "Khmer Mixed Vegetable Stir-Fry",
+    "cat": "stirfry",
+    "priceR": 12000,
+    "priceU": 3
+  },
+  {
+    "nameKh": "ឆាក្តាមថ្មម្រេចខ្ចីកំពត",
+    "nameEn": "Kampot Mud Crab with Fresh Green Peppercorns",
+    "cat": "stirfry",
+    "priceR": 35000,
+    "priceU": 8.75
+  },
+  {
+    "nameKh": "ឆាលៀសសមុទ្រស្លឹកម្រះព្រៅ",
+    "nameEn": "Stir-Fried Clams with Holy Basil",
+    "cat": "stirfry",
+    "priceR": 16000,
+    "priceU": 4
+  },
+  {
+    "nameKh": "ឆាពោតបារាំងបង្គាស្រស់",
+    "nameEn": "Okra Stir-Fried with River Shrimp",
+    "cat": "stirfry",
+    "priceR": 16000,
+    "priceU": 4
+  },
+  {
+    "nameKh": "ឆាខ្ទឹមបារាំងសាច់គោ",
+    "nameEn": "Sweet Onion Tender Beef Stir-Fry",
+    "cat": "stirfry",
+    "priceR": 18000,
+    "priceU": 4.5
+  },
+  {
+    "nameKh": "ឆាផ្សិតចំបើងប្រហិតសាច់ជ្រូក",
+    "nameEn": "Straw Mushroom & Pork Meatball Stir-Fry",
+    "cat": "stirfry",
+    "priceR": 15000,
+    "priceU": 3.75
+  },
+  {
+    "nameKh": "ឆាក្តៅខ្យងស្រែស្លឹកកន្ទួត",
+    "nameEn": "River Snails with Star Gooseberry Leaves",
+    "cat": "stirfry",
+    "priceR": 14000,
+    "priceU": 3.5
+  },
+  {
+    "nameKh": "ឆាផ្កាគូឆាយប្រហិតត្រី",
+    "nameEn": "Chinese Chives Stir-Fried with Fish Cake",
+    "cat": "stirfry",
+    "priceR": 14000,
+    "priceU": 3.5
+  },
+  {
+    "nameKh": "ឆាត្រឡាចសាច់ជ្រូកចិញ្ច្រាំ",
+    "nameEn": "Winter Melon Stir-Fried with Minced Pork",
+    "cat": "stirfry",
+    "priceR": 14000,
+    "priceU": 3.5
+  },
+  {
+    "nameKh": "ឆាម្ទេសប្លោកសាច់មាន់",
+    "nameEn": "Sweet Bell Pepper Stir-Fried Chicken",
+    "cat": "stirfry",
+    "priceR": 16000,
+    "priceU": 4
+  },
+  {
+    "nameKh": "ឆាខ្ញីមាន់ស្រែ",
+    "nameEn": "Country Chicken Stir-Fried with Young Ginger",
+    "cat": "stirfry",
+    "priceR": 18000,
+    "priceU": 4.5
+  },
+  {
+    "nameKh": "ញាំត្រយូងចេកសាច់មាន់ស្រែ",
+    "nameEn": "Banana Blossom Salad with Free-Range Chicken",
+    "cat": "salad",
+    "priceR": 18000,
+    "priceU": 4.5
+  },
+  {
+    "nameKh": "ញាំត្រសក់ត្រីឆ្អើរ",
+    "nameEn": "Cucumber Salad with Smoked Fish",
+    "cat": "salad",
+    "priceR": 14000,
+    "priceU": 3.5
+  },
+  {
+    "nameKh": "ទឹកគ្រឿងសណ្តែកដីបាត់ដំបង",
+    "nameEn": "Battambang Peanut Fish Dip Platter",
+    "cat": "salad",
+    "priceR": 18000,
+    "priceU": 4.5
+  },
+  {
+    "nameKh": "ប្រហុកកប់ស្លឹកចេកអាំង",
+    "nameEn": "Charcoal Pit Prahok in Banana Leaf",
+    "cat": "salad",
+    "priceR": 14000,
+    "priceU": 3.5
+  },
+  {
+    "nameKh": "ម៉ាំល្ហុងសាច់ជ្រូកបីជាន់",
+    "nameEn": "Fermented Mudfish Papaya with Pork Belly",
+    "cat": "salad",
+    "priceR": 16000,
+    "priceU": 4
+  },
+  {
+    "nameKh": "ផ្អកត្រីបំពងពងទា",
+    "nameEn": "Crispy Fermented Fish Cakes with Eggs",
+    "cat": "salad",
+    "priceR": 16000,
+    "priceU": 4
+  },
+  {
+    "nameKh": "ញាំសណ្តែកបណ្តុះសាច់គោ",
+    "nameEn": "Crisp Bean Sprout Salad with Seared Beef",
+    "cat": "salad",
+    "priceR": 16000,
+    "priceU": 4
+  },
+  {
+    "nameKh": "ទឹកត្រីជូរអែមអន្លក់ខ្ចី",
+    "nameEn": "Sweet-Sour Garlic Lime Dip with Crudités",
+    "cat": "salad",
+    "priceR": 10000,
+    "priceU": 2.5
+  },
+  {
+    "nameKh": "ញាំក្រូចថ្លុងបង្គាស្រស់",
+    "nameEn": "Pomelo Salad with Fresh Steamed Prawns",
+    "cat": "salad",
+    "priceR": 20000,
+    "priceU": 5
+  },
+  {
+    "nameKh": "ភ្លាត្រីសាលម៉ុនបែបខ្មែរ",
+    "nameEn": "Khmer-style Salmon Ceviche with Herbs",
+    "cat": "salad",
+    "priceR": 24000,
+    "priceU": 6
+  },
+  {
+    "nameKh": "បុកស្វាយខ្ចីត្រីឆ្អើរ",
+    "nameEn": "Pounded Green Mango Salad with Smoked Fish",
+    "cat": "salad",
+    "priceR": 14000,
+    "priceU": 3.5
+  },
+  {
+    "nameKh": "ញាំមីសួរគ្រឿងសមុទ្រ",
+    "nameEn": "Glass Noodle Seafood Salad with Herbs",
+    "cat": "salad",
+    "priceR": 20000,
+    "priceU": 5
+  },
+  {
+    "nameKh": "ទឹកគ្រឿងប្រហុកទន្លេសាប",
+    "nameEn": "Tonle Sap Rich Herbal Prahok Dip",
+    "cat": "salad",
+    "priceR": 18000,
+    "priceU": 4.5
+  },
+  {
+    "nameKh": "ញាំត្រួយចេកសាច់ជ្រូកបីជាន់",
+    "nameEn": "Banana Stem Salad with Tender Pork Belly",
+    "cat": "salad",
+    "priceR": 16000,
+    "priceU": 4
+  },
+  {
+    "nameKh": "បុកកន្ទួតទឹកត្រីផ្អែម",
+    "nameEn": "Pounded Gooseberry with Sweet Chili Sauce",
+    "cat": "salad",
+    "priceR": 8000,
+    "priceU": 2
+  },
+  {
+    "nameKh": "ញាំសាច់មាន់ស្ពៃក្តោប",
+    "nameEn": "Shredded Cabbage Chicken Herb Salad",
+    "cat": "salad",
+    "priceR": 16000,
+    "priceU": 4
+  },
+  {
+    "nameKh": "ភ្លាកំពឹសរាំ",
+    "nameEn": "Dancing Live Freshwater Shrimp Salad",
+    "cat": "salad",
+    "priceR": 18000,
+    "priceU": 4.5
+  },
+  {
+    "nameKh": "ទឹកប្រហុកអន្លក់បន្លែខ្ចី",
+    "nameEn": "Simmered Prahok Dipping Sauce with Crudités",
+    "cat": "salad",
+    "priceR": 12000,
+    "priceU": 3
+  },
+  {
+    "nameKh": "ញាំស្វាយខ្ចីសាច់គោអាំង",
+    "nameEn": "Green Mango Salad with Sliced Grilled Beef",
+    "cat": "salad",
+    "priceR": 18000,
+    "priceU": 4.5
+  },
+  {
+    "nameKh": "ញាំពពាយបង្គាស្រស់",
+    "nameEn": "Winged Bean Salad with Fresh Shrimp",
+    "cat": "salad",
+    "priceR": 16000,
+    "priceU": 4
+  },
+  {
+    "nameKh": "បុកត្រប់វែងត្រីឆ្អើរ",
+    "nameEn": "Pounded Roasted Eggplant with Smoked Fish",
+    "cat": "salad",
+    "priceR": 14000,
+    "priceU": 3.5
+  },
+  {
+    "nameKh": "នំបញ្ចុកសម្លការីសាច់មាន់",
+    "nameEn": "Nom Banh Chok with Red Chicken Curry",
+    "cat": "noodles",
+    "priceR": 12000,
+    "priceU": 3
+  },
+  {
+    "nameKh": "នំបញ្ចុកទឹកប្រហុកសៀមរាប",
+    "nameEn": "Siem Reap Spicy Prahok Rice Noodles",
+    "cat": "noodles",
+    "priceR": 12000,
+    "priceU": 3
+  },
+  {
+    "nameKh": "គុយទាវកាត់ទន្លេបាសាក់",
+    "nameEn": "Steamed Rice Noodle Rolls with Minced Pork",
+    "cat": "noodles",
+    "priceR": 10000,
+    "priceU": 2.5
+  },
+  {
+    "nameKh": "គុយទាវឆាខ្មែរពងទាចៀន",
+    "nameEn": "Stir-Fried Rice Noodles with Duck Egg",
+    "cat": "noodles",
+    "priceR": 12000,
+    "priceU": 3
+  },
+  {
+    "nameKh": "មីសួរស៊ុបប្រហិតសាច់ជ្រូក",
+    "nameEn": "Glass Noodle Clear Soup with Meatballs",
+    "cat": "noodles",
+    "priceR": 12000,
+    "priceU": 3
+  },
+  {
+    "nameKh": "គុយទាវសាច់គោទឹកស៊ុបថ្លា",
+    "nameEn": "Clear Broth Kuyteav with Tender Beef",
+    "cat": "noodles",
+    "priceR": 14000,
+    "priceU": 3.5
+  },
+  {
+    "nameKh": "មីឆាគ្រឿងសមុទ្រកែប",
+    "nameEn": "Kep Seafood Stir-Fried Noodles",
+    "cat": "noodles",
+    "priceR": 18000,
+    "priceU": 4.5
+  },
+  {
+    "nameKh": "នំបញ្ចុកសម្លណាំយ៉ាខ្ទិះដូង",
+    "nameEn": "Southern Nam Ya Coconut Fish Vermicelli",
+    "cat": "noodles",
+    "priceR": 14000,
+    "priceU": 3.5
+  },
+  {
+    "nameKh": "គុយទាវខគោ",
+    "nameEn": "Rich Cambodian Beef Stew Noodle Soup",
+    "cat": "noodles",
+    "priceR": 18000,
+    "priceU": 4.5
+  },
+  {
+    "nameKh": "នំបញ្ចុកសម្លទំពាំង",
+    "nameEn": "Nom Banh Chok with Bamboo Shoot Curry Broth",
+    "cat": "noodles",
+    "priceR": 12000,
+    "priceU": 3
+  },
+  {
+    "nameKh": "គុយទាវទាខ្វៃ",
+    "nameEn": "Roast Duck Noodle Soup",
+    "cat": "noodles",
+    "priceR": 20000,
+    "priceU": 5
+  },
+  {
+    "nameKh": "គុយទាវប្រហិតត្រីឆ្លាត",
+    "nameEn": "Featherback Fish Ball Noodle Soup",
+    "cat": "noodles",
+    "priceR": 14000,
+    "priceU": 3.5
+  },
+  {
+    "nameKh": "មីគោកសាច់ជ្រូកចិញ្ច្រាំ",
+    "nameEn": "Dry Egg Noodles with Seasoned Minced Pork",
+    "cat": "noodles",
+    "priceR": 12000,
+    "priceU": 3
+  },
+  {
+    "nameKh": "គុយទាវគ្រឿងសមុទ្រកំពត",
+    "nameEn": "Kampot Seafood Rice Noodle Soup",
+    "cat": "noodles",
+    "priceR": 18000,
+    "priceU": 4.5
+  },
+  {
+    "nameKh": "លតឆាស៊ុតទា",
+    "nameEn": "Khmer Lot Cha Short Rice Noodles with Fried Duck Egg",
+    "cat": "noodles",
+    "priceR": 10000,
+    "priceU": 2.5
+  },
+  {
+    "nameKh": "មីកូឡាស្ទឹងសែន",
+    "nameEn": "Steung Saen Sweet & Sour Kola Noodles",
+    "cat": "noodles",
+    "priceR": 12000,
+    "priceU": 3
+  },
+  {
+    "nameKh": "នំបញ្ចុកទឹកម្ហូបកំពត",
+    "nameEn": "Kampot Bok Lahong Rice Noodle Platter",
+    "cat": "noodles",
+    "priceR": 12000,
+    "priceU": 3
+  },
+  {
+    "nameKh": "គុយទាវបាក់ទូកសាច់ជ្រូក",
+    "nameEn": "Bak Touk Style Morning Kuyteav",
+    "cat": "noodles",
+    "priceR": 12000,
+    "priceU": 3
+  },
+  {
+    "nameKh": "មីសួរបំពងស្រួយគ្រឿងសមុទ្រ",
+    "nameEn": "Crispy Golden Glass Noodles with Seafood Sauce",
+    "cat": "noodles",
+    "priceR": 18000,
+    "priceU": 4.5
+  },
+  {
+    "nameKh": "មីស៊ុបឆ្អឹងជំនីរជ្រូក",
+    "nameEn": "Slow-Simmered Pork Rib Egg Noodle Soup",
+    "cat": "noodles",
+    "priceR": 16000,
+    "priceU": 4
+  },
+  {
+    "nameKh": "បាយឆាឡុកឡាក់សាច់គោ",
+    "nameEn": "Beef Lok Lak Fried Rice Platter",
+    "cat": "rice",
+    "priceR": 20000,
+    "priceU": 5
+  },
+  {
+    "nameKh": "បាយឆាម្រះព្រៅសាច់ជ្រូក",
+    "nameEn": "Holy Basil Pork Fried Rice",
+    "cat": "rice",
+    "priceR": 14000,
+    "priceU": 3.5
+  },
+  {
+    "nameKh": "បបរមាន់ស្រែស្លឹកខ្ទឹម",
+    "nameEn": "Free-Range Chicken Rice Porridge",
+    "cat": "rice",
+    "priceR": 14000,
+    "priceU": 3.5
+  },
+  {
+    "nameKh": "បបរត្រីរ៉ស់ខ្ញីស្រស់",
+    "nameEn": "Snakehead Fish Ginger Rice Congee",
+    "cat": "rice",
+    "priceR": 14000,
+    "priceU": 3.5
+  },
+  {
+    "nameKh": "បាយដំណើបសង់ខ្យាខ្មែរ",
+    "nameEn": "Sticky Rice with Rich Coconut Custard",
+    "cat": "rice",
+    "priceR": 6000,
+    "priceU": 1.5
+  },
+  {
+    "nameKh": "បាយដំណើបត្រប់ដុត",
+    "nameEn": "Sticky Rice with Charcoal Roasted Eggplant",
+    "cat": "rice",
+    "priceR": 8000,
+    "priceU": 2
+  },
+  {
+    "nameKh": "បាយក្ដាំងទឹកប្រហុក",
+    "nameEn": "Crispy Rice Cakes with Savory Prahok Dip",
+    "cat": "rice",
+    "priceR": 10000,
+    "priceU": 2.5
+  },
+  {
+    "nameKh": "បាយសាច់គោអាំងពងទាចៀន",
+    "nameEn": "Grilled Beef Rice Plate with Fried Egg",
+    "cat": "rice",
+    "priceR": 12000,
+    "priceU": 3
+  },
+  {
+    "nameKh": "បាយឆាគ្រឿងការីបង្គាស្រស់",
+    "nameEn": "Curry Prawn Fried Rice",
+    "cat": "rice",
+    "priceR": 18000,
+    "priceU": 4.5
+  },
+  {
+    "nameKh": "បាយមាន់ហៃណាំខ្មែរ",
+    "nameEn": "Khmer Hainanese Steamed Chicken Rice",
+    "cat": "rice",
+    "priceR": 16000,
+    "priceU": 4
+  },
+  {
+    "nameKh": "បាយសាច់ជ្រូកបំពងខ្ទឹមស",
+    "nameEn": "Crispy Garlic Pork Slices with Jasmine Rice",
+    "cat": "rice",
+    "priceR": 14000,
+    "priceU": 3.5
+  },
+  {
+    "nameKh": "បាយឆាសាច់ក្រកសៀមរាប",
+    "nameEn": "Siem Reap Sweet Sausage Fried Rice",
+    "cat": "rice",
+    "priceR": 16000,
+    "priceU": 4
+  },
+  {
+    "nameKh": "បបរគ្រឿងជ្រូកខ្មែរ",
+    "nameEn": "Savory Traditional Pork Offal Rice Congee",
+    "cat": "rice",
+    "priceR": 14000,
+    "priceU": 3.5
+  },
+  {
+    "nameKh": "បបរខ្យងស្រែខ្ញីខ្ចី",
+    "nameEn": "River Snail & Young Ginger Congee",
+    "cat": "rice",
+    "priceR": 12000,
+    "priceU": 3
+  },
+  {
+    "nameKh": "បាយដំណើបសណ្តែកខ្មៅ",
+    "nameEn": "Sticky Rice with Black Beans & Sweet Coconut",
+    "cat": "rice",
+    "priceR": 6000,
+    "priceU": 1.5
+  },
+  {
+    "nameKh": "បាយសាច់ជ្រូកចៀនពងទាក្រឡុក",
+    "nameEn": "Stir-Scrambled Egg & Pork Cutlet Rice",
+    "cat": "rice",
+    "priceR": 12000,
+    "priceU": 3
+  },
+  {
+    "nameKh": "បាយឆាប្រហុកពងទា",
+    "nameEn": "Prahok & Duck Egg Savory Fried Rice",
+    "cat": "rice",
+    "priceR": 14000,
+    "priceU": 3.5
+  },
+  {
+    "nameKh": "បាយដំណើបស្វាយទុំ",
+    "nameEn": "Mango Sweet Sticky Rice with Coconut Drizzle",
+    "cat": "rice",
+    "priceR": 10000,
+    "priceU": 2.5
+  },
+  {
+    "nameKh": "បាយឆាត្រីប្រៃសាច់ជ្រូក",
+    "nameEn": "Salted Fish & Minced Pork Fragrant Fried Rice",
+    "cat": "rice",
+    "priceR": 16000,
+    "priceU": 4
+  },
+  {
+    "nameKh": "បាយក្ដាំងបំពងស្រួយស្នូលសាច់",
+    "nameEn": "Crisp Golden Rice Crust with Minced Meat Dip",
+    "cat": "rice",
+    "priceR": 12000,
+    "priceU": 3
+  },
+  {
+    "nameKh": "នំអន្សមចេកស្ករត្នោត",
+    "nameEn": "Num Ansom Chek (Sweet Banana Sticky Rice Cake)",
+    "cat": "dessert",
+    "priceR": 8000,
+    "priceU": 2
+  },
+  {
+    "nameKh": "នំគមស្នូលដូងស្ករត្នោត",
+    "nameEn": "Num Kom (Pyramid Sticky Cake with Sweet Coconut)",
+    "cat": "dessert",
+    "priceR": 5000,
+    "priceU": 1.25
+  },
+  {
+    "nameKh": "នំកងស្ករត្នោត",
+    "nameEn": "Num Kong (Khmer Glazed Donut Rings)",
+    "cat": "dessert",
+    "priceR": 4000,
+    "priceU": 1
+  },
+  {
+    "nameKh": "បង្អែមបបរត្នោតខ្ទិះដូង",
+    "nameEn": "Palm Fruit Tapioca Pudding with Coconut Cream",
+    "cat": "dessert",
+    "priceR": 6000,
+    "priceU": 1.5
+  },
+  {
+    "nameKh": "បង្អែមពោតខ្ទិះដូង",
+    "nameEn": "Sweet Corn Coconut Pudding",
+    "cat": "dessert",
+    "priceR": 5000,
+    "priceU": 1.25
+  },
+  {
+    "nameKh": "នំស្លឹកស្រស់បាត់ដំបង",
+    "nameEn": "Fresh Leaf Wrapped Sweet Rice Cakes",
+    "cat": "dessert",
+    "priceR": 6000,
+    "priceU": 1.5
+  },
+  {
+    "nameKh": "បង្អែមបាយដំណើបខ្មៅ",
+    "nameEn": "Black Sticky Rice with Salted Coconut Cream",
+    "cat": "dessert",
+    "priceR": 7000,
+    "priceU": 1.75
+  },
+  {
+    "nameKh": "នំចាក់ចុចដូងកោស",
+    "nameEn": "Steamed Layered Pandan Rice Cakes",
+    "cat": "dessert",
+    "priceR": 5000,
+    "priceU": 1.25
+  },
+  {
+    "nameKh": "បង្អែមត្រាវខ្ទិះដូង",
+    "nameEn": "Taro Dumplings in Warm Coconut Milk",
+    "cat": "dessert",
+    "priceR": 6000,
+    "priceU": 1.5
+  },
+  {
+    "nameKh": "នំទ្រាបបាយដំណើប",
+    "nameEn": "Num Treap (Sticky Rice with Caramelized Coconut)",
+    "cat": "dessert",
+    "priceR": 6000,
+    "priceU": 1.5
+  },
+  {
+    "nameKh": "នំបត់ស្លឹកចេក",
+    "nameEn": "Num Bat Folded Rice Cake",
+    "cat": "dessert",
+    "priceR": 5000,
+    "priceU": 1.25
+  },
+  {
+    "nameKh": "នំពព្លាក់ទឹកស្ករត្នោត",
+    "nameEn": "Num Popleak Tapioca Coconut Balls",
+    "cat": "dessert",
+    "priceR": 6000,
+    "priceU": 1.5
+  },
+  {
+    "nameKh": "បង្អែមល្ពៅសង់ខ្យា",
+    "nameEn": "Steamed Kabocha Pumpkin Custard",
+    "cat": "dessert",
+    "priceR": 8000,
+    "priceU": 2
+  },
+  {
+    "nameKh": "បង្អែមបាញ់ចានឿក",
+    "nameEn": "Banh Ja-Neuk Mung Bean Dumplings in Ginger Syrup",
+    "cat": "dessert",
+    "priceR": 6000,
+    "priceU": 1.5
+  },
+  {
+    "nameKh": "នំល្ពៅចំហុយខ្ទិះដូង",
+    "nameEn": "Steamed Pumpkin Rice Cake with Coconut",
+    "cat": "dessert",
+    "priceR": 5000,
+    "priceU": 1.25
+  },
+  {
+    "nameKh": "នំក្រូចស្នូលសណ្តែក",
+    "nameEn": "Orange Shaped Sesame Mung Bean Dumplings",
+    "cat": "dessert",
+    "priceR": 4000,
+    "priceU": 1
+  },
+  {
+    "nameKh": "បង្អែមសារាយសមុទ្រខ្ទិះដូង",
+    "nameEn": "Agar Jelly Coconut Cubes",
+    "cat": "dessert",
+    "priceR": 5000,
+    "priceU": 1.25
+  },
+  {
+    "nameKh": "បង្អែមគ្រាប់ឈូកខ្ទិះដូង",
+    "nameEn": "Lotus Seed Sweet Coconut Dessert",
+    "cat": "dessert",
+    "priceR": 7000,
+    "priceU": 1.75
+  },
+  {
+    "nameKh": "នំត្នោតចំហុយស្រស់",
+    "nameEn": "Traditional Steamed Palmyra Palm Cakes",
+    "cat": "dessert",
+    "priceR": 5000,
+    "priceU": 1.25
+  },
+  {
+    "nameKh": "នំកន្តំចេក",
+    "nameEn": "Sticky Sweet Pressed Banana Treats",
+    "cat": "dessert",
+    "priceR": 5000,
+    "priceU": 1.25
+  },
+  {
+    "nameKh": "បង្អែមចេកបុកទឹកដោះគោ",
+    "nameEn": "Mashed Ripe Banana with Coconut Cream",
+    "cat": "dessert",
+    "priceR": 6000,
+    "priceU": 1.5
+  },
+  {
+    "nameKh": "នំពុម្ពខ្ទិះដូងស្រួយ",
+    "nameEn": "Khmer Crispy Coconut Waffle Cakes",
+    "cat": "dessert",
+    "priceR": 5000,
+    "priceU": 1.25
+  },
+  {
+    "nameKh": "បង្អែមត្នោតខ្ចីទឹកកកឈូស",
+    "nameEn": "Iced Young Palm Fruit in Pandan Syrup",
+    "cat": "dessert",
+    "priceR": 7000,
+    "priceU": 1.75
+  },
+  {
+    "nameKh": "បង្អែមសណ្តែកបាយខ្ទិះដូង",
+    "nameEn": "Split Mung Bean Warm Sweet Coconut Pudding",
+    "cat": "dessert",
+    "priceR": 6000,
+    "priceU": 1.5
+  },
+  {
+    "nameKh": "សាច់ក្រកសៀមរាបរសជាតិដើម",
+    "nameEn": "Authentic Siem Reap Sweet Pork Sausage",
+    "cat": "specialty",
+    "priceR": 20000,
+    "priceU": 5
+  },
+  {
+    "nameKh": "ងៀតគោបាត់ដំបងអាំង",
+    "nameEn": "Sun-Dried Battambang Beef Jerky",
+    "cat": "specialty",
+    "priceR": 25000,
+    "priceU": 6.25
+  },
+  {
+    "nameKh": "អំបុកស្រូវថ្មីដូងខ្ចី",
+    "nameEn": "Flattened New Rice with Fresh Young Coconut",
+    "cat": "specialty",
+    "priceR": 8000,
+    "priceU": 2
+  },
+  {
+    "nameKh": "នំគ្រក់ខ្ទិះដូងក្តៅៗ",
+    "nameEn": "Num Krok (Crispy Coconut Rice Pods with Chives)",
+    "cat": "specialty",
+    "priceR": 6000,
+    "priceU": 1.5
+  },
+  {
+    "nameKh": "ចេកចៀនម្សៅស្រួយស្ករត្នោត",
+    "nameEn": "Crispy Deep-Fried Bananas with Palm Glaze",
+    "cat": "specialty",
+    "priceR": 4000,
+    "priceU": 1
+  },
+  {
+    "nameKh": "នំបំពងស្នូលសណ្តែក",
+    "nameEn": "Fried Sesame Balls with Mung Bean Filling",
+    "cat": "specialty",
+    "priceR": 4000,
+    "priceU": 1
+  },
+  {
+    "nameKh": "ខ្យងស្រែស្ងោរស្លឹកគ្រៃទឹកត្រីកោះកុង",
+    "nameEn": "Poached River Snails with Spicy Lemongrass Dip",
+    "cat": "specialty",
+    "priceR": 12000,
+    "priceU": 3
+  },
+  {
+    "nameKh": "គល់ស្លឹកគ្រៃញាត់សាច់ជ្រូកបំពង",
+    "nameEn": "Crispy Lemongrass Stalks Stuffed with Pork",
+    "cat": "specialty",
+    "priceR": 16000,
+    "priceU": 4
+  },
+  {
+    "nameKh": "កណ្តូបស្រែបំពងស្លឹកក្រូចសើច",
+    "nameEn": "Crispy Grasshoppers with Kaffir Lime",
+    "cat": "specialty",
+    "priceR": 10000,
+    "priceU": 2.5
+  },
+  {
+    "nameKh": "អាពីងបំពងខ្ទឹមសកំពង់ចាម",
+    "nameEn": "Kampong Cham Crispy Garlic Fried Tarantula",
+    "cat": "specialty",
+    "priceR": 15000,
+    "priceU": 3.75
+  },
+  {
+    "nameKh": "ពងទាកូនទឹកត្រីម្រេចកំពត",
+    "nameEn": "Balut with Kampot Peppercorn Lime Sauce",
+    "cat": "specialty",
+    "priceR": 6000,
+    "priceU": 1.5
+  },
+  {
+    "nameKh": "ងៀតត្រីរ៉ស់បំពង",
+    "nameEn": "Crispy Sun-Dried Snakehead Fish Strips",
+    "cat": "specialty",
+    "priceR": 20000,
+    "priceU": 5
+  },
+  {
+    "nameKh": "លៀសហាលថ្ងៃអំបិលម្ទេស",
+    "nameEn": "Sun-Dried Spicy Freshwater Clams",
+    "cat": "specialty",
+    "priceR": 6000,
+    "priceU": 1.5
+  },
+  {
+    "nameKh": "សណ្តែកដីលីងស្លឹកក្រូចសើច",
+    "nameEn": "Roasted Peanuts with Lime Leaves & Garlic",
+    "cat": "specialty",
+    "priceR": 5000,
+    "priceU": 1.25
+  },
+  {
+    "nameKh": "ស្វាយខ្ចីទឹកត្រីផ្អែម",
+    "nameEn": "Green Mango Slices with Sweet Chili Dip",
+    "cat": "specialty",
+    "priceR": 6000,
+    "priceU": 1.5
+  },
+  {
+    "nameKh": "ពោតអាំងលាបខ្ទិះដូង",
+    "nameEn": "Charcoal Grilled Corn with Salted Coconut Glaze",
+    "cat": "specialty",
+    "priceR": 4000,
+    "priceU": 1
+  },
+  {
+    "nameKh": "នំប៉័ងប៉ាតេសាច់ជ្រូកក្រហម",
+    "nameEn": "Khmer Baguette Sandwich with Pate & Pickles",
+    "cat": "specialty",
+    "priceR": 8000,
+    "priceU": 2
+  },
+  {
+    "nameKh": "ប្រហិតចៀនទឹកជ្រលក់អំពិលទុំ",
+    "nameEn": "Deep-Fried Meatball Skewers with Tamarind Glaze",
+    "cat": "specialty",
+    "priceR": 8000,
+    "priceU": 2
+  },
+  {
+    "nameKh": "ដំឡូងជ្វាចៀនស្រួយ",
+    "nameEn": "Crispy Sweet Potato Fritters",
+    "cat": "specialty",
+    "priceR": 4000,
+    "priceU": 1
+  },
+  {
+    "nameKh": "ត្រីប្រម៉ាចំហុយសាច់ជ្រូកបីជាន់",
+    "nameEn": "Steamed Salted Threadfin with Minced Pork Belly",
+    "cat": "specialty",
+    "priceR": 18000,
+    "priceU": 4.5
+  },
+  {
+    "nameKh": "ក្រឡានថ្មគោលបាត់ដំបង",
+    "nameEn": "Kralan Thma Koul Bamboo Sticky Rice",
+    "cat": "specialty",
+    "priceR": 8000,
+    "priceU": 2
+  },
+  {
+    "nameKh": "ចង្រិតអាំងម្ទេសហឹរ",
+    "nameEn": "Spicy Charcoal Grilled Crickets",
+    "cat": "specialty",
+    "priceR": 10000,
+    "priceU": 2.5
+  },
+  {
+    "nameKh": "នំជាលស្លឹកចេក",
+    "nameEn": "Num Cheal Steamed Glutinous Cakes",
+    "cat": "specialty",
+    "priceR": 5000,
+    "priceU": 1.25
+  }
+];
 
   const fullList: FoodItem[] = [...seedFoods];
 

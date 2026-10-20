@@ -738,12 +738,16 @@ verifiedVenues.forEach((v, idx) => {
     status: 'approved',
     isVerified: true,
     isFeatured: !!v.featured,
+    paymentStatus: 'verified',
+    promotionalPrice: 4.99,
+    isPromoted: true,
+    paymentDate: '2026-01-15',
   });
 });
 
-// 2. Add community / sample listings across provinces (75 venues) to reach 105 total
+// 2. Add community / sample listings across provinces (185 venues) to reach 215 total
 let sampleIndex = 0;
-while (allRestaurants.length < 105) {
+while (allRestaurants.length < 215) {
   const prov = provinces[sampleIndex % provinces.length];
   const theme = sampleThemes[sampleIndex % sampleThemes.length];
   const numInProv = Math.floor(sampleIndex / provinces.length) + 1;
@@ -751,6 +755,7 @@ while (allRestaurants.length < 105) {
   const photo = photoPool[idNum % photoPool.length];
   const latOffset = ((sampleIndex % 7) - 3) * 0.012;
   const lngOffset = ((sampleIndex % 5) - 2) * 0.015;
+  const isPendingPayment = idNum % 7 === 0;
 
   allRestaurants.push({
     id: `rest-${idNum}`,
@@ -776,9 +781,13 @@ while (allRestaurants.length < 105) {
     rating: +(4.2 + ((idNum % 7) * 0.1)).toFixed(1),
     reviewCount: 15 + ((idNum * 9) % 80),
     signatureDishesKh: theme.dishes,
-    status: idNum % 5 === 0 ? 'pending' : 'approved',
+    status: isPendingPayment ? 'pending' : 'approved',
     isVerified: false,
     isFeatured: false,
+    paymentStatus: isPendingPayment ? 'pending_verification' : 'verified',
+    promotionalPrice: 4.99,
+    isPromoted: !isPendingPayment && (idNum % 5 === 0),
+    paymentDate: isPendingPayment ? undefined : '2026-02-01',
   });
 
   sampleIndex++;
@@ -790,7 +799,7 @@ console.log(`Sample/Unverified count: ${allRestaurants.filter(r => !r.isVerified
 
 // Generate TypeScript code
 const tsContent = `// Khmer Food & Tourism - Cambodian Restaurant Directory
-// 105 authentic venues: Verified iconic Cambodian establishments + Unverified community listings
+// 215 authentic venues: 30 Verified iconic Cambodian establishments + 185 Unverified community listings across all 25 provinces
 import { Restaurant } from '../types';
 
 export const initial100Restaurants: Restaurant[] = ${JSON.stringify(allRestaurants, null, 2)};

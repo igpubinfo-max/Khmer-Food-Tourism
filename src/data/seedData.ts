@@ -1,19 +1,8 @@
-import { FoodItem, Restaurant, TouristDestination, CommunityPost, User, AppSettings } from '../types';
+import { FoodItem, Restaurant, TouristDestination, CommunityPost, User, AppSettings, RegistrationTransaction } from '../types';
 import { initial100Foods } from './seedFoods';
 import { initial100Restaurants } from './seedRestaurants';
 
 export const initialUsers: User[] = [
-  {
-    id: 'admin-1',
-    name: 'Chea Savuth',
-    username: 'Chea Savuth',
-    email: 'cheasavuth@khmerfoodtourism.com',
-    role: 'admin',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-    phone: '012 888 999',
-    bio: 'អ្នកគ្រប់គ្រងជាន់ខ្ពស់ និងស្ថាបនិកកម្មវិធី អាហារ និងទេសចរណ៍ខ្មែរ (Chea Savuth - Senior Administrator)',
-    createdAt: '2026-01-01',
-  },
   {
     id: 'owner-1',
     name: 'សុខ គីមលី (ម្ចាស់ហាង)',
@@ -43,13 +32,19 @@ export const initialAppSettings: AppSettings = {
   apkDownloadUrl: 'https://github.com/igpubinfo-max/Khmer-Food-Tourism/releases/download/v1.0.0/app-debug.apk',
   playStoreUrl: 'https://play.google.com/store/apps/details?id=com.khmerfood.tourism',
   appStoreUrl: 'https://apps.apple.com/app/khmer-food-tourism/id1234567890',
+  iosAppStoreUrl: 'https://apps.apple.com/app/khmer-food-tourism/id1234567890',
+  iosTestFlightUrl: 'https://testflight.apple.com/join/khmerfoodtourism',
   supportQrImageUrl: '/donation-qr.png',
   supportBankName: 'CANADIA BANK / BAKONG KHQR',
   supportAccountName: 'CHEA SAVUTH / KHMER FOOD TOURISM',
   supportMessageKh: 'សូមជួយគាំទ្រការអភិវឌ្ឍន៍កម្មវិធី "អាហារ និងទេសចរណ៍ខ្មែរ" ដើម្បីផ្សព្វផ្សាយវប្បធម៌ និងម្ហូបខ្មែរទៅកាន់ពិភពលោក។ រាល់ការបរិច្ចាគស្ម័គ្រចិត្តរបស់លោកអ្នក គឺជាកម្លាំងចិត្តដ៏ធំធេងសម្រាប់ក្រុមការងារ!',
   supportMessageEn: 'Thank you for supporting Khmer Food & Tourism. Your kind voluntary contribution empowers us to continue promoting authentic Cambodian heritage and cuisine worldwide!',
-  adminPasswordHash: 'c8dd983bf1aa2ea654be2c719155c93385ccf6f32a074e9280df3e20478fbca5', // SHA-256 salted hash for initial setup password CheaSavuth@2026
+  adminPasswordHash: 'pbkdf2$100000$70fcb2b4c0d7d330e0c35f90e46c1dc4d23d0a6ba9e8bf24d49f9236b54dbcd5$9f4c042b557cce87cacb3a142fef4082cded0ac5bf594f6a0fd167439f53b369',
   isAdminInitialized: true,
+  promotionalFeeUsd: 4.99,
+  promotionalFeeEnabled: true,
+  promotionPeriodKh: 'តម្លៃប្រូម៉ូសិនពិសេស៖ $4.99 USD (បញ្ចុះតម្លៃ ៧៥% ពីតម្លៃដើម $19.99)',
+  promotionPeriodEn: 'Special Promotional Price: $4.99 USD (75% Off Regular $19.99)',
 };
 
 // 100+ Authentic Khmer Dishes
@@ -242,8 +237,8 @@ export const initialCommunityPosts: CommunityPost[] = [
       },
       {
         id: 'c-2',
-        authorId: 'admin-1',
-        authorName: 'Chea Savuth',
+        authorId: 'system-admin',
+        authorName: 'ក្រុមការងាររដ្ឋបាល (Admin)',
         authorAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
         text: 'រូបភាពស្រស់ស្អាតណាស់! ក្តាមកំពត-កែបល្បីល្បាញលេខ១តែម្តង។',
         createdAt: '៣០ នាទីមុន',
@@ -277,5 +272,57 @@ export const initialCommunityPosts: CommunityPost[] = [
     ],
     createdAt: '៥ ម៉ោងមុន',
     status: 'approved',
+  },
+];
+
+export const initialTransactions: RegistrationTransaction[] = [
+  {
+    id: 'TXN-20261020-001',
+    restaurantId: 'rest-1',
+    restaurantNameKh: 'ភោជនីយដ្ឋាន ម្លិះ (Malis Restaurant)',
+    restaurantNameEn: 'Malis Restaurant Phnom Penh',
+    ownerId: 'owner-1',
+    ownerName: 'Luu Meng (លូ ម៉េង)',
+    ownerPhone: '015 814 888',
+    amountUsd: 4.99,
+    status: 'verified',
+    paymentMethod: 'KHQR',
+    transactionRef: 'KHQR-MB-9823419082',
+    createdAt: '2026-01-15 08:30',
+    verifiedAt: '2026-01-15 09:00',
+    verifiedBy: 'Chea Savuth',
+    notes: 'Verified via Canadia Bakong KHQR settlement.',
+  },
+  {
+    id: 'TXN-20261020-002',
+    restaurantId: 'rest-2',
+    restaurantNameKh: 'ភោជនីយដ្ឋាន រំដេង (Romdeng Restaurant)',
+    restaurantNameEn: 'Romdeng Restaurant Phnom Penh',
+    ownerId: 'owner-2',
+    ownerName: 'Friends International',
+    ownerPhone: '092 219 509',
+    amountUsd: 4.99,
+    status: 'verified',
+    paymentMethod: 'Bakong',
+    transactionRef: 'BAKONG-TRX-447192831',
+    createdAt: '2026-01-16 10:15',
+    verifiedAt: '2026-01-16 11:00',
+    verifiedBy: 'Chea Savuth',
+    notes: 'Bakong peer-to-peer verified.',
+  },
+  {
+    id: 'TXN-20261020-003',
+    restaurantId: 'rest-7',
+    restaurantNameKh: 'តូបនំបញ្ចុកទឹកសម្លខ្មែរ (ខេត្តកំពត 1)',
+    restaurantNameEn: 'Fresh Num Banh Chok Stall (Kampot #1)',
+    ownerId: 'user-1',
+    ownerName: 'ចាន់ថា វណ្ណៈ',
+    ownerPhone: '077 123 456',
+    amountUsd: 4.99,
+    status: 'pending_verification',
+    paymentMethod: 'KHQR',
+    transactionRef: 'KHQR-ABA-5819203112',
+    createdAt: '2026-10-20 12:40',
+    notes: 'Awaiting admin verification against bank statement.',
   },
 ];

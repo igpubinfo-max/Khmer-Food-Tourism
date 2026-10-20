@@ -17,6 +17,7 @@ import { AdminDashboard } from './components/AdminDashboard';
 import { AdminLoginModal } from './components/AdminLoginModal';
 import { InstallModal } from './components/InstallModal';
 import { SupportModal } from './components/SupportModal';
+import { ExitConfirmModal } from './components/ExitConfirmModal';
 import { Toast } from './components/Toast';
 
 const MainScreen: React.FC = () => {
@@ -47,6 +48,7 @@ const MainScreen: React.FC = () => {
       <AdminLoginModal />
       <InstallModal />
       <SupportModal />
+      <ExitConfirmModal />
 
       {/* Notifications */}
       <Toast />

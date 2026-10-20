@@ -1,5 +1,5 @@
 // Khmer Food & Tourism - Cambodian Restaurant Directory
-// 105 authentic venues: Verified iconic Cambodian establishments + Unverified community listings
+// 215 authentic venues: 30 Verified iconic Cambodian establishments + 185 Unverified community listings across all 25 provinces
 import { Restaurant } from '../types';
 
 export const initial100Restaurants: Restaurant[] = [
@@ -34,7 +34,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": true,
-    "isFeatured": true
+    "isFeatured": true,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-01-15"
   },
   {
     "id": "rest-2",
@@ -67,7 +71,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": true,
-    "isFeatured": true
+    "isFeatured": true,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-01-15"
   },
   {
     "id": "rest-3",
@@ -100,7 +108,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": true,
-    "isFeatured": true
+    "isFeatured": true,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-01-15"
   },
   {
     "id": "rest-4",
@@ -133,7 +145,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": true,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-01-15"
   },
   {
     "id": "rest-5",
@@ -166,7 +182,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": true,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-01-15"
   },
   {
     "id": "rest-6",
@@ -199,7 +219,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": true,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-01-15"
   },
   {
     "id": "rest-7",
@@ -232,7 +256,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": true,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-01-15"
   },
   {
     "id": "rest-8",
@@ -265,7 +293,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": true,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-01-15"
   },
   {
     "id": "rest-9",
@@ -298,7 +330,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": true,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-01-15"
   },
   {
     "id": "rest-10",
@@ -331,7 +367,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": true,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-01-15"
   },
   {
     "id": "rest-11",
@@ -364,7 +404,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": true,
-    "isFeatured": true
+    "isFeatured": true,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-01-15"
   },
   {
     "id": "rest-12",
@@ -397,7 +441,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": true,
-    "isFeatured": true
+    "isFeatured": true,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-01-15"
   },
   {
     "id": "rest-13",
@@ -430,7 +478,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": true,
-    "isFeatured": true
+    "isFeatured": true,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-01-15"
   },
   {
     "id": "rest-14",
@@ -463,7 +515,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": true,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-01-15"
   },
   {
     "id": "rest-15",
@@ -496,7 +552,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": true,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-01-15"
   },
   {
     "id": "rest-16",
@@ -529,7 +589,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": true,
-    "isFeatured": true
+    "isFeatured": true,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-01-15"
   },
   {
     "id": "rest-17",
@@ -562,7 +626,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": true,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-01-15"
   },
   {
     "id": "rest-18",
@@ -595,7 +663,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": true,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-01-15"
   },
   {
     "id": "rest-19",
@@ -628,7 +700,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": true,
-    "isFeatured": true
+    "isFeatured": true,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-01-15"
   },
   {
     "id": "rest-20",
@@ -661,7 +737,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": true,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-01-15"
   },
   {
     "id": "rest-21",
@@ -694,7 +774,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": true,
-    "isFeatured": true
+    "isFeatured": true,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-01-15"
   },
   {
     "id": "rest-22",
@@ -727,7 +811,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": true,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-01-15"
   },
   {
     "id": "rest-23",
@@ -760,7 +848,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": true,
-    "isFeatured": true
+    "isFeatured": true,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-01-15"
   },
   {
     "id": "rest-24",
@@ -793,7 +885,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": true,
-    "isFeatured": true
+    "isFeatured": true,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-01-15"
   },
   {
     "id": "rest-25",
@@ -826,7 +922,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": true,
-    "isFeatured": true
+    "isFeatured": true,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-01-15"
   },
   {
     "id": "rest-26",
@@ -859,7 +959,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": true,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-01-15"
   },
   {
     "id": "rest-27",
@@ -892,7 +996,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": true,
-    "isFeatured": true
+    "isFeatured": true,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-01-15"
   },
   {
     "id": "rest-28",
@@ -925,7 +1033,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": true,
-    "isFeatured": true
+    "isFeatured": true,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-01-15"
   },
   {
     "id": "rest-29",
@@ -958,7 +1070,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": true,
-    "isFeatured": true
+    "isFeatured": true,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-01-15"
   },
   {
     "id": "rest-30",
@@ -991,7 +1107,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": true,
-    "isFeatured": true
+    "isFeatured": true,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-01-15"
   },
   {
     "id": "rest-31",
@@ -1024,7 +1144,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": true,
-    "isFeatured": true
+    "isFeatured": true,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-01-15"
   },
   {
     "id": "rest-32",
@@ -1057,7 +1181,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": true,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-01-15"
   },
   {
     "id": "rest-33",
@@ -1090,7 +1218,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": true,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-01-15"
   },
   {
     "id": "rest-34",
@@ -1123,7 +1255,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": true,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-01-15"
   },
   {
     "id": "rest-35",
@@ -1156,7 +1292,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": true,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-01-15"
   },
   {
     "id": "rest-36",
@@ -1189,7 +1329,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": true,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-01-15"
   },
   {
     "id": "rest-37",
@@ -1222,7 +1366,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": true,
-    "isFeatured": true
+    "isFeatured": true,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-01-15"
   },
   {
     "id": "rest-38",
@@ -1255,7 +1403,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": true,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-01-15"
   },
   {
     "id": "rest-39",
@@ -1288,7 +1440,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": true,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-01-15"
   },
   {
     "id": "rest-40",
@@ -1321,7 +1477,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": true,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-01-15"
   },
   {
     "id": "rest-41",
@@ -1353,7 +1513,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
   },
   {
     "id": "rest-42",
@@ -1383,9 +1547,12 @@ export const initial100Restaurants: Restaurant[] = [
       "នំបញ្ចុកការី",
       "សម្លណាំយ៉ា"
     ],
-    "status": "approved",
+    "status": "pending",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "pending_verification",
+    "promotionalPrice": 4.99,
+    "isPromoted": false
   },
   {
     "id": "rest-43",
@@ -1417,7 +1584,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
   },
   {
     "id": "rest-44",
@@ -1449,7 +1620,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
   },
   {
     "id": "rest-45",
@@ -1479,9 +1654,13 @@ export const initial100Restaurants: Restaurant[] = [
       "មឹកអាំង",
       "បង្គាចំហុយ"
     ],
-    "status": "pending",
+    "status": "approved",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-02-01"
   },
   {
     "id": "rest-46",
@@ -1513,7 +1692,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
   },
   {
     "id": "rest-47",
@@ -1545,7 +1728,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
   },
   {
     "id": "rest-48",
@@ -1577,7 +1764,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
   },
   {
     "id": "rest-49",
@@ -1607,9 +1798,12 @@ export const initial100Restaurants: Restaurant[] = [
       "ចេកខ្ទិះ",
       "បបរត្នោត"
     ],
-    "status": "approved",
+    "status": "pending",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "pending_verification",
+    "promotionalPrice": 4.99,
+    "isPromoted": false
   },
   {
     "id": "rest-50",
@@ -1639,9 +1833,13 @@ export const initial100Restaurants: Restaurant[] = [
       "កាហ្វេទឹកដោះគោទឹកកក",
       "នំប៉័ងប៉ាតេ"
     ],
-    "status": "pending",
+    "status": "approved",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-02-01"
   },
   {
     "id": "rest-51",
@@ -1673,7 +1871,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
   },
   {
     "id": "rest-52",
@@ -1705,7 +1907,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
   },
   {
     "id": "rest-53",
@@ -1737,7 +1943,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
   },
   {
     "id": "rest-54",
@@ -1769,7 +1979,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
   },
   {
     "id": "rest-55",
@@ -1799,9 +2013,13 @@ export const initial100Restaurants: Restaurant[] = [
       "មឹកអាំង",
       "បង្គាចំហុយ"
     ],
-    "status": "pending",
+    "status": "approved",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-02-01"
   },
   {
     "id": "rest-56",
@@ -1831,9 +2049,12 @@ export const initial100Restaurants: Restaurant[] = [
       "នំប៉័ងការី",
       "សម្លម្ជូរគ្រឿង"
     ],
-    "status": "approved",
+    "status": "pending",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "pending_verification",
+    "promotionalPrice": 4.99,
+    "isPromoted": false
   },
   {
     "id": "rest-57",
@@ -1865,7 +2086,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
   },
   {
     "id": "rest-58",
@@ -1897,7 +2122,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
   },
   {
     "id": "rest-59",
@@ -1929,7 +2158,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
   },
   {
     "id": "rest-60",
@@ -1959,9 +2192,13 @@ export const initial100Restaurants: Restaurant[] = [
       "កាហ្វេទឹកដោះគោទឹកកក",
       "នំប៉័ងប៉ាតេ"
     ],
-    "status": "pending",
+    "status": "approved",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-02-01"
   },
   {
     "id": "rest-61",
@@ -1993,7 +2230,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
   },
   {
     "id": "rest-62",
@@ -2025,7 +2266,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
   },
   {
     "id": "rest-63",
@@ -2055,9 +2300,12 @@ export const initial100Restaurants: Restaurant[] = [
       "ពងទាចៀន",
       "ស៊ុបឆ្អឹងជ្រូក"
     ],
-    "status": "approved",
+    "status": "pending",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "pending_verification",
+    "promotionalPrice": 4.99,
+    "isPromoted": false
   },
   {
     "id": "rest-64",
@@ -2089,7 +2337,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
   },
   {
     "id": "rest-65",
@@ -2119,9 +2371,13 @@ export const initial100Restaurants: Restaurant[] = [
       "មឹកអាំង",
       "បង្គាចំហុយ"
     ],
-    "status": "pending",
+    "status": "approved",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-02-01"
   },
   {
     "id": "rest-66",
@@ -2153,7 +2409,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
   },
   {
     "id": "rest-67",
@@ -2185,7 +2445,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
   },
   {
     "id": "rest-68",
@@ -2217,7 +2481,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
   },
   {
     "id": "rest-69",
@@ -2249,7 +2517,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
   },
   {
     "id": "rest-70",
@@ -2281,7 +2553,10 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "pending",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "pending_verification",
+    "promotionalPrice": 4.99,
+    "isPromoted": false
   },
   {
     "id": "rest-71",
@@ -2313,7 +2588,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
   },
   {
     "id": "rest-72",
@@ -2345,7 +2624,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
   },
   {
     "id": "rest-73",
@@ -2377,7 +2660,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
   },
   {
     "id": "rest-74",
@@ -2409,7 +2696,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
   },
   {
     "id": "rest-75",
@@ -2439,9 +2730,13 @@ export const initial100Restaurants: Restaurant[] = [
       "មឹកអាំង",
       "បង្គាចំហុយ"
     ],
-    "status": "pending",
+    "status": "approved",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-02-01"
   },
   {
     "id": "rest-76",
@@ -2473,7 +2768,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
   },
   {
     "id": "rest-77",
@@ -2503,9 +2802,12 @@ export const initial100Restaurants: Restaurant[] = [
       "បាយដំណើប",
       "ជ្រក់ត្រសក់"
     ],
-    "status": "approved",
+    "status": "pending",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "pending_verification",
+    "promotionalPrice": 4.99,
+    "isPromoted": false
   },
   {
     "id": "rest-78",
@@ -2537,7 +2839,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
   },
   {
     "id": "rest-79",
@@ -2569,7 +2875,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
   },
   {
     "id": "rest-80",
@@ -2599,9 +2909,13 @@ export const initial100Restaurants: Restaurant[] = [
       "កាហ្វេទឹកដោះគោទឹកកក",
       "នំប៉័ងប៉ាតេ"
     ],
-    "status": "pending",
+    "status": "approved",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-02-01"
   },
   {
     "id": "rest-81",
@@ -2633,7 +2947,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
   },
   {
     "id": "rest-82",
@@ -2665,7 +2983,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
   },
   {
     "id": "rest-83",
@@ -2697,7 +3019,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
   },
   {
     "id": "rest-84",
@@ -2727,9 +3053,12 @@ export const initial100Restaurants: Restaurant[] = [
       "គុយទាវសាច់គោ",
       "មីគាវ"
     ],
-    "status": "approved",
+    "status": "pending",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "pending_verification",
+    "promotionalPrice": 4.99,
+    "isPromoted": false
   },
   {
     "id": "rest-85",
@@ -2759,9 +3088,13 @@ export const initial100Restaurants: Restaurant[] = [
       "មឹកអាំង",
       "បង្គាចំហុយ"
     ],
-    "status": "pending",
+    "status": "approved",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-02-01"
   },
   {
     "id": "rest-86",
@@ -2793,7 +3126,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
   },
   {
     "id": "rest-87",
@@ -2825,7 +3162,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
   },
   {
     "id": "rest-88",
@@ -2857,7 +3198,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
   },
   {
     "id": "rest-89",
@@ -2889,7 +3234,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
   },
   {
     "id": "rest-90",
@@ -2919,9 +3268,13 @@ export const initial100Restaurants: Restaurant[] = [
       "កាហ្វេទឹកដោះគោទឹកកក",
       "នំប៉័ងប៉ាតេ"
     ],
-    "status": "pending",
+    "status": "approved",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-02-01"
   },
   {
     "id": "rest-91",
@@ -2951,9 +3304,12 @@ export const initial100Restaurants: Restaurant[] = [
       "ត្រីអាំងទឹកត្រីអំពិល",
       "ប្រហុកខ្ទិះ"
     ],
-    "status": "approved",
+    "status": "pending",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "pending_verification",
+    "promotionalPrice": 4.99,
+    "isPromoted": false
   },
   {
     "id": "rest-92",
@@ -2985,7 +3341,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
   },
   {
     "id": "rest-93",
@@ -3017,7 +3377,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
   },
   {
     "id": "rest-94",
@@ -3049,7 +3413,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
   },
   {
     "id": "rest-95",
@@ -3079,9 +3447,13 @@ export const initial100Restaurants: Restaurant[] = [
       "មឹកអាំង",
       "បង្គាចំហុយ"
     ],
-    "status": "pending",
+    "status": "approved",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-02-01"
   },
   {
     "id": "rest-96",
@@ -3113,7 +3485,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
   },
   {
     "id": "rest-97",
@@ -3145,7 +3521,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
   },
   {
     "id": "rest-98",
@@ -3175,9 +3555,12 @@ export const initial100Restaurants: Restaurant[] = [
       "ភ្លាសាច់គោក្រូចឆ្មា",
       "ស្លាបមាន់បំពង"
     ],
-    "status": "approved",
+    "status": "pending",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "pending_verification",
+    "promotionalPrice": 4.99,
+    "isPromoted": false
   },
   {
     "id": "rest-99",
@@ -3209,7 +3592,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
   },
   {
     "id": "rest-100",
@@ -3239,9 +3626,13 @@ export const initial100Restaurants: Restaurant[] = [
       "កាហ្វេទឹកដោះគោទឹកកក",
       "នំប៉័ងប៉ាតេ"
     ],
-    "status": "pending",
+    "status": "approved",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-02-01"
   },
   {
     "id": "rest-101",
@@ -3273,7 +3664,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
   },
   {
     "id": "rest-102",
@@ -3305,7 +3700,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
   },
   {
     "id": "rest-103",
@@ -3337,7 +3736,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
   },
   {
     "id": "rest-104",
@@ -3369,7 +3772,11 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "approved",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
   },
   {
     "id": "rest-105",
@@ -3401,6 +3808,3954 @@ export const initial100Restaurants: Restaurant[] = [
     ],
     "status": "pending",
     "isVerified": false,
-    "isFeatured": false
+    "isFeatured": false,
+    "paymentStatus": "pending_verification",
+    "promotionalPrice": 4.99,
+    "isPromoted": false
+  },
+  {
+    "id": "rest-106",
+    "nameKh": "ផ្ទះបាយការីខ្មែរឈ្ងុយឆ្ងាញ់ (ខេត្តក្រចេះ 3)",
+    "nameEn": "Fragrant Khmer Curry Kitchen (Kratie #3)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) ផ្ទះបាយការីខ្មែរឈ្ងុយឆ្ងាញ់ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តក្រចេះ។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Fragrant Khmer Curry Kitchen offers authentic everyday Khmer cooking located in Kratie. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តក្រចេះ",
+    "addressEn": "Central Market Area, Kratie",
+    "provinceKh": "ខេត្តក្រចេះ",
+    "provinceEn": "Kratie",
+    "phone": "097 842 778",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Kratie%2BCambodia",
+    "latitude": 12.4763,
+    "longitude": 105.9888,
+    "rating": 4.3,
+    "reviewCount": 89,
+    "signatureDishesKh": [
+      "សម្លការីមាន់ស្រែ",
+      "នំប៉័ងការី",
+      "សម្លម្ជូរគ្រឿង"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-107",
+    "nameKh": "រានមាន់ដុតទឹកឃ្មុំព្រៃ (ខេត្តស្ទឹងត្រែង 3)",
+    "nameEn": "Honey Roast Country Chicken Grill (Stung Treng #3)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) រានមាន់ដុតទឹកឃ្មុំព្រៃ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តស្ទឹងត្រែង។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Honey Roast Country Chicken Grill offers authentic everyday Khmer cooking located in Stung Treng. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តស្ទឹងត្រែង",
+    "addressEn": "Central Market Area, Stung Treng",
+    "provinceKh": "ខេត្តស្ទឹងត្រែង",
+    "provinceEn": "Stung Treng",
+    "phone": "098 849 791",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Stung%20Treng%2BCambodia",
+    "latitude": 13.5259,
+    "longitude": 105.9533,
+    "rating": 4.4,
+    "reviewCount": 18,
+    "signatureDishesKh": [
+      "មាន់ស្រែដុតទឹកឃ្មុំ",
+      "បាយដំណើប",
+      "ជ្រក់ត្រសក់"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-108",
+    "nameKh": "តូបបុកល្ហុង និងភ្លាសាច់គោ (ខេត្តព្រះវិហារ 3)",
+    "nameEn": "Papaya Salad & Spicy Pleah Shack (Preah Vihear #3)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) តូបបុកល្ហុង និងភ្លាសាច់គោ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តព្រះវិហារ។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Papaya Salad & Spicy Pleah Shack offers authentic everyday Khmer cooking located in Preah Vihear. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តព្រះវិហារ",
+    "addressEn": "Central Market Area, Preah Vihear",
+    "provinceKh": "ខេត្តព្រះវិហារ",
+    "provinceEn": "Preah Vihear",
+    "phone": "090 856 804",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$$",
+    "mapUrl": "https://maps.google.com/?q=Preah%20Vihear%2BCambodia",
+    "latitude": 13.8193,
+    "longitude": 104.9814,
+    "rating": 4.5,
+    "reviewCount": 27,
+    "signatureDishesKh": [
+      "បុកល្ហុងក្តាមប្រៃ",
+      "ភ្លាសាច់គោក្រូចឆ្មា",
+      "ស្លាបមាន់បំពង"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-109",
+    "nameKh": "រានបង្អែមខ្មែរស្ករត្នោត (ខេត្តបន្ទាយមានជ័យ 3)",
+    "nameEn": "Khmer Palm Sugar Sweets Hub (Banteay Meanchey #3)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) រានបង្អែមខ្មែរស្ករត្នោត ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តបន្ទាយមានជ័យ។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Khmer Palm Sugar Sweets Hub offers authentic everyday Khmer cooking located in Banteay Meanchey. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តបន្ទាយមានជ័យ",
+    "addressEn": "Central Market Area, Banteay Meanchey",
+    "provinceKh": "ខេត្តបន្ទាយមានជ័យ",
+    "provinceEn": "Banteay Meanchey",
+    "phone": "091 863 817",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Banteay%20Meanchey%2BCambodia",
+    "latitude": 13.6099,
+    "longitude": 102.9889,
+    "rating": 4.6,
+    "reviewCount": 36,
+    "signatureDishesKh": [
+      "នំផ្លែអាយ",
+      "ចេកខ្ទិះ",
+      "បបរត្នោត"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-110",
+    "nameKh": "ផ្ទះកាហ្វេ និងអាហារសម្រន់ខ្មែរ (ខេត្តឧត្តរមានជ័យ 3)",
+    "nameEn": "Khmer Coffee & Country Snacks (Oddar Meanchey #3)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) ផ្ទះកាហ្វេ និងអាហារសម្រន់ខ្មែរ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តឧត្តរមានជ័យ។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Khmer Coffee & Country Snacks offers authentic everyday Khmer cooking located in Oddar Meanchey. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តឧត្តរមានជ័យ",
+    "addressEn": "Central Market Area, Oddar Meanchey",
+    "provinceKh": "ខេត្តឧត្តរមានជ័យ",
+    "provinceEn": "Oddar Meanchey",
+    "phone": "092 870 830",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Oddar%20Meanchey%2BCambodia",
+    "latitude": 14.2179,
+    "longitude": 103.5478,
+    "rating": 4.7,
+    "reviewCount": 45,
+    "signatureDishesKh": [
+      "នំគ្រក់ក្តៅៗ",
+      "កាហ្វេទឹកដោះគោទឹកកក",
+      "នំប៉័ងប៉ាតេ"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-111",
+    "nameKh": "ផ្ទះបាយអ្នកស្រែ (ខេត្តប៉ៃលិន 3)",
+    "nameEn": "Village Farmer Kitchen (Pailin #3)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) ផ្ទះបាយអ្នកស្រែ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តប៉ៃលិន។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Village Farmer Kitchen offers authentic everyday Khmer cooking located in Pailin. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តប៉ៃលិន",
+    "addressEn": "Central Market Area, Pailin",
+    "provinceKh": "ខេត្តប៉ៃលិន",
+    "provinceEn": "Pailin",
+    "phone": "093 877 843",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$$",
+    "mapUrl": "https://maps.google.com/?q=Pailin%2BCambodia",
+    "latitude": 12.8129,
+    "longitude": 102.5792,
+    "rating": 4.8,
+    "reviewCount": 54,
+    "signatureDishesKh": [
+      "សម្លកកូរ",
+      "ត្រីអាំងទឹកត្រីអំពិល",
+      "ប្រហុកខ្ទិះ"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-112",
+    "nameKh": "តូបនំបញ្ចុកទឹកសម្លខ្មែរ (ខេត្តព្រៃវែង 3)",
+    "nameEn": "Fresh Num Banh Chok Stall (Prey Veng #3)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) តូបនំបញ្ចុកទឹកសម្លខ្មែរ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តព្រៃវែង។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Fresh Num Banh Chok Stall offers authentic everyday Khmer cooking located in Prey Veng. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តព្រៃវែង",
+    "addressEn": "Central Market Area, Prey Veng",
+    "provinceKh": "ខេត្តព្រៃវែង",
+    "provinceEn": "Prey Veng",
+    "phone": "094 884 856",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Prey%20Veng%2BCambodia",
+    "latitude": 11.461,
+    "longitude": 105.3114,
+    "rating": 4.2,
+    "reviewCount": 63,
+    "signatureDishesKh": [
+      "នំបញ្ចុកសម្លខ្មែរ",
+      "នំបញ្ចុកការី",
+      "សម្លណាំយ៉ា"
+    ],
+    "status": "pending",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "pending_verification",
+    "promotionalPrice": 4.99,
+    "isPromoted": false
+  },
+  {
+    "id": "rest-113",
+    "nameKh": "រានបាយសាច់ជ្រូកអាំងពេលព្រឹក (ខេត្តស្វាយរៀង 3)",
+    "nameEn": "Morning Grilled Pork Rice Cart (Svay Rieng #3)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) រានបាយសាច់ជ្រូកអាំងពេលព្រឹក ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តស្វាយរៀង។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Morning Grilled Pork Rice Cart offers authentic everyday Khmer cooking located in Svay Rieng. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តស្វាយរៀង",
+    "addressEn": "Central Market Area, Svay Rieng",
+    "provinceKh": "ខេត្តស្វាយរៀង",
+    "provinceEn": "Svay Rieng",
+    "phone": "095 891 869",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Svay%20Rieng%2BCambodia",
+    "latitude": 11.0758,
+    "longitude": 105.7994,
+    "rating": 4.3,
+    "reviewCount": 72,
+    "signatureDishesKh": [
+      "បាយសាច់ជ្រូកអាំង",
+      "ពងទាចៀន",
+      "ស៊ុបឆ្អឹងជ្រូក"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-114",
+    "nameKh": "តូបគុយទាវឆ្នាំងដីបុរាណ (ខេត្តកំពង់ស្ពឺ 3)",
+    "nameEn": "Traditional Claypot Kuyteav Stall (Kampong Speu #3)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) តូបគុយទាវឆ្នាំងដីបុរាណ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តកំពង់ស្ពឺ។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Traditional Claypot Kuyteav Stall offers authentic everyday Khmer cooking located in Kampong Speu. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តកំពង់ស្ពឺ",
+    "addressEn": "Central Market Area, Kampong Speu",
+    "provinceKh": "ខេត្តកំពង់ស្ពឺ",
+    "provinceEn": "Kampong Speu",
+    "phone": "096 898 882",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$$",
+    "mapUrl": "https://maps.google.com/?q=Kampong%20Speu%2BCambodia",
+    "latitude": 11.4533,
+    "longitude": 104.5358,
+    "rating": 4.4,
+    "reviewCount": 81,
+    "signatureDishesKh": [
+      "គុយទាវភ្នំពេញ",
+      "គុយទាវសាច់គោ",
+      "មីគាវ"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-115",
+    "nameKh": "រានអាហារសមុទ្រស្រស់ (ខេត្តត្បូងឃ្មុំ 3)",
+    "nameEn": "Fresh Coastal Seafood Stall (Tboung Khmum #3)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) រានអាហារសមុទ្រស្រស់ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តត្បូងឃ្មុំ។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Fresh Coastal Seafood Stall offers authentic everyday Khmer cooking located in Tboung Khmum. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តត្បូងឃ្មុំ",
+    "addressEn": "Central Market Area, Tboung Khmum",
+    "provinceKh": "ខេត្តត្បូងឃ្មុំ",
+    "provinceEn": "Tboung Khmum",
+    "phone": "097 905 895",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Tboung%20Khmum%2BCambodia",
+    "latitude": 11.9026,
+    "longitude": 105.6875,
+    "rating": 4.5,
+    "reviewCount": 90,
+    "signatureDishesKh": [
+      "ក្តាមឆាម្រេចខ្ចី",
+      "មឹកអាំង",
+      "បង្គាចំហុយ"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-116",
+    "nameKh": "ផ្ទះបាយការីខ្មែរឈ្ងុយឆ្ងាញ់ (រាជធានីភ្នំពេញ 4)",
+    "nameEn": "Fragrant Khmer Curry Kitchen (Phnom Penh #4)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) ផ្ទះបាយការីខ្មែរឈ្ងុយឆ្ងាញ់ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងរាជធានីភ្នំពេញ។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Fragrant Khmer Curry Kitchen offers authentic everyday Khmer cooking located in Phnom Penh. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ រាជធានីភ្នំពេញ",
+    "addressEn": "Central Market Area, Phnom Penh",
+    "provinceKh": "រាជធានីភ្នំពេញ",
+    "provinceEn": "Phnom Penh",
+    "phone": "098 912 908",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Phnom%20Penh%2BCambodia",
+    "latitude": 11.5804,
+    "longitude": 104.8982,
+    "rating": 4.6,
+    "reviewCount": 19,
+    "signatureDishesKh": [
+      "សម្លការីមាន់ស្រែ",
+      "នំប៉័ងការី",
+      "សម្លម្ជូរគ្រឿង"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-117",
+    "nameKh": "រានមាន់ដុតទឹកឃ្មុំព្រៃ (ខេត្តសៀមរាប 4)",
+    "nameEn": "Honey Roast Country Chicken Grill (Siem Reap #4)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) រានមាន់ដុតទឹកឃ្មុំព្រៃ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តសៀមរាប។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Honey Roast Country Chicken Grill offers authentic everyday Khmer cooking located in Siem Reap. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តសៀមរាប",
+    "addressEn": "Central Market Area, Siem Reap",
+    "provinceKh": "ខេត្តសៀមរាប",
+    "provinceEn": "Siem Reap",
+    "phone": "090 919 921",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$$",
+    "mapUrl": "https://maps.google.com/?q=Siem%20Reap%2BCambodia",
+    "latitude": 13.3993,
+    "longitude": 103.8414,
+    "rating": 4.7,
+    "reviewCount": 28,
+    "signatureDishesKh": [
+      "មាន់ស្រែដុតទឹកឃ្មុំ",
+      "បាយដំណើប",
+      "ជ្រក់ត្រសក់"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-118",
+    "nameKh": "តូបបុកល្ហុង និងភ្លាសាច់គោ (ខេត្តបាត់ដំបង 4)",
+    "nameEn": "Papaya Salad & Spicy Pleah Shack (Battambang #4)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) តូបបុកល្ហុង និងភ្លាសាច់គោ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តបាត់ដំបង។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Papaya Salad & Spicy Pleah Shack offers authentic everyday Khmer cooking located in Battambang. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តបាត់ដំបង",
+    "addressEn": "Central Market Area, Battambang",
+    "provinceKh": "ខេត្តបាត់ដំបង",
+    "provinceEn": "Battambang",
+    "phone": "091 926 934",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Battambang%2BCambodia",
+    "latitude": 13.0597,
+    "longitude": 103.2022,
+    "rating": 4.8,
+    "reviewCount": 37,
+    "signatureDishesKh": [
+      "បុកល្ហុងក្តាមប្រៃ",
+      "ភ្លាសាច់គោក្រូចឆ្មា",
+      "ស្លាបមាន់បំពង"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-119",
+    "nameKh": "រានបង្អែមខ្មែរស្ករត្នោត (ខេត្តកំពត 4)",
+    "nameEn": "Khmer Palm Sugar Sweets Hub (Kampot #4)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) រានបង្អែមខ្មែរស្ករត្នោត ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តកំពត។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Khmer Palm Sugar Sweets Hub offers authentic everyday Khmer cooking located in Kampot. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តកំពត",
+    "addressEn": "Central Market Area, Kampot",
+    "provinceKh": "ខេត្តកំពត",
+    "provinceEn": "Kampot",
+    "phone": "092 933 947",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Kampot%2BCambodia",
+    "latitude": 10.5852,
+    "longitude": 104.1934,
+    "rating": 4.2,
+    "reviewCount": 46,
+    "signatureDishesKh": [
+      "នំផ្លែអាយ",
+      "ចេកខ្ទិះ",
+      "បបរត្នោត"
+    ],
+    "status": "pending",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "pending_verification",
+    "promotionalPrice": 4.99,
+    "isPromoted": false
+  },
+  {
+    "id": "rest-120",
+    "nameKh": "ផ្ទះកាហ្វេ និងអាហារសម្រន់ខ្មែរ (ខេត្តកែប 4)",
+    "nameEn": "Khmer Coffee & Country Snacks (Kep #4)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) ផ្ទះកាហ្វេ និងអាហារសម្រន់ខ្មែរ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តកែប។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Khmer Coffee & Country Snacks offers authentic everyday Khmer cooking located in Kep. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តកែប",
+    "addressEn": "Central Market Area, Kep",
+    "provinceKh": "ខេត្តកែប",
+    "provinceEn": "Kep",
+    "phone": "093 940 960",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$$",
+    "mapUrl": "https://maps.google.com/?q=Kep%2BCambodia",
+    "latitude": 10.4702,
+    "longitude": 104.3281,
+    "rating": 4.3,
+    "reviewCount": 55,
+    "signatureDishesKh": [
+      "នំគ្រក់ក្តៅៗ",
+      "កាហ្វេទឹកដោះគោទឹកកក",
+      "នំប៉័ងប៉ាតេ"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-121",
+    "nameKh": "ផ្ទះបាយអ្នកស្រែ (ខេត្តព្រះសីហនុ 4)",
+    "nameEn": "Village Farmer Kitchen (Preah Sihanouk #4)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) ផ្ទះបាយអ្នកស្រែ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តព្រះសីហនុ។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Village Farmer Kitchen offers authentic everyday Khmer cooking located in Preah Sihanouk. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តព្រះសីហនុ",
+    "addressEn": "Central Market Area, Preah Sihanouk",
+    "provinceKh": "ខេត្តព្រះសីហនុ",
+    "provinceEn": "Preah Sihanouk",
+    "phone": "094 947 973",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Preah%20Sihanouk%2BCambodia",
+    "latitude": 10.6184,
+    "longitude": 103.4964,
+    "rating": 4.4,
+    "reviewCount": 64,
+    "signatureDishesKh": [
+      "សម្លកកូរ",
+      "ត្រីអាំងទឹកត្រីអំពិល",
+      "ប្រហុកខ្ទិះ"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-122",
+    "nameKh": "តូបនំបញ្ចុកទឹកសម្លខ្មែរ (ខេត្តកំពង់ចាម 4)",
+    "nameEn": "Fresh Num Banh Chok Stall (Kampong Cham #4)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) តូបនំបញ្ចុកទឹកសម្លខ្មែរ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តកំពង់ចាម។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Fresh Num Banh Chok Stall offers authentic everyday Khmer cooking located in Kampong Cham. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តកំពង់ចាម",
+    "addressEn": "Central Market Area, Kampong Cham",
+    "provinceKh": "ខេត្តកំពង់ចាម",
+    "provinceEn": "Kampong Cham",
+    "phone": "095 954 986",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Kampong%20Cham%2BCambodia",
+    "latitude": 12.0048,
+    "longitude": 105.4491,
+    "rating": 4.5,
+    "reviewCount": 73,
+    "signatureDishesKh": [
+      "នំបញ្ចុកសម្លខ្មែរ",
+      "នំបញ្ចុកការី",
+      "សម្លណាំយ៉ា"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-123",
+    "nameKh": "រានបាយសាច់ជ្រូកអាំងពេលព្រឹក (ខេត្តកណ្តាល 4)",
+    "nameEn": "Morning Grilled Pork Rice Cart (Kandal #4)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) រានបាយសាច់ជ្រូកអាំងពេលព្រឹក ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តកណ្តាល។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Morning Grilled Pork Rice Cart offers authentic everyday Khmer cooking located in Kandal. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តកណ្តាល",
+    "addressEn": "Central Market Area, Kandal",
+    "provinceKh": "ខេត្តកណ្តាល",
+    "provinceEn": "Kandal",
+    "phone": "096 961 999",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$$",
+    "mapUrl": "https://maps.google.com/?q=Kandal%2BCambodia",
+    "latitude": 11.5073,
+    "longitude": 104.95,
+    "rating": 4.6,
+    "reviewCount": 82,
+    "signatureDishesKh": [
+      "បាយសាច់ជ្រូកអាំង",
+      "ពងទាចៀន",
+      "ស៊ុបឆ្អឹងជ្រូក"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-124",
+    "nameKh": "តូបគុយទាវឆ្នាំងដីបុរាណ (ខេត្តតាកែវ 4)",
+    "nameEn": "Traditional Claypot Kuyteav Stall (Takeo #4)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) តូបគុយទាវឆ្នាំងដីបុរាណ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តតាកែវ។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Traditional Claypot Kuyteav Stall offers authentic everyday Khmer cooking located in Takeo. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តតាកែវ",
+    "addressEn": "Central Market Area, Takeo",
+    "provinceKh": "ខេត្តតាកែវ",
+    "provinceEn": "Takeo",
+    "phone": "097 968 212",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Takeo%2BCambodia",
+    "latitude": 11.0268,
+    "longitude": 104.7999,
+    "rating": 4.7,
+    "reviewCount": 91,
+    "signatureDishesKh": [
+      "គុយទាវភ្នំពេញ",
+      "គុយទាវសាច់គោ",
+      "មីគាវ"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-125",
+    "nameKh": "រានអាហារសមុទ្រស្រស់ (ខេត្តពោធិ៍សាត់ 4)",
+    "nameEn": "Fresh Coastal Seafood Stall (Pursat #4)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) រានអាហារសមុទ្រស្រស់ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តពោធិ៍សាត់។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Fresh Coastal Seafood Stall offers authentic everyday Khmer cooking located in Pursat. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តពោធិ៍សាត់",
+    "addressEn": "Central Market Area, Pursat",
+    "provinceKh": "ខេត្តពោធិ៍សាត់",
+    "provinceEn": "Pursat",
+    "phone": "098 975 225",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Pursat%2BCambodia",
+    "latitude": 12.5028,
+    "longitude": 103.9492,
+    "rating": 4.8,
+    "reviewCount": 20,
+    "signatureDishesKh": [
+      "ក្តាមឆាម្រេចខ្ចី",
+      "មឹកអាំង",
+      "បង្គាចំហុយ"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-126",
+    "nameKh": "ផ្ទះបាយការីខ្មែរឈ្ងុយឆ្ងាញ់ (ខេត្តកំពង់ធំ 4)",
+    "nameEn": "Fragrant Khmer Curry Kitchen (Kampong Thom #4)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) ផ្ទះបាយការីខ្មែរឈ្ងុយឆ្ងាញ់ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តកំពង់ធំ។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Fragrant Khmer Curry Kitchen offers authentic everyday Khmer cooking located in Kampong Thom. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តកំពង់ធំ",
+    "addressEn": "Central Market Area, Kampong Thom",
+    "provinceKh": "ខេត្តកំពង់ធំ",
+    "provinceEn": "Kampong Thom",
+    "phone": "090 982 238",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$$",
+    "mapUrl": "https://maps.google.com/?q=Kampong%20Thom%2BCambodia",
+    "latitude": 12.6871,
+    "longitude": 104.8587,
+    "rating": 4.2,
+    "reviewCount": 29,
+    "signatureDishesKh": [
+      "សម្លការីមាន់ស្រែ",
+      "នំប៉័ងការី",
+      "សម្លម្ជូរគ្រឿង"
+    ],
+    "status": "pending",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "pending_verification",
+    "promotionalPrice": 4.99,
+    "isPromoted": false
+  },
+  {
+    "id": "rest-127",
+    "nameKh": "រានមាន់ដុតទឹកឃ្មុំព្រៃ (ខេត្តកំពង់ឆ្នាំង 4)",
+    "nameEn": "Honey Roast Country Chicken Grill (Kampong Chhnang #4)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) រានមាន់ដុតទឹកឃ្មុំព្រៃ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តកំពង់ឆ្នាំង។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Honey Roast Country Chicken Grill offers authentic everyday Khmer cooking located in Kampong Chhnang. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តកំពង់ឆ្នាំង",
+    "addressEn": "Central Market Area, Kampong Chhnang",
+    "provinceKh": "ខេត្តកំពង់ឆ្នាំង",
+    "provinceEn": "Kampong Chhnang",
+    "phone": "091 989 251",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Kampong%20Chhnang%2BCambodia",
+    "latitude": 12.2383,
+    "longitude": 104.6508,
+    "rating": 4.3,
+    "reviewCount": 38,
+    "signatureDishesKh": [
+      "មាន់ស្រែដុតទឹកឃ្មុំ",
+      "បាយដំណើប",
+      "ជ្រក់ត្រសក់"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-128",
+    "nameKh": "តូបបុកល្ហុង និងភ្លាសាច់គោ (ខេត្តកោះកុង 4)",
+    "nameEn": "Papaya Salad & Spicy Pleah Shack (Koh Kong #4)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) តូបបុកល្ហុង និងភ្លាសាច់គោ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តកោះកុង។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Papaya Salad & Spicy Pleah Shack offers authentic everyday Khmer cooking located in Koh Kong. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តកោះកុង",
+    "addressEn": "Central Market Area, Koh Kong",
+    "provinceKh": "ខេត្តកោះកុង",
+    "provinceEn": "Koh Kong",
+    "phone": "092 996 264",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Koh%20Kong%2BCambodia",
+    "latitude": 11.6153,
+    "longitude": 102.9839,
+    "rating": 4.4,
+    "reviewCount": 47,
+    "signatureDishesKh": [
+      "បុកល្ហុងក្តាមប្រៃ",
+      "ភ្លាសាច់គោក្រូចឆ្មា",
+      "ស្លាបមាន់បំពង"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-129",
+    "nameKh": "រានបង្អែមខ្មែរស្ករត្នោត (ខេត្តមណ្ឌលគិរី 4)",
+    "nameEn": "Khmer Palm Sugar Sweets Hub (Mondulkiri #4)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) រានបង្អែមខ្មែរស្ករត្នោត ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តមណ្ឌលគិរី។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Khmer Palm Sugar Sweets Hub offers authentic everyday Khmer cooking located in Mondulkiri. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តមណ្ឌលគិរី",
+    "addressEn": "Central Market Area, Mondulkiri",
+    "provinceKh": "ខេត្តមណ្ឌលគិរី",
+    "provinceEn": "Mondulkiri",
+    "phone": "093 103 277",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$$",
+    "mapUrl": "https://maps.google.com/?q=Mondulkiri%2BCambodia",
+    "latitude": 12.4678,
+    "longitude": 107.2045,
+    "rating": 4.5,
+    "reviewCount": 56,
+    "signatureDishesKh": [
+      "នំផ្លែអាយ",
+      "ចេកខ្ទិះ",
+      "បបរត្នោត"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-130",
+    "nameKh": "ផ្ទះកាហ្វេ និងអាហារសម្រន់ខ្មែរ (ខេត្តរតនគិរី 4)",
+    "nameEn": "Khmer Coffee & Country Snacks (Ratanakiri #4)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) ផ្ទះកាហ្វេ និងអាហារសម្រន់ខ្មែរ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តរតនគិរី។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Khmer Coffee & Country Snacks offers authentic everyday Khmer cooking located in Ratanakiri. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តរតនគិរី",
+    "addressEn": "Central Market Area, Ratanakiri",
+    "provinceKh": "ខេត្តរតនគិរី",
+    "provinceEn": "Ratanakiri",
+    "phone": "094 110 290",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Ratanakiri%2BCambodia",
+    "latitude": 13.7554,
+    "longitude": 107.0425,
+    "rating": 4.6,
+    "reviewCount": 65,
+    "signatureDishesKh": [
+      "នំគ្រក់ក្តៅៗ",
+      "កាហ្វេទឹកដោះគោទឹកកក",
+      "នំប៉័ងប៉ាតេ"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-131",
+    "nameKh": "ផ្ទះបាយអ្នកស្រែ (ខេត្តក្រចេះ 4)",
+    "nameEn": "Village Farmer Kitchen (Kratie #4)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) ផ្ទះបាយអ្នកស្រែ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តក្រចេះ។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Village Farmer Kitchen offers authentic everyday Khmer cooking located in Kratie. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តក្រចេះ",
+    "addressEn": "Central Market Area, Kratie",
+    "provinceKh": "ខេត្តក្រចេះ",
+    "provinceEn": "Kratie",
+    "phone": "095 117 303",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Kratie%2BCambodia",
+    "latitude": 12.5243,
+    "longitude": 105.9888,
+    "rating": 4.7,
+    "reviewCount": 74,
+    "signatureDishesKh": [
+      "សម្លកកូរ",
+      "ត្រីអាំងទឹកត្រីអំពិល",
+      "ប្រហុកខ្ទិះ"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-132",
+    "nameKh": "តូបនំបញ្ចុកទឹកសម្លខ្មែរ (ខេត្តស្ទឹងត្រែង 4)",
+    "nameEn": "Fresh Num Banh Chok Stall (Stung Treng #4)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) តូបនំបញ្ចុកទឹកសម្លខ្មែរ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តស្ទឹងត្រែង។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Fresh Num Banh Chok Stall offers authentic everyday Khmer cooking located in Stung Treng. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តស្ទឹងត្រែង",
+    "addressEn": "Central Market Area, Stung Treng",
+    "provinceKh": "ខេត្តស្ទឹងត្រែង",
+    "provinceEn": "Stung Treng",
+    "phone": "096 124 316",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$$",
+    "mapUrl": "https://maps.google.com/?q=Stung%20Treng%2BCambodia",
+    "latitude": 13.4899,
+    "longitude": 105.9533,
+    "rating": 4.8,
+    "reviewCount": 83,
+    "signatureDishesKh": [
+      "នំបញ្ចុកសម្លខ្មែរ",
+      "នំបញ្ចុកការី",
+      "សម្លណាំយ៉ា"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-133",
+    "nameKh": "រានបាយសាច់ជ្រូកអាំងពេលព្រឹក (ខេត្តព្រះវិហារ 4)",
+    "nameEn": "Morning Grilled Pork Rice Cart (Preah Vihear #4)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) រានបាយសាច់ជ្រូកអាំងពេលព្រឹក ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តព្រះវិហារ។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Morning Grilled Pork Rice Cart offers authentic everyday Khmer cooking located in Preah Vihear. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តព្រះវិហារ",
+    "addressEn": "Central Market Area, Preah Vihear",
+    "provinceKh": "ខេត្តព្រះវិហារ",
+    "provinceEn": "Preah Vihear",
+    "phone": "097 131 329",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Preah%20Vihear%2BCambodia",
+    "latitude": 13.7833,
+    "longitude": 104.9814,
+    "rating": 4.2,
+    "reviewCount": 92,
+    "signatureDishesKh": [
+      "បាយសាច់ជ្រូកអាំង",
+      "ពងទាចៀន",
+      "ស៊ុបឆ្អឹងជ្រូក"
+    ],
+    "status": "pending",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "pending_verification",
+    "promotionalPrice": 4.99,
+    "isPromoted": false
+  },
+  {
+    "id": "rest-134",
+    "nameKh": "តូបគុយទាវឆ្នាំងដីបុរាណ (ខេត្តបន្ទាយមានជ័យ 4)",
+    "nameEn": "Traditional Claypot Kuyteav Stall (Banteay Meanchey #4)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) តូបគុយទាវឆ្នាំងដីបុរាណ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តបន្ទាយមានជ័យ។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Traditional Claypot Kuyteav Stall offers authentic everyday Khmer cooking located in Banteay Meanchey. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តបន្ទាយមានជ័យ",
+    "addressEn": "Central Market Area, Banteay Meanchey",
+    "provinceKh": "ខេត្តបន្ទាយមានជ័យ",
+    "provinceEn": "Banteay Meanchey",
+    "phone": "098 138 342",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Banteay%20Meanchey%2BCambodia",
+    "latitude": 13.5739,
+    "longitude": 102.9889,
+    "rating": 4.3,
+    "reviewCount": 21,
+    "signatureDishesKh": [
+      "គុយទាវភ្នំពេញ",
+      "គុយទាវសាច់គោ",
+      "មីគាវ"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-135",
+    "nameKh": "រានអាហារសមុទ្រស្រស់ (ខេត្តឧត្តរមានជ័យ 4)",
+    "nameEn": "Fresh Coastal Seafood Stall (Oddar Meanchey #4)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) រានអាហារសមុទ្រស្រស់ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តឧត្តរមានជ័យ។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Fresh Coastal Seafood Stall offers authentic everyday Khmer cooking located in Oddar Meanchey. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តឧត្តរមានជ័យ",
+    "addressEn": "Central Market Area, Oddar Meanchey",
+    "provinceKh": "ខេត្តឧត្តរមានជ័យ",
+    "provinceEn": "Oddar Meanchey",
+    "phone": "090 145 355",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$$",
+    "mapUrl": "https://maps.google.com/?q=Oddar%20Meanchey%2BCambodia",
+    "latitude": 14.1819,
+    "longitude": 103.5478,
+    "rating": 4.4,
+    "reviewCount": 30,
+    "signatureDishesKh": [
+      "ក្តាមឆាម្រេចខ្ចី",
+      "មឹកអាំង",
+      "បង្គាចំហុយ"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-136",
+    "nameKh": "ផ្ទះបាយការីខ្មែរឈ្ងុយឆ្ងាញ់ (ខេត្តប៉ៃលិន 4)",
+    "nameEn": "Fragrant Khmer Curry Kitchen (Pailin #4)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) ផ្ទះបាយការីខ្មែរឈ្ងុយឆ្ងាញ់ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តប៉ៃលិន។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Fragrant Khmer Curry Kitchen offers authentic everyday Khmer cooking located in Pailin. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តប៉ៃលិន",
+    "addressEn": "Central Market Area, Pailin",
+    "provinceKh": "ខេត្តប៉ៃលិន",
+    "provinceEn": "Pailin",
+    "phone": "091 152 368",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Pailin%2BCambodia",
+    "latitude": 12.8609,
+    "longitude": 102.5792,
+    "rating": 4.5,
+    "reviewCount": 39,
+    "signatureDishesKh": [
+      "សម្លការីមាន់ស្រែ",
+      "នំប៉័ងការី",
+      "សម្លម្ជូរគ្រឿង"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-137",
+    "nameKh": "រានមាន់ដុតទឹកឃ្មុំព្រៃ (ខេត្តព្រៃវែង 4)",
+    "nameEn": "Honey Roast Country Chicken Grill (Prey Veng #4)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) រានមាន់ដុតទឹកឃ្មុំព្រៃ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តព្រៃវែង។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Honey Roast Country Chicken Grill offers authentic everyday Khmer cooking located in Prey Veng. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តព្រៃវែង",
+    "addressEn": "Central Market Area, Prey Veng",
+    "provinceKh": "ខេត្តព្រៃវែង",
+    "provinceEn": "Prey Veng",
+    "phone": "092 159 381",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Prey%20Veng%2BCambodia",
+    "latitude": 11.509,
+    "longitude": 105.3114,
+    "rating": 4.6,
+    "reviewCount": 48,
+    "signatureDishesKh": [
+      "មាន់ស្រែដុតទឹកឃ្មុំ",
+      "បាយដំណើប",
+      "ជ្រក់ត្រសក់"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-138",
+    "nameKh": "តូបបុកល្ហុង និងភ្លាសាច់គោ (ខេត្តស្វាយរៀង 4)",
+    "nameEn": "Papaya Salad & Spicy Pleah Shack (Svay Rieng #4)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) តូបបុកល្ហុង និងភ្លាសាច់គោ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តស្វាយរៀង។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Papaya Salad & Spicy Pleah Shack offers authentic everyday Khmer cooking located in Svay Rieng. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តស្វាយរៀង",
+    "addressEn": "Central Market Area, Svay Rieng",
+    "provinceKh": "ខេត្តស្វាយរៀង",
+    "provinceEn": "Svay Rieng",
+    "phone": "093 166 394",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$$",
+    "mapUrl": "https://maps.google.com/?q=Svay%20Rieng%2BCambodia",
+    "latitude": 11.1238,
+    "longitude": 105.7994,
+    "rating": 4.7,
+    "reviewCount": 57,
+    "signatureDishesKh": [
+      "បុកល្ហុងក្តាមប្រៃ",
+      "ភ្លាសាច់គោក្រូចឆ្មា",
+      "ស្លាបមាន់បំពង"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-139",
+    "nameKh": "រានបង្អែមខ្មែរស្ករត្នោត (ខេត្តកំពង់ស្ពឺ 4)",
+    "nameEn": "Khmer Palm Sugar Sweets Hub (Kampong Speu #4)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) រានបង្អែមខ្មែរស្ករត្នោត ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តកំពង់ស្ពឺ។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Khmer Palm Sugar Sweets Hub offers authentic everyday Khmer cooking located in Kampong Speu. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តកំពង់ស្ពឺ",
+    "addressEn": "Central Market Area, Kampong Speu",
+    "provinceKh": "ខេត្តកំពង់ស្ពឺ",
+    "provinceEn": "Kampong Speu",
+    "phone": "094 173 407",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Kampong%20Speu%2BCambodia",
+    "latitude": 11.4173,
+    "longitude": 104.5358,
+    "rating": 4.8,
+    "reviewCount": 66,
+    "signatureDishesKh": [
+      "នំផ្លែអាយ",
+      "ចេកខ្ទិះ",
+      "បបរត្នោត"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-140",
+    "nameKh": "ផ្ទះកាហ្វេ និងអាហារសម្រន់ខ្មែរ (ខេត្តត្បូងឃ្មុំ 4)",
+    "nameEn": "Khmer Coffee & Country Snacks (Tboung Khmum #4)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) ផ្ទះកាហ្វេ និងអាហារសម្រន់ខ្មែរ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តត្បូងឃ្មុំ។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Khmer Coffee & Country Snacks offers authentic everyday Khmer cooking located in Tboung Khmum. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តត្បូងឃ្មុំ",
+    "addressEn": "Central Market Area, Tboung Khmum",
+    "provinceKh": "ខេត្តត្បូងឃ្មុំ",
+    "provinceEn": "Tboung Khmum",
+    "phone": "095 180 420",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Tboung%20Khmum%2BCambodia",
+    "latitude": 11.8666,
+    "longitude": 105.6875,
+    "rating": 4.2,
+    "reviewCount": 75,
+    "signatureDishesKh": [
+      "នំគ្រក់ក្តៅៗ",
+      "កាហ្វេទឹកដោះគោទឹកកក",
+      "នំប៉័ងប៉ាតេ"
+    ],
+    "status": "pending",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "pending_verification",
+    "promotionalPrice": 4.99,
+    "isPromoted": false
+  },
+  {
+    "id": "rest-141",
+    "nameKh": "ផ្ទះបាយអ្នកស្រែ (រាជធានីភ្នំពេញ 5)",
+    "nameEn": "Village Farmer Kitchen (Phnom Penh #5)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) ផ្ទះបាយអ្នកស្រែ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងរាជធានីភ្នំពេញ។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Village Farmer Kitchen offers authentic everyday Khmer cooking located in Phnom Penh. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ រាជធានីភ្នំពេញ",
+    "addressEn": "Central Market Area, Phnom Penh",
+    "provinceKh": "រាជធានីភ្នំពេញ",
+    "provinceEn": "Phnom Penh",
+    "phone": "096 187 433",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$$",
+    "mapUrl": "https://maps.google.com/?q=Phnom%20Penh%2BCambodia",
+    "latitude": 11.5444,
+    "longitude": 104.8982,
+    "rating": 4.3,
+    "reviewCount": 84,
+    "signatureDishesKh": [
+      "សម្លកកូរ",
+      "ត្រីអាំងទឹកត្រីអំពិល",
+      "ប្រហុកខ្ទិះ"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-142",
+    "nameKh": "តូបនំបញ្ចុកទឹកសម្លខ្មែរ (ខេត្តសៀមរាប 5)",
+    "nameEn": "Fresh Num Banh Chok Stall (Siem Reap #5)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) តូបនំបញ្ចុកទឹកសម្លខ្មែរ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តសៀមរាប។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Fresh Num Banh Chok Stall offers authentic everyday Khmer cooking located in Siem Reap. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តសៀមរាប",
+    "addressEn": "Central Market Area, Siem Reap",
+    "provinceKh": "ខេត្តសៀមរាប",
+    "provinceEn": "Siem Reap",
+    "phone": "097 194 446",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Siem%20Reap%2BCambodia",
+    "latitude": 13.3633,
+    "longitude": 103.8414,
+    "rating": 4.4,
+    "reviewCount": 93,
+    "signatureDishesKh": [
+      "នំបញ្ចុកសម្លខ្មែរ",
+      "នំបញ្ចុកការី",
+      "សម្លណាំយ៉ា"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-143",
+    "nameKh": "រានបាយសាច់ជ្រូកអាំងពេលព្រឹក (ខេត្តបាត់ដំបង 5)",
+    "nameEn": "Morning Grilled Pork Rice Cart (Battambang #5)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) រានបាយសាច់ជ្រូកអាំងពេលព្រឹក ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តបាត់ដំបង។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Morning Grilled Pork Rice Cart offers authentic everyday Khmer cooking located in Battambang. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តបាត់ដំបង",
+    "addressEn": "Central Market Area, Battambang",
+    "provinceKh": "ខេត្តបាត់ដំបង",
+    "provinceEn": "Battambang",
+    "phone": "098 201 459",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Battambang%2BCambodia",
+    "latitude": 13.1077,
+    "longitude": 103.2022,
+    "rating": 4.5,
+    "reviewCount": 22,
+    "signatureDishesKh": [
+      "បាយសាច់ជ្រូកអាំង",
+      "ពងទាចៀន",
+      "ស៊ុបឆ្អឹងជ្រូក"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-144",
+    "nameKh": "តូបគុយទាវឆ្នាំងដីបុរាណ (ខេត្តកំពត 5)",
+    "nameEn": "Traditional Claypot Kuyteav Stall (Kampot #5)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) តូបគុយទាវឆ្នាំងដីបុរាណ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តកំពត។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Traditional Claypot Kuyteav Stall offers authentic everyday Khmer cooking located in Kampot. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តកំពត",
+    "addressEn": "Central Market Area, Kampot",
+    "provinceKh": "ខេត្តកំពត",
+    "provinceEn": "Kampot",
+    "phone": "090 208 472",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$$",
+    "mapUrl": "https://maps.google.com/?q=Kampot%2BCambodia",
+    "latitude": 10.6332,
+    "longitude": 104.1934,
+    "rating": 4.6,
+    "reviewCount": 31,
+    "signatureDishesKh": [
+      "គុយទាវភ្នំពេញ",
+      "គុយទាវសាច់គោ",
+      "មីគាវ"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-145",
+    "nameKh": "រានអាហារសមុទ្រស្រស់ (ខេត្តកែប 5)",
+    "nameEn": "Fresh Coastal Seafood Stall (Kep #5)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) រានអាហារសមុទ្រស្រស់ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តកែប។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Fresh Coastal Seafood Stall offers authentic everyday Khmer cooking located in Kep. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តកែប",
+    "addressEn": "Central Market Area, Kep",
+    "provinceKh": "ខេត្តកែប",
+    "provinceEn": "Kep",
+    "phone": "091 215 485",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Kep%2BCambodia",
+    "latitude": 10.5182,
+    "longitude": 104.3281,
+    "rating": 4.7,
+    "reviewCount": 40,
+    "signatureDishesKh": [
+      "ក្តាមឆាម្រេចខ្ចី",
+      "មឹកអាំង",
+      "បង្គាចំហុយ"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-146",
+    "nameKh": "ផ្ទះបាយការីខ្មែរឈ្ងុយឆ្ងាញ់ (ខេត្តព្រះសីហនុ 5)",
+    "nameEn": "Fragrant Khmer Curry Kitchen (Preah Sihanouk #5)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) ផ្ទះបាយការីខ្មែរឈ្ងុយឆ្ងាញ់ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តព្រះសីហនុ។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Fragrant Khmer Curry Kitchen offers authentic everyday Khmer cooking located in Preah Sihanouk. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តព្រះសីហនុ",
+    "addressEn": "Central Market Area, Preah Sihanouk",
+    "provinceKh": "ខេត្តព្រះសីហនុ",
+    "provinceEn": "Preah Sihanouk",
+    "phone": "092 222 498",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Preah%20Sihanouk%2BCambodia",
+    "latitude": 10.5824,
+    "longitude": 103.4964,
+    "rating": 4.8,
+    "reviewCount": 49,
+    "signatureDishesKh": [
+      "សម្លការីមាន់ស្រែ",
+      "នំប៉័ងការី",
+      "សម្លម្ជូរគ្រឿង"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-147",
+    "nameKh": "រានមាន់ដុតទឹកឃ្មុំព្រៃ (ខេត្តកំពង់ចាម 5)",
+    "nameEn": "Honey Roast Country Chicken Grill (Kampong Cham #5)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) រានមាន់ដុតទឹកឃ្មុំព្រៃ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តកំពង់ចាម។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Honey Roast Country Chicken Grill offers authentic everyday Khmer cooking located in Kampong Cham. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តកំពង់ចាម",
+    "addressEn": "Central Market Area, Kampong Cham",
+    "provinceKh": "ខេត្តកំពង់ចាម",
+    "provinceEn": "Kampong Cham",
+    "phone": "093 229 511",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$$",
+    "mapUrl": "https://maps.google.com/?q=Kampong%20Cham%2BCambodia",
+    "latitude": 11.9688,
+    "longitude": 105.4491,
+    "rating": 4.2,
+    "reviewCount": 58,
+    "signatureDishesKh": [
+      "មាន់ស្រែដុតទឹកឃ្មុំ",
+      "បាយដំណើប",
+      "ជ្រក់ត្រសក់"
+    ],
+    "status": "pending",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "pending_verification",
+    "promotionalPrice": 4.99,
+    "isPromoted": false
+  },
+  {
+    "id": "rest-148",
+    "nameKh": "តូបបុកល្ហុង និងភ្លាសាច់គោ (ខេត្តកណ្តាល 5)",
+    "nameEn": "Papaya Salad & Spicy Pleah Shack (Kandal #5)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) តូបបុកល្ហុង និងភ្លាសាច់គោ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តកណ្តាល។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Papaya Salad & Spicy Pleah Shack offers authentic everyday Khmer cooking located in Kandal. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តកណ្តាល",
+    "addressEn": "Central Market Area, Kandal",
+    "provinceKh": "ខេត្តកណ្តាល",
+    "provinceEn": "Kandal",
+    "phone": "094 236 524",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Kandal%2BCambodia",
+    "latitude": 11.4713,
+    "longitude": 104.95,
+    "rating": 4.3,
+    "reviewCount": 67,
+    "signatureDishesKh": [
+      "បុកល្ហុងក្តាមប្រៃ",
+      "ភ្លាសាច់គោក្រូចឆ្មា",
+      "ស្លាបមាន់បំពង"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-149",
+    "nameKh": "រានបង្អែមខ្មែរស្ករត្នោត (ខេត្តតាកែវ 5)",
+    "nameEn": "Khmer Palm Sugar Sweets Hub (Takeo #5)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) រានបង្អែមខ្មែរស្ករត្នោត ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តតាកែវ។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Khmer Palm Sugar Sweets Hub offers authentic everyday Khmer cooking located in Takeo. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តតាកែវ",
+    "addressEn": "Central Market Area, Takeo",
+    "provinceKh": "ខេត្តតាកែវ",
+    "provinceEn": "Takeo",
+    "phone": "095 243 537",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Takeo%2BCambodia",
+    "latitude": 10.9908,
+    "longitude": 104.7999,
+    "rating": 4.4,
+    "reviewCount": 76,
+    "signatureDishesKh": [
+      "នំផ្លែអាយ",
+      "ចេកខ្ទិះ",
+      "បបរត្នោត"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-150",
+    "nameKh": "ផ្ទះកាហ្វេ និងអាហារសម្រន់ខ្មែរ (ខេត្តពោធិ៍សាត់ 5)",
+    "nameEn": "Khmer Coffee & Country Snacks (Pursat #5)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) ផ្ទះកាហ្វេ និងអាហារសម្រន់ខ្មែរ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តពោធិ៍សាត់។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Khmer Coffee & Country Snacks offers authentic everyday Khmer cooking located in Pursat. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តពោធិ៍សាត់",
+    "addressEn": "Central Market Area, Pursat",
+    "provinceKh": "ខេត្តពោធិ៍សាត់",
+    "provinceEn": "Pursat",
+    "phone": "096 250 550",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$$",
+    "mapUrl": "https://maps.google.com/?q=Pursat%2BCambodia",
+    "latitude": 12.5508,
+    "longitude": 103.9492,
+    "rating": 4.5,
+    "reviewCount": 85,
+    "signatureDishesKh": [
+      "នំគ្រក់ក្តៅៗ",
+      "កាហ្វេទឹកដោះគោទឹកកក",
+      "នំប៉័ងប៉ាតេ"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-151",
+    "nameKh": "ផ្ទះបាយអ្នកស្រែ (ខេត្តកំពង់ធំ 5)",
+    "nameEn": "Village Farmer Kitchen (Kampong Thom #5)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) ផ្ទះបាយអ្នកស្រែ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តកំពង់ធំ។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Village Farmer Kitchen offers authentic everyday Khmer cooking located in Kampong Thom. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តកំពង់ធំ",
+    "addressEn": "Central Market Area, Kampong Thom",
+    "provinceKh": "ខេត្តកំពង់ធំ",
+    "provinceEn": "Kampong Thom",
+    "phone": "097 257 563",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Kampong%20Thom%2BCambodia",
+    "latitude": 12.7351,
+    "longitude": 104.8587,
+    "rating": 4.6,
+    "reviewCount": 94,
+    "signatureDishesKh": [
+      "សម្លកកូរ",
+      "ត្រីអាំងទឹកត្រីអំពិល",
+      "ប្រហុកខ្ទិះ"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-152",
+    "nameKh": "តូបនំបញ្ចុកទឹកសម្លខ្មែរ (ខេត្តកំពង់ឆ្នាំង 5)",
+    "nameEn": "Fresh Num Banh Chok Stall (Kampong Chhnang #5)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) តូបនំបញ្ចុកទឹកសម្លខ្មែរ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តកំពង់ឆ្នាំង។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Fresh Num Banh Chok Stall offers authentic everyday Khmer cooking located in Kampong Chhnang. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តកំពង់ឆ្នាំង",
+    "addressEn": "Central Market Area, Kampong Chhnang",
+    "provinceKh": "ខេត្តកំពង់ឆ្នាំង",
+    "provinceEn": "Kampong Chhnang",
+    "phone": "098 264 576",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Kampong%20Chhnang%2BCambodia",
+    "latitude": 12.2863,
+    "longitude": 104.6508,
+    "rating": 4.7,
+    "reviewCount": 23,
+    "signatureDishesKh": [
+      "នំបញ្ចុកសម្លខ្មែរ",
+      "នំបញ្ចុកការី",
+      "សម្លណាំយ៉ា"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-153",
+    "nameKh": "រានបាយសាច់ជ្រូកអាំងពេលព្រឹក (ខេត្តកោះកុង 5)",
+    "nameEn": "Morning Grilled Pork Rice Cart (Koh Kong #5)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) រានបាយសាច់ជ្រូកអាំងពេលព្រឹក ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តកោះកុង។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Morning Grilled Pork Rice Cart offers authentic everyday Khmer cooking located in Koh Kong. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តកោះកុង",
+    "addressEn": "Central Market Area, Koh Kong",
+    "provinceKh": "ខេត្តកោះកុង",
+    "provinceEn": "Koh Kong",
+    "phone": "090 271 589",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$$",
+    "mapUrl": "https://maps.google.com/?q=Koh%20Kong%2BCambodia",
+    "latitude": 11.5793,
+    "longitude": 102.9839,
+    "rating": 4.8,
+    "reviewCount": 32,
+    "signatureDishesKh": [
+      "បាយសាច់ជ្រូកអាំង",
+      "ពងទាចៀន",
+      "ស៊ុបឆ្អឹងជ្រូក"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-154",
+    "nameKh": "តូបគុយទាវឆ្នាំងដីបុរាណ (ខេត្តមណ្ឌលគិរី 5)",
+    "nameEn": "Traditional Claypot Kuyteav Stall (Mondulkiri #5)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) តូបគុយទាវឆ្នាំងដីបុរាណ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តមណ្ឌលគិរី។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Traditional Claypot Kuyteav Stall offers authentic everyday Khmer cooking located in Mondulkiri. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តមណ្ឌលគិរី",
+    "addressEn": "Central Market Area, Mondulkiri",
+    "provinceKh": "ខេត្តមណ្ឌលគិរី",
+    "provinceEn": "Mondulkiri",
+    "phone": "091 278 602",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Mondulkiri%2BCambodia",
+    "latitude": 12.4318,
+    "longitude": 107.2045,
+    "rating": 4.2,
+    "reviewCount": 41,
+    "signatureDishesKh": [
+      "គុយទាវភ្នំពេញ",
+      "គុយទាវសាច់គោ",
+      "មីគាវ"
+    ],
+    "status": "pending",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "pending_verification",
+    "promotionalPrice": 4.99,
+    "isPromoted": false
+  },
+  {
+    "id": "rest-155",
+    "nameKh": "រានអាហារសមុទ្រស្រស់ (ខេត្តរតនគិរី 5)",
+    "nameEn": "Fresh Coastal Seafood Stall (Ratanakiri #5)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) រានអាហារសមុទ្រស្រស់ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តរតនគិរី។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Fresh Coastal Seafood Stall offers authentic everyday Khmer cooking located in Ratanakiri. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តរតនគិរី",
+    "addressEn": "Central Market Area, Ratanakiri",
+    "provinceKh": "ខេត្តរតនគិរី",
+    "provinceEn": "Ratanakiri",
+    "phone": "092 285 615",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Ratanakiri%2BCambodia",
+    "latitude": 13.7194,
+    "longitude": 107.0425,
+    "rating": 4.3,
+    "reviewCount": 50,
+    "signatureDishesKh": [
+      "ក្តាមឆាម្រេចខ្ចី",
+      "មឹកអាំង",
+      "បង្គាចំហុយ"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-156",
+    "nameKh": "ផ្ទះបាយការីខ្មែរឈ្ងុយឆ្ងាញ់ (ខេត្តក្រចេះ 5)",
+    "nameEn": "Fragrant Khmer Curry Kitchen (Kratie #5)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) ផ្ទះបាយការីខ្មែរឈ្ងុយឆ្ងាញ់ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តក្រចេះ។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Fragrant Khmer Curry Kitchen offers authentic everyday Khmer cooking located in Kratie. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តក្រចេះ",
+    "addressEn": "Central Market Area, Kratie",
+    "provinceKh": "ខេត្តក្រចេះ",
+    "provinceEn": "Kratie",
+    "phone": "093 292 628",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$$",
+    "mapUrl": "https://maps.google.com/?q=Kratie%2BCambodia",
+    "latitude": 12.4883,
+    "longitude": 105.9888,
+    "rating": 4.4,
+    "reviewCount": 59,
+    "signatureDishesKh": [
+      "សម្លការីមាន់ស្រែ",
+      "នំប៉័ងការី",
+      "សម្លម្ជូរគ្រឿង"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-157",
+    "nameKh": "រានមាន់ដុតទឹកឃ្មុំព្រៃ (ខេត្តស្ទឹងត្រែង 5)",
+    "nameEn": "Honey Roast Country Chicken Grill (Stung Treng #5)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) រានមាន់ដុតទឹកឃ្មុំព្រៃ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តស្ទឹងត្រែង។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Honey Roast Country Chicken Grill offers authentic everyday Khmer cooking located in Stung Treng. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តស្ទឹងត្រែង",
+    "addressEn": "Central Market Area, Stung Treng",
+    "provinceKh": "ខេត្តស្ទឹងត្រែង",
+    "provinceEn": "Stung Treng",
+    "phone": "094 299 641",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Stung%20Treng%2BCambodia",
+    "latitude": 13.5379,
+    "longitude": 105.9533,
+    "rating": 4.5,
+    "reviewCount": 68,
+    "signatureDishesKh": [
+      "មាន់ស្រែដុតទឹកឃ្មុំ",
+      "បាយដំណើប",
+      "ជ្រក់ត្រសក់"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-158",
+    "nameKh": "តូបបុកល្ហុង និងភ្លាសាច់គោ (ខេត្តព្រះវិហារ 5)",
+    "nameEn": "Papaya Salad & Spicy Pleah Shack (Preah Vihear #5)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) តូបបុកល្ហុង និងភ្លាសាច់គោ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តព្រះវិហារ។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Papaya Salad & Spicy Pleah Shack offers authentic everyday Khmer cooking located in Preah Vihear. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តព្រះវិហារ",
+    "addressEn": "Central Market Area, Preah Vihear",
+    "provinceKh": "ខេត្តព្រះវិហារ",
+    "provinceEn": "Preah Vihear",
+    "phone": "095 306 654",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Preah%20Vihear%2BCambodia",
+    "latitude": 13.8313,
+    "longitude": 104.9814,
+    "rating": 4.6,
+    "reviewCount": 77,
+    "signatureDishesKh": [
+      "បុកល្ហុងក្តាមប្រៃ",
+      "ភ្លាសាច់គោក្រូចឆ្មា",
+      "ស្លាបមាន់បំពង"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-159",
+    "nameKh": "រានបង្អែមខ្មែរស្ករត្នោត (ខេត្តបន្ទាយមានជ័យ 5)",
+    "nameEn": "Khmer Palm Sugar Sweets Hub (Banteay Meanchey #5)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) រានបង្អែមខ្មែរស្ករត្នោត ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តបន្ទាយមានជ័យ។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Khmer Palm Sugar Sweets Hub offers authentic everyday Khmer cooking located in Banteay Meanchey. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តបន្ទាយមានជ័យ",
+    "addressEn": "Central Market Area, Banteay Meanchey",
+    "provinceKh": "ខេត្តបន្ទាយមានជ័យ",
+    "provinceEn": "Banteay Meanchey",
+    "phone": "096 313 667",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$$",
+    "mapUrl": "https://maps.google.com/?q=Banteay%20Meanchey%2BCambodia",
+    "latitude": 13.6219,
+    "longitude": 102.9889,
+    "rating": 4.7,
+    "reviewCount": 86,
+    "signatureDishesKh": [
+      "នំផ្លែអាយ",
+      "ចេកខ្ទិះ",
+      "បបរត្នោត"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-160",
+    "nameKh": "ផ្ទះកាហ្វេ និងអាហារសម្រន់ខ្មែរ (ខេត្តឧត្តរមានជ័យ 5)",
+    "nameEn": "Khmer Coffee & Country Snacks (Oddar Meanchey #5)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) ផ្ទះកាហ្វេ និងអាហារសម្រន់ខ្មែរ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តឧត្តរមានជ័យ។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Khmer Coffee & Country Snacks offers authentic everyday Khmer cooking located in Oddar Meanchey. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តឧត្តរមានជ័យ",
+    "addressEn": "Central Market Area, Oddar Meanchey",
+    "provinceKh": "ខេត្តឧត្តរមានជ័យ",
+    "provinceEn": "Oddar Meanchey",
+    "phone": "097 320 680",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Oddar%20Meanchey%2BCambodia",
+    "latitude": 14.1459,
+    "longitude": 103.5478,
+    "rating": 4.8,
+    "reviewCount": 15,
+    "signatureDishesKh": [
+      "នំគ្រក់ក្តៅៗ",
+      "កាហ្វេទឹកដោះគោទឹកកក",
+      "នំប៉័ងប៉ាតេ"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-161",
+    "nameKh": "ផ្ទះបាយអ្នកស្រែ (ខេត្តប៉ៃលិន 5)",
+    "nameEn": "Village Farmer Kitchen (Pailin #5)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) ផ្ទះបាយអ្នកស្រែ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តប៉ៃលិន។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Village Farmer Kitchen offers authentic everyday Khmer cooking located in Pailin. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តប៉ៃលិន",
+    "addressEn": "Central Market Area, Pailin",
+    "provinceKh": "ខេត្តប៉ៃលិន",
+    "provinceEn": "Pailin",
+    "phone": "098 327 693",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Pailin%2BCambodia",
+    "latitude": 12.8249,
+    "longitude": 102.5792,
+    "rating": 4.2,
+    "reviewCount": 24,
+    "signatureDishesKh": [
+      "សម្លកកូរ",
+      "ត្រីអាំងទឹកត្រីអំពិល",
+      "ប្រហុកខ្ទិះ"
+    ],
+    "status": "pending",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "pending_verification",
+    "promotionalPrice": 4.99,
+    "isPromoted": false
+  },
+  {
+    "id": "rest-162",
+    "nameKh": "តូបនំបញ្ចុកទឹកសម្លខ្មែរ (ខេត្តព្រៃវែង 5)",
+    "nameEn": "Fresh Num Banh Chok Stall (Prey Veng #5)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) តូបនំបញ្ចុកទឹកសម្លខ្មែរ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តព្រៃវែង។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Fresh Num Banh Chok Stall offers authentic everyday Khmer cooking located in Prey Veng. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តព្រៃវែង",
+    "addressEn": "Central Market Area, Prey Veng",
+    "provinceKh": "ខេត្តព្រៃវែង",
+    "provinceEn": "Prey Veng",
+    "phone": "090 334 706",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$$",
+    "mapUrl": "https://maps.google.com/?q=Prey%20Veng%2BCambodia",
+    "latitude": 11.473,
+    "longitude": 105.3114,
+    "rating": 4.3,
+    "reviewCount": 33,
+    "signatureDishesKh": [
+      "នំបញ្ចុកសម្លខ្មែរ",
+      "នំបញ្ចុកការី",
+      "សម្លណាំយ៉ា"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-163",
+    "nameKh": "រានបាយសាច់ជ្រូកអាំងពេលព្រឹក (ខេត្តស្វាយរៀង 5)",
+    "nameEn": "Morning Grilled Pork Rice Cart (Svay Rieng #5)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) រានបាយសាច់ជ្រូកអាំងពេលព្រឹក ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តស្វាយរៀង។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Morning Grilled Pork Rice Cart offers authentic everyday Khmer cooking located in Svay Rieng. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តស្វាយរៀង",
+    "addressEn": "Central Market Area, Svay Rieng",
+    "provinceKh": "ខេត្តស្វាយរៀង",
+    "provinceEn": "Svay Rieng",
+    "phone": "091 341 719",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Svay%20Rieng%2BCambodia",
+    "latitude": 11.0878,
+    "longitude": 105.7994,
+    "rating": 4.4,
+    "reviewCount": 42,
+    "signatureDishesKh": [
+      "បាយសាច់ជ្រូកអាំង",
+      "ពងទាចៀន",
+      "ស៊ុបឆ្អឹងជ្រូក"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-164",
+    "nameKh": "តូបគុយទាវឆ្នាំងដីបុរាណ (ខេត្តកំពង់ស្ពឺ 5)",
+    "nameEn": "Traditional Claypot Kuyteav Stall (Kampong Speu #5)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) តូបគុយទាវឆ្នាំងដីបុរាណ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តកំពង់ស្ពឺ។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Traditional Claypot Kuyteav Stall offers authentic everyday Khmer cooking located in Kampong Speu. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តកំពង់ស្ពឺ",
+    "addressEn": "Central Market Area, Kampong Speu",
+    "provinceKh": "ខេត្តកំពង់ស្ពឺ",
+    "provinceEn": "Kampong Speu",
+    "phone": "092 348 732",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Kampong%20Speu%2BCambodia",
+    "latitude": 11.4653,
+    "longitude": 104.5358,
+    "rating": 4.5,
+    "reviewCount": 51,
+    "signatureDishesKh": [
+      "គុយទាវភ្នំពេញ",
+      "គុយទាវសាច់គោ",
+      "មីគាវ"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-165",
+    "nameKh": "រានអាហារសមុទ្រស្រស់ (ខេត្តត្បូងឃ្មុំ 5)",
+    "nameEn": "Fresh Coastal Seafood Stall (Tboung Khmum #5)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) រានអាហារសមុទ្រស្រស់ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តត្បូងឃ្មុំ។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Fresh Coastal Seafood Stall offers authentic everyday Khmer cooking located in Tboung Khmum. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តត្បូងឃ្មុំ",
+    "addressEn": "Central Market Area, Tboung Khmum",
+    "provinceKh": "ខេត្តត្បូងឃ្មុំ",
+    "provinceEn": "Tboung Khmum",
+    "phone": "093 355 745",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$$",
+    "mapUrl": "https://maps.google.com/?q=Tboung%20Khmum%2BCambodia",
+    "latitude": 11.9146,
+    "longitude": 105.6875,
+    "rating": 4.6,
+    "reviewCount": 60,
+    "signatureDishesKh": [
+      "ក្តាមឆាម្រេចខ្ចី",
+      "មឹកអាំង",
+      "បង្គាចំហុយ"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-166",
+    "nameKh": "ផ្ទះបាយការីខ្មែរឈ្ងុយឆ្ងាញ់ (រាជធានីភ្នំពេញ 6)",
+    "nameEn": "Fragrant Khmer Curry Kitchen (Phnom Penh #6)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) ផ្ទះបាយការីខ្មែរឈ្ងុយឆ្ងាញ់ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងរាជធានីភ្នំពេញ។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Fragrant Khmer Curry Kitchen offers authentic everyday Khmer cooking located in Phnom Penh. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ រាជធានីភ្នំពេញ",
+    "addressEn": "Central Market Area, Phnom Penh",
+    "provinceKh": "រាជធានីភ្នំពេញ",
+    "provinceEn": "Phnom Penh",
+    "phone": "094 362 758",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Phnom%20Penh%2BCambodia",
+    "latitude": 11.5924,
+    "longitude": 104.8982,
+    "rating": 4.7,
+    "reviewCount": 69,
+    "signatureDishesKh": [
+      "សម្លការីមាន់ស្រែ",
+      "នំប៉័ងការី",
+      "សម្លម្ជូរគ្រឿង"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-167",
+    "nameKh": "រានមាន់ដុតទឹកឃ្មុំព្រៃ (ខេត្តសៀមរាប 6)",
+    "nameEn": "Honey Roast Country Chicken Grill (Siem Reap #6)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) រានមាន់ដុតទឹកឃ្មុំព្រៃ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តសៀមរាប។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Honey Roast Country Chicken Grill offers authentic everyday Khmer cooking located in Siem Reap. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តសៀមរាប",
+    "addressEn": "Central Market Area, Siem Reap",
+    "provinceKh": "ខេត្តសៀមរាប",
+    "provinceEn": "Siem Reap",
+    "phone": "095 369 771",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Siem%20Reap%2BCambodia",
+    "latitude": 13.3273,
+    "longitude": 103.8414,
+    "rating": 4.8,
+    "reviewCount": 78,
+    "signatureDishesKh": [
+      "មាន់ស្រែដុតទឹកឃ្មុំ",
+      "បាយដំណើប",
+      "ជ្រក់ត្រសក់"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-168",
+    "nameKh": "តូបបុកល្ហុង និងភ្លាសាច់គោ (ខេត្តបាត់ដំបង 6)",
+    "nameEn": "Papaya Salad & Spicy Pleah Shack (Battambang #6)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) តូបបុកល្ហុង និងភ្លាសាច់គោ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តបាត់ដំបង។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Papaya Salad & Spicy Pleah Shack offers authentic everyday Khmer cooking located in Battambang. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តបាត់ដំបង",
+    "addressEn": "Central Market Area, Battambang",
+    "provinceKh": "ខេត្តបាត់ដំបង",
+    "provinceEn": "Battambang",
+    "phone": "096 376 784",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$$",
+    "mapUrl": "https://maps.google.com/?q=Battambang%2BCambodia",
+    "latitude": 13.0717,
+    "longitude": 103.2022,
+    "rating": 4.2,
+    "reviewCount": 87,
+    "signatureDishesKh": [
+      "បុកល្ហុងក្តាមប្រៃ",
+      "ភ្លាសាច់គោក្រូចឆ្មា",
+      "ស្លាបមាន់បំពង"
+    ],
+    "status": "pending",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "pending_verification",
+    "promotionalPrice": 4.99,
+    "isPromoted": false
+  },
+  {
+    "id": "rest-169",
+    "nameKh": "រានបង្អែមខ្មែរស្ករត្នោត (ខេត្តកំពត 6)",
+    "nameEn": "Khmer Palm Sugar Sweets Hub (Kampot #6)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) រានបង្អែមខ្មែរស្ករត្នោត ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តកំពត។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Khmer Palm Sugar Sweets Hub offers authentic everyday Khmer cooking located in Kampot. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តកំពត",
+    "addressEn": "Central Market Area, Kampot",
+    "provinceKh": "ខេត្តកំពត",
+    "provinceEn": "Kampot",
+    "phone": "097 383 797",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Kampot%2BCambodia",
+    "latitude": 10.5972,
+    "longitude": 104.1934,
+    "rating": 4.3,
+    "reviewCount": 16,
+    "signatureDishesKh": [
+      "នំផ្លែអាយ",
+      "ចេកខ្ទិះ",
+      "បបរត្នោត"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-170",
+    "nameKh": "ផ្ទះកាហ្វេ និងអាហារសម្រន់ខ្មែរ (ខេត្តកែប 6)",
+    "nameEn": "Khmer Coffee & Country Snacks (Kep #6)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) ផ្ទះកាហ្វេ និងអាហារសម្រន់ខ្មែរ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តកែប។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Khmer Coffee & Country Snacks offers authentic everyday Khmer cooking located in Kep. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តកែប",
+    "addressEn": "Central Market Area, Kep",
+    "provinceKh": "ខេត្តកែប",
+    "provinceEn": "Kep",
+    "phone": "098 390 810",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Kep%2BCambodia",
+    "latitude": 10.4822,
+    "longitude": 104.3281,
+    "rating": 4.4,
+    "reviewCount": 25,
+    "signatureDishesKh": [
+      "នំគ្រក់ក្តៅៗ",
+      "កាហ្វេទឹកដោះគោទឹកកក",
+      "នំប៉័ងប៉ាតេ"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-171",
+    "nameKh": "ផ្ទះបាយអ្នកស្រែ (ខេត្តព្រះសីហនុ 6)",
+    "nameEn": "Village Farmer Kitchen (Preah Sihanouk #6)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) ផ្ទះបាយអ្នកស្រែ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តព្រះសីហនុ។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Village Farmer Kitchen offers authentic everyday Khmer cooking located in Preah Sihanouk. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តព្រះសីហនុ",
+    "addressEn": "Central Market Area, Preah Sihanouk",
+    "provinceKh": "ខេត្តព្រះសីហនុ",
+    "provinceEn": "Preah Sihanouk",
+    "phone": "090 397 823",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$$",
+    "mapUrl": "https://maps.google.com/?q=Preah%20Sihanouk%2BCambodia",
+    "latitude": 10.6304,
+    "longitude": 103.4964,
+    "rating": 4.5,
+    "reviewCount": 34,
+    "signatureDishesKh": [
+      "សម្លកកូរ",
+      "ត្រីអាំងទឹកត្រីអំពិល",
+      "ប្រហុកខ្ទិះ"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-172",
+    "nameKh": "តូបនំបញ្ចុកទឹកសម្លខ្មែរ (ខេត្តកំពង់ចាម 6)",
+    "nameEn": "Fresh Num Banh Chok Stall (Kampong Cham #6)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) តូបនំបញ្ចុកទឹកសម្លខ្មែរ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តកំពង់ចាម។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Fresh Num Banh Chok Stall offers authentic everyday Khmer cooking located in Kampong Cham. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តកំពង់ចាម",
+    "addressEn": "Central Market Area, Kampong Cham",
+    "provinceKh": "ខេត្តកំពង់ចាម",
+    "provinceEn": "Kampong Cham",
+    "phone": "091 404 836",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Kampong%20Cham%2BCambodia",
+    "latitude": 12.0168,
+    "longitude": 105.4491,
+    "rating": 4.6,
+    "reviewCount": 43,
+    "signatureDishesKh": [
+      "នំបញ្ចុកសម្លខ្មែរ",
+      "នំបញ្ចុកការី",
+      "សម្លណាំយ៉ា"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-173",
+    "nameKh": "រានបាយសាច់ជ្រូកអាំងពេលព្រឹក (ខេត្តកណ្តាល 6)",
+    "nameEn": "Morning Grilled Pork Rice Cart (Kandal #6)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) រានបាយសាច់ជ្រូកអាំងពេលព្រឹក ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តកណ្តាល។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Morning Grilled Pork Rice Cart offers authentic everyday Khmer cooking located in Kandal. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តកណ្តាល",
+    "addressEn": "Central Market Area, Kandal",
+    "provinceKh": "ខេត្តកណ្តាល",
+    "provinceEn": "Kandal",
+    "phone": "092 411 849",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Kandal%2BCambodia",
+    "latitude": 11.5193,
+    "longitude": 104.95,
+    "rating": 4.7,
+    "reviewCount": 52,
+    "signatureDishesKh": [
+      "បាយសាច់ជ្រូកអាំង",
+      "ពងទាចៀន",
+      "ស៊ុបឆ្អឹងជ្រូក"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-174",
+    "nameKh": "តូបគុយទាវឆ្នាំងដីបុរាណ (ខេត្តតាកែវ 6)",
+    "nameEn": "Traditional Claypot Kuyteav Stall (Takeo #6)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) តូបគុយទាវឆ្នាំងដីបុរាណ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តតាកែវ។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Traditional Claypot Kuyteav Stall offers authentic everyday Khmer cooking located in Takeo. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តតាកែវ",
+    "addressEn": "Central Market Area, Takeo",
+    "provinceKh": "ខេត្តតាកែវ",
+    "provinceEn": "Takeo",
+    "phone": "093 418 862",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$$",
+    "mapUrl": "https://maps.google.com/?q=Takeo%2BCambodia",
+    "latitude": 10.9548,
+    "longitude": 104.7999,
+    "rating": 4.8,
+    "reviewCount": 61,
+    "signatureDishesKh": [
+      "គុយទាវភ្នំពេញ",
+      "គុយទាវសាច់គោ",
+      "មីគាវ"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-175",
+    "nameKh": "រានអាហារសមុទ្រស្រស់ (ខេត្តពោធិ៍សាត់ 6)",
+    "nameEn": "Fresh Coastal Seafood Stall (Pursat #6)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) រានអាហារសមុទ្រស្រស់ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តពោធិ៍សាត់។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Fresh Coastal Seafood Stall offers authentic everyday Khmer cooking located in Pursat. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តពោធិ៍សាត់",
+    "addressEn": "Central Market Area, Pursat",
+    "provinceKh": "ខេត្តពោធិ៍សាត់",
+    "provinceEn": "Pursat",
+    "phone": "094 425 875",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Pursat%2BCambodia",
+    "latitude": 12.5148,
+    "longitude": 103.9492,
+    "rating": 4.2,
+    "reviewCount": 70,
+    "signatureDishesKh": [
+      "ក្តាមឆាម្រេចខ្ចី",
+      "មឹកអាំង",
+      "បង្គាចំហុយ"
+    ],
+    "status": "pending",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "pending_verification",
+    "promotionalPrice": 4.99,
+    "isPromoted": false
+  },
+  {
+    "id": "rest-176",
+    "nameKh": "ផ្ទះបាយការីខ្មែរឈ្ងុយឆ្ងាញ់ (ខេត្តកំពង់ធំ 6)",
+    "nameEn": "Fragrant Khmer Curry Kitchen (Kampong Thom #6)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) ផ្ទះបាយការីខ្មែរឈ្ងុយឆ្ងាញ់ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តកំពង់ធំ។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Fragrant Khmer Curry Kitchen offers authentic everyday Khmer cooking located in Kampong Thom. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តកំពង់ធំ",
+    "addressEn": "Central Market Area, Kampong Thom",
+    "provinceKh": "ខេត្តកំពង់ធំ",
+    "provinceEn": "Kampong Thom",
+    "phone": "095 432 888",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Kampong%20Thom%2BCambodia",
+    "latitude": 12.6991,
+    "longitude": 104.8587,
+    "rating": 4.3,
+    "reviewCount": 79,
+    "signatureDishesKh": [
+      "សម្លការីមាន់ស្រែ",
+      "នំប៉័ងការី",
+      "សម្លម្ជូរគ្រឿង"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-177",
+    "nameKh": "រានមាន់ដុតទឹកឃ្មុំព្រៃ (ខេត្តកំពង់ឆ្នាំង 6)",
+    "nameEn": "Honey Roast Country Chicken Grill (Kampong Chhnang #6)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) រានមាន់ដុតទឹកឃ្មុំព្រៃ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តកំពង់ឆ្នាំង។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Honey Roast Country Chicken Grill offers authentic everyday Khmer cooking located in Kampong Chhnang. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តកំពង់ឆ្នាំង",
+    "addressEn": "Central Market Area, Kampong Chhnang",
+    "provinceKh": "ខេត្តកំពង់ឆ្នាំង",
+    "provinceEn": "Kampong Chhnang",
+    "phone": "096 439 901",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$$",
+    "mapUrl": "https://maps.google.com/?q=Kampong%20Chhnang%2BCambodia",
+    "latitude": 12.2503,
+    "longitude": 104.6508,
+    "rating": 4.4,
+    "reviewCount": 88,
+    "signatureDishesKh": [
+      "មាន់ស្រែដុតទឹកឃ្មុំ",
+      "បាយដំណើប",
+      "ជ្រក់ត្រសក់"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-178",
+    "nameKh": "តូបបុកល្ហុង និងភ្លាសាច់គោ (ខេត្តកោះកុង 6)",
+    "nameEn": "Papaya Salad & Spicy Pleah Shack (Koh Kong #6)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) តូបបុកល្ហុង និងភ្លាសាច់គោ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តកោះកុង។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Papaya Salad & Spicy Pleah Shack offers authentic everyday Khmer cooking located in Koh Kong. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តកោះកុង",
+    "addressEn": "Central Market Area, Koh Kong",
+    "provinceKh": "ខេត្តកោះកុង",
+    "provinceEn": "Koh Kong",
+    "phone": "097 446 914",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Koh%20Kong%2BCambodia",
+    "latitude": 11.6273,
+    "longitude": 102.9839,
+    "rating": 4.5,
+    "reviewCount": 17,
+    "signatureDishesKh": [
+      "បុកល្ហុងក្តាមប្រៃ",
+      "ភ្លាសាច់គោក្រូចឆ្មា",
+      "ស្លាបមាន់បំពង"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-179",
+    "nameKh": "រានបង្អែមខ្មែរស្ករត្នោត (ខេត្តមណ្ឌលគិរី 6)",
+    "nameEn": "Khmer Palm Sugar Sweets Hub (Mondulkiri #6)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) រានបង្អែមខ្មែរស្ករត្នោត ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តមណ្ឌលគិរី។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Khmer Palm Sugar Sweets Hub offers authentic everyday Khmer cooking located in Mondulkiri. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តមណ្ឌលគិរី",
+    "addressEn": "Central Market Area, Mondulkiri",
+    "provinceKh": "ខេត្តមណ្ឌលគិរី",
+    "provinceEn": "Mondulkiri",
+    "phone": "098 453 927",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Mondulkiri%2BCambodia",
+    "latitude": 12.4798,
+    "longitude": 107.2045,
+    "rating": 4.6,
+    "reviewCount": 26,
+    "signatureDishesKh": [
+      "នំផ្លែអាយ",
+      "ចេកខ្ទិះ",
+      "បបរត្នោត"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-180",
+    "nameKh": "ផ្ទះកាហ្វេ និងអាហារសម្រន់ខ្មែរ (ខេត្តរតនគិរី 6)",
+    "nameEn": "Khmer Coffee & Country Snacks (Ratanakiri #6)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) ផ្ទះកាហ្វេ និងអាហារសម្រន់ខ្មែរ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តរតនគិរី។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Khmer Coffee & Country Snacks offers authentic everyday Khmer cooking located in Ratanakiri. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តរតនគិរី",
+    "addressEn": "Central Market Area, Ratanakiri",
+    "provinceKh": "ខេត្តរតនគិរី",
+    "provinceEn": "Ratanakiri",
+    "phone": "090 460 940",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$$",
+    "mapUrl": "https://maps.google.com/?q=Ratanakiri%2BCambodia",
+    "latitude": 13.7674,
+    "longitude": 107.0425,
+    "rating": 4.7,
+    "reviewCount": 35,
+    "signatureDishesKh": [
+      "នំគ្រក់ក្តៅៗ",
+      "កាហ្វេទឹកដោះគោទឹកកក",
+      "នំប៉័ងប៉ាតេ"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-181",
+    "nameKh": "ផ្ទះបាយអ្នកស្រែ (ខេត្តក្រចេះ 6)",
+    "nameEn": "Village Farmer Kitchen (Kratie #6)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) ផ្ទះបាយអ្នកស្រែ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តក្រចេះ។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Village Farmer Kitchen offers authentic everyday Khmer cooking located in Kratie. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តក្រចេះ",
+    "addressEn": "Central Market Area, Kratie",
+    "provinceKh": "ខេត្តក្រចេះ",
+    "provinceEn": "Kratie",
+    "phone": "091 467 953",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Kratie%2BCambodia",
+    "latitude": 12.4523,
+    "longitude": 105.9888,
+    "rating": 4.8,
+    "reviewCount": 44,
+    "signatureDishesKh": [
+      "សម្លកកូរ",
+      "ត្រីអាំងទឹកត្រីអំពិល",
+      "ប្រហុកខ្ទិះ"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-182",
+    "nameKh": "តូបនំបញ្ចុកទឹកសម្លខ្មែរ (ខេត្តស្ទឹងត្រែង 6)",
+    "nameEn": "Fresh Num Banh Chok Stall (Stung Treng #6)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) តូបនំបញ្ចុកទឹកសម្លខ្មែរ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តស្ទឹងត្រែង។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Fresh Num Banh Chok Stall offers authentic everyday Khmer cooking located in Stung Treng. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តស្ទឹងត្រែង",
+    "addressEn": "Central Market Area, Stung Treng",
+    "provinceKh": "ខេត្តស្ទឹងត្រែង",
+    "provinceEn": "Stung Treng",
+    "phone": "092 474 966",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Stung%20Treng%2BCambodia",
+    "latitude": 13.5019,
+    "longitude": 105.9533,
+    "rating": 4.2,
+    "reviewCount": 53,
+    "signatureDishesKh": [
+      "នំបញ្ចុកសម្លខ្មែរ",
+      "នំបញ្ចុកការី",
+      "សម្លណាំយ៉ា"
+    ],
+    "status": "pending",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "pending_verification",
+    "promotionalPrice": 4.99,
+    "isPromoted": false
+  },
+  {
+    "id": "rest-183",
+    "nameKh": "រានបាយសាច់ជ្រូកអាំងពេលព្រឹក (ខេត្តព្រះវិហារ 6)",
+    "nameEn": "Morning Grilled Pork Rice Cart (Preah Vihear #6)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) រានបាយសាច់ជ្រូកអាំងពេលព្រឹក ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តព្រះវិហារ។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Morning Grilled Pork Rice Cart offers authentic everyday Khmer cooking located in Preah Vihear. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តព្រះវិហារ",
+    "addressEn": "Central Market Area, Preah Vihear",
+    "provinceKh": "ខេត្តព្រះវិហារ",
+    "provinceEn": "Preah Vihear",
+    "phone": "093 481 979",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$$",
+    "mapUrl": "https://maps.google.com/?q=Preah%20Vihear%2BCambodia",
+    "latitude": 13.7953,
+    "longitude": 104.9814,
+    "rating": 4.3,
+    "reviewCount": 62,
+    "signatureDishesKh": [
+      "បាយសាច់ជ្រូកអាំង",
+      "ពងទាចៀន",
+      "ស៊ុបឆ្អឹងជ្រូក"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-184",
+    "nameKh": "តូបគុយទាវឆ្នាំងដីបុរាណ (ខេត្តបន្ទាយមានជ័យ 6)",
+    "nameEn": "Traditional Claypot Kuyteav Stall (Banteay Meanchey #6)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) តូបគុយទាវឆ្នាំងដីបុរាណ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តបន្ទាយមានជ័យ។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Traditional Claypot Kuyteav Stall offers authentic everyday Khmer cooking located in Banteay Meanchey. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តបន្ទាយមានជ័យ",
+    "addressEn": "Central Market Area, Banteay Meanchey",
+    "provinceKh": "ខេត្តបន្ទាយមានជ័យ",
+    "provinceEn": "Banteay Meanchey",
+    "phone": "094 488 992",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Banteay%20Meanchey%2BCambodia",
+    "latitude": 13.5859,
+    "longitude": 102.9889,
+    "rating": 4.4,
+    "reviewCount": 71,
+    "signatureDishesKh": [
+      "គុយទាវភ្នំពេញ",
+      "គុយទាវសាច់គោ",
+      "មីគាវ"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-185",
+    "nameKh": "រានអាហារសមុទ្រស្រស់ (ខេត្តឧត្តរមានជ័យ 6)",
+    "nameEn": "Fresh Coastal Seafood Stall (Oddar Meanchey #6)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) រានអាហារសមុទ្រស្រស់ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តឧត្តរមានជ័យ។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Fresh Coastal Seafood Stall offers authentic everyday Khmer cooking located in Oddar Meanchey. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តឧត្តរមានជ័យ",
+    "addressEn": "Central Market Area, Oddar Meanchey",
+    "provinceKh": "ខេត្តឧត្តរមានជ័យ",
+    "provinceEn": "Oddar Meanchey",
+    "phone": "095 495 205",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Oddar%20Meanchey%2BCambodia",
+    "latitude": 14.1939,
+    "longitude": 103.5478,
+    "rating": 4.5,
+    "reviewCount": 80,
+    "signatureDishesKh": [
+      "ក្តាមឆាម្រេចខ្ចី",
+      "មឹកអាំង",
+      "បង្គាចំហុយ"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-186",
+    "nameKh": "ផ្ទះបាយការីខ្មែរឈ្ងុយឆ្ងាញ់ (ខេត្តប៉ៃលិន 6)",
+    "nameEn": "Fragrant Khmer Curry Kitchen (Pailin #6)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) ផ្ទះបាយការីខ្មែរឈ្ងុយឆ្ងាញ់ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តប៉ៃលិន។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Fragrant Khmer Curry Kitchen offers authentic everyday Khmer cooking located in Pailin. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តប៉ៃលិន",
+    "addressEn": "Central Market Area, Pailin",
+    "provinceKh": "ខេត្តប៉ៃលិន",
+    "provinceEn": "Pailin",
+    "phone": "096 502 218",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$$",
+    "mapUrl": "https://maps.google.com/?q=Pailin%2BCambodia",
+    "latitude": 12.8729,
+    "longitude": 102.5792,
+    "rating": 4.6,
+    "reviewCount": 89,
+    "signatureDishesKh": [
+      "សម្លការីមាន់ស្រែ",
+      "នំប៉័ងការី",
+      "សម្លម្ជូរគ្រឿង"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-187",
+    "nameKh": "រានមាន់ដុតទឹកឃ្មុំព្រៃ (ខេត្តព្រៃវែង 6)",
+    "nameEn": "Honey Roast Country Chicken Grill (Prey Veng #6)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) រានមាន់ដុតទឹកឃ្មុំព្រៃ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តព្រៃវែង។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Honey Roast Country Chicken Grill offers authentic everyday Khmer cooking located in Prey Veng. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តព្រៃវែង",
+    "addressEn": "Central Market Area, Prey Veng",
+    "provinceKh": "ខេត្តព្រៃវែង",
+    "provinceEn": "Prey Veng",
+    "phone": "097 509 231",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Prey%20Veng%2BCambodia",
+    "latitude": 11.521,
+    "longitude": 105.3114,
+    "rating": 4.7,
+    "reviewCount": 18,
+    "signatureDishesKh": [
+      "មាន់ស្រែដុតទឹកឃ្មុំ",
+      "បាយដំណើប",
+      "ជ្រក់ត្រសក់"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-188",
+    "nameKh": "តូបបុកល្ហុង និងភ្លាសាច់គោ (ខេត្តស្វាយរៀង 6)",
+    "nameEn": "Papaya Salad & Spicy Pleah Shack (Svay Rieng #6)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) តូបបុកល្ហុង និងភ្លាសាច់គោ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តស្វាយរៀង។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Papaya Salad & Spicy Pleah Shack offers authentic everyday Khmer cooking located in Svay Rieng. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តស្វាយរៀង",
+    "addressEn": "Central Market Area, Svay Rieng",
+    "provinceKh": "ខេត្តស្វាយរៀង",
+    "provinceEn": "Svay Rieng",
+    "phone": "098 516 244",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Svay%20Rieng%2BCambodia",
+    "latitude": 11.0518,
+    "longitude": 105.7994,
+    "rating": 4.8,
+    "reviewCount": 27,
+    "signatureDishesKh": [
+      "បុកល្ហុងក្តាមប្រៃ",
+      "ភ្លាសាច់គោក្រូចឆ្មា",
+      "ស្លាបមាន់បំពង"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-189",
+    "nameKh": "រានបង្អែមខ្មែរស្ករត្នោត (ខេត្តកំពង់ស្ពឺ 6)",
+    "nameEn": "Khmer Palm Sugar Sweets Hub (Kampong Speu #6)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) រានបង្អែមខ្មែរស្ករត្នោត ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តកំពង់ស្ពឺ។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Khmer Palm Sugar Sweets Hub offers authentic everyday Khmer cooking located in Kampong Speu. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តកំពង់ស្ពឺ",
+    "addressEn": "Central Market Area, Kampong Speu",
+    "provinceKh": "ខេត្តកំពង់ស្ពឺ",
+    "provinceEn": "Kampong Speu",
+    "phone": "090 523 257",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$$",
+    "mapUrl": "https://maps.google.com/?q=Kampong%20Speu%2BCambodia",
+    "latitude": 11.4293,
+    "longitude": 104.5358,
+    "rating": 4.2,
+    "reviewCount": 36,
+    "signatureDishesKh": [
+      "នំផ្លែអាយ",
+      "ចេកខ្ទិះ",
+      "បបរត្នោត"
+    ],
+    "status": "pending",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "pending_verification",
+    "promotionalPrice": 4.99,
+    "isPromoted": false
+  },
+  {
+    "id": "rest-190",
+    "nameKh": "ផ្ទះកាហ្វេ និងអាហារសម្រន់ខ្មែរ (ខេត្តត្បូងឃ្មុំ 6)",
+    "nameEn": "Khmer Coffee & Country Snacks (Tboung Khmum #6)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) ផ្ទះកាហ្វេ និងអាហារសម្រន់ខ្មែរ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តត្បូងឃ្មុំ។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Khmer Coffee & Country Snacks offers authentic everyday Khmer cooking located in Tboung Khmum. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តត្បូងឃ្មុំ",
+    "addressEn": "Central Market Area, Tboung Khmum",
+    "provinceKh": "ខេត្តត្បូងឃ្មុំ",
+    "provinceEn": "Tboung Khmum",
+    "phone": "091 530 270",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Tboung%20Khmum%2BCambodia",
+    "latitude": 11.8786,
+    "longitude": 105.6875,
+    "rating": 4.3,
+    "reviewCount": 45,
+    "signatureDishesKh": [
+      "នំគ្រក់ក្តៅៗ",
+      "កាហ្វេទឹកដោះគោទឹកកក",
+      "នំប៉័ងប៉ាតេ"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-191",
+    "nameKh": "ផ្ទះបាយអ្នកស្រែ (រាជធានីភ្នំពេញ 7)",
+    "nameEn": "Village Farmer Kitchen (Phnom Penh #7)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) ផ្ទះបាយអ្នកស្រែ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងរាជធានីភ្នំពេញ។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Village Farmer Kitchen offers authentic everyday Khmer cooking located in Phnom Penh. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ រាជធានីភ្នំពេញ",
+    "addressEn": "Central Market Area, Phnom Penh",
+    "provinceKh": "រាជធានីភ្នំពេញ",
+    "provinceEn": "Phnom Penh",
+    "phone": "092 537 283",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Phnom%20Penh%2BCambodia",
+    "latitude": 11.5564,
+    "longitude": 104.8982,
+    "rating": 4.4,
+    "reviewCount": 54,
+    "signatureDishesKh": [
+      "សម្លកកូរ",
+      "ត្រីអាំងទឹកត្រីអំពិល",
+      "ប្រហុកខ្ទិះ"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-192",
+    "nameKh": "តូបនំបញ្ចុកទឹកសម្លខ្មែរ (ខេត្តសៀមរាប 7)",
+    "nameEn": "Fresh Num Banh Chok Stall (Siem Reap #7)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) តូបនំបញ្ចុកទឹកសម្លខ្មែរ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តសៀមរាប។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Fresh Num Banh Chok Stall offers authentic everyday Khmer cooking located in Siem Reap. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តសៀមរាប",
+    "addressEn": "Central Market Area, Siem Reap",
+    "provinceKh": "ខេត្តសៀមរាប",
+    "provinceEn": "Siem Reap",
+    "phone": "093 544 296",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$$",
+    "mapUrl": "https://maps.google.com/?q=Siem%20Reap%2BCambodia",
+    "latitude": 13.3753,
+    "longitude": 103.8414,
+    "rating": 4.5,
+    "reviewCount": 63,
+    "signatureDishesKh": [
+      "នំបញ្ចុកសម្លខ្មែរ",
+      "នំបញ្ចុកការី",
+      "សម្លណាំយ៉ា"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-193",
+    "nameKh": "រានបាយសាច់ជ្រូកអាំងពេលព្រឹក (ខេត្តបាត់ដំបង 7)",
+    "nameEn": "Morning Grilled Pork Rice Cart (Battambang #7)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) រានបាយសាច់ជ្រូកអាំងពេលព្រឹក ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តបាត់ដំបង។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Morning Grilled Pork Rice Cart offers authentic everyday Khmer cooking located in Battambang. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តបាត់ដំបង",
+    "addressEn": "Central Market Area, Battambang",
+    "provinceKh": "ខេត្តបាត់ដំបង",
+    "provinceEn": "Battambang",
+    "phone": "094 551 309",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Battambang%2BCambodia",
+    "latitude": 13.1197,
+    "longitude": 103.2022,
+    "rating": 4.6,
+    "reviewCount": 72,
+    "signatureDishesKh": [
+      "បាយសាច់ជ្រូកអាំង",
+      "ពងទាចៀន",
+      "ស៊ុបឆ្អឹងជ្រូក"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-194",
+    "nameKh": "តូបគុយទាវឆ្នាំងដីបុរាណ (ខេត្តកំពត 7)",
+    "nameEn": "Traditional Claypot Kuyteav Stall (Kampot #7)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) តូបគុយទាវឆ្នាំងដីបុរាណ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តកំពត។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Traditional Claypot Kuyteav Stall offers authentic everyday Khmer cooking located in Kampot. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តកំពត",
+    "addressEn": "Central Market Area, Kampot",
+    "provinceKh": "ខេត្តកំពត",
+    "provinceEn": "Kampot",
+    "phone": "095 558 322",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Kampot%2BCambodia",
+    "latitude": 10.6452,
+    "longitude": 104.1934,
+    "rating": 4.7,
+    "reviewCount": 81,
+    "signatureDishesKh": [
+      "គុយទាវភ្នំពេញ",
+      "គុយទាវសាច់គោ",
+      "មីគាវ"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-195",
+    "nameKh": "រានអាហារសមុទ្រស្រស់ (ខេត្តកែប 7)",
+    "nameEn": "Fresh Coastal Seafood Stall (Kep #7)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) រានអាហារសមុទ្រស្រស់ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តកែប។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Fresh Coastal Seafood Stall offers authentic everyday Khmer cooking located in Kep. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តកែប",
+    "addressEn": "Central Market Area, Kep",
+    "provinceKh": "ខេត្តកែប",
+    "provinceEn": "Kep",
+    "phone": "096 565 335",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$$",
+    "mapUrl": "https://maps.google.com/?q=Kep%2BCambodia",
+    "latitude": 10.4462,
+    "longitude": 104.3281,
+    "rating": 4.8,
+    "reviewCount": 90,
+    "signatureDishesKh": [
+      "ក្តាមឆាម្រេចខ្ចី",
+      "មឹកអាំង",
+      "បង្គាចំហុយ"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-196",
+    "nameKh": "ផ្ទះបាយការីខ្មែរឈ្ងុយឆ្ងាញ់ (ខេត្តព្រះសីហនុ 7)",
+    "nameEn": "Fragrant Khmer Curry Kitchen (Preah Sihanouk #7)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) ផ្ទះបាយការីខ្មែរឈ្ងុយឆ្ងាញ់ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តព្រះសីហនុ។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Fragrant Khmer Curry Kitchen offers authentic everyday Khmer cooking located in Preah Sihanouk. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តព្រះសីហនុ",
+    "addressEn": "Central Market Area, Preah Sihanouk",
+    "provinceKh": "ខេត្តព្រះសីហនុ",
+    "provinceEn": "Preah Sihanouk",
+    "phone": "097 572 348",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Preah%20Sihanouk%2BCambodia",
+    "latitude": 10.5944,
+    "longitude": 103.4964,
+    "rating": 4.2,
+    "reviewCount": 19,
+    "signatureDishesKh": [
+      "សម្លការីមាន់ស្រែ",
+      "នំប៉័ងការី",
+      "សម្លម្ជូរគ្រឿង"
+    ],
+    "status": "pending",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "pending_verification",
+    "promotionalPrice": 4.99,
+    "isPromoted": false
+  },
+  {
+    "id": "rest-197",
+    "nameKh": "រានមាន់ដុតទឹកឃ្មុំព្រៃ (ខេត្តកំពង់ចាម 7)",
+    "nameEn": "Honey Roast Country Chicken Grill (Kampong Cham #7)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) រានមាន់ដុតទឹកឃ្មុំព្រៃ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តកំពង់ចាម។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Honey Roast Country Chicken Grill offers authentic everyday Khmer cooking located in Kampong Cham. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តកំពង់ចាម",
+    "addressEn": "Central Market Area, Kampong Cham",
+    "provinceKh": "ខេត្តកំពង់ចាម",
+    "provinceEn": "Kampong Cham",
+    "phone": "098 579 361",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Kampong%20Cham%2BCambodia",
+    "latitude": 11.9808,
+    "longitude": 105.4491,
+    "rating": 4.3,
+    "reviewCount": 28,
+    "signatureDishesKh": [
+      "មាន់ស្រែដុតទឹកឃ្មុំ",
+      "បាយដំណើប",
+      "ជ្រក់ត្រសក់"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-198",
+    "nameKh": "តូបបុកល្ហុង និងភ្លាសាច់គោ (ខេត្តកណ្តាល 7)",
+    "nameEn": "Papaya Salad & Spicy Pleah Shack (Kandal #7)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) តូបបុកល្ហុង និងភ្លាសាច់គោ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តកណ្តាល។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Papaya Salad & Spicy Pleah Shack offers authentic everyday Khmer cooking located in Kandal. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តកណ្តាល",
+    "addressEn": "Central Market Area, Kandal",
+    "provinceKh": "ខេត្តកណ្តាល",
+    "provinceEn": "Kandal",
+    "phone": "090 586 374",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$$",
+    "mapUrl": "https://maps.google.com/?q=Kandal%2BCambodia",
+    "latitude": 11.4833,
+    "longitude": 104.95,
+    "rating": 4.4,
+    "reviewCount": 37,
+    "signatureDishesKh": [
+      "បុកល្ហុងក្តាមប្រៃ",
+      "ភ្លាសាច់គោក្រូចឆ្មា",
+      "ស្លាបមាន់បំពង"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-199",
+    "nameKh": "រានបង្អែមខ្មែរស្ករត្នោត (ខេត្តតាកែវ 7)",
+    "nameEn": "Khmer Palm Sugar Sweets Hub (Takeo #7)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) រានបង្អែមខ្មែរស្ករត្នោត ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តតាកែវ។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Khmer Palm Sugar Sweets Hub offers authentic everyday Khmer cooking located in Takeo. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តតាកែវ",
+    "addressEn": "Central Market Area, Takeo",
+    "provinceKh": "ខេត្តតាកែវ",
+    "provinceEn": "Takeo",
+    "phone": "091 593 387",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Takeo%2BCambodia",
+    "latitude": 11.0028,
+    "longitude": 104.7999,
+    "rating": 4.5,
+    "reviewCount": 46,
+    "signatureDishesKh": [
+      "នំផ្លែអាយ",
+      "ចេកខ្ទិះ",
+      "បបរត្នោត"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-200",
+    "nameKh": "ផ្ទះកាហ្វេ និងអាហារសម្រន់ខ្មែរ (ខេត្តពោធិ៍សាត់ 7)",
+    "nameEn": "Khmer Coffee & Country Snacks (Pursat #7)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) ផ្ទះកាហ្វេ និងអាហារសម្រន់ខ្មែរ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តពោធិ៍សាត់។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Khmer Coffee & Country Snacks offers authentic everyday Khmer cooking located in Pursat. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តពោធិ៍សាត់",
+    "addressEn": "Central Market Area, Pursat",
+    "provinceKh": "ខេត្តពោធិ៍សាត់",
+    "provinceEn": "Pursat",
+    "phone": "092 600 400",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Pursat%2BCambodia",
+    "latitude": 12.5628,
+    "longitude": 103.9492,
+    "rating": 4.6,
+    "reviewCount": 55,
+    "signatureDishesKh": [
+      "នំគ្រក់ក្តៅៗ",
+      "កាហ្វេទឹកដោះគោទឹកកក",
+      "នំប៉័ងប៉ាតេ"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-201",
+    "nameKh": "ផ្ទះបាយអ្នកស្រែ (ខេត្តកំពង់ធំ 7)",
+    "nameEn": "Village Farmer Kitchen (Kampong Thom #7)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) ផ្ទះបាយអ្នកស្រែ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តកំពង់ធំ។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Village Farmer Kitchen offers authentic everyday Khmer cooking located in Kampong Thom. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តកំពង់ធំ",
+    "addressEn": "Central Market Area, Kampong Thom",
+    "provinceKh": "ខេត្តកំពង់ធំ",
+    "provinceEn": "Kampong Thom",
+    "phone": "093 607 413",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$$",
+    "mapUrl": "https://maps.google.com/?q=Kampong%20Thom%2BCambodia",
+    "latitude": 12.7471,
+    "longitude": 104.8587,
+    "rating": 4.7,
+    "reviewCount": 64,
+    "signatureDishesKh": [
+      "សម្លកកូរ",
+      "ត្រីអាំងទឹកត្រីអំពិល",
+      "ប្រហុកខ្ទិះ"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-202",
+    "nameKh": "តូបនំបញ្ចុកទឹកសម្លខ្មែរ (ខេត្តកំពង់ឆ្នាំង 7)",
+    "nameEn": "Fresh Num Banh Chok Stall (Kampong Chhnang #7)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) តូបនំបញ្ចុកទឹកសម្លខ្មែរ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តកំពង់ឆ្នាំង។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Fresh Num Banh Chok Stall offers authentic everyday Khmer cooking located in Kampong Chhnang. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តកំពង់ឆ្នាំង",
+    "addressEn": "Central Market Area, Kampong Chhnang",
+    "provinceKh": "ខេត្តកំពង់ឆ្នាំង",
+    "provinceEn": "Kampong Chhnang",
+    "phone": "094 614 426",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Kampong%20Chhnang%2BCambodia",
+    "latitude": 12.2143,
+    "longitude": 104.6508,
+    "rating": 4.8,
+    "reviewCount": 73,
+    "signatureDishesKh": [
+      "នំបញ្ចុកសម្លខ្មែរ",
+      "នំបញ្ចុកការី",
+      "សម្លណាំយ៉ា"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-203",
+    "nameKh": "រានបាយសាច់ជ្រូកអាំងពេលព្រឹក (ខេត្តកោះកុង 7)",
+    "nameEn": "Morning Grilled Pork Rice Cart (Koh Kong #7)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) រានបាយសាច់ជ្រូកអាំងពេលព្រឹក ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តកោះកុង។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Morning Grilled Pork Rice Cart offers authentic everyday Khmer cooking located in Koh Kong. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តកោះកុង",
+    "addressEn": "Central Market Area, Koh Kong",
+    "provinceKh": "ខេត្តកោះកុង",
+    "provinceEn": "Koh Kong",
+    "phone": "095 621 439",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Koh%20Kong%2BCambodia",
+    "latitude": 11.5913,
+    "longitude": 102.9839,
+    "rating": 4.2,
+    "reviewCount": 82,
+    "signatureDishesKh": [
+      "បាយសាច់ជ្រូកអាំង",
+      "ពងទាចៀន",
+      "ស៊ុបឆ្អឹងជ្រូក"
+    ],
+    "status": "pending",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "pending_verification",
+    "promotionalPrice": 4.99,
+    "isPromoted": false
+  },
+  {
+    "id": "rest-204",
+    "nameKh": "តូបគុយទាវឆ្នាំងដីបុរាណ (ខេត្តមណ្ឌលគិរី 7)",
+    "nameEn": "Traditional Claypot Kuyteav Stall (Mondulkiri #7)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) តូបគុយទាវឆ្នាំងដីបុរាណ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តមណ្ឌលគិរី។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Traditional Claypot Kuyteav Stall offers authentic everyday Khmer cooking located in Mondulkiri. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តមណ្ឌលគិរី",
+    "addressEn": "Central Market Area, Mondulkiri",
+    "provinceKh": "ខេត្តមណ្ឌលគិរី",
+    "provinceEn": "Mondulkiri",
+    "phone": "096 628 452",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$$",
+    "mapUrl": "https://maps.google.com/?q=Mondulkiri%2BCambodia",
+    "latitude": 12.4438,
+    "longitude": 107.2045,
+    "rating": 4.3,
+    "reviewCount": 91,
+    "signatureDishesKh": [
+      "គុយទាវភ្នំពេញ",
+      "គុយទាវសាច់គោ",
+      "មីគាវ"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-205",
+    "nameKh": "រានអាហារសមុទ្រស្រស់ (ខេត្តរតនគិរី 7)",
+    "nameEn": "Fresh Coastal Seafood Stall (Ratanakiri #7)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) រានអាហារសមុទ្រស្រស់ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តរតនគិរី។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Fresh Coastal Seafood Stall offers authentic everyday Khmer cooking located in Ratanakiri. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តរតនគិរី",
+    "addressEn": "Central Market Area, Ratanakiri",
+    "provinceKh": "ខេត្តរតនគិរី",
+    "provinceEn": "Ratanakiri",
+    "phone": "097 635 465",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Ratanakiri%2BCambodia",
+    "latitude": 13.7314,
+    "longitude": 107.0425,
+    "rating": 4.4,
+    "reviewCount": 20,
+    "signatureDishesKh": [
+      "ក្តាមឆាម្រេចខ្ចី",
+      "មឹកអាំង",
+      "បង្គាចំហុយ"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-206",
+    "nameKh": "ផ្ទះបាយការីខ្មែរឈ្ងុយឆ្ងាញ់ (ខេត្តក្រចេះ 7)",
+    "nameEn": "Fragrant Khmer Curry Kitchen (Kratie #7)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) ផ្ទះបាយការីខ្មែរឈ្ងុយឆ្ងាញ់ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តក្រចេះ។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Fragrant Khmer Curry Kitchen offers authentic everyday Khmer cooking located in Kratie. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តក្រចេះ",
+    "addressEn": "Central Market Area, Kratie",
+    "provinceKh": "ខេត្តក្រចេះ",
+    "provinceEn": "Kratie",
+    "phone": "098 642 478",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Kratie%2BCambodia",
+    "latitude": 12.5003,
+    "longitude": 105.9888,
+    "rating": 4.5,
+    "reviewCount": 29,
+    "signatureDishesKh": [
+      "សម្លការីមាន់ស្រែ",
+      "នំប៉័ងការី",
+      "សម្លម្ជូរគ្រឿង"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-207",
+    "nameKh": "រានមាន់ដុតទឹកឃ្មុំព្រៃ (ខេត្តស្ទឹងត្រែង 7)",
+    "nameEn": "Honey Roast Country Chicken Grill (Stung Treng #7)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) រានមាន់ដុតទឹកឃ្មុំព្រៃ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តស្ទឹងត្រែង។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Honey Roast Country Chicken Grill offers authentic everyday Khmer cooking located in Stung Treng. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តស្ទឹងត្រែង",
+    "addressEn": "Central Market Area, Stung Treng",
+    "provinceKh": "ខេត្តស្ទឹងត្រែង",
+    "provinceEn": "Stung Treng",
+    "phone": "090 649 491",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$$",
+    "mapUrl": "https://maps.google.com/?q=Stung%20Treng%2BCambodia",
+    "latitude": 13.5499,
+    "longitude": 105.9533,
+    "rating": 4.6,
+    "reviewCount": 38,
+    "signatureDishesKh": [
+      "មាន់ស្រែដុតទឹកឃ្មុំ",
+      "បាយដំណើប",
+      "ជ្រក់ត្រសក់"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-208",
+    "nameKh": "តូបបុកល្ហុង និងភ្លាសាច់គោ (ខេត្តព្រះវិហារ 7)",
+    "nameEn": "Papaya Salad & Spicy Pleah Shack (Preah Vihear #7)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) តូបបុកល្ហុង និងភ្លាសាច់គោ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តព្រះវិហារ។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Papaya Salad & Spicy Pleah Shack offers authentic everyday Khmer cooking located in Preah Vihear. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តព្រះវិហារ",
+    "addressEn": "Central Market Area, Preah Vihear",
+    "provinceKh": "ខេត្តព្រះវិហារ",
+    "provinceEn": "Preah Vihear",
+    "phone": "091 656 504",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Preah%20Vihear%2BCambodia",
+    "latitude": 13.8433,
+    "longitude": 104.9814,
+    "rating": 4.7,
+    "reviewCount": 47,
+    "signatureDishesKh": [
+      "បុកល្ហុងក្តាមប្រៃ",
+      "ភ្លាសាច់គោក្រូចឆ្មា",
+      "ស្លាបមាន់បំពង"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-209",
+    "nameKh": "រានបង្អែមខ្មែរស្ករត្នោត (ខេត្តបន្ទាយមានជ័យ 7)",
+    "nameEn": "Khmer Palm Sugar Sweets Hub (Banteay Meanchey #7)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) រានបង្អែមខ្មែរស្ករត្នោត ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តបន្ទាយមានជ័យ។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Khmer Palm Sugar Sweets Hub offers authentic everyday Khmer cooking located in Banteay Meanchey. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តបន្ទាយមានជ័យ",
+    "addressEn": "Central Market Area, Banteay Meanchey",
+    "provinceKh": "ខេត្តបន្ទាយមានជ័យ",
+    "provinceEn": "Banteay Meanchey",
+    "phone": "092 663 517",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Banteay%20Meanchey%2BCambodia",
+    "latitude": 13.5499,
+    "longitude": 102.9889,
+    "rating": 4.8,
+    "reviewCount": 56,
+    "signatureDishesKh": [
+      "នំផ្លែអាយ",
+      "ចេកខ្ទិះ",
+      "បបរត្នោត"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-210",
+    "nameKh": "ផ្ទះកាហ្វេ និងអាហារសម្រន់ខ្មែរ (ខេត្តឧត្តរមានជ័យ 7)",
+    "nameEn": "Khmer Coffee & Country Snacks (Oddar Meanchey #7)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) ផ្ទះកាហ្វេ និងអាហារសម្រន់ខ្មែរ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តឧត្តរមានជ័យ។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Khmer Coffee & Country Snacks offers authentic everyday Khmer cooking located in Oddar Meanchey. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តឧត្តរមានជ័យ",
+    "addressEn": "Central Market Area, Oddar Meanchey",
+    "provinceKh": "ខេត្តឧត្តរមានជ័យ",
+    "provinceEn": "Oddar Meanchey",
+    "phone": "093 670 530",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$$",
+    "mapUrl": "https://maps.google.com/?q=Oddar%20Meanchey%2BCambodia",
+    "latitude": 14.1579,
+    "longitude": 103.5478,
+    "rating": 4.2,
+    "reviewCount": 65,
+    "signatureDishesKh": [
+      "នំគ្រក់ក្តៅៗ",
+      "កាហ្វេទឹកដោះគោទឹកកក",
+      "នំប៉័ងប៉ាតេ"
+    ],
+    "status": "pending",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "pending_verification",
+    "promotionalPrice": 4.99,
+    "isPromoted": false
+  },
+  {
+    "id": "rest-211",
+    "nameKh": "ផ្ទះបាយអ្នកស្រែ (ខេត្តប៉ៃលិន 7)",
+    "nameEn": "Village Farmer Kitchen (Pailin #7)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) ផ្ទះបាយអ្នកស្រែ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តប៉ៃលិន។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Village Farmer Kitchen offers authentic everyday Khmer cooking located in Pailin. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តប៉ៃលិន",
+    "addressEn": "Central Market Area, Pailin",
+    "provinceKh": "ខេត្តប៉ៃលិន",
+    "provinceEn": "Pailin",
+    "phone": "094 677 543",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Pailin%2BCambodia",
+    "latitude": 12.8369,
+    "longitude": 102.5792,
+    "rating": 4.3,
+    "reviewCount": 74,
+    "signatureDishesKh": [
+      "សម្លកកូរ",
+      "ត្រីអាំងទឹកត្រីអំពិល",
+      "ប្រហុកខ្ទិះ"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-212",
+    "nameKh": "តូបនំបញ្ចុកទឹកសម្លខ្មែរ (ខេត្តព្រៃវែង 7)",
+    "nameEn": "Fresh Num Banh Chok Stall (Prey Veng #7)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) តូបនំបញ្ចុកទឹកសម្លខ្មែរ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តព្រៃវែង។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Fresh Num Banh Chok Stall offers authentic everyday Khmer cooking located in Prey Veng. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តព្រៃវែង",
+    "addressEn": "Central Market Area, Prey Veng",
+    "provinceKh": "ខេត្តព្រៃវែង",
+    "provinceEn": "Prey Veng",
+    "phone": "095 684 556",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Prey%20Veng%2BCambodia",
+    "latitude": 11.485,
+    "longitude": 105.3114,
+    "rating": 4.4,
+    "reviewCount": 83,
+    "signatureDishesKh": [
+      "នំបញ្ចុកសម្លខ្មែរ",
+      "នំបញ្ចុកការី",
+      "សម្លណាំយ៉ា"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-213",
+    "nameKh": "រានបាយសាច់ជ្រូកអាំងពេលព្រឹក (ខេត្តស្វាយរៀង 7)",
+    "nameEn": "Morning Grilled Pork Rice Cart (Svay Rieng #7)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) រានបាយសាច់ជ្រូកអាំងពេលព្រឹក ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តស្វាយរៀង។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Morning Grilled Pork Rice Cart offers authentic everyday Khmer cooking located in Svay Rieng. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តស្វាយរៀង",
+    "addressEn": "Central Market Area, Svay Rieng",
+    "provinceKh": "ខេត្តស្វាយរៀង",
+    "provinceEn": "Svay Rieng",
+    "phone": "096 691 569",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$$",
+    "mapUrl": "https://maps.google.com/?q=Svay%20Rieng%2BCambodia",
+    "latitude": 11.0998,
+    "longitude": 105.7994,
+    "rating": 4.5,
+    "reviewCount": 92,
+    "signatureDishesKh": [
+      "បាយសាច់ជ្រូកអាំង",
+      "ពងទាចៀន",
+      "ស៊ុបឆ្អឹងជ្រូក"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-214",
+    "nameKh": "តូបគុយទាវឆ្នាំងដីបុរាណ (ខេត្តកំពង់ស្ពឺ 7)",
+    "nameEn": "Traditional Claypot Kuyteav Stall (Kampong Speu #7)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) តូបគុយទាវឆ្នាំងដីបុរាណ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តកំពង់ស្ពឺ។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Traditional Claypot Kuyteav Stall offers authentic everyday Khmer cooking located in Kampong Speu. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តកំពង់ស្ពឺ",
+    "addressEn": "Central Market Area, Kampong Speu",
+    "provinceKh": "ខេត្តកំពង់ស្ពឺ",
+    "provinceEn": "Kampong Speu",
+    "phone": "097 698 582",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Kampong%20Speu%2BCambodia",
+    "latitude": 11.4773,
+    "longitude": 104.5358,
+    "rating": 4.6,
+    "reviewCount": 21,
+    "signatureDishesKh": [
+      "គុយទាវភ្នំពេញ",
+      "គុយទាវសាច់គោ",
+      "មីគាវ"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": false,
+    "paymentDate": "2026-02-01"
+  },
+  {
+    "id": "rest-215",
+    "nameKh": "រានអាហារសមុទ្រស្រស់ (ខេត្តត្បូងឃ្មុំ 7)",
+    "nameEn": "Fresh Coastal Seafood Stall (Tboung Khmum #7)",
+    "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) រានអាហារសមុទ្រស្រស់ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តត្បូងឃ្មុំ។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
+    "descriptionEn": "(Sample / Unverified User Submission) Fresh Coastal Seafood Stall offers authentic everyday Khmer cooking located in Tboung Khmum. Awaiting admin verification.",
+    "photoUrl": "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80",
+    "galleryPhotos": [
+      "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80"
+    ],
+    "addressKh": "ភូមិកណ្តាល ឃុំ/សង្កាត់ទីផ្សារ ខេត្តត្បូងឃ្មុំ",
+    "addressEn": "Central Market Area, Tboung Khmum",
+    "provinceKh": "ខេត្តត្បូងឃ្មុំ",
+    "provinceEn": "Tboung Khmum",
+    "phone": "098 705 595",
+    "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
+    "openingHoursEn": "06:30 AM - 08:00 PM",
+    "priceLevel": "$",
+    "mapUrl": "https://maps.google.com/?q=Tboung%20Khmum%2BCambodia",
+    "latitude": 11.9266,
+    "longitude": 105.6875,
+    "rating": 4.7,
+    "reviewCount": 30,
+    "signatureDishesKh": [
+      "ក្តាមឆាម្រេចខ្ចី",
+      "មឹកអាំង",
+      "បង្គាចំហុយ"
+    ],
+    "status": "approved",
+    "isVerified": false,
+    "isFeatured": false,
+    "paymentStatus": "verified",
+    "promotionalPrice": 4.99,
+    "isPromoted": true,
+    "paymentDate": "2026-02-01"
   }
 ];

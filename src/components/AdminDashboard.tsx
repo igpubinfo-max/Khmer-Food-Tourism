@@ -2,9 +2,12 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
   X, Shield, Utensils, Store, Compass, MessageSquare, 
-  Users, Plus, Trash2, CheckCircle2, AlertTriangle, Settings, QrCode, Heart, KeyRound, Lock, ExternalLink
+  Users, Plus, Trash2, CheckCircle2, AlertTriangle, Settings, 
+  QrCode, Heart, KeyRound, Lock, ExternalLink, CreditCard,
+  ShieldCheck, ShieldAlert, Clock, RefreshCw, FileText, Check, Ban
 } from 'lucide-react';
-import { FoodCategorySlug, DestinationCategorySlug, UserRole } from '../types';
+import { FoodCategorySlug, DestinationCategorySlug, UserRole, RegistrationTransaction } from '../types';
+import { getSecurityAuditLogs, SecurityAuditEntry, revokeAdminSession } from '../utils/security';
 
 export const AdminDashboard: React.FC = () => {
   const { 
@@ -14,17 +17,16 @@ export const AdminDashboard: React.FC = () => {
     destinations, addDestination, deleteDestination,
     posts, deletePost,
     users, updateUserRole,
-    appSettings, updateAppSettings, setAdminPassword, currentUser
+    transactions, verifyTransaction, rejectTransaction,
+    appSettings, updateAppSettings, setAdminPassword, currentUser, showToast
   } = useApp();
 
-  const [activeTab, setActiveTab] = useState<'stats' | 'food' | 'restaurants' | 'destinations' | 'community' | 'users' | 'settings'>('stats');
+  const [activeTab, setActiveTab] = useState<'stats' | 'food' | 'restaurants' | 'destinations' | 'community' | 'users' | 'transactions' | 'settings' | 'security'>('stats');
 
   // Form states for Food
   const [newFoodNameKh, setNewFoodNameKh] = useState('');
   const [newFoodNameEn, setNewFoodNameEn] = useState('');
   const [newFoodCategory, setNewFoodCategory] = useState<FoodCategorySlug>('soup');
-  const [newFoodPriceRiel, setNewFoodPriceRiel] = useState(18000);
-  const [newFoodPriceUsd, setNewFoodPriceUsd] = useState(4.5);
   const [newFoodCookTime, setNewFoodCookTime] = useState('២៥ នាទី');
   const [newFoodPhotoUrl, setNewFoodPhotoUrl] = useState('https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=80');
   const [newFoodDescKh, setNewFoodDescKh] = useState('');
@@ -42,7 +44,7 @@ export const AdminDashboard: React.FC = () => {
   const [newDestDescKh, setNewDestDescKh] = useState('');
   const [showAddDestForm, setShowAddDestForm] = useState(false);
 
-  // Form states for Settings
+  // Form states for Settings & Promotional pricing
   const [apkUrl, setApkUrl] = useState(appSettings.apkDownloadUrl);
   const [playStoreUrl, setPlayStoreUrl] = useState(appSettings.playStoreUrl);
   const [appStoreUrl, setAppStoreUrl] = useState(appSettings.appStoreUrl);
@@ -50,33 +52,46 @@ export const AdminDashboard: React.FC = () => {
   const [bankName, setBankName] = useState(appSettings.supportBankName);
   const [accountName, setAccountName] = useState(appSettings.supportAccountName);
   const [supportMessageKh, setSupportMessageKh] = useState(appSettings.supportMessageKh);
+  const [promotionalFeeUsd, setPromotionalFeeUsd] = useState(appSettings.promotionalFeeUsd || 4.99);
+  const [promotionPeriodKh, setPromotionPeriodKh] = useState(appSettings.promotionPeriodKh || '');
   const [newAdminPass, setNewAdminPass] = useState('');
+
+  // Transaction filter
+  const [txnFilter, setTxnFilter] = useState<'all' | 'pending' | 'verified' | 'rejected'>('all');
+
+  // Security audit logs state
+  const [auditLogs, setAuditLogs] = useState<SecurityAuditEntry[]>(() => getSecurityAuditLogs());
 
   if (!isAdminOpen) return null;
 
   const isKm = language === 'km';
   const pendingRestaurants = restaurants.filter(r => r.status === 'pending');
   const verifiedRestaurantsCount = restaurants.filter(r => r.isVerified).length;
+  const pendingTxns = transactions.filter(t => t.status === 'pending_verification');
 
-  // Handlers
+  const filteredTransactions = transactions.filter(t => {
+    if (txnFilter === 'all') return true;
+    if (txnFilter === 'pending') return t.status === 'pending_verification';
+    return t.status === txnFilter;
+  });
+
   const handleCreateFood = (e: React.FormEvent) => {
     e.preventDefault();
     addFood({
       nameKh: newFoodNameKh,
       nameEn: newFoodNameEn || newFoodNameKh,
       categorySlug: newFoodCategory,
-      categoryKh: newFoodCategory === 'soup' ? 'សម្ល & អាម៉ុក' : newFoodCategory === 'stirfry' ? 'ម្ហូបឆា' : 'ម្ហូបខ្មែរ',
+      categoryKh: newFoodCategory === 'soup' ? 'សម្ល & អាម៉ុក' : newFoodCategory === 'grilled' ? 'ម្ហូបអាំង' : 'ម្ហូបខ្មែរ',
       categoryEn: newFoodCategory,
       descriptionKh: newFoodDescKh,
       descriptionEn: newFoodDescKh,
       photoUrl: newFoodPhotoUrl,
-      prepTime: '២០ នាទី',
+      prepTime: '១៥ នាទី',
       cookTime: newFoodCookTime,
       servings: '២-៣ នាក់',
       difficulty: 'medium',
-      calories: 350,
-      priceRiel: Number(newFoodPriceRiel),
-      priceUsd: Number(newFoodPriceUsd),
+      priceRiel: 0,
+      priceUsd: 0,
       ingredients: [
         { nameKh: 'គ្រឿងផ្សំខ្មែរដើម', nameEn: 'Traditional Khmer ingredients', amount: '១ ចាន' },
         { nameKh: 'គ្រឿងទេស និងអំបិល ស្ករ', nameEn: 'Seasonings', amount: 'តាមចំណូលចិត្ត' },
@@ -130,24 +145,40 @@ export const AdminDashboard: React.FC = () => {
       supportBankName: bankName,
       supportAccountName: accountName,
       supportMessageKh,
+      promotionalFeeUsd: Number(promotionalFeeUsd),
+      promotionPeriodKh,
     });
   };
 
   const handleChangeAdminPassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newAdminPass) return;
+    if (!newAdminPass || newAdminPass.length < 8) {
+      showToast(isKm ? 'ពាក្យសម្ងាត់ត្រូវមានយ៉ាងហោច ៨ តួអក្សរ!' : 'Password must be at least 8 characters!', 'warning');
+      return;
+    }
     await setAdminPassword(newAdminPass);
     setNewAdminPass('');
   };
 
+  const handleRevokeSessions = () => {
+    revokeAdminSession();
+    setIsAdminOpen(false);
+    showToast(isKm ? 'បានចាកចេញពីសម័យគ្រប់គ្រងដោយសុវត្ថិភាព!' : 'Admin session revoked securely!', 'info');
+  };
+
+  const handleRefreshAudit = () => {
+    setAuditLogs(getSecurityAuditLogs());
+    showToast(isKm ? 'បានទាញយកកំណត់ហេតុសុវត្ថិភាពថ្មី!' : 'Security logs refreshed!', 'info');
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/75 backdrop-blur-sm animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-sm animate-fade-in">
       <div 
-        className="relative w-full max-w-4xl h-[92vh] bg-stone-50 dark:bg-stone-900 rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-amber-950/20"
+        className="relative w-full max-w-5xl h-[92vh] bg-stone-50 dark:bg-stone-900 rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-amber-950/20"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-red-950 via-stone-900 to-red-900 text-white shrink-0">
+        <div className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-red-950 via-stone-900 to-red-950 text-white shrink-0">
           <div className="flex items-center gap-3">
             <div className="p-2.5 rounded-2xl bg-amber-500/20 text-amber-400 border border-amber-500/30">
               <Shield className="w-6 h-6" />
@@ -157,12 +188,14 @@ export const AdminDashboard: React.FC = () => {
                 <h2 className="text-lg font-bold font-khmer">
                   {isKm ? 'ផ្ទាំងគ្រប់គ្រងរដ្ឋបាលជាន់ខ្ពស់' : 'Administrator Control Center'}
                 </h2>
-                <span className="text-[10px] bg-amber-500 text-stone-950 font-bold px-2 py-0.5 rounded-full">
-                  Chea Savuth
+                <span className="text-[10px] bg-amber-500 text-stone-950 font-bold px-2 py-0.5 rounded-full font-mono">
+                  SINGLE AUTHORIZED ADMIN
                 </span>
               </div>
               <p className="text-xs text-stone-300 font-khmer">
-                {isKm ? 'គ្រប់គ្រងមុខម្ហូប ហាងអាហារ ទេសចរណ៍ សហគមន៍ និងការកំណត់ QR Code' : 'Manage foods, restaurants, tourism, community, and QR configuration'}
+                {isKm 
+                  ? 'គ្រប់គ្រងមុខម្ហូប (200+) ហាងអាហារ (200+) ទេសចរណ៍ ការទូទាត់ $4.99 និងសន្តិសុខ' 
+                  : 'Manage foods, restaurants, destinations, $4.99 transactions, and security'}
               </p>
             </div>
           </div>
@@ -185,6 +218,21 @@ export const AdminDashboard: React.FC = () => {
           >
             <Shield className="w-4 h-4" />
             <span>{isKm ? 'ទិដ្ឋភាពរួម' : 'Overview'}</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('transactions')}
+            className={`flex items-center gap-1.5 px-3 py-2.5 font-bold whitespace-nowrap border-b-2 transition relative ${
+              activeTab === 'transactions' ? 'border-amber-600 text-amber-600' : 'border-transparent text-stone-400'
+            }`}
+          >
+            <CreditCard className="w-4 h-4" />
+            <span>{isKm ? `ការទូទាត់ $4.99 (${transactions.length})` : `Payments (${transactions.length})`}</span>
+            {pendingTxns.length > 0 && (
+              <span className="px-1.5 py-0.2 bg-red-600 text-white rounded-full text-[9px] font-bold">
+                {pendingTxns.length}
+              </span>
+            )}
           </button>
 
           <button
@@ -241,91 +289,228 @@ export const AdminDashboard: React.FC = () => {
           </button>
 
           <button
+            onClick={() => setActiveTab('security')}
+            className={`flex items-center gap-1.5 px-3 py-2.5 font-bold whitespace-nowrap border-b-2 transition ${
+              activeTab === 'security' ? 'border-amber-600 text-amber-600' : 'border-transparent text-stone-400'
+            }`}
+          >
+            <ShieldAlert className="w-4 h-4 text-red-600" />
+            <span>{isKm ? 'សន្តិសុខ & Logs' : 'Security'}</span>
+          </button>
+
+          <button
             onClick={() => setActiveTab('settings')}
             className={`flex items-center gap-1.5 px-3 py-2.5 font-bold whitespace-nowrap border-b-2 transition ${
-              activeTab === 'settings' ? 'border-red-600 text-red-600' : 'border-transparent text-stone-400'
+              activeTab === 'settings' ? 'border-amber-600 text-amber-600' : 'border-transparent text-stone-400'
             }`}
           >
             <Settings className="w-4 h-4" />
-            <span>{isKm ? 'ការកំណត់ QR Code & ប្រព័ន្ធ' : 'App & QR Settings'}</span>
+            <span>{isKm ? 'ការកំណត់' : 'Settings'}</span>
           </button>
         </div>
 
         {/* Tab Body */}
-        <div className="flex-1 overflow-y-auto no-scrollbar p-4 space-y-4 text-xs">
-          {/* STATS OVERVIEW */}
+        <div className="flex-1 overflow-y-auto p-6 text-xs">
+          {/* STATS OVERVIEW TAB */}
           {activeTab === 'stats' && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div className="p-4 rounded-2xl bg-amber-50 dark:bg-stone-800 border border-amber-200 dark:border-stone-700">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-amber-800 dark:text-amber-300 font-khmer">
-                      {isKm ? 'មុខម្ហូបខ្មែរ (100+)' : 'Khmer Foods'}
-                    </span>
-                    <Utensils className="w-4 h-4 text-amber-600" />
-                  </div>
-                  <p className="text-2xl font-bold text-stone-900 dark:text-stone-100 mt-2">{foods.length}</p>
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div className="p-4 rounded-2xl bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 shadow-sm">
+                  <span className="text-stone-400 font-khmer text-xs">មុខម្ហូបខ្មែរសរុប</span>
+                  <p className="text-2xl font-bold text-amber-600 font-mono mt-2">{foods.length}</p>
+                  <span className="text-[10px] text-emerald-600 font-bold">✓ 200+ Disconnected Prices</span>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-stone-800 border border-emerald-200 dark:border-stone-700">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-emerald-800 dark:text-emerald-300 font-khmer">
-                      {isKm ? 'ហាងអាហារ (100+)' : 'Restaurants'}
-                    </span>
-                    <Store className="w-4 h-4 text-emerald-600" />
-                  </div>
-                  <p className="text-2xl font-bold text-stone-900 dark:text-stone-100 mt-2">{restaurants.length}</p>
-                  <p className="text-[10px] text-emerald-700 mt-0.5">
-                    {verifiedRestaurantsCount} {isKm ? 'ផ្ទៀងផ្ទាត់ផ្លូវការ' : 'verified'}
-                  </p>
+                <div className="p-4 rounded-2xl bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 shadow-sm">
+                  <span className="text-stone-400 font-khmer text-xs">ហាងអាហារសរុប</span>
+                  <p className="text-2xl font-bold text-red-600 font-mono mt-2">{restaurants.length}</p>
+                  <span className="text-[10px] text-stone-500 font-khmer">{verifiedRestaurantsCount} ហាងផ្ទៀងផ្ទាត់ផ្លូវការ</span>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-blue-50 dark:bg-stone-800 border border-blue-200 dark:border-stone-700">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-blue-800 dark:text-blue-300 font-khmer">
-                      {isKm ? 'តំបន់ទេសចរណ៍' : 'Destinations'}
-                    </span>
-                    <Compass className="w-4 h-4 text-blue-600" />
-                  </div>
-                  <p className="text-2xl font-bold text-stone-900 dark:text-stone-100 mt-2">{destinations.length}</p>
+                <div className="p-4 rounded-2xl bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 shadow-sm">
+                  <span className="text-stone-400 font-khmer text-xs">ប្រតិបត្តិការ $4.99</span>
+                  <p className="text-2xl font-bold text-emerald-600 font-mono mt-2">{transactions.length}</p>
+                  <span className="text-[10px] text-amber-600 font-bold font-khmer">{pendingTxns.length} រង់ចាំផ្ទៀងផ្ទាត់</span>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-rose-50 dark:bg-stone-800 border border-rose-200 dark:border-stone-700">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-rose-800 dark:text-rose-300 font-khmer">
-                      {isKm ? 'ការបង្ហោះសហគមន៍' : 'Community Posts'}
-                    </span>
-                    <MessageSquare className="w-4 h-4 text-rose-600" />
-                  </div>
-                  <p className="text-2xl font-bold text-stone-900 dark:text-stone-100 mt-2">{posts.length}</p>
+                <div className="p-4 rounded-2xl bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 shadow-sm">
+                  <span className="text-stone-400 font-khmer text-xs">តំបន់ទេសចរណ៍</span>
+                  <p className="text-2xl font-bold text-stone-900 dark:text-stone-100 font-mono mt-2">{destinations.length}</p>
+                  <span className="text-[10px] text-blue-600 font-bold font-khmer">២៥ ខេត្តក្រុង</span>
                 </div>
               </div>
 
-              {/* Pending approval notification */}
-              {pendingRestaurants.length > 0 && (
-                <div className="p-4 rounded-2xl bg-amber-50 dark:bg-stone-800 border border-amber-300 space-y-2">
-                  <p className="font-bold text-amber-900 dark:text-amber-300 flex items-center gap-1.5 font-khmer">
-                    <AlertTriangle className="w-4 h-4 text-amber-600" />
-                    <span>{isKm ? 'មានសំណើចុះបញ្ជីហាងអាហារថ្មីរង់ចាំការត្រួតពិនិត្យ!' : 'Pending Restaurant Submissions:'}</span>
-                  </p>
-                  {pendingRestaurants.map(r => (
-                    <div key={r.id} className="flex items-center justify-between p-2.5 bg-white dark:bg-stone-700 rounded-xl">
-                      <div>
-                        <p className="font-bold text-stone-900 dark:text-white font-khmer">{r.nameKh}</p>
-                        <p className="text-[10px] text-stone-500">{r.addressKh} • 📞 {r.phone}</p>
-                      </div>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => approveRestaurant(r.id)}
-                          className="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs font-khmer"
-                        >
-                          {isKm ? 'អនុម័ត' : 'Approve'}
-                        </button>
-                      </div>
-                    </div>
-                  ))}
+              {/* Pending Transactions Alert */}
+              {pendingTxns.length > 0 && (
+                <div className="p-4 rounded-2xl bg-amber-50 dark:bg-stone-800 border-2 border-amber-400 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <p className="font-bold text-amber-900 dark:text-amber-200 flex items-center gap-1.5 font-khmer">
+                      <CreditCard className="w-4 h-4 text-amber-600" />
+                      <span>{isKm ? `មានប្រតិបត្តិការចុះបញ្ជីថ្មី ${pendingTxns.length} រង់ចាំការផ្ទៀងផ្ទាត់ធនាគារ!` : `${pendingTxns.length} Pending $4.99 Registrations!`}</span>
+                    </p>
+                    <button
+                      onClick={() => setActiveTab('transactions')}
+                      className="px-3 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-khmer font-bold text-xs"
+                    >
+                      {isKm ? 'ពិនិត្យឥឡូវនេះ' : 'Review Now'}
+                    </button>
+                  </div>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* TRANSACTIONS TAB ($4.99 Promotional Registrations) */}
+          {activeTab === 'transactions' && (
+            <div className="space-y-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <h3 className="font-bold text-stone-900 dark:text-stone-100 font-khmer text-base">
+                    {isKm ? 'ការទូទាត់ប្រាក់ចុះបញ្ជីហាង ($4.99 Registration Fee & Transactions)' : '$4.99 Registration Transactions'}
+                  </h3>
+                  <p className="text-stone-500 font-khmer text-xs">
+                    {isKm ? 'ផ្ទៀងផ្ទាត់លេខកូដប្រតិបត្តិការ (Trx ID) ជាមួយធនាគារ មុននឹងធ្វើឱ្យហាងសកម្ម' : 'Verify bank transaction references before activating promoted restaurant listings'}
+                  </p>
+                </div>
+
+                {/* Filter buttons */}
+                <div className="flex gap-1.5 bg-stone-100 dark:bg-stone-800 p-1 rounded-xl shrink-0">
+                  <button
+                    onClick={() => setTxnFilter('all')}
+                    className={`px-3 py-1.5 rounded-lg font-khmer font-semibold ${txnFilter === 'all' ? 'bg-white dark:bg-stone-700 shadow text-stone-900 dark:text-white' : 'text-stone-500'}`}
+                  >
+                    {isKm ? 'ទាំងអស់' : 'All'} ({transactions.length})
+                  </button>
+                  <button
+                    onClick={() => setTxnFilter('pending')}
+                    className={`px-3 py-1.5 rounded-lg font-khmer font-semibold ${txnFilter === 'pending' ? 'bg-amber-500 text-white shadow' : 'text-stone-500'}`}
+                  >
+                    {isKm ? 'រង់ចាំ' : 'Pending'} ({pendingTxns.length})
+                  </button>
+                  <button
+                    onClick={() => setTxnFilter('verified')}
+                    className={`px-3 py-1.5 rounded-lg font-khmer font-semibold ${txnFilter === 'verified' ? 'bg-emerald-600 text-white shadow' : 'text-stone-500'}`}
+                  >
+                    {isKm ? 'ផ្ទៀងផ្ទាត់រួច' : 'Verified'}
+                  </button>
+                </div>
+              </div>
+
+              {/* Transactions List */}
+              <div className="space-y-3">
+                {filteredTransactions.length === 0 ? (
+                  <div className="text-center py-8 text-stone-400 font-khmer">
+                    {isKm ? 'គ្មានប្រតិបត្តិការក្នុងប្រភេទនេះឡើយ' : 'No transactions found.'}
+                  </div>
+                ) : (
+                  filteredTransactions.map((t) => (
+                    <div 
+                      key={t.id} 
+                      className={`p-4 rounded-2xl border transition-all ${
+                        t.status === 'pending_verification' 
+                          ? 'bg-amber-50/60 dark:bg-stone-800 border-amber-300' 
+                          : t.status === 'verified'
+                          ? 'bg-white dark:bg-stone-800 border-emerald-200 dark:border-stone-700'
+                          : 'bg-red-50/40 dark:bg-stone-800 border-red-200'
+                      }`}
+                    >
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono font-bold text-stone-800 dark:text-stone-200">{t.id}</span>
+                            <span className={`px-2 py-0.5 rounded-full font-khmer font-bold text-[10px] ${
+                              t.status === 'verified' 
+                                ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
+                                : t.status === 'pending_verification'
+                                ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
+                                : 'bg-red-100 text-red-800'
+                            }`}>
+                              {t.status === 'verified' ? '✓ បានផ្ទៀងផ្ទាត់ & ធ្វើឱ្យសកម្ម' : t.status === 'pending_verification' ? '⏳ រង់ចាំការផ្ទៀងផ្ទាត់' : '✕ បានបដិសេធ'}
+                            </span>
+                            <span className="font-bold text-red-600 font-mono text-sm">${t.amountUsd} USD</span>
+                          </div>
+
+                          <div className="font-bold text-stone-900 dark:text-stone-100 font-khmer text-sm">
+                            {t.restaurantNameKh}
+                          </div>
+
+                          <div className="text-[11px] text-stone-600 dark:text-stone-400 font-khmer space-x-2">
+                            <span>ម្ចាស់ហាង៖ <strong>{t.ownerName}</strong></span>
+                            {t.ownerPhone && <span>• 📞 {t.ownerPhone}</span>}
+                            <span>• វិធីបង់៖ <strong className="font-mono">{t.paymentMethod}</strong></span>
+                            <span>• កាលបរិច្ឆេទ៖ {t.createdAt}</span>
+                          </div>
+
+                          <div className="p-2 bg-stone-100 dark:bg-stone-900 rounded-xl font-mono text-xs flex items-center justify-between">
+                            <span className="text-stone-500 font-khmer">Bank Ref / Trx ID:</span>
+                            <span className="font-bold text-stone-900 dark:text-amber-300">{t.transactionRef}</span>
+                          </div>
+                        </div>
+
+                        {/* Verification Actions */}
+                        {t.status === 'pending_verification' && (
+                          <div className="flex sm:flex-col gap-2 shrink-0">
+                            <button
+                              onClick={() => verifyTransaction(t.id)}
+                              className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-khmer font-bold text-xs flex items-center justify-center gap-1 shadow-sm transition active:scale-95"
+                            >
+                              <Check className="w-4 h-4" />
+                              <span>{isKm ? 'ផ្ទៀងផ្ទាត់ & ធ្វើឱ្យសកម្ម' : 'Verify & Activate'}</span>
+                            </button>
+
+                            <button
+                              onClick={() => rejectTransaction(t.id, 'Transaction ID could not be verified on bank statement.')}
+                              className="px-3 py-1.5 rounded-xl bg-stone-200 dark:bg-stone-700 hover:bg-rose-600 hover:text-white text-stone-700 dark:text-stone-300 font-khmer font-medium text-xs transition"
+                            >
+                              <span>{isKm ? 'បដិសេធ' : 'Reject'}</span>
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              {/* Promotional Settings Editor */}
+              <div className="p-5 bg-white dark:bg-stone-800 rounded-3xl border border-stone-200 dark:border-stone-700 space-y-3 font-khmer">
+                <h4 className="font-bold text-stone-900 dark:text-stone-100 text-sm flex items-center gap-1.5">
+                  <Settings className="w-4 h-4 text-amber-600" />
+                  <span>{isKm ? 'ការកំណត់តម្លៃប្រូម៉ូសិនចុះបញ្ជីហាង' : 'Promotional Pricing Configuration'}</span>
+                </h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block font-semibold mb-1">
+                      {isKm ? 'តម្លៃប្រូម៉ូសិន (USD)' : 'Promotional Fee (USD)'}
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={promotionalFeeUsd}
+                      onChange={e => setPromotionalFeeUsd(parseFloat(e.target.value) || 4.99)}
+                      className="w-full px-3 py-2 rounded-xl border bg-stone-50 dark:bg-stone-700 font-mono font-bold"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-semibold mb-1">
+                      {isKm ? 'សារប្រូម៉ូសិន (Khmer Notice)' : 'Promotion Notice (Khmer)'}
+                    </label>
+                    <input
+                      type="text"
+                      value={promotionPeriodKh}
+                      onChange={e => setPromotionPeriodKh(e.target.value)}
+                      placeholder="តម្លៃប្រូម៉ូសិនពិសេស៖ $4.99 USD"
+                      className="w-full px-3 py-2 rounded-xl border bg-stone-50 dark:bg-stone-700 font-khmer"
+                    />
+                  </div>
+                </div>
+                <button
+                  onClick={handleSaveSettings}
+                  className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-xs"
+                >
+                  {isKm ? 'រក្សាទុកការកំណត់ប្រូម៉ូសិន' : 'Save Promotional Settings'}
+                </button>
+              </div>
             </div>
           )}
 
@@ -333,23 +518,20 @@ export const AdminDashboard: React.FC = () => {
           {activeTab === 'food' && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="font-bold text-stone-900 dark:text-stone-100 font-khmer">
-                  {isKm ? `គ្រប់គ្រងបញ្ជីមុខម្ហូបខ្មែរ (សរុប ${foods.length} មុខ)` : `Manage Khmer Foods (${foods.length} items)`}
+                <h3 className="font-bold text-stone-900 dark:text-stone-100 font-khmer text-sm">
+                  {isKm ? `គ្រប់គ្រងបញ្ជីមុខម្ហូបខ្មែរ (សរុប ${foods.length} មុខ - គ្មានតម្លៃលើរូបភាព)` : `Manage Khmer Foods (${foods.length} items - No Prices on Pictures)`}
                 </h3>
                 <button
                   onClick={() => setShowAddFoodForm(!showAddFoodForm)}
                   className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-amber-600 text-white font-bold hover:bg-amber-500 font-khmer"
                 >
                   <Plus className="w-3.5 h-3.5" />
-                  <span>{showAddFoodForm ? (isKm ? 'បិទបែបបទ' : 'Close') : (isKm ? 'បញ្ចូលមុខម្ហូបថ្មី' : 'Add Food')}</span>
+                  <span>{showAddFoodForm ? (isKm ? 'បិទ' : 'Close') : (isKm ? 'បញ្ចូលមុខម្ហូបថ្មី' : 'Add Food')}</span>
                 </button>
               </div>
 
               {showAddFoodForm && (
                 <form onSubmit={handleCreateFood} className="p-4 rounded-2xl bg-amber-50/70 dark:bg-stone-800 border border-amber-200 dark:border-stone-700 space-y-3 font-khmer">
-                  <h4 className="font-bold text-amber-900 dark:text-amber-200">
-                    {isKm ? 'បញ្ចូលមុខម្ហូបខ្មែរថ្មី' : 'New Dish Information'}
-                  </h4>
                   <div className="grid grid-cols-2 gap-2">
                     <div>
                       <label className="block font-medium mb-1">ឈ្មោះខ្មែរ *</label>
@@ -374,24 +556,22 @@ export const AdminDashboard: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 gap-2">
-                    <div>
-                      <label className="block font-medium mb-1">ប្រភេទ</label>
-                      <select
-                        value={newFoodCategory}
-                        onChange={(e) => setNewFoodCategory(e.target.value as FoodCategorySlug)}
-                        className="w-full px-2.5 py-1.5 rounded-lg border bg-white dark:bg-stone-700"
-                      >
-                        <option value="soup">សម្ល & អាម៉ុក (Soup)</option>
-                        <option value="grilled">ម្ហូបអាំង (Grilled)</option>
-                        <option value="stirfry">ម្ហូបឆា (Stir-fry)</option>
-                        <option value="salad">ញាំ & ភ្លា (Salad)</option>
-                        <option value="noodles">គុយទាវ & នំបញ្ចុក (Noodles)</option>
-                        <option value="rice">ម្ហូបបាយ (Rice Dishes)</option>
-                        <option value="dessert">បង្អែមខ្មែរ (Dessert)</option>
-                        <option value="specialty">មុខម្ហូបពិសេស (Specialty)</option>
-                      </select>
-                    </div>
+                  <div>
+                    <label className="block font-medium mb-1">ប្រភេទ</label>
+                    <select
+                      value={newFoodCategory}
+                      onChange={(e) => setNewFoodCategory(e.target.value as FoodCategorySlug)}
+                      className="w-full px-2.5 py-1.5 rounded-lg border bg-white dark:bg-stone-700"
+                    >
+                      <option value="soup">សម្ល & អាម៉ុក (Soup)</option>
+                      <option value="grilled">ម្ហូបអាំង (Grilled)</option>
+                      <option value="stirfry">ម្ហូបឆា (Stir-fry)</option>
+                      <option value="salad">ញាំ & ភ្លា (Salad)</option>
+                      <option value="noodles">គុយទាវ & នំបញ្ចុក (Noodles)</option>
+                      <option value="rice">ម្ហូបបាយ (Rice Dishes)</option>
+                      <option value="dessert">បង្អែមខ្មែរ (Dessert)</option>
+                      <option value="specialty">មុខម្ហូបពិសេស (Specialty)</option>
+                    </select>
                   </div>
 
                   <div>
@@ -401,16 +581,6 @@ export const AdminDashboard: React.FC = () => {
                       value={newFoodPhotoUrl}
                       onChange={(e) => setNewFoodPhotoUrl(e.target.value)}
                       className="w-full px-2.5 py-1.5 rounded-lg border bg-white dark:bg-stone-700"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block font-medium mb-1">ការពិពណ៌នាអំពីមុខម្ហូប</label>
-                    <textarea
-                      rows={2}
-                      value={newFoodDescKh}
-                      onChange={(e) => setNewFoodDescKh(e.target.value)}
-                      className="w-full px-2.5 py-1.5 rounded-lg border bg-white dark:bg-stone-700 resize-none"
                     />
                   </div>
 
@@ -424,7 +594,7 @@ export const AdminDashboard: React.FC = () => {
               )}
 
               {/* Food List */}
-              <div className="space-y-2 max-h-[55vh] overflow-y-auto no-scrollbar">
+              <div className="space-y-2 max-h-[50vh] overflow-y-auto no-scrollbar">
                 {foods.map((food) => (
                   <div key={food.id} className="p-3 bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 flex items-center justify-between">
                     <div className="flex items-center gap-3 overflow-hidden">
@@ -440,7 +610,6 @@ export const AdminDashboard: React.FC = () => {
                     <button
                       onClick={() => deleteFood(food.id)}
                       className="p-2 text-stone-400 hover:text-rose-600 rounded-lg shrink-0"
-                      title="លុប"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -455,71 +624,44 @@ export const AdminDashboard: React.FC = () => {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="font-bold text-stone-900 dark:text-stone-100 font-khmer">
-                    {isKm ? `គ្រប់គ្រង និងផ្ទៀងផ្ទាត់ហាងអាហារ (សរុប ${restaurants.length} ហាង)` : `Manage & Verify Restaurants (${restaurants.length} shops)`}
+                  <h3 className="font-bold text-stone-900 dark:text-stone-100 font-khmer text-sm">
+                    {isKm ? `គ្រប់គ្រងហាងអាហារ (សរុប ${restaurants.length} ហាង)` : `Manage Restaurants (${restaurants.length} shops)`}
                   </h3>
-                  <p className="text-[11px] text-stone-500 font-khmer">
-                    {isKm ? `${verifiedRestaurantsCount} ហាងផ្ទៀងផ្ទាត់ផ្លូវការ • ${restaurants.length - verifiedRestaurantsCount} ហាងគំរូ/មិនទាន់ផ្ទៀងផ្ទាត់` : `${verifiedRestaurantsCount} verified • ${restaurants.length - verifiedRestaurantsCount} unverified`}
+                  <p className="text-[10px] text-stone-400 font-khmer">
+                    {isKm ? `${verifiedRestaurantsCount} ហាងផ្ទៀងផ្ទាត់ផ្លូវការ • ${restaurants.length - verifiedRestaurantsCount} គំរូសហគមន៍` : `${verifiedRestaurantsCount} verified • ${restaurants.length - verifiedRestaurantsCount} community listings`}
                   </p>
                 </div>
               </div>
 
-              <div className="space-y-2 max-h-[60vh] overflow-y-auto no-scrollbar">
+              <div className="space-y-2 max-h-[50vh] overflow-y-auto no-scrollbar">
                 {restaurants.map((rest) => (
-                  <div key={rest.id} className="p-3 bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 flex items-center justify-between gap-2">
+                  <div key={rest.id} className="p-3 bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 flex items-center justify-between">
                     <div className="flex items-center gap-3 overflow-hidden">
                       <img src={rest.photoUrl} alt="rest" className="w-12 h-12 rounded-xl object-cover shrink-0" />
                       <div className="overflow-hidden">
-                        <div className="flex items-center gap-2 flex-wrap">
+                        <div className="flex items-center gap-1.5">
                           <h4 className="font-bold text-stone-900 dark:text-stone-100 font-khmer truncate">{rest.nameKh}</h4>
-                          
-                          {/* Verification Badge */}
-                          <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${
-                            rest.isVerified ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-amber-100 text-amber-800 border border-amber-300'
-                          }`}>
-                            {rest.isVerified ? (isKm ? '✓ ផ្ទៀងផ្ទាត់រួច' : '✓ Verified') : (isKm ? '⚠️ មិនទាន់ផ្ទៀងផ្ទាត់' : '⚠️ Unverified')}
-                          </span>
-
-                          {/* Approval Status */}
-                          <span className={`px-2 py-0.5 rounded-full text-[9px] font-semibold ${
-                            rest.status === 'approved' ? 'bg-blue-50 text-blue-700' : 'bg-red-50 text-red-700'
-                          }`}>
-                            {rest.status === 'approved' ? 'Approved' : 'Pending'}
-                          </span>
+                          {rest.isVerified && <span className="text-emerald-600 text-[10px] font-bold">✓ Verified</span>}
+                          {rest.isPromoted && <span className="text-amber-600 text-[10px] font-bold">★ Promoted</span>}
                         </div>
                         <p className="text-[10px] text-stone-400 truncate">
-                          {rest.provinceKh} • 📞 {rest.phone} • {rest.priceLevel}
+                          {rest.provinceKh} • 📞 {rest.phone}
                         </p>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      {/* Toggle Verification */}
+                    <div className="flex items-center gap-2 shrink-0">
                       <button
                         onClick={() => toggleVerifyRestaurant(rest.id)}
-                        className={`px-2.5 py-1 rounded-xl text-[10px] font-bold transition-all ${
-                          rest.isVerified 
-                            ? 'bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200' 
-                            : 'bg-emerald-600 text-white hover:bg-emerald-700'
+                        className={`px-2.5 py-1 rounded-lg text-[10px] font-bold font-khmer ${
+                          rest.isVerified ? 'bg-stone-200 text-stone-700' : 'bg-emerald-600 text-white'
                         }`}
-                        title={rest.isVerified ? 'ដកការផ្ទៀងផ្ទាត់' : 'ផ្ទៀងផ្ទាត់ផ្លូវការ'}
                       >
-                        {rest.isVerified ? (isKm ? 'ដកផ្ទៀងផ្ទាត់' : 'Unverify') : (isKm ? 'ផ្ទៀងផ្ទាត់' : 'Verify')}
+                        {rest.isVerified ? 'Unverify' : 'Verify'}
                       </button>
-
-                      {rest.status !== 'approved' && (
-                        <button
-                          onClick={() => approveRestaurant(rest.id)}
-                          className="px-2.5 py-1 rounded-xl bg-blue-600 text-white font-bold text-[10px]"
-                        >
-                          {isKm ? 'អនុម័ត' : 'Approve'}
-                        </button>
-                      )}
-
                       <button
                         onClick={() => deleteRestaurant(rest.id)}
-                        className="p-1.5 text-stone-400 hover:text-rose-600 rounded-lg"
-                        title="លុប"
+                        className="p-1.5 text-stone-400 hover:text-rose-600"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -534,130 +676,59 @@ export const AdminDashboard: React.FC = () => {
           {activeTab === 'destinations' && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="font-bold text-stone-900 dark:text-stone-100 font-khmer">
-                  {isKm ? `គ្រប់គ្រងតំបន់ទេសចរណ៍ (សរុប ${destinations.length})` : `Manage Tourist Spots (${destinations.length})`}
+                <h3 className="font-bold text-stone-900 dark:text-stone-100 font-khmer text-sm">
+                  {isKm ? `តំបន់ទេសចរណ៍ខ្មែរ (${destinations.length} កន្លែង)` : `Tourist Destinations (${destinations.length})`}
                 </h3>
                 <button
                   onClick={() => setShowAddDestForm(!showAddDestForm)}
-                  className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-500 font-khmer"
+                  className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-amber-600 text-white font-bold hover:bg-amber-500 font-khmer"
                 >
                   <Plus className="w-3.5 h-3.5" />
-                  <span>{showAddDestForm ? (isKm ? 'បិទបែបបទ' : 'Close') : (isKm ? 'បញ្ចូលកន្លែងថ្មី' : 'Add Destination')}</span>
+                  <span>{showAddDestForm ? 'បិទ' : 'បញ្ចូលកន្លែងថ្មី'}</span>
                 </button>
               </div>
 
               {showAddDestForm && (
-                <form onSubmit={handleCreateDestination} className="p-4 rounded-2xl bg-blue-50/70 dark:bg-stone-800 border border-blue-200 dark:border-stone-700 space-y-3 font-khmer">
-                  <h4 className="font-bold text-blue-900 dark:text-blue-200">
-                    {isKm ? 'បញ្ចូលតំបន់ទេសចរណ៍ថ្មី' : 'New Destination'}
-                  </h4>
-
+                <form onSubmit={handleCreateDestination} className="p-4 rounded-2xl bg-amber-50/70 dark:bg-stone-800 border border-amber-200 dark:border-stone-700 space-y-3 font-khmer">
                   <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <label className="block font-medium mb-1">ឈ្មោះខ្មែរ *</label>
-                      <input
-                        type="text"
-                        required
-                        value={newDestNameKh}
-                        onChange={(e) => setNewDestNameKh(e.target.value)}
-                        placeholder="ប្រាសាទបន្ទាយស្រី"
-                        className="w-full px-2.5 py-1.5 rounded-lg border bg-white dark:bg-stone-700"
-                      />
-                    </div>
-                    <div>
-                      <label className="block font-medium mb-1">ឈ្មោះអង់គ្លេស</label>
-                      <input
-                        type="text"
-                        value={newDestNameEn}
-                        onChange={(e) => setNewDestNameEn(e.target.value)}
-                        placeholder="Banteay Srei Temple"
-                        className="w-full px-2.5 py-1.5 rounded-lg border bg-white dark:bg-stone-700"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-2">
-                    <div>
-                      <label className="block font-medium mb-1">ប្រភេទ</label>
-                      <select
-                        value={newDestCategory}
-                        onChange={(e) => setNewDestCategory(e.target.value as DestinationCategorySlug)}
-                        className="w-full px-2.5 py-1.5 rounded-lg border bg-white dark:bg-stone-700"
-                      >
-                        <option value="temple">ប្រាសាទ / Temple</option>
-                        <option value="nature">ធម្មជាតិ & ទឹកធ្លាក់ / Nature</option>
-                        <option value="mountain">ភ្នំ / Mountain</option>
-                        <option value="beach">ឆ្នេរសមុទ្រ / Beach</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block font-medium mb-1">ខេត្ត</label>
-                      <input
-                        type="text"
-                        value={newDestProvince}
-                        onChange={(e) => setNewDestProvince(e.target.value)}
-                        className="w-full px-2.5 py-1.5 rounded-lg border bg-white dark:bg-stone-700"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block font-medium mb-1">តម្លៃសំបុត្រ</label>
-                      <input
-                        type="text"
-                        value={newDestFee}
-                        onChange={(e) => setNewDestFee(e.target.value)}
-                        className="w-full px-2.5 py-1.5 rounded-lg border bg-white dark:bg-stone-700"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block font-medium mb-1">រូបភាព (Photo URL)</label>
                     <input
-                      type="url"
-                      value={newDestPhotoUrl}
-                      onChange={(e) => setNewDestPhotoUrl(e.target.value)}
-                      className="w-full px-2.5 py-1.5 rounded-lg border bg-white dark:bg-stone-700"
+                      type="text"
+                      required
+                      value={newDestNameKh}
+                      onChange={(e) => setNewDestNameKh(e.target.value)}
+                      placeholder="ឈ្មោះកន្លែងទេសចរណ៍ *"
+                      className="px-2.5 py-1.5 rounded-lg border bg-white dark:bg-stone-700"
+                    />
+                    <input
+                      type="text"
+                      value={newDestProvince}
+                      onChange={(e) => setNewDestProvince(e.target.value)}
+                      placeholder="ខេត្ត / ក្រុង"
+                      className="px-2.5 py-1.5 rounded-lg border bg-white dark:bg-stone-700"
                     />
                   </div>
-
-                  <div>
-                    <label className="block font-medium mb-1">ការពិពណ៌នា</label>
-                    <textarea
-                      rows={2}
-                      value={newDestDescKh}
-                      onChange={(e) => setNewDestDescKh(e.target.value)}
-                      className="w-full px-2.5 py-1.5 rounded-lg border bg-white dark:bg-stone-700 resize-none"
-                    />
-                  </div>
-
                   <button
                     type="submit"
-                    className="px-4 py-2 rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-500 font-khmer"
+                    className="px-4 py-2 rounded-xl bg-amber-600 text-white font-bold hover:bg-amber-500 font-khmer"
                   >
-                    {isKm ? 'រក្សាទុកទីតាំងទេសចរណ៍' : 'Save Destination'}
+                    រក្សាទុក
                   </button>
                 </form>
               )}
 
-              <div className="space-y-2">
-                {destinations.map((dest) => (
-                  <div key={dest.id} className="p-3 bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 flex items-center justify-between">
+              <div className="space-y-2 max-h-[50vh] overflow-y-auto no-scrollbar">
+                {destinations.map((d) => (
+                  <div key={d.id} className="p-3 bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <img src={dest.photoUrl} alt="dest" className="w-12 h-12 rounded-xl object-cover shrink-0" />
+                      <img src={d.photoUrl} alt="dest" className="w-12 h-12 rounded-xl object-cover shrink-0" />
                       <div>
-                        <h4 className="font-bold text-stone-900 dark:text-stone-100 font-khmer">{dest.nameKh}</h4>
-                        <p className="text-[10px] text-stone-400">
-                          {dest.provinceKh} • {dest.categoryKh} • {dest.entranceFeeKh}
-                        </p>
+                        <h4 className="font-bold text-stone-900 dark:text-stone-100 font-khmer">{d.nameKh}</h4>
+                        <p className="text-[10px] text-stone-400">{d.provinceKh}</p>
                       </div>
                     </div>
-
                     <button
-                      onClick={() => deleteDestination(dest.id)}
-                      className="p-2 text-stone-400 hover:text-rose-600 rounded-lg"
-                      title="លុប"
+                      onClick={() => deleteDestination(d.id)}
+                      className="p-1.5 text-stone-400 hover:text-rose-600"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -667,30 +738,25 @@ export const AdminDashboard: React.FC = () => {
             </div>
           )}
 
-          {/* COMMUNITY POSTS MODERATION */}
+          {/* COMMUNITY POSTS TAB */}
           {activeTab === 'community' && (
             <div className="space-y-4">
-              <h3 className="font-bold text-stone-900 dark:text-stone-100 font-khmer">
-                {isKm ? 'ត្រួតពិនិត្យការបង្ហោះសហគមន៍' : 'Community Moderation'}
+              <h3 className="font-bold text-stone-900 dark:text-stone-100 font-khmer text-sm">
+                {isKm ? `ការចែករំលែកសហគមន៍ (${posts.length} បទបង្ហាញ)` : `Community Feed (${posts.length} posts)`}
               </h3>
-
-              <div className="space-y-2">
-                {posts.map((post) => (
-                  <div key={post.id} className="p-3 bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 flex items-center justify-between">
+              <div className="space-y-2 max-h-[50vh] overflow-y-auto no-scrollbar">
+                {posts.map((p) => (
+                  <div key={p.id} className="p-3 bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <img src={post.photoUrl} alt="post" className="w-12 h-12 rounded-xl object-cover shrink-0" />
+                      <img src={p.photoUrl} alt="post" className="w-12 h-12 rounded-xl object-cover shrink-0" />
                       <div>
-                        <h4 className="font-bold text-stone-900 dark:text-stone-100 font-khmer">{post.titleKh}</h4>
-                        <p className="text-[10px] text-stone-400">
-                          {post.authorName} • {post.categoryTag} • {post.likesCount} ❤️ • {post.comments.length} 💬
-                        </p>
+                        <h4 className="font-bold text-stone-900 dark:text-stone-100 font-khmer truncate max-w-xs">{p.titleKh}</h4>
+                        <p className="text-[10px] text-stone-400">{p.authorName} • {p.locationName}</p>
                       </div>
                     </div>
-
                     <button
-                      onClick={() => deletePost(post.id)}
-                      className="p-2 text-stone-400 hover:text-rose-600 rounded-lg"
-                      title="លុបការបង្ហោះមិនសមរម្យ"
+                      onClick={() => deletePost(p.id)}
+                      className="p-1.5 text-stone-400 hover:text-rose-600"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -700,50 +766,142 @@ export const AdminDashboard: React.FC = () => {
             </div>
           )}
 
-          {/* USER MANAGEMENT */}
+          {/* USERS TAB */}
           {activeTab === 'users' && (
             <div className="space-y-4">
-              <h3 className="font-bold text-stone-900 dark:text-stone-100 font-khmer">
-                {isKm ? 'គ្រប់គ្រងអ្នកប្រើប្រាស់ និងសិទ្ធិ' : 'User Management & Permissions'}
+              <h3 className="font-bold text-stone-900 dark:text-stone-100 font-khmer text-sm">
+                {isKm ? `អ្នកប្រើប្រាស់ក្នុងប្រព័ន្ធ (${users.length} គណនី)` : `User Accounts (${users.length})`}
               </h3>
-
-              <div className="space-y-2">
+              <div className="space-y-2 max-h-[50vh] overflow-y-auto no-scrollbar">
                 {users.map((u) => (
                   <div key={u.id} className="p-3 bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <img src={u.avatar} alt="user" className="w-10 h-10 rounded-full object-cover shrink-0" />
+                      <img src={u.avatar} alt="avatar" className="w-10 h-10 rounded-full object-cover" />
                       <div>
-                        <div className="flex items-center gap-1.5">
-                          <h4 className="font-bold text-stone-900 dark:text-stone-100 font-khmer">{u.name}</h4>
-                          {u.name.toLowerCase().includes('savuth') && (
-                            <span className="text-[9px] bg-amber-500 text-stone-950 px-1.5 py-0.2 rounded font-bold">Admin</span>
-                          )}
-                        </div>
-                        <p className="text-[10px] text-stone-400">{u.email} • {u.role}</p>
+                        <h4 className="font-bold text-stone-900 dark:text-stone-100 font-khmer">{u.name}</h4>
+                        <p className="text-[10px] text-stone-400">{u.email} • 📞 {u.phone || 'N/A'}</p>
                       </div>
                     </div>
-
-                    <div className="flex items-center gap-1.5">
-                      <select
-                        value={u.role}
-                        onChange={(e) => updateUserRole(u.id, e.target.value as UserRole)}
-                        className="px-2 py-1 rounded-lg border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-[11px] font-semibold"
-                      >
-                        <option value="user">User</option>
-                        <option value="owner">Shop Owner</option>
-                        <option value="admin">Admin</option>
-                      </select>
-                    </div>
+                    <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-stone-100 dark:bg-stone-700 font-mono">
+                      {u.role}
+                    </span>
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {/* SETTINGS & QR CODES TAB */}
+          {/* SECURITY & AUDIT LOGS TAB */}
+          {activeTab === 'security' && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-bold text-stone-900 dark:text-stone-100 font-khmer text-base">
+                    {isKm ? 'សុវត្ថិភាពប្រព័ន្ធ និងកំណត់ហេតុសវនកម្ម (Security & Audit Logs)' : 'Security Controls & Audit Trail'}
+                  </h3>
+                  <p className="text-stone-500 font-khmer text-xs">
+                    {isKm ? 'តាមដានសកម្មភាពសន្តិសុខ និងកម្រិតការពារ PBKDF2-HMAC-SHA256' : 'Real-time security auditing and enterprise cryptographic protection'}
+                  </p>
+                </div>
+                <button
+                  onClick={handleRefreshAudit}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-200 dark:bg-stone-700 text-stone-700 dark:text-stone-200 font-khmer text-xs"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  <span>{isKm ? 'ផ្ទុកកំណត់ហេតុឡើងវិញ' : 'Refresh Logs'}</span>
+                </button>
+              </div>
+
+              {/* Active Security Safeguards */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="p-3.5 bg-emerald-50 dark:bg-emerald-950/40 rounded-2xl border border-emerald-200 dark:border-emerald-800">
+                  <div className="flex items-center gap-2 mb-1">
+                    <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                    <span className="font-bold text-emerald-900 dark:text-emerald-200 font-mono text-xs">PBKDF2-SHA256</span>
+                  </div>
+                  <p className="text-[10px] text-emerald-700 dark:text-emerald-300 font-khmer">
+                    100,000 iterations + 32-byte cryptographic salt. No fast hashes.
+                  </p>
+                </div>
+
+                <div className="p-3.5 bg-blue-50 dark:bg-blue-950/40 rounded-2xl border border-blue-200 dark:border-blue-800">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Lock className="w-4 h-4 text-blue-600" />
+                    <span className="font-bold text-blue-900 dark:text-blue-200 font-mono text-xs">HMAC Sessions</span>
+                  </div>
+                  <p className="text-[10px] text-blue-700 dark:text-blue-300 font-khmer">
+                    Cryptographically signed tokens with 2h expiry and memory key.
+                  </p>
+                </div>
+
+                <div className="p-3.5 bg-purple-50 dark:bg-purple-950/40 rounded-2xl border border-purple-200 dark:border-purple-800">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Clock className="w-4 h-4 text-purple-600" />
+                    <span className="font-bold text-purple-900 dark:text-purple-200 font-mono text-xs">Brute-Force Guard</span>
+                  </div>
+                  <p className="text-[10px] text-purple-700 dark:text-purple-300 font-khmer">
+                    Max 5 attempts, exponential throttling & 15m lockout.
+                  </p>
+                </div>
+              </div>
+
+              {/* Audit Log Table */}
+              <div className="bg-white dark:bg-stone-800 rounded-3xl border border-stone-200 dark:border-stone-700 overflow-hidden shadow-sm">
+                <div className="px-5 py-3 border-b border-stone-200 dark:border-stone-700 font-bold font-khmer text-xs flex justify-between items-center">
+                  <span>{isKm ? 'កំណត់ហេតុសវនកម្មសុវត្ថិភាពថ្មីៗ (គ្មានការកត់ត្រា Password/Token)' : 'Recent Security Audit Events (Sanitized)'}</span>
+                  <span className="text-[10px] text-stone-400 font-mono">{auditLogs.length} events</span>
+                </div>
+                <div className="max-h-[35vh] overflow-y-auto no-scrollbar divide-y divide-stone-100 dark:divide-stone-700 font-mono text-[11px]">
+                  {auditLogs.length === 0 ? (
+                    <div className="p-6 text-center text-stone-400 font-khmer">
+                      {isKm ? 'មិនទាន់មានព្រឹត្តិការណ៍សន្តិសុខត្រូវបានកត់ត្រា' : 'No audit records logged yet.'}
+                    </div>
+                  ) : (
+                    auditLogs.map(log => (
+                      <div key={log.id} className="p-3 flex items-start justify-between gap-3">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className={`px-1.5 py-0.2 rounded font-bold text-[9px] ${
+                              log.status === 'SUCCESS' ? 'bg-emerald-100 text-emerald-800' : log.status === 'BLOCKED' ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800'
+                            }`}>
+                              {log.status}
+                            </span>
+                            <span className="font-bold text-stone-800 dark:text-stone-200">{log.action}</span>
+                            <span className="text-stone-400">[{log.resource}]</span>
+                          </div>
+                          <p className="text-stone-500 dark:text-stone-400 text-[10px] mt-0.5">{log.details}</p>
+                        </div>
+                        <span className="text-[10px] text-stone-400 whitespace-nowrap shrink-0">{log.timestamp.slice(11, 19)}</span>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+
+              {/* Emergency Session Revocation */}
+              <div className="p-4 bg-stone-100 dark:bg-stone-800 rounded-2xl flex items-center justify-between">
+                <div>
+                  <h4 className="font-bold text-stone-900 dark:text-stone-100 font-khmer text-xs">
+                    {isKm ? 'ចាកចេញពីសម័យគ្រប់គ្រងរដ្ឋបាល' : 'Revoke Active Administrator Session'}
+                  </h4>
+                  <p className="text-[10px] text-stone-500 font-khmer">
+                    {isKm ? 'បិទសម័យរដ្ឋបាលបច្ចុប្បន្នភ្លាមៗ ដើម្បីធានាសុវត្ថិភាព' : 'Invalidates current HMAC session token and locks dashboard.'}
+                  </p>
+                </div>
+                <button
+                  onClick={handleRevokeSessions}
+                  className="px-4 py-2 bg-red-700 hover:bg-red-800 text-white font-bold rounded-xl text-xs font-khmer"
+                >
+                  {isKm ? 'ចាកចេញភ្លាមៗ' : 'Revoke & Lock'}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* SETTINGS TAB */}
           {activeTab === 'settings' && (
             <div className="space-y-6">
-              {/* App Download Links & Install QR Configuration */}
+              {/* Installation & Store URLs */}
               <div className="bg-white dark:bg-stone-800 p-5 rounded-3xl border border-stone-200 dark:border-stone-700 shadow-sm space-y-4">
                 <div className="flex items-center gap-2.5 pb-2 border-b border-stone-200 dark:border-stone-700">
                   <QrCode className="w-5 h-5 text-red-600" />
@@ -767,7 +925,7 @@ export const AdminDashboard: React.FC = () => {
                       value={apkUrl}
                       onChange={e => setApkUrl(e.target.value)}
                       required
-                      className="w-full px-3 py-2 rounded-xl border bg-stone-50 dark:bg-stone-700 text-stone-800 dark:text-stone-100"
+                      className="w-full px-3 py-2 rounded-xl border bg-stone-50 dark:bg-stone-700 text-stone-800 dark:text-stone-100 font-mono text-xs"
                     />
                   </div>
 
@@ -780,7 +938,7 @@ export const AdminDashboard: React.FC = () => {
                         type="url"
                         value={playStoreUrl}
                         onChange={e => setPlayStoreUrl(e.target.value)}
-                        className="w-full px-3 py-2 rounded-xl border bg-stone-50 dark:bg-stone-700 text-stone-800 dark:text-stone-100"
+                        className="w-full px-3 py-2 rounded-xl border bg-stone-50 dark:bg-stone-700 text-stone-800 dark:text-stone-100 font-mono text-xs"
                       />
                     </div>
                     <div>
@@ -791,19 +949,17 @@ export const AdminDashboard: React.FC = () => {
                         type="url"
                         value={appStoreUrl}
                         onChange={e => setAppStoreUrl(e.target.value)}
-                        className="w-full px-3 py-2 rounded-xl border bg-stone-50 dark:bg-stone-700 text-stone-800 dark:text-stone-100"
+                        className="w-full px-3 py-2 rounded-xl border bg-stone-50 dark:bg-stone-700 text-stone-800 dark:text-stone-100 font-mono text-xs"
                       />
                     </div>
                   </div>
 
-                  <div className="pt-2">
-                    <button
-                      type="submit"
-                      className="px-5 py-2.5 bg-gradient-to-r from-red-700 to-amber-600 hover:from-red-800 hover:to-amber-700 text-white font-bold rounded-xl shadow-md transition-all font-khmer text-xs"
-                    >
-                      {isKm ? 'រក្សាទុកតំណភ្ជាប់ដំឡើង' : 'Save Download Configuration'}
-                    </button>
-                  </div>
+                  <button
+                    type="submit"
+                    className="px-5 py-2.5 bg-gradient-to-r from-red-700 to-amber-600 hover:from-red-800 hover:to-amber-700 text-white font-bold rounded-xl shadow-md transition-all font-khmer text-xs"
+                  >
+                    {isKm ? 'រក្សាទុកតំណភ្ជាប់ដំឡើង' : 'Save Download Configuration'}
+                  </button>
                 </form>
               </div>
 
@@ -822,9 +978,7 @@ export const AdminDashboard: React.FC = () => {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  {/* QR Preview Frame */}
                   <div className="flex flex-col items-center justify-center p-3 bg-stone-50 dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-700">
-                    <span className="text-[10px] text-stone-400 font-khmer mb-2">រូបភាព QR បច្ចុប្បន្ន</span>
                     <img 
                       src={supportQrUrl} 
                       alt="Support KHQR Preview" 
@@ -835,7 +989,6 @@ export const AdminDashboard: React.FC = () => {
                     />
                   </div>
 
-                  {/* Settings fields */}
                   <div className="sm:col-span-2 space-y-3 font-khmer">
                     <div>
                       <label className="block font-semibold mb-1 text-stone-700 dark:text-stone-300">
@@ -845,7 +998,7 @@ export const AdminDashboard: React.FC = () => {
                         type="text"
                         value={supportQrUrl}
                         onChange={e => setSupportQrUrl(e.target.value)}
-                        className="w-full px-3 py-2 rounded-xl border bg-stone-50 dark:bg-stone-700 text-stone-800 dark:text-stone-100"
+                        className="w-full px-3 py-2 rounded-xl border bg-stone-50 dark:bg-stone-700 text-stone-800 dark:text-stone-100 font-mono text-xs"
                       />
                     </div>
 
@@ -874,18 +1027,6 @@ export const AdminDashboard: React.FC = () => {
                       </div>
                     </div>
 
-                    <div>
-                      <label className="block font-semibold mb-1 text-stone-700 dark:text-stone-300">
-                        {isKm ? 'សារអំពាវនាវឧបត្ថម្ភ (Khmer)' : 'Support Message (Khmer)'}
-                      </label>
-                      <textarea
-                        rows={2}
-                        value={supportMessageKh}
-                        onChange={e => setSupportMessageKh(e.target.value)}
-                        className="w-full px-3 py-2 rounded-xl border bg-stone-50 dark:bg-stone-700 text-stone-800 dark:text-stone-100 resize-none"
-                      />
-                    </div>
-
                     <button
                       onClick={handleSaveSettings}
                       className="px-5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl shadow-md transition-all font-khmer text-xs"
@@ -896,16 +1037,16 @@ export const AdminDashboard: React.FC = () => {
                 </div>
               </div>
 
-              {/* Administrator Security & Password Management */}
+              {/* Password Management */}
               <div className="bg-white dark:bg-stone-800 p-5 rounded-3xl border border-stone-200 dark:border-stone-700 shadow-sm space-y-4 font-khmer">
                 <div className="flex items-center gap-2.5 pb-2 border-b border-stone-200 dark:border-stone-700">
                   <KeyRound className="w-5 h-5 text-amber-600" />
                   <div>
                     <h4 className="font-bold text-stone-900 dark:text-stone-100 text-sm">
-                      {isKm ? 'សុវត្ថិភាពគណនីរដ្ឋបាល Chea Savuth' : 'Chea Savuth Account Security'}
+                      {isKm ? 'ផ្លាស់ប្តូរពាក្យសម្ងាត់រដ្ឋបាល' : 'Update Admin Credentials'}
                     </h4>
                     <p className="text-[11px] text-stone-500">
-                      {isKm ? 'ផ្លាស់ប្តូរពាក្យសម្ងាត់រដ្ឋបាលដោយប្រើប្រាស់ Web Crypto SHA-256 + Salt' : 'Update secure hashed admin credentials'}
+                      {isKm ? 'ផ្លាស់ប្តូរពាក្យសម្ងាត់ដោយប្រើប្រាស់ PBKDF2-HMAC-SHA256 (100,000 Iterations)' : 'Hash & update admin credentials securely'}
                     </p>
                   </div>
                 </div>
@@ -913,14 +1054,14 @@ export const AdminDashboard: React.FC = () => {
                 <form onSubmit={handleChangeAdminPassword} className="space-y-3 max-w-md">
                   <div>
                     <label className="block font-semibold mb-1 text-stone-700 dark:text-stone-300">
-                      {isKm ? 'ពាក្យសម្ងាត់ថ្មី (New Password)' : 'New Admin Password'}
+                      {isKm ? 'ពាក្យសម្ងាត់ថ្មី (New Password - យ៉ាងហោច ៨ តួ)' : 'New Admin Password (min 8 chars)'}
                     </label>
                     <input
                       type="password"
                       value={newAdminPass}
                       onChange={e => setNewAdminPass(e.target.value)}
                       placeholder="••••••••••••"
-                      className="w-full px-3 py-2 rounded-xl border bg-stone-50 dark:bg-stone-700 text-stone-800 dark:text-stone-100"
+                      className="w-full px-3 py-2 rounded-xl border bg-stone-50 dark:bg-stone-700 text-stone-800 dark:text-stone-100 font-mono"
                     />
                   </div>
 
@@ -929,7 +1070,7 @@ export const AdminDashboard: React.FC = () => {
                     className="px-5 py-2.5 bg-stone-900 hover:bg-black text-white font-bold rounded-xl shadow-md transition-all text-xs flex items-center gap-2"
                   >
                     <Lock className="w-3.5 h-3.5 text-amber-400" />
-                    <span>{isKm ? 'ផ្លាស់ប្តូរ និង Hash ពាក្យសម្ងាត់' : 'Hash & Update Password'}</span>
+                    <span>{isKm ? 'Hash PBKDF2 និងផ្លាស់ប្តូរ' : 'Hash PBKDF2 & Update'}</span>
                   </button>
                 </form>
               </div>

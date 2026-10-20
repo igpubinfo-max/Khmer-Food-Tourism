@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { X, Download, Share2, Smartphone, CheckCircle, ExternalLink, QrCode } from 'lucide-react';
+import { 
+  X, Download, Share2, Smartphone, CheckCircle, ExternalLink, 
+  QrCode, Apple, Compass, PlusSquare, ArrowRight, ShieldCheck 
+} from 'lucide-react';
 import QRCode from 'qrcode';
 import { useApp } from '../context/AppContext';
 
@@ -12,192 +15,293 @@ export const InstallModal: React.FC = () => {
     showToast 
   } = useApp();
 
-  const [qrDataUrl, setQrDataUrl] = useState<string>('');
+  const [platformTab, setPlatformTab] = useState<'android' | 'ios'>('android');
+  const [androidQrUrl, setAndroidQrUrl] = useState<string>('');
+  const [iosQrUrl, setIosQrUrl] = useState<string>('');
   const [copied, setCopied] = useState<boolean>(false);
 
-  // Fallback download page or current URL if no APK link set
-  const downloadTarget = appSettings.apkDownloadUrl || window.location.href;
+  const isKm = language === 'km';
+  const apkDownloadTarget = appSettings.apkDownloadUrl || 'https://github.com/igpubinfo-max/Khmer-Food-Tourism/releases/download/v1.0.0/app-debug.apk';
+  const iosWebTarget = window.location.origin || 'https://khmerfoodtourism.com';
 
   useEffect(() => {
-    if (isInstallModalOpen && downloadTarget) {
-      QRCode.toDataURL(downloadTarget, {
+    if (isInstallModalOpen) {
+      // Android QR generates direct APK link
+      QRCode.toDataURL(apkDownloadTarget, {
         width: 320,
         margin: 2,
-        color: {
-          dark: '#991b1b', // Deep Cambodian crimson red
-          light: '#ffffff',
-        },
-      })
-        .then(url => setQrDataUrl(url))
-        .catch(err => console.error('Failed to generate install QR', err));
+        color: { dark: '#991b1b', light: '#ffffff' },
+      }).then(url => setAndroidQrUrl(url)).catch(console.error);
+
+      // iOS QR generates web / PWA installation URL
+      QRCode.toDataURL(iosWebTarget, {
+        width: 320,
+        margin: 2,
+        color: { dark: '#1e293b', light: '#ffffff' },
+      }).then(url => setIosQrUrl(url)).catch(console.error);
     }
-  }, [isInstallModalOpen, downloadTarget]);
+  }, [isInstallModalOpen, apkDownloadTarget, iosWebTarget]);
 
   if (!isInstallModalOpen) return null;
 
-  const isKm = language === 'km';
-
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(downloadTarget);
+  const handleCopyLink = (target: string) => {
+    navigator.clipboard.writeText(target);
     setCopied(true);
-    showToast(isKm ? 'បានចម្លងតំណភ្ជាប់ដំឡើងកម្មវិធីជោគជ័យ!' : 'Install link copied to clipboard!', 'success');
+    showToast(isKm ? 'បានចម្លងតំណភ្ជាប់ជោគជ័យ!' : 'Link copied to clipboard!', 'success');
     setTimeout(() => setCopied(false), 2500);
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-sm animate-fade-in">
       <div 
-        className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden border border-amber-200/50 max-h-[92vh] flex flex-col"
+        className="relative w-full max-w-lg bg-white dark:bg-stone-900 rounded-3xl shadow-2xl overflow-hidden border border-amber-300/40 max-h-[92vh] flex flex-col"
         onClick={e => e.stopPropagation()}
       >
-        {/* Header with Cambodian Temple Pattern */}
-        <div className="relative bg-gradient-to-r from-red-800 via-amber-700 to-red-900 text-white p-6 pb-5">
+        {/* Header */}
+        <div className="relative bg-gradient-to-r from-red-900 via-amber-800 to-stone-900 text-white p-5 pb-4">
           <button
             onClick={() => setIsInstallModalOpen(false)}
-            className="absolute top-4 right-4 p-2 rounded-full bg-black/20 hover:bg-black/40 text-white transition-colors"
+            className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
           </button>
           
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-white/10 rounded-2xl backdrop-blur-md border border-white/20">
-              <QrCode className="w-7 h-7 text-amber-300" />
+            <div className="p-2.5 bg-white/10 rounded-2xl backdrop-blur-md border border-white/20">
+              <Smartphone className="w-6 h-6 text-amber-300" />
             </div>
             <div>
-              <h2 className="text-xl font-bold font-khmer">
-                {isKm ? 'ដំឡើងកម្មវិធីទូរស័ព្ទដៃ' : 'Install Mobile App'}
+              <h2 className="text-base sm:text-lg font-bold font-khmer">
+                {isKm ? 'ទាញយក និងដំឡើងកម្មវិធីទូរស័ព្ទដៃ' : 'Download & Install Mobile App'}
               </h2>
-              <p className="text-xs text-amber-200 font-khmer">
-                {isKm ? 'អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism)' : 'Download Android APK & Install Guide'}
+              <p className="text-[11px] text-amber-200 font-khmer">
+                {isKm ? 'គាំទ្រប្រព័ន្ធ Android និង Apple iOS (iPhone)' : 'Supported on Android & Apple iOS (iPhone)'}
               </p>
             </div>
           </div>
-        </div>
 
-        {/* Content Body */}
-        <div className="p-6 overflow-y-auto space-y-6 flex-1">
-          {/* QR Code Presentation Box */}
-          <div className="bg-gradient-to-b from-amber-50 to-orange-50/40 rounded-2xl p-5 border border-amber-200 text-center flex flex-col items-center">
-            <div className="relative p-3 bg-white rounded-2xl shadow-md border-2 border-amber-300/80 mb-3">
-              {qrDataUrl ? (
-                <img 
-                  src={qrDataUrl} 
-                  alt="QR Code for App Installation" 
-                  className="w-52 h-52 object-contain rounded-lg"
-                />
-              ) : (
-                <div className="w-52 h-52 flex items-center justify-center text-stone-400">
-                  <span className="font-khmer text-sm">{isKm ? 'កំពុងបង្កើត QR Code...' : 'Generating QR Code...'}</span>
-                </div>
-              )}
-              {/* Angkor Center Icon Badge */}
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="bg-white p-1 rounded-full shadow-md border border-amber-400">
-                  <span className="text-lg">🇰🇭</span>
-                </div>
-              </div>
-            </div>
-
-            <p className="text-xs text-stone-600 font-khmer max-w-xs">
-              {isKm 
-                ? 'ស្កេន QR Code នេះដោយប្រើកាមេរ៉ាទូរស័ព្ទ Android ដើម្បីទាញយក APK ដោយផ្ទាល់' 
-                : 'Scan this QR code with your Android camera to download the APK directly'}
-            </p>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="space-y-2.5">
-            <a
-              href={appSettings.apkDownloadUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full flex items-center justify-center gap-2.5 py-3.5 px-4 bg-gradient-to-r from-red-700 to-amber-600 hover:from-red-800 hover:to-amber-700 text-white font-semibold rounded-2xl shadow-lg shadow-red-700/20 active:scale-[0.98] transition-all font-khmer text-sm"
+          {/* Platform Tab Switcher */}
+          <div className="grid grid-cols-2 gap-2 mt-4 p-1 bg-black/25 rounded-2xl backdrop-blur-sm">
+            <button
+              onClick={() => setPlatformTab('android')}
+              className={`py-2 px-3 rounded-xl font-khmer text-xs font-bold transition-all flex items-center justify-center gap-2 ${
+                platformTab === 'android'
+                  ? 'bg-amber-500 text-white shadow-md'
+                  : 'text-amber-100 hover:text-white'
+              }`}
             >
-              <Download className="w-5 h-5 text-amber-200" />
-              <span>{isKm ? 'ទាញយកឯកសារ Android APK ផ្ទាល់' : 'Direct Download Android APK'}</span>
-            </a>
+              <Smartphone className="w-4 h-4" />
+              <span>{isKm ? 'ប្រព័ន្ធ Android (APK)' : 'Android (APK)'}</span>
+            </button>
 
             <button
-              onClick={handleCopyLink}
-              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-stone-100 hover:bg-stone-200 text-stone-700 font-medium rounded-2xl transition-all font-khmer text-xs border border-stone-200"
+              onClick={() => setPlatformTab('ios')}
+              className={`py-2 px-3 rounded-xl font-khmer text-xs font-bold transition-all flex items-center justify-center gap-2 ${
+                platformTab === 'ios'
+                  ? 'bg-slate-800 text-white shadow-md'
+                  : 'text-amber-100 hover:text-white'
+              }`}
             >
-              {copied ? <CheckCircle className="w-4 h-4 text-emerald-600" /> : <Share2 className="w-4 h-4 text-stone-500" />}
-              <span>{copied ? (isKm ? 'បានចម្លងរួចរាល់!' : 'Copied!') : (isKm ? 'ចម្លងតំណភ្ជាប់ទាញយក' : 'Copy Download Link')}</span>
+              <Apple className="w-4 h-4" />
+              <span>{isKm ? 'ប្រព័ន្ធ iPhone (iOS)' : 'Apple iOS (iPhone)'}</span>
             </button>
-          </div>
-
-          {/* App Store Availability Badges */}
-          <div className="border-t border-stone-200 pt-4">
-            <h4 className="text-xs font-bold text-stone-600 uppercase tracking-wider mb-2.5 font-khmer">
-              {isKm ? 'ការទាញយកពីផ្លូវការ' : 'Official Stores'}
-            </h4>
-            <div className="grid grid-cols-2 gap-2.5">
-              <a
-                href={appSettings.playStoreUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2.5 p-2.5 bg-stone-50 hover:bg-stone-100 rounded-xl border border-stone-200 text-stone-800 transition-colors"
-              >
-                <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center text-white shrink-0">
-                  <Smartphone className="w-4 h-4" />
-                </div>
-                <div className="text-left overflow-hidden">
-                  <div className="text-[10px] text-stone-500">Google Play</div>
-                  <div className="text-xs font-bold truncate">Android Store</div>
-                </div>
-              </a>
-
-              <a
-                href={appSettings.appStoreUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2.5 p-2.5 bg-stone-50 hover:bg-stone-100 rounded-xl border border-stone-200 text-stone-800 transition-colors"
-              >
-                <div className="w-7 h-7 rounded-lg bg-slate-900 flex items-center justify-center text-white shrink-0">
-                  <Smartphone className="w-4 h-4" />
-                </div>
-                <div className="text-left overflow-hidden">
-                  <div className="text-[10px] text-stone-500">Apple Store</div>
-                  <div className="text-xs font-bold truncate">iOS App (Coming)</div>
-                </div>
-              </a>
-            </div>
-          </div>
-
-          {/* 4-Step Installation Guide */}
-          <div className="bg-stone-50 rounded-2xl p-4 border border-stone-200/80 space-y-2.5">
-            <h4 className="text-xs font-bold text-red-900 font-khmer flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-red-600"></span>
-              {isKm ? 'ការណែនាំដំឡើងលើទូរស័ព្ទ Android' : 'Installation Guide for Android'}
-            </h4>
-            <ul className="text-xs text-stone-600 space-y-2 font-khmer pl-1">
-              <li className="flex items-start gap-2">
-                <span className="w-4 h-4 rounded-full bg-amber-500 text-white flex items-center justify-center text-[10px] shrink-0 mt-0.5">1</span>
-                <span>{isKm ? 'ចុចប៊ូតុង "ទាញយកឯកសារ Android APK ផ្ទាល់" ឬស្កេន QR Code' : 'Click "Direct Download Android APK" or scan the QR code.'}</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="w-4 h-4 rounded-full bg-amber-500 text-white flex items-center justify-center text-[10px] shrink-0 mt-0.5">2</span>
-                <span>{isKm ? 'បើកឯកសារ .apk ដែលបានទាញយករួច' : 'Open the downloaded .apk file.'}</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="w-4 h-4 rounded-full bg-amber-500 text-white flex items-center justify-center text-[10px] shrink-0 mt-0.5">3</span>
-                <span>{isKm ? 'ប្រសិនបើទូរស័ព្ទសួរ សូមចុចអនុញ្ញាត "Install from this source" ឬ "ដំឡើងពីប្រភពនេះ"' : 'If prompted, allow "Install from this source".'}</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="w-4 h-4 rounded-full bg-amber-500 text-white flex items-center justify-center text-[10px] shrink-0 mt-0.5">4</span>
-                <span>{isKm ? 'ចុច "ដំឡើង (Install)" ហើយបើកដំណើរការកម្មវិធីជាការស្រេច!' : 'Tap "Install" and enjoy Khmer Food & Tourism!'}</span>
-              </li>
-            </ul>
           </div>
         </div>
 
-        {/* Modal Footer */}
-        <div className="p-4 bg-stone-100 border-t border-stone-200 flex justify-between items-center text-xs text-stone-500 font-khmer">
-          <span>{isKm ? 'កំណែចុងក្រោយ (v1.0)' : 'Latest Version (v1.0)'}</span>
+        {/* Body Content */}
+        <div className="p-5 overflow-y-auto space-y-5 flex-1 text-xs">
+          {/* ANDROID TAB */}
+          {platformTab === 'android' && (
+            <div className="space-y-4">
+              {/* QR Code Presentation Box */}
+              <div className="bg-gradient-to-b from-amber-50 to-orange-50/50 dark:from-stone-800 dark:to-stone-800/60 rounded-2xl p-4 border border-amber-200 dark:border-stone-700 text-center flex flex-col items-center">
+                <div className="relative p-2.5 bg-white rounded-2xl shadow-md border-2 border-amber-400 mb-2">
+                  {androidQrUrl ? (
+                    <img 
+                      src={androidQrUrl} 
+                      alt="Android APK Install QR" 
+                      className="w-44 h-44 object-contain rounded-lg"
+                    />
+                  ) : (
+                    <div className="w-44 h-44 flex items-center justify-center text-stone-400">
+                      <span className="font-khmer text-xs">{isKm ? 'កំពុងបង្កើត QR Code...' : 'Generating QR...'}</span>
+                    </div>
+                  )}
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div className="bg-white p-1 rounded-full shadow-md border border-amber-400">
+                      <span className="text-base">🤖</span>
+                    </div>
+                  </div>
+                </div>
+
+                <p className="text-[11px] text-stone-600 dark:text-stone-300 font-khmer max-w-xs">
+                  {isKm 
+                    ? 'ស្កេន QR Code នេះដោយកាមេរ៉ាទូរស័ព្ទ Android ដើម្បីទាញយក APK ដំឡើងភ្លាមៗ' 
+                    : 'Scan this QR code with your Android phone camera to download APK directly.'}
+                </p>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="space-y-2">
+                <a
+                  href={apkDownloadTarget}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-gradient-to-r from-red-700 via-amber-700 to-red-800 hover:from-red-800 hover:to-amber-800 text-white font-bold rounded-2xl shadow-lg shadow-red-700/20 active:scale-[0.98] transition-all font-khmer text-xs"
+                >
+                  <Download className="w-4 h-4 text-amber-200" />
+                  <span>{isKm ? 'ទាញយកឯកសារ Android APK ផ្ទាល់ (Direct Download)' : 'Direct Download Android APK'}</span>
+                </a>
+
+                <button
+                  onClick={() => handleCopyLink(apkDownloadTarget)}
+                  className="w-full flex items-center justify-center gap-1.5 py-2.5 px-4 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 font-medium rounded-2xl transition font-khmer text-xs border border-stone-200 dark:border-stone-700"
+                >
+                  {copied ? <CheckCircle className="w-4 h-4 text-emerald-600" /> : <Share2 className="w-4 h-4 text-stone-500" />}
+                  <span>{copied ? (isKm ? 'បានចម្លងរួចរាល់!' : 'Copied!') : (isKm ? 'ចម្លងតំណភ្ជាប់ APK' : 'Copy APK Download Link')}</span>
+                </button>
+              </div>
+
+              {/* Official Store Status */}
+              <div className="p-3 bg-stone-50 dark:bg-stone-800 rounded-xl border border-stone-200 dark:border-stone-700 flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center text-white shrink-0 font-bold">
+                  ▶
+                </div>
+                <div className="flex-1">
+                  <div className="font-bold text-stone-800 dark:text-stone-200 font-khmer text-xs">
+                    Google Play Store
+                  </div>
+                  <div className="text-[10px] text-stone-500 font-khmer">
+                    {isKm ? 'ស្ថានភាព៖ កំពុងត្រួតពិនិត្យផ្លូវការ (In Review) - សូមប្រើ Direct APK' : 'Status: Official Release in Review - Please use Direct APK'}
+                  </div>
+                </div>
+              </div>
+
+              {/* 4-Step Android Installation Guide */}
+              <div className="bg-stone-50 dark:bg-stone-800/80 rounded-2xl p-4 border border-stone-200 dark:border-stone-700 space-y-2">
+                <h4 className="text-xs font-bold text-red-900 dark:text-red-300 font-khmer flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-red-600"></span>
+                  {isKm ? 'ការណែនាំដំឡើងលើទូរស័ព្ទ Android (៤ ជំហានងាយៗ)' : '4 Easy Installation Steps for Android'}
+                </h4>
+                <ul className="text-[11px] text-stone-600 dark:text-stone-300 space-y-1.5 font-khmer pl-1">
+                  <li className="flex items-start gap-2">
+                    <span className="w-4 h-4 rounded-full bg-amber-500 text-white flex items-center justify-center text-[10px] shrink-0 mt-0.5">1</span>
+                    <span>{isKm ? 'ចុចប៊ូតុង "ទាញយកឯកសារ Android APK ផ្ទាល់" ឬស្កេន QR Code' : 'Click "Direct Download Android APK" or scan QR Code.'}</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="w-4 h-4 rounded-full bg-amber-500 text-white flex items-center justify-center text-[10px] shrink-0 mt-0.5">2</span>
+                    <span>{isKm ? 'បើកឯកសារ app-debug.apk ដែលបានទាញយករួច' : 'Open the downloaded .apk file.'}</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="w-4 h-4 rounded-full bg-amber-500 text-white flex items-center justify-center text-[10px] shrink-0 mt-0.5">3</span>
+                    <span>{isKm ? 'ប្រសិនបើទូរស័ព្ទសួរ សូមចុចអនុញ្ញាត "Install from this source" ឬ "ដំឡើងពីប្រភពនេះ"' : 'If prompted, enable "Install unknown apps / from this source".'}</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="w-4 h-4 rounded-full bg-amber-500 text-white flex items-center justify-center text-[10px] shrink-0 mt-0.5">4</span>
+                    <span>{isKm ? 'ចុច "ដំឡើង (Install)" ហើយបើកដំណើរការកម្មវិធីជាការស្រេច!' : 'Tap "Install" and enjoy Khmer Food & Tourism!'}</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          )}
+
+          {/* IPHONE / IOS TAB */}
+          {platformTab === 'ios' && (
+            <div className="space-y-4">
+              {/* iOS Instant Web / PWA QR */}
+              <div className="bg-gradient-to-b from-slate-50 to-stone-100 dark:from-stone-800 dark:to-stone-900 rounded-2xl p-4 border border-stone-200 dark:border-stone-700 text-center flex flex-col items-center">
+                <div className="relative p-2.5 bg-white rounded-2xl shadow-md border-2 border-slate-700 mb-2">
+                  {iosQrUrl ? (
+                    <img 
+                      src={iosQrUrl} 
+                      alt="iPhone Web App QR" 
+                      className="w-44 h-44 object-contain rounded-lg"
+                    />
+                  ) : (
+                    <div className="w-44 h-44 flex items-center justify-center text-stone-400">
+                      <span className="font-khmer text-xs">{isKm ? 'កំពុងបង្កើត QR Code...' : 'Generating QR...'}</span>
+                    </div>
+                  )}
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div className="bg-white p-1 rounded-full shadow-md border border-slate-700">
+                      <Apple className="w-4 h-4 text-slate-900" />
+                    </div>
+                  </div>
+                </div>
+
+                <p className="text-[11px] text-stone-600 dark:text-stone-300 font-khmer max-w-xs">
+                  {isKm 
+                    ? 'ស្កេន QR Code នេះដោយកាមេរ៉ា iPhone ដើម្បីបើកកម្មវិធីលើ Safari និងបន្ថែមទៅអេក្រង់ដើម (Home Screen)' 
+                    : 'Scan with your iPhone camera to open in Safari and add to Home Screen.'}
+                </p>
+              </div>
+
+              {/* Official Apple Store & TestFlight Status */}
+              <div className="grid grid-cols-2 gap-2">
+                <a
+                  href={appSettings.iosTestFlightUrl || 'https://testflight.apple.com'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-3 bg-stone-50 dark:bg-stone-800 hover:bg-stone-100 rounded-xl border border-stone-200 dark:border-stone-700 text-stone-800 dark:text-stone-200 flex flex-col items-center text-center transition"
+                >
+                  <Apple className="w-5 h-5 text-slate-800 dark:text-slate-200 mb-1" />
+                  <span className="font-bold font-khmer text-xs">Apple TestFlight</span>
+                  <span className="text-[9px] text-stone-500 font-khmer">{isKm ? 'កំណែសាកល្បង Beta' : 'Beta Testing'}</span>
+                </a>
+
+                <div className="p-3 bg-stone-50 dark:bg-stone-800 rounded-xl border border-stone-200 dark:border-stone-700 text-stone-800 dark:text-stone-200 flex flex-col items-center text-center opacity-85">
+                  <div className="w-5 h-5 rounded-full bg-slate-900 text-white flex items-center justify-center text-[10px] font-bold mb-1">
+                    A
+                  </div>
+                  <span className="font-bold font-khmer text-xs">App Store</span>
+                  <span className="text-[9px] text-stone-500 font-khmer">{isKm ? 'កំពុងត្រួតពិនិត្យ (Coming Soon)' : 'In Review (Coming)'}</span>
+                </div>
+              </div>
+
+              {/* Safari Add to Home Screen (PWA Guide for iPhone) */}
+              <div className="bg-gradient-to-r from-amber-50 to-orange-50/60 dark:from-stone-800 dark:to-stone-800 rounded-2xl p-4 border border-amber-200 dark:border-stone-700 space-y-2">
+                <h4 className="text-xs font-bold text-amber-950 dark:text-amber-200 font-khmer flex items-center gap-1.5">
+                  <Compass className="w-4 h-4 text-blue-600" />
+                  {isKm ? 'វិធីដំឡើងលើ iPhone តាម Safari (ដំណើរការដូច App ពេញលេញ)' : 'Install on iPhone via Safari (Full App Mode)'}
+                </h4>
+                <ul className="text-[11px] text-stone-700 dark:text-stone-300 space-y-2 font-khmer pl-1">
+                  <li className="flex items-start gap-2">
+                    <span className="w-4 h-4 rounded-full bg-slate-800 text-white flex items-center justify-center text-[10px] shrink-0 mt-0.5">1</span>
+                    <span>{isKm ? 'បើកតំណភ្ជាប់កម្មវិធីនៅក្នុង Safari នៅលើទូរស័ព្ទ iPhone' : 'Open the app link in Safari on your iPhone.'}</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="w-4 h-4 rounded-full bg-slate-800 text-white flex items-center justify-center text-[10px] shrink-0 mt-0.5">2</span>
+                    <span>
+                      {isKm ? 'ចុចលើប៊ូតុង "Share" ' : 'Tap the "Share" button '}
+                      <Share2 className="w-3.5 h-3.5 inline text-blue-600 mx-0.5" />
+                      {isKm ? '(សញ្ញាការ៉េព្រួញឡើងលើ) នៅរបារខាងក្រោម' : 'at the bottom toolbar.'}
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="w-4 h-4 rounded-full bg-slate-800 text-white flex items-center justify-center text-[10px] shrink-0 mt-0.5">3</span>
+                    <span>
+                      {isKm ? 'អូសចុះក្រោម រួចជ្រើសរើស ' : 'Scroll down and tap '}
+                      <strong className="text-stone-900 dark:text-white">"Add to Home Screen"</strong>
+                      {isKm ? ' (បន្ថែមទៅអេក្រង់ដើម)' : '.'}
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="w-4 h-4 rounded-full bg-slate-800 text-white flex items-center justify-center text-[10px] shrink-0 mt-0.5">4</span>
+                    <span>{isKm ? 'ចុច "Add (បន្ថែម)" — រូបសញ្ញាកម្មវិធីនឹងបង្ហាញលើអេក្រង់ដើមទូរស័ព្ទ iPhone របស់អ្នកភ្លាមៗ!' : 'Tap "Add" — The app icon appears on your home screen and opens full-screen!'}</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="p-4 bg-stone-100 dark:bg-stone-800 border-t border-stone-200 dark:border-stone-700 flex justify-between items-center text-xs text-stone-500 font-khmer">
+          <span>{isKm ? 'កំណែចុងក្រោយ (v1.0.0)' : 'Release v1.0.0'}</span>
           <button
             onClick={() => setIsInstallModalOpen(false)}
-            className="px-4 py-1.5 bg-stone-200 hover:bg-stone-300 text-stone-700 rounded-xl transition-colors font-medium"
+            className="px-4 py-1.5 bg-stone-200 dark:bg-stone-700 hover:bg-stone-300 dark:hover:bg-stone-600 text-stone-700 dark:text-stone-200 rounded-xl transition font-medium"
           >
             {isKm ? 'បិទ' : 'Close'}
           </button>

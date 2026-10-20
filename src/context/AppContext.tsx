@@ -1,13 +1,20 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { 
   User, FoodItem, Restaurant, TouristDestination, CommunityPost, 
-  Language, UserRole, AppSettings 
+  Language, UserRole, AppSettings, RegistrationTransaction 
 } from '../types';
 import { 
   initialUsers, initialFoods, initialRestaurants, 
-  initialDestinations, initialCommunityPosts, initialAppSettings 
+  initialDestinations, initialCommunityPosts, initialAppSettings, initialTransactions 
 } from '../data/seedData';
 import { hashPassword, verifyPassword } from '../utils/crypto';
+import { 
+  hashPasswordPBKDF2, verifyPasswordPBKDF2, 
+  checkAdminLoginAllowed, recordAdminLoginFailed, resetAdminLoginAttempts,
+  createAdminSession, verifyAdminSession, revokeAdminSession,
+  recordSecurityAudit
+} from '../utils/security';
+import { App as CapApp } from '@capacitor/app';
 
 export type ActiveTab = 'home' | 'food' | 'restaurants' | 'tourism' | 'community' | 'profile';
 
@@ -38,6 +45,12 @@ interface AppContextType {
   restaurants: Restaurant[];
   destinations: TouristDestination[];
   posts: CommunityPost[];
+
+  // Transactions & $4.99 Registration Payments
+  transactions: RegistrationTransaction[];
+  addRegistrationTransaction: (txn: Omit<RegistrationTransaction, 'id' | 'createdAt' | 'status'>) => RegistrationTransaction;
+  verifyTransaction: (txnId: string) => void;
+  rejectTransaction: (txnId: string, reason?: string) => void;
   
   // Bookmarks
   bookmarks: string[];
@@ -89,6 +102,9 @@ interface AppContextType {
   setIsInstallModalOpen: (open: boolean) => void;
   isSupportModalOpen: boolean;
   setIsSupportModalOpen: (open: boolean) => void;
+  isExitModalOpen: boolean;
+  setIsExitModalOpen: (open: boolean) => void;
+  exitAppNow: () => void;
   
   // Search & Filter
   searchQuery: string;
@@ -110,25 +126,42 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [language, setLanguage] = useState<Language>('km');
   const [activeTab, setActiveTab] = useState<ActiveTab>('home');
   
-  // Local storage loaded states with fallbacks (v3 storage keys for 100+ dataset)
+  // Local storage loaded states with fallbacks (v4 storage keys for 200+ dataset)
   const [users, setUsers] = useState<User[]>(() => {
-    const saved = localStorage.getItem('kft_users_v3');
+    const saved = localStorage.getItem('kft_users_v4');
     return saved ? JSON.parse(saved) : initialUsers;
   });
 
   const [currentUser, setCurrentUser] = useState<User | null>(() => {
-    const saved = localStorage.getItem('kft_current_user_v3');
+    const saved = localStorage.getItem('kft_current_user_v4');
     return saved ? JSON.parse(saved) : initialUsers[2]; // Default to regular user
   });
 
   const [foods, setFoods] = useState<FoodItem[]>(() => {
-    const saved = localStorage.getItem('kft_foods_v3');
-    return saved ? JSON.parse(saved) : initialFoods;
+    const saved = localStorage.getItem('kft_foods_v4');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length >= 200) return parsed;
+      } catch {}
+    }
+    return initialFoods;
   });
 
   const [restaurants, setRestaurants] = useState<Restaurant[]>(() => {
-    const saved = localStorage.getItem('kft_restaurants_v3');
-    return saved ? JSON.parse(saved) : initialRestaurants;
+    const saved = localStorage.getItem('kft_restaurants_v4');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length >= 200) return parsed;
+      } catch {}
+    }
+    return initialRestaurants;
+  });
+
+  const [transactions, setTransactions] = useState<RegistrationTransaction[]>(() => {
+    const saved = localStorage.getItem('kft_transactions_v4');
+    return saved ? JSON.parse(saved) : initialTransactions;
   });
 
   const [destinations, setDestinations] = useState<TouristDestination[]>(() => {
@@ -163,6 +196,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isAdminLoginModalOpen, setIsAdminLoginModalOpen] = useState(false);
   const [isInstallModalOpen, setIsInstallModalOpen] = useState(false);
   const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
+  const [isExitModalOpen, setIsExitModalOpen] = useState(false);
 
   // Global search & filters
   const [searchQuery, setSearchQuery] = useState('');
@@ -178,38 +212,185 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }, 3200);
   };
 
-  // Sync to localStorage
+  // Sync to localStorage (v4)
   useEffect(() => {
-    localStorage.setItem('kft_users_v3', JSON.stringify(users));
+    localStorage.setItem('kft_users_v4', JSON.stringify(users));
   }, [users]);
 
   useEffect(() => {
-    localStorage.setItem('kft_current_user_v3', JSON.stringify(currentUser));
+    localStorage.setItem('kft_current_user_v4', JSON.stringify(currentUser));
   }, [currentUser]);
 
   useEffect(() => {
-    localStorage.setItem('kft_foods_v3', JSON.stringify(foods));
+    localStorage.setItem('kft_foods_v4', JSON.stringify(foods));
   }, [foods]);
 
   useEffect(() => {
-    localStorage.setItem('kft_restaurants_v3', JSON.stringify(restaurants));
+    localStorage.setItem('kft_restaurants_v4', JSON.stringify(restaurants));
   }, [restaurants]);
 
   useEffect(() => {
-    localStorage.setItem('kft_destinations_v3', JSON.stringify(destinations));
+    localStorage.setItem('kft_destinations_v4', JSON.stringify(destinations));
   }, [destinations]);
 
   useEffect(() => {
-    localStorage.setItem('kft_posts_v3', JSON.stringify(posts));
+    localStorage.setItem('kft_posts_v4', JSON.stringify(posts));
   }, [posts]);
 
   useEffect(() => {
-    localStorage.setItem('kft_bookmarks_v3', JSON.stringify(bookmarks));
+    localStorage.setItem('kft_bookmarks_v4', JSON.stringify(bookmarks));
   }, [bookmarks]);
 
   useEffect(() => {
-    localStorage.setItem('kft_settings_v3', JSON.stringify(appSettings));
+    localStorage.setItem('kft_settings_v4', JSON.stringify(appSettings));
   }, [appSettings]);
+
+  useEffect(() => {
+    localStorage.setItem('kft_transactions_v4', JSON.stringify(transactions));
+  }, [transactions]);
+
+  // Keep a mutable ref of current modal & navigation state for the native back-button listener
+  const appNavStateRef = useRef({
+    isExitModalOpen,
+    selectedFood,
+    selectedRestaurant,
+    selectedDestination,
+    isAuthModalOpen,
+    isAddPostModalOpen,
+    isAddRestaurantModalOpen,
+    isAdminOpen,
+    isAdminLoginModalOpen,
+    isInstallModalOpen,
+    isSupportModalOpen,
+    activeTab,
+  });
+
+  useEffect(() => {
+    appNavStateRef.current = {
+      isExitModalOpen,
+      selectedFood,
+      selectedRestaurant,
+      selectedDestination,
+      isAuthModalOpen,
+      isAddPostModalOpen,
+      isAddRestaurantModalOpen,
+      isAdminOpen,
+      isAdminLoginModalOpen,
+      isInstallModalOpen,
+      isSupportModalOpen,
+      activeTab,
+    };
+  }, [
+    isExitModalOpen, selectedFood, selectedRestaurant, selectedDestination,
+    isAuthModalOpen, isAddPostModalOpen, isAddRestaurantModalOpen,
+    isAdminOpen, isAdminLoginModalOpen, isInstallModalOpen, isSupportModalOpen,
+    activeTab,
+  ]);
+
+  const lastBackPressRef = useRef<number>(0);
+
+  const exitAppNow = async () => {
+    try {
+      await CapApp.exitApp();
+    } catch {
+      window.close();
+    }
+  };
+
+  // Android Hardware Back Button Listener & Confirm Before Exit
+  useEffect(() => {
+    const handleBackButtonAction = () => {
+      const state = appNavStateRef.current;
+
+      // 1. If Exit Confirmation Modal is already open, pressing back again immediately exits
+      if (state.isExitModalOpen) {
+        exitAppNow();
+        return;
+      }
+
+      // 2. If any modal or detail screen is open, close the active modal first without exiting
+      if (state.selectedFood) {
+        setSelectedFood(null);
+        return;
+      }
+      if (state.selectedRestaurant) {
+        setSelectedRestaurant(null);
+        return;
+      }
+      if (state.selectedDestination) {
+        setSelectedDestination(null);
+        return;
+      }
+      if (state.isAuthModalOpen) {
+        setIsAuthModalOpen(false);
+        return;
+      }
+      if (state.isAddRestaurantModalOpen) {
+        setIsAddRestaurantModalOpen(false);
+        return;
+      }
+      if (state.isAddPostModalOpen) {
+        setIsAddPostModalOpen(false);
+        return;
+      }
+      if (state.isAdminLoginModalOpen) {
+        setIsAdminLoginModalOpen(false);
+        return;
+      }
+      if (state.isAdminOpen) {
+        setIsAdminOpen(false);
+        return;
+      }
+      if (state.isInstallModalOpen) {
+        setIsInstallModalOpen(false);
+        return;
+      }
+      if (state.isSupportModalOpen) {
+        setIsSupportModalOpen(false);
+        return;
+      }
+
+      // 3. If on another tab than 'home', navigate back to 'home'
+      if (state.activeTab !== 'home') {
+        setActiveTab('home');
+        return;
+      }
+
+      // 4. On main 'home' screen:
+      // Double back within 2 seconds exits immediately; otherwise display confirmation modal
+      const now = Date.now();
+      if (now - lastBackPressRef.current < 2000) {
+        exitAppNow();
+      } else {
+        lastBackPressRef.current = now;
+        setIsExitModalOpen(true);
+      }
+    };
+
+    let backListenerHandle: { remove: () => void } | null = null;
+    CapApp.addListener('backButton', () => {
+      handleBackButtonAction();
+    }).then(h => {
+      backListenerHandle = h;
+    }).catch(err => {
+      console.log('Native back-button listener not available in standard web view', err);
+    });
+
+    // Also support keyboard Escape for desktop/emulator testing
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        handleBackButtonAction();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      if (backListenerHandle && backListenerHandle.remove) {
+        backListenerHandle.remove();
+      }
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
 
   // Bookmarking
   const toggleBookmark = (id: string) => {
@@ -254,48 +435,89 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return true;
   };
 
-  // Secure Admin Login for Chea Savuth
+  // Secure Admin Login with Rate Limiting, Brute-Force Lockout, and PBKDF2
   const loginAdmin = async (username: string, password: string): Promise<boolean> => {
+    const status = checkAdminLoginAllowed();
+    if (!status.allowed) {
+      recordSecurityAudit('ADMIN_LOGIN_ATTEMPT', 'BLOCKED', 'AdminPortal', `Lockout active for ${status.remainingLockoutSeconds}s`);
+      showToast(
+        language === 'km' 
+          ? `គណនីរដ្ឋបាលត្រូវបានចាក់សោរបណ្តោះអាសន្ន។ សូមរង់ចាំ ${status.remainingLockoutSeconds} វិនាទី!` 
+          : `Admin login locked out. Try again in ${status.remainingLockoutSeconds}s!`, 
+        'warning'
+      );
+      return false;
+    }
+
     const cleanUser = username.trim().toLowerCase();
     const isAdminUser = cleanUser === 'chea savuth' || cleanUser === 'cheasavuth' || cleanUser === 'admin';
     if (!isAdminUser) {
+      recordAdminLoginFailed();
+      recordSecurityAudit('ADMIN_LOGIN_FAILED', 'FAILURE', 'AdminPortal', 'Unknown admin username');
       showToast(language === 'km' ? 'ឈ្មោះគណនីរដ្ឋបាលមិនត្រឹមត្រូវទេ!' : 'Invalid admin username!', 'warning');
       return false;
     }
 
-    const isValid = await verifyPassword(password, appSettings.adminPasswordHash);
+    const isValid = await verifyPasswordPBKDF2(password, appSettings.adminPasswordHash);
     if (!isValid) {
-      showToast(language === 'km' ? 'ពាក្យសម្ងាត់មិនត្រឹមត្រូវទេ!' : 'Invalid password!', 'warning');
+      const fail = recordAdminLoginFailed();
+      recordSecurityAudit('ADMIN_LOGIN_FAILED', 'FAILURE', 'AdminPortal', 'Invalid credentials');
+      if (fail.lockedOut) {
+        showToast(
+          language === 'km' 
+            ? 'ការប៉ុនប៉ងបរាជ័យលើសកំណត់! គណនីរដ្ឋបាលត្រូវបានចាក់សោរ ១៥ នាទី។' 
+            : 'Too many failed attempts! Admin portal locked for 15 minutes.', 
+          'warning'
+        );
+      } else {
+        const rem = 5 - fail.attempts;
+        showToast(
+          language === 'km' 
+            ? `ពាក្យសម្ងាត់មិនត្រឹមត្រូវទេ! (នៅសល់ ${rem} ដងទៀត)` 
+            : `Invalid password! (${rem} attempts remaining)`, 
+          'warning'
+        );
+      }
       return false;
     }
 
-    // Find or create Chea Savuth user
-    let cheaUser = users.find(u => u.role === 'admin' || u.name.toLowerCase().includes('chea savuth'));
-    if (!cheaUser) {
-      cheaUser = initialUsers[0];
-      setUsers(prev => [cheaUser!, ...prev.filter(u => u.id !== cheaUser!.id)]);
-    }
+    resetAdminLoginAttempts();
+    await createAdminSession();
+    recordSecurityAudit('ADMIN_LOGIN_SUCCESS', 'SUCCESS', 'AdminPortal', 'Authorized admin session established');
 
-    setCurrentUser(cheaUser);
+    // Isolated single authorized administrator profile
+    const adminProfile: User = {
+      id: 'admin-authorized-single',
+      name: 'Chea Savuth',
+      email: 'cheasavuth@khmerfoodtourism.com',
+      role: 'admin',
+      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+      phone: '012 888 999',
+      bio: 'Senior Administrator (Authorized Single Admin)',
+      createdAt: '2026-01-01',
+    };
+
+    setCurrentUser(adminProfile);
     setIsAdminLoginModalOpen(false);
     setIsAdminOpen(true);
-    showToast(language === 'km' ? `សូមស្វាគមន៍ លោក Chea Savuth! ចូលកាន់ផ្ទាំងគ្រប់គ្រងរដ្ឋបាលជោគជ័យ។` : `Welcome, Chea Savuth! Admin portal unlocked.`, 'success');
+    showToast(language === 'km' ? 'ចូលកាន់ផ្ទាំងគ្រប់គ្រងរដ្ឋបាលជោគជ័យ!' : 'Admin portal unlocked securely!', 'success');
     return true;
   };
 
   const setAdminPassword = async (newPassword: string): Promise<boolean> => {
-    if (!newPassword || newPassword.length < 6) {
-      showToast(language === 'km' ? 'ពាក្យសម្ងាត់ត្រូវមានយ៉ាងហោចណាស់ ៦ តួអក្សរ!' : 'Password must be at least 6 characters!', 'warning');
+    if (!newPassword || newPassword.length < 8) {
+      showToast(language === 'km' ? 'ពាក្យសម្ងាត់ត្រូវមានយ៉ាងហោចណាស់ ៨ តួអក្សរ!' : 'Password must be at least 8 characters!', 'warning');
       return false;
     }
 
-    const newHash = await hashPassword(newPassword);
+    const newHash = await hashPasswordPBKDF2(newPassword);
     setAppSettings(prev => ({
       ...prev,
       adminPasswordHash: newHash,
       isAdminInitialized: true,
     }));
-    showToast(language === 'km' ? 'បានផ្លាស់ប្តូរពាក្យសម្ងាត់រដ្ឋបាល Chea Savuth ជោគជ័យ!' : 'Admin password updated securely!', 'success');
+    recordSecurityAudit('ADMIN_CREDENTIALS_UPDATE', 'SUCCESS', 'AdminPortal', 'Admin password updated with PBKDF2');
+    showToast(language === 'km' ? 'បានផ្លាស់ប្តូរពាក្យសម្ងាត់រដ្ឋបាលដោយសុវត្ថិភាព (PBKDF2)!' : 'Admin password updated securely (PBKDF2)!', 'success');
     return true;
   };
 
@@ -304,15 +526,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       ...prev,
       ...newSettings,
     }));
+    recordSecurityAudit('SETTINGS_UPDATE', 'SUCCESS', 'AppSettings', 'Application configuration updated');
     showToast(language === 'km' ? 'បានរក្សាទុកការកំណត់កម្មវិធីជោគជ័យ!' : 'App settings updated!', 'success');
   };
 
   const register = (name: string, email: string, role: UserRole, phone?: string, restaurantName?: string) => {
+    // Enforce: only one authorized admin exists. Users can NEVER self-register as admin
+    const safeRole: UserRole = role === 'admin' ? 'user' : role;
     const newUser: User = {
       id: `user-${Date.now()}`,
       name,
       email,
-      role,
+      role: safeRole,
       phone,
       restaurantName,
       avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
@@ -320,21 +545,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
     setUsers(prev => [...prev, newUser]);
     setCurrentUser(newUser);
-    showToast(language === 'km' ? `បង្កើតគណនីបានជោគជ័យ!` : `Account created successfully!`, 'success');
+    showToast(language === 'km' ? 'បង្កើតគណនីបានជោគជ័យ!' : 'Account created successfully!', 'success');
     setIsAuthModalOpen(false);
   };
 
   const logout = () => {
+    revokeAdminSession();
     setCurrentUser(null);
     setIsAdminOpen(false);
     showToast(language === 'km' ? 'បានចាកចេញពីគណនី' : 'Logged out', 'info');
   };
 
   const updateUserRole = (userId: string, newRole: UserRole) => {
+    if (newRole === 'admin') {
+      showToast(language === 'km' ? 'មិនអនុញ្ញាតឱ្យបង្កើតគណនីរដ្ឋបាលស្ទួនឡើយ!' : 'Duplicate admin accounts are strictly prohibited!', 'warning');
+      recordSecurityAudit('ROLE_PROMOTION_BLOCKED', 'BLOCKED', 'UserManagement', `Attempted promotion of ${userId} to admin`);
+      return;
+    }
     setUsers(prev => prev.map(u => u.id === userId ? { ...u, role: newRole } : u));
     if (currentUser?.id === userId) {
       setCurrentUser(prev => prev ? { ...prev, role: newRole } : null);
     }
+    recordSecurityAudit('ROLE_CHANGE', 'SUCCESS', 'UserManagement', `User ${userId} role changed to ${newRole}`);
     showToast(language === 'km' ? 'បានកែប្រែសិទ្ធិអ្នកប្រើប្រាស់' : 'Updated user role', 'success');
   };
 
@@ -508,6 +740,84 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     showToast(language === 'km' ? 'បានលុបការបង្ហោះ' : 'Post deleted', 'info');
   };
 
+  // Transactions & $4.99 Registration Payment
+  const addRegistrationTransaction = (txnData: Omit<RegistrationTransaction, 'id' | 'createdAt' | 'status'>): RegistrationTransaction => {
+    const id = `TXN-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${Math.floor(100 + Math.random() * 900)}`;
+    const newTxn: RegistrationTransaction = {
+      ...txnData,
+      id,
+      status: 'pending_verification',
+      createdAt: new Date().toISOString().replace('T', ' ').slice(0, 16),
+    };
+    setTransactions(prev => [newTxn, ...prev]);
+    return newTxn;
+  };
+
+  const verifyTransaction = (txnId: string) => {
+    let targetRestId = '';
+    setTransactions(prev => prev.map(t => {
+      if (t.id !== txnId) return t;
+      targetRestId = t.restaurantId;
+      return {
+        ...t,
+        status: 'verified',
+        verifiedAt: new Date().toISOString().replace('T', ' ').slice(0, 16),
+        verifiedBy: currentUser?.name || 'Chea Savuth',
+      };
+    }));
+
+    if (targetRestId) {
+      setRestaurants(prev => prev.map(r => {
+        if (r.id !== targetRestId) return r;
+        return {
+          ...r,
+          status: 'approved',
+          isVerified: true,
+          isPromoted: true,
+          paymentStatus: 'verified',
+          paymentDate: new Date().toISOString().split('T')[0],
+        };
+      }));
+    }
+
+    showToast(
+      language === 'km' 
+        ? 'បានផ្ទៀងផ្ទាត់ការទូទាត់ $4.99 និងធ្វើឱ្យហាងសកម្មជោគជ័យ!' 
+        : 'Payment verified and restaurant activated successfully!',
+      'success'
+    );
+  };
+
+  const rejectTransaction = (txnId: string, reason?: string) => {
+    let targetRestId = '';
+    setTransactions(prev => prev.map(t => {
+      if (t.id !== txnId) return t;
+      targetRestId = t.restaurantId;
+      return {
+        ...t,
+        status: 'rejected',
+        notes: reason || 'Transaction could not be verified with bank statement.',
+      };
+    }));
+
+    if (targetRestId) {
+      setRestaurants(prev => prev.map(r => {
+        if (r.id !== targetRestId) return r;
+        return {
+          ...r,
+          paymentStatus: 'rejected',
+        };
+      }));
+    }
+
+    showToast(
+      language === 'km' 
+        ? 'បានបដិសេធប្រតិបត្តិការទូទាត់' 
+        : 'Transaction rejected',
+      'info'
+    );
+  };
+
   const resetAllData = () => {
     setUsers(initialUsers);
     setCurrentUser(initialUsers[2]);
@@ -517,6 +827,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setPosts(initialCommunityPosts);
     setBookmarks(['food-1', 'dest-1']);
     setAppSettings(initialAppSettings);
+    setTransactions(initialTransactions);
     localStorage.clear();
     showToast(language === 'km' ? 'បានកំណត់ទិន្នន័យឡើងវិញ' : 'Reset to default data', 'info');
   };
@@ -542,6 +853,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         restaurants,
         destinations,
         posts,
+        transactions,
+        addRegistrationTransaction,
+        verifyTransaction,
+        rejectTransaction,
+        isExitModalOpen,
+        setIsExitModalOpen,
+        exitAppNow,
         bookmarks,
         toggleBookmark,
         isBookmarked,

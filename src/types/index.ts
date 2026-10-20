@@ -65,6 +65,26 @@ export interface FoodItem {
 
 export type RestaurantPriceLevel = '$' | '$$' | '$$$' | '$$$$';
 
+export type PaymentStatus = 'unpaid' | 'pending_verification' | 'verified' | 'rejected' | 'waived';
+
+export interface RegistrationTransaction {
+  id: string; // e.g. "TXN-20261020-001"
+  restaurantId: string;
+  restaurantNameKh: string;
+  restaurantNameEn: string;
+  ownerId: string;
+  ownerName: string;
+  ownerPhone?: string;
+  amountUsd: number;
+  status: 'pending_verification' | 'verified' | 'rejected';
+  paymentMethod: 'KHQR' | 'Bakong' | 'BankTransfer' | 'Manual';
+  transactionRef: string;
+  createdAt: string;
+  verifiedAt?: string;
+  verifiedBy?: string;
+  notes?: string;
+}
+
 export interface Restaurant {
   id: string;
   nameKh: string;
@@ -91,6 +111,11 @@ export interface Restaurant {
   status: 'approved' | 'pending' | 'rejected';
   isVerified: boolean;
   isFeatured?: boolean;
+  paymentStatus?: PaymentStatus;
+  paymentTransactionId?: string;
+  paymentDate?: string;
+  promotionalPrice?: number;
+  isPromoted?: boolean;
 }
 
 export type DestinationCategorySlug = 'temple' | 'nature' | 'mountain' | 'beach' | 'resort';
@@ -162,6 +187,8 @@ export interface AppSettings {
   apkDownloadUrl: string;
   playStoreUrl: string;
   appStoreUrl: string;
+  iosAppStoreUrl: string;
+  iosTestFlightUrl: string;
   supportQrImageUrl: string;
   supportBankName: string;
   supportAccountName: string;
@@ -169,4 +196,8 @@ export interface AppSettings {
   supportMessageEn: string;
   adminPasswordHash: string;
   isAdminInitialized: boolean;
+  promotionalFeeUsd: number;
+  promotionalFeeEnabled: boolean;
+  promotionPeriodKh: string;
+  promotionPeriodEn: string;
 }

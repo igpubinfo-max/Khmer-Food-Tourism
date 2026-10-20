@@ -39,41 +39,43 @@ jobs:
           mkdir -p android/app/src/main/assets/public
           cp -rf dist/* android/app/src/main/assets/public/
 
-      - name: 7. Build Android Debug APK
+      - name: 7. Build Hardened Android APK (Debug & Optimized Release with R8)
         run: |
           cd android
           chmod +x ./gradlew
-          ./gradlew assembleDebug --no-daemon
+          ./gradlew assembleDebug assembleRelease --no-daemon
 
       - name: 8. Locate Generated APK Files
         run: |
-          echo "=== SEARCHING FOR APK FILES ==="
+          echo "=== SEARCHING FOR GENERATED APK FILES ==="
           find . -name "*.apk" -ls
 
       - name: 9. Upload Android APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Khmer-Food-Tourism-APK
-          path: 'android/app/build/outputs/apk/debug/*.apk'
+          path: 'android/app/build/outputs/apk/**/*.apk'
 
       - name: 10. Publish GitHub Release with APK
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
           tag_name: v1.0.0
-          name: "Khmer Food & Tourism v1.0.0 (Android APK)"
+          name: "Khmer Food & Tourism v1.0.0 — 200+ Dishes, 200+ Restaurants, $4.99 Promo & Security Hardening"
           body: |
             ### 🇰🇭 កម្មវិធីទូរស័ព្ទដៃ អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism Mobile App)
             
-            **លក្ខណៈពិសេសថ្មីៗ (Key Features):**
-            - 🍲 **១០០+ មុខម្ហូបខ្មែរ (100+ Authentic Dishes):** រូបភាពពិត រូបមន្តគ្រឿងផ្សំ និងរបៀបចម្អិនតាមលំដាប់លំដោយ។
-            - 🏪 **១០០+ ភោជនីយដ្ឋាន (100+ Cambodian Restaurants):** គ្របដណ្តប់ទូទាំង ២៥ ខេត្តក្រុង ដោយបែងចែកច្បាស់លាស់រវាងហាងផ្ទៀងផ្ទាត់ផ្លូវការ និងគំរូអ្នកប្រើប្រាស់។
-            - 📲 **QR Code ដំឡើងកម្មវិធី (App Install QR):** ស្កេនទាញយកឯកសារ APK ដំឡើងលើទូរស័ព្ទ Android ដោយផ្ទាល់។
-            - 💖 **ជួយឧបត្ថម្ភគាំទ្រកម្មវិធី (Support Our App):** តាមរយៈផ្លូវការ Bakong KHQR (Canadia Bank / KHQR)។
-            - 🛡️ **គណនីរដ្ឋបាល Chea Savuth (Senior Admin Portal):** ការពារសុវត្ថិភាពដោយ Web Crypto SHA-256 + Salt អាចគ្រប់គ្រងមុខម្ហូប ហាង ទេសចរណ៍ ការកំណត់ QR Code និងតំណភ្ជាប់ទាញយក។
+            **កំណែថ្មី v1.0.0 (Key Features & Security Hardening):**
+            - 💳 **តម្លៃចុះបញ្ជីហាងប្រូម៉ូសិន $4.99 USD (Restaurant Registration $4.99 Promo):** ការទូទាត់តាម Bakong KHQR ជាមួយលេខកូដប្រតិបត្តិការ (Trx ID) និងការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាលមុននឹងធ្វើឱ្យហាងសកម្ម។
+            - 🍲 **២០០+ មុខម្ហូបខ្មែរពិតៗ (200+ Authentic Khmer Dishes):** រូបភាពច្បាស់ៗ ដកតម្លៃចេញពីរូបភាព គ្រឿងផ្សំ និងរបៀបចម្អិន ៨ ប្រភេទ (សម្ល, អាំង, ឆា, ញាំ, គុយទាវ/នំបញ្ចុក, បាយ, បង្អែម, អាហារសម្រន់)។
+            - 🏪 **២០០+ ភោជនីយដ្ឋានទូទាំង ២៥ ខេត្តក្រុង (200+ Cambodian Restaurants):** គ្របដណ្តប់ទូទាំងប្រទេស បែងចែកច្បាស់លាស់រវាងហាងផ្ទៀងផ្ទាត់ផ្លូវការ និងគំរូសហគមន៍។
+            - 🔙 **ប៊ូតុងត្រឡប់ Android (Hardware Back Button with Confirmation):** សួរបញ្ជាក់ “តើអ្នកចង់ចាកចេញពីកម្មវិធីមែនទេ?” ជាមួយប៊ូតុង “បាទ/ចាស” និង “បន្តប្រើប្រាស់” ការពារការចាកចេញដោយអចេតនានៅពេលបំពេញទម្រង់បែបបទ។
+            - 📲 **ទាញយក និងដំឡើងងាយស្រួលទាំង Android & iOS:** គាំទ្រ Direct APK Download លើ Android និង Safari Add-to-Home-Screen PWA Guide លើ iPhone។
+            - 🛡️ **សុវត្ថិភាពកម្រិតខ្ពស់ (Enterprise Security Hardening):** គណនីរដ្ឋបាលតែមួយគត់ ការពារដោយ PBKDF2-HMAC-SHA256 (100,000 Iterations), HMAC session tokens, Rate limiting & brute-force lockout, R8 code shrinking and obfuscation, និង network-security-config (HTTPS only)។
           draft: false
           prerelease: false
           files: |
             android/app/build/outputs/apk/debug/*.apk
+            android/app/build/outputs/apk/release/*.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
