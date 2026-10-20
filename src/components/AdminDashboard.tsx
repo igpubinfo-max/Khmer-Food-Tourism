@@ -5,10 +5,11 @@ import {
   Users, Plus, Trash2, CheckCircle2, AlertTriangle, Settings, 
   QrCode, Heart, KeyRound, Lock, ExternalLink, CreditCard,
   ShieldCheck, ShieldAlert, Clock, RefreshCw, FileText, Check, Ban,
-  Sparkles, Image as ImageIcon, Search
+  Sparkles, Image as ImageIcon, Search, Camera, Upload
 } from 'lucide-react';
 import { FoodCategorySlug, DestinationCategorySlug, UserRole, RegistrationTransaction, FoodItem } from '../types';
 import { getSecurityAuditLogs, SecurityAuditEntry, revokeAdminSession } from '../utils/security';
+import { FoodImageModal } from './FoodImageModal';
 
 export const AdminDashboard: React.FC = () => {
   const { 
@@ -29,6 +30,7 @@ export const AdminDashboard: React.FC = () => {
   const [auditSearchQuery, setAuditSearchQuery] = useState('');
   const [editingFoodId, setEditingFoodId] = useState<string | null>(null);
   const [editingFoodUrl, setEditingFoodUrl] = useState('');
+  const [selectedFoodForImageEdit, setSelectedFoodForImageEdit] = useState<FoodItem | null>(null);
 
   // Form states for Food
   const [newFoodNameKh, setNewFoodNameKh] = useState('');
@@ -242,8 +244,8 @@ export const AdminDashboard: React.FC = () => {
               </div>
               <p className="text-xs text-stone-300 font-khmer">
                 {isKm 
-                  ? 'គ្រប់គ្រងមុខម្ហូប (200+) ហាងអាហារ (200+) ទេសចរណ៍ ការទូទាត់ $4.99 និងសន្តិសុខ' 
-                  : 'Manage foods, restaurants, destinations, $4.99 transactions, and security'}
+                  ? 'គ្រប់គ្រងមុខម្ហូប (100) ហាងអាហារ (200+) ទេសចរណ៍ ការទូទាត់ $4.99 និងសន្តិសុខ' 
+                  : 'Manage foods (100), restaurants (200+), destinations, $4.99 transactions, and security'}
               </p>
             </div>
           </div>
@@ -670,12 +672,24 @@ export const AdminDashboard: React.FC = () => {
                       </div>
                     </div>
 
-                    <button
-                      onClick={() => deleteFood(food.id)}
-                      className="p-2 text-stone-400 hover:text-rose-600 rounded-lg shrink-0"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedFoodForImageEdit(food)}
+                        className="px-2.5 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 font-bold text-[11px] font-khmer flex items-center gap-1 transition shadow-xs"
+                        title={isKm ? 'ផ្លាស់ប្តូររូបភាពពីទូរស័ព្ទ/កុំព្យូទ័រ' : 'Change photo from phone or computer'}
+                      >
+                        <Camera className="w-3.5 h-3.5 text-amber-600" />
+                        <span>{isKm ? 'កែរូបថត' : 'Photo'}</span>
+                      </button>
+
+                      <button
+                        onClick={() => deleteFood(food.id)}
+                        className="p-2 text-stone-400 hover:text-rose-600 rounded-lg shrink-0"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -1155,8 +1169,8 @@ export const AdminDashboard: React.FC = () => {
                     </h3>
                     <p className="text-xs text-amber-200/80 font-khmer">
                       {isKm 
-                        ? 'ការត្រួតពិនិត្យរូបភាពមុខម្ហូបខ្មែរទាំង ២៣០+ មុខ ដើម្បីធានាភាពត្រឹមត្រូវតាមឈ្មោះមុខម្ហូបពិតប្រាកដ និងដកភាពជាន់គ្នាចេញ ១០០%'
-                        : 'Audit and replacement of 230+ Cambodian dish images ensuring authentic culinary representation and 0% duplicates.'}
+                        ? 'ការត្រួតពិនិត្យរូបភាពមុខម្ហូបខ្មែរទាំង ១០០ មុខ ដើម្បីធានាភាពត្រឹមត្រូវតាមឈ្មោះមុខម្ហូបពិតប្រាកដ និងដកភាពជាន់គ្នាចេញ ១០០%'
+                        : 'Audit and replacement of 100 Cambodian dish images ensuring authentic culinary representation and 0% duplicates.'}
                     </p>
                   </div>
                 </div>
@@ -1290,13 +1304,12 @@ export const AdminDashboard: React.FC = () => {
                               <span>{isKm ? 'យល់ព្រមរូបភាពនេះ' : 'Approve Photo'}</span>
                             </button>
                             <button
-                              onClick={() => {
-                                setEditingFoodId(food.id);
-                                setEditingFoodUrl(food.photoUrl);
-                              }}
-                              className="py-2 px-3 bg-stone-100 hover:bg-stone-200 dark:bg-stone-700 dark:hover:bg-stone-600 text-stone-800 dark:text-stone-200 font-bold rounded-xl text-xs font-khmer transition"
+                              type="button"
+                              onClick={() => setSelectedFoodForImageEdit(food)}
+                              className="py-2 px-3 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-xl text-xs font-khmer flex items-center justify-center gap-1.5 shadow-sm transition"
                             >
-                              {isKm ? 'ប្តូរ URL ថ្មី' : 'Change URL'}
+                              <Camera className="w-3.5 h-3.5" />
+                              <span>{isKm ? 'ផ្លាស់ប្តូររូបភាព' : 'Change Photo'}</span>
                             </button>
                           </div>
                         )}
@@ -1405,15 +1418,12 @@ export const AdminDashboard: React.FC = () => {
                           )}
 
                           <button
-                            onClick={() => {
-                              const newUrl = prompt(isKm ? `បញ្ចូល URL រូបភាពថ្មីសម្រាប់ "${food.nameKh}":` : `Enter new image URL for "${food.nameEn}":`, food.photoUrl);
-                              if (newUrl && newUrl.trim()) {
-                                handleSaveCustomImage(food, newUrl.trim());
-                              }
-                            }}
-                            className="text-[10px] font-bold text-amber-600 hover:underline font-khmer"
+                            type="button"
+                            onClick={() => setSelectedFoodForImageEdit(food)}
+                            className="text-[10px] font-bold text-amber-600 hover:text-amber-700 hover:underline font-khmer flex items-center gap-0.5"
                           >
-                            {isKm ? 'កែប្រែ' : 'Edit'}
+                            <Camera className="w-3 h-3" />
+                            <span>{isKm ? 'កែរូបភាព' : 'Edit Photo'}</span>
                           </button>
                         </div>
                       </div>
@@ -1425,6 +1435,18 @@ export const AdminDashboard: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Food Image Upload & Management Modal (Phone Gallery + Preview + Compression) */}
+      <FoodImageModal
+        food={selectedFoodForImageEdit}
+        isOpen={!!selectedFoodForImageEdit}
+        onClose={() => setSelectedFoodForImageEdit(null)}
+        onSave={(updatedFood) => {
+          updateFood(updatedFood);
+          showToast(isKm ? `បានរក្សាទុករូបភាពសម្រាប់ "${updatedFood.nameKh}" ជោគជ័យ!` : `Updated photo for "${updatedFood.nameEn}"!`, 'success');
+        }}
+        isKm={isKm}
+      />
     </div>
   );
 };

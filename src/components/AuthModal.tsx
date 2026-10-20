@@ -115,40 +115,10 @@ export const AuthModal: React.FC = () => {
 
               <button
                 type="submit"
-                className="w-full py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs shadow-md transition"
+                className="w-full py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs shadow-md transition font-khmer"
               >
                 {language === 'km' ? 'ចូលគណនី' : 'Sign In'}
               </button>
-
-              {/* Quick Preset Logins */}
-              <div className="pt-2 border-t border-stone-200 dark:border-stone-800 space-y-1.5">
-                <p className="text-[10px] text-stone-400 text-center">
-                  {language === 'km' ? 'ចូលដោយចុចមួយដង (Quick Test Logins):' : 'One-Click Fast Logins:'}
-                </p>
-                <div className="grid grid-cols-3 gap-1.5">
-                  <button
-                    type="button"
-                    onClick={() => login('admin@khmerfood.com', 'admin')}
-                    className="p-1.5 rounded-lg bg-red-50 text-red-700 font-bold text-[10px] border border-red-200"
-                  >
-                    🛡️ Admin
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => login('kimly@restaurant.com', 'owner')}
-                    className="p-1.5 rounded-lg bg-amber-50 text-amber-800 font-bold text-[10px] border border-amber-200"
-                  >
-                    🏪 Owner
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => login('vannak@gmail.com', 'user')}
-                    className="p-1.5 rounded-lg bg-blue-50 text-blue-700 font-bold text-[10px] border border-blue-200"
-                  >
-                    👤 User
-                  </button>
-                </div>
-              </div>
             </form>
           ) : (
             <form onSubmit={handleRegisterSubmit} className="space-y-3">

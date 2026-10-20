@@ -90,23 +90,15 @@ export const Header: React.FC = () => {
             <span>{isKm ? 'EN' : 'ខ្មែរ'}</span>
           </button>
 
-          {/* Admin / User Action */}
-          {currentUser?.role === 'admin' ? (
+          {/* Admin Action (Only visible when authenticated as admin) */}
+          {currentUser?.role === 'admin' && (
             <button
               onClick={() => setIsAdminOpen(true)}
               className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-gradient-to-r from-red-700 to-amber-600 text-white text-[11px] font-bold shadow hover:brightness-110"
-              title="ផ្ទាំងគ្រប់គ្រងរដ្ឋបាល Chea Savuth"
+              title="ផ្ទាំងគ្រប់គ្រងរដ្ឋបាល"
             >
               <Shield className="w-3.5 h-3.5 text-amber-300" />
               <span className="hidden sm:inline">Admin</span>
-            </button>
-          ) : (
-            <button
-              onClick={() => setIsAdminLoginModalOpen(true)}
-              className="p-1.5 rounded-full hover:bg-amber-800/80 text-amber-300"
-              title={isKm ? 'ច្រកចូលរដ្ឋបាល Chea Savuth' : 'Admin Portal Login'}
-            >
-              <ShieldCheck className="w-4 h-4" />
             </button>
           )}
         </div>

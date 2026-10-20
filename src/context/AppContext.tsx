@@ -138,11 +138,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
 
   const [foods, setFoods] = useState<FoodItem[]>(() => {
-    const saved = localStorage.getItem('kft_foods_v4');
+    // Purge legacy 200+ dataset cache to enforce exact 100 authentic foods
+    try {
+      localStorage.removeItem('kft_foods_v4');
+    } catch {}
+    const saved = localStorage.getItem('kft_foods_100_v1');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length >= 200 && parsed[0]?.imageAuditStatus) return parsed;
+        if (Array.isArray(parsed) && parsed.length === 100 && parsed[0]?.imageAuditStatus) return parsed;
       } catch {}
     }
     return initialFoods;
@@ -222,7 +226,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [currentUser]);
 
   useEffect(() => {
-    localStorage.setItem('kft_foods_v4', JSON.stringify(foods));
+    localStorage.setItem('kft_foods_100_v1', JSON.stringify(foods));
   }, [foods]);
 
   useEffect(() => {
@@ -413,18 +417,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const login = (email: string, role?: UserRole): boolean => {
     const existing = users.find(u => u.email.toLowerCase() === email.toLowerCase());
     if (existing) {
+      if (existing.role === 'admin') {
+        showToast(language === 'km' ? 'សូមប្រើប្រាស់ច្រកចូលរដ្ឋបាលជាមួយពាក្យសម្ងាត់សុវត្ថិភាព' : 'Please use Admin Portal with secure password', 'info');
+        setIsAdminLoginModalOpen(true);
+        return false;
+      }
       setCurrentUser(existing);
       showToast(language === 'km' ? `សូមស្វាគមន៍មកវិញ ${existing.name}!` : `Welcome back, ${existing.name}!`, 'success');
       setIsAuthModalOpen(false);
       return true;
     }
     
-    // Quick demo login if not found
+    // Normal registration/login for users/owners only (NEVER grant admin role here)
+    const assignedRole: UserRole = role === 'owner' ? 'owner' : 'user';
     const newUser: User = {
       id: `user-${Date.now()}`,
       name: email.split('@')[0],
       email: email,
-      role: role || (email.includes('admin') ? 'admin' : email.includes('owner') ? 'owner' : 'user'),
+      role: assignedRole,
       avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
       createdAt: new Date().toISOString().split('T')[0],
     };

@@ -28,13 +28,6 @@ export const ProfileView: React.FC = () => {
   // User posts
   const myPosts = posts.filter(p => currentUser && p.authorId === currentUser.id);
 
-  // Quick Account switchers for testing
-  const demoAccounts = [
-    { label: 'Admin (Chea Savuth)', email: 'cheasavuth@khmerfoodtourism.com', role: 'admin' },
-    { label: 'Owner (សុខ គីមលី)', email: 'kimly@restaurant.com', role: 'owner' },
-    { label: 'User (ចាន់ថា វណ្ណៈ)', email: 'vannak@gmail.com', role: 'user' },
-  ];
-
   return (
     <div className="max-w-md mx-auto px-4 py-3 space-y-4 pb-24">
       {/* User Header Profile Card */}
@@ -59,7 +52,7 @@ export const ProfileView: React.FC = () => {
                       ? 'bg-amber-100 text-amber-800' 
                       : 'bg-blue-100 text-blue-700'
                   }`}>
-                    {currentUser.role === 'admin' ? '🛡️ Admin (Chea Savuth)' : currentUser.role === 'owner' ? '🏪 Shop Owner' : '👤 Foodie'}
+                    {currentUser.role === 'admin' ? '🛡️ Administrator' : currentUser.role === 'owner' ? '🏪 Shop Owner' : '👤 Foodie'}
                   </span>
                 </div>
                 <p className="text-xs text-stone-500 mt-0.5">{currentUser.email}</p>
@@ -75,22 +68,14 @@ export const ProfileView: React.FC = () => {
               </p>
             )}
 
-            {/* Admin Portal Shortcut if Admin */}
-            {currentUser.role === 'admin' ? (
+            {/* Admin Portal Shortcut ONLY if Admin */}
+            {currentUser.role === 'admin' && (
               <button
                 onClick={() => setIsAdminOpen(true)}
                 className="w-full py-2.5 px-3 rounded-2xl bg-gradient-to-r from-red-700 to-amber-600 hover:from-red-800 hover:to-amber-700 text-white font-bold text-xs shadow-sm flex items-center justify-center gap-2 transition font-khmer"
               >
                 <Shield className="w-4 h-4 text-amber-300" />
                 <span>{isKm ? 'ចូលផ្ទាំងគ្រប់គ្រងរដ្ឋបាល (Admin Dashboard)' : 'Open Admin Dashboard'}</span>
-              </button>
-            ) : (
-              <button
-                onClick={() => setIsAdminLoginModalOpen(true)}
-                className="w-full py-2 px-3 rounded-2xl bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-xs flex items-center justify-center gap-2 transition font-khmer border border-stone-200"
-              >
-                <ShieldAlert className="w-4 h-4 text-red-600" />
-                <span>{isKm ? 'ច្រកចូលរដ្ឋបាល Chea Savuth (Admin Portal)' : 'Admin Portal Login (Chea Savuth)'}</span>
               </button>
             )}
           </div>
@@ -107,18 +92,12 @@ export const ProfileView: React.FC = () => {
                 {isKm ? 'ដើម្បីរក្សាទុកម្ហូប ចែករំលែក និងចុះបញ្ជីហាង' : 'To save recipes, share posts & manage shops'}
               </p>
             </div>
-            <div className="flex gap-2 justify-center">
+            <div className="flex justify-center">
               <button
                 onClick={() => setIsAuthModalOpen(true)}
-                className="px-6 py-2 rounded-xl bg-amber-600 text-white font-bold text-xs shadow hover:bg-amber-500 font-khmer"
+                className="w-full sm:w-auto px-8 py-2.5 rounded-xl bg-amber-600 text-white font-bold text-xs shadow hover:bg-amber-500 font-khmer transition"
               >
                 {isKm ? 'ចូលគណនី / ចុះឈ្មោះ' : 'Sign In / Register'}
-              </button>
-              <button
-                onClick={() => setIsAdminLoginModalOpen(true)}
-                className="px-4 py-2 rounded-xl bg-red-700 text-white font-bold text-xs shadow hover:bg-red-800 font-khmer"
-              >
-                {isKm ? 'រដ្ឋបាល (Admin)' : 'Admin'}
               </button>
             </div>
           </div>
@@ -160,32 +139,6 @@ export const ProfileView: React.FC = () => {
             </div>
           </div>
         </button>
-      </div>
-
-      {/* Quick Demo Switcher */}
-      <div className="p-3.5 rounded-2xl bg-amber-50/80 dark:bg-stone-800/80 border border-amber-200/60 dark:border-stone-700 space-y-2">
-        <p className="text-[11px] font-bold text-amber-900 dark:text-amber-300 flex items-center gap-1.5 font-khmer">
-          <KeyRound className="w-3.5 h-3.5" />
-          <span>{isKm ? 'ផ្លាស់ប្តូរគណនីសាកល្បងភ្លាមៗ (Quick Demo Switch):' : 'Instant Demo Account Switch:'}</span>
-        </p>
-        <div className="grid grid-cols-3 gap-2">
-          {demoAccounts.map((acc) => {
-            const isCurrent = currentUser?.email === acc.email;
-            return (
-              <button
-                key={acc.email}
-                onClick={() => login(acc.email, acc.role as any)}
-                className={`p-2 rounded-xl text-[11px] font-semibold border transition text-center font-khmer ${
-                  isCurrent
-                    ? 'bg-amber-600 text-white border-amber-600 shadow-xs'
-                    : 'bg-white dark:bg-stone-700 text-stone-700 dark:text-stone-200 border-stone-200 dark:border-stone-600 hover:border-amber-400'
-                }`}
-              >
-                {acc.label}
-              </button>
-            );
-          })}
-        </div>
       </div>
 
       {/* Tabs: Bookmarks / My Posts / Settings */}
@@ -340,6 +293,17 @@ export const ProfileView: React.FC = () => {
               <span>{isKm ? 'ចាកចេញពីគណនី' : 'Sign Out'}</span>
             </button>
           )}
+
+          {/* Discreet Admin Portal Access */}
+          <div className="pt-2 border-t border-stone-100 dark:border-stone-700 text-center">
+            <button
+              onClick={() => setIsAdminLoginModalOpen(true)}
+              className="inline-flex items-center gap-1.5 text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 text-[11px] font-medium transition py-1.5 px-3 rounded-xl hover:bg-stone-50 dark:hover:bg-stone-700/40"
+            >
+              <Shield className="w-3.5 h-3.5" />
+              <span>{isKm ? 'ច្រកចូលប្រព័ន្ធរដ្ឋបាល' : 'System Administration'}</span>
+            </button>
+          </div>
         </div>
       )}
 

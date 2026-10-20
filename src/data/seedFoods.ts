@@ -13,10 +13,10 @@ export const seedFoods: FoodItem[] = [
     categoryEn: 'Signature / Amok',
     descriptionKh: 'អាម៉ុកត្រី គឺជាម្ហូបតំណាងអត្តសញ្ញាណជាតិខ្មែរដ៏ល្បីល្បាញលើពិភពលោក។ ចម្អិនពីសាច់ត្រីរ៉ស់ស្រស់ៗ លាយជាមួយគ្រឿងបុកខ្មែរ ខ្ទិះដូងខាប់ ស៊ុត និងស្លឹកញ វេចក្នុងកន្ទោងស្លឹកចេក រួចចំហុយឱ្យឈ្ងុយឈ្ងប់។',
     descriptionEn: 'The undisputed national dish of Cambodia. Fresh river fish gently cooked in fragrant lemongrass-turmeric kroeung with rich coconut cream and steamed inside banana leaf cups.',
-    photoUrl: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=800&auto=format&fit=crop&q=80&dish=food-1',
+    photoUrl: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=800&auto=format&fit=crop&q=80&dish=food-1',
     imageAuditStatus: 'verified',
     imageAuditNote: 'ផ្ទៀងផ្ទាត់ត្រឹមត្រូវ៖ អាម៉ុកត្រីខ្ទិះដូងស្លឹកញរប្រពៃណីខ្មែរ (Traditional Fish Amok)',
-    originalPhotoUrl: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800',
+    originalPhotoUrl: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=800',
     prepTime: '២៥ នាទី',
     cookTime: '៣០ នាទី',
     servings: '៣-៤ នាក់',
@@ -3178,9 +3178,36 @@ export const generateFull100Foods = (): FoodItem[] => {
 ];
 
   const fullList: FoodItem[] = [...seedFoods];
+  const existingNames = new Set(seedFoods.map(f => f.nameKh));
 
-  additionalAuthenticDishes.forEach((d, idx) => {
-        const id = `food-${fullList.length + 1}`;
+  // Balanced selection targets across categories to ensure exactly 100 total authentic dishes
+  const targetCategoryCounts: Record<string, number> = {
+    soup: 7,       // 18 core + 7 = 25
+    grilled: 8,    // 7 core + 8 = 15
+    stirfry: 10,   // 5 core + 10 = 15
+    salad: 5,      // 5 core + 5 = 10
+    noodles: 5,    // 5 core + 5 = 10
+    rice: 5,       // 3 core + 5 = 8
+    dessert: 5,    // 5 core + 5 = 10
+    specialty: 5,  // 2 core + 5 = 7
+  };
+
+  const selectedAdditionalDishes: typeof additionalAuthenticDishes = [];
+  for (const [cat, count] of Object.entries(targetCategoryCounts)) {
+    let added = 0;
+    for (const d of additionalAuthenticDishes) {
+      if (d.cat === cat && !existingNames.has(d.nameKh)) {
+        existingNames.add(d.nameKh);
+        selectedAdditionalDishes.push(d);
+        added++;
+        if (added === count) break;
+      }
+    }
+  }
+
+  // Exactly 50 dishes added: 50 core + 50 selected = 100 dishes total
+  selectedAdditionalDishes.forEach((d, idx) => {
+    const id = `food-${fullList.length + 1}`;
     const pool = categoryPhotoPools[d.cat] || categoryPhotoPools['specialty'];
     const basePhoto = pool[idx % pool.length];
     // Attach unique dish parameter to ensure zero duplication
@@ -3188,7 +3215,7 @@ export const generateFull100Foods = (): FoodItem[] => {
     const catObj = categories.find(c => c.slug === d.cat) || categories[0];
 
     // Certain regional specialty dishes flagged for admin review
-    const isFlagged = [139, 210, 214, 220].includes(fullList.length + 1);
+    const isFlagged = [56, 68, 79, 92].includes(fullList.length + 1);
     const auditStatus = isFlagged ? 'flagged_review' : 'verified';
     const auditNote = isFlagged 
       ? 'រង់ចាំការពិនិត្យផ្ទៀងផ្ទាត់រូបភាពពីរដ្ឋបាល (Pending Admin Review)'
