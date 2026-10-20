@@ -37,12 +37,22 @@ jobs:
           cp -rf dist/* android/app/src/main/assets/public/
 
       - name: 7. Build Android Debug APK
+        id: build_apk
+        continue-on-error: true
         run: |
           cd android
           chmod +x ./gradlew
-          ./gradlew assembleDebug --no-daemon
+          ./gradlew assembleDebug --no-daemon --stacktrace 2>&1 | tee ../gradle.log
 
-      - name: 8. Upload Android APK File
+      - name: 8. Print Gradle Log
+        run: |
+          echo "==== GRADLE LOG TAIL ===="
+          tail -n 100 gradle.log
+          if [ "${{ steps.build_apk.outcome }}" != "success" ]; then
+            exit 1
+          fi
+
+      - name: 9. Upload Android APK File
         uses: actions/upload-artifact@v4
         with:
           name: Khmer-Food-Tourism-APK
