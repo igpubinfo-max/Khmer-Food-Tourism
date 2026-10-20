@@ -39,11 +39,11 @@ jobs:
           mkdir -p android/app/src/main/assets/public
           cp -rf dist/* android/app/src/main/assets/public/
 
-      - name: 7. Build Hardened Android APK (Debug & Optimized Release with R8)
+      - name: 7. Build Android Debug APK
         run: |
           cd android
           chmod +x ./gradlew
-          ./gradlew assembleDebug assembleRelease --no-daemon
+          ./gradlew assembleDebug --no-daemon
 
       - name: 8. Locate Generated APK Files
         run: |
@@ -54,14 +54,16 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Khmer-Food-Tourism-APK
-          path: 'android/app/build/outputs/apk/**/*.apk'
+          path: 'android/app/build/outputs/apk/debug/*.apk'
 
       - name: 10. Publish GitHub Release with APK
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
           tag_name: v1.0.0
-          name: "Khmer Food & Tourism v1.0.0 — 200+ Dishes, 200+ Restaurants, $4.99 Promo & Security Hardening"
+          name: "Khmer Food & Tourism v1.0.0 (Updated Android APK)"
+          overwrite: true
+          make_latest: true
           body: |
             ### 🇰🇭 កម្មវិធីទូរស័ព្ទដៃ អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism Mobile App)
             
@@ -71,11 +73,10 @@ jobs:
             - 🏪 **២០០+ ភោជនីយដ្ឋានទូទាំង ២៥ ខេត្តក្រុង (200+ Cambodian Restaurants):** គ្របដណ្តប់ទូទាំងប្រទេស បែងចែកច្បាស់លាស់រវាងហាងផ្ទៀងផ្ទាត់ផ្លូវការ និងគំរូសហគមន៍។
             - 🔙 **ប៊ូតុងត្រឡប់ Android (Hardware Back Button with Confirmation):** សួរបញ្ជាក់ “តើអ្នកចង់ចាកចេញពីកម្មវិធីមែនទេ?” ជាមួយប៊ូតុង “បាទ/ចាស” និង “បន្តប្រើប្រាស់” ការពារការចាកចេញដោយអចេតនានៅពេលបំពេញទម្រង់បែបបទ។
             - 📲 **ទាញយក និងដំឡើងងាយស្រួលទាំង Android & iOS:** គាំទ្រ Direct APK Download លើ Android និង Safari Add-to-Home-Screen PWA Guide លើ iPhone។
-            - 🛡️ **សុវត្ថិភាពកម្រិតខ្ពស់ (Enterprise Security Hardening):** គណនីរដ្ឋបាលតែមួយគត់ ការពារដោយ PBKDF2-HMAC-SHA256 (100,000 Iterations), HMAC session tokens, Rate limiting & brute-force lockout, R8 code shrinking and obfuscation, និង network-security-config (HTTPS only)។
+            - 🛡️ **សុវត្ថិភាពកម្រិតខ្ពស់ (Enterprise Security Hardening):** គណនីរដ្ឋបាលតែមួយគត់ ការពារដោយ PBKDF2-HMAC-SHA256 (100,000 Iterations), HMAC session tokens, Rate limiting & brute-force lockout, និង network-security-config (HTTPS only)។
           draft: false
           prerelease: false
           files: |
             android/app/build/outputs/apk/debug/*.apk
-            android/app/build/outputs/apk/release/*.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
