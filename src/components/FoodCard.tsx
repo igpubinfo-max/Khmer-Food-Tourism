@@ -54,6 +54,11 @@ export const FoodCard: React.FC<FoodCardProps> = ({ food }) => {
           <Clock className="w-3 h-3 text-emerald-300" />
           <span>{food.cookTime}</span>
         </div>
+
+        {/* Sample / Representative Image Label (រូបតំណាង) */}
+        <div className="absolute bottom-2.5 right-2.5 px-1.5 py-0.5 rounded-md bg-black/60 backdrop-blur-xs text-[9px] text-white/90 font-khmer border border-white/20 select-none pointer-events-none shadow-xs">
+          <span>{language === 'km' ? 'រូបតំណាង' : 'Sample photo'}</span>
+        </div>
       </div>
 
       {/* Content */}

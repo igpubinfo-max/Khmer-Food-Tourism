@@ -113,6 +113,9 @@ interface AppContextType {
   setIsAdminLoginModalOpen: (open: boolean) => void;
   isInstallModalOpen: boolean;
   setIsInstallModalOpen: (open: boolean) => void;
+  installPlatformTab: 'android' | 'ios';
+  setInstallPlatformTab: (tab: 'android' | 'ios') => void;
+  openInstallModal: (tab?: 'android' | 'ios') => void;
   isSupportModalOpen: boolean;
   setIsSupportModalOpen: (open: boolean) => void;
   isExitModalOpen: boolean;
@@ -333,6 +336,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [isAdminLoginModalOpen, setIsAdminLoginModalOpen] = useState(false);
   const [isInstallModalOpen, setIsInstallModalOpen] = useState(false);
+  const [installPlatformTab, setInstallPlatformTab] = useState<'android' | 'ios'>('android');
+
+  const openInstallModal = (tab: 'android' | 'ios' = 'android') => {
+    setInstallPlatformTab(tab);
+    setIsInstallModalOpen(true);
+  };
   const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
   const [isExitModalOpen, setIsExitModalOpen] = useState(false);
 
@@ -1302,6 +1311,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setIsAdminLoginModalOpen,
         isInstallModalOpen,
         setIsInstallModalOpen,
+        installPlatformTab,
+        setInstallPlatformTab,
+        openInstallModal,
         isSupportModalOpen,
         setIsSupportModalOpen,
         searchQuery,

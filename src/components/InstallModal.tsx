@@ -12,16 +12,17 @@ export const InstallModal: React.FC = () => {
     setIsInstallModalOpen, 
     appSettings, 
     language,
-    showToast 
+    showToast,
+    installPlatformTab,
+    setInstallPlatformTab
   } = useApp();
 
-  const [platformTab, setPlatformTab] = useState<'android' | 'ios'>('android');
   const [androidQrUrl, setAndroidQrUrl] = useState<string>('');
   const [iosQrUrl, setIosQrUrl] = useState<string>('');
   const [copied, setCopied] = useState<boolean>(false);
 
   const isKm = language === 'km';
-  const apkDownloadTarget = appSettings.apkDownloadUrl || 'https://github.com/igpubinfo-max/Khmer-Food-Tourism/releases/download/v1.0.0/app-debug.apk';
+  const apkDownloadTarget = appSettings.apkDownloadUrl || 'https://github.com/igpubinfo-max/Khmer-Food-Tourism/releases/download/v1.3.2/app-debug.apk';
   const iosWebTarget = window.location.origin || 'https://khmerfoodtourism.com';
 
   useEffect(() => {
@@ -84,9 +85,9 @@ export const InstallModal: React.FC = () => {
           {/* Platform Tab Switcher */}
           <div className="grid grid-cols-2 gap-2 mt-4 p-1 bg-black/25 rounded-2xl backdrop-blur-sm">
             <button
-              onClick={() => setPlatformTab('android')}
+              onClick={() => setInstallPlatformTab('android')}
               className={`py-2 px-3 rounded-xl font-khmer text-xs font-bold transition-all flex items-center justify-center gap-2 ${
-                platformTab === 'android'
+                installPlatformTab === 'android'
                   ? 'bg-[#059669] text-white shadow-md'
                   : 'text-emerald-200 hover:text-white'
               }`}
@@ -96,9 +97,9 @@ export const InstallModal: React.FC = () => {
             </button>
 
             <button
-              onClick={() => setPlatformTab('ios')}
+              onClick={() => setInstallPlatformTab('ios')}
               className={`py-2 px-3 rounded-xl font-khmer text-xs font-bold transition-all flex items-center justify-center gap-2 ${
-                platformTab === 'ios'
+                installPlatformTab === 'ios'
                   ? 'bg-slate-800 text-white shadow-md'
                   : 'text-emerald-200 hover:text-white'
               }`}
@@ -112,7 +113,7 @@ export const InstallModal: React.FC = () => {
         {/* Body Content */}
         <div className="p-5 overflow-y-auto space-y-5 flex-1 text-xs">
           {/* ANDROID TAB */}
-          {platformTab === 'android' && (
+          {installPlatformTab === 'android' && (
             <div className="space-y-4">
               {/* QR Code Presentation Box */}
               <div className="bg-gradient-to-b from-slate-50 to-white dark:from-slate-800 dark:to-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-700 text-center flex flex-col items-center">
@@ -203,11 +204,21 @@ export const InstallModal: React.FC = () => {
                   </li>
                 </ul>
               </div>
+
+              {/* Quick Switch to iOS button */}
+              <button
+                onClick={() => setInstallPlatformTab('ios')}
+                className="w-full flex items-center justify-center gap-2 py-2.5 px-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-2xl border border-slate-200 dark:border-slate-700 transition font-khmer text-xs font-semibold"
+              >
+                <Apple className="w-4 h-4 text-slate-700 dark:text-slate-300" />
+                <span>{isKm ? 'ប្រើប្រាស់ Apple iPhone? ចុចទីនេះសម្រាប់ iOS' : 'Using Apple iPhone? Switch to iOS guide'}</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
             </div>
           )}
 
           {/* IPHONE / IOS TAB */}
-          {platformTab === 'ios' && (
+          {installPlatformTab === 'ios' && (
             <div className="space-y-4">
               {/* iOS Instant Web / PWA QR */}
               <div className="bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-700 text-center flex flex-col items-center">
@@ -292,13 +303,23 @@ export const InstallModal: React.FC = () => {
                   </li>
                 </ul>
               </div>
+
+              {/* Quick Switch to Android APK */}
+              <button
+                onClick={() => setInstallPlatformTab('android')}
+                className="w-full flex items-center justify-center gap-2 py-2.5 px-3 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:hover:bg-emerald-900/50 text-[#064E3B] dark:text-emerald-300 rounded-2xl border border-emerald-200/80 dark:border-emerald-800/80 transition font-khmer text-xs font-semibold"
+              >
+                <Smartphone className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                <span>{isKm ? 'ប្រើប្រាស់ Android? ចុចទីនេះដើម្បីទាញយក APK' : 'Using Android? Switch to APK Download'}</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
             </div>
           )}
         </div>
 
         {/* Footer */}
         <div className="p-4 bg-slate-50 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 flex justify-between items-center text-xs text-slate-500 font-khmer">
-          <span>{isKm ? 'កំណែចុងក្រោយ (v1.0.0)' : 'Release v1.0.0'}</span>
+          <span>{isKm ? 'កំណែចុងក្រោយ (v1.3.2)' : 'Release v1.3.2'}</span>
           <button
             onClick={() => setIsInstallModalOpen(false)}
             className="px-4 py-1.5 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-xl transition font-medium"

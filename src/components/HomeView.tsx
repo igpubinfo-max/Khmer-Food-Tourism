@@ -5,14 +5,16 @@ import { RestaurantCard } from './RestaurantCard';
 import { TouristCard } from './TouristCard';
 import { 
   Sparkles, ChevronRight, Utensils, Store, Compass, 
-  MapPin, Heart, Flame, QrCode, Download, ShieldCheck
+  MapPin, Heart, Flame, QrCode, Download, ShieldCheck,
+  Apple, Smartphone
 } from 'lucide-react';
 
 export const HomeView: React.FC = () => {
   const { 
     foods, restaurants, destinations, setActiveTab, 
     language, setSelectedProvince, posts,
-    setIsInstallModalOpen, setIsSupportModalOpen
+    setIsInstallModalOpen, setIsSupportModalOpen,
+    openInstallModal
   } = useApp();
 
   const isKm = language === 'km';
@@ -65,11 +67,19 @@ export const HomeView: React.FC = () => {
             </button>
 
             <button
-              onClick={() => setIsInstallModalOpen(true)}
+              onClick={() => openInstallModal('android')}
               className="px-3.5 py-2 rounded-xl bg-white/15 hover:bg-white/25 text-white font-medium text-xs border border-white/20 transition flex items-center gap-1.5 font-khmer"
             >
-              <QrCode className="w-3.5 h-3.5 text-emerald-200" />
+              <Smartphone className="w-3.5 h-3.5 text-emerald-200" />
               <span>{isKm ? 'ដំឡើង APK' : 'Install APK'}</span>
+            </button>
+
+            <button
+              onClick={() => openInstallModal('ios')}
+              className="px-3.5 py-2 rounded-xl bg-white/15 hover:bg-white/25 text-white font-medium text-xs border border-white/20 transition flex items-center gap-1.5 font-khmer"
+            >
+              <Apple className="w-3.5 h-3.5 text-emerald-200" />
+              <span>{isKm ? 'សម្រាប់ iOS' : 'For iOS'}</span>
             </button>
 
             <button
@@ -90,25 +100,34 @@ export const HomeView: React.FC = () => {
       <div className="bg-white dark:bg-slate-800 rounded-3xl p-4 border border-slate-200/90 dark:border-slate-700 shadow-xs flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 flex items-center justify-center text-[#064E3B] dark:text-emerald-400 shadow-2xs shrink-0 border border-emerald-200/60">
-            <QrCode className="w-6 h-6" />
+            <Smartphone className="w-6 h-6" />
           </div>
           <div>
             <h4 className="font-bold text-[#0F172A] dark:text-white text-xs sm:text-sm font-khmer">
-              {isKm ? 'ដំឡើងកម្មវិធី ឬជួយឧបត្ថម្ភ' : 'Install App or Support Us'}
+              {isKm ? 'ដំឡើងកម្មវិធីទូរស័ព្ទដៃ' : 'Install Mobile App'}
             </h4>
             <p className="text-[11px] text-slate-500 dark:text-slate-400 font-khmer line-clamp-1">
-              {isKm ? 'ស្កេន QR Code ទាញយក Android APK ឬបរិច្ចាគ KHQR' : 'Scan to download APK or donate via Bakong KHQR'}
+              {isKm ? 'ទាញយក Android APK ឬដំឡើងលើ Apple iOS' : 'Download Android APK or install on Apple iOS'}
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-1.5 shrink-0">
           <button
-            onClick={() => setIsInstallModalOpen(true)}
-            className="p-2 bg-[#064E3B] hover:bg-[#047857] text-white rounded-xl shadow-xs transition"
-            title={isKm ? 'ដំឡើង APK' : 'Install'}
+            onClick={() => openInstallModal('android')}
+            className="flex items-center gap-1 px-2.5 py-2 bg-[#064E3B] hover:bg-[#047857] text-white rounded-xl shadow-xs transition text-xs font-bold font-khmer"
+            title={isKm ? 'ដំឡើង Android APK' : 'Install APK'}
           >
-            <Download className="w-4 h-4" />
+            <Smartphone className="w-3.5 h-3.5 text-emerald-300" />
+            <span>APK</span>
+          </button>
+          <button
+            onClick={() => openInstallModal('ios')}
+            className="flex items-center gap-1 px-2.5 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl shadow-xs transition text-xs font-bold font-khmer border border-slate-700"
+            title={isKm ? 'ដំឡើងលើ iPhone (iOS)' : 'Install on iOS'}
+          >
+            <Apple className="w-3.5 h-3.5 text-slate-200" />
+            <span>iOS</span>
           </button>
           <button
             onClick={() => setIsSupportModalOpen(true)}

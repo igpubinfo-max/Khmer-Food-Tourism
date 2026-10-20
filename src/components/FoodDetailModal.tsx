@@ -134,6 +134,11 @@ export const FoodDetailModal: React.FC = () => {
                 {language === 'km' ? selectedFood.nameEn : selectedFood.nameKh}
               </p>
             </div>
+
+            {/* Sample / Representative Image Label (រូបតំណាង) */}
+            <div className="absolute bottom-4 right-4 z-10 px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-xs text-[10px] text-white/90 font-khmer border border-white/20 select-none pointer-events-none shadow-xs">
+              <span>{language === 'km' ? 'រូបតំណាង' : 'Sample photo'}</span>
+            </div>
           </div>
 
           <div className="p-4 sm:p-6 space-y-6">
