@@ -60,20 +60,20 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: v1.0.0
-          name: "Khmer Food & Tourism v1.0.0 (Updated Android APK)"
+          tag_name: v1.1.0
+          name: "Khmer Food & Tourism v1.1.0 (Free Listing & 1-Year Premium APK)"
           overwrite: true
           make_latest: true
           body: |
             ### 🇰🇭 កម្មវិធីទូរស័ព្ទដៃ អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism Mobile App)
             
-            **កំណែថ្មី v1.0.0 (Key Features & Security Hardening):**
-            - 💳 **តម្លៃចុះបញ្ជីហាងប្រូម៉ូសិន $4.99 USD (Restaurant Registration $4.99 Promo):** ការទូទាត់តាម Bakong KHQR ជាមួយលេខកូដប្រតិបត្តិការ (Trx ID) និងការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាលមុននឹងធ្វើឱ្យហាងសកម្ម។
-            - 🍲 **២០០+ មុខម្ហូបខ្មែរពិតៗ (200+ Authentic Khmer Dishes):** រូបភាពច្បាស់ៗ ដកតម្លៃចេញពីរូបភាព គ្រឿងផ្សំ និងរបៀបចម្អិន ៨ ប្រភេទ (សម្ល, អាំង, ឆា, ញាំ, គុយទាវ/នំបញ្ចុក, បាយ, បង្អែម, អាហារសម្រន់)។
-            - 🏪 **២០០+ ភោជនីយដ្ឋានទូទាំង ២៥ ខេត្តក្រុង (200+ Cambodian Restaurants):** គ្របដណ្តប់ទូទាំងប្រទេស បែងចែកច្បាស់លាស់រវាងហាងផ្ទៀងផ្ទាត់ផ្លូវការ និងគំរូសហគមន៍។
-            - 🔙 **ប៊ូតុងត្រឡប់ Android (Hardware Back Button with Confirmation):** សួរបញ្ជាក់ “តើអ្នកចង់ចាកចេញពីកម្មវិធីមែនទេ?” ជាមួយប៊ូតុង “បាទ/ចាស” និង “បន្តប្រើប្រាស់” ការពារការចាកចេញដោយអចេតនានៅពេលបំពេញទម្រង់បែបបទ។
-            - 📲 **ទាញយក និងដំឡើងងាយស្រួលទាំង Android & iOS:** គាំទ្រ Direct APK Download លើ Android និង Safari Add-to-Home-Screen PWA Guide លើ iPhone។
-            - 🛡️ **សុវត្ថិភាពកម្រិតខ្ពស់ (Enterprise Security Hardening):** គណនីរដ្ឋបាលតែមួយគត់ ការពារដោយ PBKDF2-HMAC-SHA256 (100,000 Iterations), HMAC session tokens, Rate limiting & brute-force lockout, និង network-security-config (HTTPS only)។
+            **កំណែថ្មី v1.1.0 (Free Listing, One-Time $4.99 Premium for 365 Days & Security):**
+            - 🎁 **ចុះបញ្ជីហាងឥតគិតថ្លៃ $0 (Free Restaurant Listing):** ម្ចាស់ហាងអាចចុះឈ្មោះហាងដោយឥតគិតថ្លៃ ($0) បង្ហាញក្នុងបញ្ជីហាងទូទៅ រូបតំណាងហាង ១ សន្លឹក អាសយដ្ឋាន និងលេខទូរស័ព្ទ (មិនអាចបន្ថែមមុខម្ហូបបានទេ)។
+            - ⭐ **សមាជិក VIP Premium $4.99 សម្រាប់ ១ ឆ្នាំ (365 ថ្ងៃ):** បង់តែម្តង $4.99 សម្រាប់រយៈពេល ៣៦៥ ថ្ងៃ (មិនមែនជាការកាត់លុយប្រចាំខែ ឬបន្តស្វ័យប្រវត្តិឡើយ)។ អាចបញ្ចូលមុខម្ហូបបានរហូតដល់ ៥ មុខ ជាមួយរូបភាព តម្លៃជាដុល្លារ និងរៀល។
+            - ⏳ **រក្សាទុកទិន្នន័យទាំងអស់ពេលផុតកំណត់ (No Data Loss):** នៅពេលផុតកំណត់ ៣៦៥ ថ្ងៃ ទិន្នន័យហាង និងមុខម្ហូបត្រូវបានរក្សាទុកបង្ហាញជាធម្មតា (មិនលុបចោលឡើយ) ហើយស្ថានភាពត្រឡប់មក Free Listing ធម្មតា ដោយអាចបន្តជាថ្មី $4.99 បានគ្រប់ពេល។
+            - 🚫 **ដកមុខងារ QR Code របស់ភោជនីយដ្ឋានចេញទាំងស្រុង (No Restaurant QR Codes):** គ្មានការបង្កើត បង្ហាញ ឬគ្រប់គ្រង QR Code សម្រាប់ភោជនីយដ្ឋានទៀតឡើយ។ ការទូទាត់ធ្វើឡើងតាម ABA Bank Transfer / Bakong ជាមួយលេខប្រតិបត្តិការ (Trx ID)។
+            - 🍲 **២០០+ មុខម្ហូបខ្មែរពិតៗ និង ១០០+ តំបន់ទេសចរណ៍ (Authentic Dishes & Attractions):** មុខម្ហូបខ្មែរចម្រុះ ៨ ប្រភេទ និងតំបន់ទេសចរណ៍ទូទាំង ២៥ ខេត្តក្រុង។
+            - 🛡️ **សុវត្ថិភាពខ្ពស់ និងរដ្ឋបាលតែម្នាក់គត់ (Strict Single Admin Security):** គ្រប់គ្រងសិទ្ធិដោយ PBKDF2-HMAC-SHA256, Cloud Firestore Security Rules រឹតបន្តឹង 5-item limit និងការពារមិនឱ្យអ្នកប្រើប្រាស់កែប្រែស្ថានភាព VIP ឬកាលបរិច្ឆេទដោយខ្លួនឯង។
           draft: false
           prerelease: false
           files: |
