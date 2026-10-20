@@ -1,7 +1,7 @@
 import React from 'react';
 import { Restaurant } from '../types';
 import { useApp } from '../context/AppContext';
-import { MapPin, Phone, Star, Clock, Navigation } from 'lucide-react';
+import { MapPin, Phone, Star, Clock, Navigation, CheckCircle2, AlertCircle } from 'lucide-react';
 
 interface RestaurantCardProps {
   restaurant: Restaurant;
@@ -9,6 +9,7 @@ interface RestaurantCardProps {
 
 export const RestaurantCard: React.FC<RestaurantCardProps> = ({ restaurant }) => {
   const { language, setSelectedRestaurant } = useApp();
+  const isKm = language === 'km';
 
   return (
     <div 
@@ -19,27 +20,47 @@ export const RestaurantCard: React.FC<RestaurantCardProps> = ({ restaurant }) =>
       <div className="relative aspect-16/9 w-full overflow-hidden bg-stone-100 dark:bg-stone-700">
         <img 
           src={restaurant.photoUrl} 
-          alt={language === 'km' ? restaurant.nameKh : restaurant.nameEn}
+          alt={isKm ? restaurant.nameKh : restaurant.nameEn}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           loading="lazy"
         />
 
         {/* Province pill */}
         <div className="absolute top-2.5 left-2.5">
-          <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-900/80 backdrop-blur-md text-amber-200 shadow">
-            {language === 'km' ? restaurant.provinceKh : restaurant.provinceEn}
+          <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-900/80 backdrop-blur-md text-amber-200 shadow font-khmer">
+            {isKm ? restaurant.provinceKh : restaurant.provinceEn}
           </span>
         </div>
 
-        {/* Price level */}
-        <div className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-md text-amber-300 text-xs font-bold">
-          {restaurant.priceLevel}
+        {/* Verification Badge */}
+        <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5">
+          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold backdrop-blur-md shadow flex items-center gap-1 font-khmer ${
+            restaurant.isVerified
+              ? 'bg-emerald-600/90 text-white border border-emerald-400/40'
+              : 'bg-amber-600/90 text-amber-100 border border-amber-400/40'
+          }`}>
+            {restaurant.isVerified ? (
+              <>
+                <CheckCircle2 className="w-3 h-3 text-white" />
+                <span>{isKm ? 'ផ្ទៀងផ្ទាត់រួច' : 'Verified'}</span>
+              </>
+            ) : (
+              <>
+                <AlertCircle className="w-3 h-3 text-amber-200" />
+                <span>{isKm ? 'គំរូ / មិនទាន់ផ្ទៀងផ្ទាត់' : 'Sample'}</span>
+              </>
+            )}
+          </span>
+
+          <span className="px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-md text-amber-300 text-xs font-bold">
+            {restaurant.priceLevel}
+          </span>
         </div>
 
         {/* Hours badge */}
-        <div className="absolute bottom-2.5 left-2.5 flex items-center gap-1 px-2 py-0.5 rounded-md bg-stone-950/75 backdrop-blur-sm text-stone-200 text-[10px]">
+        <div className="absolute bottom-2.5 left-2.5 flex items-center gap-1 px-2 py-0.5 rounded-md bg-stone-950/75 backdrop-blur-sm text-stone-200 text-[10px] font-khmer">
           <Clock className="w-3 h-3 text-amber-400" />
-          <span>{language === 'km' ? restaurant.openingHoursKh : restaurant.openingHoursEn}</span>
+          <span>{isKm ? restaurant.openingHoursKh : restaurant.openingHoursEn}</span>
         </div>
       </div>
 
@@ -47,20 +68,20 @@ export const RestaurantCard: React.FC<RestaurantCardProps> = ({ restaurant }) =>
       <div className="p-3.5 flex flex-col flex-1 justify-between">
         <div>
           <div className="flex items-start justify-between gap-1 mb-1">
-            <h3 className="font-bold text-sm text-stone-900 dark:text-stone-100 group-hover:text-amber-800 transition line-clamp-1">
-              {language === 'km' ? restaurant.nameKh : restaurant.nameEn}
+            <h3 className="font-bold text-sm text-stone-900 dark:text-stone-100 group-hover:text-amber-800 transition line-clamp-1 font-khmer">
+              {isKm ? restaurant.nameKh : restaurant.nameEn}
             </h3>
           </div>
 
-          <div className="flex items-start gap-1 text-[11px] text-stone-500 dark:text-stone-400 mb-2 line-clamp-1">
+          <div className="flex items-start gap-1 text-[11px] text-stone-500 dark:text-stone-400 mb-2 line-clamp-1 font-khmer">
             <MapPin className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
-            <span>{language === 'km' ? restaurant.addressKh : restaurant.addressEn}</span>
+            <span>{isKm ? restaurant.addressKh : restaurant.addressEn}</span>
           </div>
 
           {/* Signature dishes tags */}
           <div className="flex flex-wrap gap-1 mb-2.5">
             {restaurant.signatureDishesKh.slice(0, 2).map((dish, i) => (
-              <span key={i} className="px-2 py-0.5 rounded-md bg-amber-50 dark:bg-stone-700/60 text-amber-800 dark:text-amber-300 text-[10px] font-medium border border-amber-200/50 dark:border-stone-600">
+              <span key={i} className="px-2 py-0.5 rounded-md bg-amber-50 dark:bg-stone-700/60 text-amber-800 dark:text-amber-300 text-[10px] font-medium border border-amber-200/50 dark:border-stone-600 font-khmer">
                 🍽️ {dish}
               </span>
             ))}

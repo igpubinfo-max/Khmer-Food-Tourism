@@ -5,15 +5,17 @@ import { RestaurantCard } from './RestaurantCard';
 import { TouristCard } from './TouristCard';
 import { 
   Sparkles, ChevronRight, Utensils, Store, Compass, 
-  MapPin, Heart, Flame
+  MapPin, Heart, Flame, QrCode, Download, ShieldCheck
 } from 'lucide-react';
 
 export const HomeView: React.FC = () => {
   const { 
     foods, restaurants, destinations, setActiveTab, 
-    language, setSelectedProvince, posts 
+    language, setSelectedProvince, posts,
+    setIsInstallModalOpen, setIsSupportModalOpen
   } = useApp();
 
+  const isKm = language === 'km';
   const featuredFoods = foods.slice(0, 4);
   const featuredRestaurants = restaurants.slice(0, 3);
   const featuredDestinations = destinations.slice(0, 3);
@@ -31,43 +33,91 @@ export const HomeView: React.FC = () => {
       {/* Hero Banner */}
       <div className="relative rounded-3xl overflow-hidden shadow-lg bg-gradient-to-br from-amber-800 via-amber-900 to-amber-950 text-white p-5">
         <div className="relative z-10 space-y-2">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-400/30 text-amber-300 text-[11px] font-bold">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>{language === 'km' ? 'មរតកវប្បធម៌ខ្មែរ' : 'Cambodian Heritage'}</span>
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-400/30 text-amber-300 text-[11px] font-bold">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>{isKm ? 'មរតកវប្បធម៌ខ្មែរ' : 'Cambodian Heritage'}</span>
+            </div>
+            <span className="text-[10px] bg-red-600/80 text-white px-2 py-0.5 rounded-full font-bold">
+              100+ Dishes & Shops
+            </span>
           </div>
 
           <h2 className="font-moul text-lg sm:text-xl text-amber-200 leading-snug drop-shadow-sm">
-            {language === 'km' 
+            {isKm 
               ? 'ភ្លក្សរសជាតិម្ហូបខ្មែរ និងទស្សនាសម្រស់កម្ពុជា' 
               : 'Taste Khmer Flavors & Discover Cambodia'}
           </h2>
 
           <p className="text-xs text-amber-100/80 leading-relaxed font-normal">
-            {language === 'km'
-              ? 'ស្វែងរកមុខម្ហូបប្រពៃណី រូបមន្តចម្អិន ភោជនីយដ្ឋានឆ្ងាញ់ៗ និងតំបន់ទេសចរណ៍ស្រស់ត្រកាលទូទាំងប្រទេស'
-              : 'Discover traditional recipes, authentic restaurants, and breathtaking destinations across Cambodia.'}
+            {isKm
+              ? 'ស្វែងរកមុខម្ហូបប្រពៃណី ១០០+ មុខ រូបមន្តចម្អិន ភោជនីយដ្ឋាន ១០០+ ហាង និងតំបន់ទេសចរណ៍ស្រស់ត្រកាលទូទាំងប្រទេស'
+              : 'Discover 100+ authentic Khmer dishes, cooking recipes, 100+ restaurants, and breathtaking destinations.'}
           </p>
 
-          <div className="pt-2 flex items-center gap-2">
+          <div className="pt-2 flex items-center gap-2 flex-wrap">
             <button
               onClick={() => setActiveTab('food')}
-              className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 text-amber-950 font-bold text-xs shadow-md transition active:scale-95 flex items-center gap-1"
+              className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 text-amber-950 font-bold text-xs shadow-md transition active:scale-95 flex items-center gap-1 font-khmer"
             >
               <Utensils className="w-3.5 h-3.5" />
-              <span>{language === 'km' ? 'មើលមុខម្ហូប' : 'Explore Food'}</span>
+              <span>{isKm ? 'មើលមុខម្ហូប' : 'Explore Food'}</span>
             </button>
 
             <button
-              onClick={() => setActiveTab('tourism')}
-              className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white font-medium text-xs border border-white/20 transition"
+              onClick={() => setIsInstallModalOpen(true)}
+              className="px-3.5 py-2 rounded-xl bg-white/15 hover:bg-white/25 text-white font-medium text-xs border border-white/25 transition flex items-center gap-1.5 font-khmer"
             >
-              <span>{language === 'km' ? 'កន្លែងដើរលេង' : 'Destinations'}</span>
+              <QrCode className="w-3.5 h-3.5 text-amber-300" />
+              <span>{isKm ? 'ដំឡើង APK' : 'Install APK'}</span>
+            </button>
+
+            <button
+              onClick={() => setIsSupportModalOpen(true)}
+              className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 text-white font-medium text-xs shadow transition flex items-center gap-1.5 font-khmer"
+            >
+              <Heart className="w-3.5 h-3.5 fill-white" />
+              <span>{isKm ? 'ជួយគាំទ្រ' : 'Support'}</span>
             </button>
           </div>
         </div>
 
         {/* Decorative background shape */}
         <div className="absolute -bottom-8 -right-8 w-36 h-36 rounded-full bg-amber-500/10 blur-2xl pointer-events-none" />
+      </div>
+
+      {/* App Installation & Support Interactive Showcase Card */}
+      <div className="bg-gradient-to-r from-amber-50 via-orange-50/50 to-red-50/40 rounded-3xl p-4 border border-amber-200/80 shadow-sm flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-red-700 to-amber-600 flex items-center justify-center text-white shadow-md shrink-0">
+            <QrCode className="w-6 h-6" />
+          </div>
+          <div>
+            <h4 className="font-bold text-stone-900 text-xs sm:text-sm font-khmer">
+              {isKm ? 'ដំឡើងកម្មវិធី ឬជួយឧបត្ថម្ភ' : 'Install App or Support Us'}
+            </h4>
+            <p className="text-[11px] text-stone-600 font-khmer line-clamp-1">
+              {isKm ? 'ស្កេន QR Code ទាញយក Android APK ឬបរិច្ចាគ KHQR' : 'Scan to download APK or donate via Bakong KHQR'}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-1.5 shrink-0">
+          <button
+            onClick={() => setIsInstallModalOpen(true)}
+            className="p-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl shadow-xs transition"
+            title={isKm ? 'ដំឡើង APK' : 'Install'}
+          >
+            <Download className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => setIsSupportModalOpen(true)}
+            className="p-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl shadow-xs transition"
+            title={isKm ? 'ជួយឧបត្ថម្ភ KHQR' : 'Support'}
+          >
+            <Heart className="w-4 h-4 fill-white" />
+          </button>
+        </div>
       </div>
 
       {/* Quick Category Icons */}
@@ -80,26 +130,26 @@ export const HomeView: React.FC = () => {
           >
             <span className="text-xl mb-1">{cat.icon}</span>
             <span className="text-[10px] font-bold text-stone-700 dark:text-stone-300 text-center">
-              {language === 'km' ? cat.labelKh : cat.labelEn}
+              {isKm ? cat.labelKh : cat.labelEn}
             </span>
           </button>
         ))}
       </div>
 
-      {/* Section 1: Featured Khmer Food */}
+      {/* Section 1: Featured Khmer Food (100+ total) */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-2 h-5 rounded-full bg-amber-600" />
             <h3 className="font-moul text-xs sm:text-sm text-stone-900 dark:text-stone-100">
-              {language === 'km' ? 'មុខម្ហូបខ្មែរល្បីៗ' : 'Famous Khmer Dishes'}
+              {isKm ? `មុខម្ហូបខ្មែរល្បីៗ (សរុប ${foods.length}+ មុខ)` : `Famous Khmer Dishes (${foods.length}+ total)`}
             </h3>
           </div>
           <button
             onClick={() => setActiveTab('food')}
             className="flex items-center gap-0.5 text-xs font-semibold text-amber-700 dark:text-amber-400 hover:underline"
           >
-            <span>{language === 'km' ? 'មើលទាំងអស់' : 'View all'}</span>
+            <span>{isKm ? 'មើលទាំងអស់' : 'View all'}</span>
             <ChevronRight className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -111,20 +161,20 @@ export const HomeView: React.FC = () => {
         </div>
       </div>
 
-      {/* Section 2: Recommended Restaurants */}
+      {/* Section 2: Recommended Restaurants (100+ total) */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-2 h-5 rounded-full bg-emerald-600" />
             <h3 className="font-moul text-xs sm:text-sm text-stone-900 dark:text-stone-100">
-              {language === 'km' ? 'ភោជនីយដ្ឋានឆ្នើមៗ' : 'Featured Restaurants'}
+              {isKm ? `ភោជនីយដ្ឋានឆ្នើមៗ (សរុប ${restaurants.length}+ ហាង)` : `Featured Restaurants (${restaurants.length}+ shops)`}
             </h3>
           </div>
           <button
             onClick={() => setActiveTab('restaurants')}
             className="flex items-center gap-0.5 text-xs font-semibold text-amber-700 dark:text-amber-400 hover:underline"
           >
-            <span>{language === 'km' ? 'មើលទាំងអស់' : 'View all'}</span>
+            <span>{isKm ? 'មើលទាំងអស់' : 'View all'}</span>
             <ChevronRight className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -142,14 +192,14 @@ export const HomeView: React.FC = () => {
           <div className="flex items-center gap-2">
             <div className="w-2 h-5 rounded-full bg-blue-600" />
             <h3 className="font-moul text-xs sm:text-sm text-stone-900 dark:text-stone-100">
-              {language === 'km' ? 'តំបន់ទេសចរណ៍ស្រស់ត្រកាល' : 'Must-Visit Destinations'}
+              {isKm ? 'តំបន់ទេសចរណ៍ស្រស់ត្រកាល' : 'Must-Visit Destinations'}
             </h3>
           </div>
           <button
             onClick={() => setActiveTab('tourism')}
             className="flex items-center gap-0.5 text-xs font-semibold text-amber-700 dark:text-amber-400 hover:underline"
           >
-            <span>{language === 'km' ? 'មើលទាំងអស់' : 'View all'}</span>
+            <span>{isKm ? 'មើលទាំងអស់' : 'View all'}</span>
             <ChevronRight className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -165,18 +215,18 @@ export const HomeView: React.FC = () => {
       {posts.length > 0 && (
         <div className="p-4 rounded-3xl bg-amber-50 dark:bg-stone-800 border border-amber-200/60 dark:border-stone-700 space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-amber-900 dark:text-amber-300 flex items-center gap-1.5">
+            <span className="text-xs font-bold text-amber-900 dark:text-amber-300 flex items-center gap-1.5 font-khmer">
               <Heart className="w-4 h-4 text-rose-500 fill-current" />
-              {language === 'km' ? 'ការចែករំលែកថ្មីៗពីសហគមន៍' : 'Recent Community Stories'}
+              {isKm ? 'ការចែករំលែកថ្មីៗពីសហគមន៍' : 'Recent Community Stories'}
             </span>
             <button
               onClick={() => setActiveTab('community')}
-              className="text-xs font-semibold text-amber-700 hover:underline"
+              className="text-xs font-semibold text-amber-700 hover:underline font-khmer"
             >
-              {language === 'km' ? 'ចូលរួម' : 'Join Feed'}
+              {isKm ? 'ចូលរួម' : 'Join Feed'}
             </button>
           </div>
-          <p className="text-xs text-stone-600 dark:text-stone-300">
+          <p className="text-xs text-stone-600 dark:text-stone-300 font-khmer">
             {posts[0].titleKh}
           </p>
         </div>

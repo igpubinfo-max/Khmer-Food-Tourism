@@ -7,13 +7,18 @@ import { Search, Utensils, Plus, Sparkles } from 'lucide-react';
 export const FoodView: React.FC = () => {
   const { foods, language, searchQuery, setSearchQuery, currentUser, setIsAdminOpen } = useApp();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const isKm = language === 'km';
 
   const categories = [
     { id: 'all', nameKh: 'ទាំងអស់', nameEn: 'All Foods' },
     { id: 'soup', nameKh: 'សម្ល & អាម៉ុក', nameEn: 'Soups & Amok' },
+    { id: 'grilled', nameKh: 'ម្ហូបអាំង', nameEn: 'Grilled & BBQ' },
     { id: 'stirfry', nameKh: 'ម្ហូបឆា', nameEn: 'Stir-fried' },
-    { id: 'breakfast', nameKh: 'អាហារពេលព្រឹក', nameEn: 'Breakfast' },
+    { id: 'salad', nameKh: 'ញាំ & ភ្លា', nameEn: 'Salads & Dips' },
+    { id: 'noodles', nameKh: 'គុយទាវ & នំបញ្ចុក', nameEn: 'Noodles' },
+    { id: 'rice', nameKh: 'ម្ហូបបាយ & បបរ', nameEn: 'Rice Dishes' },
     { id: 'dessert', nameKh: 'នំ & បង្អែម', nameEn: 'Desserts' },
+    { id: 'specialty', nameKh: 'មុខម្ហូបពិសេស', nameEn: 'Specialties' },
   ];
 
   const filteredFoods = foods.filter((f) => {
@@ -39,28 +44,28 @@ export const FoodView: React.FC = () => {
         <div>
           <h2 className="font-moul text-sm sm:text-base text-stone-900 dark:text-stone-100 flex items-center gap-2">
             <Utensils className="w-4 h-4 text-amber-600" />
-            <span>{language === 'km' ? 'វិចិត្រសាលមុខម្ហូបខ្មែរ' : 'Khmer Food Gallery'}</span>
+            <span>{isKm ? 'វិចិត្រសាលមុខម្ហូបខ្មែរ (100+ មុខ)' : 'Khmer Food Collection (100+ Dishes)'}</span>
           </h2>
-          <p className="text-[11px] text-stone-500">
-            {language === 'km' 
-              ? `មានមុខម្ហូបឆ្ងាញ់ៗចំនួន ${filteredFoods.length} មុខ` 
-              : `Found ${filteredFoods.length} dishes`}
+          <p className="text-[11px] text-stone-500 font-khmer">
+            {isKm 
+              ? `បង្ហាញ ${filteredFoods.length} លើ ${foods.length} មុខម្ហូបខ្មែរពិតៗ` 
+              : `Showing ${filteredFoods.length} of ${foods.length} authentic dishes`}
           </p>
         </div>
 
         {currentUser?.role === 'admin' && (
           <button
             onClick={() => setIsAdminOpen(true)}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs shadow-xs"
+            className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs shadow-xs font-khmer"
           >
             <Plus className="w-3.5 h-3.5" />
-            <span>{language === 'km' ? 'បញ្ចូលម្ហូប' : 'Add Food'}</span>
+            <span>{isKm ? 'បញ្ចូលម្ហូប' : 'Add Food'}</span>
           </button>
         )}
       </div>
 
       {/* Category Pills */}
-      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 font-khmer">
         {categories.map((cat) => {
           const active = selectedCategory === cat.id;
           return (
@@ -73,7 +78,7 @@ export const FoodView: React.FC = () => {
                   : 'bg-white dark:bg-stone-800 text-stone-600 dark:text-stone-300 border border-stone-200 dark:border-stone-700 hover:bg-amber-50'
               }`}
             >
-              {language === 'km' ? cat.nameKh : cat.nameEn}
+              {isKm ? cat.nameKh : cat.nameEn}
             </button>
           );
         })}
@@ -81,17 +86,17 @@ export const FoodView: React.FC = () => {
 
       {/* Foods Grid */}
       {filteredFoods.length === 0 ? (
-        <div className="p-8 text-center bg-white dark:bg-stone-800 rounded-3xl border border-stone-200 dark:border-stone-700 space-y-2">
+        <div className="p-8 text-center bg-white dark:bg-stone-800 rounded-3xl border border-stone-200 dark:border-stone-700 space-y-2 font-khmer">
           <Utensils className="w-8 h-8 mx-auto text-stone-300" />
           <p className="text-xs text-stone-500 font-medium">
-            {language === 'km' ? 'មិនមានមុខម្ហូបដែលត្រូវគ្នានឹងការស្វែងរកទេ' : 'No matching dishes found'}
+            {isKm ? 'មិនមានមុខម្ហូបដែលត្រូវគ្នានឹងការស្វែងរកទេ' : 'No matching dishes found'}
           </p>
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
               className="px-3 py-1 text-xs text-amber-600 font-bold hover:underline"
             >
-              {language === 'km' ? 'សម្អាតការស្វែងរក' : 'Clear search'}
+              {isKm ? 'សម្អាតការស្វែងរក' : 'Clear search'}
             </button>
           )}
         </div>

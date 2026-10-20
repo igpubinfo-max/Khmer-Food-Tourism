@@ -1,12 +1,13 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { 
   User, FoodItem, Restaurant, TouristDestination, CommunityPost, 
-  Language, UserRole 
+  Language, UserRole, AppSettings 
 } from '../types';
 import { 
   initialUsers, initialFoods, initialRestaurants, 
-  initialDestinations, initialCommunityPosts 
+  initialDestinations, initialCommunityPosts, initialAppSettings 
 } from '../data/seedData';
+import { hashPassword, verifyPassword } from '../utils/crypto';
 
 export type ActiveTab = 'home' | 'food' | 'restaurants' | 'tourism' | 'community' | 'profile';
 
@@ -23,6 +24,14 @@ interface AppContextType {
   register: (name: string, email: string, role: UserRole, phone?: string, restaurantName?: string) => void;
   logout: () => void;
   updateUserRole: (userId: string, newRole: UserRole) => void;
+
+  // Admin Auth (Chea Savuth)
+  loginAdmin: (username: string, password: string) => Promise<boolean>;
+  setAdminPassword: (newPassword: string) => Promise<boolean>;
+  
+  // App Settings & QR Codes
+  appSettings: AppSettings;
+  updateAppSettings: (newSettings: Partial<AppSettings>) => void;
   
   // Data lists
   foods: FoodItem[];
@@ -45,6 +54,7 @@ interface AppContextType {
   updateRestaurant: (rest: Restaurant) => void;
   deleteRestaurant: (id: string) => void;
   approveRestaurant: (id: string) => void;
+  toggleVerifyRestaurant: (id: string) => void;
   
   // Destination Actions
   addDestination: (dest: Omit<TouristDestination, 'id' | 'rating' | 'reviewCount'>) => void;
@@ -73,6 +83,12 @@ interface AppContextType {
   setIsAddRestaurantModalOpen: (open: boolean) => void;
   isAdminOpen: boolean;
   setIsAdminOpen: (open: boolean) => void;
+  isAdminLoginModalOpen: boolean;
+  setIsAdminLoginModalOpen: (open: boolean) => void;
+  isInstallModalOpen: boolean;
+  setIsInstallModalOpen: (open: boolean) => void;
+  isSupportModalOpen: boolean;
+  setIsSupportModalOpen: (open: boolean) => void;
   
   // Search & Filter
   searchQuery: string;
@@ -94,40 +110,45 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [language, setLanguage] = useState<Language>('km');
   const [activeTab, setActiveTab] = useState<ActiveTab>('home');
   
-  // Local storage loaded states with fallbacks
+  // Local storage loaded states with fallbacks (v3 storage keys for 100+ dataset)
   const [users, setUsers] = useState<User[]>(() => {
-    const saved = localStorage.getItem('kft_users_v2');
+    const saved = localStorage.getItem('kft_users_v3');
     return saved ? JSON.parse(saved) : initialUsers;
   });
 
   const [currentUser, setCurrentUser] = useState<User | null>(() => {
-    const saved = localStorage.getItem('kft_current_user_v2');
+    const saved = localStorage.getItem('kft_current_user_v3');
     return saved ? JSON.parse(saved) : initialUsers[2]; // Default to regular user
   });
 
   const [foods, setFoods] = useState<FoodItem[]>(() => {
-    const saved = localStorage.getItem('kft_foods_v2');
+    const saved = localStorage.getItem('kft_foods_v3');
     return saved ? JSON.parse(saved) : initialFoods;
   });
 
   const [restaurants, setRestaurants] = useState<Restaurant[]>(() => {
-    const saved = localStorage.getItem('kft_restaurants_v2');
+    const saved = localStorage.getItem('kft_restaurants_v3');
     return saved ? JSON.parse(saved) : initialRestaurants;
   });
 
   const [destinations, setDestinations] = useState<TouristDestination[]>(() => {
-    const saved = localStorage.getItem('kft_destinations_v2');
+    const saved = localStorage.getItem('kft_destinations_v3');
     return saved ? JSON.parse(saved) : initialDestinations;
   });
 
   const [posts, setPosts] = useState<CommunityPost[]>(() => {
-    const saved = localStorage.getItem('kft_posts_v2');
+    const saved = localStorage.getItem('kft_posts_v3');
     return saved ? JSON.parse(saved) : initialCommunityPosts;
   });
 
   const [bookmarks, setBookmarks] = useState<string[]>(() => {
-    const saved = localStorage.getItem('kft_bookmarks_v2');
+    const saved = localStorage.getItem('kft_bookmarks_v3');
     return saved ? JSON.parse(saved) : ['food-1', 'dest-1'];
+  });
+
+  const [appSettings, setAppSettings] = useState<AppSettings>(() => {
+    const saved = localStorage.getItem('kft_settings_v3');
+    return saved ? JSON.parse(saved) : initialAppSettings;
   });
 
   // Modal & selection states
@@ -139,6 +160,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isAddPostModalOpen, setIsAddPostModalOpen] = useState(false);
   const [isAddRestaurantModalOpen, setIsAddRestaurantModalOpen] = useState(false);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
+  const [isAdminLoginModalOpen, setIsAdminLoginModalOpen] = useState(false);
+  const [isInstallModalOpen, setIsInstallModalOpen] = useState(false);
+  const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
 
   // Global search & filters
   const [searchQuery, setSearchQuery] = useState('');
@@ -156,32 +180,36 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Sync to localStorage
   useEffect(() => {
-    localStorage.setItem('kft_users_v2', JSON.stringify(users));
+    localStorage.setItem('kft_users_v3', JSON.stringify(users));
   }, [users]);
 
   useEffect(() => {
-    localStorage.setItem('kft_current_user_v2', JSON.stringify(currentUser));
+    localStorage.setItem('kft_current_user_v3', JSON.stringify(currentUser));
   }, [currentUser]);
 
   useEffect(() => {
-    localStorage.setItem('kft_foods_v2', JSON.stringify(foods));
+    localStorage.setItem('kft_foods_v3', JSON.stringify(foods));
   }, [foods]);
 
   useEffect(() => {
-    localStorage.setItem('kft_restaurants_v2', JSON.stringify(restaurants));
+    localStorage.setItem('kft_restaurants_v3', JSON.stringify(restaurants));
   }, [restaurants]);
 
   useEffect(() => {
-    localStorage.setItem('kft_destinations_v2', JSON.stringify(destinations));
+    localStorage.setItem('kft_destinations_v3', JSON.stringify(destinations));
   }, [destinations]);
 
   useEffect(() => {
-    localStorage.setItem('kft_posts_v2', JSON.stringify(posts));
+    localStorage.setItem('kft_posts_v3', JSON.stringify(posts));
   }, [posts]);
 
   useEffect(() => {
-    localStorage.setItem('kft_bookmarks_v2', JSON.stringify(bookmarks));
+    localStorage.setItem('kft_bookmarks_v3', JSON.stringify(bookmarks));
   }, [bookmarks]);
+
+  useEffect(() => {
+    localStorage.setItem('kft_settings_v3', JSON.stringify(appSettings));
+  }, [appSettings]);
 
   // Bookmarking
   const toggleBookmark = (id: string) => {
@@ -226,6 +254,59 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return true;
   };
 
+  // Secure Admin Login for Chea Savuth
+  const loginAdmin = async (username: string, password: string): Promise<boolean> => {
+    const cleanUser = username.trim().toLowerCase();
+    const isAdminUser = cleanUser === 'chea savuth' || cleanUser === 'cheasavuth' || cleanUser === 'admin';
+    if (!isAdminUser) {
+      showToast(language === 'km' ? 'ឈ្មោះគណនីរដ្ឋបាលមិនត្រឹមត្រូវទេ!' : 'Invalid admin username!', 'warning');
+      return false;
+    }
+
+    const isValid = await verifyPassword(password, appSettings.adminPasswordHash);
+    if (!isValid) {
+      showToast(language === 'km' ? 'ពាក្យសម្ងាត់មិនត្រឹមត្រូវទេ!' : 'Invalid password!', 'warning');
+      return false;
+    }
+
+    // Find or create Chea Savuth user
+    let cheaUser = users.find(u => u.role === 'admin' || u.name.toLowerCase().includes('chea savuth'));
+    if (!cheaUser) {
+      cheaUser = initialUsers[0];
+      setUsers(prev => [cheaUser!, ...prev.filter(u => u.id !== cheaUser!.id)]);
+    }
+
+    setCurrentUser(cheaUser);
+    setIsAdminLoginModalOpen(false);
+    setIsAdminOpen(true);
+    showToast(language === 'km' ? `សូមស្វាគមន៍ លោក Chea Savuth! ចូលកាន់ផ្ទាំងគ្រប់គ្រងរដ្ឋបាលជោគជ័យ។` : `Welcome, Chea Savuth! Admin portal unlocked.`, 'success');
+    return true;
+  };
+
+  const setAdminPassword = async (newPassword: string): Promise<boolean> => {
+    if (!newPassword || newPassword.length < 6) {
+      showToast(language === 'km' ? 'ពាក្យសម្ងាត់ត្រូវមានយ៉ាងហោចណាស់ ៦ តួអក្សរ!' : 'Password must be at least 6 characters!', 'warning');
+      return false;
+    }
+
+    const newHash = await hashPassword(newPassword);
+    setAppSettings(prev => ({
+      ...prev,
+      adminPasswordHash: newHash,
+      isAdminInitialized: true,
+    }));
+    showToast(language === 'km' ? 'បានផ្លាស់ប្តូរពាក្យសម្ងាត់រដ្ឋបាល Chea Savuth ជោគជ័យ!' : 'Admin password updated securely!', 'success');
+    return true;
+  };
+
+  const updateAppSettings = (newSettings: Partial<AppSettings>) => {
+    setAppSettings(prev => ({
+      ...prev,
+      ...newSettings,
+    }));
+    showToast(language === 'km' ? 'បានរក្សាទុកការកំណត់កម្មវិធីជោគជ័យ!' : 'App settings updated!', 'success');
+  };
+
   const register = (name: string, email: string, role: UserRole, phone?: string, restaurantName?: string) => {
     const newUser: User = {
       id: `user-${Date.now()}`,
@@ -245,6 +326,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const logout = () => {
     setCurrentUser(null);
+    setIsAdminOpen(false);
     showToast(language === 'km' ? 'បានចាកចេញពីគណនី' : 'Logged out', 'info');
   };
 
@@ -290,6 +372,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       reviewCount: 1,
       ownerId: currentUser?.id,
       status: isOwnerOrAdmin ? 'approved' : 'pending',
+      isVerified: isOwnerOrAdmin,
     };
     setRestaurants(prev => [newRest, ...prev]);
     showToast(
@@ -315,6 +398,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const approveRestaurant = (id: string) => {
     setRestaurants(prev => prev.map(r => r.id === id ? { ...r, status: 'approved' } : r));
     showToast(language === 'km' ? 'បានអនុម័តហាងអាហារជោគជ័យ' : 'Restaurant approved!', 'success');
+  };
+
+  const toggleVerifyRestaurant = (id: string) => {
+    setRestaurants(prev => prev.map(r => {
+      if (r.id !== id) return r;
+      const nextVerified = !r.isVerified;
+      showToast(
+        nextVerified
+          ? (language === 'km' ? `បានផ្ទៀងផ្ទាត់ហាង "${r.nameKh}" ត្រឹមត្រូវផ្លូវការ` : `Verified ${r.nameEn}!`)
+          : (language === 'km' ? `បានដាក់ហាង "${r.nameKh}" ក្នុងស្ថានភាពមិនទាន់ផ្ទៀងផ្ទាត់` : `Set ${r.nameEn} to unverified`),
+        'info'
+      );
+      return { ...r, isVerified: nextVerified };
+    }));
   };
 
   // Destination CRUD
@@ -419,6 +516,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setDestinations(initialDestinations);
     setPosts(initialCommunityPosts);
     setBookmarks(['food-1', 'dest-1']);
+    setAppSettings(initialAppSettings);
     localStorage.clear();
     showToast(language === 'km' ? 'បានកំណត់ទិន្នន័យឡើងវិញ' : 'Reset to default data', 'info');
   };
@@ -436,6 +534,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         register,
         logout,
         updateUserRole,
+        loginAdmin,
+        setAdminPassword,
+        appSettings,
+        updateAppSettings,
         foods,
         restaurants,
         destinations,
@@ -450,6 +552,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         updateRestaurant,
         deleteRestaurant,
         approveRestaurant,
+        toggleVerifyRestaurant,
         addDestination,
         updateDestination,
         deleteDestination,
@@ -471,6 +574,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setIsAddRestaurantModalOpen,
         isAdminOpen,
         setIsAdminOpen,
+        isAdminLoginModalOpen,
+        setIsAdminLoginModalOpen,
+        isInstallModalOpen,
+        setIsInstallModalOpen,
+        isSupportModalOpen,
+        setIsSupportModalOpen,
         searchQuery,
         setSearchQuery,
         selectedProvince,

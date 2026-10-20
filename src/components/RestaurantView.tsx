@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { RestaurantCard } from './RestaurantCard';
-import { Store, Plus, MapPin, Sparkles, PhoneCall } from 'lucide-react';
+import { Store, Plus, MapPin, Sparkles, PhoneCall, CheckCircle2, AlertCircle } from 'lucide-react';
 
 export const RestaurantView: React.FC = () => {
   const { 
@@ -11,13 +11,23 @@ export const RestaurantView: React.FC = () => {
   } = useApp();
 
   const [priceFilter, setPriceFilter] = useState<string>('all');
+  const [verifiedFilter, setVerifiedFilter] = useState<'all' | 'verified' | 'unverified'>('all');
+
+  const isKm = language === 'km';
 
   const provinces = [
     { id: '', nameKh: 'គ្រប់ទីតាំង', nameEn: 'All Locations' },
-    { id: 'រាជធានីភ្នំពេញ', nameKh: 'ភ្នំពេញ', nameEn: 'Phnom Penh' },
-    { id: 'ខេត្តសៀមរាប', nameKh: 'សៀមរាប', nameEn: 'Siem Reap' },
-    { id: 'ខេត្តកែប/កំពត', nameKh: 'កំពត / កែប', nameEn: 'Kampot / Kep' },
-    { id: 'ខេត្តបាត់ដំបង', nameKh: 'បាត់ដំបង', nameEn: 'Battambang' },
+    { id: 'ភ្នំពេញ', nameKh: 'ភ្នំពេញ', nameEn: 'Phnom Penh' },
+    { id: 'សៀមរាប', nameKh: 'សៀមរាប', nameEn: 'Siem Reap' },
+    { id: 'កំពត', nameKh: 'កំពត', nameEn: 'Kampot' },
+    { id: 'កែប', nameKh: 'កែប', nameEn: 'Kep' },
+    { id: 'បាត់ដំបង', nameKh: 'បាត់ដំបង', nameEn: 'Battambang' },
+    { id: 'ព្រះសីហនុ', nameKh: 'ព្រះសីហនុ', nameEn: 'Sihanoukville' },
+    { id: 'កំពង់ចាម', nameKh: 'កំពង់ចាម', nameEn: 'Kampong Cham' },
+    { id: 'មណ្ឌលគិរី', nameKh: 'មណ្ឌលគិរី', nameEn: 'Mondulkiri' },
+    { id: 'កោះកុង', nameKh: 'កោះកុង', nameEn: 'Koh Kong' },
+    { id: 'តាកែវ', nameKh: 'តាកែវ', nameEn: 'Takeo' },
+    { id: 'ពោធិ៍សាត់', nameKh: 'ពោធិ៍សាត់', nameEn: 'Pursat' },
   ];
 
   const filteredRestaurants = restaurants.filter((r) => {
@@ -25,6 +35,10 @@ export const RestaurantView: React.FC = () => {
     if (r.status !== 'approved' && currentUser?.role !== 'admin' && currentUser?.id !== r.ownerId) {
       return false;
     }
+    // verification filter
+    if (verifiedFilter === 'verified' && !r.isVerified) return false;
+    if (verifiedFilter === 'unverified' && r.isVerified) return false;
+
     // province filter
     if (selectedProvince && !r.provinceKh.includes(selectedProvince)) {
       return false;
@@ -44,6 +58,9 @@ export const RestaurantView: React.FC = () => {
     return true;
   });
 
+  const verifiedCount = restaurants.filter(r => r.isVerified).length;
+  const sampleCount = restaurants.filter(r => !r.isVerified).length;
+
   return (
     <div className="max-w-md mx-auto px-4 py-3 space-y-4 pb-24">
       {/* Title Bar */}
@@ -51,12 +68,12 @@ export const RestaurantView: React.FC = () => {
         <div>
           <h2 className="font-moul text-sm sm:text-base text-stone-900 dark:text-stone-100 flex items-center gap-2">
             <Store className="w-4 h-4 text-amber-600" />
-            <span>{language === 'km' ? 'បញ្ជីភោជនីយដ្ឋាន & ហាងអាហារ' : 'Restaurant Directory'}</span>
+            <span>{isKm ? 'បញ្ជីភោជនីយដ្ឋាន & ហាងអាហារ' : 'Restaurant Directory'}</span>
           </h2>
-          <p className="text-[11px] text-stone-500">
-            {language === 'km' 
-              ? `មានភោជនីយដ្ឋានឆ្ងាញ់ៗចំនួន ${filteredRestaurants.length} ហាង` 
-              : `Found ${filteredRestaurants.length} restaurants`}
+          <p className="text-[11px] text-stone-500 font-khmer">
+            {isKm 
+              ? `បង្ហាញ ${filteredRestaurants.length} / ${restaurants.length} ហាង (${verifiedCount} ផ្ទៀងផ្ទាត់ផ្លូវការ)` 
+              : `Showing ${filteredRestaurants.length} of ${restaurants.length} (${verifiedCount} verified)`}
           </p>
         </div>
 
@@ -65,21 +82,57 @@ export const RestaurantView: React.FC = () => {
             if (!currentUser) setIsAuthModalOpen(true);
             else setIsAddRestaurantModalOpen(true);
           }}
-          className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs shadow-xs"
+          className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs shadow-xs font-khmer"
         >
           <Plus className="w-3.5 h-3.5" />
-          <span>{language === 'km' ? 'ចុះបញ្ជីហាង' : 'Add Shop'}</span>
+          <span>{isKm ? 'ចុះបញ្ជីហាង' : 'Add Shop'}</span>
+        </button>
+      </div>
+
+      {/* Verification Filter Switcher */}
+      <div className="flex items-center gap-1.5 p-1 bg-stone-100 dark:bg-stone-800 rounded-2xl text-xs font-khmer">
+        <button
+          onClick={() => setVerifiedFilter('all')}
+          className={`flex-1 py-1.5 px-2 rounded-xl text-center font-bold transition-all ${
+            verifiedFilter === 'all'
+              ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-white shadow-xs'
+              : 'text-stone-500 hover:text-stone-800'
+          }`}
+        >
+          {isKm ? `ទាំងអស់ (${restaurants.length})` : `All (${restaurants.length})`}
+        </button>
+        <button
+          onClick={() => setVerifiedFilter('verified')}
+          className={`flex-1 py-1.5 px-2 rounded-xl text-center font-bold flex items-center justify-center gap-1 transition-all ${
+            verifiedFilter === 'verified'
+              ? 'bg-emerald-600 text-white shadow-xs'
+              : 'text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50'
+          }`}
+        >
+          <CheckCircle2 className="w-3.5 h-3.5" />
+          <span>{isKm ? `ផ្ទៀងផ្ទាត់ (${verifiedCount})` : `Verified (${verifiedCount})`}</span>
+        </button>
+        <button
+          onClick={() => setVerifiedFilter('unverified')}
+          className={`flex-1 py-1.5 px-2 rounded-xl text-center font-bold flex items-center justify-center gap-1 transition-all ${
+            verifiedFilter === 'unverified'
+              ? 'bg-amber-600 text-white shadow-xs'
+              : 'text-amber-700 dark:text-amber-400 hover:bg-amber-50'
+          }`}
+        >
+          <AlertCircle className="w-3.5 h-3.5" />
+          <span>{isKm ? `គំរូ (${sampleCount})` : `Sample (${sampleCount})`}</span>
         </button>
       </div>
 
       {/* Banner for Restaurant Owners */}
       <div className="p-3.5 rounded-2xl bg-gradient-to-r from-amber-900 via-amber-800 to-amber-950 text-white shadow-xs flex items-center justify-between">
         <div className="space-y-0.5">
-          <p className="font-bold text-xs text-amber-200">
-            {language === 'km' ? 'តើលោកអ្នកជាម្ចាស់ហាងអាហារមែនទេ?' : 'Are you a restaurant owner?'}
+          <p className="font-bold text-xs text-amber-200 font-khmer">
+            {isKm ? 'តើលោកអ្នកជាម្ចាស់ហាងអាហារមែនទេ?' : 'Are you a restaurant owner?'}
           </p>
-          <p className="text-[10px] text-amber-100/80">
-            {language === 'km' ? 'ចុះបញ្ជីហាងរបស់អ្នកដើម្បីទទួលបានអតិថិជនកាន់តែច្រើន!' : 'List your shop and attract foodies across Cambodia!'}
+          <p className="text-[10px] text-amber-100/80 font-khmer">
+            {isKm ? 'ចុះបញ្ជីហាងរបស់អ្នកដើម្បីទទួលបានអតិថិជនកាន់តែច្រើន!' : 'List your shop and attract foodies across Cambodia!'}
           </p>
         </div>
         <button
@@ -87,47 +140,47 @@ export const RestaurantView: React.FC = () => {
             if (!currentUser) setIsAuthModalOpen(true);
             else setIsAddRestaurantModalOpen(true);
           }}
-          className="px-3 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-amber-950 text-xs font-bold shrink-0 shadow transition active:scale-95"
+          className="px-3 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-amber-950 text-xs font-bold shrink-0 shadow transition active:scale-95 font-khmer"
         >
-          {language === 'km' ? 'ចុះឈ្មោះហាង' : 'Register'}
+          {isKm ? 'ចុះឈ្មោះហាង' : 'Register'}
         </button>
       </div>
 
       {/* Location Filter Pills */}
-      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 font-khmer">
         {provinces.map((p) => {
           const active = selectedProvince === p.id || (!selectedProvince && p.id === '');
           return (
             <button
               key={p.id || 'all'}
               onClick={() => setSelectedProvince(p.id)}
-              className={`px-3 py-1 rounded-full text-xs whitespace-nowrap transition font-medium ${
+              className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
                 active
-                  ? 'bg-amber-600 text-white font-bold shadow-2xs'
-                  : 'bg-white dark:bg-stone-800 text-stone-600 dark:text-stone-300 border border-stone-200 dark:border-stone-700'
+                  ? 'bg-amber-600 text-white font-bold shadow-xs'
+                  : 'bg-white dark:bg-stone-800 text-stone-600 dark:text-stone-300 border border-stone-200 dark:border-stone-700 hover:border-amber-400'
               }`}
             >
-              {language === 'km' ? p.nameKh : p.nameEn}
+              {isKm ? p.nameKh : p.nameEn}
             </button>
           );
         })}
       </div>
 
-      {/* Restaurant List */}
-      {filteredRestaurants.length === 0 ? (
-        <div className="p-8 text-center bg-white dark:bg-stone-800 rounded-3xl border border-stone-200 dark:border-stone-700 space-y-2">
-          <Store className="w-8 h-8 mx-auto text-stone-300" />
-          <p className="text-xs text-stone-500 font-medium">
-            {language === 'km' ? 'មិនមានហាងអាហារដែលត្រូវនឹងការស្វែងរកទេ' : 'No restaurants found'}
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {filteredRestaurants.map((restaurant) => (
+      {/* Restaurant Cards List */}
+      <div className="space-y-3">
+        {filteredRestaurants.length > 0 ? (
+          filteredRestaurants.map((restaurant) => (
             <RestaurantCard key={restaurant.id} restaurant={restaurant} />
-          ))}
-        </div>
-      )}
+          ))
+        ) : (
+          <div className="py-12 text-center text-stone-400 space-y-2 font-khmer">
+            <Store className="w-10 h-10 mx-auto text-stone-300" />
+            <p className="text-xs">
+              {isKm ? 'រកមិនឃើញហាងអាហារត្រូវនឹងលក្ខខណ្ឌស្វែងរកទេ' : 'No restaurants matched your filters'}
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

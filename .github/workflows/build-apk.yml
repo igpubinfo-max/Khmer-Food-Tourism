@@ -5,6 +5,9 @@ on:
     branches: [ main, master ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build-apk:
     runs-on: ubuntu-latest
@@ -47,8 +50,30 @@ jobs:
           echo "=== SEARCHING FOR APK FILES ==="
           find . -name "*.apk" -ls
 
-      - name: 9. Upload Android APK File
+      - name: 9. Upload Android APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Khmer-Food-Tourism-APK
-          path: '**/*.apk'
+          path: 'android/app/build/outputs/apk/debug/*.apk'
+
+      - name: 10. Publish GitHub Release with APK
+        uses: softprops/action-gh-release@v2
+        if: github.ref == 'refs/heads/main'
+        with:
+          tag_name: v1.0.0
+          name: "Khmer Food & Tourism v1.0.0 (Android APK)"
+          body: |
+            ### 🇰🇭 កម្មវិធីទូរស័ព្ទដៃ អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism Mobile App)
+            
+            **លក្ខណៈពិសេសថ្មីៗ (Key Features):**
+            - 🍲 **១០០+ មុខម្ហូបខ្មែរ (100+ Authentic Dishes):** រូបភាពពិត រូបមន្តគ្រឿងផ្សំ និងរបៀបចម្អិនតាមលំដាប់លំដោយ។
+            - 🏪 **១០០+ ភោជនីយដ្ឋាន (100+ Cambodian Restaurants):** គ្របដណ្តប់ទូទាំង ២៥ ខេត្តក្រុង ដោយបែងចែកច្បាស់លាស់រវាងហាងផ្ទៀងផ្ទាត់ផ្លូវការ និងគំរូអ្នកប្រើប្រាស់។
+            - 📲 **QR Code ដំឡើងកម្មវិធី (App Install QR):** ស្កេនទាញយកឯកសារ APK ដំឡើងលើទូរស័ព្ទ Android ដោយផ្ទាល់។
+            - 💖 **ជួយឧបត្ថម្ភគាំទ្រកម្មវិធី (Support Our App):** តាមរយៈផ្លូវការ Bakong KHQR (Canadia Bank / KHQR)។
+            - 🛡️ **គណនីរដ្ឋបាល Chea Savuth (Senior Admin Portal):** ការពារសុវត្ថិភាពដោយ Web Crypto SHA-256 + Salt អាចគ្រប់គ្រងមុខម្ហូប ហាង ទេសចរណ៍ ការកំណត់ QR Code និងតំណភ្ជាប់ទាញយក។
+          draft: false
+          prerelease: false
+          files: |
+            android/app/build/outputs/apk/debug/*.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -15,6 +15,9 @@ import { TouristDetailModal } from './components/TouristDetailModal';
 import { AuthModal } from './components/AuthModal';
 import { AddRestaurantModal } from './components/AddRestaurantModal';
 import { AdminDashboard } from './components/AdminDashboard';
+import { AdminLoginModal } from './components/AdminLoginModal';
+import { InstallModal } from './components/InstallModal';
+import { SupportModal } from './components/SupportModal';
 import { Toast } from './components/Toast';
 
 const MainScreen: React.FC = () => {
@@ -42,6 +45,9 @@ const MainScreen: React.FC = () => {
       <AuthModal />
       <AddRestaurantModal />
       <AdminDashboard />
+      <AdminLoginModal />
+      <InstallModal />
+      <SupportModal />
 
       {/* Notifications */}
       <Toast />

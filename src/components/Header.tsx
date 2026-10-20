@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { Search, Heart, Globe, Shield, User as UserIcon, X } from 'lucide-react';
+import { Search, Heart, Globe, Shield, User as UserIcon, X, QrCode, Download, ShieldCheck } from 'lucide-react';
 
 export const Header: React.FC = () => {
   const { 
     language, setLanguage, bookmarks, setActiveTab, 
-    currentUser, setIsAuthModalOpen, setIsAdminOpen,
+    currentUser, setIsAuthModalOpen, setIsAdminOpen, setIsAdminLoginModalOpen,
+    setIsInstallModalOpen, setIsSupportModalOpen,
     searchQuery, setSearchQuery, selectedProvince, setSelectedProvince
   } = useApp();
 
@@ -21,6 +22,8 @@ export const Header: React.FC = () => {
     { id: 'ខេត្តព្រះសីហនុ', nameKh: 'ព្រះសីហនុ', nameEn: 'Sihanoukville' },
     { id: 'ខេត្តមណ្ឌលគិរី', nameKh: 'មណ្ឌលគិរី', nameEn: 'Mondulkiri' },
   ];
+
+  const isKm = language === 'km';
 
   return (
     <header className="sticky top-0 z-40 bg-amber-900/95 backdrop-blur-md text-amber-50 shadow-md transition-all">
@@ -46,65 +49,64 @@ export const Header: React.FC = () => {
 
         {/* Action icons */}
         <div className="flex items-center gap-1.5">
+          {/* App Install QR Button */}
+          <button
+            onClick={() => setIsInstallModalOpen(true)}
+            className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-800/80 hover:bg-amber-700 text-amber-200 text-[11px] font-bold border border-amber-600/40 shadow-sm transition-all"
+            title={isKm ? 'ដំឡើងកម្មវិធីលើទូរស័ព្ទ (Install App)' : 'Install App'}
+          >
+            <QrCode className="w-3.5 h-3.5 text-amber-300" />
+            <span className="hidden xs:inline">{isKm ? 'ដំឡើង' : 'Install'}</span>
+          </button>
+
+          {/* Support Our App Button */}
+          <button
+            onClick={() => setIsSupportModalOpen(true)}
+            className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white text-[11px] font-bold shadow-sm transition-all"
+            title={isKm ? 'ជួយឧបត្ថម្ភគាំទ្រកម្មវិធី (Support App)' : 'Support App'}
+          >
+            <Heart className="w-3.5 h-3.5 fill-white text-white" />
+            <span className="hidden xs:inline">{isKm ? 'ឧបត្ថម្ភ' : 'Support'}</span>
+          </button>
+
           {/* Search Toggle */}
           <button
             onClick={() => setIsSearchVisible(!isSearchVisible)}
             className={`p-2 rounded-full transition-colors ${
               isSearchVisible || searchQuery ? 'bg-amber-700 text-amber-200' : 'hover:bg-amber-800/80 text-amber-200'
             }`}
-            title={language === 'km' ? 'ស្វែងរក' : 'Search'}
+            title={isKm ? 'ស្វែងរក' : 'Search'}
           >
             <Search className="w-4 h-4" />
           </button>
 
           {/* Language Toggle */}
           <button
-            onClick={() => setLanguage(language === 'km' ? 'en' : 'km')}
+            onClick={() => setLanguage(isKm ? 'en' : 'km')}
             className="flex items-center gap-1 px-2 py-1 rounded-full bg-amber-800/70 hover:bg-amber-700/80 text-[11px] font-semibold text-amber-200 transition-colors"
             title="ផ្លាស់ប្តូរភាសា / Switch Language"
           >
             <Globe className="w-3.5 h-3.5 text-amber-300" />
-            <span>{language === 'km' ? 'EN' : 'ខ្មែរ'}</span>
+            <span>{isKm ? 'EN' : 'ខ្មែរ'}</span>
           </button>
 
-          {/* Bookmarks */}
-          <button
-            onClick={() => setActiveTab('profile')}
-            className="relative p-2 rounded-full hover:bg-amber-800/80 text-amber-200 transition-colors"
-            title={language === 'km' ? 'បញ្ជីចំណូលចិត្ត' : 'Saved'}
-          >
-            <Heart className="w-4 h-4 text-rose-400" />
-            {bookmarks.length > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-rose-500 text-white text-[9px] font-bold flex items-center justify-center shadow">
-                {bookmarks.length}
-              </span>
-            )}
-          </button>
-
-          {/* User/Admin Button */}
+          {/* Admin / User Action */}
           {currentUser?.role === 'admin' ? (
             <button
               onClick={() => setIsAdminOpen(true)}
-              className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-gradient-to-r from-red-600 to-amber-600 text-white text-[11px] font-bold shadow hover:brightness-110"
-              title="Admin Panel"
+              className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-gradient-to-r from-red-700 to-amber-600 text-white text-[11px] font-bold shadow hover:brightness-110"
+              title="ផ្ទាំងគ្រប់គ្រងរដ្ឋបាល Chea Savuth"
             >
-              <Shield className="w-3.5 h-3.5" />
+              <Shield className="w-3.5 h-3.5 text-amber-300" />
               <span className="hidden sm:inline">Admin</span>
-            </button>
-          ) : currentUser ? (
-            <button
-              onClick={() => setActiveTab('profile')}
-              className="w-7 h-7 rounded-full overflow-hidden border border-amber-400 shadow cursor-pointer"
-            >
-              <img src={currentUser.avatar} alt={currentUser.name} className="w-full h-full object-cover" />
             </button>
           ) : (
             <button
-              onClick={() => setIsAuthModalOpen(true)}
-              className="p-1.5 rounded-full hover:bg-amber-800/80 text-amber-200"
-              title="ចូលគណនី / Login"
+              onClick={() => setIsAdminLoginModalOpen(true)}
+              className="p-1.5 rounded-full hover:bg-amber-800/80 text-amber-300"
+              title={isKm ? 'ច្រកចូលរដ្ឋបាល Chea Savuth' : 'Admin Portal Login'}
             >
-              <UserIcon className="w-4 h-4" />
+              <ShieldCheck className="w-4 h-4" />
             </button>
           )}
         </div>
@@ -119,7 +121,7 @@ export const Header: React.FC = () => {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={language === 'km' ? 'ស្វែងរកម្ហូប, ហាងអាហារ, ឬកន្លែងដើរលេង...' : 'Search food, restaurant, or destination...'}
+              placeholder={isKm ? 'ស្វែងរកម្ហូប, ហាងអាហារ, ឬកន្លែងដើរលេង...' : 'Search food, restaurant, or destination...'}
               className="w-full pl-9 pr-8 py-2 rounded-xl bg-amber-950/60 border border-amber-700/60 text-amber-50 placeholder-amber-400/60 text-xs focus:outline-none focus:border-amber-400 transition"
               autoFocus
             />
@@ -147,7 +149,7 @@ export const Header: React.FC = () => {
                       : 'bg-amber-950/40 text-amber-200/90 hover:bg-amber-800/60'
                   }`}
                 >
-                  {language === 'km' ? prov.nameKh : prov.nameEn}
+                  {isKm ? prov.nameKh : prov.nameEn}
                 </button>
               );
             })}

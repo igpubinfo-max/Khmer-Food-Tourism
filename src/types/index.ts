@@ -5,16 +5,26 @@ export type UserRole = 'user' | 'owner' | 'admin';
 export interface User {
   id: string;
   name: string;
+  username?: string;
   email: string;
   role: UserRole;
   avatar: string;
   phone?: string;
   bio?: string;
   restaurantName?: string;
+  passwordHash?: string;
   createdAt: string;
 }
 
-export type FoodCategorySlug = 'soup' | 'stirfry' | 'salad' | 'dessert' | 'breakfast' | 'snack';
+export type FoodCategorySlug = 
+  | 'soup' 
+  | 'grilled' 
+  | 'stirfry' 
+  | 'salad' 
+  | 'dessert' 
+  | 'noodles' 
+  | 'rice' 
+  | 'specialty';
 
 export interface Ingredient {
   nameKh: string;
@@ -79,6 +89,7 @@ export interface Restaurant {
   signatureDishesKh: string[];
   ownerId?: string;
   status: 'approved' | 'pending' | 'rejected';
+  isVerified: boolean;
   isFeatured?: boolean;
 }
 
@@ -145,4 +156,17 @@ export interface ReportedItem {
   reason: string;
   reporterName: string;
   createdAt: string;
+}
+
+export interface AppSettings {
+  apkDownloadUrl: string;
+  playStoreUrl: string;
+  appStoreUrl: string;
+  supportQrImageUrl: string;
+  supportBankName: string;
+  supportAccountName: string;
+  supportMessageKh: string;
+  supportMessageEn: string;
+  adminPasswordHash: string;
+  isAdminInitialized: boolean;
 }
