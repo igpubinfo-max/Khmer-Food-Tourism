@@ -374,7 +374,7 @@ export const AdminDashboard: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-1 gap-2">
                     <div>
                       <label className="block font-medium mb-1">ប្រភេទ</label>
                       <select
@@ -391,27 +391,6 @@ export const AdminDashboard: React.FC = () => {
                         <option value="dessert">បង្អែមខ្មែរ (Dessert)</option>
                         <option value="specialty">មុខម្ហូបពិសេស (Specialty)</option>
                       </select>
-                    </div>
-
-                    <div>
-                      <label className="block font-medium mb-1">តម្លៃរៀល (៛)</label>
-                      <input
-                        type="number"
-                        value={newFoodPriceRiel}
-                        onChange={(e) => setNewFoodPriceRiel(Number(e.target.value))}
-                        className="w-full px-2.5 py-1.5 rounded-lg border bg-white dark:bg-stone-700"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block font-medium mb-1">តម្លៃដុល្លារ ($)</label>
-                      <input
-                        type="number"
-                        step="0.5"
-                        value={newFoodPriceUsd}
-                        onChange={(e) => setNewFoodPriceUsd(Number(e.target.value))}
-                        className="w-full px-2.5 py-1.5 rounded-lg border bg-white dark:bg-stone-700"
-                      />
                     </div>
                   </div>
 
@@ -453,7 +432,7 @@ export const AdminDashboard: React.FC = () => {
                       <div className="overflow-hidden">
                         <h4 className="font-bold text-stone-900 dark:text-stone-100 font-khmer truncate">{food.nameKh}</h4>
                         <p className="text-[10px] text-stone-400 truncate">
-                          {food.nameEn} • {food.priceRiel.toLocaleString()} ៛ (${food.priceUsd}) • {food.categoryKh}
+                          {food.nameEn} • {food.categoryKh}
                         </p>
                       </div>
                     </div>

@@ -137,20 +137,20 @@ export const FoodDetailModal: React.FC = () => {
           </div>
 
           <div className="p-4 sm:p-6 space-y-6">
-            {/* Price & Meta Cards */}
-            <div className="flex items-center justify-between p-3.5 bg-amber-50 dark:bg-stone-800/80 rounded-2xl border border-amber-200/60 dark:border-stone-700">
-              <div>
-                <p className="text-[11px] text-amber-800 dark:text-amber-400 font-semibold uppercase tracking-wider">
-                  {language === 'km' ? 'តម្លៃប៉ាន់ស្មាន' : 'Est. Price'}
-                </p>
-                <p className="text-lg font-bold text-amber-900 dark:text-amber-200">
-                  {selectedFood.priceRiel.toLocaleString()} ៛ <span className="text-xs font-normal text-stone-500">(${selectedFood.priceUsd})</span>
-                </p>
+            {/* Meta Rating & Category Bar (No Prices) */}
+            <div className="flex items-center justify-between p-3.5 bg-amber-50/80 dark:bg-stone-800/80 rounded-2xl border border-amber-200/60 dark:border-stone-700">
+              <div className="flex items-center gap-2">
+                <span className="px-3 py-1 rounded-xl bg-amber-600 text-white font-bold text-xs font-khmer">
+                  {language === 'km' ? selectedFood.categoryKh : selectedFood.categoryEn}
+                </span>
+                <span className="text-xs text-stone-500 font-khmer">
+                  {language === 'km' ? 'មុខម្ហូបខ្មែរប្រពៃណី' : 'Traditional Khmer Recipe'}
+                </span>
               </div>
 
-              <div className="flex items-center gap-2 text-xs">
-                <span className="px-2.5 py-1 rounded-lg bg-white dark:bg-stone-700 shadow-xs font-semibold text-stone-700 dark:text-stone-300">
-                  ★ {selectedFood.rating} ({selectedFood.reviewCount})
+              <div className="flex items-center gap-1.5 text-xs">
+                <span className="px-2.5 py-1 rounded-lg bg-white dark:bg-stone-700 shadow-xs font-bold text-amber-700 dark:text-amber-300 flex items-center gap-1">
+                  ★ {selectedFood.rating} <span className="font-normal text-stone-400">({selectedFood.reviewCount})</span>
                 </span>
               </div>
             </div>

@@ -1,6 +1,5 @@
 import React from 'react';
 import { AppProvider, useApp } from './context/AppContext';
-import { DeviceWrapper } from './components/DeviceWrapper';
 import { Header } from './components/Header';
 import { BottomNav } from './components/BottomNav';
 import { HomeView } from './components/HomeView';
@@ -24,10 +23,10 @@ const MainScreen: React.FC = () => {
   const { activeTab } = useApp();
 
   return (
-    <div className="flex-1 flex flex-col relative w-full overflow-y-auto no-scrollbar">
+    <div className="flex-1 flex flex-col w-full min-h-screen relative overflow-y-auto no-scrollbar pb-16">
       <Header />
       
-      <main className="flex-1">
+      <main className="flex-1 w-full">
         {activeTab === 'home' && <HomeView />}
         {activeTab === 'food' && <FoodView />}
         {activeTab === 'restaurants' && <RestaurantView />}
@@ -61,9 +60,12 @@ const MainScreen: React.FC = () => {
 export default function App() {
   return (
     <AppProvider>
-      <DeviceWrapper>
-        <MainScreen />
-      </DeviceWrapper>
+      {/* Full-screen Native Mobile App Layout (No fake bezels, no notches, edge-to-edge full screen) */}
+      <div className="w-full min-h-screen bg-stone-50 dark:bg-stone-900 text-stone-900 dark:text-stone-100 flex justify-center">
+        <div className="w-full max-w-md min-h-screen flex flex-col bg-stone-50 dark:bg-stone-900 relative shadow-none md:shadow-2xl md:border-x md:border-stone-200 dark:md:border-stone-800">
+          <MainScreen />
+        </div>
+      </div>
     </AppProvider>
   );
 }

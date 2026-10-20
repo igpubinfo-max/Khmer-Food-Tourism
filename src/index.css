@@ -10,9 +10,12 @@
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
-  .no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
+  /* Safe area helpers for notch and home indicator */
+  .pb-safe {
+    padding-bottom: max(env(safe-area-inset-bottom, 0px), 8px);
+  }
+  .pt-safe {
+    padding-top: env(safe-area-inset-top, 0px);
   }
 }
 

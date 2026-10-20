@@ -50,14 +50,9 @@ export const FoodCard: React.FC<FoodCardProps> = ({ food }) => {
         </button>
 
         {/* Cook Time pill */}
-        <div className="absolute bottom-2.5 left-2.5 flex items-center gap-1 px-2 py-0.5 rounded-md bg-stone-900/75 backdrop-blur-sm text-stone-200 text-[10px] font-medium">
+        <div className="absolute bottom-2.5 left-2.5 flex items-center gap-1 px-2 py-0.5 rounded-md bg-stone-900/75 backdrop-blur-sm text-stone-200 text-[10px] font-medium font-khmer">
           <Clock className="w-3 h-3 text-amber-300" />
           <span>{food.cookTime}</span>
-        </div>
-
-        {/* Price tag */}
-        <div className="absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded-md bg-amber-600/90 backdrop-blur-sm text-white text-[11px] font-bold shadow">
-          {food.priceRiel.toLocaleString()} ៛ (${food.priceUsd})
         </div>
       </div>
 
