@@ -72,13 +72,13 @@ export const FoodCard: React.FC<FoodCardProps> = ({ food }) => {
         <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-700/60 text-[11px]">
           <div className="flex items-center gap-1 text-slate-700 dark:text-slate-200 font-semibold">
             <Star className="w-3.5 h-3.5 fill-current text-amber-500" />
-            <span>{food.rating}</span>
-            <span className="text-slate-400 text-[10px]">({food.reviewCount})</span>
+            <span>{food.rating ?? 4.8}</span>
+            <span className="text-slate-400 text-[10px]">({food.reviewCount ?? 0})</span>
           </div>
 
           <div className="flex items-center gap-1 text-slate-500 text-[10px]">
             <Flame className="w-3 h-3 text-orange-500" />
-            <span>{food.calories} kcal</span>
+            <span>{food.calories ?? 320} kcal</span>
           </div>
         </div>
       </div>

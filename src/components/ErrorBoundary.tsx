@@ -31,6 +31,7 @@ export class ErrorBoundary extends Component<Props, State> {
     } catch (e) {
       console.warn('Failed to clear storage:', e);
     }
+    this.setState({ hasError: false, error: undefined });
     window.location.reload();
   };
 
@@ -55,6 +56,12 @@ export class ErrorBoundary extends Component<Props, State> {
             <p className="text-[11px] text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-200">
               សូមចុចប៊ូតុងខាងក្រោមដើម្បីសម្អាត Cache និងបើកដំណើរការកម្មវិធីឡើងវិញដោយសុវត្ថិភាព។
             </p>
+
+            {this.state.error && (
+              <div className="text-[10px] text-rose-600 font-mono text-left break-all bg-rose-50/80 p-2.5 rounded-xl border border-rose-200/80">
+                ⚠️ Error: {this.state.error.message || String(this.state.error)}
+              </div>
+            )}
 
             <button
               onClick={this.handleRecover}

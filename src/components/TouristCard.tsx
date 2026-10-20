@@ -92,13 +92,13 @@ export const TouristCard: React.FC<TouristCardProps> = ({ destination }) => {
         <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-700/60 text-[11px]">
           <div className="flex items-center gap-1 text-slate-700 dark:text-slate-200 font-semibold">
             <Star className="w-3.5 h-3.5 fill-current text-amber-500" />
-            <span>{destination.rating}</span>
-            <span className="text-slate-400 text-[10px]">({destination.reviewCount})</span>
+            <span>{destination.rating ?? 4.8}</span>
+            <span className="text-slate-400 text-[10px]">({destination.reviewCount ?? 0})</span>
           </div>
 
           <div className="flex items-center gap-1 text-[#064E3B] dark:text-emerald-400 font-medium text-[10px]">
             <Ticket className="w-3 h-3" />
-            <span>{language === 'km' ? destination.entryFeeKh : destination.entryFeeEn}</span>
+            <span>{language === 'km' ? (destination.entryFeeKh || 'ឥតគិតថ្លៃ') : (destination.entryFeeEn || 'Free')}</span>
           </div>
         </div>
       </div>

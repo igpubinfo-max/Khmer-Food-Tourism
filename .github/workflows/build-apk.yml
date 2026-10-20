@@ -60,14 +60,16 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: v1.3.3
-          name: "Khmer Food & Tourism v1.3.3 (10 VIP Benefits, $9.99 Promo, Chea Kimseng ABA)"
+          tag_name: v1.3.4
+          name: "Khmer Food & Tourism v1.3.4 (Fix Startup Crash & Remove Restaurant Hours Overlay)"
           overwrite: true
           make_latest: true
           body: |
             ### 🇰🇭 កម្មវិធីទូរស័ព្ទដៃ អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism Mobile App)
             
-            **កំណែថ្មី v1.3.3 (10 Premium VIP Benefits, $9.99 End-of-Year Promo, Chea Kimseng ABA):**
+            **កំណែថ្មី v1.3.4 (Fix Startup Crash & Remove Restaurant Hours Overlay):**
+            - 🛠️ **ដោះស្រាយបញ្ហា Crash / ErrorBoundary Screen:** ធ្វើការការពារសុវត្ថិភាពទិន្នន័យ (Safe Normalization) គ្រប់ភោជនីយដ្ឋាន និងមុខម្ហូបទាំងអស់ ដោយធានាមិនឱ្យមានកំហុស Runtime JavaScript Error ពេលបើកកម្មវិធីឡើយ។
+            - 🕒 **លុបម៉ោងបើក-បិទលើរូបភាពភោជនីយដ្ឋាន (Removed opening and closing hours on restaurant pictures):** គ្មានការបង្ហាញម៉ោងបើក និងបិទលើផ្ទាំងរូបភាពភោជនីយដ្ឋានទៀតឡើយ ដោយរក្សាទុកម៉ោងត្រឹមត្រូវតែក្នុងព័ត៌មានលម្អិតប៉ុណ្ណោះ។
             - ⭐ **អត្ថប្រយោជន៍ VIP ទាំង ១០ យ៉ាងពេញលេញ (10 VIP Benefits):**
               1. បង្ហាញក្នុងបញ្ជីហាងឆ្នើម (Featured restaurant listing)
               2. ដាក់រូបភាពហាងច្រើនសន្លឹក Gallery (Multiple restaurant photos)
@@ -79,13 +81,10 @@ jobs:
               8. បង្ហាញក្នុងផ្នែកផ្សព្វផ្សាយ VIP ពិសេស (Dedicated VIP promotion section)
               9. ប៊ូតុងខល ផែនទី និងចែករំលែករហ័ស (Easy-to-access call, map, and share buttons)
               10. សេវាជំនួយសមាជិក VIP ផ្ទាល់តាម Telegram (VIP member support channel)
-            - 🏷️ **តម្លៃសមាជិកភាព VIP $9.99 សម្រាប់ ៣៦៥ ថ្ងៃ (End of year promo):** បង់តែមួយលើក $9.99 សម្រាប់រយៈពេល ៣៦៥ ថ្ងៃ (តម្លៃពិសេសត្រឹមដំណាច់ឆ្នាំនេះប៉ុណ្ណោះ គ្មានការកាត់ប្រាក់ប្រចាំខែ និងគ្មានការបន្តស្វ័យប្រវត្តិឡើយ)។
-            - 🏦 **ឈ្មោះគណនីទទួលធនាគារ ABA៖** កែសម្រួលឈ្មោះគណនីទទួលធនាគារ ABA ទៅជា **CHEA KIMSENG**។
-            - ⏱️ **លុបម៉ោងលើរូបភាពម្ហូបទាំងអស់ (Removed times from food pictures):** គ្មានការបង្ហាញម៉ោង ឬ cookTime badge ពីលើរូបភាពមុខម្ហូបឡើយ។
+            - 🏷️ **តម្លៃសមាជិកភាព VIP $9.99 សម្រាប់ ៣៦៥ ថ្ងៃ (End of year promo):** បង់តែមួយលើក $9.99 សម្រាប់រយៈពេល ៣៦៥ ថ្ងៃ។
+            - 🏦 **ឈ្មោះគណនីទទួលធនាគារ ABA៖** ឈ្មោះគណនីទទួលធនាគារ ABA គឺ **CHEA KIMSENG**។
             - 📷 **រក្សាស្លាក "រូបតំណាង" (Sample Photo):** លើគ្រប់កាតមុខម្ហូប និងផ្ទាំងលម្អិតមុខម្ហូបទាំងអស់។
             - 🍎 **ប៊ូតុងដំឡើងសម្រាប់ iOS (Apple iPhone):** មានប៊ូតុង iOS ផ្ទាល់ និងការណែនាំ Safari Add to Home Screen (PWA) ពេញលេញ។
-            - 🎁 **ចុះបញ្ជីហាងឥតគិតថ្លៃ $0 (Free Restaurant Listing):** ម្ចាស់ហាងអាចចុះឈ្មោះហាងដោយឥតគិតថ្លៃ ($0) បង្ហាញក្នុងបញ្ជីហាងទូទៅ។
-            - 🚫 **គ្មានមុខងារ QR Code របស់ភោជនីយដ្ឋានឡើយ។**
           draft: false
           prerelease: false
           files: |

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
   X, UtensilsCrossed, Plus, Trash2, Edit2, Sparkles, 
@@ -52,6 +52,20 @@ export const ManageMenuModal: React.FC = () => {
   const [storeGalleryPhotos, setStoreGalleryPhotos] = useState<string[]>(managingRestaurant?.galleryPhotos || []);
   const [newGalleryInput, setNewGalleryInput] = useState('');
 
+  // Sync state whenever managingRestaurant changes
+  useEffect(() => {
+    if (managingRestaurant) {
+      setStoreNameKh(managingRestaurant.nameKh || '');
+      setStoreNameEn(managingRestaurant.nameEn || '');
+      setStorePhone(managingRestaurant.phone || '');
+      setStoreAddressKh(managingRestaurant.addressKh || '');
+      setStoreOpeningHours(managingRestaurant.openingHoursKh || '');
+      setStoreMapUrl(managingRestaurant.mapUrl || '');
+      setStoreCoverPhoto(managingRestaurant.photoUrl || '');
+      setStoreGalleryPhotos(managingRestaurant.galleryPhotos || []);
+    }
+  }, [managingRestaurant?.id]);
+
   // Upgrade / Renewal fields
   const [transactionRef, setTransactionRef] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<'BankTransfer' | 'Bakong' | 'KHQR'>('BankTransfer');
@@ -70,7 +84,8 @@ export const ManageMenuModal: React.FC = () => {
   const mapsCount = managingRestaurant.analytics?.mapClicks || 24;
   const sharesCount = managingRestaurant.analytics?.shareClicks || 11;
 
-  const shareableUrl = `${window.location.origin}/?restaurant=${managingRestaurant.id}`;
+  const origin = typeof window !== 'undefined' && window.location?.origin ? window.location.origin : 'https://khmerfoodtourism.com';
+  const shareableUrl = `${origin}/?restaurant=${managingRestaurant.id}`;
 
   const resetMenuForm = () => {
     setNameKh('');
@@ -218,10 +233,19 @@ export const ManageMenuModal: React.FC = () => {
   };
 
   const handleCopyShareLink = () => {
-    navigator.clipboard.writeText(shareableUrl);
-    setCopiedLink(true);
-    showToast(isKm ? 'បានចម្លងតំណភ្ជាប់ហាងជោគជ័យ!' : 'Restaurant link copied!', 'success');
-    setTimeout(() => setCopiedLink(false), 2000);
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(shareableUrl).then(() => {
+        setCopiedLink(true);
+        showToast(isKm ? 'បានចម្លងតំណភ្ជាប់ហាងជោគជ័យ!' : 'Restaurant link copied!', 'success');
+        setTimeout(() => setCopiedLink(false), 2000);
+      }).catch(() => {
+        showToast(isKm ? 'បានចម្លងតំណភ្ជាប់ហាងជោគជ័យ!' : 'Restaurant link copied!', 'success');
+      });
+    } else {
+      setCopiedLink(true);
+      showToast(isKm ? 'បានចម្លងតំណភ្ជាប់ហាងជោគជ័យ!' : 'Restaurant link copied!', 'success');
+      setTimeout(() => setCopiedLink(false), 2000);
+    }
   };
 
   const handleDirectShare = () => {

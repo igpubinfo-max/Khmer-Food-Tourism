@@ -43,7 +43,8 @@ export const RestaurantDetailModal: React.FC = () => {
 
   const handleShare = () => {
     trackRestaurantShare(selectedRestaurant.id);
-    const shareUrl = `${window.location.origin}/?restaurant=${selectedRestaurant.id}`;
+    const origin = typeof window !== 'undefined' && window.location?.origin ? window.location.origin : 'https://khmerfoodtourism.com';
+    const shareUrl = `${origin}/?restaurant=${selectedRestaurant.id}`;
     if (navigator.share) {
       navigator.share({
         title: isKm ? selectedRestaurant.nameKh : selectedRestaurant.nameEn,
@@ -52,8 +53,11 @@ export const RestaurantDetailModal: React.FC = () => {
           : `Check out ${selectedRestaurant.nameEn}!`,
         url: shareUrl,
       }).catch(() => {});
+    } else if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(shareUrl).then(() => {
+        showToast(isKm ? 'បានចម្លងតំណភ្ជាប់ហាងជោគជ័យ!' : 'Restaurant link copied to clipboard!', 'success');
+      }).catch(() => {});
     } else {
-      navigator.clipboard.writeText(shareUrl);
       showToast(isKm ? 'បានចម្លងតំណភ្ជាប់ហាងជោគជ័យ!' : 'Restaurant link copied to clipboard!', 'success');
     }
   };
@@ -328,7 +332,7 @@ export const RestaurantDetailModal: React.FC = () => {
                 </div>
                 
                 <div className="grid grid-cols-1 gap-2">
-                  {selectedRestaurant.signatureDishesKh.map((dish, i) => (
+                  {(selectedRestaurant.signatureDishesKh || []).map((dish, i) => (
                     <div 
                       key={i}
                       className="flex items-center gap-2.5 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 text-xs text-slate-800 dark:text-slate-200"

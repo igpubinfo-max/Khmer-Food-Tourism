@@ -192,12 +192,63 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return initialFoods;
   });
 
+  const normalizeRestaurant = (r: any): Restaurant => {
+    const isPromoted = Boolean(r.isPromoted);
+    const membershipTier = (r.membershipTier || (isPromoted ? 'premium' : 'free')) as MembershipTier;
+    const membershipExpiresAt = r.membershipExpiresAt || (membershipTier === 'premium' ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString() : undefined);
+    
+    return {
+      id: r.id || `rest-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+      nameKh: r.nameKh || 'ភោជនីយដ្ឋានខ្មែរ',
+      nameEn: r.nameEn || r.nameKh || 'Khmer Restaurant',
+      descriptionKh: r.descriptionKh || 'ភោជនីយដ្ឋានម្ហូបខ្មែររសជាតិដើម ផាសុកភាព និងអនាម័យខ្ពស់។',
+      descriptionEn: r.descriptionEn || 'Authentic traditional Khmer restaurant.',
+      photoUrl: r.photoUrl || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80',
+      galleryPhotos: Array.isArray(r.galleryPhotos) ? r.galleryPhotos : [],
+      addressKh: r.addressKh || 'រាជធានីភ្នំពេញ កម្ពុជា',
+      addressEn: r.addressEn || 'Phnom Penh, Cambodia',
+      provinceKh: r.provinceKh || 'រាជធានីភ្នំពេញ',
+      provinceEn: r.provinceEn || 'Phnom Penh',
+      phone: r.phone || '012 345 678',
+      openingHoursKh: r.openingHoursKh || '០៧:០០ ព្រឹក - ០៩:០០ យប់',
+      openingHoursEn: r.openingHoursEn || '07:00 AM - 09:00 PM',
+      priceLevel: r.priceLevel || '$$',
+      mapUrl: r.mapUrl || `https://maps.google.com/?q=${encodeURIComponent(r.nameKh || 'Cambodia')}`,
+      latitude: typeof r.latitude === 'number' ? r.latitude : 11.5564,
+      longitude: typeof r.longitude === 'number' ? r.longitude : 104.9282,
+      rating: typeof r.rating === 'number' ? r.rating : 4.8,
+      reviewCount: typeof r.reviewCount === 'number' ? r.reviewCount : 50,
+      signatureDishesKh: Array.isArray(r.signatureDishesKh) && r.signatureDishesKh.length > 0
+        ? r.signatureDishesKh 
+        : ['ម្ហូបខ្មែរប្រពៃណី', 'ម្ហូបពិសេសប្រចាំហាង'],
+      status: r.status || 'approved',
+      isVerified: typeof r.isVerified === 'boolean' ? r.isVerified : true,
+      isFeatured: Boolean(r.isFeatured),
+      membershipTier,
+      membershipExpiresAt,
+      menuItems: Array.isArray(r.menuItems) ? r.menuItems : [],
+      analytics: r.analytics && typeof r.analytics === 'object' ? {
+        views: typeof r.analytics.views === 'number' ? r.analytics.views : 65,
+        phoneClicks: typeof r.analytics.phoneClicks === 'number' ? r.analytics.phoneClicks : 14,
+        mapClicks: typeof r.analytics.mapClicks === 'number' ? r.analytics.mapClicks : 18,
+        shareClicks: typeof r.analytics.shareClicks === 'number' ? r.analytics.shareClicks : 9,
+      } : { views: 65, phoneClicks: 14, mapClicks: 18, shareClicks: 9 },
+      paymentStatus: r.paymentStatus || (membershipTier === 'premium' ? 'verified' : 'unpaid'),
+      promotionalPrice: typeof r.promotionalPrice === 'number' ? r.promotionalPrice : 9.99,
+      isPromoted,
+      ownerId: r.ownerId,
+      paymentDate: r.paymentDate,
+    };
+  };
+
   const [restaurants, setRestaurants] = useState<Restaurant[]>(() => {
     try {
       const saved = localStorage.getItem('kft_restaurants_membership_v1');
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length >= 50) return parsed;
+        if (Array.isArray(parsed) && parsed.length >= 50) {
+          return parsed.map(normalizeRestaurant);
+        }
       }
     } catch (e) {
       console.warn('Failed to parse kft_restaurants_membership_v1', e);
@@ -208,7 +259,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } catch {}
     return initialRestaurants.map(r => {
       if (r.id === 'rest-19') {
-        return {
+        return normalizeRestaurant({
           ...r,
           ownerId: 'owner-1',
           membershipTier: 'premium' as MembershipTier,
@@ -248,14 +299,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               createdAt: '2026-01-15',
             }
           ]
-        };
+        });
       }
-      return {
-        ...r,
-        membershipTier: (r.membershipTier || (r.isPromoted ? 'premium' : 'free')) as MembershipTier,
-        membershipExpiresAt: r.membershipExpiresAt || (r.isPromoted ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString() : undefined),
-        menuItems: r.menuItems || [],
-      };
+      return normalizeRestaurant(r);
     });
   });
 
@@ -822,7 +868,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Restaurant CRUD
   const addRestaurant = (restData: Omit<Restaurant, 'id' | 'rating' | 'reviewCount' | 'status'> & { status?: 'approved' | 'pending' | 'rejected' }) => {
     const isPremium = restData.membershipTier === 'premium';
-    const newRest: Restaurant = {
+    const newRest: Restaurant = normalizeRestaurant({
       ...restData,
       id: `rest-${Date.now()}`,
       rating: 5.0,
@@ -835,7 +881,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString() 
         : undefined,
       menuItems: isPremium ? (restData.menuItems || []).slice(0, 5) : [], // Free users cannot add menu items!
-    };
+    });
     setRestaurants(prev => [newRest, ...prev]);
     showToast(
       isPremium
@@ -855,14 +901,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return;
     }
 
-    const safeUpdated: Restaurant = isAdmin ? updated : {
+    const safeUpdated: Restaurant = normalizeRestaurant(isAdmin ? updated : {
       ...updated,
       membershipTier: original?.membershipTier || 'free',
       membershipExpiresAt: original?.membershipExpiresAt,
       paymentStatus: original?.paymentStatus,
       status: original?.status || 'approved',
       isVerified: original?.isVerified ?? true,
-    };
+      signatureDishesKh: Array.isArray(updated.signatureDishesKh) ? updated.signatureDishesKh : (original?.signatureDishesKh || ['ម្ហូបខ្មែរប្រពៃណី']),
+      galleryPhotos: Array.isArray(updated.galleryPhotos) ? updated.galleryPhotos : (original?.galleryPhotos || []),
+      menuItems: Array.isArray(updated.menuItems) ? updated.menuItems : (original?.menuItems || []),
+    });
 
     setRestaurants(prev => prev.map(r => r.id === updated.id ? safeUpdated : r));
     if (selectedRestaurant?.id === updated.id) setSelectedRestaurant(safeUpdated);

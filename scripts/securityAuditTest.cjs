@@ -104,9 +104,11 @@ assert(!manageMenuContent.includes('QRCodeCanvas') && !manageMenuContent.include
 assert(manageMenuContent.includes('CHEA KIMSENG'), 'ABA receiver CHEA KIMSENG in ManageMenuModal.');
 assert(manageMenuContent.includes('$9.99') || manageMenuContent.includes('promoPrice'), 'ManageMenuModal uses promotional fee $9.99.');
 
-// TEST 13: Zero Times on Food Picture Cards
+// TEST 13: Zero Times on Picture Cards
 const foodCardContent = fs.readFileSync(path.resolve(__dirname, '../src/components/FoodCard.tsx'), 'utf8');
-assert(!foodCardContent.includes('food.cookTime'), 'Zero times/cookTime on food picture cards (Requirement 11).');
+assert(!foodCardContent.includes('food.cookTime'), 'Zero times/cookTime on food picture cards.');
+const restCardContent = fs.readFileSync(path.resolve(__dirname, '../src/components/RestaurantCard.tsx'), 'utf8');
+assert(!restCardContent.includes('restaurant.openingHoursKh'), 'Zero opening and closing hours on restaurant picture cards.');
 
 // TEST 13: Firestore Security Rules Enforcing 5 Menu Items & Protected Membership Fields
 const firestoreRules = fs.readFileSync(path.resolve(__dirname, '../firestore.rules'), 'utf8');

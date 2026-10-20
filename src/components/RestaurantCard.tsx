@@ -1,7 +1,7 @@
 import React from 'react';
 import { Restaurant, isRestaurantPremiumActive } from '../types';
 import { useApp } from '../context/AppContext';
-import { MapPin, Phone, Star, Clock, Navigation, CheckCircle2, AlertCircle, Sparkles, Share2 } from 'lucide-react';
+import { MapPin, Phone, Star, Navigation, CheckCircle2, AlertCircle, Sparkles, Share2 } from 'lucide-react';
 
 interface RestaurantCardProps {
   restaurant: Restaurant;
@@ -18,15 +18,19 @@ export const RestaurantCard: React.FC<RestaurantCardProps> = ({ restaurant }) =>
   const handleShare = (e: React.MouseEvent) => {
     e.stopPropagation();
     trackRestaurantShare(restaurant.id);
-    const shareUrl = `${window.location.origin}/?restaurant=${restaurant.id}`;
+    const origin = typeof window !== 'undefined' && window.location?.origin ? window.location.origin : 'https://khmerfoodtourism.com';
+    const shareUrl = `${origin}/?restaurant=${restaurant.id}`;
     if (navigator.share) {
       navigator.share({
         title: isKm ? restaurant.nameKh : restaurant.nameEn,
         text: isKm ? `សូមចូលមើល ${restaurant.nameKh} ក្នុងកម្មវិធី Khmer Food & Tourism!` : `Check out ${restaurant.nameEn}!`,
         url: shareUrl,
       }).catch(() => {});
+    } else if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(shareUrl).then(() => {
+        showToast(isKm ? 'បានចម្លងតំណភ្ជាប់ហាងជោគជ័យ!' : 'Restaurant link copied to clipboard!', 'success');
+      }).catch(() => {});
     } else {
-      navigator.clipboard.writeText(shareUrl);
       showToast(isKm ? 'បានចម្លងតំណភ្ជាប់ហាងជោគជ័យ!' : 'Restaurant link copied to clipboard!', 'success');
     }
   };
@@ -55,7 +59,7 @@ export const RestaurantCard: React.FC<RestaurantCardProps> = ({ restaurant }) =>
         {/* Province pill */}
         <div className="absolute top-2.5 left-2.5">
           <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-[#064E3B]/90 backdrop-blur-md text-emerald-100 border border-emerald-400/30 shadow-xs font-khmer">
-            {isKm ? restaurant.provinceKh : restaurant.provinceEn}
+            {isKm ? (restaurant.provinceKh || 'កម្ពុជា') : (restaurant.provinceEn || 'Cambodia')}
           </span>
         </div>
 
@@ -90,14 +94,8 @@ export const RestaurantCard: React.FC<RestaurantCardProps> = ({ restaurant }) =>
           </span>
 
           <span className="px-2 py-0.5 rounded-md bg-[#064E3B]/90 backdrop-blur-md text-emerald-100 text-xs font-bold border border-emerald-400/30">
-            {restaurant.priceLevel}
+            {restaurant.priceLevel || '$$'}
           </span>
-        </div>
-
-        {/* Hours badge */}
-        <div className="absolute bottom-2.5 left-2.5 flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#064E3B]/90 backdrop-blur-sm text-white text-[10px] font-khmer border border-emerald-400/30">
-          <Clock className="w-3 h-3 text-emerald-300" />
-          <span>{isKm ? restaurant.openingHoursKh : restaurant.openingHoursEn}</span>
         </div>
       </div>
 
@@ -117,7 +115,7 @@ export const RestaurantCard: React.FC<RestaurantCardProps> = ({ restaurant }) =>
 
           {/* Signature dishes tags */}
           <div className="flex flex-wrap gap-1 mb-2.5">
-            {restaurant.signatureDishesKh.slice(0, 2).map((dish, i) => (
+            {(restaurant.signatureDishesKh || []).slice(0, 2).map((dish, i) => (
               <span key={i} className="px-2 py-0.5 rounded-md bg-slate-50 dark:bg-slate-700/60 text-slate-700 dark:text-slate-200 text-[10px] font-medium border border-slate-200/80 dark:border-slate-600/60 font-khmer">
                 🍽️ {dish}
               </span>
@@ -129,13 +127,13 @@ export const RestaurantCard: React.FC<RestaurantCardProps> = ({ restaurant }) =>
         <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-700/60">
           <div className="flex items-center gap-1 text-slate-700 dark:text-slate-200 font-semibold text-xs">
             <Star className="w-3.5 h-3.5 fill-current text-amber-500" />
-            <span>{restaurant.rating}</span>
-            <span className="text-slate-400 text-[10px]">({restaurant.reviewCount})</span>
+            <span>{restaurant.rating ?? 4.8}</span>
+            <span className="text-slate-400 text-[10px]">({restaurant.reviewCount ?? 0})</span>
           </div>
 
           <div className="flex items-center gap-1.5">
             <a
-              href={`tel:${restaurant.phone}`}
+              href={`tel:${restaurant.phone || ''}`}
               onClick={(e) => {
                 e.stopPropagation();
                 trackRestaurantCall(restaurant.id);
@@ -147,7 +145,7 @@ export const RestaurantCard: React.FC<RestaurantCardProps> = ({ restaurant }) =>
             </a>
 
             <a
-              href={restaurant.mapUrl}
+              href={restaurant.mapUrl || '#'}
               target="_blank"
               rel="noopener noreferrer"
               onClick={(e) => {

@@ -207,12 +207,12 @@ export const FoodDetailModal: React.FC = () => {
                   {language === 'km' ? 'គ្រឿងផ្សំចាំបាច់' : 'Ingredients Needed'}
                 </h3>
                 <span className="text-[11px] text-slate-400">
-                  {Object.values(checkedIngredients).filter(Boolean).length} / {selectedFood.ingredients.length}
+                  {Object.values(checkedIngredients).filter(Boolean).length} / {(selectedFood.ingredients || []).length}
                 </span>
               </div>
 
               <div className="space-y-1.5">
-                {selectedFood.ingredients.map((ing, idx) => {
+                {(selectedFood.ingredients || []).map((ing, idx) => {
                   const isChecked = !!checkedIngredients[idx];
                   return (
                     <div
@@ -246,7 +246,7 @@ export const FoodDetailModal: React.FC = () => {
               </h3>
 
               <div className="space-y-3">
-                {selectedFood.steps.map((st) => (
+                {(selectedFood.steps || []).map((st) => (
                   <div 
                     key={st.stepNumber}
                     className="p-3.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 shadow-2xs space-y-2"
