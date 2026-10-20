@@ -1,15 +1,16 @@
 import React from 'react';
 import { TouristDestination } from '../types';
 import { useApp } from '../context/AppContext';
-import { MapPin, Star, Heart, Ticket } from 'lucide-react';
+import { MapPin, Star, Heart, Ticket, Camera } from 'lucide-react';
 
 interface TouristCardProps {
   destination: TouristDestination;
 }
 
 export const TouristCard: React.FC<TouristCardProps> = ({ destination }) => {
-  const { language, setSelectedDestination, isBookmarked, toggleBookmark } = useApp();
+  const { language, setSelectedDestination, isBookmarked, toggleBookmark, currentUser } = useApp();
   const bookmarked = isBookmarked(destination.id);
+  const isAdmin = currentUser?.role === 'admin';
 
   return (
     <div 
@@ -31,6 +32,21 @@ export const TouristCard: React.FC<TouristCardProps> = ({ destination }) => {
             {language === 'km' ? destination.provinceKh : destination.provinceEn}
           </span>
         </div>
+
+        {/* Admin Change Photo Shortcut */}
+        {isAdmin && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setSelectedDestination(destination);
+            }}
+            className="absolute top-2.5 right-11 p-2 rounded-full bg-amber-500 hover:bg-amber-400 text-stone-950 shadow-md backdrop-blur-md transition-transform active:scale-90"
+            title={language === 'km' ? 'ប្តូររូបភាព' : 'Change Photo'}
+          >
+            <Camera className="w-3.5 h-3.5" />
+          </button>
+        )}
 
         {/* Bookmark Button */}
         <button

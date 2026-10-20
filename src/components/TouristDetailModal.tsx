@@ -1,15 +1,22 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
   X, Heart, MapPin, Calendar, Ticket, ExternalLink, 
-  Send, Share2, Sparkles, Compass
+  Send, Share2, Sparkles, Compass, Camera
 } from 'lucide-react';
+import { TouristImageModal } from './TouristImageModal';
 
 export const TouristDetailModal: React.FC = () => {
-  const { selectedDestination, setSelectedDestination, language, isBookmarked, toggleBookmark, showToast } = useApp();
+  const { 
+    selectedDestination, setSelectedDestination, updateDestination,
+    language, isBookmarked, toggleBookmark, showToast, currentUser 
+  } = useApp();
+
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
 
   if (!selectedDestination) return null;
 
+  const isAdmin = currentUser?.role === 'admin';
   const bookmarked = isBookmarked(selectedDestination.id);
 
   const handleShareTelegram = () => {
@@ -44,15 +51,29 @@ export const TouristDetailModal: React.FC = () => {
             <X className="w-4 h-4" />
           </button>
 
-          <button
-            onClick={() => toggleBookmark(selectedDestination.id)}
-            className={`p-2.5 rounded-full backdrop-blur-md shadow pointer-events-auto transition active:scale-90 ${
-              bookmarked ? 'bg-rose-500 text-white' : 'bg-black/50 hover:bg-black/70 text-white'
-            }`}
-            title="រក្សាទុក"
-          >
-            <Heart className={`w-4 h-4 ${bookmarked ? 'fill-current' : ''}`} />
-          </button>
+          <div className="flex items-center gap-2 pointer-events-auto">
+            {isAdmin && (
+              <button
+                type="button"
+                onClick={() => setIsImageModalOpen(true)}
+                className="py-1.5 px-3 rounded-full bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs shadow-lg backdrop-blur-md transition active:scale-90 flex items-center gap-1.5"
+                title={language === 'km' ? 'ផ្លាស់ប្តូររូបភាព' : 'Change Photo'}
+              >
+                <Camera className="w-3.5 h-3.5 text-stone-950" />
+                <span className="font-khmer">{language === 'km' ? 'ប្តូររូបភាព' : 'Change Photo'}</span>
+              </button>
+            )}
+
+            <button
+              onClick={() => toggleBookmark(selectedDestination.id)}
+              className={`p-2.5 rounded-full backdrop-blur-md shadow transition active:scale-90 ${
+                bookmarked ? 'bg-rose-500 text-white' : 'bg-black/50 hover:bg-black/70 text-white'
+              }`}
+              title="រក្សាទុក"
+            >
+              <Heart className={`w-4 h-4 ${bookmarked ? 'fill-current' : ''}`} />
+            </button>
+          </div>
         </div>
 
         {/* Scrollable Body */}
@@ -197,6 +218,19 @@ export const TouristDetailModal: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Destination Photo Upload / Replace Modal for Admin */}
+      <TouristImageModal
+        destination={selectedDestination}
+        isOpen={isImageModalOpen}
+        onClose={() => setIsImageModalOpen(false)}
+        onSave={(updatedDest) => {
+          updateDestination(updatedDest);
+          setSelectedDestination(updatedDest);
+          showToast(language === 'km' ? `បានផ្លាស់ប្តូររូបភាពសម្រាប់ "${updatedDest.nameKh}" ជោគជ័យ!` : `Updated photo for "${updatedDest.nameEn}"!`, 'success');
+        }}
+        isKm={language === 'km'}
+      />
     </div>
   );
 };

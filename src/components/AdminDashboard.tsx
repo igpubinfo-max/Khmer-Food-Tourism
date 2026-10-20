@@ -7,16 +7,17 @@ import {
   ShieldCheck, ShieldAlert, Clock, RefreshCw, FileText, Check, Ban,
   Sparkles, Image as ImageIcon, Search, Camera, Upload
 } from 'lucide-react';
-import { FoodCategorySlug, DestinationCategorySlug, UserRole, RegistrationTransaction, FoodItem } from '../types';
+import { FoodCategorySlug, DestinationCategorySlug, UserRole, RegistrationTransaction, FoodItem, TouristDestination } from '../types';
 import { getSecurityAuditLogs, SecurityAuditEntry, revokeAdminSession } from '../utils/security';
 import { FoodImageModal } from './FoodImageModal';
+import { TouristImageModal } from './TouristImageModal';
 
 export const AdminDashboard: React.FC = () => {
   const { 
     isAdminOpen, setIsAdminOpen, language,
     foods, addFood, updateFood, deleteFood,
     restaurants, deleteRestaurant, approveRestaurant, toggleVerifyRestaurant,
-    destinations, addDestination, deleteDestination,
+    destinations, addDestination, updateDestination, deleteDestination,
     posts, deletePost,
     users, updateUserRole,
     transactions, verifyTransaction, rejectTransaction,
@@ -52,6 +53,9 @@ export const AdminDashboard: React.FC = () => {
   const [newDestPhotoUrl, setNewDestPhotoUrl] = useState('https://images.unsplash.com/photo-1569154941061-e231b4725ef1?w=800&auto=format&fit=crop&q=80');
   const [newDestDescKh, setNewDestDescKh] = useState('');
   const [showAddDestForm, setShowAddDestForm] = useState(false);
+  const [selectedDestForImageEdit, setSelectedDestForImageEdit] = useState<TouristDestination | null>(null);
+  const [destSearchQuery, setDestSearchQuery] = useState('');
+  const [destProvinceFilter, setDestProvinceFilter] = useState('all');
 
   // Form states for Settings & Promotional pricing
   const [apkUrl, setApkUrl] = useState(appSettings.apkDownloadUrl);
@@ -752,17 +756,75 @@ export const AdminDashboard: React.FC = () => {
           {/* DESTINATIONS TAB */}
           {activeTab === 'destinations' && (
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="font-bold text-stone-900 dark:text-stone-100 font-khmer text-sm">
-                  {isKm ? `តំបន់ទេសចរណ៍ខ្មែរ (${destinations.length} កន្លែង)` : `Tourist Destinations (${destinations.length})`}
-                </h3>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-2 border-b border-stone-200 dark:border-stone-700">
+                <div>
+                  <h3 className="font-bold text-stone-900 dark:text-stone-100 font-khmer text-sm flex items-center gap-2">
+                    <Compass className="w-4 h-4 text-amber-600" />
+                    <span>{isKm ? `តំបន់ទេសចរណ៍ខ្មែរ (${destinations.length} កន្លែង)` : `Tourist Destinations (${destinations.length})`}</span>
+                  </h3>
+                  <p className="text-[11px] text-stone-500 font-khmer">
+                    {isKm ? 'គ្រប់គ្រងព័ត៌មាន និងផ្លាស់ប្តូររូបភាពតំបន់ទេសចរណ៍ពីទូរស័ព្ទ ឬកុំព្យូទ័រ' : 'Manage destinations and replace photos from phone or computer'}
+                  </p>
+                </div>
                 <button
                   onClick={() => setShowAddDestForm(!showAddDestForm)}
-                  className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-amber-600 text-white font-bold hover:bg-amber-500 font-khmer"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-600 text-white font-bold hover:bg-amber-500 font-khmer text-xs shadow-sm self-start sm:self-auto"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span>{showAddDestForm ? 'បិទ' : 'បញ្ចូលកន្លែងថ្មី'}</span>
                 </button>
+              </div>
+
+              {/* Search & Province Filter */}
+              <div className="space-y-2">
+                <div className="relative">
+                  <Search className="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    value={destSearchQuery}
+                    onChange={(e) => setDestSearchQuery(e.target.value)}
+                    placeholder={isKm ? "ស្វែងរកតាមឈ្មោះកន្លែង ខេត្ត ឬលេខសម្គាល់..." : "Search by destination name, province, or ID..."}
+                    className="w-full pl-9 pr-4 py-2 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-stone-100 text-xs font-khmer focus:outline-none focus:border-amber-500"
+                  />
+                  {destSearchQuery && (
+                    <button
+                      onClick={() => setDestSearchQuery('')}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+
+                {/* Filter Pills */}
+                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar text-[11px] font-khmer">
+                  <button
+                    onClick={() => setDestProvinceFilter('all')}
+                    className={`px-2.5 py-1 rounded-lg font-bold shrink-0 transition ${
+                      destProvinceFilter === 'all' 
+                        ? 'bg-amber-600 text-white shadow-xs' 
+                        : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:bg-stone-200'
+                    }`}
+                  >
+                    {isKm ? `ទាំងអស់ (${destinations.length})` : `All (${destinations.length})`}
+                  </button>
+                  {Array.from(new Set(destinations.map(d => d.provinceKh))).filter(Boolean).slice(0, 10).map((prov) => {
+                    const count = destinations.filter(d => d.provinceKh === prov).length;
+                    return (
+                      <button
+                        key={prov}
+                        onClick={() => setDestProvinceFilter(prov)}
+                        className={`px-2.5 py-1 rounded-lg shrink-0 transition ${
+                          destProvinceFilter === prov 
+                            ? 'bg-amber-600 text-white font-bold shadow-xs' 
+                            : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:bg-stone-200'
+                        }`}
+                      >
+                        {prov} ({count})
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
               {showAddDestForm && (
@@ -774,43 +836,100 @@ export const AdminDashboard: React.FC = () => {
                       value={newDestNameKh}
                       onChange={(e) => setNewDestNameKh(e.target.value)}
                       placeholder="ឈ្មោះកន្លែងទេសចរណ៍ *"
-                      className="px-2.5 py-1.5 rounded-lg border bg-white dark:bg-stone-700"
+                      className="px-2.5 py-1.5 rounded-lg border bg-white dark:bg-stone-700 text-xs"
                     />
                     <input
                       type="text"
                       value={newDestProvince}
                       onChange={(e) => setNewDestProvince(e.target.value)}
                       placeholder="ខេត្ត / ក្រុង"
-                      className="px-2.5 py-1.5 rounded-lg border bg-white dark:bg-stone-700"
+                      className="px-2.5 py-1.5 rounded-lg border bg-white dark:bg-stone-700 text-xs"
                     />
                   </div>
                   <button
                     type="submit"
-                    className="px-4 py-2 rounded-xl bg-amber-600 text-white font-bold hover:bg-amber-500 font-khmer"
+                    className="px-4 py-2 rounded-xl bg-amber-600 text-white font-bold hover:bg-amber-500 font-khmer text-xs"
                   >
                     រក្សាទុក
                   </button>
                 </form>
               )}
 
-              <div className="space-y-2 max-h-[50vh] overflow-y-auto no-scrollbar">
-                {destinations.map((d) => (
-                  <div key={d.id} className="p-3 bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <img src={d.photoUrl} alt="dest" className="w-12 h-12 rounded-xl object-cover shrink-0" />
-                      <div>
-                        <h4 className="font-bold text-stone-900 dark:text-stone-100 font-khmer">{d.nameKh}</h4>
-                        <p className="text-[10px] text-stone-400">{d.provinceKh}</p>
+              {/* Destination Items List */}
+              <div className="space-y-2.5 max-h-[58vh] overflow-y-auto no-scrollbar">
+                {destinations
+                  .filter(d => {
+                    const q = destSearchQuery.toLowerCase().trim();
+                    const matchesSearch = !q || 
+                      d.nameKh.toLowerCase().includes(q) ||
+                      d.nameEn.toLowerCase().includes(q) ||
+                      d.provinceKh.toLowerCase().includes(q) ||
+                      d.id.toLowerCase().includes(q);
+                    const matchesProvince = destProvinceFilter === 'all' || d.provinceKh === destProvinceFilter;
+                    return matchesSearch && matchesProvince;
+                  })
+                  .map((d) => (
+                    <div 
+                      key={d.id} 
+                      className="p-3 bg-white dark:bg-stone-800/90 rounded-2xl border border-stone-200 dark:border-stone-700 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs hover:border-amber-300 transition"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        {/* Thumbnail with quick click to edit photo */}
+                        <div 
+                          onClick={() => setSelectedDestForImageEdit(d)}
+                          className="relative w-14 h-14 rounded-xl overflow-hidden bg-stone-100 dark:bg-stone-700 shrink-0 cursor-pointer group border border-stone-200 dark:border-stone-600"
+                          title={isKm ? 'ចុចដើម្បីប្តូររូបភាព' : 'Click to change photo'}
+                        >
+                          <img 
+                            src={d.photoUrl} 
+                            alt={d.nameKh} 
+                            className="w-full h-full object-cover group-hover:scale-110 transition duration-200" 
+                          />
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition text-white">
+                            <Camera className="w-4 h-4 text-amber-300" />
+                          </div>
+                        </div>
+
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="font-mono text-[9px] font-bold px-1.5 py-0.5 rounded bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-300">
+                              {d.id}
+                            </span>
+                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 font-khmer">
+                              {d.provinceKh}
+                            </span>
+                          </div>
+                          <h4 className="font-bold text-stone-900 dark:text-stone-100 font-khmer text-xs truncate mt-0.5">
+                            {d.nameKh}
+                          </h4>
+                          <p className="text-[10px] text-stone-500 truncate">
+                            {d.nameEn} • {d.categoryKh}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
+                        {/* Change Photo Button */}
+                        <button
+                          type="button"
+                          onClick={() => setSelectedDestForImageEdit(d)}
+                          className="px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/40 dark:hover:bg-amber-900/60 text-amber-800 dark:text-amber-200 border border-amber-300 dark:border-amber-700 font-khmer font-bold text-xs flex items-center gap-1.5 transition active:scale-95 shadow-2xs"
+                        >
+                          <Camera className="w-3.5 h-3.5 text-amber-600" />
+                          <span>{isKm ? 'ប្តូររូបភាព' : 'Change Photo'}</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => deleteDestination(d.id)}
+                          className="p-1.5 text-stone-400 hover:text-rose-600 transition"
+                          title="Delete"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
                       </div>
                     </div>
-                    <button
-                      onClick={() => deleteDestination(d.id)}
-                      className="p-1.5 text-stone-400 hover:text-rose-600"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
+                  ))}
               </div>
             </div>
           )}
@@ -1444,6 +1563,18 @@ export const AdminDashboard: React.FC = () => {
         onSave={(updatedFood) => {
           updateFood(updatedFood);
           showToast(isKm ? `បានរក្សាទុករូបភាពសម្រាប់ "${updatedFood.nameKh}" ជោគជ័យ!` : `Updated photo for "${updatedFood.nameEn}"!`, 'success');
+        }}
+        isKm={isKm}
+      />
+
+      {/* Tourist Destination Image Upload & Management Modal (Phone Gallery + Preview + Compression) */}
+      <TouristImageModal
+        destination={selectedDestForImageEdit}
+        isOpen={!!selectedDestForImageEdit}
+        onClose={() => setSelectedDestForImageEdit(null)}
+        onSave={(updatedDest) => {
+          updateDestination(updatedDest);
+          showToast(isKm ? `បានរក្សាទុករូបភាពសម្រាប់ "${updatedDest.nameKh}" ជោគជ័យ!` : `Updated photo for "${updatedDest.nameEn}"!`, 'success');
         }}
         isKm={isKm}
       />
