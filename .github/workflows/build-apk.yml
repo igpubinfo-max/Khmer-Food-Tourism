@@ -60,17 +60,18 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: v1.3.6
-          name: "Khmer Food & Tourism v1.3.6 (Bugfix & Telegram/FB Share Fix)"
+          tag_name: v1.3.7
+          name: "Khmer Food & Tourism v1.3.7 (Restaurant Sample Image Label)"
           overwrite: true
           make_latest: true
           body: |
             ### 🇰🇭 កម្មវិធីទូរស័ព្ទដៃ អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism Mobile App)
             
-            **កំណែថ្មី v1.3.6 (Bugfix & Social Share):**
-            - 🚀 **ដោះស្រាយបញ្ហា Crash ពេលចុចលើ Premium VIP (Resolved handleShareTelegram undefined):** កែសម្រួលមុខងារចែករំលែក Telegram និង Facebook ក្នុងផ្ទាំង Restaurant Detail Modal ឱ្យដំណើរការយ៉ាងរលូន ១០០% ដោយគ្មានកំហុស។
+            **កំណែថ្មី v1.3.7 (Sample Image Label on Restaurants):**
+            - 🏷️ **បន្ថែមស្លាក "រូបតំណាង" លើរូបភាពហាង (Sample Photo Label):** បានបន្ថែមស្លាក "រូបតំណាង" នៅផ្នែកខាងក្រោមនៃរូបភាពហាងទាំងអស់ ដូចគ្នានឹងរូបភាពម្ហូបដែរ ដើម្បីភាពច្បាស់លាស់ និងស្តង់ដារ។
+            - 🚀 **ដោះស្រាយបញ្ហា Crash ពេលចុចលើ Premium VIP (Social Sharing):** ដំណើរការ Telegram & Facebook sharing យ៉ាងរលូន។
             - 📧 **អ៊ីមែលសម្រាប់មតិកែលម្អ (Feedback Email):** `kftapp@gmail.com` នៅខាងក្រោម Header Buttons, ក្នុងផ្ទាំង Support Modal, និងលើផ្ទាំង Error Recovery ជាមួយប៊ូតុងចម្លងអ៊ីមែលរហ័ស។
-            - 🛡️ **ការការពារទិន្នន័យ Cache & Version Migration:** បានប្តូរ storage key ទៅ `kft_restaurants_membership_v2` និង Version Auto-Purge v1.3.6។
+            - 🛡️ **ការការពារទិន្នន័យ Cache & Version Migration:** បានប្តូរ storage key ទៅ `kft_restaurants_membership_v2` និង Version Auto-Purge v1.3.7។
             - ⭐ **អត្ថប្រយោជន៍ VIP ទាំង ១០ យ៉ាងពេញលេញ (10 VIP Benefits)**
             - 🏷️ **តម្លៃសមាជិកភាព VIP $9.99 សម្រាប់ ៣៦៥ ថ្ងៃ (End of year promo)**
             - 🏦 **ឈ្មោះគណនីទទួលធនាគារ ABA៖** **CHEA KIMSENG**។

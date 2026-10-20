@@ -154,6 +154,11 @@ export const RestaurantDetailModal: React.FC = () => {
                 {isKm ? selectedRestaurant.nameEn : selectedRestaurant.nameKh}
               </p>
             </div>
+
+            {/* Sample / Representative Image Label (រូបតំណាង) */}
+            <div className="absolute bottom-2.5 right-3 z-10 px-1.5 py-0.5 rounded-md bg-black/60 backdrop-blur-xs text-[9px] text-white/90 font-khmer border border-white/20 select-none pointer-events-none shadow-xs">
+              <span>{isKm ? 'រូបតំណាង' : 'Sample photo'}</span>
+            </div>
           </div>
 
           <div className="p-4 sm:p-6 space-y-5">

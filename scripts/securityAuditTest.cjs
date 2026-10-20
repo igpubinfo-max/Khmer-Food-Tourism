@@ -127,6 +127,10 @@ const restDetailContent = fs.readFileSync(path.resolve(__dirname, '../src/compon
 assert(restDetailContent.includes('const handleShareTelegram ='), 'RestaurantDetailModal defines handleShareTelegram handler.');
 assert(restDetailContent.includes('const handleShareFacebook ='), 'RestaurantDetailModal defines handleShareFacebook handler.');
 
+// TEST 17: Restaurant Picture Sample Label (រូបតំណាង)
+assert(restCardContent.includes('រូបតំណាង'), 'RestaurantCard contains representative sample label (រូបតំណាង) on pictures.');
+assert(restDetailContent.includes('រូបតំណាង'), 'RestaurantDetailModal contains representative sample label (រូបតំណាង) on hero picture.');
+
 console.log('\n================================================================');
 console.log(`  AUDIT SUMMARY: ${passCount} PASSED, ${failCount} FAILED`);
 console.log('================================================================\n');
