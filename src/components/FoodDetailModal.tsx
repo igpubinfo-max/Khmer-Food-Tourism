@@ -91,7 +91,7 @@ export const FoodDetailModal: React.FC = () => {
             <button
               onClick={handleSpeak}
               className={`p-2.5 rounded-full backdrop-blur-md shadow transition active:scale-90 ${
-                isSpeaking ? 'bg-amber-500 text-white animate-pulse' : 'bg-black/50 hover:bg-black/70 text-white'
+                isSpeaking ? 'bg-[#34A853] text-white animate-pulse' : 'bg-black/50 hover:bg-black/70 text-white'
               }`}
               title="ស្តាប់សម្លេងអានរូបមន្ត"
             >
@@ -124,13 +124,13 @@ export const FoodDetailModal: React.FC = () => {
             
             {/* Bottom info inside hero */}
             <div className="absolute bottom-4 left-4 right-4 text-white">
-              <span className="px-3 py-1 rounded-full text-xs font-bold bg-amber-500 text-amber-950 shadow mb-2 inline-block">
+              <span className="px-3 py-1 rounded-full text-xs font-bold bg-[#14532D] text-[#A7DCA5] border border-[#228B4E]/50 shadow mb-2 inline-block">
                 {language === 'km' ? selectedFood.categoryKh : selectedFood.categoryEn}
               </span>
-              <h2 className="text-xl sm:text-2xl font-bold font-moul leading-snug drop-shadow">
+              <h2 className="text-xl sm:text-2xl font-bold font-moul leading-snug drop-shadow text-white">
                 {language === 'km' ? selectedFood.nameKh : selectedFood.nameEn}
               </h2>
-              <p className="text-xs text-amber-200/90 font-medium">
+              <p className="text-xs text-[#A7DCA5] font-medium">
                 {language === 'km' ? selectedFood.nameEn : selectedFood.nameKh}
               </p>
             </div>
@@ -138,18 +138,18 @@ export const FoodDetailModal: React.FC = () => {
 
           <div className="p-4 sm:p-6 space-y-6">
             {/* Meta Rating & Category Bar (No Prices) */}
-            <div className="flex items-center justify-between p-3.5 bg-amber-50/80 dark:bg-stone-800/80 rounded-2xl border border-amber-200/60 dark:border-stone-700">
+            <div className="flex items-center justify-between p-3.5 bg-[#EAF6EC] dark:bg-[#0B3D2E]/50 rounded-2xl border border-[#A7DCA5]/60 dark:border-[#228B4E]/30">
               <div className="flex items-center gap-2">
-                <span className="px-3 py-1 rounded-xl bg-amber-600 text-white font-bold text-xs font-khmer">
+                <span className="px-3 py-1 rounded-xl bg-[#14532D] text-white font-bold text-xs font-khmer">
                   {language === 'km' ? selectedFood.categoryKh : selectedFood.categoryEn}
                 </span>
-                <span className="text-xs text-stone-500 font-khmer">
+                <span className="text-xs text-[#183326]/70 dark:text-stone-300 font-khmer">
                   {language === 'km' ? 'មុខម្ហូបខ្មែរប្រពៃណី' : 'Traditional Khmer Recipe'}
                 </span>
               </div>
 
               <div className="flex items-center gap-1.5 text-xs">
-                <span className="px-2.5 py-1 rounded-lg bg-white dark:bg-stone-700 shadow-xs font-bold text-amber-700 dark:text-amber-300 flex items-center gap-1">
+                <span className="px-2.5 py-1 rounded-lg bg-white dark:bg-stone-700 shadow-xs font-bold text-[#14532D] dark:text-[#A7DCA5] flex items-center gap-1 border border-[#A7DCA5]/30">
                   ★ {selectedFood.rating} <span className="font-normal text-stone-400">({selectedFood.reviewCount})</span>
                 </span>
               </div>
@@ -157,28 +157,28 @@ export const FoodDetailModal: React.FC = () => {
 
             {/* Attributes Grid */}
             <div className="grid grid-cols-4 gap-2 text-center">
-              <div className="p-2.5 rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-100 dark:border-stone-700">
-                <Clock className="w-4 h-4 mx-auto text-amber-600 mb-1" />
+              <div className="p-2.5 rounded-xl bg-white dark:bg-stone-800 border border-[#A7DCA5]/40 dark:border-stone-700">
+                <Clock className="w-4 h-4 mx-auto text-[#228B4E] mb-1" />
                 <p className="text-[10px] text-stone-400">{language === 'km' ? 'ចម្អិន' : 'Cook'}</p>
-                <p className="text-xs font-bold text-stone-700 dark:text-stone-200">{selectedFood.cookTime}</p>
+                <p className="text-xs font-bold text-[#183326] dark:text-stone-200">{selectedFood.cookTime}</p>
               </div>
 
-              <div className="p-2.5 rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-100 dark:border-stone-700">
-                <Users className="w-4 h-4 mx-auto text-blue-600 mb-1" />
+              <div className="p-2.5 rounded-xl bg-white dark:bg-stone-800 border border-[#A7DCA5]/40 dark:border-stone-700">
+                <Users className="w-4 h-4 mx-auto text-[#34A853] mb-1" />
                 <p className="text-[10px] text-stone-400">{language === 'km' ? 'ចំណុះ' : 'Serves'}</p>
-                <p className="text-xs font-bold text-stone-700 dark:text-stone-200">{selectedFood.servings}</p>
+                <p className="text-xs font-bold text-[#183326] dark:text-stone-200">{selectedFood.servings}</p>
               </div>
 
-              <div className="p-2.5 rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-100 dark:border-stone-700">
-                <Flame className="w-4 h-4 mx-auto text-orange-600 mb-1" />
+              <div className="p-2.5 rounded-xl bg-white dark:bg-stone-800 border border-[#A7DCA5]/40 dark:border-stone-700">
+                <Flame className="w-4 h-4 mx-auto text-orange-500 mb-1" />
                 <p className="text-[10px] text-stone-400">{language === 'km' ? 'ថាមពល' : 'Energy'}</p>
-                <p className="text-xs font-bold text-stone-700 dark:text-stone-200">{selectedFood.calories} cal</p>
+                <p className="text-xs font-bold text-[#183326] dark:text-stone-200">{selectedFood.calories} cal</p>
               </div>
 
-              <div className="p-2.5 rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-100 dark:border-stone-700">
-                <ChefHat className="w-4 h-4 mx-auto text-emerald-600 mb-1" />
+              <div className="p-2.5 rounded-xl bg-white dark:bg-stone-800 border border-[#A7DCA5]/40 dark:border-stone-700">
+                <ChefHat className="w-4 h-4 mx-auto text-[#14532D] dark:text-[#A7DCA5] mb-1" />
                 <p className="text-[10px] text-stone-400">{language === 'km' ? 'កម្រិត' : 'Level'}</p>
-                <p className="text-xs font-bold text-stone-700 dark:text-stone-200">
+                <p className="text-xs font-bold text-[#183326] dark:text-stone-200">
                   {selectedFood.difficulty === 'easy' ? 'ងាយ' : selectedFood.difficulty === 'medium' ? 'មធ្យម' : 'ជំនាញ'}
                 </p>
               </div>
@@ -186,11 +186,11 @@ export const FoodDetailModal: React.FC = () => {
 
             {/* Description */}
             <div>
-              <h3 className="font-bold text-stone-900 dark:text-stone-100 text-sm mb-1.5 flex items-center gap-1.5">
-                <Sparkles className="w-4 h-4 text-amber-500" />
+              <h3 className="font-bold text-[#183326] dark:text-stone-100 text-sm mb-1.5 flex items-center gap-1.5">
+                <Sparkles className="w-4 h-4 text-[#228B4E]" />
                 {language === 'km' ? 'អំពីមុខម្ហូបនេះ' : 'About this Dish'}
               </h3>
-              <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-300 leading-relaxed bg-stone-50/70 dark:bg-stone-800/40 p-3.5 rounded-xl border border-stone-100 dark:border-stone-800">
+              <p className="text-xs sm:text-sm text-[#183326]/90 dark:text-stone-300 leading-relaxed bg-[#EAF6EC]/60 dark:bg-stone-800/40 p-3.5 rounded-xl border border-[#A7DCA5]/40 dark:border-stone-800">
                 {language === 'km' ? selectedFood.descriptionKh : selectedFood.descriptionEn}
               </p>
             </div>
@@ -198,7 +198,7 @@ export const FoodDetailModal: React.FC = () => {
             {/* Ingredients Checklist */}
             <div>
               <div className="flex items-center justify-between mb-2">
-                <h3 className="font-bold text-stone-900 dark:text-stone-100 text-sm">
+                <h3 className="font-bold text-[#183326] dark:text-stone-100 text-sm">
                   {language === 'km' ? 'គ្រឿងផ្សំចាំបាច់' : 'Ingredients Needed'}
                 </h3>
                 <span className="text-[11px] text-stone-400">
@@ -215,15 +215,15 @@ export const FoodDetailModal: React.FC = () => {
                       onClick={() => toggleIngredient(idx)}
                       className={`flex items-center justify-between p-2.5 rounded-xl cursor-pointer transition border text-xs ${
                         isChecked
-                          ? 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-300 dark:border-emerald-800 text-emerald-900 dark:text-emerald-300 line-through opacity-70'
-                          : 'bg-white dark:bg-stone-800 border-stone-200/80 dark:border-stone-700 text-stone-800 dark:text-stone-200 hover:border-amber-400'
+                          ? 'bg-[#EAF6EC] dark:bg-[#0B3D2E]/40 border-[#228B4E] dark:border-[#228B4E] text-[#14532D] dark:text-[#A7DCA5] line-through opacity-70'
+                          : 'bg-white dark:bg-stone-800 border-[#A7DCA5]/50 dark:border-stone-700 text-[#183326] dark:text-stone-200 hover:border-[#34A853]'
                       }`}
                     >
                       <div className="flex items-center gap-2.5">
                         {isChecked ? (
-                          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                          <CheckCircle2 className="w-4 h-4 text-[#228B4E] shrink-0" />
                         ) : (
-                          <Circle className="w-4 h-4 text-stone-400 shrink-0" />
+                          <Circle className="w-4 h-4 text-[#A7DCA5] shrink-0" />
                         )}
                         <span className="font-medium">{language === 'km' ? ing.nameKh : ing.nameEn}</span>
                       </div>
@@ -236,7 +236,7 @@ export const FoodDetailModal: React.FC = () => {
 
             {/* Step-by-Step Cooking Directions */}
             <div>
-              <h3 className="font-bold text-stone-900 dark:text-stone-100 text-sm mb-2.5">
+              <h3 className="font-bold text-[#183326] dark:text-stone-100 text-sm mb-2.5">
                 {language === 'km' ? 'របៀបធ្វើ និងវិធីចម្អិនតាមលំដាប់' : 'Step-by-Step Instructions'}
               </h3>
 
@@ -244,10 +244,10 @@ export const FoodDetailModal: React.FC = () => {
                 {selectedFood.steps.map((st) => (
                   <div 
                     key={st.stepNumber}
-                    className="p-3.5 rounded-xl bg-white dark:bg-stone-800 border border-stone-200/80 dark:border-stone-700 shadow-2xs space-y-2"
+                    className="p-3.5 rounded-xl bg-white dark:bg-stone-800 border border-[#A7DCA5]/40 dark:border-stone-700 shadow-2xs space-y-2"
                   >
                     <div className="flex items-start gap-2.5">
-                      <span className="w-6 h-6 rounded-full bg-amber-600 text-white font-bold text-xs flex items-center justify-center shrink-0">
+                      <span className="w-6 h-6 rounded-full bg-[#14532D] text-white font-bold text-xs flex items-center justify-center shrink-0">
                         {st.stepNumber}
                       </span>
                       <p className="text-xs sm:text-sm text-stone-700 dark:text-stone-200 leading-relaxed font-normal pt-0.5">
@@ -256,7 +256,7 @@ export const FoodDetailModal: React.FC = () => {
                     </div>
 
                     {st.tipKh && (
-                      <div className="ml-8 p-2 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200/60 text-[11px] text-amber-800 dark:text-amber-300">
+                      <div className="ml-8 p-2 rounded-lg bg-[#EAF6EC] dark:bg-[#0B3D2E]/40 border border-[#A7DCA5]/60 text-[11px] text-[#14532D] dark:text-[#A7DCA5]">
                         💡 {st.tipKh}
                       </div>
                     )}

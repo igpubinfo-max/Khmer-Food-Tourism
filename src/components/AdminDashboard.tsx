@@ -228,25 +228,25 @@ export const AdminDashboard: React.FC = () => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-sm animate-fade-in">
       <div 
-        className="relative w-full max-w-5xl h-[92vh] bg-stone-50 dark:bg-stone-900 rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-amber-950/20"
+        className="relative w-full max-w-5xl h-[92vh] bg-stone-50 dark:bg-stone-900 rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-[#A7DCA5]/40"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-red-950 via-stone-900 to-red-950 text-white shrink-0">
+        <div className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-[#0B3D2E] via-[#14532D] to-[#0B3D2E] text-white shrink-0">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-2xl bg-amber-500/20 text-amber-400 border border-amber-500/30">
+            <div className="p-2.5 rounded-2xl bg-white/10 text-[#A7DCA5] border border-[#A7DCA5]/30">
               <Shield className="w-6 h-6" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-lg font-bold font-khmer">
+                <h2 className="text-lg font-bold font-khmer text-white">
                   {isKm ? 'ផ្ទាំងគ្រប់គ្រងរដ្ឋបាលជាន់ខ្ពស់' : 'Administrator Control Center'}
                 </h2>
-                <span className="text-[10px] bg-amber-500 text-stone-950 font-bold px-2 py-0.5 rounded-full font-mono">
+                <span className="text-[10px] bg-[#228B4E] text-white font-bold px-2 py-0.5 rounded-full font-mono">
                   SINGLE AUTHORIZED ADMIN
                 </span>
               </div>
-              <p className="text-xs text-stone-300 font-khmer">
+              <p className="text-xs text-[#A7DCA5] font-khmer">
                 {isKm 
                   ? 'គ្រប់គ្រងមុខម្ហូប (100) ហាងអាហារ (200+) ទេសចរណ៍ ការទូទាត់ $4.99 និងសន្តិសុខ' 
                   : 'Manage foods (100), restaurants (200+), destinations, $4.99 transactions, and security'}
@@ -256,9 +256,9 @@ export const AdminDashboard: React.FC = () => {
 
           <button
             onClick={() => setIsAdminOpen(false)}
-            className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition"
+            className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-[#A7DCA5] hover:text-white transition"
           >
-            <X className="w-5 h-5 text-stone-200" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
@@ -267,7 +267,7 @@ export const AdminDashboard: React.FC = () => {
           <button
             onClick={() => setActiveTab('stats')}
             className={`flex items-center gap-1.5 px-3 py-2.5 font-bold whitespace-nowrap border-b-2 transition ${
-              activeTab === 'stats' ? 'border-amber-600 text-amber-600' : 'border-transparent text-stone-400'
+              activeTab === 'stats' ? 'border-[#14532D] text-[#14532D] dark:text-[#A7DCA5]' : 'border-transparent text-stone-400'
             }`}
           >
             <Shield className="w-4 h-4" />
@@ -277,7 +277,7 @@ export const AdminDashboard: React.FC = () => {
           <button
             onClick={() => setActiveTab('transactions')}
             className={`flex items-center gap-1.5 px-3 py-2.5 font-bold whitespace-nowrap border-b-2 transition relative ${
-              activeTab === 'transactions' ? 'border-amber-600 text-amber-600' : 'border-transparent text-stone-400'
+              activeTab === 'transactions' ? 'border-[#14532D] text-[#14532D] dark:text-[#A7DCA5]' : 'border-transparent text-stone-400'
             }`}
           >
             <CreditCard className="w-4 h-4" />
@@ -292,7 +292,7 @@ export const AdminDashboard: React.FC = () => {
           <button
             onClick={() => setActiveTab('food')}
             className={`flex items-center gap-1.5 px-3 py-2.5 font-bold whitespace-nowrap border-b-2 transition ${
-              activeTab === 'food' ? 'border-amber-600 text-amber-600' : 'border-transparent text-stone-400'
+              activeTab === 'food' ? 'border-[#14532D] text-[#14532D] dark:text-[#A7DCA5]' : 'border-transparent text-stone-400'
             }`}
           >
             <Utensils className="w-4 h-4" />
@@ -302,10 +302,10 @@ export const AdminDashboard: React.FC = () => {
           <button
             onClick={() => setActiveTab('image_audit')}
             className={`flex items-center gap-1.5 px-3 py-2.5 font-bold whitespace-nowrap border-b-2 transition relative ${
-              activeTab === 'image_audit' ? 'border-amber-600 text-amber-600' : 'border-transparent text-stone-400'
+              activeTab === 'image_audit' ? 'border-[#14532D] text-[#14532D] dark:text-[#A7DCA5]' : 'border-transparent text-stone-400'
             }`}
           >
-            <Sparkles className="w-4 h-4 text-amber-500" />
+            <Sparkles className="w-4 h-4 text-[#228B4E]" />
             <span>{isKm ? `សវនកម្មរូបភាព AI` : `AI Image Audit`}</span>
             {flaggedFoods.length > 0 && (
               <span className="px-1.5 py-0.2 bg-amber-500 text-white rounded-full text-[9px] font-bold">
@@ -317,7 +317,7 @@ export const AdminDashboard: React.FC = () => {
           <button
             onClick={() => setActiveTab('restaurants')}
             className={`flex items-center gap-1.5 px-3 py-2.5 font-bold whitespace-nowrap border-b-2 transition relative ${
-              activeTab === 'restaurants' ? 'border-amber-600 text-amber-600' : 'border-transparent text-stone-400'
+              activeTab === 'restaurants' ? 'border-[#14532D] text-[#14532D] dark:text-[#A7DCA5]' : 'border-transparent text-stone-400'
             }`}
           >
             <Store className="w-4 h-4" />
@@ -330,7 +330,7 @@ export const AdminDashboard: React.FC = () => {
           <button
             onClick={() => setActiveTab('destinations')}
             className={`flex items-center gap-1.5 px-3 py-2.5 font-bold whitespace-nowrap border-b-2 transition ${
-              activeTab === 'destinations' ? 'border-amber-600 text-amber-600' : 'border-transparent text-stone-400'
+              activeTab === 'destinations' ? 'border-[#14532D] text-[#14532D] dark:text-[#A7DCA5]' : 'border-transparent text-stone-400'
             }`}
           >
             <Compass className="w-4 h-4" />
@@ -340,7 +340,7 @@ export const AdminDashboard: React.FC = () => {
           <button
             onClick={() => setActiveTab('community')}
             className={`flex items-center gap-1.5 px-3 py-2.5 font-bold whitespace-nowrap border-b-2 transition ${
-              activeTab === 'community' ? 'border-amber-600 text-amber-600' : 'border-transparent text-stone-400'
+              activeTab === 'community' ? 'border-[#14532D] text-[#14532D] dark:text-[#A7DCA5]' : 'border-transparent text-stone-400'
             }`}
           >
             <MessageSquare className="w-4 h-4" />
@@ -350,7 +350,7 @@ export const AdminDashboard: React.FC = () => {
           <button
             onClick={() => setActiveTab('users')}
             className={`flex items-center gap-1.5 px-3 py-2.5 font-bold whitespace-nowrap border-b-2 transition ${
-              activeTab === 'users' ? 'border-amber-600 text-amber-600' : 'border-transparent text-stone-400'
+              activeTab === 'users' ? 'border-[#14532D] text-[#14532D] dark:text-[#A7DCA5]' : 'border-transparent text-stone-400'
             }`}
           >
             <Users className="w-4 h-4" />
@@ -360,7 +360,7 @@ export const AdminDashboard: React.FC = () => {
           <button
             onClick={() => setActiveTab('security')}
             className={`flex items-center gap-1.5 px-3 py-2.5 font-bold whitespace-nowrap border-b-2 transition ${
-              activeTab === 'security' ? 'border-amber-600 text-amber-600' : 'border-transparent text-stone-400'
+              activeTab === 'security' ? 'border-[#14532D] text-[#14532D] dark:text-[#A7DCA5]' : 'border-transparent text-stone-400'
             }`}
           >
             <ShieldAlert className="w-4 h-4 text-red-600" />
@@ -370,7 +370,7 @@ export const AdminDashboard: React.FC = () => {
           <button
             onClick={() => setActiveTab('settings')}
             className={`flex items-center gap-1.5 px-3 py-2.5 font-bold whitespace-nowrap border-b-2 transition ${
-              activeTab === 'settings' ? 'border-amber-600 text-amber-600' : 'border-transparent text-stone-400'
+              activeTab === 'settings' ? 'border-[#14532D] text-[#14532D] dark:text-[#A7DCA5]' : 'border-transparent text-stone-400'
             }`}
           >
             <Settings className="w-4 h-4" />
@@ -384,42 +384,42 @@ export const AdminDashboard: React.FC = () => {
           {activeTab === 'stats' && (
             <div className="space-y-6">
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <div className="p-4 rounded-2xl bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 shadow-sm">
+                <div className="p-4 rounded-2xl bg-white dark:bg-stone-800 border border-[#A7DCA5]/30 dark:border-stone-700 shadow-xs">
                   <span className="text-stone-400 font-khmer text-xs">មុខម្ហូបខ្មែរសរុប</span>
-                  <p className="text-2xl font-bold text-amber-600 font-mono mt-2">{foods.length}</p>
-                  <span className="text-[10px] text-emerald-600 font-bold">✓ 200+ Disconnected Prices</span>
+                  <p className="text-2xl font-bold text-[#14532D] dark:text-[#A7DCA5] font-mono mt-2">{foods.length}</p>
+                  <span className="text-[10px] text-[#228B4E] font-bold">✓ 200+ Disconnected Prices</span>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 shadow-sm">
+                <div className="p-4 rounded-2xl bg-white dark:bg-stone-800 border border-[#A7DCA5]/30 dark:border-stone-700 shadow-xs">
                   <span className="text-stone-400 font-khmer text-xs">ហាងអាហារសរុប</span>
-                  <p className="text-2xl font-bold text-red-600 font-mono mt-2">{restaurants.length}</p>
+                  <p className="text-2xl font-bold text-[#228B4E] font-mono mt-2">{restaurants.length}</p>
                   <span className="text-[10px] text-stone-500 font-khmer">{verifiedRestaurantsCount} ហាងផ្ទៀងផ្ទាត់ផ្លូវការ</span>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 shadow-sm">
+                <div className="p-4 rounded-2xl bg-white dark:bg-stone-800 border border-[#A7DCA5]/30 dark:border-stone-700 shadow-xs">
                   <span className="text-stone-400 font-khmer text-xs">ប្រតិបត្តិការ $4.99</span>
-                  <p className="text-2xl font-bold text-emerald-600 font-mono mt-2">{transactions.length}</p>
-                  <span className="text-[10px] text-amber-600 font-bold font-khmer">{pendingTxns.length} រង់ចាំផ្ទៀងផ្ទាត់</span>
+                  <p className="text-2xl font-bold text-[#14532D] dark:text-[#A7DCA5] font-mono mt-2">{transactions.length}</p>
+                  <span className="text-[10px] text-[#228B4E] font-bold font-khmer">{pendingTxns.length} រង់ចាំផ្ទៀងផ្ទាត់</span>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 shadow-sm">
+                <div className="p-4 rounded-2xl bg-white dark:bg-stone-800 border border-[#A7DCA5]/30 dark:border-stone-700 shadow-xs">
                   <span className="text-stone-400 font-khmer text-xs">តំបន់ទេសចរណ៍</span>
-                  <p className="text-2xl font-bold text-stone-900 dark:text-stone-100 font-mono mt-2">{destinations.length}</p>
-                  <span className="text-[10px] text-blue-600 font-bold font-khmer">២៥ ខេត្តក្រុង</span>
+                  <p className="text-2xl font-bold text-[#183326] dark:text-stone-100 font-mono mt-2">{destinations.length}</p>
+                  <span className="text-[10px] text-[#228B4E] font-bold font-khmer">២៥ ខេត្តក្រុង</span>
                 </div>
               </div>
 
               {/* Pending Transactions Alert */}
               {pendingTxns.length > 0 && (
-                <div className="p-4 rounded-2xl bg-amber-50 dark:bg-stone-800 border-2 border-amber-400 space-y-2">
+                <div className="p-4 rounded-2xl bg-[#EAF6EC] dark:bg-[#0B3D2E]/50 border-2 border-[#228B4E] space-y-2">
                   <div className="flex items-center justify-between">
-                    <p className="font-bold text-amber-900 dark:text-amber-200 flex items-center gap-1.5 font-khmer">
-                      <CreditCard className="w-4 h-4 text-amber-600" />
+                    <p className="font-bold text-[#183326] dark:text-white flex items-center gap-1.5 font-khmer">
+                      <CreditCard className="w-4 h-4 text-[#228B4E]" />
                       <span>{isKm ? `មានប្រតិបត្តិការចុះបញ្ជីថ្មី ${pendingTxns.length} រង់ចាំការផ្ទៀងផ្ទាត់ធនាគារ!` : `${pendingTxns.length} Pending $4.99 Registrations!`}</span>
                     </p>
                     <button
                       onClick={() => setActiveTab('transactions')}
-                      className="px-3 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-khmer font-bold text-xs"
+                      className="px-3 py-1 bg-[#14532D] hover:bg-[#0B3D2E] text-white rounded-lg font-khmer font-bold text-xs transition active:scale-95"
                     >
                       {isKm ? 'ពិនិត្យឥឡូវនេះ' : 'Review Now'}
                     </button>
@@ -446,19 +446,19 @@ export const AdminDashboard: React.FC = () => {
                 <div className="flex gap-1.5 bg-stone-100 dark:bg-stone-800 p-1 rounded-xl shrink-0">
                   <button
                     onClick={() => setTxnFilter('all')}
-                    className={`px-3 py-1.5 rounded-lg font-khmer font-semibold ${txnFilter === 'all' ? 'bg-white dark:bg-stone-700 shadow text-stone-900 dark:text-white' : 'text-stone-500'}`}
+                    className={`px-3 py-1.5 rounded-lg font-khmer font-semibold ${txnFilter === 'all' ? 'bg-white dark:bg-stone-700 shadow text-[#183326] dark:text-white' : 'text-stone-500'}`}
                   >
                     {isKm ? 'ទាំងអស់' : 'All'} ({transactions.length})
                   </button>
                   <button
                     onClick={() => setTxnFilter('pending')}
-                    className={`px-3 py-1.5 rounded-lg font-khmer font-semibold ${txnFilter === 'pending' ? 'bg-amber-500 text-white shadow' : 'text-stone-500'}`}
+                    className={`px-3 py-1.5 rounded-lg font-khmer font-semibold ${txnFilter === 'pending' ? 'bg-[#14532D] text-white shadow' : 'text-stone-500'}`}
                   >
                     {isKm ? 'រង់ចាំ' : 'Pending'} ({pendingTxns.length})
                   </button>
                   <button
                     onClick={() => setTxnFilter('verified')}
-                    className={`px-3 py-1.5 rounded-lg font-khmer font-semibold ${txnFilter === 'verified' ? 'bg-emerald-600 text-white shadow' : 'text-stone-500'}`}
+                    className={`px-3 py-1.5 rounded-lg font-khmer font-semibold ${txnFilter === 'verified' ? 'bg-[#228B4E] text-white shadow' : 'text-stone-500'}`}
                   >
                     {isKm ? 'ផ្ទៀងផ្ទាត់រួច' : 'Verified'}
                   </button>
@@ -477,29 +477,29 @@ export const AdminDashboard: React.FC = () => {
                       key={t.id} 
                       className={`p-4 rounded-2xl border transition-all ${
                         t.status === 'pending_verification' 
-                          ? 'bg-amber-50/60 dark:bg-stone-800 border-amber-300' 
+                          ? 'bg-[#EAF6EC]/60 dark:bg-[#0B3D2E]/40 border-[#A7DCA5]' 
                           : t.status === 'verified'
-                          ? 'bg-white dark:bg-stone-800 border-emerald-200 dark:border-stone-700'
+                          ? 'bg-white dark:bg-stone-800 border-[#A7DCA5]/40 dark:border-stone-700'
                           : 'bg-red-50/40 dark:bg-stone-800 border-red-200'
                       }`}
                     >
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div className="space-y-1">
                           <div className="flex items-center gap-2">
-                            <span className="font-mono font-bold text-stone-800 dark:text-stone-200">{t.id}</span>
+                            <span className="font-mono font-bold text-[#183326] dark:text-stone-200">{t.id}</span>
                             <span className={`px-2 py-0.5 rounded-full font-khmer font-bold text-[10px] ${
                               t.status === 'verified' 
-                                ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
+                                ? 'bg-[#EAF6EC] text-[#14532D] dark:bg-[#14532D]/40 dark:text-[#A7DCA5]'
                                 : t.status === 'pending_verification'
                                 ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
                                 : 'bg-red-100 text-red-800'
                             }`}>
                               {t.status === 'verified' ? '✓ បានផ្ទៀងផ្ទាត់ & ធ្វើឱ្យសកម្ម' : t.status === 'pending_verification' ? '⏳ រង់ចាំការផ្ទៀងផ្ទាត់' : '✕ បានបដិសេធ'}
                             </span>
-                            <span className="font-bold text-red-600 font-mono text-sm">${t.amountUsd} USD</span>
+                            <span className="font-bold text-[#14532D] dark:text-[#A7DCA5] font-mono text-sm">${t.amountUsd} USD</span>
                           </div>
 
-                          <div className="font-bold text-stone-900 dark:text-stone-100 font-khmer text-sm">
+                          <div className="font-bold text-[#183326] dark:text-stone-100 font-khmer text-sm">
                             {t.restaurantNameKh}
                           </div>
 
@@ -512,7 +512,7 @@ export const AdminDashboard: React.FC = () => {
 
                           <div className="p-2 bg-stone-100 dark:bg-stone-900 rounded-xl font-mono text-xs flex items-center justify-between">
                             <span className="text-stone-500 font-khmer">Bank Ref / Trx ID:</span>
-                            <span className="font-bold text-stone-900 dark:text-amber-300">{t.transactionRef}</span>
+                            <span className="font-bold text-[#14532D] dark:text-[#A7DCA5]">{t.transactionRef}</span>
                           </div>
                         </div>
 
@@ -521,9 +521,9 @@ export const AdminDashboard: React.FC = () => {
                           <div className="flex sm:flex-col gap-2 shrink-0">
                             <button
                               onClick={() => verifyTransaction(t.id)}
-                              className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-khmer font-bold text-xs flex items-center justify-center gap-1 shadow-sm transition active:scale-95"
+                              className="px-3.5 py-2 rounded-xl bg-[#14532D] hover:bg-[#0B3D2E] text-white font-khmer font-bold text-xs flex items-center justify-center gap-1 shadow-xs transition active:scale-95"
                             >
-                              <Check className="w-4 h-4" />
+                              <Check className="w-4 h-4 text-[#A7DCA5]" />
                               <span>{isKm ? 'ផ្ទៀងផ្ទាត់ & ធ្វើឱ្យសកម្ម' : 'Verify & Activate'}</span>
                             </button>
 
@@ -542,9 +542,9 @@ export const AdminDashboard: React.FC = () => {
               </div>
 
               {/* Promotional Settings Editor */}
-              <div className="p-5 bg-white dark:bg-stone-800 rounded-3xl border border-stone-200 dark:border-stone-700 space-y-3 font-khmer">
-                <h4 className="font-bold text-stone-900 dark:text-stone-100 text-sm flex items-center gap-1.5">
-                  <Settings className="w-4 h-4 text-amber-600" />
+              <div className="p-5 bg-white dark:bg-stone-800 rounded-3xl border border-[#A7DCA5]/40 dark:border-stone-700 space-y-3 font-khmer">
+                <h4 className="font-bold text-[#183326] dark:text-stone-100 text-sm flex items-center gap-1.5">
+                  <Settings className="w-4 h-4 text-[#228B4E]" />
                   <span>{isKm ? 'ការកំណត់តម្លៃប្រូម៉ូសិនចុះបញ្ជីហាង' : 'Promotional Pricing Configuration'}</span>
                 </h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -575,7 +575,7 @@ export const AdminDashboard: React.FC = () => {
                 </div>
                 <button
                   onClick={handleSaveSettings}
-                  className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-xs"
+                  className="px-4 py-2 bg-[#14532D] hover:bg-[#0B3D2E] text-white font-bold rounded-xl text-xs transition active:scale-95 shadow-xs"
                 >
                   {isKm ? 'រក្សាទុកការកំណត់ប្រូម៉ូសិន' : 'Save Promotional Settings'}
                 </button>
@@ -587,20 +587,20 @@ export const AdminDashboard: React.FC = () => {
           {activeTab === 'food' && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="font-bold text-stone-900 dark:text-stone-100 font-khmer text-sm">
+                <h3 className="font-bold text-[#183326] dark:text-stone-100 font-khmer text-sm">
                   {isKm ? `គ្រប់គ្រងបញ្ជីមុខម្ហូបខ្មែរ (សរុប ${foods.length} មុខ - គ្មានតម្លៃលើរូបភាព)` : `Manage Khmer Foods (${foods.length} items - No Prices on Pictures)`}
                 </h3>
                 <button
                   onClick={() => setShowAddFoodForm(!showAddFoodForm)}
-                  className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-amber-600 text-white font-bold hover:bg-amber-500 font-khmer"
+                  className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[#14532D] text-white font-bold hover:bg-[#0B3D2E] font-khmer transition active:scale-95 shadow-xs"
                 >
-                  <Plus className="w-3.5 h-3.5" />
+                  <Plus className="w-3.5 h-3.5 text-[#A7DCA5]" />
                   <span>{showAddFoodForm ? (isKm ? 'បិទ' : 'Close') : (isKm ? 'បញ្ចូលមុខម្ហូបថ្មី' : 'Add Food')}</span>
                 </button>
               </div>
 
               {showAddFoodForm && (
-                <form onSubmit={handleCreateFood} className="p-4 rounded-2xl bg-amber-50/70 dark:bg-stone-800 border border-amber-200 dark:border-stone-700 space-y-3 font-khmer">
+                <form onSubmit={handleCreateFood} className="p-4 rounded-2xl bg-[#EAF6EC]/70 dark:bg-stone-800 border border-[#A7DCA5]/40 dark:border-stone-700 space-y-3 font-khmer">
                   <div className="grid grid-cols-2 gap-2">
                     <div>
                       <label className="block font-medium mb-1">ឈ្មោះខ្មែរ *</label>
@@ -655,7 +655,7 @@ export const AdminDashboard: React.FC = () => {
 
                   <button
                     type="submit"
-                    className="px-4 py-2 rounded-xl bg-amber-600 text-white font-bold hover:bg-amber-500 font-khmer"
+                    className="px-4 py-2 rounded-xl bg-[#14532D] text-white font-bold hover:bg-[#0B3D2E] font-khmer transition active:scale-95 shadow-xs"
                   >
                     {isKm ? 'រក្សាទុកមុខម្ហូប' : 'Save Food Item'}
                   </button>
@@ -665,11 +665,11 @@ export const AdminDashboard: React.FC = () => {
               {/* Food List */}
               <div className="space-y-2 max-h-[50vh] overflow-y-auto no-scrollbar">
                 {foods.map((food) => (
-                  <div key={food.id} className="p-3 bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 flex items-center justify-between">
+                  <div key={food.id} className="p-3 bg-white dark:bg-stone-800 rounded-2xl border border-[#A7DCA5]/30 dark:border-stone-700 flex items-center justify-between">
                     <div className="flex items-center gap-3 overflow-hidden">
-                      <img src={food.photoUrl} alt="food" className="w-12 h-12 rounded-xl object-cover shrink-0" />
+                      <img src={food.photoUrl} alt="food" className="w-12 h-12 rounded-xl object-cover shrink-0 border border-[#A7DCA5]/40" />
                       <div className="overflow-hidden">
-                        <h4 className="font-bold text-stone-900 dark:text-stone-100 font-khmer truncate">{food.nameKh}</h4>
+                        <h4 className="font-bold text-[#183326] dark:text-stone-100 font-khmer truncate">{food.nameKh}</h4>
                         <p className="text-[10px] text-stone-400 truncate">
                           {food.nameEn} • {food.categoryKh}
                         </p>
@@ -680,10 +680,10 @@ export const AdminDashboard: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => setSelectedFoodForImageEdit(food)}
-                        className="px-2.5 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 font-bold text-[11px] font-khmer flex items-center gap-1 transition shadow-xs"
+                        className="px-2.5 py-1.5 rounded-xl bg-[#EAF6EC] hover:bg-[#A7DCA5]/40 text-[#14532D] dark:bg-[#14532D]/50 dark:text-[#A7DCA5] font-bold text-[11px] font-khmer flex items-center gap-1 transition shadow-2xs border border-[#A7DCA5]/40"
                         title={isKm ? 'ផ្លាស់ប្តូររូបភាពពីទូរស័ព្ទ/កុំព្យូទ័រ' : 'Change photo from phone or computer'}
                       >
-                        <Camera className="w-3.5 h-3.5 text-amber-600" />
+                        <Camera className="w-3.5 h-3.5 text-[#228B4E]" />
                         <span>{isKm ? 'កែរូបថត' : 'Photo'}</span>
                       </button>
 
@@ -705,7 +705,7 @@ export const AdminDashboard: React.FC = () => {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="font-bold text-stone-900 dark:text-stone-100 font-khmer text-sm">
+                  <h3 className="font-bold text-[#183326] dark:text-stone-100 font-khmer text-sm">
                     {isKm ? `គ្រប់គ្រងហាងអាហារ (សរុប ${restaurants.length} ហាង)` : `Manage Restaurants (${restaurants.length} shops)`}
                   </h3>
                   <p className="text-[10px] text-stone-400 font-khmer">
@@ -716,14 +716,14 @@ export const AdminDashboard: React.FC = () => {
 
               <div className="space-y-2 max-h-[50vh] overflow-y-auto no-scrollbar">
                 {restaurants.map((rest) => (
-                  <div key={rest.id} className="p-3 bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 flex items-center justify-between">
+                  <div key={rest.id} className="p-3 bg-white dark:bg-stone-800 rounded-2xl border border-[#A7DCA5]/30 dark:border-stone-700 flex items-center justify-between">
                     <div className="flex items-center gap-3 overflow-hidden">
-                      <img src={rest.photoUrl} alt="rest" className="w-12 h-12 rounded-xl object-cover shrink-0" />
+                      <img src={rest.photoUrl} alt="rest" className="w-12 h-12 rounded-xl object-cover shrink-0 border border-[#A7DCA5]/40" />
                       <div className="overflow-hidden">
                         <div className="flex items-center gap-1.5">
-                          <h4 className="font-bold text-stone-900 dark:text-stone-100 font-khmer truncate">{rest.nameKh}</h4>
-                          {rest.isVerified && <span className="text-emerald-600 text-[10px] font-bold">✓ Verified</span>}
-                          {rest.isPromoted && <span className="text-amber-600 text-[10px] font-bold">★ Promoted</span>}
+                          <h4 className="font-bold text-[#183326] dark:text-stone-100 font-khmer truncate">{rest.nameKh}</h4>
+                          {rest.isVerified && <span className="text-[#228B4E] text-[10px] font-bold">✓ Verified</span>}
+                          {rest.isPromoted && <span className="text-[#14532D] dark:text-[#A7DCA5] text-[10px] font-bold">★ Promoted</span>}
                         </div>
                         <p className="text-[10px] text-stone-400 truncate">
                           {rest.provinceKh} • 📞 {rest.phone}
@@ -758,8 +758,8 @@ export const AdminDashboard: React.FC = () => {
             <div className="space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-2 border-b border-stone-200 dark:border-stone-700">
                 <div>
-                  <h3 className="font-bold text-stone-900 dark:text-stone-100 font-khmer text-sm flex items-center gap-2">
-                    <Compass className="w-4 h-4 text-amber-600" />
+                  <h3 className="font-bold text-[#183326] dark:text-stone-100 font-khmer text-sm flex items-center gap-2">
+                    <Compass className="w-4 h-4 text-[#228B4E]" />
                     <span>{isKm ? `តំបន់ទេសចរណ៍ខ្មែរ (${destinations.length} កន្លែង)` : `Tourist Destinations (${destinations.length})`}</span>
                   </h3>
                   <p className="text-[11px] text-stone-500 font-khmer">
@@ -768,9 +768,9 @@ export const AdminDashboard: React.FC = () => {
                 </div>
                 <button
                   onClick={() => setShowAddDestForm(!showAddDestForm)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-600 text-white font-bold hover:bg-amber-500 font-khmer text-xs shadow-sm self-start sm:self-auto"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#14532D] text-white font-bold hover:bg-[#0B3D2E] font-khmer text-xs shadow-xs self-start sm:self-auto transition active:scale-95"
                 >
-                  <Plus className="w-3.5 h-3.5" />
+                  <Plus className="w-3.5 h-3.5 text-[#A7DCA5]" />
                   <span>{showAddDestForm ? 'បិទ' : 'បញ្ចូលកន្លែងថ្មី'}</span>
                 </button>
               </div>
@@ -784,7 +784,7 @@ export const AdminDashboard: React.FC = () => {
                     value={destSearchQuery}
                     onChange={(e) => setDestSearchQuery(e.target.value)}
                     placeholder={isKm ? "ស្វែងរកតាមឈ្មោះកន្លែង ខេត្ត ឬលេខសម្គាល់..." : "Search by destination name, province, or ID..."}
-                    className="w-full pl-9 pr-4 py-2 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-stone-100 text-xs font-khmer focus:outline-none focus:border-amber-500"
+                    className="w-full pl-9 pr-4 py-2 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-stone-100 text-xs font-khmer focus:outline-none focus:border-[#228B4E]"
                   />
                   {destSearchQuery && (
                     <button
@@ -802,7 +802,7 @@ export const AdminDashboard: React.FC = () => {
                     onClick={() => setDestProvinceFilter('all')}
                     className={`px-2.5 py-1 rounded-lg font-bold shrink-0 transition ${
                       destProvinceFilter === 'all' 
-                        ? 'bg-amber-600 text-white shadow-xs' 
+                        ? 'bg-[#14532D] text-white shadow-xs' 
                         : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:bg-stone-200'
                     }`}
                   >
@@ -816,7 +816,7 @@ export const AdminDashboard: React.FC = () => {
                         onClick={() => setDestProvinceFilter(prov)}
                         className={`px-2.5 py-1 rounded-lg shrink-0 transition ${
                           destProvinceFilter === prov 
-                            ? 'bg-amber-600 text-white font-bold shadow-xs' 
+                            ? 'bg-[#14532D] text-white font-bold shadow-xs' 
                             : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:bg-stone-200'
                         }`}
                       >
@@ -828,7 +828,7 @@ export const AdminDashboard: React.FC = () => {
               </div>
 
               {showAddDestForm && (
-                <form onSubmit={handleCreateDestination} className="p-4 rounded-2xl bg-amber-50/70 dark:bg-stone-800 border border-amber-200 dark:border-stone-700 space-y-3 font-khmer">
+                <form onSubmit={handleCreateDestination} className="p-4 rounded-2xl bg-[#EAF6EC]/70 dark:bg-stone-800 border border-[#A7DCA5]/40 dark:border-stone-700 space-y-3 font-khmer">
                   <div className="grid grid-cols-2 gap-2">
                     <input
                       type="text"
@@ -836,19 +836,19 @@ export const AdminDashboard: React.FC = () => {
                       value={newDestNameKh}
                       onChange={(e) => setNewDestNameKh(e.target.value)}
                       placeholder="ឈ្មោះកន្លែងទេសចរណ៍ *"
-                      className="px-2.5 py-1.5 rounded-lg border bg-white dark:bg-stone-700 text-xs"
+                      className="px-2.5 py-1.5 rounded-lg border bg-white dark:bg-stone-700 text-xs focus:outline-none focus:border-[#228B4E]"
                     />
                     <input
                       type="text"
                       value={newDestProvince}
                       onChange={(e) => setNewDestProvince(e.target.value)}
                       placeholder="ខេត្ត / ក្រុង"
-                      className="px-2.5 py-1.5 rounded-lg border bg-white dark:bg-stone-700 text-xs"
+                      className="px-2.5 py-1.5 rounded-lg border bg-white dark:bg-stone-700 text-xs focus:outline-none focus:border-[#228B4E]"
                     />
                   </div>
                   <button
                     type="submit"
-                    className="px-4 py-2 rounded-xl bg-amber-600 text-white font-bold hover:bg-amber-500 font-khmer text-xs"
+                    className="px-4 py-2 rounded-xl bg-[#14532D] text-white font-bold hover:bg-[#0B3D2E] font-khmer text-xs transition active:scale-95 shadow-xs"
                   >
                     រក្សាទុក
                   </button>
@@ -871,13 +871,13 @@ export const AdminDashboard: React.FC = () => {
                   .map((d) => (
                     <div 
                       key={d.id} 
-                      className="p-3 bg-white dark:bg-stone-800/90 rounded-2xl border border-stone-200 dark:border-stone-700 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs hover:border-amber-300 transition"
+                      className="p-3 bg-white dark:bg-stone-800/90 rounded-2xl border border-[#A7DCA5]/30 dark:border-stone-700 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs hover:border-[#A7DCA5] transition"
                     >
                       <div className="flex items-center gap-3 min-w-0">
                         {/* Thumbnail with quick click to edit photo */}
                         <div 
                           onClick={() => setSelectedDestForImageEdit(d)}
-                          className="relative w-14 h-14 rounded-xl overflow-hidden bg-stone-100 dark:bg-stone-700 shrink-0 cursor-pointer group border border-stone-200 dark:border-stone-600"
+                          className="relative w-14 h-14 rounded-xl overflow-hidden bg-stone-100 dark:bg-stone-700 shrink-0 cursor-pointer group border border-[#A7DCA5]/40"
                           title={isKm ? 'ចុចដើម្បីប្តូររូបភាព' : 'Click to change photo'}
                         >
                           <img 
@@ -886,7 +886,7 @@ export const AdminDashboard: React.FC = () => {
                             className="w-full h-full object-cover group-hover:scale-110 transition duration-200" 
                           />
                           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition text-white">
-                            <Camera className="w-4 h-4 text-amber-300" />
+                            <Camera className="w-4 h-4 text-[#A7DCA5]" />
                           </div>
                         </div>
 
@@ -895,11 +895,11 @@ export const AdminDashboard: React.FC = () => {
                             <span className="font-mono text-[9px] font-bold px-1.5 py-0.5 rounded bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-300">
                               {d.id}
                             </span>
-                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 font-khmer">
+                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-[#EAF6EC] text-[#14532D] border border-[#A7DCA5]/40 font-khmer">
                               {d.provinceKh}
                             </span>
                           </div>
-                          <h4 className="font-bold text-stone-900 dark:text-stone-100 font-khmer text-xs truncate mt-0.5">
+                          <h4 className="font-bold text-[#183326] dark:text-stone-100 font-khmer text-xs truncate mt-0.5">
                             {d.nameKh}
                           </h4>
                           <p className="text-[10px] text-stone-500 truncate">
@@ -913,9 +913,9 @@ export const AdminDashboard: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => setSelectedDestForImageEdit(d)}
-                          className="px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/40 dark:hover:bg-amber-900/60 text-amber-800 dark:text-amber-200 border border-amber-300 dark:border-amber-700 font-khmer font-bold text-xs flex items-center gap-1.5 transition active:scale-95 shadow-2xs"
+                          className="px-3 py-1.5 rounded-xl bg-[#EAF6EC] hover:bg-[#A7DCA5]/40 dark:bg-[#14532D]/40 dark:hover:bg-[#14532D]/60 text-[#14532D] dark:text-[#A7DCA5] border border-[#A7DCA5]/40 font-khmer font-bold text-xs flex items-center gap-1.5 transition active:scale-95 shadow-2xs"
                         >
-                          <Camera className="w-3.5 h-3.5 text-amber-600" />
+                          <Camera className="w-3.5 h-3.5 text-[#228B4E]" />
                           <span>{isKm ? 'ប្តូររូបភាព' : 'Change Photo'}</span>
                         </button>
 
@@ -1152,7 +1152,7 @@ export const AdminDashboard: React.FC = () => {
 
                   <button
                     type="submit"
-                    className="px-5 py-2.5 bg-gradient-to-r from-red-700 to-amber-600 hover:from-red-800 hover:to-amber-700 text-white font-bold rounded-xl shadow-md transition-all font-khmer text-xs"
+                    className="px-5 py-2.5 bg-gradient-to-r from-[#14532D] to-[#228B4E] hover:from-[#0B3D2E] hover:to-[#14532D] text-white font-bold rounded-xl shadow-md transition-all font-khmer text-xs active:scale-95"
                   >
                     {isKm ? 'រក្សាទុកតំណភ្ជាប់ដំឡើង' : 'Save Download Configuration'}
                   </button>
@@ -1225,7 +1225,7 @@ export const AdminDashboard: React.FC = () => {
 
                     <button
                       onClick={handleSaveSettings}
-                      className="px-5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl shadow-md transition-all font-khmer text-xs"
+                      className="px-5 py-2.5 bg-[#14532D] hover:bg-[#0B3D2E] text-white font-bold rounded-xl shadow-md transition-all font-khmer text-xs active:scale-95"
                     >
                       {isKm ? 'រក្សាទុកព័ត៌មាន KHQR' : 'Save KHQR Configuration'}
                     </button>
@@ -1236,7 +1236,7 @@ export const AdminDashboard: React.FC = () => {
               {/* Password Management */}
               <div className="bg-white dark:bg-stone-800 p-5 rounded-3xl border border-stone-200 dark:border-stone-700 shadow-sm space-y-4 font-khmer">
                 <div className="flex items-center gap-2.5 pb-2 border-b border-stone-200 dark:border-stone-700">
-                  <KeyRound className="w-5 h-5 text-amber-600" />
+                  <KeyRound className="w-5 h-5 text-[#228B4E]" />
                   <div>
                     <h4 className="font-bold text-stone-900 dark:text-stone-100 text-sm">
                       {isKm ? 'ផ្លាស់ប្តូរពាក្យសម្ងាត់រដ្ឋបាល' : 'Update Admin Credentials'}
@@ -1263,9 +1263,9 @@ export const AdminDashboard: React.FC = () => {
 
                   <button
                     type="submit"
-                    className="px-5 py-2.5 bg-stone-900 hover:bg-black text-white font-bold rounded-xl shadow-md transition-all text-xs flex items-center gap-2"
+                    className="px-5 py-2.5 bg-[#14532D] hover:bg-[#0B3D2E] text-white font-bold rounded-xl shadow-md transition-all text-xs flex items-center gap-2 active:scale-95"
                   >
-                    <Lock className="w-3.5 h-3.5 text-amber-400" />
+                    <Lock className="w-3.5 h-3.5 text-[#A7DCA5]" />
                     <span>{isKm ? 'Hash PBKDF2 និងផ្លាស់ប្តូរ' : 'Hash PBKDF2 & Update'}</span>
                   </button>
                 </form>
@@ -1277,16 +1277,16 @@ export const AdminDashboard: React.FC = () => {
           {activeTab === 'image_audit' && (
             <div className="space-y-6">
               {/* Header & Description */}
-              <div className="bg-gradient-to-r from-amber-950 via-stone-900 to-amber-900 text-amber-50 p-6 rounded-3xl border border-amber-800/40 shadow-sm space-y-3">
+              <div className="bg-gradient-to-r from-[#0B3D2E] via-[#14532D] to-[#0B3D2E] text-white p-6 rounded-3xl border border-[#A7DCA5]/40 shadow-sm space-y-3">
                 <div className="flex items-center gap-3">
-                  <div className="p-3 bg-amber-500/20 text-amber-400 rounded-2xl border border-amber-500/30">
+                  <div className="p-3 bg-white/10 text-[#A7DCA5] rounded-2xl border border-[#A7DCA5]/30">
                     <Sparkles className="w-6 h-6" />
                   </div>
                   <div>
-                    <h3 className="font-moul text-base text-amber-200">
+                    <h3 className="font-moul text-base text-white">
                       {isKm ? 'សវនកម្មរូបភាពម្ហូបខ្មែរ AI & ការផ្ទៀងផ្ទាត់' : 'AI Food Image Audit & Verification'}
                     </h3>
-                    <p className="text-xs text-amber-200/80 font-khmer">
+                    <p className="text-xs text-[#A7DCA5] font-khmer">
                       {isKm 
                         ? 'ការត្រួតពិនិត្យរូបភាពមុខម្ហូបខ្មែរទាំង ១០០ មុខ ដើម្បីធានាភាពត្រឹមត្រូវតាមឈ្មោះមុខម្ហូបពិតប្រាកដ និងដកភាពជាន់គ្នាចេញ ១០០%'
                         : 'Audit and replacement of 100 Cambodian dish images ensuring authentic culinary representation and 0% duplicates.'}
@@ -1297,27 +1297,27 @@ export const AdminDashboard: React.FC = () => {
                 {/* Metric Summary Cards */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
                   <div className="bg-white/10 backdrop-blur-sm p-3.5 rounded-2xl border border-white/10">
-                    <div className="text-[10px] text-amber-300 font-khmer">{isKm ? 'មុខម្ហូបសរុបបាន Audit' : 'Total Dishes Audited'}</div>
+                    <div className="text-[10px] text-[#A7DCA5] font-khmer">{isKm ? 'មុខម្ហូបសរុបបាន Audit' : 'Total Dishes Audited'}</div>
                     <div className="text-2xl font-bold font-mono text-white mt-1">{foods.length}</div>
-                    <div className="text-[9px] text-emerald-400 font-khmer mt-0.5">✓ គ្រប់មុខម្ហូបទាំងអស់</div>
+                    <div className="text-[9px] text-[#A7DCA5] font-khmer mt-0.5">✓ គ្រប់មុខម្ហូបទាំងអស់</div>
                   </div>
 
                   <div className="bg-white/10 backdrop-blur-sm p-3.5 rounded-2xl border border-white/10">
-                    <div className="text-[10px] text-emerald-300 font-khmer">{isKm ? 'ផ្ទៀងផ្ទាត់ត្រឹមត្រូវ ១០០%' : 'Verified & Accurate'}</div>
-                    <div className="text-2xl font-bold font-mono text-emerald-400 mt-1">{verifiedFoods.length}</div>
-                    <div className="text-[9px] text-emerald-300 font-khmer mt-0.5">✓ រូបភាពច្បាស់តាមមុខម្ហូប</div>
+                    <div className="text-[10px] text-[#A7DCA5] font-khmer">{isKm ? 'ផ្ទៀងផ្ទាត់ត្រឹមត្រូវ ១០០%' : 'Verified & Accurate'}</div>
+                    <div className="text-2xl font-bold font-mono text-[#A7DCA5] mt-1">{verifiedFoods.length}</div>
+                    <div className="text-[9px] text-[#A7DCA5] font-khmer mt-0.5">✓ រូបភាពច្បាស់តាមមុខម្ហូប</div>
                   </div>
 
                   <div className="bg-white/10 backdrop-blur-sm p-3.5 rounded-2xl border border-white/10">
-                    <div className="text-[10px] text-indigo-300 font-khmer">{isKm ? 'ដកភាពជាន់គ្នាចេញ' : 'Duplicates Resolved'}</div>
-                    <div className="text-2xl font-bold font-mono text-indigo-300 mt-1">228</div>
-                    <div className="text-[9px] text-indigo-200 font-khmer mt-0.5">0% Duplication rate</div>
+                    <div className="text-[10px] text-[#A7DCA5] font-khmer">{isKm ? 'ដកភាពជាន់គ្នាចេញ' : 'Duplicates Resolved'}</div>
+                    <div className="text-2xl font-bold font-mono text-white mt-1">228</div>
+                    <div className="text-[9px] text-[#A7DCA5] font-khmer mt-0.5">0% Duplication rate</div>
                   </div>
 
                   <div className="bg-white/10 backdrop-blur-sm p-3.5 rounded-2xl border border-white/10">
-                    <div className="text-[10px] text-amber-300 font-khmer">{isKm ? 'រង់ចាំរដ្ឋបាលពិនិត្យ' : 'Pending Admin Review'}</div>
-                    <div className="text-2xl font-bold font-mono text-amber-400 mt-1">{flaggedFoods.length}</div>
-                    <div className="text-[9px] text-amber-200 font-khmer mt-0.5">{flaggedFoods.length > 0 ? 'ទាមទារការសម្រេច' : 'រួចរាល់ទាំងអស់'}</div>
+                    <div className="text-[10px] text-[#A7DCA5] font-khmer">{isKm ? 'រង់ចាំរដ្ឋបាលពិនិត្យ' : 'Pending Admin Review'}</div>
+                    <div className="text-2xl font-bold font-mono text-white mt-1">{flaggedFoods.length}</div>
+                    <div className="text-[9px] text-[#A7DCA5] font-khmer mt-0.5">{flaggedFoods.length > 0 ? 'ទាមទារការសម្រេច' : 'រួចរាល់ទាំងអស់'}</div>
                   </div>
                 </div>
               </div>
@@ -1417,17 +1417,17 @@ export const AdminDashboard: React.FC = () => {
                           <div className="flex items-center gap-2 pt-1 border-t border-amber-200 dark:border-amber-800">
                             <button
                               onClick={() => handleApproveImage(food)}
-                              className="flex-1 py-2 px-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs font-khmer flex items-center justify-center gap-1.5 shadow-sm transition"
+                              className="flex-1 py-2 px-3 bg-[#14532D] hover:bg-[#0B3D2E] text-white font-bold rounded-xl text-xs font-khmer flex items-center justify-center gap-1.5 shadow-xs transition active:scale-95"
                             >
-                              <Check className="w-3.5 h-3.5" />
+                              <Check className="w-3.5 h-3.5 text-[#A7DCA5]" />
                               <span>{isKm ? 'យល់ព្រមរូបភាពនេះ' : 'Approve Photo'}</span>
                             </button>
                             <button
                               type="button"
                               onClick={() => setSelectedFoodForImageEdit(food)}
-                              className="py-2 px-3 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-xl text-xs font-khmer flex items-center justify-center gap-1.5 shadow-sm transition"
+                              className="py-2 px-3 bg-[#228B4E] hover:bg-[#14532D] text-white font-bold rounded-xl text-xs font-khmer flex items-center justify-center gap-1.5 shadow-xs transition active:scale-95"
                             >
-                              <Camera className="w-3.5 h-3.5" />
+                              <Camera className="w-3.5 h-3.5 text-[#A7DCA5]" />
                               <span>{isKm ? 'ផ្លាស់ប្តូររូបភាព' : 'Change Photo'}</span>
                             </button>
                           </div>
@@ -1439,12 +1439,12 @@ export const AdminDashboard: React.FC = () => {
               </div>
 
               {/* FULL CATALOG AUDIT BROWSER */}
-              <div className="bg-white dark:bg-stone-800 p-5 rounded-3xl border border-stone-200 dark:border-stone-700 shadow-sm space-y-4">
+              <div className="bg-white dark:bg-stone-800 p-5 rounded-3xl border border-[#A7DCA5]/30 dark:border-stone-700 shadow-xs space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-stone-200 dark:border-stone-700">
                   <div className="flex items-center gap-2">
-                    <ImageIcon className="w-5 h-5 text-amber-600" />
+                    <ImageIcon className="w-5 h-5 text-[#228B4E]" />
                     <div>
-                      <h4 className="font-bold text-stone-900 dark:text-stone-100 font-khmer text-sm">
+                      <h4 className="font-bold text-[#183326] dark:text-stone-100 font-khmer text-sm">
                         {isKm ? `កាតាឡុកមុខម្ហូបទាំងអស់ (${foods.length})` : `Full Catalog Image Browser (${foods.length})`}
                       </h4>
                       <p className="text-[11px] text-stone-500 font-khmer">
@@ -1455,11 +1455,11 @@ export const AdminDashboard: React.FC = () => {
 
                   <div className="flex items-center gap-2">
                     {/* Filter Pills */}
-                    <div className="flex bg-stone-100 dark:bg-stone-900 p-1 rounded-xl text-[11px] font-khmer">
+                    <div className="flex bg-[#EAF6EC] dark:bg-stone-900 p-1 rounded-xl text-[11px] font-khmer border border-[#A7DCA5]/40">
                       <button
                         onClick={() => setAuditFilter('all')}
                         className={`px-2.5 py-1 rounded-lg font-bold transition ${
-                          auditFilter === 'all' ? 'bg-white dark:bg-stone-800 text-amber-600 shadow-sm' : 'text-stone-500'
+                          auditFilter === 'all' ? 'bg-white dark:bg-stone-800 text-[#14532D] shadow-xs' : 'text-stone-500'
                         }`}
                       >
                         {isKm ? `ទាំងអស់ (${foods.length})` : `All (${foods.length})`}
@@ -1467,7 +1467,7 @@ export const AdminDashboard: React.FC = () => {
                       <button
                         onClick={() => setAuditFilter('verified')}
                         className={`px-2.5 py-1 rounded-lg font-bold transition ${
-                          auditFilter === 'verified' ? 'bg-white dark:bg-stone-800 text-emerald-600 shadow-sm' : 'text-stone-500'
+                          auditFilter === 'verified' ? 'bg-white dark:bg-stone-800 text-[#228B4E] shadow-xs' : 'text-stone-500'
                         }`}
                       >
                         {isKm ? `ផ្ទៀងផ្ទាត់ (${verifiedFoods.length})` : `Verified (${verifiedFoods.length})`}
@@ -1475,7 +1475,7 @@ export const AdminDashboard: React.FC = () => {
                       <button
                         onClick={() => setAuditFilter('flagged')}
                         className={`px-2.5 py-1 rounded-lg font-bold transition ${
-                          auditFilter === 'flagged' ? 'bg-white dark:bg-stone-800 text-amber-600 shadow-sm' : 'text-stone-500'
+                          auditFilter === 'flagged' ? 'bg-white dark:bg-stone-800 text-amber-600 shadow-xs' : 'text-stone-500'
                         }`}
                       >
                         {isKm ? `រង់ចាំពិនិត្យ (${flaggedFoods.length})` : `Flagged (${flaggedFoods.length})`}
@@ -1492,7 +1492,7 @@ export const AdminDashboard: React.FC = () => {
                     value={auditSearchQuery}
                     onChange={e => setAuditSearchQuery(e.target.value)}
                     placeholder={isKm ? "ស្វែងរកឈ្មោះម្ហូបខ្មែរ អង់គ្លេស ឬលេខសម្គាល់..." : "Search by Khmer, English name, or ID..."}
-                    className="w-full pl-9 pr-4 py-2 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-900 text-stone-800 dark:text-stone-200 text-xs font-khmer"
+                    className="w-full pl-9 pr-4 py-2 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-900 text-stone-800 dark:text-stone-200 text-xs font-khmer focus:outline-none focus:border-[#228B4E]"
                   />
                 </div>
 
@@ -1501,23 +1501,23 @@ export const AdminDashboard: React.FC = () => {
                   {filteredAuditFoods.map(food => (
                     <div 
                       key={food.id}
-                      className="p-3 rounded-2xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-900/50 flex gap-3 items-center hover:border-amber-400 transition"
+                      className="p-3 rounded-2xl border border-[#A7DCA5]/30 dark:border-stone-700 bg-white dark:bg-stone-900/50 flex gap-3 items-center hover:border-[#A7DCA5] transition shadow-xs"
                     >
                       <img 
                         src={food.photoUrl} 
                         alt={food.nameKh}
-                        className="w-16 h-16 object-cover rounded-xl border border-stone-200 shrink-0" 
+                        className="w-16 h-16 object-cover rounded-xl border border-[#A7DCA5]/40 shrink-0" 
                       />
                       <div className="min-w-0 flex-1 space-y-0.5">
                         <div className="flex items-center gap-1">
                           <span className="font-mono text-[9px] font-bold text-stone-500">
                             {food.id}
                           </span>
-                          <span className="text-[9px] px-1.5 py-0.2 rounded bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 font-khmer">
+                          <span className="text-[9px] px-1.5 py-0.2 rounded bg-[#EAF6EC] dark:bg-stone-800 text-[#14532D] dark:text-[#A7DCA5] font-khmer">
                             {food.categoryKh}
                           </span>
                         </div>
-                        <h6 className="font-bold text-stone-900 dark:text-stone-100 font-khmer text-xs truncate">
+                        <h6 className="font-bold text-[#183326] dark:text-stone-100 font-khmer text-xs truncate">
                           {food.nameKh}
                         </h6>
                         <p className="text-[10px] text-stone-500 truncate">
@@ -1530,7 +1530,7 @@ export const AdminDashboard: React.FC = () => {
                               {isKm ? 'រង់ចាំពិនិត្យ' : 'Review'}
                             </span>
                           ) : (
-                            <span className="text-[9px] font-bold text-emerald-600 bg-emerald-100 dark:bg-emerald-950/60 px-1.5 py-0.2 rounded font-khmer flex items-center gap-1">
+                            <span className="text-[9px] font-bold text-[#228B4E] bg-[#EAF6EC] dark:bg-emerald-950/60 px-1.5 py-0.2 rounded font-khmer flex items-center gap-1">
                               <CheckCircle2 className="w-2.5 h-2.5" />
                               {isKm ? 'ផ្ទៀងផ្ទាត់ហើយ' : 'Verified'}
                             </span>
@@ -1539,7 +1539,7 @@ export const AdminDashboard: React.FC = () => {
                           <button
                             type="button"
                             onClick={() => setSelectedFoodForImageEdit(food)}
-                            className="text-[10px] font-bold text-amber-600 hover:text-amber-700 hover:underline font-khmer flex items-center gap-0.5"
+                            className="text-[10px] font-bold text-[#14532D] dark:text-[#A7DCA5] hover:text-[#228B4E] hover:underline font-khmer flex items-center gap-0.5"
                           >
                             <Camera className="w-3 h-3" />
                             <span>{isKm ? 'កែរូបភាព' : 'Edit Photo'}</span>

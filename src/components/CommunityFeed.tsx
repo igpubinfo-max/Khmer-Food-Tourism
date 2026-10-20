@@ -42,19 +42,19 @@ export const CommunityFeed: React.FC = () => {
   return (
     <div className="max-w-md mx-auto px-4 py-4 space-y-4 pb-20">
       {/* Top Banner & Post creator trigger */}
-      <div className="p-4 rounded-3xl bg-gradient-to-r from-amber-800 to-amber-950 text-white shadow-md flex items-center justify-between">
+      <div className="p-4 rounded-3xl bg-gradient-to-r from-[#0B3D2E] via-[#14532D] to-[#0B3D2E] text-white shadow-md flex items-center justify-between border border-[#A7DCA5]/30">
         <div>
-          <h2 className="font-moul text-sm sm:text-base text-amber-200">
+          <h2 className="font-moul text-sm sm:text-base text-[#A7DCA5]">
             {language === 'km' ? 'សហគមន៍ចែករំលែក' : 'Community Feed'}
           </h2>
-          <p className="text-[11px] text-amber-300/80 mt-0.5">
+          <p className="text-[11px] text-[#A7DCA5]/80 mt-0.5">
             {language === 'km' ? 'ចែករំលែកម្ហូបឆ្ងាញ់ រូបមន្ត និងកន្លែងកម្សាន្ត' : 'Share delicious food, recipes & travel'}
           </p>
         </div>
 
         <button
           onClick={() => setIsAddPostModalOpen(true)}
-          className="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-amber-500 hover:bg-amber-400 text-amber-950 font-bold text-xs shadow-md transition active:scale-95"
+          className="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-[#34A853] hover:bg-[#228B4E] text-white font-bold text-xs shadow-md transition active:scale-95"
         >
           <Plus className="w-4 h-4" />
           <span>{language === 'km' ? 'បង្ហោះ' : 'Post'}</span>
@@ -71,7 +71,7 @@ export const CommunityFeed: React.FC = () => {
           return (
             <article 
               key={post.id}
-              className="bg-white dark:bg-stone-800/90 rounded-3xl overflow-hidden shadow-xs border border-amber-100/70 dark:border-stone-700/60"
+              className="bg-white dark:bg-[#0B3D2E] rounded-3xl overflow-hidden shadow-xs border border-[#A7DCA5]/40 dark:border-[#228B4E]/30"
             >
               {/* Post Author Bar */}
               <div className="p-3.5 flex items-center justify-between">
@@ -79,11 +79,11 @@ export const CommunityFeed: React.FC = () => {
                   <img 
                     src={post.authorAvatar} 
                     alt={post.authorName}
-                    className="w-9 h-9 rounded-full object-cover border border-amber-300 shadow-2xs"
+                    className="w-9 h-9 rounded-full object-cover border border-[#A7DCA5] shadow-2xs"
                   />
                   <div>
                     <div className="flex items-center gap-1.5">
-                      <h4 className="font-bold text-xs text-stone-900 dark:text-stone-100">
+                      <h4 className="font-bold text-xs text-[#183326] dark:text-stone-100">
                         {post.authorName}
                       </h4>
                       {post.authorRole === 'admin' && (
@@ -93,8 +93,8 @@ export const CommunityFeed: React.FC = () => {
                         </span>
                       )}
                       {post.authorRole === 'owner' && (
-                        <span className="flex items-center gap-0.5 px-1.5 py-0.2 rounded-md bg-amber-100 text-amber-800 text-[9px] font-bold">
-                          <Store className="w-2.5 h-2.5" />
+                        <span className="flex items-center gap-0.5 px-1.5 py-0.2 rounded-md bg-[#EAF6EC] text-[#14532D] text-[9px] font-bold">
+                          <Store className="w-2.5 h-2.5 text-[#228B4E]" />
                           {language === 'km' ? 'ម្ចាស់ហាង' : 'Owner'}
                         </span>
                       )}
@@ -125,12 +125,12 @@ export const CommunityFeed: React.FC = () => {
               {/* Title & Tag */}
               <div className="px-3.5 pb-2">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 dark:bg-stone-700/60 text-amber-800 dark:text-amber-300 text-[10px] font-bold">
-                    <Tag className="w-2.5 h-2.5" />
+                  <span className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#EAF6EC] dark:bg-[#14532D]/40 text-[#14532D] dark:text-[#A7DCA5] text-[10px] font-bold border border-[#A7DCA5]/30">
+                    <Tag className="w-2.5 h-2.5 text-[#34A853]" />
                     {post.categoryTag}
                   </span>
                 </div>
-                <h3 className="font-bold text-sm text-stone-900 dark:text-stone-100">
+                <h3 className="font-bold text-sm text-[#183326] dark:text-stone-100">
                   {post.titleKh}
                 </h3>
                 <p className="text-xs text-stone-600 dark:text-stone-300 mt-1 leading-relaxed whitespace-pre-line">
@@ -140,7 +140,7 @@ export const CommunityFeed: React.FC = () => {
 
               {/* Post Photo */}
               {post.photoUrl && (
-                <div className="relative aspect-4/3 w-full bg-stone-100 dark:bg-stone-700 overflow-hidden">
+                <div className="relative aspect-4/3 w-full bg-[#EAF6EC]/50 dark:bg-stone-800 overflow-hidden">
                   <img 
                     src={post.photoUrl} 
                     alt={post.titleKh}
@@ -151,7 +151,7 @@ export const CommunityFeed: React.FC = () => {
               )}
 
               {/* Interaction Bar: Like, Comment, Share */}
-              <div className="p-3 border-t border-stone-100 dark:border-stone-700/60 flex items-center justify-between text-xs">
+              <div className="p-3 border-t border-[#A7DCA5]/20 dark:border-[#228B4E]/20 flex items-center justify-between text-xs">
                 <div className="flex items-center gap-4">
                   {/* Like Button */}
                   <button
@@ -167,7 +167,7 @@ export const CommunityFeed: React.FC = () => {
                   {/* Comment Toggle */}
                   <button
                     onClick={() => setActiveCommentPostId(isCommentOpen ? null : post.id)}
-                    className="flex items-center gap-1.5 text-stone-500 hover:text-amber-700 font-semibold transition"
+                    className="flex items-center gap-1.5 text-stone-500 hover:text-[#14532D] dark:hover:text-[#A7DCA5] font-semibold transition"
                   >
                     <MessageCircle className="w-4 h-4" />
                     <span>{post.comments.length}</span>
@@ -192,7 +192,7 @@ export const CommunityFeed: React.FC = () => {
                   </button>
                   <button
                     onClick={handleCopyLink}
-                    className="px-2 py-1 rounded-lg bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-300 text-[10px]"
+                    className="px-2 py-1 rounded-lg bg-[#EAF6EC] dark:bg-[#14532D]/40 text-[#14532D] dark:text-[#A7DCA5] text-[10px] font-semibold"
                   >
                     {language === 'km' ? 'ចម្លង' : 'Copy'}
                   </button>
@@ -201,7 +201,7 @@ export const CommunityFeed: React.FC = () => {
 
               {/* Comments Section */}
               {isCommentOpen && (
-                <div className="px-3.5 pb-3.5 pt-1 bg-stone-50/70 dark:bg-stone-800/40 border-t border-stone-100 dark:border-stone-700/60 animate-in fade-in duration-150">
+                <div className="px-3.5 pb-3.5 pt-1 bg-[#EAF6EC]/40 dark:bg-stone-800/40 border-t border-[#A7DCA5]/20 dark:border-[#228B4E]/20 animate-in fade-in duration-150">
                   {/* Comments list */}
                   <div className="space-y-2 mb-2.5 max-h-48 overflow-y-auto no-scrollbar">
                     {post.comments.length === 0 ? (
@@ -210,7 +210,7 @@ export const CommunityFeed: React.FC = () => {
                       </p>
                     ) : (
                       post.comments.map((cm) => (
-                        <div key={cm.id} className="flex items-start gap-2 bg-white dark:bg-stone-800 p-2 rounded-xl border border-stone-100 dark:border-stone-700 text-xs">
+                        <div key={cm.id} className="flex items-start gap-2 bg-white dark:bg-stone-800 p-2 rounded-xl border border-[#A7DCA5]/20 text-xs">
                           <img 
                             src={cm.authorAvatar} 
                             alt={cm.authorName} 
@@ -218,7 +218,7 @@ export const CommunityFeed: React.FC = () => {
                           />
                           <div className="flex-1">
                             <div className="flex items-center justify-between">
-                              <span className="font-bold text-[11px] text-stone-900 dark:text-stone-200">
+                              <span className="font-bold text-[11px] text-[#183326] dark:text-stone-200">
                                 {cm.authorName}
                               </span>
                               <span className="text-[9px] text-stone-400">{cm.createdAt}</span>
@@ -242,11 +242,11 @@ export const CommunityFeed: React.FC = () => {
                         if (e.key === 'Enter') handleSendComment(post.id);
                       }}
                       placeholder={language === 'km' ? 'សរសេរមតិយោបល់...' : 'Write a comment...'}
-                      className="flex-1 px-3 py-1.5 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 text-xs focus:outline-none focus:border-amber-500"
+                      className="flex-1 px-3 py-1.5 rounded-xl border border-[#A7DCA5]/40 bg-white dark:bg-stone-800 text-xs focus:outline-none focus:border-[#34A853]"
                     />
                     <button
                       onClick={() => handleSendComment(post.id)}
-                      className="p-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white shadow-2xs transition active:scale-95"
+                      className="p-2 rounded-xl bg-[#14532D] hover:bg-[#0B3D2E] text-white shadow-2xs transition active:scale-95"
                     >
                       <Send className="w-3.5 h-3.5" />
                     </button>

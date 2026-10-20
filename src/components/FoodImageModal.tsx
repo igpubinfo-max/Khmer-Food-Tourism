@@ -164,31 +164,31 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
       <div 
-        className="bg-white dark:bg-stone-900 w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] border border-stone-200 dark:border-stone-800"
+        className="bg-white dark:bg-stone-900 w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] border border-[#A7DCA5]/40"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="px-5 py-4 bg-gradient-to-r from-amber-700 to-amber-900 text-white flex items-center justify-between">
+        <div className="px-5 py-4 bg-gradient-to-r from-[#0B3D2E] via-[#14532D] to-[#0B3D2E] text-white flex items-center justify-between">
           <div className="space-y-0.5">
             <div className="flex items-center gap-2">
-              <span className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded bg-black/25 text-amber-200">
+              <span className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded bg-white/10 text-[#A7DCA5]">
                 {food.id}
               </span>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/30 text-amber-100 font-khmer">
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#228B4E]/30 text-[#A7DCA5] font-khmer">
                 {food.categoryKh}
               </span>
             </div>
-            <h3 className="font-bold text-sm sm:text-base font-khmer truncate">
+            <h3 className="font-bold text-sm sm:text-base font-khmer truncate text-white">
               {food.nameKh}
             </h3>
-            <p className="text-[11px] text-amber-200/90 truncate">
+            <p className="text-[11px] text-[#A7DCA5] truncate">
               {food.nameEn}
             </p>
           </div>
 
           <button
             onClick={onClose}
-            className="p-2 rounded-full hover:bg-white/10 text-white/80 hover:text-white transition"
+            className="p-2 rounded-full hover:bg-white/10 text-[#A7DCA5] hover:text-white transition"
           >
             <X className="w-5 h-5" />
           </button>
@@ -206,8 +206,8 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
           {/* Live Mobile Card Preview */}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <span className="font-bold text-stone-700 dark:text-stone-300 flex items-center gap-1.5">
-                <Eye className="w-3.5 h-3.5 text-amber-600" />
+              <span className="font-bold text-[#183326] dark:text-stone-300 flex items-center gap-1.5">
+                <Eye className="w-3.5 h-3.5 text-[#228B4E]" />
                 {isKm ? 'ការបង្ហាញរូបភាពក្នុងកម្មវិធី (Live App Preview)' : 'Live Mobile Card Preview'}
               </span>
               <div className="flex items-center gap-1 bg-stone-100 dark:bg-stone-800 p-0.5 rounded-lg text-[10px]">
@@ -215,7 +215,7 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
                   type="button"
                   onClick={() => setFitMode('cover')}
                   className={`px-2 py-0.5 rounded-md font-bold transition ${
-                    fitMode === 'cover' ? 'bg-amber-600 text-white' : 'text-stone-500'
+                    fitMode === 'cover' ? 'bg-[#14532D] text-white' : 'text-stone-500'
                   }`}
                 >
                   {isKm ? 'ពេញស៊ុម (Cover)' : 'Cover'}
@@ -224,7 +224,7 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
                   type="button"
                   onClick={() => setFitMode('contain')}
                   className={`px-2 py-0.5 rounded-md font-bold transition ${
-                    fitMode === 'contain' ? 'bg-amber-600 text-white' : 'text-stone-500'
+                    fitMode === 'contain' ? 'bg-[#14532D] text-white' : 'text-stone-500'
                   }`}
                 >
                   {isKm ? 'រូបពេញ (Contain)' : 'Fit'}
@@ -233,7 +233,7 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
             </div>
 
             {/* Mobile Card Mockup */}
-            <div className="rounded-2xl border border-stone-200 dark:border-stone-700 overflow-hidden bg-stone-50 dark:bg-stone-800/60 shadow-xs max-w-sm mx-auto">
+            <div className="rounded-2xl border border-[#A7DCA5]/40 dark:border-stone-700 overflow-hidden bg-stone-50 dark:bg-stone-800/60 shadow-xs max-w-sm mx-auto">
               <div className="relative aspect-[16/10] bg-stone-900 flex items-center justify-center overflow-hidden">
                 {photoUrl ? (
                   <img 
@@ -249,15 +249,15 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
                     <span>{isKm ? 'មិនទាន់មានរូបភាព' : 'No photo selected'}</span>
                   </div>
                 )}
-                <div className="absolute top-2 left-2 bg-black/60 backdrop-blur-xs text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                <div className="absolute top-2 left-2 bg-[#0B3D2E]/80 backdrop-blur-xs text-[#A7DCA5] text-[10px] font-bold px-2 py-0.5 rounded-full border border-[#A7DCA5]/30">
                   {food.categoryKh}
                 </div>
-                <div className="absolute bottom-2 right-2 bg-black/60 backdrop-blur-xs text-amber-300 text-[10px] font-bold px-2 py-0.5 rounded-full font-mono">
+                <div className="absolute bottom-2 right-2 bg-black/60 backdrop-blur-xs text-[#A7DCA5] text-[10px] font-bold px-2 py-0.5 rounded-full font-mono">
                   {food.cookTime || '២៥ នាទី'}
                 </div>
               </div>
               <div className="p-3">
-                <h4 className="font-bold text-stone-900 dark:text-stone-100 text-xs">
+                <h4 className="font-bold text-[#183326] dark:text-stone-100 text-xs">
                   {food.nameKh}
                 </h4>
                 <p className="text-[10px] text-stone-500">
@@ -268,10 +268,10 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
           </div>
 
           {/* Option 1: File Upload / Phone Gallery Picker */}
-          <div className="space-y-2 p-3.5 rounded-2xl bg-amber-50/70 dark:bg-stone-800/80 border border-amber-200/80 dark:border-stone-700">
+          <div className="space-y-2 p-3.5 rounded-2xl bg-[#EAF6EC]/60 dark:bg-stone-800/80 border border-[#A7DCA5]/40 dark:border-stone-700">
             <div className="flex items-center justify-between">
-              <span className="font-bold text-stone-800 dark:text-stone-200 flex items-center gap-1.5">
-                <Smartphone className="w-4 h-4 text-amber-600" />
+              <span className="font-bold text-[#183326] dark:text-stone-200 flex items-center gap-1.5">
+                <Smartphone className="w-4 h-4 text-[#228B4E]" />
                 {isKm ? '១. ជ្រើសរើសរូបពីទូរស័ព្ទ / កុំព្យូទ័រ' : '1. Upload Photo from Phone Gallery'}
               </span>
               <span className="text-[10px] text-stone-400">JPG, PNG, WebP</span>
@@ -289,9 +289,9 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
               type="button"
               disabled={isProcessing}
               onClick={() => fileInputRef.current?.click()}
-              className="w-full py-3 px-4 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold flex items-center justify-center gap-2 shadow-sm transition active:scale-98 disabled:opacity-50"
+              className="w-full py-3 px-4 rounded-xl bg-[#14532D] hover:bg-[#0B3D2E] text-white font-bold flex items-center justify-center gap-2 shadow-xs transition active:scale-98 disabled:opacity-50"
             >
-              <Upload className="w-4 h-4" />
+              <Upload className="w-4 h-4 text-[#A7DCA5]" />
               <span>
                 {isProcessing 
                   ? (isKm ? 'កំពុងដំណើរការ និងបង្រួមរូបភាព...' : 'Optimizing image...') 
@@ -307,7 +307,7 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
 
           {/* Option 2: Direct URL Input */}
           <div className="space-y-1.5 p-3.5 rounded-2xl bg-stone-50 dark:bg-stone-800/50 border border-stone-200 dark:border-stone-700">
-            <span className="font-bold text-stone-700 dark:text-stone-300 block">
+            <span className="font-bold text-[#183326] dark:text-stone-300 block">
               {isKm ? '២. ឬ បញ្ចូលតំណភ្ជាប់ URL រូបភាព (Image URL):' : '2. Or Enter Direct Image Web URL:'}
             </span>
             <div className="flex gap-2">
@@ -316,12 +316,12 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
                 value={urlInput}
                 onChange={e => setUrlInput(e.target.value)}
                 placeholder="https://images.unsplash.com/photo-..."
-                className="flex-1 px-3 py-2 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-800 dark:text-stone-200 text-xs font-mono focus:outline-none focus:border-amber-500"
+                className="flex-1 px-3 py-2 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-800 dark:text-stone-200 text-xs font-mono focus:outline-none focus:border-[#228B4E]"
               />
               <button
                 type="button"
                 onClick={handleApplyUrl}
-                className="px-3.5 py-2 rounded-xl bg-stone-700 hover:bg-stone-800 text-white font-bold transition shrink-0"
+                className="px-3.5 py-2 rounded-xl bg-[#228B4E] hover:bg-[#14532D] text-white font-bold transition shrink-0 active:scale-95"
               >
                 {isKm ? 'មើល' : 'Apply'}
               </button>
@@ -330,7 +330,7 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
 
           {/* Audit Status & Verification Note */}
           <div className="space-y-2 p-3.5 rounded-2xl bg-stone-50 dark:bg-stone-800/50 border border-stone-200 dark:border-stone-700">
-            <span className="font-bold text-stone-700 dark:text-stone-300 block">
+            <span className="font-bold text-[#183326] dark:text-stone-300 block">
               {isKm ? 'ស្ថានភាពផ្ទៀងផ្ទាត់រូបភាព (Audit Status):' : 'Verification Status:'}
             </span>
             <div className="grid grid-cols-2 gap-2">
@@ -339,11 +339,11 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
                 onClick={() => setAuditStatus('verified')}
                 className={`p-2.5 rounded-xl border font-bold flex items-center justify-center gap-1.5 transition ${
                   auditStatus === 'verified'
-                    ? 'bg-emerald-50 border-emerald-500 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300'
-                    : 'border-stone-200 dark:border-stone-700 text-stone-500 hover:border-emerald-300'
+                    ? 'bg-[#EAF6EC] border-[#228B4E] text-[#14532D] dark:bg-[#14532D]/40 dark:text-[#A7DCA5]'
+                    : 'border-stone-200 dark:border-stone-700 text-stone-500 hover:border-[#228B4E]'
                 }`}
               >
-                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                <CheckCircle2 className="w-4 h-4 text-[#228B4E]" />
                 <span>{isKm ? '✓ ផ្ទៀងផ្ទាត់ត្រឹមត្រូវ' : '✓ Verified Authentic'}</span>
               </button>
 
@@ -370,7 +370,7 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
                 value={auditNote}
                 onChange={e => setAuditNote(e.target.value)}
                 placeholder={isKm ? 'ឧទាហរណ៍៖ រូបថតម្ហូបដើមពីហាង...' : 'e.g., Authentic traditional photo...'}
-                className="w-full px-3 py-2 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-800 dark:text-stone-200 text-xs focus:outline-none focus:border-amber-500 font-khmer"
+                className="w-full px-3 py-2 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-800 dark:text-stone-200 text-xs focus:outline-none focus:border-[#228B4E] font-khmer"
               />
             </div>
           </div>
@@ -399,9 +399,9 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
             <button
               type="button"
               onClick={handleSave}
-              className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center gap-1.5 shadow-md transition active:scale-95"
+              className="px-5 py-2 rounded-xl bg-[#14532D] hover:bg-[#0B3D2E] text-white font-bold flex items-center gap-1.5 shadow-md transition active:scale-95"
             >
-              <Check className="w-4 h-4" />
+              <Check className="w-4 h-4 text-[#A7DCA5]" />
               <span>{isKm ? 'រក្សាទុករូបភាព' : 'Save Photo'}</span>
             </button>
           </div>

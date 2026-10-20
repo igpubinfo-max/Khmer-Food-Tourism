@@ -1,9 +1,34 @@
 @import "tailwindcss";
 
+@theme {
+  --color-forest-dark: #0B3D2E;
+  --color-forest-primary: #14532D;
+  --color-forest-secondary: #228B4E;
+  --color-forest-accent: #34A853;
+  --color-forest-light: #A7DCA5;
+  --color-forest-mint: #EAF6EC;
+  --color-forest-text: #183326;
+}
+
+:root {
+  --primary-dark-green: #14532D;
+  --deep-forest-green: #0B3D2E;
+  --secondary-green: #228B4E;
+  --light-green: #A7DCA5;
+  --soft-mint: #EAF6EC;
+  --main-text: #183326;
+  --accent-green: #34A853;
+}
+
 @layer base {
   * {
     box-sizing: border-box;
     -webkit-font-smoothing: antialiased;
+  }
+  
+  body {
+    background-color: #EAF6EC;
+    color: #183326;
   }
   
   /* Smooth scrolling and hide default scrollbars for mobile feel */
@@ -31,7 +56,7 @@
 
 /* Glassmorphism helpers */
 .glass-header {
-  background: rgba(255, 255, 255, 0.88);
+  background: rgba(11, 61, 46, 0.95);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }

@@ -79,30 +79,30 @@ export const RestaurantDetailModal: React.FC = () => {
             
             <div className="absolute bottom-4 left-4 right-4 text-white">
               <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500 text-amber-950 shadow font-khmer">
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#0B3D2E]/85 text-[#A7DCA5] border border-[#228B4E]/30 shadow font-khmer">
                   {isKm ? selectedRestaurant.provinceKh : selectedRestaurant.provinceEn}
                 </span>
 
                 {isPremiumActive ? (
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow flex items-center gap-1 font-khmer">
-                    <Sparkles className="w-3 h-3" />
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-gradient-to-r from-[#14532D] to-[#228B4E] text-[#A7DCA5] border border-[#A7DCA5]/40 shadow flex items-center gap-1 font-khmer">
+                    <Sparkles className="w-3 h-3 text-[#A7DCA5]" />
                     <span>⭐ {isKm ? 'សមាជិកភាព VIP Premium' : 'Premium Member'}</span>
                   </span>
                 ) : (
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-stone-700/90 text-stone-200 shadow font-khmer">
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#0B3D2E]/80 text-[#EAF6EC] border border-[#228B4E]/30 shadow font-khmer">
                     🏷️ {isKm ? 'ចុះបញ្ជីឥតគិតថ្លៃ ($0)' : 'Free Listing ($0)'}
                   </span>
                 )}
 
-                <span className="px-2 py-0.5 rounded-md bg-black/60 text-amber-300 text-[10px] font-bold">
+                <span className="px-2 py-0.5 rounded-md bg-[#0B3D2E]/80 text-[#A7DCA5] text-[10px] font-bold border border-[#228B4E]/30">
                   {selectedRestaurant.priceLevel}
                 </span>
               </div>
 
-              <h2 className="text-lg sm:text-xl font-bold font-moul leading-snug drop-shadow">
+              <h2 className="text-lg sm:text-xl font-bold font-moul leading-snug drop-shadow text-white">
                 {isKm ? selectedRestaurant.nameKh : selectedRestaurant.nameEn}
               </h2>
-              <p className="text-xs text-amber-200/90 font-medium">
+              <p className="text-xs text-[#A7DCA5] font-medium">
                 {isKm ? selectedRestaurant.nameEn : selectedRestaurant.nameKh}
               </p>
             </div>
@@ -111,13 +111,13 @@ export const RestaurantDetailModal: React.FC = () => {
           <div className="p-4 sm:p-6 space-y-5">
             {/* Owner Management Control Bar */}
             {isOwner && (
-              <div className="p-3.5 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-stone-800 dark:to-stone-800 rounded-2xl border-2 border-amber-400 flex items-center justify-between font-khmer">
+              <div className="p-3.5 bg-[#EAF6EC] dark:bg-[#0B3D2E]/60 rounded-2xl border-2 border-[#A7DCA5] flex items-center justify-between font-khmer">
                 <div>
-                  <div className="font-bold text-xs text-amber-950 dark:text-amber-200 flex items-center gap-1.5">
+                  <div className="font-bold text-xs text-[#14532D] dark:text-[#A7DCA5] flex items-center gap-1.5">
                     <span>👑</span>
                     <span>{isKm ? 'លោកអ្នកជាម្ចាស់ហាងនេះ' : 'You are the owner of this restaurant'}</span>
                   </div>
-                  <div className="text-[10px] text-stone-600 dark:text-stone-300">
+                  <div className="text-[10px] text-[#183326]/70 dark:text-stone-300">
                     {isKm 
                       ? `មុខម្ហូបក្នុងហាង៖ ${(selectedRestaurant.menuItems || []).length}/5 មុខ (អតិបរមា ៥ មុខ)` 
                       : `Menu items: ${(selectedRestaurant.menuItems || []).length}/5 (Max 5)`}
@@ -128,9 +128,9 @@ export const RestaurantDetailModal: React.FC = () => {
                     setManagingRestaurant(selectedRestaurant);
                     setIsManageMenuModalOpen(true);
                   }}
-                  className="px-3.5 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs shadow flex items-center gap-1.5 transition active:scale-95"
+                  className="px-3.5 py-2 rounded-xl bg-[#14532D] hover:bg-[#0B3D2E] text-white font-bold text-xs shadow flex items-center gap-1.5 transition active:scale-95"
                 >
-                  <UtensilsCrossed className="w-3.5 h-3.5" />
+                  <UtensilsCrossed className="w-3.5 h-3.5 text-[#A7DCA5]" />
                   <span>{isKm ? 'គ្រប់គ្រងមុខម្ហូប' : 'Manage Menu'}</span>
                 </button>
               </div>
@@ -151,7 +151,7 @@ export const RestaurantDetailModal: React.FC = () => {
 
               <a
                 href={`tel:${selectedRestaurant.phone}`}
-                className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow transition active:scale-95 font-mono"
+                className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-[#228B4E] hover:bg-[#14532D] text-white text-xs font-bold shadow transition active:scale-95 font-mono"
               >
                 <Phone className="w-4 h-4" />
                 <span>{selectedRestaurant.phone}</span>
@@ -159,11 +159,11 @@ export const RestaurantDetailModal: React.FC = () => {
             </div>
 
             {/* Address & Hours */}
-            <div className="p-3.5 rounded-2xl bg-stone-50 dark:bg-stone-800/80 border border-stone-200/80 dark:border-stone-700 space-y-2.5 text-xs font-khmer">
+            <div className="p-3.5 rounded-2xl bg-white dark:bg-stone-800/80 border border-[#A7DCA5]/40 dark:border-stone-700 space-y-2.5 text-xs font-khmer">
               <div className="flex items-start gap-2.5">
-                <MapPin className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                <MapPin className="w-4 h-4 text-[#228B4E] shrink-0 mt-0.5" />
                 <div>
-                  <p className="font-semibold text-stone-900 dark:text-stone-200">
+                  <p className="font-semibold text-[#183326] dark:text-stone-200">
                     {isKm ? 'អាសយដ្ឋាន' : 'Address'}
                   </p>
                   <p className="text-stone-600 dark:text-stone-400">
@@ -172,10 +172,10 @@ export const RestaurantDetailModal: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex items-start gap-2.5 pt-2 border-t border-stone-200 dark:border-stone-700">
-                <Clock className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+              <div className="flex items-start gap-2.5 pt-2 border-t border-[#A7DCA5]/30 dark:border-stone-700">
+                <Clock className="w-4 h-4 text-[#228B4E] shrink-0 mt-0.5" />
                 <div>
-                  <p className="font-semibold text-stone-900 dark:text-stone-200">
+                  <p className="font-semibold text-[#183326] dark:text-stone-200">
                     {isKm ? 'ម៉ោងបើកដំណើរការ' : 'Opening Hours'}
                   </p>
                   <p className="text-stone-600 dark:text-stone-400">
@@ -189,8 +189,8 @@ export const RestaurantDetailModal: React.FC = () => {
             {selectedRestaurant.menuItems && selectedRestaurant.menuItems.length > 0 ? (
               <div className="space-y-3 font-khmer">
                 <div className="flex items-center justify-between">
-                  <h3 className="font-bold text-stone-900 dark:text-stone-100 text-sm flex items-center gap-1.5">
-                    <UtensilsCrossed className="w-4 h-4 text-amber-600" />
+                  <h3 className="font-bold text-[#183326] dark:text-stone-100 text-sm flex items-center gap-1.5">
+                    <UtensilsCrossed className="w-4 h-4 text-[#228B4E]" />
                     <span>
                       {isKm 
                         ? `មុខម្ហូបពិសេសក្នុងហាង (${selectedRestaurant.menuItems.length} មុខ)` 
@@ -203,7 +203,7 @@ export const RestaurantDetailModal: React.FC = () => {
                         setManagingRestaurant(selectedRestaurant);
                         setIsManageMenuModalOpen(true);
                       }}
-                      className="text-amber-600 font-bold text-xs hover:underline"
+                      className="text-[#14532D] dark:text-[#A7DCA5] font-bold text-xs hover:underline"
                     >
                       {isKm ? '+ កែប្រែ / បន្ថែម' : '+ Edit / Add'}
                     </button>
@@ -214,22 +214,22 @@ export const RestaurantDetailModal: React.FC = () => {
                   {selectedRestaurant.menuItems.map((item, i) => (
                     <div 
                       key={item.id || i}
-                      className="p-3 rounded-2xl bg-white dark:bg-stone-800 border border-amber-200/60 dark:border-stone-700 shadow-xs flex items-center gap-3"
+                      className="p-3 rounded-2xl bg-white dark:bg-stone-800 border border-[#A7DCA5]/50 dark:border-stone-700 shadow-xs flex items-center gap-3"
                     >
-                      <div className="w-16 h-16 rounded-xl overflow-hidden bg-stone-100 shrink-0 border border-stone-200 dark:border-stone-700">
+                      <div className="w-16 h-16 rounded-xl overflow-hidden bg-stone-100 shrink-0 border border-[#A7DCA5]/30 dark:border-stone-700">
                         <img src={item.photoUrl} alt={item.nameKh} className="w-full h-full object-cover" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between">
-                          <h4 className="font-bold text-stone-900 dark:text-stone-100 text-xs truncate">
+                          <h4 className="font-bold text-[#183326] dark:text-stone-100 text-xs truncate">
                             {item.nameKh}
                           </h4>
-                          <span className="text-red-600 font-bold font-mono text-xs ml-2">${item.priceUsd.toFixed(2)}</span>
+                          <span className="text-[#14532D] font-bold font-mono text-xs ml-2">${item.priceUsd.toFixed(2)}</span>
                         </div>
                         {item.nameEn && (
                           <p className="text-[10px] text-stone-500 truncate">{item.nameEn}</p>
                         )}
-                        <p className="text-[10px] text-stone-400 font-mono">({item.priceRiel.toLocaleString()} ៛)</p>
+                        <p className="text-[10px] text-[#228B4E] font-mono">({item.priceRiel.toLocaleString()} ៛)</p>
                         {item.descriptionKh && (
                           <p className="text-[10px] text-stone-600 dark:text-stone-300 line-clamp-1 mt-0.5">
                             {item.descriptionKh}
@@ -244,8 +244,8 @@ export const RestaurantDetailModal: React.FC = () => {
               /* Fallback Signature Dishes */
               <div className="font-khmer">
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-bold text-stone-900 dark:text-stone-100 text-sm flex items-center gap-1.5">
-                    <UtensilsCrossed className="w-4 h-4 text-amber-600" />
+                  <h3 className="font-bold text-[#183326] dark:text-stone-100 text-sm flex items-center gap-1.5">
+                    <UtensilsCrossed className="w-4 h-4 text-[#228B4E]" />
                     <span>{isKm ? 'មុខម្ហូបប្រចាំហាង (Signature Dishes)' : 'Signature Menus'}</span>
                   </h3>
                   {isOwner && (
@@ -254,7 +254,7 @@ export const RestaurantDetailModal: React.FC = () => {
                         setManagingRestaurant(selectedRestaurant);
                         setIsManageMenuModalOpen(true);
                       }}
-                      className="text-amber-600 font-bold text-xs hover:underline"
+                      className="text-[#14532D] dark:text-[#A7DCA5] font-bold text-xs hover:underline"
                     >
                       {isKm ? '+ គ្រប់គ្រងមុខម្ហូប' : '+ Manage Menu'}
                     </button>
@@ -265,9 +265,9 @@ export const RestaurantDetailModal: React.FC = () => {
                   {selectedRestaurant.signatureDishesKh.map((dish, i) => (
                     <div 
                       key={i}
-                      className="flex items-center gap-2.5 p-2.5 rounded-xl bg-amber-50/70 dark:bg-stone-800 border border-amber-200/50 dark:border-stone-700 text-xs text-amber-950 dark:text-amber-200"
+                      className="flex items-center gap-2.5 p-2.5 rounded-xl bg-[#EAF6EC] dark:bg-stone-800 border border-[#A7DCA5]/50 dark:border-stone-700 text-xs text-[#14532D] dark:text-[#A7DCA5]"
                     >
-                      <span className="w-5 h-5 rounded-full bg-amber-600 text-white text-[10px] font-bold flex items-center justify-center shrink-0">
+                      <span className="w-5 h-5 rounded-full bg-[#14532D] text-white text-[10px] font-bold flex items-center justify-center shrink-0">
                         {i + 1}
                       </span>
                       <span className="font-medium">{dish}</span>
@@ -279,8 +279,8 @@ export const RestaurantDetailModal: React.FC = () => {
 
             {/* Description */}
             <div className="font-khmer">
-              <h3 className="font-bold text-stone-900 dark:text-stone-100 text-sm mb-1.5 flex items-center gap-1.5">
-                <Sparkles className="w-4 h-4 text-amber-500" />
+              <h3 className="font-bold text-[#183326] dark:text-stone-100 text-sm mb-1.5 flex items-center gap-1.5">
+                <Sparkles className="w-4 h-4 text-[#228B4E]" />
                 <span>{isKm ? 'អំពីភោជនីយដ្ឋាន' : 'About the Restaurant'}</span>
               </h3>
               <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-300 leading-relaxed bg-stone-50/70 dark:bg-stone-800/40 p-3.5 rounded-xl border border-stone-100 dark:border-stone-800">

@@ -26,20 +26,20 @@ export const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({ isOpen, 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-sm animate-fade-in">
       <div 
-        className="relative w-full max-w-lg max-h-[90vh] bg-white dark:bg-stone-900 rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-amber-950/20"
+        className="relative w-full max-w-lg max-h-[90vh] bg-white dark:bg-[#0B3D2E] rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-[#A7DCA5]/30"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 bg-gradient-to-r from-red-950 via-stone-900 to-amber-950 text-white shrink-0">
+        <div className="flex items-center justify-between px-5 py-4 bg-gradient-to-r from-[#0B3D2E] via-[#14532D] to-[#0B3D2E] text-white shrink-0 border-b border-[#A7DCA5]/20">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 bg-amber-500/20 text-amber-400 rounded-xl border border-amber-500/30">
+            <div className="p-2 bg-[#A7DCA5]/20 text-[#A7DCA5] rounded-xl border border-[#A7DCA5]/30">
               <ShieldCheck className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-moul text-sm text-amber-200">
+              <h3 className="font-moul text-sm text-[#A7DCA5]">
                 {isKm ? 'គោលការណ៍ឯកជនភាព & សុវត្ថិភាព' : 'Privacy Policy & Data Safety'}
               </h3>
-              <p className="text-[10px] text-amber-200/80 font-khmer">
+              <p className="text-[10px] text-[#A7DCA5]/80 font-khmer">
                 {isKm ? 'កម្មវិធី Khmer Food & Tourism • អនុលោមតាម Google Play Store' : 'Khmer Food & Tourism • Google Play Compliant'}
               </p>
             </div>
@@ -53,11 +53,11 @@ export const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({ isOpen, 
         </div>
 
         {/* Content Body */}
-        <div className="flex-1 overflow-y-auto p-5 text-xs space-y-4 font-khmer text-stone-700 dark:text-stone-300 leading-relaxed">
+        <div className="flex-1 overflow-y-auto p-5 text-xs space-y-4 font-khmer text-[#183326] dark:text-stone-300 leading-relaxed">
           {/* Summary Banner */}
-          <div className="p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/60 flex items-start gap-2.5">
-            <Lock className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-            <div className="text-[11px] text-amber-900 dark:text-amber-200">
+          <div className="p-3.5 rounded-2xl bg-[#EAF6EC] dark:bg-[#14532D]/30 border border-[#A7DCA5]/50 dark:border-[#228B4E]/40 flex items-start gap-2.5">
+            <Lock className="w-4 h-4 text-[#228B4E] shrink-0 mt-0.5" />
+            <div className="text-[11px] text-[#183326] dark:text-[#A7DCA5]">
               <span className="font-bold">{isKm ? 'ការសន្យាសុវត្ថិភាពទិន្នន័យ៖' : 'Our Privacy Commitment:'}</span>{' '}
               {isKm 
                 ? 'កម្មវិធីយើងខ្ញុំមិនលក់ មិនចែកចាយ ឬជួញដូរទិន្នន័យឯកជនរបស់អ្នកប្រើប្រាស់ទៅឱ្យតតិយជនឡើយ។ រាល់ការតភ្ជាប់ប្រើប្រាស់បច្ចេកវិទ្យាការពារ HTTPS/TLS និងការអ៊ិនគ្រីបកម្រិតខ្ពស់។'
@@ -67,8 +67,8 @@ export const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({ isOpen, 
 
           {/* Section 1 */}
           <div className="space-y-1.5">
-            <h4 className="font-bold text-stone-900 dark:text-stone-100 flex items-center gap-1.5 text-xs">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+            <h4 className="font-bold text-[#183326] dark:text-stone-100 flex items-center gap-1.5 text-xs">
+              <CheckCircle2 className="w-3.5 h-3.5 text-[#34A853]" />
               <span>{isKm ? '១. ព័ត៌មានដែលយើងប្រមូល (Information We Collect)' : '1. Information We Collect'}</span>
             </h4>
             <p className="text-[11px] text-stone-600 dark:text-stone-400 pl-5">
@@ -80,8 +80,8 @@ export const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({ isOpen, 
 
           {/* Section 2 */}
           <div className="space-y-1.5">
-            <h4 className="font-bold text-stone-900 dark:text-stone-100 flex items-center gap-1.5 text-xs">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+            <h4 className="font-bold text-[#183326] dark:text-stone-100 flex items-center gap-1.5 text-xs">
+              <CheckCircle2 className="w-3.5 h-3.5 text-[#34A853]" />
               <span>{isKm ? '២. ការប្រើប្រាស់សិទ្ធិទូរស័ព្ទ (Device Permissions)' : '2. Device Permissions'}</span>
             </h4>
             <p className="text-[11px] text-stone-600 dark:text-stone-400 pl-5">
@@ -93,8 +93,8 @@ export const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({ isOpen, 
 
           {/* Section 3 */}
           <div className="space-y-1.5">
-            <h4 className="font-bold text-stone-900 dark:text-stone-100 flex items-center gap-1.5 text-xs">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+            <h4 className="font-bold text-[#183326] dark:text-stone-100 flex items-center gap-1.5 text-xs">
+              <CheckCircle2 className="w-3.5 h-3.5 text-[#34A853]" />
               <span>{isKm ? '៣. សុវត្ថិភាព និងការរក្សាទុក (Security & Storage)' : '3. Security & Storage'}</span>
             </h4>
             <p className="text-[11px] text-stone-600 dark:text-stone-400 pl-5">
@@ -106,8 +106,8 @@ export const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({ isOpen, 
 
           {/* Section 4 */}
           <div className="space-y-1.5">
-            <h4 className="font-bold text-stone-900 dark:text-stone-100 flex items-center gap-1.5 text-xs">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+            <h4 className="font-bold text-[#183326] dark:text-stone-100 flex items-center gap-1.5 text-xs">
+              <CheckCircle2 className="w-3.5 h-3.5 text-[#34A853]" />
               <span>{isKm ? '៤. ការទូទាត់ប្រាក់ និងប្រូម៉ូសិន (Payment & Promotions)' : '4. Payment & Promotions'}</span>
             </h4>
             <p className="text-[11px] text-stone-600 dark:text-stone-400 pl-5">
@@ -141,26 +141,26 @@ export const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({ isOpen, 
           </div>
 
           {/* Developer Contact */}
-          <div className="pt-2 border-t border-stone-200 dark:border-stone-800 text-[11px] space-y-1 text-stone-500">
-            <p className="font-bold text-stone-700 dark:text-stone-300">
+          <div className="pt-2 border-t border-[#A7DCA5]/30 text-[11px] space-y-1 text-stone-500">
+            <p className="font-bold text-[#183326] dark:text-[#A7DCA5]">
               {isKm ? 'ទំនាក់ទំនងអ្នកអភិវឌ្ឍន៍ (Developer Contact):' : 'Developer & Support Contact:'}
             </p>
             <p className="flex items-center gap-1.5">
-              <Mail className="w-3.5 h-3.5 text-stone-400" />
+              <Mail className="w-3.5 h-3.5 text-[#228B4E]" />
               <span>support@khmerfoodtourism.com</span>
             </p>
             <p className="flex items-center gap-1.5">
-              <Globe className="w-3.5 h-3.5 text-stone-400" />
+              <Globe className="w-3.5 h-3.5 text-[#228B4E]" />
               <span>https://github.com/igpubinfo-max/Khmer-Food-Tourism</span>
             </p>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="px-5 py-3 bg-stone-100 dark:bg-stone-800/80 border-t border-stone-200 dark:border-stone-800 flex justify-end shrink-0">
+        <div className="px-5 py-3 bg-[#EAF6EC] dark:bg-[#14532D]/40 border-t border-[#A7DCA5]/30 flex justify-end shrink-0">
           <button
             onClick={onClose}
-            className="px-5 py-2 bg-stone-900 hover:bg-black text-white font-bold rounded-xl text-xs font-khmer transition shadow-sm"
+            className="px-5 py-2 bg-[#14532D] hover:bg-[#0B3D2E] text-white font-bold rounded-xl text-xs font-khmer transition shadow-sm"
           >
             {isKm ? 'យល់ព្រម និងបិទ' : 'Close'}
           </button>

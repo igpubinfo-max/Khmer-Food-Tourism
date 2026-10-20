@@ -8,14 +8,14 @@ export const Toast: React.FC = () => {
   if (!toast) return null;
 
   const icons = {
-    success: <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />,
-    info: <Info className="w-5 h-5 text-amber-600 shrink-0" />,
+    success: <CheckCircle2 className="w-5 h-5 text-[#34A853] shrink-0" />,
+    info: <Info className="w-5 h-5 text-[#228B4E] shrink-0" />,
     warning: <AlertTriangle className="w-5 h-5 text-rose-600 shrink-0" />,
   };
 
   const bgStyles = {
-    success: 'bg-emerald-50 border-emerald-200 text-emerald-950',
-    info: 'bg-amber-50 border-amber-200 text-amber-950',
+    success: 'bg-[#EAF6EC] border-[#A7DCA5] text-[#183326]',
+    info: 'bg-[#EAF6EC] border-[#A7DCA5] text-[#183326]',
     warning: 'bg-rose-50 border-rose-200 text-rose-950',
   };
 

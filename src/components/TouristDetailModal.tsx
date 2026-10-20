@@ -56,10 +56,10 @@ export const TouristDetailModal: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setIsImageModalOpen(true)}
-                className="py-1.5 px-3 rounded-full bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs shadow-lg backdrop-blur-md transition active:scale-90 flex items-center gap-1.5"
+                className="py-1.5 px-3 rounded-full bg-[#34A853] hover:bg-[#228B4E] text-white font-bold text-xs shadow-lg backdrop-blur-md transition active:scale-90 flex items-center gap-1.5 border border-[#A7DCA5]/40"
                 title={language === 'km' ? 'ផ្លាស់ប្តូររូបភាព' : 'Change Photo'}
               >
-                <Camera className="w-3.5 h-3.5 text-stone-950" />
+                <Camera className="w-3.5 h-3.5 text-white" />
                 <span className="font-khmer">{language === 'km' ? 'ប្តូររូបភាព' : 'Change Photo'}</span>
               </button>
             )}
@@ -88,13 +88,13 @@ export const TouristDetailModal: React.FC = () => {
             <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" />
             
             <div className="absolute bottom-4 left-4 right-4 text-white">
-              <span className="px-3 py-0.5 rounded-full text-xs font-bold bg-amber-500 text-amber-950 shadow mb-2 inline-block">
+              <span className="px-3 py-0.5 rounded-full text-xs font-bold bg-[#14532D] text-[#A7DCA5] border border-[#228B4E]/40 shadow mb-2 inline-block">
                 {language === 'km' ? selectedDestination.categoryKh : selectedDestination.categoryEn}
               </span>
-              <h2 className="text-xl sm:text-2xl font-bold font-moul leading-snug drop-shadow">
+              <h2 className="text-xl sm:text-2xl font-bold font-moul leading-snug drop-shadow text-white">
                 {language === 'km' ? selectedDestination.nameKh : selectedDestination.nameEn}
               </h2>
-              <p className="text-xs text-amber-200/90 font-medium">
+              <p className="text-xs text-[#A7DCA5] font-medium">
                 {language === 'km' ? selectedDestination.nameEn : selectedDestination.nameKh}
               </p>
             </div>
@@ -118,33 +118,33 @@ export const TouristDetailModal: React.FC = () => {
             {/* Quick Info Cards: Fees & Best Time */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {/* Fee Card */}
-              <div className="p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200/60 dark:border-emerald-800 space-y-1">
-                <div className="flex items-center gap-2 text-emerald-800 dark:text-emerald-300 font-bold text-xs">
-                  <Ticket className="w-4 h-4 text-emerald-600" />
+              <div className="p-3.5 rounded-2xl bg-[#EAF6EC] dark:bg-[#0B3D2E]/40 border border-[#A7DCA5]/60 dark:border-[#228B4E]/40 space-y-1">
+                <div className="flex items-center gap-2 text-[#14532D] dark:text-[#A7DCA5] font-bold text-xs">
+                  <Ticket className="w-4 h-4 text-[#228B4E]" />
                   <span>{language === 'km' ? 'សំបុត្រចូលទស្សនា' : 'Entrance Fee'}</span>
                 </div>
-                <p className="text-xs text-emerald-950 dark:text-emerald-200 font-medium leading-relaxed">
+                <p className="text-xs text-[#183326] dark:text-stone-200 font-medium leading-relaxed">
                   {language === 'km' ? selectedDestination.entranceFeeKh : selectedDestination.entranceFeeEn}
                 </p>
               </div>
 
               {/* Best Time Card */}
-              <div className="p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200/60 dark:border-amber-800 space-y-1">
-                <div className="flex items-center gap-2 text-amber-800 dark:text-amber-300 font-bold text-xs">
-                  <Calendar className="w-4 h-4 text-amber-600" />
+              <div className="p-3.5 rounded-2xl bg-[#EAF6EC] dark:bg-[#0B3D2E]/40 border border-[#A7DCA5]/60 dark:border-[#228B4E]/40 space-y-1">
+                <div className="flex items-center gap-2 text-[#14532D] dark:text-[#A7DCA5] font-bold text-xs">
+                  <Calendar className="w-4 h-4 text-[#228B4E]" />
                   <span>{language === 'km' ? 'ពេលវេលាល្អបំផុតដើម្បីមកលេង' : 'Best Time to Visit'}</span>
                 </div>
-                <p className="text-xs text-amber-950 dark:text-amber-200 font-medium leading-relaxed">
+                <p className="text-xs text-[#183326] dark:text-stone-200 font-medium leading-relaxed">
                   {language === 'km' ? selectedDestination.bestTimeToVisitKh : selectedDestination.bestTimeToVisitEn}
                 </p>
               </div>
             </div>
 
             {/* Address */}
-            <div className="p-3.5 rounded-2xl bg-stone-50 dark:bg-stone-800/80 border border-stone-200/80 dark:border-stone-700 flex items-start gap-2.5 text-xs">
-              <MapPin className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+            <div className="p-3.5 rounded-2xl bg-[#EAF6EC]/50 dark:bg-[#0B3D2E]/40 border border-[#A7DCA5]/40 dark:border-[#14532D]/50 flex items-start gap-2.5 text-xs">
+              <MapPin className="w-4 h-4 text-[#228B4E] shrink-0 mt-0.5" />
               <div>
-                <p className="font-semibold text-stone-900 dark:text-stone-200">
+                <p className="font-semibold text-[#183326] dark:text-stone-200">
                   {language === 'km' ? 'ទីតាំងភូមិសាស្ត្រ' : 'Location Address'}
                 </p>
                 <p className="text-stone-600 dark:text-stone-400">
@@ -155,11 +155,11 @@ export const TouristDetailModal: React.FC = () => {
 
             {/* Description */}
             <div>
-              <h3 className="font-bold text-stone-900 dark:text-stone-100 text-sm mb-1.5 flex items-center gap-1.5">
-                <Sparkles className="w-4 h-4 text-amber-500" />
+              <h3 className="font-bold text-[#183326] dark:text-stone-100 text-sm mb-1.5 flex items-center gap-1.5">
+                <Sparkles className="w-4 h-4 text-[#228B4E]" />
                 {language === 'km' ? 'ប្រវត្តិ និងទិដ្ឋភាពទូទៅ' : 'Overview & History'}
               </h3>
-              <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-300 leading-relaxed bg-stone-50/70 dark:bg-stone-800/40 p-3.5 rounded-xl border border-stone-100 dark:border-stone-800">
+              <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-300 leading-relaxed bg-[#EAF6EC]/40 dark:bg-[#0B3D2E]/30 p-3.5 rounded-xl border border-[#A7DCA5]/30 dark:border-[#14532D]/40">
                 {language === 'km' ? selectedDestination.descriptionKh : selectedDestination.descriptionEn}
               </p>
             </div>
@@ -167,17 +167,17 @@ export const TouristDetailModal: React.FC = () => {
             {/* Highlights List */}
             {selectedDestination.highlightsKh && selectedDestination.highlightsKh.length > 0 && (
               <div>
-                <h3 className="font-bold text-stone-900 dark:text-stone-100 text-sm mb-2">
+                <h3 className="font-bold text-[#183326] dark:text-stone-100 text-sm mb-2">
                   {language === 'km' ? 'ចំណុចលេចធ្លោមិនគួររំលង' : 'Key Highlights'}
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {selectedDestination.highlightsKh.map((hl, i) => (
                     <div 
                       key={i}
-                      className="p-2.5 rounded-xl bg-white dark:bg-stone-800 border border-stone-200/80 dark:border-stone-700 text-xs flex items-center gap-2"
+                      className="p-2.5 rounded-xl bg-white dark:bg-stone-800 border border-[#A7DCA5]/30 dark:border-[#14532D]/40 text-xs flex items-center gap-2"
                     >
-                      <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0" />
-                      <span className="font-medium text-stone-800 dark:text-stone-200">{hl}</span>
+                      <span className="w-2 h-2 rounded-full bg-[#34A853] shrink-0" />
+                      <span className="font-medium text-[#183326] dark:text-stone-200">{hl}</span>
                     </div>
                   ))}
                 </div>

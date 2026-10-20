@@ -54,28 +54,28 @@ export const InstallModal: React.FC = () => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-sm animate-fade-in">
       <div 
-        className="relative w-full max-w-lg bg-white dark:bg-stone-900 rounded-3xl shadow-2xl overflow-hidden border border-amber-300/40 max-h-[92vh] flex flex-col"
+        className="relative w-full max-w-lg bg-white dark:bg-stone-900 rounded-3xl shadow-2xl overflow-hidden border border-[#A7DCA5]/40 max-h-[92vh] flex flex-col"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="relative bg-gradient-to-r from-red-900 via-amber-800 to-stone-900 text-white p-5 pb-4">
+        <div className="relative bg-gradient-to-r from-[#0B3D2E] via-[#14532D] to-[#0B3D2E] text-white p-5 pb-4">
           <button
             onClick={() => setIsInstallModalOpen(false)}
-            className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+            className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-[#A7DCA5] hover:text-white transition-colors"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
           </button>
           
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-white/10 rounded-2xl backdrop-blur-md border border-white/20">
-              <Smartphone className="w-6 h-6 text-amber-300" />
+            <div className="p-2.5 bg-white/10 rounded-2xl backdrop-blur-md border border-[#A7DCA5]/30">
+              <Smartphone className="w-6 h-6 text-[#A7DCA5]" />
             </div>
             <div>
-              <h2 className="text-base sm:text-lg font-bold font-khmer">
+              <h2 className="text-base sm:text-lg font-bold font-khmer text-white">
                 {isKm ? 'ទាញយក និងដំឡើងកម្មវិធីទូរស័ព្ទដៃ' : 'Download & Install Mobile App'}
               </h2>
-              <p className="text-[11px] text-amber-200 font-khmer">
+              <p className="text-[11px] text-[#A7DCA5] font-khmer">
                 {isKm ? 'គាំទ្រប្រព័ន្ធ Android និង Apple iOS (iPhone)' : 'Supported on Android & Apple iOS (iPhone)'}
               </p>
             </div>
@@ -87,8 +87,8 @@ export const InstallModal: React.FC = () => {
               onClick={() => setPlatformTab('android')}
               className={`py-2 px-3 rounded-xl font-khmer text-xs font-bold transition-all flex items-center justify-center gap-2 ${
                 platformTab === 'android'
-                  ? 'bg-amber-500 text-white shadow-md'
-                  : 'text-amber-100 hover:text-white'
+                  ? 'bg-[#34A853] text-white shadow-md'
+                  : 'text-[#A7DCA5] hover:text-white'
               }`}
             >
               <Smartphone className="w-4 h-4" />
@@ -100,7 +100,7 @@ export const InstallModal: React.FC = () => {
               className={`py-2 px-3 rounded-xl font-khmer text-xs font-bold transition-all flex items-center justify-center gap-2 ${
                 platformTab === 'ios'
                   ? 'bg-slate-800 text-white shadow-md'
-                  : 'text-amber-100 hover:text-white'
+                  : 'text-[#A7DCA5] hover:text-white'
               }`}
             >
               <Apple className="w-4 h-4" />
@@ -115,8 +115,8 @@ export const InstallModal: React.FC = () => {
           {platformTab === 'android' && (
             <div className="space-y-4">
               {/* QR Code Presentation Box */}
-              <div className="bg-gradient-to-b from-amber-50 to-orange-50/50 dark:from-stone-800 dark:to-stone-800/60 rounded-2xl p-4 border border-amber-200 dark:border-stone-700 text-center flex flex-col items-center">
-                <div className="relative p-2.5 bg-white rounded-2xl shadow-md border-2 border-amber-400 mb-2">
+              <div className="bg-gradient-to-b from-[#EAF6EC] to-white dark:from-[#0B3D2E]/60 dark:to-stone-850 rounded-2xl p-4 border border-[#A7DCA5]/40 dark:border-stone-700 text-center flex flex-col items-center">
+                <div className="relative p-2.5 bg-white rounded-2xl shadow-md border-2 border-[#228B4E] mb-2">
                   {androidQrUrl ? (
                     <img 
                       src={androidQrUrl} 
@@ -129,13 +129,13 @@ export const InstallModal: React.FC = () => {
                     </div>
                   )}
                   <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <div className="bg-white p-1 rounded-full shadow-md border border-amber-400">
+                    <div className="bg-white p-1 rounded-full shadow-md border border-[#228B4E]">
                       <span className="text-base">🤖</span>
                     </div>
                   </div>
                 </div>
 
-                <p className="text-[11px] text-stone-600 dark:text-stone-300 font-khmer max-w-xs">
+                <p className="text-[11px] text-[#183326] dark:text-stone-300 font-khmer max-w-xs">
                   {isKm 
                     ? 'ស្កេន QR Code នេះដោយកាមេរ៉ាទូរស័ព្ទ Android ដើម្បីទាញយក APK ដំឡើងភ្លាមៗ' 
                     : 'Scan this QR code with your Android phone camera to download APK directly.'}
@@ -148,9 +148,9 @@ export const InstallModal: React.FC = () => {
                   href={apkDownloadTarget}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-gradient-to-r from-red-700 via-amber-700 to-red-800 hover:from-red-800 hover:to-amber-800 text-white font-bold rounded-2xl shadow-lg shadow-red-700/20 active:scale-[0.98] transition-all font-khmer text-xs"
+                  className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-gradient-to-r from-[#14532D] to-[#228B4E] hover:from-[#0B3D2E] hover:to-[#14532D] text-white font-bold rounded-2xl shadow-lg shadow-[#14532D]/20 active:scale-[0.98] transition-all font-khmer text-xs"
                 >
-                  <Download className="w-4 h-4 text-amber-200" />
+                  <Download className="w-4 h-4 text-[#A7DCA5]" />
                   <span>{isKm ? 'ទាញយកឯកសារ Android APK ផ្ទាល់ (Direct Download)' : 'Direct Download Android APK'}</span>
                 </a>
 
@@ -158,14 +158,14 @@ export const InstallModal: React.FC = () => {
                   onClick={() => handleCopyLink(apkDownloadTarget)}
                   className="w-full flex items-center justify-center gap-1.5 py-2.5 px-4 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 font-medium rounded-2xl transition font-khmer text-xs border border-stone-200 dark:border-stone-700"
                 >
-                  {copied ? <CheckCircle className="w-4 h-4 text-emerald-600" /> : <Share2 className="w-4 h-4 text-stone-500" />}
+                  {copied ? <CheckCircle className="w-4 h-4 text-[#228B4E]" /> : <Share2 className="w-4 h-4 text-stone-500" />}
                   <span>{copied ? (isKm ? 'បានចម្លងរួចរាល់!' : 'Copied!') : (isKm ? 'ចម្លងតំណភ្ជាប់ APK' : 'Copy APK Download Link')}</span>
                 </button>
               </div>
 
               {/* Official Store Status */}
               <div className="p-3 bg-stone-50 dark:bg-stone-800 rounded-xl border border-stone-200 dark:border-stone-700 flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center text-white shrink-0 font-bold">
+                <div className="w-8 h-8 rounded-lg bg-[#228B4E] flex items-center justify-center text-white shrink-0 font-bold">
                   ▶
                 </div>
                 <div className="flex-1">
@@ -180,25 +180,25 @@ export const InstallModal: React.FC = () => {
 
               {/* 4-Step Android Installation Guide */}
               <div className="bg-stone-50 dark:bg-stone-800/80 rounded-2xl p-4 border border-stone-200 dark:border-stone-700 space-y-2">
-                <h4 className="text-xs font-bold text-red-900 dark:text-red-300 font-khmer flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-red-600"></span>
+                <h4 className="text-xs font-bold text-[#14532D] dark:text-[#A7DCA5] font-khmer flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-[#34A853]"></span>
                   {isKm ? 'ការណែនាំដំឡើងលើទូរស័ព្ទ Android (៤ ជំហានងាយៗ)' : '4 Easy Installation Steps for Android'}
                 </h4>
                 <ul className="text-[11px] text-stone-600 dark:text-stone-300 space-y-1.5 font-khmer pl-1">
                   <li className="flex items-start gap-2">
-                    <span className="w-4 h-4 rounded-full bg-amber-500 text-white flex items-center justify-center text-[10px] shrink-0 mt-0.5">1</span>
+                    <span className="w-4 h-4 rounded-full bg-[#14532D] text-white flex items-center justify-center text-[10px] shrink-0 mt-0.5">1</span>
                     <span>{isKm ? 'ចុចប៊ូតុង "ទាញយកឯកសារ Android APK ផ្ទាល់" ឬស្កេន QR Code' : 'Click "Direct Download Android APK" or scan QR Code.'}</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="w-4 h-4 rounded-full bg-amber-500 text-white flex items-center justify-center text-[10px] shrink-0 mt-0.5">2</span>
+                    <span className="w-4 h-4 rounded-full bg-[#14532D] text-white flex items-center justify-center text-[10px] shrink-0 mt-0.5">2</span>
                     <span>{isKm ? 'បើកឯកសារ app-debug.apk ដែលបានទាញយករួច' : 'Open the downloaded .apk file.'}</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="w-4 h-4 rounded-full bg-amber-500 text-white flex items-center justify-center text-[10px] shrink-0 mt-0.5">3</span>
+                    <span className="w-4 h-4 rounded-full bg-[#14532D] text-white flex items-center justify-center text-[10px] shrink-0 mt-0.5">3</span>
                     <span>{isKm ? 'ប្រសិនបើទូរស័ព្ទសួរ សូមចុចអនុញ្ញាត "Install from this source" ឬ "ដំឡើងពីប្រភពនេះ"' : 'If prompted, enable "Install unknown apps / from this source".'}</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="w-4 h-4 rounded-full bg-amber-500 text-white flex items-center justify-center text-[10px] shrink-0 mt-0.5">4</span>
+                    <span className="w-4 h-4 rounded-full bg-[#14532D] text-white flex items-center justify-center text-[10px] shrink-0 mt-0.5">4</span>
                     <span>{isKm ? 'ចុច "ដំឡើង (Install)" ហើយបើកដំណើរការកម្មវិធីជាការស្រេច!' : 'Tap "Install" and enjoy Khmer Food & Tourism!'}</span>
                   </li>
                 </ul>
@@ -260,26 +260,26 @@ export const InstallModal: React.FC = () => {
               </div>
 
               {/* Safari Add to Home Screen (PWA Guide for iPhone) */}
-              <div className="bg-gradient-to-r from-amber-50 to-orange-50/60 dark:from-stone-800 dark:to-stone-800 rounded-2xl p-4 border border-amber-200 dark:border-stone-700 space-y-2">
-                <h4 className="text-xs font-bold text-amber-950 dark:text-amber-200 font-khmer flex items-center gap-1.5">
-                  <Compass className="w-4 h-4 text-blue-600" />
+              <div className="bg-[#EAF6EC]/60 dark:bg-stone-800 rounded-2xl p-4 border border-[#A7DCA5]/40 dark:border-stone-700 space-y-2">
+                <h4 className="text-xs font-bold text-[#183326] dark:text-[#A7DCA5] font-khmer flex items-center gap-1.5">
+                  <Compass className="w-4 h-4 text-[#228B4E]" />
                   {isKm ? 'វិធីដំឡើងលើ iPhone តាម Safari (ដំណើរការដូច App ពេញលេញ)' : 'Install on iPhone via Safari (Full App Mode)'}
                 </h4>
                 <ul className="text-[11px] text-stone-700 dark:text-stone-300 space-y-2 font-khmer pl-1">
                   <li className="flex items-start gap-2">
-                    <span className="w-4 h-4 rounded-full bg-slate-800 text-white flex items-center justify-center text-[10px] shrink-0 mt-0.5">1</span>
+                    <span className="w-4 h-4 rounded-full bg-[#14532D] text-white flex items-center justify-center text-[10px] shrink-0 mt-0.5">1</span>
                     <span>{isKm ? 'បើកតំណភ្ជាប់កម្មវិធីនៅក្នុង Safari នៅលើទូរស័ព្ទ iPhone' : 'Open the app link in Safari on your iPhone.'}</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="w-4 h-4 rounded-full bg-slate-800 text-white flex items-center justify-center text-[10px] shrink-0 mt-0.5">2</span>
+                    <span className="w-4 h-4 rounded-full bg-[#14532D] text-white flex items-center justify-center text-[10px] shrink-0 mt-0.5">2</span>
                     <span>
                       {isKm ? 'ចុចលើប៊ូតុង "Share" ' : 'Tap the "Share" button '}
-                      <Share2 className="w-3.5 h-3.5 inline text-blue-600 mx-0.5" />
+                      <Share2 className="w-3.5 h-3.5 inline text-[#228B4E] mx-0.5" />
                       {isKm ? '(សញ្ញាការ៉េព្រួញឡើងលើ) នៅរបារខាងក្រោម' : 'at the bottom toolbar.'}
                     </span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="w-4 h-4 rounded-full bg-slate-800 text-white flex items-center justify-center text-[10px] shrink-0 mt-0.5">3</span>
+                    <span className="w-4 h-4 rounded-full bg-[#14532D] text-white flex items-center justify-center text-[10px] shrink-0 mt-0.5">3</span>
                     <span>
                       {isKm ? 'អូសចុះក្រោម រួចជ្រើសរើស ' : 'Scroll down and tap '}
                       <strong className="text-stone-900 dark:text-white">"Add to Home Screen"</strong>
@@ -287,7 +287,7 @@ export const InstallModal: React.FC = () => {
                     </span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="w-4 h-4 rounded-full bg-slate-800 text-white flex items-center justify-center text-[10px] shrink-0 mt-0.5">4</span>
+                    <span className="w-4 h-4 rounded-full bg-[#14532D] text-white flex items-center justify-center text-[10px] shrink-0 mt-0.5">4</span>
                     <span>{isKm ? 'ចុច "Add (បន្ថែម)" — រូបសញ្ញាកម្មវិធីនឹងបង្ហាញលើអេក្រង់ដើមទូរស័ព្ទ iPhone របស់អ្នកភ្លាមៗ!' : 'Tap "Add" — The app icon appears on your home screen and opens full-screen!'}</span>
                   </li>
                 </ul>
