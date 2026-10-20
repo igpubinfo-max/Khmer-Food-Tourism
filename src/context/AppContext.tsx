@@ -141,13 +141,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   
   // Local storage loaded states with fallbacks (v4 storage keys for 200+ dataset)
   const [users, setUsers] = useState<User[]>(() => {
-    const saved = localStorage.getItem('kft_users_v4');
-    return saved ? JSON.parse(saved) : initialUsers;
+    try {
+      const saved = localStorage.getItem('kft_users_v4');
+      if (saved && saved !== 'undefined' && saved !== 'null') {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {
+      console.warn('Failed to parse kft_users_v4', e);
+    }
+    return initialUsers;
   });
 
   const [currentUser, setCurrentUser] = useState<User | null>(() => {
-    const saved = localStorage.getItem('kft_current_user_v4');
-    return saved ? JSON.parse(saved) : initialUsers[2]; // Default to regular user
+    try {
+      const saved = localStorage.getItem('kft_current_user_v4');
+      if (saved && saved !== 'undefined' && saved !== 'null') {
+        const parsed = JSON.parse(saved);
+        if (parsed && typeof parsed === 'object') return parsed;
+      }
+    } catch (e) {
+      console.warn('Failed to parse kft_current_user_v4', e);
+    }
+    return initialUsers[1] || initialUsers[0] || null; // Default to standard user safely
   });
 
   const [foods, setFoods] = useState<FoodItem[]>(() => {
@@ -155,23 +171,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     try {
       localStorage.removeItem('kft_foods_v4');
     } catch {}
-    const saved = localStorage.getItem('kft_foods_100_v1');
-    if (saved) {
-      try {
+    try {
+      const saved = localStorage.getItem('kft_foods_100_v1');
+      if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length === 100 && parsed[0]?.imageAuditStatus) return parsed;
-      } catch {}
+        if (Array.isArray(parsed) && parsed.length >= 50 && parsed[0]?.imageAuditStatus) return parsed;
+      }
+    } catch (e) {
+      console.warn('Failed to parse kft_foods_100_v1', e);
     }
     return initialFoods;
   });
 
   const [restaurants, setRestaurants] = useState<Restaurant[]>(() => {
-    const saved = localStorage.getItem('kft_restaurants_membership_v1');
-    if (saved) {
-      try {
+    try {
+      const saved = localStorage.getItem('kft_restaurants_membership_v1');
+      if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length >= 200) return parsed;
-      } catch {}
+        if (Array.isArray(parsed) && parsed.length >= 50) return parsed;
+      }
+    } catch (e) {
+      console.warn('Failed to parse kft_restaurants_membership_v1', e);
     }
     try {
       localStorage.removeItem('kft_restaurants_v3');
@@ -234,17 +254,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [managingRestaurant, setManagingRestaurant] = useState<Restaurant | null>(null);
 
   const [transactions, setTransactions] = useState<RegistrationTransaction[]>(() => {
-    const saved = localStorage.getItem('kft_transactions_v4');
-    return saved ? JSON.parse(saved) : initialTransactions;
+    try {
+      const saved = localStorage.getItem('kft_transactions_v4');
+      if (saved && saved !== 'undefined' && saved !== 'null') {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch (e) {
+      console.warn('Failed to parse kft_transactions_v4', e);
+    }
+    return initialTransactions;
   });
 
   const [destinations, setDestinations] = useState<TouristDestination[]>(() => {
-    const saved = localStorage.getItem('kft_destinations_100_v1');
-    if (saved) {
-      try {
+    try {
+      const saved = localStorage.getItem('kft_destinations_100_v1');
+      if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length >= 100) return parsed;
-      } catch {}
+        if (Array.isArray(parsed) && parsed.length >= 50) return parsed;
+      }
+    } catch (e) {
+      console.warn('Failed to parse kft_destinations_100_v1', e);
     }
     try {
       localStorage.removeItem('kft_destinations_v3');
@@ -254,18 +284,42 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
 
   const [posts, setPosts] = useState<CommunityPost[]>(() => {
-    const saved = localStorage.getItem('kft_posts_v3');
-    return saved ? JSON.parse(saved) : initialCommunityPosts;
+    try {
+      const saved = localStorage.getItem('kft_posts_v4') || localStorage.getItem('kft_posts_v3');
+      if (saved && saved !== 'undefined' && saved !== 'null') {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch (e) {
+      console.warn('Failed to parse kft_posts', e);
+    }
+    return initialCommunityPosts;
   });
 
   const [bookmarks, setBookmarks] = useState<string[]>(() => {
-    const saved = localStorage.getItem('kft_bookmarks_v3');
-    return saved ? JSON.parse(saved) : ['food-1', 'dest-1'];
+    try {
+      const saved = localStorage.getItem('kft_bookmarks_v4') || localStorage.getItem('kft_bookmarks_v3');
+      if (saved && saved !== 'undefined' && saved !== 'null') {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch (e) {
+      console.warn('Failed to parse kft_bookmarks', e);
+    }
+    return ['food-1', 'dest-1'];
   });
 
   const [appSettings, setAppSettings] = useState<AppSettings>(() => {
-    const saved = localStorage.getItem('kft_settings_v3');
-    return saved ? JSON.parse(saved) : initialAppSettings;
+    try {
+      const saved = localStorage.getItem('kft_settings_v4') || localStorage.getItem('kft_settings_v3');
+      if (saved && saved !== 'undefined' && saved !== 'null') {
+        const parsed = JSON.parse(saved);
+        if (parsed && typeof parsed === 'object') return { ...initialAppSettings, ...parsed };
+      }
+    } catch (e) {
+      console.warn('Failed to parse kft_settings', e);
+    }
+    return initialAppSettings;
   });
 
   // Modal & selection states
@@ -296,41 +350,97 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }, 3200);
   };
 
-  // Sync to localStorage (v4)
+  // Sync to localStorage safely (guarded against QuotaExceeded or JSON corruption)
   useEffect(() => {
-    localStorage.setItem('kft_users_v4', JSON.stringify(users));
+    try {
+      if (users && users.length > 0) {
+        localStorage.setItem('kft_users_v4', JSON.stringify(users));
+      }
+    } catch (e) {
+      console.warn('Storage sync failed for users:', e);
+    }
   }, [users]);
 
   useEffect(() => {
-    localStorage.setItem('kft_current_user_v4', JSON.stringify(currentUser));
+    try {
+      if (currentUser) {
+        localStorage.setItem('kft_current_user_v4', JSON.stringify(currentUser));
+      } else {
+        localStorage.removeItem('kft_current_user_v4');
+      }
+    } catch (e) {
+      console.warn('Storage sync failed for currentUser:', e);
+    }
   }, [currentUser]);
 
   useEffect(() => {
-    localStorage.setItem('kft_foods_100_v1', JSON.stringify(foods));
+    try {
+      if (foods && foods.length > 0) {
+        localStorage.setItem('kft_foods_100_v1', JSON.stringify(foods));
+      }
+    } catch (e) {
+      console.warn('Storage sync failed for foods:', e);
+    }
   }, [foods]);
 
   useEffect(() => {
-    localStorage.setItem('kft_restaurants_membership_v1', JSON.stringify(restaurants));
+    try {
+      if (restaurants && restaurants.length > 0) {
+        localStorage.setItem('kft_restaurants_membership_v1', JSON.stringify(restaurants));
+      }
+    } catch (e) {
+      console.warn('Storage sync failed for restaurants:', e);
+    }
   }, [restaurants]);
 
   useEffect(() => {
-    localStorage.setItem('kft_destinations_100_v1', JSON.stringify(destinations));
+    try {
+      if (destinations && destinations.length > 0) {
+        localStorage.setItem('kft_destinations_100_v1', JSON.stringify(destinations));
+      }
+    } catch (e) {
+      console.warn('Storage sync failed for destinations:', e);
+    }
   }, [destinations]);
 
   useEffect(() => {
-    localStorage.setItem('kft_posts_v4', JSON.stringify(posts));
+    try {
+      if (posts) {
+        localStorage.setItem('kft_posts_v4', JSON.stringify(posts));
+      }
+    } catch (e) {
+      console.warn('Storage sync failed for posts:', e);
+    }
   }, [posts]);
 
   useEffect(() => {
-    localStorage.setItem('kft_bookmarks_v4', JSON.stringify(bookmarks));
+    try {
+      if (bookmarks) {
+        localStorage.setItem('kft_bookmarks_v4', JSON.stringify(bookmarks));
+      }
+    } catch (e) {
+      console.warn('Storage sync failed for bookmarks:', e);
+    }
   }, [bookmarks]);
 
   useEffect(() => {
-    localStorage.setItem('kft_settings_v4', JSON.stringify(appSettings));
+    try {
+      if (appSettings) {
+        localStorage.setItem('kft_settings_v4', JSON.stringify(appSettings));
+      }
+    } catch (e) {
+      console.warn('Storage sync failed for appSettings:', e);
+    }
   }, [appSettings]);
 
   useEffect(() => {
-    localStorage.setItem('kft_transactions_v4', JSON.stringify(transactions));
+    try {
+      if (transactions) {
+        localStorage.setItem('kft_transactions_v4', JSON.stringify(transactions));
+      }
+    } catch (e) {
+      console.warn('Storage sync failed for transactions:', e);
+    }
   }, [transactions]);
 
   // Keep a mutable ref of current modal & navigation state for the native back-button listener
