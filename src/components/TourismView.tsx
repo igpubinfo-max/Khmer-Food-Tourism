@@ -40,11 +40,11 @@ export const TourismView: React.FC = () => {
     <div className="max-w-md mx-auto px-4 py-3 space-y-4 pb-24">
       {/* Title Bar */}
       <div>
-        <h2 className="font-moul text-sm sm:text-base text-[#183326] dark:text-stone-100 flex items-center gap-2">
-          <Compass className="w-4 h-4 text-[#228B4E]" />
+        <h2 className="font-moul text-sm sm:text-base text-[#0F172A] dark:text-white flex items-center gap-2">
+          <Compass className="w-4 h-4 text-[#059669]" />
           <span>{language === 'km' ? 'តំបន់ទេសចរណ៍ស្រស់ត្រកាល' : 'Scenic Destinations'}</span>
         </h2>
-        <p className="text-[11px] text-stone-500 font-khmer">
+        <p className="text-[11px] text-slate-500 font-khmer">
           {language === 'km' 
             ? `មានទីតាំងទេសចរណ៍ចំនួន ${filteredDestinations.length} កន្លែង` 
             : `Showing ${filteredDestinations.length} travel spots`}
@@ -61,8 +61,8 @@ export const TourismView: React.FC = () => {
               onClick={() => setSelectedCategory(cat.id)}
               className={`px-3 py-1.5 rounded-full text-xs whitespace-nowrap transition font-medium ${
                 active
-                  ? 'bg-[#14532D] text-white font-bold shadow-xs border border-[#34A853]'
-                  : 'bg-white dark:bg-stone-800 text-[#183326] dark:text-stone-300 border border-[#A7DCA5]/60 hover:bg-[#EAF6EC]'
+                  ? 'bg-[#064E3B] text-white font-bold shadow-xs'
+                  : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200/90 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'
               }`}
             >
               {language === 'km' ? cat.nameKh : cat.nameEn}
@@ -73,9 +73,9 @@ export const TourismView: React.FC = () => {
 
       {/* Destination List */}
       {filteredDestinations.length === 0 ? (
-        <div className="p-8 text-center bg-white dark:bg-stone-800 rounded-3xl border border-[#A7DCA5]/40 dark:border-stone-700 space-y-2 font-khmer">
-          <Compass className="w-8 h-8 mx-auto text-stone-300" />
-          <p className="text-xs text-stone-500 font-medium">
+        <div className="p-8 text-center bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 space-y-2 font-khmer shadow-xs">
+          <Compass className="w-8 h-8 mx-auto text-slate-300" />
+          <p className="text-xs text-slate-500 font-medium">
             {language === 'km' ? 'មិនមានតំបន់ទេសចរណ៍ដែលត្រូវគ្នានឹងការស្វែងរកទេ' : 'No destinations match your criteria'}
           </p>
         </div>

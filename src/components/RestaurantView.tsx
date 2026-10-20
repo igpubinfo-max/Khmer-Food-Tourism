@@ -66,11 +66,11 @@ export const RestaurantView: React.FC = () => {
       {/* Title Bar */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="font-moul text-sm sm:text-base text-[#183326] dark:text-stone-100 flex items-center gap-2">
-            <Store className="w-4 h-4 text-[#14532D]" />
+          <h2 className="font-moul text-sm sm:text-base text-[#0F172A] dark:text-white flex items-center gap-2">
+            <Store className="w-4 h-4 text-[#064E3B] dark:text-emerald-400" />
             <span>{isKm ? 'បញ្ជីភោជនីយដ្ឋាន & ហាងអាហារ' : 'Restaurant Directory'}</span>
           </h2>
-          <p className="text-[11px] text-stone-500 font-khmer">
+          <p className="text-[11px] text-slate-500 font-khmer">
             {isKm 
               ? `បង្ហាញ ${filteredRestaurants.length} / ${restaurants.length} ហាង (${verifiedCount} ផ្ទៀងផ្ទាត់ផ្លូវការ)` 
               : `Showing ${filteredRestaurants.length} of ${restaurants.length} (${verifiedCount} verified)`}
@@ -82,21 +82,21 @@ export const RestaurantView: React.FC = () => {
             if (!currentUser) setIsAuthModalOpen(true);
             else setIsAddRestaurantModalOpen(true);
           }}
-          className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[#14532D] hover:bg-[#0B3D2E] text-white font-bold text-xs shadow-xs font-khmer transition"
+          className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-xs shadow-xs font-khmer transition"
         >
-          <Plus className="w-3.5 h-3.5 text-[#A7DCA5]" />
+          <Plus className="w-3.5 h-3.5 text-emerald-200" />
           <span>{isKm ? 'ចុះបញ្ជីហាង' : 'Add Shop'}</span>
         </button>
       </div>
 
       {/* Verification Filter Switcher */}
-      <div className="flex items-center gap-1.5 p-1 bg-[#EAF6EC] dark:bg-stone-800 rounded-2xl text-xs font-khmer border border-[#A7DCA5]/50">
+      <div className="flex items-center gap-1.5 p-1 bg-slate-100 dark:bg-slate-800 rounded-2xl text-xs font-khmer border border-slate-200/90 dark:border-slate-700">
         <button
           onClick={() => setVerifiedFilter('all')}
           className={`flex-1 py-1.5 px-2 rounded-xl text-center font-bold transition-all ${
             verifiedFilter === 'all'
-              ? 'bg-[#14532D] text-white shadow-xs'
-              : 'text-[#183326]/70 dark:text-stone-300 hover:text-[#14532D]'
+              ? 'bg-[#064E3B] text-white shadow-xs'
+              : 'text-slate-600 dark:text-slate-300 hover:text-[#064E3B]'
           }`}
         >
           {isKm ? `ទាំងអស់ (${restaurants.length})` : `All (${restaurants.length})`}
@@ -105,8 +105,8 @@ export const RestaurantView: React.FC = () => {
           onClick={() => setVerifiedFilter('verified')}
           className={`flex-1 py-1.5 px-2 rounded-xl text-center font-bold flex items-center justify-center gap-1 transition-all ${
             verifiedFilter === 'verified'
-              ? 'bg-[#228B4E] text-white shadow-xs'
-              : 'text-[#228B4E] dark:text-emerald-400 hover:bg-[#A7DCA5]/30'
+              ? 'bg-[#059669] text-white shadow-xs'
+              : 'text-[#059669] dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-slate-700'
           }`}
         >
           <CheckCircle2 className="w-3.5 h-3.5" />
@@ -116,8 +116,8 @@ export const RestaurantView: React.FC = () => {
           onClick={() => setVerifiedFilter('unverified')}
           className={`flex-1 py-1.5 px-2 rounded-xl text-center font-bold flex items-center justify-center gap-1 transition-all ${
             verifiedFilter === 'unverified'
-              ? 'bg-[#34A853] text-white shadow-xs'
-              : 'text-[#14532D] dark:text-stone-300 hover:bg-[#A7DCA5]/30'
+              ? 'bg-slate-700 text-white shadow-xs'
+              : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
           }`}
         >
           <AlertCircle className="w-3.5 h-3.5" />
@@ -126,12 +126,12 @@ export const RestaurantView: React.FC = () => {
       </div>
 
       {/* Banner for Restaurant Owners */}
-      <div className="p-3.5 rounded-2xl bg-gradient-to-r from-[#0B3D2E] via-[#14532D] to-[#0B3D2E] text-white shadow-xs flex items-center justify-between border border-[#228B4E]/40">
+      <div className="p-3.5 rounded-2xl bg-gradient-to-r from-[#064E3B] via-[#065F46] to-[#047857] text-white shadow-xs flex items-center justify-between border border-emerald-600/30">
         <div className="space-y-0.5">
           <p className="font-bold text-xs text-white font-khmer">
             {isKm ? '🎁 ចុះបញ្ជីហាងឥតគិតថ្លៃ ($0) ឬ Premium $4.99/ឆ្នាំ' : '🎁 Free Shop Listing ($0) or Premium $4.99/Year'}
           </p>
-          <p className="text-[10px] text-[#A7DCA5] font-khmer">
+          <p className="text-[10px] text-emerald-200 font-khmer">
             {isKm ? 'ចុះឈ្មោះហាងរបស់អ្នក និងថែមមុខម្ហូបក្នុងហាងបានរហូតដល់ ៥ មុខ!' : 'List your restaurant and add up to 5 food menu items!'}
           </p>
         </div>
@@ -140,7 +140,7 @@ export const RestaurantView: React.FC = () => {
             if (!currentUser) setIsAuthModalOpen(true);
             else setIsAddRestaurantModalOpen(true);
           }}
-          className="px-3 py-1.5 rounded-xl bg-[#34A853] hover:bg-[#228B4E] text-white text-xs font-bold shrink-0 shadow transition active:scale-95 font-khmer"
+          className="px-3 py-1.5 rounded-xl bg-[#10B981] hover:bg-[#059669] text-white text-xs font-bold shrink-0 shadow transition active:scale-95 font-khmer"
         >
           {isKm ? 'ចុះបញ្ជីហាង' : 'Register Shop'}
         </button>
@@ -156,8 +156,8 @@ export const RestaurantView: React.FC = () => {
               onClick={() => setSelectedProvince(p.id)}
               className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
                 active
-                  ? 'bg-[#14532D] text-white font-bold shadow-xs border border-[#34A853]'
-                  : 'bg-white dark:bg-stone-800 text-[#183326] dark:text-stone-300 border border-[#A7DCA5]/60 hover:bg-[#EAF6EC]'
+                  ? 'bg-[#064E3B] text-white font-bold shadow-xs'
+                  : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200/90 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'
               }`}
             >
               {isKm ? p.nameKh : p.nameEn}
@@ -173,8 +173,8 @@ export const RestaurantView: React.FC = () => {
             <RestaurantCard key={restaurant.id} restaurant={restaurant} />
           ))
         ) : (
-          <div className="py-12 text-center text-stone-400 space-y-2 font-khmer">
-            <Store className="w-10 h-10 mx-auto text-stone-300" />
+          <div className="py-12 text-center text-slate-400 space-y-2 font-khmer">
+            <Store className="w-10 h-10 mx-auto text-slate-300" />
             <p className="text-xs">
               {isKm ? 'រកមិនឃើញហាងអាហារត្រូវនឹងលក្ខខណ្ឌស្វែងរកទេ' : 'No restaurants matched your filters'}
             </p>

@@ -26,7 +26,7 @@ export const Header: React.FC = () => {
   const isKm = language === 'km';
 
   return (
-    <header className="sticky top-0 z-40 bg-[#0B3D2E]/98 backdrop-blur-md text-white shadow-md transition-all pt-[env(safe-area-inset-top,0px)] border-b border-[#14532D]">
+    <header className="sticky top-0 z-40 bg-[#064E3B] backdrop-blur-md text-white shadow-md transition-all pt-[env(safe-area-inset-top,0px)] border-b border-[#047857]">
       {/* Main Bar */}
       <div className="max-w-md mx-auto px-4 py-2.5 flex items-center justify-between gap-2">
         {/* Brand */}
@@ -34,14 +34,14 @@ export const Header: React.FC = () => {
           onClick={() => setActiveTab('home')}
           className="flex items-center gap-2.5 cursor-pointer group"
         >
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#228B4E] via-[#14532D] to-[#0B3D2E] p-0.5 shadow-md flex items-center justify-center border border-[#A7DCA5]/30">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#059669] to-[#064E3B] p-0.5 shadow-md flex items-center justify-center border border-emerald-400/30">
             <img src="/logo.svg" alt="Khmer Food" className="w-full h-full rounded-[10px] object-cover" />
           </div>
           <div>
             <h1 className="font-moul text-sm sm:text-base tracking-wide text-white leading-tight drop-shadow-sm">
               អាហារ & ទេសចរណ៍ខ្មែរ
             </h1>
-            <p className="text-[10px] text-[#A7DCA5] font-medium tracking-wider uppercase">
+            <p className="text-[10px] text-emerald-200 font-medium tracking-wider uppercase">
               Khmer Food & Tourism
             </p>
           </div>
@@ -52,17 +52,17 @@ export const Header: React.FC = () => {
           {/* App Install QR Button */}
           <button
             onClick={() => setIsInstallModalOpen(true)}
-            className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#14532D] hover:bg-[#228B4E] text-[#A7DCA5] hover:text-white text-[11px] font-bold border border-[#228B4E]/60 shadow-sm transition-all"
+            className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#065F46] hover:bg-[#047857] text-white text-[11px] font-bold border border-emerald-500/40 shadow-xs transition-all"
             title={isKm ? 'ដំឡើងកម្មវិធីលើទូរស័ព្ទ (Install App)' : 'Install App'}
           >
-            <QrCode className="w-3.5 h-3.5 text-[#A7DCA5]" />
+            <QrCode className="w-3.5 h-3.5 text-emerald-200" />
             <span className="hidden xs:inline">{isKm ? 'ដំឡើង' : 'Install'}</span>
           </button>
 
           {/* Support Our App Button */}
           <button
             onClick={() => setIsSupportModalOpen(true)}
-            className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#34A853] hover:bg-[#228B4E] text-white text-[11px] font-bold shadow-sm transition-all"
+            className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#10B981] hover:bg-[#059669] text-white text-[11px] font-bold shadow-xs transition-all"
             title={isKm ? 'ជួយឧបត្ថម្ភគាំទ្រកម្មវិធី (Support App)' : 'Support App'}
           >
             <Heart className="w-3.5 h-3.5 fill-white text-white" />
@@ -73,7 +73,7 @@ export const Header: React.FC = () => {
           <button
             onClick={() => setIsSearchVisible(!isSearchVisible)}
             className={`p-2 rounded-full transition-colors ${
-              isSearchVisible || searchQuery ? 'bg-[#14532D] text-white ring-1 ring-[#A7DCA5]/50' : 'hover:bg-[#14532D] text-[#A7DCA5]'
+              isSearchVisible || searchQuery ? 'bg-white text-[#064E3B] shadow-xs' : 'hover:bg-[#065F46] text-emerald-100'
             }`}
             title={isKm ? 'ស្វែងរក' : 'Search'}
           >
@@ -83,10 +83,10 @@ export const Header: React.FC = () => {
           {/* Language Toggle */}
           <button
             onClick={() => setLanguage(isKm ? 'en' : 'km')}
-            className="flex items-center gap-1 px-2 py-1 rounded-full bg-[#14532D] hover:bg-[#228B4E] text-[11px] font-semibold text-[#A7DCA5] hover:text-white transition-colors border border-[#228B4E]/40"
+            className="flex items-center gap-1 px-2 py-1 rounded-full bg-[#065F46] hover:bg-[#047857] text-[11px] font-semibold text-emerald-100 hover:text-white transition-colors border border-emerald-500/40"
             title="ផ្លាស់ប្តូរភាសា / Switch Language"
           >
-            <Globe className="w-3.5 h-3.5 text-[#A7DCA5]" />
+            <Globe className="w-3.5 h-3.5 text-emerald-200" />
             <span>{isKm ? 'EN' : 'ខ្មែរ'}</span>
           </button>
 
@@ -94,10 +94,10 @@ export const Header: React.FC = () => {
           {currentUser?.role === 'admin' && (
             <button
               onClick={() => setIsAdminOpen(true)}
-              className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-gradient-to-r from-[#14532D] to-[#228B4E] text-white border border-[#A7DCA5]/50 text-[11px] font-bold shadow hover:brightness-110"
+              className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-gradient-to-r from-[#059669] to-[#047857] text-white border border-emerald-300/40 text-[11px] font-bold shadow-xs hover:brightness-110"
               title="ផ្ទាំងគ្រប់គ្រងរដ្ឋបាល"
             >
-              <Shield className="w-3.5 h-3.5 text-[#A7DCA5]" />
+              <Shield className="w-3.5 h-3.5 text-emerald-200" />
               <span className="hidden sm:inline">Admin</span>
             </button>
           )}
@@ -106,21 +106,21 @@ export const Header: React.FC = () => {
 
       {/* Expandable Search & Province Filter Bar */}
       {isSearchVisible && (
-        <div className="max-w-md mx-auto px-4 pb-3 pt-1 border-t border-[#14532D] animate-in slide-in-from-top-2 duration-150 bg-[#0B3D2E]">
+        <div className="max-w-md mx-auto px-4 pb-3 pt-1 border-t border-[#047857] animate-in slide-in-from-top-2 duration-150 bg-[#064E3B]">
           <div className="relative flex items-center">
-            <Search className="w-4 h-4 text-[#A7DCA5] absolute left-3 pointer-events-none" />
+            <Search className="w-4 h-4 text-emerald-200 absolute left-3 pointer-events-none" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={isKm ? 'ស្វែងរកម្ហូប, ហាងអាហារ, ឬកន្លែងដើរលេង...' : 'Search food, restaurant, or destination...'}
-              className="w-full pl-9 pr-8 py-2 rounded-xl bg-[#14532D]/80 border border-[#228B4E] text-white placeholder-[#A7DCA5]/60 text-xs focus:outline-none focus:border-[#A7DCA5] transition"
+              className="w-full pl-9 pr-8 py-2 rounded-xl bg-[#047857]/70 border border-emerald-400/60 text-white placeholder-emerald-200/70 text-xs focus:outline-none focus:border-white focus:bg-[#047857] transition"
               autoFocus
             />
             {searchQuery && (
               <button 
                 onClick={() => setSearchQuery('')}
-                className="absolute right-2.5 p-1 text-[#A7DCA5] hover:text-white"
+                className="absolute right-2.5 p-1 text-emerald-200 hover:text-white"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -137,8 +137,8 @@ export const Header: React.FC = () => {
                   onClick={() => setSelectedProvince(prov.id === '' ? '' : prov.nameKh)}
                   className={`px-2.5 py-1 rounded-full text-[11px] whitespace-nowrap transition-all ${
                     active
-                      ? 'bg-[#34A853] text-white font-bold shadow'
-                      : 'bg-[#14532D] text-[#A7DCA5] hover:bg-[#228B4E] hover:text-white'
+                      ? 'bg-white text-[#064E3B] font-bold shadow-xs'
+                      : 'bg-[#065F46] text-emerald-100 hover:bg-[#047857] hover:text-white'
                   }`}
                 >
                   {isKm ? prov.nameKh : prov.nameEn}

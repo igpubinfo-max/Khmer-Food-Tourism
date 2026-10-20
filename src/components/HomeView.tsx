@@ -30,15 +30,15 @@ export const HomeView: React.FC = () => {
 
   return (
     <div className="max-w-md mx-auto px-4 py-3 space-y-6 pb-24">
-      {/* Hero Banner (Professional Dark Forest Green) */}
-      <div className="relative rounded-3xl overflow-hidden shadow-lg bg-gradient-to-br from-[#0B3D2E] via-[#14532D] to-[#0B3D2E] text-white p-5 border border-[#228B4E]/30">
+      {/* Hero Banner (Clean Deep Emerald) */}
+      <div className="relative rounded-3xl overflow-hidden shadow-md bg-gradient-to-br from-[#064E3B] via-[#065F46] to-[#047857] text-white p-5 border border-emerald-600/30">
         <div className="relative z-10 space-y-2">
           <div className="flex items-center gap-2 flex-wrap">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#228B4E]/40 border border-[#A7DCA5]/40 text-[#A7DCA5] text-[11px] font-bold">
-              <Sparkles className="w-3.5 h-3.5" />
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 border border-white/20 text-emerald-100 text-[11px] font-bold">
+              <Sparkles className="w-3.5 h-3.5 text-emerald-200" />
               <span>{isKm ? 'មរតកវប្បធម៌ខ្មែរ' : 'Cambodian Heritage'}</span>
             </div>
-            <span className="text-[10px] bg-[#34A853] text-white px-2 py-0.5 rounded-full font-bold">
+            <span className="text-[10px] bg-[#10B981] text-white px-2 py-0.5 rounded-full font-bold shadow-xs">
               100+ Dishes & Shops
             </span>
           </div>
@@ -49,7 +49,7 @@ export const HomeView: React.FC = () => {
               : 'Taste Khmer Flavors & Discover Cambodia'}
           </h2>
 
-          <p className="text-xs text-[#A7DCA5] leading-relaxed font-normal">
+          <p className="text-xs text-emerald-100 leading-relaxed font-normal">
             {isKm
               ? 'ស្វែងរកមុខម្ហូបប្រពៃណី ១០០+ មុខ រូបមន្តចម្អិន ភោជនីយដ្ឋាន ១០០+ ហាង និងតំបន់ទេសចរណ៍ស្រស់ត្រកាលទូទាំងប្រទេស'
               : 'Discover 100+ authentic Khmer dishes, cooking recipes, 100+ restaurants, and breathtaking destinations.'}
@@ -58,7 +58,7 @@ export const HomeView: React.FC = () => {
           <div className="pt-2 flex items-center gap-2 flex-wrap">
             <button
               onClick={() => setActiveTab('food')}
-              className="px-4 py-2 rounded-xl bg-[#34A853] hover:bg-[#228B4E] text-white font-bold text-xs shadow-md transition active:scale-95 flex items-center gap-1 font-khmer"
+              className="px-4 py-2 rounded-xl bg-[#10B981] hover:bg-[#059669] text-white font-bold text-xs shadow-xs transition active:scale-95 flex items-center gap-1 font-khmer"
             >
               <Utensils className="w-3.5 h-3.5" />
               <span>{isKm ? 'មើលមុខម្ហូប' : 'Explore Food'}</span>
@@ -66,37 +66,37 @@ export const HomeView: React.FC = () => {
 
             <button
               onClick={() => setIsInstallModalOpen(true)}
-              className="px-3.5 py-2 rounded-xl bg-white/15 hover:bg-white/25 text-white font-medium text-xs border border-[#A7DCA5]/40 transition flex items-center gap-1.5 font-khmer"
+              className="px-3.5 py-2 rounded-xl bg-white/15 hover:bg-white/25 text-white font-medium text-xs border border-white/20 transition flex items-center gap-1.5 font-khmer"
             >
-              <QrCode className="w-3.5 h-3.5 text-[#A7DCA5]" />
+              <QrCode className="w-3.5 h-3.5 text-emerald-200" />
               <span>{isKm ? 'ដំឡើង APK' : 'Install APK'}</span>
             </button>
 
             <button
               onClick={() => setIsSupportModalOpen(true)}
-              className="px-3.5 py-2 rounded-xl bg-[#14532D] hover:bg-[#228B4E] text-white font-medium text-xs border border-[#228B4E]/60 shadow transition flex items-center gap-1.5 font-khmer"
+              className="px-3.5 py-2 rounded-xl bg-[#065F46] hover:bg-[#047857] text-white font-medium text-xs border border-emerald-400/40 shadow-xs transition flex items-center gap-1.5 font-khmer"
             >
-              <Heart className="w-3.5 h-3.5 fill-[#A7DCA5] text-[#A7DCA5]" />
+              <Heart className="w-3.5 h-3.5 fill-white text-white" />
               <span>{isKm ? 'ជួយគាំទ្រ' : 'Support'}</span>
             </button>
           </div>
         </div>
 
         {/* Decorative background shape */}
-        <div className="absolute -bottom-8 -right-8 w-36 h-36 rounded-full bg-[#34A853]/15 blur-2xl pointer-events-none" />
+        <div className="absolute -bottom-8 -right-8 w-36 h-36 rounded-full bg-white/10 blur-2xl pointer-events-none" />
       </div>
 
       {/* App Installation & Support Interactive Showcase Card */}
-      <div className="bg-[#EAF6EC] dark:bg-[#0B3D2E]/50 rounded-3xl p-4 border border-[#A7DCA5]/60 shadow-sm flex items-center justify-between gap-3">
+      <div className="bg-white dark:bg-slate-800 rounded-3xl p-4 border border-slate-200/90 dark:border-slate-700 shadow-xs flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#0B3D2E] to-[#14532D] flex items-center justify-center text-[#A7DCA5] shadow-md shrink-0 border border-[#228B4E]/40">
+          <div className="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 flex items-center justify-center text-[#064E3B] dark:text-emerald-400 shadow-2xs shrink-0 border border-emerald-200/60">
             <QrCode className="w-6 h-6" />
           </div>
           <div>
-            <h4 className="font-bold text-[#183326] dark:text-stone-100 text-xs sm:text-sm font-khmer">
+            <h4 className="font-bold text-[#0F172A] dark:text-white text-xs sm:text-sm font-khmer">
               {isKm ? 'ដំឡើងកម្មវិធី ឬជួយឧបត្ថម្ភ' : 'Install App or Support Us'}
             </h4>
-            <p className="text-[11px] text-[#183326]/80 dark:text-stone-300 font-khmer line-clamp-1">
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 font-khmer line-clamp-1">
               {isKm ? 'ស្កេន QR Code ទាញយក Android APK ឬបរិច្ចាគ KHQR' : 'Scan to download APK or donate via Bakong KHQR'}
             </p>
           </div>
@@ -105,14 +105,14 @@ export const HomeView: React.FC = () => {
         <div className="flex items-center gap-1.5 shrink-0">
           <button
             onClick={() => setIsInstallModalOpen(true)}
-            className="p-2 bg-[#14532D] hover:bg-[#0B3D2E] text-white rounded-xl shadow-xs transition"
+            className="p-2 bg-[#064E3B] hover:bg-[#047857] text-white rounded-xl shadow-xs transition"
             title={isKm ? 'ដំឡើង APK' : 'Install'}
           >
             <Download className="w-4 h-4" />
           </button>
           <button
             onClick={() => setIsSupportModalOpen(true)}
-            className="p-2 bg-[#34A853] hover:bg-[#228B4E] text-white rounded-xl shadow-xs transition"
+            className="p-2 bg-[#10B981] hover:bg-[#059669] text-white rounded-xl shadow-xs transition"
             title={isKm ? 'ជួយឧបត្ថម្ភ KHQR' : 'Support'}
           >
             <Heart className="w-4 h-4 fill-white" />
@@ -126,28 +126,28 @@ export const HomeView: React.FC = () => {
           <button
             key={i}
             onClick={() => setActiveTab(cat.tab as any)}
-            className="flex flex-col items-center p-2 rounded-2xl bg-white dark:bg-stone-800 border border-[#A7DCA5]/40 dark:border-stone-700/60 shadow-2xs min-w-[70px] hover:border-[#34A853] transition"
+            className="flex flex-col items-center p-2 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700/80 shadow-2xs min-w-[70px] hover:border-emerald-500 transition active:scale-95"
           >
             <span className="text-xl mb-1">{cat.icon}</span>
-            <span className="text-[10px] font-bold text-[#183326] dark:text-stone-300 text-center">
+            <span className="text-[10px] font-bold text-[#0F172A] dark:text-slate-200 text-center">
               {isKm ? cat.labelKh : cat.labelEn}
             </span>
           </button>
         ))}
       </div>
 
-      {/* Section 1: Featured Khmer Food (100+ total) */}
+      {/* Section 1: Featured Khmer Food */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-2 h-5 rounded-full bg-[#14532D]" />
-            <h3 className="font-moul text-xs sm:text-sm text-[#183326] dark:text-stone-100">
+            <div className="w-2 h-5 rounded-full bg-[#064E3B]" />
+            <h3 className="font-moul text-xs sm:text-sm text-[#0F172A] dark:text-white">
               {isKm ? `មុខម្ហូបខ្មែរល្បីៗ (សរុប ${foods.length}+ មុខ)` : `Famous Khmer Dishes (${foods.length}+ total)`}
             </h3>
           </div>
           <button
             onClick={() => setActiveTab('food')}
-            className="flex items-center gap-0.5 text-xs font-semibold text-[#14532D] dark:text-[#A7DCA5] hover:text-[#228B4E]"
+            className="flex items-center gap-0.5 text-xs font-semibold text-[#064E3B] dark:text-emerald-400 hover:text-[#059669]"
           >
             <span>{isKm ? 'មើលទាំងអស់' : 'View all'}</span>
             <ChevronRight className="w-3.5 h-3.5" />
@@ -161,18 +161,18 @@ export const HomeView: React.FC = () => {
         </div>
       </div>
 
-      {/* Section 2: Recommended Restaurants (100+ total) */}
+      {/* Section 2: Recommended Restaurants */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-2 h-5 rounded-full bg-[#228B4E]" />
-            <h3 className="font-moul text-xs sm:text-sm text-[#183326] dark:text-stone-100">
+            <div className="w-2 h-5 rounded-full bg-[#059669]" />
+            <h3 className="font-moul text-xs sm:text-sm text-[#0F172A] dark:text-white">
               {isKm ? `ភោជនីយដ្ឋានឆ្នើមៗ (សរុប ${restaurants.length}+ ហាង)` : `Featured Restaurants (${restaurants.length}+ shops)`}
             </h3>
           </div>
           <button
             onClick={() => setActiveTab('restaurants')}
-            className="flex items-center gap-0.5 text-xs font-semibold text-[#14532D] dark:text-[#A7DCA5] hover:text-[#228B4E]"
+            className="flex items-center gap-0.5 text-xs font-semibold text-[#064E3B] dark:text-emerald-400 hover:text-[#059669]"
           >
             <span>{isKm ? 'មើលទាំងអស់' : 'View all'}</span>
             <ChevronRight className="w-3.5 h-3.5" />
@@ -190,14 +190,14 @@ export const HomeView: React.FC = () => {
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-2 h-5 rounded-full bg-[#34A853]" />
-            <h3 className="font-moul text-xs sm:text-sm text-[#183326] dark:text-stone-100">
+            <div className="w-2 h-5 rounded-full bg-[#10B981]" />
+            <h3 className="font-moul text-xs sm:text-sm text-[#0F172A] dark:text-white">
               {isKm ? 'តំបន់ទេសចរណ៍ស្រស់ត្រកាល' : 'Must-Visit Destinations'}
             </h3>
           </div>
           <button
             onClick={() => setActiveTab('tourism')}
-            className="flex items-center gap-0.5 text-xs font-semibold text-[#14532D] dark:text-[#A7DCA5] hover:text-[#228B4E]"
+            className="flex items-center gap-0.5 text-xs font-semibold text-[#064E3B] dark:text-emerald-400 hover:text-[#059669]"
           >
             <span>{isKm ? 'មើលទាំងអស់' : 'View all'}</span>
             <ChevronRight className="w-3.5 h-3.5" />
@@ -213,20 +213,20 @@ export const HomeView: React.FC = () => {
 
       {/* Section 4: Community Highlights */}
       {posts.length > 0 && (
-        <div className="p-4 rounded-3xl bg-[#EAF6EC] dark:bg-stone-800 border border-[#A7DCA5]/60 dark:border-stone-700 space-y-2">
+        <div className="p-4 rounded-3xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 space-y-2 shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-[#14532D] dark:text-[#A7DCA5] flex items-center gap-1.5 font-khmer">
+            <span className="text-xs font-bold text-[#064E3B] dark:text-emerald-400 flex items-center gap-1.5 font-khmer">
               <Heart className="w-4 h-4 text-rose-500 fill-current" />
               {isKm ? 'ការចែករំលែកថ្មីៗពីសហគមន៍' : 'Recent Community Stories'}
             </span>
             <button
               onClick={() => setActiveTab('community')}
-              className="text-xs font-semibold text-[#14532D] dark:text-[#A7DCA5] hover:underline font-khmer"
+              className="text-xs font-semibold text-[#064E3B] dark:text-emerald-400 hover:underline font-khmer"
             >
               {isKm ? 'ចូលរួម' : 'Join Feed'}
             </button>
           </div>
-          <p className="text-xs text-[#183326] dark:text-stone-300 font-khmer">
+          <p className="text-xs text-[#0F172A] dark:text-slate-300 font-khmer">
             {posts[0].titleKh}
           </p>
         </div>

@@ -144,43 +144,43 @@ export const AdminLoginModal: React.FC = () => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fade-in">
       <div 
-        className="relative w-full max-w-md bg-white dark:bg-stone-900 rounded-3xl shadow-2xl overflow-hidden border border-[#A7DCA5]/40 max-h-[92vh] flex flex-col"
+        className="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden border border-slate-200 dark:border-slate-800 max-h-[92vh] flex flex-col"
         onClick={e => e.stopPropagation()}
       >
         {/* Admin Header */}
-        <div className="relative bg-gradient-to-r from-[#0B3D2E] via-[#14532D] to-[#0B3D2E] text-white p-6 pb-5">
+        <div className="relative bg-[#064E3B] text-white p-6 pb-5 border-b border-[#047857]">
           <button
             onClick={() => setIsAdminLoginModalOpen(false)}
-            className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-[#A7DCA5] hover:text-white transition-colors"
+            className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-emerald-200 hover:text-white transition-colors"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
           </button>
           
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-white/10 rounded-2xl border border-[#A7DCA5]/30 shadow-inner">
-              <ShieldAlert className="w-7 h-7 text-[#A7DCA5]" />
+            <div className="p-3 bg-white/10 rounded-2xl border border-white/20 shadow-inner">
+              <ShieldAlert className="w-7 h-7 text-emerald-300" />
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-[10px] bg-[#228B4E]/30 text-[#A7DCA5] border border-[#A7DCA5]/40 px-2 py-0.5 rounded-full font-bold font-mono">
+                <span className="text-[10px] bg-emerald-500/20 text-emerald-200 border border-emerald-400/30 px-2 py-0.5 rounded-full font-bold font-mono">
                   ENTERPRISE SECURE
                 </span>
               </div>
-              <h2 className="text-lg font-bold font-khmer mt-0.5">
+              <h2 className="text-lg font-bold font-khmer mt-0.5 text-white">
                 {isKm ? 'ច្រកចូលរដ្ឋបាលសុវត្ថិភាព' : 'Authorized Admin Portal'}
               </h2>
             </div>
           </div>
 
           {/* Subtabs for Login vs Change Password */}
-          <div className="flex gap-2 mt-4 bg-black/30 p-1 rounded-xl">
+          <div className="flex gap-2 mt-4 bg-black/25 p-1 rounded-xl">
             <button
               onClick={() => { setActiveTab('login'); setErrorMsg(''); }}
               className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold font-khmer transition-all ${
                 activeTab === 'login'
-                  ? 'bg-[#34A853] text-white shadow-md font-bold'
-                  : 'text-[#A7DCA5] hover:text-white'
+                  ? 'bg-[#059669] text-white shadow-md font-bold'
+                  : 'text-emerald-200 hover:text-white'
               }`}
             >
               {isKm ? 'ចូលគណនីរដ្ឋបាល' : 'Admin Login'}
@@ -189,8 +189,8 @@ export const AdminLoginModal: React.FC = () => {
               onClick={() => { setActiveTab('change_password'); setErrorMsg(''); }}
               className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold font-khmer transition-all ${
                 activeTab === 'change_password'
-                  ? 'bg-[#34A853] text-white shadow-md font-bold'
-                  : 'text-[#A7DCA5] hover:text-white'
+                  ? 'bg-[#059669] text-white shadow-md font-bold'
+                  : 'text-emerald-200 hover:text-white'
               }`}
             >
               {isKm ? 'ប្តូរពាក្យសម្ងាត់' : 'Change Password'}
@@ -227,42 +227,42 @@ export const AdminLoginModal: React.FC = () => {
           {activeTab === 'login' ? (
             <form onSubmit={handleLoginSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-[#183326] dark:text-stone-300 font-khmer mb-1.5">
+                <label className="block text-xs font-semibold text-[#0F172A] dark:text-slate-300 font-khmer mb-1.5">
                   {isKm ? 'ឈ្មោះអ្នកគ្រប់គ្រង (Admin ID / Username)' : 'Admin ID / Username'}
                 </label>
                 <div className="relative">
-                  <UserIcon className="w-4 h-4 text-stone-400 absolute left-3.5 top-3.5" />
+                  <UserIcon className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
                   <input
                     type="text"
                     value={username}
                     onChange={e => setUsername(e.target.value)}
                     required
                     disabled={lockoutSeconds > 0}
-                    className="w-full pl-10 pr-4 py-2.5 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-xl text-sm font-medium text-stone-800 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-[#34A853] focus:border-[#228B4E] disabled:opacity-50"
+                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#059669]/20 focus:border-[#059669] disabled:opacity-50"
                     placeholder={isKm ? 'បញ្ចូលឈ្មោះអ្នកគ្រប់គ្រង' : 'Enter Admin ID'}
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-[#183326] dark:text-stone-300 font-khmer mb-1.5">
+                <label className="block text-xs font-semibold text-[#0F172A] dark:text-slate-300 font-khmer mb-1.5">
                   {isKm ? 'ពាក្យសម្ងាត់សុវត្ថិភាព (Password)' : 'Secure Password'}
                 </label>
                 <div className="relative">
-                  <Lock className="w-4 h-4 text-stone-400 absolute left-3.5 top-3.5" />
+                  <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
                   <input
                     type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={e => setPassword(e.target.value)}
                     required
                     disabled={lockoutSeconds > 0}
-                    className="w-full pl-10 pr-10 py-2.5 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-xl text-sm font-medium text-stone-800 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-[#34A853] focus:border-[#228B4E] disabled:opacity-50 font-mono"
+                    className="w-full pl-10 pr-10 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#059669]/20 focus:border-[#059669] disabled:opacity-50 font-mono"
                     placeholder="••••••••••••"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3.5 top-3 text-stone-400 hover:text-stone-600"
+                    className="absolute right-3.5 top-3 text-slate-400 hover:text-slate-600"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -270,9 +270,9 @@ export const AdminLoginModal: React.FC = () => {
               </div>
 
               {/* Security Policy Badge */}
-              <div className="bg-[#EAF6EC]/60 dark:bg-[#0B3D2E]/40 rounded-xl p-3 border border-[#A7DCA5]/30 text-[11px] text-[#183326] dark:text-stone-300 font-khmer space-y-1">
-                <div className="font-bold flex items-center gap-1.5 text-[#14532D] dark:text-[#A7DCA5]">
-                  <ShieldCheck className="w-4 h-4 text-[#228B4E]" />
+              <div className="bg-slate-50 dark:bg-slate-800/40 rounded-xl p-3 border border-slate-200 dark:border-slate-700 text-[11px] text-[#0F172A] dark:text-slate-300 font-khmer space-y-1">
+                <div className="font-bold flex items-center gap-1.5 text-[#064E3B] dark:text-emerald-400">
+                  <ShieldCheck className="w-4 h-4 text-[#059669]" />
                   <span>{isKm ? 'ស្តង់ដាសុវត្ថិភាពខ្ពស់បំផុត (Security Policy):' : 'Security Policy:'}</span>
                 </div>
                 <p>
@@ -285,9 +285,9 @@ export const AdminLoginModal: React.FC = () => {
               <button
                 type="submit"
                 disabled={loading || lockoutSeconds > 0}
-                className="w-full py-3.5 px-4 bg-gradient-to-r from-[#14532D] to-[#228B4E] hover:from-[#0B3D2E] hover:to-[#14532D] text-white font-semibold rounded-2xl shadow-lg shadow-[#14532D]/30 active:scale-[0.98] transition-all font-khmer text-sm flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+                className="w-full py-3.5 px-4 bg-[#064E3B] hover:bg-[#047857] text-white font-semibold rounded-2xl shadow-md shadow-emerald-950/20 active:scale-[0.98] transition-all font-khmer text-sm flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
               >
-                <Lock className="w-4 h-4 text-[#A7DCA5]" />
+                <Lock className="w-4 h-4 text-emerald-300" />
                 <span>
                   {loading 
                     ? (isKm ? 'កំពុងផ្ទៀងផ្ទាត់សុវត្ថិភាព...' : 'Verifying...') 
@@ -300,7 +300,7 @@ export const AdminLoginModal: React.FC = () => {
           ) : (
             <form onSubmit={handleChangePasswordSubmit} className="space-y-3.5">
               <div>
-                <label className="block text-xs font-semibold text-[#183326] dark:text-stone-300 font-khmer mb-1">
+                <label className="block text-xs font-semibold text-[#0F172A] dark:text-slate-300 font-khmer mb-1">
                   {isKm ? 'ពាក្យសម្ងាត់បច្ចុប្បន្ន' : 'Current Password'}
                 </label>
                 <input
@@ -308,13 +308,13 @@ export const AdminLoginModal: React.FC = () => {
                   value={currentAdminPass}
                   onChange={e => setCurrentAdminPass(e.target.value)}
                   required
-                  className="w-full px-3.5 py-2.5 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-xl text-sm font-mono text-stone-800 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-[#34A853] focus:border-[#228B4E]"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-mono text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#059669]/20 focus:border-[#059669]"
                   placeholder="••••••••••••"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-[#183326] dark:text-stone-300 font-khmer mb-1">
+                <label className="block text-xs font-semibold text-[#0F172A] dark:text-slate-300 font-khmer mb-1">
                   {isKm ? 'ពាក្យសម្ងាត់ថ្មី (យ៉ាងហោច ៨ តួអក្សរ)' : 'New Password (min 8 characters)'}
                 </label>
                 <input
@@ -322,13 +322,13 @@ export const AdminLoginModal: React.FC = () => {
                   value={newAdminPass}
                   onChange={e => setNewAdminPass(e.target.value)}
                   required
-                  className="w-full px-3.5 py-2.5 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-xl text-sm font-mono text-stone-800 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-[#34A853] focus:border-[#228B4E]"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-mono text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#059669]/20 focus:border-[#059669]"
                   placeholder="••••••••••••"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-[#183326] dark:text-stone-300 font-khmer mb-1">
+                <label className="block text-xs font-semibold text-[#0F172A] dark:text-slate-300 font-khmer mb-1">
                   {isKm ? 'ផ្ទៀងផ្ទាត់ពាក្យសម្ងាត់ថ្មីម្តងទៀត' : 'Confirm New Password'}
                 </label>
                 <input
@@ -336,7 +336,7 @@ export const AdminLoginModal: React.FC = () => {
                   value={confirmAdminPass}
                   onChange={e => setConfirmAdminPass(e.target.value)}
                   required
-                  className="w-full px-3.5 py-2.5 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-xl text-sm font-mono text-stone-800 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-[#34A853] focus:border-[#228B4E]"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-mono text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#059669]/20 focus:border-[#059669]"
                   placeholder="••••••••••••"
                 />
               </div>
@@ -344,9 +344,9 @@ export const AdminLoginModal: React.FC = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3.5 px-4 bg-gradient-to-r from-[#14532D] to-[#228B4E] hover:from-[#0B3D2E] hover:to-[#14532D] text-white font-semibold rounded-2xl shadow-lg shadow-[#14532D]/30 active:scale-[0.98] transition-all font-khmer text-sm flex items-center justify-center gap-2 disabled:opacity-50"
+                className="w-full py-3.5 px-4 bg-[#064E3B] hover:bg-[#047857] text-white font-semibold rounded-2xl shadow-md shadow-emerald-950/20 active:scale-[0.98] transition-all font-khmer text-sm flex items-center justify-center gap-2 disabled:opacity-50"
               >
-                <CheckCircle2 className="w-4 h-4 text-[#A7DCA5]" />
+                <CheckCircle2 className="w-4 h-4 text-emerald-300" />
                 <span>{loading ? (isKm ? 'កំពុងរក្សាទុក...' : 'Updating...') : (isKm ? 'ផ្លាស់ប្តូរ និង Hash PBKDF2 ថ្មី' : 'Hash PBKDF2 & Save Password')}</span>
               </button>
             </form>
@@ -354,11 +354,11 @@ export const AdminLoginModal: React.FC = () => {
         </div>
 
         {/* Modal Footer */}
-        <div className="p-4 bg-stone-100 dark:bg-stone-800 border-t border-stone-200 dark:border-stone-700 flex justify-between items-center text-xs text-stone-500 font-khmer">
+        <div className="p-4 bg-slate-50 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 flex justify-between items-center text-xs text-slate-500 font-khmer">
           <span>{isKm ? 'កម្រិតសុវត្ថិភាព៖ PBKDF2-HMAC-SHA256' : 'Security Level: PBKDF2-256'}</span>
           <button
             onClick={() => setIsAdminLoginModalOpen(false)}
-            className="px-4 py-1.5 bg-stone-200 dark:bg-stone-700 hover:bg-stone-300 dark:hover:bg-stone-600 text-stone-700 dark:text-stone-200 rounded-xl transition font-medium"
+            className="px-4 py-1.5 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-xl transition font-medium"
           >
             {isKm ? 'បោះបង់' : 'Cancel'}
           </button>

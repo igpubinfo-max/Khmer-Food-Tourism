@@ -60,15 +60,15 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: v1.2.0
-          name: "Khmer Food & Tourism v1.2.0 (Dark Green & Light Green Premium Edition)"
+          tag_name: v1.3.0
+          name: "Khmer Food & Tourism v1.3.0 (Eye-Friendly Clean White & Deep Emerald Edition)"
           overwrite: true
           make_latest: true
           body: |
             ### 🇰🇭 កម្មវិធីទូរស័ព្ទដៃ អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism Mobile App)
             
-            **កំណែថ្មី v1.2.0 (Dark Green & Light Green Premium Theme Edition):**
-            - 🌿 **រចនាពណ៌បៃតងធម្មជាតិប្រណិត (Dark Green & Light Green):** រចនារូបរាងថ្មីស្រឡាងដោយប្រើពណ៌ Dark Forest Green (#0B3D2E, #14532D) និង Light Mint Green (#A7DCA5, #EAF6EC, #34A853) ស្រស់ស្អាត ងាយស្រួលមើល និងមានកម្រិត Contrast ច្បាស់ល្អបំផុត។
+            **កំណែថ្មី v1.3.0 (Eye-Friendly Clean White & Deep Emerald Edition):**
+            - 🌿 **ស្ទីលពណ៌ភ្នែកស្រួលមើល មិនចាំងភ្នែក មិនព្រិល (Clean White & Deep Emerald):** កែសម្រួលពណ៌ផ្ទៃខាងក្រោយមកជាពណ៌សទន់ភ្លឺស្រឡះ (Neutral Pearl White #F8FAFC) ផ្ទៃកាតពណ៌សសុទ្ធ (#FFFFFF) និងអក្សរខ្មៅដិតច្បាស់ (#0F172A) កាត់បន្ថយការចាំងភ្នែក និងភាពព្រិលភ្នែក ១០០% ស្របតាមស្ទីល App លំដាប់អន្តរជាតិ (GrabFood/Starbucks) ដោយប្រើ Header ពណ៌បៃតងចាស់ជ្រៅ (Deep Emerald #064E3B) និងប៊ូតុងសកម្ម Fresh Emerald (#059669)។
             - 🎁 **ចុះបញ្ជីហាងឥតគិតថ្លៃ $0 (Free Restaurant Listing):** ម្ចាស់ហាងអាចចុះឈ្មោះហាងដោយឥតគិតថ្លៃ ($0) បង្ហាញក្នុងបញ្ជីហាងទូទៅ រូបតំណាងហាង ១ សន្លឹក អាសយដ្ឋាន និងលេខទូរស័ព្ទ។
             - ⭐ **សមាជិក VIP Premium $4.99 សម្រាប់ ១ ឆ្នាំ (365 ថ្ងៃ):** បង់តែម្តង $4.99 សម្រាប់រយៈពេល ៣៦៥ ថ្ងៃ (មិនមែនជាការកាត់លុយប្រចាំខែ ឬបន្តស្វ័យប្រវត្តិឡើយ)។ អាចបញ្ចូលមុខម្ហូបបានរហូតដល់ ៥ មុខ ជាមួយរូបភាព តម្លៃជាដុល្លារ និងរៀល។
             - ⏳ **រក្សាទុកទិន្នន័យទាំងអស់ពេលផុតកំណត់ (No Data Loss):** នៅពេលផុតកំណត់ ៣៦៥ ថ្ងៃ ទិន្នន័យហាង និងមុខម្ហូបត្រូវបានរក្សាទុកបង្ហាញជាធម្មតា (មិនលុបចោលឡើយ)។

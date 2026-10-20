@@ -39,25 +39,25 @@ export const ProfileView: React.FC = () => {
   return (
     <div className="max-w-md mx-auto px-4 py-3 space-y-4 pb-24">
       {/* User Header Profile Card */}
-      <div className="p-4 rounded-3xl bg-white dark:bg-stone-800 border border-[#A7DCA5]/50 dark:border-stone-700/60 shadow-xs">
+      <div className="p-4 rounded-3xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700/80 shadow-xs">
         {currentUser ? (
           <div className="space-y-3">
             <div className="flex items-center gap-3">
               <img 
                 src={currentUser.avatar} 
                 alt={currentUser.name} 
-                className="w-14 h-14 rounded-2xl object-cover border-2 border-[#228B4E] shadow-md"
+                className="w-14 h-14 rounded-2xl object-cover border-2 border-[#059669] shadow-xs"
               />
               <div className="flex-1">
                 <div className="flex items-center gap-2">
-                  <h3 className="font-bold text-sm sm:text-base text-[#183326] dark:text-stone-100 font-khmer">
+                  <h3 className="font-bold text-sm sm:text-base text-[#0F172A] dark:text-white font-khmer">
                     {currentUser.name}
                   </h3>
                   <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
                     currentUser.role === 'admin' 
                       ? 'bg-rose-100 text-rose-700' 
                       : currentUser.role === 'owner' 
-                      ? 'bg-[#EAF6EC] text-[#14532D] border border-[#A7DCA5]/50' 
+                      ? 'bg-emerald-50 text-[#064E3B] border border-emerald-200' 
                       : 'bg-emerald-100 text-emerald-800'
                   }`}>
                     {currentUser.role === 'admin' ? '🛡️ Administrator' : currentUser.role === 'owner' ? '🏪 Shop Owner' : '👤 Foodie'}
@@ -69,9 +69,9 @@ export const ProfileView: React.FC = () => {
                   </p>
                 ) : (
                   <>
-                    <p className="text-xs text-stone-500 mt-0.5">{currentUser.email}</p>
+                    <p className="text-xs text-slate-500 mt-0.5">{currentUser.email}</p>
                     {currentUser.phone && (
-                      <p className="text-[11px] text-[#228B4E] font-mono">📞 {currentUser.phone}</p>
+                      <p className="text-[11px] text-[#059669] font-mono">📞 {currentUser.phone}</p>
                     )}
                   </>
                 )}
@@ -79,7 +79,7 @@ export const ProfileView: React.FC = () => {
             </div>
 
             {currentUser.bio && (
-              <p className="text-xs text-stone-600 dark:text-stone-300 bg-[#EAF6EC]/50 dark:bg-stone-700/40 p-2.5 rounded-xl border border-[#A7DCA5]/40 dark:border-stone-700 font-khmer">
+              <p className="text-xs text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-700/40 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 font-khmer">
                 {currentUser.bio}
               </p>
             )}
@@ -88,30 +88,30 @@ export const ProfileView: React.FC = () => {
             {currentUser.role === 'admin' && (
               <button
                 onClick={() => setIsAdminOpen(true)}
-                className="w-full py-2.5 px-3 rounded-2xl bg-gradient-to-r from-[#14532D] to-[#228B4E] hover:from-[#0B3D2E] hover:to-[#14532D] text-white border border-[#A7DCA5]/40 font-bold text-xs shadow-sm flex items-center justify-center gap-2 transition font-khmer"
+                className="w-full py-2.5 px-3 rounded-2xl bg-gradient-to-r from-[#064E3B] to-[#059669] hover:from-[#047857] hover:to-[#064E3B] text-white border border-emerald-400/30 font-bold text-xs shadow-xs flex items-center justify-center gap-2 transition font-khmer"
               >
-                <Shield className="w-4 h-4 text-[#A7DCA5]" />
+                <Shield className="w-4 h-4 text-emerald-200" />
                 <span>{isKm ? 'ចូលផ្ទាំងគ្រប់គ្រងរដ្ឋបាល (Admin Dashboard)' : 'Open Admin Dashboard'}</span>
               </button>
             )}
           </div>
         ) : (
           <div className="text-center py-4 space-y-3 font-khmer">
-            <div className="w-12 h-12 rounded-full bg-[#EAF6EC] text-[#14532D] border border-[#A7DCA5]/40 flex items-center justify-center mx-auto">
+            <div className="w-12 h-12 rounded-full bg-slate-100 text-[#064E3B] border border-slate-200 flex items-center justify-center mx-auto">
               <UserIcon className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="font-bold text-sm text-[#183326] dark:text-stone-200">
+              <h3 className="font-bold text-sm text-[#0F172A] dark:text-white">
                 {isKm ? 'សូមចូលគណនីរបស់អ្នក' : 'Please Sign In'}
               </h3>
-              <p className="text-xs text-stone-500">
+              <p className="text-xs text-slate-500">
                 {isKm ? 'ដើម្បីរក្សាទុកម្ហូប ចែករំលែក និងចុះបញ្ជីហាង' : 'To save recipes, share posts & manage shops'}
               </p>
             </div>
             <div className="flex justify-center">
               <button
                 onClick={() => setIsAuthModalOpen(true)}
-                className="w-full sm:w-auto px-8 py-2.5 rounded-xl bg-[#14532D] hover:bg-[#0B3D2E] text-white font-bold text-xs shadow font-khmer transition"
+                className="w-full sm:w-auto px-8 py-2.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-xs shadow-xs font-khmer transition"
               >
                 {isKm ? 'ចូលគណនី / ចុះឈ្មោះ' : 'Sign In / Register'}
               </button>
@@ -124,16 +124,16 @@ export const ProfileView: React.FC = () => {
       <div className="grid grid-cols-2 gap-2.5">
         <button
           onClick={() => setIsInstallModalOpen(true)}
-          className="p-3 bg-white dark:bg-stone-800 rounded-2xl border border-[#A7DCA5]/60 shadow-xs flex items-center gap-2.5 hover:bg-[#EAF6EC] transition text-left"
+          className="p-3 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/90 dark:border-slate-700 shadow-xs flex items-center gap-2.5 hover:bg-slate-50 dark:hover:bg-slate-700/60 transition text-left"
         >
-          <div className="p-2 rounded-xl bg-[#14532D] text-white shrink-0">
-            <Download className="w-4 h-4 text-[#A7DCA5]" />
+          <div className="p-2 rounded-xl bg-[#064E3B] text-white shrink-0">
+            <Download className="w-4 h-4 text-emerald-200" />
           </div>
           <div>
-            <div className="text-xs font-bold text-[#183326] dark:text-white font-khmer">
+            <div className="text-xs font-bold text-[#0F172A] dark:text-white font-khmer">
               {isKm ? 'ដំឡើង APK' : 'Install App'}
             </div>
-            <div className="text-[10px] text-stone-500 font-khmer">
+            <div className="text-[10px] text-slate-500 font-khmer">
               {isKm ? 'ទាញយក APK ផ្ទាល់' : 'Direct APK Download'}
             </div>
           </div>
@@ -141,16 +141,16 @@ export const ProfileView: React.FC = () => {
 
         <button
           onClick={() => setIsSupportModalOpen(true)}
-          className="p-3 bg-white dark:bg-stone-800 rounded-2xl border border-[#A7DCA5]/60 shadow-xs flex items-center gap-2.5 hover:bg-[#EAF6EC] transition text-left"
+          className="p-3 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/90 dark:border-slate-700 shadow-xs flex items-center gap-2.5 hover:bg-slate-50 dark:hover:bg-slate-700/60 transition text-left"
         >
-          <div className="p-2 rounded-xl bg-[#34A853] text-white shrink-0">
+          <div className="p-2 rounded-xl bg-[#10B981] text-white shrink-0">
             <Heart className="w-4 h-4 fill-white" />
           </div>
           <div>
-            <div className="text-xs font-bold text-[#183326] dark:text-white font-khmer">
+            <div className="text-xs font-bold text-[#0F172A] dark:text-white font-khmer">
               {isKm ? 'ជួយឧបត្ថម្ភ' : 'Support App'}
             </div>
-            <div className="text-[10px] text-stone-500 font-khmer">
+            <div className="text-[10px] text-slate-500 font-khmer">
               {isKm ? 'Bakong KHQR' : 'Bakong KHQR'}
             </div>
           </div>
@@ -158,14 +158,14 @@ export const ProfileView: React.FC = () => {
       </div>
 
       {/* Tabs: My Restaurant (for owners) / Bookmarks / My Posts / Settings */}
-      <div className="flex border-b border-[#A7DCA5]/40 dark:border-stone-700 text-xs font-khmer overflow-x-auto no-scrollbar">
+      <div className="flex border-b border-slate-200 dark:border-slate-700 text-xs font-khmer overflow-x-auto no-scrollbar">
         {isOwner && (
           <button
             onClick={() => setActiveSubTab('myrestaurant')}
             className={`flex-1 py-2.5 font-bold text-center border-b-2 transition whitespace-nowrap px-2 ${
               activeSubTab === 'myrestaurant'
-                ? 'border-[#14532D] text-[#14532D] dark:text-[#A7DCA5]'
-                : 'border-transparent text-stone-400 hover:text-[#183326]'
+                ? 'border-[#064E3B] text-[#064E3B] dark:border-emerald-400 dark:text-emerald-400'
+                : 'border-transparent text-slate-400 hover:text-slate-700'
             }`}
           >
             {isKm ? '🏪 ហាងរបស់ខ្ញុំ' : '🏪 My Restaurant'}
@@ -176,8 +176,8 @@ export const ProfileView: React.FC = () => {
           onClick={() => setActiveSubTab('bookmarks')}
           className={`flex-1 py-2.5 font-bold text-center border-b-2 transition whitespace-nowrap px-2 ${
             activeSubTab === 'bookmarks'
-              ? 'border-[#14532D] text-[#14532D] dark:text-[#A7DCA5]'
-              : 'border-transparent text-stone-400 hover:text-[#183326]'
+              ? 'border-[#064E3B] text-[#064E3B] dark:border-emerald-400 dark:text-emerald-400'
+              : 'border-transparent text-slate-400 hover:text-slate-700'
           }`}
         >
           {isKm ? `ចំណូលចិត្ត (${bookmarks.length})` : `Saved (${bookmarks.length})`}
@@ -187,8 +187,8 @@ export const ProfileView: React.FC = () => {
           onClick={() => setActiveSubTab('myposts')}
           className={`flex-1 py-2.5 font-bold text-center border-b-2 transition whitespace-nowrap px-2 ${
             activeSubTab === 'myposts'
-              ? 'border-[#14532D] text-[#14532D] dark:text-[#A7DCA5]'
-              : 'border-transparent text-stone-400 hover:text-stone-600'
+              ? 'border-[#064E3B] text-[#064E3B] dark:border-emerald-400 dark:text-emerald-400'
+              : 'border-transparent text-slate-400 hover:text-slate-600'
           }`}
         >
           {isKm ? `ការបង្ហោះ (${myPosts.length})` : `Posts (${myPosts.length})`}
@@ -198,8 +198,8 @@ export const ProfileView: React.FC = () => {
           onClick={() => setActiveSubTab('settings')}
           className={`flex-1 py-2.5 font-bold text-center border-b-2 transition whitespace-nowrap px-2 ${
             activeSubTab === 'settings'
-              ? 'border-[#14532D] text-[#14532D] dark:text-[#A7DCA5]'
-              : 'border-transparent text-stone-400 hover:text-stone-600'
+              ? 'border-[#064E3B] text-[#064E3B] dark:border-emerald-400 dark:text-emerald-400'
+              : 'border-transparent text-slate-400 hover:text-slate-600'
           }`}
         >
           {isKm ? 'ការកំណត់' : 'Settings'}
@@ -210,19 +210,19 @@ export const ProfileView: React.FC = () => {
       {activeSubTab === 'myrestaurant' && isOwner && (
         <div className="space-y-3 font-khmer">
           {myRestaurants.length === 0 ? (
-            <div className="text-center py-8 bg-white dark:bg-[#0B3D2E]/40 rounded-3xl border border-[#A7DCA5]/40 dark:border-[#14532D]/50 p-6 space-y-3">
-              <Store className="w-10 h-10 mx-auto text-[#228B4E]" />
+            <div className="text-center py-8 bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 p-6 space-y-3 shadow-xs">
+              <Store className="w-10 h-10 mx-auto text-[#059669]" />
               <div>
-                <h4 className="font-bold text-xs text-[#183326] dark:text-stone-100">
+                <h4 className="font-bold text-xs text-[#0F172A] dark:text-white">
                   {isKm ? 'មិនទាន់មានហាងអាហារដែលបានចុះបញ្ជីនៅឡើយទេ' : 'No registered restaurant found'}
                 </h4>
-                <p className="text-[10px] text-stone-500 mt-1">
+                <p className="text-[10px] text-slate-500 mt-1">
                   {isKm ? 'ចុះបញ្ជីហាងរបស់អ្នកដោយឥតគិតថ្លៃ ($0) ឬ Premium ($4.99 សម្រាប់ ៣៦៥ ថ្ងៃ) ដើម្បីផ្សព្វផ្សាយ!' : 'Register your restaurant for free ($0) or Premium ($4.99)!'}
                 </p>
               </div>
               <button
                 onClick={() => setIsAddRestaurantModalOpen(true)}
-                className="px-4 py-2 rounded-xl bg-[#14532D] text-white font-bold text-xs shadow hover:bg-[#0B3D2E] transition active:scale-95"
+                className="px-4 py-2 rounded-xl bg-[#064E3B] text-white font-bold text-xs shadow-xs hover:bg-[#047857] transition active:scale-95"
               >
                 {isKm ? '+ ចុះបញ្ជីហាងឥឡូវនេះ' : '+ Register Restaurant Now'}
               </button>
@@ -235,25 +235,25 @@ export const ProfileView: React.FC = () => {
               const items = restaurant.menuItems || [];
 
               return (
-                <div key={restaurant.id} className="p-4 bg-white dark:bg-[#0B3D2E]/50 rounded-3xl border border-[#A7DCA5]/40 dark:border-[#14532D]/50 shadow-xs space-y-3.5">
+                <div key={restaurant.id} className="p-4 bg-white dark:bg-slate-800 rounded-3xl border border-slate-200/90 dark:border-slate-700 shadow-xs space-y-3.5">
                   <div className="flex items-center gap-3">
-                    <img src={restaurant.photoUrl} alt="restaurant" className="w-16 h-16 rounded-2xl object-cover border border-[#A7DCA5] shrink-0" />
+                    <img src={restaurant.photoUrl} alt="restaurant" className="w-16 h-16 rounded-2xl object-cover border border-slate-200 shrink-0" />
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-bold text-[#183326] dark:text-stone-100 text-sm truncate">
+                      <h4 className="font-bold text-[#0F172A] dark:text-white text-sm truncate">
                         {isKm ? restaurant.nameKh : restaurant.nameEn}
                       </h4>
-                      <p className="text-[10px] text-stone-500 truncate">{restaurant.addressKh}</p>
-                      <p className="text-[10px] text-[#228B4E] font-mono mt-0.5">📞 {restaurant.phone}</p>
+                      <p className="text-[10px] text-slate-500 truncate">{restaurant.addressKh}</p>
+                      <p className="text-[10px] text-[#059669] font-mono mt-0.5">📞 {restaurant.phone}</p>
                     </div>
                   </div>
 
                   {/* Membership Card */}
-                  <div className="p-3.5 bg-[#EAF6EC]/50 dark:bg-[#0B3D2E]/70 rounded-2xl border border-[#A7DCA5]/30 dark:border-[#14532D]/60 space-y-2 text-xs">
+                  <div className="p-3.5 bg-slate-50 dark:bg-slate-700/40 rounded-2xl border border-slate-200/90 dark:border-slate-600 space-y-2 text-xs">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-1.5">
                         {isPremium ? (
-                          <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-gradient-to-r from-[#14532D] to-[#228B4E] text-white flex items-center gap-1 font-khmer shadow-xs">
-                            <Sparkles className="w-3 h-3 text-[#A7DCA5]" />
+                          <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-gradient-to-r from-[#064E3B] to-[#059669] text-white flex items-center gap-1 font-khmer shadow-xs">
+                            <Sparkles className="w-3 h-3 text-emerald-200" />
                             <span>⭐ {isKm ? 'សមាជិកភាព VIP Premium (៣៦៥ ថ្ងៃ)' : 'Premium Active (365 Days)'}</span>
                           </span>
                         ) : isExpired ? (
@@ -261,19 +261,19 @@ export const ProfileView: React.FC = () => {
                             ⏳ {isKm ? 'Premium បានផុតកំណត់' : 'Premium Expired'}
                           </span>
                         ) : (
-                          <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-[#EAF6EC] text-[#14532D] border border-[#A7DCA5]/50">
+                          <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-200 text-slate-800">
                             🏷️ {isKm ? 'ចុះបញ្ជីឥតគិតថ្លៃ ($0 Free Listing)' : 'Free Listing ($0)'}
                           </span>
                         )}
                       </div>
 
-                      <div className="text-[11px] font-bold text-[#14532D] dark:text-[#A7DCA5] font-mono">
+                      <div className="text-[11px] font-bold text-[#064E3B] dark:text-emerald-400 font-mono">
                         {items.length} / 5 {isKm ? 'មុខម្ហូប' : 'items'}
                       </div>
                     </div>
 
                     {isPremium && restaurant.membershipExpiresAt && (
-                      <p className="text-[10px] text-[#183326]/80 dark:text-stone-300">
+                      <p className="text-[10px] text-slate-700 dark:text-slate-300">
                         {isKm 
                           ? `📅 ផុតកំណត់នៅថ្ងៃទី៖ ${new Date(restaurant.membershipExpiresAt).toLocaleDateString()} (ទូទាត់តែមួយលើក $4.99 គ្មានកាត់ប្រចាំខែ)` 
                           : `Valid until: ${new Date(restaurant.membershipExpiresAt).toLocaleDateString()} (One-time payment, no monthly fee)`}
@@ -281,7 +281,7 @@ export const ProfileView: React.FC = () => {
                     )}
 
                     {isFree && (
-                      <p className="text-[10px] text-stone-500">
+                      <p className="text-[10px] text-slate-500">
                         {isKm 
                           ? 'គណនីឥតគិតថ្លៃមិនអាចបន្ថែមមុខម្ហូបបានទេ។ ដំឡើងទៅ Premium ($4.99 សម្រាប់ ៣៦៥ ថ្ងៃ) ដើម្បីបន្ថែមម្ហូបរហូតដល់ ៥ មុខ!' 
                           : 'Free listing cannot add food items. Upgrade to Premium ($4.99 for 365 days) to add up to 5 food items!'}
@@ -302,9 +302,9 @@ export const ProfileView: React.FC = () => {
                           setManagingRestaurant(restaurant);
                           setIsManageMenuModalOpen(true);
                         }}
-                        className="flex-1 py-2 px-3 rounded-xl bg-[#14532D] hover:bg-[#0B3D2E] text-white font-bold text-xs shadow-xs flex items-center justify-center gap-1.5 transition active:scale-95"
+                        className="flex-1 py-2 px-3 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-xs shadow-xs flex items-center justify-center gap-1.5 transition active:scale-95"
                       >
-                        <UtensilsCrossed className="w-3.5 h-3.5 text-[#A7DCA5]" />
+                        <UtensilsCrossed className="w-3.5 h-3.5 text-emerald-200" />
                         <span>{isKm ? `គ្រប់គ្រងមុខម្ហូប (${items.length}/5)` : `Manage Menu (${items.length}/5)`}</span>
                       </button>
 
@@ -314,7 +314,7 @@ export const ProfileView: React.FC = () => {
                             setManagingRestaurant(restaurant);
                             setIsManageMenuModalOpen(true);
                           }}
-                          className="py-2 px-3 rounded-xl bg-gradient-to-r from-[#228B4E] to-[#34A853] hover:from-[#14532D] hover:to-[#228B4E] text-white font-bold text-xs shadow-xs transition active:scale-95"
+                          className="py-2 px-3 rounded-xl bg-[#10B981] hover:bg-[#059669] text-white font-bold text-xs shadow-xs transition active:scale-95"
                         >
                           {isKm ? '⭐ ដំឡើង $4.99' : '⭐ Upgrade $4.99'}
                         </button>
@@ -332,15 +332,15 @@ export const ProfileView: React.FC = () => {
       {activeSubTab === 'bookmarks' && (
         <div className="space-y-4">
           {savedFoods.length === 0 && savedDestinations.length === 0 ? (
-            <div className="text-center py-8 text-stone-400 text-xs space-y-1 font-khmer">
-              <Heart className="w-8 h-8 mx-auto text-stone-300" />
+            <div className="text-center py-8 text-slate-400 text-xs space-y-1 font-khmer">
+              <Heart className="w-8 h-8 mx-auto text-slate-300" />
               <p>{isKm ? 'មិនទាន់មានមុខម្ហូប ឬកន្លែងកម្សាន្តដែលបានរក្សាទុកនៅឡើយទេ' : 'No saved items yet'}</p>
             </div>
           ) : (
             <>
               {savedFoods.length > 0 && (
                 <div className="space-y-2">
-                  <h4 className="font-bold text-xs text-[#183326] dark:text-[#A7DCA5] font-khmer">
+                  <h4 className="font-bold text-xs text-[#0F172A] dark:text-white font-khmer">
                     {isKm ? 'មុខម្ហូបដែលបានរក្សាទុក' : 'Saved Recipes'}
                   </h4>
                   <div className="grid grid-cols-2 gap-3">
@@ -351,7 +351,7 @@ export const ProfileView: React.FC = () => {
 
               {savedDestinations.length > 0 && (
                 <div className="space-y-2 pt-2">
-                  <h4 className="font-bold text-xs text-[#183326] dark:text-[#A7DCA5] font-khmer">
+                  <h4 className="font-bold text-xs text-[#0F172A] dark:text-white font-khmer">
                     {isKm ? 'តំបន់ទេសចរណ៍ដែលបានរក្សាទុក' : 'Saved Travel Spots'}
                   </h4>
                   <div className="space-y-3">
@@ -368,17 +368,17 @@ export const ProfileView: React.FC = () => {
       {activeSubTab === 'myposts' && (
         <div className="space-y-3">
           {myPosts.length === 0 ? (
-            <div className="text-center py-8 text-stone-400 text-xs font-khmer">
+            <div className="text-center py-8 text-slate-400 text-xs font-khmer">
               <p>{isKm ? 'លោកអ្នកមិនទាន់បានបង្ហោះអ្វីនៅឡើយទេ' : 'You haven’t posted anything yet'}</p>
             </div>
           ) : (
             myPosts.map((p) => (
-              <div key={p.id} className="p-3 bg-white dark:bg-[#0B3D2E]/50 rounded-2xl border border-[#A7DCA5]/40 dark:border-[#14532D]/50 flex items-center justify-between">
+              <div key={p.id} className="p-3 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/90 dark:border-slate-700 flex items-center justify-between shadow-xs">
                 <div className="flex items-center gap-2.5">
                   <img src={p.photoUrl} alt="thumb" className="w-12 h-12 rounded-xl object-cover" />
                   <div>
-                    <h5 className="font-bold text-xs text-[#183326] dark:text-stone-100 font-khmer">{p.titleKh}</h5>
-                    <p className="text-[10px] text-stone-400">{p.likesCount} ❤️ • {p.comments.length} 💬</p>
+                    <h5 className="font-bold text-xs text-[#0F172A] dark:text-white font-khmer">{p.titleKh}</h5>
+                    <p className="text-[10px] text-slate-400">{p.likesCount} ❤️ • {p.comments.length} 💬</p>
                   </div>
                 </div>
               </div>
@@ -389,39 +389,39 @@ export const ProfileView: React.FC = () => {
 
       {/* Tab: Settings */}
       {activeSubTab === 'settings' && (
-        <div className="p-4 bg-white dark:bg-[#0B3D2E]/50 rounded-3xl border border-[#A7DCA5]/40 dark:border-[#14532D]/50 space-y-3 text-xs font-khmer">
+        <div className="p-4 bg-white dark:bg-slate-800 rounded-3xl border border-slate-200/90 dark:border-slate-700 space-y-3 text-xs font-khmer shadow-xs">
           {/* Language Switch */}
-          <div className="flex items-center justify-between py-2 border-b border-stone-100 dark:border-[#14532D]/30">
-            <span className="font-medium text-[#183326] dark:text-stone-200 flex items-center gap-2">
-              <Globe className="w-4 h-4 text-[#228B4E]" />
+          <div className="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-700">
+            <span className="font-medium text-[#0F172A] dark:text-slate-200 flex items-center gap-2">
+              <Globe className="w-4 h-4 text-[#059669]" />
               {isKm ? 'ភាសាកម្មវិធី (App Language)' : 'Language'}
             </span>
             <button
               onClick={() => setLanguage(isKm ? 'en' : 'km')}
-              className="px-3 py-1 rounded-xl bg-[#EAF6EC] dark:bg-[#14532D]/50 text-[#14532D] dark:text-[#A7DCA5] font-bold border border-[#A7DCA5]/40"
+              className="px-3 py-1 rounded-xl bg-slate-100 dark:bg-slate-700 text-[#0F172A] dark:text-slate-200 font-bold border border-slate-200 dark:border-slate-600"
             >
               {isKm ? 'ភាសាខ្មែរ (Khmer)' : 'English'}
             </button>
           </div>
 
           {/* Privacy Policy & Data Safety */}
-          <div className="flex items-center justify-between py-2 border-b border-stone-100 dark:border-[#14532D]/30">
-            <span className="font-medium text-[#183326] dark:text-stone-200 flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-[#228B4E]" />
+          <div className="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-700">
+            <span className="font-medium text-[#0F172A] dark:text-slate-200 flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-[#059669]" />
               {isKm ? 'គោលការណ៍ឯកជនភាព & សុវត្ថិភាព' : 'Privacy Policy & Data Safety'}
             </span>
             <button
               onClick={() => setIsPrivacyModalOpen(true)}
-              className="px-3 py-1 rounded-xl bg-[#EAF6EC] dark:bg-[#14532D]/50 text-[#14532D] dark:text-[#A7DCA5] font-bold hover:bg-[#A7DCA5]/30 transition border border-[#A7DCA5]/40"
+              className="px-3 py-1 rounded-xl bg-slate-100 dark:bg-slate-700 text-[#0F172A] dark:text-slate-200 font-bold hover:bg-slate-200 transition border border-slate-200 dark:border-slate-600"
             >
               {isKm ? 'មើល' : 'View'}
             </button>
           </div>
 
           {/* Reset App Data */}
-          <div className="flex items-center justify-between py-2 border-b border-stone-100 dark:border-[#14532D]/30">
-            <span className="font-medium text-[#183326] dark:text-stone-200 flex items-center gap-2">
-              <RefreshCw className="w-4 h-4 text-stone-500" />
+          <div className="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-700">
+            <span className="font-medium text-[#0F172A] dark:text-slate-200 flex items-center gap-2">
+              <RefreshCw className="w-4 h-4 text-slate-500" />
               {isKm ? 'កំណត់ទិន្នន័យឡើងវិញ' : 'Reset Database to Seed'}
             </span>
             <button
@@ -440,7 +440,7 @@ export const ProfileView: React.FC = () => {
           {currentUser && (
             <button
               onClick={logout}
-              className="w-full py-2.5 rounded-2xl bg-[#EAF6EC] dark:bg-[#14532D]/40 hover:bg-[#A7DCA5]/30 text-[#183326] dark:text-stone-200 font-bold flex items-center justify-center gap-1.5 transition"
+              className="w-full py-2.5 rounded-2xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-[#0F172A] dark:text-slate-200 font-bold flex items-center justify-center gap-1.5 transition"
             >
               <LogOut className="w-4 h-4" />
               <span>{isKm ? 'ចាកចេញពីគណនី' : 'Sign Out'}</span>
@@ -448,10 +448,10 @@ export const ProfileView: React.FC = () => {
           )}
 
           {/* Discreet Admin Portal Access */}
-          <div className="pt-2 border-t border-stone-100 dark:border-[#14532D]/30 text-center">
+          <div className="pt-2 border-t border-slate-100 dark:border-slate-700 text-center">
             <button
               onClick={() => setIsAdminLoginModalOpen(true)}
-              className="inline-flex items-center gap-1.5 text-stone-400 hover:text-[#14532D] dark:hover:text-[#A7DCA5] text-[11px] font-medium transition py-1.5 px-3 rounded-xl hover:bg-[#EAF6EC] dark:hover:bg-[#14532D]/30"
+              className="inline-flex items-center gap-1.5 text-slate-400 hover:text-[#064E3B] dark:hover:text-emerald-400 text-[11px] font-medium transition py-1.5 px-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700"
             >
               <Shield className="w-3.5 h-3.5" />
               <span>{isKm ? 'ច្រកចូលប្រព័ន្ធរដ្ឋបាល' : 'System Administration'}</span>

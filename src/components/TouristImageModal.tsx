@@ -161,29 +161,29 @@ export const TouristImageModal: React.FC<TouristImageModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200">
       <div 
-        className="bg-white dark:bg-stone-900 w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] border border-[#A7DCA5]/40"
+        className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] border border-slate-200 dark:border-slate-800"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="px-5 py-4 border-b border-stone-200 dark:border-[#14532D]/40 flex items-center justify-between bg-gradient-to-r from-[#0B3D2E] via-[#14532D] to-[#0B3D2E] text-white">
+        <div className="px-5 py-4 border-b border-[#047857] flex items-center justify-between bg-[#064E3B] text-white">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 bg-white/10 text-[#A7DCA5] rounded-xl border border-[#A7DCA5]/30">
+            <div className="p-2 bg-white/10 text-emerald-300 rounded-xl border border-white/20">
               <Sparkles className="w-4 h-4" />
             </div>
             <div>
               <h3 className="font-moul text-sm text-white">
                 {isKm ? 'ផ្លាស់ប្តូររូបភាពកន្លែងទេសចរណ៍' : 'Change Destination Photo'}
               </h3>
-              <p className="text-[11px] text-[#A7DCA5] font-khmer flex items-center gap-1">
+              <p className="text-[11px] text-emerald-200 font-khmer flex items-center gap-1">
                 <span>{destination.nameKh}</span>
                 <span>•</span>
-                <span className="text-[#A7DCA5] font-bold">{destination.provinceKh}</span>
+                <span className="text-emerald-200 font-bold">{destination.provinceKh}</span>
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-[#A7DCA5] hover:text-white transition"
+            className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-emerald-200 hover:text-white transition"
           >
             <X className="w-5 h-5" />
           </button>
@@ -192,17 +192,17 @@ export const TouristImageModal: React.FC<TouristImageModalProps> = ({
         {/* Scrollable Content */}
         <div className="p-5 overflow-y-auto space-y-4 no-scrollbar">
           {/* Destination Summary Card */}
-          <div className="p-3 bg-[#EAF6EC]/40 dark:bg-stone-800/80 rounded-2xl border border-[#A7DCA5]/30 dark:border-stone-700 flex items-center justify-between text-xs">
+          <div className="p-3 bg-slate-50 dark:bg-slate-800/80 rounded-2xl border border-slate-200 dark:border-slate-700 flex items-center justify-between text-xs">
             <div>
-              <div className="font-bold text-[#183326] dark:text-stone-100 font-khmer">
+              <div className="font-bold text-[#0F172A] dark:text-slate-100 font-khmer">
                 {destination.nameKh} ({destination.nameEn})
               </div>
-              <div className="text-[11px] text-stone-500 flex items-center gap-1 mt-0.5 font-khmer">
-                <MapPin className="w-3 h-3 text-[#228B4E]" />
+              <div className="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5 font-khmer">
+                <MapPin className="w-3 h-3 text-[#059669]" />
                 <span>{destination.provinceKh} • {destination.categoryKh}</span>
               </div>
             </div>
-            <span className="font-mono text-[10px] font-bold px-2 py-0.5 rounded bg-[#EAF6EC] text-[#14532D] border border-[#A7DCA5]/40">
+            <span className="font-mono text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 text-[#064E3B] border border-slate-200">
               {destination.id}
             </span>
           </div>
@@ -210,18 +210,18 @@ export const TouristImageModal: React.FC<TouristImageModalProps> = ({
           {/* Large Image Preview Box */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <label className="text-xs font-bold text-[#183326] dark:text-stone-200 font-khmer flex items-center gap-1.5">
-                <ImageIcon className="w-4 h-4 text-[#228B4E]" />
+              <label className="text-xs font-bold text-[#0F172A] dark:text-slate-200 font-khmer flex items-center gap-1.5">
+                <ImageIcon className="w-4 h-4 text-[#059669]" />
                 <span>{isKm ? 'ការមើលរូបភាពជាក់ស្តែង (Live Preview)' : 'Live Preview'}</span>
               </label>
 
               {/* Fit Mode Toggle */}
-              <div className="flex items-center gap-1 bg-stone-100 dark:bg-stone-800 p-0.5 rounded-lg text-[10px]">
+              <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg text-[10px]">
                 <button
                   type="button"
                   onClick={() => setFitMode('cover')}
                   className={`px-2 py-0.5 rounded font-bold transition ${
-                    fitMode === 'cover' ? 'bg-[#14532D] text-white' : 'text-stone-600 dark:text-stone-400'
+                    fitMode === 'cover' ? 'bg-[#064E3B] text-white' : 'text-slate-600 dark:text-slate-400'
                   }`}
                 >
                   Cover
@@ -230,7 +230,7 @@ export const TouristImageModal: React.FC<TouristImageModalProps> = ({
                   type="button"
                   onClick={() => setFitMode('contain')}
                   className={`px-2 py-0.5 rounded font-bold transition ${
-                    fitMode === 'contain' ? 'bg-[#14532D] text-white' : 'text-stone-600 dark:text-stone-400'
+                    fitMode === 'contain' ? 'bg-[#064E3B] text-white' : 'text-slate-600 dark:text-slate-400'
                   }`}
                 >
                   Contain
@@ -238,7 +238,7 @@ export const TouristImageModal: React.FC<TouristImageModalProps> = ({
               </div>
             </div>
 
-            <div className="relative aspect-16/10 rounded-2xl overflow-hidden bg-stone-900 border-2 border-[#A7DCA5]/40 dark:border-stone-700 shadow-inner group">
+            <div className="relative aspect-16/10 rounded-2xl overflow-hidden bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-inner group">
               {photoUrl ? (
                 <img 
                   src={photoUrl} 
@@ -247,7 +247,7 @@ export const TouristImageModal: React.FC<TouristImageModalProps> = ({
                   onError={() => setErrorMsg(isKm ? 'មិនអាចបើករូបភាពតាម URL នេះបានទេ' : 'Cannot load image from this URL')}
                 />
               ) : (
-                <div className="w-full h-full flex flex-col items-center justify-center text-stone-500 font-khmer text-xs">
+                <div className="w-full h-full flex flex-col items-center justify-center text-slate-500 font-khmer text-xs">
                   <ImageIcon className="w-10 h-10 mb-2 opacity-50" />
                   <span>{isKm ? 'គ្មានរូបភាពជ្រើសរើស' : 'No photo selected'}</span>
                 </div>
@@ -255,7 +255,7 @@ export const TouristImageModal: React.FC<TouristImageModalProps> = ({
 
               {isProcessing && (
                 <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center text-white text-xs font-khmer gap-2">
-                  <RefreshCw className="w-6 h-6 animate-spin text-[#A7DCA5]" />
+                  <RefreshCw className="w-6 h-6 animate-spin text-emerald-300" />
                   <span>{isKm ? 'កំពុងបង្រួមទំហំរូបភាព...' : 'Optimizing and compressing image...'}</span>
                 </div>
               )}
@@ -271,13 +271,13 @@ export const TouristImageModal: React.FC<TouristImageModalProps> = ({
           </div>
 
           {/* Action 1: Upload from Phone / Device Gallery */}
-          <div className="p-4 rounded-2xl bg-[#EAF6EC]/60 dark:bg-[#0B3D2E]/30 border border-[#A7DCA5]/40 dark:border-[#14532D]/60 space-y-2.5">
+          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 space-y-2.5">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-[#183326] dark:text-[#A7DCA5] font-khmer flex items-center gap-1.5">
-                <Smartphone className="w-4 h-4 text-[#228B4E]" />
+              <span className="text-xs font-bold text-[#0F172A] dark:text-emerald-300 font-khmer flex items-center gap-1.5">
+                <Smartphone className="w-4 h-4 text-[#059669]" />
                 <span>{isKm ? 'វិធីទី១៖ ជ្រើសរើសរូបពីទូរស័ព្ទ / កុំព្យូទ័រ' : 'Option 1: Choose from Phone / Computer'}</span>
               </span>
-              <span className="text-[10px] text-[#14532D] dark:text-[#A7DCA5] font-khmer font-bold">JPG, PNG, WebP</span>
+              <span className="text-[10px] text-slate-500 font-khmer font-bold">JPG, PNG, WebP</span>
             </div>
 
             <input 
@@ -292,12 +292,12 @@ export const TouristImageModal: React.FC<TouristImageModalProps> = ({
               type="button"
               disabled={isProcessing}
               onClick={() => fileInputRef.current?.click()}
-              className="w-full py-3 px-4 rounded-xl bg-[#14532D] hover:bg-[#0B3D2E] text-white font-khmer font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition active:scale-[0.99] disabled:opacity-50"
+              className="w-full py-3 px-4 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-khmer font-bold text-xs flex items-center justify-center gap-2 shadow-md shadow-emerald-950/20 transition active:scale-[0.99] disabled:opacity-50"
             >
-              <Upload className="w-4 h-4 text-[#A7DCA5]" />
+              <Upload className="w-4 h-4 text-emerald-300" />
               <span>{isKm ? 'ជ្រើសរើសរូបភាពពីវិចិត្រសាល (Gallery / File)' : 'Select Image from Device Gallery'}</span>
             </button>
-            <p className="text-[10px] text-stone-500 font-khmer text-center">
+            <p className="text-[10px] text-slate-500 font-khmer text-center">
               {isKm 
                 ? 'រូបភាពនឹងត្រូវបង្រួមទំហំស្វ័យប្រវត្តិកម្រិត HD ដើម្បីផ្ទុកលឿន និងសន្សំទំហំទូរស័ព្ទ' 
                 : 'Image is automatically compressed to HD for fast loading and reduced data usage'}
@@ -306,7 +306,7 @@ export const TouristImageModal: React.FC<TouristImageModalProps> = ({
 
           {/* Action 2: Direct Image URL */}
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-[#183326] dark:text-stone-200 font-khmer block">
+            <label className="text-xs font-bold text-[#0F172A] dark:text-slate-200 font-khmer block">
               {isKm ? 'វិធីទី២៖ ឬបញ្ចូលតំណភ្ជាប់រូបភាព (Image URL)' : 'Option 2: Or Paste Image URL'}
             </label>
             <div className="flex gap-2">
@@ -315,12 +315,12 @@ export const TouristImageModal: React.FC<TouristImageModalProps> = ({
                 value={urlInput}
                 onChange={(e) => setUrlInput(e.target.value)}
                 placeholder="https://images.unsplash.com/..."
-                className="flex-1 px-3 py-2 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-xs font-mono text-stone-900 dark:text-stone-100 focus:outline-none focus:border-[#228B4E]"
+                className="flex-1 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-mono text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#059669]/20 focus:border-[#059669]"
               />
               <button
                 type="button"
                 onClick={handleApplyUrl}
-                className="px-3.5 py-2 bg-[#228B4E] hover:bg-[#14532D] text-white text-xs font-khmer font-bold rounded-xl transition active:scale-95"
+                className="px-3.5 py-2 bg-[#059669] hover:bg-[#047857] text-white text-xs font-khmer font-bold rounded-xl transition active:scale-95"
               >
                 {isKm ? 'ដាក់រូប' : 'Apply'}
               </button>
@@ -339,7 +339,7 @@ export const TouristImageModal: React.FC<TouristImageModalProps> = ({
             <button
               type="button"
               onClick={handleResetToDefault}
-              className="text-[11px] text-stone-500 hover:text-[#14532D] font-khmer flex items-center gap-1 transition"
+              className="text-[11px] text-slate-500 hover:text-[#064E3B] font-khmer flex items-center gap-1 transition"
             >
               <RefreshCw className="w-3 h-3" />
               <span>{isKm ? 'កំណត់រូបភាពដើមឡើងវិញ' : 'Reset to default image'}</span>
@@ -348,11 +348,11 @@ export const TouristImageModal: React.FC<TouristImageModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="px-5 py-3.5 border-t border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-stone-900/80 flex items-center justify-between">
+        <div className="px-5 py-3.5 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/80 flex items-center justify-between">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-xl border border-stone-200 dark:border-stone-700 text-stone-700 dark:text-stone-300 font-khmer text-xs hover:bg-stone-100 dark:hover:bg-stone-800 transition"
+            className="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-khmer text-xs hover:bg-slate-100 dark:hover:bg-slate-800 transition"
           >
             {isKm ? 'បោះបង់' : 'Cancel'}
           </button>
@@ -360,9 +360,9 @@ export const TouristImageModal: React.FC<TouristImageModalProps> = ({
             type="button"
             disabled={isProcessing || !photoUrl.trim()}
             onClick={handleSave}
-            className="px-6 py-2 rounded-xl bg-gradient-to-r from-[#14532D] to-[#228B4E] hover:from-[#0B3D2E] hover:to-[#14532D] text-white font-khmer font-bold text-xs shadow-md flex items-center gap-1.5 transition active:scale-95 disabled:opacity-50"
+            className="px-6 py-2 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-khmer font-bold text-xs shadow-md shadow-emerald-950/20 flex items-center gap-1.5 transition active:scale-95 disabled:opacity-50"
           >
-            <Check className="w-4 h-4 text-[#A7DCA5]" />
+            <Check className="w-4 h-4 text-emerald-300" />
             <span>{isKm ? 'រក្សាទុករូបភាព' : 'Save Photo'}</span>
           </button>
         </div>

@@ -28,28 +28,28 @@ export const SupportModal: React.FC = () => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
       <div 
-        className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden border border-[#A7DCA5]/40 max-h-[92vh] flex flex-col"
+        className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-200 max-h-[92vh] flex flex-col"
         onClick={e => e.stopPropagation()}
       >
         {/* Modal Header */}
-        <div className="relative bg-gradient-to-r from-[#0B3D2E] via-[#14532D] to-[#0B3D2E] text-white p-6 pb-5">
+        <div className="relative bg-[#064E3B] text-white p-6 pb-5 border-b border-[#047857]">
           <button
             onClick={() => setIsSupportModalOpen(false)}
-            className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-[#A7DCA5] hover:text-white transition-colors"
+            className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-emerald-200 hover:text-white transition-colors"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
           </button>
           
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-white/10 rounded-2xl backdrop-blur-md border border-[#A7DCA5]/30 shadow-inner">
-              <Heart className="w-7 h-7 text-[#A7DCA5] fill-[#A7DCA5]" />
+            <div className="p-3 bg-white/10 rounded-2xl backdrop-blur-md border border-white/20 shadow-inner">
+              <Heart className="w-7 h-7 text-emerald-300 fill-emerald-300" />
             </div>
             <div>
               <h2 className="text-xl font-bold font-khmer text-white">
                 {isKm ? 'ជួយឧបត្ថម្ភគាំទ្រកម្មវិធី' : 'Support Our Application'}
               </h2>
-              <p className="text-xs text-[#A7DCA5] font-khmer">
+              <p className="text-xs text-emerald-200 font-khmer">
                 {isKm ? 'ការបរិច្ចាគស្ម័គ្រចិត្តតាមរយៈ Bakong KHQR' : 'Voluntary contribution via Bakong KHQR'}
               </p>
             </div>
@@ -59,13 +59,13 @@ export const SupportModal: React.FC = () => {
         {/* Modal Body */}
         <div className="p-6 overflow-y-auto space-y-6 flex-1">
           {/* Important Separation Notice */}
-          <div className="flex items-start gap-2.5 p-3.5 bg-[#EAF6EC] border border-[#A7DCA5]/50 rounded-2xl text-xs text-[#183326] font-khmer">
-            <ShieldCheck className="w-5 h-5 text-[#228B4E] shrink-0 mt-0.5" />
+          <div className="flex items-start gap-2.5 p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs text-[#0F172A] font-khmer">
+            <ShieldCheck className="w-5 h-5 text-[#059669] shrink-0 mt-0.5" />
             <div>
-              <p className="font-semibold text-[#14532D]">
+              <p className="font-semibold text-[#064E3B]">
                 {isKm ? 'ចំណាំសំខាន់ (Important Note):' : 'Important Notice:'}
               </p>
-              <p className="text-[#183326]/80 mt-0.5">
+              <p className="text-[#0F172A]/80 mt-0.5">
                 {isKm 
                   ? 'នេះជា QR Code សម្រាប់តែការជួយឧបត្ថម្ភស្ម័គ្រចិត្តដល់ការអភិវឌ្ឍន៍កម្មវិធី "អាហារ និងទេសចរណ៍ខ្មែរ" ប៉ុណ្ណោះ។ ដាច់ដោយឡែកពី QR Code ដំឡើងកម្មវិធី។' 
                   : 'This QR code is strictly for voluntary support to develop Khmer Food & Tourism. It is kept completely separate from the app installation QR code.'}
@@ -123,12 +123,12 @@ export const SupportModal: React.FC = () => {
           </div>
 
           {/* Support Message */}
-          <div className="bg-[#EAF6EC]/60 rounded-2xl p-4 border border-[#A7DCA5]/40 text-center space-y-2">
-            <p className="text-xs text-[#183326] font-khmer leading-relaxed">
+          <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200 text-center space-y-2">
+            <p className="text-xs text-[#0F172A] font-khmer leading-relaxed">
               {isKm ? appSettings.supportMessageKh : appSettings.supportMessageEn}
             </p>
-            <div className="flex items-center justify-center gap-1 text-[11px] text-[#228B4E] font-khmer">
-              <Heart className="w-3.5 h-3.5 fill-[#228B4E]" />
+            <div className="flex items-center justify-center gap-1 text-[11px] text-[#059669] font-khmer">
+              <Heart className="w-3.5 h-3.5 fill-[#059669]" />
               <span>{isKm ? 'សូមថ្លែងអំណរគុណយ៉ាងជ្រាលជ្រៅ!' : 'Thank you for your generous support!'}</span>
             </div>
           </div>

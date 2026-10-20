@@ -38,7 +38,7 @@ export const TouristDetailModal: React.FC = () => {
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
       <div 
-        className="bg-white dark:bg-stone-900 w-full max-w-lg h-[90vh] sm:h-[85vh] rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden relative"
+        className="bg-white dark:bg-slate-900 w-full max-w-lg h-[90vh] sm:h-[85vh] rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden relative border border-slate-200/80 dark:border-slate-800"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Top Controls */}
@@ -56,7 +56,7 @@ export const TouristDetailModal: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setIsImageModalOpen(true)}
-                className="py-1.5 px-3 rounded-full bg-[#34A853] hover:bg-[#228B4E] text-white font-bold text-xs shadow-lg backdrop-blur-md transition active:scale-90 flex items-center gap-1.5 border border-[#A7DCA5]/40"
+                className="py-1.5 px-3 rounded-full bg-[#10B981] hover:bg-[#059669] text-white font-bold text-xs shadow-lg backdrop-blur-md transition active:scale-90 flex items-center gap-1.5 border border-white/20"
                 title={language === 'km' ? 'ផ្លាស់ប្តូររូបភាព' : 'Change Photo'}
               >
                 <Camera className="w-3.5 h-3.5 text-white" />
@@ -79,7 +79,7 @@ export const TouristDetailModal: React.FC = () => {
         {/* Scrollable Body */}
         <div className="overflow-y-auto flex-1 no-scrollbar pb-6">
           {/* Hero Image */}
-          <div className="relative h-64 sm:h-72 w-full bg-stone-800">
+          <div className="relative h-64 sm:h-72 w-full bg-slate-800">
             <img 
               src={selectedDestination.photoUrl} 
               alt={selectedDestination.nameKh}
@@ -88,13 +88,13 @@ export const TouristDetailModal: React.FC = () => {
             <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" />
             
             <div className="absolute bottom-4 left-4 right-4 text-white">
-              <span className="px-3 py-0.5 rounded-full text-xs font-bold bg-[#14532D] text-[#A7DCA5] border border-[#228B4E]/40 shadow mb-2 inline-block">
+              <span className="px-3 py-0.5 rounded-full text-xs font-bold bg-[#064E3B] text-emerald-100 border border-emerald-400/40 shadow mb-2 inline-block">
                 {language === 'km' ? selectedDestination.categoryKh : selectedDestination.categoryEn}
               </span>
               <h2 className="text-xl sm:text-2xl font-bold font-moul leading-snug drop-shadow text-white">
                 {language === 'km' ? selectedDestination.nameKh : selectedDestination.nameEn}
               </h2>
-              <p className="text-xs text-[#A7DCA5] font-medium">
+              <p className="text-xs text-emerald-200 font-medium">
                 {language === 'km' ? selectedDestination.nameEn : selectedDestination.nameKh}
               </p>
             </div>
@@ -118,36 +118,36 @@ export const TouristDetailModal: React.FC = () => {
             {/* Quick Info Cards: Fees & Best Time */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {/* Fee Card */}
-              <div className="p-3.5 rounded-2xl bg-[#EAF6EC] dark:bg-[#0B3D2E]/40 border border-[#A7DCA5]/60 dark:border-[#228B4E]/40 space-y-1">
-                <div className="flex items-center gap-2 text-[#14532D] dark:text-[#A7DCA5] font-bold text-xs">
-                  <Ticket className="w-4 h-4 text-[#228B4E]" />
+              <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 space-y-1">
+                <div className="flex items-center gap-2 text-[#064E3B] dark:text-emerald-400 font-bold text-xs">
+                  <Ticket className="w-4 h-4 text-[#059669]" />
                   <span>{language === 'km' ? 'សំបុត្រចូលទស្សនា' : 'Entrance Fee'}</span>
                 </div>
-                <p className="text-xs text-[#183326] dark:text-stone-200 font-medium leading-relaxed">
+                <p className="text-xs text-slate-700 dark:text-slate-200 font-medium leading-relaxed">
                   {language === 'km' ? selectedDestination.entranceFeeKh : selectedDestination.entranceFeeEn}
                 </p>
               </div>
 
               {/* Best Time Card */}
-              <div className="p-3.5 rounded-2xl bg-[#EAF6EC] dark:bg-[#0B3D2E]/40 border border-[#A7DCA5]/60 dark:border-[#228B4E]/40 space-y-1">
-                <div className="flex items-center gap-2 text-[#14532D] dark:text-[#A7DCA5] font-bold text-xs">
-                  <Calendar className="w-4 h-4 text-[#228B4E]" />
+              <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 space-y-1">
+                <div className="flex items-center gap-2 text-[#064E3B] dark:text-emerald-400 font-bold text-xs">
+                  <Calendar className="w-4 h-4 text-[#059669]" />
                   <span>{language === 'km' ? 'ពេលវេលាល្អបំផុតដើម្បីមកលេង' : 'Best Time to Visit'}</span>
                 </div>
-                <p className="text-xs text-[#183326] dark:text-stone-200 font-medium leading-relaxed">
+                <p className="text-xs text-slate-700 dark:text-slate-200 font-medium leading-relaxed">
                   {language === 'km' ? selectedDestination.bestTimeToVisitKh : selectedDestination.bestTimeToVisitEn}
                 </p>
               </div>
             </div>
 
             {/* Address */}
-            <div className="p-3.5 rounded-2xl bg-[#EAF6EC]/50 dark:bg-[#0B3D2E]/40 border border-[#A7DCA5]/40 dark:border-[#14532D]/50 flex items-start gap-2.5 text-xs">
-              <MapPin className="w-4 h-4 text-[#228B4E] shrink-0 mt-0.5" />
+            <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 flex items-start gap-2.5 text-xs">
+              <MapPin className="w-4 h-4 text-[#059669] shrink-0 mt-0.5" />
               <div>
-                <p className="font-semibold text-[#183326] dark:text-stone-200">
+                <p className="font-semibold text-[#0F172A] dark:text-white">
                   {language === 'km' ? 'ទីតាំងភូមិសាស្ត្រ' : 'Location Address'}
                 </p>
-                <p className="text-stone-600 dark:text-stone-400">
+                <p className="text-slate-600 dark:text-slate-400">
                   {language === 'km' ? selectedDestination.addressKh : selectedDestination.addressEn}
                 </p>
               </div>
@@ -155,11 +155,11 @@ export const TouristDetailModal: React.FC = () => {
 
             {/* Description */}
             <div>
-              <h3 className="font-bold text-[#183326] dark:text-stone-100 text-sm mb-1.5 flex items-center gap-1.5">
-                <Sparkles className="w-4 h-4 text-[#228B4E]" />
+              <h3 className="font-bold text-[#0F172A] dark:text-white text-sm mb-1.5 flex items-center gap-1.5">
+                <Sparkles className="w-4 h-4 text-[#059669]" />
                 {language === 'km' ? 'ប្រវត្តិ និងទិដ្ឋភាពទូទៅ' : 'Overview & History'}
               </h3>
-              <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-300 leading-relaxed bg-[#EAF6EC]/40 dark:bg-[#0B3D2E]/30 p-3.5 rounded-xl border border-[#A7DCA5]/30 dark:border-[#14532D]/40">
+              <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed bg-slate-50 dark:bg-slate-800/50 p-3.5 rounded-xl border border-slate-200/90 dark:border-slate-700">
                 {language === 'km' ? selectedDestination.descriptionKh : selectedDestination.descriptionEn}
               </p>
             </div>
@@ -167,17 +167,17 @@ export const TouristDetailModal: React.FC = () => {
             {/* Highlights List */}
             {selectedDestination.highlightsKh && selectedDestination.highlightsKh.length > 0 && (
               <div>
-                <h3 className="font-bold text-[#183326] dark:text-stone-100 text-sm mb-2">
+                <h3 className="font-bold text-[#0F172A] dark:text-white text-sm mb-2">
                   {language === 'km' ? 'ចំណុចលេចធ្លោមិនគួររំលង' : 'Key Highlights'}
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {selectedDestination.highlightsKh.map((hl, i) => (
                     <div 
                       key={i}
-                      className="p-2.5 rounded-xl bg-white dark:bg-stone-800 border border-[#A7DCA5]/30 dark:border-[#14532D]/40 text-xs flex items-center gap-2"
+                      className="p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 text-xs flex items-center gap-2"
                     >
-                      <span className="w-2 h-2 rounded-full bg-[#34A853] shrink-0" />
-                      <span className="font-medium text-[#183326] dark:text-stone-200">{hl}</span>
+                      <span className="w-2 h-2 rounded-full bg-[#10B981] shrink-0" />
+                      <span className="font-medium text-[#0F172A] dark:text-slate-200">{hl}</span>
                     </div>
                   ))}
                 </div>
@@ -185,8 +185,8 @@ export const TouristDetailModal: React.FC = () => {
             )}
 
             {/* Social Share Bar */}
-            <div className="pt-2 border-t border-stone-200 dark:border-stone-700">
-              <p className="text-xs font-semibold text-stone-500 mb-2.5 text-center">
+            <div className="pt-2 border-t border-slate-200 dark:border-slate-800">
+              <p className="text-xs font-semibold text-slate-500 mb-2.5 text-center">
                 {language === 'km' ? 'ចែករំលែកតំបន់ទេសចរណ៍នេះ' : 'Share this destination'}
               </p>
               
@@ -209,7 +209,7 @@ export const TouristDetailModal: React.FC = () => {
 
                 <button
                   onClick={handleCopyLink}
-                  className="px-3 py-1.5 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-200 text-xs font-medium border border-stone-300 dark:border-stone-600"
+                  className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-medium border border-slate-300 dark:border-slate-700"
                 >
                   {language === 'km' ? 'ចម្លង' : 'Copy'}
                 </button>

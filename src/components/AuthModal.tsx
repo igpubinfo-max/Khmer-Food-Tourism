@@ -29,20 +29,20 @@ export const AuthModal: React.FC = () => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
       <div 
-        className="bg-white dark:bg-stone-900 w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden flex flex-col relative"
+        className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden flex flex-col relative border border-slate-200 dark:border-slate-800"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close button */}
         <button
           onClick={() => setIsAuthModalOpen(false)}
-          className="absolute top-3.5 right-3.5 p-2 rounded-full text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 z-10"
+          className="absolute top-3.5 right-3.5 p-2 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 z-10"
         >
           <X className="w-4 h-4" />
         </button>
 
         {/* Top Header */}
-        <div className="p-6 pb-4 bg-gradient-to-b from-[#0B3D2E] to-[#14532D] text-white text-center space-y-1">
-          <div className="w-12 h-12 rounded-2xl bg-white/10 border border-[#A7DCA5]/30 flex items-center justify-center mx-auto mb-2 text-[#A7DCA5]">
+        <div className="p-6 pb-4 bg-[#064E3B] text-white text-center space-y-1 border-b border-[#047857]">
+          <div className="w-12 h-12 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center mx-auto mb-2 text-emerald-300">
             <Sparkles className="w-6 h-6" />
           </div>
           <h2 className="font-moul text-base text-white">
@@ -50,17 +50,17 @@ export const AuthModal: React.FC = () => {
               ? (language === 'km' ? 'ចូលគណនី' : 'Welcome Back') 
               : (language === 'km' ? 'ចុះឈ្មោះគណនីថ្មី' : 'Create Account')}
           </h2>
-          <p className="text-xs text-[#A7DCA5]">
+          <p className="text-xs text-emerald-200">
             {language === 'km' ? 'កម្មវិធី អាហារ & ទេសចរណ៍ខ្មែរ' : 'Khmer Food & Tourism App'}
           </p>
         </div>
 
         {/* Switch tab */}
-        <div className="flex border-b border-stone-200 dark:border-stone-800 text-xs">
+        <div className="flex border-b border-slate-200 dark:border-slate-800 text-xs">
           <button
             onClick={() => setTab('login')}
             className={`flex-1 py-3 font-bold border-b-2 transition ${
-              tab === 'login' ? 'border-[#14532D] text-[#14532D] dark:text-[#A7DCA5]' : 'border-transparent text-stone-400'
+              tab === 'login' ? 'border-[#064E3B] text-[#064E3B] dark:border-emerald-400 dark:text-emerald-400' : 'border-transparent text-slate-400'
             }`}
           >
             {language === 'km' ? 'ចូលប្រើប្រាស់' : 'Sign In'}
@@ -68,7 +68,7 @@ export const AuthModal: React.FC = () => {
           <button
             onClick={() => setTab('register')}
             className={`flex-1 py-3 font-bold border-b-2 transition ${
-              tab === 'register' ? 'border-[#14532D] text-[#14532D] dark:text-[#A7DCA5]' : 'border-transparent text-stone-400'
+              tab === 'register' ? 'border-[#064E3B] text-[#064E3B] dark:border-emerald-400 dark:text-emerald-400' : 'border-transparent text-slate-400'
             }`}
           >
             {language === 'km' ? 'ចុះឈ្មោះថ្មី' : 'Register'}
@@ -80,42 +80,42 @@ export const AuthModal: React.FC = () => {
           {tab === 'login' ? (
             <form onSubmit={handleLoginSubmit} className="space-y-3">
               <div>
-                <label className="block font-bold text-[#183326] dark:text-stone-300 mb-1">
+                <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
                   {language === 'km' ? 'អ៊ីមែល / ឈ្មោះគណនី' : 'Email Address'}
                 </label>
                 <div className="relative flex items-center">
-                  <Mail className="w-4 h-4 text-stone-400 absolute left-3 pointer-events-none" />
+                  <Mail className="w-4 h-4 text-slate-400 absolute left-3 pointer-events-none" />
                   <input
                     type="email"
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="user@example.com"
-                    className="w-full pl-9 pr-3 py-2 rounded-xl border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 focus:outline-none focus:border-[#228B4E]"
+                    className="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-[#0F172A] dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#059669]/20 focus:border-[#059669]"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block font-bold text-[#183326] dark:text-stone-300 mb-1">
+                <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
                   {language === 'km' ? 'ពាក្យសម្ងាត់' : 'Password'}
                 </label>
                 <div className="relative flex items-center">
-                  <Lock className="w-4 h-4 text-stone-400 absolute left-3 pointer-events-none" />
+                  <Lock className="w-4 h-4 text-slate-400 absolute left-3 pointer-events-none" />
                   <input
                     type="password"
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full pl-9 pr-3 py-2 rounded-xl border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 focus:outline-none focus:border-[#228B4E]"
+                    className="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-[#0F172A] dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#059669]/20 focus:border-[#059669]"
                   />
                 </div>
               </div>
 
               <button
                 type="submit"
-                className="w-full py-2.5 rounded-xl bg-[#14532D] hover:bg-[#0B3D2E] text-white font-bold text-xs shadow-md transition font-khmer active:scale-95"
+                className="w-full py-2.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-xs shadow-md shadow-emerald-950/20 transition font-khmer active:scale-95"
               >
                 {language === 'km' ? 'ចូលគណនី' : 'Sign In'}
               </button>
@@ -123,7 +123,7 @@ export const AuthModal: React.FC = () => {
           ) : (
             <form onSubmit={handleRegisterSubmit} className="space-y-3">
               <div>
-                <label className="block font-bold text-[#183326] dark:text-stone-300 mb-1">
+                <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
                   {language === 'km' ? 'ប្រភេទគណនី (Account Role)' : 'Account Role'}
                 </label>
                 <div className="grid grid-cols-2 gap-2">
@@ -131,10 +131,10 @@ export const AuthModal: React.FC = () => {
                     type="button"
                     onClick={() => setRole('user')}
                     className={`p-2 rounded-xl border text-center font-bold text-xs flex items-center justify-center gap-1.5 transition ${
-                      role === 'user' ? 'border-[#228B4E] bg-[#EAF6EC] text-[#14532D] dark:bg-[#14532D]/40 dark:text-[#A7DCA5]' : 'border-stone-300 text-stone-600'
+                      role === 'user' ? 'border-[#059669] bg-emerald-50 text-[#064E3B] dark:bg-emerald-950/40 dark:text-emerald-300' : 'border-slate-200 text-slate-600'
                     }`}
                   >
-                    <User className="w-3.5 h-3.5 text-[#228B4E]" />
+                    <User className="w-3.5 h-3.5 text-[#059669]" />
                     <span>{language === 'km' ? 'អ្នកប្រើប្រាស់ទូទៅ' : 'Food Lover'}</span>
                   </button>
 
@@ -142,17 +142,17 @@ export const AuthModal: React.FC = () => {
                     type="button"
                     onClick={() => setRole('owner')}
                     className={`p-2 rounded-xl border text-center font-bold text-xs flex items-center justify-center gap-1.5 transition ${
-                      role === 'owner' ? 'border-[#228B4E] bg-[#EAF6EC] text-[#14532D] dark:bg-[#14532D]/40 dark:text-[#A7DCA5]' : 'border-stone-300 text-stone-600'
+                      role === 'owner' ? 'border-[#059669] bg-emerald-50 text-[#064E3B] dark:bg-emerald-950/40 dark:text-emerald-300' : 'border-slate-200 text-slate-600'
                     }`}
                   >
-                    <Store className="w-3.5 h-3.5 text-[#228B4E]" />
+                    <Store className="w-3.5 h-3.5 text-[#059669]" />
                     <span>{language === 'km' ? 'ម្ចាស់ហាងអាហារ' : 'Shop Owner'}</span>
                   </button>
                 </div>
               </div>
 
               <div>
-                <label className="block font-bold text-[#183326] dark:text-stone-300 mb-1">
+                <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
                   {language === 'km' ? 'ឈ្មោះពេញ' : 'Full Name'}
                 </label>
                 <input
@@ -161,13 +161,13 @@ export const AuthModal: React.FC = () => {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="សុខ ចាន់ដារ៉ា"
-                  className="w-full px-3 py-2 rounded-xl border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 focus:outline-none focus:border-[#228B4E]"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-[#0F172A] dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#059669]/20 focus:border-[#059669]"
                 />
               </div>
 
               {role === 'owner' && (
                 <div>
-                  <label className="block font-bold text-[#183326] dark:text-stone-300 mb-1">
+                  <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
                     {language === 'km' ? 'ឈ្មោះហាងអាហារ' : 'Restaurant Name'}
                   </label>
                   <input
@@ -176,13 +176,13 @@ export const AuthModal: React.FC = () => {
                     value={restaurantName}
                     onChange={(e) => setRestaurantName(e.target.value)}
                     placeholder="ហាងអាហារមរតកខ្មែរ"
-                    className="w-full px-3 py-2 rounded-xl border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 focus:outline-none focus:border-[#228B4E]"
+                    className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-[#0F172A] dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#059669]/20 focus:border-[#059669]"
                   />
                 </div>
               )}
 
               <div>
-                <label className="block font-bold text-[#183326] dark:text-stone-300 mb-1">
+                <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
                   {language === 'km' ? 'អ៊ីមែល' : 'Email'}
                 </label>
                 <input
@@ -191,12 +191,12 @@ export const AuthModal: React.FC = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@example.com"
-                  className="w-full px-3 py-2 rounded-xl border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 focus:outline-none focus:border-[#228B4E]"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-[#0F172A] dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#059669]/20 focus:border-[#059669]"
                 />
               </div>
 
               <div>
-                <label className="block font-bold text-[#183326] dark:text-stone-300 mb-1">
+                <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
                   {language === 'km' ? 'លេខទូរស័ព្ទ' : 'Phone Number'}
                 </label>
                 <input
@@ -204,13 +204,13 @@ export const AuthModal: React.FC = () => {
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="012 xxx xxx"
-                  className="w-full px-3 py-2 rounded-xl border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 focus:outline-none focus:border-[#228B4E]"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-[#0F172A] dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#059669]/20 focus:border-[#059669]"
                 />
               </div>
 
               <button
                 type="submit"
-                className="w-full py-2.5 rounded-xl bg-[#14532D] hover:bg-[#0B3D2E] text-white font-bold text-xs shadow-md transition active:scale-95"
+                className="w-full py-2.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-xs shadow-md shadow-emerald-950/20 transition active:scale-95"
               >
                 {language === 'km' ? 'ចុះឈ្មោះឥឡូវនេះ' : 'Complete Registration'}
               </button>

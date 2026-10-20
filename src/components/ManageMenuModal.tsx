@@ -98,7 +98,7 @@ export const ManageMenuModal: React.FC = () => {
     }
     setEditingItemId(item.id);
     setNameKh(item.nameKh);
-    setNameEn(item.nameEn || '');
+    setNameEn(item.nameEn);
     setPriceUsd(item.priceUsd.toString());
     setPriceRiel(item.priceRiel.toString());
     setPhotoUrl(item.photoUrl);
@@ -106,47 +106,49 @@ export const ManageMenuModal: React.FC = () => {
     setMode('edit');
   };
 
-  const handleSubmitItem = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!nameKh.trim()) {
-      showToast(isKm ? 'សូមបញ្ចូលឈ្មោះមុខម្ហូបជាភាសាខ្មែរ!' : 'Please enter food name in Khmer!', 'warning');
+  const handleDeleteItem = (item: RestaurantMenuItem) => {
+    if (!isPremiumActive) {
+      showToast(isKm ? 'សមាជិកភាពបានផុតកំណត់ហើយ' : 'Membership expired', 'warning');
       return;
     }
-
-    const usd = parseFloat(priceUsd) || 0;
-    const riel = parseInt(priceRiel) || Math.round(usd * 4100);
-
-    if (mode === 'add') {
-      const success = addRestaurantMenuItem(managingRestaurant.id, {
-        nameKh: nameKh.trim(),
-        nameEn: nameEn.trim() || undefined,
-        priceUsd: usd,
-        priceRiel: riel,
-        photoUrl: photoUrl.trim(),
-        descriptionKh: descriptionKh.trim() || undefined,
-      });
-      if (success) resetForm();
-    } else if (mode === 'edit' && editingItemId) {
-      const existing = menuItems.find(m => m.id === editingItemId);
-      if (!existing) return;
-
-      const success = updateRestaurantMenuItem(managingRestaurant.id, {
-        ...existing,
-        nameKh: nameKh.trim(),
-        nameEn: nameEn.trim() || undefined,
-        priceUsd: usd,
-        priceRiel: riel,
-        photoUrl: photoUrl.trim(),
-        descriptionKh: descriptionKh.trim() || undefined,
-      });
-      if (success) resetForm();
+    if (window.confirm(isKm ? `តើអ្នកពិតជាចង់លុបមុខម្ហូប "${item.nameKh}" មែនទេ?` : `Delete menu item "${item.nameKh}"?`)) {
+      deleteRestaurantMenuItem(managingRestaurant.id, item.id);
     }
   };
 
-  const handleDeleteItem = (item: RestaurantMenuItem) => {
-    if (window.confirm(isKm ? `តើអ្នកពិតជាចង់លុបមុខម្ហូប "${item.nameKh}" មែនទេ?` : `Are you sure you want to delete "${item.nameKh}"?`)) {
-      deleteRestaurantMenuItem(managingRestaurant.id, item.id);
+  const handleSubmitItem = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!nameKh.trim()) {
+      showToast(isKm ? 'សូមបញ្ចូលឈ្មោះមុខម្ហូប!' : 'Please enter dish name!', 'warning');
+      return;
     }
+
+    const parsedUsd = parseFloat(priceUsd) || 0;
+    const parsedRiel = parseInt(priceRiel) || Math.round(parsedUsd * 4100);
+
+    if (mode === 'add') {
+      addRestaurantMenuItem(managingRestaurant.id, {
+        nameKh: nameKh.trim(),
+        nameEn: nameEn.trim() || nameKh.trim(),
+        priceUsd: parsedUsd,
+        priceRiel: parsedRiel,
+        photoUrl: photoUrl.trim() || sampleFoodPhotos[0],
+        descriptionKh: descriptionKh.trim(),
+        descriptionEn: descriptionKh.trim(),
+      });
+    } else if (mode === 'edit' && editingItemId) {
+      updateRestaurantMenuItem(managingRestaurant.id, editingItemId, {
+        nameKh: nameKh.trim(),
+        nameEn: nameEn.trim() || nameKh.trim(),
+        priceUsd: parsedUsd,
+        priceRiel: parsedRiel,
+        photoUrl: photoUrl.trim() || sampleFoodPhotos[0],
+        descriptionKh: descriptionKh.trim(),
+        descriptionEn: descriptionKh.trim(),
+      });
+    }
+
+    resetForm();
   };
 
   const handleUpgradeSubmit = (e: React.FormEvent) => {
@@ -167,39 +169,39 @@ export const ManageMenuModal: React.FC = () => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-sm animate-fade-in">
       <div 
-        className="bg-white dark:bg-stone-900 w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] border border-[#A7DCA5]/40"
+        className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] border border-slate-200 dark:border-slate-800"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="px-5 py-4 border-b border-stone-200 dark:border-[#14532D]/40 flex items-center justify-between bg-gradient-to-r from-[#0B3D2E] via-[#14532D] to-[#0B3D2E] text-white">
+        <div className="px-5 py-4 border-b border-[#047857] flex items-center justify-between bg-[#064E3B] text-white">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 bg-white/10 text-[#A7DCA5] rounded-xl border border-[#A7DCA5]/30">
+            <div className="p-2 bg-emerald-500/20 text-emerald-200 rounded-xl border border-emerald-400/30">
               <UtensilsCrossed className="w-5 h-5" />
             </div>
             <div>
               <h2 className="font-moul text-sm text-white leading-snug">
                 {isKm ? 'គ្រប់គ្រងមុខម្ហូបក្នុងហាង' : 'Manage Restaurant Menu'}
               </h2>
-              <p className="text-[10px] text-[#A7DCA5] font-khmer">
+              <p className="text-[10px] text-emerald-200 font-khmer">
                 {isKm ? managingRestaurant.nameKh : managingRestaurant.nameEn}
               </p>
             </div>
           </div>
           <button
             onClick={() => setIsManageMenuModalOpen(false)}
-            className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-[#A7DCA5] hover:text-white transition"
+            className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-emerald-200 hover:text-white transition"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Membership Status Bar */}
-        <div className="p-4 bg-[#EAF6EC]/40 dark:bg-[#0B3D2E]/60 border-b border-[#A7DCA5]/30 dark:border-[#14532D]/40">
+        <div className="p-4 bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               {isPremiumActive ? (
-                <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-gradient-to-r from-[#14532D] to-[#228B4E] text-white flex items-center gap-1 font-khmer shadow-xs">
-                  <Sparkles className="w-3 h-3 text-[#A7DCA5]" />
+                <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-[#064E3B] text-white flex items-center gap-1 font-khmer shadow-xs">
+                  <Sparkles className="w-3 h-3 text-emerald-200" />
                   <span>⭐ {isKm ? 'សមាជិកភាព Premium (៣៦៥ ថ្ងៃ)' : 'Premium Active (365 Days)'}</span>
                 </span>
               ) : isExpired ? (
@@ -208,17 +210,17 @@ export const ManageMenuModal: React.FC = () => {
                   <span>⏳ {isKm ? 'Premium បានផុតកំណត់' : 'Premium Expired'}</span>
                 </span>
               ) : (
-                <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-[#EAF6EC] text-[#14532D] border border-[#A7DCA5]/50 font-khmer">
+                <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-200 text-slate-800 font-khmer">
                   🏷️ {isKm ? 'ចុះបញ្ជីឥតគិតថ្លៃ ($0 Free Listing)' : 'Free Listing ($0)'}
                 </span>
               )}
             </div>
 
             <div className="text-right">
-              <span className="text-xs font-bold text-[#14532D] dark:text-[#A7DCA5] font-mono">
+              <span className="text-xs font-bold text-[#064E3B] dark:text-emerald-400 font-mono">
                 {menuItems.length} / 5
               </span>
-              <span className="text-[10px] text-stone-500 font-khmer ml-1">
+              <span className="text-[10px] text-slate-500 font-khmer ml-1">
                 {isKm ? 'មុខម្ហូប' : 'items'}
               </span>
             </div>
@@ -226,8 +228,8 @@ export const ManageMenuModal: React.FC = () => {
 
           {/* Membership Details & Expiration Notice */}
           {isPremiumActive && managingRestaurant.membershipExpiresAt && (
-            <div className="mt-2 flex items-center gap-1.5 text-[10px] text-stone-600 dark:text-stone-300 font-khmer">
-              <Calendar className="w-3.5 h-3.5 text-[#228B4E]" />
+            <div className="mt-2 flex items-center gap-1.5 text-[10px] text-slate-600 dark:text-slate-300 font-khmer">
+              <Calendar className="w-3.5 h-3.5 text-[#059669]" />
               <span>
                 {isKm 
                   ? `សុពលភាពដល់ថ្ងៃទី៖ ${new Date(managingRestaurant.membershipExpiresAt).toLocaleDateString()} (ទូទាត់តែមួយលើក $4.99 គ្មានកាត់ប្រចាំខែ)` 
@@ -238,8 +240,8 @@ export const ManageMenuModal: React.FC = () => {
 
           {/* Free Listing Notice */}
           {isFree && (
-            <div className="mt-2 p-2.5 bg-[#EAF6EC] dark:bg-[#14532D]/40 border border-[#A7DCA5]/50 dark:border-[#14532D]/60 rounded-xl flex items-center justify-between text-xs font-khmer">
-              <div className="text-[10px] text-[#183326] dark:text-stone-200">
+            <div className="mt-2 p-2.5 bg-slate-100 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600 rounded-xl flex items-center justify-between text-xs font-khmer">
+              <div className="text-[10px] text-slate-700 dark:text-slate-200">
                 <span className="font-bold">{isKm ? 'សេចក្តីជូនដំណឹង៖' : 'Notice:'}</span>{' '}
                 {isKm 
                   ? 'គណនីឥតគិតថ្លៃមិនអាចបន្ថែមមុខម្ហូបបានទេ។ ដំឡើងទៅ Premium ($4.99 សម្រាប់ ៣៦៥ ថ្ងៃ) ដើម្បីបន្ថែមម្ហូប ៥ មុខ!' 
@@ -247,7 +249,7 @@ export const ManageMenuModal: React.FC = () => {
               </div>
               <button
                 onClick={() => setMode('upgrade')}
-                className="px-2.5 py-1 rounded-lg bg-[#14532D] hover:bg-[#0B3D2E] text-white font-bold text-[10px] shrink-0 ml-2 shadow transition active:scale-95"
+                className="px-2.5 py-1 rounded-lg bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-[10px] shrink-0 ml-2 shadow transition active:scale-95"
               >
                 {isKm ? 'ដំឡើង $4.99' : 'Upgrade $4.99'}
               </button>
@@ -265,7 +267,7 @@ export const ManageMenuModal: React.FC = () => {
               </div>
               <button
                 onClick={() => setMode('upgrade')}
-                className="px-2.5 py-1 rounded-lg bg-gradient-to-r from-[#14532D] to-[#228B4E] hover:from-[#0B3D2E] hover:to-[#14532D] text-white font-bold text-[10px] shrink-0 ml-2 shadow transition active:scale-95"
+                className="px-2.5 py-1 rounded-lg bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-[10px] shrink-0 ml-2 shadow transition active:scale-95"
               >
                 {isKm ? 'បន្ត $4.99' : 'Renew $4.99'}
               </button>
@@ -279,38 +281,38 @@ export const ManageMenuModal: React.FC = () => {
           {mode === 'list' && (
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <h3 className="font-bold text-[#183326] dark:text-stone-100 font-khmer text-xs">
+                <h3 className="font-bold text-[#0F172A] dark:text-white font-khmer text-xs">
                   {isKm ? 'បញ្ជីមុខម្ហូបក្នុងហាង (អតិបរមា ៥ មុខ)' : 'Restaurant Menu Items (Max 5)'}
                 </h3>
 
                 {isPremiumActive && menuItems.length < 5 && (
                   <button
                     onClick={handleStartAdd}
-                    className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[#14532D] hover:bg-[#0B3D2E] text-white font-bold text-xs shadow-xs font-khmer transition active:scale-95"
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-xs shadow-xs font-khmer transition active:scale-95"
                   >
-                    <Plus className="w-3.5 h-3.5 text-[#A7DCA5]" />
+                    <Plus className="w-3.5 h-3.5 text-emerald-200" />
                     <span>{isKm ? 'បន្ថែមម្ហូបថ្មី' : 'Add Dish'}</span>
                   </button>
                 )}
               </div>
 
               {menuItems.length === 0 ? (
-                <div className="py-10 text-center text-stone-400 space-y-2 font-khmer">
-                  <UtensilsCrossed className="w-10 h-10 mx-auto text-stone-300" />
+                <div className="py-10 text-center text-slate-400 space-y-2 font-khmer">
+                  <UtensilsCrossed className="w-10 h-10 mx-auto text-slate-300" />
                   <p className="text-xs">
                     {isKm ? 'ហាងនេះមិនទាន់មានមុខម្ហូបនៅឡើយទេ' : 'No menu items added yet'}
                   </p>
                   {isPremiumActive ? (
                     <button
                       onClick={handleStartAdd}
-                      className="px-4 py-2 rounded-xl bg-[#14532D] text-white font-bold text-xs hover:bg-[#0B3D2E] transition active:scale-95"
+                      className="px-4 py-2 rounded-xl bg-[#064E3B] text-white font-bold text-xs hover:bg-[#047857] transition active:scale-95"
                     >
                       {isKm ? '+ បន្ថែមមុខម្ហូបដំបូង' : '+ Add First Menu Item'}
                     </button>
                   ) : (
                     <button
                       onClick={() => setMode('upgrade')}
-                      className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#14532D] to-[#228B4E] text-white font-bold text-xs shadow-md hover:from-[#0B3D2E] hover:to-[#14532D] transition active:scale-95"
+                      className="px-4 py-2 rounded-xl bg-[#10B981] hover:bg-[#059669] text-white font-bold text-xs shadow-md transition active:scale-95"
                     >
                       {isKm ? '⭐ ដំឡើង Premium $4.99 ដើម្បីបន្ថែមម្ហូប' : '⭐ Upgrade to Premium $4.99 to add food items'}
                     </button>
@@ -321,30 +323,30 @@ export const ManageMenuModal: React.FC = () => {
                   {menuItems.map((item, index) => (
                     <div 
                       key={item.id}
-                      className="p-3 rounded-2xl bg-white dark:bg-[#0B3D2E]/40 border border-[#A7DCA5]/40 dark:border-[#14532D]/50 flex items-center gap-3 shadow-xs"
+                      className="p-3 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 flex items-center gap-3 shadow-xs"
                     >
-                      <div className="w-14 h-14 rounded-xl overflow-hidden bg-stone-200 shrink-0 border border-[#A7DCA5]/40">
+                      <div className="w-14 h-14 rounded-xl overflow-hidden bg-slate-100 shrink-0 border border-slate-200">
                         <img src={item.photoUrl} alt={item.nameKh} className="w-full h-full object-cover" />
                       </div>
 
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1.5">
-                          <span className="w-4 h-4 rounded-full bg-[#14532D] text-white text-[9px] font-bold flex items-center justify-center shrink-0">
+                          <span className="w-4 h-4 rounded-full bg-[#064E3B] text-white text-[9px] font-bold flex items-center justify-center shrink-0">
                             {index + 1}
                           </span>
-                          <h4 className="font-bold text-[#183326] dark:text-stone-100 font-khmer text-xs truncate">
+                          <h4 className="font-bold text-[#0F172A] dark:text-white font-khmer text-xs truncate">
                             {item.nameKh}
                           </h4>
                         </div>
                         {item.nameEn && (
-                          <p className="text-[10px] text-stone-500 truncate">{item.nameEn}</p>
+                          <p className="text-[10px] text-slate-500 truncate">{item.nameEn}</p>
                         )}
                         <div className="flex items-center gap-2 mt-1">
-                          <span className="text-[#14532D] dark:text-[#A7DCA5] font-bold font-mono text-xs">${item.priceUsd.toFixed(2)}</span>
-                          <span className="text-[10px] text-stone-400 font-mono">({item.priceRiel.toLocaleString()} ៛)</span>
+                          <span className="text-[#064E3B] dark:text-emerald-400 font-bold font-mono text-xs">${item.priceUsd.toFixed(2)}</span>
+                          <span className="text-[10px] text-slate-400 font-mono">({item.priceRiel.toLocaleString()} ៛)</span>
                         </div>
                         {item.descriptionKh && (
-                          <p className="text-[10px] text-stone-500 font-khmer line-clamp-1 mt-0.5">{item.descriptionKh}</p>
+                          <p className="text-[10px] text-slate-500 font-khmer line-clamp-1 mt-0.5">{item.descriptionKh}</p>
                         )}
                       </div>
 
@@ -353,14 +355,14 @@ export const ManageMenuModal: React.FC = () => {
                         <button
                           onClick={() => handleStartEdit(item)}
                           disabled={!isPremiumActive}
-                          className="p-1.5 rounded-lg bg-[#EAF6EC] hover:bg-[#A7DCA5]/40 text-[#14532D] dark:bg-[#14532D]/50 dark:text-[#A7DCA5] transition disabled:opacity-40"
+                          className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200 transition disabled:opacity-40"
                           title="កែប្រែ"
                         >
                           <Edit2 className="w-3.5 h-3.5" />
                         </button>
                         <button
                           onClick={() => handleDeleteItem(item)}
-                          className="p-1.5 rounded-lg bg-red-100 hover:bg-red-200 text-red-600 transition"
+                          className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 transition"
                           title="លុប"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -376,8 +378,8 @@ export const ManageMenuModal: React.FC = () => {
           {/* Mode: Add / Edit Form */}
           {(mode === 'add' || mode === 'edit') && (
             <form onSubmit={handleSubmitItem} className="space-y-3 font-khmer">
-              <div className="flex items-center justify-between border-b border-stone-200 dark:border-[#14532D]/30 pb-2">
-                <h3 className="font-bold text-[#183326] dark:text-stone-100 text-xs">
+              <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-2">
+                <h3 className="font-bold text-[#0F172A] dark:text-white text-xs">
                   {mode === 'add' 
                     ? (isKm ? `+ បន្ថែមមុខម្ហូបថ្មី (${menuItems.length + 1}/5)` : `+ Add New Menu Item (${menuItems.length + 1}/5)`) 
                     : (isKm ? 'កែប្រែព័ត៌មានមុខម្ហូប' : 'Edit Menu Item')}
@@ -385,14 +387,14 @@ export const ManageMenuModal: React.FC = () => {
                 <button
                   type="button"
                   onClick={resetForm}
-                  className="text-[11px] text-stone-500 hover:text-stone-800"
+                  className="text-[11px] text-slate-500 hover:text-slate-800"
                 >
                   {isKm ? 'បោះបង់' : 'Cancel'}
                 </button>
               </div>
 
               <div>
-                <label className="block font-bold text-stone-700 dark:text-stone-300 mb-1">
+                <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
                   {isKm ? 'ឈ្មោះមុខម្ហូប (ភាសាខ្មែរ) *' : 'Dish Name (Khmer) *'}
                 </label>
                 <input
@@ -401,12 +403,12 @@ export const ManageMenuModal: React.FC = () => {
                   value={nameKh}
                   onChange={e => setNameKh(e.target.value)}
                   placeholder="ឧ. ឡុកឡាក់សាច់គោពិសេស"
-                  className="w-full px-3 py-2 rounded-xl border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-xs focus:ring-2 focus:ring-[#34A853] focus:border-[#228B4E] outline-none"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs focus:ring-2 focus:ring-emerald-500/30 focus:border-[#059669] outline-none text-[#0F172A] dark:text-white"
                 />
               </div>
 
               <div>
-                <label className="block font-bold text-stone-700 dark:text-stone-300 mb-1">
+                <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
                   {isKm ? 'ឈ្មោះមុខម្ហូបជាអក្សរឡាតាំង' : 'Dish Name (English)'}
                 </label>
                 <input
@@ -414,13 +416,13 @@ export const ManageMenuModal: React.FC = () => {
                   value={nameEn}
                   onChange={e => setNameEn(e.target.value)}
                   placeholder="e.g. Special Beef Lok Lak"
-                  className="w-full px-3 py-2 rounded-xl border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-xs focus:ring-2 focus:ring-[#34A853] focus:border-[#228B4E] outline-none"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs focus:ring-2 focus:ring-emerald-500/30 focus:border-[#059669] outline-none text-[#0F172A] dark:text-white"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-bold text-stone-700 dark:text-stone-300 mb-1">
+                  <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
                     {isKm ? 'តម្លៃ (USD $)' : 'Price (USD $)'}
                   </label>
                   <input
@@ -434,12 +436,12 @@ export const ManageMenuModal: React.FC = () => {
                       setPriceRiel((num * 4100).toFixed(0));
                     }}
                     placeholder="5.00"
-                    className="w-full px-3 py-2 rounded-xl border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-xs font-mono focus:ring-2 focus:ring-[#34A853] focus:border-[#228B4E] outline-none"
+                    className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-mono focus:ring-2 focus:ring-emerald-500/30 focus:border-[#059669] outline-none text-[#0F172A] dark:text-white"
                   />
                 </div>
 
                 <div>
-                  <label className="block font-bold text-stone-700 dark:text-stone-300 mb-1">
+                  <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
                     {isKm ? 'តម្លៃជាប្រាក់រៀល (៛)' : 'Price (KHR ៛)'}
                   </label>
                   <input
@@ -448,13 +450,13 @@ export const ManageMenuModal: React.FC = () => {
                     value={priceRiel}
                     onChange={e => setPriceRiel(e.target.value)}
                     placeholder="20000"
-                    className="w-full px-3 py-2 rounded-xl border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-xs font-mono focus:ring-2 focus:ring-[#34A853] focus:border-[#228B4E] outline-none"
+                    className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-mono focus:ring-2 focus:ring-emerald-500/30 focus:border-[#059669] outline-none text-[#0F172A] dark:text-white"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block font-bold text-stone-700 dark:text-stone-300 mb-1">
+                <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
                   {isKm ? 'រូបភាពមុខម្ហូប (Photo URL) *' : 'Dish Photo URL *'}
                 </label>
                 <input
@@ -462,7 +464,7 @@ export const ManageMenuModal: React.FC = () => {
                   required
                   value={photoUrl}
                   onChange={e => setPhotoUrl(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-xs mb-2 focus:ring-2 focus:ring-[#34A853] focus:border-[#228B4E] outline-none"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs mb-2 focus:ring-2 focus:ring-emerald-500/30 focus:border-[#059669] outline-none text-[#0F172A] dark:text-white font-mono text-[11px]"
                 />
                 
                 <div className="grid grid-cols-4 gap-2">
@@ -471,7 +473,7 @@ export const ManageMenuModal: React.FC = () => {
                       key={i}
                       onClick={() => setPhotoUrl(url)}
                       className={`aspect-16/10 rounded-lg overflow-hidden cursor-pointer border-2 transition ${
-                        photoUrl === url ? 'border-[#14532D] ring-2 ring-[#34A853]' : 'border-transparent opacity-70 hover:opacity-100'
+                        photoUrl === url ? 'border-[#064E3B] ring-2 ring-emerald-300' : 'border-transparent opacity-70 hover:opacity-100'
                       }`}
                     >
                       <img src={url} alt="sample" className="w-full h-full object-cover" />
@@ -481,7 +483,7 @@ export const ManageMenuModal: React.FC = () => {
               </div>
 
               <div>
-                <label className="block font-bold text-stone-700 dark:text-stone-300 mb-1">
+                <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
                   {isKm ? 'ការពិពណ៌នាអំពីមុខម្ហូប' : 'Description'}
                 </label>
                 <textarea
@@ -489,7 +491,7 @@ export const ManageMenuModal: React.FC = () => {
                   value={descriptionKh}
                   onChange={e => setDescriptionKh(e.target.value)}
                   placeholder="រៀបរាប់ពីរសជាតិ គ្រឿងផ្សំ និងរបៀបទទួលទាន..."
-                  className="w-full px-3 py-2 rounded-xl border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-xs resize-none focus:ring-2 focus:ring-[#34A853] focus:border-[#228B4E] outline-none"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs resize-none focus:ring-2 focus:ring-emerald-500/30 focus:border-[#059669] outline-none text-[#0F172A] dark:text-white"
                 />
               </div>
 
@@ -497,14 +499,14 @@ export const ManageMenuModal: React.FC = () => {
                 <button
                   type="button"
                   onClick={resetForm}
-                  className="py-2.5 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 font-bold"
+                  className="py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold"
                 >
                   {isKm ? 'បោះបង់' : 'Cancel'}
                 </button>
 
                 <button
                   type="submit"
-                  className="py-2.5 rounded-xl bg-[#14532D] hover:bg-[#0B3D2E] text-white font-bold shadow transition active:scale-95"
+                  className="py-2.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold shadow-xs transition active:scale-95"
                 >
                   {mode === 'add' ? (isKm ? 'រក្សាទុកមុខម្ហូប' : 'Save Dish') : (isKm ? 'កែប្រែព័ត៌មាន' : 'Update Dish')}
                 </button>
@@ -515,13 +517,13 @@ export const ManageMenuModal: React.FC = () => {
           {/* Mode: Upgrade / Renew to Premium ($4.99 for 365 Days) */}
           {mode === 'upgrade' && (
             <form onSubmit={handleUpgradeSubmit} className="space-y-4 font-khmer">
-              <div className="p-4 bg-gradient-to-br from-[#EAF6EC] via-white to-[#EAF6EC] dark:from-[#0B3D2E] dark:to-[#14532D]/70 rounded-2xl border-2 border-[#228B4E] text-center space-y-2">
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#14532D] text-white text-[10px] font-bold rounded-full shadow-xs">
-                  <Sparkles className="w-3.5 h-3.5 text-[#A7DCA5]" />
+              <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border-2 border-emerald-500 text-center space-y-2">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#064E3B] text-white text-[10px] font-bold rounded-full shadow-xs">
+                  <Sparkles className="w-3.5 h-3.5 text-emerald-200" />
                   <span>One-Time Payment: $4.99 USD for 365 Days</span>
                 </div>
-                <div className="text-2xl font-black text-[#14532D] dark:text-[#A7DCA5] font-mono">$4.99 USD</div>
-                <p className="text-[11px] text-stone-600 dark:text-stone-300 leading-snug">
+                <div className="text-2xl font-black text-[#064E3B] dark:text-emerald-400 font-mono">$4.99 USD</div>
+                <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-snug">
                   {isKm 
                     ? 'ការទូទាត់តែមួយលើក $4.99 សម្រាប់រយៈពេល ៣៦៥ ថ្ងៃពេញ (គ្មានការកាត់ប្រាក់ប្រចាំខែ និងគ្មានការបន្តស្វ័យប្រវត្តិឡើយ)។ លោកអ្នកអាចបន្ថែមមុខម្ហូបលម្អិតបានរហូតដល់ ៥ មុខ ជាមួយរូបភាព និងតម្លៃ។' 
                     : 'One-time payment of $4.99 for 365 days. No monthly subscription, no automatic charges. Add up to 5 food menu items with photos and prices.'}
@@ -529,30 +531,30 @@ export const ManageMenuModal: React.FC = () => {
               </div>
 
               {/* Bank Transfer Details (NO QR CODE) */}
-              <div className="p-4 bg-[#EAF6EC]/40 dark:bg-[#0B3D2E]/60 rounded-2xl border border-[#A7DCA5]/40 dark:border-[#14532D]/50 space-y-2">
-                <div className="text-xs font-bold text-[#183326] dark:text-stone-200 border-b border-[#A7DCA5]/30 pb-1">
+              <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-2">
+                <div className="text-xs font-bold text-[#0F172A] dark:text-white border-b border-slate-200 dark:border-slate-700 pb-1">
                   {isKm ? 'ព័ត៌មានគណនីផ្ទេរប្រាក់ (ABA Bank Transfer)' : 'Bank Transfer Details'}
                 </div>
                 <div className="flex justify-between text-[11px]">
-                  <span className="text-stone-500">{isKm ? 'ធនាគារ៖' : 'Bank:'}</span>
-                  <span className="font-bold text-[#183326] dark:text-stone-200 font-mono">ABA BANK</span>
+                  <span className="text-slate-500">{isKm ? 'ធនាគារ៖' : 'Bank:'}</span>
+                  <span className="font-bold text-[#0F172A] dark:text-white font-mono">ABA BANK</span>
                 </div>
                 <div className="flex justify-between text-[11px]">
-                  <span className="text-stone-500">{isKm ? 'ឈ្មោះគណនី៖' : 'Beneficiary:'}</span>
-                  <span className="font-bold text-[#183326] dark:text-stone-200 font-mono">KHMER FOOD TOURISM</span>
+                  <span className="text-slate-500">{isKm ? 'ឈ្មោះគណនី៖' : 'Beneficiary:'}</span>
+                  <span className="font-bold text-[#0F172A] dark:text-white font-mono">KHMER FOOD TOURISM</span>
                 </div>
                 <div className="flex justify-between text-[11px]">
-                  <span className="text-stone-500">{isKm ? 'លេខគណនី៖' : 'Account Number:'}</span>
-                  <span className="font-bold text-[#14532D] dark:text-[#A7DCA5] font-mono text-xs">000 123 456 (USD)</span>
+                  <span className="text-slate-500">{isKm ? 'លេខគណនី៖' : 'Account Number:'}</span>
+                  <span className="font-bold text-[#064E3B] dark:text-emerald-400 font-mono text-xs">000 123 456 (USD)</span>
                 </div>
-                <div className="flex justify-between text-[11px] pt-1 border-t border-[#A7DCA5]/30">
-                  <span className="text-stone-500">{isKm ? 'ចំនួនទឹកប្រាក់៖' : 'Amount:'}</span>
-                  <span className="font-bold text-[#14532D] dark:text-[#A7DCA5] font-mono text-xs">$4.99 USD</span>
+                <div className="flex justify-between text-[11px] pt-1 border-t border-slate-200 dark:border-slate-700">
+                  <span className="text-slate-500">{isKm ? 'ចំនួនទឹកប្រាក់៖' : 'Amount:'}</span>
+                  <span className="font-bold text-[#064E3B] dark:text-emerald-400 font-mono text-xs">$4.99 USD</span>
                 </div>
               </div>
 
               <div>
-                <label className="block font-bold text-[#183326] dark:text-stone-200 mb-1 text-xs">
+                <label className="block font-bold text-[#0F172A] dark:text-white mb-1 text-xs">
                   {isKm ? 'លេខកូដប្រតិបត្តិការធនាគារ (Transaction Ref / Trx ID) *' : 'Bank Transaction Reference / Trx ID *'}
                 </label>
                 <input
@@ -561,9 +563,9 @@ export const ManageMenuModal: React.FC = () => {
                   value={transactionRef}
                   onChange={e => setTransactionRef(e.target.value)}
                   placeholder="ឧ. TRX-123456789 ឬលេខ Ref លើវិក្កយបត្រ"
-                  className="w-full px-3 py-2.5 rounded-xl border-2 border-[#228B4E] bg-white dark:bg-stone-800 text-[#183326] dark:text-stone-100 font-mono font-bold text-xs focus:outline-none focus:border-[#14532D]"
+                  className="w-full px-3 py-2.5 rounded-xl border-2 border-emerald-500 bg-white dark:bg-slate-800 text-[#0F172A] dark:text-white font-mono font-bold text-xs focus:outline-none focus:border-[#064E3B]"
                 />
-                <p className="text-[10px] text-stone-500 mt-1">
+                <p className="text-[10px] text-slate-500 mt-1">
                   {isKm 
                     ? 'បញ្ចូលលេខកូដប្រតិបត្តិការពីបង្កាន់ដៃធនាគារ ABA របស់អ្នក។ រដ្ឋបាលនឹងផ្ទៀងផ្ទាត់ និងបើកដំណើរការ ៣៦៥ ថ្ងៃជូន។' 
                     : 'Enter the Transaction ID from your ABA bank receipt for administrative verification.'}
@@ -574,14 +576,14 @@ export const ManageMenuModal: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setMode('list')}
-                  className="py-2.5 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 font-bold"
+                  className="py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold"
                 >
                   {isKm ? 'ត្រឡប់ក្រោយ' : 'Back'}
                 </button>
 
                 <button
                   type="submit"
-                  className="py-2.5 rounded-xl bg-gradient-to-r from-[#14532D] to-[#228B4E] hover:from-[#0B3D2E] hover:to-[#14532D] text-white font-bold shadow text-xs transition active:scale-95"
+                  className="py-2.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold shadow-xs text-xs transition active:scale-95"
                 >
                   {isKm ? 'ដាក់ស្នើការទូទាត់ $4.99' : 'Submit $4.99 Payment'}
                 </button>

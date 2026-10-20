@@ -197,27 +197,27 @@ export const AddRestaurantModal: React.FC = () => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-sm animate-fade-in">
       <div 
-        className="bg-white dark:bg-stone-900 w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] border border-[#A7DCA5]/40"
+        className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] border border-slate-200 dark:border-slate-800"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="px-5 py-4 border-b border-stone-200 dark:border-[#14532D]/40 flex items-center justify-between bg-gradient-to-r from-[#0B3D2E] via-[#14532D] to-[#0B3D2E] text-white">
+        <div className="px-5 py-4 border-b border-[#047857] flex items-center justify-between bg-[#064E3B] text-white">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 bg-white/10 text-[#A7DCA5] rounded-xl border border-[#A7DCA5]/30">
+            <div className="p-2 bg-emerald-500/20 text-emerald-200 rounded-xl border border-emerald-400/30">
               <Store className="w-5 h-5" />
             </div>
             <div>
               <h2 className="font-moul text-sm text-white leading-snug">
                 {isKm ? 'ចុះបញ្ជីហាងអាហារ' : 'Register Restaurant'}
               </h2>
-              <div className="flex items-center gap-1.5 text-[10px] text-[#A7DCA5] font-khmer">
-                <span className={`px-2 py-0.5 rounded-full ${step === 1 ? 'bg-[#34A853] text-white font-bold' : 'bg-white/20'}`}>
+              <div className="flex items-center gap-1.5 text-[10px] text-emerald-200 font-khmer">
+                <span className={`px-2 py-0.5 rounded-full ${step === 1 ? 'bg-[#10B981] text-white font-bold' : 'bg-white/20'}`}>
                   {isKm ? '១. ព័ត៌មានហាង' : '1. Shop Details'}
                 </span>
                 {selectedTier === 'premium' && (
                   <>
                     <span>→</span>
-                    <span className={`px-2 py-0.5 rounded-full ${step === 2 ? 'bg-[#34A853] text-white font-bold' : 'bg-white/20'}`}>
+                    <span className={`px-2 py-0.5 rounded-full ${step === 2 ? 'bg-[#10B981] text-white font-bold' : 'bg-white/20'}`}>
                       {isKm ? `២. Premium $${promoPrice} (៣៦៥ ថ្ងៃ)` : `2. Premium $${promoPrice} (365 Days)`}
                     </span>
                   </>
@@ -227,7 +227,7 @@ export const AddRestaurantModal: React.FC = () => {
           </div>
           <button
             onClick={() => setIsAddRestaurantModalOpen(false)}
-            className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-[#A7DCA5] hover:text-white transition"
+            className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-emerald-200 hover:text-white transition"
           >
             <X className="w-5 h-5" />
           </button>
@@ -241,7 +241,7 @@ export const AddRestaurantModal: React.FC = () => {
           >
             {/* Membership Tier Cards */}
             <div>
-              <label className="block font-bold text-stone-800 dark:text-stone-200 mb-1.5 text-xs">
+              <label className="block font-bold text-slate-800 dark:text-slate-200 mb-1.5 text-xs">
                 {isKm ? 'ជ្រើសរើសប្រភេទសមាជិកភាព (Select Membership Plan):' : 'Select Membership Plan:'}
               </label>
 
@@ -251,21 +251,21 @@ export const AddRestaurantModal: React.FC = () => {
                   onClick={() => setSelectedTier('free')}
                   className={`p-3.5 rounded-2xl border-2 cursor-pointer transition flex flex-col justify-between ${
                     selectedTier === 'free' 
-                      ? 'border-[#228B4E] bg-[#EAF6EC] dark:bg-[#14532D]/40 ring-2 ring-[#A7DCA5]' 
-                      : 'border-stone-200 dark:border-stone-700 hover:border-[#228B4E] bg-white dark:bg-stone-800/40'
+                      ? 'border-[#059669] bg-emerald-50/50 dark:bg-emerald-950/20 ring-2 ring-[#059669]/20' 
+                      : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 bg-white dark:bg-slate-800/40'
                   }`}
                 >
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
-                      <span className="font-bold text-xs text-[#183326] dark:text-stone-100 flex items-center gap-1">
+                      <span className="font-bold text-xs text-[#0F172A] dark:text-slate-100 flex items-center gap-1">
                         <span>🎁</span>
                         <span>{isKm ? 'ឥតគិតថ្លៃ' : 'Free Listing'}</span>
                       </span>
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#228B4E] text-white">
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#059669] text-white">
                         $0
                       </span>
                     </div>
-                    <ul className="text-[10px] text-stone-600 dark:text-stone-300 space-y-1">
+                    <ul className="text-[10px] text-slate-600 dark:text-slate-300 space-y-1">
                       <li>✓ {isKm ? 'បង្ហាញក្នុងបញ្ជីហាងផ្លូវការ' : 'Listed in directory'}</li>
                       <li>✓ {isKm ? 'រូបតំណាងហាង ១ សន្លឹក' : '1 profile photo'}</li>
                       <li>✓ {isKm ? 'អាសយដ្ឋាន និងលេខទូរស័ព្ទ' : 'Address & contact info'}</li>
@@ -275,7 +275,7 @@ export const AddRestaurantModal: React.FC = () => {
                     </ul>
                   </div>
                   {selectedTier === 'free' && (
-                    <div className="mt-2 text-[10px] font-bold text-[#14532D] dark:text-[#A7DCA5] flex items-center gap-1">
+                    <div className="mt-2 text-[10px] font-bold text-[#064E3B] dark:text-emerald-400 flex items-center gap-1">
                       <CheckCircle2 className="w-3.5 h-3.5" />
                       <span>{isKm ? 'បានជ្រើសរើស' : 'Selected'}</span>
                     </div>
@@ -287,22 +287,22 @@ export const AddRestaurantModal: React.FC = () => {
                   onClick={() => setSelectedTier('premium')}
                   className={`p-3.5 rounded-2xl border-2 cursor-pointer transition flex flex-col justify-between ${
                     selectedTier === 'premium' 
-                      ? 'border-[#14532D] bg-[#EAF6EC] dark:bg-[#14532D]/40 ring-2 ring-[#34A853]' 
-                      : 'border-stone-200 dark:border-stone-700 hover:border-[#14532D] bg-white dark:bg-stone-800/40'
+                      ? 'border-[#064E3B] bg-emerald-50/50 dark:bg-emerald-950/20 ring-2 ring-[#064E3B]/20' 
+                      : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 bg-white dark:bg-slate-800/40'
                   }`}
                 >
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
-                      <span className="font-bold text-xs text-[#14532D] dark:text-[#A7DCA5] flex items-center gap-1">
+                      <span className="font-bold text-xs text-[#064E3B] dark:text-emerald-400 flex items-center gap-1">
                         <span>⭐</span>
                         <span>{isKm ? 'Premium VIP' : 'Premium VIP'}</span>
                       </span>
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#14532D] text-white font-mono">
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#064E3B] text-white font-mono">
                         $4.99
                       </span>
                     </div>
-                    <ul className="text-[10px] text-stone-600 dark:text-stone-300 space-y-1">
-                      <li className="text-[#14532D] dark:text-[#A7DCA5] font-bold">
+                    <ul className="text-[10px] text-slate-600 dark:text-slate-300 space-y-1">
+                      <li className="text-[#064E3B] dark:text-emerald-400 font-bold">
                         ✓ {isKm ? 'ថែមមុខម្ហូបបានរហូតដល់ ៥ មុខ' : 'Add up to 5 food items'}
                       </li>
                       <li>✓ {isKm ? 'រូបភាព តម្លៃ និងការពិពណ៌នា' : 'Photos, prices, descriptions'}</li>
@@ -311,7 +311,7 @@ export const AddRestaurantModal: React.FC = () => {
                     </ul>
                   </div>
                   {selectedTier === 'premium' && (
-                    <div className="mt-2 text-[10px] font-bold text-[#14532D] dark:text-[#A7DCA5] flex items-center gap-1">
+                    <div className="mt-2 text-[10px] font-bold text-[#064E3B] dark:text-emerald-400 flex items-center gap-1">
                       <CheckCircle2 className="w-3.5 h-3.5" />
                       <span>{isKm ? 'បានជ្រើសរើស ($4.99)' : 'Selected ($4.99)'}</span>
                     </div>
@@ -320,7 +320,7 @@ export const AddRestaurantModal: React.FC = () => {
               </div>
 
               {/* No Auto-Renew Guarantee Notice */}
-              <p className="text-[10px] text-stone-500 mt-1.5">
+              <p className="text-[10px] text-slate-500 mt-1.5">
                 {isKm 
                   ? 'ℹ️ ការទូទាត់ Premium គឺជាការបង់តែមួយលើក $4.99 សម្រាប់រយៈពេល ៣៦៥ ថ្ងៃ (គ្មានការកាត់ប្រាក់ប្រចាំខែ និងគ្មានការបន្តស្វ័យប្រវត្តិឡើយ)។' 
                   : 'ℹ️ Premium is a one-time payment of $4.99 for 365 days. No monthly subscription or automatic renewal.'}
@@ -330,7 +330,7 @@ export const AddRestaurantModal: React.FC = () => {
             {/* Shop Names */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block font-bold text-stone-700 dark:text-stone-300 mb-1">
+                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
                   {isKm ? 'ឈ្មោះហាងជាភាសាខ្មែរ *' : 'Restaurant Name (Khmer) *'}
                 </label>
                 <input
@@ -339,12 +339,12 @@ export const AddRestaurantModal: React.FC = () => {
                   value={nameKh}
                   onChange={(e) => setNameKh(e.target.value)}
                   placeholder="ឧ. ភោជនីយដ្ឋាន ម្លិះអង្គរ"
-                  className="w-full px-3 py-2 rounded-xl border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-xs focus:ring-2 focus:ring-[#34A853] focus:border-[#228B4E] outline-none"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs focus:ring-2 focus:ring-[#059669]/20 focus:border-[#059669] outline-none"
                 />
               </div>
 
               <div>
-                <label className="block font-bold text-stone-700 dark:text-stone-300 mb-1">
+                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
                   {isKm ? 'ឈ្មោះហាងជាអក្សរឡាតាំង' : 'Restaurant Name (English)'}
                 </label>
                 <input
@@ -352,7 +352,7 @@ export const AddRestaurantModal: React.FC = () => {
                   value={nameEn}
                   onChange={(e) => setNameEn(e.target.value)}
                   placeholder="e.g. Malis Angkor Restaurant"
-                  className="w-full px-3 py-2 rounded-xl border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-xs font-sans focus:ring-2 focus:ring-[#34A853] focus:border-[#228B4E] outline-none"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-sans focus:ring-2 focus:ring-[#059669]/20 focus:border-[#059669] outline-none"
                 />
               </div>
             </div>
@@ -360,7 +360,7 @@ export const AddRestaurantModal: React.FC = () => {
             {/* Province & Price Tier */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block font-bold text-stone-700 dark:text-stone-300 mb-1">
+                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
                   {isKm ? 'ខេត្ត / រាជធានី' : 'Province / City'}
                 </label>
                 <select
@@ -369,7 +369,7 @@ export const AddRestaurantModal: React.FC = () => {
                     setProvinceKh(e.target.value);
                     setProvinceEn(e.target.value);
                   }}
-                  className="w-full px-3 py-2 rounded-xl border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-xs focus:ring-2 focus:ring-[#34A853] focus:border-[#228B4E] outline-none"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs focus:ring-2 focus:ring-[#059669]/20 focus:border-[#059669] outline-none"
                 >
                   <option value="រាជធានីភ្នំពេញ">រាជធានីភ្នំពេញ (Phnom Penh)</option>
                   <option value="ខេត្តសៀមរាប">ខេត្តសៀមរាប (Siem Reap)</option>
@@ -385,13 +385,13 @@ export const AddRestaurantModal: React.FC = () => {
               </div>
 
               <div>
-                <label className="block font-bold text-stone-700 dark:text-stone-300 mb-1">
+                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
                   {isKm ? 'កម្រិតតម្លៃ' : 'Price Tier'}
                 </label>
                 <select
                   value={priceLevel}
                   onChange={(e) => setPriceLevel(e.target.value as RestaurantPriceLevel)}
-                  className="w-full px-3 py-2 rounded-xl border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-xs focus:ring-2 focus:ring-[#34A853] focus:border-[#228B4E] outline-none"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs focus:ring-2 focus:ring-[#059669]/20 focus:border-[#059669] outline-none"
                 >
                   <option value="$">$ (ទូទៅ / $1 - $3)</option>
                   <option value="$$">$$ (មធ្យម / $3 - $8)</option>
@@ -404,8 +404,8 @@ export const AddRestaurantModal: React.FC = () => {
             {/* Address & Contact Phone */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block font-bold text-stone-700 dark:text-stone-300 mb-1">
-                  <MapPin className="w-3.5 h-3.5 inline mr-1 text-[#228B4E]" />
+                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  <MapPin className="w-3.5 h-3.5 inline mr-1 text-[#059669]" />
                   {isKm ? 'អាសយដ្ឋានជាក់ស្ដែង *' : 'Physical Address *'}
                 </label>
                 <input
@@ -414,13 +414,13 @@ export const AddRestaurantModal: React.FC = () => {
                   value={addressKh}
                   onChange={(e) => setAddressKh(e.target.value)}
                   placeholder="ផ្ទះលេខ, ផ្លូវ, សង្កាត់, ក្រុង/ខណ្ឌ..."
-                  className="w-full px-3 py-2 rounded-xl border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-xs focus:ring-2 focus:ring-[#34A853] focus:border-[#228B4E] outline-none"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs focus:ring-2 focus:ring-[#059669]/20 focus:border-[#059669] outline-none"
                 />
               </div>
 
               <div>
-                <label className="block font-bold text-stone-700 dark:text-stone-300 mb-1">
-                  <Phone className="w-3.5 h-3.5 inline mr-1 text-[#228B4E]" />
+                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  <Phone className="w-3.5 h-3.5 inline mr-1 text-[#059669]" />
                   {isKm ? 'លេខទូរស័ព្ទទាក់ទង *' : 'Contact Phone *'}
                 </label>
                 <input
@@ -429,15 +429,15 @@ export const AddRestaurantModal: React.FC = () => {
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="012 xxx xxx"
-                  className="w-full px-3 py-2 rounded-xl border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-xs font-mono focus:ring-2 focus:ring-[#34A853] focus:border-[#228B4E] outline-none"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-mono focus:ring-2 focus:ring-[#059669]/20 focus:border-[#059669] outline-none"
                 />
               </div>
             </div>
 
             {/* Opening Hours */}
             <div>
-              <label className="block font-bold text-stone-700 dark:text-stone-300 mb-1">
-                <Clock className="w-3.5 h-3.5 inline mr-1 text-[#228B4E]" />
+              <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
+                <Clock className="w-3.5 h-3.5 inline mr-1 text-[#059669]" />
                 {isKm ? 'ម៉ោងបើកដំណើរការ' : 'Opening Hours'}
               </label>
               <input
@@ -445,13 +445,13 @@ export const AddRestaurantModal: React.FC = () => {
                 value={openingHoursKh}
                 onChange={(e) => setOpeningHoursKh(e.target.value)}
                 placeholder="០៧:០០ ព្រឹក - ០៩:០០ យប់"
-                className="w-full px-3 py-2 rounded-xl border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-xs focus:ring-2 focus:ring-[#34A853] focus:border-[#228B4E] outline-none"
+                className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs focus:ring-2 focus:ring-[#059669]/20 focus:border-[#059669] outline-none"
               />
             </div>
 
             {/* Description */}
             <div>
-              <label className="block font-bold text-stone-700 dark:text-stone-300 mb-1">
+              <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
                 {isKm ? 'ការពិពណ៌នាអំពីហាង' : 'Restaurant Description'}
               </label>
               <textarea
@@ -459,14 +459,14 @@ export const AddRestaurantModal: React.FC = () => {
                 value={descriptionKh}
                 onChange={(e) => setDescriptionKh(e.target.value)}
                 placeholder="រៀបរាប់ពីរសជាតិអាហារ បរិយាកាស និងសេវាកម្ម..."
-                className="w-full px-3 py-2 rounded-xl border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-xs resize-none focus:ring-2 focus:ring-[#34A853] focus:border-[#228B4E] outline-none"
+                className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs resize-none focus:ring-2 focus:ring-[#059669]/20 focus:border-[#059669] outline-none"
               />
             </div>
 
             {/* Profile Photo */}
             <div>
-              <label className="block font-bold text-stone-700 dark:text-stone-300 mb-1">
-                <Image className="w-3.5 h-3.5 inline mr-1 text-[#228B4E]" />
+              <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
+                <Image className="w-3.5 h-3.5 inline mr-1 text-[#059669]" />
                 {isKm ? 'រូបភាពតំណាងហាង (Restaurant Profile Photo URL) *' : 'Profile Photo URL *'}
               </label>
               <input
@@ -474,7 +474,7 @@ export const AddRestaurantModal: React.FC = () => {
                 required
                 value={photoUrl}
                 onChange={(e) => setPhotoUrl(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-xs mb-2 focus:ring-2 focus:ring-[#34A853] focus:border-[#228B4E] outline-none"
+                className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs mb-2 focus:ring-2 focus:ring-[#059669]/20 focus:border-[#059669] outline-none"
               />
 
               <div className="grid grid-cols-4 gap-2">
@@ -483,7 +483,7 @@ export const AddRestaurantModal: React.FC = () => {
                     key={i}
                     onClick={() => setPhotoUrl(url)}
                     className={`aspect-16/10 rounded-lg overflow-hidden cursor-pointer border-2 transition ${
-                      photoUrl === url ? 'border-[#14532D] ring-2 ring-[#34A853]' : 'border-transparent opacity-70 hover:opacity-100'
+                      photoUrl === url ? 'border-[#064E3B] ring-2 ring-[#059669]' : 'border-transparent opacity-70 hover:opacity-100'
                     }`}
                   >
                     <img src={url} alt="sample" className="w-full h-full object-cover" />
@@ -498,7 +498,7 @@ export const AddRestaurantModal: React.FC = () => {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#14532D] to-[#228B4E] hover:from-[#0B3D2E] hover:to-[#14532D] text-white font-bold text-xs shadow-lg shadow-[#14532D]/20 transition active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50"
+                  className="w-full py-3.5 rounded-2xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-xs shadow-md shadow-emerald-950/20 transition active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50"
                 >
                   <span>🚀</span>
                   <span>{isKm ? 'ចុះបញ្ជីហាងឥតគិតថ្លៃ ($0 Free Listing)' : 'Register Free Restaurant Listing ($0)'}</span>
@@ -507,9 +507,9 @@ export const AddRestaurantModal: React.FC = () => {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#14532D] to-[#228B4E] hover:from-[#0B3D2E] hover:to-[#14532D] text-white font-bold text-xs shadow-lg shadow-[#14532D]/20 transition active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50"
+                  className="w-full py-3.5 rounded-2xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-xs shadow-md shadow-emerald-950/20 transition active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50"
                 >
-                  <Sparkles className="w-4 h-4 text-[#A7DCA5]" />
+                  <Sparkles className="w-4 h-4 text-emerald-300" />
                   <span>{isKm ? `បន្តទៅបង់ប្រាក់សមាជិកភាព Premium ($${promoPrice} សម្រាប់ ៣៦៥ ថ្ងៃ)` : `Continue to Premium ($${promoPrice} for 365 Days)`}</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
@@ -522,17 +522,17 @@ export const AddRestaurantModal: React.FC = () => {
         {step === 2 && (
           <form onSubmit={handleFinalSubmit} className="p-5 space-y-4 overflow-y-auto no-scrollbar flex-1 text-xs font-khmer">
             {/* Promo Price Header Box */}
-            <div className="bg-gradient-to-br from-[#EAF6EC] via-white to-[#EAF6EC] dark:from-[#0B3D2E] dark:to-[#14532D]/70 p-4 rounded-2xl border-2 border-[#228B4E] text-center relative overflow-hidden">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#14532D] text-white text-[10px] font-bold rounded-full mb-2 shadow-xs">
-                <Sparkles className="w-3.5 h-3.5 text-[#A7DCA5]" />
+            <div className="bg-gradient-to-br from-emerald-50 via-white to-emerald-50 dark:from-slate-800 dark:to-emerald-950/40 p-4 rounded-2xl border border-emerald-200 dark:border-emerald-800 text-center relative overflow-hidden">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#064E3B] text-white text-[10px] font-bold rounded-full mb-2 shadow-xs">
+                <Sparkles className="w-3.5 h-3.5 text-emerald-300" />
                 <span>One-Time Payment: ${promoPrice} USD for 365 Days</span>
               </div>
               <div className="flex items-center justify-center gap-3">
-                <span className="text-stone-400 line-through text-sm">$19.99 USD</span>
-                <span className="text-2xl font-black text-[#14532D] dark:text-[#A7DCA5] font-mono">${promoPrice} USD</span>
-                <span className="text-xs text-stone-500">(~ ២០,៤០០ រៀល)</span>
+                <span className="text-slate-400 line-through text-sm">$19.99 USD</span>
+                <span className="text-2xl font-black text-[#064E3B] dark:text-emerald-400 font-mono">${promoPrice} USD</span>
+                <span className="text-xs text-slate-500">(~ ២០,៤០០ រៀល)</span>
               </div>
-              <p className="text-[11px] text-stone-600 dark:text-stone-300 mt-1 leading-snug">
+              <p className="text-[11px] text-slate-600 dark:text-slate-300 mt-1 leading-snug">
                 {isKm 
                   ? 'ការទូទាត់តែមួយលើក $4.99 សម្រាប់រយៈពេល ៣៦៥ ថ្ងៃពេញ (គ្មានការគិតថ្លៃប្រចាំខែ និងគ្មានការបន្តស្វ័យប្រវត្តិឡើយ)។ លោកអ្នកអាចបន្ថែមមុខម្ហូបក្នុងហាងបានរហូតដល់ ៥ មុខ។' 
                   : 'One-time payment of $4.99 for 365 days. No monthly subscription or automatic renewal. Add up to 5 food menu items.'}
@@ -540,35 +540,35 @@ export const AddRestaurantModal: React.FC = () => {
             </div>
 
             {/* Bank Transfer Box (NO QR CODE) */}
-            <div className="bg-[#EAF6EC]/40 dark:bg-[#0B3D2E]/60 rounded-2xl p-4 border border-[#A7DCA5]/40 dark:border-[#14532D]/60 space-y-2.5">
-              <div className="text-xs font-bold text-[#183326] dark:text-stone-200 border-b border-[#A7DCA5]/30 pb-1.5 flex items-center gap-1.5">
-                <CreditCard className="w-4 h-4 text-[#228B4E]" />
+            <div className="bg-slate-50 dark:bg-slate-800/60 rounded-2xl p-4 border border-slate-200 dark:border-slate-700 space-y-2.5">
+              <div className="text-xs font-bold text-[#0F172A] dark:text-slate-200 border-b border-slate-200 dark:border-slate-700 pb-1.5 flex items-center gap-1.5">
+                <CreditCard className="w-4 h-4 text-[#059669]" />
                 <span>{isKm ? 'ព័ត៌មានគណនីផ្ទេរប្រាក់ (ABA Bank Transfer)' : 'Bank Transfer Information'}</span>
               </div>
 
               <div className="space-y-1.5 text-[11px]">
                 <div className="flex justify-between">
-                  <span className="text-stone-500">{isKm ? 'ធនាគារ៖' : 'Bank:'}</span>
-                  <span className="font-bold text-[#183326] dark:text-stone-100 font-mono">ABA BANK</span>
+                  <span className="text-slate-500">{isKm ? 'ធនាគារ៖' : 'Bank:'}</span>
+                  <span className="font-bold text-[#0F172A] dark:text-slate-100 font-mono">ABA BANK</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-stone-500">{isKm ? 'ម្ចាស់គណនី៖' : 'Beneficiary:'}</span>
-                  <span className="font-bold text-[#183326] dark:text-stone-100 font-mono">KHMER FOOD TOURISM</span>
+                  <span className="text-slate-500">{isKm ? 'ម្ចាស់គណនី៖' : 'Beneficiary:'}</span>
+                  <span className="font-bold text-[#0F172A] dark:text-slate-100 font-mono">KHMER FOOD TOURISM</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-stone-500">{isKm ? 'លេខគណនី៖' : 'Account Number:'}</span>
-                  <span className="font-bold text-[#14532D] dark:text-[#A7DCA5] font-mono text-xs">000 123 456 (USD)</span>
+                  <span className="text-slate-500">{isKm ? 'លេខគណនី៖' : 'Account Number:'}</span>
+                  <span className="font-bold text-[#064E3B] dark:text-emerald-400 font-mono text-xs">000 123 456 (USD)</span>
                 </div>
-                <div className="flex justify-between pt-1 border-t border-[#A7DCA5]/30">
-                  <span className="text-stone-500">{isKm ? 'ចំនួនទឹកប្រាក់៖' : 'Total Amount:'}</span>
-                  <span className="font-bold text-[#14532D] dark:text-[#A7DCA5] font-mono text-xs">${promoPrice} USD</span>
+                <div className="flex justify-between pt-1 border-t border-slate-200 dark:border-slate-700">
+                  <span className="text-slate-500">{isKm ? 'ចំនួនទឹកប្រាក់៖' : 'Total Amount:'}</span>
+                  <span className="font-bold text-[#064E3B] dark:text-emerald-400 font-mono text-xs">${promoPrice} USD</span>
                 </div>
               </div>
             </div>
 
             {/* Transaction Reference Input */}
             <div className="space-y-1.5">
-              <label className="block font-bold text-[#183326] dark:text-stone-200 text-xs">
+              <label className="block font-bold text-[#0F172A] dark:text-slate-200 text-xs">
                 {isKm ? 'លេខកូដប្រតិបត្តិការធនាគារ (Transaction Ref / Trx ID) *' : 'Bank Transaction Reference / Trx ID *'}
               </label>
               <input
@@ -577,9 +577,9 @@ export const AddRestaurantModal: React.FC = () => {
                 value={transactionRef}
                 onChange={(e) => setTransactionRef(e.target.value)}
                 placeholder="ឧ. TRX-123456789 ឬលេខ Ref លើវិក្កយបត្រ ABA"
-                className="w-full px-3 py-2.5 rounded-xl border-2 border-[#228B4E] bg-white dark:bg-stone-800 text-[#183326] dark:text-stone-100 font-mono font-bold text-xs focus:outline-none focus:border-[#14532D]"
+                className="w-full px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-[#0F172A] dark:text-slate-100 font-mono font-bold text-xs focus:outline-none focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/20"
               />
-              <p className="text-[10px] text-stone-500">
+              <p className="text-[10px] text-slate-500">
                 {isKm 
                   ? 'បញ្ចូលលេខកូដប្រតិបត្តិការពីបង្កាន់ដៃធនាគារ ABA របស់អ្នក ដើម្បីឱ្យរដ្ឋបាលផ្ទៀងផ្ទាត់ និងបើកដំណើរការ ៣៦៥ ថ្ងៃជូន។' 
                   : 'Enter the Transaction ID shown on your ABA bank receipt for administrative verification.'}
@@ -587,10 +587,10 @@ export const AddRestaurantModal: React.FC = () => {
             </div>
 
             {/* Verification Notice */}
-            <div className="p-3 bg-[#EAF6EC] dark:bg-[#14532D]/30 rounded-2xl border border-[#A7DCA5]/50 flex items-start gap-2.5">
-              <ShieldCheck className="w-5 h-5 text-[#228B4E] shrink-0 mt-0.5" />
-              <div className="text-[10px] text-[#183326] dark:text-stone-200 leading-relaxed">
-                <span className="font-bold block text-[#14532D] dark:text-[#A7DCA5] mb-0.5">
+            <div className="p-3 bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-slate-200 dark:border-slate-700 flex items-start gap-2.5">
+              <ShieldCheck className="w-5 h-5 text-[#059669] shrink-0 mt-0.5" />
+              <div className="text-[10px] text-[#0F172A] dark:text-slate-200 leading-relaxed">
+                <span className="font-bold block text-[#064E3B] dark:text-emerald-400 mb-0.5">
                   {isKm ? 'ការការពារសុវត្ថិភាព និងការផ្ទៀងផ្ទាត់' : 'Security & Verification'}
                 </span>
                 {isKm 
@@ -604,7 +604,7 @@ export const AddRestaurantModal: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setStep(1)}
-                className="py-3 px-4 rounded-2xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 text-xs font-semibold flex items-center justify-center gap-1.5 transition"
+                className="py-3 px-4 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold flex items-center justify-center gap-1.5 transition"
               >
                 <ArrowLeft className="w-4 h-4" />
                 <span>{isKm ? 'ត្រឡប់ក្រោយ' : 'Back'}</span>
@@ -613,7 +613,7 @@ export const AddRestaurantModal: React.FC = () => {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="py-3 px-4 rounded-2xl bg-gradient-to-r from-[#14532D] to-[#228B4E] hover:from-[#0B3D2E] hover:to-[#14532D] text-white text-xs font-bold shadow-lg shadow-[#14532D]/30 flex items-center justify-center gap-1.5 transition active:scale-[0.98] disabled:opacity-50"
+                className="py-3 px-4 rounded-2xl bg-[#064E3B] hover:bg-[#047857] text-white text-xs font-bold shadow-md shadow-emerald-950/20 flex items-center justify-center gap-1.5 transition active:scale-[0.98] disabled:opacity-50"
               >
                 <CheckCircle2 className="w-4 h-4" />
                 <span>{isKm ? 'ដាក់ស្នើ និងបង់ប្រាក់' : 'Submit & Pay $4.99'}</span>

@@ -42,11 +42,11 @@ export const FoodView: React.FC = () => {
       {/* Header bar */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="font-moul text-sm sm:text-base text-[#183326] dark:text-stone-100 flex items-center gap-2">
-            <Utensils className="w-4 h-4 text-[#228B4E]" />
+          <h2 className="font-moul text-sm sm:text-base text-[#0F172A] dark:text-white flex items-center gap-2">
+            <Utensils className="w-4 h-4 text-[#059669]" />
             <span>{isKm ? 'វិចិត្រសាលមុខម្ហូបខ្មែរ (100+ មុខ)' : 'Khmer Food Collection (100+ Dishes)'}</span>
           </h2>
-          <p className="text-[11px] text-stone-500 font-khmer">
+          <p className="text-[11px] text-slate-500 font-khmer">
             {isKm 
               ? `បង្ហាញ ${filteredFoods.length} លើ ${foods.length} មុខម្ហូបខ្មែរពិតៗ` 
               : `Showing ${filteredFoods.length} of ${foods.length} authentic dishes`}
@@ -56,9 +56,9 @@ export const FoodView: React.FC = () => {
         {currentUser?.role === 'admin' && (
           <button
             onClick={() => setIsAdminOpen(true)}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[#14532D] hover:bg-[#0B3D2E] text-white font-bold text-xs shadow-xs font-khmer transition"
+            className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-xs shadow-xs font-khmer transition"
           >
-            <Plus className="w-3.5 h-3.5 text-[#A7DCA5]" />
+            <Plus className="w-3.5 h-3.5 text-emerald-200" />
             <span>{isKm ? 'បញ្ចូលម្ហូប' : 'Add Food'}</span>
           </button>
         )}
@@ -74,8 +74,8 @@ export const FoodView: React.FC = () => {
               onClick={() => setSelectedCategory(cat.id)}
               className={`px-3 py-1.5 rounded-full text-xs whitespace-nowrap transition-all duration-150 font-medium ${
                 active
-                  ? 'bg-[#14532D] text-white font-bold shadow-xs scale-102 border border-[#34A853]'
-                  : 'bg-white dark:bg-stone-800 text-[#183326] dark:text-stone-300 border border-[#A7DCA5]/60 dark:border-stone-700 hover:bg-[#EAF6EC]'
+                  ? 'bg-[#064E3B] text-white font-bold shadow-xs scale-102'
+                  : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200/90 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'
               }`}
             >
               {isKm ? cat.nameKh : cat.nameEn}
@@ -86,15 +86,15 @@ export const FoodView: React.FC = () => {
 
       {/* Foods Grid */}
       {filteredFoods.length === 0 ? (
-        <div className="p-8 text-center bg-white dark:bg-stone-800 rounded-3xl border border-[#A7DCA5]/50 dark:border-stone-700 space-y-2 font-khmer">
-          <Utensils className="w-8 h-8 mx-auto text-stone-300" />
-          <p className="text-xs text-stone-500 font-medium">
+        <div className="p-8 text-center bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 space-y-2 font-khmer shadow-xs">
+          <Utensils className="w-8 h-8 mx-auto text-slate-300" />
+          <p className="text-xs text-slate-500 font-medium">
             {isKm ? 'មិនមានមុខម្ហូបដែលត្រូវគ្នានឹងការស្វែងរកទេ' : 'No matching dishes found'}
           </p>
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              className="px-3 py-1 text-xs text-[#14532D] font-bold hover:underline"
+              className="px-3 py-1 text-xs text-[#064E3B] font-bold hover:underline"
             >
               {isKm ? 'សម្អាតការស្វែងរក' : 'Clear search'}
             </button>

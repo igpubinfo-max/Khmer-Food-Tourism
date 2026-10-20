@@ -46,20 +46,20 @@ export const CreatePostModal: React.FC = () => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
       <div 
-        className="bg-white dark:bg-[#0B3D2E] w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] border border-[#A7DCA5]/30"
+        className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] border border-slate-200 dark:border-slate-800"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="px-5 py-4 border-b border-[#A7DCA5]/20 flex items-center justify-between bg-gradient-to-r from-[#0B3D2E] via-[#14532D] to-[#0B3D2E] text-white">
+        <div className="px-5 py-4 border-b border-[#047857] flex items-center justify-between bg-[#064E3B] text-white">
           <div className="flex items-center gap-2">
-            <Plus className="w-5 h-5 text-[#34A853]" />
-            <h2 className="font-moul text-sm sm:text-base text-[#A7DCA5]">
+            <Plus className="w-5 h-5 text-emerald-200" />
+            <h2 className="font-moul text-sm sm:text-base text-white">
               {language === 'km' ? 'ចែករំលែកការបង្ហោះថ្មី' : 'Share New Post'}
             </h2>
           </div>
           <button
             onClick={() => setIsAddPostModalOpen(false)}
-            className="p-1 rounded-full text-[#A7DCA5] hover:text-white"
+            className="p-1 rounded-full text-emerald-200 hover:text-white"
           >
             <X className="w-5 h-5" />
           </button>
@@ -69,7 +69,7 @@ export const CreatePostModal: React.FC = () => {
         <form onSubmit={handleSubmit} className="p-5 space-y-4 overflow-y-auto no-scrollbar flex-1 text-xs">
           {/* Title */}
           <div>
-            <label className="block font-bold text-[#183326] dark:text-stone-300 mb-1">
+            <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
               {language === 'km' ? 'ចំណងជើងការបង្ហោះ *' : 'Post Title *'}
             </label>
             <input
@@ -78,13 +78,13 @@ export const CreatePostModal: React.FC = () => {
               value={titleKh}
               onChange={(e) => setTitleKh(e.target.value)}
               placeholder="ឧទាហរណ៍៖ អាហារពេលល្ងាចដ៏ឈ្ងុយឆ្ងាញ់នៅមាត់ស្ទឹងបាត់ដំបង!"
-              className="w-full px-3 py-2 rounded-xl border border-[#A7DCA5]/40 bg-[#EAF6EC]/20 dark:bg-stone-800 focus:outline-none focus:border-[#34A853] text-[#183326] dark:text-stone-100"
+              className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:border-[#059669] text-[#0F172A] dark:text-white"
             />
           </div>
 
           {/* Description */}
           <div>
-            <label className="block font-bold text-[#183326] dark:text-stone-300 mb-1">
+            <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
               {language === 'km' ? 'ការពិពណ៌នា / រូបមន្ត / ការចែករំលែក *' : 'Description / Recipe / Experience *'}
             </label>
             <textarea
@@ -93,21 +93,21 @@ export const CreatePostModal: React.FC = () => {
               value={descriptionKh}
               onChange={(e) => setDescriptionKh(e.target.value)}
               placeholder="សរសេររៀបរាប់ពីរសជាតិអាហារ របៀបចម្អិន ឬបទពិសោធន៍ដើរលេង..."
-              className="w-full px-3 py-2 rounded-xl border border-[#A7DCA5]/40 bg-[#EAF6EC]/20 dark:bg-stone-800 focus:outline-none focus:border-[#34A853] resize-none text-[#183326] dark:text-stone-100"
+              className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:border-[#059669] resize-none text-[#0F172A] dark:text-white"
             />
           </div>
 
           {/* Tag & Location */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block font-bold text-[#183326] dark:text-stone-300 mb-1">
-                <Tag className="w-3.5 h-3.5 inline mr-1 text-[#228B4E]" />
+              <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
+                <Tag className="w-3.5 h-3.5 inline mr-1 text-[#059669]" />
                 {language === 'km' ? 'ស្លាកប្រធានបទ' : 'Category Tag'}
               </label>
               <select
                 value={categoryTag}
                 onChange={(e) => setCategoryTag(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl border border-[#A7DCA5]/40 bg-[#EAF6EC]/20 dark:bg-stone-800 focus:outline-none focus:border-[#34A853] text-[#183326] dark:text-stone-100 font-khmer"
+                className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:border-[#059669] text-[#0F172A] dark:text-white font-khmer"
               >
                 <option value="ម្ហូបខ្មែរ">ម្ហូបខ្មែរ (Khmer Food)</option>
                 <option value="រូបមន្តម្ហូប">រូបមន្តម្ហូប (Cooking Recipe)</option>
@@ -119,7 +119,7 @@ export const CreatePostModal: React.FC = () => {
             </div>
 
             <div>
-              <label className="block font-bold text-[#183326] dark:text-stone-300 mb-1">
+              <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
                 <MapPin className="w-3.5 h-3.5 inline mr-1 text-rose-600" />
                 {language === 'km' ? 'ទីតាំង / ខេត្ត' : 'Location / Province'}
               </label>
@@ -128,15 +128,15 @@ export const CreatePostModal: React.FC = () => {
                 value={locationName}
                 onChange={(e) => setLocationName(e.target.value)}
                 placeholder="រាជធានីភ្នំពេញ, សៀមរាប..."
-                className="w-full px-3 py-2 rounded-xl border border-[#A7DCA5]/40 bg-[#EAF6EC]/20 dark:bg-stone-800 focus:outline-none focus:border-[#34A853] text-[#183326] dark:text-stone-100"
+                className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:border-[#059669] text-[#0F172A] dark:text-white"
               />
             </div>
           </div>
 
           {/* Photo URL & Presets */}
           <div>
-            <label className="block font-bold text-[#183326] dark:text-stone-300 mb-1">
-              <Image className="w-3.5 h-3.5 inline mr-1 text-[#228B4E]" />
+            <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
+              <Image className="w-3.5 h-3.5 inline mr-1 text-[#059669]" />
               {language === 'km' ? 'រូបភាពដែលត្រូវបង្ហោះ (Photo URL)' : 'Photo URL'}
             </label>
             <input
@@ -144,10 +144,10 @@ export const CreatePostModal: React.FC = () => {
               required
               value={photoUrl}
               onChange={(e) => setPhotoUrl(e.target.value)}
-              className="w-full px-3 py-2 rounded-xl border border-[#A7DCA5]/40 bg-[#EAF6EC]/20 dark:bg-stone-800 focus:outline-none focus:border-[#34A853] mb-2 text-[#183326] dark:text-stone-100 font-mono text-[11px]"
+              className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:border-[#059669] mb-2 text-[#0F172A] dark:text-white font-mono text-[11px]"
             />
 
-            <p className="text-[10px] text-stone-400 mb-1">
+            <p className="text-[10px] text-slate-400 mb-1">
               {language === 'km' ? 'ជ្រើសរើសរូបភាពគំរូស្អាតៗ៖' : 'Or choose a photo from presets:'}
             </p>
             <div className="grid grid-cols-6 gap-1.5">
@@ -156,7 +156,7 @@ export const CreatePostModal: React.FC = () => {
                   key={i}
                   onClick={() => setPhotoUrl(url)}
                   className={`aspect-square rounded-lg overflow-hidden cursor-pointer border-2 transition ${
-                    photoUrl === url ? 'border-[#34A853] ring-2 ring-[#A7DCA5]' : 'border-transparent opacity-75 hover:opacity-100'
+                    photoUrl === url ? 'border-[#059669] ring-2 ring-emerald-300' : 'border-transparent opacity-75 hover:opacity-100'
                   }`}
                 >
                   <img src={url} alt="preset" className="w-full h-full object-cover" />
@@ -169,7 +169,7 @@ export const CreatePostModal: React.FC = () => {
           <div className="pt-2">
             <button
               type="submit"
-              className="w-full py-3 rounded-2xl bg-gradient-to-r from-[#14532D] to-[#228B4E] hover:from-[#0B3D2E] hover:to-[#14532D] text-white font-bold text-xs shadow-md transition active:scale-98 flex items-center justify-center gap-2"
+              className="w-full py-3 rounded-2xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-xs shadow-md transition active:scale-98 flex items-center justify-center gap-2"
             >
               <Send className="w-4 h-4" />
               <span>
