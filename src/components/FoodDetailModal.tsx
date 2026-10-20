@@ -35,8 +35,8 @@ export const FoodDetailModal: React.FC = () => {
     }
 
     const textToRead = language === 'km'
-      ? `${selectedFood.nameKh}។ ${selectedFood.descriptionKh}។ គ្រឿងផ្សំរួមមាន៖ ${selectedFood.ingredients.map(i => i.nameKh).join(', ')}។`
-      : `${selectedFood.nameEn}. ${selectedFood.descriptionEn}. Ingredients include: ${selectedFood.ingredients.map(i => i.nameEn).join(', ')}.`;
+      ? `${selectedFood.nameKh}។ ${selectedFood.descriptionKh}។ គ្រឿងផ្សំរួមមាន៖ ${(selectedFood.ingredients || []).map(i => i.nameKh).join(', ')}។`
+      : `${selectedFood.nameEn}. ${selectedFood.descriptionEn}. Ingredients include: ${(selectedFood.ingredients || []).map(i => i.nameEn).join(', ')}.`;
 
     const utterance = new SpeechSynthesisUtterance(textToRead);
     utterance.lang = language === 'km' ? 'km-KH' : 'en-US';

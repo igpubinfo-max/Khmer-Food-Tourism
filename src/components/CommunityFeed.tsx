@@ -64,7 +64,7 @@ export const CommunityFeed: React.FC = () => {
       {/* Feed list */}
       <div className="space-y-4">
         {posts.map((post) => {
-          const isLiked = currentUser ? post.likedByUserIds.includes(currentUser.id) : false;
+          const isLiked = currentUser ? (post.likedByUserIds || []).includes(currentUser.id) : false;
           const isCommentOpen = activeCommentPostId === post.id;
           const isAuthor = currentUser?.id === post.authorId || currentUser?.role === 'admin';
 
@@ -161,7 +161,7 @@ export const CommunityFeed: React.FC = () => {
                     }`}
                   >
                     <Heart className={`w-4 h-4 ${isLiked ? 'fill-current' : ''}`} />
-                    <span>{post.likesCount}</span>
+                    <span>{post.likesCount ?? 0}</span>
                   </button>
 
                   {/* Comment Toggle */}
@@ -170,7 +170,7 @@ export const CommunityFeed: React.FC = () => {
                     className="flex items-center gap-1.5 text-slate-500 hover:text-[#064E3B] dark:hover:text-emerald-400 font-semibold transition"
                   >
                     <MessageCircle className="w-4 h-4" />
-                    <span>{post.comments.length}</span>
+                    <span>{(post.comments || []).length}</span>
                   </button>
                 </div>
 
@@ -204,12 +204,12 @@ export const CommunityFeed: React.FC = () => {
                 <div className="px-3.5 pb-3.5 pt-1 bg-slate-50/70 dark:bg-slate-800/40 border-t border-slate-100 dark:border-slate-700 animate-in fade-in duration-150">
                   {/* Comments list */}
                   <div className="space-y-2 mb-2.5 max-h-48 overflow-y-auto no-scrollbar">
-                    {post.comments.length === 0 ? (
+                    {(post.comments || []).length === 0 ? (
                       <p className="text-center text-[11px] text-slate-400 py-2">
                         {language === 'km' ? 'មិនទាន់មានមតិយោបល់នៅឡើយទេ' : 'No comments yet'}
                       </p>
                     ) : (
-                      post.comments.map((cm) => (
+                      (post.comments || []).map((cm) => (
                         <div key={cm.id} className="flex items-start gap-2 bg-white dark:bg-slate-800 p-2 rounded-xl border border-slate-200/80 text-xs">
                           <img 
                             src={cm.authorAvatar} 

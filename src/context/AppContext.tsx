@@ -243,7 +243,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [restaurants, setRestaurants] = useState<Restaurant[]>(() => {
     try {
-      const saved = localStorage.getItem('kft_restaurants_membership_v1');
+      const saved = localStorage.getItem('kft_restaurants_membership_v2');
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length >= 50) {
@@ -251,9 +251,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
       }
     } catch (e) {
-      console.warn('Failed to parse kft_restaurants_membership_v1', e);
+      console.warn('Failed to parse kft_restaurants_membership_v2', e);
     }
     try {
+      localStorage.removeItem('kft_restaurants_membership_v1');
       localStorage.removeItem('kft_restaurants_v3');
       localStorage.removeItem('kft_restaurants_v4');
     } catch {}
@@ -343,7 +344,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const saved = localStorage.getItem('kft_posts_v4') || localStorage.getItem('kft_posts_v3');
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) return parsed;
+        if (Array.isArray(parsed)) {
+          return parsed.map((p: any) => ({
+            id: p.id || `post-${Date.now()}`,
+            authorId: p.authorId || 'user-1',
+            authorName: p.authorName || 'អ្នកស្រឡាញ់ម្ហូបខ្មែរ',
+            authorAvatar: p.authorAvatar || 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
+            authorRole: p.authorRole || 'user',
+            titleKh: p.titleKh || '',
+            descriptionKh: p.descriptionKh || '',
+            photoUrl: p.photoUrl || '',
+            categoryTag: p.categoryTag || 'ទូទៅ',
+            locationName: p.locationName || 'កម្ពុជា',
+            likesCount: typeof p.likesCount === 'number' ? p.likesCount : 0,
+            likedByUserIds: Array.isArray(p.likedByUserIds) ? p.likedByUserIds : [],
+            comments: Array.isArray(p.comments) ? p.comments : [],
+            createdAt: p.createdAt || 'ថ្មីៗនេះ',
+            status: p.status || 'approved',
+          }));
+        }
       }
     } catch (e) {
       console.warn('Failed to parse kft_posts', e);
@@ -454,7 +473,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     try {
       if (restaurants && restaurants.length > 0) {
-        localStorage.setItem('kft_restaurants_membership_v1', JSON.stringify(restaurants));
+        localStorage.setItem('kft_restaurants_membership_v2', JSON.stringify(restaurants));
       }
     } catch (e) {
       console.warn('Storage sync failed for restaurants:', e);

@@ -22,7 +22,7 @@ export const InstallModal: React.FC = () => {
   const [copied, setCopied] = useState<boolean>(false);
 
   const isKm = language === 'km';
-  const apkDownloadTarget = appSettings.apkDownloadUrl || 'https://github.com/igpubinfo-max/Khmer-Food-Tourism/releases/download/v1.3.4/app-debug.apk';
+  const apkDownloadTarget = appSettings.apkDownloadUrl || 'https://github.com/igpubinfo-max/Khmer-Food-Tourism/releases/download/v1.3.5/app-debug.apk';
   const iosWebTarget = typeof window !== 'undefined' && window.location?.origin ? window.location.origin : 'https://khmerfoodtourism.com';
 
   useEffect(() => {

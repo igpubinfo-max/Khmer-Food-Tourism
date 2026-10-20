@@ -110,7 +110,13 @@ assert(!foodCardContent.includes('food.cookTime'), 'Zero times/cookTime on food 
 const restCardContent = fs.readFileSync(path.resolve(__dirname, '../src/components/RestaurantCard.tsx'), 'utf8');
 assert(!restCardContent.includes('restaurant.openingHoursKh'), 'Zero opening and closing hours on restaurant picture cards.');
 
-// TEST 13: Firestore Security Rules Enforcing 5 Menu Items & Protected Membership Fields
+// TEST 14: Feedback Email (kftapp@gmail.com)
+const headerContent = fs.readFileSync(path.resolve(__dirname, '../src/components/Header.tsx'), 'utf8');
+assert(headerContent.includes('kftapp@gmail.com'), 'Feedback email kftapp@gmail.com present in Header below action icons.');
+const supportContent = fs.readFileSync(path.resolve(__dirname, '../src/components/SupportModal.tsx'), 'utf8');
+assert(supportContent.includes('kftapp@gmail.com'), 'Feedback email kftapp@gmail.com present in SupportModal.');
+
+// TEST 15: Firestore Security Rules Enforcing 5 Menu Items & Protected Membership Fields
 const firestoreRules = fs.readFileSync(path.resolve(__dirname, '../firestore.rules'), 'utf8');
 assert(firestoreRules.includes('request.resource.data.menuItems.size() <= 5'), 'Firestore rules enforce maximum 5 menu items per restaurant.');
 assert(firestoreRules.includes('request.resource.data.membershipTier == resource.data.membershipTier'), 'Firestore rules prevent unauthorized membership self-promotion.');

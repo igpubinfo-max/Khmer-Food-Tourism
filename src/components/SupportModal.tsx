@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Heart, ShieldCheck, Download, Smartphone, HelpCircle } from 'lucide-react';
+import { X, Heart, ShieldCheck, Download, Smartphone, HelpCircle, Mail } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 export const SupportModal: React.FC = () => {
@@ -130,6 +130,42 @@ export const SupportModal: React.FC = () => {
             <div className="flex items-center justify-center gap-1 text-[11px] text-[#059669] font-khmer">
               <Heart className="w-3.5 h-3.5 fill-[#059669]" />
               <span>{isKm ? 'សូមថ្លែងអំណរគុណយ៉ាងជ្រាលជ្រៅ!' : 'Thank you for your generous support!'}</span>
+            </div>
+          </div>
+
+          {/* Feedback & Inquiries Email Section */}
+          <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-200 space-y-2 font-khmer">
+            <div className="flex items-center gap-2 text-xs font-bold text-[#064E3B]">
+              <Mail className="w-4 h-4 text-[#059669]" />
+              <span>{isKm ? 'មតិកែលម្អ និងទំនាក់ទំនង (Feedback & Support)' : 'Feedback & Contact Email'}</span>
+            </div>
+            <p className="text-[11px] text-slate-600 leading-relaxed">
+              {isKm 
+                ? 'ដើម្បីផ្ញើមតិរិះគន់ស្ថាបនា សំណូមពរ ឬរាយការណ៍បញ្ហាផ្សេងៗ សូមផ្ញើមកកាន់អ៊ីមែលផ្លូវការ៖' 
+                : 'For constructive feedback, feature suggestions, or inquiries, please email us directly:'}
+            </p>
+            <div className="flex items-center justify-between gap-2 p-2.5 bg-white rounded-xl border border-emerald-300 shadow-2xs">
+              <a 
+                href="mailto:kftapp@gmail.com" 
+                className="text-xs font-bold text-[#064E3B] hover:underline flex items-center gap-1.5 font-mono truncate"
+              >
+                <span>📧 kftapp@gmail.com</span>
+              </a>
+              <button
+                type="button"
+                onClick={() => {
+                  if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText('kftapp@gmail.com').then(() => {
+                      showToast(isKm ? 'បានចម្លងអ៊ីមែលជោគជ័យ!' : 'Email copied!', 'success');
+                    }).catch(() => {});
+                  } else {
+                    showToast(isKm ? 'បានចម្លងអ៊ីមែលជោគជ័យ!' : 'Email copied!', 'success');
+                  }
+                }}
+                className="px-2.5 py-1 rounded-lg bg-[#064E3B] hover:bg-[#047857] text-white text-[10px] font-bold shrink-0 transition active:scale-95"
+              >
+                {isKm ? 'ចម្លង' : 'Copy'}
+              </button>
             </div>
           </div>
 

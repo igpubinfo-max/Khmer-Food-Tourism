@@ -60,31 +60,21 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: v1.3.4
-          name: "Khmer Food & Tourism v1.3.4 (Fix Startup Crash & Remove Restaurant Hours Overlay)"
+          tag_name: v1.3.5
+          name: "Khmer Food & Tourism v1.3.5 (Feedback Email & Cache Protection)"
           overwrite: true
           make_latest: true
           body: |
             ### 🇰🇭 កម្មវិធីទូរស័ព្ទដៃ អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism Mobile App)
             
-            **កំណែថ្មី v1.3.4 (Fix Startup Crash & Remove Restaurant Hours Overlay):**
-            - 🛠️ **ដោះស្រាយបញ្ហា Crash / ErrorBoundary Screen:** ធ្វើការការពារសុវត្ថិភាពទិន្នន័យ (Safe Normalization) គ្រប់ភោជនីយដ្ឋាន និងមុខម្ហូបទាំងអស់ ដោយធានាមិនឱ្យមានកំហុស Runtime JavaScript Error ពេលបើកកម្មវិធីឡើយ។
-            - 🕒 **លុបម៉ោងបើក-បិទលើរូបភាពភោជនីយដ្ឋាន (Removed opening and closing hours on restaurant pictures):** គ្មានការបង្ហាញម៉ោងបើក និងបិទលើផ្ទាំងរូបភាពភោជនីយដ្ឋានទៀតឡើយ ដោយរក្សាទុកម៉ោងត្រឹមត្រូវតែក្នុងព័ត៌មានលម្អិតប៉ុណ្ណោះ។
-            - ⭐ **អត្ថប្រយោជន៍ VIP ទាំង ១០ យ៉ាងពេញលេញ (10 VIP Benefits):**
-              1. បង្ហាញក្នុងបញ្ជីហាងឆ្នើម (Featured restaurant listing)
-              2. ដាក់រូបភាពហាងច្រើនសន្លឹក Gallery (Multiple restaurant photos)
-              3. មុខម្ហូប ៥ មុខ ជាមួយរូបភាព និងតម្លៃ (Up to 5 editable food menu items)
-              4. កែប្រែព័ត៌មានហាង រូបភាព និងលេខទូរស័ព្ទដោយខ្លួនឯង (Self-service editing)
-              5. តំណភ្ជាប់ចែករំលែកទំព័រហាងផ្ទាល់ (Shareable restaurant page link)
-              6. ផ្លាកសញ្ញា VIP Premium លើបញ្ជី និងទំព័រហាង (Premium VIP badge)
-              7. ស្ថិតិហាងផ្ទាល់៖ អ្នកមើល ចុចទូរស័ព្ទ ចុច Maps និងចែករំលែក (Restaurant analytics)
-              8. បង្ហាញក្នុងផ្នែកផ្សព្វផ្សាយ VIP ពិសេស (Dedicated VIP promotion section)
-              9. ប៊ូតុងខល ផែនទី និងចែករំលែករហ័ស (Easy-to-access call, map, and share buttons)
-              10. សេវាជំនួយសមាជិក VIP ផ្ទាល់តាម Telegram (VIP member support channel)
-            - 🏷️ **តម្លៃសមាជិកភាព VIP $9.99 សម្រាប់ ៣៦៥ ថ្ងៃ (End of year promo):** បង់តែមួយលើក $9.99 សម្រាប់រយៈពេល ៣៦៥ ថ្ងៃ។
-            - 🏦 **ឈ្មោះគណនីទទួលធនាគារ ABA៖** ឈ្មោះគណនីទទួលធនាគារ ABA គឺ **CHEA KIMSENG**។
-            - 📷 **រក្សាស្លាក "រូបតំណាង" (Sample Photo):** លើគ្រប់កាតមុខម្ហូប និងផ្ទាំងលម្អិតមុខម្ហូបទាំងអស់។
-            - 🍎 **ប៊ូតុងដំឡើងសម្រាប់ iOS (Apple iPhone):** មានប៊ូតុង iOS ផ្ទាល់ និងការណែនាំ Safari Add to Home Screen (PWA) ពេញលេញ។
+            **កំណែថ្មី v1.3.5 (Feedback Email & Cache Protection):**
+            - 📧 **បន្ថែមអ៊ីមែលសម្រាប់មតិកែលម្អ (Feedback Email):** បានបន្ថែម `kftapp@gmail.com` នៅខាងក្រោម Header Buttons, ក្នុងផ្ទាំង Support Modal, និងលើផ្ទាំង Error Recovery ជាមួយប៊ូតុងចម្លងអ៊ីមែលរហ័ស។
+            - 🛡️ **ការការពារទិន្នន័យ Cache & Version Migration:** បានប្តូរ storage key ទៅ `kft_restaurants_membership_v2` និងបន្ថែម Version Auto-Purge ដើម្បីជម្រះទិន្នន័យចាស់ដែលខូច ឬមិនពេញលេញពីកំណែមុនៗចោលដោយស្វ័យប្រវត្តិ។
+            - 🛠️ **ដោះស្រាយបញ្ហា ErrorBoundary:** ការពារសុវត្ថិភាពទិន្នន័យសម្រាប់ posts, comments, restaurants, foods, destinations ដើម្បីធានាមិនឱ្យមាន runtime error ឡើយ។
+            - 🕒 **លុបម៉ោងបើក-បិទលើរូបភាពភោជនីយដ្ឋាន:** គ្មានការបង្ហាញម៉ោងបើក និងបិទលើផ្ទាំងរូបភាពភោជនីយដ្ឋានទៀតឡើយ។
+            - ⭐ **អត្ថប្រយោជន៍ VIP ទាំង ១០ យ៉ាងពេញលេញ (10 VIP Benefits)**
+            - 🏷️ **តម្លៃសមាជិកភាព VIP $9.99 សម្រាប់ ៣៦៥ ថ្ងៃ (End of year promo)**
+            - 🏦 **ឈ្មោះគណនីទទួលធនាគារ ABA៖** **CHEA KIMSENG**។
           draft: false
           prerelease: false
           files: |

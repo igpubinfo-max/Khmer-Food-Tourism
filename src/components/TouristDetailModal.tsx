@@ -171,7 +171,7 @@ export const TouristDetailModal: React.FC = () => {
                   {language === 'km' ? 'ចំណុចលេចធ្លោមិនគួររំលង' : 'Key Highlights'}
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {selectedDestination.highlightsKh.map((hl, i) => (
+                  {(selectedDestination.highlightsKh || []).map((hl, i) => (
                     <div 
                       key={i}
                       className="p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 text-xs flex items-center gap-2"
