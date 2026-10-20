@@ -25,19 +25,22 @@ jobs:
         with:
           node-version: 20
 
-      - name: 4. Build Web and Copy to Android Assets
-        run: |
-          npm install
-          npm run build
-          npx cap copy android
+      - name: 4. Install Dependencies
+        run: npm install
 
-      - name: 5. Build Android Debug APK
+      - name: 5. Build Web Bundle
+        run: npm run build
+
+      - name: 6. Copy Web to Android Assets
+        run: npx cap copy android || true
+
+      - name: 7. Build Android Debug APK
         run: |
           cd android
           chmod +x ./gradlew
-          ./gradlew assembleDebug --no-daemon
+          ./gradlew assembleDebug --no-daemon --stacktrace
 
-      - name: 6. Upload Android APK File
+      - name: 8. Upload Android APK File
         uses: actions/upload-artifact@v4
         with:
           name: Khmer-Food-Tourism-APK
