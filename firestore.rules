@@ -1,0 +1,82 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper Functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Only ONE designated administrator account
+    function isAdmin() {
+      return isAuthenticated() && (
+        request.auth.token.role == 'admin' ||
+        request.auth.token.email == 'cheasavuth@khmerfoodtourism.com'
+      );
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // 1. Food Collection: Publicly readable; Only Admin can write
+    match /foods/{foodId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // 2. Restaurant Directory:
+    // - Public read for verified restaurants
+    // - Authenticated restaurant owners can create and edit their own restaurant
+    // - Status field (verified/pending) can ONLY be modified by Admin
+    match /restaurants/{restaurantId} {
+      allow read: if resource.data.status == 'verified' || isAdmin() || (isAuthenticated() && resource.data.ownerId == request.auth.uid);
+      allow create: if isAuthenticated() && 
+                    request.resource.data.ownerId == request.auth.uid &&
+                    request.resource.data.status == 'pending_verification';
+      allow update: if (isAdmin()) || (
+        isAuthenticated() && 
+        resource.data.ownerId == request.auth.uid &&
+        request.resource.data.ownerId == request.auth.uid &&
+        request.resource.data.status == resource.data.status // Cannot self-approve status!
+      );
+      allow delete: if isAdmin() || (isAuthenticated() && resource.data.ownerId == request.auth.uid);
+    }
+
+    // 3. Transactions ($4.99 Registration Fee):
+    // - Only Admin can view all or verify transactions
+    // - Owner can create and read their own transaction
+    match /transactions/{txnId} {
+      allow read: if isAdmin() || (isAuthenticated() && resource.data.ownerId == request.auth.uid);
+      allow create: if isAuthenticated() && request.resource.data.ownerId == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+
+    // 4. Tourist Destinations:
+    match /destinations/{destId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // 5. Community Posts & Reviews:
+    match /posts/{postId} {
+      allow read: if true;
+      allow create: if isAuthenticated() && request.resource.data.authorId == request.auth.uid;
+      allow update, delete: if isAdmin() || (isAuthenticated() && resource.data.authorId == request.auth.uid);
+    }
+
+    // 6. User Profiles:
+    // - Normal users can only read and write their own profile
+    // - Users CANNOT promote themselves to 'admin' role
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.auth.uid == userId && request.resource.data.role != 'admin';
+      allow update: if isAdmin() || (
+        isAuthenticated() && 
+        request.auth.uid == userId && 
+        request.resource.data.role == resource.data.role // Cannot escalate privileges!
+      );
+      allow delete: if isAdmin() || (isAuthenticated() && request.auth.uid == userId);
+    }
+  }
+}

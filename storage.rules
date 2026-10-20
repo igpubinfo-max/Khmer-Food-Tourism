@@ -1,0 +1,44 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && (
+        request.auth.token.role == 'admin' ||
+        request.auth.token.email == 'cheasavuth@khmerfoodtourism.com'
+      );
+    }
+
+    function isValidImage() {
+      return request.resource.contentType.matches('image/.*') &&
+             request.resource.size < 5 * 1024 * 1024; // Max 5MB
+    }
+
+    // Food & Destination official images: Public read, Admin write
+    match /foods/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdmin() && isValidImage();
+    }
+
+    match /destinations/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdmin() && isValidImage();
+    }
+
+    // Restaurant uploads: Public read, Authenticated owner write
+    match /restaurants/{restaurantId}/{fileName} {
+      allow read: if true;
+      allow write: if isAuthenticated() && isValidImage();
+    }
+
+    // Payment receipts: Private, Admin and uploading owner only
+    match /receipts/{userId}/{fileName} {
+      allow read: if isAdmin() || (isAuthenticated() && request.auth.uid == userId);
+      allow write: if isAuthenticated() && request.auth.uid == userId && isValidImage();
+    }
+  }
+}

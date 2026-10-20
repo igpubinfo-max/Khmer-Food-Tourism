@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { FoodCard } from './FoodCard';
 import { TouristCard } from './TouristCard';
+import { PrivacyPolicyModal } from './PrivacyPolicyModal';
 import { 
   User as UserIcon, Heart, Shield, Store, 
-  Globe, LogOut, RefreshCw, KeyRound, Check, Plus, QrCode, ShieldAlert
+  Globe, LogOut, RefreshCw, KeyRound, Check, Plus, QrCode, ShieldAlert, ShieldCheck
 } from 'lucide-react';
 
 export const ProfileView: React.FC = () => {
@@ -17,6 +18,7 @@ export const ProfileView: React.FC = () => {
   } = useApp();
 
   const [activeSubTab, setActiveSubTab] = useState<'bookmarks' | 'myposts' | 'settings'>('bookmarks');
+  const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState(false);
   const isKm = language === 'km';
 
   // Bookmarked items
@@ -296,6 +298,20 @@ export const ProfileView: React.FC = () => {
             </button>
           </div>
 
+          {/* Privacy Policy & Data Safety */}
+          <div className="flex items-center justify-between py-2 border-b border-stone-100 dark:border-stone-700">
+            <span className="font-medium text-stone-700 dark:text-stone-300 flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-emerald-600" />
+              {isKm ? 'គោលការណ៍ឯកជនភាព & សុវត្ថិភាព' : 'Privacy Policy & Data Safety'}
+            </span>
+            <button
+              onClick={() => setIsPrivacyModalOpen(true)}
+              className="px-3 py-1 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 font-bold hover:bg-amber-100 transition"
+            >
+              {isKm ? 'មើល' : 'View'}
+            </button>
+          </div>
+
           {/* Reset App Data */}
           <div className="flex items-center justify-between py-2 border-b border-stone-100 dark:border-stone-700">
             <span className="font-medium text-stone-700 dark:text-stone-300 flex items-center gap-2">
@@ -326,6 +342,12 @@ export const ProfileView: React.FC = () => {
           )}
         </div>
       )}
+
+      {/* Privacy Policy Modal */}
+      <PrivacyPolicyModal 
+        isOpen={isPrivacyModalOpen} 
+        onClose={() => setIsPrivacyModalOpen(false)} 
+      />
     </div>
   );
 };
