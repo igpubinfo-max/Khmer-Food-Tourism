@@ -20,33 +20,30 @@ jobs:
           java-version: '21'
           cache: 'gradle'
 
-      - name: 3. Setup Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: 4. Setup Node.js 20
+      - name: 3. Setup Node.js 20
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'npm'
 
-      - name: 5. Install Dependencies
+      - name: 4. Install Dependencies
         run: npm install
 
-      - name: 6. Build Web Application
+      - name: 5. Build Web Application
         run: npm run build
 
-      - name: 7. Sync Capacitor Android
+      - name: 6. Sync Capacitor Android
         run: |
           chmod +x android/gradlew
           npx cap sync android
 
-      - name: 8. Build Android Debug APK
+      - name: 7. Build Android Debug APK
         run: |
           cd android
           chmod +x ./gradlew
-          ./gradlew assembleDebug --no-daemon --stacktrace
+          ./gradlew assembleDebug --no-daemon
 
-      - name: 9. Upload Android APK File
+      - name: 8. Upload Android APK File
         uses: actions/upload-artifact@v4
         with:
           name: Khmer-Food-Tourism-APK
