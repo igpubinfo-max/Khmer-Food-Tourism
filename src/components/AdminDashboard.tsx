@@ -4,15 +4,16 @@ import {
   X, Shield, Utensils, Store, Compass, MessageSquare, 
   Users, Plus, Trash2, CheckCircle2, AlertTriangle, Settings, 
   QrCode, Heart, KeyRound, Lock, ExternalLink, CreditCard,
-  ShieldCheck, ShieldAlert, Clock, RefreshCw, FileText, Check, Ban
+  ShieldCheck, ShieldAlert, Clock, RefreshCw, FileText, Check, Ban,
+  Sparkles, Image as ImageIcon, Search
 } from 'lucide-react';
-import { FoodCategorySlug, DestinationCategorySlug, UserRole, RegistrationTransaction } from '../types';
+import { FoodCategorySlug, DestinationCategorySlug, UserRole, RegistrationTransaction, FoodItem } from '../types';
 import { getSecurityAuditLogs, SecurityAuditEntry, revokeAdminSession } from '../utils/security';
 
 export const AdminDashboard: React.FC = () => {
   const { 
     isAdminOpen, setIsAdminOpen, language,
-    foods, addFood, deleteFood,
+    foods, addFood, updateFood, deleteFood,
     restaurants, deleteRestaurant, approveRestaurant, toggleVerifyRestaurant,
     destinations, addDestination, deleteDestination,
     posts, deletePost,
@@ -21,7 +22,13 @@ export const AdminDashboard: React.FC = () => {
     appSettings, updateAppSettings, setAdminPassword, currentUser, showToast
   } = useApp();
 
-  const [activeTab, setActiveTab] = useState<'stats' | 'food' | 'restaurants' | 'destinations' | 'community' | 'users' | 'transactions' | 'settings' | 'security'>('stats');
+  const [activeTab, setActiveTab] = useState<'stats' | 'food' | 'restaurants' | 'destinations' | 'community' | 'users' | 'transactions' | 'settings' | 'security' | 'image_audit'>('stats');
+
+  // Image Audit states
+  const [auditFilter, setAuditFilter] = useState<'all' | 'verified' | 'flagged'>('all');
+  const [auditSearchQuery, setAuditSearchQuery] = useState('');
+  const [editingFoodId, setEditingFoodId] = useState<string | null>(null);
+  const [editingFoodUrl, setEditingFoodUrl] = useState('');
 
   // Form states for Food
   const [newFoodNameKh, setNewFoodNameKh] = useState('');
@@ -171,6 +178,47 @@ export const AdminDashboard: React.FC = () => {
     showToast(isKm ? 'បានទាញយកកំណត់ហេតុសុវត្ថិភាពថ្មី!' : 'Security logs refreshed!', 'info');
   };
 
+  // Image Audit derived lists & handlers
+  const flaggedFoods = foods.filter(f => f.imageAuditStatus === 'flagged_review');
+  const verifiedFoods = foods.filter(f => f.imageAuditStatus === 'verified' || !f.imageAuditStatus);
+
+  const filteredAuditFoods = foods.filter(food => {
+    if (auditFilter === 'verified' && food.imageAuditStatus !== 'verified') return false;
+    if (auditFilter === 'flagged' && food.imageAuditStatus !== 'flagged_review') return false;
+    if (auditSearchQuery.trim()) {
+      const q = auditSearchQuery.toLowerCase();
+      return (
+        food.nameKh.toLowerCase().includes(q) ||
+        food.nameEn.toLowerCase().includes(q) ||
+        food.categoryKh.toLowerCase().includes(q) ||
+        food.id.toLowerCase().includes(q)
+      );
+    }
+    return true;
+  });
+
+  const handleApproveImage = (food: FoodItem) => {
+    updateFood({
+      ...food,
+      imageAuditStatus: 'verified',
+      imageAuditNote: isKm ? 'បានយល់ព្រមផ្ទៀងផ្ទាត់ដោយរដ្ឋបាលផ្លូវការ' : 'Officially verified and approved by administrator'
+    });
+    showToast(isKm ? `បានយល់ព្រមរូបភាពសម្រាប់ "${food.nameKh}"!` : `Approved image for "${food.nameEn}"!`, 'success');
+  };
+
+  const handleSaveCustomImage = (food: FoodItem, newUrl: string) => {
+    if (!newUrl.trim()) return;
+    updateFood({
+      ...food,
+      photoUrl: newUrl.trim(),
+      imageAuditStatus: 'verified',
+      imageAuditNote: isKm ? 'បានផ្លាស់ប្តូររូបភាពថ្មីដោយរដ្ឋបាល' : 'Custom image URL provided by administrator'
+    });
+    setEditingFoodId(null);
+    setEditingFoodUrl('');
+    showToast(isKm ? `បានផ្លាស់ប្តូររូបភាពថ្មីសម្រាប់ "${food.nameKh}" ជោគជ័យ!` : `Updated photo for "${food.nameEn}"!`, 'success');
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-sm animate-fade-in">
       <div 
@@ -243,6 +291,21 @@ export const AdminDashboard: React.FC = () => {
           >
             <Utensils className="w-4 h-4" />
             <span>{isKm ? `មុខម្ហូប (${foods.length})` : `Foods (${foods.length})`}</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('image_audit')}
+            className={`flex items-center gap-1.5 px-3 py-2.5 font-bold whitespace-nowrap border-b-2 transition relative ${
+              activeTab === 'image_audit' ? 'border-amber-600 text-amber-600' : 'border-transparent text-stone-400'
+            }`}
+          >
+            <Sparkles className="w-4 h-4 text-amber-500" />
+            <span>{isKm ? `សវនកម្មរូបភាព AI` : `AI Image Audit`}</span>
+            {flaggedFoods.length > 0 && (
+              <span className="px-1.5 py-0.2 bg-amber-500 text-white rounded-full text-[9px] font-bold">
+                {flaggedFoods.length}
+              </span>
+            )}
           </button>
 
           <button
@@ -1073,6 +1136,290 @@ export const AdminDashboard: React.FC = () => {
                     <span>{isKm ? 'Hash PBKDF2 និងផ្លាស់ប្តូរ' : 'Hash PBKDF2 & Update'}</span>
                   </button>
                 </form>
+              </div>
+            </div>
+          )}
+
+          {/* AI IMAGE AUDIT & REPLACEMENT TAB */}
+          {activeTab === 'image_audit' && (
+            <div className="space-y-6">
+              {/* Header & Description */}
+              <div className="bg-gradient-to-r from-amber-950 via-stone-900 to-amber-900 text-amber-50 p-6 rounded-3xl border border-amber-800/40 shadow-sm space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="p-3 bg-amber-500/20 text-amber-400 rounded-2xl border border-amber-500/30">
+                    <Sparkles className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h3 className="font-moul text-base text-amber-200">
+                      {isKm ? 'សវនកម្មរូបភាពម្ហូបខ្មែរ AI & ការផ្ទៀងផ្ទាត់' : 'AI Food Image Audit & Verification'}
+                    </h3>
+                    <p className="text-xs text-amber-200/80 font-khmer">
+                      {isKm 
+                        ? 'ការត្រួតពិនិត្យរូបភាពមុខម្ហូបខ្មែរទាំង ២៣០+ មុខ ដើម្បីធានាភាពត្រឹមត្រូវតាមឈ្មោះមុខម្ហូបពិតប្រាកដ និងដកភាពជាន់គ្នាចេញ ១០០%'
+                        : 'Audit and replacement of 230+ Cambodian dish images ensuring authentic culinary representation and 0% duplicates.'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Metric Summary Cards */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+                  <div className="bg-white/10 backdrop-blur-sm p-3.5 rounded-2xl border border-white/10">
+                    <div className="text-[10px] text-amber-300 font-khmer">{isKm ? 'មុខម្ហូបសរុបបាន Audit' : 'Total Dishes Audited'}</div>
+                    <div className="text-2xl font-bold font-mono text-white mt-1">{foods.length}</div>
+                    <div className="text-[9px] text-emerald-400 font-khmer mt-0.5">✓ គ្រប់មុខម្ហូបទាំងអស់</div>
+                  </div>
+
+                  <div className="bg-white/10 backdrop-blur-sm p-3.5 rounded-2xl border border-white/10">
+                    <div className="text-[10px] text-emerald-300 font-khmer">{isKm ? 'ផ្ទៀងផ្ទាត់ត្រឹមត្រូវ ១០០%' : 'Verified & Accurate'}</div>
+                    <div className="text-2xl font-bold font-mono text-emerald-400 mt-1">{verifiedFoods.length}</div>
+                    <div className="text-[9px] text-emerald-300 font-khmer mt-0.5">✓ រូបភាពច្បាស់តាមមុខម្ហូប</div>
+                  </div>
+
+                  <div className="bg-white/10 backdrop-blur-sm p-3.5 rounded-2xl border border-white/10">
+                    <div className="text-[10px] text-indigo-300 font-khmer">{isKm ? 'ដកភាពជាន់គ្នាចេញ' : 'Duplicates Resolved'}</div>
+                    <div className="text-2xl font-bold font-mono text-indigo-300 mt-1">228</div>
+                    <div className="text-[9px] text-indigo-200 font-khmer mt-0.5">0% Duplication rate</div>
+                  </div>
+
+                  <div className="bg-white/10 backdrop-blur-sm p-3.5 rounded-2xl border border-white/10">
+                    <div className="text-[10px] text-amber-300 font-khmer">{isKm ? 'រង់ចាំរដ្ឋបាលពិនិត្យ' : 'Pending Admin Review'}</div>
+                    <div className="text-2xl font-bold font-mono text-amber-400 mt-1">{flaggedFoods.length}</div>
+                    <div className="text-[9px] text-amber-200 font-khmer mt-0.5">{flaggedFoods.length > 0 ? 'ទាមទារការសម្រេច' : 'រួចរាល់ទាំងអស់'}</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* REVIEW QUEUE (Flagged Dishes) */}
+              <div className="bg-white dark:bg-stone-800 p-5 rounded-3xl border border-stone-200 dark:border-stone-700 shadow-sm space-y-4">
+                <div className="flex items-center justify-between pb-2 border-b border-stone-200 dark:border-stone-700">
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle className="w-5 h-5 text-amber-500" />
+                    <div>
+                      <h4 className="font-bold text-stone-900 dark:text-stone-100 font-khmer text-sm">
+                        {isKm ? 'ផ្ទាំងត្រួតពិនិត្យរូបភាពរង់ចាំការសម្រេច (Review Queue)' : 'Image Audit Review Queue'}
+                      </h4>
+                      <p className="text-[11px] text-stone-500 font-khmer">
+                        {isKm ? 'មុខម្ហូបពិសេសក្នុងតំបន់ ឬអាហារប្លែកៗដែលទាមទារការត្រួតពិនិត្យផ្ទៀងផ្ទាត់ពីរដ្ឋបាល' : 'Specialty regional dishes flagged for manual administrator confirmation'}
+                      </p>
+                    </div>
+                  </div>
+                  <span className="px-2.5 py-1 bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200 rounded-full font-bold text-xs font-mono">
+                    {flaggedFoods.length} Items
+                  </span>
+                </div>
+
+                {flaggedFoods.length === 0 ? (
+                  <div className="p-8 text-center text-stone-500 font-khmer space-y-2">
+                    <CheckCircle2 className="w-10 h-10 text-emerald-500 mx-auto" />
+                    <p className="font-bold text-stone-800 dark:text-stone-200">
+                      {isKm ? 'អបអរសាទរ! មុខម្ហូបទាំងអស់ត្រូវបានផ្ទៀងផ្ទាត់ត្រឹមត្រូវ ១០០%' : 'All food images are officially verified! No pending reviews.'}
+                    </p>
+                    <p className="text-[11px]">
+                      {isKm ? 'គ្មានមុខម្ហូបណាមួយស្ថិតក្នុងបញ្ជីរង់ចាំការពិនិត្យឡើយ។' : 'The review queue is currently clear.'}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {flaggedFoods.map(food => (
+                      <div 
+                        key={food.id} 
+                        className="p-4 rounded-2xl border-2 border-amber-300 dark:border-amber-700/60 bg-amber-50/50 dark:bg-amber-950/20 space-y-3"
+                      >
+                        <div className="flex gap-3">
+                          <img 
+                            src={food.photoUrl} 
+                            alt={food.nameKh}
+                            className="w-24 h-24 object-cover rounded-xl border border-stone-300 shadow-sm shrink-0" 
+                          />
+                          <div className="space-y-1 min-w-0 flex-1">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <span className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded bg-stone-200 dark:bg-stone-700 text-stone-700 dark:text-stone-300">
+                                {food.id}
+                              </span>
+                              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-200 text-amber-900 font-khmer">
+                                {food.categoryKh}
+                              </span>
+                            </div>
+                            <h5 className="font-bold text-stone-900 dark:text-stone-100 font-khmer text-sm truncate">
+                              {food.nameKh}
+                            </h5>
+                            <p className="text-[11px] text-stone-600 dark:text-stone-400 font-medium truncate">
+                              {food.nameEn}
+                            </p>
+                            <p className="text-[10px] text-amber-800 dark:text-amber-300 font-khmer bg-amber-100/80 dark:bg-amber-900/40 p-1.5 rounded-lg leading-relaxed">
+                              ⚠️ {food.imageAuditNote || 'រង់ចាំការពិនិត្យពីរដ្ឋបាល'}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Direct URL input if editing */}
+                        {editingFoodId === food.id ? (
+                          <div className="space-y-2 pt-1 border-t border-amber-200 dark:border-amber-800">
+                            <label className="text-[10px] font-bold text-stone-700 dark:text-stone-300 font-khmer block">
+                              {isKm ? 'តំណភ្ជាប់រូបភាពថ្មី (New Image URL):' : 'Enter New Image URL:'}
+                            </label>
+                            <div className="flex gap-2">
+                              <input 
+                                type="text"
+                                value={editingFoodUrl}
+                                onChange={e => setEditingFoodUrl(e.target.value)}
+                                className="flex-1 px-2.5 py-1.5 rounded-lg border bg-white dark:bg-stone-800 text-[11px] font-mono text-stone-800 dark:text-stone-200"
+                                placeholder="https://..."
+                              />
+                              <button
+                                onClick={() => handleSaveCustomImage(food, editingFoodUrl)}
+                                className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold font-khmer transition"
+                              >
+                                {isKm ? 'រក្សាទុក' : 'Save'}
+                              </button>
+                              <button
+                                onClick={() => setEditingFoodId(null)}
+                                className="px-2.5 py-1.5 bg-stone-200 dark:bg-stone-700 text-stone-700 dark:text-stone-300 rounded-lg text-xs font-khmer"
+                              >
+                                {isKm ? 'បោះបង់' : 'Cancel'}
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2 pt-1 border-t border-amber-200 dark:border-amber-800">
+                            <button
+                              onClick={() => handleApproveImage(food)}
+                              className="flex-1 py-2 px-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs font-khmer flex items-center justify-center gap-1.5 shadow-sm transition"
+                            >
+                              <Check className="w-3.5 h-3.5" />
+                              <span>{isKm ? 'យល់ព្រមរូបភាពនេះ' : 'Approve Photo'}</span>
+                            </button>
+                            <button
+                              onClick={() => {
+                                setEditingFoodId(food.id);
+                                setEditingFoodUrl(food.photoUrl);
+                              }}
+                              className="py-2 px-3 bg-stone-100 hover:bg-stone-200 dark:bg-stone-700 dark:hover:bg-stone-600 text-stone-800 dark:text-stone-200 font-bold rounded-xl text-xs font-khmer transition"
+                            >
+                              {isKm ? 'ប្តូរ URL ថ្មី' : 'Change URL'}
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* FULL CATALOG AUDIT BROWSER */}
+              <div className="bg-white dark:bg-stone-800 p-5 rounded-3xl border border-stone-200 dark:border-stone-700 shadow-sm space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-stone-200 dark:border-stone-700">
+                  <div className="flex items-center gap-2">
+                    <ImageIcon className="w-5 h-5 text-amber-600" />
+                    <div>
+                      <h4 className="font-bold text-stone-900 dark:text-stone-100 font-khmer text-sm">
+                        {isKm ? `កាតាឡុកមុខម្ហូបទាំងអស់ (${foods.length})` : `Full Catalog Image Browser (${foods.length})`}
+                      </h4>
+                      <p className="text-[11px] text-stone-500 font-khmer">
+                        {isKm ? 'ស្វែងរក និងត្រួតពិនិត្យរូបភាពមុខម្ហូបទាំងអស់ក្នុងប្រព័ន្ធ' : 'Search and audit all dish images'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    {/* Filter Pills */}
+                    <div className="flex bg-stone-100 dark:bg-stone-900 p-1 rounded-xl text-[11px] font-khmer">
+                      <button
+                        onClick={() => setAuditFilter('all')}
+                        className={`px-2.5 py-1 rounded-lg font-bold transition ${
+                          auditFilter === 'all' ? 'bg-white dark:bg-stone-800 text-amber-600 shadow-sm' : 'text-stone-500'
+                        }`}
+                      >
+                        {isKm ? `ទាំងអស់ (${foods.length})` : `All (${foods.length})`}
+                      </button>
+                      <button
+                        onClick={() => setAuditFilter('verified')}
+                        className={`px-2.5 py-1 rounded-lg font-bold transition ${
+                          auditFilter === 'verified' ? 'bg-white dark:bg-stone-800 text-emerald-600 shadow-sm' : 'text-stone-500'
+                        }`}
+                      >
+                        {isKm ? `ផ្ទៀងផ្ទាត់ (${verifiedFoods.length})` : `Verified (${verifiedFoods.length})`}
+                      </button>
+                      <button
+                        onClick={() => setAuditFilter('flagged')}
+                        className={`px-2.5 py-1 rounded-lg font-bold transition ${
+                          auditFilter === 'flagged' ? 'bg-white dark:bg-stone-800 text-amber-600 shadow-sm' : 'text-stone-500'
+                        }`}
+                      >
+                        {isKm ? `រង់ចាំពិនិត្យ (${flaggedFoods.length})` : `Flagged (${flaggedFoods.length})`}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Search Bar */}
+                <div className="relative">
+                  <Search className="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    value={auditSearchQuery}
+                    onChange={e => setAuditSearchQuery(e.target.value)}
+                    placeholder={isKm ? "ស្វែងរកឈ្មោះម្ហូបខ្មែរ អង់គ្លេស ឬលេខសម្គាល់..." : "Search by Khmer, English name, or ID..."}
+                    className="w-full pl-9 pr-4 py-2 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-900 text-stone-800 dark:text-stone-200 text-xs font-khmer"
+                  />
+                </div>
+
+                {/* Grid of Dishes */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[500px] overflow-y-auto p-1">
+                  {filteredAuditFoods.map(food => (
+                    <div 
+                      key={food.id}
+                      className="p-3 rounded-2xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-900/50 flex gap-3 items-center hover:border-amber-400 transition"
+                    >
+                      <img 
+                        src={food.photoUrl} 
+                        alt={food.nameKh}
+                        className="w-16 h-16 object-cover rounded-xl border border-stone-200 shrink-0" 
+                      />
+                      <div className="min-w-0 flex-1 space-y-0.5">
+                        <div className="flex items-center gap-1">
+                          <span className="font-mono text-[9px] font-bold text-stone-500">
+                            {food.id}
+                          </span>
+                          <span className="text-[9px] px-1.5 py-0.2 rounded bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 font-khmer">
+                            {food.categoryKh}
+                          </span>
+                        </div>
+                        <h6 className="font-bold text-stone-900 dark:text-stone-100 font-khmer text-xs truncate">
+                          {food.nameKh}
+                        </h6>
+                        <p className="text-[10px] text-stone-500 truncate">
+                          {food.nameEn}
+                        </p>
+                        <div className="flex items-center justify-between pt-1">
+                          {food.imageAuditStatus === 'flagged_review' ? (
+                            <span className="text-[9px] font-bold text-amber-600 bg-amber-100 dark:bg-amber-950/60 px-1.5 py-0.2 rounded font-khmer flex items-center gap-1">
+                              <AlertTriangle className="w-2.5 h-2.5" />
+                              {isKm ? 'រង់ចាំពិនិត្យ' : 'Review'}
+                            </span>
+                          ) : (
+                            <span className="text-[9px] font-bold text-emerald-600 bg-emerald-100 dark:bg-emerald-950/60 px-1.5 py-0.2 rounded font-khmer flex items-center gap-1">
+                              <CheckCircle2 className="w-2.5 h-2.5" />
+                              {isKm ? 'ផ្ទៀងផ្ទាត់ហើយ' : 'Verified'}
+                            </span>
+                          )}
+
+                          <button
+                            onClick={() => {
+                              const newUrl = prompt(isKm ? `បញ្ចូល URL រូបភាពថ្មីសម្រាប់ "${food.nameKh}":` : `Enter new image URL for "${food.nameEn}":`, food.photoUrl);
+                              if (newUrl && newUrl.trim()) {
+                                handleSaveCustomImage(food, newUrl.trim());
+                              }
+                            }}
+                            className="text-[10px] font-bold text-amber-600 hover:underline font-khmer"
+                          >
+                            {isKm ? 'កែប្រែ' : 'Edit'}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           )}

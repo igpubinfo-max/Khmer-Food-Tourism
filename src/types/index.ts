@@ -61,6 +61,9 @@ export interface FoodItem {
   rating: number;
   reviewCount: number;
   isFeatured?: boolean;
+  imageAuditStatus?: 'verified' | 'replaced' | 'flagged_review';
+  imageAuditNote?: string;
+  originalPhotoUrl?: string;
 }
 
 export type RestaurantPriceLevel = '$' | '$$' | '$$$' | '$$$$';
