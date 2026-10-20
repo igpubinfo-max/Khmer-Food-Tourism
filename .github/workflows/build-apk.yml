@@ -31,8 +31,10 @@ jobs:
       - name: 5. Build Web Bundle
         run: npm run build
 
-      - name: 6. Copy Web to Android Assets
-        run: npx cap copy android
+      - name: 6. Copy Web Assets directly into Android
+        run: |
+          mkdir -p android/app/src/main/assets/public
+          cp -rf dist/* android/app/src/main/assets/public/
 
       - name: 7. Build Android Debug APK
         run: |
