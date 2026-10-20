@@ -1,0 +1,18 @@
+{
+  "short_name": "Khmer Food",
+  "name": "Khmer Food & Tourism - អាហារ និងទេសចរណ៍ខ្មែរ",
+  "description": "Cambodian Cuisine, Authentic Restaurants, and Scenic Tourist Destinations",
+  "icons": [
+    {
+      "src": "/logo.svg",
+      "type": "image/svg+xml",
+      "sizes": "192x192 512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#78350f",
+  "theme_color": "#b45309",
+  "display": "standalone",
+  "orientation": "portrait"
+}

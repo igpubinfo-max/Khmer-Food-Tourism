@@ -24,26 +24,20 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
 
-      - name: 4. Install Dependencies
-        run: npm install
-
-      - name: 5. Build Web Application
-        run: npm run build
-
-      - name: 6. Sync Capacitor Android
+      - name: 4. Build Web and Copy to Android Assets
         run: |
-          chmod +x android/gradlew
-          npx cap sync android
+          npm install
+          npm run build
+          npx cap copy android
 
-      - name: 7. Build Android Debug APK
+      - name: 5. Build Android Debug APK
         run: |
           cd android
           chmod +x ./gradlew
           ./gradlew assembleDebug --no-daemon
 
-      - name: 8. Upload Android APK File
+      - name: 6. Upload Android APK File
         uses: actions/upload-artifact@v4
         with:
           name: Khmer-Food-Tourism-APK
