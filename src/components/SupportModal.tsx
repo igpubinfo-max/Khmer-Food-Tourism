@@ -141,8 +141,8 @@ export const SupportModal: React.FC = () => {
             </h4>
             <p className="text-[11px] text-stone-500 font-khmer leading-normal">
               {isKm 
-                ? 'លោកអ្នកអាចប្រើប្រាស់កម្មវិធីធនាគារណាមួយក៏បាន ដូចជា Bakong App, Canadia Bank App, ABA Mobile, ACLEDA mobile, Wing, TrueMoney និងកម្មវិធីសមាជិក Bakong ទាំងអស់ដើម្បីស្កេន។' 
-                : 'Scan with Bakong App, Canadia Bank, ABA Mobile, ACLEDA, Wing, or any member app of National Bank of Cambodia Bakong network.'}
+                ? 'លោកអ្នកអាចប្រើប្រាស់កម្មវិធីធនាគារណាមួយក៏បាន ដូចជា ABA Mobile, Bakong App, ACLEDA mobile, Wing, TrueMoney និងកម្មវិធីសមាជិក Bakong ទាំងអស់ដើម្បីស្កេន។' 
+                : 'Scan with ABA Mobile, Bakong App, ACLEDA, Wing, or any member app of National Bank of Cambodia Bakong network.'}
             </p>
           </div>
         </div>

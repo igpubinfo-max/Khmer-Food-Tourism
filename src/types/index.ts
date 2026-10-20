@@ -68,7 +68,7 @@ export interface FoodItem {
 
 export type RestaurantPriceLevel = '$' | '$$' | '$$$' | '$$$$';
 
-export type PaymentStatus = 'unpaid' | 'pending_verification' | 'verified' | 'rejected' | 'waived';
+export type PaymentStatus = 'unpaid' | 'pending_verification' | 'verified' | 'rejected' | 'waived' | 'free_trial';
 
 export interface RegistrationTransaction {
   id: string; // e.g. "TXN-20261020-001"
@@ -119,6 +119,8 @@ export interface Restaurant {
   paymentDate?: string;
   promotionalPrice?: number;
   isPromoted?: boolean;
+  isFreeTrial?: boolean;
+  freeTrialExpiry?: string;
 }
 
 export type DestinationCategorySlug = 'temple' | 'nature' | 'mountain' | 'beach' | 'resort';

@@ -203,7 +203,7 @@ export const AuthModal: React.FC = () => {
                   type="text"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  placeholder="012 345 678"
+                  placeholder="012 xxx xxx"
                   className="w-full px-3 py-2 rounded-xl border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 focus:outline-none focus:border-amber-500"
                 />
               </div>

@@ -53,8 +53,87 @@ export const AddRestaurantModal: React.FC = () => {
     'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80',
   ];
 
-  const handleNextToPayment = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleRegisterFreeTrial = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!currentUser) {
+      setIsAuthModalOpen(true);
+      return;
+    }
+    if (!nameKh.trim()) {
+      showToast(isKm ? 'សូមបញ្ចូលឈ្មោះហាងជាភាសាខ្មែរ!' : 'Please enter restaurant name in Khmer!', 'warning');
+      return;
+    }
+    if (!addressKh.trim()) {
+      showToast(isKm ? 'សូមបញ្ចូលអាសយដ្ឋានហាង!' : 'Please enter restaurant address!', 'warning');
+      return;
+    }
+    if (!phone.trim()) {
+      showToast(isKm ? 'សូមបញ្ចូលលេខទូរស័ព្ទទាក់ទង!' : 'Please enter contact phone number!', 'warning');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    const dishes = dishesInput
+      .split(',')
+      .map(s => s.trim())
+      .filter(Boolean);
+
+    const generatedRestId = `rest-${Date.now()}`;
+    const expiryDate = new Date();
+    expiryDate.setDate(expiryDate.getDate() + 30);
+
+    // 1. Create Restaurant Listing with 1-Month Free Promotion
+    addRestaurant({
+      nameKh: nameKh || 'ហាងអាហារខ្មែរ',
+      nameEn: nameEn || nameKh || 'Khmer Restaurant',
+      provinceKh,
+      provinceEn,
+      addressKh: addressKh || 'កម្ពុជា',
+      addressEn: addressKh || 'Cambodia',
+      phone: phone.trim(),
+      openingHoursKh,
+      openingHoursEn: openingHoursKh,
+      priceLevel,
+      photoUrl,
+      signatureDishesKh: dishes.length > 0 ? dishes : ['ម្ហូបខ្មែរប្រពៃណី'],
+      descriptionKh: descriptionKh || 'ហាងអាហារខ្មែររសជាតិដើម បរិយាកាសស្អាត និងផាសុកភាព។',
+      descriptionEn: descriptionKh || 'Authentic traditional Khmer restaurant with delicious dishes.',
+      mapUrl: `https://maps.google.com/?q=${encodeURIComponent(nameKh || 'Cambodia Restaurant')}`,
+      latitude: 11.5564,
+      longitude: 104.9282,
+      paymentStatus: 'free_trial',
+      isFreeTrial: true,
+      freeTrialExpiry: expiryDate.toISOString(),
+      promotionalPrice: promoPrice,
+      isPromoted: true,
+      isVerified: true,
+      status: 'approved',
+    });
+
+    // 2. Record Registration Transaction for Free Trial
+    addRegistrationTransaction({
+      restaurantId: generatedRestId,
+      restaurantNameKh: nameKh,
+      restaurantNameEn: nameEn || nameKh,
+      ownerId: currentUser?.id || 'owner-guest',
+      ownerName: currentUser?.name || 'Restaurant Owner',
+      ownerPhone: phone,
+      amountUsd: 0,
+      paymentMethod: 'Manual',
+      transactionRef: `FREE-TRIAL-${Date.now().toString().slice(-6)}`,
+      status: 'verified',
+      notes: '🎁 ការចុះបញ្ជីផ្សព្វផ្សាយឥតគិតថ្លៃ ១ ខែដំបូង (1-Month Free Trial Promotion)',
+    });
+
+    setIsSubmitting(false);
+    setIsAddRestaurantModalOpen(false);
+    setStep(1);
+    setTransactionRef('');
+  };
+
+  const handleNextToPayment = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     if (!currentUser) {
       setIsAuthModalOpen(true);
       return;
@@ -103,7 +182,7 @@ export const AddRestaurantModal: React.FC = () => {
       provinceEn,
       addressKh: addressKh || 'កម្ពុជា',
       addressEn: addressKh || 'Cambodia',
-      phone: phone || '012 345 678',
+      phone: phone.trim(),
       openingHoursKh,
       openingHoursEn: openingHoursKh,
       priceLevel,
@@ -155,11 +234,11 @@ export const AddRestaurantModal: React.FC = () => {
               </h2>
               <div className="flex items-center gap-1.5 text-[10px] text-amber-200/90 font-khmer">
                 <span className={`px-2 py-0.5 rounded-full ${step === 1 ? 'bg-amber-500 text-white font-bold' : 'bg-white/20'}`}>
-                  {isKm ? '១. ព័ត៌មានហាង' : '1. Shop Info'}
+                  {isKm ? '១. ចុះបញ្ជីឥតគិតថ្លៃ ១ ខែ' : '1. Free 1-Month Trial'}
                 </span>
                 <span>→</span>
                 <span className={`px-2 py-0.5 rounded-full ${step === 2 ? 'bg-amber-500 text-white font-bold' : 'bg-white/20'}`}>
-                  {isKm ? `២. តម្លៃប្រូម៉ូសិន $${promoPrice}` : `2. Promo Fee $${promoPrice}`}
+                  {isKm ? `២. VIP ប្រូម៉ូសិន $${promoPrice}` : `2. VIP Promo $${promoPrice}`}
                 </span>
               </div>
             </div>
@@ -174,23 +253,24 @@ export const AddRestaurantModal: React.FC = () => {
 
         {/* Step 1: Restaurant Details Form */}
         {step === 1 && (
-          <form onSubmit={handleNextToPayment} className="p-5 space-y-4 overflow-y-auto no-scrollbar flex-1 text-xs">
-            {/* Promotional Banner */}
-            <div className="p-3 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-stone-800 dark:to-stone-800 rounded-2xl border border-amber-300/80 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-amber-600 animate-pulse shrink-0" />
+          <form onSubmit={handleRegisterFreeTrial} className="p-5 space-y-4 overflow-y-auto no-scrollbar flex-1 text-xs">
+            {/* 1-Month Free Promotional Banner */}
+            <div className="p-3.5 bg-gradient-to-r from-emerald-50 via-amber-50 to-orange-50 dark:from-stone-800 dark:to-stone-800 rounded-2xl border-2 border-emerald-400/80 shadow-xs flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-amber-500 text-white flex items-center justify-center font-bold text-lg shrink-0 shadow">
+                  🎁
+                </div>
                 <div>
-                  <div className="font-bold text-amber-900 dark:text-amber-200 font-khmer text-xs">
-                    Special Promotional Price: ${promoPrice} USD
+                  <div className="font-bold text-emerald-950 dark:text-emerald-200 font-khmer text-xs flex items-center gap-1.5">
+                    <span>{isKm ? 'ឥតគិតថ្លៃ ១ ខែដំបូង ក្រោយការចុះបញ្ជី!' : '1-Month Free Trial Upon Registration!'}</span>
+                    <span className="px-1.5 py-0.5 rounded-full text-[9px] bg-emerald-600 text-white font-mono font-bold">FREE</span>
                   </div>
-                  <div className="text-[10px] text-stone-600 dark:text-stone-300 font-khmer">
-                    {appSettings.promotionPeriodKh || 'តម្លៃប្រូម៉ូសិនពិសេស៖ $4.99 USD (បញ្ចុះតម្លៃ ៧៥% ពីតម្លៃដើម $19.99)'}
+                  <div className="text-[10px] text-stone-600 dark:text-stone-300 font-khmer mt-0.5 leading-snug">
+                    {isKm 
+                      ? 'ហាងរបស់អ្នកនឹងត្រូវបានដាក់បង្ហាញ និងផ្សព្វផ្សាយរយៈពេល ៣០ ថ្ងៃដោយឥតគិតថ្លៃ។ ផុតកំណត់ទើបជ្រើសរើសបន្តប្រូម៉ូសិនពិសេសត្រឹម $4.99 USD តាម ABA Bank' 
+                      : 'Your restaurant will be actively promoted for 30 days for free. Extended VIP promotion is only $4.99 USD via ABA Bank.'}
                   </div>
                 </div>
-              </div>
-              <div className="text-right">
-                <span className="text-[10px] line-through text-stone-400 block">$19.99</span>
-                <span className="text-xs font-bold text-red-600 font-mono">${promoPrice}</span>
               </div>
             </div>
 
@@ -295,7 +375,7 @@ export const AddRestaurantModal: React.FC = () => {
                   required
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  placeholder="012 888 999"
+                  placeholder="012 xxx xxx"
                   className="w-full px-3 py-2 rounded-xl border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 focus:outline-none focus:border-amber-500"
                 />
               </div>
@@ -374,14 +454,25 @@ export const AddRestaurantModal: React.FC = () => {
               </div>
             </div>
 
-            {/* Next Button */}
-            <div className="pt-2">
+            {/* Step 1 Actions */}
+            <div className="pt-2 space-y-2">
               <button
                 type="submit"
-                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-red-700 via-amber-700 to-amber-800 hover:from-red-800 hover:to-amber-900 text-white font-bold text-xs shadow-lg shadow-red-700/20 transition active:scale-[0.98] flex items-center justify-center gap-2 font-khmer"
+                disabled={isSubmitting}
+                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-amber-600 hover:from-emerald-700 hover:to-amber-700 text-white font-bold text-xs shadow-lg shadow-emerald-700/20 transition active:scale-[0.98] flex items-center justify-center gap-2 font-khmer disabled:opacity-50"
               >
-                <span>{isKm ? `បន្តទៅការទូទាត់ប្រូម៉ូសិន ($${promoPrice})` : `Continue to $${promoPrice} Payment`}</span>
-                <ArrowRight className="w-4 h-4" />
+                <span>🎁</span>
+                <span>{isKm ? 'ចុះបញ្ជី និងបើកការផ្សព្វផ្សាយឥតគិតថ្លៃ ១ ខែភ្លាមៗ' : 'Register & Activate 1-Month Free Promotion Now'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleNextToPayment}
+                className="w-full py-2.5 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 font-medium text-[11px] transition flex items-center justify-center gap-1.5 font-khmer"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                <span>{isKm ? `ឬ បង់ប្រាក់ $${promoPrice} តាម ABA Bank ដើម្បីផ្សព្វផ្សាយអចិន្ត្រៃយ៍ (Lifetime VIP)` : `Or Pay $${promoPrice} via ABA Bank for Lifetime VIP`}</span>
+                <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
           </form>
@@ -412,7 +503,7 @@ export const AddRestaurantModal: React.FC = () => {
             <div className="bg-stone-50 dark:bg-stone-800/60 rounded-2xl p-4 border border-stone-200 dark:border-stone-700 flex flex-col items-center">
               <div className="text-[11px] font-bold text-stone-700 dark:text-stone-300 mb-2 font-khmer flex items-center gap-1.5">
                 <QrCode className="w-4 h-4 text-red-600" />
-                <span>{isKm ? 'ស្កេនទូទាត់តាម Bakong KHQR (គ្រប់ធនាគារ)' : 'Scan & Pay via Bakong KHQR'}</span>
+                <span>{isKm ? 'ស្កេនទូទាត់តាម ABA Mobile ឬ Bakong KHQR' : 'Scan & Pay via ABA Mobile / Bakong KHQR'}</span>
               </div>
 
               {/* QR Image */}

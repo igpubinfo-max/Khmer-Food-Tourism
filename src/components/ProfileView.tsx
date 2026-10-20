@@ -55,9 +55,17 @@ export const ProfileView: React.FC = () => {
                     {currentUser.role === 'admin' ? '🛡️ Administrator' : currentUser.role === 'owner' ? '🏪 Shop Owner' : '👤 Foodie'}
                   </span>
                 </div>
-                <p className="text-xs text-stone-500 mt-0.5">{currentUser.email}</p>
-                {currentUser.phone && (
-                  <p className="text-[11px] text-stone-400">📞 {currentUser.phone}</p>
+                {currentUser.role === 'admin' ? (
+                  <p className="text-xs text-rose-600 font-medium font-khmer mt-0.5">
+                    {isKm ? 'គណនីរដ្ឋបាលប្រព័ន្ធ (Private)' : 'System Administrator (Private)'}
+                  </p>
+                ) : (
+                  <>
+                    <p className="text-xs text-stone-500 mt-0.5">{currentUser.email}</p>
+                    {currentUser.phone && (
+                      <p className="text-[11px] text-stone-400">📞 {currentUser.phone}</p>
+                    )}
+                  </>
                 )}
               </div>
             </div>

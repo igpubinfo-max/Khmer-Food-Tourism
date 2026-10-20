@@ -33,7 +33,12 @@ export const RestaurantCard: React.FC<RestaurantCardProps> = ({ restaurant }) =>
         </div>
 
         {/* Verification Badge */}
-        <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5">
+        <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5 flex-wrap justify-end">
+          {restaurant.isFreeTrial && (
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow flex items-center gap-1 font-khmer">
+              <span>🎁 {isKm ? 'ឥតគិតថ្លៃ ១ ខែ' : '1 Mo Free'}</span>
+            </span>
+          )}
           <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold backdrop-blur-md shadow flex items-center gap-1 font-khmer ${
             restaurant.isVerified
               ? 'bg-emerald-600/90 text-white border border-emerald-400/40'

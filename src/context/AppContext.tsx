@@ -63,7 +63,7 @@ interface AppContextType {
   deleteFood: (id: string) => void;
   
   // Restaurant Actions
-  addRestaurant: (rest: Omit<Restaurant, 'id' | 'rating' | 'reviewCount' | 'status'>) => void;
+  addRestaurant: (rest: Omit<Restaurant, 'id' | 'rating' | 'reviewCount' | 'status'> & { status?: 'approved' | 'pending' | 'rejected' }) => void;
   updateRestaurant: (rest: Restaurant) => void;
   deleteRestaurant: (id: string) => void;
   approveRestaurant: (id: string) => void;
@@ -169,8 +169,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
 
   const [destinations, setDestinations] = useState<TouristDestination[]>(() => {
-    const saved = localStorage.getItem('kft_destinations_v3');
-    return saved ? JSON.parse(saved) : initialDestinations;
+    const saved = localStorage.getItem('kft_destinations_100_v1');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length >= 100) return parsed;
+      } catch {}
+    }
+    try {
+      localStorage.removeItem('kft_destinations_v3');
+      localStorage.removeItem('kft_destinations_v4');
+    } catch {}
+    return initialDestinations;
   });
 
   const [posts, setPosts] = useState<CommunityPost[]>(() => {
@@ -234,7 +244,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [restaurants]);
 
   useEffect(() => {
-    localStorage.setItem('kft_destinations_v4', JSON.stringify(destinations));
+    localStorage.setItem('kft_destinations_100_v1', JSON.stringify(destinations));
   }, [destinations]);
 
   useEffect(() => {
@@ -499,15 +509,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     await createAdminSession();
     recordSecurityAudit('ADMIN_LOGIN_SUCCESS', 'SUCCESS', 'AdminPortal', 'Authorized admin session established');
 
-    // Isolated single authorized administrator profile
+    // Isolated single authorized administrator profile (private credentials protected)
     const adminProfile: User = {
       id: 'admin-authorized-single',
-      name: 'Chea Savuth',
-      email: 'cheasavuth@khmerfoodtourism.com',
+      name: 'រដ្ឋបាលប្រព័ន្ធ (System Admin)',
+      email: 'admin@khmerfoodtourism.com',
       role: 'admin',
       avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-      phone: '012 888 999',
-      bio: 'Senior Administrator (Authorized Single Admin)',
+      bio: 'ប្រព័ន្ធគ្រប់គ្រងរដ្ឋបាលផ្លូវការ (System Administrator)',
       createdAt: '2026-01-01',
     };
 
@@ -609,20 +618,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // Restaurant CRUD
-  const addRestaurant = (restData: Omit<Restaurant, 'id' | 'rating' | 'reviewCount' | 'status'>) => {
+  const addRestaurant = (restData: Omit<Restaurant, 'id' | 'rating' | 'reviewCount' | 'status'> & { status?: 'approved' | 'pending' | 'rejected' }) => {
     const isOwnerOrAdmin = currentUser?.role === 'admin';
+    const isFreeTrial = restData.isFreeTrial ?? false;
     const newRest: Restaurant = {
       ...restData,
       id: `rest-${Date.now()}`,
       rating: 5.0,
       reviewCount: 1,
       ownerId: currentUser?.id,
-      status: isOwnerOrAdmin ? 'approved' : 'pending',
-      isVerified: isOwnerOrAdmin,
+      status: (isOwnerOrAdmin || isFreeTrial) ? 'approved' : (restData.status || 'pending'),
+      isVerified: isOwnerOrAdmin || isFreeTrial || (restData.isVerified ?? false),
     };
     setRestaurants(prev => [newRest, ...prev]);
     showToast(
-      isOwnerOrAdmin
+      isFreeTrial
+        ? (language === 'km' ? '🎉 ចុះបញ្ជីជោគជ័យ! ហាងទទួលបានការផ្សព្វផ្សាយឥតគិតថ្លៃ ១ ខែ!' : '🎉 Registered! 1-Month Free Promotion activated!')
+        : isOwnerOrAdmin
         ? (language === 'km' ? 'បានចុះបញ្ជីហាងអាហារបានជោគជ័យ!' : 'Restaurant registered!')
         : (language === 'km' ? 'បានផ្ញើសំណើចុះបញ្ជីហាង! រង់ចាំការត្រួតពិនិត្យពីរដ្ឋបាល' : 'Submitted for admin approval!'),
       'success'
@@ -776,7 +788,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         ...t,
         status: 'verified',
         verifiedAt: new Date().toISOString().replace('T', ' ').slice(0, 16),
-        verifiedBy: currentUser?.name || 'Chea Savuth',
+        verifiedBy: currentUser?.name || 'System Administrator',
       };
     }));
 

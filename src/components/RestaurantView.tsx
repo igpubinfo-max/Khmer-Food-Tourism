@@ -129,10 +129,10 @@ export const RestaurantView: React.FC = () => {
       <div className="p-3.5 rounded-2xl bg-gradient-to-r from-amber-900 via-amber-800 to-amber-950 text-white shadow-xs flex items-center justify-between">
         <div className="space-y-0.5">
           <p className="font-bold text-xs text-amber-200 font-khmer">
-            {isKm ? 'តើលោកអ្នកជាម្ចាស់ហាងអាហារមែនទេ?' : 'Are you a restaurant owner?'}
+            {isKm ? '🎁 ចុះបញ្ជីហាងឥតគិតថ្លៃ ១ ខែដំបូង!' : '🎁 Free 1-Month Promotion for Restaurants!'}
           </p>
           <p className="text-[10px] text-amber-100/80 font-khmer">
-            {isKm ? 'ចុះបញ្ជីហាងរបស់អ្នកដើម្បីទទួលបានអតិថិជនកាន់តែច្រើន!' : 'List your shop and attract foodies across Cambodia!'}
+            {isKm ? 'ផ្សព្វផ្សាយហាងរបស់អ្នកទូទាំងប្រទេសដោយឥតគិតថ្លៃ ៣០ ថ្ងៃ!' : 'Promote your shop to tourists across Cambodia for 30 days free!'}
           </p>
         </div>
         <button
@@ -140,9 +140,9 @@ export const RestaurantView: React.FC = () => {
             if (!currentUser) setIsAuthModalOpen(true);
             else setIsAddRestaurantModalOpen(true);
           }}
-          className="px-3 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-amber-950 text-xs font-bold shrink-0 shadow transition active:scale-95 font-khmer"
+          className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-400 to-orange-400 hover:from-amber-300 hover:to-orange-300 text-stone-900 text-xs font-bold shrink-0 shadow transition active:scale-95 font-khmer"
         >
-          {isKm ? 'ចុះឈ្មោះហាង' : 'Register'}
+          {isKm ? 'ចុះឈ្មោះភ្លាម' : 'Register Free'}
         </button>
       </div>
 

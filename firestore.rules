@@ -11,7 +11,7 @@ service cloud.firestore {
     function isAdmin() {
       return isAuthenticated() && (
         request.auth.token.role == 'admin' ||
-        request.auth.token.email == 'cheasavuth@khmerfoodtourism.com'
+        request.auth.token.email in ['admin@khmerfoodtourism.com', 'cheasavuth@khmerfoodtourism.com']
       );
     }
 
