@@ -137,11 +137,11 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
   };
 
   const handleResetToDefault = () => {
-    const defaultUrl = food.originalPhotoUrl || `https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=80&dish=${food.id}`;
+    const defaultUrl = food.originalPhotoUrl || `/foods/${food.id}.jpg`;
     setPhotoUrl(defaultUrl);
     setUrlInput(defaultUrl);
-    setAuditStatus('flagged_review');
-    setAuditNote(isKm ? 'បានកំណត់រូបភាពលំនាំដើមឡើងវិញ' : 'Reset to default image');
+    setAuditStatus('verified');
+    setAuditNote(isKm ? 'បានកំណត់ទៅរូបភាពដើមពិតប្រាកដពី Magnific' : 'Reset to authentic food image');
   };
 
   const handleSave = () => {

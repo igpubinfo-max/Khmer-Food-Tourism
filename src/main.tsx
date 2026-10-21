@@ -4,11 +4,12 @@ import './index.css'
 import App from './App.tsx'
 import { ErrorBoundary } from './components/ErrorBoundary.tsx'
 
-// 0. Version Migration: Purge legacy corrupted storage on upgrade to v1.3.9
+// 0. Version Migration: Purge legacy corrupted storage on upgrade to v1.4.0
 try {
-  const CURRENT_VER = '1.3.9';
+  const CURRENT_VER = '1.4.0';
   const installedVer = localStorage.getItem('kft_app_installed_ver');
   if (installedVer !== CURRENT_VER) {
+    localStorage.removeItem('kft_foods_100_v1');
     localStorage.removeItem('kft_restaurants_membership_v1');
     localStorage.removeItem('kft_destinations_100_v1');
     localStorage.removeItem('kft_restaurants_v3');
@@ -25,7 +26,7 @@ try {
 // 1. Pre-boot cache sanitation: Purge invalid or corrupt values
 try {
   const keysToCheck = [
-    'kft_current_user_v4', 'kft_users_v4', 'kft_foods_100_v1',
+    'kft_current_user_v4', 'kft_users_v4', 'kft_foods_100_v1', 'kft_foods_100_v2',
     'kft_restaurants_membership_v2', 'kft_destinations_100_v1',
     'kft_posts_v4', 'kft_posts_v3', 'kft_bookmarks_v4', 'kft_bookmarks_v3',
     'kft_settings_v4', 'kft_settings_v3', 'kft_transactions_v4'
