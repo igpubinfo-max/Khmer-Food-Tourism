@@ -31,6 +31,7 @@ interface AppContextType {
   users: User[];
   login: (email: string, role?: UserRole) => boolean;
   register: (name: string, email: string, role: UserRole, phone?: string, restaurantName?: string) => void;
+  loginWithGoogle: (profile: any) => void;
   logout: () => void;
   updateUserRole: (userId: string, newRole: UserRole) => void;
 
@@ -936,6 +937,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Bookmarking
   const toggleBookmark = (id: string) => {
+    if (!currentUser) {
+      showToast(
+        language === 'km' 
+          ? 'សូមចុះឈ្មោះ ឬចូលគណនី ដើម្បីរក្សាទុកមុខម្ហូប និងកន្លែងដែលចូលចិត្ត' 
+          : 'Please sign in or register to save favorites',
+        'info'
+      );
+      setIsAuthModalOpen(true);
+      return;
+    }
     setBookmarks(prev => {
       const exists = prev.includes(id);
       const updated = exists ? prev.filter(item => item !== id) : [...prev, id];
@@ -1131,6 +1142,57 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setUsers(prev => [...prev, newUser]);
     setCurrentUser(newUser);
     showToast(language === 'km' ? `សូមស្វាគមន៍មកកាន់កម្មវិធី ${displayName}!` : `Welcome to the app, ${displayName}!`, 'success');
+    setIsAuthModalOpen(false);
+  };
+
+  const loginWithGoogle = (profile: {
+    id: string;
+    name: string;
+    email: string;
+    avatar?: string;
+    phone?: string;
+  }) => {
+    // Check if user already exists with this ID or Email
+    const existing = users.find(u => 
+      u.id === profile.id || 
+      (profile.email && u.email.toLowerCase() === profile.email.toLowerCase())
+    );
+
+    if (existing) {
+      const updated: User = {
+        ...existing,
+        name: profile.name || existing.name,
+        avatar: profile.avatar || existing.avatar,
+        authProvider: 'google',
+        linkedProviders: Array.from(new Set([...(existing.linkedProviders || []), 'google'])),
+        isVerified: true,
+        verifiedAt: existing.verifiedAt || new Date().toISOString(),
+      };
+      setUsers(prev => prev.map(u => u.id === existing.id ? updated : u));
+      setCurrentUser(updated);
+      showToast(language === 'km' ? `សូមស្វាគមន៍មកវិញ ${updated.name}!` : `Welcome back, ${updated.name}!`, 'success');
+      setIsAuthModalOpen(false);
+      return;
+    }
+
+    // Auto-create new user account with Google credentials
+    const newUser: User = {
+      id: profile.id,
+      name: profile.name,
+      email: profile.email,
+      role: 'user',
+      avatar: profile.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
+      phone: profile.phone,
+      authProvider: 'google',
+      linkedProviders: ['google'],
+      isVerified: true,
+      verifiedAt: new Date().toISOString(),
+      createdAt: new Date().toISOString().split('T')[0],
+    };
+
+    setUsers(prev => [...prev, newUser]);
+    setCurrentUser(newUser);
+    showToast(language === 'km' ? `សូមស្វាគមន៍មកកាន់កម្មវិធី ${newUser.name}!` : `Welcome to the app, ${newUser.name}!`, 'success');
     setIsAuthModalOpen(false);
   };
 
@@ -1541,6 +1603,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const toggleLikePost = (postId: string) => {
+    if (!currentUser) {
+      showToast(
+        language === 'km' 
+          ? 'សូមចុះឈ្មោះ ឬចូលគណនី ដើម្បីចុច Like' 
+          : 'Please sign in or register to like posts',
+        'info'
+      );
+      setIsAuthModalOpen(true);
+      return;
+    }
     const uid = currentUser?.id || 'guest';
     setPosts(prev => prev.map(p => {
       if (p.id !== postId) return p;
@@ -1557,6 +1629,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const addComment = (postId: string, text: string) => {
+    if (!currentUser) {
+      showToast(
+        language === 'km' 
+          ? 'សូមចុះឈ្មោះ ឬចូលគណនី ដើម្បីបញ្ចេញមតិយោបល់' 
+          : 'Please sign in or register to comment',
+        'info'
+      );
+      setIsAuthModalOpen(true);
+      return;
+    }
     if (!text.trim()) return;
     const newComment = {
       id: `c-${Date.now()}`,
@@ -1877,6 +1959,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         users,
         login,
         register,
+        loginWithGoogle,
         logout,
         updateUserRole,
         loginAdmin,

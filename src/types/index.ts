@@ -15,6 +15,8 @@ export interface User {
   passwordHash?: string;
   isVerified?: boolean;
   verifiedAt?: string;
+  authProvider?: 'google' | 'phone' | 'email';
+  linkedProviders?: ('google' | 'phone' | 'email')[];
   createdAt: string;
 }
 
