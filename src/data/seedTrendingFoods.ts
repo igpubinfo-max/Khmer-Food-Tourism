@@ -38,7 +38,10 @@ export const initialTrendingFoods: TrendingFoodItem[] = [
     mapUrl: 'https://maps.google.com/?q=13.0957,103.1982',
     lastUpdated: '2026-10-21',
     isVerified: true,
-    viewCount: 1420
+    viewCount: 1420,
+    landmarkNameKh: 'រូបសំណាកលោកតាដំបងក្រញូង (ខេត្តបាត់ដំបង)',
+    landmarkNameEn: 'Ta Dambang Kranhoung Statue, Battambang',
+    videoUrl: 'https://www.tiktok.com/tag/NomKrokBattambang',
   },
   {
     id: 'trend-food-2',
@@ -71,7 +74,10 @@ export const initialTrendingFoods: TrendingFoodItem[] = [
     mapUrl: 'https://maps.google.com/?q=10.4828,104.2938',
     lastUpdated: '2026-10-21',
     isVerified: true,
-    viewCount: 2150
+    viewCount: 2150,
+    landmarkNameKh: 'រូបសំណាកក្តាមសមុទ្រយក្ស & ឆ្នេរកែប',
+    landmarkNameEn: 'Kep Giant Blue Crab Statue & Beach, Kep',
+    videoUrl: 'https://www.facebook.com/search/top?q=KepCrabBanhChao',
   },
   {
     id: 'trend-food-3',
@@ -104,7 +110,10 @@ export const initialTrendingFoods: TrendingFoodItem[] = [
     mapUrl: 'https://maps.google.com/?q=10.5942,104.1812',
     lastUpdated: '2026-10-20',
     isVerified: true,
-    viewCount: 3890
+    viewCount: 3890,
+    landmarkNameKh: 'រង្វង់មូលទុរេនកំពត & ស្ពានចាស់កំពត',
+    landmarkNameEn: 'Kampot Durian Roundabout & Old Bridge, Kampot',
+    videoUrl: 'https://www.tiktok.com/tag/KampotGrilledSquid',
   },
   {
     id: 'trend-food-4',
@@ -137,7 +146,10 @@ export const initialTrendingFoods: TrendingFoodItem[] = [
     mapUrl: 'https://maps.google.com/?q=11.5724,104.9288',
     lastUpdated: '2026-10-21',
     isVerified: true,
-    viewCount: 1740
+    viewCount: 1740,
+    landmarkNameKh: 'រមណីយដ្ឋានប្រវត្តិសាស្ត្រវត្តភ្នំដូនពេញ',
+    landmarkNameEn: 'Wat Phnom Historical Sanctuary, Phnom Penh',
+    videoUrl: 'https://www.tiktok.com/tag/KuyTeavKhuorKo',
   },
   {
     id: 'trend-food-5',
@@ -170,7 +182,10 @@ export const initialTrendingFoods: TrendingFoodItem[] = [
     mapUrl: 'https://maps.google.com/?q=11.6158,102.9839',
     lastUpdated: '2026-10-21',
     isVerified: true,
-    viewCount: 2890
+    viewCount: 2890,
+    landmarkNameKh: 'ស្ពានឈើព្រៃកោងកាងពាមក្រសោប ខេត្តកោះកុង',
+    landmarkNameEn: 'Peam Krasaop Mangrove Wooden Bridge, Koh Kong',
+    videoUrl: 'https://www.facebook.com/search/top?q=BokLhongKohKong',
   },
   {
     id: 'trend-food-6',
@@ -203,7 +218,10 @@ export const initialTrendingFoods: TrendingFoodItem[] = [
     mapUrl: 'https://maps.google.com/?q=13.3582,103.8647',
     lastUpdated: '2026-10-20',
     isVerified: true,
-    viewCount: 1680
+    viewCount: 1680,
+    landmarkNameKh: 'ប្រាសាទអង្គរវត្តដ៏អស្ចារ្យ ខេត្តសៀមរាប',
+    landmarkNameEn: 'Angkor Wat Heritage Landmark, Siem Reap',
+    videoUrl: 'https://www.tiktok.com/tag/PalmSugarCoffee',
   },
   {
     id: 'trend-food-7',
@@ -236,7 +254,10 @@ export const initialTrendingFoods: TrendingFoodItem[] = [
     mapUrl: 'https://maps.google.com/?q=11.5681,104.9154',
     lastUpdated: '2026-10-21',
     isVerified: true,
-    viewCount: 3410
+    viewCount: 3410,
+    landmarkNameKh: 'វិមានឯករាជ្យ និងសួនច្បារ រាជធានីភ្នំពេញ',
+    landmarkNameEn: 'Independence Monument & Park, Phnom Penh',
+    videoUrl: 'https://www.tiktok.com/tag/SachKoAingPrahok',
   },
   {
     id: 'trend-food-8',
@@ -269,7 +290,10 @@ export const initialTrendingFoods: TrendingFoodItem[] = [
     mapUrl: 'https://maps.google.com/?q=13.1012,103.1954',
     lastUpdated: '2026-10-21',
     isVerified: true,
-    viewCount: 1980
+    viewCount: 1980,
+    landmarkNameKh: 'ភ្នំសំពៅ និងផ្ទះឈើបុរាណវត្តគរ បាត់ដំបង',
+    landmarkNameEn: 'Phnom Sampeau & Wat Kor Heritage, Battambang',
+    videoUrl: 'https://www.facebook.com/search/top?q=BongEmBattambang',
   },
   {
     id: 'trend-food-9',
@@ -302,7 +326,10 @@ export const initialTrendingFoods: TrendingFoodItem[] = [
     mapUrl: 'https://maps.google.com/?q=11.9924,105.4638',
     lastUpdated: '2026-10-21',
     isVerified: true,
-    viewCount: 2240
+    viewCount: 2240,
+    landmarkNameKh: 'ស្ពានគីហ្សូណា និងស្ពានឫស្សីកោះប៉ែន កំពង់ចាម',
+    landmarkNameEn: 'Kizuna Bridge & Koh Pen Bamboo Bridge, Kampong Cham',
+    videoUrl: 'https://www.tiktok.com/tag/NumBanhChokKampongCham',
   },
   {
     id: 'trend-food-10',
@@ -335,7 +362,10 @@ export const initialTrendingFoods: TrendingFoodItem[] = [
     mapUrl: 'https://maps.google.com/?q=11.5392,104.9142',
     lastUpdated: '2026-10-21',
     isVerified: true,
-    viewCount: 3120
+    viewCount: 3120,
+    landmarkNameKh: 'ព្រះបរមរាជវាំងចតុមុខមង្គល រាជធានីភ្នំពេញ',
+    landmarkNameEn: 'Royal Palace of Cambodia, Phnom Penh',
+    videoUrl: 'https://www.tiktok.com/tag/SoupPhorPea999',
   },
   {
     id: 'trend-food-11',
@@ -368,7 +398,10 @@ export const initialTrendingFoods: TrendingFoodItem[] = [
     mapUrl: 'https://maps.google.com/?q=11.5746,104.9275',
     lastUpdated: '2026-10-21',
     isVerified: true,
-    viewCount: 2650
+    viewCount: 2650,
+    landmarkNameKh: 'តំបន់មាត់ទន្លេចតុមុខ និងផ្សាររាត្រីភ្នំពេញ',
+    landmarkNameEn: 'Chaktomuk Riverside Walkway & Night Market, Phnom Penh',
+    videoUrl: 'https://www.tiktok.com/tag/NgeavAingPhnomPenh',
   },
   {
     id: 'trend-food-12',
@@ -401,6 +434,9 @@ export const initialTrendingFoods: TrendingFoodItem[] = [
     mapUrl: 'https://maps.google.com/?q=11.4532,104.5208',
     lastUpdated: '2026-10-21',
     isVerified: true,
-    viewCount: 1530
+    viewCount: 1530,
+    landmarkNameKh: 'ឧទ្យានជាតិព្រះសុរាម្រិត-កុសមៈ គិរីរម្យ កំពង់ស្ពឺ',
+    landmarkNameEn: 'Kirirom Pine Forest National Park, Kampong Speu',
+    videoUrl: 'https://www.facebook.com/search/top?q=CoconutGreenTeaKampongSpeu',
   }
 ];

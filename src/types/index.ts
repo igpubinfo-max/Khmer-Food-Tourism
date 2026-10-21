@@ -351,6 +351,9 @@ export interface TrendingFoodItem {
   lastUpdated: string;
   isVerified: boolean;
   viewCount?: number;
+  landmarkNameKh?: string;
+  landmarkNameEn?: string;
+  videoUrl?: string;
 }
 
 // AI Smart Check-in & Auto Add Restaurant Types
