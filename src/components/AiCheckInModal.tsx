@@ -85,8 +85,13 @@ export const AiCheckInModal: React.FC = () => {
     if (!file) return;
 
     if (!currentUser) {
-      showToast(isKm ? 'សូមចូលគណនីជាមុនសិន!' : 'Please sign in first!', 'warning');
+      showToast(isKm ? 'សូមចូលគណនី Administrator ជាមុនសិន!' : 'Please sign in with an Administrator account first!', 'warning');
       setIsAuthModalOpen(true);
+      return;
+    }
+
+    if (currentUser.role !== 'admin') {
+      showToast(isKm ? 'មុខងារឆែកអ៊ីន & បន្ថែមហាងដោយ AI ត្រូវបានកំណត់សម្រាប់តែ Administrator ប៉ុណ្ណោះ!' : 'AI Food Check-in is restricted to Administrator accounts only!', 'warning');
       return;
     }
 
@@ -130,8 +135,9 @@ export const AiCheckInModal: React.FC = () => {
   };
 
   const handleSubmit = async () => {
-    if (!currentUser) {
-      setIsAuthModalOpen(true);
+    if (!currentUser || currentUser.role !== 'admin') {
+      showToast(isKm ? 'មុខងារឆែកអ៊ីន & បន្ថែមហាងដោយ AI ត្រូវបានកំណត់សម្រាប់តែ Administrator ប៉ុណ្ណោះ!' : 'AI Food Check-in is restricted to Administrator accounts only!', 'warning');
+      if (!currentUser) setIsAuthModalOpen(true);
       return;
     }
 
@@ -196,6 +202,9 @@ export const AiCheckInModal: React.FC = () => {
                 <span className="px-1.5 py-0.5 rounded-full bg-amber-400 text-stone-900 text-[9px] font-black shadow-xs">
                   Smart AI ✨
                 </span>
+                <span className="px-1.5 py-0.5 rounded-full bg-rose-500 text-white text-[9px] font-black shadow-xs">
+                  Admin Only 🛡️
+                </span>
               </div>
               <p className="text-[11px] text-emerald-200 font-khmer flex items-center gap-1">
                 <MapPin className="w-3 h-3 text-emerald-300" />
@@ -213,7 +222,34 @@ export const AiCheckInModal: React.FC = () => {
 
         {/* Modal Content */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4 font-khmer text-xs">
-          {/* STEP 1: PICK PHOTO */}
+          {(!currentUser || currentUser.role !== 'admin') ? (
+            <div className="py-10 px-4 text-center space-y-4">
+              <div className="w-14 h-14 rounded-full bg-rose-100 dark:bg-rose-900/40 text-rose-600 dark:text-rose-400 mx-auto flex items-center justify-center shadow-inner">
+                <AlertCircle className="w-8 h-8" />
+              </div>
+              <div className="space-y-1.5">
+                <h4 className="font-moul text-sm text-stone-800 dark:text-stone-100">
+                  {isKm ? 'មុខងារសម្រាប់ Administrator ប៉ុណ្ណោះ' : 'Administrator Access Only'}
+                </h4>
+                <p className="text-xs text-stone-500 leading-relaxed max-w-xs mx-auto">
+                  {isKm 
+                    ? 'មុខងារឆែកអ៊ីន & បន្ថែមហាងដោយស្វ័យប្រវត្តិតាមរយៈ AI ត្រូវបានកំណត់សិទ្ធិសម្រាប់តែគណនី Administrator ដើម្បីគ្រប់គ្រង និងត្រួតពិនិត្យទិន្នន័យ។' 
+                    : 'AI Check-in & Auto Add Restaurant is strictly restricted to Administrator accounts for data verification.'}
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  handleClose();
+                  setIsAuthModalOpen(true);
+                }}
+                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 text-white font-bold text-xs shadow-md transition active:scale-95"
+              >
+                {isKm ? 'ចូលគណនី Administrator' : 'Sign in as Administrator'}
+              </button>
+            </div>
+          ) : (
+            <>
+              {/* STEP 1: PICK PHOTO */}
           {step === 'pick_photo' && (
             <div className="space-y-4">
               <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-slate-700 dark:text-emerald-200 space-y-2">
@@ -443,10 +479,12 @@ export const AiCheckInModal: React.FC = () => {
               </h4>
             </div>
           )}
+            </>
+          )}
         </div>
 
         {/* Footer Actions */}
-        {step === 'confirm_details' && (
+        {currentUser?.role === 'admin' && step === 'confirm_details' && (
           <div className="p-3 bg-slate-50 dark:bg-slate-800/90 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between gap-2 shrink-0">
             <button
               onClick={() => setStep('pick_photo')}

@@ -60,7 +60,7 @@ jobs:
           echo "=== SEARCHING FOR GENERATED APK FILES ==="
           find . -name "*.apk" -ls
           cd android/app/build/outputs/apk/debug
-          cp app-debug.apk KhmerFoodTourism-v1.5.3.apk
+          cp app-debug.apk KhmerFoodTourism-v1.5.4.apk
           ls -la
 
       - name: 10. Upload Android APK Artifact
@@ -73,14 +73,23 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: v1.5.3
-          name: "Khmer Food & Tourism v1.5.3 (AI Trending Food & AI Smart Check-in)"
+          tag_name: v1.5.4
+          name: "Khmer Food & Tourism v1.5.4 (Authentic Shop Photos, Scenic Food Locations & Admin AI Check-in)"
           overwrite: true
           make_latest: true
           body: |
             ### 🇰🇭 កម្មវិធីទូរស័ព្ទដៃ អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism Mobile App)
             
-            **កំណែថ្មី v1.5.3 (AI Trending Food & AI Smart Check-in System):**
+            **កំណែថ្មី v1.5.4 (Authentic Shop Photos, Scenic Food Locations & Admin AI Check-in):**
+            - 🏪 **១. បច្ចុប្បន្នភាពរូបភាពហាងពិតជាក់ស្តែង (Authentic Local Shop Photos):**
+              - បានបញ្ចូលរូបភាពហាងពិតចំនួន ៤៩ ហាង ពីថតរូប Shop (rest-1 ដល់ rest-50) ទៅក្នុងកញ្ចប់កម្មវិធី APK ផ្ទាល់ ជំនួសរូបភាពគំរូទូទៅ។
+            - 🏞️ **២. រូបភាពទីតាំង & ភូមិដ្ឋានមុខម្ហូបល្បីៗ (Scenic Location & Village Scenery):**
+              - មុខម្ហូបល្បីៗ AI Trending Food ត្រូវបានកែសម្រួលរូបភាពមកជារូបភាពទីតាំង ភូមិដ្ឋាន ផ្សារបុរាណ និងទេសភាពធម្មជាតិដែលម្ហូបនោះតាំងនៅ ដូចជានៅក្រុងបាត់ដំបង កែប កំពត ភ្នំពេញ កោះកុង សៀមរាប និងកំពង់ចាម ដូចគ្នាទៅនឹងរូបភាពទេសចរណ៍។
+              - ស្លាកបង្ហាញលើរូបភាពត្រូវបានប្តូរជា «រូបភាពទីតាំង / ភូមិដ្ឋាន» (Location / Village Scenery)។
+            - 🛡️ **៣. កំណត់សិទ្ធិមុខងារឆែកអ៊ីន AI សម្រាប់តែ Administrator ប៉ុណ្ណោះ (Admin Only AI Check-in):**
+              - ប៊ូតុងឆែកអ៊ីន & បន្ថែមហាងដោយ AI (AI Smart Check-in) បង្ហាញជូនតែគណនី Administrator ប៉ុណ្ណោះ។
+              - បន្ថែមប៊ូតុងចុះឈ្មោះហាងដោយ AI ផ្ទាល់នៅក្នុងផ្ទាំងគ្រប់គ្រង Admin Dashboard។
+              - ការពារប្រព័ន្ធ Backend និង Logic មិនឱ្យគណនីទូទៅអាចបញ្ជូនទិន្នន័យឆែកអ៊ីនដោយគ្មានការអនុញ្ញាតឡើយ។
             - 📱 **១. កែសម្រួលទំព័រដើម (Home Screen Layout):**
               - បានផ្លាស់ប្តូរផ្នែក “TikTok & FB Review” ឡើងលើ ស្ថិតនៅក្រោមផ្នែក Account/Profile (Member Hub) ដោយផ្ទាល់។
               - រក្សាព័ត៌មានគណនី និងមុខងារផ្ទាល់ខ្លួនទាំង ៦ ឱ្យនៅដដែល មិនប៉ះពាល់ ឬបាំងបិទផ្នែកណាមួយឡើយ។

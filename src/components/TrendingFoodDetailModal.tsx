@@ -103,9 +103,9 @@ export const TrendingFoodDetailModal: React.FC = () => {
             )}
           </div>
 
-          {/* Representative Sample Label */}
-          <span className="absolute bottom-2 right-3 bg-black/60 text-white/80 text-[8px] px-1.5 py-0.5 rounded-sm font-khmer">
-            {isKm ? 'រូបតំណាងពិតប្រាកដ' : 'Real Match Photo'}
+          {/* Location / Village Scenery Label */}
+          <span className="absolute bottom-2 right-3 bg-black/70 text-white/90 text-[8px] px-2 py-0.5 rounded-sm font-khmer shadow-sm">
+            {isKm ? 'រូបភាពទីតាំង / ភូមិដ្ឋាន' : 'Location / Village Scenery'}
           </span>
 
           {/* Title overlay */}

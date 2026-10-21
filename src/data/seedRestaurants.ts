@@ -9,7 +9,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Malis Restaurant Phnom Penh",
     "descriptionKh": "ភោជនីយដ្ឋានម្ហូបខ្មែរប្រណីតលំដាប់កំពូល បង្កើតឡើងដោយមេចុងភៅឆ្នើម លូ ម៉េង ដើម្បីលើកតម្កើងម្ហូបខ្មែររស់ឡើងវិញ។ បរិយាកាសសួនមនោរម្យ និងសេវាកម្មស្តង់ដាអន្តរជាតិ។",
     "descriptionEn": "Master Chef Luu Meng's premier living Cambodian cuisine venue in Tonle Bassac, renowned worldwide.",
-    "photoUrl": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-1.jpg",
     "galleryPhotos": [
       "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80",
       "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80"
@@ -46,7 +46,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Romdeng Restaurant Phnom Penh",
     "descriptionKh": "ភោជនីយដ្ឋានបណ្តុះបណ្តាលវិជ្ជាជីវៈយុវជនខ្មែរ ដោយអង្គការ Friends-International។ បម្រើម្ហូបខ្មែរបុរាណ និងម្ហូបតំបន់ស្រុកស្រែដ៏មានឱជារស។",
     "descriptionEn": "Vibrant training restaurant by Friends-International serving regional Cambodian delicacies and creative specialties.",
-    "photoUrl": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-2.jpg",
     "galleryPhotos": [
       "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80",
       "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80"
@@ -83,7 +83,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Eleven One Kitchen BKK1",
     "descriptionKh": "ភោជនីយដ្ឋានដែលផ្តោតលើសុខភាព ប្រើប្រាស់គ្រឿងផ្សំសរីរាង្គក្នុងស្រុក និងគ្មានការប្រើប្រាស់ប្លាស្ទិក គាំទ្របរិស្ថានបៃតង។",
     "descriptionEn": "Eco-conscious Cambodian eatery serving wholesome local home cooking made with chemical-free produce.",
-    "photoUrl": "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-3.jpg",
     "galleryPhotos": [
       "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80",
       "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80"
@@ -120,7 +120,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Kravanh Authentic Khmer Restaurant",
     "descriptionKh": "ហាងអាហារខ្មែររសជាតិដើមបែបគ្រួសារខ្មែរអភិជន តុបតែងរចនាបថបែបបុរាណ ម្ហូបឆ្ងាញ់ប្រកបដោយអនាម័យខ្ពស់។",
     "descriptionEn": "Authentic royal and traditional home recipes prepared with exquisite presentation and antique atmosphere.",
-    "photoUrl": "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-4.jpg",
     "galleryPhotos": [
       "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80",
       "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80"
@@ -157,7 +157,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Khmer Surin Restaurant BKK1",
     "descriptionKh": "ភោជនីយដ្ឋានដ៏ល្បីល្បាញយូរឆ្នាំនៅភ្នំពេញ តាំងពីឆ្នាំ ១៩៩៦ មានបរិយាកាសផ្ទះឈើបុរាណ លម្អដោយរុក្ខជាតិបៃតង និងវត្ថុសិល្បៈខ្មែរ។",
     "descriptionEn": "A long-standing Phnom Penh staple since 1996 serving fragrant Khmer and Surin-border regional fare in a lush garden terrace.",
-    "photoUrl": "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-5.jpg",
     "galleryPhotos": [
       "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80",
       "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80"
@@ -194,7 +194,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Sovanna Restaurant & BBQ Phnom Penh",
     "descriptionKh": "ហាងសាច់អាំង និងម្ហូបក្លែមបែបខ្មែរដ៏ពេញនិយមបំផុត រសជាតិទឹកត្រីកោះកុង និងទឹកប្រហុកបុកល្បីល្បាញខ្លាំង។",
     "descriptionEn": "Legendary lively local barbecue spot serving charcoal-grilled beef, ribs, and fresh seafood with pungent dipping sauces.",
-    "photoUrl": "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-6.jpg",
     "galleryPhotos": [
       "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80",
       "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80"
@@ -231,7 +231,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "One More Restaurant Toul Kork",
     "descriptionKh": "ភោជនីយដ្ឋានប្រណីតនៅខណ្ឌទួលគោក ដែលមានកេរ្តិ៍ឈ្មោះល្បីល្បាញខាងស៊ុប និងមុខម្ហូបខ្មែរបុរាណប្រកបដោយសោភ័ណភាពខ្ពស់។",
     "descriptionEn": "Sophisticated Khmer dining destination in Toul Kork featuring royal soups and traditional dishes.",
-    "photoUrl": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-7.jpg",
     "galleryPhotos": [
       "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80",
       "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80"
@@ -268,7 +268,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Mok Mony Restaurant Phnom Penh",
     "descriptionKh": "ហាងអាហារបែបគ្រួសារខ្មែរដ៏កក់ក្តៅ បម្រើម្ហូបបុរាណបែបខ្មែរកណ្តាល ជាមួយទឹកជ្រលក់រូបមន្តសម្ងាត់។",
     "descriptionEn": "Cozy and intimate family-run kitchen serving beloved traditional recipes and unique stuffed specialties.",
-    "photoUrl": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-8.jpg",
     "galleryPhotos": [
       "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80",
       "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80"
@@ -305,7 +305,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Friends the Restaurant Phnom Penh",
     "descriptionKh": "ភោជនីយដ្ឋានបណ្តុះបណ្តាលសង្គមដ៏ល្បីល្បាញក្បែរសារមន្ទីរជាតិភ្នំពេញ បម្រើម្ហូបបែប tapas ខ្មែរ និងអាស៊ី។",
     "descriptionEn": "Celebrated training venue by Tree Alliance near the National Museum serving inventive tapas.",
-    "photoUrl": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-9.jpg",
     "galleryPhotos": [
       "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80",
       "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80"
@@ -342,7 +342,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Bopha Phnom Penh Titanic Riverside",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ទន្លេសាបដ៏ស្រស់ស្អាតលើវិថីព្រះស៊ីសុវត្ថិ បម្រើម្ហូបខ្មែរបុរាណ និងទស្សនាភ្លើងរាត្រីមាត់ទន្លេ។",
     "descriptionEn": "Charming open-air riverside dining terrace along Sisowath Quay serving royal and traditional Khmer recipes.",
-    "photoUrl": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-10.jpg",
     "galleryPhotos": [
       "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80",
       "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80"
@@ -379,7 +379,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "The Sugar Palm Siem Reap",
     "descriptionKh": "ហាងអាហារខ្មែរពិតៗ ស្ថិតក្នុងផ្ទះឈើប្រពៃណីខ្មែរនៅក្រុងសៀមរាប។ ល្បីល្បាញបំផុតលើពិភពលោកខាងម្ហូប អាម៉ុកត្រីចំហុយ និងសម្លការីខ្មែរ។",
     "descriptionEn": "Iconic authentic Cambodian restaurant set in a charming wooden house in Siem Reap, globally celebrated for Fish Amok.",
-    "photoUrl": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-11.jpg",
     "galleryPhotos": [
       "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80",
       "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80"
@@ -416,7 +416,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Chanrey Tree Riverside Siem Reap",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ស្ទឹងសៀមរាប រចនាបែបខ្មែរទំនើបក្បែរសួនផ្កា ម្ហូបឆ្ងាញ់ប្រកបដោយអត្តសញ្ញាណខ្មែរពិតៗ។",
     "descriptionEn": "Exquisite lush riverside dining offering refined countryside home-style Khmer cooking.",
-    "photoUrl": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-12.jpg",
     "galleryPhotos": [
       "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80",
       "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80"
@@ -453,7 +453,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Cuisine Wat Damnak Siem Reap",
     "descriptionKh": "ភោជនីយដ្ឋានដំបូងគេបង្អស់នៅកម្ពុជាដែលជាប់ក្នុងបញ្ជី Asia's 50 Best Restaurants។ ច្នៃម្ហូបខ្មែរជាមួយគ្រឿងផ្សំក្នុងស្រុកដ៏អស្ចារ្យ។",
     "descriptionEn": "Award-winning restaurant featured in Asia's 50 Best, blending traditional Khmer flavors with modern techniques.",
-    "photoUrl": "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-13.jpg",
     "galleryPhotos": [
       "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80",
       "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80"
@@ -490,7 +490,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Marum Training Restaurant Siem Reap",
     "descriptionKh": "ភោជនីយដ្ឋានបណ្តុះបណ្តាលយុវជនខ្មែរក្នុងផ្ទះឈើបុរាណសួនបៃតង មានម្ហូបតំបន់ច្នៃប្រឌិត និងរសជាតិខ្មែរពិតប្រាកដ។",
     "descriptionEn": "Lush garden training restaurant by TREE Alliance serving innovative tapas and traditional Khmer recipes.",
-    "photoUrl": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-14.jpg",
     "galleryPhotos": [
       "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80",
       "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80"
@@ -527,7 +527,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Haven Restaurant Siem Reap",
     "descriptionKh": "ភោជនីយដ្ឋានបណ្តុះបណ្តាលសង្គមដ៏ល្បីល្បាញ បម្រើម្ហូបខ្មែរ និងអាស៊ី ជាមួយនឹងគ្រឿងផ្សំស្រស់ៗចេញពីកសិដ្ឋាន។",
     "descriptionEn": "Beloved social-purpose dining destination helping disadvantaged youth, serving delicious Khmer curries and stir-fries.",
-    "photoUrl": "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-15.jpg",
     "galleryPhotos": [
       "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80",
       "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80"
@@ -564,7 +564,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Viroth's Restaurant Siem Reap",
     "descriptionKh": "ភោជនីយដ្ឋានលំដាប់ខ្ពស់រចនាបថទសវត្សរ៍ទី ៦០ ក្នុងសួនផ្កា ម្ហូបខ្មែរឆ្ងាញ់ប្រកបដោយសោភ័ណភាពវិចិត្រ។",
     "descriptionEn": "Chic 1960s-inspired modernist venue surrounded by lotus ponds serving elevated Khmer traditional dishes.",
-    "photoUrl": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-16.jpg",
     "galleryPhotos": [
       "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80",
       "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80"
@@ -638,7 +638,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Pou Restaurant and Bar Siem Reap",
     "descriptionKh": "បង្កើតឡើងដោយមេចុងភៅវ័យក្មេង ម៉េងលី លើកស្ទួយម្ហូបច្នៃប្រឌិតពីបន្លែស្មៅព្រៃ និងវប្បធម៌ម្ហូបបុរាណខ្មែរ។",
     "descriptionEn": "Visionary young Cambodian chef Mengly crafts culinary magic utilizing wild herbs and ancestral techniques.",
-    "photoUrl": "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-18.jpg",
     "galleryPhotos": [
       "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80",
       "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80"
@@ -675,7 +675,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Kimly Seafood Restaurant Crab Market Kep",
     "descriptionKh": "ហាងគ្រឿងសមុទ្រ និងក្តាមសេះដ៏ល្បីល្បាញបំផុតនៅផ្សារក្តាមខេត្តកែប។ ក្តាមសេះស្រស់ៗឆាម្រេចខ្ចីកំពត ជាប់មាត់សមុទ្រ។",
     "descriptionEn": "The legendary waterfront dining spot right on Kep Crab Market frying live sea crabs with green Kampot peppercorns.",
-    "photoUrl": "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-19.jpg",
     "galleryPhotos": [
       "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80",
       "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80"
@@ -712,7 +712,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Holy Crab Restaurant Kep",
     "descriptionKh": "ហាងគ្រឿងសមុទ្រមាត់សមុទ្រផ្សារក្តាមកែប ល្បីល្បាញខាងក្តាមសេះឆាម្រេចកំពត និងត្រីចំហុយទឹកស៊ីអ៊ីវ។",
     "descriptionEn": "Vibrant Crab Market restaurant with ocean terrace serving freshly caught seafood and spicy Kampot peppercorn dishes.",
-    "photoUrl": "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-20.jpg",
     "galleryPhotos": [
       "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80",
       "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80"
@@ -749,7 +749,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Rikitikitavi Riverside Kampot",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ព្រែកកំពតដ៏ស្រស់ស្អាត ទស្សនាថ្ងៃលិចលើជួរភ្នំបូកគោ បម្រើម្ហូបខ្មែរឆ្ងាញ់ៗជាមួយម្រេចកំពតពិតៗ។",
     "descriptionEn": "Stunning sunset lounge and dining on Kampot riverside with views of Bokor mountains and fresh local dishes.",
-    "photoUrl": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-21.jpg",
     "galleryPhotos": [
       "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80",
       "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80"
@@ -786,7 +786,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Atelier Kampot French & Khmer",
     "descriptionKh": "ភោជនីយដ្ឋានក្នុងអគារបេតិកភណ្ឌបារាំងមាត់ព្រែកកំពត បង្កើតឡើងដោយកសិដ្ឋានម្រេចកំពត La Plantation បម្រើម្ហូបម្រេចកំពតពិតៗ។",
     "descriptionEn": "Heritage riverside bistro from the owners of La Plantation featuring authentic Kampot peppercorn gastronomy.",
-    "photoUrl": "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-22.jpg",
     "galleryPhotos": [
       "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80",
       "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80"
@@ -823,7 +823,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "The Sailing Club Kep",
     "descriptionKh": "ភោជនីយដ្ឋាន និងបារមាត់សមុទ្រដ៏រ៉ូមែនទិកនៅខេត្តកែប ទស្សនាថ្ងៃលិចលើផែឈើបុរាណ ម្ហូបគ្រឿងសមុទ្រស្រស់ៗ។",
     "descriptionEn": "Iconic seaside lounge on a restored wooden pier at Knai Bang Chatt resort in Kep with sunset dining.",
-    "photoUrl": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-23.jpg",
     "galleryPhotos": [
       "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80",
       "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80"
@@ -860,7 +860,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Mlop Svay Restaurant Battambang",
     "descriptionKh": "ហាងអាហារស្រុកស្រែដ៏ល្បីនៅខេត្តបាត់ដំបង ជង្រុកស្រូវកម្ពុជា។ ល្បីល្បាញខាងត្រីរ៉ស់អាំង ភ្លាសាច់គោ និងសម្លកកូរជើងជ្រូក។",
     "descriptionEn": "Beloved countryside open-air restaurant famous for whole snakehead fish, spicy beef pleah, and rural stews.",
-    "photoUrl": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-24.jpg",
     "galleryPhotos": [
       "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80",
       "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80"
@@ -897,7 +897,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Jaan Bai Restaurant Battambang",
     "descriptionKh": "ភោជនីយដ្ឋានសង្គមដ៏ល្បីល្បាញគាំទ្រដោយ Cambodian Children's Trust (CCT)។ ម្ហូបខ្មែរច្នៃប្រឌិត និងការតុបតែងប្រកបដោយសិល្បៈ។",
     "descriptionEn": "Renowned social enterprise kitchen in Battambang serving innovative contemporary Khmer dishes.",
-    "photoUrl": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-25.jpg",
     "galleryPhotos": [
       "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80",
       "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80"
@@ -934,7 +934,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Nary Kitchen & Cooking School",
     "descriptionKh": "ហាងបាយខ្មែរ និងថ្នាក់បង្រៀនធ្វើម្ហូបដ៏ល្បីនៅបាត់ដំបង បម្រើម្ហូបប្រពៃណីខ្មែរពិតៗ ធ្វើដោយទឹកដៃមេផ្ទះខ្មែរ។",
     "descriptionEn": "Popular family restaurant and cooking school teaching authentic traditional Khmer cooking methods.",
-    "photoUrl": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-26.jpg",
     "galleryPhotos": [
       "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80",
       "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80"
@@ -971,7 +971,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Sandan Training Restaurant Sihanoukville",
     "descriptionKh": "ភោជនីយដ្ឋានបណ្តុះបណ្តាលវិជ្ជាជីវៈកុមារ និងយុវជនដោយ M'Lop Tapang ស្ថិតក្នុងសួនធម្មជាតិដ៏ស្រស់ស្អាត បម្រើគ្រឿងសមុទ្រ និងម្ហូបខ្មែរ។",
     "descriptionEn": "Social enterprise training restaurant by M'Lop Tapang with tropical garden dining and fresh coastal seafood.",
-    "photoUrl": "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-27.jpg",
     "galleryPhotos": [
       "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80",
       "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80"
@@ -1008,7 +1008,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Smile Restaurant Kampong Cham",
     "descriptionKh": "ភោជនីយដ្ឋានបណ្តុះបណ្តាលយុវជនមាត់ទន្លេមេគង្គខេត្តកំពង់ចាម បម្រើម្ហូបខ្មែរឆ្ងាញ់ៗ ទេសភាពស្ពានកោះប៉ែន។",
     "descriptionEn": "Riverside training cafe run by BSDA organization serving authentic Khmer curries with Mekong River views.",
-    "photoUrl": "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-28.jpg",
     "galleryPhotos": [
       "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80",
       "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80"
@@ -1045,7 +1045,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Greenhouse Restaurant Sen Monorom",
     "descriptionKh": "ហាងអាហារបែបខ្មែរស្រុកស្រែលើភ្នំមណ្ឌលគិរី ល្បីល្បាញខាងស៊ុបសាច់គោ ម្ហូបជនជាតិដើមភាគតិច និងកាហ្វេមណ្ឌលគិរីសុទ្ធ។",
     "descriptionEn": "Hilltop rustic restaurant in Sen Monorom offering highland Khmer stews and fresh 100% Mondulkiri coffee.",
-    "photoUrl": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-29.jpg",
     "galleryPhotos": [
       "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80",
       "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80"
@@ -1082,7 +1082,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Otto Seaside Seafood Koh Kong",
     "descriptionKh": "ហាងគ្រឿងសមុទ្រស្រស់ៗក្បែរមាត់ព្រែក និងឆ្នេរសមុទ្រខេត្តកោះកុង ល្បីល្បាញខាងក្តាមសមុទ្រ មឹកបំពង និងទឹកត្រីកោះកុងសុទ្ធ។",
     "descriptionEn": "Authentic coastal eatery famous for Koh Kong mud crabs, deep-fried fresh squid, and genuine Koh Kong chili sauce.",
-    "photoUrl": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-30.jpg",
     "galleryPhotos": [
       "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80",
       "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80"
@@ -1119,7 +1119,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Takeo River Prawn House",
     "descriptionKh": "ហាងអាហារប្រពៃណីល្បីល្បាញបំផុតនៅខេត្តតាកែវ ខាងបង្កងទឹកសាបមេគង្គដុតខ្លាញ់ក្បាល និងញាំស្វាយខ្ចី។",
     "descriptionEn": "Famous traditional restaurant in Takeo renowned for massive grilled freshwater prawns with river-side tamarind sauce.",
-    "photoUrl": "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-31.jpg",
     "galleryPhotos": [
       "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80",
       "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80"
@@ -1156,7 +1156,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Kratie Mekong Dolphin Restaurant",
     "descriptionKh": "ហាងអាហារមាត់ទន្លេមេគង្គខេត្តក្រចេះ ក្បែរកន្លែងទស្សនាផ្សោតកំបោរ បម្រើម្ហូបត្រីទន្លេស្រស់ៗ និងក្រឡានក្រចេះ។",
     "descriptionEn": "Riverside restaurant overlooking the Mekong near Kampi dolphin pool serving fresh river fish delicacies.",
-    "photoUrl": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-32.jpg",
     "galleryPhotos": [
       "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80",
       "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80"
@@ -1193,7 +1193,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Pursat River View Restaurant",
     "descriptionKh": "ហាងអាហារល្បីល្បាញនៅខេត្តពោធិ៍សាត់ ខាងក្រូចក្រហមពោធិ៍សាត់ ត្រីងៀត និងប្រហុកសាច់អាំង។",
     "descriptionEn": "Popular local hub along the Pursat River famous for sundried lake fish and authentic Pursat oranges.",
-    "photoUrl": "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-33.jpg",
     "galleryPhotos": [
       "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80",
       "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80"
@@ -1230,7 +1230,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Yeak Laom Lake Restaurant Banlung",
     "descriptionKh": "ហាងអាហារក្បែរបឹងភ្នំភ្លើងយក្សឡោម បម្រើម្ហូបខ្មែរលើ និងបន្លែព្រៃធម្មជាតិខេត្តរតនគិរី។",
     "descriptionEn": "Scenic dining near the ancient Yeak Laom volcanic lake serving highland forest herbs and wild soups.",
-    "photoUrl": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-34.jpg",
     "galleryPhotos": [
       "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80",
       "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80"
@@ -1267,7 +1267,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Steung Saen Restaurant Kampong Thom",
     "descriptionKh": "ហាងអាហារកណ្តាលក្រុងកំពង់ធំ ផ្លូវទៅប្រាសាទសំបូរព្រៃគុក បម្រើម្ហូបត្រីបឹងទន្លេសាប និងសម្លម្ជូរគ្រឿង។",
     "descriptionEn": "Stopover venue en route to Sambor Prei Kuk temples serving fresh Tonle Sap river fish and kroeung stews.",
-    "photoUrl": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-35.jpg",
     "galleryPhotos": [
       "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80",
       "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80"
@@ -1304,7 +1304,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Kampong Chhnang Claypot Kitchen",
     "descriptionKh": "ហាងបាយល្បីខាងម្ហូបឆ្នាំងដីបុរាណ ត្រីដុត និងនំបញ្ចុកទឹកសម្លខ្មែរដើម ក្នុងដែនដីកុលាលភាជន៍ខ្មែរ។",
     "descriptionEn": "Authentic clay pot dining in Cambodia's pottery heartland serving bubbling hot fish soups and rice noodles.",
-    "photoUrl": "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-36.jpg",
     "galleryPhotos": [
       "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80",
       "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80"
@@ -1341,7 +1341,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Ta Khmao Roast Duck House Kandal",
     "descriptionKh": "ហាងទាខ្វៃ និងម្ហូបខ្មែរ-ចិនដ៏ល្បីល្បាញប្រចាំក្រុងតាខ្មៅ ខេត្តកណ្តាល ស្បែកស្រួយ សាច់ទន់ផ្អែម។",
     "descriptionEn": "Legendary Ta Khmao duck roasting house famous across Cambodia for crispy golden skin and aromatic dipping sauce.",
-    "photoUrl": "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-37.jpg",
     "galleryPhotos": [
       "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80",
       "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80"
@@ -1378,7 +1378,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Stung Treng Mekong Pas-ee Fish Restaurant",
     "descriptionKh": "ហាងអាហារល្បីល្បាញបំផុតប្រចាំខេត្តស្ទឹងត្រែង ខាងត្រីប៉ាស៊ីអ៊ីទន្លេមេគង្គដ៏កម្រ និងមានឱជារសឆ្ងាញ់ពិសា។",
     "descriptionEn": "Renowned northern Cambodian eatery famous for the prized and rare Mekong River Pas-ee fish.",
-    "photoUrl": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-38.jpg",
     "galleryPhotos": [
       "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80",
       "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80"
@@ -1415,7 +1415,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Dangrek Foothill Restaurant Preah Vihear",
     "descriptionKh": "ហាងអាហារខ្មែរនៅជើងភ្នំដងរែក ផ្លូវឡើងប្រាសាទព្រះវិហារ បម្រើម្ហូបសាច់គោអាំង និងសម្លម្ជូរគ្រឿង។",
     "descriptionEn": "Scenic stopover near the base of the sacred Preah Vihear Temple cliff serving charcoal grilled beef.",
-    "photoUrl": "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-39.jpg",
     "galleryPhotos": [
       "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80",
       "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80"
@@ -1452,7 +1452,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Pailin Mountain Gem Restaurant",
     "descriptionKh": "ហាងអាហារខ្មែរក្បែរជួរភ្នំខេត្តប៉ៃលិន បម្រើម្ហូបសាច់គោ ម្ហូបព្រៃស្របច្បាប់ និងទឹកឃ្មុំព្រៃប៉ៃលិន។",
     "descriptionEn": "Mountain view restaurant in the sapphire city of Pailin serving beef stews and local garden specialties.",
-    "photoUrl": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-40.jpg",
     "galleryPhotos": [
       "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80",
       "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80"
@@ -1489,7 +1489,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Village Farmer Kitchen (Phnom Penh #1)",
     "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) ផ្ទះបាយអ្នកស្រែ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងរាជធានីភ្នំពេញ។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
     "descriptionEn": "(Sample / Unverified User Submission) Village Farmer Kitchen offers authentic everyday Khmer cooking located in Phnom Penh. Awaiting admin verification.",
-    "photoUrl": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-41.jpg",
     "galleryPhotos": [
       "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80"
     ],
@@ -1525,7 +1525,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Fresh Num Banh Chok Stall (Siem Reap #1)",
     "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) តូបនំបញ្ចុកទឹកសម្លខ្មែរ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តសៀមរាប។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
     "descriptionEn": "(Sample / Unverified User Submission) Fresh Num Banh Chok Stall offers authentic everyday Khmer cooking located in Siem Reap. Awaiting admin verification.",
-    "photoUrl": "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-42.jpg",
     "galleryPhotos": [
       "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80"
     ],
@@ -1560,7 +1560,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Morning Grilled Pork Rice Cart (Battambang #1)",
     "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) រានបាយសាច់ជ្រូកអាំងពេលព្រឹក ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តបាត់ដំបង។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
     "descriptionEn": "(Sample / Unverified User Submission) Morning Grilled Pork Rice Cart offers authentic everyday Khmer cooking located in Battambang. Awaiting admin verification.",
-    "photoUrl": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-43.jpg",
     "galleryPhotos": [
       "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80"
     ],
@@ -1596,7 +1596,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Traditional Claypot Kuyteav Stall (Kampot #1)",
     "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) តូបគុយទាវឆ្នាំងដីបុរាណ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តកំពត។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
     "descriptionEn": "(Sample / Unverified User Submission) Traditional Claypot Kuyteav Stall offers authentic everyday Khmer cooking located in Kampot. Awaiting admin verification.",
-    "photoUrl": "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-44.jpg",
     "galleryPhotos": [
       "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80"
     ],
@@ -1632,7 +1632,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Fresh Coastal Seafood Stall (Kep #1)",
     "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) រានអាហារសមុទ្រស្រស់ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តកែប។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
     "descriptionEn": "(Sample / Unverified User Submission) Fresh Coastal Seafood Stall offers authentic everyday Khmer cooking located in Kep. Awaiting admin verification.",
-    "photoUrl": "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-45.jpg",
     "galleryPhotos": [
       "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80"
     ],
@@ -1668,7 +1668,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Fragrant Khmer Curry Kitchen (Preah Sihanouk #1)",
     "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) ផ្ទះបាយការីខ្មែរឈ្ងុយឆ្ងាញ់ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តព្រះសីហនុ។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
     "descriptionEn": "(Sample / Unverified User Submission) Fragrant Khmer Curry Kitchen offers authentic everyday Khmer cooking located in Preah Sihanouk. Awaiting admin verification.",
-    "photoUrl": "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-46.jpg",
     "galleryPhotos": [
       "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80"
     ],
@@ -1704,7 +1704,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Honey Roast Country Chicken Grill (Kampong Cham #1)",
     "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) រានមាន់ដុតទឹកឃ្មុំព្រៃ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តកំពង់ចាម។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
     "descriptionEn": "(Sample / Unverified User Submission) Honey Roast Country Chicken Grill offers authentic everyday Khmer cooking located in Kampong Cham. Awaiting admin verification.",
-    "photoUrl": "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-47.jpg",
     "galleryPhotos": [
       "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80"
     ],
@@ -1740,7 +1740,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Papaya Salad & Spicy Pleah Shack (Kandal #1)",
     "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) តូបបុកល្ហុង និងភ្លាសាច់គោ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តកណ្តាល។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
     "descriptionEn": "(Sample / Unverified User Submission) Papaya Salad & Spicy Pleah Shack offers authentic everyday Khmer cooking located in Kandal. Awaiting admin verification.",
-    "photoUrl": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-48.jpg",
     "galleryPhotos": [
       "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80"
     ],
@@ -1776,7 +1776,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Khmer Palm Sugar Sweets Hub (Takeo #1)",
     "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) រានបង្អែមខ្មែរស្ករត្នោត ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តតាកែវ។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
     "descriptionEn": "(Sample / Unverified User Submission) Khmer Palm Sugar Sweets Hub offers authentic everyday Khmer cooking located in Takeo. Awaiting admin verification.",
-    "photoUrl": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-49.jpg",
     "galleryPhotos": [
       "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80"
     ],
@@ -1811,7 +1811,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Khmer Coffee & Country Snacks (Pursat #1)",
     "descriptionKh": "(គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់) ផ្ទះកាហ្វេ និងអាហារសម្រន់ខ្មែរ ផ្តល់ជូននូវម្ហូបអាហារបែបសាមញ្ញ ស្រុកស្រែ មានផាសុកភាព ស្ថិតក្នុងខេត្តពោធិ៍សាត់។ រង់ចាំការផ្ទៀងផ្ទាត់ផ្លូវការពីរដ្ឋបាល។",
     "descriptionEn": "(Sample / Unverified User Submission) Khmer Coffee & Country Snacks offers authentic everyday Khmer cooking located in Pursat. Awaiting admin verification.",
-    "photoUrl": "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-50.jpg",
     "galleryPhotos": [
       "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80"
     ],

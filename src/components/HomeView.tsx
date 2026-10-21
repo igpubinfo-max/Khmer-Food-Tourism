@@ -250,15 +250,17 @@ export const HomeView: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-2">
-            {/* AI Food Check-in Quick Button inside Member Hub */}
-            <button
-              onClick={() => setIsAiCheckInModalOpen(true)}
-              className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white text-[10px] font-bold shadow-md flex items-center gap-1 active:scale-95 transition"
-              title={isKm ? 'ឆែកអ៊ីន & បន្ថែមហាងដោយ AI' : 'AI Food Check-in'}
-            >
-              <Camera className="w-3.5 h-3.5" />
-              <span>{isKm ? 'ឆែកអ៊ីន AI' : 'AI Check-in'}</span>
-            </button>
+            {/* AI Food Check-in Quick Button inside Member Hub (Administrator Only) */}
+            {currentUser?.role === 'admin' && (
+              <button
+                onClick={() => setIsAiCheckInModalOpen(true)}
+                className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white text-[10px] font-bold shadow-md flex items-center gap-1 active:scale-95 transition"
+                title={isKm ? 'ឆែកអ៊ីន & បន្ថែមហាងដោយ AI (Administrator Only)' : 'AI Food Check-in (Admin Only)'}
+              >
+                <Camera className="w-3.5 h-3.5" />
+                <span>{isKm ? 'ឆែកអ៊ីន AI' : 'AI Check-in'}</span>
+              </button>
+            )}
 
             {!currentUser && (
               <button
@@ -458,9 +460,9 @@ export const HomeView: React.FC = () => {
                 )}
               </div>
 
-              {/* Sample indicator */}
-              <span className="absolute bottom-1 right-1.5 z-10 bg-black/60 text-white/80 text-[7px] px-1 rounded-xs font-khmer select-none">
-                {isKm ? 'រូបតំណាង' : 'Sample'}
+              {/* Location / Village scenery indicator */}
+              <span className="absolute bottom-1 right-1.5 z-10 bg-black/70 text-white/90 text-[7px] px-1.5 py-0.5 rounded-xs font-khmer select-none shadow-xs">
+                {isKm ? 'រូបភាពទីតាំង / ភូមិដ្ឋាន' : 'Location / Village Scenery'}
               </span>
 
               {/* Title & Info on bottom */}
@@ -520,13 +522,16 @@ export const HomeView: React.FC = () => {
             <span>{isKm ? 'ស្វែងយល់មុខម្ហូបល្បីៗទាំងអស់' : 'Explore All Viral Foods'}</span>
           </button>
 
-          <button
-            onClick={() => setIsAiCheckInModalOpen(true)}
-            className="py-2 px-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm"
-          >
-            <Camera className="w-3.5 h-3.5 text-emerald-200" />
-            <span>{isKm ? 'ឆែកអ៊ីន & បន្ថែមហាង' : 'Check in & Add'}</span>
-          </button>
+          {currentUser?.role === 'admin' && (
+            <button
+              onClick={() => setIsAiCheckInModalOpen(true)}
+              className="py-2 px-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm"
+              title={isKm ? 'ឆែកអ៊ីន & បន្ថែមហាងដោយ AI (Administrator Only)' : 'AI Food Check-in (Admin Only)'}
+            >
+              <Camera className="w-3.5 h-3.5 text-emerald-200" />
+              <span>{isKm ? 'ឆែកអ៊ីន & បន្ថែមហាង' : 'Check in & Add'}</span>
+            </button>
+          )}
         </div>
       </div>
 

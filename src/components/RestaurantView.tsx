@@ -86,17 +86,16 @@ export const RestaurantView: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-1.5">
-          <button
-            onClick={() => {
-              if (!currentUser) setIsAuthModalOpen(true);
-              else setIsAiCheckInModalOpen(true);
-            }}
-            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 text-white font-bold text-xs shadow-xs font-khmer transition active:scale-95"
-            title={isKm ? 'ឆែកអ៊ីន & បន្ថែមហាងដោយ AI' : 'AI Food Check-in'}
-          >
-            <Camera className="w-3.5 h-3.5 text-emerald-200" />
-            <span>{isKm ? 'ឆែកអ៊ីន AI' : 'AI Check-in'}</span>
-          </button>
+          {currentUser?.role === 'admin' && (
+            <button
+              onClick={() => setIsAiCheckInModalOpen(true)}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 text-white font-bold text-xs shadow-xs font-khmer transition active:scale-95"
+              title={isKm ? 'ឆែកអ៊ីន & បន្ថែមហាងដោយ AI (Administrator Only)' : 'AI Food Check-in (Admin Only)'}
+            >
+              <Camera className="w-3.5 h-3.5 text-emerald-200" />
+              <span>{isKm ? 'ឆែកអ៊ីន AI' : 'AI Check-in'}</span>
+            </button>
+          )}
 
           <button
             onClick={() => {

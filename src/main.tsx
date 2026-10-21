@@ -4,9 +4,9 @@ import './index.css'
 import App from './App.tsx'
 import { ErrorBoundary } from './components/ErrorBoundary.tsx'
 
-// 0. Version Migration: Safe non-destructive upgrade to v1.5.3
+// 0. Version Migration: Safe non-destructive upgrade to v1.5.4
 try {
-  const CURRENT_VER = '1.5.3';
+  const CURRENT_VER = '1.5.4';
   const installedVer = localStorage.getItem('kft_app_installed_ver');
   if (installedVer !== CURRENT_VER) {
     // Keep all existing user accounts, credentials, and v4 data intact

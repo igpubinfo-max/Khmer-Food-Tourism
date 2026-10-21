@@ -94,6 +94,22 @@ const appTsxContent = fs.readFileSync(appTsxPath, 'utf8');
 assert(appTsxContent.includes('AiCheckInModal'), 'AiCheckInModal registered in App.tsx.');
 assert(appTsxContent.includes('TrendingFoodDetailModal'), 'TrendingFoodDetailModal registered in App.tsx.');
 
+// TEST 11: Administrator-Only AI Smart Check-in Restriction
+assert(appContextContent.includes("currentUser.role !== 'admin'"), 'AppContext strictly restricts AI Smart Check-in to Administrator accounts.');
+assert(homeViewContent.includes("currentUser?.role === 'admin'"), 'Home screen renders AI Food Check-in button only for Administrator.');
+const restViewPath = path.resolve(__dirname, '../src/components/RestaurantView.tsx');
+const restViewContent = fs.readFileSync(restViewPath, 'utf8');
+assert(restViewContent.includes("currentUser?.role === 'admin'"), 'Restaurant view renders AI Check-in button only for Administrator.');
+
+// TEST 12: Shop Directory Photos Bundle
+const seedRestaurantsPath = path.resolve(__dirname, '../src/data/seedRestaurants.ts');
+const seedRestaurantsContent = fs.readFileSync(seedRestaurantsPath, 'utf8');
+assert(seedRestaurantsContent.includes('/Shop/rest-1.jpg'), 'Seed restaurants updated with local shop photos (/Shop/rest-1.jpg).');
+assert(seedRestaurantsContent.includes('/Shop/rest-50.jpg'), 'Seed restaurants updated with local shop photos (/Shop/rest-50.jpg).');
+
+// TEST 13: Location / Village Scenery Indicator
+assert(homeViewContent.includes('រូបភាពទីតាំង / ភូមិដ្ឋាន'), 'Trending food cards display Location/Village Scenery indicator (រូបភាពទីតាំង / ភូមិដ្ឋាន).');
+
 console.log('\n================================================================');
 console.log(`  ALL ${passCount}/${passCount + failCount} AI TRENDING & CHECK-IN TESTS PASSED!`);
 console.log('================================================================\n');

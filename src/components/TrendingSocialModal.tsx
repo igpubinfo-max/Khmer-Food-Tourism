@@ -221,9 +221,9 @@ export const TrendingSocialModal: React.FC = () => {
                     )}
                   </div>
 
-                  {/* Representative Sample Label */}
-                  <span className="absolute bottom-2 right-2.5 bg-black/60 text-white/80 text-[7px] px-1 rounded-xs select-none">
-                    {isKm ? 'រូបតំណាង' : 'Sample'}
+                  {/* Location / Village Scenery Label */}
+                  <span className="absolute bottom-2 right-2.5 bg-black/70 text-white/90 text-[7px] px-1.5 py-0.5 rounded-xs select-none shadow-xs">
+                    {isKm ? 'រូបភាពទីតាំង / ភូមិដ្ឋាន' : 'Location / Village Scenery'}
                   </span>
 
                   {/* Food name & Restaurant banner */}

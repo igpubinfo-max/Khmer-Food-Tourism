@@ -22,7 +22,8 @@ export const AdminDashboard: React.FC = () => {
     users, updateUserRole,
     transactions, verifyTransaction, rejectTransaction,
     appSettings, updateAppSettings, setAdminPassword, currentUser, showToast,
-    aiCheckIns, approveAiCheckIn, rejectAiCheckIn, mergeAiCheckIn
+    aiCheckIns, approveAiCheckIn, rejectAiCheckIn, mergeAiCheckIn,
+    setIsAiCheckInModalOpen
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<'stats' | 'food' | 'restaurants' | 'destinations' | 'community' | 'users' | 'transactions' | 'settings' | 'security' | 'image_audit' | 'ai_checkins'>('stats');
@@ -782,9 +783,16 @@ export const AdminDashboard: React.FC = () => {
                     <span>{isKm ? `ការឆែកអ៊ីន & បន្ថែមហាងដោយ AI (${aiCheckIns.length})` : `AI Check-in Submissions (${aiCheckIns.length})`}</span>
                   </h3>
                   <p className="text-[11px] text-stone-500 font-khmer">
-                    {isKm ? 'ពិនិត្យ អនុម័ត ឬច្របាច់បញ្ចូលគ្នា (Merge) ហាងដែលបានឆែកអ៊ីនដោយសមាជិក' : 'Review, approve, or merge restaurant check-ins contributed by community'}
+                    {isKm ? 'ពិនិត្យ អនុម័ត ឬច្របាច់បញ្ចូលគ្នា (Merge) ហាងដែលបានឆែកអ៊ីនដោយ Administrator' : 'Review, approve, or merge restaurant check-ins contributed by Administrator'}
                   </p>
                 </div>
+                <button
+                  onClick={() => setIsAiCheckInModalOpen(true)}
+                  className="self-start sm:self-auto flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 text-white font-bold text-xs shadow-xs font-khmer transition active:scale-95"
+                >
+                  <Camera className="w-4 h-4 text-emerald-200" />
+                  <span>{isKm ? '+ ឆែកអ៊ីន & បន្ថែមហាងដោយ AI ថ្មី' : '+ New AI Check-in & Add'}</span>
+                </button>
               </div>
 
               {aiCheckIns.length === 0 ? (

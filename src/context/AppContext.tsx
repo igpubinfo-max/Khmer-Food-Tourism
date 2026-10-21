@@ -216,7 +216,7 @@ interface AppContextType {
   aiCheckIns: AiCheckInSubmission[];
   isAiCheckInModalOpen: boolean;
   setIsAiCheckInModalOpen: (open: boolean) => void;
-  submitAiCheckIn: (data: Omit<AiCheckInSubmission, 'id' | 'checkInTime' | 'status'> & { id?: string; checkInTime?: string }) => Promise<{ success: boolean; isDuplicate?: boolean; isBranch?: boolean; status: 'approved' | 'pending'; restaurantId?: string; message: string }>;
+  submitAiCheckIn: (data: Omit<AiCheckInSubmission, 'id' | 'checkInTime' | 'status'> & { id?: string; checkInTime?: string }) => Promise<{ success: boolean; isDuplicate?: boolean; isBranch?: boolean; status: 'approved' | 'pending' | 'rejected' | 'merged'; restaurantId?: string; message: string }>;
   approveAiCheckIn: (id: string) => void;
   rejectAiCheckIn: (id: string, reason?: string) => void;
   mergeAiCheckIn: (checkInId: string, targetRestaurantId: string) => void;
@@ -288,13 +288,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const membershipTier = (r.membershipTier || (isPromoted ? 'premium' : 'free')) as MembershipTier;
     const membershipExpiresAt = r.membershipExpiresAt || (membershipTier === 'premium' ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString() : undefined);
     
+    // Normalize photoUrl for rest-1 to rest-50 (excluding rest-17) to use authentic bundled shop photos
+    let photoUrl = r.photoUrl || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80';
+    if (typeof r.id === 'string') {
+      const match = r.id.match(/^rest-([1-9]|[1-4][0-9]|50)$/);
+      if (match && match[1] !== '17' && (!photoUrl || photoUrl.startsWith('https://images.unsplash.com') || photoUrl.startsWith('/Shop/'))) {
+        photoUrl = `/Shop/rest-${match[1]}.jpg`;
+      }
+    }
+
     return {
       id: r.id || `rest-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
       nameKh: r.nameKh || 'ភោជនីយដ្ឋានខ្មែរ',
       nameEn: r.nameEn || r.nameKh || 'Khmer Restaurant',
       descriptionKh: r.descriptionKh || 'ភោជនីយដ្ឋានម្ហូបខ្មែររសជាតិដើម ផាសុកភាព និងអនាម័យខ្ពស់។',
       descriptionEn: r.descriptionEn || 'Authentic traditional Khmer restaurant.',
-      photoUrl: r.photoUrl || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80',
+      photoUrl,
       galleryPhotos: Array.isArray(r.galleryPhotos) ? r.galleryPhotos : [],
       addressKh: r.addressKh || 'រាជធានីភ្នំពេញ កម្ពុជា',
       addressEn: r.addressEn || 'Phnom Penh, Cambodia',
@@ -2121,11 +2130,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // AI Smart Check-in & Auto Add Restaurant Engine
   const submitAiCheckIn = async (
     data: Omit<AiCheckInSubmission, 'id' | 'checkInTime' | 'status'> & { id?: string; checkInTime?: string }
-  ): Promise<{ success: boolean; isDuplicate?: boolean; isBranch?: boolean; status: 'approved' | 'pending'; restaurantId?: string; message: string }> => {
+  ): Promise<{ success: boolean; isDuplicate?: boolean; isBranch?: boolean; status: 'approved' | 'pending' | 'rejected' | 'merged'; restaurantId?: string; message: string }> => {
     if (!currentUser) {
-      showToast(language === 'km' ? 'សូមចូលគណនីដើម្បីឆែកអ៊ីន!' : 'Please sign in to check in!', 'warning');
+      showToast(language === 'km' ? 'សូមចូលគណនី Administrator ដើម្បីឆែកអ៊ីន!' : 'Please sign in with an Administrator account!', 'warning');
       setIsAuthModalOpen(true);
       return { success: false, status: 'pending', message: 'Authentication required' };
+    }
+
+    if (currentUser.role !== 'admin') {
+      const adminOnlyMsg = language === 'km'
+        ? 'មុខងារឆែកអ៊ីន & បន្ថែមហាងដោយ AI ត្រូវបានកំណត់សម្រាប់តែគណនី Administrator ប៉ុណ្ណោះ'
+        : 'AI Smart Check-in & Auto Add Restaurant is strictly restricted to Administrator accounts only.';
+      showToast(adminOnlyMsg, 'warning');
+      return { success: false, status: 'rejected', message: adminOnlyMsg };
     }
 
     // Rate Limiting check (anti-spam, max 10/hour per user)

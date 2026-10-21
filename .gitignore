@@ -25,7 +25,8 @@ dist-ssr
 backup_*
 *.apk
 Food/
-Shop/
+/Shop/
+!public/Shop/
 backups/
 *.txt
 
