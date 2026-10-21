@@ -4,9 +4,9 @@ import './index.css'
 import App from './App.tsx'
 import { ErrorBoundary } from './components/ErrorBoundary.tsx'
 
-// 0. Version Migration: Purge legacy corrupted storage on upgrade to v1.5.0
+// 0. Version Migration: Purge legacy corrupted storage on upgrade to v1.5.1
 try {
-  const CURRENT_VER = '1.5.0';
+  const CURRENT_VER = '1.5.1';
   const installedVer = localStorage.getItem('kft_app_installed_ver');
   if (installedVer !== CURRENT_VER) {
     const savedUser = localStorage.getItem('kft_current_user_v4');

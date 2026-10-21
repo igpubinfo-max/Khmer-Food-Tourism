@@ -60,7 +60,7 @@ jobs:
           echo "=== SEARCHING FOR GENERATED APK FILES ==="
           find . -name "*.apk" -ls
           cd android/app/build/outputs/apk/debug
-          cp app-debug.apk KhmerFoodTourism-v1.5.0.apk
+          cp app-debug.apk KhmerFoodTourism-v1.5.1.apk
           ls -la
 
       - name: 10. Upload Android APK Artifact
@@ -73,22 +73,22 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: v1.5.0
-          name: "Khmer Food & Tourism v1.5.0 (Native Android Google Account Selector + Real Google OAuth)"
+          tag_name: v1.5.1
+          name: "Khmer Food & Tourism v1.5.1 (Streamlined Google Sign-In & Instant Email Auth)"
           overwrite: true
           make_latest: true
           body: |
             ### 🇰🇭 កម្មវិធីទូរស័ព្ទដៃ អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism Mobile App)
             
-            **កំណែថ្មី v1.5.0 (Native Android Google Account Selector + Real Google OAuth):**
-            - 🌐 **១. ជ្រើសរើស Gmail ដោយស្វ័យប្រវត្តិតាមរយៈ Native Android Account Selector:**
-              - ប្រើប្រាស់ Android System Account Selector ផ្ទាល់ ដែលបង្ហាញបញ្ជី Gmail ដែលអ្នកប្រើប្រាស់កំពុង Login ក្នុងទូរស័ព្ទដៃ (Main Google Account សម្រាប់ Play Store / Gmail)។
-              - មិនទាមទារ SHA-1 ឬការកំណត់ស្មុគស្មាញក្នុង Google Cloud Console ឡើយ ដំណើរការ ១០០% លើគ្រប់ទូរស័ព្ទ Android ទាំងអស់។
-              - គ្រាន់តែចុចលើ Gmail របស់ខ្លួន នោះកម្មវិធីនឹង Register/Login ចូលភ្លាមៗដោយស្វ័យប្រវត្តិ។
-            - 💻 **២. ដំណើរការ Google OAuth 2.0 Web Popup លើកុំព្យូទ័រ (ដូច Pacdora បេះបិទ)**។
-            - 🚪 **៣. ចាកចេញពីកម្មវិធីស្វ័យប្រវត្តិប្រសិនបើគ្មានគណនី (Auto-Exit Mandatory Gate)**។
-            - 🔐 **៤. ឥតគិតថ្លៃ ១០០% ជារៀងរហូត គ្មានការគិតថ្លៃសេវា SMS (Zero SMS fees)**។
-            - 📧 **៥. អាសយដ្ឋានអ៊ីមែលផ្លូវការ `kftcam@gmail.com`**។
+            **កំណែថ្មី v1.5.1 (Streamlined Google Sign-In & Zero-Friction User Experience):**
+            - 🚀 **១. ផ្ទាំងចុះឈ្មោះថ្មីទាន់សម័យ និងងាយស្រួលបំផុត (Streamlined Welcome Screen):**
+              - បានដកចេញប្រអប់លេខទូរស័ព្ទ និង SMS OTP ស្មុគស្មាញ ដើម្បីជៀសវាងការយល់ច្រឡំ និងការចំណាយឥតប្រយោជន៍។
+              - បង្ហាញប៊ូតុងធំចម្បង «បន្តជាមួយ Google» (Continue with Google) ចូលប្រើភ្លាមៗក្នុងរយៈពេលតែ ១ វិនាទី (1-Tap Instant Sign-In)។
+            - 📧 **២. គាំទ្រការចុះឈ្មោះ និងចូលប្រើតាមអ៊ីមែល (Instant Email Auth)** ដោយឥតគិតថ្លៃ និងមិនបាច់រង់ចាំលេខកូដ។
+            - 🌐 **៣. ផ្សាយផ្ទាល់លើ GitHub Pages សម្រាប់ Apple iPhone (PWA Add to Home Screen)** តាមរយៈ `https://igpubinfo-max.github.io/Khmer-Food-Tourism/`។
+            - 🚪 **៤. ចាកចេញពីកម្មវិធីស្វ័យប្រវត្តិប្រសិនបើគ្មានគណនី (Auto-Exit Mandatory Gate)**។
+            - 🔐 **៥. ឥតគិតថ្លៃ ១០០% ជារៀងរហូត គ្មានការគិតថ្លៃសេវា SMS (Zero SMS fees)**។
+            - 📧 **៦. អាសយដ្ឋានអ៊ីមែលផ្លូវការ `kftcam@gmail.com`**។
           draft: false
           prerelease: false
           files: |
