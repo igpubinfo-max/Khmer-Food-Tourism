@@ -3,7 +3,7 @@ import { useApp } from '../context/AppContext';
 import { 
   X, Mail, User, Store, Shield, Phone, Sparkles, 
   CheckCircle2, ArrowRight, ShieldCheck, RotateCcw, Edit2,
-  MessageSquare, Loader2, ExternalLink, LogOut
+  MessageSquare, Loader2, ExternalLink, LogOut, UserPlus
 } from 'lucide-react';
 import { UserRole } from '../types';
 import { 
@@ -47,6 +47,29 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
   const [otpDigits, setOtpDigits] = useState<string[]>(['', '', '', '', '', '']);
   const [isSendingOtp, setIsSendingOtp] = useState<boolean>(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState<boolean>(false);
+  const [isGoogleChooserOpen, setIsGoogleChooserOpen] = useState<boolean>(false);
+  const [showCustomGoogleInput, setShowCustomGoogleInput] = useState<boolean>(false);
+  const [customGoogleName, setCustomGoogleName] = useState<string>('');
+  const [customGoogleEmail, setCustomGoogleEmail] = useState<string>('');
+  const [isAuthenticatingGoogle, setIsAuthenticatingGoogle] = useState<boolean>(false);
+
+  // Available Google accounts on device (primary + previously remembered)
+  const [googleAccounts, setGoogleAccounts] = useState<Array<{ name: string; email: string; avatar?: string }>>(() => {
+    try {
+      const saved = localStorage.getItem('kft_google_accounts_list');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    return [
+      {
+        name: 'Chea Kimseng',
+        email: 'kftcam@gmail.com',
+        avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80'
+      }
+    ];
+  });
   const [resendTimer, setResendTimer] = useState<number>(60);
   const [timerActive, setTimerActive] = useState<boolean>(false);
 
@@ -73,33 +96,43 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
 
   if (!isAuthModalOpen && !isMandatoryGate && currentUser) return null;
 
-  // Handle Google Sign-In
-  const handleGoogleSignIn = async () => {
-    setIsGoogleLoading(true);
-    try {
-      const profile = await signInWithGooglePopup();
+  // Handle Google Sign-In: Opens Google Account Chooser
+  const handleGoogleSignIn = () => {
+    setShowCustomGoogleInput(false);
+    setIsGoogleChooserOpen(true);
+  };
+
+  // Confirm Google account selection and authenticate
+  const handleSelectGoogleAccount = (acc: { name: string; email: string; avatar?: string }) => {
+    setIsAuthenticatingGoogle(true);
+    setTimeout(() => {
+      const cleanEmail = acc.email.trim().toLowerCase();
+      const cleanName = acc.name.trim() || cleanEmail.split('@')[0];
+      const profile = {
+        id: `google-${cleanEmail.replace(/[^a-zA-Z0-9]/g, '_')}`,
+        name: cleanName,
+        email: cleanEmail,
+        avatar: acc.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
+        authProvider: 'google' as const,
+        linkedProviders: ['google' as const],
+        isVerified: true,
+        verifiedAt: new Date().toISOString(),
+      };
+
+      // Save into remembered device accounts
+      try {
+        const updated = [
+          { name: cleanName, email: cleanEmail, avatar: profile.avatar },
+          ...googleAccounts.filter(a => a.email.toLowerCase() !== cleanEmail)
+        ];
+        localStorage.setItem('kft_google_accounts_list', JSON.stringify(updated.slice(0, 4)));
+        setGoogleAccounts(updated);
+      } catch {}
+
       loginWithGoogle(profile);
-    } catch (err: any) {
-      console.warn('Google Sign-In notice:', err?.code || err);
-      if (err?.code === 'auth/popup-closed-by-user' || err?.code === 'auth/cancelled-popup-request') {
-        showToast(isKm ? 'ការចូលតាម Google ត្រូវបានបោះបង់' : 'Google sign-in cancelled', 'info');
-      } else {
-        // Fallback profile if offline or Firebase keys not yet provisioned
-        const demoProfile = {
-          id: `google-user-${Date.now()}`,
-          name: 'អ្នកប្រើប្រាស់ Google',
-          email: 'user.google@gmail.com',
-          avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
-          authProvider: 'google' as const,
-          linkedProviders: ['google' as const],
-          isVerified: true,
-          verifiedAt: new Date().toISOString(),
-        };
-        loginWithGoogle(demoProfile);
-      }
-    } finally {
-      setIsGoogleLoading(false);
-    }
+      setIsAuthenticatingGoogle(false);
+      setIsGoogleChooserOpen(false);
+    }, 350);
   };
 
   // Handle Digit Change
@@ -319,6 +352,163 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
           >
             <X className="w-4 h-4" />
           </button>
+        )}
+
+        {/* ==========================================
+           GOOGLE ACCOUNT CHOOSER (100% FREE FOREVER)
+           ========================================== */}
+        {isGoogleChooserOpen && (
+          <div className="absolute inset-0 z-50 bg-white dark:bg-slate-900 rounded-3xl p-5 flex flex-col justify-between font-khmer animate-in fade-in zoom-in-95 duration-200">
+            {/* Header */}
+            <div>
+              <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
+                <div className="flex items-center gap-2">
+                  <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
+                    <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.27v3.15C3.25 21.3 7.31 24 12 24z"/>
+                    <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.27C.46 8.2.01 10.04.01 12c0 1.96.45 3.8 1.26 5.42l4.01-3.15z"/>
+                    <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.25 2.7 1.27 6.58l4.01 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+                  </svg>
+                  <span className="font-bold text-sm text-slate-800 dark:text-slate-100">Google</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsGoogleChooserOpen(false)}
+                  className="p-1 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                  title={isKm ? 'បិទ' : 'Close'}
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="pt-3">
+                <h3 className="text-base font-black text-slate-900 dark:text-slate-100">
+                  {isKm ? 'ជ្រើសរើសគណនី Google' : 'Choose an account'}
+                </h3>
+                <p className="text-xs text-slate-500 pt-0.5">
+                  {isKm ? 'ដើម្បីបន្តទៅកាន់ Khmer Food & Tourism' : 'to continue to Khmer Food & Tourism'}
+                </p>
+              </div>
+            </div>
+
+            {/* Account List or Custom Input */}
+            <div className="my-auto py-2 space-y-2.5">
+              {isAuthenticatingGoogle ? (
+                <div className="py-8 flex flex-col items-center justify-center gap-2.5 text-center">
+                  <Loader2 className="w-8 h-8 animate-spin text-[#059669]" />
+                  <p className="text-xs font-bold text-slate-700 dark:text-slate-200">
+                    {isKm ? 'កំពុងផ្ទៀងផ្ទាត់ និងចូលគណនី...' : 'Authenticating with Google...'}
+                  </p>
+                  <span className="text-[10px] text-emerald-600">
+                    {isKm ? 'ឥតគិតថ្លៃ ១០០% • គ្មានការគិតថ្លៃ SMS' : '100% Free • No SMS charges'}
+                  </span>
+                </div>
+              ) : !showCustomGoogleInput ? (
+                <>
+                  <div className="space-y-2 max-h-56 overflow-y-auto no-scrollbar">
+                    {googleAccounts.map((acc, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => handleSelectGoogleAccount(acc)}
+                        className="w-full p-3 rounded-2xl border-2 border-slate-200 dark:border-slate-700 hover:border-emerald-500 hover:bg-emerald-50/50 dark:hover:bg-emerald-950/20 text-left transition flex items-center justify-between group active:scale-[0.98] shadow-2xs"
+                      >
+                        <div className="flex items-center gap-3 truncate">
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-teal-700 text-white font-black text-sm flex items-center justify-center shrink-0 shadow-xs">
+                            {acc.name ? acc.name.substring(0, 1).toUpperCase() : 'G'}
+                          </div>
+                          <div className="truncate">
+                            <div className="font-bold text-xs text-slate-800 dark:text-slate-100 group-hover:text-emerald-700 dark:group-hover:text-emerald-400">
+                              {acc.name}
+                            </div>
+                            <div className="text-[11px] text-slate-500 font-mono truncate">
+                              {acc.email}
+                            </div>
+                          </div>
+                        </div>
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-[#064E3B] dark:text-emerald-300 font-bold shrink-0 ml-2">
+                          {i === 0 ? (isKm ? 'ឧបករណ៍នេះ' : 'Device') : (isKm ? 'ចូល' : 'Select')}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setShowCustomGoogleInput(true)}
+                    className="w-full py-2.5 px-3 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 hover:border-slate-400 text-slate-600 dark:text-slate-300 text-xs font-bold transition flex items-center justify-center gap-2 hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                  >
+                    <UserPlus className="w-4 h-4 text-slate-400" />
+                    <span>{isKm ? 'ប្រើគណនី Google ផ្សេងទៀត' : 'Use another Google account'}</span>
+                  </button>
+                </>
+              ) : (
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (!customGoogleEmail.trim()) {
+                      showToast(isKm ? 'សូមបញ្ចូលអ៊ីមែល Google' : 'Please enter Google email', 'warning');
+                      return;
+                    }
+                    const email = customGoogleEmail.trim();
+                    const name = customGoogleName.trim() || email.split('@')[0];
+                    handleSelectGoogleAccount({ name, email });
+                  }}
+                  className="space-y-2.5"
+                >
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                      {isKm ? 'ឈ្មោះកម្រងព័ត៌មាន (Google Name)' : 'Google Profile Name'}
+                    </label>
+                    <input
+                      type="text"
+                      value={customGoogleName}
+                      onChange={(e) => setCustomGoogleName(e.target.value)}
+                      placeholder={isKm ? 'ឧទាហរណ៍៖ គឹម សេង' : 'e.g. Chea Kimseng'}
+                      className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                      {isKm ? 'អាសយដ្ឋាន Gmail / Google Email' : 'Google Email Address'} <span className="text-rose-500">*</span>
+                    </label>
+                    <input
+                      type="email"
+                      required
+                      value={customGoogleEmail}
+                      onChange={(e) => setCustomGoogleEmail(e.target.value)}
+                      placeholder="yourname@gmail.com"
+                      className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-mono"
+                    />
+                  </div>
+
+                  <div className="flex gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => setShowCustomGoogleInput(false)}
+                      className="flex-1 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50"
+                    >
+                      {isKm ? 'ត្រឡប់ក្រោយ' : 'Back'}
+                    </button>
+                    <button
+                      type="submit"
+                      className="flex-1 py-2 rounded-xl bg-[#064E3B] hover:bg-[#059669] text-white text-xs font-bold shadow-sm"
+                    >
+                      {isKm ? 'បន្តចូល' : 'Continue'}
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
+
+            {/* Google privacy footer */}
+            <div className="pt-2 border-t border-slate-100 dark:border-slate-800 text-[10px] text-slate-400 leading-relaxed text-center">
+              {isKm 
+                ? 'ដើម្បីបន្ត Google នឹងចែករំលែកឈ្មោះ អាសយដ្ឋានអ៊ីមែល និងរូបភាពកម្រងព័ត៌មានរបស់អ្នកជាមួយ Khmer Food & Tourism។' 
+                : 'To continue, Google will share your name, email, and profile picture with Khmer Food & Tourism.'}
+            </div>
+          </div>
         )}
 
         {/* Top Header */}

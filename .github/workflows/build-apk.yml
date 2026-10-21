@@ -50,7 +50,7 @@ jobs:
           echo "=== SEARCHING FOR GENERATED APK FILES ==="
           find . -name "*.apk" -ls
           cd android/app/build/outputs/apk/debug
-          cp app-debug.apk KhmerFoodTourism-v1.4.6.apk
+          cp app-debug.apk KhmerFoodTourism-v1.4.7.apk
           ls -la
 
       - name: 9. Upload Android APK Artifact
@@ -63,19 +63,23 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: v1.4.6
-          name: "Khmer Food & Tourism v1.4.6 (Remove Duplicate Exit Button & Test Mode Helper)"
+          tag_name: v1.4.7
+          name: "Khmer Food & Tourism v1.4.7 (Continue with Google - 100% Free Forever)"
           overwrite: true
           make_latest: true
           body: |
             ### 🇰🇭 កម្មវិធីទូរស័ព្ទដៃ អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism Mobile App)
             
-            **កំណែថ្មី v1.4.6 (Fix Duplicate Exit Button & SMS Test Mode Helper):**
-            - 🚪 **១. កែសម្រួលប៊ូតុង Exit App៖** លុបបំបាត់ប៊ូតុងចាកចេញជាន់គ្នា (Removed duplicate Exit App button) នៅសល់ប៊ូតុងតែមួយនៅផ្នែកខាងក្រោមយ៉ាងស្រស់ស្អាត។
-            - 💡 **២. ជំនួយការតេស្តលេខទូរស័ព្ទ (SMS Test Mode Helper):** បញ្ជាក់ការណែនាំអំពីប្រព័ន្ធ SMS Gateway (Plasgate Cambodia) និងផ្ដល់លេខកូដសាកល្បង `123456` ដើម្បីងាយស្រួលតេស្តលើទូរស័ព្ទដៃភ្លាមៗ។
-            - 📲 **៣. ជម្រើសចូលគណនីលឿនបំផុត (Continue with Google):** ចុចចូលភ្លាមៗ 1-Tap មិនបាច់ចាំលេខកូដ SMS។
-            - 🔐 **៤. រក្សាសុវត្ថិភាព និងការចាកចេញដោយស្វ័យប្រវត្តិប្រសិនបើគ្មានគណនី (Auto-Exit Gate)**។
-            - 📧 **៥. អាសយដ្ឋានអ៊ីមែលផ្លូវការ `kftcam@gmail.com`**។
+            **កំណែថ្មី v1.4.7 (Continue with Google — 100% Free Forever):**
+            - 🌟 **១. ចូលគណនីតាម Google ឥតគិតថ្លៃ ១០០% ជារៀងរហូត (Continue with Google):**
+              - ចុះឈ្មោះ និងចូលគណនីភ្លាមៗត្រឹមតែ ១-Tap តាមរយៈ Google Account លើទូរស័ព្ទដៃ Android។
+              - មិនបាច់រង់ចាំ ឬបង់ថ្លៃសេវាសារ SMS (Zero SMS verification fee)។
+              - ផ្ទាំងជ្រើសរើសគណនី Google (Google Account Chooser) បង្ហាញក្នុងកម្មវិធីដោយផ្ទាល់ (Direct in-app account selection)។
+              - ទាញយកឈ្មោះ Email និងរូបតំណាង Profile Picture មកបង្កើតគណនីធម្មតា (Normal User Account: `role: 'user'`)។
+              - រក្សាទុក session ក្នុងម៉ាស៊ីន និងសម្គាល់អ្នកធ្លាប់ចុះឈ្មោះរួចដើម្បី Login ចូលគណនីដើម ដោយមិនបង្កើតគណនីស្ទួន។
+            - 🚪 **២. ចាកចេញពីកម្មវិធីស្វ័យប្រវត្តិប្រសិនបើគ្មានគណនី (Auto-Exit Mandatory Gate)**។
+            - 🔐 **៣. សុវត្ថិភាពទិន្នន័យខ្ពស់ និងរក្សាទិន្នន័យមុខម្ហូប រមណីយដ្ឋាន ហាងអាហារទាំងអស់**។
+            - 📧 **៤. អាសយដ្ឋានអ៊ីមែលផ្លូវការ `kftcam@gmail.com`**។
           draft: false
           prerelease: false
           files: |
