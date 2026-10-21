@@ -7,15 +7,21 @@ import { isRestaurantPremiumActive } from '../types';
 import { 
   Sparkles, ChevronRight, Utensils, Store, Compass, 
   MapPin, Heart, Flame, QrCode, Download, ShieldCheck,
-  Apple, Smartphone
+  Apple, Smartphone, Bot, Calendar, Bookmark, Bell, 
+  UtensilsCrossed, MessageSquareQuote
 } from 'lucide-react';
 
 export const HomeView: React.FC = () => {
   const { 
     foods, restaurants, destinations, setActiveTab, 
     language, setSelectedProvince, posts,
+    currentUser, setIsAuthModalOpen,
     setIsInstallModalOpen, setIsSupportModalOpen,
-    openInstallModal, setSelectedDestination
+    openInstallModal, setSelectedDestination,
+    setIsWhatToEatModalOpen, setIsNearMeModalOpen,
+    setIsDailyDiscoveriesModalOpen, setIsWishlistsModalOpen,
+    setIsAiTripPlannerModalOpen, setIsNotificationsModalOpen,
+    setIsTrendingSocialModalOpen, unreadNotificationsCount
   } = useApp();
 
   const isKm = language === 'km';
@@ -163,6 +169,147 @@ export const HomeView: React.FC = () => {
         ))}
       </div>
 
+      {/* 6 Personalized Account Features Suite (មជ្ឈមណ្ឌលផ្ទាល់ខ្លួនសម្រាប់គណនី) */}
+      <div className="p-4 rounded-3xl bg-gradient-to-br from-emerald-950 via-[#064E3B] to-slate-900 text-white border border-emerald-500/40 shadow-sm space-y-3 font-khmer">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping" />
+            <div>
+              <h3 className="font-moul text-xs sm:text-sm text-white flex items-center gap-1.5">
+                <span>{isKm ? 'សេវាកម្មផ្ទាល់ខ្លួន (Member Hub)' : 'Personalized Member Hub'}</span>
+              </h3>
+              <p className="text-[10px] text-emerald-200">
+                {currentUser 
+                  ? (isKm ? `គណនី៖ ${currentUser.name}` : `Account: ${currentUser.name}`)
+                  : (isKm ? 'ចូលគណនីដើម្បីរីករាយមុខងារពិសេសទាំង ៦' : 'Sign in to unlock all 6 account features')}
+              </p>
+            </div>
+          </div>
+
+          {!currentUser && (
+            <button
+              onClick={() => setIsAuthModalOpen(true)}
+              className="px-2.5 py-1 bg-amber-400 hover:bg-amber-500 text-stone-900 rounded-xl text-[10px] font-black shadow-xs transition"
+            >
+              {isKm ? 'ចូលគណនី' : 'Sign In'}
+            </button>
+          )}
+        </div>
+
+        {/* 6 Feature Buttons Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+          {/* A. ថ្ងៃនេះញ៉ាំអ្វី? (High Priority) */}
+          <button
+            onClick={() => setIsWhatToEatModalOpen(true)}
+            className="p-3 rounded-2xl bg-gradient-to-br from-amber-500/20 to-amber-600/30 border border-amber-400/50 hover:border-amber-400 text-left transition group active:scale-95 relative overflow-hidden"
+          >
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-xl">🍲</span>
+              <span className="px-1.5 py-0.5 rounded-full bg-amber-400 text-stone-900 text-[9px] font-black shadow-xs">
+                {isKm ? 'អាទិភាពខ្ពស់ ⭐' : 'High Priority ⭐'}
+              </span>
+            </div>
+            <div className="text-xs font-bold text-white group-hover:text-amber-300">
+              {isKm ? 'ថ្ងៃនេះញ៉ាំអ្វី?' : 'What to Eat Today?'}
+            </div>
+            <div className="text-[10px] text-amber-200/80 line-clamp-1 mt-0.5">
+              {isKm ? 'ជ្រើសរើសម្ហូបតាមថវិកា' : 'Smart meal match'}
+            </div>
+          </button>
+
+          {/* B. នៅជិតខ្ញុំ */}
+          <button
+            onClick={() => setIsNearMeModalOpen(true)}
+            className="p-3 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/15 text-left transition group active:scale-95"
+          >
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-xl">📍</span>
+              <span className="text-[10px] font-mono text-emerald-300 font-bold">GPS</span>
+            </div>
+            <div className="text-xs font-bold text-white group-hover:text-emerald-300">
+              {isKm ? 'នៅជិតខ្ញុំ' : 'Near Me'}
+            </div>
+            <div className="text-[10px] text-slate-300 line-clamp-1 mt-0.5">
+              {isKm ? 'រកហាង & កន្លែងក្បែរខ្លួន' : 'Places & distances'}
+            </div>
+          </button>
+
+          {/* C. កន្លែងថ្មីប្រចាំថ្ងៃ */}
+          <button
+            onClick={() => setIsDailyDiscoveriesModalOpen(true)}
+            className="p-3 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/15 text-left transition group active:scale-95"
+          >
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-xl">✨</span>
+              <span className="text-[9px] text-amber-300 font-bold">Daily</span>
+            </div>
+            <div className="text-xs font-bold text-white group-hover:text-emerald-300">
+              {isKm ? 'កន្លែងថ្មីប្រចាំថ្ងៃ' : 'Daily Picks'}
+            </div>
+            <div className="text-[10px] text-slate-300 line-clamp-1 mt-0.5">
+              {isKm ? 'ស្វែងយល់ថ្ងៃនេះ' : 'Daily hidden gems'}
+            </div>
+          </button>
+
+          {/* D. បញ្ជីកន្លែងដែលចង់ទៅ */}
+          <button
+            onClick={() => setIsWishlistsModalOpen(true)}
+            className="p-3 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/15 text-left transition group active:scale-95"
+          >
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-xl">📑</span>
+              <span className="text-[9px] text-emerald-300 font-bold">Lists</span>
+            </div>
+            <div className="text-xs font-bold text-white group-hover:text-emerald-300">
+              {isKm ? 'បញ្ជីកន្លែងចង់ទៅ' : 'Wishlists'}
+            </div>
+            <div className="text-[10px] text-slate-300 line-clamp-1 mt-0.5">
+              {isKm ? 'ហាងចង់សាក គ្រួសារ' : 'Custom trip lists'}
+            </div>
+          </button>
+
+          {/* E. ផែនការដើរលេង AI */}
+          <button
+            onClick={() => setIsAiTripPlannerModalOpen(true)}
+            className="p-3 rounded-2xl bg-gradient-to-br from-teal-500/20 to-emerald-600/30 border border-teal-400/40 text-left transition group active:scale-95"
+          >
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-xl">🤖</span>
+              <span className="px-1.5 py-0.2 rounded-full bg-teal-400/30 text-teal-200 text-[9px] font-bold">
+                Smart AI
+              </span>
+            </div>
+            <div className="text-xs font-bold text-white group-hover:text-teal-300">
+              {isKm ? 'ផែនការដើរលេង AI' : 'AI Trip Planner'}
+            </div>
+            <div className="text-[10px] text-teal-200/80 line-clamp-1 mt-0.5">
+              {isKm ? 'AI រៀបចំផ្លូវស្វ័យប្រវត្តិ' : 'Automated itinerary'}
+            </div>
+          </button>
+
+          {/* F. ការជូនដំណឹងដែលមានប្រយោជន៍ */}
+          <button
+            onClick={() => setIsNotificationsModalOpen(true)}
+            className="p-3 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/15 text-left transition group active:scale-95 relative"
+          >
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-xl">🔔</span>
+              {unreadNotificationsCount > 0 && (
+                <span className="px-1.5 py-0.2 rounded-full bg-rose-500 text-white text-[9px] font-black animate-pulse">
+                  {unreadNotificationsCount} ថ្មី
+                </span>
+              )}
+            </div>
+            <div className="text-xs font-bold text-white group-hover:text-emerald-300">
+              {isKm ? 'ការជូនដំណឹង' : 'Notifications'}
+            </div>
+            <div className="text-[10px] text-slate-300 line-clamp-1 mt-0.5">
+              {isKm ? 'ប្រូម៉ូសិនហាង & បញ្ចុះតម្លៃ' : 'Promos & updates'}
+            </div>
+          </button>
+        </div>
+      </div>
+
       {/* Section 1: Featured Khmer Food */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
@@ -247,29 +394,29 @@ export const HomeView: React.FC = () => {
         </div>
       </div>
 
-      {/* Dedicated Viral Trending Section: TikTok & Facebook Popular Spots */}
+      {/* Dedicated Viral Trending Section: TikTok & Facebook Popular Review Spots */}
       {trendingSocialDestinations.length > 0 && (
-        <div className="p-4 rounded-3xl bg-gradient-to-br from-slate-900 via-emerald-950 to-slate-900 text-white border border-pink-500/40 shadow-md space-y-3 font-khmer">
+        <div className="p-4 rounded-3xl bg-gradient-to-br from-slate-900 via-rose-950 to-slate-900 text-white border border-rose-500/40 shadow-md space-y-3 font-khmer">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="px-2.5 py-1 rounded-xl bg-gradient-to-r from-rose-500 to-pink-600 text-white text-[10px] font-bold shadow-xs flex items-center gap-1">
-                <span>🔥</span>
-                <span>TikTok & FB</span>
+                <Flame className="w-3.5 h-3.5 fill-current" />
+                <span>TikTok & FB Review</span>
               </span>
               <div>
                 <h3 className="font-moul text-xs sm:text-sm text-white">
-                  {isKm ? 'កន្លែងដើរលេងល្បីលើ TikTok & FB' : 'Viral Spots on TikTok & FB'}
+                  {isKm ? 'កន្លែងដើរលេងល្បីលើ TikTok & FB' : 'Viral Review Spots on TikTok & FB'}
                 </h3>
                 <p className="text-[10px] text-pink-200">
-                  {isKm ? 'ទីតាំងពេញនិយមផុស និងចែករំលែកច្រើនជាងគេ' : 'Most trending travel destinations'}
+                  {isKm ? 'កន្លែងដែលគេចូលចិត្តទៅ Review និងផុសច្រើនបំផុត' : 'Most reviewed & shared travel spots on social media'}
                 </p>
               </div>
             </div>
             <button
-              onClick={() => setActiveTab('tourism')}
+              onClick={() => setIsTrendingSocialModalOpen(true)}
               className="text-xs font-bold text-pink-300 hover:text-white flex items-center gap-0.5"
             >
-              <span>{isKm ? 'ទាំងអស់' : 'All'}</span>
+              <span>{isKm ? 'មើលទាំងអស់' : 'View All'}</span>
               <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -288,23 +435,48 @@ export const HomeView: React.FC = () => {
                   loading="lazy" 
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/35 to-transparent" />
-                <span className="absolute top-2 left-2 px-1.5 py-0.5 rounded-full bg-rose-600/95 text-white text-[9px] font-bold shadow-xs">
-                  {d.socialViews || 'Viral'}
-                </span>
+                
+                <div className="absolute top-2 left-2 flex items-center gap-1">
+                  <span className="px-1.5 py-0.5 rounded-full bg-rose-600/95 text-white text-[9px] font-black shadow-xs">
+                    {d.socialViews || 'Viral'}
+                  </span>
+                  {d.socialLikes && (
+                    <span className="px-1.5 py-0.5 rounded-full bg-black/60 text-rose-300 text-[8px] font-bold hidden sm:inline-block">
+                      ❤️ {d.socialLikes}
+                    </span>
+                  )}
+                </div>
+
                 <span className="absolute bottom-1 right-1.5 bg-black/60 text-white/80 text-[7px] px-1 rounded-xs font-khmer select-none">
                   {isKm ? 'រូបតំណាង' : 'Sample'}
                 </span>
+
                 <div className="absolute bottom-2 left-2 right-2">
                   <h4 className="font-bold text-white text-xs line-clamp-1 leading-snug drop-shadow">
                     {isKm ? d.nameKh : d.nameEn}
                   </h4>
-                  <p className="text-[9px] text-pink-300 font-mono truncate">
-                    {d.socialHashtag || d.provinceKh}
-                  </p>
+                  {d.reviewerQuoteKh ? (
+                    <p className="text-[9px] text-pink-200 italic line-clamp-1">
+                      "{d.reviewerQuoteKh}"
+                    </p>
+                  ) : (
+                    <p className="text-[9px] text-pink-300 font-mono truncate">
+                      {d.socialHashtag || d.provinceKh}
+                    </p>
+                  )}
                 </div>
               </div>
             ))}
           </div>
+
+          {/* Quick Bar to open all viral review spots */}
+          <button
+            onClick={() => setIsTrendingSocialModalOpen(true)}
+            className="w-full py-2.5 px-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-pink-200 hover:text-white text-xs font-bold transition flex items-center justify-center gap-1.5"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-pink-400" />
+            <span>{isKm ? 'ស្វែងយល់កន្លែងដើរលេងល្បីៗលើ TikTok & FB ទាំងអស់' : 'Explore All Trending Social Spots'}</span>
+          </button>
         </div>
       )}
 

@@ -2,11 +2,14 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
   X, Heart, Clock, Users, Flame, ChefHat, 
-  Share2, CheckCircle2, Circle, Volume2, Sparkles, Send
+  Share2, CheckCircle2, Circle, Volume2, Sparkles, Send, Bookmark
 } from 'lucide-react';
 
 export const FoodDetailModal: React.FC = () => {
-  const { selectedFood, setSelectedFood, language, isBookmarked, toggleBookmark, showToast } = useApp();
+  const { 
+    selectedFood, setSelectedFood, language, 
+    isBookmarked, toggleBookmark, showToast, openAddToWishlist 
+  } = useApp();
   const [checkedIngredients, setCheckedIngredients] = useState<Record<number, boolean>>({});
   const [isSpeaking, setIsSpeaking] = useState(false);
 
@@ -98,7 +101,25 @@ export const FoodDetailModal: React.FC = () => {
               <Volume2 className="w-4 h-4" />
             </button>
 
-            {/* Bookmark */}
+            {/* Bookmark to Wishlist */}
+            <button
+              onClick={() => openAddToWishlist({
+                id: selectedFood.id,
+                type: 'food',
+                nameKh: selectedFood.nameKh,
+                nameEn: selectedFood.nameEn,
+                photoUrl: selectedFood.photoUrl,
+                categoryKh: selectedFood.categoryKh,
+                priceDisplay: `${selectedFood.priceRiel.toLocaleString()} ៛`,
+                rating: selectedFood.rating,
+              })}
+              className="p-2.5 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur-md shadow transition active:scale-90 text-amber-300"
+              title="ដាក់ក្នុងបញ្ជីចង់ញ៉ាំ"
+            >
+              <Bookmark className="w-4 h-4 fill-current" />
+            </button>
+
+            {/* Favorite */}
             <button
               onClick={() => toggleBookmark(selectedFood.id)}
               className={`p-2.5 rounded-full backdrop-blur-md shadow transition active:scale-90 ${

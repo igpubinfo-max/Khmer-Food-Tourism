@@ -2,7 +2,8 @@ import React, { createContext, useContext, useState, useEffect, useRef } from 'r
 import { 
   User, FoodItem, Restaurant, TouristDestination, CommunityPost, 
   Language, UserRole, AppSettings, RegistrationTransaction,
-  RestaurantMenuItem, MembershipTier, isRestaurantPremiumActive
+  RestaurantMenuItem, MembershipTier, isRestaurantPremiumActive,
+  Wishlist, WishlistItem, TripPlan, AppNotification
 } from '../types';
 import { 
   initialUsers, initialFoods, initialRestaurants, 
@@ -127,6 +128,50 @@ interface AppContextType {
   isExitModalOpen: boolean;
   setIsExitModalOpen: (open: boolean) => void;
   exitAppNow: () => void;
+
+  // 6 Personalized Account Features & Wishlists
+  wishlists: Wishlist[];
+  createWishlist: (nameKh: string, nameEn?: string, emoji?: string) => void;
+  deleteWishlist: (id: string) => void;
+  addToWishlist: (wishlistId: string, item: Omit<WishlistItem, 'addedAt'>) => void;
+  removeFromWishlist: (wishlistId: string, itemId: string) => void;
+  isItemInWishlist: (itemId: string, wishlistId?: string) => boolean;
+
+  // AI Trip Planner
+  tripPlans: TripPlan[];
+  saveTripPlan: (plan: TripPlan) => void;
+  deleteTripPlan: (id: string) => void;
+  generateAiTripPlan: (provinceKh: string, durationDays: number, budgetLevel: 'budget' | 'medium' | 'luxury', companion: 'solo' | 'couple' | 'friends' | 'family') => TripPlan;
+
+  // Helpful Notifications
+  notifications: AppNotification[];
+  notificationsEnabled: boolean;
+  setNotificationsEnabled: (enabled: boolean) => void;
+  markNotificationAsRead: (id: string) => void;
+  markAllNotificationsAsRead: () => void;
+  clearAllNotifications: () => void;
+  unreadNotificationsCount: number;
+
+  // Account Feature Modals
+  isWhatToEatModalOpen: boolean;
+  setIsWhatToEatModalOpen: (open: boolean) => void;
+  isNearMeModalOpen: boolean;
+  setIsNearMeModalOpen: (open: boolean) => void;
+  isDailyDiscoveriesModalOpen: boolean;
+  setIsDailyDiscoveriesModalOpen: (open: boolean) => void;
+  isWishlistsModalOpen: boolean;
+  setIsWishlistsModalOpen: (open: boolean) => void;
+  isAiTripPlannerModalOpen: boolean;
+  setIsAiTripPlannerModalOpen: (open: boolean) => void;
+  isNotificationsModalOpen: boolean;
+  setIsNotificationsModalOpen: (open: boolean) => void;
+  isTrendingSocialModalOpen: boolean;
+  setIsTrendingSocialModalOpen: (open: boolean) => void;
+
+  // Quick Wishlist Add Helper
+  targetWishlistItem: WishlistItem | null;
+  setTargetWishlistItem: (item: WishlistItem | null) => void;
+  openAddToWishlist: (item: { id: string; type: 'food' | 'restaurant' | 'destination'; nameKh: string; nameEn: string; photoUrl: string; categoryKh?: string; provinceKh?: string; priceDisplay?: string; rating?: number }) => void;
   
   // Search & Filter
   searchQuery: string;
@@ -423,6 +468,205 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
   const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
   const [isExitModalOpen, setIsExitModalOpen] = useState(false);
+
+  // 6 Personalized Account Features Modals
+  const [isWhatToEatModalOpen, setIsWhatToEatModalOpen] = useState(false);
+  const [isNearMeModalOpen, setIsNearMeModalOpen] = useState(false);
+  const [isDailyDiscoveriesModalOpen, setIsDailyDiscoveriesModalOpen] = useState(false);
+  const [isWishlistsModalOpen, setIsWishlistsModalOpen] = useState(false);
+  const [isAiTripPlannerModalOpen, setIsAiTripPlannerModalOpen] = useState(false);
+  const [isNotificationsModalOpen, setIsNotificationsModalOpen] = useState(false);
+  const [isTrendingSocialModalOpen, setIsTrendingSocialModalOpen] = useState(false);
+  const [targetWishlistItem, setTargetWishlistItem] = useState<WishlistItem | null>(null);
+
+  // Personalized Wishlists
+  const defaultWishlistsTemplate: Wishlist[] = [
+    {
+      id: 'wl-default-1',
+      userId: currentUser?.id || 'guest',
+      nameKh: 'ហាងដែលចង់សាក',
+      nameEn: 'Restaurants to Try',
+      emoji: '🍽️',
+      isDefault: true,
+      items: [
+        {
+          id: 'rest-1',
+          type: 'restaurant',
+          nameKh: 'ភោជនីយដ្ឋាន ម៉ាលីស (Malis)',
+          nameEn: 'Malis Restaurant',
+          photoUrl: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80',
+          categoryKh: 'ម្ហូបខ្មែរបុរាណប្រណិត',
+          provinceKh: 'រាជធានីភ្នំពេញ',
+          priceDisplay: '$$$',
+          rating: 4.9,
+          addedAt: '2026-10-21',
+        },
+      ],
+      createdAt: '2026-10-21',
+    },
+    {
+      id: 'wl-default-2',
+      userId: currentUser?.id || 'guest',
+      nameKh: 'កន្លែងទៅជាមួយគ្រួសារ',
+      nameEn: 'Family Trip Spots',
+      emoji: '👨‍👩‍👧‍👦',
+      isDefault: true,
+      items: [
+        {
+          id: 'dest-9',
+          type: 'destination',
+          nameKh: 'ប្រាសាទអង្គរវត្ត (បេតិកភណ្ឌពិភពលោក)',
+          nameEn: 'Angkor Wat Temple',
+          photoUrl: 'https://images.unsplash.com/photo-1569154941061-e231b4725ef1?w=800&auto=format&fit=crop&q=80',
+          categoryKh: 'ប្រាសាទបុរាណ / បេតិកភណ្ឌ',
+          provinceKh: 'ខេត្តសៀមរាប',
+          rating: 5.0,
+          addedAt: '2026-10-21',
+        },
+      ],
+      createdAt: '2026-10-21',
+    },
+    {
+      id: 'wl-default-3',
+      userId: currentUser?.id || 'guest',
+      nameKh: 'កន្លែងចង់ទៅថ្ងៃអាទិត្យ',
+      nameEn: 'Sunday Hangouts',
+      emoji: '☀️',
+      isDefault: true,
+      items: [
+        {
+          id: 'dest-29',
+          type: 'destination',
+          nameKh: 'ឧទ្យានជាតិព្រះមុនីវង្សបូកគោ',
+          nameEn: 'Preah Monivong Bokor National Park',
+          photoUrl: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&auto=format&fit=crop&q=80',
+          categoryKh: 'ភ្នំ & ឧទ្យានជាតិ',
+          provinceKh: 'ខេត្តកំពត',
+          rating: 4.8,
+          addedAt: '2026-10-21',
+        },
+      ],
+      createdAt: '2026-10-21',
+    },
+  ];
+
+  const [wishlists, setWishlists] = useState<Wishlist[]>(() => {
+    try {
+      const storageKey = `kft_wishlists_v2_${currentUser?.id || 'guest'}`;
+      const saved = localStorage.getItem(storageKey);
+      if (saved && saved !== 'undefined' && saved !== 'null') {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {
+      console.warn('Failed to parse wishlists', e);
+    }
+    return defaultWishlistsTemplate;
+  });
+
+  // User Trip Plans
+  const [tripPlans, setTripPlans] = useState<TripPlan[]>(() => {
+    try {
+      const storageKey = `kft_trip_plans_v1_${currentUser?.id || 'guest'}`;
+      const saved = localStorage.getItem(storageKey);
+      if (saved && saved !== 'undefined' && saved !== 'null') {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch (e) {
+      console.warn('Failed to parse trip plans', e);
+    }
+    return [];
+  });
+
+  // Helpful Notifications
+  const defaultNotificationsList: AppNotification[] = [
+    {
+      id: 'notif-1',
+      titleKh: 'ប្រូម៉ូសិនពិសេស VIP 15%',
+      titleEn: 'VIP Partner 15% Discount',
+      messageKh: 'ភោជនីយដ្ឋាន គីមលី កំពត-កែប ចុះ 15% សម្រាប់សមាជិក App នៅចុងសប្តាហ៍នេះ!',
+      messageEn: 'Kimly Restaurant Kampot-Kep offers 15% off for App members this weekend!',
+      type: 'promo',
+      date: '2026-10-21',
+      isRead: false,
+      targetType: 'restaurant',
+      targetId: 'rest-1',
+      discountPercent: 15,
+    },
+    {
+      id: 'notif-2',
+      titleKh: 'កន្លែង Review ល្បីថ្មីលើ TikTok & FB',
+      titleEn: 'Trending Viral Spot on TikTok & FB',
+      messageKh: 'ខ្នងផ្សារ និងទឹកធ្លាក់ប៊ូស្រា កំពុងមានការ Review យ៉ាងកក្រើកលើ TikTok & Facebook!',
+      messageEn: 'Knong Phsar and Bousra Waterfall are viral sensation spots right now!',
+      type: 'new_spot',
+      date: '2026-10-20',
+      isRead: false,
+      targetType: 'destination',
+      targetId: 'dest-92',
+    },
+    {
+      id: 'notif-3',
+      titleKh: 'មុខម្ហូបខ្មែរឆ្នើមប្រចាំថ្ងៃ',
+      titleEn: 'Daily Authentic Dish Pick',
+      messageKh: 'ថ្ងៃនេះសាកល្បងភ្លក្ស "អាម៉ុកត្រីអន្លក់ស្លឹកញ" រសជាតិដើមខ្មែរពិតៗ!',
+      messageEn: 'Try authentic Cambodian Fish Amok with Noni leaves today!',
+      type: 'discount',
+      date: '2026-10-19',
+      isRead: true,
+      targetType: 'food',
+      targetId: 'food-1',
+    },
+  ];
+
+  const [notifications, setNotifications] = useState<AppNotification[]>(() => {
+    try {
+      const saved = localStorage.getItem('kft_notifications_v1');
+      if (saved && saved !== 'undefined' && saved !== 'null') {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {
+      console.warn('Failed to parse notifications', e);
+    }
+    return defaultNotificationsList;
+  });
+
+  const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem('kft_notifications_enabled_v1');
+      if (saved !== null) return saved === 'true';
+    } catch {}
+    return true;
+  });
+
+  // Sync wishlists, trip plans & notifications to localStorage
+  useEffect(() => {
+    try {
+      const storageKey = `kft_wishlists_v2_${currentUser?.id || 'guest'}`;
+      localStorage.setItem(storageKey, JSON.stringify(wishlists));
+    } catch {}
+  }, [wishlists, currentUser]);
+
+  useEffect(() => {
+    try {
+      const storageKey = `kft_trip_plans_v1_${currentUser?.id || 'guest'}`;
+      localStorage.setItem(storageKey, JSON.stringify(tripPlans));
+    } catch {}
+  }, [tripPlans, currentUser]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('kft_notifications_v1', JSON.stringify(notifications));
+    } catch {}
+  }, [notifications]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('kft_notifications_enabled_v1', String(notificationsEnabled));
+    } catch {}
+  }, [notificationsEnabled]);
 
   // Global search & filters
   const [searchQuery, setSearchQuery] = useState('');
@@ -1369,6 +1613,195 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
   };
 
+  // Wishlist methods
+  const createWishlist = (nameKh: string, nameEn?: string, emoji: string = '📌') => {
+    const newWl: Wishlist = {
+      id: `wl-${Date.now()}`,
+      userId: currentUser?.id || 'guest',
+      nameKh,
+      nameEn: nameEn || nameKh,
+      emoji,
+      items: [],
+      createdAt: new Date().toISOString(),
+    };
+    setWishlists(prev => [newWl, ...prev]);
+    showToast(language === 'km' ? `បានបង្កើតបញ្ជី «${nameKh}»` : `Created list "${nameKh}"`, 'success');
+  };
+
+  const deleteWishlist = (id: string) => {
+    setWishlists(prev => prev.filter(w => w.id !== id));
+    showToast(language === 'km' ? 'បានលុបបញ្ជីជោគជ័យ' : 'List deleted', 'info');
+  };
+
+  const addToWishlist = (wishlistId: string, item: Omit<WishlistItem, 'addedAt'>) => {
+    setWishlists(prev => prev.map(w => {
+      if (w.id !== wishlistId) return w;
+      if (w.items.some(i => i.id === item.id)) {
+        return w;
+      }
+      return {
+        ...w,
+        items: [{ ...item, addedAt: new Date().toISOString() }, ...w.items],
+      };
+    }));
+    showToast(language === 'km' ? `បានបញ្ចូល «${item.nameKh}» ទៅក្នុងបញ្ជី!` : `Added "${item.nameEn || item.nameKh}" to list!`, 'success');
+  };
+
+  const removeFromWishlist = (wishlistId: string, itemId: string) => {
+    setWishlists(prev => prev.map(w => {
+      if (w.id !== wishlistId) return w;
+      return {
+        ...w,
+        items: w.items.filter(i => i.id !== itemId),
+      };
+    }));
+    showToast(language === 'km' ? 'បានដកចេញពីបញ្ជី' : 'Removed from list', 'info');
+  };
+
+  const isItemInWishlist = (itemId: string, wishlistId?: string): boolean => {
+    if (wishlistId) {
+      const target = wishlists.find(w => w.id === wishlistId);
+      return Boolean(target?.items.some(i => i.id === itemId));
+    }
+    return wishlists.some(w => w.items.some(i => i.id === itemId));
+  };
+
+  const openAddToWishlist = (item: { 
+    id: string; 
+    type: 'food' | 'restaurant' | 'destination'; 
+    nameKh: string; 
+    nameEn: string; 
+    photoUrl: string; 
+    categoryKh?: string; 
+    provinceKh?: string; 
+    priceDisplay?: string; 
+    rating?: number 
+  }) => {
+    setTargetWishlistItem({
+      ...item,
+      addedAt: new Date().toISOString(),
+    });
+    setIsWishlistsModalOpen(true);
+  };
+
+  // AI Trip Planner methods
+  const saveTripPlan = (plan: TripPlan) => {
+    setTripPlans(prev => [plan, ...prev.filter(p => p.id !== plan.id)]);
+    showToast(language === 'km' ? 'បានរក្សាទុកផែនការដើរលេង!' : 'Trip plan saved!', 'success');
+  };
+
+  const deleteTripPlan = (id: string) => {
+    setTripPlans(prev => prev.filter(p => p.id !== id));
+    showToast(language === 'km' ? 'បានលុបផែនការដើរលេង' : 'Trip plan deleted', 'info');
+  };
+
+  const generateAiTripPlan = (
+    provinceKh: string, 
+    durationDays: number, 
+    budgetLevel: 'budget' | 'medium' | 'luxury', 
+    companion: 'solo' | 'couple' | 'friends' | 'family'
+  ): TripPlan => {
+    const provDestinations = destinations.filter(d => d.provinceKh.includes(provinceKh) || provinceKh.includes(d.provinceKh));
+    const poolDest = provDestinations.length > 0 ? provDestinations : destinations;
+    
+    const provRestaurants = restaurants.filter(r => r.provinceKh.includes(provinceKh) || provinceKh.includes(r.provinceKh));
+    const poolRest = provRestaurants.length > 0 ? provRestaurants : restaurants;
+    
+    const days: any[] = [];
+    const costPerDay = budgetLevel === 'budget' ? 35 : budgetLevel === 'medium' ? 75 : 160;
+
+    for (let i = 1; i <= durationDays; i++) {
+      const dest1 = poolDest[(i * 2 - 2) % poolDest.length];
+      const dest2 = poolDest[(i * 2 - 1) % poolDest.length];
+      const rest1 = poolRest[(i * 2 - 2) % poolRest.length];
+      const rest2 = poolRest[(i * 2 - 1) % poolRest.length];
+      const foodPick = foods[(i * 3) % foods.length];
+
+      days.push({
+        dayNumber: i,
+        titleKh: `ថ្ងៃទី ${i}៖ ដំណើរកម្សាន្ត និងស្វែងយល់រសជាតិនៅ${provinceKh}`,
+        titleEn: `Day ${i}: Exploring & Dining in ${provinceKh}`,
+        dayEstimatedCostUsd: costPerDay,
+        activities: [
+          {
+            timePeriod: 'morning',
+            titleKh: 'ពេលព្រឹក៖ ទស្សនាទីតាំងទេសចរណ៍ និងថតរូបអនុស្សាវរីយ៍',
+            titleEn: 'Morning: Scenic Sightseeing & Photography',
+            descKh: `ទស្សនាកម្សាន្តនៅ «${dest1.nameKh}» រីករាយជាមួយទេសភាពស្រស់ត្រកាល និងខ្យល់អាកាសបរិសុទ្ធ។`,
+            descEn: `Visit ${dest1.nameEn} and enjoy scenic panoramic views.`,
+            placeNameKh: dest1.nameKh,
+            photoUrl: dest1.photoUrl,
+            estimatedCostUsd: budgetLevel === 'budget' ? 5 : 15,
+          },
+          {
+            timePeriod: 'lunch',
+            titleKh: 'ពេលថ្ងៃត្រង់៖ អាហារថ្ងៃត្រង់រសជាតិដើមខ្មែរឆ្ងាញ់ពិសា',
+            titleEn: 'Lunch: Authentic Local Cuisine',
+            descKh: `ពិសាអាហារថ្ងៃត្រង់នៅ «${rest1.nameKh}» ភ្លក្សម្ហូបពិសេស ${rest1.signatureDishesKh?.[0] || foodPick.nameKh}។`,
+            descEn: `Enjoy lunch at ${rest1.nameEn}.`,
+            placeNameKh: rest1.nameKh,
+            dishNameKh: rest1.signatureDishesKh?.[0] || foodPick.nameKh,
+            photoUrl: rest1.photoUrl,
+            estimatedCostUsd: budgetLevel === 'budget' ? 10 : 25,
+          },
+          {
+            timePeriod: 'afternoon',
+            titleKh: 'ពេលរសៀល៖ ផ្សងព្រេង និងទស្សនាកន្លែងល្បីប្រចាំតំបន់',
+            titleEn: 'Afternoon: Adventure & Highlights',
+            descKh: `បន្តដំណើរទៅកាន់ «${dest2.nameKh}» ថតរូប Review ចែករំលែកលើ TikTok/Facebook។`,
+            descEn: `Explore ${dest2.nameEn}.`,
+            placeNameKh: dest2.nameKh,
+            photoUrl: dest2.photoUrl,
+            estimatedCostUsd: budgetLevel === 'budget' ? 5 : 15,
+          },
+          {
+            timePeriod: 'dinner',
+            titleKh: 'ពេលល្ងាច៖ អាហារពេលរាត្រី និងសម្រាកលម្ហែកាយ',
+            titleEn: 'Dinner: Evening Dining & Relaxation',
+            descKh: `អាហារពេលល្ងាចនៅ «${rest2.nameKh}» ជាមួយបរិយាកាសកក់ក្តៅ និងម្ហូបឆ្ងាញ់ៗ។`,
+            descEn: `Dine at ${rest2.nameEn}.`,
+            placeNameKh: rest2.nameKh,
+            dishNameKh: rest2.signatureDishesKh?.[0] || 'ម្ហូបពិសេសប្រចាំហាង',
+            photoUrl: rest2.photoUrl,
+            estimatedCostUsd: budgetLevel === 'budget' ? 15 : 35,
+          },
+        ],
+      });
+    }
+
+    const generatedPlan: TripPlan = {
+      id: `plan-${Date.now()}`,
+      userId: currentUser?.id || 'guest',
+      provinceKh,
+      provinceEn: provinceKh,
+      durationDays,
+      budgetLevel,
+      companion,
+      totalEstimatedCostUsd: costPerDay * durationDays,
+      days,
+      createdAt: new Date().toISOString(),
+    };
+
+    return generatedPlan;
+  };
+
+  // Notifications methods
+  const markNotificationAsRead = (id: string) => {
+    setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
+  };
+
+  const markAllNotificationsAsRead = () => {
+    setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+    showToast(language === 'km' ? 'បានសម្គាល់ថាបានអានទាំងអស់' : 'Marked all as read', 'info');
+  };
+
+  const clearAllNotifications = () => {
+    setNotifications([]);
+    showToast(language === 'km' ? 'បានលុបការជូនដំណឹងទាំងអស់' : 'Cleared all notifications', 'info');
+  };
+
+  const unreadNotificationsCount = notificationsEnabled ? notifications.filter(n => !n.isRead).length : 0;
+
   const resetAllData = () => {
     setUsers(initialUsers);
     setCurrentUser(initialUsers[2]);
@@ -1471,6 +1904,46 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         toast,
         showToast,
         resetAllData,
+
+        // 6 Personalized Account Features & Wishlists
+        wishlists,
+        createWishlist,
+        deleteWishlist,
+        addToWishlist,
+        removeFromWishlist,
+        isItemInWishlist,
+        tripPlans,
+        saveTripPlan,
+        deleteTripPlan,
+        generateAiTripPlan,
+        notifications,
+        notificationsEnabled,
+        setNotificationsEnabled,
+        markNotificationAsRead,
+        markAllNotificationsAsRead,
+        clearAllNotifications,
+        unreadNotificationsCount,
+
+        // Modals
+        isWhatToEatModalOpen,
+        setIsWhatToEatModalOpen,
+        isNearMeModalOpen,
+        setIsNearMeModalOpen,
+        isDailyDiscoveriesModalOpen,
+        setIsDailyDiscoveriesModalOpen,
+        isWishlistsModalOpen,
+        setIsWishlistsModalOpen,
+        isAiTripPlannerModalOpen,
+        setIsAiTripPlannerModalOpen,
+        isNotificationsModalOpen,
+        setIsNotificationsModalOpen,
+        isTrendingSocialModalOpen,
+        setIsTrendingSocialModalOpen,
+
+        // Quick Wishlist Add Helper
+        targetWishlistItem,
+        setTargetWishlistItem,
+        openAddToWishlist,
       }}
     >
       {children}

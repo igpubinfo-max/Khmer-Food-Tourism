@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
   X, MapPin, Phone, Star, Clock, ExternalLink, 
-  Send, Share2, UtensilsCrossed, Sparkles, CheckCircle2, AlertCircle, Copy, Camera
+  Send, Share2, UtensilsCrossed, Sparkles, CheckCircle2, AlertCircle, Copy, Camera, Bookmark
 } from 'lucide-react';
 import { isRestaurantPremiumActive } from '../types';
 import { RestaurantImageModal } from './RestaurantImageModal';
@@ -20,7 +20,8 @@ export const RestaurantDetailModal: React.FC = () => {
     trackRestaurantCall,
     trackRestaurantMap,
     trackRestaurantShare,
-    updateRestaurant
+    updateRestaurant,
+    openAddToWishlist
   } = useApp();
 
   const [activePhoto, setActivePhoto] = useState<string>('');
@@ -107,6 +108,23 @@ export const RestaurantDetailModal: React.FC = () => {
           </button>
           
           <div className="flex items-center gap-2 pointer-events-auto">
+            <button
+              onClick={() => openAddToWishlist({
+                id: selectedRestaurant.id,
+                type: 'restaurant',
+                nameKh: selectedRestaurant.nameKh,
+                nameEn: selectedRestaurant.nameEn,
+                photoUrl: selectedRestaurant.photoUrl,
+                categoryKh: selectedRestaurant.provinceKh,
+                provinceKh: selectedRestaurant.provinceKh,
+                priceDisplay: selectedRestaurant.priceLevel,
+                rating: selectedRestaurant.rating,
+              })}
+              className="p-2.5 rounded-full bg-black/60 hover:bg-black/80 backdrop-blur-md text-white shadow transition active:scale-95 border border-white/20"
+              title={isKm ? 'ដាក់ក្នុងបញ្ជីចង់ទៅ' : 'Add to Wishlist'}
+            >
+              <Bookmark className="w-4 h-4 text-amber-300" />
+            </button>
             <button
               type="button"
               onClick={() => setIsImageModalOpen(true)}

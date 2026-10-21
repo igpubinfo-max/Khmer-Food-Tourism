@@ -149,6 +149,43 @@ const xxxhdpiIcon = path.resolve(__dirname, '../android/app/src/main/res/mipmap-
 assert(fs.existsSync(mdpiIcon) && fs.statSync(mdpiIcon).size > 0, 'Android mdpi icon exists and is non-empty.');
 assert(fs.existsSync(xxxhdpiIcon) && fs.statSync(xxxhdpiIcon).size > 0, 'Android xxxhdpi icon exists and is non-empty.');
 
+// TEST 21: Feature 1 - Home Screen Viral Review Spots on TikTok & Facebook
+const homeViewContent = fs.readFileSync(path.resolve(__dirname, '../src/components/HomeView.tsx'), 'utf8');
+assert(homeViewContent.includes('TikTok & FB Review') || homeViewContent.includes('កន្លែងដើរលេងល្បីលើ TikTok & FB'), 'Home screen contains dedicated TikTok & FB Review section.');
+assert(fs.existsSync(path.resolve(__dirname, '../src/components/TrendingSocialModal.tsx')), 'TrendingSocialModal component exists for viral review exploration.');
+
+// TEST 22: Feature 2A - ថ្ងៃនេះញ៉ាំអ្វី? (What to Eat Today? - High Priority)
+const whatToEatContent = fs.readFileSync(path.resolve(__dirname, '../src/components/WhatToEatModal.tsx'), 'utf8');
+assert(whatToEatContent.includes('ថ្ងៃនេះញ៉ាំអ្វី?'), 'WhatToEatModal contains Khmer title “ថ្ងៃនេះញ៉ាំអ្វី?”.');
+assert(whatToEatContent.includes('អាទិភាពខ្ពស់'), 'WhatToEatModal is flagged as High Priority (អាទិភាពខ្ពស់).');
+assert(whatToEatContent.includes('បង្ហាញម្ហូបផ្សេងទៀត'), 'WhatToEatModal contains «បង្ហាញម្ហូបផ្សេងទៀត» (Shuffle/Show Another) button.');
+
+// TEST 23: Feature 2B - នៅជិតខ្ញុំ (Near Me)
+const nearMeContent = fs.readFileSync(path.resolve(__dirname, '../src/components/NearMeModal.tsx'), 'utf8');
+assert(nearMeContent.includes('នៅជិតខ្ញុំ'), 'NearMeModal contains Khmer title “នៅជិតខ្ញុំ”.');
+assert(nearMeContent.includes('calculateDistanceKm') || nearMeContent.includes('គ.ម'), 'NearMeModal computes and displays distance in km.');
+assert(nearMeContent.includes('នាំផ្លូវ'), 'NearMeModal provides directions and navigation button (នាំផ្លូវ).');
+
+// TEST 24: Feature 2C - កន្លែងថ្មីប្រចាំថ្ងៃ (Daily Discoveries - ស្វែងយល់ថ្ងៃនេះ)
+const dailyContent = fs.readFileSync(path.resolve(__dirname, '../src/components/DailyDiscoveriesModal.tsx'), 'utf8');
+assert(dailyContent.includes('កន្លែងថ្មីប្រចាំថ្ងៃ'), 'DailyDiscoveriesModal contains Khmer title “កន្លែងថ្មីប្រចាំថ្ងៃ”.');
+assert(dailyContent.includes('ស្វែងយល់ថ្ងៃនេះ'), 'DailyDiscoveriesModal contains “ស្វែងយល់ថ្ងៃនេះ” daily curated rotation.');
+
+// TEST 25: Feature 2D - បញ្ជីកន្លែងដែលចង់ទៅ (Custom Wishlists)
+const wishlistsContent = fs.readFileSync(path.resolve(__dirname, '../src/components/WishlistsModal.tsx'), 'utf8');
+assert(wishlistsContent.includes('បញ្ជីកន្លែងដែលចង់ទៅ'), 'WishlistsModal contains Khmer title “បញ្ជីកន្លែងដែលចង់ទៅ”.');
+assert(appContextContent.includes('ហាងដែលចង់សាក') && appContextContent.includes('កន្លែងទៅជាមួយគ្រួសារ'), 'AppContext contains required default wishlists (ហាងដែលចង់សាក, កន្លែងទៅជាមួយគ្រួសារ, កន្លែងចង់ទៅថ្ងៃអាទិត្យ).');
+
+// TEST 26: Feature 2E - ផែនការដើរលេង AI (AI Automated Trip Planner)
+const aiTripPlannerContent = fs.readFileSync(path.resolve(__dirname, '../src/components/AiTripPlannerModal.tsx'), 'utf8');
+assert(aiTripPlannerContent.includes('ផែនការដើរលេង AI'), 'AiTripPlannerModal contains Khmer title “ផែនការដើរលេង AI”.');
+assert(appContextContent.includes('generateAiTripPlan'), 'AppContext contains automated AI trip plan generator function.');
+
+// TEST 27: Feature 2F - ការជូនដំណឹងដែលមានប្រយោជន៍ (Helpful Notifications with Toggle)
+const notificationsContent = fs.readFileSync(path.resolve(__dirname, '../src/components/NotificationsModal.tsx'), 'utf8');
+assert(notificationsContent.includes('ការជូនដំណឹងដែលមានប្រយោជន៍'), 'NotificationsModal contains Khmer title “ការជូនដំណឹងដែលមានប្រយោជន៍”.');
+assert(notificationsContent.includes('setNotificationsEnabled'), 'NotificationsModal provides user toggle switch to disable/enable notifications (អ្នកប្រើអាចបិទការជូនដំណឹងបាន).');
+
 console.log('\n================================================================');
 console.log(`  AUDIT SUMMARY: ${passCount} PASSED, ${failCount} FAILED`);
 console.log('================================================================\n');

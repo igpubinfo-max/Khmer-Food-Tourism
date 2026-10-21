@@ -2,14 +2,15 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
   X, Heart, MapPin, Calendar, Ticket, ExternalLink, 
-  Send, Share2, Sparkles, Compass, Camera
+  Send, Share2, Sparkles, Compass, Camera, Bookmark
 } from 'lucide-react';
 import { TouristImageModal } from './TouristImageModal';
 
 export const TouristDetailModal: React.FC = () => {
   const { 
     selectedDestination, setSelectedDestination, updateDestination,
-    language, isBookmarked, toggleBookmark, showToast, currentUser 
+    language, isBookmarked, toggleBookmark, showToast, currentUser,
+    openAddToWishlist
   } = useApp();
 
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
@@ -63,6 +64,23 @@ export const TouristDetailModal: React.FC = () => {
                 <span className="font-khmer">{language === 'km' ? 'ប្តូររូបភាព' : 'Change Photo'}</span>
               </button>
             )}
+
+            <button
+              onClick={() => openAddToWishlist({
+                id: selectedDestination.id,
+                type: 'destination',
+                nameKh: selectedDestination.nameKh,
+                nameEn: selectedDestination.nameEn,
+                photoUrl: selectedDestination.photoUrl,
+                categoryKh: selectedDestination.categoryKh,
+                provinceKh: selectedDestination.provinceKh,
+                rating: selectedDestination.rating,
+              })}
+              className="p-2.5 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur-md shadow transition active:scale-90 text-amber-300"
+              title={language === 'km' ? 'ដាក់ក្នុងបញ្ជីចង់ទៅ' : 'Add to Wishlist'}
+            >
+              <Bookmark className="w-4 h-4 fill-current" />
+            </button>
 
             <button
               onClick={() => toggleBookmark(selectedDestination.id)}

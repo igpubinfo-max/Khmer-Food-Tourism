@@ -5,7 +5,8 @@ import { TouristCard } from './TouristCard';
 import { PrivacyPolicyModal } from './PrivacyPolicyModal';
 import { 
   User as UserIcon, Heart, Shield, Store, 
-  Globe, LogOut, RefreshCw, Download, Sparkles, UtensilsCrossed, ShieldCheck 
+  Globe, LogOut, RefreshCw, Download, Sparkles, UtensilsCrossed, ShieldCheck,
+  Bot, Bell, Compass, Calendar, Bookmark, Plus, MapPin, Trash2, Share2, Tag, Utensils, ChevronRight
 } from 'lucide-react';
 import { isRestaurantPremiumActive } from '../types';
 
@@ -13,16 +14,21 @@ export const ProfileView: React.FC = () => {
   const { 
     currentUser, users, login, logout, language, setLanguage, 
     bookmarks, foods, destinations, posts, restaurants,
+    wishlists, tripPlans, deleteTripPlan, notifications, notificationsEnabled, setNotificationsEnabled,
+    unreadNotificationsCount, setIsWhatToEatModalOpen, setIsNearMeModalOpen,
+    setIsDailyDiscoveriesModalOpen, setIsWishlistsModalOpen, setIsAiTripPlannerModalOpen,
+    setIsNotificationsModalOpen, setIsTrendingSocialModalOpen,
     setIsAuthModalOpen, setIsAdminOpen, setIsAdminLoginModalOpen,
     setIsInstallModalOpen, setIsSupportModalOpen, setIsAddRestaurantModalOpen,
     setManagingRestaurant, setIsManageMenuModalOpen,
+    setSelectedFood, setSelectedRestaurant, setSelectedDestination,
     resetAllData, showToast 
   } = useApp();
 
   const isKm = language === 'km';
   const isOwner = currentUser?.role === 'owner';
-  const [activeSubTab, setActiveSubTab] = useState<'bookmarks' | 'myposts' | 'settings' | 'myrestaurant'>(
-    isOwner ? 'myrestaurant' : 'bookmarks'
+  const [activeSubTab, setActiveSubTab] = useState<'bookmarks' | 'wishlists' | 'tripplans' | 'myposts' | 'settings' | 'myrestaurant'>(
+    isOwner ? 'myrestaurant' : 'wishlists'
   );
   const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState(false);
 
@@ -157,35 +163,164 @@ export const ProfileView: React.FC = () => {
         </button>
       </div>
 
-      {/* Tabs: My Restaurant (for owners) / Bookmarks / My Posts / Settings */}
+      {/* 6 Personalized Account Features Hub */}
+      <div className="p-4 rounded-3xl bg-gradient-to-br from-emerald-950 via-[#064E3B] to-slate-900 text-white border border-emerald-500/40 shadow-xs space-y-3 font-khmer">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping" />
+            <h3 className="font-moul text-xs sm:text-sm text-white">
+              {isKm ? 'សេវាកម្មផ្ទាល់ខ្លួន (Personal Features)' : 'Personalized Features'}
+            </h3>
+          </div>
+          <span className="text-[10px] text-emerald-200">
+            {currentUser ? currentUser.name : (isKm ? 'ភ្ញៀវ' : 'Guest')}
+          </span>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2">
+          {/* A. ថ្ងៃនេះញ៉ាំអ្វី? */}
+          <button
+            onClick={() => setIsWhatToEatModalOpen(true)}
+            className="p-2.5 rounded-2xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/40 text-left transition"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-lg">🍲</span>
+              <span className="px-1.5 py-0.2 rounded-full bg-amber-400 text-stone-900 text-[8px] font-black">
+                {isKm ? 'អាទិភាពខ្ពស់ ⭐' : 'High Priority'}
+              </span>
+            </div>
+            <div className="text-xs font-bold text-white mt-1">
+              {isKm ? 'ថ្ងៃនេះញ៉ាំអ្វី?' : 'What to Eat Today?'}
+            </div>
+          </button>
+
+          {/* B. នៅជិតខ្ញុំ */}
+          <button
+            onClick={() => setIsNearMeModalOpen(true)}
+            className="p-2.5 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/15 text-left transition"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-lg">📍</span>
+              <span className="text-[9px] font-mono text-emerald-300 font-bold">GPS</span>
+            </div>
+            <div className="text-xs font-bold text-white mt-1">
+              {isKm ? 'នៅជិតខ្ញុំ' : 'Near Me'}
+            </div>
+          </button>
+
+          {/* C. កន្លែងថ្មីប្រចាំថ្ងៃ */}
+          <button
+            onClick={() => setIsDailyDiscoveriesModalOpen(true)}
+            className="p-2.5 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/15 text-left transition"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-lg">✨</span>
+              <span className="text-[8px] text-amber-300 font-bold">Daily</span>
+            </div>
+            <div className="text-xs font-bold text-white mt-1">
+              {isKm ? 'កន្លែងថ្មីប្រចាំថ្ងៃ' : 'Daily Picks'}
+            </div>
+          </button>
+
+          {/* D. បញ្ជីកន្លែងដែលចង់ទៅ */}
+          <button
+            onClick={() => setIsWishlistsModalOpen(true)}
+            className="p-2.5 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/15 text-left transition"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-lg">📑</span>
+              <span className="text-[9px] text-emerald-300 font-bold">{wishlists.length}</span>
+            </div>
+            <div className="text-xs font-bold text-white mt-1">
+              {isKm ? 'បញ្ជីកន្លែងចង់ទៅ' : 'My Wishlists'}
+            </div>
+          </button>
+
+          {/* E. ផែនការដើរលេង AI */}
+          <button
+            onClick={() => setIsAiTripPlannerModalOpen(true)}
+            className="p-2.5 rounded-2xl bg-teal-500/20 hover:bg-teal-500/30 border border-teal-400/30 text-left transition"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-lg">🤖</span>
+              <span className="text-[8px] text-teal-300 font-bold">Smart AI</span>
+            </div>
+            <div className="text-xs font-bold text-white mt-1">
+              {isKm ? 'ផែនការដើរលេង AI' : 'AI Trip Planner'}
+            </div>
+          </button>
+
+          {/* F. ការជូនដំណឹង */}
+          <button
+            onClick={() => setIsNotificationsModalOpen(true)}
+            className="p-2.5 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/15 text-left transition relative"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-lg">🔔</span>
+              {unreadNotificationsCount > 0 && (
+                <span className="px-1.5 py-0.2 rounded-full bg-rose-500 text-white text-[8px] font-black">
+                  {unreadNotificationsCount}
+                </span>
+              )}
+            </div>
+            <div className="text-xs font-bold text-white mt-1">
+              {isKm ? 'ការជូនដំណឹង' : 'Notifications'}
+            </div>
+          </button>
+        </div>
+      </div>
+
+      {/* Tabs: My Restaurant (for owners) / Wishlists / Saved / Trip Plans / My Posts / Settings */}
       <div className="flex border-b border-slate-200 dark:border-slate-700 text-xs font-khmer overflow-x-auto no-scrollbar">
         {isOwner && (
           <button
             onClick={() => setActiveSubTab('myrestaurant')}
-            className={`flex-1 py-2.5 font-bold text-center border-b-2 transition whitespace-nowrap px-2 ${
+            className={`py-2.5 font-bold text-center border-b-2 transition whitespace-nowrap px-3 ${
               activeSubTab === 'myrestaurant'
                 ? 'border-[#064E3B] text-[#064E3B] dark:border-emerald-400 dark:text-emerald-400'
                 : 'border-transparent text-slate-400 hover:text-slate-700'
             }`}
           >
-            {isKm ? '🏪 ហាងរបស់ខ្ញុំ' : '🏪 My Restaurant'}
+            {isKm ? '🏪 ហាងខ្ញុំ' : '🏪 Shop'}
           </button>
         )}
 
         <button
+          onClick={() => setActiveSubTab('wishlists')}
+          className={`py-2.5 font-bold text-center border-b-2 transition whitespace-nowrap px-3 ${
+            activeSubTab === 'wishlists'
+              ? 'border-[#064E3B] text-[#064E3B] dark:border-emerald-400 dark:text-emerald-400'
+              : 'border-transparent text-slate-400 hover:text-slate-700'
+          }`}
+        >
+          {isKm ? `📑 បញ្ជីចង់ទៅ (${wishlists.length})` : `Lists (${wishlists.length})`}
+        </button>
+
+        <button
+          onClick={() => setActiveSubTab('tripplans')}
+          className={`py-2.5 font-bold text-center border-b-2 transition whitespace-nowrap px-3 ${
+            activeSubTab === 'tripplans'
+              ? 'border-[#064E3B] text-[#064E3B] dark:border-emerald-400 dark:text-emerald-400'
+              : 'border-transparent text-slate-400 hover:text-slate-700'
+          }`}
+        >
+          {isKm ? `🤖 ផែនការ AI (${tripPlans.length})` : `Plans (${tripPlans.length})`}
+        </button>
+
+        <button
           onClick={() => setActiveSubTab('bookmarks')}
-          className={`flex-1 py-2.5 font-bold text-center border-b-2 transition whitespace-nowrap px-2 ${
+          className={`py-2.5 font-bold text-center border-b-2 transition whitespace-nowrap px-3 ${
             activeSubTab === 'bookmarks'
               ? 'border-[#064E3B] text-[#064E3B] dark:border-emerald-400 dark:text-emerald-400'
               : 'border-transparent text-slate-400 hover:text-slate-700'
           }`}
         >
-          {isKm ? `ចំណូលចិត្ត (${bookmarks.length})` : `Saved (${bookmarks.length})`}
+          {isKm ? `❤️ ចំណូលចិត្ត (${bookmarks.length})` : `Saved (${bookmarks.length})`}
         </button>
 
         <button
           onClick={() => setActiveSubTab('myposts')}
-          className={`flex-1 py-2.5 font-bold text-center border-b-2 transition whitespace-nowrap px-2 ${
+          className={`py-2.5 font-bold text-center border-b-2 transition whitespace-nowrap px-3 ${
             activeSubTab === 'myposts'
               ? 'border-[#064E3B] text-[#064E3B] dark:border-emerald-400 dark:text-emerald-400'
               : 'border-transparent text-slate-400 hover:text-slate-600'
@@ -196,7 +331,7 @@ export const ProfileView: React.FC = () => {
 
         <button
           onClick={() => setActiveSubTab('settings')}
-          className={`flex-1 py-2.5 font-bold text-center border-b-2 transition whitespace-nowrap px-2 ${
+          className={`py-2.5 font-bold text-center border-b-2 transition whitespace-nowrap px-3 ${
             activeSubTab === 'settings'
               ? 'border-[#064E3B] text-[#064E3B] dark:border-emerald-400 dark:text-emerald-400'
               : 'border-transparent text-slate-400 hover:text-slate-600'
@@ -328,6 +463,121 @@ export const ProfileView: React.FC = () => {
         </div>
       )}
 
+      {/* Tab: Wishlists (បញ្ជីកន្លែងដែលចង់ទៅ) */}
+      {activeSubTab === 'wishlists' && (
+        <div className="space-y-3 font-khmer">
+          <div className="flex items-center justify-between">
+            <h4 className="font-bold text-xs text-[#0F172A] dark:text-white">
+              {isKm ? `បញ្ជីផ្ទាល់ខ្លួនសរុប (${wishlists.length})` : `My Wishlists (${wishlists.length})`}
+            </h4>
+            <button
+              onClick={() => setIsWishlistsModalOpen(true)}
+              className="flex items-center gap-1 px-3 py-1.5 bg-[#064E3B] text-white rounded-xl text-xs font-bold shadow-xs hover:bg-[#047857] transition"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>{isKm ? 'គ្រប់គ្រងបញ្ជី' : 'Manage Lists'}</span>
+            </button>
+          </div>
+
+          <div className="space-y-2.5">
+            {wishlists.map(w => (
+              <div
+                key={w.id}
+                onClick={() => setIsWishlistsModalOpen(true)}
+                className="p-3 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/90 dark:border-slate-700 shadow-xs flex items-center justify-between cursor-pointer hover:border-emerald-500 transition"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">{w.emoji}</span>
+                  <div>
+                    <h5 className="font-bold text-xs sm:text-sm text-[#0F172A] dark:text-white">
+                      {isKm ? w.nameKh : w.nameEn}
+                    </h5>
+                    <p className="text-[10px] text-slate-500">
+                      {isKm ? `${w.items.length} ទីតាំង / មុខម្ហូបក្នុងបញ្ជី` : `${w.items.length} items`}
+                    </p>
+                  </div>
+                </div>
+                <ChevronRight className="w-4 h-4 text-slate-400" />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Tab: AI Trip Plans (ផែនការដើរលេង AI) */}
+      {activeSubTab === 'tripplans' && (
+        <div className="space-y-3 font-khmer">
+          <div className="flex items-center justify-between">
+            <h4 className="font-bold text-xs text-[#0F172A] dark:text-white">
+              {isKm ? `ផែនការដើរលេងដែលបានរក្សាទុក (${tripPlans.length})` : `Saved AI Trip Plans (${tripPlans.length})`}
+            </h4>
+            <button
+              onClick={() => setIsAiTripPlannerModalOpen(true)}
+              className="flex items-center gap-1 px-3 py-1.5 bg-[#064E3B] text-white rounded-xl text-xs font-bold shadow-xs hover:bg-[#047857] transition"
+            >
+              <Bot className="w-3.5 h-3.5" />
+              <span>{isKm ? '+ បង្កើតថ្មី' : '+ New Plan'}</span>
+            </button>
+          </div>
+
+          {tripPlans.length === 0 ? (
+            <div className="text-center py-8 bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 p-6 space-y-3 shadow-xs">
+              <Bot className="w-10 h-10 mx-auto text-[#059669]" />
+              <div>
+                <h4 className="font-bold text-xs text-[#0F172A] dark:text-white">
+                  {isKm ? 'មិនទាន់មានផែនការដើរលេងនៅឡើយទេ' : 'No saved trip plans yet'}
+                </h4>
+                <p className="text-[10px] text-slate-500 mt-1">
+                  {isKm ? 'ឱ្យ AI រៀបចំកាលវិភាគ ហាងញ៉ាំអាហារ និងកន្លែងដើរលេងដោយស្វ័យប្រវត្តិតាមថវិកា!' : 'Let AI automate your itinerary and food spots!'}
+                </p>
+              </div>
+              <button
+                onClick={() => setIsAiTripPlannerModalOpen(true)}
+                className="px-4 py-2 rounded-xl bg-[#064E3B] text-white font-bold text-xs shadow-xs hover:bg-[#047857] transition"
+              >
+                {isKm ? '🤖 បង្កើតផែនការដើរលេងឥឡូវនេះ' : 'Generate AI Plan'}
+              </button>
+            </div>
+          ) : (
+            tripPlans.map(plan => (
+              <div
+                key={plan.id}
+                className="p-3.5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/90 dark:border-slate-700 shadow-xs space-y-2"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-[#064E3B] text-[10px] font-bold">
+                    📍 {plan.provinceKh}
+                  </span>
+                  <button
+                    onClick={() => deleteTripPlan(plan.id)}
+                    className="p-1 text-slate-400 hover:text-rose-500 rounded-lg"
+                    title={isKm ? 'លុប' : 'Delete'}
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-bold text-[#0F172A] dark:text-white">
+                    {plan.durationDays} ថ្ងៃ • {plan.companion}
+                  </span>
+                  <span className="font-mono text-emerald-600 font-bold">
+                    ~${plan.totalEstimatedCostUsd} USD
+                  </span>
+                </div>
+
+                <button
+                  onClick={() => setIsAiTripPlannerModalOpen(true)}
+                  className="w-full py-1.5 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold hover:bg-slate-200 transition"
+                >
+                  {isKm ? 'មើលកាលវិភាគលម្អិត' : 'View Full Schedule'}
+                </button>
+              </div>
+            ))
+          )}
+        </div>
+      )}
+
       {/* Tab: Bookmarks */}
       {activeSubTab === 'bookmarks' && (
         <div className="space-y-4">
@@ -401,6 +651,31 @@ export const ProfileView: React.FC = () => {
               className="px-3 py-1 rounded-xl bg-slate-100 dark:bg-slate-700 text-[#0F172A] dark:text-slate-200 font-bold border border-slate-200 dark:border-slate-600"
             >
               {isKm ? 'ភាសាខ្មែរ (Khmer)' : 'English'}
+            </button>
+          </div>
+
+          {/* Helpful Notifications Toggle */}
+          <div className="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-700">
+            <div>
+              <span className="font-medium text-[#0F172A] dark:text-slate-200 flex items-center gap-2">
+                <Bell className="w-4 h-4 text-[#059669]" />
+                {isKm ? 'ការជូនដំណឹង (Notifications)' : 'Notifications'}
+              </span>
+              <p className="text-[10px] text-slate-500 pl-6">
+                {isKm ? 'ជូនដំណឹងអំពីប្រូម៉ូសិនហាង និងកន្លែងថ្មី' : 'Receive promo alerts & viral new spots'}
+              </p>
+            </div>
+            <button
+              onClick={() => setNotificationsEnabled(!notificationsEnabled)}
+              className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors duration-200 cursor-pointer ${
+                notificationsEnabled ? 'bg-[#064E3B]' : 'bg-slate-300 dark:bg-slate-600'
+              }`}
+            >
+              <div
+                className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-200 ${
+                  notificationsEnabled ? 'translate-x-5' : 'translate-x-0'
+                }`}
+              />
             </button>
           </div>
 

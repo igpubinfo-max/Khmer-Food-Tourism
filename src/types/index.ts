@@ -195,8 +195,86 @@ export interface TouristDestination {
   socialPlatform?: 'tiktok' | 'facebook' | 'all';
   socialHashtag?: string; // e.g. "#KnongPhsar #SeaOfClouds"
   socialViews?: string; // e.g. "2.4M+ Views"
+  socialLikes?: string; // e.g. "185K Likes"
   socialHighlightKh?: string;
   socialHighlightEn?: string;
+  reviewerQuoteKh?: string; // e.g. "ទេសភាពស្អាតដូចឋានសួគ៌ ពេលព្រឹកពពកហោះកាត់ជើង!"
+  reviewerQuoteEn?: string;
+  reviewerName?: string;
+}
+
+// User Wishlist Item & Custom Lists (បញ្ជីកន្លែងដែលចង់ទៅ)
+export interface WishlistItem {
+  id: string; // matches FoodItem.id, Restaurant.id, or TouristDestination.id
+  type: 'food' | 'restaurant' | 'destination';
+  nameKh: string;
+  nameEn: string;
+  photoUrl: string;
+  categoryKh?: string;
+  provinceKh?: string;
+  priceDisplay?: string;
+  rating?: number;
+  addedAt: string;
+}
+
+export interface Wishlist {
+  id: string;
+  userId: string;
+  nameKh: string;
+  nameEn: string;
+  emoji: string;
+  isDefault?: boolean;
+  items: WishlistItem[];
+  createdAt: string;
+}
+
+// AI Trip Planner (ផែនការដើរលេង AI ដោយស្វ័យប្រវត្តិ)
+export interface TripPlanActivity {
+  timePeriod: 'morning' | 'lunch' | 'afternoon' | 'dinner';
+  titleKh: string;
+  titleEn: string;
+  descKh: string;
+  descEn: string;
+  placeNameKh?: string;
+  dishNameKh?: string;
+  photoUrl?: string;
+  estimatedCostUsd: number;
+}
+
+export interface TripPlanDay {
+  dayNumber: number;
+  titleKh: string;
+  titleEn: string;
+  activities: TripPlanActivity[];
+  dayEstimatedCostUsd: number;
+}
+
+export interface TripPlan {
+  id: string;
+  userId: string;
+  provinceKh: string;
+  provinceEn: string;
+  durationDays: number;
+  budgetLevel: 'budget' | 'medium' | 'luxury';
+  companion: 'solo' | 'couple' | 'friends' | 'family';
+  totalEstimatedCostUsd: number;
+  days: TripPlanDay[];
+  createdAt: string;
+}
+
+// Helpful Notifications (ការជូនដំណឹងដែលមានប្រយោជន៍)
+export interface AppNotification {
+  id: string;
+  titleKh: string;
+  titleEn: string;
+  messageKh: string;
+  messageEn: string;
+  type: 'promo' | 'new_spot' | 'discount' | 'system';
+  date: string;
+  isRead: boolean;
+  targetType?: 'restaurant' | 'destination' | 'food';
+  targetId?: string;
+  discountPercent?: number;
 }
 
 export interface CommentItem {

@@ -19,6 +19,13 @@ import { AdminLoginModal } from './components/AdminLoginModal';
 import { InstallModal } from './components/InstallModal';
 import { SupportModal } from './components/SupportModal';
 import { ExitConfirmModal } from './components/ExitConfirmModal';
+import { WhatToEatModal } from './components/WhatToEatModal';
+import { NearMeModal } from './components/NearMeModal';
+import { DailyDiscoveriesModal } from './components/DailyDiscoveriesModal';
+import { WishlistsModal } from './components/WishlistsModal';
+import { AiTripPlannerModal } from './components/AiTripPlannerModal';
+import { NotificationsModal } from './components/NotificationsModal';
+import { TrendingSocialModal } from './components/TrendingSocialModal';
 import { Toast } from './components/Toast';
 
 const MainScreen: React.FC = () => {
@@ -51,6 +58,15 @@ const MainScreen: React.FC = () => {
       <InstallModal />
       <SupportModal />
       <ExitConfirmModal />
+
+      {/* 6 Personalized Account Features & Viral Modals */}
+      <WhatToEatModal />
+      <NearMeModal />
+      <DailyDiscoveriesModal />
+      <WishlistsModal />
+      <AiTripPlannerModal />
+      <NotificationsModal />
+      <TrendingSocialModal />
 
       {/* Notifications */}
       <Toast />

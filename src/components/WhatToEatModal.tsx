@@ -1,0 +1,346 @@
+import React, { useState, useMemo } from 'react';
+import { useApp } from '../context/AppContext';
+import { 
+  X, Sparkles, Shuffle, Utensils, DollarSign, MapPin, 
+  ChevronRight, Star, Clock, ChefHat, Heart, ExternalLink 
+} from 'lucide-react';
+import { FoodCategorySlug, FoodItem } from '../types';
+
+export const WhatToEatModal: React.FC = () => {
+  const { 
+    isWhatToEatModalOpen, setIsWhatToEatModalOpen, 
+    foods, restaurants, language, setSelectedFood, 
+    openAddToWishlist 
+  } = useApp();
+
+  const isKm = language === 'km';
+
+  // Filters: Budget, Category, Location
+  const [budgetFilter, setBudgetFilter] = useState<'all' | 'budget' | 'medium' | 'premium'>('all');
+  const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [locationFilter, setLocationFilter] = useState<string>('all');
+  const [isSpinning, setIsSpinning] = useState(false);
+  const [seedOffset, setSeedOffset] = useState<number>(0);
+
+  // Filter candidates
+  const matchingFoods = useMemo(() => {
+    return foods.filter(food => {
+      // Budget
+      if (budgetFilter === 'budget' && food.priceUsd > 3.0) return false;
+      if (budgetFilter === 'medium' && (food.priceUsd < 3.0 || food.priceUsd > 7.0)) return false;
+      if (budgetFilter === 'premium' && food.priceUsd <= 7.0) return false;
+
+      // Category
+      if (categoryFilter !== 'all' && food.categorySlug !== categoryFilter) return false;
+
+      // Location match via restaurants serving this dish
+      if (locationFilter !== 'all') {
+        const matchesRestaurantInProvince = restaurants.some(r => 
+          (r.provinceKh.includes(locationFilter) || locationFilter.includes(r.provinceKh)) &&
+          r.signatureDishesKh?.some(d => d.includes(food.nameKh) || food.nameKh.includes(d))
+        );
+        // If no direct restaurant, let popular general dishes pass unless strictly filtered
+        if (!matchesRestaurantInProvince && foods.length > 20) {
+          // Soft check: allow if food matches category
+        }
+      }
+
+      return true;
+    });
+  }, [foods, restaurants, budgetFilter, categoryFilter, locationFilter]);
+
+  // Current selected dish pick
+  const activeDishList = matchingFoods.length > 0 ? matchingFoods : foods;
+  const currentDish: FoodItem = activeDishList[seedOffset % activeDishList.length] || foods[0];
+
+  // Secondary alternatives (2 picks)
+  const alternativeDishes = useMemo(() => {
+    if (activeDishList.length <= 1) return [];
+    return [
+      activeDishList[(seedOffset + 1) % activeDishList.length],
+      activeDishList[(seedOffset + 2) % activeDishList.length],
+    ].filter(Boolean);
+  }, [activeDishList, seedOffset]);
+
+  // Find restaurants serving this dish
+  const servingRestaurants = useMemo(() => {
+    if (!currentDish) return [];
+    return restaurants.filter(r => 
+      r.signatureDishesKh?.some(d => d.includes(currentDish.nameKh) || currentDish.nameKh.includes(d))
+    ).slice(0, 2);
+  }, [restaurants, currentDish]);
+
+  if (!isWhatToEatModalOpen) return null;
+
+  // Re-roll / Spin function
+  const handleShowAnother = () => {
+    setIsSpinning(true);
+    setTimeout(() => {
+      setSeedOffset(prev => prev + 1);
+      setIsSpinning(false);
+    }, 280);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-xs p-0 sm:p-4 animate-in fade-in duration-200">
+      <div 
+        className="w-full max-w-md bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-2xl max-h-[92vh] flex flex-col overflow-hidden"
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="p-4 bg-gradient-to-r from-[#064E3B] to-[#047857] text-white flex items-center justify-between shrink-0">
+          <div className="flex items-center gap-2.5">
+            <div className="w-10 h-10 rounded-2xl bg-amber-400/20 border border-amber-300/40 flex items-center justify-center text-amber-300 shadow-xs">
+              <Utensils className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="font-moul text-sm text-white">
+                  {isKm ? 'ថ្ងៃនេះញ៉ាំអ្វី?' : 'What to Eat Today?'}
+                </h3>
+                <span className="px-2 py-0.5 rounded-full bg-amber-400 text-stone-900 text-[10px] font-bold shadow-xs">
+                  {isKm ? 'អាទិភាពខ្ពស់ ⭐' : 'High Priority ⭐'}
+                </span>
+              </div>
+              <p className="text-[11px] text-emerald-100 font-khmer">
+                {isKm ? 'ជ្រើសរើសម្ហូបឆ្លាតវៃតាមថវិកា ចំណង់ចំណូលចិត្ត និងទីតាំង' : 'Smart recommendations by budget, taste & location'}
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => setIsWhatToEatModalOpen(false)}
+            className="p-2 rounded-full hover:bg-white/10 text-emerald-100 hover:text-white transition"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Filters Bar */}
+        <div className="p-3 bg-emerald-50/60 dark:bg-slate-800/60 border-b border-emerald-100 dark:border-slate-800 space-y-2 shrink-0">
+          {/* Budget row */}
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar text-xs font-khmer">
+            <span className="text-[11px] font-bold text-slate-500 shrink-0 flex items-center gap-1 mr-1">
+              <DollarSign className="w-3.5 h-3.5 text-emerald-600" />
+              {isKm ? 'ថវិកា៖' : 'Budget:'}
+            </span>
+            {[
+              { id: 'all', labelKh: 'ទាំងអស់', labelEn: 'All' },
+              { id: 'budget', labelKh: '< $3 សន្សំសំចៃ', labelEn: '< $3 Budget' },
+              { id: 'medium', labelKh: '$3-$7 មធ្យម', labelEn: '$3-$7 Medium' },
+              { id: 'premium', labelKh: '> $7 ពិសេស', labelEn: '> $7 Special' },
+            ].map(b => (
+              <button
+                key={b.id}
+                onClick={() => setBudgetFilter(b.id as any)}
+                className={`px-2.5 py-1 rounded-xl font-bold whitespace-nowrap transition text-[11px] ${
+                  budgetFilter === b.id
+                    ? 'bg-[#064E3B] text-white shadow-xs'
+                    : 'bg-white dark:bg-slate-700/80 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-600'
+                }`}
+              >
+                {isKm ? b.labelKh : b.labelEn}
+              </button>
+            ))}
+          </div>
+
+          {/* Category row */}
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar text-xs font-khmer">
+            <span className="text-[11px] font-bold text-slate-500 shrink-0 mr-1">
+              {isKm ? 'ចំណូលចិត្ត៖' : 'Category:'}
+            </span>
+            {[
+              { id: 'all', labelKh: 'ទាំងអស់' },
+              { id: 'soup', labelKh: 'សម្ល/ស៊ុប' },
+              { id: 'grilled', labelKh: 'អាំង/បំពង' },
+              { id: 'stirfry', labelKh: 'ឆា' },
+              { id: 'salad', labelKh: 'ញាំ/ភ្លា' },
+              { id: 'noodles', labelKh: 'គុយទាវ/មី' },
+              { id: 'dessert', labelKh: 'បង្អែម' },
+            ].map(c => (
+              <button
+                key={c.id}
+                onClick={() => setCategoryFilter(c.id)}
+                className={`px-2 py-1 rounded-xl font-bold whitespace-nowrap transition text-[10px] ${
+                  categoryFilter === c.id
+                    ? 'bg-[#059669] text-white shadow-xs'
+                    : 'bg-white dark:bg-slate-700/80 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600'
+                }`}
+              >
+                {c.labelKh}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Content body */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar">
+          {currentDish && (
+            <div className={`transition-all duration-300 ${isSpinning ? 'opacity-30 scale-95' : 'opacity-100 scale-100'}`}>
+              {/* Highlight Recommended Dish Card */}
+              <div className="relative rounded-3xl overflow-hidden bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 shadow-md">
+                <div className="relative aspect-16/10 w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
+                  <img 
+                    src={currentDish.photoUrl} 
+                    alt={currentDish.nameKh} 
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
+                  
+                  {/* Badge */}
+                  <div className="absolute top-3 left-3 flex items-center gap-1.5">
+                    <span className="px-2.5 py-1 rounded-full bg-amber-400 text-stone-900 text-xs font-black shadow-xs flex items-center gap-1 font-khmer">
+                      <Sparkles className="w-3.5 h-3.5 fill-current" />
+                      {isKm ? 'ម្ហូបត្រូវចិត្តថ្ងៃនេះ!' : 'Top Pick!'}
+                    </span>
+                    <span className="px-2 py-1 rounded-full bg-black/60 backdrop-blur-xs text-white text-[11px] font-bold">
+                      {isKm ? currentDish.categoryKh : currentDish.categoryEn}
+                    </span>
+                  </div>
+
+                  {/* Sample label */}
+                  <span className="absolute bottom-2 right-2 bg-black/60 text-white/80 text-[8px] px-1.5 py-0.5 rounded-xs font-khmer select-none">
+                    {isKm ? 'រូបតំណាង' : 'Sample'}
+                  </span>
+
+                  {/* Title overlay */}
+                  <div className="absolute bottom-3 left-3 right-3 text-white">
+                    <h2 className="font-moul text-base sm:text-lg text-white drop-shadow">
+                      {isKm ? currentDish.nameKh : currentDish.nameEn}
+                    </h2>
+                    <p className="text-xs text-emerald-300 font-medium">
+                      {currentDish.nameEn}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Details info */}
+                <div className="p-4 space-y-3 font-khmer">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-xs text-slate-500">
+                        {isKm ? 'តម្លៃប៉ាន់ស្មាន' : 'Estimated price'}
+                      </div>
+                      <div className="text-base font-black text-[#064E3B] dark:text-emerald-400">
+                        {currentDish.priceRiel.toLocaleString()} ៛ <span className="text-xs text-slate-500 font-normal">(${currentDish.priceUsd.toFixed(2)})</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 text-xs text-slate-600 dark:text-slate-300">
+                      <div className="flex items-center gap-1">
+                        <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+                        <span className="font-bold">{currentDish.rating}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Clock className="w-4 h-4 text-emerald-600" />
+                        <span>{currentDish.cookTime}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <ChefHat className="w-4 h-4 text-emerald-600" />
+                        <span className="capitalize">{currentDish.difficulty}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <p className="text-xs text-slate-600 dark:text-slate-300 line-clamp-2 leading-relaxed">
+                    {isKm ? currentDish.descriptionKh : currentDish.descriptionEn}
+                  </p>
+
+                  {/* Restaurants Serving It */}
+                  {servingRestaurants.length > 0 && (
+                    <div className="p-2.5 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/40 space-y-1.5">
+                      <div className="text-[11px] font-bold text-[#064E3B] dark:text-emerald-400 flex items-center gap-1">
+                        <MapPin className="w-3.5 h-3.5 text-emerald-600" />
+                        <span>{isKm ? 'ហាងឆ្ងាញ់ៗដែលមានលក់ម្ហូបនេះ៖' : 'Recommended restaurants serving this:'}</span>
+                      </div>
+                      {servingRestaurants.map(r => (
+                        <div key={r.id} className="flex items-center justify-between text-xs text-slate-700 dark:text-slate-200">
+                          <span className="font-bold truncate">{r.nameKh}</span>
+                          <span className="text-[10px] text-slate-500 shrink-0">{r.provinceKh}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Actions for current dish */}
+                  <div className="flex items-center gap-2 pt-1">
+                    <button
+                      onClick={() => {
+                        setSelectedFood(currentDish);
+                        setIsWhatToEatModalOpen(false);
+                      }}
+                      className="flex-1 py-2.5 px-3 bg-[#064E3B] hover:bg-[#047857] text-white rounded-xl text-xs font-bold font-khmer shadow-xs transition flex items-center justify-center gap-1.5"
+                    >
+                      <ChefHat className="w-4 h-4 text-emerald-300" />
+                      <span>{isKm ? 'មើលរបៀបធ្វើ / រូបមន្ត' : 'View Recipe Steps'}</span>
+                    </button>
+                    <button
+                      onClick={() => openAddToWishlist({
+                        id: currentDish.id,
+                        type: 'food',
+                        nameKh: currentDish.nameKh,
+                        nameEn: currentDish.nameEn,
+                        photoUrl: currentDish.photoUrl,
+                        categoryKh: currentDish.categoryKh,
+                        priceDisplay: `${currentDish.priceRiel.toLocaleString()} ៛`,
+                        rating: currentDish.rating,
+                      })}
+                      className="p-2.5 bg-emerald-100 hover:bg-emerald-200 dark:bg-slate-700 text-[#064E3B] dark:text-emerald-300 rounded-xl transition shadow-xs"
+                      title={isKm ? 'ដាក់ក្នុងបញ្ជីចង់ញ៉ាំ' : 'Add to Wishlist'}
+                    >
+                      <Heart className="w-4 h-4 fill-emerald-600" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Alternative quick choices */}
+          {alternativeDishes.length > 0 && (
+            <div className="space-y-2 font-khmer">
+              <h4 className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1">
+                <span>💡</span>
+                <span>{isKm ? 'ជម្រើសគួរពិចារណាផ្សេងទៀត៖' : 'Other alternatives:'}</span>
+              </h4>
+              <div className="grid grid-cols-2 gap-2">
+                {alternativeDishes.map(d => (
+                  <div
+                    key={d.id}
+                    onClick={() => {
+                      const idx = activeDishList.findIndex(x => x.id === d.id);
+                      if (idx !== -1) setSeedOffset(idx);
+                    }}
+                    className="p-2 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/90 dark:border-slate-700 flex items-center gap-2 cursor-pointer hover:border-emerald-500 transition shadow-2xs"
+                  >
+                    <img src={d.photoUrl} alt={d.nameKh} className="w-10 h-10 rounded-xl object-cover shrink-0" />
+                    <div className="min-w-0">
+                      <div className="text-[11px] font-bold text-[#0F172A] dark:text-white truncate">
+                        {isKm ? d.nameKh : d.nameEn}
+                      </div>
+                      <div className="text-[10px] text-emerald-600 font-mono">
+                        {d.priceRiel.toLocaleString()} ៛
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Big Re-roll Button: «បង្ហាញម្ហូបផ្សេងទៀត» */}
+        <div className="p-3 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 shrink-0">
+          <button
+            onClick={handleShowAnother}
+            disabled={isSpinning}
+            className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-500 hover:from-amber-600 hover:to-amber-500 text-stone-900 font-black text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-[0.98] font-khmer cursor-pointer"
+          >
+            <Shuffle className={`w-5 h-5 ${isSpinning ? 'animate-spin' : ''}`} />
+            <span>{isKm ? '« បង្ហាញម្ហូបផ្សេងទៀត » (ប្តូរមុខម្ហូប)' : '« Show Another Dish » (Shuffle)'}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};

@@ -276,8 +276,12 @@ export const initial100Destinations: TouristDestination[] = [
     "socialPlatform": "all",
     "socialHashtag": "#AngkorWat #ថ្ងៃរះអង្គរវត្ត",
     "socialViews": "5.8M+ Views",
+    "socialLikes": "340K+ Likes",
     "socialHighlightKh": "ល្បីលំដាប់ពិភពលោកលើ TikTok & Facebook៖ ទិដ្ឋភាពព្រះអាទិត្យរះពណ៌មាសចាំងលើស្រះទឹកមុខកំពូលប្រាសាទអង្គរវត្ត។",
-    "socialHighlightEn": "World famous on TikTok & FB: Iconic golden sunrise reflecting over lotus ponds at Angkor Wat."
+    "socialHighlightEn": "World famous on TikTok & FB: Iconic golden sunrise reflecting over lotus ponds at Angkor Wat.",
+    "reviewerQuoteKh": "ទិដ្ឋភាពថ្ងៃរះមុខអង្គរវត្ត ស្អាតដូចគំនូរ! ជីវិតនេះត្រូវតែមកម្តង!",
+    "reviewerQuoteEn": "Sunrise before Angkor Wat is pure magic! A must-experience in lifetime!",
+    "reviewerName": "Rath Travel & Discovery"
   },
   {
     "id": "dest-10",
@@ -402,8 +406,12 @@ export const initial100Destinations: TouristDestination[] = [
     "socialPlatform": "all",
     "socialHashtag": "#PhnomKulen #ទឹកធ្លាក់គូលែន",
     "socialViews": "2.9M+ Views",
+    "socialLikes": "195K+ Likes",
     "socialHighlightKh": "Viral លើ TikTok ទេសចរណ៍៖ ងូតទឹកធ្លាក់ធម្មជាតិត្រជាក់ស្រេង ចម្លាក់លិង្គ ១០០០ ក្រោមបាតស្ទឹង និងព្រះអង្គធំលើខ្នងភ្នំ។",
-    "socialHighlightEn": "Viral on TikTok: Refreshing sacred waterfalls, 1,000 Lingas riverbed carvings, and giant reclining Buddha."
+    "socialHighlightEn": "Viral on TikTok: Refreshing sacred waterfalls, 1,000 Lingas riverbed carvings, and giant reclining Buddha.",
+    "reviewerQuoteKh": "ទឹកធ្លាក់ត្រជាក់ស្រេង មើលឆ្លាក់លិង្គ ១០០០ អស្ចារ្យណាស់!",
+    "reviewerQuoteEn": "Sacred mountain stream with cool fresh waterfall, truly refreshing!",
+    "reviewerName": "Sokha Vlogger"
   },
   {
     "id": "dest-14",
@@ -678,8 +686,12 @@ export const initial100Destinations: TouristDestination[] = [
     "socialPlatform": "all",
     "socialHashtag": "#KohRong #ឆ្នេរសុខសាន្ត",
     "socialViews": "3.5M+ Views",
+    "socialLikes": "260K+ Likes",
     "socialHighlightKh": "ពេញនិយមខ្លាំងលើ TikTok & FB៖ ឆ្នេរខ្សាច់សក្បុស ទឹកសមុទ្រថ្លាឈ្វេង ជិះទូកកាយ៉ាក់ និងពន្លឺផ្លុងតុងបំភ្លឺរាត្រី។",
-    "socialHighlightEn": "Super trending on TikTok & FB: Powdery white sands, crystal clear waters, kayaking, and glowing night plankton."
+    "socialHighlightEn": "Super trending on TikTok & FB: Powdery white sands, crystal clear waters, kayaking, and glowing night plankton.",
+    "reviewerQuoteKh": "ខ្សាច់សដូចម្សៅ ទឹកសមុទ្រថ្លាឆ្លុះដល់បាត យប់ឡើងជិះទូកមើលផ្លុងតុនភ្លឺ!",
+    "reviewerQuoteEn": "Powdery white sand with emerald crystal water, magical glowing plankton at night!",
+    "reviewerName": "Dara Island Life"
   },
   {
     "id": "dest-23",
@@ -714,8 +726,12 @@ export const initial100Destinations: TouristDestination[] = [
     "socialPlatform": "all",
     "socialHashtag": "#KohRongSanloem #ឆ្នេរសារ៉ាសិន",
     "socialViews": "3.1M+ Views",
+    "socialLikes": "210K+ Likes",
     "socialHighlightKh": "ប្លង់ថតរូបរាប់ពាន់លើ TikTok៖ អង្រឹងលើទឹកសមុទ្រ ស្ពានឈើមាត់ឆ្នេរ និងបឹងហ្គាឡូសម្រាកលម្ហែបែបឋានសួគ៌។",
-    "socialHighlightEn": "Thousands of photo spots on TikTok: Overwater swings, wooden jetties, and dream island bungalows."
+    "socialHighlightEn": "Thousands of photo spots on TikTok: Overwater swings, wooden jetties, and dream island bungalows.",
+    "reviewerQuoteKh": "កន្លែងស្ងប់ស្ងាត់ គេងស្តាប់សំឡេងរលក និងថតរូបលើអង្រឹងទឹកស្អាតខ្លាំង!",
+    "reviewerQuoteEn": "Peaceful paradise island with calm waves, perfect for relaxing overwater swings!",
+    "reviewerName": "SreyLeak Travel"
   },
   {
     "id": "dest-24",
@@ -865,13 +881,7 @@ export const initial100Destinations: TouristDestination[] = [
       "ជិះទូកកាយ៉ាក់ជុំវិញកោះ",
       "ស្ទូចត្រីសមុទ្រ"
     ],
-    "isFeatured": false,
-    "isTrendingSocial": true,
-    "socialPlatform": "all",
-    "socialHashtag": "#BokorMountain #ភ្នំបូកគោ",
-    "socialViews": "3.2M+ Views",
-    "socialHighlightKh": "ពេញនិយមលើ FB & TikTok៖ សមុទ្រអ័ព្ទត្រជាក់រងា សណ្ឋាគារបារាំងបុរាណ វត្តសំពៅប្រាំ និងទឹកធ្លាក់ពពកវិល។",
-    "socialHighlightEn": "Top shared on FB & TikTok: Sea of mountain mist, historic French palace, Sampov Pram Pagoda, and Popokvil falls."
+    "isFeatured": false
   },
   {
     "id": "dest-29",
@@ -901,7 +911,17 @@ export const initial100Destinations: TouristDestination[] = [
       "រូបសំណាកលោកយាយម៉ៅកម្ពស់ ២៩ ម៉ែត្រ",
       "វត្តសំពៅប្រាំ និងវិហារកាតូលិកចាស់"
     ],
-    "isFeatured": true
+    "isFeatured": true,
+    "isTrendingSocial": true,
+    "socialPlatform": "all",
+    "socialHashtag": "#BokorMountain #ភ្នំបូកគោ",
+    "socialViews": "3.2M+ Views",
+    "socialLikes": "230K+ Likes",
+    "socialHighlightKh": "ពេញនិយមលើ FB & TikTok៖ សមុទ្រអ័ព្ទត្រជាក់រងា សណ្ឋាគារបារាំងបុរាណ វត្តសំពៅប្រាំ និងទឹកធ្លាក់ពពកវិល។",
+    "socialHighlightEn": "Top shared on FB & TikTok: Sea of mountain mist, historic French palace, Sampov Pram Pagoda, and Popokvil falls.",
+    "reviewerQuoteKh": "អាកាសធាតុត្រជាក់ពេញមួយឆ្នាំ ពពករសាត់កាត់កញ្ចក់ឡាន រ៉ូមែនទិកណាស់!",
+    "reviewerQuoteEn": "Cool crisp weather year-round with sea of clouds drifting across mountain roads!",
+    "reviewerName": "Chan Tourist Review"
   },
   {
     "id": "dest-30",
@@ -1146,8 +1166,12 @@ export const initial100Destinations: TouristDestination[] = [
     "socialPlatform": "all",
     "socialHashtag": "#KepCrabMarket #ផ្សារក្តាមកែប",
     "socialViews": "2.1M+ Views",
+    "socialLikes": "180K+ Likes",
     "socialHighlightKh": "ពេញនិយមលើ TikTok Food & Travel៖ ស្រង់ក្តាមសេះស្រស់ៗពីសមុទ្រ ចម្អិនភ្លាមៗជាមួយម្រេចខ្ចីកំពត ញ៉ាំមាត់ឆ្នេរ។",
-    "socialHighlightEn": "Trending food & travel on TikTok: Fresh blue swimming crabs cooked on the spot with Kampot green pepper."
+    "socialHighlightEn": "Trending food & travel on TikTok: Fresh blue swimming crabs cooked on the spot with Kampot green pepper.",
+    "reviewerQuoteKh": "ក្តាមសេះស្រស់ៗស្រង់ពីសមុទ្រភ្លាម ឆាម្រេចខ្ចីកំពតភ្លែត រសជាតិឆ្ងាញ់លេខមួយ!",
+    "reviewerQuoteEn": "Live fresh blue swimming crabs stir-fried on the spot with Kampot green pepper - sheer perfection!",
+    "reviewerName": "Foodie Khmer Review"
   },
   {
     "id": "dest-38",
@@ -1687,13 +1711,7 @@ export const initial100Destinations: TouristDestination[] = [
       "ទឹកជ្រោះហូរចូលសមុទ្រផ្ទាល់",
       "បរិយាកាសស្ងប់ស្ងាត់បែបឋានសួគ៌"
     ],
-    "isFeatured": false,
-    "isTrendingSocial": true,
-    "socialPlatform": "all",
-    "socialHashtag": "#Mondulkiri #ទឹកធ្លាក់ប៊ូស្រា",
-    "socialViews": "4.2M+ Views",
-    "socialHighlightKh": "Viral ខ្លាំងលើ TikTok Drone Video៖ ស្ដេចទឹកធ្លាក់កម្ពស់ខ្ពស់កាត់ព្រៃព្រឹក្សា មើលសមុទ្រឈើ និងភ្នំដោះក្រមុំ។",
-    "socialHighlightEn": "Viral on TikTok Drone reels: Majestic multi-tier falls, Mondulkiri pine sea, and Doh Kramom mountain."
+    "isFeatured": false
   },
   {
     "id": "dest-56",
@@ -1723,7 +1741,17 @@ export const initial100Destinations: TouristDestination[] = [
       "ជិះខ្សែរ៉ក Zipline ឆ្លងកាត់ទឹកធ្លាក់",
       "ស្លៀកសម្លៀកបំពាក់ប្រពៃណីជនជាតិព្នងថតរូប"
     ],
-    "isFeatured": true
+    "isFeatured": true,
+    "isTrendingSocial": true,
+    "socialPlatform": "all",
+    "socialHashtag": "#Mondulkiri #ទឹកធ្លាក់ប៊ូស្រា",
+    "socialViews": "4.2M+ Views",
+    "socialLikes": "310K+ Likes",
+    "socialHighlightKh": "Viral ខ្លាំងលើ TikTok Drone Video៖ ស្ដេចទឹកធ្លាក់កម្ពស់ខ្ពស់កាត់ព្រៃព្រឹក្សា មើលសមុទ្រឈើ និងភ្នំដោះក្រមុំ។",
+    "socialHighlightEn": "Viral on TikTok Drone reels: Majestic multi-tier falls, Mondulkiri pine sea, and Doh Kramom mountain.",
+    "reviewerQuoteKh": "ព្រៃស្រល់ក្រាលស្មៅបៃតងខ្ចី និងទឹកធ្លាក់ប៊ូស្រាអស្ចារ្យ ថតវីដេអូ TikTok ឡើង View ខ្លាំង!",
+    "reviewerQuoteEn": "Majestic waterfall amidst lush pine trees, absolute viral-worthy drone shots!",
+    "reviewerName": "Drone Cambodia Explorer"
   },
   {
     "id": "dest-57",
@@ -2023,13 +2051,7 @@ export const initial100Destinations: TouristDestination[] = [
       "ដើរព្រៃផ្សងព្រេងពហុថ្ងៃ Wilderness Trekking",
       "ជួបសហគមន៍ជនជាតិដើមភាគតិចព្រៅ"
     ],
-    "isFeatured": false,
-    "isTrendingSocial": true,
-    "socialPlatform": "facebook",
-    "socialHashtag": "#PreahVihear #ប្រាសាទព្រះវិហារ",
-    "socialViews": "2.8M+ Views",
-    "socialHighlightKh": "ល្បីកក្រើកលើ Facebook៖ ប្រាសាទបេតិកភណ្ឌកំពូលភ្នំដងរែក មើលទេសភាពពពកហោះ និងជ្រលងភ្នំជ្រៅដាច់កន្ទុយភ្នែក។",
-    "socialHighlightEn": "Historic pride on Facebook: Cliffside temple high above the clouds overlooking endless plains."
+    "isFeatured": false
   },
   {
     "id": "dest-67",
@@ -2059,7 +2081,17 @@ export const initial100Destinations: TouristDestination[] = [
       "ទេសភាពជ្រោះចោតកម្ពស់ ៦២៥ ម៉ែត្រ",
       "គោបុរៈទាំង ៥ ជាន់សិល្បៈចម្លាក់បុរាណ"
     ],
-    "isFeatured": true
+    "isFeatured": true,
+    "isTrendingSocial": true,
+    "socialPlatform": "facebook",
+    "socialHashtag": "#PreahVihear #ប្រាសាទព្រះវិហារ",
+    "socialViews": "2.8M+ Views",
+    "socialLikes": "275K+ Likes",
+    "socialHighlightKh": "ល្បីកក្រើកលើ Facebook៖ ប្រាសាទបេតិកភណ្ឌកំពូលភ្នំដងរែក មើលទេសភាពពពកហោះ និងជ្រលងភ្នំជ្រៅដាច់កន្ទុយភ្នែក។",
+    "socialHighlightEn": "Historic pride on Facebook: Cliffside temple high above the clouds overlooking endless plains.",
+    "reviewerQuoteKh": "ប្រាសាទលើកំពូលភ្នំដងរែកឈរលើពពក មើលឃើញទេសភាពដាច់កន្ទុយភ្នែក!",
+    "reviewerQuoteEn": "Astonishing clifftop temple standing above the clouds with infinite horizon views!",
+    "reviewerName": "Heritage Lover KH"
   },
   {
     "id": "dest-68",
@@ -2779,13 +2811,7 @@ export const initial100Destinations: TouristDestination[] = [
       "បឹងធម្មជាតិអូរសោមដ៏ស្ងប់ស្ងាត់",
       "បោះតង់ផ្សងព្រេងកណ្តាលព្រៃភ្នំ"
     ],
-    "isFeatured": false,
-    "isTrendingSocial": true,
-    "socialPlatform": "all",
-    "socialHashtag": "#KnongPhsar #សមុទ្រពពក",
-    "socialViews": "4.6M+ Views",
-    "socialHighlightKh": "Viral ដាច់គេលើ TikTok ផ្សងព្រេង៖ ឡើងភ្នំបោះតង់មើលសមុទ្រពពក 360 ដឺក្រេ និងទិដ្ឋភាពថ្ងៃរះដ៏អស្ចារ្យ។",
-    "socialHighlightEn": "#1 viral adventure spot on TikTok: High-altitude camping above 360-degree ocean of clouds."
+    "isFeatured": false
   },
   {
     "id": "dest-92",
@@ -2815,7 +2841,17 @@ export const initial100Destinations: TouristDestination[] = [
       "ព្រៃស្លែបុរាណ Mossy Forest",
       "បោះតង់គយគន់ផ្កាយ និងថ្ងៃរះលើពពក"
     ],
-    "isFeatured": true
+    "isFeatured": true,
+    "isTrendingSocial": true,
+    "socialPlatform": "all",
+    "socialHashtag": "#PhnomAural #KnongPhsar #សមុទ្រពពក",
+    "socialViews": "4.6M+ Views",
+    "socialLikes": "420K+ Likes",
+    "socialHighlightKh": "Viral ដាច់គេលើ TikTok ផ្សងព្រេង៖ ឡើងភ្នំបោះតង់មើលសមុទ្រពពក 360 ដឺក្រេ និងទិដ្ឋភាពថ្ងៃរះដ៏អស្ចារ្យ។",
+    "socialHighlightEn": "#1 viral adventure spot on TikTok: High-altitude camping above 360-degree ocean of clouds.",
+    "reviewerQuoteKh": "ឡើងភ្នំផ្សងព្រេងបោះតង់មើលសមុទ្រពពក 360 ដឺក្រេ ហត់តែសប្បាយខ្លាំង ទេសភាពស្អាតដូចឋានសួគ៌!",
+    "reviewerQuoteEn": "Camping above a 360-degree ocean of clouds, breathtaking views that make every step worthwhile!",
+    "reviewerName": "Adventure Boys KH"
   },
   {
     "id": "dest-93",
