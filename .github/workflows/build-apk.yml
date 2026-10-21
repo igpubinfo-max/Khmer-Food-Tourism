@@ -50,7 +50,7 @@ jobs:
           echo "=== SEARCHING FOR GENERATED APK FILES ==="
           find . -name "*.apk" -ls
           cd android/app/build/outputs/apk/debug
-          cp app-debug.apk KhmerFoodTourism-v1.4.8.apk
+          cp app-debug.apk KhmerFoodTourism-v1.4.9.apk
           ls -la
 
       - name: 9. Upload Android APK Artifact
@@ -63,18 +63,19 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: v1.4.8
-          name: "Khmer Food & Tourism v1.4.8 (Real Device Google Account Linker)"
+          tag_name: v1.4.9
+          name: "Khmer Food & Tourism v1.4.9 (Pacdora-Style Real Google OAuth Integration)"
           overwrite: true
           make_latest: true
           body: |
             ### 🇰🇭 កម្មវិធីទូរស័ព្ទដៃ អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism Mobile App)
             
-            **កំណែថ្មី v1.4.8 (Link Real Main Google Account on User Phone):**
-            - 📲 **១. ភ្ជាប់គណនី Google ពិតប្រាកដនៅលើទូរស័ព្ទដៃអ្នកប្រើប្រាស់ (Real Device Google Account Linker):**
-              - ភ្ជាប់ប្រព័ន្ធ Native Android Google Sign-In SDK (`play-services-auth`) ដើម្បីឱ្យប្រព័ន្ធ Android បង្ហាញគណនី Google ដែលអ្នកប្រើប្រាស់បាន Login លើទូរស័ព្ទដៃនោះពិតប្រាកដ (គណនី Google Play Store / Gmail លើទូរស័ព្ទ)។
-              - លុបចោលទាំងស្រុងនូវឈ្មោះ ឬ Email ដែលបានកំណត់ទុកជាមុន (No hardcoded names/emails) ដើម្បីធានាថាអ្នកប្រើប្រាស់គ្រប់រូបភ្ជាប់គណនីផ្ទាល់ខ្លួនរបស់គាត់។
-              - ទាញយកឈ្មោះ Email និងរូបតំណាងពិតប្រាកដមកចុះឈ្មោះជាគណនីធម្មតា (`role: 'user'`)។
+            **កំណែថ្មី v1.4.9 (Official Google OAuth Client ID Integration — Identical to Pacdora):**
+            - 🌐 **១. ភ្ជាប់ Google OAuth 2.0 Client ID ផ្លូវការ (ដូច Pacdora បេះបិទ):**
+              - ភ្ជាប់លេខកូដសម្គាល់ Client ID របស់គម្រោង៖ `834153814844-po5bjnuts0urg1imef38617kgpol1dq2.apps.googleusercontent.com`។
+              - នៅពេលចុចលើ «Continue with Google» គឺវាបើកផ្ទាំងពិតរបស់ Google ពី `accounts.google.com` ដោយស្វ័យប្រវត្ត។
+              - Google ស្គាល់ Gmail Account ដែលលោកអ្នកបាន Login ក្នុង Google Chrome ឬក្នុងទូរស័ព្ទដៃភ្លាមៗ។
+              - មិនមានផ្ទាំងសរសេរដៃក្នុង App ទៀតឡើយ (Zero in-app mock dialogs)។
             - 🚪 **២. ចាកចេញពីកម្មវិធីស្វ័យប្រវត្តិប្រសិនបើគ្មានគណនី (Auto-Exit Mandatory Gate)**។
             - 🔐 **៣. ឥតគិតថ្លៃ ១០០% ជារៀងរហូត គ្មានការគិតថ្លៃសេវា SMS (Zero SMS fees)**។
             - 📧 **៤. អាសយដ្ឋានអ៊ីមែលផ្លូវការ `kftcam@gmail.com`**។

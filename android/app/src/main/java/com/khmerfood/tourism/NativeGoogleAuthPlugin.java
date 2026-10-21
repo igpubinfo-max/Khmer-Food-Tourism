@@ -24,6 +24,7 @@ public class NativeGoogleAuthPlugin extends Plugin {
     @Override
     public void load() {
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken("834153814844-po5bjnuts0urg1imef38617kgpol1dq2.apps.googleusercontent.com")
                 .requestEmail()
                 .requestProfile()
                 .build();
