@@ -1,6 +1,6 @@
-export const APP_VERSION = 'v1.5.7';
-export const APP_VERSION_NAME = '1.5.7';
-export const APP_BUILD_CODE = 29;
+export const APP_VERSION = 'v1.5.8';
+export const APP_VERSION_NAME = '1.5.8';
+export const APP_BUILD_CODE = 30;
 export const APP_RELEASE_DATE = '2026-10-21';
 
 export type Language = 'km' | 'en';

@@ -200,6 +200,7 @@ interface AppContextType {
   isUpgradeVipModalOpen: boolean;
   setIsUpgradeVipModalOpen: (open: boolean) => void;
   openUpgradeVipModal: () => void;
+  submitVipUpgradeRequest: (durationDays?: number, amountUsd?: number, notes?: string) => Promise<{ success: boolean; transactionId: string }>;
   upgradeCurrentUserToVip: (paymentMethod: 'GooglePlayBilling' | 'KHQR' | 'Bakong' | 'Card', transactionRef: string, last4?: string) => Promise<{ success: boolean; error?: string }>;
   renewCurrentUserVip: (paymentMethod: 'GooglePlayBilling' | 'KHQR' | 'Bakong' | 'Card', transactionRef: string) => Promise<{ success: boolean; error?: string }>;
   restoreCurrentUserVipPurchases: () => Promise<{ success: boolean; restored: boolean; message: string }>;
@@ -1803,15 +1804,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const verifyTransaction = (txnId: string) => {
     let targetRestId = '';
     let targetUserId = '';
+    let targetTxn: RegistrationTransaction | undefined;
+
     setTransactions(prev => prev.map(t => {
       if (t.id !== txnId) return t;
       targetRestId = t.restaurantId || '';
       targetUserId = t.userId || '';
+      targetTxn = t;
       return {
         ...t,
         status: 'verified',
         verifiedAt: new Date().toISOString().replace('T', ' ').slice(0, 16),
-        verifiedBy: currentUser?.name || 'System Administrator',
+        verifiedBy: currentUser?.name || 'Chea Savuth (Admin)',
       };
     }));
 
@@ -1834,8 +1838,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     if (targetUserId) {
+      // Find durationDays from the transaction or default to 365 days
+      const matchedTxn = targetTxn || transactions.find(t => t.id === txnId);
+      const durationDays = matchedTxn?.durationDays || 365;
       const now = new Date();
-      const expiresAt = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
+      const expiresAt = new Date(now.getTime() + durationDays * 24 * 60 * 60 * 1000);
+
       setUsers(prev => prev.map(u => {
         if (u.id !== targetUserId) return u;
         return {
@@ -1847,6 +1855,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           paymentStatus: 'verified'
         };
       }));
+
       if (currentUser?.id === targetUserId) {
         setCurrentUser(prev => prev ? {
           ...prev,
@@ -1857,25 +1866,54 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           paymentStatus: 'verified'
         } : null);
       }
+
+      // Upgrade user's restaurants if any
+      setRestaurants(prev => prev.map(r => {
+        if (r.ownerId !== targetUserId) return r;
+        return {
+          ...r,
+          membershipTier: 'premium',
+          membershipExpiresAt: expiresAt.toISOString(),
+          isPromoted: true,
+          isVerified: true
+        };
+      }));
+
+      // Add approval notification
+      const approvalNotif: AppNotification = {
+        id: `notif-approved-${Date.now()}`,
+        titleKh: '🎉 សមាជិកភាព Premium VIP ត្រូវបានអនុម័ត!',
+        titleEn: '🎉 Premium VIP Membership Approved!',
+        messageKh: `រដ្ឋបាលបានពិនិត្យ និងអនុម័តដំឡើងគណនីរបស់អ្នកជា Premium VIP (${durationDays} ថ្ងៃ) ដោយជោគជ័យ! អត្ថប្រយោជន៍ទាំង ១០ ត្រូវបានបើកដំណើរការពេញលេញ។`,
+        messageEn: `Administrator approved your Premium VIP membership for ${durationDays} days successfully! All 10 benefits are active.`,
+        type: 'system',
+        date: now.toISOString().split('T')[0],
+        isRead: false
+      };
+      setNotifications(prev => [approvalNotif, ...prev]);
     }
 
     showToast(
       language === 'km' 
-        ? 'បានផ្ទៀងផ្ទាត់ការទូទាត់ $4.99 និងធ្វើឱ្យសមាជិកភាព Premium សកម្ម ៣៦៥ ថ្ងៃជោគជ័យ!' 
-        : 'Payment verified: 365-day Premium membership activated successfully!',
+        ? 'បានផ្ទៀងផ្ទាត់ និងអនុម័តធ្វើឱ្យសមាជិកភាពសកម្មដោយជោគជ័យ!' 
+        : 'Payment verified: Membership activated successfully!',
       'success'
     );
   };
 
   const rejectTransaction = (txnId: string, reason?: string) => {
     let targetRestId = '';
+    let targetUserId = '';
+    const rejectionReason = reason || 'ការទូទាត់មិនអាចផ្ទៀងផ្ទាត់បានជាមួយរបាយការណ៍ធនាគារ (Transaction could not be verified on bank statement).';
+
     setTransactions(prev => prev.map(t => {
       if (t.id !== txnId) return t;
       targetRestId = t.restaurantId || '';
+      targetUserId = t.userId || '';
       return {
         ...t,
         status: 'rejected',
-        notes: reason || 'Transaction could not be verified with bank statement.',
+        notes: rejectionReason,
       };
     }));
 
@@ -1887,6 +1925,37 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           paymentStatus: 'rejected',
         };
       }));
+    }
+
+    if (targetUserId) {
+      setUsers(prev => prev.map(u => {
+        if (u.id !== targetUserId) return u;
+        return {
+          ...u,
+          subscriptionStatus: 'expired',
+          paymentStatus: 'failed'
+        };
+      }));
+
+      if (currentUser?.id === targetUserId) {
+        setCurrentUser(prev => prev ? {
+          ...prev,
+          subscriptionStatus: 'expired',
+          paymentStatus: 'failed'
+        } : null);
+      }
+
+      const rejectNotif: AppNotification = {
+        id: `notif-rejected-${Date.now()}`,
+        titleKh: '❌ សំណើដំឡើង VIP ត្រូវបានបដិសេធ',
+        titleEn: '❌ VIP Upgrade Request Rejected',
+        messageKh: `សំណើដំឡើង VIP របស់អ្នកមិនត្រូវបានអនុម័តទេ៖ ${rejectionReason}`,
+        messageEn: `Your VIP upgrade request was rejected: ${rejectionReason}`,
+        type: 'system',
+        date: new Date().toISOString().split('T')[0],
+        isRead: false
+      };
+      setNotifications(prev => [rejectNotif, ...prev]);
     }
 
     showToast(
@@ -2120,6 +2189,89 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       : `Your VIP subscription has been restored successfully (Expires: ${eligible.expiresAt.split('T')[0]})! 🎉`;
     showToast(successMsg, 'success');
     return { success: true, restored: true, message: successMsg };
+  };
+
+  // Submit VIP Upgrade Request for Administrator Review & Approval
+  const submitVipUpgradeRequest = async (
+    durationDays: number = 365,
+    amountUsd: number = 9.99,
+    notes?: string
+  ): Promise<{ success: boolean; transactionId: string }> => {
+    if (!currentUser) {
+      setIsAuthModalOpen(true);
+      return { success: false, transactionId: '' };
+    }
+
+    const now = new Date();
+    const txnId = `TXN-VIP-${Date.now().toString(36).toUpperCase()}-${Math.floor(100 + Math.random() * 900)}`;
+    const txnRef = `ABA-KHQR-${durationDays}D-${Date.now().toString(36).toUpperCase()}`;
+
+    const newTxn: RegistrationTransaction = {
+      id: txnId,
+      type: 'user_vip_upgrade',
+      userId: currentUser.id,
+      userName: currentUser.name,
+      userEmail: currentUser.email,
+      ownerId: currentUser.id,
+      ownerName: currentUser.name,
+      amountUsd,
+      durationDays,
+      membershipTier: 'premium_vip',
+      status: 'pending_verification',
+      paymentMethod: 'KHQR',
+      transactionRef: txnRef,
+      createdAt: now.toISOString().replace('T', ' ').slice(0, 16),
+      notes: notes || `សំណើដំឡើង VIP ${durationDays} ថ្ងៃ ($${amountUsd} USD) តាម ABA KHQR - រង់ចាំការអនុម័តពីរដ្ឋបាល`
+    };
+
+    setTransactions(prev => [newTxn, ...prev]);
+
+    // Update currentUser and users state to 'pending'
+    const pendingUser: User = {
+      ...currentUser,
+      subscriptionStatus: 'pending',
+      paymentStatus: 'pending_verification',
+      paymentMethod: 'KHQR',
+      transactionRef: txnRef
+    };
+
+    setCurrentUser(pendingUser);
+    setUsers(prev => prev.map(u => u.id === currentUser.id ? pendingUser : u));
+
+    // Send Admin Notification
+    const adminNotif: AppNotification = {
+      id: `notif-admin-vip-${Date.now()}`,
+      titleKh: '👑 សំណើដំឡើង VIP ថ្មីពីអតិថិជន',
+      titleEn: '👑 New VIP Upgrade Request',
+      messageKh: `អតិថិជន ${currentUser.name} បានផ្ញើសំណើដំឡើង Premium VIP (${durationDays} ថ្ងៃ - $${amountUsd} USD) តាម ABA KHQR។ សូមពិនិត្យ និងអនុម័ត។`,
+      messageEn: `Customer ${currentUser.name} submitted a Premium VIP upgrade request (${durationDays} days - $${amountUsd} USD) via ABA KHQR. Please review in Admin Dashboard.`,
+      type: 'system',
+      date: now.toISOString().split('T')[0],
+      isRead: false
+    };
+
+    // Send User Notification
+    const userNotif: AppNotification = {
+      id: `notif-user-vip-req-${Date.now() + 1}`,
+      titleKh: '📩 សំណើដំឡើង VIP ត្រូវបានបញ្ជូន',
+      titleEn: '📩 VIP Upgrade Request Submitted',
+      messageKh: `សំណើដំឡើង Premium VIP (${durationDays} ថ្ងៃ) របស់អ្នកត្រូវបានបញ្ជូនទៅរដ្ឋបាលហើយ។ រដ្ឋបាលនឹងពិនិត្យផ្ទៀងផ្ទាត់ និងអនុម័តជូនក្នុងពេលឆាប់ៗនេះ។`,
+      messageEn: `Your VIP upgrade request (${durationDays} days) has been submitted to admin. It will be verified and approved shortly.`,
+      type: 'system',
+      date: now.toISOString().split('T')[0],
+      isRead: false
+    };
+
+    setNotifications(prev => [adminNotif, userNotif, ...prev]);
+
+    showToast(
+      language === 'km' 
+        ? 'បានបញ្ជូនសំណើដំឡើង VIP ជូនរដ្ឋបាលដោយជោគជ័យ! សូមរង់ចាំការអនុម័ត។' 
+        : 'VIP upgrade request submitted to admin successfully! Awaiting verification.',
+      'success'
+    );
+
+    return { success: true, transactionId: txnId };
   };
 
   // AI Trending Food Update
@@ -2695,6 +2847,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         isUpgradeVipModalOpen,
         setIsUpgradeVipModalOpen,
         openUpgradeVipModal,
+        submitVipUpgradeRequest,
         upgradeCurrentUserToVip,
         renewCurrentUserVip,
         restoreCurrentUserVipPurchases,

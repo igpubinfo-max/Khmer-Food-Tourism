@@ -5,6 +5,8 @@ import { User, RegistrationTransaction } from '../types';
 
 export const VIP_ANNUAL_PRICE_USD = 9.99;
 export const VIP_SUBSCRIPTION_DAYS = 365;
+export const VIP_QUARTERLY_PRICE_USD = 2.99;
+export const VIP_QUARTERLY_DAYS = 90;
 export const GOOGLE_PLAY_PRODUCT_ID = 'com.khmerfoodtourism.subscription.vip.annual';
 
 export interface PaymentVerificationRequest {
@@ -90,8 +92,8 @@ export function recordVerifiedTransaction(transactionRef: string): void {
   }
 }
 
-// Calculate 365-day start and expiry dates with renewal extension support
-export function calculateVipDates(existingExpiry?: string): { startDate: string; expiryDate: string; durationDays: number } {
+// Calculate 365-day or 90-day start and expiry dates with renewal extension support
+export function calculateVipDates(existingExpiry?: string, durationDays: number = VIP_SUBSCRIPTION_DAYS): { startDate: string; expiryDate: string; durationDays: number } {
   const now = new Date();
   let startTime = now.getTime();
   
@@ -103,12 +105,12 @@ export function calculateVipDates(existingExpiry?: string): { startDate: string;
     }
   }
   
-  const expiryTime = startTime + VIP_SUBSCRIPTION_DAYS * 24 * 60 * 60 * 1000;
+  const expiryTime = startTime + durationDays * 24 * 60 * 60 * 1000;
   
   return {
     startDate: now.toISOString(),
     expiryDate: new Date(expiryTime).toISOString(),
-    durationDays: VIP_SUBSCRIPTION_DAYS
+    durationDays
   };
 }
 

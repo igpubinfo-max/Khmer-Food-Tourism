@@ -60,7 +60,7 @@ jobs:
           echo "=== SEARCHING FOR GENERATED APK FILES ==="
           find . -name "*.apk" -ls
           cd android/app/build/outputs/apk/debug
-          cp app-debug.apk KhmerFoodTourism-v1.5.7.apk
+          cp app-debug.apk KhmerFoodTourism-v1.5.8.apk
           ls -la
 
       - name: 10. Upload Android APK Artifact
@@ -73,26 +73,25 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: v1.5.7
-          name: "Khmer Food & Tourism v1.5.7 (Official ABA KHQR & Instant 1-Tap VIP Upgrade)"
+          tag_name: v1.5.8
+          name: "Khmer Food & Tourism v1.5.8 (Official ABA KHQR Flyer & Admin VIP Approval Workflow)"
           overwrite: true
           make_latest: true
           body: |
             ### 🇰🇭 កម្មវិធីទូរស័ព្ទដៃ អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism Mobile App)
             
-            **កំណែថ្មី v1.5.7 (Official ABA KHQR & Instant 1-Tap VIP Upgrade):**
-            - 🏦 **១. ព័ត៌មានគណនី ABA ពិតជាក់ស្តែង (Official ABA Bank Account Info):**
-              - ឈ្មោះគណនី៖ **KIMSENG CHEA**
-              - គណនី USD ($9.99): **`095 245 959`** (មានប៊ូតុងចម្លងរហ័ស)
-              - គណនី KHR (៤០,៥០០៛): **`012 719 946`** (មានប៊ូតុងចម្លងរហ័ស)
-            - 📲 **២. ស្កេន KHQR ស្គាល់ភ្លាមៗដោយគ្មានបញ្ហា (Authentic Dual Currency ABA KHQR):**
-              - បានដាក់បញ្ចូលកូដ KHQR ពិតជាក់ស្តែងរបស់ ABA Bank ដែលមានស្លាកសញ្ញាផ្កាបាគងក្រហមនៅចំកណ្តាល។
-              - កម្មវិធី ABA Mobile អាចស្កេន និងស្គាល់ឈ្មោះ KIMSENG CHEA ភ្លាមៗ ១០០% ដោយគ្មានបញ្ហា "Invalid ABA QR" ទៀតឡើយ។
-            - 🗑️ **៣. ដកចេញប្រអប់វាយលេខប្រតិបត្តិការ (Deleted Trx ID Input):**
-              - លុបចោលទាំងស្រុងនូវប្រអប់តម្រូវឱ្យវាយលេខ Trx ID/Reference ដើម្បីកុំឱ្យស្មុគស្មាញដល់អ្នកប្រើប្រាស់។
-            - ⚡ **៤. ដំឡើង VIP ដោយស្វ័យប្រវត្តិភ្លាមតែម្តង (Auto & 1-Tap Instant VIP Upgrade):**
-              - ពេលអ្នកប្រើប្រាស់ស្កេន ឬត្រឡប់មកពីកម្មវិធី ABA Mobile ប្រព័ន្ធនឹងដំឡើងគណនីជា VIP ដោយស្វ័យប្រវត្តិ។
-              - មានប៊ូតុងធំមួយចុចដំឡើងភ្លាមៗ៖ **«⚡ បញ្ជាក់ការទូទាត់ & ដំឡើងជា VIP ភ្លាមតែម្តង ($9.99 USD)»** ដំណើរការភ្លាម ៣៦៥ ថ្ងៃពេញ។
+            **កំណែថ្មី v1.5.8 (Official ABA KHQR Flyer & Admin VIP Approval Workflow):**
+            - 🏦 **១. បង្ហាញផ្ទាំងរូបភាព ABA KHQR ផ្លូវការសុទ្ធសាធ (Official ABA QR Flyer):**
+              - បង្ហាញរូបភាព Stand / Flyer ផ្លូវការរបស់ធនាគារ ABA ពេញលេញ គ្មានការកាត់ត ឬបាត់បង់គុណភាព។
+              - ដកចេញនូវព័ត៌មានស្ទួន លេខគណនីដដែលៗ និងប្រអប់វាយលេខស្មុគស្មាញ។
+              - កម្មវិធី ABA Mobile អាចស្កេន និងស្គាល់ឈ្មោះ KIMSENG CHEA ភ្លាមៗ ១០០%។
+            - 🛡️ **២. ប្រព័ន្ធបញ្ជាក់ការដំឡើង VIP ដោយរដ្ឋបាល (Admin Review & Confirmation Workflow):**
+              - អ្នកប្រើប្រាស់ធម្មតាមិនអាចចុច Active VIP ដោយខ្លួនឯងបានទេ (លុបចោលប៊ូតុងស្វ័យប្រវត្តិក្លែងក្លាយ)។
+              - អ្នកប្រើប្រាស់ទូទាត់តាម ABA រួច ចុច «ផ្ញើសំណើដំឡើង VIP ជូនរដ្ឋបាល»។
+              - រដ្ឋបាល (Admin) ពិនិត្យផ្ទៀងផ្ទាត់លើ Admin Dashboard និងមានសិទ្ធិចុច «អនុម័តដំឡើង VIP» ឬ «បដិសេធ»។
+            - ⏱️ **៣. រយៈពេលសមាជិកភាព VIP ត្រឹមត្រូវ (Precise Subscription Durations):**
+              - គណនាចាប់ពីពេលរដ្ឋបាលចុចអនុម័ត (៣៦៥ ថ្ងៃ សម្រាប់កញ្ចប់ $9.99/ឆ្នាំ, ៩០ ថ្ងៃ សម្រាប់កញ្ចប់ $2.99)។
+              - បង្ហាញស្ថានភាពស៊ីសង្វាក់គ្នា (Free, Pending, Active, Expired) នៅលើ Profile និង Admin Dashboard។
                 5. 🎥 Food Video Reels Showcase លើទំព័រហាងផ្ទាល់ខ្លួន
                 6. 📍 សម្គាល់ Pin ពណ៌មាសលើផែនទី Google Maps
             - 📱 **៣. បង្ហាញកំណែកម្មវិធីច្បាស់លាស់គ្រប់ការ Update (Clear App Version Display):**

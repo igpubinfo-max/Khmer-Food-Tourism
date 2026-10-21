@@ -302,6 +302,72 @@ export const ProfileView: React.FC = () => {
             </div>
           </div>
         </div>
+      ) : currentUser?.subscriptionStatus === 'pending' ? (
+        /* PENDING ADMIN CONFIRMATION CARD */
+        <div className="p-4 rounded-3xl bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-amber-600/15 border border-amber-400/50 shadow-xs transition font-khmer">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="p-2.5 rounded-2xl shrink-0 bg-amber-400 text-slate-900 shadow-sm animate-pulse">
+                <Clock className="w-5 h-5" />
+              </div>
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="text-xs font-bold text-slate-900 dark:text-white font-khmer">
+                    {isKm ? 'ស្ថានភាពសមាជិកភាព៖' : 'Membership:'}
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300">
+                    {isKm ? '⏳ រង់ចាំការអនុម័តពីរដ្ឋបាល (Pending)' : '⏳ Pending Admin Approval'}
+                  </span>
+                </div>
+                
+                <p className="text-[11px] text-amber-700 dark:text-amber-400 mt-0.5 font-khmer truncate">
+                  {isKm 
+                    ? 'សំណើដំឡើង VIP ត្រូវបានបញ្ជូន។ រដ្ឋបាលកំពុងត្រួតពិនិត្យ និងអនុម័ត...' 
+                    : 'VIP upgrade request submitted. Administrator is reviewing your payment...'}
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={openUpgradeVipModal}
+              className="px-3.5 py-2 rounded-xl text-xs font-bold font-khmer shadow-xs transition shrink-0 active:scale-95 bg-amber-500 hover:bg-amber-600 text-white"
+            >
+              {isKm ? 'មើលស្ថានភាព' : 'View Status'}
+            </button>
+          </div>
+        </div>
+      ) : currentUser?.subscriptionStatus === 'expired' ? (
+        /* EXPIRED VIP CARD */
+        <div className="p-4 rounded-3xl bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-800 shadow-xs transition font-khmer">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="p-2.5 rounded-2xl shrink-0 bg-rose-100 dark:bg-rose-900/40 text-rose-600 dark:text-rose-400">
+                <Crown className="w-5 h-5" />
+              </div>
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="text-xs font-bold text-slate-900 dark:text-white font-khmer">
+                    {isKm ? 'ស្ថានភាពសមាជិកភាព៖' : 'Membership:'}
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300">
+                    {isKm ? '❌ ផុតកំណត់ (Expired)' : 'Expired'}
+                  </span>
+                </div>
+                
+                <p className="text-[11px] text-rose-600 dark:text-rose-400 mt-0.5 font-khmer truncate">
+                  {isKm ? 'សមាជិកភាព VIP របស់អ្នកបានផុតកំណត់ហើយ។ សូមបន្តឡើងវិញដើម្បីទទួលអត្ថប្រយោជន៍។' : 'Your VIP membership has expired. Renew to regain all 10 benefits.'}
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={openUpgradeVipModal}
+              className="px-3.5 py-2 rounded-xl text-xs font-bold font-khmer shadow-xs transition shrink-0 active:scale-95 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
+            >
+              {isKm ? '🔄 បន្ត VIP' : 'Renew VIP'}
+            </button>
+          </div>
+        </div>
       ) : (
         /* STANDARD FREE USER UPGRADE CARD */
         <div className="p-4 rounded-3xl bg-gradient-to-r from-emerald-950/20 via-slate-900/10 to-amber-950/20 border border-slate-200 dark:border-slate-700 shadow-xs transition font-khmer">
@@ -709,9 +775,19 @@ export const ProfileView: React.FC = () => {
               <span className={`px-2.5 py-1 rounded-full text-xs font-black ${
                 isVip 
                   ? 'bg-amber-400 text-slate-950 shadow-xs' 
+                  : currentUser?.subscriptionStatus === 'pending'
+                  ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
+                  : currentUser?.subscriptionStatus === 'expired'
+                  ? 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300'
                   : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
               }`}>
-                {isVip ? (isKm ? '🌟 Premium VIP' : '🌟 Premium VIP') : (isKm ? 'Free User' : 'Free User')}
+                {isVip 
+                  ? (isKm ? '🌟 Premium VIP' : '🌟 Premium VIP') 
+                  : currentUser?.subscriptionStatus === 'pending'
+                  ? (isKm ? '⏳ រង់ចាំអនុម័ត (Pending)' : '⏳ Pending Review')
+                  : currentUser?.subscriptionStatus === 'expired'
+                  ? (isKm ? '❌ ផុតកំណត់' : 'Expired')
+                  : (isKm ? 'Free User' : 'Free User')}
               </span>
             </div>
 
@@ -720,7 +796,13 @@ export const ProfileView: React.FC = () => {
               <div className="flex justify-between">
                 <span className="text-slate-500">{isKm ? 'ស្ថានភាពបច្ចុប្បន្ន៖' : 'Current Status:'}</span>
                 <span className="font-bold text-slate-900 dark:text-white">
-                  {isVip ? (isKm ? 'កំពុងដំណើរការ (Active)' : 'Active') : (isKm ? 'គណនីឥតគិតថ្លៃ (Free Account)' : 'Free Account')}
+                  {isVip 
+                    ? (isKm ? 'កំពុងដំណើរការ (Active)' : 'Active') 
+                    : currentUser?.subscriptionStatus === 'pending'
+                    ? (isKm ? '⏳ រង់ចាំរដ្ឋបាលអនុម័ត (Pending Review)' : '⏳ Pending Admin Approval')
+                    : currentUser?.subscriptionStatus === 'expired'
+                    ? (isKm ? '❌ ផុតកំណត់ (Expired)' : 'Expired')
+                    : (isKm ? 'គណនីឥតគិតថ្លៃ (Free Account)' : 'Free Account')}
                 </span>
               </div>
               {isVip && (
@@ -758,6 +840,10 @@ export const ProfileView: React.FC = () => {
               <span>
                 {isVip 
                   ? (isKm ? '🔄 បន្តសមាជិកភាព VIP ៣៦៥ ថ្ងៃ ($9.99)' : 'Renew VIP for 365 Days ($9.99)')
+                  : currentUser?.subscriptionStatus === 'pending'
+                  ? (isKm ? '⏳ មើលស្ថានភាពសំណើដំឡើង VIP' : 'View Pending Request Status')
+                  : currentUser?.subscriptionStatus === 'expired'
+                  ? (isKm ? '🔄 បន្តសមាជិកភាព VIP ឡើងវិញ ($9.99/ឆ្នាំ)' : 'Renew VIP Membership ($9.99/yr)')
                   : (isKm ? '👑 ដំឡើងទៅជា Premium VIP ($9.99/ឆ្នាំ)' : 'Upgrade to Premium VIP ($9.99/yr)')}
               </span>
             </button>
