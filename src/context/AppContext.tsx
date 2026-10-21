@@ -2,9 +2,13 @@ import React, { createContext, useContext, useState, useEffect, useRef } from 'r
 import { 
   User, FoodItem, Restaurant, TouristDestination, CommunityPost, 
   Language, UserRole, AppSettings, RegistrationTransaction,
-  RestaurantMenuItem, MembershipTier, isRestaurantPremiumActive,
+  RestaurantMenuItem, MembershipTier, isRestaurantPremiumActive, isUserVipActive, getVipRemainingDays,
   Wishlist, WishlistItem, TripPlan, AppNotification
 } from '../types';
+import { 
+  verifyPaymentOnBackend, calculateVipDates, checkEligibleRestoration,
+  VIP_ANNUAL_PRICE_USD, VIP_SUBSCRIPTION_DAYS, PaymentVerificationRequest
+} from '../services/paymentService';
 import { 
   initialUsers, initialFoods, initialRestaurants, 
   initialDestinations, initialCommunityPosts, initialAppSettings, initialTransactions 
@@ -187,6 +191,14 @@ interface AppContextType {
   
   // Reset & Backup
   resetAllData: () => void;
+
+  // Premium VIP Subscription ($9.99/year)
+  isUpgradeVipModalOpen: boolean;
+  setIsUpgradeVipModalOpen: (open: boolean) => void;
+  openUpgradeVipModal: () => void;
+  upgradeCurrentUserToVip: (paymentMethod: 'GooglePlayBilling' | 'KHQR' | 'Bakong' | 'Card', transactionRef: string, last4?: string) => Promise<{ success: boolean; error?: string }>;
+  renewCurrentUserVip: (paymentMethod: 'GooglePlayBilling' | 'KHQR' | 'Bakong' | 'Card', transactionRef: string) => Promise<{ success: boolean; error?: string }>;
+  restoreCurrentUserVipPurchases: () => Promise<{ success: boolean; restored: boolean; message: string }>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -490,6 +502,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isAiTripPlannerModalOpen, setIsAiTripPlannerModalOpen] = useState(false);
   const [isNotificationsModalOpen, setIsNotificationsModalOpen] = useState(false);
   const [isTrendingSocialModalOpen, setIsTrendingSocialModalOpen] = useState(false);
+  const [isUpgradeVipModalOpen, setIsUpgradeVipModalOpen] = useState(false);
+  const openUpgradeVipModal = () => setIsUpgradeVipModalOpen(true);
   const [targetWishlistItem, setTargetWishlistItem] = useState<WishlistItem | null>(null);
 
   // Personalized Wishlists
@@ -710,6 +724,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     try {
       if (currentUser) {
         localStorage.setItem('kft_current_user_v4', JSON.stringify(currentUser));
+        
+        // Automatic VIP subscription expiry enforcement
+        if (currentUser.membershipTier === 'premium_vip' && currentUser.subscriptionExpiryDate) {
+          const isExpired = new Date(currentUser.subscriptionExpiryDate).getTime() <= Date.now();
+          if (isExpired) {
+            const downgraded: User = {
+              ...currentUser,
+              membershipTier: 'free',
+              subscriptionStatus: 'expired'
+            };
+            setCurrentUser(downgraded);
+            setUsers(prev => prev.map(u => u.id === currentUser.id ? downgraded : u));
+          }
+        }
       } else {
         localStorage.removeItem('kft_current_user_v4');
         setIsAuthModalOpen(true);
@@ -1700,9 +1728,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const verifyTransaction = (txnId: string) => {
     let targetRestId = '';
+    let targetUserId = '';
     setTransactions(prev => prev.map(t => {
       if (t.id !== txnId) return t;
-      targetRestId = t.restaurantId;
+      targetRestId = t.restaurantId || '';
+      targetUserId = t.userId || '';
       return {
         ...t,
         status: 'verified',
@@ -1729,6 +1759,32 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }));
     }
 
+    if (targetUserId) {
+      const now = new Date();
+      const expiresAt = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
+      setUsers(prev => prev.map(u => {
+        if (u.id !== targetUserId) return u;
+        return {
+          ...u,
+          membershipTier: 'premium_vip',
+          subscriptionStartDate: now.toISOString(),
+          subscriptionExpiryDate: expiresAt.toISOString(),
+          subscriptionStatus: 'active',
+          paymentStatus: 'verified'
+        };
+      }));
+      if (currentUser?.id === targetUserId) {
+        setCurrentUser(prev => prev ? {
+          ...prev,
+          membershipTier: 'premium_vip',
+          subscriptionStartDate: now.toISOString(),
+          subscriptionExpiryDate: expiresAt.toISOString(),
+          subscriptionStatus: 'active',
+          paymentStatus: 'verified'
+        } : null);
+      }
+    }
+
     showToast(
       language === 'km' 
         ? 'បានផ្ទៀងផ្ទាត់ការទូទាត់ $4.99 និងធ្វើឱ្យសមាជិកភាព Premium សកម្ម ៣៦៥ ថ្ងៃជោគជ័យ!' 
@@ -1741,7 +1797,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     let targetRestId = '';
     setTransactions(prev => prev.map(t => {
       if (t.id !== txnId) return t;
-      targetRestId = t.restaurantId;
+      targetRestId = t.restaurantId || '';
       return {
         ...t,
         status: 'rejected',
@@ -1765,6 +1821,231 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         : 'Transaction rejected',
       'info'
     );
+  };
+
+  // User VIP Upgrade & Renewal Methods ($9.99 USD / 365 Days)
+  const upgradeCurrentUserToVip = async (
+    paymentMethod: 'GooglePlayBilling' | 'KHQR' | 'Bakong' | 'Card',
+    transactionRef: string,
+    last4?: string
+  ): Promise<{ success: boolean; error?: string }> => {
+    if (!currentUser) {
+      setIsAuthModalOpen(true);
+      return { success: false, error: 'Please sign in first.' };
+    }
+
+    try {
+      const req: PaymentVerificationRequest = {
+        userId: currentUser.id,
+        userEmail: currentUser.email,
+        userName: currentUser.name,
+        paymentMethod,
+        transactionRef,
+        amountUsd: VIP_ANNUAL_PRICE_USD,
+        nonce: `vip_nonce_${Date.now()}`,
+        timestamp: Date.now(),
+        paymentToken: last4 ? `card_${last4}` : undefined
+      };
+
+      const result = await verifyPaymentOnBackend(req);
+      if (!result.success) {
+        const failedTxn: RegistrationTransaction = {
+          id: `TXN-VIP-FAIL-${Date.now().toString(36).toUpperCase()}`,
+          type: 'user_vip_upgrade',
+          userId: currentUser.id,
+          userName: currentUser.name,
+          userEmail: currentUser.email,
+          amountUsd: VIP_ANNUAL_PRICE_USD,
+          durationDays: 365,
+          membershipTier: 'premium_vip',
+          status: 'failed',
+          paymentMethod,
+          transactionRef,
+          createdAt: new Date().toISOString(),
+          notes: result.error || 'Payment verification failed'
+        };
+        setTransactions(prev => [failedTxn, ...prev]);
+
+        showToast(
+          language === 'km' 
+            ? `ការផ្ទៀងផ្ទាត់មិនជោគជ័យ៖ ${result.error || 'សូមព្យាយាមម្តងទៀត'}` 
+            : `Verification failed: ${result.error || 'Please try again'}`,
+          'warning'
+        );
+        return { success: false, error: result.error };
+      }
+
+      // Upgrade existing account
+      const updatedUser: User = {
+        ...currentUser,
+        membershipTier: 'premium_vip',
+        subscriptionStartDate: result.startDate,
+        subscriptionExpiryDate: result.expiryDate,
+        subscriptionStatus: 'active',
+        paymentStatus: 'verified',
+        paymentMethod,
+        transactionRef: result.transactionRef,
+        autoRenew: true
+      };
+
+      setCurrentUser(updatedUser);
+      setUsers(prev => prev.map(u => u.id === currentUser.id ? updatedUser : u));
+
+      // Record verified transaction securely
+      const verifiedTxn: RegistrationTransaction = {
+        id: `TXN-VIP-${Date.now().toString(36).toUpperCase()}-${Math.floor(100 + Math.random() * 900)}`,
+        type: 'user_vip_upgrade',
+        userId: currentUser.id,
+        userName: currentUser.name,
+        userEmail: currentUser.email,
+        ownerId: currentUser.id,
+        ownerName: currentUser.name,
+        amountUsd: VIP_ANNUAL_PRICE_USD,
+        durationDays: 365,
+        membershipTier: 'premium_vip',
+        status: 'verified',
+        paymentMethod,
+        transactionRef: result.transactionRef,
+        verificationSignature: result.verificationSignature,
+        createdAt: result.startDate,
+        expiresAt: result.expiryDate,
+        verifiedAt: new Date().toISOString().replace('T', ' ').slice(0, 16),
+        verifiedBy: paymentMethod === 'GooglePlayBilling' ? 'Google Play Billing Server' : 'Secure Payment Engine',
+        notes: `365-day Premium VIP membership activated successfully ($9.99 USD/year)`
+      };
+
+      setTransactions(prev => [verifiedTxn, ...prev]);
+
+      // Upgrade user's restaurants to VIP benefits
+      setRestaurants(prev => prev.map(r => {
+        if (r.ownerId !== currentUser.id) return r;
+        return {
+          ...r,
+          membershipTier: 'premium',
+          membershipExpiresAt: result.expiryDate,
+          isPromoted: true,
+          isVerified: true
+        };
+      }));
+
+      showToast(
+        language === 'km' 
+          ? 'អបអរសាទរ! គណនីរបស់អ្នកត្រូវបានដំឡើងទៅជា Premium VIP (៣៦៥ ថ្ងៃ) ដោយជោគជ័យ! 🎉' 
+          : 'Congratulations! Your account has been upgraded to Premium VIP (365 days)! 🎉',
+        'success'
+      );
+
+      return { success: true };
+    } catch (e: any) {
+      console.error('Upgrade to VIP error:', e);
+      return { success: false, error: e?.message || 'Unexpected payment error' };
+    }
+  };
+
+  const renewCurrentUserVip = async (
+    paymentMethod: 'GooglePlayBilling' | 'KHQR' | 'Bakong' | 'Card',
+    transactionRef: string
+  ): Promise<{ success: boolean; error?: string }> => {
+    if (!currentUser) return { success: false, error: 'Please sign in first.' };
+
+    const dates = calculateVipDates(currentUser.subscriptionExpiryDate);
+    const req: PaymentVerificationRequest = {
+      userId: currentUser.id,
+      userEmail: currentUser.email,
+      userName: currentUser.name,
+      paymentMethod,
+      transactionRef,
+      amountUsd: VIP_ANNUAL_PRICE_USD,
+      nonce: `renew_nonce_${Date.now()}`,
+      timestamp: Date.now()
+    };
+
+    const result = await verifyPaymentOnBackend(req);
+    if (!result.success) {
+      showToast(result.error || 'Renewal failed', 'warning');
+      return { success: false, error: result.error };
+    }
+
+    const renewedUser: User = {
+      ...currentUser,
+      membershipTier: 'premium_vip',
+      subscriptionStartDate: dates.startDate,
+      subscriptionExpiryDate: dates.expiryDate,
+      subscriptionStatus: 'active',
+      paymentStatus: 'verified',
+      paymentMethod,
+      transactionRef: result.transactionRef,
+      autoRenew: true
+    };
+
+    setCurrentUser(renewedUser);
+    setUsers(prev => prev.map(u => u.id === currentUser.id ? renewedUser : u));
+
+    const renewTxn: RegistrationTransaction = {
+      id: `TXN-VIP-RENEW-${Date.now().toString(36).toUpperCase()}`,
+      type: 'user_vip_upgrade',
+      userId: currentUser.id,
+      userName: currentUser.name,
+      userEmail: currentUser.email,
+      ownerId: currentUser.id,
+      ownerName: currentUser.name,
+      amountUsd: VIP_ANNUAL_PRICE_USD,
+      durationDays: 365,
+      membershipTier: 'premium_vip',
+      status: 'verified',
+      paymentMethod,
+      transactionRef: result.transactionRef,
+      verificationSignature: result.verificationSignature,
+      createdAt: dates.startDate,
+      expiresAt: dates.expiryDate,
+      verifiedAt: new Date().toISOString().replace('T', ' ').slice(0, 16),
+      verifiedBy: 'Google Play / Verified Payment Engine',
+      notes: `VIP subscription renewed (+365 days)`
+    };
+    setTransactions(prev => [renewTxn, ...prev]);
+
+    showToast(
+      language === 'km' 
+        ? 'ការបន្តសមាជិកភាព VIP ៣៦៥ ថ្ងៃជោគជ័យ! 🎉' 
+        : 'VIP subscription renewed for 365 days successfully! 🎉',
+      'success'
+    );
+    return { success: true };
+  };
+
+  const restoreCurrentUserVipPurchases = async (): Promise<{ success: boolean; restored: boolean; message: string }> => {
+    if (!currentUser) {
+      return { success: false, restored: false, message: 'Please sign in first.' };
+    }
+
+    const eligible = checkEligibleRestoration(currentUser.id, currentUser.email, transactions);
+    if (!eligible || !eligible.expiresAt) {
+      const msg = language === 'km' 
+        ? 'មិនមានការទូទាត់ VIP ដែលត្រូវស្តារឡើងវិញសម្រាប់គណនីនេះទេ' 
+        : 'No active VIP purchases found to restore for this account.';
+      showToast(msg, 'info');
+      return { success: true, restored: false, message: msg };
+    }
+
+    const restoredUser: User = {
+      ...currentUser,
+      membershipTier: 'premium_vip',
+      subscriptionStartDate: eligible.createdAt,
+      subscriptionExpiryDate: eligible.expiresAt,
+      subscriptionStatus: 'active',
+      paymentStatus: 'verified',
+      paymentMethod: eligible.paymentMethod,
+      transactionRef: eligible.transactionRef
+    };
+
+    setCurrentUser(restoredUser);
+    setUsers(prev => prev.map(u => u.id === currentUser.id ? restoredUser : u));
+
+    const successMsg = language === 'km' 
+      ? `ការជាវ VIP របស់អ្នកត្រូវបានស្តារឡើងវិញដោយជោគជ័យ (ផុតកំណត់៖ ${eligible.expiresAt.split('T')[0]})! 🎉` 
+      : `Your VIP subscription has been restored successfully (Expires: ${eligible.expiresAt.split('T')[0]})! 🎉`;
+    showToast(successMsg, 'success');
+    return { success: true, restored: true, message: successMsg };
   };
 
   // Wishlist methods
@@ -2100,6 +2381,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         targetWishlistItem,
         setTargetWishlistItem,
         openAddToWishlist,
+
+        // Premium VIP Subscription ($9.99/year)
+        isUpgradeVipModalOpen,
+        setIsUpgradeVipModalOpen,
+        openUpgradeVipModal,
+        upgradeCurrentUserToVip,
+        renewCurrentUserVip,
+        restoreCurrentUserVipPurchases,
       }}
     >
       {children}

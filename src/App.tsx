@@ -26,6 +26,7 @@ import { WishlistsModal } from './components/WishlistsModal';
 import { AiTripPlannerModal } from './components/AiTripPlannerModal';
 import { NotificationsModal } from './components/NotificationsModal';
 import { TrendingSocialModal } from './components/TrendingSocialModal';
+import { UpgradeVipModal } from './components/UpgradeVipModal';
 import { Toast } from './components/Toast';
 
 const MainScreen: React.FC = () => {
@@ -79,6 +80,7 @@ const MainScreen: React.FC = () => {
       <AiTripPlannerModal />
       <NotificationsModal />
       <TrendingSocialModal />
+      <UpgradeVipModal />
 
       {/* Notifications */}
       <Toast />

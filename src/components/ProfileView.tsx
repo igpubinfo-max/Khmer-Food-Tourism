@@ -7,9 +7,9 @@ import {
   User as UserIcon, Heart, Shield, Store, 
   Globe, LogOut, RefreshCw, Download, Sparkles, UtensilsCrossed, ShieldCheck, CheckCircle2,
   Bot, Bell, Compass, Calendar, Bookmark, Plus, MapPin, Trash2, Share2, Tag, Utensils, ChevronRight,
-  Edit2, Check, X as CloseIcon
+  Edit2, Check, X as CloseIcon, Crown, Star, Zap, Award
 } from 'lucide-react';
-import { isRestaurantPremiumActive } from '../types';
+import { isRestaurantPremiumActive, isUserVipActive, getVipRemainingDays, TEN_VIP_BENEFITS } from '../types';
 
 export const ProfileView: React.FC = () => {
   const { 
@@ -23,12 +23,16 @@ export const ProfileView: React.FC = () => {
     setIsInstallModalOpen, setIsSupportModalOpen, setIsAddRestaurantModalOpen,
     setManagingRestaurant, setIsManageMenuModalOpen,
     setSelectedFood, setSelectedRestaurant, setSelectedDestination,
-    resetAllData, showToast, updateCurrentUserProfile
+    resetAllData, showToast, updateCurrentUserProfile,
+    openUpgradeVipModal
   } = useApp();
 
   const isKm = language === 'km';
   const isOwner = currentUser?.role === 'owner';
-  const [activeSubTab, setActiveSubTab] = useState<'bookmarks' | 'wishlists' | 'tripplans' | 'myposts' | 'settings' | 'myrestaurant'>(
+  const isVip = isUserVipActive(currentUser);
+  const remainingDays = getVipRemainingDays(currentUser);
+
+  const [activeSubTab, setActiveSubTab] = useState<'bookmarks' | 'wishlists' | 'tripplans' | 'myposts' | 'settings' | 'myrestaurant' | 'membership'>(
     isOwner ? 'myrestaurant' : 'wishlists'
   );
   const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState(false);
@@ -107,8 +111,18 @@ export const ProfileView: React.FC = () => {
                   </div>
                 )}
                 
-                {/* Verified Badge & Role */}
+                {/* Verified Badge & Role & VIP Status */}
                 <div className="flex items-center gap-1.5 flex-wrap mt-1">
+                  {isVip ? (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black bg-gradient-to-r from-amber-200 to-amber-300 text-amber-950 border border-amber-400 shadow-2xs font-khmer">
+                      <Crown className="w-3.5 h-3.5 fill-amber-700 text-amber-700" />
+                      <span>{isKm ? 'Premium VIP 🌟' : 'Premium VIP 🌟'}</span>
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-600 shadow-2xs font-khmer">
+                      <span>{isKm ? 'គណនីឥតគិតថ្លៃ (Free)' : 'Free User'}</span>
+                    </span>
+                  )}
                   <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 shadow-2xs font-khmer">
                     <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                     <span>{isKm ? 'គណនីបានផ្ទៀងផ្ទាត់ ✓' : 'Verified Account ✓'}</span>
@@ -185,6 +199,62 @@ export const ProfileView: React.FC = () => {
             </div>
           </div>
         )}
+      </div>
+
+      {/* Membership Status & VIP Upgrade Banner Card */}
+      <div className={`p-4 rounded-3xl border shadow-xs transition ${
+        isVip 
+          ? 'bg-gradient-to-r from-amber-500/15 via-emerald-500/10 to-teal-500/15 border-amber-400/60' 
+          : 'bg-gradient-to-r from-emerald-950/20 via-slate-900/10 to-amber-950/20 border-slate-200 dark:border-slate-700'
+      }`}>
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className={`p-2.5 rounded-2xl shrink-0 ${isVip ? 'bg-amber-400 text-slate-900 shadow-md' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'}`}>
+              <Crown className={`w-5 h-5 ${isVip ? 'fill-slate-900' : ''}`} />
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="text-xs font-bold text-slate-900 dark:text-white font-khmer">
+                  {isKm ? 'ស្ថានភាពសមាជិកភាព៖' : 'Membership:'}
+                </span>
+                <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold font-khmer ${
+                  isVip 
+                    ? 'bg-amber-400 text-slate-950 shadow-2xs' 
+                    : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
+                }`}>
+                  {isVip ? (isKm ? '🌟 Premium VIP (សកម្ម)' : '🌟 Premium VIP (Active)') : (isKm ? 'គណនីឥតគិតថ្លៃ (Free User)' : 'Free User')}
+                </span>
+              </div>
+              
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-khmer truncate">
+                {isVip ? (
+                  <span>
+                    {isKm 
+                      ? `ផុតកំណត់៖ ${currentUser?.subscriptionExpiryDate ? currentUser.subscriptionExpiryDate.split('T')[0] : ''} (${remainingDays} ថ្ងៃទៀត)`
+                      : `Expires: ${currentUser?.subscriptionExpiryDate ? currentUser.subscriptionExpiryDate.split('T')[0] : ''} (${remainingDays} days left)`}
+                  </span>
+                ) : (
+                  <span>
+                    {isKm 
+                      ? 'ដំឡើងទៅជា Premium VIP ($9.99/ឆ្នាំ) ដើម្បីដោះសោអត្ថប្រយោជន៍ទាំង ១០!' 
+                      : 'Upgrade to Premium VIP ($9.99/year) to unlock all 10 benefits!'}
+                  </span>
+                )}
+              </p>
+            </div>
+          </div>
+
+          <button
+            onClick={openUpgradeVipModal}
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold font-khmer shadow-xs transition shrink-0 active:scale-95 ${
+              isVip 
+                ? 'bg-amber-500 hover:bg-amber-600 text-white' 
+                : 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-amber-500/20'
+            }`}
+          >
+            {isVip ? (isKm ? '🔄 បន្ត VIP' : 'Renew VIP') : (isKm ? '👑 ដំឡើង VIP' : 'Upgrade VIP')}
+          </button>
+        </div>
       </div>
 
       {/* App Installation & Support Buttons Showcase */}
@@ -391,6 +461,17 @@ export const ProfileView: React.FC = () => {
         </button>
 
         <button
+          onClick={() => setActiveSubTab('membership')}
+          className={`py-2.5 font-bold text-center border-b-2 transition whitespace-nowrap px-3 ${
+            activeSubTab === 'membership'
+              ? 'border-amber-500 text-amber-600 dark:border-amber-400 dark:text-amber-400 font-extrabold'
+              : 'border-transparent text-slate-400 hover:text-slate-700'
+          }`}
+        >
+          {isKm ? (isVip ? '👑 សមាជិក VIP' : '👑 សមាជិកភាព') : '👑 Membership'}
+        </button>
+
+        <button
           onClick={() => setActiveSubTab('settings')}
           className={`py-2.5 font-bold text-center border-b-2 transition whitespace-nowrap px-3 ${
             activeSubTab === 'settings'
@@ -521,6 +602,125 @@ export const ProfileView: React.FC = () => {
               );
             })
           )}
+        </div>
+      )}
+
+      {/* Tab: Membership Page */}
+      {activeSubTab === 'membership' && (
+        <div className="space-y-4 font-khmer">
+          {/* Header Card */}
+          <div className="p-4 rounded-3xl bg-gradient-to-br from-amber-500/20 via-emerald-500/10 to-teal-500/15 border-2 border-amber-400/50 shadow-xs space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-2xl bg-amber-400 text-slate-900 shadow-md">
+                  <Crown className="w-6 h-6 fill-slate-900" />
+                </div>
+                <div>
+                  <h4 className="font-moul text-sm text-slate-900 dark:text-white">
+                    {isKm ? 'ទំព័រសមាជិកភាព (VIP Membership Page)' : 'VIP Membership Page'}
+                  </h4>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                    {isKm ? 'គម្រោងប្រចាំឆ្នាំ $9.99 USD / ៣៦៥ ថ្ងៃ' : '$9.99 USD / 365 Days Annual Plan'}
+                  </p>
+                </div>
+              </div>
+
+              <span className={`px-2.5 py-1 rounded-full text-xs font-black ${
+                isVip 
+                  ? 'bg-amber-400 text-slate-950 shadow-xs' 
+                  : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
+              }`}>
+                {isVip ? (isKm ? '🌟 Premium VIP' : '🌟 Premium VIP') : (isKm ? 'Free User' : 'Free User')}
+              </span>
+            </div>
+
+            {/* Details */}
+            <div className="p-3 bg-white/70 dark:bg-slate-800/70 rounded-2xl border border-slate-200 dark:border-slate-700 text-xs space-y-1.5">
+              <div className="flex justify-between">
+                <span className="text-slate-500">{isKm ? 'ស្ថានភាពបច្ចុប្បន្ន៖' : 'Current Status:'}</span>
+                <span className="font-bold text-slate-900 dark:text-white">
+                  {isVip ? (isKm ? 'កំពុងដំណើរការ (Active)' : 'Active') : (isKm ? 'គណនីឥតគិតថ្លៃ (Free Account)' : 'Free Account')}
+                </span>
+              </div>
+              {isVip && (
+                <>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">{isKm ? 'កាលបរិច្ឆេទផុតកំណត់៖' : 'Expiry Date:'}</span>
+                    <span className="font-mono font-bold text-emerald-600">
+                      {currentUser?.subscriptionExpiryDate ? currentUser.subscriptionExpiryDate.split('T')[0] : 'N/A'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">{isKm ? 'រយៈពេលដែលនៅសល់៖' : 'Remaining Period:'}</span>
+                    <span className="font-bold text-amber-600 dark:text-amber-400">
+                      {remainingDays} {isKm ? 'ថ្ងៃ' : 'Days'}
+                    </span>
+                  </div>
+                  {currentUser?.transactionRef && (
+                    <div className="flex justify-between text-[11px]">
+                      <span className="text-slate-500">Trx Ref:</span>
+                      <span className="font-mono text-slate-600 dark:text-slate-400 truncate max-w-[180px]">
+                        {currentUser.transactionRef}
+                      </span>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+
+            {/* Upgrade / Renew CTA */}
+            <button
+              onClick={openUpgradeVipModal}
+              className="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-1.5"
+            >
+              <Crown className="w-4 h-4 fill-white" />
+              <span>
+                {isVip 
+                  ? (isKm ? '🔄 បន្តសមាជិកភាព VIP ៣៦៥ ថ្ងៃ ($9.99)' : 'Renew VIP for 365 Days ($9.99)')
+                  : (isKm ? '👑 ដំឡើងទៅជា Premium VIP ($9.99/ឆ្នាំ)' : 'Upgrade to Premium VIP ($9.99/yr)')}
+              </span>
+            </button>
+          </div>
+
+          {/* 10 Benefits Check-list */}
+          <div className="space-y-2">
+            <h5 className="font-bold text-xs text-slate-900 dark:text-white flex items-center gap-1.5">
+              <Sparkles className="w-4 h-4 text-amber-500" />
+              <span>{isKm ? 'អត្ថប្រយោជន៍ទាំង ១០ យ៉ាងនៃ Premium VIP:' : 'All 10 Premium VIP Benefits:'}</span>
+            </h5>
+
+            <div className="space-y-2">
+              {TEN_VIP_BENEFITS.map(b => (
+                <div 
+                  key={b.id}
+                  className="p-3 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 shadow-2xs flex items-start gap-2.5"
+                >
+                  <div className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 text-xs font-bold font-mono ${
+                    isVip 
+                      ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' 
+                      : 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
+                  }`}>
+                    {b.id}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-slate-900 dark:text-white">
+                        {isKm ? b.titleKh : b.titleEn}
+                      </span>
+                      <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded-md ${
+                        isVip ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-400'
+                      }`}>
+                        {isVip ? '✓ Active' : 'Locked'}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
+                      {isKm ? b.descriptionKh : b.descriptionEn}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       )}
 
@@ -701,6 +901,27 @@ export const ProfileView: React.FC = () => {
       {/* Tab: Settings */}
       {activeSubTab === 'settings' && (
         <div className="p-4 bg-white dark:bg-slate-800 rounded-3xl border border-slate-200/90 dark:border-slate-700 space-y-3 text-xs font-khmer shadow-xs">
+          {/* VIP Membership Management */}
+          <div className="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-700">
+            <div>
+              <span className="font-medium text-[#0F172A] dark:text-slate-200 flex items-center gap-2">
+                <Crown className="w-4 h-4 text-amber-500" />
+                {isKm ? 'គ្រប់គ្រងសមាជិកភាព (VIP Membership)' : 'VIP Membership'}
+              </span>
+              <p className="text-[10px] text-slate-500 pl-6">
+                {isVip 
+                  ? (isKm ? `ស្ថានភាព៖ Premium VIP (${remainingDays} ថ្ងៃទៀត)` : `Status: Premium VIP (${remainingDays} days left)`)
+                  : (isKm ? 'ស្ថានភាព៖ គណនីឥតគិតថ្លៃ • $9.99/ឆ្នាំ' : 'Status: Free User • $9.99/year')}
+              </p>
+            </div>
+            <button
+              onClick={openUpgradeVipModal}
+              className="px-3 py-1 rounded-xl bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 font-bold border border-amber-300 hover:bg-amber-100 transition"
+            >
+              {isVip ? (isKm ? 'គ្រប់គ្រង / បន្ត' : 'Manage') : (isKm ? 'ដំឡើង VIP' : 'Upgrade')}
+            </button>
+          </div>
+
           {/* Language Switch */}
           <div className="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-700">
             <span className="font-medium text-[#0F172A] dark:text-slate-200 flex items-center gap-2">

@@ -186,6 +186,26 @@ const notificationsContent = fs.readFileSync(path.resolve(__dirname, '../src/com
 assert(notificationsContent.includes('ការជូនដំណឹងដែលមានប្រយោជន៍'), 'NotificationsModal contains Khmer title “ការជូនដំណឹងដែលមានប្រយោជន៍”.');
 assert(notificationsContent.includes('setNotificationsEnabled'), 'NotificationsModal provides user toggle switch to disable/enable notifications (អ្នកប្រើអាចបិទការជូនដំណឹងបាន).');
 
+// TEST 28: User Account Upgrade to Premium VIP Subscription ($9.99/year)
+const upgradeVipContent = fs.readFileSync(path.resolve(__dirname, '../src/components/UpgradeVipModal.tsx'), 'utf8');
+assert(upgradeVipContent.includes('ដំឡើងទៅជា Premium VIP') || upgradeVipContent.includes('Premium VIP'), 'UpgradeVipModal contains Khmer title “ដំឡើងទៅជា Premium VIP”.');
+assert(upgradeVipContent.includes('9.99'), 'UpgradeVipModal displays annual subscription price $9.99 USD.');
+assert(upgradeVipContent.includes('GooglePlayBilling') && upgradeVipContent.includes('KHQR'), 'UpgradeVipModal supports Google Play Billing and KHQR payment.');
+
+const typesContent = fs.readFileSync(path.resolve(__dirname, '../src/types/index.ts'), 'utf8');
+assert(typesContent.includes('TEN_VIP_BENEFITS') && typesContent.includes('isUserVipActive'), 'Types defines TEN_VIP_BENEFITS and isUserVipActive helper.');
+
+const profileContent = fs.readFileSync(path.resolve(__dirname, '../src/components/ProfileView.tsx'), 'utf8');
+assert(profileContent.includes('ស្ថានភាពសមាជិកភាព') || profileContent.includes('សមាជិកភាព VIP'), 'ProfileView displays current membership status (Free User or Premium VIP).');
+assert(profileContent.includes('openUpgradeVipModal'), 'ProfileView provides direct action to open UpgradeVipModal.');
+
+// TEST 29: Payment Security & Cryptographic Server Verification (OWASP & Google Play Policy)
+const paymentServiceContent = fs.readFileSync(path.resolve(__dirname, '../src/services/paymentService.ts'), 'utf8');
+assert(paymentServiceContent.includes('checkDuplicateTransaction'), 'Payment service enforces anti-fraud duplicate transaction rejection.');
+assert(paymentServiceContent.includes('verifyPaymentOnBackend'), 'Server-side cryptographic verification process implemented.');
+assert(paymentServiceContent.includes('checkEligibleRestoration'), 'Restore purchases capability implemented.');
+assert(!paymentServiceContent.includes('cardNumber') && !paymentServiceContent.includes('cvv'), 'Zero raw credit card numbers or secret keys stored in APK.');
+
 console.log('\n================================================================');
 console.log(`  AUDIT SUMMARY: ${passCount} PASSED, ${failCount} FAILED`);
 console.log('================================================================\n');

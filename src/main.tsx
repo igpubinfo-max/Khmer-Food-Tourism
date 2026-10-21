@@ -4,23 +4,19 @@ import './index.css'
 import App from './App.tsx'
 import { ErrorBoundary } from './components/ErrorBoundary.tsx'
 
-// 0. Version Migration: Purge legacy corrupted storage on upgrade to v1.5.1
+// 0. Version Migration: Safe non-destructive upgrade to v1.5.2
 try {
-  const CURRENT_VER = '1.5.1';
+  const CURRENT_VER = '1.5.2';
   const installedVer = localStorage.getItem('kft_app_installed_ver');
   if (installedVer !== CURRENT_VER) {
-    const savedUser = localStorage.getItem('kft_current_user_v4');
-    if (savedUser && (savedUser.includes('vannak') || savedUser.includes('user-1') || savedUser.includes('ចាន់ថា'))) {
-      localStorage.removeItem('kft_current_user_v4');
+    // Keep all existing user accounts, credentials, and v4 data intact
+    if (!installedVer) {
+      localStorage.removeItem('kft_foods_100_v1');
+      localStorage.removeItem('kft_restaurants_membership_v1');
+      localStorage.removeItem('kft_destinations_100_v1');
+      localStorage.removeItem('kft_restaurants_v3');
+      localStorage.removeItem('kft_posts_v3');
     }
-    localStorage.removeItem('kft_foods_100_v1');
-    localStorage.removeItem('kft_restaurants_membership_v1');
-    localStorage.removeItem('kft_destinations_100_v1');
-    localStorage.removeItem('kft_restaurants_v3');
-    localStorage.removeItem('kft_restaurants_v4');
-    localStorage.removeItem('kft_foods_v4');
-    localStorage.removeItem('kft_posts_v4');
-    localStorage.removeItem('kft_posts_v3');
     localStorage.setItem('kft_app_installed_ver', CURRENT_VER);
   }
 } catch (e) {

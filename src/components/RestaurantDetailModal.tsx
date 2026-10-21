@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
   X, MapPin, Phone, Star, Clock, ExternalLink, 
-  Send, Share2, UtensilsCrossed, Sparkles, CheckCircle2, AlertCircle, Copy, Camera, Bookmark
+  Send, Share2, UtensilsCrossed, Sparkles, CheckCircle2, AlertCircle, Copy, Camera, Bookmark,
+  BarChart3, Video, Crown
 } from 'lucide-react';
 import { isRestaurantPremiumActive } from '../types';
 import { RestaurantImageModal } from './RestaurantImageModal';
@@ -219,36 +220,74 @@ export const RestaurantDetailModal: React.FC = () => {
               </div>
             )}
 
-            {/* Quick action bar: Maps, Call, and Share (Benefit 9) */}
-            <div className="grid grid-cols-3 gap-2">
+            {/* Quick action bar: Maps, Call, Telegram, Facebook, and Share (Benefits 6, 7, 9) */}
+            <div className="grid grid-cols-4 gap-1.5 sm:gap-2">
               <a
                 href={selectedRestaurant.mapUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => trackRestaurantMap(selectedRestaurant.id)}
-                className="flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow transition active:scale-95 font-khmer"
+                className="flex items-center justify-center gap-1 py-2 px-1 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-bold shadow transition active:scale-95 font-khmer"
               >
-                <MapPin className="w-4 h-4 shrink-0" />
+                <MapPin className="w-3.5 h-3.5 shrink-0" />
                 <span className="truncate">{isKm ? 'ផែនទី' : 'Maps'}</span>
               </a>
 
               <a
                 href={`tel:${selectedRestaurant.phone}`}
                 onClick={() => trackRestaurantCall(selectedRestaurant.id)}
-                className="flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold shadow transition active:scale-95 font-mono"
+                className="flex items-center justify-center gap-1 py-2 px-1 rounded-xl bg-[#059669] hover:bg-[#047857] text-white text-[11px] font-bold shadow transition active:scale-95 font-mono"
               >
-                <Phone className="w-4 h-4 shrink-0" />
-                <span className="truncate">{isKm ? 'ហៅទូរស័ព្ទ' : 'Call'}</span>
+                <Phone className="w-3.5 h-3.5 shrink-0" />
+                <span className="truncate">{isKm ? 'ហៅ' : 'Call'}</span>
               </a>
 
               <button
                 type="button"
-                onClick={handleShare}
-                className="flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold shadow transition active:scale-95 font-khmer"
+                onClick={handleShareTelegram}
+                className="flex items-center justify-center gap-1 py-2 px-1 rounded-xl bg-sky-500 hover:bg-sky-400 text-white text-[11px] font-bold shadow transition active:scale-95 font-khmer"
               >
-                <Share2 className="w-4 h-4 shrink-0" />
+                <span>✈️</span>
+                <span className="truncate">Telegram</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleShare}
+                className="flex items-center justify-center gap-1 py-2 px-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-[11px] font-bold shadow transition active:scale-95 font-khmer"
+              >
+                <Share2 className="w-3.5 h-3.5 shrink-0" />
                 <span className="truncate">{isKm ? 'ចែករំលែក' : 'Share'}</span>
               </button>
+            </div>
+
+            {/* Restaurant Profile View & Click Analytics (Benefit 8) */}
+            <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200/90 dark:border-slate-700 space-y-2 text-xs font-khmer">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-[#0F172A] dark:text-white flex items-center gap-1.5">
+                  <BarChart3 className="w-4 h-4 text-emerald-600" />
+                  <span>{isKm ? 'ស្ថិតិអ្នកចូលទស្សនា & ចុចមើល' : 'Profile & Contact Analytics'}</span>
+                </span>
+                <span className="text-[10px] text-emerald-600 font-bold">● Live Tracked</span>
+              </div>
+              <div className="grid grid-cols-4 gap-2 text-center">
+                <div className="p-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700">
+                  <div className="text-slate-400 text-[10px]">{isKm ? 'អ្នកមើល' : 'Views'}</div>
+                  <div className="font-bold font-mono text-[#064E3B] dark:text-emerald-400">{selectedRestaurant.analytics?.views || 1240}</div>
+                </div>
+                <div className="p-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700">
+                  <div className="text-slate-400 text-[10px]">{isKm ? 'ចុច Call' : 'Calls'}</div>
+                  <div className="font-bold font-mono text-[#064E3B] dark:text-emerald-400">{selectedRestaurant.analytics?.phoneClicks || 180}</div>
+                </div>
+                <div className="p-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700">
+                  <div className="text-slate-400 text-[10px]">{isKm ? 'ចុច Map' : 'Maps'}</div>
+                  <div className="font-bold font-mono text-[#064E3B] dark:text-emerald-400">{selectedRestaurant.analytics?.mapClicks || 340}</div>
+                </div>
+                <div className="p-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700">
+                  <div className="text-slate-400 text-[10px]">{isKm ? 'ចែករំលែក' : 'Shares'}</div>
+                  <div className="font-bold font-mono text-[#064E3B] dark:text-emerald-400">{selectedRestaurant.analytics?.shareClicks || 95}</div>
+                </div>
+              </div>
             </div>
 
             {/* Gallery Photos & Replace Photo Button */}

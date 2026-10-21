@@ -60,7 +60,7 @@ jobs:
           echo "=== SEARCHING FOR GENERATED APK FILES ==="
           find . -name "*.apk" -ls
           cd android/app/build/outputs/apk/debug
-          cp app-debug.apk KhmerFoodTourism-v1.5.1.apk
+          cp app-debug.apk KhmerFoodTourism-v1.5.2.apk
           ls -la
 
       - name: 10. Upload Android APK Artifact
@@ -73,22 +73,36 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: v1.5.1
-          name: "Khmer Food & Tourism v1.5.1 (Streamlined Google Sign-In & Instant Email Auth)"
+          tag_name: v1.5.2
+          name: "Khmer Food & Tourism v1.5.2 (Premium VIP Upgrade & Subscription System)"
           overwrite: true
           make_latest: true
           body: |
             ### 🇰🇭 កម្មវិធីទូរស័ព្ទដៃ អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism Mobile App)
             
-            **កំណែថ្មី v1.5.1 (Streamlined Google Sign-In & Zero-Friction User Experience):**
-            - 🚀 **១. ផ្ទាំងចុះឈ្មោះថ្មីទាន់សម័យ និងងាយស្រួលបំផុត (Streamlined Welcome Screen):**
-              - បានដកចេញប្រអប់លេខទូរស័ព្ទ និង SMS OTP ស្មុគស្មាញ ដើម្បីជៀសវាងការយល់ច្រឡំ និងការចំណាយឥតប្រយោជន៍។
-              - បង្ហាញប៊ូតុងធំចម្បង «បន្តជាមួយ Google» (Continue with Google) ចូលប្រើភ្លាមៗក្នុងរយៈពេលតែ ១ វិនាទី (1-Tap Instant Sign-In)។
-            - 📧 **២. គាំទ្រការចុះឈ្មោះ និងចូលប្រើតាមអ៊ីមែល (Instant Email Auth)** ដោយឥតគិតថ្លៃ និងមិនបាច់រង់ចាំលេខកូដ។
-            - 🌐 **៣. ផ្សាយផ្ទាល់លើ GitHub Pages សម្រាប់ Apple iPhone (PWA Add to Home Screen)** តាមរយៈ `https://igpubinfo-max.github.io/Khmer-Food-Tourism/`។
-            - 🚪 **៤. ចាកចេញពីកម្មវិធីស្វ័យប្រវត្តិប្រសិនបើគ្មានគណនី (Auto-Exit Mandatory Gate)**។
-            - 🔐 **៥. ឥតគិតថ្លៃ ១០០% ជារៀងរហូត គ្មានការគិតថ្លៃសេវា SMS (Zero SMS fees)**។
-            - 📧 **៦. អាសយដ្ឋានអ៊ីមែលផ្លូវការ `kftcam@gmail.com`**។
+            **កំណែថ្មី v1.5.2 (Premium VIP Upgrade & Subscription Management System):**
+            - 🌟 **១. ប្រព័ន្ធដំឡើងគណនី Premium VIP ($9.99 USD / ឆ្នាំ):**
+              - រក្សាទុកគណនី និងទិន្នន័យដែលមានស្រាប់ ១០០% ដោយមិនបាច់ចុះឈ្មោះឡើងវិញ។
+              - បង្ហាញស្ថានភាពសមាជិកភាព Free User និង Premium VIP លើ Profile, Account Settings, និង Membership page។
+            - 💎 **២. អត្ថប្រយោជន៍ពិសេសទាំង ១០ សម្រាប់សមាជិក VIP (10 Premium VIP Benefits):**
+              1. Enhanced Restaurant Profile (ព័ត៌មានលម្អិតកម្រិតខ្ពស់)
+              2. More Food Photos & Menu Items (រូបភាព និងមុខម្ហូបរហូតដល់ ២០)
+              3. Promotional Video Uploads (វីដេអូផ្សព្វផ្សាយម្ហូបអាហារ)
+              4. Premium VIP Badge (ផ្លាកសញ្ញាបញ្ជាក់ភាពជា VIP)
+              5. Additional Promotional Placement (ការដាក់ផ្សាយពិសេស)
+              6. Highlighted Location on Map (ទីតាំងលេចធ្លោលើផែនទី និងរុករក)
+              7. Quick Contact Buttons (Call, Telegram, Facebook)
+              8. Live View & Contact Statistics (ស្ថិតិអ្នកចូលទស្សនា និងទំនាក់ទំនង)
+              9. Shareable Profile Link (តំណភ្ជាប់ចែករំលែកហាង)
+              10. Priority Search Visibility (ការបង្ហាញមុនគេក្នុងការស្វែងរក)
+            - 💳 **៣. ការទូទាត់ប្រាក់ប្រកបដោយសុវត្ថិភាពខ្ពស់ (Secure Payment Gateway):**
+              - គាំទ្រ Google Play Billing, KHQR / Bakong (CHEA KIMSENG), និង Credit/Debit Card។
+              - មានផ្ទាំងបញ្ជាក់ព័ត៌មាន (Confirmation Screen) មុនពេលបង់ប្រាក់។
+              - ការផ្ទៀងផ្ទាត់ Cryptographic HMAC-SHA256 និងការពារការបន្លំ Duplicate Transactions។
+            - ⏳ **៤. គ្រប់គ្រងសុពលភាព និងការបន្តគណនី (Subscription Renewal & Expiry Control):**
+              - បង្ហាញកាលបរិច្ឆេទផុតកំណត់ និងចំនួនថ្ងៃនៅសល់យ៉ាងច្បាស់លាស់។
+              - គាំទ្រការបន្តសុពលភាពមុនកាលកំណត់ (Renew early) និងការស្ដារការទិញ (Restore Purchases)។
+            - 🛡️ **៥. តារាងគ្រប់គ្រង Admin មានសុវត្ថិភាពខ្ពស់** សម្រាប់ពិនិត្យប្រតិបត្តិការ និងការផ្ទៀងផ្ទាត់។
           draft: false
           prerelease: false
           files: |

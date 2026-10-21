@@ -18,7 +18,120 @@ export interface User {
   authProvider?: 'google' | 'phone' | 'email';
   linkedProviders?: ('google' | 'phone' | 'email')[];
   createdAt: string;
+
+  // Premium VIP Subscription ($9.99 USD per year / 365 days)
+  membershipTier?: 'free' | 'premium_vip';
+  subscriptionStartDate?: string;
+  subscriptionExpiryDate?: string;
+  subscriptionStatus?: 'active' | 'expired' | 'pending' | 'cancelled';
+  paymentStatus?: 'verified' | 'pending_verification' | 'failed' | 'cancelled';
+  paymentMethod?: 'GooglePlayBilling' | 'KHQR' | 'Bakong' | 'Card' | 'Manual' | 'BankTransfer';
+  transactionRef?: string;
+  autoRenew?: boolean;
 }
+
+export interface VipBenefitItem {
+  id: number;
+  titleKh: string;
+  titleEn: string;
+  descriptionKh: string;
+  descriptionEn: string;
+  iconName: string;
+  category: 'profile' | 'promotion' | 'reach' | 'analytics';
+}
+
+export const TEN_VIP_BENEFITS: VipBenefitItem[] = [
+  {
+    id: 1,
+    titleKh: 'ទម្រង់ហាងកម្រិតខ្ពស់ (Enhanced Restaurant Profile)',
+    titleEn: 'Enhanced Restaurant Profile',
+    descriptionKh: 'កែប្រែទម្រង់ហាងជាមួយ Theme មាស និងផ្លាកសញ្ញាបញ្ជាក់ផ្លូវការ Iconic VIP',
+    descriptionEn: 'Customized golden theme, verified iconic badge, and custom branding for your restaurant.',
+    iconName: 'Sparkles',
+    category: 'profile'
+  },
+  {
+    id: 2,
+    titleKh: 'រូបថតច្រើនសន្លឹក & មុខម្ហូបរហូតដល់ ២០ មុខ (More Photos & Menu Items)',
+    titleEn: 'More Food Photos & Menu Items',
+    descriptionKh: 'បង្ហោះមុខម្ហូបក្នុងបញ្ជីបានរហូតដល់ ២០ មុខ ព្រមទាំងរូបថត Gallery ច្រើនសន្លឹក',
+    descriptionEn: 'Add up to 20 menu items (free accounts limited to 5) with high-res photo gallery.',
+    iconName: 'UtensilsCrossed',
+    category: 'profile'
+  },
+  {
+    id: 3,
+    titleKh: 'បង្ហោះវីដេអូផ្សព្វផ្សាយម្ហូប (Food Promotional Video Uploads)',
+    titleEn: 'Food Promotional Video Uploads',
+    descriptionKh: 'ភ្ជាប់វីដេអូផ្សព្វផ្សាយម្ហូប YouTube, TikTok ឬ MP4 លើទំព័រហាងផ្ទាល់',
+    descriptionEn: 'Embed promotional video clips (YouTube, TikTok, MP4) directly on restaurant cards.',
+    iconName: 'Video',
+    category: 'promotion'
+  },
+  {
+    id: 4,
+    titleKh: 'ផ្លាកសញ្ញា VIP Badge មាស (Premium VIP Badge)',
+    titleEn: 'Premium VIP Badge',
+    descriptionKh: 'បង្ហាញផ្លាកសញ្ញា VIP ពណ៌មាសលើកម្រង Profile, Comments និងកាតហាង',
+    descriptionEn: 'Distinguished golden VIP badge on your profile, comments, reviews, and restaurant listings.',
+    iconName: 'Crown',
+    category: 'profile'
+  },
+  {
+    id: 5,
+    titleKh: 'ទីតាំងផ្សព្វផ្សាយពិសេស (Additional Promotional Placement)',
+    titleEn: 'Additional Promotional Placement',
+    descriptionKh: 'ទទួលបានការផ្សព្វផ្សាយលើគេក្នុងទំព័រដើម Home Screen និងបញ្ជី Top Recommended',
+    descriptionEn: 'Prime featured spot on the home page carousel and top recommendations section.',
+    iconName: 'Flame',
+    category: 'promotion'
+  },
+  {
+    id: 6,
+    titleKh: 'ទីតាំងច្បាស់លាស់លើផែនទី (Restaurant Location on Map)',
+    titleEn: 'Restaurant Location on the Map',
+    descriptionKh: 'សម្គាល់ទីតាំងហាងដោយ Pin ពណ៌មាសលើផែនទី GPS និងប៊ូតុងនាំផ្លូវ 1-Tap Directions',
+    descriptionEn: 'Highlighted golden map pin with instant turn-by-turn navigation for visitors.',
+    iconName: 'MapPin',
+    category: 'reach'
+  },
+  {
+    id: 7,
+    titleKh: 'ប៊ូតុងទាក់ទងរហ័ស (Quick Contact Buttons)',
+    titleEn: 'Quick Contact Buttons',
+    descriptionKh: 'ប៊ូតុងទាក់ទងរហ័ស ហៅទូរស័ព្ទ (Call), Telegram និង Facebook ដោយផ្ទាល់លើកាតហាង',
+    descriptionEn: 'One-tap direct contact buttons for Phone Call, Telegram chat, and Facebook page.',
+    iconName: 'Zap',
+    category: 'reach'
+  },
+  {
+    id: 8,
+    titleKh: 'ស្ថិតិអ្នកចូលទស្សនា & ចុចមើល (Profile View & Click Statistics)',
+    titleEn: 'Profile View & Contact Click Statistics',
+    descriptionKh: 'ផ្ទាំងគ្រប់គ្រងមើលចំនួនអ្នកទស្សនាហាង ចំនួនអ្នកចុច Call និងចំនួនអ្នកចុច Map',
+    descriptionEn: 'Detailed real-time analytics dashboard on visitor views, calls, and direction clicks.',
+    iconName: 'BarChart3',
+    category: 'analytics'
+  },
+  {
+    id: 9,
+    titleKh: 'តំណភ្ជាប់ចែករំលែកផ្ទាល់ (Shareable Restaurant Profile Link)',
+    titleEn: 'Shareable Restaurant Profile Link',
+    descriptionKh: 'តំណភ្ជាប់ Deep Link ផ្ទាល់ខ្លួន ចម្លង និងចែករំលែកទៅបណ្តាញសង្គម Telegram និង Facebook',
+    descriptionEn: 'Direct custom deep-link to share your profile across Telegram, Facebook, and WhatsApp.',
+    iconName: 'Share2',
+    category: 'reach'
+  },
+  {
+    id: 10,
+    titleKh: 'ចំណាត់ថ្នាក់ខ្ពស់ក្នុងការស្វែងរក (Improved Search Visibility)',
+    titleEn: 'Improved Search Visibility & Priority Ranking',
+    descriptionKh: 'ទទួលបានអាទិភាពបង្ហាញលើគេពេលអតិថិជនស្វែងរកមុខម្ហូប និងឈ្មោះហាងក្នុងកម្មវិធី',
+    descriptionEn: 'Algorithm boost ensuring your listings appear at the top of search and filter queries.',
+    iconName: 'Search',
+    category: 'promotion'
+  }
+];
 
 export type FoodCategorySlug = 
   | 'soup' 
@@ -90,19 +203,30 @@ export interface RestaurantMenuItem {
   updatedAt?: string;
 }
 
+export type TransactionType = 'restaurant_registration' | 'user_vip_upgrade';
+
 export interface RegistrationTransaction {
-  id: string; // e.g. "TXN-20261020-001"
-  restaurantId: string;
-  restaurantNameKh: string;
-  restaurantNameEn: string;
-  ownerId: string;
-  ownerName: string;
+  id: string; // e.g. "TXN-20261020-001" or "TXN-VIP-20261021-001"
+  type?: TransactionType;
+  restaurantId?: string;
+  restaurantNameKh?: string;
+  restaurantNameEn?: string;
+  ownerId?: string;
+  ownerName?: string;
   ownerPhone?: string;
+  userId?: string;
+  userName?: string;
+  userEmail?: string;
   amountUsd: number;
-  status: 'pending_verification' | 'verified' | 'rejected';
-  paymentMethod: 'KHQR' | 'Bakong' | 'BankTransfer' | 'Manual';
+  durationDays?: number; // 365
+  membershipTier?: 'premium' | 'premium_vip';
+  status: 'pending_verification' | 'verified' | 'rejected' | 'failed' | 'cancelled';
+  paymentMethod: 'KHQR' | 'Bakong' | 'BankTransfer' | 'Manual' | 'GooglePlayBilling' | 'Card';
   transactionRef: string;
+  paymentToken?: string;
+  verificationSignature?: string;
   createdAt: string;
+  expiresAt?: string;
   verifiedAt?: string;
   verifiedBy?: string;
   notes?: string;
@@ -148,6 +272,11 @@ export interface Restaurant {
     shareClicks?: number;
   };
   
+  // VIP 10 Benefits Media & Quick Contacts
+  promoVideoUrl?: string; // YouTube, TikTok, or direct MP4 video link
+  telegramUrl?: string;
+  facebookUrl?: string;
+
   paymentStatus?: PaymentStatus;
   paymentTransactionId?: string;
   paymentDate?: string;
@@ -163,6 +292,21 @@ export const isRestaurantPremiumActive = (restaurant?: Restaurant | null): boole
   if (restaurant.membershipTier !== 'premium') return false;
   if (!restaurant.membershipExpiresAt) return false;
   return new Date(restaurant.membershipExpiresAt).getTime() > Date.now();
+};
+
+// Helper to determine if a user has an active Premium VIP subscription
+export const isUserVipActive = (user?: User | null): boolean => {
+  if (!user) return false;
+  if (user.membershipTier !== 'premium_vip') return false;
+  if (!user.subscriptionExpiryDate) return false;
+  return new Date(user.subscriptionExpiryDate).getTime() > Date.now();
+};
+
+// Helper to calculate remaining days in VIP subscription
+export const getVipRemainingDays = (user?: User | null): number => {
+  if (!isUserVipActive(user) || !user?.subscriptionExpiryDate) return 0;
+  const diffMs = new Date(user.subscriptionExpiryDate).getTime() - Date.now();
+  return Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
 };
 
 export type DestinationCategorySlug = 'temple' | 'nature' | 'mountain' | 'beach' | 'resort';

@@ -500,11 +500,14 @@ export const AdminDashboard: React.FC = () => {
                           </div>
 
                           <div className="font-bold text-[#0F172A] dark:text-stone-100 font-khmer text-sm">
-                            {t.restaurantNameKh}
+                            {t.type === 'user_vip_upgrade' 
+                              ? `👑 ដំឡើងសមាជិកភាព VIP៖ ${t.userName || t.ownerName || 'User VIP'}` 
+                              : t.restaurantNameKh}
                           </div>
 
                           <div className="text-[11px] text-stone-600 dark:text-stone-400 font-khmer space-x-2">
-                            <span>ម្ចាស់ហាង៖ <strong>{t.ownerName}</strong></span>
+                            <span>{t.type === 'user_vip_upgrade' ? 'អ្នកប្រើប្រាស់៖' : 'ម្ចាស់ហាង៖'} <strong>{t.userName || t.ownerName}</strong></span>
+                            {t.userEmail && <span>• ✉️ {t.userEmail}</span>}
                             {t.ownerPhone && <span>• 📞 {t.ownerPhone}</span>}
                             <span>• វិធីបង់៖ <strong className="font-mono">{t.paymentMethod}</strong></span>
                             <span>• កាលបរិច្ឆេទ៖ {t.createdAt}</span>
