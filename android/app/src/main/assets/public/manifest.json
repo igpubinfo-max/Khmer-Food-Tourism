@@ -4,15 +4,16 @@
   "description": "Cambodian Cuisine, Authentic Restaurants, and Scenic Tourist Destinations",
   "icons": [
     {
-      "src": "/logo.svg",
+      "src": "./logo.svg",
       "type": "image/svg+xml",
       "sizes": "192x192 512x512",
       "purpose": "any maskable"
     }
   ],
-  "start_url": "/",
-  "background_color": "#78350f",
-  "theme_color": "#b45309",
+  "start_url": "./",
+  "scope": "./",
+  "background_color": "#064E3B",
+  "theme_color": "#064E3B",
   "display": "standalone",
   "orientation": "portrait"
 }

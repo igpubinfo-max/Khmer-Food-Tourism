@@ -32,20 +32,30 @@ jobs:
         run: npm install
 
       - name: 5. Build Web Bundle
-        run: npm run build
+        run: |
+          npm run build
+          cp dist/index.html dist/404.html
 
-      - name: 6. Copy Web Assets directly into Android
+      - name: 6. Deploy Web App to GitHub Pages (gh-pages)
+        uses: peaceiris/actions-gh-pages@v4
+        if: github.ref == 'refs/heads/main'
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          keep_files: false
+
+      - name: 7. Copy Web Assets directly into Android
         run: |
           mkdir -p android/app/src/main/assets/public
           cp -rf dist/* android/app/src/main/assets/public/
 
-      - name: 7. Build Android Debug APK
+      - name: 8. Build Android Debug APK
         run: |
           cd android
           chmod +x ./gradlew
           ./gradlew assembleDebug --no-daemon
 
-      - name: 8. Locate and Rename APK Files
+      - name: 9. Locate and Rename APK Files
         run: |
           echo "=== SEARCHING FOR GENERATED APK FILES ==="
           find . -name "*.apk" -ls
@@ -53,13 +63,13 @@ jobs:
           cp app-debug.apk KhmerFoodTourism-v1.5.0.apk
           ls -la
 
-      - name: 9. Upload Android APK Artifact
+      - name: 10. Upload Android APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Khmer-Food-Tourism-APK
           path: 'android/app/build/outputs/apk/debug/*.apk'
 
-      - name: 10. Publish GitHub Release with APK
+      - name: 11. Publish GitHub Release with APK
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:

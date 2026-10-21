@@ -23,7 +23,7 @@ export const InstallModal: React.FC = () => {
 
   const isKm = language === 'km';
   const apkDownloadTarget = appSettings.apkDownloadUrl || 'https://github.com/igpubinfo-max/Khmer-Food-Tourism/releases/download/v1.5.0/KhmerFoodTourism-v1.5.0.apk';
-  const iosWebTarget = typeof window !== 'undefined' && window.location?.origin ? window.location.origin : 'https://khmerfoodtourism.com';
+  const iosWebTarget = 'https://igpubinfo-max.github.io/Khmer-Food-Tourism/';
 
   useEffect(() => {
     if (isInstallModalOpen) {
@@ -246,6 +246,26 @@ export const InstallModal: React.FC = () => {
                     ? 'ស្កេន QR Code នេះដោយកាមេរ៉ា iPhone ដើម្បីបើកកម្មវិធីលើ Safari និងបន្ថែមទៅអេក្រង់ដើម (Home Screen)' 
                     : 'Scan with your iPhone camera to open in Safari and add to Home Screen.'}
                 </p>
+
+                <div className="w-full space-y-2 pt-2">
+                  <a
+                    href={iosWebTarget}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-slate-900 hover:bg-black text-white font-bold rounded-2xl shadow-md active:scale-[0.98] transition-all font-khmer text-xs"
+                  >
+                    <ExternalLink className="w-4 h-4 text-emerald-400" />
+                    <span>{isKm ? 'បើកកម្មវិធីលើ Safari ផ្ទាល់ (Open in Safari)' : 'Open Web App in Safari'}</span>
+                  </a>
+
+                  <button
+                    onClick={() => handleCopyLink(iosWebTarget)}
+                    className="w-full flex items-center justify-center gap-1.5 py-2.5 px-4 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-medium rounded-2xl transition font-khmer text-xs border border-slate-200 dark:border-slate-700"
+                  >
+                    {copied ? <CheckCircle className="w-4 h-4 text-[#059669]" /> : <Share2 className="w-4 h-4 text-slate-500" />}
+                    <span>{copied ? (isKm ? 'បានចម្លងរួចរាល់!' : 'Copied!') : (isKm ? 'ចម្លងតំណភ្ជាប់ Web App សម្រាប់ iPhone' : 'Copy iPhone Web App Link')}</span>
+                  </button>
+                </div>
               </div>
 
               {/* Official Apple Store & TestFlight Status */}
