@@ -34,6 +34,7 @@ interface AppContextType {
   loginWithGoogle: (profile: any) => void;
   logout: () => void;
   updateUserRole: (userId: string, newRole: UserRole) => void;
+  updateCurrentUserProfile: (newName: string, newAvatar?: string) => void;
 
   // Admin Auth (Chea Savuth)
   loginAdmin: (username: string, password: string) => Promise<boolean>;
@@ -1203,6 +1204,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     showToast(language === 'km' ? 'បានចាកចេញពីគណនី' : 'Logged out', 'info');
   };
 
+  const updateCurrentUserProfile = (newName: string, newAvatar?: string) => {
+    if (!currentUser) return;
+    const cleanName = newName.trim();
+    if (!cleanName) return;
+
+    const updated: User = {
+      ...currentUser,
+      name: cleanName,
+      avatar: newAvatar || currentUser.avatar,
+    };
+
+    setCurrentUser(updated);
+    setUsers(prev => prev.map(u => u.id === currentUser.id ? updated : u));
+    try {
+      localStorage.setItem('kft_current_user_v4', JSON.stringify(updated));
+    } catch (e) {
+      console.warn('Storage save error:', e);
+    }
+    showToast(language === 'km' ? 'បានកែប្រែឈ្មោះជោគជ័យ!' : 'Name updated successfully!', 'success');
+  };
+
   const updateUserRole = (userId: string, newRole: UserRole) => {
     if (newRole === 'admin') {
       showToast(language === 'km' ? 'មិនអនុញ្ញាតឱ្យបង្កើតគណនីរដ្ឋបាលស្ទួនឡើយ!' : 'Duplicate admin accounts are strictly prohibited!', 'warning');
@@ -1962,6 +1984,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         loginWithGoogle,
         logout,
         updateUserRole,
+        updateCurrentUserProfile,
         loginAdmin,
         setAdminPassword,
         appSettings,

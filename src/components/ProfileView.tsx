@@ -6,7 +6,8 @@ import { PrivacyPolicyModal } from './PrivacyPolicyModal';
 import { 
   User as UserIcon, Heart, Shield, Store, 
   Globe, LogOut, RefreshCw, Download, Sparkles, UtensilsCrossed, ShieldCheck, CheckCircle2,
-  Bot, Bell, Compass, Calendar, Bookmark, Plus, MapPin, Trash2, Share2, Tag, Utensils, ChevronRight
+  Bot, Bell, Compass, Calendar, Bookmark, Plus, MapPin, Trash2, Share2, Tag, Utensils, ChevronRight,
+  Edit2, Check, X as CloseIcon
 } from 'lucide-react';
 import { isRestaurantPremiumActive } from '../types';
 
@@ -22,7 +23,7 @@ export const ProfileView: React.FC = () => {
     setIsInstallModalOpen, setIsSupportModalOpen, setIsAddRestaurantModalOpen,
     setManagingRestaurant, setIsManageMenuModalOpen,
     setSelectedFood, setSelectedRestaurant, setSelectedDestination,
-    resetAllData, showToast 
+    resetAllData, showToast, updateCurrentUserProfile
   } = useApp();
 
   const isKm = language === 'km';
@@ -31,6 +32,8 @@ export const ProfileView: React.FC = () => {
     isOwner ? 'myrestaurant' : 'wishlists'
   );
   const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState(false);
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [tempName, setTempName] = useState('');
 
   // Bookmarked items
   const savedFoods = foods.filter(f => bookmarks.includes(f.id));
@@ -55,10 +58,54 @@ export const ProfileView: React.FC = () => {
                 className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border-2 border-[#059669] shadow-md ring-4 ring-emerald-500/20 shrink-0"
               />
               <div className="flex-1 min-w-0">
-                {/* Large Prominent Account Name */}
-                <h2 className="font-moul text-lg sm:text-2xl text-slate-900 dark:text-white leading-snug tracking-wide break-words">
-                  {currentUser.name}
-                </h2>
+                {/* Large Prominent Account Name & Quick Edit */}
+                {isEditingName ? (
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                    <input
+                      type="text"
+                      autoFocus
+                      value={tempName}
+                      onChange={(e) => setTempName(e.target.value)}
+                      placeholder={isKm ? 'វាយឈ្មោះថ្មី...' : 'Enter new name...'}
+                      className="w-full max-w-[180px] px-2.5 py-1 text-xs font-bold rounded-lg border-2 border-emerald-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500/20"
+                    />
+                    <button
+                      onClick={() => {
+                        if (tempName.trim()) {
+                          updateCurrentUserProfile(tempName.trim());
+                        }
+                        setIsEditingName(false);
+                      }}
+                      className="p-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition"
+                      title={isKm ? 'រក្សាទុក' : 'Save'}
+                    >
+                      <Check className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => setIsEditingName(false)}
+                      className="p-1.5 rounded-lg bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 text-slate-600 dark:text-slate-300 transition"
+                      title={isKm ? 'បោះបង់' : 'Cancel'}
+                    >
+                      <CloseIcon className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <h2 className="font-moul text-lg sm:text-2xl text-slate-900 dark:text-white leading-snug tracking-wide break-words">
+                      {currentUser.name}
+                    </h2>
+                    <button
+                      onClick={() => {
+                        setTempName(currentUser.name);
+                        setIsEditingName(true);
+                      }}
+                      className="p-1 rounded-lg bg-slate-100 hover:bg-emerald-100 dark:bg-slate-700 dark:hover:bg-emerald-950/50 text-slate-500 hover:text-emerald-700 dark:text-slate-400 dark:hover:text-emerald-300 transition"
+                      title={isKm ? 'កែប្រែឈ្មោះ' : 'Edit Name'}
+                    >
+                      <Edit2 className="w-3 h-3" />
+                    </button>
+                  </div>
+                )}
                 
                 {/* Verified Badge & Role */}
                 <div className="flex items-center gap-1.5 flex-wrap mt-1">
