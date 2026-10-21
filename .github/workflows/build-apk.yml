@@ -50,7 +50,7 @@ jobs:
           echo "=== SEARCHING FOR GENERATED APK FILES ==="
           find . -name "*.apk" -ls
           cd android/app/build/outputs/apk/debug
-          cp app-debug.apk KhmerFoodTourism-v1.4.5.apk
+          cp app-debug.apk KhmerFoodTourism-v1.4.6.apk
           ls -la
 
       - name: 9. Upload Android APK Artifact
@@ -63,24 +63,18 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: v1.4.5
-          name: "Khmer Food & Tourism v1.4.5 (External Telecom SMS OTP & Auto-Exit Mandatory Gate)"
+          tag_name: v1.4.6
+          name: "Khmer Food & Tourism v1.4.6 (Remove Duplicate Exit Button & Test Mode Helper)"
           overwrite: true
           make_latest: true
           body: |
             ### 🇰🇭 កម្មវិធីទូរស័ព្ទដៃ អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism Mobile App)
             
-            **កំណែថ្មី v1.4.5 (External Telecom SMS OTP & Auto-Exit Mandatory Gate):**
-            - 📲 **១. លេខកូដ OTP មិនត្រូវបានបង្ហាញក្នុងកម្មវិធីឡើយ (No In-App OTP Display):**
-              - លុបចោលទាំងស្រុងនូវផ្ទាំងបង្ហាញលេខកូដក្នុងកម្មវិធី (Removed in-app notification banner)។
-              - លេខកូដសម្ងាត់ ៦ ខ្ទង់ ត្រូវបានបញ្ជូនទៅក្នុងទូរស័ព្ទរបស់អ្នកប្រើប្រាស់តាមរយៈប្រព័ន្ធក្រុមហ៊ុនទូរស័ព្ទចល័ត (Telecom SMS Operator) ឬប្រអប់សំបុត្រ Email ខាងក្រៅពិតប្រាកដ។
-              - អ្នកប្រើប្រាស់ត្រូវពិនិត្យប្រអប់សារ SMS លើទូរស័ព្ទដៃ រួចយកលេខកូដមកវាយបញ្ចូលក្នុងប្រអប់ PIN ទាំង ៦។
-            - 🚪 **២. ចាកចេញពីកម្មវិធីស្វ័យប្រវត្តិកាលណាគ្មានគណនី (Auto-Exit if No Account):**
-              - កម្មវិធីទាមទារជាកាតព្វកិច្ចឱ្យមានគណនីដើម្បីចូលប្រើប្រាស់។
-              - លុបចោលប៊ូតុងរុករកជាភ្ញៀវ និងប៊ូតុងបិទ (No guest bypass or close button)។
-              - ប្រសិនបើអ្នកប្រើប្រាស់មិនបង្កើត ឬមិនចូលគណនីទេ ដោយចុចប៊ូតុងថយក្រោយ (Android Back Button) ឬចុច «ចាកចេញពីកម្មវិធី (Exit App)» កម្មវិធីនឹងបិទចាកចេញភ្លាមៗដោយស្វ័យប្រវត្តិ (Automatic App Exit)។
-            - 🌐 **៣. ជម្រើសចូលគណនីងាយស្រួល ៣ ប្រភេទ (Google 1-Tap, Phone SMS OTP, Email)**។
-            - 🔐 **៤. សុវត្ថិភាពទិន្នន័យកម្រិតខ្ពស់ និងគាំទ្រទូរស័ព្ទកម្ពុជា (+855)**។
+            **កំណែថ្មី v1.4.6 (Fix Duplicate Exit Button & SMS Test Mode Helper):**
+            - 🚪 **១. កែសម្រួលប៊ូតុង Exit App៖** លុបបំបាត់ប៊ូតុងចាកចេញជាន់គ្នា (Removed duplicate Exit App button) នៅសល់ប៊ូតុងតែមួយនៅផ្នែកខាងក្រោមយ៉ាងស្រស់ស្អាត។
+            - 💡 **២. ជំនួយការតេស្តលេខទូរស័ព្ទ (SMS Test Mode Helper):** បញ្ជាក់ការណែនាំអំពីប្រព័ន្ធ SMS Gateway (Plasgate Cambodia) និងផ្ដល់លេខកូដសាកល្បង `123456` ដើម្បីងាយស្រួលតេស្តលើទូរស័ព្ទដៃភ្លាមៗ។
+            - 📲 **៣. ជម្រើសចូលគណនីលឿនបំផុត (Continue with Google):** ចុចចូលភ្លាមៗ 1-Tap មិនបាច់ចាំលេខកូដ SMS។
+            - 🔐 **៤. រក្សាសុវត្ថិភាព និងការចាកចេញដោយស្វ័យប្រវត្តិប្រសិនបើគ្មានគណនី (Auto-Exit Gate)**។
             - 📧 **៥. អាសយដ្ឋានអ៊ីមែលផ្លូវការ `kftcam@gmail.com`**។
           draft: false
           prerelease: false
