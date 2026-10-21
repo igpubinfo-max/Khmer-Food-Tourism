@@ -29,6 +29,8 @@ import { TrendingSocialModal } from './components/TrendingSocialModal';
 import { TrendingFoodDetailModal } from './components/TrendingFoodDetailModal';
 import { AiCheckInModal } from './components/AiCheckInModal';
 import { UpgradeVipModal } from './components/UpgradeVipModal';
+import { QrScannerModal } from './components/QrScannerModal';
+import { VipAddRestaurantModal } from './components/VipAddRestaurantModal';
 import { Toast } from './components/Toast';
 
 const MainScreen: React.FC = () => {
@@ -85,6 +87,8 @@ const MainScreen: React.FC = () => {
       <TrendingFoodDetailModal />
       <AiCheckInModal />
       <UpgradeVipModal />
+      <QrScannerModal />
+      <VipAddRestaurantModal />
 
       {/* Notifications */}
       <Toast />

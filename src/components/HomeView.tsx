@@ -1,12 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
-import { TrendingFoodCategorySlug, TrendingFoodItem } from '../types';
+import { TrendingFoodCategorySlug, TrendingFoodItem, isUserVipActive } from '../types';
 import { 
   Sparkles, ChevronRight, Utensils, Store, Compass, 
   MapPin, Heart, Flame, QrCode, Download, ShieldCheck,
   Apple, Smartphone, Bot, Calendar, Bookmark, Bell, 
   UtensilsCrossed, MessageSquareQuote, Camera, Phone,
-  Share2, Navigation, Eye, ExternalLink, Play, Shuffle, Search, RefreshCw
+  Share2, Navigation, Eye, ExternalLink, Play, Shuffle, Search, RefreshCw,
+  Crown, Plus, Edit2, CheckCircle2, X, Tag, ChefHat, Copy, Video, Check
 } from 'lucide-react';
 
 export const HomeView: React.FC = () => {
@@ -21,15 +22,157 @@ export const HomeView: React.FC = () => {
     setIsAiTripPlannerModalOpen, setIsNotificationsModalOpen,
     setIsTrendingSocialModalOpen, unreadNotificationsCount,
     trendingFoods, setSelectedTrendingFood, setIsTrendingFoodDetailModalOpen,
-    setIsAiCheckInModalOpen, showToast
+    setIsAiCheckInModalOpen, showToast,
+    searchQuery: globalSearchQuery, setSearchQuery: setGlobalSearchQuery,
+    setSelectedFood, setSelectedRestaurant,
+    setIsVipAddRestaurantModalOpen, setIsManageMenuModalOpen, setManagingRestaurant,
+    openUpgradeVipModal
   } = useApp();
 
   const isKm = language === 'km';
+  const isVip = isUserVipActive(currentUser);
+  const myRestaurants = useMemo(() => {
+    return currentUser ? restaurants.filter(r => r.ownerId === currentUser.id) : [];
+  }, [restaurants, currentUser]);
 
-  // Active category filter, search query, and AI random seed for AI Trending Food on Home
+  // Active category filter, local search query, and AI random seed for AI Trending Food on Home
   const [selectedCategory, setSelectedCategory] = useState<TrendingFoodCategorySlug>('all');
-  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [trendingSearchQuery, setTrendingSearchQuery] = useState<string>('');
   const [randomSeed, setRandomSeed] = useState<number>(0);
+
+  // Search results tab filter when global search is active
+  const [searchTab, setSearchTab] = useState<'all' | 'food' | 'restaurants' | 'tourism'>('all');
+
+  // AI Viral Content Generator State
+  const [aiViralIndex, setAiViralIndex] = useState<number>(0);
+  const [hasCopiedCaption, setHasCopiedCaption] = useState<boolean>(false);
+
+  // Authentic Cambodian viral food concepts pool for AI generator
+  const viralAiIdeas = useMemo(() => [
+    {
+      foodNameKh: 'នំក្រក់ពិសេស និងសាច់អាំងបាត់ដំបង',
+      foodNameEn: 'Battambang Crispy Num Krok & Beef Skewers',
+      provinceKh: 'ខេត្តបាត់ដំបង',
+      provinceEn: 'Battambang',
+      accountHandle: currentUser?.socialAccounts?.tiktok?.handle ? `@${currentUser.socialAccounts.tiktok.handle}` : '@cheakimseng',
+      verifiedCreator: currentUser?.name || 'Chea Kimseng Foodie',
+      hookKh: '🔥 តើអ្នកធ្លាប់ភ្លក្សនំក្រក់ពិសេសនៅបាត់ដំបងក្បែរលោកតាដំបងក្រញូងហើយឬនៅ? ក្លិនឈ្ងុយខ្ទិះដូង ស្រួយស្រឹបមិនអាចបំភ្លេចបាន!',
+      hookEn: '🔥 Have you ever tasted authentic Battambang Num Krok near the Ta Dumbong shrine? Crispy coconut perfection!',
+      captionKh: 'រសជាតិមរតកដើមនំក្រក់ក្តៅៗស្រួយក្រៅទន់ក្នុង ជ្រលក់ទឹកត្រីផ្អែមពិសេស និងសាច់អាំងប្រឡាក់គ្រឿងល្មៀតឈ្ងុយឆ្ងាញ់! មើលហើយចង់ហោះទៅបាត់ដំបងភ្លាមៗ 😋📍',
+      captionEn: 'Golden crispy Num Krok hot off the cast iron pan, served with authentic sweet fish sauce & lemongrass beef skewers! 😋📍',
+      hashtags: '#KhmerFood #BattambangEats #NumKrok #CambodianStreetFood #TikTokFoodCambodia #អាហារខ្មែរ #ទេសចរណ៍បាត់ដំបង',
+      videoConceptKh: 'ប្លង់ ១: ចាក់ម្សៅខ្ទិះលើខ្ទះដែកក្តៅៗមានផ្សែងហុយ -> ប្លង់ ២: លើកនំក្រក់ស្រួយជ្រលក់ទឹកត្រីផ្អែម -> ប្លង់ ៣: បង្ហាញរូបលោកតាដំបងក្រញូងតំណាងខេត្តបាត់ដំបង',
+      videoConceptEn: 'Shot 1: Sizzling coconut batter poured into cast-iron pan -> Shot 2: Dipping hot crispy cake into sweet chili sauce -> Shot 3: Ta Dumbong landmark cutaway',
+    },
+    {
+      foodNameKh: 'ក្តាមថ្មឆាម្រេចខ្ចីកំពត និងមឹកបំពងម្សៅកែប',
+      foodNameEn: 'Kampot Fresh Green Pepper Crab & Kep Squid',
+      provinceKh: 'ខេត្តកំពត & កែប',
+      provinceEn: 'Kampot & Kep',
+      accountHandle: currentUser?.socialAccounts?.tiktok?.handle ? `@${currentUser.socialAccounts.tiktok.handle}` : '@cheakimseng',
+      verifiedCreator: currentUser?.name || 'Chea Kimseng Foodie',
+      hookKh: '🦀 កំពតមិនមែនមានតែទុរេនទេ! មកភ្លក្សក្តាមសមុទ្រស្រស់ឆាជាមួយម្រេចខ្ចីកំពត GI ហឹរឈ្ងុយជាប់មាត់!',
+      hookEn: '🦀 Fresh mud crab wok-fried with world-famous GI Kampot green peppercorns!',
+      captionKh: 'សាច់ក្តាមផ្អែមស្រស់ៗពីផ្សារក្តាមកែប ឆាជាមួយម្រេចខ្ចីកំពតពិតៗ ហឹរប្រហើរឈ្ងុយឆ្ងាញ់ខ្លាំង! ធានាថាញ៉ាំបាយអស់ ៣ ចានមិនដឹងខ្លួន! 🤤🌊',
+      captionEn: 'Sweet fresh sea crab tossed with fragrant Kampot green peppercorns right by the sea! Absolute Cambodian pride 🤤🌊',
+      hashtags: '#KampotPepperCrab #KepCrabMarket #CambodiaSeafood #KhmerFoodie #TikTokCambodia #ម្រេចកំពត #ក្តាមឆាម្រេចខ្ចី',
+      videoConceptKh: 'ប្លង់ ១: ស្រង់ក្តាមស្រស់ៗពីកន្ត្រកទឹកសមុទ្រ -> ប្លង់ ២: ភ្លើងឆាបឆាជាមួយម្រេចខ្ចី -> ប្លង់ ៣: បង្ហាញទេសភាពឆ្នេរសមុទ្រកែប និងផ្សារក្តាម',
+      videoConceptEn: 'Shot 1: Pulling fresh crab baskets from the sea -> Shot 2: Wok fire flaring with peppercorns -> Shot 3: Kep Crab Market seaside sunset',
+    },
+    {
+      foodNameKh: 'នំបញ្ចុកសម្លការីសៀមរាប និងប្រហុកអាំងស្លឹកចេក',
+      foodNameEn: 'Siem Reap Curry Nom Banh Chok & Grilled Prahok',
+      provinceKh: 'ខេត្តសៀមរាប',
+      provinceEn: 'Siem Reap',
+      accountHandle: currentUser?.socialAccounts?.tiktok?.handle ? `@${currentUser.socialAccounts.tiktok.handle}` : '@cheakimseng',
+      verifiedCreator: currentUser?.name || 'Chea Kimseng Foodie',
+      hookKh: '🍜 មកដល់សៀមរាបអង្គរ បើមិនបានញ៉ាំនំបញ្ចុកទឹកសម្លការីព្រះវិហារ និងប្រហុកខ្ចប់ស្លឹកចេក ដូចមិនទាន់មកដល់!',
+      hookEn: '🍜 Visiting Angkor without fresh Siem Reap Nom Banh Chok is incomplete!',
+      captionKh: 'សរសៃនំបញ្ចុកបុកដៃស្រស់ៗស្រុះទឹកក្តៅ ស្រោចទឹកសម្លការីក្រហមដូងខ្ទិះរោយជីរគ្រប់មុខ និងប្រហុកអាំងឈ្ងុយសាយភាយ! រសជាតិប្រពៃណីពិតៗ ❤️',
+      captionEn: 'Handmade rice noodles ladled with fragrant coconut curry, fresh herbs, and roasted prahok in banana leaves! ❤️',
+      hashtags: '#SiemReapEats #NomBanhChok #AngkorFood #KhmerTraditionalDish #FoodReviewCambodia #នំបញ្ចុកសៀមរាប',
+      videoConceptKh: 'ប្លង់ ១: ចាប់សរសៃនំបញ្ចុកសស្គុសដាក់ចាន -> ប្លង់ ២: ស្រោចទឹកសម្លការីក្តៅហុយផ្សែង -> ប្លង់ ៣: ប្លង់ស្វាគមន៍មុខប្រាសាទអង្គរវត្ត',
+      videoConceptEn: 'Shot 1: Plating silky fresh rice noodles -> Shot 2: Ladling rich golden coconut curry -> Shot 3: Iconic Angkor Wat panorama',
+    },
+    {
+      foodNameKh: 'គុយទាវភ្នំពេញពិសេស និងកាហ្វេទឹកដោះគោទឹកកកបុរាណ',
+      foodNameEn: 'Phnom Penh Kuy Teav & Traditional Iced Milk Coffee',
+      provinceKh: 'រាជធានីភ្នំពេញ',
+      provinceEn: 'Phnom Penh',
+      accountHandle: currentUser?.socialAccounts?.tiktok?.handle ? `@${currentUser.socialAccounts.tiktok.handle}` : '@cheakimseng',
+      verifiedCreator: currentUser?.name || 'Chea Kimseng Foodie',
+      hookKh: '🥣 អាហារពេលព្រឹកលេខ ១ របស់ប្រជាជនខ្មែរ! គុយទាវភ្នំពេញទឹកស៊ុបឆ្អឹងជ្រូកផ្អែមថ្លាឈ្វេង!',
+      hookEn: '🥣 Number 1 Cambodian morning staple! Clear sweet pork bone broth Kuy Teav Phnom Penh!',
+      captionKh: 'ចាប់ផ្តើមព្រឹកព្រលឹមជាមួយគុយទាវភ្នំពេញគ្រឿងក្នុងពិសេស ខ្ទឹមលីងឈ្ងុយ និងកាហ្វេទឹកដោះគោកូរហុយផ្សែង! រសជាតិកម្រិតរាជធានី 💯☕',
+      captionEn: 'Start your morning in Phnom Penh with iconic Kuy Teav and artisan condensed milk iced coffee! 💯☕',
+      hashtags: '#PhnomPenhFood #KuyTeavPhnomPenh #KhmerBreakfast #CambodianCoffee #ភ្នំពេញ #គុយទាវខ្មែរ',
+      videoConceptKh: 'ប្លង់ ១: ស្រង់សរសៃគុយទាវឡើង -> ប្លង់ ២: ចាក់ទឹកស៊ុបពុះក្តៅស្រោចលើសាច់ -> ប្លង់ ៣: ចាក់ទឹកដោះគោចូលកាហ្វេខ្មៅទឹកកក',
+      videoConceptEn: 'Shot 1: Lifting bouncy rice noodles -> Shot 2: Pouring crystal clear boiling broth -> Shot 3: Swirling iced milk coffee',
+    }
+  ], [currentUser]);
+
+  const currentViralIdea = viralAiIdeas[aiViralIndex % viralAiIdeas.length];
+
+  const handleNextAiIdea = () => {
+    setAiViralIndex(prev => prev + 1);
+    setHasCopiedCaption(false);
+    showToast(
+      isKm 
+        ? '🤖 AI បានបង្កើតគំនិតវីដេអូ Viral ថ្មីសម្រាប់មុខម្ហូបខ្មែរ!' 
+        : '🤖 AI generated a new viral Khmer food concept!',
+      'success'
+    );
+  };
+
+  const handleCopyCaption = () => {
+    const fullText = `${currentViralIdea.hookKh}\n\n${currentViralIdea.captionKh}\n\n${currentViralIdea.hashtags}`;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(fullText).then(() => {
+        setHasCopiedCaption(true);
+        showToast(isKm ? 'បានចម្លង Caption & Hashtags រួចរាល់!' : 'Caption & Hashtags copied!', 'success');
+        setTimeout(() => setHasCopiedCaption(false), 2500);
+      }).catch(() => {});
+    }
+  };
+
+  // Global Search Filtering across Foods, Restaurants, and Destinations
+  const searchResults = useMemo(() => {
+    const q = (globalSearchQuery || '').toLowerCase().trim();
+    if (!q) return null;
+
+    const matchedFoods = foods.filter(f => 
+      f.nameKh.toLowerCase().includes(q) ||
+      f.nameEn.toLowerCase().includes(q) ||
+      (f.descriptionKh && f.descriptionKh.toLowerCase().includes(q)) ||
+      (f.categoryKh && f.categoryKh.toLowerCase().includes(q)) ||
+      (f.ingredients && f.ingredients.some(i => i.nameKh.toLowerCase().includes(q) || i.nameEn.toLowerCase().includes(q)))
+    );
+
+    const matchedRestaurants = restaurants.filter(r =>
+      r.nameKh.toLowerCase().includes(q) ||
+      r.nameEn.toLowerCase().includes(q) ||
+      (r.addressKh && r.addressKh.toLowerCase().includes(q)) ||
+      (r.provinceKh && r.provinceKh.toLowerCase().includes(q)) ||
+      (r.signatureDishesKh && r.signatureDishesKh.some(d => d.toLowerCase().includes(q)))
+    );
+
+    const matchedDestinations = destinations.filter(d =>
+      d.nameKh.toLowerCase().includes(q) ||
+      d.nameEn.toLowerCase().includes(q) ||
+      (d.descriptionKh && d.descriptionKh.toLowerCase().includes(q)) ||
+      (d.provinceKh && d.provinceKh.toLowerCase().includes(q)) ||
+      (d.categoryKh && d.categoryKh.toLowerCase().includes(q))
+    );
+
+    const totalCount = matchedFoods.length + matchedRestaurants.length + matchedDestinations.length;
+
+    return {
+      foods: matchedFoods,
+      restaurants: matchedRestaurants,
+      destinations: matchedDestinations,
+      totalCount
+    };
+  }, [globalSearchQuery, foods, restaurants, destinations]);
 
   const handleAiRandomize = () => {
     setRandomSeed(prev => prev + 1);
@@ -46,8 +189,8 @@ export const HomeView: React.FC = () => {
     let pool = trendingFoods.filter(item => {
       const matchCat = selectedCategory === 'all' || item.categorySlug === selectedCategory;
       if (!matchCat) return false;
-      if (!searchQuery.trim()) return true;
-      const q = searchQuery.toLowerCase().trim();
+      if (!trendingSearchQuery.trim()) return true;
+      const q = trendingSearchQuery.toLowerCase().trim();
       return (
         item.foodNameKh.toLowerCase().includes(q) ||
         item.foodNameEn.toLowerCase().includes(q) ||
@@ -69,7 +212,7 @@ export const HomeView: React.FC = () => {
     }
 
     return pool.slice(0, 4);
-  }, [trendingFoods, selectedCategory, searchQuery, randomSeed]);
+  }, [trendingFoods, selectedCategory, trendingSearchQuery, randomSeed]);
 
   const quickCategories = [
     { labelKh: 'ម្ហូបពិសេស', labelEn: 'Signature', icon: '🍲', tab: 'food' },
@@ -135,7 +278,207 @@ export const HomeView: React.FC = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto px-4 py-3 space-y-6 pb-24">
+    <div className="max-w-md mx-auto px-4 py-3 space-y-5 pb-24 font-khmer">
+      {/* 1. Fast Global Top Search Bar */}
+      <div className="relative">
+        <div className="relative flex items-center">
+          <Search className="w-4 h-4 text-emerald-600 dark:text-emerald-400 absolute left-3.5 pointer-events-none" />
+          <input
+            type="text"
+            value={globalSearchQuery}
+            onChange={(e) => setGlobalSearchQuery(e.target.value)}
+            placeholder={isKm ? 'ស្វែងរកមុខម្ហូប, គ្រឿងផ្សំ, ហាងអាហារ, ឬទីតាំងទេសចរណ៍...' : 'Search food, dishes, ingredients, restaurants, places...'}
+            className="w-full pl-10 pr-9 py-2.5 rounded-2xl bg-white dark:bg-slate-800 border-2 border-emerald-500/30 text-slate-900 dark:text-white placeholder-slate-400 text-xs shadow-xs focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 font-khmer transition"
+          />
+          {globalSearchQuery && (
+            <button
+              onClick={() => setGlobalSearchQuery('')}
+              className="absolute right-2.5 p-1 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-white transition"
+              title={isKm ? 'សម្អាតការស្វែងរក' : 'Clear search'}
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* 2. Global Live Search Results Dropdown/Panel */}
+      {searchResults && (
+        <div className="p-4 rounded-3xl bg-white dark:bg-slate-800 border-2 border-emerald-500 shadow-lg space-y-3 animate-in fade-in slide-in-from-top-2 duration-150">
+          <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-700">
+            <div className="flex items-center gap-1.5">
+              <Search className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              <h3 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white">
+                {isKm ? `លទ្ធផលស្វែងរក (${searchResults.totalCount})` : `Search Results (${searchResults.totalCount})`}
+              </h3>
+            </div>
+            <button
+              onClick={() => setGlobalSearchQuery('')}
+              className="text-xs text-rose-500 hover:text-rose-600 font-bold flex items-center gap-0.5"
+            >
+              <span>{isKm ? 'បិទការស្វែងរក' : 'Close'}</span>
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          {/* Result Filter Tabs */}
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar text-xs">
+            <button
+              onClick={() => setSearchTab('all')}
+              className={`px-3 py-1 rounded-xl font-bold transition text-[11px] ${
+                searchTab === 'all'
+                  ? 'bg-emerald-600 text-white shadow-xs'
+                  : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
+              }`}
+            >
+              {isKm ? `ទាំងអស់ (${searchResults.totalCount})` : `All (${searchResults.totalCount})`}
+            </button>
+            <button
+              onClick={() => setSearchTab('food')}
+              className={`px-3 py-1 rounded-xl font-bold transition text-[11px] flex items-center gap-1 ${
+                searchTab === 'food'
+                  ? 'bg-emerald-600 text-white shadow-xs'
+                  : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
+              }`}
+            >
+              <span>🍲</span>
+              <span>{isKm ? `មុខម្ហូប (${searchResults.foods.length})` : `Dishes (${searchResults.foods.length})`}</span>
+            </button>
+            <button
+              onClick={() => setSearchTab('restaurants')}
+              className={`px-3 py-1 rounded-xl font-bold transition text-[11px] flex items-center gap-1 ${
+                searchTab === 'restaurants'
+                  ? 'bg-emerald-600 text-white shadow-xs'
+                  : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
+              }`}
+            >
+              <span>🏪</span>
+              <span>{isKm ? `ហាងអាហារ (${searchResults.restaurants.length})` : `Restaurants (${searchResults.restaurants.length})`}</span>
+            </button>
+            <button
+              onClick={() => setSearchTab('tourism')}
+              className={`px-3 py-1 rounded-xl font-bold transition text-[11px] flex items-center gap-1 ${
+                searchTab === 'tourism'
+                  ? 'bg-emerald-600 text-white shadow-xs'
+                  : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
+              }`}
+            >
+              <span>🏛️</span>
+              <span>{isKm ? `ទេសចរណ៍ (${searchResults.destinations.length})` : `Places (${searchResults.destinations.length})`}</span>
+            </button>
+          </div>
+
+          {/* Results List */}
+          <div className="space-y-2 max-h-[360px] overflow-y-auto no-scrollbar pt-1">
+            {searchResults.totalCount === 0 ? (
+              <div className="py-8 text-center text-slate-500 space-y-2.5">
+                <Search className="w-8 h-8 mx-auto text-slate-400 stroke-1" />
+                <p className="text-xs">
+                  {isKm 
+                    ? `រកមិនឃើញលទ្ធផលត្រូវនឹង "${globalSearchQuery}" ទេ` 
+                    : `No results found for "${globalSearchQuery}"`}
+                </p>
+                <div className="flex items-center justify-center gap-1.5 flex-wrap pt-1 text-[11px]">
+                  <span className="text-slate-400">{isKm ? 'សាកល្បង៖' : 'Try:'}</span>
+                  {['សម្លការី', 'នំបញ្ចុក', 'អាម៉ុក', 'បាត់ដំបង', 'សៀមរាប'].map((tag) => (
+                    <button
+                      key={tag}
+                      onClick={() => setGlobalSearchQuery(tag)}
+                      className="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 font-bold border border-emerald-200"
+                    >
+                      {tag}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <>
+                {/* Foods */}
+                {(searchTab === 'all' || searchTab === 'food') && searchResults.foods.map((food) => (
+                  <div
+                    key={`food-${food.id}`}
+                    onClick={() => setSelectedFood(food)}
+                    className="p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-700/50 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 border border-slate-200/80 dark:border-slate-600 flex items-center justify-between gap-3 cursor-pointer transition group"
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <img src={food.photoUrl} alt={food.nameKh} className="w-12 h-12 rounded-xl object-cover shrink-0 border border-slate-200" />
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <span className="px-1.5 py-0.2 rounded-md bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 text-[9px] font-bold">
+                            🍲 មុខម្ហូប
+                          </span>
+                          <h4 className="font-bold text-xs text-slate-900 dark:text-white truncate group-hover:text-emerald-600">
+                            {isKm ? food.nameKh : food.nameEn}
+                          </h4>
+                        </div>
+                        <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                          {isKm ? food.descriptionKh : food.descriptionEn}
+                        </p>
+                      </div>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-slate-400 shrink-0 group-hover:translate-x-0.5 transition" />
+                  </div>
+                ))}
+
+                {/* Restaurants */}
+                {(searchTab === 'all' || searchTab === 'restaurants') && searchResults.restaurants.map((rest) => (
+                  <div
+                    key={`rest-${rest.id}`}
+                    onClick={() => setSelectedRestaurant(rest)}
+                    className="p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-700/50 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 border border-slate-200/80 dark:border-slate-600 flex items-center justify-between gap-3 cursor-pointer transition group"
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <img src={rest.photoUrl} alt={rest.nameKh} className="w-12 h-12 rounded-xl object-cover shrink-0 border border-slate-200" />
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <span className="px-1.5 py-0.2 rounded-md bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 text-[9px] font-bold">
+                            🏪 ហាងអាហារ
+                          </span>
+                          <h4 className="font-bold text-xs text-slate-900 dark:text-white truncate group-hover:text-emerald-600">
+                            {isKm ? rest.nameKh : rest.nameEn}
+                          </h4>
+                        </div>
+                        <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                          📍 {rest.addressKh} • 📞 {rest.phone}
+                        </p>
+                      </div>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-slate-400 shrink-0 group-hover:translate-x-0.5 transition" />
+                  </div>
+                ))}
+
+                {/* Destinations */}
+                {(searchTab === 'all' || searchTab === 'tourism') && searchResults.destinations.map((dest) => (
+                  <div
+                    key={`dest-${dest.id}`}
+                    onClick={() => setSelectedDestination(dest)}
+                    className="p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-700/50 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 border border-slate-200/80 dark:border-slate-600 flex items-center justify-between gap-3 cursor-pointer transition group"
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <img src={dest.photoUrl} alt={dest.nameKh} className="w-12 h-12 rounded-xl object-cover shrink-0 border border-slate-200" />
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <span className="px-1.5 py-0.2 rounded-md bg-teal-100 text-teal-800 dark:bg-teal-950 dark:text-teal-300 text-[9px] font-bold">
+                            🏛️ ទេសចរណ៍
+                          </span>
+                          <h4 className="font-bold text-xs text-slate-900 dark:text-white truncate group-hover:text-emerald-600">
+                            {isKm ? dest.nameKh : dest.nameEn}
+                          </h4>
+                        </div>
+                        <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                          📍 {dest.provinceKh} ({dest.categoryKh})
+                        </p>
+                      </div>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-slate-400 shrink-0 group-hover:translate-x-0.5 transition" />
+                  </div>
+                ))}
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Hero Banner (Clean Deep Emerald) */}
       <div className="relative rounded-3xl overflow-hidden shadow-md bg-gradient-to-br from-[#064E3B] via-[#065F46] to-[#047857] text-white p-5 border border-emerald-600/30">
         <div className="relative z-10 space-y-2">
@@ -209,6 +552,95 @@ export const HomeView: React.FC = () => {
         {/* Decorative background shape */}
         <div className="absolute -bottom-8 -right-8 w-36 h-36 rounded-full bg-white/10 blur-2xl pointer-events-none" />
       </div>
+
+      {/* 3. VIP Restaurant Management Showcase Card on Home (Restored & Highly Potential) */}
+      {(isVip || currentUser?.role === 'owner' || currentUser?.role === 'admin') && (
+        <div className="p-4 sm:p-5 rounded-3xl bg-gradient-to-br from-amber-500/20 via-yellow-500/10 to-amber-600/20 border-2 border-amber-400/80 shadow-md space-y-3 font-khmer">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-2xl bg-gradient-to-br from-amber-400 to-yellow-500 text-slate-950 shadow-md">
+                <Crown className="w-6 h-6 fill-slate-950" />
+              </div>
+              <div>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <h3 className="font-moul text-xs sm:text-sm text-slate-900 dark:text-white">
+                    {isKm ? 'ផ្ទាំងគ្រប់គ្រងហាង VIP' : 'VIP Restaurant Management'}
+                  </h3>
+                  <span className="px-2 py-0.5 rounded-full text-[9px] font-black bg-amber-400 text-slate-950 shadow-2xs">
+                    🌟 VIP Active
+                  </span>
+                </div>
+                <p className="text-[10px] text-amber-800 dark:text-amber-300 font-bold mt-0.5">
+                  {isKm 
+                    ? 'គណនី VIP សក្តានុពលខ្ពស់ • សិទ្ធិបន្ថែម & គ្រប់គ្រងហាងពេញលេញ' 
+                    : 'Super Potential VIP Account • Full Restaurant & Menu Management'}
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setIsVipAddRestaurantModalOpen(true)}
+              className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 text-slate-950 font-bold text-xs shadow-xs transition flex items-center gap-1 shrink-0 active:scale-95"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>{isKm ? 'បន្ថែមហាង VIP' : 'Add Store'}</span>
+            </button>
+          </div>
+
+          {/* User's Owned Restaurants on Home */}
+          <div className="space-y-2 pt-1">
+            {myRestaurants.length === 0 ? (
+              <div className="p-3 bg-white/70 dark:bg-slate-800/70 rounded-2xl border border-amber-300/50 flex items-center justify-between gap-2">
+                <div className="text-[11px] text-slate-700 dark:text-slate-200">
+                  {isKm ? '💡 លោកអ្នកមិនទាន់បានបន្ថែមហាងនៅឡើយទេ។ ចុចប៊ូតុងដើម្បីបង្កើតហាង VIP ដំបូងរបស់អ្នក!' : 'You have not added any restaurant yet. Click Add to list your VIP shop!'}
+                </div>
+                <button
+                  onClick={() => setIsVipAddRestaurantModalOpen(true)}
+                  className="px-3 py-1.5 bg-[#064E3B] hover:bg-[#047857] text-white rounded-xl text-[11px] font-bold shrink-0 transition"
+                >
+                  {isKm ? '+ បន្ថែមហាង' : '+ Add Shop'}
+                </button>
+              </div>
+            ) : (
+              myRestaurants.map((shop) => (
+                <div 
+                  key={shop.id}
+                  className="p-3 bg-white/85 dark:bg-slate-800/85 rounded-2xl border border-amber-300/60 shadow-xs flex items-center justify-between gap-3"
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <img src={shop.photoUrl} alt={shop.nameKh} className="w-12 h-12 rounded-xl object-cover shrink-0 border border-slate-200" />
+                    <div className="min-w-0">
+                      <h4 className="font-bold text-xs text-slate-900 dark:text-white truncate">
+                        {isKm ? shop.nameKh : shop.nameEn}
+                      </h4>
+                      <p className="text-[10px] text-slate-500 truncate mt-0.5">
+                        📍 {shop.addressKh} • 📞 {shop.phone}
+                      </p>
+                      <span className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400">
+                        {shop.menuItems?.length || 0} / 5 មុខម្ហូបក្នុងហាង
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <button
+                      onClick={() => {
+                        setManagingRestaurant(shop);
+                        setIsManageMenuModalOpen(true);
+                      }}
+                      className="px-2.5 py-1.5 bg-emerald-700 hover:bg-emerald-600 text-white rounded-xl text-[10px] font-bold shadow-xs transition flex items-center gap-1"
+                      title={isKm ? 'គ្រប់គ្រងមុខម្ហូប & ព័ត៌មាន' : 'Manage Menu & Details'}
+                    >
+                      <Edit2 className="w-3 h-3" />
+                      <span>{isKm ? 'គ្រប់គ្រង' : 'Manage'}</span>
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      )}
 
       {/* App Installation & Support Interactive Showcase Card */}
       <div className="bg-white dark:bg-slate-800 rounded-3xl p-4 border border-slate-200/90 dark:border-slate-700 shadow-xs flex items-center justify-between gap-3">
@@ -484,11 +916,110 @@ export const HomeView: React.FC = () => {
           <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-pink-300" />
           <input
             type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            value={trendingSearchQuery}
+            onChange={(e) => setTrendingSearchQuery(e.target.value)}
             placeholder={isKm ? "ស្វែងរកវីដេអូ ឬទីតាំងខេត្តដោយ AI..." : "Search viral food or province by AI..."}
             className="w-full pl-8 pr-3 py-1.5 rounded-xl bg-white/10 text-white placeholder-pink-200/60 border border-white/15 text-[11px] focus:outline-none focus:border-rose-400"
           />
+        </div>
+
+        {/* REQUIREMENT 5: DEDICATED AI TIKTOK VIRAL FOOD GENERATOR & TRENDING DATA ENGINE */}
+        <div className="p-3.5 rounded-2xl bg-gradient-to-br from-black/80 via-rose-950/70 to-slate-900 border border-rose-400/50 space-y-3 font-khmer shadow-md text-xs">
+          {/* Header row with Creator Account & Live Status */}
+          <div className="flex items-center justify-between gap-2 pb-2 border-b border-rose-500/30">
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-rose-500 to-pink-500 flex items-center justify-center text-white shrink-0 shadow-xs">
+                <Sparkles className="w-4 h-4" />
+              </div>
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <h4 className="font-moul text-xs text-white">
+                    {isKm ? 'AI TikTok Viral Food Creator' : 'AI TikTok Viral Creator'}
+                  </h4>
+                  <span className="px-1.5 py-0.2 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 text-[8px] font-mono font-bold flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    <span>Live TikTok Connected</span>
+                  </span>
+                </div>
+                <p className="text-[10px] text-pink-200 truncate mt-0.5">
+                  🎵 {isKm ? 'គណនីទិន្នន័យ៖' : 'Source:'} <span className="font-bold text-amber-300">{currentViralIdea.accountHandle}</span> ({currentViralIdea.verifiedCreator})
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={handleNextAiIdea}
+              className="px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 text-stone-900 font-bold text-[10px] shadow-xs flex items-center gap-1 shrink-0 transition active:scale-95"
+              title={isKm ? 'បង្កើតគំនិត AI ថ្មី' : 'Generate New Idea'}
+            >
+              <RefreshCw className="w-3 h-3" />
+              <span>{isKm ? 'គំនិតថ្មី' : 'New Idea'}</span>
+            </button>
+          </div>
+
+          {/* AI Generated Viral Content Breakdown */}
+          <div className="space-y-2 bg-white/5 p-2.5 rounded-xl border border-white/10">
+            {/* Viral Hook */}
+            <div>
+              <div className="text-[10px] font-bold text-pink-300 flex items-center gap-1">
+                <span>💡</span>
+                <span>{isKm ? 'ចំណងជើងទាក់ទាញ (AI Viral Hook):' : 'AI Viral Hook:'}</span>
+              </div>
+              <p className="text-[11px] font-bold text-white mt-0.5 leading-snug bg-black/40 p-2 rounded-lg border border-rose-500/30">
+                "{isKm ? currentViralIdea.hookKh : currentViralIdea.hookEn}"
+              </p>
+            </div>
+
+            {/* AI Caption & Hashtags */}
+            <div>
+              <div className="text-[10px] font-bold text-pink-300 flex items-center gap-1">
+                <span>📝</span>
+                <span>{isKm ? 'អត្ថបទបង្ហោះ & Hashtags (AI Caption):' : 'AI Caption & Hashtags:'}</span>
+              </div>
+              <p className="text-[10px] text-slate-200 mt-0.5 leading-relaxed bg-black/30 p-2 rounded-lg">
+                {isKm ? currentViralIdea.captionKh : currentViralIdea.captionEn}
+              </p>
+              <p className="text-[9px] font-mono text-amber-300 mt-1 break-words">
+                {currentViralIdea.hashtags}
+              </p>
+            </div>
+
+            {/* 3-Shot Video Concept */}
+            <div>
+              <div className="text-[10px] font-bold text-teal-300 flex items-center gap-1">
+                <Video className="w-3 h-3 text-teal-300" />
+                <span>{isKm ? 'ប្លង់ថតវីដេអូ AI (3-Shot Video Concept):' : '3-Shot Video Concept:'}</span>
+              </div>
+              <p className="text-[10px] text-teal-100 mt-0.5 leading-relaxed bg-teal-950/40 p-2 rounded-lg border border-teal-500/30">
+                🎬 {isKm ? currentViralIdea.videoConceptKh : currentViralIdea.videoConceptEn}
+              </p>
+            </div>
+          </div>
+
+          {/* Action Row */}
+          <div className="flex items-center gap-2 pt-0.5">
+            <button
+              onClick={handleCopyCaption}
+              className={`flex-1 py-1.5 px-3 rounded-xl font-bold text-[10px] transition flex items-center justify-center gap-1 shadow-xs ${
+                hasCopiedCaption
+                  ? 'bg-emerald-600 text-white'
+                  : 'bg-white/15 hover:bg-white/25 text-white border border-white/20'
+              }`}
+            >
+              {hasCopiedCaption ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+              <span>{hasCopiedCaption ? (isKm ? 'បានចម្លងរួចរាល់!' : 'Copied!') : (isKm ? 'ចម្លង Caption & Tags' : 'Copy Caption')}</span>
+            </button>
+
+            <a
+              href={`https://www.tiktok.com/search?q=${encodeURIComponent(currentViralIdea.foodNameKh)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="py-1.5 px-3 rounded-xl bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 text-white font-bold text-[10px] flex items-center gap-1 shadow-xs transition"
+            >
+              <Play className="w-3 h-3 fill-current" />
+              <span>{isKm ? 'មើលលើ TikTok' : 'Watch TikTok'}</span>
+            </a>
+          </div>
         </div>
 
         {/* 4 Trending Video Panels Grid */}

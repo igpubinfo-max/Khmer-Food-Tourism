@@ -1,18 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useApp } from '../context/AppContext';
-import { Search, Heart, Globe, Shield, User as UserIcon, X, QrCode, Download, ShieldCheck, Mail } from 'lucide-react';
+import { Search, Heart, Globe, Shield, User as UserIcon, X, QrCode, Download, ShieldCheck, Mail, Camera } from 'lucide-react';
 import { APP_VERSION } from '../types';
 
 export const Header: React.FC = () => {
   const { 
     language, setLanguage, bookmarks, setActiveTab, 
     currentUser, setIsAuthModalOpen, setIsAdminOpen, setIsAdminLoginModalOpen,
-    setIsInstallModalOpen, setIsSupportModalOpen,
+    setIsInstallModalOpen, setIsSupportModalOpen, setIsQrScannerModalOpen,
     searchQuery, setSearchQuery, selectedProvince, setSelectedProvince,
     showToast
   } = useApp();
 
   const [isSearchVisible, setIsSearchVisible] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const provinces = [
     { id: '', nameKh: 'គ្រប់ខេត្តក្រុង', nameEn: 'All Provinces' },
@@ -56,10 +57,20 @@ export const Header: React.FC = () => {
 
         {/* Action icons */}
         <div className="flex items-center gap-1.5">
+          {/* Scan QR Code Button */}
+          <button
+            onClick={() => setIsQrScannerModalOpen(true)}
+            className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-800 hover:bg-emerald-700 text-white text-[11px] font-bold border border-emerald-400/50 shadow-xs transition-all active:scale-95"
+            title={isKm ? 'ស្កេន QR កូដ (Scan QR Code)' : 'Scan QR Code'}
+          >
+            <Camera className="w-3.5 h-3.5 text-emerald-200" />
+            <span className="hidden xs:inline">{isKm ? 'ស្កេន QR' : 'Scan'}</span>
+          </button>
+
           {/* App Install QR Button */}
           <button
             onClick={() => setIsInstallModalOpen(true)}
-            className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#065F46] hover:bg-[#047857] text-white text-[11px] font-bold border border-emerald-500/40 shadow-xs transition-all"
+            className="flex items-center gap-1 px-2 py-1 rounded-full bg-[#065F46] hover:bg-[#047857] text-white text-[11px] font-bold border border-emerald-500/40 shadow-xs transition-all"
             title={isKm ? 'ដំឡើងកម្មវិធីលើទូរស័ព្ទ (Install App)' : 'Install App'}
           >
             <QrCode className="w-3.5 h-3.5 text-emerald-200" />
@@ -69,7 +80,7 @@ export const Header: React.FC = () => {
           {/* Support Our App Button */}
           <button
             onClick={() => setIsSupportModalOpen(true)}
-            className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#10B981] hover:bg-[#059669] text-white text-[11px] font-bold shadow-xs transition-all"
+            className="flex items-center gap-1 px-2 py-1 rounded-full bg-[#10B981] hover:bg-[#059669] text-white text-[11px] font-bold shadow-xs transition-all"
             title={isKm ? 'ជួយឧបត្ថម្ភគាំទ្រកម្មវិធី (Support App)' : 'Support App'}
           >
             <Heart className="w-3.5 h-3.5 fill-white text-white" />
@@ -78,7 +89,13 @@ export const Header: React.FC = () => {
 
           {/* Search Toggle */}
           <button
-            onClick={() => setIsSearchVisible(!isSearchVisible)}
+            onClick={() => {
+              const nextState = !isSearchVisible;
+              setIsSearchVisible(nextState);
+              if (nextState) {
+                setTimeout(() => searchInputRef.current?.focus(), 100);
+              }
+            }}
             className={`p-2 rounded-full transition-colors ${
               isSearchVisible || searchQuery ? 'bg-white text-[#064E3B] shadow-xs' : 'hover:bg-[#065F46] text-emerald-100'
             }`}
@@ -147,6 +164,7 @@ export const Header: React.FC = () => {
           <div className="relative flex items-center">
             <Search className="w-4 h-4 text-emerald-200 absolute left-3 pointer-events-none" />
             <input
+              ref={searchInputRef}
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}

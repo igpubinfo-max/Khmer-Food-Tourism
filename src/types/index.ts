@@ -1,7 +1,7 @@
-export const APP_VERSION = 'v1.5.8';
-export const APP_VERSION_NAME = '1.5.8';
-export const APP_BUILD_CODE = 30;
-export const APP_RELEASE_DATE = '2026-10-21';
+export const APP_VERSION = 'v1.5.9';
+export const APP_VERSION_NAME = '1.5.9';
+export const APP_BUILD_CODE = 31;
+export const APP_RELEASE_DATE = '2026-10-22';
 
 export type Language = 'km' | 'en';
 
@@ -33,6 +33,25 @@ export interface User {
   paymentMethod?: 'GooglePlayBilling' | 'KHQR' | 'Bakong' | 'Card' | 'Manual' | 'BankTransfer';
   transactionRef?: string;
   autoRenew?: boolean;
+
+  // Connected Social Accounts (TikTok & Facebook)
+  socialAccounts?: UserSocialAccounts;
+}
+
+export interface ConnectedSocialAccount {
+  connected: boolean;
+  username: string;
+  handle?: string;
+  displayName: string;
+  avatarUrl?: string;
+  profileUrl?: string;
+  connectedAt?: string;
+  followersCount?: string;
+}
+
+export interface UserSocialAccounts {
+  tiktok?: ConnectedSocialAccount;
+  facebook?: ConnectedSocialAccount;
 }
 
 export interface VipBenefitItem {

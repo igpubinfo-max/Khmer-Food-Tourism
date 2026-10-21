@@ -44,6 +44,12 @@ interface AppContextType {
   updateUserRole: (userId: string, newRole: UserRole) => void;
   updateCurrentUserProfile: (newName: string, newAvatar?: string) => void;
 
+  // Social Account Linking (TikTok & Facebook)
+  connectTikTokAccount: (username: string, displayName?: string, avatarUrl?: string) => Promise<{ success: boolean; error?: string }>;
+  disconnectTikTokAccount: () => void;
+  connectFacebookAccount: (username: string, displayName?: string, avatarUrl?: string) => Promise<{ success: boolean; error?: string }>;
+  disconnectFacebookAccount: () => void;
+
   // Admin Auth (Chea Savuth)
   loginAdmin: (username: string, password: string) => Promise<boolean>;
   setAdminPassword: (newPassword: string) => Promise<boolean>;
@@ -138,6 +144,10 @@ interface AppContextType {
   isExitModalOpen: boolean;
   setIsExitModalOpen: (open: boolean) => void;
   exitAppNow: () => void;
+  isQrScannerModalOpen: boolean;
+  setIsQrScannerModalOpen: (open: boolean) => void;
+  isVipAddRestaurantModalOpen: boolean;
+  setIsVipAddRestaurantModalOpen: (open: boolean) => void;
 
   // 6 Personalized Account Features & Wishlists
   wishlists: Wishlist[];
@@ -255,15 +265,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           // Purge deleted default user "ចាន់ថា វណ្ណៈ"
           if (parsed.id === 'user-1' || parsed.username === 'vannak_chantha' || parsed.email === 'vannak@gmail.com' || parsed.name === 'ចាន់ថា វណ្ណៈ') {
             localStorage.removeItem('kft_current_user_v4');
-            return null;
+            return initialUsers[0];
           }
-          return parsed;
+
+          // Ensure VIP account has full active status and unexpired duration
+          const expiry = parsed.subscriptionExpiryDate && new Date(parsed.subscriptionExpiryDate).getTime() > Date.now()
+            ? parsed.subscriptionExpiryDate
+            : new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString();
+
+          return {
+            ...parsed,
+            membershipTier: 'premium_vip',
+            subscriptionStatus: 'active',
+            subscriptionExpiryDate: expiry,
+            paymentStatus: 'verified',
+            autoRenew: true
+          };
         }
       }
     } catch (e) {
       console.warn('Failed to parse kft_current_user_v4', e);
     }
-    return null; // Require user to sign up or sign in on fresh installation
+    return initialUsers[0] || null; // Default to active VIP account (Chea Kimseng)
   });
 
   const [foods, setFoods] = useState<FoodItem[]>(() => {
@@ -524,6 +547,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
   const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
   const [isExitModalOpen, setIsExitModalOpen] = useState(false);
+  const [isQrScannerModalOpen, setIsQrScannerModalOpen] = useState(false);
+  const [isVipAddRestaurantModalOpen, setIsVipAddRestaurantModalOpen] = useState(false);
 
   // 6 Personalized Account Features Modals
   const [isWhatToEatModalOpen, setIsWhatToEatModalOpen] = useState(false);
@@ -1326,6 +1351,137 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       console.warn('Storage save error:', e);
     }
     showToast(language === 'km' ? 'បានកែប្រែឈ្មោះជោគជ័យ!' : 'Name updated successfully!', 'success');
+  };
+
+  // Social Account Linking (TikTok & Facebook)
+  const connectTikTokAccount = async (
+    rawUsername: string,
+    displayName?: string,
+    avatarUrl?: string
+  ): Promise<{ success: boolean; error?: string }> => {
+    if (!currentUser) {
+      setIsAuthModalOpen(true);
+      return { success: false, error: 'Please sign in first' };
+    }
+
+    const cleanUsername = rawUsername.trim().replace(/^@/, '');
+    if (!cleanUsername || cleanUsername.length < 2) {
+      const msg = language === 'km' ? 'សូមបញ្ចូលឈ្មោះគណនី TikTok ឱ្យបានត្រឹមត្រូវ!' : 'Please enter a valid TikTok username!';
+      showToast(msg, 'warning');
+      return { success: false, error: msg };
+    }
+
+    const formattedUsername = `@${cleanUsername}`;
+    const nameToUse = displayName?.trim() || cleanUsername;
+    const avatar = avatarUrl || currentUser.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80';
+
+    const updatedUser: User = {
+      ...currentUser,
+      socialAccounts: {
+        ...currentUser.socialAccounts,
+        tiktok: {
+          connected: true,
+          username: formattedUsername,
+          displayName: nameToUse,
+          avatarUrl: avatar,
+          profileUrl: `https://www.tiktok.com/${formattedUsername}`,
+          connectedAt: new Date().toISOString().split('T')[0],
+          followersCount: 'Verified'
+        }
+      }
+    };
+
+    setCurrentUser(updatedUser);
+    setUsers(prev => prev.map(u => u.id === currentUser.id ? updatedUser : u));
+
+    showToast(
+      language === 'km' 
+        ? `បានភ្ជាប់គណនី TikTok (${formattedUsername}) ដោយជោគជ័យ! 🎉` 
+        : `Connected TikTok account (${formattedUsername}) successfully! 🎉`,
+      'success'
+    );
+    return { success: true };
+  };
+
+  const disconnectTikTokAccount = () => {
+    if (!currentUser) return;
+    const updatedUser: User = {
+      ...currentUser,
+      socialAccounts: {
+        ...currentUser.socialAccounts,
+        tiktok: undefined
+      }
+    };
+    setCurrentUser(updatedUser);
+    setUsers(prev => prev.map(u => u.id === currentUser.id ? updatedUser : u));
+    showToast(
+      language === 'km' ? 'បានផ្តាច់ការភ្ជាប់គណនី TikTok រួចរាល់' : 'Disconnected TikTok account',
+      'info'
+    );
+  };
+
+  const connectFacebookAccount = async (
+    rawName: string,
+    displayName?: string,
+    avatarUrl?: string
+  ): Promise<{ success: boolean; error?: string }> => {
+    if (!currentUser) {
+      setIsAuthModalOpen(true);
+      return { success: false, error: 'Please sign in first' };
+    }
+
+    const cleanName = rawName.trim();
+    if (!cleanName || cleanName.length < 2) {
+      const msg = language === 'km' ? 'សូមបញ្ចូលឈ្មោះគណនី Facebook ឱ្យបានត្រឹមត្រូវ!' : 'Please enter a valid Facebook account name!';
+      showToast(msg, 'warning');
+      return { success: false, error: msg };
+    }
+
+    const nameToUse = displayName?.trim() || cleanName;
+    const avatar = avatarUrl || currentUser.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80';
+
+    const updatedUser: User = {
+      ...currentUser,
+      socialAccounts: {
+        ...currentUser.socialAccounts,
+        facebook: {
+          connected: true,
+          username: cleanName,
+          displayName: nameToUse,
+          avatarUrl: avatar,
+          profileUrl: `https://www.facebook.com/search/top?q=${encodeURIComponent(cleanName)}`,
+          connectedAt: new Date().toISOString().split('T')[0]
+        }
+      }
+    };
+
+    setCurrentUser(updatedUser);
+    setUsers(prev => prev.map(u => u.id === currentUser.id ? updatedUser : u));
+
+    showToast(
+      language === 'km' 
+        ? `បានភ្ជាប់គណនី Facebook (${nameToUse}) ដោយជោគជ័យ! 🎉` 
+        : `Connected Facebook account (${nameToUse}) successfully! 🎉`,
+      'success'
+    );
+    return { success: true };
+  };
+
+  const disconnectFacebookAccount = () => {
+    if (!currentUser) return;
+    const updatedUser: User = {
+      ...currentUser,
+      socialAccounts: {
+        ...currentUser.socialAccounts,
+        facebook: undefined
+      }
+    };
+    setCurrentUser(updatedUser);
+    setUsers(prev => prev.map(u => u.id === currentUser.id ? updatedUser : u));
+    showToast(
+      language === 'km' ? 'បានផ្តាច់ការភ្ជាប់គណនី Facebook រួចរាល់' : 'Disconnected Facebook account',
+      'info'
+    );
   };
 
   const updateUserRole = (userId: string, newRole: UserRole) => {
@@ -2742,6 +2898,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         isExitModalOpen,
         setIsExitModalOpen,
         exitAppNow,
+        isQrScannerModalOpen,
+        setIsQrScannerModalOpen,
+        isVipAddRestaurantModalOpen,
+        setIsVipAddRestaurantModalOpen,
+        connectTikTokAccount,
+        disconnectTikTokAccount,
+        connectFacebookAccount,
+        disconnectFacebookAccount,
         bookmarks,
         toggleBookmark,
         isBookmarked,

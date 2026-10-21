@@ -60,7 +60,7 @@ jobs:
           echo "=== SEARCHING FOR GENERATED APK FILES ==="
           find . -name "*.apk" -ls
           cd android/app/build/outputs/apk/debug
-          cp app-debug.apk KhmerFoodTourism-v1.5.8.apk
+          cp app-debug.apk KhmerFoodTourism-v1.5.9.apk
           ls -la
 
       - name: 10. Upload Android APK Artifact
@@ -73,21 +73,28 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: v1.5.8
-          name: "Khmer Food & Tourism v1.5.8 (Official ABA KHQR Flyer & Admin VIP Approval Workflow)"
+          tag_name: v1.5.9
+          name: "Khmer Food & Tourism v1.5.9 (VIP Account Power, QR Recognition, Social Accounts & AI Viral Search)"
           overwrite: true
           make_latest: true
           body: |
             ### 🇰🇭 កម្មវិធីទូរស័ព្ទដៃ អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism Mobile App)
             
-            **កំណែថ្មី v1.5.8 (Official ABA KHQR Flyer & Admin VIP Approval Workflow):**
-            - 🏦 **១. បង្ហាញផ្ទាំងរូបភាព ABA KHQR ផ្លូវការសុទ្ធសាធ (Official ABA QR Flyer):**
-              - បង្ហាញរូបភាព Stand / Flyer ផ្លូវការរបស់ធនាគារ ABA ពេញលេញ គ្មានការកាត់ត ឬបាត់បង់គុណភាព។
-              - ដកចេញនូវព័ត៌មានស្ទួន លេខគណនីដដែលៗ និងប្រអប់វាយលេខស្មុគស្មាញ។
-              - កម្មវិធី ABA Mobile អាចស្កេន និងស្គាល់ឈ្មោះ KIMSENG CHEA ភ្លាមៗ ១០០%។
-            - 🛡️ **២. ប្រព័ន្ធបញ្ជាក់ការដំឡើង VIP ដោយរដ្ឋបាល (Admin Review & Confirmation Workflow):**
-              - អ្នកប្រើប្រាស់ធម្មតាមិនអាចចុច Active VIP ដោយខ្លួនឯងបានទេ (លុបចោលប៊ូតុងស្វ័យប្រវត្តិក្លែងក្លាយ)។
-              - អ្នកប្រើប្រាស់ទូទាត់តាម ABA រួច ចុច «ផ្ញើសំណើដំឡើង VIP ជូនរដ្ឋបាល»។
+            **កំណែថ្មី v1.5.9 (VIP Account Power, QR Recognition, Social Accounts & AI Viral Search):**
+            - 👑 **១. បើកសិទ្ធិគណនី VIP ពេញលេញ និងផ្ទាំងគ្រប់គ្រងហាង VIP (VIP Account & Store Management):**
+              - គណនី Chea Kimseng ទទួលបានសិទ្ធិ VIP ពេញលេញ ៣៦៥ ថ្ងៃ។
+              - បន្ថែមហាងផ្ទាល់ខ្លួន កែប្រែព័ត៌មាន បង្ហោះរូបថត និងគ្រប់គ្រងមុខម្ហូបដោយឥតគិតកម្រៃបន្ថែម។
+              - ដកចេញនូវទម្រង់ចុះឈ្មោះចាស់ដែលមានកម្រៃសេវាស្មុគស្មាញ។
+            - 🔗 **២. ភ្ជាប់គណនី TikTok និង Facebook ផ្ទាល់ខ្លួនត្រឹមត្រូវ (Connected Social Accounts):**
+              - ភ្ជាប់គណនី TikTok និង Facebook របស់ម្ចាស់គណនីផ្ទាល់ បង្ហាញឈ្មោះ រូបភាព និង handle ច្បាស់លាស់។
+              - ជម្រើសផ្តាច់គណនី (Disconnect) និងភ្ជាប់ឡើងវិញ (Reconnect) បានយ៉ាងងាយស្រួល។
+            - 📷 **៣. ប្រព័ន្ធស្កេន QR កូដកម្រិតខ្ពស់ (Live Camera & Gallery QR Decoder):**
+              - ស្កេនតាមកាមេរ៉ាផ្ទាល់ ឬជ្រើសរូបភាពពី Gallery/Screenshot ដោយប្រើប្រាស់ jsqr។
+              - ស្គាល់ ABA KHQR, Bakong KHQR, Deep-link ទៅ ABA Mobile ភ្លាមៗ។
+            - 🔍 **៤. ប៊ូតុងស្វែងរកកំពូល និងផ្ទាំងលទ្ធផលស្វែងរកពេញលេញ (Top Fast Search Engine):**
+              - ស្វែងរកមុខម្ហូប គ្រឿងផ្សំ ហាងអាហារ និងទីតាំងទេសចរណ៍ទូទាំងប្រទេសកម្ពុជា។
+            - 🤖 **៥. មុខងារ AI TikTok Viral Food Creator Studio:**
+              - បង្កើតចំណងជើង Hook, Caption, Hashtags និងប្លង់ថតវីដេអូ AI 3 ប្លង់ដោយស្វ័យប្រវត្តិ។
               - រដ្ឋបាល (Admin) ពិនិត្យផ្ទៀងផ្ទាត់លើ Admin Dashboard និងមានសិទ្ធិចុច «អនុម័តដំឡើង VIP» ឬ «បដិសេធ»។
             - ⏱️ **៣. រយៈពេលសមាជិកភាព VIP ត្រឹមត្រូវ (Precise Subscription Durations):**
               - គណនាចាប់ពីពេលរដ្ឋបាលចុចអនុម័ត (៣៦៥ ថ្ងៃ សម្រាប់កញ្ចប់ $9.99/ឆ្នាំ, ៩០ ថ្ងៃ សម្រាប់កញ្ចប់ $2.99)។
