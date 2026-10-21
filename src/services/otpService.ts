@@ -1,6 +1,7 @@
 /**
  * OTP & Verification Delivery Service for Khmer Food & Tourism
- * Dispatches 6-digit authentication tokens via SMS & Email with Cambodian phone support
+ * Dispatches 6-digit authentication tokens via SMS & Email with Cambodian phone support (+855)
+ * Codes are delivered externally to the user's phone/email and NEVER displayed in-app.
  */
 
 export interface NormalizedPhone {
@@ -24,14 +25,6 @@ export interface SendOtpResult {
   messageEn: string;
   type: 'phone' | 'email';
   recipient: string;
-  code: string;
-  timestamp: number;
-}
-
-export interface IncomingOtpEventDetail {
-  type: 'phone' | 'email';
-  recipient: string;
-  name: string;
   code: string;
   timestamp: number;
 }
@@ -93,24 +86,8 @@ export const validateEmail = (email: string): boolean => {
 };
 
 /**
- * Broadcast an incoming OTP event so the app can render the simulated native SMS/Email heads-up banner
- */
-export const dispatchIncomingOtpNotification = (detail: IncomingOtpEventDetail) => {
-  if (typeof window !== 'undefined') {
-    const event = new CustomEvent('kft:incoming_otp', { detail });
-    window.dispatchEvent(event);
-
-    // Haptic vibration feedback if supported
-    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
-      try {
-        navigator.vibrate([120, 80, 120]);
-      } catch {}
-    }
-  }
-};
-
-/**
- * Send OTP to a Phone Number via SMS
+ * Send OTP to a Cambodian Phone Number via SMS
+ * Code is dispatched externally to the user's mobile carrier (Cellcard, Smart, Metfone, etc.)
  */
 export const sendSmsOtp = async (params: {
   phone: string;
@@ -118,7 +95,6 @@ export const sendSmsOtp = async (params: {
   name?: string;
 }): Promise<SendOtpResult> => {
   const norm = normalizePhoneNumber(params.phone);
-  const recipientName = params.name?.trim() || 'អតិថិជន';
 
   // Attempt external SMS Gateway if configured
   try {
@@ -135,33 +111,23 @@ export const sendSmsOtp = async (params: {
       });
     }
   } catch (err) {
-    console.warn('SMS gateway dispatch attempt noted:', err);
+    console.warn('SMS gateway dispatch attempt:', err);
   }
-
-  // Trigger realistic incoming SMS notification event for user verification
-  setTimeout(() => {
-    dispatchIncomingOtpNotification({
-      type: 'phone',
-      recipient: norm.local,
-      name: recipientName,
-      code: params.code,
-      timestamp: Date.now(),
-    });
-  }, 1200);
 
   return {
     success: true,
     type: 'phone',
     recipient: norm.local,
     code: params.code,
-    messageKh: `បានផ្ញើសារ SMS ទៅកាន់លេខ ${norm.local} រួចរាល់!`,
-    messageEn: `SMS verification code dispatched to ${norm.local}!`,
+    messageKh: `បានផ្ញើសារ SMS ទៅកាន់លេខ ${norm.local}។ សូមពិនិត្យប្រអប់សារលើទូរស័ព្ទដៃ!`,
+    messageEn: `SMS verification code dispatched to ${norm.local}. Please check your phone SMS!`,
     timestamp: Date.now(),
   };
 };
 
 /**
  * Send OTP to an Email Address
+ * Code is dispatched externally to the user's email inbox
  */
 export const sendEmailOtp = async (params: {
   email: string;
@@ -188,27 +154,16 @@ export const sendEmailOtp = async (params: {
       });
     }
   } catch (err) {
-    console.warn('Email dispatch attempt noted:', err);
+    console.warn('Email dispatch attempt:', err);
   }
-
-  // Trigger realistic incoming Email notification event for user verification
-  setTimeout(() => {
-    dispatchIncomingOtpNotification({
-      type: 'email',
-      recipient: cleanEmail,
-      name: recipientName,
-      code: params.code,
-      timestamp: Date.now(),
-    });
-  }, 1200);
 
   return {
     success: true,
     type: 'email',
     recipient: cleanEmail,
     code: params.code,
-    messageKh: `បានផ្ញើអ៊ីមែលផ្ទៀងផ្ទាត់ទៅកាន់ ${cleanEmail} រួចរាល់!`,
-    messageEn: `Email verification code dispatched to ${cleanEmail}!`,
+    messageKh: `បានផ្ញើអ៊ីមែលផ្ទៀងផ្ទាត់ទៅកាន់ ${cleanEmail}។ សូមពិនិត្យប្រអប់សំបុត្រ!`,
+    messageEn: `Email verification code dispatched to ${cleanEmail}. Please check your inbox!`,
     timestamp: Date.now(),
   };
 };

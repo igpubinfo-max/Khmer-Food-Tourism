@@ -862,7 +862,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       if (state.isAuthModalOpen) {
         if (!currentUser) {
-          setIsExitModalOpen(true);
+          exitAppNow();
           return;
         }
         setIsAuthModalOpen(false);

@@ -3,7 +3,7 @@ import { useApp } from '../context/AppContext';
 import { 
   X, Mail, User, Store, Shield, Phone, Sparkles, 
   CheckCircle2, ArrowRight, ShieldCheck, RotateCcw, Edit2,
-  MessageSquare, Loader2, ExternalLink
+  MessageSquare, Loader2, ExternalLink, LogOut
 } from 'lucide-react';
 import { UserRole } from '../types';
 import { 
@@ -15,13 +15,14 @@ import {
 } from '../services/otpService';
 import { signInWithGooglePopup } from '../services/firebase';
 
-export const AuthModal: React.FC = () => {
+export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatoryGate = false }) => {
   const { 
     isAuthModalOpen, 
     setIsAuthModalOpen, 
     login, 
     register, 
     loginWithGoogle,
+    exitAppNow,
     language, 
     currentUser, 
     setIsAdminLoginModalOpen,
@@ -41,7 +42,7 @@ export const AuthModal: React.FC = () => {
   const [restaurantName, setRestaurantName] = useState('');
   const [role, setRole] = useState<UserRole>('user');
 
-  // Verification OTP state
+  // Verification OTP state (never shown in-app)
   const [generatedOtp, setGeneratedOtp] = useState<string>('');
   const [otpDigits, setOtpDigits] = useState<string[]>(['', '', '', '', '', '']);
   const [isSendingOtp, setIsSendingOtp] = useState<boolean>(false);
@@ -70,22 +71,7 @@ export const AuthModal: React.FC = () => {
     return () => clearInterval(interval);
   }, [timerActive, resendTimer]);
 
-  // Listen to paste event from notification banner
-  useEffect(() => {
-    const handlePasteEvent = (e: Event) => {
-      const custom = e as CustomEvent<{ code: string }>;
-      if (custom.detail?.code) {
-        const chars = custom.detail.code.slice(0, 6).split('');
-        while (chars.length < 6) chars.push('');
-        setOtpDigits(chars);
-        inputRefs.current[5]?.focus();
-      }
-    };
-    window.addEventListener('kft:paste_otp', handlePasteEvent);
-    return () => window.removeEventListener('kft:paste_otp', handlePasteEvent);
-  }, []);
-
-  if (!isAuthModalOpen) return null;
+  if (!isAuthModalOpen && !isMandatoryGate && currentUser) return null;
 
   // Handle Google Sign-In
   const handleGoogleSignIn = async () => {
@@ -98,7 +84,7 @@ export const AuthModal: React.FC = () => {
       if (err?.code === 'auth/popup-closed-by-user' || err?.code === 'auth/cancelled-popup-request') {
         showToast(isKm ? 'ការចូលតាម Google ត្រូវបានបោះបង់' : 'Google sign-in cancelled', 'info');
       } else {
-        // Resilient fallback for testing when Firebase Console API key is being provisioned
+        // Fallback profile if offline or Firebase keys not yet provisioned
         const demoProfile = {
           id: `google-user-${Date.now()}`,
           name: 'អ្នកប្រើប្រាស់ Google',
@@ -269,7 +255,7 @@ export const AuthModal: React.FC = () => {
     if (entered.length < 6) {
       showToast(
         isKm 
-          ? 'សូមបញ្ចូលលេខកូដផ្ទៀងផ្ទាត់ ៦ ខ្ទង់ ពីសារ SMS ឬអ៊ីមែល' 
+          ? 'សូមបញ្ចូលលេខកូដផ្ទៀងផ្ទាត់ ៦ ខ្ទង់ ពីសារ SMS លើទូរស័ព្ទដៃ ឬអ៊ីមែល' 
           : 'Please enter all 6 digits of the verification code received via SMS/Email', 
         'warning'
       );
@@ -279,8 +265,8 @@ export const AuthModal: React.FC = () => {
     if (entered !== generatedOtp.trim()) {
       showToast(
         isKm 
-          ? `លេខកូដផ្ទៀងផ្ទាត់មិនត្រឹមត្រូវទេ! សូមពិនិត្យសារ SMS ឬអ៊ីមែលដែលបានផ្ញើទៅកាន់ ${signupMethod === 'phone' ? phone : email} ម្តងទៀត។` 
-          : `Invalid verification code! Please check the SMS or Email sent to ${signupMethod === 'phone' ? phone : email}.`, 
+          ? `លេខកូដផ្ទៀងផ្ទាត់មិនត្រឹមត្រូវទេ! សូមពិនិត្យសារ SMS លើទូរស័ព្ទ ឬអ៊ីមែលដែលបានផ្ញើទៅកាន់ ${signupMethod === 'phone' ? phone : email} ម្តងទៀត។` 
+          : `Invalid verification code! Please check the SMS on your phone or Email sent to ${signupMethod === 'phone' ? phone : email}.`, 
         'warning'
       );
       return;
@@ -307,23 +293,29 @@ export const AuthModal: React.FC = () => {
   };
 
   const handleClose = () => {
+    if (!currentUser) {
+      exitAppNow();
+      return;
+    }
     setIsAuthModalOpen(false);
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
       <div 
-        className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden flex flex-col relative border border-slate-200 dark:border-slate-800 max-h-[90vh]"
+        className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden flex flex-col relative border border-slate-200 dark:border-slate-800 max-h-[92vh]"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Close button (allows guest browsing) */}
-        <button
-          onClick={handleClose}
-          className="absolute top-3.5 right-3.5 p-2 rounded-full text-slate-300 hover:text-white hover:bg-white/10 transition z-10"
-          title={isKm ? 'បិទ / រុករកជាភ្ញៀវ' : 'Close / Browse as Guest'}
-        >
-          <X className="w-4 h-4" />
-        </button>
+        {/* Close button (only available if user is already authenticated) */}
+        {currentUser && (
+          <button
+            onClick={handleClose}
+            className="absolute top-3.5 right-3.5 p-2 rounded-full text-slate-300 hover:text-white hover:bg-white/10 transition z-10"
+            title={isKm ? 'បិទ' : 'Close'}
+          >
+            <X className="w-4 h-4" />
+          </button>
+        )}
 
         {/* Top Header */}
         <div className="p-5 pb-4 bg-gradient-to-br from-[#064E3B] via-[#065F46] to-[#047857] text-white text-center space-y-1.5 border-b border-[#047857]">
@@ -337,15 +329,15 @@ export const AuthModal: React.FC = () => {
           <h2 className="font-moul text-base text-white tracking-wide">
             {tab === 'register' 
               ? (registerStep === 'verify' 
-                  ? (isKm ? 'ផ្ទៀងផ្ទាត់កូដ OTP' : 'Verify OTP Code')
-                  : (isKm ? 'ចុះឈ្មោះ ឬចូលគណនី' : 'Sign In or Register'))
+                  ? (isKm ? 'ផ្ទៀងផ្ទាត់កូដ OTP ពីទូរស័ព្ទ' : 'Verify Phone OTP Code')
+                  : (isKm ? 'ចុះឈ្មោះគណនីថ្មី' : 'Create Account'))
               : (isKm ? 'ចូលប្រើប្រាស់' : 'Welcome Back')}
           </h2>
           <p className="text-[11px] text-emerald-100 font-khmer">
             {tab === 'register'
               ? (registerStep === 'verify'
-                  ? (isKm ? 'បញ្ចូលលេខកូដ ៦ ខ្ទង់ដែលបានផ្ញើទៅកាន់សារ ឬអ៊ីមែល' : 'Enter the 6-digit code sent to your SMS or Email')
-                  : (isKm ? 'ជ្រើសរើសជម្រើសចូលប្រើប្រាស់ងាយស្រួលបំផុត' : 'Choose your preferred sign-in option'))
+                  ? (isKm ? 'សូមពិនិត្យសារ SMS លើទូរស័ព្ទដៃ រួចវាយបញ្ចូលលេខកូដ' : 'Check phone SMS and enter received code')
+                  : (isKm ? 'តម្រូវឱ្យមានគណនីដើម្បីចូលប្រើប្រាស់កម្មវិធី' : 'Account required to access application'))
               : (isKm ? 'សូមបញ្ចូលលេខទូរស័ព្ទ ឬ អ៊ីមែលរបស់អ្នក' : 'Sign in with your phone or email')}
           </p>
         </div>
@@ -635,24 +627,24 @@ export const AuthModal: React.FC = () => {
                   </button>
                 </div>
 
-                {/* Instructions card */}
+                {/* Instructions card: Note that OTP is never shown in app */}
                 <div className="p-3 bg-gradient-to-br from-slate-50 to-emerald-50/50 dark:from-slate-800 dark:to-emerald-950/30 rounded-2xl border border-slate-200 dark:border-slate-700/80 space-y-1.5 text-center">
                   <h3 className="font-bold text-xs text-slate-800 dark:text-slate-200">
                     {isKm 
                       ? (signupMethod === 'phone' ? 'សូមពិនិត្យសារ SMS លើទូរស័ព្ទដៃ' : 'សូមពិនិត្យប្រអប់សំបុត្រអ៊ីមែល')
                       : (signupMethod === 'phone' ? 'Check SMS on your phone' : 'Check your Email inbox')}
                   </h3>
-                  <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-snug font-khmer">
+                  <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed font-khmer">
                     {isKm
                       ? (signupMethod === 'phone'
-                          ? `ប្រព័ន្ធបានផ្ញើសារ SMS លេខកូដ ៦ ខ្ទង់ ទៅកាន់ ${phone}។ សូមបញ្ចូលលេខកូដខាងក្រោម៖`
-                          : `ប្រព័ន្ធបានផ្ញើអ៊ីមែលលេខកូដ ៦ ខ្ទង់ ទៅកាន់ ${email}។ សូមបញ្ចូលលេខកូដខាងក្រោម៖`)
+                          ? `សារ SMS លេខកូដ ៦ ខ្ទង់ ត្រូវបានបញ្ជូនទៅក្នុងទូរស័ព្ទដៃរបស់អ្នកតាមរយៈប្រព័ន្ធទូរស័ព្ទចល័ត។ សូមពិនិត្យមើលសារ SMS លើទូរស័ព្ទដៃ រួចយកលេខកូដមកវាយបញ្ចូលខាងក្រោម (លេខកូដមិនត្រូវបានបង្ហាញក្នុងកម្មវិធីឡើយ)៖`
+                          : `អ៊ីមែលលេខកូដ ៦ ខ្ទង់ ត្រូវបានបញ្ជូនទៅកាន់ប្រអប់សំបុត្រ ${email}។ សូមពិនិត្យប្រអប់សំបុត្រ រួចយកលេខកូដមកវាយបញ្ចូលខាងក្រោម (លេខកូដមិនត្រូវបានបង្ហាញក្នុងកម្មវិធីឡើយ)៖`)
                       : (signupMethod === 'phone'
-                          ? `Dispatched 6-digit SMS code to ${phone}. Enter code below:`
-                          : `Dispatched 6-digit code to ${email}. Enter code below:`)}
+                          ? `6-digit SMS code dispatched to your phone via mobile carrier. Please check your SMS inbox and enter the code below (code is never shown in-app):`
+                          : `6-digit code dispatched to ${email}. Please check your email inbox and enter the code below (code is never shown in-app):`)}
                   </p>
 
-                  {/* App launch shortcut for testing/convenience */}
+                  {/* App launch shortcut */}
                   <div className="pt-0.5 flex items-center justify-center gap-2">
                     {signupMethod === 'phone' ? (
                       <a
@@ -660,7 +652,7 @@ export const AuthModal: React.FC = () => {
                         className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 text-[10px] font-bold border border-slate-200 dark:border-slate-600 shadow-2xs hover:bg-slate-50 transition"
                       >
                         <MessageSquare className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
-                        <span>{isKm ? 'បើកប្រអប់សារ SMS' : 'Open SMS App'}</span>
+                        <span>{isKm ? 'បើកប្រអប់សារ SMS លើទូរស័ព្ទ' : 'Open Phone SMS'}</span>
                         <ExternalLink className="w-2.5 h-2.5 text-slate-400" />
                       </a>
                     ) : (
@@ -681,7 +673,7 @@ export const AuthModal: React.FC = () => {
                 {/* 6 Individual PIN Input Boxes */}
                 <div className="space-y-1.5">
                   <label className="block font-bold text-slate-700 dark:text-slate-300 text-xs text-center">
-                    {isKm ? 'បញ្ចូលលេខកូដ ៦ ខ្ទង់៖' : 'Enter 6-Digit Code:'}
+                    {isKm ? 'វាយបញ្ចូលលេខកូដ ៦ ខ្ទង់ពីទូរស័ព្ទដៃ៖' : 'Type 6-Digit Code from Phone:'}
                   </label>
                   
                   <div className="flex items-center justify-center gap-1.5 sm:gap-2" onPaste={handlePaste}>
@@ -739,6 +731,16 @@ export const AuthModal: React.FC = () => {
                 >
                   <CheckCircle2 className="w-4 h-4 text-emerald-300" />
                   <span>{isKm ? 'ផ្ទៀងផ្ទាត់ និងបង្កើតគណនី' : 'Verify & Create Account'}</span>
+                </button>
+
+                {/* Exit Application Button on Verification Step */}
+                <button
+                  type="button"
+                  onClick={exitAppNow}
+                  className="w-full py-2 text-center text-xs font-bold text-rose-500 hover:text-rose-600 transition font-khmer flex items-center justify-center gap-1.5"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span>{isKm ? 'ចាកចេញពីកម្មវិធី (Exit App)' : 'Exit Application'}</span>
                 </button>
               </form>
             )
@@ -812,20 +814,20 @@ export const AuthModal: React.FC = () => {
             </div>
           )}
 
-          {/* Guest Browsing Option (Public food browsing) */}
+          {/* Mandatory Exit Application Option if user refuses to create account */}
           <div className="pt-2 border-t border-slate-200 dark:border-slate-800 text-center font-khmer space-y-1">
             <button
               type="button"
-              onClick={handleClose}
-              className="w-full py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold transition flex items-center justify-center gap-2 shadow-2xs"
+              onClick={exitAppNow}
+              className="w-full py-2.5 px-3 rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/30 dark:hover:bg-rose-950/50 text-rose-600 dark:text-rose-400 text-xs font-bold transition flex items-center justify-center gap-2 border border-rose-200 dark:border-rose-900/50 shadow-2xs"
             >
-              <span>🍽️</span>
-              <span>{isKm ? 'រុករកមុខម្ហូប និងហាងអាហារជាភ្ញៀវ' : 'Browse Foods & Shops as Guest'}</span>
+              <LogOut className="w-3.5 h-3.5" />
+              <span>{isKm ? 'ចាកចេញពីកម្មវិធី (Exit App)' : 'Exit Application'}</span>
             </button>
             <p className="text-[10px] text-slate-400">
               {isKm 
-                ? 'លោកអ្នកអាចមើលមុខម្ហូប និងកន្លែងដើរលេងបានដោយមិនបាច់ចុះឈ្មោះ' 
-                : 'You can explore recipes and tourist spots without an account'}
+                ? 'តម្រូវឱ្យមានគណនីដើម្បីចូលប្រើប្រាស់។ ប្រសិនបើមិនបង្កើតគណនីទេ កម្មវិធីនឹងបិទស្វ័យប្រវត្តិ។' 
+                : 'Account required. If you do not create an account, the app will exit automatically.'}
             </p>
           </div>
 
