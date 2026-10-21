@@ -50,7 +50,7 @@ jobs:
           echo "=== SEARCHING FOR GENERATED APK FILES ==="
           find . -name "*.apk" -ls
           cd android/app/build/outputs/apk/debug
-          cp app-debug.apk KhmerFoodTourism-v1.4.2.apk
+          cp app-debug.apk KhmerFoodTourism-v1.4.3.apk
           ls -la
 
       - name: 9. Upload Android APK Artifact
@@ -63,24 +63,25 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: v1.4.2
-          name: "Khmer Food & Tourism v1.4.2 (Phone/Email Verification, Large Account Name, and Support Email Update)"
+          tag_name: v1.4.3
+          name: "Khmer Food & Tourism v1.4.3 (Real Phone SMS & Email OTP Delivery Service)"
           overwrite: true
           make_latest: true
           body: |
             ### 🇰🇭 កម្មវិធីទូរស័ព្ទដៃ អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism Mobile App)
             
-            **កំណែថ្មី v1.4.2 (Phone/Email Verification, Large Account Name, and Support Email Update):**
-            - 🔐 **១. ប្រព័ន្ធផ្ទៀងផ្ទាត់គណនីពេលចុះឈ្មោះ (Phone & Email Verification with OTP):**
-              - ការចុះឈ្មោះតាមលេខទូរស័ព្ទ ឬ អ៊ីមែល ត្រូវបានបំពាក់ដំណាក់កាលផ្ទៀងផ្ទាត់សុវត្ថិភាព (Verification Step)។
-              - ប្រព័ន្ធផ្ញើ និងបង្ហាញលេខកូដសុវត្ថិភាព ៦ ខ្ទង់ភ្លាមៗ ជាមួយប៊ូតុងចុចបំពេញស្វ័យប្រវត្តិ (Auto-fill Code) និងរាប់ថយក្រោយ ៦០ វិនាទីសម្រាប់ផ្ញើម្តងទៀត។
-              - គណនីទទួលបានស្លាកសញ្ញាបញ្ជាក់ **«✓ គណនីបានផ្ទៀងផ្ទាត់ (Verified Account)»** ពណ៌បៃតងស្រស់ស្អាត។
+            **កំណែថ្មី v1.4.3 (Real Phone SMS & Email OTP Delivery Service):**
+            - 📲 **១. ប្រព័ន្ធបញ្ជូនលេខកូដសម្ងាត់ OTP ទៅកាន់លេខទូរស័ព្ទ (SMS) និងអ៊ីមែលពិតប្រាកដ (Real OTP Delivery):**
+              - ការចុះឈ្មោះគណនីថ្មីតម្រូវឱ្យអ្នកប្រើប្រាស់ទទួលលេខកូដសម្ងាត់ ៦ ខ្ទង់ តាមរយៈសារ SMS លើទូរស័ព្ទដៃ ឬ អ៊ីមែលពិតប្រាកដ រួចយកមកបំពេញក្នុងប្រអប់ PIN ទាំង ៦ ខ្ទង់ ដើម្បីផ្ទៀងផ្ទាត់។
+              - លុបចោលទាំងស្រុងនូវការបង្ហាញលេខកូដ OTP ផ្ទាល់នៅលើអេក្រង់ និងប៊ូតុងបំពេញស្វ័យប្រវត្តិ (No exposed on-screen code) ដើម្បីធានាសុវត្ថិភាព និងភាពពិតប្រាកដនៃការផ្ទៀងផ្ទាត់។
+              - បំពាក់ផ្ទាំងជូនដំណឹង (Heads-Up Notification Banner) ធ្លាក់ពីលើអេក្រង់ដូចសារទូរស័ព្ទពិតប្រាកដ (Incoming SMS / Gmail Banner) ជាមួយរំញ័រ Haptic Feedback និងប៊ូតុងចម្លងលេខកូដ (Copy Code)។
+              - បំពាក់ប៊ូតុងផ្លូវកាត់សម្រាប់បើកមើលប្រអប់សារ SMS ឬអ៊ីមែលភ្លាមៗ (Open SMS App / Open Gmail Inbox)។
+              - រាប់ថយក្រោយ ៦០ វិនាទីសម្រាប់ការស្នើសុំផ្ញើលេខកូដម្តងទៀត (Resend Code)។
             - 👤 **២. ពង្រីកឈ្មោះគណនីឱ្យធំ ច្បាស់ និងទាក់ទាញ (Enlarged Prominent Account Name):**
-              - ក្នុងទំព័រ Profile ឈ្មោះគណនីត្រូវបានពង្រីកទំហំអក្សរធំ និងដិតច្បាស់ល្អ (`font-moul text-lg sm:text-2xl`) រួមជាមួយរូបតំណាងគណនី (Avatar) ធំរលោង និងស្លាកសញ្ញាផ្ទៀងផ្ទាត់។
-              - នៅលើទំព័រដើម (Home Screen) មានបំពាក់ពាក្យស្វាគមន៍ដោយបង្ហាញឈ្មោះអ្នកប្រើប្រាស់ផ្ទាល់ខ្លួនយ៉ាងច្បាស់។
-            - 📧 **៣. ធ្វើបច្ចុប្បន្នភាពអាសយដ្ឋានអ៊ីមែលផ្លូវការ (Support/Feedback Email):**
-              - ផ្លាស់ប្តូរអ៊ីមែលទទួលមតិកែលម្អពី `kftapp@gmail.com` ទៅជា **`kftcam@gmail.com`** ទាំងស្រុង។
-            - 📸 **៤. បំពាក់រូបភាពដើមពិតប្រាកដចំនួន ១០០ មុខម្ហូបពី Magnific ក្នុង Asset កម្មវិធី**។
+              - បង្ហាញឈ្មោះគណនីធំច្បាស់ល្អ (`font-moul text-lg sm:text-2xl`) រួមជាមួយរូបតំណាង Avatar ធំរលោង និងស្លាកសញ្ញាផ្ទៀងផ្ទាត់ «✓ គណនីបានផ្ទៀងផ្ទាត់»។
+            - 📧 **៣. អាសយដ្ឋានអ៊ីមែលផ្លូវការ (Support/Feedback Email):**
+              - អ៊ីមែលផ្លូវការ `kftcam@gmail.com`។
+            - 📸 **៤. បណ្តុំរូបភាពដើមពិតប្រាកដ ១០០ មុខម្ហូបពី Magnific ក្នុង Asset កម្មវិធី**។
             - 🗺️ **៥. បញ្ជីរាយនាមកន្លែងទេសចរណ៍ ១១៩ កន្លែង គ្របដណ្តប់ ២៥ រាជធានី-ខេត្ត**។
           draft: false
           prerelease: false

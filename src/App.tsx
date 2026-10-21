@@ -27,9 +27,24 @@ import { AiTripPlannerModal } from './components/AiTripPlannerModal';
 import { NotificationsModal } from './components/NotificationsModal';
 import { TrendingSocialModal } from './components/TrendingSocialModal';
 import { Toast } from './components/Toast';
+import { OtpNotificationBanner } from './components/OtpNotificationBanner';
 
 const MainScreen: React.FC = () => {
-  const { activeTab } = useApp();
+  const { activeTab, currentUser } = useApp();
+
+  // Strict Condition: If user has not created an account / logged in, app access is completely locked!
+  if (!currentUser) {
+    return (
+      <div className="flex-1 flex flex-col w-full min-h-screen relative overflow-y-auto no-scrollbar bg-slate-950 items-center justify-center p-3 sm:p-4">
+        {/* Full-Screen Mandatory Account Registration & Verification Gate */}
+        <AuthModal isMandatoryGate={true} />
+        <ExitConfirmModal />
+        <AdminLoginModal />
+        <OtpNotificationBanner />
+        <Toast />
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 flex flex-col w-full min-h-screen relative overflow-y-auto no-scrollbar pb-16">
@@ -70,6 +85,7 @@ const MainScreen: React.FC = () => {
 
       {/* Notifications */}
       <Toast />
+      <OtpNotificationBanner />
 
       {/* Mobile Bottom Navigation */}
       <BottomNav />

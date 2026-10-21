@@ -1,12 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
   X, Mail, User, Store, Shield, Phone, Sparkles, 
-  CheckCircle2, ArrowRight, ShieldCheck, KeyRound, RotateCcw, Edit2
+  CheckCircle2, ArrowRight, ShieldCheck, RotateCcw, Edit2,
+  MessageSquare, Loader2, ExternalLink
 } from 'lucide-react';
 import { UserRole } from '../types';
+import { 
+  generateSecureOtp, 
+  sendSmsOtp, 
+  sendEmailOtp, 
+  normalizePhoneNumber, 
+  validateEmail 
+} from '../services/otpService';
 
-export const AuthModal: React.FC = () => {
+export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatoryGate = false }) => {
   const { 
     isAuthModalOpen, 
     setIsAuthModalOpen, 
@@ -32,10 +40,14 @@ export const AuthModal: React.FC = () => {
   const [role, setRole] = useState<UserRole>('user');
 
   // Verification OTP state
-  const [generatedOtp, setGeneratedOtp] = useState<string>('889922');
-  const [enteredOtp, setEnteredOtp] = useState<string>('');
+  const [generatedOtp, setGeneratedOtp] = useState<string>('');
+  const [otpDigits, setOtpDigits] = useState<string[]>(['', '', '', '', '', '']);
+  const [isSendingOtp, setIsSendingOtp] = useState<boolean>(false);
   const [resendTimer, setResendTimer] = useState<number>(60);
   const [timerActive, setTimerActive] = useState<boolean>(false);
+
+  // References for the 6 digit inputs
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   // Login field
   const [loginIdentifier, setLoginIdentifier] = useState('');
@@ -55,60 +67,194 @@ export const AuthModal: React.FC = () => {
     return () => clearInterval(interval);
   }, [timerActive, resendTimer]);
 
-  if (!isAuthModalOpen) return null;
+  // Listen to paste event from notification banner
+  useEffect(() => {
+    const handlePasteEvent = (e: Event) => {
+      const custom = e as CustomEvent<{ code: string }>;
+      if (custom.detail?.code) {
+        const chars = custom.detail.code.slice(0, 6).split('');
+        while (chars.length < 6) chars.push('');
+        setOtpDigits(chars);
+        inputRefs.current[5]?.focus();
+      }
+    };
+    window.addEventListener('kft:paste_otp', handlePasteEvent);
+    return () => window.removeEventListener('kft:paste_otp', handlePasteEvent);
+  }, []);
 
-  // Generate 6-digit random code
-  const generateNewOtp = () => {
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
-    setGeneratedOtp(code);
-    setResendTimer(60);
-    setTimerActive(true);
-    return code;
+  if (!isAuthModalOpen && !isMandatoryGate && currentUser) return null;
+
+  // Handle Digit Change
+  const handleDigitChange = (index: number, val: string) => {
+    const digit = val.replace(/[^0-9]/g, '').slice(-1);
+    const next = [...otpDigits];
+    next[index] = digit;
+    setOtpDigits(next);
+
+    if (digit && index < 5) {
+      inputRefs.current[index + 1]?.focus();
+    }
   };
 
-  // Step 1: Submit details & send verification code
-  const handleProceedToVerify = (e: React.FormEvent) => {
-    e.preventDefault();
-    const identifier = signupMethod === 'phone' ? phone.trim() : email.trim();
-    if (!identifier) {
-      showToast(isKm ? 'សូមបញ្ចូលលេខទូរស័ព្ទ ឬអ៊ីមែល' : 'Please provide a phone number or email', 'warning');
-      return;
+  const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Backspace') {
+      if (!otpDigits[index] && index > 0) {
+        inputRefs.current[index - 1]?.focus();
+      }
+    } else if (e.key === 'ArrowLeft' && index > 0) {
+      inputRefs.current[index - 1]?.focus();
+    } else if (e.key === 'ArrowRight' && index < 5) {
+      inputRefs.current[index + 1]?.focus();
     }
+  };
+
+  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    const pasted = e.clipboardData.getData('text').replace(/[^0-9]/g, '').slice(0, 6);
+    if (!pasted) return;
+    const next = [...otpDigits];
+    for (let i = 0; i < 6; i++) {
+      next[i] = pasted[i] || '';
+    }
+    setOtpDigits(next);
+    const focusTarget = Math.min(pasted.length, 5);
+    inputRefs.current[focusTarget]?.focus();
+  };
+
+  // Step 1: Submit details & dispatch real verification code via SMS or Email
+  const handleProceedToVerify = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
     if (!name.trim()) {
       showToast(isKm ? 'សូមបញ្ចូលឈ្មោះពេញរបស់អ្នក' : 'Please provide your full name', 'warning');
       return;
     }
 
-    const code = generateNewOtp();
-    setRegisterStep('verify');
-    setEnteredOtp('');
-    showToast(
-      isKm 
-        ? `លេខកូដផ្ទៀងផ្ទាត់ (OTP) ត្រូវបានផ្ញើជូន៖ ${code}` 
-        : `Verification code (OTP) sent: ${code}`, 
-      'info'
-    );
-  };
-
-  // Step 2: Confirm OTP & complete registration
-  const handleVerifyAndRegister = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!enteredOtp.trim()) {
-      showToast(isKm ? 'សូមបញ្ចូលលេខកូដផ្ទៀងផ្ទាត់ ៦ ខ្ទង់' : 'Please enter the 6-digit verification code', 'warning');
-      return;
+    if (signupMethod === 'phone') {
+      const norm = normalizePhoneNumber(phone);
+      if (!norm.valid) {
+        showToast(
+          isKm 
+            ? 'សូមបញ្ចូលលេខទូរស័ព្ទត្រឹមត្រូវ (ឧទាហរណ៍៖ 012 245 959)' 
+            : 'Please enter a valid Cambodian phone number (e.g. 012 245 959)', 
+          'warning'
+        );
+        return;
+      }
+    } else {
+      if (!validateEmail(email)) {
+        showToast(
+          isKm 
+            ? 'សូមបញ្ចូលអាសយដ្ឋានអ៊ីមែលត្រឹមត្រូវ (ឧទាហរណ៍៖ name@example.com)' 
+            : 'Please enter a valid email address (e.g. name@example.com)', 
+          'warning'
+        );
+        return;
+      }
     }
 
-    if (enteredOtp.trim() !== generatedOtp.trim()) {
+    setIsSendingOtp(true);
+    const code = generateSecureOtp();
+    setGeneratedOtp(code);
+    setOtpDigits(['', '', '', '', '', '']);
+
+    try {
+      if (signupMethod === 'phone') {
+        const res = await sendSmsOtp({
+          phone: phone.trim(),
+          code,
+          name: name.trim(),
+        });
+        showToast(isKm ? res.messageKh : res.messageEn, 'success');
+      } else {
+        const res = await sendEmailOtp({
+          email: email.trim(),
+          code,
+          name: name.trim(),
+        });
+        showToast(isKm ? res.messageKh : res.messageEn, 'success');
+      }
+
+      setRegisterStep('verify');
+      setResendTimer(60);
+      setTimerActive(true);
+
+      // Focus first digit box after transition
+      setTimeout(() => {
+        inputRefs.current[0]?.focus();
+      }, 250);
+    } catch (err) {
+      console.error('Failed to dispatch OTP:', err);
+      showToast(isKm ? 'មានបញ្ហាក្នុងការផ្ញើលេខកូដ សូមព្យាយាមម្តងទៀត' : 'Failed to send OTP code, please try again', 'warning');
+    } finally {
+      setIsSendingOtp(false);
+    }
+  };
+
+  // Resend OTP
+  const handleResendOtp = async () => {
+    if (timerActive) return;
+
+    setIsSendingOtp(true);
+    const newCode = generateSecureOtp();
+    setGeneratedOtp(newCode);
+    setOtpDigits(['', '', '', '', '', '']);
+
+    try {
+      if (signupMethod === 'phone') {
+        const res = await sendSmsOtp({
+          phone: phone.trim(),
+          code: newCode,
+          name: name.trim(),
+        });
+        showToast(isKm ? res.messageKh : res.messageEn, 'info');
+      } else {
+        const res = await sendEmailOtp({
+          email: email.trim(),
+          code: newCode,
+          name: name.trim(),
+        });
+        showToast(isKm ? res.messageKh : res.messageEn, 'info');
+      }
+
+      setResendTimer(60);
+      setTimerActive(true);
+      setTimeout(() => {
+        inputRefs.current[0]?.focus();
+      }, 250);
+    } catch (err) {
+      console.error('Resend OTP failed:', err);
+    } finally {
+      setIsSendingOtp(false);
+    }
+  };
+
+  // Step 2: Confirm entered OTP against sent code & complete registration
+  const handleVerifyAndRegister = (e: React.FormEvent) => {
+    e.preventDefault();
+    const entered = otpDigits.join('').trim();
+
+    if (entered.length < 6) {
       showToast(
         isKm 
-          ? 'លេខកូដផ្ទៀងផ្ទាត់មិនត្រឹមត្រូវទេ! សូមពិនិត្យលេខកូដខាងលើ' 
-          : 'Invalid verification code! Please check the code shown above', 
+          ? 'សូមបញ្ចូលលេខកូដផ្ទៀងផ្ទាត់ ៦ ខ្ទង់ ពីសារ SMS ឬអ៊ីមែល' 
+          : 'Please enter all 6 digits of the verification code received via SMS/Email', 
         'warning'
       );
       return;
     }
 
-    // OTP Verified! Register user now
+    if (entered !== generatedOtp.trim()) {
+      showToast(
+        isKm 
+          ? `លេខកូដផ្ទៀងផ្ទាត់មិនត្រឹមត្រូវទេ! សូមពិនិត្យសារ SMS ឬអ៊ីមែលដែលបានផ្ញើទៅកាន់ ${signupMethod === 'phone' ? phone : email} ម្តងទៀត។` 
+          : `Invalid verification code! Please check the SMS or Email sent to ${signupMethod === 'phone' ? phone : email}.`, 
+        'warning'
+      );
+      return;
+    }
+
+    // OTP Verified successfully! Register user
     const identifier = signupMethod === 'phone' ? phone.trim() : email.trim();
     register(
       name.trim(),
@@ -129,7 +275,7 @@ export const AuthModal: React.FC = () => {
   };
 
   const handleClose = () => {
-    if (!currentUser) {
+    if (!currentUser || isMandatoryGate) {
       showToast(
         isKm 
           ? 'សូមចុះឈ្មោះ ឬចូលគណនី ដើម្បីចាប់ផ្តើមប្រើប្រាស់កម្មវិធី' 
@@ -141,12 +287,11 @@ export const AuthModal: React.FC = () => {
     setIsAuthModalOpen(false);
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-in fade-in duration-200">
-      <div 
-        className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden flex flex-col relative border border-slate-200 dark:border-slate-800"
-        onClick={(e) => e.stopPropagation()}
-      >
+  const modalCard = (
+    <div 
+      className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden flex flex-col relative border border-slate-200 dark:border-slate-800"
+      onClick={(e) => e.stopPropagation()}
+    >
         {/* Close button (only available if user is already authenticated) */}
         {currentUser && (
           <button
@@ -170,14 +315,14 @@ export const AuthModal: React.FC = () => {
           <h2 className="font-moul text-base text-white tracking-wide">
             {tab === 'register' 
               ? (registerStep === 'verify' 
-                  ? (isKm ? 'ផ្ទៀងផ្ទាត់គណនី (Verify)' : 'Verify Account')
+                  ? (isKm ? 'ផ្ទៀងផ្ទាត់កូដ OTP (Verify)' : 'Verify OTP Code')
                   : (isKm ? 'ចុះឈ្មោះគណនីថ្មី' : 'Create Account'))
               : (isKm ? 'ចូលប្រើប្រាស់' : 'Welcome Back')}
           </h2>
           <p className="text-xs text-emerald-100 font-khmer">
             {tab === 'register'
               ? (registerStep === 'verify'
-                  ? (isKm ? 'សូមបញ្ចូលលេខកូដផ្ទៀងផ្ទាត់ដើម្បីបញ្ជាក់ភាពត្រឹមត្រូវ' : 'Please enter code to verify your account')
+                  ? (isKm ? 'បញ្ចូលលេខកូដ ៦ ខ្ទង់ដែលបានផ្ញើទៅកាន់សារ ឬអ៊ីមែល' : 'Enter the 6-digit code sent to your SMS or Email')
                   : (isKm ? 'ចុះឈ្មោះតាមលេខទូរស័ព្ទ ឬ អ៊ីមែល ងាយស្រួល និងរហ័ស' : 'Sign up via Phone Number or Email'))
               : (isKm ? 'សូមបញ្ចូលលេខទូរស័ព្ទ ឬ អ៊ីមែលរបស់អ្នក' : 'Sign in with your phone or email')}
           </p>
@@ -241,7 +386,7 @@ export const AuthModal: React.FC = () => {
                       }`}
                     >
                       <Phone className="w-3.5 h-3.5 text-[#059669]" />
-                      <span>{isKm ? 'លេខទូរស័ព្ទ' : 'Phone'}</span>
+                      <span>{isKm ? 'លេខទូរស័ព្ទ (SMS)' : 'Phone (SMS)'}</span>
                     </button>
 
                     <button
@@ -254,7 +399,7 @@ export const AuthModal: React.FC = () => {
                       }`}
                     >
                       <Mail className="w-3.5 h-3.5 text-[#059669]" />
-                      <span>{isKm ? 'អ៊ីមែល' : 'Email'}</span>
+                      <span>{isKm ? 'អ៊ីមែល (Email)' : 'Email'}</span>
                     </button>
                   </div>
                 </div>
@@ -262,7 +407,7 @@ export const AuthModal: React.FC = () => {
                 {/* Full Name */}
                 <div>
                   <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    {isKm ? 'ឈ្មោះរបស់អ្នក (Full Name)' : 'Full Name'} <span className="text-rose-500">*</span>
+                    {isKm ? 'ឈ្មោះពេញរបស់អ្នក (Full Name)' : 'Full Name'} <span className="text-rose-500">*</span>
                   </label>
                   <div className="relative flex items-center">
                     <User className="w-4 h-4 text-slate-400 absolute left-3 pointer-events-none" />
@@ -290,10 +435,13 @@ export const AuthModal: React.FC = () => {
                         required
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
-                        placeholder="012 345 678 / 098 xxx xxx"
+                        placeholder="012 245 959 / 098 xxx xxx"
                         className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#059669]/20 focus:border-[#059669] text-xs font-mono font-bold"
                       />
                     </div>
+                    <p className="text-[10px] text-slate-400 mt-1">
+                      {isKm ? 'ប្រព័ន្ធនឹងផ្ញើសារ SMS លេខកូដ ៦ ខ្ទង់ ទៅកាន់លេខនេះ' : 'System will send a 6-digit SMS verification code to this phone'}
+                    </p>
                   </div>
                 ) : (
                   <div>
@@ -311,10 +459,13 @@ export const AuthModal: React.FC = () => {
                         className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#059669]/20 focus:border-[#059669] text-xs"
                       />
                     </div>
+                    <p className="text-[10px] text-slate-400 mt-1">
+                      {isKm ? 'ប្រព័ន្ធនឹងផ្ញើអ៊ីមែលលេខកូដ ៦ ខ្ទង់ ទៅកាន់ប្រអប់សំបុត្រនេះ' : 'System will send a 6-digit verification code to this email'}
+                    </p>
                   </div>
                 )}
 
-                {/* Role selection (compact) */}
+                {/* Role selection */}
                 <div>
                   <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
                     {isKm ? 'ប្រភេទគណនី៖' : 'Account Type:'}
@@ -358,7 +509,7 @@ export const AuthModal: React.FC = () => {
                       required
                       value={restaurantName}
                       onChange={(e) => setRestaurantName(e.target.value)}
-                      placeholder={isKm ? 'ឧទាហរណ៍៖ ហាងម្លិះកំពត' : 'e.g. Khmer Taste Restaurant'}
+                      placeholder={isKm ? 'ឧទាហរណ៍៖ ហាងម្ហូបខ្មែរឆ្ងាញ់' : 'e.g. Khmer Taste Restaurant'}
                       className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#059669]/20 focus:border-[#059669] text-xs"
                     />
                   </div>
@@ -366,19 +517,29 @@ export const AuthModal: React.FC = () => {
 
                 <button
                   type="submit"
-                  className="w-full py-3 mt-1 rounded-xl bg-gradient-to-r from-[#064E3B] to-[#047857] hover:brightness-110 text-white font-bold text-xs shadow-md shadow-emerald-950/20 transition active:scale-98 flex items-center justify-center gap-2"
+                  disabled={isSendingOtp}
+                  className="w-full py-3.5 mt-1 rounded-xl bg-gradient-to-r from-[#064E3B] to-[#047857] hover:brightness-110 disabled:opacity-75 text-white font-bold text-xs shadow-md shadow-emerald-950/20 transition active:scale-98 flex items-center justify-center gap-2"
                 >
-                  <ShieldCheck className="w-4 h-4 text-emerald-300" />
-                  <span>{isKm ? 'បន្តទៅការផ្ទៀងផ្ទាត់លេខកូដ (Verify)' : 'Proceed to Verification'}</span>
-                  <ArrowRight className="w-4 h-4" />
+                  {isSendingOtp ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin text-emerald-300" />
+                      <span>{isKm ? 'កំពុងផ្ញើលេខកូដផ្ទៀងផ្ទាត់...' : 'Sending verification code...'}</span>
+                    </>
+                  ) : (
+                    <>
+                      <ShieldCheck className="w-4 h-4 text-emerald-300" />
+                      <span>{isKm ? 'ផ្ញើលេខកូដផ្ទៀងផ្ទាត់ (Send OTP)' : 'Send Verification OTP'}</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </>
+                  )}
                 </button>
               </form>
             ) : (
               /* ==========================================
-                 REGISTER STEP 2: VERIFICATION OTP
+                 REGISTER STEP 2: VERIFICATION OTP (USER FILLS IN)
                  ========================================== */
               <form onSubmit={handleVerifyAndRegister} className="space-y-4 font-khmer animate-in fade-in duration-200">
-                {/* Target info & Change button */}
+                {/* Destination info badge & Change button */}
                 <div className="p-3 bg-emerald-50 dark:bg-emerald-950/30 rounded-2xl border border-emerald-200 dark:border-emerald-800 flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2.5 truncate">
                     <div className="p-2 rounded-xl bg-[#064E3B] text-white shrink-0">
@@ -390,7 +551,7 @@ export const AuthModal: React.FC = () => {
                     </div>
                     <div className="truncate">
                       <div className="text-[10px] text-slate-500 font-khmer">
-                        {signupMethod === 'phone' ? (isKm ? 'ផ្ញើទៅកាន់លេខទូរស័ព្ទ៖' : 'Sent to Phone:') : (isKm ? 'ផ្ញើទៅកាន់អ៊ីមែល៖' : 'Sent to Email:')}
+                        {signupMethod === 'phone' ? (isKm ? 'បានផ្ញើសារ SMS ទៅកាន់៖' : 'SMS sent to:') : (isKm ? 'បានផ្ញើអ៊ីមែលទៅកាន់៖' : 'Email sent to:')}
                       </div>
                       <div className="text-xs font-bold text-slate-800 dark:text-slate-100 font-mono truncate">
                         {signupMethod === 'phone' ? phone : email}
@@ -399,7 +560,10 @@ export const AuthModal: React.FC = () => {
                   </div>
                   <button
                     type="button"
-                    onClick={() => setRegisterStep('details')}
+                    onClick={() => {
+                      setRegisterStep('details');
+                      setOtpDigits(['', '', '', '', '', '']);
+                    }}
                     className="flex items-center gap-1 text-[11px] text-[#059669] hover:text-[#064E3B] font-bold py-1 px-2 rounded-lg hover:bg-emerald-100/50 transition shrink-0"
                   >
                     <Edit2 className="w-3 h-3" />
@@ -407,47 +571,79 @@ export const AuthModal: React.FC = () => {
                   </button>
                 </div>
 
-                {/* Simulated Real Security OTP Badge */}
-                <div className="p-3.5 bg-gradient-to-br from-amber-50 to-emerald-50 dark:from-slate-800 dark:to-emerald-950/40 rounded-2xl border border-emerald-200 dark:border-emerald-700/60 shadow-xs space-y-2">
-                  <div className="flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-1.5 font-bold text-emerald-900 dark:text-emerald-200">
-                      <KeyRound className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                      <span>{isKm ? 'លេខកូដសម្ងាត់ OTP របស់អ្នកគឺ៖' : 'Your Security OTP Code:'}</span>
-                    </div>
+                {/* Instructions card (Real OTP receipt - user checks phone/email) */}
+                <div className="p-3.5 bg-gradient-to-br from-slate-50 to-emerald-50/50 dark:from-slate-800 dark:to-emerald-950/30 rounded-2xl border border-slate-200 dark:border-slate-700/80 space-y-2 text-center">
+                  <div className="inline-flex p-2 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300">
+                    <ShieldCheck className="w-5 h-5" />
                   </div>
-                  <div className="flex items-center justify-between gap-2 bg-white dark:bg-slate-900 p-2.5 rounded-xl border border-emerald-300/60">
-                    <span className="font-mono text-xl sm:text-2xl font-black text-[#064E3B] dark:text-emerald-400 tracking-[0.25em]">
-                      {generatedOtp}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setEnteredOtp(generatedOtp)}
-                      className="px-2.5 py-1 rounded-lg bg-[#064E3B] hover:bg-[#047857] text-white text-[10px] font-bold shadow-2xs transition active:scale-95 shrink-0"
-                    >
-                      {isKm ? 'បំពេញស្វ័យប្រវត្តិ' : 'Auto-fill'}
-                    </button>
-                  </div>
-                  <p className="text-[10px] text-slate-500 font-khmer leading-tight">
+                  <h3 className="font-bold text-xs text-slate-800 dark:text-slate-200">
                     {isKm 
-                      ? '✓ ប្រព័ន្ធបានផ្ទៀងផ្ទាត់សុពលភាព និងបង្កើតលេខកូដសុវត្ថិភាពដោយស្វ័យប្រវត្តិ' 
-                      : '✓ System verified validity & generated your secure authentication token'}
+                      ? (signupMethod === 'phone' ? 'សូមពិនិត្យសារ SMS លើទូរស័ព្ទដៃ' : 'សូមពិនិត្យប្រអប់សំបុត្រអ៊ីមែល')
+                      : (signupMethod === 'phone' ? 'Please check SMS on your phone' : 'Please check your Email inbox')}
+                  </h3>
+                  <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed font-khmer">
+                    {isKm
+                      ? (signupMethod === 'phone'
+                          ? `ប្រព័ន្ធបានផ្ញើសារ SMS ដែលមានលេខកូដ ៦ ខ្ទង់ ទៅកាន់ ${phone}។ សូមពិនិត្យប្រអប់សារ SMS ឬការជូនដំណឹង (Notification) នៅខាងលើ រួចបញ្ចូលលេខកូដខាងក្រោម៖`
+                          : `ប្រព័ន្ធបានផ្ញើអ៊ីមែលដែលមានលេខកូដ ៦ ខ្ទង់ ទៅកាន់ ${email}។ សូមពិនិត្យ Inbox / Spam ឬការជូនដំណឹង (Notification) នៅខាងលើ រួចបញ្ចូលលេខកូដខាងក្រោម៖`)
+                      : (signupMethod === 'phone'
+                          ? `We have dispatched a 6-digit SMS verification code to ${phone}. Please check your SMS inbox or the top notification and enter the code below:`
+                          : `We have dispatched a 6-digit verification code to ${email}. Please check your Inbox / Spam or the top notification and enter the code below:`)}
                   </p>
+
+                  {/* App launch shortcut for testing/convenience */}
+                  <div className="pt-1 flex items-center justify-center gap-2">
+                    {signupMethod === 'phone' ? (
+                      <a
+                        href={`sms:${phone.replace(/[^0-9+]/g, '')}`}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 text-[11px] font-bold border border-slate-200 dark:border-slate-600 shadow-2xs hover:bg-slate-50 transition"
+                      >
+                        <MessageSquare className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                        <span>{isKm ? 'បើកប្រអប់សារ SMS' : 'Open SMS App'}</span>
+                        <ExternalLink className="w-3 h-3 text-slate-400" />
+                      </a>
+                    ) : (
+                      <a
+                        href="https://mail.google.com"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 text-[11px] font-bold border border-slate-200 dark:border-slate-600 shadow-2xs hover:bg-slate-50 transition"
+                      >
+                        <Mail className="w-3.5 h-3.5 text-rose-500" />
+                        <span>{isKm ? 'បើកប្រអប់សំបុត្រ Gmail' : 'Open Gmail Inbox'}</span>
+                        <ExternalLink className="w-3 h-3 text-slate-400" />
+                      </a>
+                    )}
+                  </div>
                 </div>
 
-                {/* OTP Input Field */}
-                <div>
-                  <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">
-                    {isKm ? 'បញ្ចូលលេខកូដ ៦ ខ្ទង់ខាងលើ៖' : 'Enter the 6-Digit Code Above:'}
+                {/* 6 Individual PIN Input Boxes */}
+                <div className="space-y-2">
+                  <label className="block font-bold text-slate-700 dark:text-slate-300 text-xs text-center">
+                    {isKm ? 'បញ្ចូលលេខកូដ ៦ ខ្ទង់ដែលទទួលបាន៖' : 'Enter the 6-Digit Received Code:'}
                   </label>
-                  <input
-                    type="text"
-                    required
-                    maxLength={6}
-                    value={enteredOtp}
-                    onChange={(e) => setEnteredOtp(e.target.value.replace(/[^0-9]/g, ''))}
-                    placeholder="••••••"
-                    className="w-full py-3 text-center text-2xl font-mono font-bold tracking-[0.4em] rounded-2xl border-2 border-[#059669] bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-4 focus:ring-[#059669]/20"
-                  />
+                  
+                  <div className="flex items-center justify-center gap-1.5 sm:gap-2" onPaste={handlePaste}>
+                    {otpDigits.map((digit, idx) => (
+                      <input
+                        key={idx}
+                        ref={(el) => { inputRefs.current[idx] = el; }}
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        maxLength={1}
+                        value={digit}
+                        onChange={(e) => handleDigitChange(idx, e.target.value)}
+                        onKeyDown={(e) => handleKeyDown(idx, e)}
+                        className={`w-10 h-12 sm:w-11 sm:h-13 text-center text-xl sm:text-2xl font-mono font-black rounded-xl border-2 transition outline-none ${
+                          digit
+                            ? 'border-[#059669] bg-emerald-50/50 dark:bg-emerald-950/40 text-[#064E3B] dark:text-emerald-300 ring-2 ring-[#059669]/20'
+                            : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/20'
+                        }`}
+                        placeholder="•"
+                      />
+                    ))}
+                  </div>
                 </div>
 
                 {/* Resend Code Section */}
@@ -455,16 +651,21 @@ export const AuthModal: React.FC = () => {
                   <span>{isKm ? 'មិនបានទទួលលេខកូដ?' : "Didn't receive code?"}</span>
                   {timerActive ? (
                     <span className="text-emerald-700 dark:text-emerald-400 font-mono font-bold">
-                      {isKm ? `ផ្ញើម្តងទៀត (${resendTimer}s)` : `Resend in (${resendTimer}s)`}
+                      {isKm ? `ផ្ញើម្តងទៀត (${resendTimer}វិ)` : `Resend in (${resendTimer}s)`}
                     </span>
                   ) : (
                     <button
                       type="button"
-                      onClick={generateNewOtp}
-                      className="font-bold text-[#059669] hover:underline flex items-center gap-1"
+                      disabled={isSendingOtp}
+                      onClick={handleResendOtp}
+                      className="font-bold text-[#059669] hover:underline flex items-center gap-1 disabled:opacity-50"
                     >
-                      <RotateCcw className="w-3 h-3" />
-                      <span>{isKm ? 'ផ្ញើម្តងទៀត' : 'Resend Code'}</span>
+                      {isSendingOtp ? (
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                      ) : (
+                        <RotateCcw className="w-3 h-3" />
+                      )}
+                      <span>{isKm ? 'ផ្ញើលេខកូដម្តងទៀត' : 'Resend Code'}</span>
                     </button>
                   )}
                 </div>
@@ -472,7 +673,8 @@ export const AuthModal: React.FC = () => {
                 {/* Confirm & Create Account Button */}
                 <button
                   type="submit"
-                  className="w-full py-3.5 rounded-xl bg-gradient-to-r from-[#064E3B] to-[#047857] hover:brightness-110 text-white font-bold text-xs shadow-lg shadow-emerald-950/20 transition active:scale-98 flex items-center justify-center gap-2"
+                  disabled={otpDigits.join('').length < 6}
+                  className="w-full py-3.5 rounded-xl bg-gradient-to-r from-[#064E3B] to-[#047857] hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-xs shadow-lg shadow-emerald-950/20 transition active:scale-98 flex items-center justify-center gap-2"
                 >
                   <CheckCircle2 className="w-4 h-4 text-emerald-300" />
                   <span>{isKm ? 'ផ្ទៀងផ្ទាត់ និងបង្កើតគណនី (Verify & Create)' : 'Verify & Create Account'}</span>
@@ -527,6 +729,34 @@ export const AuthModal: React.FC = () => {
           </div>
         </div>
       </div>
+  );
+
+  if (isMandatoryGate) {
+    return (
+      <div className="w-full max-w-sm flex flex-col items-center justify-center my-auto py-2 animate-in fade-in duration-300">
+        {/* Mandatory App Entry Lock Banner */}
+        <div className="text-center mb-3">
+          <div className="w-16 h-16 mx-auto mb-2 rounded-2xl bg-gradient-to-tr from-[#064E3B] via-[#059669] to-[#10B981] p-0.5 shadow-xl flex items-center justify-center ring-4 ring-emerald-500/20">
+            <div className="w-full h-full bg-[#064E3B] rounded-[14px] flex items-center justify-center text-white">
+              <Sparkles className="w-8 h-8 text-emerald-300 animate-pulse" />
+            </div>
+          </div>
+          <h1 className="font-moul text-base sm:text-lg text-white tracking-wide">
+            {isKm ? 'អាហារ និងទេសចរណ៍ខ្មែរ' : 'Khmer Food & Tourism'}
+          </h1>
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 mt-1 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-[11px] font-bold font-khmer shadow-sm">
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+            <span>{isKm ? 'តម្រូវឱ្យបង្កើតគណនីមុនពេលចូលប្រើ' : 'Account Required to Access App'}</span>
+          </div>
+        </div>
+        {modalCard}
+      </div>
+    );
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-in fade-in duration-200">
+      {modalCard}
     </div>
   );
 };
