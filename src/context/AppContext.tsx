@@ -3,12 +3,16 @@ import {
   User, FoodItem, Restaurant, TouristDestination, CommunityPost, 
   Language, UserRole, AppSettings, RegistrationTransaction,
   RestaurantMenuItem, MembershipTier, isRestaurantPremiumActive, isUserVipActive, getVipRemainingDays,
-  Wishlist, WishlistItem, TripPlan, AppNotification
+  Wishlist, WishlistItem, TripPlan, AppNotification,
+  TrendingFoodItem, AiCheckInSubmission
 } from '../types';
 import { 
   verifyPaymentOnBackend, calculateVipDates, checkEligibleRestoration,
   VIP_ANNUAL_PRICE_USD, VIP_SUBSCRIPTION_DAYS, PaymentVerificationRequest
 } from '../services/paymentService';
+import { initialTrendingFoods } from '../data/seedTrendingFoods';
+import { findDuplicateRestaurant, mergeRestaurantRecords } from '../utils/duplicateDetector';
+import { recordSubmissionTimestamp, checkSubmissionRateLimit } from '../services/aiCheckInService';
 import { 
   initialUsers, initialFoods, initialRestaurants, 
   initialDestinations, initialCommunityPosts, initialAppSettings, initialTransactions 
@@ -199,6 +203,23 @@ interface AppContextType {
   upgradeCurrentUserToVip: (paymentMethod: 'GooglePlayBilling' | 'KHQR' | 'Bakong' | 'Card', transactionRef: string, last4?: string) => Promise<{ success: boolean; error?: string }>;
   renewCurrentUserVip: (paymentMethod: 'GooglePlayBilling' | 'KHQR' | 'Bakong' | 'Card', transactionRef: string) => Promise<{ success: boolean; error?: string }>;
   restoreCurrentUserVipPurchases: () => Promise<{ success: boolean; restored: boolean; message: string }>;
+
+  // AI Trending Food Discovery Section
+  trendingFoods: TrendingFoodItem[];
+  updateTrendingFood: (item: TrendingFoodItem) => void;
+  selectedTrendingFood: TrendingFoodItem | null;
+  setSelectedTrendingFood: (item: TrendingFoodItem | null) => void;
+  isTrendingFoodDetailModalOpen: boolean;
+  setIsTrendingFoodDetailModalOpen: (open: boolean) => void;
+
+  // AI Smart Check-in & Auto Add Restaurant
+  aiCheckIns: AiCheckInSubmission[];
+  isAiCheckInModalOpen: boolean;
+  setIsAiCheckInModalOpen: (open: boolean) => void;
+  submitAiCheckIn: (data: Omit<AiCheckInSubmission, 'id' | 'checkInTime' | 'status'> & { id?: string; checkInTime?: string }) => Promise<{ success: boolean; isDuplicate?: boolean; isBranch?: boolean; status: 'approved' | 'pending'; restaurantId?: string; message: string }>;
+  approveAiCheckIn: (id: string) => void;
+  rejectAiCheckIn: (id: string, reason?: string) => void;
+  mergeAiCheckIn: (checkInId: string, targetRestaurantId: string) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -505,6 +526,50 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isUpgradeVipModalOpen, setIsUpgradeVipModalOpen] = useState(false);
   const openUpgradeVipModal = () => setIsUpgradeVipModalOpen(true);
   const [targetWishlistItem, setTargetWishlistItem] = useState<WishlistItem | null>(null);
+
+  // AI Trending Food Discovery Section State
+  const [trendingFoods, setTrendingFoods] = useState<TrendingFoodItem[]>(() => {
+    try {
+      const saved = localStorage.getItem('kft_trending_foods_v1');
+      if (saved && saved !== 'undefined' && saved !== 'null') {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {
+      console.warn('Failed to parse kft_trending_foods_v1', e);
+    }
+    return initialTrendingFoods;
+  });
+
+  const [selectedTrendingFood, setSelectedTrendingFood] = useState<TrendingFoodItem | null>(null);
+  const [isTrendingFoodDetailModalOpen, setIsTrendingFoodDetailModalOpen] = useState<boolean>(false);
+
+  // AI Smart Check-in State
+  const [aiCheckIns, setAiCheckIns] = useState<AiCheckInSubmission[]>(() => {
+    try {
+      const saved = localStorage.getItem('kft_ai_checkins_v1');
+      if (saved && saved !== 'undefined' && saved !== 'null') {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch (e) {
+      console.warn('Failed to parse kft_ai_checkins_v1', e);
+    }
+    return [];
+  });
+  const [isAiCheckInModalOpen, setIsAiCheckInModalOpen] = useState<boolean>(false);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('kft_trending_foods_v1', JSON.stringify(trendingFoods));
+    } catch {}
+  }, [trendingFoods]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('kft_ai_checkins_v1', JSON.stringify(aiCheckIns));
+    } catch {}
+  }, [aiCheckIns]);
 
   // Personalized Wishlists
   const defaultWishlistsTemplate: Wishlist[] = [
@@ -2048,6 +2113,233 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return { success: true, restored: true, message: successMsg };
   };
 
+  // AI Trending Food Update
+  const updateTrendingFood = (updated: TrendingFoodItem) => {
+    setTrendingFoods(prev => prev.map(item => item.id === updated.id ? updated : item));
+  };
+
+  // AI Smart Check-in & Auto Add Restaurant Engine
+  const submitAiCheckIn = async (
+    data: Omit<AiCheckInSubmission, 'id' | 'checkInTime' | 'status'> & { id?: string; checkInTime?: string }
+  ): Promise<{ success: boolean; isDuplicate?: boolean; isBranch?: boolean; status: 'approved' | 'pending'; restaurantId?: string; message: string }> => {
+    if (!currentUser) {
+      showToast(language === 'km' ? 'សូមចូលគណនីដើម្បីឆែកអ៊ីន!' : 'Please sign in to check in!', 'warning');
+      setIsAuthModalOpen(true);
+      return { success: false, status: 'pending', message: 'Authentication required' };
+    }
+
+    // Rate Limiting check (anti-spam, max 10/hour per user)
+    const rateCheck = checkSubmissionRateLimit(currentUser.id);
+    if (!rateCheck.allowed) {
+      const msg = language === 'km'
+        ? `អ្នកបានឆែកអ៊ីនលើសកម្រិតកំណត់ (អតិបរមា ១០ ដង/ម៉ោង)។ សូមរង់ចាំ ${rateCheck.waitMinutes} នាទីទៀត!`
+        : `Rate limit reached (max 10/hour). Please wait ${rateCheck.waitMinutes} minutes!`;
+      showToast(msg, 'warning');
+      return { success: false, status: 'pending', message: msg };
+    }
+
+    const checkInId = data.id || `checkin-${Date.now()}`;
+    const checkInTime = data.checkInTime || new Date().toISOString();
+
+    // 1. Run Duplicate Detection against existing restaurant directory
+    const duplicateResult = findDuplicateRestaurant(
+      {
+        nameKh: data.restaurantNameKh,
+        nameEn: data.restaurantNameEn,
+        phone: data.phone,
+        latitude: data.latitude,
+        longitude: data.longitude,
+        addressKh: data.addressKh,
+        addressEn: data.addressEn,
+        provinceKh: data.provinceKh,
+      },
+      restaurants
+    );
+
+    // Case A: Existing restaurant found (Duplicate match) -> Update existing record without duplicate
+    if (duplicateResult.isDuplicate && duplicateResult.matchedRestaurant) {
+      const matched = duplicateResult.matchedRestaurant;
+      const updatedRest = mergeRestaurantRecords(matched, {
+        phone: data.phone,
+        signatureDishesKh: data.signatureDishes,
+        photoUrl: data.photoUrl,
+        galleryPhotos: [data.photoUrl],
+      });
+
+      setRestaurants(prev => prev.map(r => r.id === matched.id ? updatedRest : r));
+
+      const mergedSubmission: AiCheckInSubmission = {
+        ...data,
+        id: checkInId,
+        checkInTime,
+        status: 'merged',
+        matchedExistingRestaurantId: matched.id,
+      };
+
+      setAiCheckIns(prev => [mergedSubmission, ...prev]);
+      recordSubmissionTimestamp(currentUser.id);
+
+      const successMsg = language === 'km'
+        ? `បានកត់ត្រាការឆែកអ៊ីន និងធ្វើបច្ចុប្បន្នភាពហាង «${matched.nameKh}» ដោយជោគជ័យ!`
+        : `Check-in recorded and updated for existing restaurant "${matched.nameEn || matched.nameKh}"!`;
+      showToast(successMsg, 'success');
+
+      return {
+        success: true,
+        isDuplicate: true,
+        status: 'approved',
+        restaurantId: matched.id,
+        message: successMsg,
+      };
+    }
+
+    // Case B: Different branch of the same restaurant brand
+    const isBranch = duplicateResult.isDifferentBranch;
+
+    // Case C: Genuinely new restaurant or branch
+    // If confidence score >= 0.8 and valid name provided -> Auto-publish!
+    const isAutoApprovable = data.confidenceScore >= 0.8 && data.restaurantNameKh.trim().length > 1;
+
+    if (isAutoApprovable) {
+      const newRestId = `rest-ai-${Date.now()}`;
+      const newRestaurant: Restaurant = {
+        id: newRestId,
+        nameKh: data.restaurantNameKh,
+        nameEn: data.restaurantNameEn || data.restaurantNameKh,
+        descriptionKh: data.aiDescriptionKh || `ហាងម្ហូបឆ្ងាញ់ដែលត្រូវបានរកឃើញដោយ AI Smart Check-in ក្នុង ${data.provinceKh}។`,
+        descriptionEn: data.aiDescriptionEn || `Food place discovered via AI Smart Check-in in ${data.provinceEn}.`,
+        photoUrl: data.photoUrl,
+        galleryPhotos: [data.photoUrl],
+        addressKh: data.addressKh || `ស្ថិតនៅ ${data.provinceKh}`,
+        addressEn: data.addressEn || `Located in ${data.provinceEn}`,
+        provinceKh: data.provinceKh,
+        provinceEn: data.provinceEn,
+        phone: data.phone || '012 000 000',
+        openingHoursKh: '០៧:០០ ព្រឹក - ០៩:០០ យប់',
+        openingHoursEn: '07:00 AM - 09:00 PM',
+        priceLevel: '$$',
+        mapUrl: `https://maps.google.com/?q=${data.latitude},${data.longitude}`,
+        latitude: data.latitude,
+        longitude: data.longitude,
+        rating: 4.8,
+        reviewCount: 1,
+        signatureDishesKh: data.signatureDishes && data.signatureDishes.length > 0 ? data.signatureDishes : ['ម្ហូបពិសេសប្រចាំហាង'],
+        status: 'approved',
+        isVerified: true,
+        membershipTier: 'free',
+        ownerId: currentUser.id,
+      };
+
+      setRestaurants(prev => [newRestaurant, ...prev]);
+
+      const approvedSubmission: AiCheckInSubmission = {
+        ...data,
+        id: checkInId,
+        checkInTime,
+        status: 'approved',
+        matchedExistingRestaurantId: newRestId,
+      };
+
+      setAiCheckIns(prev => [approvedSubmission, ...prev]);
+      recordSubmissionTimestamp(currentUser.id);
+
+      const msg = language === 'km'
+        ? `អបអរសាទរ! AI បានផ្ទៀងផ្ទាត់ និងបន្ថែមហាង «${data.restaurantNameKh}» ទៅក្នុងកម្មវិធីដោយស្វ័យប្រវត្តិ!`
+        : `Congratulations! AI verified and published "${data.restaurantNameKh}" automatically!`;
+      showToast(msg, 'success');
+
+      return {
+        success: true,
+        isBranch,
+        status: 'approved',
+        restaurantId: newRestId,
+        message: msg,
+      };
+    } else {
+      // Case D: Low confidence or uncertain details -> Send to Admin review queue!
+      const pendingSubmission: AiCheckInSubmission = {
+        ...data,
+        id: checkInId,
+        checkInTime,
+        status: 'pending',
+      };
+
+      setAiCheckIns(prev => [pendingSubmission, ...prev]);
+      recordSubmissionTimestamp(currentUser.id);
+
+      const msg = language === 'km'
+        ? 'ការឆែកអ៊ីនត្រូវបានកត់ត្រា និងបញ្ជូនទៅកាន់ក្រុមការងារ Admin ដើម្បីផ្ទៀងផ្ទាត់បន្ថែម!'
+        : 'Check-in recorded and submitted to Admin queue for further verification!';
+      showToast(msg, 'info');
+
+      return {
+        success: true,
+        status: 'pending',
+        message: msg,
+      };
+    }
+  };
+
+  const approveAiCheckIn = (id: string) => {
+    const sub = aiCheckIns.find(c => c.id === id);
+    if (!sub) return;
+
+    const newRestId = `rest-ai-${Date.now()}`;
+    const newRestaurant: Restaurant = {
+      id: newRestId,
+      nameKh: sub.restaurantNameKh,
+      nameEn: sub.restaurantNameEn || sub.restaurantNameKh,
+      descriptionKh: sub.aiDescriptionKh || `ហាងដែលត្រូវបានផ្ទៀងផ្ទាត់ និងអនុម័តដោយ Admin ក្នុង ${sub.provinceKh}។`,
+      descriptionEn: sub.aiDescriptionEn || `Restaurant verified and approved by Admin in ${sub.provinceEn}.`,
+      photoUrl: sub.photoUrl,
+      galleryPhotos: [sub.photoUrl],
+      addressKh: sub.addressKh,
+      addressEn: sub.addressEn,
+      provinceKh: sub.provinceKh,
+      provinceEn: sub.provinceEn,
+      phone: sub.phone || '012 000 000',
+      openingHoursKh: '០៧:០០ ព្រឹក - ០៩:០០ យប់',
+      openingHoursEn: '07:00 AM - 09:00 PM',
+      priceLevel: '$$',
+      mapUrl: `https://maps.google.com/?q=${sub.latitude},${sub.longitude}`,
+      latitude: sub.latitude,
+      longitude: sub.longitude,
+      rating: 4.8,
+      reviewCount: 1,
+      signatureDishesKh: sub.signatureDishes && sub.signatureDishes.length > 0 ? sub.signatureDishes : ['ម្ហូបពិសេសប្រចាំហាង'],
+      status: 'approved',
+      isVerified: true,
+      membershipTier: 'free',
+      ownerId: sub.userId,
+    };
+
+    setRestaurants(prev => [newRestaurant, ...prev]);
+    setAiCheckIns(prev => prev.map(c => c.id === id ? { ...c, status: 'approved', matchedExistingRestaurantId: newRestId } : c));
+    showToast(language === 'km' ? `បានអនុម័ត និងចុះផ្សាយហាង «${sub.restaurantNameKh}»!` : `Approved and published "${sub.restaurantNameKh}"!`, 'success');
+  };
+
+  const rejectAiCheckIn = (id: string, reason?: string) => {
+    setAiCheckIns(prev => prev.map(c => c.id === id ? { ...c, status: 'rejected', adminNotes: reason } : c));
+    showToast(language === 'km' ? 'បានបដិសេធការឆែកអ៊ីន!' : 'Rejected check-in submission!', 'info');
+  };
+
+  const mergeAiCheckIn = (checkInId: string, targetRestaurantId: string) => {
+    const sub = aiCheckIns.find(c => c.id === checkInId);
+    const target = restaurants.find(r => r.id === targetRestaurantId);
+    if (!sub || !target) return;
+
+    const merged = mergeRestaurantRecords(target, {
+      phone: sub.phone,
+      signatureDishesKh: sub.signatureDishes,
+      photoUrl: sub.photoUrl,
+      galleryPhotos: [sub.photoUrl],
+    });
+
+    setRestaurants(prev => prev.map(r => r.id === target.id ? merged : r));
+    setAiCheckIns(prev => prev.map(c => c.id === checkInId ? { ...c, status: 'merged', matchedExistingRestaurantId: target.id } : c));
+    showToast(language === 'km' ? `បានច្របាច់បញ្ចូលគ្នាជាមួយ «${target.nameKh}» រួចរាល់!` : `Merged with "${target.nameKh}" successfully!`, 'success');
+  };
+
   // Wishlist methods
   const createWishlist = (nameKh: string, nameEn?: string, emoji: string = '📌') => {
     const newWl: Wishlist = {
@@ -2389,6 +2681,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         upgradeCurrentUserToVip,
         renewCurrentUserVip,
         restoreCurrentUserVipPurchases,
+
+        // AI Trending Food Discovery Section
+        trendingFoods,
+        updateTrendingFood,
+        selectedTrendingFood,
+        setSelectedTrendingFood,
+        isTrendingFoodDetailModalOpen,
+        setIsTrendingFoodDetailModalOpen,
+
+        // AI Smart Check-in & Auto Add Restaurant
+        aiCheckIns,
+        isAiCheckInModalOpen,
+        setIsAiCheckInModalOpen,
+        submitAiCheckIn,
+        approveAiCheckIn,
+        rejectAiCheckIn,
+        mergeAiCheckIn,
       }}
     >
       {children}

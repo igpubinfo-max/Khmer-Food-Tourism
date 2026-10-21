@@ -309,6 +309,79 @@ export const getVipRemainingDays = (user?: User | null): number => {
   return Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
 };
 
+// AI Trending Food Section Types (Strictly Food Places only: Street Food, Cafés, Desserts, Famous & Unusual Dishes)
+export type TrendingFoodCategorySlug = 
+  | 'all'
+  | 'street_food' 
+  | 'dessert_snack' 
+  | 'cafe_drink' 
+  | 'noodle_soup' 
+  | 'famous_dish' 
+  | 'unusual_local';
+
+export interface TrendingFoodItem {
+  id: string;
+  foodNameKh: string;
+  foodNameEn: string;
+  restaurantNameKh: string;
+  restaurantNameEn: string;
+  photoUrl: string;
+  categorySlug: TrendingFoodCategorySlug;
+  categoryKh: string;
+  categoryEn: string;
+  descriptionKh: string;
+  descriptionEn: string;
+  provinceKh: string;
+  provinceEn: string;
+  addressKh: string;
+  addressEn: string;
+  phone?: string;
+  priceDisplay?: string;
+  sourcePlatform: 'tiktok' | 'facebook' | 'youtube' | 'local_discovery';
+  sourceUrl?: string;
+  socialHashtag?: string;
+  socialViews?: string;
+  socialLikes?: string;
+  reviewerQuoteKh?: string;
+  reviewerQuoteEn?: string;
+  reviewerName?: string;
+  latitude: number;
+  longitude: number;
+  mapUrl?: string;
+  lastUpdated: string;
+  isVerified: boolean;
+  viewCount?: number;
+}
+
+// AI Smart Check-in & Auto Add Restaurant Types
+export interface AiCheckInSubmission {
+  id: string;
+  userId: string;
+  userName: string;
+  restaurantNameKh: string;
+  restaurantNameEn: string;
+  foodCategoryKh: string;
+  foodCategoryEn: string;
+  signatureDishes: string[];
+  photoUrl: string;
+  latitude: number;
+  longitude: number;
+  addressKh: string;
+  addressEn: string;
+  provinceKh: string;
+  provinceEn: string;
+  phone?: string;
+  aiDescriptionKh: string;
+  aiDescriptionEn: string;
+  checkInTime: string;
+  confidenceScore: number; // 0.0 to 1.0
+  status: 'approved' | 'pending' | 'rejected' | 'merged';
+  matchedExistingRestaurantId?: string;
+  verificationSource: 'ai_vision_ocr' | 'gps_spatial' | 'user_assisted' | 'admin_verified';
+  adminNotes?: string;
+  isFoodOnlyPhoto?: boolean;
+}
+
 export type DestinationCategorySlug = 'temple' | 'nature' | 'mountain' | 'beach' | 'resort';
 
 export interface TouristDestination {

@@ -21,10 +21,11 @@ export const AdminDashboard: React.FC = () => {
     posts, deletePost,
     users, updateUserRole,
     transactions, verifyTransaction, rejectTransaction,
-    appSettings, updateAppSettings, setAdminPassword, currentUser, showToast
+    appSettings, updateAppSettings, setAdminPassword, currentUser, showToast,
+    aiCheckIns, approveAiCheckIn, rejectAiCheckIn, mergeAiCheckIn
   } = useApp();
 
-  const [activeTab, setActiveTab] = useState<'stats' | 'food' | 'restaurants' | 'destinations' | 'community' | 'users' | 'transactions' | 'settings' | 'security' | 'image_audit'>('stats');
+  const [activeTab, setActiveTab] = useState<'stats' | 'food' | 'restaurants' | 'destinations' | 'community' | 'users' | 'transactions' | 'settings' | 'security' | 'image_audit' | 'ai_checkins'>('stats');
 
   // Image Audit states
   const [auditFilter, setAuditFilter] = useState<'all' | 'verified' | 'flagged'>('all');
@@ -324,6 +325,21 @@ export const AdminDashboard: React.FC = () => {
             <span>{isKm ? `ហាងអាហារ (${restaurants.length})` : `Shops (${restaurants.length})`}</span>
             {pendingRestaurants.length > 0 && (
               <span className="w-2 h-2 rounded-full bg-red-500 absolute top-2 right-1" />
+            )}
+          </button>
+
+          <button
+            onClick={() => setActiveTab('ai_checkins')}
+            className={`flex items-center gap-1.5 px-3 py-2.5 font-bold whitespace-nowrap border-b-2 transition relative ${
+              activeTab === 'ai_checkins' ? 'border-[#064E3B] text-[#064E3B] dark:border-emerald-400 dark:text-emerald-400' : 'border-transparent text-stone-400'
+            }`}
+          >
+            <Camera className="w-4 h-4 text-emerald-500" />
+            <span>{isKm ? `ការឆែកអ៊ីន AI (${aiCheckIns.length})` : `AI Check-ins (${aiCheckIns.length})`}</span>
+            {aiCheckIns.filter(c => c.status === 'pending').length > 0 && (
+              <span className="px-1.5 py-0.2 bg-amber-500 text-white rounded-full text-[9px] font-bold">
+                {aiCheckIns.filter(c => c.status === 'pending').length}
+              </span>
             )}
           </button>
 
@@ -756,7 +772,114 @@ export const AdminDashboard: React.FC = () => {
             </div>
           )}
 
-          {/* DESTINATIONS TAB */}
+          {/* AI CHECK-IN SUBMISSIONS TAB */}
+          {activeTab === 'ai_checkins' && (
+            <div className="space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-2 border-b border-stone-200 dark:border-stone-700">
+                <div>
+                  <h3 className="font-bold text-[#0F172A] dark:text-stone-100 font-khmer text-sm flex items-center gap-2">
+                    <Camera className="w-4 h-4 text-emerald-500" />
+                    <span>{isKm ? `ការឆែកអ៊ីន & បន្ថែមហាងដោយ AI (${aiCheckIns.length})` : `AI Check-in Submissions (${aiCheckIns.length})`}</span>
+                  </h3>
+                  <p className="text-[11px] text-stone-500 font-khmer">
+                    {isKm ? 'ពិនិត្យ អនុម័ត ឬច្របាច់បញ្ចូលគ្នា (Merge) ហាងដែលបានឆែកអ៊ីនដោយសមាជិក' : 'Review, approve, or merge restaurant check-ins contributed by community'}
+                  </p>
+                </div>
+              </div>
+
+              {aiCheckIns.length === 0 ? (
+                <div className="py-12 text-center text-stone-400 space-y-2">
+                  <Camera className="w-10 h-10 mx-auto text-stone-300 dark:text-stone-600" />
+                  <p className="font-khmer">{isKm ? 'មិនទាន់មានការឆែកអ៊ីនពីសមាជិកនៅឡើយទេ' : 'No AI check-in submissions yet'}</p>
+                </div>
+              ) : (
+                <div className="space-y-3 font-khmer">
+                  {aiCheckIns.map(checkIn => (
+                    <div
+                      key={checkIn.id}
+                      className="p-4 rounded-2xl bg-white dark:bg-stone-800 border border-slate-200 dark:border-slate-700 shadow-xs space-y-3"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-start gap-3">
+                          <img
+                            src={checkIn.photoUrl}
+                            alt={checkIn.restaurantNameKh}
+                            className="w-16 h-16 rounded-xl object-cover shrink-0 border border-slate-200 dark:border-slate-700"
+                          />
+                          <div>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <h4 className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm">
+                                {checkIn.restaurantNameKh}
+                              </h4>
+                              <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${
+                                checkIn.status === 'approved' 
+                                  ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
+                                  : checkIn.status === 'pending'
+                                  ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
+                                  : checkIn.status === 'merged'
+                                  ? 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300'
+                                  : 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300'
+                              }`}>
+                                {checkIn.status.toUpperCase()}
+                              </span>
+                              <span className="text-[10px] text-emerald-600 font-mono">
+                                AI Confidence: {Math.round(checkIn.confidenceScore * 100)}%
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-stone-500">
+                              {checkIn.foodCategoryKh} • 📍 {checkIn.provinceKh} ({checkIn.addressKh})
+                            </p>
+                            <p className="text-[10px] text-stone-400 mt-0.5">
+                              👤 {checkIn.userName} • 🕒 {checkIn.checkInTime.slice(0, 16).replace('T', ' ')}
+                            </p>
+                            {checkIn.signatureDishes && checkIn.signatureDishes.length > 0 && (
+                              <p className="text-[10px] text-emerald-700 dark:text-emerald-300 mt-1">
+                                🍲 {checkIn.signatureDishes.join(', ')}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Action Buttons for Admin */}
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          {checkIn.status === 'pending' && (
+                            <>
+                              <button
+                                onClick={() => approveAiCheckIn(checkIn.id)}
+                                className="px-3 py-1.5 bg-[#064E3B] hover:bg-[#047857] text-white rounded-xl text-xs font-bold transition flex items-center gap-1"
+                              >
+                                <Check className="w-3.5 h-3.5" />
+                                <span>{isKm ? 'អនុម័ត & បន្ថែម' : 'Approve'}</span>
+                              </button>
+                              <button
+                                onClick={() => rejectAiCheckIn(checkIn.id, 'Unverified details')}
+                                className="px-2.5 py-1.5 bg-rose-50 text-rose-600 dark:bg-rose-950/40 rounded-xl text-xs font-bold hover:bg-rose-100 transition"
+                              >
+                                <Ban className="w-3.5 h-3.5" />
+                                <span>{isKm ? 'បដិសេធ' : 'Reject'}</span>
+                              </button>
+                            </>
+                          )}
+                          {checkIn.status === 'approved' && (
+                            <span className="text-[11px] font-bold text-emerald-600 flex items-center gap-1">
+                              <CheckCircle2 className="w-3.5 h-3.5" />
+                              <span>{isKm ? 'បានចុះផ្សាយ' : 'Published'}</span>
+                            </span>
+                          )}
+                          {checkIn.status === 'merged' && (
+                            <span className="text-[11px] font-bold text-blue-600 flex items-center gap-1">
+                              <CheckCircle2 className="w-3.5 h-3.5" />
+                              <span>{isKm ? 'បានច្របាច់បញ្ចូល' : 'Merged'}</span>
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
           {activeTab === 'destinations' && (
             <div className="space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-2 border-b border-stone-200 dark:border-stone-700">

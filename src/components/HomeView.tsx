@@ -1,14 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { FoodCard } from './FoodCard';
 import { RestaurantCard } from './RestaurantCard';
 import { TouristCard } from './TouristCard';
-import { isRestaurantPremiumActive } from '../types';
+import { isRestaurantPremiumActive, TrendingFoodCategorySlug, TrendingFoodItem } from '../types';
 import { 
   Sparkles, ChevronRight, Utensils, Store, Compass, 
   MapPin, Heart, Flame, QrCode, Download, ShieldCheck,
   Apple, Smartphone, Bot, Calendar, Bookmark, Bell, 
-  UtensilsCrossed, MessageSquareQuote
+  UtensilsCrossed, MessageSquareQuote, Camera, Phone,
+  Share2, Navigation, Eye, ExternalLink
 } from 'lucide-react';
 
 export const HomeView: React.FC = () => {
@@ -21,14 +22,21 @@ export const HomeView: React.FC = () => {
     setIsWhatToEatModalOpen, setIsNearMeModalOpen,
     setIsDailyDiscoveriesModalOpen, setIsWishlistsModalOpen,
     setIsAiTripPlannerModalOpen, setIsNotificationsModalOpen,
-    setIsTrendingSocialModalOpen, unreadNotificationsCount
+    setIsTrendingSocialModalOpen, unreadNotificationsCount,
+    trendingFoods, setSelectedTrendingFood, setIsTrendingFoodDetailModalOpen,
+    setIsAiCheckInModalOpen, showToast
   } = useApp();
 
   const isKm = language === 'km';
   const featuredFoods = foods.slice(0, 4);
 
-  // Viral Social Trending Destinations (TikTok & Facebook)
-  const trendingSocialDestinations = destinations.filter(d => d.isTrendingSocial);
+  // Active category filter for AI Trending Food on Home
+  const [selectedCategory, setSelectedCategory] = useState<TrendingFoodCategorySlug>('all');
+
+  // Filter trending foods by category for Home showcase
+  const displayTrendingFoods = trendingFoods
+    .filter(item => selectedCategory === 'all' || item.categorySlug === selectedCategory)
+    .slice(0, 4);
 
   // Benefits 1 & 8: Dedicated Premium VIP Showcase & Featured sorting
   const premiumVipRestaurants = restaurants.filter(r => isRestaurantPremiumActive(r));
@@ -43,6 +51,51 @@ export const HomeView: React.FC = () => {
     { labelKh: 'ឆ្នេរសមុទ្រ', labelEn: 'Beaches', icon: '🏝️', tab: 'tourism' },
     { labelKh: 'ទឹកធ្លាក់ & ភ្នំ', labelEn: 'Nature', icon: '🏞️', tab: 'tourism' },
   ];
+
+  const foodCategoryChips: { id: TrendingFoodCategorySlug; labelKh: string; labelEn: string; icon: string }[] = [
+    { id: 'all', labelKh: 'ទាំងអស់', labelEn: 'All', icon: '🔥' },
+    { id: 'street_food', labelKh: 'អាហារតាមផ្លូវ', labelEn: 'Street Food', icon: '🍢' },
+    { id: 'famous_dish', labelKh: 'មុខម្ហូបល្បីៗ', labelEn: 'Famous', icon: '🍲' },
+    { id: 'cafe_drink', labelKh: 'កាហ្វេ & ភេសជ្ជៈ', labelEn: 'Café', icon: '☕' },
+    { id: 'dessert_snack', labelKh: 'បង្អែម', labelEn: 'Desserts', icon: '🍨' },
+    { id: 'unusual_local', labelKh: 'ម្ហូបប្លែកៗ', labelEn: 'Unusual', icon: '✨' },
+  ];
+
+  const handleOpenFoodDetail = (item: TrendingFoodItem) => {
+    setSelectedTrendingFood(item);
+    setIsTrendingFoodDetailModalOpen(true);
+  };
+
+  const handleCall = (e: React.MouseEvent, phone?: string) => {
+    e.stopPropagation();
+    if (phone) {
+      window.open(`tel:${phone}`, '_self');
+    } else {
+      showToast(isKm ? 'មិនមានលេខទូរស័ព្ទសម្រាប់ហាងនេះទេ' : 'No phone number available', 'info');
+    }
+  };
+
+  const handleMap = (e: React.MouseEvent, item: TrendingFoodItem) => {
+    e.stopPropagation();
+    if (item.mapUrl) {
+      window.open(item.mapUrl, '_blank');
+    } else if (item.latitude && item.longitude) {
+      window.open(`https://maps.google.com/?q=${item.latitude},${item.longitude}`, '_blank');
+    }
+  };
+
+  const handleShare = (e: React.MouseEvent, item: TrendingFoodItem) => {
+    e.stopPropagation();
+    const text = isKm
+      ? `🔥 មុខម្ហូបល្បីលើ TikTok & FB៖ ${item.foodNameKh} នៅ ${item.restaurantNameKh} (${item.provinceKh})!`
+      : `🔥 Trending Food: ${item.foodNameEn} at ${item.restaurantNameEn} (${item.provinceEn})!`;
+    if (navigator.share) {
+      navigator.share({ title: item.foodNameKh, text, url: window.location.href }).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(`${text}\n${window.location.href}`);
+      showToast(isKm ? 'បានចម្លងព័ត៌មានរួចរាល់!' : 'Copied info to clipboard!', 'success');
+    }
+  };
 
   return (
     <div className="max-w-md mx-auto px-4 py-3 space-y-6 pb-24">
@@ -196,14 +249,26 @@ export const HomeView: React.FC = () => {
             </div>
           </div>
 
-          {!currentUser && (
+          <div className="flex items-center gap-2">
+            {/* AI Food Check-in Quick Button inside Member Hub */}
             <button
-              onClick={() => setIsAuthModalOpen(true)}
-              className="px-2.5 py-1 bg-amber-400 hover:bg-amber-500 text-stone-900 rounded-xl text-[10px] font-black shadow-xs transition"
+              onClick={() => setIsAiCheckInModalOpen(true)}
+              className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white text-[10px] font-bold shadow-md flex items-center gap-1 active:scale-95 transition"
+              title={isKm ? 'ឆែកអ៊ីន & បន្ថែមហាងដោយ AI' : 'AI Food Check-in'}
             >
-              {isKm ? 'ចូលគណនី' : 'Sign In'}
+              <Camera className="w-3.5 h-3.5" />
+              <span>{isKm ? 'ឆែកអ៊ីន AI' : 'AI Check-in'}</span>
             </button>
-          )}
+
+            {!currentUser && (
+              <button
+                onClick={() => setIsAuthModalOpen(true)}
+                className="px-2.5 py-1 bg-amber-400 hover:bg-amber-500 text-stone-900 rounded-xl text-[10px] font-black shadow-xs transition"
+              >
+                {isKm ? 'ចូលគណនី' : 'Sign In'}
+              </button>
+            )}
+          </div>
         </div>
 
         {/* 6 Feature Buttons Grid */}
@@ -320,6 +385,151 @@ export const HomeView: React.FC = () => {
         </div>
       </div>
 
+      {/* REQUIREMENTS 1 & 2: DEDICATED AI TRENDING FOOD SECTION (TIKTOK & FB REVIEW) */}
+      {/* Placed directly below the complete Account/Profile section */}
+      <div className="p-4 rounded-3xl bg-gradient-to-br from-slate-900 via-rose-950 to-slate-900 text-white border border-rose-500/40 shadow-md space-y-3 font-khmer">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="px-2.5 py-1 rounded-xl bg-gradient-to-r from-rose-500 to-pink-600 text-white text-[10px] font-bold shadow-xs flex items-center gap-1">
+              <Flame className="w-3.5 h-3.5 fill-current" />
+              <span>TikTok & FB Review</span>
+            </span>
+            <div>
+              <h3 className="font-moul text-xs sm:text-sm text-white">
+                {isKm ? 'អាហារល្បីលើ TikTok & FB' : 'Trending Food on TikTok & FB'}
+              </h3>
+              <p className="text-[10px] text-pink-200">
+                {isKm ? 'ហាងអាហារឆ្ងាញ់ៗ ប្លែកៗ និងល្បីបំផុតលើបណ្តាញសង្គម' : 'Viral restaurants, street food, cafés & unique dishes'}
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => setIsTrendingSocialModalOpen(true)}
+            className="text-xs font-bold text-pink-300 hover:text-white flex items-center gap-0.5"
+          >
+            <span>{isKm ? 'មើលទាំងអស់' : 'View All'}</span>
+            <ChevronRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        {/* Category Filter Chips for Trending Food */}
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
+          {foodCategoryChips.map(chip => (
+            <button
+              key={chip.id}
+              onClick={() => setSelectedCategory(chip.id)}
+              className={`px-2.5 py-1 rounded-xl text-[10px] font-bold whitespace-nowrap transition flex items-center gap-1 ${
+                selectedCategory === chip.id
+                  ? 'bg-rose-500 text-white shadow-xs'
+                  : 'bg-white/10 text-pink-200 hover:text-white border border-white/10'
+              }`}
+            >
+              <span>{chip.icon}</span>
+              <span>{isKm ? chip.labelKh : chip.labelEn}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* 4 Trending Food Cards Grid */}
+        <div className="grid grid-cols-2 gap-2.5">
+          {displayTrendingFoods.map((food) => (
+            <div
+              key={food.id}
+              onClick={() => handleOpenFoodDetail(food)}
+              className="group relative rounded-2xl overflow-hidden aspect-4/3 bg-slate-800 border border-white/15 cursor-pointer shadow-sm hover:scale-[1.02] transition duration-200 flex flex-col justify-between"
+            >
+              <img 
+                src={food.photoUrl} 
+                alt={food.foodNameKh} 
+                className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-300" 
+                loading="lazy" 
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent pointer-events-none" />
+              
+              {/* Badges on top */}
+              <div className="relative z-10 p-2 flex items-center justify-between">
+                <span className="px-1.5 py-0.5 rounded-full bg-rose-600/95 text-white text-[8px] font-black shadow-xs">
+                  {food.socialViews || 'Viral'}
+                </span>
+                {food.socialLikes && (
+                  <span className="px-1.5 py-0.5 rounded-full bg-black/60 text-rose-300 text-[8px] font-bold">
+                    ❤️ {food.socialLikes}
+                  </span>
+                )}
+              </div>
+
+              {/* Sample indicator */}
+              <span className="absolute bottom-1 right-1.5 z-10 bg-black/60 text-white/80 text-[7px] px-1 rounded-xs font-khmer select-none">
+                {isKm ? 'រូបតំណាង' : 'Sample'}
+              </span>
+
+              {/* Title & Info on bottom */}
+              <div className="relative z-10 p-2">
+                <h4 className="font-bold text-white text-xs line-clamp-1 leading-snug drop-shadow">
+                  {isKm ? food.foodNameKh : food.foodNameEn}
+                </h4>
+                <p className="text-[9px] text-pink-200 line-clamp-1">
+                  🏪 {isKm ? food.restaurantNameKh : food.restaurantNameEn}
+                </p>
+                <div className="flex items-center justify-between mt-1 text-[8px] text-pink-300">
+                  <span>📍 {isKm ? food.provinceKh : food.provinceEn}</span>
+                  {food.priceDisplay && <span className="font-mono font-bold text-amber-300">{food.priceDisplay.split('/')[0]}</span>}
+                </div>
+
+                {/* Quick 3-Action Bar on Card */}
+                <div className="grid grid-cols-3 gap-1 pt-1.5">
+                  <button
+                    onClick={(e) => handleMap(e, food)}
+                    className="py-1 px-1 bg-white/20 hover:bg-white/30 text-white rounded-md text-[8px] font-bold flex items-center justify-center gap-0.5 transition"
+                    title={isKm ? 'នាំផ្លូវ' : 'Map'}
+                  >
+                    <Navigation className="w-2.5 h-2.5 text-emerald-300" />
+                    <span>{isKm ? 'ផ្លូវ' : 'Map'}</span>
+                  </button>
+
+                  <button
+                    onClick={(e) => handleCall(e, food.phone)}
+                    className="py-1 px-1 bg-white/20 hover:bg-white/30 text-white rounded-md text-[8px] font-bold flex items-center justify-center gap-0.5 transition"
+                    title={isKm ? 'ទូរស័ព្ទ' : 'Call'}
+                  >
+                    <Phone className="w-2.5 h-2.5 text-emerald-300" />
+                    <span>{isKm ? 'Call' : 'Call'}</span>
+                  </button>
+
+                  <button
+                    onClick={(e) => handleShare(e, food)}
+                    className="py-1 px-1 bg-white/20 hover:bg-white/30 text-white rounded-md text-[8px] font-bold flex items-center justify-center gap-0.5 transition"
+                    title={isKm ? 'ចែករំលែក' : 'Share'}
+                  >
+                    <Share2 className="w-2.5 h-2.5 text-pink-300" />
+                    <span>{isKm ? 'Share' : 'Share'}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Bottom Action Bar */}
+        <div className="flex items-center gap-2 pt-1">
+          <button
+            onClick={() => setIsTrendingSocialModalOpen(true)}
+            className="flex-1 py-2 px-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-pink-200 hover:text-white text-xs font-bold transition flex items-center justify-center gap-1.5"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-pink-400" />
+            <span>{isKm ? 'ស្វែងយល់មុខម្ហូបល្បីៗទាំងអស់' : 'Explore All Viral Foods'}</span>
+          </button>
+
+          <button
+            onClick={() => setIsAiCheckInModalOpen(true)}
+            className="py-2 px-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm"
+          >
+            <Camera className="w-3.5 h-3.5 text-emerald-200" />
+            <span>{isKm ? 'ឆែកអ៊ីន & បន្ថែមហាង' : 'Check in & Add'}</span>
+          </button>
+        </div>
+      </div>
+
       {/* Section 1: Featured Khmer Food */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
@@ -404,93 +614,7 @@ export const HomeView: React.FC = () => {
         </div>
       </div>
 
-      {/* Dedicated Viral Trending Section: TikTok & Facebook Popular Review Spots */}
-      {trendingSocialDestinations.length > 0 && (
-        <div className="p-4 rounded-3xl bg-gradient-to-br from-slate-900 via-rose-950 to-slate-900 text-white border border-rose-500/40 shadow-md space-y-3 font-khmer">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="px-2.5 py-1 rounded-xl bg-gradient-to-r from-rose-500 to-pink-600 text-white text-[10px] font-bold shadow-xs flex items-center gap-1">
-                <Flame className="w-3.5 h-3.5 fill-current" />
-                <span>TikTok & FB Review</span>
-              </span>
-              <div>
-                <h3 className="font-moul text-xs sm:text-sm text-white">
-                  {isKm ? 'កន្លែងដើរលេងល្បីលើ TikTok & FB' : 'Viral Review Spots on TikTok & FB'}
-                </h3>
-                <p className="text-[10px] text-pink-200">
-                  {isKm ? 'កន្លែងដែលគេចូលចិត្តទៅ Review និងផុសច្រើនបំផុត' : 'Most reviewed & shared travel spots on social media'}
-                </p>
-              </div>
-            </div>
-            <button
-              onClick={() => setIsTrendingSocialModalOpen(true)}
-              className="text-xs font-bold text-pink-300 hover:text-white flex items-center gap-0.5"
-            >
-              <span>{isKm ? 'មើលទាំងអស់' : 'View All'}</span>
-              <ChevronRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-
-          <div className="grid grid-cols-2 gap-2.5">
-            {trendingSocialDestinations.slice(0, 4).map((d) => (
-              <div
-                key={d.id}
-                onClick={() => setSelectedDestination(d)}
-                className="group relative rounded-2xl overflow-hidden aspect-4/3 bg-slate-800 border border-white/15 cursor-pointer shadow-sm hover:scale-[1.02] transition duration-200"
-              >
-                <img 
-                  src={d.photoUrl} 
-                  alt={d.nameKh} 
-                  className="w-full h-full object-cover group-hover:scale-105 transition duration-300" 
-                  loading="lazy" 
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/35 to-transparent" />
-                
-                <div className="absolute top-2 left-2 flex items-center gap-1">
-                  <span className="px-1.5 py-0.5 rounded-full bg-rose-600/95 text-white text-[9px] font-black shadow-xs">
-                    {d.socialViews || 'Viral'}
-                  </span>
-                  {d.socialLikes && (
-                    <span className="px-1.5 py-0.5 rounded-full bg-black/60 text-rose-300 text-[8px] font-bold hidden sm:inline-block">
-                      ❤️ {d.socialLikes}
-                    </span>
-                  )}
-                </div>
-
-                <span className="absolute bottom-1 right-1.5 bg-black/60 text-white/80 text-[7px] px-1 rounded-xs font-khmer select-none">
-                  {isKm ? 'រូបតំណាង' : 'Sample'}
-                </span>
-
-                <div className="absolute bottom-2 left-2 right-2">
-                  <h4 className="font-bold text-white text-xs line-clamp-1 leading-snug drop-shadow">
-                    {isKm ? d.nameKh : d.nameEn}
-                  </h4>
-                  {d.reviewerQuoteKh ? (
-                    <p className="text-[9px] text-pink-200 italic line-clamp-1">
-                      "{d.reviewerQuoteKh}"
-                    </p>
-                  ) : (
-                    <p className="text-[9px] text-pink-300 font-mono truncate">
-                      {d.socialHashtag || d.provinceKh}
-                    </p>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Quick Bar to open all viral review spots */}
-          <button
-            onClick={() => setIsTrendingSocialModalOpen(true)}
-            className="w-full py-2.5 px-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-pink-200 hover:text-white text-xs font-bold transition flex items-center justify-center gap-1.5"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-pink-400" />
-            <span>{isKm ? 'ស្វែងយល់កន្លែងដើរលេងល្បីៗលើ TikTok & FB ទាំងអស់' : 'Explore All Trending Social Spots'}</span>
-          </button>
-        </div>
-      )}
-
-      {/* Section 3: Tourist Destinations */}
+      {/* Section 3: Tourist Destinations (Completely separated from Food Discovery) */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">

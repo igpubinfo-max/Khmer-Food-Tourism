@@ -2,13 +2,13 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { RestaurantCard } from './RestaurantCard';
 import { isRestaurantPremiumActive } from '../types';
-import { Store, Plus, MapPin, Sparkles, PhoneCall, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Store, Plus, MapPin, Sparkles, PhoneCall, CheckCircle2, AlertCircle, Camera } from 'lucide-react';
 
 export const RestaurantView: React.FC = () => {
   const { 
     restaurants, language, searchQuery, setSearchQuery, 
     selectedProvince, setSelectedProvince, setIsAddRestaurantModalOpen,
-    currentUser, setIsAuthModalOpen 
+    currentUser, setIsAuthModalOpen, setIsAiCheckInModalOpen
   } = useApp();
 
   const [priceFilter, setPriceFilter] = useState<string>('all');
@@ -85,16 +85,30 @@ export const RestaurantView: React.FC = () => {
           </p>
         </div>
 
-        <button
-          onClick={() => {
-            if (!currentUser) setIsAuthModalOpen(true);
-            else setIsAddRestaurantModalOpen(true);
-          }}
-          className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-xs shadow-xs font-khmer transition"
-        >
-          <Plus className="w-3.5 h-3.5 text-emerald-200" />
-          <span>{isKm ? 'ចុះបញ្ជីហាង' : 'Add Shop'}</span>
-        </button>
+        <div className="flex items-center gap-1.5">
+          <button
+            onClick={() => {
+              if (!currentUser) setIsAuthModalOpen(true);
+              else setIsAiCheckInModalOpen(true);
+            }}
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 text-white font-bold text-xs shadow-xs font-khmer transition active:scale-95"
+            title={isKm ? 'ឆែកអ៊ីន & បន្ថែមហាងដោយ AI' : 'AI Food Check-in'}
+          >
+            <Camera className="w-3.5 h-3.5 text-emerald-200" />
+            <span>{isKm ? 'ឆែកអ៊ីន AI' : 'AI Check-in'}</span>
+          </button>
+
+          <button
+            onClick={() => {
+              if (!currentUser) setIsAuthModalOpen(true);
+              else setIsAddRestaurantModalOpen(true);
+            }}
+            className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-xs shadow-xs font-khmer transition"
+          >
+            <Plus className="w-3.5 h-3.5 text-emerald-200" />
+            <span>{isKm ? 'ចុះបញ្ជីហាង' : 'Add Shop'}</span>
+          </button>
+        </div>
       </div>
 
       {/* Verification Filter Switcher */}
