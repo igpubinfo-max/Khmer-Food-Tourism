@@ -5,7 +5,7 @@ import { TouristCard } from './TouristCard';
 import { PrivacyPolicyModal } from './PrivacyPolicyModal';
 import { 
   User as UserIcon, Heart, Shield, Store, 
-  Globe, LogOut, RefreshCw, Download, Sparkles, UtensilsCrossed, ShieldCheck,
+  Globe, LogOut, RefreshCw, Download, Sparkles, UtensilsCrossed, ShieldCheck, CheckCircle2,
   Bot, Bell, Compass, Calendar, Bookmark, Plus, MapPin, Trash2, Share2, Tag, Utensils, ChevronRight
 } from 'lucide-react';
 import { isRestaurantPremiumActive } from '../types';
@@ -47,41 +47,53 @@ export const ProfileView: React.FC = () => {
       {/* User Header Profile Card */}
       <div className="p-4 rounded-3xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700/80 shadow-xs">
         {currentUser ? (
-          <div className="space-y-3">
-            <div className="flex items-center gap-3">
+          <div className="space-y-4">
+            <div className="flex items-center gap-4">
               <img 
                 src={currentUser.avatar} 
                 alt={currentUser.name} 
-                className="w-14 h-14 rounded-2xl object-cover border-2 border-[#059669] shadow-xs"
+                className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border-2 border-[#059669] shadow-md ring-4 ring-emerald-500/20 shrink-0"
               />
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <h3 className="font-bold text-sm sm:text-base text-[#0F172A] dark:text-white font-khmer">
-                    {currentUser.name}
-                  </h3>
-                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+              <div className="flex-1 min-w-0">
+                {/* Large Prominent Account Name */}
+                <h2 className="font-moul text-lg sm:text-2xl text-slate-900 dark:text-white leading-snug tracking-wide break-words">
+                  {currentUser.name}
+                </h2>
+                
+                {/* Verified Badge & Role */}
+                <div className="flex items-center gap-1.5 flex-wrap mt-1">
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 shadow-2xs font-khmer">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                    <span>{isKm ? 'គណនីបានផ្ទៀងផ្ទាត់ ✓' : 'Verified Account ✓'}</span>
+                  </span>
+                  <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold font-khmer ${
                     currentUser.role === 'admin' 
-                      ? 'bg-rose-100 text-rose-700' 
+                      ? 'bg-rose-100 text-rose-700 border border-rose-200' 
                       : currentUser.role === 'owner' 
-                      ? 'bg-emerald-50 text-[#064E3B] border border-emerald-200' 
-                      : 'bg-emerald-100 text-emerald-800'
+                      ? 'bg-amber-100 text-amber-900 border border-amber-300' 
+                      : 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200 border border-slate-300'
                   }`}>
-                    {currentUser.role === 'admin' ? '🛡️ Administrator' : currentUser.role === 'owner' ? '🏪 Shop Owner' : '👤 Foodie'}
+                    {currentUser.role === 'admin' ? '🛡️ Administrator' : currentUser.role === 'owner' ? '🏪 ម្ចាស់ហាង' : '👤 អ្នកប្រើប្រាស់'}
                   </span>
                 </div>
+
                 {currentUser.role === 'admin' ? (
-                  <p className="text-xs text-rose-600 font-medium font-khmer mt-0.5">
+                  <p className="text-xs text-rose-600 font-medium font-khmer mt-1">
                     {isKm ? 'គណនីរដ្ឋបាលប្រព័ន្ធ (Private)' : 'System Administrator (Private)'}
                   </p>
                 ) : (
-                  <>
+                  <div className="mt-1 space-y-0.5">
                     {currentUser.phone && (
-                      <p className="text-xs text-[#059669] font-mono mt-0.5">📞 {currentUser.phone}</p>
+                      <p className="text-xs sm:text-sm text-[#059669] font-mono font-bold flex items-center gap-1.5">
+                        <span>📞</span> <span>{currentUser.phone}</span>
+                      </p>
                     )}
                     {currentUser.email && !currentUser.email.endsWith('@phone.kh') && (
-                      <p className="text-xs text-slate-500 mt-0.5">{currentUser.email}</p>
+                      <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-mono flex items-center gap-1.5">
+                        <span>✉️</span> <span>{currentUser.email}</span>
+                      </p>
                     )}
-                  </>
+                  </div>
                 )}
               </div>
             </div>

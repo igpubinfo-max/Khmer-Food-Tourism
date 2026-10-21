@@ -111,17 +111,17 @@ export const Header: React.FC = () => {
           <Mail className="w-3.5 h-3.5 text-emerald-300 shrink-0" />
           <span className="text-emerald-200 text-[10px]">{isKm ? 'មតិកែលម្អ (Feedback):' : 'Feedback:'}</span>
           <a 
-            href="mailto:kftapp@gmail.com" 
+            href="mailto:kftcam@gmail.com" 
             className="font-mono text-white underline hover:text-emerald-200 font-semibold text-[11px]"
           >
-            kftapp@gmail.com
+            kftcam@gmail.com
           </a>
         </div>
         <button
           type="button"
           onClick={() => {
             if (navigator.clipboard && navigator.clipboard.writeText) {
-              navigator.clipboard.writeText('kftapp@gmail.com').then(() => {
+              navigator.clipboard.writeText('kftcam@gmail.com').then(() => {
                 showToast(isKm ? 'បានចម្លងអ៊ីមែលជោគជ័យ!' : 'Email copied to clipboard!', 'success');
               }).catch(() => {});
             } else {

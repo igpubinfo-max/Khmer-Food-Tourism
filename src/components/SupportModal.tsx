@@ -146,16 +146,16 @@ export const SupportModal: React.FC = () => {
             </p>
             <div className="flex items-center justify-between gap-2 p-2.5 bg-white rounded-xl border border-emerald-300 shadow-2xs">
               <a 
-                href="mailto:kftapp@gmail.com" 
+                href="mailto:kftcam@gmail.com" 
                 className="text-xs font-bold text-[#064E3B] hover:underline flex items-center gap-1.5 font-mono truncate"
               >
-                <span>📧 kftapp@gmail.com</span>
+                <span>📧 kftcam@gmail.com</span>
               </a>
               <button
                 type="button"
                 onClick={() => {
                   if (navigator.clipboard && navigator.clipboard.writeText) {
-                    navigator.clipboard.writeText('kftapp@gmail.com').then(() => {
+                    navigator.clipboard.writeText('kftcam@gmail.com').then(() => {
                       showToast(isKm ? 'បានចម្លងអ៊ីមែលជោគជ័យ!' : 'Email copied!', 'success');
                     }).catch(() => {});
                   } else {

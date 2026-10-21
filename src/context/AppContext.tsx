@@ -980,6 +980,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       email: emailVal,
       phone: phoneVal,
       role: assignedRole,
+      isVerified: true,
+      verifiedAt: new Date().toISOString(),
       avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
       createdAt: new Date().toISOString().split('T')[0],
     };
@@ -1117,6 +1119,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       role: safeRole,
       phone: phoneVal,
       restaurantName,
+      isVerified: true,
+      verifiedAt: new Date().toISOString(),
       avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
       createdAt: new Date().toISOString().split('T')[0],
     };

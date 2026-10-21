@@ -59,6 +59,16 @@ export const HomeView: React.FC = () => {
             </span>
           </div>
 
+          {currentUser && (
+            <div className="flex items-center gap-2 pt-1 pb-0.5 animate-in fade-in">
+              <span className="text-sm sm:text-base font-bold font-khmer text-emerald-200 flex items-center gap-1.5 drop-shadow-sm flex-wrap">
+                <span>{isKm ? 'សួស្តី,' : 'Hello,'}</span>
+                <span className="text-white text-base sm:text-xl font-bold font-moul underline decoration-emerald-400 decoration-2">{currentUser.name}</span>
+                <span>👋</span>
+              </span>
+            </div>
+          )}
+
           <h2 className="font-moul text-lg sm:text-xl text-white leading-snug drop-shadow-sm">
             {isKm 
               ? 'ភ្លក្សរសជាតិម្ហូបខ្មែរ និងទស្សនាសម្រស់កម្ពុជា' 

@@ -13,6 +13,8 @@ export interface User {
   bio?: string;
   restaurantName?: string;
   passwordHash?: string;
+  isVerified?: boolean;
+  verifiedAt?: string;
   createdAt: string;
 }
 

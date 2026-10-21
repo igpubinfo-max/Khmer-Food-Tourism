@@ -73,8 +73,8 @@ export class ErrorBoundary extends Component<Props, State> {
 
             <div className="pt-2 text-center text-[10px] text-slate-500 font-khmer">
               <span>មតិកែលម្អ / ជំនួយបច្ចេកទេស៖ </span>
-              <a href="mailto:kftapp@gmail.com" className="font-mono text-[#064E3B] underline font-bold">
-                kftapp@gmail.com
+              <a href="mailto:kftcam@gmail.com" className="font-mono text-[#064E3B] underline font-bold">
+                kftcam@gmail.com
               </a>
             </div>
           </div>
