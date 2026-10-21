@@ -1,10 +1,10 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
   X, Sparkles, Shuffle, Utensils, DollarSign, MapPin, 
-  ChevronRight, Star, Clock, ChefHat, Heart, ExternalLink 
+  Star, Clock, ChefHat, Heart, Compass, Flame, Sun, Sunset, Moon, Coffee
 } from 'lucide-react';
-import { FoodCategorySlug, FoodItem } from '../types';
+import { FoodItem } from '../types';
 
 export const WhatToEatModal: React.FC = () => {
   const { 
@@ -15,52 +15,125 @@ export const WhatToEatModal: React.FC = () => {
 
   const isKm = language === 'km';
 
-  // Filters: Budget, Category, Location
+  // Filters: Budget, Category, Meal Time
   const [budgetFilter, setBudgetFilter] = useState<'all' | 'budget' | 'medium' | 'premium'>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
-  const [locationFilter, setLocationFilter] = useState<string>('all');
   const [isSpinning, setIsSpinning] = useState(false);
-  const [seedOffset, setSeedOffset] = useState<number>(0);
+  
+  // Current dish index and history of seen dish IDs to prevent repetition
+  const [currentDishId, setCurrentDishId] = useState<string>('');
+  const seenDishIdsRef = useRef<Set<string>>(new Set());
 
-  // Filter candidates
+  // Determine current mealtime in Cambodia
+  const currentMealInfo = useMemo(() => {
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 10) {
+      return {
+        slug: 'breakfast',
+        labelKh: 'អាហារពេលព្រឹក',
+        labelEn: 'Breakfast Recommendation',
+        icon: Coffee,
+        accent: 'from-amber-500 to-orange-500'
+      };
+    } else if (hour >= 10 && hour < 14) {
+      return {
+        slug: 'lunch',
+        labelKh: 'អាហារថ្ងៃត្រង់',
+        labelEn: 'Lunch Recommendation',
+        icon: Sun,
+        accent: 'from-emerald-500 to-teal-600'
+      };
+    } else if (hour >= 14 && hour < 17) {
+      return {
+        slug: 'afternoon',
+        labelKh: 'អាហារសម្រន់ & បង្អែម',
+        labelEn: 'Afternoon Treats',
+        icon: Sparkles,
+        accent: 'from-pink-500 to-rose-500'
+      };
+    } else if (hour >= 17 && hour < 22) {
+      return {
+        slug: 'dinner',
+        labelKh: 'អាហារពេលល្ងាច',
+        labelEn: 'Dinner Recommendation',
+        icon: Sunset,
+        accent: 'from-indigo-600 to-purple-600'
+      };
+    } else {
+      return {
+        slug: 'night',
+        labelKh: 'អាហារពេលយប់',
+        labelEn: 'Late Night Cravings',
+        icon: Moon,
+        accent: 'from-slate-700 to-slate-900'
+      };
+    }
+  }, []);
+
+  // Filter candidate dishes
   const matchingFoods = useMemo(() => {
     return foods.filter(food => {
-      // Budget
+      // Budget filter
       if (budgetFilter === 'budget' && food.priceUsd > 3.0) return false;
       if (budgetFilter === 'medium' && (food.priceUsd < 3.0 || food.priceUsd > 7.0)) return false;
       if (budgetFilter === 'premium' && food.priceUsd <= 7.0) return false;
 
-      // Category
+      // Category filter
       if (categoryFilter !== 'all' && food.categorySlug !== categoryFilter) return false;
-
-      // Location match via restaurants serving this dish
-      if (locationFilter !== 'all') {
-        const matchesRestaurantInProvince = restaurants.some(r => 
-          (r.provinceKh.includes(locationFilter) || locationFilter.includes(r.provinceKh)) &&
-          r.signatureDishesKh?.some(d => d.includes(food.nameKh) || food.nameKh.includes(d))
-        );
-        // If no direct restaurant, let popular general dishes pass unless strictly filtered
-        if (!matchesRestaurantInProvince && foods.length > 20) {
-          // Soft check: allow if food matches category
-        }
-      }
 
       return true;
     });
-  }, [foods, restaurants, budgetFilter, categoryFilter, locationFilter]);
+  }, [foods, budgetFilter, categoryFilter]);
 
-  // Current selected dish pick
+  // Active candidate list
   const activeDishList = matchingFoods.length > 0 ? matchingFoods : foods;
-  const currentDish: FoodItem = activeDishList[seedOffset % activeDishList.length] || foods[0];
 
-  // Secondary alternatives (2 picks)
+  // Pick a fresh random dish that hasn't been shown recently
+  const pickRandomDish = (excludeId?: string): FoodItem => {
+    if (activeDishList.length === 0) return foods[0];
+    if (activeDishList.length === 1) return activeDishList[0];
+
+    // Filter out already seen dishes in this session if possible
+    let unseenCandidates = activeDishList.filter(f => 
+      f.id !== excludeId && !seenDishIdsRef.current.has(f.id)
+    );
+
+    // If all candidates have been seen, reset the history to start a fresh cycle
+    if (unseenCandidates.length === 0) {
+      seenDishIdsRef.current.clear();
+      unseenCandidates = activeDishList.filter(f => f.id !== excludeId);
+    }
+
+    const pool = unseenCandidates.length > 0 ? unseenCandidates : activeDishList;
+    const randomPick = pool[Math.floor(Math.random() * pool.length)];
+
+    seenDishIdsRef.current.add(randomPick.id);
+    return randomPick;
+  };
+
+  // Re-roll dish whenever modal opens or filters change
+  useEffect(() => {
+    if (isWhatToEatModalOpen && foods.length > 0) {
+      const initialPick = pickRandomDish();
+      setCurrentDishId(initialPick.id);
+    }
+  }, [isWhatToEatModalOpen, budgetFilter, categoryFilter]);
+
+  // Current active dish
+  const currentDish: FoodItem = useMemo(() => {
+    return activeDishList.find(f => f.id === currentDishId) || activeDishList[0] || foods[0];
+  }, [activeDishList, currentDishId, foods]);
+
+  // 2 Distinct Alternative Dishes randomly picked from candidates
   const alternativeDishes = useMemo(() => {
     if (activeDishList.length <= 1) return [];
-    return [
-      activeDishList[(seedOffset + 1) % activeDishList.length],
-      activeDishList[(seedOffset + 2) % activeDishList.length],
-    ].filter(Boolean);
-  }, [activeDishList, seedOffset]);
+    const pool = activeDishList.filter(f => f.id !== currentDish?.id);
+    if (pool.length === 0) return [];
+
+    // Shuffle pool to pick 2 completely distinct items
+    const shuffled = [...pool].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, 2);
+  }, [activeDishList, currentDish?.id]);
 
   // Find restaurants serving this dish
   const servingRestaurants = useMemo(() => {
@@ -72,14 +145,17 @@ export const WhatToEatModal: React.FC = () => {
 
   if (!isWhatToEatModalOpen) return null;
 
-  // Re-roll / Spin function
+  // AI Re-roll / Spin handler with random shuffle
   const handleShowAnother = () => {
     setIsSpinning(true);
     setTimeout(() => {
-      setSeedOffset(prev => prev + 1);
+      const nextDish = pickRandomDish(currentDish?.id);
+      setCurrentDishId(nextDish.id);
       setIsSpinning(false);
     }, 280);
   };
+
+  const MealIcon = currentMealInfo.icon;
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-xs p-0 sm:p-4 animate-in fade-in duration-200">
@@ -103,7 +179,7 @@ export const WhatToEatModal: React.FC = () => {
                 </span>
               </div>
               <p className="text-[11px] text-emerald-100 font-khmer">
-                {isKm ? 'ជ្រើសរើសម្ហូបឆ្លាតវៃតាមថវិកា ចំណង់ចំណូលចិត្ត និងទីតាំង' : 'Smart recommendations by budget, taste & location'}
+                {isKm ? 'AI ជួយស្នើម្ហូបប្លែកៗឆ្លាតវៃតាមថវិកា និងចំណង់ចំណូលចិត្ត' : 'Smart AI generated recommendations from 235 authentic dishes'}
               </p>
             </div>
           </div>
@@ -113,6 +189,17 @@ export const WhatToEatModal: React.FC = () => {
           >
             <X className="w-5 h-5" />
           </button>
+        </div>
+
+        {/* AI Mealtime Context Banner */}
+        <div className="px-4 py-2 bg-gradient-to-r from-amber-500/10 via-emerald-500/10 to-teal-500/10 border-b border-emerald-100/60 dark:border-slate-800 flex items-center justify-between text-xs font-khmer shrink-0">
+          <div className="flex items-center gap-2 text-[#064E3B] dark:text-emerald-300 font-bold text-[11px]">
+            <MealIcon className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+            <span>{isKm ? `AI ណែនាំសម្រាប់ ${currentMealInfo.labelKh} ពេលនេះ` : `AI Pick for ${currentMealInfo.labelEn}`}</span>
+          </div>
+          <span className="text-[10px] text-slate-500 font-mono font-medium">
+            {activeDishList.length} {isKm ? 'មុខម្ហូប' : 'dishes'}
+          </span>
         </div>
 
         {/* Filters Bar */}
@@ -154,7 +241,7 @@ export const WhatToEatModal: React.FC = () => {
               { id: 'grilled', labelKh: 'អាំង/បំពង' },
               { id: 'stirfry', labelKh: 'ឆា' },
               { id: 'salad', labelKh: 'ញាំ/ភ្លា' },
-              { id: 'noodles', labelKh: 'គុយទាវ/មី' },
+              { id: 'noodles', labelKh: 'គុយទាវ/នំបញ្ចុក' },
               { id: 'dessert', labelKh: 'បង្អែម' },
             ].map(c => (
               <button
@@ -175,14 +262,14 @@ export const WhatToEatModal: React.FC = () => {
         {/* Content body */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar">
           {currentDish && (
-            <div className={`transition-all duration-300 ${isSpinning ? 'opacity-30 scale-95' : 'opacity-100 scale-100'}`}>
+            <div className={`transition-all duration-300 ${isSpinning ? 'opacity-30 scale-95 blur-[1px]' : 'opacity-100 scale-100'}`}>
               {/* Highlight Recommended Dish Card */}
               <div className="relative rounded-3xl overflow-hidden bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 shadow-md">
                 <div className="relative aspect-16/10 w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
                   <img 
                     src={currentDish.photoUrl} 
                     alt={currentDish.nameKh} 
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                     loading="lazy"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
@@ -190,8 +277,8 @@ export const WhatToEatModal: React.FC = () => {
                   {/* Badge */}
                   <div className="absolute top-3 left-3 flex items-center gap-1.5">
                     <span className="px-2.5 py-1 rounded-full bg-amber-400 text-stone-900 text-xs font-black shadow-xs flex items-center gap-1 font-khmer">
-                      <Sparkles className="w-3.5 h-3.5 fill-current" />
-                      {isKm ? 'ម្ហូបត្រូវចិត្តថ្ងៃនេះ!' : 'Top Pick!'}
+                      <Sparkles className="w-3.5 h-3.5 fill-current text-amber-900" />
+                      {isKm ? 'AI ស្នើឡើងសម្រាប់អ្នក!' : 'AI Top Pick!'}
                     </span>
                     <span className="px-2 py-1 rounded-full bg-black/60 backdrop-blur-xs text-white text-[11px] font-bold">
                       {isKm ? currentDish.categoryKh : currentDish.categoryEn}
@@ -300,25 +387,25 @@ export const WhatToEatModal: React.FC = () => {
           {alternativeDishes.length > 0 && (
             <div className="space-y-2 font-khmer">
               <h4 className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1">
-                <span>💡</span>
-                <span>{isKm ? 'ជម្រើសគួរពិចារណាផ្សេងទៀត៖' : 'Other alternatives:'}</span>
+                <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                <span>{isKm ? 'ជម្រើសគួរពិចារណាផ្សេងទៀត (AI Alternative Picks)៖' : 'Other AI alternative picks:'}</span>
               </h4>
               <div className="grid grid-cols-2 gap-2">
                 {alternativeDishes.map(d => (
                   <div
                     key={d.id}
                     onClick={() => {
-                      const idx = activeDishList.findIndex(x => x.id === d.id);
-                      if (idx !== -1) setSeedOffset(idx);
+                      setCurrentDishId(d.id);
+                      seenDishIdsRef.current.add(d.id);
                     }}
-                    className="p-2 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/90 dark:border-slate-700 flex items-center gap-2 cursor-pointer hover:border-emerald-500 transition shadow-2xs"
+                    className="p-2 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/90 dark:border-slate-700 flex items-center gap-2 cursor-pointer hover:border-emerald-500 transition shadow-2xs group"
                   >
-                    <img src={d.photoUrl} alt={d.nameKh} className="w-10 h-10 rounded-xl object-cover shrink-0" />
+                    <img src={d.photoUrl} alt={d.nameKh} className="w-10 h-10 rounded-xl object-cover shrink-0 group-hover:scale-105 transition-transform" />
                     <div className="min-w-0">
                       <div className="text-[11px] font-bold text-[#0F172A] dark:text-white truncate">
                         {isKm ? d.nameKh : d.nameEn}
                       </div>
-                      <div className="text-[10px] text-emerald-600 font-mono">
+                      <div className="text-[10px] text-emerald-600 font-mono font-bold">
                         {d.priceRiel.toLocaleString()} ៛
                       </div>
                     </div>
@@ -337,7 +424,7 @@ export const WhatToEatModal: React.FC = () => {
             className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-500 hover:from-amber-600 hover:to-amber-500 text-stone-900 font-black text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-[0.98] font-khmer cursor-pointer"
           >
             <Shuffle className={`w-5 h-5 ${isSpinning ? 'animate-spin' : ''}`} />
-            <span>{isKm ? '« បង្ហាញម្ហូបផ្សេងទៀត » (ប្តូរមុខម្ហូប)' : '« Show Another Dish » (Shuffle)'}</span>
+            <span>{isKm ? '« បង្ហាញម្ហូបផ្សេងទៀត » (AI ជ្រើសម្ហូបថ្មី)' : '« Show Another Dish » (AI Generate)'}</span>
           </button>
         </div>
       </div>

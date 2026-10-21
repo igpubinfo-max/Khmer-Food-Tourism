@@ -5,7 +5,7 @@ import { Restaurant } from '../types';
 export const initial100Restaurants: Restaurant[] = [
   {
     "id": "rest-1",
-    "nameKh": "ភោជនីយដ្ឋាន ម្លិះ (Malis Restaurant)",
+    "nameKh": "ភោជនីយដ្ឋាន ម្លិះ",
     "nameEn": "Malis Restaurant Phnom Penh",
     "descriptionKh": "ភោជនីយដ្ឋានម្ហូបខ្មែរប្រណីតលំដាប់កំពូល បង្កើតឡើងដោយមេចុងភៅឆ្នើម លូ ម៉េង ដើម្បីលើកតម្កើងម្ហូបខ្មែររស់ឡើងវិញ។ បរិយាកាសសួនមនោរម្យ និងសេវាកម្មស្តង់ដាអន្តរជាតិ។",
     "descriptionEn": "Master Chef Luu Meng's premier living Cambodian cuisine venue in Tonle Bassac, renowned worldwide.",
@@ -42,7 +42,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-2",
-    "nameKh": "ភោជនីយដ្ឋាន រំដេង (Romdeng Restaurant)",
+    "nameKh": "ភោជនីយដ្ឋាន រំដេង",
     "nameEn": "Romdeng Restaurant Phnom Penh",
     "descriptionKh": "ភោជនីយដ្ឋានបណ្តុះបណ្តាលវិជ្ជាជីវៈយុវជនខ្មែរ ដោយអង្គការ Friends-International។ បម្រើម្ហូបខ្មែរបុរាណ និងម្ហូបតំបន់ស្រុកស្រែដ៏មានឱជារស។",
     "descriptionEn": "Vibrant training restaurant by Friends-International serving regional Cambodian delicacies and creative specialties.",
@@ -79,7 +79,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-3",
-    "nameKh": "ភោជនីយដ្ឋាន អេឡឹវិន វ័ន ឃីតឆិន (Eleven One Kitchen)",
+    "nameKh": "ភោជនីយដ្ឋាន អេឡឹវិន វ័ន ឃីតឆិន",
     "nameEn": "Eleven One Kitchen BKK1",
     "descriptionKh": "ភោជនីយដ្ឋានដែលផ្តោតលើសុខភាព ប្រើប្រាស់គ្រឿងផ្សំសរីរាង្គក្នុងស្រុក និងគ្មានការប្រើប្រាស់ប្លាស្ទិក គាំទ្របរិស្ថានបៃតង។",
     "descriptionEn": "Eco-conscious Cambodian eatery serving wholesome local home cooking made with chemical-free produce.",
@@ -116,7 +116,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-4",
-    "nameKh": "ភោជនីយដ្ឋាន ក្រវាញ (Kravanh Restaurant)",
+    "nameKh": "ភោជនីយដ្ឋាន ក្រវាញ",
     "nameEn": "Kravanh Authentic Khmer Restaurant",
     "descriptionKh": "ហាងអាហារខ្មែររសជាតិដើមបែបគ្រួសារខ្មែរអភិជន តុបតែងរចនាបថបែបបុរាណ ម្ហូបឆ្ងាញ់ប្រកបដោយអនាម័យខ្ពស់។",
     "descriptionEn": "Authentic royal and traditional home recipes prepared with exquisite presentation and antique atmosphere.",
@@ -153,7 +153,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-5",
-    "nameKh": "ភោជនីយដ្ឋាន ខ្មែរសុរិន្ទ (Khmer Surin Restaurant)",
+    "nameKh": "ភោជនីយដ្ឋាន ខ្មែរសុរិន្ទ",
     "nameEn": "Khmer Surin Restaurant BKK1",
     "descriptionKh": "ភោជនីយដ្ឋានដ៏ល្បីល្បាញយូរឆ្នាំនៅភ្នំពេញ តាំងពីឆ្នាំ ១៩៩៦ មានបរិយាកាសផ្ទះឈើបុរាណ លម្អដោយរុក្ខជាតិបៃតង និងវត្ថុសិល្បៈខ្មែរ។",
     "descriptionEn": "A long-standing Phnom Penh staple since 1996 serving fragrant Khmer and Surin-border regional fare in a lush garden terrace.",
@@ -190,7 +190,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-6",
-    "nameKh": "ភោជនីយដ្ឋាន សុវណ្ណា សាច់អាំង (Sovanna BBQ)",
+    "nameKh": "ភោជនីយដ្ឋាន សុវណ្ណា សាច់អាំង",
     "nameEn": "Sovanna Restaurant & BBQ Phnom Penh",
     "descriptionKh": "ហាងសាច់អាំង និងម្ហូបក្លែមបែបខ្មែរដ៏ពេញនិយមបំផុត រសជាតិទឹកត្រីកោះកុង និងទឹកប្រហុកបុកល្បីល្បាញខ្លាំង។",
     "descriptionEn": "Legendary lively local barbecue spot serving charcoal-grilled beef, ribs, and fresh seafood with pungent dipping sauces.",
@@ -227,7 +227,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-7",
-    "nameKh": "ភោជនីយដ្ឋាន វ័ន ម៉រ (One More Restaurant)",
+    "nameKh": "ភោជនីយដ្ឋាន វ័ន ម៉រ",
     "nameEn": "One More Restaurant Toul Kork",
     "descriptionKh": "ភោជនីយដ្ឋានប្រណីតនៅខណ្ឌទួលគោក ដែលមានកេរ្តិ៍ឈ្មោះល្បីល្បាញខាងស៊ុប និងមុខម្ហូបខ្មែរបុរាណប្រកបដោយសោភ័ណភាពខ្ពស់។",
     "descriptionEn": "Sophisticated Khmer dining destination in Toul Kork featuring royal soups and traditional dishes.",
@@ -264,7 +264,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-8",
-    "nameKh": "ភោជនីយដ្ឋាន មុខមុនី (Mok Mony)",
+    "nameKh": "ភោជនីយដ្ឋាន មុខមុនី",
     "nameEn": "Mok Mony Restaurant Phnom Penh",
     "descriptionKh": "ហាងអាហារបែបគ្រួសារខ្មែរដ៏កក់ក្តៅ បម្រើម្ហូបបុរាណបែបខ្មែរកណ្តាល ជាមួយទឹកជ្រលក់រូបមន្តសម្ងាត់។",
     "descriptionEn": "Cozy and intimate family-run kitchen serving beloved traditional recipes and unique stuffed specialties.",
@@ -301,7 +301,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-9",
-    "nameKh": "ភោជនីយដ្ឋាន ហ្វ្រេន ដឹ រេស្ត៊ូរ៉ង់ (Friends the Restaurant)",
+    "nameKh": "ភោជនីយដ្ឋាន ហ្វ្រេន ដឹ រេស្ត៊ូរ៉ង់",
     "nameEn": "Friends the Restaurant Phnom Penh",
     "descriptionKh": "ភោជនីយដ្ឋានបណ្តុះបណ្តាលសង្គមដ៏ល្បីល្បាញក្បែរសារមន្ទីរជាតិភ្នំពេញ បម្រើម្ហូបបែប tapas ខ្មែរ និងអាស៊ី។",
     "descriptionEn": "Celebrated training venue by Tree Alliance near the National Museum serving inventive tapas.",
@@ -338,7 +338,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-10",
-    "nameKh": "ភោជនីយដ្ឋាន បុប្ផាភ្នំពេញ ទីតានិច (Bopha Phnom Penh Titanic)",
+    "nameKh": "ភោជនីយដ្ឋាន បុប្ផាភ្នំពេញ ទីតានិច",
     "nameEn": "Bopha Phnom Penh Titanic Riverside",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ទន្លេសាបដ៏ស្រស់ស្អាតលើវិថីព្រះស៊ីសុវត្ថិ បម្រើម្ហូបខ្មែរបុរាណ និងទស្សនាភ្លើងរាត្រីមាត់ទន្លេ។",
     "descriptionEn": "Charming open-air riverside dining terrace along Sisowath Quay serving royal and traditional Khmer recipes.",
@@ -375,7 +375,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-11",
-    "nameKh": "ហាងអាហារ ស្ករត្នោត (The Sugar Palm Siem Reap)",
+    "nameKh": "ហាងអាហារ ស្ករត្នោត",
     "nameEn": "The Sugar Palm Siem Reap",
     "descriptionKh": "ហាងអាហារខ្មែរពិតៗ ស្ថិតក្នុងផ្ទះឈើប្រពៃណីខ្មែរនៅក្រុងសៀមរាប។ ល្បីល្បាញបំផុតលើពិភពលោកខាងម្ហូប អាម៉ុកត្រីចំហុយ និងសម្លការីខ្មែរ។",
     "descriptionEn": "Iconic authentic Cambodian restaurant set in a charming wooden house in Siem Reap, globally celebrated for Fish Amok.",
@@ -412,7 +412,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-12",
-    "nameKh": "ភោជនីយដ្ឋាន ចន្ទ្រា (Chanrey Tree)",
+    "nameKh": "ភោជនីយដ្ឋាន ចន្ទ្រា",
     "nameEn": "Chanrey Tree Riverside Siem Reap",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ស្ទឹងសៀមរាប រចនាបែបខ្មែរទំនើបក្បែរសួនផ្កា ម្ហូបឆ្ងាញ់ប្រកបដោយអត្តសញ្ញាណខ្មែរពិតៗ។",
     "descriptionEn": "Exquisite lush riverside dining offering refined countryside home-style Khmer cooking.",
@@ -449,7 +449,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-13",
-    "nameKh": "ភោជនីយដ្ឋាន គ្វីហ្ស៊ីន វត្តដំណាក់ (Cuisine Wat Damnak)",
+    "nameKh": "ភោជនីយដ្ឋាន គ្វីហ្ស៊ីន វត្តដំណាក់",
     "nameEn": "Cuisine Wat Damnak Siem Reap",
     "descriptionKh": "ភោជនីយដ្ឋានដំបូងគេបង្អស់នៅកម្ពុជាដែលជាប់ក្នុងបញ្ជី Asia's 50 Best Restaurants។ ច្នៃម្ហូបខ្មែរជាមួយគ្រឿងផ្សំក្នុងស្រុកដ៏អស្ចារ្យ។",
     "descriptionEn": "Award-winning restaurant featured in Asia's 50 Best, blending traditional Khmer flavors with modern techniques.",
@@ -486,7 +486,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-14",
-    "nameKh": "ភោជនីយដ្ឋាន ម៉ារ៉ុម (Marum Restaurant)",
+    "nameKh": "ភោជនីយដ្ឋាន ម៉ារ៉ុម",
     "nameEn": "Marum Training Restaurant Siem Reap",
     "descriptionKh": "ភោជនីយដ្ឋានបណ្តុះបណ្តាលយុវជនខ្មែរក្នុងផ្ទះឈើបុរាណសួនបៃតង មានម្ហូបតំបន់ច្នៃប្រឌិត និងរសជាតិខ្មែរពិតប្រាកដ។",
     "descriptionEn": "Lush garden training restaurant by TREE Alliance serving innovative tapas and traditional Khmer recipes.",
@@ -523,7 +523,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-15",
-    "nameKh": "ភោជនីយដ្ឋាន ហេវិន (Haven Restaurant)",
+    "nameKh": "ភោជនីយដ្ឋាន ហេវិន",
     "nameEn": "Haven Restaurant Siem Reap",
     "descriptionKh": "ភោជនីយដ្ឋានបណ្តុះបណ្តាលសង្គមដ៏ល្បីល្បាញ បម្រើម្ហូបខ្មែរ និងអាស៊ី ជាមួយនឹងគ្រឿងផ្សំស្រស់ៗចេញពីកសិដ្ឋាន។",
     "descriptionEn": "Beloved social-purpose dining destination helping disadvantaged youth, serving delicious Khmer curries and stir-fries.",
@@ -560,7 +560,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-16",
-    "nameKh": "ភោជនីយដ្ឋាន វីរោធ (Viroth's Restaurant)",
+    "nameKh": "ភោជនីយដ្ឋាន វីរោធ",
     "nameEn": "Viroth's Restaurant Siem Reap",
     "descriptionKh": "ភោជនីយដ្ឋានលំដាប់ខ្ពស់រចនាបថទសវត្សរ៍ទី ៦០ ក្នុងសួនផ្កា ម្ហូបខ្មែរឆ្ងាញ់ប្រកបដោយសោភ័ណភាពវិចិត្រ។",
     "descriptionEn": "Chic 1960s-inspired modernist venue surrounded by lotus ponds serving elevated Khmer traditional dishes.",
@@ -597,7 +597,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-17",
-    "nameKh": "ភោជនីយដ្ឋាន ស្ពូនស៍ ខេមបូឌា (Spoons Cambodia)",
+    "nameKh": "ភោជនីយដ្ឋាន ស្ពូនស៍ ខេមបូឌា",
     "nameEn": "Spoons Cambodia Training Restaurant",
     "descriptionKh": "ភោជនីយដ្ឋានបណ្តុះបណ្តាលសិស្សក្រីក្រ សាងសង់ពីដើមឫស្សីប្រណីត បម្រើម្ហូបខ្មែរបែបច្នៃប្រឌិត និងម្ហូបតាមផ្លូវខ្មែរ។",
     "descriptionEn": "Architecturally stunning bamboo pavilion training venue serving exquisite modern twists on Cambodian street classics.",
@@ -634,7 +634,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-18",
-    "nameKh": "ភោជនីយដ្ឋាន ពោធិ៍ (Pou Restaurant and Bar)",
+    "nameKh": "ភោជនីយដ្ឋាន ពោធិ៍",
     "nameEn": "Pou Restaurant and Bar Siem Reap",
     "descriptionKh": "បង្កើតឡើងដោយមេចុងភៅវ័យក្មេង ម៉េងលី លើកស្ទួយម្ហូបច្នៃប្រឌិតពីបន្លែស្មៅព្រៃ និងវប្បធម៌ម្ហូបបុរាណខ្មែរ។",
     "descriptionEn": "Visionary young Cambodian chef Mengly crafts culinary magic utilizing wild herbs and ancestral techniques.",
@@ -671,7 +671,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-19",
-    "nameKh": "ភោជនីយដ្ឋាន គីមលី គ្រឿងសមុទ្រកែប (Kimly Seafood Kep)",
+    "nameKh": "ភោជនីយដ្ឋាន គីមលី គ្រឿងសមុទ្រកែប",
     "nameEn": "Kimly Seafood Restaurant Crab Market Kep",
     "descriptionKh": "ហាងគ្រឿងសមុទ្រ និងក្តាមសេះដ៏ល្បីល្បាញបំផុតនៅផ្សារក្តាមខេត្តកែប។ ក្តាមសេះស្រស់ៗឆាម្រេចខ្ចីកំពត ជាប់មាត់សមុទ្រ។",
     "descriptionEn": "The legendary waterfront dining spot right on Kep Crab Market frying live sea crabs with green Kampot peppercorns.",
@@ -708,7 +708,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-20",
-    "nameKh": "ហាង ហូលី ក្រាប កែប (Holy Crab Kep)",
+    "nameKh": "ហាង ហូលី ក្រាប កែប",
     "nameEn": "Holy Crab Restaurant Kep",
     "descriptionKh": "ហាងគ្រឿងសមុទ្រមាត់សមុទ្រផ្សារក្តាមកែប ល្បីល្បាញខាងក្តាមសេះឆាម្រេចកំពត និងត្រីចំហុយទឹកស៊ីអ៊ីវ។",
     "descriptionEn": "Vibrant Crab Market restaurant with ocean terrace serving freshly caught seafood and spicy Kampot peppercorn dishes.",
@@ -745,7 +745,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-21",
-    "nameKh": "ភោជនីយដ្ឋាន រីឃីធីឃីថាវី កំពត (Rikitikitavi Kampot)",
+    "nameKh": "ភោជនីយដ្ឋាន រីឃីធីឃីថាវី កំពត",
     "nameEn": "Rikitikitavi Riverside Kampot",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ព្រែកកំពតដ៏ស្រស់ស្អាត ទស្សនាថ្ងៃលិចលើជួរភ្នំបូកគោ បម្រើម្ហូបខ្មែរឆ្ងាញ់ៗជាមួយម្រេចកំពតពិតៗ។",
     "descriptionEn": "Stunning sunset lounge and dining on Kampot riverside with views of Bokor mountains and fresh local dishes.",
@@ -782,7 +782,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-22",
-    "nameKh": "អាតេលីយេ កំពត (Atelier Kampot)",
+    "nameKh": "អាតេលីយេ កំពត",
     "nameEn": "Atelier Kampot French & Khmer",
     "descriptionKh": "ភោជនីយដ្ឋានក្នុងអគារបេតិកភណ្ឌបារាំងមាត់ព្រែកកំពត បង្កើតឡើងដោយកសិដ្ឋានម្រេចកំពត La Plantation បម្រើម្ហូបម្រេចកំពតពិតៗ។",
     "descriptionEn": "Heritage riverside bistro from the owners of La Plantation featuring authentic Kampot peppercorn gastronomy.",
@@ -819,7 +819,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-23",
-    "nameKh": "ភោជនីយដ្ឋាន សេលីងក្លឹប កែប (Sailing Club Kep)",
+    "nameKh": "ភោជនីយដ្ឋាន សេលីងក្លឹប កែប",
     "nameEn": "The Sailing Club Kep",
     "descriptionKh": "ភោជនីយដ្ឋាន និងបារមាត់សមុទ្រដ៏រ៉ូមែនទិកនៅខេត្តកែប ទស្សនាថ្ងៃលិចលើផែឈើបុរាណ ម្ហូបគ្រឿងសមុទ្រស្រស់ៗ។",
     "descriptionEn": "Iconic seaside lounge on a restored wooden pier at Knai Bang Chatt resort in Kep with sunset dining.",
@@ -856,7 +856,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-24",
-    "nameKh": "ហាងបាយ ម្លប់ស្វាយ បាត់ដំបង (Mlop Svay)",
+    "nameKh": "ហាងបាយ ម្លប់ស្វាយ បាត់ដំបង",
     "nameEn": "Mlop Svay Restaurant Battambang",
     "descriptionKh": "ហាងអាហារស្រុកស្រែដ៏ល្បីនៅខេត្តបាត់ដំបង ជង្រុកស្រូវកម្ពុជា។ ល្បីល្បាញខាងត្រីរ៉ស់អាំង ភ្លាសាច់គោ និងសម្លកកូរជើងជ្រូក។",
     "descriptionEn": "Beloved countryside open-air restaurant famous for whole snakehead fish, spicy beef pleah, and rural stews.",
@@ -893,7 +893,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-25",
-    "nameKh": "ភោជនីយដ្ឋាន ចានបាយ (Jaan Bai Restaurant)",
+    "nameKh": "ភោជនីយដ្ឋាន ចានបាយ",
     "nameEn": "Jaan Bai Restaurant Battambang",
     "descriptionKh": "ភោជនីយដ្ឋានសង្គមដ៏ល្បីល្បាញគាំទ្រដោយ Cambodian Children's Trust (CCT)។ ម្ហូបខ្មែរច្នៃប្រឌិត និងការតុបតែងប្រកបដោយសិល្បៈ។",
     "descriptionEn": "Renowned social enterprise kitchen in Battambang serving innovative contemporary Khmer dishes.",
@@ -930,7 +930,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-26",
-    "nameKh": "ហាងបាយ ណារី ឃីតឆិន (Nary Kitchen Battambang)",
+    "nameKh": "ហាងបាយ ណារី ឃីតឆិន",
     "nameEn": "Nary Kitchen & Cooking School",
     "descriptionKh": "ហាងបាយខ្មែរ និងថ្នាក់បង្រៀនធ្វើម្ហូបដ៏ល្បីនៅបាត់ដំបង បម្រើម្ហូបប្រពៃណីខ្មែរពិតៗ ធ្វើដោយទឹកដៃមេផ្ទះខ្មែរ។",
     "descriptionEn": "Popular family restaurant and cooking school teaching authentic traditional Khmer cooking methods.",
@@ -967,7 +967,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-27",
-    "nameKh": "ភោជនីយដ្ឋាន សន្ទាន់ (Sandan Restaurant Sihanoukville)",
+    "nameKh": "ភោជនីយដ្ឋាន សន្ទាន់",
     "nameEn": "Sandan Training Restaurant Sihanoukville",
     "descriptionKh": "ភោជនីយដ្ឋានបណ្តុះបណ្តាលវិជ្ជាជីវៈកុមារ និងយុវជនដោយ M'Lop Tapang ស្ថិតក្នុងសួនធម្មជាតិដ៏ស្រស់ស្អាត បម្រើគ្រឿងសមុទ្រ និងម្ហូបខ្មែរ។",
     "descriptionEn": "Social enterprise training restaurant by M'Lop Tapang with tropical garden dining and fresh coastal seafood.",
@@ -1004,7 +1004,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-28",
-    "nameKh": "ហាងបាយ ស្មាញ (Smile Restaurant Kampong Cham)",
+    "nameKh": "ហាងបាយ ស្មាញ",
     "nameEn": "Smile Restaurant Kampong Cham",
     "descriptionKh": "ភោជនីយដ្ឋានបណ្តុះបណ្តាលយុវជនមាត់ទន្លេមេគង្គខេត្តកំពង់ចាម បម្រើម្ហូបខ្មែរឆ្ងាញ់ៗ ទេសភាពស្ពានកោះប៉ែន។",
     "descriptionEn": "Riverside training cafe run by BSDA organization serving authentic Khmer curries with Mekong River views.",
@@ -1041,7 +1041,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-29",
-    "nameKh": "ហាងបាយ ហ្គ្រីនហោស៍ សែនមនោរម្យ (Greenhouse Mondulkiri)",
+    "nameKh": "ហាងបាយ ហ្គ្រីនហោស៍ សែនមនោរម្យ",
     "nameEn": "Greenhouse Restaurant Sen Monorom",
     "descriptionKh": "ហាងអាហារបែបខ្មែរស្រុកស្រែលើភ្នំមណ្ឌលគិរី ល្បីល្បាញខាងស៊ុបសាច់គោ ម្ហូបជនជាតិដើមភាគតិច និងកាហ្វេមណ្ឌលគិរីសុទ្ធ។",
     "descriptionEn": "Hilltop rustic restaurant in Sen Monorom offering highland Khmer stews and fresh 100% Mondulkiri coffee.",
@@ -1078,7 +1078,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-30",
-    "nameKh": "ភោជនីយដ្ឋាន អូតូ មាត់សមុទ្រកោះកុង (Otto Seaside Koh Kong)",
+    "nameKh": "ភោជនីយដ្ឋាន អូតូ មាត់សមុទ្រកោះកុង",
     "nameEn": "Otto Seaside Seafood Koh Kong",
     "descriptionKh": "ហាងគ្រឿងសមុទ្រស្រស់ៗក្បែរមាត់ព្រែក និងឆ្នេរសមុទ្រខេត្តកោះកុង ល្បីល្បាញខាងក្តាមសមុទ្រ មឹកបំពង និងទឹកត្រីកោះកុងសុទ្ធ។",
     "descriptionEn": "Authentic coastal eatery famous for Koh Kong mud crabs, deep-fried fresh squid, and genuine Koh Kong chili sauce.",
@@ -1115,7 +1115,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-31",
-    "nameKh": "ហាងបាយ បង្កងទឹកសាបតាកែវ (Takeo Giant Prawn Eatery)",
+    "nameKh": "ហាងបាយ បង្កងទឹកសាបតាកែវ",
     "nameEn": "Takeo River Prawn House",
     "descriptionKh": "ហាងអាហារប្រពៃណីល្បីល្បាញបំផុតនៅខេត្តតាកែវ ខាងបង្កងទឹកសាបមេគង្គដុតខ្លាញ់ក្បាល និងញាំស្វាយខ្ចី។",
     "descriptionEn": "Famous traditional restaurant in Takeo renowned for massive grilled freshwater prawns with river-side tamarind sauce.",
@@ -1152,7 +1152,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-32",
-    "nameKh": "ភោជនីយដ្ឋាន ផ្សោតទន្លេមេគង្គ ក្រចេះ (Kratie Dolphin Cafe)",
+    "nameKh": "ភោជនីយដ្ឋាន ផ្សោតទន្លេមេគង្គ ក្រចេះ",
     "nameEn": "Kratie Mekong Dolphin Restaurant",
     "descriptionKh": "ហាងអាហារមាត់ទន្លេមេគង្គខេត្តក្រចេះ ក្បែរកន្លែងទស្សនាផ្សោតកំបោរ បម្រើម្ហូបត្រីទន្លេស្រស់ៗ និងក្រឡានក្រចេះ។",
     "descriptionEn": "Riverside restaurant overlooking the Mekong near Kampi dolphin pool serving fresh river fish delicacies.",
@@ -1189,7 +1189,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-33",
-    "nameKh": "ហាងបាយ ស្ទឹងពោធិ៍សាត់ (Pursat River Restaurant)",
+    "nameKh": "ហាងបាយ ស្ទឹងពោធិ៍សាត់",
     "nameEn": "Pursat River View Restaurant",
     "descriptionKh": "ហាងអាហារល្បីល្បាញនៅខេត្តពោធិ៍សាត់ ខាងក្រូចក្រហមពោធិ៍សាត់ ត្រីងៀត និងប្រហុកសាច់អាំង។",
     "descriptionEn": "Popular local hub along the Pursat River famous for sundried lake fish and authentic Pursat oranges.",
@@ -1226,7 +1226,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-34",
-    "nameKh": "ភោជនីយដ្ឋាន បឹងយក្សឡោម រតនគិរី (Yeak Laom Cafe Ratanakiri)",
+    "nameKh": "ភោជនីយដ្ឋាន បឹងយក្សឡោម រតនគិរី",
     "nameEn": "Yeak Laom Lake Restaurant Banlung",
     "descriptionKh": "ហាងអាហារក្បែរបឹងភ្នំភ្លើងយក្សឡោម បម្រើម្ហូបខ្មែរលើ និងបន្លែព្រៃធម្មជាតិខេត្តរតនគិរី។",
     "descriptionEn": "Scenic dining near the ancient Yeak Laom volcanic lake serving highland forest herbs and wild soups.",
@@ -1263,7 +1263,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-35",
-    "nameKh": "ហាងបាយ ស្ទឹងសែន កំពង់ធំ (Steung Saen Restaurant)",
+    "nameKh": "ហាងបាយ ស្ទឹងសែន កំពង់ធំ",
     "nameEn": "Steung Saen Restaurant Kampong Thom",
     "descriptionKh": "ហាងអាហារកណ្តាលក្រុងកំពង់ធំ ផ្លូវទៅប្រាសាទសំបូរព្រៃគុក បម្រើម្ហូបត្រីបឹងទន្លេសាប និងសម្លម្ជូរគ្រឿង។",
     "descriptionEn": "Stopover venue en route to Sambor Prei Kuk temples serving fresh Tonle Sap river fish and kroeung stews.",
@@ -1300,7 +1300,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-36",
-    "nameKh": "ហាងបាយ កំពង់ឆ្នាំង ឆ្នាំងដី (Kampong Chhnang Claypot)",
+    "nameKh": "ហាងបាយ កំពង់ឆ្នាំង ឆ្នាំងដី",
     "nameEn": "Kampong Chhnang Claypot Kitchen",
     "descriptionKh": "ហាងបាយល្បីខាងម្ហូបឆ្នាំងដីបុរាណ ត្រីដុត និងនំបញ្ចុកទឹកសម្លខ្មែរដើម ក្នុងដែនដីកុលាលភាជន៍ខ្មែរ។",
     "descriptionEn": "Authentic clay pot dining in Cambodia's pottery heartland serving bubbling hot fish soups and rice noodles.",
@@ -1337,7 +1337,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-37",
-    "nameKh": "ហាងទាខ្វៃ តាខ្មៅ (Ta Khmao Roast Duck House)",
+    "nameKh": "ហាងទាខ្វៃ តាខ្មៅ",
     "nameEn": "Ta Khmao Roast Duck House Kandal",
     "descriptionKh": "ហាងទាខ្វៃ និងម្ហូបខ្មែរ-ចិនដ៏ល្បីល្បាញប្រចាំក្រុងតាខ្មៅ ខេត្តកណ្តាល ស្បែកស្រួយ សាច់ទន់ផ្អែម។",
     "descriptionEn": "Legendary Ta Khmao duck roasting house famous across Cambodia for crispy golden skin and aromatic dipping sauce.",
@@ -1374,7 +1374,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-38",
-    "nameKh": "ហាងបាយ ត្រីប៉ាស៊ីអ៊ី ស្ទឹងត្រែង (Stung Treng Mekong Fish)",
+    "nameKh": "ហាងបាយ ត្រីប៉ាស៊ីអ៊ី ស្ទឹងត្រែង",
     "nameEn": "Stung Treng Mekong Pas-ee Fish Restaurant",
     "descriptionKh": "ហាងអាហារល្បីល្បាញបំផុតប្រចាំខេត្តស្ទឹងត្រែង ខាងត្រីប៉ាស៊ីអ៊ីទន្លេមេគង្គដ៏កម្រ និងមានឱជារសឆ្ងាញ់ពិសា។",
     "descriptionEn": "Renowned northern Cambodian eatery famous for the prized and rare Mekong River Pas-ee fish.",
@@ -1411,7 +1411,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-39",
-    "nameKh": "ហាងបាយ ជើងភ្នំដងរែក ព្រះវិហារ (Dangrek Preah Vihear Rest)",
+    "nameKh": "ហាងបាយ ជើងភ្នំដងរែក ព្រះវិហារ",
     "nameEn": "Dangrek Foothill Restaurant Preah Vihear",
     "descriptionKh": "ហាងអាហារខ្មែរនៅជើងភ្នំដងរែក ផ្លូវឡើងប្រាសាទព្រះវិហារ បម្រើម្ហូបសាច់គោអាំង និងសម្លម្ជូរគ្រឿង។",
     "descriptionEn": "Scenic stopover near the base of the sacred Preah Vihear Temple cliff serving charcoal grilled beef.",
@@ -1448,7 +1448,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-40",
-    "nameKh": "ហាងបាយ ត្បូងប៉ៃលិន (Pailin Gem View Restaurant)",
+    "nameKh": "ហាងបាយ ត្បូងប៉ៃលិន",
     "nameEn": "Pailin Mountain Gem Restaurant",
     "descriptionKh": "ហាងអាហារខ្មែរក្បែរជួរភ្នំខេត្តប៉ៃលិន បម្រើម្ហូបសាច់គោ ម្ហូបព្រៃស្របច្បាប់ និងទឹកឃ្មុំព្រៃប៉ៃលិន។",
     "descriptionEn": "Mountain view restaurant in the sapphire city of Pailin serving beef stews and local garden specialties.",
