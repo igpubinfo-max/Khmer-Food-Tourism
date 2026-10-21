@@ -26,11 +26,16 @@ export const TouristCard: React.FC<TouristCardProps> = ({ destination }) => {
           loading="lazy"
         />
 
-        {/* Province pill */}
-        <div className="absolute top-2.5 left-2.5">
+        {/* Province pill & Viral Social Badge */}
+        <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 flex-wrap z-10">
           <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-[#064E3B]/90 backdrop-blur-md text-emerald-100 border border-emerald-400/30 shadow-xs">
             {language === 'km' ? destination.provinceKh : destination.provinceEn}
           </span>
+          {destination.isTrendingSocial && (
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-gradient-to-r from-rose-600 via-pink-600 to-indigo-600 text-white border border-white/30 shadow-xs flex items-center gap-1 font-khmer">
+              <span>🔥 {destination.socialViews || 'TikTok & FB'}</span>
+            </span>
+          )}
         </div>
 
         {/* Admin Change Photo Shortcut */}

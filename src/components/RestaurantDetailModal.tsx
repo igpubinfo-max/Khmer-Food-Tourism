@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
   X, MapPin, Phone, Star, Clock, ExternalLink, 
-  Send, Share2, UtensilsCrossed, Sparkles, CheckCircle2, AlertCircle, Copy
+  Send, Share2, UtensilsCrossed, Sparkles, CheckCircle2, AlertCircle, Copy, Camera
 } from 'lucide-react';
 import { isRestaurantPremiumActive } from '../types';
+import { RestaurantImageModal } from './RestaurantImageModal';
 
 export const RestaurantDetailModal: React.FC = () => {
   const { 
@@ -18,10 +19,12 @@ export const RestaurantDetailModal: React.FC = () => {
     trackRestaurantView,
     trackRestaurantCall,
     trackRestaurantMap,
-    trackRestaurantShare
+    trackRestaurantShare,
+    updateRestaurant
   } = useApp();
 
   const [activePhoto, setActivePhoto] = useState<string>('');
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
 
   useEffect(() => {
     if (selectedRestaurant) {
@@ -104,6 +107,15 @@ export const RestaurantDetailModal: React.FC = () => {
           </button>
           
           <div className="flex items-center gap-2 pointer-events-auto">
+            <button
+              type="button"
+              onClick={() => setIsImageModalOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/60 hover:bg-black/80 backdrop-blur-md text-white text-xs font-bold shadow transition active:scale-95 font-khmer border border-white/20"
+              title={isKm ? 'ប្តូររូបភាពហាងផ្ទាល់ខ្លួន' : 'Change Shop Photo'}
+            >
+              <Camera className="w-3.5 h-3.5 text-emerald-300" />
+              <span>{isKm ? 'ប្តូររូបភាព' : 'Change Photo'}</span>
+            </button>
             <a
               href={`tel:${selectedRestaurant.phone}`}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold shadow transition active:scale-95"
@@ -221,18 +233,23 @@ export const RestaurantDetailModal: React.FC = () => {
               </button>
             </div>
 
-            {/* Gallery Photos (Multiple Photos Benefit for Premium VIP) */}
-            {allPhotos.length > 1 && (
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="font-bold text-[#0F172A] dark:text-white font-khmer flex items-center gap-1.5">
-                    <span>📸</span>
-                    <span>{isKm ? `រូបភាពបរិយាកាស និងម្ហូប (${allPhotos.length} សន្លឹក)` : `Photo Gallery (${allPhotos.length} photos)`}</span>
-                  </span>
-                  <span className="text-[10px] text-[#059669] font-medium font-khmer">
-                    {isKm ? 'ចុចលើរូបដើម្បីផ្លាស់ប្តូរ' : 'Tap to switch preview'}
-                  </span>
-                </div>
+            {/* Gallery Photos & Replace Photo Button */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-bold text-[#0F172A] dark:text-white font-khmer flex items-center gap-1.5">
+                  <Camera className="w-4 h-4 text-[#059669]" />
+                  <span>{isKm ? `រូបភាពហាង (${allPhotos.length} សន្លឹក)` : `Shop Photos (${allPhotos.length})`}</span>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setIsImageModalOpen(true)}
+                  className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-gradient-to-r from-[#064E3B] to-[#059669] hover:brightness-110 text-white font-khmer font-bold text-xs shadow-xs transition active:scale-95 cursor-pointer"
+                >
+                  <Camera className="w-3.5 h-3.5 text-emerald-200" />
+                  <span>{isKm ? 'ប្តូររូបភាពហាង' : 'Change Photo'}</span>
+                </button>
+              </div>
+              {allPhotos.length > 1 && (
                 <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
                   {allPhotos.map((photo, idx) => (
                     <button
@@ -248,8 +265,8 @@ export const RestaurantDetailModal: React.FC = () => {
                     </button>
                   ))}
                 </div>
-              </div>
-            )}
+              )}
+            </div>
 
             {/* Address & Hours */}
             <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 space-y-2.5 text-xs font-khmer shadow-2xs">
@@ -418,6 +435,19 @@ export const RestaurantDetailModal: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Quick Image Replacement Modal */}
+      <RestaurantImageModal
+        restaurant={selectedRestaurant}
+        isOpen={isImageModalOpen}
+        onClose={() => setIsImageModalOpen(false)}
+        onSave={(updated) => {
+          updateRestaurant(updated);
+          setActivePhoto(updated.photoUrl);
+          showToast(isKm ? 'បានផ្លាស់ប្តូររូបភាពហាងជោគជ័យ!' : 'Restaurant photo updated successfully!', 'success');
+        }}
+        isKm={isKm}
+      />
     </div>
   );
 };

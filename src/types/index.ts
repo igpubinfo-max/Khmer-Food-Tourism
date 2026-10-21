@@ -191,6 +191,12 @@ export interface TouristDestination {
   reviewCount: number;
   highlightsKh: string[];
   isFeatured?: boolean;
+  isTrendingSocial?: boolean; // Viral on TikTok & Facebook
+  socialPlatform?: 'tiktok' | 'facebook' | 'all';
+  socialHashtag?: string; // e.g. "#KnongPhsar #SeaOfClouds"
+  socialViews?: string; // e.g. "2.4M+ Views"
+  socialHighlightKh?: string;
+  socialHighlightEn?: string;
 }
 
 export interface CommentItem {

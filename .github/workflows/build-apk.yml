@@ -60,21 +60,20 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: v1.3.7
-          name: "Khmer Food & Tourism v1.3.7 (Restaurant Sample Image Label)"
+          tag_name: v1.3.8
+          name: "Khmer Food & Tourism v1.3.8 (Custom App Icon, Replace Shop Photo & Viral TikTok/FB Destinations)"
           overwrite: true
           make_latest: true
           body: |
             ### 🇰🇭 កម្មវិធីទូរស័ព្ទដៃ អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism Mobile App)
             
-            **កំណែថ្មី v1.3.7 (Sample Image Label on Restaurants):**
-            - 🏷️ **បន្ថែមស្លាក "រូបតំណាង" លើរូបភាពហាង (Sample Photo Label):** បានបន្ថែមស្លាក "រូបតំណាង" នៅផ្នែកខាងក្រោមនៃរូបភាពហាងទាំងអស់ ដូចគ្នានឹងរូបភាពម្ហូបដែរ ដើម្បីភាពច្បាស់លាស់ និងស្តង់ដារ។
-            - 🚀 **ដោះស្រាយបញ្ហា Crash ពេលចុចលើ Premium VIP (Social Sharing):** ដំណើរការ Telegram & Facebook sharing យ៉ាងរលូន។
-            - 📧 **អ៊ីមែលសម្រាប់មតិកែលម្អ (Feedback Email):** `kftapp@gmail.com` នៅខាងក្រោម Header Buttons, ក្នុងផ្ទាំង Support Modal, និងលើផ្ទាំង Error Recovery ជាមួយប៊ូតុងចម្លងអ៊ីមែលរហ័ស។
-            - 🛡️ **ការការពារទិន្នន័យ Cache & Version Migration:** បានប្តូរ storage key ទៅ `kft_restaurants_membership_v2` និង Version Auto-Purge v1.3.7។
+            **កំណែថ្មី v1.3.8 (App Icon, Replace Shop Photo & Viral Travel Spots):**
+            - 🌟 **បំពាក់រូបតំណាងកម្មវិធីថ្មី (Custom App Launcher Icon):** បំពាក់ Icon ផ្ដិលមាស និងប្រាសាទខ្មែរ រៀបចំតាមស្តង់ដារ Android Mipmap ពេញលេញ (mdpi, hdpi, xhdpi, xxhdpi, xxxhdpi, round, adaptive) ពេលដំឡើងលើទូរស័ព្ទនឹងចេញរូប Logo ថ្មីភ្លាមៗ។
+            - 📸 **មុខងារប្តូររូបភាពហាងផ្ទាល់ខ្លួន (Replace Shop Photo):** បន្ថែមប៊ូតុង "ប្តូររូបភាពហាង" ក្នុងផ្ទាំងលម្អិតហាង អនុញ្ញាតឱ្យម្ចាស់ហាង និងអ្នកប្រើប្រាស់ Upload រូបភាពផ្ទាល់ពីទូរស័ព្ទ/កុំព្យូទ័រ ឬដាក់ URL រូបភាពជាក់ស្តែងបានយ៉ាងងាយស្រួល។
+            - 🔥 **ផ្នែកកន្លែងដើរលេងល្បីលើ TikTok & Facebook (Viral Travel Spots):** បង្ហាញតំបន់ទេសចរណ៍ដែលគេពេញនិយមផុសច្រើនជាងគេ (ភ្នំខ្នងផ្សារ, កោះរ៉ុងសន្លឹម, ភ្នំគូលែន, មណ្ឌលគិរី, ភ្នំបូកគោ, អង្គរវត្ត, ផ្សារក្តាមកែប) ជាមួយស្លាកចំនួន Views និង Hashtags។
+            - 🏷️ **ស្លាក "រូបតំណាង" (Sample Photo Label):** នៅលើរូបភាពទាំងអស់ ដើម្បីភាពច្បាស់លាស់។
+            - 📧 **អ៊ីមែលសម្រាប់មតិកែលម្អ (Feedback Email):** `kftapp@gmail.com`
             - ⭐ **អត្ថប្រយោជន៍ VIP ទាំង ១០ យ៉ាងពេញលេញ (10 VIP Benefits)**
-            - 🏷️ **តម្លៃសមាជិកភាព VIP $9.99 សម្រាប់ ៣៦៥ ថ្ងៃ (End of year promo)**
-            - 🏦 **ឈ្មោះគណនីទទួលធនាគារ ABA៖** **CHEA KIMSENG**។
             - 🏷️ **តម្លៃសមាជិកភាព VIP $9.99 សម្រាប់ ៣៦៥ ថ្ងៃ (End of year promo)**
             - 🏦 **ឈ្មោះគណនីទទួលធនាគារ ABA៖** **CHEA KIMSENG**។
           draft: false

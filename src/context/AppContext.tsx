@@ -324,15 +324,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [destinations, setDestinations] = useState<TouristDestination[]>(() => {
     try {
-      const saved = localStorage.getItem('kft_destinations_100_v1');
+      const saved = localStorage.getItem('kft_destinations_100_v2');
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length >= 50) return parsed;
       }
     } catch (e) {
-      console.warn('Failed to parse kft_destinations_100_v1', e);
+      console.warn('Failed to parse kft_destinations_100_v2', e);
     }
     try {
+      localStorage.removeItem('kft_destinations_100_v1');
       localStorage.removeItem('kft_destinations_v3');
       localStorage.removeItem('kft_destinations_v4');
     } catch {}
@@ -483,7 +484,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     try {
       if (destinations && destinations.length > 0) {
-        localStorage.setItem('kft_destinations_100_v1', JSON.stringify(destinations));
+        localStorage.setItem('kft_destinations_100_v2', JSON.stringify(destinations));
       }
     } catch (e) {
       console.warn('Storage sync failed for destinations:', e);
@@ -914,8 +915,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const original = restaurants.find(r => r.id === updated.id);
     const isAdmin = currentUser?.role === 'admin';
     const isOwner = currentUser?.id && original?.ownerId === currentUser.id;
+    const isUnclaimed = !original?.ownerId; // Seeded restaurants can be customized by users
 
-    if (!isAdmin && !isOwner) {
+    if (!isAdmin && !isOwner && !isUnclaimed) {
       showToast(language === 'km' ? 'គ្មានសិទ្ធិកែប្រែហាងនេះទេ!' : 'Unauthorized!', 'warning');
       return;
     }
@@ -933,6 +935,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
 
     setRestaurants(prev => prev.map(r => r.id === updated.id ? safeUpdated : r));
+    if (selectedRestaurant && selectedRestaurant.id === updated.id) {
+      setSelectedRestaurant(safeUpdated);
+    }
     if (selectedRestaurant?.id === updated.id) setSelectedRestaurant(safeUpdated);
     if (managingRestaurant?.id === updated.id) setManagingRestaurant(safeUpdated);
     showToast(language === 'km' ? 'បានកែប្រែព័ត៌មានហាងរួចរាល់' : 'Restaurant updated!', 'success');

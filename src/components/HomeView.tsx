@@ -15,11 +15,14 @@ export const HomeView: React.FC = () => {
     foods, restaurants, destinations, setActiveTab, 
     language, setSelectedProvince, posts,
     setIsInstallModalOpen, setIsSupportModalOpen,
-    openInstallModal
+    openInstallModal, setSelectedDestination
   } = useApp();
 
   const isKm = language === 'km';
   const featuredFoods = foods.slice(0, 4);
+
+  // Viral Social Trending Destinations (TikTok & Facebook)
+  const trendingSocialDestinations = destinations.filter(d => d.isTrendingSocial);
 
   // Benefits 1 & 8: Dedicated Premium VIP Showcase & Featured sorting
   const premiumVipRestaurants = restaurants.filter(r => isRestaurantPremiumActive(r));
@@ -243,6 +246,67 @@ export const HomeView: React.FC = () => {
           ))}
         </div>
       </div>
+
+      {/* Dedicated Viral Trending Section: TikTok & Facebook Popular Spots */}
+      {trendingSocialDestinations.length > 0 && (
+        <div className="p-4 rounded-3xl bg-gradient-to-br from-slate-900 via-emerald-950 to-slate-900 text-white border border-pink-500/40 shadow-md space-y-3 font-khmer">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="px-2.5 py-1 rounded-xl bg-gradient-to-r from-rose-500 to-pink-600 text-white text-[10px] font-bold shadow-xs flex items-center gap-1">
+                <span>🔥</span>
+                <span>TikTok & FB</span>
+              </span>
+              <div>
+                <h3 className="font-moul text-xs sm:text-sm text-white">
+                  {isKm ? 'កន្លែងដើរលេងល្បីលើ TikTok & FB' : 'Viral Spots on TikTok & FB'}
+                </h3>
+                <p className="text-[10px] text-pink-200">
+                  {isKm ? 'ទីតាំងពេញនិយមផុស និងចែករំលែកច្រើនជាងគេ' : 'Most trending travel destinations'}
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => setActiveTab('tourism')}
+              className="text-xs font-bold text-pink-300 hover:text-white flex items-center gap-0.5"
+            >
+              <span>{isKm ? 'ទាំងអស់' : 'All'}</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2.5">
+            {trendingSocialDestinations.slice(0, 4).map((d) => (
+              <div
+                key={d.id}
+                onClick={() => setSelectedDestination(d)}
+                className="group relative rounded-2xl overflow-hidden aspect-4/3 bg-slate-800 border border-white/15 cursor-pointer shadow-sm hover:scale-[1.02] transition duration-200"
+              >
+                <img 
+                  src={d.photoUrl} 
+                  alt={d.nameKh} 
+                  className="w-full h-full object-cover group-hover:scale-105 transition duration-300" 
+                  loading="lazy" 
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/35 to-transparent" />
+                <span className="absolute top-2 left-2 px-1.5 py-0.5 rounded-full bg-rose-600/95 text-white text-[9px] font-bold shadow-xs">
+                  {d.socialViews || 'Viral'}
+                </span>
+                <span className="absolute bottom-1 right-1.5 bg-black/60 text-white/80 text-[7px] px-1 rounded-xs font-khmer select-none">
+                  {isKm ? 'រូបតំណាង' : 'Sample'}
+                </span>
+                <div className="absolute bottom-2 left-2 right-2">
+                  <h4 className="font-bold text-white text-xs line-clamp-1 leading-snug drop-shadow">
+                    {isKm ? d.nameKh : d.nameEn}
+                  </h4>
+                  <p className="text-[9px] text-pink-300 font-mono truncate">
+                    {d.socialHashtag || d.provinceKh}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Section 3: Tourist Destinations */}
       <div className="space-y-3">

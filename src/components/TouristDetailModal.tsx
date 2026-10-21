@@ -115,6 +115,31 @@ export const TouristDetailModal: React.FC = () => {
               </a>
             </div>
 
+            {/* Viral TikTok & Facebook Trending Card */}
+            {selectedDestination.isTrendingSocial && (
+              <div className="p-3.5 rounded-2xl bg-gradient-to-r from-rose-500/10 via-pink-500/10 to-indigo-500/10 border border-pink-500/30 space-y-1.5 font-khmer">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-rose-600 dark:text-rose-400 flex items-center gap-1.5">
+                    <span>🔥</span>
+                    <span>{language === 'km' ? 'កន្លែងដើរលេងល្បីលើ TikTok & Facebook' : 'Viral & Trending on TikTok & FB'}</span>
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-gradient-to-r from-rose-600 to-pink-600 text-white shadow-xs">
+                    {selectedDestination.socialViews || 'Trending'}
+                  </span>
+                </div>
+                {selectedDestination.socialHashtag && (
+                  <p className="text-[11px] font-semibold text-pink-600 dark:text-pink-400 font-mono">
+                    {selectedDestination.socialHashtag}
+                  </p>
+                )}
+                {selectedDestination.socialHighlightKh && (
+                  <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
+                    {language === 'km' ? selectedDestination.socialHighlightKh : (selectedDestination.socialHighlightEn || selectedDestination.socialHighlightKh)}
+                  </p>
+                )}
+              </div>
+            )}
+
             {/* Quick Info Cards: Fees & Best Time */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {/* Fee Card */}

@@ -131,6 +131,24 @@ assert(restDetailContent.includes('const handleShareFacebook ='), 'RestaurantDet
 assert(restCardContent.includes('រូបតំណាង'), 'RestaurantCard contains representative sample label (រូបតំណាង) on pictures.');
 assert(restDetailContent.includes('រូបតំណាង'), 'RestaurantDetailModal contains representative sample label (រូបតំណាង) on hero picture.');
 
+// TEST 18: Restaurant Image Replacement Modal
+const restImageModalPath = path.resolve(__dirname, '../src/components/RestaurantImageModal.tsx');
+assert(fs.existsSync(restImageModalPath), 'RestaurantImageModal component exists.');
+assert(restDetailContent.includes('RestaurantImageModal'), 'RestaurantDetailModal integrates RestaurantImageModal.');
+assert(restDetailContent.includes('ប្តូររូបភាព'), 'RestaurantDetailModal contains Change Photo button (ប្តូររូបភាពហាង).');
+
+// TEST 19: TikTok & Facebook Viral Travel Destinations
+const seedDestPath = path.resolve(__dirname, '../src/data/seedDestinations.ts');
+const seedDestContent = fs.readFileSync(seedDestPath, 'utf8');
+assert(seedDestContent.includes('isTrendingSocial'), 'seedDestinations includes viral social media attributes.');
+assert(seedDestContent.includes('TikTok') || seedDestContent.includes('Facebook'), 'seedDestinations includes TikTok & Facebook viral highlights.');
+
+// TEST 20: Android App Launcher Icon Assets
+const mdpiIcon = path.resolve(__dirname, '../android/app/src/main/res/mipmap-mdpi/ic_launcher.png');
+const xxxhdpiIcon = path.resolve(__dirname, '../android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png');
+assert(fs.existsSync(mdpiIcon) && fs.statSync(mdpiIcon).size > 0, 'Android mdpi icon exists and is non-empty.');
+assert(fs.existsSync(xxxhdpiIcon) && fs.statSync(xxxhdpiIcon).size > 0, 'Android xxxhdpi icon exists and is non-empty.');
+
 console.log('\n================================================================');
 console.log(`  AUDIT SUMMARY: ${passCount} PASSED, ${failCount} FAILED`);
 console.log('================================================================\n');

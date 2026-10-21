@@ -10,6 +10,7 @@ export const TourismView: React.FC = () => {
 
   const categories = [
     { id: 'all', nameKh: 'ទាំងអស់', nameEn: 'All' },
+    { id: 'trending_social', nameKh: '🔥 ល្បីលើ TikTok & FB', nameEn: '🔥 TikTok & FB Viral' },
     { id: 'temple', nameKh: 'ប្រាសាទបុរាណ', nameEn: 'Temples' },
     { id: 'nature', nameKh: 'ធម្មជាតិ & ទឹកធ្លាក់', nameEn: 'Nature & Falls' },
     { id: 'beach', nameKh: 'កោះ & ឆ្នេរសមុទ្រ', nameEn: 'Islands & Beaches' },
@@ -18,7 +19,9 @@ export const TourismView: React.FC = () => {
 
   const filteredDestinations = destinations.filter((d) => {
     // category filter
-    if (selectedCategory !== 'all' && d.categorySlug !== selectedCategory) {
+    if (selectedCategory === 'trending_social') {
+      if (!d.isTrendingSocial) return false;
+    } else if (selectedCategory !== 'all' && d.categorySlug !== selectedCategory) {
       return false;
     }
     // province filter
