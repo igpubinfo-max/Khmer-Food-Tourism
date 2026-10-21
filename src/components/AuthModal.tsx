@@ -53,7 +53,7 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
   const [customGoogleEmail, setCustomGoogleEmail] = useState<string>('');
   const [isAuthenticatingGoogle, setIsAuthenticatingGoogle] = useState<boolean>(false);
 
-  // Available Google accounts on device (primary + previously remembered)
+  // Available Google accounts on device (previously remembered on this device)
   const [googleAccounts, setGoogleAccounts] = useState<Array<{ name: string; email: string; avatar?: string }>>(() => {
     try {
       const saved = localStorage.getItem('kft_google_accounts_list');
@@ -62,13 +62,7 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
         if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       }
     } catch {}
-    return [
-      {
-        name: 'Chea Kimseng',
-        email: 'kftcam@gmail.com',
-        avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80'
-      }
-    ];
+    return [];
   });
   const [resendTimer, setResendTimer] = useState<number>(60);
   const [timerActive, setTimerActive] = useState<boolean>(false);
@@ -96,9 +90,59 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
 
   if (!isAuthModalOpen && !isMandatoryGate && currentUser) return null;
 
-  // Handle Google Sign-In: Opens Google Account Chooser
-  const handleGoogleSignIn = () => {
-    setShowCustomGoogleInput(false);
+  // Handle Google Sign-In: Connects to real device Google Account (Google Play / Gmail on phone)
+  const handleGoogleSignIn = async () => {
+    setIsGoogleLoading(true);
+
+    try {
+      // 1. Try Native Android Google Account Picker (queries actual Google accounts logged in on device)
+      const { Capacitor, registerPlugin } = await import('@capacitor/core');
+      if (Capacitor.isNativePlatform()) {
+        const NativeGoogleAuth = registerPlugin<any>('NativeGoogleAuth');
+        if (NativeGoogleAuth && typeof NativeGoogleAuth.signIn === 'function') {
+          const res = await NativeGoogleAuth.signIn();
+          if (res && res.email) {
+            const cleanEmail = res.email.trim().toLowerCase();
+            const cleanName = res.name?.trim() || cleanEmail.split('@')[0];
+            const profile = {
+              id: `google-${cleanEmail.replace(/[^a-zA-Z0-9]/g, '_')}`,
+              name: cleanName,
+              email: cleanEmail,
+              avatar: res.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
+              authProvider: 'google' as const,
+              linkedProviders: ['google' as const],
+              isVerified: true,
+              verifiedAt: new Date().toISOString(),
+            };
+
+            // Save to remembered device accounts
+            try {
+              const updated = [
+                { name: cleanName, email: cleanEmail, avatar: profile.avatar },
+                ...googleAccounts.filter(a => a.email.toLowerCase() !== cleanEmail)
+              ];
+              localStorage.setItem('kft_google_accounts_list', JSON.stringify(updated.slice(0, 4)));
+              setGoogleAccounts(updated);
+            } catch {}
+
+            loginWithGoogle(profile);
+            return;
+          }
+        }
+      }
+    } catch (err: any) {
+      console.warn('Native Google Auth check:', err);
+      // If user cancelled native account picker dialog
+      if (err?.message && (err.message.includes('12501') || err.message.includes('canceled') || err.message.includes('cancelled'))) {
+        showToast(isKm ? 'ការចូលតាម Google ត្រូវបានបោះបង់' : 'Google sign-in cancelled', 'info');
+        return;
+      }
+    } finally {
+      setIsGoogleLoading(false);
+    }
+
+    // 2. Fallback in-app Google Account Linker (if running in Web preview or native picker was bypassed)
+    setShowCustomGoogleInput(googleAccounts.length === 0);
     setIsGoogleChooserOpen(true);
   };
 
@@ -383,10 +427,10 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
 
               <div className="pt-3">
                 <h3 className="text-base font-black text-slate-900 dark:text-slate-100">
-                  {isKm ? 'ជ្រើសរើសគណនី Google' : 'Choose an account'}
+                  {isKm ? 'ភ្ជាប់គណនី Google លើទូរស័ព្ទដៃ' : 'Link Google Account on Phone'}
                 </h3>
                 <p className="text-xs text-slate-500 pt-0.5">
-                  {isKm ? 'ដើម្បីបន្តទៅកាន់ Khmer Food & Tourism' : 'to continue to Khmer Food & Tourism'}
+                  {isKm ? 'ភ្ជាប់អ៊ីមែលដែលលោកអ្នកប្រើសម្រាប់ទាញយក App លើទូរស័ព្ទនេះ' : 'Link the main Google account logged in on this phone'}
                 </p>
               </div>
             </div>
