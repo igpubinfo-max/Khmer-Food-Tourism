@@ -50,7 +50,7 @@ jobs:
           echo "=== SEARCHING FOR GENERATED APK FILES ==="
           find . -name "*.apk" -ls
           cd android/app/build/outputs/apk/debug
-          cp app-debug.apk KhmerFoodTourism-v1.4.0.apk
+          cp app-debug.apk KhmerFoodTourism-v1.4.1.apk
           ls -la
 
       - name: 9. Upload Android APK Artifact
@@ -63,29 +63,22 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: v1.4.0
-          name: "Khmer Food & Tourism v1.4.0 (100 Authentic Magnific Food Photos & Offline Local Assets)"
+          tag_name: v1.4.1
+          name: "Khmer Food & Tourism v1.4.1 (Mandatory Email/Phone Sign-Up & Clean User Management)"
           overwrite: true
           make_latest: true
           body: |
             ### 🇰🇭 កម្មវិធីទូរស័ព្ទដៃ អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism Mobile App)
             
-            **កំណែថ្មី v1.4.0 (100 Authentic Magnific Food Photos & Offline Local Assets):**
-            - 📸 **១. បំពាក់រូបភាពដើមពិតប្រាកដចំនួន ១០០ មុខម្ហូប (Authentic Magnific Photos):** មុខម្ហូបទាំង ១០០ មុខ (food-1 ដល់ food-100) ត្រូវបានបំពាក់រូបភាពដើមដ៏ស្រស់ស្អាតពិតប្រាកដពី Magnific ដែលត្រូវបាន optimize កម្រិតច្បាស់ខ្ពស់ HD និងផ្ទុកដោយផ្ទាល់ក្នុង Asset កម្មវិធី (`public/foods/`)។
-            - ⚡ **២. ដំណើរការលឿនរហ័ស Offline Fast Loading:** រូបភាពទាំងអស់ត្រូវបានផ្ទុកជាប់ក្នុង App ធ្វើឱ្យការបើកមើលមុខម្ហូបដើរលឿនបំផុត មិនស៊ីអ៊ីនធឺណិត និងមិនពឹងផ្អែកលើតំណភ្ជាប់ខាងក្រៅ។
-            - 🔥 **៣. មុខងារថ្មីលើ Home Screen សម្រាប់កន្លែងដើរលេង TikTok & Facebook Viral:** ផ្ទាំងពិសេសបង្ហាញតំបន់ទេសចរណ៍ល្បីៗដែលមានការ Review និងផុសច្រើនលើ TikTok និង Facebook រួមមាន Quotes អ្នក Review, ចំនួន Views និង Likes។
-            - 🍛 **៤. មុខងារពិសេសសម្រាប់គណនីទាំង ៦ ចំណុច:**
-              - A. **ថ្ងៃនេះញ៉ាំអ្វី?** (អាទិភាពខ្ពស់ ជាមួយប៊ូតុងបង្ហាញម្ហូបផ្សេងទៀត)
-              - B. **នៅជិតខ្ញុំ** (គណនាចម្ងាយ GPS និងប៊ូតុងនាំផ្លូវ Maps)
-              - C. **កន្លែងថ្មីប្រចាំថ្ងៃ** (បញ្ជី «ស្វែងយល់ថ្ងៃនេះ» វិលជុំស្វ័យប្រវត្តិ)
-              - D. **បញ្ជីកន្លែងដែលចង់ទៅ** (គ្រប់គ្រង Wishlists ផ្ទាល់ខ្លួន)
-              - E. **ផែនការដើរលេង AI** (រៀបចំកាលវិភាគដើរលេងដោយស្វ័យប្រវត្តិតាមថវិកា និងចំនួនថ្ងៃ)
-              - F. **ការជូនដំណឹងដែលមានប្រយោជន៍** (ជូនដំណឹងប្រូម៉ូសិន ជាមួយកុងតាក់បិទ/បើក)
-            - 🌟 **បំពាក់រូបតំណាងកម្មវិធីថ្មី (Custom App Launcher Icon):** រូបផ្ដិលមាស និងប្រាសាទខ្មែរ។
-            - 📸 **មុខងារប្តូររូបភាពហាងផ្ទាល់ខ្លួន (Replace Shop Photo):** ប៊ូតុង "ប្តូររូបភាពហាង" ក្នុងផ្ទាំងលម្អិតហាង។
-            - 📧 **អ៊ីមែលសម្រាប់មតិកែលម្អ (Feedback Email):** `kftapp@gmail.com`
-            - 🏷️ **តម្លៃសមាជិកភាព VIP $9.99 សម្រាប់ ៣៦៥ ថ្ងៃ (End of year promo)**
-            - 🏦 **ឈ្មោះគណនីទទួលធនាគារ ABA៖** **CHEA KIMSENG**។
+            **កំណែថ្មី v1.4.1 (Mandatory Email/Phone Sign-Up & Clean User Management):**
+            - 👤 **១. លុបគណនីលំនាំដើម (ចាន់ថា វណ្ណៈ) ចេញពីប្រព័ន្ធទាំងស្រុង:** គ្មានគណនីបន្លំ ឬ Demo ទៀតឡើយ។
+            - 📱 **២. តម្រូវឱ្យចុះឈ្មោះគណនីថ្មីពេលដំឡើង App រួច (Mandatory Fast Sign-Up):**
+              - អ្នកប្រើប្រាស់អាចចុះឈ្មោះបានយ៉ាងងាយស្រួល និងលឿនរហ័សបំផុត តាមរយៈ **លេខទូរស័ព្ទ (Phone Number)** ឬ **អ៊ីមែល (Email)**។
+              - ត្រឹមតែបំពេញ **ឈ្មោះ** និង **លេខទូរស័ព្ទ/អ៊ីមែល** រួចចុច "ចុះឈ្មោះ និងចូលប្រើប្រាស់" គឺអាចចាប់ផ្តើមប្រើប្រាស់ភ្លាមៗ។
+              - មានផ្ទាំង **ចូលគណនី (Sign In)** សម្រាប់អ្នកដែលមានគណនីស្រាប់។
+            - 📸 **៣. បំពាក់រូបភាពដើមពិតប្រាកដចំនួន ១០០ មុខម្ហូបពី Magnific ក្នុង Asset កម្មវិធី**។
+            - 🗺️ **៤. បញ្ជីរាយនាមកន្លែងទេសចរណ៍ ១១៩ កន្លែង គ្របដណ្តប់ ២៥ រាជធានី-ខេត្ត**។
+            - ⚡ **៥. មុខងារពិសេសគណនីទាំង ៦ ចំណុច** (ថ្ងៃនេះញ៉ាំអ្វី, នៅជិតខ្ញុំ, កន្លែងថ្មីប្រចាំថ្ងៃ, បញ្ជីកន្លែងចង់ទៅ, ផែនការដើរលេង AI, ការជូនដំណឹង)។
           draft: false
           prerelease: false
           files: |

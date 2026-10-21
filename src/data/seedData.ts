@@ -16,17 +16,6 @@ export const initialUsers: User[] = [
     restaurantName: 'ភោជនីយដ្ឋាន គីមលី កំពត-កែប',
     createdAt: '2026-01-15',
   },
-  {
-    id: 'user-1',
-    name: 'ចាន់ថា វណ្ណៈ',
-    username: 'vannak_chantha',
-    email: 'vannak@gmail.com',
-    role: 'user',
-    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
-    phone: '077 123 456',
-    bio: 'ចូលចិត្តធ្វើដំណើរផ្សងព្រេង និងភ្លក្សម្ហូបឆ្ងាញ់ៗទូទាំង ២៥ ខេត្តក្រុង',
-    createdAt: '2026-02-10',
-  },
 ];
 
 export const initialAppSettings: AppSettings = {
@@ -60,9 +49,9 @@ export const initialDestinations: TouristDestination[] = initial100Destinations;
 export const initialCommunityPosts: CommunityPost[] = [
   {
     id: 'post-1',
-    authorId: 'user-1',
-    authorName: 'ចាន់ថា វណ្ណៈ',
-    authorAvatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
+    authorId: 'user-traveler',
+    authorName: 'អ្នកដំណើរខ្មែរ (Khmer Traveler)',
+    authorAvatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
     authorRole: 'user',
     titleKh: 'បទពិសោធន៍ញ៉ាំក្តាមសេះឆាម្រេចខ្ចី នៅមាត់សមុទ្រកែប!',
     descriptionKh: 'ថ្ងៃនេះបានមកដល់ខេត្តកែប ឆ្ងាញ់មែនទែនបងប្អូនអើយ! ក្តាមសេះទើបស្រង់ពីកន្ត្រកសមុទ្រស្រស់ៗ សាច់ផ្អែមឆ្ងាញ់ លាយជាមួយម្រេចខ្ចីកំពតក្រអូបហឹរតិចៗ ញ៉ាំបណ្តើរមើលថ្ងៃលិចបណ្តើរ ពិតជាមានក្តីសុខខ្លាំងណាស់!',
@@ -104,13 +93,13 @@ export const initialCommunityPosts: CommunityPost[] = [
     categoryTag: 'រូបមន្តម្ហូប',
     locationName: 'ខេត្តកំពត',
     likesCount: 65,
-    likedByUserIds: ['user-1'],
+    likedByUserIds: ['owner-1'],
     comments: [
       {
         id: 'c-3',
-        authorId: 'user-1',
-        authorName: 'ចាន់ថា វណ្ណៈ',
-        authorAvatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
+        authorId: 'user-traveler',
+        authorName: 'អ្នកដំណើរខ្មែរ',
+        authorAvatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
         text: 'រូបមន្តល្អណាស់លោកពូ ចាំថ្ងៃចុងសប្តាហ៍នេះខ្ញុំសាកល្បងធ្វើតាម!',
         createdAt: '៤៥ នាទីមុន',
       },
@@ -160,9 +149,9 @@ export const initialTransactions: RegistrationTransaction[] = [
     restaurantId: 'rest-7',
     restaurantNameKh: 'តូបនំបញ្ចុកទឹកសម្លខ្មែរ (ខេត្តកំពត 1)',
     restaurantNameEn: 'Fresh Num Banh Chok Stall (Kampot #1)',
-    ownerId: 'user-1',
-    ownerName: 'ចាន់ថា វណ្ណៈ',
-    ownerPhone: '077 123 456',
+    ownerId: 'owner-7',
+    ownerName: 'សុខ គីមលី',
+    ownerPhone: '098 765 432',
     amountUsd: 4.99,
     status: 'pending_verification',
     paymentMethod: 'KHQR',

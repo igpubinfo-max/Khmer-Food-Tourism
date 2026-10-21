@@ -75,9 +75,11 @@ export const ProfileView: React.FC = () => {
                   </p>
                 ) : (
                   <>
-                    <p className="text-xs text-slate-500 mt-0.5">{currentUser.email}</p>
                     {currentUser.phone && (
-                      <p className="text-[11px] text-[#059669] font-mono">📞 {currentUser.phone}</p>
+                      <p className="text-xs text-[#059669] font-mono mt-0.5">📞 {currentUser.phone}</p>
+                    )}
+                    {currentUser.email && !currentUser.email.endsWith('@phone.kh') && (
+                      <p className="text-xs text-slate-500 mt-0.5">{currentUser.email}</p>
                     )}
                   </>
                 )}

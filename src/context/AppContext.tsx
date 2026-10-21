@@ -199,7 +199,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const saved = localStorage.getItem('kft_users_v4');
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          // Purge deleted default user "ចាន់ថា វណ្ណៈ" from local user database
+          return parsed.filter(u => u.id !== 'user-1' && u.username !== 'vannak_chantha' && u.email !== 'vannak@gmail.com');
+        }
       }
     } catch (e) {
       console.warn('Failed to parse kft_users_v4', e);
@@ -212,12 +215,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const saved = localStorage.getItem('kft_current_user_v4');
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
-        if (parsed && typeof parsed === 'object') return parsed;
+        if (parsed && typeof parsed === 'object') {
+          // Purge deleted default user "ចាន់ថា វណ្ណៈ"
+          if (parsed.id === 'user-1' || parsed.username === 'vannak_chantha' || parsed.email === 'vannak@gmail.com' || parsed.name === 'ចាន់ថា វណ្ណៈ') {
+            localStorage.removeItem('kft_current_user_v4');
+            return null;
+          }
+          return parsed;
+        }
       }
     } catch (e) {
       console.warn('Failed to parse kft_current_user_v4', e);
     }
-    return initialUsers[1] || initialUsers[0] || null; // Default to standard user safely
+    return null; // Require user to sign up or sign in on fresh installation
   });
 
   const [foods, setFoods] = useState<FoodItem[]>(() => {
@@ -455,7 +465,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(null);
   const [selectedDestination, setSelectedDestination] = useState<TouristDestination | null>(null);
   
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(() => !currentUser);
   const [isAddPostModalOpen, setIsAddPostModalOpen] = useState(false);
   const [isAddRestaurantModalOpen, setIsAddRestaurantModalOpen] = useState(false);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
@@ -700,6 +710,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         localStorage.setItem('kft_current_user_v4', JSON.stringify(currentUser));
       } else {
         localStorage.removeItem('kft_current_user_v4');
+        setIsAuthModalOpen(true);
       }
     } catch (e) {
       console.warn('Storage sync failed for currentUser:', e);
@@ -937,8 +948,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const isBookmarked = (id: string) => bookmarks.includes(id);
 
   // Auth
-  const login = (email: string, role?: UserRole): boolean => {
-    const existing = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+  const login = (identifier: string, role?: UserRole): boolean => {
+    const clean = identifier.trim().toLowerCase();
+    const cleanDigits = identifier.replace(/[\s-+]/g, '');
+    const existing = users.find(u => 
+      u.email.toLowerCase() === clean || 
+      (cleanDigits.length >= 7 && u.phone && u.phone.replace(/[\s-+]/g, '') === cleanDigits)
+    );
     if (existing) {
       if (existing.role === 'admin') {
         showToast(language === 'km' ? 'សូមប្រើប្រាស់ច្រកចូលរដ្ឋបាលជាមួយពាក្យសម្ងាត់សុវត្ថិភាព' : 'Please use Admin Portal with secure password', 'info');
@@ -953,10 +969,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     
     // Normal registration/login for users/owners only (NEVER grant admin role here)
     const assignedRole: UserRole = role === 'owner' ? 'owner' : 'user';
+    const isPhone = /^[0-9+ ]{7,15}$/.test(clean);
+    const emailVal = isPhone ? `user_${cleanDigits}@phone.kh` : (clean.includes('@') ? clean : `${clean}@user.kh`);
+    const phoneVal = isPhone ? identifier.trim() : undefined;
+    const nameVal = isPhone ? `អ្នកប្រើប្រាស់ ${identifier.trim()}` : clean.split('@')[0];
+
     const newUser: User = {
       id: `user-${Date.now()}`,
-      name: email.split('@')[0],
-      email: email,
+      name: nameVal,
+      email: emailVal,
+      phone: phoneVal,
       role: assignedRole,
       avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
       createdAt: new Date().toISOString().split('T')[0],
@@ -1066,22 +1088,41 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     showToast(language === 'km' ? 'បានរក្សាទុកការកំណត់កម្មវិធីជោគជ័យ!' : 'App settings updated!', 'success');
   };
 
-  const register = (name: string, email: string, role: UserRole, phone?: string, restaurantName?: string) => {
+  const register = (name: string, emailOrPhone: string, role: UserRole, phone?: string, restaurantName?: string) => {
     // Enforce: only one authorized admin exists. Users can NEVER self-register as admin
     const safeRole: UserRole = role === 'admin' ? 'user' : role;
+    const cleanId = emailOrPhone.trim();
+    const isPhone = /^[0-9+ ]{7,15}$/.test(cleanId);
+    const cleanPhoneDigits = (phone || (isPhone ? cleanId : '')).replace(/[\s-+]/g, '');
+    const emailVal = isPhone ? `user_${cleanPhoneDigits}@phone.kh` : (cleanId.includes('@') ? cleanId : `${cleanId}@user.kh`);
+    const phoneVal = phone ? phone.trim() : (isPhone ? cleanId : undefined);
+    const displayName = name.trim() || (isPhone ? `អ្នកប្រើប្រាស់ ${cleanId}` : cleanId.split('@')[0]);
+
+    // Check if user already exists
+    const existing = users.find(u => 
+      u.email.toLowerCase() === emailVal.toLowerCase() || 
+      (cleanPhoneDigits.length >= 7 && u.phone && u.phone.replace(/[\s-+]/g, '') === cleanPhoneDigits)
+    );
+    if (existing) {
+      setCurrentUser(existing);
+      showToast(language === 'km' ? `សូមស្វាគមន៍មកវិញ ${existing.name}!` : `Welcome back, ${existing.name}!`, 'success');
+      setIsAuthModalOpen(false);
+      return;
+    }
+
     const newUser: User = {
       id: `user-${Date.now()}`,
-      name,
-      email,
+      name: displayName,
+      email: emailVal,
       role: safeRole,
-      phone,
+      phone: phoneVal,
       restaurantName,
       avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
       createdAt: new Date().toISOString().split('T')[0],
     };
     setUsers(prev => [...prev, newUser]);
     setCurrentUser(newUser);
-    showToast(language === 'km' ? 'បង្កើតគណនីបានជោគជ័យ!' : 'Account created successfully!', 'success');
+    showToast(language === 'km' ? `សូមស្វាគមន៍មកកាន់កម្មវិធី ${displayName}!` : `Welcome to the app, ${displayName}!`, 'success');
     setIsAuthModalOpen(false);
   };
 
