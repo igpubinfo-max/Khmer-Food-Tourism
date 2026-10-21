@@ -6,6 +6,8 @@
 -keep class com.getcapacitor.** { *; }
 -keep interface com.getcapacitor.** { *; }
 -keep class com.getcapacitor.community.** { *; }
+-keep class com.khmerfood.tourism.NativeGoogleAuthPlugin { *; }
+-keep class com.khmerfood.tourism.MainActivity { *; }
 -dontwarn com.getcapacitor.**
 -keepattributes JavascriptInterface
 -keepattributes *Annotation*

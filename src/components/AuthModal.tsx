@@ -78,28 +78,37 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
     setIsGoogleLoading(true);
 
     try {
-      // 1. If running on Android device, invoke native Google Play Services account picker
+      // 1. If running on Android device, invoke native system Google account picker
       const { Capacitor, registerPlugin } = await import('@capacitor/core');
       if (Capacitor.isNativePlatform()) {
-        const NativeGoogleAuth = registerPlugin<any>('NativeGoogleAuth');
-        if (NativeGoogleAuth && typeof NativeGoogleAuth.signIn === 'function') {
-          const res = await NativeGoogleAuth.signIn();
-          if (res && res.email) {
-            const cleanEmail = res.email.trim().toLowerCase();
-            const cleanName = res.name?.trim() || cleanEmail.split('@')[0];
-            const profile = {
-              id: `google-${cleanEmail.replace(/[^a-zA-Z0-9]/g, '_')}`,
-              name: cleanName,
-              email: cleanEmail,
-              avatar: res.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
-              authProvider: 'google' as const,
-              linkedProviders: ['google' as const],
-              isVerified: true,
-              verifiedAt: new Date().toISOString(),
-            };
-            loginWithGoogle(profile);
+        try {
+          const NativeGoogleAuth = registerPlugin<any>('NativeGoogleAuth');
+          if (NativeGoogleAuth && typeof NativeGoogleAuth.signIn === 'function') {
+            const res = await NativeGoogleAuth.signIn();
+            if (res && res.email) {
+              const cleanEmail = res.email.trim().toLowerCase();
+              const cleanName = res.name?.trim() || cleanEmail.split('@')[0];
+              const profile = {
+                id: `google-${cleanEmail.replace(/[^a-zA-Z0-9]/g, '_')}`,
+                name: cleanName,
+                email: cleanEmail,
+                avatar: res.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
+                authProvider: 'google' as const,
+                linkedProviders: ['google' as const],
+                isVerified: true,
+                verifiedAt: new Date().toISOString(),
+              };
+              loginWithGoogle(profile);
+              return;
+            }
+          }
+        } catch (nativeErr: any) {
+          // If user cancelled, exit gracefully without showing error
+          if (nativeErr?.message && (nativeErr.message.includes('12501') || nativeErr.message.includes('cancelled') || nativeErr.message.includes('canceled'))) {
+            showToast(isKm ? 'ការចូលតាម Google ត្រូវបានបោះបង់' : 'Google sign-in cancelled', 'info');
             return;
           }
+          console.warn('Native Google Auth notice, falling back:', nativeErr);
         }
       }
 
@@ -112,7 +121,8 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
       if (err?.message && (err.message.includes('12501') || err.message.includes('closed') || err.message.includes('canceled') || err.message.includes('cancelled'))) {
         showToast(isKm ? 'ការចូលតាម Google ត្រូវបានបោះបង់' : 'Google sign-in cancelled', 'info');
       } else {
-        showToast(isKm ? 'មានបញ្ហាក្នុងការបើកផ្ទាំង Google សូមព្យាយាមម្តងទៀត' : 'Could not open Google sign-in, please try again', 'warning');
+        const detail = err?.message ? ` (${err.message})` : '';
+        showToast(isKm ? `មានបញ្ហាក្នុងការបើកផ្ទាំង Google${detail} សូមព្យាយាមម្តងទៀត` : `Could not open Google sign-in${detail}, please try again`, 'warning');
       }
     } finally {
       setIsGoogleLoading(false);
