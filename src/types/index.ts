@@ -1,3 +1,8 @@
+export const APP_VERSION = 'v1.5.6';
+export const APP_VERSION_NAME = '1.5.6';
+export const APP_BUILD_CODE = 28;
+export const APP_RELEASE_DATE = '2026-10-21';
+
 export type Language = 'km' | 'en';
 
 export type UserRole = 'user' | 'owner' | 'admin';
@@ -338,6 +343,8 @@ export interface TrendingFoodItem {
   phone?: string;
   priceDisplay?: string;
   sourcePlatform: 'tiktok' | 'facebook' | 'youtube' | 'local_discovery';
+  sourceAccount?: string;
+  sourceAccountTitle?: string;
   sourceUrl?: string;
   socialHashtag?: string;
   socialViews?: string;

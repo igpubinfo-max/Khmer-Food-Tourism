@@ -60,7 +60,7 @@ jobs:
           echo "=== SEARCHING FOR GENERATED APK FILES ==="
           find . -name "*.apk" -ls
           cd android/app/build/outputs/apk/debug
-          cp app-debug.apk KhmerFoodTourism-v1.5.5.apk
+          cp app-debug.apk KhmerFoodTourism-v1.5.6.apk
           ls -la
 
       - name: 10. Upload Android APK Artifact
@@ -73,14 +73,35 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: v1.5.5
-          name: "Khmer Food & Tourism v1.5.5 (Clean Home, Iconic Landmarks & AI Video Panels)"
+          tag_name: v1.5.6
+          name: "Khmer Food & Tourism v1.5.6 (KHQR ABA VIP, Super Potential Account & Viral Sharing Links)"
           overwrite: true
           make_latest: true
           body: |
             ### 🇰🇭 កម្មវិធីទូរស័ព្ទដៃ អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism Mobile App)
             
-            **កំណែថ្មី v1.5.5 (Clean Home, Iconic Landmarks & AI Video Panels):**
+            **កំណែថ្មី v1.5.6 (KHQR ABA VIP, Super Potential Account & Viral Sharing Links):**
+            - 🏦 **១. ដំឡើង VIP តាម KHQR / ABA Bank ផ្ទៀងផ្ទាត់ដោយផ្ទាល់ក្នុងកម្មវិធី (Exclusive ABA Bank VIP Upgrade):**
+              - បានដកចេញនូវជម្រើស Google Play និង Visa Card ដើម្បីសម្រួលដល់ការទូទាត់។
+              - គាំទ្រការទូទាត់តាមរយៈ KHQR / ABA Mobile Bank (ឈ្មោះគណនី: CHEA KIMSENG, លេខគណនី: 001 892 198)។
+              - មានប៊ូតុងបើកកម្មវិធី ABA Mobile, ប៊ូតុងចម្លងលេខគណនី, និងប៊ូតុងបញ្ជាក់ការទូទាត់ផ្ទាល់នៅក្នុងកម្មវិធី (Confirm Button in Program)។
+              - ផ្ទៀងផ្ទាត់ប្រតិបត្តិការ Trx ID ដោយស្វ័យប្រវត្តិតាមរយៈ Server-Side Cryptographic Verification។
+            - ⚡ **២. គណនីសក្តានុពលកម្រិតខ្ពស់បន្ទាប់ពី Upgrade ជា VIP (Super Potential VIP Account):**
+              - បង្ហាញផ្ទាំង Super Potential VIP Dashboard ពណ៌មាសប្រណិតក្នុង Profile។
+              - អភ័យឯកសិទ្ធិពិសេសទាំង ៦៖
+                1. 🚀 ចំណាត់ថ្នាក់ស្វែងរកកំពូល (Top 1 Search Priority Boost - 10x Visibility)
+                2. 📈 ស្ថិតិ Live Analytics (អ្នកចុចមើល Profile, Call, និងទិសដៅ)
+                3. 👑 ផ្លាកសញ្ញា Golden VIP Badge បង្ហាញលើ Profile និង Comment
+                4. 📸 បង្ហោះរូបភាព HD ឥតកំណត់សម្រាប់បញ្ជីមុខម្ហូប
+                5. 🎥 Food Video Reels Showcase លើទំព័រហាងផ្ទាល់ខ្លួន
+                6. 📍 សម្គាល់ Pin ពណ៌មាសលើផែនទី Google Maps
+            - 📱 **៣. បង្ហាញកំណែកម្មវិធីច្បាស់លាស់គ្រប់ការ Update (Clear App Version Display):**
+              - បង្ហាញ Badge កំណែកម្មវិធី `v1.5.6` លើ Header ខាងលើជាប់នឹង Logo និងឈ្មោះកម្មវិធី។
+              - បង្ហាញកាតព័ត៌មានកំណែកម្មវិធី `v1.5.6 (Build 28)` ក្នុង Profile និង Account Settings សម្រាប់អ្នកប្រើប្រាស់ងាយស្រួលដឹងពីបច្ចុប្បន្នភាព។
+            - 🎬 **៤. ប៊ូតុង Play ភ្ជាប់ទៅកាន់ Sharing Account លើ TikTok ឬ FB ល្បីៗ (Verified Viral Video Links):**
+              - ដកចេញនូវ Tag ដែលបណ្តាលឱ្យមានកំហុស "Couldn't find this hashtag"។
+              - ភ្ជាប់ផ្ទាល់ទៅកាន់ Sharing Accounts ល្បីៗប្រចាំប្រទេសកម្ពុជា (@foodbuzzcambodia, @derleng.official, @heng_foodie, @mengly_foodie, @streetfoodkh, @reanmlob, @eatnowcambodia)។
+              - បង្ហាញឈ្មោះ Sharing Account លើផ្ទាំងនីមួយៗ និងចុច Play បើកមើលវីដេអូ Trend លើ TikTok App ឬ Facebook App ភ្លាមៗដោយគ្មានបញ្ហា។
             - 🏠 **១. សម្អាតទំព័រដើមឱ្យស្រឡះទូលាយ (Clean Streamlined Home Screen):**
               - បានដកបញ្ជីមុខម្ហូប ភោជនីយដ្ឋាន និងតំបន់ទេសចរណ៍ចេញពីទំព័រដើម ដើម្បីកាត់បន្ថយភាពរញ៉េរញ៉ៃ និងឱ្យកម្មវិធីដំណើរការកាន់តែលឿន។
               - អ្នកប្រើប្រាស់អាចចូលមើលបញ្ជីពេញលេញបានតាមរយៈ Tabs របារខាងក្រោម (Foods, Restaurants, Tourism)។

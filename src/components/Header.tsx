@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { Search, Heart, Globe, Shield, User as UserIcon, X, QrCode, Download, ShieldCheck, Mail } from 'lucide-react';
+import { APP_VERSION } from '../types';
 
 export const Header: React.FC = () => {
   const { 
@@ -39,9 +40,14 @@ export const Header: React.FC = () => {
             <img src="/logo.svg" alt="Khmer Food" className="w-full h-full rounded-[10px] object-cover" />
           </div>
           <div>
-            <h1 className="font-moul text-sm sm:text-base tracking-wide text-white leading-tight drop-shadow-sm">
-              អាហារ & ទេសចរណ៍ខ្មែរ
-            </h1>
+            <div className="flex items-center gap-1.5">
+              <h1 className="font-moul text-sm sm:text-base tracking-wide text-white leading-tight drop-shadow-sm">
+                អាហារ & ទេសចរណ៍ខ្មែរ
+              </h1>
+              <span className="px-1.5 py-0.2 rounded-md bg-white/20 text-white font-mono text-[9px] font-bold border border-white/25">
+                {APP_VERSION}
+              </span>
+            </div>
             <p className="text-[10px] text-emerald-200 font-medium tracking-wider uppercase">
               Khmer Food & Tourism
             </p>

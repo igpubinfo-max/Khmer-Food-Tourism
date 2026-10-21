@@ -522,20 +522,21 @@ export const HomeView: React.FC = () => {
                   </span>
                 )}
 
-                <span className="px-1.5 py-0.5 rounded-full bg-black/60 text-amber-300 text-[8px] font-bold">
-                  👁️ {food.socialViews || 'Viral'}
+                {/* Viral Sharing Account or Views */}
+                <span className="px-1.5 py-0.5 rounded-full bg-black/75 text-amber-300 text-[8px] font-bold border border-amber-400/30 font-mono truncate max-w-[55%]">
+                  {food.sourceAccount || `👁️ ${food.socialViews || 'Viral'}`}
                 </span>
               </div>
 
-              {/* Center Play Button Overlay to Watch Trending Video */}
+              {/* Center Play Button Overlay to Watch Trending Video from Sharing Account */}
               <div className="relative z-10 flex flex-col items-center justify-center -mt-1">
                 <button
                   onClick={(e) => handleOpenVideo(e, food)}
                   className="px-2.5 py-1 rounded-full bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white text-[9px] font-bold shadow-lg flex items-center gap-1 active:scale-95 transition border border-white/20"
-                  title={isKm ? 'ចុចមើលវីដេអូល្បី' : 'Watch Viral Video'}
+                  title={isKm ? `ចុចមើលវីដេអូល្បីពី ${food.sourceAccount || food.sourcePlatform}` : 'Watch Viral Video'}
                 >
                   <Play className="w-2.5 h-2.5 fill-current" />
-                  <span>{food.sourcePlatform === 'tiktok' ? 'វីដេអូ TikTok' : 'វីដេអូ FB'}</span>
+                  <span>{food.sourceAccount ? `មើល ${food.sourceAccount}` : (food.sourcePlatform === 'tiktok' ? 'វីដេអូ TikTok' : 'វីដេអូ FB')}</span>
                 </button>
               </div>
 

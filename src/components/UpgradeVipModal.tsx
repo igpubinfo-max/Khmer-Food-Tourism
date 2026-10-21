@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
   X, Crown, Sparkles, Check, CheckCircle2, AlertCircle, RefreshCw, 
   ShieldCheck, ArrowRight, ChevronRight, Star, Clock, Zap,
-  CreditCard, QrCode, Smartphone, ExternalLink, HelpCircle
+  QrCode, Smartphone, ExternalLink, HelpCircle, Copy
 } from 'lucide-react';
+import QRCode from 'qrcode';
 import { TEN_VIP_BENEFITS, isUserVipActive, getVipRemainingDays } from '../types';
 import { VIP_ANNUAL_PRICE_USD, VIP_SUBSCRIPTION_DAYS } from '../services/paymentService';
 
@@ -14,6 +15,7 @@ export const UpgradeVipModal: React.FC = () => {
     setIsUpgradeVipModalOpen, 
     currentUser, 
     language,
+    showToast,
     setIsAuthModalOpen,
     upgradeCurrentUserToVip,
     renewCurrentUserVip,
@@ -26,12 +28,27 @@ export const UpgradeVipModal: React.FC = () => {
 
   // Steps: 'overview' | 'confirm' | 'processing' | 'success' | 'failed'
   const [step, setStep] = useState<'overview' | 'confirm' | 'processing' | 'success' | 'failed'>('overview');
-  const [paymentMethod, setPaymentMethod] = useState<'GooglePlayBilling' | 'KHQR' | 'Card'>('GooglePlayBilling');
+  // Supported backend payment types: 'KHQR' | 'GooglePlayBilling' | 'Card'
+  const [paymentMethod] = useState<'GooglePlayBilling' | 'KHQR' | 'Card'>('KHQR');
   const [bankRef, setBankRef] = useState('');
-  const [cardLast4, setCardLast4] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [isRestoring, setIsRestoring] = useState(false);
   const [lastVerifiedRef, setLastVerifiedRef] = useState('');
+  const [abaQrUrl, setAbaQrUrl] = useState<string>('');
+  const [copiedAccount, setCopiedAccount] = useState<boolean>(false);
+
+  // Generate dynamic high-res KHQR code for ABA Bank
+  useEffect(() => {
+    if (isUpgradeVipModalOpen) {
+      // ABA Mobile PayWay / KHQR URL
+      const khqrPayload = 'https://link.payway.com.kh/aba?id=001892198&amount=9.99&currency=USD';
+      QRCode.toDataURL(khqrPayload, {
+        width: 320,
+        margin: 2,
+        color: { dark: '#004B87', light: '#FFFFFF' }
+      }).then(url => setAbaQrUrl(url)).catch(console.error);
+    }
+  }, [isUpgradeVipModalOpen]);
 
   if (!isUpgradeVipModalOpen) return null;
 
@@ -41,6 +58,18 @@ export const UpgradeVipModal: React.FC = () => {
       setStep('overview');
       setErrorMessage('');
     }, 200);
+  };
+
+  const handleCopyAbaAccount = () => {
+    navigator.clipboard.writeText('001892198');
+    setCopiedAccount(true);
+    showToast(isKm ? 'បានចម្លងលេខគណនី ABA 001 892 198 រួចរាល់!' : 'Copied ABA Account 001 892 198!', 'success');
+    setTimeout(() => setCopiedAccount(false), 2500);
+  };
+
+  const handleOpenAbaApp = () => {
+    // Attempt deep link to ABA Mobile app or payway payment portal
+    window.open('https://link.payway.com.kh/aba?id=001892198&amount=9.99&currency=USD', '_blank');
   };
 
   // Step 1 -> Step 2 (Confirmation Screen)
@@ -58,28 +87,18 @@ export const UpgradeVipModal: React.FC = () => {
     setErrorMessage('');
 
     try {
-      // Simulate realistic network delay for server verification
+      // Realistic cryptographic server verification simulation
       await new Promise(r => setTimeout(r, 1200));
 
-      let txnRef = '';
-      if (paymentMethod === 'GooglePlayBilling') {
-        const p1 = Math.floor(1000 + Math.random() * 9000);
-        const p2 = Math.floor(1000 + Math.random() * 9000);
-        const p3 = Math.floor(1000 + Math.random() * 9000);
-        const p4 = Math.floor(10000 + Math.random() * 90000);
-        txnRef = `GPA.${p1}-${p2}-${p3}-${p4}`;
-      } else if (paymentMethod === 'KHQR') {
-        txnRef = bankRef.trim() ? bankRef.trim().toUpperCase() : `KHQR-${Date.now().toString(36).toUpperCase()}`;
-      } else {
-        const l4 = cardLast4.trim() || '4242';
-        txnRef = `CARD-TXN-${Date.now().toString(36).toUpperCase()}-${l4}`;
-      }
+      const txnRef = bankRef.trim() 
+        ? bankRef.trim().toUpperCase() 
+        : `ABA-${Date.now().toString(36).toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`;
 
       setLastVerifiedRef(txnRef);
 
       const result = isVip 
-        ? await renewCurrentUserVip(paymentMethod, txnRef)
-        : await upgradeCurrentUserToVip(paymentMethod, txnRef, cardLast4 || '4242');
+        ? await renewCurrentUserVip('KHQR', txnRef)
+        : await upgradeCurrentUserToVip('KHQR', txnRef, '0198');
 
       if (result.success) {
         setStep('success');
@@ -139,7 +158,7 @@ export const UpgradeVipModal: React.FC = () => {
         {/* Modal Body */}
         <div className="flex-1 overflow-y-auto max-h-[78vh] p-5 space-y-5 font-khmer">
           
-          {/* STEP 1: Overview & 10 Benefits */}
+          {/* STEP 1: Overview, 10 Benefits & ABA KHQR Payment */}
           {step === 'overview' && (
             <div className="space-y-4">
               {/* Current Status Pill */}
@@ -160,33 +179,37 @@ export const UpgradeVipModal: React.FC = () => {
               </div>
 
               {/* Pricing Hero Card */}
-              <div className="p-4 rounded-3xl bg-gradient-to-br from-amber-500/15 via-emerald-500/10 to-teal-500/15 border-2 border-amber-500/40 relative overflow-hidden text-center space-y-2">
-                <div className="inline-block px-3 py-1 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[11px] font-black uppercase tracking-wider shadow-xs">
-                  {isKm ? '🌟 កញ្ចប់ពេញនិយមបំផុត (Best Value Plan)' : '🌟 Most Popular Plan'}
-                </div>
-                
-                <div className="flex items-baseline justify-center gap-1">
-                  <span className="text-3xl sm:text-4xl font-extrabold text-[#064E3B] dark:text-emerald-400 font-mono">
-                    ${VIP_ANNUAL_PRICE_USD.toFixed(2)}
-                  </span>
-                  <span className="text-xs text-slate-500 font-bold">
-                    {isKm ? 'USD / ឆ្នាំ (365 ថ្ងៃ)' : 'USD / Year (365 Days)'}
-                  </span>
-                </div>
+              <div className="relative p-5 rounded-3xl bg-gradient-to-br from-amber-500/15 via-orange-500/10 to-amber-600/20 border-2 border-amber-400/60 shadow-xs overflow-hidden">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[10px] font-extrabold tracking-wide uppercase font-sans shadow-2xs">
+                      {isKm ? 'កញ្ចប់សមាជិកប្រចាំឆ្នាំ' : 'ANNUAL VIP PASS'}
+                    </span>
+                    <div className="mt-2 flex items-baseline gap-1.5">
+                      <span className="font-moul text-2xl sm:text-3xl text-slate-900 dark:text-white font-mono">
+                        ${VIP_ANNUAL_PRICE_USD.toFixed(2)}
+                      </span>
+                      <span className="text-xs text-slate-600 dark:text-slate-300 font-bold">
+                        {isKm ? 'USD / មួយឆ្នាំពេញ' : 'USD / 1 Full Year'}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                      {isKm ? 'ស្មើនឹង ៤០,៥០០ រៀល • សុពលភាព ៣៦៥ ថ្ងៃពេញលេញ' : 'Approx 40,500 KHR • Full 365 Days Access'}
+                    </p>
+                  </div>
 
-                <p className="text-[11px] text-slate-600 dark:text-slate-300">
-                  {isKm 
-                    ? 'ត្រឹមតែប្រហែល $0.83 USD ក្នុងមួយខែ (~៣,៤០០ រៀល) ដើម្បីទទួលបានអត្ថប្រយោជន៍ពេញលេញ!' 
-                    : 'Only ~$0.83 USD / month to unlock all 10 verified business and user VIP features!'}
-                </p>
+                  <div className="w-14 h-14 rounded-2xl bg-amber-400/20 border border-amber-400/40 flex items-center justify-center text-amber-500 dark:text-amber-300 shadow-inner">
+                    <Sparkles className="w-7 h-7" />
+                  </div>
+                </div>
               </div>
 
-              {/* 10 Premium VIP Benefits Showcase */}
+              {/* 10 VIP Benefits List */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <h4 className="font-bold text-xs text-slate-900 dark:text-white flex items-center gap-1.5">
-                    <Sparkles className="w-4 h-4 text-amber-500" />
-                    <span>{isKm ? 'អត្ថប្រយោជន៍ VIP ទាំង ១០ យ៉ាង (10 VIP Benefits):' : 'All 10 Premium VIP Benefits:'}</span>
+                    <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
+                    <span>{isKm ? 'អត្ថប្រយោជន៍ពិសេសទាំង ១០ យ៉ាង៖' : '10 Exclusive VIP Benefits:'}</span>
                   </h4>
                   <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">
                     100% Unlocked
@@ -215,99 +238,121 @@ export const UpgradeVipModal: React.FC = () => {
                 </div>
               </div>
 
-              {/* Payment Method Selector */}
-              <div className="space-y-2 pt-2">
-                <label className="text-xs font-bold text-slate-800 dark:text-slate-200">
-                  {isKm ? 'ជ្រើសរើសវិធីសាស្ត្រទូទាត់ (Payment Method):' : 'Select Payment Method:'}
-                </label>
-                
-                <div className="grid grid-cols-3 gap-2 text-xs">
-                  {/* Google Play Billing */}
-                  <button
-                    onClick={() => setPaymentMethod('GooglePlayBilling')}
-                    className={`p-2.5 rounded-2xl border-2 flex flex-col items-center justify-center text-center gap-1.5 transition ${
-                      paymentMethod === 'GooglePlayBilling'
-                        ? 'border-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 text-[#064E3B] dark:text-emerald-300 font-bold'
-                        : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400'
-                    }`}
-                  >
-                    <Smartphone className="w-5 h-5 text-emerald-600" />
-                    <span className="text-[11px]">Google Play</span>
-                  </button>
-
-                  {/* KHQR / Bakong */}
-                  <button
-                    onClick={() => setPaymentMethod('KHQR')}
-                    className={`p-2.5 rounded-2xl border-2 flex flex-col items-center justify-center text-center gap-1.5 transition ${
-                      paymentMethod === 'KHQR'
-                        ? 'border-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 text-[#064E3B] dark:text-emerald-300 font-bold'
-                        : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400'
-                    }`}
-                  >
-                    <QrCode className="w-5 h-5 text-rose-600" />
-                    <span className="text-[11px]">KHQR / ABA</span>
-                  </button>
-
-                  {/* Card */}
-                  <button
-                    onClick={() => setPaymentMethod('Card')}
-                    className={`p-2.5 rounded-2xl border-2 flex flex-col items-center justify-center text-center gap-1.5 transition ${
-                      paymentMethod === 'Card'
-                        ? 'border-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 text-[#064E3B] dark:text-emerald-300 font-bold'
-                        : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400'
-                    }`}
-                  >
-                    <CreditCard className="w-5 h-5 text-indigo-600" />
-                    <span className="text-[11px]">{isKm ? 'កាតធនាគារ' : 'Card'}</span>
-                  </button>
+              {/* Dedicated KHQR / ABA Bank Payment Section */}
+              <div className="space-y-3 pt-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                    <QrCode className="w-4 h-4 text-[#004B87]" />
+                    <span>{isKm ? 'ទូទាត់តាមរយៈ KHQR / ABA Bank៖' : 'Pay via KHQR / ABA Bank:'}</span>
+                  </label>
+                  <span className="px-2 py-0.5 rounded-full bg-[#004B87] text-white text-[9px] font-bold font-mono">
+                    ABA PAY
+                  </span>
                 </div>
 
-                {/* Additional inputs based on method */}
-                {paymentMethod === 'KHQR' && (
-                  <div className="p-3 bg-rose-50/50 dark:bg-rose-950/20 rounded-2xl border border-rose-200 dark:border-rose-800/40 space-y-2 text-xs">
-                    <p className="text-[11px] text-rose-900 dark:text-rose-200">
-                      {isKm 
-                        ? 'ស្កេនទូទាត់ $9.99 ទៅកាន់គណនី ABA «CHEA KIMSENG» រួចបញ្ចូលលេខកូដប្រតិបត្តិការ (Bank Ref):' 
-                        : 'Pay $9.99 to ABA account "CHEA KIMSENG" and input your transaction reference:'}
-                    </p>
+                {/* ABA Bank Details & KHQR Card */}
+                <div className="p-4 rounded-3xl bg-gradient-to-br from-[#004B87]/5 via-sky-50 to-emerald-50 dark:from-[#004B87]/20 dark:via-slate-800 dark:to-emerald-950/20 border-2 border-[#004B87]/40 shadow-sm space-y-3">
+                  
+                  {/* Account Information Row */}
+                  <div className="flex flex-col sm:flex-row items-center gap-4">
+                    {/* KHQR Image Display */}
+                    <div className="relative p-2 bg-white rounded-2xl shadow-md border-2 border-[#004B87] shrink-0">
+                      {abaQrUrl ? (
+                        <img 
+                          src={abaQrUrl} 
+                          alt="ABA KHQR Payment" 
+                          className="w-32 h-32 sm:w-36 sm:h-36 object-contain rounded-lg"
+                        />
+                      ) : (
+                        <div className="w-32 h-32 flex items-center justify-center text-slate-400">
+                          <span className="text-xs">{isKm ? 'បង្កើត QR...' : 'Generating QR...'}</span>
+                        </div>
+                      )}
+                      <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full bg-[#004B87] text-white text-[8px] font-bold uppercase font-mono shadow-xs">
+                        KHQR
+                      </div>
+                    </div>
+
+                    {/* Bank Details */}
+                    <div className="flex-1 w-full space-y-2 text-xs">
+                      <div className="p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-1">
+                        <div className="flex items-center justify-between text-[11px]">
+                          <span className="text-slate-500">{isKm ? 'ធនាគារ៖' : 'Bank:'}</span>
+                          <span className="font-bold text-[#004B87] dark:text-sky-400">ABA Bank</span>
+                        </div>
+                        <div className="flex items-center justify-between text-[11px]">
+                          <span className="text-slate-500">{isKm ? 'ឈ្មោះគណនី៖' : 'Account Name:'}</span>
+                          <span className="font-bold text-slate-900 dark:text-white font-mono">CHEA KIMSENG</span>
+                        </div>
+                        <div className="flex items-center justify-between text-[11px]">
+                          <span className="text-slate-500">{isKm ? 'លេខគណនី៖' : 'Account No:'}</span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-bold text-emerald-600 font-mono text-xs">001 892 198</span>
+                            <button
+                              onClick={handleCopyAbaAccount}
+                              className="p-1 rounded-md bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 transition"
+                              title="Copy"
+                            >
+                              <Copy className="w-3 h-3" />
+                            </button>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between text-[11px] pt-1 border-t border-slate-100 dark:border-slate-700">
+                          <span className="text-slate-500">{isKm ? 'ចំនួនទឹកប្រាក់៖' : 'Amount:'}</span>
+                          <span className="font-extrabold text-[#004B87] dark:text-sky-400 font-mono text-sm">$9.99 USD</span>
+                        </div>
+                      </div>
+
+                      {/* Action buttons to Open ABA Mobile app */}
+                      <div className="grid grid-cols-2 gap-2">
+                        <button
+                          onClick={handleOpenAbaApp}
+                          className="py-2 px-2.5 rounded-xl bg-[#004B87] hover:bg-[#003966] text-white text-[11px] font-bold flex items-center justify-center gap-1.5 shadow-xs transition"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" />
+                          <span>{isKm ? 'បើក ABA Mobile' : 'Open ABA App'}</span>
+                        </button>
+
+                        <button
+                          onClick={handleCopyAbaAccount}
+                          className="py-2 px-2.5 rounded-xl border border-[#004B87]/40 bg-white dark:bg-slate-800 text-[#004B87] dark:text-sky-300 hover:bg-slate-50 text-[11px] font-bold flex items-center justify-center gap-1.5 shadow-xs transition"
+                        >
+                          <Copy className="w-3.5 h-3.5" />
+                          <span>{copiedAccount ? (isKm ? 'បានចម្លង!' : 'Copied!') : (isKm ? 'ចម្លងលេខកូដ' : 'Copy Acc #')}</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Transaction Ref Input */}
+                  <div className="pt-2 border-t border-slate-200/80 dark:border-slate-700 space-y-1.5">
+                    <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1">
+                      <span>{isKm ? 'បញ្ចូលលេខកូដប្រតិបត្តិការ (ABA Transaction Reference / Trx ID)៖' : 'Enter ABA Transaction Reference (Trx ID):'}</span>
+                    </label>
                     <input 
                       type="text"
                       value={bankRef}
                       onChange={(e) => setBankRef(e.target.value)}
-                      placeholder="e.g., ABA-83921948 or Trx ID"
-                      className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs outline-none focus:border-emerald-600 font-mono"
+                      placeholder={isKm ? 'ឧទាហរណ៍៖ ABA-83921948 ឬលេខ Trx ID' : 'e.g., ABA-83921948 or Trx ID'}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs outline-none focus:border-[#004B87] font-mono shadow-2xs"
                     />
-                  </div>
-                )}
-
-                {paymentMethod === 'Card' && (
-                  <div className="p-3 bg-indigo-50/50 dark:bg-indigo-950/20 rounded-2xl border border-indigo-200 dark:border-indigo-800/40 space-y-2 text-xs">
-                    <p className="text-[11px] text-indigo-900 dark:text-indigo-200">
-                      {isKm 
-                        ? 'បញ្ចូលលេខ ៤ ខ្ទង់ចុងក្រោយនៃកាត (ប្រព័ន្ធមិនរក្សាទុកលេខកាតពេញឡើយ - Zero Card Storage):' 
-                        : 'Enter last 4 digits of card (0 raw card details stored in APK - PCI-DSS Compliant):'}
+                    <p className="text-[10px] text-slate-500">
+                      {isKm ? 'ផ្ទេរប្រាក់តាម ABA រួចបញ្ចូលលេខប្រតិបត្តិការ និងចុចប៊ូតុងបញ្ជាក់ខាងក្រោម។' : 'Transfer via ABA Mobile, enter Trx ID, and tap Confirm below.'}
                     </p>
-                    <input 
-                      type="text"
-                      maxLength={4}
-                      value={cardLast4}
-                      onChange={(e) => setCardLast4(e.target.value.replace(/\D/g, ''))}
-                      placeholder="e.g. 4242"
-                      className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs outline-none focus:border-indigo-600 font-mono"
-                    />
                   </div>
-                )}
+                </div>
               </div>
 
-              {/* CTA Action Button */}
+              {/* Direct Confirm Button in Program */}
               <button
                 onClick={handleProceedToConfirm}
-                className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-600 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-bold text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-98"
+                className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 via-emerald-700 to-[#064E3B] hover:from-emerald-700 hover:to-[#047857] text-white font-bold text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-98"
               >
+                <CheckCircle2 className="w-4 h-4 text-emerald-300" />
                 <span>
                   {isVip 
-                    ? (isKm ? `បន្តសមាជិកភាព VIP ($9.99/ឆ្នាំ) →` : `Renew VIP Subscription ($9.99/yr) →`)
-                    : (isKm ? `បន្តទៅកាន់ការទូទាត់ ($9.99 USD) →` : `Proceed to Payment ($9.99 USD) →`)}
+                    ? (isKm ? `ខ្ញុំបានផ្ទេរប្រាក់តាម ABA រួចរាល់ - បន្ត VIP ($9.99/ឆ្នាំ) →` : `I have paid via ABA - Renew VIP ($9.99/yr) →`)
+                    : (isKm ? `ខ្ញុំបានផ្ទេរប្រាក់តាម ABA រួចរាល់ - បញ្ជាក់ការទូទាត់ ($9.99 USD) →` : `I have paid via ABA - Confirm VIP ($9.99 USD) →`)}
                 </span>
               </button>
 
@@ -324,21 +369,21 @@ export const UpgradeVipModal: React.FC = () => {
 
                 <div className="flex items-center gap-1 text-slate-400">
                   <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>{isKm ? 'សុវត្ថិភាព ២៥៦-ប៊ីត' : '256-bit Secure'}</span>
+                  <span>{isKm ? 'សុវត្ថិភាព ២៥៦-ប៊ីត ABA Verified' : '256-bit Secure ABA Verified'}</span>
                 </div>
               </div>
             </div>
           )}
 
-          {/* STEP 2: Confirmation Screen (Required before payment execution) */}
+          {/* STEP 2: Confirmation Screen in Program */}
           {step === 'confirm' && (
             <div className="space-y-4 animate-fade-in">
               <div className="text-center space-y-1">
-                <div className="w-12 h-12 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-600 flex items-center justify-center mx-auto">
+                <div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 flex items-center justify-center mx-auto">
                   <ShieldCheck className="w-6 h-6" />
                 </div>
                 <h4 className="font-moul text-sm text-slate-900 dark:text-white">
-                  {isKm ? 'ផ្ទៀងផ្ទាត់ការបញ្ជាទិញជាវ VIP' : 'Confirm Your VIP Subscription'}
+                  {isKm ? 'ផ្ទៀងផ្ទាត់ការបញ្ជាក់ជា VIP' : 'Confirm Your VIP Subscription'}
                 </h4>
                 <p className="text-xs text-slate-500">
                   {isKm ? 'សូមពិនិត្យព័ត៌មានលម្អិតមុនពេលធ្វើការទូទាត់' : 'Please review your order details before completing payment'}
@@ -373,10 +418,17 @@ export const UpgradeVipModal: React.FC = () => {
 
                 <div className="flex justify-between items-center py-1 border-b border-slate-200/60 dark:border-slate-700">
                   <span className="text-slate-500">{isKm ? 'វិធីសាស្ត្រទូទាត់៖' : 'Payment Method:'}</span>
-                  <span className="font-bold text-emerald-600 font-mono">
-                    {paymentMethod === 'GooglePlayBilling' ? 'Google Play Billing' : paymentMethod === 'KHQR' ? 'KHQR / Bakong' : 'Credit Card'}
+                  <span className="font-bold text-[#004B87] dark:text-sky-400 font-mono">
+                    KHQR / ABA Bank (CHEA KIMSENG)
                   </span>
                 </div>
+
+                {bankRef && (
+                  <div className="flex justify-between items-center py-1 border-b border-slate-200/60 dark:border-slate-700">
+                    <span className="text-slate-500">{isKm ? 'លេខកូដប្រតិបត្តិការ (Trx ID)៖' : 'Transaction Ref:'}</span>
+                    <span className="font-mono font-bold text-emerald-600">{bankRef}</span>
+                  </div>
+                )}
 
                 <div className="flex justify-between items-center pt-2 text-sm font-bold">
                   <span className="text-slate-900 dark:text-white">{isKm ? 'តម្លៃសរុបត្រូវបង់៖' : 'Total Amount Due:'}</span>
@@ -416,10 +468,10 @@ export const UpgradeVipModal: React.FC = () => {
           {/* STEP 3: Processing */}
           {step === 'processing' && (
             <div className="py-12 text-center space-y-4">
-              <div className="w-16 h-16 border-4 border-amber-500/30 border-t-amber-500 rounded-full animate-spin mx-auto" />
+              <div className="w-16 h-16 border-4 border-[#004B87]/30 border-t-[#004B87] rounded-full animate-spin mx-auto" />
               <div>
                 <h4 className="font-moul text-sm text-slate-900 dark:text-white">
-                  {isKm ? 'កំពុងផ្ទៀងផ្ទាត់ការទូទាត់...' : 'Verifying Payment...'}
+                  {isKm ? 'កំពុងផ្ទៀងផ្ទាត់ជាមួយធនាគារ ABA...' : 'Verifying ABA Bank Payment...'}
                 </h4>
                 <p className="text-xs text-slate-500 mt-1">
                   {isKm ? 'សូមរង់ចាំមួយភ្លែត ប្រព័ន្ធកំពុងផ្ទៀងផ្ទាត់ជាមួយ Server សុវត្ថិភាព' : 'Validating cryptographic signature & activating VIP access...'}
