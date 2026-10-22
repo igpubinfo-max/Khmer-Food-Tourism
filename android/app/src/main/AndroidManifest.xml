@@ -36,6 +36,19 @@
         </provider>
     </application>
 
+    <!-- Package queries for Android 11+ (API 30+) package visibility -->
+    <queries>
+        <package android:name="com.ababank.mobile" />
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="abamobilebank" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="https" />
+        </intent>
+    </queries>
+
     <!-- Permissions for Khmer Food & Tourism -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />

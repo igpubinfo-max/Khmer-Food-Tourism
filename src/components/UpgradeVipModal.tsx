@@ -6,7 +6,10 @@ import {
   QrCode, ExternalLink, CheckCircle2, ChevronRight,
   Download, Copy, Check, ArrowRight, ShieldAlert, BadgeCheck
 } from 'lucide-react';
-import { TEN_VIP_BENEFITS, isUserVipActive, getVipRemainingDays } from '../types';
+import { 
+  TEN_VIP_BENEFITS, isUserVipActive, getVipRemainingDays,
+  APP_VERSION, APP_BUILD_CODE
+} from '../types';
 import { 
   VIP_ANNUAL_PRICE_USD, 
   VIP_SUBSCRIPTION_DAYS,
@@ -91,16 +94,57 @@ export const UpgradeVipModal: React.FC = () => {
     setCustomTxnRef(`ABA-KHQR-${plan.days}D-${Date.now().toString(36).toUpperCase()}`);
   };
 
-  // Launch ABA Mobile App without prematurely setting status to pending
-  const handleLaunchAbaApp = () => {
+  // Launch ABA Mobile App natively or via fallback without prematurely setting status to pending
+  const handleLaunchAbaApp = async () => {
     setHasLaunchedAba(true);
-    showToast(
-      isKm 
-        ? '✅ កំពុងបើកកម្មវិធី ABA Mobile... សូមបញ្ចប់ការផ្ទេរប្រាក់ រួចចុច «ផ្ទៀងផ្ទាត់ការទូទាត់» ខាងក្រោម!' 
-        : '✅ Opening ABA Mobile... Complete payment, then tap "Verify Payment" below!',
-      'info'
-    );
-    window.location.href = 'abamobilebank://';
+
+    let launchedNatively = false;
+    try {
+      const { Capacitor, registerPlugin } = await import('@capacitor/core');
+      if (Capacitor.isNativePlatform()) {
+        const NativeAbaLauncher = registerPlugin<any>('NativeAbaLauncher');
+        if (NativeAbaLauncher && typeof NativeAbaLauncher.openAbaMobile === 'function') {
+          const res = await NativeAbaLauncher.openAbaMobile();
+          if (res?.success) {
+            launchedNatively = true;
+            showToast(
+              isKm 
+                ? '✅ កំពុងបើកកម្មវិធី ABA Mobile... សូមបញ្ចប់ការផ្ទេរប្រាក់ រួចចុច «ផ្ទៀងផ្ទាត់ការទូទាត់» ខាងក្រោម!' 
+                : '✅ Opening ABA Mobile... Complete payment, then tap "Verify Payment" below!',
+              'info'
+            );
+            return;
+          } else if (res?.reason && res.reason.includes('market')) {
+            showToast(
+              isKm 
+                ? '⚠️ មិនទាន់មាន ABA Mobile ក្នុងទូរស័ព្ទឡើយ កំពុងបើក Play Store ដើម្បីដំឡើង...' 
+                : '⚠️ ABA Mobile not installed, opening Google Play Store...',
+              'info'
+            );
+            return;
+          }
+        }
+      }
+    } catch (err) {
+      console.warn('Native ABA launcher error:', err);
+    }
+
+    if (!launchedNatively) {
+      showToast(
+        isKm 
+          ? '✅ កំពុងបើកកម្មវិធី ABA Mobile... សូមបញ្ចប់ការផ្ទេរប្រាក់ រួចចុច «ផ្ទៀងផ្ទាត់ការទូទាត់» ខាងក្រោម!' 
+          : '✅ Opening ABA Mobile... Complete payment, then tap "Verify Payment" below!',
+        'info'
+      );
+      try {
+        window.location.href = 'intent://#Intent;scheme=abamobilebank;package=com.ababank.mobile;end';
+        setTimeout(() => {
+          window.location.href = 'abamobilebank://';
+        }, 300);
+      } catch {
+        window.location.href = 'abamobilebank://';
+      }
+    }
   };
 
   const handleSaveQrImage = () => {
@@ -193,10 +237,13 @@ export const UpgradeVipModal: React.FC = () => {
                 <Crown className="w-5 h-5 fill-slate-900" />
               </div>
               <div>
-                <h3 className="font-moul text-sm sm:text-base text-white flex items-center gap-1.5">
+                <h3 className="font-moul text-sm sm:text-base text-white flex items-center gap-1.5 flex-wrap">
                   <span>{isKm ? 'ដំឡើងទៅជា Premium VIP' : 'Upgrade to Premium VIP'}</span>
                   <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-900 text-[10px] font-black font-sans">
                     VIP
+                  </span>
+                  <span className="px-1.5 py-0.5 rounded-md bg-white/20 text-white font-mono text-[9px] font-bold border border-white/25">
+                    {APP_VERSION}
                   </span>
                 </h3>
                 <p className="text-[11px] text-amber-200 font-khmer">
@@ -627,6 +674,16 @@ export const UpgradeVipModal: React.FC = () => {
             </div>
           )}
 
+        </div>
+
+        {/* Modal Footer / Prominent App Version Bar */}
+        <div className="px-5 py-2.5 bg-slate-100 dark:bg-slate-950/80 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-500 font-mono shrink-0">
+          <span className="font-semibold text-slate-600 dark:text-slate-400">
+            KhmerFoodTourism {APP_VERSION} (Build {APP_BUILD_CODE})
+          </span>
+          <span className="text-emerald-600 dark:text-emerald-400 font-medium">
+            ABA KHQR Verified
+          </span>
         </div>
       </div>
     </div>

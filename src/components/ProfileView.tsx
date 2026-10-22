@@ -1541,7 +1541,7 @@ export const ProfileView: React.FC = () => {
                 <div className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
                   <span>{isKm ? 'កំណែកម្មវិធី (App Version)' : 'App Version'}</span>
                   <span className="font-mono text-emerald-600 dark:text-emerald-400 font-extrabold text-[11px] bg-emerald-100 dark:bg-emerald-950/80 px-2 py-0.5 rounded-md border border-emerald-300 dark:border-emerald-700">
-                    {APP_VERSION}
+                    KhmerFoodTourism {APP_VERSION}
                   </span>
                 </div>
                 <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
@@ -1608,7 +1608,7 @@ export const ProfileView: React.FC = () => {
               {isKm ? `គណនីកំពុងប្រើប្រាស់៖ ${currentUser.name}` : `Signed in as: ${currentUser.name}`}
             </span>
             <span className="font-mono text-[10px] text-slate-400">
-              v{APP_VERSION} ({APP_BUILD_CODE})
+              KhmerFoodTourism {APP_VERSION} (Build {APP_BUILD_CODE})
             </span>
           </div>
 

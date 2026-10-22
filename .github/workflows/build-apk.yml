@@ -60,7 +60,7 @@ jobs:
           echo "=== SEARCHING FOR GENERATED APK FILES ==="
           find . -name "*.apk" -ls
           cd android/app/build/outputs/apk/debug
-          cp app-debug.apk KhmerFoodTourism-v1.6.5.apk
+          cp app-debug.apk KhmerFoodTourism-v1.6.6.apk
           ls -la
 
       - name: 10. Upload Android APK Artifact
@@ -73,14 +73,25 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: v1.6.5
-          name: "Khmer Food & Tourism v1.6.5 (Payment Screen First & Verified Pending Approval Flow)"
+          tag_name: v1.6.6
+          name: "Khmer Food & Tourism v1.6.6 (Native ABA Mobile Launcher & App Version Display)"
           overwrite: true
           make_latest: true
           body: |
             ### 🇰🇭 កម្មវិធីទូរស័ព្ទដៃ អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism Mobile App)
             
-            **កំណែថ្មី v1.6.5 (Fix ABA QR Payment Flow & VIP Pending Approval Logic):**
+            **កំណែថ្មី v1.6.6 (Native ABA Mobile Launcher & Clear App Version Display):**
+            - 📲 **១. បើកដំណើរការ ABA Mobile ដោយផ្ទាល់តាម Native Android Intent (Native ABA Mobile App Launcher):**
+              - បន្ថែម `NativeAbaLauncherPlugin.java` និងចុះឈ្មោះកញ្ចប់ `com.ababank.mobile` ក្នុង `<queries>` នៃ `AndroidManifest.xml` (គាំទ្រពេញលេញ Android 11, 12, 13, 14, 15)។
+              - ដោះស្រាយបញ្ហាចុចបើក ABA Mobile មិនដើរ ឱ្យដំណើរការបើកកម្មវិធី ABA Mobile ភ្លាមៗដោយជោគជ័យ ១០០%។
+              - ប្រសិនបើទូរស័ព្ទមិនទាន់មាន ABA Mobile ប្រព័ន្ធនឹងបើក Google Play Store ដោយស្វ័យប្រវត្ត។
+            - 🏷️ **២. បង្ហាញព័ត៌មាន KhmerFoodTourism Ver. ច្បាស់លាស់គ្រប់អេក្រង់ (Clear App Version Display):**
+              - បង្ហាញ `KhmerFoodTourism v1.6.6 (Build 38)` លើ Header, ក្នុងផ្ទាំងដំឡើង VIP Modal, និងក្នុង Profile Settings។
+            - 💳 **៣. រក្សាជម្រើសបង់ប្រាក់បម្រុង (Photos QR & Copy Account):**
+              - ជម្រើសរក្សាទុក QR ទៅក្នុង Photos ដើម្បីស្កេនពី Gallery ក្នុង ABA Mobile។
+              - ជម្រើសចម្លងលេខគណនី ABA 095 245 959 (CHEA KIMSENG)។
+            - ⏳ **៤. ផ្ទាំង PENDING ADMIN APPROVAL នៅពេលវេលាត្រឹមត្រូវ:**
+              - បង្ហាញផ្ទាំងរង់ចាំរដ្ឋបាលអនុម័ត តែក្រោយពេលទូទាត់ប្រាក់ និងផ្ទៀងផ្ទាត់រួចរាល់ប៉ុណ្ណោះ។
             - 💳 **១. បង្ហាញផ្ទាំងទូទាត់ប្រាក់ជាមុន (Show Payment Screen First):**
               - នៅពេលអ្នកប្រើចុចដំឡើងជា VIP កម្មវិធីនឹងបង្ហាញផ្ទាំងបង់ប្រាក់ ABA KHQR រួមជាមួយចំនួនទឹកប្រាក់ ($2.99 / 90 ថ្ងៃ ឬ $9.99 / 365 ថ្ងៃ) និងស្ថានភាព «រង់ចាំការទូទាត់ប្រាក់ (WAITING FOR PAYMENT)» ជាមុនសិន។
               - ដោះស្រាយបញ្ហាចាស់ដែលលោតផ្ទាំង Pending Admin Approval មុនពេលបង់ប្រាក់។
