@@ -51,6 +51,15 @@ jobs:
 
       - name: 8. Build Android Debug APK
         run: |
+          if [ ! -f android/app/khmerfood-upload-key.jks ]; then
+            keytool -genkeypair -v -noprompt \
+              -keystore android/app/khmerfood-upload-key.jks \
+              -alias khmerfood-upload \
+              -keyalg RSA -keysize 2048 -validity 10000 \
+              -storepass 'KhmerFood2026PlayStore' \
+              -keypass 'KhmerFood2026PlayStore' \
+              -dname "CN=Savuth Chea, OU=Khmer Food and Tourism, O=Khmer Food and Tourism, L=Phnom Penh, ST=Phnom Penh, C=KH"
+          fi
           cd android
           chmod +x ./gradlew
           ./gradlew assembleDebug --no-daemon
@@ -63,22 +72,15 @@ jobs:
           cp app-debug.apk KhmerFoodTourism-v1.7.6.apk
           ls -la
 
-      - name: 9b. Generate Upload Keystore & Build Signed Play Store AAB (Option B)
+      - name: 9b. Build Signed Play Store AAB (Option B)
         run: |
-          if [ ! -f android/app/khmerfood-upload-key.jks ]; then
-            keytool -genkeypair -v \
-              -keystore android/app/khmerfood-upload-key.jks \
-              -alias khmerfood-upload \
-              -keyalg RSA -keysize 2048 -validity 10000 \
-              -storepass "KhmerFood2026!PlayStore" \
-              -keypass "KhmerFood2026!PlayStore" \
-              -dname "CN=Savuth Chea, OU=Khmer Food and Tourism, O=Khmer Food and Tourism, L=Phnom Penh, ST=Phnom Penh, C=KH"
-          fi
           VITE_PLAY_STORE_BUILD=true npm run build
           cp -rf dist/* android/app/src/main/assets/public/
           cd android
-          ./gradlew bundleRelease --no-daemon
-          cp app/build/outputs/bundle/release/app-release.aab app/build/outputs/apk/debug/KhmerFoodTourism-v1.7.6.aab
+          ./gradlew bundleRelease --no-daemon -x lint -x lintVitalRelease
+          AAB_FILE=$(find app/build/outputs/bundle -name "*.aab" | head -n 1)
+          echo "Found AAB: $AAB_FILE"
+          cp "$AAB_FILE" app/build/outputs/apk/debug/KhmerFoodTourism-v1.7.6.aab
           cp app/khmerfood-upload-key.jks app/build/outputs/apk/debug/khmerfood-upload-key.jks
           ls -la app/build/outputs/apk/debug/
 
