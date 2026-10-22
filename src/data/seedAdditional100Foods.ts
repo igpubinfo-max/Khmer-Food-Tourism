@@ -21,82 +21,129 @@ interface AdditionalDishSeed {
   calories: number;
 }
 
-// Category-specific verified online culinary photo bases (Unsplash Food Collection)
-// Each dish gets a unique query signature so no two dishes share the exact same URL or reuse local /foods/ files.
-const ONLINE_PHOTO_BASES: Record<FoodCategorySlug, string[]> = {
-  soup: [
-    'https://images.unsplash.com/photo-1547592166-23ac45744acd',
-    'https://images.unsplash.com/photo-1547592180-85f173990554',
-    'https://images.unsplash.com/photo-1604152135912-04a022e23696',
-    'https://images.unsplash.com/photo-1588166524941-3bf61a9c41db',
-    'https://images.unsplash.com/photo-1565557623262-b51c2513a641',
-    'https://images.unsplash.com/photo-1455619452474-d2be8b1e70cd',
-    'https://images.unsplash.com/photo-1617093727343-374698b1b08d',
-    'https://images.unsplash.com/photo-1569718212165-3a8278d5f624',
-  ],
-  grilled: [
-    'https://images.unsplash.com/photo-1555939594-58d7cb561ad1',
-    'https://images.unsplash.com/photo-1544025162-d76694265947',
-    'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2',
-    'https://images.unsplash.com/photo-1598515214211-89d3c73ae83b',
-    'https://images.unsplash.com/photo-1529193591184-b1d58069ecdd',
-    'https://images.unsplash.com/photo-1532550907401-a500c9a57435',
-    'https://images.unsplash.com/photo-1558030006-450675393462',
-  ],
-  stirfry: [
-    'https://images.unsplash.com/photo-1512058564366-18510be2db19',
-    'https://images.unsplash.com/photo-1603133872878-684f208fb84b',
-    'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb',
-    'https://images.unsplash.com/photo-1540420773420-3366772f4999',
-    'https://images.unsplash.com/photo-1559847844-5315695dadae',
-    'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8',
-    'https://images.unsplash.com/photo-1574484284002-952d92456975',
-  ],
-  salad: [
-    'https://images.unsplash.com/photo-1546069901-ba9599a7e63c',
-    'https://images.unsplash.com/photo-1512621776951-a57141f2eefd',
-    'https://images.unsplash.com/photo-1505253716362-afaea1d3d1af',
-    'https://images.unsplash.com/photo-1607532941433-304659e8198a',
-    'https://images.unsplash.com/photo-1540420773420-3366772f4999',
-  ],
-  noodles: [
-    'https://images.unsplash.com/photo-1569718212165-3a8278d5f624',
-    'https://images.unsplash.com/photo-1552611052-33e04de081de',
-    'https://images.unsplash.com/photo-1585032226651-759b368d7246',
-    'https://images.unsplash.com/photo-1612929633738-8fe44f7ec841',
-    'https://images.unsplash.com/photo-1555126634-323283e090fa',
-  ],
-  rice: [
-    'https://images.unsplash.com/photo-1603133872878-684f208fb84b',
-    'https://images.unsplash.com/photo-1516684732162-798a0062be99',
-    'https://images.unsplash.com/photo-1536304993881-ff6e9eefa2a6',
-    'https://images.unsplash.com/photo-1596560548464-f010549b84d7',
-    'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8',
-  ],
-  streetfood: [
-    'https://images.unsplash.com/photo-1504674900247-0877df9cc836',
-    'https://images.unsplash.com/photo-1562967914-608f82629710',
-    'https://images.unsplash.com/photo-1541544741938-0af808871cc0',
-    'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb',
-  ],
-  dessert: [
-    'https://images.unsplash.com/photo-1551024709-8f23befc6f87',
-    'https://images.unsplash.com/photo-1563805042-7684c019e1cb',
-    'https://images.unsplash.com/photo-1488477181946-6428a0291777',
-    'https://images.unsplash.com/photo-1587314168485-3236d6710814',
-  ],
-  drink: [
-    'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd',
-    'https://images.unsplash.com/photo-1544145945-f90425340c7e',
-    'https://images.unsplash.com/photo-1461023058943-07fcbe16d735',
-    'https://images.unsplash.com/photo-1505252585461-04db1eb84625',
-  ],
+// Dish-specific verified Southeast Asian & Cambodian culinary photos (Wikimedia Commons)
+const DISH_SPECIFIC_PHOTOS: Record<string, string> = {
+  // Soups & Curries (food-101 .. food-116)
+  'food-101': 'https://upload.wikimedia.org/wikipedia/commons/3/33/Tom_saep.JPG',
+  'food-102': 'https://upload.wikimedia.org/wikipedia/commons/e/ea/Tom_yuea_phai.jpg',
+  'food-103': 'https://upload.wikimedia.org/wikipedia/commons/3/3a/Tom_khlong.JPG',
+  'food-104': 'https://upload.wikimedia.org/wikipedia/commons/f/f9/Cambodian_red_curry.jpg',
+  'food-105': 'https://upload.wikimedia.org/wikipedia/commons/f/fe/Tom_som_kraduk_mu.JPG',
+  'food-106': 'https://upload.wikimedia.org/wikipedia/commons/1/1c/Kaeng_lueang.JPG',
+  'food-107': 'https://upload.wikimedia.org/wikipedia/commons/9/97/Kaeng_khua_mu_bai_chamuang.JPG',
+  'food-108': 'https://upload.wikimedia.org/wikipedia/commons/8/8d/Tom_mara_yat_sai_mu_sap_wunsen.jpg',
+  'food-109': 'https://upload.wikimedia.org/wikipedia/commons/1/15/Samlor_machu_kroeung_served_at_Neary_Khmer%2C_2018-01-02.jpg',
+  'food-110': 'https://upload.wikimedia.org/wikipedia/commons/c/c1/Kaeng_phak_wan.JPG',
+  'food-111': 'https://upload.wikimedia.org/wikipedia/commons/5/50/Tom_kha_kai_at_a_restaurant.jpg',
+  'food-112': 'https://upload.wikimedia.org/wikipedia/commons/4/49/Kaeng_phak_bung_sai_pla.jpg',
+  'food-113': 'https://upload.wikimedia.org/wikipedia/commons/d/d4/Kaeng_thae_pho.jpg',
+  'food-114': 'https://upload.wikimedia.org/wikipedia/commons/0/0c/Kaeng_khua_het_fang.jpg',
+  'food-115': 'https://upload.wikimedia.org/wikipedia/commons/7/73/Kaeng_khae-963.JPG',
+  'food-116': 'https://upload.wikimedia.org/wikipedia/commons/d/d3/Kaeng_fak_sai_kai.JPG',
+
+  // Grilled & Roasted (food-117 .. food-130)
+  'food-117': 'https://upload.wikimedia.org/wikipedia/commons/0/02/Elephant_Walk_Trey_Ang.jpg',
+  'food-118': 'https://upload.wikimedia.org/wikipedia/commons/5/5a/Kai_rom_khwan.jpg',
+  'food-119': 'https://upload.wikimedia.org/wikipedia/commons/7/7b/Aep_mu.JPG',
+  'food-120': 'https://upload.wikimedia.org/wikipedia/commons/9/93/Suea_rong_hai.jpg',
+  'food-121': 'https://upload.wikimedia.org/wikipedia/commons/c/cb/Plamuk_yang.jpg',
+  'food-122': 'https://upload.wikimedia.org/wikipedia/commons/3/3b/Kung_yang.JPG',
+  'food-123': 'https://upload.wikimedia.org/wikipedia/commons/7/79/Si_khrong_mu_thot.JPG',
+  'food-124': 'https://upload.wikimedia.org/wikipedia/commons/9/9b/Miang_pla.jpg',
+  'food-125': 'https://upload.wikimedia.org/wikipedia/commons/4/4c/Ho_mok_thale.jpg',
+  'food-126': 'https://upload.wikimedia.org/wikipedia/commons/8/85/Kai_yang_CM.jpg',
+  'food-127': 'https://upload.wikimedia.org/wikipedia/commons/0/07/Pla_wong_thot.jpg',
+  'food-128': 'https://upload.wikimedia.org/wikipedia/commons/7/7d/Kho_mu_yang_kratha_ron.jpg',
+  'food-129': 'https://upload.wikimedia.org/wikipedia/commons/2/24/Khao_na_pet.JPG',
+  'food-130': 'https://upload.wikimedia.org/wikipedia/commons/1/19/Nam_phrik_pla_thu872.jpg',
+
+  // Stir-Fry & Braised (food-131 .. food-146)
+  'food-131': 'https://upload.wikimedia.org/wikipedia/commons/8/80/Cha_kroeung.jpg',
+  'food-132': 'https://upload.wikimedia.org/wikipedia/commons/8/89/Mu_phat_phrik_khing.jpg',
+  'food-133': 'https://upload.wikimedia.org/wikipedia/commons/0/09/Kai_phat_khing.jpg',
+  'food-134': 'https://upload.wikimedia.org/wikipedia/commons/1/19/Pak_boong_fai_daeng.jpg',
+  'food-135': 'https://upload.wikimedia.org/wikipedia/commons/6/60/Nor_mai_farang_phat_kung.jpg',
+  'food-136': 'https://upload.wikimedia.org/wikipedia/commons/e/e3/Pla_muek_phat_phrik_phao.JPG',
+  'food-137': 'https://upload.wikimedia.org/wikipedia/commons/2/20/Nuea_phat_bai_yira.jpg',
+  'food-138': 'https://upload.wikimedia.org/wikipedia/commons/3/33/Phat_buap.jpg',
+  'food-139': 'https://upload.wikimedia.org/wikipedia/commons/1/12/Phat_khana_mu_krop.jpg',
+  'food-140': 'https://upload.wikimedia.org/wikipedia/commons/6/68/Khao_kha_mu_02.JPG',
+  'food-141': 'https://upload.wikimedia.org/wikipedia/commons/3/38/Tap_kai_phat_phrik_sot.jpg',
+  'food-142': 'https://upload.wikimedia.org/wikipedia/commons/4/40/Pla_tub_tim_tod_samrod.jpg',
+  'food-143': 'https://upload.wikimedia.org/wikipedia/commons/1/14/Pla_duk_phat_phet.jpg',
+  'food-144': 'https://upload.wikimedia.org/wikipedia/commons/f/fb/Deep_fried_prawns_with_garlic_and_pepper%2C_Chung_Borikan_2.jpg',
+  'food-145': 'https://upload.wikimedia.org/wikipedia/commons/1/10/Peppered_Ginger_Chicken.jpg',
+  'food-146': 'https://upload.wikimedia.org/wikipedia/commons/9/94/Pla_sam_thap.jpg',
+
+  // Salads & Dips (food-147 .. food-156)
+  'food-147': 'https://upload.wikimedia.org/wikipedia/commons/c/c5/Phla_nuea_makhuea_on.jpg',
+  'food-148': 'https://upload.wikimedia.org/wikipedia/commons/7/76/Phnom_Penh_-_Banana_Flower_Salad_(16818928552).jpg',
+  'food-149': 'https://upload.wikimedia.org/wikipedia/commons/1/1e/Yam_wun_sen.JPG',
+  'food-150': 'https://upload.wikimedia.org/wikipedia/commons/3/31/Yam_som-o.JPG',
+  'food-151': 'https://upload.wikimedia.org/wikipedia/commons/f/f6/SpicyRawShrimpSalad.jpg',
+  'food-152': 'https://upload.wikimedia.org/wikipedia/commons/a/a2/2019_02_Yam_pla_salit.jpg',
+  'food-153': 'https://upload.wikimedia.org/wikipedia/commons/6/6f/Yam_takhrai_kung_sot.jpg',
+  'food-154': 'https://upload.wikimedia.org/wikipedia/commons/0/0f/Nam_phrik_kapi_2.jpg',
+  'food-155': 'https://upload.wikimedia.org/wikipedia/commons/4/4f/Nam_phrik_ong_02.jpg',
+  'food-156': 'https://upload.wikimedia.org/wikipedia/commons/c/c2/Khmer-style_green_papaya_salad.jpg',
+
+  // Noodles (food-157 .. food-166)
+  'food-157': 'https://upload.wikimedia.org/wikipedia/commons/f/fc/Num_Banh_Chok_Somlar_Kari.jpg',
+  'food-158': 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Boat_noodles.jpg',
+  'food-159': 'https://upload.wikimedia.org/wikipedia/commons/8/8a/Phat_mama.jpg',
+  'food-160': 'https://upload.wikimedia.org/wikipedia/commons/3/39/Phat_Thai_kung_Chang_Khien_street_stall.jpg',
+  'food-161': 'https://upload.wikimedia.org/wikipedia/commons/b/b0/Bami_mu_daeng_kiao.JPG',
+  'food-162': 'https://upload.wikimedia.org/wikipedia/commons/b/b5/B%C3%BAn_n%C6%B0%E1%BB%9Bc_l%C3%A8o.jpg',
+  'food-163': 'https://upload.wikimedia.org/wikipedia/commons/e/e6/Khanom_Jeen_Nam_Yaa.jpg',
+  'food-164': 'https://upload.wikimedia.org/wikipedia/commons/9/95/Fried_cellophane_noodles_with_shrimp_Pad_woon_sen_kung.jpg',
+  'food-165': 'https://upload.wikimedia.org/wikipedia/commons/3/30/Kuaitiao_nuea_pueay.JPG',
+  'food-166': 'https://upload.wikimedia.org/wikipedia/commons/c/c4/Banh-Canh-Noodle-Soup.jpg',
+
+  // Rice & Porridge (food-167 .. food-176)
+  'food-167': 'https://upload.wikimedia.org/wikipedia/commons/5/50/Thaifriedrice.jpg',
+  'food-168': 'https://upload.wikimedia.org/wikipedia/commons/f/f0/Khao_mu_krop_mu_daeng_in_Nong_Khai.jpg',
+  'food-169': 'https://upload.wikimedia.org/wikipedia/commons/f/f2/Jok_mu_sap.JPG',
+  'food-170': 'https://upload.wikimedia.org/wikipedia/commons/f/fc/Khao_tom_pla_01.jpg',
+  'food-171': 'https://upload.wikimedia.org/wikipedia/commons/6/69/2017_0426_Mu_krop_phat_kaphrao_khai_dao_rat_khao_in_Ayutthaya.jpg',
+  'food-172': 'https://upload.wikimedia.org/wikipedia/commons/e/ed/2013_Khao_man_kai_Chiang_Mai.jpg',
+  'food-173': 'https://upload.wikimedia.org/wikipedia/commons/9/94/Khao.kluke.kapi-01.jpg',
+  'food-174': 'https://upload.wikimedia.org/wikipedia/commons/0/09/Khao_tom_kui.jpg',
+  'food-175': 'https://upload.wikimedia.org/wikipedia/commons/c/c9/Nuea_daet_diao_kraphao_thot.jpg',
+  'food-176': 'https://upload.wikimedia.org/wikipedia/commons/8/8d/Khao_phat_nam_phrik_long_ruea.jpg',
+
+  // Street Food & Snacks (food-177 .. food-184)
+  'food-177': 'https://upload.wikimedia.org/wikipedia/commons/c/cb/Khanom_khrok.jpg',
+  'food-178': 'https://upload.wikimedia.org/wikipedia/commons/d/d1/Thad_khai.jpg',
+  'food-179': 'https://upload.wikimedia.org/wikipedia/commons/d/d4/Yam_hoi_khraeng.jpg',
+  'food-180': 'https://upload.wikimedia.org/wikipedia/commons/a/a2/Grilled_pork_and_beef_balls.jpg',
+  'food-181': 'https://upload.wikimedia.org/wikipedia/commons/7/7e/Khao_phan_nga_muan.jpg',
+  'food-182': 'https://upload.wikimedia.org/wikipedia/commons/c/c2/Banh_goi_03.JPG',
+  'food-183': 'https://upload.wikimedia.org/wikipedia/commons/e/eb/Khanom_kuichai.jpg',
+  'food-184': 'https://upload.wikimedia.org/wikipedia/commons/0/0a/Balut_Egg.jpg',
+
+  // Desserts & Traditional Cakes (food-185 .. food-192)
+  'food-185': 'https://upload.wikimedia.org/wikipedia/commons/6/65/Sankya_lapov.jpg',
+  'food-186': 'https://upload.wikimedia.org/wikipedia/commons/2/2f/Chek_ktis.jpg',
+  'food-187': 'https://upload.wikimedia.org/wikipedia/commons/f/f6/Banhtet.jpg',
+  'food-188': 'https://upload.wikimedia.org/wikipedia/commons/4/4d/Banhit.jpg',
+  'food-189': 'https://upload.wikimedia.org/wikipedia/commons/b/ba/Banhchay.JPG',
+  'food-190': 'https://upload.wikimedia.org/wikipedia/commons/8/87/Mango_with_glutinous_rice.jpg',
+  'food-191': 'https://upload.wikimedia.org/wikipedia/commons/e/ed/Num_Plae_Ai.jpg',
+  'food-192': 'https://upload.wikimedia.org/wikipedia/commons/7/71/Khanom_tako_pheuak70.jpg',
+
+  // Drinks & Beverages (food-193 .. food-200)
+  'food-193': 'https://upload.wikimedia.org/wikipedia/commons/a/a2/Sugar_cane_juice_in_Phnom_Penh_4.jpg',
+  'food-194': 'https://upload.wikimedia.org/wikipedia/commons/8/8a/Kafae_boran_Chiang_Mai.jpg',
+  'food-195': 'https://upload.wikimedia.org/wikipedia/commons/0/01/Borassus_flabellifer.jpg',
+  'food-196': 'https://upload.wikimedia.org/wikipedia/commons/a/a4/Nam_bai_bua_bok.JPG',
+  'food-197': 'https://upload.wikimedia.org/wikipedia/commons/f/f4/9750Foods_Fruits_Baliuag_Bulacan_Philippines_37.jpg',
+  'food-198': 'https://upload.wikimedia.org/wikipedia/commons/0/0d/A_Hong_Kong_Style_Ice_Lemon_Tea_in_Cheung_Chau.jpg',
+  'food-199': 'https://upload.wikimedia.org/wikipedia/commons/2/2c/A_cup_of_hot_soy_milk_(3076343897).jpg',
+  'food-200': 'https://upload.wikimedia.org/wikipedia/commons/5/5f/Acai_rosa_soy_granita_in_habitu_cafe.jpg',
 };
 
-function getMatchedOnlinePhotoUrl(cat: FoodCategorySlug, index: number, dishId: string): string {
-  const pool = ONLINE_PHOTO_BASES[cat] || ONLINE_PHOTO_BASES.soup;
-  const base = pool[index % pool.length];
-  return `${base}?w=800&auto=format&fit=crop&q=80&dish=${dishId}`;
+function getMatchedOnlinePhotoUrl(_cat: FoodCategorySlug, _index: number, dishId: string): string {
+  return DISH_SPECIFIC_PHOTOS[dishId] || 'https://upload.wikimedia.org/wikipedia/commons/7/76/2016_Phnom_Penh%2C_Amok_trey_(02).jpg';
 }
 
 const RAW_100_NEW_DISHES: Array<{
@@ -1574,8 +1621,8 @@ export const additional100Foods: FoodItem[] = RAW_100_NEW_DISHES.map((item, idx)
     descriptionEn: `${item.nameEn} is an authentic Cambodian culinary dish prepared with ${item.mainIngEn}, ${item.subIngEn}, and aromatic ${item.herbEn}.`,
     photoUrl: onlinePhotoUrl,
     originalPhotoUrl: onlinePhotoUrl,
-    imageAuditStatus: 'verified',
-    imageAuditNote: `រូបភាពម្ហូបផ្ទៀងផ្ទាត់ពី Online (${item.nameKh})`,
+    imageAuditStatus: 'flagged_review',
+    imageAuditNote: `រូបភាពយោង (${item.nameKh})`,
     prepTime: item.cat === 'drink' ? '១០ នាទី' : '២០ នាទី',
     cookTime: item.cat === 'drink' ? '៥ នាទី' : '២៥ នាទី',
     servings: '២-៤ នាក់',

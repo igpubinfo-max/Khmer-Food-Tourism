@@ -220,7 +220,7 @@ export const NearMeModal: React.FC = () => {
                   <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-slate-100 shrink-0">
                     <img src={r.photoUrl} alt={r.nameKh} className="w-full h-full object-cover" loading="lazy" />
                     <span className="absolute bottom-0.5 right-1 bg-black/60 text-white/80 text-[7px] px-1 rounded-xs">
-                      {isKm ? 'រូបតំណាង' : 'Sample'}
+                      {isKm ? 'រូបភាពយោង' : 'Reference'}
                     </span>
                   </div>
 
@@ -302,7 +302,7 @@ export const NearMeModal: React.FC = () => {
                   <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-slate-100 shrink-0">
                     <img src={d.photoUrl} alt={d.nameKh} className="w-full h-full object-cover" loading="lazy" />
                     <span className="absolute bottom-0.5 right-1 bg-black/60 text-white/80 text-[7px] px-1 rounded-xs">
-                      {isKm ? 'រូបតំណាង' : 'Sample'}
+                      {isKm ? 'រូបភាពយោង' : 'Reference'}
                     </span>
                   </div>
 

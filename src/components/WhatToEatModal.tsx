@@ -285,9 +285,9 @@ export const WhatToEatModal: React.FC = () => {
                     </span>
                   </div>
 
-                  {/* Sample label */}
+                  {/* Reference label */}
                   <span className="absolute bottom-2 right-2 bg-black/60 text-white/80 text-[8px] px-1.5 py-0.5 rounded-xs font-khmer select-none">
-                    {isKm ? 'រូបតំណាង' : 'Sample'}
+                    {isKm ? 'រូបភាពយោង' : 'Reference photo'}
                   </span>
 
                   {/* Title overlay */}

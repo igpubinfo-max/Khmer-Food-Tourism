@@ -49,9 +49,9 @@ export const FoodCard: React.FC<FoodCardProps> = ({ food }) => {
           <Heart className={`w-3.5 h-3.5 ${bookmarked ? 'fill-current' : ''}`} />
         </button>
 
-        {/* Sample / Representative Image Label (រូបតំណាង) */}
+        {/* Reference Image Label (រូបភាពយោង) */}
         <div className="absolute bottom-2.5 right-2.5 px-1.5 py-0.5 rounded-md bg-black/60 backdrop-blur-xs text-[9px] text-white/90 font-khmer border border-white/20 select-none pointer-events-none shadow-xs">
-          <span>{language === 'km' ? 'រូបតំណាង' : 'Sample photo'}</span>
+          <span>{language === 'km' ? 'រូបភាពយោង' : 'Reference photo'}</span>
         </div>
       </div>
 

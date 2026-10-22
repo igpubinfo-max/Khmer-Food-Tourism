@@ -189,6 +189,40 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
                 </ul>
               </div>
 
+              {/* Quick Continue if User Already Has an Active Session on This Device */}
+              {currentUser && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsAuthModalOpen(false);
+                    showToast(
+                      isKm
+                        ? `សូមស្វាគមន៍មកវិញ ${currentUser.name}!`
+                        : `Welcome back, ${currentUser.name}!`,
+                      'success'
+                    );
+                  }}
+                  className="w-full p-3 rounded-2xl bg-gradient-to-r from-[#064E3B] to-[#047857] hover:brightness-110 text-white shadow-md transition-all active:scale-[0.98] flex items-center justify-between cursor-pointer"
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-8 h-8 rounded-xl bg-white/15 border border-white/25 flex items-center justify-center shrink-0">
+                      <User className="w-4 h-4 text-amber-300" />
+                    </div>
+                    <div className="text-left min-w-0">
+                      <span className="block text-xs font-bold truncate">
+                        {isKm
+                          ? `បន្តជាមួយគណនី៖ ${currentUser.name}`
+                          : `Continue as ${currentUser.name}`}
+                      </span>
+                      <span className="block text-[10px] text-emerald-200 truncate">
+                        {currentUser.email}
+                      </span>
+                    </div>
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-amber-300 shrink-0" />
+                </button>
+              )}
+
               {/* HERO BUTTON: CONTINUE WITH GOOGLE */}
               <button
                 type="button"

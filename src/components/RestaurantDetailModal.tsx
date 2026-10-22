@@ -272,9 +272,9 @@ export const RestaurantDetailModal: React.FC = () => {
               </p>
             </div>
 
-            {/* Sample / Representative Image Label (រូបតំណាង) */}
+            {/* Reference Image Label (រូបភាពយោង) */}
             <div className="absolute bottom-2.5 right-3 z-10 px-1.5 py-0.5 rounded-md bg-black/60 backdrop-blur-xs text-[9px] text-white/90 font-khmer border border-white/20 select-none pointer-events-none shadow-xs">
-              <span>{isKm ? 'រូបតំណាង' : 'Sample photo'}</span>
+              <span>{isKm ? 'រូបភាពយោង' : 'Reference photo'}</span>
             </div>
           </div>
 
@@ -504,7 +504,7 @@ export const RestaurantDetailModal: React.FC = () => {
                       <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-slate-100 shrink-0 border border-slate-200 dark:border-slate-700">
                         <img src={item.photoUrl} alt={item.nameKh} className="w-full h-full object-cover" />
                         <span className="absolute bottom-0 right-0 bg-black/65 text-white/90 text-[7px] px-1 rounded-tl-sm font-khmer select-none">
-                          {isKm ? 'រូបតំណាង' : 'Sample'}
+                          {isKm ? 'រូបភាពយោង' : 'Ref'}
                         </span>
                       </div>
                       <div className="flex-1 min-w-0">

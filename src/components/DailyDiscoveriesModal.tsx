@@ -129,7 +129,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
                     {isKm ? 'ហាងថ្មីគួរស្គាល់' : 'Featured Gem'}
                   </span>
                   <span className="absolute bottom-1 right-2 bg-black/60 text-white/80 text-[7px] px-1 rounded-xs">
-                    {isKm ? 'រូបតំណាង' : 'Sample'}
+                    {isKm ? 'រូបភាពយោង' : 'Reference'}
                   </span>
                   <div className="absolute bottom-2.5 left-3 right-3 text-white">
                     <h4 className="font-bold text-sm sm:text-base leading-snug drop-shadow">
@@ -175,7 +175,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
                     <div className="relative aspect-4/3 rounded-xl overflow-hidden bg-slate-100">
                       <img src={food.photoUrl} alt={food.nameKh} className="w-full h-full object-cover" loading="lazy" />
                       <span className="absolute bottom-0.5 right-1 bg-black/60 text-white/80 text-[7px] px-1 rounded-xs">
-                        {isKm ? 'រូបតំណាង' : 'Sample'}
+                        {isKm ? 'រូបភាពយោង' : 'Reference'}
                       </span>
                     </div>
                     <div>
@@ -214,7 +214,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
                     {dailyDestination.provinceKh}
                   </span>
                   <span className="absolute bottom-1 right-2 bg-black/60 text-white/80 text-[7px] px-1 rounded-xs">
-                    {isKm ? 'រូបតំណាង' : 'Sample'}
+                    {isKm ? 'រូបភាពយោង' : 'Reference'}
                   </span>
                   <div className="absolute bottom-2.5 left-3 right-3 text-white">
                     <h4 className="font-bold text-sm sm:text-base leading-snug drop-shadow">

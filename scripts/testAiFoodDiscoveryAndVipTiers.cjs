@@ -296,6 +296,24 @@ test('Auto Online Food Image Search («🤖 ស្វែងរករូបភា
   assert(foodImgModalContent.includes('🤖 ស្វែងរករូបភាពម្ហូបពី Online ដោយស្វ័យប្រវត្តិ'), 'Auto Online Food Photo Search button present in FoodImageModal');
 });
 
+test('Welcome Screen (3-5s before Login), Gemini Vision API Key, Dish-Specific Photos & «រូបភាពយោង» Label Replacement', () => {
+  const welcomeModalContent = fs.readFileSync(path.resolve(__dirname, '../src/components/WelcomeScreenModal.tsx'), 'utf8');
+  const add100Content = fs.readFileSync(path.resolve(__dirname, '../src/data/seedAdditional100Foods.ts'), 'utf8');
+  const destSeed = fs.readFileSync(path.resolve(__dirname, '../src/data/seedDestinations.ts'), 'utf8');
+  const foodCardContent = fs.readFileSync(path.resolve(__dirname, '../src/components/FoodCard.tsx'), 'utf8');
+  const restCardContent = fs.readFileSync(path.resolve(__dirname, '../src/components/RestaurantCard.tsx'), 'utf8');
+  const touristCardContent = fs.readFileSync(path.resolve(__dirname, '../src/components/TouristCard.tsx'), 'utf8');
+
+  assert(aiFoodServiceContent.includes("DEFAULT_GEMINI_VISION_API_KEY = 'AIzaSyCZnYNQLNcuco5HxdmrWVXKXwvAr7mg7v0'"), 'Gemini Vision API key pre-configured');
+  assert(welcomeModalContent.includes('WELCOME_DURATION_MS = 4500') && welcomeModalContent.includes('ចាប់ផ្តើមប្រើប្រាស់ឥឡូវនេះ'), 'WelcomeScreenModal has 4.5s timer and Get Started button');
+  assert(appContent.includes('WELCOME_SESSION_KEY') && appContent.includes('<WelcomeScreenModal'), 'WelcomeScreenModal integrated once per session in App.tsx');
+  assert(add100Content.includes('DISH_SPECIFIC_PHOTOS') && !add100Content.includes('images.unsplash.com'), 'All 100 new dishes (food-101..200) use dish-specific Wikimedia Commons photos');
+  assert(!destSeed.includes('Pol_Pot') && !destSeed.includes('Vietnamese_invasion') && !destSeed.includes('Pupil') && !destSeed.includes('Fish_Amok'), 'All mismatched destination photos removed from seedDestinations.ts');
+  assert(foodCardContent.includes('រូបភាពយោង') && !foodCardContent.includes('រូបតំណាង'), 'FoodCard uses រូបភាពយោង instead of រូបតំណាង');
+  assert(restCardContent.includes('រូបភាពយោង') && !restCardContent.includes('រូបតំណាង'), 'RestaurantCard uses រូបភាពយោង instead of រូបតំណាង');
+  assert(touristCardContent.includes('រូបភាពយោង') && !touristCardContent.includes('រូបតំណាង'), 'TouristCard uses រូបភាពយោង instead of រូបតំណាង');
+});
+
 console.log('\n================================================================');
 console.log(`  ALL ${pass}/${pass} AI FOOD DISCOVERY & PAYMENT SECURITY TESTS PASSED!`);
 console.log('================================================================\n');

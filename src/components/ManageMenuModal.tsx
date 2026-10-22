@@ -451,7 +451,7 @@ export const ManageMenuModal: React.FC = () => {
                           <div className="relative w-14 h-14 rounded-xl overflow-hidden bg-slate-100 shrink-0 border border-slate-200">
                             <img src={item.photoUrl} alt={item.nameKh} className="w-full h-full object-cover" />
                             <span className="absolute bottom-0 right-0 bg-black/65 text-white/90 text-[7px] px-1 rounded-tl-sm font-khmer select-none">
-                              {isKm ? 'រូបតំណាង' : 'Sample'}
+                              {isKm ? 'រូបភាពយោង' : 'Ref'}
                             </span>
                           </div>
 

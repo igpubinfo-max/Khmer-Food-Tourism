@@ -349,17 +349,37 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       localStorage.removeItem('kft_foods_100_v2');
     } catch {}
     try {
-      const saved = localStorage.getItem('kft_foods_100_v3');
+      const saved = localStorage.getItem('kft_foods_200_v4') || localStorage.getItem('kft_foods_100_v3');
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length >= 50 && parsed[0]?.photoUrl?.startsWith('/foods/')) {
-          const existingIds = new Set(parsed.map((f: FoodItem) => f.id));
+          const initialMap = new Map(initialFoods.map(f => [f.id, f]));
+          const upgraded = parsed.map((f: FoodItem) => {
+            const seed = initialMap.get(f.id);
+            if (!seed) return f;
+            // Refresh food-101..food-200 if still using old generic Unsplash URL
+            if (
+              f.id.startsWith('food-') &&
+              parseInt(f.id.replace('food-', ''), 10) >= 101 &&
+              (!f.photoUrl || f.photoUrl.includes('images.unsplash.com'))
+            ) {
+              return {
+                ...f,
+                photoUrl: seed.photoUrl,
+                originalPhotoUrl: seed.originalPhotoUrl,
+                imageAuditStatus: seed.imageAuditStatus,
+                imageAuditNote: seed.imageAuditNote,
+              };
+            }
+            return f;
+          });
+          const existingIds = new Set(upgraded.map((f: FoodItem) => f.id));
           const missingFromInitial = initialFoods.filter(f => !existingIds.has(f.id));
-          return missingFromInitial.length > 0 ? [...parsed, ...missingFromInitial] : parsed;
+          return missingFromInitial.length > 0 ? [...upgraded, ...missingFromInitial] : upgraded;
         }
       }
     } catch (e) {
-      console.warn('Failed to parse kft_foods_100_v3', e);
+      console.warn('Failed to parse kft_foods_200_v4', e);
     }
     return initialFoods;
   });
@@ -545,15 +565,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [destinations, setDestinations] = useState<TouristDestination[]>(() => {
     try {
-      const saved = localStorage.getItem('kft_destinations_real_v5');
+      const saved = localStorage.getItem('kft_destinations_real_v6') || localStorage.getItem('kft_destinations_real_v5');
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length >= 100 && !String(parsed[0]?.photoUrl || '').includes('1569683795645')) {
-          return parsed;
+          const initialMap = new Map(initialDestinations.map(d => [d.id, d]));
+          const upgraded = parsed.map((d: TouristDestination) => {
+            const seed = initialMap.get(d.id);
+            if (!seed) return d;
+            // Keep custom data: photo uploads, otherwise sync verified landmark photoUrl from seed
+            const hasCustomDataUpload = typeof d.photoUrl === 'string' && d.photoUrl.startsWith('data:');
+            return {
+              ...d,
+              photoUrl: hasCustomDataUpload ? d.photoUrl : seed.photoUrl,
+            };
+          });
+          const existingIds = new Set(upgraded.map((d: TouristDestination) => d.id));
+          const missingFromInitial = initialDestinations.filter(d => !existingIds.has(d.id));
+          return missingFromInitial.length > 0 ? [...upgraded, ...missingFromInitial] : upgraded;
         }
       }
     } catch (e) {
-      console.warn('Failed to parse kft_destinations_real_v5', e);
+      console.warn('Failed to parse kft_destinations_real_v6', e);
     }
     try {
       localStorage.removeItem('kft_destinations_google_v3');
@@ -986,7 +1019,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     try {
       if (foods && foods.length > 0) {
-        localStorage.setItem('kft_foods_100_v3', JSON.stringify(foods));
+        localStorage.setItem('kft_foods_200_v4', JSON.stringify(foods));
       }
     } catch (e) {
       console.warn('Storage sync failed for foods:', e);
@@ -1006,7 +1039,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     try {
       if (destinations && destinations.length > 0) {
-        localStorage.setItem('kft_destinations_real_v5', JSON.stringify(destinations));
+        localStorage.setItem('kft_destinations_real_v6', JSON.stringify(destinations));
       }
     } catch (e) {
       console.warn('Storage sync failed for destinations:', e);

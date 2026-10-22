@@ -156,9 +156,9 @@ export const FoodDetailModal: React.FC = () => {
               </p>
             </div>
 
-            {/* Sample / Representative Image Label (រូបតំណាង) */}
+            {/* Reference Image Label (រូបភាពយោង) */}
             <div className="absolute bottom-4 right-4 z-10 px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-xs text-[10px] text-white/90 font-khmer border border-white/20 select-none pointer-events-none shadow-xs">
-              <span>{language === 'km' ? 'រូបតំណាង' : 'Sample photo'}</span>
+              <span>{language === 'km' ? 'រូបភាពយោង' : 'Reference photo'}</span>
             </div>
           </div>
 

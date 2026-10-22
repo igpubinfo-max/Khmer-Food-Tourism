@@ -199,6 +199,7 @@ const AI_USAGE_STORAGE_KEY = 'kft_ai_food_daily_usage_v1';
 const AI_CORRECTIONS_STORAGE_KEY = 'kft_ai_user_corrections_feedback_v1';
 const AI_VISION_CACHE_STORAGE_KEY = 'kft_ai_vision_cache_v1';
 const AI_VISION_CONFIG_STORAGE_KEY = 'kft_ai_vision_config_v1';
+export const DEFAULT_GEMINI_VISION_API_KEY = 'AIzaSyCZnYNQLNcuco5HxdmrWVXKXwvAr7mg7v0';
 
 export interface AiVisionProviderConfig {
   provider: 'backend_proxy' | 'gemini_vision' | 'openai_vision' | 'hybrid_hsv_vision';
@@ -241,9 +242,9 @@ export function getAiVisionProviderConfig(): AiVisionProviderConfig {
     if (raw) {
       const parsed = JSON.parse(raw);
       return {
-        provider: parsed.provider || (envBackendUrl ? 'backend_proxy' : 'hybrid_hsv_vision'),
+        provider: parsed.provider || (envBackendUrl ? 'backend_proxy' : 'gemini_vision'),
         backendProxyUrl: parsed.backendProxyUrl || envBackendUrl || '',
-        apiKey: parsed.apiKey || '',
+        apiKey: parsed.apiKey || DEFAULT_GEMINI_VISION_API_KEY,
         modelName: parsed.modelName || 'gemini-2.5-flash',
         timeoutMs: parsed.timeoutMs || 10000,
       };
@@ -253,8 +254,9 @@ export function getAiVisionProviderConfig(): AiVisionProviderConfig {
   }
 
   return {
-    provider: envBackendUrl ? 'backend_proxy' : 'hybrid_hsv_vision',
+    provider: envBackendUrl ? 'backend_proxy' : 'gemini_vision',
     backendProxyUrl: envBackendUrl || '',
+    apiKey: DEFAULT_GEMINI_VISION_API_KEY,
     modelName: 'gemini-2.5-flash',
     timeoutMs: 10000,
   };

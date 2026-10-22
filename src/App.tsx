@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
 import { Header } from './components/Header';
 import { BottomNav } from './components/BottomNav';
@@ -12,6 +12,7 @@ import { FoodDetailModal } from './components/FoodDetailModal';
 import { RestaurantDetailModal } from './components/RestaurantDetailModal';
 import { TouristDetailModal } from './components/TouristDetailModal';
 import { AuthModal } from './components/AuthModal';
+import { WelcomeScreenModal, WELCOME_SESSION_KEY } from './components/WelcomeScreenModal';
 import { AddRestaurantModal } from './components/AddRestaurantModal';
 import { ManageMenuModal } from './components/ManageMenuModal';
 import { AdminDashboard } from './components/AdminDashboard';
@@ -37,7 +38,25 @@ import { RestaurantCheckInModal } from './components/RestaurantCheckInModal';
 import { Toast } from './components/Toast';
 
 const MainScreen: React.FC = () => {
-  const { activeTab, currentUser } = useApp();
+  const { activeTab, currentUser, setIsAuthModalOpen } = useApp();
+  const [showWelcomeScreen, setShowWelcomeScreen] = useState<boolean>(() => {
+    try {
+      return sessionStorage.getItem(WELCOME_SESSION_KEY) !== 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  if (showWelcomeScreen) {
+    return (
+      <WelcomeScreenModal
+        onComplete={() => {
+          setShowWelcomeScreen(false);
+          setIsAuthModalOpen(true);
+        }}
+      />
+    );
+  }
 
   // Strict Condition: If user does not create or sign into an account, app cannot be used!
   if (!currentUser) {
