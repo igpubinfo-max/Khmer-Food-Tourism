@@ -46,8 +46,50 @@ export interface GooglePlaceCachedItem {
   cachedAt: string;
 }
 
-const SMART_CACHE_STORAGE_KEY = 'kft_google_places_smart_cache_v1';
+const SMART_CACHE_STORAGE_KEY = 'kft_google_places_smart_cache_v2';
 const SMART_CACHE_STATS_KEY = 'kft_google_places_cache_stats_v1';
+
+/**
+ * Sanitize any phone string into a clean dialable phone number (digits and optional leading +).
+ * Returns '' if the string is a placeholder message (e.g. 'មើលទីតាំងលើផែនទី Google Maps') or has < 6 digits.
+ */
+export function sanitizeDialablePhone(rawPhone?: string): string {
+  if (!rawPhone) return '';
+  const khmerDigits = '០១២៣៤៥៦៧៨៩';
+  const normalized = String(rawPhone)
+    .replace(/[០-៩]/g, (ch) => String(khmerDigits.indexOf(ch)))
+    .trim();
+
+  if (
+    !normalized ||
+    normalized.includes('Google Maps') ||
+    normalized.includes('មើលទីតាំង') ||
+    normalized.includes('មាននៅលើ')
+  ) {
+    return '';
+  }
+
+  // Take first phone number if multiple are separated by ; / , or |
+  const firstPart = normalized.split(/[;/,|]/)[0] || '';
+  const dialable = firstPart.replace(/[^+0-9]/g, '');
+  const digitCount = dialable.replace(/\D/g, '').length;
+  return digitCount >= 6 ? dialable : '';
+}
+
+/**
+ * Format a phone string for human display, or return '' if not a valid phone number
+ */
+export function formatDisplayPhone(rawPhone?: string): string {
+  const dialable = sanitizeDialablePhone(rawPhone);
+  if (!dialable) return '';
+  const khmerDigits = '០១២៣៤៥៦៧៨៩';
+  const firstPart = String(rawPhone || '')
+    .replace(/[០-៩]/g, (ch) => String(khmerDigits.indexOf(ch)))
+    .split(/[;/,|]/)[0]
+    .replace(/[^+0-9\s()-]/g, '')
+    .trim();
+  return firstPart || dialable;
+}
 
 /**
  * Extended Verified Phnom Penh & Cambodia Real Places Directory
@@ -417,7 +459,11 @@ export async function searchCambodiaPlacesWithSmartCache(
     );
   });
 
-  if (matchedInCache.length > 0) {
+  if (
+    matchedInCache.length > 0 &&
+    (!isGoogleMapsConfigured() ||
+      matchedInCache.some((m) => m.placeId.startsWith('gmap-')))
+  ) {
     incrementCacheStat('cacheHitsSavedQuota');
     return {
       results: matchedInCache,
@@ -437,7 +483,7 @@ export async function searchCambodiaPlacesWithSmartCache(
       const searchBiasText =
         provinceFilter && provinceFilter !== 'ទាំងអស់'
           ? `${cleanQuery} ${provinceFilter} Cambodia`
-          : `${cleanQuery} Phnom Penh Cambodia`;
+          : `${cleanQuery} Cambodia`;
 
       const res = await fetch('https://places.googleapis.com/v1/places:searchText', {
         method: 'POST',
@@ -445,7 +491,7 @@ export async function searchCambodiaPlacesWithSmartCache(
           'Content-Type': 'application/json',
           'X-Goog-Api-Key': cfg.googleMapsApiKey,
           'X-Goog-FieldMask':
-            'places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.userRatingCount,places.nationalPhoneNumber,places.regularOpeningHours,places.photos,places.types,places.googleMapsUri',
+            'places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.userRatingCount,places.nationalPhoneNumber,places.internationalPhoneNumber,places.regularOpeningHours,places.photos,places.types,places.googleMapsUri',
         },
         body: JSON.stringify({
           textQuery: searchBiasText,
@@ -484,6 +530,10 @@ export async function searchCambodiaPlacesWithSmartCache(
             );
           const isCafe = types.some((t) => ['cafe', 'coffee_shop', 'bakery'].includes(t));
 
+          const cleanPhone = formatDisplayPhone(
+            p.nationalPhoneNumber || p.internationalPhoneNumber || ''
+          );
+
           return {
             placeId: `gmap-${p.id || Date.now()}`,
             nameKh: displayName,
@@ -493,7 +543,7 @@ export async function searchCambodiaPlacesWithSmartCache(
             address,
             lat,
             lng,
-            phone: p.nationalPhoneNumber || 'មាននៅលើ Google Maps',
+            phone: cleanPhone,
             openHours:
               p.regularOpeningHours?.weekdayDescriptions?.[0] || '07:00 AM - 09:00 PM',
             rating: Number(p.rating || 4.5),
@@ -550,10 +600,13 @@ export async function searchCambodiaPlacesWithSmartCache(
           const displayName = row.name || (row.display_name || '').split(',')[0] || cleanQuery;
           const address = row.display_name || 'ភ្នំពេញ, កម្ពុជា';
           const province = inferCambodiaProvinceFromAddressOrGps(address, lat, lng);
-          const phone =
+          const phone = formatDisplayPhone(
             row.extratags?.phone ||
-            row.extratags?.['contact:phone'] ||
-            'មើលទីតាំងលើផែនទី Google Maps';
+              row.extratags?.['contact:phone'] ||
+              row.extratags?.['phone:mobile'] ||
+              row.extratags?.['contact:mobile'] ||
+              ''
+          );
           const openHours = row.extratags?.opening_hours || '07:00 AM - 09:00 PM';
 
           const categoryType =
@@ -611,6 +664,46 @@ export async function searchCambodiaPlacesWithSmartCache(
 }
 
 /**
+ * On-demand lookup of a place's official phone number from Google Maps Places API
+ * when a user clicks Call on a shop that was previously cached without a phone number.
+ */
+export async function resolveRestaurantPhoneOnDemand(
+  name: string,
+  province?: string
+): Promise<string> {
+  if (!isGoogleMapsConfigured() || !name) return '';
+  const cfg = getCloudApiConfig();
+  try {
+    const queryText = province ? `${name} ${province} Cambodia` : `${name} Cambodia`;
+    const res = await fetch('https://places.googleapis.com/v1/places:searchText', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Goog-Api-Key': cfg.googleMapsApiKey,
+        'X-Goog-FieldMask':
+          'places.nationalPhoneNumber,places.internationalPhoneNumber',
+      },
+      body: JSON.stringify({
+        textQuery: queryText,
+        regionCode: 'KH',
+        maxResultCount: 1,
+      }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      const first = data?.places?.[0];
+      const found = formatDisplayPhone(
+        first?.nationalPhoneNumber || first?.internationalPhoneNumber || ''
+      );
+      return found;
+    }
+  } catch {
+    // ignore
+  }
+  return '';
+}
+
+/**
  * Convert a GooglePlaceCachedItem into the app's `Restaurant` model so it can be
  * viewed, called, navigated to on Google Maps, or saved permanently to the app directory!
  */
@@ -627,7 +720,7 @@ export function convertGooglePlaceToRestaurant(place: GooglePlaceCachedItem): Re
     addressEn: place.address,
     provinceKh: place.province,
     provinceEn: place.province,
-    phone: place.phone,
+    phone: formatDisplayPhone(place.phone),
     openingHoursKh: place.openHours,
     openingHoursEn: place.openHours,
     priceLevel: '$$',

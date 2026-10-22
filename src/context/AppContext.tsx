@@ -360,7 +360,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       addressEn: r.addressEn || 'Phnom Penh, Cambodia',
       provinceKh: r.provinceKh || 'រាជធានីភ្នំពេញ',
       provinceEn: r.provinceEn || 'Phnom Penh',
-      phone: r.phone || '012 345 678',
+      phone:
+        r.phone &&
+        !String(r.phone).includes('Google Maps') &&
+        !String(r.phone).includes('មើលទីតាំង') &&
+        !String(r.phone).includes('មាននៅលើ')
+          ? r.phone
+          : '',
       openingHoursKh: r.openingHoursKh || '០៧:០០ ព្រឹក - ០៩:០០ យប់',
       openingHoursEn: r.openingHoursEn || '07:00 AM - 09:00 PM',
       priceLevel: r.priceLevel || '$$',

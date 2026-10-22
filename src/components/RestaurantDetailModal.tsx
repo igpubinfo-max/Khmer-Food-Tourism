@@ -7,6 +7,11 @@ import {
 } from 'lucide-react';
 import { isRestaurantPremiumActive } from '../types';
 import { RestaurantImageModal } from './RestaurantImageModal';
+import {
+  sanitizeDialablePhone,
+  formatDisplayPhone,
+  resolveRestaurantPhoneOnDemand,
+} from '../services/googlePlacesService';
 
 export const RestaurantDetailModal: React.FC = () => {
   const { 
@@ -32,6 +37,18 @@ export const RestaurantDetailModal: React.FC = () => {
     if (selectedRestaurant) {
       setActivePhoto(selectedRestaurant.photoUrl);
       trackRestaurantView(selectedRestaurant.id);
+      if (!sanitizeDialablePhone(selectedRestaurant.phone)) {
+        resolveRestaurantPhoneOnDemand(
+          selectedRestaurant.nameKh || selectedRestaurant.nameEn,
+          selectedRestaurant.provinceKh
+        ).then((foundPhone) => {
+          if (foundPhone) {
+            const updated = { ...selectedRestaurant, phone: foundPhone };
+            setSelectedRestaurant(updated);
+            updateRestaurant(updated);
+          }
+        });
+      }
     }
   }, [selectedRestaurant?.id]);
 
@@ -40,6 +57,44 @@ export const RestaurantDetailModal: React.FC = () => {
   const isKm = language === 'km';
   const isPremiumActive = isRestaurantPremiumActive(selectedRestaurant);
   const isOwner = currentUser?.id && selectedRestaurant.ownerId === currentUser.id;
+  const dialablePhone = sanitizeDialablePhone(selectedRestaurant.phone);
+  const displayPhone = formatDisplayPhone(selectedRestaurant.phone);
+
+  const handleCallRestaurant = async (e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
+    trackRestaurantCall(selectedRestaurant.id);
+    if (dialablePhone) {
+      window.location.href = `tel:${dialablePhone}`;
+      return;
+    }
+    showToast(
+      isKm
+        ? 'កំពុងស្វែងរកលេខទូរស័ព្ទហាងពី Google Maps...'
+        : 'Checking Google Maps for restaurant phone number...',
+      'info'
+    );
+    const foundPhone = await resolveRestaurantPhoneOnDemand(
+      selectedRestaurant.nameKh || selectedRestaurant.nameEn,
+      selectedRestaurant.provinceKh
+    );
+    const cleanFound = sanitizeDialablePhone(foundPhone);
+    if (cleanFound) {
+      const updated = { ...selectedRestaurant, phone: foundPhone };
+      setSelectedRestaurant(updated);
+      updateRestaurant(updated);
+      window.location.href = `tel:${cleanFound}`;
+      return;
+    }
+    showToast(
+      isKm
+        ? 'ហាងនេះមិនបានដាក់លេខទូរស័ព្ទលើផែនទីទេ — កំពុងបើកទីតាំងលើ Google Maps ជូនលោកអ្នក!'
+        : 'This shop has not listed a phone number on the map — opening Google Maps!',
+      'warning'
+    );
+    if (selectedRestaurant.mapUrl) {
+      window.open(selectedRestaurant.mapUrl, '_blank');
+    }
+  };
 
   const allPhotos = [
     selectedRestaurant.photoUrl,
@@ -135,13 +190,14 @@ export const RestaurantDetailModal: React.FC = () => {
               <Camera className="w-3.5 h-3.5 text-emerald-300" />
               <span>{isKm ? 'ប្តូររូបភាព' : 'Change Photo'}</span>
             </button>
-            <a
-              href={`tel:${selectedRestaurant.phone}`}
+            <button
+              type="button"
+              onClick={handleCallRestaurant}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold shadow transition active:scale-95"
             >
               <Phone className="w-3.5 h-3.5" />
               <span>{isKm ? 'ហៅទូរស័ព្ទ' : 'Call'}</span>
-            </a>
+            </button>
           </div>
         </div>
 
@@ -233,14 +289,14 @@ export const RestaurantDetailModal: React.FC = () => {
                 <span className="truncate">{isKm ? 'ផែនទី' : 'Maps'}</span>
               </a>
 
-              <a
-                href={`tel:${selectedRestaurant.phone}`}
-                onClick={() => trackRestaurantCall(selectedRestaurant.id)}
+              <button
+                type="button"
+                onClick={handleCallRestaurant}
                 className="flex items-center justify-center gap-1 py-2 px-1 rounded-xl bg-[#059669] hover:bg-[#047857] text-white text-[11px] font-bold shadow transition active:scale-95 font-mono"
               >
                 <Phone className="w-3.5 h-3.5 shrink-0" />
                 <span className="truncate">{isKm ? 'ហៅ' : 'Call'}</span>
-              </a>
+              </button>
 
               <button
                 type="button"
@@ -336,6 +392,29 @@ export const RestaurantDetailModal: React.FC = () => {
                   <p className="text-slate-600 dark:text-slate-400">
                     {isKm ? selectedRestaurant.addressKh : selectedRestaurant.addressEn}
                   </p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-2.5 pt-2 border-t border-slate-100 dark:border-slate-700">
+                <Phone className="w-4 h-4 text-[#059669] shrink-0 mt-0.5" />
+                <div className="flex-1 flex items-center justify-between gap-2">
+                  <div>
+                    <p className="font-semibold text-[#0F172A] dark:text-white">
+                      {isKm ? 'លេខទូរស័ព្ទទំនាក់ទំនង' : 'Phone Number'}
+                    </p>
+                    <p className="text-slate-600 dark:text-slate-400 font-mono">
+                      {displayPhone || (isKm ? 'មិនមានលេខទូរស័ព្ទលើផែនទី' : 'Not listed on map')}
+                    </p>
+                  </div>
+                  {displayPhone && (
+                    <button
+                      type="button"
+                      onClick={handleCallRestaurant}
+                      className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold shadow-2xs transition"
+                    >
+                      📞 {displayPhone}
+                    </button>
+                  )}
                 </div>
               </div>
 

@@ -2,6 +2,7 @@ import React from 'react';
 import { Restaurant, isRestaurantPremiumActive } from '../types';
 import { useApp } from '../context/AppContext';
 import { MapPin, Phone, Star, Navigation, CheckCircle2, AlertCircle, Sparkles, Share2 } from 'lucide-react';
+import { sanitizeDialablePhone, resolveRestaurantPhoneOnDemand } from '../services/googlePlacesService';
 
 interface RestaurantCardProps {
   restaurant: Restaurant;
@@ -137,17 +138,40 @@ export const RestaurantCard: React.FC<RestaurantCardProps> = ({ restaurant }) =>
           </div>
 
           <div className="flex items-center gap-1.5">
-            <a
-              href={`tel:${restaurant.phone || ''}`}
-              onClick={(e) => {
+            <button
+              type="button"
+              onClick={async (e) => {
                 e.stopPropagation();
                 trackRestaurantCall(restaurant.id);
+                const dialable = sanitizeDialablePhone(restaurant.phone);
+                if (dialable) {
+                  window.location.href = `tel:${dialable}`;
+                  return;
+                }
+                const found = await resolveRestaurantPhoneOnDemand(
+                  restaurant.nameKh || restaurant.nameEn,
+                  restaurant.provinceKh
+                );
+                const cleanFound = sanitizeDialablePhone(found);
+                if (cleanFound) {
+                  window.location.href = `tel:${cleanFound}`;
+                  return;
+                }
+                showToast(
+                  isKm
+                    ? 'ហាងនេះមិនបានដាក់លេខទូរស័ព្ទលើផែនទីទេ — កំពុងបើកទីតាំងលើ Google Maps!'
+                    : 'Phone number not listed on map — opening Google Maps!',
+                  'warning'
+                );
+                if (restaurant.mapUrl) {
+                  window.open(restaurant.mapUrl, '_blank');
+                }
               }}
               className="p-1.5 rounded-lg bg-emerald-50 text-[#064E3B] hover:bg-[#064E3B] hover:text-white dark:bg-emerald-950/40 dark:text-emerald-300 transition"
               title={isKm ? 'ហៅទូរស័ព្ទទៅហាង' : 'Call restaurant'}
             >
               <Phone className="w-3.5 h-3.5" />
-            </a>
+            </button>
 
             <a
               href={restaurant.mapUrl || '#'}

@@ -5,6 +5,7 @@ import {
   ExternalLink, Phone, Star, ArrowUpRight, LocateFixed 
 } from 'lucide-react';
 import { Restaurant, TouristDestination } from '../types';
+import { sanitizeDialablePhone } from '../services/googlePlacesService';
 
 // Haversine formula for distance between 2 GPS coordinates in km
 function calculateDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
@@ -268,9 +269,9 @@ export const NearMeModal: React.FC = () => {
                     <span>{isKm ? 'នាំផ្លូវ (Google Maps)' : 'Directions Route'}</span>
                   </a>
 
-                  {r.phone && (
+                  {sanitizeDialablePhone(r.phone) && (
                     <a
-                      href={`tel:${r.phone}`}
+                      href={`tel:${sanitizeDialablePhone(r.phone)}`}
                       className="p-2 bg-emerald-50 hover:bg-emerald-100 dark:bg-slate-700 text-[#064E3B] dark:text-emerald-300 rounded-xl transition"
                       title={r.phone}
                     >
