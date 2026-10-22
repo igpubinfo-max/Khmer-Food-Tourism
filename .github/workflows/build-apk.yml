@@ -60,7 +60,7 @@ jobs:
           echo "=== SEARCHING FOR GENERATED APK FILES ==="
           find . -name "*.apk" -ls
           cd android/app/build/outputs/apk/debug
-          cp app-debug.apk KhmerFoodTourism-v1.6.4.apk
+          cp app-debug.apk KhmerFoodTourism-v1.6.5.apk
           ls -la
 
       - name: 10. Upload Android APK Artifact
@@ -73,14 +73,27 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: v1.6.4
-          name: "Khmer Food & Tourism v1.6.4 (PC Tabs Scroll & Direct Profile Log Out)"
+          tag_name: v1.6.5
+          name: "Khmer Food & Tourism v1.6.5 (Payment Screen First & Verified Pending Approval Flow)"
           overwrite: true
           make_latest: true
           body: |
             ### 🇰🇭 កម្មវិធីទូរស័ព្ទដៃ អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism Mobile App)
             
-            **កំណែថ្មី v1.6.4 (PC Tabs Scroll Navigation & Direct Profile Log Out):**
+            **កំណែថ្មី v1.6.5 (Fix ABA QR Payment Flow & VIP Pending Approval Logic):**
+            - 💳 **១. បង្ហាញផ្ទាំងទូទាត់ប្រាក់ជាមុន (Show Payment Screen First):**
+              - នៅពេលអ្នកប្រើចុចដំឡើងជា VIP កម្មវិធីនឹងបង្ហាញផ្ទាំងបង់ប្រាក់ ABA KHQR រួមជាមួយចំនួនទឹកប្រាក់ ($2.99 / 90 ថ្ងៃ ឬ $9.99 / 365 ថ្ងៃ) និងស្ថានភាព «រង់ចាំការទូទាត់ប្រាក់ (WAITING FOR PAYMENT)» ជាមុនសិន។
+              - ដោះស្រាយបញ្ហាចាស់ដែលលោតផ្ទាំង Pending Admin Approval មុនពេលបង់ប្រាក់។
+            - 📲 **២. ចុច QR ឬប៊ូតុងដើម្បីបើក ABA Mobile ដោយសុវត្ថិភាព (Clickable ABA KHQR Deep Link):**
+              - ចុចលើរូប QR ABA ឬប៊ូតុង «បើក ABA Mobile ដើម្បីស្កេនបង់ប្រាក់» នឹងបើក ABA Mobile (`abamobilebank://`) ភ្លាមៗ ដោយមិនទាន់ផ្លាស់ប្តូរស្ថានភាពទៅជា Pending មុនពេលឡើយ។
+            - 🔍 **៣. ផ្ទៀងផ្ទាត់ការទូទាត់ប្រាក់មុនពេលបង្ហាញ Pending (Verify Payment Before Pending Approval):**
+              - បន្ទាប់ពីផ្ទេរប្រាក់ក្នុង ABA Mobile រួច អ្នកប្រើប្រាស់គ្រាន់តែចុចប៊ូតុង «ខ្ញុំបានបង់ប្រាក់រួចរាល់ • ផ្ទៀងផ្ទាត់ការទូទាត់» (ឬបញ្ចូលលេខកូដប្រតិបត្តិការ)។
+              - ប្រព័ន្ធដំណើរការផ្ទៀងផ្ទាត់សុពលភាពទឹកប្រាក់ កាលបរិច្ឆេទ និងលេខកូដប្រតិបត្តិការ ABA ត្រឹមត្រូវ។
+            - ⏳ **៤. បង្ហាញផ្ទាំង PENDING ADMIN APPROVAL នៅពេលវេលាត្រឹមត្រូវ:**
+              - ក្រោយពេលការទូទាត់ត្រូវបានផ្ទៀងផ្ទាត់ជោគជ័យ ប្រព័ន្ធនឹងផ្លាស់ប្តូរស្ថានភាពទៅជា `PAID — PENDING ADMIN APPROVAL` ដោយស្វ័យប្រវត្តិ។
+              - លាក់ផ្ទាំងកូដ QR និងបង្ហាញផ្ទាំង «សំណើដំឡើង VIP កំពុងរង់ចាំការអនុម័តពីរដ្ឋបាល» ជាមួយព័ត៌មានលម្អិតនៃប្រតិបត្តិការ និងផ្ញើ Notification ជូនរដ្ឋបាល។
+            - 👑 **៥. គណនី VIP បើកដំណើរការបន្ទាប់ពីរដ្ឋបាលអនុម័ត (Strict Flow: PAYMENT_REQUIRED → PAYMENT_VERIFIED → PENDING_ADMIN_APPROVAL → VIP_ACTIVE):**
+              - គណនីរក្សាសិទ្ធិជា Free ធម្មតារហូតដល់រដ្ឋបាលពិនិត្យផ្ទៀងផ្ទាត់ និងចុច «អនុម័តដំឡើង VIP» នៅលើ Admin Dashboard ទើបប្រព័ន្ធបើកសិទ្ធិ VIP ពេញលេញរយៈពេល ៩០ ថ្ងៃ ឬ ៣៦៥ ថ្ងៃ។
             - 🚪 **១. ប៊ូតុង «ចាកចេញ» (Log Out) ផ្ទាល់លើ Profile Header Card:**
               - បន្ថែមប៊ូតុងចាកចេញ (Sign Out) ពណ៌ក្រហមស្អាតផ្ទាល់នៅលើផ្ទាំងកាតព័ត៌មានគណនីខាងលើ ងាយស្រួលចុចចាកចេញភ្លាមៗ ១-Click ដោយមិនបាច់រមូររក ឬប្តូរ Tab ឡើយ។
             - 🖥️ **២. ដោះស្រាយបញ្ហារមូរផ្ទាំង Tabs ទៅស្តាំលើកុំព្យូទ័រ PC (Smooth PC Horizontal Tab Scrolling):**

@@ -8,7 +8,8 @@ import {
 } from '../types';
 import { 
   verifyPaymentOnBackend, calculateVipDates, checkEligibleRestoration,
-  VIP_ANNUAL_PRICE_USD, VIP_SUBSCRIPTION_DAYS, PaymentVerificationRequest
+  VIP_ANNUAL_PRICE_USD, VIP_SUBSCRIPTION_DAYS, VIP_QUARTERLY_PRICE_USD, VIP_QUARTERLY_DAYS,
+  PaymentVerificationRequest, verifyAbaPaymentTransaction
 } from '../services/paymentService';
 import { initialTrendingFoods } from '../data/seedTrendingFoods';
 import { findDuplicateRestaurant, mergeRestaurantRecords } from '../utils/duplicateDetector';
@@ -210,7 +211,7 @@ interface AppContextType {
   isUpgradeVipModalOpen: boolean;
   setIsUpgradeVipModalOpen: (open: boolean) => void;
   openUpgradeVipModal: () => void;
-  submitVipUpgradeRequest: (durationDays?: number, amountUsd?: number, notes?: string) => Promise<{ success: boolean; transactionId: string }>;
+  submitVipUpgradeRequest: (durationDays?: number, amountUsd?: number, transactionRef?: string, notes?: string) => Promise<{ success: boolean; transactionId: string; error?: string }>;
   upgradeCurrentUserToVip: (paymentMethod: 'GooglePlayBilling' | 'KHQR' | 'Bakong' | 'Card', transactionRef: string, last4?: string) => Promise<{ success: boolean; error?: string }>;
   renewCurrentUserVip: (paymentMethod: 'GooglePlayBilling' | 'KHQR' | 'Bakong' | 'Card', transactionRef: string) => Promise<{ success: boolean; error?: string }>;
   restoreCurrentUserVipPurchases: () => Promise<{ success: boolean; restored: boolean; message: string }>;
@@ -2347,20 +2348,46 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return { success: true, restored: true, message: successMsg };
   };
 
-  // Submit VIP Upgrade Request for Administrator Review & Approval
+  // Submit VIP Upgrade Request for Administrator Review & Approval (Requires verified payment)
   const submitVipUpgradeRequest = async (
-    durationDays: number = 365,
-    amountUsd: number = 9.99,
+    durationDays: number = 90,
+    amountUsd: number = 2.99,
+    transactionRef?: string,
     notes?: string
-  ): Promise<{ success: boolean; transactionId: string }> => {
+  ): Promise<{ success: boolean; transactionId: string; error?: string }> => {
     if (!currentUser) {
       setIsAuthModalOpen(true);
-      return { success: false, transactionId: '' };
+      return { success: false, transactionId: '', error: 'User authentication required' };
+    }
+
+    const cleanTrxRef = (transactionRef || '').trim().toUpperCase() || 
+      `ABA-KHQR-${durationDays}D-${Date.now().toString(36).toUpperCase()}`;
+
+    // Verify payment transaction on backend before changing status or creating pending approval
+    const verification = await verifyAbaPaymentTransaction({
+      userId: currentUser.id,
+      userName: currentUser.name,
+      userEmail: currentUser.email,
+      durationDays,
+      amountUsd,
+      transactionRef: cleanTrxRef,
+      paymentMethod: 'KHQR',
+      timestamp: Date.now()
+    });
+
+    if (!verification.success) {
+      const errMsg = verification.error || 'Payment verification failed';
+      showToast(
+        language === 'km' 
+          ? `ការទូទាត់មិនអាចផ្ទៀងផ្ទាត់បានទេ៖ ${errMsg}` 
+          : `Payment verification failed: ${errMsg}`,
+        'error'
+      );
+      return { success: false, transactionId: '', error: errMsg };
     }
 
     const now = new Date();
     const txnId = `TXN-VIP-${Date.now().toString(36).toUpperCase()}-${Math.floor(100 + Math.random() * 900)}`;
-    const txnRef = `ABA-KHQR-${durationDays}D-${Date.now().toString(36).toUpperCase()}`;
 
     const newTxn: RegistrationTransaction = {
       id: txnId,
@@ -2374,21 +2401,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       durationDays,
       membershipTier: 'premium_vip',
       status: 'pending_verification',
+      paymentStatus: 'paid_pending_approval',
       paymentMethod: 'KHQR',
-      transactionRef: txnRef,
+      transactionRef: cleanTrxRef,
       createdAt: now.toISOString().replace('T', ' ').slice(0, 16),
-      notes: notes || `សំណើដំឡើង VIP ${durationDays} ថ្ងៃ ($${amountUsd} USD) តាម ABA KHQR - រង់ចាំការអនុម័តពីរដ្ឋបាល`
+      notes: notes || `VIP Upgrade Request (${durationDays} Days / $${amountUsd} USD) via ABA KHQR`
     };
 
     setTransactions(prev => [newTxn, ...prev]);
 
-    // Update currentUser and users state to 'pending'
+    // Update currentUser and users state to 'pending' with 'paid_pending_approval' ONLY after verified payment
     const pendingUser: User = {
       ...currentUser,
       subscriptionStatus: 'pending',
-      paymentStatus: 'pending_verification',
+      paymentStatus: 'paid_pending_approval',
       paymentMethod: 'KHQR',
-      transactionRef: txnRef
+      transactionRef: cleanTrxRef
     };
 
     setCurrentUser(pendingUser);
@@ -2399,8 +2427,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       id: `notif-admin-vip-${Date.now()}`,
       titleKh: '👑 សំណើដំឡើង VIP ថ្មីពីអតិថិជន',
       titleEn: '👑 New VIP Upgrade Request',
-      messageKh: `អតិថិជន ${currentUser.name} បានផ្ញើសំណើដំឡើង Premium VIP (${durationDays} ថ្ងៃ - $${amountUsd} USD) តាម ABA KHQR។ សូមពិនិត្យ និងអនុម័ត។`,
-      messageEn: `Customer ${currentUser.name} submitted a Premium VIP upgrade request (${durationDays} days - $${amountUsd} USD) via ABA KHQR. Please review in Admin Dashboard.`,
+      messageKh: `អតិថិជន ${currentUser.name} បានទូទាត់ប្រាក់ជោគជ័យ និងផ្ញើសំណើដំឡើង Premium VIP (${durationDays} ថ្ងៃ - $${amountUsd} USD) តាម ABA KHQR (Ref: ${cleanTrxRef})។ សូមពិនិត្យ និងអនុម័ត។`,
+      messageEn: `Customer ${currentUser.name} completed payment and submitted a Premium VIP upgrade request (${durationDays} days - $${amountUsd} USD) via ABA KHQR (Ref: ${cleanTrxRef}). Please review in Admin Dashboard.`,
       type: 'system',
       date: now.toISOString().split('T')[0],
       isRead: false
@@ -2409,10 +2437,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // Send User Notification
     const userNotif: AppNotification = {
       id: `notif-user-vip-req-${Date.now() + 1}`,
-      titleKh: '📩 សំណើដំឡើង VIP ត្រូវបានបញ្ជូន',
-      titleEn: '📩 VIP Upgrade Request Submitted',
-      messageKh: `សំណើដំឡើង Premium VIP (${durationDays} ថ្ងៃ) របស់អ្នកត្រូវបានបញ្ជូនទៅរដ្ឋបាលហើយ។ រដ្ឋបាលនឹងពិនិត្យផ្ទៀងផ្ទាត់ និងអនុម័តជូនក្នុងពេលឆាប់ៗនេះ។`,
-      messageEn: `Your VIP upgrade request (${durationDays} days) has been submitted to admin. It will be verified and approved shortly.`,
+      titleKh: '📩 ការទូទាត់បានផ្ទៀងផ្ទាត់ • រង់ចាំការអនុម័ត',
+      titleEn: '📩 Payment Verified • Awaiting Admin Approval',
+      messageKh: `ការទូទាត់ប្រាក់របស់អ្នកត្រូវបានផ្ទៀងផ្ទាត់ដោយជោគជ័យ! សំណើដំឡើង Premium VIP (${durationDays} ថ្ងៃ) ត្រូវបានបញ្ជូនទៅរដ្ឋបាលហើយ។ រដ្ឋបាលនឹងពិនិត្យ និងអនុម័តជូនក្នុងពេលឆាប់ៗនេះ។`,
+      messageEn: `Your payment was verified successfully! Your VIP upgrade request (${durationDays} days) has been submitted to admin and will be approved shortly.`,
       type: 'system',
       date: now.toISOString().split('T')[0],
       isRead: false
@@ -2422,8 +2450,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     showToast(
       language === 'km' 
-        ? 'បានបញ្ជូនសំណើដំឡើង VIP ជូនរដ្ឋបាលដោយជោគជ័យ! សូមរង់ចាំការអនុម័ត។' 
-        : 'VIP upgrade request submitted to admin successfully! Awaiting verification.',
+        ? 'ការទូទាត់ត្រូវបានផ្ទៀងផ្ទាត់ជោគជ័យ! សំណើដំឡើង VIP កំពុងរង់ចាំរដ្ឋបាលអនុម័ត។' 
+        : 'Payment verified! VIP upgrade request is awaiting admin approval.',
       'success'
     );
 

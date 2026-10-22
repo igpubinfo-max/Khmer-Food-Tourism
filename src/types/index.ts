@@ -1,7 +1,12 @@
-export const APP_VERSION = 'v1.6.4';
-export const APP_VERSION_NAME = '1.6.4';
-export const APP_BUILD_CODE = 36;
+export const APP_VERSION = 'v1.6.5';
+export const APP_VERSION_NAME = '1.6.5';
+export const APP_BUILD_CODE = 37;
 export const APP_RELEASE_DATE = '2026-10-22';
+
+export const VIP_ANNUAL_PRICE_USD = 9.99;
+export const VIP_SUBSCRIPTION_DAYS = 365;
+export const VIP_QUARTERLY_PRICE_USD = 2.99;
+export const VIP_QUARTERLY_DAYS = 90;
 
 export type Language = 'km' | 'en';
 
@@ -29,7 +34,7 @@ export interface User {
   subscriptionStartDate?: string;
   subscriptionExpiryDate?: string;
   subscriptionStatus?: 'active' | 'expired' | 'pending' | 'cancelled';
-  paymentStatus?: 'verified' | 'pending_verification' | 'failed' | 'cancelled';
+  paymentStatus?: 'verified' | 'pending_verification' | 'failed' | 'cancelled' | 'paid_pending_approval' | 'waiting_for_payment';
   paymentMethod?: 'GooglePlayBilling' | 'KHQR' | 'Bakong' | 'Card' | 'Manual' | 'BankTransfer';
   transactionRef?: string;
   autoRenew?: boolean;

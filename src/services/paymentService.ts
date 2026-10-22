@@ -132,8 +132,11 @@ export async function verifyPaymentOnBackend(
     };
   }
 
-  // 2. Validate amount ($9.99 USD)
-  if (Math.abs(req.amountUsd - VIP_ANNUAL_PRICE_USD) > 0.01) {
+  // 2. Validate amount ($9.99 USD Annual or $2.99 USD Quarterly)
+  const isAnnualPrice = Math.abs(req.amountUsd - VIP_ANNUAL_PRICE_USD) <= 0.01;
+  const isQuarterlyPrice = Math.abs(req.amountUsd - VIP_QUARTERLY_PRICE_USD) <= 0.01;
+
+  if (!isAnnualPrice && !isQuarterlyPrice) {
     return {
       success: false,
       transactionRef: req.transactionRef,
@@ -142,7 +145,7 @@ export async function verifyPaymentOnBackend(
       expiryDate: '',
       durationDays: 0,
       amountUsd: req.amountUsd,
-      error: `Invalid subscription price: expected $${VIP_ANNUAL_PRICE_USD} USD.`
+      error: `Invalid subscription price: expected $${VIP_ANNUAL_PRICE_USD} or $${VIP_QUARTERLY_PRICE_USD} USD.`
     };
   }
 
@@ -169,7 +172,8 @@ export async function verifyPaymentOnBackend(
   );
 
   // 5. Calculate subscription period
-  const { startDate, expiryDate, durationDays } = calculateVipDates();
+  const duration = isQuarterlyPrice ? VIP_QUARTERLY_DAYS : VIP_SUBSCRIPTION_DAYS;
+  const { startDate, expiryDate, durationDays } = calculateVipDates(undefined, duration);
 
   // 6. Record to anti-duplicate ledger
   recordVerifiedTransaction(req.transactionRef);
@@ -177,6 +181,89 @@ export async function verifyPaymentOnBackend(
   return {
     success: true,
     transactionRef: req.transactionRef,
+    verificationSignature: signature,
+    startDate,
+    expiryDate,
+    durationDays,
+    amountUsd: req.amountUsd
+  };
+}
+
+// Dedicated ABA KHQR Transaction Verification Engine
+export interface AbaPaymentVerificationRequest {
+  userId: string;
+  userName: string;
+  userEmail: string;
+  durationDays: number;
+  amountUsd: number;
+  transactionRef: string;
+  paymentMethod: 'KHQR';
+  timestamp?: number;
+}
+
+export async function verifyAbaPaymentTransaction(
+  req: AbaPaymentVerificationRequest
+): Promise<PaymentVerificationResult> {
+  const cleanRef = req.transactionRef ? req.transactionRef.trim().toUpperCase() : '';
+  if (!cleanRef || cleanRef.length < 5) {
+    return {
+      success: false,
+      transactionRef: cleanRef,
+      verificationSignature: '',
+      startDate: '',
+      expiryDate: '',
+      durationDays: req.durationDays || VIP_QUARTERLY_DAYS,
+      amountUsd: req.amountUsd,
+      error: 'Missing or invalid transaction reference from ABA Mobile.'
+    };
+  }
+
+  // Validate amount
+  const isAnnualPrice = Math.abs(req.amountUsd - VIP_ANNUAL_PRICE_USD) <= 0.01;
+  const isQuarterlyPrice = Math.abs(req.amountUsd - VIP_QUARTERLY_PRICE_USD) <= 0.01;
+  if (!isAnnualPrice && !isQuarterlyPrice) {
+    return {
+      success: false,
+      transactionRef: cleanRef,
+      verificationSignature: '',
+      startDate: '',
+      expiryDate: '',
+      durationDays: req.durationDays,
+      amountUsd: req.amountUsd,
+      error: `Invalid subscription price: expected $${VIP_ANNUAL_PRICE_USD} or $${VIP_QUARTERLY_PRICE_USD} USD.`
+    };
+  }
+
+  // Anti-fraud duplicate check
+  if (checkDuplicateTransaction(cleanRef)) {
+    return {
+      success: false,
+      transactionRef: cleanRef,
+      verificationSignature: '',
+      startDate: '',
+      expiryDate: '',
+      durationDays: req.durationDays,
+      amountUsd: req.amountUsd,
+      error: 'FRAUD_PREVENTION: Duplicate transaction reference detected. This transaction has already been used.'
+    };
+  }
+
+  const timestamp = req.timestamp || Date.now();
+  const signature = await generateVerificationSignature(
+    req.userId,
+    cleanRef,
+    req.amountUsd,
+    timestamp
+  );
+
+  const duration = req.durationDays || (isQuarterlyPrice ? VIP_QUARTERLY_DAYS : VIP_SUBSCRIPTION_DAYS);
+  const { startDate, expiryDate, durationDays } = calculateVipDates(undefined, duration);
+
+  recordVerifiedTransaction(cleanRef);
+
+  return {
+    success: true,
+    transactionRef: cleanRef,
     verificationSignature: signature,
     startDate,
     expiryDate,
