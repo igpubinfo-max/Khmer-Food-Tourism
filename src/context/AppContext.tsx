@@ -70,6 +70,9 @@ interface AppContextType {
   addRegistrationTransaction: (txn: Omit<RegistrationTransaction, 'id' | 'createdAt' | 'status'>) => RegistrationTransaction;
   verifyTransaction: (txnId: string) => void;
   rejectTransaction: (txnId: string, reason?: string) => void;
+  requestMorePaymentInfo: (txnId: string, reason?: string) => void;
+  uploadPaymentProofToTransaction: (txnId: string, proofDataUrl: string, fileName?: string, mimeType?: string) => { success: boolean; error?: string };
+  getAuthorizedPaymentProof: (txnId: string) => string | null;
   
   // Bookmarks
   bookmarks: string[];
@@ -215,7 +218,13 @@ interface AppContextType {
   isUpgradeVipModalOpen: boolean;
   setIsUpgradeVipModalOpen: (open: boolean) => void;
   openUpgradeVipModal: () => void;
-  submitVipUpgradeRequest: (durationDays?: number, amountUsd?: number, transactionRef?: string, notes?: string) => Promise<{ success: boolean; transactionId: string; error?: string }>;
+  submitVipUpgradeRequest: (
+    durationDays?: number,
+    amountUsd?: number,
+    transactionRef?: string,
+    notes?: string,
+    paymentProofData?: { dataUrl: string; fileName?: string; mimeType?: string }
+  ) => Promise<{ success: boolean; transactionId: string; error?: string }>;
   upgradeCurrentUserToVip: (paymentMethod: 'GooglePlayBilling' | 'KHQR' | 'Bakong' | 'Card', transactionRef: string, last4?: string, amountUsd?: number, durationDays?: number) => Promise<{ success: boolean; error?: string }>;
   renewCurrentUserVip: (paymentMethod: 'GooglePlayBilling' | 'KHQR' | 'Bakong' | 'Card', transactionRef: string) => Promise<{ success: boolean; error?: string }>;
   restoreCurrentUserVipPurchases: () => Promise<{ success: boolean; restored: boolean; message: string }>;
@@ -2207,6 +2216,238 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
   };
 
+  // Request More Payment Information / Clearer Receipt from User (Admin Only)
+  const requestMorePaymentInfo = (txnId: string, reason?: string) => {
+    if (!currentUser || currentUser.role !== 'admin') {
+      showToast(
+        language === 'km'
+          ? '⛔ គ្មានសិទ្ធិអនុញ្ញាត៖ មានតែគណនី Administrator ប៉ុណ្ណោះដែលអាចស្នើសុំព័ត៌មានបន្ថែមបាន!'
+          : '⛔ Unauthorized: Only an authenticated Administrator can request more payment info!',
+        'warning'
+      );
+      return;
+    }
+
+    const matchedTxn = transactions.find(t => t.id === txnId);
+    if (!matchedTxn) return;
+
+    const targetUserId = matchedTxn.userId || '';
+    const reqNote =
+      reason ||
+      'សូមអាប់ឡូតរូបភាពវិក្កយបត្របង់ប្រាក់ ABA ឱ្យបានច្បាស់លាស់ (បង្ហាញចំនួនទឹកប្រាក់ កាលបរិច្ឆេទ និងលេខប្រតិបត្តិការ)។ (Please upload a clearer payment receipt screenshot showing amount, date, and transaction ID.)';
+    const adminIdentity = currentUser.name || 'Chea Savuth (Admin)';
+
+    setTransactions(prev =>
+      prev.map(t => {
+        if (t.id !== txnId) return t;
+        return {
+          ...t,
+          status: 'needs_more_info',
+          adminRequestNote: reqNote,
+          notes: reqNote,
+          verifiedBy: adminIdentity,
+        };
+      })
+    );
+
+    try {
+      const rawLogs = localStorage.getItem('kft_admin_audit_logs_v1');
+      const logs = rawLogs ? JSON.parse(rawLogs) : [];
+      logs.unshift({
+        id: `audit_${Date.now()}`,
+        action: 'REQUEST_MORE_PAYMENT_INFO',
+        txnId,
+        transactionRef: matchedTxn.transactionRef,
+        targetUserId,
+        amountUsd: matchedTxn.amountUsd,
+        reason: reqNote,
+        adminId: currentUser.id,
+        adminName: adminIdentity,
+        timestamp: new Date().toISOString(),
+      });
+      localStorage.setItem('kft_admin_audit_logs_v1', JSON.stringify(logs.slice(0, 200)));
+    } catch {}
+
+    if (targetUserId) {
+      setUsers(prev =>
+        prev.map(u => {
+          if (u.id !== targetUserId) return u;
+          return {
+            ...u,
+            membershipTier: isUserVipActive(u) ? u.membershipTier : 'free',
+            subscriptionStatus: isUserVipActive(u) ? u.subscriptionStatus : 'pending',
+            paymentStatus: 'needs_more_info',
+          };
+        })
+      );
+
+      if (currentUser?.id === targetUserId) {
+        setCurrentUser(prev =>
+          prev
+            ? {
+                ...prev,
+                membershipTier: isUserVipActive(prev) ? prev.membershipTier : 'free',
+                subscriptionStatus: isUserVipActive(prev) ? prev.subscriptionStatus : 'pending',
+                paymentStatus: 'needs_more_info',
+              }
+            : null
+        );
+      }
+
+      const infoNotif: AppNotification = {
+        id: `notif-more-info-${Date.now()}`,
+        titleKh: '💬 រដ្ឋបាលស្នើសុំភស្តុតាងបង់ប្រាក់បន្ថែម',
+        titleEn: '💬 Admin Requested Clearer Payment Proof',
+        messageKh: `សំណើ VIP របស់អ្នកត្រូវការព័ត៌មានបន្ថែម៖ ${reqNote}`,
+        messageEn: `Your VIP payment request requires additional proof: ${reqNote}`,
+        type: 'system',
+        date: new Date().toISOString().split('T')[0],
+        isRead: false,
+      };
+      setNotifications(prev => [infoNotif, ...prev]);
+    }
+
+    showToast(
+      language === 'km'
+        ? 'បានផ្ញើសំណើសុំភស្តុតាងបង់ប្រាក់បន្ថែមទៅកាន់អ្នកប្រើប្រាស់!'
+        : 'Sent request for clearer payment proof to user!',
+      'info'
+    );
+  };
+
+  // Secure Payment Proof Access Control (Owner & Authorized Admin Only)
+  const getAuthorizedPaymentProof = (txnId: string): string | null => {
+    if (!currentUser) return null;
+    const matchedTxn = transactions.find(t => t.id === txnId);
+    if (!matchedTxn) return null;
+
+    const isOwner =
+      currentUser.id === matchedTxn.userId || currentUser.id === matchedTxn.ownerId;
+    const isAdmin = currentUser.role === 'admin';
+
+    if (!isOwner && !isAdmin) {
+      return null;
+    }
+
+    if (matchedTxn.paymentProofUrl) {
+      return matchedTxn.paymentProofUrl;
+    }
+
+    try {
+      const rawVault = localStorage.getItem('kft_secure_payment_proofs_vault_v1');
+      if (rawVault) {
+        const vault = JSON.parse(rawVault);
+        if (vault[txnId]?.dataUrl) {
+          return vault[txnId].dataUrl;
+        }
+      }
+    } catch {}
+
+    return null;
+  };
+
+  // Upload or Replace Payment Proof Screenshot on an Existing Transaction
+  const uploadPaymentProofToTransaction = (
+    txnId: string,
+    proofDataUrl: string,
+    fileName: string = 'aba_payment_receipt.png',
+    mimeType: string = 'image/png'
+  ): { success: boolean; error?: string } => {
+    if (!currentUser) {
+      setIsAuthModalOpen(true);
+      return { success: false, error: 'Authentication required' };
+    }
+
+    if (!proofDataUrl || !proofDataUrl.startsWith('data:image/')) {
+      const msg =
+        language === 'km'
+          ? 'សូមជ្រើសរើសឯកសាររូបភាពឱ្យបានត្រឹមត្រូវ (JPG, JPEG, PNG)'
+          : 'Please select a valid image file (JPG, JPEG, PNG)';
+      showToast(msg, 'warning');
+      return { success: false, error: msg };
+    }
+
+    const matchedTxn = transactions.find(t => t.id === txnId);
+    if (!matchedTxn) {
+      return { success: false, error: 'Transaction not found' };
+    }
+
+    const isOwner =
+      currentUser.id === matchedTxn.userId || currentUser.id === matchedTxn.ownerId;
+    const isAdmin = currentUser.role === 'admin';
+    if (!isOwner && !isAdmin) {
+      return { success: false, error: 'Unauthorized to upload proof for this transaction' };
+    }
+
+    const nowIso = new Date().toISOString();
+
+    try {
+      const rawVault = localStorage.getItem('kft_secure_payment_proofs_vault_v1');
+      const vault = rawVault ? JSON.parse(rawVault) : {};
+      vault[txnId] = {
+        txnId,
+        userId: currentUser.id,
+        dataUrl: proofDataUrl,
+        fileName,
+        mimeType,
+        uploadedAt: nowIso,
+      };
+      localStorage.setItem('kft_secure_payment_proofs_vault_v1', JSON.stringify(vault));
+    } catch (e) {
+      console.warn('Payment proof vault save warning:', e);
+    }
+
+    setTransactions(prev =>
+      prev.map(t => {
+        if (t.id !== txnId) return t;
+        return {
+          ...t,
+          status: t.status === 'needs_more_info' ? 'pending_verification' : t.status,
+          paymentProofUrl: proofDataUrl,
+          paymentProofUploadedAt: nowIso.replace('T', ' ').slice(0, 16),
+          paymentProofFileName: fileName,
+          paymentProofMimeType: mimeType,
+        };
+      })
+    );
+
+    if (currentUser.id === matchedTxn.userId) {
+      const updatedPendingUser: User = {
+        ...currentUser,
+        membershipTier: isUserVipActive(currentUser) ? 'premium_vip' : 'free',
+        subscriptionStatus: 'pending',
+        paymentStatus: 'paid_pending_approval',
+      };
+      setCurrentUser(updatedPendingUser);
+      setUsers(prev => prev.map(u => (u.id === currentUser.id ? updatedPendingUser : u)));
+    }
+
+    try {
+      const rawLogs = localStorage.getItem('kft_admin_audit_logs_v1');
+      const logs = rawLogs ? JSON.parse(rawLogs) : [];
+      logs.unshift({
+        id: `audit_${Date.now()}`,
+        action: 'PAYMENT_PROOF_UPLOAD',
+        txnId,
+        transactionRef: matchedTxn.transactionRef,
+        targetUserId: currentUser.id,
+        amountUsd: matchedTxn.amountUsd,
+        fileName,
+        timestamp: nowIso,
+      });
+      localStorage.setItem('kft_admin_audit_logs_v1', JSON.stringify(logs.slice(0, 200)));
+    } catch {}
+
+    showToast(
+      language === 'km'
+        ? '📸 បានអាប់ឡូតភស្តុតាងបង់ប្រាក់រួចរាល់! កំពុងរង់ចាំ Admin ពិនិត្យ និងអនុម័ត។'
+        : '📸 Payment proof uploaded! Awaiting Admin verification and approval.',
+      'success'
+    );
+
+    return { success: true };
+  };
+
   // User VIP Upgrade & Renewal Methods ($2.99 / 90 Days or $9.99 / 365 Days)
   const upgradeCurrentUserToVip = async (
     paymentMethod: 'GooglePlayBilling' | 'KHQR' | 'Bakong' | 'Card',
@@ -2439,18 +2680,34 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     durationDays: number = 90,
     amountUsd: number = 2.99,
     transactionRef?: string,
-    notes?: string
+    notes?: string,
+    paymentProofData?: { dataUrl: string; fileName?: string; mimeType?: string }
   ): Promise<{ success: boolean; transactionId: string; error?: string }> => {
     if (!currentUser) {
       setIsAuthModalOpen(true);
       return { success: false, transactionId: '', error: 'User authentication required' };
     }
 
-    // Prevent duplicate pending requests for the same user
+    // Check if there is an existing pending or needs_more_info request for this user
     const existingPending = transactions.find(
-      t => t.type === 'user_vip_upgrade' && t.userId === currentUser.id && t.status === 'pending_verification'
+      t =>
+        t.type === 'user_vip_upgrade' &&
+        t.userId === currentUser.id &&
+        (t.status === 'pending_verification' || t.status === 'needs_more_info')
     );
+
     if (existingPending) {
+      // If user attached a new payment proof image, update the existing request!
+      if (paymentProofData?.dataUrl) {
+        uploadPaymentProofToTransaction(
+          existingPending.id,
+          paymentProofData.dataUrl,
+          paymentProofData.fileName || 'aba_receipt.png',
+          paymentProofData.mimeType || 'image/png'
+        );
+        return { success: true, transactionId: existingPending.id };
+      }
+
       showToast(
         language === 'km' 
           ? '⏳ សំណើរបស់អ្នកកំពុងរង់ចាំ Admin ពិនិត្យការទូទាត់រួចហើយ!' 
@@ -2487,7 +2744,45 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     const now = new Date();
+    const nowIso = now.toISOString();
+    const formattedNow = nowIso.replace('T', ' ').slice(0, 16);
     const txnId = `TXN-VIP-${Date.now().toString(36).toUpperCase()}-${Math.floor(100 + Math.random() * 900)}`;
+    const planType: 'quarterly' | 'annual' = durationDays <= 90 ? 'quarterly' : 'annual';
+
+    if (paymentProofData?.dataUrl) {
+      try {
+        const rawVault = localStorage.getItem('kft_secure_payment_proofs_vault_v1');
+        const vault = rawVault ? JSON.parse(rawVault) : {};
+        vault[txnId] = {
+          txnId,
+          userId: currentUser.id,
+          dataUrl: paymentProofData.dataUrl,
+          fileName: paymentProofData.fileName || 'aba_receipt.png',
+          mimeType: paymentProofData.mimeType || 'image/png',
+          uploadedAt: nowIso,
+        };
+        localStorage.setItem('kft_secure_payment_proofs_vault_v1', JSON.stringify(vault));
+      } catch (e) {
+        console.warn('Payment proof vault save warning:', e);
+      }
+
+      try {
+        const rawLogs = localStorage.getItem('kft_admin_audit_logs_v1');
+        const logs = rawLogs ? JSON.parse(rawLogs) : [];
+        logs.unshift({
+          id: `audit_${Date.now()}`,
+          action: 'PAYMENT_PROOF_UPLOAD',
+          txnId,
+          transactionRef: cleanTrxRef,
+          targetUserId: currentUser.id,
+          amountUsd,
+          durationDays,
+          fileName: paymentProofData.fileName || 'aba_receipt.png',
+          timestamp: nowIso,
+        });
+        localStorage.setItem('kft_admin_audit_logs_v1', JSON.stringify(logs.slice(0, 200)));
+      } catch {}
+    }
 
     const newTxn: RegistrationTransaction = {
       id: txnId,
@@ -2497,14 +2792,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       userEmail: currentUser.email,
       ownerId: currentUser.id,
       ownerName: currentUser.name,
+      planType,
       amountUsd,
+      currency: 'USD',
       durationDays,
       membershipTier: 'premium_vip',
       status: 'pending_verification',
-      paymentStatus: 'paid_pending_approval',
       paymentMethod: 'KHQR',
       transactionRef: cleanTrxRef,
-      createdAt: now.toISOString().replace('T', ' ').slice(0, 16),
+      paymentProofUrl: paymentProofData?.dataUrl,
+      paymentProofUploadedAt: paymentProofData?.dataUrl ? formattedNow : undefined,
+      paymentProofFileName: paymentProofData?.fileName,
+      paymentProofMimeType: paymentProofData?.mimeType,
+      createdAt: formattedNow,
       notes: notes || `VIP Upgrade Request (${durationDays} Days / $${amountUsd.toFixed(2)} USD) via ABA KHQR — Awaiting Admin Verification`
     };
 
@@ -2528,8 +2828,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       id: `notif-admin-vip-${Date.now()}`,
       titleKh: '👑 សំណើពិនិត្យការទូទាត់ VIP ថ្មី',
       titleEn: '👑 New VIP Payment Verification Request',
-      messageKh: `អតិថិជន ${currentUser.name} (${currentUser.email}) បានបញ្ជូនសំណើពិនិត្យការទូទាត់ Premium VIP (${durationDays} ថ្ងៃ - $${amountUsd.toFixed(2)} USD) តាម ABA KHQR (Ref: ${cleanTrxRef})។ សូមពិនិត្យរបាយការណ៍ធនាគារ ABA មុនពេលអនុម័ត។`,
-      messageEn: `Customer ${currentUser.name} (${currentUser.email}) submitted a Premium VIP payment verification request (${durationDays} days - $${amountUsd.toFixed(2)} USD) via ABA KHQR (Ref: ${cleanTrxRef}). Please verify in ABA statement before approving.`,
+      messageKh: `អតិថិជន ${currentUser.name} (${currentUser.email}) បានបញ្ជូនសំណើពិនិត្យការទូទាត់ Premium VIP (${durationDays} ថ្ងៃ - $${amountUsd.toFixed(2)} USD) តាម ABA KHQR (Ref: ${cleanTrxRef})${paymentProofData?.dataUrl ? ' ព្រមទាំងភ្ជាប់រូបភាពភស្តុតាងបង់ប្រាក់' : ''}។ សូមពិនិត្យភស្តុតាង និងរបាយការណ៍ធនាគារ ABA មុនពេលអនុម័ត។`,
+      messageEn: `Customer ${currentUser.name} (${currentUser.email}) submitted a Premium VIP payment verification request (${durationDays} days - $${amountUsd.toFixed(2)} USD) via ABA KHQR (Ref: ${cleanTrxRef})${paymentProofData?.dataUrl ? ' with payment proof image attached' : ''}. Please verify in ABA statement before approving.`,
       type: 'system',
       date: now.toISOString().split('T')[0],
       isRead: false
@@ -3024,6 +3324,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         addRegistrationTransaction,
         verifyTransaction,
         rejectTransaction,
+        requestMorePaymentInfo,
+        uploadPaymentProofToTransaction,
+        getAuthorizedPaymentProof,
         isExitModalOpen,
         setIsExitModalOpen,
         exitAppNow,

@@ -20,7 +20,7 @@ export const AdminDashboard: React.FC = () => {
     destinations, addDestination, updateDestination, deleteDestination,
     posts, deletePost,
     users, updateUserRole,
-    transactions, verifyTransaction, rejectTransaction,
+    transactions, verifyTransaction, rejectTransaction, requestMorePaymentInfo, getAuthorizedPaymentProof,
     appSettings, updateAppSettings, setAdminPassword, currentUser, showToast,
     aiCheckIns, approveAiCheckIn, rejectAiCheckIn, mergeAiCheckIn,
     setIsAiCheckInModalOpen
@@ -71,8 +71,9 @@ export const AdminDashboard: React.FC = () => {
   const [promotionPeriodKh, setPromotionPeriodKh] = useState(appSettings.promotionPeriodKh || '');
   const [newAdminPass, setNewAdminPass] = useState('');
 
-  // Transaction filter
+  // Transaction filter & Full-Resolution Payment Proof Inspection Modal
   const [txnFilter, setTxnFilter] = useState<'all' | 'pending' | 'verified' | 'rejected'>('all');
+  const [inspectingProofTxn, setInspectingProofTxn] = useState<RegistrationTransaction | null>(null);
 
   // Security audit logs state
   const [auditLogs, setAuditLogs] = useState<SecurityAuditEntry[]>(() => getSecurityAuditLogs());
@@ -82,11 +83,14 @@ export const AdminDashboard: React.FC = () => {
   const isKm = language === 'km';
   const pendingRestaurants = restaurants.filter(r => r.status === 'pending');
   const verifiedRestaurantsCount = restaurants.filter(r => r.isVerified).length;
-  const pendingTxns = transactions.filter(t => t.status === 'pending_verification');
+  const pendingTxns = transactions.filter(
+    t => t.status === 'pending_verification' || t.status === 'needs_more_info'
+  );
 
   const filteredTransactions = transactions.filter(t => {
     if (txnFilter === 'all') return true;
-    if (txnFilter === 'pending') return t.status === 'pending_verification';
+    if (txnFilter === 'pending')
+      return t.status === 'pending_verification' || t.status === 'needs_more_info';
     return t.status === txnFilter;
   });
 
@@ -489,31 +493,48 @@ export const AdminDashboard: React.FC = () => {
                     {isKm ? 'គ្មានប្រតិបត្តិការក្នុងប្រភេទនេះឡើយ' : 'No transactions found.'}
                   </div>
                 ) : (
-                  filteredTransactions.map((t) => (
+                  filteredTransactions.map((t) => {
+                    const authorizedProofUrl = getAuthorizedPaymentProof(t.id) || t.paymentProofUrl;
+                    return (
                     <div 
                       key={t.id} 
                       className={`p-4 rounded-2xl border transition-all ${
-                        t.status === 'pending_verification' 
+                        t.status === 'pending_verification' || t.status === 'needs_more_info'
                           ? 'bg-slate-50 dark:bg-slate-900 border-slate-300 dark:border-slate-600' 
                           : t.status === 'verified'
                           ? 'bg-white dark:bg-stone-800 border-slate-200 dark:border-slate-700 dark:border-stone-700'
                           : 'bg-red-50/40 dark:bg-stone-800 border-red-200'
                       }`}
                     >
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2">
+                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                        <div className="space-y-1.5 flex-1">
+                          <div className="flex items-center gap-2 flex-wrap">
                             <span className="font-mono font-bold text-[#0F172A] dark:text-stone-200">{t.id}</span>
                             <span className={`px-2 py-0.5 rounded-full font-khmer font-bold text-[10px] ${
                               t.status === 'verified' 
                                 ? 'bg-slate-100 text-[#064E3B] dark:bg-emerald-950/40 dark:text-emerald-400'
                                 : t.status === 'pending_verification'
                                 ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
+                                : t.status === 'needs_more_info'
+                                ? 'bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300'
                                 : 'bg-red-100 text-red-800'
                             }`}>
-                              {t.status === 'verified' ? '✓ បានផ្ទៀងផ្ទាត់ & ធ្វើឱ្យសកម្ម' : t.status === 'pending_verification' ? '⏳ រង់ចាំការផ្ទៀងផ្ទាត់' : '✕ បានបដិសេធ'}
+                              {t.status === 'verified'
+                                ? '✓ បានផ្ទៀងផ្ទាត់ & ធ្វើឱ្យសកម្ម'
+                                : t.status === 'pending_verification'
+                                ? '⏳ រង់ចាំការផ្ទៀងផ្ទាត់'
+                                : t.status === 'needs_more_info'
+                                ? '💬 រង់ចាំភស្តុតាងបន្ថែម'
+                                : '✕ បានបដិសេធ'}
                             </span>
-                            <span className="font-bold text-[#064E3B] dark:text-emerald-400 font-mono text-sm">${t.amountUsd} USD</span>
+                            <span className="font-bold text-[#064E3B] dark:text-emerald-400 font-mono text-sm">
+                              ${t.amountUsd.toFixed(2)} {t.currency || 'USD'}
+                            </span>
+                            {t.durationDays && (
+                              <span className="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-800 dark:text-amber-300 font-mono text-[10px] font-bold">
+                                {t.durationDays} Days ({t.planType || (t.durationDays <= 90 ? 'Quarterly' : 'Annual')})
+                              </span>
+                            )}
                           </div>
 
                           <div className="font-bold text-[#0F172A] dark:text-stone-100 font-khmer text-sm">
@@ -536,6 +557,43 @@ export const AdminDashboard: React.FC = () => {
                             <span className="font-bold text-[#064E3B] dark:text-emerald-400">{t.transactionRef}</span>
                           </div>
 
+                          {/* PART 3 REQUIREMENT: Uploaded Payment Proof Thumbnail & Full-Resolution Inspection Button */}
+                          {authorizedProofUrl ? (
+                            <div className="p-2.5 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-300 dark:border-emerald-800/60 flex items-center justify-between gap-3">
+                              <div className="flex items-center gap-2.5">
+                                <img
+                                  src={authorizedProofUrl}
+                                  alt="Payment Proof Thumbnail"
+                                  onClick={() => setInspectingProofTxn(t)}
+                                  className="w-14 h-14 object-cover rounded-lg border border-emerald-400 cursor-pointer hover:opacity-90 transition bg-white"
+                                />
+                                <div className="font-khmer text-xs">
+                                  <div className="font-bold text-emerald-900 dark:text-emerald-200 flex items-center gap-1">
+                                    <ImageIcon className="w-3.5 h-3.5 text-emerald-600" />
+                                    <span>{isKm ? 'ភស្តុតាងបង់ប្រាក់ (Payment Proof)' : 'Uploaded Payment Proof'}</span>
+                                  </div>
+                                  <p className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
+                                    {t.paymentProofFileName || 'aba_receipt.jpg'}{' '}
+                                    {t.paymentProofUploadedAt ? `• ${t.paymentProofUploadedAt}` : ''}
+                                  </p>
+                                </div>
+                              </div>
+
+                              <button
+                                type="button"
+                                onClick={() => setInspectingProofTxn(t)}
+                                className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-khmer font-bold text-xs flex items-center gap-1.5 shadow-xs transition cursor-pointer shrink-0"
+                              >
+                                <Search className="w-3.5 h-3.5" />
+                                <span>{isKm ? '🔍 មើលភស្តុតាងពេញ' : '🔍 View Proof'}</span>
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="p-2 rounded-xl bg-amber-50/60 dark:bg-slate-800/60 border border-amber-200 dark:border-slate-700 text-[11px] text-amber-800 dark:text-amber-300 font-khmer flex items-center justify-between">
+                              <span>⚠️ {isKm ? 'អ្នកប្រើប្រាស់មិនទាន់ភ្ជាប់រូបភាពវិក្កយបត្របង់ប្រាក់នៅឡើយទេ' : 'No payment proof screenshot attached yet'}</span>
+                            </div>
+                          )}
+
                           {(t.verifiedBy || t.verifiedAt) && (
                             <div className="text-[10px] text-slate-500 dark:text-slate-400 font-khmer flex items-center gap-2">
                               <span>🛡️ ត្រួតពិនិត្យដោយ៖ <strong>{t.verifiedBy || 'Admin'}</strong></span>
@@ -550,9 +608,20 @@ export const AdminDashboard: React.FC = () => {
                           )}
                         </div>
 
-                        {/* Verification Actions */}
-                        {t.status === 'pending_verification' && (
-                          <div className="flex sm:flex-col gap-2 shrink-0">
+                        {/* PART 3 REQUIREMENT: 4 Administrator Review Actions (View Proof, Approve, Request More Info, Reject) */}
+                        {(t.status === 'pending_verification' || t.status === 'needs_more_info') && (
+                          <div className="flex sm:flex-col gap-2 shrink-0 flex-wrap">
+                            {authorizedProofUrl && (
+                              <button
+                                type="button"
+                                onClick={() => setInspectingProofTxn(t)}
+                                className="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-khmer font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition cursor-pointer"
+                              >
+                                <ImageIcon className="w-3.5 h-3.5 text-amber-400" />
+                                <span>{isKm ? '🔍 មើលភស្តុតាងពេញ' : 'View Proof'}</span>
+                              </button>
+                            )}
+
                             <button
                               onClick={() => verifyTransaction(t.id)}
                               className="px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-[#064E3B] hover:from-emerald-700 hover:to-[#047857] text-white font-khmer font-bold text-xs flex items-center justify-center gap-1.5 shadow-md transition active:scale-95 cursor-pointer"
@@ -563,6 +632,25 @@ export const AdminDashboard: React.FC = () => {
                                   ? (t.type === 'user_vip_upgrade' ? `✅ អនុម័តដំឡើង VIP (${t.durationDays || 90} ថ្ងៃ)` : 'ផ្ទៀងផ្ទាត់ & ធ្វើឱ្យសកម្ម')
                                   : (t.type === 'user_vip_upgrade' ? `Approve VIP (${t.durationDays || 90} Days)` : 'Verify & Activate')}
                               </span>
+                            </button>
+
+                            <button
+                              onClick={() => {
+                                const note = window.prompt(
+                                  isKm
+                                    ? 'បញ្ចូលសារស្នើសុំភស្តុតាងបន្ថែមពីអ្នកប្រើប្រាស់ (Request More Information)៖'
+                                    : 'Enter message requesting clearer payment proof from user:',
+                                  isKm
+                                    ? 'សូមអាប់ឡូតរូបភាពវិក្កយបត្របង់ប្រាក់ ABA ឱ្យបានច្បាស់លាស់ (បង្ហាញចំនួនទឹកប្រាក់ កាលបរិច្ឆេទ និងលេខប្រតិបត្តិការ)។'
+                                    : 'Please upload a clearer ABA receipt screenshot showing the amount, date, and transaction ID.'
+                                );
+                                if (note !== null) {
+                                  requestMorePaymentInfo(t.id, note.trim());
+                                }
+                              }}
+                              className="px-3 py-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/60 hover:bg-amber-500 hover:text-slate-950 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700 font-khmer font-bold text-xs transition cursor-pointer"
+                            >
+                              <span>{isKm ? '💬 ស្នើសុំភស្តុតាងបន្ថែម' : 'Request More Info'}</span>
                             </button>
 
                             <button
@@ -583,9 +671,108 @@ export const AdminDashboard: React.FC = () => {
                         )}
                       </div>
                     </div>
-                  ))
+                  );
+                  })
                 )}
               </div>
+
+              {/* Full-Resolution Payment Proof Inspection Lightbox Modal (Admin Review) */}
+              {inspectingProofTxn && (
+                <div
+                  className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm animate-fade-in"
+                  onClick={() => setInspectingProofTxn(null)}
+                >
+                  <div
+                    className="relative w-full max-w-xl bg-white dark:bg-slate-900 rounded-3xl border border-emerald-500/40 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div className="px-5 py-3.5 bg-slate-900 text-white flex items-center justify-between">
+                      <div className="font-khmer">
+                        <h4 className="font-bold text-sm flex items-center gap-2">
+                          <ImageIcon className="w-4 h-4 text-emerald-400" />
+                          <span>
+                            {isKm
+                              ? `ពិនិត្យភស្តុតាងបង់ប្រាក់ពេញលេញ (${inspectingProofTxn.id})`
+                              : `Full-Resolution Payment Proof (${inspectingProofTxn.id})`}
+                          </span>
+                        </h4>
+                        <p className="text-[11px] text-slate-300">
+                          👤 {inspectingProofTxn.userName || inspectingProofTxn.ownerName} • 💵 $
+                          {inspectingProofTxn.amountUsd.toFixed(2)} USD ({inspectingProofTxn.durationDays || 90} Days) • Ref:{' '}
+                          {inspectingProofTxn.transactionRef}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setInspectingProofTxn(null)}
+                        className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white cursor-pointer"
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                    </div>
+
+                    <div className="p-4 overflow-y-auto flex-1 bg-slate-950 flex items-center justify-center">
+                      <img
+                        src={getAuthorizedPaymentProof(inspectingProofTxn.id) || inspectingProofTxn.paymentProofUrl}
+                        alt="Full Resolution Payment Receipt"
+                        className="max-w-full max-h-[65vh] object-contain rounded-xl border border-slate-800"
+                      />
+                    </div>
+
+                    <div className="p-4 bg-slate-100 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2 font-khmer">
+                      <span className="text-xs text-slate-600 dark:text-slate-300">
+                        {isKm
+                          ? 'សូមផ្ទៀងផ្ទាត់ចំនួនទឹកប្រាក់ កាលបរិច្ឆេទ និងគណនីទទួល CHEA KIMSENG (095 245 959)'
+                          : 'Verify amount, date, and recipient CHEA KIMSENG (095 245 959)'}
+                      </span>
+                      <div className="flex items-center gap-2">
+                        {(inspectingProofTxn.status === 'pending_verification' ||
+                          inspectingProofTxn.status === 'needs_more_info') && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                verifyTransaction(inspectingProofTxn.id);
+                                setInspectingProofTxn(null);
+                              }}
+                              className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs cursor-pointer"
+                            >
+                              {isKm ? '✅ អនុម័ត VIP ឥឡូវនេះ' : '✅ Approve VIP Now'}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const note = window.prompt(
+                                  isKm
+                                    ? 'បញ្ចូលសារស្នើសុំភស្តុតាងបន្ថែម៖'
+                                    : 'Enter message requesting clearer proof:',
+                                  isKm
+                                    ? 'សូមអាប់ឡូតរូបភាពវិក្កយបត្របង់ប្រាក់ ABA ឱ្យបានច្បាស់លាស់។'
+                                    : 'Please upload a clearer receipt screenshot.'
+                                );
+                                if (note !== null) {
+                                  requestMorePaymentInfo(inspectingProofTxn.id, note.trim());
+                                  setInspectingProofTxn(null);
+                                }
+                              }}
+                              className="px-3 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs cursor-pointer"
+                            >
+                              {isKm ? '💬 ស្នើសុំភស្តុតាងបន្ថែម' : '💬 Request More Info'}
+                            </button>
+                          </>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => setInspectingProofTxn(null)}
+                          className="px-3 py-2 rounded-xl bg-slate-700 hover:bg-slate-600 text-white font-bold text-xs cursor-pointer"
+                        >
+                          {isKm ? 'បិទ' : 'Close'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Promotional Settings Editor */}
               <div className="p-5 bg-white dark:bg-stone-800 rounded-3xl border border-slate-200 dark:border-slate-700 dark:border-stone-700 space-y-3 font-khmer">

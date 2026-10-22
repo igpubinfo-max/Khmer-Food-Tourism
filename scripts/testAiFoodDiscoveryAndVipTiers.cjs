@@ -65,22 +65,22 @@ test('Restaurant Check-in Service enforces 10 checkins/hour anti-spam rate limit
   assert(checkInContent.includes('checkUserCheckInRateLimit'), 'Anti-spam rate limit check present');
 });
 
-// 3. Check App Version v1.7.3 (Build 45)
+// 3. Check App Version v1.7.4 (Build 46)
 const typesPath = path.resolve(__dirname, '../src/types/index.ts');
 const typesContent = fs.readFileSync(typesPath, 'utf8');
 
-test('App Version bumped to v1.7.3 (Build 45)', () => {
-  assert(typesContent.includes("APP_VERSION = 'v1.7.3'"), 'APP_VERSION is v1.7.3');
-  assert(typesContent.includes("APP_BUILD_CODE = 45"), 'APP_BUILD_CODE is 45');
+test('App Version bumped to v1.7.4 (Build 46)', () => {
+  assert(typesContent.includes("APP_VERSION = 'v1.7.4'"), 'APP_VERSION is v1.7.4');
+  assert(typesContent.includes("APP_BUILD_CODE = 46"), 'APP_BUILD_CODE is 46');
 });
 
 // 4. Check Android build.gradle version
 const gradlePath = path.resolve(__dirname, '../android/app/build.gradle');
 const gradleContent = fs.readFileSync(gradlePath, 'utf8');
 
-test('Android build.gradle has versionCode 45 and versionName 1.7.3', () => {
-  assert(gradleContent.includes('versionCode 45'), 'versionCode is 45');
-  assert(gradleContent.includes('versionName "1.7.3"'), 'versionName is 1.7.3');
+test('Android build.gradle has versionCode 46 and versionName 1.7.4', () => {
+  assert(gradleContent.includes('versionCode 46'), 'versionCode is 46');
+  assert(gradleContent.includes('versionName "1.7.4"'), 'versionName is 1.7.4');
 });
 
 // 5. Check Modals registered in App.tsx
@@ -184,6 +184,31 @@ test('AiFoodDiscoveryModal renders exact Step 5 Khmer uncertain prompt, 3 action
   assert(aiModalContent.includes('ជ្រើសរើសឈ្មោះដែល AI ណែនាំ'), 'Button 2: Select AI Suggestion present');
   assert(aiModalContent.includes('ថតរូបម្ដងទៀត'), 'Button 3: Retake Photo present');
   assert(aiModalContent.includes('កែឈ្មោះម្ហូប'), 'Visible Edit Food Name button present');
+});
+
+test('AI Food Service integrates Real AI Vision API Client, HSV fruit detection (Papaya), and removes allFoods[0] fallback', () => {
+  assert(aiFoodServiceContent.includes('callRealVisionApiProvider'), 'Real AI Vision API client present');
+  assert(aiFoodServiceContent.includes('rgbToHsv'), 'HSV color space calibration present');
+  assert(aiFoodServiceContent.includes('item-fresh-papaya') && aiFoodServiceContent.includes('ផ្លែល្ហុងទុំ'), 'Fresh papaya knowledge base entry present');
+  assert(!aiFoodServiceContent.includes('food: allFoods[0]'), 'Removed allFoods[0] (Fish Amok) fallback');
+});
+
+test('UpgradeVipModal includes «អាប់ឡូតភស្តុតាងបង់ប្រាក់» Payment Proof Upload below ABA KHQR with validation & preview', () => {
+  assert(vipModalContent.includes('អាប់ឡូតភស្តុតាងបង់ប្រាក់'), 'Exact Khmer button label «អាប់ឡូតភស្តុតាងបង់ប្រាក់» present');
+  assert(vipModalContent.includes('10 * 1024 * 1024'), '10MB max file size check present');
+  assert(vipModalContent.includes('image/jpeg') && vipModalContent.includes('image/png'), 'JPG/JPEG/PNG validation present');
+  assert(vipModalContent.includes('NEEDS_MORE_INFO'), 'Handles Administrator Request More Info status');
+});
+
+const adminDashPath = path.resolve(__dirname, '../src/components/AdminDashboard.tsx');
+const adminDashContent = fs.readFileSync(adminDashPath, 'utf8');
+
+test('AdminDashboard & AppContext enforce Secure Payment Proof Vault, Audit Logs, and 4 Admin Review Actions', () => {
+  assert(appCtxContent.includes('kft_secure_payment_proofs_vault_v1'), 'Secure payment proof vault present');
+  assert(appCtxContent.includes('getAuthorizedPaymentProof'), 'Owner/Admin access control helper present');
+  assert(appCtxContent.includes('requestMorePaymentInfo'), 'requestMorePaymentInfo action present');
+  assert(adminDashContent.includes('មើលភស្តុតាងពេញ'), 'View Full Proof action present in AdminDashboard');
+  assert(adminDashContent.includes('ស្នើសុំភស្តុតាងបន្ថែម'), 'Request More Info action present in AdminDashboard');
 });
 
 console.log('\n================================================================');

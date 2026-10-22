@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import QRCode from 'qrcode';
 import { useApp } from '../context/AppContext';
 import { 
@@ -6,7 +6,7 @@ import {
   ShieldCheck, Star, Clock,
   QrCode, ExternalLink, CheckCircle2,
   Download, Copy, Check, ArrowRight, ShieldAlert, BadgeCheck,
-  CheckCircle, XCircle
+  CheckCircle, XCircle, Upload, Image as ImageIcon, Camera, Trash2, MessageSquareWarning
 } from 'lucide-react';
 import { 
   TEN_VIP_BENEFITS, isUserVipActive, getVipRemainingDays,
@@ -54,10 +54,11 @@ const VIP_PLANS: VipPlanOption[] = [
 // Zero proprietary P2P token and zero PayWay checkout wrapper to guarantee 100% recognition by ABA Scan & Bakong
 const OFFICIAL_KHQR_USD_STRING = '00020101021129450016abaakhppxxx@abaa01090127199460208ABA Bank5204599953038405802KH5912KIMSENG CHEA6010Phnom Penh6213020909524595963047A76';
 
-// Strict 6-State Payment Status Flow (Requirement 6)
+// Strict Payment Status Flow (Requirement 6 + Admin Request More Info)
 export type PaymentStatusFlow = 
   | 'AWAITING_PAYMENT'
   | 'PENDING_ADMIN_APPROVAL'
+  | 'NEEDS_MORE_INFO'
   | 'APPROVED'
   | 'REJECTED'
   | 'PAYMENT_FAILED'
@@ -73,6 +74,7 @@ export const UpgradeVipModal: React.FC = () => {
     showToast,
     setIsAuthModalOpen,
     submitVipUpgradeRequest,
+    uploadPaymentProofToTransaction,
     restoreCurrentUserVipPurchases
   } = useApp();
 
@@ -97,6 +99,16 @@ export const UpgradeVipModal: React.FC = () => {
   );
   const [sessionExpiryTime, setSessionExpiryTime] = useState<number>(() => Date.now() + 15 * 60 * 1000);
 
+  // Payment Proof Upload State (Part 2 Requirement)
+  const [paymentProofDraft, setPaymentProofDraft] = useState<{
+    dataUrl: string;
+    fileName: string;
+    mimeType: string;
+  } | null>(null);
+  const [isProcessingProofImage, setIsProcessingProofImage] = useState(false);
+  const proofGalleryInputRef = useRef<HTMLInputElement | null>(null);
+  const proofCameraInputRef = useRef<HTMLInputElement | null>(null);
+
   // Find latest VIP transaction for this user from persisted database
   const userLatestVipTxn = useMemo(() => {
     if (!currentUser) return undefined;
@@ -111,6 +123,16 @@ export const UpgradeVipModal: React.FC = () => {
 
     if (isUserVipActive(currentUser) && currentUser.paymentStatus === 'verified') {
       setPaymentState('APPROVED');
+    } else if (
+      currentUser.paymentStatus === 'needs_more_info' ||
+      userLatestVipTxn?.status === 'needs_more_info'
+    ) {
+      setPaymentState('NEEDS_MORE_INFO');
+      if (userLatestVipTxn) {
+        setSubmittedTxnId(userLatestVipTxn.id);
+        setCustomTxnRef(userLatestVipTxn.transactionRef);
+        setSubmissionTimestamp(userLatestVipTxn.createdAt);
+      }
     } else if (
       currentUser.subscriptionStatus === 'pending' || 
       currentUser.paymentStatus === 'paid_pending_approval' ||
@@ -251,6 +273,137 @@ export const UpgradeVipModal: React.FC = () => {
     );
   };
 
+  // PART 2: Validate, compress & preview Payment Proof Image (JPG, JPEG, PNG <= 10MB)
+  const handleSelectPaymentProofFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    const extLower = file.name.toLowerCase();
+    const isValidType =
+      allowedTypes.includes(file.type) ||
+      extLower.endsWith('.jpg') ||
+      extLower.endsWith('.jpeg') ||
+      extLower.endsWith('.png');
+
+    if (!isValidType) {
+      showToast(
+        isKm
+          ? '⚠️ សូមជ្រើសរើសរូបភាពប្រភេទ JPG, JPEG ឬ PNG ប៉ុណ្ណោះ!'
+          : '⚠️ Please select a valid JPG, JPEG, or PNG image!',
+        'warning'
+      );
+      e.target.value = '';
+      return;
+    }
+
+    const maxBytes = 10 * 1024 * 1024; // 10 MB max
+    if (file.size > maxBytes) {
+      showToast(
+        isKm
+          ? '⚠️ ទំហំរូបភាពធំពេក (អតិបរមា 10MB)។ សូមជ្រើសរើសរូបភាពផ្សេង។'
+          : '⚠️ Image file size exceeds 10MB limit. Please choose a smaller image.',
+        'warning'
+      );
+      e.target.value = '';
+      return;
+    }
+
+    setIsProcessingProofImage(true);
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const rawDataUrl = ev.target?.result as string;
+      if (!rawDataUrl) {
+        setIsProcessingProofImage(false);
+        return;
+      }
+
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const canvas = document.createElement('canvas');
+          const maxDim = 1080;
+          let width = img.width;
+          let height = img.height;
+          if (width > maxDim || height > maxDim) {
+            if (width > height) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            } else {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, width, height);
+            const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+            setPaymentProofDraft({
+              dataUrl: compressedDataUrl,
+              fileName: file.name || `aba_receipt_${Date.now()}.jpg`,
+              mimeType: 'image/jpeg',
+            });
+          } else {
+            setPaymentProofDraft({
+              dataUrl: rawDataUrl,
+              fileName: file.name,
+              mimeType: file.type || 'image/png',
+            });
+          }
+        } catch {
+          setPaymentProofDraft({
+            dataUrl: rawDataUrl,
+            fileName: file.name,
+            mimeType: file.type || 'image/png',
+          });
+        }
+        setIsProcessingProofImage(false);
+        showToast(
+          isKm
+            ? '✅ បានជ្រើសរើសរូបភាពភស្តុតាងបង់ប្រាក់រួចរាល់! សូមពិនិត្យមើលរូបភាពមុនពេលបញ្ជូន។'
+            : '✅ Payment proof image ready! Preview it below before submitting.',
+          'success'
+        );
+      };
+      img.onerror = () => {
+        setIsProcessingProofImage(false);
+        showToast(
+          isKm ? 'មិនអាចអានឯកសាររូបភាពនេះបានទេ' : 'Could not read image file',
+          'warning'
+        );
+      };
+      img.src = rawDataUrl;
+    };
+    reader.onerror = () => {
+      setIsProcessingProofImage(false);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+
+  // Upload or replace payment proof on an already-submitted pending/needs_more_info request
+  const handleUploadProofToExistingRequest = () => {
+    if (!paymentProofDraft) {
+      proofGalleryInputRef.current?.click();
+      return;
+    }
+    const targetTxnId = userLatestVipTxn?.id || submittedTxnId;
+    if (!targetTxnId) return;
+
+    const res = uploadPaymentProofToTransaction(
+      targetTxnId,
+      paymentProofDraft.dataUrl,
+      paymentProofDraft.fileName,
+      paymentProofDraft.mimeType
+    );
+    if (res.success) {
+      setPaymentProofDraft(null);
+      setPaymentState('PENDING_ADMIN_APPROVAL');
+    }
+  };
+
   // Requirement 2 & 3: Submit Payment Confirmation Request to Admin Queue (NEVER activates VIP directly!)
   const handleSubmitPaymentForAdminApproval = async () => {
     if (!currentUser) {
@@ -274,7 +427,8 @@ export const UpgradeVipModal: React.FC = () => {
         selectedPlan.days,
         selectedPlan.priceUsd,
         customTxnRef,
-        `VIP Upgrade Request (${selectedPlan.days} Days / $${selectedPlan.priceUsd.toFixed(2)} USD) via ABA KHQR — Pending Admin Verification`
+        `VIP Upgrade Request (${selectedPlan.days} Days / $${selectedPlan.priceUsd.toFixed(2)} USD) via ABA KHQR — Pending Admin Verification`,
+        paymentProofDraft || undefined
       );
 
       setIsSubmittingRequest(false);
@@ -306,6 +460,23 @@ export const UpgradeVipModal: React.FC = () => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm animate-fade-in overflow-y-auto">
+      {/* Hidden File Inputs for Payment Proof Upload (Gallery & Camera) */}
+      <input
+        ref={proofGalleryInputRef}
+        type="file"
+        accept="image/jpeg,image/jpg,image/png"
+        onChange={handleSelectPaymentProofFile}
+        className="hidden"
+      />
+      <input
+        ref={proofCameraInputRef}
+        type="file"
+        accept="image/jpeg,image/jpg,image/png"
+        capture="environment"
+        onChange={handleSelectPaymentProofFile}
+        className="hidden"
+      />
+
       <div 
         className="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-amber-500/30 my-auto"
         onClick={(e) => e.stopPropagation()}
@@ -407,6 +578,94 @@ export const UpgradeVipModal: React.FC = () => {
             </div>
           )}
 
+          {/* STATE 2B: NEEDS_MORE_INFO (Displayed when Admin requests clearer payment proof) */}
+          {paymentState === 'NEEDS_MORE_INFO' && (
+            <div className="py-5 text-center space-y-4 animate-fade-in">
+              <div className="w-16 h-16 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-600 flex items-center justify-center mx-auto shadow-md ring-4 ring-amber-400/20">
+                <MessageSquareWarning className="w-8 h-8" />
+              </div>
+
+              <div>
+                <span className="px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-200 text-xs font-bold font-sans">
+                  ACTION REQUIRED • UPLOAD CLEARER PROOF
+                </span>
+                <h4 className="font-moul text-base text-slate-900 dark:text-white mt-2">
+                  {isKm ? '💬 រដ្ឋបាលស្នើសុំភស្តុតាងបង់ប្រាក់បន្ថែម' : '💬 Admin Requested Clearer Payment Proof'}
+                </h4>
+                <p className="text-xs text-amber-700 dark:text-amber-300 mt-1 max-w-sm mx-auto leading-relaxed font-semibold">
+                  {userLatestVipTxn?.adminRequestNote ||
+                    userLatestVipTxn?.notes ||
+                    (isKm
+                      ? 'សូមអាប់ឡូតរូបភាពវិក្កយបត្របង់ប្រាក់ ABA ឱ្យបានច្បាស់លាស់ (បង្ហាញចំនួនទឹកប្រាក់ កាលបរិច្ឆេទ និងលេខប្រតិបត្តិការ)។'
+                      : 'Please upload a clearer ABA payment receipt screenshot showing the amount, date, and transaction ID.')}
+                </p>
+              </div>
+
+              {/* Upload / Preview New Proof Card */}
+              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border-2 border-amber-400/60 text-left space-y-3">
+                {(paymentProofDraft?.dataUrl || userLatestVipTxn?.paymentProofUrl) && (
+                  <div className="space-y-1.5">
+                    <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300">
+                      {paymentProofDraft
+                        ? isKm
+                          ? '📸 រូបភាពភស្តុតាងថ្មីដែលបានជ្រើសរើស៖'
+                          : '📸 Selected New Payment Proof:'
+                        : isKm
+                        ? '🖼️ រូបភាពភស្តុតាងចាស់៖'
+                        : '🖼️ Previous Payment Proof:'}
+                    </span>
+                    <img
+                      src={paymentProofDraft?.dataUrl || userLatestVipTxn?.paymentProofUrl}
+                      alt="Payment Proof Preview"
+                      className="w-full max-h-56 object-contain rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-1"
+                    />
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => proofGalleryInputRef.current?.click()}
+                    className="py-2.5 px-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs flex items-center justify-center gap-1.5 shadow-sm transition cursor-pointer"
+                  >
+                    <Upload className="w-4 h-4" />
+                    <span>{isKm ? 'អាប់ឡូតភស្តុតាងបង់ប្រាក់' : 'Upload Payment Proof'}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => proofCameraInputRef.current?.click()}
+                    className="py-2.5 px-3 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-800 dark:text-white font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+                  >
+                    <Camera className="w-4 h-4" />
+                    <span>{isKm ? 'ថតរូបវិក្កយបត្រផ្ទាល់' : 'Take Photo of Receipt'}</span>
+                  </button>
+                </div>
+
+                {paymentProofDraft && (
+                  <button
+                    type="button"
+                    onClick={handleUploadProofToExistingRequest}
+                    className="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-md transition cursor-pointer"
+                  >
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>
+                      {isKm
+                        ? '📤 បញ្ជូនភស្តុតាងបង់ប្រាក់ថ្មីទៅកាន់ Admin'
+                        : '📤 Submit Updated Proof to Admin'}
+                    </span>
+                  </button>
+                )}
+              </div>
+
+              <button
+                onClick={handleClose}
+                className="w-full py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold transition shadow-md cursor-pointer"
+              >
+                {isKm ? 'បិទផ្ទាំងនេះបណ្តោះអាសន្ន' : 'Close for Now'}
+              </button>
+            </div>
+          )}
+
           {/* STATE 2: PENDING_ADMIN_APPROVAL (Displayed when user clicks confirmation button — VIP is NOT active) */}
           {paymentState === 'PENDING_ADMIN_APPROVAL' && (
             <div className="py-5 text-center space-y-4 animate-fade-in">
@@ -458,6 +717,64 @@ export const UpgradeVipModal: React.FC = () => {
                   <span className="font-mono text-slate-600 dark:text-slate-400">
                     {submissionTimestamp || userLatestVipTxn?.createdAt || new Date().toISOString().replace('T', ' ').slice(0, 16)}
                   </span>
+                </div>
+                <div className="flex items-center justify-between pt-1 border-t border-slate-200 dark:border-slate-700">
+                  <span className="text-slate-500">{isKm ? 'ភស្តុតាងបង់ប្រាក់៖' : 'Payment Proof:'}</span>
+                  <span className={`font-bold ${userLatestVipTxn?.paymentProofUrl || paymentProofDraft ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'}`}>
+                    {userLatestVipTxn?.paymentProofUrl || paymentProofDraft
+                      ? isKm
+                        ? '✅ បានភ្ជាប់រូបភាពវិក្កយបត្រ'
+                        : '✅ Receipt Image Attached'
+                      : isKm
+                      ? 'មិនទាន់ភ្ជាប់រូបភាព (អាចអាប់ឡូតខាងក្រោម)'
+                      : 'Not attached yet (Upload below)'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Allow viewing or attaching/replacing Payment Proof while Pending */}
+              <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 text-left space-y-2.5">
+                {(paymentProofDraft?.dataUrl || userLatestVipTxn?.paymentProofUrl) && (
+                  <div className="space-y-1">
+                    <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300">
+                      {isKm ? '📸 រូបភាពភស្តុតាងបង់ប្រាក់របស់អ្នក៖' : '📸 Your Uploaded Payment Proof:'}
+                    </span>
+                    <img
+                      src={paymentProofDraft?.dataUrl || userLatestVipTxn?.paymentProofUrl}
+                      alt="Uploaded Payment Proof"
+                      className="w-full max-h-48 object-contain rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-1"
+                    />
+                  </div>
+                )}
+
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => proofGalleryInputRef.current?.click()}
+                    className="flex-1 py-2 px-3 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-900 dark:text-amber-200 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+                  >
+                    <Upload className="w-3.5 h-3.5" />
+                    <span>
+                      {userLatestVipTxn?.paymentProofUrl || paymentProofDraft
+                        ? isKm
+                          ? 'ប្តូររូបភាពភស្តុតាងបង់ប្រាក់'
+                          : 'Replace Payment Proof'
+                        : isKm
+                        ? 'អាប់ឡូតភស្តុតាងបង់ប្រាក់'
+                        : 'Upload Payment Proof'}
+                    </span>
+                  </button>
+
+                  {paymentProofDraft && (
+                    <button
+                      type="button"
+                      onClick={handleUploadProofToExistingRequest}
+                      className="py-2 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm transition cursor-pointer"
+                    >
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      <span>{isKm ? 'រក្សាទុកភស្តុតាងថ្មី' : 'Save New Proof'}</span>
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -796,10 +1113,87 @@ export const UpgradeVipModal: React.FC = () => {
                     </div>
                     <p className="text-[10px] text-slate-500 dark:text-slate-400">
                       {isKm 
-                        ? '💡 ក្រោយពីផ្ទេរប្រាក់ក្នុង ABA Mobile រួចរាល់ សូមចុចប៊ូតុងខាងក្រោមដើម្បីបញ្ជូនសំណើទៅកាន់ Admin ពិនិត្យ និងអនុម័ត VIP។' 
-                        : '💡 After transferring in ABA Mobile, tap the button below to submit your request for Admin verification and VIP approval.'}
+                        ? '💡 ក្រោយពីផ្ទេរប្រាក់ក្នុង ABA Mobile រួចរាល់ សូមអាប់ឡូតរូបភាពវិក្កយបត្របង់ប្រាក់ និងចុចបញ្ជូនសំណើទៅកាន់ Admin នៅខាងក្រោម។' 
+                        : '💡 After transferring in ABA Mobile, upload your payment receipt screenshot and submit your request for Admin approval below.'}
                     </p>
                   </div>
+                </div>
+              </div>
+
+              {/* PART 2 REQUIREMENT: UPLOAD PAYMENT PROOF IMMEDIATELY BELOW ABA KHQR */}
+              <div className="p-4 rounded-3xl bg-white dark:bg-slate-800/90 border-2 border-emerald-500/40 shadow-sm space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                    <ImageIcon className="w-4 h-4 text-emerald-600" />
+                    <span>{isKm ? 'អាប់ឡូតភស្តុតាងបង់ប្រាក់ (Payment Proof)៖' : 'Upload Payment Proof:'}</span>
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 text-[10px] font-bold font-mono">
+                    JPG / JPEG / PNG
+                  </span>
+                </div>
+
+                <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
+                  {isKm
+                    ? '📸 សូមភ្ជាប់រូបភាព Screenshot វិក្កយបត្របង់ប្រាក់ ABA ($' +
+                      selectedPlan.priceUsd.toFixed(2) +
+                      ' USD) ដើម្បីឱ្យរដ្ឋបាល (Admin) ពិនិត្យ និងអនុម័តគណនី VIP របស់អ្នកបានរហ័ស។'
+                    : `📸 Attach your ABA payment receipt screenshot ($${selectedPlan.priceUsd.toFixed(2)} USD) so the Administrator can verify and approve your VIP upgrade quickly.`}
+                </p>
+
+                {/* Preview Selected Payment Proof Before Submission */}
+                {paymentProofDraft && (
+                  <div className="p-3 rounded-2xl bg-emerald-50/70 dark:bg-slate-900/90 border border-emerald-300 dark:border-emerald-700/60 space-y-2 animate-fade-in">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-bold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5 truncate">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                        <span className="truncate">{paymentProofDraft.fileName}</span>
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setPaymentProofDraft(null)}
+                        className="p-1 rounded-lg bg-rose-100 dark:bg-rose-950/60 text-rose-600 hover:bg-rose-200 transition cursor-pointer shrink-0"
+                        title={isKm ? 'លុបរូបភាព' : 'Remove image'}
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                    <img
+                      src={paymentProofDraft.dataUrl}
+                      alt="Selected Payment Proof Preview"
+                      className="w-full max-h-56 object-contain rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 p-1"
+                    />
+                  </div>
+                )}
+
+                {/* Clearly Visible Button: «អាប់ឡូតភស្តុតាងបង់ប្រាក់» */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => proofGalleryInputRef.current?.click()}
+                    disabled={isProcessingProofImage}
+                    className="py-3 px-4 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-950 font-extrabold text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-98 cursor-pointer"
+                  >
+                    <Upload className="w-4 h-4" />
+                    <span>
+                      {paymentProofDraft
+                        ? isKm
+                          ? 'ប្តូររូបភាពភស្តុតាងថ្មី'
+                          : 'Replace Payment Proof'
+                        : isKm
+                        ? 'អាប់ឡូតភស្តុតាងបង់ប្រាក់'
+                        : 'Upload Payment Proof'}
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => proofCameraInputRef.current?.click()}
+                    disabled={isProcessingProofImage}
+                    className="py-3 px-4 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-800 dark:text-white font-bold text-xs flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-600 transition active:scale-98 cursor-pointer"
+                  >
+                    <Camera className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                    <span>{isKm ? 'ថតរូបវិក្កយបត្រផ្ទាល់' : 'Take Receipt Photo'}</span>
+                  </button>
                 </div>
               </div>
 
@@ -818,21 +1212,21 @@ export const UpgradeVipModal: React.FC = () => {
                 {/* Payment Confirmation Request Button */}
                 <button
                   onClick={handleSubmitPaymentForAdminApproval}
-                  disabled={isSubmittingRequest}
+                  disabled={isSubmittingRequest || isProcessingProofImage}
                   className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 via-emerald-700 to-[#064E3B] hover:from-emerald-700 hover:to-[#047857] text-white font-extrabold text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-98 cursor-pointer ring-4 ring-emerald-500/20 disabled:opacity-50"
                 >
                   {isSubmittingRequest ? (
                     <>
                       <RefreshCw className="w-4 h-4 animate-spin text-white" />
-                      <span>{isKm ? 'កំពុងបញ្ជូនសំណើទៅកាន់ Admin...' : 'Submitting request to Admin...'}</span>
+                      <span>{isKm ? 'កំពុងបញ្ជូនសំណើ និងភស្តុតាងទៅកាន់ Admin...' : 'Submitting request & proof to Admin...'}</span>
                     </>
                   ) : (
                     <>
                       <CheckCircle2 className="w-4 h-4 text-emerald-200" />
                       <span>
                         {isKm 
-                          ? `💳 ខ្ញុំបានបង់ប្រាក់រួចរាល់ • ផ្ទៀងផ្ទាត់ការទូទាត់ ($${selectedPlan.priceUsd.toFixed(2)} USD)` 
-                          : `💳 I Have Paid • Request Verification ($${selectedPlan.priceUsd.toFixed(2)} USD)`}
+                          ? `💳 ខ្ញុំបានបង់ប្រាក់រួចរាល់ • បញ្ជូនសំណើទៅ Admin ($${selectedPlan.priceUsd.toFixed(2)} USD)` 
+                          : `💳 I Have Paid • Submit for Admin Review ($${selectedPlan.priceUsd.toFixed(2)} USD)`}
                       </span>
                     </>
                   )}
@@ -840,8 +1234,8 @@ export const UpgradeVipModal: React.FC = () => {
 
                 <p className="text-[10px] text-center text-slate-500 dark:text-slate-400 leading-relaxed">
                   {isKm 
-                    ? '🔒 ការចុចប៊ូតុងនេះនឹងបញ្ជូនសំណើទៅកាន់ Admin ដើម្បីពិនិត្យផ្ទៀងផ្ទាត់ទឹកប្រាក់។ គណនី VIP នឹងត្រូវបានបើកដំណើរការក្រោយពេល Admin អនុម័តប៉ុណ្ណោះ។' 
-                    : '🔒 Clicking this button submits a verification request to the Administrator. VIP is activated only after Admin confirms payment receipt.'}
+                    ? '🔒 ការអាប់ឡូតភស្តុតាងបង់ប្រាក់មិនបើកដំណើរការ VIP ដោយស្វ័យប្រវត្តិឡើយ។ គណនី VIP នឹងត្រូវបានបើកដំណើរការក្រោយពេល Admin ពិនិត្យ និងអនុម័តប៉ុណ្ណោះ។' 
+                    : '🔒 Uploading payment proof does not automatically activate VIP. VIP is activated only after Admin reviews and approves your payment.'}
                 </p>
               </div>
 

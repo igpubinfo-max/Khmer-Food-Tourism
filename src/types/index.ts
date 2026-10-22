@@ -1,6 +1,6 @@
-export const APP_VERSION = 'v1.7.3';
-export const APP_VERSION_NAME = '1.7.3';
-export const APP_BUILD_CODE = 45;
+export const APP_VERSION = 'v1.7.4';
+export const APP_VERSION_NAME = '1.7.4';
+export const APP_BUILD_CODE = 46;
 export const APP_RELEASE_DATE = '2026-10-22';
 
 export const VIP_ANNUAL_PRICE_USD = 9.99;
@@ -34,7 +34,7 @@ export interface User {
   subscriptionStartDate?: string;
   subscriptionExpiryDate?: string;
   subscriptionStatus?: 'active' | 'expired' | 'pending' | 'cancelled';
-  paymentStatus?: 'verified' | 'pending_verification' | 'failed' | 'cancelled' | 'paid_pending_approval' | 'waiting_for_payment';
+  paymentStatus?: 'verified' | 'pending_verification' | 'needs_more_info' | 'failed' | 'cancelled' | 'paid_pending_approval' | 'waiting_for_payment';
   paymentMethod?: 'GooglePlayBilling' | 'KHQR' | 'Bakong' | 'Card' | 'Manual' | 'BankTransfer';
   transactionRef?: string;
   autoRenew?: boolean;
@@ -247,12 +247,19 @@ export interface RegistrationTransaction {
   userId?: string;
   userName?: string;
   userEmail?: string;
+  planType?: 'quarterly' | 'annual';
   amountUsd: number;
-  durationDays?: number; // 365
+  currency?: 'USD' | 'KHR';
+  durationDays?: number; // 90 or 365
   membershipTier?: 'premium' | 'premium_vip';
-  status: 'pending_verification' | 'verified' | 'rejected' | 'failed' | 'cancelled';
+  status: 'pending_verification' | 'verified' | 'rejected' | 'needs_more_info' | 'failed' | 'cancelled';
   paymentMethod: 'KHQR' | 'Bakong' | 'BankTransfer' | 'Manual' | 'GooglePlayBilling' | 'Card';
   transactionRef: string;
+  paymentProofUrl?: string;
+  paymentProofUploadedAt?: string;
+  paymentProofFileName?: string;
+  paymentProofMimeType?: string;
+  adminRequestNote?: string;
   paymentToken?: string;
   verificationSignature?: string;
   createdAt: string;

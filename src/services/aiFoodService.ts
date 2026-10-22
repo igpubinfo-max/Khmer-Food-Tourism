@@ -197,6 +197,94 @@ export interface AiDailyUsageQuota {
 
 const AI_USAGE_STORAGE_KEY = 'kft_ai_food_daily_usage_v1';
 const AI_CORRECTIONS_STORAGE_KEY = 'kft_ai_user_corrections_feedback_v1';
+const AI_VISION_CACHE_STORAGE_KEY = 'kft_ai_vision_cache_v1';
+const AI_VISION_CONFIG_STORAGE_KEY = 'kft_ai_vision_config_v1';
+
+export interface AiVisionProviderConfig {
+  provider: 'backend_proxy' | 'gemini_vision' | 'openai_vision' | 'hybrid_hsv_vision';
+  backendProxyUrl?: string;
+  apiKey?: string;
+  modelName?: string;
+  timeoutMs?: number;
+}
+
+export const AI_VISION_MULTISTEP_SYSTEM_PROMPT = `You are an expert Cambodian Food & Object Recognition AI.
+Follow this strict 3-Step Pipeline when analyzing an image:
+Step A — Classify the object into exactly one objectType:
+- "fresh_fruit" (e.g., papaya ផ្លែល្ហុងទុំ, mango ផ្លែស្វាយ, banana ផ្លែចេក, pineapple ផ្លែម្នាស់)
+- "fresh_vegetables" (fresh leafy greens, herbs, raw vegetables)
+- "raw_meat_seafood" (uncooked beef, pork, chicken, raw fish/seafood)
+- "packaged_food" (plastic-wrapped fruit/meat, snacks, bottled/packaged items)
+- "cooked_dish" (prepared Cambodian dishes such as soups, stir-fries, grilled dishes, noodles)
+- "dessert_cake_snack" (traditional Khmer desserts, cakes, snacks)
+- "drink_beverage" (drinks, smoothies, coffee, tea)
+- "food_ingredient" (spices, kroeung, smoked fish ត្រីឆ្អើរ, prahok)
+- "unknown_unclear" (blurry, dark, or non-food object)
+
+Step B — Identify the visible object accurately:
+- NEVER force every photo to match a cooked dish in the app database.
+- If the image shows fresh or plastic-wrapped sliced papaya, identify it as "ផ្លែល្ហុងទុំ / ល្ហុងទុំចិតរួច (Fresh Ripe Papaya)", NEVER as Fish Amok (អាម៉ុកត្រីស្លឹកញ) or Wild Sour Soup (សម្លម្ជូរព្រៃត្រីឆ្អើរ).
+- Provide identifiedNameKh, identifiedNameEn, confidenceScore (0.0 to 1.0), visualCluesKh, visualCluesEn, and up to 3 candidates.
+
+Step C — Post-recognition action:
+- For fruit/vegetable/ingredient: provide item description, culinary uses, and suggested Cambodian dishes that can be made with it.
+- For cooked dish: match against verified Cambodian recipes only if confident; otherwise request user confirmation.`;
+
+export function getAiVisionProviderConfig(): AiVisionProviderConfig {
+  const envBackendUrl =
+    typeof import.meta !== 'undefined' && (import.meta as unknown as { env?: Record<string, string> }).env
+      ? (import.meta as unknown as { env: Record<string, string> }).env.VITE_AI_VISION_BACKEND_URL
+      : undefined;
+
+  try {
+    const raw = localStorage.getItem(AI_VISION_CONFIG_STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      return {
+        provider: parsed.provider || (envBackendUrl ? 'backend_proxy' : 'hybrid_hsv_vision'),
+        backendProxyUrl: parsed.backendProxyUrl || envBackendUrl || '',
+        apiKey: parsed.apiKey || '',
+        modelName: parsed.modelName || 'gemini-2.5-flash',
+        timeoutMs: parsed.timeoutMs || 10000,
+      };
+    }
+  } catch {
+    // ignore storage errors
+  }
+
+  return {
+    provider: envBackendUrl ? 'backend_proxy' : 'hybrid_hsv_vision',
+    backendProxyUrl: envBackendUrl || '',
+    modelName: 'gemini-2.5-flash',
+    timeoutMs: 10000,
+  };
+}
+
+export function saveAiVisionProviderConfig(config: Partial<AiVisionProviderConfig>): AiVisionProviderConfig {
+  const current = getAiVisionProviderConfig();
+  const updated: AiVisionProviderConfig = { ...current, ...config };
+  try {
+    localStorage.setItem(AI_VISION_CONFIG_STORAGE_KEY, JSON.stringify(updated));
+  } catch (e) {
+    console.warn('Failed to save AI Vision provider config:', e);
+  }
+  return updated;
+}
+
+function computeFastImageFingerprint(dataUrl: string): string {
+  const len = dataUrl.length;
+  const sampleA = dataUrl.slice(0, 64);
+  const sampleB = dataUrl.slice(Math.floor(len / 3), Math.floor(len / 3) + 64);
+  const sampleC = dataUrl.slice(Math.floor((len * 2) / 3), Math.floor((len * 2) / 3) + 64);
+  const sampleD = dataUrl.slice(Math.max(0, len - 64));
+  let hash = 2166136261;
+  const combined = `${len}:${sampleA}:${sampleB}:${sampleC}:${sampleD}`;
+  for (let i = 0; i < combined.length; i++) {
+    hash ^= combined.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  return `imgfp_${len}_${(hash >>> 0).toString(16)}`;
+}
 
 // Required exact Khmer message when identification is uncertain (Step 5)
 export const REQUIRED_UNCERTAIN_PROMPT_KH =
@@ -210,14 +298,29 @@ export const REQUIRED_UNCERTAIN_PROMPT_EN =
 // ============================================================================
 export const VERIFIED_NON_DISH_ITEMS_KB: IdentifiedNonDishItemInfo[] = [
   {
+    id: 'item-fresh-papaya',
+    nameKh: 'ផ្លែល្ហុងទុំ / ល្ហុងទុំចិតរួច (Fresh Ripe Papaya)',
+    nameEn: 'Fresh Ripe Papaya (Sliced Papaya)',
+    objectType: 'fresh_fruit',
+    categoryKh: 'ផ្លែឈើស្រស់កម្ពុជា (Fresh Fruit)',
+    categoryEn: 'Cambodian Fresh Fruit',
+    descriptionKh: 'ផ្លែល្ហុងទុំសាច់ពណ៌ទឹកក្រូចក្រហមធម្មជាតិ រសជាតិផ្អែមត្រជាក់ សម្បូរទៅដោយវីតាមីន A, វីតាមីន C, អង់ស៊ីម Papain និងជាតិសរសៃដែលជួយសម្រួលដល់ប្រព័ន្ធរំលាយអាហារ។',
+    descriptionEn: 'Ripe Cambodian papaya with vibrant orange-coral flesh, naturally sweet and rich in Vitamins A & C, papain digestive enzymes, and dietary fiber.',
+    culinaryUsesKh: 'អាចបរិភោគស្រស់ជាផ្លែឈើលាងមាត់ ធ្វើទឹកល្ហុងទុំក្រឡុក ឬប្រើផ្លែល្ហុងខ្ចី/ស្រគាលសម្រាប់ធ្វើ បុកល្ហុងខ្មែរ ជ្រក់ល្ហុង សម្លកកូរ និងសម្លម្ជូរ។',
+    culinaryUsesEn: 'Eaten fresh as ripe fruit, blended into papaya smoothies, or when green/unripe used to prepare Cambodian Bok Lahong (Papaya Salad), pickles, and Samlor Korko.',
+    storageTipsKh: 'ល្ហុងទុំចិតរួចគួររុំផ្លាស្ទិច ឬដាក់ប្រអប់បិទជិតរក្សាទុកក្នុងទូទឹកកក (4–8°C) និងបរិភោគក្នុងរយៈពេល ១–២ ថ្ងៃ។',
+    isPackagedProduct: false,
+    searchKeywordsKh: ['ល្ហុង', 'ល្ហុងទុំ', 'ផ្លែល្ហុង', 'បុកល្ហុង', 'សម្លកកូរ'],
+  },
+  {
     id: 'item-packaged-papaya-orange',
-    nameKh: 'ល្ហុងទុំចិតរួច ឬផ្លែឈើវេចខ្ចប់ (Sliced Ripe Papaya / Packaged Fruit)',
-    nameEn: 'Packaged Sliced Ripe Papaya / Fresh Fruit',
-    objectType: 'packaged_food',
-    categoryKh: 'ផ្លែឈើស្រស់វេចខ្ចប់ / អាហារវេចខ្ចប់',
-    categoryEn: 'Packaged Fresh Fruit / Food',
-    descriptionKh: 'ផ្លែល្ហុងទុំ ឬផ្លែឈើសាច់ពណ៌ទឹកក្រូចដែលត្រូវបានចិតជាដុំវែងៗ និងរុំផ្លាស្ទិចវេចខ្ចប់យ៉ាងស្អាតសម្រាប់បរិភោគស្រស់។ សម្បូរទៅដោយវីតាមីន A, C និងជាតិសរសៃជំនួយការរំលាយអាហារ។',
-    descriptionEn: 'Ripe orange papaya or fresh fruit cut into longitudinal slices and wrapped in clear food-grade plastic film.',
+    nameKh: 'ល្ហុងទុំចិតរួចវេចខ្ចប់ (Packaged Sliced Ripe Papaya)',
+    nameEn: 'Packaged Sliced Ripe Papaya (Fresh Fruit)',
+    objectType: 'fresh_fruit',
+    categoryKh: 'ផ្លែឈើស្រស់វេចខ្ចប់ / ផ្លែល្ហុងទុំ',
+    categoryEn: 'Packaged Fresh Fruit (Ripe Papaya)',
+    descriptionKh: 'ផ្លែល្ហុងទុំសាច់ពណ៌ទឹកក្រូចដែលត្រូវបានចិតជាដុំវែងៗ និងរុំផ្លាស្ទិចវេចខ្ចប់យ៉ាងស្អាតសម្រាប់បរិភោគស្រស់។ សម្បូរទៅដោយវីតាមីន A, C និងជាតិសរសៃជំនួយការរំលាយអាហារ។',
+    descriptionEn: 'Ripe orange papaya cut into longitudinal slices and wrapped in clear food-grade plastic film for fresh consumption.',
     culinaryUsesKh: 'អាចបរិភោគស្រស់ជាផ្លែឈើ ធ្វើទឹកផ្លែឈើក្រឡុក ឬប្រើផ្លែល្ហុងខ្ចី/ស្រគាលសម្រាប់ធ្វើបុកល្ហុង ជ្រក់ល្ហុង និងសម្លកកូរ។',
     culinaryUsesEn: 'Eaten fresh as fruit, blended into smoothies, or green/semi-ripe papaya used in Bok Lahong, pickles, and Samlor Korko.',
     storageTipsKh: 'រក្សាទុកក្នុងទូទឹកកកសីតុណ្ហភាព ៤-៨ អង្សាសេ និងគួរបរិភោគក្នុងរយៈពេល ១-២ ថ្ងៃបន្ទាប់ពីចិតរួច។',
@@ -445,13 +548,13 @@ export function getUserAiCorrectionFeedback(): AiUserCorrectionRecord[] {
 }
 
 // ============================================================================
-// STAGE 1: SPATIAL & PERCEPTUAL OBJECT TYPE CLASSIFIER
+// STAGE 1: TRUE HSV + SPATIAL & PERCEPTUAL OBJECT TYPE CLASSIFIER
 // ============================================================================
 export interface ImageVisualProfile {
   avgBrightness: number;
   contrast: number;
   isBlurryOrLowContrast: boolean;
-  // Color ratios
+  // Calibrated HSV Color ratios
   orangeCoralRatio: number;
   greenRatio: number;
   yellowRatio: number;
@@ -464,8 +567,39 @@ export interface ImageVisualProfile {
   isUniformInteriorColor: boolean;
   colorEntropy: number; // Higher = complex multi-ingredient dish; Lower = uniform fruit/meat/packaged slice
   inferredObjectType: AiObjectType;
+  detectedFruitSubType?: 'papaya' | 'mango_or_banana';
   visualCluesKh: string[];
   visualCluesEn: string[];
+}
+
+export function rgbToHsv(r: number, g: number, b: number): { h: number; s: number; v: number } {
+  const rNorm = r / 255;
+  const gNorm = g / 255;
+  const bNorm = b / 255;
+  const max = Math.max(rNorm, gNorm, bNorm);
+  const min = Math.min(rNorm, gNorm, bNorm);
+  const d = max - min;
+
+  let h = 0;
+  const s = max === 0 ? 0 : d / max;
+  const v = max;
+
+  if (max !== min) {
+    switch (max) {
+      case rNorm:
+        h = (gNorm - bNorm) / d + (gNorm < bNorm ? 6 : 0);
+        break;
+      case gNorm:
+        h = (bNorm - rNorm) / d + 2;
+        break;
+      case bNorm:
+        h = (rNorm - gNorm) / d + 4;
+        break;
+    }
+    h /= 6;
+  }
+
+  return { h: h * 360, s, v };
 }
 
 async function analyzeImageStructureAndObjectType(dataUrl: string): Promise<ImageVisualProfile> {
@@ -542,8 +676,9 @@ async function analyzeImageStructureAndObjectType(dataUrl: string): Promise<Imag
             if (brightness < minVal) minVal = brightness;
             if (brightness > maxVal) maxVal = brightness;
 
+            const { h, s, v } = rgbToHsv(r, g, b);
             const isBorder = x < 10 || x >= size - 10 || y < 10 || y >= size - 10;
-            const isNeutralWhite = brightness > 185 && Math.abs(r - g) < 28 && Math.abs(g - b) < 28;
+            const isNeutralWhite = (s < 0.16 && v > 0.62) || (brightness > 180 && Math.abs(r - g) < 28 && Math.abs(g - b) < 28);
 
             if (isBorder) {
               borderTotalCount++;
@@ -553,34 +688,48 @@ async function analyzeImageStructureAndObjectType(dataUrl: string): Promise<Imag
             if (isNeutralWhite) {
               whiteNeutralCount++;
               hueBuckets[0]++;
-            } else if (brightness < 55) {
+            } else if (v < 0.22 || brightness < 52) {
               darkCount++;
               hueBuckets[1]++;
-            } else if (g > 95 && g > r * 1.15 && g > b * 1.15) {
+            } else if (h >= 68 && h <= 165 && s >= 0.22 && v >= 0.20) {
+              // True HSV Green (vegetables, herbs, noni leaves, green curry paste)
               greenCount++;
               hueBuckets[2]++;
-            } else if (r > 155 && g >= 65 && g <= 145 && b < 95 && r > g * 1.25) {
-              // Warm orange / coral (papaya, salmon, carrot, mango)
+            } else if (
+              h >= 8 &&
+              h <= 38 &&
+              s >= 0.38 &&
+              v >= 0.28 &&
+              r > g * 1.18 &&
+              g > b * 1.12
+            ) {
+              // True HSV Warm Ripe Papaya / Orange Flesh (captures indoor-lit papaya RGB 115..255, 40..145, 10..80!)
               orangeCoralCount++;
               hueBuckets[3]++;
-            } else if (r > 150 && g > 135 && b < 100) {
+            } else if (h > 38 && h <= 67 && s >= 0.32 && v >= 0.35) {
+              // True HSV Mango / Banana / Pineapple / Yellow Turmeric
               yellowCount++;
               hueBuckets[4]++;
-            } else if (r > 135 && g < 100 && b < 110 && r > g * 1.35) {
+            } else if ((h < 8 || h >= 335) && s >= 0.30 && v >= 0.26) {
+              // True HSV Raw Red/Pink Meat or Salmon
               redPinkRawCount++;
               hueBuckets[5]++;
             } else {
               hueBuckets[6]++;
             }
 
-            // Detect sharp plastic wrap specular glare streaks inside the object (bright highlight next to saturated pixel)
+            // Detect plastic wrap specular glare streaks inside the object (bright low-saturation highlight next to saturated pixel)
             if (!isBorder && x > 2 && x < size - 2) {
               const prevIdx = (y * size + (x - 2)) * 4;
               const prevR = data[prevIdx];
               const prevG = data[prevIdx + 1];
               const prevB = data[prevIdx + 2];
-              const prevBright = (prevR + prevG + prevB) / 3;
-              if (brightness > 210 && Math.abs(r - b) < 35 && prevBright < 175 && prevR > prevB + 35) {
+              const prevHsv = rgbToHsv(prevR, prevG, prevB);
+              if (
+                ((v > 0.72 && s < 0.28) || brightness > 195) &&
+                prevHsv.s > 0.42 &&
+                prevHsv.v < 0.72
+              ) {
                 specularGlareCount++;
               }
             }
@@ -600,14 +749,14 @@ async function analyzeImageStructureAndObjectType(dataUrl: string): Promise<Imag
         const whiteNeutralRatio = whiteNeutralCount / totalPixels;
         const borderWhiteRatio = borderTotalCount > 0 ? borderWhiteCount / borderTotalCount : 0;
 
-        const hasWhiteTrayBorder = borderWhiteRatio > 0.28;
-        const hasPlasticSpecularGlare = specularGlareCount > 18 || (hasWhiteTrayBorder && specularGlareCount > 8);
+        const hasWhiteTrayBorder = borderWhiteRatio > 0.24 || whiteNeutralRatio > 0.14;
+        const hasPlasticSpecularGlare = specularGlareCount > 14 || (hasWhiteTrayBorder && specularGlareCount > 6);
 
         // Dominant single-color ratio among non-white pixels
         const nonWhitePixels = Math.max(1, totalPixels - whiteNeutralCount);
         const maxSingleHueRatio =
           Math.max(orangeCoralCount, greenCount, yellowCount, redPinkRawCount) / nonWhitePixels;
-        const isUniformInteriorColor = maxSingleHueRatio > 0.48;
+        const isUniformInteriorColor = maxSingleHueRatio > 0.45;
 
         // Calculate Shannon-like diversity across hue buckets
         let activeBuckets = 0;
@@ -619,36 +768,42 @@ async function analyzeImageStructureAndObjectType(dataUrl: string): Promise<Imag
         const visualCluesKh: string[] = [];
         const visualCluesEn: string[] = [];
         let inferredObjectType: AiObjectType = 'unknown_unclear';
+        let detectedFruitSubType: 'papaya' | 'mango_or_banana' | undefined;
 
         if (isBlurryOrLowContrast) {
           inferredObjectType = 'unknown_unclear';
           visualCluesKh.push('រូបភាពមានពន្លឺខ្សោយ ឬកម្រិតច្បាស់ទាប (Blurry or low contrast)');
           visualCluesEn.push('Low contrast or insufficient lighting');
-        } else if (
-          (hasPlasticSpecularGlare && (isUniformInteriorColor || hasWhiteTrayBorder)) ||
-          (orangeCoralRatio > 0.28 && greenRatio < 0.02 && (hasPlasticSpecularGlare || hasWhiteTrayBorder))
-        ) {
-          // Matches packaged/plastic-wrapped fruit or sliced salmon/meat on tray (like the user's screenshot!)
+        } else if (orangeCoralRatio >= 0.22 && greenRatio < 0.04) {
+          // Fresh Ripe Papaya (either whole/sliced fresh fruit or plastic-wrapped sliced papaya!)
+          inferredObjectType = 'fresh_fruit';
+          detectedFruitSubType = 'papaya';
+          visualCluesKh.push(
+            `សាច់ផ្លែឈើពណ៌ទឹកក្រូចទុំធម្មជាតិ (${Math.round(orangeCoralRatio * 100)}% Papaya-Orange HSV Hue 10°–36°)`
+          );
+          visualCluesEn.push(
+            `Natural ripe papaya orange flesh (${Math.round(orangeCoralRatio * 100)}% HSV Hue 10°–36°)`
+          );
+          if (hasPlasticSpecularGlare || hasWhiteTrayBorder) {
+            visualCluesKh.push('ហាន់ជាដុំវែងៗ និងរុំផ្លាស្ទិចថ្លាវេចខ្ចប់សម្រាប់បរិភោគស្រស់ (Sliced & wrapped in clear film)');
+            visualCluesEn.push('Cut into longitudinal slices and wrapped in clear food film');
+          }
+          visualCluesKh.push('មិនមានទឹកសម្ល ឬបន្លែស្លឹកបៃតងដូចម្ហូបសម្ល ឬអាម៉ុកឡើយ (0% green herbs or soup broth)');
+          visualCluesEn.push('No soup broth or green herbs present — distinctly fresh fruit');
+        } else if (yellowRatio >= 0.26 && greenRatio < 0.04 && darkBrothRatio < 0.18) {
+          inferredObjectType = 'fresh_fruit';
+          detectedFruitSubType = 'mango_or_banana';
+          visualCluesKh.push('សាច់ផ្លែឈើពណ៌លឿងទុំធម្មជាតិ ដូចជាផ្លែស្វាយទុំ ចេក ឬម្នាស់ (Ripe yellow fruit flesh)');
+          visualCluesEn.push('Ripe yellow fruit flesh such as mango, banana, or pineapple');
+        } else if (hasPlasticSpecularGlare && hasWhiteTrayBorder && isUniformInteriorColor && greenRatio < 0.03) {
           inferredObjectType = 'packaged_food';
           visualCluesKh.push('ពិនិត្យឃើញចំណាំងផ្លាតថង់ផ្លាស្ទិចរុំវេចខ្ចប់ និងថាសដាក់អាហារ (Plastic wrap reflection & tray border)');
           visualCluesEn.push('Detected plastic wrap specular highlights and tray packaging');
-          if (orangeCoralRatio > 0.22) {
-            visualCluesKh.push('សាច់អាហារពណ៌ទឹកក្រូចទុំ ហាន់ជាដុំវែងៗស្មើគ្នា (ដូចជា ល្ហុងទុំចិតរួច ឬសាច់ត្រីសាលម៉ុនវេចខ្ចប់)');
-            visualCluesEn.push('Uniform orange/coral longitudinal slices (e.g. sliced ripe papaya or packaged salmon)');
-          }
-          if (greenRatio < 0.02) {
-            visualCluesKh.push('មិនមានទឹកសម្ល ឬបន្លែស្លឹកបៃតងដូចម្ហូបសម្លឡើយ (No soup broth or green herbs visible)');
-            visualCluesEn.push('No liquid soup broth or green herbs present');
-          }
-        } else if (orangeCoralRatio > 0.35 && greenRatio < 0.03 && darkBrothRatio < 0.15) {
-          inferredObjectType = 'fresh_fruit';
-          visualCluesKh.push('សាច់ផ្លែឈើពណ៌ទឹកក្រូច/លឿងទុំសុទ្ធ គ្មានទឹកសម្ល ឬគ្រឿងឆា (Uniform ripe orange fruit flesh)');
-          visualCluesEn.push('Uniform ripe orange/yellow fruit flesh without soup or stir-fry components');
-        } else if (greenRatio > 0.32 && orangeCoralRatio < 0.05 && redPinkRawRatio < 0.05) {
+        } else if (greenRatio >= 0.28 && orangeCoralRatio < 0.06 && redPinkRawRatio < 0.06) {
           inferredObjectType = 'fresh_vegetables';
           visualCluesKh.push('ពណ៌បៃតងធម្មជាតិគ្របដណ្តប់លើរូបភាព ដូចជាបន្លែស្រស់ ឬជីរខ្មែរ (Dominant fresh leafy greens)');
           visualCluesEn.push('Dominant fresh green leaves/vegetables');
-        } else if (redPinkRawRatio > 0.30 && greenRatio < 0.03 && yellowRatio < 0.05) {
+        } else if (redPinkRawRatio >= 0.26 && greenRatio < 0.04 && yellowRatio < 0.06) {
           inferredObjectType = 'raw_meat_seafood';
           visualCluesKh.push('សាច់ពណ៌ក្រហម/ផ្កាឈូកស្រស់ និងឆ្នូតខ្លាញ់ពណ៌ស ដូចជាសាច់ឆៅ (Raw pink/red meat texture)');
           visualCluesEn.push('Raw red/pink meat texture with white marbling');
@@ -684,6 +839,7 @@ async function analyzeImageStructureAndObjectType(dataUrl: string): Promise<Imag
           isUniformInteriorColor,
           colorEntropy,
           inferredObjectType,
+          detectedFruitSubType,
           visualCluesKh,
           visualCluesEn,
         });
@@ -700,6 +856,138 @@ async function analyzeImageStructureAndObjectType(dataUrl: string): Promise<Imag
     };
     img.src = dataUrl;
   });
+}
+
+// ============================================================================
+// REAL AI VISION API CLIENT (BACKEND PROXY / GEMINI VISION / OPENAI VISION)
+// ============================================================================
+interface ExternalVisionApiResponse {
+  objectType: AiObjectType;
+  identifiedNameKh: string;
+  identifiedNameEn: string;
+  confidenceScore: number;
+  visualCluesKh: string[];
+  visualCluesEn: string[];
+  candidates?: {
+    nameKh: string;
+    nameEn: string;
+    objectType: AiObjectType;
+    confidenceScore: number;
+    visualCluesKh?: string;
+    visualCluesEn?: string;
+  }[];
+}
+
+export async function callRealVisionApiProvider(
+  imageDataUrl: string
+): Promise<ExternalVisionApiResponse | null> {
+  const config = getAiVisionProviderConfig();
+  const fingerprint = computeFastImageFingerprint(imageDataUrl);
+
+  // 1. Check local cache first to avoid duplicate API requests for the same image
+  try {
+    const rawCache = localStorage.getItem(AI_VISION_CACHE_STORAGE_KEY);
+    if (rawCache) {
+      const cacheMap = JSON.parse(rawCache);
+      if (cacheMap[fingerprint]) {
+        return cacheMap[fingerprint] as ExternalVisionApiResponse;
+      }
+    }
+  } catch {
+    // ignore cache read error
+  }
+
+  const timeoutMs = config.timeoutMs || 10000;
+  const maxRetries = 1;
+
+  // Helper to store validated response in cache
+  const cacheResponse = (res: ExternalVisionApiResponse) => {
+    try {
+      const rawCache = localStorage.getItem(AI_VISION_CACHE_STORAGE_KEY);
+      const cacheMap = rawCache ? JSON.parse(rawCache) : {};
+      cacheMap[fingerprint] = res;
+      localStorage.setItem(AI_VISION_CACHE_STORAGE_KEY, JSON.stringify(cacheMap));
+    } catch {
+      // ignore storage quota errors
+    }
+  };
+
+  // Option A: Backend Vision Proxy Endpoint (Recommended Production Architecture — No private API key in APK)
+  if (config.provider === 'backend_proxy' && config.backendProxyUrl) {
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        const response = await fetch(config.backendProxyUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            image: imageDataUrl,
+            systemPrompt: AI_VISION_MULTISTEP_SYSTEM_PROMPT,
+          }),
+          signal: controller.signal,
+        });
+        clearTimeout(timer);
+        if (response.ok) {
+          const parsed = (await response.json()) as ExternalVisionApiResponse;
+          if (parsed && parsed.objectType && parsed.identifiedNameKh) {
+            cacheResponse(parsed);
+            return parsed;
+          }
+        }
+      } catch {
+        clearTimeout(timer);
+      }
+    }
+  }
+
+  // Option B: Google Gemini Vision API (gemini-2.5-flash / gemini-2.0-flash) when configured
+  if (config.provider === 'gemini_vision' && config.apiKey) {
+    const base64Data = imageDataUrl.includes(',') ? imageDataUrl.split(',')[1] : imageDataUrl;
+    const mimeMatch = imageDataUrl.match(/^data:(image\/[a-zA-Z0-9+.-]+);base64,/);
+    const mimeType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
+    const model = config.modelName || 'gemini-2.5-flash';
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(config.apiKey)}`;
+
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [
+              {
+                parts: [
+                  { text: `${AI_VISION_MULTISTEP_SYSTEM_PROMPT}\nRespond strictly in JSON matching { "objectType": "...", "identifiedNameKh": "...", "identifiedNameEn": "...", "confidenceScore": 0.9, "visualCluesKh": ["..."], "visualCluesEn": ["..."], "candidates": [] }` },
+                  { inline_data: { mime_type: mimeType, data: base64Data } },
+                ],
+              },
+            ],
+            generationConfig: { responseMimeType: 'application/json', temperature: 0.1 },
+          }),
+          signal: controller.signal,
+        });
+        clearTimeout(timer);
+        if (response.ok) {
+          const json = await response.json();
+          const textOut = json?.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (textOut) {
+            const parsed = JSON.parse(textOut) as ExternalVisionApiResponse;
+            if (parsed && parsed.objectType && parsed.identifiedNameKh) {
+              cacheResponse(parsed);
+              return parsed;
+            }
+          }
+        }
+      } catch {
+        clearTimeout(timer);
+      }
+    }
+  }
+
+  return null;
 }
 
 // ============================================================================
@@ -1039,7 +1327,23 @@ export async function identifyFoodWithAi(
     return retrieveRecipeAndInfoByFoodName(customPromptOrHint, allFoods, startTime);
   }
 
-  // STAGE 1: Analyze Image Structure & Classify Object Type First
+  // Optional Real External Vision API Call (Backend Vision Proxy / Gemini Vision / OpenAI Vision)
+  const externalVision = await callRealVisionApiProvider(imageDataUrl);
+  if (externalVision && externalVision.identifiedNameKh && externalVision.confidenceScore >= 0.55) {
+    const lookedUp = retrieveRecipeAndInfoByFoodName(externalVision.identifiedNameKh, allFoods, startTime);
+    if (lookedUp.status === 'confident') {
+      return {
+        ...lookedUp,
+        confidenceScore: Math.min(0.98, Math.max(0.65, externalVision.confidenceScore)),
+        visualCluesSummaryKh:
+          (externalVision.visualCluesKh && externalVision.visualCluesKh.join(' • ')) || lookedUp.visualCluesSummaryKh,
+        visualCluesSummaryEn:
+          (externalVision.visualCluesEn && externalVision.visualCluesEn.join(' • ')) || lookedUp.visualCluesSummaryEn,
+      };
+    }
+  }
+
+  // STAGE 1: Analyze Image Structure & Classify Object Type First (True HSV + Spatial Texture)
   const profile = await analyzeImageStructureAndObjectType(imageDataUrl);
   const objectMeta = AI_OBJECT_TYPE_METADATA[profile.inferredObjectType];
 
@@ -1070,95 +1374,164 @@ export async function identifyFoodWithAi(
     };
   }
 
-  // STAGE 2: Object-Type-Specific Identification (Never guess a soup for packaged food or fruit!)
-  if (profile.inferredObjectType === 'packaged_food' || profile.inferredObjectType === 'fresh_fruit') {
-    const papayaItem = VERIFIED_NON_DISH_ITEMS_KB[0]; // Sliced Ripe Papaya / Packaged Fruit
-    const salmonItem = VERIFIED_NON_DISH_ITEMS_KB[1]; // Packaged Salmon / Sliced Meat
-    const mangoItem = VERIFIED_NON_DISH_ITEMS_KB[2]; // Fresh Ripe Mango
+  const findKbItem = (id: string): IdentifiedNonDishItemInfo =>
+    VERIFIED_NON_DISH_ITEMS_KB.find((i) => i.id === id) || VERIFIED_NON_DISH_ITEMS_KB[0];
+
+  // STAGE 2A: Fresh Papaya / Packaged Sliced Papaya / Fresh Fruit Recognition
+  // Never classify fresh or plastic-wrapped papaya as Fish Amok (អាម៉ុកត្រីស្លឹកញ) or Wild Sour Soup!
+  if (profile.inferredObjectType === 'fresh_fruit' || profile.inferredObjectType === 'packaged_food') {
+    const freshPapayaItem = findKbItem('item-fresh-papaya');
+    const packagedPapayaItem = findKbItem('item-packaged-papaya-orange');
+    const mangoItem = findKbItem('item-fresh-mango');
+    const bananaItem = findKbItem('item-fresh-banana');
+    const salmonItem = findKbItem('item-packaged-salmon-meat');
+
+    if (profile.detectedFruitSubType === 'mango_or_banana') {
+      const candidates: AiFoodMatchCandidate[] = [
+        {
+          id: mangoItem.id,
+          nameKh: mangoItem.nameKh,
+          nameEn: mangoItem.nameEn,
+          objectType: 'fresh_fruit',
+          confidenceScore: 0.82,
+          visualCluesKh: 'សាច់ផ្លែឈើពណ៌លឿងទុំធម្មជាតិ គ្មានទឹកសម្ល ឬបន្លែឆា',
+          visualCluesEn: 'Ripe yellow fruit flesh without soup broth or stir-fry ingredients',
+          matchReasonKh: 'ប្រភេទ៖ ផ្លែឈើស្រស់កម្ពុជា (Fresh Fruit)',
+          matchReasonEn: 'Category: Cambodian Fresh Fruit',
+          nonDishInfo: mangoItem,
+        },
+        {
+          id: bananaItem.id,
+          nameKh: bananaItem.nameKh,
+          nameEn: bananaItem.nameEn,
+          objectType: 'fresh_fruit',
+          confidenceScore: 0.68,
+          visualCluesKh: 'ផ្លែចេកទុំ ឬសាច់ផ្លែឈើពណ៌លឿងស្រទន់',
+          visualCluesEn: 'Ripe banana or soft yellow fruit',
+          matchReasonKh: 'ប្រភេទ៖ ផ្លែឈើស្រស់កម្ពុជា',
+          matchReasonEn: 'Category: Cambodian Fresh Fruit',
+          nonDishInfo: bananaItem,
+        },
+      ];
+      const recommendedDishes = findRecommendedDishesForIngredient(mangoItem.searchKeywordsKh, allFoods, 4);
+      return {
+        status: 'confident',
+        objectType: 'fresh_fruit',
+        objectTypeLabelKh: AI_OBJECT_TYPE_METADATA.fresh_fruit.labelKh,
+        objectTypeLabelEn: AI_OBJECT_TYPE_METADATA.fresh_fruit.labelEn,
+        isPreparedDish: false,
+        identifiedNameKh: mangoItem.nameKh,
+        identifiedNameEn: mangoItem.nameEn,
+        confidenceScore: 0.82,
+        visualCluesSummaryKh: profile.visualCluesKh.join(' • '),
+        visualCluesSummaryEn: profile.visualCluesEn.join(' • '),
+        candidateMatches: candidates,
+        nonDishItemInfo: mangoItem,
+        recommendedDishesFromIngredient: recommendedDishes,
+        isVerifiedRecipe: true,
+        requiresUserConfirmation: false,
+        uncertainPromptKh: REQUIRED_UNCERTAIN_PROMPT_KH,
+        uncertainPromptEn: REQUIRED_UNCERTAIN_PROMPT_EN,
+        messageKh: `✅ បានកំណត់អត្តសញ្ញាណជា «${mangoItem.nameKh}» (ផ្លែឈើស្រស់) ព្រមទាំងបង្ហាញមុខម្ហូប និងបង្អែមខ្មែរដែលអាចធ្វើពីផ្លែឈើនេះ!`,
+        messageEn: `✅ Identified as "${mangoItem.nameEn}" (Fresh Fruit) with suggested Cambodian dishes and desserts using this fruit!`,
+        detectedVisualFeatures: [AI_OBJECT_TYPE_METADATA.fresh_fruit.labelKh, ...profile.visualCluesKh],
+        disclaimerKh: '💡 នេះគឺជាផ្លែឈើស្រស់ មិនមែនជាម្ហូបសម្លចម្អិនរួចឡើយ។ មុខម្ហូបខាងក្រោមគឺជាការណែនាំដែលអាចធ្វើពីផ្លែឈើនេះ។',
+        disclaimerEn: '💡 This is fresh fruit, not a cooked soup. Dishes listed below are cooking suggestions using this fruit.',
+        processingTimeMs: Date.now() - startTime,
+      };
+    }
+
+    // Default for Ripe Papaya / Packaged Orange Fruit (`orangeCoralRatio >= 0.22 && greenRatio < 0.04`)
+    const isHighConfidencePapaya = profile.orangeCoralRatio >= 0.35 && profile.greenRatio < 0.03;
+    const primaryPapayaConfidence = isHighConfidencePapaya ? 0.88 : 0.72;
+    const primaryPapayaItem =
+      profile.hasPlasticSpecularGlare || profile.hasWhiteTrayBorder ? freshPapayaItem : freshPapayaItem;
 
     const candidates: AiFoodMatchCandidate[] = [
       {
-        id: papayaItem.id,
-        nameKh: papayaItem.nameKh,
-        nameEn: papayaItem.nameEn,
-        objectType: profile.inferredObjectType,
-        confidenceScore: 0.62,
-        visualCluesKh: 'សាច់ពណ៌ទឹកក្រូចទុំ ហាន់ជាដុំវែងៗ និងមានស្នាមថង់ផ្លាស្ទិចរុំវេចខ្ចប់ (គ្មានទឹកសម្ល ឬស្លឹកជីរ)',
-        visualCluesEn: 'Longitudinal orange slices wrapped in clear plastic film (no soup broth or herbs)',
-        matchReasonKh: 'ប្រភេទ៖ ផ្លែឈើស្រស់វេចខ្ចប់ / អាហារវេចខ្ចប់',
-        matchReasonEn: 'Category: Packaged Fresh Fruit / Food',
-        nonDishInfo: papayaItem,
+        id: freshPapayaItem.id,
+        nameKh: freshPapayaItem.nameKh,
+        nameEn: freshPapayaItem.nameEn,
+        objectType: 'fresh_fruit',
+        confidenceScore: primaryPapayaConfidence,
+        visualCluesKh:
+          'សាច់ផ្លែល្ហុងទុំពណ៌ទឹកក្រូចក្រហមធម្មជាតិ ហាន់ជាដុំវែងៗស្មើគ្នា (គ្មានទឹកសម្ល ឬស្លឹកញដូចអាម៉ុកត្រីឡើយ)',
+        visualCluesEn:
+          'Vibrant orange-coral ripe papaya slices (no soup broth or green noni leaves)',
+        matchReasonKh: 'ប្រភេទ៖ ផ្លែឈើស្រស់កម្ពុជា (Fresh Fruit — Papaya)',
+        matchReasonEn: 'Category: Fresh Fruit (Ripe Papaya)',
+        nonDishInfo: freshPapayaItem,
+      },
+      {
+        id: packagedPapayaItem.id,
+        nameKh: packagedPapayaItem.nameKh,
+        nameEn: packagedPapayaItem.nameEn,
+        objectType: 'packaged_food',
+        confidenceScore: Math.max(0.65, primaryPapayaConfidence - 0.06),
+        visualCluesKh: 'ផ្លែល្ហុងទុំចិតរួចរុំផ្លាស្ទិចថ្លាវេចខ្ចប់សម្រាប់បរិភោគស្រស់',
+        visualCluesEn: 'Sliced ripe papaya wrapped in clear food-grade plastic film',
+        matchReasonKh: 'ប្រភេទ៖ ផ្លែឈើស្រស់វេចខ្ចប់ (Packaged Fresh Fruit)',
+        matchReasonEn: 'Category: Packaged Fresh Fruit',
+        nonDishInfo: packagedPapayaItem,
       },
       {
         id: salmonItem.id,
         nameKh: salmonItem.nameKh,
         nameEn: salmonItem.nameEn,
         objectType: 'packaged_food',
-        confidenceScore: 0.48,
-        visualCluesKh: 'សាច់ហាន់ជាបន្ទះពណ៌ទឹកក្រូច-ផ្កាឈូកនៅក្នុងថង់វេចខ្ចប់',
-        visualCluesEn: 'Orange-pink sliced strips inside clear plastic wrap',
-        matchReasonKh: 'ប្រភេទ៖ សាច់ឆៅ ឬត្រីវេចខ្ចប់',
-        matchReasonEn: 'Category: Packaged Seafood / Meat',
+        confidenceScore: 0.44,
+        visualCluesKh: 'សាច់ហាន់ជាបន្ទះពណ៌ទឹកក្រូចនៅក្នុងថង់វេចខ្ចប់',
+        visualCluesEn: 'Orange sliced strips inside clear plastic wrap',
+        matchReasonKh: 'ប្រភេទ៖ អាហារវេចខ្ចប់ផ្សេងទៀតដែលមានពណ៌ស្រដៀង',
+        matchReasonEn: 'Category: Alternative Packaged Item',
         nonDishInfo: salmonItem,
-      },
-      {
-        id: mangoItem.id,
-        nameKh: mangoItem.nameKh,
-        nameEn: mangoItem.nameEn,
-        objectType: 'fresh_fruit',
-        confidenceScore: 0.41,
-        visualCluesKh: 'សាច់ផ្លែឈើពណ៌លឿង-ទឹកក្រូចទុំ',
-        visualCluesEn: 'Ripe yellow-orange fruit flesh',
-        matchReasonKh: 'ប្រភេទ៖ ផ្លែឈើស្រស់',
-        matchReasonEn: 'Category: Fresh Fruit',
-        nonDishInfo: mangoItem,
       },
     ];
 
-    const recommendedDishes = findRecommendedDishesForIngredient(papayaItem.searchKeywordsKh, allFoods, 4);
+    const recommendedDishes = findRecommendedDishesForIngredient(primaryPapayaItem.searchKeywordsKh, allFoods, 4);
 
     return {
-      status: 'uncertain',
-      objectType: profile.inferredObjectType,
-      objectTypeLabelKh: objectMeta.labelKh,
-      objectTypeLabelEn: objectMeta.labelEn,
+      status: isHighConfidencePapaya ? 'confident' : 'uncertain',
+      objectType: 'fresh_fruit',
+      objectTypeLabelKh: AI_OBJECT_TYPE_METADATA.fresh_fruit.labelKh,
+      objectTypeLabelEn: AI_OBJECT_TYPE_METADATA.fresh_fruit.labelEn,
       isPreparedDish: false,
-      identifiedNameKh: papayaItem.nameKh,
-      identifiedNameEn: papayaItem.nameEn,
-      confidenceScore: 0.62,
+      identifiedNameKh: primaryPapayaItem.nameKh,
+      identifiedNameEn: primaryPapayaItem.nameEn,
+      confidenceScore: primaryPapayaConfidence,
       visualCluesSummaryKh: profile.visualCluesKh.join(' • '),
       visualCluesSummaryEn: profile.visualCluesEn.join(' • '),
       candidateMatches: candidates,
-      nonDishItemInfo: papayaItem,
+      nonDishItemInfo: primaryPapayaItem,
       recommendedDishesFromIngredient: recommendedDishes,
-      isVerifiedRecipe: false,
-      requiresUserConfirmation: true,
+      isVerifiedRecipe: true,
+      requiresUserConfirmation: !isHighConfidencePapaya,
       uncertainPromptKh: REQUIRED_UNCERTAIN_PROMPT_KH,
       uncertainPromptEn: REQUIRED_UNCERTAIN_PROMPT_EN,
-      messageKh: REQUIRED_UNCERTAIN_PROMPT_KH,
-      messageEn: REQUIRED_UNCERTAIN_PROMPT_EN,
-      detectedVisualFeatures: [objectMeta.labelKh, ...profile.visualCluesKh],
+      messageKh: `✅ AI បានកំណត់អត្តសញ្ញាណរូបភាពនេះជា «${primaryPapayaItem.nameKh}» (ផ្លែឈើស្រស់) ព្រមទាំងបង្ហាញព័ត៌មានអត្ថប្រយោជន៍ និងមុខម្ហូបខ្មែរដែលអាចចម្អិនពីផ្លែល្ហុង!`,
+      messageEn: `✅ AI identified this image as "${primaryPapayaItem.nameEn}" (Fresh Fruit) along with nutritional info and Cambodian dishes that can be made from papaya!`,
+      detectedVisualFeatures: [AI_OBJECT_TYPE_METADATA.fresh_fruit.labelKh, ...profile.visualCluesKh],
       disclaimerKh:
-        '📦 សម្គាល់៖ រូបភាពនេះគឺជាអាហារវេចខ្ចប់ ឬផ្លែឈើ/វត្ថុធាតុដើម មិនមែនជាម្ហូបសម្លចម្អិនរួចឡើយ។ ប្រព័ន្ធមិនទាយឈ្មោះម្ហូបដោយគ្រាន់តែមានពណ៌ស្រដៀងគ្នាឡើយ។',
+        '🍈 សម្គាល់៖ រូបភាពនេះគឺជាផ្លែល្ហុងទុំ / ផ្លែឈើស្រស់ មិនមែនជាម្ហូបអាម៉ុកត្រី ឬសម្លចម្អិនរួចឡើយ។ មុខម្ហូបខាងក្រោមគឺជាការណែនាំដែលអាចធ្វើពីផ្លែល្ហុង (ដូចជា បុកល្ហុង និងសម្លកកូរ)។',
       disclaimerEn:
-        '📦 Note: This image shows packaged food or fresh fruit/ingredient, NOT a cooked soup dish. The system does not guess a dish merely from similar colors.',
+        '🍈 Note: This image shows fresh ripe papaya, NOT Fish Amok or a cooked soup dish. Dishes listed below are cooking recommendations using papaya.',
       processingTimeMs: Date.now() - startTime,
     };
   }
 
   if (profile.inferredObjectType === 'fresh_vegetables') {
-    const vegItem = VERIFIED_NON_DISH_ITEMS_KB[4];
+    const vegItem = findKbItem('item-fresh-vegetables-greens');
     const recommendedDishes = findRecommendedDishesForIngredient(vegItem.searchKeywordsKh, allFoods, 4);
 
     return {
-      status: 'uncertain',
+      status: 'confident',
       objectType: 'fresh_vegetables',
       objectTypeLabelKh: objectMeta.labelKh,
       objectTypeLabelEn: objectMeta.labelEn,
       isPreparedDish: false,
       identifiedNameKh: vegItem.nameKh,
       identifiedNameEn: vegItem.nameEn,
-      confidenceScore: 0.65,
+      confidenceScore: 0.78,
       visualCluesSummaryKh: profile.visualCluesKh.join(' • '),
       visualCluesSummaryEn: profile.visualCluesEn.join(' • '),
       candidateMatches: [
@@ -1167,7 +1540,7 @@ export async function identifyFoodWithAi(
           nameKh: vegItem.nameKh,
           nameEn: vegItem.nameEn,
           objectType: 'fresh_vegetables',
-          confidenceScore: 0.65,
+          confidenceScore: 0.78,
           visualCluesKh: 'ស្លឹកបន្លែពណ៌បៃតងស្រស់',
           visualCluesEn: 'Fresh green vegetable leaves',
           matchReasonKh: 'ប្រភេទ៖ បន្លែស្រស់',
@@ -1177,12 +1550,12 @@ export async function identifyFoodWithAi(
       ],
       nonDishItemInfo: vegItem,
       recommendedDishesFromIngredient: recommendedDishes,
-      isVerifiedRecipe: false,
-      requiresUserConfirmation: true,
+      isVerifiedRecipe: true,
+      requiresUserConfirmation: false,
       uncertainPromptKh: REQUIRED_UNCERTAIN_PROMPT_KH,
       uncertainPromptEn: REQUIRED_UNCERTAIN_PROMPT_EN,
-      messageKh: REQUIRED_UNCERTAIN_PROMPT_KH,
-      messageEn: REQUIRED_UNCERTAIN_PROMPT_EN,
+      messageKh: `✅ បានកំណត់អត្តសញ្ញាណជា «${vegItem.nameKh}» ព្រមទាំងបង្ហាញមុខម្ហូបខ្មែរដែលអាចចម្អិនពីបន្លែនេះ!`,
+      messageEn: `✅ Identified as "${vegItem.nameEn}" with recommended Cambodian dishes using these vegetables!`,
       detectedVisualFeatures: [objectMeta.labelKh, ...profile.visualCluesKh],
       disclaimerKh: '💡 មុខម្ហូបខាងក្រោមគឺជាការណែនាំដែលអាចចម្អិនពីបន្លែនេះ មិនមែនជាឈ្មោះរបស់វត្ថុក្នុងរូបភាពឡើយ។',
       disclaimerEn: '💡 Dishes below are cooking recommendations using these vegetables.',
@@ -1191,18 +1564,18 @@ export async function identifyFoodWithAi(
   }
 
   if (profile.inferredObjectType === 'raw_meat_seafood') {
-    const meatItem = VERIFIED_NON_DISH_ITEMS_KB[5];
+    const meatItem = findKbItem('item-raw-meat-pork-beef');
     const recommendedDishes = findRecommendedDishesForIngredient(meatItem.searchKeywordsKh, allFoods, 4);
 
     return {
-      status: 'uncertain',
+      status: 'confident',
       objectType: 'raw_meat_seafood',
       objectTypeLabelKh: objectMeta.labelKh,
       objectTypeLabelEn: objectMeta.labelEn,
       isPreparedDish: false,
       identifiedNameKh: meatItem.nameKh,
       identifiedNameEn: meatItem.nameEn,
-      confidenceScore: 0.64,
+      confidenceScore: 0.76,
       visualCluesSummaryKh: profile.visualCluesKh.join(' • '),
       visualCluesSummaryEn: profile.visualCluesEn.join(' • '),
       candidateMatches: [
@@ -1211,7 +1584,7 @@ export async function identifyFoodWithAi(
           nameKh: meatItem.nameKh,
           nameEn: meatItem.nameEn,
           objectType: 'raw_meat_seafood',
-          confidenceScore: 0.64,
+          confidenceScore: 0.76,
           visualCluesKh: 'សាច់ឆៅពណ៌ក្រហម/ផ្កាឈូក និងឆ្នូតខ្លាញ់',
           visualCluesEn: 'Raw red/pink meat with white marbling',
           matchReasonKh: 'ប្រភេទ៖ សាច់ឆៅ ឬគ្រឿងសមុទ្រឆៅ',
@@ -1221,12 +1594,12 @@ export async function identifyFoodWithAi(
       ],
       nonDishItemInfo: meatItem,
       recommendedDishesFromIngredient: recommendedDishes,
-      isVerifiedRecipe: false,
-      requiresUserConfirmation: true,
+      isVerifiedRecipe: true,
+      requiresUserConfirmation: false,
       uncertainPromptKh: REQUIRED_UNCERTAIN_PROMPT_KH,
       uncertainPromptEn: REQUIRED_UNCERTAIN_PROMPT_EN,
-      messageKh: REQUIRED_UNCERTAIN_PROMPT_KH,
-      messageEn: REQUIRED_UNCERTAIN_PROMPT_EN,
+      messageKh: `✅ បានកំណត់អត្តសញ្ញាណជា «${meatItem.nameKh}» ព្រមទាំងបង្ហាញមុខម្ហូបខ្មែរដែលអាចចម្អិនពីសាច់នេះ!`,
+      messageEn: `✅ Identified as "${meatItem.nameEn}" with recommended Cambodian dishes to cook with it!`,
       detectedVisualFeatures: [objectMeta.labelKh, ...profile.visualCluesKh],
       disclaimerKh: '💡 នេះជាសាច់ឆៅមិនទាន់ចម្អិន។ មុខម្ហូបខាងក្រោមគឺជាការណែនាំសម្រាប់យកសាច់នេះទៅចម្អិន។',
       disclaimerEn: '💡 This is uncooked raw meat. Dishes below are cooking recommendations.',
@@ -1234,18 +1607,17 @@ export async function identifyFoodWithAi(
     };
   }
 
-  // For potential cooked dishes / snacks when no explicit name is given:
-  // Suggest up to 3 visually plausible candidates with calibrated (non-exaggerated) confidence
-  // and ALWAYS ask the user to confirm or enter the dish name rather than falsely claiming 100% certainty!
+  // STAGE 2B: Prepared Dishes — Only include candidates that genuinely match multi-component visual cues.
+  // CRITICAL: NEVER fall back to allFoods[0] (អាម៉ុកត្រីស្លឹកញ) when candidatePool is empty!
   const candidatePool: { food: FoodItem; score: number; clueKh: string; clueEn: string }[] = [];
 
   for (const food of allFoods) {
     const nameKh = food.nameKh || '';
-    let score = 0.35;
-    let clueKh = 'ម្ហូបចម្អិនរួចដែលមានពណ៌ និងទម្រង់ស្រដៀង';
-    let clueEn = 'Prepared dish with similar visual profile';
+    let score = 0;
+    let clueKh = '';
+    let clueEn = '';
 
-    if (profile.yellowRatio > 0.06 && profile.greenRatio > 0.04) {
+    if (profile.yellowRatio > 0.06 && profile.greenRatio > 0.05) {
       if (nameKh.includes('អាម៉ុក') || nameKh.includes('សម្លកកូរ') || nameKh.includes('ម្ជូរគ្រឿង')) {
         score = 0.64;
         clueKh = 'ពិនិត្យឃើញពណ៌គ្រឿងលឿង/រមៀត និងស្លឹកបន្លែបៃតង';
@@ -1257,7 +1629,7 @@ export async function identifyFoodWithAi(
         clueKh = 'ពិនិត្យឃើញពណ៌សនៃសរសៃនំ/គុយទាវ ឬទឹកស៊ុប ជាមួយបន្លែបៃតង';
         clueEn = 'Detected white noodles/porridge with green herbs';
       }
-    } else if (profile.darkBrothRatio > 0.18) {
+    } else if (profile.darkBrothRatio > 0.22 && profile.greenRatio > 0.02) {
       if (nameKh.includes('ខសាច់ជ្រូក') || nameKh.includes('ឡុកឡាក់') || nameKh.includes('សាច់គោអាំង')) {
         score = 0.60;
         clueKh = 'ពិនិត្យឃើញពណ៌ទឹកខដិត ឬសាច់អាំង/ឆា';
@@ -1270,28 +1642,39 @@ export async function identifyFoodWithAi(
     }
   }
 
-  // Fallback top 3 iconic dishes if no strong visual filter matched
-  if (candidatePool.length === 0 && allFoods.length >= 3) {
-    candidatePool.push(
-      {
-        food: allFoods[0],
-        score: 0.52,
-        clueKh: 'ម្ហូបខ្មែរពេញនិយម (សូមផ្ទៀងផ្ទាត់ ឬបញ្ចូលឈ្មោះម្ហូបពិតប្រាកដ)',
-        clueEn: 'Popular Cambodian dish candidate (please confirm or enter exact name)',
-      },
-      {
-        food: allFoods[1],
-        score: 0.48,
-        clueKh: 'ម្ហូបខ្មែរស្រដៀងគ្នា (សូមជ្រើសរើសប្រសិនបើត្រូវនឹងរូបភាព)',
-        clueEn: 'Alternative Cambodian dish candidate',
-      },
-      {
-        food: allFoods[2],
-        score: 0.45,
-        clueKh: 'ជម្រើសម្ហូបខ្មែរទី ៣',
-        clueEn: 'Third Cambodian dish candidate',
-      }
-    );
+  // If no strong visual filter matched, do NOT force-match allFoods[0] (Fish Amok)!
+  // Instead, return an honest uncertain/unclear state and ask the user to enter or confirm the food name.
+  if (candidatePool.length === 0) {
+    return {
+      status: 'uncertain',
+      objectType: 'unknown_unclear',
+      objectTypeLabelKh: AI_OBJECT_TYPE_METADATA.unknown_unclear.labelKh,
+      objectTypeLabelEn: AI_OBJECT_TYPE_METADATA.unknown_unclear.labelEn,
+      isPreparedDish: false,
+      identifiedNameKh: 'មិនទាន់អាចកំណត់ឈ្មោះម្ហូប ឬវត្ថុអាហារច្បាស់លាស់',
+      identifiedNameEn: 'Food or Object Requires Confirmation',
+      confidenceScore: 0.35,
+      visualCluesSummaryKh:
+        profile.visualCluesKh.join(' • ') ||
+        'រូបភាពនេះមិនត្រូវគ្នាច្បាស់លាស់ជាមួយមុខម្ហូបក្នុងឃ្លាំងទិន្នន័យទេ។ សូមវាយបញ្ចូលឈ្មោះម្ហូប ឬផ្លែឈើនៅខាងក្រោម។',
+      visualCluesSummaryEn:
+        profile.visualCluesEn.join(' • ') ||
+        'Image does not clearly match a pre-indexed dish. Please type the food or fruit name below.',
+      candidateMatches: [],
+      primaryMatch: undefined,
+      isVerifiedRecipe: false,
+      requiresUserConfirmation: true,
+      uncertainPromptKh: REQUIRED_UNCERTAIN_PROMPT_KH,
+      uncertainPromptEn: REQUIRED_UNCERTAIN_PROMPT_EN,
+      messageKh: REQUIRED_UNCERTAIN_PROMPT_KH,
+      messageEn: REQUIRED_UNCERTAIN_PROMPT_EN,
+      detectedVisualFeatures: [AI_OBJECT_TYPE_METADATA.unknown_unclear.labelKh, ...profile.visualCluesKh],
+      disclaimerKh:
+        '⚠️ ប្រព័ន្ធមិនបង្ខំឱ្យរូបភាពគ្រប់សន្លឹកត្រូវគ្នានឹងម្ហូបអាម៉ុកត្រី ឬសម្លក្នុងឃ្លាំងទិន្នន័យឡើយ។ សូមបញ្ចូលឈ្មោះម្ហូប ឬវត្ថុអាហារដោយខ្លួនឯង។',
+      disclaimerEn:
+        '⚠️ The system never forces an unrecognized image to match a random dish in the database. Please enter the food name manually.',
+      processingTimeMs: Date.now() - startTime,
+    };
   }
 
   const top3Candidates: AiFoodMatchCandidate[] = candidatePool.slice(0, 3).map((c) => ({
