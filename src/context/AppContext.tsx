@@ -212,7 +212,7 @@ interface AppContextType {
   setIsUpgradeVipModalOpen: (open: boolean) => void;
   openUpgradeVipModal: () => void;
   submitVipUpgradeRequest: (durationDays?: number, amountUsd?: number, transactionRef?: string, notes?: string) => Promise<{ success: boolean; transactionId: string; error?: string }>;
-  upgradeCurrentUserToVip: (paymentMethod: 'GooglePlayBilling' | 'KHQR' | 'Bakong' | 'Card', transactionRef: string, last4?: string) => Promise<{ success: boolean; error?: string }>;
+  upgradeCurrentUserToVip: (paymentMethod: 'GooglePlayBilling' | 'KHQR' | 'Bakong' | 'Card', transactionRef: string, last4?: string, amountUsd?: number, durationDays?: number) => Promise<{ success: boolean; error?: string }>;
   renewCurrentUserVip: (paymentMethod: 'GooglePlayBilling' | 'KHQR' | 'Bakong' | 'Card', transactionRef: string) => Promise<{ success: boolean; error?: string }>;
   restoreCurrentUserVipPurchases: () => Promise<{ success: boolean; restored: boolean; message: string }>;
 
@@ -2124,11 +2124,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
   };
 
-  // User VIP Upgrade & Renewal Methods ($9.99 USD / 365 Days)
+  // User VIP Upgrade & Renewal Methods ($2.99 / 90 Days or $9.99 / 365 Days)
   const upgradeCurrentUserToVip = async (
     paymentMethod: 'GooglePlayBilling' | 'KHQR' | 'Bakong' | 'Card',
     transactionRef: string,
-    last4?: string
+    last4?: string,
+    amountUsd: number = VIP_QUARTERLY_PRICE_USD,
+    durationDays: number = VIP_QUARTERLY_DAYS
   ): Promise<{ success: boolean; error?: string }> => {
     if (!currentUser) {
       setIsAuthModalOpen(true);
@@ -2142,7 +2144,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         userName: currentUser.name,
         paymentMethod,
         transactionRef,
-        amountUsd: VIP_ANNUAL_PRICE_USD,
+        amountUsd,
         nonce: `vip_nonce_${Date.now()}`,
         timestamp: Date.now(),
         paymentToken: last4 ? `card_${last4}` : undefined
@@ -2156,8 +2158,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           userId: currentUser.id,
           userName: currentUser.name,
           userEmail: currentUser.email,
-          amountUsd: VIP_ANNUAL_PRICE_USD,
-          durationDays: 365,
+          amountUsd,
+          durationDays,
           membershipTier: 'premium_vip',
           status: 'failed',
           paymentMethod,
@@ -2201,8 +2203,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         userEmail: currentUser.email,
         ownerId: currentUser.id,
         ownerName: currentUser.name,
-        amountUsd: VIP_ANNUAL_PRICE_USD,
-        durationDays: 365,
+        amountUsd,
+        durationDays: result.durationDays,
         membershipTier: 'premium_vip',
         status: 'verified',
         paymentMethod,
@@ -2211,8 +2213,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         createdAt: result.startDate,
         expiresAt: result.expiryDate,
         verifiedAt: new Date().toISOString().replace('T', ' ').slice(0, 16),
-        verifiedBy: paymentMethod === 'GooglePlayBilling' ? 'Google Play Billing Server' : 'Secure Payment Engine',
-        notes: `365-day Premium VIP membership activated successfully ($9.99 USD/year)`
+        verifiedBy: paymentMethod === 'GooglePlayBilling' ? 'Google Play Billing Server' : 'Secure ABA KHQR Payment Engine',
+        notes: `${result.durationDays}-day Premium VIP membership activated successfully ($${amountUsd} USD)`
       };
 
       setTransactions(prev => [verifiedTxn, ...prev]);
@@ -2231,8 +2233,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
       showToast(
         language === 'km' 
-          ? 'អបអរសាទរ! គណនីរបស់អ្នកត្រូវបានដំឡើងទៅជា Premium VIP (៣៦៥ ថ្ងៃ) ដោយជោគជ័យ! 🎉' 
-          : 'Congratulations! Your account has been upgraded to Premium VIP (365 days)! 🎉',
+          ? `អបអរសាទរ! គណនីរបស់អ្នកត្រូវបានដំឡើងទៅជា Premium VIP (${result.durationDays} ថ្ងៃ) ដោយជោគជ័យ! 🎉` 
+          : `Congratulations! Your account has been upgraded to Premium VIP (${result.durationDays} days)! 🎉`,
         'success'
       );
 

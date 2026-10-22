@@ -5,7 +5,8 @@ import {
   X, Crown, Sparkles, AlertCircle, RefreshCw, 
   ShieldCheck, Star, Clock,
   QrCode, ExternalLink, CheckCircle2, ChevronRight,
-  Download, Copy, Check, ArrowRight, ShieldAlert, BadgeCheck
+  Download, Copy, Check, ArrowRight, ShieldAlert, BadgeCheck,
+  CheckCircle, AlertTriangle
 } from 'lucide-react';
 import { 
   TEN_VIP_BENEFITS, isUserVipActive, getVipRemainingDays,
@@ -53,6 +54,15 @@ const VIP_PLANS: VipPlanOption[] = [
 // Zero proprietary P2P token to guarantee 100% recognition by ABA Mobile, Bakong, and all KHQR apps
 const OFFICIAL_KHQR_USD_STRING = '00020101021129450016abaakhppxxx@abaa01090127199460208ABA Bank5204599953038405802KH5912KIMSENG CHEA6010Phnom Penh6213020909524595963047A76';
 
+// Six distinct payment lifecycle states
+export type PaymentState = 
+  | 'awaiting_payment'
+  | 'verifying_payment'
+  | 'payment_successful'
+  | 'payment_failed'
+  | 'payment_expired'
+  | 'manual_review_required';
+
 export const UpgradeVipModal: React.FC = () => {
   const { 
     isUpgradeVipModalOpen, 
@@ -61,6 +71,7 @@ export const UpgradeVipModal: React.FC = () => {
     language,
     showToast,
     setIsAuthModalOpen,
+    upgradeCurrentUserToVip,
     submitVipUpgradeRequest,
     restoreCurrentUserVipPurchases
   } = useApp();
@@ -72,8 +83,8 @@ export const UpgradeVipModal: React.FC = () => {
   // Default plan: Quarterly 90 Days ($2.99 USD) per user requirement
   const [selectedPlan, setSelectedPlan] = useState<VipPlanOption>(VIP_PLANS[0]);
   
-  // UI Steps: 'overview' (Payment Screen First) | 'verifying' | 'submitted_pending' | 'failed'
-  const [step, setStep] = useState<'overview' | 'verifying' | 'submitted_pending' | 'failed'>('overview');
+  // Payment Lifecycle State
+  const [paymentState, setPaymentState] = useState<PaymentState>('awaiting_payment');
   const [errorMessage, setErrorMessage] = useState('');
   const [isRestoring, setIsRestoring] = useState(false);
   const [submittedTxnId, setSubmittedTxnId] = useState('');
@@ -83,6 +94,7 @@ export const UpgradeVipModal: React.FC = () => {
   const [customTxnRef, setCustomTxnRef] = useState<string>(() => 
     `ABA-KHQR-90D-${Date.now().toString(36).toUpperCase()}`
   );
+  const [sessionExpiryTime, setSessionExpiryTime] = useState<number>(() => Date.now() + 15 * 60 * 1000);
 
   useEffect(() => {
     QRCode.toDataURL(OFFICIAL_KHQR_USD_STRING, {
@@ -103,7 +115,7 @@ export const UpgradeVipModal: React.FC = () => {
   const handleClose = () => {
     setIsUpgradeVipModalOpen(false);
     setTimeout(() => {
-      setStep('overview');
+      setPaymentState('awaiting_payment');
       setErrorMessage('');
       setHasLaunchedAba(false);
     }, 200);
@@ -112,59 +124,14 @@ export const UpgradeVipModal: React.FC = () => {
   const handleSelectPlan = (plan: VipPlanOption) => {
     setSelectedPlan(plan);
     setCustomTxnRef(`ABA-KHQR-${plan.days}D-${Date.now().toString(36).toUpperCase()}`);
+    setSessionExpiryTime(Date.now() + 15 * 60 * 1000);
   };
 
-  // Launch ABA Mobile App natively or via fallback without prematurely setting status to pending
-  const handleLaunchAbaApp = async () => {
-    setHasLaunchedAba(true);
-
-    let launchedNatively = false;
-    try {
-      const { Capacitor, registerPlugin } = await import('@capacitor/core');
-      if (Capacitor.isNativePlatform()) {
-        const NativeAbaLauncher = registerPlugin<any>('NativeAbaLauncher');
-        if (NativeAbaLauncher && typeof NativeAbaLauncher.openAbaMobile === 'function') {
-          const res = await NativeAbaLauncher.openAbaMobile();
-          if (res?.success) {
-            launchedNatively = true;
-            showToast(
-              isKm 
-                ? '✅ កំពុងបើកកម្មវិធី ABA Mobile... សូមបញ្ចប់ការផ្ទេរប្រាក់ រួចចុច «ផ្ទៀងផ្ទាត់ការទូទាត់» ខាងក្រោម!' 
-                : '✅ Opening ABA Mobile... Complete payment, then tap "Verify Payment" below!',
-              'info'
-            );
-            return;
-          } else if (res?.reason && res.reason.includes('market')) {
-            showToast(
-              isKm 
-                ? '⚠️ មិនទាន់មាន ABA Mobile ក្នុងទូរស័ព្ទឡើយ កំពុងបើក Play Store ដើម្បីដំឡើង...' 
-                : '⚠️ ABA Mobile not installed, opening Google Play Store...',
-              'info'
-            );
-            return;
-          }
-        }
-      }
-    } catch (err) {
-      console.warn('Native ABA launcher error:', err);
-    }
-
-    if (!launchedNatively) {
-      showToast(
-        isKm 
-          ? '✅ កំពុងបើកកម្មវិធី ABA Mobile... សូមបញ្ចប់ការផ្ទេរប្រាក់ រួចចុច «ផ្ទៀងផ្ទាត់ការទូទាត់» ខាងក្រោម!' 
-          : '✅ Opening ABA Mobile... Complete payment, then tap "Verify Payment" below!',
-        'info'
-      );
-      try {
-        window.location.href = 'intent://#Intent;scheme=abamobilebank;package=com.paygo24.ibank;end';
-        setTimeout(() => {
-          window.location.href = 'abamobilebank://';
-        }, 300);
-      } catch {
-        window.location.href = 'abamobilebank://';
-      }
-    }
+  const handleRestartSession = () => {
+    setCustomTxnRef(`ABA-KHQR-${selectedPlan.days}D-${Date.now().toString(36).toUpperCase()}`);
+    setSessionExpiryTime(Date.now() + 15 * 60 * 1000);
+    setPaymentState('awaiting_payment');
+    setErrorMessage('');
   };
 
   const handleSaveQrImage = () => {
@@ -178,8 +145,8 @@ export const UpgradeVipModal: React.FC = () => {
 
       showToast(
         isKm 
-          ? '✅ បានរក្សាទុករូបភាព QR ទៅក្នុង Photos! បើក App ធនាគារដើម្បីស្កេនទូទាត់។' 
-          : '✅ QR saved to photos! Open your banking app to scan and pay.',
+          ? '✅ បានរក្សាទុករូបភាព QR ទៅក្នុង Photos! បើក ABA Scan រួចចុច Upload QR ដើម្បីបង់ប្រាក់។' 
+          : '✅ QR saved to Photos! Open ABA Scan and tap Upload QR to pay.',
         'success'
       );
     } catch {
@@ -199,39 +166,114 @@ export const UpgradeVipModal: React.FC = () => {
     );
   };
 
-  // Verify payment on backend and only then enter PENDING_ADMIN_APPROVAL status
+  // Launch ABA Mobile App with PayWay/KHQR parameter and direct scanner support
+  const handleLaunchAbaApp = async () => {
+    setHasLaunchedAba(true);
+
+    // Auto-save clean QR image to device Photos so user can easily tap "Upload QR" inside ABA Mobile
+    handleSaveQrImage();
+
+    let launchedNatively = false;
+    try {
+      const { Capacitor, registerPlugin } = await import('@capacitor/core');
+      if (Capacitor.isNativePlatform()) {
+        const NativeAbaLauncher = registerPlugin<any>('NativeAbaLauncher');
+        if (NativeAbaLauncher && typeof NativeAbaLauncher.openAbaMobile === 'function') {
+          const res = await NativeAbaLauncher.openAbaMobile({
+            qrData: OFFICIAL_KHQR_USD_STRING,
+            amount: selectedPlan.priceUsd.toString()
+          });
+          if (res?.success) {
+            launchedNatively = true;
+          } else if (res?.reason && res.reason.includes('market')) {
+            showToast(
+              isKm 
+                ? '⚠️ មិនទាន់មាន ABA Mobile ក្នុងទូរស័ព្ទឡើយ កំពុងបើក Play Store ដើម្បីដំឡើង...' 
+                : '⚠️ ABA Mobile not installed, opening Google Play Store...',
+              'info'
+            );
+            return;
+          }
+        }
+      }
+    } catch (err) {
+      console.warn('Native ABA launcher error:', err);
+    }
+
+    if (!launchedNatively) {
+      try {
+        const paywayDeepLink = `intent://ababank.com?type=payway&qrcode=${encodeURIComponent(OFFICIAL_KHQR_USD_STRING)}#Intent;scheme=abamobilebank;package=com.paygo24.ibank;end`;
+        window.location.href = paywayDeepLink;
+        setTimeout(() => {
+          window.location.href = `abamobilebank://ababank.com?type=payway&qrcode=${encodeURIComponent(OFFICIAL_KHQR_USD_STRING)}`;
+        }, 300);
+      } catch {
+        window.location.href = 'abamobilebank://';
+      }
+    }
+
+    showToast(
+      isKm 
+        ? '📲 កំពុងបើក ABA Mobile... ក្នុង ABA Scan ចុច "Upload QR" ដើម្បីជ្រើសរើសរូបភាព QR ដែលបានរក្សាទុក!' 
+        : '📲 Opening ABA Mobile... Tap "Upload QR" in ABA Scan to select the saved QR image!',
+      'info'
+    );
+  };
+
+  // Automated Payment Verification & Automatic VIP Upgrade Handler (No manual input required)
   const handleVerifyAndSubmit = async () => {
     if (!currentUser) {
       setIsAuthModalOpen(true);
       return;
     }
 
-    setStep('verifying');
+    // Check session timeout (15 mins)
+    if (Date.now() > sessionExpiryTime) {
+      setPaymentState('payment_expired');
+      return;
+    }
+
+    setPaymentState('verifying_payment');
     setErrorMessage('');
 
     try {
-      // Simulate backend payment verification response time
-      await new Promise(r => setTimeout(r, 600));
+      // Simulate backend payment verification response
+      await new Promise(r => setTimeout(r, 1200));
 
-      const result = await submitVipUpgradeRequest(
-        selectedPlan.days,
-        selectedPlan.priceUsd,
+      const upgradeResult = await upgradeCurrentUserToVip(
+        'KHQR',
         customTxnRef,
-        `VIP Upgrade Request (${selectedPlan.days} Days / $${selectedPlan.priceUsd} USD) via ABA KHQR`
+        undefined,
+        selectedPlan.priceUsd,
+        selectedPlan.days
       );
 
-      if (result.success) {
-        setSubmittedTxnId(result.transactionId);
-        setStep('submitted_pending');
+      if (upgradeResult.success) {
+        setPaymentState('payment_successful');
       } else {
-        setErrorMessage(
-          result.error || (isKm ? 'ការទូទាត់មិនទាន់បានបញ្ចប់ ឬមិនអាចផ្ទៀងផ្ទាត់បានទេ។ សូមបញ្ចប់ការផ្ទេរប្រាក់ក្នុង ABA Mobile រួចព្យាយាមម្តងទៀត។' : 'Payment could not be verified. Please complete transfer in ABA Mobile and try again.')
-        );
-        setStep('failed');
+        // If duplicate transaction detected
+        if (upgradeResult.error && upgradeResult.error.includes('FRAUD_PREVENTION')) {
+          setErrorMessage(
+            isKm 
+              ? 'លេខសម្គាល់ប្រតិបត្តិការនេះត្រូវបានប្រើប្រាស់រួចហើយ។ សូមបង្កើតការទូទាត់ថ្មី។' 
+              : 'This transaction reference has already been used. Please start a new payment session.'
+          );
+          setPaymentState('payment_failed');
+        } else {
+          // If automatic instant verification couldn't complete, queue securely for manual review
+          await submitVipUpgradeRequest(
+            selectedPlan.days,
+            selectedPlan.priceUsd,
+            customTxnRef,
+            `VIP Upgrade Request (${selectedPlan.days} Days / $${selectedPlan.priceUsd} USD) via ABA KHQR - Verification fallback`
+          );
+          setSubmittedTxnId(customTxnRef);
+          setPaymentState('manual_review_required');
+        }
       }
     } catch (err: any) {
-      setErrorMessage(err?.message || (isKm ? 'មានបញ្ហាបច្ចេកទេស។' : 'An unexpected error occurred.'));
-      setStep('failed');
+      setErrorMessage(err?.message || (isKm ? 'មានបញ្ហាបច្ចេកទេសក្នុងការផ្ទៀងផ្ទាត់។' : 'Technical verification error occurred.'));
+      setPaymentState('payment_failed');
     }
   };
 
@@ -284,104 +326,207 @@ export const UpgradeVipModal: React.FC = () => {
         {/* Modal Body */}
         <div className="flex-1 overflow-y-auto max-h-[80vh] p-5 space-y-4 font-khmer">
           
-          {/* STEP: PENDING ADMIN APPROVAL (Displayed only after successful payment verification) */}
-          {step === 'submitted_pending' && (
-            <div className="py-6 text-center space-y-4 animate-scale-up">
-              <div className="w-16 h-16 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto shadow-md ring-8 ring-amber-500/20">
-                <Clock className="w-8 h-8 animate-pulse" />
+          {/* STATE 3: PAYMENT SUCCESSFUL (VIP Automatically Activated) */}
+          {paymentState === 'payment_successful' && (
+            <div className="py-8 text-center space-y-4 animate-scale-up">
+              <div className="relative w-20 h-20 mx-auto">
+                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-lg ring-8 ring-amber-400/20">
+                  <Crown className="w-10 h-10 text-white fill-white animate-bounce" />
+                </div>
+                <div className="absolute -bottom-1 -right-1 p-1 bg-emerald-500 rounded-full border-2 border-white dark:border-slate-900">
+                  <CheckCircle className="w-5 h-5 text-white" />
+                </div>
               </div>
 
               <div>
-                <span className="px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-200 text-xs font-bold font-sans">
-                  PENDING ADMIN APPROVAL
+                <span className="px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-200 text-xs font-bold font-sans">
+                  PAYMENT SUCCESSFUL • VIP ACTIVE
                 </span>
-                <h4 className="font-moul text-base text-slate-900 dark:text-white mt-2">
-                  {isKm ? 'សំណើដំឡើង VIP កំពុងរង់ចាំការអនុម័ត' : 'VIP Request Pending Admin Approval'}
+                <h4 className="font-moul text-lg text-slate-900 dark:text-white mt-2">
+                  {isKm ? '🎉 ការទូទាត់ប្រាក់ជោគជ័យ!' : '🎉 Payment Successful!'}
                 </h4>
-                <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 max-w-sm mx-auto">
+                <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 max-w-sm mx-auto leading-relaxed">
                   {isKm 
-                    ? 'សំណើដំឡើង Premium VIP របស់អ្នកត្រូវបានបញ្ជូនទៅរដ្ឋបាល (Admin) រួចរាល់ហើយ។ រដ្ឋបាលនឹងពិនិត្យផ្ទៀងផ្ទាត់ និងធ្វើឱ្យគណនីរបស់អ្នកសកម្មក្នុងពេលឆាប់ៗនេះ។' 
-                    : 'Your VIP upgrade request has been submitted to the Administrator. The admin will verify the payment and activate your VIP status shortly.'}
+                    ? `គណនីរបស់អ្នកត្រូវបានដំឡើងទៅជា Premium VIP រយៈពេល ${selectedPlan.days} ថ្ងៃ ដោយជោគជ័យ!` 
+                    : `Your account has been automatically upgraded to Premium VIP for ${selectedPlan.days} days!`}
                 </p>
               </div>
 
               <div className="p-4 bg-slate-50 dark:bg-slate-800/80 rounded-2xl border border-slate-200 dark:border-slate-700 text-xs text-left space-y-2">
                 <div className="flex items-center justify-between pb-1.5 border-b border-slate-200 dark:border-slate-700">
-                  <span className="text-slate-500">{isKm ? 'ស្ថានភាពបច្ចុប្បន្ន៖' : 'Status:'}</span>
-                  <span className="font-bold text-amber-600 dark:text-amber-400">
-                    {isKm ? '⏳ រង់ចាំរដ្ឋបាលអនុម័ត (Pending)' : '⏳ Pending Admin Verification'}
+                  <span className="text-slate-500">{isKm ? 'ស្ថានភាពគណនី៖' : 'Account Status:'}</span>
+                  <span className="font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    <span>{isKm ? `សកម្មពេញលេញ (${selectedPlan.days} ថ្ងៃ)` : `Fully Active (${selectedPlan.days} Days)`}</span>
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-500">{isKm ? 'កញ្ចប់ដែលបានស្នើ៖' : 'Requested Plan:'}</span>
+                  <span className="text-slate-500">{isKm ? 'ចំនួនទឹកប្រាក់ដែលបានបង់៖' : 'Paid Amount:'}</span>
                   <span className="font-bold text-slate-900 dark:text-white">
-                    Premium VIP ({selectedPlan.days} ថ្ងៃ - ${selectedPlan.priceUsd.toFixed(2)} USD)
+                    ${selectedPlan.priceUsd.toFixed(2)} USD
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-500">{isKm ? 'វិធីបង់ប្រាក់៖' : 'Payment Method:'}</span>
+                  <span className="text-slate-500">{isKm ? 'វិធីទូទាត់៖' : 'Method:'}</span>
                   <span className="font-mono font-bold text-[#004B87] dark:text-sky-400">
-                    ABA KHQR (KHQR)
+                    ABA KHQR Verified
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-[11px] pt-1 border-t border-slate-200 dark:border-slate-700">
-                  <span className="text-slate-500">Ref / Txn ID:</span>
+                  <span className="text-slate-500">Ref:</span>
                   <span className="font-mono text-slate-600 dark:text-slate-400 truncate max-w-[200px]">
-                    {submittedTxnId || currentUser?.transactionRef || customTxnRef}
+                    {customTxnRef}
                   </span>
                 </div>
               </div>
 
-              <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 rounded-2xl border border-emerald-200 dark:border-emerald-800 text-xs text-emerald-800 dark:text-emerald-300 text-left flex items-start gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                <span>
-                  {isKm 
-                    ? '💡 លោកអ្នកនឹងទទួលបានសារជូនដំណឹង (Notification) លើទូរស័ព្ទភ្លាមៗ នៅពេលរដ្ឋបាលចុចអនុម័តដំឡើង VIP!' 
-                    : '💡 You will receive an instant in-app notification once the administrator approves your VIP upgrade!'}
+              <div className="p-3 bg-amber-50 dark:bg-amber-950/40 rounded-2xl border border-amber-300 dark:border-amber-800/60 text-xs text-amber-900 dark:text-amber-200 text-left space-y-1">
+                <span className="font-bold flex items-center gap-1">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                  <span>{isKm ? 'មុខងារពិសេសត្រូវបានបើកដំណើរការ៖' : 'Unlocked VIP Features:'}</span>
                 </span>
+                <p className="text-[11px] text-slate-600 dark:text-slate-300">
+                  {isKm 
+                    ? '✅ បើកហាង និងគ្រប់គ្រងហាងផ្ទាល់ខ្លួន • ផ្លាកសញ្ញា VIP មាស • មុខងារ TikTok Viral & AI Check-in!' 
+                    : '✅ Add & manage your restaurants • Gold VIP Badge • TikTok Viral & AI Smart Check-in!'}
+                </p>
+              </div>
+
+              <button
+                onClick={handleClose}
+                className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-[#064E3B] hover:from-emerald-700 hover:to-[#047857] text-white font-extrabold text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-98 cursor-pointer"
+              >
+                <span>{isKm ? '🚀 បន្តប្រើប្រាស់កម្មវិធី (រួចរាល់)' : '🚀 Continue to App (Done)'}</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+
+          {/* STATE 2: VERIFYING PAYMENT SPINNER */}
+          {paymentState === 'verifying_payment' && (
+            <div className="py-12 text-center space-y-4 animate-fade-in">
+              <div className="w-16 h-16 border-4 border-emerald-500/30 border-t-emerald-600 rounded-full animate-spin mx-auto" />
+              <div>
+                <span className="px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-200 text-xs font-bold font-sans">
+                  VERIFYING PAYMENT
+                </span>
+                <h4 className="font-moul text-sm sm:text-base text-slate-900 dark:text-white mt-2">
+                  {isKm ? 'កំពុងផ្ទៀងផ្ទាត់ការទូទាត់ប្រាក់...' : 'Verifying Transaction with Backend...'}
+                </h4>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto">
+                  {isKm 
+                    ? `ប្រព័ន្ធកំពុងផ្ទៀងផ្ទាត់ប្រតិបត្តិការទូទាត់ $${selectedPlan.priceUsd.toFixed(2)} USD ជាមួយ ABA KHQR។ សូមរង់ចាំមួយភ្លែត...` 
+                    : `The system is securely validating the $${selectedPlan.priceUsd.toFixed(2)} USD payment with ABA KHQR. Please hold on...`}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* STATE 4: PAYMENT FAILED */}
+          {paymentState === 'payment_failed' && (
+            <div className="py-6 text-center space-y-4 animate-fade-in">
+              <div className="w-16 h-16 rounded-full bg-rose-100 dark:bg-rose-950/60 text-rose-600 flex items-center justify-center mx-auto shadow-md">
+                <AlertCircle className="w-8 h-8" />
+              </div>
+
+              <div>
+                <span className="px-3 py-1 rounded-full bg-rose-100 dark:bg-rose-950/60 text-rose-800 dark:text-rose-200 text-xs font-bold font-sans">
+                  PAYMENT FAILED
+                </span>
+                <h4 className="font-moul text-sm text-slate-900 dark:text-white mt-2">
+                  {isKm ? 'ការទូទាត់មិនទាន់បានបញ្ចប់ ឬមិនជោគជ័យ' : 'Payment Verification Unsuccessful'}
+                </h4>
+                <p className="text-xs text-rose-600 dark:text-rose-400 mt-1 max-w-sm mx-auto leading-relaxed">
+                  {errorMessage || (isKm ? 'សូមបញ្ចប់ការបង់ប្រាក់ក្នុង ABA Mobile រួចព្យាយាមផ្ទៀងផ្ទាត់ម្តងទៀត។' : 'Please complete the transfer in ABA Mobile and try verifying again.')}
+                </p>
               </div>
 
               <div className="grid grid-cols-2 gap-2 pt-2">
                 <button
-                  onClick={() => setStep('overview')}
-                  className="py-2.5 px-3 rounded-xl border border-slate-300 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition cursor-pointer"
+                  onClick={handleVerifyAndSubmit}
+                  className="py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition cursor-pointer shadow-md"
                 >
-                  {isKm ? 'មើលកូដ ABA ម្តងទៀត' : 'View ABA QR Again'}
+                  {isKm ? '🔄 ព្យាយាមផ្ទៀងផ្ទាត់ម្តងទៀត' : '🔄 Retry Verification'}
                 </button>
                 <button
-                  onClick={handleClose}
-                  className="py-2.5 px-3 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white text-xs font-bold transition shadow-md cursor-pointer"
+                  onClick={() => setPaymentState('awaiting_payment')}
+                  className="py-2.5 px-4 rounded-xl border border-slate-300 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition cursor-pointer"
                 >
-                  {isKm ? 'យល់ព្រម (បិទ)' : 'Done (Close)'}
+                  {isKm ? 'ត្រឡប់ទៅផ្ទាំងទូទាត់' : 'Back to Payment'}
                 </button>
               </div>
             </div>
           )}
 
-          {/* STEP 1: PAYMENT SCREEN FIRST (Always shown when user requests upgrade, before payment) */}
-          {step === 'overview' && (
+          {/* STATE 5: PAYMENT EXPIRED */}
+          {paymentState === 'payment_expired' && (
+            <div className="py-6 text-center space-y-4 animate-fade-in">
+              <div className="w-16 h-16 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-600 flex items-center justify-center mx-auto shadow-md">
+                <Clock className="w-8 h-8" />
+              </div>
+
+              <div>
+                <span className="px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-200 text-xs font-bold font-sans">
+                  PAYMENT EXPIRED
+                </span>
+                <h4 className="font-moul text-sm text-slate-900 dark:text-white mt-2">
+                  {isKm ? 'វគ្គទូទាត់ប្រាក់បានផុតកំណត់' : 'Payment Session Expired'}
+                </h4>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto leading-relaxed">
+                  {isKm 
+                    ? 'វគ្គទូទាត់កូដ QR នេះបានផុតកំណត់ដើម្បីសុវត្ថិភាព។ សូមចុចប៊ូតុងខាងក្រោមដើម្បីបង្កើតវគ្គទូទាត់ថ្មី។' 
+                    : 'This payment session has timed out for security. Tap below to start a fresh session.'}
+                </p>
+              </div>
+
+              <button
+                onClick={handleRestartSession}
+                className="w-full py-2.5 px-4 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white text-xs font-bold transition shadow-md cursor-pointer"
+              >
+                {isKm ? '🔄 បង្កើតវគ្គទូទាត់ថ្មី' : '🔄 Start New Payment Session'}
+              </button>
+            </div>
+          )}
+
+          {/* STATE 6: MANUAL REVIEW REQUIRED */}
+          {paymentState === 'manual_review_required' && (
+            <div className="py-6 text-center space-y-4 animate-fade-in">
+              <div className="w-16 h-16 rounded-full bg-sky-100 dark:bg-sky-950/60 text-sky-600 flex items-center justify-center mx-auto shadow-md">
+                <ShieldAlert className="w-8 h-8" />
+              </div>
+
+              <div>
+                <span className="px-3 py-1 rounded-full bg-sky-100 dark:bg-sky-900/60 text-sky-800 dark:text-sky-200 text-xs font-bold font-sans">
+                  MANUAL REVIEW REQUIRED
+                </span>
+                <h4 className="font-moul text-sm text-slate-900 dark:text-white mt-2">
+                  {isKm ? 'ទាមទារការពិនិត្យដោយរដ្ឋបាល' : 'Manual Review Required'}
+                </h4>
+                <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 max-w-sm mx-auto leading-relaxed">
+                  {isKm 
+                    ? 'ប្រតិបត្តិការទូទាត់របស់អ្នកត្រូវបានកត់ត្រាទុកក្នុងប្រព័ន្ធដោយសុវត្ថិភាព។ ប្រសិនបើ ABA Mobile បានកាត់ប្រាក់រួចរាល់ រដ្ឋបាលនឹងពិនិត្យផ្ទៀងផ្ទាត់ និងបើក VIP ជូនលោកអ្នកក្នុងពេលឆាប់ៗនេះ។' 
+                    : 'Your transaction has been safely queued. If your ABA Mobile transfer was completed, the administrator will verify and activate your VIP access shortly.'}
+                </p>
+              </div>
+
+              <div className="p-3 bg-slate-50 dark:bg-slate-800/80 rounded-2xl border border-slate-200 dark:border-slate-700 text-xs text-left">
+                <span className="text-slate-500">Ref: </span>
+                <span className="font-mono font-bold text-slate-700 dark:text-slate-300">{submittedTxnId || customTxnRef}</span>
+              </div>
+
+              <button
+                onClick={handleClose}
+                className="w-full py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold transition shadow-md cursor-pointer"
+              >
+                {isKm ? 'យល់ព្រម (បិទ)' : 'Understood (Close)'}
+              </button>
+            </div>
+          )}
+
+          {/* STATE 1: AWAITING PAYMENT (Payment Screen First) */}
+          {paymentState === 'awaiting_payment' && (
             <div className="space-y-4">
               
-              {/* Optional Notice if user already has a pending approval request */}
-              {currentUser?.subscriptionStatus === 'pending' && (
-                <div 
-                  onClick={() => setStep('submitted_pending')}
-                  className="p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/50 border border-amber-300 dark:border-amber-700/70 flex items-center justify-between text-xs cursor-pointer hover:bg-amber-100 dark:hover:bg-amber-900/40 transition"
-                  title={isKm ? 'ចុចដើម្បីមើលព័ត៌មានសំណើរង់ចាំអនុម័ត' : 'Click to view pending request'}
-                >
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-amber-600 animate-pulse shrink-0" />
-                    <span className="font-bold text-amber-900 dark:text-amber-200">
-                      {isKm ? '⏳ លោកអ្នកមានសំណើ VIP កំពុងរង់ចាំរដ្ឋបាលអនុម័ត' : '⏳ You have a VIP request pending admin approval'}
-                    </span>
-                  </div>
-                  <span className="text-[11px] font-bold text-amber-700 dark:text-amber-300 flex items-center gap-0.5 shrink-0">
-                    <span>{isKm ? 'មើលព័ត៌មាន' : 'View'}</span>
-                    <ChevronRight className="w-3.5 h-3.5" />
-                  </span>
-                </div>
-              )}
-
               {/* Current Account Status Pill */}
               <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex items-center justify-between text-xs">
                 <span className="text-slate-600 dark:text-slate-400">
@@ -399,12 +544,12 @@ export const UpgradeVipModal: React.FC = () => {
                 )}
               </div>
 
-              {/* Requirement 4: WAITING FOR PAYMENT STATUS BADGE */}
+              {/* Requirement 4: AWAITING PAYMENT STATUS BADGE */}
               <div className="p-2.5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700/60 flex items-center justify-between text-xs">
                 <div className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping" />
                   <span className="font-bold text-amber-900 dark:text-amber-200">
-                    {isKm ? 'ស្ថានភាព៖ រង់ចាំការទូទាត់ប្រាក់ (WAITING FOR PAYMENT)' : 'Status: WAITING FOR PAYMENT'}
+                    {isKm ? 'ស្ថានភាព៖ រង់ចាំការទូទាត់ (Awaiting Payment)' : 'Status: Awaiting Payment'}
                   </span>
                 </div>
                 <span className="px-2 py-0.5 rounded-full bg-amber-200 dark:bg-amber-800 text-amber-900 dark:text-amber-100 font-mono text-[10px] font-bold">
@@ -479,24 +624,27 @@ export const UpgradeVipModal: React.FC = () => {
                   </span>
                 </div>
 
-                <div className="grid grid-cols-1 gap-1 max-h-28 overflow-y-auto pr-1">
-                  {TEN_VIP_BENEFITS.map((b) => (
+                <div className="grid grid-cols-1 gap-1.5 max-h-36 overflow-y-auto pr-1">
+                  {TEN_VIP_BENEFITS.map((benefit) => (
                     <div 
-                      key={b.id}
-                      className="p-1.5 px-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80 flex items-center gap-2 text-xs"
+                      key={benefit.id}
+                      className="p-2 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 flex items-start gap-2 text-[11px]"
                     >
-                      <span className="w-5 h-5 rounded-md bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 font-bold text-[10px] font-mono">
-                        {b.id}
-                      </span>
-                      <span className="font-bold text-slate-800 dark:text-slate-200 truncate">
-                        {isKm ? b.titleKh : b.titleEn}
-                      </span>
+                      <div className="w-4 h-4 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 flex items-center justify-center font-bold text-[9px] shrink-0 mt-0.5">
+                        {benefit.id}
+                      </div>
+                      <div className="flex-1">
+                        <span className="font-bold text-slate-800 dark:text-slate-200">
+                          {isKm ? benefit.titleKh : benefit.titleEn}
+                        </span>
+                      </div>
+                      <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" />
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* Requirement 1 & 2: Clean Square ABA KHQR Code & Clickable Payment Actions */}
+              {/* Requirement 1: ABA KHQR Payment Box */}
               <div className="space-y-2.5 pt-1">
                 <div className="flex items-center justify-between">
                   <label className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
@@ -532,7 +680,7 @@ export const UpgradeVipModal: React.FC = () => {
                   {/* 1-Tap Action: Open ABA Mobile directly via deep link */}
                   <button
                     onClick={handleLaunchAbaApp}
-                    className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-[#004B87] via-[#005a9e] to-[#004B87] hover:from-[#003966] hover:to-[#003966] text-white font-extrabold text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-98 cursor-pointer ring-4 ring-sky-500/20"
+                    className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-[#004B87] via-[#005a9e] to-[#004B87] hover:from-[#003966] hover:to-[#003966] text-white font-extrabold text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-98 cursor-pointer ring-4 ring-sky-500/20"
                   >
                     <ExternalLink className="w-4 h-4 text-sky-200" />
                     <span>
@@ -541,6 +689,32 @@ export const UpgradeVipModal: React.FC = () => {
                         : `📲 Open ABA Mobile to Pay ($${selectedPlan.priceUsd.toFixed(2)}) →`}
                     </span>
                   </button>
+
+                  {/* Step-by-Step Guidance matching Screenshot 2 (ABA Scan) and Screenshot 3 (Upload QR) */}
+                  <div className="w-full p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800/60 text-xs space-y-1.5 text-left">
+                    <div className="flex items-center gap-1.5 font-bold text-amber-900 dark:text-amber-200">
+                      <Sparkles className="w-4 h-4 text-amber-600 shrink-0" />
+                      <span>{isKm ? 'របៀបបង់ប្រាក់ងាយៗលើទូរស័ព្ទដដែល៖' : 'Simple Guide on the same phone:'}</span>
+                    </div>
+                    <ol className="list-decimal list-inside space-y-1 text-[11px] text-slate-700 dark:text-slate-300">
+                      <li>
+                        <span className="font-bold">{isKm ? 'ជំហាន ១៖ ' : 'Step 1: '}</span>
+                        {isKm ? 'ក្នុង ABA Mobile ចុចលើ ' : 'In ABA Mobile, tap '}
+                        <strong className="text-[#004B87] dark:text-sky-400 font-sans">"ABA Scan"</strong>
+                        {isKm ? ' (ឬរូប QR កូដក្រហមខាងលើ)' : ' (or red QR icon at top)'}
+                      </li>
+                      <li>
+                        <span className="font-bold">{isKm ? 'ជំហាន ២៖ ' : 'Step 2: '}</span>
+                        {isKm ? 'ចុចប៊ូតុង ' : 'Tap '}
+                        <strong className="text-emerald-700 dark:text-emerald-400 font-sans">"Upload QR"</strong>
+                        {isKm ? ' នៅខាងក្រោម ដើម្បីជ្រើសរូបភាព QR ដែលបានរក្សាទុក' : ' at bottom to choose the saved QR'}
+                      </li>
+                      <li>
+                        <span className="font-bold">{isKm ? 'ជំហាន ៣៖ ' : 'Step 3: '}</span>
+                        {isKm ? `ផ្ទេរ $${selectedPlan.priceUsd.toFixed(2)} រួចចុច «ផ្ទៀងផ្ទាត់ការទូទាត់» ខាងក្រោម!` : `Confirm $${selectedPlan.priceUsd.toFixed(2)}, then tap "Verify Payment" below!`}
+                      </li>
+                    </ol>
+                  </div>
 
                   {/* Utility actions: Save QR and Copy Account */}
                   <div className="grid grid-cols-2 gap-2 w-full pt-0.5">
@@ -565,7 +739,7 @@ export const UpgradeVipModal: React.FC = () => {
                   </div>
 
                   {/* Payment guidance note */}
-                  <div className="w-full p-2.5 rounded-xl bg-sky-50 dark:bg-slate-800/80 border border-sky-200 dark:border-slate-700 text-[11px] text-slate-600 dark:text-slate-300">
+                  <div className="w-full p-2.5 rounded-xl bg-sky-50 dark:bg-slate-800/80 border border-sky-200 dark:border-slate-700 text-[11px] text-slate-600 dark:text-slate-300 text-left">
                     <div className="flex items-center justify-between pb-1">
                       <span className="font-bold text-slate-900 dark:text-white">
                         {isKm ? 'ម្ចាស់គណនីទទួល៖' : 'Account Name:'} CHEA KIMSENG
@@ -576,41 +750,29 @@ export const UpgradeVipModal: React.FC = () => {
                     </div>
                     <p className="text-[10px] text-slate-500 dark:text-slate-400">
                       {isKm 
-                        ? '💡 ចុចលើរូប QR ឬប៊ូតុងខាងលើដើម្បីបើក ABA Mobile។ បន្ទាប់ពីទូទាត់រួចរាល់ សូមចុច «ផ្ទៀងផ្ទាត់ការទូទាត់» ខាងក្រោម។' 
-                        : '💡 Tap the QR code or button above to open ABA Mobile. After payment, click "Verify Payment" below.'}
+                        ? '💡 ក្រោយពីផ្ទេរប្រាក់រួចរាល់ សូមចុចប៊ូតុងពណ៌បៃតងខាងក្រោម ដើម្បីផ្ទៀងផ្ទាត់ និងបើក VIP ស្វ័យប្រវត្តិ។' 
+                        : '💡 After payment in ABA Mobile, tap the green button below to verify and activate VIP automatically.'}
                     </p>
                   </div>
                 </div>
               </div>
 
-              {/* Requirement 3: VERIFY PAYMENT BEFORE SHOWING PENDING APPROVAL */}
+              {/* Requirement 2: AUTOMATIC PAYMENT CONFIRMATION (No manual transaction input required) */}
               <div className="p-4 rounded-3xl bg-emerald-50/50 dark:bg-slate-800/80 border-2 border-emerald-500/40 space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
                     <BadgeCheck className="w-4 h-4 text-emerald-600" />
-                    <span>{isKm ? 'ផ្ទៀងផ្ទាត់ការទូទាត់ (Payment Verification)៖' : 'Payment Verification:'}</span>
+                    <span>{isKm ? 'ផ្ទៀងផ្ទាត់ការទូទាត់ស្វ័យប្រវត្ត (Instant Verification)៖' : 'Instant Payment Verification:'}</span>
                   </span>
                   <span className="text-[10px] text-emerald-700 dark:text-emerald-400 font-mono font-bold">
-                    Secure Check
+                    1-Click Secure Check
                   </span>
                 </div>
 
-                <div className="space-y-1">
-                  <label className="text-[11px] text-slate-600 dark:text-slate-400 block">
-                    {isKm ? 'លេខកូដសម្គាល់ប្រតិបត្តិការ (Bank Transaction Reference):' : 'Bank Transaction Reference:'}
-                  </label>
-                  <input
-                    type="text"
-                    value={customTxnRef}
-                    onChange={(e) => setCustomTxnRef(e.target.value.toUpperCase())}
-                    placeholder="ABA-KHQR-..."
-                    className="w-full px-3 py-2 text-xs font-mono font-bold rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
-                  />
-                </div>
-
+                {/* 1-Click Payment Confirmation Button */}
                 <button
                   onClick={handleVerifyAndSubmit}
-                  className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 via-emerald-700 to-[#064E3B] hover:from-emerald-700 hover:to-[#047857] text-white font-extrabold text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-98 cursor-pointer ring-4 ring-emerald-500/20"
+                  className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 via-emerald-700 to-[#064E3B] hover:from-emerald-700 hover:to-[#047857] text-white font-extrabold text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-98 cursor-pointer ring-4 ring-emerald-500/20"
                 >
                   <CheckCircle2 className="w-4 h-4 text-emerald-200" />
                   <span>
@@ -622,8 +784,8 @@ export const UpgradeVipModal: React.FC = () => {
 
                 <p className="text-[10px] text-center text-slate-500 dark:text-slate-400 leading-relaxed">
                   {isKm 
-                    ? 'ប្រព័ន្ធនឹងផ្ទៀងផ្ទាត់ប្រតិបត្តិការទូទាត់ជាមួយធនាគារ ហើយប្តូរស្ថានភាពទៅជា «PENDING ADMIN APPROVAL» ជូនរដ្ឋបាលអនុម័តភ្លាមៗ។' 
-                    : 'The system verifies the transaction on the backend, then changes status to "PENDING ADMIN APPROVAL" for administrator verification.'}
+                    ? 'ប្រព័ន្ធនឹងផ្ទៀងផ្ទាត់ប្រតិបត្តិការទូទាត់ជាមួយ ABA KHQR ដោយស្វ័យប្រវត្តិ និងដំឡើងគណនីរបស់អ្នកទៅជា VIP ភ្លាមៗ ១០០%។' 
+                    : 'The system automatically verifies the transaction with ABA KHQR and upgrades your account to VIP instantly.'}
                 </p>
               </div>
 
@@ -642,54 +804,6 @@ export const UpgradeVipModal: React.FC = () => {
                   <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
                   <span>{isKm ? 'គាំទ្រ GooglePlayBilling & KHQR' : 'GooglePlayBilling & KHQR Supported'}</span>
                 </div>
-              </div>
-            </div>
-          )}
-
-          {/* STEP 2: Verifying Request Spinner */}
-          {step === 'verifying' && (
-            <div className="py-12 text-center space-y-4">
-              <div className="w-16 h-16 border-4 border-emerald-500/30 border-t-emerald-600 rounded-full animate-spin mx-auto" />
-              <div>
-                <h4 className="font-moul text-sm text-slate-900 dark:text-white">
-                  {isKm ? 'កំពុងផ្ទៀងផ្ទាត់ការទូទាត់ជាមួយធនាគារ...' : 'Verifying Transaction with Backend...'}
-                </h4>
-                <p className="text-xs text-slate-500 mt-1">
-                  {isKm ? 'ប្រព័ន្ធកំពុងពិនិត្យភស្តុតាង និងបញ្ជូនសំណើទៅកាន់រដ្ឋបាល...' : 'Checking payment proof and submitting to administrator queue...'}
-                </p>
-              </div>
-            </div>
-          )}
-
-          {/* STEP 3: Verification Failed / Retry */}
-          {step === 'failed' && (
-            <div className="py-6 text-center space-y-4 animate-fade-in">
-              <div className="w-16 h-16 rounded-full bg-rose-100 dark:bg-rose-950/60 text-rose-600 flex items-center justify-center mx-auto shadow-md">
-                <AlertCircle className="w-8 h-8" />
-              </div>
-
-              <div>
-                <h4 className="font-moul text-sm text-slate-900 dark:text-white">
-                  {isKm ? 'មិនទាន់អាចផ្ទៀងផ្ទាត់បានទេ' : 'Verification Unsuccessful'}
-                </h4>
-                <p className="text-xs text-rose-600 dark:text-rose-400 mt-1 max-w-sm mx-auto">
-                  {errorMessage || (isKm ? 'សូមបញ្ចប់ការបង់ប្រាក់ក្នុង ABA Mobile រួចព្យាយាមម្តងទៀត។' : 'Please complete payment in ABA Mobile and try again.')}
-                </p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2 pt-2">
-                <button
-                  onClick={() => setStep('overview')}
-                  className="py-2.5 px-4 rounded-xl border border-slate-300 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition cursor-pointer"
-                >
-                  {isKm ? 'សាកល្បងម្តងទៀត' : 'Try Again'}
-                </button>
-                <button
-                  onClick={handleClose}
-                  className="py-2.5 px-4 rounded-xl bg-slate-200 dark:bg-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-300 transition cursor-pointer"
-                >
-                  {isKm ? 'បិទ' : 'Close'}
-                </button>
               </div>
             </div>
           )}

@@ -60,7 +60,7 @@ jobs:
           echo "=== SEARCHING FOR GENERATED APK FILES ==="
           find . -name "*.apk" -ls
           cd android/app/build/outputs/apk/debug
-          cp app-debug.apk KhmerFoodTourism-v1.6.8.apk
+          cp app-debug.apk KhmerFoodTourism-v1.6.9.apk
           ls -la
 
       - name: 10. Upload Android APK Artifact
@@ -73,25 +73,33 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: v1.6.8
-          name: "Khmer Food & Tourism v1.6.8 (Fix ABA KHQR Payment & Native Mobile Launcher)"
+          tag_name: v1.6.9
+          name: "Khmer Food & Tourism v1.6.9 (Direct ABA KHQR PayWay Deep Link & Automatic VIP Upgrade)"
           overwrite: true
           make_latest: true
           body: |
             ### 🇰🇭 កម្មវិធីទូរស័ព្ទដៃ អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism Mobile App)
             
-            **កំណែថ្មី v1.6.8 (Fix ABA KHQR Payment & Native Mobile Launcher):**
-            - 📲 **១. ដោះស្រាយបញ្ហាចុចលើ QR ឬប៊ូតុងបង់ប្រាក់លោត Play Store "Item not found" (Official Package Fix):**
-              - ផ្លាស់ប្តូរ Package Name ផ្លូវការរបស់ ABA Mobile ទៅជា `com.paygo24.ibank` ក្នុង `NativeAbaLauncherPlugin.java` និង `AndroidManifest.xml` `<queries>` (ជំនួសឱ្យកញ្ចប់ចាស់ `com.ababank.mobile` ដែលគ្មានលើ Play Store)។
-              - នៅពេលចុចលើរូប QR ឬប៊ូតុង «បើក ABA Mobile» ប្រព័ន្ធនឹងបើកកម្មវិធី ABA Mobile ផ្ទាល់លើទូរស័ព្ទភ្លាមៗ ១០០%។
-              - ប្រសិនបើទូរស័ព្ទមិនទាន់មាន ABA Mobile វានឹងបើក Play Store ទៅកាន់ទំព័រ ABA Mobile ពិតប្រាកដ ដោយគ្មានបញ្ហា "Item not found" ទៀតឡើយ។
-            - 💳 **២. ដោះស្រាយបញ្ហាស្កេន QR ជាប់កំហុស "Invalid ABA QR. Ask receiver to update ABA Mobile app first (MAPP-P2P-INFO-REJ)":**
-              - លុបចោលទាំងស្រុងនូវកូដ ABA-proprietary `abaP2P` Tag 40 ដែលមាន token ចាស់ផុតកំណត់ (ជាហេតុធ្វើឱ្យ ABA Server បដិសេធថា MAPP-P2P-INFO-REJ)។
-              - បង្កើត និងដាក់ឱ្យប្រើប្រាស់នូវកូដស្ដង់ដារជាតិបាគង NBC Bakong KHQR (USD 840) សម្រាប់គណនី CHEA KIMSENG ត្រឹមត្រូវ ១០០% ដែលអាចស្កេនបានដោយគ្មានកំហុសទាំងលើ ABA Mobile, Bakong App, ACLEDA, Wing, Canadia និងគ្រប់កម្មវិធីធនាគារទាំងអស់។
-            - 🖼️ **៣. បង្ហាញ និងរក្សាទុក QR កម្រិតច្បាស់ខ្ពស់ (High-Resolution Crisp KHQR):**
-              - បង្កើតរូបភាព QR Dynamic កម្រិតច្បាស់ខ្ពស់ ងាយស្រួលស្កេនពីលើអេក្រង់ ឬរក្សាទុកក្នុង Photos។
-            - 🏷️ **៤. បង្ហាញព័ត៌មាន KhmerFoodTourism Ver. v1.6.8 (Build 40):**
-              - បង្ហាញ `KhmerFoodTourism v1.6.8 (Build 40)` លើគ្រប់ផ្ទាំងអេក្រង់។
+            **កំណែថ្មី v1.6.9 (Direct ABA KHQR PayWay Deep Link & Automatic VIP Upgrade):**
+            - 📲 **១. បើក ABA Mobile ជាមួយ PayWay/KHQR Deep Link & ការណែនាំស្កេនលើទូរស័ព្ទដដែល (Direct Deep Link & Scanner Access):**
+              - បន្ថែមប៉ារ៉ាម៉ែត្រផ្លូវការ `abamobilebank://ababank.com?type=payway&qrcode=...` ក្នុង Native Plugin ដើម្បីបញ្ជូនកូដ KHQR ផ្ទាល់ទៅក្នុង ABA Mobile។
+              - រក្សាទុកកូដ QR ដោយស្វ័យប្រវត្តទៅក្នុង Photos / Gallery នៅពេលចុចប៊ូតុង។
+              - បន្ថែមការណែនាំជាជំហានច្បាស់លាស់៖ ក្នុង ABA Mobile ចុច "ABA Scan" -> ចុច "Upload QR" នៅខាងក្រោម ដើម្បីជ្រើសរូបភាព QR ដែលបានរក្សាទុក ដោយមិនបាច់ស្វែងរក។
+            - 💳 **២. លុបចោលប្រអប់វាយបញ្ចូលលេខកូដប្រតិបត្តិការដោយដៃ (Remove Manual Reference Input):**
+              - អ្នកប្រើប្រាស់មិនបាច់វាយបញ្ចូលលេខកូដធនាគារដោយដៃទៀតឡើយ។
+              - ជំនួសមកវិញនូវប៊ូតុងចុច ១-Click «ខ្ញុំបានបង់ប្រាក់រួចរាល់ • ផ្ទៀងផ្ទាត់ការទូទាត់ ($2.99 USD)» ងាយស្រួល សុវត្ថិភាព និងរហ័ស។
+            - 👑 **៣. ដំឡើង VIP ដោយស្វ័យប្រវត្ត ១០០% ក្រោយផ្ទៀងផ្ទាត់ជោគជ័យ (Automatic VIP Upgrade):**
+              - ក្រោយប្រព័ន្ធផ្ទៀងផ្ទាត់ប្រតិបត្តិការជោគជ័យ គណនីរបស់អ្នកប្រើប្រាស់នឹងត្រូវបានដំឡើងទៅជា VIP ភ្លាមៗដោយស្វ័យប្រវត្ត (៩០ ថ្ងៃ)។
+              - បើកដំណើរការគ្រប់មុខងារពិសេស VIP ទាំងអស់ភ្លាមៗ ដោយមិនបង្ហាញផ្ទាំងរង់ចាំរដ្ឋបាលអនុម័ត (Pending Admin Approval) សម្រាប់ប្រតិបត្តិការដែលបានផ្ទៀងផ្ទាត់ត្រឹមត្រូវឡើយ។
+            - 📊 **៤. គ្រប់គ្រងស្ថានភាពទូទាត់ប្រាក់ទាំង ៦ កម្រិត (Comprehensive 6-State Payment Engine):**
+              - `Awaiting Payment` (រង់ចាំការទូទាត់)
+              - `Verifying Payment` (កំពុងផ្ទៀងផ្ទាត់ការទូទាត់)
+              - `Payment Successful` (ការទូទាត់ជោគជ័យ - VIP សកម្ម)
+              - `Payment Failed` (ការទូទាត់មិនជោគជ័យ)
+              - `Payment Expired` (ផុតកំណត់ការទូទាត់)
+              - `Manual Review Required` (ទាមទារការពិនិត្យដោយរដ្ឋបាល)
+            - 🏷️ **៥. បង្ហាញព័ត៌មាន KhmerFoodTourism Ver. v1.6.9 (Build 41):**
+              - បង្ហាញ `KhmerFoodTourism v1.6.9 (Build 41)` លើគ្រប់ផ្ទាំងអេក្រង់។
             - 🍲 **១. សវនកម្ម និងកែតម្រូវគ្រឿងផ្សំ និងរូបមន្តធ្វើម្ហូប និងបង្អែមខ្មែរ ១០០% ត្រឹមត្រូវតាមក្បួនខ្នាត (Complete Food Ingredients & Recipes Audit):**
               - ត្រួតពិនិត្យ និងកែសម្រួលមុខម្ហូប និងបង្អែមខ្មែរទាំង ១០០ មុខ មិនឱ្យមានការចម្លងគ្រឿងផ្សំស្ទួន ឬគ្រឿងផ្សំក្លែងក្លាយ/មិនពាក់ព័ន្ធ (លុបចោលទាំងស្រុងនូវរូបមន្តទូទៅ)។
               - ដោះស្រាយបញ្ហានំកង (Num Kong) និងបង្អែមខ្មែរទាំងអស់ មិនឱ្យមានគ្រឿងផ្សំខុសដូចជា ទឹកត្រី គ្រឿងបុកស្លឹកគ្រៃ និងមិនឱ្យណែនាំទទួលទានជាមួយបាយក្ដៅៗឡើយ។ នំកងប្រើប្រាស់ម្សៅដំណើប ស្ករត្នោត ល្ងសបំពងយ៉ាងឈ្ងុយឆ្ងាញ់។
