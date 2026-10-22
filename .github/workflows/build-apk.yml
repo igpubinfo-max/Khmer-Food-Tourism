@@ -60,7 +60,7 @@ jobs:
           echo "=== SEARCHING FOR GENERATED APK FILES ==="
           find . -name "*.apk" -ls
           cd android/app/build/outputs/apk/debug
-          cp app-debug.apk KhmerFoodTourism-v1.6.3.apk
+          cp app-debug.apk KhmerFoodTourism-v1.6.4.apk
           ls -la
 
       - name: 10. Upload Android APK Artifact
@@ -73,14 +73,22 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: v1.6.3
-          name: "Khmer Food & Tourism v1.6.3 (Direct QR Click to ABA Mobile & Auto Pending Admin Approval)"
+          tag_name: v1.6.4
+          name: "Khmer Food & Tourism v1.6.4 (PC Tabs Scroll & Direct Profile Log Out)"
           overwrite: true
           make_latest: true
           body: |
             ### 🇰🇭 កម្មវិធីទូរស័ព្ទដៃ អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism Mobile App)
             
-            **កំណែថ្មី v1.6.3 (Direct QR Click to ABA Mobile & Auto Pending Admin Approval):**
+            **កំណែថ្មី v1.6.4 (PC Tabs Scroll Navigation & Direct Profile Log Out):**
+            - 🚪 **១. ប៊ូតុង «ចាកចេញ» (Log Out) ផ្ទាល់លើ Profile Header Card:**
+              - បន្ថែមប៊ូតុងចាកចេញ (Sign Out) ពណ៌ក្រហមស្អាតផ្ទាល់នៅលើផ្ទាំងកាតព័ត៌មានគណនីខាងលើ ងាយស្រួលចុចចាកចេញភ្លាមៗ ១-Click ដោយមិនបាច់រមូររក ឬប្តូរ Tab ឡើយ។
+            - 🖥️ **២. ដោះស្រាយបញ្ហារមូរផ្ទាំង Tabs ទៅស្តាំលើកុំព្យូទ័រ PC (Smooth PC Horizontal Tab Scrolling):**
+              - បន្ថែមប៊ូតុងព្រួញរុករកឆ្វេង-ស្តាំ (< និង >) ដែលអនុញ្ញាតឱ្យអ្នកប្រើប្រាស់លើ PC ចុចរំកិលទៅមើល Tab «សមាជិកភាព VIP» និង «ការកំណត់ (Settings)» ដោយងាយស្រួល។
+              - គាំទ្រការរមូរកង់ Mouse Wheel លើ PC ដោយបម្លែងចលនាកង់ Mouse ទៅជារំកិលផ្ដេក (Horizontal Scroll) ដោយស្វ័យប្រវត្តិ។
+              - បង្ហាញរបាររមូរស្អាតស្រាល (Scrollbar) សម្រាប់ Click & Drag។
+            - ⚙️ **៣. ប៊ូតុង Log Out និង Settings នៅផ្នែកខាងក្រោមទំព័រ Profile (Always Visible Bottom Controls):**
+              - បង្ហាញប៊ូតុង «ចាកចេញពីគណនី (Sign Out)» និងប៊ូតុង «ការកំណត់ (Settings)» នៅផ្នែកខាងក្រោមនៃទំព័រគណនីជាប់ជាប្រចាំ មិនថាអ្នកប្រើប្រាស់កំពុងបើកមើល Tab ណាមួយក៏ដោយ។
             - 📲 **១. ចុចលើរូប QR ABA ភ្ជាប់ទៅកាន់ ABA Mobile ដោយផ្ទាល់ (Tap QR to Open ABA Mobile):**
               - អ្នកប្រើអាចចុចផ្ទាល់លើរូបកូដ QR ឬប៊ូតុង ដើម្បីបើកកម្មវិធី ABA Mobile ទូទាត់ប្រាក់ភ្លាមៗ។
             - ⏳ **២. បង្ហាញផ្ទាំង Pending Admin Approval ដោយស្វ័យប្រវត្តិ (Auto Pending Screen):**
