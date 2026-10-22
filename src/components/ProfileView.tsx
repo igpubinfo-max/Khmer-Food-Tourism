@@ -7,7 +7,7 @@ import {
   User as UserIcon, Heart, Shield, Store, 
   Globe, LogOut, RefreshCw, Download, Sparkles, UtensilsCrossed, ShieldCheck, CheckCircle2,
   Bot, Bell, Compass, Calendar, Bookmark, Plus, MapPin, Trash2, Share2, Tag, Utensils, ChevronRight,
-  Edit2, Check, X as CloseIcon, Crown, Star, Zap, Award, Smartphone, Copy, ExternalLink, Clock
+  Edit2, Check, X as CloseIcon, Crown, Star, Zap, Award, Smartphone, Copy, ExternalLink, Clock, Lock
 } from 'lucide-react';
 import { isRestaurantPremiumActive, isUserVipActive, getVipRemainingDays, TEN_VIP_BENEFITS, APP_VERSION, APP_BUILD_CODE } from '../types';
 
@@ -48,6 +48,17 @@ export const ProfileView: React.FC = () => {
   const [socialUrlInput, setSocialUrlInput] = useState('');
 
   const openSocialConnect = (type: 'tiktok' | 'facebook') => {
+    if (!isVip && currentUser?.role !== 'admin') {
+      showToast(
+        isKm 
+          ? 'មុខងារភ្ជាប់គណនី TikTok & Facebook សម្រាប់តែគណនី VIP ប៉ុណ្ណោះ • សូមដំឡើង VIP ដើម្បីប្រើប្រាស់!' 
+          : 'Connecting TikTok & Facebook requires VIP • Please unlock VIP!',
+        'info'
+      );
+      openUpgradeVipModal();
+      return;
+    }
+
     setSocialModalType(type);
     if (type === 'tiktok') {
       const existing = currentUser?.socialAccounts?.tiktok;
@@ -246,24 +257,61 @@ export const ProfileView: React.FC = () => {
         )}
       </div>
 
-      {/* Connected Social Media Accounts (TikTok & Facebook) */}
+      {/* Connected Social Media Accounts (TikTok & Facebook) - Requires VIP per Requirement 3 */}
       {currentUser && (
-        <div className="p-4 rounded-3xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 shadow-xs space-y-3 font-khmer">
-          <div className="flex items-center justify-between">
+        <div className={`p-4 rounded-3xl border shadow-xs space-y-3 font-khmer transition-all ${
+          isVip || currentUser.role === 'admin'
+            ? 'bg-white dark:bg-slate-800 border-slate-200/90 dark:border-slate-700'
+            : 'bg-slate-50/80 dark:bg-slate-800/60 border-2 border-dashed border-slate-300 dark:border-slate-700'
+        }`}>
+          <div className="flex items-center justify-between gap-2 flex-wrap">
             <div className="flex items-center gap-2">
-              <Share2 className="w-4 h-4 text-pink-500" />
-              <h3 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white">
-                {isKm ? 'គណនីបណ្ដាញសង្គមដែលបានភ្ជាប់' : 'Connected Social Accounts'}
-              </h3>
+              <div className={`p-1.5 rounded-xl ${isVip || currentUser.role === 'admin' ? 'bg-pink-100 text-pink-600 dark:bg-pink-950/60' : 'bg-slate-200 text-slate-500 dark:bg-slate-700'}`}>
+                {isVip || currentUser.role === 'admin' ? <Share2 className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
+              </div>
+              <div>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <h3 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white">
+                    {isKm ? 'គណនីបណ្ដាញសង្គមដែលបានភ្ជាប់' : 'Connected Social Accounts'}
+                  </h3>
+                  {isVip || currentUser.role === 'admin' ? (
+                    <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 font-bold text-[9px] flex items-center gap-1 font-mono border border-emerald-300 dark:border-emerald-800">
+                      <Sparkles className="w-2.5 h-2.5 fill-current" />
+                      <span>VIP UNLOCKED</span>
+                    </span>
+                  ) : (
+                    <span className="px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold text-[9px] flex items-center gap-1 border border-slate-300 dark:border-slate-600">
+                      <Lock className="w-2.5 h-2.5 text-amber-500" />
+                      <span>VIP Only</span>
+                    </span>
+                  )}
+                </div>
+                <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
+                  {isVip || currentUser.role === 'admin'
+                    ? (isKm ? 'ភ្ជាប់គណនី TikTok និង Facebook ដើម្បីផ្សព្វផ្សាយហាង និងវីដេអូ Review របស់អ្នក' : 'Connect TikTok and Facebook to promote your shop and food reviews')
+                    : (isKm ? 'មុខងារភ្ជាប់ TikTok & Facebook ត្រូវបានចាក់សោ • នឹងបើកដំណើរការបន្ទាប់ពីដំឡើងជាគណនី VIP' : 'Connecting TikTok & Facebook is locked • Will enable after upgrading to VIP account')}
+                </p>
+              </div>
             </div>
-            <span className="text-[10px] text-slate-400 font-mono">
-              TikTok & Facebook
-            </span>
+
+            {!isVip && currentUser.role !== 'admin' && (
+              <button
+                onClick={openUpgradeVipModal}
+                className="px-3 py-1 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 text-slate-950 font-extrabold text-[10px] shadow-xs flex items-center gap-1 transition active:scale-95 cursor-pointer shrink-0"
+              >
+                <Crown className="w-3 h-3 fill-slate-950" />
+                <span>{isKm ? 'ដំឡើង VIP' : 'Unlock VIP'}</span>
+              </button>
+            )}
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             {/* TikTok Account Card */}
-            <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 space-y-2">
+            <div className={`p-3 rounded-2xl border space-y-2 ${
+              isVip || currentUser.role === 'admin'
+                ? 'bg-slate-50 dark:bg-slate-700/50 border-slate-200 dark:border-slate-600'
+                : 'bg-white/60 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700'
+            }`}>
               <div className="flex items-center justify-between">
                 <span className="px-2 py-0.5 rounded-full bg-black text-pink-300 border border-pink-500/40 text-[9px] font-bold flex items-center gap-1 font-mono">
                   <span>🎵</span>
@@ -302,7 +350,7 @@ export const ProfileView: React.FC = () => {
                   <div className="flex items-center gap-1.5 pt-2">
                     <button
                       onClick={() => openSocialConnect('tiktok')}
-                      className="flex-1 py-1 px-2 rounded-lg bg-slate-200 dark:bg-slate-600 hover:bg-slate-300 text-slate-700 dark:text-slate-200 text-[10px] font-bold transition text-center"
+                      className="flex-1 py-1 px-2 rounded-lg bg-slate-200 dark:bg-slate-600 hover:bg-slate-300 text-slate-700 dark:text-slate-200 text-[10px] font-bold transition text-center cursor-pointer"
                     >
                       {isKm ? '🔄 ភ្ជាប់ឡើងវិញ' : 'Reconnect'}
                     </button>
@@ -313,7 +361,7 @@ export const ProfileView: React.FC = () => {
                           showToast(isKm ? 'បានផ្តាច់គណនី TikTok' : 'TikTok disconnected', 'info');
                         }
                       }}
-                      className="py-1 px-2 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 text-[10px] font-bold transition"
+                      className="py-1 px-2 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 text-[10px] font-bold transition cursor-pointer"
                     >
                       {isKm ? 'ផ្តាច់' : 'Disconnect'}
                     </button>
@@ -324,18 +372,40 @@ export const ProfileView: React.FC = () => {
                   <p className="text-[10px] text-slate-500 mb-2">
                     {isKm ? 'ភ្ជាប់ដើម្បីផ្សព្វផ្សាយវីដេអូម្ហូប និងកន្លែង Review របស់អ្នក' : 'Connect to feature your viral food review videos'}
                   </p>
-                  <button
-                    onClick={() => openSocialConnect('tiktok')}
-                    className="w-full py-1.5 px-3 rounded-xl bg-black hover:bg-slate-900 text-white font-bold text-[11px] flex items-center justify-center gap-1.5 transition"
-                  >
-                    <span>+ ភ្ជាប់ TikTok</span>
-                  </button>
+                  {isVip || currentUser.role === 'admin' ? (
+                    <button
+                      onClick={() => openSocialConnect('tiktok')}
+                      className="w-full py-1.5 px-3 rounded-xl bg-black hover:bg-slate-900 text-white font-bold text-[11px] flex items-center justify-center gap-1.5 transition cursor-pointer"
+                    >
+                      <span>+ ភ្ជាប់ TikTok</span>
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        showToast(
+                          isKm 
+                            ? 'មុខងារភ្ជាប់គណនី TikTok សម្រាប់តែគណនី VIP ប៉ុណ្ណោះ • សូមដំឡើង VIP ដើម្បីប្រើប្រាស់!' 
+                            : 'Connecting TikTok requires VIP • Please unlock VIP!',
+                          'info'
+                        );
+                        openUpgradeVipModal();
+                      }}
+                      className="w-full py-1.5 px-3 rounded-xl bg-slate-200 dark:bg-slate-700 hover:bg-amber-400 hover:text-slate-950 text-slate-700 dark:text-slate-200 font-bold text-[11px] flex items-center justify-center gap-1.5 transition cursor-pointer border border-slate-300 dark:border-slate-600"
+                    >
+                      <Lock className="w-3 h-3 text-amber-500" />
+                      <span>{isKm ? 'ដំឡើង VIP ដើម្បីភ្ជាប់ TikTok' : 'Unlock VIP to Connect'}</span>
+                    </button>
+                  )}
                 </div>
               )}
             </div>
 
             {/* Facebook Account Card */}
-            <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 space-y-2">
+            <div className={`p-3 rounded-2xl border space-y-2 ${
+              isVip || currentUser.role === 'admin'
+                ? 'bg-slate-50 dark:bg-slate-700/50 border-slate-200 dark:border-slate-600'
+                : 'bg-white/60 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700'
+            }`}>
               <div className="flex items-center justify-between">
                 <span className="px-2 py-0.5 rounded-full bg-blue-600 text-white text-[9px] font-bold flex items-center gap-1 font-mono">
                   <span>📘</span>
@@ -374,7 +444,7 @@ export const ProfileView: React.FC = () => {
                   <div className="flex items-center gap-1.5 pt-2">
                     <button
                       onClick={() => openSocialConnect('facebook')}
-                      className="flex-1 py-1 px-2 rounded-lg bg-slate-200 dark:bg-slate-600 hover:bg-slate-300 text-slate-700 dark:text-slate-200 text-[10px] font-bold transition text-center"
+                      className="flex-1 py-1 px-2 rounded-lg bg-slate-200 dark:bg-slate-600 hover:bg-slate-300 text-slate-700 dark:text-slate-200 text-[10px] font-bold transition text-center cursor-pointer"
                     >
                       {isKm ? '🔄 ភ្ជាប់ឡើងវិញ' : 'Reconnect'}
                     </button>
@@ -385,7 +455,7 @@ export const ProfileView: React.FC = () => {
                           showToast(isKm ? 'បានផ្តាច់គណនី Facebook' : 'Facebook disconnected', 'info');
                         }
                       }}
-                      className="py-1 px-2 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 text-[10px] font-bold transition"
+                      className="py-1 px-2 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 text-[10px] font-bold transition cursor-pointer"
                     >
                       {isKm ? 'ផ្តាច់' : 'Disconnect'}
                     </button>
@@ -396,12 +466,30 @@ export const ProfileView: React.FC = () => {
                   <p className="text-[10px] text-slate-500 mb-2">
                     {isKm ? 'ភ្ជាប់គណនី Facebook ឬ Page ដើម្បីចែករំលែក និង Review ម្ហូប' : 'Connect Facebook account or page to share reviews'}
                   </p>
-                  <button
-                    onClick={() => openSocialConnect('facebook')}
-                    className="w-full py-1.5 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-[11px] flex items-center justify-center gap-1.5 transition"
-                  >
-                    <span>+ ភ្ជាប់ Facebook</span>
-                  </button>
+                  {isVip || currentUser.role === 'admin' ? (
+                    <button
+                      onClick={() => openSocialConnect('facebook')}
+                      className="w-full py-1.5 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-[11px] flex items-center justify-center gap-1.5 transition cursor-pointer"
+                    >
+                      <span>+ ភ្ជាប់ Facebook</span>
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        showToast(
+                          isKm 
+                            ? 'មុខងារភ្ជាប់គណនី Facebook សម្រាប់តែគណនី VIP ប៉ុណ្ណោះ • សូមដំឡើង VIP ដើម្បីប្រើប្រាស់!' 
+                            : 'Connecting Facebook requires VIP • Please unlock VIP!',
+                          'info'
+                        );
+                        openUpgradeVipModal();
+                      }}
+                      className="w-full py-1.5 px-3 rounded-xl bg-slate-200 dark:bg-slate-700 hover:bg-amber-400 hover:text-slate-950 text-slate-700 dark:text-slate-200 font-bold text-[11px] flex items-center justify-center gap-1.5 transition cursor-pointer border border-slate-300 dark:border-slate-600"
+                    >
+                      <Lock className="w-3 h-3 text-amber-500" />
+                      <span>{isKm ? 'ដំឡើង VIP ដើម្បីភ្ជាប់ Facebook' : 'Unlock VIP to Connect'}</span>
+                    </button>
+                  )}
                 </div>
               )}
             </div>
