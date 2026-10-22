@@ -11,6 +11,13 @@ import { FoodCategorySlug, DestinationCategorySlug, UserRole, RegistrationTransa
 import { getSecurityAuditLogs, SecurityAuditEntry, revokeAdminSession } from '../utils/security';
 import { FoodImageModal } from './FoodImageModal';
 import { TouristImageModal } from './TouristImageModal';
+import {
+  getCloudApiConfig,
+  saveCloudApiConfig,
+  testSupabaseConnection,
+  SUPABASE_SETUP_SQL,
+} from '../services/supabaseService';
+import { getSmartCacheStats } from '../services/googlePlacesService';
 
 export const AdminDashboard: React.FC = () => {
   const { 
@@ -23,7 +30,7 @@ export const AdminDashboard: React.FC = () => {
     transactions, verifyTransaction, rejectTransaction, requestMorePaymentInfo, getAuthorizedPaymentProof,
     appSettings, updateAppSettings, setAdminPassword, currentUser, showToast,
     aiCheckIns, approveAiCheckIn, rejectAiCheckIn, mergeAiCheckIn,
-    setIsAiCheckInModalOpen
+    setIsAiCheckInModalOpen, triggerCloudSyncNow
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<'stats' | 'food' | 'restaurants' | 'destinations' | 'community' | 'users' | 'transactions' | 'settings' | 'security' | 'image_audit' | 'ai_checkins'>('stats');
@@ -78,7 +85,14 @@ export const AdminDashboard: React.FC = () => {
   // Security audit logs state
   const [auditLogs, setAuditLogs] = useState<SecurityAuditEntry[]>(() => getSecurityAuditLogs());
 
+  // Supabase Free Tier + Google Maps Places API + Smart Cache configuration state
+  const [cloudCfg, setCloudCfg] = useState(() => getCloudApiConfig());
+  const [supabaseTestStatus, setSupabaseTestStatus] = useState<string>('');
+  const [isSyncingCloud, setIsSyncingCloud] = useState(false);
+
   if (!isAdminOpen) return null;
+
+  const smartCacheStats = getSmartCacheStats();
 
   const isKm = language === 'km';
   const pendingRestaurants = restaurants.filter(r => r.status === 'pending');
@@ -1616,6 +1630,158 @@ export const AdminDashboard: React.FC = () => {
                     <span>{isKm ? 'Hash PBKDF2 និងផ្លាស់ប្តូរ' : 'Hash PBKDF2 & Update'}</span>
                   </button>
                 </form>
+              </div>
+
+              {/* Supabase Free Tier Cloud & Google Maps Places API + Smart Cache */}
+              <div className="bg-white dark:bg-stone-800 p-5 rounded-3xl border-2 border-emerald-500/40 dark:border-emerald-600/40 shadow-sm space-y-4 font-khmer text-xs">
+                <div className="flex items-center justify-between pb-2 border-b border-stone-200 dark:border-stone-700">
+                  <div>
+                    <h4 className="font-bold text-stone-900 dark:text-stone-100 text-sm flex items-center gap-2">
+                      <span>☁️</span>
+                      <span>ប្រព័ន្ធ Cloud Supabase (Free Tier) & Google Maps Places API + Smart Cache</span>
+                    </h4>
+                    <p className="text-[11px] text-stone-500 mt-0.5">
+                      ភ្ជាប់ Supabase ឥតគិតថ្លៃ (50,000 នាក់/ខែ, 500MB Database, 1GB រូបភាព) និង Google Maps Places API ($200/ខែ Free Credit + Smart Cache សន្សំកូតា)
+                    </p>
+                  </div>
+                </div>
+
+                {/* Smart Cache Live Statistics */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800">
+                  <div>
+                    <div className="text-[10px] text-stone-500">ហាង & ទីតាំងក្នុង Smart Cache</div>
+                    <div className="text-lg font-black text-emerald-700 dark:text-emerald-300 font-mono">
+                      {smartCacheStats.totalCachedPlaces} កន្លែង
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-[10px] text-stone-500">សន្សំកូតា Google Maps ($0)</div>
+                    <div className="text-lg font-black text-emerald-700 dark:text-emerald-300 font-mono">
+                      {smartCacheStats.cacheHitsSavedQuota} ដង
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-[10px] text-stone-500">ចំនួនហៅទៅ Google API ផ្ទាល់</div>
+                    <div className="text-lg font-black text-stone-700 dark:text-stone-300 font-mono">
+                      {smartCacheStats.googleApiCallsCount} ដង
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block font-semibold mb-1 text-stone-700 dark:text-stone-300">
+                      1. Supabase Project URL (Free Tier)
+                    </label>
+                    <input
+                      type="text"
+                      value={cloudCfg.supabaseUrl}
+                      onChange={(e) => setCloudCfg({ ...cloudCfg, supabaseUrl: e.target.value })}
+                      placeholder="https://xxxxxxxx.supabase.co"
+                      className="w-full px-3 py-2 rounded-xl border bg-stone-50 dark:bg-stone-700 text-stone-800 dark:text-stone-100 font-mono text-[11px]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-semibold mb-1 text-stone-700 dark:text-stone-300">
+                      2. Supabase Anon Public Key
+                    </label>
+                    <input
+                      type="password"
+                      value={cloudCfg.supabaseAnonKey}
+                      onChange={(e) => setCloudCfg({ ...cloudCfg, supabaseAnonKey: e.target.value })}
+                      placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                      className="w-full px-3 py-2 rounded-xl border bg-stone-50 dark:bg-stone-700 text-stone-800 dark:text-stone-100 font-mono text-[11px]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-semibold mb-1 text-stone-700 dark:text-stone-300">
+                      3. Google Maps Places API Key ($200/ខែ Free Credit)
+                    </label>
+                    <input
+                      type="password"
+                      value={cloudCfg.googleMapsApiKey}
+                      onChange={(e) => setCloudCfg({ ...cloudCfg, googleMapsApiKey: e.target.value })}
+                      placeholder="AIzaSy..."
+                      className="w-full px-3 py-2 rounded-xl border bg-stone-50 dark:bg-stone-700 text-stone-800 dark:text-stone-100 font-mono text-[11px]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-semibold mb-1 text-stone-700 dark:text-stone-300">
+                      4. Google Gemini AI Vision API Key (ស្កេនម្ហូប & រូបមន្ត)
+                    </label>
+                    <input
+                      type="password"
+                      value={cloudCfg.geminiApiKey}
+                      onChange={(e) => setCloudCfg({ ...cloudCfg, geminiApiKey: e.target.value })}
+                      placeholder="AIzaSy..."
+                      className="w-full px-3 py-2 rounded-xl border bg-stone-50 dark:bg-stone-700 text-stone-800 dark:text-stone-100 font-mono text-[11px]"
+                    />
+                  </div>
+                </div>
+
+                {supabaseTestStatus && (
+                  <div className="p-3 rounded-xl bg-stone-100 dark:bg-stone-900 border border-stone-300 dark:border-stone-700 text-[11px] font-bold text-stone-800 dark:text-stone-200">
+                    {supabaseTestStatus}
+                  </div>
+                )}
+
+                <div className="flex flex-wrap items-center gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const saved = saveCloudApiConfig(cloudCfg);
+                      setCloudCfg(saved);
+                      showToast('បានរក្សាទុកការកំណត់ Cloud Supabase & Google Maps Places API ជោគជ័យ!', 'success');
+                    }}
+                    className="px-4 py-2 bg-[#064E3B] hover:bg-[#047857] text-white font-bold rounded-xl shadow-xs transition active:scale-95"
+                  >
+                    💾 រក្សាទុកការកំណត់ Cloud & API
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      saveCloudApiConfig(cloudCfg);
+                      setSupabaseTestStatus('កំពុងសាកល្បងភ្ជាប់ទៅកាន់ Supabase...');
+                      const res = await testSupabaseConnection();
+                      setSupabaseTestStatus(res.messageKh);
+                    }}
+                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-xs transition active:scale-95"
+                  >
+                    🔌 សាកល្បងភ្ជាប់ Supabase
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={isSyncingCloud}
+                    onClick={async () => {
+                      if (!triggerCloudSyncNow) return;
+                      setIsSyncingCloud(true);
+                      const ok = await triggerCloudSyncNow();
+                      setIsSyncingCloud(false);
+                      showToast(
+                        ok
+                          ? 'បានធ្វើសមកាលកម្មទិន្នន័យ (Sync) ជាមួយ Supabase Cloud ជោគជ័យ!'
+                          : 'មិនទាន់អាច Sync បានទេ សូមពិនិត្យ Supabase URL & Anon Key។',
+                        ok ? 'success' : 'warning'
+                      );
+                    }}
+                    className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded-xl shadow-xs transition active:scale-95"
+                  >
+                    🔄 {isSyncingCloud ? 'កំពុង Sync...' : 'Sync ទិន្នន័យជាមួយ Cloud ឥឡូវនេះ'}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard?.writeText(SUPABASE_SETUP_SQL);
+                      showToast('បានចម្លងកូដ SQL សម្រាប់ដាក់ក្នុង Supabase SQL Editor!', 'info');
+                    }}
+                    className="px-3 py-2 bg-stone-200 dark:bg-stone-700 hover:bg-stone-300 text-stone-800 dark:text-stone-200 font-bold rounded-xl transition"
+                  >
+                    📋 ចម្លងកូដ SQL បង្កើតតារាង Supabase
+                  </button>
+                </div>
               </div>
             </div>
           )}

@@ -60,7 +60,7 @@ jobs:
           echo "=== SEARCHING FOR GENERATED APK FILES ==="
           find . -name "*.apk" -ls
           cd android/app/build/outputs/apk/debug
-          cp app-debug.apk KhmerFoodTourism-v1.7.4.apk
+          cp app-debug.apk KhmerFoodTourism-v1.7.5.apk
           ls -la
 
       - name: 10. Upload Android APK Artifact
@@ -73,14 +73,20 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: v1.7.4
-          name: "Khmer Food & Tourism v1.7.4 (Real AI Vision API, Accurate Papaya/Fruit HSV Recognition & VIP Payment Proof Upload)"
+          tag_name: v1.7.5
+          name: "Khmer Food & Tourism v1.7.5 (Google Maps Places API + Smart Cache & Supabase Free Tier Cloud Sync)"
           overwrite: true
           make_latest: true
           body: |
             ### 🇰🇭 កម្មវិធីទូរស័ព្ទដៃ អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism Mobile App)
             
-            **កំណែថ្មី v1.7.4 (Real AI Vision API, Accurate Papaya/Fruit HSV Recognition & VIP Payment Proof Upload):**
+            **កំណែថ្មី v1.7.5 (Google Maps Places API + Smart Cache & Supabase Free Tier Cloud Sync):**
+            - 🗺️ **១. ភ្ជាប់ Google Maps Places API + ប្រព័ន្ធ Smart Cache (សន្សំកូតា $200/ខែ Free Credit):**
+              - ស្វែងរកហាងអាហារ កាហ្វេ ភោជនីយដ្ឋាន ផ្លូវ និងតំបន់ទេសចរណ៍ពិតៗនៅភ្នំពេញ និងទូទាំង ២៥ ខេត្ត-រាជធានី រួមទាំងរូបភាពហាងពិតៗ (`Place Photos`) និងទីតាំង GPS ដូចក្នុង Google Maps។
+              - **ប្រព័ន្ធ Smart Cache ឆ្លាតវៃ៖** នៅពេលមានអ្នកប្រើស្វែងរកហាងថ្មីជាលើកទី ១ កម្មវិធីរក្សាទុកឈ្មោះ ទីតាំង GPS និងរូបភាពហាងនោះទុកក្នុង Database និង Smart Cache។ នៅពេលអ្នកប្រើទី ២ ទី ៣... ស្វែងរកហាងដដែល វាទាញយកមកបង្ហាញភ្លាមៗដោយមិនកាត់កូតា Google Maps ម្តងទៀតឡើយ!
+            - ☁️ **២. ភ្ជាប់ប្រព័ន្ធ Supabase Cloud Database & Storage (Free Tier $0/ខែ):**
+              - ធ្វើសមកាលកម្ម (Real-time Cloud Sync) សម្រាប់គណនីអ្នកប្រើប្រាស់ ហាងអាហារ និងរូបភាពភស្តុតាងបង់ប្រាក់ VIP រវាងទូរស័ព្ទអតិថិជនគ្រប់គ្នា និងទូរស័ព្ទ Admin។
+              - បន្ថែមផ្ទាំងកំណត់ **Cloud Supabase & Google Maps API** ក្នុង Admin Dashboard ជាមួយប៊ូតុងសាកល្បងការភ្ជាប់ និងប៊ូតុងចម្លងកូដ SQL បង្កើតតារាងដោយ 1-Click។
             - 🧠 **១. ប្រព័ន្ធ AI Vision API ពិតប្រាកដ & ការវិភាគពណ៌ HSV ច្បាស់លាស់ (Real AI Vision & True HSV Fruit/Object Recognition):**
               - កំណត់អត្តសញ្ញាណ **ផ្លែល្ហុងទុំ / ល្ហុងទុំចិតរួច (Fresh Ripe Papaya)** និងផ្លែឈើស្រស់បានយ៉ាងត្រឹមត្រូវ ១០០% (មិនច្រឡំជាម្ហូបអាម៉ុកត្រីស្លឹកញ ឬសម្លម្ជូរព្រៃត្រីឆ្អើរឡើយ!)។
               - លុបបំបាត់ការបង្ខំឱ្យរូបភាពគ្រប់សន្លឹកត្រូវគ្នានឹងម្ហូបក្នុងឃ្លាំងទិន្នន័យ (Removed `allFoods[0]` fallback)។

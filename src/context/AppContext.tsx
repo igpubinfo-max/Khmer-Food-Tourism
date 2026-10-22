@@ -26,6 +26,11 @@ import {
   recordSecurityAudit
 } from '../utils/security';
 import { App as CapApp } from '@capacitor/app';
+import {
+  isSupabaseConfigured,
+  syncAllAppDataWithSupabase,
+  pushCloudDocument,
+} from '../services/supabaseService';
 
 export type ActiveTab = 'home' | 'food' | 'restaurants' | 'tourism' | 'community' | 'profile';
 
@@ -73,6 +78,7 @@ interface AppContextType {
   requestMorePaymentInfo: (txnId: string, reason?: string) => void;
   uploadPaymentProofToTransaction: (txnId: string, proofDataUrl: string, fileName?: string, mimeType?: string) => { success: boolean; error?: string };
   getAuthorizedPaymentProof: (txnId: string) => string | null;
+  triggerCloudSyncNow?: () => Promise<boolean>;
   
   // Bookmarks
   bookmarks: string[];
@@ -928,11 +934,71 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     try {
       if (transactions) {
         localStorage.setItem('kft_transactions_v4', JSON.stringify(transactions));
+        if (isSupabaseConfigured()) {
+          pushCloudDocument('kft_cloud_transactions_v1', transactions);
+        }
       }
     } catch (e) {
       console.warn('Storage sync failed for transactions:', e);
     }
   }, [transactions]);
+
+  // Automatic & Manual Supabase Cloud Synchronization (Free Tier Compatible)
+  const triggerCloudSyncNow = async (): Promise<boolean> => {
+    if (!isSupabaseConfigured()) return false;
+    try {
+      let localVault: Record<string, any> = {};
+      try {
+        const rawVault = localStorage.getItem('kft_secure_payment_proofs_vault_v1');
+        if (rawVault) localVault = JSON.parse(rawVault);
+      } catch {}
+
+      const customRests = restaurants.filter(r => !r.id.startsWith('rest-') || Number(r.id.replace('rest-', '')) > 50);
+      const result = await syncAllAppDataWithSupabase({
+        users,
+        transactions,
+        customRestaurants: customRests,
+        paymentProofsVault: localVault,
+      });
+
+      if (result.synced) {
+        if (result.mergedUsers.length >= users.length) {
+          setUsers(result.mergedUsers);
+          if (currentUser) {
+            const matchedCurrent = result.mergedUsers.find(u => u.id === currentUser.id);
+            if (matchedCurrent) setCurrentUser(matchedCurrent);
+          }
+        }
+        if (result.mergedTransactions.length >= transactions.length) {
+          setTransactions(result.mergedTransactions);
+        }
+        if (result.mergedCustomRestaurants.length > 0) {
+          setRestaurants(prev => {
+            const map = new Map<string, Restaurant>();
+            for (const r of prev) map.set(r.id, r);
+            for (const r of result.mergedCustomRestaurants) map.set(r.id, r);
+            return Array.from(map.values());
+          });
+        }
+        try {
+          localStorage.setItem(
+            'kft_secure_payment_proofs_vault_v1',
+            JSON.stringify(result.mergedPaymentProofsVault)
+          );
+        } catch {}
+      }
+      return result.synced;
+    } catch (err) {
+      console.warn('Cloud sync error:', err);
+      return false;
+    }
+  };
+
+  useEffect(() => {
+    if (isSupabaseConfigured()) {
+      triggerCloudSyncNow();
+    }
+  }, []);
 
   // Keep a mutable ref of current modal & navigation state for the native back-button listener
   const appNavStateRef = useRef({
@@ -3327,6 +3393,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         requestMorePaymentInfo,
         uploadPaymentProofToTransaction,
         getAuthorizedPaymentProof,
+        triggerCloudSyncNow,
         isExitModalOpen,
         setIsExitModalOpen,
         exitAppNow,

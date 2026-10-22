@@ -1,12 +1,47 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { TouristCard } from './TouristCard';
-import { Compass, Sparkles, MapPin } from 'lucide-react';
+import { Compass, Sparkles, MapPin, Globe, Loader2, Plus } from 'lucide-react';
 import { DestinationCategorySlug } from '../types';
+import {
+  searchCambodiaPlacesWithSmartCache,
+  convertGooglePlaceToDestination,
+  GooglePlaceCachedItem,
+} from '../services/googlePlacesService';
 
 export const TourismView: React.FC = () => {
-  const { destinations, language, searchQuery, selectedProvince, setSelectedProvince } = useApp();
+  const { destinations, language, searchQuery, selectedProvince, setSelectedProvince, addDestination, showToast } = useApp();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [smartCacheTourism, setSmartCacheTourism] = useState<GooglePlaceCachedItem[]>([]);
+  const [isSearchingOnline, setIsSearchingOnline] = useState(false);
+
+  useEffect(() => {
+    const q = searchQuery.trim();
+    if (!q || q.length < 2) {
+      setSmartCacheTourism([]);
+      setIsSearchingOnline(false);
+      return;
+    }
+
+    let cancelled = false;
+    setIsSearchingOnline(true);
+    const timer = setTimeout(async () => {
+      const res = await searchCambodiaPlacesWithSmartCache(
+        q,
+        selectedProvince || 'ទាំងអស់',
+        'tourism'
+      );
+      if (!cancelled) {
+        setSmartCacheTourism(res.results);
+        setIsSearchingOnline(false);
+      }
+    }, 350);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [searchQuery, selectedProvince]);
 
   const categories = [
     { id: 'all', nameKh: 'ទាំងអស់', nameEn: 'All' },
@@ -75,7 +110,7 @@ export const TourismView: React.FC = () => {
       </div>
 
       {/* Destination List */}
-      {filteredDestinations.length === 0 ? (
+      {filteredDestinations.length === 0 && !isSearchingOnline && smartCacheTourism.length === 0 ? (
         <div className="p-8 text-center bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 space-y-2 font-khmer shadow-xs">
           <Compass className="w-8 h-8 mx-auto text-slate-300" />
           <p className="text-xs text-slate-500 font-medium">
@@ -87,6 +122,82 @@ export const TourismView: React.FC = () => {
           {filteredDestinations.map((dest) => (
             <TouristCard key={dest.id} destination={dest} />
           ))}
+        </div>
+      )}
+
+      {/* Google Maps Places API + Smart Cache Tourism Results */}
+      {searchQuery.trim().length >= 2 && (
+        <div className="mt-4 pt-3 border-t border-slate-200 dark:border-slate-700 space-y-3 font-khmer">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              <Globe className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              <span className="text-xs font-bold text-slate-800 dark:text-slate-100">
+                លទ្ធផលតំបន់ទេសចរណ៍ពី Google Maps & Smart Cache
+              </span>
+            </div>
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-300 font-bold">
+              ⚡ Smart Cache
+            </span>
+          </div>
+
+          {isSearchingOnline ? (
+            <div className="py-5 flex items-center justify-center gap-2 text-xs text-slate-500">
+              <Loader2 className="w-4 h-4 animate-spin text-emerald-600" />
+              <span>កំពុងស្វែងរកតំបន់ទេសចរណ៍ពី Google Maps...</span>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {smartCacheTourism.map((place) => {
+                const mappedDest = convertGooglePlaceToDestination(place);
+                const alreadyInApp = destinations.some(
+                  (d) =>
+                    d.id === mappedDest.id ||
+                    d.nameKh.toLowerCase() === mappedDest.nameKh.toLowerCase()
+                );
+                return (
+                  <div key={place.placeId} className="space-y-1.5">
+                    <TouristCard destination={mappedDest} />
+                    {!alreadyInApp && (
+                      <button
+                        onClick={() => {
+                          addDestination({
+                            nameKh: mappedDest.nameKh,
+                            nameEn: mappedDest.nameEn,
+                            categorySlug: mappedDest.categorySlug,
+                            categoryKh: mappedDest.categoryKh,
+                            categoryEn: mappedDest.categoryEn,
+                            descriptionKh: mappedDest.descriptionKh,
+                            descriptionEn: mappedDest.descriptionEn,
+                            photoUrl: mappedDest.photoUrl,
+                            provinceKh: mappedDest.provinceKh,
+                            provinceEn: mappedDest.provinceEn,
+                            addressKh: mappedDest.addressKh,
+                            addressEn: mappedDest.addressEn,
+                            entranceFeeKh: mappedDest.entranceFeeKh,
+                            entranceFeeEn: mappedDest.entranceFeeEn,
+                            bestTimeToVisitKh: mappedDest.bestTimeToVisitKh,
+                            bestTimeToVisitEn: mappedDest.bestTimeToVisitEn,
+                            mapUrl: mappedDest.mapUrl,
+                            latitude: mappedDest.latitude,
+                            longitude: mappedDest.longitude,
+                            highlightsKh: mappedDest.highlightsKh,
+                          });
+                          showToast(
+                            `បានរក្សាទុកតំបន់ទេសចរណ៍ "${mappedDest.nameKh}" ចូលក្នុងបញ្ជីកម្មវិធី និង Smart Cache!`,
+                            'success'
+                          );
+                        }}
+                        className="w-full py-1.5 px-3 rounded-xl bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/50 dark:hover:bg-emerald-900/60 border border-emerald-300 dark:border-emerald-700 text-emerald-800 dark:text-emerald-300 text-xs font-bold flex items-center justify-center gap-1.5 transition"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>រក្សាទុកតំបន់ទេសចរណ៍នេះចូលក្នុងកម្មវិធីអចិន្ត្រៃយ៍</span>
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
     </div>

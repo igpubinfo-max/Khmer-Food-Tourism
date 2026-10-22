@@ -65,22 +65,22 @@ test('Restaurant Check-in Service enforces 10 checkins/hour anti-spam rate limit
   assert(checkInContent.includes('checkUserCheckInRateLimit'), 'Anti-spam rate limit check present');
 });
 
-// 3. Check App Version v1.7.4 (Build 46)
+// 3. Check App Version v1.7.5 (Build 47)
 const typesPath = path.resolve(__dirname, '../src/types/index.ts');
 const typesContent = fs.readFileSync(typesPath, 'utf8');
 
-test('App Version bumped to v1.7.4 (Build 46)', () => {
-  assert(typesContent.includes("APP_VERSION = 'v1.7.4'"), 'APP_VERSION is v1.7.4');
-  assert(typesContent.includes("APP_BUILD_CODE = 46"), 'APP_BUILD_CODE is 46');
+test('App Version bumped to v1.7.5 (Build 47)', () => {
+  assert(typesContent.includes("APP_VERSION = 'v1.7.5'"), 'APP_VERSION is v1.7.5');
+  assert(typesContent.includes("APP_BUILD_CODE = 47"), 'APP_BUILD_CODE is 47');
 });
 
 // 4. Check Android build.gradle version
 const gradlePath = path.resolve(__dirname, '../android/app/build.gradle');
 const gradleContent = fs.readFileSync(gradlePath, 'utf8');
 
-test('Android build.gradle has versionCode 46 and versionName 1.7.4', () => {
-  assert(gradleContent.includes('versionCode 46'), 'versionCode is 46');
-  assert(gradleContent.includes('versionName "1.7.4"'), 'versionName is 1.7.4');
+test('Android build.gradle has versionCode 47 and versionName 1.7.5', () => {
+  assert(gradleContent.includes('versionCode 47'), 'versionCode is 47');
+  assert(gradleContent.includes('versionName "1.7.5"'), 'versionName is 1.7.5');
 });
 
 // 5. Check Modals registered in App.tsx
@@ -209,6 +209,24 @@ test('AdminDashboard & AppContext enforce Secure Payment Proof Vault, Audit Logs
   assert(appCtxContent.includes('requestMorePaymentInfo'), 'requestMorePaymentInfo action present');
   assert(adminDashContent.includes('មើលភស្តុតាងពេញ'), 'View Full Proof action present in AdminDashboard');
   assert(adminDashContent.includes('ស្នើសុំភស្តុតាងបន្ថែម'), 'Request More Info action present in AdminDashboard');
+});
+
+const googlePlacesPath = path.resolve(__dirname, '../src/services/googlePlacesService.ts');
+const googlePlacesContent = fs.readFileSync(googlePlacesPath, 'utf8');
+const supabasePath = path.resolve(__dirname, '../src/services/supabaseService.ts');
+const supabaseContent = fs.readFileSync(supabasePath, 'utf8');
+
+test('Google Maps Places API + Smart Cache Service saves places on 1st search and serves subsequent users for $0 quota', () => {
+  assert(googlePlacesContent.includes('searchCambodiaPlacesWithSmartCache'), 'searchCambodiaPlacesWithSmartCache present');
+  assert(googlePlacesContent.includes('places.googleapis.com/v1/places:searchText'), 'Google Maps Places API v1 endpoint present');
+  assert(googlePlacesContent.includes('kft_google_places_smart_cache_v1'), 'Smart Cache storage key present');
+  assert(googlePlacesContent.includes('cacheHitsSavedQuota'), 'Quota savings counter present');
+});
+
+test('Supabase Free Tier Cloud Sync Service syncs Users, Transactions, Payment Proofs, and Smart-Cached Restaurants', () => {
+  assert(supabaseContent.includes('syncAllAppDataWithSupabase'), 'syncAllAppDataWithSupabase present');
+  assert(supabaseContent.includes('SUPABASE_SETUP_SQL'), '1-click Supabase SQL setup script present');
+  assert(adminDashContent.includes('ប្រព័ន្ធ Cloud Supabase (Free Tier) & Google Maps Places API + Smart Cache'), 'Admin Dashboard Cloud & API configuration panel present');
 });
 
 console.log('\n================================================================');
