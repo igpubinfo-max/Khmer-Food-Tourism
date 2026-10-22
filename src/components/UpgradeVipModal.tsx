@@ -3,7 +3,8 @@ import { useApp } from '../context/AppContext';
 import { 
   X, Crown, Sparkles, AlertCircle, RefreshCw, 
   ShieldCheck, Star, Clock,
-  QrCode, ExternalLink, Send, CheckCircle2, ChevronRight
+  QrCode, ExternalLink, Send, CheckCircle2, ChevronRight,
+  Download, Copy, Check
 } from 'lucide-react';
 import { TEN_VIP_BENEFITS, isUserVipActive, getVipRemainingDays } from '../types';
 import { 
@@ -77,6 +78,8 @@ export const UpgradeVipModal: React.FC = () => {
 
   if (!isUpgradeVipModalOpen) return null;
 
+  const [hasCopiedAccount, setHasCopiedAccount] = useState(false);
+
   const handleClose = () => {
     setIsUpgradeVipModalOpen(false);
     setTimeout(() => {
@@ -88,19 +91,51 @@ export const UpgradeVipModal: React.FC = () => {
   const handleOpenAbaApp = () => {
     showToast(
       isKm 
-        ? 'កំពុងបើក ABA Mobile... សូមស្កេន ឬទូទាត់ រួចចុចផ្ញើសំណើជូនរដ្ឋបាល!' 
-        : 'Opening ABA Mobile... Please pay and submit your request for admin approval!',
+        ? 'កំពុងបើកកម្មវិធី ABA Mobile... សូមស្កេន ឬផ្ទេរប្រាក់ រួចចុចផ្ញើសំណើជូនរដ្ឋបាល!' 
+        : 'Opening ABA Mobile... Please scan or transfer, then submit your request for admin approval!',
       'info'
     );
     
-    // Official supported ABA Mobile deep link with KHQR payload
-    const abaDeepLink = `aba://qr?data=${encodeURIComponent(OFFICIAL_ABA_KHQR_PAYLOAD)}`;
-    window.location.href = abaDeepLink;
+    // Direct clean launch of ABA Mobile app without expired P2P token query
+    // This eliminates the [MAPP-P2P-INFO-REJ] error popup in ABA Mobile
+    window.location.href = 'abamobilebank://';
 
     setTimeout(() => {
       // Fallback to ABA PayWay link if ABA app is not installed
       window.open('https://link.payway.com.kh/aba?id=095245959', '_blank');
-    }, 800);
+    }, 900);
+  };
+
+  const handleSaveQrImage = () => {
+    try {
+      const link = document.createElement('a');
+      link.href = '/images/aba_official_qr.png';
+      link.download = 'ABA_KHQR_KIMSENG_CHEA.png';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      showToast(
+        isKm 
+          ? '✅ បានទាញយករូបភាព QR ទៅក្នុង Photos! បើក ABA Mobile រួចជ្រើសរើសស្កេនពីរូបថត (Scan from Photos) ដើម្បីទូទាត់។' 
+          : '✅ QR saved to photos! Open ABA Mobile and scan from gallery to pay.',
+        'success'
+      );
+    } catch {
+      showToast(isKm ? 'សូម Screenshot រូបភាព QR ដើម្បីស្កេន' : 'Please screenshot QR to scan', 'info');
+    }
+  };
+
+  const handleCopyAccount = () => {
+    navigator.clipboard.writeText('095 245 959');
+    setHasCopiedAccount(true);
+    setTimeout(() => setHasCopiedAccount(false), 3000);
+    showToast(
+      isKm 
+        ? '✅ បានចម្លងលេខគណនី ABA៖ 095 245 959 (CHEA KIMSENG)!' 
+        : '✅ Copied ABA Account: 095 245 959 (CHEA KIMSENG)!',
+      'success'
+    );
   };
 
   // Submit VIP Upgrade Request to Administrator (Strict Admin Review Flow)
@@ -397,10 +432,45 @@ export const UpgradeVipModal: React.FC = () => {
                     </div>
                   </div>
 
+                  {/* Clean ABA Receiver & Account Details */}
+                  <div className="p-2.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 flex items-center justify-between text-xs">
+                    <div className="text-left">
+                      <span className="text-[10px] text-slate-400 block font-khmer">{isKm ? 'ឈ្មោះគណនី ABA' : 'Account Name'}</span>
+                      <span className="font-extrabold text-slate-900 dark:text-white font-mono">CHEA KIMSENG</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-[10px] text-slate-400 block font-khmer">{isKm ? 'លេខគណនី ABA' : 'Account Number'}</span>
+                      <span className="font-extrabold text-[#004B87] dark:text-sky-400 font-mono text-sm">095 245 959</span>
+                    </div>
+                  </div>
+
+                  {/* 2 Quick Utility Actions: Save QR Flyer & Copy Account */}
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={handleSaveQrImage}
+                      className="py-2.5 px-3 rounded-xl bg-white dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-100 text-xs font-bold border border-slate-200 dark:border-slate-600 flex items-center justify-center gap-1.5 transition active:scale-95 shadow-2xs cursor-pointer"
+                      title={isKm ? 'រក្សាទុករូបភាព QR ទៅក្នុង Photos' : 'Save QR to Photos'}
+                    >
+                      <Download className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                      <span>{isKm ? 'រក្សាទុករូបភាព QR' : 'Save QR Image'}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleCopyAccount}
+                      className="py-2.5 px-3 rounded-xl bg-white dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-100 text-xs font-bold border border-slate-200 dark:border-slate-600 flex items-center justify-center gap-1.5 transition active:scale-95 shadow-2xs cursor-pointer"
+                      title={isKm ? 'ចម្លងលេខគណនី 095 245 959' : 'Copy 095 245 959'}
+                    >
+                      {hasCopiedAccount ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5 text-amber-500" />}
+                      <span>{hasCopiedAccount ? (isKm ? 'បានចម្លង!' : 'Copied!') : (isKm ? 'ចម្លងលេខគណនី' : 'Copy Account')}</span>
+                    </button>
+                  </div>
+
                   {/* 1-Tap Action to Open ABA Mobile App */}
                   <button
                     onClick={handleOpenAbaApp}
-                    className="w-full py-2.5 px-4 rounded-xl bg-[#004B87] hover:bg-[#003966] text-white text-xs font-bold flex items-center justify-center gap-2 shadow-sm transition active:scale-98"
+                    className="w-full py-2.5 px-4 rounded-xl bg-[#004B87] hover:bg-[#003966] text-white text-xs font-bold flex items-center justify-center gap-2 shadow-sm transition active:scale-98 cursor-pointer"
                   >
                     <ExternalLink className="w-4 h-4" />
                     <span>
@@ -410,10 +480,10 @@ export const UpgradeVipModal: React.FC = () => {
                     </span>
                   </button>
 
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 text-left leading-relaxed">
                     {isKm 
-                      ? '💡 បើក ABA Mobile ដើម្បីស្កេន ឬទូទាត់តាមកូដ KHQR ខាងលើ។ លោកអ្នកក៏អាច Screenshot រូបភាពនេះ រួច Scan ក្នុង App ធនាគារណាមួយដែលគាំទ្រ KHQR។' 
-                      : '💡 Open ABA Mobile to scan or pay via the KHQR above, or save a screenshot to scan from your photo gallery in any KHQR-supported banking app.'}
+                      ? '💡 គន្លឹះ៖ លោកអ្នកអាចចុច «រក្សាទុករូបភាព QR» រួចបើក ABA Mobile ហើយជ្រើសរើសស្កេនពីរូបថត (Scan from Photos) ឬចម្លងលេខគណនី 095 245 959 (CHEA KIMSENG) ដើម្បីផ្ទេរប្រាក់បានយ៉ាងងាយស្រួល។' 
+                      : '💡 Tip: Tap "Save QR Image" then open ABA Mobile and select "Scan from Photos", or copy account 095 245 959 (CHEA KIMSENG) to transfer easily.'}
                   </p>
                 </div>
               </div>

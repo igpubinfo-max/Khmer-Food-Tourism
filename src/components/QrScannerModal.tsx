@@ -372,11 +372,11 @@ export const QrScannerModal: React.FC = () => {
                   <div className="space-y-2 pt-1">
                     <button
                       onClick={() => {
-                        const abaDeepLink = `aba://qr?data=${encodeURIComponent(scanResult.raw)}`;
-                        window.location.href = abaDeepLink;
+                        // Direct clean launch of ABA Mobile app avoiding broken P2P token errors
+                        window.location.href = 'abamobilebank://';
                         setTimeout(() => {
                           window.open('https://link.payway.com.kh/aba?id=095245959', '_blank');
-                        }, 600);
+                        }, 800);
                       }}
                       className="w-full py-2.5 px-4 rounded-xl bg-[#004B87] hover:bg-[#003966] text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md transition active:scale-95"
                     >

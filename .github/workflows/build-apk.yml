@@ -60,7 +60,7 @@ jobs:
           echo "=== SEARCHING FOR GENERATED APK FILES ==="
           find . -name "*.apk" -ls
           cd android/app/build/outputs/apk/debug
-          cp app-debug.apk KhmerFoodTourism-v1.5.9.apk
+          cp app-debug.apk KhmerFoodTourism-v1.6.0.apk
           ls -la
 
       - name: 10. Upload Android APK Artifact
@@ -73,14 +73,25 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: v1.5.9
-          name: "Khmer Food & Tourism v1.5.9 (VIP Account Power, QR Recognition, Social Accounts & AI Viral Search)"
+          tag_name: v1.6.0
+          name: "Khmer Food & Tourism v1.6.0 (Golden VIP Hero, Shop & Member Unlocking, ABA KHQR Fix, Clean Home Feed)"
           overwrite: true
           make_latest: true
           body: |
             ### 🇰🇭 កម្មវិធីទូរស័ព្ទដៃ អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism Mobile App)
             
-            **កំណែថ្មី v1.5.9 (VIP Account Power, QR Recognition, Social Accounts & AI Viral Search):**
+            **កំណែថ្មី v1.6.0 (Golden VIP Hero, Shop & Member Unlocking, ABA KHQR Fix, Clean Home Feed):**
+            - 🌟 **១. Hero Banner ពណ៌មាស និងសារផ្សព្វផ្សាយហាង VIP (Golden VIP Hero Banner):**
+              - បង្ហាញសារ: "Unlock to be VIP account for advertising your Shop" (ដំឡើងទៅជាគណនី VIP ដើម្បីផ្សព្វផ្សាយហាងរបស់អ្នក) ក្រោមឈ្មោះគណនី។
+              - នៅពេលអ្នកប្រើដំឡើងជា VIP ផ្ទាំង Hero Banner នឹងផ្លាស់ប្តូរពណ៌ទៅជា **ពណ៌មាស (Gold)** ភ្លឺរលោងស្អាតទាក់ទាញភ្លាមៗ!
+            - 🏪 **២. បើកដំណើរការផ្ទាំងគ្រប់គ្រងហាង និងសេវាកម្មផ្ទាល់ខ្លួន (Manage Shop & Personal Feature):**
+              - ផ្ទាំងគ្រប់គ្រងហាង (Manage Shop Panel) និងសេវាកម្មផ្ទាល់ខ្លួន (Personal Feature / Member Hub) ត្រូវបានចាក់សោសម្រាប់អ្នកប្រើឥតគិតថ្លៃ និងបើកដំណើរការពេញលេញ (Enabled) បន្ទាប់ពីក្លាយជាសមាជិក VIP!
+            - 📱 **៣. ដកចេញវីដេអូ TikTok & FB (Clean Home Feed):**
+              - ដកចេញទាំងស្រុងនូវផ្ទាំងវីដេអូ TikTok & FB ៤ ផ្ទាំង និង Video player នៅលើទំព័រដើម ដើម្បីឲ្យផ្ទៃកម្មវិធីមានភាពស្រឡះ ស្អាត និងងាយស្រួលប្រើប្រាស់។
+            - 💳 **៤. ដោះស្រាយបញ្ហា ABA Mobile QR Payment (Fixed ABA Error [MAPP-P2P-INFO-REJ]):**
+              - លុបបំបាត់សារកំហុស "Invalid ABA QR. Ask receiver to update ABA Mobile app to the Latest version first." ដោយភ្ជាប់ Deep Link ផ្ទាល់ទៅកាន់កម្មវិធី ABA Mobile (`abamobilebank://`)។
+              - បន្ថែមប៊ូតុងរក្សាទុករូបភាព QR ទៅក្នុង Photos (Save QR Flyer to Photos) សម្រាប់ស្កេនពីរូបថតក្នុង ABA Mobile ដោយជោគជ័យ ១០០%។
+              - បន្ថែមប៊ូតុងចម្លងលេខគណនី ABA 095 245 959 (CHEA KIMSENG) ងាយស្រួលផ្ទេរប្រាក់ភ្លាមៗ។
             - 👑 **១. បើកសិទ្ធិគណនី VIP ពេញលេញ និងផ្ទាំងគ្រប់គ្រងហាង VIP (VIP Account & Store Management):**
               - គណនី Chea Kimseng ទទួលបានសិទ្ធិ VIP ពេញលេញ ៣៦៥ ថ្ងៃ។
               - បន្ថែមហាងផ្ទាល់ខ្លួន កែប្រែព័ត៌មាន បង្ហោះរូបថត និងគ្រប់គ្រងមុខម្ហូបដោយឥតគិតកម្រៃបន្ថែម។
