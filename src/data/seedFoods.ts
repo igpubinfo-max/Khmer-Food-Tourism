@@ -1516,7 +1516,7 @@ export const seedFoods: FoodItem[] = [
     id: 'food-44',
     nameKh: 'នំផ្លែអាយស្ករត្នោត',
     nameEn: 'Num Phlae Ai (Palm Sugar Sticky Rice Dumplings)',
-    categorySlug: 'dessert',
+    categorySlug: 'cake',
     categoryKh: 'បង្អែមខ្មែរ / នំប្រពៃណី',
     categoryEn: 'Desserts / Traditional Sweets',
     descriptionKh: 'នំផ្លែអាយ ជានំខ្មែរបុរាណធ្វើពីម្សៅដំណើបមូលតូចៗ មានស្នូលស្ករត្នោតផ្អែមក្រអូបនៅខាងក្នុង។ ពេលទំពារ ស្ករត្នោតរលាយផ្ទុះក្នុងមាត់យ៉ាងឆ្ងាញ់ពិសា រោយជាមួយដូងកោសសរសៃស្រស់ៗ។',
@@ -1551,7 +1551,7 @@ export const seedFoods: FoodItem[] = [
     id: 'food-45',
     nameKh: 'ក្រឡានប្ញស្សីថ្មគោលបាត់ដំបង',
     nameEn: 'Kralan (Sticky Rice in Bamboo Tubes)',
-    categorySlug: 'dessert',
+    categorySlug: 'cake',
     categoryKh: 'នំប្រពៃណី / បាត់ដំបង-ក្រចេះ',
     categoryEn: 'Snacks / Bamboo Sticky Rice',
     descriptionKh: 'ក្រឡាន ជាអាហារប្រពៃណីខ្មែរដ៏ល្បីល្បាញនៅថ្មគោល និងក្រចេះ។ អង្ករដំណើបលាយជាមួយខ្ទិះដូងខាប់ សណ្តែកខ្មៅ និងស្ករត្នោត ញាត់ក្នុងបំពង់ឬស្សីស្រស់ រួចដុតលើរងើកភ្លើងរហូតឈ្ងុយ។',
@@ -1586,7 +1586,7 @@ export const seedFoods: FoodItem[] = [
     id: 'food-46',
     nameKh: 'នំអន្សមជ្រូកខ្មែរ',
     nameEn: 'Num Ansom Chrouk (Savory Pork Sticky Rice Cake)',
-    categorySlug: 'dessert',
+    categorySlug: 'cake',
     categoryKh: 'នំប្រពៃណី / ពិធីបុណ្យ',
     categoryEn: 'Traditional / Festival Cake',
     descriptionKh: 'នំអន្សមជ្រូក គឺជានិមិត្តរូបនៃពិធីបុណ្យភ្ជុំបិណ្ឌ និងចូលឆ្នាំខ្មែរ។ វេចពីអង្ករដំណើប សណ្តែកបាយ និងសាច់ជ្រូកបីជាន់ប្រឡាក់ម្រេចកំពត វេចក្នុងស្លឹកចេករាងស៊ីឡាំង រួចស្ងោររាប់ម៉ោង។',
@@ -1761,6 +1761,3186 @@ export const seedFoods: FoodItem[] = [
 ];
 
 // Dynamically generate the full collection up to 105 dishes so all 100+ items are distinct, rich, and authentic!
+
+// Comprehensive Verified Khmer Recipe and Ingredient Ledger for Dishes 51 to 100
+export const AUTHENTIC_FOOD_RECIPES = {
+  "food-51": {
+    "nameKh": "សម្លម្ជូរត្រីកែវរំដេង",
+    "nameEn": "River Keo Fish Galangal Sour Soup",
+    "cat": "soup",
+    "catKh": "ម្ហូបសម្ល / ម្ជូរ",
+    "catEn": "Soup / Sour Stew",
+    "descKh": "សម្លម្ជូរត្រីកែវរំដេង ជាសម្លបុរាណតាមដងទន្លេមេគង្គ ប្រើត្រីកែវស្រស់សាច់ផ្អែម ចម្អិនជាមួយរំដេងចាស់ហាន់ស្ដើង ទឹកអំពិលទុំ និងត្រកួនស្រួយ រសជាតិជូរអែមប្រហើរឈ្ងុយរំដេង។",
+    "descEn": "A traditional Mekong River sour fish soup prepared with fresh Keo fish, aromatic sliced mature galangal, ripe tamarind, and crisp morning glory.",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "២០ នាទី",
+    "servings": "៣-៤ នាក់",
+    "calories": 220,
+    "difficulty": "easy",
+    "ingredients": [
+      {
+        "nameKh": "ត្រីកែវស្រស់លាងស្អាត",
+        "nameEn": "Fresh river Keo fish",
+        "amount": "៤០០ ក្រាម"
+      },
+      {
+        "nameKh": "រំដេងចាស់ហាន់ស្ដើង",
+        "nameEn": "Thinly sliced mature galangal",
+        "amount": "៣ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "ទឹកអំពិលទុំខាប់",
+        "nameEn": "Concentrated tamarind juice",
+        "amount": "២ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "ត្រកួនស្រែបេះទងខ្លីៗ",
+        "nameEn": "Water spinach stems",
+        "amount": "១ ចាន"
+      },
+      {
+        "nameKh": "ទឹកត្រី និងស្ករត្នោត",
+        "nameEn": "Fish sauce and palm sugar",
+        "amount": "១ ស្លាបព្រាបាយកន្លះ"
+      },
+      {
+        "nameKh": "ម្ទេសក្រហមហាន់",
+        "nameEn": "Sliced red chili",
+        "amount": "តាមចំណូលចិត្ត"
+      }
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "instructionKh": "លាងសម្អាតត្រីកែវឱ្យស្អាត កាត់ក្បាល ឬទុកទាំងមូលតាមចំណូលចិត្ត។ ហាន់រំដេងជាបន្ទះស្ដើងៗ។",
+        "instructionEn": "Clean the Keo fish thoroughly. Slice galangal thinly."
+      },
+      {
+        "stepNumber": 2,
+        "instructionKh": "ដាំទឹកឱ្យពុះខ្លាំង បង់រំដេង និងទឹកអំពិលទុំចូលឱ្យចេញក្លិនឈ្ងុយប្រហើរ។",
+        "instructionEn": "Bring water to a rolling boil, add galangal slices and tamarind juice until fragrant."
+      },
+      {
+        "stepNumber": 3,
+        "instructionKh": "ដាក់ត្រីកែវចូលកុំកូរឱ្យបែកសាច់ ថែមទឹកត្រី អំបិល និងស្ករត្នោតបន្តិច។",
+        "instructionEn": "Gently place fish into the pot without stirring, season with fish sauce, salt, and palm sugar."
+      },
+      {
+        "stepNumber": 4,
+        "instructionKh": "បង់ត្រកួន និងម្ទេសចូល រម្ងាស់ ១ នាទីរួចលើកចុះ ទទួលទានជាមួយបាយក្ដៅៗ។",
+        "instructionEn": "Add morning glory and chilies, simmer for 1 minute, and serve hot with steamed rice."
+      }
+    ]
+  },
+  "food-52": {
+    "nameKh": "សម្លម្ជូរល្ពៅសាច់ជ្រូក",
+    "nameEn": "Pumpkin Pork Rib Sour Soup",
+    "cat": "soup",
+    "catKh": "ម្ហូបសម្ល / ម្ជូរ",
+    "catEn": "Soup / Sour Stew",
+    "descKh": "សម្លម្ជូរល្ពៅសាច់ជ្រូក ចម្អិនពីឆ្អឹងជំនីរជ្រូករម្ងាស់ផុយផ្អែមទឹកស៊ុប លាយជាមួយល្ពៅទុំសាច់ស្វិត ទឹកអំពិលទុំ និងជីរនាងវង រសជាតិជូរស្រាលផ្អែមធម្មជាតិ។",
+    "descEn": "Savory Cambodian sour soup featuring tender simmered pork ribs, rich sweet pumpkin, tamarind broth, and fragrant holy basil.",
+    "prepTime": "២០ នាទី",
+    "cookTime": "៣០ នាទី",
+    "servings": "៣-៥ នាក់",
+    "calories": 310,
+    "difficulty": "medium",
+    "ingredients": [
+      {
+        "nameKh": "ឆ្អឹងជំនីរជ្រូកកាប់ដុំៗ",
+        "nameEn": "Pork ribs cut into bite-sized pieces",
+        "amount": "៤០០ ក្រាម"
+      },
+      {
+        "nameKh": "ល្ពៅទុំចិតដុំរាងត្រីកោណ",
+        "nameEn": "Ripe sweet pumpkin chunks",
+        "amount": "៣០០ ក្រាម"
+      },
+      {
+        "nameKh": "ទឹកអំពិលទុំ",
+        "nameEn": "Tamarind pulp extract",
+        "amount": "២ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "ប្រហុកសាច់បន្តិច",
+        "nameEn": "Prahok paste for depth",
+        "amount": "កន្លះស្លាបព្រាកាហ្វេ"
+      },
+      {
+        "nameKh": "ជីរនាងវង និងម្ទេស",
+        "nameEn": "Fresh holy basil and chili",
+        "amount": "១ ក្តាប់"
+      },
+      {
+        "nameKh": "ទឹកត្រី និងស្ករត្នោត",
+        "nameEn": "Fish sauce and palm sugar",
+        "amount": "១ ស្លាបព្រាបាយ"
+      }
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "instructionKh": "រម្ងាស់ឆ្អឹងជំនីរជ្រូកជាមួយប្រហុកបន្តិចក្នុងទឹកពុះរយៈពេល ២០ នាទីឱ្យសាច់ផុយទន់ និងចេញជាតិផ្អែម។",
+        "instructionEn": "Simmer pork ribs with prahok in boiling water for 20 minutes until tender and sweet."
+      },
+      {
+        "stepNumber": 2,
+        "instructionKh": "ដាក់ទឹកអំពិលទុំ និងដុំល្ពៅចូលរម្ងាស់ឱ្យល្ពៅឆ្អិនទន់ល្មម កុំឱ្យរលួយ។",
+        "instructionEn": "Add tamarind juice and pumpkin chunks, cooking until pumpkin is tender but firm."
+      },
+      {
+        "stepNumber": 3,
+        "instructionKh": "ថែមទឹកត្រី និងស្ករត្នោត ភ្លក្សរសជាតិជូរអែមដិតល្មម។",
+        "instructionEn": "Season with fish sauce and palm sugar, balancing sweet, sour, and savory."
+      },
+      {
+        "stepNumber": 4,
+        "instructionKh": "បង់ជីរនាងវង និងម្ទេសរួចលើកចុះភ្លាមៗ ដួសទទួលទានជាមួយបាយក្ដៅៗ។",
+        "instructionEn": "Toss in holy basil and sliced chili, remove from heat, and serve warm with rice."
+      }
+    ]
+  },
+  "food-53": {
+    "nameKh": "សម្លម្ជូរទំពាំងត្រីឆ្អើរ",
+    "nameEn": "Bamboo Shoot & Smoked Fish Soup",
+    "cat": "soup",
+    "catKh": "ម្ហូបសម្ល / ម្ជូរ",
+    "catEn": "Soup / Sour Stew",
+    "descKh": "សម្លម្ជូរទំពាំងត្រីឆ្អើរ ជាសម្លប្រពៃណីខ្មែរជនបទដ៏ពេញនិយម មានក្លិនឈ្ងុយត្រីឆ្អើរជាប់ច្រមុះ អមដោយទំពាំងស្រស់ស្រួយផ្អែម និងស្លឹកបាសធម្មជាតិ។",
+    "descEn": "Rustic Cambodian country soup with fragrant smoked fish flakes, tender bamboo shoots, fresh tamarind, and sweet ivy gourd greens.",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "២៥ នាទី",
+    "servings": "៣-៤ នាក់",
+    "calories": 195,
+    "difficulty": "easy",
+    "ingredients": [
+      {
+        "nameKh": "ត្រីឆ្អើរបេះយកសាច់ធំៗ",
+        "nameEn": "Flaked smoked freshwater fish",
+        "amount": "២០០ ក្រាម"
+      },
+      {
+        "nameKh": "ទំពាំងស្រស់ហាន់សរសៃស្ងោរស្រុះ",
+        "nameEn": "Parboiled shredded bamboo shoots",
+        "amount": "២៥០ ក្រាម"
+      },
+      {
+        "nameKh": "ស្លឹកអំពិលខ្ចី ឬទឹកអំពិលទុំ",
+        "nameEn": "Young tamarind leaves or tamarind juice",
+        "amount": "២ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "ស្លឹកបាសស្រស់",
+        "nameEn": "Fresh ivy gourd leaves",
+        "amount": "១ កន្ត្រកតូច"
+      },
+      {
+        "nameKh": "ទឹកត្រី និងអំបិល",
+        "nameEn": "Fish sauce and sea salt",
+        "amount": "១ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "ម្ទេសដៃនាងហាន់",
+        "nameEn": "Fresh chili slices",
+        "amount": "តាមចំណូលចិត្ត"
+      }
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "instructionKh": "ស្ងោរទំពាំងបង្ហូរទឹកចោលមួយសារដើម្បីកាត់បន្ថយជាតិចត់។ បេះត្រីឆ្អើរជាដុំៗ។",
+        "instructionEn": "Boil bamboo shoots and drain to remove bitterness. Flake smoked fish."
+      },
+      {
+        "stepNumber": 2,
+        "instructionKh": "ដាំទឹកឱ្យពុះ ដាក់ត្រីឆ្អើរ និងទំពាំងចូលរម្ងាស់ឱ្យទឹកស៊ុបចេញក្លិនឈ្ងុយ។",
+        "instructionEn": "Bring water to boil, add smoked fish and bamboo shoots, simmering to extract flavors."
+      },
+      {
+        "stepNumber": 3,
+        "instructionKh": "ថែមទឹកអំពិល ទឹកត្រី អំបិល និងស្ករត្នោតបន្តិច ភ្លក្សរសជាតិជូរស្រទន់។",
+        "instructionEn": "Season with tamarind, fish sauce, salt, and palm sugar for a balanced tang."
+      },
+      {
+        "stepNumber": 4,
+        "instructionKh": "បង់ស្លឹកបាសចូលកូរត្រឡប់មួយភ្លែត រួចដួសទទួលទានជាមួយបាយ។",
+        "instructionEn": "Stir in ivy gourd leaves, remove from heat, and serve with rice."
+      }
+    ]
+  },
+  "food-54": {
+    "nameKh": "សម្លប្រហើរននោងបង្គាស្រស់",
+    "nameEn": "Luffa Gourd Fresh Shrimp Herbal Soup",
+    "cat": "soup",
+    "catKh": "ម្ហូបសម្ល / ប្រហើរ",
+    "catEn": "Soup / Herbal Broth",
+    "descKh": "សម្លប្រហើរននោងបង្គាស្រស់ ប្រើគ្រឿងបុកស្លឹកគ្រៃ រមៀត ខ្ទឹមស និងប្រហុកសាច់បន្តិច ចម្អិនជាមួយបង្គាស្រស់ផ្អែម និងននោងខ្ចី ជួយសម្រួលការរំលាយអាហារ និងមានសុខភាពល្អ។",
+    "descEn": "Nutritious Cambodian herbal clear soup featuring tender young luffa sponge gourd, sweet sea prawns, and crushed lemongrass kroeung.",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "១៥ នាទី",
+    "servings": "៣-៤ នាក់",
+    "calories": 180,
+    "difficulty": "easy",
+    "ingredients": [
+      {
+        "nameKh": "បង្គាស្រស់បកសំបកទុកកន្ទុយ",
+        "nameEn": "Fresh prawns, peeled with tails on",
+        "amount": "២៥០ ក្រាម"
+      },
+      {
+        "nameKh": "ននោងខ្ចីចិតសំបកកាត់ចំណិត",
+        "nameEn": "Peeled young luffa gourd slices",
+        "amount": "២ ផ្លែ"
+      },
+      {
+        "nameKh": "គ្រឿងបុកប្រហើរ (ស្លឹកគ្រៃ រមៀត ខ្ទឹមស)",
+        "nameEn": "Proher lemongrass kroeung paste",
+        "amount": "២ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "ប្រហុកសាច់ចិញ្ច្រាំ",
+        "nameEn": "Minced prahok",
+        "amount": "កន្លះស្លាបព្រាកាហ្វេ"
+      },
+      {
+        "nameKh": "ស្លឹកបាស និងស្លឹកម្រុំ",
+        "nameEn": "Moringa and ivy gourd leaves",
+        "amount": "១ ចាន"
+      },
+      {
+        "nameKh": "ទឹកត្រី និងអំបិល",
+        "nameEn": "Fish sauce and salt",
+        "amount": "១ ស្លាបព្រាបាយ"
+      }
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "instructionKh": "រំលាយគ្រឿងបុក និងប្រហុកក្នុងទឹកពុះឱ្យចេញក្លិនឈ្ងុយប្រហើរ។",
+        "instructionEn": "Dissolve kroeung paste and prahok into boiling water until deeply aromatic."
+      },
+      {
+        "stepNumber": 2,
+        "instructionKh": "ដាក់បង្គាស្រស់ចូលឱ្យឆ្អិនឡើងពណ៌ក្រហមផ្អែម។",
+        "instructionEn": "Add fresh prawns and cook gently until pink and tender."
+      },
+      {
+        "stepNumber": 3,
+        "instructionKh": "ដាក់ននោងចូលរម្ងាស់ ២ នាទី ថែមទឹកត្រី និងអំបិល។",
+        "instructionEn": "Add sliced luffa gourd, cook for 2 minutes, and season with fish sauce."
+      },
+      {
+        "stepNumber": 4,
+        "instructionKh": "បង់ស្លឹកបាស និងស្លឹកម្រុំលើកចុះភ្លាមៗ រសជាតិផ្អែមបន្លែធម្មជាតិ។",
+        "instructionEn": "Add moringa leaves, remove from heat immediately, and enjoy."
+      }
+    ]
+  },
+  "food-55": {
+    "nameKh": "សម្លស្ងោរម្រះញាត់សាច់ជ្រូក",
+    "nameEn": "Bitter Melon Stuffed with Pork Soup",
+    "cat": "soup",
+    "catKh": "ម្ហូបស្ងោរ / ស៊ុប",
+    "catEn": "Soup / Clear Broth",
+    "descKh": "សម្លស្ងោរម្រះញាត់សាច់ជ្រូក ប្រើម្រះខ្ចីឆ្កៀលគ្រាប់ ញាត់សាច់ជ្រូកចិញ្ច្រាំលាយមីសួរ និងផ្សិតត្រចៀកកណ្តុរ រម្ងាស់ក្នុងទឹកស៊ុបឆ្អឹងជ្រូកថ្លាឈ្ងុយម្រេចកំពត មានគុណប្រយោជន៍ត្រជាក់ក្នុងខ្លួន។",
+    "descEn": "Classic clear comforting soup of bitter melon rings stuffed with seasoned minced pork, glass noodles, and wood ear mushrooms.",
+    "prepTime": "២៥ នាទី",
+    "cookTime": "៣៥ នាទី",
+    "servings": "៤-៥ នាក់",
+    "calories": 240,
+    "difficulty": "medium",
+    "ingredients": [
+      {
+        "nameKh": "ផ្លែម្រះខ្ចីកាត់កង់ឆ្កៀលគ្រាប់",
+        "nameEn": "Bitter gourd sliced into 2-inch hollow rings",
+        "amount": "២ ផ្លែធំ"
+      },
+      {
+        "nameKh": "សាច់ជ្រូកចិញ្ច្រាំជាប់ខ្លាញ់បន្តិច",
+        "nameEn": "Minced pork shoulder",
+        "amount": "៣០០ ក្រាម"
+      },
+      {
+        "nameKh": "មីសួរ និងផ្សិតត្រចៀកកណ្តុរហាន់",
+        "nameEn": "Soaked glass noodles & wood ear mushrooms",
+        "amount": "៥០ ក្រាម"
+      },
+      {
+        "nameKh": "ទឹកស៊ុបឆ្អឹងជ្រូកថ្លា",
+        "nameEn": "Clear pork bone stock",
+        "amount": "១ លីត្រ"
+      },
+      {
+        "nameKh": "ខ្ទឹមស ម្រេចកំពត ស្លឹកខ្ទឹម",
+        "nameEn": "Garlic, Kampot pepper, scallions",
+        "amount": "២ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "ទឹកត្រី និងអំបិល",
+        "nameEn": "Fish sauce and salt",
+        "amount": "១ ស្លាបព្រាបាយ"
+      }
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "instructionKh": "ច្របល់សាច់ជ្រូកជាមួយមីសួរ ផ្សិតត្រចៀកកណ្តុរ ខ្ទឹមស ម្រេច និងទឹកត្រី រួចញាត់ចូលក្នុងកង់ម្រះឱ្យណែនស្អាត។",
+        "instructionEn": "Mix minced pork with glass noodles, mushrooms, garlic, and pepper, then stuff firmly into bitter melon rings."
+      },
+      {
+        "stepNumber": 2,
+        "instructionKh": "ដាំទឹកស៊ុបឆ្អឹងជ្រូកឱ្យពុះ ដួសពពុះចេញឱ្យទឹកថ្លា។",
+        "instructionEn": "Bring pork stock to boil and skim off froth to ensure clear broth."
+      },
+      {
+        "stepNumber": 3,
+        "instructionKh": "ដាក់ម្រះញាត់សាច់ចូល រម្ងាស់ភ្លើងតិចៗ ៣០ នាទីរហូតដល់ម្រះទន់ល្មមបាត់ជាតិល្វីងខ្លាំង។",
+        "instructionEn": "Gently lower stuffed melon into broth, simmering on low heat for 30 minutes."
+      },
+      {
+        "stepNumber": 4,
+        "instructionKh": "ថែមទឹកត្រី អំបិល រោយស្លឹកខ្ទឹម និងម្រេចកំពត ដួសទទួលទានក្តៅៗ។",
+        "instructionEn": "Season with fish sauce, garnish with scallions and crushed pepper, serve warm."
+      }
+    ]
+  },
+  "food-56": {
+    "nameKh": "សម្លម្ជូរផ្កាកំប្លោកត្រីរ៉ស់",
+    "nameEn": "Water Lily Flower Sour Soup with Fish",
+    "cat": "soup",
+    "catKh": "ម្ហូបសម្ល / ម្ជូរ",
+    "catEn": "Soup / Sour Stew",
+    "descKh": "សម្លម្ជូរផ្កាកំប្លោកត្រីរ៉ស់ ប្រើត្រីរ៉ស់ស្រស់កាត់កង់ ចម្អិនជាមួយផ្កាកំប្លោកស្រស់ៗ ទឹកអំពិលទុំ និងប្រហុកសាច់បន្តិច ផ្កាកំប្លោកស្រួយផ្អែមចូលគ្នាជាមួយទឹកស៊ុបជូរអែមឆ្ងាញ់ពិសា។",
+    "descEn": "Traditional wetlands delicacy featuring river snakehead fish steaks, delicate purple water hyacinth flowers, and tangy tamarind broth.",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "២០ នាទី",
+    "servings": "៣-៤ នាក់",
+    "calories": 210,
+    "difficulty": "easy",
+    "ingredients": [
+      {
+        "nameKh": "ត្រីរ៉ស់កាត់កង់លាងស្អាត",
+        "nameEn": "Snakehead fish steaks",
+        "amount": "៤០០ ក្រាម"
+      },
+      {
+        "nameKh": "ផ្កាកំប្លោកបេះយកផ្កាស្អាត",
+        "nameEn": "Fresh water hyacinth blossoms",
+        "amount": "២០០ ក្រាម"
+      },
+      {
+        "nameKh": "ទឹកអំពិលទុំ",
+        "nameEn": "Ripe tamarind pulp extract",
+        "amount": "២ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "ប្រហុកសាច់បន្តិច",
+        "nameEn": "Prahok paste",
+        "amount": "កន្លះស្លាបព្រាកាហ្វេ"
+      },
+      {
+        "nameKh": "ម្ទេសក្រហម និងជីរសម្ល",
+        "nameEn": "Fresh chili and soup herbs",
+        "amount": "តាមចំណូលចិត្ត"
+      },
+      {
+        "nameKh": "ទឹកត្រី និងស្ករត្នោត",
+        "nameEn": "Fish sauce and palm sugar",
+        "amount": "១ ស្លាបព្រាបាយ"
+      }
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "instructionKh": "លាងសម្អាតត្រីរ៉ស់ជាមួយអំបិលឱ្យអស់រំអិល។ លាងផ្កាកំប្លោកឱ្យស្អាតស្រង់ឱ្យស្រក់ទឹក។",
+        "instructionEn": "Clean fish steaks with salt. Wash water hyacinth blossoms gently and drain."
+      },
+      {
+        "stepNumber": 2,
+        "instructionKh": "ដាំទឹកពុះជាមួយប្រហុកបន្តិច និងទឹកអំពិលទុំឱ្យចេញជាតិជូរឈ្ងុយ។",
+        "instructionEn": "Boil water with prahok and tamarind paste until fragrant and tangy."
+      },
+      {
+        "stepNumber": 3,
+        "instructionKh": "ដាក់ត្រីរ៉ស់ចូលរម្ងាស់ឱ្យឆ្អិន ថែមទឹកត្រី និងស្ករត្នោត។",
+        "instructionEn": "Add fish steaks and simmer until tender, seasoning with fish sauce and sugar."
+      },
+      {
+        "stepNumber": 4,
+        "instructionKh": "ដាក់ផ្កាកំប្លោកចូលកូរមួយភ្លែតលើកចុះ កុំឱ្យរលួយផ្កា ដួសទទួលទានជាមួយបាយ។",
+        "instructionEn": "Toss in flowers, cook for 30 seconds to preserve crispness, and serve immediately."
+      }
+    ]
+  },
+  "food-57": {
+    "nameKh": "សម្លការីទាស្រែចេកខ្ចី",
+    "nameEn": "Country Duck Red Curry with Green Banana",
+    "cat": "soup",
+    "catKh": "ម្ហូបការី / សម្ល",
+    "catEn": "Curry / Traditional",
+    "descKh": "សម្លការីទាស្រែចេកខ្ចី សាច់ទារម្ងាស់ជាមួយគ្រឿងការីក្រហមខ្មែរ ខ្ទិះដូងខាប់ និងចេកណាំវ៉ាខ្ចី ចេកមានសាច់ស្វិតផ្អែមស្រូបជាតិការីខាប់ឈ្ងុយ រោយសណ្តែកដីបុកពីលើ។",
+    "descEn": "Rich, celebratory Cambodian red curry made with braised duck, unripe baby bananas, thick coconut cream, and crushed peanuts.",
+    "prepTime": "២៥ នាទី",
+    "cookTime": "៤០ នាទី",
+    "servings": "៤-៦ នាក់",
+    "calories": 420,
+    "difficulty": "hard",
+    "ingredients": [
+      {
+        "nameKh": "សាច់ទាស្រែកាប់ដុំល្មម",
+        "nameEn": "Country duck cut into pieces",
+        "amount": "៦០០ ក្រាម"
+      },
+      {
+        "nameKh": "ចេកណាំវ៉ាខ្ចីចិតសំបកកាត់ចំណិត",
+        "nameEn": "Green bananas peeled and sliced",
+        "amount": "៤-៥ ផ្លែ"
+      },
+      {
+        "nameKh": "គ្រឿងការីក្រហមខ្មែរ",
+        "nameEn": "Khmer red curry paste",
+        "amount": "៣ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "ខ្ទិះដូងដើមខាប់ និងចុងខ្ទិះ",
+        "nameEn": "Coconut cream and coconut milk",
+        "amount": "៥០០ មីលីលីត្រ"
+      },
+      {
+        "nameKh": "សណ្តែកដីលីងបុកម៉ត់",
+        "nameEn": "Crushed roasted peanuts",
+        "amount": "៣ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "ស្ករត្នោត និងទឹកត្រី",
+        "nameEn": "Palm sugar and fish sauce",
+        "amount": "២ ស្លាបព្រាបាយ"
+      }
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "instructionKh": "រំលីងគ្រឿងការីក្រហមជាមួយក្បាលខ្ទិះដូងឱ្យបែកប្រេងក្រហមឈ្ងុយ។",
+        "instructionEn": "Fry red curry paste in coconut cream until fragrant and red oils separate."
+      },
+      {
+        "stepNumber": 2,
+        "instructionKh": "ដាក់សាច់ទាចូលឆារម្ងាស់ឱ្យរឹបសាច់ចូលជាតិគ្រឿងសព្វល្អ។",
+        "instructionEn": "Add duck pieces and sear until coated in fragrant curry."
+      },
+      {
+        "stepNumber": 3,
+        "instructionKh": "ចាក់ចុងខ្ទិះដូងចូល រម្ងាស់ទាឱ្យផុយទន់ ២៥ នាទី រួចដាក់ចេកខ្ចីចូលរម្ងាស់បន្ត។",
+        "instructionEn": "Pour in coconut milk, simmer duck for 25 minutes until tender, then add green bananas."
+      },
+      {
+        "stepNumber": 4,
+        "instructionKh": "ពេលចេកទន់ ថែមស្ករត្នោត ទឹកត្រី និងរោយសណ្តែកដីបុក ទទួលទានជាមួយនំបុ័ង ឬនំបញ្ចុក។",
+        "instructionEn": "Season with palm sugar, fish sauce, top with roasted peanuts, and serve with baguette or noodles."
+      }
+    ]
+  },
+  "food-58": {
+    "nameKh": "ស្លាបមាន់អាំងទឹកឃ្មុំអំបិលម្ទេស",
+    "nameEn": "Honey Glazed Spicy Chicken Wings",
+    "cat": "grilled",
+    "catKh": "ម្ហូបអាំង / សាច់អាំង",
+    "catEn": "Grilled & BBQ",
+    "descKh": "ស្លាបមាន់អាំងទឹកឃ្មុំអំបិលម្ទេស ប្រឡាក់ជាមួយទឹកឃ្មុំព្រៃធម្មជាតិ អំបិលម្ទេសហុយ និងខ្ទឹមស អាំងលើរងើកភ្លើងធ្យូងឡើងពណ៌ក្រហមស្រួយស្បែក សាច់ខាងក្នុងទន់ផ្អែមឆ្ងាញ់។",
+    "descEn": "Succulent chicken wings marinated in natural wild honey, garlic, and crushed chili salt, charbroiled to crispy caramelized perfection.",
+    "prepTime": "២០ នាទី",
+    "cookTime": "២៥ នាទី",
+    "servings": "២-៣ នាក់",
+    "calories": 340,
+    "difficulty": "medium",
+    "ingredients": [
+      {
+        "nameKh": "ស្លាបមាន់ស្រែស្រស់",
+        "nameEn": "Fresh chicken wings",
+        "amount": "៥០០ ក្រាម"
+      },
+      {
+        "nameKh": "ទឹកឃ្មុំព្រៃធម្មជាតិ",
+        "nameEn": "Pure wild honey",
+        "amount": "២ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "ខ្ទឹមសចិញ្ច្រាំ និងម្ទេសបុក",
+        "nameEn": "Minced garlic and crushed chilies",
+        "amount": "១ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "ទឹកត្រី និងទឹកស៊ីអ៊ីវ",
+        "nameEn": "Fish sauce and light soy sauce",
+        "amount": "១ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "ម្រេចកំពតម៉ត់",
+        "nameEn": "Freshly ground Kampot pepper",
+        "amount": "កន្លះស្លាបព្រាកាហ្វេ"
+      }
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "instructionKh": "លាងស្លាបមាន់ឱ្យស្អាត ឆូតខ្នងបន្តិចឱ្យងាយចូលជាតិគ្រឿង។",
+        "instructionEn": "Clean chicken wings and make small incisions for marinade penetration."
+      },
+      {
+        "stepNumber": 2,
+        "instructionKh": "ប្រឡាក់ជាមួយទឹកឃ្មុំ ខ្ទឹមស ទឹកស៊ីអ៊ីវ ទឹកត្រី អំបិលម្ទេស និងម្រេច ទុក ៣០ នាទី។",
+        "instructionEn": "Marinate with honey, garlic, soy sauce, fish sauce, chili salt, and pepper for 30 minutes."
+      },
+      {
+        "stepNumber": 3,
+        "instructionKh": "អាំងលើរងើកភ្លើងធ្យូងមធ្យម លាបទឹកឃ្មុំសងខាងរហូតដល់ឡើងពណ៌ក្រហមស្រួយឈ្ងុយ។",
+        "instructionEn": "Grill over glowing charcoal, basting with honey until golden brown and charred."
+      },
+      {
+        "stepNumber": 4,
+        "instructionKh": "ទទួលទានក្តៅៗជាមួយជ្រក់ល្ហុង និងទឹកត្រីកោះកុង។",
+        "instructionEn": "Serve sizzling hot with pickled green papaya and Koh Kong spicy dipping sauce."
+      }
+    ]
+  },
+  "food-59": {
+    "nameKh": "ត្រីដៀបអាំងទឹកត្រីស្វាយខ្ចី",
+    "nameEn": "Grilled Dieb Fish with Green Mango Dip",
+    "cat": "grilled",
+    "catKh": "ម្ហូបអាំង / ត្រីអាំង",
+    "catEn": "Grilled & BBQ",
+    "descKh": "ត្រីដៀបអាំងទឹកត្រីស្វាយខ្ចី ប្រើត្រីដៀបធម្មជាតិស្រស់ អាំងលើធ្យូងភ្លើងឱ្យស្បែកស្រួយសាច់ផ្អែម ជ្រលក់ទឹកត្រីស្វាយខ្ចីសាប់ហឹរជូរអែម រសជាតិប្លែកឆ្ងាញ់ពិសា។",
+    "descEn": "Tender whole river Dieb fish grilled over charcoal embers, served alongside a sweet and sour shredded green mango fish sauce dip.",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "២០ នាទី",
+    "servings": "២-៣ នាក់",
+    "calories": 250,
+    "difficulty": "easy",
+    "ingredients": [
+      {
+        "nameKh": "ត្រីដៀបស្រស់វះពោះស្អាត",
+        "nameEn": "Fresh cleaned Dieb river fish",
+        "amount": "២ ក្បាល"
+      },
+      {
+        "nameKh": "ស្វាយខ្ចីសាប់សរសៃស្រួយ",
+        "nameEn": "Crisp shredded green mango",
+        "amount": "១ ផ្លែ"
+      },
+      {
+        "nameKh": "ទឹកត្រី និងស្ករត្នោត",
+        "nameEn": "Fish sauce and palm sugar",
+        "amount": "២ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "ខ្ទឹមក្រហម និងម្ទេសហាន់",
+        "nameEn": "Shallots and sliced bird chilies",
+        "amount": "១ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "អំបិលគ្រួសសម្រាប់ប្រឡាក់ត្រី",
+        "nameEn": "Coarse sea salt for fish",
+        "amount": "កន្លះស្លាបព្រាកាហ្វេ"
+      }
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "instructionKh": "លាងសម្អាតត្រី ឆូតសងខាង រោយអំបិលគ្រួសបន្តិចលើស្បែកត្រី។",
+        "instructionEn": "Clean fish, score sides, and rub skin with coarse salt."
+      },
+      {
+        "stepNumber": 2,
+        "instructionKh": "អាំងលើធ្យូងភ្លើងមធ្យមរហូតដល់ស្បែកស្រួយពណ៌មាស សាច់ឆ្អិនផ្អែមខាងក្នុង។",
+        "instructionEn": "Grill over charcoal embers until the skin is blistered and the meat is flaky."
+      },
+      {
+        "stepNumber": 3,
+        "instructionKh": "ធ្វើទឹកត្រីស្វាយ៖ លាយទឹកត្រី ស្ករត្នោត ខ្ទឹមក្រហម ម្ទេស និងស្វាយខ្ចីសាប់ចូលគ្នា។",
+        "instructionEn": "Whisk fish sauce, palm sugar, shallots, chilies, and shredded mango."
+      },
+      {
+        "stepNumber": 4,
+        "instructionKh": "ទទួលទានត្រីអាំងក្តៅៗជ្រលក់ទឹកត្រីស្វាយខ្ចីជាមួយបាយស។",
+        "instructionEn": "Dip warm grilled fish in mango sauce and enjoy with steamed rice."
+      }
+    ]
+  },
+  "food-60": {
+    "nameKh": "កោះមាន់អាំងគ្រឿងស្លឹកគ្រៃ",
+    "nameEn": "Grilled Chicken Gizzards with Kroeung",
+    "cat": "grilled",
+    "catKh": "ម្ហូបអាំង / អាហារសម្រន់",
+    "catEn": "Grilled & BBQ",
+    "descKh": "កោះមាន់អាំងគ្រឿងស្លឹកគ្រៃ ប្រឡាក់ជាមួយគ្រឿងបុកខ្មែរ រមៀត និងខ្ទិះដូងបន្តិច ដោតចង្កាក់អាំងឈ្ងុយឈ្ងប់ សាច់កោះមាន់ស្រួយស្វិតចូលជាតិគ្រឿងឆ្ងាញ់។",
+    "descEn": "Crunchy and flavorful skewered chicken gizzards marinated with aromatic lemongrass kroeung, coconut milk, and grilled over open embers.",
+    "prepTime": "២៥ នាទី",
+    "cookTime": "២០ នាទី",
+    "servings": "២-៣ នាក់",
+    "calories": 230,
+    "difficulty": "medium",
+    "ingredients": [
+      {
+        "nameKh": "កោះមាន់ស្រស់លាងស្អាត",
+        "nameEn": "Cleaned fresh chicken gizzards",
+        "amount": "៤០០ ក្រាម"
+      },
+      {
+        "nameKh": "គ្រឿងបុកស្លឹកគ្រៃរមៀត",
+        "nameEn": "Lemongrass turmeric kroeung",
+        "amount": "២ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "ខ្ទិះដូងបន្តិច",
+        "nameEn": "Coconut milk for tenderness",
+        "amount": "២ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "ទឹកត្រី និងស្ករត្នោត",
+        "nameEn": "Fish sauce and palm sugar",
+        "amount": "១ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "ប្រេងខ្យង និងម្រេចកំពត",
+        "nameEn": "Oyster sauce and Kampot pepper",
+        "amount": "១ ស្លាបព្រាកាហ្វេ"
+      }
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "instructionKh": "លាងកោះមាន់ជាមួយអំបិល និងទឹកក្រូចឆ្មាឱ្យស្អាតអស់រំអិល កាត់ចំណិតល្មម។",
+        "instructionEn": "Scrub gizzards thoroughly with salt and lime juice, rinse and slice into pieces."
+      },
+      {
+        "stepNumber": 2,
+        "instructionKh": "ប្រឡាក់ជាមួយគ្រឿងបុក ខ្ទិះដូង ទឹកត្រី ស្ករត្នោត និងប្រេងខ្យង ទុក ១ ម៉ោង។",
+        "instructionEn": "Marinate with kroeung paste, coconut milk, fish sauce, and seasonings for 1 hour."
+      },
+      {
+        "stepNumber": 3,
+        "instructionKh": "ដោតចង្កាក់ឬស្សី រួចអាំងលើភ្លើងធ្យូងរហូតដល់ឆ្អិនក្រហមឈ្ងុយ។",
+        "instructionEn": "Thread onto bamboo skewers and grill over embers until fragrant and charred."
+      },
+      {
+        "stepNumber": 4,
+        "instructionKh": "ទទួលទានជាមួយជ្រក់ត្រសក់ និងទឹកម្ទេសខ្មែរ។",
+        "instructionEn": "Serve with pickled cucumber relish and Khmer chili sauce."
+      }
+    ]
+  },
+  "food-61": {
+    "nameKh": "សាច់ជ្រូកអាំងពពុះសណ្តែក",
+    "nameEn": "Grilled Pork Strips with Bean Curd",
+    "cat": "grilled",
+    "catKh": "ម្ហូបអាំង / សាច់អាំង",
+    "catEn": "Grilled & BBQ",
+    "descKh": "សាច់ជ្រូកអាំងពពុះសណ្តែក ប្រើសាច់ជ្រូកបីជាន់ប្រឡាក់គ្រឿង រុំដោយបន្ទះពពុះសណ្តែក អាំងលើធ្យូងភ្លើងឱ្យពពុះសណ្តែកស្រួយស្រោក និងសាច់ជ្រូកទន់ឈ្ងុយ។",
+    "descEn": "Savory marinated pork belly wrapped tightly in golden bean curd skin, grilled until blistered, crispy, and aromatic.",
+    "prepTime": "២០ នាទី",
+    "cookTime": "២០ នាទី",
+    "servings": "៣-៤ នាក់",
+    "calories": 360,
+    "difficulty": "medium",
+    "ingredients": [
+      {
+        "nameKh": "សាច់ជ្រូកបីជាន់ហាន់បន្ទះ",
+        "nameEn": "Pork belly strips",
+        "amount": "៣៥០ ក្រាម"
+      },
+      {
+        "nameKh": "បន្ទះពពុះសណ្តែកត្រាំទឹកទន់",
+        "nameEn": "Softened dried bean curd sheets",
+        "amount": "៤-៥ បន្ទះ"
+      },
+      {
+        "nameKh": "ទឹកស៊ីអ៊ីវ ខ្ទឹមស និងម្រេចកំពត",
+        "nameEn": "Soy sauce, minced garlic, Kampot pepper",
+        "amount": "១ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "ស្ករត្នោត និងប្រេងល្ង",
+        "nameEn": "Palm sugar and sesame oil",
+        "amount": "១ ស្លាបព្រាកាហ្វេ"
+      }
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "instructionKh": "ប្រឡាក់សាច់ជ្រូកជាមួយខ្ទឹមស ទឹកស៊ីអ៊ីវ ស្ករត្នោត ម្រេច និងប្រេងល្ង ២០ នាទី។",
+        "instructionEn": "Season pork with garlic, soy sauce, palm sugar, and sesame oil for 20 minutes."
+      },
+      {
+        "stepNumber": 2,
+        "instructionKh": "យកបន្ទះពពុះសណ្តែកមករុំសាច់ជ្រូកឱ្យស្អាតណែនល្អ។",
+        "instructionEn": "Roll the seasoned pork tightly inside soaked bean curd sheets."
+      },
+      {
+        "stepNumber": 3,
+        "instructionKh": "អាំងលើធ្យូងភ្លើងតិចៗឱ្យពពុះសណ្តែកស្រួយ និងសាច់ជ្រូកឆ្អិនឈ្ងុយ។",
+        "instructionEn": "Grill gently over medium-low charcoal until the skin is blistered and crisp."
+      },
+      {
+        "stepNumber": 4,
+        "instructionKh": "កាត់ជាកង់ៗ ដួសដាក់ចាន ជ្រលក់ទឹកត្រីផ្អែមម្ទេស។",
+        "instructionEn": "Slice into medallions and serve with sweet chili dipping sauce."
+      }
+    ]
+  },
+  "food-62": {
+    "nameKh": "ខ្យងស្រែអាំងអំបិលម្ទេស",
+    "nameEn": "Charcoal Grilled River Snails with Chili Salt",
+    "cat": "grilled",
+    "catKh": "ម្ហូបអាំង / អាហារសម្រន់",
+    "catEn": "Grilled & Street Food",
+    "descKh": "ខ្យងស្រែអាំងអំបិលម្ទេស ជាអាហារសម្រន់តាមផ្លូវដ៏ពេញនិយមបំផុត ខ្យងស្រែធំៗដុតលើធ្យូងភ្លើង ចាក់អំបិលម្ទេសស្លឹកក្រូចសើចចូលមាត់ខ្យង សាច់ខ្យងស្រួយផ្អែមហឹរឈ្ងុយ។",
+    "descEn": "Iconic Cambodian street food featuring large freshwater snails grilled over charcoal with a spicy kaffir lime leaf and chili salt mixture poured directly into the shell.",
+    "prepTime": "៣០ នាទី",
+    "cookTime": "១៥ នាទី",
+    "servings": "២-៣ នាក់",
+    "calories": 160,
+    "difficulty": "easy",
+    "ingredients": [
+      {
+        "nameKh": "ខ្យងស្រែធំៗត្រាំទឹកស្អាត",
+        "nameEn": "Fresh large paddy snails, soaked and cleaned",
+        "amount": "១ គីឡូក្រាម"
+      },
+      {
+        "nameKh": "អំបិលគ្រួស និងម្ទេសក្រហមបុក",
+        "nameEn": "Coarse salt and crushed red chilies",
+        "amount": "២ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "ខ្ទឹមស និងស្លឹកក្រូចសើចហាន់ល្អិត",
+        "nameEn": "Garlic and finely minced kaffir lime leaves",
+        "amount": "១ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "ទឹកត្រីកោះកុង ឬក្រូចឆ្មា",
+        "nameEn": "Koh Kong dipping sauce or fresh lime",
+        "amount": "សម្រាប់ជ្រលក់"
+      }
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "instructionKh": "ត្រាំខ្យងស្រែក្នុងទឹកលាយម្ទេសបុក ២ ម៉ោងឱ្យខ្ជាក់ភក់ លាងឱ្យស្អាត កាត់គូទបន្តិច។",
+        "instructionEn": "Soak snails in chili water for 2 hours to purge silt. Wash and snip off the tips."
+      },
+      {
+        "stepNumber": 2,
+        "instructionKh": "បុកអំបិល ម្ទេស ខ្ទឹមស និងស្លឹកក្រូចសើចឱ្យម៉ត់ចូលគ្នា។",
+        "instructionEn": "Pound salt, chilies, garlic, and kaffir lime leaves into a fragrant coarse paste."
+      },
+      {
+        "stepNumber": 3,
+        "instructionKh": "ដាក់ខ្យងលើចង្ក្រានធ្យូង ចាក់អំបិលម្ទេសចូលមាត់ខ្យង អាំងរហូតដល់ពុះឈ្ងុយ។",
+        "instructionEn": "Place snails on grill grate, spoon chili salt into shell openings, and roast until bubbling."
+      },
+      {
+        "stepNumber": 4,
+        "instructionKh": "ឆ្កៀលសាច់ខ្យងជ្រលក់ទឹកត្រីកោះកុង ឬអំបិលម្រេចក្រូចឆ្មា ទទួលទានក្តៅៗ។",
+        "instructionEn": "Pick tender snail meat with skewers, dip in lime sauce, and enjoy hot."
+      }
+    ]
+  },
+  "food-63": {
+    "nameKh": "ត្រីអណ្តែងអាំងទឹកត្រីអំពិលទុំ",
+    "nameEn": "Grilled Catfish with Tamarind Fish Sauce",
+    "cat": "grilled",
+    "catKh": "ម្ហូបអាំង / ត្រីអាំង",
+    "catEn": "Grilled & BBQ",
+    "descKh": "ត្រីអណ្តែងស្រែអាំង ស្បែកស្រួយពណ៌មាសសាច់ទន់ផ្អែម ទទួលទានជាមួយទឹកត្រីអំពិលទុំខាប់ជូរអែមហឹរឈ្ងុយខ្ទឹមក្រហម និងជីរនាងវង ជាម្ហូបស្រែដ៏ឈ្ងុយឆ្ងាញ់។",
+    "descEn": "Grilled wild freshwater catfish with crisp charred skin and flaky sweet meat, served with sweet-sour tamarind dipping sauce and fresh herbs.",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "២៥ នាទី",
+    "servings": "២-៤ នាក់",
+    "calories": 270,
+    "difficulty": "easy",
+    "ingredients": [
+      {
+        "nameKh": "ត្រីអណ្តែងស្រែស្រស់",
+        "nameEn": "Fresh wild river catfish",
+        "amount": "២ ក្បាល"
+      },
+      {
+        "nameKh": "ទឹកអំពិលទុំខាប់",
+        "nameEn": "Concentrated tamarind pulp",
+        "amount": "៣ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "ទឹកត្រី និងស្ករត្នោត",
+        "nameEn": "Fish sauce and palm sugar",
+        "amount": "២ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "ខ្ទឹមក្រហម និងម្ទេសហាន់",
+        "nameEn": "Shallots and minced red chilies",
+        "amount": "១ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "ជីរនាងវង និងបន្លែអន្លក់",
+        "nameEn": "Holy basil and fresh vegetables",
+        "amount": "១ ចាន"
+      }
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "instructionKh": "លាងសម្អាតត្រីអណ្តែងដោយប្រើផេះ ឬអំបិលឱ្យអស់រំអិល ឆូតខ្នងសងខាង។",
+        "instructionEn": "Rub catfish with ash or coarse salt to remove slime, rinse and score sides."
+      },
+      {
+        "stepNumber": 2,
+        "instructionKh": "អាំងលើភ្លើងធ្យូងរហូតដល់ឆ្អិនស្បែកស្រួយពណ៌លឿងទុំ សាច់ខាងក្នុងឆ្អិនល្អ។",
+        "instructionEn": "Grill over glowing coals until skin is golden brown and meat flakes easily."
+      },
+      {
+        "stepNumber": 3,
+        "instructionKh": "ធ្វើទឹកត្រីអំពិល៖ កូរទឹកអំពិល ទឹកត្រី ស្ករត្នោត ខ្ទឹម និងម្ទេសឱ្យខាប់ចូលគ្នា។",
+        "instructionEn": "Whisk tamarind paste, fish sauce, palm sugar, shallots, and chili into a thick sauce."
+      },
+      {
+        "stepNumber": 4,
+        "instructionKh": "ទទួលទានត្រីអាំងជ្រលក់ទឹកត្រីអំពិលទុំ អមដោយជីរនាងវង និងបាយក្ដៅៗ។",
+        "instructionEn": "Dip pieces of grilled fish in tamarind sauce and eat with holy basil and rice."
+      }
+    ]
+  },
+  "food-64": {
+    "nameKh": "សាច់គោចង្កាក់អាំងគ្រឿងបាត់ដំបង",
+    "nameEn": "Battambang Beef Skewers with Kroeung",
+    "cat": "grilled",
+    "catKh": "ម្ហូបអាំង / អាហារសម្រន់",
+    "catEn": "Grilled & Street Food",
+    "descKh": "សាច់គោចង្កាក់អាំងគ្រឿងបាត់ដំបង ប្រឡាក់ជាមួយគ្រឿងបុកស្លឹកគ្រៃរមៀត ស្ករត្នោត និងខ្ទិះដូង អាំងលើធ្យូងភ្លើងឈ្ងុយឈ្ងប់ ទទួលទានជាមួយជ្រក់ល្ហុងស្រួយ និងនំប៉័ង។",
+    "descEn": "Famous Battambang-style beef skewers marinated in vibrant lemongrass-turmeric kroeung and palm sugar, char-grilled and served with pickled papaya.",
+    "prepTime": "៣០ នាទី",
+    "cookTime": "១៥ នាទី",
+    "servings": "៣-៤ នាក់",
+    "calories": 320,
+    "difficulty": "medium",
+    "ingredients": [
+      {
+        "nameKh": "សាច់គោផុយហាន់បន្ទះស្ដើង",
+        "nameEn": "Thinly sliced tender beef flank/sirloin",
+        "amount": "៥០០ ក្រាម"
+      },
+      {
+        "nameKh": "គ្រឿងបុកស្លឹកគ្រៃរមៀតបាត់ដំបង",
+        "nameEn": "Battambang lemongrass kroeung",
+        "amount": "៣ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "ខ្លាញ់គោ ឬខ្លាញ់ជ្រូកបន្តិច",
+        "nameEn": "Beef or pork fat cubes",
+        "amount": "៥០ ក្រាម"
+      },
+      {
+        "nameKh": "ស្ករត្នោត ទឹកត្រី ទឹកស៊ីអ៊ីវ",
+        "nameEn": "Palm sugar, fish sauce, soy sauce",
+        "amount": "២ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "ជ្រក់ល្ហុងបាត់ដំបង",
+        "nameEn": "Battambang pickled green papaya",
+        "amount": "១ ចាន"
+      }
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "instructionKh": "ប្រឡាក់សាច់គោជាមួយគ្រឿងបុក ស្ករត្នោត ទឹកត្រី ទឹកស៊ីអ៊ីវ និងប្រេងឆា ទុក ២ ម៉ោង។",
+        "instructionEn": "Marinate sliced beef in kroeung paste, palm sugar, and seasonings for 2 hours."
+      },
+      {
+        "stepNumber": 2,
+        "instructionKh": "ដោតសាច់គោលើចង្កាក់ឬស្សី ដោយដាក់ដុំខ្លាញ់គោមួយចំកណ្តាលដើម្បីរក្សាភាពទន់។",
+        "instructionEn": "Thread beef onto bamboo skewers with a cube of fat in the center for juiciness."
+      },
+      {
+        "stepNumber": 3,
+        "instructionKh": "អាំងលើរងើកភ្លើងធ្យូងឱ្យឈ្ងុយឈ្ងប់ កុំឱ្យឆ្អិនស្ងួតខ្លាំងពេក។",
+        "instructionEn": "Grill over hot coals, turning frequently until aromatic and lightly charred."
+      },
+      {
+        "stepNumber": 4,
+        "instructionKh": "ទទួលទានជាមួយជ្រក់ល្ហុងបាត់ដំបងស្រួយៗ និងនំប៉័ងលាបប៊័រ។",
+        "instructionEn": "Serve skewers with crispy pickled papaya and buttered baguette."
+      }
+    ]
+  },
+  "food-65": {
+    "nameKh": "ត្រីផ្ទក់អាំងអំបិលម្ទេសបាយក្ដៅ",
+    "nameEn": "Grilled Giant Snakehead with Hot Rice",
+    "cat": "grilled",
+    "catKh": "ម្ហូបអាំង / ត្រីអាំង",
+    "catEn": "Grilled & BBQ",
+    "descKh": "ត្រីផ្ទក់ស្រែអាំង រុំស្លឹកចេកអាំងលើធ្យូងភ្លើងឱ្យសាច់ត្រីឆ្អិនទន់រក្សាជាតិផ្អែមធម្មជាតិ ស្បែកស្រួយស្រោក ទទួលទានជាមួយទឹកត្រីអំពិលទុំ និងបន្លែអន្លក់ស្រស់។",
+    "descEn": "Large wild giant snakehead fish wrapped in banana leaves and slow-grilled over charcoal embers, served with tamarind dip and fragrant rice.",
+    "prepTime": "២០ នាទី",
+    "cookTime": "៣០ នាទី",
+    "servings": "៣-៥ នាក់",
+    "calories": 290,
+    "difficulty": "medium",
+    "ingredients": [
+      {
+        "nameKh": "ត្រីផ្ទក់ស្រែស្រស់ទម្ងន់ ១ គីឡូ",
+        "nameEn": "Whole giant snakehead fish (1 kg)",
+        "amount": "១ ក្បាល"
+      },
+      {
+        "nameKh": "អំបិលគ្រួសកំពត",
+        "nameEn": "Kampot sea salt",
+        "amount": "១ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "ស្លឹកចេកសម្រាប់រុំ",
+        "nameEn": "Banana leaves for wrapping",
+        "amount": "៣-៤ ធាង"
+      },
+      {
+        "nameKh": "ទឹកត្រីអំពិលទុំ ឬទឹកត្រីស្វាយ",
+        "nameEn": "Tamarind or green mango dip",
+        "amount": "១ ចានតូច"
+      },
+      {
+        "nameKh": "បន្លែអន្លក់ស្រស់គ្រប់មុខ",
+        "nameEn": "Assorted fresh vegetables and crudités",
+        "amount": "១ កន្ត្រក"
+      }
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "instructionKh": "វះពោះត្រីផ្ទក់លាងឱ្យស្អាត ឆូតខ្នង រោយអំបិលគ្រួសលើស្បែកត្រីឱ្យសព្វ។",
+        "instructionEn": "Clean snakehead fish, score sides, and rub skin evenly with coarse sea salt."
+      },
+      {
+        "stepNumber": 2,
+        "instructionKh": "រុំស្លឹកចេកឱ្យជិត រួចអាំងលើធ្យូងភ្លើងតិចៗ ២០ នាទីឱ្យសាច់ឆ្អិនទន់ផ្អែម។",
+        "instructionEn": "Wrap securely in banana leaves and slow-grill over coals for 20 minutes."
+      },
+      {
+        "stepNumber": 3,
+        "instructionKh": "បកស្លឹកចេកចេញ អាំងឱ្យស្បែកក្រៀមស្រួយបន្តិច។",
+        "instructionEn": "Unwrap leaves and grill directly for 5 minutes to crisp up the skin."
+      },
+      {
+        "stepNumber": 4,
+        "instructionKh": "ទទួលទានក្តៅៗជាមួយបន្លែអន្លក់ស្រស់ ទឹកត្រីអំពិលទុំ និងបាយក្ដៅៗ។",
+        "instructionEn": "Serve hot with fresh herbs, tamarind dipping sauce, and steamed jasmine rice."
+      }
+    ]
+  },
+  "food-66": {
+    "nameKh": "ឆាត្រកួនប្រហុកខ្ទឹមស",
+    "nameEn": "Wok Morning Glory with Prahok Essence",
+    "cat": "stirfry",
+    "catKh": "ម្ហូបឆា / បន្លែឆា",
+    "catEn": "Stir-Fried",
+    "descKh": "ឆាត្រកួនប្រហុកខ្ទឹមស ប្រើត្រកួនស្រែបេះទងស្រួយ ឆាលើភ្លើងខ្លាំងជាមួយខ្ទឹមសដំ និងប្រហុកសាច់បន្តិច ត្រកួននៅរក្សាពណ៌បៃតងស្រស់ និងមានក្លិនឈ្ងុយប្រហើរ។",
+    "descEn": "Crunchy morning glory greens flash-stir-fried in a scorching wok with crushed garlic, bird’s eye chilies, and a hint of savory prahok.",
+    "prepTime": "១០ នាទី",
+    "cookTime": "៥ នាទី",
+    "servings": "២-៣ នាក់",
+    "calories": 140,
+    "difficulty": "easy",
+    "ingredients": [
+      {
+        "nameKh": "ត្រកួនស្រែបេះទងខ្លីៗ",
+        "nameEn": "Fresh water spinach / morning glory",
+        "amount": "៣០០ ក្រាម"
+      },
+      {
+        "nameKh": "ខ្ទឹមសដំឱ្យបែក",
+        "nameEn": "Crushed fresh garlic cloves",
+        "amount": "៥-៦ កំពឹស"
+      },
+      {
+        "nameKh": "ប្រហុកសាច់ចិញ្ច្រាំបន្តិច",
+        "nameEn": "Minced prahok paste",
+        "amount": "កន្លះស្លាបព្រាកាហ្វេ"
+      },
+      {
+        "nameKh": "ម្ទេសក្រហមហាន់",
+        "nameEn": "Sliced red chili",
+        "amount": "២ គ្រាប់"
+      },
+      {
+        "nameKh": "ស្ករត្នោត ទឹកត្រី ប្រេងឆា",
+        "nameEn": "Palm sugar, fish sauce, cooking oil",
+        "amount": "១ ស្លាបព្រាបាយ"
+      }
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "instructionKh": "លាងត្រកួនឱ្យស្អាត កាច់ជាកំណាត់ខ្លីៗ ស្រង់ឱ្យស្ងួតទឹក។",
+        "instructionEn": "Wash morning glory, snap into 3-inch lengths, and drain well."
+      },
+      {
+        "stepNumber": 2,
+        "instructionKh": "ដាក់ប្រេងក្នុងខ្ទះឱ្យក្តៅខ្លាំង បំពងខ្ទឹមស និងប្រហុកឱ្យឈ្ងុយឈ្ងប់។",
+        "instructionEn": "Heat oil in wok until smoking hot, sauté garlic and prahok until fragrant."
+      },
+      {
+        "stepNumber": 3,
+        "instructionKh": "ដាក់ត្រកួនចូលឆាលើភ្លើងខ្លាំងយ៉ាងលឿន ថែមស្ករត្នោត ទឹកត្រី និងម្ទេស។",
+        "instructionEn": "Toss in morning glory, flash-fry over high heat, seasoning with sugar and fish sauce."
+      },
+      {
+        "stepNumber": 4,
+        "instructionKh": "ឆាច្របល់ ២ នាទីឱ្យត្រកួននៅរក្សាពណ៌បៃតងស្រស់ រួចដួសដាក់ចានភ្លាមៗ។",
+        "instructionEn": "Stir-fry for 1-2 minutes until vibrant green, then plate immediately."
+      }
+    ]
+  },
+  "food-67": {
+    "nameKh": "ឆាផ្កាខាត់ណាបង្គាស្រស់",
+    "nameEn": "Stir-Fried Broccoli with Fresh Prawns",
+    "cat": "stirfry",
+    "catKh": "ម្ហូបឆា / គ្រឿងសមុទ្រ",
+    "catEn": "Stir-Fried",
+    "descKh": "ឆាផ្កាខាត់ណាបង្គាស្រស់ ប្រើបង្គាសមុទ្រស្រស់សាច់ផ្អែម ឆាជាមួយផ្កាខាត់ណាស្រួយ ប្រេងខ្យង ខ្ទឹមស និងម្រេចកំពត ពណ៌ស្រស់ស្អាតនិងមានជីវជាតិខ្ពស់។",
+    "descEn": "Fresh succulent sea prawns stir-fried with crisp green broccoli florets in a savory garlic oyster sauce glaze.",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "១០ នាទី",
+    "servings": "៣-៤ នាក់",
+    "calories": 210,
+    "difficulty": "easy",
+    "ingredients": [
+      {
+        "nameKh": "បង្គាសមុទ្រស្រស់បកសំបក",
+        "nameEn": "Fresh prawns, peeled and deveined",
+        "amount": "២៥០ ក្រាម"
+      },
+      {
+        "nameKh": "ផ្កាខាត់ណាហាន់ចំណិតល្មម",
+        "nameEn": "Fresh broccoli florets",
+        "amount": "៣០០ ក្រាម"
+      },
+      {
+        "nameKh": "ខ្ទឹមសចិញ្ច្រាំ",
+        "nameEn": "Minced garlic",
+        "amount": "១ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "ប្រេងខ្យង និងទឹកស៊ីអ៊ីវ",
+        "nameEn": "Oyster sauce and soy sauce",
+        "amount": "១ ស្លាបព្រាបាយកន្លះ"
+      },
+      {
+        "nameKh": "ស្ករត្នោត និងម្រេចកំពត",
+        "nameEn": "Palm sugar and Kampot pepper",
+        "amount": "កន្លះស្លាបព្រាកាហ្វេ"
+      }
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "instructionKh": "ស្រឡោះផ្កាខាត់ណាក្នុងទឹកពុះ ១ នាទី រួចស្រង់ត្រាំទឹកត្រជាក់ដើម្បីរក្សាភាពស្រួយ។",
+        "instructionEn": "Blanch broccoli in boiling water for 1 minute, plunge into cold water to retain crunch."
+      },
+      {
+        "stepNumber": 2,
+        "instructionKh": "ឆាខ្ទឹមសក្នុងប្រេងក្តៅឱ្យឈ្ងុយ ដាក់បង្គាចូលឆាឱ្យឡើងពណ៌ក្រហម។",
+        "instructionEn": "Sauté garlic in hot oil until fragrant, add prawns and sear until pink."
+      },
+      {
+        "stepNumber": 3,
+        "instructionKh": "ដាក់ខាត់ណាចូល ថែមប្រេងខ្យង ទឹកស៊ីអ៊ីវ និងស្ករត្នោត ឆាលើភ្លើងខ្លាំង។",
+        "instructionEn": "Add broccoli, oyster sauce, soy sauce, and palm sugar, tossing on high heat."
+      },
+      {
+        "stepNumber": 4,
+        "instructionKh": "ដួសដាក់ចាន រោយម្រេចកំពតពីលើ ទទួលទានក្តៅៗជាមួយបាយ។",
+        "instructionEn": "Plate and sprinkle with Kampot black pepper, serve hot with rice."
+      }
+    ]
+  },
+  "food-68": {
+    "nameKh": "ឆាមឹកស្រស់ម្រេចខ្ចីកំពត",
+    "nameEn": "Fresh Squid Stir-Fried with Kampot Peppercorns",
+    "cat": "stirfry",
+    "catKh": "ម្ហូបឆា / គ្រឿងសមុទ្រ",
+    "catEn": "Stir-Fried",
+    "descKh": "ឆាមឹកស្រស់ម្រេចខ្ចីកំពត ជាម្ហូបឆ្នេរសមុទ្រកែប-កំពតដ៏ល្បីល្បាញ មឹកបំពង់ស្រស់សាច់ស្រួយផ្អែម ឆាជាមួយចង្កោមម្រេចខ្ចីកំពតបែកក្លិនឈ្ងុយប្រហើរ រសជាតិហឹរស្រាលឆ្ងាញ់ពិសា។",
+    "descEn": "World-renowned coastal Kep/Kampot delicacy of crisp fresh squid flash-fried with whole green Kampot peppercorn clusters in garlic oyster sauce.",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "៨ នាទី",
+    "servings": "២-៣ នាក់",
+    "calories": 220,
+    "difficulty": "medium",
+    "ingredients": [
+      {
+        "nameKh": "មឹកបំពង់ស្រស់កាត់កង់ៗ",
+        "nameEn": "Fresh squid cut into bite-sized rings",
+        "amount": "៤០០ ក្រាម"
+      },
+      {
+        "nameKh": "ម្រេចខ្ចីកំពតទាំងចង្កោម",
+        "nameEn": "Fresh green Kampot peppercorn clusters",
+        "amount": "៥-៦ ចង្កោម"
+      },
+      {
+        "nameKh": "ខ្ទឹមស និងខ្ទឹមបារាំងហាន់",
+        "nameEn": "Minced garlic and sliced sweet onion",
+        "amount": "២ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "ប្រេងខ្យង និងទឹកត្រី",
+        "nameEn": "Oyster sauce and fish sauce",
+        "amount": "១ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "ស្ករត្នោត",
+        "nameEn": "Palm sugar",
+        "amount": "១ ស្លាបព្រាកាហ្វេ"
+      }
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "instructionKh": "លាងមឹកឱ្យស្អាត កាត់កង់ ឬឆូតក្រឡា ស្រង់ឱ្យស្ងួតទឹក។",
+        "instructionEn": "Clean squid, score diagonally or cut into rings, and pat dry."
+      },
+      {
+        "stepNumber": 2,
+        "instructionKh": "បំពងខ្ទឹមសក្នុងប្រេងក្តៅ ដាក់ចង្កោមម្រេចខ្ចីចូលឆាឱ្យបែកក្លិនឈ្ងុយប្រហើរ។",
+        "instructionEn": "Sauté garlic in oil, add green peppercorns, bruising them slightly to release aroma."
+      },
+      {
+        "stepNumber": 3,
+        "instructionKh": "ដាក់មឹក និងខ្ទឹមបារាំងចូលឆាភ្លើងខ្លាំងយ៉ាងលឿន ថែមប្រេងខ្យង ទឹកត្រី និងស្ករត្នោត។",
+        "instructionEn": "Add squid and onions over high heat, seasoning with oyster sauce, fish sauce, and sugar."
+      },
+      {
+        "stepNumber": 4,
+        "instructionKh": "ឆាច្របល់ ១-២ នាទីកុំឱ្យមឹកស្វិត រួចដួសដាក់ចានភ្លាមៗ។",
+        "instructionEn": "Toss for 1-2 minutes until squid is just cooked and tender, serve immediately."
+      }
+    ]
+  },
+  "food-69": {
+    "nameKh": "ឆាត្រប់វែងសាច់ជ្រូកចិញ្ច្រាំ",
+    "nameEn": "Eggplant Stir-Fried with Minced Pork",
+    "cat": "stirfry",
+    "catKh": "ម្ហូបឆា / ម្ហូបប្រពៃណី",
+    "catEn": "Stir-Fried",
+    "descKh": "ឆាត្រប់វែងសាច់ជ្រូកចិញ្ច្រាំ ត្រប់វែងពណ៌ស្វាយឆាជាមួយសាច់ជ្រូកចិញ្ច្រាំ សៀងផ្អែម ខ្ទឹមស និងជីរនាងវង ត្រប់ទន់រលោងឈ្ងុយរសជាតិដិតដល់។",
+    "descEn": "Tender Asian purple eggplants stir-fried with seasoned minced pork, fermented sweet soybean paste, and fragrant holy basil.",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "១៥ នាទី",
+    "servings": "៣-៤ នាក់",
+    "calories": 260,
+    "difficulty": "easy",
+    "ingredients": [
+      {
+        "nameKh": "ត្រប់វែងពណ៌ស្វាយកាត់ចំណិត",
+        "nameEn": "Long Asian purple eggplants cut into batons",
+        "amount": "៣ ផ្លែ"
+      },
+      {
+        "nameKh": "សាច់ជ្រូកចិញ្ច្រាំ",
+        "nameEn": "Minced pork",
+        "amount": "២០០ ក្រាម"
+      },
+      {
+        "nameKh": "សៀងផ្អែម ឬប្រេងខ្យង",
+        "nameEn": "Sweet fermented soybean paste or oyster sauce",
+        "amount": "១ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "ខ្ទឹមសចិញ្ច្រាំ និងម្ទេស",
+        "nameEn": "Minced garlic and chili",
+        "amount": "១ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "ស្លឹកជីរនាងវងស្រស់",
+        "nameEn": "Fresh holy basil leaves",
+        "amount": "១ ក្តាប់"
+      },
+      {
+        "nameKh": "ទឹកត្រី និងស្ករត្នោត",
+        "nameEn": "Fish sauce and palm sugar",
+        "amount": "១ ស្លាបព្រាបាយ"
+      }
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "instructionKh": "បំពងត្រប់ក្នុងប្រេងក្តៅមួយភ្លែតឱ្យទន់ស្រួយ រួចស្រង់ទុកឱ្យស្រក់ប្រេង។",
+        "instructionEn": "Flash-fry eggplant batons in hot oil for 2 minutes until tender, then drain."
+      },
+      {
+        "stepNumber": 2,
+        "instructionKh": "ឆាខ្ទឹមស និងសាច់ជ្រូកចិញ្ច្រាំក្នុងខ្ទះឱ្យឆ្អិនឈ្ងុយ។",
+        "instructionEn": "Sauté minced garlic and pork in a wok until browned and fragrant."
+      },
+      {
+        "stepNumber": 3,
+        "instructionKh": "ដាក់ត្រប់បំពងចូល ថែមសៀង ប្រេងខ្យង ទឹកត្រី និងស្ករត្នោត។",
+        "instructionEn": "Add eggplant, sweet soybean paste, fish sauce, and palm sugar, tossing gently."
+      },
+      {
+        "stepNumber": 4,
+        "instructionKh": "បង់ជីរនាងវងចូលឆាច្របល់លើកចុះ ទទួលទានជាមួយបាយក្ដៅៗ។",
+        "instructionEn": "Fold in holy basil leaves, remove from heat, and serve with hot rice."
+      }
+    ]
+  },
+  "food-70": {
+    "nameKh": "ឆាព្រលិតត្រីឆ្អើរ",
+    "nameEn": "Water Lily Stems Stir-Fried with Smoked Fish",
+    "cat": "stirfry",
+    "catKh": "ម្ហូបឆា / ម្ហូបស្រុកស្រែ",
+    "catEn": "Stir-Fried",
+    "descKh": "ឆាព្រលិតត្រីឆ្អើរ ជាម្ហូបស្រុកស្រែដ៏សាមញ្ញតែមានរសជាតិឆ្ងាញ់ពិសា ដើមព្រលិតស្រួយផ្អែម ឆាជាមួយសាច់ត្រីឆ្អើរឈ្ងុយ ខ្ទឹមស និងប្រហុកសាច់បន្តិច។",
+    "descEn": "Crisp water lily stems flash-fried with fragrant smoked river fish flakes, garlic, and a hint of prahok.",
+    "prepTime": "១០ នាទី",
+    "cookTime": "៨ នាទី",
+    "servings": "២-៣ នាក់",
+    "calories": 170,
+    "difficulty": "easy",
+    "ingredients": [
+      {
+        "nameKh": "ដើមព្រលិតស្រស់បកសំបកកាត់កំណាត់",
+        "nameEn": "Cleaned fresh water lily stems, cut into pieces",
+        "amount": "៣០០ ក្រាម"
+      },
+      {
+        "nameKh": "ត្រីឆ្អើរបេះសាច់សុទ្ធ",
+        "nameEn": "Flaked smoked river fish meat",
+        "amount": "១៥០ ក្រាម"
+      },
+      {
+        "nameKh": "ប្រហុកសាច់ចិញ្ច្រាំបន្តិច",
+        "nameEn": "Minced prahok",
+        "amount": "កន្លះស្លាបព្រាកាហ្វេ"
+      },
+      {
+        "nameKh": "ខ្ទឹមស និងម្ទេសក្រហម",
+        "nameEn": "Garlic and sliced red chilies",
+        "amount": "១ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "ទឹកត្រី និងស្ករត្នោត",
+        "nameEn": "Fish sauce and palm sugar",
+        "amount": "១ ស្លាបព្រាបាយ"
+      }
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "instructionKh": "បកសំបកព្រលិត កាត់ប្រវែងមួយថ្នាំងដៃ លាងទឹកឱ្យស្អាត ស្រង់ឱ្យស្ងួត។",
+        "instructionEn": "Peel outer fibrous skin of water lily stems, cut into segments, and drain."
+      },
+      {
+        "stepNumber": 2,
+        "instructionKh": "ឆាខ្ទឹមស និងប្រហុកសាច់ក្នុងប្រេងឱ្យឈ្ងុយ រួចដាក់សាច់ត្រីឆ្អើរចូលឆារមាស់។",
+        "instructionEn": "Sauté garlic and prahok in oil until fragrant, add smoked fish flakes."
+      },
+      {
+        "stepNumber": 3,
+        "instructionKh": "ដាក់ព្រលិតចូលឆាលើភ្លើងខ្លាំងយ៉ាងរហ័ស ថែមទឹកត្រី និងស្ករត្នោត។",
+        "instructionEn": "Toss in water lily stems over high heat, season with fish sauce and sugar."
+      },
+      {
+        "stepNumber": 4,
+        "instructionKh": "ឆាច្របល់ ១ នាទីកុំឱ្យរលួយព្រលិត រួចដួសដាក់ចានទទួលទានជាមួយបាយ។",
+        "instructionEn": "Flash-fry for 1 minute to keep stems crunchy, then plate and serve."
+      }
+    ]
+  },
+  "food-71": {
+    "nameKh": "ឆាក្តៅកង្កែបស្រែស្លឹកម្រះព្រៅ",
+    "nameEn": "Spicy Wok-Fried Farm Frog with Holy Basil",
+    "cat": "stirfry",
+    "catKh": "ម្ហូបឆា / ឆាក្តៅ",
+    "catEn": "Stir-Fried",
+    "descKh": "ឆាក្តៅកង្កែបស្រែស្លឹកម្រះព្រៅ សាច់កង្កែបស្រែស្រស់ឆាជាមួយគ្រឿងបុកស្លឹកគ្រៃរមៀត ម្ទេសដៃនាង និងស្លឹកម្រះព្រៅហឹរឈ្ងុយ រសជាតិហឹរដិតដល់បែបខ្មែរដើម។",
+    "descEn": "Fiery wok-fried farm frog with traditional lemongrass-turmeric kroeung paste, hot chilies, green peppercorns, and aromatic holy basil.",
+    "prepTime": "២០ នាទី",
+    "cookTime": "១៥ នាទី",
+    "servings": "៣-៤ នាក់",
+    "calories": 240,
+    "difficulty": "medium",
+    "ingredients": [
+      {
+        "nameKh": "កង្កែបស្រែកាប់ដុំល្មម",
+        "nameEn": "Cleaned farm frog cut into pieces",
+        "amount": "៤០០ ក្រាម"
+      },
+      {
+        "nameKh": "គ្រឿងបុកស្លឹកគ្រៃរមៀត",
+        "nameEn": "Lemongrass kroeung paste",
+        "amount": "២ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "ស្លឹកម្រះព្រៅស្រស់",
+        "nameEn": "Fresh holy basil leaves",
+        "amount": "១ ក្តាប់"
+      },
+      {
+        "nameKh": "ម្ទេសដៃនាង និងគ្រាប់ម្រេចខ្ចី",
+        "nameEn": "Red chilies and green Kampot peppercorns",
+        "amount": "១ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "ទឹកត្រី ស្ករត្នោត ប្រេងខ្យង",
+        "nameEn": "Fish sauce, palm sugar, oyster sauce",
+        "amount": "១ ស្លាបព្រាបាយកន្លះ"
+      }
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "instructionKh": "ប្រឡាក់សាច់កង្កែបជាមួយគ្រឿងបុកបន្តិច និងទឹកត្រី ១៥ នាទី។",
+        "instructionEn": "Marinate frog pieces with a spoonful of kroeung and fish sauce for 15 minutes."
+      },
+      {
+        "stepNumber": 2,
+        "instructionKh": "ឆាគ្រឿងបុកក្នុងប្រេងក្តៅឱ្យឈ្ងុយ ដាក់កង្កែបចូលឆាឱ្យសាច់ឆ្អិនណែនល្អ។",
+        "instructionEn": "Fry remaining kroeung in hot oil until fragrant, add frog pieces and sear well."
+      },
+      {
+        "stepNumber": 3,
+        "instructionKh": "ថែមទឹកត្រី ប្រេងខ្យង ស្ករត្នោត ម្ទេស និងគ្រាប់ម្រេចខ្ចី ឆាឱ្យចូលជាតិ។",
+        "instructionEn": "Season with fish sauce, oyster sauce, sugar, chilies, and green peppercorns."
+      },
+      {
+        "stepNumber": 4,
+        "instructionKh": "បង់ស្លឹកម្រះព្រៅចូលច្របល់បិទភ្លើងភ្លាមៗ ដួសទទួលទានជាមួយបាយក្ដៅៗ។",
+        "instructionEn": "Toss in holy basil, turn off heat, and serve piping hot with steamed rice."
+      }
+    ]
+  },
+  "food-72": {
+    "nameKh": "ឆាសាច់គោម្រះព្រៅម្ទេសហឹរ",
+    "nameEn": "Fiery Holy Basil Beef Stir-Fry",
+    "cat": "stirfry",
+    "catKh": "ម្ហូបឆា / ឆាក្តៅ",
+    "catEn": "Stir-Fried",
+    "descKh": "ឆាសាច់គោម្រះព្រៅម្ទេសហឹរ សាច់គោផុយហាន់ស្ដើង ឆាលើភ្លើងខ្លាំងជាមួយខ្ទឹមស ម្ទេសបុក និងស្លឹកម្រះព្រៅស្រស់ ក្លិនឈ្ងុយឈួល រសជាតិហឹរដិតដល់ត្រូវចិត្តអ្នកចូលចិត្តហឹរ។",
+    "descEn": "Thin slices of tender beef flash-stir-fried with crushed garlic, bird’s eye chilies, fish sauce, and a generous heap of fresh holy basil.",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "៨ នាទី",
+    "servings": "២-៣ នាក់",
+    "calories": 280,
+    "difficulty": "easy",
+    "ingredients": [
+      {
+        "nameKh": "សាច់គោផុយហាន់ស្ដើង",
+        "nameEn": "Tender beef sliced thin",
+        "amount": "៣៥០ ក្រាម"
+      },
+      {
+        "nameKh": "ស្លឹកម្រះព្រៅស្រស់",
+        "nameEn": "Fresh holy basil leaves",
+        "amount": "១ ក្តាប់ធំ"
+      },
+      {
+        "nameKh": "ខ្ទឹមស និងម្ទេសបកបុកម៉ត់",
+        "nameEn": "Pounded garlic and bird’s eye chilies",
+        "amount": "២ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "ប្រេងខ្យង ទឹកត្រី ទឹកស៊ីអ៊ីវ",
+        "nameEn": "Oyster sauce, fish sauce, dark soy sauce",
+        "amount": "១ ស្លាបព្រាបាយកន្លះ"
+      },
+      {
+        "nameKh": "ស្ករត្នោត",
+        "nameEn": "Palm sugar",
+        "amount": "កន្លះស្លាបព្រាកាហ្វេ"
+      }
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "instructionKh": "បុកខ្ទឹមស និងម្ទេសជាមួយគ្នាឱ្យម៉ត់ល្មម។",
+        "instructionEn": "Pound garlic and fresh chilies in a mortar into a coarse paste."
+      },
+      {
+        "stepNumber": 2,
+        "instructionKh": "ដាក់ប្រេងក្នុងខ្ទះឱ្យក្តៅ បំពងខ្ទឹមម្ទេសឱ្យឈ្ងុយឈួល។",
+        "instructionEn": "Heat oil in wok, fry garlic-chili paste until aromatic and sizzling."
+      },
+      {
+        "stepNumber": 3,
+        "instructionKh": "ដាក់សាច់គោចូលឆាលើភ្លើងខ្លាំងយ៉ាងលឿន ថែមប្រេងខ្យង ទឹកត្រី ទឹកស៊ីអ៊ីវ និងស្ករត្នោត។",
+        "instructionEn": "Add sliced beef, tossing rapidly over intense heat with oyster sauce, fish sauce, and sugar."
+      },
+      {
+        "stepNumber": 4,
+        "instructionKh": "បង់ស្លឹកម្រះព្រៅចូលច្របល់ ៣០ វិនាទីរួចដួសដាក់ចាន ទទួលទានជាមួយបាយក្ដៅៗ។",
+        "instructionEn": "Throw in holy basil, stir for 30 seconds until wilted, plate and serve hot."
+      }
+    ]
+  },
+  "food-73": {
+    "nameKh": "ឆាស្ពៃក្តោបពងទាខ្មែរ",
+    "nameEn": "Cabbage Stir-Fried with Eggs",
+    "cat": "stirfry",
+    "catKh": "ម្ហូបឆា / បន្លែឆា",
+    "catEn": "Stir-Fried",
+    "descKh": "ឆាស្ពៃក្តោបពងទាខ្មែរ ស្ពៃក្តោបហាន់បន្ទះឆាជាមួយពងទាស្រស់ ខ្ទឹមស និងម្រេចកំពត ស្ពៃស្រួយផ្អែមចូលជាតិជាមួយពងទាឈ្ងុយ ជាម្ហូបសាមញ្ញប្រចាំគ្រួសារខ្មែរ។",
+    "descEn": "Homestyle Cambodian comfort dish of shredded crisp green cabbage stir-fried with rich duck eggs, garlic, and freshly cracked Kampot pepper.",
+    "prepTime": "១០ នាទី",
+    "cookTime": "៨ នាទី",
+    "servings": "២-៣ នាក់",
+    "calories": 190,
+    "difficulty": "easy",
+    "ingredients": [
+      {
+        "nameKh": "ស្ពៃក្តោបហាន់ជាបន្ទះស្ដើង",
+        "nameEn": "Shredded fresh cabbage",
+        "amount": "៣៥០ ក្រាម"
+      },
+      {
+        "nameKh": "ពងទាស្រស់",
+        "nameEn": "Fresh duck eggs",
+        "amount": "២-៣ គ្រាប់"
+      },
+      {
+        "nameKh": "ខ្ទឹមសចិញ្ច្រាំ",
+        "nameEn": "Minced garlic",
+        "amount": "១ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "ទឹកត្រី និងអំបិល",
+        "nameEn": "Fish sauce and sea salt",
+        "amount": "១ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "ស្ករត្នោត និងម្រេចកំពត",
+        "nameEn": "Palm sugar and ground pepper",
+        "amount": "កន្លះស្លាបព្រាកាហ្វេ"
+      }
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "instructionKh": "ឆាខ្ទឹមសក្នុងប្រេងឱ្យឈ្ងុយ គោះពងទាចូលកូរឱ្យបែកដុំៗឆ្អិនមធ្យម។",
+        "instructionEn": "Sauté garlic in oil, crack duck eggs into the pan, and scramble into soft curds."
+      },
+      {
+        "stepNumber": 2,
+        "instructionKh": "ដាក់ស្ពៃក្តោបចូលឆាលើភ្លើងខ្លាំងឱ្យទន់ល្មមនៅរក្សាភាពស្រួយ។",
+        "instructionEn": "Add shredded cabbage, tossing over high heat until tender-crisp."
+      },
+      {
+        "stepNumber": 3,
+        "instructionKh": "ថែមទឹកត្រី អំបិល និងស្ករត្នោតបន្តិច ឆាច្របល់ឱ្យចូលជាតិ។",
+        "instructionEn": "Season with fish sauce, salt, and palm sugar, tossing evenly."
+      },
+      {
+        "stepNumber": 4,
+        "instructionKh": "រោយម្រេចកំពតម៉ត់ពីលើ ដួសដាក់ចានទទួលទានក្តៅៗជាមួយបាយ។",
+        "instructionEn": "Garnish with freshly ground pepper and serve warm with steamed rice."
+      }
+    ]
+  },
+  "food-74": {
+    "nameKh": "ឆាខ្ញីត្រីរ៉ស់រសជាតិដើម",
+    "nameEn": "Snakehead Fish with Ginger & Black Beans",
+    "cat": "stirfry",
+    "catKh": "ម្ហូបឆា / ត្រីឆា",
+    "catEn": "Stir-Fried",
+    "descKh": "ឆាខ្ញីត្រីរ៉ស់ ប្រើត្រីរ៉ស់ហាន់កង់បំពងស្រួយ ឆាជាមួយខ្ញីខ្ចីហាន់សរសៃ សៀងផ្អែម ខ្ទឹមស និងស្លឹកខ្ទឹម រសជាតិឈ្ងុយខ្ញីក្តៅឧណ្ហៗជួយកម្តៅរាងកាយ។",
+    "descEn": "Crispy fried river snakehead fish steaks wok-tossed with loads of julienned young ginger, fermented sweet soybean paste, and scallions.",
+    "prepTime": "២០ នាទី",
+    "cookTime": "១៥ នាទី",
+    "servings": "៣-៤ នាក់",
+    "calories": 270,
+    "difficulty": "medium",
+    "ingredients": [
+      {
+        "nameKh": "ត្រីរ៉ស់ហាន់ជាកង់ៗបំពងស្រួយ",
+        "nameEn": "Crispy fried snakehead fish steaks",
+        "amount": "៤០០ ក្រាម"
+      },
+      {
+        "nameKh": "ខ្ញីខ្ចីហាន់សរសៃល្អិត",
+        "nameEn": "Finely julienned young ginger",
+        "amount": "១ ចានតូច"
+      },
+      {
+        "nameKh": "សៀងផ្អែម",
+        "nameEn": "Sweet fermented soybean paste",
+        "amount": "១ ស្លាបព្រាបាយកន្លះ"
+      },
+      {
+        "nameKh": "ខ្ទឹមស ម្ទេស ស្លឹកខ្ទឹម",
+        "nameEn": "Garlic, red chili, scallions",
+        "amount": "២ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "ទឹកត្រី និងស្ករត្នោត",
+        "nameEn": "Fish sauce and palm sugar",
+        "amount": "១ ស្លាបព្រាបាយ"
+      }
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "instructionKh": "បំពងត្រីរ៉ស់ក្នុងប្រេងឱ្យឡើងពណ៌លឿងស្រួយ រួចស្រង់ទុកឱ្យស្រក់ប្រេង។",
+        "instructionEn": "Deep-fry fish steaks in hot oil until golden and crisp, then drain."
+      },
+      {
+        "stepNumber": 2,
+        "instructionKh": "ឆាខ្ទឹមស និងខ្ញីសរសៃឱ្យទន់ឈ្ងុយ រួចដាក់សៀងផ្អែមចូលឆារមាស់។",
+        "instructionEn": "Sauté garlic and ginger strands until soft and fragrant, then add sweet bean paste."
+      },
+      {
+        "stepNumber": 3,
+        "instructionKh": "ថែមទឹកត្រី ស្ករត្នោត និងទឹកបន្តិចឱ្យចេញទឹកខាប់ៗ។",
+        "instructionEn": "Add fish sauce, palm sugar, and a splash of water to form a glossy sauce."
+      },
+      {
+        "stepNumber": 4,
+        "instructionKh": "ដាក់ត្រីបំពងចូលច្របល់ថ្នមៗ រោយស្លឹកខ្ទឹមលើកចុះទទួលទានជាមួយបាយ។",
+        "instructionEn": "Gently toss fried fish into the ginger sauce, garnish with scallions, and serve."
+      }
+    ]
+  },
+  "food-75": {
+    "nameKh": "ឆាក្តៅសាច់គោស្លឹកម្រះព្រៅ",
+    "nameEn": "Spicy Holy Basil Beef Stir-Fry",
+    "cat": "stirfry",
+    "catKh": "ម្ហូបឆា / ឆាក្តៅ",
+    "catEn": "Stir-Fried",
+    "descKh": "ឆាក្តៅសាច់គោស្លឹកម្រះព្រៅ សាច់គោជាប់ខ្លាញ់បន្តិចឆាជាមួយគ្រឿងបុកស្លឹកគ្រៃ ម្ទេសប្លោក ខ្ទឹមបារាំង និងស្លឹកម្រះព្រៅ រសជាតិហឹរឈ្ងុយឈួលចូលជាតិឆ្ងាញ់។",
+    "descEn": "Savory stir-fried beef slices with traditional lemongrass kroeung, sliced bell peppers, onions, and spicy holy basil.",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "១០ នាទី",
+    "servings": "៣-៤ នាក់",
+    "calories": 290,
+    "difficulty": "medium",
+    "ingredients": [
+      {
+        "nameKh": "សាច់គោជាប់ខ្លាញ់បន្តិចហាន់ស្ដើង",
+        "nameEn": "Beef slices with slight marbling",
+        "amount": "៣៥០ ក្រាម"
+      },
+      {
+        "nameKh": "គ្រឿងបុកខ្មែរ (ស្លឹកគ្រៃ រមៀត)",
+        "nameEn": "Khmer lemongrass kroeung",
+        "amount": "២ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "ស្លឹកម្រះព្រៅស្រស់",
+        "nameEn": "Fresh holy basil",
+        "amount": "១ ក្តាប់"
+      },
+      {
+        "nameKh": "ម្ទេសប្លោក និងខ្ទឹមបារាំងហាន់",
+        "nameEn": "Bell peppers and sliced onions",
+        "amount": "១ ចានតូច"
+      },
+      {
+        "nameKh": "ប្រេងខ្យង ទឹកត្រី ស្ករត្នោត",
+        "nameEn": "Oyster sauce, fish sauce, palm sugar",
+        "amount": "១ ស្លាបព្រាបាយកន្លះ"
+      }
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "instructionKh": "ឆាគ្រឿងបុកក្នុងប្រេងឱ្យឈ្ងុយ ដាក់សាច់គោចូលឆាភ្លើងខ្លាំងឱ្យសាច់ឆ្អិនសព្វ។",
+        "instructionEn": "Sauté kroeung in oil until fragrant, add beef slices and flash-fry on high heat."
+      },
+      {
+        "stepNumber": 2,
+        "instructionKh": "ដាក់ម្ទេសប្លោក និងខ្ទឹមបារាំងចូលឆាច្របល់ឱ្យទន់ស្រួយ។",
+        "instructionEn": "Add bell peppers and onions, tossing until crisp-tender."
+      },
+      {
+        "stepNumber": 3,
+        "instructionKh": "ថែមប្រេងខ្យង ទឹកត្រី និងស្ករត្នោតឱ្យរសជាតិដិតដល់។",
+        "instructionEn": "Season with oyster sauce, fish sauce, and palm sugar."
+      },
+      {
+        "stepNumber": 4,
+        "instructionKh": "បង់ស្លឹកម្រះព្រៅចូលលើកចុះ ដួសទទួលទានជាមួយបាយក្ដៅៗ។",
+        "instructionEn": "Toss in holy basil, remove from heat, and serve with hot rice."
+      }
+    ]
+  },
+  "food-76": {
+    "nameKh": "ញាំត្រយូងចេកសាច់មាន់ស្រែ",
+    "nameEn": "Banana Blossom Salad with Free-Range Chicken",
+    "cat": "salad",
+    "catKh": "ញាំ & ភ្លា",
+    "catEn": "Salads & Dips",
+    "descKh": "ញាំត្រយូងចេកសាច់មាន់ស្រែ ប្រើត្រយូងចេកហាន់ស្ដើងស្រួយ ច្របល់ជាមួយសាច់មាន់ស្រែស្ងោរបេះសរសៃ ស្លឹកជីរគ្រប់មុខ សណ្តែកដីបុក និងទឹកត្រីកោះកុងជូរអែមឆ្ងាញ់ពិសា។",
+    "descEn": "Refreshing royal Cambodian salad of crisp shaved banana blossoms, shredded poached free-range chicken, fresh mint, crushed peanuts, and sweet-sour dressing.",
+    "prepTime": "២៥ នាទី",
+    "cookTime": "១៥ នាទី",
+    "servings": "៣-៤ នាក់",
+    "calories": 220,
+    "difficulty": "medium",
+    "ingredients": [
+      {
+        "nameKh": "ត្រយូងចេកហាន់ស្ដើងត្រាំទឹកក្រូចឆ្មា",
+        "nameEn": "Thinly shaved banana blossom",
+        "amount": "១ ផ្កាធំ"
+      },
+      {
+        "nameKh": "សាច់មាន់ស្រែស្ងោរបេះជាសរសៃ",
+        "nameEn": "Shredded poached free-range chicken",
+        "amount": "២០០ ក្រាម"
+      },
+      {
+        "nameKh": "ស្លឹកជីរគ្រប់មុខ (ជីរអង្កាម ជីររណារ)",
+        "nameEn": "Assorted fresh herbs (mint, sawtooth)",
+        "amount": "១ ក្តាប់"
+      },
+      {
+        "nameKh": "សណ្តែកដីលីងបុកម៉ត់",
+        "nameEn": "Crushed roasted peanuts",
+        "amount": "៣ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "ទឹកត្រី ក្រូចឆ្មា ស្ករត្នោត ខ្ទឹមស ម្ទេស",
+        "nameEn": "Lime fish sauce dressing (garlic, chili, sugar)",
+        "amount": "៣ ស្លាបព្រាបាយ"
+      }
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "instructionKh": "ហាន់ត្រយូងចេកស្ដើងៗត្រាំក្នុងទឹកលាយទឹកក្រូចឆ្មាដើម្បីកុំឱ្យខ្មៅ រួចស្រង់ពូតទឹកឱ្យស្ងួត។",
+        "instructionEn": "Shave banana blossom thinly into lime water to prevent browning, then drain thoroughly."
+      },
+      {
+        "stepNumber": 2,
+        "instructionKh": "ធ្វើទឹកញាំ៖ លាយទឹកត្រី ទឹកក្រូចឆ្មា ស្ករត្នោត ខ្ទឹមស និងម្ទេសបុកឱ្យមានរសជាតិជូរអែម។",
+        "instructionEn": "Whisk fish sauce, lime juice, palm sugar, garlic, and chilies into a balanced dressing."
+      },
+      {
+        "stepNumber": 3,
+        "instructionKh": "ច្របល់ត្រយូងចេក សាច់មាន់បេះ ជីរគ្រប់មុខ និងទឹកញាំចូលគ្នាឱ្យសព្វ។",
+        "instructionEn": "Toss shredded chicken, banana blossom, herbs, and dressing together."
+      },
+      {
+        "stepNumber": 4,
+        "instructionKh": "រៀបដាក់ចាន រោយសណ្តែកដីលីងបុកឈ្ងុយៗពីលើ ដួសទទួលទានភ្លាមៗ។",
+        "instructionEn": "Mound on a platter, garnish generously with roasted peanuts, and serve."
+      }
+    ]
+  },
+  "food-77": {
+    "nameKh": "ញាំត្រសក់ត្រីឆ្អើរ",
+    "nameEn": "Cucumber Salad with Smoked Fish",
+    "cat": "salad",
+    "catKh": "ញាំ & ភ្លា",
+    "catEn": "Salads & Dips",
+    "descKh": "ញាំត្រសក់ត្រីឆ្អើរ ត្រសក់ខ្ចីចិតចំណិតស្ដើងស្រួយ ច្របាច់ជាមួយសាច់ត្រីឆ្អើរឈ្ងុយ ខ្ទឹមក្រហម ម្ទេស និងទឹកត្រីក្រូចឆ្មាជូរអែម ជាម្ហូបស្រាលស្រស់ស្រាយ។",
+    "descEn": "Crunchy cucumber ribbons tossed with flaky smoked river fish, shallots, fresh chilies, and tangy lime fish sauce.",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "៥ នាទី",
+    "servings": "២-៣ នាក់",
+    "calories": 160,
+    "difficulty": "easy",
+    "ingredients": [
+      {
+        "nameKh": "ត្រសក់ខ្ចីចិតចំណិតស្ដើង",
+        "nameEn": "Thinly sliced crisp cucumbers",
+        "amount": "៣ ផ្លែ"
+      },
+      {
+        "nameKh": "ត្រីឆ្អើរបេះសាច់សុទ្ធ",
+        "nameEn": "Flaked smoked fish",
+        "amount": "១៥០ ក្រាម"
+      },
+      {
+        "nameKh": "ខ្ទឹមក្រហម និងម្ទេសហាន់",
+        "nameEn": "Shallots and fresh red chilies",
+        "amount": "១ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "ជីរពងទាកូន ឬជីរនាងវង",
+        "nameEn": "Vietnamese coriander or holy basil",
+        "amount": "១ ក្តាប់"
+      },
+      {
+        "nameKh": "ទឹកត្រី ទឹកក្រូចឆ្មា ស្ករត្នោត",
+        "nameEn": "Fish sauce, lime juice, palm sugar",
+        "amount": "២ ស្លាបព្រាបាយ"
+      }
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "instructionKh": "ចិតត្រសក់ជាចំណិតស្ដើង ច្របាច់អំបិលបន្តិចរួចលាងទឹកពូតឱ្យស្រួយ។",
+        "instructionEn": "Slice cucumbers, toss with a pinch of salt, rinse and squeeze to maximize crunch."
+      },
+      {
+        "stepNumber": 2,
+        "instructionKh": "បេះត្រីឆ្អើរជាដុំតូចៗ លីងលើខ្ទះឱ្យឈ្ងុយបន្តិច។",
+        "instructionEn": "Flake smoked fish and gently toast in a dry pan until aromatic."
+      },
+      {
+        "stepNumber": 3,
+        "instructionKh": "លាយទឹកត្រី ទឹកក្រូចឆ្មា ស្ករត្នោត ខ្ទឹមក្រហម និងម្ទេសឱ្យចូលជាតិ។",
+        "instructionEn": "Mix lime juice, fish sauce, palm sugar, shallots, and chilies."
+      },
+      {
+        "stepNumber": 4,
+        "instructionKh": "ច្របល់ត្រសក់ ត្រីឆ្អើរ ជីរ និងទឹកញាំចូលគ្នា ដួសទទួលទានភ្លាមៗ។",
+        "instructionEn": "Combine cucumbers, smoked fish, herbs, and dressing; serve immediately."
+      }
+    ]
+  },
+  "food-78": {
+    "nameKh": "ទឹកគ្រឿងសណ្តែកដីបាត់ដំបង",
+    "nameEn": "Battambang Peanut Fish Dip Platter",
+    "cat": "salad",
+    "catKh": "ទឹកគ្រឿង & ញាំ",
+    "catEn": "Salads & Dips",
+    "descKh": "ទឹកគ្រឿងសណ្តែកដីបាត់ដំបង ជាទឹកជ្រលក់បុរាណខ្មែរដ៏ល្បី ប្រើសាច់ត្រីរ៉ស់ស្ងោរបុកម៉ត់ លាយទឹកប្រហុកថ្លា សណ្តែកដីលីងបុក ទឹកអំពិលទុំ និងស្ករត្នោត ទទួលទានផ្ទាប់ជាមួយបន្លែអន្លក់ស្រស់គ្រប់មុខ។",
+    "descEn": "Traditional Battambang-style thick fish and peanut dip made with pounded river fish, clarified prahok stock, crushed peanuts, and tangy tamarind, served with a raw vegetable platter.",
+    "prepTime": "២០ នាទី",
+    "cookTime": "១៥ នាទី",
+    "servings": "៣-៥ នាក់",
+    "calories": 230,
+    "difficulty": "medium",
+    "ingredients": [
+      {
+        "nameKh": "សាច់ត្រីរ៉ស់ស្ងោរបុកម៉ត់",
+        "nameEn": "Pounded boiled river snakehead fish meat",
+        "amount": "២៥០ ក្រាម"
+      },
+      {
+        "nameKh": "សណ្តែកដីលីងបុកម៉ត់",
+        "nameEn": "Finely ground roasted peanuts",
+        "amount": "៤ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "ទឹកប្រហុកដាំពុះត្រងស្អាត",
+        "nameEn": "Boiled clarified prahok broth",
+        "amount": "១ កូនចាន"
+      },
+      {
+        "nameKh": "ទឹកអំពិលទុំ ឬទឹកក្រូចឆ្មា",
+        "nameEn": "Tamarind pulp extract or lime",
+        "amount": "២ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "ស្ករត្នោត ខ្ទឹមស និងម្ទេស",
+        "nameEn": "Palm sugar, garlic, fresh chilies",
+        "amount": "១ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "បន្លែអន្លក់ស្រស់ (ត្រយូងចេក ត្រសក់ ផ្កាកំប្លោក)",
+        "nameEn": "Fresh crudités platter (banana blossom, cucumber, water lily)",
+        "amount": "១ កន្ត្រកធំ"
+      }
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "instructionKh": "ស្ងោរត្រីរ៉ស់ បេះយកតែសាច់បុកជាមួយខ្ទឹមស និងម្ទេសឱ្យម៉ត់រលោង។",
+        "instructionEn": "Boil fish, debone, and pound meat in mortar with garlic and chili."
+      },
+      {
+        "stepNumber": 2,
+        "instructionKh": "ដាំទឹកប្រហុកឱ្យពុះ ត្រងយកទឹកថ្លា ចាក់ច្របល់ជាមួយសាច់ត្រីបុក។",
+        "instructionEn": "Simmer prahok in water, strain, and mix warm broth into pounded fish."
+      },
+      {
+        "stepNumber": 3,
+        "instructionKh": "ដាក់សណ្តែកដីបុក ទឹកអំពិលទុំ និងស្ករត្នោត កូរឱ្យខាប់រលោងល្មម។",
+        "instructionEn": "Stir in ground roasted peanuts, tamarind, and palm sugar until thick and creamy."
+      },
+      {
+        "stepNumber": 4,
+        "instructionKh": "ដួសដាក់ចានកណ្ដាល រៀបបន្លែអន្លក់ស្រស់ជុំវិញ ទទួលទានជាមួយបាយ។",
+        "instructionEn": "Ladle dip into a bowl, surround with fresh seasonal greens, and enjoy with rice."
+      }
+    ]
+  },
+  "food-79": {
+    "nameKh": "ប្រហុកកប់ស្លឹកចេកអាំង",
+    "nameEn": "Charcoal Pit Prahok in Banana Leaf",
+    "cat": "salad",
+    "catKh": "ប្រហុក & ទឹកគ្រឿង",
+    "catEn": "Salads & Dips",
+    "descKh": "ប្រហុកកប់ស្លឹកចេកអាំង ប្រើប្រហុកសាច់ត្រីកំភ្លាញចិញ្ច្រាំជាមួយសាច់ជ្រូកបីជាន់ ខ្ទឹមស ខ្ទឹមក្រហម និងស្លឹកក្រូចសើច ខ្ចប់ក្នុងស្លឹកចេកអាំងលើធ្យូងភ្លើងឡើងឈ្ងុយឈ្ងប់ ទទួលទានជាមួយអន្លក់បន្លែស្រស់។",
+    "descEn": "Authentic Khmer fermented fish paste pounded with minced pork belly, lemongrass, garlic, wrapped in banana leaf packets, and slow-roasted over embers.",
+    "prepTime": "២០ នាទី",
+    "cookTime": "២០ នាទី",
+    "servings": "៣-៤ នាក់",
+    "calories": 250,
+    "difficulty": "medium",
+    "ingredients": [
+      {
+        "nameKh": "ប្រហុកសាច់ត្រីកំភ្លាញចិញ្ច្រាំ",
+        "nameEn": "Minced river fish prahok",
+        "amount": "១៥០ ក្រាម"
+      },
+      {
+        "nameKh": "សាច់ជ្រូកបីជាន់ចិញ្ច្រាំម៉ត់",
+        "nameEn": "Minced pork belly",
+        "amount": "១៥០ ក្រាម"
+      },
+      {
+        "nameKh": "ខ្ទឹមស ខ្ទឹមក្រហម និងស្លឹកក្រូចសើច",
+        "nameEn": "Garlic, shallots, and kaffir lime leaves",
+        "amount": "២ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "ម្ទេសស្រស់ហាន់ល្អិត",
+        "nameEn": "Finely sliced fresh bird chilies",
+        "amount": "១ ស្លាបព្រាកាហ្វេ"
+      },
+      {
+        "nameKh": "ស្លឹកចេក និងបន្ទះឬស្សីខ្ទាស់",
+        "nameEn": "Banana leaves and bamboo toothpicks",
+        "amount": "សម្រាប់ខ្ចប់"
+      }
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "instructionKh": "ចិញ្ច្រាំប្រហុកសាច់ជាមួយសាច់ជ្រូកបីជាន់ ខ្ទឹមស ខ្ទឹមក្រហម និងស្លឹកក្រូចសើចឱ្យម៉ត់ចូលគ្នា។",
+        "instructionEn": "Mince prahok with pork belly, garlic, shallots, and kaffir lime leaves until homogenous."
+      },
+      {
+        "stepNumber": 2,
+        "instructionKh": "ថែមស្ករត្នោតបន្តិច និងម្ទេសហាន់ល្អិត ច្របល់ឱ្យសព្វ។",
+        "instructionEn": "Season with a pinch of palm sugar and chopped chilies."
+      },
+      {
+        "stepNumber": 3,
+        "instructionKh": "ខ្ចប់ក្នុងស្លឹកចេកជាកញ្ចប់រាងបួនជ្រុង ចាក់ម្ជុលខ្ទាស់ឱ្យជាប់។",
+        "instructionEn": "Wrap into tight square banana leaf parcels and pin shut with toothpicks."
+      },
+      {
+        "stepNumber": 4,
+        "instructionKh": "អាំងលើធ្យូងភ្លើងរហូតដល់ស្លឹកចេកឡើងពណ៌ខ្លោចក្រអូបឈ្ងុយ ទទួលទានជាមួយអន្លក់បន្លែខ្ចី។",
+        "instructionEn": "Char-grill over hot embers until aromatic and cooked through; serve with fresh crudités."
+      }
+    ]
+  },
+  "food-80": {
+    "nameKh": "ម៉ាំល្ហុងសាច់ជ្រូកបីជាន់",
+    "nameEn": "Fermented Mudfish Papaya with Pork Belly",
+    "cat": "salad",
+    "catKh": "ម៉ាំ & ប្រហុក",
+    "catEn": "Salads & Dips",
+    "descKh": "ម៉ាំល្ហុងសាច់ជ្រូកបីជាន់ ប្រើម៉ាំត្រីរ៉ស់ខ្មែរផ្អាប់ជាមួយអង្ករលីង ច្របល់ជាមួយល្ហុងសាប់ស្រួយ សាច់ជ្រូកបីជាន់ស្ងោរហាន់ស្ដើង ខ្ញី ខ្ទឹមស និងម្ទេស រសជាតិដិតដល់ជូរប្រៃផ្អែមឈ្ងុយ។",
+    "descEn": "Traditional fermented fish delicacy mixed with crisp shredded green papaya, boiled pork belly slices, ginger strands, and garlic.",
+    "prepTime": "២០ នាទី",
+    "cookTime": "១០ នាទី",
+    "servings": "៣-៤ នាក់",
+    "calories": 270,
+    "difficulty": "easy",
+    "ingredients": [
+      {
+        "nameKh": "ម៉ាំត្រីរ៉ស់ ឬត្រីផ្ទក់ខ្មែរ",
+        "nameEn": "Traditional fermented fish mam",
+        "amount": "១៥០ ក្រាម"
+      },
+      {
+        "nameKh": "ល្ហុងខ្ចីសាប់សរសៃស្រួយ",
+        "nameEn": "Crisp shredded green papaya",
+        "amount": "២០០ ក្រាម"
+      },
+      {
+        "nameKh": "សាច់ជ្រូកបីជាន់ស្ងោរហាន់ស្ដើង",
+        "nameEn": "Boiled sliced pork belly",
+        "amount": "១៥០ ក្រាម"
+      },
+      {
+        "nameKh": "ខ្ញីខ្ចី ខ្ទឹមស និងម្ទេសហាន់សរសៃ",
+        "nameEn": "Ginger, garlic, and chili slivers",
+        "amount": "២ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "ស្ករត្នោត និងទឹកក្រូចឆ្មា",
+        "nameEn": "Palm sugar and lime juice",
+        "amount": "១ ស្លាបព្រាបាយ"
+      }
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "instructionKh": "ច្របាច់ល្ហុងសាប់ជាមួយអំបិលរួចលាងទឹកពូតឱ្យស្ងួតដើម្បីឱ្យសរសៃល្ហុងស្រួយ។",
+        "instructionEn": "Toss shredded papaya with salt, rinse, and squeeze dry for maximum crunch."
+      },
+      {
+        "stepNumber": 2,
+        "instructionKh": "ចិញ្ច្រាំម៉ាំត្រីឱ្យម៉ត់ លាយជាមួយស្ករត្នោត ខ្ញី ខ្ទឹមស និងម្ទេស។",
+        "instructionEn": "Mince mam and mix with palm sugar, ginger, garlic, and chilies."
+      },
+      {
+        "stepNumber": 3,
+        "instructionKh": "ច្របល់ម៉ាំជាមួយល្ហុងសាប់ និងសាច់ជ្រូកបីជាន់ឱ្យចូលជាតិសព្វល្អ។",
+        "instructionEn": "Toss seasoned mam with shredded papaya and pork belly slices."
+      },
+      {
+        "stepNumber": 4,
+        "instructionKh": "ផ្អាប់ទុកកន្លះម៉ោង រួចដួសទទួលទានជាមួយជីរនាងវង និងបាយក្ដៅៗ។",
+        "instructionEn": "Let sit for 30 minutes to meld flavors, then serve with holy basil and rice."
+      }
+    ]
+  },
+  "food-81": {
+    "nameKh": "នំបញ្ចុកសម្លការីសាច់មាន់",
+    "nameEn": "Nom Banh Chok with Red Chicken Curry",
+    "cat": "noodles",
+    "catKh": "នំបញ្ចុក & មី",
+    "catEn": "Noodles & Curry",
+    "descKh": "នំបញ្ចុកសម្លការីសាច់មាន់ នំបញ្ចុកសរសៃស្រស់ទន់រលោង ស្រោចដោយទឹកសម្លការីក្រហមសាច់មាន់ស្រែ ខ្ទិះដូងខាប់ ដំឡូងជ្វា និងត្រប់វែង អមដោយបន្លែអន្លក់ស្រស់គ្រប់មុខ។",
+    "descEn": "Fresh fermented rice noodles drenched in rich, aromatic red chicken coconut curry, sweet potatoes, eggplants, and crunchy garden crudités.",
+    "prepTime": "២៥ នាទី",
+    "cookTime": "៣០ នាទី",
+    "servings": "៤-៦ នាក់",
+    "calories": 410,
+    "difficulty": "medium",
+    "ingredients": [
+      {
+        "nameKh": "នំបញ្ចុកសរសៃស្រស់",
+        "nameEn": "Fresh artisanal fermented rice noodles",
+        "amount": "៥០០ ក្រាម"
+      },
+      {
+        "nameKh": "សាច់មាន់ស្រែកាប់ដុំៗ",
+        "nameEn": "Country chicken cut into pieces",
+        "amount": "៤០០ ក្រាម"
+      },
+      {
+        "nameKh": "គ្រឿងការីក្រហម និងខ្ទិះដូង",
+        "nameEn": "Red curry paste and coconut milk",
+        "amount": "៤០០ មីលីលីត្រ"
+      },
+      {
+        "nameKh": "ដំឡូងជ្វា និងត្រប់វែងកាត់ចំណិត",
+        "nameEn": "Sweet potatoes and Asian eggplants",
+        "amount": "២០០ ក្រាម"
+      },
+      {
+        "nameKh": "បន្លែអន្លក់ (ត្រយូងចេក សណ្តែកបណ្តុះ សណ្តែកកួរ)",
+        "nameEn": "Fresh noodle greens (banana blossom, sprouts, long beans)",
+        "amount": "១ កន្ត្រក"
+      }
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "instructionKh": "រំលីងគ្រឿងការីជាមួយក្បាលខ្ទិះដូងឱ្យបែកប្រេងក្រហម រួចដាក់សាច់មាន់ចូលឆាឱ្យចូលជាតិ។",
+        "instructionEn": "Fry red curry in thick coconut cream until fragrant oil rises, add chicken and sear."
+      },
+      {
+        "stepNumber": 2,
+        "instructionKh": "ចាក់ចុងខ្ទិះដូងចូល រម្ងាស់ឱ្យសាច់មាន់ទន់ រួចដាក់ដំឡូងជ្វា និងត្រប់ចូល។",
+        "instructionEn": "Pour in remaining coconut milk, simmer chicken until tender, then add sweet potatoes and eggplants."
+      },
+      {
+        "stepNumber": 3,
+        "instructionKh": "ថែមទឹកត្រី និងស្ករត្នោត រម្ងាស់រហូតដល់ដំឡូងឆ្អិនទន់ល្មម។",
+        "instructionEn": "Season with fish sauce and palm sugar, simmering until vegetables are soft."
+      },
+      {
+        "stepNumber": 4,
+        "instructionKh": "ចាប់នំបញ្ចុកដាក់ចាន រៀបបន្លែអន្លក់ស្រស់ ដួសទឹកការីមាន់ក្តៅៗស្រោចពីលើ។",
+        "instructionEn": "Place noodles in bowl, arrange crisp fresh greens, and ladle piping-hot curry on top."
+      }
+    ]
+  },
+  "food-82": {
+    "nameKh": "នំបញ្ចុកទឹកប្រហុកសៀមរាប",
+    "nameEn": "Siem Reap Spicy Prahok Rice Noodles",
+    "cat": "noodles",
+    "catKh": "នំបញ្ចុក & មី",
+    "catEn": "Noodles & Soups",
+    "descKh": "នំបញ្ចុកទឹកប្រហុកសៀមរាប ជានំបញ្ចុកប្រចាំតំបន់អង្គរដ៏ល្បីល្បាញ ទឹកស៊ុបប្រហុកដាំពុះលាយសាច់ត្រីអាំងបុក រសជាតិហឹរជូរអែម រោយសណ្តែកដីបុក និងអន្លក់ស្រែស្រស់ៗ។",
+    "descEn": "Legendary Siem Reap Angkor specialty of fermented rice noodles served with a hot, tangy, aromatic prahok broth infused with pounded grilled fish and crushed peanuts.",
+    "prepTime": "២០ នាទី",
+    "cookTime": "២០ នាទី",
+    "servings": "៣-៤ នាក់",
+    "calories": 320,
+    "difficulty": "medium",
+    "ingredients": [
+      {
+        "nameKh": "នំបញ្ចុកសរសៃស្រស់",
+        "nameEn": "Fresh fermented rice noodles",
+        "amount": "៤០០ ក្រាម"
+      },
+      {
+        "nameKh": "សាច់ត្រីរ៉ស់អាំងបុកម៉ត់",
+        "nameEn": "Pounded grilled snakehead fish meat",
+        "amount": "២០០ ក្រាម"
+      },
+      {
+        "nameKh": "ទឹកប្រហុកដាំពុះត្រងស្អាត",
+        "nameEn": "Boiled strained prahok broth",
+        "amount": "៣០០ មីលីលីត្រ"
+      },
+      {
+        "nameKh": "សណ្តែកដីលីងបុកម៉ត់",
+        "nameEn": "Crushed roasted peanuts",
+        "amount": "៣ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "ទឹកក្រូចឆ្មា ម្ទេស និងស្ករត្នោត",
+        "nameEn": "Lime juice, fresh chilies, palm sugar",
+        "amount": "២ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "បន្លែអន្លក់នំបញ្ចុកស្រែ",
+        "nameEn": "Crisp assorted local greens and herbs",
+        "amount": "១ កន្ត្រក"
+      }
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "instructionKh": "ដាំទឹកប្រហុកជាមួយស្លឹកគ្រៃ និងរំដេងឱ្យពុះឈ្ងុយ រួចត្រងយកទឹកថ្លា។",
+        "instructionEn": "Simmer prahok with lemongrass and galangal, then strain into clear broth."
+      },
+      {
+        "stepNumber": 2,
+        "instructionKh": "បុកសាច់ត្រីអាំងឱ្យម៉ត់ លាយជាមួយទឹកប្រហុក ថែមទឹកក្រូចឆ្មា ម្ទេស និងស្ករត្នោត។",
+        "instructionEn": "Mix pounded grilled fish into prahok broth, seasoning with lime juice, chili, and sugar."
+      },
+      {
+        "stepNumber": 3,
+        "instructionKh": "ចាប់នំបញ្ចុកដាក់ចាន ផ្ទាប់ជាមួយបន្លែអន្លក់គ្រប់មុខ។",
+        "instructionEn": "Twirl fresh noodles into serving bowls and arrange assorted fresh greens."
+      },
+      {
+        "stepNumber": 4,
+        "instructionKh": "ស្រោចទឹកប្រហុកសាច់ត្រី រោយសណ្តែកដីបុក ទទួលទានភ្លាមៗ។",
+        "instructionEn": "Ladle the tangy fish broth over noodles, top with crushed peanuts, and enjoy."
+      }
+    ]
+  },
+  "food-83": {
+    "nameKh": "គុយទាវកាត់ទន្លេបាសាក់",
+    "nameEn": "Steamed Rice Noodle Rolls with Minced Pork",
+    "cat": "noodles",
+    "catKh": "មី & គុយទាវ",
+    "catEn": "Noodles & Dim Sum",
+    "descKh": "គុយទាវកាត់ទន្លេបាសាក់ ប្រើសន្លឹកគុយទាវចំហុយទន់រលោង កាត់ជាដុំៗ រោយសាច់ជ្រូកចិញ្ច្រាំឆាផ្សិតក្រៀម សាច់ក្រក សណ្តែកបណ្តុះ ខ្ទឹមបំពង និងស្រោចទឹកត្រីផ្អែមជូរអែម។",
+    "descEn": "Silky steamed fresh flat rice noodle sheets topped with savory minced pork, dried mushrooms, sliced sausage, crispy shallots, and sweet garlic fish sauce.",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "១០ នាទី",
+    "servings": "២-៣ នាក់",
+    "calories": 280,
+    "difficulty": "easy",
+    "ingredients": [
+      {
+        "nameKh": "សន្លឹកគុយទាវចំហុយទន់ៗ",
+        "nameEn": "Fresh steamed wide rice noodle sheets",
+        "amount": "៣០០ ក្រាម"
+      },
+      {
+        "nameKh": "សាច់ជ្រូកចិញ្ច្រាំឆាជាមួយផ្សិតក្រៀម",
+        "nameEn": "Minced pork stir-fried with shiitake mushrooms",
+        "amount": "១៥០ ក្រាម"
+      },
+      {
+        "nameKh": "សាច់ក្រក និងពងទាហាន់សរសៃ",
+        "nameEn": "Cambodian sausage and egg omelet strips",
+        "amount": "៨០ ក្រាម"
+      },
+      {
+        "nameKh": "សណ្តែកបណ្តុះស្រួយ និងខ្ទឹមបំពង",
+        "nameEn": "Bean sprouts and crispy fried shallots",
+        "amount": "១ ចានតូច"
+      },
+      {
+        "nameKh": "ទឹកត្រីផ្អែមខ្មែរ",
+        "nameEn": "Sweet garlic-lime fish sauce dressing",
+        "amount": "៣ ស្លាបព្រាបាយ"
+      }
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "instructionKh": "ឆាសាច់ជ្រូកចិញ្ច្រាំជាមួយខ្ទឹមស និងផ្សិតក្រៀមឱ្យឈ្ងុយ ថែមទឹកត្រី និងម្រេច។",
+        "instructionEn": "Stir-fry minced pork with garlic and soaked mushrooms, seasoning with fish sauce and pepper."
+      },
+      {
+        "stepNumber": 2,
+        "instructionKh": "កាត់សន្លឹកគុយទាវជាដុំៗ រៀបដាក់ចាន រោយសាច់ជ្រូកឆាពីលើ។",
+        "instructionEn": "Cut fresh noodle sheets into bite-sized rolls, place in bowl, and top with pork."
+      },
+      {
+        "stepNumber": 3,
+        "instructionKh": "ដាក់សាច់ក្រក ពងទាហាន់សរសៃ សណ្តែកបណ្តុះ និងខ្ទឹមបំពង។",
+        "instructionEn": "Garnish with sausage slices, egg strips, blanched bean sprouts, and crispy shallots."
+      },
+      {
+        "stepNumber": 4,
+        "instructionKh": "ស្រោចទឹកត្រីផ្អែមជូរអែម ទទួលទានជាអាហារពេលព្រឹក ឬពេលរសៀល។",
+        "instructionEn": "Drizzle sweet garlic lime sauce over the dish and enjoy."
+      }
+    ]
+  },
+  "food-84": {
+    "nameKh": "គុយទាវឆាខ្មែរពងទាចៀន",
+    "nameEn": "Stir-Fried Rice Noodles with Duck Egg",
+    "cat": "noodles",
+    "catKh": "មី & គុយទាវ",
+    "catEn": "Stir-Fried Noodles",
+    "descKh": "គុយទាវឆាខ្មែរ គុយទាវសរសៃធំឆាលើភ្លើងខ្លាំងជាមួយពងទា សាច់ជ្រូក ឬសាច់គោ តៅហ៊ូ និងសណ្តែកបណ្តុះ គ្រាប់គុយទាវឡើងពណ៌ក្រហមឈ្ងុយ ទទួលទានជាមួយទឹកត្រីម្ទេសក្រូចឆ្មា។",
+    "descEn": "Classic Cambodian street-style wok-charred flat rice noodles stir-fried with rich duck eggs, tender pork, firm tofu, crunchy bean sprouts, and crushed peanuts.",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "១០ នាទី",
+    "servings": "២-៣ នាក់",
+    "calories": 380,
+    "difficulty": "medium",
+    "ingredients": [
+      {
+        "nameKh": "គុយទាវសរសៃធំស្រស់",
+        "nameEn": "Fresh wide flat rice noodles",
+        "amount": "៣៥០ ក្រាម"
+      },
+      {
+        "nameKh": "ពងទាស្រស់",
+        "nameEn": "Fresh duck eggs",
+        "amount": "២ គ្រាប់"
+      },
+      {
+        "nameKh": "សាច់ជ្រូក ឬសាច់គោហាន់ស្ដើង",
+        "nameEn": "Sliced pork or tender beef",
+        "amount": "១៥០ ក្រាម"
+      },
+      {
+        "nameKh": "តៅហ៊ូលឿង និងសណ្តែកបណ្តុះ",
+        "nameEn": "Fried yellow tofu and bean sprouts",
+        "amount": "១០០ ក្រាម"
+      },
+      {
+        "nameKh": "ស្លឹកខ្ទឹម ទឹកស៊ីអ៊ីវ ស្ករត្នោត ទឹកត្រី",
+        "nameEn": "Scallions, dark soy sauce, palm sugar, fish sauce",
+        "amount": "២ ស្លាបព្រាបាយ"
+      }
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "instructionKh": "ឆាខ្ទឹមស និងសាច់ឱ្យឆ្អិន គោះពងទាចូលកូរឱ្យចូលគ្នាលើភ្លើងខ្លាំង។",
+        "instructionEn": "Sauté garlic and meat in a hot wok, crack duck eggs in and scramble lightly."
+      },
+      {
+        "stepNumber": 2,
+        "instructionKh": "ដាក់គុយទាវចូលឆាលើភ្លើងខ្លាំង ថែមទឹកស៊ីអ៊ីវ ទឹកត្រី និងស្ករត្នោតឱ្យឡើងពណ៌ឈ្ងុយ។",
+        "instructionEn": "Toss in wide noodles over intense heat, adding soy sauce, fish sauce, and palm sugar."
+      },
+      {
+        "stepNumber": 3,
+        "instructionKh": "ដាក់តៅហ៊ូ សណ្តែកបណ្តុះ និងស្លឹកខ្ទឹមឆាច្របល់យ៉ាងលឿន។",
+        "instructionEn": "Add yellow tofu, bean sprouts, and chives, tossing quickly to retain crunch."
+      },
+      {
+        "stepNumber": 4,
+        "instructionKh": "ដួសដាក់ចាន រោយសណ្តែកដីបុក ទទួលទានជាមួយទឹកត្រីម្ទេសក្រូចឆ្មា។",
+        "instructionEn": "Plate immediately, sprinkle crushed roasted peanuts, and serve with lime and chili."
+      }
+    ]
+  },
+  "food-85": {
+    "nameKh": "មីសួរស៊ុបប្រហិតសាច់ជ្រូក",
+    "nameEn": "Glass Noodle Clear Soup with Meatballs",
+    "cat": "noodles",
+    "catKh": "មី & គុយទាវ",
+    "catEn": "Noodles & Soup",
+    "descKh": "មីសួរស៊ុបប្រហិតសាច់ជ្រូក ទឹកស៊ុបឆ្អឹងជ្រូកថ្លាឈ្ងុយផ្អែម អមដោយប្រហិតសាច់ជ្រូកធ្វើដោយដៃទន់ស្វិត មីសួរទន់រលោង ផ្សិតត្រចៀកកណ្តុរ និងស្ពៃចង្កឹះ ជាអាហារសម្រាលពោះដ៏ពេញនិយម។",
+    "descEn": "Soothing clear broth with silky mung bean glass noodles, homemade bouncy pork meatballs, wood ear mushrooms, and fresh greens.",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "២០ នាទី",
+    "servings": "២-៣ នាក់",
+    "calories": 260,
+    "difficulty": "easy",
+    "ingredients": [
+      {
+        "nameKh": "មីសួរត្រាំទឹកទន់",
+        "nameEn": "Soaked mung bean glass noodles",
+        "amount": "១៥០ ក្រាម"
+      },
+      {
+        "nameKh": "ប្រហិតសាច់ជ្រូកធ្វើដោយដៃ",
+        "nameEn": "Handmade seasoned pork meatballs",
+        "amount": "២០០ ក្រាម"
+      },
+      {
+        "nameKh": "ទឹកស៊ុបឆ្អឹងជ្រូកថ្លា",
+        "nameEn": "Clear pork bone broth",
+        "amount": "៨០០ មីលីលីត្រ"
+      },
+      {
+        "nameKh": "ស្ពៃចង្កឹះ និងផ្សិតត្រចៀកកណ្តុរ",
+        "nameEn": "Bok choy and wood ear mushrooms",
+        "amount": "១ ចាន"
+      },
+      {
+        "nameKh": "ស្លឹកខ្ទឹម ខ្ទឹមបំពង ម្រេចកំពត",
+        "nameEn": "Scallions, crispy fried garlic, Kampot pepper",
+        "amount": "១ ស្លាបព្រាបាយ"
+      }
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "instructionKh": "ដាំទឹកស៊ុបឆ្អឹងជ្រូកឱ្យពុះ ដួសពពុះចេញឱ្យទឹកថ្លាឈ្ងុយ។",
+        "instructionEn": "Bring pork stock to a rolling boil and skim froth for a crystal-clear broth."
+      },
+      {
+        "stepNumber": 2,
+        "instructionKh": "ចាប់ប្រហិតសាច់ជ្រូកមូលៗបង់ចូលក្នុងទឹកស៊ុបឱ្យឆ្អិនអណ្តែតឡើង។",
+        "instructionEn": "Drop handmade meatballs into boiling broth until they cook and float to the surface."
+      },
+      {
+        "stepNumber": 3,
+        "instructionKh": "ដាក់មីសួរ និងស្ពៃចង្កឹះចូលស្រុះ ១ នាទី។",
+        "instructionEn": "Add softened glass noodles, mushrooms, and bok choy, simmering for 1 minute."
+      },
+      {
+        "stepNumber": 4,
+        "instructionKh": "ដួសដាក់ចាន រោយខ្ទឹមបំពង ស្លឹកខ្ទឹម និងម្រេចកំពត ទទួលទានក្តៅៗ។",
+        "instructionEn": "Ladle into bowls, top with fried garlic, scallions, and crushed pepper."
+      }
+    ]
+  },
+  "food-86": {
+    "nameKh": "បាយឆាឡុកឡាក់សាច់គោ",
+    "nameEn": "Beef Lok Lak Fried Rice Platter",
+    "cat": "rice",
+    "catKh": "ម្ហូបបាយ",
+    "catEn": "Rice Dishes",
+    "descKh": "បាយឆាឡុកឡាក់សាច់គោ បាយឆាពងទាគ្រាប់ស្ងួតឈ្ងុយ អមដោយសាច់គោឡុកឡាក់ផុយទន់ឆាភ្លើងខ្លាំង ប៉េងប៉ោះ ត្រសក់ និងទឹកជ្រលក់អំបិលម្រេចកំពតក្រូចឆ្មា។",
+    "descEn": "Fragrant golden egg fried rice paired with tender wok-seared cubed beef tenderloin, fresh garden tomatoes, and black Kampot pepper-lime dipping sauce.",
+    "prepTime": "២០ នាទី",
+    "cookTime": "១៥ នាទី",
+    "servings": "២-៣ នាក់",
+    "calories": 450,
+    "difficulty": "medium",
+    "ingredients": [
+      {
+        "nameKh": "បាយកកអង្ករផ្កាម្លិះ",
+        "nameEn": "Chilled cooked jasmine rice",
+        "amount": "៣ ចាន"
+      },
+      {
+        "nameKh": "សាច់គោផុយកាត់ដុំឡុកឡាក់",
+        "nameEn": "Cubed beef tenderloin",
+        "amount": "៣០០ ក្រាម"
+      },
+      {
+        "nameKh": "ពងទាស្រស់សម្រាប់ឆាបាយ",
+        "nameEn": "Duck eggs for fried rice",
+        "amount": "២ គ្រាប់"
+      },
+      {
+        "nameKh": "ប៉េងប៉ោះ ត្រសក់ និងសាឡាត់",
+        "nameEn": "Sliced tomatoes, cucumbers, lettuce",
+        "amount": "១ ចាន"
+      },
+      {
+        "nameKh": "ទឹកជ្រលក់អំបិលម្រេចកំពតក្រូចឆ្មា",
+        "nameEn": "Kampot black pepper, sea salt, lime dip",
+        "amount": "១ កូនចាន"
+      }
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "instructionKh": "ឆាបាយកកជាមួយពងទា និងខ្ទឹមសលើភ្លើងខ្លាំងឱ្យគ្រាប់បាយស្ងួតឈ្ងុយ។",
+        "instructionEn": "Stir-fry chilled rice with eggs and minced garlic over high flame until dry and fragrant."
+      },
+      {
+        "stepNumber": 2,
+        "instructionKh": "ឆាសាច់គោជាមួយខ្ទឹមស ប្រេងខ្យង និងស្ករត្នោតលើភ្លើងខ្លាំងមួយភ្លែតកុំឱ្យស្វិត។",
+        "instructionEn": "Flash-sear cubed beef with garlic, oyster sauce, and palm sugar over smoking wok."
+      },
+      {
+        "stepNumber": 3,
+        "instructionKh": "រៀបបាយឆាដាក់ចាន ទ្រាប់បន្លែស្រស់ជុំវិញ និងដួសសាច់គោឡុកឡាក់ដាក់ពីលើ។",
+        "instructionEn": "Mound fried rice on platter with fresh salad vegetables and top with tender beef."
+      },
+      {
+        "stepNumber": 4,
+        "instructionKh": "ទទួលទានជាមួយទឹកជ្រលក់អំបិលម្រេចកំពតច្របាច់ក្រូចឆ្មា។",
+        "instructionEn": "Dip savory beef into lime-pepper sauce and enjoy with the fried rice."
+      }
+    ]
+  },
+  "food-87": {
+    "nameKh": "បាយឆាម្រះព្រៅសាច់ជ្រូក",
+    "nameEn": "Holy Basil Pork Fried Rice",
+    "cat": "rice",
+    "catKh": "ម្ហូបបាយ",
+    "catEn": "Rice Dishes",
+    "descKh": "បាយឆាម្រះព្រៅសាច់ជ្រូក ប្រើបាយអង្ករផ្កាម្លិះឆាជាមួយសាច់ជ្រូកចិញ្ច្រាំ ខ្ទឹមស ម្ទេសបុក និងស្លឹកម្រះព្រៅហឹរឈ្ងុយ ដាក់ពងទាចៀនក្រៀមពីលើ រសជាតិដិតដល់។",
+    "descEn": "Aromatic spicy fried rice with minced pork, pounded garlic and chilies, fragrant holy basil, crowned with a crispy sunny-side-up fried duck egg.",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "១០ នាទី",
+    "servings": "២ នាក់",
+    "calories": 420,
+    "difficulty": "easy",
+    "ingredients": [
+      {
+        "nameKh": "បាយកកអង្ករផ្កាម្លិះ",
+        "nameEn": "Chilled cooked jasmine rice",
+        "amount": "២ ចានធំ"
+      },
+      {
+        "nameKh": "សាច់ជ្រូកចិញ្ច្រាំ",
+        "nameEn": "Minced pork",
+        "amount": "១៥០ ក្រាម"
+      },
+      {
+        "nameKh": "ស្លឹកម្រះព្រៅស្រស់",
+        "nameEn": "Fresh holy basil leaves",
+        "amount": "១ ក្តាប់"
+      },
+      {
+        "nameKh": "ខ្ទឹមស និងម្ទេសបុក",
+        "nameEn": "Pounded garlic and red chilies",
+        "amount": "១ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "ពងទាចៀនគែមស្រួយ",
+        "nameEn": "Crispy-edged fried duck eggs",
+        "amount": "២ គ្រាប់"
+      }
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "instructionKh": "ឆាខ្ទឹមស និងម្ទេសបុកក្នុងប្រេងក្តៅឱ្យឈួលឈ្ងុយ។",
+        "instructionEn": "Fry garlic-chili paste in hot oil until intensely aromatic."
+      },
+      {
+        "stepNumber": 2,
+        "instructionKh": "ដាក់សាច់ជ្រូកចិញ្ច្រាំចូលឆាឱ្យឆ្អិន ថែមទឹកត្រី និងស្ករត្នោត។",
+        "instructionEn": "Add minced pork, browning thoroughly with fish sauce and palm sugar."
+      },
+      {
+        "stepNumber": 3,
+        "instructionKh": "ដាក់បាយកកចូលឆាច្របល់លើភ្លើងខ្លាំង រួចបង់ស្លឹកម្រះព្រៅចូល។",
+        "instructionEn": "Toss in cold jasmine rice, frying on high flame, then fold in holy basil."
+      },
+      {
+        "stepNumber": 4,
+        "instructionKh": "ដួសដាក់ចាន ដាក់ពងទាចៀនក្រៀមពីលើ ទទួលទានក្តៅៗ។",
+        "instructionEn": "Plate up, crown with a crispy fried egg, and enjoy hot."
+      }
+    ]
+  },
+  "food-88": {
+    "nameKh": "បបរមាន់ស្រែស្លឹកខ្ទឹម",
+    "nameEn": "Free-Range Chicken Rice Porridge",
+    "cat": "soup",
+    "catKh": "ស៊ុប & បបរ",
+    "catEn": "Porridge & Congee",
+    "descKh": "បបរមាន់ស្រែស្លឹកខ្ទឹម រម្ងាស់អង្ករជាមួយទឹកស៊ុបស្ងោរមាន់ស្រែផ្អែមធម្មជាតិ សាច់មាន់ទន់បេះសរសៃ ខ្ញីហាន់ល្អិត សណ្តែកបណ្តុះ ស្លឹកខ្ទឹម និងខ្ទឹមបំពង ជាអាហារពេលព្រឹកដ៏កក់ក្តៅ។",
+    "descEn": "Heartwarming Cambodian chicken congee simmered with rich free-range chicken broth, shredded chicken, julienned ginger, bean sprouts, and crispy garlic.",
+    "prepTime": "២០ នាទី",
+    "cookTime": "៣៥ នាទី",
+    "servings": "៣-៥ នាក់",
+    "calories": 290,
+    "difficulty": "easy",
+    "ingredients": [
+      {
+        "nameKh": "អង្ករខ្សាយលាយដំណើបបន្តិច",
+        "nameEn": "Jasmine rice with a touch of sticky rice",
+        "amount": "២០០ ក្រាម"
+      },
+      {
+        "nameKh": "សាច់មាន់ស្រែស្ងោរបេះជាសរសៃ",
+        "nameEn": "Poached shredded free-range chicken",
+        "amount": "៣០០ ក្រាម"
+      },
+      {
+        "nameKh": "ទឹកស៊ុបស្ងោរមាន់ផ្អែមឈ្ងុយ",
+        "nameEn": "Rich poached chicken broth",
+        "amount": "១.២ លីត្រ"
+      },
+      {
+        "nameKh": "ខ្ញីខ្ចីហាន់សរសៃ និងសណ្តែកបណ្តុះ",
+        "nameEn": "Shredded fresh ginger and crisp bean sprouts",
+        "amount": "១ ចាន"
+      },
+      {
+        "nameKh": "ស្លឹកខ្ទឹម ខ្ទឹមបំពង ក្រូចឆ្មា ម្រេច",
+        "nameEn": "Scallions, fried garlic, lime wedges, Kampot pepper",
+        "amount": "២ ស្លាបព្រាបាយ"
+      }
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "instructionKh": "ស្ងោរមាន់ស្រែជាមួយខ្ទឹមស និងខ្ញីឱ្យឆ្អិនផុយ ស្រង់សាច់បេះជាសរសៃ។",
+        "instructionEn": "Poach chicken with garlic and ginger until tender, shred the meat."
+      },
+      {
+        "stepNumber": 2,
+        "instructionKh": "យកទឹកស៊ុបមាន់ដាំបបរអង្កររហូតដល់គ្រាប់បាយរីកទន់ខាប់រលោង។",
+        "instructionEn": "Simmer rice in chicken broth until grains bloom into a velvety congee."
+      },
+      {
+        "stepNumber": 3,
+        "instructionKh": "ថែមទឹកត្រី និងអំបិលបន្តិច ភ្លក្សរសជាតិផ្អែមទឹកស៊ុបធម្មជាតិ។",
+        "instructionEn": "Season with fish sauce and salt to taste."
+      },
+      {
+        "stepNumber": 4,
+        "instructionKh": "ដួសបបរដាក់ចាន រៀបសាច់មាន់ ខ្ញីសរសៃ សណ្តែកបណ្តុះ ស្លឹកខ្ទឹម និងម្រេចកំពត។",
+        "instructionEn": "Ladle into bowls, top with shredded chicken, ginger, sprouts, scallions, and pepper."
+      }
+    ]
+  },
+  "food-89": {
+    "nameKh": "បបរត្រីរ៉ស់ខ្ញីស្រស់",
+    "nameEn": "Snakehead Fish Ginger Rice Congee",
+    "cat": "soup",
+    "catKh": "ស៊ុប & បបរ",
+    "catEn": "Porridge & Congee",
+    "descKh": "បបរត្រីរ៉ស់ខ្ញីស្រស់ រម្ងាស់អង្ករជាមួយទឹកស៊ុបត្រីថ្លា សាច់ត្រីរ៉ស់ស្រស់ហាន់បន្ទះស្ដើងទន់ផ្អែម ខ្ញីខ្ចីហាន់សរសៃជួយកម្តៅរាងកាយ និងបំបាត់ក្លិនឆ្អាប ឈ្ងុយឆ្ងាញ់ពិសា។",
+    "descEn": "Traditional delicate rice porridge with tender fresh river snakehead fish fillets, shredded young ginger, scallions, and golden fried garlic.",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "២៥ នាទី",
+    "servings": "៣-៤ នាក់",
+    "calories": 230,
+    "difficulty": "easy",
+    "ingredients": [
+      {
+        "nameKh": "អង្ករផ្កាម្លិះថ្មី",
+        "nameEn": "Fragrant new jasmine rice",
+        "amount": "១៨០ ក្រាម"
+      },
+      {
+        "nameKh": "សាច់ត្រីរ៉ស់ស្រស់ហាន់ស្ដើង",
+        "nameEn": "Fresh snakehead fish fillet slices",
+        "amount": "៣០០ ក្រាម"
+      },
+      {
+        "nameKh": "ខ្ញីខ្ចីហាន់សរសៃល្អិត",
+        "nameEn": "Finely julienned young ginger",
+        "amount": "៣ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "ស្លឹកខ្ទឹម ស្លឹកជីរវ៉ាន់ស៊ុយ",
+        "nameEn": "Scallions and fresh cilantro",
+        "amount": "២ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "ទឹកត្រី ម្រេចកំពត ខ្ទឹមបំពង",
+        "nameEn": "Fish sauce, Kampot pepper, crispy garlic",
+        "amount": "១ ស្លាបព្រាបាយ"
+      }
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "instructionKh": "រម្ងាស់អង្ករជាមួយទឹកស៊ុបត្រីឱ្យរីកទន់រលោង។",
+        "instructionEn": "Simmer jasmine rice in clear fish stock until grains are softly broken down."
+      },
+      {
+        "stepNumber": 2,
+        "instructionKh": "ដាក់ខ្ញីហាន់សរសៃចូលក្នុងបបរឱ្យចេញក្លិនឈ្ងុយបំបាត់ឆ្អាប។",
+        "instructionEn": "Stir in ginger strands to infuse congee with a warming, fragrant aroma."
+      },
+      {
+        "stepNumber": 3,
+        "instructionKh": "ពេលបបរពុះ ដាក់សាច់ត្រីរ៉ស់ស្រស់ចូលកុំកូរខ្លាំង ត្រីឆ្អិនលឿនក្នុង ២ នាទី។",
+        "instructionEn": "Gently slip fish slices into simmering congee, cooking for 2 minutes without breaking."
+      },
+      {
+        "stepNumber": 4,
+        "instructionKh": "ដួសដាក់ចាន រោយខ្ទឹមបំពង ស្លឹកខ្ទឹម និងម្រេចកំពត ទទួលទានពេលព្រឹក។",
+        "instructionEn": "Ladle into bowls, sprinkle with fried garlic, scallions, and pepper."
+      }
+    ]
+  },
+  "food-90": {
+    "nameKh": "បាយដំណើបសង់ខ្យាខ្មែរ",
+    "nameEn": "Sticky Rice with Rich Coconut Custard",
+    "cat": "dessert",
+    "catKh": "បង្អែមខ្មែរ",
+    "catEn": "Desserts & Sweets",
+    "descKh": "បាយដំណើបសង់ខ្យាខ្មែរ ជាបង្អែមប្រពៃណីខ្មែរដ៏ល្បីល្បាញ អង្ករដំណើបចំហុយជាមួយខ្ទិះដូងខាប់ទន់ឈ្ងុយស្លឹកតើយ ដាក់សង់ខ្យាស៊ុតទាស្ករត្នោតពីលើ រសជាតិផ្អែមមុតស្រាលឈ្ងុយដូង។",
+    "descEn": "Classic Cambodian royal sweet: fragrant coconut-steamed sticky rice infused with pandan, crowned with rich steamed duck egg and palm sugar custard.",
+    "prepTime": "២៥ នាទី",
+    "cookTime": "៣០ នាទី",
+    "servings": "៤-៦ នាក់",
+    "calories": 340,
+    "difficulty": "medium",
+    "ingredients": [
+      {
+        "nameKh": "អង្ករដំណើបថ្មីត្រាំទន់",
+        "nameEn": "Soaked fragrant glutinous rice",
+        "amount": "៣០០ ក្រាម"
+      },
+      {
+        "nameKh": "សង់ខ្យាស៊ុតទាស្ករត្នោត",
+        "nameEn": "Steamed duck egg and palm sugar custard",
+        "amount": "២០០ ក្រាម"
+      },
+      {
+        "nameKh": "ខ្ទិះដូងខាប់រោយអំបិលបន្តិច",
+        "nameEn": "Salted coconut cream sauce",
+        "amount": "១៥០ មីលីលីត្រ"
+      },
+      {
+        "nameKh": "ស្លឹកតើយស្រស់",
+        "nameEn": "Fresh pandan leaves",
+        "amount": "៤-៥ ស្លឹក"
+      },
+      {
+        "nameKh": "ស្ករត្នោតសុទ្ធ",
+        "nameEn": "Pure palm sugar",
+        "amount": "១០០ ក្រាម"
+      }
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "instructionKh": "ត្រាំអង្ករដំណើប រួចចំហុយជាមួយស្លឹកតើយ និងខ្ទិះដូងឱ្យទន់រលោងឈ្ងុយ។",
+        "instructionEn": "Soak sticky rice, then steam with pandan leaves and coconut cream until glossy and tender."
+      },
+      {
+        "stepNumber": 2,
+        "instructionKh": "វាយស៊ុតទាជាមួយខ្ទិះដូង និងស្ករត្នោត ចំហុយឱ្យឆ្អិនណែនជាសង់ខ្យា។",
+        "instructionEn": "Whisk duck eggs with coconut cream and palm sugar, steam until set into smooth custard."
+      },
+      {
+        "stepNumber": 3,
+        "instructionKh": "ដួសបាយដំណើបដាក់លើស្លឹកចេក កាត់សង់ខ្យាជាចំណិតដាក់ពីលើ។",
+        "instructionEn": "Ladle warm sticky rice onto banana leaf, slice custard and place on top."
+      },
+      {
+        "stepNumber": 4,
+        "instructionKh": "ស្រក់ក្បាលខ្ទិះដូងខាប់បន្តិច ទទួលទានជាបង្អែមលាងមាត់ដ៏ឈ្ងុយឆ្ងាញ់។",
+        "instructionEn": "Drizzle with salted coconut cream and serve as an authentic Khmer dessert."
+      }
+    ]
+  },
+  "food-91": {
+    "nameKh": "នំអន្សមចេកស្ករត្នោត",
+    "nameEn": "Num Ansom Chek (Sweet Banana Sticky Rice Cake)",
+    "cat": "cake",
+    "catKh": "នំខ្មែរ & បង្អែម",
+    "catEn": "Traditional Cakes",
+    "descKh": "នំអន្សមចេកស្ករត្នោត ជានំបុរាណខ្មែរក្នុងពិធីបុណ្យភ្ជុំបិណ្ឌ និងចូលឆ្នាំ អង្ករដំណើបច្របល់ជាមួយដូងកោស និងស្ករត្នោត ខ្ចប់ចេកណាំវ៉ាទុំក្នុងស្លឹកចេក រួចស្ងោររហូតដល់ទន់ស្អិតឈ្ងុយ។",
+    "descEn": "Traditional cylindrical banana leaf parcels of sticky rice seasoned with shredded coconut and palm sugar, wrapping sweet ripe baby bananas, slow-boiled for hours.",
+    "prepTime": "៤០ នាទី",
+    "cookTime": "៤ ម៉ោង",
+    "servings": "៦-៨ នាក់",
+    "calories": 310,
+    "difficulty": "hard",
+    "ingredients": [
+      {
+        "nameKh": "អង្ករដំណើបត្រាំទន់",
+        "nameEn": "Soaked sticky rice",
+        "amount": "៥០០ ក្រាម"
+      },
+      {
+        "nameKh": "ចេកណាំវ៉ាទុំផ្អែម",
+        "nameEn": "Ripe sweet baby bananas",
+        "amount": "៦-៨ ផ្លែ"
+      },
+      {
+        "nameKh": "ដូងទុំកោសសរសៃ",
+        "nameEn": "Freshly grated coconut meat",
+        "amount": "១៥០ ក្រាម"
+      },
+      {
+        "nameKh": "ស្ករត្នោត និងអំបិលបន្តិច",
+        "nameEn": "Palm sugar and pinch of sea salt",
+        "amount": "៣ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "ស្លឹកចេក និងខ្សែចេកសម្រាប់វេច",
+        "nameEn": "Banana leaves and binding strings",
+        "amount": "សម្រាប់វេចខ្ចប់"
+      }
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "instructionKh": "ច្របល់អង្ករដំណើបជាមួយដូងកោស ស្ករត្នោត និងអំបិលបន្តិចឱ្យសព្វស្មើដៃ។",
+        "instructionEn": "Toss soaked sticky rice with grated coconut, palm sugar, and a pinch of salt."
+      },
+      {
+        "stepNumber": 2,
+        "instructionKh": "រៀបស្លឹកចេក ដាក់អង្ករដំណើប ទ្រាប់ចេកទុំចំកណ្តាល រួចគ្របអង្ករពីលើ។",
+        "instructionEn": "Lay out softened banana leaves, spread rice, place a ripe banana in center, and cover."
+      },
+      {
+        "stepNumber": 3,
+        "instructionKh": "វេចខ្ចប់ជារាងមូលទ្រវែង ចងខ្សែចេកឱ្យណែនដៃល្អ។",
+        "instructionEn": "Roll into a tight cylinder and tie securely with banana twine."
+      },
+      {
+        "stepNumber": 4,
+        "instructionKh": "ស្ងោរក្នុងទឹកពុះរយៈពេល ៤ ម៉ោងរហូតដល់ឆ្អិនស្អិតទន់ឈ្ងុយ កាត់ជាកង់ៗទទួលទានត្រជាក់។",
+        "instructionEn": "Boil in deep pot for 4 hours until thoroughly gelatinized, slice and enjoy cool."
+      }
+    ]
+  },
+  "food-92": {
+    "nameKh": "នំគមស្នូលដូងស្ករត្នោត",
+    "nameEn": "Num Kom (Pyramid Sticky Cake with Sweet Coconut)",
+    "cat": "cake",
+    "catKh": "នំខ្មែរ & បង្អែម",
+    "catEn": "Traditional Cakes",
+    "descKh": "នំគម ជានំប្រពៃណីខ្មែររាងសាជីជ្រុង ធ្វើពីម្សៅដំណើបទន់រលោង ញាត់ស្នូលដូងកោសឆាស្ករត្នោតផ្អែមឈ្ងុយ វេចក្នុងស្លឹកចេកចំហុយឆ្អិន ជាតំណាងសិរីសួស្តីក្នុងពិធីបុណ្យជាតិ។",
+    "descEn": "Iconic pyramid-shaped banana leaf steamed rice cakes filled with fragrant caramelized grated coconut and palm sugar.",
+    "prepTime": "៣០ នាទី",
+    "cookTime": "២៥ នាទី",
+    "servings": "៤-៦ នាក់",
+    "calories": 220,
+    "difficulty": "medium",
+    "ingredients": [
+      {
+        "nameKh": "ម្សៅដំណើបម៉ត់",
+        "nameEn": "Fine glutinous rice flour",
+        "amount": "៣០០ ក្រាម"
+      },
+      {
+        "nameKh": "ដូងទុំកោសសរសៃ",
+        "nameEn": "Freshly shredded coconut",
+        "amount": "២០០ ក្រាម"
+      },
+      {
+        "nameKh": "ស្ករត្នោតសុទ្ធ",
+        "nameEn": "Pure Cambodian palm sugar",
+        "amount": "១៥០ ក្រាម"
+      },
+      {
+        "nameKh": "ស្លឹកចេកកាត់រាងមូល និងប្រេងឆា",
+        "nameEn": "Banana leaf discs and touch of oil",
+        "amount": "សម្រាប់វេចខ្ចប់"
+      }
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "instructionKh": "ច្របាច់ម្សៅដំណើបជាមួយទឹកក្តៅឧណ្ហៗឱ្យទន់ស្មើដៃ មិនស្អិត។",
+        "instructionEn": "Knead glutinous rice flour with warm water into smooth pliable dough."
+      },
+      {
+        "stepNumber": 2,
+        "instructionKh": "ឆាស្នូល៖ ដាក់ស្ករត្នោតរលាយលើភ្លើង ដាក់ដូងកោសចូលឆាឱ្យខាប់ស្អិតឈ្ងុយ រួចលុញជាដុំមូលតូចៗ។",
+        "instructionEn": "Caramelize palm sugar with shredded coconut until thick and fragrant, roll into balls."
+      },
+      {
+        "stepNumber": 3,
+        "instructionKh": "យកម្សៅមកសំប៉ែត ដាក់ស្នូលដូងចំកណ្តាល រួចវេចខ្ចប់ស្លឹកចេករាងសាជីជ្រុង។",
+        "instructionEn": "Flatten dough, insert coconut ball, seal, and wrap into conical pyramid shape with banana leaves."
+      },
+      {
+        "stepNumber": 4,
+        "instructionKh": "ចំហុយរយៈពេល ២៥ នាទីឱ្យឆ្អិនឡើងរលោង ទទួលទានក្នុងពិធីបុណ្យប្រពៃណី។",
+        "instructionEn": "Steam for 25 minutes until cooked and glossy, serve at room temperature."
+      }
+    ]
+  },
+  "food-93": {
+    "nameKh": "នំកងស្ករត្នោត",
+    "nameEn": "Num Kong (Khmer Glazed Donut Rings)",
+    "cat": "cake",
+    "catKh": "នំខ្មែរ & បង្អែម",
+    "catEn": "Traditional Cakes & Donuts",
+    "descKh": "នំកងស្ករត្នោត គឺជានំប្រពៃណីខ្មែរដ៏ពេញនិយមបំផុត មានរាងដូចកងដៃ ធ្វើពីម្សៅដំណើបបំពងស្រួយស្រោក ស្រោបដោយស្ករត្នោតរម្ងាស់ឡើងជើងក្អែក និងរោយល្ងសលីងឈ្ងុយឆ្ងាញ់ ទទួលទានជាបង្អែមសម្រន់។",
+    "descEn": "Traditional Cambodian crispy fried rice flour donut rings generously glazed with caramelized palm sugar syrup and sprinkled with toasted fragrant white sesame seeds.",
+    "prepTime": "២០ នាទី",
+    "cookTime": "១៥ នាទី",
+    "servings": "៣-៤ នាក់",
+    "calories": 280,
+    "difficulty": "easy",
+    "ingredients": [
+      {
+        "nameKh": "ម្សៅដំណើប និងម្សៅអង្ករខ្សាយបន្តិច",
+        "nameEn": "Glutinous rice flour with rice flour",
+        "amount": "២៥០ ក្រាម"
+      },
+      {
+        "nameKh": "ស្ករត្នោតខ្មែរសម្រាប់ស្រោប",
+        "nameEn": "Pure Cambodian palm sugar for glaze",
+        "amount": "១៥០ ក្រាម"
+      },
+      {
+        "nameKh": "ល្ងសលីងឈ្ងុយ",
+        "nameEn": "Toasted white sesame seeds",
+        "amount": "២ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "ខ្ទិះដូង ឬទឹកក្តៅឧណ្ហៗ",
+        "nameEn": "Warm coconut milk or water",
+        "amount": "១៥០ មីលីលីត្រ"
+      },
+      {
+        "nameKh": "ប្រេងសម្រាប់បំពង",
+        "nameEn": "Vegetable oil for deep frying",
+        "amount": "១ ចានធំ"
+      },
+      {
+        "nameKh": "អំបិលបន្តិច",
+        "nameEn": "Pinch of sea salt",
+        "amount": "កន្លះស្លាបព្រាកាហ្វេ"
+      }
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "instructionKh": "ច្របាច់ម្សៅដំណើបជាមួយខ្ទិះដូង និងអំបិលបន្តិចឱ្យទន់ស្មើដៃ រួចលុញជារាងកងមូលៗដូចកងដៃ។",
+        "instructionEn": "Knead glutinous rice flour with warm coconut milk and salt into smooth dough, then shape into ring donuts."
+      },
+      {
+        "stepNumber": 2,
+        "instructionKh": "ដាំប្រេងឱ្យក្តៅមធ្យម ដាក់នំកងចូលបំពងរហូតដល់ឡើងប៉ោងពណ៌លឿងស្រួយ រួចស្រង់ទុកឱ្យស្រក់ប្រេង។",
+        "instructionEn": "Deep fry dough rings in medium-hot oil until puffed, golden, and crispy. Drain excess oil."
+      },
+      {
+        "stepNumber": 3,
+        "instructionKh": "រម្ងាស់ស្ករត្នោតជាមួយទឹកបន្តិចលើភ្លើងតិចៗរហូតដល់ឡើងជើងក្អែកស្អិតខាប់ឈ្ងុយ។",
+        "instructionEn": "Simmer pure palm sugar with a splash of water over gentle heat until caramelized and syrupy."
+      },
+      {
+        "stepNumber": 4,
+        "instructionKh": "យកនំកងមកជ្រលក់ស្រោបស្ករត្នោតតែម្ខាង រួចរោយល្ងសលីងពីលើភ្លាមៗ ទុកឱ្យស្ករកកស្រួយ ទទួលទានជាបង្អែមសម្រន់ (មិនទទួលទានជាមួយបាយឡើយ)។",
+        "instructionEn": "Dip one side of crispy donuts into palm glaze, sprinkle toasted sesame seeds, let set, and enjoy as a sweet afternoon pastry."
+      }
+    ]
+  },
+  "food-94": {
+    "nameKh": "បង្អែមបបរត្នោតខ្ទិះដូង",
+    "nameEn": "Palm Fruit Tapioca Pudding with Coconut Cream",
+    "cat": "dessert",
+    "catKh": "បង្អែមខ្មែរ",
+    "catEn": "Desserts & Sweets",
+    "descKh": "បង្អែមបបរត្នោតខ្ទិះដូង ប្រើសាច់ត្នោតខ្ចីទន់រលោង ចម្អិនក្នុងទឹកខ្ទិះដូងខាប់ គ្រាប់សាគូ និងស្ករត្នោតសុទ្ធ ក្លិនឈ្ងុយស្លឹកតើយ រសជាតិផ្អែមស្រទន់ត្រជាក់ចិត្ត។",
+    "descEn": "Delightful tropical dessert of tender young palm fruit slices simmered in rich coconut cream with tapioca pearls and pure palm sugar.",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "២០ នាទី",
+    "servings": "៣-៤ នាក់",
+    "calories": 270,
+    "difficulty": "easy",
+    "ingredients": [
+      {
+        "nameKh": "សាច់ត្នោតខ្ចីហាន់បន្ទះ",
+        "nameEn": "Fresh tender young palm fruit slices",
+        "amount": "៣០០ ក្រាម"
+      },
+      {
+        "nameKh": "គ្រាប់សាគូតូចៗ",
+        "nameEn": "Mini tapioca pearls",
+        "amount": "៦០ ក្រាម"
+      },
+      {
+        "nameKh": "ខ្ទិះដូងដើមខាប់",
+        "nameEn": "Rich coconut cream",
+        "amount": "៣៥០ មីលីលីត្រ"
+      },
+      {
+        "nameKh": "ស្ករត្នោតសុទ្ធ",
+        "nameEn": "Pure palm sugar",
+        "amount": "១២០ ក្រាម"
+      },
+      {
+        "nameKh": "ស្លឹកតើយ និងអំបិលបន្តិច",
+        "nameEn": "Pandan leaves and pinch of salt",
+        "amount": "៣ ស្លឹក"
+      }
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "instructionKh": "លាងសាច់ត្នោតខ្ចីឱ្យស្អាត ហាន់ជាបន្ទះស្ដើងល្មម។",
+        "instructionEn": "Rinse young palm fruit and slice into bite-sized pieces."
+      },
+      {
+        "stepNumber": 2,
+        "instructionKh": "ដាំទឹកជាមួយស្លឹកតើយ និងគ្រាប់សាគូឱ្យឆ្អិនថ្លា។",
+        "instructionEn": "Boil water with pandan leaves and tapioca pearls until translucent."
+      },
+      {
+        "stepNumber": 3,
+        "instructionKh": "ដាក់ស្ករត្នោត អំបិលបន្តិច និងសាច់ត្នោតចូលរម្ងាស់ឱ្យចូលជាតិ ៥ នាទី។",
+        "instructionEn": "Stir in palm sugar, pinch of salt, and palm fruit slices; simmer for 5 minutes."
+      },
+      {
+        "stepNumber": 4,
+        "instructionKh": "ចាក់ខ្ទិះដូងខាប់ចូល កូរឱ្យពុះតិចៗលើកចុះ ដួសទទួលទានក្តៅៗ ឬត្រជាក់ជាមួយទឹកកក។",
+        "instructionEn": "Pour in thick coconut cream, bring to a gentle simmer, and serve warm or chilled with crushed ice."
+      }
+    ]
+  },
+  "food-95": {
+    "nameKh": "បង្អែមពោតខ្ទិះដូង",
+    "nameEn": "Sweet Corn Coconut Pudding",
+    "cat": "dessert",
+    "catKh": "បង្អែមខ្មែរ",
+    "catEn": "Desserts & Sweets",
+    "descKh": "បង្អែមពោតខ្ទិះដូង ប្រើពោតដំណើបស្ងោរឈូសសរសៃ ចម្អិនជាមួយគ្រាប់សាគូ ខ្ទិះដូងខាប់ និងស្ករត្នោត រសជាតិផ្អែមមុតស្រាលឈ្ងុយគ្រាប់ពោត និងដូង។",
+    "descEn": "Warm, sweet Cambodian pudding made with fresh sticky corn kernels, translucent tapioca pearls, and rich salted coconut cream.",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "២០ នាទី",
+    "servings": "៣-៤ នាក់",
+    "calories": 260,
+    "difficulty": "easy",
+    "ingredients": [
+      {
+        "nameKh": "ពោតដំណើបស្ងោរឈូសគ្រាប់",
+        "nameEn": "Fresh sticky corn, shucked and sliced",
+        "amount": "២ ផ្លែ"
+      },
+      {
+        "nameKh": "គ្រាប់សាគូ",
+        "nameEn": "Tapioca pearls",
+        "amount": "៥០ ក្រាម"
+      },
+      {
+        "nameKh": "ខ្ទិះដូងខាប់",
+        "nameEn": "Thick coconut milk & cream",
+        "amount": "៣៥០ មីលីលីត្រ"
+      },
+      {
+        "nameKh": "ស្ករស ឬស្ករត្នោត",
+        "nameEn": "Sugar or palm sugar",
+        "amount": "១០០ ក្រាម"
+      },
+      {
+        "nameKh": "អំបិលបន្តិច",
+        "nameEn": "Pinch of sea salt",
+        "amount": "កន្លះស្លាបព្រាកាហ្វេ"
+      }
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "instructionKh": "ឈូសគ្រាប់ពោតដំណើបឱ្យម៉ត់ល្មម។",
+        "instructionEn": "Slice kernels off sweet sticky corn cobs."
+      },
+      {
+        "stepNumber": 2,
+        "instructionKh": "ដាំទឹកពុះ ដាក់គ្រាប់សាគូ និងពោតចូលកូរឱ្យឆ្អិនទន់ស្អិត។",
+        "instructionEn": "Boil water, add tapioca pearls and corn, cooking until pearls are clear."
+      },
+      {
+        "stepNumber": 3,
+        "instructionKh": "ថែមស្ករ និងអំបិលបន្តិចឱ្យមានរសជាតិផ្អែមមុតស្រាល។",
+        "instructionEn": "Stir in sugar and a pinch of salt to balance sweetness."
+      },
+      {
+        "stepNumber": 4,
+        "instructionKh": "ចាក់ខ្ទិះដូងចូលកូរឱ្យសព្វ ដួសដាក់ចានទទួលទានក្តៅៗឈ្ងុយដូង។",
+        "instructionEn": "Stir in rich coconut cream, remove from heat, and enjoy warm."
+      }
+    ]
+  },
+  "food-96": {
+    "nameKh": "សាច់ក្រកសៀមរាបរសជាតិដើម",
+    "nameEn": "Authentic Siem Reap Sweet Pork Sausage",
+    "cat": "specialty",
+    "catKh": "មុខម្ហូបពិសេស / សាច់ក្រក",
+    "catEn": "Specialties",
+    "descKh": "សាច់ក្រកសៀមរាប ជារបស់ផ្ញើដ៏ល្បីល្បាញប្រចាំខេត្តសៀមរាប សាច់ជ្រូកចិញ្ច្រាំជាប់ខ្លាញ់ល្មម ប្រឡាក់ស្រាស ស្ករត្នោត និងម្រេចកំពត ហាលថ្ងៃឱ្យឡើងជាតិជូរអែម យកមកចៀនឈ្ងុយឈ្ងប់។",
+    "descEn": "Prized artisanal Cambodian sweet and savory pork sausages from Siem Reap, seasoned with rice wine, palm sugar, and Kampot pepper, naturally cured.",
+    "prepTime": "៣០ នាទី",
+    "cookTime": "១៥ នាទី",
+    "servings": "៣-៥ នាក់",
+    "calories": 380,
+    "difficulty": "medium",
+    "ingredients": [
+      {
+        "nameKh": "សាច់ក្រកសៀមរាបស្ងួតស្រាប់",
+        "nameEn": "Authentic Siem Reap pork sausages",
+        "amount": "៤០០ ក្រាម"
+      },
+      {
+        "nameKh": "ទឹកបន្តិចសម្រាប់រម្ងាស់ចៀន",
+        "nameEn": "Water for poaching and pan-frying",
+        "amount": "កន្លះកែវ"
+      },
+      {
+        "nameKh": "ជ្រក់ខ្ញី ឬជ្រក់ត្រសក់",
+        "nameEn": "Pickled ginger or cucumber",
+        "amount": "១ ចានតូច"
+      },
+      {
+        "nameKh": "ម្រេចកំពត និងម្ទេសស្រស់",
+        "nameEn": "Kampot pepper and fresh chilies",
+        "amount": "តាមចំណូលចិត្ត"
+      }
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "instructionKh": "កាត់សាច់ក្រកជាកំណាត់ខ្លីៗល្មម។",
+        "instructionEn": "Slice sausages into serving segments."
+      },
+      {
+        "stepNumber": 2,
+        "instructionKh": "ដាក់សាច់ក្រកក្នុងខ្ទះ ចាក់ទឹកកន្លះកែវ រម្ងាស់លើភ្លើងមធ្យមរហូតដល់រីងទឹក។",
+        "instructionEn": "Place sausages in pan with half a cup of water, simmering until water evaporates."
+      },
+      {
+        "stepNumber": 3,
+        "instructionKh": "ពេលរីងទឹក ខ្លាញ់សាច់ក្រកនឹងចេញមកចៀនសាច់ក្រកឡើងពណ៌ក្រហមឈ្ងុយ។",
+        "instructionEn": "As water disappears, the rendered pork fat fries sausages to a shiny golden red."
+      },
+      {
+        "stepNumber": 4,
+        "instructionKh": "ដួសដាក់ចាន ទទួលទានជាមួយជ្រក់ខ្ញី និងបាយក្ដៅៗ។",
+        "instructionEn": "Serve sizzling hot with pickled ginger and steamed rice."
+      }
+    ]
+  },
+  "food-97": {
+    "nameKh": "ងៀតគោបាត់ដំបងអាំង",
+    "nameEn": "Sun-Dried Battambang Beef Jerky",
+    "cat": "specialty",
+    "catKh": "មុខម្ហូបពិសេស / ងៀត",
+    "catEn": "Specialties",
+    "descKh": "ងៀតគោបាត់ដំបង សាច់គោផុយប្រឡាក់ស្ករត្នោត ទឹកត្រី ខ្ទឹមស ម្រេចកំពត និងរោយគ្រាប់ល្ងស ហាលថ្ងៃឱ្យស្ងួតល្មម អាំងលើធ្យូងភ្លើងឱ្យឈ្ងុយ សាច់ទន់ផ្អែមឆ្ងាញ់។",
+    "descEn": "Celebrated Battambang sweet-savory sun-dried beef jerky topped with sesame seeds, lightly grilled over charcoal until tender and aromatic.",
+    "prepTime": "២០ នាទី",
+    "cookTime": "១០ នាទី",
+    "servings": "៣-៤ នាក់",
+    "calories": 290,
+    "difficulty": "easy",
+    "ingredients": [
+      {
+        "nameKh": "ងៀតគោបាត់ដំបងហាលស្ងួតស្រាប់",
+        "nameEn": "Cured Battambang beef jerky with sesame",
+        "amount": "៣០០ ក្រាម"
+      },
+      {
+        "nameKh": "ជ្រក់ត្រសក់ ឬជ្រក់ល្ហុង",
+        "nameEn": "Pickled cucumbers or green papaya",
+        "amount": "១ ចាន"
+      },
+      {
+        "nameKh": "ទឹកត្រីកោះកុង ឬទឹកម្ទេស",
+        "nameEn": "Koh Kong spicy dip or chili sauce",
+        "amount": "សម្រាប់ជ្រលក់"
+      }
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "instructionKh": "កាត់បន្ទះងៀតគោជាដុំល្មមសម្រាប់អាំង។",
+        "instructionEn": "Cut beef jerky sheets into manageable pieces."
+      },
+      {
+        "stepNumber": 2,
+        "instructionKh": "អាំងលើរងើកភ្លើងធ្យូងតិចៗ ២ នាទីសងខាងឱ្យឆ្អិនឈ្ងុយ កុំឱ្យខ្លោច។",
+        "instructionEn": "Grill over gentle charcoal heat for 2 minutes per side until sizzling and fragrant."
+      },
+      {
+        "stepNumber": 3,
+        "instructionKh": "យកដំបងឈើមកដំ ឬញីសាច់ងៀតឱ្យបែកទន់សរសៃ។",
+        "instructionEn": "Lightly pound with a mallet to loosen tender beef fibers."
+      },
+      {
+        "stepNumber": 4,
+        "instructionKh": "ទទួលទានក្តៅៗជាមួយបាយក្ដៅៗ ឬជ្រក់ត្រសក់ស្រួយៗ។",
+        "instructionEn": "Serve warm accompanied by pickled cucumbers and hot rice."
+      }
+    ]
+  },
+  "food-98": {
+    "nameKh": "អំបុកស្រូវថ្មីដូងខ្ចី",
+    "nameEn": "Flattened New Rice with Fresh Young Coconut",
+    "cat": "cake",
+    "catKh": "នំខ្មែរ & អាហារសម្រន់",
+    "catEn": "Traditional Snacks",
+    "descKh": "អំបុកស្រូវថ្មីដូងខ្ចី ជានិមិត្តរូបនៃពិធីបុណ្យអកអំបុក អំបុកស្រូវថ្មីលីងបុកឈ្ងុយៗ ច្របល់ជាមួយសាច់ដូងខ្ចីកោស ទឹកដូង និងស្ករត្នោតបន្តិច រសជាតិផ្អែមស្រទន់ឈ្ងុយដូង។",
+    "descEn": "Seasonal delicacy of newly harvested flattened green rice tossed with tender shredded young coconut, sweet coconut water, and a sprinkle of palm sugar.",
+    "prepTime": "១០ នាទី",
+    "cookTime": "៥ នាទី",
+    "servings": "៣-៤ នាក់",
+    "calories": 210,
+    "difficulty": "easy",
+    "ingredients": [
+      {
+        "nameKh": "អំបុកស្រូវថ្មីលីងបុកឈ្ងុយ",
+        "nameEn": "Freshly toasted pounded new crop rice (Ambok)",
+        "amount": "២៥០ ក្រាម"
+      },
+      {
+        "nameKh": "សាច់ដូងខ្ចីកោសសរសៃ",
+        "nameEn": "Fresh young coconut flesh, shredded",
+        "amount": "១៥០ ក្រាម"
+      },
+      {
+        "nameKh": "ទឹកដូងខ្ចីផ្អែមធម្មជាតិ",
+        "nameEn": "Fresh sweet coconut water",
+        "amount": "កន្លះកែវ"
+      },
+      {
+        "nameKh": "ស្ករត្នោត ឬស្ករសបន្តិច",
+        "nameEn": "Palm sugar or cane sugar",
+        "amount": "១ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "ចេកណាំវ៉ាទុំសម្រាប់ផ្ទាប់",
+        "nameEn": "Ripe sweet baby bananas",
+        "amount": "៣-៤ ផ្លែ"
+      }
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "instructionKh": "រើសអំបុកឱ្យស្អាត ស្រោចទឹកដូងខ្ចីបន្តិចច្របល់ឱ្យអំបុកទន់ស្មើដៃ។",
+        "instructionEn": "Sprinkle fresh coconut water over ambok rice to soften grains evenly."
+      },
+      {
+        "stepNumber": 2,
+        "instructionKh": "ដាក់សាច់ដូងខ្ចីកោស និងស្ករត្នោតបន្តិចចូល។",
+        "instructionEn": "Add fresh shredded young coconut meat and palm sugar."
+      },
+      {
+        "stepNumber": 3,
+        "instructionKh": "ច្របល់ចូលគ្នាថ្នមៗឱ្យសព្វ និងឡើងក្លិនឈ្ងុយដូង។",
+        "instructionEn": "Toss gently until well blended and fragrant."
+      },
+      {
+        "stepNumber": 4,
+        "instructionKh": "ទទួលទានផ្ទាប់ជាមួយចេកណាំវ៉ាទុំផ្អែម ក្នុងរដូវបុណ្យអុំទូក អកអំបុក (មិនទទួលទានជាមួយបាយឡើយ)។",
+        "instructionEn": "Serve with ripe bananas as a celebratory Water Festival treat."
+      }
+    ]
+  },
+  "food-99": {
+    "nameKh": "នំគ្រក់ខ្ទិះដូងក្តៅៗ",
+    "nameEn": "Num Krok (Crispy Coconut Rice Pods with Chives)",
+    "cat": "cake",
+    "catKh": "នំខ្មែរ & អាហារសម្រន់",
+    "catEn": "Traditional Cakes & Snacks",
+    "descKh": "នំគ្រក់ខ្ទិះដូង ជានំខ្មែរដ៏ពេញនិយមបំផុត ម្សៅអង្ករលាយខ្ទិះដូង និងស្លឹកខ្ទឹម ចាក់ក្នុងពុម្ពដែកក្តៅឱ្យបាតនំស្រួយស្រោក ផ្ទៃខាងក្នុងទន់រលោងឈ្ងុយដូង ជ្រលក់ទឹកត្រីផ្អែម។",
+    "descEn": "Beloved Cambodian crispy coconut-rice spherical pancakes cooked in cast-iron pans, with a crisp outer shell, creamy coconut center, and chopped chives.",
+    "prepTime": "២០ នាទី",
+    "cookTime": "១៥ នាទី",
+    "servings": "៣-៤ នាក់",
+    "calories": 290,
+    "difficulty": "medium",
+    "ingredients": [
+      {
+        "nameKh": "ម្សៅអង្ករខ្សាយលាយម្សៅដំណើប",
+        "nameEn": "Rice flour blended with sticky rice flour",
+        "amount": "២៥០ ក្រាម"
+      },
+      {
+        "nameKh": "ខ្ទិះដូងដើមខាប់",
+        "nameEn": "Rich coconut cream",
+        "amount": "៣០០ មីលីលីត្រ"
+      },
+      {
+        "nameKh": "ស្លឹកខ្ទឹមហាន់ល្អិត",
+        "nameEn": "Finely chopped chives / scallions",
+        "amount": "៣ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "ទឹកត្រីផ្អែមលាយទឹកខ្ទិះសម្រាប់ជ្រលក់",
+        "nameEn": "Sweet coconut fish sauce dip",
+        "amount": "១ កូនចាន"
+      },
+      {
+        "nameKh": "ប្រេងឆាសម្រាប់លាបពុម្ព",
+        "nameEn": "Oil for greasing the cast-iron pan",
+        "amount": "២ ស្លាបព្រាបាយ"
+      }
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "instructionKh": "លាយម្សៅអង្ករជាមួយទឹក ខ្ទិះដូង អំបិលបន្តិច និងស្លឹកខ្ទឹមឱ្យសព្វជាល្បាយរាវល្មម។",
+        "instructionEn": "Whisk rice flour with water, coconut cream, salt, and chives into a smooth batter."
+      },
+      {
+        "stepNumber": 2,
+        "instructionKh": "ដុតពុម្ពនំគ្រក់ដែកឱ្យក្តៅខ្លាំង លាបប្រេង រួចចាក់ម្សៅចូលកន្លះពុម្ព។",
+        "instructionEn": "Heat the cast-iron cake pan until smoking, grease cups, and pour batter halfway."
+      },
+      {
+        "stepNumber": 3,
+        "instructionKh": "ចាក់ក្បាលខ្ទិះដូងខាប់ពីលើ រួចគ្របគម្រប ៣ នាទីឱ្យបាតនំស្រួយពណ៌ត្នោត។",
+        "instructionEn": "Spoon a dollop of thick coconut cream on top, cover for 3 minutes until bottom is crisp."
+      },
+      {
+        "stepNumber": 4,
+        "instructionKh": "ឆ្កៀលនំគ្រក់ដាក់ផ្គុំជាគូៗ ទទួលទានក្តៅៗជ្រលក់ទឹកត្រីផ្អែម (ជាអាហារសម្រន់ពេលព្រឹក/រសៀល)។",
+        "instructionEn": "Scoop out half-spheres, pair them together, and serve hot with sweet dipping sauce."
+      }
+    ]
+  },
+  "food-100": {
+    "nameKh": "ចេកចៀនម្សៅស្រួយស្ករត្នោត",
+    "nameEn": "Crispy Deep-Fried Bananas with Palm Glaze",
+    "cat": "cake",
+    "catKh": "នំខ្មែរ & អាហារសម្រន់",
+    "catEn": "Traditional Cakes & Snacks",
+    "descKh": "ចេកចៀនម្សៅស្រួយស្ករត្នោត ចេកណាំវ៉ាទុំសំប៉ែត ជ្រលក់ក្នុងម្សៅស្រួយរោយគ្រាប់ល្ងស បំពងក្នុងប្រេងក្តៅឡើងពណ៌មាសស្រួយស្រោក សាច់ចេកខាងក្នុងទន់ផ្អែមឆ្ងាញ់។",
+    "descEn": "Favorite Cambodian street snack of sweet baby bananas pressed flat, coated in a crispy sesame rice batter, and fried golden brown.",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "១២ នាទី",
+    "servings": "៣-៤ នាក់",
+    "calories": 270,
+    "difficulty": "easy",
+    "ingredients": [
+      {
+        "nameKh": "ចេកណាំវ៉ាទុំសំប៉ែតល្មម",
+        "nameEn": "Ripe sweet baby bananas, pressed flat",
+        "amount": "៦-៨ ផ្លែ"
+      },
+      {
+        "nameKh": "ម្សៅអង្ករលាយម្សៅមីស្រួយ",
+        "nameEn": "Rice flour & crispy batter mix",
+        "amount": "២០០ ក្រាម"
+      },
+      {
+        "nameKh": "គ្រាប់ល្ងស ឬល្ងខ្មៅ",
+        "nameEn": "Toasted sesame seeds",
+        "amount": "២ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "ស្ករត្នោត និងអំបិលបន្តិច",
+        "nameEn": "Palm sugar and pinch of salt",
+        "amount": "១ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "ប្រេងសម្រាប់បំពង",
+        "nameEn": "Vegetable oil for deep-frying",
+        "amount": "១ ចានធំ"
+      }
+    ],
+    "steps": [
+      {
+        "stepNumber": 1,
+        "instructionKh": "ចិតចេកទុំជាបន្ទះ រួចយកថង់ប្លាស្ទិកទ្រាប់សង្កត់ឱ្យសំប៉ែតល្មម។",
+        "instructionEn": "Peel ripe bananas and gently press between plastic sheets into flat cutlets."
+      },
+      {
+        "stepNumber": 2,
+        "instructionKh": "លាយម្សៅស្រួយជាមួយទឹក ស្ករត្នោត អំបិលបន្តិច និងគ្រាប់ល្ងឱ្យខាប់ល្មម។",
+        "instructionEn": "Whisk rice flour with water, palm sugar, salt, and sesame seeds into a smooth batter."
+      },
+      {
+        "stepNumber": 3,
+        "instructionKh": "ជ្រលក់ចេកក្នុងម្សៅ រួចបំពងក្នុងប្រេងក្តៅរហូតដល់ឡើងពណ៌មាសស្រួយសងខាង។",
+        "instructionEn": "Dip flattened bananas into batter and fry in hot oil until puffed, golden, and crispy."
+      },
+      {
+        "stepNumber": 4,
+        "instructionKh": "ស្រង់ឱ្យស្រក់ប្រេង ទទួលទានក្តៅៗស្រួយស្រោកផ្អែមធម្មជាតិ (ជាអាហារសម្រន់ពេលរសៀល)។",
+        "instructionEn": "Drain on paper towels and enjoy warm as a crispy afternoon sweet snack."
+      }
+    ]
+  }
+};
+
 export const generateFull100Foods = (): FoodItem[] => {
   const categories: Array<{ slug: FoodItem['categorySlug']; kh: string; en: string }> = [
     { slug: 'soup', kh: 'ម្ហូបសម្ល', en: 'Traditional Soups' },
@@ -3209,45 +6389,67 @@ export const generateFull100Foods = (): FoodItem[] => {
   selectedAdditionalDishes.forEach((d, idx) => {
     const id = `food-${fullList.length + 1}`;
     const photo = `/foods/${id}.jpg`;
-    const catObj = categories.find(c => c.slug === d.cat) || categories[0];
     const auditStatus = 'verified';
     const auditNote = `រូបភាពដើមពិតប្រាកដពី Magnific (${d.nameKh})`;
 
-    fullList.push({
-      id,
-      nameKh: d.nameKh,
-      nameEn: d.nameEn,
-      categorySlug: d.cat as any,
-      categoryKh: catObj.kh,
-      categoryEn: catObj.en,
-      descriptionKh: `${d.nameKh} គឺ​ជា​ម្ហូប​ខ្មែរ​ប្រពៃណី​ដ៏​ឈ្ងុយឆ្ងាញ់ ដែល​ប្រើប្រាស់​គ្រឿងទេស​ធម្មជាតិ​ស្រស់ៗ ចម្អិន​តាម​ក្បួនខ្នាត​ខ្មែរ​ដើម រសជាតិ​ប្លែក​ពិសា និង​ពេញនិយម​យ៉ាង​ខ្លាំង។`,
-      descriptionEn: `${d.nameEn} is a traditional Cambodian culinary specialty prepared with fresh local ingredients, herbs, and time-honored cooking traditions.`,
-      photoUrl: photo,
-      imageAuditStatus: auditStatus,
-      imageAuditNote: auditNote,
-      originalPhotoUrl: photo,
-      prepTime: '១៥ នាទី',
-      cookTime: '២០ នាទី',
-      servings: '២-៣ នាក់',
-      calories: 280 + ((idx * 17) % 220),
-      difficulty: idx % 3 === 0 ? 'easy' : idx % 3 === 1 ? 'medium' : 'hard',
-      priceRiel: d.priceR,
-      priceUsd: d.priceU,
-      rating: +(4.6 + ((idx % 4) * 0.1)).toFixed(1),
-      reviewCount: 45 + ((idx * 11) % 150),
-      isFeatured: idx % 8 === 0,
-      ingredients: [
-        { nameKh: 'គ្រឿងផ្សំចម្បងស្រស់ៗ', nameEn: 'Fresh core ingredients', amount: '៣០០ ក្រាម' },
-        { nameKh: 'គ្រឿងបុកស្លឹកគ្រៃ និងខ្ទឹមស', nameEn: 'Lemongrass kroeung & garlic', amount: '២ ស្លាបព្រាបាយ' },
-        { nameKh: 'ទឹកត្រី និងស្ករត្នោតខ្មែរ', nameEn: 'Fish sauce and palm sugar', amount: '១ ស្លាបព្រាបាយ' },
-        { nameKh: 'ជីរគ្រប់មុខ និងម្ទេស', nameEn: 'Fresh herbs and chilies', amount: 'តាមចំណូលចិត្ត' },
-      ],
-      steps: [
-        { stepNumber: 1, instructionKh: 'លាងសម្អាតគ្រឿងផ្សំឱ្យស្អាត រួចហាន់ជាចំណិតល្មម។', instructionEn: 'Clean all fresh ingredients and slice into even portions.' },
-        { stepNumber: 2, instructionKh: 'ចម្អិនតាមលំដាប់ដោយប្រើភ្លើងមធ្យមឱ្យចូលជាតិល្អ។', instructionEn: 'Cook over medium heat, allowing flavors and spices to meld.' },
-        { stepNumber: 3, instructionKh: 'ភ្លក្សរសជាតិ និងដួសដាក់ចានទទួលទានជាមួយបាយក្ដៅៗ។', instructionEn: 'Taste and adjust seasoning, then serve warm with steamed rice.' },
-      ],
-    });
+    // Authentic audited recipe lookup
+    const customRecipe = (AUTHENTIC_FOOD_RECIPES as Record<string, any>)[id];
+    
+    if (customRecipe) {
+      fullList.push({
+        id,
+        nameKh: customRecipe.nameKh,
+        nameEn: customRecipe.nameEn,
+        categorySlug: customRecipe.cat,
+        categoryKh: customRecipe.catKh,
+        categoryEn: customRecipe.catEn,
+        descriptionKh: customRecipe.descKh,
+        descriptionEn: customRecipe.descEn,
+        photoUrl: photo,
+        imageAuditStatus: auditStatus,
+        imageAuditNote: auditNote,
+        originalPhotoUrl: photo,
+        prepTime: customRecipe.prepTime,
+        cookTime: customRecipe.cookTime,
+        servings: customRecipe.servings,
+        calories: customRecipe.calories,
+        difficulty: customRecipe.difficulty,
+        priceRiel: d.priceR,
+        priceUsd: d.priceU,
+        rating: +(4.6 + ((idx % 4) * 0.1)).toFixed(1),
+        reviewCount: 45 + ((idx * 11) % 150),
+        isFeatured: idx % 8 === 0,
+        ingredients: customRecipe.ingredients,
+        steps: customRecipe.steps
+      });
+    } else {
+      const catObj = categories.find(c => c.slug === d.cat) || categories[0];
+      fullList.push({
+        id,
+        nameKh: d.nameKh,
+        nameEn: d.nameEn,
+        categorySlug: d.cat as any,
+        categoryKh: catObj.kh,
+        categoryEn: catObj.en,
+        descriptionKh: `${d.nameKh} គឺជារសជាតិម្ហូបខ្មែរដើមពិតប្រាកដ។`,
+        descriptionEn: `${d.nameEn} is an authentic Cambodian dish.`,
+        photoUrl: photo,
+        imageAuditStatus: auditStatus,
+        imageAuditNote: auditNote,
+        originalPhotoUrl: photo,
+        prepTime: '១៥ នាទី',
+        cookTime: '២០ នាទី',
+        servings: '២-៣ នាក់',
+        calories: 280,
+        difficulty: 'medium',
+        priceRiel: d.priceR,
+        priceUsd: d.priceU,
+        rating: 4.7,
+        reviewCount: 50,
+        ingredients: [],
+        steps: []
+      });
+    }
   });
 
   return fullList;

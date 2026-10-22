@@ -1,6 +1,6 @@
-export const APP_VERSION = 'v1.6.6';
-export const APP_VERSION_NAME = '1.6.6';
-export const APP_BUILD_CODE = 38;
+export const APP_VERSION = 'v1.6.7';
+export const APP_VERSION_NAME = '1.6.7';
+export const APP_BUILD_CODE = 39;
 export const APP_RELEASE_DATE = '2026-10-22';
 
 export const VIP_ANNUAL_PRICE_USD = 9.99;
@@ -168,6 +168,7 @@ export type FoodCategorySlug =
   | 'stirfry' 
   | 'salad' 
   | 'dessert' 
+  | 'cake'
   | 'noodles' 
   | 'rice' 
   | 'specialty';

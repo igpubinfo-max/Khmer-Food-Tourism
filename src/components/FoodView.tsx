@@ -11,13 +11,14 @@ export const FoodView: React.FC = () => {
 
   const categories = [
     { id: 'all', nameKh: 'ទាំងអស់', nameEn: 'All Foods' },
-    { id: 'soup', nameKh: 'សម្ល & អាម៉ុក', nameEn: 'Soups & Amok' },
-    { id: 'grilled', nameKh: 'ម្ហូបអាំង', nameEn: 'Grilled & BBQ' },
+    { id: 'dessert', nameKh: 'បង្អែមខ្មែរ', nameEn: 'Khmer Desserts' },
+    { id: 'cake', nameKh: 'នំខ្មែរ & អាហារសម្រន់', nameEn: 'Traditional Cakes & Snacks' },
+    { id: 'rice', nameKh: 'ម្ហូបបាយ', nameEn: 'Rice Dishes' },
+    { id: 'noodles', nameKh: 'មី គុយទាវ & នំបញ្ចុក', nameEn: 'Noodle Dishes' },
+    { id: 'soup', nameKh: 'ស៊ុប សម្ល & បបរ', nameEn: 'Soups & Porridges' },
+    { id: 'grilled', nameKh: 'ម្ហូបអាំង ចៀន & ចំហុយ', nameEn: 'Grilled & Steamed' },
     { id: 'stirfry', nameKh: 'ម្ហូបឆា', nameEn: 'Stir-fried' },
-    { id: 'salad', nameKh: 'ញាំ & ភ្លា', nameEn: 'Salads & Dips' },
-    { id: 'noodles', nameKh: 'គុយទាវ & នំបញ្ចុក', nameEn: 'Noodles' },
-    { id: 'rice', nameKh: 'ម្ហូបបាយ & បបរ', nameEn: 'Rice Dishes' },
-    { id: 'dessert', nameKh: 'នំ & បង្អែម', nameEn: 'Desserts' },
+    { id: 'salad', nameKh: 'ញាំ ភ្លា & ទឹកគ្រឿង', nameEn: 'Salads & Dips' },
     { id: 'specialty', nameKh: 'មុខម្ហូបពិសេស', nameEn: 'Specialties' },
   ];
 

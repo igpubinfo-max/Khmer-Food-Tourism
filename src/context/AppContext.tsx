@@ -291,19 +291,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
 
   const [foods, setFoods] = useState<FoodItem[]>(() => {
-    // Purge legacy caches to ensure authentic local food photos are loaded
+    // Purge legacy caches to ensure authentic local food photos and recipes are loaded
     try {
       localStorage.removeItem('kft_foods_v4');
       localStorage.removeItem('kft_foods_100_v1');
+      localStorage.removeItem('kft_foods_100_v2');
     } catch {}
     try {
-      const saved = localStorage.getItem('kft_foods_100_v2');
+      const saved = localStorage.getItem('kft_foods_100_v3');
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length >= 50 && parsed[0]?.photoUrl?.startsWith('/foods/')) return parsed;
       }
     } catch (e) {
-      console.warn('Failed to parse kft_foods_100_v2', e);
+      console.warn('Failed to parse kft_foods_100_v3', e);
     }
     return initialFoods;
   });
@@ -851,7 +852,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     try {
       if (foods && foods.length > 0) {
-        localStorage.setItem('kft_foods_100_v2', JSON.stringify(foods));
+        localStorage.setItem('kft_foods_100_v3', JSON.stringify(foods));
       }
     } catch (e) {
       console.warn('Storage sync failed for foods:', e);
