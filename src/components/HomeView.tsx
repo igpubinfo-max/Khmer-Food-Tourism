@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
-import { TrendingFoodCategorySlug, TrendingFoodItem, isUserVipActive } from '../types';
+import { TrendingFoodCategorySlug, TrendingFoodItem, isUserVipActive, sortRestaurantsChronologically } from '../types';
+import { shareRichContent, copyTextNativeOrWeb } from '../utils/androidMediaHelper';
 import { 
   Sparkles, ChevronRight, Utensils, Store, Compass, 
   MapPin, Heart, Flame, QrCode, Download, ShieldCheck,
@@ -33,7 +34,7 @@ export const HomeView: React.FC = () => {
   const isKm = language === 'km';
   const isVip = isUserVipActive(currentUser);
   const myRestaurants = useMemo(() => {
-    return currentUser ? restaurants.filter(r => r.ownerId === currentUser.id) : [];
+    return currentUser ? sortRestaurantsChronologically(restaurants.filter(r => r.ownerId === currentUser.id)) : [];
   }, [restaurants, currentUser]);
 
   // Active category filter, local search query, and AI random seed for AI Trending Food on Home
@@ -125,14 +126,13 @@ export const HomeView: React.FC = () => {
     );
   };
 
-  const handleCopyCaption = () => {
+  const handleCopyCaption = async () => {
     const fullText = `${currentViralIdea.hookKh}\n\n${currentViralIdea.captionKh}\n\n${currentViralIdea.hashtags}`;
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(fullText).then(() => {
-        setHasCopiedCaption(true);
-        showToast(isKm ? 'បានចម្លង Caption & Hashtags រួចរាល់!' : 'Caption & Hashtags copied!', 'success');
-        setTimeout(() => setHasCopiedCaption(false), 2500);
-      }).catch(() => {});
+    const ok = await copyTextNativeOrWeb(fullText, currentViralIdea.foodNameKh);
+    if (ok) {
+      setHasCopiedCaption(true);
+      showToast(isKm ? 'បានចម្លង Caption & Hashtags រួចរាល់!' : 'Caption & Hashtags copied!', 'success');
+      setTimeout(() => setHasCopiedCaption(false), 2500);
     }
   };
 
@@ -149,13 +149,13 @@ export const HomeView: React.FC = () => {
       (f.ingredients && f.ingredients.some(i => i.nameKh.toLowerCase().includes(q) || i.nameEn.toLowerCase().includes(q)))
     );
 
-    const matchedRestaurants = restaurants.filter(r =>
+    const matchedRestaurants = sortRestaurantsChronologically(restaurants.filter(r =>
       r.nameKh.toLowerCase().includes(q) ||
       r.nameEn.toLowerCase().includes(q) ||
       (r.addressKh && r.addressKh.toLowerCase().includes(q)) ||
       (r.provinceKh && r.provinceKh.toLowerCase().includes(q)) ||
       (r.signatureDishesKh && r.signatureDishesKh.some(d => d.toLowerCase().includes(q)))
-    );
+    ));
 
     const matchedDestinations = destinations.filter(d =>
       d.nameKh.toLowerCase().includes(q) ||
@@ -267,15 +267,32 @@ export const HomeView: React.FC = () => {
 
   const handleShare = (e: React.MouseEvent, item: TrendingFoodItem) => {
     e.stopPropagation();
-    const text = isKm
-      ? `🔥 មុខម្ហូបល្បីលើ TikTok & FB៖ ${item.foodNameKh} នៅ ${item.restaurantNameKh} (${item.provinceKh})!`
-      : `🔥 Trending Food: ${item.foodNameEn} at ${item.restaurantNameEn} (${item.provinceEn})!`;
-    if (navigator.share) {
-      navigator.share({ title: item.foodNameKh, text, url: window.location.href }).catch(() => {});
-    } else {
-      navigator.clipboard.writeText(`${text}\n${window.location.href}`);
-      showToast(isKm ? 'បានចម្លងព័ត៌មានរួចរាល់!' : 'Copied info to clipboard!', 'success');
-    }
+    const mapLink =
+      item.mapUrl ||
+      (item.latitude && item.longitude
+        ? `https://www.google.com/maps/search/?api=1&query=${item.latitude},${item.longitude}`
+        : undefined);
+    shareRichContent(
+      {
+        title: isKm
+          ? `${item.foodNameKh} — ${item.restaurantNameKh}`
+          : `${item.foodNameEn} — ${item.restaurantNameEn}`,
+        nameKh: `${item.foodNameKh} (${item.restaurantNameKh})`,
+        nameEn: `${item.foodNameEn} (${item.restaurantNameEn})`,
+        description: isKm ? item.descriptionKh : item.descriptionEn,
+        location: isKm
+          ? `${item.addressKh} (${item.provinceKh})`
+          : `${item.addressEn} (${item.provinceEn})`,
+        phone: item.phone,
+        priceDisplay: item.priceDisplay,
+        photoUrl: item.photoUrl,
+        mapUrl: mapLink,
+        itemType: 'trending',
+        itemId: item.id,
+        isKm,
+      },
+      showToast
+    );
   };
 
   return (

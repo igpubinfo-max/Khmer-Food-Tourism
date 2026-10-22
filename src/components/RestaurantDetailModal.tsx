@@ -12,6 +12,11 @@ import {
   formatDisplayPhone,
   resolveRestaurantPhoneOnDemand,
 } from '../services/googlePlacesService';
+import {
+  shareRichContent,
+  formatRichShareText,
+  copyTextNativeOrWeb,
+} from '../utils/androidMediaHelper';
 
 export const RestaurantDetailModal: React.FC = () => {
   const { 
@@ -131,50 +136,57 @@ export const RestaurantDetailModal: React.FC = () => {
     ...shopFoodPhotos,
   ].filter((url, index, self) => url && self.indexOf(url) === index);
 
+  const sharePayload = {
+    title: isKm ? selectedRestaurant.nameKh : selectedRestaurant.nameEn,
+    nameKh: selectedRestaurant.nameKh,
+    nameEn: selectedRestaurant.nameEn,
+    description: isKm ? selectedRestaurant.descriptionKh : selectedRestaurant.descriptionEn,
+    location: isKm
+      ? `${selectedRestaurant.addressKh} (${selectedRestaurant.provinceKh})`
+      : `${selectedRestaurant.addressEn} (${selectedRestaurant.provinceEn})`,
+    phone: displayPhone || selectedRestaurant.phone,
+    priceDisplay: selectedRestaurant.priceLevel,
+    signatureDishes: selectedRestaurant.signatureDishesKh,
+    photoUrl: activePhoto || selectedRestaurant.photoUrl,
+    mapUrl: selectedRestaurant.mapUrl,
+    itemType: 'restaurant' as const,
+    itemId: selectedRestaurant.id,
+    isKm,
+  };
+
   const handleShare = () => {
     trackRestaurantShare(selectedRestaurant.id);
-    const origin = typeof window !== 'undefined' && window.location?.origin ? window.location.origin : 'https://khmerfoodtourism.com';
-    const shareUrl = `${origin}/?restaurant=${selectedRestaurant.id}`;
-    if (navigator.share) {
-      navigator.share({
-        title: isKm ? selectedRestaurant.nameKh : selectedRestaurant.nameEn,
-        text: isKm 
-          ? `សូមណែនាំហាងអាហារឆ្ងាញ់៖ ${selectedRestaurant.nameKh} 📍 ${selectedRestaurant.addressKh} 📞 ${selectedRestaurant.phone}`
-          : `Check out ${selectedRestaurant.nameEn}!`,
-        url: shareUrl,
-      }).catch(() => {});
-    } else if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(shareUrl).then(() => {
-        showToast(isKm ? 'បានចម្លងតំណភ្ជាប់ហាងជោគជ័យ!' : 'Restaurant link copied to clipboard!', 'success');
-      }).catch(() => {});
-    } else {
-      showToast(isKm ? 'បានចម្លងតំណភ្ជាប់ហាងជោគជ័យ!' : 'Restaurant link copied to clipboard!', 'success');
-    }
+    shareRichContent(sharePayload, showToast);
   };
 
   const handleShareTelegram = () => {
     trackRestaurantShare(selectedRestaurant.id);
-    const origin = typeof window !== 'undefined' && window.location?.origin ? window.location.origin : 'https://khmerfoodtourism.com';
-    const shareUrl = `${origin}/?restaurant=${selectedRestaurant.id}`;
-    const text = encodeURIComponent(
-      isKm
-        ? `សូមណែនាំហាងអាហារឆ្ងាញ់៖ ${selectedRestaurant.nameKh}\n📍 ${selectedRestaurant.addressKh}\n📞 ${selectedRestaurant.phone}`
-        : `Check out ${selectedRestaurant.nameEn}!\n📍 ${selectedRestaurant.addressEn}\n📞 ${selectedRestaurant.phone}`
-    );
-    const encUrl = encodeURIComponent(shareUrl);
-    window.open(`https://t.me/share/url?url=${encUrl}&text=${text}`, '_blank');
+    const { fullText, directLink } = formatRichShareText(sharePayload);
+    const encUrl = encodeURIComponent(selectedRestaurant.mapUrl || directLink);
+    const encText = encodeURIComponent(fullText);
+    window.open(`https://t.me/share/url?url=${encUrl}&text=${encText}`, '_blank');
   };
 
   const handleShareFacebook = () => {
     trackRestaurantShare(selectedRestaurant.id);
-    const origin = typeof window !== 'undefined' && window.location?.origin ? window.location.origin : 'https://khmerfoodtourism.com';
-    const shareUrl = `${origin}/?restaurant=${selectedRestaurant.id}`;
-    const encUrl = encodeURIComponent(shareUrl);
-    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encUrl}`, '_blank');
+    const { fullText, directLink } = formatRichShareText(sharePayload);
+    const encUrl = encodeURIComponent(selectedRestaurant.mapUrl || directLink);
+    const encQuote = encodeURIComponent(fullText);
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encUrl}&quote=${encQuote}`, '_blank');
   };
 
-  const handleCopyLink = () => {
-    handleShare();
+  const handleCopyLink = async () => {
+    trackRestaurantShare(selectedRestaurant.id);
+    const { fullText, title } = formatRichShareText(sharePayload);
+    const ok = await copyTextNativeOrWeb(fullText, title);
+    if (ok) {
+      showToast(
+        isKm
+          ? 'បានចម្លងឈ្មោះ ពិពណ៌នា ទីតាំង និងតំណភ្ជាប់ហាងជោគជ័យ!'
+          : 'Restaurant details & link copied to clipboard!',
+        'success'
+      );
+    }
   };
 
   return (
@@ -582,26 +594,38 @@ export const RestaurantDetailModal: React.FC = () => {
                 {isKm ? 'ចែករំលែកទីតាំងហាងនេះ' : 'Share this restaurant'}
               </p>
               
-              <div className="flex items-center justify-center gap-3">
+              <div className="flex items-center justify-center gap-2 flex-wrap">
                 <button
+                  type="button"
+                  onClick={handleShare}
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white text-xs font-bold shadow transition active:scale-95"
+                >
+                  <Share2 className="w-3.5 h-3.5" />
+                  <span>{isKm ? 'ចែករំលែក (Share)' : 'Share App'}</span>
+                </button>
+
+                <button
+                  type="button"
                   onClick={handleShareTelegram}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#229ED9] text-white text-xs font-bold shadow hover:brightness-105"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#229ED9] text-white text-xs font-bold shadow hover:brightness-105 transition active:scale-95"
                 >
                   <Send className="w-3.5 h-3.5" />
                   Telegram
                 </button>
 
                 <button
+                  type="button"
                   onClick={handleShareFacebook}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#1877F2] text-white text-xs font-bold shadow hover:brightness-105"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#1877F2] text-white text-xs font-bold shadow hover:brightness-105 transition active:scale-95"
                 >
                   <Share2 className="w-3.5 h-3.5" />
                   Facebook
                 </button>
 
                 <button
+                  type="button"
                   onClick={handleCopyLink}
-                  className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-medium border border-slate-300 dark:border-slate-700"
+                  className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-medium border border-slate-300 dark:border-slate-700 transition active:scale-95"
                 >
                   {isKm ? 'ចម្លង' : 'Copy'}
                 </button>

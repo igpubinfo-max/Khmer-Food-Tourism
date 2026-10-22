@@ -6,6 +6,7 @@ import {
   Phone, Share2, Calendar, UtensilsCrossed, Filter
 } from 'lucide-react';
 import { TrendingFoodCategorySlug, TrendingFoodItem } from '../types';
+import { shareRichContent } from '../utils/androidMediaHelper';
 
 export const TrendingSocialModal: React.FC = () => {
   const { 
@@ -78,15 +79,32 @@ export const TrendingSocialModal: React.FC = () => {
   };
 
   const handleShare = (food: TrendingFoodItem) => {
-    const text = isKm
-      ? `🔥 មុខម្ហូបល្បីលើ TikTok & FB៖ ${food.foodNameKh} នៅ ${food.restaurantNameKh} (${food.provinceKh})!`
-      : `🔥 Trending Food: ${food.foodNameEn} at ${food.restaurantNameEn} (${food.provinceEn})!`;
-    if (navigator.share) {
-      navigator.share({ title: food.foodNameKh, text, url: window.location.href }).catch(() => {});
-    } else {
-      navigator.clipboard.writeText(`${text}\n${window.location.href}`);
-      showToast(isKm ? 'បានចម្លងព័ត៌មានរួចរាល់!' : 'Copied info to clipboard!', 'success');
-    }
+    const mapLink =
+      food.mapUrl ||
+      (food.latitude && food.longitude
+        ? `https://www.google.com/maps/search/?api=1&query=${food.latitude},${food.longitude}`
+        : undefined);
+    shareRichContent(
+      {
+        title: isKm
+          ? `${food.foodNameKh} — ${food.restaurantNameKh}`
+          : `${food.foodNameEn} — ${food.restaurantNameEn}`,
+        nameKh: `${food.foodNameKh} (${food.restaurantNameKh})`,
+        nameEn: `${food.foodNameEn} (${food.restaurantNameEn})`,
+        description: isKm ? food.descriptionKh : food.descriptionEn,
+        location: isKm
+          ? `${food.addressKh} (${food.provinceKh})`
+          : `${food.addressEn} (${food.provinceEn})`,
+        phone: food.phone,
+        priceDisplay: food.priceDisplay,
+        photoUrl: food.photoUrl,
+        mapUrl: mapLink,
+        itemType: 'trending',
+        itemId: food.id,
+        isKm,
+      },
+      showToast
+    );
   };
 
   return (

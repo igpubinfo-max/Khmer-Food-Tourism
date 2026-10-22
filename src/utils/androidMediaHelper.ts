@@ -16,6 +16,21 @@ interface NativeMediaLauncherPlugin {
     width?: number;
     height?: number;
   }>;
+  shareContent(options: {
+    title?: string;
+    text?: string;
+    url?: string;
+    photoUrl?: string;
+  }): Promise<{
+    shared: boolean;
+    hasImage?: boolean;
+  }>;
+  copyToClipboard(options: {
+    text: string;
+    label?: string;
+  }): Promise<{
+    copied: boolean;
+  }>;
 }
 
 const NativeMediaLauncher = registerPlugin<NativeMediaLauncherPlugin>('NativeAbaLauncher');
@@ -306,4 +321,212 @@ export function decodeQrFromImageDataUrl(dataUrl: string): Promise<string | null
     };
     img.src = dataUrl;
   });
+}
+
+export interface RichShareOptions {
+  title: string;
+  nameKh?: string;
+  nameEn?: string;
+  description?: string;
+  location?: string;
+  phone?: string;
+  priceDisplay?: string;
+  signatureDishes?: string[];
+  photoUrl?: string;
+  mapUrl?: string;
+  itemType: 'restaurant' | 'food' | 'destination' | 'trending' | 'post';
+  itemId?: string;
+  isKm?: boolean;
+}
+
+export function buildPublicDirectLink(itemType: string, itemId?: string, mapUrl?: string): string {
+  const origin =
+    typeof window !== 'undefined' &&
+    window.location?.origin &&
+    !window.location.origin.includes('localhost') &&
+    !window.location.origin.includes('127.0.0.1') &&
+    !window.location.origin.startsWith('capacitor://')
+      ? window.location.origin
+      : 'https://khmerfoodtourism.com';
+
+  if (itemId) {
+    return `${origin}/?${itemType}=${encodeURIComponent(itemId)}`;
+  }
+  return mapUrl || origin;
+}
+
+export function formatRichShareText(options: RichShareOptions): {
+  title: string;
+  fullText: string;
+  directLink: string;
+} {
+  const isKm = options.isKm !== false;
+  const directLink = buildPublicDirectLink(options.itemType, options.itemId, options.mapUrl);
+  const titleHeader =
+    options.nameKh && options.nameEn && options.nameKh !== options.nameEn
+      ? `${options.nameKh} (${options.nameEn})`
+      : options.title;
+
+  const lines: string[] = [];
+  const typeEmoji =
+    options.itemType === 'restaurant'
+      ? '🏪'
+      : options.itemType === 'food'
+      ? '🍲'
+      : options.itemType === 'destination'
+      ? '🏛️'
+      : options.itemType === 'trending'
+      ? '🔥'
+      : '🇰🇭';
+
+  lines.push(`${typeEmoji} ${titleHeader}`);
+
+  if (options.description && options.description.trim()) {
+    lines.push(`📝 ${options.description.trim()}`);
+  }
+
+  if (options.signatureDishes && options.signatureDishes.length > 0) {
+    const label = isKm ? '🍽️ មុខម្ហូបពិសេស៖' : '🍽️ Signature Dishes:';
+    lines.push(`${label} ${options.signatureDishes.slice(0, 4).join(', ')}`);
+  }
+
+  if (options.priceDisplay && options.priceDisplay.trim()) {
+    const label = isKm ? '💰 តម្លៃ៖' : '💰 Price:';
+    lines.push(`${label} ${options.priceDisplay.trim()}`);
+  }
+
+  if (options.location && options.location.trim()) {
+    lines.push(`📍 ${isKm ? 'ទីតាំង៖' : 'Location:'} ${options.location.trim()}`);
+  }
+
+  if (options.phone && options.phone.trim()) {
+    lines.push(`📞 ${isKm ? 'ទូរស័ព្ទ៖' : 'Phone:'} ${options.phone.trim()}`);
+  }
+
+  if (options.mapUrl && options.mapUrl.trim()) {
+    lines.push(`🗺️ Google Maps: ${options.mapUrl.trim()}`);
+  }
+
+  lines.push(`🔗 ${isKm ? 'តំណភ្ជាប់ផ្ទាល់៖' : 'Direct Link:'} ${directLink}`);
+
+  return {
+    title: titleHeader,
+    fullText: lines.join('\n'),
+    directLink,
+  };
+}
+
+/**
+ * Copies text reliably on both Android native (via ClipboardManager) and Web browsers.
+ */
+export async function copyTextNativeOrWeb(text: string, label: string = 'Khmer Food & Tourism'): Promise<boolean> {
+  if (Capacitor.isNativePlatform()) {
+    try {
+      const res = await NativeMediaLauncher.copyToClipboard({ text, label });
+      if (res && res.copied) return true;
+    } catch {
+      // fallback below
+    }
+  }
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch {
+    // fallback textarea
+  }
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Shares restaurant, food, destination, or community post using the Android Native Share Sheet
+ * (with photo attachment, name, description, location, and direct links for Telegram, Facebook,
+ * Messenger, WhatsApp, and other installed apps), or Web Share API / Clipboard fallback.
+ */
+export async function shareRichContent(
+  options: RichShareOptions,
+  onToast?: (msg: string, type?: 'success' | 'info' | 'warning') => void
+): Promise<boolean> {
+  const isKm = options.isKm !== false;
+  const { title, fullText, directLink } = formatRichShareText(options);
+
+  // 1. Native Android Share Sheet via Capacitor Plugin (supports photo + text + links across all apps)
+  if (Capacitor.isNativePlatform()) {
+    try {
+      const res = await NativeMediaLauncher.shareContent({
+        title,
+        text: fullText,
+        url: options.mapUrl || directLink,
+        photoUrl: options.photoUrl || '',
+      });
+      if (res && res.shared) {
+        return true;
+      }
+    } catch (err) {
+      console.warn('Native shareContent fallback:', err);
+    }
+  }
+
+  // 2. Web Share API (Mobile / Desktop Browsers)
+  if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
+    try {
+      // Try attaching the image file if browser supports file sharing
+      if (options.photoUrl && typeof navigator.canShare === 'function') {
+        try {
+          const resp = await fetch(options.photoUrl);
+          if (resp.ok) {
+            const blob = await resp.blob();
+            const file = new File([blob], 'khmer-food-tourism.jpg', { type: blob.type || 'image/jpeg' });
+            if (navigator.canShare({ files: [file], title, text: fullText })) {
+              await navigator.share({
+                files: [file],
+                title,
+                text: fullText,
+              });
+              return true;
+            }
+          }
+        } catch {
+          // continue to text/url web share
+        }
+      }
+
+      await navigator.share({
+        title,
+        text: fullText,
+        url: options.mapUrl || directLink,
+      });
+      return true;
+    } catch (err: any) {
+      if (err && err.name === 'AbortError') {
+        return false;
+      }
+    }
+  }
+
+  // 3. Fallback: Copy full details & direct links to clipboard
+  const copied = await copyTextNativeOrWeb(fullText, title);
+  if (copied && onToast) {
+    onToast(
+      isKm
+        ? 'បានចម្លងឈ្មោះ ពិពណ៌នា ទីតាំង និងតំណភ្ជាប់ផ្ទាល់រួចរាល់!'
+        : 'Copied name, description, location, and direct link!',
+      'success'
+    );
+  }
+  return copied;
 }

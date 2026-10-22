@@ -354,7 +354,66 @@ export interface Restaurant {
   isPromoted?: boolean;
   isFreeTrial?: boolean;
   freeTrialExpiry?: string;
+  created_at?: string;
+  createdAt?: string;
 }
+
+// Helper to resolve original created_at ISO timestamp for chronological sorting
+export const getRestaurantCreatedAtIso = (r?: Partial<Restaurant> | null): string => {
+  if (!r) return '2026-01-01T00:00:00.000Z';
+  const raw = r.created_at || r.createdAt;
+  if (raw && typeof raw === 'string') {
+    const parsed = Date.parse(raw);
+    if (!Number.isNaN(parsed)) {
+      return new Date(parsed).toISOString();
+    }
+  }
+  const idStr = String(r.id || '');
+  const seedMatch = idStr.match(/^rest-(\d+)$/);
+  if (seedMatch) {
+    const n = parseInt(seedMatch[1], 10);
+    if (n >= 1 && n <= 1000) {
+      return new Date(Date.UTC(2026, 0, 1, 0, n, 0)).toISOString();
+    }
+    if (n > 1000000000000) {
+      return new Date(n).toISOString();
+    }
+  }
+  const tsMatch = idStr.match(/(\d{13})/);
+  if (tsMatch) {
+    const ts = parseInt(tsMatch[1], 10);
+    if (!Number.isNaN(ts)) {
+      return new Date(ts).toISOString();
+    }
+  }
+  if (r.paymentDate) {
+    const pd = Date.parse(r.paymentDate);
+    if (!Number.isNaN(pd)) {
+      return new Date(pd).toISOString();
+    }
+  }
+  return '2026-06-01T00:00:00.000Z';
+};
+
+export const getRestaurantCreatedAtMs = (r?: Partial<Restaurant> | null): number => {
+  const iso = getRestaurantCreatedAtIso(r);
+  const ms = Date.parse(iso);
+  return Number.isNaN(ms) ? 0 : ms;
+};
+
+// Sort restaurants in chronological order: earlier-added restaurants first, newly added restaurants afterward
+export const sortRestaurantsChronologically = (list: Restaurant[]): Restaurant[] => {
+  return [...list].sort((a, b) => {
+    const timeDiff = getRestaurantCreatedAtMs(a) - getRestaurantCreatedAtMs(b);
+    if (timeDiff !== 0) return timeDiff;
+    const aNum = parseInt(String(a.id || '').replace(/\D+/g, ''), 10);
+    const bNum = parseInt(String(b.id || '').replace(/\D+/g, ''), 10);
+    if (!Number.isNaN(aNum) && !Number.isNaN(bNum) && aNum !== bNum) {
+      return aNum - bNum;
+    }
+    return String(a.id || '').localeCompare(String(b.id || ''));
+  });
+};
 
 // Helper to determine if a restaurant has an active Premium membership
 export const isRestaurantPremiumActive = (restaurant?: Restaurant | null): boolean => {

@@ -4,6 +4,7 @@ import {
   X, MapPin, Phone, Share2, ExternalLink, Flame, 
   Calendar, Heart, Sparkles, Navigation, Bookmark, MessageSquareQuote 
 } from 'lucide-react';
+import { shareRichContent } from '../utils/androidMediaHelper';
 
 export const TrendingFoodDetailModal: React.FC = () => {
   const { 
@@ -46,20 +47,32 @@ export const TrendingFoodDetailModal: React.FC = () => {
   };
 
   const handleShare = () => {
-    const text = isKm 
-      ? `🔥 មុខម្ហូបល្បីលើ TikTok/FB៖ ${item.foodNameKh} នៅ ${item.restaurantNameKh} (${item.provinceKh})! ចូលមើលក្នុង Khmer Food Tourism App!`
-      : `🔥 Trending on TikTok/FB: ${item.foodNameEn} at ${item.restaurantNameEn} (${item.provinceEn})! Check out on Khmer Food Tourism App!`;
-    
-    if (navigator.share) {
-      navigator.share({
-        title: item.foodNameKh,
-        text,
-        url: window.location.href,
-      }).catch(() => {});
-    } else {
-      navigator.clipboard.writeText(`${text}\n${window.location.href}`);
-      showToast(isKm ? 'បានចម្លងព័ត៌មាន និងតំណភ្ជាប់រួចរាល់!' : 'Copied link and info to clipboard!', 'success');
-    }
+    const mapLink =
+      item.mapUrl ||
+      (item.latitude && item.longitude
+        ? `https://www.google.com/maps/search/?api=1&query=${item.latitude},${item.longitude}`
+        : undefined);
+    shareRichContent(
+      {
+        title: isKm
+          ? `${item.foodNameKh} — ${item.restaurantNameKh}`
+          : `${item.foodNameEn} — ${item.restaurantNameEn}`,
+        nameKh: `${item.foodNameKh} (${item.restaurantNameKh})`,
+        nameEn: `${item.foodNameEn} (${item.restaurantNameEn})`,
+        description: isKm ? item.descriptionKh : item.descriptionEn,
+        location: isKm
+          ? `${item.addressKh} (${item.provinceKh})`
+          : `${item.addressEn} (${item.provinceEn})`,
+        phone: item.phone,
+        priceDisplay: item.priceDisplay,
+        photoUrl: item.photoUrl,
+        mapUrl: mapLink,
+        itemType: 'trending',
+        itemId: item.id,
+        isKm,
+      },
+      showToast
+    );
   };
 
   return (

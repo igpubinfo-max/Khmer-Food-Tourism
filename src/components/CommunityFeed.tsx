@@ -5,6 +5,11 @@ import {
   Send, Trash2, Plus, ShieldCheck, Store
 } from 'lucide-react';
 import { CreatePostModal } from './CreatePostModal';
+import {
+  shareRichContent,
+  formatRichShareText,
+  copyTextNativeOrWeb,
+} from '../utils/androidMediaHelper';
 
 export const CommunityFeed: React.FC = () => {
   const { 
@@ -23,20 +28,66 @@ export const CommunityFeed: React.FC = () => {
     setCommentInputs(prev => ({ ...prev, [postId]: '' }));
   };
 
-  const handleShareTelegram = (title: string, desc: string) => {
-    const text = encodeURIComponent(`Khmer Food & Tourism Community:\n${title}\n${desc}`);
-    const url = encodeURIComponent(window.location.href);
+  const handleShareNative = (post: { id: string; titleKh: string; descriptionKh: string; photoUrl?: string; locationName?: string }) => {
+    shareRichContent(
+      {
+        title: post.titleKh,
+        nameKh: post.titleKh,
+        description: post.descriptionKh,
+        location: post.locationName || (language === 'km' ? 'កម្ពុជា' : 'Cambodia'),
+        photoUrl: post.photoUrl,
+        itemType: 'post',
+        itemId: post.id,
+        isKm: language === 'km',
+      },
+      showToast
+    );
+  };
+
+  const handleShareTelegram = (title: string, desc: string, locationName?: string, postId?: string) => {
+    const { fullText, directLink } = formatRichShareText({
+      title,
+      nameKh: title,
+      description: desc,
+      location: locationName,
+      itemType: 'post',
+      itemId: postId,
+      isKm: language === 'km',
+    });
+    const text = encodeURIComponent(fullText);
+    const url = encodeURIComponent(directLink);
     window.open(`https://t.me/share/url?url=${url}&text=${text}`, '_blank');
   };
 
-  const handleShareFacebook = () => {
-    const url = encodeURIComponent(window.location.href);
-    window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
+  const handleShareFacebook = (title?: string, desc?: string, locationName?: string, postId?: string) => {
+    const { fullText, directLink } = formatRichShareText({
+      title: title || 'Khmer Food & Tourism',
+      nameKh: title,
+      description: desc,
+      location: locationName,
+      itemType: 'post',
+      itemId: postId,
+      isKm: language === 'km',
+    });
+    const url = encodeURIComponent(directLink);
+    const quote = encodeURIComponent(fullText);
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${quote}`, '_blank');
   };
 
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(window.location.href);
-    showToast(language === 'km' ? 'បានចម្លងតំណភ្ជាប់!' : 'Link copied!', 'success');
+  const handleCopyLink = async (title?: string, desc?: string, locationName?: string, postId?: string) => {
+    const { fullText } = formatRichShareText({
+      title: title || 'Khmer Food & Tourism',
+      nameKh: title,
+      description: desc,
+      location: locationName,
+      itemType: 'post',
+      itemId: postId,
+      isKm: language === 'km',
+    });
+    const ok = await copyTextNativeOrWeb(fullText, title || 'Khmer Food & Tourism');
+    if (ok) {
+      showToast(language === 'km' ? 'បានចម្លងព័ត៌មាន និងតំណភ្ជាប់!' : 'Post details & link copied!', 'success');
+    }
   };
 
   return (
@@ -177,21 +228,33 @@ export const CommunityFeed: React.FC = () => {
                 {/* Share dropdown / icons */}
                 <div className="flex items-center gap-1.5">
                   <button
-                    onClick={() => handleShareTelegram(post.titleKh, post.descriptionKh)}
+                    type="button"
+                    onClick={() => handleShareNative(post)}
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#064E3B] hover:bg-[#047857] text-white text-[10px] font-bold shadow-2xs transition active:scale-95"
+                    title={language === 'km' ? 'ចែករំលែកការបង្ហោះ' : 'Share post'}
+                  >
+                    <Share2 className="w-3 h-3" />
+                    <span>{language === 'km' ? 'ចែករំលែក' : 'Share'}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleShareTelegram(post.titleKh, post.descriptionKh, post.locationName, post.id)}
                     className="p-1.5 rounded-full bg-[#229ED9]/10 text-[#229ED9] hover:bg-[#229ED9]/20 transition"
                     title="Share to Telegram"
                   >
                     <Send className="w-3.5 h-3.5" />
                   </button>
                   <button
-                    onClick={handleShareFacebook}
+                    type="button"
+                    onClick={() => handleShareFacebook(post.titleKh, post.descriptionKh, post.locationName, post.id)}
                     className="p-1.5 rounded-full bg-[#1877F2]/10 text-[#1877F2] hover:bg-[#1877F2]/20 transition"
                     title="Share to Facebook"
                   >
                     <Share2 className="w-3.5 h-3.5" />
                   </button>
                   <button
-                    onClick={handleCopyLink}
+                    type="button"
+                    onClick={() => handleCopyLink(post.titleKh, post.descriptionKh, post.locationName, post.id)}
                     className="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-[10px] font-semibold"
                   >
                     {language === 'km' ? 'ចម្លង' : 'Copy'}

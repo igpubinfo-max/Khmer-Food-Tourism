@@ -4,6 +4,11 @@ import {
   X, Heart, Clock, Users, Flame, ChefHat, 
   Share2, CheckCircle2, Circle, Volume2, Sparkles, Send, Bookmark
 } from 'lucide-react';
+import {
+  shareRichContent,
+  formatRichShareText,
+  copyTextNativeOrWeb,
+} from '../utils/androidMediaHelper';
 
 export const FoodDetailModal: React.FC = () => {
   const { 
@@ -53,21 +58,46 @@ export const FoodDetailModal: React.FC = () => {
     showToast(language === 'km' ? 'កំពុងអានព័ត៌មានមុខម្ហូប...' : 'Reading recipe audio...', 'info');
   };
 
+  const isKm = language === 'km';
+  const sharePayload = {
+    title: isKm ? selectedFood.nameKh : selectedFood.nameEn,
+    nameKh: selectedFood.nameKh,
+    nameEn: selectedFood.nameEn,
+    description: isKm ? selectedFood.descriptionKh : selectedFood.descriptionEn,
+    location: isKm ? `${selectedFood.categoryKh} • កម្ពុជា` : `${selectedFood.categoryEn} • Cambodia`,
+    priceDisplay: `${selectedFood.priceRiel.toLocaleString()} ៛ ($${selectedFood.priceUsd.toFixed(2)})`,
+    signatureDishes: (selectedFood.ingredients || []).slice(0, 4).map(i => (isKm ? i.nameKh : i.nameEn)),
+    photoUrl: selectedFood.photoUrl,
+    itemType: 'food' as const,
+    itemId: selectedFood.id,
+    isKm,
+  };
+
+  const handleShareNative = () => {
+    shareRichContent(sharePayload, showToast);
+  };
+
   // Social Sharing
   const handleShareTelegram = () => {
-    const text = encodeURIComponent(`សូមមើលមុខម្ហូបខ្មែរឆ្ងាញ់ៗ៖ ${selectedFood.nameKh} (${selectedFood.nameEn})\n${selectedFood.descriptionKh}`);
-    const url = encodeURIComponent(window.location.href);
+    const { fullText, directLink } = formatRichShareText(sharePayload);
+    const text = encodeURIComponent(fullText);
+    const url = encodeURIComponent(directLink);
     window.open(`https://t.me/share/url?url=${url}&text=${text}`, '_blank');
   };
 
   const handleShareFacebook = () => {
-    const url = encodeURIComponent(window.location.href);
-    window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
+    const { fullText, directLink } = formatRichShareText(sharePayload);
+    const url = encodeURIComponent(directLink);
+    const quote = encodeURIComponent(fullText);
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${quote}`, '_blank');
   };
 
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(window.location.href);
-    showToast(language === 'km' ? 'បានចម្លងតំណភ្ជាប់រួចរាល់!' : 'Link copied to clipboard!', 'success');
+  const handleCopyLink = async () => {
+    const { fullText, title } = formatRichShareText(sharePayload);
+    const ok = await copyTextNativeOrWeb(fullText, title);
+    if (ok) {
+      showToast(language === 'km' ? 'បានចម្លងព័ត៌មានមុខម្ហូប និងតំណភ្ជាប់រួចរាល់!' : 'Food details & link copied to clipboard!', 'success');
+    }
   };
 
   return (
@@ -117,6 +147,15 @@ export const FoodDetailModal: React.FC = () => {
               title="ដាក់ក្នុងបញ្ជីចង់ញ៉ាំ"
             >
               <Bookmark className="w-4 h-4 fill-current" />
+            </button>
+
+            {/* Share Button */}
+            <button
+              onClick={handleShareNative}
+              className="p-2.5 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur-md shadow transition active:scale-90 text-white"
+              title={language === 'km' ? 'ចែករំលែកមុខម្ហូប' : 'Share dish'}
+            >
+              <Share2 className="w-4 h-4" />
             </button>
 
             {/* Favorite */}
@@ -297,11 +336,22 @@ export const FoodDetailModal: React.FC = () => {
                 {language === 'km' ? 'ចែករំលែកមុខម្ហូបនេះទៅកាន់មិត្តភក្តិ' : 'Share this recipe with friends'}
               </p>
               
-              <div className="flex items-center justify-center gap-3">
+              <div className="flex items-center justify-center gap-2 flex-wrap">
+                {/* Native Share Sheet */}
+                <button
+                  type="button"
+                  onClick={handleShareNative}
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white text-xs font-bold shadow transition active:scale-95"
+                >
+                  <Share2 className="w-3.5 h-3.5" />
+                  <span>{language === 'km' ? 'ចែករំលែក (Share)' : 'Share App'}</span>
+                </button>
+
                 {/* Telegram */}
                 <button
+                  type="button"
                   onClick={handleShareTelegram}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#229ED9] text-white text-xs font-bold shadow hover:brightness-105"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#229ED9] text-white text-xs font-bold shadow hover:brightness-105 transition active:scale-95"
                 >
                   <Send className="w-3.5 h-3.5" />
                   Telegram
@@ -309,8 +359,9 @@ export const FoodDetailModal: React.FC = () => {
 
                 {/* Facebook */}
                 <button
+                  type="button"
                   onClick={handleShareFacebook}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#1877F2] text-white text-xs font-bold shadow hover:brightness-105"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#1877F2] text-white text-xs font-bold shadow hover:brightness-105 transition active:scale-95"
                 >
                   <Share2 className="w-3.5 h-3.5" />
                   Facebook
@@ -318,8 +369,9 @@ export const FoodDetailModal: React.FC = () => {
 
                 {/* Copy link */}
                 <button
+                  type="button"
                   onClick={handleCopyLink}
-                  className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-medium border border-slate-300 dark:border-slate-700 hover:bg-slate-200"
+                  className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-medium border border-slate-300 dark:border-slate-700 hover:bg-slate-200 transition active:scale-95"
                 >
                   {language === 'km' ? 'ចម្លងតំណ' : 'Copy link'}
                 </button>

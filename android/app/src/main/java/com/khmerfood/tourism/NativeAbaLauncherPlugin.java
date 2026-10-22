@@ -1,6 +1,8 @@
 package com.khmerfood.tourism;
 
 import android.app.Activity;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -17,6 +19,7 @@ import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.util.Base64;
 import androidx.activity.result.ActivityResult;
+import androidx.core.content.FileProvider;
 import com.getcapacitor.JSObject;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
@@ -28,6 +31,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 @CapacitorPlugin(name = "NativeAbaLauncher")
 public class NativeAbaLauncherPlugin extends Plugin {
@@ -333,5 +338,236 @@ public class NativeAbaLauncherPlugin extends Plugin {
         } catch (Exception e) {
             call.reject("Error reading selected image: " + e.getMessage());
         }
+    }
+
+    /**
+     * Copies text directly to the Android system clipboard.
+     */
+    @PluginMethod
+    public void copyToClipboard(PluginCall call) {
+        Context context = getContext();
+        if (context == null) {
+            call.reject("Context is null");
+            return;
+        }
+        String text = call.getString("text", "");
+        String label = call.getString("label", "Khmer Food & Tourism");
+        try {
+            ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+            if (clipboard != null) {
+                ClipData clip = ClipData.newPlainText(label, text);
+                clipboard.setPrimaryClip(clip);
+            }
+            JSObject ret = new JSObject();
+            ret.put("copied", true);
+            call.resolve(ret);
+        } catch (Exception e) {
+            call.reject("Clipboard error: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Resolves a photoUrl (bundled APK asset, Base64 data URL, or remote HTTP/HTTPS URL)
+     * into a temporary file in cache/shared_images so it can be shared via FileProvider.
+     */
+    private File resolveShareImageFile(Context context, String photoUrl) {
+        if (photoUrl == null || photoUrl.trim().isEmpty()) {
+            return null;
+        }
+        try {
+            File shareDir = new File(context.getCacheDir(), "shared_images");
+            if (!shareDir.exists()) {
+                shareDir.mkdirs();
+            }
+            // Clean up old cached share files (> 1 hour old)
+            File[] existing = shareDir.listFiles();
+            long now = System.currentTimeMillis();
+            if (existing != null) {
+                for (File f : existing) {
+                    if (now - f.lastModified() > 3600_000L) {
+                        f.delete();
+                    }
+                }
+            }
+
+            File outFile = new File(shareDir, "kft_share_" + now + ".jpg");
+            String trimmed = photoUrl.trim();
+
+            if (trimmed.startsWith("data:image/")) {
+                int commaIdx = trimmed.indexOf(',');
+                String base64Part = commaIdx != -1 ? trimmed.substring(commaIdx + 1) : trimmed;
+                byte[] decoded = Base64.decode(base64Part, Base64.DEFAULT);
+                Bitmap bmp = BitmapFactory.decodeByteArray(decoded, 0, decoded.length);
+                if (bmp != null) {
+                    try (FileOutputStream fos = new FileOutputStream(outFile)) {
+                        bmp.compress(Bitmap.CompressFormat.JPEG, 92, fos);
+                        fos.flush();
+                    }
+                    return outFile;
+                }
+            }
+
+            // Check if it's a bundled asset path (e.g., "/Shop/rest-1.jpg", "/foods/food-1.jpg", or "https://localhost/Shop/...")
+            String assetRelPath = null;
+            if (trimmed.startsWith("/")) {
+                assetRelPath = trimmed;
+            } else if (trimmed.contains("localhost/")) {
+                int idx = trimmed.indexOf("localhost/");
+                assetRelPath = trimmed.substring(idx + "localhost".length());
+            }
+            if (assetRelPath != null) {
+                int qIdx = assetRelPath.indexOf('?');
+                if (qIdx != -1) {
+                    assetRelPath = assetRelPath.substring(0, qIdx);
+                }
+                String fullAssetPath = "public" + (assetRelPath.startsWith("/") ? assetRelPath : "/" + assetRelPath);
+                try (InputStream is = context.getAssets().open(fullAssetPath);
+                     FileOutputStream fos = new FileOutputStream(outFile)) {
+                    byte[] buf = new byte[8192];
+                    int read;
+                    while ((read = is.read(buf)) != -1) {
+                        fos.write(buf, 0, read);
+                    }
+                    fos.flush();
+                    if (outFile.exists() && outFile.length() > 0) {
+                        return outFile;
+                    }
+                } catch (Exception ignored) {
+                }
+            }
+
+            // Remote HTTP/HTTPS image URL
+            if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+                HttpURLConnection conn = null;
+                try {
+                    URL url = new URL(trimmed);
+                    conn = (HttpURLConnection) url.openConnection();
+                    conn.setConnectTimeout(4500);
+                    conn.setReadTimeout(4500);
+                    conn.setInstanceFollowRedirects(true);
+                    conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android 14)");
+                    conn.connect();
+                    if (conn.getResponseCode() >= 200 && conn.getResponseCode() < 300) {
+                        try (InputStream is = conn.getInputStream();
+                             FileOutputStream fos = new FileOutputStream(outFile)) {
+                            byte[] buf = new byte[8192];
+                            int read;
+                            while ((read = is.read(buf)) != -1) {
+                                fos.write(buf, 0, read);
+                            }
+                            fos.flush();
+                        }
+                        if (outFile.exists() && outFile.length() > 0) {
+                            return outFile;
+                        }
+                    }
+                } catch (Exception ignored) {
+                } finally {
+                    if (conn != null) {
+                        conn.disconnect();
+                    }
+                }
+            }
+        } catch (Exception ignored) {
+        }
+        return null;
+    }
+
+    /**
+     * Opens the native Android Share Sheet (Intent.ACTION_SEND + Intent.createChooser)
+     * with restaurant/food name, photo (via FileProvider), description, location, and direct links
+     * for Telegram, Facebook, Messenger, WhatsApp, Line, and all installed apps.
+     */
+    @PluginMethod
+    public void shareContent(PluginCall call) {
+        final Context context = getContext();
+        if (context == null) {
+            call.reject("Context is null");
+            return;
+        }
+
+        final String title = call.getString("title", "Khmer Food & Tourism");
+        final String text = call.getString("text", "");
+        final String url = call.getString("url", "");
+        final String photoUrl = call.getString("photoUrl", "");
+
+        new Thread(() -> {
+            try {
+                StringBuilder fullTextBuilder = new StringBuilder();
+                if (text != null && !text.trim().isEmpty()) {
+                    fullTextBuilder.append(text.trim());
+                }
+                if (url != null && !url.trim().isEmpty() && !fullTextBuilder.toString().contains(url.trim())) {
+                    if (fullTextBuilder.length() > 0) {
+                        fullTextBuilder.append("\n\n");
+                    }
+                    fullTextBuilder.append(url.trim());
+                }
+                final String finalShareText = fullTextBuilder.toString();
+
+                File sharedImageFile = resolveShareImageFile(context, photoUrl);
+                Uri tempUri = null;
+                if (sharedImageFile != null && sharedImageFile.exists() && sharedImageFile.length() > 0) {
+                    try {
+                        tempUri = FileProvider.getUriForFile(
+                            context,
+                            context.getPackageName() + ".fileprovider",
+                            sharedImageFile
+                        );
+                    } catch (Exception ignored) {
+                        tempUri = null;
+                    }
+                }
+                final Uri contentUri = tempUri;
+
+                Activity activity = getActivity();
+                Runnable launchShare = () -> {
+                    try {
+                        Intent sendIntent = new Intent(Intent.ACTION_SEND);
+                        if (contentUri != null) {
+                            sendIntent.setType("image/*");
+                            sendIntent.putExtra(Intent.EXTRA_STREAM, contentUri);
+                            sendIntent.putExtra(Intent.EXTRA_TITLE, title);
+                            sendIntent.putExtra(Intent.EXTRA_SUBJECT, title);
+                            sendIntent.putExtra(Intent.EXTRA_TEXT, finalShareText);
+                            sendIntent.setClipData(ClipData.newUri(context.getContentResolver(), title, contentUri));
+                            sendIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                        } else {
+                            sendIntent.setType("text/plain");
+                            sendIntent.putExtra(Intent.EXTRA_TITLE, title);
+                            sendIntent.putExtra(Intent.EXTRA_SUBJECT, title);
+                            sendIntent.putExtra(Intent.EXTRA_TEXT, finalShareText);
+                        }
+
+                        Intent chooser = Intent.createChooser(
+                            sendIntent,
+                            (title != null && !title.isEmpty()) ? title : "ចែករំលែកតាមរយៈ / Share via"
+                        );
+                        chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+                        if (activity != null) {
+                            activity.startActivity(chooser);
+                        } else {
+                            context.startActivity(chooser);
+                        }
+
+                        JSObject ret = new JSObject();
+                        ret.put("shared", true);
+                        ret.put("hasImage", contentUri != null);
+                        call.resolve(ret);
+                    } catch (Exception e) {
+                        call.reject("Failed to open Android Share Sheet: " + e.getMessage());
+                    }
+                };
+
+                if (activity != null) {
+                    activity.runOnUiThread(launchShare);
+                } else {
+                    launchShare.run();
+                }
+            } catch (Exception e) {
+                call.reject("Share error: " + e.getMessage());
+            }
+        }).start();
     }
 }

@@ -3,6 +3,7 @@ import {
   User, FoodItem, Restaurant, TouristDestination, CommunityPost, 
   Language, UserRole, AppSettings, RegistrationTransaction,
   RestaurantMenuItem, MembershipTier, isRestaurantPremiumActive, isUserVipActive, getVipRemainingDays,
+  getRestaurantCreatedAtIso, sortRestaurantsChronologically,
   Wishlist, WishlistItem, TripPlan, AppNotification,
   TrendingFoodItem, AiCheckInSubmission,
   SupportTicket, SupportTicketMessage, SupportTicketStatus, VIP_PLANS
@@ -463,6 +464,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       promoVideoUrl: r.promoVideoUrl,
       telegramUrl: r.telegramUrl,
       facebookUrl: r.facebookUrl,
+      created_at: getRestaurantCreatedAtIso(r),
+      createdAt: getRestaurantCreatedAtIso(r),
     };
   };
 
@@ -470,11 +473,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const seedMap = new Map<string, Restaurant>(initialRestaurants.map(r => [r.id, r]));
     try {
       localStorage.removeItem('kft_restaurants_real_v5');
-      const saved = localStorage.getItem('kft_restaurants_real_v6');
+      const saved = localStorage.getItem('kft_restaurants_real_v7') || localStorage.getItem('kft_restaurants_real_v6');
+      localStorage.removeItem('kft_restaurants_real_v6');
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length >= 50) {
-          return parsed.map((r: any) => {
+          const normalizedList = parsed.map((r: any) => {
             const seed = r && r.id ? seedMap.get(String(r.id)) : undefined;
             if (seed) {
               return normalizeRestaurant({
@@ -490,14 +494,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 provinceKh: seed.provinceKh,
                 provinceEn: seed.provinceEn,
                 signatureDishesKh: seed.signatureDishesKh,
+                created_at: seed.created_at || getRestaurantCreatedAtIso(seed),
+                createdAt: seed.created_at || getRestaurantCreatedAtIso(seed),
               });
             }
             return normalizeRestaurant(r);
           });
+          return sortRestaurantsChronologically(normalizedList);
         }
       }
     } catch (e) {
-      console.warn('Failed to parse kft_restaurants_real_v6', e);
+      console.warn('Failed to parse kft_restaurants_real_v7', e);
     }
 
     // Preserve any user-created custom restaurants from previous storage key
@@ -565,7 +572,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       return normalizeRestaurant(r);
     });
-    return [...customLegacyRestaurants, ...baseRestaurants];
+    return sortRestaurantsChronologically([...baseRestaurants, ...customLegacyRestaurants]);
   });
 
   const [isManageMenuModalOpen, setIsManageMenuModalOpen] = useState(false);
@@ -1051,7 +1058,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     try {
       if (restaurants && restaurants.length > 0) {
-        localStorage.setItem('kft_restaurants_real_v6', JSON.stringify(restaurants));
+        localStorage.setItem('kft_restaurants_real_v7', JSON.stringify(restaurants));
       }
     } catch (e) {
       console.warn('Storage sync failed for restaurants:', e);
@@ -1159,10 +1166,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             for (const r of prev) map.set(r.id, r);
             for (const r of result.mergedCustomRestaurants) {
               if (r && r.id && !/^rest-\d+$/.test(String(r.id))) {
-                map.set(r.id, r);
+                map.set(r.id, normalizeRestaurant(r));
               }
             }
-            return Array.from(map.values());
+            return sortRestaurantsChronologically(Array.from(map.values()));
           });
         }
         try {
@@ -1183,6 +1190,34 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (isSupabaseConfigured()) {
       triggerCloudSyncNow();
     }
+    // Handle direct shared deep links (?restaurant=..., ?food=..., ?destination=...)
+    try {
+      if (typeof window !== 'undefined' && window.location?.search) {
+        const params = new URLSearchParams(window.location.search);
+        const restId = params.get('restaurant');
+        const foodId = params.get('food');
+        const destId = params.get('destination');
+        if (restId) {
+          const found = restaurants.find(r => r.id === restId);
+          if (found) {
+            setActiveTab('restaurants');
+            setSelectedRestaurant(found);
+          }
+        } else if (foodId) {
+          const found = foods.find(f => f.id === foodId);
+          if (found) {
+            setActiveTab('food');
+            setSelectedFood(found);
+          }
+        } else if (destId) {
+          const found = destinations.find(d => d.id === destId);
+          if (found) {
+            setActiveTab('tourism');
+            setSelectedDestination(found);
+          }
+        }
+      }
+    } catch {}
   }, []);
 
   // Keep a mutable ref of current modal & navigation state for the native back-button listener
@@ -1797,6 +1832,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const foodImgs = Array.isArray(restData.foodImages) && restData.foodImages.length > 0
       ? restData.foodImages
       : (Array.isArray(restData.galleryPhotos) ? restData.galleryPhotos : []);
+    const nowIso = new Date().toISOString();
     const newRest: Restaurant = normalizeRestaurant({
       ...restData,
       photoUrl: profileImg,
@@ -1814,8 +1850,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         ? new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString() 
         : undefined,
       menuItems: isPremium ? (restData.menuItems || []).slice(0, 20) : [],
+      created_at: restData.created_at || restData.createdAt || nowIso,
+      createdAt: restData.created_at || restData.createdAt || nowIso,
     });
-    setRestaurants(prev => [newRest, ...prev]);
+    setRestaurants(prev => sortRestaurantsChronologically([...prev, newRest]));
     showToast(
       isPremium
         ? (language === 'km' ? '🎉 ចុះបញ្ជីហាង Premium VIP រួចរាល់!' : '🎉 Registered as Premium VIP!')
@@ -1840,12 +1878,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       ? updated.foodImages
       : (Array.isArray(updated.galleryPhotos) ? updated.galleryPhotos : (original?.foodImages || original?.galleryPhotos || []));
 
+    const preservedCreatedAt = original?.created_at || original?.createdAt || updated.created_at || updated.createdAt || getRestaurantCreatedAtIso(original || updated);
+
     const safeUpdated: Restaurant = normalizeRestaurant(isAdmin ? {
       ...updated,
       photoUrl: profileImg,
       profileImage: profileImg,
       galleryPhotos: foodImgs,
       foodImages: foodImgs,
+      created_at: preservedCreatedAt,
+      createdAt: preservedCreatedAt,
     } : {
       ...updated,
       photoUrl: profileImg,
@@ -1859,6 +1901,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       isVerified: original?.isVerified ?? true,
       signatureDishesKh: Array.isArray(updated.signatureDishesKh) ? updated.signatureDishesKh : (original?.signatureDishesKh || ['ម្ហូបខ្មែរប្រពៃណី']),
       menuItems: Array.isArray(updated.menuItems) ? updated.menuItems : (original?.menuItems || []),
+      created_at: preservedCreatedAt,
+      createdAt: preservedCreatedAt,
     });
 
     setRestaurants(prev => prev.map(r => r.id === updated.id ? safeUpdated : r));
@@ -3633,9 +3677,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         isVerified: true,
         membershipTier: 'free',
         ownerId: currentUser.id,
+        created_at: checkInTime,
+        createdAt: checkInTime,
       };
 
-      setRestaurants(prev => [newRestaurant, ...prev]);
+      setRestaurants(prev => sortRestaurantsChronologically([...prev, newRestaurant]));
 
       const approvedSubmission: AiCheckInSubmission = {
         ...data,
@@ -3716,9 +3762,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       isVerified: true,
       membershipTier: 'free',
       ownerId: sub.userId,
+      created_at: sub.checkInTime || new Date().toISOString(),
+      createdAt: sub.checkInTime || new Date().toISOString(),
     };
 
-    setRestaurants(prev => [newRestaurant, ...prev]);
+    setRestaurants(prev => sortRestaurantsChronologically([...prev, newRestaurant]));
     setAiCheckIns(prev => prev.map(c => c.id === id ? { ...c, status: 'approved', matchedExistingRestaurantId: newRestId } : c));
     showToast(language === 'km' ? `បានអនុម័ត និងចុះផ្សាយហាង «${sub.restaurantNameKh}»!` : `Approved and published "${sub.restaurantNameKh}"!`, 'success');
   };

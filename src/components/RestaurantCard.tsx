@@ -3,6 +3,7 @@ import { Restaurant, isRestaurantPremiumActive } from '../types';
 import { useApp } from '../context/AppContext';
 import { MapPin, Phone, Star, Navigation, CheckCircle2, AlertCircle, Sparkles, Share2 } from 'lucide-react';
 import { sanitizeDialablePhone, resolveRestaurantPhoneOnDemand } from '../services/googlePlacesService';
+import { shareRichContent } from '../utils/androidMediaHelper';
 
 interface RestaurantCardProps {
   restaurant: Restaurant;
@@ -19,21 +20,26 @@ export const RestaurantCard: React.FC<RestaurantCardProps> = ({ restaurant }) =>
   const handleShare = (e: React.MouseEvent) => {
     e.stopPropagation();
     trackRestaurantShare(restaurant.id);
-    const origin = typeof window !== 'undefined' && window.location?.origin ? window.location.origin : 'https://khmerfoodtourism.com';
-    const shareUrl = `${origin}/?restaurant=${restaurant.id}`;
-    if (navigator.share) {
-      navigator.share({
+    shareRichContent(
+      {
         title: isKm ? restaurant.nameKh : restaurant.nameEn,
-        text: isKm ? `សូមចូលមើល ${restaurant.nameKh} ក្នុងកម្មវិធី Khmer Food & Tourism!` : `Check out ${restaurant.nameEn}!`,
-        url: shareUrl,
-      }).catch(() => {});
-    } else if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(shareUrl).then(() => {
-        showToast(isKm ? 'បានចម្លងតំណភ្ជាប់ហាងជោគជ័យ!' : 'Restaurant link copied to clipboard!', 'success');
-      }).catch(() => {});
-    } else {
-      showToast(isKm ? 'បានចម្លងតំណភ្ជាប់ហាងជោគជ័យ!' : 'Restaurant link copied to clipboard!', 'success');
-    }
+        nameKh: restaurant.nameKh,
+        nameEn: restaurant.nameEn,
+        description: isKm ? restaurant.descriptionKh : restaurant.descriptionEn,
+        location: isKm
+          ? `${restaurant.addressKh} (${restaurant.provinceKh})`
+          : `${restaurant.addressEn} (${restaurant.provinceEn})`,
+        phone: restaurant.phone,
+        priceDisplay: restaurant.priceLevel,
+        signatureDishes: restaurant.signatureDishesKh,
+        photoUrl: restaurant.photoUrl,
+        mapUrl: restaurant.mapUrl,
+        itemType: 'restaurant',
+        itemId: restaurant.id,
+        isKm,
+      },
+      showToast
+    );
   };
 
   return (

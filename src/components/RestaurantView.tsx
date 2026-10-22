@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { RestaurantCard } from './RestaurantCard';
-import { isRestaurantPremiumActive, Restaurant } from '../types';
+import { isRestaurantPremiumActive, Restaurant, sortRestaurantsChronologically } from '../types';
 import { Store, Plus, MapPin, Sparkles, PhoneCall, CheckCircle2, AlertCircle, Camera, Globe, Loader2 } from 'lucide-react';
 import {
   searchCambodiaPlacesWithSmartCache,
@@ -104,12 +104,8 @@ export const RestaurantView: React.FC = () => {
     return true;
   });
 
-  // Benefit 1: Featured restaurant listing (VIP restaurants placed first)
-  const sortedRestaurants = [...filteredRestaurants].sort((a, b) => {
-    const aVip = isRestaurantPremiumActive(a) ? 1 : 0;
-    const bVip = isRestaurantPremiumActive(b) ? 1 : 0;
-    return bVip - aVip;
-  });
+  // Chronological order: restaurants added earlier appear first, newly added restaurants appear afterward
+  const sortedRestaurants = sortRestaurantsChronologically(filteredRestaurants);
 
   const verifiedCount = restaurants.filter(r => r.isVerified).length;
   const sampleCount = restaurants.filter(r => !r.isVerified).length;

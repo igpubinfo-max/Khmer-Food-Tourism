@@ -1,15 +1,37 @@
 import React from 'react';
 import { FoodItem } from '../types';
 import { useApp } from '../context/AppContext';
-import { Star, Heart, Flame } from 'lucide-react';
+import { Star, Heart, Flame, Share2 } from 'lucide-react';
+import { shareRichContent } from '../utils/androidMediaHelper';
 
 interface FoodCardProps {
   food: FoodItem;
 }
 
 export const FoodCard: React.FC<FoodCardProps> = ({ food }) => {
-  const { language, setSelectedFood, isBookmarked, toggleBookmark } = useApp();
+  const { language, setSelectedFood, isBookmarked, toggleBookmark, showToast } = useApp();
   const bookmarked = isBookmarked(food.id);
+  const isKm = language === 'km';
+
+  const handleShareFood = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    shareRichContent(
+      {
+        title: isKm ? food.nameKh : food.nameEn,
+        nameKh: food.nameKh,
+        nameEn: food.nameEn,
+        description: isKm ? food.descriptionKh : food.descriptionEn,
+        location: isKm ? `${food.categoryKh} • កម្ពុជា` : `${food.categoryEn} • Cambodia`,
+        priceDisplay: `${food.priceRiel.toLocaleString()} ៛ ($${food.priceUsd.toFixed(2)})`,
+        signatureDishes: (food.ingredients || []).slice(0, 4).map(i => (isKm ? i.nameKh : i.nameEn)),
+        photoUrl: food.photoUrl,
+        itemType: 'food',
+        itemId: food.id,
+        isKm,
+      },
+      showToast
+    );
+  };
 
   return (
     <div 
@@ -76,9 +98,19 @@ export const FoodCard: React.FC<FoodCardProps> = ({ food }) => {
             <span className="text-slate-400 text-[10px]">({food.reviewCount ?? 0})</span>
           </div>
 
-          <div className="flex items-center gap-1 text-slate-500 text-[10px]">
-            <Flame className="w-3 h-3 text-orange-500" />
-            <span>{food.calories ?? 320} kcal</span>
+          <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-0.5 text-slate-500 text-[10px]">
+              <Flame className="w-3 h-3 text-orange-500" />
+              <span>{food.calories ?? 320} kcal</span>
+            </div>
+            <button
+              type="button"
+              onClick={handleShareFood}
+              className="p-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-200 transition"
+              title={isKm ? 'ចែករំលែកមុខម្ហូប' : 'Share dish'}
+            >
+              <Share2 className="w-3 h-3" />
+            </button>
           </div>
         </div>
       </div>

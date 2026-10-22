@@ -4,6 +4,7 @@ import { Restaurant } from '../types';
 export const initial100Restaurants: Restaurant[] = [
   {
     "id": "rest-1",
+    created_at: '2026-01-01T00:01:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន ម្លិះ",
     "nameEn": "Malis Restaurant Phnom Penh",
     "descriptionKh": "ភោជនីយដ្ឋានម្ហូបខ្មែរប្រណីតលំដាប់កំពូល បង្កើតឡើងដោយមេចុងភៅឆ្នើម លូ ម៉េង ដើម្បីលើកតម្កើងម្ហូបខ្មែររស់ឡើងវិញ។ បរិយាកាសសួនមនោរម្យ និងសេវាកម្មស្តង់ដាអន្តរជាតិ។",
@@ -41,6 +42,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-2",
+    created_at: '2026-01-01T00:02:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន រំដេង",
     "nameEn": "Romdeng Restaurant Phnom Penh",
     "descriptionKh": "ភោជនីយដ្ឋានបណ្តុះបណ្តាលវិជ្ជាជីវៈយុវជនខ្មែរ ដោយអង្គការ Friends-International។ បម្រើម្ហូបខ្មែរបុរាណ និងម្ហូបតំបន់ស្រុកស្រែដ៏មានឱជារស។",
@@ -78,6 +80,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-3",
+    created_at: '2026-01-01T00:03:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន អេឡឹវិន វ័ន ឃីតឆិន",
     "nameEn": "Eleven One Kitchen BKK1",
     "descriptionKh": "ភោជនីយដ្ឋានដែលផ្តោតលើសុខភាព ប្រើប្រាស់គ្រឿងផ្សំសរីរាង្គក្នុងស្រុក និងគ្មានការប្រើប្រាស់ប្លាស្ទិក គាំទ្របរិស្ថានបៃតង។",
@@ -115,6 +118,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-4",
+    created_at: '2026-01-01T00:04:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន ក្រវាញ",
     "nameEn": "Kravanh Authentic Khmer Restaurant",
     "descriptionKh": "ហាងអាហារខ្មែររសជាតិដើមបែបគ្រួសារខ្មែរអភិជន តុបតែងរចនាបថបែបបុរាណ ម្ហូបឆ្ងាញ់ប្រកបដោយអនាម័យខ្ពស់។",
@@ -152,6 +156,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-5",
+    created_at: '2026-01-01T00:05:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន ខ្មែរសុរិន្ទ",
     "nameEn": "Khmer Surin Restaurant BKK1",
     "descriptionKh": "ភោជនីយដ្ឋានដ៏ល្បីល្បាញយូរឆ្នាំនៅភ្នំពេញ តាំងពីឆ្នាំ ១៩៩៦ មានបរិយាកាសផ្ទះឈើបុរាណ លម្អដោយរុក្ខជាតិបៃតង និងវត្ថុសិល្បៈខ្មែរ។",
@@ -189,6 +194,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-6",
+    created_at: '2026-01-01T00:06:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន សុវណ្ណា សាច់អាំង",
     "nameEn": "Sovanna Restaurant & BBQ Phnom Penh",
     "descriptionKh": "ហាងសាច់អាំង និងម្ហូបក្លែមបែបខ្មែរដ៏ពេញនិយមបំផុត រសជាតិទឹកត្រីកោះកុង និងទឹកប្រហុកបុកល្បីល្បាញខ្លាំង។",
@@ -226,6 +232,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-7",
+    created_at: '2026-01-01T00:07:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន វ័ន ម៉រ",
     "nameEn": "One More Restaurant Toul Kork",
     "descriptionKh": "ភោជនីយដ្ឋានប្រណីតនៅខណ្ឌទួលគោក ដែលមានកេរ្តិ៍ឈ្មោះល្បីល្បាញខាងស៊ុប និងមុខម្ហូបខ្មែរបុរាណប្រកបដោយសោភ័ណភាពខ្ពស់។",
@@ -263,6 +270,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-8",
+    created_at: '2026-01-01T00:08:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន មុខមុនី",
     "nameEn": "Mok Mony Restaurant Phnom Penh",
     "descriptionKh": "ហាងអាហារបែបគ្រួសារខ្មែរដ៏កក់ក្តៅ បម្រើម្ហូបបុរាណបែបខ្មែរកណ្តាល ជាមួយទឹកជ្រលក់រូបមន្តសម្ងាត់។",
@@ -300,6 +308,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-9",
+    created_at: '2026-01-01T00:09:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន ហ្វ្រេន ដឹ រេស្ត៊ូរ៉ង់",
     "nameEn": "Friends the Restaurant Phnom Penh",
     "descriptionKh": "ភោជនីយដ្ឋានបណ្តុះបណ្តាលសង្គមដ៏ល្បីល្បាញក្បែរសារមន្ទីរជាតិភ្នំពេញ បម្រើម្ហូបបែប tapas ខ្មែរ និងអាស៊ី។",
@@ -337,6 +346,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-10",
+    created_at: '2026-01-01T00:10:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន បុប្ផាភ្នំពេញ ទីតានិច",
     "nameEn": "Bopha Phnom Penh Titanic Riverside",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ទន្លេសាបដ៏ស្រស់ស្អាតលើវិថីព្រះស៊ីសុវត្ថិ បម្រើម្ហូបខ្មែរបុរាណ និងទស្សនាភ្លើងរាត្រីមាត់ទន្លេ។",
@@ -374,6 +384,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-11",
+    created_at: '2026-01-01T00:11:00.000Z',
     "nameKh": "ហាងអាហារ ស្ករត្នោត",
     "nameEn": "The Sugar Palm Siem Reap",
     "descriptionKh": "ហាងអាហារខ្មែរពិតៗ ស្ថិតក្នុងផ្ទះឈើប្រពៃណីខ្មែរនៅក្រុងសៀមរាប។ ល្បីល្បាញបំផុតលើពិភពលោកខាងម្ហូប អាម៉ុកត្រីចំហុយ និងសម្លការីខ្មែរ។",
@@ -411,6 +422,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-12",
+    created_at: '2026-01-01T00:12:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន ចន្ទ្រា",
     "nameEn": "Chanrey Tree Riverside Siem Reap",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ស្ទឹងសៀមរាប រចនាបែបខ្មែរទំនើបក្បែរសួនផ្កា ម្ហូបឆ្ងាញ់ប្រកបដោយអត្តសញ្ញាណខ្មែរពិតៗ។",
@@ -448,6 +460,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-13",
+    created_at: '2026-01-01T00:13:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន គ្វីហ្ស៊ីន វត្តដំណាក់",
     "nameEn": "Cuisine Wat Damnak Siem Reap",
     "descriptionKh": "ភោជនីយដ្ឋានដំបូងគេបង្អស់នៅកម្ពុជាដែលជាប់ក្នុងបញ្ជី Asia's 50 Best Restaurants។ ច្នៃម្ហូបខ្មែរជាមួយគ្រឿងផ្សំក្នុងស្រុកដ៏អស្ចារ្យ។",
@@ -485,6 +498,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-14",
+    created_at: '2026-01-01T00:14:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន ម៉ារ៉ុម",
     "nameEn": "Marum Training Restaurant Siem Reap",
     "descriptionKh": "ភោជនីយដ្ឋានបណ្តុះបណ្តាលយុវជនខ្មែរក្នុងផ្ទះឈើបុរាណសួនបៃតង មានម្ហូបតំបន់ច្នៃប្រឌិត និងរសជាតិខ្មែរពិតប្រាកដ។",
@@ -522,6 +536,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-15",
+    created_at: '2026-01-01T00:15:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន ហេវិន",
     "nameEn": "Haven Restaurant Siem Reap",
     "descriptionKh": "ភោជនីយដ្ឋានបណ្តុះបណ្តាលសង្គមដ៏ល្បីល្បាញ បម្រើម្ហូបខ្មែរ និងអាស៊ី ជាមួយនឹងគ្រឿងផ្សំស្រស់ៗចេញពីកសិដ្ឋាន។",
@@ -559,6 +574,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-16",
+    created_at: '2026-01-01T00:16:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន វីរោធ",
     "nameEn": "Viroth's Restaurant Siem Reap",
     "descriptionKh": "ភោជនីយដ្ឋានលំដាប់ខ្ពស់រចនាបថទសវត្សរ៍ទី ៦០ ក្នុងសួនផ្កា ម្ហូបខ្មែរឆ្ងាញ់ប្រកបដោយសោភ័ណភាពវិចិត្រ។",
@@ -596,6 +612,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-17",
+    created_at: '2026-01-01T00:17:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន ស្ពូនស៍ ខេមបូឌា",
     "nameEn": "Spoons Cambodia Training Restaurant",
     "descriptionKh": "ភោជនីយដ្ឋានបណ្តុះបណ្តាលសិស្សក្រីក្រ សាងសង់ពីដើមឫស្សីប្រណីត បម្រើម្ហូបខ្មែរបែបច្នៃប្រឌិត និងម្ហូបតាមផ្លូវខ្មែរ។",
@@ -633,6 +650,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-18",
+    created_at: '2026-01-01T00:18:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន ពោធិ៍",
     "nameEn": "Pou Restaurant and Bar Siem Reap",
     "descriptionKh": "បង្កើតឡើងដោយមេចុងភៅវ័យក្មេង ម៉េងលី លើកស្ទួយម្ហូបច្នៃប្រឌិតពីបន្លែស្មៅព្រៃ និងវប្បធម៌ម្ហូបបុរាណខ្មែរ។",
@@ -670,6 +688,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-19",
+    created_at: '2026-01-01T00:19:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន គីមលី គ្រឿងសមុទ្រកែប",
     "nameEn": "Kimly Seafood Restaurant Crab Market Kep",
     "descriptionKh": "ហាងគ្រឿងសមុទ្រ និងក្តាមសេះដ៏ល្បីល្បាញបំផុតនៅផ្សារក្តាមខេត្តកែប។ ក្តាមសេះស្រស់ៗឆាម្រេចខ្ចីកំពត ជាប់មាត់សមុទ្រ។",
@@ -707,6 +726,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-20",
+    created_at: '2026-01-01T00:20:00.000Z',
     "nameKh": "ហាង ហូលី ក្រាប កែប",
     "nameEn": "Holy Crab Restaurant Kep",
     "descriptionKh": "ហាងគ្រឿងសមុទ្រមាត់សមុទ្រផ្សារក្តាមកែប ល្បីល្បាញខាងក្តាមសេះឆាម្រេចកំពត និងត្រីចំហុយទឹកស៊ីអ៊ីវ។",
@@ -744,6 +764,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-21",
+    created_at: '2026-01-01T00:21:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន រីឃីធីឃីថាវី កំពត",
     "nameEn": "Rikitikitavi Riverside Kampot",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ព្រែកកំពតដ៏ស្រស់ស្អាត ទស្សនាថ្ងៃលិចលើជួរភ្នំបូកគោ បម្រើម្ហូបខ្មែរឆ្ងាញ់ៗជាមួយម្រេចកំពតពិតៗ។",
@@ -781,6 +802,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-22",
+    created_at: '2026-01-01T00:22:00.000Z',
     "nameKh": "អាតេលីយេ កំពត",
     "nameEn": "Atelier Kampot French & Khmer",
     "descriptionKh": "ភោជនីយដ្ឋានក្នុងអគារបេតិកភណ្ឌបារាំងមាត់ព្រែកកំពត បង្កើតឡើងដោយកសិដ្ឋានម្រេចកំពត La Plantation បម្រើម្ហូបម្រេចកំពតពិតៗ។",
@@ -818,6 +840,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-23",
+    created_at: '2026-01-01T00:23:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន សេលីងក្លឹប កែប",
     "nameEn": "The Sailing Club Kep",
     "descriptionKh": "ភោជនីយដ្ឋាន និងបារមាត់សមុទ្រដ៏រ៉ូមែនទិកនៅខេត្តកែប ទស្សនាថ្ងៃលិចលើផែឈើបុរាណ ម្ហូបគ្រឿងសមុទ្រស្រស់ៗ។",
@@ -855,6 +878,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-24",
+    created_at: '2026-01-01T00:24:00.000Z',
     "nameKh": "ហាងបាយ ម្លប់ស្វាយ បាត់ដំបង",
     "nameEn": "Mlop Svay Restaurant Battambang",
     "descriptionKh": "ហាងអាហារស្រុកស្រែដ៏ល្បីនៅខេត្តបាត់ដំបង ជង្រុកស្រូវកម្ពុជា។ ល្បីល្បាញខាងត្រីរ៉ស់អាំង ភ្លាសាច់គោ និងសម្លកកូរជើងជ្រូក។",
@@ -892,6 +916,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-25",
+    created_at: '2026-01-01T00:25:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន ចានបាយ",
     "nameEn": "Jaan Bai Restaurant Battambang",
     "descriptionKh": "ភោជនីយដ្ឋានសង្គមដ៏ល្បីល្បាញគាំទ្រដោយ Cambodian Children's Trust (CCT)។ ម្ហូបខ្មែរច្នៃប្រឌិត និងការតុបតែងប្រកបដោយសិល្បៈ។",
@@ -929,6 +954,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-26",
+    created_at: '2026-01-01T00:26:00.000Z',
     "nameKh": "ហាងបាយ ណារី ឃីតឆិន",
     "nameEn": "Nary Kitchen & Cooking School",
     "descriptionKh": "ហាងបាយខ្មែរ និងថ្នាក់បង្រៀនធ្វើម្ហូបដ៏ល្បីនៅបាត់ដំបង បម្រើម្ហូបប្រពៃណីខ្មែរពិតៗ ធ្វើដោយទឹកដៃមេផ្ទះខ្មែរ។",
@@ -966,6 +992,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-27",
+    created_at: '2026-01-01T00:27:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន សន្ទាន់",
     "nameEn": "Sandan Training Restaurant Sihanoukville",
     "descriptionKh": "ភោជនីយដ្ឋានបណ្តុះបណ្តាលវិជ្ជាជីវៈកុមារ និងយុវជនដោយ M'Lop Tapang ស្ថិតក្នុងសួនធម្មជាតិដ៏ស្រស់ស្អាត បម្រើគ្រឿងសមុទ្រ និងម្ហូបខ្មែរ។",
@@ -1003,6 +1030,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-28",
+    created_at: '2026-01-01T00:28:00.000Z',
     "nameKh": "ហាងបាយ ស្មាញ",
     "nameEn": "Smile Restaurant Kampong Cham",
     "descriptionKh": "ភោជនីយដ្ឋានបណ្តុះបណ្តាលយុវជនមាត់ទន្លេមេគង្គខេត្តកំពង់ចាម បម្រើម្ហូបខ្មែរឆ្ងាញ់ៗ ទេសភាពស្ពានកោះប៉ែន។",
@@ -1040,6 +1068,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-29",
+    created_at: '2026-01-01T00:29:00.000Z',
     "nameKh": "ហាងបាយ ហ្គ្រីនហោស៍ សែនមនោរម្យ",
     "nameEn": "Greenhouse Restaurant Sen Monorom",
     "descriptionKh": "ហាងអាហារបែបខ្មែរស្រុកស្រែលើភ្នំមណ្ឌលគិរី ល្បីល្បាញខាងស៊ុបសាច់គោ ម្ហូបជនជាតិដើមភាគតិច និងកាហ្វេមណ្ឌលគិរីសុទ្ធ។",
@@ -1077,6 +1106,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-30",
+    created_at: '2026-01-01T00:30:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន អូតូ មាត់សមុទ្រកោះកុង",
     "nameEn": "Otto Seaside Seafood Koh Kong",
     "descriptionKh": "ហាងគ្រឿងសមុទ្រស្រស់ៗក្បែរមាត់ព្រែក និងឆ្នេរសមុទ្រខេត្តកោះកុង ល្បីល្បាញខាងក្តាមសមុទ្រ មឹកបំពង និងទឹកត្រីកោះកុងសុទ្ធ។",
@@ -1114,6 +1144,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-31",
+    created_at: '2026-01-01T00:31:00.000Z',
     "nameKh": "ហាងបាយ បង្កងទឹកសាបតាកែវ",
     "nameEn": "Takeo River Prawn House",
     "descriptionKh": "ហាងអាហារប្រពៃណីល្បីល្បាញបំផុតនៅខេត្តតាកែវ ខាងបង្កងទឹកសាបមេគង្គដុតខ្លាញ់ក្បាល និងញាំស្វាយខ្ចី។",
@@ -1151,6 +1182,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-32",
+    created_at: '2026-01-01T00:32:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន ផ្សោតទន្លេមេគង្គ ក្រចេះ",
     "nameEn": "Kratie Mekong Dolphin Restaurant",
     "descriptionKh": "ហាងអាហារមាត់ទន្លេមេគង្គខេត្តក្រចេះ ក្បែរកន្លែងទស្សនាផ្សោតកំបោរ បម្រើម្ហូបត្រីទន្លេស្រស់ៗ និងក្រឡានក្រចេះ។",
@@ -1188,6 +1220,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-33",
+    created_at: '2026-01-01T00:33:00.000Z',
     "nameKh": "ហាងបាយ ស្ទឹងពោធិ៍សាត់",
     "nameEn": "Pursat River View Restaurant",
     "descriptionKh": "ហាងអាហារល្បីល្បាញនៅខេត្តពោធិ៍សាត់ ខាងក្រូចក្រហមពោធិ៍សាត់ ត្រីងៀត និងប្រហុកសាច់អាំង។",
@@ -1225,6 +1258,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-34",
+    created_at: '2026-01-01T00:34:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន បឹងយក្សឡោម រតនគិរី",
     "nameEn": "Yeak Laom Lake Restaurant Banlung",
     "descriptionKh": "ហាងអាហារក្បែរបឹងភ្នំភ្លើងយក្សឡោម បម្រើម្ហូបខ្មែរលើ និងបន្លែព្រៃធម្មជាតិខេត្តរតនគិរី។",
@@ -1262,6 +1296,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-35",
+    created_at: '2026-01-01T00:35:00.000Z',
     "nameKh": "ហាងបាយ ស្ទឹងសែន កំពង់ធំ",
     "nameEn": "Steung Saen Restaurant Kampong Thom",
     "descriptionKh": "ហាងអាហារកណ្តាលក្រុងកំពង់ធំ ផ្លូវទៅប្រាសាទសំបូរព្រៃគុក បម្រើម្ហូបត្រីបឹងទន្លេសាប និងសម្លម្ជូរគ្រឿង។",
@@ -1299,6 +1334,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-36",
+    created_at: '2026-01-01T00:36:00.000Z',
     "nameKh": "ហាងបាយ កំពង់ឆ្នាំង ឆ្នាំងដី",
     "nameEn": "Kampong Chhnang Claypot Kitchen",
     "descriptionKh": "ហាងបាយល្បីខាងម្ហូបឆ្នាំងដីបុរាណ ត្រីដុត និងនំបញ្ចុកទឹកសម្លខ្មែរដើម ក្នុងដែនដីកុលាលភាជន៍ខ្មែរ។",
@@ -1336,6 +1372,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-37",
+    created_at: '2026-01-01T00:37:00.000Z',
     "nameKh": "ហាងទាខ្វៃ តាខ្មៅ",
     "nameEn": "Ta Khmao Roast Duck House Kandal",
     "descriptionKh": "ហាងទាខ្វៃ និងម្ហូបខ្មែរ-ចិនដ៏ល្បីល្បាញប្រចាំក្រុងតាខ្មៅ ខេត្តកណ្តាល ស្បែកស្រួយ សាច់ទន់ផ្អែម។",
@@ -1373,6 +1410,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-38",
+    created_at: '2026-01-01T00:38:00.000Z',
     "nameKh": "ហាងបាយ ត្រីប៉ាស៊ីអ៊ី ស្ទឹងត្រែង",
     "nameEn": "Stung Treng Mekong Pas-ee Fish Restaurant",
     "descriptionKh": "ហាងអាហារល្បីល្បាញបំផុតប្រចាំខេត្តស្ទឹងត្រែង ខាងត្រីប៉ាស៊ីអ៊ីទន្លេមេគង្គដ៏កម្រ និងមានឱជារសឆ្ងាញ់ពិសា។",
@@ -1410,6 +1448,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-39",
+    created_at: '2026-01-01T00:39:00.000Z',
     "nameKh": "ហាងបាយ ជើងភ្នំដងរែក ព្រះវិហារ",
     "nameEn": "Dangrek Foothill Restaurant Preah Vihear",
     "descriptionKh": "ហាងអាហារខ្មែរនៅជើងភ្នំដងរែក ផ្លូវឡើងប្រាសាទព្រះវិហារ បម្រើម្ហូបសាច់គោអាំង និងសម្លម្ជូរគ្រឿង។",
@@ -1447,6 +1486,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-40",
+    created_at: '2026-01-01T00:40:00.000Z',
     "nameKh": "ហាងបាយ ត្បូងប៉ៃលិន",
     "nameEn": "Pailin Mountain Gem Restaurant",
     "descriptionKh": "ហាងអាហារខ្មែរក្បែរជួរភ្នំខេត្តប៉ៃលិន បម្រើម្ហូបសាច់គោ ម្ហូបព្រៃស្របច្បាប់ និងទឹកឃ្មុំព្រៃប៉ៃលិន។",
@@ -1484,6 +1524,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
       {
     "id": "rest-41",
+    created_at: '2026-01-01T00:41:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន ទន្លេបាសាក់ ២",
     "nameEn": "Tonle Bassac II Khmer & International Restaurant",
     "descriptionKh": "ភោជនីយដ្ឋានដ៏ធំទូលាយល្បីល្បាញនៅភ្នំពេញ បម្រើម្ហូបខ្មែរប្រពៃណី គ្រឿងសមុទ្រអាំង និងបង្អែមខ្មែររាប់រយមុខ។",
@@ -1522,6 +1563,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-42",
+    created_at: '2026-01-01T00:42:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន ម្លិះ សៀមរាប (មាត់ស្ទឹង)",
     "nameEn": "Malis Restaurant Siem Reap Pokambor Riverside",
     "descriptionKh": "ភោជនីយដ្ឋានម្លិះសាខាផ្លូវការនៅមាត់ស្ទឹងសៀមរាប បម្រើម្ហូបខ្មែរប្រណិត អាម៉ុកត្រី ប្រហុកខ្ទិះ និងគុយទាវម្លិះក្នុងបរិយាកាសក្បាច់ខ្មែរ។",
@@ -1559,6 +1601,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-43",
+    created_at: '2026-01-01T00:43:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន ផ្កាកុលាបស បាត់ដំបង (White Rose)",
     "nameEn": "White Rose Restaurant Battambang",
     "descriptionKh": "ភោជនីយដ្ឋានចំណាស់ដ៏ល្បីល្បាញនៅកណ្តាលក្រុងបាត់ដំបង បម្រើម្ហូបខ្មែរគ្រប់មុខ ណែមបាត់ដំបង អាម៉ុក និងទឹកក្រឡុកផ្លែឈើ។",
@@ -1597,6 +1640,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-44",
+    created_at: '2026-01-01T00:44:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន មាត់ព្រែកកំពត ក្តាមឆាម្រេចខ្ចី",
     "nameEn": "Kampot Riverfront Green Pepper Crab Restaurant",
     "descriptionKh": "ភោជនីយដ្ឋានជាប់មាត់ព្រែកកំពត ល្បីខាងម្ហូបក្តាមឆាម្រេចខ្ចីកំពត បង្គាអាំង និងត្រីសមុទ្រស្រស់ៗជាមួយទេសភាពភ្នំបូកគោ។",
@@ -1635,6 +1679,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-45",
+    created_at: '2026-01-01T00:45:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន ផ្សារក្តាម គ្រឿងសមុទ្រធម្មជាតិ កែប",
     "nameEn": "Kep Crab Market Oceanfront Seafood Restaurant",
     "descriptionKh": "ភោជនីយដ្ឋានជាប់មាត់សមុទ្រក្នុងផ្សារក្តាមកែប ស្រង់ក្តាមសេះរស់ៗពីកន្ត្រកក្នុងទឹកសមុទ្រយកមកឆាម្រេចខ្ចីភ្លាមៗ។",
@@ -1673,6 +1718,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-46",
+    created_at: '2026-01-01T00:46:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន ញ៉ាំ ក្រុងព្រះសីហនុ",
     "nameEn": "Nyam Khmer & Seafood Restaurant Sihanoukville",
     "descriptionKh": "ភោជនីយដ្ឋានម្ហូបខ្មែរ និងគ្រឿងសមុទ្រស្រស់ដ៏ល្បីក្នុងក្រុងព្រះសីហនុ បម្រើក្តាមឆាម្រេច មឹកអាំង និងសម្លម្ជូរគ្រឿងសមុទ្ររសជាតិដើម។",
@@ -1711,6 +1757,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-47",
+    created_at: '2026-01-01T00:47:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន មាត់ស្ទឹង កំពង់ចាម",
     "nameEn": "Riverside Khmer Kitchen (Kampong Cham)",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ទឹកដ៏ល្បីប្រចាំតំបន់ បម្រើម្ហូបត្រីទន្លេស្រស់ៗ សម្លម្ជូរព្រៃ និងមាន់ស្រែដុតក្នុងបរិយាកាសធម្មជាតិ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ចាម ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -1749,6 +1796,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-48",
+    created_at: '2026-01-01T00:48:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន មាត់ស្ទឹង កណ្តាល",
     "nameEn": "Riverside Khmer Kitchen (Kandal)",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ទឹកដ៏ល្បីប្រចាំតំបន់ បម្រើម្ហូបត្រីទន្លេស្រស់ៗ សម្លម្ជូរព្រៃ និងមាន់ស្រែដុតក្នុងបរិយាកាសធម្មជាតិ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកណ្តាល ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -1787,6 +1835,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-49",
+    created_at: '2026-01-01T00:49:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន មាត់ស្ទឹង តាកែវ",
     "nameEn": "Riverside Khmer Kitchen (Takeo)",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ទឹកដ៏ល្បីប្រចាំតំបន់ បម្រើម្ហូបត្រីទន្លេស្រស់ៗ សម្លម្ជូរព្រៃ និងមាន់ស្រែដុតក្នុងបរិយាកាសធម្មជាតិ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តតាកែវ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -1824,6 +1873,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-50",
+    created_at: '2026-01-01T00:50:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន មាត់ស្ទឹង ពោធិ៍សាត់",
     "nameEn": "Riverside Khmer Kitchen (Pursat)",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ទឹកដ៏ល្បីប្រចាំតំបន់ បម្រើម្ហូបត្រីទន្លេស្រស់ៗ សម្លម្ជូរព្រៃ និងមាន់ស្រែដុតក្នុងបរិយាកាសធម្មជាតិ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តពោធិ៍សាត់ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -1862,6 +1912,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-51",
+    created_at: '2026-01-01T00:51:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន មាត់ស្ទឹង កំពង់ធំ",
     "nameEn": "Riverside Khmer Kitchen (Kampong Thom)",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ទឹកដ៏ល្បីប្រចាំតំបន់ បម្រើម្ហូបត្រីទន្លេស្រស់ៗ សម្លម្ជូរព្រៃ និងមាន់ស្រែដុតក្នុងបរិយាកាសធម្មជាតិ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ធំ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -1900,6 +1951,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-52",
+    created_at: '2026-01-01T00:52:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន មាត់ស្ទឹង កំពង់ឆ្នាំង",
     "nameEn": "Riverside Khmer Kitchen (Kampong Chhnang)",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ទឹកដ៏ល្បីប្រចាំតំបន់ បម្រើម្ហូបត្រីទន្លេស្រស់ៗ សម្លម្ជូរព្រៃ និងមាន់ស្រែដុតក្នុងបរិយាកាសធម្មជាតិ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ឆ្នាំង ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -1938,6 +1990,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-53",
+    created_at: '2026-01-01T00:53:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន ទឹកធ្លាក់តាតៃ គ្រឿងសមុទ្រកោះកុង",
     "nameEn": "Tatai Waterfall Riverside Seafood Koh Kong",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ស្ទឹងតាតៃ បម្រើគ្រឿងសមុទ្រស្រស់ៗ ក្តាមថ្មកោះកុង បង្គាអាំង និងត្រីសមុទ្រចំហុយក្រូចឆ្មារ។",
@@ -1976,6 +2029,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-54",
+    created_at: '2026-01-01T00:54:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន ភ្នំសមុទ្រឈើ សែនមនោរម្យ",
     "nameEn": "Sea Forest Hilltop Restaurant Mondulkiri",
     "descriptionKh": "ភោជនីយដ្ឋានលើកំពូលភ្នំគយគន់ទេសភាពសមុទ្រឈើមណ្ឌលគិរី បម្រើសម្លប្រុងបំពង់ឫស្សី មាន់ដុតទឹកឃ្មុំព្រៃ និងបន្លែធម្មជាតិ។",
@@ -2014,6 +2068,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-55",
+    created_at: '2026-01-01T00:55:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន ភ្នំស្វាយ បានលុង រតនគិរី",
     "nameEn": "Phnom Svay Mountain View Restaurant Banlung",
     "descriptionKh": "ភោជនីយដ្ឋានក្បែរភ្នំស្វាយ ក្រុងបានលុង បម្រើម្ហូបប្រចាំតំបន់ភូមិភាគឦសាន ភ្លាសាច់គោ សម្លបំពង់ឫស្សី និងមាន់ដុត។",
@@ -2052,6 +2107,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-56",
+    created_at: '2026-01-01T00:56:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន មាត់ស្ទឹង ក្រចេះ",
     "nameEn": "Riverside Khmer Kitchen (Kratie)",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ទឹកដ៏ល្បីប្រចាំតំបន់ បម្រើម្ហូបត្រីទន្លេស្រស់ៗ សម្លម្ជូរព្រៃ និងមាន់ស្រែដុតក្នុងបរិយាកាសធម្មជាតិ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តក្រចេះ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -2089,6 +2145,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-57",
+    created_at: '2026-01-01T00:57:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន មាត់ស្ទឹង ស្ទឹងត្រែង",
     "nameEn": "Riverside Khmer Kitchen (Stung Treng)",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ទឹកដ៏ល្បីប្រចាំតំបន់ បម្រើម្ហូបត្រីទន្លេស្រស់ៗ សម្លម្ជូរព្រៃ និងមាន់ស្រែដុតក្នុងបរិយាកាសធម្មជាតិ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តស្ទឹងត្រែង ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -2127,6 +2184,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-58",
+    created_at: '2026-01-01T00:58:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន មាត់ស្ទឹង ព្រះវិហារ",
     "nameEn": "Riverside Khmer Kitchen (Preah Vihear)",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ទឹកដ៏ល្បីប្រចាំតំបន់ បម្រើម្ហូបត្រីទន្លេស្រស់ៗ សម្លម្ជូរព្រៃ និងមាន់ស្រែដុតក្នុងបរិយាកាសធម្មជាតិ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តព្រះវិហារ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -2165,6 +2223,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-59",
+    created_at: '2026-01-01T00:59:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន មាត់ស្ទឹង បន្ទាយមានជ័យ",
     "nameEn": "Riverside Khmer Kitchen (Banteay Meanchey)",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ទឹកដ៏ល្បីប្រចាំតំបន់ បម្រើម្ហូបត្រីទន្លេស្រស់ៗ សម្លម្ជូរព្រៃ និងមាន់ស្រែដុតក្នុងបរិយាកាសធម្មជាតិ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តបន្ទាយមានជ័យ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -2203,6 +2262,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-60",
+    created_at: '2026-01-01T01:00:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន មាត់ស្ទឹង ឧត្តរមានជ័យ",
     "nameEn": "Riverside Khmer Kitchen (Oddar Meanchey)",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ទឹកដ៏ល្បីប្រចាំតំបន់ បម្រើម្ហូបត្រីទន្លេស្រស់ៗ សម្លម្ជូរព្រៃ និងមាន់ស្រែដុតក្នុងបរិយាកាសធម្មជាតិ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តឧត្តរមានជ័យ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -2241,6 +2301,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-61",
+    created_at: '2026-01-01T01:01:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន មាត់ស្ទឹង ប៉ៃលិន",
     "nameEn": "Riverside Khmer Kitchen (Pailin)",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ទឹកដ៏ល្បីប្រចាំតំបន់ បម្រើម្ហូបត្រីទន្លេស្រស់ៗ សម្លម្ជូរព្រៃ និងមាន់ស្រែដុតក្នុងបរិយាកាសធម្មជាតិ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តប៉ៃលិន ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -2279,6 +2340,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-62",
+    created_at: '2026-01-01T01:02:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន មាត់ស្ទឹង ព្រៃវែង",
     "nameEn": "Riverside Khmer Kitchen (Prey Veng)",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ទឹកដ៏ល្បីប្រចាំតំបន់ បម្រើម្ហូបត្រីទន្លេស្រស់ៗ សម្លម្ជូរព្រៃ និងមាន់ស្រែដុតក្នុងបរិយាកាសធម្មជាតិ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តព្រៃវែង ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -2317,6 +2379,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-63",
+    created_at: '2026-01-01T01:03:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន មាត់ស្ទឹង ស្វាយរៀង",
     "nameEn": "Riverside Khmer Kitchen (Svay Rieng)",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ទឹកដ៏ល្បីប្រចាំតំបន់ បម្រើម្ហូបត្រីទន្លេស្រស់ៗ សម្លម្ជូរព្រៃ និងមាន់ស្រែដុតក្នុងបរិយាកាសធម្មជាតិ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តស្វាយរៀង ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -2354,6 +2417,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-64",
+    created_at: '2026-01-01T01:04:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន មាត់ស្ទឹង កំពង់ស្ពឺ",
     "nameEn": "Riverside Khmer Kitchen (Kampong Speu)",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ទឹកដ៏ល្បីប្រចាំតំបន់ បម្រើម្ហូបត្រីទន្លេស្រស់ៗ សម្លម្ជូរព្រៃ និងមាន់ស្រែដុតក្នុងបរិយាកាសធម្មជាតិ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ស្ពឺ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -2392,6 +2456,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-65",
+    created_at: '2026-01-01T01:05:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន មាត់ស្ទឹង ត្បូងឃ្មុំ",
     "nameEn": "Riverside Khmer Kitchen (Tboung Khmum)",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ទឹកដ៏ល្បីប្រចាំតំបន់ បម្រើម្ហូបត្រីទន្លេស្រស់ៗ សម្លម្ជូរព្រៃ និងមាន់ស្រែដុតក្នុងបរិយាកាសធម្មជាតិ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តត្បូងឃ្មុំ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -2430,6 +2495,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-66",
+    created_at: '2026-01-01T01:06:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន សួនទឹកកោះពេជ្រ គ្រឿងសមុទ្រ",
     "nameEn": "Koh Pich Riverside Seafood & Khmer Grill",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ទន្លេកោះពេជ្រ បរិយាកាសល្ហើយត្រជាក់ ស័ក្តិសមសម្រាប់អាហារពេលល្ងាចជួបជុំគ្រួសារ និងមិត្តភក្តិ។",
@@ -2468,6 +2534,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-67",
+    created_at: '2026-01-01T01:07:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន ផ្ទះបាយខ្មែរ ផ្សារចាស់ សៀមរាប",
     "nameEn": "Khmer Kitchen Restaurant Old Market Siem Reap",
     "descriptionKh": "ភោជនីយដ្ឋានដ៏ល្បីល្បាញនៅតំបន់ផ្សារចាស់ សៀមរាប បម្រើអាម៉ុកត្រី ការីក្រហមខ្មែរ និងឡុកឡាក់សាច់គោរសជាតិឆ្ងាញ់តម្លៃសមរម្យ។",
@@ -2506,6 +2573,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-68",
+    created_at: '2026-01-01T01:08:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន ស្ទឹងសង្កែ មាត់ទឹកបាត់ដំបង",
     "nameEn": "Sangkae Riverbank Dining Battambang",
     "descriptionKh": "ភោជនីយដ្ឋានតាមបណ្តោយមាត់ស្ទឹងសង្កែ បរិយាកាសស្រស់ស្រាយ បម្រើម្ហូបត្រីទន្លេ ប្រហុកខ្ទិះ និងសម្លខ្មែររសជាតិអ្នកបាត់ដំបង។",
@@ -2544,6 +2612,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-69",
+    created_at: '2026-01-01T01:09:00.000Z',
     "nameKh": "អាហារដ្ឋាន គុយទាវ និងមីទាខ្វៃ ផ្សារសាមគ្គីកំពត",
     "nameEn": "Kampot Samaki Market Roast Duck Noodle & Kuyteav",
     "descriptionKh": "ហាងអាហារពេលព្រឹកដ៏ល្បីប្រចាំក្រុងកំពត បម្រើមីទាខ្វៃ គុយទាវគ្រឿងសមុទ្រ និងបាយសាច់ជ្រូកអាំងក្តៅៗ។",
@@ -2582,6 +2651,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-70",
+    created_at: '2026-01-01T01:10:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន ជំនោរសមុទ្រកែប",
     "nameEn": "Kep Sea Breeze Crab & Seafood Pavilion",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់សមុទ្រកែប បរិយាកាសស្រស់ស្រាយ គយគន់កោះទន្សាយ និងពិសាគ្រឿងសមុទ្រស្រស់ៗគ្រប់មុខ។",
@@ -2619,6 +2689,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-71",
+    created_at: '2026-01-01T01:11:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន កំណប់សមុទ្រ ឆ្នេរអូរឈើទាល",
     "nameEn": "Treasure Island Seafood Restaurant Ochheuteal Beach",
     "descriptionKh": "ភោជនីយដ្ឋានជាប់មាត់ឆ្នេរអូរឈើទាល បម្រើគ្រឿងសមុទ្ររស់ៗស្រង់ពីទូកនេសាទ បង្គាអាំង ក្តាមចំហុយ និងត្រីសមុទ្របំពងទឹកត្រីផ្អែម។",
@@ -2657,6 +2728,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-72",
+    created_at: '2026-01-01T01:12:00.000Z',
     "nameKh": "អាហារដ្ឋាន គុយទាវ និងបាយព្រឹក ផ្សារធំ កំពង់ចាម",
     "nameEn": "Central Market Morning Kuyteav & Rice House (Kampong Cham)",
     "descriptionKh": "ហាងអាហារពេលព្រឹក និងថ្ងៃត្រង់ដ៏ពេញនិយមក្បែរផ្សារធំ មានគុយទាវឆ្អឹងជ្រូករម្ងាស់ បាយសាច់ជ្រូកអាំងធ្យូង និងកាហ្វេឆុងថ្មីៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ចាម ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -2695,6 +2767,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-73",
+    created_at: '2026-01-01T01:13:00.000Z',
     "nameKh": "អាហារដ្ឋាន គុយទាវ និងបាយព្រឹក ផ្សារធំ កណ្តាល",
     "nameEn": "Central Market Morning Kuyteav & Rice House (Kandal)",
     "descriptionKh": "ហាងអាហារពេលព្រឹក និងថ្ងៃត្រង់ដ៏ពេញនិយមក្បែរផ្សារធំ មានគុយទាវឆ្អឹងជ្រូករម្ងាស់ បាយសាច់ជ្រូកអាំងធ្យូង និងកាហ្វេឆុងថ្មីៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកណ្តាល ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -2733,6 +2806,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-74",
+    created_at: '2026-01-01T01:14:00.000Z',
     "nameKh": "អាហារដ្ឋាន គុយទាវ និងបាយព្រឹក ផ្សារធំ តាកែវ",
     "nameEn": "Central Market Morning Kuyteav & Rice House (Takeo)",
     "descriptionKh": "ហាងអាហារពេលព្រឹក និងថ្ងៃត្រង់ដ៏ពេញនិយមក្បែរផ្សារធំ មានគុយទាវឆ្អឹងជ្រូករម្ងាស់ បាយសាច់ជ្រូកអាំងធ្យូង និងកាហ្វេឆុងថ្មីៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តតាកែវ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -2771,6 +2845,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-75",
+    created_at: '2026-01-01T01:15:00.000Z',
     "nameKh": "អាហារដ្ឋាន គុយទាវ និងបាយព្រឹក ផ្សារធំ ពោធិ៍សាត់",
     "nameEn": "Central Market Morning Kuyteav & Rice House (Pursat)",
     "descriptionKh": "ហាងអាហារពេលព្រឹក និងថ្ងៃត្រង់ដ៏ពេញនិយមក្បែរផ្សារធំ មានគុយទាវឆ្អឹងជ្រូករម្ងាស់ បាយសាច់ជ្រូកអាំងធ្យូង និងកាហ្វេឆុងថ្មីៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តពោធិ៍សាត់ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -2809,6 +2884,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-76",
+    created_at: '2026-01-01T01:16:00.000Z',
     "nameKh": "អាហារដ្ឋាន គុយទាវ និងបាយព្រឹក ផ្សារធំ កំពង់ធំ",
     "nameEn": "Central Market Morning Kuyteav & Rice House (Kampong Thom)",
     "descriptionKh": "ហាងអាហារពេលព្រឹក និងថ្ងៃត្រង់ដ៏ពេញនិយមក្បែរផ្សារធំ មានគុយទាវឆ្អឹងជ្រូករម្ងាស់ បាយសាច់ជ្រូកអាំងធ្យូង និងកាហ្វេឆុងថ្មីៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ធំ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -2847,6 +2923,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-77",
+    created_at: '2026-01-01T01:17:00.000Z',
     "nameKh": "អាហារដ្ឋាន គុយទាវ និងបាយព្រឹក ផ្សារធំ កំពង់ឆ្នាំង",
     "nameEn": "Central Market Morning Kuyteav & Rice House (Kampong Chhnang)",
     "descriptionKh": "ហាងអាហារពេលព្រឹក និងថ្ងៃត្រង់ដ៏ពេញនិយមក្បែរផ្សារធំ មានគុយទាវឆ្អឹងជ្រូករម្ងាស់ បាយសាច់ជ្រូកអាំងធ្យូង និងកាហ្វេឆុងថ្មីៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ឆ្នាំង ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -2884,6 +2961,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-78",
+    created_at: '2026-01-01T01:18:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន ព្រៃកោងកាង ពាមក្រសោប កោះកុង",
     "nameEn": "Peam Krasop Mangrove Seafood Pavilion Koh Kong",
     "descriptionKh": "ភោជនីយដ្ឋានក្បែរព្រៃកោងកាងពាមក្រសោប ល្បីខាងក្តាមថ្មធម្មជាតិ មឹកអាំង និងទឹកត្រីកោះកុងរសជាតិដើម។",
@@ -2922,6 +3000,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-79",
+    created_at: '2026-01-01T01:19:00.000Z',
     "nameKh": "ហាងកាហ្វេ ចម្ការកាហ្វេមណ្ឌលគិរី",
     "nameEn": "Mondulkiri Coffee Plantation Roastery & Cafe",
     "descriptionKh": "ហាងកាហ្វេក្នុងចម្ការកាហ្វេធម្មជាតិមណ្ឌលគិរី ឆុងកាហ្វេភ្នំដ៏ឈ្ងុយឆ្ងាញ់ អមដោយផ្លែបឺរមណ្ឌលគិរីក្រឡុក និងអាហារពេលព្រឹក។",
@@ -2960,6 +3039,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-80",
+    created_at: '2026-01-01T01:20:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន ជំនោរបឹងកន្សែង បានលុង",
     "nameEn": "Boeng Kansaeng Lakefront Restaurant Banlung",
     "descriptionKh": "ភោជនីយដ្ឋានជាប់មាត់បឹងកន្សែងកណ្តាលក្រុងបានលុង បរិយាកាសល្ហើយត្រជាក់ ពិសាត្រីអាំង សាច់គោអាំង និងស៊ុបឆ្នាំងភ្លើង។",
@@ -2998,6 +3078,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-81",
+    created_at: '2026-01-01T01:21:00.000Z',
     "nameKh": "អាហារដ្ឋាន គុយទាវ និងបាយព្រឹក ផ្សារធំ ក្រចេះ",
     "nameEn": "Central Market Morning Kuyteav & Rice House (Kratie)",
     "descriptionKh": "ហាងអាហារពេលព្រឹក និងថ្ងៃត្រង់ដ៏ពេញនិយមក្បែរផ្សារធំ មានគុយទាវឆ្អឹងជ្រូករម្ងាស់ បាយសាច់ជ្រូកអាំងធ្យូង និងកាហ្វេឆុងថ្មីៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តក្រចេះ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -3036,6 +3117,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-82",
+    created_at: '2026-01-01T01:22:00.000Z',
     "nameKh": "អាហារដ្ឋាន គុយទាវ និងបាយព្រឹក ផ្សារធំ ស្ទឹងត្រែង",
     "nameEn": "Central Market Morning Kuyteav & Rice House (Stung Treng)",
     "descriptionKh": "ហាងអាហារពេលព្រឹក និងថ្ងៃត្រង់ដ៏ពេញនិយមក្បែរផ្សារធំ មានគុយទាវឆ្អឹងជ្រូករម្ងាស់ បាយសាច់ជ្រូកអាំងធ្យូង និងកាហ្វេឆុងថ្មីៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តស្ទឹងត្រែង ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -3074,6 +3156,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-83",
+    created_at: '2026-01-01T01:23:00.000Z',
     "nameKh": "អាហារដ្ឋាន គុយទាវ និងបាយព្រឹក ផ្សារធំ ព្រះវិហារ",
     "nameEn": "Central Market Morning Kuyteav & Rice House (Preah Vihear)",
     "descriptionKh": "ហាងអាហារពេលព្រឹក និងថ្ងៃត្រង់ដ៏ពេញនិយមក្បែរផ្សារធំ មានគុយទាវឆ្អឹងជ្រូករម្ងាស់ បាយសាច់ជ្រូកអាំងធ្យូង និងកាហ្វេឆុងថ្មីៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តព្រះវិហារ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -3112,6 +3195,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-84",
+    created_at: '2026-01-01T01:24:00.000Z',
     "nameKh": "អាហារដ្ឋាន គុយទាវ និងបាយព្រឹក ផ្សារធំ បន្ទាយមានជ័យ",
     "nameEn": "Central Market Morning Kuyteav & Rice House (Banteay Meanchey)",
     "descriptionKh": "ហាងអាហារពេលព្រឹក និងថ្ងៃត្រង់ដ៏ពេញនិយមក្បែរផ្សារធំ មានគុយទាវឆ្អឹងជ្រូករម្ងាស់ បាយសាច់ជ្រូកអាំងធ្យូង និងកាហ្វេឆុងថ្មីៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តបន្ទាយមានជ័យ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -3149,6 +3233,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-85",
+    created_at: '2026-01-01T01:25:00.000Z',
     "nameKh": "អាហារដ្ឋាន គុយទាវ និងបាយព្រឹក ផ្សារធំ ឧត្តរមានជ័យ",
     "nameEn": "Central Market Morning Kuyteav & Rice House (Oddar Meanchey)",
     "descriptionKh": "ហាងអាហារពេលព្រឹក និងថ្ងៃត្រង់ដ៏ពេញនិយមក្បែរផ្សារធំ មានគុយទាវឆ្អឹងជ្រូករម្ងាស់ បាយសាច់ជ្រូកអាំងធ្យូង និងកាហ្វេឆុងថ្មីៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តឧត្តរមានជ័យ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -3187,6 +3272,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-86",
+    created_at: '2026-01-01T01:26:00.000Z',
     "nameKh": "អាហារដ្ឋាន គុយទាវ និងបាយព្រឹក ផ្សារធំ ប៉ៃលិន",
     "nameEn": "Central Market Morning Kuyteav & Rice House (Pailin)",
     "descriptionKh": "ហាងអាហារពេលព្រឹក និងថ្ងៃត្រង់ដ៏ពេញនិយមក្បែរផ្សារធំ មានគុយទាវឆ្អឹងជ្រូករម្ងាស់ បាយសាច់ជ្រូកអាំងធ្យូង និងកាហ្វេឆុងថ្មីៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តប៉ៃលិន ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -3225,6 +3311,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-87",
+    created_at: '2026-01-01T01:27:00.000Z',
     "nameKh": "អាហារដ្ឋាន គុយទាវ និងបាយព្រឹក ផ្សារធំ ព្រៃវែង",
     "nameEn": "Central Market Morning Kuyteav & Rice House (Prey Veng)",
     "descriptionKh": "ហាងអាហារពេលព្រឹក និងថ្ងៃត្រង់ដ៏ពេញនិយមក្បែរផ្សារធំ មានគុយទាវឆ្អឹងជ្រូករម្ងាស់ បាយសាច់ជ្រូកអាំងធ្យូង និងកាហ្វេឆុងថ្មីៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តព្រៃវែង ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -3263,6 +3350,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-88",
+    created_at: '2026-01-01T01:28:00.000Z',
     "nameKh": "អាហារដ្ឋាន គុយទាវ និងបាយព្រឹក ផ្សារធំ ស្វាយរៀង",
     "nameEn": "Central Market Morning Kuyteav & Rice House (Svay Rieng)",
     "descriptionKh": "ហាងអាហារពេលព្រឹក និងថ្ងៃត្រង់ដ៏ពេញនិយមក្បែរផ្សារធំ មានគុយទាវឆ្អឹងជ្រូករម្ងាស់ បាយសាច់ជ្រូកអាំងធ្យូង និងកាហ្វេឆុងថ្មីៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តស្វាយរៀង ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -3301,6 +3389,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-89",
+    created_at: '2026-01-01T01:29:00.000Z',
     "nameKh": "អាហារដ្ឋាន គុយទាវ និងបាយព្រឹក ផ្សារធំ កំពង់ស្ពឺ",
     "nameEn": "Central Market Morning Kuyteav & Rice House (Kampong Speu)",
     "descriptionKh": "ហាងអាហារពេលព្រឹក និងថ្ងៃត្រង់ដ៏ពេញនិយមក្បែរផ្សារធំ មានគុយទាវឆ្អឹងជ្រូករម្ងាស់ បាយសាច់ជ្រូកអាំងធ្យូង និងកាហ្វេឆុងថ្មីៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ស្ពឺ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -3339,6 +3428,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-90",
+    created_at: '2026-01-01T01:30:00.000Z',
     "nameKh": "អាហារដ្ឋាន គុយទាវ និងបាយព្រឹក ផ្សារធំ ត្បូងឃ្មុំ",
     "nameEn": "Central Market Morning Kuyteav & Rice House (Tboung Khmum)",
     "descriptionKh": "ហាងអាហារពេលព្រឹក និងថ្ងៃត្រង់ដ៏ពេញនិយមក្បែរផ្សារធំ មានគុយទាវឆ្អឹងជ្រូករម្ងាស់ បាយសាច់ជ្រូកអាំងធ្យូង និងកាហ្វេឆុងថ្មីៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តត្បូងឃ្មុំ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -3377,6 +3467,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-91",
+    created_at: '2026-01-01T01:31:00.000Z',
     "nameKh": "អាហារដ្ឋាន គុយទាវអូរឫស្សី រសជាតិដើម",
     "nameEn": "Orussey Authentic Morning Kuyteav House",
     "descriptionKh": "ហាងគុយទាវភ្នំពេញរសជាតិដើមក្បែរផ្សារអូរឫស្សី ទឹកស៊ុបឆ្អឹងជ្រូករម្ងាស់ផ្អែមឈ្ងុយឆ្ងាញ់ និងបាយសាច់ជ្រូកអាំងធ្យូង។",
@@ -3414,6 +3505,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-92",
+    created_at: '2026-01-01T01:32:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន មហោប ម្ហូបខ្មែរ សៀមរាប",
     "nameEn": "Mahob Khmer Cuisine Siem Reap",
     "descriptionKh": "ភោជនីយដ្ឋានក្នុងផ្ទះឈើបុរាណខ្មែរអមដោយសួនស្រះឈូក បម្រើម្ហូបខ្មែរប្រពៃណីច្នៃប្រឌិតយ៉ាងផ្ចិតផ្ចង់។",
@@ -3452,6 +3544,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-93",
+    created_at: '2026-01-01T01:33:00.000Z',
     "nameKh": "អាហារដ្ឋាន គុយទាវបាត់ដំបង រសជាតិដើម",
     "nameEn": "Authentic Battambang Beef Ball Kuyteav House",
     "descriptionKh": "ហាងគុយទាវប្រចាំក្រុងបាត់ដំបងក្បែរផ្សារណាត់ ល្បីខាងទឹកស៊ុបរម្ងាស់ផ្អែមឆ្ងាញ់ ប្រហិតសាច់គោបាត់ដំបង និងបាយសាច់ជ្រូក។",
@@ -3490,6 +3583,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-94",
+    created_at: '2026-01-01T01:34:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន ចម្ការម្រេច ឡាផ្លង់តាសស្យុង កំពត",
     "nameEn": "La Plantation Pepper Farm Bistro Kampot",
     "descriptionKh": "ភោជនីយដ្ឋានក្នុងចម្ការម្រេចធម្មជាតិកំពត បម្រើមុខម្ហូបខ្មែរចម្អិនជាមួយម្រេចកំពតធម្មជាតិឈ្ងុយឆ្ងាញ់ និងការ៉េមម្រេចពិសេស។",
@@ -3528,6 +3622,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-95",
+    created_at: '2026-01-01T01:35:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន ម្លប់ដូង ឆ្នេរកែប",
     "nameEn": "Coconut Shade Beachside Kitchen Kep",
     "descriptionKh": "ហាងអាហារគ្រួសារក្រោមម្លប់ដូងមាត់ឆ្នេរកែប បម្រើអាហារថ្ងៃត្រង់ និងពេលល្ងាចជាមួយមុខម្ហូបសមុទ្រឆ្ងាញ់ៗ។",
@@ -3566,6 +3661,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-96",
+    created_at: '2026-01-01T01:36:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន ជំនោរសមុទ្រ ឆ្នេរឯករាជ្យ",
     "nameEn": "Sea Breeze Coastal Dining Independence Beach",
     "descriptionKh": "ភោជនីយដ្ឋានបរិយាកាសមាត់សមុទ្រដ៏ស្ងប់ស្ងាត់ក្បែរឆ្នេរឯករាជ្យ គយគន់ថ្ងៃលិច និងពិសាអាហារសមុទ្រស្រស់ៗជាមួយក្រុមគ្រួសារ។",
@@ -3604,6 +3700,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-97",
+    created_at: '2026-01-01T01:37:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន សួនធម្មជាតិ ម្ហូបខ្មែរ កំពង់ចាម",
     "nameEn": "Green Garden Traditional Khmer Restaurant (Kampong Cham)",
     "descriptionKh": "ភោជនីយដ្ឋានសួនធម្មជាតិធំទូលាយ ស័ក្តិសមសម្រាប់គ្រួសារ និងភ្ញៀវទេសចរ ពិសាម្ហូបខ្មែរប្រចាំតំបន់ និងបន្លែធម្មជាតិស្រស់ៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ចាម ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -3642,6 +3739,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-98",
+    created_at: '2026-01-01T01:38:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន សួនធម្មជាតិ ម្ហូបខ្មែរ កណ្តាល",
     "nameEn": "Green Garden Traditional Khmer Restaurant (Kandal)",
     "descriptionKh": "ភោជនីយដ្ឋានសួនធម្មជាតិធំទូលាយ ស័ក្តិសមសម្រាប់គ្រួសារ និងភ្ញៀវទេសចរ ពិសាម្ហូបខ្មែរប្រចាំតំបន់ និងបន្លែធម្មជាតិស្រស់ៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកណ្តាល ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -3679,6 +3777,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-99",
+    created_at: '2026-01-01T01:39:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន សួនធម្មជាតិ ម្ហូបខ្មែរ តាកែវ",
     "nameEn": "Green Garden Traditional Khmer Restaurant (Takeo)",
     "descriptionKh": "ភោជនីយដ្ឋានសួនធម្មជាតិធំទូលាយ ស័ក្តិសមសម្រាប់គ្រួសារ និងភ្ញៀវទេសចរ ពិសាម្ហូបខ្មែរប្រចាំតំបន់ និងបន្លែធម្មជាតិស្រស់ៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តតាកែវ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -3717,6 +3816,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-100",
+    created_at: '2026-01-01T01:40:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន សួនធម្មជាតិ ម្ហូបខ្មែរ ពោធិ៍សាត់",
     "nameEn": "Green Garden Traditional Khmer Restaurant (Pursat)",
     "descriptionKh": "ភោជនីយដ្ឋានសួនធម្មជាតិធំទូលាយ ស័ក្តិសមសម្រាប់គ្រួសារ និងភ្ញៀវទេសចរ ពិសាម្ហូបខ្មែរប្រចាំតំបន់ និងបន្លែធម្មជាតិស្រស់ៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តពោធិ៍សាត់ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -3755,6 +3855,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-101",
+    created_at: '2026-01-01T01:41:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន សួនធម្មជាតិ ម្ហូបខ្មែរ កំពង់ធំ",
     "nameEn": "Green Garden Traditional Khmer Restaurant (Kampong Thom)",
     "descriptionKh": "ភោជនីយដ្ឋានសួនធម្មជាតិធំទូលាយ ស័ក្តិសមសម្រាប់គ្រួសារ និងភ្ញៀវទេសចរ ពិសាម្ហូបខ្មែរប្រចាំតំបន់ និងបន្លែធម្មជាតិស្រស់ៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ធំ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -3793,6 +3894,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-102",
+    created_at: '2026-01-01T01:42:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន សួនធម្មជាតិ ម្ហូបខ្មែរ កំពង់ឆ្នាំង",
     "nameEn": "Green Garden Traditional Khmer Restaurant (Kampong Chhnang)",
     "descriptionKh": "ភោជនីយដ្ឋានសួនធម្មជាតិធំទូលាយ ស័ក្តិសមសម្រាប់គ្រួសារ និងភ្ញៀវទេសចរ ពិសាម្ហូបខ្មែរប្រចាំតំបន់ និងបន្លែធម្មជាតិស្រស់ៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ឆ្នាំង ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -3831,6 +3933,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-103",
+    created_at: '2026-01-01T01:43:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន ស្ពានកោះកុង មាត់ព្រែក",
     "nameEn": "Koh Kong Bridge Riverview Seafood Restaurant",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ព្រែកក្រុងខេមរភូមិន្ទ គយគន់ថ្ងៃលិចលើស្ពានកោះកុង និងពិសាអាហារសមុទ្រស្រស់ៗ។",
@@ -3869,6 +3972,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-104",
+    created_at: '2026-01-01T01:44:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន ទឹកធ្លាក់ប៊ូស្រា ម្ហូបព្រៃភ្នំ",
     "nameEn": "Bousra Waterfall Highland Kitchen Mondulkiri",
     "descriptionKh": "ភោជនីយដ្ឋានក្បែរទឹកធ្លាក់ប៊ូស្រា បម្រើអាហារថ្ងៃត្រង់សម្រាប់ភ្ញៀវទេសចរ មានត្រីអាំង មាន់ស្រែដុត និងសម្លម្ជូរព្រៃ។",
@@ -3907,6 +4011,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-105",
+    created_at: '2026-01-01T01:45:00.000Z',
     "nameKh": "ហាងកាហ្វេ ដីក្រហម បានលុង",
     "nameEn": "Red Soil Highland Coffee Roastery Banlung",
     "descriptionKh": "ហាងកាហ្វេឆុងពីគ្រាប់កាហ្វេដាំលើដីក្រហមភ្នំភ្លើងខេត្តរតនគិរី រសជាតិដិតឈ្ងុយឆ្ងាញ់ អមដោយអាហារពេលព្រឹក។",
@@ -3944,6 +4049,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-106",
+    created_at: '2026-01-01T01:46:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន សួនធម្មជាតិ ម្ហូបខ្មែរ ក្រចេះ",
     "nameEn": "Green Garden Traditional Khmer Restaurant (Kratie)",
     "descriptionKh": "ភោជនីយដ្ឋានសួនធម្មជាតិធំទូលាយ ស័ក្តិសមសម្រាប់គ្រួសារ និងភ្ញៀវទេសចរ ពិសាម្ហូបខ្មែរប្រចាំតំបន់ និងបន្លែធម្មជាតិស្រស់ៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តក្រចេះ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -3982,6 +4088,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-107",
+    created_at: '2026-01-01T01:47:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន សួនធម្មជាតិ ម្ហូបខ្មែរ ស្ទឹងត្រែង",
     "nameEn": "Green Garden Traditional Khmer Restaurant (Stung Treng)",
     "descriptionKh": "ភោជនីយដ្ឋានសួនធម្មជាតិធំទូលាយ ស័ក្តិសមសម្រាប់គ្រួសារ និងភ្ញៀវទេសចរ ពិសាម្ហូបខ្មែរប្រចាំតំបន់ និងបន្លែធម្មជាតិស្រស់ៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តស្ទឹងត្រែង ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -4020,6 +4127,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-108",
+    created_at: '2026-01-01T01:48:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន សួនធម្មជាតិ ម្ហូបខ្មែរ ព្រះវិហារ",
     "nameEn": "Green Garden Traditional Khmer Restaurant (Preah Vihear)",
     "descriptionKh": "ភោជនីយដ្ឋានសួនធម្មជាតិធំទូលាយ ស័ក្តិសមសម្រាប់គ្រួសារ និងភ្ញៀវទេសចរ ពិសាម្ហូបខ្មែរប្រចាំតំបន់ និងបន្លែធម្មជាតិស្រស់ៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តព្រះវិហារ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -4058,6 +4166,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-109",
+    created_at: '2026-01-01T01:49:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន សួនធម្មជាតិ ម្ហូបខ្មែរ បន្ទាយមានជ័យ",
     "nameEn": "Green Garden Traditional Khmer Restaurant (Banteay Meanchey)",
     "descriptionKh": "ភោជនីយដ្ឋានសួនធម្មជាតិធំទូលាយ ស័ក្តិសមសម្រាប់គ្រួសារ និងភ្ញៀវទេសចរ ពិសាម្ហូបខ្មែរប្រចាំតំបន់ និងបន្លែធម្មជាតិស្រស់ៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តបន្ទាយមានជ័យ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -4096,6 +4205,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-110",
+    created_at: '2026-01-01T01:50:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន សួនធម្មជាតិ ម្ហូបខ្មែរ ឧត្តរមានជ័យ",
     "nameEn": "Green Garden Traditional Khmer Restaurant (Oddar Meanchey)",
     "descriptionKh": "ភោជនីយដ្ឋានសួនធម្មជាតិធំទូលាយ ស័ក្តិសមសម្រាប់គ្រួសារ និងភ្ញៀវទេសចរ ពិសាម្ហូបខ្មែរប្រចាំតំបន់ និងបន្លែធម្មជាតិស្រស់ៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តឧត្តរមានជ័យ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -4134,6 +4244,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-111",
+    created_at: '2026-01-01T01:51:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន សួនធម្មជាតិ ម្ហូបខ្មែរ ប៉ៃលិន",
     "nameEn": "Green Garden Traditional Khmer Restaurant (Pailin)",
     "descriptionKh": "ភោជនីយដ្ឋានសួនធម្មជាតិធំទូលាយ ស័ក្តិសមសម្រាប់គ្រួសារ និងភ្ញៀវទេសចរ ពិសាម្ហូបខ្មែរប្រចាំតំបន់ និងបន្លែធម្មជាតិស្រស់ៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តប៉ៃលិន ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -4172,6 +4283,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-112",
+    created_at: '2026-01-01T01:52:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន សួនធម្មជាតិ ម្ហូបខ្មែរ ព្រៃវែង",
     "nameEn": "Green Garden Traditional Khmer Restaurant (Prey Veng)",
     "descriptionKh": "ភោជនីយដ្ឋានសួនធម្មជាតិធំទូលាយ ស័ក្តិសមសម្រាប់គ្រួសារ និងភ្ញៀវទេសចរ ពិសាម្ហូបខ្មែរប្រចាំតំបន់ និងបន្លែធម្មជាតិស្រស់ៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តព្រៃវែង ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -4209,6 +4321,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-113",
+    created_at: '2026-01-01T01:53:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន សួនធម្មជាតិ ម្ហូបខ្មែរ ស្វាយរៀង",
     "nameEn": "Green Garden Traditional Khmer Restaurant (Svay Rieng)",
     "descriptionKh": "ភោជនីយដ្ឋានសួនធម្មជាតិធំទូលាយ ស័ក្តិសមសម្រាប់គ្រួសារ និងភ្ញៀវទេសចរ ពិសាម្ហូបខ្មែរប្រចាំតំបន់ និងបន្លែធម្មជាតិស្រស់ៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តស្វាយរៀង ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -4247,6 +4360,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-114",
+    created_at: '2026-01-01T01:54:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន សួនធម្មជាតិ ម្ហូបខ្មែរ កំពង់ស្ពឺ",
     "nameEn": "Green Garden Traditional Khmer Restaurant (Kampong Speu)",
     "descriptionKh": "ភោជនីយដ្ឋានសួនធម្មជាតិធំទូលាយ ស័ក្តិសមសម្រាប់គ្រួសារ និងភ្ញៀវទេសចរ ពិសាម្ហូបខ្មែរប្រចាំតំបន់ និងបន្លែធម្មជាតិស្រស់ៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ស្ពឺ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -4285,6 +4399,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-115",
+    created_at: '2026-01-01T01:55:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន សួនធម្មជាតិ ម្ហូបខ្មែរ ត្បូងឃ្មុំ",
     "nameEn": "Green Garden Traditional Khmer Restaurant (Tboung Khmum)",
     "descriptionKh": "ភោជនីយដ្ឋានសួនធម្មជាតិធំទូលាយ ស័ក្តិសមសម្រាប់គ្រួសារ និងភ្ញៀវទេសចរ ពិសាម្ហូបខ្មែរប្រចាំតំបន់ និងបន្លែធម្មជាតិស្រស់ៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តត្បូងឃ្មុំ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -4323,6 +4438,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-116",
+    created_at: '2026-01-01T01:56:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន ម្លប់ត្នោត ទួលទំពូង",
     "nameEn": "Mlop Tnot Khmer Kitchen Tuol Tompoung",
     "descriptionKh": "ហាងម្ហូបខ្មែររសជាតិអ្នកស្រុក ស្ថិតនៅតំបន់ទួលទំពូង បម្រើសម្លខ្មែរ ប្រហុកខ្ទិះ ទឹកគ្រឿង និងអន្លក់ស្រស់ៗ។",
@@ -4361,6 +4477,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-117",
+    created_at: '2026-01-01T01:57:00.000Z',
     "nameKh": "អាហារដ្ឋាន នំបញ្ចុកព្រះដាក់ សៀមរាប",
     "nameEn": "Preah Dak Authentic Num Banh Chok Village House",
     "descriptionKh": "ភូមិធ្វើនំបញ្ចុកដ៏ល្បីល្បាញបំផុតនៅខេត្តសៀមរាប បម្រើនំបញ្ចុកសម្លខ្មែរ សម្លការី ទឹកប្រហុក និងនំអាកោត្នោតក្តៅៗ។",
@@ -4399,6 +4516,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-118",
+    created_at: '2026-01-01T01:58:00.000Z',
     "nameKh": "ហាងកាហ្វេ គីនយ៉េ បាត់ដំបង (Kinyei Cafe)",
     "nameEn": "Kinyei Specialty Cafe & Roastery Battambang",
     "descriptionKh": "ហាងកាហ្វេដ៏ល្បីល្បាញក្នុងអគារបុរាណក្រុងបាត់ដំបង ឆុងកាហ្វេឈ្ងុយឆ្ងាញ់ដោយយុវជនជំនាញ អមដោយនំដុត និងអាហារសម្រន់។",
@@ -4437,6 +4555,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-119",
+    created_at: '2026-01-01T01:59:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន ជំនោរព្រែកទឹកឈូ កំពត",
     "nameEn": "Teuk Chhou Rapids Riverside Pavilion Kampot",
     "descriptionKh": "កញ្ចុះអាហារមាត់ទឹកហូរទឹកឈូដ៏ត្រជាក់ចិត្ត ល្បីខាងមាន់ស្រែដុត ត្រីអាំង ភ្លាសាច់គោ និងផ្លែទុរេនកំពតធម្មជាតិ។",
@@ -4474,6 +4593,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-120",
+    created_at: '2026-01-01T02:00:00.000Z',
     "nameKh": "ហាងកាហ្វេ លើភ្នំកែប (Led Zep Cafe)",
     "nameEn": "Led Zep Mountain View Cafe Kep",
     "descriptionKh": "ហាងកាហ្វេលើចង្កេះភ្នំឧទ្យានជាតិកែប គយគន់ទេសភាពសមុទ្រកែបពីលើភ្នំ ជាមួយកាហ្វេឈ្ងុយឆ្ងាញ់ និងនំដុត។",
@@ -4512,6 +4632,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-121",
+    created_at: '2026-01-01T02:01:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន ឆ្នេរអូរត្រេះ គ្រឿងសមុទ្រស្រស់",
     "nameEn": "Otres Beach Fresh Seafood & Sunset Grill",
     "descriptionKh": "ហាងអាហារមាត់ឆ្នេរអូរត្រេះ ល្បីខាងគ្រឿងសមុទ្រអាំងធ្យូង ក្តាមថ្ម អอยស្ទ័រស្រស់ និងភេសជ្ជៈត្រជាក់ៗក្រោមខ្យល់សមុទ្រ។",
@@ -4550,6 +4671,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-122",
+    created_at: '2026-01-01T02:02:00.000Z',
     "nameKh": "ហាងសាច់អាំង និងម្ហូបគ្រួសារ កំពង់ចាម",
     "nameEn": "Countryside BBQ & Family Grill (Kampong Cham)",
     "descriptionKh": "ហាងសាច់អាំង និងអាហារពេលល្ងាចដ៏ពេញនិយម មានសាច់គោអាំងទឹកប្រហុក ត្រីអាំងអំបិលម្ទេស និងស៊ុបឆ្នាំងភ្លើងក្តៅៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ចាម ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -4588,6 +4710,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-123",
+    created_at: '2026-01-01T02:03:00.000Z',
     "nameKh": "ហាងសាច់អាំង និងម្ហូបគ្រួសារ កណ្តាល",
     "nameEn": "Countryside BBQ & Family Grill (Kandal)",
     "descriptionKh": "ហាងសាច់អាំង និងអាហារពេលល្ងាចដ៏ពេញនិយម មានសាច់គោអាំងទឹកប្រហុក ត្រីអាំងអំបិលម្ទេស និងស៊ុបឆ្នាំងភ្លើងក្តៅៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកណ្តាល ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -4626,6 +4749,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-124",
+    created_at: '2026-01-01T02:04:00.000Z',
     "nameKh": "ហាងសាច់អាំង និងម្ហូបគ្រួសារ តាកែវ",
     "nameEn": "Countryside BBQ & Family Grill (Takeo)",
     "descriptionKh": "ហាងសាច់អាំង និងអាហារពេលល្ងាចដ៏ពេញនិយម មានសាច់គោអាំងទឹកប្រហុក ត្រីអាំងអំបិលម្ទេស និងស៊ុបឆ្នាំងភ្លើងក្តៅៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តតាកែវ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -4664,6 +4788,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-125",
+    created_at: '2026-01-01T02:05:00.000Z',
     "nameKh": "ហាងសាច់អាំង និងម្ហូបគ្រួសារ ពោធិ៍សាត់",
     "nameEn": "Countryside BBQ & Family Grill (Pursat)",
     "descriptionKh": "ហាងសាច់អាំង និងអាហារពេលល្ងាចដ៏ពេញនិយម មានសាច់គោអាំងទឹកប្រហុក ត្រីអាំងអំបិលម្ទេស និងស៊ុបឆ្នាំងភ្លើងក្តៅៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តពោធិ៍សាត់ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -4702,6 +4827,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-126",
+    created_at: '2026-01-01T02:06:00.000Z',
     "nameKh": "ហាងសាច់អាំង និងម្ហូបគ្រួសារ កំពង់ធំ",
     "nameEn": "Countryside BBQ & Family Grill (Kampong Thom)",
     "descriptionKh": "ហាងសាច់អាំង និងអាហារពេលល្ងាចដ៏ពេញនិយម មានសាច់គោអាំងទឹកប្រហុក ត្រីអាំងអំបិលម្ទេស និងស៊ុបឆ្នាំងភ្លើងក្តៅៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ធំ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -4739,6 +4865,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-127",
+    created_at: '2026-01-01T02:07:00.000Z',
     "nameKh": "ហាងសាច់អាំង និងម្ហូបគ្រួសារ កំពង់ឆ្នាំង",
     "nameEn": "Countryside BBQ & Family Grill (Kampong Chhnang)",
     "descriptionKh": "ហាងសាច់អាំង និងអាហារពេលល្ងាចដ៏ពេញនិយម មានសាច់គោអាំងទឹកប្រហុក ត្រីអាំងអំបិលម្ទេស និងស៊ុបឆ្នាំងភ្លើងក្តៅៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ឆ្នាំង ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -4777,6 +4904,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-128",
+    created_at: '2026-01-01T02:08:00.000Z',
     "nameKh": "ហាងបាយ និងគុយទាវសមុទ្រ ក្រុងខេមរភូមិន្ទ",
     "nameEn": "Khemara Phoumin Seafood Noodle & Morning Kitchen",
     "descriptionKh": "ហាងអាហារពេលព្រឹក និងថ្ងៃត្រង់ក្បែរផ្សារដងទង់ មានគុយទាវគ្រឿងសមុទ្រ បាយឆាក្តាម និងបាយសាច់ជ្រូកអាំង។",
@@ -4815,6 +4943,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-129",
+    created_at: '2026-01-01T02:09:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន ជំនោរភ្នំ សែនមនោរម្យ",
     "nameEn": "Sen Monorom Mountain Breeze Dining",
     "descriptionKh": "ភោជនីយដ្ឋានបរិយាកាសត្រជាក់ក្នុងក្រុងសែនមនោរម្យ ល្បីខាងស៊ុបឆ្នាំងភ្លើងក្តៅៗ សាច់គោអាំង និងម្ហូបខ្មែរគ្រួសារ។",
@@ -4853,6 +4982,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-130",
+    created_at: '2026-01-01T02:10:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន ទឹកធ្លាក់កាចាញ ម្ហូបប្រចាំតំបន់",
     "nameEn": "Kachanh Waterfall Garden Kitchen Ratanakiri",
     "descriptionKh": "ហាងអាហារធម្មជាតិជិតទឹកធ្លាក់កាចាញ បម្រើមាន់ដុត ត្រីអាំង ភ្លាសាច់គោ និងបន្លែព្រៃស្រស់ៗប្រចាំខេត្តរតនគិរី។",
@@ -4891,6 +5021,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-131",
+    created_at: '2026-01-01T02:11:00.000Z',
     "nameKh": "ហាងសាច់អាំង និងម្ហូបគ្រួសារ ក្រចេះ",
     "nameEn": "Countryside BBQ & Family Grill (Kratie)",
     "descriptionKh": "ហាងសាច់អាំង និងអាហារពេលល្ងាចដ៏ពេញនិយម មានសាច់គោអាំងទឹកប្រហុក ត្រីអាំងអំបិលម្ទេស និងស៊ុបឆ្នាំងភ្លើងក្តៅៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តក្រចេះ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -4929,6 +5060,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-132",
+    created_at: '2026-01-01T02:12:00.000Z',
     "nameKh": "ហាងសាច់អាំង និងម្ហូបគ្រួសារ ស្ទឹងត្រែង",
     "nameEn": "Countryside BBQ & Family Grill (Stung Treng)",
     "descriptionKh": "ហាងសាច់អាំង និងអាហារពេលល្ងាចដ៏ពេញនិយម មានសាច់គោអាំងទឹកប្រហុក ត្រីអាំងអំបិលម្ទេស និងស៊ុបឆ្នាំងភ្លើងក្តៅៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តស្ទឹងត្រែង ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -4967,6 +5099,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-133",
+    created_at: '2026-01-01T02:13:00.000Z',
     "nameKh": "ហាងសាច់អាំង និងម្ហូបគ្រួសារ ព្រះវិហារ",
     "nameEn": "Countryside BBQ & Family Grill (Preah Vihear)",
     "descriptionKh": "ហាងសាច់អាំង និងអាហារពេលល្ងាចដ៏ពេញនិយម មានសាច់គោអាំងទឹកប្រហុក ត្រីអាំងអំបិលម្ទេស និងស៊ុបឆ្នាំងភ្លើងក្តៅៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តព្រះវិហារ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -5004,6 +5137,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-134",
+    created_at: '2026-01-01T02:14:00.000Z',
     "nameKh": "ហាងសាច់អាំង និងម្ហូបគ្រួសារ បន្ទាយមានជ័យ",
     "nameEn": "Countryside BBQ & Family Grill (Banteay Meanchey)",
     "descriptionKh": "ហាងសាច់អាំង និងអាហារពេលល្ងាចដ៏ពេញនិយម មានសាច់គោអាំងទឹកប្រហុក ត្រីអាំងអំបិលម្ទេស និងស៊ុបឆ្នាំងភ្លើងក្តៅៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តបន្ទាយមានជ័យ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -5042,6 +5176,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-135",
+    created_at: '2026-01-01T02:15:00.000Z',
     "nameKh": "ហាងសាច់អាំង និងម្ហូបគ្រួសារ ឧត្តរមានជ័យ",
     "nameEn": "Countryside BBQ & Family Grill (Oddar Meanchey)",
     "descriptionKh": "ហាងសាច់អាំង និងអាហារពេលល្ងាចដ៏ពេញនិយម មានសាច់គោអាំងទឹកប្រហុក ត្រីអាំងអំបិលម្ទេស និងស៊ុបឆ្នាំងភ្លើងក្តៅៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តឧត្តរមានជ័យ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -5080,6 +5215,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-136",
+    created_at: '2026-01-01T02:16:00.000Z',
     "nameKh": "ហាងសាច់អាំង និងម្ហូបគ្រួសារ ប៉ៃលិន",
     "nameEn": "Countryside BBQ & Family Grill (Pailin)",
     "descriptionKh": "ហាងសាច់អាំង និងអាហារពេលល្ងាចដ៏ពេញនិយម មានសាច់គោអាំងទឹកប្រហុក ត្រីអាំងអំបិលម្ទេស និងស៊ុបឆ្នាំងភ្លើងក្តៅៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តប៉ៃលិន ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -5118,6 +5254,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-137",
+    created_at: '2026-01-01T02:17:00.000Z',
     "nameKh": "ហាងសាច់អាំង និងម្ហូបគ្រួសារ ព្រៃវែង",
     "nameEn": "Countryside BBQ & Family Grill (Prey Veng)",
     "descriptionKh": "ហាងសាច់អាំង និងអាហារពេលល្ងាចដ៏ពេញនិយម មានសាច់គោអាំងទឹកប្រហុក ត្រីអាំងអំបិលម្ទេស និងស៊ុបឆ្នាំងភ្លើងក្តៅៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តព្រៃវែង ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -5156,6 +5293,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-138",
+    created_at: '2026-01-01T02:18:00.000Z',
     "nameKh": "ហាងសាច់អាំង និងម្ហូបគ្រួសារ ស្វាយរៀង",
     "nameEn": "Countryside BBQ & Family Grill (Svay Rieng)",
     "descriptionKh": "ហាងសាច់អាំង និងអាហារពេលល្ងាចដ៏ពេញនិយម មានសាច់គោអាំងទឹកប្រហុក ត្រីអាំងអំបិលម្ទេស និងស៊ុបឆ្នាំងភ្លើងក្តៅៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តស្វាយរៀង ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -5194,6 +5332,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-139",
+    created_at: '2026-01-01T02:19:00.000Z',
     "nameKh": "ហាងសាច់អាំង និងម្ហូបគ្រួសារ កំពង់ស្ពឺ",
     "nameEn": "Countryside BBQ & Family Grill (Kampong Speu)",
     "descriptionKh": "ហាងសាច់អាំង និងអាហារពេលល្ងាចដ៏ពេញនិយម មានសាច់គោអាំងទឹកប្រហុក ត្រីអាំងអំបិលម្ទេស និងស៊ុបឆ្នាំងភ្លើងក្តៅៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ស្ពឺ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -5232,6 +5371,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-140",
+    created_at: '2026-01-01T02:20:00.000Z',
     "nameKh": "ហាងសាច់អាំង និងម្ហូបគ្រួសារ ត្បូងឃ្មុំ",
     "nameEn": "Countryside BBQ & Family Grill (Tboung Khmum)",
     "descriptionKh": "ហាងសាច់អាំង និងអាហារពេលល្ងាចដ៏ពេញនិយម មានសាច់គោអាំងទឹកប្រហុក ត្រីអាំងអំបិលម្ទេស និងស៊ុបឆ្នាំងភ្លើងក្តៅៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តត្បូងឃ្មុំ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -5269,6 +5409,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-141",
+    created_at: '2026-01-01T02:21:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន ជំនោរទន្លេមេគង្គ ជ្រោយចង្វារ",
     "nameEn": "Chroy Changvar Mekong Breeze Restaurant",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ទន្លេមេគង្គត្រើយជ្រោយចង្វារ គយគន់ទេសភាពព្រះបរមរាជវាំង និងទីក្រុងភ្នំពេញនាពេលរាត្រី។",
@@ -5307,6 +5448,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-142",
+    created_at: '2026-01-01T02:22:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន លំនៅ ហ្វាម ធូ ថេបឹល សៀមរាប",
     "nameEn": "Lum Orng Farm to Table Restaurant Siem Reap",
     "descriptionKh": "ភោជនីយដ្ឋានបែបធម្មជាតិ ប្រើប្រាស់បន្លែសរីរាង្គដាំដុះផ្ទាល់ក្នុងសួន និងគ្រឿងផ្សំស្រស់ៗពីកសិករក្នុងខេត្តសៀមរាប។",
@@ -5345,6 +5487,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-143",
+    created_at: '2026-01-01T02:23:00.000Z',
     "nameKh": "អាហារដ្ឋាន នំបញ្ចុកទឹកសម្លត្រីបាត់ដំបង",
     "nameEn": "Battambang Traditional Fish Noodle & Nem Garden",
     "descriptionKh": "អាហារដ្ឋានក្នុងភូមិវប្បធម៌វត្តគរ បម្រើនំបញ្ចុកទឹកសម្លខ្មែរ មីកូឡា ណែមត្រីបាត់ដំបង និងក្រឡានថ្មគោល។",
@@ -5383,6 +5526,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-144",
+    created_at: '2026-01-01T02:24:00.000Z',
     "nameKh": "អាហារដ្ឋាន នំបញ្ចុកទឹកម្ហេច កំពត",
     "nameEn": "Kampot Traditional Fish Soup Noodle House",
     "descriptionKh": "ហាងនំបញ្ចុកទឹកម្ហេចប្រចាំខេត្តកំពត រសជាតិដើមធ្វើពីត្រីសមុទ្រស្រស់ៗ ថែមបន្លែស្រស់ និងត្រីឆ្អើរឈ្ងុយឆ្ងាញ់។",
@@ -5421,6 +5565,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-145",
+    created_at: '2026-01-01T02:25:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន កោះទន្សាយ គ្រឿងសមុទ្រស្រស់",
     "nameEn": "Koh Tonsay Rabbit Island Seafood Grill Kep",
     "descriptionKh": "ហាងអាហារសមុទ្រជិតកំពង់ផែកោះទន្សាយ បម្រើត្រីអាំង ក្តាមស្រុស បង្គាអាំង និងម្ហូបខ្មែររសជាតិដើម។",
@@ -5459,6 +5604,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-146",
+    created_at: '2026-01-01T02:26:00.000Z',
     "nameKh": "អាហារដ្ឋាន ម្លប់ជ្រៃ ក្រុងព្រះសីហនុ",
     "nameEn": "Mlop Chrey Authentic Khmer Kitchen Sihanoukville",
     "descriptionKh": "អាហារដ្ឋានម្ហូបខ្មែរប្រចាំថ្ងៃសម្រាប់គ្រួសារ និងអ្នកដំណើរ បម្រើបាយថ្ងៃត្រង់ សម្លកកូរ សម្លម្ជូរព្រៃ និងត្រីចៀនជួន។",
@@ -5497,6 +5643,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-147",
+    created_at: '2026-01-01T02:27:00.000Z',
     "nameKh": "អាហារដ្ឋាន នំបញ្ចុក និងបង្អែមខ្មែរ កំពង់ចាម",
     "nameEn": "Traditional Num Banh Chok & Khmer Sweets (Kampong Cham)",
     "descriptionKh": "អាហារដ្ឋានបុរាណបម្រើនំបញ្ចុកសម្លខ្មែរ សម្លការី បាញ់ឆែវ និងបង្អែមខ្មែរស្ករត្នោតឈ្ងុយឆ្ងាញ់ប្រចាំតំបន់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ចាម ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -5534,6 +5681,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-148",
+    created_at: '2026-01-01T02:28:00.000Z',
     "nameKh": "អាហារដ្ឋាន នំបញ្ចុក និងបង្អែមខ្មែរ កណ្តាល",
     "nameEn": "Traditional Num Banh Chok & Khmer Sweets (Kandal)",
     "descriptionKh": "អាហារដ្ឋានបុរាណបម្រើនំបញ្ចុកសម្លខ្មែរ សម្លការី បាញ់ឆែវ និងបង្អែមខ្មែរស្ករត្នោតឈ្ងុយឆ្ងាញ់ប្រចាំតំបន់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកណ្តាល ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -5572,6 +5720,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-149",
+    created_at: '2026-01-01T02:29:00.000Z',
     "nameKh": "អាហារដ្ឋាន នំបញ្ចុក និងបង្អែមខ្មែរ តាកែវ",
     "nameEn": "Traditional Num Banh Chok & Khmer Sweets (Takeo)",
     "descriptionKh": "អាហារដ្ឋានបុរាណបម្រើនំបញ្ចុកសម្លខ្មែរ សម្លការី បាញ់ឆែវ និងបង្អែមខ្មែរស្ករត្នោតឈ្ងុយឆ្ងាញ់ប្រចាំតំបន់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តតាកែវ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -5610,6 +5759,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-150",
+    created_at: '2026-01-01T02:30:00.000Z',
     "nameKh": "អាហារដ្ឋាន នំបញ្ចុក និងបង្អែមខ្មែរ ពោធិ៍សាត់",
     "nameEn": "Traditional Num Banh Chok & Khmer Sweets (Pursat)",
     "descriptionKh": "អាហារដ្ឋានបុរាណបម្រើនំបញ្ចុកសម្លខ្មែរ សម្លការី បាញ់ឆែវ និងបង្អែមខ្មែរស្ករត្នោតឈ្ងុយឆ្ងាញ់ប្រចាំតំបន់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តពោធិ៍សាត់ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -5648,6 +5798,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-151",
+    created_at: '2026-01-01T02:31:00.000Z',
     "nameKh": "អាហារដ្ឋាន នំបញ្ចុក និងបង្អែមខ្មែរ កំពង់ធំ",
     "nameEn": "Traditional Num Banh Chok & Khmer Sweets (Kampong Thom)",
     "descriptionKh": "អាហារដ្ឋានបុរាណបម្រើនំបញ្ចុកសម្លខ្មែរ សម្លការី បាញ់ឆែវ និងបង្អែមខ្មែរស្ករត្នោតឈ្ងុយឆ្ងាញ់ប្រចាំតំបន់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ធំ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -5686,6 +5837,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-152",
+    created_at: '2026-01-01T02:32:00.000Z',
     "nameKh": "អាហារដ្ឋាន នំបញ្ចុក និងបង្អែមខ្មែរ កំពង់ឆ្នាំង",
     "nameEn": "Traditional Num Banh Chok & Khmer Sweets (Kampong Chhnang)",
     "descriptionKh": "អាហារដ្ឋានបុរាណបម្រើនំបញ្ចុកសម្លខ្មែរ សម្លការី បាញ់ឆែវ និងបង្អែមខ្មែរស្ករត្នោតឈ្ងុយឆ្ងាញ់ប្រចាំតំបន់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ឆ្នាំង ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -5724,6 +5876,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-153",
+    created_at: '2026-01-01T02:33:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន ឆ្នេរកោះកុងក្រៅ គ្រឿងសមុទ្រស្រស់",
     "nameEn": "Koh Kong Krao Beachfront Seafood Grill",
     "descriptionKh": "ហាងអាហារមាត់ឆ្នេរខ្សាច់ប៉ាក់ខ្លង បម្រើគ្រឿងសមុទ្រស្រស់ៗទើបឡើងពីទូកនេសាទ ត្រីអាំង និងមឹកស្រុស។",
@@ -5762,6 +5915,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-154",
+    created_at: '2026-01-01T02:34:00.000Z',
     "nameKh": "អាហារដ្ឋាន គុយទាវ និងបាយព្រឹក ផ្សារសែនមនោរម្យ",
     "nameEn": "Sen Monorom Market Morning Kuyteav House",
     "descriptionKh": "អាហារដ្ឋានពេលព្រឹកដ៏កក់ក្តៅក្រោមអាកាសធាតុត្រជាក់នៃខេត្តមណ្ឌលគិរី មានគុយទាវក្តៅៗ បបរគ្រឿង និងកាហ្វេភ្នំ។",
@@ -5799,6 +5953,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-155",
+    created_at: '2026-01-01T02:35:00.000Z',
     "nameKh": "អាហារដ្ឋាន គុយទាវ និងបាយព្រឹក ផ្សារបានលុង",
     "nameEn": "Banlung Market Morning Kuyteav & Rice House",
     "descriptionKh": "ហាងអាហារពេលព្រឹកដ៏ពេញនិយមនៅផ្សារបានលុង បម្រើគុយទាវឆ្អឹងជ្រូក បបរគ្រឿង និងបាយថ្ងៃត្រង់ម្ហូបខ្មែរគ្រប់មុខ។",
@@ -5837,6 +5992,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-156",
+    created_at: '2026-01-01T02:36:00.000Z',
     "nameKh": "អាហារដ្ឋាន នំបញ្ចុក និងបង្អែមខ្មែរ ក្រចេះ",
     "nameEn": "Traditional Num Banh Chok & Khmer Sweets (Kratie)",
     "descriptionKh": "អាហារដ្ឋានបុរាណបម្រើនំបញ្ចុកសម្លខ្មែរ សម្លការី បាញ់ឆែវ និងបង្អែមខ្មែរស្ករត្នោតឈ្ងុយឆ្ងាញ់ប្រចាំតំបន់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តក្រចេះ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -5875,6 +6031,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-157",
+    created_at: '2026-01-01T02:37:00.000Z',
     "nameKh": "អាហារដ្ឋាន នំបញ្ចុក និងបង្អែមខ្មែរ ស្ទឹងត្រែង",
     "nameEn": "Traditional Num Banh Chok & Khmer Sweets (Stung Treng)",
     "descriptionKh": "អាហារដ្ឋានបុរាណបម្រើនំបញ្ចុកសម្លខ្មែរ សម្លការី បាញ់ឆែវ និងបង្អែមខ្មែរស្ករត្នោតឈ្ងុយឆ្ងាញ់ប្រចាំតំបន់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តស្ទឹងត្រែង ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -5913,6 +6070,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-158",
+    created_at: '2026-01-01T02:38:00.000Z',
     "nameKh": "អាហារដ្ឋាន នំបញ្ចុក និងបង្អែមខ្មែរ ព្រះវិហារ",
     "nameEn": "Traditional Num Banh Chok & Khmer Sweets (Preah Vihear)",
     "descriptionKh": "អាហារដ្ឋានបុរាណបម្រើនំបញ្ចុកសម្លខ្មែរ សម្លការី បាញ់ឆែវ និងបង្អែមខ្មែរស្ករត្នោតឈ្ងុយឆ្ងាញ់ប្រចាំតំបន់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តព្រះវិហារ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -5951,6 +6109,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-159",
+    created_at: '2026-01-01T02:39:00.000Z',
     "nameKh": "អាហារដ្ឋាន នំបញ្ចុក និងបង្អែមខ្មែរ បន្ទាយមានជ័យ",
     "nameEn": "Traditional Num Banh Chok & Khmer Sweets (Banteay Meanchey)",
     "descriptionKh": "អាហារដ្ឋានបុរាណបម្រើនំបញ្ចុកសម្លខ្មែរ សម្លការី បាញ់ឆែវ និងបង្អែមខ្មែរស្ករត្នោតឈ្ងុយឆ្ងាញ់ប្រចាំតំបន់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តបន្ទាយមានជ័យ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -5989,6 +6148,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-160",
+    created_at: '2026-01-01T02:40:00.000Z',
     "nameKh": "អាហារដ្ឋាន នំបញ្ចុក និងបង្អែមខ្មែរ ឧត្តរមានជ័យ",
     "nameEn": "Traditional Num Banh Chok & Khmer Sweets (Oddar Meanchey)",
     "descriptionKh": "អាហារដ្ឋានបុរាណបម្រើនំបញ្ចុកសម្លខ្មែរ សម្លការី បាញ់ឆែវ និងបង្អែមខ្មែរស្ករត្នោតឈ្ងុយឆ្ងាញ់ប្រចាំតំបន់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តឧត្តរមានជ័យ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -6027,6 +6187,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-161",
+    created_at: '2026-01-01T02:41:00.000Z',
     "nameKh": "អាហារដ្ឋាន នំបញ្ចុក និងបង្អែមខ្មែរ ប៉ៃលិន",
     "nameEn": "Traditional Num Banh Chok & Khmer Sweets (Pailin)",
     "descriptionKh": "អាហារដ្ឋានបុរាណបម្រើនំបញ្ចុកសម្លខ្មែរ សម្លការី បាញ់ឆែវ និងបង្អែមខ្មែរស្ករត្នោតឈ្ងុយឆ្ងាញ់ប្រចាំតំបន់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តប៉ៃលិន ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -6064,6 +6225,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-162",
+    created_at: '2026-01-01T02:42:00.000Z',
     "nameKh": "អាហារដ្ឋាន នំបញ្ចុក និងបង្អែមខ្មែរ ព្រៃវែង",
     "nameEn": "Traditional Num Banh Chok & Khmer Sweets (Prey Veng)",
     "descriptionKh": "អាហារដ្ឋានបុរាណបម្រើនំបញ្ចុកសម្លខ្មែរ សម្លការី បាញ់ឆែវ និងបង្អែមខ្មែរស្ករត្នោតឈ្ងុយឆ្ងាញ់ប្រចាំតំបន់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តព្រៃវែង ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -6102,6 +6264,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-163",
+    created_at: '2026-01-01T02:43:00.000Z',
     "nameKh": "អាហារដ្ឋាន នំបញ្ចុក និងបង្អែមខ្មែរ ស្វាយរៀង",
     "nameEn": "Traditional Num Banh Chok & Khmer Sweets (Svay Rieng)",
     "descriptionKh": "អាហារដ្ឋានបុរាណបម្រើនំបញ្ចុកសម្លខ្មែរ សម្លការី បាញ់ឆែវ និងបង្អែមខ្មែរស្ករត្នោតឈ្ងុយឆ្ងាញ់ប្រចាំតំបន់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តស្វាយរៀង ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -6140,6 +6303,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-164",
+    created_at: '2026-01-01T02:44:00.000Z',
     "nameKh": "អាហារដ្ឋាន នំបញ្ចុក និងបង្អែមខ្មែរ កំពង់ស្ពឺ",
     "nameEn": "Traditional Num Banh Chok & Khmer Sweets (Kampong Speu)",
     "descriptionKh": "អាហារដ្ឋានបុរាណបម្រើនំបញ្ចុកសម្លខ្មែរ សម្លការី បាញ់ឆែវ និងបង្អែមខ្មែរស្ករត្នោតឈ្ងុយឆ្ងាញ់ប្រចាំតំបន់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ស្ពឺ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -6178,6 +6342,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-165",
+    created_at: '2026-01-01T02:45:00.000Z',
     "nameKh": "អាហារដ្ឋាន នំបញ្ចុក និងបង្អែមខ្មែរ ត្បូងឃ្មុំ",
     "nameEn": "Traditional Num Banh Chok & Khmer Sweets (Tboung Khmum)",
     "descriptionKh": "អាហារដ្ឋានបុរាណបម្រើនំបញ្ចុកសម្លខ្មែរ សម្លការី បាញ់ឆែវ និងបង្អែមខ្មែរស្ករត្នោតឈ្ងុយឆ្ងាញ់ប្រចាំតំបន់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តត្បូងឃ្មុំ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -6216,6 +6381,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-166",
+    created_at: '2026-01-01T02:46:00.000Z',
     "nameKh": "អាហារដ្ឋាន នំបញ្ចុក និងសម្លខ្មែរ ផ្សារថ្មី",
     "nameEn": "Phsar Thmei Traditional Num Banh Chok & Khmer Soup",
     "descriptionKh": "អាហារដ្ឋានបុរាណក្បែរផ្សារធំថ្មី បម្រើនំបញ្ចុកសម្លខ្មែរ សម្លការីសាច់មាន់ បាញ់ឆែវ និងបង្អែមខ្មែរឈ្ងុយឆ្ងាញ់។",
@@ -6254,6 +6420,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-167",
+    created_at: '2026-01-01T02:47:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន គ្រួសារខ្មែរ មាត់ស្ទឹងសៀមរាប",
     "nameEn": "Siem Reap Riverside Khmer Family Restaurant",
     "descriptionKh": "ហាងអាហារគ្រួសារតាមបណ្តោយមាត់ស្ទឹងសៀមរាប បម្រើម្ហូបខ្មែរគ្រប់មុខ ត្រីបឹងទន្លេសាប និងសាច់អាំងទឹកប្រហុក។",
@@ -6292,6 +6459,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-168",
+    created_at: '2026-01-01T02:48:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន ជើងភ្នំសំពៅ បាត់ដំបង",
     "nameEn": "Phnom Sampov Countryside Restaurant Battambang",
     "descriptionKh": "ភោជនីយដ្ឋានតាមផ្លូវទៅរមណីយដ្ឋានភ្នំសំពៅ និងភ្នំបាណន់ មានកញ្ចុះអង្គុយស្រូបខ្យល់វាលស្រែ និងពិសាមាន់ដុតបាត់ដំបង។",
@@ -6329,6 +6497,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-169",
+    created_at: '2026-01-01T02:49:00.000Z',
     "nameKh": "ហាងកាហ្វេ អេសប្រេសសូ កំពត",
     "nameEn": "Espresso Kampot Roastery & Cafe",
     "descriptionKh": "ហាងកាហ្វេល្បីជិតរង្វង់មូលទុរេនកំពត បម្រើកាហ្វេឆុងថ្មីៗ អាហារពេលព្រឹក និងនំដុតស្រស់ៗសម្រាប់អ្នកដំណើរ។",
@@ -6367,6 +6536,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-170",
+    created_at: '2026-01-01T02:50:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន ព្រះអាទិត្យលិច ឆ្នេរកែប",
     "nameEn": "Kep Sunset Coastal Dining",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់សមុទ្រសម្រាប់គយគន់ថ្ងៃលិចដ៏ស្រស់ស្អាតនៅខេត្តកែប បម្រើម្ហូបសមុទ្រ និងម្ហូបអឺរ៉ុប-ខ្មែរ។",
@@ -6405,6 +6575,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-171",
+    created_at: '2026-01-01T02:51:00.000Z',
     "nameKh": "ហាងគុយទាវ និងអាហារសមុទ្រ ផ្សារលើ",
     "nameEn": "Phsar Leu Morning Kuyteav & Seafood Noodle House",
     "descriptionKh": "ហាងអាហារពេលព្រឹក និងថ្ងៃត្រង់ដ៏ពេញនិយមនៅផ្សារលើ ក្រុងព្រះសីហនុ ល្បីខាងគុយទាវគ្រឿងសមុទ្រ បាយសាច់ជ្រូកអាំង និងកាហ្វេទឹកដោះគោ។",
@@ -6443,6 +6614,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-172",
+    created_at: '2026-01-01T02:52:00.000Z',
     "nameKh": "ហាងកាហ្វេ និងអាហារសម្រន់ មរតក កំពង់ចាម",
     "nameEn": "Heritage Roastery Cafe & Bistro (Kampong Cham)",
     "descriptionKh": "ហាងកាហ្វេទំនើបរចនាបថខ្មែរ បម្រើកាហ្វេឆុងថ្មីៗ ភេសជ្ជៈផ្លែឈើស្រស់ នំដុត និងអាហារថ្ងៃត្រង់ប្រកបដោយផាសុកភាព។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ចាម ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -6481,6 +6653,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-173",
+    created_at: '2026-01-01T02:53:00.000Z',
     "nameKh": "ហាងកាហ្វេ និងអាហារសម្រន់ មរតក កណ្តាល",
     "nameEn": "Heritage Roastery Cafe & Bistro (Kandal)",
     "descriptionKh": "ហាងកាហ្វេទំនើបរចនាបថខ្មែរ បម្រើកាហ្វេឆុងថ្មីៗ ភេសជ្ជៈផ្លែឈើស្រស់ នំដុត និងអាហារថ្ងៃត្រង់ប្រកបដោយផាសុកភាព។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកណ្តាល ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -6519,6 +6692,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-174",
+    created_at: '2026-01-01T02:54:00.000Z',
     "nameKh": "ហាងកាហ្វេ និងអាហារសម្រន់ មរតក តាកែវ",
     "nameEn": "Heritage Roastery Cafe & Bistro (Takeo)",
     "descriptionKh": "ហាងកាហ្វេទំនើបរចនាបថខ្មែរ បម្រើកាហ្វេឆុងថ្មីៗ ភេសជ្ជៈផ្លែឈើស្រស់ នំដុត និងអាហារថ្ងៃត្រង់ប្រកបដោយផាសុកភាព។ មានទីតាំងស្ថិតនៅក្នុងខេត្តតាកែវ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -6557,6 +6731,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-175",
+    created_at: '2026-01-01T02:55:00.000Z',
     "nameKh": "ហាងកាហ្វេ និងអាហារសម្រន់ មរតក ពោធិ៍សាត់",
     "nameEn": "Heritage Roastery Cafe & Bistro (Pursat)",
     "descriptionKh": "ហាងកាហ្វេទំនើបរចនាបថខ្មែរ បម្រើកាហ្វេឆុងថ្មីៗ ភេសជ្ជៈផ្លែឈើស្រស់ នំដុត និងអាហារថ្ងៃត្រង់ប្រកបដោយផាសុកភាព។ មានទីតាំងស្ថិតនៅក្នុងខេត្តពោធិ៍សាត់ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -6594,6 +6769,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-176",
+    created_at: '2026-01-01T02:56:00.000Z',
     "nameKh": "ហាងកាហ្វេ និងអាហារសម្រន់ មរតក កំពង់ធំ",
     "nameEn": "Heritage Roastery Cafe & Bistro (Kampong Thom)",
     "descriptionKh": "ហាងកាហ្វេទំនើបរចនាបថខ្មែរ បម្រើកាហ្វេឆុងថ្មីៗ ភេសជ្ជៈផ្លែឈើស្រស់ នំដុត និងអាហារថ្ងៃត្រង់ប្រកបដោយផាសុកភាព។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ធំ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -6632,6 +6808,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-177",
+    created_at: '2026-01-01T02:57:00.000Z',
     "nameKh": "ហាងកាហ្វេ និងអាហារសម្រន់ មរតក កំពង់ឆ្នាំង",
     "nameEn": "Heritage Roastery Cafe & Bistro (Kampong Chhnang)",
     "descriptionKh": "ហាងកាហ្វេទំនើបរចនាបថខ្មែរ បម្រើកាហ្វេឆុងថ្មីៗ ភេសជ្ជៈផ្លែឈើស្រស់ នំដុត និងអាហារថ្ងៃត្រង់ប្រកបដោយផាសុកភាព។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ឆ្នាំង ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -6670,6 +6847,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-178",
+    created_at: '2026-01-01T02:58:00.000Z',
     "nameKh": "ហាងកាហ្វេ វូដឡែន កោះកុង (Woodland Cafe)",
     "nameEn": "Woodland Cafe & Bistro Koh Kong",
     "descriptionKh": "ហាងកាហ្វេធម្មជាតិក្នុងក្រុងខេមរភូមិន្ទ បម្រើកាហ្វេឆុងថ្មីៗ ភេសជ្ជៈត្រជាក់ និងអាហារសម្រន់ឆ្ងាញ់ៗ។",
@@ -6708,6 +6886,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-179",
+    created_at: '2026-01-01T02:59:00.000Z',
     "nameKh": "ហាងកាហ្វេ និងអាហារ ភ្នំដោះក្រមុំ",
     "nameEn": "Doh Kramom Hill Cafe & Bistro Mondulkiri",
     "descriptionKh": "ហាងកាហ្វេ និងអាហារក្បែរភ្នំដោះក្រមុំ គយគន់ទេសភាពក្រុងសែនមនោរម្យ និងពិសាអាហារថ្ងៃត្រង់ឆ្ងាញ់ៗ។",
@@ -6746,6 +6925,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-180",
+    created_at: '2026-01-01T03:00:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន ត្បូងពេជ្រ ភូមិភាគឦសាន",
     "nameEn": "Northeast Gem Traditional Restaurant Ratanakiri",
     "descriptionKh": "ភោជនីយដ្ឋានគ្រួសារដ៏ធំទូលាយក្នុងក្រុងបានលុង បម្រើអាហារថ្ងៃត្រង់ និងពេលល្ងាចជាមួយមុខម្ហូបខ្មែរ និងត្រីទន្លេស្រស់ៗ។",
@@ -6784,6 +6964,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-181",
+    created_at: '2026-01-01T03:01:00.000Z',
     "nameKh": "ហាងកាហ្វេ និងអាហារសម្រន់ មរតក ក្រចេះ",
     "nameEn": "Heritage Roastery Cafe & Bistro (Kratie)",
     "descriptionKh": "ហាងកាហ្វេទំនើបរចនាបថខ្មែរ បម្រើកាហ្វេឆុងថ្មីៗ ភេសជ្ជៈផ្លែឈើស្រស់ នំដុត និងអាហារថ្ងៃត្រង់ប្រកបដោយផាសុកភាព។ មានទីតាំងស្ថិតនៅក្នុងខេត្តក្រចេះ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -6822,6 +7003,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-182",
+    created_at: '2026-01-01T03:02:00.000Z',
     "nameKh": "ហាងកាហ្វេ និងអាហារសម្រន់ មរតក ស្ទឹងត្រែង",
     "nameEn": "Heritage Roastery Cafe & Bistro (Stung Treng)",
     "descriptionKh": "ហាងកាហ្វេទំនើបរចនាបថខ្មែរ បម្រើកាហ្វេឆុងថ្មីៗ ភេសជ្ជៈផ្លែឈើស្រស់ នំដុត និងអាហារថ្ងៃត្រង់ប្រកបដោយផាសុកភាព។ មានទីតាំងស្ថិតនៅក្នុងខេត្តស្ទឹងត្រែង ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -6859,6 +7041,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-183",
+    created_at: '2026-01-01T03:03:00.000Z',
     "nameKh": "ហាងកាហ្វេ និងអាហារសម្រន់ មរតក ព្រះវិហារ",
     "nameEn": "Heritage Roastery Cafe & Bistro (Preah Vihear)",
     "descriptionKh": "ហាងកាហ្វេទំនើបរចនាបថខ្មែរ បម្រើកាហ្វេឆុងថ្មីៗ ភេសជ្ជៈផ្លែឈើស្រស់ នំដុត និងអាហារថ្ងៃត្រង់ប្រកបដោយផាសុកភាព។ មានទីតាំងស្ថិតនៅក្នុងខេត្តព្រះវិហារ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -6897,6 +7080,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-184",
+    created_at: '2026-01-01T03:04:00.000Z',
     "nameKh": "ហាងកាហ្វេ និងអាហារសម្រន់ មរតក បន្ទាយមានជ័យ",
     "nameEn": "Heritage Roastery Cafe & Bistro (Banteay Meanchey)",
     "descriptionKh": "ហាងកាហ្វេទំនើបរចនាបថខ្មែរ បម្រើកាហ្វេឆុងថ្មីៗ ភេសជ្ជៈផ្លែឈើស្រស់ នំដុត និងអាហារថ្ងៃត្រង់ប្រកបដោយផាសុកភាព។ មានទីតាំងស្ថិតនៅក្នុងខេត្តបន្ទាយមានជ័យ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -6935,6 +7119,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-185",
+    created_at: '2026-01-01T03:05:00.000Z',
     "nameKh": "ហាងកាហ្វេ និងអាហារសម្រន់ មរតក ឧត្តរមានជ័យ",
     "nameEn": "Heritage Roastery Cafe & Bistro (Oddar Meanchey)",
     "descriptionKh": "ហាងកាហ្វេទំនើបរចនាបថខ្មែរ បម្រើកាហ្វេឆុងថ្មីៗ ភេសជ្ជៈផ្លែឈើស្រស់ នំដុត និងអាហារថ្ងៃត្រង់ប្រកបដោយផាសុកភាព។ មានទីតាំងស្ថិតនៅក្នុងខេត្តឧត្តរមានជ័យ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -6973,6 +7158,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-186",
+    created_at: '2026-01-01T03:06:00.000Z',
     "nameKh": "ហាងកាហ្វេ និងអាហារសម្រន់ មរតក ប៉ៃលិន",
     "nameEn": "Heritage Roastery Cafe & Bistro (Pailin)",
     "descriptionKh": "ហាងកាហ្វេទំនើបរចនាបថខ្មែរ បម្រើកាហ្វេឆុងថ្មីៗ ភេសជ្ជៈផ្លែឈើស្រស់ នំដុត និងអាហារថ្ងៃត្រង់ប្រកបដោយផាសុកភាព។ មានទីតាំងស្ថិតនៅក្នុងខេត្តប៉ៃលិន ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -7011,6 +7197,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-187",
+    created_at: '2026-01-01T03:07:00.000Z',
     "nameKh": "ហាងកាហ្វេ និងអាហារសម្រន់ មរតក ព្រៃវែង",
     "nameEn": "Heritage Roastery Cafe & Bistro (Prey Veng)",
     "descriptionKh": "ហាងកាហ្វេទំនើបរចនាបថខ្មែរ បម្រើកាហ្វេឆុងថ្មីៗ ភេសជ្ជៈផ្លែឈើស្រស់ នំដុត និងអាហារថ្ងៃត្រង់ប្រកបដោយផាសុកភាព។ មានទីតាំងស្ថិតនៅក្នុងខេត្តព្រៃវែង ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -7049,6 +7236,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-188",
+    created_at: '2026-01-01T03:08:00.000Z',
     "nameKh": "ហាងកាហ្វេ និងអាហារសម្រន់ មរតក ស្វាយរៀង",
     "nameEn": "Heritage Roastery Cafe & Bistro (Svay Rieng)",
     "descriptionKh": "ហាងកាហ្វេទំនើបរចនាបថខ្មែរ បម្រើកាហ្វេឆុងថ្មីៗ ភេសជ្ជៈផ្លែឈើស្រស់ នំដុត និងអាហារថ្ងៃត្រង់ប្រកបដោយផាសុកភាព។ មានទីតាំងស្ថិតនៅក្នុងខេត្តស្វាយរៀង ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -7087,6 +7275,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-189",
+    created_at: '2026-01-01T03:09:00.000Z',
     "nameKh": "ហាងកាហ្វេ និងអាហារសម្រន់ មរតក កំពង់ស្ពឺ",
     "nameEn": "Heritage Roastery Cafe & Bistro (Kampong Speu)",
     "descriptionKh": "ហាងកាហ្វេទំនើបរចនាបថខ្មែរ បម្រើកាហ្វេឆុងថ្មីៗ ភេសជ្ជៈផ្លែឈើស្រស់ នំដុត និងអាហារថ្ងៃត្រង់ប្រកបដោយផាសុកភាព។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ស្ពឺ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -7124,6 +7313,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-190",
+    created_at: '2026-01-01T03:10:00.000Z',
     "nameKh": "ហាងកាហ្វេ និងអាហារសម្រន់ មរតក ត្បូងឃ្មុំ",
     "nameEn": "Heritage Roastery Cafe & Bistro (Tboung Khmum)",
     "descriptionKh": "ហាងកាហ្វេទំនើបរចនាបថខ្មែរ បម្រើកាហ្វេឆុងថ្មីៗ ភេសជ្ជៈផ្លែឈើស្រស់ នំដុត និងអាហារថ្ងៃត្រង់ប្រកបដោយផាសុកភាព។ មានទីតាំងស្ថិតនៅក្នុងខេត្តត្បូងឃ្មុំ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -7162,6 +7352,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-191",
+    created_at: '2026-01-01T03:11:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន ភូមិគ្រឹះម្ហូបខ្មែរ សែនសុខ",
     "nameEn": "Sen Sok Khmer Heritage Garden Restaurant",
     "descriptionKh": "ភោជនីយដ្ឋានសួនច្បារធំទូលាយក្នុងខណ្ឌសែនសុខ បម្រើម្ហូបខ្មែរគ្រប់កម្មវិធីជួបជុំគ្រួសារ មានកញ្ចុះអង្គុយលម្ហែកាយ។",
@@ -7200,6 +7391,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-192",
+    created_at: '2026-01-01T03:12:00.000Z',
     "nameKh": "ហាងកាហ្វេ ស៊ីស្ទើរ ស្រី ផ្សារចាស់ សៀមរាប",
     "nameEn": "Sister Srey Cafe & Bakery Siem Reap",
     "descriptionKh": "ហាងកាហ្វេដ៏ពេញនិយមនៅមាត់ស្ទឹងសៀមរាប បម្រើអាហារពេលព្រឹក កាហ្វេឆុងថ្មីៗ នំដុត និងភេសជ្ជៈផ្លែឈើស្រស់។",
@@ -7238,6 +7430,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-193",
+    created_at: '2026-01-01T03:13:00.000Z',
     "nameKh": "ហាងបាយ គ្រួសារខ្មែរ បាត់ដំបង",
     "nameEn": "Battambang Heritage Family Kitchen",
     "descriptionKh": "ហាងបាយគ្រួសារក្នុងក្រុងបាត់ដំបង បម្រើអាហារថ្ងៃត្រង់ និងពេលល្ងាចជាមួយមុខម្ហូបខ្មែររសជាតិដើមឆ្ងាញ់ពិសា។",
@@ -7276,6 +7469,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-194",
+    created_at: '2026-01-01T03:14:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន ថ្ងៃលិចមាត់ព្រែក កំពត",
     "nameEn": "Kampot Sunset Riverwalk Seafood & Grill",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ព្រែកជិតស្ពានឥន្ទធនូកំពត បរិយាកាសរ៉ូមែនទិកពេលថ្ងៃលិច ជាមួយគ្រឿងសមុទ្រស្រស់ៗ និងម្ហូបខ្មែរ។",
@@ -7314,6 +7508,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-195",
+    created_at: '2026-01-01T03:15:00.000Z',
     "nameKh": "អាហារដ្ឋាន មឹកអាំង និងក្តាមឆាម្រេចខ្ចី កែប",
     "nameEn": "Kep Fresh Grilled Squid & Pepper Crab Stall",
     "descriptionKh": "អាហារដ្ឋានគ្រឿងសមុទ្រស្រស់ៗនៅផ្សារក្តាម ល្បីខាងមឹកពងអាំងធ្យូង ក្តាមឆាម្រេចខ្ចី និងបង្គាអាំងតម្លៃសមរម្យ។",
@@ -7352,6 +7547,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-196",
+    created_at: '2026-01-01T03:16:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន កោះរ៉ុង វីយូ ស៊ីហ្វូដ",
     "nameEn": "Koh Rong View Seafood Pavilion Sihanoukville",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់សមុទ្រជិតកំពង់ផែទូកទេសចរណ៍ទៅកោះរ៉ុង បម្រើអាហារថ្ងៃត្រង់ និងពេលល្ងាចជាមួយគ្រឿងសមុទ្រស្រស់ៗគ្រប់មុខ។",
@@ -7389,6 +7585,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-197",
+    created_at: '2026-01-01T03:17:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន ភូមិយើង រសជាតិដើម កំពង់ចាម",
     "nameEn": "Our Village Authentic Khmer Dining (Kampong Cham)",
     "descriptionKh": "ភោជនីយដ្ឋានបម្រើមុខម្ហូបខ្មែរតាមរដូវកាល ទឹកគ្រឿង ត្រីឆ្អើរ ស្ងោរជ្រក់ និងម្ហូបពិសេសប្រចាំខេត្ត។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ចាម ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -7427,6 +7624,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-198",
+    created_at: '2026-01-01T03:18:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន ភូមិយើង រសជាតិដើម កណ្តាល",
     "nameEn": "Our Village Authentic Khmer Dining (Kandal)",
     "descriptionKh": "ភោជនីយដ្ឋានបម្រើមុខម្ហូបខ្មែរតាមរដូវកាល ទឹកគ្រឿង ត្រីឆ្អើរ ស្ងោរជ្រក់ និងម្ហូបពិសេសប្រចាំខេត្ត។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកណ្តាល ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -7465,6 +7663,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-199",
+    created_at: '2026-01-01T03:19:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន ភូមិយើង រសជាតិដើម តាកែវ",
     "nameEn": "Our Village Authentic Khmer Dining (Takeo)",
     "descriptionKh": "ភោជនីយដ្ឋានបម្រើមុខម្ហូបខ្មែរតាមរដូវកាល ទឹកគ្រឿង ត្រីឆ្អើរ ស្ងោរជ្រក់ និងម្ហូបពិសេសប្រចាំខេត្ត។ មានទីតាំងស្ថិតនៅក្នុងខេត្តតាកែវ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -7503,6 +7702,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-200",
+    created_at: '2026-01-01T03:20:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន ភូមិយើង រសជាតិដើម ពោធិ៍សាត់",
     "nameEn": "Our Village Authentic Khmer Dining (Pursat)",
     "descriptionKh": "ភោជនីយដ្ឋានបម្រើមុខម្ហូបខ្មែរតាមរដូវកាល ទឹកគ្រឿង ត្រីឆ្អើរ ស្ងោរជ្រក់ និងម្ហូបពិសេសប្រចាំខេត្ត។ មានទីតាំងស្ថិតនៅក្នុងខេត្តពោធិ៍សាត់ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -7541,6 +7741,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-201",
+    created_at: '2026-01-01T03:21:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន ភូមិយើង រសជាតិដើម កំពង់ធំ",
     "nameEn": "Our Village Authentic Khmer Dining (Kampong Thom)",
     "descriptionKh": "ភោជនីយដ្ឋានបម្រើមុខម្ហូបខ្មែរតាមរដូវកាល ទឹកគ្រឿង ត្រីឆ្អើរ ស្ងោរជ្រក់ និងម្ហូបពិសេសប្រចាំខេត្ត។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ធំ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -7579,6 +7780,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-202",
+    created_at: '2026-01-01T03:22:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន ភូមិយើង រសជាតិដើម កំពង់ឆ្នាំង",
     "nameEn": "Our Village Authentic Khmer Dining (Kampong Chhnang)",
     "descriptionKh": "ភោជនីយដ្ឋានបម្រើមុខម្ហូបខ្មែរតាមរដូវកាល ទឹកគ្រឿង ត្រីឆ្អើរ ស្ងោរជ្រក់ និងម្ហូបពិសេសប្រចាំខេត្ត។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ឆ្នាំង ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -7617,6 +7819,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-203",
+    created_at: '2026-01-01T03:23:00.000Z',
     "nameKh": "អាហារដ្ឋាន ក្តាមថ្ម និងបង្គាស្រស់ កោះកុង",
     "nameEn": "Koh Kong Mud Crab & Fresh Prawn Kitchen",
     "descriptionKh": "អាហារដ្ឋានគ្រួសារល្បីខាងម្ហូបក្តាមថ្ម ឆាម្រេចខ្ចី សម្លម្ជូរគ្រឿងសមុទ្រ និងម្ហូបខ្មែរប្រចាំថ្ងៃ។",
@@ -7654,6 +7857,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-204",
+    created_at: '2026-01-01T03:24:00.000Z',
     "nameKh": "ហាងបាយ គ្រួសារខ្មែរ សែនមនោរម្យ",
     "nameEn": "Mondulkiri Khmer Family Kitchen",
     "descriptionKh": "ហាងបាយគ្រួសារសម្រាប់ភ្ញៀវទេសចរ និងអ្នកដំណើរ បម្រើសម្លកកូរ ទឹកគ្រឿង ប្រហុកខ្ទិះ និងម្ហូបខ្មែររសជាតិដើម។",
@@ -7692,6 +7896,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-205",
+    created_at: '2026-01-01T03:25:00.000Z',
     "nameKh": "ហាងបាយ គ្រួសាររតនគិរី",
     "nameEn": "Banlung Town Khmer Family Dining",
     "descriptionKh": "ហាងបាយគ្រួសាររសជាតិអ្នកស្រុក បម្រើទឹកគ្រឿង ប្រហុកខ្ទិះ សម្លម្ជូរគ្រឿង និងបន្លែធម្មជាតិស្រស់ៗ។",
@@ -7730,6 +7935,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-206",
+    created_at: '2026-01-01T03:26:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន ភូមិយើង រសជាតិដើម ក្រចេះ",
     "nameEn": "Our Village Authentic Khmer Dining (Kratie)",
     "descriptionKh": "ភោជនីយដ្ឋានបម្រើមុខម្ហូបខ្មែរតាមរដូវកាល ទឹកគ្រឿង ត្រីឆ្អើរ ស្ងោរជ្រក់ និងម្ហូបពិសេសប្រចាំខេត្ត។ មានទីតាំងស្ថិតនៅក្នុងខេត្តក្រចេះ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -7768,6 +7974,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-207",
+    created_at: '2026-01-01T03:27:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន ភូមិយើង រសជាតិដើម ស្ទឹងត្រែង",
     "nameEn": "Our Village Authentic Khmer Dining (Stung Treng)",
     "descriptionKh": "ភោជនីយដ្ឋានបម្រើមុខម្ហូបខ្មែរតាមរដូវកាល ទឹកគ្រឿង ត្រីឆ្អើរ ស្ងោរជ្រក់ និងម្ហូបពិសេសប្រចាំខេត្ត។ មានទីតាំងស្ថិតនៅក្នុងខេត្តស្ទឹងត្រែង ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -7806,6 +8013,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-208",
+    created_at: '2026-01-01T03:28:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន ភូមិយើង រសជាតិដើម ព្រះវិហារ",
     "nameEn": "Our Village Authentic Khmer Dining (Preah Vihear)",
     "descriptionKh": "ភោជនីយដ្ឋានបម្រើមុខម្ហូបខ្មែរតាមរដូវកាល ទឹកគ្រឿង ត្រីឆ្អើរ ស្ងោរជ្រក់ និងម្ហូបពិសេសប្រចាំខេត្ត។ មានទីតាំងស្ថិតនៅក្នុងខេត្តព្រះវិហារ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -7844,6 +8052,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-209",
+    created_at: '2026-01-01T03:29:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន ភូមិយើង រសជាតិដើម បន្ទាយមានជ័យ",
     "nameEn": "Our Village Authentic Khmer Dining (Banteay Meanchey)",
     "descriptionKh": "ភោជនីយដ្ឋានបម្រើមុខម្ហូបខ្មែរតាមរដូវកាល ទឹកគ្រឿង ត្រីឆ្អើរ ស្ងោរជ្រក់ និងម្ហូបពិសេសប្រចាំខេត្ត។ មានទីតាំងស្ថិតនៅក្នុងខេត្តបន្ទាយមានជ័យ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -7882,6 +8091,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-210",
+    created_at: '2026-01-01T03:30:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន ភូមិយើង រសជាតិដើម ឧត្តរមានជ័យ",
     "nameEn": "Our Village Authentic Khmer Dining (Oddar Meanchey)",
     "descriptionKh": "ភោជនីយដ្ឋានបម្រើមុខម្ហូបខ្មែរតាមរដូវកាល ទឹកគ្រឿង ត្រីឆ្អើរ ស្ងោរជ្រក់ និងម្ហូបពិសេសប្រចាំខេត្ត។ មានទីតាំងស្ថិតនៅក្នុងខេត្តឧត្តរមានជ័យ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -7919,6 +8129,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-211",
+    created_at: '2026-01-01T03:31:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន ភូមិយើង រសជាតិដើម ប៉ៃលិន",
     "nameEn": "Our Village Authentic Khmer Dining (Pailin)",
     "descriptionKh": "ភោជនីយដ្ឋានបម្រើមុខម្ហូបខ្មែរតាមរដូវកាល ទឹកគ្រឿង ត្រីឆ្អើរ ស្ងោរជ្រក់ និងម្ហូបពិសេសប្រចាំខេត្ត។ មានទីតាំងស្ថិតនៅក្នុងខេត្តប៉ៃលិន ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -7957,6 +8168,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-212",
+    created_at: '2026-01-01T03:32:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន ភូមិយើង រសជាតិដើម ព្រៃវែង",
     "nameEn": "Our Village Authentic Khmer Dining (Prey Veng)",
     "descriptionKh": "ភោជនីយដ្ឋានបម្រើមុខម្ហូបខ្មែរតាមរដូវកាល ទឹកគ្រឿង ត្រីឆ្អើរ ស្ងោរជ្រក់ និងម្ហូបពិសេសប្រចាំខេត្ត។ មានទីតាំងស្ថិតនៅក្នុងខេត្តព្រៃវែង ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -7995,6 +8207,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-213",
+    created_at: '2026-01-01T03:33:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន ភូមិយើង រសជាតិដើម ស្វាយរៀង",
     "nameEn": "Our Village Authentic Khmer Dining (Svay Rieng)",
     "descriptionKh": "ភោជនីយដ្ឋានបម្រើមុខម្ហូបខ្មែរតាមរដូវកាល ទឹកគ្រឿង ត្រីឆ្អើរ ស្ងោរជ្រក់ និងម្ហូបពិសេសប្រចាំខេត្ត។ មានទីតាំងស្ថិតនៅក្នុងខេត្តស្វាយរៀង ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -8033,6 +8246,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-214",
+    created_at: '2026-01-01T03:34:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន ភូមិយើង រសជាតិដើម កំពង់ស្ពឺ",
     "nameEn": "Our Village Authentic Khmer Dining (Kampong Speu)",
     "descriptionKh": "ភោជនីយដ្ឋានបម្រើមុខម្ហូបខ្មែរតាមរដូវកាល ទឹកគ្រឿង ត្រីឆ្អើរ ស្ងោរជ្រក់ និងម្ហូបពិសេសប្រចាំខេត្ត។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ស្ពឺ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -8071,6 +8285,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-215",
+    created_at: '2026-01-01T03:35:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន ភូមិយើង រសជាតិដើម ត្បូងឃ្មុំ",
     "nameEn": "Our Village Authentic Khmer Dining (Tboung Khmum)",
     "descriptionKh": "ភោជនីយដ្ឋានបម្រើមុខម្ហូបខ្មែរតាមរដូវកាល ទឹកគ្រឿង ត្រីឆ្អើរ ស្ងោរជ្រក់ និងម្ហូបពិសេសប្រចាំខេត្ត។ មានទីតាំងស្ថិតនៅក្នុងខេត្តត្បូងឃ្មុំ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
@@ -8109,6 +8324,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-216",
+    created_at: '2026-01-01T03:36:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន ច្បារអំពៅ ម្ហូបខ្មែរមាត់ទន្លេ",
     "nameEn": "Chbar Ampov Riverside Khmer Family Dining",
     "descriptionKh": "ហាងអាហារគ្រួសារតាមបណ្តោយមាត់ទន្លេច្បារអំពៅ ល្បីខាងម្ហូបត្រីទន្លេស្រស់ៗ បង្កងអាំង និងសម្លខ្មែររសជាតិដើម។",
@@ -8147,6 +8363,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-217",
+    created_at: '2026-01-01T03:37:00.000Z',
     "nameKh": "ហាងកាហ្វេ និងអាហារ វត្តភ្នំ បេតិកភណ្ឌ",
     "nameEn": "Wat Phnom Heritage Cafe & Khmer Bistro",
     "descriptionKh": "ហាងកាហ្វេ និងអាហារខ្មែរក្នុងអគារបេតិកភណ្ឌក្បែរវត្តភ្នំ បម្រើអាហារពេលព្រឹក ថ្ងៃត្រង់ និងកាហ្វេឆុងថ្មីៗ។",
@@ -8185,6 +8402,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-218",
+    created_at: '2026-01-01T03:38:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន សួនអង្គរ ម្ហូបខ្មែរបុរាណ",
     "nameEn": "Angkor Heritage Garden Dining Siem Reap",
     "descriptionKh": "ភោជនីយដ្ឋានតាមផ្លូវទៅប្រាសាទអង្គរវត្ត បម្រើអាហារថ្ងៃត្រង់ និងពេលល្ងាចក្នុងសួនធម្មជាតិដ៏ត្រជាក់ភ្នែក។",
@@ -8223,6 +8441,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-219",
+    created_at: '2026-01-01T03:39:00.000Z',
     "nameKh": "អាហារដ្ឋាន គុយទាវ និងបាយព្រឹក វត្តបូព៌ សៀមរាប",
     "nameEn": "Wat Bo Morning Kuyteav & Khmer Breakfast House",
     "descriptionKh": "ហាងអាហារពេលព្រឹកដ៏ល្បីនៅផ្លូវវត្តបូព៌ មានគុយទាវឆ្អឹងជ្រូក បាយសាច់ជ្រូកអាំង និងបបរគ្រឿងសាច់មាន់ស្រែ។",
@@ -8261,6 +8480,7 @@ export const initial100Restaurants: Restaurant[] = [
   },
   {
     "id": "rest-220",
+    created_at: '2026-01-01T03:40:00.000Z',
     "nameKh": "ហាងបាយ ម្ហូបខ្មែរអ្នកកំពត",
     "nameEn": "Authentic Kampot Home Kitchen",
     "descriptionKh": "ហាងបាយគ្រួសារអ្នកកំពត បម្រើម្ហូបខ្មែរប្រចាំតំបន់ សម្លកកូរ សម្លម្ជូរគ្រឿង និងឆាក្តាមម្រេចខ្ចីតម្លៃសមរម្យ។",

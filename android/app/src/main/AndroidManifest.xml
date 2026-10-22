@@ -41,6 +41,12 @@
         <package android:name="com.paygo24.ibank" />
         <package android:name="com.ababank.mobile" />
         <package android:name="km.gov.nbc.bakong" />
+        <package android:name="org.telegram.messenger" />
+        <package android:name="org.telegram.messenger.web" />
+        <package android:name="com.facebook.katana" />
+        <package android:name="com.facebook.orca" />
+        <package android:name="com.whatsapp" />
+        <package android:name="jp.naver.line.android" />
         <intent>
             <action android:name="android.intent.action.VIEW" />
             <data android:scheme="abamobilebank" />
@@ -48,6 +54,14 @@
         <intent>
             <action android:name="android.intent.action.VIEW" />
             <data android:scheme="https" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.SEND" />
+            <data android:mimeType="text/plain" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.SEND" />
+            <data android:mimeType="image/*" />
         </intent>
     </queries>
 
