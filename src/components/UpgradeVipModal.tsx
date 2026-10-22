@@ -87,9 +87,51 @@ export const UpgradeVipModal: React.FC = () => {
     }, 200);
   };
 
+  // Click on QR ABA: Link to ABA app for payment & show Pending Admin Approval
+  const handlePayViaAba = async () => {
+    if (!currentUser) {
+      setIsAuthModalOpen(true);
+      return;
+    }
+
+    setStep('submitting');
+    setErrorMessage('');
+
+    try {
+      // 1. Submit the VIP Upgrade Request to Admin (creates pending transaction)
+      const result = await submitVipUpgradeRequest(
+        selectedPlan.days,
+        selectedPlan.priceUsd,
+        `VIP Upgrade Request (${selectedPlan.days} Days / $${selectedPlan.priceUsd} USD) via ABA KHQR`
+      );
+
+      if (result.success) {
+        setSubmittedTxnId(result.transactionId);
+
+        showToast(
+          isKm 
+            ? 'កំពុងបើកកម្មវិធី ABA Mobile... សំណើត្រូវបានបញ្ជូនទៅរដ្ឋបាលរួចរាល់!' 
+            : 'Opening ABA Mobile... Request submitted for Admin approval!',
+          'info'
+        );
+
+        // 2. Clean launch into ABA Mobile app for payment
+        window.location.href = 'abamobilebank://';
+
+        // 3. Immediately transition to "Pending Admin Approval" screen
+        setStep('submitted_pending');
+      } else {
+        setErrorMessage(isKm ? 'មិនអាចផ្ញើសំណើបានទេ។ សូមព្យាយាមម្តងទៀត។' : 'Failed to submit request. Please try again.');
+        setStep('failed');
+      }
+    } catch (err: any) {
+      setErrorMessage(err?.message || (isKm ? 'មានបញ្ហាបច្ចេកទេស។' : 'An unexpected error occurred.'));
+      setStep('failed');
+    }
+  };
+
   const handleOpenAbaApp = () => {
-    // Direct clean launch of ABA Mobile app without expired P2P token query
-    window.location.href = 'abamobilebank://';
+    handlePayViaAba();
   };
 
   const handleSaveQrImage = () => {
@@ -395,34 +437,53 @@ export const UpgradeVipModal: React.FC = () => {
                   </span>
                 </div>
 
-                {/* Show QR Code Only - Pure, Large & Clean Square QR */}
+                {/* Show QR Code Only - Click to open ABA Mobile & Transition to Pending Admin Approval */}
                 <div className="p-4 rounded-3xl bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 shadow-sm flex flex-col items-center justify-center space-y-3">
                   <div 
-                    onClick={handleSaveQrImage}
-                    className="p-2 bg-white rounded-2xl shadow-sm border border-slate-200 max-w-[260px] cursor-pointer hover:shadow-md transition active:scale-98"
-                    title={isKm ? 'ចុចដើម្បីរក្សាទុករូបភាព QR' : 'Tap to save QR code'}
+                    onClick={handlePayViaAba}
+                    className="relative p-2 bg-white rounded-2xl shadow-sm border-2 border-emerald-500/40 max-w-[260px] cursor-pointer hover:shadow-lg transition active:scale-98 group"
+                    title={isKm ? 'ចុចលើរូប QR ដើម្បីបើកកម្មវិធី ABA Mobile ទូទាត់' : 'Click QR to open ABA Mobile & Pay'}
                   >
                     <img 
                       src="/images/aba_qr_code_only.png" 
                       alt="Official Payment QR Code" 
                       className="w-full h-auto object-contain rounded-xl block"
                     />
+                    <div className="absolute inset-0 bg-[#004B87]/10 opacity-0 group-hover:opacity-100 transition rounded-xl flex items-center justify-center pointer-events-none">
+                      <span className="px-3 py-1.5 rounded-full bg-[#004B87] text-white text-[11px] font-bold shadow-lg flex items-center gap-1">
+                        <ExternalLink className="w-3.5 h-3.5" />
+                        <span>{isKm ? '👆 ចុចដើម្បីបើក ABA Mobile' : '👆 Tap to open ABA Mobile'}</span>
+                      </span>
+                    </div>
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  {/* 1-Tap Action: Open ABA Mobile & Enter Pending Admin Approval */}
+                  <button
+                    onClick={handlePayViaAba}
+                    className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-[#004B87] via-[#005a9e] to-[#004B87] hover:from-[#003966] hover:to-[#003966] text-white font-extrabold text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-98 cursor-pointer ring-4 ring-sky-500/20"
+                  >
+                    <ExternalLink className="w-4 h-4 text-sky-200" />
+                    <span>
+                      {isKm 
+                        ? `📲 បើក ABA Mobile ដើម្បីទូទាត់ ($${selectedPlan.priceUsd.toFixed(2)}) →` 
+                        : `📲 Open ABA Mobile to Pay ($${selectedPlan.priceUsd.toFixed(2)}) →`}
+                    </span>
+                  </button>
+
+                  <div className="grid grid-cols-2 gap-2 w-full pt-0.5">
                     <button
                       type="button"
                       onClick={handleSaveQrImage}
-                      className="py-2 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold flex items-center gap-1.5 transition active:scale-95 cursor-pointer border border-slate-200 dark:border-slate-700 shadow-2xs"
+                      className="py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer border border-slate-200 dark:border-slate-700 shadow-2xs"
                     >
                       <Download className="w-3.5 h-3.5 text-emerald-600" />
-                      <span>{isKm ? 'រក្សាទុករូបភាព QR' : 'Save QR Image'}</span>
+                      <span>{isKm ? 'រក្សាទុក QR ក្នុង Photos' : 'Save QR to Photos'}</span>
                     </button>
 
                     <button
                       type="button"
                       onClick={handleCopyAccount}
-                      className="py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold flex items-center gap-1.5 transition active:scale-95 cursor-pointer border border-slate-200 dark:border-slate-700 shadow-2xs"
+                      className="py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer border border-slate-200 dark:border-slate-700 shadow-2xs"
                       title={isKm ? 'ចម្លងលេខគណនី 095 245 959' : 'Copy 095 245 959'}
                     >
                       {hasCopiedAccount ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5 text-amber-500" />}
@@ -432,8 +493,8 @@ export const UpgradeVipModal: React.FC = () => {
 
                   <p className="text-[11px] text-center text-slate-500 dark:text-slate-400">
                     {isKm 
-                      ? '💡 បើក ABA Mobile ឬ App ធនាគារណាមួយដើម្បីស្កេនកូដ QR ខាងលើ' 
-                      : '💡 Open ABA Mobile or any banking app to scan this QR code'}
+                      ? '💡 ចុចលើរូប QR ឬប៊ូតុងខាងលើដើម្បីបើក ABA Mobile។ ក្រោយពេលទូទាត់ ប្រព័ន្ធនឹងបង្ហាញផ្ទាំង "Pending Admin Approval" ដោយស្វ័យប្រវត្តិ។' 
+                      : '💡 Tap the QR code or button above to open ABA Mobile. After payment, the "Pending Admin Approval" screen will appear automatically.'}
                   </p>
                 </div>
               </div>
