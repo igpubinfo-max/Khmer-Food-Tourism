@@ -518,12 +518,13 @@ export const AdminDashboard: React.FC = () => {
 
                           <div className="font-bold text-[#0F172A] dark:text-stone-100 font-khmer text-sm">
                             {t.type === 'user_vip_upgrade' 
-                              ? `👑 ដំឡើងសមាជិកភាព VIP៖ ${t.userName || t.ownerName || 'User VIP'}` 
+                              ? `👑 ដំឡើងសមាជិកភាព VIP (${t.durationDays || 90} ថ្ងៃ)៖ ${t.userName || t.ownerName || 'User VIP'}` 
                               : t.restaurantNameKh}
                           </div>
 
-                          <div className="text-[11px] text-stone-600 dark:text-stone-400 font-khmer space-x-2">
+                          <div className="text-[11px] text-stone-600 dark:text-stone-400 font-khmer flex flex-wrap gap-x-2 gap-y-1">
                             <span>{t.type === 'user_vip_upgrade' ? 'អ្នកប្រើប្រាស់៖' : 'ម្ចាស់ហាង៖'} <strong>{t.userName || t.ownerName}</strong></span>
+                            {t.userId && <span>• ID: <code className="font-mono text-[10px]">{t.userId}</code></span>}
                             {t.userEmail && <span>• ✉️ {t.userEmail}</span>}
                             {t.ownerPhone && <span>• 📞 {t.ownerPhone}</span>}
                             <span>• វិធីបង់៖ <strong className="font-mono">{t.paymentMethod}</strong></span>
@@ -534,6 +535,13 @@ export const AdminDashboard: React.FC = () => {
                             <span className="text-stone-500 font-khmer">Bank Ref / Trx ID:</span>
                             <span className="font-bold text-[#064E3B] dark:text-emerald-400">{t.transactionRef}</span>
                           </div>
+
+                          {(t.verifiedBy || t.verifiedAt) && (
+                            <div className="text-[10px] text-slate-500 dark:text-slate-400 font-khmer flex items-center gap-2">
+                              <span>🛡️ ត្រួតពិនិត្យដោយ៖ <strong>{t.verifiedBy || 'Admin'}</strong></span>
+                              {t.verifiedAt && <span>• ពេលវេលា៖ {t.verifiedAt}</span>}
+                            </div>
+                          )}
 
                           {t.notes && (
                             <div className="text-[11px] text-amber-800 dark:text-amber-200 bg-amber-50 dark:bg-amber-950/50 p-2 rounded-xl border border-amber-200 dark:border-amber-800 font-khmer">
@@ -547,19 +555,27 @@ export const AdminDashboard: React.FC = () => {
                           <div className="flex sm:flex-col gap-2 shrink-0">
                             <button
                               onClick={() => verifyTransaction(t.id)}
-                              className="px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-[#064E3B] hover:from-emerald-700 hover:to-[#047857] text-white font-khmer font-bold text-xs flex items-center justify-center gap-1.5 shadow-md transition active:scale-95"
+                              className="px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-[#064E3B] hover:from-emerald-700 hover:to-[#047857] text-white font-khmer font-bold text-xs flex items-center justify-center gap-1.5 shadow-md transition active:scale-95 cursor-pointer"
                             >
                               <Check className="w-4 h-4 text-emerald-200" />
                               <span>
                                 {isKm 
-                                  ? (t.type === 'user_vip_upgrade' ? `✅ អនុម័តដំឡើង VIP (${t.durationDays || 365} ថ្ងៃ)` : 'ផ្ទៀងផ្ទាត់ & ធ្វើឱ្យសកម្ម')
-                                  : (t.type === 'user_vip_upgrade' ? `Approve VIP (${t.durationDays || 365} Days)` : 'Verify & Activate')}
+                                  ? (t.type === 'user_vip_upgrade' ? `✅ អនុម័តដំឡើង VIP (${t.durationDays || 90} ថ្ងៃ)` : 'ផ្ទៀងផ្ទាត់ & ធ្វើឱ្យសកម្ម')
+                                  : (t.type === 'user_vip_upgrade' ? `Approve VIP (${t.durationDays || 90} Days)` : 'Verify & Activate')}
                               </span>
                             </button>
 
                             <button
-                              onClick={() => rejectTransaction(t.id, 'Transaction ID could not be verified on bank statement.')}
-                              className="px-3 py-1.5 rounded-xl bg-rose-50 dark:bg-rose-950/60 hover:bg-rose-600 hover:text-white text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800 font-khmer font-bold text-xs transition"
+                              onClick={() => {
+                                const customReason = window.prompt(
+                                  isKm ? 'បញ្ចូលមូលហេតុនៃការបដិសេធ (Rejection Reason)៖' : 'Enter rejection reason:',
+                                  isKm ? 'មិនឃើញមានប្រតិបត្តិការទូទាត់ក្នុងរបាយការណ៍ធនាគារ ABA ឡើយ។' : 'Transaction could not be verified on ABA bank statement.'
+                                );
+                                if (customReason !== null) {
+                                  rejectTransaction(t.id, customReason.trim() || 'Transaction ID could not be verified on bank statement.');
+                                }
+                              }}
+                              className="px-3 py-1.5 rounded-xl bg-rose-50 dark:bg-rose-950/60 hover:bg-rose-600 hover:text-white text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800 font-khmer font-bold text-xs transition cursor-pointer"
                             >
                               <span>{isKm ? '❌ បដិសេធ' : 'Reject'}</span>
                             </button>

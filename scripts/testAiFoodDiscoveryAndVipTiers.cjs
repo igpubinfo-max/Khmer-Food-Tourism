@@ -1,4 +1,4 @@
-// Test Suite: AI Food Discovery, Spatial Check-in & VIP Tiers ($2.99 & $9.99)
+// Test Suite: AI Food Discovery, Spatial Check-in, VIP Tiers & Strict Admin-Approved Payment Flow
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
@@ -65,22 +65,22 @@ test('Restaurant Check-in Service enforces 10 checkins/hour anti-spam rate limit
   assert(checkInContent.includes('checkUserCheckInRateLimit'), 'Anti-spam rate limit check present');
 });
 
-// 3. Check App Version v1.7.0 (Build 42)
+// 3. Check App Version v1.7.1 (Build 43)
 const typesPath = path.resolve(__dirname, '../src/types/index.ts');
 const typesContent = fs.readFileSync(typesPath, 'utf8');
 
-test('App Version bumped to v1.7.0 (Build 42)', () => {
-  assert(typesContent.includes("APP_VERSION = 'v1.7.0'"), 'APP_VERSION is v1.7.0');
-  assert(typesContent.includes("APP_BUILD_CODE = 42"), 'APP_BUILD_CODE is 42');
+test('App Version bumped to v1.7.1 (Build 43)', () => {
+  assert(typesContent.includes("APP_VERSION = 'v1.7.1'"), 'APP_VERSION is v1.7.1');
+  assert(typesContent.includes("APP_BUILD_CODE = 43"), 'APP_BUILD_CODE is 43');
 });
 
 // 4. Check Android build.gradle version
 const gradlePath = path.resolve(__dirname, '../android/app/build.gradle');
 const gradleContent = fs.readFileSync(gradlePath, 'utf8');
 
-test('Android build.gradle has versionCode 42 and versionName 1.7.0', () => {
-  assert(gradleContent.includes('versionCode 42'), 'versionCode is 42');
-  assert(gradleContent.includes('versionName "1.7.0"'), 'versionName is 1.7.0');
+test('Android build.gradle has versionCode 43 and versionName 1.7.1', () => {
+  assert(gradleContent.includes('versionCode 43'), 'versionCode is 43');
+  assert(gradleContent.includes('versionName "1.7.1"'), 'versionName is 1.7.1');
 });
 
 // 5. Check Modals registered in App.tsx
@@ -107,6 +107,31 @@ test('HomeView has prominent Restaurant Check-in button', () => {
   assert(homeContent.includes('setIsRestaurantCheckInModalOpen(true)'), 'Restaurant Check-in button present on HomeView');
 });
 
+// 7. Critical Payment Security & ABA KHQR Fix Checks
+const pluginPath = path.resolve(__dirname, '../android/app/src/main/java/com/khmerfood/tourism/NativeAbaLauncherPlugin.java');
+const pluginContent = fs.readFileSync(pluginPath, 'utf8');
+const vipModalPath = path.resolve(__dirname, '../src/components/UpgradeVipModal.tsx');
+const vipModalContent = fs.readFileSync(vipModalPath, 'utf8');
+const appCtxPath = path.resolve(__dirname, '../src/context/AppContext.tsx');
+const appCtxContent = fs.readFileSync(appCtxPath, 'utf8');
+
+test('Zero unsupported type=payway URL in UpgradeVipModal (prevents [MAPP-PW] Invalid Qr Merchant Data)', () => {
+  assert(!vipModalContent.includes('type=payway&qrcode='), 'No type=payway&qrcode= in UpgradeVipModal.tsx');
+});
+
+test('UpgradeVipModal never calls upgradeCurrentUserToVip directly on button click (strictly requires Admin approval)', () => {
+  assert(!vipModalContent.includes('upgradeCurrentUserToVip('), 'UpgradeVipModal does not call upgradeCurrentUserToVip');
+  assert(vipModalContent.includes('submitVipUpgradeRequest('), 'UpgradeVipModal calls submitVipUpgradeRequest');
+  assert(vipModalContent.includes("setPaymentState('PENDING_ADMIN_APPROVAL')"), 'Transitions to PENDING_ADMIN_APPROVAL');
+  assert(vipModalContent.includes('កំពុងរង់ចាំ Admin ពិនិត្យការទូទាត់'), 'Displays Khmer pending admin approval message');
+});
+
+test('AppContext enforces Admin role authorization and prevents duplicate approvals on verifyTransaction', () => {
+  assert(appCtxContent.includes("if (!currentUser || currentUser.role !== 'admin')"), 'Admin role check enforced');
+  assert(appCtxContent.includes("if (matchedTxn.status === 'verified')"), 'Duplicate approval prevention enforced');
+  assert(appCtxContent.includes('kft_admin_audit_logs_v1'), 'Admin audit log recorded');
+});
+
 console.log('\n================================================================');
-console.log(`  ALL ${pass}/${pass} AI FOOD DISCOVERY & VIP TIERS TESTS PASSED!`);
+console.log(`  ALL ${pass}/${pass} AI FOOD DISCOVERY & PAYMENT SECURITY TESTS PASSED!`);
 console.log('================================================================\n');

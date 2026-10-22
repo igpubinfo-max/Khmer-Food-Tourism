@@ -1966,25 +1966,69 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const verifyTransaction = (txnId: string) => {
-    let targetRestId = '';
-    let targetUserId = '';
-    let targetTxn: RegistrationTransaction | undefined;
+    // Security Safeguard: Only authenticated Administrator can approve payments
+    if (!currentUser || currentUser.role !== 'admin') {
+      showToast(
+        language === 'km' 
+          ? '⛔ គ្មានសិទ្ធិអនុញ្ញាត៖ មានតែគណនី Administrator ប៉ុណ្ណោះដែលអាចអនុម័តការទូទាត់ប្រាក់បាន!' 
+          : '⛔ Unauthorized: Only an authenticated Administrator can approve payments!',
+        'warning'
+      );
+      return;
+    }
+
+    const matchedTxn = transactions.find(t => t.id === txnId);
+    if (!matchedTxn) return;
+
+    // Prevent duplicate approvals and duplicate VIP extensions
+    if (matchedTxn.status === 'verified') {
+      showToast(
+        language === 'km' 
+          ? 'ប្រតិបត្តិការនេះត្រូវបានអនុម័តរួចហើយ!' 
+          : 'This transaction has already been approved!',
+        'info'
+      );
+      return;
+    }
+
+    const targetRestId = matchedTxn.restaurantId || '';
+    const targetUserId = matchedTxn.userId || '';
+    const durationDays = matchedTxn.durationDays || (Math.abs(matchedTxn.amountUsd - 2.99) < 0.05 ? 90 : 365);
+    const now = new Date();
+    const verifiedTimestamp = now.toISOString().replace('T', ' ').slice(0, 16);
+    const adminIdentity = currentUser.name || 'Chea Savuth (Admin)';
 
     setTransactions(prev => prev.map(t => {
       if (t.id !== txnId) return t;
-      targetRestId = t.restaurantId || '';
-      targetUserId = t.userId || '';
-      targetTxn = t;
       return {
         ...t,
         status: 'verified',
-        verifiedAt: new Date().toISOString().replace('T', ' ').slice(0, 16),
-        verifiedBy: currentUser?.name || 'Chea Savuth (Admin)',
+        paymentStatus: 'verified',
+        verifiedAt: verifiedTimestamp,
+        verifiedBy: adminIdentity,
       };
     }));
 
+    // Record Admin Audit Log
+    try {
+      const rawLogs = localStorage.getItem('kft_admin_audit_logs_v1');
+      const logs = rawLogs ? JSON.parse(rawLogs) : [];
+      logs.unshift({
+        id: `audit_${Date.now()}`,
+        action: 'APPROVE_PAYMENT',
+        txnId,
+        transactionRef: matchedTxn.transactionRef,
+        targetUserId,
+        amountUsd: matchedTxn.amountUsd,
+        durationDays,
+        adminId: currentUser.id,
+        adminName: adminIdentity,
+        timestamp: now.toISOString()
+      });
+      localStorage.setItem('kft_admin_audit_logs_v1', JSON.stringify(logs.slice(0, 200)));
+    } catch {}
+
     if (targetRestId) {
-      const now = new Date();
       const expiresAt = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
       setRestaurants(prev => prev.map(r => {
         if (r.id !== targetRestId) return r;
@@ -2002,10 +2046,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     if (targetUserId) {
-      // Find durationDays from the transaction or default to 365 days
-      const matchedTxn = targetTxn || transactions.find(t => t.id === txnId);
-      const durationDays = matchedTxn?.durationDays || 365;
-      const now = new Date();
       const expiresAt = new Date(now.getTime() + durationDays * 24 * 60 * 60 * 1000);
 
       setUsers(prev => prev.map(u => {
@@ -2066,20 +2106,55 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const rejectTransaction = (txnId: string, reason?: string) => {
-    let targetRestId = '';
-    let targetUserId = '';
+    // Security Safeguard: Only authenticated Administrator can reject payments
+    if (!currentUser || currentUser.role !== 'admin') {
+      showToast(
+        language === 'km' 
+          ? '⛔ គ្មានសិទ្ធិអនុញ្ញាត៖ មានតែគណនី Administrator ប៉ុណ្ណោះដែលអាចបដិសេធការទូទាត់ប្រាក់បាន!' 
+          : '⛔ Unauthorized: Only an authenticated Administrator can reject payments!',
+        'warning'
+      );
+      return;
+    }
+
+    const matchedTxn = transactions.find(t => t.id === txnId);
+    if (!matchedTxn) return;
+
+    const targetRestId = matchedTxn.restaurantId || '';
+    const targetUserId = matchedTxn.userId || '';
     const rejectionReason = reason || 'ការទូទាត់មិនអាចផ្ទៀងផ្ទាត់បានជាមួយរបាយការណ៍ធនាគារ (Transaction could not be verified on bank statement).';
+    const adminIdentity = currentUser.name || 'Chea Savuth (Admin)';
 
     setTransactions(prev => prev.map(t => {
       if (t.id !== txnId) return t;
-      targetRestId = t.restaurantId || '';
-      targetUserId = t.userId || '';
       return {
         ...t,
         status: 'rejected',
+        paymentStatus: 'failed',
         notes: rejectionReason,
+        verifiedAt: new Date().toISOString().replace('T', ' ').slice(0, 16),
+        verifiedBy: adminIdentity,
       };
     }));
+
+    // Record Admin Audit Log
+    try {
+      const rawLogs = localStorage.getItem('kft_admin_audit_logs_v1');
+      const logs = rawLogs ? JSON.parse(rawLogs) : [];
+      logs.unshift({
+        id: `audit_${Date.now()}`,
+        action: 'REJECT_PAYMENT',
+        txnId,
+        transactionRef: matchedTxn.transactionRef,
+        targetUserId,
+        amountUsd: matchedTxn.amountUsd,
+        reason: rejectionReason,
+        adminId: currentUser.id,
+        adminName: adminIdentity,
+        timestamp: new Date().toISOString()
+      });
+      localStorage.setItem('kft_admin_audit_logs_v1', JSON.stringify(logs.slice(0, 200)));
+    } catch {}
 
     if (targetRestId) {
       setRestaurants(prev => prev.map(r => {
@@ -2096,7 +2171,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (u.id !== targetUserId) return u;
         return {
           ...u,
-          subscriptionStatus: 'expired',
+          membershipTier: isUserVipActive(u) ? u.membershipTier : 'free',
+          subscriptionStatus: isUserVipActive(u) ? u.subscriptionStatus : 'cancelled',
           paymentStatus: 'failed'
         };
       }));
@@ -2104,7 +2180,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (currentUser?.id === targetUserId) {
         setCurrentUser(prev => prev ? {
           ...prev,
-          subscriptionStatus: 'expired',
+          membershipTier: isUserVipActive(prev) ? prev.membershipTier : 'free',
+          subscriptionStatus: isUserVipActive(prev) ? prev.subscriptionStatus : 'cancelled',
           paymentStatus: 'failed'
         } : null);
       }
@@ -2357,7 +2434,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return { success: true, restored: true, message: successMsg };
   };
 
-  // Submit VIP Upgrade Request for Administrator Review & Approval (Requires verified payment)
+  // Submit VIP Upgrade Request for Administrator Review & Approval (Never activates VIP directly)
   const submitVipUpgradeRequest = async (
     durationDays: number = 90,
     amountUsd: number = 2.99,
@@ -2369,10 +2446,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return { success: false, transactionId: '', error: 'User authentication required' };
     }
 
+    // Prevent duplicate pending requests for the same user
+    const existingPending = transactions.find(
+      t => t.type === 'user_vip_upgrade' && t.userId === currentUser.id && t.status === 'pending_verification'
+    );
+    if (existingPending) {
+      showToast(
+        language === 'km' 
+          ? '⏳ សំណើរបស់អ្នកកំពុងរង់ចាំ Admin ពិនិត្យការទូទាត់រួចហើយ!' 
+          : '⏳ Your payment request is already pending Admin approval!',
+        'info'
+      );
+      return { success: true, transactionId: existingPending.id };
+    }
+
     const cleanTrxRef = (transactionRef || '').trim().toUpperCase() || 
       `ABA-KHQR-${durationDays}D-${Date.now().toString(36).toUpperCase()}`;
 
-    // Verify payment transaction on backend before changing status or creating pending approval
+    // Validate request parameters on backend before creating pending approval request
     const verification = await verifyAbaPaymentTransaction({
       userId: currentUser.id,
       userName: currentUser.name,
@@ -2385,12 +2476,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
 
     if (!verification.success) {
-      const errMsg = verification.error || 'Payment verification failed';
+      const errMsg = verification.error || 'Payment request validation failed';
       showToast(
         language === 'km' 
-          ? `ការទូទាត់មិនអាចផ្ទៀងផ្ទាត់បានទេ៖ ${errMsg}` 
-          : `Payment verification failed: ${errMsg}`,
-        'error'
+          ? `សំណើទូទាត់មិនត្រឹមត្រូវ៖ ${errMsg}` 
+          : `Payment request invalid: ${errMsg}`,
+        'warning'
       );
       return { success: false, transactionId: '', error: errMsg };
     }
@@ -2414,14 +2505,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       paymentMethod: 'KHQR',
       transactionRef: cleanTrxRef,
       createdAt: now.toISOString().replace('T', ' ').slice(0, 16),
-      notes: notes || `VIP Upgrade Request (${durationDays} Days / $${amountUsd} USD) via ABA KHQR`
+      notes: notes || `VIP Upgrade Request (${durationDays} Days / $${amountUsd.toFixed(2)} USD) via ABA KHQR — Awaiting Admin Verification`
     };
 
     setTransactions(prev => [newTxn, ...prev]);
 
-    // Update currentUser and users state to 'pending' with 'paid_pending_approval' ONLY after verified payment
+    // Keep user on previous membership level ('free' unless already active VIP) while awaiting Admin approval
     const pendingUser: User = {
       ...currentUser,
+      membershipTier: isUserVipActive(currentUser) ? 'premium_vip' : 'free',
       subscriptionStatus: 'pending',
       paymentStatus: 'paid_pending_approval',
       paymentMethod: 'KHQR',
@@ -2434,10 +2526,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // Send Admin Notification
     const adminNotif: AppNotification = {
       id: `notif-admin-vip-${Date.now()}`,
-      titleKh: '👑 សំណើដំឡើង VIP ថ្មីពីអតិថិជន',
-      titleEn: '👑 New VIP Upgrade Request',
-      messageKh: `អតិថិជន ${currentUser.name} បានទូទាត់ប្រាក់ជោគជ័យ និងផ្ញើសំណើដំឡើង Premium VIP (${durationDays} ថ្ងៃ - $${amountUsd} USD) តាម ABA KHQR (Ref: ${cleanTrxRef})។ សូមពិនិត្យ និងអនុម័ត។`,
-      messageEn: `Customer ${currentUser.name} completed payment and submitted a Premium VIP upgrade request (${durationDays} days - $${amountUsd} USD) via ABA KHQR (Ref: ${cleanTrxRef}). Please review in Admin Dashboard.`,
+      titleKh: '👑 សំណើពិនិត្យការទូទាត់ VIP ថ្មី',
+      titleEn: '👑 New VIP Payment Verification Request',
+      messageKh: `អតិថិជន ${currentUser.name} (${currentUser.email}) បានបញ្ជូនសំណើពិនិត្យការទូទាត់ Premium VIP (${durationDays} ថ្ងៃ - $${amountUsd.toFixed(2)} USD) តាម ABA KHQR (Ref: ${cleanTrxRef})។ សូមពិនិត្យរបាយការណ៍ធនាគារ ABA មុនពេលអនុម័ត។`,
+      messageEn: `Customer ${currentUser.name} (${currentUser.email}) submitted a Premium VIP payment verification request (${durationDays} days - $${amountUsd.toFixed(2)} USD) via ABA KHQR (Ref: ${cleanTrxRef}). Please verify in ABA statement before approving.`,
       type: 'system',
       date: now.toISOString().split('T')[0],
       isRead: false
@@ -2446,10 +2538,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // Send User Notification
     const userNotif: AppNotification = {
       id: `notif-user-vip-req-${Date.now() + 1}`,
-      titleKh: '📩 ការទូទាត់បានផ្ទៀងផ្ទាត់ • រង់ចាំការអនុម័ត',
-      titleEn: '📩 Payment Verified • Awaiting Admin Approval',
-      messageKh: `ការទូទាត់ប្រាក់របស់អ្នកត្រូវបានផ្ទៀងផ្ទាត់ដោយជោគជ័យ! សំណើដំឡើង Premium VIP (${durationDays} ថ្ងៃ) ត្រូវបានបញ្ជូនទៅរដ្ឋបាលហើយ។ រដ្ឋបាលនឹងពិនិត្យ និងអនុម័តជូនក្នុងពេលឆាប់ៗនេះ។`,
-      messageEn: `Your payment was verified successfully! Your VIP upgrade request (${durationDays} days) has been submitted to admin and will be approved shortly.`,
+      titleKh: '⏳ កំពុងរង់ចាំ Admin ពិនិត្យការទូទាត់',
+      titleEn: '⏳ Pending Admin Payment Verification',
+      messageKh: `សំណើពិនិត្យការទូទាត់ប្រាក់ ($${amountUsd.toFixed(2)} USD / ${durationDays} ថ្ងៃ) របស់អ្នកត្រូវបានបញ្ជូនទៅរដ្ឋបាល។ គណនី VIP នឹងត្រូវបានបើកដំណើរការបន្ទាប់ពីរដ្ឋបាលពិនិត្យ និងអនុម័ត។`,
+      messageEn: `Your payment confirmation request ($${amountUsd.toFixed(2)} USD / ${durationDays} days) has been submitted. VIP will be activated after administrator verification and approval.`,
       type: 'system',
       date: now.toISOString().split('T')[0],
       isRead: false
@@ -2459,9 +2551,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     showToast(
       language === 'km' 
-        ? 'ការទូទាត់ត្រូវបានផ្ទៀងផ្ទាត់ជោគជ័យ! សំណើដំឡើង VIP កំពុងរង់ចាំរដ្ឋបាលអនុម័ត។' 
-        : 'Payment verified! VIP upgrade request is awaiting admin approval.',
-      'success'
+        ? '⏳ បានបញ្ជូនសំណើរួចរាល់! កំពុងរង់ចាំ Admin ពិនិត្យការទូទាត់។' 
+        : '⏳ Request submitted! Awaiting Admin payment verification.',
+      'info'
     );
 
     return { success: true, transactionId: txnId };

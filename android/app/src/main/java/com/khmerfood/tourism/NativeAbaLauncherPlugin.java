@@ -32,54 +32,14 @@ public class NativeAbaLauncherPlugin extends Plugin {
         PackageManager pm = context.getPackageManager();
         JSObject ret = new JSObject();
 
-        String qrData = call.getString("qrData", "");
-        String amount = call.getString("amount", "2.99");
-
         try {
-            // 1. First priority: Deep link with KHQR / PayWay payload directly to payment/scan screen
-            if (qrData != null && !qrData.trim().isEmpty()) {
-                // Try PayWay format
-                try {
-                    String paywayUri = "abamobilebank://ababank.com?type=payway&qrcode=" + Uri.encode(qrData.trim());
-                    Intent payIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(paywayUri));
-                    payIntent.setPackage(OFFICIAL_ABA_PACKAGE);
-                    payIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    if (payIntent.resolveActivity(pm) != null) {
-                        context.startActivity(payIntent);
-                        ret.put("success", true);
-                        ret.put("method", "payway_deeplink");
-                        call.resolve(ret);
-                        return;
-                    }
-                } catch (Exception ignored) {
-                }
-
-                // Try direct scan URI
-                try {
-                    Intent scanIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("abamobilebank://scan"));
-                    scanIntent.setPackage(OFFICIAL_ABA_PACKAGE);
-                    scanIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    if (scanIntent.resolveActivity(pm) != null) {
-                        context.startActivity(scanIntent);
-                        ret.put("success", true);
-                        ret.put("method", "scan_deeplink");
-                        call.resolve(ret);
-                        return;
-                    }
-                } catch (Exception ignored) {
-                }
-            }
-
-            // 2. Second priority: Launch ABA Mobile app directly by package name
+            // 1. First priority: Launch ABA Mobile app directly by official package name (com.paygo24.ibank)
+            // Note: Do NOT pass type=payway&qrcode=... for individual NBC Bakong KHQR accounts, as that triggers [MAPP-PW] Invalid Qr Merchant Data.
             for (String pkg : ABA_PACKAGES) {
                 try {
                     Intent launchIntent = pm.getLaunchIntentForPackage(pkg);
                     if (launchIntent != null) {
                         launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                        if (qrData != null && !qrData.trim().isEmpty()) {
-                            launchIntent.putExtra("qr_data", qrData.trim());
-                            launchIntent.putExtra("amount", amount);
-                        }
                         context.startActivity(launchIntent);
                         ret.put("success", true);
                         ret.put("method", "package_launch");
@@ -91,7 +51,7 @@ public class NativeAbaLauncherPlugin extends Plugin {
                 }
             }
 
-            // 3. Third priority: Launch via generic deep link URI
+            // 2. Second priority: Launch via clean scheme URI (abamobilebank://) without unsupported payway parameters
             try {
                 Intent uriIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(ABA_SCHEME_URI));
                 uriIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -105,7 +65,7 @@ public class NativeAbaLauncherPlugin extends Plugin {
             } catch (Exception ignored) {
             }
 
-            // 4. Fourth priority: Try explicit Intent URI format with official package
+            // 3. Third priority: Try explicit Intent URI format with official package
             try {
                 Intent parsedIntent = Intent.parseUri("intent://#Intent;scheme=abamobilebank;package=" + OFFICIAL_ABA_PACKAGE + ";end", Intent.URI_INTENT_SCHEME);
                 parsedIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -119,7 +79,7 @@ public class NativeAbaLauncherPlugin extends Plugin {
             } catch (Exception ignored) {
             }
 
-            // 5. Fallback: ABA Mobile is not installed on the device -> Open official Google Play Store page
+            // 4. Fallback: ABA Mobile is not installed on the device -> Open official Google Play Store page
             try {
                 Intent marketIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + OFFICIAL_ABA_PACKAGE));
                 marketIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
