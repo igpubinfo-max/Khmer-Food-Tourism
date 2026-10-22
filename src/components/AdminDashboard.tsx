@@ -15,6 +15,8 @@ import {
   getCloudApiConfig,
   saveCloudApiConfig,
   testSupabaseConnection,
+  isGoogleMapsConfigured,
+  isSupabaseConfigured,
   SUPABASE_SETUP_SQL,
 } from '../services/supabaseService';
 import { getSmartCacheStats } from '../services/googlePlacesService';
@@ -456,11 +458,13 @@ export const AdminDashboard: React.FC = () => {
                     </p>
                   </div>
                   <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold font-khmer ${
-                    isGoogleMapsConfigured()
+                    Boolean(cloudCfg.googleMapsApiKey && cloudCfg.googleMapsApiKey.length > 15) || isGoogleMapsConfigured()
                       ? 'bg-emerald-600 text-white'
                       : 'bg-amber-200 text-amber-900'
                   }`}>
-                    {isGoogleMapsConfigured() ? '✓ បានភ្ជាប់ Google Maps រួចរាល់' : 'មិនទាន់ដាក់សោ Google Maps'}
+                    {Boolean(cloudCfg.googleMapsApiKey && cloudCfg.googleMapsApiKey.length > 15) || isGoogleMapsConfigured()
+                      ? '✓ បានភ្ជាប់ Google Maps រួចរាល់'
+                      : 'មិនទាន់ដាក់សោ Google Maps'}
                   </span>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-2">

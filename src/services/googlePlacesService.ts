@@ -658,7 +658,7 @@ export function convertGooglePlaceToDestination(
     id: place.placeId,
     nameKh: place.nameKh,
     nameEn: place.nameEn || place.nameKh,
-    categorySlug: 'cultural',
+    categorySlug: 'resort',
     categoryKh: 'វប្បធម៌ និងទេសចរណ៍',
     categoryEn: 'Culture & Tourism',
     descriptionKh: `${place.nameKh} មានទីតាំងស្ថិតនៅ ${place.address}។ ទាញយកទិន្នន័យ និងទីតាំង GPS ពិតប្រាកដពីផែនទី Google Maps។`,

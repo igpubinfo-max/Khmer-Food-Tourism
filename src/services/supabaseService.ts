@@ -298,8 +298,8 @@ export async function syncAllAppDataWithSupabase(localState: {
         userMap.set(u.id, u);
       } else {
         // If either cloud or local was upgraded to VIP by Admin, preserve VIP status
-        const isCloudVip = existing.membershipStatus === 'vip' || existing.isVip;
-        const isLocalVip = u.membershipStatus === 'vip' || u.isVip;
+        const isCloudVip = existing.membershipTier === 'premium_vip' || existing.subscriptionStatus === 'active';
+        const isLocalVip = u.membershipTier === 'premium_vip' || u.subscriptionStatus === 'active';
         if (isCloudVip && !isLocalVip) {
           userMap.set(u.id, existing);
         } else {
