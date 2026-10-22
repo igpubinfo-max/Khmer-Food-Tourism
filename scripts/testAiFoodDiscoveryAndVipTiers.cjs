@@ -65,22 +65,22 @@ test('Restaurant Check-in Service enforces 10 checkins/hour anti-spam rate limit
   assert(checkInContent.includes('checkUserCheckInRateLimit'), 'Anti-spam rate limit check present');
 });
 
-// 3. Check App Version v1.7.2 (Build 44)
+// 3. Check App Version v1.7.3 (Build 45)
 const typesPath = path.resolve(__dirname, '../src/types/index.ts');
 const typesContent = fs.readFileSync(typesPath, 'utf8');
 
-test('App Version bumped to v1.7.2 (Build 44)', () => {
-  assert(typesContent.includes("APP_VERSION = 'v1.7.2'"), 'APP_VERSION is v1.7.2');
-  assert(typesContent.includes("APP_BUILD_CODE = 44"), 'APP_BUILD_CODE is 44');
+test('App Version bumped to v1.7.3 (Build 45)', () => {
+  assert(typesContent.includes("APP_VERSION = 'v1.7.3'"), 'APP_VERSION is v1.7.3');
+  assert(typesContent.includes("APP_BUILD_CODE = 45"), 'APP_BUILD_CODE is 45');
 });
 
 // 4. Check Android build.gradle version
 const gradlePath = path.resolve(__dirname, '../android/app/build.gradle');
 const gradleContent = fs.readFileSync(gradlePath, 'utf8');
 
-test('Android build.gradle has versionCode 44 and versionName 1.7.2', () => {
-  assert(gradleContent.includes('versionCode 44'), 'versionCode is 44');
-  assert(gradleContent.includes('versionName "1.7.2"'), 'versionName is 1.7.2');
+test('Android build.gradle has versionCode 45 and versionName 1.7.3', () => {
+  assert(gradleContent.includes('versionCode 45'), 'versionCode is 45');
+  assert(gradleContent.includes('versionName "1.7.3"'), 'versionName is 1.7.3');
 });
 
 // 5. Check Modals registered in App.tsx
@@ -147,6 +147,43 @@ test('RestaurantCheckInModal supports "Other / Shop Not in List" custom shop che
   assert(checkInModalContent.includes('isCustomShop') && checkInModalContent.includes('customShopName'), 'Custom shop state present');
   assert(checkInModalContent.includes('ផ្សេងៗ (ហាងមិនមានក្នុងបញ្ជី)'), 'Khmer Other/Shop Not in List label present');
   assert(checkInModalContent.includes('handleSelectOtherShop'), 'handleSelectOtherShop handler present');
+});
+
+test('AI Food Service defines all 9 Object Types (Fruit, Vegetables, Raw Meat/Seafood, Packaged Food, Cooked Dish, Dessert, Drink, Ingredient, Unknown)', () => {
+  const requiredTypes = [
+    'fresh_fruit',
+    'fresh_vegetables',
+    'raw_meat_seafood',
+    'packaged_food',
+    'cooked_dish',
+    'dessert_cake_snack',
+    'drink_beverage',
+    'food_ingredient',
+    'unknown_unclear'
+  ];
+  for (const t of requiredTypes) {
+    assert(aiFoodServiceContent.includes(`'${t}'`), `Object type ${t} defined`);
+  }
+});
+
+test('AI Food Service removes arbitrary idHash jitter scoring and separates object classification from recipe retrieval', () => {
+  assert(!aiFoodServiceContent.includes('idHash % 15'), 'No arbitrary idHash jitter scoring');
+  assert(aiFoodServiceContent.includes('analyzeImageStructureAndObjectType'), 'Stage 1 object classification present');
+  assert(aiFoodServiceContent.includes('retrieveRecipeAndInfoByFoodName'), 'Stage 3/4 verified recipe retrieval present');
+  assert(aiFoodServiceContent.includes('saveUserAiCorrectionFeedback'), 'Reviewable user correction feedback storage present');
+});
+
+test('AiFoodDiscoveryModal renders exact Step 5 Khmer uncertain prompt, 3 action buttons, and «កែឈ្មោះម្ហូប» button', () => {
+  assert(
+    aiFoodServiceContent.includes(
+      'AI មិនទាន់អាចស្គាល់ឈ្មោះម្ហូបនេះបានច្បាស់ទេ។ សូមបញ្ចូលឈ្មោះម្ហូប ឬឈ្មោះវត្ថុអាហារនេះដោយខ្លួនឯង ដើម្បីឱ្យប្រព័ន្ធស្វែងរកគ្រឿងផ្សំ និងរបៀបធ្វើបានត្រឹមត្រូវ។'
+    ),
+    'Exact Step 5 Khmer prompt present'
+  );
+  assert(aiModalContent.includes('បញ្ចូលឈ្មោះដោយខ្លួនឯង'), 'Button 1: Enter Name Manually present');
+  assert(aiModalContent.includes('ជ្រើសរើសឈ្មោះដែល AI ណែនាំ'), 'Button 2: Select AI Suggestion present');
+  assert(aiModalContent.includes('ថតរូបម្ដងទៀត'), 'Button 3: Retake Photo present');
+  assert(aiModalContent.includes('កែឈ្មោះម្ហូប'), 'Visible Edit Food Name button present');
 });
 
 console.log('\n================================================================');

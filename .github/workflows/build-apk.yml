@@ -60,7 +60,7 @@ jobs:
           echo "=== SEARCHING FOR GENERATED APK FILES ==="
           find . -name "*.apk" -ls
           cd android/app/build/outputs/apk/debug
-          cp app-debug.apk KhmerFoodTourism-v1.7.2.apk
+          cp app-debug.apk KhmerFoodTourism-v1.7.3.apk
           ls -la
 
       - name: 10. Upload Android APK Artifact
@@ -73,31 +73,23 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: v1.7.2
-          name: "Khmer Food & Tourism v1.7.2 (Fixed AI Food Scanner React Error #310 & Added Custom 'Other' Shop Check-in)"
+          tag_name: v1.7.3
+          name: "Khmer Food & Tourism v1.7.3 (Upgraded 4-Stage AI Food & Object Scanner, Verified Recipe Retrieval & Manual Name Correction)"
           overwrite: true
           make_latest: true
           body: |
             ### 🇰🇭 កម្មវិធីទូរស័ព្ទដៃ អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism Mobile App)
             
-            **កំណែថ្មី v1.7.2 (Fixed AI Food Scanner React Error #310 & Added Custom 'Other' Shop Check-in):**
-            - 🤖 **១. ជួសជុលបញ្ហា Error #310 នៅពេលចុចស្កេនមុខម្ហូប AI (Fixed AI Food Scanner Hook Order):**
-              - ជួសជុលលំដាប់ React Hooks (`useMemo`) ក្នុង `AiFoodDiscoveryModal.tsx` ដើម្បីឱ្យផ្ទាំង **ស្វែងរក & ស្គាល់មុខម្ហូប AI** បើកដំណើរការដោយរលូន ១០០% គ្មានផ្ទាំង Error #310 ទៀតឡើយ។
-            - 📍 **២. បន្ថែមជម្រើស «➕ ផ្សេងៗ — ហាងមិនមានក្នុងបញ្ជី (Other / Custom Shop)» ក្នុងផ្ទាំងឆែកអ៊ីនហាង (Restaurant Check-in):**
-              - ប្រសិនបើហាងដែលអ្នកកំពុងញ៉ាំមិនទាន់មានក្នុងបញ្ជី អ្នកអាចចុចប៊ូតុង **«➕ ផ្សេងៗ (ហាងមិនមានក្នុងបញ្ជី)»** ដើម្បីវាយបញ្ចូលឈ្មោះហាងថ្មី ខេត្ត/ក្រុង លេខទូរស័ព្ទ និងអាសយដ្ឋានដោយខ្លួនឯង រួចឆែកអ៊ីនជាមួយទីតាំង GPS ផ្ទាល់ និងបន្ថែមហាងថ្មីចូលក្នុងបញ្ជីកម្មវិធីដោយស្វ័យប្រវត្តិ។
-              - បន្ថែមប្រអប់ស្វែងរកហាង (`Search`) ក្នុងបញ្ជីឆែកអ៊ីនដើម្បីងាយស្រួលរកហាងដែលមានស្រាប់។
-            - 🛠️ **៣. លុបបំបាត់ទាំងស្រុងនូវកំហុស "Invalid QR Merchant Data [MAPP-PW]" (Fixed ABA KHQR Launch):**
-              - ដកចេញនូវប៉ារ៉ាម៉ែត្រ `type=payway&qrcode=...` ដែលបង្កឱ្យម៉ូឌុល PayWay ក្នុង ABA Mobile បដិសេធកូដ QR គណនីបុគ្គល (`[MAPP-PW] Invalid Qr Merchant Data`)។
-              - បើកកម្មវិធី ABA Mobile ដោយផ្ទាល់តាមរយៈ Package ផ្លូវការ `com.paygo24.ibank` ដោយគ្មានផ្ទាំង Error ព្រមទាំងរក្សាទុករូបភាព Bakong KHQR ច្បាស់ល្អទៅក្នុង Photos ដោយស្វ័យប្រវត្តិសម្រាប់ចុច "Upload QR" ក្នុង ABA Scan។
-            - 🔒 **៤. បិទបញ្ឈប់ការបើក VIP ដោយស្វ័យប្រវត្តិនៅពេលចុចប៊ូតុង និងតម្រូវឱ្យ Admin អនុម័តជាមុន (Strict Admin-Approved VIP Flow):**
-              - នៅពេលអ្នកប្រើប្រាស់ចុចប៊ូតុង «ខ្ញុំបានបង់ប្រាក់រួចរាល់ • ផ្ទៀងផ្ទាត់ការទូទាត់ ($2.99 USD)» ប្រព័ន្ធនឹង **មិនបើក VIP ភ្លាមៗឡើយ** និងមិនបង្ហាញផ្ទាំងជោគជ័យក្លែងក្លាយឡើយ។
-              - ប្រព័ន្ធបង្កើតសំណើក្នុងស្ថានភាព `PENDING_ADMIN_APPROVAL` («⏳ កំពុងរង់ចាំ Admin ពិនិត្យការទូទាត់») និងរក្សាគណនីជា Free ធម្មតារហូតដល់ Admin ពិនិត្យរបាយការណ៍ធនាគារ ABA និងចុចអនុម័ត (Approve) ក្នុង Admin Dashboard។
-            - 🛡️ **៥. ប្រព័ន្ធសុវត្ថិភាព Admin Verification & Audit Log:**
-              - មានតែគណនី Administrator ប៉ុណ្ណោះដែលអាចចុច Approve ឬ Reject សំណើទូទាត់ប្រាក់បាន។
-              - ទប់ស្កាត់ការបញ្ជូនសំណើស្ទួន និងការចុចអនុម័តស្ទួន (Duplicate Approval Prevention) ព្រមទាំងកត់ត្រា Audit Log គ្រប់សកម្មភាពរបស់ Admin។
-            - 🤖 **៦. មុខងារស្កេនសម្គាល់មុខម្ហូបខ្មែរ AI, ឆែកអ៊ីនហាង GPS & រូបមន្តពិត ១០០% (v1.7.0 Features Included):**
-              - ស្កេនសម្គាល់មុខម្ហូបខ្មែរ បង្អែមខ្មែរ នំខ្មែរ និងភេសជ្ជៈប្រពៃណីតាមរយៈកាមេរ៉ា ឬ Gallery។
-              - បង្ហាញឈ្មោះជាភាសាខ្មែរ និងអង់គ្លេស កម្រិតភាគរយជាក់លាក់ (Confidence Score) និងជម្រើសមុខម្ហូបស្រដៀងគ្នា។
+            **កំណែថ្មី v1.7.3 (Upgraded 4-Stage AI Food & Object Scanner, Verified Recipe Retrieval & Manual Name Correction):**
+            - 🧠 **១. ប្រព័ន្ធ AI Food Scanner ៤ ជំហានថ្មី — កំណត់ប្រភេទវត្ថុក្នុងរូបភាពជាមុន (Object Classification First):**
+              - បែងចែកប្រភេទវត្ថុក្នុងរូបភាពជាមុនសិន៖ **ផ្លែឈើស្រស់ (Fresh Fruit)**, **បន្លែស្រស់ (Fresh Vegetables)**, **សាច់ឆៅ/គ្រឿងសមុទ្រឆៅ (Raw Meat/Seafood)**, **អាហារវេចខ្ចប់ (Packaged Food)**, **ម្ហូបចម្អិនរួច (Cooked Dish)**, **បង្អែម/នំខ្មែរ (Dessert/Cake)**, **ភេសជ្ជៈ (Beverage)**, **គ្រឿងផ្សំ (Ingredient)** និង **វត្ថុមិនច្បាស់លាស់ (Unclear Object)**។
+              - បញ្ឈប់ទាំងស្រុងនូវការទាយឈ្មោះម្ហូបសម្ល (ដូចជា សម្លម្ជូរព្រៃត្រីឆ្អើរ) នៅពេលស្កេនរូបផ្លែឈើ ឬអាហារវេចខ្ចប់ដែលមានពណ៌ស្រដៀងគ្នា!
+            - ✍️ **២. មុខងារបញ្ជាក់ឈ្មោះម្ហូប និងប៊ូតុង «កែឈ្មោះម្ហូប» (Manual Correction & Verified Recipe Lookup):**
+              - នៅពេលរូបភាពមិនទាន់អាចកំណត់ឈ្មោះម្ហូបច្បាស់លាស់ ប្រព័ន្ធបង្ហាញសារជាភាសាខ្មែរច្បាស់លាស់ និងប៊ូតុង ៣៖ **«បញ្ចូលឈ្មោះដោយខ្លួនឯង»**, **«ជ្រើសរើសឈ្មោះដែល AI ណែនាំ»**, និង **«ថតរូបម្ដងទៀត»** ព្រមទាំងប៊ូតុង **«កែឈ្មោះម្ហូប»**។
+              - នៅពេលបញ្ចូលឈ្មោះម្ហូប ប្រព័ន្ធទាញយកគ្រឿងផ្សំ បរិមាណ និងជំហានចម្អិនលម្អិតពីឃ្លាំងទិន្នន័យផ្លូវការ ១០០% (មិនបង្កើតគ្រឿងផ្សំ ឬរូបមន្តក្លែងក្លាយឡើយ)។
+            - 📍 **៣. ជម្រើស «➕ ផ្សេងៗ — ហាងមិនមានក្នុងបញ្ជី (Other / Custom Shop)» ក្នុងផ្ទាំងឆែកអ៊ីនហាង (Restaurant Check-in):**
+              - អនុញ្ញាតឱ្យវាយបញ្ចូលឈ្មោះហាងថ្មី ខេត្ត/ក្រុង លេខទូរស័ព្ទ និងអាសយដ្ឋានដោយខ្លួនឯង រួចឆែកអ៊ីនជាមួយទីតាំង GPS ផ្ទាល់។
+            - 🛠️ **៤. លុបបំបាត់ទាំងស្រុងនូវកំហុស "Invalid QR Merchant Data [MAPP-PW]" & តម្រូវឱ្យ Admin អនុម័ត VIP ជាមុន។**
               - រូបមន្ត និងគ្រឿងផ្សំត្រូវបានទាញចេញពីឃ្លាំងទិន្នន័យផ្លូវការ ១០០% គ្មានការបង្កើតគ្រឿងផ្សំក្លែងក្លាយឡើយ (Never invent ingredients)។
             - 🍳 **២. ស្វែងរកមុខម្ហូបតាមគ្រឿងផ្សំដែលមាននៅផ្ទះ (Cook with What You Have):**
               - ជ្រើសរើសគ្រឿងផ្សំដែលមាននៅផ្ទះដើម្បីទទួលបានបញ្ជីមុខម្ហូបខ្មែរដែលត្រូវគ្នា ព្រមទាំងបង្ហាញគ្រឿងផ្សំដែលខ្វះខាត។
