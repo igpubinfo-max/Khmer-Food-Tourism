@@ -226,6 +226,7 @@ test('Google Maps Places API + Smart Cache Service saves places on 1st search an
 test('Supabase Free Tier Cloud Sync Service syncs Users, Transactions, Payment Proofs, and Smart-Cached Restaurants', () => {
   assert(supabaseContent.includes('syncAllAppDataWithSupabase'), 'syncAllAppDataWithSupabase present');
   assert(supabaseContent.includes('SUPABASE_SETUP_SQL'), '1-click Supabase SQL setup script present');
+  assert(supabaseContent.includes("DEFAULT_GOOGLE_MAPS_API_KEY = 'AIzaSyCZnYNQLNcuco5HxdmrWVXKXwvAr7mg7v0'"), 'Google Maps API Key pre-configured in Box #3');
   assert(adminDashContent.includes('ប្រព័ន្ធ Cloud Supabase (Free Tier) & Google Maps Places API + Smart Cache'), 'Admin Dashboard Cloud & API configuration panel present');
 });
 
