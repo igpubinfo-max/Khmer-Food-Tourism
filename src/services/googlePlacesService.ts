@@ -468,8 +468,8 @@ export async function searchCambodiaPlacesWithSmartCache(
           // Build official matched Google Maps Place Photo URL
           let photoUrl =
             typeFilter === 'tourism'
-              ? 'https://images.unsplash.com/photo-1569683795645-b62e50fbf103?w=800&auto=format&fit=crop&q=80'
-              : 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80';
+              ? 'https://thumb.wikimedia.org/wikipedia/commons/thumb/4/41/Angkor_Wat.jpg/960px-Angkor_Wat.jpg'
+              : '/Shop/rest-1.jpg';
           if (Array.isArray(p.photos) && p.photos.length > 0 && p.photos[0].name) {
             photoUrl = `https://places.googleapis.com/v1/${p.photos[0].name}/media?maxHeightPx=700&maxWidthPx=900&key=${encodeURIComponent(
               cfg.googleMapsApiKey
@@ -568,18 +568,12 @@ export async function searchCambodiaPlacesWithSmartCache(
           const fallbackPhotos =
             categoryType === 'tourism'
               ? [
-                  'https://images.unsplash.com/photo-1569683795645-b62e50fbf103?w=800&auto=format&fit=crop&q=80',
-                  'https://images.unsplash.com/photo-1540611025311-01df3cef54b5?w=800&auto=format&fit=crop&q=80',
+                  'https://thumb.wikimedia.org/wikipedia/commons/thumb/4/41/Angkor_Wat.jpg/960px-Angkor_Wat.jpg',
+                  'https://thumb.wikimedia.org/wikipedia/commons/thumb/0/00/Phnom_Penh_Independence_Monument.jpg/960px-Phnom_Penh_Independence_Monument.jpg',
                 ]
               : categoryType === 'cafe'
-              ? [
-                  'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=800&auto=format&fit=crop&q=80',
-                  'https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=800&auto=format&fit=crop&q=80',
-                ]
-              : [
-                  'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80',
-                  'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80',
-                ];
+              ? ['/Shop/rest-10.jpg', '/Shop/rest-20.jpg']
+              : ['/Shop/rest-1.jpg', '/Shop/rest-2.jpg'];
 
           return {
             placeId: `osm-kh-${row.place_id || Date.now() + idx}`,

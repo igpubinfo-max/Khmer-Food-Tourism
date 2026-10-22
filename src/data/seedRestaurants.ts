@@ -10,8 +10,8 @@ export const initial100Restaurants: Restaurant[] = [
     "descriptionEn": "Master Chef Luu Meng's premier living Cambodian cuisine venue in Tonle Bassac, renowned worldwide.",
     "photoUrl": "/Shop/rest-1.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-4.jpg",
+      "/foods/food-8.jpg"
     ],
     "addressKh": "ផ្ទះលេខ ១៣៦ មហាវិថីព្រះនរោត្តម សង្កាត់ទន្លេបាសាក់ ខណ្ឌចំការមន",
     "addressEn": "No. 136 Norodom Blvd, Sangkat Tonle Bassac, Khan Chamkarmon, Phnom Penh",
@@ -47,8 +47,8 @@ export const initial100Restaurants: Restaurant[] = [
     "descriptionEn": "Vibrant training restaurant by Friends-International serving regional Cambodian delicacies and creative specialties.",
     "photoUrl": "/Shop/rest-2.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-7.jpg",
+      "/foods/food-15.jpg"
     ],
     "addressKh": "ផ្ទះលេខ ៧៤ ផ្លូវ ១៧៤ សង្កាត់ផ្សារថ្មី ៣ ខណ្ឌដូនពេញ",
     "addressEn": "No. 74 Street 174, Sangkat Phsar Thmey 3, Khan Daun Penh, Phnom Penh",
@@ -84,8 +84,8 @@ export const initial100Restaurants: Restaurant[] = [
     "descriptionEn": "Eco-conscious Cambodian eatery serving wholesome local home cooking made with chemical-free produce.",
     "photoUrl": "/Shop/rest-3.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-10.jpg",
+      "/foods/food-22.jpg"
     ],
     "addressKh": "ផ្ទះលេខ ៣៧ ផ្លូវ ៣៣៤ សង្កាត់បឹងកេងកង ១",
     "addressEn": "No. 37 Street 334, BKK1, Khan Boeng Keng Kang, Phnom Penh",
@@ -121,8 +121,8 @@ export const initial100Restaurants: Restaurant[] = [
     "descriptionEn": "Authentic royal and traditional home recipes prepared with exquisite presentation and antique atmosphere.",
     "photoUrl": "/Shop/rest-4.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-13.jpg",
+      "/foods/food-29.jpg"
     ],
     "addressKh": "ផ្ទះលេខ ១១២ ផ្លូវព្រះសុធារស សង្កាត់ជ័យជំនះ",
     "addressEn": "No. 112 Sothearos Blvd, Sangkat Chey Chumneah, Phnom Penh",
@@ -158,8 +158,8 @@ export const initial100Restaurants: Restaurant[] = [
     "descriptionEn": "A long-standing Phnom Penh staple since 1996 serving fragrant Khmer and Surin-border regional fare in a lush garden terrace.",
     "photoUrl": "/Shop/rest-5.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-16.jpg",
+      "/foods/food-36.jpg"
     ],
     "addressKh": "ផ្ទះលេខ ៩ ផ្លូវ ៥៧ សង្កាត់បឹងកេងកង ១",
     "addressEn": "No. 9 Street 57, BKK1, Phnom Penh",
@@ -195,8 +195,8 @@ export const initial100Restaurants: Restaurant[] = [
     "descriptionEn": "Legendary lively local barbecue spot serving charcoal-grilled beef, ribs, and fresh seafood with pungent dipping sauces.",
     "photoUrl": "/Shop/rest-6.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-19.jpg",
+      "/foods/food-43.jpg"
     ],
     "addressKh": "ផ្លូវ ២១ សង្កាត់ទន្លេបាសាក់ រាជធានីភ្នំពេញ",
     "addressEn": "Street 21, Sangkat Tonle Bassac, Phnom Penh",
@@ -232,8 +232,8 @@ export const initial100Restaurants: Restaurant[] = [
     "descriptionEn": "Sophisticated Khmer dining destination in Toul Kork featuring royal soups and traditional dishes.",
     "photoUrl": "/Shop/rest-7.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-22.jpg",
+      "/foods/food-50.jpg"
     ],
     "addressKh": "ផ្លូវ ៣១៥ សង្កាត់បឹងកក់ ១ ខណ្ឌទួលគោក",
     "addressEn": "Street 315, Boeng Kak 1, Toul Kork, Phnom Penh",
@@ -269,8 +269,8 @@ export const initial100Restaurants: Restaurant[] = [
     "descriptionEn": "Cozy and intimate family-run kitchen serving beloved traditional recipes and unique stuffed specialties.",
     "photoUrl": "/Shop/rest-8.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-25.jpg",
+      "/foods/food-57.jpg"
     ],
     "addressKh": "ផ្ទះលេខ ៦៣ ផ្លូវ ២៩ សង្កាត់ទន្លេបាសាក់",
     "addressEn": "No. 63 Street 29, Tonle Bassac, Phnom Penh",
@@ -306,8 +306,8 @@ export const initial100Restaurants: Restaurant[] = [
     "descriptionEn": "Celebrated training venue by Tree Alliance near the National Museum serving inventive tapas.",
     "photoUrl": "/Shop/rest-9.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-28.jpg",
+      "/foods/food-64.jpg"
     ],
     "addressKh": "ផ្ទះលេខ ២១៥ ផ្លូវលេខ ១៣ សង្កាត់ជ័យជំនះ",
     "addressEn": "No. 215 Street 13, near National Museum, Phnom Penh",
@@ -343,8 +343,8 @@ export const initial100Restaurants: Restaurant[] = [
     "descriptionEn": "Charming open-air riverside dining terrace along Sisowath Quay serving royal and traditional Khmer recipes.",
     "photoUrl": "/Shop/rest-10.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-31.jpg",
+      "/foods/food-71.jpg"
     ],
     "addressKh": "វិថីព្រះស៊ីសុវត្ថិ សង្កាត់ផ្សារចាស់ រាជធានីភ្នំពេញ",
     "addressEn": "Sisowath Quay, riverside, Phnom Penh",
@@ -380,8 +380,8 @@ export const initial100Restaurants: Restaurant[] = [
     "descriptionEn": "Iconic authentic Cambodian restaurant set in a charming wooden house in Siem Reap, globally celebrated for Fish Amok.",
     "photoUrl": "/Shop/rest-11.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-34.jpg",
+      "/foods/food-78.jpg"
     ],
     "addressKh": "ផ្លូវតាវ៉ាន់ ភូមិវត្តបូព៌ ក្រុងសៀមរាប",
     "addressEn": "Taphul Village / Wat Bo area, Siem Reap, Cambodia",
@@ -417,8 +417,8 @@ export const initial100Restaurants: Restaurant[] = [
     "descriptionEn": "Exquisite lush riverside dining offering refined countryside home-style Khmer cooking.",
     "photoUrl": "/Shop/rest-12.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-37.jpg",
+      "/foods/food-85.jpg"
     ],
     "addressKh": "ផ្លូវមាត់ស្ទឹងពោធិ៍ ក្រុងសៀមរាប",
     "addressEn": "Pokambor Avenue, Riverside, Siem Reap",
@@ -454,8 +454,8 @@ export const initial100Restaurants: Restaurant[] = [
     "descriptionEn": "Award-winning restaurant featured in Asia's 50 Best, blending traditional Khmer flavors with modern techniques.",
     "photoUrl": "/Shop/rest-13.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-40.jpg",
+      "/foods/food-92.jpg"
     ],
     "addressKh": "ភូមិវត្តដំណាក់ ក្រុងសៀមរាប",
     "addressEn": "Wat Damnak Village, Siem Reap, Cambodia",
@@ -491,8 +491,8 @@ export const initial100Restaurants: Restaurant[] = [
     "descriptionEn": "Lush garden training restaurant by TREE Alliance serving innovative tapas and traditional Khmer recipes.",
     "photoUrl": "/Shop/rest-14.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-43.jpg",
+      "/foods/food-99.jpg"
     ],
     "addressKh": "ផ្ទះលេខ ៨A ផ្លូវ ៧ មករា ភូមិវត្តបូព៌ ក្រុងសៀមរាប",
     "addressEn": "No. 8A, Phum Slokram, Wat Bo area, Siem Reap",
@@ -528,8 +528,8 @@ export const initial100Restaurants: Restaurant[] = [
     "descriptionEn": "Beloved social-purpose dining destination helping disadvantaged youth, serving delicious Khmer curries and stir-fries.",
     "photoUrl": "/Shop/rest-15.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-46.jpg",
+      "/foods/food-6.jpg"
     ],
     "addressKh": "ផ្លូវសូកូឡា ភូមិវត្តបូព៌ ក្រុងសៀមរាប",
     "addressEn": "Chocolate Road, Wat Damnak Area, Siem Reap",
@@ -565,8 +565,8 @@ export const initial100Restaurants: Restaurant[] = [
     "descriptionEn": "Chic 1960s-inspired modernist venue surrounded by lotus ponds serving elevated Khmer traditional dishes.",
     "photoUrl": "/Shop/rest-16.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-49.jpg",
+      "/foods/food-13.jpg"
     ],
     "addressKh": "ផ្លូវវត្តបូព៌ ក្រុងសៀមរាប",
     "addressEn": "Wat Bo Road, Siem Reap",
@@ -600,10 +600,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Spoons Cambodia Training Restaurant",
     "descriptionKh": "ភោជនីយដ្ឋានបណ្តុះបណ្តាលសិស្សក្រីក្រ សាងសង់ពីដើមឫស្សីប្រណីត បម្រើម្ហូបខ្មែរបែបច្នៃប្រឌិត និងម្ហូបតាមផ្លូវខ្មែរ។",
     "descriptionEn": "Architecturally stunning bamboo pavilion training venue serving exquisite modern twists on Cambodian street classics.",
-    "photoUrl": "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-18.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-52.jpg",
+      "/foods/food-20.jpg"
     ],
     "addressKh": "ភូមិវត្តបូព៌ ក្រុងសៀមរាប",
     "addressEn": "Wat Bo Village, Siem Reap",
@@ -639,8 +639,8 @@ export const initial100Restaurants: Restaurant[] = [
     "descriptionEn": "Visionary young Cambodian chef Mengly crafts culinary magic utilizing wild herbs and ancestral techniques.",
     "photoUrl": "/Shop/rest-18.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-55.jpg",
+      "/foods/food-27.jpg"
     ],
     "addressKh": "ផ្លូវវត្តបូព៌ ក្រុងសៀមរាប",
     "addressEn": "Wat Bo Road, Siem Reap",
@@ -676,8 +676,8 @@ export const initial100Restaurants: Restaurant[] = [
     "descriptionEn": "The legendary waterfront dining spot right on Kep Crab Market frying live sea crabs with green Kampot peppercorns.",
     "photoUrl": "/Shop/rest-19.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-58.jpg",
+      "/foods/food-34.jpg"
     ],
     "addressKh": "ផ្សារក្តាមខេត្តកែប ជាប់មាត់សមុទ្រ ក្រុងកែប",
     "addressEn": "Crab Market Waterfront, Kep, Cambodia",
@@ -713,8 +713,8 @@ export const initial100Restaurants: Restaurant[] = [
     "descriptionEn": "Vibrant Crab Market restaurant with ocean terrace serving freshly caught seafood and spicy Kampot peppercorn dishes.",
     "photoUrl": "/Shop/rest-20.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-61.jpg",
+      "/foods/food-41.jpg"
     ],
     "addressKh": "ផ្សារក្តាមកែប ក្រុងកែប",
     "addressEn": "Crab Market Waterfront, Kep City",
@@ -750,8 +750,8 @@ export const initial100Restaurants: Restaurant[] = [
     "descriptionEn": "Stunning sunset lounge and dining on Kampot riverside with views of Bokor mountains and fresh local dishes.",
     "photoUrl": "/Shop/rest-21.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-64.jpg",
+      "/foods/food-48.jpg"
     ],
     "addressKh": "ផ្លូវមាត់ព្រែកកំពត ក្រុងកំពត",
     "addressEn": "Riverside Road, Kampot City, Cambodia",
@@ -787,8 +787,8 @@ export const initial100Restaurants: Restaurant[] = [
     "descriptionEn": "Heritage riverside bistro from the owners of La Plantation featuring authentic Kampot peppercorn gastronomy.",
     "photoUrl": "/Shop/rest-22.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-67.jpg",
+      "/foods/food-55.jpg"
     ],
     "addressKh": "ផ្លូវមាត់ព្រែក ក្រុងកំពត",
     "addressEn": "Riverside Street, Kampot City",
@@ -824,8 +824,8 @@ export const initial100Restaurants: Restaurant[] = [
     "descriptionEn": "Iconic seaside lounge on a restored wooden pier at Knai Bang Chatt resort in Kep with sunset dining.",
     "photoUrl": "/Shop/rest-23.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-70.jpg",
+      "/foods/food-62.jpg"
     ],
     "addressKh": "ឆ្នេរខេត្តកែប ក្រុងកែប",
     "addressEn": "Phum Thmey, Sangkat Prey Thom, Kep",
@@ -861,8 +861,8 @@ export const initial100Restaurants: Restaurant[] = [
     "descriptionEn": "Beloved countryside open-air restaurant famous for whole snakehead fish, spicy beef pleah, and rural stews.",
     "photoUrl": "/Shop/rest-24.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-73.jpg",
+      "/foods/food-69.jpg"
     ],
     "addressKh": "ផ្លូវមាត់ស្ទឹងសង្កែ ក្រុងបាត់ដំបង",
     "addressEn": "Sangkae River East Bank, Battambang City",
@@ -898,8 +898,8 @@ export const initial100Restaurants: Restaurant[] = [
     "descriptionEn": "Renowned social enterprise kitchen in Battambang serving innovative contemporary Khmer dishes.",
     "photoUrl": "/Shop/rest-25.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-76.jpg",
+      "/foods/food-76.jpg"
     ],
     "addressKh": "ផ្លូវលេខ ២ ជិតផ្សារណាត់ ក្រុងបាត់ដំបង",
     "addressEn": "Street 2, near Psar Nat, Battambang",
@@ -935,8 +935,8 @@ export const initial100Restaurants: Restaurant[] = [
     "descriptionEn": "Popular family restaurant and cooking school teaching authentic traditional Khmer cooking methods.",
     "photoUrl": "/Shop/rest-26.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-79.jpg",
+      "/foods/food-83.jpg"
     ],
     "addressKh": "ផ្លូវ ១១១ ក្រុងបាត់ដំបង",
     "addressEn": "Street 111, Battambang City",
@@ -972,8 +972,8 @@ export const initial100Restaurants: Restaurant[] = [
     "descriptionEn": "Social enterprise training restaurant by M'Lop Tapang with tropical garden dining and fresh coastal seafood.",
     "photoUrl": "/Shop/rest-27.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-82.jpg",
+      "/foods/food-90.jpg"
     ],
     "addressKh": "ផ្លូវក្បែរឆ្នេរអូរឈើទាល ក្រុងព្រះសីហនុ",
     "addressEn": "Near Ochheuteal Beach, Sihanoukville",
@@ -1009,8 +1009,8 @@ export const initial100Restaurants: Restaurant[] = [
     "descriptionEn": "Riverside training cafe run by BSDA organization serving authentic Khmer curries with Mekong River views.",
     "photoUrl": "/Shop/rest-28.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-85.jpg",
+      "/foods/food-97.jpg"
     ],
     "addressKh": "ផ្លូវមាត់ទន្លេមេគង្គ ក្រុងកំពង់ចាម",
     "addressEn": "Riverside Road, Kampong Cham City",
@@ -1046,8 +1046,8 @@ export const initial100Restaurants: Restaurant[] = [
     "descriptionEn": "Hilltop rustic restaurant in Sen Monorom offering highland Khmer stews and fresh 100% Mondulkiri coffee.",
     "photoUrl": "/Shop/rest-29.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-88.jpg",
+      "/foods/food-4.jpg"
     ],
     "addressKh": "ក្រុងសែនមនោរម្យ ខេត្តមណ្ឌលគិរី",
     "addressEn": "Sen Monorom City Center, Mondulkiri",
@@ -1083,8 +1083,8 @@ export const initial100Restaurants: Restaurant[] = [
     "descriptionEn": "Authentic coastal eatery famous for Koh Kong mud crabs, deep-fried fresh squid, and genuine Koh Kong chili sauce.",
     "photoUrl": "/Shop/rest-30.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-91.jpg",
+      "/foods/food-11.jpg"
     ],
     "addressKh": "ភូមិ១ ឃុំស្មាច់មានជ័យ ក្រុងខេមរភូមិន្ទ ខេត្តកោះកុង",
     "addressEn": "Smach Mean Chey, Khemarak Phoumin, Koh Kong",
@@ -1120,8 +1120,8 @@ export const initial100Restaurants: Restaurant[] = [
     "descriptionEn": "Famous traditional restaurant in Takeo renowned for massive grilled freshwater prawns with river-side tamarind sauce.",
     "photoUrl": "/Shop/rest-31.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-94.jpg",
+      "/foods/food-18.jpg"
     ],
     "addressKh": "ក្រុងដូនកែវ ខេត្តតាកែវ",
     "addressEn": "Doun Kaev City, Takeo Province",
@@ -1157,8 +1157,8 @@ export const initial100Restaurants: Restaurant[] = [
     "descriptionEn": "Riverside restaurant overlooking the Mekong near Kampi dolphin pool serving fresh river fish delicacies.",
     "photoUrl": "/Shop/rest-32.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-97.jpg",
+      "/foods/food-25.jpg"
     ],
     "addressKh": "ផ្លូវមាត់ទន្លេ ឃុំសំបុក ស្រុកចិត្របុរី ខេត្តក្រចេះ",
     "addressEn": "River Road, Sambok, Kratie Province",
@@ -1194,8 +1194,8 @@ export const initial100Restaurants: Restaurant[] = [
     "descriptionEn": "Popular local hub along the Pursat River famous for sundried lake fish and authentic Pursat oranges.",
     "photoUrl": "/Shop/rest-33.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-100.jpg",
+      "/foods/food-32.jpg"
     ],
     "addressKh": "មាត់ស្ទឹងពោធិ៍សាត់ ក្រុងពោធិ៍សាត់",
     "addressEn": "Pursat Riverfront, Pursat City",
@@ -1231,8 +1231,8 @@ export const initial100Restaurants: Restaurant[] = [
     "descriptionEn": "Scenic dining near the ancient Yeak Laom volcanic lake serving highland forest herbs and wild soups.",
     "photoUrl": "/Shop/rest-34.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-3.jpg",
+      "/foods/food-39.jpg"
     ],
     "addressKh": "បឹងយក្សឡោម ក្រុងបានលុង ខេត្តរតនគិរី",
     "addressEn": "Yeak Laom Lake, Banlung City, Ratanakiri",
@@ -1268,8 +1268,8 @@ export const initial100Restaurants: Restaurant[] = [
     "descriptionEn": "Stopover venue en route to Sambor Prei Kuk temples serving fresh Tonle Sap river fish and kroeung stews.",
     "photoUrl": "/Shop/rest-35.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-6.jpg",
+      "/foods/food-46.jpg"
     ],
     "addressKh": "ក្រុងស្ទឹងសែន ខេត្តកំពង់ធំ",
     "addressEn": "Steung Saen City, Kampong Thom",
@@ -1305,8 +1305,8 @@ export const initial100Restaurants: Restaurant[] = [
     "descriptionEn": "Authentic clay pot dining in Cambodia's pottery heartland serving bubbling hot fish soups and rice noodles.",
     "photoUrl": "/Shop/rest-36.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-9.jpg",
+      "/foods/food-53.jpg"
     ],
     "addressKh": "ក្រុងកំពង់ឆ្នាំង ខេត្តកំពង់ឆ្នាំង",
     "addressEn": "Kampong Chhnang City Center",
@@ -1342,8 +1342,8 @@ export const initial100Restaurants: Restaurant[] = [
     "descriptionEn": "Legendary Ta Khmao duck roasting house famous across Cambodia for crispy golden skin and aromatic dipping sauce.",
     "photoUrl": "/Shop/rest-37.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-12.jpg",
+      "/foods/food-60.jpg"
     ],
     "addressKh": "ក្រុងតាខ្មៅ ខេត្តកណ្តាល",
     "addressEn": "Ta Khmao City, Kandal Province",
@@ -1379,8 +1379,8 @@ export const initial100Restaurants: Restaurant[] = [
     "descriptionEn": "Renowned northern Cambodian eatery famous for the prized and rare Mekong River Pas-ee fish.",
     "photoUrl": "/Shop/rest-38.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-15.jpg",
+      "/foods/food-67.jpg"
     ],
     "addressKh": "ផ្លូវមាត់ទន្លេសេកុង ក្រុងស្ទឹងត្រែង",
     "addressEn": "Sekong Riverfront, Stung Treng City",
@@ -1416,8 +1416,8 @@ export const initial100Restaurants: Restaurant[] = [
     "descriptionEn": "Scenic stopover near the base of the sacred Preah Vihear Temple cliff serving charcoal grilled beef.",
     "photoUrl": "/Shop/rest-39.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-18.jpg",
+      "/foods/food-74.jpg"
     ],
     "addressKh": "ស្រុកជាំក្សាន្ត ខេត្តព្រះវិហារ",
     "addressEn": "Choam Khsant District, Preah Vihear",
@@ -1453,8 +1453,8 @@ export const initial100Restaurants: Restaurant[] = [
     "descriptionEn": "Mountain view restaurant in the sapphire city of Pailin serving beef stews and local garden specialties.",
     "photoUrl": "/Shop/rest-40.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-21.jpg",
+      "/foods/food-81.jpg"
     ],
     "addressKh": "ក្រុងប៉ៃលិន ខេត្តប៉ៃលិន",
     "addressEn": "Pailin City Center, Pailin Province",
@@ -1490,7 +1490,8 @@ export const initial100Restaurants: Restaurant[] = [
     "descriptionEn": "Premier fine-dining Cambodian restaurant by Chef Luu Meng serving living Khmer cuisine in a lush courtyard setting. Located in Phnom Penh with verified GPS coordinates and Google Maps directions.",
     "photoUrl": "/Shop/rest-41.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-24.jpg",
+      "/foods/food-88.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង រាជធានីភ្នំពេញ",
     "addressEn": "Main Boulevard, Phnom Penh, Cambodia",
@@ -1527,7 +1528,8 @@ export const initial100Restaurants: Restaurant[] = [
     "descriptionEn": "Cambodia leading specialty coffee roastery and artisanal bakery featuring modern Khmer architectural design. Located in Siem Reap with verified GPS coordinates and Google Maps directions.",
     "photoUrl": "/Shop/rest-42.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-27.jpg",
+      "/foods/food-95.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តសៀមរាប",
     "addressEn": "Main Boulevard, Siem Reap, Cambodia",
@@ -1562,7 +1564,8 @@ export const initial100Restaurants: Restaurant[] = [
     "descriptionEn": "Set in a charming colonial villa with a garden pool, serving authentic provincial Cambodian recipes. Located in Battambang with verified GPS coordinates and Google Maps directions.",
     "photoUrl": "/Shop/rest-43.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-30.jpg",
+      "/foods/food-2.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តបាត់ដំបង",
     "addressEn": "Main Boulevard, Battambang, Cambodia",
@@ -1599,7 +1602,8 @@ export const initial100Restaurants: Restaurant[] = [
     "descriptionEn": "Highly rated authentic Khmer kitchen known for classic royal and countryside Cambodian dishes. Located in Kampot with verified GPS coordinates and Google Maps directions.",
     "photoUrl": "/Shop/rest-44.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-33.jpg",
+      "/foods/food-9.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តកំពត",
     "addressEn": "Main Boulevard, Kampot, Cambodia",
@@ -1636,7 +1640,8 @@ export const initial100Restaurants: Restaurant[] = [
     "descriptionEn": "Popular Cambodian coffee chain famous for its signature creamy iced coffee and refreshing fruit teas. Located in Kep with verified GPS coordinates and Google Maps directions.",
     "photoUrl": "/Shop/rest-45.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-36.jpg",
+      "/foods/food-16.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តកែប",
     "addressEn": "Main Boulevard, Kep, Cambodia",
@@ -1672,7 +1677,8 @@ export const initial100Restaurants: Restaurant[] = [
     "descriptionEn": "Spacious family restaurant serving classic Cambodian breakfast kuyteav, countryside soups, and grilled seafood. Located in Preah Sihanouk with verified GPS coordinates and Google Maps directions.",
     "photoUrl": "/Shop/rest-46.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-39.jpg",
+      "/foods/food-23.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តព្រះសីហនុ",
     "addressEn": "Main Boulevard, Preah Sihanouk, Cambodia",
@@ -1709,7 +1715,8 @@ export const initial100Restaurants: Restaurant[] = [
     "descriptionEn": "Bustling open-air charcoal grill famous for tender marinated beef skewers, grilled squid, and spicy dipping sauces. Located in Kampong Cham with verified GPS coordinates and Google Maps directions.",
     "photoUrl": "/Shop/rest-47.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-42.jpg",
+      "/foods/food-30.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តកំពង់ចាម",
     "addressEn": "Main Boulevard, Kampong Cham, Cambodia",
@@ -1746,7 +1753,8 @@ export const initial100Restaurants: Restaurant[] = [
     "descriptionEn": "Vibrant evening street food market offering sizzling lort cha, crispy num krok, spicy papaya salad, and grilled skewers. Located in Kandal with verified GPS coordinates and Google Maps directions.",
     "photoUrl": "/Shop/rest-48.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-45.jpg",
+      "/foods/food-37.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តកណ្តាល",
     "addressEn": "Main Boulevard, Kandal, Cambodia",
@@ -1783,7 +1791,8 @@ export const initial100Restaurants: Restaurant[] = [
     "descriptionEn": "Beloved breakfast spot serving slow-simmered pork bone noodle soup, roasted duck noodles, and charcoal grilled pork rice. Located in Takeo with verified GPS coordinates and Google Maps directions.",
     "photoUrl": "/Shop/rest-49.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-48.jpg",
+      "/foods/food-44.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តតាកែវ",
     "addressEn": "Main Boulevard, Takeo, Cambodia",
@@ -1819,7 +1828,8 @@ export const initial100Restaurants: Restaurant[] = [
     "descriptionEn": "Scenic waterside pavilion serving fresh river fish, hot claypot soups, and honey-glazed country chicken. Located in Pursat with verified GPS coordinates and Google Maps directions.",
     "photoUrl": "/Shop/rest-50.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-51.jpg",
+      "/foods/food-51.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តពោធិ៍សាត់",
     "addressEn": "Main Boulevard, Pursat, Cambodia",
@@ -1854,9 +1864,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Malis Restaurant Cambodian Living Cuisine (Kampong Thom #2)",
     "descriptionKh": "ភោជនីយដ្ឋានម្ហូបខ្មែរប្រណិតដ៏ល្បីល្បាញ បង្កើតឡើងដោយចុងភៅល្បីឈ្មោះ លូ ម៉េង បម្រើអាម៉ុកត្រី គុយទាវម៉ាលីស និងម្ហូបខ្មែរបុរាណ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ធំ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Premier fine-dining Cambodian restaurant by Chef Luu Meng serving living Khmer cuisine in a lush courtyard setting. Located in Kampong Thom with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-2.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-54.jpg",
+      "/foods/food-58.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តកំពង់ធំ",
     "addressEn": "Main Boulevard, Kampong Thom, Cambodia",
@@ -1891,9 +1902,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "BROWN Coffee and Bakery Roastery (Kampong Chhnang #2)",
     "descriptionKh": "ហាងកាហ្វេទំនើបលំដាប់ជួរមុខរបស់កម្ពុជា បម្រើកាហ្វេឆុងថ្មីៗ នំដុតស្រស់ៗ និងកន្លែងអង្គុយធ្វើការប្រកបដោយផាសុកភាព។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ឆ្នាំង ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Cambodia leading specialty coffee roastery and artisanal bakery featuring modern Khmer architectural design. Located in Kampong Chhnang with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-3.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-57.jpg",
+      "/foods/food-65.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តកំពង់ឆ្នាំង",
     "addressEn": "Main Boulevard, Kampong Chhnang, Cambodia",
@@ -1927,9 +1939,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Romdeng Cambodian Restaurant (Koh Kong #2)",
     "descriptionKh": "ភោជនីយដ្ឋានក្នុងអគារបុរាណ សម្បូរដោយម្ហូបខ្មែរតាមតំបន់ សម្លម្ជូរព្រៃ ត្រីបំពងអំពិលទុំ និងបង្អែមខ្មែរ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកោះកុង ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Set in a charming colonial villa with a garden pool, serving authentic provincial Cambodian recipes. Located in Koh Kong with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-4.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-60.jpg",
+      "/foods/food-72.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តកោះកុង",
     "addressEn": "Main Boulevard, Koh Kong, Cambodia",
@@ -1964,9 +1977,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Kravanh Authentic Khmer Cuisine (Mondulkiri #2)",
     "descriptionKh": "ហាងម្ហូបខ្មែររសជាតិដើមល្បីល្បាញលើ Google Maps ផ្តោតលើគ្រឿងផ្សំធម្មជាតិស្រស់ៗ និងការរៀបចំយ៉ាងផ្ចិតផ្ចង់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តមណ្ឌលគិរី ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Highly rated authentic Khmer kitchen known for classic royal and countryside Cambodian dishes. Located in Mondulkiri with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1544148103-0773bf10d330?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-5.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-63.jpg",
+      "/foods/food-79.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តមណ្ឌលគិរី",
     "addressEn": "Main Boulevard, Mondulkiri, Cambodia",
@@ -2001,9 +2015,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Tube Coffee Cambodia (Ratanakiri #2)",
     "descriptionKh": "ហាងកាហ្វេក្នុងស្រុកដ៏ពេញនិយម ល្បីខាងកាហ្វេទឹកដោះគោរសជាតិដិតឈ្ងុយឆ្ងាញ់ និងភេសជ្ជៈត្រជាក់គ្រប់មុខ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តរតនគិរី ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Popular Cambodian coffee chain famous for its signature creamy iced coffee and refreshing fruit teas. Located in Ratanakiri with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-6.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-66.jpg",
+      "/foods/food-86.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តរតនគិរី",
     "addressEn": "Main Boulevard, Ratanakiri, Cambodia",
@@ -2037,9 +2052,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "One More Khmer & Asian Restaurant (Kratie #2)",
     "descriptionKh": "ភោជនីយដ្ឋានគ្រួសារដ៏ធំទូលាយ បម្រើអាហារពេលព្រឹក ថ្ងៃត្រង់ និងពេលល្ងាច ជាមួយមុខម្ហូបខ្មែរជាង ១០០ មុខ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តក្រចេះ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Spacious family restaurant serving classic Cambodian breakfast kuyteav, countryside soups, and grilled seafood. Located in Kratie with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1552566626-52f8b828add9?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-7.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-69.jpg",
+      "/foods/food-93.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តក្រចេះ",
     "addressEn": "Main Boulevard, Kratie, Cambodia",
@@ -2073,9 +2089,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Sovanna BBQ & Fresh Seafood Grill (Stung Treng #2)",
     "descriptionKh": "ហាងសាច់អាំង និងគ្រឿងសមុទ្រស្រស់ៗដ៏ល្បីល្បាញ មានសាច់គោអាំង ទឹកប្រហុក មឹកអាំង និងបង្គាអាំងធ្យូងឈ្ងុយឆ្ងាញ់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តស្ទឹងត្រែង ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Bustling open-air charcoal grill famous for tender marinated beef skewers, grilled squid, and spicy dipping sauces. Located in Stung Treng with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-8.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-72.jpg",
+      "/foods/food-100.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តស្ទឹងត្រែង",
     "addressEn": "Main Boulevard, Stung Treng, Cambodia",
@@ -2110,9 +2127,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Cambodian Night Market & Street Food Court (Preah Vihear #2)",
     "descriptionKh": "ប្រជុំដោយតូបអាហារតាមផ្លូវខ្មែរដ៏សម្បូរបែប មីឆា នំគ្រក់ បុកល្ហុង សាច់អាំង និងបង្អែមខ្មែរគ្រប់មុខ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តព្រះវិហារ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Vibrant evening street food market offering sizzling lort cha, crispy num krok, spicy papaya salad, and grilled skewers. Located in Preah Vihear with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-9.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-75.jpg",
+      "/foods/food-7.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តព្រះវិហារ",
     "addressEn": "Main Boulevard, Preah Vihear, Cambodia",
@@ -2147,9 +2165,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Authentic Morning Kuyteav & Grilled Pork Rice (Banteay Meanchey #2)",
     "descriptionKh": "ហាងអាហារពេលព្រឹកដ៏ពេញនិយម មានទឹកស៊ុបឆ្អឹងជ្រូករម្ងាស់ផ្អែមឆ្ងាញ់ និងបាយសាច់ជ្រូកអាំងធ្យូងក្តៅៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តបន្ទាយមានជ័យ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Beloved breakfast spot serving slow-simmered pork bone noodle soup, roasted duck noodles, and charcoal grilled pork rice. Located in Banteay Meanchey with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-10.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-78.jpg",
+      "/foods/food-14.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តបន្ទាយមានជ័យ",
     "addressEn": "Main Boulevard, Banteay Meanchey, Cambodia",
@@ -2184,9 +2203,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Riverside Breeze Dining Pavilion (Oddar Meanchey #2)",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ទន្លេខ្យល់អាកាសបរិសុទ្ធ បម្រើម្ហូបត្រីទន្លេស្រស់ៗ សម្លម្ជូរគ្រឿង និងមាន់ស្រែដុត។ មានទីតាំងស្ថិតនៅក្នុងខេត្តឧត្តរមានជ័យ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Scenic waterside pavilion serving fresh river fish, hot claypot soups, and honey-glazed country chicken. Located in Oddar Meanchey with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-11.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-81.jpg",
+      "/foods/food-21.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តឧត្តរមានជ័យ",
     "addressEn": "Main Boulevard, Oddar Meanchey, Cambodia",
@@ -2221,9 +2241,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Malis Restaurant Cambodian Living Cuisine (Pailin #3)",
     "descriptionKh": "ភោជនីយដ្ឋានម្ហូបខ្មែរប្រណិតដ៏ល្បីល្បាញ បង្កើតឡើងដោយចុងភៅល្បីឈ្មោះ លូ ម៉េង បម្រើអាម៉ុកត្រី គុយទាវម៉ាលីស និងម្ហូបខ្មែរបុរាណ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តប៉ៃលិន ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Premier fine-dining Cambodian restaurant by Chef Luu Meng serving living Khmer cuisine in a lush courtyard setting. Located in Pailin with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-12.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-84.jpg",
+      "/foods/food-28.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តប៉ៃលិន",
     "addressEn": "Main Boulevard, Pailin, Cambodia",
@@ -2258,9 +2279,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "BROWN Coffee and Bakery Roastery (Prey Veng #3)",
     "descriptionKh": "ហាងកាហ្វេទំនើបលំដាប់ជួរមុខរបស់កម្ពុជា បម្រើកាហ្វេឆុងថ្មីៗ នំដុតស្រស់ៗ និងកន្លែងអង្គុយធ្វើការប្រកបដោយផាសុកភាព។ មានទីតាំងស្ថិតនៅក្នុងខេត្តព្រៃវែង ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Cambodia leading specialty coffee roastery and artisanal bakery featuring modern Khmer architectural design. Located in Prey Veng with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-13.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-87.jpg",
+      "/foods/food-35.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តព្រៃវែង",
     "addressEn": "Main Boulevard, Prey Veng, Cambodia",
@@ -2294,9 +2316,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Romdeng Cambodian Restaurant (Svay Rieng #3)",
     "descriptionKh": "ភោជនីយដ្ឋានក្នុងអគារបុរាណ សម្បូរដោយម្ហូបខ្មែរតាមតំបន់ សម្លម្ជូរព្រៃ ត្រីបំពងអំពិលទុំ និងបង្អែមខ្មែរ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តស្វាយរៀង ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Set in a charming colonial villa with a garden pool, serving authentic provincial Cambodian recipes. Located in Svay Rieng with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-14.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-90.jpg",
+      "/foods/food-42.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តស្វាយរៀង",
     "addressEn": "Main Boulevard, Svay Rieng, Cambodia",
@@ -2330,9 +2353,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Kravanh Authentic Khmer Cuisine (Kampong Speu #3)",
     "descriptionKh": "ហាងម្ហូបខ្មែររសជាតិដើមល្បីល្បាញលើ Google Maps ផ្តោតលើគ្រឿងផ្សំធម្មជាតិស្រស់ៗ និងការរៀបចំយ៉ាងផ្ចិតផ្ចង់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ស្ពឺ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Highly rated authentic Khmer kitchen known for classic royal and countryside Cambodian dishes. Located in Kampong Speu with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1544148103-0773bf10d330?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-15.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-93.jpg",
+      "/foods/food-49.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តកំពង់ស្ពឺ",
     "addressEn": "Main Boulevard, Kampong Speu, Cambodia",
@@ -2367,9 +2391,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Tube Coffee Cambodia (Tboung Khmum #3)",
     "descriptionKh": "ហាងកាហ្វេក្នុងស្រុកដ៏ពេញនិយម ល្បីខាងកាហ្វេទឹកដោះគោរសជាតិដិតឈ្ងុយឆ្ងាញ់ និងភេសជ្ជៈត្រជាក់គ្រប់មុខ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តត្បូងឃ្មុំ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Popular Cambodian coffee chain famous for its signature creamy iced coffee and refreshing fruit teas. Located in Tboung Khmum with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-16.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-96.jpg",
+      "/foods/food-56.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តត្បូងឃ្មុំ",
     "addressEn": "Main Boulevard, Tboung Khmum, Cambodia",
@@ -2403,9 +2428,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "One More Khmer & Asian Restaurant (Phnom Penh #3)",
     "descriptionKh": "ភោជនីយដ្ឋានគ្រួសារដ៏ធំទូលាយ បម្រើអាហារពេលព្រឹក ថ្ងៃត្រង់ និងពេលល្ងាច ជាមួយមុខម្ហូបខ្មែរជាង ១០០ មុខ។ មានទីតាំងស្ថិតនៅក្នុងរាជធានីភ្នំពេញ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Spacious family restaurant serving classic Cambodian breakfast kuyteav, countryside soups, and grilled seafood. Located in Phnom Penh with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1552566626-52f8b828add9?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-18.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-99.jpg",
+      "/foods/food-63.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង រាជធានីភ្នំពេញ",
     "addressEn": "Main Boulevard, Phnom Penh, Cambodia",
@@ -2440,9 +2466,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Sovanna BBQ & Fresh Seafood Grill (Siem Reap #3)",
     "descriptionKh": "ហាងសាច់អាំង និងគ្រឿងសមុទ្រស្រស់ៗដ៏ល្បីល្បាញ មានសាច់គោអាំង ទឹកប្រហុក មឹកអាំង និងបង្គាអាំងធ្យូងឈ្ងុយឆ្ងាញ់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តសៀមរាប ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Bustling open-air charcoal grill famous for tender marinated beef skewers, grilled squid, and spicy dipping sauces. Located in Siem Reap with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-19.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-2.jpg",
+      "/foods/food-70.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តសៀមរាប",
     "addressEn": "Main Boulevard, Siem Reap, Cambodia",
@@ -2477,9 +2504,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Cambodian Night Market & Street Food Court (Battambang #3)",
     "descriptionKh": "ប្រជុំដោយតូបអាហារតាមផ្លូវខ្មែរដ៏សម្បូរបែប មីឆា នំគ្រក់ បុកល្ហុង សាច់អាំង និងបង្អែមខ្មែរគ្រប់មុខ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តបាត់ដំបង ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Vibrant evening street food market offering sizzling lort cha, crispy num krok, spicy papaya salad, and grilled skewers. Located in Battambang with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-20.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-5.jpg",
+      "/foods/food-77.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តបាត់ដំបង",
     "addressEn": "Main Boulevard, Battambang, Cambodia",
@@ -2514,9 +2542,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Authentic Morning Kuyteav & Grilled Pork Rice (Kampot #3)",
     "descriptionKh": "ហាងអាហារពេលព្រឹកដ៏ពេញនិយម មានទឹកស៊ុបឆ្អឹងជ្រូករម្ងាស់ផ្អែមឆ្ងាញ់ និងបាយសាច់ជ្រូកអាំងធ្យូងក្តៅៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពត ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Beloved breakfast spot serving slow-simmered pork bone noodle soup, roasted duck noodles, and charcoal grilled pork rice. Located in Kampot with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-21.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-8.jpg",
+      "/foods/food-84.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តកំពត",
     "addressEn": "Main Boulevard, Kampot, Cambodia",
@@ -2551,9 +2580,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Riverside Breeze Dining Pavilion (Kep #3)",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ទន្លេខ្យល់អាកាសបរិសុទ្ធ បម្រើម្ហូបត្រីទន្លេស្រស់ៗ សម្លម្ជូរគ្រឿង និងមាន់ស្រែដុត។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកែប ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Scenic waterside pavilion serving fresh river fish, hot claypot soups, and honey-glazed country chicken. Located in Kep with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-22.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-11.jpg",
+      "/foods/food-91.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តកែប",
     "addressEn": "Main Boulevard, Kep, Cambodia",
@@ -2587,9 +2617,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Malis Restaurant Cambodian Living Cuisine (Preah Sihanouk #4)",
     "descriptionKh": "ភោជនីយដ្ឋានម្ហូបខ្មែរប្រណិតដ៏ល្បីល្បាញ បង្កើតឡើងដោយចុងភៅល្បីឈ្មោះ លូ ម៉េង បម្រើអាម៉ុកត្រី គុយទាវម៉ាលីស និងម្ហូបខ្មែរបុរាណ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តព្រះសីហនុ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Premier fine-dining Cambodian restaurant by Chef Luu Meng serving living Khmer cuisine in a lush courtyard setting. Located in Preah Sihanouk with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-23.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-14.jpg",
+      "/foods/food-98.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តព្រះសីហនុ",
     "addressEn": "Main Boulevard, Preah Sihanouk, Cambodia",
@@ -2624,9 +2655,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "BROWN Coffee and Bakery Roastery (Kampong Cham #4)",
     "descriptionKh": "ហាងកាហ្វេទំនើបលំដាប់ជួរមុខរបស់កម្ពុជា បម្រើកាហ្វេឆុងថ្មីៗ នំដុតស្រស់ៗ និងកន្លែងអង្គុយធ្វើការប្រកបដោយផាសុកភាព។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ចាម ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Cambodia leading specialty coffee roastery and artisanal bakery featuring modern Khmer architectural design. Located in Kampong Cham with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-24.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-17.jpg",
+      "/foods/food-5.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តកំពង់ចាម",
     "addressEn": "Main Boulevard, Kampong Cham, Cambodia",
@@ -2660,9 +2692,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Romdeng Cambodian Restaurant (Kandal #4)",
     "descriptionKh": "ភោជនីយដ្ឋានក្នុងអគារបុរាណ សម្បូរដោយម្ហូបខ្មែរតាមតំបន់ សម្លម្ជូរព្រៃ ត្រីបំពងអំពិលទុំ និងបង្អែមខ្មែរ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកណ្តាល ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Set in a charming colonial villa with a garden pool, serving authentic provincial Cambodian recipes. Located in Kandal with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-25.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-20.jpg",
+      "/foods/food-12.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តកណ្តាល",
     "addressEn": "Main Boulevard, Kandal, Cambodia",
@@ -2697,9 +2730,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Kravanh Authentic Khmer Cuisine (Takeo #4)",
     "descriptionKh": "ហាងម្ហូបខ្មែររសជាតិដើមល្បីល្បាញលើ Google Maps ផ្តោតលើគ្រឿងផ្សំធម្មជាតិស្រស់ៗ និងការរៀបចំយ៉ាងផ្ចិតផ្ចង់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តតាកែវ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Highly rated authentic Khmer kitchen known for classic royal and countryside Cambodian dishes. Located in Takeo with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1544148103-0773bf10d330?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-26.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-23.jpg",
+      "/foods/food-19.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តតាកែវ",
     "addressEn": "Main Boulevard, Takeo, Cambodia",
@@ -2734,9 +2768,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Tube Coffee Cambodia (Pursat #4)",
     "descriptionKh": "ហាងកាហ្វេក្នុងស្រុកដ៏ពេញនិយម ល្បីខាងកាហ្វេទឹកដោះគោរសជាតិដិតឈ្ងុយឆ្ងាញ់ និងភេសជ្ជៈត្រជាក់គ្រប់មុខ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តពោធិ៍សាត់ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Popular Cambodian coffee chain famous for its signature creamy iced coffee and refreshing fruit teas. Located in Pursat with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-27.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-26.jpg",
+      "/foods/food-26.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តពោធិ៍សាត់",
     "addressEn": "Main Boulevard, Pursat, Cambodia",
@@ -2770,9 +2805,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "One More Khmer & Asian Restaurant (Kampong Thom #4)",
     "descriptionKh": "ភោជនីយដ្ឋានគ្រួសារដ៏ធំទូលាយ បម្រើអាហារពេលព្រឹក ថ្ងៃត្រង់ និងពេលល្ងាច ជាមួយមុខម្ហូបខ្មែរជាង ១០០ មុខ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ធំ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Spacious family restaurant serving classic Cambodian breakfast kuyteav, countryside soups, and grilled seafood. Located in Kampong Thom with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1552566626-52f8b828add9?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-28.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-29.jpg",
+      "/foods/food-33.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តកំពង់ធំ",
     "addressEn": "Main Boulevard, Kampong Thom, Cambodia",
@@ -2807,9 +2843,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Sovanna BBQ & Fresh Seafood Grill (Kampong Chhnang #4)",
     "descriptionKh": "ហាងសាច់អាំង និងគ្រឿងសមុទ្រស្រស់ៗដ៏ល្បីល្បាញ មានសាច់គោអាំង ទឹកប្រហុក មឹកអាំង និងបង្គាអាំងធ្យូងឈ្ងុយឆ្ងាញ់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ឆ្នាំង ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Bustling open-air charcoal grill famous for tender marinated beef skewers, grilled squid, and spicy dipping sauces. Located in Kampong Chhnang with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-29.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-32.jpg",
+      "/foods/food-40.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តកំពង់ឆ្នាំង",
     "addressEn": "Main Boulevard, Kampong Chhnang, Cambodia",
@@ -2843,9 +2880,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Cambodian Night Market & Street Food Court (Koh Kong #4)",
     "descriptionKh": "ប្រជុំដោយតូបអាហារតាមផ្លូវខ្មែរដ៏សម្បូរបែប មីឆា នំគ្រក់ បុកល្ហុង សាច់អាំង និងបង្អែមខ្មែរគ្រប់មុខ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកោះកុង ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Vibrant evening street food market offering sizzling lort cha, crispy num krok, spicy papaya salad, and grilled skewers. Located in Koh Kong with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-30.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-35.jpg",
+      "/foods/food-47.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តកោះកុង",
     "addressEn": "Main Boulevard, Koh Kong, Cambodia",
@@ -2880,9 +2918,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Authentic Morning Kuyteav & Grilled Pork Rice (Mondulkiri #4)",
     "descriptionKh": "ហាងអាហារពេលព្រឹកដ៏ពេញនិយម មានទឹកស៊ុបឆ្អឹងជ្រូករម្ងាស់ផ្អែមឆ្ងាញ់ និងបាយសាច់ជ្រូកអាំងធ្យូងក្តៅៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តមណ្ឌលគិរី ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Beloved breakfast spot serving slow-simmered pork bone noodle soup, roasted duck noodles, and charcoal grilled pork rice. Located in Mondulkiri with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-31.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-38.jpg",
+      "/foods/food-54.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តមណ្ឌលគិរី",
     "addressEn": "Main Boulevard, Mondulkiri, Cambodia",
@@ -2917,9 +2956,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Riverside Breeze Dining Pavilion (Ratanakiri #4)",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ទន្លេខ្យល់អាកាសបរិសុទ្ធ បម្រើម្ហូបត្រីទន្លេស្រស់ៗ សម្លម្ជូរគ្រឿង និងមាន់ស្រែដុត។ មានទីតាំងស្ថិតនៅក្នុងខេត្តរតនគិរី ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Scenic waterside pavilion serving fresh river fish, hot claypot soups, and honey-glazed country chicken. Located in Ratanakiri with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-32.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-41.jpg",
+      "/foods/food-61.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តរតនគិរី",
     "addressEn": "Main Boulevard, Ratanakiri, Cambodia",
@@ -2954,9 +2994,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Malis Restaurant Cambodian Living Cuisine (Kratie #5)",
     "descriptionKh": "ភោជនីយដ្ឋានម្ហូបខ្មែរប្រណិតដ៏ល្បីល្បាញ បង្កើតឡើងដោយចុងភៅល្បីឈ្មោះ លូ ម៉េង បម្រើអាម៉ុកត្រី គុយទាវម៉ាលីស និងម្ហូបខ្មែរបុរាណ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តក្រចេះ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Premier fine-dining Cambodian restaurant by Chef Luu Meng serving living Khmer cuisine in a lush courtyard setting. Located in Kratie with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-33.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-44.jpg",
+      "/foods/food-68.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តក្រចេះ",
     "addressEn": "Main Boulevard, Kratie, Cambodia",
@@ -2991,9 +3032,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "BROWN Coffee and Bakery Roastery (Stung Treng #5)",
     "descriptionKh": "ហាងកាហ្វេទំនើបលំដាប់ជួរមុខរបស់កម្ពុជា បម្រើកាហ្វេឆុងថ្មីៗ នំដុតស្រស់ៗ និងកន្លែងអង្គុយធ្វើការប្រកបដោយផាសុកភាព។ មានទីតាំងស្ថិតនៅក្នុងខេត្តស្ទឹងត្រែង ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Cambodia leading specialty coffee roastery and artisanal bakery featuring modern Khmer architectural design. Located in Stung Treng with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-34.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-47.jpg",
+      "/foods/food-75.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តស្ទឹងត្រែង",
     "addressEn": "Main Boulevard, Stung Treng, Cambodia",
@@ -3027,9 +3069,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Romdeng Cambodian Restaurant (Preah Vihear #5)",
     "descriptionKh": "ភោជនីយដ្ឋានក្នុងអគារបុរាណ សម្បូរដោយម្ហូបខ្មែរតាមតំបន់ សម្លម្ជូរព្រៃ ត្រីបំពងអំពិលទុំ និងបង្អែមខ្មែរ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តព្រះវិហារ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Set in a charming colonial villa with a garden pool, serving authentic provincial Cambodian recipes. Located in Preah Vihear with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-35.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-50.jpg",
+      "/foods/food-82.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តព្រះវិហារ",
     "addressEn": "Main Boulevard, Preah Vihear, Cambodia",
@@ -3064,9 +3107,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Kravanh Authentic Khmer Cuisine (Banteay Meanchey #5)",
     "descriptionKh": "ហាងម្ហូបខ្មែររសជាតិដើមល្បីល្បាញលើ Google Maps ផ្តោតលើគ្រឿងផ្សំធម្មជាតិស្រស់ៗ និងការរៀបចំយ៉ាងផ្ចិតផ្ចង់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តបន្ទាយមានជ័យ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Highly rated authentic Khmer kitchen known for classic royal and countryside Cambodian dishes. Located in Banteay Meanchey with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1544148103-0773bf10d330?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-36.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-53.jpg",
+      "/foods/food-89.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តបន្ទាយមានជ័យ",
     "addressEn": "Main Boulevard, Banteay Meanchey, Cambodia",
@@ -3100,9 +3144,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Tube Coffee Cambodia (Oddar Meanchey #5)",
     "descriptionKh": "ហាងកាហ្វេក្នុងស្រុកដ៏ពេញនិយម ល្បីខាងកាហ្វេទឹកដោះគោរសជាតិដិតឈ្ងុយឆ្ងាញ់ និងភេសជ្ជៈត្រជាក់គ្រប់មុខ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តឧត្តរមានជ័យ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Popular Cambodian coffee chain famous for its signature creamy iced coffee and refreshing fruit teas. Located in Oddar Meanchey with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-37.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-56.jpg",
+      "/foods/food-96.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តឧត្តរមានជ័យ",
     "addressEn": "Main Boulevard, Oddar Meanchey, Cambodia",
@@ -3136,9 +3181,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "One More Khmer & Asian Restaurant (Pailin #5)",
     "descriptionKh": "ភោជនីយដ្ឋានគ្រួសារដ៏ធំទូលាយ បម្រើអាហារពេលព្រឹក ថ្ងៃត្រង់ និងពេលល្ងាច ជាមួយមុខម្ហូបខ្មែរជាង ១០០ មុខ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តប៉ៃលិន ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Spacious family restaurant serving classic Cambodian breakfast kuyteav, countryside soups, and grilled seafood. Located in Pailin with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1552566626-52f8b828add9?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-38.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-59.jpg",
+      "/foods/food-3.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តប៉ៃលិន",
     "addressEn": "Main Boulevard, Pailin, Cambodia",
@@ -3173,9 +3219,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Sovanna BBQ & Fresh Seafood Grill (Prey Veng #5)",
     "descriptionKh": "ហាងសាច់អាំង និងគ្រឿងសមុទ្រស្រស់ៗដ៏ល្បីល្បាញ មានសាច់គោអាំង ទឹកប្រហុក មឹកអាំង និងបង្គាអាំងធ្យូងឈ្ងុយឆ្ងាញ់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តព្រៃវែង ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Bustling open-air charcoal grill famous for tender marinated beef skewers, grilled squid, and spicy dipping sauces. Located in Prey Veng with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-39.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-62.jpg",
+      "/foods/food-10.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តព្រៃវែង",
     "addressEn": "Main Boulevard, Prey Veng, Cambodia",
@@ -3210,9 +3257,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Cambodian Night Market & Street Food Court (Svay Rieng #5)",
     "descriptionKh": "ប្រជុំដោយតូបអាហារតាមផ្លូវខ្មែរដ៏សម្បូរបែប មីឆា នំគ្រក់ បុកល្ហុង សាច់អាំង និងបង្អែមខ្មែរគ្រប់មុខ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តស្វាយរៀង ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Vibrant evening street food market offering sizzling lort cha, crispy num krok, spicy papaya salad, and grilled skewers. Located in Svay Rieng with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-40.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-65.jpg",
+      "/foods/food-17.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តស្វាយរៀង",
     "addressEn": "Main Boulevard, Svay Rieng, Cambodia",
@@ -3247,9 +3295,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Authentic Morning Kuyteav & Grilled Pork Rice (Kampong Speu #5)",
     "descriptionKh": "ហាងអាហារពេលព្រឹកដ៏ពេញនិយម មានទឹកស៊ុបឆ្អឹងជ្រូករម្ងាស់ផ្អែមឆ្ងាញ់ និងបាយសាច់ជ្រូកអាំងធ្យូងក្តៅៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ស្ពឺ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Beloved breakfast spot serving slow-simmered pork bone noodle soup, roasted duck noodles, and charcoal grilled pork rice. Located in Kampong Speu with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-41.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-68.jpg",
+      "/foods/food-24.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តកំពង់ស្ពឺ",
     "addressEn": "Main Boulevard, Kampong Speu, Cambodia",
@@ -3284,9 +3333,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Riverside Breeze Dining Pavilion (Tboung Khmum #5)",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ទន្លេខ្យល់អាកាសបរិសុទ្ធ បម្រើម្ហូបត្រីទន្លេស្រស់ៗ សម្លម្ជូរគ្រឿង និងមាន់ស្រែដុត។ មានទីតាំងស្ថិតនៅក្នុងខេត្តត្បូងឃ្មុំ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Scenic waterside pavilion serving fresh river fish, hot claypot soups, and honey-glazed country chicken. Located in Tboung Khmum with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-42.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-71.jpg",
+      "/foods/food-31.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តត្បូងឃ្មុំ",
     "addressEn": "Main Boulevard, Tboung Khmum, Cambodia",
@@ -3321,9 +3371,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Malis Restaurant Cambodian Living Cuisine (Phnom Penh #6)",
     "descriptionKh": "ភោជនីយដ្ឋានម្ហូបខ្មែរប្រណិតដ៏ល្បីល្បាញ បង្កើតឡើងដោយចុងភៅល្បីឈ្មោះ លូ ម៉េង បម្រើអាម៉ុកត្រី គុយទាវម៉ាលីស និងម្ហូបខ្មែរបុរាណ។ មានទីតាំងស្ថិតនៅក្នុងរាជធានីភ្នំពេញ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Premier fine-dining Cambodian restaurant by Chef Luu Meng serving living Khmer cuisine in a lush courtyard setting. Located in Phnom Penh with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-43.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-74.jpg",
+      "/foods/food-38.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង រាជធានីភ្នំពេញ",
     "addressEn": "Main Boulevard, Phnom Penh, Cambodia",
@@ -3357,9 +3408,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "BROWN Coffee and Bakery Roastery (Siem Reap #6)",
     "descriptionKh": "ហាងកាហ្វេទំនើបលំដាប់ជួរមុខរបស់កម្ពុជា បម្រើកាហ្វេឆុងថ្មីៗ នំដុតស្រស់ៗ និងកន្លែងអង្គុយធ្វើការប្រកបដោយផាសុកភាព។ មានទីតាំងស្ថិតនៅក្នុងខេត្តសៀមរាប ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Cambodia leading specialty coffee roastery and artisanal bakery featuring modern Khmer architectural design. Located in Siem Reap with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-44.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-77.jpg",
+      "/foods/food-45.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តសៀមរាប",
     "addressEn": "Main Boulevard, Siem Reap, Cambodia",
@@ -3393,9 +3445,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Romdeng Cambodian Restaurant (Battambang #6)",
     "descriptionKh": "ភោជនីយដ្ឋានក្នុងអគារបុរាណ សម្បូរដោយម្ហូបខ្មែរតាមតំបន់ សម្លម្ជូរព្រៃ ត្រីបំពងអំពិលទុំ និងបង្អែមខ្មែរ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តបាត់ដំបង ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Set in a charming colonial villa with a garden pool, serving authentic provincial Cambodian recipes. Located in Battambang with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-45.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-80.jpg",
+      "/foods/food-52.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តបាត់ដំបង",
     "addressEn": "Main Boulevard, Battambang, Cambodia",
@@ -3430,9 +3483,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Kravanh Authentic Khmer Cuisine (Kampot #6)",
     "descriptionKh": "ហាងម្ហូបខ្មែររសជាតិដើមល្បីល្បាញលើ Google Maps ផ្តោតលើគ្រឿងផ្សំធម្មជាតិស្រស់ៗ និងការរៀបចំយ៉ាងផ្ចិតផ្ចង់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពត ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Highly rated authentic Khmer kitchen known for classic royal and countryside Cambodian dishes. Located in Kampot with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1544148103-0773bf10d330?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-46.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-83.jpg",
+      "/foods/food-59.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តកំពត",
     "addressEn": "Main Boulevard, Kampot, Cambodia",
@@ -3467,9 +3521,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Tube Coffee Cambodia (Kep #6)",
     "descriptionKh": "ហាងកាហ្វេក្នុងស្រុកដ៏ពេញនិយម ល្បីខាងកាហ្វេទឹកដោះគោរសជាតិដិតឈ្ងុយឆ្ងាញ់ និងភេសជ្ជៈត្រជាក់គ្រប់មុខ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកែប ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Popular Cambodian coffee chain famous for its signature creamy iced coffee and refreshing fruit teas. Located in Kep with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-47.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-86.jpg",
+      "/foods/food-66.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តកែប",
     "addressEn": "Main Boulevard, Kep, Cambodia",
@@ -3503,9 +3558,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "One More Khmer & Asian Restaurant (Preah Sihanouk #6)",
     "descriptionKh": "ភោជនីយដ្ឋានគ្រួសារដ៏ធំទូលាយ បម្រើអាហារពេលព្រឹក ថ្ងៃត្រង់ និងពេលល្ងាច ជាមួយមុខម្ហូបខ្មែរជាង ១០០ មុខ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តព្រះសីហនុ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Spacious family restaurant serving classic Cambodian breakfast kuyteav, countryside soups, and grilled seafood. Located in Preah Sihanouk with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1552566626-52f8b828add9?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-48.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-89.jpg",
+      "/foods/food-73.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តព្រះសីហនុ",
     "addressEn": "Main Boulevard, Preah Sihanouk, Cambodia",
@@ -3540,9 +3596,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Sovanna BBQ & Fresh Seafood Grill (Kampong Cham #6)",
     "descriptionKh": "ហាងសាច់អាំង និងគ្រឿងសមុទ្រស្រស់ៗដ៏ល្បីល្បាញ មានសាច់គោអាំង ទឹកប្រហុក មឹកអាំង និងបង្គាអាំងធ្យូងឈ្ងុយឆ្ងាញ់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ចាម ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Bustling open-air charcoal grill famous for tender marinated beef skewers, grilled squid, and spicy dipping sauces. Located in Kampong Cham with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-49.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-92.jpg",
+      "/foods/food-80.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តកំពង់ចាម",
     "addressEn": "Main Boulevard, Kampong Cham, Cambodia",
@@ -3577,9 +3634,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Cambodian Night Market & Street Food Court (Kandal #6)",
     "descriptionKh": "ប្រជុំដោយតូបអាហារតាមផ្លូវខ្មែរដ៏សម្បូរបែប មីឆា នំគ្រក់ បុកល្ហុង សាច់អាំង និងបង្អែមខ្មែរគ្រប់មុខ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកណ្តាល ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Vibrant evening street food market offering sizzling lort cha, crispy num krok, spicy papaya salad, and grilled skewers. Located in Kandal with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-50.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-95.jpg",
+      "/foods/food-87.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តកណ្តាល",
     "addressEn": "Main Boulevard, Kandal, Cambodia",
@@ -3613,9 +3671,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Authentic Morning Kuyteav & Grilled Pork Rice (Takeo #6)",
     "descriptionKh": "ហាងអាហារពេលព្រឹកដ៏ពេញនិយម មានទឹកស៊ុបឆ្អឹងជ្រូករម្ងាស់ផ្អែមឆ្ងាញ់ និងបាយសាច់ជ្រូកអាំងធ្យូងក្តៅៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តតាកែវ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Beloved breakfast spot serving slow-simmered pork bone noodle soup, roasted duck noodles, and charcoal grilled pork rice. Located in Takeo with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-1.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-98.jpg",
+      "/foods/food-94.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តតាកែវ",
     "addressEn": "Main Boulevard, Takeo, Cambodia",
@@ -3650,9 +3709,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Riverside Breeze Dining Pavilion (Pursat #6)",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ទន្លេខ្យល់អាកាសបរិសុទ្ធ បម្រើម្ហូបត្រីទន្លេស្រស់ៗ សម្លម្ជូរគ្រឿង និងមាន់ស្រែដុត។ មានទីតាំងស្ថិតនៅក្នុងខេត្តពោធិ៍សាត់ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Scenic waterside pavilion serving fresh river fish, hot claypot soups, and honey-glazed country chicken. Located in Pursat with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-2.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-1.jpg",
+      "/foods/food-1.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តពោធិ៍សាត់",
     "addressEn": "Main Boulevard, Pursat, Cambodia",
@@ -3687,9 +3747,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Malis Restaurant Cambodian Living Cuisine (Kampong Thom #7)",
     "descriptionKh": "ភោជនីយដ្ឋានម្ហូបខ្មែរប្រណិតដ៏ល្បីល្បាញ បង្កើតឡើងដោយចុងភៅល្បីឈ្មោះ លូ ម៉េង បម្រើអាម៉ុកត្រី គុយទាវម៉ាលីស និងម្ហូបខ្មែរបុរាណ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ធំ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Premier fine-dining Cambodian restaurant by Chef Luu Meng serving living Khmer cuisine in a lush courtyard setting. Located in Kampong Thom with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-3.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-4.jpg",
+      "/foods/food-8.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តកំពង់ធំ",
     "addressEn": "Main Boulevard, Kampong Thom, Cambodia",
@@ -3724,9 +3785,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "BROWN Coffee and Bakery Roastery (Kampong Chhnang #7)",
     "descriptionKh": "ហាងកាហ្វេទំនើបលំដាប់ជួរមុខរបស់កម្ពុជា បម្រើកាហ្វេឆុងថ្មីៗ នំដុតស្រស់ៗ និងកន្លែងអង្គុយធ្វើការប្រកបដោយផាសុកភាព។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ឆ្នាំង ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Cambodia leading specialty coffee roastery and artisanal bakery featuring modern Khmer architectural design. Located in Kampong Chhnang with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-4.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-7.jpg",
+      "/foods/food-15.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តកំពង់ឆ្នាំង",
     "addressEn": "Main Boulevard, Kampong Chhnang, Cambodia",
@@ -3760,9 +3822,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Romdeng Cambodian Restaurant (Koh Kong #7)",
     "descriptionKh": "ភោជនីយដ្ឋានក្នុងអគារបុរាណ សម្បូរដោយម្ហូបខ្មែរតាមតំបន់ សម្លម្ជូរព្រៃ ត្រីបំពងអំពិលទុំ និងបង្អែមខ្មែរ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកោះកុង ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Set in a charming colonial villa with a garden pool, serving authentic provincial Cambodian recipes. Located in Koh Kong with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-5.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-10.jpg",
+      "/foods/food-22.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តកោះកុង",
     "addressEn": "Main Boulevard, Koh Kong, Cambodia",
@@ -3797,9 +3860,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Kravanh Authentic Khmer Cuisine (Mondulkiri #7)",
     "descriptionKh": "ហាងម្ហូបខ្មែររសជាតិដើមល្បីល្បាញលើ Google Maps ផ្តោតលើគ្រឿងផ្សំធម្មជាតិស្រស់ៗ និងការរៀបចំយ៉ាងផ្ចិតផ្ចង់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តមណ្ឌលគិរី ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Highly rated authentic Khmer kitchen known for classic royal and countryside Cambodian dishes. Located in Mondulkiri with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1544148103-0773bf10d330?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-6.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-13.jpg",
+      "/foods/food-29.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តមណ្ឌលគិរី",
     "addressEn": "Main Boulevard, Mondulkiri, Cambodia",
@@ -3834,9 +3898,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Tube Coffee Cambodia (Ratanakiri #7)",
     "descriptionKh": "ហាងកាហ្វេក្នុងស្រុកដ៏ពេញនិយម ល្បីខាងកាហ្វេទឹកដោះគោរសជាតិដិតឈ្ងុយឆ្ងាញ់ និងភេសជ្ជៈត្រជាក់គ្រប់មុខ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តរតនគិរី ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Popular Cambodian coffee chain famous for its signature creamy iced coffee and refreshing fruit teas. Located in Ratanakiri with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-7.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-16.jpg",
+      "/foods/food-36.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តរតនគិរី",
     "addressEn": "Main Boulevard, Ratanakiri, Cambodia",
@@ -3869,9 +3934,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "One More Khmer & Asian Restaurant (Kratie #7)",
     "descriptionKh": "ភោជនីយដ្ឋានគ្រួសារដ៏ធំទូលាយ បម្រើអាហារពេលព្រឹក ថ្ងៃត្រង់ និងពេលល្ងាច ជាមួយមុខម្ហូបខ្មែរជាង ១០០ មុខ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តក្រចេះ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Spacious family restaurant serving classic Cambodian breakfast kuyteav, countryside soups, and grilled seafood. Located in Kratie with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1552566626-52f8b828add9?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-8.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-19.jpg",
+      "/foods/food-43.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តក្រចេះ",
     "addressEn": "Main Boulevard, Kratie, Cambodia",
@@ -3906,9 +3972,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Sovanna BBQ & Fresh Seafood Grill (Stung Treng #7)",
     "descriptionKh": "ហាងសាច់អាំង និងគ្រឿងសមុទ្រស្រស់ៗដ៏ល្បីល្បាញ មានសាច់គោអាំង ទឹកប្រហុក មឹកអាំង និងបង្គាអាំងធ្យូងឈ្ងុយឆ្ងាញ់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តស្ទឹងត្រែង ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Bustling open-air charcoal grill famous for tender marinated beef skewers, grilled squid, and spicy dipping sauces. Located in Stung Treng with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-9.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-22.jpg",
+      "/foods/food-50.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តស្ទឹងត្រែង",
     "addressEn": "Main Boulevard, Stung Treng, Cambodia",
@@ -3943,9 +4010,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Cambodian Night Market & Street Food Court (Preah Vihear #7)",
     "descriptionKh": "ប្រជុំដោយតូបអាហារតាមផ្លូវខ្មែរដ៏សម្បូរបែប មីឆា នំគ្រក់ បុកល្ហុង សាច់អាំង និងបង្អែមខ្មែរគ្រប់មុខ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តព្រះវិហារ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Vibrant evening street food market offering sizzling lort cha, crispy num krok, spicy papaya salad, and grilled skewers. Located in Preah Vihear with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-10.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-25.jpg",
+      "/foods/food-57.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តព្រះវិហារ",
     "addressEn": "Main Boulevard, Preah Vihear, Cambodia",
@@ -3980,9 +4048,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Authentic Morning Kuyteav & Grilled Pork Rice (Banteay Meanchey #7)",
     "descriptionKh": "ហាងអាហារពេលព្រឹកដ៏ពេញនិយម មានទឹកស៊ុបឆ្អឹងជ្រូករម្ងាស់ផ្អែមឆ្ងាញ់ និងបាយសាច់ជ្រូកអាំងធ្យូងក្តៅៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តបន្ទាយមានជ័យ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Beloved breakfast spot serving slow-simmered pork bone noodle soup, roasted duck noodles, and charcoal grilled pork rice. Located in Banteay Meanchey with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-11.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-28.jpg",
+      "/foods/food-64.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តបន្ទាយមានជ័យ",
     "addressEn": "Main Boulevard, Banteay Meanchey, Cambodia",
@@ -4017,9 +4086,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Riverside Breeze Dining Pavilion (Oddar Meanchey #7)",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ទន្លេខ្យល់អាកាសបរិសុទ្ធ បម្រើម្ហូបត្រីទន្លេស្រស់ៗ សម្លម្ជូរគ្រឿង និងមាន់ស្រែដុត។ មានទីតាំងស្ថិតនៅក្នុងខេត្តឧត្តរមានជ័យ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Scenic waterside pavilion serving fresh river fish, hot claypot soups, and honey-glazed country chicken. Located in Oddar Meanchey with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-12.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-31.jpg",
+      "/foods/food-71.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តឧត្តរមានជ័យ",
     "addressEn": "Main Boulevard, Oddar Meanchey, Cambodia",
@@ -4054,9 +4124,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Malis Restaurant Cambodian Living Cuisine (Pailin #8)",
     "descriptionKh": "ភោជនីយដ្ឋានម្ហូបខ្មែរប្រណិតដ៏ល្បីល្បាញ បង្កើតឡើងដោយចុងភៅល្បីឈ្មោះ លូ ម៉េង បម្រើអាម៉ុកត្រី គុយទាវម៉ាលីស និងម្ហូបខ្មែរបុរាណ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តប៉ៃលិន ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Premier fine-dining Cambodian restaurant by Chef Luu Meng serving living Khmer cuisine in a lush courtyard setting. Located in Pailin with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-13.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-34.jpg",
+      "/foods/food-78.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តប៉ៃលិន",
     "addressEn": "Main Boulevard, Pailin, Cambodia",
@@ -4091,9 +4162,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "BROWN Coffee and Bakery Roastery (Prey Veng #8)",
     "descriptionKh": "ហាងកាហ្វេទំនើបលំដាប់ជួរមុខរបស់កម្ពុជា បម្រើកាហ្វេឆុងថ្មីៗ នំដុតស្រស់ៗ និងកន្លែងអង្គុយធ្វើការប្រកបដោយផាសុកភាព។ មានទីតាំងស្ថិតនៅក្នុងខេត្តព្រៃវែង ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Cambodia leading specialty coffee roastery and artisanal bakery featuring modern Khmer architectural design. Located in Prey Veng with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-14.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-37.jpg",
+      "/foods/food-85.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តព្រៃវែង",
     "addressEn": "Main Boulevard, Prey Veng, Cambodia",
@@ -4126,9 +4198,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Romdeng Cambodian Restaurant (Svay Rieng #8)",
     "descriptionKh": "ភោជនីយដ្ឋានក្នុងអគារបុរាណ សម្បូរដោយម្ហូបខ្មែរតាមតំបន់ សម្លម្ជូរព្រៃ ត្រីបំពងអំពិលទុំ និងបង្អែមខ្មែរ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តស្វាយរៀង ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Set in a charming colonial villa with a garden pool, serving authentic provincial Cambodian recipes. Located in Svay Rieng with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-15.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-40.jpg",
+      "/foods/food-92.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តស្វាយរៀង",
     "addressEn": "Main Boulevard, Svay Rieng, Cambodia",
@@ -4163,9 +4236,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Kravanh Authentic Khmer Cuisine (Kampong Speu #8)",
     "descriptionKh": "ហាងម្ហូបខ្មែររសជាតិដើមល្បីល្បាញលើ Google Maps ផ្តោតលើគ្រឿងផ្សំធម្មជាតិស្រស់ៗ និងការរៀបចំយ៉ាងផ្ចិតផ្ចង់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ស្ពឺ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Highly rated authentic Khmer kitchen known for classic royal and countryside Cambodian dishes. Located in Kampong Speu with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1544148103-0773bf10d330?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-16.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-43.jpg",
+      "/foods/food-99.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តកំពង់ស្ពឺ",
     "addressEn": "Main Boulevard, Kampong Speu, Cambodia",
@@ -4200,9 +4274,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Tube Coffee Cambodia (Tboung Khmum #8)",
     "descriptionKh": "ហាងកាហ្វេក្នុងស្រុកដ៏ពេញនិយម ល្បីខាងកាហ្វេទឹកដោះគោរសជាតិដិតឈ្ងុយឆ្ងាញ់ និងភេសជ្ជៈត្រជាក់គ្រប់មុខ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តត្បូងឃ្មុំ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Popular Cambodian coffee chain famous for its signature creamy iced coffee and refreshing fruit teas. Located in Tboung Khmum with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-18.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-46.jpg",
+      "/foods/food-6.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តត្បូងឃ្មុំ",
     "addressEn": "Main Boulevard, Tboung Khmum, Cambodia",
@@ -4236,9 +4311,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "One More Khmer & Asian Restaurant (Phnom Penh #8)",
     "descriptionKh": "ភោជនីយដ្ឋានគ្រួសារដ៏ធំទូលាយ បម្រើអាហារពេលព្រឹក ថ្ងៃត្រង់ និងពេលល្ងាច ជាមួយមុខម្ហូបខ្មែរជាង ១០០ មុខ។ មានទីតាំងស្ថិតនៅក្នុងរាជធានីភ្នំពេញ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Spacious family restaurant serving classic Cambodian breakfast kuyteav, countryside soups, and grilled seafood. Located in Phnom Penh with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1552566626-52f8b828add9?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-19.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-49.jpg",
+      "/foods/food-13.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង រាជធានីភ្នំពេញ",
     "addressEn": "Main Boulevard, Phnom Penh, Cambodia",
@@ -4273,9 +4349,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Sovanna BBQ & Fresh Seafood Grill (Siem Reap #8)",
     "descriptionKh": "ហាងសាច់អាំង និងគ្រឿងសមុទ្រស្រស់ៗដ៏ល្បីល្បាញ មានសាច់គោអាំង ទឹកប្រហុក មឹកអាំង និងបង្គាអាំងធ្យូងឈ្ងុយឆ្ងាញ់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តសៀមរាប ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Bustling open-air charcoal grill famous for tender marinated beef skewers, grilled squid, and spicy dipping sauces. Located in Siem Reap with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-20.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-52.jpg",
+      "/foods/food-20.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តសៀមរាប",
     "addressEn": "Main Boulevard, Siem Reap, Cambodia",
@@ -4310,9 +4387,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Cambodian Night Market & Street Food Court (Battambang #8)",
     "descriptionKh": "ប្រជុំដោយតូបអាហារតាមផ្លូវខ្មែរដ៏សម្បូរបែប មីឆា នំគ្រក់ បុកល្ហុង សាច់អាំង និងបង្អែមខ្មែរគ្រប់មុខ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តបាត់ដំបង ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Vibrant evening street food market offering sizzling lort cha, crispy num krok, spicy papaya salad, and grilled skewers. Located in Battambang with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-21.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-55.jpg",
+      "/foods/food-27.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តបាត់ដំបង",
     "addressEn": "Main Boulevard, Battambang, Cambodia",
@@ -4347,9 +4425,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Authentic Morning Kuyteav & Grilled Pork Rice (Kampot #8)",
     "descriptionKh": "ហាងអាហារពេលព្រឹកដ៏ពេញនិយម មានទឹកស៊ុបឆ្អឹងជ្រូករម្ងាស់ផ្អែមឆ្ងាញ់ និងបាយសាច់ជ្រូកអាំងធ្យូងក្តៅៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពត ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Beloved breakfast spot serving slow-simmered pork bone noodle soup, roasted duck noodles, and charcoal grilled pork rice. Located in Kampot with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-22.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-58.jpg",
+      "/foods/food-34.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តកំពត",
     "addressEn": "Main Boulevard, Kampot, Cambodia",
@@ -4383,9 +4462,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Riverside Breeze Dining Pavilion (Kep #8)",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ទន្លេខ្យល់អាកាសបរិសុទ្ធ បម្រើម្ហូបត្រីទន្លេស្រស់ៗ សម្លម្ជូរគ្រឿង និងមាន់ស្រែដុត។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកែប ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Scenic waterside pavilion serving fresh river fish, hot claypot soups, and honey-glazed country chicken. Located in Kep with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-23.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-61.jpg",
+      "/foods/food-41.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តកែប",
     "addressEn": "Main Boulevard, Kep, Cambodia",
@@ -4420,9 +4500,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Malis Restaurant Cambodian Living Cuisine (Preah Sihanouk #9)",
     "descriptionKh": "ភោជនីយដ្ឋានម្ហូបខ្មែរប្រណិតដ៏ល្បីល្បាញ បង្កើតឡើងដោយចុងភៅល្បីឈ្មោះ លូ ម៉េង បម្រើអាម៉ុកត្រី គុយទាវម៉ាលីស និងម្ហូបខ្មែរបុរាណ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តព្រះសីហនុ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Premier fine-dining Cambodian restaurant by Chef Luu Meng serving living Khmer cuisine in a lush courtyard setting. Located in Preah Sihanouk with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-24.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-64.jpg",
+      "/foods/food-48.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តព្រះសីហនុ",
     "addressEn": "Main Boulevard, Preah Sihanouk, Cambodia",
@@ -4457,9 +4538,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "BROWN Coffee and Bakery Roastery (Kampong Cham #9)",
     "descriptionKh": "ហាងកាហ្វេទំនើបលំដាប់ជួរមុខរបស់កម្ពុជា បម្រើកាហ្វេឆុងថ្មីៗ នំដុតស្រស់ៗ និងកន្លែងអង្គុយធ្វើការប្រកបដោយផាសុកភាព។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ចាម ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Cambodia leading specialty coffee roastery and artisanal bakery featuring modern Khmer architectural design. Located in Kampong Cham with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-25.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-67.jpg",
+      "/foods/food-55.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តកំពង់ចាម",
     "addressEn": "Main Boulevard, Kampong Cham, Cambodia",
@@ -4493,9 +4575,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Romdeng Cambodian Restaurant (Kandal #9)",
     "descriptionKh": "ភោជនីយដ្ឋានក្នុងអគារបុរាណ សម្បូរដោយម្ហូបខ្មែរតាមតំបន់ សម្លម្ជូរព្រៃ ត្រីបំពងអំពិលទុំ និងបង្អែមខ្មែរ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកណ្តាល ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Set in a charming colonial villa with a garden pool, serving authentic provincial Cambodian recipes. Located in Kandal with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-26.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-70.jpg",
+      "/foods/food-62.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តកណ្តាល",
     "addressEn": "Main Boulevard, Kandal, Cambodia",
@@ -4530,9 +4613,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Kravanh Authentic Khmer Cuisine (Takeo #9)",
     "descriptionKh": "ហាងម្ហូបខ្មែររសជាតិដើមល្បីល្បាញលើ Google Maps ផ្តោតលើគ្រឿងផ្សំធម្មជាតិស្រស់ៗ និងការរៀបចំយ៉ាងផ្ចិតផ្ចង់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តតាកែវ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Highly rated authentic Khmer kitchen known for classic royal and countryside Cambodian dishes. Located in Takeo with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1544148103-0773bf10d330?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-27.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-73.jpg",
+      "/foods/food-69.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តតាកែវ",
     "addressEn": "Main Boulevard, Takeo, Cambodia",
@@ -4567,9 +4651,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Tube Coffee Cambodia (Pursat #9)",
     "descriptionKh": "ហាងកាហ្វេក្នុងស្រុកដ៏ពេញនិយម ល្បីខាងកាហ្វេទឹកដោះគោរសជាតិដិតឈ្ងុយឆ្ងាញ់ និងភេសជ្ជៈត្រជាក់គ្រប់មុខ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តពោធិ៍សាត់ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Popular Cambodian coffee chain famous for its signature creamy iced coffee and refreshing fruit teas. Located in Pursat with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-28.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-76.jpg",
+      "/foods/food-76.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តពោធិ៍សាត់",
     "addressEn": "Main Boulevard, Pursat, Cambodia",
@@ -4603,9 +4688,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "One More Khmer & Asian Restaurant (Kampong Thom #9)",
     "descriptionKh": "ភោជនីយដ្ឋានគ្រួសារដ៏ធំទូលាយ បម្រើអាហារពេលព្រឹក ថ្ងៃត្រង់ និងពេលល្ងាច ជាមួយមុខម្ហូបខ្មែរជាង ១០០ មុខ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ធំ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Spacious family restaurant serving classic Cambodian breakfast kuyteav, countryside soups, and grilled seafood. Located in Kampong Thom with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1552566626-52f8b828add9?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-29.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-79.jpg",
+      "/foods/food-83.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តកំពង់ធំ",
     "addressEn": "Main Boulevard, Kampong Thom, Cambodia",
@@ -4639,9 +4725,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Sovanna BBQ & Fresh Seafood Grill (Kampong Chhnang #9)",
     "descriptionKh": "ហាងសាច់អាំង និងគ្រឿងសមុទ្រស្រស់ៗដ៏ល្បីល្បាញ មានសាច់គោអាំង ទឹកប្រហុក មឹកអាំង និងបង្គាអាំងធ្យូងឈ្ងុយឆ្ងាញ់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ឆ្នាំង ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Bustling open-air charcoal grill famous for tender marinated beef skewers, grilled squid, and spicy dipping sauces. Located in Kampong Chhnang with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-30.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-82.jpg",
+      "/foods/food-90.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តកំពង់ឆ្នាំង",
     "addressEn": "Main Boulevard, Kampong Chhnang, Cambodia",
@@ -4676,9 +4763,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Cambodian Night Market & Street Food Court (Koh Kong #9)",
     "descriptionKh": "ប្រជុំដោយតូបអាហារតាមផ្លូវខ្មែរដ៏សម្បូរបែប មីឆា នំគ្រក់ បុកល្ហុង សាច់អាំង និងបង្អែមខ្មែរគ្រប់មុខ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកោះកុង ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Vibrant evening street food market offering sizzling lort cha, crispy num krok, spicy papaya salad, and grilled skewers. Located in Koh Kong with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-31.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-85.jpg",
+      "/foods/food-97.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តកោះកុង",
     "addressEn": "Main Boulevard, Koh Kong, Cambodia",
@@ -4713,9 +4801,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Authentic Morning Kuyteav & Grilled Pork Rice (Mondulkiri #9)",
     "descriptionKh": "ហាងអាហារពេលព្រឹកដ៏ពេញនិយម មានទឹកស៊ុបឆ្អឹងជ្រូករម្ងាស់ផ្អែមឆ្ងាញ់ និងបាយសាច់ជ្រូកអាំងធ្យូងក្តៅៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តមណ្ឌលគិរី ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Beloved breakfast spot serving slow-simmered pork bone noodle soup, roasted duck noodles, and charcoal grilled pork rice. Located in Mondulkiri with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-32.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-88.jpg",
+      "/foods/food-4.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តមណ្ឌលគិរី",
     "addressEn": "Main Boulevard, Mondulkiri, Cambodia",
@@ -4750,9 +4839,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Riverside Breeze Dining Pavilion (Ratanakiri #9)",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ទន្លេខ្យល់អាកាសបរិសុទ្ធ បម្រើម្ហូបត្រីទន្លេស្រស់ៗ សម្លម្ជូរគ្រឿង និងមាន់ស្រែដុត។ មានទីតាំងស្ថិតនៅក្នុងខេត្តរតនគិរី ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Scenic waterside pavilion serving fresh river fish, hot claypot soups, and honey-glazed country chicken. Located in Ratanakiri with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-33.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-91.jpg",
+      "/foods/food-11.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តរតនគិរី",
     "addressEn": "Main Boulevard, Ratanakiri, Cambodia",
@@ -4787,9 +4877,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Malis Restaurant Cambodian Living Cuisine (Kratie #10)",
     "descriptionKh": "ភោជនីយដ្ឋានម្ហូបខ្មែរប្រណិតដ៏ល្បីល្បាញ បង្កើតឡើងដោយចុងភៅល្បីឈ្មោះ លូ ម៉េង បម្រើអាម៉ុកត្រី គុយទាវម៉ាលីស និងម្ហូបខ្មែរបុរាណ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តក្រចេះ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Premier fine-dining Cambodian restaurant by Chef Luu Meng serving living Khmer cuisine in a lush courtyard setting. Located in Kratie with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-34.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-94.jpg",
+      "/foods/food-18.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តក្រចេះ",
     "addressEn": "Main Boulevard, Kratie, Cambodia",
@@ -4824,9 +4915,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "BROWN Coffee and Bakery Roastery (Stung Treng #10)",
     "descriptionKh": "ហាងកាហ្វេទំនើបលំដាប់ជួរមុខរបស់កម្ពុជា បម្រើកាហ្វេឆុងថ្មីៗ នំដុតស្រស់ៗ និងកន្លែងអង្គុយធ្វើការប្រកបដោយផាសុកភាព។ មានទីតាំងស្ថិតនៅក្នុងខេត្តស្ទឹងត្រែង ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Cambodia leading specialty coffee roastery and artisanal bakery featuring modern Khmer architectural design. Located in Stung Treng with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-35.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-97.jpg",
+      "/foods/food-25.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តស្ទឹងត្រែង",
     "addressEn": "Main Boulevard, Stung Treng, Cambodia",
@@ -4860,9 +4952,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Romdeng Cambodian Restaurant (Preah Vihear #10)",
     "descriptionKh": "ភោជនីយដ្ឋានក្នុងអគារបុរាណ សម្បូរដោយម្ហូបខ្មែរតាមតំបន់ សម្លម្ជូរព្រៃ ត្រីបំពងអំពិលទុំ និងបង្អែមខ្មែរ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តព្រះវិហារ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Set in a charming colonial villa with a garden pool, serving authentic provincial Cambodian recipes. Located in Preah Vihear with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-36.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-100.jpg",
+      "/foods/food-32.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តព្រះវិហារ",
     "addressEn": "Main Boulevard, Preah Vihear, Cambodia",
@@ -4896,9 +4989,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Kravanh Authentic Khmer Cuisine (Banteay Meanchey #10)",
     "descriptionKh": "ហាងម្ហូបខ្មែររសជាតិដើមល្បីល្បាញលើ Google Maps ផ្តោតលើគ្រឿងផ្សំធម្មជាតិស្រស់ៗ និងការរៀបចំយ៉ាងផ្ចិតផ្ចង់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តបន្ទាយមានជ័យ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Highly rated authentic Khmer kitchen known for classic royal and countryside Cambodian dishes. Located in Banteay Meanchey with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1544148103-0773bf10d330?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-37.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-3.jpg",
+      "/foods/food-39.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តបន្ទាយមានជ័យ",
     "addressEn": "Main Boulevard, Banteay Meanchey, Cambodia",
@@ -4933,9 +5027,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Tube Coffee Cambodia (Oddar Meanchey #10)",
     "descriptionKh": "ហាងកាហ្វេក្នុងស្រុកដ៏ពេញនិយម ល្បីខាងកាហ្វេទឹកដោះគោរសជាតិដិតឈ្ងុយឆ្ងាញ់ និងភេសជ្ជៈត្រជាក់គ្រប់មុខ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តឧត្តរមានជ័យ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Popular Cambodian coffee chain famous for its signature creamy iced coffee and refreshing fruit teas. Located in Oddar Meanchey with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-38.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-6.jpg",
+      "/foods/food-46.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តឧត្តរមានជ័យ",
     "addressEn": "Main Boulevard, Oddar Meanchey, Cambodia",
@@ -4969,9 +5064,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "One More Khmer & Asian Restaurant (Pailin #10)",
     "descriptionKh": "ភោជនីយដ្ឋានគ្រួសារដ៏ធំទូលាយ បម្រើអាហារពេលព្រឹក ថ្ងៃត្រង់ និងពេលល្ងាច ជាមួយមុខម្ហូបខ្មែរជាង ១០០ មុខ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តប៉ៃលិន ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Spacious family restaurant serving classic Cambodian breakfast kuyteav, countryside soups, and grilled seafood. Located in Pailin with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1552566626-52f8b828add9?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-39.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-9.jpg",
+      "/foods/food-53.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តប៉ៃលិន",
     "addressEn": "Main Boulevard, Pailin, Cambodia",
@@ -5006,9 +5102,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Sovanna BBQ & Fresh Seafood Grill (Prey Veng #10)",
     "descriptionKh": "ហាងសាច់អាំង និងគ្រឿងសមុទ្រស្រស់ៗដ៏ល្បីល្បាញ មានសាច់គោអាំង ទឹកប្រហុក មឹកអាំង និងបង្គាអាំងធ្យូងឈ្ងុយឆ្ងាញ់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តព្រៃវែង ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Bustling open-air charcoal grill famous for tender marinated beef skewers, grilled squid, and spicy dipping sauces. Located in Prey Veng with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-40.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-12.jpg",
+      "/foods/food-60.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តព្រៃវែង",
     "addressEn": "Main Boulevard, Prey Veng, Cambodia",
@@ -5043,9 +5140,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Cambodian Night Market & Street Food Court (Svay Rieng #10)",
     "descriptionKh": "ប្រជុំដោយតូបអាហារតាមផ្លូវខ្មែរដ៏សម្បូរបែប មីឆា នំគ្រក់ បុកល្ហុង សាច់អាំង និងបង្អែមខ្មែរគ្រប់មុខ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តស្វាយរៀង ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Vibrant evening street food market offering sizzling lort cha, crispy num krok, spicy papaya salad, and grilled skewers. Located in Svay Rieng with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-41.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-15.jpg",
+      "/foods/food-67.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តស្វាយរៀង",
     "addressEn": "Main Boulevard, Svay Rieng, Cambodia",
@@ -5080,9 +5178,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Authentic Morning Kuyteav & Grilled Pork Rice (Kampong Speu #10)",
     "descriptionKh": "ហាងអាហារពេលព្រឹកដ៏ពេញនិយម មានទឹកស៊ុបឆ្អឹងជ្រូករម្ងាស់ផ្អែមឆ្ងាញ់ និងបាយសាច់ជ្រូកអាំងធ្យូងក្តៅៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ស្ពឺ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Beloved breakfast spot serving slow-simmered pork bone noodle soup, roasted duck noodles, and charcoal grilled pork rice. Located in Kampong Speu with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-42.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-18.jpg",
+      "/foods/food-74.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តកំពង់ស្ពឺ",
     "addressEn": "Main Boulevard, Kampong Speu, Cambodia",
@@ -5117,9 +5216,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Riverside Breeze Dining Pavilion (Tboung Khmum #10)",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ទន្លេខ្យល់អាកាសបរិសុទ្ធ បម្រើម្ហូបត្រីទន្លេស្រស់ៗ សម្លម្ជូរគ្រឿង និងមាន់ស្រែដុត។ មានទីតាំងស្ថិតនៅក្នុងខេត្តត្បូងឃ្មុំ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Scenic waterside pavilion serving fresh river fish, hot claypot soups, and honey-glazed country chicken. Located in Tboung Khmum with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-43.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-21.jpg",
+      "/foods/food-81.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តត្បូងឃ្មុំ",
     "addressEn": "Main Boulevard, Tboung Khmum, Cambodia",
@@ -5153,9 +5253,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Malis Restaurant Cambodian Living Cuisine (Phnom Penh #11)",
     "descriptionKh": "ភោជនីយដ្ឋានម្ហូបខ្មែរប្រណិតដ៏ល្បីល្បាញ បង្កើតឡើងដោយចុងភៅល្បីឈ្មោះ លូ ម៉េង បម្រើអាម៉ុកត្រី គុយទាវម៉ាលីស និងម្ហូបខ្មែរបុរាណ។ មានទីតាំងស្ថិតនៅក្នុងរាជធានីភ្នំពេញ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Premier fine-dining Cambodian restaurant by Chef Luu Meng serving living Khmer cuisine in a lush courtyard setting. Located in Phnom Penh with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-44.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-24.jpg",
+      "/foods/food-88.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង រាជធានីភ្នំពេញ",
     "addressEn": "Main Boulevard, Phnom Penh, Cambodia",
@@ -5190,9 +5291,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "BROWN Coffee and Bakery Roastery (Siem Reap #11)",
     "descriptionKh": "ហាងកាហ្វេទំនើបលំដាប់ជួរមុខរបស់កម្ពុជា បម្រើកាហ្វេឆុងថ្មីៗ នំដុតស្រស់ៗ និងកន្លែងអង្គុយធ្វើការប្រកបដោយផាសុកភាព។ មានទីតាំងស្ថិតនៅក្នុងខេត្តសៀមរាប ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Cambodia leading specialty coffee roastery and artisanal bakery featuring modern Khmer architectural design. Located in Siem Reap with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-45.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-27.jpg",
+      "/foods/food-95.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តសៀមរាប",
     "addressEn": "Main Boulevard, Siem Reap, Cambodia",
@@ -5226,9 +5328,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Romdeng Cambodian Restaurant (Battambang #11)",
     "descriptionKh": "ភោជនីយដ្ឋានក្នុងអគារបុរាណ សម្បូរដោយម្ហូបខ្មែរតាមតំបន់ សម្លម្ជូរព្រៃ ត្រីបំពងអំពិលទុំ និងបង្អែមខ្មែរ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តបាត់ដំបង ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Set in a charming colonial villa with a garden pool, serving authentic provincial Cambodian recipes. Located in Battambang with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-46.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-30.jpg",
+      "/foods/food-2.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តបាត់ដំបង",
     "addressEn": "Main Boulevard, Battambang, Cambodia",
@@ -5263,9 +5366,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Kravanh Authentic Khmer Cuisine (Kampot #11)",
     "descriptionKh": "ហាងម្ហូបខ្មែររសជាតិដើមល្បីល្បាញលើ Google Maps ផ្តោតលើគ្រឿងផ្សំធម្មជាតិស្រស់ៗ និងការរៀបចំយ៉ាងផ្ចិតផ្ចង់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពត ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Highly rated authentic Khmer kitchen known for classic royal and countryside Cambodian dishes. Located in Kampot with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1544148103-0773bf10d330?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-47.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-33.jpg",
+      "/foods/food-9.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តកំពត",
     "addressEn": "Main Boulevard, Kampot, Cambodia",
@@ -5300,9 +5404,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Tube Coffee Cambodia (Kep #11)",
     "descriptionKh": "ហាងកាហ្វេក្នុងស្រុកដ៏ពេញនិយម ល្បីខាងកាហ្វេទឹកដោះគោរសជាតិដិតឈ្ងុយឆ្ងាញ់ និងភេសជ្ជៈត្រជាក់គ្រប់មុខ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកែប ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Popular Cambodian coffee chain famous for its signature creamy iced coffee and refreshing fruit teas. Located in Kep with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-48.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-36.jpg",
+      "/foods/food-16.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តកែប",
     "addressEn": "Main Boulevard, Kep, Cambodia",
@@ -5336,9 +5441,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "One More Khmer & Asian Restaurant (Preah Sihanouk #11)",
     "descriptionKh": "ភោជនីយដ្ឋានគ្រួសារដ៏ធំទូលាយ បម្រើអាហារពេលព្រឹក ថ្ងៃត្រង់ និងពេលល្ងាច ជាមួយមុខម្ហូបខ្មែរជាង ១០០ មុខ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តព្រះសីហនុ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Spacious family restaurant serving classic Cambodian breakfast kuyteav, countryside soups, and grilled seafood. Located in Preah Sihanouk with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1552566626-52f8b828add9?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-49.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-39.jpg",
+      "/foods/food-23.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តព្រះសីហនុ",
     "addressEn": "Main Boulevard, Preah Sihanouk, Cambodia",
@@ -5373,9 +5479,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Sovanna BBQ & Fresh Seafood Grill (Kampong Cham #11)",
     "descriptionKh": "ហាងសាច់អាំង និងគ្រឿងសមុទ្រស្រស់ៗដ៏ល្បីល្បាញ មានសាច់គោអាំង ទឹកប្រហុក មឹកអាំង និងបង្គាអាំងធ្យូងឈ្ងុយឆ្ងាញ់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ចាម ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Bustling open-air charcoal grill famous for tender marinated beef skewers, grilled squid, and spicy dipping sauces. Located in Kampong Cham with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-50.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-42.jpg",
+      "/foods/food-30.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តកំពង់ចាម",
     "addressEn": "Main Boulevard, Kampong Cham, Cambodia",
@@ -5409,9 +5516,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Cambodian Night Market & Street Food Court (Kandal #11)",
     "descriptionKh": "ប្រជុំដោយតូបអាហារតាមផ្លូវខ្មែរដ៏សម្បូរបែប មីឆា នំគ្រក់ បុកល្ហុង សាច់អាំង និងបង្អែមខ្មែរគ្រប់មុខ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកណ្តាល ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Vibrant evening street food market offering sizzling lort cha, crispy num krok, spicy papaya salad, and grilled skewers. Located in Kandal with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-1.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-45.jpg",
+      "/foods/food-37.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តកណ្តាល",
     "addressEn": "Main Boulevard, Kandal, Cambodia",
@@ -5446,9 +5554,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Authentic Morning Kuyteav & Grilled Pork Rice (Takeo #11)",
     "descriptionKh": "ហាងអាហារពេលព្រឹកដ៏ពេញនិយម មានទឹកស៊ុបឆ្អឹងជ្រូករម្ងាស់ផ្អែមឆ្ងាញ់ និងបាយសាច់ជ្រូកអាំងធ្យូងក្តៅៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តតាកែវ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Beloved breakfast spot serving slow-simmered pork bone noodle soup, roasted duck noodles, and charcoal grilled pork rice. Located in Takeo with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-2.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-48.jpg",
+      "/foods/food-44.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តតាកែវ",
     "addressEn": "Main Boulevard, Takeo, Cambodia",
@@ -5483,9 +5592,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Riverside Breeze Dining Pavilion (Pursat #11)",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ទន្លេខ្យល់អាកាសបរិសុទ្ធ បម្រើម្ហូបត្រីទន្លេស្រស់ៗ សម្លម្ជូរគ្រឿង និងមាន់ស្រែដុត។ មានទីតាំងស្ថិតនៅក្នុងខេត្តពោធិ៍សាត់ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Scenic waterside pavilion serving fresh river fish, hot claypot soups, and honey-glazed country chicken. Located in Pursat with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-3.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-51.jpg",
+      "/foods/food-51.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តពោធិ៍សាត់",
     "addressEn": "Main Boulevard, Pursat, Cambodia",
@@ -5520,9 +5630,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Malis Restaurant Cambodian Living Cuisine (Kampong Thom #12)",
     "descriptionKh": "ភោជនីយដ្ឋានម្ហូបខ្មែរប្រណិតដ៏ល្បីល្បាញ បង្កើតឡើងដោយចុងភៅល្បីឈ្មោះ លូ ម៉េង បម្រើអាម៉ុកត្រី គុយទាវម៉ាលីស និងម្ហូបខ្មែរបុរាណ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ធំ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Premier fine-dining Cambodian restaurant by Chef Luu Meng serving living Khmer cuisine in a lush courtyard setting. Located in Kampong Thom with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-4.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-54.jpg",
+      "/foods/food-58.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តកំពង់ធំ",
     "addressEn": "Main Boulevard, Kampong Thom, Cambodia",
@@ -5557,9 +5668,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "BROWN Coffee and Bakery Roastery (Kampong Chhnang #12)",
     "descriptionKh": "ហាងកាហ្វេទំនើបលំដាប់ជួរមុខរបស់កម្ពុជា បម្រើកាហ្វេឆុងថ្មីៗ នំដុតស្រស់ៗ និងកន្លែងអង្គុយធ្វើការប្រកបដោយផាសុកភាព។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ឆ្នាំង ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Cambodia leading specialty coffee roastery and artisanal bakery featuring modern Khmer architectural design. Located in Kampong Chhnang with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-5.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-57.jpg",
+      "/foods/food-65.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តកំពង់ឆ្នាំង",
     "addressEn": "Main Boulevard, Kampong Chhnang, Cambodia",
@@ -5593,9 +5705,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Romdeng Cambodian Restaurant (Koh Kong #12)",
     "descriptionKh": "ភោជនីយដ្ឋានក្នុងអគារបុរាណ សម្បូរដោយម្ហូបខ្មែរតាមតំបន់ សម្លម្ជូរព្រៃ ត្រីបំពងអំពិលទុំ និងបង្អែមខ្មែរ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកោះកុង ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Set in a charming colonial villa with a garden pool, serving authentic provincial Cambodian recipes. Located in Koh Kong with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-6.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-60.jpg",
+      "/foods/food-72.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តកោះកុង",
     "addressEn": "Main Boulevard, Koh Kong, Cambodia",
@@ -5630,9 +5743,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Kravanh Authentic Khmer Cuisine (Mondulkiri #12)",
     "descriptionKh": "ហាងម្ហូបខ្មែររសជាតិដើមល្បីល្បាញលើ Google Maps ផ្តោតលើគ្រឿងផ្សំធម្មជាតិស្រស់ៗ និងការរៀបចំយ៉ាងផ្ចិតផ្ចង់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តមណ្ឌលគិរី ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Highly rated authentic Khmer kitchen known for classic royal and countryside Cambodian dishes. Located in Mondulkiri with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1544148103-0773bf10d330?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-7.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-63.jpg",
+      "/foods/food-79.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តមណ្ឌលគិរី",
     "addressEn": "Main Boulevard, Mondulkiri, Cambodia",
@@ -5666,9 +5780,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Tube Coffee Cambodia (Ratanakiri #12)",
     "descriptionKh": "ហាងកាហ្វេក្នុងស្រុកដ៏ពេញនិយម ល្បីខាងកាហ្វេទឹកដោះគោរសជាតិដិតឈ្ងុយឆ្ងាញ់ និងភេសជ្ជៈត្រជាក់គ្រប់មុខ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តរតនគិរី ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Popular Cambodian coffee chain famous for its signature creamy iced coffee and refreshing fruit teas. Located in Ratanakiri with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-8.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-66.jpg",
+      "/foods/food-86.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តរតនគិរី",
     "addressEn": "Main Boulevard, Ratanakiri, Cambodia",
@@ -5702,9 +5817,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "One More Khmer & Asian Restaurant (Kratie #12)",
     "descriptionKh": "ភោជនីយដ្ឋានគ្រួសារដ៏ធំទូលាយ បម្រើអាហារពេលព្រឹក ថ្ងៃត្រង់ និងពេលល្ងាច ជាមួយមុខម្ហូបខ្មែរជាង ១០០ មុខ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តក្រចេះ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Spacious family restaurant serving classic Cambodian breakfast kuyteav, countryside soups, and grilled seafood. Located in Kratie with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1552566626-52f8b828add9?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-9.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-69.jpg",
+      "/foods/food-93.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តក្រចេះ",
     "addressEn": "Main Boulevard, Kratie, Cambodia",
@@ -5739,9 +5855,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Sovanna BBQ & Fresh Seafood Grill (Stung Treng #12)",
     "descriptionKh": "ហាងសាច់អាំង និងគ្រឿងសមុទ្រស្រស់ៗដ៏ល្បីល្បាញ មានសាច់គោអាំង ទឹកប្រហុក មឹកអាំង និងបង្គាអាំងធ្យូងឈ្ងុយឆ្ងាញ់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តស្ទឹងត្រែង ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Bustling open-air charcoal grill famous for tender marinated beef skewers, grilled squid, and spicy dipping sauces. Located in Stung Treng with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-10.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-72.jpg",
+      "/foods/food-100.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តស្ទឹងត្រែង",
     "addressEn": "Main Boulevard, Stung Treng, Cambodia",
@@ -5776,9 +5893,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Cambodian Night Market & Street Food Court (Preah Vihear #12)",
     "descriptionKh": "ប្រជុំដោយតូបអាហារតាមផ្លូវខ្មែរដ៏សម្បូរបែប មីឆា នំគ្រក់ បុកល្ហុង សាច់អាំង និងបង្អែមខ្មែរគ្រប់មុខ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តព្រះវិហារ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Vibrant evening street food market offering sizzling lort cha, crispy num krok, spicy papaya salad, and grilled skewers. Located in Preah Vihear with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-11.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-75.jpg",
+      "/foods/food-7.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តព្រះវិហារ",
     "addressEn": "Main Boulevard, Preah Vihear, Cambodia",
@@ -5813,9 +5931,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Authentic Morning Kuyteav & Grilled Pork Rice (Banteay Meanchey #12)",
     "descriptionKh": "ហាងអាហារពេលព្រឹកដ៏ពេញនិយម មានទឹកស៊ុបឆ្អឹងជ្រូករម្ងាស់ផ្អែមឆ្ងាញ់ និងបាយសាច់ជ្រូកអាំងធ្យូងក្តៅៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តបន្ទាយមានជ័យ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Beloved breakfast spot serving slow-simmered pork bone noodle soup, roasted duck noodles, and charcoal grilled pork rice. Located in Banteay Meanchey with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-12.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-78.jpg",
+      "/foods/food-14.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តបន្ទាយមានជ័យ",
     "addressEn": "Main Boulevard, Banteay Meanchey, Cambodia",
@@ -5850,9 +5969,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Riverside Breeze Dining Pavilion (Oddar Meanchey #12)",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ទន្លេខ្យល់អាកាសបរិសុទ្ធ បម្រើម្ហូបត្រីទន្លេស្រស់ៗ សម្លម្ជូរគ្រឿង និងមាន់ស្រែដុត។ មានទីតាំងស្ថិតនៅក្នុងខេត្តឧត្តរមានជ័យ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Scenic waterside pavilion serving fresh river fish, hot claypot soups, and honey-glazed country chicken. Located in Oddar Meanchey with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-13.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-81.jpg",
+      "/foods/food-21.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តឧត្តរមានជ័យ",
     "addressEn": "Main Boulevard, Oddar Meanchey, Cambodia",
@@ -5887,9 +6007,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Malis Restaurant Cambodian Living Cuisine (Pailin #13)",
     "descriptionKh": "ភោជនីយដ្ឋានម្ហូបខ្មែរប្រណិតដ៏ល្បីល្បាញ បង្កើតឡើងដោយចុងភៅល្បីឈ្មោះ លូ ម៉េង បម្រើអាម៉ុកត្រី គុយទាវម៉ាលីស និងម្ហូបខ្មែរបុរាណ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តប៉ៃលិន ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Premier fine-dining Cambodian restaurant by Chef Luu Meng serving living Khmer cuisine in a lush courtyard setting. Located in Pailin with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-14.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-84.jpg",
+      "/foods/food-28.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តប៉ៃលិន",
     "addressEn": "Main Boulevard, Pailin, Cambodia",
@@ -5923,9 +6044,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "BROWN Coffee and Bakery Roastery (Prey Veng #13)",
     "descriptionKh": "ហាងកាហ្វេទំនើបលំដាប់ជួរមុខរបស់កម្ពុជា បម្រើកាហ្វេឆុងថ្មីៗ នំដុតស្រស់ៗ និងកន្លែងអង្គុយធ្វើការប្រកបដោយផាសុកភាព។ មានទីតាំងស្ថិតនៅក្នុងខេត្តព្រៃវែង ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Cambodia leading specialty coffee roastery and artisanal bakery featuring modern Khmer architectural design. Located in Prey Veng with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-15.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-87.jpg",
+      "/foods/food-35.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តព្រៃវែង",
     "addressEn": "Main Boulevard, Prey Veng, Cambodia",
@@ -5959,9 +6081,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Romdeng Cambodian Restaurant (Svay Rieng #13)",
     "descriptionKh": "ភោជនីយដ្ឋានក្នុងអគារបុរាណ សម្បូរដោយម្ហូបខ្មែរតាមតំបន់ សម្លម្ជូរព្រៃ ត្រីបំពងអំពិលទុំ និងបង្អែមខ្មែរ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តស្វាយរៀង ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Set in a charming colonial villa with a garden pool, serving authentic provincial Cambodian recipes. Located in Svay Rieng with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-16.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-90.jpg",
+      "/foods/food-42.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តស្វាយរៀង",
     "addressEn": "Main Boulevard, Svay Rieng, Cambodia",
@@ -5996,9 +6119,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Kravanh Authentic Khmer Cuisine (Kampong Speu #13)",
     "descriptionKh": "ហាងម្ហូបខ្មែររសជាតិដើមល្បីល្បាញលើ Google Maps ផ្តោតលើគ្រឿងផ្សំធម្មជាតិស្រស់ៗ និងការរៀបចំយ៉ាងផ្ចិតផ្ចង់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ស្ពឺ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Highly rated authentic Khmer kitchen known for classic royal and countryside Cambodian dishes. Located in Kampong Speu with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1544148103-0773bf10d330?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-18.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-93.jpg",
+      "/foods/food-49.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តកំពង់ស្ពឺ",
     "addressEn": "Main Boulevard, Kampong Speu, Cambodia",
@@ -6033,9 +6157,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Tube Coffee Cambodia (Tboung Khmum #13)",
     "descriptionKh": "ហាងកាហ្វេក្នុងស្រុកដ៏ពេញនិយម ល្បីខាងកាហ្វេទឹកដោះគោរសជាតិដិតឈ្ងុយឆ្ងាញ់ និងភេសជ្ជៈត្រជាក់គ្រប់មុខ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តត្បូងឃ្មុំ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Popular Cambodian coffee chain famous for its signature creamy iced coffee and refreshing fruit teas. Located in Tboung Khmum with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-19.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-96.jpg",
+      "/foods/food-56.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តត្បូងឃ្មុំ",
     "addressEn": "Main Boulevard, Tboung Khmum, Cambodia",
@@ -6069,9 +6194,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "One More Khmer & Asian Restaurant (Phnom Penh #13)",
     "descriptionKh": "ភោជនីយដ្ឋានគ្រួសារដ៏ធំទូលាយ បម្រើអាហារពេលព្រឹក ថ្ងៃត្រង់ និងពេលល្ងាច ជាមួយមុខម្ហូបខ្មែរជាង ១០០ មុខ។ មានទីតាំងស្ថិតនៅក្នុងរាជធានីភ្នំពេញ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Spacious family restaurant serving classic Cambodian breakfast kuyteav, countryside soups, and grilled seafood. Located in Phnom Penh with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1552566626-52f8b828add9?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-20.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-99.jpg",
+      "/foods/food-63.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង រាជធានីភ្នំពេញ",
     "addressEn": "Main Boulevard, Phnom Penh, Cambodia",
@@ -6106,9 +6232,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Sovanna BBQ & Fresh Seafood Grill (Siem Reap #13)",
     "descriptionKh": "ហាងសាច់អាំង និងគ្រឿងសមុទ្រស្រស់ៗដ៏ល្បីល្បាញ មានសាច់គោអាំង ទឹកប្រហុក មឹកអាំង និងបង្គាអាំងធ្យូងឈ្ងុយឆ្ងាញ់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តសៀមរាប ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Bustling open-air charcoal grill famous for tender marinated beef skewers, grilled squid, and spicy dipping sauces. Located in Siem Reap with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-21.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-2.jpg",
+      "/foods/food-70.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តសៀមរាប",
     "addressEn": "Main Boulevard, Siem Reap, Cambodia",
@@ -6143,9 +6270,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Cambodian Night Market & Street Food Court (Battambang #13)",
     "descriptionKh": "ប្រជុំដោយតូបអាហារតាមផ្លូវខ្មែរដ៏សម្បូរបែប មីឆា នំគ្រក់ បុកល្ហុង សាច់អាំង និងបង្អែមខ្មែរគ្រប់មុខ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តបាត់ដំបង ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Vibrant evening street food market offering sizzling lort cha, crispy num krok, spicy papaya salad, and grilled skewers. Located in Battambang with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-22.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-5.jpg",
+      "/foods/food-77.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តបាត់ដំបង",
     "addressEn": "Main Boulevard, Battambang, Cambodia",
@@ -6179,9 +6307,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Authentic Morning Kuyteav & Grilled Pork Rice (Kampot #13)",
     "descriptionKh": "ហាងអាហារពេលព្រឹកដ៏ពេញនិយម មានទឹកស៊ុបឆ្អឹងជ្រូករម្ងាស់ផ្អែមឆ្ងាញ់ និងបាយសាច់ជ្រូកអាំងធ្យូងក្តៅៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពត ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Beloved breakfast spot serving slow-simmered pork bone noodle soup, roasted duck noodles, and charcoal grilled pork rice. Located in Kampot with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-23.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-8.jpg",
+      "/foods/food-84.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តកំពត",
     "addressEn": "Main Boulevard, Kampot, Cambodia",
@@ -6216,9 +6345,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Riverside Breeze Dining Pavilion (Kep #13)",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ទន្លេខ្យល់អាកាសបរិសុទ្ធ បម្រើម្ហូបត្រីទន្លេស្រស់ៗ សម្លម្ជូរគ្រឿង និងមាន់ស្រែដុត។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកែប ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Scenic waterside pavilion serving fresh river fish, hot claypot soups, and honey-glazed country chicken. Located in Kep with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-24.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-11.jpg",
+      "/foods/food-91.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តកែប",
     "addressEn": "Main Boulevard, Kep, Cambodia",
@@ -6253,9 +6383,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Malis Restaurant Cambodian Living Cuisine (Preah Sihanouk #14)",
     "descriptionKh": "ភោជនីយដ្ឋានម្ហូបខ្មែរប្រណិតដ៏ល្បីល្បាញ បង្កើតឡើងដោយចុងភៅល្បីឈ្មោះ លូ ម៉េង បម្រើអាម៉ុកត្រី គុយទាវម៉ាលីស និងម្ហូបខ្មែរបុរាណ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តព្រះសីហនុ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Premier fine-dining Cambodian restaurant by Chef Luu Meng serving living Khmer cuisine in a lush courtyard setting. Located in Preah Sihanouk with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-25.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-14.jpg",
+      "/foods/food-98.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តព្រះសីហនុ",
     "addressEn": "Main Boulevard, Preah Sihanouk, Cambodia",
@@ -6290,9 +6421,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "BROWN Coffee and Bakery Roastery (Kampong Cham #14)",
     "descriptionKh": "ហាងកាហ្វេទំនើបលំដាប់ជួរមុខរបស់កម្ពុជា បម្រើកាហ្វេឆុងថ្មីៗ នំដុតស្រស់ៗ និងកន្លែងអង្គុយធ្វើការប្រកបដោយផាសុកភាព។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ចាម ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Cambodia leading specialty coffee roastery and artisanal bakery featuring modern Khmer architectural design. Located in Kampong Cham with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-26.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-17.jpg",
+      "/foods/food-5.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តកំពង់ចាម",
     "addressEn": "Main Boulevard, Kampong Cham, Cambodia",
@@ -6326,9 +6458,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Romdeng Cambodian Restaurant (Kandal #14)",
     "descriptionKh": "ភោជនីយដ្ឋានក្នុងអគារបុរាណ សម្បូរដោយម្ហូបខ្មែរតាមតំបន់ សម្លម្ជូរព្រៃ ត្រីបំពងអំពិលទុំ និងបង្អែមខ្មែរ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកណ្តាល ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Set in a charming colonial villa with a garden pool, serving authentic provincial Cambodian recipes. Located in Kandal with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-27.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-20.jpg",
+      "/foods/food-12.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តកណ្តាល",
     "addressEn": "Main Boulevard, Kandal, Cambodia",
@@ -6363,9 +6496,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Kravanh Authentic Khmer Cuisine (Takeo #14)",
     "descriptionKh": "ហាងម្ហូបខ្មែររសជាតិដើមល្បីល្បាញលើ Google Maps ផ្តោតលើគ្រឿងផ្សំធម្មជាតិស្រស់ៗ និងការរៀបចំយ៉ាងផ្ចិតផ្ចង់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តតាកែវ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Highly rated authentic Khmer kitchen known for classic royal and countryside Cambodian dishes. Located in Takeo with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1544148103-0773bf10d330?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-28.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-23.jpg",
+      "/foods/food-19.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តតាកែវ",
     "addressEn": "Main Boulevard, Takeo, Cambodia",
@@ -6400,9 +6534,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Tube Coffee Cambodia (Pursat #14)",
     "descriptionKh": "ហាងកាហ្វេក្នុងស្រុកដ៏ពេញនិយម ល្បីខាងកាហ្វេទឹកដោះគោរសជាតិដិតឈ្ងុយឆ្ងាញ់ និងភេសជ្ជៈត្រជាក់គ្រប់មុខ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តពោធិ៍សាត់ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Popular Cambodian coffee chain famous for its signature creamy iced coffee and refreshing fruit teas. Located in Pursat with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-29.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-26.jpg",
+      "/foods/food-26.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តពោធិ៍សាត់",
     "addressEn": "Main Boulevard, Pursat, Cambodia",
@@ -6435,9 +6570,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "One More Khmer & Asian Restaurant (Kampong Thom #14)",
     "descriptionKh": "ភោជនីយដ្ឋានគ្រួសារដ៏ធំទូលាយ បម្រើអាហារពេលព្រឹក ថ្ងៃត្រង់ និងពេលល្ងាច ជាមួយមុខម្ហូបខ្មែរជាង ១០០ មុខ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ធំ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Spacious family restaurant serving classic Cambodian breakfast kuyteav, countryside soups, and grilled seafood. Located in Kampong Thom with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1552566626-52f8b828add9?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-30.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-29.jpg",
+      "/foods/food-33.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តកំពង់ធំ",
     "addressEn": "Main Boulevard, Kampong Thom, Cambodia",
@@ -6472,9 +6608,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Sovanna BBQ & Fresh Seafood Grill (Kampong Chhnang #14)",
     "descriptionKh": "ហាងសាច់អាំង និងគ្រឿងសមុទ្រស្រស់ៗដ៏ល្បីល្បាញ មានសាច់គោអាំង ទឹកប្រហុក មឹកអាំង និងបង្គាអាំងធ្យូងឈ្ងុយឆ្ងាញ់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ឆ្នាំង ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Bustling open-air charcoal grill famous for tender marinated beef skewers, grilled squid, and spicy dipping sauces. Located in Kampong Chhnang with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-31.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-32.jpg",
+      "/foods/food-40.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តកំពង់ឆ្នាំង",
     "addressEn": "Main Boulevard, Kampong Chhnang, Cambodia",
@@ -6509,9 +6646,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Cambodian Night Market & Street Food Court (Koh Kong #14)",
     "descriptionKh": "ប្រជុំដោយតូបអាហារតាមផ្លូវខ្មែរដ៏សម្បូរបែប មីឆា នំគ្រក់ បុកល្ហុង សាច់អាំង និងបង្អែមខ្មែរគ្រប់មុខ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកោះកុង ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Vibrant evening street food market offering sizzling lort cha, crispy num krok, spicy papaya salad, and grilled skewers. Located in Koh Kong with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-32.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-35.jpg",
+      "/foods/food-47.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តកោះកុង",
     "addressEn": "Main Boulevard, Koh Kong, Cambodia",
@@ -6546,9 +6684,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Authentic Morning Kuyteav & Grilled Pork Rice (Mondulkiri #14)",
     "descriptionKh": "ហាងអាហារពេលព្រឹកដ៏ពេញនិយម មានទឹកស៊ុបឆ្អឹងជ្រូករម្ងាស់ផ្អែមឆ្ងាញ់ និងបាយសាច់ជ្រូកអាំងធ្យូងក្តៅៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តមណ្ឌលគិរី ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Beloved breakfast spot serving slow-simmered pork bone noodle soup, roasted duck noodles, and charcoal grilled pork rice. Located in Mondulkiri with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-33.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-38.jpg",
+      "/foods/food-54.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តមណ្ឌលគិរី",
     "addressEn": "Main Boulevard, Mondulkiri, Cambodia",
@@ -6583,9 +6722,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Riverside Breeze Dining Pavilion (Ratanakiri #14)",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ទន្លេខ្យល់អាកាសបរិសុទ្ធ បម្រើម្ហូបត្រីទន្លេស្រស់ៗ សម្លម្ជូរគ្រឿង និងមាន់ស្រែដុត។ មានទីតាំងស្ថិតនៅក្នុងខេត្តរតនគិរី ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Scenic waterside pavilion serving fresh river fish, hot claypot soups, and honey-glazed country chicken. Located in Ratanakiri with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-34.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-41.jpg",
+      "/foods/food-61.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តរតនគិរី",
     "addressEn": "Main Boulevard, Ratanakiri, Cambodia",
@@ -6620,9 +6760,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Malis Restaurant Cambodian Living Cuisine (Kratie #15)",
     "descriptionKh": "ភោជនីយដ្ឋានម្ហូបខ្មែរប្រណិតដ៏ល្បីល្បាញ បង្កើតឡើងដោយចុងភៅល្បីឈ្មោះ លូ ម៉េង បម្រើអាម៉ុកត្រី គុយទាវម៉ាលីស និងម្ហូបខ្មែរបុរាណ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តក្រចេះ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Premier fine-dining Cambodian restaurant by Chef Luu Meng serving living Khmer cuisine in a lush courtyard setting. Located in Kratie with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-35.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-44.jpg",
+      "/foods/food-68.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តក្រចេះ",
     "addressEn": "Main Boulevard, Kratie, Cambodia",
@@ -6657,9 +6798,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "BROWN Coffee and Bakery Roastery (Stung Treng #15)",
     "descriptionKh": "ហាងកាហ្វេទំនើបលំដាប់ជួរមុខរបស់កម្ពុជា បម្រើកាហ្វេឆុងថ្មីៗ នំដុតស្រស់ៗ និងកន្លែងអង្គុយធ្វើការប្រកបដោយផាសុកភាព។ មានទីតាំងស្ថិតនៅក្នុងខេត្តស្ទឹងត្រែង ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Cambodia leading specialty coffee roastery and artisanal bakery featuring modern Khmer architectural design. Located in Stung Treng with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-36.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-47.jpg",
+      "/foods/food-75.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តស្ទឹងត្រែង",
     "addressEn": "Main Boulevard, Stung Treng, Cambodia",
@@ -6692,9 +6834,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Romdeng Cambodian Restaurant (Preah Vihear #15)",
     "descriptionKh": "ភោជនីយដ្ឋានក្នុងអគារបុរាណ សម្បូរដោយម្ហូបខ្មែរតាមតំបន់ សម្លម្ជូរព្រៃ ត្រីបំពងអំពិលទុំ និងបង្អែមខ្មែរ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តព្រះវិហារ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Set in a charming colonial villa with a garden pool, serving authentic provincial Cambodian recipes. Located in Preah Vihear with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-37.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-50.jpg",
+      "/foods/food-82.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តព្រះវិហារ",
     "addressEn": "Main Boulevard, Preah Vihear, Cambodia",
@@ -6729,9 +6872,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Kravanh Authentic Khmer Cuisine (Banteay Meanchey #15)",
     "descriptionKh": "ហាងម្ហូបខ្មែររសជាតិដើមល្បីល្បាញលើ Google Maps ផ្តោតលើគ្រឿងផ្សំធម្មជាតិស្រស់ៗ និងការរៀបចំយ៉ាងផ្ចិតផ្ចង់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តបន្ទាយមានជ័យ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Highly rated authentic Khmer kitchen known for classic royal and countryside Cambodian dishes. Located in Banteay Meanchey with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1544148103-0773bf10d330?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-38.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-53.jpg",
+      "/foods/food-89.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តបន្ទាយមានជ័យ",
     "addressEn": "Main Boulevard, Banteay Meanchey, Cambodia",
@@ -6766,9 +6910,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Tube Coffee Cambodia (Oddar Meanchey #15)",
     "descriptionKh": "ហាងកាហ្វេក្នុងស្រុកដ៏ពេញនិយម ល្បីខាងកាហ្វេទឹកដោះគោរសជាតិដិតឈ្ងុយឆ្ងាញ់ និងភេសជ្ជៈត្រជាក់គ្រប់មុខ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តឧត្តរមានជ័យ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Popular Cambodian coffee chain famous for its signature creamy iced coffee and refreshing fruit teas. Located in Oddar Meanchey with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-39.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-56.jpg",
+      "/foods/food-96.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តឧត្តរមានជ័យ",
     "addressEn": "Main Boulevard, Oddar Meanchey, Cambodia",
@@ -6802,9 +6947,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "One More Khmer & Asian Restaurant (Pailin #15)",
     "descriptionKh": "ភោជនីយដ្ឋានគ្រួសារដ៏ធំទូលាយ បម្រើអាហារពេលព្រឹក ថ្ងៃត្រង់ និងពេលល្ងាច ជាមួយមុខម្ហូបខ្មែរជាង ១០០ មុខ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តប៉ៃលិន ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Spacious family restaurant serving classic Cambodian breakfast kuyteav, countryside soups, and grilled seafood. Located in Pailin with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1552566626-52f8b828add9?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-40.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-59.jpg",
+      "/foods/food-3.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តប៉ៃលិន",
     "addressEn": "Main Boulevard, Pailin, Cambodia",
@@ -6839,9 +6985,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Sovanna BBQ & Fresh Seafood Grill (Prey Veng #15)",
     "descriptionKh": "ហាងសាច់អាំង និងគ្រឿងសមុទ្រស្រស់ៗដ៏ល្បីល្បាញ មានសាច់គោអាំង ទឹកប្រហុក មឹកអាំង និងបង្គាអាំងធ្យូងឈ្ងុយឆ្ងាញ់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តព្រៃវែង ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Bustling open-air charcoal grill famous for tender marinated beef skewers, grilled squid, and spicy dipping sauces. Located in Prey Veng with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-41.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-62.jpg",
+      "/foods/food-10.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តព្រៃវែង",
     "addressEn": "Main Boulevard, Prey Veng, Cambodia",
@@ -6876,9 +7023,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Cambodian Night Market & Street Food Court (Svay Rieng #15)",
     "descriptionKh": "ប្រជុំដោយតូបអាហារតាមផ្លូវខ្មែរដ៏សម្បូរបែប មីឆា នំគ្រក់ បុកល្ហុង សាច់អាំង និងបង្អែមខ្មែរគ្រប់មុខ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តស្វាយរៀង ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Vibrant evening street food market offering sizzling lort cha, crispy num krok, spicy papaya salad, and grilled skewers. Located in Svay Rieng with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-42.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-65.jpg",
+      "/foods/food-17.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តស្វាយរៀង",
     "addressEn": "Main Boulevard, Svay Rieng, Cambodia",
@@ -6913,9 +7061,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Authentic Morning Kuyteav & Grilled Pork Rice (Kampong Speu #15)",
     "descriptionKh": "ហាងអាហារពេលព្រឹកដ៏ពេញនិយម មានទឹកស៊ុបឆ្អឹងជ្រូករម្ងាស់ផ្អែមឆ្ងាញ់ និងបាយសាច់ជ្រូកអាំងធ្យូងក្តៅៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ស្ពឺ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Beloved breakfast spot serving slow-simmered pork bone noodle soup, roasted duck noodles, and charcoal grilled pork rice. Located in Kampong Speu with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-43.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-68.jpg",
+      "/foods/food-24.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តកំពង់ស្ពឺ",
     "addressEn": "Main Boulevard, Kampong Speu, Cambodia",
@@ -6949,9 +7098,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Riverside Breeze Dining Pavilion (Tboung Khmum #15)",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ទន្លេខ្យល់អាកាសបរិសុទ្ធ បម្រើម្ហូបត្រីទន្លេស្រស់ៗ សម្លម្ជូរគ្រឿង និងមាន់ស្រែដុត។ មានទីតាំងស្ថិតនៅក្នុងខេត្តត្បូងឃ្មុំ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Scenic waterside pavilion serving fresh river fish, hot claypot soups, and honey-glazed country chicken. Located in Tboung Khmum with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-44.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-71.jpg",
+      "/foods/food-31.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តត្បូងឃ្មុំ",
     "addressEn": "Main Boulevard, Tboung Khmum, Cambodia",
@@ -6986,9 +7136,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Malis Restaurant Cambodian Living Cuisine (Phnom Penh #16)",
     "descriptionKh": "ភោជនីយដ្ឋានម្ហូបខ្មែរប្រណិតដ៏ល្បីល្បាញ បង្កើតឡើងដោយចុងភៅល្បីឈ្មោះ លូ ម៉េង បម្រើអាម៉ុកត្រី គុយទាវម៉ាលីស និងម្ហូបខ្មែរបុរាណ។ មានទីតាំងស្ថិតនៅក្នុងរាជធានីភ្នំពេញ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Premier fine-dining Cambodian restaurant by Chef Luu Meng serving living Khmer cuisine in a lush courtyard setting. Located in Phnom Penh with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-45.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-74.jpg",
+      "/foods/food-38.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង រាជធានីភ្នំពេញ",
     "addressEn": "Main Boulevard, Phnom Penh, Cambodia",
@@ -7023,9 +7174,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "BROWN Coffee and Bakery Roastery (Siem Reap #16)",
     "descriptionKh": "ហាងកាហ្វេទំនើបលំដាប់ជួរមុខរបស់កម្ពុជា បម្រើកាហ្វេឆុងថ្មីៗ នំដុតស្រស់ៗ និងកន្លែងអង្គុយធ្វើការប្រកបដោយផាសុកភាព។ មានទីតាំងស្ថិតនៅក្នុងខេត្តសៀមរាប ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Cambodia leading specialty coffee roastery and artisanal bakery featuring modern Khmer architectural design. Located in Siem Reap with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-46.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-77.jpg",
+      "/foods/food-45.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តសៀមរាប",
     "addressEn": "Main Boulevard, Siem Reap, Cambodia",
@@ -7059,9 +7211,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Romdeng Cambodian Restaurant (Battambang #16)",
     "descriptionKh": "ភោជនីយដ្ឋានក្នុងអគារបុរាណ សម្បូរដោយម្ហូបខ្មែរតាមតំបន់ សម្លម្ជូរព្រៃ ត្រីបំពងអំពិលទុំ និងបង្អែមខ្មែរ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តបាត់ដំបង ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Set in a charming colonial villa with a garden pool, serving authentic provincial Cambodian recipes. Located in Battambang with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-47.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-80.jpg",
+      "/foods/food-52.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តបាត់ដំបង",
     "addressEn": "Main Boulevard, Battambang, Cambodia",
@@ -7096,9 +7249,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Kravanh Authentic Khmer Cuisine (Kampot #16)",
     "descriptionKh": "ហាងម្ហូបខ្មែររសជាតិដើមល្បីល្បាញលើ Google Maps ផ្តោតលើគ្រឿងផ្សំធម្មជាតិស្រស់ៗ និងការរៀបចំយ៉ាងផ្ចិតផ្ចង់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពត ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Highly rated authentic Khmer kitchen known for classic royal and countryside Cambodian dishes. Located in Kampot with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1544148103-0773bf10d330?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-48.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-83.jpg",
+      "/foods/food-59.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តកំពត",
     "addressEn": "Main Boulevard, Kampot, Cambodia",
@@ -7133,9 +7287,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Tube Coffee Cambodia (Kep #16)",
     "descriptionKh": "ហាងកាហ្វេក្នុងស្រុកដ៏ពេញនិយម ល្បីខាងកាហ្វេទឹកដោះគោរសជាតិដិតឈ្ងុយឆ្ងាញ់ និងភេសជ្ជៈត្រជាក់គ្រប់មុខ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកែប ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Popular Cambodian coffee chain famous for its signature creamy iced coffee and refreshing fruit teas. Located in Kep with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-49.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-86.jpg",
+      "/foods/food-66.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តកែប",
     "addressEn": "Main Boulevard, Kep, Cambodia",
@@ -7169,9 +7324,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "One More Khmer & Asian Restaurant (Preah Sihanouk #16)",
     "descriptionKh": "ភោជនីយដ្ឋានគ្រួសារដ៏ធំទូលាយ បម្រើអាហារពេលព្រឹក ថ្ងៃត្រង់ និងពេលល្ងាច ជាមួយមុខម្ហូបខ្មែរជាង ១០០ មុខ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តព្រះសីហនុ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Spacious family restaurant serving classic Cambodian breakfast kuyteav, countryside soups, and grilled seafood. Located in Preah Sihanouk with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1552566626-52f8b828add9?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-50.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-89.jpg",
+      "/foods/food-73.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តព្រះសីហនុ",
     "addressEn": "Main Boulevard, Preah Sihanouk, Cambodia",
@@ -7205,9 +7361,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Sovanna BBQ & Fresh Seafood Grill (Kampong Cham #16)",
     "descriptionKh": "ហាងសាច់អាំង និងគ្រឿងសមុទ្រស្រស់ៗដ៏ល្បីល្បាញ មានសាច់គោអាំង ទឹកប្រហុក មឹកអាំង និងបង្គាអាំងធ្យូងឈ្ងុយឆ្ងាញ់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ចាម ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Bustling open-air charcoal grill famous for tender marinated beef skewers, grilled squid, and spicy dipping sauces. Located in Kampong Cham with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-1.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-92.jpg",
+      "/foods/food-80.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តកំពង់ចាម",
     "addressEn": "Main Boulevard, Kampong Cham, Cambodia",
@@ -7242,9 +7399,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Cambodian Night Market & Street Food Court (Kandal #16)",
     "descriptionKh": "ប្រជុំដោយតូបអាហារតាមផ្លូវខ្មែរដ៏សម្បូរបែប មីឆា នំគ្រក់ បុកល្ហុង សាច់អាំង និងបង្អែមខ្មែរគ្រប់មុខ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកណ្តាល ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Vibrant evening street food market offering sizzling lort cha, crispy num krok, spicy papaya salad, and grilled skewers. Located in Kandal with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-2.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-95.jpg",
+      "/foods/food-87.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តកណ្តាល",
     "addressEn": "Main Boulevard, Kandal, Cambodia",
@@ -7279,9 +7437,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Authentic Morning Kuyteav & Grilled Pork Rice (Takeo #16)",
     "descriptionKh": "ហាងអាហារពេលព្រឹកដ៏ពេញនិយម មានទឹកស៊ុបឆ្អឹងជ្រូករម្ងាស់ផ្អែមឆ្ងាញ់ និងបាយសាច់ជ្រូកអាំងធ្យូងក្តៅៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តតាកែវ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Beloved breakfast spot serving slow-simmered pork bone noodle soup, roasted duck noodles, and charcoal grilled pork rice. Located in Takeo with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-3.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-98.jpg",
+      "/foods/food-94.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តតាកែវ",
     "addressEn": "Main Boulevard, Takeo, Cambodia",
@@ -7316,9 +7475,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Riverside Breeze Dining Pavilion (Pursat #16)",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ទន្លេខ្យល់អាកាសបរិសុទ្ធ បម្រើម្ហូបត្រីទន្លេស្រស់ៗ សម្លម្ជូរគ្រឿង និងមាន់ស្រែដុត។ មានទីតាំងស្ថិតនៅក្នុងខេត្តពោធិ៍សាត់ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Scenic waterside pavilion serving fresh river fish, hot claypot soups, and honey-glazed country chicken. Located in Pursat with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-4.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-1.jpg",
+      "/foods/food-1.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តពោធិ៍សាត់",
     "addressEn": "Main Boulevard, Pursat, Cambodia",
@@ -7353,9 +7513,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Malis Restaurant Cambodian Living Cuisine (Kampong Thom #17)",
     "descriptionKh": "ភោជនីយដ្ឋានម្ហូបខ្មែរប្រណិតដ៏ល្បីល្បាញ បង្កើតឡើងដោយចុងភៅល្បីឈ្មោះ លូ ម៉េង បម្រើអាម៉ុកត្រី គុយទាវម៉ាលីស និងម្ហូបខ្មែរបុរាណ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ធំ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Premier fine-dining Cambodian restaurant by Chef Luu Meng serving living Khmer cuisine in a lush courtyard setting. Located in Kampong Thom with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-5.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-4.jpg",
+      "/foods/food-8.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តកំពង់ធំ",
     "addressEn": "Main Boulevard, Kampong Thom, Cambodia",
@@ -7390,9 +7551,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "BROWN Coffee and Bakery Roastery (Kampong Chhnang #17)",
     "descriptionKh": "ហាងកាហ្វេទំនើបលំដាប់ជួរមុខរបស់កម្ពុជា បម្រើកាហ្វេឆុងថ្មីៗ នំដុតស្រស់ៗ និងកន្លែងអង្គុយធ្វើការប្រកបដោយផាសុកភាព។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ឆ្នាំង ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Cambodia leading specialty coffee roastery and artisanal bakery featuring modern Khmer architectural design. Located in Kampong Chhnang with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-6.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-7.jpg",
+      "/foods/food-15.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តកំពង់ឆ្នាំង",
     "addressEn": "Main Boulevard, Kampong Chhnang, Cambodia",
@@ -7426,9 +7588,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Romdeng Cambodian Restaurant (Koh Kong #17)",
     "descriptionKh": "ភោជនីយដ្ឋានក្នុងអគារបុរាណ សម្បូរដោយម្ហូបខ្មែរតាមតំបន់ សម្លម្ជូរព្រៃ ត្រីបំពងអំពិលទុំ និងបង្អែមខ្មែរ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកោះកុង ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Set in a charming colonial villa with a garden pool, serving authentic provincial Cambodian recipes. Located in Koh Kong with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-7.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-10.jpg",
+      "/foods/food-22.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តកោះកុង",
     "addressEn": "Main Boulevard, Koh Kong, Cambodia",
@@ -7462,9 +7625,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Kravanh Authentic Khmer Cuisine (Mondulkiri #17)",
     "descriptionKh": "ហាងម្ហូបខ្មែររសជាតិដើមល្បីល្បាញលើ Google Maps ផ្តោតលើគ្រឿងផ្សំធម្មជាតិស្រស់ៗ និងការរៀបចំយ៉ាងផ្ចិតផ្ចង់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តមណ្ឌលគិរី ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Highly rated authentic Khmer kitchen known for classic royal and countryside Cambodian dishes. Located in Mondulkiri with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1544148103-0773bf10d330?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-8.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-13.jpg",
+      "/foods/food-29.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តមណ្ឌលគិរី",
     "addressEn": "Main Boulevard, Mondulkiri, Cambodia",
@@ -7499,9 +7663,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Tube Coffee Cambodia (Ratanakiri #17)",
     "descriptionKh": "ហាងកាហ្វេក្នុងស្រុកដ៏ពេញនិយម ល្បីខាងកាហ្វេទឹកដោះគោរសជាតិដិតឈ្ងុយឆ្ងាញ់ និងភេសជ្ជៈត្រជាក់គ្រប់មុខ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តរតនគិរី ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Popular Cambodian coffee chain famous for its signature creamy iced coffee and refreshing fruit teas. Located in Ratanakiri with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-9.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-16.jpg",
+      "/foods/food-36.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តរតនគិរី",
     "addressEn": "Main Boulevard, Ratanakiri, Cambodia",
@@ -7535,9 +7700,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "One More Khmer & Asian Restaurant (Kratie #17)",
     "descriptionKh": "ភោជនីយដ្ឋានគ្រួសារដ៏ធំទូលាយ បម្រើអាហារពេលព្រឹក ថ្ងៃត្រង់ និងពេលល្ងាច ជាមួយមុខម្ហូបខ្មែរជាង ១០០ មុខ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តក្រចេះ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Spacious family restaurant serving classic Cambodian breakfast kuyteav, countryside soups, and grilled seafood. Located in Kratie with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1552566626-52f8b828add9?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-10.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-19.jpg",
+      "/foods/food-43.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តក្រចេះ",
     "addressEn": "Main Boulevard, Kratie, Cambodia",
@@ -7572,9 +7738,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Sovanna BBQ & Fresh Seafood Grill (Stung Treng #17)",
     "descriptionKh": "ហាងសាច់អាំង និងគ្រឿងសមុទ្រស្រស់ៗដ៏ល្បីល្បាញ មានសាច់គោអាំង ទឹកប្រហុក មឹកអាំង និងបង្គាអាំងធ្យូងឈ្ងុយឆ្ងាញ់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តស្ទឹងត្រែង ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Bustling open-air charcoal grill famous for tender marinated beef skewers, grilled squid, and spicy dipping sauces. Located in Stung Treng with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-11.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-22.jpg",
+      "/foods/food-50.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តស្ទឹងត្រែង",
     "addressEn": "Main Boulevard, Stung Treng, Cambodia",
@@ -7609,9 +7776,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Cambodian Night Market & Street Food Court (Preah Vihear #17)",
     "descriptionKh": "ប្រជុំដោយតូបអាហារតាមផ្លូវខ្មែរដ៏សម្បូរបែប មីឆា នំគ្រក់ បុកល្ហុង សាច់អាំង និងបង្អែមខ្មែរគ្រប់មុខ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តព្រះវិហារ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Vibrant evening street food market offering sizzling lort cha, crispy num krok, spicy papaya salad, and grilled skewers. Located in Preah Vihear with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-12.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-25.jpg",
+      "/foods/food-57.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តព្រះវិហារ",
     "addressEn": "Main Boulevard, Preah Vihear, Cambodia",
@@ -7646,9 +7814,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Authentic Morning Kuyteav & Grilled Pork Rice (Banteay Meanchey #17)",
     "descriptionKh": "ហាងអាហារពេលព្រឹកដ៏ពេញនិយម មានទឹកស៊ុបឆ្អឹងជ្រូករម្ងាស់ផ្អែមឆ្ងាញ់ និងបាយសាច់ជ្រូកអាំងធ្យូងក្តៅៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តបន្ទាយមានជ័យ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Beloved breakfast spot serving slow-simmered pork bone noodle soup, roasted duck noodles, and charcoal grilled pork rice. Located in Banteay Meanchey with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-13.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-28.jpg",
+      "/foods/food-64.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តបន្ទាយមានជ័យ",
     "addressEn": "Main Boulevard, Banteay Meanchey, Cambodia",
@@ -7683,9 +7852,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Riverside Breeze Dining Pavilion (Oddar Meanchey #17)",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ទន្លេខ្យល់អាកាសបរិសុទ្ធ បម្រើម្ហូបត្រីទន្លេស្រស់ៗ សម្លម្ជូរគ្រឿង និងមាន់ស្រែដុត។ មានទីតាំងស្ថិតនៅក្នុងខេត្តឧត្តរមានជ័យ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Scenic waterside pavilion serving fresh river fish, hot claypot soups, and honey-glazed country chicken. Located in Oddar Meanchey with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-14.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-31.jpg",
+      "/foods/food-71.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តឧត្តរមានជ័យ",
     "addressEn": "Main Boulevard, Oddar Meanchey, Cambodia",
@@ -7719,9 +7889,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Malis Restaurant Cambodian Living Cuisine (Pailin #18)",
     "descriptionKh": "ភោជនីយដ្ឋានម្ហូបខ្មែរប្រណិតដ៏ល្បីល្បាញ បង្កើតឡើងដោយចុងភៅល្បីឈ្មោះ លូ ម៉េង បម្រើអាម៉ុកត្រី គុយទាវម៉ាលីស និងម្ហូបខ្មែរបុរាណ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តប៉ៃលិន ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Premier fine-dining Cambodian restaurant by Chef Luu Meng serving living Khmer cuisine in a lush courtyard setting. Located in Pailin with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-15.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-34.jpg",
+      "/foods/food-78.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តប៉ៃលិន",
     "addressEn": "Main Boulevard, Pailin, Cambodia",
@@ -7756,9 +7927,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "BROWN Coffee and Bakery Roastery (Prey Veng #18)",
     "descriptionKh": "ហាងកាហ្វេទំនើបលំដាប់ជួរមុខរបស់កម្ពុជា បម្រើកាហ្វេឆុងថ្មីៗ នំដុតស្រស់ៗ និងកន្លែងអង្គុយធ្វើការប្រកបដោយផាសុកភាព។ មានទីតាំងស្ថិតនៅក្នុងខេត្តព្រៃវែង ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Cambodia leading specialty coffee roastery and artisanal bakery featuring modern Khmer architectural design. Located in Prey Veng with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-16.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-37.jpg",
+      "/foods/food-85.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តព្រៃវែង",
     "addressEn": "Main Boulevard, Prey Veng, Cambodia",
@@ -7792,9 +7964,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Romdeng Cambodian Restaurant (Svay Rieng #18)",
     "descriptionKh": "ភោជនីយដ្ឋានក្នុងអគារបុរាណ សម្បូរដោយម្ហូបខ្មែរតាមតំបន់ សម្លម្ជូរព្រៃ ត្រីបំពងអំពិលទុំ និងបង្អែមខ្មែរ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តស្វាយរៀង ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Set in a charming colonial villa with a garden pool, serving authentic provincial Cambodian recipes. Located in Svay Rieng with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-18.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-40.jpg",
+      "/foods/food-92.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តស្វាយរៀង",
     "addressEn": "Main Boulevard, Svay Rieng, Cambodia",
@@ -7829,9 +8002,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Kravanh Authentic Khmer Cuisine (Kampong Speu #18)",
     "descriptionKh": "ហាងម្ហូបខ្មែររសជាតិដើមល្បីល្បាញលើ Google Maps ផ្តោតលើគ្រឿងផ្សំធម្មជាតិស្រស់ៗ និងការរៀបចំយ៉ាងផ្ចិតផ្ចង់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ស្ពឺ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Highly rated authentic Khmer kitchen known for classic royal and countryside Cambodian dishes. Located in Kampong Speu with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1544148103-0773bf10d330?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-19.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-43.jpg",
+      "/foods/food-99.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តកំពង់ស្ពឺ",
     "addressEn": "Main Boulevard, Kampong Speu, Cambodia",
@@ -7866,9 +8040,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Tube Coffee Cambodia (Tboung Khmum #18)",
     "descriptionKh": "ហាងកាហ្វេក្នុងស្រុកដ៏ពេញនិយម ល្បីខាងកាហ្វេទឹកដោះគោរសជាតិដិតឈ្ងុយឆ្ងាញ់ និងភេសជ្ជៈត្រជាក់គ្រប់មុខ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តត្បូងឃ្មុំ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Popular Cambodian coffee chain famous for its signature creamy iced coffee and refreshing fruit teas. Located in Tboung Khmum with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-20.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-46.jpg",
+      "/foods/food-6.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តត្បូងឃ្មុំ",
     "addressEn": "Main Boulevard, Tboung Khmum, Cambodia",
@@ -7902,9 +8077,10 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "One More Khmer & Asian Restaurant (Phnom Penh #18)",
     "descriptionKh": "ភោជនីយដ្ឋានគ្រួសារដ៏ធំទូលាយ បម្រើអាហារពេលព្រឹក ថ្ងៃត្រង់ និងពេលល្ងាច ជាមួយមុខម្ហូបខ្មែរជាង ១០០ មុខ។ មានទីតាំងស្ថិតនៅក្នុងរាជធានីភ្នំពេញ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Spacious family restaurant serving classic Cambodian breakfast kuyteav, countryside soups, and grilled seafood. Located in Phnom Penh with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1552566626-52f8b828add9?w=800&auto=format&fit=crop&q=80",
+    "photoUrl": "/Shop/rest-21.jpg",
     "galleryPhotos": [
-      "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=800&auto=format&fit=crop&q=80"
+      "/foods/food-49.jpg",
+      "/foods/food-13.jpg"
     ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង រាជធានីភ្នំពេញ",
     "addressEn": "Main Boulevard, Phnom Penh, Cambodia",
@@ -7939,8 +8115,11 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Sovanna BBQ & Fresh Seafood Grill (Phnom Penh #18)",
     "descriptionKh": "ហាងសាច់អាំង និងគ្រឿងសមុទ្រស្រស់ៗដ៏ល្បីល្បាញ មានសាច់គោអាំង ទឹកប្រហុក មឹកអាំង និងបង្គាអាំងធ្យូងឈ្ងុយឆ្ងាញ់។ មានទីតាំងស្ថិតនៅក្នុងរាជធានីភ្នំពេញ ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Bustling open-air charcoal grill famous for tender marinated beef skewers, grilled squid, and spicy dipping sauces. Located in Phnom Penh with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80",
-    "galleryPhotos": [],
+    "photoUrl": "/Shop/rest-22.jpg",
+    "galleryPhotos": [
+      "/foods/food-52.jpg",
+      "/foods/food-20.jpg"
+    ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង រាជធានីភ្នំពេញ",
     "addressEn": "Main Boulevard, Phnom Penh, Cambodia",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -7974,8 +8153,11 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Cambodian Night Market & Street Food Court (Siem Reap #18)",
     "descriptionKh": "ប្រជុំដោយតូបអាហារតាមផ្លូវខ្មែរដ៏សម្បូរបែប មីឆា នំគ្រក់ បុកល្ហុង សាច់អាំង និងបង្អែមខ្មែរគ្រប់មុខ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តសៀមរាប ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Vibrant evening street food market offering sizzling lort cha, crispy num krok, spicy papaya salad, and grilled skewers. Located in Siem Reap with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800&auto=format&fit=crop&q=80",
-    "galleryPhotos": [],
+    "photoUrl": "/Shop/rest-23.jpg",
+    "galleryPhotos": [
+      "/foods/food-55.jpg",
+      "/foods/food-27.jpg"
+    ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តសៀមរាប",
     "addressEn": "Main Boulevard, Siem Reap, Cambodia",
     "provinceKh": "ខេត្តសៀមរាប",
@@ -8009,8 +8191,11 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Authentic Morning Kuyteav & Grilled Pork Rice (Siem Reap #18)",
     "descriptionKh": "ហាងអាហារពេលព្រឹកដ៏ពេញនិយម មានទឹកស៊ុបឆ្អឹងជ្រូករម្ងាស់ផ្អែមឆ្ងាញ់ និងបាយសាច់ជ្រូកអាំងធ្យូងក្តៅៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តសៀមរាប ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Beloved breakfast spot serving slow-simmered pork bone noodle soup, roasted duck noodles, and charcoal grilled pork rice. Located in Siem Reap with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=800&auto=format&fit=crop&q=80",
-    "galleryPhotos": [],
+    "photoUrl": "/Shop/rest-24.jpg",
+    "galleryPhotos": [
+      "/foods/food-58.jpg",
+      "/foods/food-34.jpg"
+    ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តសៀមរាប",
     "addressEn": "Main Boulevard, Siem Reap, Cambodia",
     "provinceKh": "ខេត្តសៀមរាប",
@@ -8044,8 +8229,11 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Riverside Breeze Dining Pavilion (Kampot #18)",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ទន្លេខ្យល់អាកាសបរិសុទ្ធ បម្រើម្ហូបត្រីទន្លេស្រស់ៗ សម្លម្ជូរគ្រឿង និងមាន់ស្រែដុត។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពត ផ្តល់ជូនបរិយាកាសស្អាត ម្ហូបឆ្ងាញ់ និងទីតាំង GPS ច្បាស់លាស់លើ Google Maps។",
     "descriptionEn": "Scenic waterside pavilion serving fresh river fish, hot claypot soups, and honey-glazed country chicken. Located in Kampot with verified GPS coordinates and Google Maps directions.",
-    "photoUrl": "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80",
-    "galleryPhotos": [],
+    "photoUrl": "/Shop/rest-25.jpg",
+    "galleryPhotos": [
+      "/foods/food-61.jpg",
+      "/foods/food-41.jpg"
+    ],
     "addressKh": "ផ្លូវធំកណ្តាលក្រុង ខេត្តកំពត",
     "addressEn": "Main Boulevard, Kampot, Cambodia",
     "provinceKh": "ខេត្តកំពត",

@@ -333,12 +333,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const membershipTier = (r.membershipTier || (isPromoted ? 'premium' : 'free')) as MembershipTier;
     const membershipExpiresAt = r.membershipExpiresAt || (membershipTier === 'premium' ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString() : undefined);
     
-    // Normalize photoUrl for rest-1 to rest-50 (excluding rest-17) to use authentic bundled shop photos
-    let photoUrl = r.photoUrl || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80';
+    // Normalize photoUrl for all rest-1..rest-220 to use authentic bundled shop photos
+    let photoUrl = r.photoUrl || '/Shop/rest-1.jpg';
     if (typeof r.id === 'string') {
-      const match = r.id.match(/^rest-([1-9]|[1-4][0-9]|50)$/);
-      if (match && match[1] !== '17' && (!photoUrl || photoUrl.startsWith('https://images.unsplash.com') || photoUrl.startsWith('/Shop/'))) {
-        photoUrl = `/Shop/rest-${match[1]}.jpg`;
+      const match = r.id.match(/^rest-(\d+)$/);
+      if (match && (!photoUrl || photoUrl.startsWith('https://images.unsplash.com') || photoUrl.startsWith('/Shop/'))) {
+        const num = parseInt(match[1], 10);
+        if (num >= 1 && num <= 50 && num !== 17) {
+          photoUrl = `/Shop/rest-${num}.jpg`;
+        } else {
+          const fallbackShopNum = ((num - 1) % 48) + 1 >= 17 ? ((num - 1) % 48) + 2 : ((num - 1) % 48) + 1;
+          photoUrl = `/Shop/rest-${fallbackShopNum}.jpg`;
+        }
       }
     }
 
@@ -388,7 +394,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [restaurants, setRestaurants] = useState<Restaurant[]>(() => {
     try {
-      const saved = localStorage.getItem('kft_restaurants_google_v3');
+      const saved = localStorage.getItem('kft_restaurants_real_v5');
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length >= 50) {
@@ -396,13 +402,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
       }
     } catch (e) {
-      console.warn('Failed to parse kft_restaurants_google_v3', e);
+      console.warn('Failed to parse kft_restaurants_real_v5', e);
     }
 
     // Preserve any user-created custom restaurants from previous storage key
     let customLegacyRestaurants: Restaurant[] = [];
     try {
-      const oldSaved = localStorage.getItem('kft_restaurants_membership_v2');
+      const oldSaved = localStorage.getItem('kft_restaurants_google_v3') || localStorage.getItem('kft_restaurants_membership_v2');
       if (oldSaved && oldSaved !== 'undefined' && oldSaved !== 'null') {
         const parsedOld = JSON.parse(oldSaved);
         if (Array.isArray(parsedOld)) {
@@ -411,6 +417,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             .map(normalizeRestaurant);
         }
       }
+      localStorage.removeItem('kft_restaurants_google_v3');
+      localStorage.removeItem('kft_restaurants_membership_v2');
       localStorage.removeItem('kft_restaurants_membership_v1');
       localStorage.removeItem('kft_restaurants_v3');
       localStorage.removeItem('kft_restaurants_v4');
@@ -483,15 +491,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [destinations, setDestinations] = useState<TouristDestination[]>(() => {
     try {
-      const saved = localStorage.getItem('kft_destinations_google_v3');
+      const saved = localStorage.getItem('kft_destinations_real_v5');
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length >= 100) return parsed;
+        if (Array.isArray(parsed) && parsed.length >= 100 && !String(parsed[0]?.photoUrl || '').includes('1569683795645')) {
+          return parsed;
+        }
       }
     } catch (e) {
-      console.warn('Failed to parse kft_destinations_google_v3', e);
+      console.warn('Failed to parse kft_destinations_real_v5', e);
     }
     try {
+      localStorage.removeItem('kft_destinations_google_v3');
       localStorage.removeItem('kft_destinations_100_v2');
       localStorage.removeItem('kft_destinations_100_v1');
       localStorage.removeItem('kft_destinations_v3');
@@ -502,7 +513,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [posts, setPosts] = useState<CommunityPost[]>(() => {
     try {
-      const saved = localStorage.getItem('kft_posts_v5');
+      const saved = localStorage.getItem('kft_posts_v6');
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) {
@@ -603,13 +614,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // AI Trending Food Discovery Section State
   const [trendingFoods, setTrendingFoods] = useState<TrendingFoodItem[]>(() => {
     try {
-      const saved = localStorage.getItem('kft_trending_foods_v2');
+      localStorage.removeItem('kft_trending_foods_v2');
+      const saved = localStorage.getItem('kft_trending_foods_v3');
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0 && String(parsed[0]?.photoUrl || '').startsWith('/foods/')) return parsed;
       }
     } catch (e) {
-      console.warn('Failed to parse kft_trending_foods_v2', e);
+      console.warn('Failed to parse kft_trending_foods_v3', e);
     }
     return initialTrendingFoods;
   });
@@ -634,7 +646,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   useEffect(() => {
     try {
-      localStorage.setItem('kft_trending_foods_v2', JSON.stringify(trendingFoods));
+      localStorage.setItem('kft_trending_foods_v3', JSON.stringify(trendingFoods));
     } catch {}
   }, [trendingFoods]);
 
@@ -659,7 +671,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           type: 'restaurant',
           nameKh: 'ភោជនីយដ្ឋាន ម៉ាលីស (Malis)',
           nameEn: 'Malis Restaurant',
-          photoUrl: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80',
+          photoUrl: '/Shop/rest-1.jpg',
           categoryKh: 'ម្ហូបខ្មែរបុរាណប្រណិត',
           provinceKh: 'រាជធានីភ្នំពេញ',
           priceDisplay: '$$$',
@@ -682,7 +694,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           type: 'destination',
           nameKh: 'ប្រាសាទអង្គរវត្ត (បេតិកភណ្ឌពិភពលោក)',
           nameEn: 'Angkor Wat Temple',
-          photoUrl: 'https://images.unsplash.com/photo-1569154941061-e231b4725ef1?w=800&auto=format&fit=crop&q=80',
+          photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/4/41/Angkor_Wat.jpg/960px-Angkor_Wat.jpg',
           categoryKh: 'ប្រាសាទបុរាណ / បេតិកភណ្ឌ',
           provinceKh: 'ខេត្តសៀមរាប',
           rating: 5.0,
@@ -704,7 +716,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           type: 'destination',
           nameKh: 'ឧទ្យានជាតិព្រះមុនីវង្សបូកគោ',
           nameEn: 'Preah Monivong Bokor National Park',
-          photoUrl: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&auto=format&fit=crop&q=80',
+          photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/b/ba/Waterfall_Bokor_Hill_Station.jpg/960px-Waterfall_Bokor_Hill_Station.jpg',
           categoryKh: 'ភ្នំ & ឧទ្យានជាតិ',
           provinceKh: 'ខេត្តកំពត',
           rating: 4.8,
@@ -717,7 +729,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [wishlists, setWishlists] = useState<Wishlist[]>(() => {
     try {
-      const storageKey = `kft_wishlists_v2_${currentUser?.id || 'guest'}`;
+      const storageKey = `kft_wishlists_v3_${currentUser?.id || 'guest'}`;
       const saved = localStorage.getItem(storageKey);
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
@@ -809,7 +821,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Sync wishlists, trip plans & notifications to localStorage
   useEffect(() => {
     try {
-      const storageKey = `kft_wishlists_v2_${currentUser?.id || 'guest'}`;
+      const storageKey = `kft_wishlists_v3_${currentUser?.id || 'guest'}`;
       localStorage.setItem(storageKey, JSON.stringify(wishlists));
     } catch {}
   }, [wishlists, currentUser]);
@@ -898,7 +910,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     try {
       if (restaurants && restaurants.length > 0) {
-        localStorage.setItem('kft_restaurants_google_v3', JSON.stringify(restaurants));
+        localStorage.setItem('kft_restaurants_real_v5', JSON.stringify(restaurants));
       }
     } catch (e) {
       console.warn('Storage sync failed for restaurants:', e);
@@ -908,7 +920,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     try {
       if (destinations && destinations.length > 0) {
-        localStorage.setItem('kft_destinations_google_v3', JSON.stringify(destinations));
+        localStorage.setItem('kft_destinations_real_v5', JSON.stringify(destinations));
       }
     } catch (e) {
       console.warn('Storage sync failed for destinations:', e);
@@ -918,7 +930,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     try {
       if (posts) {
-        localStorage.setItem('kft_posts_v5', JSON.stringify(posts));
+        localStorage.setItem('kft_posts_v6', JSON.stringify(posts));
       }
     } catch (e) {
       console.warn('Storage sync failed for posts:', e);
