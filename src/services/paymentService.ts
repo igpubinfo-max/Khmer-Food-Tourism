@@ -1,13 +1,43 @@
 // Khmer Food & Tourism — Secure Payment & Subscription Verification Service
 // Google Play Billing + KHQR/Bakong + Credit Card Integration with Server-Side Verification Proofs
 
-import { User, RegistrationTransaction } from '../types';
+import { User, RegistrationTransaction, VIP_PLANS, VipPlanConfig } from '../types';
 
 export const VIP_ANNUAL_PRICE_USD = 4.99;
 export const VIP_SUBSCRIPTION_DAYS = 90;
 export const VIP_QUARTERLY_PRICE_USD = 2.99;
 export const VIP_QUARTERLY_DAYS = 30;
-export const GOOGLE_PLAY_PRODUCT_ID = 'com.khmerfoodtourism.subscription.vip.annual';
+export const GOOGLE_PLAY_PRODUCT_ID = 'com.khmerfoodtourism.subscription.vip.90days';
+export { VIP_PLANS };
+
+/**
+ * Centralized backend plan validator.
+ * Strictly maps any plan identifier, duration, or amount to one of the two official VIP plans:
+ * - VIP 30 Days ($2.99 / 30 days)
+ * - VIP 90 Days ($4.99 / 90 days)
+ * Never trusts arbitrary client durations or prices.
+ */
+export function resolveAndValidateVipPlan(input?: {
+  planType?: 'quarterly' | 'annual' | string;
+  durationDays?: number;
+  amountUsd?: number;
+}): VipPlanConfig {
+  if (input?.planType === 'quarterly' || input?.durationDays === 30) {
+    return VIP_PLANS.quarterly;
+  }
+  if (input?.planType === 'annual' || input?.durationDays === 90) {
+    return VIP_PLANS.annual;
+  }
+  if (typeof input?.amountUsd === 'number') {
+    if (Math.abs(input.amountUsd - VIP_QUARTERLY_PRICE_USD) <= 0.05) {
+      return VIP_PLANS.quarterly;
+    }
+    if (Math.abs(input.amountUsd - VIP_ANNUAL_PRICE_USD) <= 0.05) {
+      return VIP_PLANS.annual;
+    }
+  }
+  return VIP_PLANS.quarterly;
+}
 
 export interface PaymentVerificationRequest {
   userId: string;
@@ -92,8 +122,9 @@ export function recordVerifiedTransaction(transactionRef: string): void {
   }
 }
 
-// Calculate 365-day or 90-day start and expiry dates with renewal extension support
+// Calculate 30-day or 90-day start and expiry dates with renewal extension support
 export function calculateVipDates(existingExpiry?: string, durationDays: number = VIP_SUBSCRIPTION_DAYS): { startDate: string; expiryDate: string; durationDays: number } {
+  const validDuration = durationDays === VIP_QUARTERLY_DAYS ? VIP_QUARTERLY_DAYS : VIP_SUBSCRIPTION_DAYS;
   const now = new Date();
   let startTime = now.getTime();
   
@@ -105,12 +136,12 @@ export function calculateVipDates(existingExpiry?: string, durationDays: number 
     }
   }
   
-  const expiryTime = startTime + durationDays * 24 * 60 * 60 * 1000;
+  const expiryTime = startTime + validDuration * 24 * 60 * 60 * 1000;
   
   return {
     startDate: now.toISOString(),
     expiryDate: new Date(expiryTime).toISOString(),
-    durationDays
+    durationDays: validDuration
   };
 }
 
@@ -132,7 +163,7 @@ export async function verifyPaymentOnBackend(
     };
   }
 
-  // 2. Validate amount ($9.99 USD Annual or $2.99 USD Quarterly)
+  // 2. Validate amount ($4.99 USD for 90 Days or $2.99 USD for 30 Days)
   const isAnnualPrice = Math.abs(req.amountUsd - VIP_ANNUAL_PRICE_USD) <= 0.01;
   const isQuarterlyPrice = Math.abs(req.amountUsd - VIP_QUARTERLY_PRICE_USD) <= 0.01;
 
@@ -345,7 +376,7 @@ export function checkEligibleRestoration(
   // Look for any verified VIP subscription transaction associated with this user
   const matching = transactions.filter(t => 
     t.status === 'verified' &&
-    (t.type === 'user_vip_upgrade' || t.amountUsd === VIP_ANNUAL_PRICE_USD) &&
+    (t.type === 'user_vip_upgrade' || t.amountUsd === VIP_ANNUAL_PRICE_USD || t.amountUsd === VIP_QUARTERLY_PRICE_USD) &&
     (t.userId === userId || (userEmail && t.userEmail === userEmail))
   );
 

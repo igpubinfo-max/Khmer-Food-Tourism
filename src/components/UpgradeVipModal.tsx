@@ -18,6 +18,11 @@ import {
   VIP_QUARTERLY_PRICE_USD,
   VIP_QUARTERLY_DAYS 
 } from '../services/paymentService';
+import {
+  savePngDataUrlToGallery,
+  pickImageUsingNativeAndroidGallery,
+} from '../utils/androidMediaHelper';
+import { Capacitor } from '@capacitor/core';
 
 interface VipPlanOption {
   id: 'annual' | 'quarterly';
@@ -32,8 +37,8 @@ interface VipPlanOption {
 const VIP_PLANS: VipPlanOption[] = [
   {
     id: 'quarterly',
-    titleKh: 'កញ្ចប់ ១ ខែ • ៣០ ថ្ងៃ (30 Days VIP)',
-    titleEn: 'Monthly VIP Pass (30 Days)',
+    titleKh: 'VIP 30 ថ្ងៃ ($2.99 / 30 ថ្ងៃ)',
+    titleEn: 'VIP 30 Days ($2.99 / 30 days)',
     days: VIP_QUARTERLY_DAYS, // 30
     priceUsd: VIP_QUARTERLY_PRICE_USD, // 2.99
     priceKhrApprox: '១២,២០០ រៀល',
@@ -41,8 +46,8 @@ const VIP_PLANS: VipPlanOption[] = [
   },
   {
     id: 'annual',
-    titleKh: 'កញ្ចប់ ៣ ខែ • ៩០ ថ្ងៃ (90 Days VIP)',
-    titleEn: 'Quarterly VIP Pass (90 Days)',
+    titleKh: 'VIP 90 ថ្ងៃ ($4.99 / 90 ថ្ងៃ)',
+    titleEn: 'VIP 90 Days ($4.99 / 90 days)',
     days: VIP_SUBSCRIPTION_DAYS, // 90
     priceUsd: VIP_ANNUAL_PRICE_USD, // 4.99
     priceKhrApprox: '២០,៤០០ រៀល',
@@ -67,7 +72,10 @@ export type PaymentStatusFlow =
 export const UpgradeVipModal: React.FC = () => {
   const { 
     isUpgradeVipModalOpen, 
-    setIsUpgradeVipModalOpen, 
+    setIsUpgradeVipModalOpen,
+    isVipRenewMode,
+    setIsVipRenewMode,
+    openSupportTicketModal,
     currentUser, 
     transactions,
     language,
@@ -83,7 +91,7 @@ export const UpgradeVipModal: React.FC = () => {
   const remainingDays = getVipRemainingDays(currentUser);
   const isPlayStoreBuild = import.meta.env.VITE_PLAY_STORE_BUILD === 'true';
 
-  // Default plan: Quarterly 90 Days ($2.99 USD)
+  // Default plan: VIP 30 Days ($2.99 USD)
   const [selectedPlan, setSelectedPlan] = useState<VipPlanOption>(VIP_PLANS[0]);
   
   // Payment Lifecycle State
@@ -96,7 +104,7 @@ export const UpgradeVipModal: React.FC = () => {
   const [hasCopiedAccount, setHasCopiedAccount] = useState(false);
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>('/images/aba_qr_code_only.png');
   const [customTxnRef, setCustomTxnRef] = useState<string>(() => 
-    `ABA-KHQR-90D-${Date.now().toString(36).toUpperCase()}`
+    `ABA-KHQR-30D-${Date.now().toString(36).toUpperCase()}`
   );
   const [sessionExpiryTime, setSessionExpiryTime] = useState<number>(() => Date.now() + 15 * 60 * 1000);
 
@@ -122,9 +130,13 @@ export const UpgradeVipModal: React.FC = () => {
   useEffect(() => {
     if (!isUpgradeVipModalOpen || !currentUser) return;
 
-    if (isUserVipActive(currentUser) && currentUser.paymentStatus === 'verified') {
-      setPaymentState('APPROVED');
-    } else if (
+    // Requirement 6 Fix: When user clicks "បន្ត VIP" (Renew VIP), always open AWAITING_PAYMENT so it never auto-approves!
+    if (isVipRenewMode) {
+      setPaymentState('AWAITING_PAYMENT');
+      return;
+    }
+
+    if (
       currentUser.paymentStatus === 'needs_more_info' ||
       userLatestVipTxn?.status === 'needs_more_info'
     ) {
@@ -150,10 +162,12 @@ export const UpgradeVipModal: React.FC = () => {
       userLatestVipTxn?.status === 'rejected'
     ) {
       setPaymentState('REJECTED');
+    } else if (isUserVipActive(currentUser) && currentUser.paymentStatus === 'verified') {
+      setPaymentState('APPROVED');
     } else {
       setPaymentState('AWAITING_PAYMENT');
     }
-  }, [isUpgradeVipModalOpen, currentUser, userLatestVipTxn]);
+  }, [isUpgradeVipModalOpen, isVipRenewMode, currentUser, userLatestVipTxn]);
 
   useEffect(() => {
     QRCode.toDataURL(OFFICIAL_KHQR_USD_STRING, {
@@ -172,7 +186,49 @@ export const UpgradeVipModal: React.FC = () => {
   if (!isUpgradeVipModalOpen) return null;
 
   const handleClose = () => {
+    setIsVipRenewMode(false);
     setIsUpgradeVipModalOpen(false);
+  };
+
+  const handleOpenContactAdminSupport = () => {
+    setIsUpgradeVipModalOpen(false);
+    openSupportTicketModal({
+      planType: selectedPlan.id,
+      paymentRef: userLatestVipTxn?.transactionRef || customTxnRef,
+      receiptUrl: paymentProofDraft?.dataUrl || userLatestVipTxn?.paymentProofUrl,
+    });
+  };
+
+  const handlePickReceiptFromGallery = async () => {
+    if (Capacitor.isNativePlatform()) {
+      setIsProcessingProofImage(true);
+      try {
+        const res = await pickImageUsingNativeAndroidGallery();
+        if (!res.cancelled && res.dataUrl) {
+          setPaymentProofDraft({
+            dataUrl: res.dataUrl,
+            fileName: `aba_receipt_${Date.now()}.jpg`,
+            mimeType: 'image/jpeg',
+          });
+          setIsProcessingProofImage(false);
+          showToast(
+            isKm
+              ? '✅ បានជ្រើសរើសរូបភាពវិក្កយបត្រពី Gallery រួចរាល់!'
+              : '✅ Selected payment receipt from Gallery!',
+            'success'
+          );
+          return;
+        }
+        if (res.cancelled) {
+          setIsProcessingProofImage(false);
+          return;
+        }
+      } catch {
+        // Fallback to standard file input below
+      }
+      setIsProcessingProofImage(false);
+    }
+    proofGalleryInputRef.current?.click();
   };
 
   const handleSelectPlan = (plan: VipPlanOption) => {
@@ -191,23 +247,18 @@ export const UpgradeVipModal: React.FC = () => {
     setErrorMessage('');
   };
 
-  const handleSaveQrImage = () => {
+  const handleSaveQrImage = async () => {
     try {
-      const link = document.createElement('a');
-      link.href = qrCodeDataUrl || '/images/aba_qr_code_only.png';
-      link.download = `ABA_KHQR_CHEA_KIMSENG_${selectedPlan.priceUsd.toFixed(2)}.png`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
+      const fileName = `ABA-KHQR-CHEA-KIMSENG-${selectedPlan.days}Days-${selectedPlan.priceUsd.toFixed(2)}.png`;
+      const result = await savePngDataUrlToGallery(qrCodeDataUrl, fileName);
       showToast(
-        isKm 
-          ? '✅ បានរក្សាទុករូបភាព QR ទៅក្នុង Photos! បើក ABA Scan រួចចុច Upload QR ដើម្បីបង់ប្រាក់។' 
-          : '✅ QR saved to Photos! Open ABA Scan and tap Upload QR to pay.',
+        result.duplicate
+          ? (isKm ? '✅ រូបភាព QR នេះត្រូវបានរក្សាទុករួចហើយនៅក្នុង Gallery / Photos!' : '✅ QR image is already saved in your Gallery / Photos!')
+          : (isKm ? '✅ បានរក្សាទុករូបភាព QR ទៅក្នុង Gallery / Photos រួចរាល់! បើក ABA Scan រួចចុច Upload QR ដើម្បីបង់ប្រាក់។' : '✅ QR saved to Gallery / Photos! Open ABA Scan and tap Upload QR to pay.'),
         'success'
       );
-    } catch {
-      showToast(isKm ? 'សូម Screenshot រូបភាព QR ដើម្បីស្កេន' : 'Please screenshot QR to scan', 'info');
+    } catch (err: any) {
+      showToast(err?.message || (isKm ? 'សូម Screenshot រូបភាព QR ដើម្បីស្កេន' : 'Please screenshot QR to scan'), 'warning');
     }
   };
 
@@ -601,13 +652,31 @@ export const UpgradeVipModal: React.FC = () => {
                 )}
               </div>
 
-              <button
-                onClick={handleClose}
-                className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-[#064E3B] hover:from-emerald-700 hover:to-[#047857] text-white font-extrabold text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-98 cursor-pointer"
-              >
-                <span>{isKm ? '🚀 បន្តប្រើប្រាស់កម្មវិធី (រួចរាល់)' : '🚀 Continue to App (Done)'}</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
+              <div className="space-y-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsVipRenewMode(true);
+                    setPaymentState('AWAITING_PAYMENT');
+                  }}
+                  className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-950 font-extrabold text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-98 cursor-pointer"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                  <span>
+                    {isKm
+                      ? '🔄 បន្តសុពលភាព VIP បន្ថែម ($2.99 / 30 ថ្ងៃ ឬ $4.99 / 90 ថ្ងៃ)'
+                      : '🔄 Renew / Extend VIP ($2.99 / 30 Days or $4.99 / 90 Days)'}
+                  </span>
+                </button>
+
+                <button
+                  onClick={handleClose}
+                  className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-[#064E3B] hover:from-emerald-700 hover:to-[#047857] text-white font-extrabold text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-98 cursor-pointer"
+                >
+                  <span>{isKm ? '🚀 បន្តប្រើប្រាស់កម្មវិធី (រួចរាល់)' : '🚀 Continue to App (Done)'}</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           )}
 
@@ -658,7 +727,7 @@ export const UpgradeVipModal: React.FC = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <button
                     type="button"
-                    onClick={() => proofGalleryInputRef.current?.click()}
+                    onClick={handlePickReceiptFromGallery}
                     className="py-2.5 px-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs flex items-center justify-center gap-1.5 shadow-sm transition cursor-pointer"
                   >
                     <Upload className="w-4 h-4" />
@@ -783,7 +852,7 @@ export const UpgradeVipModal: React.FC = () => {
                 <div className="flex flex-wrap items-center gap-2">
                   <button
                     type="button"
-                    onClick={() => proofGalleryInputRef.current?.click()}
+                    onClick={handlePickReceiptFromGallery}
                     className="flex-1 py-2 px-3 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-900 dark:text-amber-200 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
                   >
                     <Upload className="w-3.5 h-3.5" />
@@ -816,6 +885,19 @@ export const UpgradeVipModal: React.FC = () => {
                   ? '🔒 សម្គាល់សុវត្ថិភាព៖ មុខងារ VIP នឹងត្រូវបានបើកដំណើរការដោយស្វ័យប្រវត្តិភ្លាមៗ បន្ទាប់ពីរដ្ឋបាលពិនិត្យឃើញទឹកប្រាក់ចូលក្នុងគណនី ABA និងចុចអនុម័ត (Approve)។' 
                   : '🔒 Security Note: VIP features will unlock automatically once the administrator confirms receipt in ABA and approves your request.'}
               </div>
+
+              <button
+                type="button"
+                onClick={handleOpenContactAdminSupport}
+                className="w-full py-2.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-extrabold transition shadow-md cursor-pointer flex items-center justify-center gap-1.5"
+              >
+                <MessageSquareWarning className="w-4 h-4" />
+                <span>
+                  {isKm
+                    ? '💬 ទាក់ទង Admin / បញ្ហាការបង់ប្រាក់ VIP (ផ្ញើសារ & វិក្កយបត្រ)'
+                    : '💬 Contact Admin / Payment Support (Send Message & Receipt)'}
+                </span>
+              </button>
 
               <button
                 onClick={handleClose}
@@ -954,7 +1036,7 @@ export const UpgradeVipModal: React.FC = () => {
                 </span>
               </div>
 
-              {/* VIP Subscription Plan Selector (90 Days $2.99 or 365 Days $9.99) */}
+              {/* VIP Subscription Plan Selector (30 Days $2.99 or 90 Days $4.99) */}
               <div className="space-y-2">
                 <label className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
                   <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
@@ -1202,7 +1284,7 @@ export const UpgradeVipModal: React.FC = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <button
                     type="button"
-                    onClick={() => proofGalleryInputRef.current?.click()}
+                    onClick={handlePickReceiptFromGallery}
                     disabled={isProcessingProofImage}
                     className="py-3 px-4 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-950 font-extrabold text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-98 cursor-pointer"
                   >
@@ -1270,6 +1352,20 @@ export const UpgradeVipModal: React.FC = () => {
                     ? '🔒 ការអាប់ឡូតភស្តុតាងបង់ប្រាក់មិនបើកដំណើរការ VIP ដោយស្វ័យប្រវត្តិឡើយ។ គណនី VIP នឹងត្រូវបានបើកដំណើរការក្រោយពេល Admin ពិនិត្យ និងអនុម័តប៉ុណ្ណោះ។' 
                     : '🔒 Uploading payment proof does not automatically activate VIP. VIP is activated only after Admin reviews and approves your payment.'}
                 </p>
+
+                {/* Requirement 1: Direct Contact Admin / Payment Support Button inside VIP Subscription Section */}
+                <button
+                  type="button"
+                  onClick={handleOpenContactAdminSupport}
+                  className="w-full py-2.5 px-4 rounded-xl bg-white dark:bg-slate-900 hover:bg-amber-50 dark:hover:bg-slate-800 border-2 border-amber-500/60 text-amber-800 dark:text-amber-300 font-extrabold text-xs flex items-center justify-center gap-2 transition cursor-pointer shadow-xs"
+                >
+                  <MessageSquareWarning className="w-4 h-4 text-amber-600 shrink-0" />
+                  <span>
+                    {isKm
+                      ? '💬 បានបង់ប្រាក់រួចតែមិនទាន់បើក VIP? ទាក់ទង Admin ផ្ទាល់នៅទីនេះ'
+                      : '💬 Paid via ABA but VIP not active? Contact Admin / Payment Support'}
+                  </span>
+                </button>
               </div>
 
               {/* Restore Purchases & Security Guarantee */}

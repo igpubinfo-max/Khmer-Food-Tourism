@@ -4,12 +4,13 @@ import {
   Language, UserRole, AppSettings, RegistrationTransaction,
   RestaurantMenuItem, MembershipTier, isRestaurantPremiumActive, isUserVipActive, getVipRemainingDays,
   Wishlist, WishlistItem, TripPlan, AppNotification,
-  TrendingFoodItem, AiCheckInSubmission
+  TrendingFoodItem, AiCheckInSubmission,
+  SupportTicket, SupportTicketMessage, SupportTicketStatus, VIP_PLANS
 } from '../types';
 import { 
   verifyPaymentOnBackend, calculateVipDates, checkEligibleRestoration,
   VIP_ANNUAL_PRICE_USD, VIP_SUBSCRIPTION_DAYS, VIP_QUARTERLY_PRICE_USD, VIP_QUARTERLY_DAYS,
-  PaymentVerificationRequest, verifyAbaPaymentTransaction
+  PaymentVerificationRequest, verifyAbaPaymentTransaction, resolveAndValidateVipPlan
 } from '../services/paymentService';
 import { initialTrendingFoods } from '../data/seedTrendingFoods';
 import { findDuplicateRestaurant, mergeRestaurantRecords } from '../utils/duplicateDetector';
@@ -220,10 +221,12 @@ interface AppContextType {
   // Reset & Backup
   resetAllData: () => void;
 
-  // Premium VIP Subscription ($9.99/year)
+  // Premium VIP Subscription ($2.99 / 30 Days or $4.99 / 90 Days)
   isUpgradeVipModalOpen: boolean;
   setIsUpgradeVipModalOpen: (open: boolean) => void;
-  openUpgradeVipModal: () => void;
+  isVipRenewMode: boolean;
+  setIsVipRenewMode: (renew: boolean) => void;
+  openUpgradeVipModal: (renewMode?: boolean) => void;
   submitVipUpgradeRequest: (
     durationDays?: number,
     amountUsd?: number,
@@ -232,8 +235,26 @@ interface AppContextType {
     paymentProofData?: { dataUrl: string; fileName?: string; mimeType?: string }
   ) => Promise<{ success: boolean; transactionId: string; error?: string }>;
   upgradeCurrentUserToVip: (paymentMethod: 'GooglePlayBilling' | 'KHQR' | 'Bakong' | 'Card', transactionRef: string, last4?: string, amountUsd?: number, durationDays?: number) => Promise<{ success: boolean; error?: string }>;
-  renewCurrentUserVip: (paymentMethod: 'GooglePlayBilling' | 'KHQR' | 'Bakong' | 'Card', transactionRef: string) => Promise<{ success: boolean; error?: string }>;
+  renewCurrentUserVip: (paymentMethod: 'GooglePlayBilling' | 'KHQR' | 'Bakong' | 'Card', transactionRef: string, durationDays?: number, amountUsd?: number) => Promise<{ success: boolean; error?: string }>;
   restoreCurrentUserVipPurchases: () => Promise<{ success: boolean; restored: boolean; message: string }>;
+
+  // User–Admin Two-Way Support & Payment Reply System
+  supportTickets: SupportTicket[];
+  isSupportTicketModalOpen: boolean;
+  setIsSupportTicketModalOpen: (open: boolean) => void;
+  supportModalPrefill: { planType?: 'quarterly' | 'annual'; paymentRef?: string; receiptUrl?: string } | null;
+  openSupportTicketModal: (prefill?: { planType?: 'quarterly' | 'annual'; paymentRef?: string; receiptUrl?: string }) => void;
+  createSupportTicket: (input: {
+    message: string;
+    planType?: 'quarterly' | 'annual';
+    paymentDate?: string;
+    paymentRef?: string;
+    receiptUrl?: string;
+  }) => SupportTicket | null;
+  replyToSupportTicket: (ticketId: string, message: string, attachmentUrl?: string) => boolean;
+  updateSupportTicketStatus: (ticketId: string, status: SupportTicketStatus) => void;
+  approveVipFromSupportTicket: (ticketId: string, durationDays?: 30 | 90, adminNote?: string) => void;
+  markSupportTicketRead: (ticketId: string) => void;
 
   // AI Trending Food Discovery Section
   trendingFoods: TrendingFoodItem[];
@@ -299,7 +320,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               parsed.subscriptionExpiryDate &&
               new Date(parsed.subscriptionExpiryDate).getTime() > Date.now()
                 ? parsed.subscriptionExpiryDate
-                : new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString();
+                : new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString();
 
             return {
               ...parsed,
@@ -331,7 +352,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const saved = localStorage.getItem('kft_foods_100_v3');
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length >= 50 && parsed[0]?.photoUrl?.startsWith('/foods/')) return parsed;
+        if (Array.isArray(parsed) && parsed.length >= 50 && parsed[0]?.photoUrl?.startsWith('/foods/')) {
+          const existingIds = new Set(parsed.map((f: FoodItem) => f.id));
+          const missingFromInitial = initialFoods.filter(f => !existingIds.has(f.id));
+          return missingFromInitial.length > 0 ? [...parsed, ...missingFromInitial] : parsed;
+        }
       }
     } catch (e) {
       console.warn('Failed to parse kft_foods_100_v3', e);
@@ -342,11 +367,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const normalizeRestaurant = (r: any): Restaurant => {
     const isPromoted = Boolean(r.isPromoted);
     const membershipTier = (r.membershipTier || (isPromoted ? 'premium' : 'free')) as MembershipTier;
-    const membershipExpiresAt = r.membershipExpiresAt || (membershipTier === 'premium' ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString() : undefined);
+    const membershipExpiresAt = r.membershipExpiresAt || (membershipTier === 'premium' ? new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString() : undefined);
     
-    // Normalize photoUrl for all rest-1..rest-220 to use authentic bundled shop photos
-    let photoUrl = r.photoUrl || '/Shop/rest-1.jpg';
-    if (typeof r.id === 'string') {
+    // Normalize photoUrl for all rest-1..rest-220 to use authentic bundled shop photos unless custom uploaded
+    let photoUrl = r.profileImage || r.photoUrl || '/Shop/rest-1.jpg';
+    if (typeof r.id === 'string' && !r.profileImage) {
       const match = r.id.match(/^rest-(\d+)$/);
       if (match && (!photoUrl || photoUrl.startsWith('https://images.unsplash.com') || photoUrl.startsWith('/Shop/'))) {
         const num = parseInt(match[1], 10);
@@ -359,6 +384,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
     }
 
+    const foodImages = Array.isArray(r.foodImages)
+      ? r.foodImages
+      : (Array.isArray(r.galleryPhotos) ? r.galleryPhotos : []);
+    const galleryPhotos = Array.isArray(r.galleryPhotos) && r.galleryPhotos.length > 0
+      ? r.galleryPhotos
+      : foodImages;
+
     return {
       id: r.id || `rest-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
       nameKh: r.nameKh || 'ភោជនីយដ្ឋានខ្មែរ',
@@ -366,7 +398,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       descriptionKh: r.descriptionKh || 'ភោជនីយដ្ឋានម្ហូបខ្មែររសជាតិដើម ផាសុកភាព និងអនាម័យខ្ពស់។',
       descriptionEn: r.descriptionEn || 'Authentic traditional Khmer restaurant.',
       photoUrl,
-      galleryPhotos: Array.isArray(r.galleryPhotos) ? r.galleryPhotos : [],
+      profileImage: r.profileImage || photoUrl,
+      galleryPhotos,
+      foodImages,
       addressKh: r.addressKh || 'រាជធានីភ្នំពេញ កម្ពុជា',
       addressEn: r.addressEn || 'Phnom Penh, Cambodia',
       provinceKh: r.provinceKh || 'រាជធានីភ្នំពេញ',
@@ -402,10 +436,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         shareClicks: typeof r.analytics.shareClicks === 'number' ? r.analytics.shareClicks : 9,
       } : { views: 65, phoneClicks: 14, mapClicks: 18, shareClicks: 9 },
       paymentStatus: r.paymentStatus || (membershipTier === 'premium' ? 'verified' : 'unpaid'),
-      promotionalPrice: typeof r.promotionalPrice === 'number' ? r.promotionalPrice : 9.99,
+      promotionalPrice: typeof r.promotionalPrice === 'number' ? r.promotionalPrice : 2.99,
       isPromoted,
       ownerId: r.ownerId,
       paymentDate: r.paymentDate,
+      promoVideoUrl: r.promoVideoUrl,
+      telegramUrl: r.telegramUrl,
+      facebookUrl: r.facebookUrl,
     };
   };
 
@@ -447,7 +484,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           ...r,
           ownerId: 'owner-1',
           membershipTier: 'premium' as MembershipTier,
-          membershipExpiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+          membershipExpiresAt: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
           menuItems: [
             {
               id: 'menu-1',
@@ -582,7 +619,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             ...initialAppSettings, 
             ...parsed,
             supportAccountName: 'CHEA KIMSENG',
-            promotionalFeeUsd: 9.99,
+            promotionalFeeUsd: 2.99,
           };
         }
       }
@@ -625,8 +662,40 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isNotificationsModalOpen, setIsNotificationsModalOpen] = useState(false);
   const [isTrendingSocialModalOpen, setIsTrendingSocialModalOpen] = useState(false);
   const [isUpgradeVipModalOpen, setIsUpgradeVipModalOpen] = useState(false);
-  const openUpgradeVipModal = () => setIsUpgradeVipModalOpen(true);
+  const [isVipRenewMode, setIsVipRenewMode] = useState(false);
+  const openUpgradeVipModal = (renewMode: boolean = false) => {
+    setIsVipRenewMode(Boolean(renewMode));
+    setIsUpgradeVipModalOpen(true);
+  };
   const [targetWishlistItem, setTargetWishlistItem] = useState<WishlistItem | null>(null);
+
+  // User–Admin Support & Payment Reply State
+  const [supportTickets, setSupportTickets] = useState<SupportTicket[]>(() => {
+    try {
+      const saved = localStorage.getItem('kft_support_tickets_v1');
+      if (saved && saved !== 'undefined' && saved !== 'null') {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch (e) {
+      console.warn('Failed to parse kft_support_tickets_v1', e);
+    }
+    return [];
+  });
+  const [isSupportTicketModalOpen, setIsSupportTicketModalOpen] = useState(false);
+  const [supportModalPrefill, setSupportModalPrefill] = useState<{
+    planType?: 'quarterly' | 'annual';
+    paymentRef?: string;
+    receiptUrl?: string;
+  } | null>(null);
+  const openSupportTicketModal = (prefill?: {
+    planType?: 'quarterly' | 'annual';
+    paymentRef?: string;
+    receiptUrl?: string;
+  }) => {
+    setSupportModalPrefill(prefill || null);
+    setIsSupportTicketModalOpen(true);
+  };
 
   // AI Trending Food Discovery Section State
   const [trendingFoods, setTrendingFoods] = useState<TrendingFoodItem[]>(() => {
@@ -986,6 +1055,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       console.warn('Storage sync failed for transactions:', e);
     }
   }, [transactions]);
+
+  useEffect(() => {
+    try {
+      if (supportTickets) {
+        localStorage.setItem('kft_support_tickets_v1', JSON.stringify(supportTickets));
+        if (isSupabaseConfigured()) {
+          pushCloudDocument('kft_cloud_support_tickets_v1', supportTickets);
+        }
+      }
+    } catch (e) {
+      console.warn('Storage sync failed for supportTickets:', e);
+    }
+  }, [supportTickets]);
 
   // Automatic & Manual Supabase Cloud Synchronization (Free Tier Compatible)
   const triggerCloudSyncNow = async (): Promise<boolean> => {
@@ -1652,8 +1734,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Restaurant CRUD
   const addRestaurant = (restData: Omit<Restaurant, 'id' | 'rating' | 'reviewCount' | 'status'> & { status?: 'approved' | 'pending' | 'rejected' }) => {
     const isPremium = restData.membershipTier === 'premium';
+    const profileImg = restData.profileImage || restData.photoUrl || '/Shop/rest-1.jpg';
+    const foodImgs = Array.isArray(restData.foodImages) && restData.foodImages.length > 0
+      ? restData.foodImages
+      : (Array.isArray(restData.galleryPhotos) ? restData.galleryPhotos : []);
     const newRest: Restaurant = normalizeRestaurant({
       ...restData,
+      photoUrl: profileImg,
+      profileImage: profileImg,
+      galleryPhotos: foodImgs,
+      foodImages: foodImgs,
       id: `rest-${Date.now()}`,
       rating: 5.0,
       reviewCount: 1,
@@ -1662,14 +1752,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       isVerified: true,
       membershipTier: isPremium ? 'premium' : 'free',
       membershipExpiresAt: isPremium 
-        ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString() 
+        ? new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString() 
         : undefined,
-      menuItems: isPremium ? (restData.menuItems || []).slice(0, 5) : [], // Free users cannot add menu items!
+      menuItems: isPremium ? (restData.menuItems || []).slice(0, 20) : [],
     });
     setRestaurants(prev => [newRest, ...prev]);
     showToast(
       isPremium
-        ? (language === 'km' ? '🎉 ចុះបញ្ជីហាង Premium រួចរាល់ (៣៦៥ ថ្ងៃ)!' : '🎉 Registered as Premium (365 days)!')
+        ? (language === 'km' ? '🎉 ចុះបញ្ជីហាង Premium VIP រួចរាល់!' : '🎉 Registered as Premium VIP!')
         : (language === 'km' ? '🎉 បានចុះបញ្ជីហាងឥតគិតថ្លៃ ($0 Free Listing) បានជោគជ័យ!' : '🎉 Free Restaurant Listing registered ($0)!'),
       'success'
     );
@@ -1679,22 +1769,36 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const original = restaurants.find(r => r.id === updated.id);
     const isAdmin = currentUser?.role === 'admin';
     const isOwner = currentUser?.id && original?.ownerId === currentUser.id;
-    const isUnclaimed = !original?.ownerId; // Seeded restaurants can be customized by users
+    const isUnclaimed = !original?.ownerId;
 
     if (!isAdmin && !isOwner && !isUnclaimed) {
-      showToast(language === 'km' ? 'គ្មានសិទ្ធិកែប្រែហាងនេះទេ!' : 'Unauthorized!', 'warning');
+      showToast(language === 'km' ? 'គ្មានសិទ្ធិកែប្រែហាងនេះទេ! មានតែម្ចាស់ហាង ឬ Admin ប៉ុណ្ណោះដែលអាចកែប្រែបាន។' : 'Unauthorized! Only the shop owner or Admin can edit this shop.', 'warning');
       return;
     }
 
-    const safeUpdated: Restaurant = normalizeRestaurant(isAdmin ? updated : {
+    const profileImg = updated.profileImage || updated.photoUrl || original?.profileImage || original?.photoUrl || '/Shop/rest-1.jpg';
+    const foodImgs = Array.isArray(updated.foodImages)
+      ? updated.foodImages
+      : (Array.isArray(updated.galleryPhotos) ? updated.galleryPhotos : (original?.foodImages || original?.galleryPhotos || []));
+
+    const safeUpdated: Restaurant = normalizeRestaurant(isAdmin ? {
       ...updated,
+      photoUrl: profileImg,
+      profileImage: profileImg,
+      galleryPhotos: foodImgs,
+      foodImages: foodImgs,
+    } : {
+      ...updated,
+      photoUrl: profileImg,
+      profileImage: profileImg,
+      galleryPhotos: foodImgs,
+      foodImages: foodImgs,
       membershipTier: original?.membershipTier || 'free',
       membershipExpiresAt: original?.membershipExpiresAt,
       paymentStatus: original?.paymentStatus,
       status: original?.status || 'approved',
       isVerified: original?.isVerified ?? true,
       signatureDishesKh: Array.isArray(updated.signatureDishesKh) ? updated.signatureDishesKh : (original?.signatureDishesKh || ['ម្ហូបខ្មែរប្រពៃណី']),
-      galleryPhotos: Array.isArray(updated.galleryPhotos) ? updated.galleryPhotos : (original?.galleryPhotos || []),
       menuItems: Array.isArray(updated.menuItems) ? updated.menuItems : (original?.menuItems || []),
     });
 
@@ -1704,10 +1808,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
     if (selectedRestaurant?.id === updated.id) setSelectedRestaurant(safeUpdated);
     if (managingRestaurant?.id === updated.id) setManagingRestaurant(safeUpdated);
-    showToast(language === 'km' ? 'បានកែប្រែព័ត៌មានហាងរួចរាល់' : 'Restaurant updated!', 'success');
+    showToast(language === 'km' ? 'បានកែប្រែព័ត៌មានហាង និងរូបភាពរួចរាល់' : 'Restaurant details and photos updated!', 'success');
   };
 
-  // Restaurant Food Menu Items (Max 5 for Active Premium)
+  // Restaurant Food Menu Items
   const addRestaurantMenuItem = (
     restaurantId: string, 
     itemData: Omit<RestaurantMenuItem, 'id' | 'createdAt' | 'restaurantId'>
@@ -1733,8 +1837,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (!isRestaurantPremiumActive(targetRest)) {
       showToast(
         language === 'km' 
-          ? 'ការចុះបញ្ជីឥតគិតថ្លៃមិនអាចបន្ថែមមុខម្ហូបបានទេ។ សូមដំឡើងទៅ Premium VIP ($9.99 សម្រាប់ ៣៦៥ ថ្ងៃ)!' 
-          : 'Free listing cannot add food items. Please upgrade to Premium VIP ($9.99 for 365 days)!',
+          ? 'ការចុះបញ្ជីឥតគិតថ្លៃមិនអាចបន្ថែមមុខម្ហូបបានទេ។ សូមដំឡើងទៅកញ្ចប់ VIP ($2.99 / 30 ថ្ងៃ ឬ $4.99 / 90 ថ្ងៃ)!' 
+          : 'Free listing cannot add food items. Please upgrade to VIP ($2.99 / 30 days or $4.99 / 90 days)!',
         'warning'
       );
       return false;
@@ -1853,10 +1957,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       ownerId: currentUser?.id || targetRest.ownerId || 'owner-guest',
       ownerName: currentUser?.name || 'Restaurant Owner',
       ownerPhone: targetRest.phone,
-      amountUsd: appSettings.promotionalFeeUsd || 9.99,
+      amountUsd: VIP_QUARTERLY_PRICE_USD,
+      durationDays: VIP_QUARTERLY_DAYS,
       paymentMethod,
       transactionRef: transactionRef.trim(),
-      notes: 'One-time $9.99 Premium VIP Membership for 365 days (End of year promo). 10 VIP Benefits. No auto-renewal.',
+      notes: 'VIP 30 Days ($2.99) or VIP 90 Days ($4.99) Membership. 10 VIP Benefits.',
     });
 
     setRestaurants(prev => prev.map(r => {
@@ -1869,8 +1974,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     showToast(
       language === 'km' 
-        ? 'បានផ្ញើសំណើដំឡើង Premium VIP ($9.99) រួចរាល់! រដ្ឋបាលនឹងត្រួតពិនិត្យ និងបើកដំណើរការជូន ៣៦៥ ថ្ងៃ។' 
-        : 'Submitted Premium VIP upgrade request ($9.99)! Admin will verify and activate 365-day access.',
+        ? 'បានផ្ញើសំណើដំឡើង VIP រួចរាល់! រដ្ឋបាលនឹងត្រួតពិនិត្យ និងបើកដំណើរការជូន។' 
+        : 'Submitted VIP upgrade request! Admin will verify and activate access.',
       'success'
     );
   };
@@ -2112,19 +2217,34 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     const targetRestId = matchedTxn.restaurantId || '';
     const targetUserId = matchedTxn.userId || '';
-    const durationDays = matchedTxn.durationDays || (Math.abs(matchedTxn.amountUsd - 2.99) < 0.05 ? 30 : 90);
+    const validatedPlan = resolveAndValidateVipPlan({
+      planType: matchedTxn.planType,
+      durationDays: matchedTxn.durationDays,
+      amountUsd: matchedTxn.amountUsd,
+    });
+    const durationDays = validatedPlan.durationDays;
     const now = new Date();
     const verifiedTimestamp = now.toISOString().replace('T', ' ').slice(0, 16);
     const adminIdentity = currentUser.name || 'Chea Savuth (Admin)';
+
+    const matchedUserObj = users.find(u => u.id === targetUserId);
+    const { startDate: calcStart, expiryDate: calcExpiry } = calculateVipDates(
+      matchedUserObj?.subscriptionExpiryDate,
+      durationDays
+    );
 
     setTransactions(prev => prev.map(t => {
       if (t.id !== txnId) return t;
       return {
         ...t,
+        durationDays,
+        amountUsd: validatedPlan.priceUsd,
+        planType: validatedPlan.id,
         status: 'verified',
         paymentStatus: 'verified',
         verifiedAt: verifiedTimestamp,
         verifiedBy: adminIdentity,
+        expiresAt: calcExpiry,
       };
     }));
 
@@ -2138,7 +2258,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         txnId,
         transactionRef: matchedTxn.transactionRef,
         targetUserId,
-        amountUsd: matchedTxn.amountUsd,
+        amountUsd: validatedPlan.priceUsd,
         durationDays,
         adminId: currentUser.id,
         adminName: adminIdentity,
@@ -2148,7 +2268,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } catch {}
 
     if (targetRestId) {
-      const expiresAt = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
       setRestaurants(prev => prev.map(r => {
         if (r.id !== targetRestId) return r;
         return {
@@ -2157,7 +2276,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           isVerified: true,
           isPromoted: true,
           membershipTier: 'premium',
-          membershipExpiresAt: expiresAt.toISOString(),
+          membershipExpiresAt: calcExpiry,
           paymentStatus: 'verified',
           paymentDate: now.toISOString().split('T')[0],
         };
@@ -2165,15 +2284,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     if (targetUserId) {
-      const expiresAt = new Date(now.getTime() + durationDays * 24 * 60 * 60 * 1000);
-
       setUsers(prev => prev.map(u => {
         if (u.id !== targetUserId) return u;
         return {
           ...u,
           membershipTier: 'premium_vip',
-          subscriptionStartDate: now.toISOString(),
-          subscriptionExpiryDate: expiresAt.toISOString(),
+          subscriptionStartDate: calcStart,
+          subscriptionExpiryDate: calcExpiry,
           subscriptionStatus: 'active',
           paymentStatus: 'verified'
         };
@@ -2183,8 +2300,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setCurrentUser(prev => prev ? {
           ...prev,
           membershipTier: 'premium_vip',
-          subscriptionStartDate: now.toISOString(),
-          subscriptionExpiryDate: expiresAt.toISOString(),
+          subscriptionStartDate: calcStart,
+          subscriptionExpiryDate: calcExpiry,
           subscriptionStatus: 'active',
           paymentStatus: 'verified'
         } : null);
@@ -2196,7 +2313,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return {
           ...r,
           membershipTier: 'premium',
-          membershipExpiresAt: expiresAt.toISOString(),
+          membershipExpiresAt: calcExpiry,
           isPromoted: true,
           isVerified: true
         };
@@ -2558,7 +2675,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return { success: true };
   };
 
-  // User VIP Upgrade & Renewal Methods ($2.99 / 90 Days or $9.99 / 365 Days)
+  // User VIP Upgrade & Renewal Methods ($2.99 / 30 Days or $4.99 / 90 Days)
   const upgradeCurrentUserToVip = async (
     paymentMethod: 'GooglePlayBilling' | 'KHQR' | 'Bakong' | 'Card',
     transactionRef: string,
@@ -2680,73 +2797,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const renewCurrentUserVip = async (
-    paymentMethod: 'GooglePlayBilling' | 'KHQR' | 'Bakong' | 'Card',
-    transactionRef: string
+    _paymentMethod: 'GooglePlayBilling' | 'KHQR' | 'Bakong' | 'Card',
+    transactionRef: string,
+    durationDays: number = VIP_QUARTERLY_DAYS,
+    amountUsd: number = VIP_QUARTERLY_PRICE_USD
   ): Promise<{ success: boolean; error?: string }> => {
     if (!currentUser) return { success: false, error: 'Please sign in first.' };
 
-    const dates = calculateVipDates(currentUser.subscriptionExpiryDate);
-    const req: PaymentVerificationRequest = {
-      userId: currentUser.id,
-      userEmail: currentUser.email,
-      userName: currentUser.name,
-      paymentMethod,
+    const validatedPlan = resolveAndValidateVipPlan({ durationDays, amountUsd });
+    const reqRes = await submitVipUpgradeRequest(
+      validatedPlan.durationDays,
+      validatedPlan.priceUsd,
       transactionRef,
-      amountUsd: VIP_ANNUAL_PRICE_USD,
-      nonce: `renew_nonce_${Date.now()}`,
-      timestamp: Date.now()
-    };
-
-    const result = await verifyPaymentOnBackend(req);
-    if (!result.success) {
-      showToast(result.error || 'Renewal failed', 'warning');
-      return { success: false, error: result.error };
-    }
-
-    const renewedUser: User = {
-      ...currentUser,
-      membershipTier: 'premium_vip',
-      subscriptionStartDate: dates.startDate,
-      subscriptionExpiryDate: dates.expiryDate,
-      subscriptionStatus: 'active',
-      paymentStatus: 'verified',
-      paymentMethod,
-      transactionRef: result.transactionRef,
-      autoRenew: true
-    };
-
-    setCurrentUser(renewedUser);
-    setUsers(prev => prev.map(u => u.id === currentUser.id ? renewedUser : u));
-
-    const renewTxn: RegistrationTransaction = {
-      id: `TXN-VIP-RENEW-${Date.now().toString(36).toUpperCase()}`,
-      type: 'user_vip_upgrade',
-      userId: currentUser.id,
-      userName: currentUser.name,
-      userEmail: currentUser.email,
-      ownerId: currentUser.id,
-      ownerName: currentUser.name,
-      amountUsd: VIP_ANNUAL_PRICE_USD,
-      durationDays: 365,
-      membershipTier: 'premium_vip',
-      status: 'verified',
-      paymentMethod,
-      transactionRef: result.transactionRef,
-      verificationSignature: result.verificationSignature,
-      createdAt: dates.startDate,
-      expiresAt: dates.expiryDate,
-      verifiedAt: new Date().toISOString().replace('T', ' ').slice(0, 16),
-      verifiedBy: 'Google Play / Verified Payment Engine',
-      notes: `VIP subscription renewed (+365 days)`
-    };
-    setTransactions(prev => [renewTxn, ...prev]);
-
-    showToast(
-      language === 'km' 
-        ? 'ការបន្តសមាជិកភាព VIP ៣៦៥ ថ្ងៃជោគជ័យ! 🎉' 
-        : 'VIP subscription renewed for 365 days successfully! 🎉',
-      'success'
+      `VIP Renewal Request (${validatedPlan.nameEn} - $${validatedPlan.priceUsd.toFixed(2)} / ${validatedPlan.durationDays} days) — Awaiting Admin Verification`
     );
+
+    if (!reqRes.success) {
+      return { success: false, error: reqRes.error };
+    }
     return { success: true };
   };
 
@@ -2787,8 +2855,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Submit VIP Upgrade Request for Administrator Review & Approval (Never activates VIP directly)
   const submitVipUpgradeRequest = async (
-    durationDays: number = 90,
-    amountUsd: number = 2.99,
+    durationDays: number = VIP_QUARTERLY_DAYS,
+    amountUsd: number = VIP_QUARTERLY_PRICE_USD,
     transactionRef?: string,
     notes?: string,
     paymentProofData?: { dataUrl: string; fileName?: string; mimeType?: string }
@@ -2798,6 +2866,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return { success: false, transactionId: '', error: 'User authentication required' };
     }
 
+    const validatedPlan = resolveAndValidateVipPlan({ durationDays, amountUsd });
+    const validDays = validatedPlan.durationDays;
+    const validPrice = validatedPlan.priceUsd;
+    const planType: 'quarterly' | 'annual' = validatedPlan.id;
+
     // Check if there is an existing pending or needs_more_info request for this user
     const existingPending = transactions.find(
       t =>
@@ -2806,7 +2879,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         (t.status === 'pending_verification' || t.status === 'needs_more_info')
     );
 
-    if (existingPending) {
+    if (existingPending && !isVipRenewMode) {
       // If user attached a new payment proof image, update the existing request!
       if (paymentProofData?.dataUrl) {
         uploadPaymentProofToTransaction(
@@ -2828,15 +2901,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     const cleanTrxRef = (transactionRef || '').trim().toUpperCase() || 
-      `ABA-KHQR-${durationDays}D-${Date.now().toString(36).toUpperCase()}`;
+      `ABA-KHQR-${validDays}D-${Date.now().toString(36).toUpperCase()}`;
 
     // Validate request parameters on backend before creating pending approval request
     const verification = await verifyAbaPaymentTransaction({
       userId: currentUser.id,
       userName: currentUser.name,
       userEmail: currentUser.email,
-      durationDays,
-      amountUsd,
+      durationDays: validDays,
+      amountUsd: validPrice,
       transactionRef: cleanTrxRef,
       paymentMethod: 'KHQR',
       timestamp: Date.now()
@@ -2857,7 +2930,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const nowIso = now.toISOString();
     const formattedNow = nowIso.replace('T', ' ').slice(0, 16);
     const txnId = `TXN-VIP-${Date.now().toString(36).toUpperCase()}-${Math.floor(100 + Math.random() * 900)}`;
-    const planType: 'quarterly' | 'annual' = durationDays <= 90 ? 'quarterly' : 'annual';
 
     if (paymentProofData?.dataUrl) {
       try {
@@ -2885,8 +2957,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           txnId,
           transactionRef: cleanTrxRef,
           targetUserId: currentUser.id,
-          amountUsd,
-          durationDays,
+          amountUsd: validPrice,
+          durationDays: validDays,
           fileName: paymentProofData.fileName || 'aba_receipt.png',
           timestamp: nowIso,
         });
@@ -2903,9 +2975,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       ownerId: currentUser.id,
       ownerName: currentUser.name,
       planType,
-      amountUsd,
+      amountUsd: validPrice,
       currency: 'USD',
-      durationDays,
+      durationDays: validDays,
       membershipTier: 'premium_vip',
       status: 'pending_verification',
       paymentMethod: 'KHQR',
@@ -2915,10 +2987,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       paymentProofFileName: paymentProofData?.fileName,
       paymentProofMimeType: paymentProofData?.mimeType,
       createdAt: formattedNow,
-      notes: notes || `VIP Upgrade Request (${durationDays} Days / $${amountUsd.toFixed(2)} USD) via ABA KHQR — Awaiting Admin Verification`
+      notes: notes || `VIP ${validDays} Days ($${validPrice.toFixed(2)} USD) via ABA KHQR — Awaiting Admin Verification`
     };
 
     setTransactions(prev => [newTxn, ...prev]);
+    setIsVipRenewMode(false);
 
     // Keep user on previous membership level ('free' unless already active VIP) while awaiting Admin approval
     const pendingUser: User = {
@@ -2938,8 +3011,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       id: `notif-admin-vip-${Date.now()}`,
       titleKh: '👑 សំណើពិនិត្យការទូទាត់ VIP ថ្មី',
       titleEn: '👑 New VIP Payment Verification Request',
-      messageKh: `អតិថិជន ${currentUser.name} (${currentUser.email}) បានបញ្ជូនសំណើពិនិត្យការទូទាត់ Premium VIP (${durationDays} ថ្ងៃ - $${amountUsd.toFixed(2)} USD) តាម ABA KHQR (Ref: ${cleanTrxRef})${paymentProofData?.dataUrl ? ' ព្រមទាំងភ្ជាប់រូបភាពភស្តុតាងបង់ប្រាក់' : ''}។ សូមពិនិត្យភស្តុតាង និងរបាយការណ៍ធនាគារ ABA មុនពេលអនុម័ត។`,
-      messageEn: `Customer ${currentUser.name} (${currentUser.email}) submitted a Premium VIP payment verification request (${durationDays} days - $${amountUsd.toFixed(2)} USD) via ABA KHQR (Ref: ${cleanTrxRef})${paymentProofData?.dataUrl ? ' with payment proof image attached' : ''}. Please verify in ABA statement before approving.`,
+      messageKh: `អតិថិជន ${currentUser.name} (${currentUser.email}) បានបញ្ជូនសំណើពិនិត្យការទូទាត់ VIP ${validDays} ថ្ងៃ ($${validPrice.toFixed(2)} USD) តាម ABA KHQR (Ref: ${cleanTrxRef})${paymentProofData?.dataUrl ? ' ព្រមទាំងភ្ជាប់រូបភាពភស្តុតាងបង់ប្រាក់' : ''}។ សូមពិនិត្យភស្តុតាង និងរបាយការណ៍ធនាគារ ABA មុនពេលអនុម័ត។`,
+      messageEn: `Customer ${currentUser.name} (${currentUser.email}) submitted a VIP ${validDays} Days ($${validPrice.toFixed(2)} USD) payment verification request via ABA KHQR (Ref: ${cleanTrxRef})${paymentProofData?.dataUrl ? ' with payment proof image attached' : ''}. Please verify in ABA statement before approving.`,
       type: 'system',
       date: now.toISOString().split('T')[0],
       isRead: false
@@ -2950,8 +3023,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       id: `notif-user-vip-req-${Date.now() + 1}`,
       titleKh: '⏳ កំពុងរង់ចាំ Admin ពិនិត្យការទូទាត់',
       titleEn: '⏳ Pending Admin Payment Verification',
-      messageKh: `សំណើពិនិត្យការទូទាត់ប្រាក់ ($${amountUsd.toFixed(2)} USD / ${durationDays} ថ្ងៃ) របស់អ្នកត្រូវបានបញ្ជូនទៅរដ្ឋបាល។ គណនី VIP នឹងត្រូវបានបើកដំណើរការបន្ទាប់ពីរដ្ឋបាលពិនិត្យ និងអនុម័ត។`,
-      messageEn: `Your payment confirmation request ($${amountUsd.toFixed(2)} USD / ${durationDays} days) has been submitted. VIP will be activated after administrator verification and approval.`,
+      messageKh: `សំណើពិនិត្យការទូទាត់ប្រាក់ ($${validPrice.toFixed(2)} USD / ${validDays} ថ្ងៃ) របស់អ្នកត្រូវបានបញ្ជូនទៅរដ្ឋបាល។ គណនី VIP នឹងត្រូវបានបើកដំណើរការបន្ទាប់ពីរដ្ឋបាលពិនិត្យ និងអនុម័ត។`,
+      messageEn: `Your payment confirmation request ($${validPrice.toFixed(2)} USD / ${validDays} days) has been submitted. VIP will be activated after administrator verification and approval.`,
       type: 'system',
       date: now.toISOString().split('T')[0],
       isRead: false
@@ -2967,6 +3040,415 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
 
     return { success: true, transactionId: txnId };
+  };
+
+  // ============================================================================
+  // User–Admin Two-Way Support & Payment Verification Reply System (Requirement 1)
+  // ============================================================================
+  const createSupportTicket = (input: {
+    message: string;
+    planType?: 'quarterly' | 'annual';
+    paymentDate?: string;
+    paymentRef?: string;
+    receiptUrl?: string;
+  }): SupportTicket | null => {
+    if (!currentUser) {
+      setIsAuthModalOpen(true);
+      return null;
+    }
+
+    const cleanMessage = (input.message || '').trim();
+    if (!cleanMessage) {
+      showToast(
+        language === 'km' ? 'សូមសរសេរសារពន្យល់ពីបញ្ហាការបង់ប្រាក់របស់អ្នក។' : 'Please enter a message explaining your payment issue.',
+        'warning'
+      );
+      return null;
+    }
+
+    const plan = resolveAndValidateVipPlan({ planType: input.planType || 'quarterly' });
+    const now = new Date();
+    const nowIso = now.toISOString();
+    const readableNow = nowIso.replace('T', ' ').slice(0, 16);
+    const ticketId = `SUP-${Date.now().toString(36).toUpperCase()}-${Math.floor(100 + Math.random() * 900)}`;
+
+    const userLatestTxn = transactions.find(t => t.userId === currentUser.id);
+    const autoRef = (input.paymentRef || currentUser.transactionRef || userLatestTxn?.transactionRef || `ABA-${Date.now().toString().slice(-6)}`).trim();
+    const autoDate = (input.paymentDate || readableNow.slice(0, 10)).trim();
+
+    const firstMsg: SupportTicketMessage = {
+      id: `msg-${Date.now()}`,
+      senderRole: 'user',
+      senderId: currentUser.id,
+      senderName: currentUser.name,
+      message: cleanMessage,
+      attachmentUrl: input.receiptUrl,
+      createdAt: readableNow,
+    };
+
+    const newTicket: SupportTicket = {
+      id: ticketId,
+      userId: currentUser.id,
+      username: currentUser.username || currentUser.name,
+      userEmail: currentUser.email,
+      userPhone: currentUser.phone,
+      paymentPlanId: plan.id,
+      paymentPlanLabel: `${plan.nameEn} ($${plan.priceUsd.toFixed(2)} / ${plan.durationDays} days)`,
+      amountUsd: plan.priceUsd,
+      durationDays: plan.durationDays,
+      paymentDate: autoDate,
+      paymentRef: autoRef,
+      receiptUrl: input.receiptUrl,
+      status: 'pending',
+      vipApproved: false,
+      unreadByAdmin: true,
+      unreadByUser: false,
+      messages: [firstMsg],
+      createdAt: readableNow,
+      updatedAt: readableNow,
+    };
+
+    setSupportTickets(prev => [newTicket, ...prev]);
+
+    // Also attach receipt to existing pending transaction or create a pending transaction so Admin can approve from either place
+    const existingPending = transactions.find(
+      t => t.userId === currentUser.id && (t.status === 'pending_verification' || t.status === 'needs_more_info')
+    );
+    if (existingPending && input.receiptUrl) {
+      uploadPaymentProofToTransaction(existingPending.id, input.receiptUrl, `support_receipt_${ticketId}.jpg`, 'image/jpeg');
+    } else if (!existingPending && input.receiptUrl) {
+      const linkedTxn: RegistrationTransaction = {
+        id: `TXN-SUP-${Date.now().toString(36).toUpperCase()}`,
+        type: 'user_vip_upgrade',
+        userId: currentUser.id,
+        userName: currentUser.name,
+        userEmail: currentUser.email,
+        ownerId: currentUser.id,
+        ownerName: currentUser.name,
+        planType: plan.id,
+        amountUsd: plan.priceUsd,
+        currency: 'USD',
+        durationDays: plan.durationDays,
+        membershipTier: 'premium_vip',
+        status: 'pending_verification',
+        paymentMethod: 'KHQR',
+        transactionRef: autoRef,
+        paymentProofUrl: input.receiptUrl,
+        paymentProofUploadedAt: readableNow,
+        paymentProofFileName: `support_receipt_${ticketId}.jpg`,
+        paymentProofMimeType: 'image/jpeg',
+        createdAt: readableNow,
+        notes: `[Support Ticket #${ticketId}] ${cleanMessage}`,
+      };
+      setTransactions(prev => [linkedTxn, ...prev]);
+    }
+
+    const adminNotif: AppNotification = {
+      id: `notif-sup-admin-${Date.now()}`,
+      titleKh: '💬 សារជំនួយបញ្ហាការបង់ប្រាក់ VIP ថ្មី',
+      titleEn: '💬 New VIP Payment Support Message',
+      messageKh: `អ្នកប្រើប្រាស់ ${currentUser.name} (ID: ${currentUser.id}) បានផ្ញើសារជំនួយសម្រាប់កញ្ចប់ ${plan.nameEn} ($${plan.priceUsd.toFixed(2)})៖ "${cleanMessage.slice(0, 80)}"`,
+      messageEn: `User ${currentUser.name} (ID: ${currentUser.id}) submitted a payment support ticket for ${plan.nameEn} ($${plan.priceUsd.toFixed(2)}): "${cleanMessage.slice(0, 80)}"`,
+      type: 'system',
+      date: nowIso.split('T')[0],
+      isRead: false,
+    };
+    setNotifications(prev => [adminNotif, ...prev]);
+
+    showToast(
+      language === 'km'
+        ? '✅ បានផ្ញើសារជំនួយ និងវិក្កយបត្រទៅកាន់ Admin រួចរាល់! Admin នឹងឆ្លើយតបក្នុងពេលឆាប់ៗ។'
+        : '✅ Support message & receipt sent to Admin! You will receive a reply in the app.',
+      'success'
+    );
+    return newTicket;
+  };
+
+  const replyToSupportTicket = (ticketId: string, message: string, attachmentUrl?: string): boolean => {
+    if (!currentUser) {
+      setIsAuthModalOpen(true);
+      return false;
+    }
+
+    const cleanText = (message || '').trim();
+    if (!cleanText && !attachmentUrl) return false;
+
+    const targetTicket = supportTickets.find(t => t.id === ticketId);
+    if (!targetTicket) return false;
+
+    const isAdminSender = currentUser.role === 'admin';
+    const isTicketOwner = currentUser.id === targetTicket.userId;
+    if (!isAdminSender && !isTicketOwner) {
+      showToast(language === 'km' ? 'គ្មានសិទ្ធិឆ្លើយតបសារនេះទេ!' : 'Unauthorized!', 'warning');
+      return false;
+    }
+
+    const now = new Date();
+    const readableNow = now.toISOString().replace('T', ' ').slice(0, 16);
+    const newMsg: SupportTicketMessage = {
+      id: `msg-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      senderRole: isAdminSender ? 'admin' : 'user',
+      senderId: currentUser.id,
+      senderName: isAdminSender ? `${currentUser.name} (Admin)` : currentUser.name,
+      message: cleanText || (language === 'km' ? 'បានភ្ជាប់រូបភាពវិក្កយបត្របន្ថែម' : 'Attached payment receipt'),
+      attachmentUrl,
+      createdAt: readableNow,
+    };
+
+    setSupportTickets(prev =>
+      prev.map(t => {
+        if (t.id !== ticketId) return t;
+        return {
+          ...t,
+          receiptUrl: attachmentUrl || t.receiptUrl,
+          status: isAdminSender ? 'replied' : (t.status === 'resolved' ? 'pending' : t.status),
+          unreadByAdmin: !isAdminSender,
+          unreadByUser: isAdminSender,
+          messages: [...t.messages, newMsg],
+          updatedAt: readableNow,
+        };
+      })
+    );
+
+    if (isAdminSender) {
+      const replyNotif: AppNotification = {
+        id: `notif-sup-reply-${Date.now()}`,
+        titleKh: '💬 រដ្ឋបាល (Admin) បានឆ្លើយតបសារជំនួយរបស់អ្នក!',
+        titleEn: '💬 Admin Replied to Your Support Message!',
+        messageKh: `Admin បានឆ្លើយតបលើសំណើ #${ticketId}៖ "${cleanText.slice(0, 90)}"។ សូមចូលមើលក្នុងគណនី > សារជំនួយ & ប្រវត្តិបង់ប្រាក់។`,
+        messageEn: `Admin replied to ticket #${ticketId}: "${cleanText.slice(0, 90)}". Check Account > Support Messages / Payment History.`,
+        type: 'system',
+        date: now.toISOString().split('T')[0],
+        isRead: false,
+      };
+      setNotifications(prev => [replyNotif, ...prev]);
+      showToast(language === 'km' ? '✅ បានផ្ញើការឆ្លើយតបទៅកាន់អ្នកប្រើប្រាស់!' : '✅ Reply sent to user!', 'success');
+    } else {
+      const userReplyNotif: AppNotification = {
+        id: `notif-sup-user-${Date.now()}`,
+        titleKh: '💬 អ្នកប្រើប្រាស់បានឆ្លើយតបសារជំនួយ',
+        titleEn: '💬 User Replied to Support Ticket',
+        messageKh: `${currentUser.name} បានឆ្លើយតបក្នុងសំណើ #${ticketId}៖ "${cleanText.slice(0, 90)}"`,
+        messageEn: `${currentUser.name} replied in ticket #${ticketId}: "${cleanText.slice(0, 90)}"`,
+        type: 'system',
+        date: now.toISOString().split('T')[0],
+        isRead: false,
+      };
+      setNotifications(prev => [userReplyNotif, ...prev]);
+      showToast(language === 'km' ? '✅ បានផ្ញើសារឆ្លើយតបទៅកាន់ Admin!' : '✅ Message sent to Admin!', 'success');
+    }
+
+    return true;
+  };
+
+  const updateSupportTicketStatus = (ticketId: string, status: SupportTicketStatus) => {
+    const readableNow = new Date().toISOString().replace('T', ' ').slice(0, 16);
+    setSupportTickets(prev =>
+      prev.map(t => (t.id === ticketId ? { ...t, status, updatedAt: readableNow } : t))
+    );
+    showToast(
+      language === 'km'
+        ? `បានប្តូរស្ថានភាពសំណើទៅជា "${status.toUpperCase()}"`
+        : `Updated ticket status to "${status.toUpperCase()}"`,
+      'info'
+    );
+  };
+
+  const markSupportTicketRead = (ticketId: string) => {
+    if (!currentUser) return;
+    const isAdminUser = currentUser.role === 'admin';
+    setSupportTickets(prev =>
+      prev.map(t => {
+        if (t.id !== ticketId) return t;
+        return {
+          ...t,
+          unreadByAdmin: isAdminUser ? false : t.unreadByAdmin,
+          unreadByUser: !isAdminUser ? false : t.unreadByUser,
+        };
+      })
+    );
+  };
+
+  const approveVipFromSupportTicket = (ticketId: string, durationDays?: 30 | 90, adminNote?: string) => {
+    if (!currentUser || currentUser.role !== 'admin') {
+      showToast(
+        language === 'km'
+          ? '⛔ មានតែគណនី Administrator ប៉ុណ្ណោះដែលអាចអនុម័តបើកដំណើរការ VIP បាន!'
+          : '⛔ Only an Administrator can approve and activate VIP!',
+        'warning'
+      );
+      return;
+    }
+
+    const ticket = supportTickets.find(t => t.id === ticketId);
+    if (!ticket) return;
+
+    const validatedPlan = resolveAndValidateVipPlan({
+      durationDays: durationDays || ticket.durationDays,
+      amountUsd: ticket.amountUsd,
+    });
+    const finalDays = validatedPlan.durationDays;
+    const finalPrice = validatedPlan.priceUsd;
+
+    const targetUser = users.find(u => u.id === ticket.userId);
+    const { startDate, expiryDate } = calculateVipDates(targetUser?.subscriptionExpiryDate, finalDays);
+    const now = new Date();
+    const readableNow = now.toISOString().replace('T', ' ').slice(0, 16);
+    const expiryDateFormatted = expiryDate.split('T')[0];
+
+    // 1. Activate VIP on user account
+    setUsers(prev =>
+      prev.map(u => {
+        if (u.id !== ticket.userId) return u;
+        return {
+          ...u,
+          membershipTier: 'premium_vip',
+          subscriptionStartDate: startDate,
+          subscriptionExpiryDate: expiryDate,
+          subscriptionStatus: 'active',
+          paymentStatus: 'verified',
+          paymentMethod: 'KHQR',
+          transactionRef: ticket.paymentRef,
+        };
+      })
+    );
+
+    if (currentUser.id === ticket.userId) {
+      setCurrentUser(prev =>
+        prev
+          ? {
+              ...prev,
+              membershipTier: 'premium_vip',
+              subscriptionStartDate: startDate,
+              subscriptionExpiryDate: expiryDate,
+              subscriptionStatus: 'active',
+              paymentStatus: 'verified',
+              paymentMethod: 'KHQR',
+              transactionRef: ticket.paymentRef,
+            }
+          : null
+      );
+    }
+
+    // 2. Upgrade user's shops to premium
+    setRestaurants(prev =>
+      prev.map(r => {
+        if (r.ownerId !== ticket.userId) return r;
+        return {
+          ...r,
+          membershipTier: 'premium',
+          membershipExpiresAt: expiryDate,
+          isPromoted: true,
+          isVerified: true,
+          paymentStatus: 'verified',
+        };
+      })
+    );
+
+    // 3. Mark any pending transaction for this user as verified, or record one
+    const matchingTxn = transactions.find(
+      t =>
+        t.userId === ticket.userId &&
+        (t.status === 'pending_verification' || t.status === 'needs_more_info')
+    );
+
+    if (matchingTxn) {
+      setTransactions(prev =>
+        prev.map(t =>
+          t.id === matchingTxn.id
+            ? {
+                ...t,
+                planType: validatedPlan.id,
+                durationDays: finalDays,
+                amountUsd: finalPrice,
+                status: 'verified',
+                verifiedAt: readableNow,
+                verifiedBy: `${currentUser.name} (Admin via Support #${ticketId})`,
+                expiresAt: expiryDate,
+              }
+            : t
+        )
+      );
+    } else {
+      const approvedTxn: RegistrationTransaction = {
+        id: `TXN-VIP-${Date.now().toString(36).toUpperCase()}`,
+        type: 'user_vip_upgrade',
+        userId: ticket.userId,
+        userName: ticket.username,
+        userEmail: ticket.userEmail,
+        ownerId: ticket.userId,
+        ownerName: ticket.username,
+        planType: validatedPlan.id,
+        amountUsd: finalPrice,
+        currency: 'USD',
+        durationDays: finalDays,
+        membershipTier: 'premium_vip',
+        status: 'verified',
+        paymentMethod: 'KHQR',
+        transactionRef: ticket.paymentRef,
+        paymentProofUrl: ticket.receiptUrl,
+        createdAt: startDate,
+        expiresAt: expiryDate,
+        verifiedAt: readableNow,
+        verifiedBy: `${currentUser.name} (Admin via Support #${ticketId})`,
+        notes: `Approved via Support Ticket #${ticketId} (${validatedPlan.nameEn} - $${finalPrice.toFixed(2)} / ${finalDays} days)`,
+      };
+      setTransactions(prev => [approvedTxn, ...prev]);
+    }
+
+    // 4. Add official approval reply message to the support ticket & mark Resolved
+    const approvalReplyText =
+      adminNote?.trim() ||
+      `🎉 ការទូទាត់ប្រាក់របស់អ្នក ($${finalPrice.toFixed(2)} USD សម្រាប់កញ្ចប់ ${validatedPlan.nameEn} - ${finalDays} ថ្ងៃ) ត្រូវបានផ្ទៀងផ្ទាត់ និងអនុម័តរួចរាល់! គណនី VIP របស់អ្នកត្រូវបានបើកដំណើរការពេញលេញ រហូតដល់ថ្ងៃទី ${expiryDateFormatted}។ សូមអរគុណ!`;
+
+    const approvalMsg: SupportTicketMessage = {
+      id: `msg-approve-${Date.now()}`,
+      senderRole: 'admin',
+      senderId: currentUser.id,
+      senderName: `${currentUser.name} (Admin)`,
+      message: approvalReplyText,
+      createdAt: readableNow,
+    };
+
+    setSupportTickets(prev =>
+      prev.map(t => {
+        if (t.id !== ticketId) return t;
+        return {
+          ...t,
+          durationDays: finalDays,
+          amountUsd: finalPrice,
+          paymentPlanId: validatedPlan.id,
+          paymentPlanLabel: `${validatedPlan.nameEn} ($${finalPrice.toFixed(2)} / ${finalDays} days)`,
+          status: 'resolved',
+          vipApproved: true,
+          vipApprovedAt: readableNow,
+          unreadByAdmin: false,
+          unreadByUser: true,
+          messages: [...t.messages, approvalMsg],
+          updatedAt: readableNow,
+        };
+      })
+    );
+
+    // 5. Notify user immediately in-app
+    const vipNotif: AppNotification = {
+      id: `notif-vip-active-${Date.now()}`,
+      titleKh: `🎉 គណនី VIP (${finalDays} ថ្ងៃ) ត្រូវបានបើកដំណើរការ!`,
+      titleEn: `🎉 VIP Access (${finalDays} Days) Activated!`,
+      messageKh: `រដ្ឋបាលបានផ្ទៀងផ្ទាត់វិក្កយបត្រ និងបើកដំណើរការកញ្ចប់ ${validatedPlan.nameEn} ($${finalPrice.toFixed(2)} / ${finalDays} ថ្ងៃ) ជូនគណនីរបស់អ្នករួចរាល់ (ផុតកំណត់៖ ${expiryDateFormatted})!`,
+      messageEn: `Admin verified your payment and activated ${validatedPlan.nameEn} ($${finalPrice.toFixed(2)} / ${finalDays} days) until ${expiryDateFormatted}!`,
+      type: 'system',
+      date: now.toISOString().split('T')[0],
+      isRead: false,
+    };
+    setNotifications(prev => [vipNotif, ...prev]);
+
+    showToast(
+      language === 'km'
+        ? `🎉 បានអនុម័ត និងបើកដំណើរការ VIP (${finalDays} ថ្ងៃ / $${finalPrice.toFixed(2)}) ជូន ${ticket.username} ដោយជោគជ័យ!`
+        : `🎉 Approved & activated VIP (${finalDays} days / $${finalPrice.toFixed(2)}) for ${ticket.username}!`,
+      'success'
+    );
   };
 
   // AI Trending Food Update
@@ -3554,14 +4036,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setTargetWishlistItem,
         openAddToWishlist,
 
-        // Premium VIP Subscription ($9.99/year)
+        // Premium VIP Subscription ($2.99 / 30 Days or $4.99 / 90 Days)
         isUpgradeVipModalOpen,
         setIsUpgradeVipModalOpen,
+        isVipRenewMode,
+        setIsVipRenewMode,
         openUpgradeVipModal,
         submitVipUpgradeRequest,
         upgradeCurrentUserToVip,
         renewCurrentUserVip,
         restoreCurrentUserVipPurchases,
+
+        // User–Admin Two-Way Support & Payment Reply System
+        supportTickets,
+        isSupportTicketModalOpen,
+        setIsSupportTicketModalOpen,
+        supportModalPrefill,
+        openSupportTicketModal,
+        createSupportTicket,
+        replyToSupportTicket,
+        updateSupportTicketStatus,
+        approveVipFromSupportTicket,
+        markSupportTicketRead,
 
         // AI Trending Food Discovery Section
         trendingFoods,

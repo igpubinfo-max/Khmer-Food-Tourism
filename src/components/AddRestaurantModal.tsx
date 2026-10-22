@@ -1,27 +1,45 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useApp } from '../context/AppContext';
-import { 
-  X, Store, Image, MapPin, Phone, Clock, Plus, 
-  ArrowRight, ArrowLeft, ShieldCheck, CheckCircle2, 
-  AlertTriangle, Sparkles, Building2, CreditCard
+import {
+  X,
+  Store,
+  Image,
+  MapPin,
+  Phone,
+  Clock,
+  ArrowRight,
+  ArrowLeft,
+  ShieldCheck,
+  CheckCircle2,
+  Sparkles,
+  CreditCard,
+  Camera,
+  Upload,
+  Trash2,
+  RefreshCw,
+  Utensils,
 } from 'lucide-react';
-import { RestaurantPriceLevel } from '../types';
+import { RestaurantPriceLevel, VIP_PLANS, VipPlanType } from '../types';
+import {
+  pickImageUsingNativeAndroidGallery,
+  processAndCompressImageFile,
+} from '../utils/androidMediaHelper';
 
 export const AddRestaurantModal: React.FC = () => {
-  const { 
-    isAddRestaurantModalOpen, 
-    setIsAddRestaurantModalOpen, 
-    addRestaurant, 
+  const {
+    isAddRestaurantModalOpen,
+    setIsAddRestaurantModalOpen,
+    addRestaurant,
     addRegistrationTransaction,
-    appSettings,
-    language, 
-    currentUser, 
+    language,
+    currentUser,
     setIsAuthModalOpen,
-    showToast 
+    showToast,
   } = useApp();
 
   const [step, setStep] = useState<1 | 2>(1);
   const [selectedTier, setSelectedTier] = useState<'free' | 'premium'>('free');
+  const [selectedVipPlan, setSelectedVipPlan] = useState<VipPlanType>('quarterly');
 
   // Form Fields
   const [nameKh, setNameKh] = useState('');
@@ -32,26 +50,152 @@ export const AddRestaurantModal: React.FC = () => {
   const [phone, setPhone] = useState('');
   const [openingHoursKh, setOpeningHoursKh] = useState('០៧:០០ ព្រឹក - ០៩:០០ យប់');
   const [priceLevel, setPriceLevel] = useState<RestaurantPriceLevel>('$$');
-  const [photoUrl, setPhotoUrl] = useState('https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80');
+  const [profilePhotoUrl, setProfilePhotoUrl] = useState(
+    'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80'
+  );
+  const [foodPhotos, setFoodPhotos] = useState<string[]>([]);
   const [descriptionKh, setDescriptionKh] = useState('');
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
-  // Payment Step Fields (One-time $9.99 for 365 Days)
+  // Payment Step Fields ($2.99 for 30 Days or $4.99 for 90 Days)
   const [transactionRef, setTransactionRef] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState<'BankTransfer' | 'Bakong' | 'KHQR'>('BankTransfer');
+  const [paymentMethod] = useState<'BankTransfer' | 'Bakong' | 'KHQR'>('BankTransfer');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const profileGalleryInputRef = useRef<HTMLInputElement>(null);
+  const profileCameraInputRef = useRef<HTMLInputElement>(null);
+  const foodGalleryInputRef = useRef<HTMLInputElement>(null);
+  const foodCameraInputRef = useRef<HTMLInputElement>(null);
 
   if (!isAddRestaurantModalOpen) return null;
 
   const isKm = language === 'km';
-  const promoPrice = appSettings.promotionalFeeUsd || 9.99;
+  const activePlan = VIP_PLANS[selectedVipPlan];
 
-  // Preset photos for quick selection
   const samplePhotos = [
     'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80',
     'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80',
     'https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80',
     'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80',
   ];
+
+  // Handle Shop Profile Picture Pick from Native Android Gallery or Fallback
+  const handlePickProfileFromGallery = async () => {
+    setIsUploadingImage(true);
+    try {
+      const nativePick = await pickImageUsingNativeAndroidGallery();
+      if (nativePick.cancelled) {
+        setIsUploadingImage(false);
+        return;
+      }
+      if (nativePick.success && nativePick.dataUrl) {
+        setProfilePhotoUrl(nativePick.dataUrl);
+        showToast(
+          isKm ? '✅ បានជ្រើសរើសរូបតំណាងហាងជោគជ័យ!' : '✅ Shop profile picture selected!',
+          'success'
+        );
+        setIsUploadingImage(false);
+        return;
+      }
+    } catch {
+      // Fallback to standard file input
+    }
+    setIsUploadingImage(false);
+    profileGalleryInputRef.current?.click();
+  };
+
+  const handleProfileFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+
+    setIsUploadingImage(true);
+    try {
+      const dataUrl = await processAndCompressImageFile(file);
+      setProfilePhotoUrl(dataUrl);
+      showToast(
+        isKm ? '✅ បានដាក់រូបតំណាងហាងជោគជ័យ!' : '✅ Shop profile picture uploaded!',
+        'success'
+      );
+    } catch (err: any) {
+      showToast(err?.message || (isKm ? 'រូបភាពមិនត្រឹមត្រូវ' : 'Invalid image'), 'error');
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
+
+  // Handle Food Photos (Multiple Images) Pick
+  const handlePickFoodFromGallery = async () => {
+    setIsUploadingImage(true);
+    try {
+      const nativePick = await pickImageUsingNativeAndroidGallery();
+      if (nativePick.cancelled) {
+        setIsUploadingImage(false);
+        return;
+      }
+      if (nativePick.success && nativePick.dataUrl) {
+        setFoodPhotos((prev) => [...prev, nativePick.dataUrl!].slice(0, 10));
+        showToast(
+          isKm ? '✅ បានបន្ថែមរូបភាពមុខម្ហូបជោគជ័យ!' : '✅ Food photo added!',
+          'success'
+        );
+        setIsUploadingImage(false);
+        return;
+      }
+    } catch {
+      // Fallback to multi-file input
+    }
+    setIsUploadingImage(false);
+    foodGalleryInputRef.current?.click();
+  };
+
+  const handleFoodFilesChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    e.target.value = '';
+    if (files.length === 0) return;
+
+    setIsUploadingImage(true);
+    const uploadedUrls: string[] = [];
+    for (const file of files.slice(0, 8)) {
+      try {
+        const dataUrl = await processAndCompressImageFile(file);
+        if (dataUrl) uploadedUrls.push(dataUrl);
+      } catch (err: any) {
+        showToast(
+          err?.message || (isKm ? 'រូបភាពមិនត្រឹមត្រូវ' : 'Invalid image file'),
+          'warning'
+        );
+      }
+    }
+    setIsUploadingImage(false);
+
+    if (uploadedUrls.length > 0) {
+      setFoodPhotos((prev) => [...prev, ...uploadedUrls].slice(0, 10));
+      showToast(
+        isKm
+          ? `✅ បានបន្ថែមរូបភាពមុខម្ហូបចំនួន ${uploadedUrls.length} សន្លឹក!`
+          : `✅ Added ${uploadedUrls.length} food photo(s)!`,
+        'success'
+      );
+    }
+  };
+
+  const handleRemoveFoodPhoto = (idx: number) => {
+    setFoodPhotos((prev) => prev.filter((_, i) => i !== idx));
+  };
+
+  const handleReplaceFoodPhoto = async (idx: number) => {
+    try {
+      const nativePick = await pickImageUsingNativeAndroidGallery();
+      if (nativePick.success && nativePick.dataUrl) {
+        setFoodPhotos((prev) => prev.map((item, i) => (i === idx ? nativePick.dataUrl! : item)));
+        showToast(isKm ? '✅ បានប្តូររូបភាពមុខម្ហូបជោគជ័យ!' : '✅ Food photo replaced!', 'success');
+        return;
+      }
+    } catch {
+      // ignore
+    }
+  };
 
   // 1. Free Registration Handler ($0 Free Listing)
   const handleFreeRegistration = (e?: React.FormEvent) => {
@@ -75,6 +219,11 @@ export const AddRestaurantModal: React.FC = () => {
 
     setIsSubmitting(true);
 
+    const finalProfile =
+      profilePhotoUrl.trim() ||
+      'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80';
+    const combinedGallery = Array.from(new Set([finalProfile, ...foodPhotos]));
+
     addRestaurant({
       nameKh: nameKh.trim() || 'ហាងអាហារខ្មែរ',
       nameEn: nameEn.trim() || nameKh.trim() || 'Khmer Restaurant',
@@ -86,7 +235,10 @@ export const AddRestaurantModal: React.FC = () => {
       openingHoursKh,
       openingHoursEn: openingHoursKh,
       priceLevel,
-      photoUrl,
+      photoUrl: finalProfile,
+      profileImage: finalProfile,
+      foodImages: foodPhotos,
+      galleryPhotos: combinedGallery,
       signatureDishesKh: ['ម្ហូបខ្មែរប្រពៃណី'],
       descriptionKh: descriptionKh.trim() || 'ហាងអាហារខ្មែររសជាតិដើម បរិយាកាសស្អាត និងផាសុកភាព។',
       descriptionEn: descriptionKh.trim() || 'Authentic traditional Khmer restaurant.',
@@ -94,19 +246,23 @@ export const AddRestaurantModal: React.FC = () => {
       latitude: 11.5564,
       longitude: 104.9282,
       membershipTier: 'free',
-      menuItems: [], // Free users cannot add food menu items!
+      menuItems: [],
       status: 'approved',
       isVerified: true,
       isPromoted: false,
+      ownerId: currentUser.id,
+      ownerName: currentUser.name,
+      ownerPhone: phone.trim(),
     });
 
     setIsSubmitting(false);
     setIsAddRestaurantModalOpen(false);
     setStep(1);
     setSelectedTier('free');
+    setFoodPhotos([]);
   };
 
-  // 2. Next to Step 2 for Premium ($4.99 for 365 Days)
+  // 2. Next to Step 2 for Premium ($2.99 for 30 Days or $4.99 for 90 Days)
   const handleNextToPayment = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!currentUser) {
@@ -128,14 +284,14 @@ export const AddRestaurantModal: React.FC = () => {
     setStep(2);
   };
 
-  // 3. Final Submit for Premium ($4.99 Payment)
+  // 3. Final Submit for Premium ($2.99 / 30 Days or $4.99 / 90 Days)
   const handleFinalSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!transactionRef.trim()) {
       showToast(
-        isKm 
-          ? 'សូមបញ្ចូលលេខកូដប្រតិបត្តិការធនាគារ (Transaction Ref / Trx ID) ពីវិក្កយបត្ររបស់អ្នក!' 
-          : 'Please enter your bank Transaction Reference / Trx ID!', 
+        isKm
+          ? 'សូមបញ្ចូលលេខកូដប្រតិបត្តិការធនាគារ (Transaction Ref / Trx ID) ពីវិក្កយបត្ររបស់អ្នក!'
+          : 'Please enter your bank Transaction Reference / Trx ID!',
         'warning'
       );
       return;
@@ -143,9 +299,15 @@ export const AddRestaurantModal: React.FC = () => {
 
     setIsSubmitting(true);
     const generatedRestId = `rest-${Date.now()}`;
-    const expiresAt = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString();
+    const expiresAt = new Date(
+      Date.now() + activePlan.durationDays * 24 * 60 * 60 * 1000
+    ).toISOString();
 
-    // Create Restaurant with Premium status
+    const finalProfile =
+      profilePhotoUrl.trim() ||
+      'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80';
+    const combinedGallery = Array.from(new Set([finalProfile, ...foodPhotos]));
+
     addRestaurant({
       nameKh: nameKh.trim() || 'ហាងអាហារខ្មែរ',
       nameEn: nameEn.trim() || nameKh.trim() || 'Khmer Restaurant',
@@ -157,7 +319,10 @@ export const AddRestaurantModal: React.FC = () => {
       openingHoursKh,
       openingHoursEn: openingHoursKh,
       priceLevel,
-      photoUrl,
+      photoUrl: finalProfile,
+      profileImage: finalProfile,
+      foodImages: foodPhotos,
+      galleryPhotos: combinedGallery,
       signatureDishesKh: ['ម្ហូបខ្មែរប្រពៃណី'],
       descriptionKh: descriptionKh.trim() || 'ហាងអាហារខ្មែររសជាតិដើម បរិយាកាសស្អាត និងផាសុកភាព។',
       descriptionEn: descriptionKh.trim() || 'Authentic traditional Khmer restaurant with delicious dishes.',
@@ -166,15 +331,17 @@ export const AddRestaurantModal: React.FC = () => {
       longitude: 104.9282,
       membershipTier: 'premium',
       membershipExpiresAt: expiresAt,
-      menuItems: [], // Up to 5 items can now be added by owner!
+      menuItems: [],
       paymentStatus: 'pending_verification',
-      promotionalPrice: promoPrice,
+      promotionalPrice: activePlan.priceUsd,
       isPromoted: true,
       isVerified: true,
       status: 'approved',
+      ownerId: currentUser?.id || 'owner-guest',
+      ownerName: currentUser?.name || 'Restaurant Owner',
+      ownerPhone: phone.trim(),
     });
 
-    // Record Registration Transaction
     addRegistrationTransaction({
       restaurantId: generatedRestId,
       restaurantNameKh: nameKh.trim(),
@@ -182,21 +349,24 @@ export const AddRestaurantModal: React.FC = () => {
       ownerId: currentUser?.id || 'owner-guest',
       ownerName: currentUser?.name || 'Restaurant Owner',
       ownerPhone: phone.trim(),
-      amountUsd: promoPrice,
+      amountUsd: activePlan.priceUsd,
+      durationDays: activePlan.durationDays,
+      planType: activePlan.id,
       paymentMethod,
       transactionRef: transactionRef.trim(),
-      notes: `One-time payment of $${promoPrice} USD for 365 days Premium Membership (allows up to 5 food menu items). No monthly charges.`,
+      notes: `One-time payment of $${activePlan.priceUsd.toFixed(2)} USD for ${activePlan.durationDays} days Premium VIP Membership (${activePlan.nameEn}).`,
     });
 
     setIsSubmitting(false);
     setIsAddRestaurantModalOpen(false);
     setStep(1);
     setTransactionRef('');
+    setFoodPhotos([]);
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-sm animate-fade-in">
-      <div 
+      <div
         className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] border border-slate-200 dark:border-slate-800"
         onClick={(e) => e.stopPropagation()}
       >
@@ -208,17 +378,19 @@ export const AddRestaurantModal: React.FC = () => {
             </div>
             <div>
               <h2 className="font-moul text-sm text-white leading-snug">
-                {isKm ? 'ចុះបញ្ជីហាងអាហារ' : 'Register Restaurant'}
+                {isKm ? 'ចុះបញ្ជីហាងអាហារ (បង្ហោះរូបហាង & រូបម្ហូប)' : 'Register Restaurant (Profile & Food Photos)'}
               </h2>
               <div className="flex items-center gap-1.5 text-[10px] text-emerald-200 font-khmer">
                 <span className={`px-2 py-0.5 rounded-full ${step === 1 ? 'bg-[#10B981] text-white font-bold' : 'bg-white/20'}`}>
-                  {isKm ? '១. ព័ត៌មានហាង' : '1. Shop Details'}
+                  {isKm ? '១. ព័ត៌មានហាង & រូបភាព' : '1. Shop & Photos'}
                 </span>
                 {selectedTier === 'premium' && (
                   <>
                     <span>→</span>
                     <span className={`px-2 py-0.5 rounded-full ${step === 2 ? 'bg-[#10B981] text-white font-bold' : 'bg-white/20'}`}>
-                      {isKm ? `២. Premium $${promoPrice} (៣៦៥ ថ្ងៃ)` : `2. Premium $${promoPrice} (365 Days)`}
+                      {isKm
+                        ? `២. VIP $${activePlan.priceUsd.toFixed(2)} (${activePlan.durationDays} ថ្ងៃ)`
+                        : `2. VIP $${activePlan.priceUsd.toFixed(2)} (${activePlan.durationDays} Days)`}
                     </span>
                   </>
                 )}
@@ -233,10 +405,10 @@ export const AddRestaurantModal: React.FC = () => {
           </button>
         </div>
 
-        {/* Step 1: Restaurant Form & Membership Selector */}
+        {/* Step 1: Restaurant Form, Photos & Membership Selector */}
         {step === 1 && (
-          <form 
-            onSubmit={selectedTier === 'free' ? handleFreeRegistration : handleNextToPayment} 
+          <form
+            onSubmit={selectedTier === 'free' ? handleFreeRegistration : handleNextToPayment}
             className="p-5 space-y-4 overflow-y-auto no-scrollbar flex-1 text-xs font-khmer"
           >
             {/* Membership Tier Cards */}
@@ -247,11 +419,11 @@ export const AddRestaurantModal: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-3">
                 {/* Free Listing Card ($0) */}
-                <div 
+                <div
                   onClick={() => setSelectedTier('free')}
                   className={`p-3.5 rounded-2xl border-2 cursor-pointer transition flex flex-col justify-between ${
-                    selectedTier === 'free' 
-                      ? 'border-[#059669] bg-emerald-50/50 dark:bg-emerald-950/20 ring-2 ring-[#059669]/20' 
+                    selectedTier === 'free'
+                      ? 'border-[#059669] bg-emerald-50/50 dark:bg-emerald-950/20 ring-2 ring-[#059669]/20'
                       : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 bg-white dark:bg-slate-800/40'
                   }`}
                 >
@@ -267,11 +439,8 @@ export const AddRestaurantModal: React.FC = () => {
                     </div>
                     <ul className="text-[10px] text-slate-600 dark:text-slate-300 space-y-1">
                       <li>✓ {isKm ? 'បង្ហាញក្នុងបញ្ជីហាងផ្លូវការ' : 'Listed in directory'}</li>
-                      <li>✓ {isKm ? 'រូបតំណាងហាង ១ សន្លឹក' : '1 profile photo'}</li>
+                      <li>✓ {isKm ? 'រូបតំណាងហាង & រូបម្ហូប' : 'Shop profile & food photos'}</li>
                       <li>✓ {isKm ? 'អាសយដ្ឋាន និងលេខទូរស័ព្ទ' : 'Address & contact info'}</li>
-                      <li className="text-red-500 font-semibold pt-0.5">
-                        ✗ {isKm ? 'មិនអាចបន្ថែមមុខម្ហូបបានទេ' : 'Cannot add food items'}
-                      </li>
                     </ul>
                   </div>
                   {selectedTier === 'free' && (
@@ -282,12 +451,12 @@ export const AddRestaurantModal: React.FC = () => {
                   )}
                 </div>
 
-                {/* Premium Membership Card ($9.99 for 365 Days) */}
-                <div 
+                {/* Premium VIP Membership Card ($2.99 / 30d or $4.99 / 90d) */}
+                <div
                   onClick={() => setSelectedTier('premium')}
                   className={`p-3.5 rounded-2xl border-2 cursor-pointer transition flex flex-col justify-between ${
-                    selectedTier === 'premium' 
-                      ? 'border-[#064E3B] bg-emerald-50/50 dark:bg-emerald-950/20 ring-2 ring-[#064E3B]/20' 
+                    selectedTier === 'premium'
+                      ? 'border-[#064E3B] bg-emerald-50/50 dark:bg-emerald-950/20 ring-2 ring-[#064E3B]/20'
                       : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 bg-white dark:bg-slate-800/40'
                   }`}
                 >
@@ -297,42 +466,62 @@ export const AddRestaurantModal: React.FC = () => {
                         <span>⭐</span>
                         <span>{isKm ? 'Premium VIP' : 'Premium VIP'}</span>
                       </span>
-                      <div className="flex flex-col items-end">
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#064E3B] text-white font-mono">
-                          $9.99
-                        </span>
-                        <span className="text-[8px] text-amber-600 dark:text-amber-400 font-bold">
-                          {isKm ? 'ត្រឹមដំណាច់ឆ្នាំ' : 'End of year promo'}
-                        </span>
-                      </div>
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#064E3B] text-white font-mono">
+                        ${activePlan.priceUsd.toFixed(2)}
+                      </span>
                     </div>
                     <ul className="text-[10px] text-slate-600 dark:text-slate-300 space-y-1">
                       <li className="text-[#064E3B] dark:text-emerald-400 font-bold">
                         ✓ {isKm ? 'មុខម្ហូប ៥ មុខ ជាមួយរូបភាព និងតម្លៃ' : 'Up to 5 food items with photos & prices'}
                       </li>
-                      <li>✓ {isKm ? 'រូបភាពហាងច្រើនសន្លឹក (Gallery)' : 'Multiple restaurant photos'}</li>
+                      <li>✓ {isKm ? 'រូបតំណាងហាង & រូបភាពម្ហូបច្រើនសន្លឹក' : 'Shop profile & multiple food photos'}</li>
                       <li>✓ {isKm ? 'កែប្រែព័ត៌មានហាងដោយខ្លួនឯង' : 'Self-service editing'}</li>
-                      <li>✓ {isKm ? 'បង្ហាញក្នុងបញ្ជីហាងឆ្នើម & ផ្នែក VIP' : 'Featured listing & VIP section'}</li>
-                      <li>✓ {isKm ? 'ផ្លាក VIP & ស្ថិតិហាង (មើល, ខល, Maps)' : 'VIP badge & analytics (views, calls, maps)'}</li>
-                      <li>✓ {isKm ? 'តំណភ្ជាប់ចែករំលែក & សេវាជំនួយ VIP' : 'Shareable link & member support'}</li>
-                      <li className="text-[#059669] font-medium pt-0.5">✓ {isKm ? 'សុពលភាព ១ ឆ្នាំពេញ (៣៦៥ ថ្ងៃ)' : 'One-time for 365 days'}</li>
+                      <li className="text-[#059669] font-medium pt-0.5">
+                        ✓ {isKm ? 'VIP 30 ថ្ងៃ ($2.99) ឬ 90 ថ្ងៃ ($4.99)' : 'VIP 30 Days ($2.99) or 90 Days ($4.99)'}
+                      </li>
                     </ul>
                   </div>
                   {selectedTier === 'premium' && (
                     <div className="mt-2 text-[10px] font-bold text-[#064E3B] dark:text-emerald-400 flex items-center gap-1">
                       <CheckCircle2 className="w-3.5 h-3.5" />
-                      <span>{isKm ? 'បានជ្រើសរើស ($9.99)' : 'Selected ($9.99)'}</span>
+                      <span>
+                        {isKm
+                          ? `បានជ្រើសរើស ($${activePlan.priceUsd.toFixed(2)} / ${activePlan.durationDays} ថ្ងៃ)`
+                          : `Selected ($${activePlan.priceUsd.toFixed(2)} / ${activePlan.durationDays}d)`}
+                      </span>
                     </div>
                   )}
                 </div>
               </div>
 
-              {/* No Auto-Renew Guarantee Notice */}
-              <p className="text-[10px] text-slate-500 mt-1.5">
-                {isKm 
-                  ? 'ℹ️ ការទូទាត់ Premium គឺជាការបង់តែមួយលើក $9.99 សម្រាប់រយៈពេល ៣៦៥ ថ្ងៃ (តម្លៃពិសេសត្រឹមដំណាច់ឆ្នាំនេះប៉ុណ្ណោះ គ្មានការកាត់ប្រាក់ប្រចាំខែ និងគ្មានការបន្តស្វ័យប្រវត្តិឡើយ)។' 
-                  : 'ℹ️ Premium is a one-time payment of $9.99 for 365 days (End of year promo only. No monthly subscription or automatic renewal).'}
-              </p>
+              {selectedTier === 'premium' && (
+                <div className="grid grid-cols-2 gap-2 mt-2.5">
+                  {(['quarterly', 'annual'] as VipPlanType[]).map((planKey) => {
+                    const p = VIP_PLANS[planKey];
+                    const active = selectedVipPlan === planKey;
+                    return (
+                      <button
+                        key={planKey}
+                        type="button"
+                        onClick={() => setSelectedVipPlan(planKey)}
+                        className={`p-2.5 rounded-xl border text-left transition cursor-pointer ${
+                          active
+                            ? 'border-[#064E3B] bg-emerald-50 dark:bg-emerald-950/40 text-[#064E3B] dark:text-emerald-300 font-bold'
+                            : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span>{isKm ? p.nameKh : p.nameEn}</span>
+                          <span className="font-mono font-black">${p.priceUsd.toFixed(2)}</span>
+                        </div>
+                        <div className="text-[10px] opacity-80">
+                          {isKm ? `សុពលភាព ${p.durationDays} ថ្ងៃ` : `${p.durationDays} days duration`}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
             {/* Shop Names */}
@@ -471,32 +660,197 @@ export const AddRestaurantModal: React.FC = () => {
               />
             </div>
 
-            {/* Profile Photo */}
-            <div>
-              <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
-                <Image className="w-3.5 h-3.5 inline mr-1 text-[#059669]" />
-                {isKm ? 'រូបភាពតំណាងហាង (Restaurant Profile Photo URL) *' : 'Profile Photo URL *'}
-              </label>
+            {/* REQUIREMENT 3A: Shop Profile Picture Upload Field (Gallery/Photos + Camera + Preview + Replace/Remove) */}
+            <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 space-y-2.5">
+              <div className="flex items-center justify-between">
+                <label className="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
+                  <Image className="w-4 h-4 text-[#059669]" />
+                  <span>{isKm ? '១. រូបភាពតំណាងហាង (Shop Profile Picture) *' : '1. Shop Profile Picture *'}</span>
+                </label>
+                <span className="text-[10px] text-slate-400">JPG, JPEG, PNG</span>
+              </div>
+
+              {/* Hidden file inputs */}
               <input
-                type="url"
-                required
-                value={photoUrl}
-                onChange={(e) => setPhotoUrl(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs mb-2 focus:ring-2 focus:ring-[#059669]/20 focus:border-[#059669] outline-none"
+                ref={profileGalleryInputRef}
+                type="file"
+                accept="image/jpeg,image/jpg,image/png,image/webp"
+                onChange={handleProfileFileChange}
+                className="hidden"
+              />
+              <input
+                ref={profileCameraInputRef}
+                type="file"
+                accept="image/jpeg,image/jpg,image/png"
+                capture="environment"
+                onChange={handleProfileFileChange}
+                className="hidden"
               />
 
-              <div className="grid grid-cols-4 gap-2">
+              {/* Preview Box */}
+              {profilePhotoUrl && (
+                <div className="relative rounded-2xl overflow-hidden border-2 border-[#059669]/50 bg-slate-900 h-36">
+                  <img
+                    src={profilePhotoUrl}
+                    alt="Shop Profile Preview"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute top-2 left-2 px-2.5 py-0.5 rounded-full bg-black/70 text-white text-[10px] font-bold">
+                    {isKm ? 'រូបតំណាងហាង (Preview)' : 'Shop Profile Preview'}
+                  </div>
+                  <div className="absolute bottom-2 right-2 flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={handlePickProfileFromGallery}
+                      className="px-2.5 py-1 rounded-lg bg-white/90 hover:bg-white text-slate-900 font-bold text-[10px] flex items-center gap-1 shadow cursor-pointer"
+                    >
+                      <RefreshCw className="w-3 h-3" />
+                      <span>{isKm ? 'ប្តូររូប' : 'Replace'}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setProfilePhotoUrl('')}
+                      className="px-2.5 py-1 rounded-lg bg-rose-600/90 hover:bg-rose-600 text-white font-bold text-[10px] flex items-center gap-1 shadow cursor-pointer"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                      <span>{isKm ? 'លុប' : 'Remove'}</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Gallery & Camera Upload Buttons */}
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  disabled={isUploadingImage}
+                  onClick={handlePickProfileFromGallery}
+                  className="py-2 px-3 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs transition cursor-pointer"
+                >
+                  <Upload className="w-3.5 h-3.5" />
+                  <span>{isKm ? 'ជ្រើសពី Gallery / Photos' : 'Choose from Gallery'}</span>
+                </button>
+                <button
+                  type="button"
+                  disabled={isUploadingImage}
+                  onClick={() => profileCameraInputRef.current?.click()}
+                  className="py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs transition cursor-pointer"
+                >
+                  <Camera className="w-3.5 h-3.5" />
+                  <span>{isKm ? 'ថតរូបថ្មី (Camera)' : 'Take Photo (Camera)'}</span>
+                </button>
+              </div>
+
+              {/* Preset Samples */}
+              <div className="grid grid-cols-4 gap-2 pt-1">
                 {samplePhotos.map((url, i) => (
                   <div
                     key={i}
-                    onClick={() => setPhotoUrl(url)}
+                    onClick={() => setProfilePhotoUrl(url)}
                     className={`aspect-16/10 rounded-lg overflow-hidden cursor-pointer border-2 transition ${
-                      photoUrl === url ? 'border-[#064E3B] ring-2 ring-[#059669]' : 'border-transparent opacity-70 hover:opacity-100'
+                      profilePhotoUrl === url
+                        ? 'border-[#064E3B] ring-2 ring-[#059669]'
+                        : 'border-transparent opacity-70 hover:opacity-100'
                     }`}
                   >
                     <img src={url} alt="sample" className="w-full h-full object-cover" />
                   </div>
                 ))}
+              </div>
+            </div>
+
+            {/* REQUIREMENT 3B: Food Photos Upload Field (Multiple Images + Gallery/Camera + Preview + Replace/Remove) */}
+            <div className="p-3.5 rounded-2xl bg-amber-50/50 dark:bg-slate-800/70 border border-amber-300/70 dark:border-amber-700/50 space-y-2.5">
+              <div className="flex items-center justify-between">
+                <label className="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
+                  <Utensils className="w-4 h-4 text-amber-600" />
+                  <span>
+                    {isKm
+                      ? `២. រូបភាពមុខម្ហូបប្រចាំហាង (Food Photos - ${foodPhotos.length} សន្លឹក)`
+                      : `2. Food Photos (${foodPhotos.length} uploaded)`}
+                  </span>
+                </label>
+                <span className="text-[10px] text-amber-700 dark:text-amber-300 font-bold">
+                  {isKm ? 'អាចដាក់បានច្រើនសន្លឹក' : 'Multiple Photos'}
+                </span>
+              </div>
+
+              <input
+                ref={foodGalleryInputRef}
+                type="file"
+                accept="image/jpeg,image/jpg,image/png,image/webp"
+                multiple
+                onChange={handleFoodFilesChange}
+                className="hidden"
+              />
+              <input
+                ref={foodCameraInputRef}
+                type="file"
+                accept="image/jpeg,image/jpg,image/png"
+                capture="environment"
+                onChange={handleFoodFilesChange}
+                className="hidden"
+              />
+
+              {/* Food Photos Preview Grid */}
+              {foodPhotos.length > 0 ? (
+                <div className="grid grid-cols-3 gap-2">
+                  {foodPhotos.map((imgUrl, idx) => (
+                    <div
+                      key={idx}
+                      className="relative group aspect-square rounded-xl overflow-hidden border border-amber-400 bg-slate-900"
+                    >
+                      <img
+                        src={imgUrl}
+                        alt={`Food ${idx + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-x-0 bottom-0 p-1 bg-black/75 flex items-center justify-between gap-1">
+                        <button
+                          type="button"
+                          onClick={() => handleReplaceFoodPhoto(idx)}
+                          className="px-1.5 py-0.5 rounded bg-white/90 text-slate-900 font-bold text-[9px] cursor-pointer"
+                        >
+                          {isKm ? 'ប្តូរ' : 'Replace'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveFoodPhoto(idx)}
+                          className="px-1.5 py-0.5 rounded bg-rose-600 text-white font-bold text-[9px] cursor-pointer"
+                        >
+                          {isKm ? 'លុប' : 'Remove'}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="p-3 rounded-xl border border-dashed border-amber-300 dark:border-slate-600 text-center text-[11px] text-slate-500">
+                  {isKm
+                    ? 'មិនទាន់មានរូបភាពមុខម្ហូបនៅឡើយទេ។ សូមជ្រើសរើសរូបម្ហូបពី Gallery ឬថតរូបថ្មី។'
+                    : 'No food photos selected yet. Choose from Gallery or take new photos.'}
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  disabled={isUploadingImage}
+                  onClick={() => foodGalleryInputRef.current?.click()}
+                  className="py-2 px-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs transition cursor-pointer"
+                >
+                  <Upload className="w-3.5 h-3.5" />
+                  <span>{isKm ? 'ជ្រើសរូបម្ហូបច្រើនសន្លឹក' : 'Add Food Photos'}</span>
+                </button>
+                <button
+                  type="button"
+                  disabled={isUploadingImage}
+                  onClick={() => foodCameraInputRef.current?.click()}
+                  className="py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs transition cursor-pointer"
+                >
+                  <Camera className="w-3.5 h-3.5" />
+                  <span>{isKm ? 'ថតរូបម្ហូប (Camera)' : 'Camera Food Photo'}</span>
+                </button>
               </div>
             </div>
 
@@ -518,7 +872,11 @@ export const AddRestaurantModal: React.FC = () => {
                   className="w-full py-3.5 rounded-2xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-xs shadow-md shadow-emerald-950/20 transition active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50"
                 >
                   <Sparkles className="w-4 h-4 text-emerald-300" />
-                  <span>{isKm ? `បន្តទៅបង់ប្រាក់សមាជិកភាព Premium ($${promoPrice} សម្រាប់ ៣៦៥ ថ្ងៃ)` : `Continue to Premium ($${promoPrice} for 365 Days)`}</span>
+                  <span>
+                    {isKm
+                      ? `បន្តទៅបង់ប្រាក់សមាជិកភាព VIP ($${activePlan.priceUsd.toFixed(2)} សម្រាប់ ${activePlan.durationDays} ថ្ងៃ)`
+                      : `Continue to VIP ($${activePlan.priceUsd.toFixed(2)} for ${activePlan.durationDays} Days)`}
+                  </span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               )}
@@ -526,28 +884,33 @@ export const AddRestaurantModal: React.FC = () => {
           </form>
         )}
 
-        {/* Step 2: Payment Workflow (One-Time $9.99 USD for 365 Days) — NO QR CODE */}
+        {/* Step 2: Payment Workflow ($2.99 for 30 Days or $4.99 for 90 Days) */}
         {step === 2 && (
           <form onSubmit={handleFinalSubmit} className="p-5 space-y-4 overflow-y-auto no-scrollbar flex-1 text-xs font-khmer">
-            {/* Promo Price Header Box */}
+            {/* Plan Price Header Box */}
             <div className="bg-gradient-to-br from-emerald-50 via-white to-emerald-50 dark:from-slate-800 dark:to-emerald-950/40 p-4 rounded-2xl border border-emerald-200 dark:border-emerald-800 text-center relative overflow-hidden">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#064E3B] text-white text-[10px] font-bold rounded-full mb-2 shadow-xs">
                 <Sparkles className="w-3.5 h-3.5 text-emerald-300" />
-                <span>⭐ {isKm ? 'សមាជិកភាព VIP Premium — តម្លៃពិសេសដំណាច់ឆ្នាំ' : 'Premium VIP Membership — End of Year Promo'}</span>
+                <span>
+                  ⭐ {isKm ? `សមាជិកភាព ${activePlan.nameKh}` : `${activePlan.nameEn} Membership`}
+                </span>
               </div>
               <div className="flex items-center justify-center gap-3">
-                <span className="text-slate-400 line-through text-sm">$29.99 USD</span>
-                <span className="text-2xl font-black text-[#064E3B] dark:text-emerald-400 font-mono">${promoPrice} USD</span>
-                <span className="text-xs text-slate-500">(~ ៤០,៨០០ រៀល)</span>
+                <span className="text-2xl font-black text-[#064E3B] dark:text-emerald-400 font-mono">
+                  ${activePlan.priceUsd.toFixed(2)} USD
+                </span>
+                <span className="text-xs text-slate-500">
+                  ({activePlan.durationDays} {isKm ? 'ថ្ងៃ' : 'Days'})
+                </span>
               </div>
               <p className="text-[11px] text-slate-600 dark:text-slate-300 mt-1 leading-snug">
-                {isKm 
-                  ? 'ការទូទាត់តែមួយលើក $9.99 សម្រាប់រយៈពេល ៣៦៥ ថ្ងៃពេញ (តម្លៃពិសេសត្រឹមដំណាច់ឆ្នាំនេះប៉ុណ្ណោះ គ្មានការគិតថ្លៃប្រចាំខែ និងគ្មានការបន្តស្វ័យប្រវត្តិឡើយ)។ រួមបញ្ចូលអត្ថប្រយោជន៍ VIP ទាំង ១០ យ៉ាងពេញលេញ។' 
-                  : 'One-time payment of $9.99 for 365 days (End of year promo only. No monthly subscription or automatic renewal). Full access to all 10 VIP benefits.'}
+                {isKm
+                  ? `ការទូទាត់តែមួយលើក $${activePlan.priceUsd.toFixed(2)} សម្រាប់រយៈពេល ${activePlan.durationDays} ថ្ងៃពេញ។`
+                  : `One-time payment of $${activePlan.priceUsd.toFixed(2)} for ${activePlan.durationDays} days.`}
               </p>
             </div>
 
-            {/* Bank Transfer Box (NO QR CODE) */}
+            {/* Bank Transfer Box */}
             <div className="bg-slate-50 dark:bg-slate-800/60 rounded-2xl p-4 border border-slate-200 dark:border-slate-700 space-y-2.5">
               <div className="text-xs font-bold text-[#0F172A] dark:text-slate-200 border-b border-slate-200 dark:border-slate-700 pb-1.5 flex items-center gap-1.5">
                 <CreditCard className="w-4 h-4 text-[#059669]" />
@@ -565,11 +928,13 @@ export const AddRestaurantModal: React.FC = () => {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-500">{isKm ? 'លេខគណនី៖' : 'Account Number:'}</span>
-                  <span className="font-bold text-[#064E3B] dark:text-emerald-400 font-mono text-xs">000 123 456 (USD)</span>
+                  <span className="font-bold text-[#064E3B] dark:text-emerald-400 font-mono text-xs">095 245 959 (USD)</span>
                 </div>
                 <div className="flex justify-between pt-1 border-t border-slate-200 dark:border-slate-700">
                   <span className="text-slate-500">{isKm ? 'ចំនួនទឹកប្រាក់៖' : 'Total Amount:'}</span>
-                  <span className="font-bold text-[#064E3B] dark:text-emerald-400 font-mono text-xs">${promoPrice} USD</span>
+                  <span className="font-bold text-[#064E3B] dark:text-emerald-400 font-mono text-xs">
+                    ${activePlan.priceUsd.toFixed(2)} USD ({activePlan.durationDays} Days)
+                  </span>
                 </div>
               </div>
             </div>
@@ -588,9 +953,9 @@ export const AddRestaurantModal: React.FC = () => {
                 className="w-full px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-[#0F172A] dark:text-slate-100 font-mono font-bold text-xs focus:outline-none focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/20"
               />
               <p className="text-[10px] text-slate-500">
-                {isKm 
-                  ? 'បញ្ចូលលេខកូដប្រតិបត្តិការពីបង្កាន់ដៃធនាគារ ABA របស់អ្នក ដើម្បីឱ្យរដ្ឋបាលផ្ទៀងផ្ទាត់ និងបើកដំណើរការ ៣៦៥ ថ្ងៃជូន។' 
-                  : 'Enter the Transaction ID shown on your ABA bank receipt for administrative verification.'}
+                {isKm
+                  ? `បញ្ចូលលេខកូដប្រតិបត្តិការពីបង្កាន់ដៃធនាគារ ABA របស់អ្នក ដើម្បីឱ្យរដ្ឋបាលផ្ទៀងផ្ទាត់ និងបើកដំណើរការ ${activePlan.durationDays} ថ្ងៃជូន។`
+                  : `Enter the Transaction ID shown on your ABA bank receipt for administrative verification (${activePlan.durationDays} days).`}
               </p>
             </div>
 
@@ -601,9 +966,9 @@ export const AddRestaurantModal: React.FC = () => {
                 <span className="font-bold block text-[#064E3B] dark:text-emerald-400 mb-0.5">
                   {isKm ? 'ការការពារសុវត្ថិភាព និងការផ្ទៀងផ្ទាត់' : 'Security & Verification'}
                 </span>
-                {isKm 
-                  ? 'រដ្ឋបាលនឹងផ្ទៀងផ្ទាត់លេខកូដប្រតិបត្តិការធនាគារជាមួយរបាយការណ៍គណនី ABA Bank ដើម្បីបើកដំណើរការសមាជិកភាព Premium ៣៦៥ ថ្ងៃពេញ។' 
-                  : 'The administrator will verify the bank transaction reference to activate your 365-day Premium membership.'}
+                {isKm
+                  ? `រដ្ឋបាលនឹងផ្ទៀងផ្ទាត់លេខកូដប្រតិបត្តិការធនាគារជាមួយរបាយការណ៍គណនី ABA Bank ដើម្បីបើកដំណើរការសមាជិកភាព VIP ${activePlan.durationDays} ថ្ងៃពេញ។`
+                  : `The administrator will verify the bank transaction reference to activate your ${activePlan.durationDays}-day VIP membership.`}
               </div>
             </div>
 
@@ -624,7 +989,7 @@ export const AddRestaurantModal: React.FC = () => {
                 className="py-3 px-4 rounded-2xl bg-[#064E3B] hover:bg-[#047857] text-white text-xs font-bold shadow-md shadow-emerald-950/20 flex items-center justify-center gap-1.5 transition active:scale-[0.98] disabled:opacity-50"
               >
                 <CheckCircle2 className="w-4 h-4" />
-                <span>{isKm ? 'ដាក់ស្នើ និងបង់ប្រាក់' : `Submit & Pay $${promoPrice}`}</span>
+                <span>{isKm ? 'ដាក់ស្នើ និងបង់ប្រាក់' : `Submit & Pay $${activePlan.priceUsd.toFixed(2)}`}</span>
               </button>
             </div>
           </form>

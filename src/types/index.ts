@@ -8,6 +8,37 @@ export const VIP_SUBSCRIPTION_DAYS = 90;
 export const VIP_QUARTERLY_PRICE_USD = 2.99;
 export const VIP_QUARTERLY_DAYS = 30;
 
+export interface VipPlanConfig {
+  id: 'quarterly' | 'annual';
+  nameEn: string;
+  nameKh: string;
+  priceUsd: number;
+  durationDays: 30 | 90;
+  labelEn: string;
+  labelKh: string;
+}
+
+export const VIP_PLANS: Record<'quarterly' | 'annual', VipPlanConfig> = {
+  quarterly: {
+    id: 'quarterly',
+    nameEn: 'VIP 30 Days',
+    nameKh: 'កញ្ចប់ VIP 30 ថ្ងៃ',
+    priceUsd: 2.99,
+    durationDays: 30,
+    labelEn: 'VIP 30 Days ($2.99 / 30 days)',
+    labelKh: 'VIP 30 ថ្ងៃ ($2.99 / 30 ថ្ងៃ)'
+  },
+  annual: {
+    id: 'annual',
+    nameEn: 'VIP 90 Days',
+    nameKh: 'កញ្ចប់ VIP 90 ថ្ងៃ',
+    priceUsd: 4.99,
+    durationDays: 90,
+    labelEn: 'VIP 90 Days ($4.99 / 90 days)',
+    labelKh: 'VIP 90 ថ្ងៃ ($4.99 / 90 ថ្ងៃ)'
+  }
+};
+
 export type Language = 'km' | 'en';
 
 export type UserRole = 'user' | 'owner' | 'admin';
@@ -29,7 +60,7 @@ export interface User {
   linkedProviders?: ('google' | 'phone' | 'email')[];
   createdAt: string;
 
-  // Premium VIP Subscription ($9.99 USD per year / 365 days)
+  // Premium VIP Subscription ($2.99 for 30 days or $4.99 for 90 days)
   membershipTier?: 'free' | 'premium_vip';
   subscriptionStartDate?: string;
   subscriptionExpiryDate?: string;
@@ -250,7 +281,7 @@ export interface RegistrationTransaction {
   planType?: 'quarterly' | 'annual';
   amountUsd: number;
   currency?: 'USD' | 'KHR';
-  durationDays?: number; // 90 or 365
+  durationDays?: number; // 30 or 90 days
   membershipTier?: 'premium' | 'premium_vip';
   status: 'pending_verification' | 'verified' | 'rejected' | 'needs_more_info' | 'failed' | 'cancelled';
   paymentMethod: 'KHQR' | 'Bakong' | 'BankTransfer' | 'Manual' | 'GooglePlayBilling' | 'Card';
@@ -276,7 +307,9 @@ export interface Restaurant {
   descriptionKh: string;
   descriptionEn: string;
   photoUrl: string;
+  profileImage?: string; // Shop Profile Picture (Logo / Storefront)
   galleryPhotos?: string[];
+  foodImages?: string[]; // Multiple Food Photos uploaded by shop owner
   addressKh: string;
   addressEn: string;
   provinceKh: string;
@@ -296,10 +329,10 @@ export interface Restaurant {
   isVerified: boolean;
   isFeatured?: boolean;
   
-  // Membership & Menu Items ($0 Free Listing vs One-Time $9.99 for 365 Days)
-  membershipTier?: MembershipTier; // 'free' ($0) or 'premium' ($9.99)
-  membershipExpiresAt?: string; // ISO 8601 date timestamp (365 days from activation)
-  menuItems?: RestaurantMenuItem[]; // Up to 5 items for active Premium restaurants
+  // Membership & Menu Items ($0 Free Listing vs VIP $2.99/30d or $4.99/90d)
+  membershipTier?: MembershipTier; // 'free' ($0) or 'premium' ($2.99 / $4.99)
+  membershipExpiresAt?: string; // ISO 8601 date timestamp (30 or 90 days from activation)
+  menuItems?: RestaurantMenuItem[]; // Up to 20 items for active Premium restaurants
   
   // 10 VIP Benefits tracking & Analytics
   analytics?: {
@@ -592,4 +625,40 @@ export interface AppSettings {
   promotionalFeeEnabled: boolean;
   promotionPeriodKh: string;
   promotionPeriodEn: string;
+}
+
+// User–Admin Two-Way Support & Payment Verification System
+export type SupportTicketStatus = 'pending' | 'replied' | 'resolved';
+
+export interface SupportTicketMessage {
+  id: string;
+  senderRole: 'user' | 'admin';
+  senderId: string;
+  senderName: string;
+  message: string;
+  attachmentUrl?: string;
+  createdAt: string;
+}
+
+export interface SupportTicket {
+  id: string;
+  userId: string;
+  username: string;
+  userEmail?: string;
+  userPhone?: string;
+  paymentPlanId: 'quarterly' | 'annual';
+  paymentPlanLabel: string; // "VIP 30 Days ($2.99)" or "VIP 90 Days ($4.99)"
+  amountUsd: number;
+  durationDays: 30 | 90;
+  paymentDate: string;
+  paymentRef: string;
+  receiptUrl?: string;
+  status: SupportTicketStatus; // 'pending' | 'replied' | 'resolved'
+  vipApproved?: boolean;
+  vipApprovedAt?: string;
+  unreadByAdmin?: boolean;
+  unreadByUser?: boolean;
+  messages: SupportTicketMessage[];
+  createdAt: string;
+  updatedAt: string;
 }

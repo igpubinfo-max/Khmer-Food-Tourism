@@ -1,4 +1,5 @@
 import { FoodItem } from '../types';
+import { additional100Foods } from './seedAdditional100Foods';
 
 export const seedFoods: FoodItem[] = [
   // ==========================================
@@ -6452,7 +6453,8 @@ export const generateFull100Foods = (): FoodItem[] => {
     }
   });
 
-  return fullList;
+  return [...fullList, ...additional100Foods];
 };
 
 export const initial100Foods: FoodItem[] = generateFull100Foods();
+export const initial200Foods: FoodItem[] = initial100Foods;

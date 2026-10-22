@@ -7,7 +7,7 @@ import {
   User as UserIcon, Heart, Shield, Store, 
   Globe, LogOut, RefreshCw, Download, Sparkles, UtensilsCrossed, ShieldCheck, CheckCircle2,
   Bot, Bell, Compass, Calendar, Bookmark, Plus, MapPin, Trash2, Share2, Tag, Utensils, ChevronRight, ChevronLeft,
-  Edit2, Check, X as CloseIcon, Crown, Star, Zap, Award, Smartphone, Copy, ExternalLink, Clock, Lock
+  Edit2, Check, X as CloseIcon, Crown, Star, Zap, Award, Smartphone, Copy, ExternalLink, Clock, Lock, MessageSquare
 } from 'lucide-react';
 import { isRestaurantPremiumActive, isUserVipActive, getVipRemainingDays, TEN_VIP_BENEFITS, APP_VERSION, APP_BUILD_CODE } from '../types';
 
@@ -26,7 +26,8 @@ export const ProfileView: React.FC = () => {
     setManagingRestaurant, setIsManageMenuModalOpen,
     setSelectedFood, setSelectedRestaurant, setSelectedDestination,
     resetAllData, showToast, updateCurrentUserProfile,
-    openUpgradeVipModal
+    openUpgradeVipModal,
+    supportTickets, openSupportTicketModal, transactions
   } = useApp();
 
   const isKm = language === 'km';
@@ -570,8 +571,8 @@ export const ProfileView: React.FC = () => {
             </div>
 
             <button
-              onClick={openUpgradeVipModal}
-              className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow-xs transition shrink-0 active:scale-95"
+              onClick={() => openUpgradeVipModal(true)}
+              className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow-xs transition shrink-0 active:scale-95 cursor-pointer"
             >
               {isKm ? '🔄 បន្ត VIP' : 'Renew VIP'}
             </button>
@@ -699,8 +700,8 @@ export const ProfileView: React.FC = () => {
             </div>
 
             <button
-              onClick={openUpgradeVipModal}
-              className="px-3.5 py-2 rounded-xl text-xs font-bold font-khmer shadow-xs transition shrink-0 active:scale-95 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
+              onClick={() => openUpgradeVipModal(true)}
+              className="px-3.5 py-2 rounded-xl text-xs font-bold font-khmer shadow-xs transition shrink-0 active:scale-95 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white cursor-pointer"
             >
               {isKm ? '🔄 បន្ត VIP' : 'Renew VIP'}
             </button>
@@ -733,14 +734,156 @@ export const ProfileView: React.FC = () => {
             </div>
 
             <button
-              onClick={openUpgradeVipModal}
-              className="px-3.5 py-2 rounded-xl text-xs font-bold font-khmer shadow-xs transition shrink-0 active:scale-95 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-amber-500/20"
+              onClick={() => openUpgradeVipModal(false)}
+              className="px-3.5 py-2 rounded-xl text-xs font-bold font-khmer shadow-xs transition shrink-0 active:scale-95 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-amber-500/20 cursor-pointer"
             >
               {isKm ? '👑 ដំឡើង VIP' : 'Upgrade VIP'}
             </button>
           </div>
         </div>
       )}
+
+      {/* Requirement 1: Contact Admin / Payment Support & Support Messages / Payment History */}
+      {currentUser && (() => {
+        const mySupportTickets = supportTickets.filter(t => t.userId === currentUser.id);
+        const unreadAdminReplies = mySupportTickets.filter(t => t.unreadByUser).length;
+        const myPaymentHistory = transactions.filter(
+          t => t.userId === currentUser.id || t.ownerId === currentUser.id
+        );
+        return (
+          <div className="p-4 rounded-3xl bg-white dark:bg-slate-800 border-2 border-amber-400/60 shadow-xs space-y-3 font-khmer">
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-2xl bg-amber-100 dark:bg-amber-950/70 text-amber-700 dark:text-amber-300">
+                  <MessageSquare className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white flex items-center gap-1.5">
+                    <span>
+                      {isKm
+                        ? 'សារជំនួយ & ប្រវត្តិការបង់ប្រាក់ (Support Messages / Payment History)'
+                        : 'Support Messages / Payment History'}
+                    </span>
+                    {unreadAdminReplies > 0 && (
+                      <span className="px-2 py-0.5 rounded-full bg-red-600 text-white text-[10px] font-black animate-pulse">
+                        {isKm ? `${unreadAdminReplies} សារឆ្លើយតបថ្មីពី Admin` : `${unreadAdminReplies} New Reply`}
+                      </span>
+                    )}
+                  </h4>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                    {isKm
+                      ? 'បានបង់ប្រាក់តាម ABA រួចហើយតែមិនទាន់បើក VIP? ផ្ញើសារ និងវិក្កយបត្រមកកាន់ Admin ផ្ទាល់'
+                      : 'Paid via ABA but VIP not activated? Message Admin & attach your receipt directly'}
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => openSupportTicketModal()}
+                className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white text-xs font-extrabold shadow-sm flex items-center gap-1.5 transition cursor-pointer shrink-0"
+              >
+                <MessageSquare className="w-3.5 h-3.5" />
+                <span>
+                  {isKm ? '💬 ទាក់ទង Admin / ជំនួយការបង់ប្រាក់' : '💬 Contact Admin / Payment Support'}
+                </span>
+              </button>
+            </div>
+
+            {mySupportTickets.length > 0 && (
+              <div className="space-y-2 pt-1 border-t border-slate-100 dark:border-slate-700">
+                {mySupportTickets.slice(0, 3).map(ticket => {
+                  const latestMsg = ticket.messages[ticket.messages.length - 1];
+                  return (
+                    <div
+                      key={ticket.id}
+                      onClick={() => openSupportTicketModal()}
+                      className="p-3 rounded-2xl bg-amber-50/60 dark:bg-slate-900/70 border border-amber-200 dark:border-slate-700 hover:border-amber-400 cursor-pointer transition space-y-1"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-xs font-extrabold text-slate-900 dark:text-white">
+                          #{ticket.id} • {ticket.paymentPlanLabel}
+                        </span>
+                        <span
+                          className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                            ticket.status === 'resolved'
+                              ? 'bg-emerald-100 text-emerald-700'
+                              : ticket.status === 'replied'
+                              ? 'bg-blue-100 text-blue-700'
+                              : 'bg-amber-100 text-amber-800'
+                          }`}
+                        >
+                          {ticket.status === 'resolved'
+                            ? isKm
+                              ? '✓ បានដោះស្រាយ (Resolved)'
+                              : '✓ Resolved'
+                            : ticket.status === 'replied'
+                            ? isKm
+                              ? '💬 Admin បានឆ្លើយតប (Replied)'
+                              : '💬 Replied'
+                            : isKm
+                            ? '⏳ រង់ចាំ (Pending)'
+                            : '⏳ Pending'}
+                        </span>
+                      </div>
+                      {latestMsg && (
+                        <p className="text-[11px] text-slate-700 dark:text-slate-300 truncate">
+                          <strong className={latestMsg.senderRole === 'admin' ? 'text-blue-600 dark:text-blue-400' : 'text-amber-700 dark:text-amber-400'}>
+                            {latestMsg.senderRole === 'admin' ? 'Admin: ' : `${isKm ? 'អ្នក' : 'You'}: `}
+                          </strong>
+                          {latestMsg.message}
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {myPaymentHistory.length > 0 && (
+              <div className="pt-1 border-t border-slate-100 dark:border-slate-700 space-y-1.5">
+                <div className="text-[11px] font-bold text-slate-600 dark:text-slate-400">
+                  {isKm ? 'ប្រវត្តិការបង់ប្រាក់ VIP ថ្មីៗ៖' : 'Recent VIP Payment History:'}
+                </div>
+                {myPaymentHistory.slice(0, 2).map(txn => (
+                  <div
+                    key={txn.id}
+                    className="flex items-center justify-between text-[11px] bg-slate-50 dark:bg-slate-900/60 px-3 py-1.5 rounded-xl border border-slate-200/80 dark:border-slate-700"
+                  >
+                    <div>
+                      <span className="font-bold text-slate-800 dark:text-slate-200">
+                        VIP {txn.durationDays === 30 ? '30 Days ($2.99)' : '90 Days ($4.99)'}
+                      </span>
+                      <span className="text-slate-400 ml-2 font-mono">{txn.transactionRef}</span>
+                    </div>
+                    <span
+                      className={`font-bold ${
+                        txn.status === 'verified'
+                          ? 'text-emerald-600'
+                          : txn.status === 'rejected'
+                          ? 'text-rose-600'
+                          : 'text-amber-600'
+                      }`}
+                    >
+                      {txn.status === 'verified'
+                        ? isKm
+                          ? '✓ អនុម័តរួច'
+                          : '✓ Verified'
+                        : txn.status === 'rejected'
+                        ? isKm
+                          ? '✕ បដិសេធ'
+                          : '✕ Rejected'
+                        : isKm
+                        ? '⏳ រង់ចាំពិនិត្យ'
+                        : '⏳ Pending'}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       {/* App Installation & Support Buttons Showcase */}
       <div className="grid grid-cols-2 gap-2.5">
@@ -1016,7 +1159,7 @@ export const ProfileView: React.FC = () => {
                   {isKm ? 'មិនទាន់មានហាងអាហារដែលបានចុះបញ្ជីនៅឡើយទេ' : 'No registered restaurant found'}
                 </h4>
                 <p className="text-[10px] text-slate-500 mt-1">
-                  {isKm ? 'ចុះបញ្ជីហាងរបស់អ្នកដោយឥតគិតថ្លៃ ($0) ឬ Premium ($4.99 សម្រាប់ ៣៦៥ ថ្ងៃ) ដើម្បីផ្សព្វផ្សាយ!' : 'Register your restaurant for free ($0) or Premium ($4.99)!'}
+                  {isKm ? 'ចុះបញ្ជីហាងរបស់អ្នកដោយឥតគិតថ្លៃ ($0) ឬកញ្ចប់ VIP ($2.99 / 30 ថ្ងៃ ឬ $4.99 / 90 ថ្ងៃ) ដើម្បីផ្សព្វផ្សាយ!' : 'Register your restaurant for free ($0) or VIP ($2.99 / 30d or $4.99 / 90d)!'}
                 </p>
               </div>
               <button
@@ -1066,7 +1209,7 @@ export const ProfileView: React.FC = () => {
                         {isPremium ? (
                           <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-gradient-to-r from-[#064E3B] to-[#059669] text-white flex items-center gap-1 font-khmer shadow-xs">
                             <Sparkles className="w-3 h-3 text-emerald-200" />
-                            <span>⭐ {isKm ? 'សមាជិកភាព VIP Premium (៣៦៥ ថ្ងៃ)' : 'Premium Active (365 Days)'}</span>
+                            <span>⭐ {isKm ? 'សមាជិកភាព VIP Premium (សកម្ម)' : 'Premium VIP Active'}</span>
                           </span>
                         ) : isExpired ? (
                           <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-red-100 text-red-700">
@@ -1087,24 +1230,24 @@ export const ProfileView: React.FC = () => {
                     {isPremium && restaurant.membershipExpiresAt && (
                       <p className="text-[10px] text-slate-700 dark:text-slate-300">
                         {isKm 
-                          ? `📅 ផុតកំណត់នៅថ្ងៃទី៖ ${new Date(restaurant.membershipExpiresAt).toLocaleDateString()} (ទូទាត់តែមួយលើក $4.99 គ្មានកាត់ប្រចាំខែ)` 
-                          : `Valid until: ${new Date(restaurant.membershipExpiresAt).toLocaleDateString()} (One-time payment, no monthly fee)`}
+                          ? `📅 ផុតកំណត់នៅថ្ងៃទី៖ ${new Date(restaurant.membershipExpiresAt).toLocaleDateString()} (កញ្ចប់ VIP $2.99 / 30 ថ្ងៃ ឬ $4.99 / 90 ថ្ងៃ)` 
+                          : `Valid until: ${new Date(restaurant.membershipExpiresAt).toLocaleDateString()} (VIP $2.99 / 30d or $4.99 / 90d)`}
                       </p>
                     )}
 
                     {isFree && (
                       <p className="text-[10px] text-slate-500">
                         {isKm 
-                          ? 'គណនីឥតគិតថ្លៃមិនអាចបន្ថែមមុខម្ហូបបានទេ។ ដំឡើងទៅ Premium ($4.99 សម្រាប់ ៣៦៥ ថ្ងៃ) ដើម្បីបន្ថែមម្ហូបរហូតដល់ ៥ មុខ!' 
-                          : 'Free listing cannot add food items. Upgrade to Premium ($4.99 for 365 days) to add up to 5 food items!'}
+                          ? 'គណនីឥតគិតថ្លៃមិនអាចបន្ថែមមុខម្ហូបបានទេ។ ដំឡើងទៅកញ្ចប់ VIP ($2.99 / 30 ថ្ងៃ ឬ $4.99 / 90 ថ្ងៃ) ដើម្បីបន្ថែមម្ហូប!' 
+                          : 'Free listing cannot add food items. Upgrade to VIP ($2.99 / 30 days or $4.99 / 90 days) to add food items!'}
                       </p>
                     )}
 
                     {isExpired && (
                       <p className="text-[10px] text-red-600">
                         {isKm 
-                          ? 'សមាជិកភាពបានផុតកំណត់ ៣៦៥ ថ្ងៃហើយ។ ទិន្នន័យមុខម្ហូបទាំងអស់ត្រូវបានរក្សាទុកដដែល (គ្មានការលុបឡើយ)។ សូមបន្តសមាជិកភាព $4.99 សម្រាប់ ៣៦៥ ថ្ងៃថ្មី។' 
-                          : 'Premium expired. All food items are retained. Renew Premium ($4.99) for another 365 days.'}
+                          ? 'សមាជិកភាព VIP បានផុតកំណត់ហើយ។ ទិន្នន័យមុខម្ហូបទាំងអស់ត្រូវបានរក្សាទុកដដែល។ សូមបន្តសមាជិកភាព VIP ($2.99 / 30 ថ្ងៃ ឬ $4.99 / 90 ថ្ងៃ)។' 
+                          : 'VIP expired. All food items are retained. Renew VIP ($2.99 / 30 days or $4.99 / 90 days).'}
                       </p>
                     )}
 
@@ -1128,7 +1271,7 @@ export const ProfileView: React.FC = () => {
                           }}
                           className="py-2 px-3 rounded-xl bg-[#10B981] hover:bg-[#059669] text-white font-bold text-xs shadow-xs transition active:scale-95"
                         >
-                          {isKm ? '⭐ ដំឡើង $4.99' : '⭐ Upgrade $4.99'}
+                          {isKm ? '⭐ ដំឡើង VIP ($2.99)' : '⭐ Upgrade VIP ($2.99)'}
                         </button>
                       )}
                     </div>
@@ -1222,8 +1365,8 @@ export const ProfileView: React.FC = () => {
 
             {/* Upgrade / Renew CTA */}
             <button
-              onClick={openUpgradeVipModal}
-              className="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-1.5"
+              onClick={() => openUpgradeVipModal(Boolean(isVip || currentUser?.subscriptionStatus === 'expired'))}
+              className="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-1.5 cursor-pointer"
             >
               <Crown className="w-4 h-4 fill-white" />
               <span>
@@ -1234,6 +1377,19 @@ export const ProfileView: React.FC = () => {
                   : currentUser?.subscriptionStatus === 'expired'
                   ? (isKm ? '🔄 បន្តសមាជិកភាព VIP ឡើងវិញ ($2.99/30ថ្ងៃ • $4.99/90ថ្ងៃ)' : 'Renew VIP ($2.99/30d • $4.99/90d)')
                   : (isKm ? '👑 ដំឡើងទៅជា Premium VIP ($2.99/30ថ្ងៃ • $4.99/90ថ្ងៃ)' : 'Upgrade to Premium VIP ($2.99/30d • $4.99/90d)')}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => openSupportTicketModal()}
+              className="w-full py-2.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-amber-50 border border-amber-400 text-amber-800 dark:text-amber-300 font-bold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer"
+            >
+              <MessageSquare className="w-4 h-4 text-amber-600" />
+              <span>
+                {isKm
+                  ? '💬 ទាក់ទង Admin / បញ្ហាការបង់ប្រាក់ VIP (ផ្ញើសារ & វិក្កយបត្រ)'
+                  : '💬 Contact Admin / Payment Support'}
               </span>
             </button>
           </div>
@@ -1471,10 +1627,10 @@ export const ProfileView: React.FC = () => {
               </p>
             </div>
             <button
-              onClick={openUpgradeVipModal}
-              className="px-3 py-1 rounded-xl bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 font-bold border border-amber-300 hover:bg-amber-100 transition"
+              onClick={() => openUpgradeVipModal(Boolean(isVip))}
+              className="px-3 py-1 rounded-xl bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 font-bold border border-amber-300 hover:bg-amber-100 transition cursor-pointer"
             >
-              {isVip ? (isKm ? 'គ្រប់គ្រង / បន្ត' : 'Manage') : (isKm ? 'ដំឡើង VIP' : 'Upgrade')}
+              {isVip ? (isKm ? 'គ្រប់គ្រង / បន្ត' : 'Manage / Renew') : (isKm ? 'ដំឡើង VIP' : 'Upgrade')}
             </button>
           </div>
 

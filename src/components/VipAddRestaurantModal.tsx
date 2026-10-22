@@ -1,22 +1,34 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useApp } from '../context/AppContext';
-import { 
-  X, Store, Image, MapPin, Phone, Clock, Plus, 
-  Sparkles, CheckCircle2, ChevronRight, DollarSign
+import {
+  X,
+  Store,
+  Image,
+  Sparkles,
+  CheckCircle2,
+  Camera,
+  Upload,
+  Trash2,
+  RefreshCw,
+  Utensils,
 } from 'lucide-react';
 import { RestaurantPriceLevel } from '../types';
+import {
+  pickImageUsingNativeAndroidGallery,
+  processAndCompressImageFile,
+} from '../utils/androidMediaHelper';
 
 export const VipAddRestaurantModal: React.FC = () => {
-  const { 
-    isVipAddRestaurantModalOpen, 
-    setIsVipAddRestaurantModalOpen, 
-    addRestaurant, 
-    currentUser, 
+  const {
+    isVipAddRestaurantModalOpen,
+    setIsVipAddRestaurantModalOpen,
+    addRestaurant,
+    currentUser,
     language,
     showToast,
     setIsManageMenuModalOpen,
     setManagingRestaurant,
-    restaurants
+    restaurants,
   } = useApp();
 
   const isKm = language === 'km';
@@ -29,10 +41,17 @@ export const VipAddRestaurantModal: React.FC = () => {
   const [addressKh, setAddressKh] = useState('');
   const [phone, setPhone] = useState(currentUser?.phone || '');
   const [openingHoursKh, setOpeningHoursKh] = useState('០៧:០០ ព្រឹក - ០៩:០០ យប់');
-  const [priceLevel, setPriceLevel] = useState<RestaurantPriceLevel>('$$');
-  const [photoUrl, setPhotoUrl] = useState('/Shop/rest-1.jpg');
+  const [priceLevel] = useState<RestaurantPriceLevel>('$$');
+  const [profilePhotoUrl, setProfilePhotoUrl] = useState('/Shop/rest-1.jpg');
+  const [foodPhotos, setFoodPhotos] = useState<string[]>([]);
   const [descriptionKh, setDescriptionKh] = useState('');
   const [signatureDish, setSignatureDish] = useState('');
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+
+  const profileGalleryInputRef = useRef<HTMLInputElement>(null);
+  const profileCameraInputRef = useRef<HTMLInputElement>(null);
+  const foodGalleryInputRef = useRef<HTMLInputElement>(null);
+  const foodCameraInputRef = useRef<HTMLInputElement>(null);
 
   if (!isVipAddRestaurantModalOpen) return null;
 
@@ -42,7 +61,7 @@ export const VipAddRestaurantModal: React.FC = () => {
     '/Shop/rest-3.jpg',
     '/Shop/rest-4.jpg',
     '/Shop/rest-5.jpg',
-    '/Shop/rest-19.jpg'
+    '/Shop/rest-19.jpg',
   ];
 
   const provinces = [
@@ -58,6 +77,89 @@ export const VipAddRestaurantModal: React.FC = () => {
     { nameKh: 'ខេត្តមណ្ឌលគិរី', nameEn: 'Mondulkiri' },
   ];
 
+  const handlePickProfileFromGallery = async () => {
+    setIsUploadingImage(true);
+    try {
+      const nativePick = await pickImageUsingNativeAndroidGallery();
+      if (nativePick.cancelled) {
+        setIsUploadingImage(false);
+        return;
+      }
+      if (nativePick.success && nativePick.dataUrl) {
+        setProfilePhotoUrl(nativePick.dataUrl);
+        showToast(
+          isKm ? '✅ បានជ្រើសរើសរូបតំណាងហាងជោគជ័យ!' : '✅ Shop profile picture selected!',
+          'success'
+        );
+        setIsUploadingImage(false);
+        return;
+      }
+    } catch {
+      // Fallback
+    }
+    setIsUploadingImage(false);
+    profileGalleryInputRef.current?.click();
+  };
+
+  const handleProfileFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+
+    setIsUploadingImage(true);
+    try {
+      const dataUrl = await processAndCompressImageFile(file);
+      setProfilePhotoUrl(dataUrl);
+      showToast(isKm ? '✅ បានដាក់រូបតំណាងហាងជោគជ័យ!' : '✅ Shop profile picture uploaded!', 'success');
+    } catch (err: any) {
+      showToast(err?.message || (isKm ? 'រូបភាពមិនត្រឹមត្រូវ' : 'Invalid image'), 'error');
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
+
+  const handleFoodFilesChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    e.target.value = '';
+    if (files.length === 0) return;
+
+    setIsUploadingImage(true);
+    const uploaded: string[] = [];
+    for (const file of files.slice(0, 8)) {
+      try {
+        const dataUrl = await processAndCompressImageFile(file);
+        if (dataUrl) uploaded.push(dataUrl);
+      } catch (err: any) {
+        showToast(
+          err?.message || (isKm ? 'រូបភាពមិនត្រឹមត្រូវ' : 'Invalid image file'),
+          'warning'
+        );
+      }
+    }
+    setIsUploadingImage(false);
+    if (uploaded.length > 0) {
+      setFoodPhotos((prev) => [...prev, ...uploaded].slice(0, 10));
+      showToast(
+        isKm
+          ? `✅ បានបន្ថែមរូបភាពមុខម្ហូបចំនួន ${uploaded.length} សន្លឹក!`
+          : `✅ Added ${uploaded.length} food photo(s)!`,
+        'success'
+      );
+    }
+  };
+
+  const handleReplaceFoodPhoto = async (idx: number) => {
+    try {
+      const nativePick = await pickImageUsingNativeAndroidGallery();
+      if (nativePick.success && nativePick.dataUrl) {
+        setFoodPhotos((prev) => prev.map((item, i) => (i === idx ? nativePick.dataUrl! : item)));
+        showToast(isKm ? '✅ បានប្តូររូបភាពមុខម្ហូបជោគជ័យ!' : '✅ Food photo replaced!', 'success');
+      }
+    } catch {
+      // ignore
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!nameKh.trim()) {
@@ -65,13 +167,18 @@ export const VipAddRestaurantModal: React.FC = () => {
       return;
     }
 
+    const finalProfile = profilePhotoUrl.trim() || '/Shop/rest-1.jpg';
+    const combinedGallery = Array.from(new Set([finalProfile, ...foodPhotos]));
+
     const newRestData = {
       nameKh: nameKh.trim(),
       nameEn: nameEn.trim() || nameKh.trim(),
       descriptionKh: descriptionKh.trim() || 'ភោជនីយដ្ឋានម្ហូបខ្មែររសជាតិដើម ផាសុកភាព និងអនាម័យខ្ពស់។',
       descriptionEn: nameEn.trim() ? `${nameEn.trim()} authentic restaurant.` : 'Authentic Khmer restaurant.',
-      photoUrl,
-      galleryPhotos: [photoUrl],
+      photoUrl: finalProfile,
+      profileImage: finalProfile,
+      foodImages: foodPhotos,
+      galleryPhotos: combinedGallery,
       addressKh: addressKh.trim() || `${provinceKh} ប្រទេសកម្ពុជា`,
       addressEn: `${provinceEn}, Cambodia`,
       provinceKh,
@@ -87,13 +194,16 @@ export const VipAddRestaurantModal: React.FC = () => {
       isFeatured: true,
       isVerified: true,
       membershipTier: 'premium' as const,
-      status: 'approved' as const
+      status: 'approved' as const,
+      ownerId: currentUser?.id,
+      ownerName: currentUser?.name,
+      ownerPhone: phone.trim(),
     };
 
     addRestaurant(newRestData);
     setIsVipAddRestaurantModalOpen(false);
+    setFoodPhotos([]);
 
-    // Open management modal for this new restaurant
     setTimeout(() => {
       const added = restaurants[0];
       if (added) {
@@ -103,8 +213,8 @@ export const VipAddRestaurantModal: React.FC = () => {
     }, 300);
 
     showToast(
-      isKm 
-        ? '🎉 បានបន្ថែមហាងថ្មីក្រោមសិទ្ធិ VIP ដោយជោគជ័យ! លោកអ្នកអាចគ្រប់គ្រងមុខម្ហូបបានភ្លាមៗ។' 
+      isKm
+        ? '🎉 បានបន្ថែមហាងថ្មីក្រោមសិទ្ធិ VIP ដោយជោគជ័យ! លោកអ្នកអាចគ្រប់គ្រងមុខម្ហូបបានភ្លាមៗ។'
         : '🎉 Restaurant added under VIP benefits! You can now manage your menu items.',
       'success'
     );
@@ -112,7 +222,7 @@ export const VipAddRestaurantModal: React.FC = () => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm animate-fade-in overflow-y-auto">
-      <div 
+      <div
         className="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-amber-500/40 my-auto"
         onClick={(e) => e.stopPropagation()}
       >
@@ -132,7 +242,7 @@ export const VipAddRestaurantModal: React.FC = () => {
                 </span>
               </div>
               <p className="text-[11px] text-amber-100 font-khmer">
-                {isKm ? 'បន្ថែមហាង និងគ្រប់គ្រងមុខម្ហូបបានភ្លាមៗ' : 'Instant store creation & menu control'}
+                {isKm ? 'បន្ថែមរូបតំណាងហាង រូបភាពម្ហូប និងគ្រប់គ្រងមុខម្ហូបបានភ្លាមៗ' : 'Upload shop profile, food photos & manage menu'}
               </p>
             </div>
           </div>
@@ -157,7 +267,7 @@ export const VipAddRestaurantModal: React.FC = () => {
                 type="text"
                 required
                 value={nameKh}
-                onChange={e => setNameKh(e.target.value)}
+                onChange={(e) => setNameKh(e.target.value)}
                 placeholder={isKm ? 'ឧ. ភោជនីយដ្ឋាន មរតកខ្មែរ' : 'e.g. Morodok Khmer'}
                 className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-medium focus:border-amber-500 focus:outline-none"
               />
@@ -170,7 +280,7 @@ export const VipAddRestaurantModal: React.FC = () => {
               <input
                 type="text"
                 value={nameEn}
-                onChange={e => setNameEn(e.target.value)}
+                onChange={(e) => setNameEn(e.target.value)}
                 placeholder="e.g. Morodok Khmer Restaurant"
                 className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-medium focus:border-amber-500 focus:outline-none"
               />
@@ -185,14 +295,14 @@ export const VipAddRestaurantModal: React.FC = () => {
               </label>
               <select
                 value={provinceKh}
-                onChange={e => {
-                  const found = provinces.find(p => p.nameKh === e.target.value);
+                onChange={(e) => {
+                  const found = provinces.find((p) => p.nameKh === e.target.value);
                   setProvinceKh(e.target.value);
                   if (found) setProvinceEn(found.nameEn);
                 }}
                 className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-medium focus:border-amber-500 focus:outline-none"
               >
-                {provinces.map(p => (
+                {provinces.map((p) => (
                   <option key={p.nameKh} value={p.nameKh}>
                     {isKm ? p.nameKh : p.nameEn}
                   </option>
@@ -207,7 +317,7 @@ export const VipAddRestaurantModal: React.FC = () => {
               <input
                 type="text"
                 value={phone}
-                onChange={e => setPhone(e.target.value)}
+                onChange={(e) => setPhone(e.target.value)}
                 placeholder="012 345 678"
                 className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-mono font-medium focus:border-amber-500 focus:outline-none"
               />
@@ -223,7 +333,7 @@ export const VipAddRestaurantModal: React.FC = () => {
               <input
                 type="text"
                 value={addressKh}
-                onChange={e => setAddressKh(e.target.value)}
+                onChange={(e) => setAddressKh(e.target.value)}
                 placeholder={isKm ? 'ឧ. ផ្លូវលេខ ៦៣ សង្កាត់បឹងកេងកង' : 'Street address'}
                 className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-medium focus:border-amber-500 focus:outline-none"
               />
@@ -236,7 +346,7 @@ export const VipAddRestaurantModal: React.FC = () => {
               <input
                 type="text"
                 value={openingHoursKh}
-                onChange={e => setOpeningHoursKh(e.target.value)}
+                onChange={(e) => setOpeningHoursKh(e.target.value)}
                 placeholder="០៧:០០ ព្រឹក - ០៩:០០ យប់"
                 className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-medium focus:border-amber-500 focus:outline-none"
               />
@@ -251,37 +361,182 @@ export const VipAddRestaurantModal: React.FC = () => {
             <input
               type="text"
               value={signatureDish}
-              onChange={e => setSignatureDish(e.target.value)}
+              onChange={(e) => setSignatureDish(e.target.value)}
               placeholder={isKm ? 'ឧ. អាម៉ុកត្រីរ៉ស់, សម្លម្ជូរគ្រឿង' : 'e.g. Traditional Fish Amok'}
               className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-medium focus:border-amber-500 focus:outline-none"
             />
           </div>
 
-          {/* Photo Selection */}
-          <div className="space-y-2">
-            <label className="block font-bold text-slate-800 dark:text-slate-200">
-              {isKm ? 'ជ្រើសរើសរូបថតហាង' : 'Store Photo'}
-            </label>
+          {/* 1. Shop Profile Picture Upload Field */}
+          <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 space-y-2.5">
+            <div className="flex items-center justify-between">
+              <label className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                <Image className="w-4 h-4 text-amber-500" />
+                <span>{isKm ? '១. រូបភាពតំណាងហាង (Shop Profile Picture)' : '1. Shop Profile Picture'}</span>
+              </label>
+              <span className="text-[10px] text-slate-400">JPG, JPEG, PNG</span>
+            </div>
+
+            <input
+              ref={profileGalleryInputRef}
+              type="file"
+              accept="image/jpeg,image/jpg,image/png,image/webp"
+              onChange={handleProfileFileChange}
+              className="hidden"
+            />
+            <input
+              ref={profileCameraInputRef}
+              type="file"
+              accept="image/jpeg,image/jpg,image/png"
+              capture="environment"
+              onChange={handleProfileFileChange}
+              className="hidden"
+            />
+
+            {profilePhotoUrl && (
+              <div className="relative rounded-2xl overflow-hidden border-2 border-amber-500/60 bg-slate-900 h-36">
+                <img src={profilePhotoUrl} alt="Shop Profile" className="w-full h-full object-cover" />
+                <div className="absolute bottom-2 right-2 flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={handlePickProfileFromGallery}
+                    className="px-2.5 py-1 rounded-lg bg-white/90 text-slate-900 font-bold text-[10px] flex items-center gap-1 shadow cursor-pointer"
+                  >
+                    <RefreshCw className="w-3 h-3" />
+                    <span>{isKm ? 'ប្តូររូប' : 'Replace'}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setProfilePhotoUrl('')}
+                    className="px-2.5 py-1 rounded-lg bg-rose-600 text-white font-bold text-[10px] flex items-center gap-1 shadow cursor-pointer"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                    <span>{isKm ? 'លុប' : 'Remove'}</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                disabled={isUploadingImage}
+                onClick={handlePickProfileFromGallery}
+                className="py-2 px-3 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                <Upload className="w-3.5 h-3.5" />
+                <span>{isKm ? 'ជ្រើសពី Gallery / Photos' : 'Choose from Gallery'}</span>
+              </button>
+              <button
+                type="button"
+                disabled={isUploadingImage}
+                onClick={() => profileCameraInputRef.current?.click()}
+                className="py-2 px-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                <Camera className="w-3.5 h-3.5" />
+                <span>{isKm ? 'ថតរូបថ្មី (Camera)' : 'Take Photo (Camera)'}</span>
+              </button>
+            </div>
+
             <div className="flex gap-2 overflow-x-auto pb-1">
               {samplePhotos.map((url, i) => (
                 <img
                   key={i}
                   src={url}
                   alt="sample"
-                  onClick={() => setPhotoUrl(url)}
-                  className={`w-14 h-14 rounded-xl object-cover cursor-pointer border-2 transition shrink-0 ${
-                    photoUrl === url ? 'border-amber-500 ring-2 ring-amber-400/50 scale-105' : 'border-slate-300 opacity-70 hover:opacity-100'
+                  onClick={() => setProfilePhotoUrl(url)}
+                  className={`w-12 h-12 rounded-xl object-cover cursor-pointer border-2 transition shrink-0 ${
+                    profilePhotoUrl === url
+                      ? 'border-amber-500 ring-2 ring-amber-400/50 scale-105'
+                      : 'border-slate-300 opacity-70 hover:opacity-100'
                   }`}
                 />
               ))}
             </div>
+          </div>
+
+          {/* 2. Food Photos (Multiple Images) Upload Field */}
+          <div className="p-3.5 rounded-2xl bg-amber-50/50 dark:bg-slate-800/70 border border-amber-300/70 dark:border-amber-700/50 space-y-2.5">
+            <div className="flex items-center justify-between">
+              <label className="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
+                <Utensils className="w-4 h-4 text-amber-600" />
+                <span>
+                  {isKm
+                    ? `២. រូបភាពមុខម្ហូបប្រចាំហាង (Food Photos - ${foodPhotos.length} សន្លឹក)`
+                    : `2. Food Photos (${foodPhotos.length} uploaded)`}
+                </span>
+              </label>
+              <span className="text-[10px] text-amber-700 dark:text-amber-300 font-bold">
+                {isKm ? 'អាចដាក់បានច្រើនសន្លឹក' : 'Multiple Photos'}
+              </span>
+            </div>
+
             <input
-              type="text"
-              value={photoUrl}
-              onChange={e => setPhotoUrl(e.target.value)}
-              placeholder="Photo URL or /Shop/rest-X.jpg"
-              className="w-full px-3 py-1.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-mono text-[11px]"
+              ref={foodGalleryInputRef}
+              type="file"
+              accept="image/jpeg,image/jpg,image/png,image/webp"
+              multiple
+              onChange={handleFoodFilesChange}
+              className="hidden"
             />
+            <input
+              ref={foodCameraInputRef}
+              type="file"
+              accept="image/jpeg,image/jpg,image/png"
+              capture="environment"
+              onChange={handleFoodFilesChange}
+              className="hidden"
+            />
+
+            {foodPhotos.length > 0 && (
+              <div className="grid grid-cols-3 gap-2">
+                {foodPhotos.map((imgUrl, idx) => (
+                  <div
+                    key={idx}
+                    className="relative aspect-square rounded-xl overflow-hidden border border-amber-400 bg-slate-900"
+                  >
+                    <img src={imgUrl} alt={`Food ${idx + 1}`} className="w-full h-full object-cover" />
+                    <div className="absolute inset-x-0 bottom-0 p-1 bg-black/75 flex items-center justify-between gap-1">
+                      <button
+                        type="button"
+                        onClick={() => handleReplaceFoodPhoto(idx)}
+                        className="px-1.5 py-0.5 rounded bg-white/90 text-slate-900 font-bold text-[9px] cursor-pointer"
+                      >
+                        {isKm ? 'ប្តូរ' : 'Replace'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setFoodPhotos((prev) => prev.filter((_, i) => i !== idx))}
+                        className="px-1.5 py-0.5 rounded bg-rose-600 text-white font-bold text-[9px] cursor-pointer"
+                      >
+                        {isKm ? 'លុប' : 'Remove'}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                disabled={isUploadingImage}
+                onClick={() => foodGalleryInputRef.current?.click()}
+                className="py-2 px-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                <Upload className="w-3.5 h-3.5" />
+                <span>{isKm ? 'ជ្រើសរូបម្ហូបច្រើនសន្លឹក' : 'Add Food Photos'}</span>
+              </button>
+              <button
+                type="button"
+                disabled={isUploadingImage}
+                onClick={() => foodCameraInputRef.current?.click()}
+                className="py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                <Camera className="w-3.5 h-3.5" />
+                <span>{isKm ? 'ថតរូបម្ហូប (Camera)' : 'Camera Food Photo'}</span>
+              </button>
+            </div>
           </div>
 
           {/* Description */}
@@ -292,7 +547,7 @@ export const VipAddRestaurantModal: React.FC = () => {
             <textarea
               rows={2}
               value={descriptionKh}
-              onChange={e => setDescriptionKh(e.target.value)}
+              onChange={(e) => setDescriptionKh(e.target.value)}
               placeholder={isKm ? 'រៀបរាប់សង្ខេបអំពីបរិយាកាស និងរសជាតិម្ហូប...' : 'Brief description...'}
               className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-medium focus:border-amber-500 focus:outline-none"
             />
@@ -307,7 +562,7 @@ export const VipAddRestaurantModal: React.FC = () => {
                   {isKm ? 'សិទ្ធិ VIP ពេញលេញ (១០០% Unlocked)' : 'VIP Full Permissions'}
                 </span>
                 <p className="text-[10px] text-slate-500 dark:text-slate-400">
-                  {isKm ? 'ឥតគិតថ្លៃចុះបញ្ជី • ផ្សព្វផ្សាយភ្លាមៗ ៣៦៥ ថ្ងៃ' : 'Zero registration fee • Active for 365 days'}
+                  {isKm ? 'ឥតគិតថ្លៃចុះបញ្ជី • សកម្មតាមសុពលភាពគម្រោង VIP (30 ឬ 90 ថ្ងៃ)' : 'Zero registration fee • Active under VIP plan (30 or 90 days)'}
                 </p>
               </div>
             </div>

@@ -11,6 +11,7 @@ import { FoodCategorySlug, DestinationCategorySlug, UserRole, RegistrationTransa
 import { getSecurityAuditLogs, SecurityAuditEntry, revokeAdminSession } from '../utils/security';
 import { FoodImageModal } from './FoodImageModal';
 import { TouristImageModal } from './TouristImageModal';
+import { searchOnlineFoodImages, OnlineFoodImageCandidate } from '../services/onlineFoodImageService';
 import {
   getCloudApiConfig,
   saveCloudApiConfig,
@@ -32,10 +33,14 @@ export const AdminDashboard: React.FC = () => {
     transactions, verifyTransaction, rejectTransaction, requestMorePaymentInfo, getAuthorizedPaymentProof,
     appSettings, updateAppSettings, setAdminPassword, currentUser, showToast,
     aiCheckIns, approveAiCheckIn, rejectAiCheckIn, mergeAiCheckIn,
-    setIsAiCheckInModalOpen, triggerCloudSyncNow
+    setIsAiCheckInModalOpen, triggerCloudSyncNow,
+    supportTickets, replyToSupportTicket, updateSupportTicketStatus, approveVipFromSupportTicket, markSupportTicketRead
   } = useApp();
 
-  const [activeTab, setActiveTab] = useState<'stats' | 'food' | 'restaurants' | 'destinations' | 'community' | 'users' | 'transactions' | 'settings' | 'security' | 'image_audit' | 'ai_checkins'>('stats');
+  const [activeTab, setActiveTab] = useState<'stats' | 'support_tickets' | 'food' | 'restaurants' | 'destinations' | 'community' | 'users' | 'transactions' | 'settings' | 'security' | 'image_audit' | 'ai_checkins'>('stats');
+  const [adminReplyDrafts, setAdminReplyDrafts] = useState<Record<string, string>>({});
+  const [inspectingTicketReceipt, setInspectingTicketReceipt] = useState<string | null>(null);
+  const [ticketFilter, setTicketFilter] = useState<'all' | 'Pending' | 'Replied' | 'Resolved'>('all');
 
   // Image Audit states
   const [auditFilter, setAuditFilter] = useState<'all' | 'verified' | 'flagged'>('all');
@@ -52,6 +57,8 @@ export const AdminDashboard: React.FC = () => {
   const [newFoodPhotoUrl, setNewFoodPhotoUrl] = useState('https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=80');
   const [newFoodDescKh, setNewFoodDescKh] = useState('');
   const [showAddFoodForm, setShowAddFoodForm] = useState(false);
+  const [isSearchingNewFoodPhoto, setIsSearchingNewFoodPhoto] = useState(false);
+  const [newFoodPhotoCandidates, setNewFoodPhotoCandidates] = useState<OnlineFoodImageCandidate[]>([]);
 
   // Form states for Destination
   const [newDestNameKh, setNewDestNameKh] = useState('');
@@ -76,7 +83,7 @@ export const AdminDashboard: React.FC = () => {
   const [bankName, setBankName] = useState(appSettings.supportBankName);
   const [accountName, setAccountName] = useState(appSettings.supportAccountName);
   const [supportMessageKh, setSupportMessageKh] = useState(appSettings.supportMessageKh);
-  const [promotionalFeeUsd, setPromotionalFeeUsd] = useState(appSettings.promotionalFeeUsd || 9.99);
+  const [promotionalFeeUsd, setPromotionalFeeUsd] = useState(appSettings.promotionalFeeUsd || 2.99);
   const [promotionPeriodKh, setPromotionPeriodKh] = useState(appSettings.promotionPeriodKh || '');
   const [newAdminPass, setNewAdminPass] = useState('');
 
@@ -102,6 +109,12 @@ export const AdminDashboard: React.FC = () => {
   const pendingTxns = transactions.filter(
     t => t.status === 'pending_verification' || t.status === 'needs_more_info'
   );
+  const pendingSupportTickets = supportTickets.filter(t => t.status === 'Pending');
+  const unreadAdminTickets = supportTickets.filter(t => t.unreadByAdmin);
+  const filteredSupportTickets = supportTickets.filter(t => {
+    if (ticketFilter === 'all') return true;
+    return t.status === ticketFilter;
+  });
 
   const filteredTransactions = transactions.filter(t => {
     if (txnFilter === 'all') return true;
@@ -294,6 +307,21 @@ export const AdminDashboard: React.FC = () => {
           >
             <Shield className="w-4 h-4" />
             <span>{isKm ? 'ទិដ្ឋភាពរួម' : 'Overview'}</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('support_tickets')}
+            className={`flex items-center gap-1.5 px-3 py-2.5 font-bold whitespace-nowrap border-b-2 transition relative ${
+              activeTab === 'support_tickets' ? 'border-[#064E3B] text-[#064E3B] dark:border-emerald-400 dark:text-emerald-400' : 'border-transparent text-stone-400'
+            }`}
+          >
+            <MessageSquare className="w-4 h-4 text-amber-500" />
+            <span>{isKm ? `សារជំនួយ & ឆ្លើយតប (${supportTickets.length})` : `Support & Replies (${supportTickets.length})`}</span>
+            {(unreadAdminTickets.length > 0 || pendingSupportTickets.length > 0) && (
+              <span className="px-1.5 py-0.2 bg-rose-600 text-white rounded-full text-[9px] font-bold animate-pulse">
+                {unreadAdminTickets.length || pendingSupportTickets.length}
+              </span>
+            )}
           </button>
 
           <button
@@ -508,6 +536,28 @@ export const AdminDashboard: React.FC = () => {
                 </div>
               </div>
 
+              {/* Pending Support Messages Alert Banner */}
+              {(unreadAdminTickets.length > 0 || pendingSupportTickets.length > 0) && (
+                <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border-2 border-amber-500 space-y-2">
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <p className="font-bold text-amber-950 dark:text-amber-200 flex items-center gap-2 font-khmer text-xs">
+                      <MessageSquare className="w-4 h-4 text-amber-600 animate-bounce" />
+                      <span>
+                        {isKm
+                          ? `🔔 មានសារជំនួយបញ្ហាការបង់ប្រាក់ VIP ថ្មីចំនួន ${unreadAdminTickets.length || pendingSupportTickets.length} កំពុងរង់ចាំការឆ្លើយតបពីរដ្ឋបាល!`
+                          : `🔔 ${unreadAdminTickets.length || pendingSupportTickets.length} New User Payment Support Messages awaiting Admin reply!`}
+                      </span>
+                    </p>
+                    <button
+                      onClick={() => setActiveTab('support_tickets')}
+                      className="px-3.5 py-1.5 bg-amber-500 hover:bg-amber-600 text-slate-950 rounded-xl font-khmer font-bold text-xs transition active:scale-95 cursor-pointer"
+                    >
+                      {isKm ? '💬 មើល & ឆ្លើយតបឥឡូវនេះ' : '💬 View & Reply Now'}
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {/* Pending Transactions Alert */}
               {pendingTxns.length > 0 && (
                 <div className="p-4 rounded-2xl bg-slate-100 dark:bg-slate-900 border-2 border-[#059669] space-y-2">
@@ -522,6 +572,310 @@ export const AdminDashboard: React.FC = () => {
                     >
                       {isKm ? 'ពិនិត្យឥឡូវនេះ' : 'Review Now'}
                     </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* USER–ADMIN SUPPORT & TWO-WAY REPLY SYSTEM TAB */}
+          {activeTab === 'support_tickets' && (
+            <div className="space-y-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <h3 className="font-bold text-stone-900 dark:text-stone-100 font-khmer text-base flex items-center gap-2">
+                    <MessageSquare className="w-5 h-5 text-amber-500" />
+                    <span>
+                      {isKm
+                        ? 'ប្រព័ន្ធទំនាក់ទំនងជំនួយបង់ប្រាក់ និងឆ្លើយតប ២ ទិស (User–Admin Payment Support & Reply)'
+                        : 'User–Admin Payment Support & Two-Way Reply System'}
+                    </span>
+                  </h3>
+                  <p className="text-stone-500 font-khmer text-xs">
+                    {isKm
+                      ? 'ពិនិត្យសារបញ្ហាការបង់ប្រាក់ ABA រូបវិក្កយបត្រ ឆ្លើយតបទៅអ្នកប្រើប្រាស់ផ្ទាល់ និងអនុម័តបើក VIP (30 ថ្ងៃ $2.99 ឬ 90 ថ្ងៃ $4.99)'
+                      : 'Inspect user ABA payment issues, receipts, reply in-app, and approve & activate VIP (30 Days $2.99 or 90 Days $4.99)'}
+                  </p>
+                </div>
+
+                {/* Status Filter */}
+                <div className="flex gap-1 bg-stone-100 dark:bg-stone-800 p-1 rounded-xl shrink-0">
+                  {(['all', 'Pending', 'Replied', 'Resolved'] as const).map((status) => (
+                    <button
+                      key={status}
+                      onClick={() => setTicketFilter(status)}
+                      className={`px-2.5 py-1.5 rounded-lg font-khmer font-semibold text-xs transition ${
+                        ticketFilter === status
+                          ? 'bg-[#064E3B] text-white shadow'
+                          : 'text-stone-500 hover:text-stone-800 dark:hover:text-stone-200'
+                      }`}
+                    >
+                      {status === 'all'
+                        ? isKm
+                          ? `ទាំងអស់ (${supportTickets.length})`
+                          : `All (${supportTickets.length})`
+                        : status}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {filteredSupportTickets.length === 0 ? (
+                <div className="p-8 rounded-2xl bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-center text-stone-400 font-khmer">
+                  {isKm ? 'មិនទាន់មានសារជំនួយបង់ប្រាក់ក្នុងប្រភេទនេះឡើយ។' : 'No support messages found in this filter.'}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {filteredSupportTickets.map((ticket) => {
+                    const draftText = adminReplyDrafts[ticket.id] || '';
+                    return (
+                      <div
+                        key={ticket.id}
+                        onClick={() => {
+                          if (ticket.unreadByAdmin) {
+                            markSupportTicketRead(ticket.id, 'admin');
+                          }
+                        }}
+                        className={`p-4 rounded-2xl border transition-all space-y-3 ${
+                          ticket.status === 'Pending'
+                            ? 'bg-amber-50/50 dark:bg-amber-950/20 border-amber-400 dark:border-amber-700'
+                            : ticket.status === 'Replied'
+                            ? 'bg-emerald-50/40 dark:bg-emerald-950/20 border-emerald-400 dark:border-emerald-800'
+                            : 'bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-700'
+                        }`}
+                      >
+                        {/* Ticket Top Metadata Header */}
+                        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 pb-2.5 border-b border-stone-200 dark:border-stone-700">
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="font-mono font-bold text-xs text-stone-800 dark:text-stone-200">
+                                {ticket.id}
+                              </span>
+                              <span
+                                className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold font-khmer ${
+                                  ticket.status === 'Resolved'
+                                    ? 'bg-emerald-600 text-white'
+                                    : ticket.status === 'Replied'
+                                    ? 'bg-sky-600 text-white'
+                                    : 'bg-amber-500 text-slate-950'
+                                }`}
+                              >
+                                {ticket.status === 'Pending'
+                                  ? isKm
+                                    ? '⏳ រង់ចាំពិនិត្យ (Pending)'
+                                    : '⏳ Pending'
+                                  : ticket.status === 'Replied'
+                                  ? isKm
+                                    ? '💬 បានឆ្លើយតប (Replied)'
+                                    : '💬 Replied'
+                                  : isKm
+                                  ? '✅ ដោះស្រាយរួច (Resolved)'
+                                  : '✅ Resolved'}
+                              </span>
+                              {ticket.unreadByAdmin && (
+                                <span className="px-2 py-0.5 rounded-full bg-rose-600 text-white text-[9px] font-bold">
+                                  NEW MESSAGE
+                                </span>
+                              )}
+                              {ticket.vipActivated && (
+                                <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/40 text-[10px] font-bold font-khmer">
+                                  👑 បានបើក VIP រួចរាល់
+                                </span>
+                              )}
+                            </div>
+
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-1 text-[11px] font-khmer text-stone-700 dark:text-stone-300 pt-1">
+                              <div>
+                                <span className="text-stone-400">👤 គណនី៖ </span>
+                                <strong>{ticket.username}</strong> (<code className="font-mono text-[10px]">{ticket.userId}</code>)
+                              </div>
+                              <div>
+                                <span className="text-stone-400">💎 គម្រោង៖ </span>
+                                <strong className="text-emerald-700 dark:text-emerald-300">{ticket.paymentPlan}</strong>
+                              </div>
+                              <div>
+                                <span className="text-stone-400">💵 ទឹកប្រាក់៖ </span>
+                                <strong className="font-mono">${ticket.amountUsd.toFixed(2)} USD ({ticket.durationDays} Days)</strong>
+                              </div>
+                              <div>
+                                <span className="text-stone-400">📅 ថ្ងៃបង់ប្រាក់៖ </span>
+                                <span className="font-mono">{ticket.paymentDate}</span>
+                              </div>
+                              <div>
+                                <span className="text-stone-400">🔢 លេខយោង ABA៖ </span>
+                                <strong className="font-mono text-amber-700 dark:text-amber-300">{ticket.paymentRef || 'N/A'}</strong>
+                              </div>
+                              <div>
+                                <span className="text-stone-400">🕒 ផ្ញើនៅ៖ </span>
+                                <span className="font-mono">{ticket.createdAt}</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Status Selector & Direct VIP Activation Action */}
+                          <div className="flex sm:flex-col items-end gap-2 shrink-0 flex-wrap">
+                            <div className="flex items-center gap-1">
+                              <span className="text-[10px] text-stone-400 font-khmer">ស្ថានភាព៖</span>
+                              <select
+                                value={ticket.status}
+                                onChange={(e) =>
+                                  updateSupportTicketStatus(
+                                    ticket.id,
+                                    e.target.value as 'Pending' | 'Replied' | 'Resolved'
+                                  )
+                                }
+                                className="px-2 py-1 rounded-lg border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-900 text-xs font-bold text-stone-800 dark:text-stone-100"
+                              >
+                                <option value="Pending">Pending</option>
+                                <option value="Replied">Replied</option>
+                                <option value="Resolved">Resolved</option>
+                              </select>
+                            </div>
+
+                            {!ticket.vipActivated && (
+                              <button
+                                type="button"
+                                onClick={() => approveVipFromSupportTicket(ticket.id)}
+                                className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-emerald-600 hover:from-amber-600 hover:to-emerald-700 text-white font-khmer font-bold text-xs flex items-center gap-1.5 shadow-md transition active:scale-95 cursor-pointer"
+                              >
+                                <CheckCircle2 className="w-4 h-4" />
+                                <span>
+                                  {isKm
+                                    ? `✅ អនុម័ត & បើក VIP (${ticket.durationDays} ថ្ងៃ / $${ticket.amountUsd.toFixed(2)})`
+                                    : `✅ Approve & Activate VIP (${ticket.durationDays}d / $${ticket.amountUsd.toFixed(2)})`}
+                                </span>
+                              </button>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Attached Receipt Image */}
+                        {ticket.receiptImageUrl && (
+                          <div className="p-2.5 rounded-xl bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-700 flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-3">
+                              <img
+                                src={ticket.receiptImageUrl}
+                                alt="User Receipt"
+                                onClick={() => setInspectingTicketReceipt(ticket.receiptImageUrl || null)}
+                                className="w-16 h-16 object-cover rounded-lg border border-emerald-500 cursor-pointer hover:opacity-90"
+                              />
+                              <div className="font-khmer text-xs">
+                                <p className="font-bold text-stone-900 dark:text-stone-100">
+                                  🧾 {isKm ? 'រូបភាពវិក្កយបត្របង់ប្រាក់ ABA ភ្ជាប់មកជាមួយ' : 'Attached ABA Payment Receipt'}
+                                </p>
+                                <p className="text-[10px] text-stone-500 font-mono">
+                                  {ticket.receiptFileName || 'aba_receipt.png'}
+                                </p>
+                              </div>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => setInspectingTicketReceipt(ticket.receiptImageUrl || null)}
+                              className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-khmer font-bold text-xs cursor-pointer"
+                            >
+                              {isKm ? '🔍 មើលរូបពេញ' : '🔍 View Receipt'}
+                            </button>
+                          </div>
+                        )}
+
+                        {/* Conversation History Thread */}
+                        <div className="space-y-2 max-h-60 overflow-y-auto p-3 rounded-xl bg-stone-50 dark:bg-stone-950/70 border border-stone-200 dark:border-stone-800">
+                          {ticket.messages.map((msg) => {
+                            const isAdminMsg = msg.senderRole === 'admin';
+                            return (
+                              <div
+                                key={msg.id}
+                                className={`flex flex-col ${isAdminMsg ? 'items-end' : 'items-start'}`}
+                              >
+                                <div
+                                  className={`max-w-[85%] rounded-2xl px-3.5 py-2 text-xs font-khmer ${
+                                    isAdminMsg
+                                      ? 'bg-[#064E3B] text-white rounded-br-xs'
+                                      : 'bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 border border-stone-200 dark:border-stone-700 rounded-bl-xs'
+                                  }`}
+                                >
+                                  <div className="flex items-center justify-between gap-3 mb-0.5 text-[10px] opacity-80">
+                                    <span className="font-bold">
+                                      {isAdminMsg ? `🛡️ ${msg.senderName} (Admin)` : `👤 ${msg.senderName}`}
+                                    </span>
+                                    <span className="font-mono">{msg.createdAt}</span>
+                                  </div>
+                                  <p className="whitespace-pre-wrap leading-relaxed">{msg.message}</p>
+                                  {msg.attachmentUrl && (
+                                    <img
+                                      src={msg.attachmentUrl}
+                                      alt="Attachment"
+                                      onClick={() => setInspectingTicketReceipt(msg.attachmentUrl || null)}
+                                      className="mt-2 max-h-36 rounded-lg border border-white/20 cursor-pointer"
+                                    />
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+
+                        {/* Admin Reply Input Box */}
+                        <div className="flex gap-2 pt-1">
+                          <input
+                            type="text"
+                            value={draftText}
+                            onChange={(e) =>
+                              setAdminReplyDrafts((prev) => ({ ...prev, [ticket.id]: e.target.value }))
+                            }
+                            placeholder={
+                              isKm
+                                ? 'វាយសារឆ្លើយតបទៅកាន់អ្នកប្រើប្រាស់ផ្ទាល់នៅទីនេះ...'
+                                : 'Type your admin reply to the user here...'
+                            }
+                            className="flex-1 px-3.5 py-2 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 font-khmer text-xs"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (!draftText.trim()) {
+                                showToast(isKm ? 'សូមសរសេរសារឆ្លើយតបជាមុនសិន!' : 'Please enter a reply!', 'warning');
+                                return;
+                              }
+                              replyToSupportTicket(ticket.id, draftText.trim());
+                              setAdminReplyDrafts((prev) => ({ ...prev, [ticket.id]: '' }));
+                            }}
+                            className="px-4 py-2 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-khmer font-bold text-xs transition active:scale-95 cursor-pointer shrink-0"
+                          >
+                            {isKm ? '📨 ផ្ញើការឆ្លើយតប' : '📨 Send Reply'}
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Lightbox for Support Ticket Receipt */}
+              {inspectingTicketReceipt && (
+                <div
+                  className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm"
+                  onClick={() => setInspectingTicketReceipt(null)}
+                >
+                  <div
+                    className="relative max-w-xl w-full bg-slate-900 rounded-3xl p-4 border border-emerald-500/40"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div className="flex items-center justify-between pb-3 text-white font-khmer">
+                      <span className="font-bold text-sm">🧾 រូបភាពវិក្កយបត្របង់ប្រាក់របស់អ្នកប្រើប្រាស់</span>
+                      <button
+                        type="button"
+                        onClick={() => setInspectingTicketReceipt(null)}
+                        className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white"
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                    </div>
+                    <img
+                      src={inspectingTicketReceipt}
+                      alt="Receipt Full Preview"
+                      className="max-h-[75vh] w-auto mx-auto object-contain rounded-xl"
+                    />
                   </div>
                 </div>
               )}
@@ -867,7 +1221,7 @@ export const AdminDashboard: React.FC = () => {
                       type="number"
                       step="0.01"
                       value={promotionalFeeUsd}
-                      onChange={e => setPromotionalFeeUsd(parseFloat(e.target.value) || 9.99)}
+                      onChange={e => setPromotionalFeeUsd(parseFloat(e.target.value) || 2.99)}
                       className="w-full px-3 py-2 rounded-xl border bg-stone-50 dark:bg-stone-700 font-mono font-bold"
                     />
                   </div>
@@ -879,7 +1233,7 @@ export const AdminDashboard: React.FC = () => {
                       type="text"
                       value={promotionPeriodKh}
                       onChange={e => setPromotionPeriodKh(e.target.value)}
-                      placeholder="តម្លៃប្រូម៉ូសិនពិសេស៖ $9.99 USD"
+                      placeholder="តម្លៃគម្រោង VIP៖ $2.99 (30 ថ្ងៃ) / $4.99 (90 ថ្ងៃ)"
                       className="w-full px-3 py-2 rounded-xl border bg-stone-50 dark:bg-stone-700 font-khmer"
                     />
                   </div>
@@ -954,14 +1308,104 @@ export const AdminDashboard: React.FC = () => {
                     </select>
                   </div>
 
-                  <div>
-                    <label className="block font-medium mb-1">រូបភាព (Photo URL)</label>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <label className="block font-medium">រូបភាព (Photo URL)</label>
+                      <button
+                        type="button"
+                        disabled={isSearchingNewFoodPhoto}
+                        onClick={async () => {
+                          if (!newFoodNameKh.trim() && !newFoodNameEn.trim()) {
+                            showToast(
+                              isKm
+                                ? 'សូមវាយបញ្ចូលឈ្មោះមុខម្ហូបជាមុនសិន មុនពេលស្វែងរករូបភាព Online'
+                                : 'Please enter the dish name first before searching online photos',
+                              'error'
+                            );
+                            return;
+                          }
+                          setIsSearchingNewFoodPhoto(true);
+                          try {
+                            const results = await searchOnlineFoodImages({
+                              nameKh: newFoodNameKh,
+                              nameEn: newFoodNameEn,
+                              categorySlug: newFoodCategory,
+                              existingUrls: foods.map(f => f.photoUrl),
+                            });
+                            setNewFoodPhotoCandidates(results);
+                            if (results.length > 0) {
+                              setNewFoodPhotoUrl(results[0].url);
+                              showToast(
+                                isKm
+                                  ? `រកឃើញរូបភាពម្ហូបពី Online ចំនួន ${results.length} សន្លឹក!`
+                                  : `Found ${results.length} matching online food photos!`,
+                                'success'
+                              );
+                            }
+                          } catch {
+                            showToast(
+                              isKm ? 'មិនអាចស្វែងរករូបភាពពី Online បានទេ' : 'Failed to search online food photos',
+                              'error'
+                            );
+                          } finally {
+                            setIsSearchingNewFoodPhoto(false);
+                          }
+                        }}
+                        className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-bold text-xs flex items-center gap-1.5 shadow-xs transition active:scale-95 disabled:opacity-60 cursor-pointer"
+                      >
+                        <Sparkles className={`w-3.5 h-3.5 text-amber-300 ${isSearchingNewFoodPhoto ? 'animate-spin' : ''}`} />
+                        <span>
+                          {isSearchingNewFoodPhoto
+                            ? (isKm ? 'កំពុងស្វែងរក...' : 'Searching...')
+                            : (isKm ? '🤖 ស្វែងរករូបភាពម្ហូបពី Online ដោយស្វ័យប្រវត្តិ' : '🤖 Auto-Search Online Photo')}
+                        </span>
+                      </button>
+                    </div>
+
                     <input
                       type="url"
                       value={newFoodPhotoUrl}
                       onChange={(e) => setNewFoodPhotoUrl(e.target.value)}
                       className="w-full px-2.5 py-1.5 rounded-lg border bg-white dark:bg-stone-700"
                     />
+
+                    {newFoodPhotoCandidates.length > 0 && (
+                      <div className="space-y-1.5 pt-1">
+                        <span className="text-[11px] font-bold text-emerald-800 dark:text-emerald-300 block">
+                          {isKm
+                            ? `✨ រូបភាពម្ហូបពី Online ដែលត្រូវគ្នា (${newFoodPhotoCandidates.length} សន្លឹក - ចុចជ្រើសរើស)៖`
+                            : `✨ Matching Online Food Photos (${newFoodPhotoCandidates.length} results - tap to select):`}
+                        </span>
+                        <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                          {newFoodPhotoCandidates.map((cand, idx) => {
+                            const isSelected = newFoodPhotoUrl === cand.url;
+                            return (
+                              <button
+                                key={`${cand.url}-${idx}`}
+                                type="button"
+                                onClick={() => setNewFoodPhotoUrl(cand.url)}
+                                className={`relative aspect-[4/3] rounded-xl overflow-hidden border-2 transition cursor-pointer ${
+                                  isSelected
+                                    ? 'border-emerald-600 ring-2 ring-emerald-500/30'
+                                    : 'border-slate-200 dark:border-slate-700 hover:border-emerald-400'
+                                }`}
+                              >
+                                <img
+                                  src={cand.thumbUrl || cand.url}
+                                  alt={cand.title}
+                                  className="w-full h-full object-cover"
+                                />
+                                {isSelected && (
+                                  <div className="absolute top-1 right-1 w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center">
+                                    <Check className="w-2.5 h-2.5" />
+                                  </div>
+                                )}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <button
@@ -1395,15 +1839,25 @@ export const AdminDashboard: React.FC = () => {
               </h3>
               <div className="space-y-2 max-h-[50vh] overflow-y-auto no-scrollbar">
                 {users.map((u) => (
-                  <div key={u.id} className="p-3 bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 flex items-center justify-between">
+                  <div key={u.id} className="p-3 bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <div className="flex items-center gap-3">
                       <img src={u.avatar} alt="avatar" className="w-10 h-10 rounded-full object-cover" />
                       <div>
-                        <h4 className="font-bold text-stone-900 dark:text-stone-100 font-khmer">{u.name}</h4>
+                        <h4 className="font-bold text-stone-900 dark:text-stone-100 font-khmer flex items-center gap-2">
+                          <span>{u.name}</span>
+                          <code className="text-[10px] font-mono text-stone-400">({u.id})</code>
+                        </h4>
                         <p className="text-[10px] text-stone-400">{u.email} • 📞 {u.phone || 'N/A'}</p>
+                        {(u.role === 'vip' || u.vipPlanType || u.vipExpiryDate) && (
+                          <p className="text-[10px] text-emerald-700 dark:text-emerald-400 font-khmer mt-0.5">
+                            👑 គម្រោង៖ <strong>{u.vipPlanType === 'annual' ? 'VIP 90 Days ($4.99)' : 'VIP 30 Days ($2.99)'}</strong>
+                            {u.vipActivatedAt && ` • ថ្ងៃបើក៖ ${new Date(u.vipActivatedAt).toLocaleDateString()}`}
+                            {u.vipExpiryDate && ` • ថ្ងៃផុតកំណត់៖ ${new Date(u.vipExpiryDate).toLocaleDateString()}`}
+                          </p>
+                        )}
                       </div>
                     </div>
-                    <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-stone-100 dark:bg-stone-700 font-mono">
+                    <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-stone-100 dark:bg-stone-700 font-mono self-start sm:self-center">
                       {u.role}
                     </span>
                   </div>

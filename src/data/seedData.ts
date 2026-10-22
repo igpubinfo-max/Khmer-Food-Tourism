@@ -78,10 +78,10 @@ export const initialAppSettings: AppSettings = {
   supportMessageEn: 'Thank you for supporting Khmer Food & Tourism. Your kind voluntary contribution empowers us to continue promoting authentic Cambodian heritage and cuisine worldwide!',
   adminPasswordHash: 'pbkdf2$100000$70fcb2b4c0d7d330e0c35f90e46c1dc4d23d0a6ba9e8bf24d49f9236b54dbcd5$9f4c042b557cce87cacb3a142fef4082cded0ac5bf594f6a0fd167439f53b369',
   isAdminInitialized: true,
-  promotionalFeeUsd: 9.99,
+  promotionalFeeUsd: 2.99,
   promotionalFeeEnabled: true,
-  promotionPeriodKh: 'តម្លៃប្រូម៉ូសិនពិសេស៖ $9.99 USD សម្រាប់ ៣៦៥ ថ្ងៃ (ត្រឹមដំណាច់ឆ្នាំនេះប៉ុណ្ណោះ)',
-  promotionPeriodEn: 'Special Promotional Price: $9.99 USD for 365 Days (Valid until end of this year only)',
+  promotionPeriodKh: 'កញ្ចប់ VIP ផ្លូវការ៖ $2.99 សម្រាប់ 30 ថ្ងៃ ឬ $4.99 សម្រាប់ 90 ថ្ងៃ',
+  promotionPeriodEn: 'Official VIP Plans: $2.99 for 30 Days or $4.99 for 90 Days',
 };
 
 // 100+ Authentic Khmer Dishes

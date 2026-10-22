@@ -56,9 +56,31 @@ export const RestaurantDetailModal: React.FC = () => {
 
   const isKm = language === 'km';
   const isPremiumActive = isRestaurantPremiumActive(selectedRestaurant);
-  const isOwner = currentUser?.id && selectedRestaurant.ownerId === currentUser.id;
+  const isOwner = Boolean(currentUser?.id && selectedRestaurant.ownerId === currentUser.id);
+  const isAdmin = currentUser?.role === 'admin';
+  const canEditShop = Boolean(isOwner || isAdmin || (currentUser && !selectedRestaurant.ownerId));
   const dialablePhone = sanitizeDialablePhone(selectedRestaurant.phone);
   const displayPhone = formatDisplayPhone(selectedRestaurant.phone);
+
+  const handleOpenPhotoEditor = () => {
+    if (!currentUser) {
+      showToast(
+        isKm ? 'សូមចូលគណនីជាមុនសិនដើម្បីកែប្រែរូបភាពហាង!' : 'Please log in first to edit shop photos!',
+        'warning'
+      );
+      return;
+    }
+    if (!canEditShop) {
+      showToast(
+        isKm
+          ? '⚠️ មានតែម្ចាស់ហាងផ្ទាល់ ឬ Admin ប៉ុណ្ណោះដែលអាចកែប្រែរូបភាពហាងនេះបាន!'
+          : '⚠️ Only the shop owner or an administrator can edit this shop!',
+        'warning'
+      );
+      return;
+    }
+    setIsImageModalOpen(true);
+  };
 
   const handleCallRestaurant = async (e?: React.MouseEvent) => {
     if (e) e.preventDefault();
@@ -96,9 +118,17 @@ export const RestaurantDetailModal: React.FC = () => {
     }
   };
 
+  const shopProfilePic = selectedRestaurant.profileImage || selectedRestaurant.photoUrl;
+  const shopFoodPhotos = Array.from(
+    new Set([
+      ...(selectedRestaurant.foodImages || []),
+      ...(selectedRestaurant.galleryPhotos || []),
+    ])
+  ).filter((u) => u && u !== shopProfilePic);
+
   const allPhotos = [
-    selectedRestaurant.photoUrl,
-    ...(selectedRestaurant.galleryPhotos || [])
+    shopProfilePic,
+    ...shopFoodPhotos,
   ].filter((url, index, self) => url && self.indexOf(url) === index);
 
   const handleShare = () => {
@@ -183,7 +213,7 @@ export const RestaurantDetailModal: React.FC = () => {
             </button>
             <button
               type="button"
-              onClick={() => setIsImageModalOpen(true)}
+              onClick={handleOpenPhotoEditor}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/60 hover:bg-black/80 backdrop-blur-md text-white text-xs font-bold shadow transition active:scale-95 font-khmer border border-white/20"
               title={isKm ? 'ប្តូររូបភាពហាងផ្ទាល់ខ្លួន' : 'Change Shop Photo'}
             >
@@ -221,7 +251,7 @@ export const RestaurantDetailModal: React.FC = () => {
                 {isPremiumActive ? (
                   <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-gradient-to-r from-[#064E3B] to-[#059669] text-white border border-emerald-300/40 shadow-xs flex items-center gap-1 font-khmer">
                     <Sparkles className="w-3 h-3 text-emerald-200" />
-                    <span>⭐ {isKm ? 'សមាជិកភាព VIP Premium (៣៦៥ ថ្ងៃ)' : 'VIP Premium Member (365 Days)'}</span>
+                    <span>⭐ {isKm ? 'សមាជិកភាព VIP Premium' : 'VIP Premium Member'}</span>
                   </span>
                 ) : (
                   <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-800/85 text-slate-100 border border-slate-600/40 shadow-xs font-khmer">
@@ -249,8 +279,8 @@ export const RestaurantDetailModal: React.FC = () => {
           </div>
 
           <div className="p-4 sm:p-6 space-y-5">
-            {/* Owner Management Control Bar */}
-            {isOwner && (
+            {/* Owner / Admin Management Control Bar */}
+            {(isOwner || isAdmin) && (
               <div className="p-3.5 bg-emerald-50 dark:bg-slate-800 rounded-2xl border-2 border-emerald-500/60 flex items-center justify-between font-khmer">
                 <div>
                   <div className="font-bold text-xs text-[#064E3B] dark:text-emerald-400 flex items-center gap-1.5">
@@ -259,7 +289,7 @@ export const RestaurantDetailModal: React.FC = () => {
                   </div>
                   <div className="text-[10px] text-slate-600 dark:text-slate-300">
                     {isKm 
-                      ? `មុខម្ហូប៖ ${(selectedRestaurant.menuItems || []).length}/5 មុខ | រូបភាពហាង៖ ${allPhotos.length} សន្លឹក` 
+                      ? `មុខម្ហូប៖ ${(selectedRestaurant.menuItems || []).length}/5 មុខ | រូបភាពហាង & ម្ហូប៖ ${allPhotos.length} សន្លឹក` 
                       : `Menu: ${(selectedRestaurant.menuItems || []).length}/5 | Photos: ${allPhotos.length}`}
                   </div>
                 </div>
@@ -346,35 +376,44 @@ export const RestaurantDetailModal: React.FC = () => {
               </div>
             </div>
 
-            {/* Gallery Photos & Replace Photo Button */}
-            <div className="space-y-2">
+            {/* Shop Profile Picture & Food Photos Gallery + Edit Photos Button */}
+            <div className="space-y-2.5">
               <div className="flex items-center justify-between text-xs">
                 <span className="font-bold text-[#0F172A] dark:text-white font-khmer flex items-center gap-1.5">
                   <Camera className="w-4 h-4 text-[#059669]" />
-                  <span>{isKm ? `រូបភាពហាង (${allPhotos.length} សន្លឹក)` : `Shop Photos (${allPhotos.length})`}</span>
+                  <span>
+                    {isKm
+                      ? `រូបតំណាងហាង & រូបភាពមុខម្ហូប (${allPhotos.length} សន្លឹក)`
+                      : `Shop Profile & Food Photos (${allPhotos.length})`}
+                  </span>
                 </span>
-                <button
-                  type="button"
-                  onClick={() => setIsImageModalOpen(true)}
-                  className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-gradient-to-r from-[#064E3B] to-[#059669] hover:brightness-110 text-white font-khmer font-bold text-xs shadow-xs transition active:scale-95 cursor-pointer"
-                >
-                  <Camera className="w-3.5 h-3.5 text-emerald-200" />
-                  <span>{isKm ? 'ប្តូររូបភាពហាង' : 'Change Photo'}</span>
-                </button>
+                {canEditShop && (
+                  <button
+                    type="button"
+                    onClick={handleOpenPhotoEditor}
+                    className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-gradient-to-r from-[#064E3B] to-[#059669] hover:brightness-110 text-white font-khmer font-bold text-xs shadow-xs transition active:scale-95 cursor-pointer"
+                  >
+                    <Camera className="w-3.5 h-3.5 text-emerald-200" />
+                    <span>{isKm ? 'កែរូបហាង & រូបម្ហូប' : 'Edit Shop & Food Photos'}</span>
+                  </button>
+                )}
               </div>
-              {allPhotos.length > 1 && (
+              {allPhotos.length > 0 && (
                 <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
                   {allPhotos.map((photo, idx) => (
                     <button
                       key={idx}
                       onClick={() => setActivePhoto(photo)}
-                      className={`relative w-20 h-16 rounded-xl overflow-hidden shrink-0 border-2 transition ${
-                        (activePhoto || selectedRestaurant.photoUrl) === photo 
-                          ? 'border-[#064E3B] ring-2 ring-[#059669]' 
+                      className={`relative w-24 h-18 rounded-xl overflow-hidden shrink-0 border-2 transition ${
+                        (activePhoto || shopProfilePic) === photo
+                          ? 'border-[#064E3B] ring-2 ring-[#059669]'
                           : 'border-slate-200 dark:border-slate-700 opacity-80 hover:opacity-100'
                       }`}
                     >
                       <img src={photo} alt="gallery" className="w-full h-full object-cover" />
+                      <span className="absolute bottom-0 inset-x-0 bg-black/65 text-white text-[8px] font-khmer py-0.5 text-center">
+                        {idx === 0 ? (isKm ? 'រូបហាង' : 'Shop') : isKm ? `ម្ហូប ${idx}` : `Food ${idx}`}
+                      </span>
                     </button>
                   ))}
                 </div>

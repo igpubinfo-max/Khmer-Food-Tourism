@@ -2,8 +2,9 @@ import React, { useState, useRef, useEffect } from 'react';
 import { FoodItem } from '../types';
 import { 
   X, Upload, Image as ImageIcon, Check, RefreshCw, 
-  AlertTriangle, CheckCircle2, Eye, Sliders, Smartphone, Sparkles 
+  AlertTriangle, CheckCircle2, Eye, Sliders, Smartphone, Sparkles, Search, Globe 
 } from 'lucide-react';
+import { searchOnlineFoodImages, OnlineFoodImageCandidate } from '../services/onlineFoodImageService';
 
 interface FoodImageModalProps {
   food: FoodItem | null;
@@ -78,6 +79,8 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
   const [urlInput, setUrlInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [isSearchingOnline, setIsSearchingOnline] = useState(false);
+  const [onlineCandidates, setOnlineCandidates] = useState<OnlineFoodImageCandidate[]>([]);
 
   useEffect(() => {
     if (food) {
@@ -87,10 +90,35 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
       setAuditNote(food.imageAuditNote || '');
       setFitMode('cover');
       setErrorMsg('');
+      setOnlineCandidates([]);
     }
   }, [food, isOpen]);
 
   if (!isOpen || !food) return null;
+
+  const handleSearchOnlineImages = async () => {
+    setErrorMsg('');
+    setIsSearchingOnline(true);
+    try {
+      const results = await searchOnlineFoodImages({
+        nameKh: food.nameKh,
+        nameEn: food.nameEn,
+        categorySlug: food.categorySlug,
+        existingUrls: food.photoUrl ? [food.photoUrl] : [],
+      });
+      setOnlineCandidates(results);
+      if (results.length > 0) {
+        setPhotoUrl(results[0].url);
+        setUrlInput(results[0].url);
+        setAuditStatus('verified');
+        setAuditNote(isKm ? `រូបភាពស្វែងរកពី Online ដោយស្វ័យប្រវត្តិ (${results[0].source})` : `Auto-matched online photo (${results[0].source})`);
+      }
+    } catch (err: any) {
+      setErrorMsg(err.message || (isKm ? 'មិនអាចស្វែងរករូបភាពពី Online បានទេ' : 'Failed to search online food images'));
+    } finally {
+      setIsSearchingOnline(false);
+    }
+  };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -302,12 +330,83 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
             </p>
           </div>
 
-          {/* Option 2: Direct URL Input */}
-          <div className="space-y-1.5 p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
-            <span className="font-bold text-[#0F172A] dark:text-slate-300 block">
-              {isKm ? '២. ឬ បញ្ចូលតំណភ្ជាប់ URL រូបភាព (Image URL):' : '2. Or Enter Direct Image Web URL:'}
-            </span>
-            <div className="flex gap-2">
+          {/* Option 2: Auto Online Food Image Search + Direct URL Input */}
+          <div className="space-y-2.5 p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
+            <div className="flex items-center justify-between gap-2">
+              <span className="font-bold text-[#0F172A] dark:text-slate-200 flex items-center gap-1.5">
+                <Globe className="w-4 h-4 text-emerald-600" />
+                {isKm ? '២. ស្វែងរករូបភាពម្ហូបពី Online ឬបញ្ចូល URL' : '2. Auto Online Food Photo Search or Web URL'}
+              </span>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 font-bold">
+                FREE API
+              </span>
+            </div>
+
+            <button
+              type="button"
+              disabled={isSearchingOnline}
+              onClick={handleSearchOnlineImages}
+              className="w-full py-2.5 px-3.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-bold flex items-center justify-center gap-2 shadow-sm transition active:scale-98 disabled:opacity-60 cursor-pointer"
+            >
+              <Sparkles className={`w-4 h-4 text-amber-300 ${isSearchingOnline ? 'animate-spin' : ''}`} />
+              <span>
+                {isSearchingOnline
+                  ? (isKm ? 'កំពុងស្វែងរករូបភាពម្ហូបពី Online...' : 'Searching online food photos...')
+                  : (isKm ? '🤖 ស្វែងរករូបភាពម្ហូបពី Online ដោយស្វ័យប្រវត្តិ' : '🤖 Auto-Search Matching Food Photos Online')}
+              </span>
+            </button>
+
+            {onlineCandidates.length > 0 && (
+              <div className="space-y-1.5 pt-1">
+                <span className="text-[11px] font-bold text-emerald-800 dark:text-emerald-300 block">
+                  {isKm
+                    ? `✨ រកឃើញរូបភាពម្ហូបពី Online ចំនួន ${onlineCandidates.length} សន្លឹក (ចុចជ្រើសរើស)៖`
+                    : `✨ Found ${onlineCandidates.length} matching online photos (tap to select):`}
+                </span>
+                <div className="grid grid-cols-3 gap-2 max-h-48 overflow-y-auto p-1">
+                  {onlineCandidates.map((cand, idx) => {
+                    const isSelected = photoUrl === cand.url;
+                    return (
+                      <button
+                        key={`${cand.url}-${idx}`}
+                        type="button"
+                        onClick={() => {
+                          setPhotoUrl(cand.url);
+                          setUrlInput(cand.url);
+                          setAuditStatus('verified');
+                          setAuditNote(
+                            isKm
+                              ? `រូបភាពជ្រើសរើសពី Online (${cand.source})`
+                              : `Online photo selected (${cand.source})`
+                          );
+                        }}
+                        className={`relative aspect-[4/3] rounded-xl overflow-hidden border-2 transition cursor-pointer group ${
+                          isSelected
+                            ? 'border-emerald-600 ring-2 ring-emerald-500/30'
+                            : 'border-slate-200 dark:border-slate-700 hover:border-emerald-400'
+                        }`}
+                      >
+                        <img
+                          src={cand.thumbUrl || cand.url}
+                          alt={cand.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition duration-200"
+                        />
+                        <div className="absolute bottom-0 inset-x-0 bg-black/65 text-white text-[9px] px-1.5 py-0.5 truncate">
+                          {cand.source}
+                        </div>
+                        {isSelected && (
+                          <div className="absolute top-1 right-1 w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center shadow">
+                            <Check className="w-3 h-3" />
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            <div className="flex gap-2 pt-1">
               <input
                 type="text"
                 value={urlInput}

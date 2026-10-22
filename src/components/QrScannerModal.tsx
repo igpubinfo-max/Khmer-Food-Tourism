@@ -5,6 +5,12 @@ import {
   ExternalLink, Copy, RefreshCw, Zap, ShieldCheck, HelpCircle
 } from 'lucide-react';
 import jsQR from 'jsqr';
+import { Capacitor } from '@capacitor/core';
+import {
+  pickImageUsingNativeAndroidGallery,
+  processAndCompressImageFile,
+  decodeQrFromImageDataUrl,
+} from '../utils/androidMediaHelper';
 
 export const QrScannerModal: React.FC = () => {
   const { 
@@ -19,6 +25,9 @@ export const QrScannerModal: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'camera' | 'upload'>('upload');
   const [cameraError, setCameraError] = useState<string>('');
   const [isScanningCamera, setIsScanningCamera] = useState<boolean>(false);
+  const [selectedQrImagePreview, setSelectedQrImagePreview] = useState<string>('');
+  const [isProcessingImage, setIsProcessingImage] = useState<boolean>(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [scanResult, setScanResult] = useState<{
     raw: string;
     type: 'aba_khqr' | 'bakong' | 'url' | 'text';
@@ -39,6 +48,7 @@ export const QrScannerModal: React.FC = () => {
     stopCamera();
     setIsQrScannerModalOpen(false);
     setScanResult(null);
+    setSelectedQrImagePreview('');
     setCameraError('');
   };
 
@@ -112,40 +122,70 @@ export const QrScannerModal: React.FC = () => {
     animationFrameRef.current = requestAnimationFrame(scanVideoFrame);
   };
 
-  // Image Upload Scan Handler
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const processQrDataUrl = async (dataUrl: string) => {
+    setSelectedQrImagePreview(dataUrl);
+    setIsProcessingImage(true);
+    try {
+      const decoded = await decodeQrFromImageDataUrl(dataUrl);
+      setIsProcessingImage(false);
+      if (decoded) {
+        handleDecodedData(decoded);
+        showToast(isKm ? '✅ បានស្គាល់កូដ QR ពីរូបថតដោយជោគជ័យ! 🎉' : '✅ QR Code recognized from photo! 🎉', 'success');
+      } else {
+        showToast(
+          isKm
+            ? '⚠️ រកមិនឃើញកូដ QR ក្នុងរូបភាពនេះទេ។ សូមជ្រើសរើសរូបភាពកូដ QR ឱ្យបានច្បាស់។'
+            : '⚠️ No valid QR code found in this photo. Please select a clearer QR image.',
+          'warning'
+        );
+      }
+    } catch {
+      setIsProcessingImage(false);
+      showToast(
+        isKm ? '⚠️ មានបញ្ហាក្នុងការអានរូបភាព QR។' : '⚠️ Error processing QR image.',
+        'warning'
+      );
+    }
+  };
+
+  // Trigger Native Android Gallery Picker or Web File Input safely
+  const handleTriggerGalleryPicker = async () => {
+    if (Capacitor.isNativePlatform()) {
+      setIsProcessingImage(true);
+      try {
+        const res = await pickImageUsingNativeAndroidGallery();
+        setIsProcessingImage(false);
+        if (res.cancelled) {
+          return;
+        }
+        if (res.dataUrl) {
+          await processQrDataUrl(res.dataUrl);
+          return;
+        }
+      } catch {
+        setIsProcessingImage(false);
+      }
+    }
+    fileInputRef.current?.click();
+  };
+
+  // Image Upload Scan Handler (File Input)
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    e.target.value = '';
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const img = document.createElement('img');
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return;
-
-        ctx.drawImage(img, 0, 0);
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const code = jsQR(imageData.data, imageData.width, imageData.height);
-
-        if (code && code.data) {
-          handleDecodedData(code.data);
-          showToast(isKm ? 'បានស្គាល់កូដ QR ដោយជោគជ័យ! 🎉' : 'QR Code recognized successfully! 🎉', 'success');
-        } else {
-          showToast(
-            isKm 
-              ? '⚠️ មិនអាចស្គាល់កូដ QR ក្នុងរូបភាពនេះទេ។ សូមសាកល្បងរូបភាពច្បាស់ល្អជាងនេះ។' 
-              : '⚠️ Could not recognize a valid QR code in this image. Please try a clearer picture.',
-            'warning'
-          );
-        }
-      };
-      img.src = event.target?.result as string;
-    };
-    reader.readAsDataURL(file);
+    setIsProcessingImage(true);
+    try {
+      const dataUrl = await processAndCompressImageFile(file, 1400, 0.92);
+      await processQrDataUrl(dataUrl);
+    } catch (err: any) {
+      setIsProcessingImage(false);
+      showToast(
+        err?.message || (isKm ? 'មិនអាចអានរូបភាពពី Gallery បានទេ។' : 'Could not read image from Gallery.'),
+        'warning'
+      );
+    }
   };
 
   // Decode QR Data & Categorize
@@ -272,32 +312,51 @@ export const QrScannerModal: React.FC = () => {
           {/* TAB 1: UPLOAD & GALLERY SCAN */}
           {activeTab === 'upload' && !scanResult && (
             <div className="space-y-4 text-center">
-              <label 
-                htmlFor="qr-file-input"
-                className="p-8 border-2 border-dashed border-emerald-500/50 hover:border-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/20 rounded-3xl flex flex-col items-center justify-center gap-3 cursor-pointer transition group"
+              <input
+                ref={fileInputRef}
+                id="qr-file-input"
+                type="file"
+                accept="image/png,image/jpeg,image/jpg,image/webp,image/*"
+                className="hidden"
+                onChange={handleFileUpload}
+              />
+
+              <button
+                type="button"
+                disabled={isProcessingImage}
+                onClick={handleTriggerGalleryPicker}
+                className="w-full p-7 border-2 border-dashed border-emerald-500/50 hover:border-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/20 rounded-3xl flex flex-col items-center justify-center gap-3 cursor-pointer transition group"
               >
                 <div className="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center group-hover:scale-105 transition shadow-xs">
                   <Image className="w-8 h-8" />
                 </div>
                 <div>
                   <h4 className="font-bold text-slate-900 dark:text-white text-sm">
-                    {isKm ? 'ជ្រើសរើសរូបថតកូដ QR ពីទូរស័ព្ទ' : 'Pick QR Code Photo from Gallery'}
+                    {isProcessingImage
+                      ? (isKm ? 'កំពុងអាន និងស្កេនរូបភាព QR...' : 'Scanning QR image...')
+                      : (isKm ? 'ជ្រើសរើសរូបថតកូដ QR ពី Gallery / Photos' : 'Pick QR Code Photo from Gallery / Photos')}
                   </h4>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-                    {isKm ? 'គាំទ្ររូបថត Screenshot ឬរូប QR ពីធនាគារណាមួយ' : 'Supports screenshots or photos of any KHQR'}
+                    {isKm ? 'គាំទ្ររូបថត Screenshot ឬរូប QR (PNG, JPG, JPEG)' : 'Supports screenshots or saved QR images (PNG, JPG, JPEG)'}
                   </p>
                 </div>
                 <span className="px-4 py-2 rounded-xl bg-[#064E3B] text-white font-bold text-xs shadow-sm">
-                  {isKm ? '📂 ជ្រើសរើសរូបភាព' : 'Select Photo'}
+                  {isKm ? '📂 ជ្រើសរើសរូបភាពពី Gallery' : '📂 Select Photo from Gallery'}
                 </span>
-                <input 
-                  id="qr-file-input" 
-                  type="file" 
-                  accept="image/*" 
-                  className="hidden" 
-                  onChange={handleFileUpload} 
-                />
-              </label>
+              </button>
+
+              {selectedQrImagePreview && (
+                <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-2">
+                  <p className="text-[11px] font-bold text-slate-700 dark:text-slate-300">
+                    {isKm ? '🖼️ រូបភាពដែលបានជ្រើសរើស៖' : '🖼️ Selected Image Preview:'}
+                  </p>
+                  <img
+                    src={selectedQrImagePreview}
+                    alt="Selected QR Preview"
+                    className="max-h-44 mx-auto rounded-xl object-contain border border-slate-200 dark:border-slate-700 bg-white p-1"
+                  />
+                </div>
+              )}
 
               {/* Quick Sample Test */}
               <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-between">

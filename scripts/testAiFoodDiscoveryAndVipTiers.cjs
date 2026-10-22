@@ -193,10 +193,13 @@ test('AI Food Service integrates Real AI Vision API Client, HSV fruit detection 
   assert(!aiFoodServiceContent.includes('food: allFoods[0]'), 'Removed allFoods[0] (Fish Amok) fallback');
 });
 
-test('UpgradeVipModal includes «អាប់ឡូតភស្តុតាងបង់ប្រាក់» Payment Proof Upload below ABA KHQR with validation & preview', () => {
+const mediaHelperPath = path.resolve(__dirname, '../src/utils/androidMediaHelper.ts');
+const mediaHelperContent = fs.readFileSync(mediaHelperPath, 'utf8');
+
+test('UpgradeVipModal & androidMediaHelper include «អាប់ឡូតភស្តុតាងបង់ប្រាក់» Payment Proof Upload below ABA KHQR with validation & preview', () => {
   assert(vipModalContent.includes('អាប់ឡូតភស្តុតាងបង់ប្រាក់'), 'Exact Khmer button label «អាប់ឡូតភស្តុតាងបង់ប្រាក់» present');
-  assert(vipModalContent.includes('10 * 1024 * 1024'), '10MB max file size check present');
-  assert(vipModalContent.includes('image/jpeg') && vipModalContent.includes('image/png'), 'JPG/JPEG/PNG validation present');
+  assert(mediaHelperContent.includes('MAX_IMAGE_FILE_SIZE_BYTES = 10 * 1024 * 1024'), '10MB max file size check present in androidMediaHelper');
+  assert(mediaHelperContent.includes('image/jpeg') && mediaHelperContent.includes('image/png'), 'JPG/JPEG/PNG validation present in androidMediaHelper');
   assert(vipModalContent.includes('NEEDS_MORE_INFO'), 'Handles Administrator Request More Info status');
 });
 
@@ -246,6 +249,51 @@ test('All 220 Restaurants, 124 Tourist Destinations & 12 Trending Foods upgraded
   assert(destSeed.includes('dest-124'), '124 verified tourist destinations present');
   assert(!destSeed.includes('1600585154340'), 'Zero western house photos on tourist destinations');
   assert(trendSeed.includes('/foods/food-99.jpg') && trendSeed.includes('/foods/food-27.jpg'), 'Trending foods matched with authentic food photos');
+});
+
+test('Requirement 1: Two-Way User–Admin Support & Reply System with Direct VIP Activation', () => {
+  const supportModalContent = fs.readFileSync(path.resolve(__dirname, '../src/components/PaymentSupportModal.tsx'), 'utf8');
+  assert(appContent.includes('<PaymentSupportModal />'), 'PaymentSupportModal registered in App.tsx');
+  assert(supportModalContent.includes('createSupportTicket') && supportModalContent.includes('replyToSupportTicket'), 'User can create and reply to support tickets');
+  assert(adminDashContent.includes('approveVipFromSupportTicket') && adminDashContent.includes('updateSupportTicketStatus'), 'Admin can reply, change status (Pending/Replied/Resolved), and approve VIP directly');
+});
+
+test('Requirement 2: Native Android Save QR Code to Gallery & Gallery Image Picker with Multi-Scale jsQR', () => {
+  assert(pluginContent.includes('public void saveImageToGallery(PluginCall call)'), 'Native Android saveImageToGallery plugin method present');
+  assert(pluginContent.includes('public void pickImageFromGallery(PluginCall call)'), 'Native Android pickImageFromGallery plugin method present');
+  assert(mediaHelperContent.includes('savePngDataUrlToGallery') && mediaHelperContent.includes('decodeQrFromImageDataUrl'), 'Media helper savePngDataUrlToGallery and decodeQrFromImageDataUrl present');
+});
+
+test('Requirement 3: Add & Edit Shop Profile Picture and Multiple Food Photos with Owner/Admin Authorization', () => {
+  const addRestContent = fs.readFileSync(path.resolve(__dirname, '../src/components/AddRestaurantModal.tsx'), 'utf8');
+  const vipAddRestContent = fs.readFileSync(path.resolve(__dirname, '../src/components/VipAddRestaurantModal.tsx'), 'utf8');
+  const detailRestContent = fs.readFileSync(path.resolve(__dirname, '../src/components/RestaurantDetailModal.tsx'), 'utf8');
+  assert(addRestContent.includes('profileImage:') && addRestContent.includes('foodImages:'), 'AddRestaurantModal saves profileImage and foodImages');
+  assert(vipAddRestContent.includes('profileImage:') && vipAddRestContent.includes('foodImages:'), 'VipAddRestaurantModal saves profileImage and foodImages');
+  assert(detailRestContent.includes('canEditShop') && detailRestContent.includes('shopFoodPhotos'), 'RestaurantDetailModal displays profile + food photos and enforces owner/admin edit access');
+});
+
+test('Requirement 4 & 6: Centralized VIP Plans ($2.99 / 30d & $4.99 / 90d), Zero 365-Day Plans, and Renew VIP (បន្ត VIP) Never Auto-Approves', () => {
+  const profileViewContent = fs.readFileSync(path.resolve(__dirname, '../src/components/ProfileView.tsx'), 'utf8');
+  const paymentSvcContent = fs.readFileSync(path.resolve(__dirname, '../src/services/paymentService.ts'), 'utf8');
+  assert(typesContent.includes('VIP_PLANS') && paymentSvcContent.includes('resolveAndValidateVipPlan'), 'Centralized VIP_PLANS and backend validator present');
+  assert(profileViewContent.includes('openUpgradeVipModal(true)'), 'Renew VIP buttons open UpgradeVipModal in renew mode');
+  assert(vipModalContent.includes('isVipRenewMode'), 'UpgradeVipModal respects isVipRenewMode and opens AWAITING_PAYMENT instead of auto-approving');
+  assert(!vipModalContent.includes('365') && !profileViewContent.includes('365') && !adminDashContent.includes('365'), 'Zero 365-day references in VIP modal, ProfileView, and AdminDashboard');
+});
+
+test('Auto Online Food Image Search («🤖 ស្វែងរករូបភាពម្ហូបពី Online ដោយស្វ័យប្រវត្តិ») & 200 Total Khmer Dishes (food-1..food-200)', () => {
+  const onlineImgSvcContent = fs.readFileSync(path.resolve(__dirname, '../src/services/onlineFoodImageService.ts'), 'utf8');
+  const add100Content = fs.readFileSync(path.resolve(__dirname, '../src/data/seedAdditional100Foods.ts'), 'utf8');
+  const seedFoodsContent = fs.readFileSync(path.resolve(__dirname, '../src/data/seedFoods.ts'), 'utf8');
+  const foodImgModalContent = fs.readFileSync(path.resolve(__dirname, '../src/components/FoodImageModal.tsx'), 'utf8');
+  const newDishesCount = (add100Content.match(/nameKh:\s*'/g) || []).length;
+  assert(onlineImgSvcContent.includes('searchOnlineFoodImages') && onlineImgSvcContent.includes('commons.wikimedia.org'), 'Online food image search service queries Wikimedia Commons & TheMealDB');
+  assert(newDishesCount === 100 && add100Content.includes('const num = 101 + idx;'), `100 additional Khmer foods (food-101..food-200) defined (found ${newDishesCount})`);
+  assert(!add100Content.includes('/foods/food-'), 'Additional 100 foods use online URLs and do not reuse local /foods/food-1..100.jpg');
+  assert(seedFoodsContent.includes('additional100Foods'), 'seedFoods exports all 200 dishes');
+  assert(adminDashContent.includes('🤖 ស្វែងរករូបភាពម្ហូបពី Online ដោយស្វ័យប្រវត្តិ'), 'Auto Online Food Photo Search button present in AdminDashboard Add Food form');
+  assert(foodImgModalContent.includes('🤖 ស្វែងរករូបភាពម្ហូបពី Online ដោយស្វ័យប្រវត្តិ'), 'Auto Online Food Photo Search button present in FoodImageModal');
 });
 
 console.log('\n================================================================');
