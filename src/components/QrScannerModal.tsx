@@ -371,12 +371,32 @@ export const QrScannerModal: React.FC = () => {
                 {scanResult.type === 'aba_khqr' && (
                   <div className="space-y-2 pt-1">
                     <button
-                      onClick={() => {
+                      onClick={async () => {
                         // Direct clean launch of ABA Mobile app avoiding broken P2P token errors
-                        window.location.href = 'abamobilebank://';
-                        setTimeout(() => {
-                          window.open('https://link.payway.com.kh/aba?id=095245959', '_blank');
-                        }, 800);
+                        let launched = false;
+                        try {
+                          const { Capacitor, registerPlugin } = await import('@capacitor/core');
+                          if (Capacitor.isNativePlatform()) {
+                            const NativeAbaLauncher = registerPlugin<any>('NativeAbaLauncher');
+                            if (NativeAbaLauncher && typeof NativeAbaLauncher.openAbaMobile === 'function') {
+                              const res = await NativeAbaLauncher.openAbaMobile();
+                              if (res?.success) {
+                                launched = true;
+                              }
+                            }
+                          }
+                        } catch {
+                        }
+                        if (!launched) {
+                          try {
+                            window.location.href = 'intent://#Intent;scheme=abamobilebank;package=com.paygo24.ibank;end';
+                            setTimeout(() => {
+                              window.location.href = 'abamobilebank://';
+                            }, 300);
+                          } catch {
+                            window.location.href = 'abamobilebank://';
+                          }
+                        }
                       }}
                       className="w-full py-2.5 px-4 rounded-xl bg-[#004B87] hover:bg-[#003966] text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md transition active:scale-95"
                     >

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import QRCode from 'qrcode';
 import { useApp } from '../context/AppContext';
 import { 
   X, Crown, Sparkles, AlertCircle, RefreshCw, 
@@ -48,6 +49,10 @@ const VIP_PLANS: VipPlanOption[] = [
   }
 ];
 
+// Official clean NBC Bakong KHQR for CHEA KIMSENG (ABA Bank USD 095 245 959 / 012 719 946)
+// Zero proprietary P2P token to guarantee 100% recognition by ABA Mobile, Bakong, and all KHQR apps
+const OFFICIAL_KHQR_USD_STRING = '00020101021129450016abaakhppxxx@abaa01090127199460208ABA Bank5204599953038405802KH5912KIMSENG CHEA6010Phnom Penh6213020909524595963047A76';
+
 export const UpgradeVipModal: React.FC = () => {
   const { 
     isUpgradeVipModalOpen, 
@@ -74,9 +79,24 @@ export const UpgradeVipModal: React.FC = () => {
   const [submittedTxnId, setSubmittedTxnId] = useState('');
   const [hasCopiedAccount, setHasCopiedAccount] = useState(false);
   const [hasLaunchedAba, setHasLaunchedAba] = useState(false);
+  const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>('/images/aba_qr_code_only.png');
   const [customTxnRef, setCustomTxnRef] = useState<string>(() => 
     `ABA-KHQR-90D-${Date.now().toString(36).toUpperCase()}`
   );
+
+  useEffect(() => {
+    QRCode.toDataURL(OFFICIAL_KHQR_USD_STRING, {
+      width: 600,
+      margin: 2,
+      errorCorrectionLevel: 'M',
+      color: {
+        dark: '#000000',
+        light: '#ffffff'
+      }
+    })
+      .then(url => setQrCodeDataUrl(url))
+      .catch(() => setQrCodeDataUrl('/images/aba_qr_code_only.png'));
+  }, []);
 
   if (!isUpgradeVipModalOpen) return null;
 
@@ -137,7 +157,7 @@ export const UpgradeVipModal: React.FC = () => {
         'info'
       );
       try {
-        window.location.href = 'intent://#Intent;scheme=abamobilebank;package=com.ababank.mobile;end';
+        window.location.href = 'intent://#Intent;scheme=abamobilebank;package=com.paygo24.ibank;end';
         setTimeout(() => {
           window.location.href = 'abamobilebank://';
         }, 300);
@@ -150,8 +170,8 @@ export const UpgradeVipModal: React.FC = () => {
   const handleSaveQrImage = () => {
     try {
       const link = document.createElement('a');
-      link.href = '/images/aba_qr_code_only.png';
-      link.download = 'ABA_KHQR_Payment.png';
+      link.href = qrCodeDataUrl || '/images/aba_qr_code_only.png';
+      link.download = `ABA_KHQR_CHEA_KIMSENG_${selectedPlan.priceUsd.toFixed(2)}.png`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -497,9 +517,9 @@ export const UpgradeVipModal: React.FC = () => {
                     title={isKm ? 'ចុចលើរូប QR ដើម្បីបើកកម្មវិធី ABA Mobile' : 'Click QR to open ABA Mobile'}
                   >
                     <img 
-                      src="/images/aba_qr_code_only.png" 
+                      src={qrCodeDataUrl} 
                       alt="Official Payment QR Code" 
-                      className="w-full h-auto object-contain rounded-xl block"
+                      className="w-full h-auto object-contain rounded-xl block bg-white"
                     />
                     <div className="absolute inset-0 bg-[#004B87]/15 opacity-0 group-hover:opacity-100 transition rounded-xl flex items-center justify-center pointer-events-none">
                       <span className="px-3 py-1.5 rounded-full bg-[#004B87] text-white text-[11px] font-bold shadow-lg flex items-center gap-1">

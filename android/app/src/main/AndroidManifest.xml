@@ -38,7 +38,9 @@
 
     <!-- Package queries for Android 11+ (API 30+) package visibility -->
     <queries>
+        <package android:name="com.paygo24.ibank" />
         <package android:name="com.ababank.mobile" />
+        <package android:name="km.gov.nbc.bakong" />
         <intent>
             <action android:name="android.intent.action.VIEW" />
             <data android:scheme="abamobilebank" />
