@@ -388,7 +388,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [restaurants, setRestaurants] = useState<Restaurant[]>(() => {
     try {
-      const saved = localStorage.getItem('kft_restaurants_membership_v2');
+      const saved = localStorage.getItem('kft_restaurants_google_v3');
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length >= 50) {
@@ -396,14 +396,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
       }
     } catch (e) {
-      console.warn('Failed to parse kft_restaurants_membership_v2', e);
+      console.warn('Failed to parse kft_restaurants_google_v3', e);
     }
+
+    // Preserve any user-created custom restaurants from previous storage key
+    let customLegacyRestaurants: Restaurant[] = [];
     try {
+      const oldSaved = localStorage.getItem('kft_restaurants_membership_v2');
+      if (oldSaved && oldSaved !== 'undefined' && oldSaved !== 'null') {
+        const parsedOld = JSON.parse(oldSaved);
+        if (Array.isArray(parsedOld)) {
+          customLegacyRestaurants = parsedOld
+            .filter((r: any) => r && r.id && !/^rest-\d+$/.test(String(r.id)))
+            .map(normalizeRestaurant);
+        }
+      }
       localStorage.removeItem('kft_restaurants_membership_v1');
       localStorage.removeItem('kft_restaurants_v3');
       localStorage.removeItem('kft_restaurants_v4');
     } catch {}
-    return initialRestaurants.map(r => {
+
+    const baseRestaurants = initialRestaurants.map(r => {
       if (r.id === 'rest-19') {
         return normalizeRestaurant({
           ...r,
@@ -418,7 +431,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               nameEn: 'Fried Sea Crab with Fresh Kampot Peppercorns',
               priceRiel: 40000,
               priceUsd: 10.0,
-              photoUrl: 'https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80',
+              photoUrl: '/foods/food-27.jpg',
               descriptionKh: 'ក្តាមសេះរស់ស្រង់ពីកន្ត្រកសមុទ្រកែប ឆាជាមួយម្រេចខ្ចីកំពតក្រអូបហឹរ និងខ្ទឹមសឈ្ងុយឆ្ងាញ់។',
               createdAt: '2026-01-15',
             },
@@ -429,7 +442,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               nameEn: 'Crispy Deep-Fried Calamari Squid',
               priceRiel: 28000,
               priceUsd: 7.0,
-              photoUrl: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80',
+              photoUrl: '/foods/food-23.jpg',
               descriptionKh: 'មឹកបំពងស្រួយក្រៅទន់ក្នុង ជ្រលក់ជាមួយទឹកត្រីកោះកុងរសជាតិហឹរជូរផ្អែម។',
               createdAt: '2026-01-15',
             },
@@ -440,7 +453,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               nameEn: 'Khmer Sour Seafood Soup with Banana Stem',
               priceRiel: 32000,
               priceUsd: 8.0,
-              photoUrl: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=80',
+              photoUrl: '/foods/food-3.jpg',
               descriptionKh: 'សម្លម្ជូរគ្រឿងបុរាណដាក់បង្គា មឹក និងដើមចេកស្រស់ រសជាតិជូរអែមឆ្ងាញ់ពិសា។',
               createdAt: '2026-01-15',
             }
@@ -449,6 +462,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       return normalizeRestaurant(r);
     });
+    return [...customLegacyRestaurants, ...baseRestaurants];
   });
 
   const [isManageMenuModalOpen, setIsManageMenuModalOpen] = useState(false);
@@ -469,15 +483,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [destinations, setDestinations] = useState<TouristDestination[]>(() => {
     try {
-      const saved = localStorage.getItem('kft_destinations_100_v2');
+      const saved = localStorage.getItem('kft_destinations_google_v3');
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length >= 50) return parsed;
+        if (Array.isArray(parsed) && parsed.length >= 100) return parsed;
       }
     } catch (e) {
-      console.warn('Failed to parse kft_destinations_100_v2', e);
+      console.warn('Failed to parse kft_destinations_google_v3', e);
     }
     try {
+      localStorage.removeItem('kft_destinations_100_v2');
       localStorage.removeItem('kft_destinations_100_v1');
       localStorage.removeItem('kft_destinations_v3');
       localStorage.removeItem('kft_destinations_v4');
@@ -487,7 +502,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [posts, setPosts] = useState<CommunityPost[]>(() => {
     try {
-      const saved = localStorage.getItem('kft_posts_v4') || localStorage.getItem('kft_posts_v3');
+      const saved = localStorage.getItem('kft_posts_v5');
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) {
@@ -588,13 +603,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // AI Trending Food Discovery Section State
   const [trendingFoods, setTrendingFoods] = useState<TrendingFoodItem[]>(() => {
     try {
-      const saved = localStorage.getItem('kft_trending_foods_v1');
+      const saved = localStorage.getItem('kft_trending_foods_v2');
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       }
     } catch (e) {
-      console.warn('Failed to parse kft_trending_foods_v1', e);
+      console.warn('Failed to parse kft_trending_foods_v2', e);
     }
     return initialTrendingFoods;
   });
@@ -619,7 +634,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   useEffect(() => {
     try {
-      localStorage.setItem('kft_trending_foods_v1', JSON.stringify(trendingFoods));
+      localStorage.setItem('kft_trending_foods_v2', JSON.stringify(trendingFoods));
     } catch {}
   }, [trendingFoods]);
 
@@ -883,7 +898,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     try {
       if (restaurants && restaurants.length > 0) {
-        localStorage.setItem('kft_restaurants_membership_v2', JSON.stringify(restaurants));
+        localStorage.setItem('kft_restaurants_google_v3', JSON.stringify(restaurants));
       }
     } catch (e) {
       console.warn('Storage sync failed for restaurants:', e);
@@ -893,7 +908,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     try {
       if (destinations && destinations.length > 0) {
-        localStorage.setItem('kft_destinations_100_v2', JSON.stringify(destinations));
+        localStorage.setItem('kft_destinations_google_v3', JSON.stringify(destinations));
       }
     } catch (e) {
       console.warn('Storage sync failed for destinations:', e);
@@ -903,7 +918,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     try {
       if (posts) {
-        localStorage.setItem('kft_posts_v4', JSON.stringify(posts));
+        localStorage.setItem('kft_posts_v5', JSON.stringify(posts));
       }
     } catch (e) {
       console.warn('Storage sync failed for posts:', e);
@@ -2068,7 +2083,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     const targetRestId = matchedTxn.restaurantId || '';
     const targetUserId = matchedTxn.userId || '';
-    const durationDays = matchedTxn.durationDays || (Math.abs(matchedTxn.amountUsd - 2.99) < 0.05 ? 90 : 365);
+    const durationDays = matchedTxn.durationDays || (Math.abs(matchedTxn.amountUsd - 2.99) < 0.05 ? 30 : 90);
     const now = new Date();
     const verifiedTimestamp = now.toISOString().replace('T', ' ').slice(0, 16);
     const adminIdentity = currentUser.name || 'Chea Savuth (Admin)';

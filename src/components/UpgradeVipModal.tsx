@@ -32,20 +32,20 @@ interface VipPlanOption {
 const VIP_PLANS: VipPlanOption[] = [
   {
     id: 'quarterly',
-    titleKh: 'កញ្ចប់ ៣ ខែ (Quarterly VIP)',
-    titleEn: 'Quarterly VIP Pass (90 Days)',
-    days: VIP_QUARTERLY_DAYS, // 90
+    titleKh: 'កញ្ចប់ ១ ខែ • ៣០ ថ្ងៃ (30 Days VIP)',
+    titleEn: 'Monthly VIP Pass (30 Days)',
+    days: VIP_QUARTERLY_DAYS, // 30
     priceUsd: VIP_QUARTERLY_PRICE_USD, // 2.99
     priceKhrApprox: '១២,២០០ រៀល',
     isPopular: true
   },
   {
     id: 'annual',
-    titleKh: 'កញ្ចប់សមាជិកប្រចាំឆ្នាំ (Annual VIP)',
-    titleEn: 'Annual VIP Pass (365 Days)',
-    days: VIP_SUBSCRIPTION_DAYS, // 365
-    priceUsd: VIP_ANNUAL_PRICE_USD, // 9.99
-    priceKhrApprox: '៤០,៥០០ រៀល',
+    titleKh: 'កញ្ចប់ ៣ ខែ • ៩០ ថ្ងៃ (90 Days VIP)',
+    titleEn: 'Quarterly VIP Pass (90 Days)',
+    days: VIP_SUBSCRIPTION_DAYS, // 90
+    priceUsd: VIP_ANNUAL_PRICE_USD, // 4.99
+    priceKhrApprox: '២០,៤០០ រៀល',
     isPopular: false
   }
 ];

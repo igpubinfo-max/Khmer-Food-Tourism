@@ -1,12 +1,12 @@
-export const APP_VERSION = 'v1.7.5';
-export const APP_VERSION_NAME = '1.7.5';
-export const APP_BUILD_CODE = 47;
+export const APP_VERSION = 'v1.7.6';
+export const APP_VERSION_NAME = '1.7.6';
+export const APP_BUILD_CODE = 48;
 export const APP_RELEASE_DATE = '2026-10-22';
 
-export const VIP_ANNUAL_PRICE_USD = 9.99;
-export const VIP_SUBSCRIPTION_DAYS = 365;
+export const VIP_ANNUAL_PRICE_USD = 4.99;
+export const VIP_SUBSCRIPTION_DAYS = 90;
 export const VIP_QUARTERLY_PRICE_USD = 2.99;
-export const VIP_QUARTERLY_DAYS = 90;
+export const VIP_QUARTERLY_DAYS = 30;
 
 export type Language = 'km' | 'en';
 

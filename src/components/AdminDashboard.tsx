@@ -444,6 +444,66 @@ export const AdminDashboard: React.FC = () => {
                 </div>
               </div>
 
+              {/* Quick Box #3: Google Maps Places API Key Entry Card on Overview */}
+              <div className="p-4 rounded-2xl bg-emerald-50/80 dark:bg-emerald-950/30 border-2 border-emerald-500/60 space-y-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <h4 className="font-bold text-[#064E3B] dark:text-emerald-300 font-khmer text-sm flex items-center gap-1.5">
+                      <span>🗺️ ប្រអប់ទី ៣៖ បញ្ចូលសោ Google Maps Places API Key ($200/ខែ Free Credit)</span>
+                    </h4>
+                    <p className="text-[11px] text-stone-600 dark:text-stone-300 font-khmer mt-0.5">
+                      បិទភ្ជាប់សោ Google Maps Places API Key (ផ្តើមដោយ <code className="font-mono font-bold">AIzaSy...</code>) ដើម្បីទាញយកហាង កាហ្វេ និងកន្លែងទេសចរណ៍ថ្មីៗទូទាំងកម្ពុជាដោយស្វ័យប្រវត្តិ + Smart Cache!
+                    </p>
+                  </div>
+                  <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold font-khmer ${
+                    isGoogleMapsConfigured()
+                      ? 'bg-emerald-600 text-white'
+                      : 'bg-amber-200 text-amber-900'
+                  }`}>
+                    {isGoogleMapsConfigured() ? '✓ បានភ្ជាប់ Google Maps រួចរាល់' : 'មិនទាន់ដាក់សោ Google Maps'}
+                  </span>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <input
+                    type="text"
+                    value={cloudCfg.googleMapsApiKey}
+                    onChange={(e) => setCloudCfg({ ...cloudCfg, googleMapsApiKey: e.target.value })}
+                    placeholder="បិទភ្ជាប់សោ Google Maps Places API Key ទីនេះ (ឧ. AIzaSy...)"
+                    className="flex-1 px-3.5 py-2 rounded-xl border border-emerald-400 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 font-mono text-xs"
+                  />
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      try {
+                        const clip = await navigator.clipboard.readText();
+                        if (clip && clip.trim()) {
+                          const updated = { ...cloudCfg, googleMapsApiKey: clip.trim() };
+                          const saved = saveCloudApiConfig(updated);
+                          setCloudCfg(saved);
+                          showToast('បានបិទភ្ជាប់ និងរក្សាទុកសោ Google Maps Places API ជោគជ័យ!', 'success');
+                        }
+                      } catch {
+                        showToast('សូមចុចឱ្យជាប់ក្នុងប្រអប់ រួចជ្រើសរើស Paste', 'info');
+                      }
+                    }}
+                    className="px-3.5 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-khmer font-bold text-xs rounded-xl transition cursor-pointer shrink-0"
+                  >
+                    📋 Paste & រក្សាទុកភ្លាម
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const saved = saveCloudApiConfig(cloudCfg);
+                      setCloudCfg(saved);
+                      showToast('បានរក្សាទុកសោ Google Maps Places API Key ក្នុងប្រអប់ទី ៣ ជោគជ័យ!', 'success');
+                    }}
+                    className="px-4 py-2 bg-[#064E3B] hover:bg-[#047857] text-white font-khmer font-bold text-xs rounded-xl transition cursor-pointer shrink-0"
+                  >
+                    💾 រក្សាទុកសោ (Save Key)
+                  </button>
+                </div>
+              </div>
+
               {/* Pending Transactions Alert */}
               {pendingTxns.length > 0 && (
                 <div className="p-4 rounded-2xl bg-slate-100 dark:bg-slate-900 border-2 border-[#059669] space-y-2">
@@ -546,14 +606,14 @@ export const AdminDashboard: React.FC = () => {
                             </span>
                             {t.durationDays && (
                               <span className="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-800 dark:text-amber-300 font-mono text-[10px] font-bold">
-                                {t.durationDays} Days ({t.planType || (t.durationDays <= 90 ? 'Quarterly' : 'Annual')})
+                                {t.durationDays} Days ({t.planType || (t.durationDays <= 30 ? '30 Days ($2.99)' : '90 Days ($4.99)')})
                               </span>
                             )}
                           </div>
 
                           <div className="font-bold text-[#0F172A] dark:text-stone-100 font-khmer text-sm">
                             {t.type === 'user_vip_upgrade' 
-                              ? `👑 ដំឡើងសមាជិកភាព VIP (${t.durationDays || 90} ថ្ងៃ)៖ ${t.userName || t.ownerName || 'User VIP'}` 
+                              ? `👑 ដំឡើងសមាជិកភាព VIP (${t.durationDays || 30} ថ្ងៃ)៖ ${t.userName || t.ownerName || 'User VIP'}` 
                               : t.restaurantNameKh}
                           </div>
 
@@ -1693,17 +1753,30 @@ export const AdminDashboard: React.FC = () => {
                       className="w-full px-3 py-2 rounded-xl border bg-stone-50 dark:bg-stone-700 text-stone-800 dark:text-stone-100 font-mono text-[11px]"
                     />
                   </div>
-                  <div>
-                    <label className="block font-semibold mb-1 text-stone-700 dark:text-stone-300">
-                      3. Google Maps Places API Key ($200/ខែ Free Credit)
+                  <div id="admin-google-maps-key-box" className="p-2.5 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/30 border-2 border-emerald-500/60">
+                    <label className="block font-bold mb-1 text-[#064E3B] dark:text-emerald-300">
+                      3. Google Maps Places API Key ($200/ខែ Free Credit) ⭐
                     </label>
-                    <input
-                      type="password"
-                      value={cloudCfg.googleMapsApiKey}
-                      onChange={(e) => setCloudCfg({ ...cloudCfg, googleMapsApiKey: e.target.value })}
-                      placeholder="AIzaSy..."
-                      className="w-full px-3 py-2 rounded-xl border bg-stone-50 dark:bg-stone-700 text-stone-800 dark:text-stone-100 font-mono text-[11px]"
-                    />
+                    <div className="flex gap-1.5">
+                      <input
+                        type="text"
+                        value={cloudCfg.googleMapsApiKey}
+                        onChange={(e) => setCloudCfg({ ...cloudCfg, googleMapsApiKey: e.target.value })}
+                        placeholder="AIzaSy..."
+                        className="flex-1 px-3 py-2 rounded-xl border border-emerald-400 bg-white dark:bg-stone-700 text-stone-800 dark:text-stone-100 font-mono text-[11px]"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const saved = saveCloudApiConfig(cloudCfg);
+                          setCloudCfg(saved);
+                          showToast('បានរក្សាទុកសោ Google Maps Places API Key ជោគជ័យ!', 'success');
+                        }}
+                        className="px-3 py-2 bg-[#064E3B] hover:bg-[#047857] text-white font-bold rounded-xl text-[11px] shrink-0"
+                      >
+                        💾 Save
+                      </button>
+                    </div>
                   </div>
                   <div>
                     <label className="block font-semibold mb-1 text-stone-700 dark:text-stone-300">

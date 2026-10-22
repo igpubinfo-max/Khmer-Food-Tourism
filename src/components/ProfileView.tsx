@@ -726,8 +726,8 @@ export const ProfileView: React.FC = () => {
                 
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-khmer truncate">
                   {isKm 
-                    ? 'ដំឡើងទៅជា Premium VIP ($9.99/ឆ្នាំ) ដើម្បីដោះសោសក្តានុពលទាំង ១០!' 
-                    : 'Upgrade to Premium VIP ($9.99/year) to unlock all 10 powers!'}
+                    ? 'ដំឡើងទៅជា Premium VIP ($2.99/30ថ្ងៃ ឬ $4.99/90ថ្ងៃ) ដើម្បីដោះសោសក្តានុពលទាំង ១០!' 
+                    : 'Upgrade to Premium VIP ($2.99/30d or $4.99/90d) to unlock all 10 powers!'}
                 </p>
               </div>
             </div>
@@ -1156,7 +1156,7 @@ export const ProfileView: React.FC = () => {
                     {isKm ? 'ទំព័រសមាជិកភាព (VIP Membership Page)' : 'VIP Membership Page'}
                   </h4>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                    {isKm ? 'គម្រោងប្រចាំឆ្នាំ $9.99 USD / ៣៦៥ ថ្ងៃ' : '$9.99 USD / 365 Days Annual Plan'}
+                    {isKm ? 'កញ្ចប់ $2.99 USD (30 ថ្ងៃ) ឬ $4.99 USD (90 ថ្ងៃ)' : '$2.99 USD (30 Days) or $4.99 USD (90 Days)'}
                   </p>
                 </div>
               </div>
@@ -1228,12 +1228,12 @@ export const ProfileView: React.FC = () => {
               <Crown className="w-4 h-4 fill-white" />
               <span>
                 {isVip 
-                  ? (isKm ? '🔄 បន្តសមាជិកភាព VIP ៣៦៥ ថ្ងៃ ($9.99)' : 'Renew VIP for 365 Days ($9.99)')
+                  ? (isKm ? '🔄 បន្តសមាជិកភាព VIP ($2.99/30ថ្ងៃ • $4.99/90ថ្ងៃ)' : 'Renew VIP ($2.99/30d • $4.99/90d)')
                   : currentUser?.subscriptionStatus === 'pending'
                   ? (isKm ? '⏳ មើលស្ថានភាពសំណើដំឡើង VIP' : 'View Pending Request Status')
                   : currentUser?.subscriptionStatus === 'expired'
-                  ? (isKm ? '🔄 បន្តសមាជិកភាព VIP ឡើងវិញ ($9.99/ឆ្នាំ)' : 'Renew VIP Membership ($9.99/yr)')
-                  : (isKm ? '👑 ដំឡើងទៅជា Premium VIP ($9.99/ឆ្នាំ)' : 'Upgrade to Premium VIP ($9.99/yr)')}
+                  ? (isKm ? '🔄 បន្តសមាជិកភាព VIP ឡើងវិញ ($2.99/30ថ្ងៃ • $4.99/90ថ្ងៃ)' : 'Renew VIP ($2.99/30d • $4.99/90d)')
+                  : (isKm ? '👑 ដំឡើងទៅជា Premium VIP ($2.99/30ថ្ងៃ • $4.99/90ថ្ងៃ)' : 'Upgrade to Premium VIP ($2.99/30d • $4.99/90d)')}
               </span>
             </button>
           </div>
@@ -1467,7 +1467,7 @@ export const ProfileView: React.FC = () => {
               <p className="text-[10px] text-slate-500 pl-6">
                 {isVip 
                   ? (isKm ? `ស្ថានភាព៖ Premium VIP (${remainingDays} ថ្ងៃទៀត)` : `Status: Premium VIP (${remainingDays} days left)`)
-                  : (isKm ? 'ស្ថានភាព៖ គណនីឥតគិតថ្លៃ • $9.99/ឆ្នាំ' : 'Status: Free User • $9.99/year')}
+                  : (isKm ? 'ស្ថានភាព៖ គណនីឥតគិតថ្លៃ • $2.99/30ថ្ងៃ • $4.99/90ថ្ងៃ' : 'Status: Free User • $2.99/30d • $4.99/90d')}
               </p>
             </div>
             <button

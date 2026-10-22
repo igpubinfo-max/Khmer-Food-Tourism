@@ -3,10 +3,10 @@
 
 import { User, RegistrationTransaction } from '../types';
 
-export const VIP_ANNUAL_PRICE_USD = 9.99;
-export const VIP_SUBSCRIPTION_DAYS = 365;
+export const VIP_ANNUAL_PRICE_USD = 4.99;
+export const VIP_SUBSCRIPTION_DAYS = 90;
 export const VIP_QUARTERLY_PRICE_USD = 2.99;
-export const VIP_QUARTERLY_DAYS = 90;
+export const VIP_QUARTERLY_DAYS = 30;
 export const GOOGLE_PLAY_PRODUCT_ID = 'com.khmerfoodtourism.subscription.vip.annual';
 
 export interface PaymentVerificationRequest {

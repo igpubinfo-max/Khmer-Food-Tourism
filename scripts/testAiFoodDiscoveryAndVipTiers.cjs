@@ -65,22 +65,22 @@ test('Restaurant Check-in Service enforces 10 checkins/hour anti-spam rate limit
   assert(checkInContent.includes('checkUserCheckInRateLimit'), 'Anti-spam rate limit check present');
 });
 
-// 3. Check App Version v1.7.5 (Build 47)
+// 3. Check App Version v1.7.6 (Build 48)
 const typesPath = path.resolve(__dirname, '../src/types/index.ts');
 const typesContent = fs.readFileSync(typesPath, 'utf8');
 
-test('App Version bumped to v1.7.5 (Build 47)', () => {
-  assert(typesContent.includes("APP_VERSION = 'v1.7.5'"), 'APP_VERSION is v1.7.5');
-  assert(typesContent.includes("APP_BUILD_CODE = 47"), 'APP_BUILD_CODE is 47');
+test('App Version bumped to v1.7.6 (Build 48)', () => {
+  assert(typesContent.includes("APP_VERSION = 'v1.7.6'"), 'APP_VERSION is v1.7.6');
+  assert(typesContent.includes("APP_BUILD_CODE = 48"), 'APP_BUILD_CODE is 48');
 });
 
 // 4. Check Android build.gradle version
 const gradlePath = path.resolve(__dirname, '../android/app/build.gradle');
 const gradleContent = fs.readFileSync(gradlePath, 'utf8');
 
-test('Android build.gradle has versionCode 47 and versionName 1.7.5', () => {
-  assert(gradleContent.includes('versionCode 47'), 'versionCode is 47');
-  assert(gradleContent.includes('versionName "1.7.5"'), 'versionName is 1.7.5');
+test('Android build.gradle has versionCode 48 and versionName 1.7.6', () => {
+  assert(gradleContent.includes('versionCode 48'), 'versionCode is 48');
+  assert(gradleContent.includes('versionName "1.7.6"'), 'versionName is 1.7.6');
 });
 
 // 5. Check Modals registered in App.tsx
@@ -227,6 +227,24 @@ test('Supabase Free Tier Cloud Sync Service syncs Users, Transactions, Payment P
   assert(supabaseContent.includes('syncAllAppDataWithSupabase'), 'syncAllAppDataWithSupabase present');
   assert(supabaseContent.includes('SUPABASE_SETUP_SQL'), '1-click Supabase SQL setup script present');
   assert(adminDashContent.includes('ប្រព័ន្ធ Cloud Supabase (Free Tier) & Google Maps Places API + Smart Cache'), 'Admin Dashboard Cloud & API configuration panel present');
+});
+
+test('VIP Subscription Plans updated to $2.99 for 30 days and $4.99 for 90 days', () => {
+  assert(typesContent.includes('VIP_QUARTERLY_PRICE_USD = 2.99'), 'VIP 30-day price is $2.99');
+  assert(typesContent.includes('VIP_QUARTERLY_DAYS = 30'), 'VIP 30-day duration is 30 days');
+  assert(typesContent.includes('VIP_ANNUAL_PRICE_USD = 4.99'), 'VIP 90-day price is $4.99');
+  assert(typesContent.includes('VIP_SUBSCRIPTION_DAYS = 90'), 'VIP 90-day duration is 90 days');
+});
+
+test('All 220 Restaurants, 124 Tourist Destinations & 12 Trending Foods upgraded to Google Maps GPS & matched photos', () => {
+  const restSeed = fs.readFileSync(path.resolve(__dirname, '../src/data/seedRestaurants.ts'), 'utf8');
+  const destSeed = fs.readFileSync(path.resolve(__dirname, '../src/data/seedDestinations.ts'), 'utf8');
+  const trendSeed = fs.readFileSync(path.resolve(__dirname, '../src/data/seedTrendingFoods.ts'), 'utf8');
+  assert(!restSeed.includes('គំរូអ្នកប្រើប្រាស់ដាក់ស្នើ / មិនទាន់ផ្ទៀងផ្ទាត់'), 'Zero generic unverified sample restaurants');
+  assert(restSeed.includes('rest-220'), '220 verified restaurants & cafes present');
+  assert(destSeed.includes('dest-124'), '124 verified tourist destinations present');
+  assert(!destSeed.includes('1600585154340'), 'Zero western house photos on tourist destinations');
+  assert(trendSeed.includes('/foods/food-99.jpg') && trendSeed.includes('/foods/food-27.jpg'), 'Trending foods matched with authentic food photos');
 });
 
 console.log('\n================================================================');
