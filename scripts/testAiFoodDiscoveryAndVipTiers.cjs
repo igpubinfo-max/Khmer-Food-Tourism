@@ -65,22 +65,22 @@ test('Restaurant Check-in Service enforces 10 checkins/hour anti-spam rate limit
   assert(checkInContent.includes('checkUserCheckInRateLimit'), 'Anti-spam rate limit check present');
 });
 
-// 3. Check App Version v1.7.1 (Build 43)
+// 3. Check App Version v1.7.2 (Build 44)
 const typesPath = path.resolve(__dirname, '../src/types/index.ts');
 const typesContent = fs.readFileSync(typesPath, 'utf8');
 
-test('App Version bumped to v1.7.1 (Build 43)', () => {
-  assert(typesContent.includes("APP_VERSION = 'v1.7.1'"), 'APP_VERSION is v1.7.1');
-  assert(typesContent.includes("APP_BUILD_CODE = 43"), 'APP_BUILD_CODE is 43');
+test('App Version bumped to v1.7.2 (Build 44)', () => {
+  assert(typesContent.includes("APP_VERSION = 'v1.7.2'"), 'APP_VERSION is v1.7.2');
+  assert(typesContent.includes("APP_BUILD_CODE = 44"), 'APP_BUILD_CODE is 44');
 });
 
 // 4. Check Android build.gradle version
 const gradlePath = path.resolve(__dirname, '../android/app/build.gradle');
 const gradleContent = fs.readFileSync(gradlePath, 'utf8');
 
-test('Android build.gradle has versionCode 43 and versionName 1.7.1', () => {
-  assert(gradleContent.includes('versionCode 43'), 'versionCode is 43');
-  assert(gradleContent.includes('versionName "1.7.1"'), 'versionName is 1.7.1');
+test('Android build.gradle has versionCode 44 and versionName 1.7.2', () => {
+  assert(gradleContent.includes('versionCode 44'), 'versionCode is 44');
+  assert(gradleContent.includes('versionName "1.7.2"'), 'versionName is 1.7.2');
 });
 
 // 5. Check Modals registered in App.tsx
@@ -130,6 +130,23 @@ test('AppContext enforces Admin role authorization and prevents duplicate approv
   assert(appCtxContent.includes("if (!currentUser || currentUser.role !== 'admin')"), 'Admin role check enforced');
   assert(appCtxContent.includes("if (matchedTxn.status === 'verified')"), 'Duplicate approval prevention enforced');
   assert(appCtxContent.includes('kft_admin_audit_logs_v1'), 'Admin audit log recorded');
+});
+
+const aiModalPath = path.resolve(__dirname, '../src/components/AiFoodDiscoveryModal.tsx');
+const aiModalContent = fs.readFileSync(aiModalPath, 'utf8');
+const checkInModalPath = path.resolve(__dirname, '../src/components/RestaurantCheckInModal.tsx');
+const checkInModalContent = fs.readFileSync(checkInModalPath, 'utf8');
+
+test('AiFoodDiscoveryModal declares all React useMemo hooks BEFORE early return null (prevents React Error #310)', () => {
+  const returnNullIndex = aiModalContent.indexOf('if (!isAiFoodDiscoveryModalOpen) return null;');
+  const lastUseMemoIndex = aiModalContent.lastIndexOf('useMemo(');
+  assert(returnNullIndex > lastUseMemoIndex && lastUseMemoIndex > 0, 'All useMemo hooks are strictly before early return null');
+});
+
+test('RestaurantCheckInModal supports "Other / Shop Not in List" custom shop check-in and directory registration', () => {
+  assert(checkInModalContent.includes('isCustomShop') && checkInModalContent.includes('customShopName'), 'Custom shop state present');
+  assert(checkInModalContent.includes('ផ្សេងៗ (ហាងមិនមានក្នុងបញ្ជី)'), 'Khmer Other/Shop Not in List label present');
+  assert(checkInModalContent.includes('handleSelectOtherShop'), 'handleSelectOtherShop handler present');
 });
 
 console.log('\n================================================================');

@@ -60,7 +60,7 @@ jobs:
           echo "=== SEARCHING FOR GENERATED APK FILES ==="
           find . -name "*.apk" -ls
           cd android/app/build/outputs/apk/debug
-          cp app-debug.apk KhmerFoodTourism-v1.7.1.apk
+          cp app-debug.apk KhmerFoodTourism-v1.7.2.apk
           ls -la
 
       - name: 10. Upload Android APK Artifact
@@ -73,24 +73,29 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: v1.7.1
-          name: "Khmer Food & Tourism v1.7.1 (Fixed ABA KHQR Merchant Error & Strict Admin-Approved VIP Flow)"
+          tag_name: v1.7.2
+          name: "Khmer Food & Tourism v1.7.2 (Fixed AI Food Scanner React Error #310 & Added Custom 'Other' Shop Check-in)"
           overwrite: true
           make_latest: true
           body: |
             ### 🇰🇭 កម្មវិធីទូរស័ព្ទដៃ អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism Mobile App)
             
-            **កំណែថ្មី v1.7.1 (Fixed ABA KHQR Merchant Error & Strict Admin-Approved VIP Flow):**
-            - 🛠️ **១. លុបបំបាត់ទាំងស្រុងនូវកំហុស "Invalid QR Merchant Data [MAPP-PW]" (Fixed ABA KHQR Launch):**
+            **កំណែថ្មី v1.7.2 (Fixed AI Food Scanner React Error #310 & Added Custom 'Other' Shop Check-in):**
+            - 🤖 **១. ជួសជុលបញ្ហា Error #310 នៅពេលចុចស្កេនមុខម្ហូប AI (Fixed AI Food Scanner Hook Order):**
+              - ជួសជុលលំដាប់ React Hooks (`useMemo`) ក្នុង `AiFoodDiscoveryModal.tsx` ដើម្បីឱ្យផ្ទាំង **ស្វែងរក & ស្គាល់មុខម្ហូប AI** បើកដំណើរការដោយរលូន ១០០% គ្មានផ្ទាំង Error #310 ទៀតឡើយ។
+            - 📍 **២. បន្ថែមជម្រើស «➕ ផ្សេងៗ — ហាងមិនមានក្នុងបញ្ជី (Other / Custom Shop)» ក្នុងផ្ទាំងឆែកអ៊ីនហាង (Restaurant Check-in):**
+              - ប្រសិនបើហាងដែលអ្នកកំពុងញ៉ាំមិនទាន់មានក្នុងបញ្ជី អ្នកអាចចុចប៊ូតុង **«➕ ផ្សេងៗ (ហាងមិនមានក្នុងបញ្ជី)»** ដើម្បីវាយបញ្ចូលឈ្មោះហាងថ្មី ខេត្ត/ក្រុង លេខទូរស័ព្ទ និងអាសយដ្ឋានដោយខ្លួនឯង រួចឆែកអ៊ីនជាមួយទីតាំង GPS ផ្ទាល់ និងបន្ថែមហាងថ្មីចូលក្នុងបញ្ជីកម្មវិធីដោយស្វ័យប្រវត្តិ។
+              - បន្ថែមប្រអប់ស្វែងរកហាង (`Search`) ក្នុងបញ្ជីឆែកអ៊ីនដើម្បីងាយស្រួលរកហាងដែលមានស្រាប់។
+            - 🛠️ **៣. លុបបំបាត់ទាំងស្រុងនូវកំហុស "Invalid QR Merchant Data [MAPP-PW]" (Fixed ABA KHQR Launch):**
               - ដកចេញនូវប៉ារ៉ាម៉ែត្រ `type=payway&qrcode=...` ដែលបង្កឱ្យម៉ូឌុល PayWay ក្នុង ABA Mobile បដិសេធកូដ QR គណនីបុគ្គល (`[MAPP-PW] Invalid Qr Merchant Data`)។
               - បើកកម្មវិធី ABA Mobile ដោយផ្ទាល់តាមរយៈ Package ផ្លូវការ `com.paygo24.ibank` ដោយគ្មានផ្ទាំង Error ព្រមទាំងរក្សាទុករូបភាព Bakong KHQR ច្បាស់ល្អទៅក្នុង Photos ដោយស្វ័យប្រវត្តិសម្រាប់ចុច "Upload QR" ក្នុង ABA Scan។
-            - 🔒 **២. បិទបញ្ឈប់ការបើក VIP ដោយស្វ័យប្រវត្តិនៅពេលចុចប៊ូតុង និងតម្រូវឱ្យ Admin អនុម័តជាមុន (Strict Admin-Approved VIP Flow):**
+            - 🔒 **៤. បិទបញ្ឈប់ការបើក VIP ដោយស្វ័យប្រវត្តិនៅពេលចុចប៊ូតុង និងតម្រូវឱ្យ Admin អនុម័តជាមុន (Strict Admin-Approved VIP Flow):**
               - នៅពេលអ្នកប្រើប្រាស់ចុចប៊ូតុង «ខ្ញុំបានបង់ប្រាក់រួចរាល់ • ផ្ទៀងផ្ទាត់ការទូទាត់ ($2.99 USD)» ប្រព័ន្ធនឹង **មិនបើក VIP ភ្លាមៗឡើយ** និងមិនបង្ហាញផ្ទាំងជោគជ័យក្លែងក្លាយឡើយ។
               - ប្រព័ន្ធបង្កើតសំណើក្នុងស្ថានភាព `PENDING_ADMIN_APPROVAL` («⏳ កំពុងរង់ចាំ Admin ពិនិត្យការទូទាត់») និងរក្សាគណនីជា Free ធម្មតារហូតដល់ Admin ពិនិត្យរបាយការណ៍ធនាគារ ABA និងចុចអនុម័ត (Approve) ក្នុង Admin Dashboard។
-            - 🛡️ **៣. ប្រព័ន្ធសុវត្ថិភាព Admin Verification & Audit Log:**
+            - 🛡️ **៥. ប្រព័ន្ធសុវត្ថិភាព Admin Verification & Audit Log:**
               - មានតែគណនី Administrator ប៉ុណ្ណោះដែលអាចចុច Approve ឬ Reject សំណើទូទាត់ប្រាក់បាន។
               - ទប់ស្កាត់ការបញ្ជូនសំណើស្ទួន និងការចុចអនុម័តស្ទួន (Duplicate Approval Prevention) ព្រមទាំងកត់ត្រា Audit Log គ្រប់សកម្មភាពរបស់ Admin។
-            - 🤖 **៤. មុខងារស្កេនសម្គាល់មុខម្ហូបខ្មែរ AI, ឆែកអ៊ីនហាង GPS & រូបមន្តពិត ១០០% (v1.7.0 Features Included):**
+            - 🤖 **៦. មុខងារស្កេនសម្គាល់មុខម្ហូបខ្មែរ AI, ឆែកអ៊ីនហាង GPS & រូបមន្តពិត ១០០% (v1.7.0 Features Included):**
               - ស្កេនសម្គាល់មុខម្ហូបខ្មែរ បង្អែមខ្មែរ នំខ្មែរ និងភេសជ្ជៈប្រពៃណីតាមរយៈកាមេរ៉ា ឬ Gallery។
               - បង្ហាញឈ្មោះជាភាសាខ្មែរ និងអង់គ្លេស កម្រិតភាគរយជាក់លាក់ (Confidence Score) និងជម្រើសមុខម្ហូបស្រដៀងគ្នា។
               - រូបមន្ត និងគ្រឿងផ្សំត្រូវបានទាញចេញពីឃ្លាំងទិន្នន័យផ្លូវការ ១០០% គ្មានការបង្កើតគ្រឿងផ្សំក្លែងក្លាយឡើយ (Never invent ingredients)។

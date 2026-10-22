@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
   X, Camera, Image as ImageIcon, MapPin, CheckCircle2, 
-  AlertCircle, Star, Sparkles, Navigation, Send, Store, ShieldCheck
+  AlertCircle, Star, Sparkles, Navigation, Send, Store, ShieldCheck, PlusCircle, Search
 } from 'lucide-react';
 import { 
   getCurrentDeviceLocation, 
@@ -12,21 +12,47 @@ import {
   saveCheckInRecord, 
   formatDistance, 
   NearbyRestaurantMatch, 
-  GpsLocationResult,
-  VERIFIED_CHECKIN_MAX_DISTANCE_METERS
+  GpsLocationResult
 } from '../services/restaurantCheckInService';
-import { Restaurant } from '../types';
+
+const CAMBODIA_PROVINCES = [
+  { kh: 'រាជធានីភ្នំពេញ', en: 'Phnom Penh' },
+  { kh: 'សៀមរាប', en: 'Siem Reap' },
+  { kh: 'ព្រះសីហនុ', en: 'Preah Sihanouk' },
+  { kh: 'បាត់ដំបង', en: 'Battambang' },
+  { kh: 'កំពត', en: 'Kampot' },
+  { kh: 'កែប', en: 'Kep' },
+  { kh: 'កណ្តាល', en: 'Kandal' },
+  { kh: 'កំពង់ចាម', en: 'Kampong Cham' },
+  { kh: 'កំពង់ឆ្នាំង', en: 'Kampong Chhnang' },
+  { kh: 'កំពង់ស្ពឺ', en: 'Kampong Speu' },
+  { kh: 'កំពង់ធំ', en: 'Kampong Thom' },
+  { kh: 'កោះកុង', en: 'Koh Kong' },
+  { kh: 'ក្រចេះ', en: 'Kratie' },
+  { kh: 'មណ្ឌលគិរី', en: 'Mondulkiri' },
+  { kh: 'រតនគិរី', en: 'Ratanakiri' },
+  { kh: 'ព្រៃវែង', en: 'Prey Veng' },
+  { kh: 'ពោធិ៍សាត់', en: 'Pursat' },
+  { kh: 'ស្វាយរៀង', en: 'Svay Rieng' },
+  { kh: 'តាកែវ', en: 'Takeo' },
+  { kh: 'បន្ទាយមានជ័យ', en: 'Banteay Meanchey' },
+  { kh: 'ប៉ៃលិន', en: 'Pailin' },
+  { kh: 'ឧត្តរមានជ័យ', en: 'Oddar Meanchey' },
+  { kh: 'ព្រះវិហារ', en: 'Preah Vihear' },
+  { kh: 'ស្ទឹងត្រែង', en: 'Stung Treng' },
+  { kh: 'ត្បូងឃ្មុំ', en: 'Tboung Khmum' },
+];
 
 export const RestaurantCheckInModal: React.FC = () => {
   const { 
     isRestaurantCheckInModalOpen, 
     setIsRestaurantCheckInModalOpen, 
     restaurants, 
+    addRestaurant,
     currentUser, 
     language, 
     showToast,
-    setIsAuthModalOpen,
-    openUpgradeVipModal
+    setIsAuthModalOpen
   } = useApp();
 
   const isKm = language === 'km';
@@ -42,6 +68,21 @@ export const RestaurantCheckInModal: React.FC = () => {
   const [isLocating, setIsLocating] = useState<boolean>(false);
   const [nearbyList, setNearbyList] = useState<NearbyRestaurantMatch[]>([]);
   const [selectedMatch, setSelectedMatch] = useState<NearbyRestaurantMatch | null>(null);
+  const [shopSearchQuery, setShopSearchQuery] = useState<string>('');
+
+  // Custom / "Other" Shop States (when shop is not in list)
+  const [isCustomShop, setIsCustomShop] = useState<boolean>(false);
+  const [customShopName, setCustomShopName] = useState<string>('');
+  const [customShopAddress, setCustomShopAddress] = useState<string>('');
+  const [customShopProvinceKh, setCustomShopProvinceKh] = useState<string>('រាជធានីភ្នំពេញ');
+  const [customShopPhone, setCustomShopPhone] = useState<string>('');
+  const [saveCustomShopToDirectory, setSaveCustomShopToDirectory] = useState<boolean>(true);
+  const [checkedInShopDisplay, setCheckedInShopDisplay] = useState<{
+    nameKh: string;
+    nameEn: string;
+    distanceMeters: number;
+    isVerified: boolean;
+  } | null>(null);
 
   // Review & Details
   const [rating, setRating] = useState<number>(5);
@@ -52,20 +93,39 @@ export const RestaurantCheckInModal: React.FC = () => {
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
 
+  // Filtered nearby list based on search query
+  const filteredNearbyList = useMemo(() => {
+    const q = shopSearchQuery.trim().toLowerCase();
+    if (!q) return nearbyList.slice(0, 8);
+    return nearbyList.filter(m => 
+      (m.restaurant.nameKh || '').toLowerCase().includes(q) ||
+      (m.restaurant.nameEn || '').toLowerCase().includes(q) ||
+      (m.restaurant.addressKh || '').toLowerCase().includes(q) ||
+      (m.restaurant.provinceKh || '').toLowerCase().includes(q)
+    ).slice(0, 15);
+  }, [nearbyList, shopSearchQuery]);
+
   // Auto locate GPS when modal opens
   useEffect(() => {
     if (isRestaurantCheckInModalOpen) {
       setStep('photo_loc');
       setPhotoDataUrl('');
       setSelectedMatch(null);
+      setIsCustomShop(false);
+      setCustomShopName('');
+      setCustomShopAddress('');
+      setCustomShopPhone('');
+      setShopSearchQuery('');
       setReviewNote('');
+      setDishName('');
+      setCheckedInShopDisplay(null);
       setIsLocating(true);
 
       getCurrentDeviceLocation().then(loc => {
         setGps(loc);
         setIsLocating(false);
         if (loc.isInsideCambodia) {
-          const matches = findNearbyRestaurants(loc.latitude, loc.longitude, restaurants);
+          const matches = findNearbyRestaurants(loc.latitude, loc.longitude, restaurants, 50000, 215);
           setNearbyList(matches);
           if (matches.length > 0 && matches[0].isWithinThreshold) {
             setSelectedMatch(matches[0]);
@@ -92,14 +152,37 @@ export const RestaurantCheckInModal: React.FC = () => {
     reader.readAsDataURL(file);
   };
 
+  const handleSelectOtherShop = () => {
+    setIsCustomShop(true);
+    setSelectedMatch(null);
+    if (shopSearchQuery.trim() && !customShopName.trim()) {
+      setCustomShopName(shopSearchQuery.trim());
+    }
+  };
+
   const handleSubmitCheckIn = async () => {
     if (!currentUser) {
       setIsAuthModalOpen(true);
       return;
     }
 
-    if (!selectedMatch) {
-      showToast(isKm ? 'សូមជ្រើសរើសភោជនីយដ្ឋានដើម្បីឆែកអ៊ីន!' : 'Please select a restaurant to check in!', 'warning');
+    if (!selectedMatch && !isCustomShop) {
+      showToast(
+        isKm 
+          ? 'សូមជ្រើសរើសហាងពីបញ្ជី ឬចុច «➕ ផ្សេងៗ (ហាងមិនមានក្នុងបញ្ជី)»!' 
+          : 'Please select a restaurant or tap "+ Other (Shop Not in List)"!',
+        'warning'
+      );
+      return;
+    }
+
+    if (isCustomShop && !customShopName.trim()) {
+      showToast(
+        isKm 
+          ? 'សូមវាយបញ្ចូលឈ្មោះហាង ឬភោជនីយដ្ឋានជាមុនសិន!' 
+          : 'Please enter the shop/restaurant name first!',
+        'warning'
+      );
       return;
     }
 
@@ -116,30 +199,101 @@ export const RestaurantCheckInModal: React.FC = () => {
     }
 
     setIsSubmitting(true);
-    await new Promise(r => setTimeout(r, 600));
+    await new Promise(r => setTimeout(r, 500));
 
-    const checkInRecord = {
-      id: `chk_${Date.now()}`,
-      userId: currentUser.id,
-      userName: currentUser.name,
-      userAvatar: currentUser.avatar,
-      restaurantId: selectedMatch.restaurant.id,
-      restaurantNameKh: selectedMatch.restaurant.nameKh,
-      restaurantNameEn: selectedMatch.restaurant.nameEn,
-      photoUrl: photoDataUrl || selectedMatch.restaurant.photoUrl,
-      latitude: gps?.latitude || selectedMatch.restaurant.latitude,
-      longitude: gps?.longitude || selectedMatch.restaurant.longitude,
-      distanceMeters: selectedMatch.distanceMeters,
-      isLocationVerified: selectedMatch.isWithinThreshold,
-      rating,
-      noteKh: reviewNote,
-      visitedDishNameKh: dishName,
-      status: selectedMatch.isWithinThreshold ? ('verified' as const) : ('pending_moderation' as const),
-      createdAt: new Date().toISOString()
-    };
+    const lat = gps?.latitude || 11.5564;
+    const lng = gps?.longitude || 104.9282;
 
-    saveCheckInRecord(checkInRecord);
-    recordCheckInAttempt(currentUser.id);
+    if (isCustomShop) {
+      const cleanName = customShopName.trim();
+      const provObj = CAMBODIA_PROVINCES.find(p => p.kh === customShopProvinceKh) || CAMBODIA_PROVINCES[0];
+      const cleanAddress = customShopAddress.trim() || `${provObj.kh} (GPS: ${lat.toFixed(4)}, ${lng.toFixed(4)})`;
+      const customRestId = `rest-custom-${Date.now()}`;
+
+      if (saveCustomShopToDirectory && addRestaurant) {
+        addRestaurant({
+          nameKh: cleanName,
+          nameEn: cleanName,
+          categoryKh: 'ភោជនីយដ្ឋាន & អាហារដ្ឋាន',
+          categoryEn: 'Restaurant & Eatery',
+          provinceKh: provObj.kh,
+          provinceEn: provObj.en,
+          addressKh: cleanAddress,
+          addressEn: cleanAddress,
+          descriptionKh: reviewNote.trim() || `ហាងអាហារដែលបានណែនាំតាមរយៈការឆែកអ៊ីនផ្ទាល់ (${dishName.trim() || 'ម្ហូបខ្មែរ'})។`,
+          descriptionEn: reviewNote.trim() || `Community check-in discovered restaurant (${dishName.trim() || 'Khmer Cuisine'}).`,
+          priceRange: '$1.50 - $10.00',
+          openingHours: '07:00 AM - 09:00 PM',
+          phone: customShopPhone.trim() || 'មិនទាន់មានលេខទូរស័ព្ទ',
+          latitude: lat,
+          longitude: lng,
+          photoUrl: photoDataUrl || '/Shop/rest-1.jpg',
+          signatureDishesKh: dishName.trim() ? [dishName.trim()] : ['ម្ហូបខ្មែរប្រពៃណី'],
+          isFeatured: false,
+          membershipTier: 'free',
+        });
+      }
+
+      const checkInRecord = {
+        id: `chk_${Date.now()}`,
+        userId: currentUser.id,
+        userName: currentUser.name,
+        userAvatar: currentUser.avatar,
+        restaurantId: customRestId,
+        restaurantNameKh: cleanName,
+        restaurantNameEn: cleanName,
+        photoUrl: photoDataUrl || '/Shop/rest-1.jpg',
+        latitude: lat,
+        longitude: lng,
+        distanceMeters: 0,
+        isLocationVerified: Boolean(gps?.isInsideCambodia ?? true),
+        rating,
+        noteKh: reviewNote,
+        visitedDishNameKh: dishName,
+        status: 'verified' as const,
+        createdAt: new Date().toISOString()
+      };
+
+      saveCheckInRecord(checkInRecord);
+      recordCheckInAttempt(currentUser.id);
+
+      setCheckedInShopDisplay({
+        nameKh: cleanName,
+        nameEn: cleanName,
+        distanceMeters: 0,
+        isVerified: true,
+      });
+    } else if (selectedMatch) {
+      const checkInRecord = {
+        id: `chk_${Date.now()}`,
+        userId: currentUser.id,
+        userName: currentUser.name,
+        userAvatar: currentUser.avatar,
+        restaurantId: selectedMatch.restaurant.id,
+        restaurantNameKh: selectedMatch.restaurant.nameKh,
+        restaurantNameEn: selectedMatch.restaurant.nameEn,
+        photoUrl: photoDataUrl || selectedMatch.restaurant.photoUrl,
+        latitude: gps?.latitude || selectedMatch.restaurant.latitude,
+        longitude: gps?.longitude || selectedMatch.restaurant.longitude,
+        distanceMeters: selectedMatch.distanceMeters,
+        isLocationVerified: selectedMatch.isWithinThreshold,
+        rating,
+        noteKh: reviewNote,
+        visitedDishNameKh: dishName,
+        status: selectedMatch.isWithinThreshold ? ('verified' as const) : ('pending_moderation' as const),
+        createdAt: new Date().toISOString()
+      };
+
+      saveCheckInRecord(checkInRecord);
+      recordCheckInAttempt(currentUser.id);
+
+      setCheckedInShopDisplay({
+        nameKh: selectedMatch.restaurant.nameKh,
+        nameEn: selectedMatch.restaurant.nameEn,
+        distanceMeters: selectedMatch.distanceMeters,
+        isVerified: selectedMatch.isWithinThreshold,
+      });
+    }
 
     setIsSubmitting(false);
     setStep('success');
@@ -201,8 +355,8 @@ export const RestaurantCheckInModal: React.FC = () => {
                 </h4>
                 <p className="text-slate-600 dark:text-slate-300 text-xs mt-1">
                   {isKm 
-                    ? `អ្នកបានឆែកអ៊ីននៅ «${selectedMatch?.restaurant.nameKh}» រួចរាល់។` 
-                    : `Checked in at "${selectedMatch?.restaurant.nameEn}".`}
+                    ? `អ្នកបានឆែកអ៊ីននៅ «${checkedInShopDisplay?.nameKh || selectedMatch?.restaurant.nameKh || customShopName}» រួចរាល់។` 
+                    : `Checked in at "${checkedInShopDisplay?.nameEn || selectedMatch?.restaurant.nameEn || customShopName}".`}
                 </p>
               </div>
 
@@ -211,13 +365,17 @@ export const RestaurantCheckInModal: React.FC = () => {
                   <span className="text-slate-500">{isKm ? 'ស្ថានភាពទីតាំង៖' : 'Location Status:'}</span>
                   <span className="font-bold text-emerald-600 flex items-center gap-1">
                     <ShieldCheck className="w-3.5 h-3.5" />
-                    <span>{selectedMatch?.isWithinThreshold ? (isKm ? 'បញ្ជាក់ទីតាំងពិត (Verified)' : 'Verified at Venue') : (isKm ? 'រង់ចាំពិនិត្យ' : 'Pending Review')}</span>
+                    <span>
+                      {(checkedInShopDisplay?.isVerified ?? selectedMatch?.isWithinThreshold) 
+                        ? (isKm ? 'បញ្ជាក់ទីតាំងពិត (Verified)' : 'Verified at Venue') 
+                        : (isKm ? 'រង់ចាំពិនិត្យ' : 'Pending Review')}
+                    </span>
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-500">{isKm ? 'ចម្ងាយពីហាង៖' : 'Distance:'}</span>
                   <span className="font-mono font-bold text-slate-800 dark:text-slate-200">
-                    {formatDistance(selectedMatch?.distanceMeters || 0, isKm)}
+                    {formatDistance(checkedInShopDisplay?.distanceMeters ?? selectedMatch?.distanceMeters ?? 0, isKm)}
                   </span>
                 </div>
               </div>
@@ -256,7 +414,7 @@ export const RestaurantCheckInModal: React.FC = () => {
                     getCurrentDeviceLocation().then(loc => {
                       setGps(loc);
                       setIsLocating(false);
-                      const matches = findNearbyRestaurants(loc.latitude, loc.longitude, restaurants);
+                      const matches = findNearbyRestaurants(loc.latitude, loc.longitude, restaurants, 50000, 215);
                       setNearbyList(matches);
                     });
                   }}
@@ -305,62 +463,185 @@ export const RestaurantCheckInModal: React.FC = () => {
                 <input ref={galleryInputRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoSelected} />
               </div>
 
-              {/* Nearby Restaurants Selector */}
-              <div className="space-y-1.5">
-                <label className="font-bold text-slate-800 dark:text-slate-200 flex items-center justify-between">
-                  <span>{isKm ? 'ជ្រើសរើសភោជនីយដ្ឋាននៅជិតអ្នក៖' : 'Select nearby restaurant:'}</span>
-                  <span className="text-[10px] text-slate-500">
-                    {nearbyList.length} {isKm ? 'ហាងរកឃើញ' : 'found'}
-                  </span>
-                </label>
+              {/* Nearby Restaurants Selector + "Other / Shop Not in List" */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="font-bold text-slate-800 dark:text-slate-200">
+                    {isKm ? 'ជ្រើសរើសភោជនីយដ្ឋាននៅជិតអ្នក៖' : 'Select nearby restaurant:'}
+                  </label>
+                  <button
+                    type="button"
+                    onClick={handleSelectOtherShop}
+                    className={`px-2.5 py-1 rounded-xl font-bold text-[10px] flex items-center gap-1 transition cursor-pointer ${
+                      isCustomShop
+                        ? 'bg-amber-400 text-slate-950 shadow-xs'
+                        : 'bg-amber-500/15 hover:bg-amber-500/25 text-amber-600 dark:text-amber-400 border border-amber-400/50'
+                    }`}
+                  >
+                    <PlusCircle className="w-3.5 h-3.5" />
+                    <span>{isKm ? 'ផ្សេងៗ (ហាងមិនមានក្នុងបញ្ជី)' : 'Other (Not in list)'}</span>
+                  </button>
+                </div>
 
-                <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
-                  {nearbyList.slice(0, 5).map((match) => {
-                    const isSelected = selectedMatch?.restaurant.id === match.restaurant.id;
-                    return (
-                      <div
-                        key={match.restaurant.id}
-                        onClick={() => setSelectedMatch(match)}
-                        className={`p-2.5 rounded-2xl border-2 cursor-pointer transition flex items-center justify-between ${
-                          isSelected
-                            ? 'bg-emerald-50/70 dark:bg-emerald-950/30 border-emerald-500 shadow-xs'
-                            : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-emerald-300'
-                        }`}
+                {/* Search Input for Restaurant List */}
+                <div className="relative">
+                  <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
+                  <input
+                    type="text"
+                    value={shopSearchQuery}
+                    onChange={(e) => setShopSearchQuery(e.target.value)}
+                    placeholder={isKm ? 'ស្វែងរកឈ្មោះហាងក្នុងបញ្ជី ឬចុច «ផ្សេងៗ» ខាងក្រោម...' : 'Search shop in list or select "Other" below...'}
+                    className="w-full pl-8 pr-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs outline-none focus:border-emerald-500"
+                  />
+                </div>
+
+                {/* Custom / "Other" Shop Form when selected */}
+                {isCustomShop && (
+                  <div className="p-3.5 rounded-2xl bg-amber-50/80 dark:bg-amber-950/30 border-2 border-amber-400 space-y-2.5 animate-fade-in">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-amber-900 dark:text-amber-200 flex items-center gap-1.5">
+                        <Store className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                        <span>{isKm ? 'បញ្ចូលព័ត៌មានហាងថ្មី (ហាងមិនមានក្នុងបញ្ជី)៖' : 'Enter Custom Shop (Not in List):'}</span>
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setIsCustomShop(false)}
+                        className="text-[10px] text-slate-500 hover:text-slate-800 dark:hover:text-white underline cursor-pointer"
                       >
-                        <div className="flex items-center gap-2.5">
-                          <img 
-                            src={match.restaurant.photoUrl} 
-                            alt={match.restaurant.nameKh}
-                            className="w-10 h-10 rounded-xl object-cover shrink-0" 
-                          />
-                          <div>
-                            <span className="font-bold text-slate-900 dark:text-white block truncate max-w-[200px]">
-                              {match.restaurant.nameKh}
+                        {isKm ? 'ត្រឡប់ទៅបញ្ជីវិញ' : 'Back to list'}
+                      </button>
+                    </div>
+
+                    <input
+                      type="text"
+                      value={customShopName}
+                      onChange={(e) => setCustomShopName(e.target.value)}
+                      placeholder={isKm ? 'ឈ្មោះហាង / ភោជនីយដ្ឋាន * (ឧ. ហាងគុយទាវអ៊ុំស្រី)...' : 'Shop / Restaurant Name * ...'}
+                      className="w-full px-3 py-2 rounded-xl border border-amber-300 dark:border-amber-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-xs outline-none focus:border-amber-500 font-bold"
+                    />
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <select
+                        value={customShopProvinceKh}
+                        onChange={(e) => setCustomShopProvinceKh(e.target.value)}
+                        className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-xs outline-none focus:border-amber-500"
+                      >
+                        {CAMBODIA_PROVINCES.map(p => (
+                          <option key={p.kh} value={p.kh}>
+                            {isKm ? p.kh : p.en}
+                          </option>
+                        ))}
+                      </select>
+
+                      <input
+                        type="text"
+                        value={customShopPhone}
+                        onChange={(e) => setCustomShopPhone(e.target.value)}
+                        placeholder={isKm ? 'លេខទូរស័ព្ទហាង (បើមាន)...' : 'Shop Phone (Optional)...'}
+                        className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-xs outline-none focus:border-amber-500"
+                      />
+                    </div>
+
+                    <input
+                      type="text"
+                      value={customShopAddress}
+                      onChange={(e) => setCustomShopAddress(e.target.value)}
+                      placeholder={isKm ? 'អាសយដ្ឋាន ឬទីតាំងសម្គាល់ (ទុកទទេដើម្បីប្រើ GPS ផ្ទាល់)...' : 'Address or landmark (leave blank to use live GPS)...'}
+                      className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-xs outline-none focus:border-amber-500"
+                    />
+
+                    <label className="flex items-center gap-2 text-[11px] text-slate-700 dark:text-slate-300 cursor-pointer pt-0.5">
+                      <input
+                        type="checkbox"
+                        checked={saveCustomShopToDirectory}
+                        onChange={(e) => setSaveCustomShopToDirectory(e.target.checked)}
+                        className="rounded accent-emerald-600 w-3.5 h-3.5"
+                      />
+                      <span>
+                        {isKm 
+                          ? 'បន្ថែមហាងថ្មីនេះចូលក្នុងបញ្ជីភោជនីយដ្ឋានរបស់កម្មវិធីដោយស្វ័យប្រវត្តិ' 
+                          : 'Automatically add this new shop to the app directory'}
+                      </span>
+                    </label>
+                  </div>
+                )}
+
+                {/* Nearby List + Prominent "Other" Option Card */}
+                {!isCustomShop && (
+                  <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                    {filteredNearbyList.map((match) => {
+                      const isSelected = selectedMatch?.restaurant.id === match.restaurant.id;
+                      return (
+                        <div
+                          key={match.restaurant.id}
+                          onClick={() => {
+                            setIsCustomShop(false);
+                            setSelectedMatch(match);
+                          }}
+                          className={`p-2.5 rounded-2xl border-2 cursor-pointer transition flex items-center justify-between ${
+                            isSelected
+                              ? 'bg-emerald-50/70 dark:bg-emerald-950/30 border-emerald-500 shadow-xs'
+                              : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-emerald-300'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <img 
+                              src={match.restaurant.photoUrl} 
+                              alt={match.restaurant.nameKh}
+                              className="w-10 h-10 rounded-xl object-cover shrink-0" 
+                            />
+                            <div>
+                              <span className="font-bold text-slate-900 dark:text-white block truncate max-w-[200px]">
+                                {match.restaurant.nameKh}
+                              </span>
+                              <span className="text-[10px] text-slate-500 truncate block max-w-[200px]">
+                                {match.restaurant.addressKh}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="text-right shrink-0">
+                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold block ${
+                              match.isWithinThreshold
+                                ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:bg-emerald-200'
+                                : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
+                            }`}>
+                              {formatDistance(match.distanceMeters, isKm)}
                             </span>
-                            <span className="text-[10px] text-slate-500 truncate block max-w-[200px]">
-                              {match.restaurant.addressKh}
-                            </span>
+                            {match.isWithinThreshold && (
+                              <span className="text-[9px] text-emerald-600 font-bold block mt-0.5">
+                                ✓ {isKm ? 'ក្នុងរង្វង់ 500m' : '< 500m verified'}
+                              </span>
+                            )}
                           </div>
                         </div>
+                      );
+                    })}
 
-                        <div className="text-right shrink-0">
-                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold block ${
-                            match.isWithinThreshold
-                              ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-200'
-                              : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
-                          }`}>
-                            {formatDistance(match.distanceMeters, isKm)}
+                    {/* Always-visible "Other / Shop Not in List" Card inside the list */}
+                    <div
+                      onClick={handleSelectOtherShop}
+                      className="p-3 rounded-2xl border-2 border-dashed border-amber-400/80 bg-amber-50/40 dark:bg-amber-950/20 hover:bg-amber-50 dark:hover:bg-amber-950/40 cursor-pointer transition flex items-center justify-between"
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-10 h-10 rounded-xl bg-amber-400/20 text-amber-500 flex items-center justify-center shrink-0">
+                          <PlusCircle className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <span className="font-bold text-amber-800 dark:text-amber-300 block">
+                            {isKm ? '➕ ផ្សេងៗ — ហាងមិនមានក្នុងបញ្ជី (Other)' : '➕ Other — Shop Not in List'}
                           </span>
-                          {match.isWithinThreshold && (
-                            <span className="text-[9px] text-emerald-600 font-bold block mt-0.5">
-                              ✓ {isKm ? 'ក្នុងរង្វង់ 500m' : '< 500m verified'}
-                            </span>
-                          )}
+                          <span className="text-[10px] text-slate-500 dark:text-slate-400 block">
+                            {isKm ? 'ចុចទីនេះដើម្បីវាយបញ្ចូលឈ្មោះហាងថ្មីដោយខ្លួនឯង' : 'Tap here to type a custom shop name'}
+                          </span>
                         </div>
                       </div>
-                    );
-                  })}
-                </div>
+                      <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[10px] font-bold shrink-0">
+                        {isKm ? '+ បន្ថែមហាង' : '+ Custom'}
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Rating & Review Note */}
@@ -403,7 +684,7 @@ export const RestaurantCheckInModal: React.FC = () => {
               {/* Submit Check-In Button */}
               <button
                 onClick={handleSubmitCheckIn}
-                disabled={isSubmitting || !selectedMatch}
+                disabled={isSubmitting}
                 className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 via-emerald-700 to-[#064E3B] hover:from-emerald-700 hover:to-[#047857] text-white font-extrabold text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-98 cursor-pointer disabled:opacity-50"
               >
                 <Send className="w-4 h-4" />

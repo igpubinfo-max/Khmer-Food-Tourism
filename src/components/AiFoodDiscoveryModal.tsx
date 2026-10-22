@@ -71,6 +71,36 @@ export const AiFoodDiscoveryModal: React.FC = () => {
     return getAiDailyQuota(currentUser?.membershipTier, currentUser?.subscriptionExpiryDate);
   }, [currentUser, isAnalyzing]);
 
+  // Ingredients Search computation
+  const ingredientResults: HomeIngredientsMatchResult[] = useMemo(() => {
+    if (selectedIngredients.length === 0) return [];
+    return searchByHomeIngredients(selectedIngredients, foods);
+  }, [selectedIngredients, foods]);
+
+  // Preferences Filter computation
+  const preferenceResults: FoodItem[] = useMemo(() => {
+    return getPersonalizedRecommendations({
+      taste: tastePref,
+      dietary: dietaryPref,
+      budget: budgetPref,
+      maxPrepTime: prepTimePref,
+      searchQuery: searchPrefQuery
+    }, foods);
+  }, [tastePref, dietaryPref, budgetPref, prepTimePref, searchPrefQuery, foods]);
+
+  // Matching restaurants for identified food
+  const matchingRestaurants = useMemo(() => {
+    if (!scanResult?.primaryMatch) return [];
+    const dishNameKh = (scanResult.primaryMatch.nameKh || '').toLowerCase();
+    const dishNameEn = (scanResult.primaryMatch.nameEn || '').toLowerCase();
+    return restaurants.filter(r => {
+      const sigs = (r.signatureDishesKh || []).map(s => s.toLowerCase());
+      return sigs.some(s => dishNameKh.includes(s) || s.includes(dishNameKh)) ||
+             (r.descriptionKh || '').toLowerCase().includes(dishNameKh) ||
+             (r.descriptionEn || '').toLowerCase().includes(dishNameEn);
+    }).slice(0, 3);
+  }, [scanResult, restaurants]);
+
   if (!isAiFoodDiscoveryModalOpen) return null;
 
   const handleClose = () => {
@@ -126,12 +156,6 @@ export const AiFoodDiscoveryModal: React.FC = () => {
     }
   };
 
-  // Ingredients Search computation
-  const ingredientResults: HomeIngredientsMatchResult[] = useMemo(() => {
-    if (selectedIngredients.length === 0) return [];
-    return searchByHomeIngredients(selectedIngredients, foods);
-  }, [selectedIngredients, foods]);
-
   const handleToggleIngredient = (ing: string) => {
     setSelectedIngredients(prev => 
       prev.includes(ing) ? prev.filter(i => i !== ing) : [...prev, ing]
@@ -145,30 +169,6 @@ export const AiFoodDiscoveryModal: React.FC = () => {
       setCustomIngredientInput('');
     }
   };
-
-  // Preferences Filter computation
-  const preferenceResults: FoodItem[] = useMemo(() => {
-    return getPersonalizedRecommendations({
-      taste: tastePref,
-      dietary: dietaryPref,
-      budget: budgetPref,
-      maxPrepTime: prepTimePref,
-      searchQuery: searchPrefQuery
-    }, foods);
-  }, [tastePref, dietaryPref, budgetPref, prepTimePref, searchPrefQuery, foods]);
-
-  // Matching restaurants for identified food
-  const matchingRestaurants = useMemo(() => {
-    if (!scanResult?.primaryMatch) return [];
-    const dishNameKh = scanResult.primaryMatch.nameKh.toLowerCase();
-    const dishNameEn = scanResult.primaryMatch.nameEn.toLowerCase();
-    return restaurants.filter(r => {
-      const sigs = (r.signatureDishesKh || []).map(s => s.toLowerCase());
-      return sigs.some(s => dishNameKh.includes(s) || s.includes(dishNameKh)) ||
-             r.descriptionKh.toLowerCase().includes(dishNameKh) ||
-             r.descriptionEn.toLowerCase().includes(dishNameEn);
-    }).slice(0, 3);
-  }, [scanResult, restaurants]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm animate-fade-in overflow-y-auto">
@@ -502,6 +502,34 @@ export const AiFoodDiscoveryModal: React.FC = () => {
                           </div>
                         </div>
                       )}
+
+                      {/* Optional Hint Refinement if user wants to specify dish keyword */}
+                      <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-2">
+                        <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 block">
+                          {isKm ? '💡 ប្រសិនបើមិនទាន់ត្រូវមុខម្ហូប សូមបញ្ជាក់ឈ្មោះ ឬគ្រឿងផ្សំបន្ថែម៖' : '💡 Need a closer match? Enter dish name or hint:'}
+                        </label>
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            value={customHint}
+                            onChange={(e) => setCustomHint(e.target.value)}
+                            placeholder={isKm ? 'ឧ. អាម៉ុកត្រី, នំបញ្ចុក, បង្អែម...' : 'e.g. Fish Amok, Num Banh Chok...'}
+                            className="flex-1 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-xs outline-none focus:border-emerald-500"
+                          />
+                          <button
+                            onClick={async () => {
+                              if (!photoDataUrl) return;
+                              setIsAnalyzing(true);
+                              const refined = await identifyFoodWithAi(photoDataUrl, foods, customHint);
+                              setScanResult(refined);
+                              setIsAnalyzing(false);
+                            }}
+                            className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] transition cursor-pointer shrink-0"
+                          >
+                            {isKm ? '🔍 វិភាគម្ដងទៀត' : '🔍 Re-analyze'}
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>
