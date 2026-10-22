@@ -75,10 +75,9 @@ export const UpgradeVipModal: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [isRestoring, setIsRestoring] = useState(false);
   const [submittedTxnId, setSubmittedTxnId] = useState('');
+  const [hasCopiedAccount, setHasCopiedAccount] = useState(false);
 
   if (!isUpgradeVipModalOpen) return null;
-
-  const [hasCopiedAccount, setHasCopiedAccount] = useState(false);
 
   const handleClose = () => {
     setIsUpgradeVipModalOpen(false);
