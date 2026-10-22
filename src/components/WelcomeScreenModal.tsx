@@ -11,7 +11,7 @@ import {
 import { useApp } from '../context/AppContext';
 
 export const WELCOME_SESSION_KEY = 'kft_welcome_shown_session_v1';
-const WELCOME_DURATION_MS = 4500; // 4.5 seconds (within 3–5 seconds requirement)
+const WELCOME_DURATION_MS = 8000; // 8 seconds: relaxed, comfortable reading time with instant Get Started skip button
 
 interface WelcomeScreenModalProps {
   onComplete: () => void;
@@ -168,10 +168,10 @@ export const WelcomeScreenModal: React.FC<WelcomeScreenModalProps> = ({ onComple
           </div>
 
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold font-moul text-white tracking-wide drop-shadow">
-              {isKm ? 'មរតក ẩm thực និងទេសចរណ៍ខ្មែរ' : 'Khmer Food Collection & Tourism'}
+            <h1 className="text-xl sm:text-2xl font-moul text-amber-300 tracking-normal drop-shadow leading-relaxed">
+              {isKm ? 'មរតកម្ហូបអាហារ និងទេសចរណ៍ខ្មែរ' : 'Khmer Food Collection & Tourism'}
             </h1>
-            <p className="text-xs text-emerald-200/90 font-khmer mt-1">
+            <p className="text-xs text-emerald-100/90 font-battambang mt-1">
               {isKm
                 ? 'កម្មវិធីប្រមូលផ្តុំមុខម្ហូបខ្មែរ ភោជនីយដ្ឋាន និងតំបន់ទេសចរណ៍ទូទាំង ២៥ ខេត្ត-រាជធានី'
                 : 'Discover Authentic Cambodian Cuisine, Restaurants & Scenic Destinations'}

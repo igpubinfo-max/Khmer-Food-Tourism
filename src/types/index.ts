@@ -1,7 +1,7 @@
-export const APP_VERSION = 'v1.7.6';
-export const APP_VERSION_NAME = '1.7.6';
-export const APP_BUILD_CODE = 48;
-export const APP_RELEASE_DATE = '2026-10-22';
+export const APP_VERSION = 'v1.7.7';
+export const APP_VERSION_NAME = '1.7.7';
+export const APP_BUILD_CODE = 49;
+export const APP_RELEASE_DATE = '2026-10-23';
 
 export const VIP_ANNUAL_PRICE_USD = 4.99;
 export const VIP_SUBSCRIPTION_DAYS = 90;

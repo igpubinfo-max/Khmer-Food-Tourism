@@ -69,18 +69,18 @@ test('Restaurant Check-in Service enforces 10 checkins/hour anti-spam rate limit
 const typesPath = path.resolve(__dirname, '../src/types/index.ts');
 const typesContent = fs.readFileSync(typesPath, 'utf8');
 
-test('App Version bumped to v1.7.6 (Build 48)', () => {
-  assert(typesContent.includes("APP_VERSION = 'v1.7.6'"), 'APP_VERSION is v1.7.6');
-  assert(typesContent.includes("APP_BUILD_CODE = 48"), 'APP_BUILD_CODE is 48');
+test('App Version bumped to v1.7.7 (Build 49)', () => {
+  assert(typesContent.includes("APP_VERSION = 'v1.7.7'"), 'APP_VERSION is v1.7.7');
+  assert(typesContent.includes("APP_BUILD_CODE = 49"), 'APP_BUILD_CODE is 49');
 });
 
 // 4. Check Android build.gradle version
 const gradlePath = path.resolve(__dirname, '../android/app/build.gradle');
 const gradleContent = fs.readFileSync(gradlePath, 'utf8');
 
-test('Android build.gradle has versionCode 48 and versionName 1.7.6', () => {
-  assert(gradleContent.includes('versionCode 48'), 'versionCode is 48');
-  assert(gradleContent.includes('versionName "1.7.6"'), 'versionName is 1.7.6');
+test('Android build.gradle has versionCode 49 and versionName 1.7.7', () => {
+  assert(gradleContent.includes('versionCode 49'), 'versionCode is 49');
+  assert(gradleContent.includes('versionName "1.7.7"'), 'versionName is 1.7.7');
 });
 
 // 5. Check Modals registered in App.tsx
@@ -305,7 +305,7 @@ test('Welcome Screen (3-5s before Login), Gemini Vision API Key, Dish-Specific P
   const touristCardContent = fs.readFileSync(path.resolve(__dirname, '../src/components/TouristCard.tsx'), 'utf8');
 
   assert(aiFoodServiceContent.includes("DEFAULT_GEMINI_VISION_API_KEY = 'AIzaSyCZnYNQLNcuco5HxdmrWVXKXwvAr7mg7v0'"), 'Gemini Vision API key pre-configured');
-  assert(welcomeModalContent.includes('WELCOME_DURATION_MS = 4500') && welcomeModalContent.includes('ចាប់ផ្តើមប្រើប្រាស់ឥឡូវនេះ'), 'WelcomeScreenModal has 4.5s timer and Get Started button');
+  assert(welcomeModalContent.includes('WELCOME_DURATION_MS = 8000') && welcomeModalContent.includes('ចាប់ផ្តើមប្រើប្រាស់ឥឡូវនេះ'), 'WelcomeScreenModal has 8s timer and Get Started button');
   assert(appContent.includes('WELCOME_SESSION_KEY') && appContent.includes('<WelcomeScreenModal'), 'WelcomeScreenModal integrated once per session in App.tsx');
   assert(add100Content.includes('DISH_SPECIFIC_PHOTOS') && !add100Content.includes('images.unsplash.com'), 'All 100 new dishes (food-101..200) use dish-specific Wikimedia Commons photos');
   assert(!destSeed.includes('Pol_Pot') && !destSeed.includes('Vietnamese_invasion') && !destSeed.includes('Pupil') && !destSeed.includes('Fish_Amok'), 'All mismatched destination photos removed from seedDestinations.ts');

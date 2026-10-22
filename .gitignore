@@ -24,6 +24,11 @@ dist-ssr
 *.sw?
 backup_*
 *.apk
+*.aab
+*.zip
+PlayStore-Assets/Khmer-Food-Tourism-APK-and-AAB/
+PlayStore-Assets/*.aab
+PlayStore-Assets/*.apk
 Food/
 /Shop/
 !public/Shop/
