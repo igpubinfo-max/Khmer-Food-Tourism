@@ -72,24 +72,26 @@ jobs:
           cp app-debug.apk KhmerFoodTourism-v1.7.7.apk
           ls -la
 
-      # - name: 9b. Build Signed Play Store AAB (Option B - Disabled until user explicitly requests .aab)
-      #   run: |
-      #     npm run build
-      #     cp -rf dist/* android/app/src/main/assets/public/
-      #     cd android
-      #     ./gradlew bundleRelease --no-daemon -x lint -x lintVitalRelease
-      #     AAB_FILE=$(find app/build/outputs/bundle -name "*.aab" | head -n 1)
-      #     echo "Found AAB: $AAB_FILE"
-      #     cp "$AAB_FILE" app/build/outputs/apk/debug/KhmerFoodTourism-v1.7.7.aab
-      #     cp app/khmerfood-upload-key.jks app/build/outputs/apk/debug/khmerfood-upload-key.jks
-      #     ls -la app/build/outputs/apk/debug/
+      - name: 9b. Build Signed Play Store AAB
+        run: |
+          npm run build
+          cp -rf dist/* android/app/src/main/assets/public/
+          cd android
+          ./gradlew bundleRelease --no-daemon -x lint -x lintVitalRelease
+          AAB_FILE=$(find app/build/outputs/bundle -name "*.aab" | head -n 1)
+          echo "Found AAB: $AAB_FILE"
+          cp "$AAB_FILE" app/build/outputs/apk/debug/KhmerFoodTourism-v1.7.7.aab
+          cp app/khmerfood-upload-key.jks app/build/outputs/apk/debug/khmerfood-upload-key.jks
+          ls -la app/build/outputs/apk/debug/
 
-      - name: 10. Upload Android APK Artifacts
+      - name: 10. Upload Android APK & Play Store AAB Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Khmer-Food-Tourism-APK
+          name: Khmer-Food-Tourism-APK-and-AAB
           path: |
             android/app/build/outputs/apk/debug/*.apk
+            android/app/build/outputs/apk/debug/*.aab
+            android/app/build/outputs/apk/debug/*.jks
 
       - name: 11. Publish GitHub Release with APK
         uses: softprops/action-gh-release@v2
@@ -300,5 +302,6 @@ jobs:
           prerelease: false
           files: |
             android/app/build/outputs/apk/debug/*.apk
+            android/app/build/outputs/apk/debug/*.aab
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
