@@ -334,15 +334,17 @@ export async function syncAllAppDataWithSupabase(localState: {
       (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
 
-    // 4. Merge Custom & Google Maps Smart-Cached Restaurants by ID
+    // 4. Merge Custom & Google Maps Smart-Cached Restaurants by ID (excluding built-in rest-1..220 seeds)
     const restMap = new Map<string, Restaurant>();
     if (Array.isArray(cloudRests)) {
       for (const r of cloudRests) {
-        if (r && r.id) restMap.set(r.id, r);
+        if (r && r.id && !/^rest-\d+$/.test(String(r.id))) {
+          restMap.set(r.id, r);
+        }
       }
     }
     for (const r of localState.customRestaurants) {
-      if (r && r.id) {
+      if (r && r.id && !/^rest-\d+$/.test(String(r.id))) {
         restMap.set(r.id, { ...(restMap.get(r.id) || {}), ...r });
       }
     }

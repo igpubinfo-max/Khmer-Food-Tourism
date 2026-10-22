@@ -467,16 +467,37 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const [restaurants, setRestaurants] = useState<Restaurant[]>(() => {
+    const seedMap = new Map<string, Restaurant>(initialRestaurants.map(r => [r.id, r]));
     try {
-      const saved = localStorage.getItem('kft_restaurants_real_v5');
+      localStorage.removeItem('kft_restaurants_real_v5');
+      const saved = localStorage.getItem('kft_restaurants_real_v6');
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length >= 50) {
-          return parsed.map(normalizeRestaurant);
+          return parsed.map((r: any) => {
+            const seed = r && r.id ? seedMap.get(String(r.id)) : undefined;
+            if (seed) {
+              return normalizeRestaurant({
+                ...r,
+                nameKh: seed.nameKh,
+                nameEn: seed.nameEn,
+                descriptionKh: seed.descriptionKh,
+                descriptionEn: seed.descriptionEn,
+                photoUrl: seed.photoUrl,
+                galleryPhotos: seed.galleryPhotos,
+                addressKh: seed.addressKh,
+                addressEn: seed.addressEn,
+                provinceKh: seed.provinceKh,
+                provinceEn: seed.provinceEn,
+                signatureDishesKh: seed.signatureDishesKh,
+              });
+            }
+            return normalizeRestaurant(r);
+          });
         }
       }
     } catch (e) {
-      console.warn('Failed to parse kft_restaurants_real_v5', e);
+      console.warn('Failed to parse kft_restaurants_real_v6', e);
     }
 
     // Preserve any user-created custom restaurants from previous storage key
@@ -863,7 +884,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // User Trip Plans
   const [tripPlans, setTripPlans] = useState<TripPlan[]>(() => {
     try {
-      const storageKey = `kft_trip_plans_v1_${currentUser?.id || 'guest'}`;
+      localStorage.removeItem(`kft_trip_plans_v1_${currentUser?.id || 'guest'}`);
+      const storageKey = `kft_trip_plans_v2_${currentUser?.id || 'guest'}`;
       const saved = localStorage.getItem(storageKey);
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
@@ -947,7 +969,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   useEffect(() => {
     try {
-      const storageKey = `kft_trip_plans_v1_${currentUser?.id || 'guest'}`;
+      const storageKey = `kft_trip_plans_v2_${currentUser?.id || 'guest'}`;
       localStorage.setItem(storageKey, JSON.stringify(tripPlans));
     } catch {}
   }, [tripPlans, currentUser]);
@@ -1029,7 +1051,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     try {
       if (restaurants && restaurants.length > 0) {
-        localStorage.setItem('kft_restaurants_real_v5', JSON.stringify(restaurants));
+        localStorage.setItem('kft_restaurants_real_v6', JSON.stringify(restaurants));
       }
     } catch (e) {
       console.warn('Storage sync failed for restaurants:', e);
@@ -1112,7 +1134,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (rawVault) localVault = JSON.parse(rawVault);
       } catch {}
 
-      const customRests = restaurants.filter(r => !r.id.startsWith('rest-') || Number(r.id.replace('rest-', '')) > 50);
+      const customRests = restaurants.filter(r => !/^rest-\d+$/.test(r.id));
       const result = await syncAllAppDataWithSupabase({
         users,
         transactions,
@@ -1135,7 +1157,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           setRestaurants(prev => {
             const map = new Map<string, Restaurant>();
             for (const r of prev) map.set(r.id, r);
-            for (const r of result.mergedCustomRestaurants) map.set(r.id, r);
+            for (const r of result.mergedCustomRestaurants) {
+              if (r && r.id && !/^rest-\d+$/.test(String(r.id))) {
+                map.set(r.id, r);
+              }
+            }
             return Array.from(map.values());
           });
         }
