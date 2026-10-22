@@ -31,6 +31,8 @@ import { AiCheckInModal } from './components/AiCheckInModal';
 import { UpgradeVipModal } from './components/UpgradeVipModal';
 import { QrScannerModal } from './components/QrScannerModal';
 import { VipAddRestaurantModal } from './components/VipAddRestaurantModal';
+import { AiFoodDiscoveryModal } from './components/AiFoodDiscoveryModal';
+import { RestaurantCheckInModal } from './components/RestaurantCheckInModal';
 import { Toast } from './components/Toast';
 
 const MainScreen: React.FC = () => {
@@ -86,6 +88,8 @@ const MainScreen: React.FC = () => {
       <TrendingSocialModal />
       <TrendingFoodDetailModal />
       <AiCheckInModal />
+      <AiFoodDiscoveryModal />
+      <RestaurantCheckInModal />
       <UpgradeVipModal />
       <QrScannerModal />
       <VipAddRestaurantModal />

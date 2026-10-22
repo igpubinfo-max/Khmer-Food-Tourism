@@ -125,6 +125,9 @@ export const UpgradeVipModal: React.FC = () => {
     setSelectedPlan(plan);
     setCustomTxnRef(`ABA-KHQR-${plan.days}D-${Date.now().toString(36).toUpperCase()}`);
     setSessionExpiryTime(Date.now() + 15 * 60 * 1000);
+    try {
+      localStorage.setItem('kft_user_active_plan_type', plan.id);
+    } catch {}
   };
 
   const handleRestartSession = () => {

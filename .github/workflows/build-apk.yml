@@ -60,7 +60,7 @@ jobs:
           echo "=== SEARCHING FOR GENERATED APK FILES ==="
           find . -name "*.apk" -ls
           cd android/app/build/outputs/apk/debug
-          cp app-debug.apk KhmerFoodTourism-v1.6.9.apk
+          cp app-debug.apk KhmerFoodTourism-v1.7.0.apk
           ls -la
 
       - name: 10. Upload Android APK Artifact
@@ -73,14 +73,28 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: v1.6.9
-          name: "Khmer Food & Tourism v1.6.9 (Direct ABA KHQR PayWay Deep Link & Automatic VIP Upgrade)"
+          tag_name: v1.7.0
+          name: "Khmer Food & Tourism v1.7.0 (AI Cambodian Food Discovery, Smart Check-in & VIP Tiers)"
           overwrite: true
           make_latest: true
           body: |
             ### 🇰🇭 កម្មវិធីទូរស័ព្ទដៃ អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism Mobile App)
             
-            **កំណែថ្មី v1.6.9 (Direct ABA KHQR PayWay Deep Link & Automatic VIP Upgrade):**
+            **កំណែថ្មី v1.7.0 (AI Cambodian Food Discovery, Smart Check-in & VIP Tiers):**
+            - 🤖 **១. មុខងារស្កេនសម្គាល់មុខម្ហូបខ្មែរ AI & រូបមន្តពិត ១០០% (AI Food Recognition & Verified Recipes):**
+              - ស្កេនសម្គាល់មុខម្ហូបខ្មែរ បង្អែមខ្មែរ នំខ្មែរ និងភេសជ្ជៈប្រពៃណីតាមរយៈកាមេរ៉ា ឬ Gallery។
+              - បង្ហាញឈ្មោះជាភាសាខ្មែរ និងអង់គ្លេស កម្រិតភាគរយជាក់លាក់ (Confidence Score) និងជម្រើសមុខម្ហូបស្រដៀងគ្នា។
+              - រូបមន្ត និងគ្រឿងផ្សំត្រូវបានទាញចេញពីឃ្លាំងទិន្នន័យផ្លូវការ ១០០% គ្មានការបង្កើតគ្រឿងផ្សំក្លែងក្លាយឡើយ (Never invent ingredients)។
+            - 🍳 **២. ស្វែងរកមុខម្ហូបតាមគ្រឿងផ្សំដែលមាននៅផ្ទះ (Cook with What You Have):**
+              - ជ្រើសរើសគ្រឿងផ្សំដែលមាននៅផ្ទះដើម្បីទទួលបានបញ្ជីមុខម្ហូបខ្មែរដែលត្រូវគ្នា ព្រមទាំងបង្ហាញគ្រឿងផ្សំដែលខ្វះខាត។
+            - 🎯 **៣. ណែនាំមុខម្ហូបតាមចំណង់ចំណូលចិត្ត & សុខភាព (Personalized Taste & Diet Recommendations):**
+              - តម្រៀបតាមរសជាតិ (ផ្អែម ជូរ ហឹរ ដិត/ប្រៃ) របបអាហារ (ម្ហូបបួស Vegetarian, អាហារសុខភាព Healthy) ថវិកា និងរយៈពេលចម្អិន។
+            - 📍 **៤. ឆែកអ៊ីន & បញ្ជាក់ទីតាំងភោជនីយដ្ឋានពិតប្រាកដ (Smart Restaurant Discovery & GPS Check-in):**
+              - ថតរូបនៅហាង និងទាញយកទីតាំង GPS ដើម្បីស្វែងរកភោជនីយដ្ឋានដែលនៅជិតបំផុត។
+              - បញ្ជាក់សុពលភាពចម្ងាយ (Spatial Distance Verification ក្នុងរង្វង់ 500 ម៉ែត្រ) និងការពារទិន្នន័យផ្ទាល់ខ្លួន។
+            - 👑 **៥. កំណត់កញ្ចប់សមាជិកភាព VIP យ៉ាងច្បាស់លាស់ ($2.99 និង $9.99):**
+              - គម្រោងត្រីមាស $2.99 USD (៩០ ថ្ងៃ)៖ ស្កេន AI ១៥ ដង/ថ្ងៃ, Favorites រហូតដល់ ៣០, VIP Gold Badge, ភ្ជាប់ TikTok & Facebook។
+              - គម្រោងប្រចាំឆ្នាំ $9.99 USD (៣៦៥ ថ្ងៃ)៖ ស្កេន AI គ្មានដែនកំណត់ (Unlimited), Favorites គ្មានដែនកំណត់, អាទិភាពបង្ហាញហាង, មុខងារសុខភាពកម្រិតខ្ពស់។
             - 📲 **១. បើក ABA Mobile ជាមួយ PayWay/KHQR Deep Link & ការណែនាំស្កេនលើទូរស័ព្ទដដែល (Direct Deep Link & Scanner Access):**
               - បន្ថែមប៉ារ៉ាម៉ែត្រផ្លូវការ `abamobilebank://ababank.com?type=payway&qrcode=...` ក្នុង Native Plugin ដើម្បីបញ្ជូនកូដ KHQR ផ្ទាល់ទៅក្នុង ABA Mobile។
               - រក្សាទុកកូដ QR ដោយស្វ័យប្រវត្តទៅក្នុង Photos / Gallery នៅពេលចុចប៊ូតុង។

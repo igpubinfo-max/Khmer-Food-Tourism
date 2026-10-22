@@ -23,6 +23,7 @@ export const HomeView: React.FC = () => {
     setIsTrendingSocialModalOpen, unreadNotificationsCount,
     trendingFoods, setSelectedTrendingFood, setIsTrendingFoodDetailModalOpen,
     setIsAiCheckInModalOpen, showToast,
+    setIsAiFoodDiscoveryModalOpen, setIsRestaurantCheckInModalOpen,
     searchQuery: globalSearchQuery, setSearchQuery: setGlobalSearchQuery,
     setSelectedFood, setSelectedRestaurant,
     setIsVipAddRestaurantModalOpen, setIsManageMenuModalOpen, setManagingRestaurant,
@@ -879,6 +880,55 @@ export const HomeView: React.FC = () => {
               </button>
             )}
           </div>
+        </div>
+
+        {/* Prominent AI Discovery & Restaurant Check-in Entry Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          {/* 1. AI Food Discovery & Scanner */}
+          <button
+            onClick={() => setIsAiFoodDiscoveryModalOpen(true)}
+            className="p-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 via-[#064E3B] to-teal-800 text-white text-left shadow-md flex items-center justify-between transition hover:scale-[1.01] active:scale-98 cursor-pointer ring-2 ring-emerald-400/30"
+          >
+            <div className="flex items-center gap-2.5">
+              <div className="w-10 h-10 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center shadow-sm shrink-0">
+                <Camera className="w-5 h-5 fill-slate-950" />
+              </div>
+              <div>
+                <span className="font-moul text-xs block text-white">
+                  {isKm ? 'ស្កេនសម្គាល់មុខម្ហូប AI' : 'AI Food Scanner'}
+                </span>
+                <span className="text-[10px] text-emerald-200 block">
+                  {isKm ? 'ស្គាល់ម្ហូបខ្មែរ • រូបមន្តពិត ១០០%' : 'Cambodian Food Vision & Recipes'}
+                </span>
+              </div>
+            </div>
+            <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[9px] font-black uppercase tracking-wider font-sans shrink-0">
+              AI Vision
+            </span>
+          </button>
+
+          {/* 2. Restaurant Check-in & GPS Location */}
+          <button
+            onClick={() => setIsRestaurantCheckInModalOpen(true)}
+            className="p-3.5 rounded-2xl bg-gradient-to-r from-[#004B87] via-[#005a9e] to-sky-800 text-white text-left shadow-md flex items-center justify-between transition hover:scale-[1.01] active:scale-98 cursor-pointer ring-2 ring-sky-400/30"
+          >
+            <div className="flex items-center gap-2.5">
+              <div className="w-10 h-10 rounded-xl bg-sky-400 text-slate-950 flex items-center justify-center shadow-sm shrink-0">
+                <MapPin className="w-5 h-5 fill-slate-950" />
+              </div>
+              <div>
+                <span className="font-moul text-xs block text-white">
+                  {isKm ? 'ឆែកអ៊ីន & បញ្ជាក់ទីតាំង' : 'Restaurant Check-in'}
+                </span>
+                <span className="text-[10px] text-sky-200 block">
+                  {isKm ? 'បញ្ជាក់ទីតាំង GPS • រកហាងពិត' : 'GPS Location Verification'}
+                </span>
+              </div>
+            </div>
+            <span className="px-2 py-0.5 rounded-full bg-sky-300 text-slate-950 text-[9px] font-black uppercase tracking-wider font-sans shrink-0">
+              GPS Live
+            </span>
+          </button>
         </div>
 
         {/* 6 Feature Buttons Grid - Enabled for VIP, Prompts Upgrade for Free Users */}

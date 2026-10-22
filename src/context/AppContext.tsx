@@ -149,6 +149,10 @@ interface AppContextType {
   setIsQrScannerModalOpen: (open: boolean) => void;
   isVipAddRestaurantModalOpen: boolean;
   setIsVipAddRestaurantModalOpen: (open: boolean) => void;
+  isAiFoodDiscoveryModalOpen: boolean;
+  setIsAiFoodDiscoveryModalOpen: (open: boolean) => void;
+  isRestaurantCheckInModalOpen: boolean;
+  setIsRestaurantCheckInModalOpen: (open: boolean) => void;
 
   // 6 Personalized Account Features & Wishlists
   wishlists: Wishlist[];
@@ -551,6 +555,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isExitModalOpen, setIsExitModalOpen] = useState(false);
   const [isQrScannerModalOpen, setIsQrScannerModalOpen] = useState(false);
   const [isVipAddRestaurantModalOpen, setIsVipAddRestaurantModalOpen] = useState(false);
+  const [isAiFoodDiscoveryModalOpen, setIsAiFoodDiscoveryModalOpen] = useState(false);
+  const [isRestaurantCheckInModalOpen, setIsRestaurantCheckInModalOpen] = useState(false);
 
   // 6 Personalized Account Features Modals
   const [isWhatToEatModalOpen, setIsWhatToEatModalOpen] = useState(false);
@@ -2933,6 +2939,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setIsQrScannerModalOpen,
         isVipAddRestaurantModalOpen,
         setIsVipAddRestaurantModalOpen,
+        isAiFoodDiscoveryModalOpen,
+        setIsAiFoodDiscoveryModalOpen,
+        isRestaurantCheckInModalOpen,
+        setIsRestaurantCheckInModalOpen,
         connectTikTokAccount,
         disconnectTikTokAccount,
         connectFacebookAccount,
