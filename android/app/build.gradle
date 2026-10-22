@@ -16,10 +16,24 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    signingConfigs {
+        release {
+            def ksFile = file("khmerfood-upload-key.jks")
+            if (ksFile.exists()) {
+                storeFile ksFile
+                storePassword System.getenv("KEYSTORE_PASSWORD") ?: "KhmerFood2026!PlayStore"
+                keyAlias System.getenv("KEY_ALIAS") ?: "khmerfood-upload"
+                keyPassword System.getenv("KEY_PASSWORD") ?: "KhmerFood2026!PlayStore"
+            }
+        }
+    }
     buildTypes {
         release {
-            minifyEnabled true
-            shrinkResources true
+            if (file("khmerfood-upload-key.jks").exists()) {
+                signingConfig signingConfigs.release
+            }
+            minifyEnabled false
+            shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }

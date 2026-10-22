@@ -288,19 +288,30 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             return initialUsers[0];
           }
 
-          // Ensure VIP account has full active status and unexpired duration
-          const expiry = parsed.subscriptionExpiryDate && new Date(parsed.subscriptionExpiryDate).getTime() > Date.now()
-            ? parsed.subscriptionExpiryDate
-            : new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString();
+          // Ensure only verified VIP or default Admin/Owner account keeps active VIP status
+          const isDefaultOwner =
+            parsed.id === 'user-2' ||
+            parsed.role === 'admin' ||
+            parsed.username === 'kimseng' ||
+            parsed.email === 'cheakimseng@gmail.com';
+          if (isDefaultOwner || parsed.membershipTier === 'premium_vip') {
+            const expiry =
+              parsed.subscriptionExpiryDate &&
+              new Date(parsed.subscriptionExpiryDate).getTime() > Date.now()
+                ? parsed.subscriptionExpiryDate
+                : new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString();
 
-          return {
-            ...parsed,
-            membershipTier: 'premium_vip',
-            subscriptionStatus: 'active',
-            subscriptionExpiryDate: expiry,
-            paymentStatus: 'verified',
-            autoRenew: true
-          };
+            return {
+              ...parsed,
+              membershipTier: 'premium_vip',
+              subscriptionStatus: 'active',
+              subscriptionExpiryDate: expiry,
+              paymentStatus: 'verified',
+              autoRenew: true,
+            };
+          }
+
+          return parsed;
         }
       }
     } catch (e) {
