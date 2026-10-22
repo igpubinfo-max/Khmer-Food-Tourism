@@ -27,9 +27,15 @@ export interface CloudApiConfig {
 
 const CLOUD_API_CONFIG_STORAGE_KEY = 'kft_cloud_api_config_v1';
 
+// Official Production Supabase Free-Tier Project (Southeast Asia - Singapore)
+export const DEFAULT_SUPABASE_URL = 'https://ryvltobwuwuulazqjnza.supabase.co';
+export const DEFAULT_SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_h5ufAaA0qAL3s-ebprATsw_8AApv71l';
+
 export function getCloudApiConfig(): CloudApiConfig {
-  const envSupabaseUrl = (import.meta as any).env?.VITE_SUPABASE_URL || '';
-  const envSupabaseKey = (import.meta as any).env?.VITE_SUPABASE_ANON_KEY || '';
+  const envSupabaseUrl =
+    (import.meta as any).env?.VITE_SUPABASE_URL || DEFAULT_SUPABASE_URL;
+  const envSupabaseKey =
+    (import.meta as any).env?.VITE_SUPABASE_ANON_KEY || DEFAULT_SUPABASE_PUBLISHABLE_KEY;
   const envGoogleMapsKey = (import.meta as any).env?.VITE_GOOGLE_MAPS_API_KEY || '';
   const envGeminiKey = (import.meta as any).env?.VITE_GEMINI_API_KEY || '';
   const envVisionBackend = (import.meta as any).env?.VITE_AI_VISION_BACKEND_URL || '';
