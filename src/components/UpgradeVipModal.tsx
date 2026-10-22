@@ -89,7 +89,6 @@ export const UpgradeVipModal: React.FC = () => {
   const isKm = language === 'km';
   const isVip = isUserVipActive(currentUser);
   const remainingDays = getVipRemainingDays(currentUser);
-  const isPlayStoreBuild = import.meta.env.VITE_PLAY_STORE_BUILD === 'true';
 
   // Default plan: VIP 30 Days ($2.99 USD)
   const [selectedPlan, setSelectedPlan] = useState<VipPlanOption>(VIP_PLANS[0]);
@@ -567,39 +566,6 @@ export const UpgradeVipModal: React.FC = () => {
 
         {/* Modal Body */}
         <div className="flex-1 overflow-y-auto max-h-[80vh] p-5 space-y-4 font-khmer">
-          {isPlayStoreBuild ? (
-            <div className="py-5 text-center space-y-4">
-              <div className="w-16 h-16 mx-auto rounded-full bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center shadow-lg">
-                <Crown className="w-8 h-8 text-amber-300" />
-              </div>
-              <div className="space-y-1.5">
-                <h4 className="font-moul text-base text-slate-900 dark:text-white">
-                  {isKm ? 'អត្ថប្រយោជន៍សមាជិកសហគមន៍ VIP' : 'Community Member Features'}
-                </h4>
-                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                  {isKm
-                    ? 'ក្នុងកំណែ Google Play Store នេះ មុខងារស្វែងរកហាងអាហារ កន្លែងទេសចរណ៍ និងមុខម្ហូបខ្មែរទាំងអស់ត្រូវបានបើកឱ្យប្រើប្រាស់ដោយឥតគិតថ្លៃ។ កញ្ចប់សមាជិកភាព VIP មិនត្រូវបានដាក់លក់ក្នុងកំណែនេះទេ។'
-                    : 'All restaurant directories, travel guides, and Khmer recipes are available free of charge in this Google Play edition. In-app VIP purchases are currently disabled in this build.'}
-                </p>
-              </div>
-              <div className="text-left p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 space-y-2">
-                {TEN_VIP_BENEFITS.slice(0, 6).map((b) => (
-                  <div key={b.id} className="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-200">
-                    <span>{b.icon}</span>
-                    <span>{isKm ? b.titleKh : b.titleEn}</span>
-                  </div>
-                ))}
-              </div>
-              <button
-                type="button"
-                onClick={handleClose}
-                className="w-full py-2.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-xs shadow transition"
-              >
-                {isKm ? 'យល់ព្រម / បិទផ្ទាំងនេះ' : 'Got It / Close'}
-              </button>
-            </div>
-          ) : (
-          <>
           {/* STATE 3: APPROVED (Displayed ONLY after Administrator approves in Admin Dashboard) */}
           {paymentState === 'APPROVED' && isVip && (
             <div className="py-6 text-center space-y-4 animate-scale-up">
@@ -1386,8 +1352,6 @@ export const UpgradeVipModal: React.FC = () => {
               </div>
             </div>
           )}
-          </>
-          )}
 
         </div>
 
@@ -1402,7 +1366,7 @@ export const UpgradeVipModal: React.FC = () => {
             rel="noopener noreferrer"
             className="text-emerald-600 dark:text-emerald-400 font-medium hover:underline"
           >
-            {isPlayStoreBuild ? 'Privacy Policy' : 'Admin-Verified KHQR'}
+            Admin-Verified KHQR
           </a>
         </div>
       </div>
