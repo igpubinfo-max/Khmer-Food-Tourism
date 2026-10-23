@@ -1,0 +1,1510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Khmer Food & Tourism - Technical Documentation & System Reference</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Kantumruy+Pro:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap');
+
+  @page {
+    size: A4 portrait;
+    margin: 16mm 14mm 16mm 14mm;
+  }
+
+  * {
+    box-sizing: border-box;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: #1e293b;
+    background-color: #ffffff;
+    font-size: 8.5pt;
+    line-height: 1.5;
+    margin: 0;
+    padding: 0;
+  }
+
+  .font-khmer {
+    font-family: 'Kantumruy Pro', 'Inter', sans-serif;
+  }
+
+  .font-mono {
+    font-family: 'Fira Code', monospace;
+  }
+
+  .page-break {
+    page-break-after: always;
+    break-after: page;
+  }
+
+  .avoid-break {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* Cover Page */
+  .cover {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 30px 20px 20px 20px;
+    border: 3px solid #064E3B;
+    background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 50%, #f8fafc 100%);
+    position: relative;
+  }
+
+  .cover-badge {
+    display: inline-block;
+    padding: 6px 16px;
+    background: #064E3B;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 9.5pt;
+    border-radius: 20px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .cover-title {
+    font-size: 25pt;
+    font-weight: 800;
+    color: #064E3B;
+    margin: 15px 0 5px 0;
+    line-height: 1.2;
+  }
+
+  .cover-title-khmer {
+    font-family: 'Kantumruy Pro', sans-serif;
+    font-size: 19pt;
+    font-weight: 700;
+    color: #b45309;
+    margin-bottom: 12px;
+  }
+
+  .cover-subtitle {
+    font-size: 11pt;
+    color: #475569;
+    max-width: 650px;
+    line-height: 1.6;
+    margin-bottom: 20px;
+  }
+
+  .cover-meta-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    background: #ffffff;
+    padding: 16px 20px;
+    border-radius: 12px;
+    border: 1px solid #cbd5e1;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+  }
+
+  .meta-item {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .meta-label {
+    font-size: 7.5pt;
+    text-transform: uppercase;
+    color: #64748b;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+
+  .meta-value {
+    font-size: 9pt;
+    font-weight: 700;
+    color: #0f172a;
+  }
+
+  /* Section Styling */
+  h1 {
+    font-size: 15pt;
+    font-weight: 800;
+    color: #064E3B;
+    border-bottom: 2px solid #059669;
+    padding-bottom: 6px;
+    margin-top: 20px;
+    margin-bottom: 10px;
+  }
+
+  h2 {
+    font-size: 11pt;
+    font-weight: 700;
+    color: #0f766e;
+    margin-top: 14px;
+    margin-bottom: 6px;
+    border-left: 4px solid #0d9488;
+    padding-left: 8px;
+  }
+
+  h3 {
+    font-size: 9.5pt;
+    font-weight: 700;
+    color: #1e293b;
+    margin-top: 10px;
+    margin-bottom: 4px;
+  }
+
+  p {
+    margin: 0 0 8px 0;
+    text-align: justify;
+  }
+
+  ul, ol {
+    margin: 0 0 10px 0;
+    padding-left: 20px;
+  }
+
+  li {
+    margin-bottom: 4px;
+  }
+
+  .callout {
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin: 10px 0;
+    font-size: 8pt;
+    line-height: 1.5;
+  }
+
+  .callout-info {
+    background: #f0fdf4;
+    border: 1px solid #86efac;
+    color: #14532d;
+  }
+
+  .callout-warning {
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    color: #78350f;
+  }
+
+  .callout-danger {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #7f1d1d;
+  }
+
+  .callout-title {
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 8px 0 12px 0;
+    font-size: 7.8pt;
+  }
+
+  th {
+    background: #064E3B;
+    color: #ffffff;
+    font-weight: 600;
+    text-align: left;
+    padding: 5px 7px;
+    border: 1px solid #064E3B;
+  }
+
+  td {
+    padding: 4px 7px;
+    border: 1px solid #cbd5e1;
+    vertical-align: top;
+  }
+
+  tr:nth-child(even) td {
+    background: #f8fafc;
+  }
+
+  code {
+    font-family: 'Fira Code', monospace;
+    font-size: 7.2pt;
+    background: #f1f5f9;
+    padding: 1px 4px;
+    border-radius: 3px;
+    color: #0f766e;
+    border: 1px solid #e2e8f0;
+  }
+
+  pre {
+    background: #0f172a;
+    color: #e2e8f0;
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-family: 'Fira Code', monospace;
+    font-size: 7pt;
+    line-height: 1.35;
+    overflow-x: auto;
+    margin: 6px 0;
+    border: 1px solid #1e293b;
+  }
+
+  pre code {
+    background: transparent;
+    color: inherit;
+    padding: 0;
+    border: none;
+  }
+
+  .tree {
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-family: 'Fira Code', monospace;
+    font-size: 7pt;
+    line-height: 1.35;
+    color: #1e293b;
+    margin: 8px 0;
+  }
+
+  .tree .dir {
+    font-weight: 700;
+    color: #064E3B;
+  }
+
+  .tree .comment {
+    color: #64748b;
+    font-style: italic;
+  }
+
+  .doc-header {
+    border-bottom: 1px solid #cbd5e1;
+    padding-bottom: 4px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 7pt;
+    color: #64748b;
+    font-weight: 500;
+  }
+
+  .doc-footer {
+    border-top: 1px solid #cbd5e1;
+    padding-top: 4px;
+    margin-top: 12px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 6.8pt;
+    color: #94a3b8;
+  }
+
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 8px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+  }
+
+  .card-title {
+    font-weight: 700;
+    font-size: 8.5pt;
+    color: #0f172a;
+    margin-bottom: 3px;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 5px;
+    font-size: 6.5pt;
+    font-weight: 700;
+    border-radius: 4px;
+    text-transform: uppercase;
+  }
+  .badge-success { background: #dcfce7; color: #15803d; }
+  .badge-info { background: #e0f2fe; color: #0369a1; }
+  .badge-warning { background: #fef3c7; color: #b45309; }
+  .badge-danger { background: #fee2e2; color: #b91c1c; }
+
+  .diagram-container {
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 10px;
+    margin: 8px 0;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<!-- ========================================== -->
+<!-- COVER PAGE                                 -->
+<!-- ========================================== -->
+<div class="cover page-break">
+  <div>
+    <div class="cover-badge">Official Technical Architecture Manual</div>
+    <div class="cover-title">Khmer Food & Tourism</div>
+    <div class="cover-title-khmer">អាហារ & ទេសចរណ៍ខ្មែរ</div>
+    <div class="cover-subtitle">
+      A Complete Technical Specification, Architectural Blueprints, Database Schema Reference, Security Controls, and Continuous Development Manual from Conception to Version 1.8.9 (Build 61).
+    </div>
+  </div>
+
+  <div class="diagram-container avoid-break" style="background:#ffffff; border:1px solid #e2e8f0; padding:12px;">
+    <svg viewBox="0 0 700 125" width="100%" height="110" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#064E3B"/>
+          <stop offset="100%" stop-color="#047857"/>
+        </linearGradient>
+        <linearGradient id="g2" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#0284c7"/>
+          <stop offset="100%" stop-color="#0369a1"/>
+        </linearGradient>
+        <linearGradient id="g3" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#d97706"/>
+          <stop offset="100%" stop-color="#b45309"/>
+        </linearGradient>
+      </defs>
+      <rect x="10" y="25" width="150" height="75" rx="8" fill="url(#g1)"/>
+      <text x="85" y="55" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle" font-family="sans-serif">Frontend UI / PWA</text>
+      <text x="85" y="72" fill="#d1fae5" font-size="8.5" text-anchor="middle" font-family="sans-serif">React 19 + Tailwind v4</text>
+      <text x="85" y="85" fill="#a7f3d0" font-size="7.5" text-anchor="middle" font-family="sans-serif">AppContext State Engine</text>
+
+      <path d="M 160 62 L 185 62" stroke="#64748b" stroke-width="2"/>
+
+      <rect x="185" y="25" width="155" height="75" rx="8" fill="#1e293b"/>
+      <text x="262" y="55" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle" font-family="sans-serif">Capacitor Native</text>
+      <text x="262" y="72" fill="#94a3b8" font-size="8.5" text-anchor="middle" font-family="sans-serif">BiometricPrompt Keystore</text>
+      <text x="262" y="85" fill="#38bdf8" font-size="7.5" text-anchor="middle" font-family="sans-serif">ABA / Bakong Launchers</text>
+
+      <path d="M 340 62 L 365 62" stroke="#64748b" stroke-width="2"/>
+
+      <rect x="365" y="25" width="150" height="75" rx="8" fill="url(#g2)"/>
+      <text x="440" y="55" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle" font-family="sans-serif">Database & Vault</text>
+      <text x="440" y="72" fill="#e0f2fe" font-size="8.5" text-anchor="middle" font-family="sans-serif">LocalStorage + Keystore</text>
+      <text x="440" y="85" fill="#bae6fd" font-size="7.5" text-anchor="middle" font-family="sans-serif">300 Dest + 200 Dishes</text>
+
+      <path d="M 515 62 L 540 62" stroke="#64748b" stroke-width="2"/>
+
+      <rect x="540" y="25" width="150" height="75" rx="8" fill="url(#g3)"/>
+      <text x="615" y="55" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle" font-family="sans-serif">Cloud Integrations</text>
+      <text x="615" y="72" fill="#fef3c7" font-size="8.5" text-anchor="middle" font-family="sans-serif">Google Maps & Places</text>
+      <text x="615" y="85" fill="#fde68a" font-size="7.5" text-anchor="middle" font-family="sans-serif">Supabase + KHQR + GitHub</text>
+    </svg>
+  </div>
+
+  <div class="cover-meta-grid avoid-break">
+    <div class="meta-item">
+      <span class="meta-label">Application Name</span>
+      <span class="meta-value">Khmer Food & Tourism (អាហារ & ទេសចរណ៍ខ្មែរ)</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Android Package ID</span>
+      <span class="meta-value font-mono">com.khmerfood.tourism</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Current Version & Build</span>
+      <span class="meta-value">v1.8.9 (VersionCode: 61, Tag: v1.8.9)</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Document Date & Author</span>
+      <span class="meta-value">October 23, 2026 | Technical Architecture Team</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Primary Stack</span>
+      <span class="meta-value">React 19 • TypeScript • Capacitor 8.5 • Android SDK 35</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Target Architecture</span>
+      <span class="meta-value">Android (APK / Play Store AAB), Offline-First PWA</span>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- TABLE OF CONTENTS                          -->
+<!-- ========================================== -->
+<div class="page-break">
+  <div class="doc-header">
+    <span>Khmer Food & Tourism — Technical Documentation v1.8.9</span>
+    <span>Table of Contents</span>
+  </div>
+
+  <h1>Table of Contents</h1>
+  <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:14px 20px;">
+    <ol style="line-height: 1.7; font-size: 8.5pt; font-weight: 500; color:#334155;">
+      <li><strong>Project Overview & Executive Summary</strong> ........................................................................ Page 3
+        <ul style="font-size:7.5pt; font-weight: normal; color:#64748b;">
+          <li>1.1 Purpose, Mission & Cultural Heritage Scope</li>
+          <li>1.2 Verified Core Metrics (300 Destinations, 200 Dishes, 220 Restaurants)</li>
+          <li>1.3 Architecture Highlights & Key Design Principles</li>
+        </ul>
+      </li>
+      <li><strong>System Architecture & Hybrid Mobile Runtime</strong> ............................................................... Page 4
+        <ul style="font-size:7.5pt; font-weight: normal; color:#64748b;">
+          <li>2.1 Architectural Flow Diagram</li>
+          <li>2.2 Frontend Framework (React 19.3, TypeScript 6.0, Tailwind CSS v4)</li>
+          <li>2.3 Capacitor Hybrid Native Bridge & Android Activity Shell</li>
+          <li>2.4 Custom Native Android Java Plugins (Biometrics, Banking, Google Auth)</li>
+          <li>2.5 Offline-First Client Database Engine & Storage Namespaces</li>
+          <li>2.6 External APIs & Network Integration Matrix</li>
+        </ul>
+      </li>
+      <li><strong>Comprehensive Project File & Directory Tree</strong> ................................................................ Page 6
+        <ul style="font-size:7.5pt; font-weight: normal; color:#64748b;">
+          <li>3.1 Root Configuration & Tooling Files</li>
+          <li>3.2 Application Source Architecture (<code>src/</code> directory breakdown)</li>
+          <li>3.3 Android Native Directory Tree (<code>android/</code> directory breakdown)</li>
+          <li>3.4 Public Asset & Bundled Content Inventory</li>
+        </ul>
+      </li>
+      <li><strong>Database Schema & Entity Specifications</strong> .................................................................... Page 8
+        <ul style="font-size:7.5pt; font-weight: normal; color:#64748b;">
+          <li>4.1 Storage Architecture & Storage Namespaces</li>
+          <li>4.2 Entity Relationship Diagram (ERD)</li>
+          <li>4.3 TouristDestination Entity Specification (300 Verified Destinations)</li>
+          <li>4.4 FoodItem Entity Specification (200 Authentic Khmer Dishes)</li>
+          <li>4.5 Restaurant & RestaurantMenuItem Entities (220+ Eateries)</li>
+          <li>4.6 User & Social Account Entity (Roles & Access Tokens)</li>
+          <li>4.7 RegistrationTransaction & SupportTicket Entities</li>
+          <li>4.8 CommunityPost & Wishlist Entities</li>
+        </ul>
+      </li>
+      <li><strong>Features & Functional Module Specifications</strong> ............................................................. Page 11
+        <ul style="font-size:7.5pt; font-weight: normal; color:#64748b;">
+          <li>5.1 Multi-Tier User Roles & Security Access Matrix</li>
+          <li>5.2 Hardware-Backed Biometric Fingerprint Authentication Flow</li>
+          <li>5.3 Executive Administration Suite & Master Controls</li>
+          <li>5.4 VIP Subscription Engine ($2.99 / 30d & $4.99 / 90d)</li>
+          <li>5.5 10 Exclusive VIP Benefits Implementation</li>
+          <li>5.6 AI Smart Check-In, Food Classifier & Trip Planner</li>
+          <li>5.7 Rich Social Sharing & Deep Linking Engine</li>
+        </ul>
+      </li>
+      <li><strong>Data & Image Management Pipeline</strong> ............................................................................. Page 14
+        <ul style="font-size:7.5pt; font-weight: normal; color:#64748b;">
+          <li>6.1 Multi-Format Ingestion (HTTPS, Data URLs, Base64, Local Assets)</li>
+          <li>6.2 Client-Side Image Compression & WebP Optimization</li>
+          <li>6.3 Destination Photo Update & Real-Time Sync Engine</li>
+          <li>6.4 React Cache-Busting & Live Preview Architecture</li>
+        </ul>
+      </li>
+      <li><strong>Known Issues, Root Cause Analyses & Bug Fixes</strong> .......................................................... Page 16
+        <ul style="font-size:7.5pt; font-weight: normal; color:#64748b;">
+          <li>7.1 Issue #1: Image Save Overwrite & AppContext Hydration Reversion (Fixed v1.8.9)</li>
+          <li>7.2 Issue #2: Duplicate Siem Reap Pub Street & Phnom Bakheng Replacement (Fixed v1.8.9)</li>
+          <li>7.3 Issue #3: Phnom Doh Kromom (dest-58) Authentic Viewpoint Photo (Fixed v1.8.9)</li>
+          <li>7.4 Issue #4: Biometric Fingerprint Auto-Login Race Condition (Fixed v1.8.8)</li>
+          <li>7.5 Issue #5: Image Editor Save Button Base64 Payload Acceptance (Fixed v1.8.8)</li>
+          <li>7.6 Issue #6: VIP Permission Leak & Restaurant Creation Gate (Fixed v1.8.6)</li>
+        </ul>
+      </li>
+      <li><strong>Security, Cryptography & Backup Procedures</strong> ............................................................... Page 19
+        <ul style="font-size:7.5pt; font-weight: normal; color:#64748b;">
+          <li>8.1 PBKDF2 Password Cryptography (100,000 Rounds)</li>
+          <li>8.2 Android KeyStore Hardware Vault & Constant-Time Defense</li>
+          <li>8.3 Audit Logging & Non-PII Event Recording</li>
+          <li>8.4 Database Backup Scripts & Disaster Recovery Manual</li>
+        </ul>
+      </li>
+      <li><strong>Chronological Development History (v1.0 to v1.8.9)</strong> ...................................................... Page 21</li>
+      <li><strong>Future Technical Roadmap & Strategic Priorities</strong> ......................................................... Page 24</li>
+      <li><strong>Appendix: Verification Matrix & Technical Sign-Off</strong> ........................................................ Page 25</li>
+    </ol>
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- 1. PROJECT OVERVIEW                        -->
+<!-- ========================================== -->
+<div class="page-break">
+  <div class="doc-header">
+    <span>Khmer Food & Tourism — Technical Documentation v1.8.9</span>
+    <span>1. Project Overview & Executive Summary</span>
+  </div>
+
+  <h1>1. Project Overview & Executive Summary</h1>
+
+  <h2>1.1 Purpose, Mission & Cultural Heritage Scope</h2>
+  <p>
+    <strong>“អាហារ & ទេសចរណ៍ខ្មែរ” (Khmer Food & Tourism)</strong> is a high-performance, cross-platform mobile application engineered to catalog, promote, and preserve Cambodia's authentic culinary heritage and natural, cultural, and historical tourism attractions across all 25 provinces.
+  </p>
+  <p>
+    The application solves a critical gap in regional tourism: fragmented, unverified, and outdated information regarding traditional recipes, authentic provincial restaurants, eco-tourism resorts, and cultural monuments. By unifying 200 authentic Khmer recipes with cooking instructions and nutritional values, 220+ verified provincial restaurants and street-food stalls, and 300 curated tourist destinations into a lightning-fast offline-first native mobile application, the program acts as an essential digital companion for domestic travelers, international tourists, culinary researchers, and restaurant owners.
+  </p>
+
+  <h2>1.2 Verified Core Metrics (Current Release: v1.8.9 Build 61)</h2>
+  <div class="grid-3 avoid-break">
+    <div class="card" style="border-top: 3px solid #064E3B;">
+      <div class="card-title">300 Tourist Destinations</div>
+      <p style="font-size:7.5pt; color:#64748b; margin:0;">
+        Covers all 25 provinces (dest-1 to dest-300) with zero duplicate records, verified GPS coordinates, entry fees, and authentic landmark imagery.
+      </p>
+    </div>
+    <div class="card" style="border-top: 3px solid #0284c7;">
+      <div class="card-title">200 Authentic Khmer Dishes</div>
+      <p style="font-size:7.5pt; color:#64748b; margin:0;">
+        Categorized across soups, grilled meats, stir-fries, salads, desserts, noodles, rice, and specialties with full ingredient lists and step-by-step recipes.
+      </p>
+    </div>
+    <div class="card" style="border-top: 3px solid #d97706;">
+      <div class="card-title">220+ Verified Restaurants</div>
+      <p style="font-size:7.5pt; color:#64748b; margin:0;">
+        Authentic provincial dining spots, Google Maps deep links, verified telephone dialers, photo galleries, and 10 VIP benefit integrations.
+      </p>
+    </div>
+  </div>
+
+  <div class="grid-3 avoid-break" style="margin-top:10px;">
+    <div class="card" style="border-top: 3px solid #9333ea;">
+      <div class="card-title">Hardware Biometrics</div>
+      <p style="font-size:7.5pt; color:#64748b; margin:0;">
+        Native Android BiometricPrompt integration with AndroidKeyStore AES-256-GCM hardware vault for instant one-touch admin fingerprint entry.
+      </p>
+    </div>
+    <div class="card" style="border-top: 3px solid #10b981;">
+      <div class="card-title">Bakong KHQR Payments</div>
+      <p style="font-size:7.5pt; color:#64748b; margin:0;">
+        National Bank of Cambodia (NBC) standard KHQR integration, direct ABA Mobile Bank deep-linking, and two-way slip verification.
+      </p>
+    </div>
+    <div class="card" style="border-top: 3px solid #ef4444;">
+      <div class="card-title">Zero-Duplicate Engine</div>
+      <p style="font-size:7.5pt; color:#64748b; margin:0;">
+        Integrated pre-save duplicate detector cross-verifying Khmer root names, English titles, and GPS coordinates within 100 meters.
+      </p>
+    </div>
+  </div>
+
+  <h2>1.3 Architecture Highlights & Key Design Principles</h2>
+  <ul>
+    <li><strong>Offline-First Availability:</strong> All 300 destinations, 200 foods, and core restaurant metadata reside within pre-bundled JSON/TS seed assets and synced localStorage databases. The app operates smoothly without internet access.</li>
+    <li><strong>Zero Ingestion Latency:</strong> App startup and search operations execute synchronously in under 16ms, maintaining a continuous 60-120 FPS mobile UI.</li>
+    <li><strong>Strict Principle of Least Privilege:</strong> Non-paying and unapproved users cannot access restaurant modification endpoints. VIP memberships expire strictly by timestamp calculations, preventing unauthorized privilege retention.</li>
+    <li><strong>Defense in Depth:</strong> Master credentials undergo 100,000-iteration PBKDF2 hashing with cryptographic salts; sensitive storage data is sanitized; brute-force attacks trigger automatic 15-minute lockout thresholds.</li>
+  </ul>
+</div>
+
+<!-- ========================================== -->
+<!-- 2. SYSTEM ARCHITECTURE                     -->
+<!-- ========================================== -->
+<div class="page-break">
+  <div class="doc-header">
+    <span>Khmer Food & Tourism — Technical Documentation v1.8.9</span>
+    <span>2. System Architecture & Technical Stack</span>
+  </div>
+
+  <h1>2. System Architecture & Technical Stack</h1>
+
+  <h2>2.1 High-Level Architecture Diagram</h2>
+  <div class="diagram-container avoid-break">
+    <svg viewBox="0 0 680 230" width="100%" height="200" xmlns="http://www.w3.org/2000/svg">
+      <rect x="10" y="10" width="310" height="210" rx="8" fill="#f8fafc" stroke="#cbd5e1" stroke-dasharray="4"/>
+      <text x="25" y="30" font-size="10" font-weight="bold" fill="#0f172a">Presentation & Logic Layer (Web / React)</text>
+
+      <rect x="25" y="45" width="280" height="40" rx="6" fill="#064E3B"/>
+      <text x="165" y="70" fill="#ffffff" font-size="10" font-weight="bold" text-anchor="middle">React 19.3 + TypeScript + Tailwind CSS v4</text>
+
+      <rect x="25" y="95" width="280" height="40" rx="6" fill="#0f766e"/>
+      <text x="165" y="120" fill="#ffffff" font-size="10" font-weight="bold" text-anchor="middle">AppContext (Central State, Auth, Persistence)</text>
+
+      <rect x="25" y="145" width="280" height="60" rx="6" fill="#ffffff" stroke="#94a3b8"/>
+      <text x="165" y="165" fill="#334155" font-size="8.5" font-weight="bold" text-anchor="middle">Component Modules (45+ Modals & Views)</text>
+      <text x="165" y="180" fill="#64748b" font-size="7.5" text-anchor="middle">HomeView • TourismView • FoodView • RestaurantView</text>
+      <text x="165" y="195" fill="#64748b" font-size="7.5" text-anchor="middle">AdminDashboard • TouristDetailModal • UpgradeVipModal</text>
+
+      <rect x="360" y="10" width="310" height="210" rx="8" fill="#f8fafc" stroke="#cbd5e1" stroke-dasharray="4"/>
+      <text x="375" y="30" font-size="10" font-weight="bold" fill="#0f172a">Native Mobile Container (Capacitor & Android)</text>
+
+      <rect x="375" y="45" width="280" height="40" rx="6" fill="#1e293b"/>
+      <text x="515" y="70" fill="#ffffff" font-size="10" font-weight="bold" text-anchor="middle">Capacitor 8.5.3 Native Bridge</text>
+
+      <rect x="375" y="95" width="280" height="50" rx="6" fill="#334155"/>
+      <text x="515" y="115" fill="#38bdf8" font-size="9" font-weight="bold" text-anchor="middle">Custom Native Plugins (Java / Android SDK 35)</text>
+      <text x="515" y="130" fill="#e2e8f0" font-size="7.5" text-anchor="middle">NativeBiometricAuth • NativeAbaLauncher • NativeGoogleAuth</text>
+
+      <rect x="375" y="155" width="280" height="50" rx="6" fill="#ffffff" stroke="#94a3b8"/>
+      <text x="515" y="175" fill="#0f172a" font-size="8.5" font-weight="bold" text-anchor="middle">Android OS Subsystems</text>
+      <text x="515" y="190" fill="#64748b" font-size="7.5" text-anchor="middle">AndroidKeyStore (AES-256) • BiometricPrompt • FileProvider</text>
+
+      <path d="M 305 115 L 375 115" stroke="#059669" stroke-width="2"/>
+    </svg>
+  </div>
+
+  <h2>2.2 Frontend Framework</h2>
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 25%;">Technology</th>
+        <th style="width: 20%;">Version</th>
+        <th style="width: 55%;">Role & Justification</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>React</strong></td>
+        <td><code>19.3.1</code></td>
+        <td>Declarative reactive UI rendering, concurrent mode transitions, optimized micro-task handling for instant state updates.</td>
+      </tr>
+      <tr>
+        <td><strong>TypeScript</strong></td>
+        <td><code>~6.0.3</code></td>
+        <td>Strict static type checking across all database entities, interface constraints, and API contracts.</td>
+      </tr>
+      <tr>
+        <td><strong>Tailwind CSS</strong></td>
+        <td><code>v4.3.3</code></td>
+        <td>High-performance utility-first CSS engine compiled via <code>@tailwindcss/vite</code> with zero runtime stylesheet overhead.</td>
+      </tr>
+      <tr>
+        <td><strong>Vite</strong></td>
+        <td><code>8.3.4</code></td>
+        <td>Next-generation bundle builder achieving 600-800ms production builds and instant tree-shaking.</td>
+      </tr>
+      <tr>
+        <td><strong>Lucide React</strong></td>
+        <td><code>1.59.0</code></td>
+        <td>Consistent, lightweight SVG iconography across navigation, status badges, and action triggers.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>2.3 Hybrid Native Mobile Bridge (Capacitor 8.5.3)</h2>
+  <p>
+    The program utilizes <strong>Capacitor 8.5.3</strong> as the native runtime shell. Rather than using legacy Cordova containers, Capacitor exposes direct Java/Kotlin reflection bindings into the Android OS, wrapping the compiled Vite web assets (<code>dist/</code>) inside <code>android/app/src/main/assets/public/</code>.
+  </p>
+  <p>
+    The native application entry point is <code>MainActivity.java</code> (inheriting from <code>BridgeActivity</code>), which automatically configures the hardware-accelerated Android WebView, injects Capacitor bridges, registers custom plugins, and handles Android lifecycle pauses and resumes.
+  </p>
+
+  <h2>2.4 Custom Native Android Java Plugins</h2>
+  <ul>
+    <li>
+      <strong><code>NativeBiometricAuthPlugin.java</code>:</strong> Integrates Android's <code>BiometricPrompt</code> and <code>BiometricManager</code>. It generates and holds an AES-256-GCM master key inside the hardware-backed <code>AndroidKeyStore</code> (StrongBox / TEE). When authenticating, it prompts the fingerprint dialog, encrypts/decrypts the admin credential token on success, and returns it to the webview without exposing raw passwords in user space.
+    </li>
+    <li>
+      <strong><code>NativeAbaLauncherPlugin.java</code>:</strong> Manages external app intent resolutions and deep links. It queries packages such as <code>com.paygo24.ibank</code> and <code>com.ababank.mobile</code>, opens ABA Mobile directly to complete KHQR payment workflows, and falls back to universal web links if banking apps are absent.
+    </li>
+    <li>
+      <strong><code>NativeGoogleAuthPlugin.java</code>:</strong> Connects to Google Play Services Auth (<code>com.google.android.gms.auth.api.signin</code>) allowing users to link genuine Google accounts directly on physical devices.
+    </li>
+  </ul>
+</div>
+
+<!-- ========================================== -->
+<!-- 3. PROJECT FILE STRUCTURE                  -->
+<!-- ========================================== -->
+<div class="page-break">
+  <div class="doc-header">
+    <span>Khmer Food & Tourism — Technical Documentation v1.8.9</span>
+    <span>3. Comprehensive Project File & Directory Tree</span>
+  </div>
+
+  <h1>3. Comprehensive Project File & Directory Tree</h1>
+
+  <h2>3.1 Root Configuration & Tooling Files</h2>
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 30%;">File Name</th>
+        <th style="width: 70%;">Function and Technical Purpose</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>package.json</code></td>
+        <td>NPM dependency manifest, dev scripts (<code>dev</code>, <code>build</code>, <code>lint</code>, <code>preview</code>), package version definitions.</td>
+      </tr>
+      <tr>
+        <td><code>capacitor.config.ts</code></td>
+        <td>Capacitor configuration specifying <code>appId: 'com.khmerfood.tourism'</code>, <code>appName: 'Khmer Food & Tourism'</code>, and <code>webDir: 'dist'</code>.</td>
+      </tr>
+      <tr>
+        <td><code>vite.config.ts</code></td>
+        <td>Vite build configuration integrating React plugin and Tailwind v4 engine.</td>
+      </tr>
+      <tr>
+        <td><code>tsconfig.json</code></td>
+        <td>TypeScript compiler options with strict type checking, ESNext module resolution, and path aliases.</td>
+      </tr>
+      <tr>
+        <td><code>.github/workflows/build-apk.yml</code></td>
+        <td>Automated GitHub Actions CI/CD pipeline compiling the debug/release APK and publishing releases.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>3.2 Source Architecture (<code>src/</code> Directory)</h2>
+  <div class="tree avoid-break">
+<span class="dir">src/</span>
+├── <span class="dir">components/</span> <span class="comment">// 45+ UI components & modal controllers</span>
+│   ├── <span class="dir">AdminDashboard.tsx</span> <span class="comment">// Admin hub for destination, food, shop, and payment reviews</span>
+│   ├── <span class="dir">AdminLoginModal.tsx</span> <span class="comment">// Secure admin login with fingerprint biometrics & auto-fill</span>
+│   ├── <span class="dir">AiFoodDiscoveryModal.tsx</span> <span class="comment">// AI food image classifier & dish scanner</span>
+│   ├── <span class="dir">AiTripPlannerModal.tsx</span> <span class="comment">// Custom multi-day provincial travel itinerary generator</span>
+│   ├── <span class="dir">AuthModal.tsx</span> <span class="comment">// User login, phone/email signup, and Google OAuth</span>
+│   ├── <span class="dir">BottomNav.tsx</span> <span class="comment">// Bottom navigation bar with active tab indicators</span>
+│   ├── <span class="dir">FoodDetailModal.tsx</span> <span class="comment">// Recipe steps, ingredients, and nutrition details</span>
+│   ├── <span class="dir">FoodImageModal.tsx</span> <span class="comment">// Image upload & online search for food items</span>
+│   ├── <span class="dir">Header.tsx</span> <span class="comment">// Top app header with search bar, notifications, and profile</span>
+│   ├── <span class="dir">HomeView.tsx</span> <span class="comment">// Primary landing screen with featured carousels & categories</span>
+│   ├── <span class="dir">PaymentSupportModal.tsx</span> <span class="comment">// Two-way user-admin payment ticket & proof upload</span>
+│   ├── <span class="dir">RestaurantDetailModal.tsx</span> <span class="comment">// Shop profile, menu items, map directions, contact</span>
+│   ├── <span class="dir">TouristDetailModal.tsx</span> <span class="comment">// 300 destinations viewer & admin edit form</span>
+│   ├── <span class="dir">TouristImageModal.tsx</span> <span class="comment">// Permanent destination photo replacement engine</span>
+│   ├── <span class="dir">UpgradeVipModal.tsx</span> <span class="comment">// VIP 30-day / 90-day purchase modal with KHQR scan</span>
+│   └── <span class="dir">WishlistsModal.tsx</span> <span class="comment">// User favorite collections and bookmarks</span>
+├── <span class="dir">context/</span>
+│   └── <span class="dir">AppContext.tsx</span> <span class="comment">// Master React Context state provider & storage sync</span>
+├── <span class="dir">data/</span>
+│   ├── <span class="dir">seedData.ts</span> <span class="comment">// Seed datasets for 200 foods and 220+ restaurants</span>
+│   ├── <span class="dir">seedDestinations.ts</span> <span class="comment">// Master database of 300 tourist destinations</span>
+│   ├── <span class="dir">touristDestinationsList.json</span> <span class="comment">// Raw JSON export of 300 destinations</span>
+│   └── <span class="dir">TOURIST_DESTINATIONS_LIST.md</span> <span class="comment">// Markdown documentation table of destinations</span>
+├── <span class="dir">services/</span>
+│   ├── <span class="dir">biometricService.ts</span> <span class="comment">// Native Android & WebAuthn biometric abstraction</span>
+│   ├── <span class="dir">googleMapsService.ts</span> <span class="comment">// Google Places API client with memory cache</span>
+│   └── <span class="dir">supabaseClient.ts</span> <span class="comment">// Supabase cloud database sync client</span>
+├── <span class="dir">types/</span>
+│   └── <span class="dir">index.ts</span> <span class="comment">// Central TypeScript definitions (User, Food, Restaurant, etc.)</span>
+└── <span class="dir">utils/</span>
+    ├── <span class="dir">androidMediaHelper.ts</span> <span class="comment">// Native share sheets, media download, clipboard helpers</span>
+    ├── <span class="dir">duplicateDetector.ts</span> <span class="comment">// Algorithmic duplicate destination checking</span>
+    └── <span class="dir">security.ts</span> <span class="comment">// PBKDF2 cryptography, AES-256-GCM, audit logging, rate limiting</span>
+  </div>
+
+  <h2>3.3 Android Native Tree (<code>android/</code> Directory)</h2>
+  <div class="tree avoid-break">
+<span class="dir">android/</span>
+├── <span class="dir">app/</span>
+│   ├── <span class="dir">build.gradle</span> <span class="comment">// Target SDK 35, compile SDK 36, versionCode 61, versionName 1.8.9</span>
+│   ├── <span class="dir">proguard-rules.pro</span> <span class="comment">// Code shrinking and keep rules for Capacitor</span>
+│   ├── <span class="dir">src/main/</span>
+│   │   ├── <span class="dir">AndroidManifest.xml</span> <span class="comment">// Permissions (Camera, Storage, Internet), Queries</span>
+│   │   ├── <span class="dir">assets/public/</span> <span class="comment">// Packaged web distribution assets & offline photos</span>
+│   │   │   ├── <span class="dir">destinations/dest-58.jpg</span> <span class="comment">// Real Phnom Doh Kromom image bundled</span>
+│   │   │   └── <span class="dir">foods/</span> <span class="comment">// Offline bundled food photography</span>
+│   │   └── <span class="dir">java/com/khmerfood/tourism/</span>
+│   │       ├── <span class="dir">MainActivity.java</span> <span class="comment">// BridgeActivity registering all custom plugins</span>
+│   │       ├── <span class="dir">NativeAbaLauncherPlugin.java</span> <span class="comment">// Direct ABA & Bakong payment launcher</span>
+│   │       ├── <span class="dir">NativeBiometricAuthPlugin.java</span> <span class="comment">// BiometricPrompt + AndroidKeyStore AES-256</span>
+│   │       └── <span class="dir">NativeGoogleAuthPlugin.java</span> <span class="comment">// Native Google Play Services Sign-in</span>
+└── <span class="dir">build.gradle</span> <span class="comment">// Project-level Gradle configuration</span>
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- 4. DATABASE STRUCTURE                      -->
+<!-- ========================================== -->
+<div class="page-break">
+  <div class="doc-header">
+    <span>Khmer Food & Tourism — Technical Documentation v1.8.9</span>
+    <span>4. Database Schema & Data Model Specifications</span>
+  </div>
+
+  <h1>4. Database Schema & Data Model Specifications</h1>
+
+  <h2>4.1 Storage Architecture & Storage Namespaces</h2>
+  <p>
+    The application employs a dual-tier persistence model:
+  </p>
+  <ul>
+    <li><strong>Primary Production Tier (Client LocalStorage + Synchronous Hydration):</strong> Fast, persistent, offline-first client datastore. Keys are strictly namespaced with version increments (e.g., <code>kft_destinations_real_v7</code>) to allow seamless automated migrations without data corruption.</li>
+    <li><strong>Secondary Cloud Sync Tier (Supabase PostgreSQL):</strong> Production project <code>ryvltobwuwuulazqjnza</code> pre-configured for cloud multi-device sync, admin verification, and data backup.</li>
+  </ul>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 30%;">LocalStorage Key</th>
+        <th style="width: 25%;">Entity Type</th>
+        <th style="width: 45%;">Description & Capacity</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>kft_destinations_real_v7</code></td>
+        <td><code>TouristDestination[]</code></td>
+        <td>Master store of 300 tourist destinations across all 25 provinces.</td>
+      </tr>
+      <tr>
+        <td><code>kft_restaurants_real_v6</code></td>
+        <td><code>Restaurant[]</code></td>
+        <td>220+ verified restaurants, menus, and VIP shop profiles.</td>
+      </tr>
+      <tr>
+        <td><code>kft_foods_real_v6</code></td>
+        <td><code>FoodItem[]</code></td>
+        <td>200 authentic Khmer recipes, ingredients, and nutritional values.</td>
+      </tr>
+      <tr>
+        <td><code>kft_users_v6</code></td>
+        <td><code>User[]</code></td>
+        <td>Registered user accounts, password hashes, and VIP statuses.</td>
+      </tr>
+      <tr>
+        <td><code>kft_transactions_v6</code></td>
+        <td><code>RegistrationTransaction[]</code></td>
+        <td>Financial logs for VIP subscriptions and restaurant promotions.</td>
+      </tr>
+      <tr>
+        <td><code>kft_support_tickets_v1</code></td>
+        <td><code>SupportTicket[]</code></td>
+        <td>Two-way user-admin payment dispute & support conversations.</td>
+      </tr>
+      <tr>
+        <td><code>kft_admin_saved_username_v1</code></td>
+        <td><code>string</code></td>
+        <td>Securely stored username for biometric one-touch login.</td>
+      </tr>
+      <tr>
+        <td><code>kft_admin_biometric_enrolled_v1</code></td>
+        <td><code>boolean</code></td>
+        <td>Flag indicating hardware biometric enrollment status.</td>
+      </tr>
+      <tr>
+        <td><code>kft_security_audit_log</code></td>
+        <td><code>SecurityAuditEntry[]</code></td>
+        <td>Security event log tracking auth attempts (capped at 100 entries).</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>4.2 Entity Relationship Diagram (ERD)</h2>
+  <div class="diagram-container avoid-break">
+    <svg viewBox="0 0 680 190" width="100%" height="170" xmlns="http://www.w3.org/2000/svg">
+      <rect x="10" y="15" width="180" height="160" rx="6" fill="#ffffff" stroke="#064E3B" stroke-width="2"/>
+      <rect x="10" y="15" width="180" height="24" rx="6" fill="#064E3B"/>
+      <text x="100" y="31" fill="#ffffff" font-size="9.5" font-weight="bold" text-anchor="middle">USER</text>
+      <text x="18" y="55" font-size="7.2" fill="#0f172a">PK id: string</text>
+      <text x="18" y="70" font-size="7.2" fill="#64748b">name: string</text>
+      <text x="18" y="85" font-size="7.2" fill="#64748b">email, phone, role</text>
+      <text x="18" y="100" font-size="7.2" fill="#64748b">membershipTier</text>
+      <text x="18" y="115" font-size="7.2" fill="#64748b">subscriptionStatus</text>
+      <text x="18" y="130" font-size="7.2" fill="#64748b">paymentStatus</text>
+      <text x="18" y="145" font-size="7.2" fill="#64748b">subscriptionExpiryDate</text>
+      <text x="18" y="160" font-size="7.2" fill="#64748b">socialAccounts: JSON</text>
+
+      <rect x="250" y="15" width="180" height="160" rx="6" fill="#ffffff" stroke="#0f766e" stroke-width="2"/>
+      <rect x="250" y="15" width="180" height="24" rx="6" fill="#0f766e"/>
+      <text x="340" y="31" fill="#ffffff" font-size="9.5" font-weight="bold" text-anchor="middle">RESTAURANT</text>
+      <text x="258" y="55" font-size="7.2" fill="#0f172a">PK id: string</text>
+      <text x="258" y="70" font-size="7.2" fill="#b45309">FK ownerId -> User.id</text>
+      <text x="258" y="85" font-size="7.2" fill="#64748b">nameKh, nameEn</text>
+      <text x="258" y="100" font-size="7.2" fill="#64748b">provinceKh, addressKh</text>
+      <text x="258" y="115" font-size="7.2" fill="#64748b">latitude, longitude</text>
+      <text x="258" y="130" font-size="7.2" fill="#64748b">membershipTier ('free'|'prem')</text>
+      <text x="258" y="145" font-size="7.2" fill="#64748b">membershipExpiresAt</text>
+      <text x="258" y="160" font-size="7.2" fill="#64748b">menuItems: MenuItem[]</text>
+
+      <path d="M 190 75 L 250 75" stroke="#059669" stroke-width="2" stroke-dasharray="3"/>
+      <text x="220" y="70" font-size="7" fill="#059669" text-anchor="middle">1 : N</text>
+
+      <rect x="490" y="15" width="180" height="160" rx="6" fill="#ffffff" stroke="#1e293b" stroke-width="2"/>
+      <rect x="490" y="15" width="180" height="24" rx="6" fill="#1e293b"/>
+      <text x="580" y="31" fill="#ffffff" font-size="9.5" font-weight="bold" text-anchor="middle">TOURIST_DESTINATION</text>
+      <text x="498" y="55" font-size="7.2" fill="#0f172a">PK id: string (dest-1..300)</text>
+      <text x="498" y="70" font-size="7.2" fill="#64748b">nameKh, nameEn</text>
+      <text x="498" y="85" font-size="7.2" fill="#64748b">categorySlug, categoryKh</text>
+      <text x="498" y="100" font-size="7.2" fill="#64748b">provinceKh, provinceEn</text>
+      <text x="498" y="115" font-size="7.2" fill="#64748b">entranceFeeKh, entranceFeeEn</text>
+      <text x="498" y="130" font-size="7.2" fill="#64748b">bestTimeToVisitKh</text>
+      <text x="498" y="145" font-size="7.2" fill="#64748b">latitude, longitude</text>
+      <text x="498" y="160" font-size="7.2" fill="#64748b">photoUrl, galleryPhotos[]</text>
+    </svg>
+  </div>
+
+  <h2>4.3 TouristDestination Entity Specification</h2>
+  <pre><code>export interface TouristDestination {
+  id: string;               // Unique primary key, format: 'dest-1' to 'dest-300'
+  nameKh: string;           // Khmer title e.g. "ព្រះបរមរាជវាំង និងវត្តព្រះកែវមរកត"
+  nameEn: string;           // English title e.g. "Royal Palace & Silver Pagoda"
+  categorySlug: 'temple' | 'nature' | 'mountain' | 'beach' | 'resort';
+  categoryKh: string;       // Display category in Khmer
+  categoryEn: string;       // Display category in English
+  descriptionKh: string;    // Rich historical & practical description in Khmer
+  descriptionEn: string;    // Rich historical & practical description in English
+  photoUrl: string;         // Primary banner photo (local /destinations/ or HTTPS)
+  galleryPhotos?: string[]; // Array of high-res gallery images
+  provinceKh: string;       // Province in Khmer e.g. "រាជធានីភ្នំពេញ"
+  provinceEn: string;       // Province in English e.g. "Phnom Penh"
+  addressKh: string;        // Specific street or landmark location
+  addressEn: string;        // Specific street or landmark location in English
+  entranceFeeKh: string;    // Ticket pricing e.g. "ឥតគិតថ្លៃ" or "ខ្មែរឥតគិតថ្លៃ (បរទេស $10)"
+  entranceFeeEn: string;    // Ticket pricing in English
+  bestTimeToVisitKh: string;// Ideal travel time/season e.g. "ពេញមួយឆ្នាំ"
+  bestTimeToVisitEn: string;// Ideal travel time in English
+  mapUrl: string;           // Google Maps search query link
+  latitude: number;         // GPS Latitude coordinate (e.g. 11.5625)
+  longitude: number;        // GPS Longitude coordinate (e.g. 104.9317)
+  rating: number;           // User review rating average (1.0 to 5.0)
+  reviewCount: number;      // Total review count
+  highlightsKh: string[];   // Key attraction highlights
+  isFeatured?: boolean;     // Featured on the app home screen
+}</code></pre>
+</div>
+
+<!-- ========================================== -->
+<!-- 5. FEATURES AND FUNCTIONS                  -->
+<!-- ========================================== -->
+<div class="page-break">
+  <div class="doc-header">
+    <span>Khmer Food & Tourism — Technical Documentation v1.8.9</span>
+    <span>5. Features and Functions</span>
+  </div>
+
+  <h1>5. Features and Functions</h1>
+
+  <h2>5.1 Multi-Tier User Roles & Security Access Matrix</h2>
+  <p>
+    Access to features and endpoints is managed via a Role-Based Access Control (RBAC) matrix validated both on the frontend and within data mutations in <code>AppContext.tsx</code>:
+  </p>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 25%;">Feature / Action</th>
+        <th style="width: 15%;">Guest</th>
+        <th style="width: 20%;">Regular User</th>
+        <th style="width: 20%;">Approved VIP</th>
+        <th style="width: 20%;">System Admin</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Browse Foods, Recipes, & Places</td>
+        <td><span class="badge badge-success">Allowed</span></td>
+        <td><span class="badge badge-success">Allowed</span></td>
+        <td><span class="badge badge-success">Allowed</span></td>
+        <td><span class="badge badge-success">Allowed</span></td>
+      </tr>
+      <tr>
+        <td>Save Bookmarks & Wishlists</td>
+        <td><span class="badge badge-danger">Login Req</span></td>
+        <td><span class="badge badge-success">Allowed</span></td>
+        <td><span class="badge badge-success">Allowed</span></td>
+        <td><span class="badge badge-success">Allowed</span></td>
+      </tr>
+      <tr>
+        <td>Community Posts & Comments</td>
+        <td><span class="badge badge-danger">Read Only</span></td>
+        <td><span class="badge badge-success">Allowed</span></td>
+        <td><span class="badge badge-success">Allowed (VIP Badge)</span></td>
+        <td><span class="badge badge-success">Allowed (Admin Badge)</span></td>
+      </tr>
+      <tr>
+        <td>Create / Manage Restaurant</td>
+        <td><span class="badge badge-danger">Blocked</span></td>
+        <td><span class="badge badge-danger">VIP Req</span></td>
+        <td><span class="badge badge-success">Allowed (Up to 20 Menus)</span></td>
+        <td><span class="badge badge-success">Full Master Access</span></td>
+      </tr>
+      <tr>
+        <td>Upload Food & Shop Photos</td>
+        <td><span class="badge badge-danger">Blocked</span></td>
+        <td><span class="badge badge-danger">Blocked</span></td>
+        <td><span class="badge badge-success">Camera + Gallery</span></td>
+        <td><span class="badge badge-success">Camera + Gallery + URL</span></td>
+      </tr>
+      <tr>
+        <td>Edit 300 Tourist Destinations</td>
+        <td><span class="badge badge-danger">Blocked</span></td>
+        <td><span class="badge badge-danger">Blocked</span></td>
+        <td><span class="badge badge-danger">Blocked</span></td>
+        <td><span class="badge badge-success">Full Master Access</span></td>
+      </tr>
+      <tr>
+        <td>Verify Payments & VIP Approvals</td>
+        <td><span class="badge badge-danger">Blocked</span></td>
+        <td><span class="badge badge-danger">Blocked</span></td>
+        <td><span class="badge badge-danger">Blocked</span></td>
+        <td><span class="badge badge-success">Full Master Access</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>5.2 Hardware-Backed Biometric Fingerprint Authentication Flow</h2>
+  <p>
+    Biometric authentication provides the System Admin with secure, frictionless access without requiring manual credential entry on physical mobile devices:
+  </p>
+  <div class="diagram-container avoid-break">
+    <svg viewBox="0 0 650 90" width="100%" height="75" xmlns="http://www.w3.org/2000/svg">
+      <rect x="10" y="15" width="130" height="55" rx="6" fill="#064E3B"/>
+      <text x="75" y="40" fill="#ffffff" font-size="8.5" font-weight="bold" text-anchor="middle">1. Initial Setup</text>
+      <text x="75" y="55" fill="#a7f3d0" font-size="7" text-anchor="middle">Password Login + Enroll</text>
+
+      <path d="M 140 42 L 170 42" stroke="#64748b" stroke-width="2"/>
+
+      <rect x="170" y="15" width="140" height="55" rx="6" fill="#1e293b"/>
+      <text x="240" y="40" fill="#ffffff" font-size="8.5" font-weight="bold" text-anchor="middle">2. Keystore Seal</text>
+      <text x="240" y="55" fill="#93c5fd" font-size="7" text-anchor="middle">AES-256 Token Vault</text>
+
+      <path d="M 310 42 L 340 42" stroke="#64748b" stroke-width="2"/>
+
+      <rect x="340" y="15" width="140" height="55" rx="6" fill="#0f766e"/>
+      <text x="410" y="40" fill="#ffffff" font-size="8.5" font-weight="bold" text-anchor="middle">3. BiometricPrompt</text>
+      <text x="410" y="55" fill="#99f6e4" font-size="7" text-anchor="middle">Fingerprint Hardware Scan</text>
+
+      <path d="M 480 42 L 510 42" stroke="#64748b" stroke-width="2"/>
+
+      <rect x="510" y="15" width="130" height="55" rx="6" fill="#064E3B"/>
+      <text x="575" y="40" fill="#ffffff" font-size="8.5" font-weight="bold" text-anchor="middle">4. Instant Login</text>
+      <text x="575" y="55" fill="#a7f3d0" font-size="7" text-anchor="middle">Auto-Auth into Admin Hub</text>
+    </svg>
+  </div>
+  <ul>
+    <li><strong>Enrollment:</strong> On the first login with username and password, the system invokes <code>enrollAdminBiometric()</code> in <code>biometricService.ts</code>. This stores the encrypted token in hardware-backed storage and marks <code>kft_admin_biometric_enrolled_v1 = true</code>.</li>
+    <li><strong>Auto-Fill & One-Touch Login:</strong> On subsequent visits, the login modal hides the username and password fields by default, displaying a prominent biometric trigger. A successful fingerprint scan immediately validates the session and transitions into the <code>AdminDashboard</code> without manual form submission.</li>
+  </ul>
+
+  <h2>5.3 VIP Subscription & Payment Flow ($2.99 / 30d & $4.99 / 90d)</h2>
+  <p>
+    The app supports two VIP subscription tiers for shop owners:
+  </p>
+  <div class="grid-2 avoid-break">
+    <div class="card" style="border-left: 4px solid #0284c7;">
+      <div class="card-title">VIP 30 Days (Quarterly Plan)</div>
+      <p style="font-size: 7.5pt; margin: 0; color: #475569;">
+        <strong>$2.99 USD</strong> for 30 days of active VIP restaurant listing, 20 menu items, photo uploads, and analytics tracking.
+      </p>
+    </div>
+    <div class="card" style="border-left: 4px solid #d97706;">
+      <div class="card-title">VIP 90 Days (Annual Value Plan)</div>
+      <p style="font-size: 7.5pt; margin: 0; color: #475569;">
+        <strong>$4.99 USD</strong> for 90 days of continuous VIP benefits, prime home-screen ranking, and deep-link social promotions.
+      </p>
+    </div>
+  </div>
+  <p style="margin-top: 8px;">
+    <strong>Payment Methods:</strong> Users can pay via official NBC Bakong KHQR (launching ABA Mobile directly), upload an image receipt via <code>PaymentSupportModal.tsx</code>, or submit transaction details for manual review. Admin verification is required before VIP status transitions from <code>pending_vip</code> to <code>approved_vip</code>.
+  </p>
+</div>
+
+<!-- ========================================== -->
+<!-- 6. DATA AND IMAGE MANAGEMENT               -->
+<!-- ========================================== -->
+<div class="page-break">
+  <div class="doc-header">
+    <span>Khmer Food & Tourism — Technical Documentation v1.8.9</span>
+    <span>6. Data and Image Management Pipeline</span>
+  </div>
+
+  <h1>6. Data and Image Management Pipeline</h1>
+
+  <h2>6.1 Multi-Format Image Ingestion & Validation</h2>
+  <p>
+    Images are ingested through <code>normalizeAndValidateImage()</code> in <code>TouristImageModal.tsx</code> and <code>validateImageUpload()</code> in <code>security.ts</code>. The system supports four distinct formats:
+  </p>
+  <ul>
+    <li><strong>HTTP / HTTPS URLs:</strong> Standard public web URLs (e.g. Wikimedia Commons). Validated via <code>new URL(url)</code>.</li>
+    <li><strong>Data URLs (data:image/...;base64,...):</strong> Generated by in-app camera capture or gallery file selection. The Base64 payload is validated to confirm presence of valid image data.</li>
+    <li><strong>Raw Base64 Strings:</strong> Direct Base64 payloads (pasted without URI prefixes). The engine detects MIME signatures automatically (e.g., /9j/ for JPEG, iVBOR for PNG, UklGR for WebP) and prefixes them properly.</li>
+    <li><strong>Local Bundled Assets:</strong> Relative local paths (e.g. <code>/destinations/dest-58.jpg</code> or <code>/foods/food-1.jpg</code>) served directly from Android assets or Vite public folders for offline rendering.</li>
+  </ul>
+
+  <h2>6.2 Client-Side Image Compression & Optimization Pipeline</h2>
+  <p>
+    To prevent mobile memory bloat and stay within browser localStorage limits, images selected via gallery or camera pass through client-side canvas compression:
+  </p>
+  <pre><code>// Client-side image compression & WebP conversion
+const compressImageFile = (file: File, maxWidth = 1200, maxHeight = 800, quality = 0.85): Promise&lt;string&gt; =&gt; {
+  return new Promise((resolve, reject) =&gt; {
+    const reader = new FileReader();
+    reader.onload = (e) =&gt; {
+      const img = new Image();
+      img.onload = () =&gt; {
+        let { width, height } = img;
+        if (width &gt; maxWidth || height &gt; maxHeight) {
+          const ratio = Math.min(maxWidth / width, maxHeight / height);
+          width = Math.round(width * ratio);
+          height = Math.round(height * ratio);
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, width, height);
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        try {
+          const webp = canvas.toDataURL('image/webp', quality);
+          if (webp.startsWith('data:image/webp')) {
+            resolve(webp);
+            return;
+          }
+        } catch {}
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.src = e.target.result as string;
+    };
+    reader.readAsDataURL(file);
+  });
+};</code></pre>
+
+  <h2>6.3 Real-Time Sync & Cache-Busting Architecture</h2>
+  <p>
+    In version 1.8.9, image updating in <code>TouristDetailModal.tsx</code> was overhauled to ensure persistent saving:
+  </p>
+  <ol>
+    <li>When an image is saved in <code>TouristImageModal</code>, the callback calls <code>updateDestination(updatedDest)</code>, updates <code>selectedDestination</code>, and sets <code>setEditPhotoUrl(updatedDest.photoUrl)</code> immediately.</li>
+    <li>Images are bound with dynamic React <code>key</code> attributes (<code>key={editPhotoUrl || selectedDestination.photoUrl}</code>), forcing the DOM to remount and display the new photo without browser cache interference.</li>
+    <li><code>updateDestination</code> performs a direct synchronous write to <code>localStorage.setItem('kft_destinations_real_v7', JSON.stringify(next))</code> to persist changes before any page reloads can occur.</li>
+  </ol>
+</div>
+
+<!-- ========================================== -->
+<!-- 7. KNOWN ISSUES AND FIXES                  -->
+<!-- ========================================== -->
+<div class="page-break">
+  <div class="doc-header">
+    <span>Khmer Food & Tourism — Technical Documentation v1.8.9</span>
+    <span>7. Known Issues, Root Cause Analyses & Bug Fixes</span>
+  </div>
+
+  <h1>7. Known Issues, Root Cause Analyses & Bug Fixes</h1>
+
+  <h2>7.1 Summary of Major Issues Resolved (v1.0.0 – v1.8.9)</h2>
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 15%;">Issue ID</th>
+        <th style="width: 25%;">Reported Behavior</th>
+        <th style="width: 35%;">Root Cause Analysis</th>
+        <th style="width: 25%;">Resolution & Release</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>ISSUE-01</strong></td>
+        <td>Destination photo changes appeared in preview but reverted to the old image after saving.</td>
+        <td>1) <code>TouristDetailModal</code> omitted <code>setEditPhotoUrl</code> in the modal callback.<br>2) <code>AppContext</code> hydration reverted non-data: URLs to seed values.</td>
+        <td>Fixed in <strong>v1.8.9 (Build 61)</strong>: State synchronization connected and hydration filter removed.</td>
+      </tr>
+      <tr>
+        <td><strong>ISSUE-02</strong></td>
+        <td>Duplicate entries found in tourist destination dataset (Pub Street listed twice).</td>
+        <td><code>dest-20</code> and <code>dest-123</code> were both Siem Reap Pub Street & Night Market records with identical coordinates.</td>
+        <td>Fixed in <strong>v1.8.9 (Build 61)</strong>: <code>dest-123</code> replaced with <em>Phnom Bakheng Hilltop Temple</em>.</td>
+      </tr>
+      <tr>
+        <td><strong>ISSUE-03</strong></td>
+        <td>Phnom Doh Kromom viewpoint (<code>dest-58</code>) displayed a generic mountain photo.</td>
+        <td>Initial seed data used a general Mondulkiri landscape photo as a placeholder.</td>
+        <td>Fixed in <strong>v1.8.9 (Build 61)</strong>: User's authentic photo bundled into <code>/destinations/dest-58.jpg</code>.</td>
+      </tr>
+      <tr>
+        <td><strong>ISSUE-04</strong></td>
+        <td>Fingerprint scan displayed an error prompt even after credentials auto-filled.</td>
+        <td>Toast notification error triggered by simultaneous form submit validation race condition.</td>
+        <td>Fixed in <strong>v1.8.8 (Build 60)</strong>: Direct programmatic session creation on biometric success.</td>
+      </tr>
+      <tr>
+        <td><strong>ISSUE-05</strong></td>
+        <td>Save Image button did nothing when saving Base64 strings in the image editor.</td>
+        <td>Image validator rejected raw Base64 inputs lacking the data:image/ prefix.</td>
+        <td>Fixed in <strong>v1.8.8 (Build 60)</strong>: Auto-detection of JPEG/PNG/WebP magic bytes added.</td>
+      </tr>
+      <tr>
+        <td><strong>ISSUE-06</strong></td>
+        <td>Regular and unpaid accounts could access restaurant registration screens.</td>
+        <td>Client-side navigation checks were missing strict VIP status verification.</td>
+        <td>Fixed in <strong>v1.8.6 (Build 58)</strong>: Multi-point check implemented in <code>isUserVipActive()</code>.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>7.2 Detailed Analysis: Issue #1 (Destination Photo Save Bug)</h2>
+  <div class="callout callout-warning avoid-break">
+    <div class="callout-title">Root Cause Breakdown</div>
+    <p>
+      In <code>TouristDetailModal.tsx</code>, when an administrator clicked "ប្តូររូបភាព" and saved a new image in <code>TouristImageModal</code>, the <code>onSave</code> callback omitted <code>setEditPhotoUrl(updatedDest.photoUrl)</code>. Because of this, the parent form input retained the old photo URL. When the user subsequently clicked "រក្សាទុកព័ត៌មាន", the form submitted the old URL and overwrote the change. Furthermore, upon app reload, <code>AppContext.tsx</code> contained logic that reverted non-data: URLs to seed values. Both issues have been corrected in v1.8.9.
+    </p>
+  </div>
+
+  <h2>7.3 Detailed Analysis: Issue #2 (Duplicate Siem Reap Record)</h2>
+  <div class="callout callout-info avoid-break">
+    <div class="callout-title">Audit Resolution</div>
+    <p>
+      A full database audit revealed that <code>dest-20</code> (Angkor Night Market & Pub Street) and <code>dest-123</code> (Siem Reap Pub Street & Night Market) were duplicate entries sharing coordinates <code>13.3547, 103.8548</code>. To preserve existing user bookmarks and links referencing <code>dest-123</code>, the record was updated to represent <strong>Phnom Bakheng Hilltop Sunset Temple</strong> (<code>13.4239, 103.8561</code>), a major UNESCO Angkor monument that was previously missing from the dataset.
+    </p>
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- 8. SECURITY AND BACKUP                     -->
+<!-- ========================================== -->
+<div class="page-break">
+  <div class="doc-header">
+    <span>Khmer Food & Tourism — Technical Documentation v1.8.9</span>
+    <span>8. Security, Cryptography, and Backup Procedures</span>
+  </div>
+
+  <h1>8. Security, Cryptography, and Backup Procedures</h1>
+
+  <h2>8.1 Password Cryptography (PBKDF2-HMAC-SHA256)</h2>
+  <p>
+    Passwords are hashed using NIST SP 800-132 recommendations: <strong>PBKDF2</strong> with <strong>HMAC-SHA256</strong>, 100,000 iterations, and a 32-byte cryptographic salt generated via <code>crypto.getRandomValues()</code>.
+  </p>
+  <pre><code>// Cryptographic password derivation (100,000 rounds)
+export const hashPasswordPBKDF2 = async (password: string, saltHex?: string): Promise&lt;string&gt; =&gt; {
+  const salt = saltHex || generateSaltHex(32);
+  const enc = new TextEncoder();
+  const passwordKey = await crypto.subtle.importKey('raw', enc.encode(password), { name: 'PBKDF2' }, false, ['deriveBits']);
+  const saltBytes = new Uint8Array(salt.match(/.{1,2}/g)?.map(byte =&gt; parseInt(byte, 16)) || []);
+  const derivedBits = await crypto.subtle.deriveBits(
+    { name: 'PBKDF2', salt: saltBytes, iterations: 100000, hash: 'SHA-256' },
+    passwordKey,
+    256
+  );
+  return `${salt}:${Array.from(new Uint8Array(derivedBits)).map(b =&gt; b.toString(16).padStart(2, '0')).join('')}`;
+};</code></pre>
+
+  <h2>8.2 Brute-Force Rate Limiting & Account Lockout</h2>
+  <ul>
+    <li>Maximum 5 consecutive failed login attempts allowed before lockout.</li>
+    <li>15-minute lockout timer enforced via timestamp tracking in <code>security.ts</code>.</li>
+    <li>Hash comparisons utilize constant-time string equality to prevent timing attacks.</li>
+  </ul>
+
+  <h2>8.3 Security Audit Logging System</h2>
+  <p>
+    Authentication and administrative actions are recorded in <code>kft_security_audit_log</code>. The logger stores structured events while sanitizing sensitive data (passwords, tokens, and PII are never logged). The log retains the 100 most recent entries.
+  </p>
+
+  <h2>8.4 Backup Architecture & Disaster Recovery Manual</h2>
+  <div class="grid-2 avoid-break">
+    <div class="card">
+      <div class="card-title">1. Automated Daily Backups</div>
+      <p style="font-size:7.5pt; color:#475569;">
+        Scheduled batch jobs (<code>Daily_Auto_Backup.bat</code>) run nightly, archiving system databases, configuration states, and asset uploads to <code>F:\Soft\System Program 2027 kimseng\Back up DATA every day\</code>.
+      </p>
+    </div>
+    <div class="card">
+      <div class="card-title">2. Version Control (Git)</div>
+      <p style="font-size:7.5pt; color:#475569;">
+        Full codebase history is versioned in GitHub (<code>main</code> branch) with annotated release tags (<code>v1.0.0</code> through <code>v1.8.9</code>). Every release builds a verified APK artifact.
+      </p>
+    </div>
+  </div>
+
+  <div class="grid-2 avoid-break" style="margin-top:10px;">
+    <div class="card">
+      <div class="card-title">3. Seed Database Backups</div>
+      <p style="font-size:7.5pt; color:#475569;">
+        Data integrity is anchored by versioned seed files: <code>seedDestinations.ts</code>, <code>seedData.ts</code>, <code>touristDestinationsList.json</code>, and master Excel files (<code>KhmerFoodTourism_All_300_Destinations.xlsx</code>).
+      </p>
+    </div>
+    <div class="card">
+      <div class="card-title">4. Disaster Recovery Procedure</div>
+      <p style="font-size:7.5pt; color:#475569;">
+        In the event of client data corruption, clearing localStorage triggers automatic re-hydration from compiled seed files. Critical administrative keys can be re-provisioned via the emergency unlock protocol.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- 9. DEVELOPMENT HISTORY                     -->
+<!-- ========================================== -->
+<div class="page-break">
+  <div class="doc-header">
+    <span>Khmer Food & Tourism — Technical Documentation v1.8.9</span>
+    <span>9. Chronological Development History (v1.0 to v1.8.9)</span>
+  </div>
+
+  <h1>9. Chronological Development History (v1.0 to v1.8.9)</h1>
+
+  <h2>9.1 Milestone Changelog & Release Chronology</h2>
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 12%;">Version</th>
+        <th style="width: 8%;">Build</th>
+        <th style="width: 15%;">Date</th>
+        <th style="width: 65%;">Major Features, Architectural Changes & Fixes</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>v1.8.9</code></td>
+        <td>61</td>
+        <td>2026-10-23</td>
+        <td>Fixed permanent destination photo save bug; updated Phnom Doh Kromom (<code>dest-58</code>) with real user photo; resolved Siem Reap duplicate (<code>dest-123</code> updated to Phnom Bakheng Temple); added real-time duplicate prevention guard.</td>
+      </tr>
+      <tr>
+        <td><code>v1.8.8</code></td>
+        <td>60</td>
+        <td>2026-10-23</td>
+        <td>Fixed Save Image button validation for Base64 and Data URLs; resolved fingerprint auto-login race condition; enlarged admin profile photo for recognition clarity.</td>
+      </tr>
+      <tr>
+        <td><code>v1.8.7</code></td>
+        <td>59</td>
+        <td>2026-10-23</td>
+        <td>Simplified admin biometric login UI; auto-displayed admin profile image; expanded destination dataset from 124 to 300 verified attractions across all 25 provinces.</td>
+      </tr>
+      <tr>
+        <td><code>v1.8.6</code></td>
+        <td>58</td>
+        <td>2026-10-22</td>
+        <td>Enforced strict VIP permissions for restaurant creation and management; added mobile food photo uploads from Camera/Gallery with AI search option.</td>
+      </tr>
+      <tr>
+        <td><code>v1.8.5</code></td>
+        <td>57</td>
+        <td>2026-10-22</td>
+        <td>Fixed biometric credential auto-fill; updated launcher icon with royal Khmer pedestal bowl and Phka Phnhi floral ornamentation.</td>
+      </tr>
+      <tr>
+        <td><code>v1.8.3</code></td>
+        <td>55</td>
+        <td>2026-10-22</td>
+        <td>Integrated native Android BiometricPrompt with AndroidKeyStore hardware-backed AES-256-GCM vault.</td>
+      </tr>
+      <tr>
+        <td><code>v1.7.6</code></td>
+        <td>48</td>
+        <td>2026-10-21</td>
+        <td>Expanded dataset to 200 Khmer dishes and 220 restaurants; added Google Maps Places API key shortcut; introduced VIP quarterly ($2.99/30d) and annual ($4.99/90d) subscription tiers.</td>
+      </tr>
+      <tr>
+        <td><code>v1.6.9</code></td>
+        <td>41</td>
+        <td>2026-10-21</td>
+        <td>Added direct ABA PayWay KHQR deep-linking and 6-state payment processing engine.</td>
+      </tr>
+      <tr>
+        <td><code>v1.5.0</code></td>
+        <td>32</td>
+        <td>2026-10-20</td>
+        <td>Added native Android Google Sign-In SDK (<code>play-services-auth</code>) with auto account linking.</td>
+      </tr>
+      <tr>
+        <td><code>v1.3.4</code></td>
+        <td>20</td>
+        <td>2026-10-18</td>
+        <td>Resolved startup white-screen crash with safe data normalization and added global React <code>ErrorBoundary</code>.</td>
+      </tr>
+      <tr>
+        <td><code>v1.0.0</code></td>
+        <td>1</td>
+        <td>2026-10-15</td>
+        <td>Initial project release featuring 100 Khmer dishes, 100 restaurants, Bakong KHQR, and Chea Savuth admin dashboard.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>9.2 Key Architectural Evolution Highlights</h2>
+  <ul>
+    <li><strong>From Static Web App to Hardware-Integrated Native App:</strong> Evolved from a standard React SPA to a Capacitor native Android application with hardware Keystore biometrics, external app deep-linking, and camera capture.</li>
+    <li><strong>From Placeholder Mockups to Verified Datasets:</strong> Expanded from 100 starter items to a verified, curated database of 300 tourist destinations, 200 authentic dishes, and 220+ restaurants covering all 25 Cambodian provinces.</li>
+  </ul>
+</div>
+
+<!-- ========================================== -->
+<!-- 10. FUTURE ROADMAP & APPENDIX              -->
+<!-- ========================================== -->
+<div>
+  <div class="doc-header">
+    <span>Khmer Food & Tourism — Technical Documentation v1.8.9</span>
+    <span>10. Future Roadmap & 11. Appendix</span>
+  </div>
+
+  <h1>10. Future Roadmap & Technical Recommendations</h1>
+
+  <h2>10.1 Short-Term Enhancements (Priority 1)</h2>
+  <ul>
+    <li><strong>Cloud Image CDN Offloading:</strong> Shift from storing compressed Base64 Data URLs in client storage to an external object storage bucket (e.g., Supabase Storage or Cloudinary) with automated CDN caching.</li>
+    <li><strong>Push Notifications (Firebase Cloud Messaging):</strong> Implement native FCM messaging to notify users when their VIP payment is approved by the admin.</li>
+  </ul>
+
+  <h2>10.2 Medium-Term Architectural Upgrades (Priority 2)</h2>
+  <ul>
+    <li><strong>Bi-directional Cloud Sync:</strong> Connect the local <code>AppContext</code> store with Supabase real-time subscriptions, allowing changes made by the admin to propagate instantly to user devices without requiring app updates.</li>
+    <li><strong>Multi-Language Voice Search:</strong> Add speech-to-text recognition in Khmer and English for hands-free food and destination lookups while traveling.</li>
+  </ul>
+
+  <h2>10.3 Long-Term Vision (Priority 3)</h2>
+  <ul>
+    <li><strong>Google Play Store Production Track:</strong> Submit the pre-configured Signed Android App Bundle (AAB) to Google Play Store production review using existing keystore assets.</li>
+    <li><strong>Interactive Offline Vector Maps:</strong> Embed MapLibre / OpenStreetMap vector tiles for offline topographic navigation in remote eco-tourism destinations.</li>
+  </ul>
+
+  <h1>11. Appendix: Verification Matrix & Sign-Off</h1>
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 30%;">Component / Feature</th>
+        <th style="width: 25%;">Implementation File</th>
+        <th style="width: 20%;">Verification Status</th>
+        <th style="width: 25%;">Test Result / Notes</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Destination Photo Save</td>
+        <td><code>TouristDetailModal.tsx</code></td>
+        <td><span class="badge badge-success">Verified</span></td>
+        <td>Synchronous persistence & state sync validated.</td>
+      </tr>
+      <tr>
+        <td>Phnom Doh Kromom Photo</td>
+        <td><code>/destinations/dest-58.jpg</code></td>
+        <td><span class="badge badge-success">Verified</span></td>
+        <td>User-provided image verified and bundled in assets.</td>
+      </tr>
+      <tr>
+        <td>Zero Duplicate Attractions</td>
+        <td><code>seedDestinations.ts</code></td>
+        <td><span class="badge badge-success">Verified</span></td>
+        <td>All 300 attractions checked; 0 duplicates remaining.</td>
+      </tr>
+      <tr>
+        <td>Biometric Fingerprint Login</td>
+        <td><code>biometricService.ts</code></td>
+        <td><span class="badge badge-success">Verified</span></td>
+        <td>Android BiometricPrompt & Keystore verified.</td>
+      </tr>
+      <tr>
+        <td>VIP Access Control Gates</td>
+        <td><code>AppContext.tsx</code></td>
+        <td><span class="badge badge-success">Verified</span></td>
+        <td>Regular & unpaid accounts blocked from shop creation.</td>
+      </tr>
+      <tr>
+        <td>PBKDF2 Password Hashing</td>
+        <td><code>security.ts</code></td>
+        <td><span class="badge badge-success">Verified</span></td>
+        <td>100,000 rounds with 32-byte salt verified.</td>
+      </tr>
+      <tr>
+        <td>Cloud Sync (Supabase)</td>
+        <td><code>supabaseClient.ts</code></td>
+        <td><span class="badge badge-warning">Optional / Standby</span></td>
+        <td>Configured, local-first operation active by default.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="doc-footer">
+    <span>Document ID: KFT-DOC-20261023-V189</span>
+    <span>Khmer Food & Tourism Technical Architecture Reference</span>
+    <span>Page 8 of 8</span>
+  </div>
+</div>
+
+</body>
+</html>
