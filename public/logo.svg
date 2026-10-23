@@ -1,30 +1,43 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
   <defs>
+    <linearGradient id="emeraldBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#065F46" />
+      <stop offset="60%" stop-color="#064E3B" />
+      <stop offset="100%" stop-color="#022C22" />
+    </linearGradient>
     <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#F59E0B" />
-      <stop offset="50%" stop-color="#D97706" />
+      <stop offset="0%" stop-color="#FCD34D" />
+      <stop offset="25%" stop-color="#F59E0B" />
+      <stop offset="65%" stop-color="#D97706" />
       <stop offset="100%" stop-color="#B45309" />
     </linearGradient>
-    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#78350F" />
-      <stop offset="100%" stop-color="#451A03" />
+    <linearGradient id="goldRim" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FDE68A" />
+      <stop offset="50%" stop-color="#FFFBEB" />
+      <stop offset="100%" stop-color="#FDE68A" />
     </linearGradient>
+    <filter id="emblemShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#011F18" flood-opacity="0.55"/>
+    </filter>
   </defs>
-  <rect width="100" height="100" rx="24" fill="url(#bgGrad)" />
-  <!-- Temple Silhouette & Lotus Bowl -->
-  <path d="M50 15 L53 25 L47 25 Z" fill="url(#goldGrad)" />
-  <path d="M44 26 L56 26 L50 18 Z" fill="url(#goldGrad)" />
-  <!-- Central Spire -->
-  <path d="M48 27 L52 27 L54 42 L46 42 Z" fill="url(#goldGrad)" />
-  <path d="M42 34 L45 34 L46 42 L41 42 Z" fill="url(#goldGrad)" />
-  <path d="M58 34 L55 34 L54 42 L59 42 Z" fill="url(#goldGrad)" />
-  <!-- Food / Steaming Bowl -->
-  <path d="M25 50 Q50 42 75 50 Q72 75 50 78 Q28 75 25 50 Z" fill="url(#goldGrad)" />
-  <path d="M22 49 Q50 45 78 49 Q74 53 50 53 Q26 53 22 49 Z" fill="#FDE68A" />
-  <!-- Steam Leaves / Apsara crown touch -->
-  <path d="M38 44 Q40 37 45 42" stroke="#FEF3C7" stroke-width="2.5" stroke-linecap="round" fill="none" />
-  <path d="M50 42 Q52 34 57 40" stroke="#FEF3C7" stroke-width="2.5" stroke-linecap="round" fill="none" />
-  <path d="M62 44 Q64 38 68 43" stroke="#FEF3C7" stroke-width="2.5" stroke-linecap="round" fill="none" />
-  <!-- Base Stand -->
-  <path d="M38 78 L62 78 L65 83 L35 83 Z" fill="url(#goldGrad)" opacity="0.9" />
+  <rect width="100" height="100" rx="22" fill="url(#emeraldBg)" />
+  <rect x="3.5" y="3.5" width="93" height="93" rx="19.5" fill="none" stroke="#F59E0B" stroke-width="0.8" opacity="0.3" />
+  <g transform="translate(50, 50) scale(0.80) translate(-50, -50)" filter="url(#emblemShadow)">
+    <!-- Temple Silhouette & Lotus Bowl -->
+    <path d="M50 16 L53 26 L47 26 Z" fill="url(#goldGrad)" />
+    <path d="M44 27 L56 27 L50 19 Z" fill="url(#goldGrad)" />
+    <!-- Central Spire -->
+    <path d="M48 28 L52 28 L54 43 L46 43 Z" fill="url(#goldGrad)" />
+    <path d="M42 35 L45 35 L46 43 L41 43 Z" fill="url(#goldGrad)" />
+    <path d="M58 35 L55 35 L54 43 L59 43 Z" fill="url(#goldGrad)" />
+    <!-- Food / Steaming Bowl -->
+    <path d="M25 51 Q50 43 75 51 Q72 76 50 79 Q28 76 25 51 Z" fill="url(#goldGrad)" />
+    <path d="M22 50 Q50 46 78 50 Q74 54 50 54 Q26 54 22 50 Z" fill="url(#goldRim)" />
+    <!-- Steam Leaves / Apsara crown touch -->
+    <path d="M38 45 Q40 38 45 43" stroke="#FEF3C7" stroke-width="2.5" stroke-linecap="round" fill="none" />
+    <path d="M50 43 Q52 35 57 41" stroke="#FEF3C7" stroke-width="2.5" stroke-linecap="round" fill="none" />
+    <path d="M62 45 Q64 39 68 44" stroke="#FEF3C7" stroke-width="2.5" stroke-linecap="round" fill="none" />
+    <!-- Base Stand -->
+    <path d="M38 79 L62 79 L65 84 L35 84 Z" fill="url(#goldGrad)" opacity="0.95" />
+  </g>
 </svg>

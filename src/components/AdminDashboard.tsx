@@ -37,7 +37,16 @@ export const AdminDashboard: React.FC = () => {
     supportTickets, replyToSupportTicket, updateSupportTicketStatus, approveVipFromSupportTicket, markSupportTicketRead
   } = useApp();
 
-  const [activeTab, setActiveTab] = useState<'stats' | 'support_tickets' | 'food' | 'restaurants' | 'destinations' | 'community' | 'users' | 'transactions' | 'settings' | 'security' | 'image_audit' | 'ai_checkins'>('stats');
+  const [activeTab, setActiveTab] = useState<'stats' | 'support_tickets' | 'food' | 'restaurants' | 'destinations' | 'community' | 'users' | 'transactions' | 'settings' | 'security' | 'image_audit' | 'ai_checkins'>(() => {
+    return (window as any).__kft_admin_tab || 'stats';
+  });
+
+  useEffect(() => {
+    if ((window as any).__kft_admin_tab) {
+      setActiveTab((window as any).__kft_admin_tab);
+      delete (window as any).__kft_admin_tab;
+    }
+  }, [isAdminOpen]);
   const [adminReplyDrafts, setAdminReplyDrafts] = useState<Record<string, string>>({});
   const [inspectingTicketReceipt, setInspectingTicketReceipt] = useState<string | null>(null);
   const [ticketFilter, setTicketFilter] = useState<'all' | 'Pending' | 'Replied' | 'Resolved'>('all');

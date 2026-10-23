@@ -968,28 +968,30 @@ export const HomeView: React.FC = () => {
             </span>
           </button>
 
-          {/* 1b. Auto Online Food Photo Search ($0 Free) */}
-          <button
-            onClick={() => setActiveTab('food')}
-            className="p-3.5 rounded-2xl bg-gradient-to-r from-teal-700 via-emerald-800 to-[#064E3B] text-white text-left shadow-md flex items-center justify-between transition hover:scale-[1.01] active:scale-98 cursor-pointer ring-2 ring-amber-400/50"
-          >
-            <div className="flex items-center gap-2.5">
-              <div className="w-10 h-10 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center shadow-sm shrink-0 font-bold text-base">
-                🤖
+          {/* 1b. Auto Online Food Photo Search ($0 Free) - ADMIN ONLY per Requirement #1 */}
+          {currentUser?.role === 'admin' && (
+            <button
+              onClick={() => setActiveTab('food')}
+              className="p-3.5 rounded-2xl bg-gradient-to-r from-teal-700 via-emerald-800 to-[#064E3B] text-white text-left shadow-md flex items-center justify-between transition hover:scale-[1.01] active:scale-98 cursor-pointer ring-2 ring-amber-400/50"
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center shadow-sm shrink-0 font-bold text-base">
+                  🤖
+                </div>
+                <div>
+                  <span className="font-bold text-xs block text-amber-300 font-khmer">
+                    {isKm ? '🤖 ស្វែងរករូបភាពម្ហូបពី Online ដោយស្វ័យប្រវត្តិ (Admin)' : '🤖 Auto-Search Food Photos Online (Admin)'}
+                  </span>
+                  <span className="text-[10px] text-emerald-200 block font-khmer">
+                    {isKm ? 'ប្តូររូបភាពមុខម្ហូបពី Online • ឥតគិតថ្លៃ $0' : 'Wikimedia & TheMealDB • Free $0'}
+                  </span>
+                </div>
               </div>
-              <div>
-                <span className="font-bold text-xs block text-amber-300 font-khmer">
-                  {isKm ? '🤖 ស្វែងរករូបភាពម្ហូបពី Online ដោយស្វ័យប្រវត្តិ' : '🤖 Auto-Search Food Photos Online'}
-                </span>
-                <span className="text-[10px] text-emerald-200 block font-khmer">
-                  {isKm ? 'ប្តូររូបភាពមុខម្ហូបពី Online • ឥតគិតថ្លៃ $0' : 'Wikimedia & TheMealDB • Free $0'}
-                </span>
-              </div>
-            </div>
-            <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[9px] font-black uppercase tracking-wider font-sans shrink-0">
-              {isKm ? 'ឥតគិតថ្លៃ $0' : 'FREE $0'}
-            </span>
-          </button>
+              <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[9px] font-black uppercase tracking-wider font-sans shrink-0">
+                {isKm ? 'ឥតគិតថ្លៃ $0' : 'FREE $0'}
+              </span>
+            </button>
+          )}
 
           {/* 2. Restaurant Check-in & GPS Location (Admin Only per Requirement #3) */}
           {currentUser?.role === 'admin' && (

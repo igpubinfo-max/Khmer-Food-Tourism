@@ -351,8 +351,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       localStorage.removeItem('kft_foods_100_v3');
     } catch {}
     try {
-      const saved = localStorage.getItem('kft_foods_200_v5') || localStorage.getItem('kft_foods_200_v4');
-      localStorage.removeItem('kft_foods_200_v4');
+      const saved = localStorage.getItem('kft_foods_200_v6') || localStorage.getItem('kft_foods_200_v5');
+      localStorage.removeItem('kft_foods_200_v5');
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length >= 50 && parsed[0]?.photoUrl?.startsWith('/foods/')) {
@@ -1106,7 +1106,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return;
     }
     if (foods && foods.length > 0) {
-      scheduleStorageWrite('kft_foods_200_v5', foods, 1500);
+      scheduleStorageWrite('kft_foods_200_v6', foods, 1500);
     }
   }, [foods]);
 

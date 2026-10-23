@@ -28,7 +28,8 @@ export const ProfileView: React.FC = () => {
     deleteRestaurant,
     resetAllData, showToast, updateCurrentUserProfile,
     openUpgradeVipModal,
-    supportTickets, openSupportTicketModal, transactions
+    supportTickets, openSupportTicketModal, transactions,
+    setActiveTab, setIsRestaurantCheckInModalOpen
   } = useApp();
 
   const isKm = language === 'km';
@@ -44,8 +45,14 @@ export const ProfileView: React.FC = () => {
   const [selectedVipPowerPanel, setSelectedVipPowerPanel] = useState<'analytics' | 'reels' | 'photos' | 'rank' | null>('analytics');
 
   const [activeSubTab, setActiveSubTab] = useState<'bookmarks' | 'wishlists' | 'tripplans' | 'myposts' | 'settings' | 'myrestaurant' | 'membership'>(
-    isOwner ? 'myrestaurant' : 'wishlists'
+    currentUser?.role === 'admin' ? 'settings' : (isOwner ? 'myrestaurant' : 'wishlists')
   );
+
+  useEffect(() => {
+    if (currentUser?.role === 'admin' && activeSubTab === 'membership') {
+      setActiveSubTab('settings');
+    }
+  }, [currentUser?.role, activeSubTab]);
   const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
   const [tempName, setTempName] = useState('');
@@ -205,7 +212,12 @@ export const ProfileView: React.FC = () => {
                   
                   {/* Verified Badge & Role & VIP Status */}
                   <div className="flex items-center gap-1.5 flex-wrap mt-1">
-                    {isVip ? (
+                    {currentUser.role === 'admin' ? (
+                      <span className="inline-flex items-center gap-1 px-3 py-0.5 rounded-full text-[11px] font-black bg-rose-100 text-rose-800 dark:bg-rose-950/80 dark:text-rose-300 border border-rose-300 dark:border-rose-700 shadow-2xs font-khmer">
+                        <Shield className="w-3.5 h-3.5 text-rose-600 fill-rose-600" />
+                        <span>🛡️ Administrator</span>
+                      </span>
+                    ) : isVip ? (
                       <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black bg-gradient-to-r from-amber-200 to-amber-300 text-amber-950 border border-amber-400 shadow-2xs font-khmer">
                         <Crown className="w-3.5 h-3.5 fill-amber-700 text-amber-700" />
                         <span>{isKm ? 'Premium VIP 🌟' : 'Premium VIP 🌟'}</span>
@@ -219,15 +231,15 @@ export const ProfileView: React.FC = () => {
                       <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                       <span>{isKm ? 'គណនីបានផ្ទៀងផ្ទាត់ ✓' : 'Verified Account ✓'}</span>
                     </span>
-                    <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold font-khmer ${
-                      currentUser.role === 'admin' 
-                        ? 'bg-rose-100 text-rose-700 border border-rose-200' 
-                        : currentUser.role === 'owner' 
-                        ? 'bg-amber-100 text-amber-900 border border-amber-300' 
-                        : 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200 border border-slate-300'
-                    }`}>
-                      {currentUser.role === 'admin' ? '🛡️ Administrator' : currentUser.role === 'owner' ? '🏪 ម្ចាស់ហាង' : '👤 អ្នកប្រើប្រាស់'}
-                    </span>
+                    {currentUser.role !== 'admin' && (
+                      <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold font-khmer ${
+                        currentUser.role === 'owner' 
+                          ? 'bg-amber-100 text-amber-900 border border-amber-300' 
+                          : 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200 border border-slate-300'
+                      }`}>
+                        {currentUser.role === 'owner' ? '🏪 ម្ចាស់ហាង' : '👤 អ្នកប្រើប្រាស់'}
+                      </span>
+                    )}
                   </div>
 
                   {currentUser.role === 'admin' ? (
@@ -309,7 +321,7 @@ export const ProfileView: React.FC = () => {
       </div>
 
       {/* Connected Social Media Accounts (TikTok & Facebook) - Requires VIP per Requirement 3 */}
-      {currentUser && (
+      {currentUser && currentUser.role !== 'admin' && (
         <div className={`p-4 rounded-3xl border shadow-xs space-y-3 font-khmer transition-all ${
           isVip || currentUser.role === 'admin'
             ? 'bg-white dark:bg-slate-800 border-slate-200/90 dark:border-slate-700'
@@ -548,8 +560,130 @@ export const ProfileView: React.FC = () => {
         </div>
       )}
 
-      {/* Membership Status & VIP Upgrade Banner Card */}
-      {isVip ? (
+      {/* Admin Executive Hub OR Membership Status & VIP Upgrade Banner Card */}
+      {currentUser?.role === 'admin' ? (
+        /* CLEAN EXECUTIVE ADMIN COMMAND HUB */
+        <div className="p-4 sm:p-5 rounded-3xl bg-gradient-to-br from-[#064E3B] via-[#047857] to-slate-900 text-white border-2 border-emerald-400/50 shadow-xl space-y-4 font-khmer animate-fade-in">
+          {/* Header */}
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <div className="flex items-center gap-3">
+              <div className="p-3 rounded-2xl bg-gradient-to-br from-amber-400 to-yellow-500 text-slate-950 shadow-lg ring-4 ring-amber-400/20">
+                <Shield className="w-6 h-6 fill-slate-950" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h3 className="text-sm sm:text-base font-black text-white font-moul">
+                    {isKm ? 'ផ្ទាំងបញ្ជារដ្ឋបាលកំពូល' : 'Administrator Command Hub'}
+                  </h3>
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-400/20 text-emerald-300 border border-emerald-400/40">
+                    ● SYSTEM ONLINE
+                  </span>
+                </div>
+                <p className="text-[11px] text-emerald-200 mt-0.5">
+                  {isKm ? 'គ្រប់គ្រងទិន្នន័យ ម្ហូប ហាង ទេសចរណ៍ និងអ្នកប្រើប្រាស់ទូទាំងប្រទេស' : 'System data management, food, restaurants, tourism & users'}
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setIsAdminOpen(true)}
+              className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-black text-xs shadow-md transition shrink-0 active:scale-95 cursor-pointer flex items-center gap-1.5"
+            >
+              <Sparkles className="w-4 h-4 fill-slate-950" />
+              <span>{isKm ? 'បើកផ្ទាំងគ្រប់គ្រង (Dashboard)' : 'Open Dashboard'}</span>
+            </button>
+          </div>
+
+          {/* Live System Data Quick Counters */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+            <div 
+              onClick={() => setActiveTab('food')}
+              className="p-3 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/15 backdrop-blur-xs transition cursor-pointer active:scale-95 text-center"
+            >
+              <div className="text-xl">🍲</div>
+              <div className="text-lg font-black text-white font-mono mt-0.5">{foods.length}</div>
+              <div className="text-[10px] text-emerald-200 font-bold">{isKm ? 'មុខម្ហូប (Dishes)' : 'Dishes'}</div>
+            </div>
+
+            <div 
+              onClick={() => setActiveTab('restaurants')}
+              className="p-3 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/15 backdrop-blur-xs transition cursor-pointer active:scale-95 text-center"
+            >
+              <div className="text-xl">🏪</div>
+              <div className="text-lg font-black text-white font-mono mt-0.5">{restaurants.length}</div>
+              <div className="text-[10px] text-emerald-200 font-bold">
+                {isKm ? `ហាងអាហារ (${restaurants.filter(r => r.isVip).length} VIP)` : `Restaurants (${restaurants.filter(r => r.isVip).length} VIP)`}
+              </div>
+            </div>
+
+            <div 
+              onClick={() => setActiveTab('tourism')}
+              className="p-3 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/15 backdrop-blur-xs transition cursor-pointer active:scale-95 text-center"
+            >
+              <div className="text-xl">🗺️</div>
+              <div className="text-lg font-black text-white font-mono mt-0.5">{destinations.length}</div>
+              <div className="text-[10px] text-emerald-200 font-bold">{isKm ? 'តំបន់ទេសចរណ៍' : 'Destinations'}</div>
+            </div>
+
+            <div 
+              onClick={() => { (window as any).__kft_admin_tab = 'users'; setIsAdminOpen(true); }}
+              className="p-3 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/15 backdrop-blur-xs transition cursor-pointer active:scale-95 text-center"
+            >
+              <div className="text-xl">👥</div>
+              <div className="text-lg font-black text-white font-mono mt-0.5">{users.length}</div>
+              <div className="text-[10px] text-emerald-200 font-bold">
+                {isKm ? `អ្នកប្រើប្រាស់ (${users.filter(u => isUserVipActive(u)).length} VIP)` : `Users (${users.filter(u => isUserVipActive(u)).length} VIP)`}
+              </div>
+            </div>
+          </div>
+
+          {/* Admin Quick Action Shortcuts */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
+            <button
+              type="button"
+              onClick={() => setIsAdminOpen(true)}
+              className="p-3 rounded-2xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs flex items-center gap-2.5 transition active:scale-95 cursor-pointer shadow-md"
+            >
+              <Shield className="w-4 h-4 shrink-0 fill-slate-950" />
+              <div className="text-left">
+                <div className="font-black">{isKm ? '🛠️ ផ្ទាំងគ្រប់គ្រងរដ្ឋបាល' : '🛠️ Admin Dashboard'}</div>
+                <div className="text-[10px] text-slate-800">{isKm ? 'អនុម័តហាង & ត្រួតពិនិត្យរូបថត' : 'Approvals & Audit'}</div>
+              </div>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setIsRestaurantCheckInModalOpen(true)}
+              className="p-3 rounded-2xl bg-white/15 hover:bg-white/20 border border-white/20 text-white font-bold text-xs flex items-center gap-2.5 transition active:scale-95 cursor-pointer"
+            >
+              <MapPin className="w-4 h-4 shrink-0 text-emerald-300" />
+              <div className="text-left">
+                <div className="font-bold">{isKm ? '📍 ឆែកអ៊ីន & បញ្ជាក់ GPS' : '📍 GPS Check-In'}</div>
+                <div className="text-[10px] text-emerald-200">{isKm ? 'បញ្ជាក់ទីតាំងផ្ទាល់ដល់ហាង' : 'On-Site Verification'}</div>
+              </div>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => { (window as any).__kft_admin_tab = 'support_tickets'; setIsAdminOpen(true); }}
+              className="p-3 rounded-2xl bg-white/15 hover:bg-white/20 border border-white/20 text-white font-bold text-xs flex items-center gap-2.5 transition active:scale-95 cursor-pointer relative"
+            >
+              <MessageSquare className="w-4 h-4 shrink-0 text-amber-300" />
+              <div className="text-left flex-1 min-w-0">
+                <div className="font-bold flex items-center justify-between">
+                  <span>{isKm ? '📩 សារជំនួយ & សំបុត្រ' : '📩 Support Tickets'}</span>
+                  {supportTickets.filter(t => t.status === 'open').length > 0 && (
+                    <span className="px-1.5 py-0.2 rounded-full bg-rose-500 text-white text-[9px] font-black">
+                      {supportTickets.filter(t => t.status === 'open').length}
+                    </span>
+                  )}
+                </div>
+                <div className="text-[10px] text-emerald-200 truncate">{isKm ? 'ឆ្លើយតបសំណើអតិថិជន' : 'Resolve tickets'}</div>
+              </div>
+            </button>
+          </div>
+        </div>
+      ) : isVip ? (
         /* SUPER POTENTIAL VIP ACCOUNT DASHBOARD */
         <div className="p-4 sm:p-5 rounded-3xl bg-gradient-to-br from-amber-500/20 via-yellow-500/10 to-amber-600/25 border-2 border-amber-400/80 shadow-md space-y-3.5 transition animate-fade-in font-khmer">
           {/* Header row */}
@@ -1021,8 +1155,8 @@ export const ProfileView: React.FC = () => {
         </div>
       )}
 
-      {/* Requirement 1: Contact Admin / Payment Support & Support Messages / Payment History */}
-      {currentUser && (() => {
+      {/* Requirement 1: Contact Admin / Payment Support & Support Messages / Payment History - Users Only */}
+      {currentUser && currentUser.role !== 'admin' && (() => {
         const mySupportTickets = supportTickets.filter(t => t.userId === currentUser.id);
         const unreadAdminReplies = mySupportTickets.filter(t => t.unreadByUser).length;
         const myPaymentHistory = transactions.filter(
@@ -1163,42 +1297,44 @@ export const ProfileView: React.FC = () => {
         );
       })()}
 
-      {/* App Installation & Support Buttons Showcase */}
-      <div className="grid grid-cols-2 gap-2.5">
-        <button
-          onClick={() => setIsInstallModalOpen(true)}
-          className="p-3 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/90 dark:border-slate-700 shadow-xs flex items-center gap-2.5 hover:bg-slate-50 dark:hover:bg-slate-700/60 transition text-left"
-        >
-          <div className="p-2 rounded-xl bg-[#064E3B] text-white shrink-0">
-            <Download className="w-4 h-4 text-emerald-200" />
-          </div>
-          <div>
-            <div className="text-xs font-bold text-[#0F172A] dark:text-white font-khmer">
-              {isKm ? 'ដំឡើង APK' : 'Install App'}
+      {/* App Installation & Support Buttons Showcase - Users Only */}
+      {currentUser?.role !== 'admin' && (
+        <div className="grid grid-cols-2 gap-2.5">
+          <button
+            onClick={() => setIsInstallModalOpen(true)}
+            className="p-3 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/90 dark:border-slate-700 shadow-xs flex items-center gap-2.5 hover:bg-slate-50 dark:hover:bg-slate-700/60 transition text-left"
+          >
+            <div className="p-2 rounded-xl bg-[#064E3B] text-white shrink-0">
+              <Download className="w-4 h-4 text-emerald-200" />
             </div>
-            <div className="text-[10px] text-slate-500 font-khmer">
-              {isKm ? 'ទាញយក APK ផ្ទាល់' : 'Direct APK Download'}
+            <div>
+              <div className="text-xs font-bold text-[#0F172A] dark:text-white font-khmer">
+                {isKm ? 'ដំឡើង APK' : 'Install App'}
+              </div>
+              <div className="text-[10px] text-slate-500 font-khmer">
+                {isKm ? 'ទាញយក APK ផ្ទាល់' : 'Direct APK Download'}
+              </div>
             </div>
-          </div>
-        </button>
+          </button>
 
-        <button
-          onClick={() => setIsSupportModalOpen(true)}
-          className="p-3 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/90 dark:border-slate-700 shadow-xs flex items-center gap-2.5 hover:bg-slate-50 dark:hover:bg-slate-700/60 transition text-left"
-        >
-          <div className="p-2 rounded-xl bg-[#10B981] text-white shrink-0">
-            <Heart className="w-4 h-4 fill-white" />
-          </div>
-          <div>
-            <div className="text-xs font-bold text-[#0F172A] dark:text-white font-khmer">
-              {isKm ? 'ជួយឧបត្ថម្ភ' : 'Support App'}
+          <button
+            onClick={() => setIsSupportModalOpen(true)}
+            className="p-3 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/90 dark:border-slate-700 shadow-xs flex items-center gap-2.5 hover:bg-slate-50 dark:hover:bg-slate-700/60 transition text-left"
+          >
+            <div className="p-2 rounded-xl bg-[#10B981] text-white shrink-0">
+              <Heart className="w-4 h-4 fill-white" />
             </div>
-            <div className="text-[10px] text-slate-500 font-khmer">
-              {isKm ? 'Bakong KHQR' : 'Bakong KHQR'}
+            <div>
+              <div className="text-xs font-bold text-[#0F172A] dark:text-white font-khmer">
+                {isKm ? 'ជួយឧបត្ថម្ភ' : 'Support App'}
+              </div>
+              <div className="text-[10px] text-slate-500 font-khmer">
+                {isKm ? 'Bakong KHQR' : 'Bakong KHQR'}
+              </div>
             </div>
-          </div>
-        </button>
-      </div>
+          </button>
+        </div>
+      )}
 
       {/* 6 Personalized Account Features Hub */}
       <div className="p-4 rounded-3xl bg-gradient-to-br from-emerald-950 via-[#064E3B] to-slate-900 text-white border border-emerald-500/40 shadow-xs space-y-3 font-khmer">
@@ -1399,19 +1535,21 @@ export const ProfileView: React.FC = () => {
             {isKm ? `ការបង្ហោះ (${myPosts.length})` : `Posts (${myPosts.length})`}
           </button>
 
-          <button
-            onClick={() => setActiveSubTab('membership')}
-            className={`py-2.5 font-bold text-center border-b-2 transition whitespace-nowrap px-3 ${
-              activeSubTab === 'membership'
-                ? 'border-amber-500 text-amber-600 dark:border-amber-400 dark:text-amber-400 font-extrabold'
-                : 'border-transparent text-slate-400 hover:text-slate-700'
-            }`}
-          >
-            <span className="flex items-center gap-1">
-              <Crown className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-              <span>{isKm ? (isVip ? '👑 សមាជិក VIP' : '👑 សមាជិកភាព') : '👑 Membership'}</span>
-            </span>
-          </button>
+          {currentUser?.role !== 'admin' && (
+            <button
+              onClick={() => setActiveSubTab('membership')}
+              className={`py-2.5 font-bold text-center border-b-2 transition whitespace-nowrap px-3 ${
+                activeSubTab === 'membership'
+                  ? 'border-amber-500 text-amber-600 dark:border-amber-400 dark:text-amber-400 font-extrabold'
+                  : 'border-transparent text-slate-400 hover:text-slate-700'
+              }`}
+            >
+              <span className="flex items-center gap-1">
+                <Crown className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+                <span>{isKm ? (isVip ? '👑 សមាជិក VIP' : '👑 សមាជិកភាព') : '👑 Membership'}</span>
+              </span>
+            </button>
+          )}
 
           <button
             onClick={() => setActiveSubTab('settings')}

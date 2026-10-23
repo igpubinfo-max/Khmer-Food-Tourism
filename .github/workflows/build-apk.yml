@@ -69,7 +69,7 @@ jobs:
           echo "=== SEARCHING FOR GENERATED APK FILES ==="
           find . -name "*.apk" -ls
           cd android/app/build/outputs/apk/debug
-          mv app-debug.apk KhmerFoodTourism-v1.7.9.apk
+          mv app-debug.apk KhmerFoodTourism-v1.8.0.apk
           ls -la
 
       # Play Store AAB build disabled during regular edits per user instruction (enable only when requested)
@@ -81,7 +81,7 @@ jobs:
       #     ./gradlew bundleRelease --no-daemon -x lint -x lintVitalRelease
       #     AAB_FILE=$(find app/build/outputs/bundle -name "*.aab" | head -n 1)
       #     echo "Found AAB: $AAB_FILE"
-      #     cp "$AAB_FILE" app/build/outputs/apk/debug/KhmerFoodTourism-v1.7.7.aab
+      #     cp "$AAB_FILE" app/build/outputs/apk/debug/KhmerFoodTourism-v1.8.0.aab
       #     cp app/khmerfood-upload-key.jks app/build/outputs/apk/debug/khmerfood-upload-key.jks
       #     ls -la app/build/outputs/apk/debug/
 
@@ -96,8 +96,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: v1.7.9
-          name: "Khmer Food & Tourism v1.7.9 (Admin Edit for Foods/Shops/Travel & Glowing VIP Button)"
+          tag_name: v1.8.0
+          name: "Khmer Food & Tourism v1.8.0 (Admin Auto-Search Tool, Centered App Icon & Clean Admin Portal)"
           make_latest: true
           body: |
             ### 🇰🇭 កម្មវិធីទូរស័ព្ទដៃ អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism Mobile App)
