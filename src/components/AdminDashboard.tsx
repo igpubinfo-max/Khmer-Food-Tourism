@@ -282,10 +282,10 @@ export const AdminDashboard: React.FC = () => {
               <img 
                 src={currentUser?.avatar || '/images/admin_profile.png'} 
                 alt="Chea Savuth Admin" 
-                className="w-12 h-12 rounded-2xl object-cover border-2 border-emerald-300 shadow-md ring-2 ring-emerald-400/30" 
+                className="w-16 h-16 rounded-2xl object-cover border-2 border-emerald-300 shadow-md ring-2 ring-emerald-400/40" 
               />
-              <div className="absolute -bottom-1 -right-1 p-0.5 bg-emerald-600 rounded-full border border-white text-white shadow-xs">
-                <Shield className="w-3 h-3 text-white" />
+              <div className="absolute -bottom-1 -right-1 p-1 bg-emerald-600 rounded-full border border-white text-white shadow-xs">
+                <Shield className="w-3.5 h-3.5 text-white" />
               </div>
             </div>
             <div>

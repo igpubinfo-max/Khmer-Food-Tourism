@@ -69,7 +69,7 @@ jobs:
           echo "=== SEARCHING FOR GENERATED APK FILES ==="
           find . -name "*.apk" -ls
           cd android/app/build/outputs/apk/debug
-          mv app-debug.apk KhmerFoodTourism-v1.8.7.apk
+          mv app-debug.apk KhmerFoodTourism-v1.8.8.apk
           ls -la
 
       # Play Store AAB build disabled during regular edits per user instruction (enable only when requested)
@@ -96,23 +96,22 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: v1.8.7
-          name: "Khmer Food & Tourism v1.8.7 (Simplified Admin Fingerprint Login, Admin Avatar & 300 Destinations)"
+          tag_name: v1.8.8
+          name: "Khmer Food & Tourism v1.8.8 (Fixed Save Image, Fingerprint Auto-Login & Enlarged Profile Photo)"
           make_latest: true
           body: |
             ### 🇰🇭 កម្មវិធីទូរស័ព្ទដៃ អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism Mobile App)
             
-            **កំណែថ្មី v1.8.7 (Simplified Admin Fingerprint Login, Admin Profile Picture & 300 Tourist Destinations):**
-            - 👆 **១. សម្រួលការចូលគណនី Admin កាន់តែរហ័ស (Simplified 1-Tap Biometric Fingerprint Login):**
-              - លាក់ Username និង Password ជាលំនាំដើម ដោយបង្ហាញតែប៊ូតុងស្កេនមេដៃធំទូលាយ «👆 ស្កេនស្នាមមេដៃចូលរដ្ឋបាល» ចូលបានភ្លាមៗក្នុងរយៈពេលត្រឹមតែ ១ វិនាទី។
-              - ប្រសិនបើ Admin ប្រើប្រាស់ទូរស័ព្ទថ្មី ឬមិនទាន់ចុះឈ្មោះស្កេនមេដៃ ប្រព័ន្ធនឹងបង្ហាញទម្រង់ Username/Password សម្រាប់ចូលលើកដំបូង រួចចុះឈ្មោះចូល Android Keystore (AES-256-GCM) ដោយស្វ័យប្រវត្តិ។
-              - មានប៊ូតុងបិទបើក «🔑 ចូលដោយប្រើពាក្យសម្ងាត់» សម្រាប់ករណីចង់វាយពាក្យសម្ងាត់ដោយផ្ទាល់។
-            - 👤 **២. បង្ហាញរូបថត Profile Admin ដោយស្វ័យប្រវត្តិ (Automatic Admin Profile Picture Display):**
-              - ផ្ទុករូបថតផ្លូវការរបស់លោក Chea Savuth / Admin ដោយស្វ័យប្រវត្តិតាមការស្នើសុំ ទាំងនៅលើផ្ទាំង Admin Login, Navigation Header និងផ្ទាំងគ្រប់គ្រង Admin Dashboard។
-            - 🏛️ **៣. ពង្រីកមូលដ្ឋានទិន្នន័យទេសចរណ៍ឡើងដល់ ៣០០ កន្លែងពេញលេញ (300 Verified Cambodian Destinations):**
-              - ពង្រីកពី ១២៤ កន្លែង ឡើងដល់ ៣០០ កន្លែងពិតៗ (dest-1 ដល់ dest-300) គ្រប់ដណ្តប់គ្រប់រាជធានី-ខេត្តទាំង ២៥ ក្នុងព្រះរាជាណាចក្រកម្ពុជា។
-              - គ្មានការស្ទួនទិន្នន័យ (0 duplicates) ផ្ទៀងផ្ទាត់ឈ្មោះ ទីតាំង រូបភាពពិតៗកម្រិតច្បាស់ កូអរដោនេផែនទី និងការពិពណ៌នាលម្អិតទាំងភាសាខ្មែរ និងអង់គ្លេស។
-              - ភ្ជាប់មកជាមួយឯកសារតារាងបញ្ជី Excel & CSV ពេញលេញសម្រាប់ទាញយក។
+            **កំណែថ្មី v1.8.8 (Fixed Save Image Button, Fingerprint Auto-Login & Enlarged Profile Photo):**
+            - 🖼️ **១. ជួសជុលប៊ូតុងរក្សាទុករូបភាព (Fixed Save Image Button in Image Editor):**
+              - ដោះស្រាយបញ្ហាចុចប៊ូតុង «រក្សាទុករូបភាព» មិនដើរ ដោយគាំទ្រការផ្ទៀងផ្ទាត់ និងទទួលស្គាល់ទាំង Base64, Data URL (`data:image/...`), តំណភ្ជាប់ HTTPS និងកូដរូបភាពផ្ទាល់។
+              - បង្ហាញរូបភាពផ្ទាល់ភ្លាមៗ (Instant Live Preview) ពេលបិទភ្ជាប់ (Paste) តំណភ្ជាប់ ឬកូដ Base64 ចូលក្នុងប្រអប់។
+              - រក្សាទុក និងបង្រួមទំហំស្វ័យប្រវត្តិដើម្បីកុំឱ្យលើសទំហំផ្ទុក និងបង្ហាញសារជោគជ័យភ្លាមៗ។
+            - 👆 **២. ជួសជុលការចូលដោយស្កេនមេដៃស្វ័យប្រវត្តិ (Fixed Fingerprint Auto-Login):**
+              - ដោះស្រាយបញ្ហាលោត Error ពេលស្កេនមេដៃជោគជ័យ ដោយភ្ជាប់មុខងារ Login និង Toast Notification យ៉ាងរលូន។
+              - ពេលស្កេនមេដៃត្រឹមត្រូវ ប្រព័ន្ធនឹងបំពេញ Username & Password និងចូលទៅកាន់ផ្ទាំងគ្រប់គ្រង Admin ដោយស្វ័យប្រវត្តិតែម្តង ដោយមិនចាំបាច់ចុចប៊ូតុងអ្វីបន្ថែមឡើយ។
+            - 👤 **៣. ពង្រីកទំហំរូបថត Profile Admin ឱ្យធំច្បាស់ (Enlarged Admin Profile Photo):**
+              - កាត់ និងពង្រីករូបថតលោក Chea Savuth / Admin ឱ្យផ្ទៃមុខធំច្បាស់ ងាយស្រួលចំណាំ និងមានទំហំធំទូលាយនៅលើផ្ទាំង Login និង Admin Dashboard។
             - 🔒 **៤. រក្សាសុវត្ថិភាព VIP Permissions & Food Image Upload យ៉ាងពេញលេញ:**
               - រក្សាប្រព័ន្ធការពារសិទ្ធិ VIP លើការចុះបញ្ជី និងគ្រប់គ្រងហាងយ៉ាងរឹងមាំ និងការអាប់ឡូតរូបភាពម្ហូបពី Camera / Gallery។
               - `Awaiting Payment` (រង់ចាំការទូទាត់)

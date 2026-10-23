@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { TouristDestination } from '../types';
 import { 
   X, Upload, Image as ImageIcon, Check, RefreshCw, 
-  MapPin, Sliders, Smartphone, Sparkles, CheckCircle2
+  MapPin, Smartphone, Sparkles, CheckCircle2, AlertCircle
 } from 'lucide-react';
 
 interface TouristImageModalProps {
@@ -62,6 +62,117 @@ const compressImageFile = (
   });
 };
 
+// Compress large Data URL strings directly (to avoid localStorage quota overflow)
+const compressDataUrl = (
+  dataUrl: string,
+  maxWidth = 1200,
+  maxHeight = 800,
+  quality = 0.85
+): Promise<string> => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      let width = img.width;
+      let height = img.height;
+      if (width > maxWidth || height > maxHeight) {
+        const ratio = Math.min(maxWidth / width, maxHeight / height);
+        width = Math.round(width * ratio);
+        height = Math.round(height * ratio);
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        resolve(dataUrl);
+        return;
+      }
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, width, height);
+      ctx.drawImage(img, 0, 0, width, height);
+      try {
+        const webp = canvas.toDataURL('image/webp', quality);
+        if (webp.startsWith('data:image/webp')) {
+          resolve(webp);
+          return;
+        }
+      } catch {}
+      resolve(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.onerror = () => resolve(dataUrl);
+    img.src = dataUrl;
+  });
+};
+
+// Normalize and validate any image format (HTTP/HTTPS, Data URL, or raw Base64)
+export const normalizeAndValidateImage = (
+  input: string,
+  isKm = true
+): { isValid: boolean; normalizedUrl: string; error?: string } => {
+  const trimmed = (input || '').trim();
+  if (!trimmed) {
+    return {
+      isValid: false,
+      normalizedUrl: '',
+      error: isKm ? 'សូមបញ្ចូលតំណភ្ជាប់រូបភាព ឬជ្រើសរើសឯកសារ' : 'Please provide an image URL or choose a file'
+    };
+  }
+
+  // 1. Data URL format: data:image/webp;base64,... or data:image/jpeg;base64,...
+  if (trimmed.startsWith('data:image/')) {
+    const commaIdx = trimmed.indexOf(',');
+    if (commaIdx === -1 || commaIdx === trimmed.length - 1) {
+      return {
+        isValid: false,
+        normalizedUrl: '',
+        error: isKm ? 'ទម្រង់ Data URL មិនត្រឹមត្រូវ (ខ្វះទិន្នន័យ Base64)' : 'Invalid Data URL format (Missing Base64 payload)'
+      };
+    }
+    return { isValid: true, normalizedUrl: trimmed };
+  }
+
+  // 2. Raw Base64 string without data:image/ scheme (auto-detect signature)
+  if (
+    trimmed.startsWith('/9j/') || // JPEG
+    trimmed.startsWith('iVBOR') || // PNG
+    trimmed.startsWith('UklGR') || // WebP
+    trimmed.startsWith('R0lGO')    // GIF
+  ) {
+    let mime = 'image/jpeg';
+    if (trimmed.startsWith('iVBOR')) mime = 'image/png';
+    else if (trimmed.startsWith('UklGR')) mime = 'image/webp';
+    else if (trimmed.startsWith('R0lGO')) mime = 'image/gif';
+    return { isValid: true, normalizedUrl: `data:${mime};base64,${trimmed}` };
+  }
+
+  // 3. HTTP / HTTPS URL
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+    try {
+      new URL(trimmed);
+      return { isValid: true, normalizedUrl: trimmed };
+    } catch {
+      return {
+        isValid: false,
+        normalizedUrl: '',
+        error: isKm ? 'តំណភ្ជាប់ URL មិនត្រឹមត្រូវ' : 'Invalid URL syntax'
+      };
+    }
+  }
+
+  // 4. Local relative paths (/foods/..., /images/...)
+  if (trimmed.startsWith('/') || trimmed.startsWith('./')) {
+    return { isValid: true, normalizedUrl: trimmed };
+  }
+
+  return {
+    isValid: false,
+    normalizedUrl: '',
+    error: isKm 
+      ? 'សូមបញ្ចូលតំណភ្ជាប់រូបភាព (https://...) ឬ Data URL (data:image/...)' 
+      : 'Please provide a valid image URL (https://...) or Data URL (data:image/...)'
+  };
+};
+
 export const TouristImageModal: React.FC<TouristImageModalProps> = ({
   destination,
   isOpen,
@@ -101,9 +212,9 @@ export const TouristImageModal: React.FC<TouristImageModalProps> = ({
       return;
     }
 
-    // Validate size (max 15MB before compression)
-    if (file.size > 15 * 1024 * 1024) {
-      setErrorMsg(isKm ? 'ទំហំរូបភាពធំពេក (អតិបរមា 15MB)' : 'File size is too large (max 15MB)');
+    // Validate size (max 20MB before compression)
+    if (file.size > 20 * 1024 * 1024) {
+      setErrorMsg(isKm ? 'ទំហំរូបភាពធំពេក (អតិបរមា 20MB)' : 'File size is too large (max 20MB)');
       return;
     }
 
@@ -121,41 +232,83 @@ export const TouristImageModal: React.FC<TouristImageModalProps> = ({
         compSize: `${compKb} KB`,
       });
     } catch (err: any) {
-      setErrorMsg(err.message || 'Error processing image');
+      setErrorMsg(err.message || (isKm ? 'បរាជ័យក្នុងការដំណើរការរូបភាព' : 'Error processing image'));
     } finally {
       setIsProcessing(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
+  // Immediate Live Preview as the user types or pastes into the URL / Base64 box
+  const handleUrlInputChange = (val: string) => {
+    setUrlInput(val);
+    setErrorMsg('');
+    const check = normalizeAndValidateImage(val, isKm);
+    if (check.isValid) {
+      setPhotoUrl(check.normalizedUrl);
+      setFileDetails(null);
+    }
+  };
+
   const handleApplyUrl = () => {
-    if (!urlInput.trim()) return;
-    setPhotoUrl(urlInput.trim());
+    const check = normalizeAndValidateImage(urlInput, isKm);
+    if (!check.isValid) {
+      setErrorMsg(check.error || (isKm ? 'ទម្រង់រូបភាពមិនត្រឹមត្រូវ' : 'Invalid image format'));
+      return;
+    }
+    setPhotoUrl(check.normalizedUrl);
     setFileDetails(null);
     setErrorMsg('');
   };
 
   const handleResetToDefault = () => {
-    const defaultUrl = `https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&auto=format&fit=crop&q=80&dest=${destination.id}`;
+    const defaultUrl = `https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b1/Royal_Palace%2C_Phnom_Penh_Cambodia_1.jpg/960px-Royal_Palace%2C_Phnom_Penh_Cambodia_1.jpg`;
     setPhotoUrl(defaultUrl);
     setUrlInput(defaultUrl);
     setFileDetails(null);
     setErrorMsg('');
   };
 
-  const handleSave = () => {
-    if (!photoUrl.trim()) {
-      setErrorMsg(isKm ? 'សូមបញ្ចូលរូបភាព ឬជ្រើសរើសឯកសារ' : 'Please provide an image URL or choose a file');
+  const handleSave = async () => {
+    setErrorMsg('');
+    setIsProcessing(true);
+
+    // Determine candidate: prioritize what's currently in urlInput if typed/pasted, else photoUrl
+    const candidate = urlInput.trim() ? urlInput.trim() : photoUrl.trim();
+    const check = normalizeAndValidateImage(candidate, isKm);
+
+    if (!check.isValid) {
+      setErrorMsg(check.error || (isKm ? 'សូមបញ្ចូលរូបភាព ឬជ្រើសរើសឯកសារត្រឹមត្រូវ' : 'Please provide a valid image'));
+      setIsProcessing(false);
       return;
+    }
+
+    let finalPhotoUrl = check.normalizedUrl;
+
+    // If large Data URL (> 400KB), compress before storing to protect localStorage
+    if (finalPhotoUrl.startsWith('data:image/') && finalPhotoUrl.length > 400 * 1024) {
+      try {
+        finalPhotoUrl = await compressDataUrl(finalPhotoUrl);
+      } catch (compErr) {
+        console.warn('Data URL compression skipped, using original:', compErr);
+      }
     }
 
     const updated: TouristDestination = {
       ...destination,
-      photoUrl: photoUrl.trim(),
+      photoUrl: finalPhotoUrl,
     };
 
-    onSave(updated);
-    onClose();
+    try {
+      onSave(updated);
+      setPhotoUrl(finalPhotoUrl);
+      onClose();
+    } catch (saveErr: any) {
+      console.error('Error saving destination photo:', saveErr);
+      setErrorMsg(isKm ? 'បរាជ័យក្នុងការរក្សាទុករូបភាព។ សូមព្យាយាមម្ដងទៀត។' : 'Failed to save photo. Please try again.');
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return (
@@ -244,7 +397,7 @@ export const TouristImageModal: React.FC<TouristImageModalProps> = ({
                   src={photoUrl} 
                   alt="Destination Preview" 
                   className={`w-full h-full ${fitMode === 'cover' ? 'object-cover' : 'object-contain'}`}
-                  onError={() => setErrorMsg(isKm ? 'មិនអាចបើករូបភាពតាម URL នេះបានទេ' : 'Cannot load image from this URL')}
+                  onError={() => setErrorMsg(isKm ? 'មិនអាចបើករូបភាពតាមប្រភពនេះបានទេ សូមពិនិត្យឡើងវិញ' : 'Cannot load image from this source')}
                 />
               ) : (
                 <div className="w-full h-full flex flex-col items-center justify-center text-slate-500 font-khmer text-xs">
@@ -256,7 +409,7 @@ export const TouristImageModal: React.FC<TouristImageModalProps> = ({
               {isProcessing && (
                 <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center text-white text-xs font-khmer gap-2">
                   <RefreshCw className="w-6 h-6 animate-spin text-emerald-300" />
-                  <span>{isKm ? 'កំពុងបង្រួមទំហំរូបភាព...' : 'Optimizing and compressing image...'}</span>
+                  <span>{isKm ? 'កំពុងដំណើរការ និងបង្រួមទំហំរូបភាព...' : 'Processing and optimizing image...'}</span>
                 </div>
               )}
 
@@ -292,7 +445,7 @@ export const TouristImageModal: React.FC<TouristImageModalProps> = ({
               type="button"
               disabled={isProcessing}
               onClick={() => fileInputRef.current?.click()}
-              className="w-full py-3 px-4 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-khmer font-bold text-xs flex items-center justify-center gap-2 shadow-md shadow-emerald-950/20 transition active:scale-[0.99] disabled:opacity-50"
+              className="w-full py-3 px-4 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-khmer font-bold text-xs flex items-center justify-center gap-2 shadow-md shadow-emerald-950/20 transition active:scale-[0.99] disabled:opacity-50 cursor-pointer"
             >
               <Upload className="w-4 h-4 text-emerald-300" />
               <span>{isKm ? 'ជ្រើសរើសរូបភាពពីវិចិត្រសាល (Gallery / File)' : 'Select Image from Device Gallery'}</span>
@@ -304,33 +457,39 @@ export const TouristImageModal: React.FC<TouristImageModalProps> = ({
             </p>
           </div>
 
-          {/* Action 2: Direct Image URL */}
+          {/* Action 2: Direct Image URL or Base64 / Data URL */}
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-[#0F172A] dark:text-slate-200 font-khmer block">
-              {isKm ? 'វិធីទី២៖ ឬបញ្ចូលតំណភ្ជាប់រូបភាព (Image URL)' : 'Option 2: Or Paste Image URL'}
+              {isKm ? 'វិធីទី២៖ ឬបញ្ចូលតំណភ្ជាប់រូបភាព (Image URL / Base64)' : 'Option 2: Or Paste Image URL or Base64'}
             </label>
             <div className="flex gap-2">
               <input 
-                type="url" 
+                type="text" 
                 value={urlInput}
-                onChange={(e) => setUrlInput(e.target.value)}
-                placeholder="https://images.unsplash.com/..."
+                onChange={(e) => handleUrlInputChange(e.target.value)}
+                placeholder="https://... ឬ data:image/webp;base64,..."
                 className="flex-1 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-mono text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#059669]/20 focus:border-[#059669]"
               />
               <button
                 type="button"
                 onClick={handleApplyUrl}
-                className="px-3.5 py-2 bg-[#059669] hover:bg-[#047857] text-white text-xs font-khmer font-bold rounded-xl transition active:scale-95"
+                className="px-3.5 py-2 bg-[#059669] hover:bg-[#047857] text-white text-xs font-khmer font-bold rounded-xl transition active:scale-95 cursor-pointer"
               >
                 {isKm ? 'ដាក់រូប' : 'Apply'}
               </button>
             </div>
+            <p className="text-[10px] text-slate-500 dark:text-slate-400 font-khmer">
+              {isKm 
+                ? 'គាំទ្រតំណភ្ជាប់ HTTPS, Data URL (data:image/...) និងកូដ Base64' 
+                : 'Supports HTTPS URLs, Data URLs (data:image/...), and Base64'}
+            </p>
           </div>
 
           {/* Error Message */}
           {errorMsg && (
-            <div className="p-3 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 rounded-xl text-red-600 dark:text-red-400 text-xs font-khmer">
-              {errorMsg}
+            <div className="p-3 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 rounded-xl text-red-600 dark:text-red-400 text-xs font-khmer flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <span>{errorMsg}</span>
             </div>
           )}
 
@@ -339,7 +498,7 @@ export const TouristImageModal: React.FC<TouristImageModalProps> = ({
             <button
               type="button"
               onClick={handleResetToDefault}
-              className="text-[11px] text-slate-500 hover:text-[#064E3B] font-khmer flex items-center gap-1 transition"
+              className="text-[11px] text-slate-500 hover:text-[#064E3B] font-khmer flex items-center gap-1 transition cursor-pointer"
             >
               <RefreshCw className="w-3 h-3" />
               <span>{isKm ? 'កំណត់រូបភាពដើមឡើងវិញ' : 'Reset to default image'}</span>
@@ -352,17 +511,21 @@ export const TouristImageModal: React.FC<TouristImageModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-khmer text-xs hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+            className="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-khmer text-xs hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
           >
             {isKm ? 'បោះបង់' : 'Cancel'}
           </button>
           <button
             type="button"
-            disabled={isProcessing || !photoUrl.trim()}
+            disabled={isProcessing}
             onClick={handleSave}
-            className="px-6 py-2 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-khmer font-bold text-xs shadow-md shadow-emerald-950/20 flex items-center gap-1.5 transition active:scale-95 disabled:opacity-50"
+            className="px-6 py-2 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-khmer font-bold text-xs shadow-md shadow-emerald-950/20 flex items-center gap-1.5 transition active:scale-95 disabled:opacity-50 cursor-pointer"
           >
-            <Check className="w-4 h-4 text-emerald-300" />
+            {isProcessing ? (
+              <RefreshCw className="w-4 h-4 text-emerald-300 animate-spin" />
+            ) : (
+              <Check className="w-4 h-4 text-emerald-300" />
+            )}
             <span>{isKm ? 'រក្សាទុករូបភាព' : 'Save Photo'}</span>
           </button>
         </div>

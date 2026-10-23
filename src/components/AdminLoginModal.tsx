@@ -20,7 +20,8 @@ export const AdminLoginModal: React.FC = () => {
     loginAdmin, 
     loginAdminWithBiometric,
     setAdminPassword, 
-    language 
+    language,
+    showToast
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<'login' | 'change_password'>('login');
@@ -141,16 +142,32 @@ export const AdminLoginModal: React.FC = () => {
 
       setUsername(filledUser);
       setPassword(filledPass);
+      setErrorMsg('');
 
-      showToast(
-        isKm 
-          ? 'ស្កេនស្នាមមេដៃជោគជ័យ! បានបំពេញឈ្មោះ និងលេខសម្ងាត់ដោយស្វ័យប្រវត្តិ...' 
-          : 'Fingerprint verified! Auto-filling credentials & unlocking...',
-        'info'
-      );
+      if (typeof showToast === 'function') {
+        showToast(
+          isKm 
+            ? 'ស្កេនស្នាមមេដៃជោគជ័យ! កំពុងចូលប្រព័ន្ធដោយស្វ័យប្រវត្តិ...' 
+            : 'Fingerprint verified! Logging in automatically...',
+          'success'
+        );
+      }
 
       // 2. Perform seamless login with pre-verified state
-      await loginAdminWithBiometric(true, filledUser);
+      const loginSuccess = await loginAdminWithBiometric(true, filledUser);
+      if (loginSuccess) {
+        setErrorMsg('');
+        setIsAdminLoginModalOpen(false);
+      } else {
+        // Fallback: login directly using pre-verified credentials
+        const fallbackSuccess = await loginAdmin(filledUser, filledPass);
+        if (fallbackSuccess) {
+          setErrorMsg('');
+          setIsAdminLoginModalOpen(false);
+        } else {
+          setErrorMsg(isKm ? 'ព័ត៌មានផ្ទៀងផ្ទាត់មិនត្រឹមត្រូវ' : 'Invalid admin credentials');
+        }
+      }
     } catch (err: any) {
       console.warn('Biometric login exception:', err);
       setErrorMsg(isKm ? 'បរាជ័យក្នុងការស្កេនស្នាមមេដៃ' : 'Biometric error occurred');
@@ -348,10 +365,10 @@ export const AdminLoginModal: React.FC = () => {
                     <img
                       src="/images/admin_profile.png"
                       alt="Chea Savuth Admin"
-                      className="w-24 h-24 rounded-3xl object-cover border-4 border-emerald-400 shadow-xl ring-4 ring-emerald-500/20"
+                      className="w-36 h-36 rounded-3xl object-cover border-4 border-emerald-400 shadow-2xl ring-4 ring-emerald-500/30"
                     />
-                    <div className="absolute -bottom-1 -right-1 p-1 bg-emerald-600 rounded-full border-2 border-white text-white shadow-md">
-                      <ShieldCheck className="w-4 h-4 text-white" />
+                    <div className="absolute -bottom-1 -right-1 p-1.5 bg-emerald-600 rounded-full border-2 border-white text-white shadow-md">
+                      <ShieldCheck className="w-5 h-5 text-white" />
                     </div>
                   </div>
 
@@ -394,7 +411,10 @@ export const AdminLoginModal: React.FC = () => {
                   <div className="pt-2">
                     <button
                       type="button"
-                      onClick={() => setShowManualPassword(true)}
+                      onClick={() => {
+                        setErrorMsg('');
+                        setShowManualPassword(true);
+                      }}
                       className="text-[11px] font-bold text-emerald-800 dark:text-emerald-400 hover:underline flex items-center gap-1.5 mx-auto py-1.5 px-3 rounded-lg hover:bg-emerald-50 dark:hover:bg-emerald-950/40 transition cursor-pointer"
                     >
                       <Lock className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
@@ -409,7 +429,10 @@ export const AdminLoginModal: React.FC = () => {
                   {biometricAvailable && biometricEnrolled && (
                     <button
                       type="button"
-                      onClick={() => setShowManualPassword(false)}
+                      onClick={() => {
+                        setErrorMsg('');
+                        setShowManualPassword(false);
+                      }}
                       className="text-[11px] font-bold text-[#064E3B] dark:text-emerald-400 hover:underline flex items-center gap-1.5 py-1 px-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 transition cursor-pointer"
                     >
                       <Fingerprint className="w-3.5 h-3.5" />

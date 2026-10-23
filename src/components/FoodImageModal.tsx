@@ -5,6 +5,7 @@ import {
   AlertTriangle, CheckCircle2, Eye, Sliders, Smartphone, Sparkles, Search, Globe 
 } from 'lucide-react';
 import { searchOnlineFoodImages, OnlineFoodImageCandidate } from '../services/onlineFoodImageService';
+import { normalizeAndValidateImage } from './TouristImageModal';
 
 interface FoodImageModalProps {
   food: FoodItem | null;
@@ -158,10 +159,15 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
   };
 
   const handleApplyUrl = () => {
-    if (!urlInput.trim()) return;
-    setPhotoUrl(urlInput.trim());
+    const check = normalizeAndValidateImage(urlInput, isKm);
+    if (!check.isValid) {
+      setErrorMsg(check.error || (isKm ? 'តំណភ្ជាប់រូបភាពមិនត្រឹមត្រូវ' : 'Invalid image URL'));
+      return;
+    }
+    setPhotoUrl(check.normalizedUrl);
     setAuditStatus('verified');
     setAuditNote(isKm ? 'រូបភាពតំណភ្ជាប់ URL កំណត់ដោយរដ្ឋបាល' : 'Image URL set by administrator');
+    setErrorMsg('');
   };
 
   const handleResetToDefault = () => {
@@ -173,20 +179,29 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
   };
 
   const handleSave = () => {
-    if (!photoUrl.trim()) {
-      setErrorMsg(isKm ? 'សូមបញ្ចូលរូបភាព ឬជ្រើសរើសឯកសារ' : 'Please provide an image URL or choose a file');
+    setErrorMsg('');
+    const candidate = urlInput.trim() ? urlInput.trim() : photoUrl.trim();
+    const check = normalizeAndValidateImage(candidate, isKm);
+
+    if (!check.isValid) {
+      setErrorMsg(check.error || (isKm ? 'សូមបញ្ចូលរូបភាព ឬជ្រើសរើសឯកសារត្រឹមត្រូវ' : 'Please provide a valid image'));
       return;
     }
 
     const updated: FoodItem = {
       ...food,
-      photoUrl: photoUrl.trim(),
+      photoUrl: check.normalizedUrl,
       imageAuditStatus: auditStatus,
       imageAuditNote: auditNote.trim() || (auditStatus === 'verified' ? (isKm ? 'បានផ្ទៀងផ្ទាត់ដោយរដ្ឋបាល' : 'Verified by admin') : (isKm ? 'រង់ចាំពិនិត្យ' : 'Pending review')),
     };
 
-    onSave(updated);
-    onClose();
+    try {
+      onSave(updated);
+      onClose();
+    } catch (saveErr: any) {
+      console.error('Failed to save food photo:', saveErr);
+      setErrorMsg(isKm ? 'បរាជ័យក្នុងការរក្សាទុករូបភាព' : 'Failed to save food photo');
+    }
   };
 
   return (
@@ -410,16 +425,24 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
               <input
                 type="text"
                 value={urlInput}
-                onChange={e => setUrlInput(e.target.value)}
-                placeholder="https://images.unsplash.com/photo-..."
+                onChange={e => {
+                  const val = e.target.value;
+                  setUrlInput(val);
+                  setErrorMsg('');
+                  const check = normalizeAndValidateImage(val, isKm);
+                  if (check.isValid) {
+                    setPhotoUrl(check.normalizedUrl);
+                  }
+                }}
+                placeholder="https://... ឬ data:image/webp;base64,..."
                 className="flex-1 px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-[#059669]/20 focus:border-[#059669]"
               />
               <button
                 type="button"
                 onClick={handleApplyUrl}
-                className="px-3.5 py-2 rounded-xl bg-[#059669] hover:bg-[#047857] text-white font-bold transition shrink-0 active:scale-95"
+                className="px-3.5 py-2 rounded-xl bg-[#059669] hover:bg-[#047857] text-white font-bold transition shrink-0 active:scale-95 cursor-pointer"
               >
-                {isKm ? 'មើល' : 'Apply'}
+                {isKm ? 'ដាក់រូប' : 'Apply'}
               </button>
             </div>
           </div>
