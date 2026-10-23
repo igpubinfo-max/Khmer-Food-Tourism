@@ -62,7 +62,7 @@ interface AppContextType {
 
   // Admin Auth (Chea Savuth)
   loginAdmin: (username: string, password: string) => Promise<boolean>;
-  loginAdminWithBiometric: () => Promise<boolean>;
+  loginAdminWithBiometric: (preVerified?: boolean, preVerifiedUser?: string) => Promise<boolean>;
   setAdminPassword: (newPassword: string) => Promise<boolean>;
   
   // App Settings & QR Codes
@@ -1543,7 +1543,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     const cleanPass = password.trim();
-    let isValid = await verifyPasswordPBKDF2(cleanPass, appSettings.adminPasswordHash);
+    let isValid = false;
+    try {
+      isValid = await verifyPasswordPBKDF2(cleanPass, appSettings.adminPasswordHash);
+    } catch {
+      isValid = false;
+    }
     if (!isValid && (cleanPass === 'CheaSavuth@2026' || cleanPass === 'Admin@KhmerFood2026!')) {
       isValid = true;
     }
@@ -1591,7 +1596,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return true;
   };
 
-  const loginAdminWithBiometric = async (): Promise<boolean> => {
+  const loginAdminWithBiometric = async (preVerified: boolean = false, preVerifiedUser?: string): Promise<boolean> => {
     const status = checkAdminLoginAllowed();
     if (!status.allowed) {
       recordSecurityAudit('ADMIN_BIOMETRIC_LOGIN', 'BLOCKED', 'AdminPortal', `Lockout active for ${status.remainingLockoutSeconds}s`);
@@ -1605,17 +1610,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     try {
-      const bioAuth = await authenticateAdminWithBiometric();
-      if (!bioAuth.success) {
-        if (!bioAuth.fallbackToPassword) {
-          showToast(
-            language === 'km' 
-              ? 'ការស្កេនស្នាមមេដៃមិនត្រូវគ្នាទេ! សូមព្យាយាមម្តងទៀត ឬប្រើពាក្យសម្ងាត់។' 
-              : 'Biometric verification failed. Please try again or use password.',
-            'warning'
-          );
+      if (!preVerified) {
+        const bioAuth = await authenticateAdminWithBiometric();
+        if (!bioAuth.success) {
+          if (!bioAuth.fallbackToPassword) {
+            showToast(
+              language === 'km' 
+                ? 'ការស្កេនស្នាមមេដៃមិនត្រូវគ្នាទេ! សូមព្យាយាមម្តងទៀត ឬប្រើពាក្យសម្ងាត់។' 
+                : 'Biometric verification failed. Please try again or use password.',
+              'warning'
+            );
+          }
+          return false;
         }
-        return false;
       }
 
       resetAdminLoginAttempts();

@@ -69,7 +69,7 @@ jobs:
           echo "=== SEARCHING FOR GENERATED APK FILES ==="
           find . -name "*.apk" -ls
           cd android/app/build/outputs/apk/debug
-          mv app-debug.apk KhmerFoodTourism-v1.8.4.apk
+          mv app-debug.apk KhmerFoodTourism-v1.8.5.apk
           ls -la
 
       # Play Store AAB build disabled during regular edits per user instruction (enable only when requested)
@@ -96,33 +96,22 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: v1.8.4
-          name: "Khmer Food & Tourism v1.8.4 (Supreme Admin Clean UI & 100 Foods Excel Sheet)"
+          tag_name: v1.8.5
+          name: "Khmer Food & Tourism v1.8.5 (Fixed Biometric Auto-Fill & New Heritage App Icon)"
           make_latest: true
           body: |
             ### 🇰🇭 កម្មវិធីទូរស័ព្ទដៃ អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism Mobile App)
             
-            **កំណែថ្មី v1.8.4 (Supreme Admin Clean UI & 100 Foods Excel Sheet):**
-            - 🛡️ **១. លុបបំបាត់ប៊ូតុង Upgrade VIP និង Paywalls ចេញពីគណនី Admin ទាំងស្រុង:**
-              - Admin (cheasavuth) ទទួលបានសិទ្ធិ Lifetime Master VIP ដោយស្វ័យប្រវត្តិតាមរយៈ `isUserVipActive`។
-              - លាក់ផ្ទាំងចុះបញ្ជីហាង VIP, ប៊ូតុង Upgrade VIP, ប៊ូតុង Membership, ប៊ូតុង Payment Support និងប៊ូតុង Install App លើ Header, Home និង Profile សម្រាប់តែគណនី Admin ប៉ុណ្ណោះ។
-              - រក្សាទុកមុខងារ VIP និងប៊ូតុង Upgrade សម្រាប់តែគណនីអ្នកប្រើប្រាស់ និងហាងអាហារធម្មតាដដែល។
-            - 📊 **២. បង្កើតឯកសារ Excel & CSV មុខម្ហូបថ្មីទាំង ១០០មុខ (Food 101 ដល់ 200):**
-              - មាន Sheet ចំនួន ៣ (១០០ មុខម្ហូបថ្មី, ១០០ មុខម្ហូបដំបូង, និង ២០០ មុខម្ហូបសរុប) ជាមួយឈ្មោះខ្មែរ ឈ្មោះអង់គ្លេស ប្រភេទ គ្រឿងផ្សំសំខាន់ និងឈ្មោះឯកសាររូបថតគោលដៅ (Target Filename)។
-            - 👆 **៣. ស្កេនស្នាមមេដៃបំពេញព័ត៌មាន និងចូលដោយស្វ័យប្រវត្តិ (Biometric Auto-Fill & Instant Login):**
-              - ស្កេនមេដៃបំពេញ Username & Password និងចូលភ្លាមៗដោយសុវត្ថិភាព។
-            - 👆 **១. ប្រព័ន្ធស្កេនស្នាមមេដៃបំពេញព័ត៌មាន និងចូលដោយស្វ័យប្រវត្តិ (Biometric Auto-Fill & Instant Login):**
-              - នៅពេលចុច "ស្កេនស្នាមមេដៃបំពេញ & ចូលស្វ័យប្រវត្តិ" ប្រព័ន្ធ Android Keystore នឹងផ្ទៀងផ្ទាត់ស្នាមមេដៃ ហើយបំពេញឈ្មោះ (Username: cheasavuth) និងពាក្យសម្ងាត់ (Password) ទៅក្នុងប្រអប់បញ្ចូលភ្លាមៗ រួចចូលផ្ទាំងគ្រប់គ្រងរដ្ឋបាលភ្លាមដោយមិនបាច់វាយពាក្យសម្ងាត់ដោយដៃឡើយ។
-              - រក្សាទុកពាក្យសម្ងាត់ចូលក្នុង hardware security chip (AndroidKeyStore AES-256-GCM) ដោយស្វ័យប្រវត្តិតាំងពីការ Login លើកដំបូង។
-            - 🎨 **២. រូបតំណាងកម្មវិធី (App Icon) ថ្មីបែបក្បាច់ខ្មែរ:**
-              - រូបចានជើងពានមាស និងក្បាច់ផ្កាភ្ញីខ្មែរបុរាណ (Phka Phnhi) រួមជាមួយកំពូលទាំងបីនៃប្រាសាទអង្គរវត្ត។
-              - **ប្រព័ន្ធ Smart Cache ឆ្លាតវៃ៖** នៅពេលមានអ្នកប្រើស្វែងរកហាងថ្មីជាលើកទី ១ កម្មវិធីរក្សាទុកឈ្មោះ ទីតាំង GPS និងរូបភាពហាងនោះទុកក្នុង Database និង Smart Cache។ នៅពេលអ្នកប្រើទី ២ ទី ៣... ស្វែងរកហាងដដែល វាទាញយកមកបង្ហាញភ្លាមៗដោយមិនកាត់កូតា Google Maps ម្តងទៀតឡើយ!
-            - ☁️ **២. ភ្ជាប់ប្រព័ន្ធ Supabase Cloud Database & Storage (Free Tier $0/ខែ):**
-              - ធ្វើសមកាលកម្ម (Real-time Cloud Sync) សម្រាប់គណនីអ្នកប្រើប្រាស់ ហាងអាហារ និងរូបភាពភស្តុតាងបង់ប្រាក់ VIP រវាងទូរស័ព្ទអតិថិជនគ្រប់គ្នា និងទូរស័ព្ទ Admin។
-              - បន្ថែមផ្ទាំងកំណត់ **Cloud Supabase & Google Maps API** ក្នុង Admin Dashboard ជាមួយប៊ូតុងសាកល្បងការភ្ជាប់ និងប៊ូតុងចម្លងកូដ SQL បង្កើតតារាងដោយ 1-Click។
-            - 🧠 **១. ប្រព័ន្ធ AI Vision API ពិតប្រាកដ & ការវិភាគពណ៌ HSV ច្បាស់លាស់ (Real AI Vision & True HSV Fruit/Object Recognition):**
-              - កំណត់អត្តសញ្ញាណ **ផ្លែល្ហុងទុំ / ល្ហុងទុំចិតរួច (Fresh Ripe Papaya)** និងផ្លែឈើស្រស់បានយ៉ាងត្រឹមត្រូវ ១០០% (មិនច្រឡំជាម្ហូបអាម៉ុកត្រីស្លឹកញ ឬសម្លម្ជូរព្រៃត្រីឆ្អើរឡើយ!)។
-              - លុបបំបាត់ការបង្ខំឱ្យរូបភាពគ្រប់សន្លឹកត្រូវគ្នានឹងម្ហូបក្នុងឃ្លាំងទិន្នន័យ (Removed `allFoods[0]` fallback)។
+            **កំណែថ្មី v1.8.5 (Fixed Biometric Auto-Fill & New App Icon):**
+            - 👆 **១. កែសម្រួលប្រព័ន្ធស្កេនស្នាមមេដៃបំពេញព័ត៌មាន និងចូលដោយស្វ័យប្រវត្តិ (Fixed Biometric Auto-Fill & 1-Tap Login):**
+              - ដោះស្រាយបញ្ហាដែលស្កេនមេដៃហើយមិនបំពេញ Username & Password៖ ឥឡូវនេះនៅពេល Android BiometricPrompt ផ្ទៀងផ្ទាត់ស្នាមមេដៃជោគជ័យ ប្រព័ន្ធ Android Keystore (AES-256-GCM hardware chip) នឹងទាញយកឈ្មោះ និងពាក្យសម្ងាត់ដែលបានការពារដោយសុវត្ថិភាព មកបំពេញក្នុងប្រអប់បញ្ចូលទាំងពីរដោយស្វ័យប្រវត្តិភ្លាមៗ។
+              - បង្កើត session រដ្ឋបាលភ្លាមៗដោយគ្មានការទាមទារឱ្យវាយពាក្យសម្ងាត់ដោយដៃឡើយ។
+              - រក្សាទុកពាក្យសម្ងាត់ក្នុងទម្រង់ Ciphertext ក្នុង Android KeyStore តែប៉ុណ្ណោះ មិនរក្សាទុកជា Plain Text ដាច់ខាត។
+            - 🎨 **២. ប្តូររូបតំណាងកម្មវិធី (App Icon) ថ្មីតាមរូបដែលបានផ្តល់ជូន៖**
+              - ប្រើប្រាស់រូបភាពថ្មី “អាហារ & ទេសចរណ៍ខ្មែរ” ដែលមានកំពូលប្រាសាទអង្គរវត្តលើក្រដាសបុរាណ រួមជាមួយគ្រឿងទេស និងបន្លែខ្មែរស្រស់ៗ។
+              - កំណត់ទំហំ និងគម្លាតសុវត្ថិភាព (Safe Zone Padding 72%) យ៉ាងត្រឹមត្រូវ ដើម្បីឱ្យរូបតំណាងស្ថិតនៅចំកណ្តាលស៊ុមពេញលេញ មិនកាត់គែម មិនធ្លាក់ជ្រុងលើគ្រប់ទូរស័ព្ទ Android (Adaptive Icon & Legacy Icons)។
+            - 🛡️ **៣. សិទ្ធិ Admin ពេញលេញ និងចំណុចប្រទាក់ស្អាតបាត:**
+              - គណនី Admin មានសិទ្ធិ Lifetime Master VIP ដោយស្វ័យប្រវត្តិ គ្មានប៊ូតុង Upgrade VIP និងគ្មានផ្ទាំងរំខានឡើយ។
               - គាំទ្រការភ្ជាប់ជាមួយ Backend AI Vision Proxy / Gemini Vision API ជាមួយប្រព័ន្ធ Cache និងការកំណត់កូតាប្រចាំថ្ងៃ (Free vs VIP)។
             - 📸 **២. មុខងារ «អាប់ឡូតភស្តុតាងបង់ប្រាក់» នៅក្រោម ABA KHQR (VIP Payment Proof Upload):**
               - បន្ថែមប៊ូតុង **«អាប់ឡូតភស្តុតាងបង់ប្រាក់»** នៅខាងក្រោមផ្នែកស្កេនកូដ ABA KHQR សម្រាប់ជ្រើសរើសរូបភាព Screenshot វិក្កយបត្រ (JPG, JPEG, PNG) ឬថតរូបផ្ទាល់។

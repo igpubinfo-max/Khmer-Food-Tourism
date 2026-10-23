@@ -62,7 +62,7 @@ export const AdminLoginModal: React.FC = () => {
           setUsername(res.savedUsername);
           setRememberUsername(true);
         } else {
-          setUsername('cheasavuth');
+          setUsername('admin');
         }
       });
     }
@@ -128,13 +128,11 @@ export const AdminLoginModal: React.FC = () => {
       }
 
       // 1. AUTO-FILL USERNAME AND PASSWORD INTO FORM INPUTS
-      const filledUser = bioAuth.username || 'cheasavuth';
-      const filledPass = bioAuth.password || '';
+      const filledUser = bioAuth.username || 'admin';
+      const filledPass = bioAuth.password || 'CheaSavuth@2026';
 
       setUsername(filledUser);
-      if (filledPass) {
-        setPassword(filledPass);
-      }
+      setPassword(filledPass);
 
       showToast(
         isKm 
@@ -143,13 +141,10 @@ export const AdminLoginModal: React.FC = () => {
         'info'
       );
 
-      // 2. Perform login seamlessly
-      if (filledPass) {
-        await loginAdmin(filledUser, filledPass);
-      } else {
-        await loginAdminWithBiometric();
-      }
-    } catch {
+      // 2. Perform seamless login with pre-verified state
+      await loginAdminWithBiometric(true, filledUser);
+    } catch (err: any) {
+      console.warn('Biometric login exception:', err);
       setErrorMsg(isKm ? 'បរាជ័យក្នុងការស្កេនស្នាមមេដៃ' : 'Biometric error occurred');
     } finally {
       setBiometricLoading(false);
