@@ -126,7 +126,7 @@
 | dest-120 | **ផ្លូវថ្មើរជើងមាត់ទន្លេចតុមុខ (Chaktomuk Walk Street)** | Chaktomuk Riverside Walk Street Phnom Penh | រាជធានីភ្នំពេញ (Phnom Penh) | រមណីយដ្ឋាន & វប្បធម៌ | ⭐ 4.9 (2450) |
 | dest-121 | **សួនមាត់ទន្លេកោះនរា (Koh Norea Riverside Park)** | Koh Norea Riverside Promenade Phnom Penh | រាជធានីភ្នំពេញ (Phnom Penh) | រមណីយដ្ឋាន & វប្បធម៌ | ⭐ 4.8 (1920) |
 | dest-122 | **វិមានឈ្នះឈ្នះ (Win-Win Memorial)** | Win-Win Memorial Phnom Penh | រាជធានីភ្នំពេញ (Phnom Penh) | ប្រាសាទបុរាណ / បេតិកភណ្ឌ | ⭐ 4.8 (1340) |
-| dest-123 | **ផាប់ស្ទ្រីត និងផ្សាររាត្រីអង្គរ (Siem Reap Pub Street & Night Market)** | Siem Reap Pub Street & Angkor Night Market | ខេត្តសៀមរាប (Siem Reap) | រមណីយដ្ឋាន & វប្បធម៌ | ⭐ 4.8 (4120) |
+| dest-123 | **រមណីយដ្ឋានភ្នំបាខែង (ចំណុចមើលថ្ងៃលិចលើកំពូលភ្នំកណ្តាលអង្គរ)** | Phnom Bakheng Hilltop Sunset Temple | ខេត្តសៀមរាប (Siem Reap) | ប្រាសាទបុរាណ / បេតិកភណ្ឌ | ⭐ 4.8 (2450) |
 | dest-124 | **កសិដ្ឋានម្រេចកំពត ឡា ផ្លានតេសិន (La Plantation Kampot Pepper Farm)** | La Plantation Kampot Pepper Farm | ខេត្តកំពត (Kampot) | ធម្មជាតិ & ទឹកធ្លាក់ | ⭐ 4.9 (2890) |
 | dest-125 | **ប្រាសាទបន្ទាយសំរែ** | Banteay Samre Temple | ខេត្តសៀមរាប (Siem Reap) | ប្រាសាទបុរាណ / បេតិកភណ្ឌ | ⭐ 4.8 (1640) |
 | dest-126 | **ប្រាសាទបាពួន** | Baphuon Temple | ខេត្តសៀមរាប (Siem Reap) | ប្រាសាទបុរាណ / បេតិកភណ្ឌ | ⭐ 4.8 (2180) |

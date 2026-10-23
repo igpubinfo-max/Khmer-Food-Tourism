@@ -69,7 +69,7 @@ jobs:
           echo "=== SEARCHING FOR GENERATED APK FILES ==="
           find . -name "*.apk" -ls
           cd android/app/build/outputs/apk/debug
-          mv app-debug.apk KhmerFoodTourism-v1.8.8.apk
+          mv app-debug.apk KhmerFoodTourism-v1.8.9.apk
           ls -la
 
       # Play Store AAB build disabled during regular edits per user instruction (enable only when requested)
@@ -96,28 +96,23 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: v1.8.8
-          name: "Khmer Food & Tourism v1.8.8 (Fixed Save Image, Fingerprint Auto-Login & Enlarged Profile Photo)"
+          tag_name: v1.8.9
+          name: "Khmer Food & Tourism v1.8.9 (Fixed Permanent Image Save, Real Mondulkiri Viewpoint & Clean Duplicate Audit)"
           make_latest: true
           body: |
             ### 🇰🇭 កម្មវិធីទូរស័ព្ទដៃ អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism Mobile App)
             
-            **កំណែថ្មី v1.8.8 (Fixed Save Image Button, Fingerprint Auto-Login & Enlarged Profile Photo):**
-            - 🖼️ **១. ជួសជុលប៊ូតុងរក្សាទុករូបភាព (Fixed Save Image Button in Image Editor):**
-              - ដោះស្រាយបញ្ហាចុចប៊ូតុង «រក្សាទុករូបភាព» មិនដើរ ដោយគាំទ្រការផ្ទៀងផ្ទាត់ និងទទួលស្គាល់ទាំង Base64, Data URL (`data:image/...`), តំណភ្ជាប់ HTTPS និងកូដរូបភាពផ្ទាល់។
-              - បង្ហាញរូបភាពផ្ទាល់ភ្លាមៗ (Instant Live Preview) ពេលបិទភ្ជាប់ (Paste) តំណភ្ជាប់ ឬកូដ Base64 ចូលក្នុងប្រអប់។
-              - រក្សាទុក និងបង្រួមទំហំស្វ័យប្រវត្តិដើម្បីកុំឱ្យលើសទំហំផ្ទុក និងបង្ហាញសារជោគជ័យភ្លាមៗ។
-            - 👆 **២. ជួសជុលការចូលដោយស្កេនមេដៃស្វ័យប្រវត្តិ (Fixed Fingerprint Auto-Login):**
-              - ដោះស្រាយបញ្ហាលោត Error ពេលស្កេនមេដៃជោគជ័យ ដោយភ្ជាប់មុខងារ Login និង Toast Notification យ៉ាងរលូន។
-              - ពេលស្កេនមេដៃត្រឹមត្រូវ ប្រព័ន្ធនឹងបំពេញ Username & Password និងចូលទៅកាន់ផ្ទាំងគ្រប់គ្រង Admin ដោយស្វ័យប្រវត្តិតែម្តង ដោយមិនចាំបាច់ចុចប៊ូតុងអ្វីបន្ថែមឡើយ។
-            - 👤 **៣. ពង្រីកទំហំរូបថត Profile Admin ឱ្យធំច្បាស់ (Enlarged Admin Profile Photo):**
-              - កាត់ និងពង្រីករូបថតលោក Chea Savuth / Admin ឱ្យផ្ទៃមុខធំច្បាស់ ងាយស្រួលចំណាំ និងមានទំហំធំទូលាយនៅលើផ្ទាំង Login និង Admin Dashboard។
-            - 🔒 **៤. រក្សាសុវត្ថិភាព VIP Permissions & Food Image Upload យ៉ាងពេញលេញ:**
-              - រក្សាប្រព័ន្ធការពារសិទ្ធិ VIP លើការចុះបញ្ជី និងគ្រប់គ្រងហាងយ៉ាងរឹងមាំ និងការអាប់ឡូតរូបភាពម្ហូបពី Camera / Gallery។
-              - `Awaiting Payment` (រង់ចាំការទូទាត់)
-              - `Verifying Payment` (កំពុងផ្ទៀងផ្ទាត់ការទូទាត់)
-              - `Payment Successful` (ការទូទាត់ជោគជ័យ - VIP សកម្ម)
-              - `Payment Failed` (ការទូទាត់មិនជោគជ័យ)
+            **កំណែថ្មី v1.8.9 (Permanent Destination Photo Save, Real Phnom Doh Kromom & Zero Duplicate Audit):**
+            - 📸 **១. ជួសជុលការរក្សាទុករូបភាពតំបន់ទេសចរណ៍ជាអចិន្ត្រៃយ៍ (Fixed Destination Image Save Permanently):**
+              - ដោះស្រាយបញ្ហារូបថតមិនផ្លាស់ប្តូរបន្ទាប់ពីចុច «រក្សាទុករូបភាព» ដោយបានភ្ជាប់ `setEditPhotoUrl` ចូលក្នុងទម្រង់ Edit របស់ Admin ដោយផ្ទាល់ និងធ្វើបច្ចុប្បន្នភាព Live Preview ភ្លាមៗ។
+              - កែប្រែប្រព័ន្ធ Hydration ក្នុង AppContext មិនឱ្យ Revert រូបភាព HTTPS ឬ Local Path ទៅកាន់ Seed ចាស់វិញពេល Refresh កម្មវិធីឡើយ។
+              - រក្សាទុករូបភាពចូលទៅក្នុង Database / LocalStorage ភ្លាមៗ (Instant Synchronous Persistence)។
+            - 🌄 **២. ធ្វើបច្ចុប្បន្នភាពរូបថតពិតនៃភ្នំដោះក្រមុំ (Real Phnom Doh Kromom Viewpoint dest-58):**
+              - បានប្តូររូបថតរមណីយដ្ឋានភ្នំដោះក្រមុំ ខេត្តមណ្ឌលគិរី ទៅជារូបថតជាក់ស្តែងពិតប្រាកដដែលបង្ហាញពីផ្លូវដើរឈើ និងពន្លាដំបូលក្រហមស្អាតបែបធម្មជាតិ (`/destinations/dest-58.jpg`)។
+            - 🛡️ **៣. ដោះស្រាយទិន្នន័យត្រួតគ្នា និងការពារ Duplicate (Zero Duplicates & Prevention):**
+              - ធ្វើសវនកម្ម (Audit) តំបន់ទេសចរណ៍ទាំង ៣០០ យ៉ាងហ្មត់ចត់៖ បានរកឃើញទិន្នន័យត្រួតគ្នា Pub Street & Night Market (`dest-20` និង `dest-123`)។
+              - បានជំនួស `dest-123` ដោយរមណីយដ្ឋានប្រវត្តិសាស្ត្រលំដាប់ពិភពលោក «ភ្នំបាខែង» (Phnom Bakheng Hilltop Sunset Temple) ខេត្តសៀមរាប ដោយរក្សា ID សុពលភាព Search, Favorites និង Bookmarks ឱ្យនៅដើរ ១០០%។
+              - បន្ថែមមុខងារត្រួតពិនិត្យ និងទប់ស្កាត់ការបង្កើតតំបន់ទេសចរណ៍ត្រួតគ្នា (Duplicate Prevention Guard) ទាំងឈ្មោះខ្មែរ អង់គ្លេស និងកូអរដោនេ GPS មុនពេលរក្សាទុក។
               - `Payment Expired` (ផុតកំណត់ការទូទាត់)
               - `Manual Review Required` (ទាមទារការពិនិត្យដោយរដ្ឋបាល)
             - 🏷️ **៥. បង្ហាញព័ត៌មាន KhmerFoodTourism Ver. v1.6.9 (Build 41):**

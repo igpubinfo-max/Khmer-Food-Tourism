@@ -122,9 +122,10 @@ interface AppContextType {
   setManagingRestaurant: (rest: Restaurant | null) => void;
   
   // Destination Actions
-  addDestination: (dest: Omit<TouristDestination, 'id' | 'rating' | 'reviewCount'>) => void;
+  addDestination: (dest: Omit<TouristDestination, 'id' | 'rating' | 'reviewCount'>) => boolean | void;
   updateDestination: (dest: TouristDestination) => void;
   deleteDestination: (id: string) => void;
+  checkDuplicateDestination: (candidate: { nameKh: string; nameEn?: string; provinceKh?: string; latitude?: number; longitude?: number }, excludeId?: string) => { isDuplicate: boolean; duplicate?: TouristDestination; reason?: string };
   
   // Community Actions
   addPost: (titleKh: string, descriptionKh: string, photoUrl: string, categoryTag: string, locationName: string) => void;
@@ -586,11 +587,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           const upgraded = parsed.map((d: TouristDestination) => {
             const seed = initialMap.get(d.id);
             if (!seed) return d;
-            // Keep custom data: photo uploads, otherwise sync verified landmark photoUrl from seed
-            const hasCustomDataUpload = typeof d.photoUrl === 'string' && d.photoUrl.startsWith('data:');
+            
+            // Retain valid user-saved photo URLs (HTTP/HTTPS, local /destinations/..., or data:)
+            let effectivePhoto = d.photoUrl;
+            // Upgrade dest-58 if still on old generic landscape
+            if (d.id === 'dest-58' && (!effectivePhoto || effectivePhoto.includes('Mondulkiri_province_Northeastern_Cambodia.jpg'))) {
+              effectivePhoto = seed.photoUrl;
+            }
+            // Upgrade dest-123 if on duplicate pub street
+            if (d.id === 'dest-123' && (!effectivePhoto || effectivePhoto.includes('Siem_Reap_Pubstreet.jpg') || (d.nameKh || '').includes('ផាប់ស្ទ្រីត'))) {
+              return seed;
+            }
+
+            const hasValidCustomPhoto = typeof effectivePhoto === 'string' && effectivePhoto.trim().length > 0;
             return {
+              ...seed,
               ...d,
-              photoUrl: hasCustomDataUpload ? d.photoUrl : seed.photoUrl,
+              photoUrl: hasValidCustomPhoto ? effectivePhoto : seed.photoUrl,
             };
           });
           const existingIds = new Set(upgraded.map((d: TouristDestination) => d.id));
@@ -2551,22 +2564,93 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }));
   };
 
+  const checkDuplicateDestination = (
+    candidate: { nameKh: string; nameEn?: string; provinceKh?: string; latitude?: number; longitude?: number },
+    excludeId?: string
+  ): { isDuplicate: boolean; duplicate?: TouristDestination; reason?: string } => {
+    const normKh = (candidate.nameKh || '').replace(/[()（）\s\-_.,/]/g, '').toLowerCase();
+    const normEn = (candidate.nameEn || '').trim().toLowerCase();
+
+    for (const item of destinations) {
+      if (excludeId && item.id === excludeId) continue;
+
+      const itemNormKh = (item.nameKh || '').replace(/[()（）\s\-_.,/]/g, '').toLowerCase();
+      const itemNormEn = (item.nameEn || '').trim().toLowerCase();
+      const sameProvince = !candidate.provinceKh || candidate.provinceKh === item.provinceKh;
+
+      // Exact Khmer root match
+      if (normKh && normKh === itemNormKh) {
+        return { isDuplicate: true, duplicate: item, reason: `ឈ្មោះដូចគ្នា៖ "${item.nameKh}"` };
+      }
+
+      // Exact English root match
+      if (normEn && normEn.length >= 4 && normEn === itemNormEn) {
+        return { isDuplicate: true, duplicate: item, reason: `English name matches: "${item.nameEn}"` };
+      }
+
+      // Strong substring match in same province
+      if (sameProvince && normKh.length >= 6 && itemNormKh.length >= 6 && (normKh.includes(itemNormKh) || itemNormKh.includes(normKh))) {
+        return { isDuplicate: true, duplicate: item, reason: `ឈ្មោះស្រដៀងគ្នាក្នុងខេត្ត ${item.provinceKh}៖ "${item.nameKh}"` };
+      }
+
+      // Proximity check (< 100 meters)
+      if (candidate.latitude && candidate.longitude && item.latitude && item.longitude) {
+        const dLat = Math.abs(candidate.latitude - item.latitude);
+        const dLng = Math.abs(candidate.longitude - item.longitude);
+        if (dLat < 0.001 && dLng < 0.001) {
+          return { isDuplicate: true, duplicate: item, reason: `កូអរដោនេទីតាំងត្រួតគ្នាជាមួយ "${item.nameKh}"` };
+        }
+      }
+    }
+
+    return { isDuplicate: false };
+  };
+
   // Destination CRUD
-  const addDestination = (destData: Omit<TouristDestination, 'id' | 'rating' | 'reviewCount'>) => {
+  const addDestination = (destData: Omit<TouristDestination, 'id' | 'rating' | 'reviewCount'>): boolean => {
+    const dup = checkDuplicateDestination(destData);
+    if (dup.isDuplicate && dup.duplicate) {
+      showToast(
+        language === 'km'
+          ? `⚠️ ទីតាំងនេះមានរួចហើយ៖ «${dup.duplicate.nameKh}» (${dup.duplicate.provinceKh})`
+          : `⚠️ Duplicate destination detected: "${dup.duplicate.nameEn}" (${dup.duplicate.provinceEn})`,
+        'error'
+      );
+      return false;
+    }
+
     const newDest: TouristDestination = {
       ...destData,
       id: `dest-${Date.now()}`,
       rating: 5.0,
       reviewCount: 1,
     };
-    setDestinations(prev => [newDest, ...prev]);
+    setDestinations(prev => {
+      const next = [newDest, ...prev];
+      try {
+        localStorage.setItem('kft_destinations_real_v7', JSON.stringify(next));
+      } catch (e) {
+        scheduleStorageWrite('kft_destinations_real_v7', next, 500);
+      }
+      return next;
+    });
     showToast(language === 'km' ? 'បានបញ្ចូលតំបន់ទេសចរណ៍ថ្មី' : 'Destination added!', 'success');
+    return true;
   };
 
   const updateDestination = (updated: TouristDestination) => {
-    setDestinations(prev => prev.map(d => d.id === updated.id ? updated : d));
-    if (selectedDestination?.id === updated.id) setSelectedDestination(updated);
-    showToast(language === 'km' ? 'បានកែប្រែតំបន់ទេសចរណ៍' : 'Destination updated!', 'success');
+    setDestinations(prev => {
+      const next = prev.map(d => d.id === updated.id ? updated : d);
+      try {
+        localStorage.setItem('kft_destinations_real_v7', JSON.stringify(next));
+      } catch (e) {
+        scheduleStorageWrite('kft_destinations_real_v7', next, 500);
+      }
+      return next;
+    });
+    if (selectedDestination?.id === updated.id) {
+      setSelectedDestination(updated);
+    }
   };
 
   const deleteDestination = (id: string) => {
@@ -4456,6 +4540,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         addDestination,
         updateDestination,
         deleteDestination,
+        checkDuplicateDestination,
         addPost,
         toggleLikePost,
         addComment,

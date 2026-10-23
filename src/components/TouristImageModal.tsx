@@ -300,7 +300,7 @@ export const TouristImageModal: React.FC<TouristImageModalProps> = ({
     };
 
     try {
-      onSave(updated);
+      await Promise.resolve(onSave(updated));
       setPhotoUrl(finalPhotoUrl);
       onClose();
     } catch (saveErr: any) {

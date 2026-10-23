@@ -66,10 +66,14 @@ export const TouristDetailModal: React.FC = () => {
     if ((window as any).__kft_open_dest_edit && isAdmin) {
       setIsEditingAdminDest(true);
       (window as any).__kft_open_dest_edit = undefined;
-    } else {
-      setIsEditingAdminDest(false);
     }
-  }, [selectedDestination?.id, isAdmin]);
+  }, [
+    selectedDestination?.id,
+    selectedDestination?.photoUrl,
+    selectedDestination?.nameKh,
+    selectedDestination?.descriptionKh,
+    isAdmin
+  ]);
 
   if (!selectedDestination) return null;
 
@@ -257,7 +261,12 @@ export const TouristDetailModal: React.FC = () => {
                   {isKm ? 'រូបភាពតំបន់ទេសចរណ៍ (Photo URL / Upload)' : 'Destination Photo'}
                 </label>
                 <div className="relative aspect-16/10 rounded-xl overflow-hidden bg-slate-900 border border-amber-400/50">
-                  <img src={editPhotoUrl || selectedDestination.photoUrl} alt="Preview" className="w-full h-full object-cover" />
+                  <img
+                    key={editPhotoUrl || selectedDestination.photoUrl}
+                    src={editPhotoUrl || selectedDestination.photoUrl}
+                    alt="Preview"
+                    className="w-full h-full object-cover"
+                  />
                 </div>
                 <div className="flex gap-2">
                   <input
@@ -438,6 +447,7 @@ export const TouristDetailModal: React.FC = () => {
           {/* Hero Image */}
           <div className="relative h-64 sm:h-72 w-full bg-slate-800">
             <img 
+              key={selectedDestination.photoUrl}
               src={selectedDestination.photoUrl} 
               alt={selectedDestination.nameKh}
               className="w-full h-full object-cover"
@@ -628,7 +638,13 @@ export const TouristDetailModal: React.FC = () => {
         onSave={(updatedDest) => {
           updateDestination(updatedDest);
           setSelectedDestination(updatedDest);
-          showToast(language === 'km' ? `បានផ្លាស់ប្តូររូបភាពសម្រាប់ "${updatedDest.nameKh}" ជោគជ័យ!` : `Updated photo for "${updatedDest.nameEn}"!`, 'success');
+          setEditPhotoUrl(updatedDest.photoUrl);
+          showToast(
+            language === 'km' 
+              ? `✅ បានផ្លាស់ប្តូររូបភាពសម្រាប់ «${updatedDest.nameKh}» ជោគជ័យ!` 
+              : `✅ Updated photo for "${updatedDest.nameEn}"!`, 
+            'success'
+          );
         }}
         isKm={language === 'km'}
       />

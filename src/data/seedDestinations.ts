@@ -1963,7 +1963,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Mountains & National Parks",
     "descriptionKh": "ទួលភ្នំពិសិដ្ឋដែលជាទីសក្ការបូជាធំបំផុតរបស់បងប្អូនជនជាតិដើមភាគតិចព្នង។ ពីលើកំពូលភ្នំអាចគយគន់ទេសភាពផ្ទះក្បឿងក្រុងសែនមនោរម្យ វាលស្មៅពណ៌មាស និងថ្ងៃលិចដ៏រ៉ូមែនទិក។",
     "descriptionEn": "Sacred indigenous mountain shrine offering sweeping 360-degree panoramic sunset views overlooking Sen Monorom town, pine groves, and golden grassy hills.",
-    "photoUrl": "https://upload.wikimedia.org/wikipedia/commons/a/ad/Mondulkiri_province_Northeastern_Cambodia.jpg",
+    "photoUrl": "/destinations/dest-58.jpg",
     "provinceKh": "ខេត្តមណ្ឌលគិរី",
     "provinceEn": "Mondulkiri",
     "addressKh": "ក្រុងសែនមនោរម្យ ខេត្តមណ្ឌលគិរី",
@@ -1984,7 +1984,7 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/a/ad/Mondulkiri_province_Northeastern_Cambodia.jpg"
+      "/destinations/dest-58.jpg"
     ]
   },
   {
@@ -4125,37 +4125,36 @@ export const initial100Destinations: TouristDestination[] = [
   },
   {
     "id": "dest-123",
-    "nameKh": "ផាប់ស្ទ្រីត និងផ្សាររាត្រីអង្គរ (Siem Reap Pub Street & Night Market)",
-    "nameEn": "Siem Reap Pub Street & Angkor Night Market",
-    "categorySlug": "resort",
-    "categoryKh": "រមណីយដ្ឋាន & វប្បធម៌",
-    "categoryEn": "Resorts & Cultural Heritage",
-    "descriptionKh": "មជ្ឈមណ្ឌលកម្សាន្ត និងអាហារពេលរាត្រីដ៏ល្បីល្បាញបំផុតនៅក្រុងសៀមរាប សម្បូរដោយភោជនីយដ្ឋានខ្មែរ-អន្តរជាតិ និងវត្ថុអនុស្សាវរីយ៍។",
-    "descriptionEn": "The lively heart of Siem Reap nightlife, dining, and traditional handicraft night markets.",
-    "photoUrl": "https://upload.wikimedia.org/wikipedia/commons/b/b8/Siem_Reap_Pubstreet.jpg",
+    "nameKh": "រមណីយដ្ឋានភ្នំបាខែង (ចំណុចមើលថ្ងៃលិចលើកំពូលភ្នំកណ្តាលអង្គរ)",
+    "nameEn": "Phnom Bakheng Hilltop Sunset Temple",
+    "categorySlug": "temple",
+    "categoryKh": "ប្រាសាទបុរាណ / បេតិកភណ្ឌ",
+    "categoryEn": "Historical Temple / Heritage",
+    "descriptionKh": "ប្រាសាទភ្នំបាខែង កសាងឡើងនៅចុងសតវត្សរ៍ទី៩ ក្នុងរជ្ជកាលព្រះបាទយសោវរ្ម័នទី១ ជាប្រាសាទភ្នំកណ្តាលរាជធានីយសោធរបុរៈ និងជាទីតាំងដ៏ល្បីល្បាញបំផុតលើពិភពលោកសម្រាប់ទស្សនាថ្ងៃលិចលើប្រាសាទអង្គរវត្ត។",
+    "descriptionEn": "Late 9th-century Hindu temple mountain built by King Yasovarman I atop Bakheng Hill. World-famous vantage point offering breathtaking 360-degree sunset panoramas over Angkor Wat and the Western Baray.",
+    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/01/Phnom_Bakheng_temple_at_Angkor%2C_Cambodia.jpg/960px-Phnom_Bakheng_temple_at_Angkor%2C_Cambodia.jpg",
     "provinceKh": "ខេត្តសៀមរាប",
     "provinceEn": "Siem Reap",
-    "addressKh": "ផ្លូវលេខ ៨ ក្បែរផ្សារចាស់ ក្រុងសៀមរាប ខេត្តសៀមរាប",
-    "addressEn": "Street 08, Old Market Area, Siem Reap",
-    "entranceFeeKh": "ឥតគិតថ្លៃ ($0)",
-    "entranceFeeEn": "Free Entry ($0)",
-    "bestTimeToVisitKh": "ពេលយប់ ម៉ោង ១៨:០០ - ២៣:៣០",
-    "bestTimeToVisitEn": "Evening 06:00 PM - 11:30 PM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.3548,103.8547",
-    "latitude": 13.3548,
-    "longitude": 103.8547,
+    "addressKh": "ខាងត្បូងប្រាសាទអង្គរធំ ក្រុងសៀមរាប",
+    "addressEn": "South of Angkor Thom, Siem Reap",
+    "entranceFeeKh": "រួមបញ្ចូលក្នុងប័ណ្ណអង្គរ (ខ្មែរឥតគិតថ្លៃ)",
+    "entranceFeeEn": "Included in Angkor Pass (Free for Cambodians)",
+    "bestTimeToVisitKh": "ពេលរសៀល ម៉ោង ០៤:៣០ - ០៦:០០ (មើលថ្ងៃលិច)",
+    "bestTimeToVisitEn": "Late afternoon 04:30 PM - 06:00 PM for sunset",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.4239,103.8561",
+    "latitude": 13.4239,
+    "longitude": 103.8561,
     "rating": 4.8,
-    "reviewCount": 4120,
+    "reviewCount": 2450,
     "highlightsKh": [
-      "ភោជនីយដ្ឋាន និងអាហារតាមផ្លូវ",
-      "ផ្សាររាត្រីលក់វត្ថុអនុស្សាវរីយ៍",
-      "ភ្លើងពណ៌ពេលរាត្រី"
+      "ទស្សនីយភាពថ្ងៃលិចដ៏អស្ចារ្យលើអង្គរវត្ត",
+      "ស្ថាបត្យកម្មប្រាសាទភ្នំ ៧ ជាន់តំណាងភ្នំព្រះសុមេរុ",
+      "ផ្លូវឡើងភ្នំធម្មជាតិ និងជិះដំរីទេសចរណ៍",
+      "ទិដ្ឋភាព ៣៦០ ដឺក្រេលើវាលទំនាបសៀមរាប"
     ],
     "isFeatured": true,
-    "isTrendingSocial": true,
-    "socialPlatform": "tiktok",
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/b/b8/Siem_Reap_Pubstreet.jpg"
+      "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/01/Phnom_Bakheng_temple_at_Angkor%2C_Cambodia.jpg/960px-Phnom_Bakheng_temple_at_Angkor%2C_Cambodia.jpg"
     ]
   },
   {
