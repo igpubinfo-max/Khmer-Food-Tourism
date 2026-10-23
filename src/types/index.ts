@@ -1,6 +1,6 @@
-export const APP_VERSION = 'v1.8.9';
-export const APP_VERSION_NAME = '1.8.9';
-export const APP_BUILD_CODE = 61;
+export const APP_VERSION = 'v1.9.0';
+export const APP_VERSION_NAME = '1.9.0';
+export const APP_BUILD_CODE = 62;
 export const APP_RELEASE_DATE = '2026-10-23';
 
 export const VIP_ANNUAL_PRICE_USD = 4.99;
@@ -628,6 +628,8 @@ export interface TouristDestination {
   reviewerQuoteKh?: string; // e.g. "ទេសភាពស្អាតដូចឋានសួគ៌ ពេលព្រឹកពពកហោះកាត់ជើង!"
   reviewerQuoteEn?: string;
   reviewerName?: string;
+  isCustomPhoto?: boolean;
+  photoUpdatedAt?: string;
 }
 
 // User Wishlist Item & Custom Lists (បញ្ជីកន្លែងដែលចង់ទៅ)

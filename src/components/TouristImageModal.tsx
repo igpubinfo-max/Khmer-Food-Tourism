@@ -297,6 +297,8 @@ export const TouristImageModal: React.FC<TouristImageModalProps> = ({
     const updated: TouristDestination = {
       ...destination,
       photoUrl: finalPhotoUrl,
+      isCustomPhoto: true,
+      photoUpdatedAt: new Date().toISOString(),
     };
 
     try {

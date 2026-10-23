@@ -2600,7 +2600,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Resorts & Cultural Heritage",
     "descriptionKh": "ស្ពានឫស្សីប្រពៃណីដែលត្រូវបានសាងសង់ឡើងវិញដោយដៃជារៀងរាល់រដូវប្រាំង ដោយប្រើដើមឫស្សីជាង ៥០,០០០ ដើម។ កោះប៉ែនជាកោះកណ្តាលទន្លេមេគង្គ សម្បូរដោយចម្ការផ្លែឈើ ផ្ទះបុរាណ និងឆ្នេរខ្សាច់មាត់ទន្លេ។",
     "descriptionEn": "Hand-built every dry season using over 50,000 bamboo poles across the Mekong River. Koh Pen island is an idyllic retreat of fruit orchards and shaded village lanes.",
-    "photoUrl": "https://upload.wikimedia.org/wikipedia/commons/e/e7/Aerial_View_of_Kizuna_Bridge_and_Kampong_Cham_City.jpg",
+    "photoUrl": "/destinations/dest-77.jpg",
     "provinceKh": "ខេត្តកំពង់ចាម",
     "provinceEn": "Kampong Cham",
     "addressKh": "ឆ្លងកាត់ទន្លេមេគង្គ ក្រុងកំពង់ចាម ទៅកាន់កោះប៉ែន",
@@ -2621,7 +2621,8 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": true,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/e/e7/Aerial_View_of_Kizuna_Bridge_and_Kampong_Cham_City.jpg"
+      "/destinations/dest-77.jpg",
+      "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e4/02-Bamboo_Bridge%2C_Kampong_Cham-nX-7.jpg/960px-02-Bamboo_Bridge%2C_Kampong_Cham-nX-7.jpg"
     ]
   },
   {

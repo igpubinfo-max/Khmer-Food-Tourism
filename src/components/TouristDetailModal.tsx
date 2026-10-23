@@ -86,6 +86,7 @@ export const TouristDetailModal: React.FC = () => {
       .map((s) => s.trim())
       .filter(Boolean);
 
+    const customPhotoFlag = editPhotoUrl.trim() !== '' ? true : selectedDestination.isCustomPhoto;
     const updated: TouristDestination = {
       ...selectedDestination,
       nameKh: editNameKh.trim() || selectedDestination.nameKh,
@@ -105,6 +106,8 @@ export const TouristDetailModal: React.FC = () => {
       descriptionKh: editDescriptionKh.trim() || selectedDestination.descriptionKh,
       descriptionEn: editDescriptionEn.trim() || selectedDestination.descriptionEn,
       highlightsKh: highlights.length > 0 ? highlights : selectedDestination.highlightsKh,
+      isCustomPhoto: customPhotoFlag,
+      photoUpdatedAt: new Date().toISOString(),
     };
 
     updateDestination(updated);

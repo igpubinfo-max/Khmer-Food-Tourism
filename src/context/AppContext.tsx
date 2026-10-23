@@ -579,6 +579,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [destinations, setDestinations] = useState<TouristDestination[]>(() => {
     try {
+      // 1. Load persistent overrides vault (stores explicit admin photo changes)
+      let photoOverrides: Record<string, { photoUrl: string; updatedAt?: string }> = {};
+      try {
+        const savedOverrides = localStorage.getItem('kft_destination_photo_overrides_v1');
+        if (savedOverrides) photoOverrides = JSON.parse(savedOverrides) || {};
+      } catch {}
+
       const saved = localStorage.getItem('kft_destinations_real_v7') || localStorage.getItem('kft_destinations_real_v6') || localStorage.getItem('kft_destinations_real_v5');
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
@@ -587,25 +594,58 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           const upgraded = parsed.map((d: TouristDestination) => {
             const seed = initialMap.get(d.id);
             if (!seed) return d;
-            
-            // Retain valid user-saved photo URLs (HTTP/HTTPS, local /destinations/..., or data:)
-            let effectivePhoto = d.photoUrl;
-            // Upgrade dest-58 if still on old generic landscape
-            if (d.id === 'dest-58' && (!effectivePhoto || effectivePhoto.includes('Mondulkiri_province_Northeastern_Cambodia.jpg'))) {
-              effectivePhoto = seed.photoUrl;
-            }
-            // Upgrade dest-123 if on duplicate pub street
-            if (d.id === 'dest-123' && (!effectivePhoto || effectivePhoto.includes('Siem_Reap_Pubstreet.jpg') || (d.nameKh || '').includes('ផាប់ស្ទ្រីត'))) {
-              return seed;
+
+            // PRIORITY 1: Persistent photo override vault (explicit admin customization)
+            if (photoOverrides[d.id]?.photoUrl) {
+              return {
+                ...seed,
+                ...d,
+                photoUrl: photoOverrides[d.id].photoUrl,
+                isCustomPhoto: true,
+                photoUpdatedAt: photoOverrides[d.id].updatedAt,
+              };
             }
 
-            const hasValidCustomPhoto = typeof effectivePhoto === 'string' && effectivePhoto.trim().length > 0;
+            // PRIORITY 2: Check for user custom upload or explicit flag
+            const isUserUpload = typeof d.photoUrl === 'string' && d.photoUrl.startsWith('data:');
+            const hasCustomFlag = Boolean(d.isCustomPhoto);
+
+            // Outdated placeholder signatures that must be upgraded to new verified seed photos
+            const isOutdatedSeedPhoto = 
+              !d.photoUrl ||
+              d.photoUrl.includes('Aerial_View_of_Kizuna_Bridge') || // dest-77 old Kizuna bridge
+              d.photoUrl.includes('Mondulkiri_province_Northeastern_Cambodia.jpg') || // dest-58 old landscape
+              d.photoUrl.includes('Siem_Reap_Pubstreet.jpg') || // dest-123 old pub street duplicate
+              (d.id === 'dest-123' && (d.nameKh || '').includes('ផាប់ស្ទ្រីត'));
+
+            let effectivePhoto = seed.photoUrl;
+
+            if (isUserUpload || hasCustomFlag) {
+              effectivePhoto = d.photoUrl;
+              photoOverrides[d.id] = { photoUrl: d.photoUrl, updatedAt: d.photoUpdatedAt || new Date().toISOString() };
+            } else if (!isOutdatedSeedPhoto && d.photoUrl && d.photoUrl.trim() !== '') {
+              // Custom URL previously applied
+              if (d.photoUrl !== seed.photoUrl && !d.photoUrl.includes('Aerial_View_of_Kizuna_Bridge')) {
+                effectivePhoto = d.photoUrl;
+                photoOverrides[d.id] = { photoUrl: d.photoUrl, updatedAt: d.photoUpdatedAt || new Date().toISOString() };
+              } else {
+                effectivePhoto = seed.photoUrl;
+              }
+            }
+
             return {
               ...seed,
               ...d,
-              photoUrl: hasValidCustomPhoto ? effectivePhoto : seed.photoUrl,
+              photoUrl: effectivePhoto,
+              isCustomPhoto: isUserUpload || hasCustomFlag || (effectivePhoto !== seed.photoUrl),
             };
           });
+
+          // Sync updated overrides vault
+          try {
+            localStorage.setItem('kft_destination_photo_overrides_v1', JSON.stringify(photoOverrides));
+          } catch {}
+
           const existingIds = new Set(upgraded.map((d: TouristDestination) => d.id));
           const missingFromInitial = initialDestinations.filter(d => !existingIds.has(d.id));
           return missingFromInitial.length > 0 ? [...upgraded, ...missingFromInitial] : upgraded;
@@ -2639,8 +2679,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const updateDestination = (updated: TouristDestination) => {
+    const customUpdated: TouristDestination = {
+      ...updated,
+      isCustomPhoto: true,
+      photoUpdatedAt: new Date().toISOString(),
+    };
+
+    // Persist to permanent photo overrides vault (guarantees preservation across app updates)
+    try {
+      const savedOverrides = localStorage.getItem('kft_destination_photo_overrides_v1');
+      const overrides = savedOverrides ? JSON.parse(savedOverrides) : {};
+      overrides[customUpdated.id] = {
+        photoUrl: customUpdated.photoUrl,
+        updatedAt: customUpdated.photoUpdatedAt,
+      };
+      localStorage.setItem('kft_destination_photo_overrides_v1', JSON.stringify(overrides));
+    } catch (e) {
+      console.warn('Failed to persist to photo overrides vault', e);
+    }
+
     setDestinations(prev => {
-      const next = prev.map(d => d.id === updated.id ? updated : d);
+      const next = prev.map(d => d.id === customUpdated.id ? customUpdated : d);
       try {
         localStorage.setItem('kft_destinations_real_v7', JSON.stringify(next));
       } catch (e) {
@@ -2648,8 +2707,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       return next;
     });
-    if (selectedDestination?.id === updated.id) {
-      setSelectedDestination(updated);
+    if (selectedDestination?.id === customUpdated.id) {
+      setSelectedDestination(customUpdated);
     }
   };
 
