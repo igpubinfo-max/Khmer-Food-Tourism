@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
   X, Heart, MapPin, Calendar, Ticket, ExternalLink, 
-  Send, Share2, Sparkles, Compass, Camera, Bookmark
+  Send, Share2, Sparkles, Compass, Camera, Bookmark, Edit2, Save
 } from 'lucide-react';
 import { TouristImageModal } from './TouristImageModal';
+import { TouristDestination } from '../types';
 import {
   shareRichContent,
   formatRichShareText,
@@ -19,10 +20,99 @@ export const TouristDetailModal: React.FC = () => {
   } = useApp();
 
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [isEditingAdminDest, setIsEditingAdminDest] = useState(false);
+
+  // Admin editable destination fields
+  const [editNameKh, setEditNameKh] = useState('');
+  const [editNameEn, setEditNameEn] = useState('');
+  const [editCategoryKh, setEditCategoryKh] = useState('');
+  const [editCategoryEn, setEditCategoryEn] = useState('');
+  const [editProvinceKh, setEditProvinceKh] = useState('');
+  const [editProvinceEn, setEditProvinceEn] = useState('');
+  const [editAddressKh, setEditAddressKh] = useState('');
+  const [editAddressEn, setEditAddressEn] = useState('');
+  const [editEntranceFeeKh, setEditEntranceFeeKh] = useState('');
+  const [editEntranceFeeEn, setEditEntranceFeeEn] = useState('');
+  const [editBestTimeKh, setEditBestTimeKh] = useState('');
+  const [editBestTimeEn, setEditBestTimeEn] = useState('');
+  const [editMapUrl, setEditMapUrl] = useState('');
+  const [editPhotoUrl, setEditPhotoUrl] = useState('');
+  const [editDescriptionKh, setEditDescriptionKh] = useState('');
+  const [editDescriptionEn, setEditDescriptionEn] = useState('');
+  const [editHighlightsText, setEditHighlightsText] = useState('');
+
+  const isAdmin = currentUser?.role === 'admin';
+
+  useEffect(() => {
+    if (selectedDestination) {
+      setEditNameKh(selectedDestination.nameKh || '');
+      setEditNameEn(selectedDestination.nameEn || '');
+      setEditCategoryKh(selectedDestination.categoryKh || '');
+      setEditCategoryEn(selectedDestination.categoryEn || '');
+      setEditProvinceKh(selectedDestination.provinceKh || '');
+      setEditProvinceEn(selectedDestination.provinceEn || '');
+      setEditAddressKh(selectedDestination.addressKh || '');
+      setEditAddressEn(selectedDestination.addressEn || '');
+      setEditEntranceFeeKh(selectedDestination.entranceFeeKh || 'ឥតគិតថ្លៃ');
+      setEditEntranceFeeEn(selectedDestination.entranceFeeEn || 'Free Entry');
+      setEditBestTimeKh(selectedDestination.bestTimeToVisitKh || 'ពេញមួយឆ្នាំ');
+      setEditBestTimeEn(selectedDestination.bestTimeToVisitEn || 'All year round');
+      setEditMapUrl(selectedDestination.mapUrl || '');
+      setEditPhotoUrl(selectedDestination.photoUrl || '');
+      setEditDescriptionKh(selectedDestination.descriptionKh || '');
+      setEditDescriptionEn(selectedDestination.descriptionEn || '');
+      setEditHighlightsText((selectedDestination.highlightsKh || []).join(', '));
+    }
+    if ((window as any).__kft_open_dest_edit && isAdmin) {
+      setIsEditingAdminDest(true);
+      (window as any).__kft_open_dest_edit = undefined;
+    } else {
+      setIsEditingAdminDest(false);
+    }
+  }, [selectedDestination?.id, isAdmin]);
 
   if (!selectedDestination) return null;
 
-  const isAdmin = currentUser?.role === 'admin';
+  const handleSaveAdminDestination = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedDestination) return;
+
+    const highlights = editHighlightsText
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    const updated: TouristDestination = {
+      ...selectedDestination,
+      nameKh: editNameKh.trim() || selectedDestination.nameKh,
+      nameEn: editNameEn.trim() || selectedDestination.nameEn,
+      categoryKh: editCategoryKh.trim() || selectedDestination.categoryKh,
+      categoryEn: editCategoryEn.trim() || selectedDestination.categoryEn,
+      provinceKh: editProvinceKh.trim() || selectedDestination.provinceKh,
+      provinceEn: editProvinceEn.trim() || selectedDestination.provinceEn,
+      addressKh: editAddressKh.trim() || selectedDestination.addressKh,
+      addressEn: editAddressEn.trim() || selectedDestination.addressEn,
+      entranceFeeKh: editEntranceFeeKh.trim() || selectedDestination.entranceFeeKh,
+      entranceFeeEn: editEntranceFeeEn.trim() || selectedDestination.entranceFeeEn,
+      bestTimeToVisitKh: editBestTimeKh.trim() || selectedDestination.bestTimeToVisitKh,
+      bestTimeToVisitEn: editBestTimeEn.trim() || selectedDestination.bestTimeToVisitEn,
+      mapUrl: editMapUrl.trim() || selectedDestination.mapUrl,
+      photoUrl: editPhotoUrl.trim() || selectedDestination.photoUrl,
+      descriptionKh: editDescriptionKh.trim() || selectedDestination.descriptionKh,
+      descriptionEn: editDescriptionEn.trim() || selectedDestination.descriptionEn,
+      highlightsKh: highlights.length > 0 ? highlights : selectedDestination.highlightsKh,
+    };
+
+    updateDestination(updated);
+    setSelectedDestination(updated);
+    setIsEditingAdminDest(false);
+    showToast(
+      language === 'km'
+        ? `✅ បានកែប្រែព័ត៌មានតំបន់ទេសចរណ៍ «${updated.nameKh}» រួចរាល់!`
+        : `✅ Updated destination details for "${updated.nameEn}"!`,
+      'success'
+    );
+  };
   const bookmarked = isBookmarked(selectedDestination.id);
 
   const isKm = language === 'km';
@@ -87,15 +177,27 @@ export const TouristDetailModal: React.FC = () => {
 
           <div className="flex items-center gap-2 pointer-events-auto">
             {isAdmin && (
-              <button
-                type="button"
-                onClick={() => setIsImageModalOpen(true)}
-                className="py-1.5 px-3 rounded-full bg-[#10B981] hover:bg-[#059669] text-white font-bold text-xs shadow-lg backdrop-blur-md transition active:scale-90 flex items-center gap-1.5 border border-white/20"
-                title={language === 'km' ? 'ផ្លាស់ប្តូររូបភាព' : 'Change Photo'}
-              >
-                <Camera className="w-3.5 h-3.5 text-white" />
-                <span className="font-khmer">{language === 'km' ? 'ប្តូររូបភាព' : 'Change Photo'}</span>
-              </button>
+              <>
+                <button
+                  type="button"
+                  onClick={() => setIsEditingAdminDest(!isEditingAdminDest)}
+                  className="py-1.5 px-3 rounded-full bg-amber-400 hover:bg-amber-500 text-slate-950 font-black text-xs shadow-lg backdrop-blur-md transition active:scale-90 flex items-center gap-1.5 border border-white/60"
+                  title={isKm ? 'កែប្រែព័ត៌មាន & រូបភាព (Admin)' : 'Edit Details & Photos (Admin)'}
+                >
+                  <Edit2 className="w-3.5 h-3.5" />
+                  <span className="font-khmer">{isEditingAdminDest ? (isKm ? 'មើលធម្មតា' : 'View') : (isKm ? 'កែប្រែ (Admin)' : 'Edit')}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setIsImageModalOpen(true)}
+                  className="py-1.5 px-3 rounded-full bg-[#10B981] hover:bg-[#059669] text-white font-bold text-xs shadow-lg backdrop-blur-md transition active:scale-90 flex items-center gap-1.5 border border-white/20"
+                  title={language === 'km' ? 'ផ្លាស់ប្តូររូបភាព' : 'Change Photo'}
+                >
+                  <Camera className="w-3.5 h-3.5 text-white" />
+                  <span className="font-khmer">{language === 'km' ? 'ប្តូររូបភាព' : 'Change Photo'}</span>
+                </button>
+              </>
             )}
 
             <button
@@ -129,6 +231,210 @@ export const TouristDetailModal: React.FC = () => {
 
         {/* Scrollable Body */}
         <div className="overflow-y-auto flex-1 no-scrollbar pb-6">
+          {isEditingAdminDest ? (
+            /* ADMIN EDIT DESTINATION FORM */
+            <form onSubmit={handleSaveAdminDestination} className="p-4 sm:p-6 space-y-4 font-khmer pt-16">
+              <div className="p-3.5 rounded-2xl bg-amber-500/15 border-2 border-amber-400/60 flex items-center justify-between">
+                <div>
+                  <h3 className="font-bold text-xs text-amber-800 dark:text-amber-300 flex items-center gap-1.5">
+                    <Edit2 className="w-4 h-4 text-amber-600" />
+                    <span>{isKm ? 'កែប្រែព័ត៌មានតំបន់ទេសចរណ៍ (Admin Edit)' : 'Admin Destination Editor'}</span>
+                  </h3>
+                  <p className="text-[10px] text-slate-500">ID: {selectedDestination.id}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsEditingAdminDest(false)}
+                  className="px-2.5 py-1 rounded-lg bg-slate-200 dark:bg-slate-700 text-xs font-bold"
+                >
+                  {isKm ? 'បោះបង់' : 'Cancel'}
+                </button>
+              </div>
+
+              {/* Photo */}
+              <div className="space-y-2 p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+                <label className="block font-bold text-xs text-slate-800 dark:text-slate-200">
+                  {isKm ? 'រូបភាពតំបន់ទេសចរណ៍ (Photo URL / Upload)' : 'Destination Photo'}
+                </label>
+                <div className="relative aspect-16/10 rounded-xl overflow-hidden bg-slate-900 border border-amber-400/50">
+                  <img src={editPhotoUrl || selectedDestination.photoUrl} alt="Preview" className="w-full h-full object-cover" />
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={editPhotoUrl}
+                    onChange={(e) => setEditPhotoUrl(e.target.value)}
+                    placeholder="https://..."
+                    className="flex-1 px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-xs font-mono bg-white dark:bg-slate-900 text-slate-800 dark:text-white"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setIsImageModalOpen(true)}
+                    className="px-3.5 py-2 rounded-xl bg-[#10B981] hover:bg-[#059669] text-white font-bold text-xs flex items-center gap-1.5 shrink-0 cursor-pointer"
+                  >
+                    <Camera className="w-3.5 h-3.5" />
+                    <span>{isKm ? 'ប្តូររូបភាព' : 'Upload Photo'}</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Names */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div>
+                  <label className="block font-bold text-xs text-slate-800 dark:text-slate-200 mb-1">
+                    {isKm ? 'ឈ្មោះតំបន់ទេសចរណ៍ (ភាសាខ្មែរ) *' : 'Name (Khmer) *'}
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={editNameKh}
+                    onChange={(e) => setEditNameKh(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-white font-medium"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-xs text-slate-800 dark:text-slate-200 mb-1">
+                    {isKm ? 'ឈ្មោះតំបន់ទេសចរណ៍ (English)' : 'Name (English)'}
+                  </label>
+                  <input
+                    type="text"
+                    value={editNameEn}
+                    onChange={(e) => setEditNameEn(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-white font-medium"
+                  />
+                </div>
+              </div>
+
+              {/* Category & Province */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div>
+                  <label className="block font-bold text-xs text-slate-800 dark:text-slate-200 mb-1">
+                    {isKm ? 'ប្រភេទតំបន់ទេសចរណ៍' : 'Category'}
+                  </label>
+                  <input
+                    type="text"
+                    value={editCategoryKh}
+                    onChange={(e) => setEditCategoryKh(e.target.value)}
+                    placeholder="ប្រាសាទបុរាណ, ទឹកធ្លាក់, ឆ្នេរសមុទ្រ..."
+                    className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-white font-medium"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-xs text-slate-800 dark:text-slate-200 mb-1">
+                    {isKm ? 'រាជធានី-ខេត្ត (Province)' : 'Province'}
+                  </label>
+                  <input
+                    type="text"
+                    value={editProvinceKh}
+                    onChange={(e) => setEditProvinceKh(e.target.value)}
+                    placeholder="ខេត្តសៀមរាប, កំពត..."
+                    className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-white font-medium"
+                  />
+                </div>
+              </div>
+
+              {/* Address & Google Maps URL */}
+              <div className="space-y-2">
+                <div>
+                  <label className="block font-bold text-xs text-slate-800 dark:text-slate-200 mb-1">
+                    {isKm ? 'អាសយដ្ឋាន / ទីតាំងជាក់ស្តែង' : 'Address / Location'}
+                  </label>
+                  <input
+                    type="text"
+                    value={editAddressKh}
+                    onChange={(e) => setEditAddressKh(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-xs text-slate-800 dark:text-slate-200 mb-1">
+                    {isKm ? 'តំណភ្ជាប់ផែនទី (Google Maps Link)' : 'Google Maps URL'}
+                  </label>
+                  <input
+                    type="url"
+                    value={editMapUrl}
+                    onChange={(e) => setEditMapUrl(e.target.value)}
+                    placeholder="https://maps.google.com/?q=..."
+                    className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-white font-mono"
+                  />
+                </div>
+              </div>
+
+              {/* Entrance fee & Best time */}
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block font-bold text-xs text-slate-800 dark:text-slate-200 mb-1">
+                    {isKm ? 'តម្លៃសំបុត្រ (Entrance Fee)' : 'Entrance Fee'}
+                  </label>
+                  <input
+                    type="text"
+                    value={editEntranceFeeKh}
+                    onChange={(e) => setEditEntranceFeeKh(e.target.value)}
+                    placeholder="ឥតគិតថ្លៃ ឬ $2"
+                    className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-xs text-slate-800 dark:text-slate-200 mb-1">
+                    {isKm ? 'ពេលវេលាល្អសម្រាប់ដើរលេង' : 'Best Time to Visit'}
+                  </label>
+                  <input
+                    type="text"
+                    value={editBestTimeKh}
+                    onChange={(e) => setEditBestTimeKh(e.target.value)}
+                    placeholder="ពេលព្រឹក / ពេញមួយឆ្នាំ"
+                    className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-white"
+                  />
+                </div>
+              </div>
+
+              {/* Highlights */}
+              <div>
+                <label className="block font-bold text-xs text-slate-800 dark:text-slate-200 mb-1">
+                  {isKm ? 'ចំណុចពិសេស (បំបែកដោយក្បៀស ,)' : 'Highlights (comma separated)'}
+                </label>
+                <input
+                  type="text"
+                  value={editHighlightsText}
+                  onChange={(e) => setEditHighlightsText(e.target.value)}
+                  placeholder="ទស្សនាប្រាសាទ, ថតរូបថ្ងៃលិច, ជិះទូកកម្សាន្ត"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-white"
+                />
+              </div>
+
+              {/* Description */}
+              <div>
+                <label className="block font-bold text-xs text-slate-800 dark:text-slate-200 mb-1">
+                  {isKm ? 'ការពិពណ៌នាតំបន់ទេសចរណ៍' : 'Description'}
+                </label>
+                <textarea
+                  rows={3}
+                  value={editDescriptionKh}
+                  onChange={(e) => setEditDescriptionKh(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-white leading-relaxed"
+                />
+              </div>
+
+              {/* Save & Cancel */}
+              <div className="grid grid-cols-2 gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsEditingAdminDest(false)}
+                  className="py-3 px-4 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs cursor-pointer"
+                >
+                  {isKm ? 'បោះបង់' : 'Cancel'}
+                </button>
+                <button
+                  type="submit"
+                  className="py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-600 via-[#064E3B] to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-black text-xs flex items-center justify-center gap-1.5 shadow-md active:scale-95 cursor-pointer"
+                >
+                  <Save className="w-4 h-4 text-emerald-300" />
+                  <span>{isKm ? 'រក្សាទុកការកែប្រែ' : 'Save Changes'}</span>
+                </button>
+              </div>
+            </form>
+          ) : (
+          <>
           {/* Hero Image */}
           <div className="relative h-64 sm:h-72 w-full bg-slate-800">
             <img 
@@ -309,6 +615,8 @@ export const TouristDetailModal: React.FC = () => {
               </div>
             </div>
           </div>
+          </>
+          )}
         </div>
       </div>
 

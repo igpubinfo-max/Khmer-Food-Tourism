@@ -1,7 +1,7 @@
 import React from 'react';
 import { TouristDestination } from '../types';
 import { useApp } from '../context/AppContext';
-import { MapPin, Star, Heart, Ticket, Camera } from 'lucide-react';
+import { MapPin, Star, Heart, Ticket, Camera, Edit2 } from 'lucide-react';
 
 interface TouristCardProps {
   destination: TouristDestination;
@@ -40,18 +40,19 @@ const TouristCardInner: React.FC<TouristCardProps> = ({ destination }) => {
           )}
         </div>
 
-        {/* Admin Change Photo Shortcut */}
+        {/* Admin Edit Shortcut */}
         {isAdmin && (
           <button
             type="button"
             onClick={(e) => {
               e.stopPropagation();
+              (window as any).__kft_open_dest_edit = true;
               setSelectedDestination(destination);
             }}
-            className="absolute top-2.5 right-11 p-2 rounded-full bg-[#10B981] hover:bg-[#059669] text-white shadow-md transition-transform active:scale-90"
-            title={language === 'km' ? 'ប្តូររូបភាព' : 'Change Photo'}
+            className="absolute top-2.5 right-11 p-2 rounded-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold shadow-md transition-transform active:scale-90"
+            title={language === 'km' ? 'កែប្រែព័ត៌មានតំបន់ទេសចរណ៍ (Admin)' : 'Edit Destination (Admin)'}
           >
-            <Camera className="w-3.5 h-3.5" />
+            <Edit2 className="w-3.5 h-3.5" />
           </button>
         )}
 

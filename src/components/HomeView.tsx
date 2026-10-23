@@ -717,13 +717,23 @@ export const HomeView: React.FC = () => {
                     ? '✨ ចុះបញ្ជីហាងមុន ហាងរបស់លោកអ្នកនឹងបង្ហាញមុនគេតាមលំដាប់លេខរៀង ដើម្បីងាយស្រួលឱ្យអតិថិជនស្វែងរក និងតាមដានស្ថិតិហាង។'
                     : '✨ Register your restaurant early so it appears first in chronological order, making it easy for customers to find and track store analytics.'}
                 </div>
-                <button
-                  onClick={() => setIsVipAddRestaurantModalOpen(true)}
-                  className="w-full py-3 px-4 bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-slate-950 rounded-xl text-xs font-black shadow-md border-2 border-white/80 flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer"
-                >
-                  <Crown className="w-4 h-4 fill-slate-950 shrink-0" />
-                  <span>{isKm ? '+ ចុះបញ្ជីហាង VIP របស់អ្នក (1 ហាង)' : '+ Register Your VIP Restaurant (1 Store)'}</span>
-                </button>
+                <div className="relative p-1 rounded-2xl group">
+                  {/* Softly blinking glowing lights around border */}
+                  <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 opacity-70 blur-xs vip-glow-btn pointer-events-none" />
+                  <div className="absolute top-1 left-2 w-2 h-2 rounded-full bg-yellow-200 shadow-sm shadow-amber-300 vip-sparkle-dot pointer-events-none" />
+                  <div className="absolute top-1 right-2 w-2 h-2 rounded-full bg-yellow-200 shadow-sm shadow-amber-300 vip-sparkle-dot pointer-events-none" style={{ animationDelay: '0.9s' }} />
+                  <div className="absolute bottom-1 left-4 w-1.5 h-1.5 rounded-full bg-amber-200 shadow-sm shadow-amber-300 vip-sparkle-dot pointer-events-none" style={{ animationDelay: '0.4s' }} />
+                  <div className="absolute bottom-1 right-4 w-1.5 h-1.5 rounded-full bg-amber-200 shadow-sm shadow-amber-300 vip-sparkle-dot pointer-events-none" style={{ animationDelay: '1.3s' }} />
+
+                  <button
+                    onClick={() => setIsVipAddRestaurantModalOpen(true)}
+                    className="relative w-full py-3.5 px-4 bg-gradient-to-r from-amber-300 via-amber-400 to-yellow-400 hover:from-amber-400 hover:to-yellow-500 text-slate-950 rounded-xl text-xs sm:text-sm font-black border-2 border-white/90 vip-glow-btn flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer shadow-lg"
+                  >
+                    <Crown className="w-4 h-4 fill-slate-950 shrink-0" />
+                    <span>{isKm ? '+ ចុះបញ្ជីហាង VIP របស់អ្នក (1 ហាង)' : '+ Register Your VIP Restaurant (1 Store)'}</span>
+                    <Sparkles className="w-3.5 h-3.5 text-amber-900 shrink-0" />
+                  </button>
+                </div>
               </div>
             ) : (
               myRestaurants.map((shop) => (

@@ -260,26 +260,36 @@ export const RestaurantView: React.FC = () => {
             </p>
           </div>
         </div>
-        <button
-          onClick={() => {
-            if (!currentUser) {
-              setIsAuthModalOpen(true);
-            } else if (isUserAtOneStoreLimit && myExistingRest) {
-              setManagingRestaurant(myExistingRest);
-              setIsManageMenuModalOpen(true);
-            } else {
-              setIsVipAddRestaurantModalOpen(true);
-            }
-          }}
-          className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-amber-300 via-amber-400 to-yellow-400 hover:from-amber-400 hover:to-yellow-500 text-slate-950 text-xs sm:text-sm font-black shadow-md border-2 border-white/80 flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer"
-        >
-          <span>👑</span>
-          <span>
-            {isUserAtOneStoreLimit
-              ? (isKm ? '✏️ គ្រប់គ្រងហាង VIP របស់ខ្ញុំ (1/1 ហាង)' : '✏️ Manage My VIP Store (1/1)')
-              : (isKm ? '+ ចុះបញ្ជីហាង VIP របស់អ្នក (1 ហាង)' : '+ Register Your VIP Restaurant (1 Store)')}
-          </span>
-        </button>
+        <div className="relative p-1 rounded-2xl group">
+          {/* Softly blinking glowing lights around border */}
+          <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 opacity-70 blur-xs vip-glow-btn pointer-events-none" />
+          <div className="absolute top-1 left-2 w-2 h-2 rounded-full bg-yellow-200 shadow-sm shadow-amber-300 vip-sparkle-dot pointer-events-none" />
+          <div className="absolute top-1 right-2 w-2 h-2 rounded-full bg-yellow-200 shadow-sm shadow-amber-300 vip-sparkle-dot pointer-events-none" style={{ animationDelay: '0.9s' }} />
+          <div className="absolute bottom-1 left-4 w-1.5 h-1.5 rounded-full bg-amber-200 shadow-sm shadow-amber-300 vip-sparkle-dot pointer-events-none" style={{ animationDelay: '0.4s' }} />
+          <div className="absolute bottom-1 right-4 w-1.5 h-1.5 rounded-full bg-amber-200 shadow-sm shadow-amber-300 vip-sparkle-dot pointer-events-none" style={{ animationDelay: '1.3s' }} />
+
+          <button
+            onClick={() => {
+              if (!currentUser) {
+                setIsAuthModalOpen(true);
+              } else if (isUserAtOneStoreLimit && myExistingRest) {
+                setManagingRestaurant(myExistingRest);
+                setIsManageMenuModalOpen(true);
+              } else {
+                setIsVipAddRestaurantModalOpen(true);
+              }
+            }}
+            className="relative w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-300 via-amber-400 to-yellow-400 hover:from-amber-400 hover:to-yellow-500 text-slate-950 text-xs sm:text-sm font-black border-2 border-white/90 vip-glow-btn flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer shadow-lg"
+          >
+            <span className="text-base">👑</span>
+            <span>
+              {isUserAtOneStoreLimit
+                ? (isKm ? '✏️ គ្រប់គ្រងហាង VIP របស់ខ្ញុំ (1/1 ហាង)' : '✏️ Manage My VIP Store (1/1)')
+                : (isKm ? '+ ចុះបញ្ជីហាង VIP របស់អ្នក (1 ហាង)' : '+ Register Your VIP Restaurant (1 Store)')}
+            </span>
+            <span className="text-xs">✨</span>
+          </button>
+        </div>
       </div>
 
       {/* Location Filter Pills */}

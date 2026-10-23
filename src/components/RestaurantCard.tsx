@@ -1,7 +1,7 @@
 import React from 'react';
 import { Restaurant, isRestaurantPremiumActive } from '../types';
 import { useApp } from '../context/AppContext';
-import { MapPin, Phone, Star, Navigation, CheckCircle2, AlertCircle, Sparkles, Share2 } from 'lucide-react';
+import { MapPin, Phone, Star, Navigation, CheckCircle2, AlertCircle, Sparkles, Share2, Edit2 } from 'lucide-react';
 import { sanitizeDialablePhone, resolveRestaurantPhoneOnDemand } from '../services/googlePlacesService';
 import { shareRichContent } from '../utils/androidMediaHelper';
 
@@ -11,11 +11,13 @@ interface RestaurantCardProps {
 
 const RestaurantCardInner: React.FC<RestaurantCardProps> = ({ restaurant }) => {
   const { 
-    language, setSelectedRestaurant, showToast,
+    language, setSelectedRestaurant, showToast, currentUser,
+    setIsManageMenuModalOpen, setManagingRestaurant,
     trackRestaurantView, trackRestaurantCall, trackRestaurantMap, trackRestaurantShare 
   } = useApp();
   const isKm = language === 'km';
   const isPremium = isRestaurantPremiumActive(restaurant);
+  const isAdmin = currentUser?.role === 'admin';
 
   const handleShare = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -65,11 +67,26 @@ const RestaurantCardInner: React.FC<RestaurantCardProps> = ({ restaurant }) => {
           decoding="async"
         />
 
-        {/* Province pill */}
-        <div className="absolute top-2.5 left-2.5">
+        {/* Province pill & Admin shortcut */}
+        <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 z-10">
           <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-[#064E3B]/95 text-emerald-100 border border-emerald-400/30 shadow-xs font-khmer">
             {isKm ? (restaurant.provinceKh || 'កម្ពុជា') : (restaurant.provinceEn || 'Cambodia')}
           </span>
+          {isAdmin && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setManagingRestaurant(restaurant);
+                setIsManageMenuModalOpen(true);
+              }}
+              className="px-2 py-0.5 rounded-full bg-amber-400 hover:bg-amber-500 text-slate-950 text-[10px] font-black shadow-md flex items-center gap-1 transition active:scale-90"
+              title={isKm ? 'កែប្រែហាង (Admin)' : 'Edit Store (Admin)'}
+            >
+              <Edit2 className="w-3 h-3" />
+              <span>{isKm ? 'កែប្រែ (Admin)' : 'Edit'}</span>
+            </button>
+          )}
         </div>
 
         {/* Verification & Membership Badge */}

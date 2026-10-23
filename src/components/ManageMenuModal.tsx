@@ -355,7 +355,9 @@ export const ManageMenuModal: React.FC = () => {
             </div>
             <div>
               <h2 className="font-moul text-sm text-white leading-snug">
-                {isKm ? 'ផ្ទាំងគ្រប់គ្រងម្ចាស់ហាង' : 'Owner Management Hub'}
+                {currentUser?.role === 'admin'
+                  ? (isKm ? 'គ្រប់គ្រង & កែប្រែហាង (Admin)' : 'Admin Restaurant Editor')
+                  : (isKm ? 'ផ្ទាំងគ្រប់គ្រងម្ចាស់ហាង' : 'Owner Management Hub')}
               </h2>
               <p className="text-[10px] text-emerald-200 font-khmer">
                 {isKm ? managingRestaurant.nameKh : managingRestaurant.nameEn}

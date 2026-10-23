@@ -1,7 +1,7 @@
 import React from 'react';
 import { FoodItem } from '../types';
 import { useApp } from '../context/AppContext';
-import { Star, Heart, Flame, Share2 } from 'lucide-react';
+import { Star, Heart, Flame, Share2, Edit2 } from 'lucide-react';
 import { shareRichContent } from '../utils/androidMediaHelper';
 
 interface FoodCardProps {
@@ -9,9 +9,10 @@ interface FoodCardProps {
 }
 
 const FoodCardInner: React.FC<FoodCardProps> = ({ food }) => {
-  const { language, setSelectedFood, isBookmarked, toggleBookmark, showToast } = useApp();
+  const { language, setSelectedFood, isBookmarked, toggleBookmark, showToast, currentUser } = useApp();
   const bookmarked = isBookmarked(food.id);
   const isKm = language === 'km';
+  const isAdmin = currentUser?.role === 'admin';
 
   const handleShareFood = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -55,6 +56,22 @@ const FoodCardInner: React.FC<FoodCardProps> = ({ food }) => {
             {language === 'km' ? food.categoryKh : food.categoryEn}
           </span>
         </div>
+
+        {/* Admin Edit Shortcut */}
+        {isAdmin && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              (window as any).__kft_open_food_edit = true;
+              setSelectedFood(food);
+            }}
+            className="absolute top-2.5 right-11 p-2 rounded-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold shadow-md transition-transform active:scale-90"
+            title={isKm ? 'កែប្រែព័ត៌មានម្ហូប (Admin)' : 'Edit Food (Admin)'}
+          >
+            <Edit2 className="w-3.5 h-3.5" />
+          </button>
+        )}
 
         {/* Bookmark Button */}
         <button

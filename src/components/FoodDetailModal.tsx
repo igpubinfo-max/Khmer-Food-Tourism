@@ -1,30 +1,76 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
   X, Heart, Clock, Users, Flame, ChefHat, 
-  Share2, CheckCircle2, Circle, Volume2, Sparkles, Send, Bookmark, Globe, Check
+  Share2, CheckCircle2, Circle, Volume2, Sparkles, Send, Bookmark, Globe, Check,
+  Edit2, Save, Upload, Camera, ArrowLeft
 } from 'lucide-react';
 import {
   shareRichContent,
   formatRichShareText,
   copyTextNativeOrWeb,
+  pickImageUsingNativeAndroidGallery,
+  processAndCompressImageFile,
 } from '../utils/androidMediaHelper';
 import { searchOnlineFoodImages, OnlineFoodImageCandidate } from '../services/onlineFoodImageService';
+import { FoodCategorySlug, FoodItem } from '../types';
 
 export const FoodDetailModal: React.FC = () => {
   const { 
     selectedFood, setSelectedFood, updateFood, language, 
-    isBookmarked, toggleBookmark, showToast, openAddToWishlist 
+    isBookmarked, toggleBookmark, showToast, openAddToWishlist,
+    currentUser
   } = useApp();
+  const isAdmin = currentUser?.role === 'admin';
   const [checkedIngredients, setCheckedIngredients] = useState<Record<number, boolean>>({});
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isSearchingOnline, setIsSearchingOnline] = useState(false);
   const [onlineCandidates, setOnlineCandidates] = useState<OnlineFoodImageCandidate[]>([]);
+  const [isEditingAdminFood, setIsEditingAdminFood] = useState(false);
+
+  // Admin editable fields
+  const [editNameKh, setEditNameKh] = useState('');
+  const [editNameEn, setEditNameEn] = useState('');
+  const [editCategorySlug, setEditCategorySlug] = useState<FoodCategorySlug>('soup');
+  const [editCategoryKh, setEditCategoryKh] = useState('');
+  const [editPriceUsd, setEditPriceUsd] = useState('');
+  const [editPriceRiel, setEditPriceRiel] = useState('');
+  const [editCookTime, setEditCookTime] = useState('');
+  const [editServings, setEditServings] = useState('');
+  const [editCalories, setEditCalories] = useState('');
+  const [editDifficulty, setEditDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
+  const [editDescriptionKh, setEditDescriptionKh] = useState('');
+  const [editDescriptionEn, setEditDescriptionEn] = useState('');
+  const [editPhotoUrl, setEditPhotoUrl] = useState('');
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    if (selectedFood) {
+      setEditNameKh(selectedFood.nameKh || '');
+      setEditNameEn(selectedFood.nameEn || '');
+      setEditCategorySlug((selectedFood.categorySlug as FoodCategorySlug) || 'soup');
+      setEditCategoryKh(selectedFood.categoryKh || '');
+      setEditPriceUsd((selectedFood.priceUsd || 0).toString());
+      setEditPriceRiel((selectedFood.priceRiel || 0).toString());
+      setEditCookTime(selectedFood.cookTime || '២៥ នាទី');
+      setEditServings(selectedFood.servings || '៣-៤ នាក់');
+      setEditCalories((selectedFood.calories || 320).toString());
+      setEditDifficulty(selectedFood.difficulty || 'medium');
+      setEditDescriptionKh(selectedFood.descriptionKh || '');
+      setEditDescriptionEn(selectedFood.descriptionEn || '');
+      setEditPhotoUrl(selectedFood.photoUrl || '');
+    }
     setOnlineCandidates([]);
     setIsSearchingOnline(false);
-  }, [selectedFood?.id]);
+
+    if ((window as any).__kft_open_food_edit && isAdmin) {
+      setIsEditingAdminFood(true);
+      (window as any).__kft_open_food_edit = undefined;
+    } else {
+      setIsEditingAdminFood(false);
+    }
+  }, [selectedFood?.id, isAdmin]);
 
   if (!selectedFood) return null;
 
@@ -78,6 +124,85 @@ export const FoodDetailModal: React.FC = () => {
       language === 'km'
         ? '✅ បានរក្សាទុករូបភាពម្ហូបពី Online រួចរាល់!'
         : '✅ Online food photo saved!',
+      'success'
+    );
+  };
+
+  const handlePickDevicePhoto = async () => {
+    setIsUploadingPhoto(true);
+    try {
+      const pick = await pickImageUsingNativeAndroidGallery();
+      if (!pick.cancelled && pick.dataUrl) {
+        setEditPhotoUrl(pick.dataUrl);
+        showToast(language === 'km' ? 'បានជ្រើសរើសរូបភាពពីទូរស័ព្ទ' : 'Photo selected from device', 'info');
+      }
+    } catch {
+      fileInputRef.current?.click();
+    } finally {
+      setIsUploadingPhoto(false);
+    }
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsUploadingPhoto(true);
+    try {
+      const dataUrl = await processAndCompressImageFile(file, 1080, 810, 0.85);
+      setEditPhotoUrl(dataUrl);
+      showToast(language === 'km' ? 'បានបង្រួម និងបញ្ចូលរូបភាពរួចរាល់' : 'Photo compressed and ready', 'info');
+    } catch {
+      showToast(language === 'km' ? 'មិនអាចដំណើរការរូបភាពនេះបានទេ' : 'Failed to process image', 'warning');
+    } finally {
+      setIsUploadingPhoto(false);
+    }
+  };
+
+  const handleSaveAdminFood = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedFood) return;
+
+    const catSlug = editCategorySlug;
+    const catKhMap: Record<FoodCategorySlug, string> = {
+      soup: 'ស៊ុប សម្ល & បបរ',
+      stirfry: 'ម្ហូបឆា',
+      grilled: 'ម្ហូបអាំង ចៀន & ចំហុយ',
+      salad: 'ញាំ ភ្លា & ទឹកគ្រឿង',
+      noodles: 'មី គុយទាវ & នំបញ្ចុក',
+      rice: 'ម្ហូបបាយ',
+      streetfood: 'អាហារសម្រន់តាមផ្លូវ',
+      dessert: 'បង្អែមខ្មែរ',
+      drink: 'ភេសជ្ជៈខ្មែរ',
+      cake: 'នំខ្មែរ',
+      specialty: 'មុខម្ហូបពិសេស',
+    };
+
+    const updated: FoodItem = {
+      ...selectedFood,
+      nameKh: editNameKh.trim() || selectedFood.nameKh,
+      nameEn: editNameEn.trim() || selectedFood.nameEn,
+      categorySlug: catSlug,
+      categoryKh: editCategoryKh.trim() || catKhMap[catSlug] || selectedFood.categoryKh,
+      priceUsd: parseFloat(editPriceUsd) || selectedFood.priceUsd,
+      priceRiel: parseInt(editPriceRiel) || selectedFood.priceRiel,
+      cookTime: editCookTime.trim() || selectedFood.cookTime,
+      servings: editServings.trim() || selectedFood.servings,
+      calories: parseInt(editCalories) || selectedFood.calories,
+      difficulty: editDifficulty,
+      descriptionKh: editDescriptionKh.trim() || selectedFood.descriptionKh,
+      descriptionEn: editDescriptionEn.trim() || selectedFood.descriptionEn,
+      photoUrl: editPhotoUrl.trim() || selectedFood.photoUrl,
+      imageAuditStatus: 'verified',
+      imageAuditNote: 'កែប្រែដោយរដ្ឋបាល (Admin Edited)',
+    };
+
+    updateFood(updated);
+    setSelectedFood(updated);
+    setIsEditingAdminFood(false);
+    showToast(
+      language === 'km'
+        ? `✅ បានកែប្រែព័ត៌មានមុខម្ហូប «${updated.nameKh}» រួចរាល់!`
+        : `✅ Updated food details for "${updated.nameEn}"!`,
       'success'
     );
   };
@@ -182,6 +307,19 @@ export const FoodDetailModal: React.FC = () => {
           </button>
 
           <div className="flex items-center gap-2 pointer-events-auto">
+            {/* Admin Edit Food Button */}
+            {isAdmin && (
+              <button
+                type="button"
+                onClick={() => setIsEditingAdminFood(!isEditingAdminFood)}
+                className="py-1.5 px-3 rounded-full bg-amber-400 hover:bg-amber-500 text-slate-950 font-black text-xs shadow-lg backdrop-blur-md transition active:scale-90 flex items-center gap-1.5 border border-white/60"
+                title={isKm ? 'កែប្រែព័ត៌មាន & រូបភាព (Admin)' : 'Edit Details & Photos (Admin)'}
+              >
+                <Edit2 className="w-3.5 h-3.5" />
+                <span className="font-khmer">{isEditingAdminFood ? (isKm ? 'មើលធម្មតា' : 'View') : (isKm ? 'កែប្រែ (Admin)' : 'Edit')}</span>
+              </button>
+            )}
+
             {/* Audio Reader */}
             <button
               onClick={handleSpeak}
@@ -235,6 +373,249 @@ export const FoodDetailModal: React.FC = () => {
 
         {/* Scrollable Body */}
         <div className="overflow-y-auto flex-1 no-scrollbar pb-6">
+          {isEditingAdminFood ? (
+            /* ADMIN EDIT FOOD FORM */
+            <form onSubmit={handleSaveAdminFood} className="p-4 sm:p-6 space-y-4 font-khmer pt-16">
+              <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
+
+              <div className="p-3.5 rounded-2xl bg-amber-500/15 border-2 border-amber-400/60 flex items-center justify-between">
+                <div>
+                  <h3 className="font-bold text-xs text-amber-800 dark:text-amber-300 flex items-center gap-1.5">
+                    <Edit2 className="w-4 h-4 text-amber-600" />
+                    <span>{isKm ? 'កែប្រែព័ត៌មានមុខម្ហូប (Admin Edit)' : 'Admin Food Editor'}</span>
+                  </h3>
+                  <p className="text-[10px] text-slate-500">ID: {selectedFood.id}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsEditingAdminFood(false)}
+                  className="px-2.5 py-1 rounded-lg bg-slate-200 dark:bg-slate-700 text-xs font-bold"
+                >
+                  {isKm ? 'បោះបង់' : 'Cancel'}
+                </button>
+              </div>
+
+              {/* 1. Photo replacement */}
+              <div className="space-y-2 p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+                <label className="block font-bold text-xs text-slate-800 dark:text-slate-200">
+                  {isKm ? 'រូបភាពមុខម្ហូប (Photo URL / Upload)' : 'Dish Photo'}
+                </label>
+                <div className="relative aspect-16/10 rounded-xl overflow-hidden bg-slate-900 border border-amber-400/50">
+                  <img src={editPhotoUrl || selectedFood.photoUrl} alt="Preview" className="w-full h-full object-cover" />
+                </div>
+                <input
+                  type="text"
+                  value={editPhotoUrl}
+                  onChange={(e) => setEditPhotoUrl(e.target.value)}
+                  placeholder="https://..."
+                  className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-xs font-mono bg-white dark:bg-slate-900 text-slate-800 dark:text-white"
+                />
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={handleSearchOnlinePhoto}
+                    disabled={isSearchingOnline}
+                    className="py-2 px-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <Globe className="w-3.5 h-3.5" />
+                    <span>{isSearchingOnline ? (isKm ? 'កំពុងស្វែងរក...' : 'Searching...') : (isKm ? '🤖 ស្វែងរក Online' : 'Auto Online Search')}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handlePickDevicePhoto}
+                    disabled={isUploadingPhoto}
+                    className="py-2 px-3 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <Camera className="w-3.5 h-3.5" />
+                    <span>{isKm ? 'ជ្រើសរូបពីទូរស័ព្ទ' : 'Choose from Device'}</span>
+                  </button>
+                </div>
+                {onlineCandidates.length > 0 && (
+                  <div className="grid grid-cols-3 gap-2 pt-2">
+                    {onlineCandidates.map((cand, idx) => (
+                      <button
+                        key={`${cand.url}-${idx}`}
+                        type="button"
+                        onClick={() => setEditPhotoUrl(cand.url)}
+                        className={`aspect-4/3 rounded-lg overflow-hidden border-2 transition ${
+                          editPhotoUrl === cand.url ? 'border-amber-500 ring-2 ring-amber-400/50' : 'border-slate-200'
+                        }`}
+                      >
+                        <img src={cand.url} alt={cand.title} className="w-full h-full object-cover" />
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* 2. Names */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div>
+                  <label className="block font-bold text-xs text-slate-800 dark:text-slate-200 mb-1">
+                    {isKm ? 'ឈ្មោះមុខម្ហូប (ភាសាខ្មែរ) *' : 'Name (Khmer) *'}
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={editNameKh}
+                    onChange={(e) => setEditNameKh(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-white font-medium"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-xs text-slate-800 dark:text-slate-200 mb-1">
+                    {isKm ? 'ឈ្មោះមុខម្ហូប (English)' : 'Name (English)'}
+                  </label>
+                  <input
+                    type="text"
+                    value={editNameEn}
+                    onChange={(e) => setEditNameEn(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-white font-medium"
+                  />
+                </div>
+              </div>
+
+              {/* 3. Category & Price */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <div>
+                  <label className="block font-bold text-xs text-slate-800 dark:text-slate-200 mb-1">
+                    {isKm ? 'ប្រភេទម្ហូប' : 'Category'}
+                  </label>
+                  <select
+                    value={editCategorySlug}
+                    onChange={(e) => setEditCategorySlug(e.target.value as FoodCategorySlug)}
+                    className="w-full px-2.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-white font-bold"
+                  >
+                    <option value="soup">ស៊ុប / សម្ល</option>
+                    <option value="stirfry">ម្ហូបឆា</option>
+                    <option value="grilled">ម្ហូបអាំង</option>
+                    <option value="salad">ញាំ / ភ្លា</option>
+                    <option value="noodles">គុយទាវ / នំបញ្ចុក</option>
+                    <option value="rice">ម្ហូបបាយ</option>
+                    <option value="streetfood">អាហារសម្រន់</option>
+                    <option value="dessert">បង្អែម</option>
+                    <option value="cake">នំខ្មែរ</option>
+                    <option value="drink">ភេសជ្ជៈ</option>
+                    <option value="specialty">ពិសេស</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block font-bold text-xs text-slate-800 dark:text-slate-200 mb-1">
+                    {isKm ? 'តម្លៃ ($ USD)' : 'Price USD'}
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={editPriceUsd}
+                    onChange={(e) => {
+                      setEditPriceUsd(e.target.value);
+                      const val = parseFloat(e.target.value) || 0;
+                      setEditPriceRiel((Math.round(val * 4100)).toString());
+                    }}
+                    className="w-full px-2.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-white font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-xs text-slate-800 dark:text-slate-200 mb-1">
+                    {isKm ? 'តម្លៃ (៛ រៀល)' : 'Price Riel'}
+                  </label>
+                  <input
+                    type="number"
+                    step="500"
+                    value={editPriceRiel}
+                    onChange={(e) => setEditPriceRiel(e.target.value)}
+                    className="w-full px-2.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-white font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-xs text-slate-800 dark:text-slate-200 mb-1">
+                    {isKm ? 'កម្រិតចម្អិន' : 'Difficulty'}
+                  </label>
+                  <select
+                    value={editDifficulty}
+                    onChange={(e) => setEditDifficulty(e.target.value as any)}
+                    className="w-full px-2.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-white font-bold"
+                  >
+                    <option value="easy">ងាយ (Easy)</option>
+                    <option value="medium">មធ្យម (Medium)</option>
+                    <option value="hard">ជំនាញ (Hard)</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* 4. Specs */}
+              <div className="grid grid-cols-3 gap-2">
+                <div>
+                  <label className="block font-bold text-[11px] text-slate-800 dark:text-slate-200 mb-1">
+                    {isKm ? 'ពេលចម្អិន' : 'Cook Time'}
+                  </label>
+                  <input
+                    type="text"
+                    value={editCookTime}
+                    onChange={(e) => setEditCookTime(e.target.value)}
+                    placeholder="២៥ នាទី"
+                    className="w-full px-2.5 py-1.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-[11px] text-slate-800 dark:text-slate-200 mb-1">
+                    {isKm ? 'ចំណុះទទួលទាន' : 'Servings'}
+                  </label>
+                  <input
+                    type="text"
+                    value={editServings}
+                    onChange={(e) => setEditServings(e.target.value)}
+                    placeholder="៣-៤ នាក់"
+                    className="w-full px-2.5 py-1.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-[11px] text-slate-800 dark:text-slate-200 mb-1">
+                    {isKm ? 'កាឡូរី (Cal)' : 'Calories'}
+                  </label>
+                  <input
+                    type="number"
+                    value={editCalories}
+                    onChange={(e) => setEditCalories(e.target.value)}
+                    placeholder="320"
+                    className="w-full px-2.5 py-1.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-white"
+                  />
+                </div>
+              </div>
+
+              {/* 5. Description */}
+              <div>
+                <label className="block font-bold text-xs text-slate-800 dark:text-slate-200 mb-1">
+                  {isKm ? 'ការពិពណ៌នា (ភាសាខ្មែរ)' : 'Description (Khmer)'}
+                </label>
+                <textarea
+                  rows={3}
+                  value={editDescriptionKh}
+                  onChange={(e) => setEditDescriptionKh(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-white leading-relaxed"
+                />
+              </div>
+
+              {/* Save & Cancel */}
+              <div className="grid grid-cols-2 gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsEditingAdminFood(false)}
+                  className="py-3 px-4 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs cursor-pointer"
+                >
+                  {isKm ? 'បោះបង់' : 'Cancel'}
+                </button>
+                <button
+                  type="submit"
+                  className="py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-600 via-[#064E3B] to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-black text-xs flex items-center justify-center gap-1.5 shadow-md active:scale-95 cursor-pointer"
+                >
+                  <Save className="w-4 h-4 text-emerald-300" />
+                  <span>{isKm ? 'រក្សាទុកការកែប្រែ' : 'Save Changes'}</span>
+                </button>
+              </div>
+            </form>
+          ) : (
+          <>
           {/* Hero Image */}
           <div className="relative h-64 sm:h-72 w-full bg-slate-800">
             <img 
@@ -512,6 +893,8 @@ export const FoodDetailModal: React.FC = () => {
               </div>
             </div>
           </div>
+          </>
+          )}
         </div>
       </div>
     </div>

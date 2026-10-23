@@ -223,6 +223,21 @@ export const RestaurantDetailModal: React.FC = () => {
             >
               <Bookmark className="w-4 h-4 text-amber-300" />
             </button>
+            {isAdmin && (
+              <button
+                type="button"
+                onClick={() => {
+                  setManagingRestaurant(selectedRestaurant);
+                  setIsManageMenuModalOpen(true);
+                }}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-400 hover:bg-amber-500 text-slate-950 text-xs font-black shadow transition active:scale-95 font-khmer border border-white/50"
+                title={isKm ? 'កែប្រែព័ត៌មាន & រូបភាពហាង (Admin)' : 'Edit Store Details & Photos (Admin)'}
+              >
+                <Edit2 className="w-3.5 h-3.5" />
+                <span>{isKm ? 'កែប្រែហាង (Admin)' : 'Edit Store'}</span>
+              </button>
+            )}
+
             <button
               type="button"
               onClick={handleOpenPhotoEditor}
