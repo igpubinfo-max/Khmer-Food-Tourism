@@ -8,7 +8,7 @@ import {
   Apple, Smartphone, Bot, Calendar, Bookmark, Bell, 
   UtensilsCrossed, MessageSquareQuote, Camera, Phone,
   Share2, Navigation, Eye, ExternalLink, Play, Shuffle, Search, RefreshCw,
-  Crown, Plus, Edit2, CheckCircle2, X, Tag, ChefHat, Copy, Video, Check, Lock
+  Crown, Plus, Edit2, CheckCircle2, X, Tag, ChefHat, Copy, Video, Check, Lock, Trash2
 } from 'lucide-react';
 
 export const HomeView: React.FC = () => {
@@ -28,7 +28,7 @@ export const HomeView: React.FC = () => {
     searchQuery: globalSearchQuery, setSearchQuery: setGlobalSearchQuery,
     setSelectedFood, setSelectedRestaurant,
     setIsVipAddRestaurantModalOpen, setIsManageMenuModalOpen, setManagingRestaurant,
-    openUpgradeVipModal
+    openUpgradeVipModal, deleteRestaurant
   } = useApp();
 
   const isKm = language === 'km';
@@ -672,22 +672,40 @@ export const HomeView: React.FC = () => {
                   <span className="px-2 py-0.5 rounded-full text-[9px] font-black bg-amber-400 text-slate-950 shadow-2xs">
                     🌟 VIP Active
                   </span>
+                  {currentUser?.role !== 'admin' && (
+                    <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-700 text-white">
+                      {Math.min(myRestaurants.length, 1)}/1 {isKm ? 'ហាង' : 'Store'}
+                    </span>
+                  )}
                 </div>
                 <p className="text-[10px] text-amber-800 dark:text-amber-300 font-bold mt-0.5">
                   {isKm 
-                    ? 'គណនី VIP សក្តានុពលខ្ពស់ • សិទ្ធិបន្ថែម & គ្រប់គ្រងហាងពេញលេញ' 
-                    : 'Super Potential VIP Account • Full Restaurant & Menu Management'}
+                    ? 'គណនី VIP សក្តានុពលខ្ពស់ • សិទ្ធិបន្ថែម ១ ហាង & គ្រប់គ្រងពេញលេញ' 
+                    : 'Super Potential VIP Account • Add 1 Store & Full Menu Management'}
                 </p>
               </div>
             </div>
 
-            <button
-              onClick={() => setIsVipAddRestaurantModalOpen(true)}
-              className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 text-slate-950 font-bold text-xs shadow-xs transition flex items-center gap-1 shrink-0 active:scale-95 cursor-pointer"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>{isKm ? 'បន្ថែមហាង VIP' : 'Add Store'}</span>
-            </button>
+            {currentUser?.role !== 'admin' && myRestaurants.length >= 1 ? (
+              <button
+                onClick={() => {
+                  setManagingRestaurant(myRestaurants[0]);
+                  setIsManageMenuModalOpen(true);
+                }}
+                className="px-3.5 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-xs shadow-xs transition flex items-center gap-1 shrink-0 active:scale-95 cursor-pointer"
+              >
+                <Edit2 className="w-3.5 h-3.5" />
+                <span>{isKm ? 'កែប្រែហាងខ្ញុំ' : 'Edit My Store'}</span>
+              </button>
+            ) : (
+              <button
+                onClick={() => setIsVipAddRestaurantModalOpen(true)}
+                className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 text-slate-950 font-bold text-xs shadow-xs transition flex items-center gap-1 shrink-0 active:scale-95 cursor-pointer"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>{isKm ? 'បន្ថែមហាង VIP' : 'Add Store'}</span>
+              </button>
+            )}
           </div>
 
           {/* User's Owned Restaurants on Home */}
@@ -695,7 +713,7 @@ export const HomeView: React.FC = () => {
             {myRestaurants.length === 0 ? (
               <div className="p-3 bg-white/70 dark:bg-slate-800/70 rounded-2xl border border-amber-300/50 flex items-center justify-between gap-2">
                 <div className="text-[11px] text-slate-700 dark:text-slate-200">
-                  {isKm ? '💡 លោកអ្នកមិនទាន់បានបន្ថែមហាងនៅឡើយទេ។ ចុចប៊ូតុងដើម្បីបង្កើតហាង VIP ដំបូងរបស់អ្នក!' : 'You have not added any restaurant yet. Click Add to list your VIP shop!'}
+                  {isKm ? '💡 លោកអ្នកមិនទាន់បានបន្ថែមហាងនៅឡើយទេ។ ចុចប៊ូតុងដើម្បីបង្កើតហាង VIP របស់អ្នក (១ គណនី = ១ ហាង)!' : 'You have not added any restaurant yet. Click Add to list your VIP shop (1 store per account)!'}
                 </div>
                 <button
                   onClick={() => setIsVipAddRestaurantModalOpen(true)}
@@ -720,7 +738,7 @@ export const HomeView: React.FC = () => {
                         📍 {shop.addressKh} • 📞 {shop.phone}
                       </p>
                       <span className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400">
-                        {shop.menuItems?.length || 0} / 5 មុខម្ហូបក្នុងហាង
+                        {shop.menuItems?.length || 0} / 20 មុខម្ហូបក្នុងហាង (VIP)
                       </span>
                     </div>
                   </div>
@@ -737,6 +755,19 @@ export const HomeView: React.FC = () => {
                       <Edit2 className="w-3 h-3" />
                       <span>{isKm ? 'គ្រប់គ្រង' : 'Manage'}</span>
                     </button>
+                    {deleteRestaurant && (
+                      <button
+                        onClick={() => {
+                          if (window.confirm(isKm ? `តើអ្នកពិតជាចង់លុបហាង "${shop.nameKh}" មែនទេ? ក្រោយពេលលុប អ្នកអាចបង្កើតហាងថ្មីជំនួសវិញបាន។` : `Delete "${shop.nameEn || shop.nameKh}"? You can add a new restaurant after deleting.`)) {
+                            deleteRestaurant(shop.id);
+                          }
+                        }}
+                        className="p-1.5 bg-rose-100 hover:bg-rose-600 text-rose-700 hover:text-white dark:bg-rose-950/60 dark:text-rose-300 rounded-xl text-[10px] font-bold transition cursor-pointer"
+                        title={isKm ? 'លុបហាងដើម្បីបង្កើតថ្មី' : 'Delete store'}
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
                   </div>
                 </div>
               ))
@@ -899,8 +930,8 @@ export const HomeView: React.FC = () => {
           </div>
         </div>
 
-        {/* Prominent AI Discovery & Restaurant Check-in Entry Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+        {/* Prominent AI Discovery & Admin-Only Restaurant Check-in Entry Cards */}
+        <div className={`grid grid-cols-1 ${currentUser?.role === 'admin' ? 'sm:grid-cols-2' : ''} gap-2.5`}>
           {/* 1. AI Food Discovery & Scanner */}
           <button
             onClick={() => setIsAiFoodDiscoveryModalOpen(true)}
@@ -924,28 +955,30 @@ export const HomeView: React.FC = () => {
             </span>
           </button>
 
-          {/* 2. Restaurant Check-in & GPS Location */}
-          <button
-            onClick={() => setIsRestaurantCheckInModalOpen(true)}
-            className="p-3.5 rounded-2xl bg-gradient-to-r from-[#004B87] via-[#005a9e] to-sky-800 text-white text-left shadow-md flex items-center justify-between transition hover:scale-[1.01] active:scale-98 cursor-pointer ring-2 ring-sky-400/30"
-          >
-            <div className="flex items-center gap-2.5">
-              <div className="w-10 h-10 rounded-xl bg-sky-400 text-slate-950 flex items-center justify-center shadow-sm shrink-0">
-                <MapPin className="w-5 h-5 fill-slate-950" />
+          {/* 2. Restaurant Check-in & GPS Location (Admin Only per Requirement #3) */}
+          {currentUser?.role === 'admin' && (
+            <button
+              onClick={() => setIsRestaurantCheckInModalOpen(true)}
+              className="p-3.5 rounded-2xl bg-gradient-to-r from-[#004B87] via-[#005a9e] to-sky-800 text-white text-left shadow-md flex items-center justify-between transition hover:scale-[1.01] active:scale-98 cursor-pointer ring-2 ring-sky-400/30"
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-xl bg-sky-400 text-slate-950 flex items-center justify-center shadow-sm shrink-0">
+                  <MapPin className="w-5 h-5 fill-slate-950" />
+                </div>
+                <div>
+                  <span className="font-moul text-xs block text-white">
+                    {isKm ? 'ឆែកអ៊ីន & បញ្ជាក់ទីតាំង (Admin)' : 'Restaurant Check-in (Admin)'}
+                  </span>
+                  <span className="text-[10px] text-sky-200 block">
+                    {isKm ? 'បញ្ជាក់ទីតាំង GPS • រកហាងពិត' : 'GPS Location Verification'}
+                  </span>
+                </div>
               </div>
-              <div>
-                <span className="font-moul text-xs block text-white">
-                  {isKm ? 'ឆែកអ៊ីន & បញ្ជាក់ទីតាំង' : 'Restaurant Check-in'}
-                </span>
-                <span className="text-[10px] text-sky-200 block">
-                  {isKm ? 'បញ្ជាក់ទីតាំង GPS • រកហាងពិត' : 'GPS Location Verification'}
-                </span>
-              </div>
-            </div>
-            <span className="px-2 py-0.5 rounded-full bg-sky-300 text-slate-950 text-[9px] font-black uppercase tracking-wider font-sans shrink-0">
-              GPS Live
-            </span>
-          </button>
+              <span className="px-2 py-0.5 rounded-full bg-sky-300 text-slate-950 text-[9px] font-black uppercase tracking-wider font-sans shrink-0">
+                GPS Live
+              </span>
+            </button>
+          )}
         </div>
 
         {/* 6 Feature Buttons Grid - Enabled for VIP, Prompts Upgrade for Free Users */}

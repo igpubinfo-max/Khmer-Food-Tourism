@@ -63,7 +63,7 @@ export const RestaurantDetailModal: React.FC = () => {
   const isPremiumActive = isRestaurantPremiumActive(selectedRestaurant);
   const isOwner = Boolean(currentUser?.id && selectedRestaurant.ownerId === currentUser.id);
   const isAdmin = currentUser?.role === 'admin';
-  const canEditShop = Boolean(isOwner || isAdmin || (currentUser && !selectedRestaurant.ownerId));
+  const canEditShop = Boolean(isOwner || isAdmin);
   const dialablePhone = sanitizeDialablePhone(selectedRestaurant.phone);
   const displayPhone = formatDisplayPhone(selectedRestaurant.phone);
 
@@ -301,8 +301,8 @@ export const RestaurantDetailModal: React.FC = () => {
                   </div>
                   <div className="text-[10px] text-slate-600 dark:text-slate-300">
                     {isKm 
-                      ? `មុខម្ហូប៖ ${(selectedRestaurant.menuItems || []).length}/5 មុខ | រូបភាពហាង & ម្ហូប៖ ${allPhotos.length} សន្លឹក` 
-                      : `Menu: ${(selectedRestaurant.menuItems || []).length}/5 | Photos: ${allPhotos.length}`}
+                      ? `មុខម្ហូប៖ ${(selectedRestaurant.menuItems || []).length}/20 មុខ | រូបភាពហាង & ម្ហូប៖ ${allPhotos.length} សន្លឹក` 
+                      : `Menu: ${(selectedRestaurant.menuItems || []).length}/20 | Photos: ${allPhotos.length}`}
                   </div>
                 </div>
                 <button
@@ -387,6 +387,51 @@ export const RestaurantDetailModal: React.FC = () => {
                 </div>
               </div>
             </div>
+
+            {/* VIP Food Video Reels Section (Benefit 5) */}
+            {(selectedRestaurant.promoVideoUrl || isOwner || isAdmin) && (
+              <div className="p-3.5 rounded-2xl bg-gradient-to-r from-amber-500/10 via-emerald-500/10 to-teal-500/10 border border-amber-400/50 space-y-2 text-xs font-khmer">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-[#0F172A] dark:text-white flex items-center gap-1.5">
+                    <Video className="w-4 h-4 text-amber-500" />
+                    <span>{isKm ? 'វីដេអូផ្សព្វផ្សាយម្ហូប (Food Video Reels)' : 'Food Video Reels'}</span>
+                  </span>
+                  {(isOwner || isAdmin) && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        (window as any).__kft_manage_initial_tab = 'video';
+                        setManagingRestaurant(selectedRestaurant);
+                        setIsManageMenuModalOpen(true);
+                      }}
+                      className="px-2.5 py-1 rounded-lg bg-amber-400 hover:bg-amber-500 text-slate-950 font-bold text-[10px] transition cursor-pointer"
+                    >
+                      {selectedRestaurant.promoVideoUrl
+                        ? isKm ? '✏️ កែវីដេអូ' : '✏️ Edit Video'
+                        : isKm ? '+ ដាក់វីដេអូ Reels' : '+ Add Video Reel'}
+                    </button>
+                  )}
+                </div>
+                {selectedRestaurant.promoVideoUrl ? (
+                  <a
+                    href={selectedRestaurant.promoVideoUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full py-2.5 px-3 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition"
+                  >
+                    <Video className="w-4 h-4 text-amber-300" />
+                    <span>{isKm ? '▶️ ទស្សនាវីដេអូបង្ហាញមុខម្ហូបហាងនេះ' : '▶️ Watch Store Food Video Reel'}</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                ) : (
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                    {isKm
+                      ? 'ម្ចាស់ហាងអាចដាក់តំណវីដេអូ TikTok / Facebook Reels / YouTube Shorts ដើម្បីទាក់ទាញអតិថិជន។'
+                      : 'Add a TikTok, Facebook Reel, or YouTube Short link to showcase your dishes.'}
+                  </p>
+                )}
+              </div>
+            )}
 
             {/* Shop Profile Picture & Food Photos Gallery + Edit Photos Button */}
             <div className="space-y-2.5">

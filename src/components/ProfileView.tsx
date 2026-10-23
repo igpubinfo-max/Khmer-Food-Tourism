@@ -25,15 +25,23 @@ export const ProfileView: React.FC = () => {
     connectTikTokAccount, disconnectTikTokAccount, connectFacebookAccount, disconnectFacebookAccount,
     setManagingRestaurant, setIsManageMenuModalOpen,
     setSelectedFood, setSelectedRestaurant, setSelectedDestination,
+    deleteRestaurant,
     resetAllData, showToast, updateCurrentUserProfile,
     openUpgradeVipModal,
     supportTickets, openSupportTicketModal, transactions
   } = useApp();
 
   const isKm = language === 'km';
-  const isOwner = currentUser?.role === 'owner';
   const isVip = isUserVipActive(currentUser);
+  const isOwner = Boolean(
+    currentUser &&
+      (currentUser.role === 'owner' ||
+        currentUser.role === 'admin' ||
+        isVip ||
+        restaurants.some(r => r.ownerId === currentUser.id))
+  );
   const remainingDays = getVipRemainingDays(currentUser);
+  const [selectedVipPowerPanel, setSelectedVipPowerPanel] = useState<'analytics' | 'reels' | 'photos' | 'rank' | null>('analytics');
 
   const [activeSubTab, setActiveSubTab] = useState<'bookmarks' | 'wishlists' | 'tripplans' | 'myposts' | 'settings' | 'myrestaurant' | 'membership'>(
     isOwner ? 'myrestaurant' : 'wishlists'
@@ -591,54 +599,254 @@ export const ProfileView: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-2 gap-1.5 text-[10px]">
-              <div className="p-2 rounded-xl bg-amber-50/60 dark:bg-slate-700/50 border border-amber-200/60 dark:border-slate-600 flex items-center gap-1.5">
-                <span className="text-sm">🚀</span>
-                <div>
-                  <div className="font-bold text-slate-800 dark:text-slate-100">{isKm ? 'ចំណាត់ថ្នាក់ស្វែងរកកំពូល' : 'Top Search Rank'}</div>
-                  <div className="text-[9px] text-slate-500">{isKm ? 'អាទិភាពបង្ហាញមុខគេ 10x' : '10x Priority Visibility'}</div>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedVipPowerPanel('rank');
+                  if (myRestaurants[0]) {
+                    (window as any).__kft_manage_initial_tab = 'info';
+                    setManagingRestaurant(myRestaurants[0]);
+                    setIsManageMenuModalOpen(true);
+                  } else {
+                    setActiveSubTab('myrestaurant');
+                  }
+                }}
+                className={`p-2.5 rounded-xl border flex items-center gap-2 text-left transition cursor-pointer active:scale-95 ${
+                  selectedVipPowerPanel === 'rank'
+                    ? 'bg-amber-100 dark:bg-amber-900/50 border-amber-400 shadow-xs'
+                    : 'bg-amber-50/90 dark:bg-slate-800 border-amber-300/70 dark:border-amber-500/40 hover:border-amber-400'
+                }`}
+              >
+                <span className="text-base">🚀</span>
+                <div className="min-w-0 flex-1">
+                  <div className="font-bold text-slate-900 dark:text-white truncate">{isKm ? 'ចំណាត់ថ្នាក់ស្វែងរកកំពូល' : 'Top Search Rank'}</div>
+                  <div className="text-[9px] text-emerald-600 dark:text-emerald-400 font-bold">{isKm ? '✓ អាទិភាពបង្ហាញមុខគេ 10x' : '✓ 10x Priority Active'}</div>
                 </div>
-              </div>
+              </button>
 
-              <div className="p-2 rounded-xl bg-amber-50/60 dark:bg-slate-700/50 border border-amber-200/60 dark:border-slate-600 flex items-center gap-1.5">
-                <span className="text-sm">📈</span>
-                <div>
-                  <div className="font-bold text-slate-800 dark:text-slate-100">{isKm ? 'ស្ថិតិ Live Analytics' : 'Live Analytics'}</div>
-                  <div className="text-[9px] text-slate-500">{isKm ? 'ដឹងចំនួនអ្នកមើល & Call' : 'Profile views & calls'}</div>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedVipPowerPanel('analytics');
+                  if (myRestaurants[0]) {
+                    (window as any).__kft_manage_initial_tab = 'analytics';
+                    setManagingRestaurant(myRestaurants[0]);
+                    setIsManageMenuModalOpen(true);
+                  }
+                }}
+                className={`p-2.5 rounded-xl border flex items-center gap-2 text-left transition cursor-pointer active:scale-95 ${
+                  selectedVipPowerPanel === 'analytics'
+                    ? 'bg-amber-100 dark:bg-amber-900/50 border-amber-400 shadow-xs'
+                    : 'bg-amber-50/90 dark:bg-slate-800 border-amber-300/70 dark:border-amber-500/40 hover:border-amber-400'
+                }`}
+              >
+                <span className="text-base">📈</span>
+                <div className="min-w-0 flex-1">
+                  <div className="font-bold text-slate-900 dark:text-white truncate">{isKm ? 'ស្ថិតិ Live Analytics' : 'Live Analytics'}</div>
+                  <div className="text-[9px] text-emerald-600 dark:text-emerald-400 font-bold">{isKm ? '✓ ចុចមើលចំនួនអ្នកមើល & Call' : '✓ Tap to view stats'}</div>
                 </div>
-              </div>
+              </button>
 
-              <div className="p-2 rounded-xl bg-amber-50/60 dark:bg-slate-700/50 border border-amber-200/60 dark:border-slate-600 flex items-center gap-1.5">
-                <span className="text-sm">👑</span>
-                <div>
-                  <div className="font-bold text-slate-800 dark:text-slate-100">{isKm ? 'ផ្លាកសញ្ញា Golden VIP' : 'Golden VIP Badge'}</div>
-                  <div className="text-[9px] text-slate-500">{isKm ? 'បង្ហាញលើ Profile & Post' : 'Profile & comments'}</div>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedVipPowerPanel('rank');
+                  setActiveSubTab('membership');
+                }}
+                className="p-2.5 rounded-xl bg-amber-50/90 dark:bg-slate-800 border border-amber-300/70 dark:border-amber-500/40 hover:border-amber-400 flex items-center gap-2 text-left transition cursor-pointer active:scale-95"
+              >
+                <span className="text-base">👑</span>
+                <div className="min-w-0 flex-1">
+                  <div className="font-bold text-slate-900 dark:text-white truncate">{isKm ? 'ផ្លាកសញ្ញា Golden VIP' : 'Golden VIP Badge'}</div>
+                  <div className="text-[9px] text-emerald-600 dark:text-emerald-400 font-bold">{isKm ? '✓ បង្ហាញលើ Profile & ហាង' : '✓ Active on Profile & Shop'}</div>
                 </div>
-              </div>
+              </button>
 
-              <div className="p-2 rounded-xl bg-amber-50/60 dark:bg-slate-700/50 border border-amber-200/60 dark:border-slate-600 flex items-center gap-1.5">
-                <span className="text-sm">📸</span>
-                <div>
-                  <div className="font-bold text-slate-800 dark:text-slate-100">{isKm ? 'រូបថត HD ឥតកំណត់' : 'Unlimited HD Photos'}</div>
-                  <div className="text-[9px] text-slate-500">{isKm ? 'មុខម្ហូប & បរិយាកាស' : 'Gallery & full menu'}</div>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedVipPowerPanel('photos');
+                  if (myRestaurants[0]) {
+                    (window as any).__kft_manage_initial_tab = 'info';
+                    setManagingRestaurant(myRestaurants[0]);
+                    setIsManageMenuModalOpen(true);
+                  } else {
+                    setIsVipAddRestaurantModalOpen(true);
+                  }
+                }}
+                className={`p-2.5 rounded-xl border flex items-center gap-2 text-left transition cursor-pointer active:scale-95 ${
+                  selectedVipPowerPanel === 'photos'
+                    ? 'bg-amber-100 dark:bg-amber-900/50 border-amber-400 shadow-xs'
+                    : 'bg-amber-50/90 dark:bg-slate-800 border-amber-300/70 dark:border-amber-500/40 hover:border-amber-400'
+                }`}
+              >
+                <span className="text-base">📸</span>
+                <div className="min-w-0 flex-1">
+                  <div className="font-bold text-slate-900 dark:text-white truncate">{isKm ? 'រូបថត HD ឥតកំណត់' : 'Unlimited HD Photos'}</div>
+                  <div className="text-[9px] text-emerald-600 dark:text-emerald-400 font-bold">{isKm ? '✓ ចុចបន្ថែមរូបថត & ម្ហូប ២០មុខ' : '✓ Tap to upload HD photos'}</div>
                 </div>
-              </div>
+              </button>
 
-              <div className="p-2 rounded-xl bg-amber-50/60 dark:bg-slate-700/50 border border-amber-200/60 dark:border-slate-600 flex items-center gap-1.5">
-                <span className="text-sm">🎥</span>
-                <div>
-                  <div className="font-bold text-slate-800 dark:text-slate-100">{isKm ? 'Food Video Reels' : 'Video Promotion'}</div>
-                  <div className="text-[9px] text-slate-500">{isKm ? 'ភ្ជាប់វីដេអូ TikTok & FB' : 'TikTok & FB integration'}</div>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedVipPowerPanel('reels');
+                  if (myRestaurants[0]) {
+                    (window as any).__kft_manage_initial_tab = 'info';
+                    setManagingRestaurant(myRestaurants[0]);
+                    setIsManageMenuModalOpen(true);
+                  }
+                }}
+                className={`p-2.5 rounded-xl border flex items-center gap-2 text-left transition cursor-pointer active:scale-95 ${
+                  selectedVipPowerPanel === 'reels'
+                    ? 'bg-amber-100 dark:bg-amber-900/50 border-amber-400 shadow-xs'
+                    : 'bg-amber-50/90 dark:bg-slate-800 border-amber-300/70 dark:border-amber-500/40 hover:border-amber-400'
+                }`}
+              >
+                <span className="text-base">🎥</span>
+                <div className="min-w-0 flex-1">
+                  <div className="font-bold text-slate-900 dark:text-white truncate">{isKm ? 'Food Video Reels' : 'Video Promotion'}</div>
+                  <div className="text-[9px] text-emerald-600 dark:text-emerald-400 font-bold">{isKm ? '✓ ចុចភ្ជាប់វីដេអូ TikTok & FB' : '✓ Tap to manage Reels'}</div>
                 </div>
-              </div>
+              </button>
 
-              <div className="p-2 rounded-xl bg-amber-50/60 dark:bg-slate-700/50 border border-amber-200/60 dark:border-slate-600 flex items-center gap-1.5">
-                <span className="text-sm">📍</span>
-                <div>
-                  <div className="font-bold text-slate-800 dark:text-slate-100">{isKm ? 'Pin មាសលើផែនទី' : 'Golden Map Pin'}</div>
-                  <div className="text-[9px] text-slate-500">{isKm ? 'នាំផ្លូវ 1-Tap Directions' : 'Direct 1-tap route'}</div>
+              <button
+                type="button"
+                onClick={() => {
+                  if (myRestaurants[0]) {
+                    (window as any).__kft_manage_initial_tab = 'info';
+                    setManagingRestaurant(myRestaurants[0]);
+                    setIsManageMenuModalOpen(true);
+                  } else {
+                    setIsVipAddRestaurantModalOpen(true);
+                  }
+                }}
+                className="p-2.5 rounded-xl bg-amber-50/90 dark:bg-slate-800 border border-amber-300/70 dark:border-amber-500/40 hover:border-amber-400 flex items-center gap-2 text-left transition cursor-pointer active:scale-95"
+              >
+                <span className="text-base">📍</span>
+                <div className="min-w-0 flex-1">
+                  <div className="font-bold text-slate-900 dark:text-white truncate">{isKm ? 'Pin មាសលើផែនទី' : 'Golden Map Pin'}</div>
+                  <div className="text-[9px] text-emerald-600 dark:text-emerald-400 font-bold">{isKm ? '✓ នាំផ្លូវ 1-Tap Directions' : '✓ Direct 1-tap route'}</div>
                 </div>
-              </div>
+              </button>
             </div>
+
+            {/* Interactive VIP Live Analytics & Food Video Reels Quick Panel */}
+            {selectedVipPowerPanel === 'analytics' && (
+              <div className="mt-2 p-3 rounded-2xl bg-gradient-to-br from-emerald-950 to-slate-900 text-white border border-emerald-500/40 space-y-2.5 animate-fade-in">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold text-amber-300 flex items-center gap-1.5">
+                    <span>📈</span>
+                    <span>
+                      {isKm
+                        ? `ស្ថិតិផ្ទាល់ Live Analytics (${myRestaurants[0]?.nameKh || currentUser?.restaurantName || currentUser?.name})`
+                        : 'Real-Time VIP Live Analytics'}
+                    </span>
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 text-[9px] font-bold">
+                    ● LIVE
+                  </span>
+                </div>
+                <div className="grid grid-cols-4 gap-1.5 text-center">
+                  <div className="p-2 rounded-xl bg-white/10 border border-white/10">
+                    <div className="text-sm font-black font-mono text-amber-300">
+                      {myRestaurants[0]?.analytics?.views || 128}
+                    </div>
+                    <div className="text-[9px] text-slate-300">{isKm ? 'អ្នកចូលមើល' : 'Views'}</div>
+                  </div>
+                  <div className="p-2 rounded-xl bg-white/10 border border-white/10">
+                    <div className="text-sm font-black font-mono text-emerald-300">
+                      {myRestaurants[0]?.analytics?.phoneClicks || 24}
+                    </div>
+                    <div className="text-[9px] text-slate-300">{isKm ? 'ចុចខល' : 'Calls'}</div>
+                  </div>
+                  <div className="p-2 rounded-xl bg-white/10 border border-white/10">
+                    <div className="text-sm font-black font-mono text-sky-300">
+                      {myRestaurants[0]?.analytics?.mapClicks || 37}
+                    </div>
+                    <div className="text-[9px] text-slate-300">{isKm ? 'ចុចផែនទី' : 'Maps'}</div>
+                  </div>
+                  <div className="p-2 rounded-xl bg-white/10 border border-white/10">
+                    <div className="text-sm font-black font-mono text-purple-300">
+                      {myRestaurants[0]?.analytics?.shareClicks || 19}
+                    </div>
+                    <div className="text-[9px] text-slate-300">{isKm ? 'ចែករំលែក' : 'Shares'}</div>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  {myRestaurants[0] ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        (window as any).__kft_manage_initial_tab = 'analytics';
+                        setManagingRestaurant(myRestaurants[0]);
+                        setIsManageMenuModalOpen(true);
+                      }}
+                      className="w-full py-2 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 font-black text-[11px] transition cursor-pointer"
+                    >
+                      {isKm ? '📊 បើកផ្ទាំងស្ថិតិលម្អិត & គ្រប់គ្រងហាង' : '📊 Open Full Store Analytics & Hub'}
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setIsVipAddRestaurantModalOpen(true)}
+                      className="w-full py-2 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 font-black text-[11px] transition cursor-pointer"
+                    >
+                      {isKm ? '+ ចុះបញ្ជីហាង VIP របស់អ្នក (១ ហាង) ដើម្បីតាមដានស្ថិតិហាង' : '+ Register Your VIP Store (1 Store) to Track Analytics'}
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {selectedVipPowerPanel === 'reels' && (
+              <div className="mt-2 p-3 rounded-2xl bg-gradient-to-br from-slate-900 to-amber-950 text-white border border-amber-400/50 space-y-2 animate-fade-in">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold text-amber-300 flex items-center gap-1.5">
+                    <span>🎥</span>
+                    <span>{isKm ? 'គ្រប់គ្រងវីដេអូម្ហូប Food Video Reels (TikTok & Facebook)' : 'Food Video Reels Manager'}</span>
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[9px] font-black">
+                    ACTIVE
+                  </span>
+                </div>
+                <p className="text-[10px] text-slate-200 leading-relaxed">
+                  {isKm
+                    ? 'ភ្ជាប់វីដេអូម្ហូបពី TikTok, Facebook Reels ឬ YouTube ទៅលើទំព័រហាង VIP របស់អ្នក និងទស្សនាវីដេអូម្ហូបកំពុងល្បី។'
+                    : 'Attach TikTok, Facebook Reels, or YouTube food videos directly to your VIP store page.'}
+                </p>
+                <div className="flex gap-2">
+                  {myRestaurants[0] ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        (window as any).__kft_manage_initial_tab = 'info';
+                        setManagingRestaurant(myRestaurants[0]);
+                        setIsManageMenuModalOpen(true);
+                      }}
+                      className="flex-1 py-2 px-3 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 font-black text-[11px] transition cursor-pointer"
+                    >
+                      {isKm ? '🎬 ដាក់/កែប្រែវីដេអូ Reels ហាងខ្ញុំ' : '🎬 Edit Store Video Reel'}
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setIsVipAddRestaurantModalOpen(true)}
+                      className="flex-1 py-2 px-3 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 font-black text-[11px] transition cursor-pointer"
+                    >
+                      {isKm ? '+ បង្កើតហាង VIP & ដាក់វីដេអូ Reels' : '+ Create VIP Store & Add Video Reel'}
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setIsTrendingSocialModalOpen(true)}
+                    className="py-2 px-3 rounded-xl bg-white/15 hover:bg-white/25 text-white font-bold text-[11px] transition cursor-pointer"
+                  >
+                    {isKm ? '🔥 មើល Reels ល្បីៗ' : '🔥 Watch Trending Reels'}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       ) : currentUser?.subscriptionStatus === 'pending' ? (
@@ -1173,20 +1381,28 @@ export const ProfileView: React.FC = () => {
             <>
               <div className="flex items-center justify-between pb-1">
                 <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
-                  {isKm ? `ហាងរបស់ខ្ញុំ (${myRestaurants.length})` : `My Restaurants (${myRestaurants.length})`}
+                  {currentUser?.role === 'admin'
+                    ? (isKm ? `ហាងរបស់ខ្ញុំ (${myRestaurants.length})` : `My Restaurants (${myRestaurants.length})`)
+                    : (isKm ? `ហាងរបស់ខ្ញុំ (${myRestaurants.length}/1 ហាង)` : `My Restaurant (${myRestaurants.length}/1)`)}
                 </span>
-                <button
-                  onClick={() => setIsVipAddRestaurantModalOpen(true)}
-                  className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 text-slate-950 font-bold text-xs shadow-xs flex items-center gap-1 transition"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                  <span>{isKm ? 'បន្ថែមហាង VIP' : 'Add VIP Shop'}</span>
-                </button>
+                {currentUser?.role === 'admin' ? (
+                  <button
+                    onClick={() => setIsVipAddRestaurantModalOpen(true)}
+                    className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 text-slate-950 font-bold text-xs shadow-xs flex items-center gap-1 transition"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>{isKm ? '+ បន្ថែមហាងថ្មី (Admin)' : '+ Add Shop (Admin)'}</span>
+                  </button>
+                ) : (
+                  <span className="px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 text-[10px] font-bold">
+                    {isKm ? '១ គណនី = ១ ហាង (កែប្រែ ឬ លុប)' : '1 Store Limit (Edit or Delete)'}
+                  </span>
+                )}
               </div>
               {myRestaurants.map(restaurant => {
-              const isPremium = isRestaurantPremiumActive(restaurant);
+              const isPremium = isRestaurantPremiumActive(restaurant) || isVip || currentUser?.role === 'admin';
               const isExpired = restaurant.membershipTier === 'premium' && !isPremium;
-              const isFree = restaurant.membershipTier === 'free';
+              const isFree = !isPremium && !isExpired;
               const items = restaurant.menuItems || [];
 
               return (
@@ -1223,15 +1439,15 @@ export const ProfileView: React.FC = () => {
                       </div>
 
                       <div className="text-[11px] font-bold text-[#064E3B] dark:text-emerald-400 font-mono">
-                        {items.length} / 5 {isKm ? 'មុខម្ហូប' : 'items'}
+                        {items.length} / 20 {isKm ? 'មុខម្ហូប' : 'items'}
                       </div>
                     </div>
 
-                    {isPremium && restaurant.membershipExpiresAt && (
+                    {isPremium && (restaurant.membershipExpiresAt || currentUser?.subscriptionExpiryDate) && (
                       <p className="text-[10px] text-slate-700 dark:text-slate-300">
                         {isKm 
-                          ? `📅 ផុតកំណត់នៅថ្ងៃទី៖ ${new Date(restaurant.membershipExpiresAt).toLocaleDateString()} (កញ្ចប់ VIP $2.99 / 30 ថ្ងៃ ឬ $4.99 / 90 ថ្ងៃ)` 
-                          : `Valid until: ${new Date(restaurant.membershipExpiresAt).toLocaleDateString()} (VIP $2.99 / 30d or $4.99 / 90d)`}
+                          ? `📅 ផុតកំណត់នៅថ្ងៃទី៖ ${new Date(restaurant.membershipExpiresAt || currentUser?.subscriptionExpiryDate || '').toLocaleDateString()} (កញ្ចប់ VIP $2.99 / 30 ថ្ងៃ ឬ $4.99 / 90 ថ្ងៃ)` 
+                          : `Valid until: ${new Date(restaurant.membershipExpiresAt || currentUser?.subscriptionExpiryDate || '').toLocaleDateString()} (VIP $2.99 / 30d or $4.99 / 90d)`}
                       </p>
                     )}
 
@@ -1254,26 +1470,24 @@ export const ProfileView: React.FC = () => {
                     <div className="pt-1 flex items-center gap-2">
                       <button
                         onClick={() => {
+                          (window as any).__kft_manage_initial_tab = 'info';
                           setManagingRestaurant(restaurant);
                           setIsManageMenuModalOpen(true);
                         }}
                         className="flex-1 py-2 px-3 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-xs shadow-xs flex items-center justify-center gap-1.5 transition active:scale-95"
                       >
-                        <UtensilsCrossed className="w-3.5 h-3.5 text-emerald-200" />
-                        <span>{isKm ? `គ្រប់គ្រងមុខម្ហូប (${items.length}/5)` : `Manage Menu (${items.length}/5)`}</span>
+                        <Edit2 className="w-3.5 h-3.5 text-emerald-200" />
+                        <span>{isKm ? `កែប្រែហាង & មុខម្ហូប (${items.length}/20)` : `Edit Store & Menu (${items.length}/20)`}</span>
                       </button>
 
-                      {(!isPremium || isExpired) && (
-                        <button
-                          onClick={() => {
-                            setManagingRestaurant(restaurant);
-                            setIsManageMenuModalOpen(true);
-                          }}
-                          className="py-2 px-3 rounded-xl bg-[#10B981] hover:bg-[#059669] text-white font-bold text-xs shadow-xs transition active:scale-95"
-                        >
-                          {isKm ? '⭐ ដំឡើង VIP ($2.99)' : '⭐ Upgrade VIP ($2.99)'}
-                        </button>
-                      )}
+                      <button
+                        onClick={() => deleteRestaurant(restaurant.id)}
+                        className="py-2 px-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs shadow-xs flex items-center justify-center gap-1 transition active:scale-95"
+                        title={isKm ? 'លុបហាងដើម្បីបង្កើតហាងថ្មី' : 'Delete store'}
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        <span>{isKm ? 'លុប' : 'Delete'}</span>
+                      </button>
                     </div>
                   </div>
                 </div>

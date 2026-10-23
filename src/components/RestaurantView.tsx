@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { RestaurantCard } from './RestaurantCard';
 import { isRestaurantPremiumActive, Restaurant, sortRestaurantsChronologically } from '../types';
-import { Store, Plus, MapPin, Sparkles, PhoneCall, CheckCircle2, AlertCircle, Camera, Globe, Loader2 } from 'lucide-react';
+import { Store, Plus, MapPin, Sparkles, PhoneCall, CheckCircle2, AlertCircle, Camera, Globe, Loader2, Edit2 } from 'lucide-react';
 import {
   searchCambodiaPlacesWithSmartCache,
   convertGooglePlaceToRestaurant,
@@ -15,8 +15,12 @@ export const RestaurantView: React.FC = () => {
     selectedProvince, setSelectedProvince, setIsAddRestaurantModalOpen,
     setIsVipAddRestaurantModalOpen,
     currentUser, setIsAuthModalOpen, setIsAiCheckInModalOpen,
-    addRestaurant, showToast
+    addRestaurant, showToast,
+    setManagingRestaurant, setIsManageMenuModalOpen
   } = useApp();
+
+  const myExistingRest = currentUser ? restaurants.find((r) => r.ownerId === currentUser.id) : undefined;
+  const isUserAtOneStoreLimit = Boolean(currentUser && currentUser.role !== 'admin' && myExistingRest);
 
   const [priceFilter, setPriceFilter] = useState<string>('all');
   const [verifiedFilter, setVerifiedFilter] = useState<'all' | 'verified' | 'unverified'>('all');
@@ -140,13 +144,28 @@ export const RestaurantView: React.FC = () => {
 
           <button
             onClick={() => {
-              if (!currentUser) setIsAuthModalOpen(true);
-              else setIsVipAddRestaurantModalOpen(true);
+              if (!currentUser) {
+                setIsAuthModalOpen(true);
+              } else if (isUserAtOneStoreLimit && myExistingRest) {
+                setManagingRestaurant(myExistingRest);
+                setIsManageMenuModalOpen(true);
+              } else {
+                setIsVipAddRestaurantModalOpen(true);
+              }
             }}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-xs shadow-xs font-khmer transition"
+            className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-xs shadow-xs font-khmer transition cursor-pointer"
           >
-            <Plus className="w-3.5 h-3.5 text-slate-950" />
-            <span>{isKm ? 'បន្ថែមហាង VIP' : 'Add Store'}</span>
+            {isUserAtOneStoreLimit ? (
+              <>
+                <Edit2 className="w-3.5 h-3.5 text-slate-950" />
+                <span>{isKm ? 'គ្រប់គ្រងហាងខ្ញុំ' : 'My Store'}</span>
+              </>
+            ) : (
+              <>
+                <Plus className="w-3.5 h-3.5 text-slate-950" />
+                <span>{isKm ? 'បន្ថែមហាង VIP' : 'Add Store'}</span>
+              </>
+            )}
           </button>
         </div>
       </div>
@@ -200,12 +219,20 @@ export const RestaurantView: React.FC = () => {
         </div>
         <button
           onClick={() => {
-            if (!currentUser) setIsAuthModalOpen(true);
-            else setIsVipAddRestaurantModalOpen(true);
+            if (!currentUser) {
+              setIsAuthModalOpen(true);
+            } else if (isUserAtOneStoreLimit && myExistingRest) {
+              setManagingRestaurant(myExistingRest);
+              setIsManageMenuModalOpen(true);
+            } else {
+              setIsVipAddRestaurantModalOpen(true);
+            }
           }}
-          className="px-3 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 text-xs font-black shrink-0 shadow transition active:scale-95"
+          className="px-3 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 text-xs font-black shrink-0 shadow transition active:scale-95 cursor-pointer"
         >
-          {isKm ? '+ បន្ថែមហាង' : '+ Add Store'}
+          {isUserAtOneStoreLimit
+            ? (isKm ? '✏️ គ្រប់គ្រងហាងខ្ញុំ' : '✏️ My Store')
+            : (isKm ? '+ បន្ថែមហាង' : '+ Add Store')}
         </button>
       </div>
 
@@ -280,7 +307,7 @@ export const RestaurantView: React.FC = () => {
                   return (
                     <div key={place.placeId} className="space-y-1.5">
                       <RestaurantCard restaurant={mappedRest} />
-                      {!alreadyInApp && (
+                      {!alreadyInApp && currentUser?.role === 'admin' && (
                         <button
                           onClick={() => {
                             addRestaurant({

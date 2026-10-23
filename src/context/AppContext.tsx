@@ -390,27 +390,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const membershipTier = (r.membershipTier || (isPromoted ? 'premium' : 'free')) as MembershipTier;
     const membershipExpiresAt = r.membershipExpiresAt || (membershipTier === 'premium' ? new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString() : undefined);
     
-    // Normalize photoUrl for all rest-1..rest-220 to use authentic bundled shop photos unless custom uploaded
-    let photoUrl = r.profileImage || r.photoUrl || '/Shop/rest-1.jpg';
-    if (typeof r.id === 'string' && !r.profileImage) {
-      const match = r.id.match(/^rest-(\d+)$/);
-      if (match && (!photoUrl || photoUrl.startsWith('https://images.unsplash.com') || photoUrl.startsWith('/Shop/'))) {
-        const num = parseInt(match[1], 10);
-        if (num >= 1 && num <= 50 && num !== 17) {
-          photoUrl = `/Shop/rest-${num}.jpg`;
-        } else {
-          const fallbackShopNum = ((num - 1) % 48) + 1 >= 17 ? ((num - 1) % 48) + 2 : ((num - 1) % 48) + 1;
-          photoUrl = `/Shop/rest-${fallbackShopNum}.jpg`;
-        }
-      }
-    }
-
     const foodImages = Array.isArray(r.foodImages)
       ? r.foodImages
       : (Array.isArray(r.galleryPhotos) ? r.galleryPhotos : []);
     const galleryPhotos = Array.isArray(r.galleryPhotos) && r.galleryPhotos.length > 0
       ? r.galleryPhotos
       : foodImages;
+
+    // Preserve exact matched photoUrl for each restaurant without cross-assigning another shop's storefront sign
+    const photoUrl = r.photoUrl || r.profileImage || galleryPhotos[0] || '/foods/food-1.jpg';
 
     return {
       id: r.id || `rest-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
@@ -473,21 +461,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const seedMap = new Map<string, Restaurant>(initialRestaurants.map(r => [r.id, r]));
     try {
       localStorage.removeItem('kft_restaurants_real_v5');
-      const saved = localStorage.getItem('kft_restaurants_real_v7') || localStorage.getItem('kft_restaurants_real_v6');
       localStorage.removeItem('kft_restaurants_real_v6');
+      const saved = localStorage.getItem('kft_restaurants_real_v8') || localStorage.getItem('kft_restaurants_real_v7');
+      localStorage.removeItem('kft_restaurants_real_v7');
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length >= 50) {
-          const normalizedList = parsed.map((r: any) => {
+          const seenNonAdminOwners = new Set<string>();
+          const normalizedList: Restaurant[] = [];
+          for (const r of parsed) {
             const seed = r && r.id ? seedMap.get(String(r.id)) : undefined;
             if (seed) {
-              return normalizeRestaurant({
+              const hasCustomPhoto = typeof r.profileImage === 'string' && r.profileImage.startsWith('data:');
+              normalizedList.push(normalizeRestaurant({
                 ...r,
                 nameKh: seed.nameKh,
                 nameEn: seed.nameEn,
                 descriptionKh: seed.descriptionKh,
                 descriptionEn: seed.descriptionEn,
-                photoUrl: seed.photoUrl,
+                photoUrl: hasCustomPhoto ? r.profileImage : seed.photoUrl,
+                profileImage: hasCustomPhoto ? r.profileImage : seed.photoUrl,
                 galleryPhotos: seed.galleryPhotos,
                 addressKh: seed.addressKh,
                 addressEn: seed.addressEn,
@@ -496,15 +489,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 signatureDishesKh: seed.signatureDishesKh,
                 created_at: seed.created_at || getRestaurantCreatedAtIso(seed),
                 createdAt: seed.created_at || getRestaurantCreatedAtIso(seed),
-              });
+              }));
+            } else {
+              // Enforce max 1 custom restaurant per non-admin user
+              const ownerId = r?.ownerId ? String(r.ownerId) : '';
+              const isAdminOwner = ownerId === 'admin-authorized-single';
+              if (ownerId && !isAdminOwner) {
+                if (seenNonAdminOwners.has(ownerId)) continue;
+                seenNonAdminOwners.add(ownerId);
+              }
+              normalizedList.push(normalizeRestaurant(r));
             }
-            return normalizeRestaurant(r);
-          });
+          }
           return sortRestaurantsChronologically(normalizedList);
         }
       }
     } catch (e) {
-      console.warn('Failed to parse kft_restaurants_real_v7', e);
+      console.warn('Failed to parse kft_restaurants_real_v8', e);
     }
 
     // Preserve any user-created custom restaurants from previous storage key
@@ -712,7 +713,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isQrScannerModalOpen, setIsQrScannerModalOpen] = useState(false);
   const [isVipAddRestaurantModalOpen, setIsVipAddRestaurantModalOpen] = useState(false);
   const [isAiFoodDiscoveryModalOpen, setIsAiFoodDiscoveryModalOpen] = useState(false);
-  const [isRestaurantCheckInModalOpen, setIsRestaurantCheckInModalOpen] = useState(false);
+  const [isRestaurantCheckInModalOpen, setIsRestaurantCheckInModalOpenRaw] = useState(false);
+  const setIsRestaurantCheckInModalOpen = (open: boolean) => {
+    if (open && currentUser?.role !== 'admin') {
+      showToast(
+        language === 'km'
+          ? '🔒 មុខងារឆែកអ៊ីន & បញ្ជាក់ទីតាំង GPS Live អនុញ្ញាតសម្រាប់តែ Admin ប៉ុណ្ណោះ!'
+          : '🔒 Check-in & GPS Live verification is restricted to Admin only!',
+        'warning'
+      );
+      return;
+    }
+    setIsRestaurantCheckInModalOpenRaw(open);
+  };
 
   // 6 Personalized Account Features Modals
   const [isWhatToEatModalOpen, setIsWhatToEatModalOpen] = useState(false);
@@ -789,7 +802,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
     return [];
   });
-  const [isAiCheckInModalOpen, setIsAiCheckInModalOpen] = useState<boolean>(false);
+  const [isAiCheckInModalOpen, setIsAiCheckInModalOpenRaw] = useState<boolean>(false);
+  const setIsAiCheckInModalOpen = (open: boolean) => {
+    if (open && currentUser?.role !== 'admin') {
+      showToast(
+        language === 'km'
+          ? '🔒 មុខងារ AI ឆែកអ៊ីន & បន្ថែមហាងតាម GPS អនុញ្ញាតសម្រាប់តែ Admin ប៉ុណ្ណោះ!'
+          : '🔒 AI Check-in & GPS restaurant verification is restricted to Admin only!',
+        'warning'
+      );
+      return;
+    }
+    setIsAiCheckInModalOpenRaw(open);
+  };
 
   useEffect(() => {
     try {
@@ -1058,12 +1083,38 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     try {
       if (restaurants && restaurants.length > 0) {
-        localStorage.setItem('kft_restaurants_real_v7', JSON.stringify(restaurants));
+        localStorage.setItem('kft_restaurants_real_v8', JSON.stringify(restaurants));
       }
     } catch (e) {
       console.warn('Storage sync failed for restaurants:', e);
     }
   }, [restaurants]);
+
+  // Automatically sync active VIP user membership onto any restaurant owned by currentUser
+  useEffect(() => {
+    if (!currentUser || !isUserVipActive(currentUser)) return;
+    const expiry =
+      currentUser.subscriptionExpiryDate ||
+      new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString();
+    setRestaurants(prev => {
+      let changed = false;
+      const next = prev.map(r => {
+        if (r.ownerId === currentUser.id && (!isRestaurantPremiumActive(r) || !r.isPromoted)) {
+          changed = true;
+          return {
+            ...r,
+            membershipTier: 'premium' as MembershipTier,
+            membershipExpiresAt: expiry,
+            isPromoted: true,
+            isVerified: true,
+            paymentStatus: 'verified' as const,
+          };
+        }
+        return r;
+      });
+      return changed ? next : prev;
+    });
+  }, [currentUser?.id, currentUser?.membershipTier, currentUser?.subscriptionStatus, currentUser?.subscriptionExpiryDate]);
 
   useEffect(() => {
     try {
@@ -1827,12 +1878,43 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Restaurant CRUD
   const addRestaurant = (restData: Omit<Restaurant, 'id' | 'rating' | 'reviewCount' | 'status'> & { status?: 'approved' | 'pending' | 'rejected' }) => {
-    const isPremium = restData.membershipTier === 'premium';
-    const profileImg = restData.profileImage || restData.photoUrl || '/Shop/rest-1.jpg';
+    if (!currentUser) {
+      showToast(
+        language === 'km'
+          ? 'សូមចូលគណនីជាមុនសិន ដើម្បីចុះបញ្ជីហាងអាហារ!'
+          : 'Please sign in first to register a restaurant!',
+        'warning'
+      );
+      setIsAuthModalOpen(true);
+      return;
+    }
+
+    const isAdmin = currentUser.role === 'admin';
+    if (!isAdmin) {
+      const existingOwned = restaurants.find(r => r.ownerId === currentUser.id);
+      if (existingOwned) {
+        showToast(
+          language === 'km'
+            ? '⚠️ គណនីនីមួយៗអាចបន្ថែមហាងបានតែ ១ ប៉ុណ្ណោះ! សូមកែប្រែហាងដែលមានស្រាប់ ឬលុបហាងចាស់ជាមុនសិន។'
+            : '⚠️ Each user can add only ONE restaurant! Please edit or delete your existing restaurant first.',
+          'warning'
+        );
+        setManagingRestaurant(existingOwned);
+        setIsManageMenuModalOpen(true);
+        return;
+      }
+    }
+
+    const userVipActive = isUserVipActive(currentUser) || isAdmin;
+    const isPremium = restData.membershipTier === 'premium' || userVipActive;
+    const profileImg = restData.profileImage || restData.photoUrl || '/foods/food-1.jpg';
     const foodImgs = Array.isArray(restData.foodImages) && restData.foodImages.length > 0
       ? restData.foodImages
       : (Array.isArray(restData.galleryPhotos) ? restData.galleryPhotos : []);
     const nowIso = new Date().toISOString();
+    const expiryIso =
+      currentUser.subscriptionExpiryDate ||
+      new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString();
     const newRest: Restaurant = normalizeRestaurant({
       ...restData,
       photoUrl: profileImg,
@@ -1842,13 +1924,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       id: `rest-${Date.now()}`,
       rating: 5.0,
       reviewCount: 1,
-      ownerId: currentUser?.id,
+      ownerId: currentUser.id,
       status: 'approved',
       isVerified: true,
+      isPromoted: isPremium,
       membershipTier: isPremium ? 'premium' : 'free',
-      membershipExpiresAt: isPremium 
-        ? new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString() 
-        : undefined,
+      membershipExpiresAt: isPremium ? expiryIso : undefined,
+      paymentStatus: isPremium ? 'verified' : 'unpaid',
       menuItems: isPremium ? (restData.menuItems || []).slice(0, 20) : [],
       created_at: restData.created_at || restData.createdAt || nowIso,
       createdAt: restData.created_at || restData.createdAt || nowIso,
@@ -1873,12 +1955,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return;
     }
 
-    const profileImg = updated.profileImage || updated.photoUrl || original?.profileImage || original?.photoUrl || '/Shop/rest-1.jpg';
+    const profileImg = updated.profileImage || updated.photoUrl || original?.profileImage || original?.photoUrl || '/foods/food-1.jpg';
     const foodImgs = Array.isArray(updated.foodImages)
       ? updated.foodImages
       : (Array.isArray(updated.galleryPhotos) ? updated.galleryPhotos : (original?.foodImages || original?.galleryPhotos || []));
 
     const preservedCreatedAt = original?.created_at || original?.createdAt || updated.created_at || updated.createdAt || getRestaurantCreatedAtIso(original || updated);
+    const ownerVipActive = isOwner && isUserVipActive(currentUser);
+    const effectiveTier: MembershipTier =
+      ownerVipActive || original?.membershipTier === 'premium' || updated.membershipTier === 'premium'
+        ? 'premium'
+        : 'free';
+    const effectiveExpiry =
+      original?.membershipExpiresAt ||
+      currentUser?.subscriptionExpiryDate ||
+      (effectiveTier === 'premium' ? new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString() : undefined);
 
     const safeUpdated: Restaurant = normalizeRestaurant(isAdmin ? {
       ...updated,
@@ -1894,13 +1985,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       profileImage: profileImg,
       galleryPhotos: foodImgs,
       foodImages: foodImgs,
-      membershipTier: original?.membershipTier || 'free',
-      membershipExpiresAt: original?.membershipExpiresAt,
-      paymentStatus: original?.paymentStatus,
+      membershipTier: effectiveTier,
+      membershipExpiresAt: effectiveExpiry,
+      isPromoted: effectiveTier === 'premium' ? true : Boolean(original?.isPromoted),
+      paymentStatus: effectiveTier === 'premium' ? 'verified' : original?.paymentStatus,
       status: original?.status || 'approved',
       isVerified: original?.isVerified ?? true,
       signatureDishesKh: Array.isArray(updated.signatureDishesKh) ? updated.signatureDishesKh : (original?.signatureDishesKh || ['ម្ហូបខ្មែរប្រពៃណី']),
       menuItems: Array.isArray(updated.menuItems) ? updated.menuItems : (original?.menuItems || []),
+      promoVideoUrl: updated.promoVideoUrl !== undefined ? updated.promoVideoUrl : original?.promoVideoUrl,
+      telegramUrl: updated.telegramUrl !== undefined ? updated.telegramUrl : original?.telegramUrl,
+      facebookUrl: updated.facebookUrl !== undefined ? updated.facebookUrl : original?.facebookUrl,
       created_at: preservedCreatedAt,
       createdAt: preservedCreatedAt,
     });
@@ -1914,7 +2009,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     showToast(language === 'km' ? 'បានកែប្រែព័ត៌មានហាង និងរូបភាពរួចរាល់' : 'Restaurant details and photos updated!', 'success');
   };
 
-  // Restaurant Food Menu Items
+  // Restaurant Food Menu Items (Up to 20 items for Active VIP)
   const addRestaurantMenuItem = (
     restaurantId: string, 
     itemData: Omit<RestaurantMenuItem, 'id' | 'createdAt' | 'restaurantId'>
@@ -1937,7 +2032,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return false;
     }
 
-    if (!isRestaurantPremiumActive(targetRest)) {
+    const hasVipAccess = isRestaurantPremiumActive(targetRest) || isUserVipActive(currentUser) || isAdmin;
+    if (!hasVipAccess) {
       showToast(
         language === 'km' 
           ? 'ការចុះបញ្ជីឥតគិតថ្លៃមិនអាចបន្ថែមមុខម្ហូបបានទេ។ សូមដំឡើងទៅកញ្ចប់ VIP ($2.99 / 30 ថ្ងៃ ឬ $4.99 / 90 ថ្ងៃ)!' 
@@ -1948,11 +2044,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     const currentItems = targetRest.menuItems || [];
-    if (currentItems.length >= 5) {
+    if (currentItems.length >= 20) {
       showToast(
         language === 'km' 
-          ? 'សមាជិកភាព Premium អនុញ្ញាតឱ្យបន្ថែមមុខម្ហូបអតិបរមាត្រឹម ៥ មុខប៉ុណ្ណោះ!' 
-          : 'Premium membership allows a maximum of 5 food menu items!',
+          ? 'សមាជិកភាព Premium VIP អនុញ្ញាតឱ្យបន្ថែមមុខម្ហូបអតិបរមាត្រឹម ២០ មុខប៉ុណ្ណោះ!' 
+          : 'Premium VIP membership allows a maximum of 20 food menu items!',
         'warning'
       );
       return false;
@@ -1970,6 +2066,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (r.id !== restaurantId) return r;
       return {
         ...r,
+        membershipTier: 'premium' as MembershipTier,
+        isPromoted: true,
         menuItems: updatedMenuItems,
       };
     }));
@@ -1977,14 +2075,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (selectedRestaurant?.id === restaurantId) {
       setSelectedRestaurant({
         ...selectedRestaurant,
+        membershipTier: 'premium',
+        isPromoted: true,
+        menuItems: updatedMenuItems,
+      });
+    }
+    if (managingRestaurant?.id === restaurantId) {
+      setManagingRestaurant({
+        ...managingRestaurant,
+        membershipTier: 'premium',
+        isPromoted: true,
         menuItems: updatedMenuItems,
       });
     }
 
     showToast(
       language === 'km' 
-        ? `បានបន្ថែមមុខម្ហូប "${newItem.nameKh}" ជោគជ័យ (${updatedMenuItems.length}/5)!` 
-        : `Added menu item "${newItem.nameKh}" (${updatedMenuItems.length}/5)!`,
+        ? `បានបន្ថែមមុខម្ហូប "${newItem.nameKh}" ជោគជ័យ (${updatedMenuItems.length}/20)!` 
+        : `Added menu item "${newItem.nameKh}" (${updatedMenuItems.length}/20)!`,
       'success'
     );
     return true;
@@ -2001,11 +2109,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return false;
     }
 
-    if (!isRestaurantPremiumActive(targetRest)) {
+    const hasVipAccess = isRestaurantPremiumActive(targetRest) || isUserVipActive(currentUser) || isAdmin;
+    if (!hasVipAccess) {
       showToast(
         language === 'km' 
           ? 'សមាជិកភាព Premium បានផុតកំណត់ហើយ។ សូមបន្តសមាជិកភាពដើម្បីកែប្រែព័ត៌មាន!' 
-          : 'Membership expired. Please renew Premium ($4.99) to edit menu items!',
+          : 'Membership expired. Please renew Premium VIP to edit menu items!',
         'warning'
       );
       return false;
@@ -2018,6 +2127,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setRestaurants(prev => prev.map(r => r.id === restaurantId ? { ...r, menuItems: updatedMenuItems } : r));
     if (selectedRestaurant?.id === restaurantId) {
       setSelectedRestaurant({ ...selectedRestaurant, menuItems: updatedMenuItems });
+    }
+    if (managingRestaurant?.id === restaurantId) {
+      setManagingRestaurant({ ...managingRestaurant, menuItems: updatedMenuItems });
     }
 
     showToast(language === 'km' ? 'បានកែប្រែព័ត៌មានមុខម្ហូបជោគជ័យ!' : 'Menu item updated!', 'success');
@@ -2141,9 +2253,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const deleteRestaurant = (id: string) => {
+    const target = restaurants.find(r => r.id === id);
+    if (!target) return;
+    const isAdmin = currentUser?.role === 'admin';
+    const isOwner = Boolean(currentUser?.id && target.ownerId === currentUser.id);
+    if (!isAdmin && !isOwner) {
+      showToast(
+        language === 'km'
+          ? '⛔ គ្មានសិទ្ធិលុបហាងនេះទេ! មានតែម្ចាស់ហាង ឬ Admin ប៉ុណ្ណោះដែលអាចលុបបាន។'
+          : '⛔ Unauthorized! Only the restaurant owner or Admin can delete this restaurant.',
+        'warning'
+      );
+      return;
+    }
     setRestaurants(prev => prev.filter(r => r.id !== id));
     if (selectedRestaurant?.id === id) setSelectedRestaurant(null);
-    showToast(language === 'km' ? 'បានលុបហាងអាហារ' : 'Restaurant deleted', 'info');
+    if (managingRestaurant?.id === id) {
+      setManagingRestaurant(null);
+      setIsManageMenuModalOpen(false);
+    }
+    showToast(
+      language === 'km'
+        ? '🗑️ បានលុបហាងអាហាររួចរាល់! ឥឡូវនេះអ្នកអាចបន្ថែមហាងថ្មីជំនួសបាន។'
+        : '🗑️ Restaurant deleted! You can now add a new restaurant.',
+      'info'
+    );
   };
 
   const approveRestaurant = (id: string) => {

@@ -617,7 +617,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Spoons Cambodia Training Restaurant",
     "descriptionKh": "ភោជនីយដ្ឋានបណ្តុះបណ្តាលសិស្សក្រីក្រ សាងសង់ពីដើមឫស្សីប្រណីត បម្រើម្ហូបខ្មែរបែបច្នៃប្រឌិត និងម្ហូបតាមផ្លូវខ្មែរ។",
     "descriptionEn": "Architecturally stunning bamboo pavilion training venue serving exquisite modern twists on Cambodian street classics.",
-    "photoUrl": "/Shop/rest-18.jpg",
+    "photoUrl": "/foods/food-52.jpg",
     "galleryPhotos": [
       "/foods/food-52.jpg",
       "/foods/food-20.jpg"
@@ -1529,7 +1529,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Tonle Bassac II Khmer & International Restaurant",
     "descriptionKh": "ភោជនីយដ្ឋានដ៏ធំទូលាយល្បីល្បាញនៅភ្នំពេញ បម្រើម្ហូបខ្មែរប្រពៃណី គ្រឿងសមុទ្រអាំង និងបង្អែមខ្មែររាប់រយមុខ។",
     "descriptionEn": "Renowned grand dining hall in Phnom Penh offering an extensive spread of traditional Cambodian dishes, fresh seafood, and desserts.",
-    "photoUrl": "/Shop/rest-3.jpg",
+    "photoUrl": "/foods/food-24.jpg",
     "galleryPhotos": [
       "/foods/food-24.jpg",
       "/foods/food-88.jpg"
@@ -1568,7 +1568,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Malis Restaurant Siem Reap Pokambor Riverside",
     "descriptionKh": "ភោជនីយដ្ឋានម្លិះសាខាផ្លូវការនៅមាត់ស្ទឹងសៀមរាប បម្រើម្ហូបខ្មែរប្រណិត អាម៉ុកត្រី ប្រហុកខ្ទិះ និងគុយទាវម្លិះក្នុងបរិយាកាសក្បាច់ខ្មែរ។",
     "descriptionEn": "Official Siem Reap riverside location of Malis on Pokambor Avenue serving refined Living Cambodian Cuisine in a traditional courtyard.",
-    "photoUrl": "/Shop/rest-12.jpg",
+    "photoUrl": "/foods/food-27.jpg",
     "galleryPhotos": [
       "/foods/food-27.jpg",
       "/foods/food-95.jpg"
@@ -1606,7 +1606,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "White Rose Restaurant Battambang",
     "descriptionKh": "ភោជនីយដ្ឋានចំណាស់ដ៏ល្បីល្បាញនៅកណ្តាលក្រុងបាត់ដំបង បម្រើម្ហូបខ្មែរគ្រប់មុខ ណែមបាត់ដំបង អាម៉ុក និងទឹកក្រឡុកផ្លែឈើ។",
     "descriptionEn": "Long-standing favorite in central Battambang serving authentic local Khmer dishes, Battambang spring rolls, and fruit shakes.",
-    "photoUrl": "/Shop/rest-24.jpg",
+    "photoUrl": "/foods/food-30.jpg",
     "galleryPhotos": [
       "/foods/food-30.jpg",
       "/foods/food-2.jpg"
@@ -1645,7 +1645,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Kampot Riverfront Green Pepper Crab Restaurant",
     "descriptionKh": "ភោជនីយដ្ឋានជាប់មាត់ព្រែកកំពត ល្បីខាងម្ហូបក្តាមឆាម្រេចខ្ចីកំពត បង្គាអាំង និងត្រីសមុទ្រស្រស់ៗជាមួយទេសភាពភ្នំបូកគោ។",
     "descriptionEn": "Scenic riverfront restaurant in Kampot famous for fresh crab stir-fried with green Kampot peppercorns and sunset mountain views.",
-    "photoUrl": "/Shop/rest-21.jpg",
+    "photoUrl": "/foods/food-33.jpg",
     "galleryPhotos": [
       "/foods/food-33.jpg",
       "/foods/food-9.jpg"
@@ -1684,7 +1684,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Kep Crab Market Oceanfront Seafood Restaurant",
     "descriptionKh": "ភោជនីយដ្ឋានជាប់មាត់សមុទ្រក្នុងផ្សារក្តាមកែប ស្រង់ក្តាមសេះរស់ៗពីកន្ត្រកក្នុងទឹកសមុទ្រយកមកឆាម្រេចខ្ចីភ្លាមៗ។",
     "descriptionEn": "Oceanfront restaurant right at Kep Crab Market pulling live flower crabs straight from sea baskets to stir-fry with green pepper.",
-    "photoUrl": "/Shop/rest-19.jpg",
+    "photoUrl": "/foods/food-36.jpg",
     "galleryPhotos": [
       "/foods/food-36.jpg",
       "/foods/food-16.jpg"
@@ -1723,7 +1723,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Nyam Khmer & Seafood Restaurant Sihanoukville",
     "descriptionKh": "ភោជនីយដ្ឋានម្ហូបខ្មែរ និងគ្រឿងសមុទ្រស្រស់ដ៏ល្បីក្នុងក្រុងព្រះសីហនុ បម្រើក្តាមឆាម្រេច មឹកអាំង និងសម្លម្ជូរគ្រឿងសមុទ្ររសជាតិដើម។",
     "descriptionEn": "Popular local Khmer and fresh coastal seafood restaurant in Sihanoukville serving stir-fried crab, grilled squid, and sour seafood soups.",
-    "photoUrl": "/Shop/rest-27.jpg",
+    "photoUrl": "/foods/food-39.jpg",
     "galleryPhotos": [
       "/foods/food-39.jpg",
       "/foods/food-23.jpg"
@@ -1762,7 +1762,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Riverside Khmer Kitchen (Kampong Cham)",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ទឹកដ៏ល្បីប្រចាំតំបន់ បម្រើម្ហូបត្រីទន្លេស្រស់ៗ សម្លម្ជូរព្រៃ និងមាន់ស្រែដុតក្នុងបរិយាកាសធម្មជាតិ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ចាម ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Popular local riverside restaurant serving fresh river fish, countryside sour soups, and charcoal-roasted country chicken. Conveniently located in Kampong Cham, Cambodia.",
-    "photoUrl": "/Shop/rest-28.jpg",
+    "photoUrl": "/foods/food-42.jpg",
     "galleryPhotos": [
       "/foods/food-42.jpg",
       "/foods/food-30.jpg"
@@ -1801,7 +1801,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Riverside Khmer Kitchen (Kandal)",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ទឹកដ៏ល្បីប្រចាំតំបន់ បម្រើម្ហូបត្រីទន្លេស្រស់ៗ សម្លម្ជូរព្រៃ និងមាន់ស្រែដុតក្នុងបរិយាកាសធម្មជាតិ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកណ្តាល ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Popular local riverside restaurant serving fresh river fish, countryside sour soups, and charcoal-roasted country chicken. Conveniently located in Kandal, Cambodia.",
-    "photoUrl": "/Shop/rest-28.jpg",
+    "photoUrl": "/foods/food-45.jpg",
     "galleryPhotos": [
       "/foods/food-45.jpg",
       "/foods/food-37.jpg"
@@ -1840,7 +1840,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Riverside Khmer Kitchen (Takeo)",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ទឹកដ៏ល្បីប្រចាំតំបន់ បម្រើម្ហូបត្រីទន្លេស្រស់ៗ សម្លម្ជូរព្រៃ និងមាន់ស្រែដុតក្នុងបរិយាកាសធម្មជាតិ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តតាកែវ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Popular local riverside restaurant serving fresh river fish, countryside sour soups, and charcoal-roasted country chicken. Conveniently located in Takeo, Cambodia.",
-    "photoUrl": "/Shop/rest-28.jpg",
+    "photoUrl": "/foods/food-48.jpg",
     "galleryPhotos": [
       "/foods/food-48.jpg",
       "/foods/food-44.jpg"
@@ -1878,7 +1878,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Riverside Khmer Kitchen (Pursat)",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ទឹកដ៏ល្បីប្រចាំតំបន់ បម្រើម្ហូបត្រីទន្លេស្រស់ៗ សម្លម្ជូរព្រៃ និងមាន់ស្រែដុតក្នុងបរិយាកាសធម្មជាតិ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តពោធិ៍សាត់ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Popular local riverside restaurant serving fresh river fish, countryside sour soups, and charcoal-roasted country chicken. Conveniently located in Pursat, Cambodia.",
-    "photoUrl": "/Shop/rest-28.jpg",
+    "photoUrl": "/foods/food-51.jpg",
     "galleryPhotos": [
       "/foods/food-51.jpg",
       "/foods/food-51.jpg"
@@ -1917,7 +1917,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Riverside Khmer Kitchen (Kampong Thom)",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ទឹកដ៏ល្បីប្រចាំតំបន់ បម្រើម្ហូបត្រីទន្លេស្រស់ៗ សម្លម្ជូរព្រៃ និងមាន់ស្រែដុតក្នុងបរិយាកាសធម្មជាតិ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ធំ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Popular local riverside restaurant serving fresh river fish, countryside sour soups, and charcoal-roasted country chicken. Conveniently located in Kampong Thom, Cambodia.",
-    "photoUrl": "/Shop/rest-28.jpg",
+    "photoUrl": "/foods/food-54.jpg",
     "galleryPhotos": [
       "/foods/food-54.jpg",
       "/foods/food-58.jpg"
@@ -1956,7 +1956,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Riverside Khmer Kitchen (Kampong Chhnang)",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ទឹកដ៏ល្បីប្រចាំតំបន់ បម្រើម្ហូបត្រីទន្លេស្រស់ៗ សម្លម្ជូរព្រៃ និងមាន់ស្រែដុតក្នុងបរិយាកាសធម្មជាតិ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ឆ្នាំង ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Popular local riverside restaurant serving fresh river fish, countryside sour soups, and charcoal-roasted country chicken. Conveniently located in Kampong Chhnang, Cambodia.",
-    "photoUrl": "/Shop/rest-28.jpg",
+    "photoUrl": "/foods/food-57.jpg",
     "galleryPhotos": [
       "/foods/food-57.jpg",
       "/foods/food-65.jpg"
@@ -1995,7 +1995,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Tatai Waterfall Riverside Seafood Koh Kong",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ស្ទឹងតាតៃ បម្រើគ្រឿងសមុទ្រស្រស់ៗ ក្តាមថ្មកោះកុង បង្គាអាំង និងត្រីសមុទ្រចំហុយក្រូចឆ្មារ។",
     "descriptionEn": "Riverside dining by Tatai River serving fresh Koh Kong mud crab, grilled river prawns, and steamed sea bass.",
-    "photoUrl": "/Shop/rest-30.jpg",
+    "photoUrl": "/foods/food-60.jpg",
     "galleryPhotos": [
       "/foods/food-60.jpg",
       "/foods/food-72.jpg"
@@ -2034,7 +2034,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Sea Forest Hilltop Restaurant Mondulkiri",
     "descriptionKh": "ភោជនីយដ្ឋានលើកំពូលភ្នំគយគន់ទេសភាពសមុទ្រឈើមណ្ឌលគិរី បម្រើសម្លប្រុងបំពង់ឫស្សី មាន់ដុតទឹកឃ្មុំព្រៃ និងបន្លែធម្មជាតិ។",
     "descriptionEn": "Hilltop dining overlooking the Sea Forest of Mondulkiri, serving indigenous bamboo-tube soup and wild honey roast chicken.",
-    "photoUrl": "/Shop/rest-29.jpg",
+    "photoUrl": "/foods/food-63.jpg",
     "galleryPhotos": [
       "/foods/food-63.jpg",
       "/foods/food-79.jpg"
@@ -2073,7 +2073,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Phnom Svay Mountain View Restaurant Banlung",
     "descriptionKh": "ភោជនីយដ្ឋានក្បែរភ្នំស្វាយ ក្រុងបានលុង បម្រើម្ហូបប្រចាំតំបន់ភូមិភាគឦសាន ភ្លាសាច់គោ សម្លបំពង់ឫស្សី និងមាន់ដុត។",
     "descriptionEn": "Scenic restaurant at Phnom Svay in Banlung serving northeastern Cambodian specialties, beef salad, and bamboo soup.",
-    "photoUrl": "/Shop/rest-34.jpg",
+    "photoUrl": "/foods/food-66.jpg",
     "galleryPhotos": [
       "/foods/food-66.jpg",
       "/foods/food-86.jpg"
@@ -2112,7 +2112,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Riverside Khmer Kitchen (Kratie)",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ទឹកដ៏ល្បីប្រចាំតំបន់ បម្រើម្ហូបត្រីទន្លេស្រស់ៗ សម្លម្ជូរព្រៃ និងមាន់ស្រែដុតក្នុងបរិយាកាសធម្មជាតិ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តក្រចេះ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Popular local riverside restaurant serving fresh river fish, countryside sour soups, and charcoal-roasted country chicken. Conveniently located in Kratie, Cambodia.",
-    "photoUrl": "/Shop/rest-28.jpg",
+    "photoUrl": "/foods/food-69.jpg",
     "galleryPhotos": [
       "/foods/food-69.jpg",
       "/foods/food-93.jpg"
@@ -2150,7 +2150,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Riverside Khmer Kitchen (Stung Treng)",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ទឹកដ៏ល្បីប្រចាំតំបន់ បម្រើម្ហូបត្រីទន្លេស្រស់ៗ សម្លម្ជូរព្រៃ និងមាន់ស្រែដុតក្នុងបរិយាកាសធម្មជាតិ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តស្ទឹងត្រែង ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Popular local riverside restaurant serving fresh river fish, countryside sour soups, and charcoal-roasted country chicken. Conveniently located in Stung Treng, Cambodia.",
-    "photoUrl": "/Shop/rest-28.jpg",
+    "photoUrl": "/foods/food-72.jpg",
     "galleryPhotos": [
       "/foods/food-72.jpg",
       "/foods/food-100.jpg"
@@ -2189,7 +2189,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Riverside Khmer Kitchen (Preah Vihear)",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ទឹកដ៏ល្បីប្រចាំតំបន់ បម្រើម្ហូបត្រីទន្លេស្រស់ៗ សម្លម្ជូរព្រៃ និងមាន់ស្រែដុតក្នុងបរិយាកាសធម្មជាតិ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តព្រះវិហារ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Popular local riverside restaurant serving fresh river fish, countryside sour soups, and charcoal-roasted country chicken. Conveniently located in Preah Vihear, Cambodia.",
-    "photoUrl": "/Shop/rest-28.jpg",
+    "photoUrl": "/foods/food-75.jpg",
     "galleryPhotos": [
       "/foods/food-75.jpg",
       "/foods/food-7.jpg"
@@ -2228,7 +2228,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Riverside Khmer Kitchen (Banteay Meanchey)",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ទឹកដ៏ល្បីប្រចាំតំបន់ បម្រើម្ហូបត្រីទន្លេស្រស់ៗ សម្លម្ជូរព្រៃ និងមាន់ស្រែដុតក្នុងបរិយាកាសធម្មជាតិ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តបន្ទាយមានជ័យ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Popular local riverside restaurant serving fresh river fish, countryside sour soups, and charcoal-roasted country chicken. Conveniently located in Banteay Meanchey, Cambodia.",
-    "photoUrl": "/Shop/rest-28.jpg",
+    "photoUrl": "/foods/food-78.jpg",
     "galleryPhotos": [
       "/foods/food-78.jpg",
       "/foods/food-14.jpg"
@@ -2267,7 +2267,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Riverside Khmer Kitchen (Oddar Meanchey)",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ទឹកដ៏ល្បីប្រចាំតំបន់ បម្រើម្ហូបត្រីទន្លេស្រស់ៗ សម្លម្ជូរព្រៃ និងមាន់ស្រែដុតក្នុងបរិយាកាសធម្មជាតិ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តឧត្តរមានជ័យ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Popular local riverside restaurant serving fresh river fish, countryside sour soups, and charcoal-roasted country chicken. Conveniently located in Oddar Meanchey, Cambodia.",
-    "photoUrl": "/Shop/rest-28.jpg",
+    "photoUrl": "/foods/food-81.jpg",
     "galleryPhotos": [
       "/foods/food-81.jpg",
       "/foods/food-21.jpg"
@@ -2306,7 +2306,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Riverside Khmer Kitchen (Pailin)",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ទឹកដ៏ល្បីប្រចាំតំបន់ បម្រើម្ហូបត្រីទន្លេស្រស់ៗ សម្លម្ជូរព្រៃ និងមាន់ស្រែដុតក្នុងបរិយាកាសធម្មជាតិ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តប៉ៃលិន ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Popular local riverside restaurant serving fresh river fish, countryside sour soups, and charcoal-roasted country chicken. Conveniently located in Pailin, Cambodia.",
-    "photoUrl": "/Shop/rest-28.jpg",
+    "photoUrl": "/foods/food-84.jpg",
     "galleryPhotos": [
       "/foods/food-84.jpg",
       "/foods/food-28.jpg"
@@ -2345,7 +2345,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Riverside Khmer Kitchen (Prey Veng)",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ទឹកដ៏ល្បីប្រចាំតំបន់ បម្រើម្ហូបត្រីទន្លេស្រស់ៗ សម្លម្ជូរព្រៃ និងមាន់ស្រែដុតក្នុងបរិយាកាសធម្មជាតិ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តព្រៃវែង ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Popular local riverside restaurant serving fresh river fish, countryside sour soups, and charcoal-roasted country chicken. Conveniently located in Prey Veng, Cambodia.",
-    "photoUrl": "/Shop/rest-28.jpg",
+    "photoUrl": "/foods/food-87.jpg",
     "galleryPhotos": [
       "/foods/food-87.jpg",
       "/foods/food-35.jpg"
@@ -2384,7 +2384,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Riverside Khmer Kitchen (Svay Rieng)",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ទឹកដ៏ល្បីប្រចាំតំបន់ បម្រើម្ហូបត្រីទន្លេស្រស់ៗ សម្លម្ជូរព្រៃ និងមាន់ស្រែដុតក្នុងបរិយាកាសធម្មជាតិ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តស្វាយរៀង ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Popular local riverside restaurant serving fresh river fish, countryside sour soups, and charcoal-roasted country chicken. Conveniently located in Svay Rieng, Cambodia.",
-    "photoUrl": "/Shop/rest-28.jpg",
+    "photoUrl": "/foods/food-90.jpg",
     "galleryPhotos": [
       "/foods/food-90.jpg",
       "/foods/food-42.jpg"
@@ -2422,7 +2422,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Riverside Khmer Kitchen (Kampong Speu)",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ទឹកដ៏ល្បីប្រចាំតំបន់ បម្រើម្ហូបត្រីទន្លេស្រស់ៗ សម្លម្ជូរព្រៃ និងមាន់ស្រែដុតក្នុងបរិយាកាសធម្មជាតិ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ស្ពឺ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Popular local riverside restaurant serving fresh river fish, countryside sour soups, and charcoal-roasted country chicken. Conveniently located in Kampong Speu, Cambodia.",
-    "photoUrl": "/Shop/rest-28.jpg",
+    "photoUrl": "/foods/food-93.jpg",
     "galleryPhotos": [
       "/foods/food-93.jpg",
       "/foods/food-49.jpg"
@@ -2461,7 +2461,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Riverside Khmer Kitchen (Tboung Khmum)",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ទឹកដ៏ល្បីប្រចាំតំបន់ បម្រើម្ហូបត្រីទន្លេស្រស់ៗ សម្លម្ជូរព្រៃ និងមាន់ស្រែដុតក្នុងបរិយាកាសធម្មជាតិ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តត្បូងឃ្មុំ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Popular local riverside restaurant serving fresh river fish, countryside sour soups, and charcoal-roasted country chicken. Conveniently located in Tboung Khmum, Cambodia.",
-    "photoUrl": "/Shop/rest-28.jpg",
+    "photoUrl": "/foods/food-96.jpg",
     "galleryPhotos": [
       "/foods/food-96.jpg",
       "/foods/food-56.jpg"
@@ -2500,7 +2500,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Koh Pich Riverside Seafood & Khmer Grill",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ទន្លេកោះពេជ្រ បរិយាកាសល្ហើយត្រជាក់ ស័ក្តិសមសម្រាប់អាហារពេលល្ងាចជួបជុំគ្រួសារ និងមិត្តភក្តិ។",
     "descriptionEn": "Open-air riverside restaurant on Diamond Island featuring breezy river views, grilled river prawns, and classic Khmer dishes.",
-    "photoUrl": "/Shop/rest-6.jpg",
+    "photoUrl": "/foods/food-99.jpg",
     "galleryPhotos": [
       "/foods/food-99.jpg",
       "/foods/food-63.jpg"
@@ -2539,7 +2539,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Khmer Kitchen Restaurant Old Market Siem Reap",
     "descriptionKh": "ភោជនីយដ្ឋានដ៏ល្បីល្បាញនៅតំបន់ផ្សារចាស់ សៀមរាប បម្រើអាម៉ុកត្រី ការីក្រហមខ្មែរ និងឡុកឡាក់សាច់គោរសជាតិឆ្ងាញ់តម្លៃសមរម្យ។",
     "descriptionEn": "Iconic Siem Reap dining spot near the Old Market famous for its fragrant fish amok, Khmer red pumpkin curry, and beef lok lak.",
-    "photoUrl": "/Shop/rest-11.jpg",
+    "photoUrl": "/foods/food-2.jpg",
     "galleryPhotos": [
       "/foods/food-2.jpg",
       "/foods/food-70.jpg"
@@ -2578,7 +2578,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Sangkae Riverbank Dining Battambang",
     "descriptionKh": "ភោជនីយដ្ឋានតាមបណ្តោយមាត់ស្ទឹងសង្កែ បរិយាកាសស្រស់ស្រាយ បម្រើម្ហូបត្រីទន្លេ ប្រហុកខ្ទិះ និងសម្លខ្មែររសជាតិអ្នកបាត់ដំបង។",
     "descriptionEn": "Scenic riverside restaurant along the Sangkae River serving traditional Battambang fish recipes and countryside delicacies.",
-    "photoUrl": "/Shop/rest-25.jpg",
+    "photoUrl": "/foods/food-5.jpg",
     "galleryPhotos": [
       "/foods/food-5.jpg",
       "/foods/food-77.jpg"
@@ -2617,7 +2617,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Kampot Samaki Market Roast Duck Noodle & Kuyteav",
     "descriptionKh": "ហាងអាហារពេលព្រឹកដ៏ល្បីប្រចាំក្រុងកំពត បម្រើមីទាខ្វៃ គុយទាវគ្រឿងសមុទ្រ និងបាយសាច់ជ្រូកអាំងក្តៅៗ។",
     "descriptionEn": "Iconic Kampot breakfast noodle shop near Samaki Market celebrated for homemade egg noodles with roast duck and seafood kuyteav.",
-    "photoUrl": "/Shop/rest-22.jpg",
+    "photoUrl": "/foods/food-8.jpg",
     "galleryPhotos": [
       "/foods/food-8.jpg",
       "/foods/food-84.jpg"
@@ -2656,7 +2656,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Kep Sea Breeze Crab & Seafood Pavilion",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់សមុទ្រកែប បរិយាកាសស្រស់ស្រាយ គយគន់កោះទន្សាយ និងពិសាគ្រឿងសមុទ្រស្រស់ៗគ្រប់មុខ។",
     "descriptionEn": "Breezy seaside pavilion overlooking Rabbit Island, serving steamed sea crabs, grilled prawns, and sour seafood soup.",
-    "photoUrl": "/Shop/rest-20.jpg",
+    "photoUrl": "/foods/food-11.jpg",
     "galleryPhotos": [
       "/foods/food-11.jpg",
       "/foods/food-91.jpg"
@@ -2694,7 +2694,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Treasure Island Seafood Restaurant Ochheuteal Beach",
     "descriptionKh": "ភោជនីយដ្ឋានជាប់មាត់ឆ្នេរអូរឈើទាល បម្រើគ្រឿងសមុទ្ររស់ៗស្រង់ពីទូកនេសាទ បង្គាអាំង ក្តាមចំហុយ និងត្រីសមុទ្របំពងទឹកត្រីផ្អែម។",
     "descriptionEn": "Beachfront seafood dining on Ochheuteal Beach offering live catch prawns, steamed sea crab, and crispy fried sea bass.",
-    "photoUrl": "/Shop/rest-19.jpg",
+    "photoUrl": "/foods/food-14.jpg",
     "galleryPhotos": [
       "/foods/food-14.jpg",
       "/foods/food-98.jpg"
@@ -2733,7 +2733,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Central Market Morning Kuyteav & Rice House (Kampong Cham)",
     "descriptionKh": "ហាងអាហារពេលព្រឹក និងថ្ងៃត្រង់ដ៏ពេញនិយមក្បែរផ្សារធំ មានគុយទាវឆ្អឹងជ្រូករម្ងាស់ បាយសាច់ជ្រូកអាំងធ្យូង និងកាហ្វេឆុងថ្មីៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ចាម ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Bustling morning eatery near the provincial market serving slow-simmered pork bone noodle soup and grilled pork rice. Conveniently located in Kampong Cham, Cambodia.",
-    "photoUrl": "/Shop/rest-29.jpg",
+    "photoUrl": "/foods/food-17.jpg",
     "galleryPhotos": [
       "/foods/food-17.jpg",
       "/foods/food-5.jpg"
@@ -2772,7 +2772,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Central Market Morning Kuyteav & Rice House (Kandal)",
     "descriptionKh": "ហាងអាហារពេលព្រឹក និងថ្ងៃត្រង់ដ៏ពេញនិយមក្បែរផ្សារធំ មានគុយទាវឆ្អឹងជ្រូករម្ងាស់ បាយសាច់ជ្រូកអាំងធ្យូង និងកាហ្វេឆុងថ្មីៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកណ្តាល ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Bustling morning eatery near the provincial market serving slow-simmered pork bone noodle soup and grilled pork rice. Conveniently located in Kandal, Cambodia.",
-    "photoUrl": "/Shop/rest-29.jpg",
+    "photoUrl": "/foods/food-20.jpg",
     "galleryPhotos": [
       "/foods/food-20.jpg",
       "/foods/food-12.jpg"
@@ -2811,7 +2811,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Central Market Morning Kuyteav & Rice House (Takeo)",
     "descriptionKh": "ហាងអាហារពេលព្រឹក និងថ្ងៃត្រង់ដ៏ពេញនិយមក្បែរផ្សារធំ មានគុយទាវឆ្អឹងជ្រូករម្ងាស់ បាយសាច់ជ្រូកអាំងធ្យូង និងកាហ្វេឆុងថ្មីៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តតាកែវ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Bustling morning eatery near the provincial market serving slow-simmered pork bone noodle soup and grilled pork rice. Conveniently located in Takeo, Cambodia.",
-    "photoUrl": "/Shop/rest-29.jpg",
+    "photoUrl": "/foods/food-23.jpg",
     "galleryPhotos": [
       "/foods/food-23.jpg",
       "/foods/food-19.jpg"
@@ -2850,7 +2850,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Central Market Morning Kuyteav & Rice House (Pursat)",
     "descriptionKh": "ហាងអាហារពេលព្រឹក និងថ្ងៃត្រង់ដ៏ពេញនិយមក្បែរផ្សារធំ មានគុយទាវឆ្អឹងជ្រូករម្ងាស់ បាយសាច់ជ្រូកអាំងធ្យូង និងកាហ្វេឆុងថ្មីៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តពោធិ៍សាត់ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Bustling morning eatery near the provincial market serving slow-simmered pork bone noodle soup and grilled pork rice. Conveniently located in Pursat, Cambodia.",
-    "photoUrl": "/Shop/rest-29.jpg",
+    "photoUrl": "/foods/food-26.jpg",
     "galleryPhotos": [
       "/foods/food-26.jpg",
       "/foods/food-26.jpg"
@@ -2889,7 +2889,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Central Market Morning Kuyteav & Rice House (Kampong Thom)",
     "descriptionKh": "ហាងអាហារពេលព្រឹក និងថ្ងៃត្រង់ដ៏ពេញនិយមក្បែរផ្សារធំ មានគុយទាវឆ្អឹងជ្រូករម្ងាស់ បាយសាច់ជ្រូកអាំងធ្យូង និងកាហ្វេឆុងថ្មីៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ធំ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Bustling morning eatery near the provincial market serving slow-simmered pork bone noodle soup and grilled pork rice. Conveniently located in Kampong Thom, Cambodia.",
-    "photoUrl": "/Shop/rest-29.jpg",
+    "photoUrl": "/foods/food-29.jpg",
     "galleryPhotos": [
       "/foods/food-29.jpg",
       "/foods/food-33.jpg"
@@ -2928,7 +2928,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Central Market Morning Kuyteav & Rice House (Kampong Chhnang)",
     "descriptionKh": "ហាងអាហារពេលព្រឹក និងថ្ងៃត្រង់ដ៏ពេញនិយមក្បែរផ្សារធំ មានគុយទាវឆ្អឹងជ្រូករម្ងាស់ បាយសាច់ជ្រូកអាំងធ្យូង និងកាហ្វេឆុងថ្មីៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ឆ្នាំង ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Bustling morning eatery near the provincial market serving slow-simmered pork bone noodle soup and grilled pork rice. Conveniently located in Kampong Chhnang, Cambodia.",
-    "photoUrl": "/Shop/rest-29.jpg",
+    "photoUrl": "/foods/food-32.jpg",
     "galleryPhotos": [
       "/foods/food-32.jpg",
       "/foods/food-40.jpg"
@@ -2966,7 +2966,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Peam Krasop Mangrove Seafood Pavilion Koh Kong",
     "descriptionKh": "ភោជនីយដ្ឋានក្បែរព្រៃកោងកាងពាមក្រសោប ល្បីខាងក្តាមថ្មធម្មជាតិ មឹកអាំង និងទឹកត្រីកោះកុងរសជាតិដើម។",
     "descriptionEn": "Waterfront seafood pavilion near Peam Krasop Mangrove Forest famous for wild mud crabs and authentic Koh Kong dipping sauce.",
-    "photoUrl": "/Shop/rest-30.jpg",
+    "photoUrl": "/foods/food-35.jpg",
     "galleryPhotos": [
       "/foods/food-35.jpg",
       "/foods/food-47.jpg"
@@ -3005,7 +3005,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Mondulkiri Coffee Plantation Roastery & Cafe",
     "descriptionKh": "ហាងកាហ្វេក្នុងចម្ការកាហ្វេធម្មជាតិមណ្ឌលគិរី ឆុងកាហ្វេភ្នំដ៏ឈ្ងុយឆ្ងាញ់ អមដោយផ្លែបឺរមណ្ឌលគិរីក្រឡុក និងអាហារពេលព្រឹក។",
     "descriptionEn": "Plantation roastery and cafe serving authentic highland Mondulkiri coffee, creamy local avocado smoothies, and breakfast.",
-    "photoUrl": "/Shop/rest-29.jpg",
+    "photoUrl": "/foods/food-38.jpg",
     "galleryPhotos": [
       "/foods/food-38.jpg",
       "/foods/food-54.jpg"
@@ -3044,7 +3044,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Boeng Kansaeng Lakefront Restaurant Banlung",
     "descriptionKh": "ភោជនីយដ្ឋានជាប់មាត់បឹងកន្សែងកណ្តាលក្រុងបានលុង បរិយាកាសល្ហើយត្រជាក់ ពិសាត្រីអាំង សាច់គោអាំង និងស៊ុបឆ្នាំងភ្លើង។",
     "descriptionEn": "Lakeside restaurant on Boeng Kansaeng in central Banlung offering sunset views, grilled beef skewers, and hotpot.",
-    "photoUrl": "/Shop/rest-34.jpg",
+    "photoUrl": "/foods/food-41.jpg",
     "galleryPhotos": [
       "/foods/food-41.jpg",
       "/foods/food-61.jpg"
@@ -3083,7 +3083,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Central Market Morning Kuyteav & Rice House (Kratie)",
     "descriptionKh": "ហាងអាហារពេលព្រឹក និងថ្ងៃត្រង់ដ៏ពេញនិយមក្បែរផ្សារធំ មានគុយទាវឆ្អឹងជ្រូករម្ងាស់ បាយសាច់ជ្រូកអាំងធ្យូង និងកាហ្វេឆុងថ្មីៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តក្រចេះ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Bustling morning eatery near the provincial market serving slow-simmered pork bone noodle soup and grilled pork rice. Conveniently located in Kratie, Cambodia.",
-    "photoUrl": "/Shop/rest-29.jpg",
+    "photoUrl": "/foods/food-44.jpg",
     "galleryPhotos": [
       "/foods/food-44.jpg",
       "/foods/food-68.jpg"
@@ -3122,7 +3122,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Central Market Morning Kuyteav & Rice House (Stung Treng)",
     "descriptionKh": "ហាងអាហារពេលព្រឹក និងថ្ងៃត្រង់ដ៏ពេញនិយមក្បែរផ្សារធំ មានគុយទាវឆ្អឹងជ្រូករម្ងាស់ បាយសាច់ជ្រូកអាំងធ្យូង និងកាហ្វេឆុងថ្មីៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តស្ទឹងត្រែង ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Bustling morning eatery near the provincial market serving slow-simmered pork bone noodle soup and grilled pork rice. Conveniently located in Stung Treng, Cambodia.",
-    "photoUrl": "/Shop/rest-29.jpg",
+    "photoUrl": "/foods/food-47.jpg",
     "galleryPhotos": [
       "/foods/food-47.jpg",
       "/foods/food-75.jpg"
@@ -3161,7 +3161,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Central Market Morning Kuyteav & Rice House (Preah Vihear)",
     "descriptionKh": "ហាងអាហារពេលព្រឹក និងថ្ងៃត្រង់ដ៏ពេញនិយមក្បែរផ្សារធំ មានគុយទាវឆ្អឹងជ្រូករម្ងាស់ បាយសាច់ជ្រូកអាំងធ្យូង និងកាហ្វេឆុងថ្មីៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តព្រះវិហារ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Bustling morning eatery near the provincial market serving slow-simmered pork bone noodle soup and grilled pork rice. Conveniently located in Preah Vihear, Cambodia.",
-    "photoUrl": "/Shop/rest-29.jpg",
+    "photoUrl": "/foods/food-50.jpg",
     "galleryPhotos": [
       "/foods/food-50.jpg",
       "/foods/food-82.jpg"
@@ -3200,7 +3200,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Central Market Morning Kuyteav & Rice House (Banteay Meanchey)",
     "descriptionKh": "ហាងអាហារពេលព្រឹក និងថ្ងៃត្រង់ដ៏ពេញនិយមក្បែរផ្សារធំ មានគុយទាវឆ្អឹងជ្រូករម្ងាស់ បាយសាច់ជ្រូកអាំងធ្យូង និងកាហ្វេឆុងថ្មីៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តបន្ទាយមានជ័យ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Bustling morning eatery near the provincial market serving slow-simmered pork bone noodle soup and grilled pork rice. Conveniently located in Banteay Meanchey, Cambodia.",
-    "photoUrl": "/Shop/rest-29.jpg",
+    "photoUrl": "/foods/food-53.jpg",
     "galleryPhotos": [
       "/foods/food-53.jpg",
       "/foods/food-89.jpg"
@@ -3238,7 +3238,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Central Market Morning Kuyteav & Rice House (Oddar Meanchey)",
     "descriptionKh": "ហាងអាហារពេលព្រឹក និងថ្ងៃត្រង់ដ៏ពេញនិយមក្បែរផ្សារធំ មានគុយទាវឆ្អឹងជ្រូករម្ងាស់ បាយសាច់ជ្រូកអាំងធ្យូង និងកាហ្វេឆុងថ្មីៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តឧត្តរមានជ័យ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Bustling morning eatery near the provincial market serving slow-simmered pork bone noodle soup and grilled pork rice. Conveniently located in Oddar Meanchey, Cambodia.",
-    "photoUrl": "/Shop/rest-29.jpg",
+    "photoUrl": "/foods/food-56.jpg",
     "galleryPhotos": [
       "/foods/food-56.jpg",
       "/foods/food-96.jpg"
@@ -3277,7 +3277,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Central Market Morning Kuyteav & Rice House (Pailin)",
     "descriptionKh": "ហាងអាហារពេលព្រឹក និងថ្ងៃត្រង់ដ៏ពេញនិយមក្បែរផ្សារធំ មានគុយទាវឆ្អឹងជ្រូករម្ងាស់ បាយសាច់ជ្រូកអាំងធ្យូង និងកាហ្វេឆុងថ្មីៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តប៉ៃលិន ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Bustling morning eatery near the provincial market serving slow-simmered pork bone noodle soup and grilled pork rice. Conveniently located in Pailin, Cambodia.",
-    "photoUrl": "/Shop/rest-29.jpg",
+    "photoUrl": "/foods/food-59.jpg",
     "galleryPhotos": [
       "/foods/food-59.jpg",
       "/foods/food-3.jpg"
@@ -3316,7 +3316,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Central Market Morning Kuyteav & Rice House (Prey Veng)",
     "descriptionKh": "ហាងអាហារពេលព្រឹក និងថ្ងៃត្រង់ដ៏ពេញនិយមក្បែរផ្សារធំ មានគុយទាវឆ្អឹងជ្រូករម្ងាស់ បាយសាច់ជ្រូកអាំងធ្យូង និងកាហ្វេឆុងថ្មីៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តព្រៃវែង ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Bustling morning eatery near the provincial market serving slow-simmered pork bone noodle soup and grilled pork rice. Conveniently located in Prey Veng, Cambodia.",
-    "photoUrl": "/Shop/rest-29.jpg",
+    "photoUrl": "/foods/food-62.jpg",
     "galleryPhotos": [
       "/foods/food-62.jpg",
       "/foods/food-10.jpg"
@@ -3355,7 +3355,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Central Market Morning Kuyteav & Rice House (Svay Rieng)",
     "descriptionKh": "ហាងអាហារពេលព្រឹក និងថ្ងៃត្រង់ដ៏ពេញនិយមក្បែរផ្សារធំ មានគុយទាវឆ្អឹងជ្រូករម្ងាស់ បាយសាច់ជ្រូកអាំងធ្យូង និងកាហ្វេឆុងថ្មីៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តស្វាយរៀង ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Bustling morning eatery near the provincial market serving slow-simmered pork bone noodle soup and grilled pork rice. Conveniently located in Svay Rieng, Cambodia.",
-    "photoUrl": "/Shop/rest-29.jpg",
+    "photoUrl": "/foods/food-65.jpg",
     "galleryPhotos": [
       "/foods/food-65.jpg",
       "/foods/food-17.jpg"
@@ -3394,7 +3394,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Central Market Morning Kuyteav & Rice House (Kampong Speu)",
     "descriptionKh": "ហាងអាហារពេលព្រឹក និងថ្ងៃត្រង់ដ៏ពេញនិយមក្បែរផ្សារធំ មានគុយទាវឆ្អឹងជ្រូករម្ងាស់ បាយសាច់ជ្រូកអាំងធ្យូង និងកាហ្វេឆុងថ្មីៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ស្ពឺ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Bustling morning eatery near the provincial market serving slow-simmered pork bone noodle soup and grilled pork rice. Conveniently located in Kampong Speu, Cambodia.",
-    "photoUrl": "/Shop/rest-29.jpg",
+    "photoUrl": "/foods/food-68.jpg",
     "galleryPhotos": [
       "/foods/food-68.jpg",
       "/foods/food-24.jpg"
@@ -3433,7 +3433,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Central Market Morning Kuyteav & Rice House (Tboung Khmum)",
     "descriptionKh": "ហាងអាហារពេលព្រឹក និងថ្ងៃត្រង់ដ៏ពេញនិយមក្បែរផ្សារធំ មានគុយទាវឆ្អឹងជ្រូករម្ងាស់ បាយសាច់ជ្រូកអាំងធ្យូង និងកាហ្វេឆុងថ្មីៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តត្បូងឃ្មុំ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Bustling morning eatery near the provincial market serving slow-simmered pork bone noodle soup and grilled pork rice. Conveniently located in Tboung Khmum, Cambodia.",
-    "photoUrl": "/Shop/rest-29.jpg",
+    "photoUrl": "/foods/food-71.jpg",
     "galleryPhotos": [
       "/foods/food-71.jpg",
       "/foods/food-31.jpg"
@@ -3472,7 +3472,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Orussey Authentic Morning Kuyteav House",
     "descriptionKh": "ហាងគុយទាវភ្នំពេញរសជាតិដើមក្បែរផ្សារអូរឫស្សី ទឹកស៊ុបឆ្អឹងជ្រូករម្ងាស់ផ្អែមឈ្ងុយឆ្ងាញ់ និងបាយសាច់ជ្រូកអាំងធ្យូង។",
     "descriptionEn": "Classic Phnom Penh breakfast noodle house near Orussey Market celebrated for its slow-simmered pork bone broth and grilled pork rice.",
-    "photoUrl": "/Shop/rest-8.jpg",
+    "photoUrl": "/foods/food-74.jpg",
     "galleryPhotos": [
       "/foods/food-74.jpg",
       "/foods/food-38.jpg"
@@ -3510,7 +3510,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Mahob Khmer Cuisine Siem Reap",
     "descriptionKh": "ភោជនីយដ្ឋានក្នុងផ្ទះឈើបុរាណខ្មែរអមដោយសួនស្រះឈូក បម្រើម្ហូបខ្មែរប្រពៃណីច្នៃប្រឌិតយ៉ាងផ្ចិតផ្ចង់។",
     "descriptionEn": "Set in a traditional wooden house surrounded by lotus ponds, offering refined Cambodian gastronomy and garden dining.",
-    "photoUrl": "/Shop/rest-13.jpg",
+    "photoUrl": "/foods/food-77.jpg",
     "galleryPhotos": [
       "/foods/food-77.jpg",
       "/foods/food-45.jpg"
@@ -3549,7 +3549,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Authentic Battambang Beef Ball Kuyteav House",
     "descriptionKh": "ហាងគុយទាវប្រចាំក្រុងបាត់ដំបងក្បែរផ្សារណាត់ ល្បីខាងទឹកស៊ុបរម្ងាស់ផ្អែមឆ្ងាញ់ ប្រហិតសាច់គោបាត់ដំបង និងបាយសាច់ជ្រូក។",
     "descriptionEn": "Beloved breakfast noodle shop near Phsar Nat famous for authentic Battambang beef ball kuyteav and iced drip coffee.",
-    "photoUrl": "/Shop/rest-26.jpg",
+    "photoUrl": "/foods/food-80.jpg",
     "galleryPhotos": [
       "/foods/food-80.jpg",
       "/foods/food-52.jpg"
@@ -3588,7 +3588,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "La Plantation Pepper Farm Bistro Kampot",
     "descriptionKh": "ភោជនីយដ្ឋានក្នុងចម្ការម្រេចធម្មជាតិកំពត បម្រើមុខម្ហូបខ្មែរចម្អិនជាមួយម្រេចកំពតធម្មជាតិឈ្ងុយឆ្ងាញ់ និងការ៉េមម្រេចពិសេស។",
     "descriptionEn": "Open-air wooden pavilion overlooking organic Kampot pepper fields, serving signature pepper-infused Khmer dishes.",
-    "photoUrl": "/Shop/rest-21.jpg",
+    "photoUrl": "/foods/food-83.jpg",
     "galleryPhotos": [
       "/foods/food-83.jpg",
       "/foods/food-59.jpg"
@@ -3627,7 +3627,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Coconut Shade Beachside Kitchen Kep",
     "descriptionKh": "ហាងអាហារគ្រួសារក្រោមម្លប់ដូងមាត់ឆ្នេរកែប បម្រើអាហារថ្ងៃត្រង់ និងពេលល្ងាចជាមួយមុខម្ហូបសមុទ្រឆ្ងាញ់ៗ។",
     "descriptionEn": "Relaxed family restaurant shaded by palm trees along Kep Beach serving fresh grilled seafood and cold coconut water.",
-    "photoUrl": "/Shop/rest-23.jpg",
+    "photoUrl": "/foods/food-86.jpg",
     "galleryPhotos": [
       "/foods/food-86.jpg",
       "/foods/food-66.jpg"
@@ -3666,7 +3666,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Sea Breeze Coastal Dining Independence Beach",
     "descriptionKh": "ភោជនីយដ្ឋានបរិយាកាសមាត់សមុទ្រដ៏ស្ងប់ស្ងាត់ក្បែរឆ្នេរឯករាជ្យ គយគន់ថ្ងៃលិច និងពិសាអាហារសមុទ្រស្រស់ៗជាមួយក្រុមគ្រួសារ។",
     "descriptionEn": "Relaxing ocean-view restaurant at Independence Beach featuring sunset views, charcoal-grilled seafood platters, and Khmer curries.",
-    "photoUrl": "/Shop/rest-23.jpg",
+    "photoUrl": "/foods/food-89.jpg",
     "galleryPhotos": [
       "/foods/food-89.jpg",
       "/foods/food-73.jpg"
@@ -3705,7 +3705,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Green Garden Traditional Khmer Restaurant (Kampong Cham)",
     "descriptionKh": "ភោជនីយដ្ឋានសួនធម្មជាតិធំទូលាយ ស័ក្តិសមសម្រាប់គ្រួសារ និងភ្ញៀវទេសចរ ពិសាម្ហូបខ្មែរប្រចាំតំបន់ និងបន្លែធម្មជាតិស្រស់ៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ចាម ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Spacious garden restaurant popular with families and travelers for authentic regional Cambodian dishes and fresh local produce. Conveniently located in Kampong Cham, Cambodia.",
-    "photoUrl": "/Shop/rest-31.jpg",
+    "photoUrl": "/foods/food-92.jpg",
     "galleryPhotos": [
       "/foods/food-92.jpg",
       "/foods/food-80.jpg"
@@ -3744,7 +3744,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Green Garden Traditional Khmer Restaurant (Kandal)",
     "descriptionKh": "ភោជនីយដ្ឋានសួនធម្មជាតិធំទូលាយ ស័ក្តិសមសម្រាប់គ្រួសារ និងភ្ញៀវទេសចរ ពិសាម្ហូបខ្មែរប្រចាំតំបន់ និងបន្លែធម្មជាតិស្រស់ៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកណ្តាល ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Spacious garden restaurant popular with families and travelers for authentic regional Cambodian dishes and fresh local produce. Conveniently located in Kandal, Cambodia.",
-    "photoUrl": "/Shop/rest-31.jpg",
+    "photoUrl": "/foods/food-95.jpg",
     "galleryPhotos": [
       "/foods/food-95.jpg",
       "/foods/food-87.jpg"
@@ -3782,7 +3782,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Green Garden Traditional Khmer Restaurant (Takeo)",
     "descriptionKh": "ភោជនីយដ្ឋានសួនធម្មជាតិធំទូលាយ ស័ក្តិសមសម្រាប់គ្រួសារ និងភ្ញៀវទេសចរ ពិសាម្ហូបខ្មែរប្រចាំតំបន់ និងបន្លែធម្មជាតិស្រស់ៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តតាកែវ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Spacious garden restaurant popular with families and travelers for authentic regional Cambodian dishes and fresh local produce. Conveniently located in Takeo, Cambodia.",
-    "photoUrl": "/Shop/rest-31.jpg",
+    "photoUrl": "/foods/food-98.jpg",
     "galleryPhotos": [
       "/foods/food-98.jpg",
       "/foods/food-94.jpg"
@@ -3821,7 +3821,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Green Garden Traditional Khmer Restaurant (Pursat)",
     "descriptionKh": "ភោជនីយដ្ឋានសួនធម្មជាតិធំទូលាយ ស័ក្តិសមសម្រាប់គ្រួសារ និងភ្ញៀវទេសចរ ពិសាម្ហូបខ្មែរប្រចាំតំបន់ និងបន្លែធម្មជាតិស្រស់ៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តពោធិ៍សាត់ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Spacious garden restaurant popular with families and travelers for authentic regional Cambodian dishes and fresh local produce. Conveniently located in Pursat, Cambodia.",
-    "photoUrl": "/Shop/rest-31.jpg",
+    "photoUrl": "/foods/food-1.jpg",
     "galleryPhotos": [
       "/foods/food-1.jpg",
       "/foods/food-1.jpg"
@@ -3860,7 +3860,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Green Garden Traditional Khmer Restaurant (Kampong Thom)",
     "descriptionKh": "ភោជនីយដ្ឋានសួនធម្មជាតិធំទូលាយ ស័ក្តិសមសម្រាប់គ្រួសារ និងភ្ញៀវទេសចរ ពិសាម្ហូបខ្មែរប្រចាំតំបន់ និងបន្លែធម្មជាតិស្រស់ៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ធំ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Spacious garden restaurant popular with families and travelers for authentic regional Cambodian dishes and fresh local produce. Conveniently located in Kampong Thom, Cambodia.",
-    "photoUrl": "/Shop/rest-31.jpg",
+    "photoUrl": "/foods/food-4.jpg",
     "galleryPhotos": [
       "/foods/food-4.jpg",
       "/foods/food-8.jpg"
@@ -3899,7 +3899,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Green Garden Traditional Khmer Restaurant (Kampong Chhnang)",
     "descriptionKh": "ភោជនីយដ្ឋានសួនធម្មជាតិធំទូលាយ ស័ក្តិសមសម្រាប់គ្រួសារ និងភ្ញៀវទេសចរ ពិសាម្ហូបខ្មែរប្រចាំតំបន់ និងបន្លែធម្មជាតិស្រស់ៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ឆ្នាំង ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Spacious garden restaurant popular with families and travelers for authentic regional Cambodian dishes and fresh local produce. Conveniently located in Kampong Chhnang, Cambodia.",
-    "photoUrl": "/Shop/rest-31.jpg",
+    "photoUrl": "/foods/food-7.jpg",
     "galleryPhotos": [
       "/foods/food-7.jpg",
       "/foods/food-15.jpg"
@@ -3938,7 +3938,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Koh Kong Bridge Riverview Seafood Restaurant",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ព្រែកក្រុងខេមរភូមិន្ទ គយគន់ថ្ងៃលិចលើស្ពានកោះកុង និងពិសាអាហារសមុទ្រស្រស់ៗ។",
     "descriptionEn": "Breezy riverfront restaurant in Khemara Phoumin City overlooking Koh Kong Bridge, serving fresh coastal cuisine.",
-    "photoUrl": "/Shop/rest-30.jpg",
+    "photoUrl": "/foods/food-10.jpg",
     "galleryPhotos": [
       "/foods/food-10.jpg",
       "/foods/food-22.jpg"
@@ -3977,7 +3977,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Bousra Waterfall Highland Kitchen Mondulkiri",
     "descriptionKh": "ភោជនីយដ្ឋានក្បែរទឹកធ្លាក់ប៊ូស្រា បម្រើអាហារថ្ងៃត្រង់សម្រាប់ភ្ញៀវទេសចរ មានត្រីអាំង មាន់ស្រែដុត និងសម្លម្ជូរព្រៃ។",
     "descriptionEn": "Highland pavilion near Bousra Waterfall serving charcoal-grilled country chicken, river fish, and organic mountain vegetables.",
-    "photoUrl": "/Shop/rest-29.jpg",
+    "photoUrl": "/foods/food-13.jpg",
     "galleryPhotos": [
       "/foods/food-13.jpg",
       "/foods/food-29.jpg"
@@ -4016,7 +4016,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Red Soil Highland Coffee Roastery Banlung",
     "descriptionKh": "ហាងកាហ្វេឆុងពីគ្រាប់កាហ្វេដាំលើដីក្រហមភ្នំភ្លើងខេត្តរតនគិរី រសជាតិដិតឈ្ងុយឆ្ងាញ់ អមដោយអាហារពេលព្រឹក។",
     "descriptionEn": "Local roastery serving volcanic red-soil Ratanakiri coffee, avocado shakes, and hearty Cambodian breakfast dishes.",
-    "photoUrl": "/Shop/rest-34.jpg",
+    "photoUrl": "/foods/food-16.jpg",
     "galleryPhotos": [
       "/foods/food-16.jpg",
       "/foods/food-36.jpg"
@@ -4054,7 +4054,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Green Garden Traditional Khmer Restaurant (Kratie)",
     "descriptionKh": "ភោជនីយដ្ឋានសួនធម្មជាតិធំទូលាយ ស័ក្តិសមសម្រាប់គ្រួសារ និងភ្ញៀវទេសចរ ពិសាម្ហូបខ្មែរប្រចាំតំបន់ និងបន្លែធម្មជាតិស្រស់ៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តក្រចេះ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Spacious garden restaurant popular with families and travelers for authentic regional Cambodian dishes and fresh local produce. Conveniently located in Kratie, Cambodia.",
-    "photoUrl": "/Shop/rest-31.jpg",
+    "photoUrl": "/foods/food-19.jpg",
     "galleryPhotos": [
       "/foods/food-19.jpg",
       "/foods/food-43.jpg"
@@ -4093,7 +4093,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Green Garden Traditional Khmer Restaurant (Stung Treng)",
     "descriptionKh": "ភោជនីយដ្ឋានសួនធម្មជាតិធំទូលាយ ស័ក្តិសមសម្រាប់គ្រួសារ និងភ្ញៀវទេសចរ ពិសាម្ហូបខ្មែរប្រចាំតំបន់ និងបន្លែធម្មជាតិស្រស់ៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តស្ទឹងត្រែង ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Spacious garden restaurant popular with families and travelers for authentic regional Cambodian dishes and fresh local produce. Conveniently located in Stung Treng, Cambodia.",
-    "photoUrl": "/Shop/rest-31.jpg",
+    "photoUrl": "/foods/food-22.jpg",
     "galleryPhotos": [
       "/foods/food-22.jpg",
       "/foods/food-50.jpg"
@@ -4132,7 +4132,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Green Garden Traditional Khmer Restaurant (Preah Vihear)",
     "descriptionKh": "ភោជនីយដ្ឋានសួនធម្មជាតិធំទូលាយ ស័ក្តិសមសម្រាប់គ្រួសារ និងភ្ញៀវទេសចរ ពិសាម្ហូបខ្មែរប្រចាំតំបន់ និងបន្លែធម្មជាតិស្រស់ៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តព្រះវិហារ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Spacious garden restaurant popular with families and travelers for authentic regional Cambodian dishes and fresh local produce. Conveniently located in Preah Vihear, Cambodia.",
-    "photoUrl": "/Shop/rest-31.jpg",
+    "photoUrl": "/foods/food-25.jpg",
     "galleryPhotos": [
       "/foods/food-25.jpg",
       "/foods/food-57.jpg"
@@ -4171,7 +4171,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Green Garden Traditional Khmer Restaurant (Banteay Meanchey)",
     "descriptionKh": "ភោជនីយដ្ឋានសួនធម្មជាតិធំទូលាយ ស័ក្តិសមសម្រាប់គ្រួសារ និងភ្ញៀវទេសចរ ពិសាម្ហូបខ្មែរប្រចាំតំបន់ និងបន្លែធម្មជាតិស្រស់ៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តបន្ទាយមានជ័យ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Spacious garden restaurant popular with families and travelers for authentic regional Cambodian dishes and fresh local produce. Conveniently located in Banteay Meanchey, Cambodia.",
-    "photoUrl": "/Shop/rest-31.jpg",
+    "photoUrl": "/foods/food-28.jpg",
     "galleryPhotos": [
       "/foods/food-28.jpg",
       "/foods/food-64.jpg"
@@ -4210,7 +4210,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Green Garden Traditional Khmer Restaurant (Oddar Meanchey)",
     "descriptionKh": "ភោជនីយដ្ឋានសួនធម្មជាតិធំទូលាយ ស័ក្តិសមសម្រាប់គ្រួសារ និងភ្ញៀវទេសចរ ពិសាម្ហូបខ្មែរប្រចាំតំបន់ និងបន្លែធម្មជាតិស្រស់ៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តឧត្តរមានជ័យ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Spacious garden restaurant popular with families and travelers for authentic regional Cambodian dishes and fresh local produce. Conveniently located in Oddar Meanchey, Cambodia.",
-    "photoUrl": "/Shop/rest-31.jpg",
+    "photoUrl": "/foods/food-31.jpg",
     "galleryPhotos": [
       "/foods/food-31.jpg",
       "/foods/food-71.jpg"
@@ -4249,7 +4249,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Green Garden Traditional Khmer Restaurant (Pailin)",
     "descriptionKh": "ភោជនីយដ្ឋានសួនធម្មជាតិធំទូលាយ ស័ក្តិសមសម្រាប់គ្រួសារ និងភ្ញៀវទេសចរ ពិសាម្ហូបខ្មែរប្រចាំតំបន់ និងបន្លែធម្មជាតិស្រស់ៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តប៉ៃលិន ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Spacious garden restaurant popular with families and travelers for authentic regional Cambodian dishes and fresh local produce. Conveniently located in Pailin, Cambodia.",
-    "photoUrl": "/Shop/rest-31.jpg",
+    "photoUrl": "/foods/food-34.jpg",
     "galleryPhotos": [
       "/foods/food-34.jpg",
       "/foods/food-78.jpg"
@@ -4288,7 +4288,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Green Garden Traditional Khmer Restaurant (Prey Veng)",
     "descriptionKh": "ភោជនីយដ្ឋានសួនធម្មជាតិធំទូលាយ ស័ក្តិសមសម្រាប់គ្រួសារ និងភ្ញៀវទេសចរ ពិសាម្ហូបខ្មែរប្រចាំតំបន់ និងបន្លែធម្មជាតិស្រស់ៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តព្រៃវែង ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Spacious garden restaurant popular with families and travelers for authentic regional Cambodian dishes and fresh local produce. Conveniently located in Prey Veng, Cambodia.",
-    "photoUrl": "/Shop/rest-31.jpg",
+    "photoUrl": "/foods/food-37.jpg",
     "galleryPhotos": [
       "/foods/food-37.jpg",
       "/foods/food-85.jpg"
@@ -4326,7 +4326,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Green Garden Traditional Khmer Restaurant (Svay Rieng)",
     "descriptionKh": "ភោជនីយដ្ឋានសួនធម្មជាតិធំទូលាយ ស័ក្តិសមសម្រាប់គ្រួសារ និងភ្ញៀវទេសចរ ពិសាម្ហូបខ្មែរប្រចាំតំបន់ និងបន្លែធម្មជាតិស្រស់ៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តស្វាយរៀង ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Spacious garden restaurant popular with families and travelers for authentic regional Cambodian dishes and fresh local produce. Conveniently located in Svay Rieng, Cambodia.",
-    "photoUrl": "/Shop/rest-31.jpg",
+    "photoUrl": "/foods/food-40.jpg",
     "galleryPhotos": [
       "/foods/food-40.jpg",
       "/foods/food-92.jpg"
@@ -4365,7 +4365,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Green Garden Traditional Khmer Restaurant (Kampong Speu)",
     "descriptionKh": "ភោជនីយដ្ឋានសួនធម្មជាតិធំទូលាយ ស័ក្តិសមសម្រាប់គ្រួសារ និងភ្ញៀវទេសចរ ពិសាម្ហូបខ្មែរប្រចាំតំបន់ និងបន្លែធម្មជាតិស្រស់ៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ស្ពឺ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Spacious garden restaurant popular with families and travelers for authentic regional Cambodian dishes and fresh local produce. Conveniently located in Kampong Speu, Cambodia.",
-    "photoUrl": "/Shop/rest-31.jpg",
+    "photoUrl": "/foods/food-43.jpg",
     "galleryPhotos": [
       "/foods/food-43.jpg",
       "/foods/food-99.jpg"
@@ -4404,7 +4404,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Green Garden Traditional Khmer Restaurant (Tboung Khmum)",
     "descriptionKh": "ភោជនីយដ្ឋានសួនធម្មជាតិធំទូលាយ ស័ក្តិសមសម្រាប់គ្រួសារ និងភ្ញៀវទេសចរ ពិសាម្ហូបខ្មែរប្រចាំតំបន់ និងបន្លែធម្មជាតិស្រស់ៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តត្បូងឃ្មុំ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Spacious garden restaurant popular with families and travelers for authentic regional Cambodian dishes and fresh local produce. Conveniently located in Tboung Khmum, Cambodia.",
-    "photoUrl": "/Shop/rest-31.jpg",
+    "photoUrl": "/foods/food-46.jpg",
     "galleryPhotos": [
       "/foods/food-46.jpg",
       "/foods/food-6.jpg"
@@ -4443,7 +4443,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Mlop Tnot Khmer Kitchen Tuol Tompoung",
     "descriptionKh": "ហាងម្ហូបខ្មែររសជាតិអ្នកស្រុក ស្ថិតនៅតំបន់ទួលទំពូង បម្រើសម្លខ្មែរ ប្រហុកខ្ទិះ ទឹកគ្រឿង និងអន្លក់ស្រស់ៗ។",
     "descriptionEn": "Cozy neighborhood Khmer kitchen in Tuol Tompoung serving homestyle tuk kreung, prahok ktis, and countryside soups.",
-    "photoUrl": "/Shop/rest-4.jpg",
+    "photoUrl": "/foods/food-49.jpg",
     "galleryPhotos": [
       "/foods/food-49.jpg",
       "/foods/food-13.jpg"
@@ -4482,7 +4482,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Preah Dak Authentic Num Banh Chok Village House",
     "descriptionKh": "ភូមិធ្វើនំបញ្ចុកដ៏ល្បីល្បាញបំផុតនៅខេត្តសៀមរាប បម្រើនំបញ្ចុកសម្លខ្មែរ សម្លការី ទឹកប្រហុក និងនំអាកោត្នោតក្តៅៗ។",
     "descriptionEn": "Famous traditional noodle-making village on the road to Banteay Srei serving freshly pressed Num Banh Chok and palm cakes.",
-    "photoUrl": "/Shop/rest-14.jpg",
+    "photoUrl": "/foods/food-52.jpg",
     "galleryPhotos": [
       "/foods/food-52.jpg",
       "/foods/food-20.jpg"
@@ -4521,7 +4521,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Kinyei Specialty Cafe & Roastery Battambang",
     "descriptionKh": "ហាងកាហ្វេដ៏ល្បីល្បាញក្នុងអគារបុរាណក្រុងបាត់ដំបង ឆុងកាហ្វេឈ្ងុយឆ្ងាញ់ដោយយុវជនជំនាញ អមដោយនំដុត និងអាហារសម្រន់។",
     "descriptionEn": "Award-winning specialty coffee shop in Battambang historic quarter serving artisan espresso, pastries, and light meals.",
-    "photoUrl": "/Shop/rest-25.jpg",
+    "photoUrl": "/foods/food-55.jpg",
     "galleryPhotos": [
       "/foods/food-55.jpg",
       "/foods/food-27.jpg"
@@ -4560,7 +4560,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Teuk Chhou Rapids Riverside Pavilion Kampot",
     "descriptionKh": "កញ្ចុះអាហារមាត់ទឹកហូរទឹកឈូដ៏ត្រជាក់ចិត្ត ល្បីខាងមាន់ស្រែដុត ត្រីអាំង ភ្លាសាច់គោ និងផ្លែទុរេនកំពតធម្មជាតិ។",
     "descriptionEn": "Waterside dining huts along the cool Teuk Chhou rapids serving roasted country chicken, grilled river fish, and local fruits.",
-    "photoUrl": "/Shop/rest-22.jpg",
+    "photoUrl": "/foods/food-58.jpg",
     "galleryPhotos": [
       "/foods/food-58.jpg",
       "/foods/food-34.jpg"
@@ -4598,7 +4598,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Led Zep Mountain View Cafe Kep",
     "descriptionKh": "ហាងកាហ្វេលើចង្កេះភ្នំឧទ្យានជាតិកែប គយគន់ទេសភាពសមុទ្រកែបពីលើភ្នំ ជាមួយកាហ្វេឈ្ងុយឆ្ងាញ់ និងនំដុត។",
     "descriptionEn": "Hillside cafe at the entrance of Kep National Park offering panoramic ocean views, specialty coffee, and homemade cakes.",
-    "photoUrl": "/Shop/rest-19.jpg",
+    "photoUrl": "/foods/food-61.jpg",
     "galleryPhotos": [
       "/foods/food-61.jpg",
       "/foods/food-41.jpg"
@@ -4637,7 +4637,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Otres Beach Fresh Seafood & Sunset Grill",
     "descriptionKh": "ហាងអាហារមាត់ឆ្នេរអូរត្រេះ ល្បីខាងគ្រឿងសមុទ្រអាំងធ្យូង ក្តាមថ្ម អอยស្ទ័រស្រស់ និងភេសជ្ជៈត្រជាក់ៗក្រោមខ្យល់សមុទ្រ។",
     "descriptionEn": "Laid-back beachfront grill on Otres Beach famous for BBQ seafood skewers, fresh oysters, and traditional Khmer coastal dishes.",
-    "photoUrl": "/Shop/rest-20.jpg",
+    "photoUrl": "/foods/food-64.jpg",
     "galleryPhotos": [
       "/foods/food-64.jpg",
       "/foods/food-48.jpg"
@@ -4676,7 +4676,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Countryside BBQ & Family Grill (Kampong Cham)",
     "descriptionKh": "ហាងសាច់អាំង និងអាហារពេលល្ងាចដ៏ពេញនិយម មានសាច់គោអាំងទឹកប្រហុក ត្រីអាំងអំបិលម្ទេស និងស៊ុបឆ្នាំងភ្លើងក្តៅៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ចាម ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Lively evening dining spot famous for marinated beef skewers with tuk prahok, grilled fish, and hotpot. Conveniently located in Kampong Cham, Cambodia.",
-    "photoUrl": "/Shop/rest-32.jpg",
+    "photoUrl": "/foods/food-67.jpg",
     "galleryPhotos": [
       "/foods/food-67.jpg",
       "/foods/food-55.jpg"
@@ -4715,7 +4715,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Countryside BBQ & Family Grill (Kandal)",
     "descriptionKh": "ហាងសាច់អាំង និងអាហារពេលល្ងាចដ៏ពេញនិយម មានសាច់គោអាំងទឹកប្រហុក ត្រីអាំងអំបិលម្ទេស និងស៊ុបឆ្នាំងភ្លើងក្តៅៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកណ្តាល ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Lively evening dining spot famous for marinated beef skewers with tuk prahok, grilled fish, and hotpot. Conveniently located in Kandal, Cambodia.",
-    "photoUrl": "/Shop/rest-32.jpg",
+    "photoUrl": "/foods/food-70.jpg",
     "galleryPhotos": [
       "/foods/food-70.jpg",
       "/foods/food-62.jpg"
@@ -4754,7 +4754,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Countryside BBQ & Family Grill (Takeo)",
     "descriptionKh": "ហាងសាច់អាំង និងអាហារពេលល្ងាចដ៏ពេញនិយម មានសាច់គោអាំងទឹកប្រហុក ត្រីអាំងអំបិលម្ទេស និងស៊ុបឆ្នាំងភ្លើងក្តៅៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តតាកែវ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Lively evening dining spot famous for marinated beef skewers with tuk prahok, grilled fish, and hotpot. Conveniently located in Takeo, Cambodia.",
-    "photoUrl": "/Shop/rest-32.jpg",
+    "photoUrl": "/foods/food-73.jpg",
     "galleryPhotos": [
       "/foods/food-73.jpg",
       "/foods/food-69.jpg"
@@ -4793,7 +4793,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Countryside BBQ & Family Grill (Pursat)",
     "descriptionKh": "ហាងសាច់អាំង និងអាហារពេលល្ងាចដ៏ពេញនិយម មានសាច់គោអាំងទឹកប្រហុក ត្រីអាំងអំបិលម្ទេស និងស៊ុបឆ្នាំងភ្លើងក្តៅៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តពោធិ៍សាត់ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Lively evening dining spot famous for marinated beef skewers with tuk prahok, grilled fish, and hotpot. Conveniently located in Pursat, Cambodia.",
-    "photoUrl": "/Shop/rest-32.jpg",
+    "photoUrl": "/foods/food-76.jpg",
     "galleryPhotos": [
       "/foods/food-76.jpg",
       "/foods/food-76.jpg"
@@ -4832,7 +4832,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Countryside BBQ & Family Grill (Kampong Thom)",
     "descriptionKh": "ហាងសាច់អាំង និងអាហារពេលល្ងាចដ៏ពេញនិយម មានសាច់គោអាំងទឹកប្រហុក ត្រីអាំងអំបិលម្ទេស និងស៊ុបឆ្នាំងភ្លើងក្តៅៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ធំ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Lively evening dining spot famous for marinated beef skewers with tuk prahok, grilled fish, and hotpot. Conveniently located in Kampong Thom, Cambodia.",
-    "photoUrl": "/Shop/rest-32.jpg",
+    "photoUrl": "/foods/food-79.jpg",
     "galleryPhotos": [
       "/foods/food-79.jpg",
       "/foods/food-83.jpg"
@@ -4870,7 +4870,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Countryside BBQ & Family Grill (Kampong Chhnang)",
     "descriptionKh": "ហាងសាច់អាំង និងអាហារពេលល្ងាចដ៏ពេញនិយម មានសាច់គោអាំងទឹកប្រហុក ត្រីអាំងអំបិលម្ទេស និងស៊ុបឆ្នាំងភ្លើងក្តៅៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ឆ្នាំង ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Lively evening dining spot famous for marinated beef skewers with tuk prahok, grilled fish, and hotpot. Conveniently located in Kampong Chhnang, Cambodia.",
-    "photoUrl": "/Shop/rest-32.jpg",
+    "photoUrl": "/foods/food-82.jpg",
     "galleryPhotos": [
       "/foods/food-82.jpg",
       "/foods/food-90.jpg"
@@ -4909,7 +4909,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Khemara Phoumin Seafood Noodle & Morning Kitchen",
     "descriptionKh": "ហាងអាហារពេលព្រឹក និងថ្ងៃត្រង់ក្បែរផ្សារដងទង់ មានគុយទាវគ្រឿងសមុទ្រ បាយឆាក្តាម និងបាយសាច់ជ្រូកអាំង។",
     "descriptionEn": "Popular local breakfast and lunch house near Dong Tong Market serving rich seafood kuyteav and crab fried rice.",
-    "photoUrl": "/Shop/rest-30.jpg",
+    "photoUrl": "/foods/food-85.jpg",
     "galleryPhotos": [
       "/foods/food-85.jpg",
       "/foods/food-97.jpg"
@@ -4948,7 +4948,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Sen Monorom Mountain Breeze Dining",
     "descriptionKh": "ភោជនីយដ្ឋានបរិយាកាសត្រជាក់ក្នុងក្រុងសែនមនោរម្យ ល្បីខាងស៊ុបឆ្នាំងភ្លើងក្តៅៗ សាច់គោអាំង និងម្ហូបខ្មែរគ្រួសារ។",
     "descriptionEn": "Cozy highland restaurant in Sen Monorom popular for steaming evening hotpots, grilled beef, and homestyle Khmer dishes.",
-    "photoUrl": "/Shop/rest-29.jpg",
+    "photoUrl": "/foods/food-88.jpg",
     "galleryPhotos": [
       "/foods/food-88.jpg",
       "/foods/food-4.jpg"
@@ -4987,7 +4987,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Kachanh Waterfall Garden Kitchen Ratanakiri",
     "descriptionKh": "ហាងអាហារធម្មជាតិជិតទឹកធ្លាក់កាចាញ បម្រើមាន់ដុត ត្រីអាំង ភ្លាសាច់គោ និងបន្លែព្រៃស្រស់ៗប្រចាំខេត្តរតនគិរី។",
     "descriptionEn": "Garden kitchen near Kachanh Waterfall serving roasted country chicken, grilled river fish, and wild forest greens.",
-    "photoUrl": "/Shop/rest-34.jpg",
+    "photoUrl": "/foods/food-91.jpg",
     "galleryPhotos": [
       "/foods/food-91.jpg",
       "/foods/food-11.jpg"
@@ -5026,7 +5026,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Countryside BBQ & Family Grill (Kratie)",
     "descriptionKh": "ហាងសាច់អាំង និងអាហារពេលល្ងាចដ៏ពេញនិយម មានសាច់គោអាំងទឹកប្រហុក ត្រីអាំងអំបិលម្ទេស និងស៊ុបឆ្នាំងភ្លើងក្តៅៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តក្រចេះ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Lively evening dining spot famous for marinated beef skewers with tuk prahok, grilled fish, and hotpot. Conveniently located in Kratie, Cambodia.",
-    "photoUrl": "/Shop/rest-32.jpg",
+    "photoUrl": "/foods/food-94.jpg",
     "galleryPhotos": [
       "/foods/food-94.jpg",
       "/foods/food-18.jpg"
@@ -5065,7 +5065,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Countryside BBQ & Family Grill (Stung Treng)",
     "descriptionKh": "ហាងសាច់អាំង និងអាហារពេលល្ងាចដ៏ពេញនិយម មានសាច់គោអាំងទឹកប្រហុក ត្រីអាំងអំបិលម្ទេស និងស៊ុបឆ្នាំងភ្លើងក្តៅៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តស្ទឹងត្រែង ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Lively evening dining spot famous for marinated beef skewers with tuk prahok, grilled fish, and hotpot. Conveniently located in Stung Treng, Cambodia.",
-    "photoUrl": "/Shop/rest-32.jpg",
+    "photoUrl": "/foods/food-97.jpg",
     "galleryPhotos": [
       "/foods/food-97.jpg",
       "/foods/food-25.jpg"
@@ -5104,7 +5104,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Countryside BBQ & Family Grill (Preah Vihear)",
     "descriptionKh": "ហាងសាច់អាំង និងអាហារពេលល្ងាចដ៏ពេញនិយម មានសាច់គោអាំងទឹកប្រហុក ត្រីអាំងអំបិលម្ទេស និងស៊ុបឆ្នាំងភ្លើងក្តៅៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តព្រះវិហារ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Lively evening dining spot famous for marinated beef skewers with tuk prahok, grilled fish, and hotpot. Conveniently located in Preah Vihear, Cambodia.",
-    "photoUrl": "/Shop/rest-32.jpg",
+    "photoUrl": "/foods/food-100.jpg",
     "galleryPhotos": [
       "/foods/food-100.jpg",
       "/foods/food-32.jpg"
@@ -5142,7 +5142,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Countryside BBQ & Family Grill (Banteay Meanchey)",
     "descriptionKh": "ហាងសាច់អាំង និងអាហារពេលល្ងាចដ៏ពេញនិយម មានសាច់គោអាំងទឹកប្រហុក ត្រីអាំងអំបិលម្ទេស និងស៊ុបឆ្នាំងភ្លើងក្តៅៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តបន្ទាយមានជ័យ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Lively evening dining spot famous for marinated beef skewers with tuk prahok, grilled fish, and hotpot. Conveniently located in Banteay Meanchey, Cambodia.",
-    "photoUrl": "/Shop/rest-32.jpg",
+    "photoUrl": "/foods/food-3.jpg",
     "galleryPhotos": [
       "/foods/food-3.jpg",
       "/foods/food-39.jpg"
@@ -5181,7 +5181,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Countryside BBQ & Family Grill (Oddar Meanchey)",
     "descriptionKh": "ហាងសាច់អាំង និងអាហារពេលល្ងាចដ៏ពេញនិយម មានសាច់គោអាំងទឹកប្រហុក ត្រីអាំងអំបិលម្ទេស និងស៊ុបឆ្នាំងភ្លើងក្តៅៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តឧត្តរមានជ័យ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Lively evening dining spot famous for marinated beef skewers with tuk prahok, grilled fish, and hotpot. Conveniently located in Oddar Meanchey, Cambodia.",
-    "photoUrl": "/Shop/rest-32.jpg",
+    "photoUrl": "/foods/food-6.jpg",
     "galleryPhotos": [
       "/foods/food-6.jpg",
       "/foods/food-46.jpg"
@@ -5220,7 +5220,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Countryside BBQ & Family Grill (Pailin)",
     "descriptionKh": "ហាងសាច់អាំង និងអាហារពេលល្ងាចដ៏ពេញនិយម មានសាច់គោអាំងទឹកប្រហុក ត្រីអាំងអំបិលម្ទេស និងស៊ុបឆ្នាំងភ្លើងក្តៅៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តប៉ៃលិន ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Lively evening dining spot famous for marinated beef skewers with tuk prahok, grilled fish, and hotpot. Conveniently located in Pailin, Cambodia.",
-    "photoUrl": "/Shop/rest-32.jpg",
+    "photoUrl": "/foods/food-9.jpg",
     "galleryPhotos": [
       "/foods/food-9.jpg",
       "/foods/food-53.jpg"
@@ -5259,7 +5259,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Countryside BBQ & Family Grill (Prey Veng)",
     "descriptionKh": "ហាងសាច់អាំង និងអាហារពេលល្ងាចដ៏ពេញនិយម មានសាច់គោអាំងទឹកប្រហុក ត្រីអាំងអំបិលម្ទេស និងស៊ុបឆ្នាំងភ្លើងក្តៅៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តព្រៃវែង ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Lively evening dining spot famous for marinated beef skewers with tuk prahok, grilled fish, and hotpot. Conveniently located in Prey Veng, Cambodia.",
-    "photoUrl": "/Shop/rest-32.jpg",
+    "photoUrl": "/foods/food-12.jpg",
     "galleryPhotos": [
       "/foods/food-12.jpg",
       "/foods/food-60.jpg"
@@ -5298,7 +5298,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Countryside BBQ & Family Grill (Svay Rieng)",
     "descriptionKh": "ហាងសាច់អាំង និងអាហារពេលល្ងាចដ៏ពេញនិយម មានសាច់គោអាំងទឹកប្រហុក ត្រីអាំងអំបិលម្ទេស និងស៊ុបឆ្នាំងភ្លើងក្តៅៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តស្វាយរៀង ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Lively evening dining spot famous for marinated beef skewers with tuk prahok, grilled fish, and hotpot. Conveniently located in Svay Rieng, Cambodia.",
-    "photoUrl": "/Shop/rest-32.jpg",
+    "photoUrl": "/foods/food-15.jpg",
     "galleryPhotos": [
       "/foods/food-15.jpg",
       "/foods/food-67.jpg"
@@ -5337,7 +5337,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Countryside BBQ & Family Grill (Kampong Speu)",
     "descriptionKh": "ហាងសាច់អាំង និងអាហារពេលល្ងាចដ៏ពេញនិយម មានសាច់គោអាំងទឹកប្រហុក ត្រីអាំងអំបិលម្ទេស និងស៊ុបឆ្នាំងភ្លើងក្តៅៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ស្ពឺ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Lively evening dining spot famous for marinated beef skewers with tuk prahok, grilled fish, and hotpot. Conveniently located in Kampong Speu, Cambodia.",
-    "photoUrl": "/Shop/rest-32.jpg",
+    "photoUrl": "/foods/food-18.jpg",
     "galleryPhotos": [
       "/foods/food-18.jpg",
       "/foods/food-74.jpg"
@@ -5376,7 +5376,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Countryside BBQ & Family Grill (Tboung Khmum)",
     "descriptionKh": "ហាងសាច់អាំង និងអាហារពេលល្ងាចដ៏ពេញនិយម មានសាច់គោអាំងទឹកប្រហុក ត្រីអាំងអំបិលម្ទេស និងស៊ុបឆ្នាំងភ្លើងក្តៅៗ។ មានទីតាំងស្ថិតនៅក្នុងខេត្តត្បូងឃ្មុំ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Lively evening dining spot famous for marinated beef skewers with tuk prahok, grilled fish, and hotpot. Conveniently located in Tboung Khmum, Cambodia.",
-    "photoUrl": "/Shop/rest-32.jpg",
+    "photoUrl": "/foods/food-21.jpg",
     "galleryPhotos": [
       "/foods/food-21.jpg",
       "/foods/food-81.jpg"
@@ -5414,7 +5414,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Chroy Changvar Mekong Breeze Restaurant",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ទន្លេមេគង្គត្រើយជ្រោយចង្វារ គយគន់ទេសភាពព្រះបរមរាជវាំង និងទីក្រុងភ្នំពេញនាពេលរាត្រី។",
     "descriptionEn": "Scenic Mekong riverfront dining in Chroy Changvar offering panoramic skyline views and authentic Cambodian river fish dishes.",
-    "photoUrl": "/Shop/rest-10.jpg",
+    "photoUrl": "/foods/food-24.jpg",
     "galleryPhotos": [
       "/foods/food-24.jpg",
       "/foods/food-88.jpg"
@@ -5453,7 +5453,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Lum Orng Farm to Table Restaurant Siem Reap",
     "descriptionKh": "ភោជនីយដ្ឋានបែបធម្មជាតិ ប្រើប្រាស់បន្លែសរីរាង្គដាំដុះផ្ទាល់ក្នុងសួន និងគ្រឿងផ្សំស្រស់ៗពីកសិករក្នុងខេត្តសៀមរាប។",
     "descriptionEn": "Farm-to-table garden restaurant showcasing seasonal organic produce and authentic Siem Reap culinary traditions.",
-    "photoUrl": "/Shop/rest-15.jpg",
+    "photoUrl": "/foods/food-27.jpg",
     "galleryPhotos": [
       "/foods/food-27.jpg",
       "/foods/food-95.jpg"
@@ -5492,7 +5492,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Battambang Traditional Fish Noodle & Nem Garden",
     "descriptionKh": "អាហារដ្ឋានក្នុងភូមិវប្បធម៌វត្តគរ បម្រើនំបញ្ចុកទឹកសម្លខ្មែរ មីកូឡា ណែមត្រីបាត់ដំបង និងក្រឡានថ្មគោល។",
     "descriptionEn": "Garden eatery in historic Wat Kor village serving Battambang Kola noodles, fish spring rolls, and traditional Num Banh Chok.",
-    "photoUrl": "/Shop/rest-24.jpg",
+    "photoUrl": "/foods/food-30.jpg",
     "galleryPhotos": [
       "/foods/food-30.jpg",
       "/foods/food-2.jpg"
@@ -5531,7 +5531,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Kampot Traditional Fish Soup Noodle House",
     "descriptionKh": "ហាងនំបញ្ចុកទឹកម្ហេចប្រចាំខេត្តកំពត រសជាតិដើមធ្វើពីត្រីសមុទ្រស្រស់ៗ ថែមបន្លែស្រស់ និងត្រីឆ្អើរឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Authentic Kampot specialty stall serving traditional Num Banh Chok Teuk Mhech (clear coastal fish broth rice noodles).",
-    "photoUrl": "/Shop/rest-21.jpg",
+    "photoUrl": "/foods/food-33.jpg",
     "galleryPhotos": [
       "/foods/food-33.jpg",
       "/foods/food-9.jpg"
@@ -5570,7 +5570,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Koh Tonsay Rabbit Island Seafood Grill Kep",
     "descriptionKh": "ហាងអាហារសមុទ្រជិតកំពង់ផែកោះទន្សាយ បម្រើត្រីអាំង ក្តាមស្រុស បង្គាអាំង និងម្ហូបខ្មែររសជាតិដើម។",
     "descriptionEn": "Coastal seafood grill near the Rabbit Island boat pier serving charcoal-grilled fish, steamed crab, and spicy dipping sauces.",
-    "photoUrl": "/Shop/rest-20.jpg",
+    "photoUrl": "/foods/food-36.jpg",
     "galleryPhotos": [
       "/foods/food-36.jpg",
       "/foods/food-16.jpg"
@@ -5609,7 +5609,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Mlop Chrey Authentic Khmer Kitchen Sihanoukville",
     "descriptionKh": "អាហារដ្ឋានម្ហូបខ្មែរប្រចាំថ្ងៃសម្រាប់គ្រួសារ និងអ្នកដំណើរ បម្រើបាយថ្ងៃត្រង់ សម្លកកូរ សម្លម្ជូរព្រៃ និងត្រីចៀនជួន។",
     "descriptionEn": "Beloved local family kitchen near the Golden Lions Roundabout serving traditional Khmer lunch sets, countryside soups, and fried fish.",
-    "photoUrl": "/Shop/rest-24.jpg",
+    "photoUrl": "/foods/food-39.jpg",
     "galleryPhotos": [
       "/foods/food-39.jpg",
       "/foods/food-23.jpg"
@@ -5648,7 +5648,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Traditional Num Banh Chok & Khmer Sweets (Kampong Cham)",
     "descriptionKh": "អាហារដ្ឋានបុរាណបម្រើនំបញ្ចុកសម្លខ្មែរ សម្លការី បាញ់ឆែវ និងបង្អែមខ្មែរស្ករត្នោតឈ្ងុយឆ្ងាញ់ប្រចាំតំបន់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ចាម ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Traditional local eatery serving fresh rice noodles with green fish gravy, crispy banh chao, and palm sugar desserts. Conveniently located in Kampong Cham, Cambodia.",
-    "photoUrl": "/Shop/rest-33.jpg",
+    "photoUrl": "/foods/food-42.jpg",
     "galleryPhotos": [
       "/foods/food-42.jpg",
       "/foods/food-30.jpg"
@@ -5686,7 +5686,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Traditional Num Banh Chok & Khmer Sweets (Kandal)",
     "descriptionKh": "អាហារដ្ឋានបុរាណបម្រើនំបញ្ចុកសម្លខ្មែរ សម្លការី បាញ់ឆែវ និងបង្អែមខ្មែរស្ករត្នោតឈ្ងុយឆ្ងាញ់ប្រចាំតំបន់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកណ្តាល ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Traditional local eatery serving fresh rice noodles with green fish gravy, crispy banh chao, and palm sugar desserts. Conveniently located in Kandal, Cambodia.",
-    "photoUrl": "/Shop/rest-33.jpg",
+    "photoUrl": "/foods/food-45.jpg",
     "galleryPhotos": [
       "/foods/food-45.jpg",
       "/foods/food-37.jpg"
@@ -5725,7 +5725,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Traditional Num Banh Chok & Khmer Sweets (Takeo)",
     "descriptionKh": "អាហារដ្ឋានបុរាណបម្រើនំបញ្ចុកសម្លខ្មែរ សម្លការី បាញ់ឆែវ និងបង្អែមខ្មែរស្ករត្នោតឈ្ងុយឆ្ងាញ់ប្រចាំតំបន់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តតាកែវ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Traditional local eatery serving fresh rice noodles with green fish gravy, crispy banh chao, and palm sugar desserts. Conveniently located in Takeo, Cambodia.",
-    "photoUrl": "/Shop/rest-33.jpg",
+    "photoUrl": "/foods/food-48.jpg",
     "galleryPhotos": [
       "/foods/food-48.jpg",
       "/foods/food-44.jpg"
@@ -5764,7 +5764,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Traditional Num Banh Chok & Khmer Sweets (Pursat)",
     "descriptionKh": "អាហារដ្ឋានបុរាណបម្រើនំបញ្ចុកសម្លខ្មែរ សម្លការី បាញ់ឆែវ និងបង្អែមខ្មែរស្ករត្នោតឈ្ងុយឆ្ងាញ់ប្រចាំតំបន់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តពោធិ៍សាត់ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Traditional local eatery serving fresh rice noodles with green fish gravy, crispy banh chao, and palm sugar desserts. Conveniently located in Pursat, Cambodia.",
-    "photoUrl": "/Shop/rest-33.jpg",
+    "photoUrl": "/foods/food-51.jpg",
     "galleryPhotos": [
       "/foods/food-51.jpg",
       "/foods/food-51.jpg"
@@ -5803,7 +5803,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Traditional Num Banh Chok & Khmer Sweets (Kampong Thom)",
     "descriptionKh": "អាហារដ្ឋានបុរាណបម្រើនំបញ្ចុកសម្លខ្មែរ សម្លការី បាញ់ឆែវ និងបង្អែមខ្មែរស្ករត្នោតឈ្ងុយឆ្ងាញ់ប្រចាំតំបន់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ធំ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Traditional local eatery serving fresh rice noodles with green fish gravy, crispy banh chao, and palm sugar desserts. Conveniently located in Kampong Thom, Cambodia.",
-    "photoUrl": "/Shop/rest-33.jpg",
+    "photoUrl": "/foods/food-54.jpg",
     "galleryPhotos": [
       "/foods/food-54.jpg",
       "/foods/food-58.jpg"
@@ -5842,7 +5842,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Traditional Num Banh Chok & Khmer Sweets (Kampong Chhnang)",
     "descriptionKh": "អាហារដ្ឋានបុរាណបម្រើនំបញ្ចុកសម្លខ្មែរ សម្លការី បាញ់ឆែវ និងបង្អែមខ្មែរស្ករត្នោតឈ្ងុយឆ្ងាញ់ប្រចាំតំបន់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ឆ្នាំង ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Traditional local eatery serving fresh rice noodles with green fish gravy, crispy banh chao, and palm sugar desserts. Conveniently located in Kampong Chhnang, Cambodia.",
-    "photoUrl": "/Shop/rest-33.jpg",
+    "photoUrl": "/foods/food-57.jpg",
     "galleryPhotos": [
       "/foods/food-57.jpg",
       "/foods/food-65.jpg"
@@ -5881,7 +5881,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Koh Kong Krao Beachfront Seafood Grill",
     "descriptionKh": "ហាងអាហារមាត់ឆ្នេរខ្សាច់ប៉ាក់ខ្លង បម្រើគ្រឿងសមុទ្រស្រស់ៗទើបឡើងពីទូកនេសាទ ត្រីអាំង និងមឹកស្រុស។",
     "descriptionEn": "Beachside seafood grill at Bak Khlang serving boat-fresh fish, grilled squid, and spicy Koh Kong seafood salads.",
-    "photoUrl": "/Shop/rest-30.jpg",
+    "photoUrl": "/foods/food-60.jpg",
     "galleryPhotos": [
       "/foods/food-60.jpg",
       "/foods/food-72.jpg"
@@ -5920,7 +5920,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Sen Monorom Market Morning Kuyteav House",
     "descriptionKh": "អាហារដ្ឋានពេលព្រឹកដ៏កក់ក្តៅក្រោមអាកាសធាតុត្រជាក់នៃខេត្តមណ្ឌលគិរី មានគុយទាវក្តៅៗ បបរគ្រឿង និងកាហ្វេភ្នំ។",
     "descriptionEn": "Warm morning breakfast house in chilly Sen Monorom serving steaming noodle soup, chicken rice porridge, and highland coffee.",
-    "photoUrl": "/Shop/rest-29.jpg",
+    "photoUrl": "/foods/food-63.jpg",
     "galleryPhotos": [
       "/foods/food-63.jpg",
       "/foods/food-79.jpg"
@@ -5958,7 +5958,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Banlung Market Morning Kuyteav & Rice House",
     "descriptionKh": "ហាងអាហារពេលព្រឹកដ៏ពេញនិយមនៅផ្សារបានលុង បម្រើគុយទាវឆ្អឹងជ្រូក បបរគ្រឿង និងបាយថ្ងៃត្រង់ម្ហូបខ្មែរគ្រប់មុខ។",
     "descriptionEn": "Bustling market eatery in Banlung serving morning noodle soup, grilled pork rice, and traditional Khmer lunch sets.",
-    "photoUrl": "/Shop/rest-34.jpg",
+    "photoUrl": "/foods/food-66.jpg",
     "galleryPhotos": [
       "/foods/food-66.jpg",
       "/foods/food-86.jpg"
@@ -5997,7 +5997,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Traditional Num Banh Chok & Khmer Sweets (Kratie)",
     "descriptionKh": "អាហារដ្ឋានបុរាណបម្រើនំបញ្ចុកសម្លខ្មែរ សម្លការី បាញ់ឆែវ និងបង្អែមខ្មែរស្ករត្នោតឈ្ងុយឆ្ងាញ់ប្រចាំតំបន់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តក្រចេះ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Traditional local eatery serving fresh rice noodles with green fish gravy, crispy banh chao, and palm sugar desserts. Conveniently located in Kratie, Cambodia.",
-    "photoUrl": "/Shop/rest-33.jpg",
+    "photoUrl": "/foods/food-69.jpg",
     "galleryPhotos": [
       "/foods/food-69.jpg",
       "/foods/food-93.jpg"
@@ -6036,7 +6036,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Traditional Num Banh Chok & Khmer Sweets (Stung Treng)",
     "descriptionKh": "អាហារដ្ឋានបុរាណបម្រើនំបញ្ចុកសម្លខ្មែរ សម្លការី បាញ់ឆែវ និងបង្អែមខ្មែរស្ករត្នោតឈ្ងុយឆ្ងាញ់ប្រចាំតំបន់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តស្ទឹងត្រែង ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Traditional local eatery serving fresh rice noodles with green fish gravy, crispy banh chao, and palm sugar desserts. Conveniently located in Stung Treng, Cambodia.",
-    "photoUrl": "/Shop/rest-33.jpg",
+    "photoUrl": "/foods/food-72.jpg",
     "galleryPhotos": [
       "/foods/food-72.jpg",
       "/foods/food-100.jpg"
@@ -6075,7 +6075,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Traditional Num Banh Chok & Khmer Sweets (Preah Vihear)",
     "descriptionKh": "អាហារដ្ឋានបុរាណបម្រើនំបញ្ចុកសម្លខ្មែរ សម្លការី បាញ់ឆែវ និងបង្អែមខ្មែរស្ករត្នោតឈ្ងុយឆ្ងាញ់ប្រចាំតំបន់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តព្រះវិហារ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Traditional local eatery serving fresh rice noodles with green fish gravy, crispy banh chao, and palm sugar desserts. Conveniently located in Preah Vihear, Cambodia.",
-    "photoUrl": "/Shop/rest-33.jpg",
+    "photoUrl": "/foods/food-75.jpg",
     "galleryPhotos": [
       "/foods/food-75.jpg",
       "/foods/food-7.jpg"
@@ -6114,7 +6114,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Traditional Num Banh Chok & Khmer Sweets (Banteay Meanchey)",
     "descriptionKh": "អាហារដ្ឋានបុរាណបម្រើនំបញ្ចុកសម្លខ្មែរ សម្លការី បាញ់ឆែវ និងបង្អែមខ្មែរស្ករត្នោតឈ្ងុយឆ្ងាញ់ប្រចាំតំបន់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តបន្ទាយមានជ័យ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Traditional local eatery serving fresh rice noodles with green fish gravy, crispy banh chao, and palm sugar desserts. Conveniently located in Banteay Meanchey, Cambodia.",
-    "photoUrl": "/Shop/rest-33.jpg",
+    "photoUrl": "/foods/food-78.jpg",
     "galleryPhotos": [
       "/foods/food-78.jpg",
       "/foods/food-14.jpg"
@@ -6153,7 +6153,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Traditional Num Banh Chok & Khmer Sweets (Oddar Meanchey)",
     "descriptionKh": "អាហារដ្ឋានបុរាណបម្រើនំបញ្ចុកសម្លខ្មែរ សម្លការី បាញ់ឆែវ និងបង្អែមខ្មែរស្ករត្នោតឈ្ងុយឆ្ងាញ់ប្រចាំតំបន់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តឧត្តរមានជ័យ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Traditional local eatery serving fresh rice noodles with green fish gravy, crispy banh chao, and palm sugar desserts. Conveniently located in Oddar Meanchey, Cambodia.",
-    "photoUrl": "/Shop/rest-33.jpg",
+    "photoUrl": "/foods/food-81.jpg",
     "galleryPhotos": [
       "/foods/food-81.jpg",
       "/foods/food-21.jpg"
@@ -6192,7 +6192,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Traditional Num Banh Chok & Khmer Sweets (Pailin)",
     "descriptionKh": "អាហារដ្ឋានបុរាណបម្រើនំបញ្ចុកសម្លខ្មែរ សម្លការី បាញ់ឆែវ និងបង្អែមខ្មែរស្ករត្នោតឈ្ងុយឆ្ងាញ់ប្រចាំតំបន់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តប៉ៃលិន ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Traditional local eatery serving fresh rice noodles with green fish gravy, crispy banh chao, and palm sugar desserts. Conveniently located in Pailin, Cambodia.",
-    "photoUrl": "/Shop/rest-33.jpg",
+    "photoUrl": "/foods/food-84.jpg",
     "galleryPhotos": [
       "/foods/food-84.jpg",
       "/foods/food-28.jpg"
@@ -6230,7 +6230,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Traditional Num Banh Chok & Khmer Sweets (Prey Veng)",
     "descriptionKh": "អាហារដ្ឋានបុរាណបម្រើនំបញ្ចុកសម្លខ្មែរ សម្លការី បាញ់ឆែវ និងបង្អែមខ្មែរស្ករត្នោតឈ្ងុយឆ្ងាញ់ប្រចាំតំបន់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តព្រៃវែង ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Traditional local eatery serving fresh rice noodles with green fish gravy, crispy banh chao, and palm sugar desserts. Conveniently located in Prey Veng, Cambodia.",
-    "photoUrl": "/Shop/rest-33.jpg",
+    "photoUrl": "/foods/food-87.jpg",
     "galleryPhotos": [
       "/foods/food-87.jpg",
       "/foods/food-35.jpg"
@@ -6269,7 +6269,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Traditional Num Banh Chok & Khmer Sweets (Svay Rieng)",
     "descriptionKh": "អាហារដ្ឋានបុរាណបម្រើនំបញ្ចុកសម្លខ្មែរ សម្លការី បាញ់ឆែវ និងបង្អែមខ្មែរស្ករត្នោតឈ្ងុយឆ្ងាញ់ប្រចាំតំបន់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តស្វាយរៀង ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Traditional local eatery serving fresh rice noodles with green fish gravy, crispy banh chao, and palm sugar desserts. Conveniently located in Svay Rieng, Cambodia.",
-    "photoUrl": "/Shop/rest-33.jpg",
+    "photoUrl": "/foods/food-90.jpg",
     "galleryPhotos": [
       "/foods/food-90.jpg",
       "/foods/food-42.jpg"
@@ -6308,7 +6308,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Traditional Num Banh Chok & Khmer Sweets (Kampong Speu)",
     "descriptionKh": "អាហារដ្ឋានបុរាណបម្រើនំបញ្ចុកសម្លខ្មែរ សម្លការី បាញ់ឆែវ និងបង្អែមខ្មែរស្ករត្នោតឈ្ងុយឆ្ងាញ់ប្រចាំតំបន់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ស្ពឺ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Traditional local eatery serving fresh rice noodles with green fish gravy, crispy banh chao, and palm sugar desserts. Conveniently located in Kampong Speu, Cambodia.",
-    "photoUrl": "/Shop/rest-33.jpg",
+    "photoUrl": "/foods/food-93.jpg",
     "galleryPhotos": [
       "/foods/food-93.jpg",
       "/foods/food-49.jpg"
@@ -6347,7 +6347,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Traditional Num Banh Chok & Khmer Sweets (Tboung Khmum)",
     "descriptionKh": "អាហារដ្ឋានបុរាណបម្រើនំបញ្ចុកសម្លខ្មែរ សម្លការី បាញ់ឆែវ និងបង្អែមខ្មែរស្ករត្នោតឈ្ងុយឆ្ងាញ់ប្រចាំតំបន់។ មានទីតាំងស្ថិតនៅក្នុងខេត្តត្បូងឃ្មុំ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Traditional local eatery serving fresh rice noodles with green fish gravy, crispy banh chao, and palm sugar desserts. Conveniently located in Tboung Khmum, Cambodia.",
-    "photoUrl": "/Shop/rest-33.jpg",
+    "photoUrl": "/foods/food-96.jpg",
     "galleryPhotos": [
       "/foods/food-96.jpg",
       "/foods/food-56.jpg"
@@ -6386,7 +6386,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Phsar Thmei Traditional Num Banh Chok & Khmer Soup",
     "descriptionKh": "អាហារដ្ឋានបុរាណក្បែរផ្សារធំថ្មី បម្រើនំបញ្ចុកសម្លខ្មែរ សម្លការីសាច់មាន់ បាញ់ឆែវ និងបង្អែមខ្មែរឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Traditional eatery by Central Market serving fresh hand-pressed rice noodles with fish gravy, red chicken curry, and banh chao.",
-    "photoUrl": "/Shop/rest-5.jpg",
+    "photoUrl": "/foods/food-99.jpg",
     "galleryPhotos": [
       "/foods/food-99.jpg",
       "/foods/food-63.jpg"
@@ -6425,7 +6425,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Siem Reap Riverside Khmer Family Restaurant",
     "descriptionKh": "ហាងអាហារគ្រួសារតាមបណ្តោយមាត់ស្ទឹងសៀមរាប បម្រើម្ហូបខ្មែរគ្រប់មុខ ត្រីបឹងទន្លេសាប និងសាច់អាំងទឹកប្រហុក។",
     "descriptionEn": "Welcoming family restaurant along the Siem Reap River serving Tonle Sap fish dishes, grilled meats, and vegetable stir-fries.",
-    "photoUrl": "/Shop/rest-16.jpg",
+    "photoUrl": "/foods/food-2.jpg",
     "galleryPhotos": [
       "/foods/food-2.jpg",
       "/foods/food-70.jpg"
@@ -6464,7 +6464,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Phnom Sampov Countryside Restaurant Battambang",
     "descriptionKh": "ភោជនីយដ្ឋានតាមផ្លូវទៅរមណីយដ្ឋានភ្នំសំពៅ និងភ្នំបាណន់ មានកញ្ចុះអង្គុយស្រូបខ្យល់វាលស្រែ និងពិសាមាន់ដុតបាត់ដំបង។",
     "descriptionEn": "Countryside pavilion on the route to Phnom Sampov and Banan Temple offering roasted country chicken and grilled fish.",
-    "photoUrl": "/Shop/rest-26.jpg",
+    "photoUrl": "/foods/food-5.jpg",
     "galleryPhotos": [
       "/foods/food-5.jpg",
       "/foods/food-77.jpg"
@@ -6502,7 +6502,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Espresso Kampot Roastery & Cafe",
     "descriptionKh": "ហាងកាហ្វេល្បីជិតរង្វង់មូលទុរេនកំពត បម្រើកាហ្វេឆុងថ្មីៗ អាហារពេលព្រឹក និងនំដុតស្រស់ៗសម្រាប់អ្នកដំណើរ។",
     "descriptionEn": "Top-rated specialty cafe near the Durian Roundabout serving freshly roasted coffee, all-day breakfast, and pastries.",
-    "photoUrl": "/Shop/rest-22.jpg",
+    "photoUrl": "/foods/food-8.jpg",
     "galleryPhotos": [
       "/foods/food-8.jpg",
       "/foods/food-84.jpg"
@@ -6541,7 +6541,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Kep Sunset Coastal Dining",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់សមុទ្រសម្រាប់គយគន់ថ្ងៃលិចដ៏ស្រស់ស្អាតនៅខេត្តកែប បម្រើម្ហូបសមុទ្រ និងម្ហូបអឺរ៉ុប-ខ្មែរ។",
     "descriptionEn": "Waterfront sunset dining in Kep offering fresh crab specialties, grilled calamari, and tropical refreshments.",
-    "photoUrl": "/Shop/rest-23.jpg",
+    "photoUrl": "/foods/food-11.jpg",
     "galleryPhotos": [
       "/foods/food-11.jpg",
       "/foods/food-91.jpg"
@@ -6580,7 +6580,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Phsar Leu Morning Kuyteav & Seafood Noodle House",
     "descriptionKh": "ហាងអាហារពេលព្រឹក និងថ្ងៃត្រង់ដ៏ពេញនិយមនៅផ្សារលើ ក្រុងព្រះសីហនុ ល្បីខាងគុយទាវគ្រឿងសមុទ្រ បាយសាច់ជ្រូកអាំង និងកាហ្វេទឹកដោះគោ។",
     "descriptionEn": "Bustling breakfast and lunch spot at Phsar Leu Market famous for rich seafood noodle soup and charcoal-grilled pork rice.",
-    "photoUrl": "/Shop/rest-30.jpg",
+    "photoUrl": "/foods/food-14.jpg",
     "galleryPhotos": [
       "/foods/food-14.jpg",
       "/foods/food-98.jpg"
@@ -6619,7 +6619,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Heritage Roastery Cafe & Bistro (Kampong Cham)",
     "descriptionKh": "ហាងកាហ្វេទំនើបរចនាបថខ្មែរ បម្រើកាហ្វេឆុងថ្មីៗ ភេសជ្ជៈផ្លែឈើស្រស់ នំដុត និងអាហារថ្ងៃត្រង់ប្រកបដោយផាសុកភាព។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ចាម ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Cozy Khmer-styled cafe and bistro offering specialty iced coffee, fresh fruit smoothies, and daytime meals. Conveniently located in Kampong Cham, Cambodia.",
-    "photoUrl": "/Shop/rest-34.jpg",
+    "photoUrl": "/foods/food-17.jpg",
     "galleryPhotos": [
       "/foods/food-17.jpg",
       "/foods/food-5.jpg"
@@ -6658,7 +6658,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Heritage Roastery Cafe & Bistro (Kandal)",
     "descriptionKh": "ហាងកាហ្វេទំនើបរចនាបថខ្មែរ បម្រើកាហ្វេឆុងថ្មីៗ ភេសជ្ជៈផ្លែឈើស្រស់ នំដុត និងអាហារថ្ងៃត្រង់ប្រកបដោយផាសុកភាព។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកណ្តាល ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Cozy Khmer-styled cafe and bistro offering specialty iced coffee, fresh fruit smoothies, and daytime meals. Conveniently located in Kandal, Cambodia.",
-    "photoUrl": "/Shop/rest-34.jpg",
+    "photoUrl": "/foods/food-20.jpg",
     "galleryPhotos": [
       "/foods/food-20.jpg",
       "/foods/food-12.jpg"
@@ -6697,7 +6697,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Heritage Roastery Cafe & Bistro (Takeo)",
     "descriptionKh": "ហាងកាហ្វេទំនើបរចនាបថខ្មែរ បម្រើកាហ្វេឆុងថ្មីៗ ភេសជ្ជៈផ្លែឈើស្រស់ នំដុត និងអាហារថ្ងៃត្រង់ប្រកបដោយផាសុកភាព។ មានទីតាំងស្ថិតនៅក្នុងខេត្តតាកែវ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Cozy Khmer-styled cafe and bistro offering specialty iced coffee, fresh fruit smoothies, and daytime meals. Conveniently located in Takeo, Cambodia.",
-    "photoUrl": "/Shop/rest-34.jpg",
+    "photoUrl": "/foods/food-23.jpg",
     "galleryPhotos": [
       "/foods/food-23.jpg",
       "/foods/food-19.jpg"
@@ -6736,7 +6736,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Heritage Roastery Cafe & Bistro (Pursat)",
     "descriptionKh": "ហាងកាហ្វេទំនើបរចនាបថខ្មែរ បម្រើកាហ្វេឆុងថ្មីៗ ភេសជ្ជៈផ្លែឈើស្រស់ នំដុត និងអាហារថ្ងៃត្រង់ប្រកបដោយផាសុកភាព។ មានទីតាំងស្ថិតនៅក្នុងខេត្តពោធិ៍សាត់ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Cozy Khmer-styled cafe and bistro offering specialty iced coffee, fresh fruit smoothies, and daytime meals. Conveniently located in Pursat, Cambodia.",
-    "photoUrl": "/Shop/rest-34.jpg",
+    "photoUrl": "/foods/food-26.jpg",
     "galleryPhotos": [
       "/foods/food-26.jpg",
       "/foods/food-26.jpg"
@@ -6774,7 +6774,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Heritage Roastery Cafe & Bistro (Kampong Thom)",
     "descriptionKh": "ហាងកាហ្វេទំនើបរចនាបថខ្មែរ បម្រើកាហ្វេឆុងថ្មីៗ ភេសជ្ជៈផ្លែឈើស្រស់ នំដុត និងអាហារថ្ងៃត្រង់ប្រកបដោយផាសុកភាព។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ធំ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Cozy Khmer-styled cafe and bistro offering specialty iced coffee, fresh fruit smoothies, and daytime meals. Conveniently located in Kampong Thom, Cambodia.",
-    "photoUrl": "/Shop/rest-34.jpg",
+    "photoUrl": "/foods/food-29.jpg",
     "galleryPhotos": [
       "/foods/food-29.jpg",
       "/foods/food-33.jpg"
@@ -6813,7 +6813,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Heritage Roastery Cafe & Bistro (Kampong Chhnang)",
     "descriptionKh": "ហាងកាហ្វេទំនើបរចនាបថខ្មែរ បម្រើកាហ្វេឆុងថ្មីៗ ភេសជ្ជៈផ្លែឈើស្រស់ នំដុត និងអាហារថ្ងៃត្រង់ប្រកបដោយផាសុកភាព។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ឆ្នាំង ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Cozy Khmer-styled cafe and bistro offering specialty iced coffee, fresh fruit smoothies, and daytime meals. Conveniently located in Kampong Chhnang, Cambodia.",
-    "photoUrl": "/Shop/rest-34.jpg",
+    "photoUrl": "/foods/food-32.jpg",
     "galleryPhotos": [
       "/foods/food-32.jpg",
       "/foods/food-40.jpg"
@@ -6852,7 +6852,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Woodland Cafe & Bistro Koh Kong",
     "descriptionKh": "ហាងកាហ្វេធម្មជាតិក្នុងក្រុងខេមរភូមិន្ទ បម្រើកាហ្វេឆុងថ្មីៗ ភេសជ្ជៈត្រជាក់ និងអាហារសម្រន់ឆ្ងាញ់ៗ។",
     "descriptionEn": "Garden cafe in central Khemara Phoumin serving specialty iced coffee, fruit smoothies, and light meals.",
-    "photoUrl": "/Shop/rest-30.jpg",
+    "photoUrl": "/foods/food-35.jpg",
     "galleryPhotos": [
       "/foods/food-35.jpg",
       "/foods/food-47.jpg"
@@ -6891,7 +6891,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Doh Kramom Hill Cafe & Bistro Mondulkiri",
     "descriptionKh": "ហាងកាហ្វេ និងអាហារក្បែរភ្នំដោះក្រមុំ គយគន់ទេសភាពក្រុងសែនមនោរម្យ និងពិសាអាហារថ្ងៃត្រង់ឆ្ងាញ់ៗ។",
     "descriptionEn": "Scenic bistro near Doh Kramom Hill offering panoramic town views, freshly brewed Mondulkiri coffee, and Khmer lunch sets.",
-    "photoUrl": "/Shop/rest-29.jpg",
+    "photoUrl": "/foods/food-38.jpg",
     "galleryPhotos": [
       "/foods/food-38.jpg",
       "/foods/food-54.jpg"
@@ -6930,7 +6930,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Northeast Gem Traditional Restaurant Ratanakiri",
     "descriptionKh": "ភោជនីយដ្ឋានគ្រួសារដ៏ធំទូលាយក្នុងក្រុងបានលុង បម្រើអាហារថ្ងៃត្រង់ និងពេលល្ងាចជាមួយមុខម្ហូបខ្មែរ និងត្រីទន្លេស្រស់ៗ។",
     "descriptionEn": "Spacious family restaurant in Banlung specializing in Mekong basin river fish, sour soups, and grilled meats.",
-    "photoUrl": "/Shop/rest-34.jpg",
+    "photoUrl": "/foods/food-41.jpg",
     "galleryPhotos": [
       "/foods/food-41.jpg",
       "/foods/food-61.jpg"
@@ -6969,7 +6969,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Heritage Roastery Cafe & Bistro (Kratie)",
     "descriptionKh": "ហាងកាហ្វេទំនើបរចនាបថខ្មែរ បម្រើកាហ្វេឆុងថ្មីៗ ភេសជ្ជៈផ្លែឈើស្រស់ នំដុត និងអាហារថ្ងៃត្រង់ប្រកបដោយផាសុកភាព។ មានទីតាំងស្ថិតនៅក្នុងខេត្តក្រចេះ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Cozy Khmer-styled cafe and bistro offering specialty iced coffee, fresh fruit smoothies, and daytime meals. Conveniently located in Kratie, Cambodia.",
-    "photoUrl": "/Shop/rest-34.jpg",
+    "photoUrl": "/foods/food-44.jpg",
     "galleryPhotos": [
       "/foods/food-44.jpg",
       "/foods/food-68.jpg"
@@ -7008,7 +7008,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Heritage Roastery Cafe & Bistro (Stung Treng)",
     "descriptionKh": "ហាងកាហ្វេទំនើបរចនាបថខ្មែរ បម្រើកាហ្វេឆុងថ្មីៗ ភេសជ្ជៈផ្លែឈើស្រស់ នំដុត និងអាហារថ្ងៃត្រង់ប្រកបដោយផាសុកភាព។ មានទីតាំងស្ថិតនៅក្នុងខេត្តស្ទឹងត្រែង ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Cozy Khmer-styled cafe and bistro offering specialty iced coffee, fresh fruit smoothies, and daytime meals. Conveniently located in Stung Treng, Cambodia.",
-    "photoUrl": "/Shop/rest-34.jpg",
+    "photoUrl": "/foods/food-47.jpg",
     "galleryPhotos": [
       "/foods/food-47.jpg",
       "/foods/food-75.jpg"
@@ -7046,7 +7046,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Heritage Roastery Cafe & Bistro (Preah Vihear)",
     "descriptionKh": "ហាងកាហ្វេទំនើបរចនាបថខ្មែរ បម្រើកាហ្វេឆុងថ្មីៗ ភេសជ្ជៈផ្លែឈើស្រស់ នំដុត និងអាហារថ្ងៃត្រង់ប្រកបដោយផាសុកភាព។ មានទីតាំងស្ថិតនៅក្នុងខេត្តព្រះវិហារ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Cozy Khmer-styled cafe and bistro offering specialty iced coffee, fresh fruit smoothies, and daytime meals. Conveniently located in Preah Vihear, Cambodia.",
-    "photoUrl": "/Shop/rest-34.jpg",
+    "photoUrl": "/foods/food-50.jpg",
     "galleryPhotos": [
       "/foods/food-50.jpg",
       "/foods/food-82.jpg"
@@ -7085,7 +7085,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Heritage Roastery Cafe & Bistro (Banteay Meanchey)",
     "descriptionKh": "ហាងកាហ្វេទំនើបរចនាបថខ្មែរ បម្រើកាហ្វេឆុងថ្មីៗ ភេសជ្ជៈផ្លែឈើស្រស់ នំដុត និងអាហារថ្ងៃត្រង់ប្រកបដោយផាសុកភាព។ មានទីតាំងស្ថិតនៅក្នុងខេត្តបន្ទាយមានជ័យ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Cozy Khmer-styled cafe and bistro offering specialty iced coffee, fresh fruit smoothies, and daytime meals. Conveniently located in Banteay Meanchey, Cambodia.",
-    "photoUrl": "/Shop/rest-34.jpg",
+    "photoUrl": "/foods/food-53.jpg",
     "galleryPhotos": [
       "/foods/food-53.jpg",
       "/foods/food-89.jpg"
@@ -7124,7 +7124,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Heritage Roastery Cafe & Bistro (Oddar Meanchey)",
     "descriptionKh": "ហាងកាហ្វេទំនើបរចនាបថខ្មែរ បម្រើកាហ្វេឆុងថ្មីៗ ភេសជ្ជៈផ្លែឈើស្រស់ នំដុត និងអាហារថ្ងៃត្រង់ប្រកបដោយផាសុកភាព។ មានទីតាំងស្ថិតនៅក្នុងខេត្តឧត្តរមានជ័យ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Cozy Khmer-styled cafe and bistro offering specialty iced coffee, fresh fruit smoothies, and daytime meals. Conveniently located in Oddar Meanchey, Cambodia.",
-    "photoUrl": "/Shop/rest-34.jpg",
+    "photoUrl": "/foods/food-56.jpg",
     "galleryPhotos": [
       "/foods/food-56.jpg",
       "/foods/food-96.jpg"
@@ -7163,7 +7163,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Heritage Roastery Cafe & Bistro (Pailin)",
     "descriptionKh": "ហាងកាហ្វេទំនើបរចនាបថខ្មែរ បម្រើកាហ្វេឆុងថ្មីៗ ភេសជ្ជៈផ្លែឈើស្រស់ នំដុត និងអាហារថ្ងៃត្រង់ប្រកបដោយផាសុកភាព។ មានទីតាំងស្ថិតនៅក្នុងខេត្តប៉ៃលិន ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Cozy Khmer-styled cafe and bistro offering specialty iced coffee, fresh fruit smoothies, and daytime meals. Conveniently located in Pailin, Cambodia.",
-    "photoUrl": "/Shop/rest-34.jpg",
+    "photoUrl": "/foods/food-59.jpg",
     "galleryPhotos": [
       "/foods/food-59.jpg",
       "/foods/food-3.jpg"
@@ -7202,7 +7202,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Heritage Roastery Cafe & Bistro (Prey Veng)",
     "descriptionKh": "ហាងកាហ្វេទំនើបរចនាបថខ្មែរ បម្រើកាហ្វេឆុងថ្មីៗ ភេសជ្ជៈផ្លែឈើស្រស់ នំដុត និងអាហារថ្ងៃត្រង់ប្រកបដោយផាសុកភាព។ មានទីតាំងស្ថិតនៅក្នុងខេត្តព្រៃវែង ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Cozy Khmer-styled cafe and bistro offering specialty iced coffee, fresh fruit smoothies, and daytime meals. Conveniently located in Prey Veng, Cambodia.",
-    "photoUrl": "/Shop/rest-34.jpg",
+    "photoUrl": "/foods/food-62.jpg",
     "galleryPhotos": [
       "/foods/food-62.jpg",
       "/foods/food-10.jpg"
@@ -7241,7 +7241,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Heritage Roastery Cafe & Bistro (Svay Rieng)",
     "descriptionKh": "ហាងកាហ្វេទំនើបរចនាបថខ្មែរ បម្រើកាហ្វេឆុងថ្មីៗ ភេសជ្ជៈផ្លែឈើស្រស់ នំដុត និងអាហារថ្ងៃត្រង់ប្រកបដោយផាសុកភាព។ មានទីតាំងស្ថិតនៅក្នុងខេត្តស្វាយរៀង ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Cozy Khmer-styled cafe and bistro offering specialty iced coffee, fresh fruit smoothies, and daytime meals. Conveniently located in Svay Rieng, Cambodia.",
-    "photoUrl": "/Shop/rest-34.jpg",
+    "photoUrl": "/foods/food-65.jpg",
     "galleryPhotos": [
       "/foods/food-65.jpg",
       "/foods/food-17.jpg"
@@ -7280,7 +7280,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Heritage Roastery Cafe & Bistro (Kampong Speu)",
     "descriptionKh": "ហាងកាហ្វេទំនើបរចនាបថខ្មែរ បម្រើកាហ្វេឆុងថ្មីៗ ភេសជ្ជៈផ្លែឈើស្រស់ នំដុត និងអាហារថ្ងៃត្រង់ប្រកបដោយផាសុកភាព។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ស្ពឺ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Cozy Khmer-styled cafe and bistro offering specialty iced coffee, fresh fruit smoothies, and daytime meals. Conveniently located in Kampong Speu, Cambodia.",
-    "photoUrl": "/Shop/rest-34.jpg",
+    "photoUrl": "/foods/food-68.jpg",
     "galleryPhotos": [
       "/foods/food-68.jpg",
       "/foods/food-24.jpg"
@@ -7318,7 +7318,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Heritage Roastery Cafe & Bistro (Tboung Khmum)",
     "descriptionKh": "ហាងកាហ្វេទំនើបរចនាបថខ្មែរ បម្រើកាហ្វេឆុងថ្មីៗ ភេសជ្ជៈផ្លែឈើស្រស់ នំដុត និងអាហារថ្ងៃត្រង់ប្រកបដោយផាសុកភាព។ មានទីតាំងស្ថិតនៅក្នុងខេត្តត្បូងឃ្មុំ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Cozy Khmer-styled cafe and bistro offering specialty iced coffee, fresh fruit smoothies, and daytime meals. Conveniently located in Tboung Khmum, Cambodia.",
-    "photoUrl": "/Shop/rest-34.jpg",
+    "photoUrl": "/foods/food-71.jpg",
     "galleryPhotos": [
       "/foods/food-71.jpg",
       "/foods/food-31.jpg"
@@ -7357,7 +7357,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Sen Sok Khmer Heritage Garden Restaurant",
     "descriptionKh": "ភោជនីយដ្ឋានសួនច្បារធំទូលាយក្នុងខណ្ឌសែនសុខ បម្រើម្ហូបខ្មែរគ្រប់កម្មវិធីជួបជុំគ្រួសារ មានកញ្ចុះអង្គុយលម្ហែកាយ។",
     "descriptionEn": "Spacious garden pavilion restaurant in Sen Sok popular for family gatherings, roasted country chicken, and hotpot.",
-    "photoUrl": "/Shop/rest-7.jpg",
+    "photoUrl": "/foods/food-74.jpg",
     "galleryPhotos": [
       "/foods/food-74.jpg",
       "/foods/food-38.jpg"
@@ -7396,7 +7396,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Sister Srey Cafe & Bakery Siem Reap",
     "descriptionKh": "ហាងកាហ្វេដ៏ពេញនិយមនៅមាត់ស្ទឹងសៀមរាប បម្រើអាហារពេលព្រឹក កាហ្វេឆុងថ្មីៗ នំដុត និងភេសជ្ជៈផ្លែឈើស្រស់។",
     "descriptionEn": "Vibrant social enterprise cafe by the Old Market bridge offering specialty coffee, healthy breakfasts, and Khmer fusion bites.",
-    "photoUrl": "/Shop/rest-18.jpg",
+    "photoUrl": "/foods/food-77.jpg",
     "galleryPhotos": [
       "/foods/food-77.jpg",
       "/foods/food-45.jpg"
@@ -7435,7 +7435,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Battambang Heritage Family Kitchen",
     "descriptionKh": "ហាងបាយគ្រួសារក្នុងក្រុងបាត់ដំបង បម្រើអាហារថ្ងៃត្រង់ និងពេលល្ងាចជាមួយមុខម្ហូបខ្មែររសជាតិដើមឆ្ងាញ់ពិសា។",
     "descriptionEn": "Warm family-run restaurant in central Battambang serving authentic Cambodian home cooking and seasonal river fish.",
-    "photoUrl": "/Shop/rest-24.jpg",
+    "photoUrl": "/foods/food-80.jpg",
     "galleryPhotos": [
       "/foods/food-80.jpg",
       "/foods/food-52.jpg"
@@ -7474,7 +7474,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Kampot Sunset Riverwalk Seafood & Grill",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់ព្រែកជិតស្ពានឥន្ទធនូកំពត បរិយាកាសរ៉ូមែនទិកពេលថ្ងៃលិច ជាមួយគ្រឿងសមុទ្រស្រស់ៗ និងម្ហូបខ្មែរ។",
     "descriptionEn": "Riverwalk dining near Kampot Rainbow Bridge offering golden sunset views over Bokor Mountain and fresh coastal seafood.",
-    "photoUrl": "/Shop/rest-21.jpg",
+    "photoUrl": "/foods/food-83.jpg",
     "galleryPhotos": [
       "/foods/food-83.jpg",
       "/foods/food-59.jpg"
@@ -7513,7 +7513,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Kep Fresh Grilled Squid & Pepper Crab Stall",
     "descriptionKh": "អាហារដ្ឋានគ្រឿងសមុទ្រស្រស់ៗនៅផ្សារក្តាម ល្បីខាងមឹកពងអាំងធ្យូង ក្តាមឆាម្រេចខ្ចី និងបង្គាអាំងតម្លៃសមរម្យ។",
     "descriptionEn": "Lively market stall at Kep Crab Market famous for charcoal-grilled egg squid, green pepper crab, and local seafood snacks.",
-    "photoUrl": "/Shop/rest-19.jpg",
+    "photoUrl": "/foods/food-86.jpg",
     "galleryPhotos": [
       "/foods/food-86.jpg",
       "/foods/food-66.jpg"
@@ -7552,7 +7552,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Koh Rong View Seafood Pavilion Sihanoukville",
     "descriptionKh": "ភោជនីយដ្ឋានមាត់សមុទ្រជិតកំពង់ផែទូកទេសចរណ៍ទៅកោះរ៉ុង បម្រើអាហារថ្ងៃត្រង់ និងពេលល្ងាចជាមួយគ្រឿងសមុទ្រស្រស់ៗគ្រប់មុខ។",
     "descriptionEn": "Waterfront seafood pavilion near the Koh Rong ferry pier serving steamed crab, garlic butter prawns, and Khmer sour soups.",
-    "photoUrl": "/Shop/rest-31.jpg",
+    "photoUrl": "/foods/food-89.jpg",
     "galleryPhotos": [
       "/foods/food-89.jpg",
       "/foods/food-73.jpg"
@@ -7590,7 +7590,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Our Village Authentic Khmer Dining (Kampong Cham)",
     "descriptionKh": "ភោជនីយដ្ឋានបម្រើមុខម្ហូបខ្មែរតាមរដូវកាល ទឹកគ្រឿង ត្រីឆ្អើរ ស្ងោរជ្រក់ និងម្ហូបពិសេសប្រចាំខេត្ត។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ចាម ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Authentic local dining room celebrating seasonal village recipes, smoked fish tuk kreung, and herbal sour soups. Conveniently located in Kampong Cham, Cambodia.",
-    "photoUrl": "/Shop/rest-35.jpg",
+    "photoUrl": "/foods/food-92.jpg",
     "galleryPhotos": [
       "/foods/food-92.jpg",
       "/foods/food-80.jpg"
@@ -7629,7 +7629,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Our Village Authentic Khmer Dining (Kandal)",
     "descriptionKh": "ភោជនីយដ្ឋានបម្រើមុខម្ហូបខ្មែរតាមរដូវកាល ទឹកគ្រឿង ត្រីឆ្អើរ ស្ងោរជ្រក់ និងម្ហូបពិសេសប្រចាំខេត្ត។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកណ្តាល ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Authentic local dining room celebrating seasonal village recipes, smoked fish tuk kreung, and herbal sour soups. Conveniently located in Kandal, Cambodia.",
-    "photoUrl": "/Shop/rest-35.jpg",
+    "photoUrl": "/foods/food-95.jpg",
     "galleryPhotos": [
       "/foods/food-95.jpg",
       "/foods/food-87.jpg"
@@ -7668,7 +7668,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Our Village Authentic Khmer Dining (Takeo)",
     "descriptionKh": "ភោជនីយដ្ឋានបម្រើមុខម្ហូបខ្មែរតាមរដូវកាល ទឹកគ្រឿង ត្រីឆ្អើរ ស្ងោរជ្រក់ និងម្ហូបពិសេសប្រចាំខេត្ត។ មានទីតាំងស្ថិតនៅក្នុងខេត្តតាកែវ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Authentic local dining room celebrating seasonal village recipes, smoked fish tuk kreung, and herbal sour soups. Conveniently located in Takeo, Cambodia.",
-    "photoUrl": "/Shop/rest-35.jpg",
+    "photoUrl": "/foods/food-98.jpg",
     "galleryPhotos": [
       "/foods/food-98.jpg",
       "/foods/food-94.jpg"
@@ -7707,7 +7707,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Our Village Authentic Khmer Dining (Pursat)",
     "descriptionKh": "ភោជនីយដ្ឋានបម្រើមុខម្ហូបខ្មែរតាមរដូវកាល ទឹកគ្រឿង ត្រីឆ្អើរ ស្ងោរជ្រក់ និងម្ហូបពិសេសប្រចាំខេត្ត។ មានទីតាំងស្ថិតនៅក្នុងខេត្តពោធិ៍សាត់ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Authentic local dining room celebrating seasonal village recipes, smoked fish tuk kreung, and herbal sour soups. Conveniently located in Pursat, Cambodia.",
-    "photoUrl": "/Shop/rest-35.jpg",
+    "photoUrl": "/foods/food-1.jpg",
     "galleryPhotos": [
       "/foods/food-1.jpg",
       "/foods/food-1.jpg"
@@ -7746,7 +7746,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Our Village Authentic Khmer Dining (Kampong Thom)",
     "descriptionKh": "ភោជនីយដ្ឋានបម្រើមុខម្ហូបខ្មែរតាមរដូវកាល ទឹកគ្រឿង ត្រីឆ្អើរ ស្ងោរជ្រក់ និងម្ហូបពិសេសប្រចាំខេត្ត។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ធំ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Authentic local dining room celebrating seasonal village recipes, smoked fish tuk kreung, and herbal sour soups. Conveniently located in Kampong Thom, Cambodia.",
-    "photoUrl": "/Shop/rest-35.jpg",
+    "photoUrl": "/foods/food-4.jpg",
     "galleryPhotos": [
       "/foods/food-4.jpg",
       "/foods/food-8.jpg"
@@ -7785,7 +7785,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Our Village Authentic Khmer Dining (Kampong Chhnang)",
     "descriptionKh": "ភោជនីយដ្ឋានបម្រើមុខម្ហូបខ្មែរតាមរដូវកាល ទឹកគ្រឿង ត្រីឆ្អើរ ស្ងោរជ្រក់ និងម្ហូបពិសេសប្រចាំខេត្ត។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ឆ្នាំង ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Authentic local dining room celebrating seasonal village recipes, smoked fish tuk kreung, and herbal sour soups. Conveniently located in Kampong Chhnang, Cambodia.",
-    "photoUrl": "/Shop/rest-35.jpg",
+    "photoUrl": "/foods/food-7.jpg",
     "galleryPhotos": [
       "/foods/food-7.jpg",
       "/foods/food-15.jpg"
@@ -7824,7 +7824,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Koh Kong Mud Crab & Fresh Prawn Kitchen",
     "descriptionKh": "អាហារដ្ឋានគ្រួសារល្បីខាងម្ហូបក្តាមថ្ម ឆាម្រេចខ្ចី សម្លម្ជូរគ្រឿងសមុទ្រ និងម្ហូបខ្មែរប្រចាំថ្ងៃ។",
     "descriptionEn": "Local family restaurant along National Road 48 specializing in Koh Kong mud crab and traditional coastal Khmer dishes.",
-    "photoUrl": "/Shop/rest-30.jpg",
+    "photoUrl": "/foods/food-10.jpg",
     "galleryPhotos": [
       "/foods/food-10.jpg",
       "/foods/food-22.jpg"
@@ -7862,7 +7862,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Mondulkiri Khmer Family Kitchen",
     "descriptionKh": "ហាងបាយគ្រួសារសម្រាប់ភ្ញៀវទេសចរ និងអ្នកដំណើរ បម្រើសម្លកកូរ ទឹកគ្រឿង ប្រហុកខ្ទិះ និងម្ហូបខ្មែររសជាតិដើម។",
     "descriptionEn": "Welcoming family kitchen on National Road 76 serving hearty Khmer lunch and dinner dishes with fresh highland greens.",
-    "photoUrl": "/Shop/rest-29.jpg",
+    "photoUrl": "/foods/food-13.jpg",
     "galleryPhotos": [
       "/foods/food-13.jpg",
       "/foods/food-29.jpg"
@@ -7901,7 +7901,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Banlung Town Khmer Family Dining",
     "descriptionKh": "ហាងបាយគ្រួសាររសជាតិអ្នកស្រុក បម្រើទឹកគ្រឿង ប្រហុកខ្ទិះ សម្លម្ជូរគ្រឿង និងបន្លែធម្មជាតិស្រស់ៗ។",
     "descriptionEn": "Homestyle Cambodian dining room in central Banlung serving tuk kreung, prahok ktis, and countryside soups.",
-    "photoUrl": "/Shop/rest-34.jpg",
+    "photoUrl": "/foods/food-16.jpg",
     "galleryPhotos": [
       "/foods/food-16.jpg",
       "/foods/food-36.jpg"
@@ -7940,7 +7940,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Our Village Authentic Khmer Dining (Kratie)",
     "descriptionKh": "ភោជនីយដ្ឋានបម្រើមុខម្ហូបខ្មែរតាមរដូវកាល ទឹកគ្រឿង ត្រីឆ្អើរ ស្ងោរជ្រក់ និងម្ហូបពិសេសប្រចាំខេត្ត។ មានទីតាំងស្ថិតនៅក្នុងខេត្តក្រចេះ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Authentic local dining room celebrating seasonal village recipes, smoked fish tuk kreung, and herbal sour soups. Conveniently located in Kratie, Cambodia.",
-    "photoUrl": "/Shop/rest-35.jpg",
+    "photoUrl": "/foods/food-19.jpg",
     "galleryPhotos": [
       "/foods/food-19.jpg",
       "/foods/food-43.jpg"
@@ -7979,7 +7979,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Our Village Authentic Khmer Dining (Stung Treng)",
     "descriptionKh": "ភោជនីយដ្ឋានបម្រើមុខម្ហូបខ្មែរតាមរដូវកាល ទឹកគ្រឿង ត្រីឆ្អើរ ស្ងោរជ្រក់ និងម្ហូបពិសេសប្រចាំខេត្ត។ មានទីតាំងស្ថិតនៅក្នុងខេត្តស្ទឹងត្រែង ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Authentic local dining room celebrating seasonal village recipes, smoked fish tuk kreung, and herbal sour soups. Conveniently located in Stung Treng, Cambodia.",
-    "photoUrl": "/Shop/rest-35.jpg",
+    "photoUrl": "/foods/food-22.jpg",
     "galleryPhotos": [
       "/foods/food-22.jpg",
       "/foods/food-50.jpg"
@@ -8018,7 +8018,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Our Village Authentic Khmer Dining (Preah Vihear)",
     "descriptionKh": "ភោជនីយដ្ឋានបម្រើមុខម្ហូបខ្មែរតាមរដូវកាល ទឹកគ្រឿង ត្រីឆ្អើរ ស្ងោរជ្រក់ និងម្ហូបពិសេសប្រចាំខេត្ត។ មានទីតាំងស្ថិតនៅក្នុងខេត្តព្រះវិហារ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Authentic local dining room celebrating seasonal village recipes, smoked fish tuk kreung, and herbal sour soups. Conveniently located in Preah Vihear, Cambodia.",
-    "photoUrl": "/Shop/rest-35.jpg",
+    "photoUrl": "/foods/food-25.jpg",
     "galleryPhotos": [
       "/foods/food-25.jpg",
       "/foods/food-57.jpg"
@@ -8057,7 +8057,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Our Village Authentic Khmer Dining (Banteay Meanchey)",
     "descriptionKh": "ភោជនីយដ្ឋានបម្រើមុខម្ហូបខ្មែរតាមរដូវកាល ទឹកគ្រឿង ត្រីឆ្អើរ ស្ងោរជ្រក់ និងម្ហូបពិសេសប្រចាំខេត្ត។ មានទីតាំងស្ថិតនៅក្នុងខេត្តបន្ទាយមានជ័យ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Authentic local dining room celebrating seasonal village recipes, smoked fish tuk kreung, and herbal sour soups. Conveniently located in Banteay Meanchey, Cambodia.",
-    "photoUrl": "/Shop/rest-35.jpg",
+    "photoUrl": "/foods/food-28.jpg",
     "galleryPhotos": [
       "/foods/food-28.jpg",
       "/foods/food-64.jpg"
@@ -8096,7 +8096,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Our Village Authentic Khmer Dining (Oddar Meanchey)",
     "descriptionKh": "ភោជនីយដ្ឋានបម្រើមុខម្ហូបខ្មែរតាមរដូវកាល ទឹកគ្រឿង ត្រីឆ្អើរ ស្ងោរជ្រក់ និងម្ហូបពិសេសប្រចាំខេត្ត។ មានទីតាំងស្ថិតនៅក្នុងខេត្តឧត្តរមានជ័យ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Authentic local dining room celebrating seasonal village recipes, smoked fish tuk kreung, and herbal sour soups. Conveniently located in Oddar Meanchey, Cambodia.",
-    "photoUrl": "/Shop/rest-35.jpg",
+    "photoUrl": "/foods/food-31.jpg",
     "galleryPhotos": [
       "/foods/food-31.jpg",
       "/foods/food-71.jpg"
@@ -8134,7 +8134,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Our Village Authentic Khmer Dining (Pailin)",
     "descriptionKh": "ភោជនីយដ្ឋានបម្រើមុខម្ហូបខ្មែរតាមរដូវកាល ទឹកគ្រឿង ត្រីឆ្អើរ ស្ងោរជ្រក់ និងម្ហូបពិសេសប្រចាំខេត្ត។ មានទីតាំងស្ថិតនៅក្នុងខេត្តប៉ៃលិន ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Authentic local dining room celebrating seasonal village recipes, smoked fish tuk kreung, and herbal sour soups. Conveniently located in Pailin, Cambodia.",
-    "photoUrl": "/Shop/rest-35.jpg",
+    "photoUrl": "/foods/food-34.jpg",
     "galleryPhotos": [
       "/foods/food-34.jpg",
       "/foods/food-78.jpg"
@@ -8173,7 +8173,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Our Village Authentic Khmer Dining (Prey Veng)",
     "descriptionKh": "ភោជនីយដ្ឋានបម្រើមុខម្ហូបខ្មែរតាមរដូវកាល ទឹកគ្រឿង ត្រីឆ្អើរ ស្ងោរជ្រក់ និងម្ហូបពិសេសប្រចាំខេត្ត។ មានទីតាំងស្ថិតនៅក្នុងខេត្តព្រៃវែង ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Authentic local dining room celebrating seasonal village recipes, smoked fish tuk kreung, and herbal sour soups. Conveniently located in Prey Veng, Cambodia.",
-    "photoUrl": "/Shop/rest-35.jpg",
+    "photoUrl": "/foods/food-37.jpg",
     "galleryPhotos": [
       "/foods/food-37.jpg",
       "/foods/food-85.jpg"
@@ -8212,7 +8212,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Our Village Authentic Khmer Dining (Svay Rieng)",
     "descriptionKh": "ភោជនីយដ្ឋានបម្រើមុខម្ហូបខ្មែរតាមរដូវកាល ទឹកគ្រឿង ត្រីឆ្អើរ ស្ងោរជ្រក់ និងម្ហូបពិសេសប្រចាំខេត្ត។ មានទីតាំងស្ថិតនៅក្នុងខេត្តស្វាយរៀង ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Authentic local dining room celebrating seasonal village recipes, smoked fish tuk kreung, and herbal sour soups. Conveniently located in Svay Rieng, Cambodia.",
-    "photoUrl": "/Shop/rest-35.jpg",
+    "photoUrl": "/foods/food-40.jpg",
     "galleryPhotos": [
       "/foods/food-40.jpg",
       "/foods/food-92.jpg"
@@ -8251,7 +8251,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Our Village Authentic Khmer Dining (Kampong Speu)",
     "descriptionKh": "ភោជនីយដ្ឋានបម្រើមុខម្ហូបខ្មែរតាមរដូវកាល ទឹកគ្រឿង ត្រីឆ្អើរ ស្ងោរជ្រក់ និងម្ហូបពិសេសប្រចាំខេត្ត។ មានទីតាំងស្ថិតនៅក្នុងខេត្តកំពង់ស្ពឺ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Authentic local dining room celebrating seasonal village recipes, smoked fish tuk kreung, and herbal sour soups. Conveniently located in Kampong Speu, Cambodia.",
-    "photoUrl": "/Shop/rest-35.jpg",
+    "photoUrl": "/foods/food-43.jpg",
     "galleryPhotos": [
       "/foods/food-43.jpg",
       "/foods/food-99.jpg"
@@ -8290,7 +8290,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Our Village Authentic Khmer Dining (Tboung Khmum)",
     "descriptionKh": "ភោជនីយដ្ឋានបម្រើមុខម្ហូបខ្មែរតាមរដូវកាល ទឹកគ្រឿង ត្រីឆ្អើរ ស្ងោរជ្រក់ និងម្ហូបពិសេសប្រចាំខេត្ត។ មានទីតាំងស្ថិតនៅក្នុងខេត្តត្បូងឃ្មុំ ផ្តល់ជូនបរិយាកាសស្អាត និងម្ហូបឆ្ងាញ់ពិសា។",
     "descriptionEn": "Authentic local dining room celebrating seasonal village recipes, smoked fish tuk kreung, and herbal sour soups. Conveniently located in Tboung Khmum, Cambodia.",
-    "photoUrl": "/Shop/rest-35.jpg",
+    "photoUrl": "/foods/food-46.jpg",
     "galleryPhotos": [
       "/foods/food-46.jpg",
       "/foods/food-6.jpg"
@@ -8329,7 +8329,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Chbar Ampov Riverside Khmer Family Dining",
     "descriptionKh": "ហាងអាហារគ្រួសារតាមបណ្តោយមាត់ទន្លេច្បារអំពៅ ល្បីខាងម្ហូបត្រីទន្លេស្រស់ៗ បង្កងអាំង និងសម្លខ្មែររសជាតិដើម។",
     "descriptionEn": "Riverside family restaurant in Chbar Ampov specializing in fresh Mekong river fish, grilled freshwater prawns, and sour soups.",
-    "photoUrl": "/Shop/rest-9.jpg",
+    "photoUrl": "/foods/food-49.jpg",
     "galleryPhotos": [
       "/foods/food-49.jpg",
       "/foods/food-13.jpg"
@@ -8368,7 +8368,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Wat Phnom Heritage Cafe & Khmer Bistro",
     "descriptionKh": "ហាងកាហ្វេ និងអាហារខ្មែរក្នុងអគារបេតិកភណ្ឌក្បែរវត្តភ្នំ បម្រើអាហារពេលព្រឹក ថ្ងៃត្រង់ និងកាហ្វេឆុងថ្មីៗ។",
     "descriptionEn": "Charming heritage cafe near Wat Phnom serving Cambodian breakfast sets, palm sugar lattes, and daytime bistro dishes.",
-    "photoUrl": "/Shop/rest-2.jpg",
+    "photoUrl": "/foods/food-52.jpg",
     "galleryPhotos": [
       "/foods/food-52.jpg",
       "/foods/food-20.jpg"
@@ -8407,7 +8407,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Angkor Heritage Garden Dining Siem Reap",
     "descriptionKh": "ភោជនីយដ្ឋានតាមផ្លូវទៅប្រាសាទអង្គរវត្ត បម្រើអាហារថ្ងៃត្រង់ និងពេលល្ងាចក្នុងសួនធម្មជាតិដ៏ត្រជាក់ភ្នែក។",
     "descriptionEn": "Lush garden restaurant on the way to Angkor Wat serving classic Khmer lunch and dinner sets for families and travelers.",
-    "photoUrl": "/Shop/rest-11.jpg",
+    "photoUrl": "/foods/food-55.jpg",
     "galleryPhotos": [
       "/foods/food-55.jpg",
       "/foods/food-27.jpg"
@@ -8446,7 +8446,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Wat Bo Morning Kuyteav & Khmer Breakfast House",
     "descriptionKh": "ហាងអាហារពេលព្រឹកដ៏ល្បីនៅផ្លូវវត្តបូព៌ មានគុយទាវឆ្អឹងជ្រូក បាយសាច់ជ្រូកអាំង និងបបរគ្រឿងសាច់មាន់ស្រែ។",
     "descriptionEn": "Beloved morning eatery on Wat Bo Road serving steaming bowls of pork bone kuyteav, chicken rice porridge, and iced coffee.",
-    "photoUrl": "/Shop/rest-14.jpg",
+    "photoUrl": "/foods/food-58.jpg",
     "galleryPhotos": [
       "/foods/food-58.jpg",
       "/foods/food-34.jpg"
@@ -8485,7 +8485,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Authentic Kampot Home Kitchen",
     "descriptionKh": "ហាងបាយគ្រួសារអ្នកកំពត បម្រើម្ហូបខ្មែរប្រចាំតំបន់ សម្លកកូរ សម្លម្ជូរគ្រឿង និងឆាក្តាមម្រេចខ្ចីតម្លៃសមរម្យ។",
     "descriptionEn": "Homestyle Kampot family restaurant serving hearty Cambodian lunch and dinner dishes at friendly local prices.",
-    "photoUrl": "/Shop/rest-22.jpg",
+    "photoUrl": "/foods/food-61.jpg",
     "galleryPhotos": [
       "/foods/food-61.jpg",
       "/foods/food-41.jpg"

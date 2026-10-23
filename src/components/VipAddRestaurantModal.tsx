@@ -11,6 +11,7 @@ import {
   Trash2,
   RefreshCw,
   Utensils,
+  Edit2,
 } from 'lucide-react';
 import { RestaurantPriceLevel } from '../types';
 import {
@@ -23,6 +24,7 @@ export const VipAddRestaurantModal: React.FC = () => {
     isVipAddRestaurantModalOpen,
     setIsVipAddRestaurantModalOpen,
     addRestaurant,
+    deleteRestaurant,
     currentUser,
     language,
     showToast,
@@ -32,6 +34,10 @@ export const VipAddRestaurantModal: React.FC = () => {
   } = useApp();
 
   const isKm = language === 'km';
+  const existingOwnedRestaurant =
+    currentUser && currentUser.role !== 'admin'
+      ? restaurants.find((r) => r.ownerId === currentUser.id)
+      : undefined;
 
   // Form Fields
   const [nameKh, setNameKh] = useState('');
@@ -42,7 +48,7 @@ export const VipAddRestaurantModal: React.FC = () => {
   const [phone, setPhone] = useState(currentUser?.phone || '');
   const [openingHoursKh, setOpeningHoursKh] = useState('០៧:០០ ព្រឹក - ០៩:០០ យប់');
   const [priceLevel] = useState<RestaurantPriceLevel>('$$');
-  const [profilePhotoUrl, setProfilePhotoUrl] = useState('/Shop/rest-1.jpg');
+  const [profilePhotoUrl, setProfilePhotoUrl] = useState('/foods/food-1.jpg');
   const [foodPhotos, setFoodPhotos] = useState<string[]>([]);
   const [descriptionKh, setDescriptionKh] = useState('');
   const [signatureDish, setSignatureDish] = useState('');
@@ -56,12 +62,12 @@ export const VipAddRestaurantModal: React.FC = () => {
   if (!isVipAddRestaurantModalOpen) return null;
 
   const samplePhotos = [
-    '/Shop/rest-1.jpg',
-    '/Shop/rest-2.jpg',
-    '/Shop/rest-3.jpg',
-    '/Shop/rest-4.jpg',
-    '/Shop/rest-5.jpg',
-    '/Shop/rest-19.jpg',
+    '/foods/food-1.jpg',
+    '/foods/food-2.jpg',
+    '/foods/food-3.jpg',
+    '/foods/food-4.jpg',
+    '/foods/food-5.jpg',
+    '/foods/food-6.jpg',
   ];
 
   const provinces = [
@@ -255,7 +261,89 @@ export const VipAddRestaurantModal: React.FC = () => {
           </button>
         </div>
 
-        {/* Form Body */}
+        {/* Form Body or 1-Restaurant-Per-User Limit Guard */}
+        {existingOwnedRestaurant ? (
+          <div className="p-5 space-y-4 font-khmer text-xs">
+            <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border-2 border-amber-400 space-y-2.5">
+              <div className="flex items-center gap-2 text-amber-800 dark:text-amber-300 font-bold text-sm">
+                <Store className="w-5 h-5 shrink-0" />
+                <span>
+                  {isKm
+                    ? 'គណនី VIP នីមួយៗអាចបង្កើតបានត្រឹមតែ ១ ហាងប៉ុណ្ណោះ'
+                    : 'Each VIP Account Can Add Only 1 Restaurant'}
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-700 dark:text-slate-300 leading-relaxed">
+                {isKm
+                  ? `គណនីរបស់លោកអ្នកមានហាង "${existingOwnedRestaurant.nameKh}" រួចហើយ។ ប្រសិនបើលោកអ្នកចង់ផ្លាស់ប្តូរព័ត៌មាន សូមចុចកែប្រែហាងដែលមានស្រាប់ ឬលុបហាងចាស់ជាមុនសិន មុននឹងបន្ថែមហាងថ្មី។`
+                  : `You already own "${existingOwnedRestaurant.nameEn || existingOwnedRestaurant.nameKh}". Please edit your existing restaurant or delete it before adding a new one.`}
+              </p>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center gap-3">
+              <img
+                src={existingOwnedRestaurant.photoUrl}
+                alt={existingOwnedRestaurant.nameKh}
+                className="w-14 h-14 rounded-xl object-cover shrink-0 border border-amber-400"
+              />
+              <div className="min-w-0 flex-1">
+                <h4 className="font-bold text-sm text-slate-900 dark:text-white truncate">
+                  {isKm ? existingOwnedRestaurant.nameKh : existingOwnedRestaurant.nameEn}
+                </h4>
+                <p className="text-[11px] text-slate-500 truncate mt-0.5">
+                  📍 {existingOwnedRestaurant.addressKh}
+                </p>
+                <span className="inline-block mt-1 px-2 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 text-[10px] font-bold">
+                  🍽️ {existingOwnedRestaurant.menuItems?.length || 0} / 20 មុខម្ហូប
+                </span>
+              </div>
+            </div>
+
+            <div className="space-y-2.5 pt-1">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsVipAddRestaurantModalOpen(false);
+                  setManagingRestaurant(existingOwnedRestaurant);
+                  setIsManageMenuModalOpen(true);
+                }}
+                className="w-full py-3 rounded-2xl bg-gradient-to-r from-[#064E3B] to-emerald-600 hover:from-emerald-700 text-white font-bold text-xs shadow-md flex items-center justify-center gap-2 transition cursor-pointer"
+              >
+                <Edit2 className="w-4 h-4" />
+                <span>
+                  {isKm
+                    ? '✏️ កែប្រែហាងដែលមានស្រាប់ (Edit Existing Restaurant)'
+                    : '✏️ Edit Existing Restaurant'}
+                </span>
+              </button>
+
+              {deleteRestaurant && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (
+                      window.confirm(
+                        isKm
+                          ? `តើអ្នកពិតជាចង់លុបហាង "${existingOwnedRestaurant.nameKh}" មែនទេ? ក្រោយពេលលុប អ្នកអាចបង្កើតហាងថ្មីជំនួសវិញបានភ្លាមៗ។`
+                          : `Delete "${existingOwnedRestaurant.nameEn || existingOwnedRestaurant.nameKh}" so you can add a new restaurant?`
+                      )
+                    ) {
+                      deleteRestaurant(existingOwnedRestaurant.id);
+                    }
+                  }}
+                  className="w-full py-3 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-sm flex items-center justify-center gap-2 transition cursor-pointer"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  <span>
+                    {isKm
+                      ? '🗑️ លុបហាងចាស់ដើម្បីបង្កើតថ្មី (Delete Existing Store)'
+                      : '🗑️ Delete Existing Store to Add New'}
+                  </span>
+                </button>
+              )}
+            </div>
+          </div>
+        ) : (
         <form onSubmit={handleSubmit} className="p-5 space-y-4 overflow-y-auto max-h-[78vh] font-khmer text-xs">
           {/* Store Name Inputs */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -582,6 +670,7 @@ export const VipAddRestaurantModal: React.FC = () => {
             </button>
           </div>
         </form>
+        )}
       </div>
     </div>
   );

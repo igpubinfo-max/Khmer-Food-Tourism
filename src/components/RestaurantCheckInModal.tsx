@@ -161,8 +161,14 @@ export const RestaurantCheckInModal: React.FC = () => {
   };
 
   const handleSubmitCheckIn = async () => {
-    if (!currentUser) {
-      setIsAuthModalOpen(true);
+    if (!currentUser || currentUser.role !== 'admin') {
+      showToast(
+        isKm
+          ? '🔒 មុខងារឆែកអ៊ីន & បញ្ជាក់ទីតាំង GPS Live គឺអនុញ្ញាតសម្រាប់តែ Administrator ប៉ុណ្ណោះ!'
+          : '🔒 Check-in & GPS Live verification is restricted to Administrators only!',
+        'warning'
+      );
+      if (!currentUser) setIsAuthModalOpen(true);
       return;
     }
 
@@ -342,8 +348,29 @@ export const RestaurantCheckInModal: React.FC = () => {
 
         {/* Body */}
         <div className="p-5 space-y-4 overflow-y-auto max-h-[80vh] font-khmer text-xs">
-          
-          {step === 'success' ? (
+          {(!currentUser || currentUser.role !== 'admin') ? (
+            <div className="py-10 px-4 text-center space-y-4">
+              <div className="w-14 h-14 rounded-full bg-rose-100 dark:bg-rose-900/40 text-rose-600 dark:text-rose-400 mx-auto flex items-center justify-center shadow-inner">
+                <AlertCircle className="w-8 h-8" />
+              </div>
+              <div className="space-y-1.5">
+                <h4 className="font-moul text-sm text-slate-800 dark:text-slate-100">
+                  {isKm ? 'មុខងារសម្រាប់តែ Administrator ប៉ុណ្ណោះ' : 'Administrator Access Only'}
+                </h4>
+                <p className="text-xs text-slate-500 leading-relaxed max-w-xs mx-auto">
+                  {isKm
+                    ? 'មុខងារឆែកអ៊ីន & បញ្ជាក់ទីតាំងហាងតាមរយៈ GPS Live ត្រូវបានកំណត់សិទ្ធិសម្រាប់តែគណនី Administrator ដើម្បីត្រួតពិនិត្យឈ្មោះ រូបភាព និងទីតាំងហាងឱ្យបានត្រឹមត្រូវ ១០០%។'
+                    : 'Check-in & GPS Live restaurant verification is restricted to Administrator accounts only.'}
+                </p>
+              </div>
+              <button
+                onClick={handleClose}
+                className="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs shadow-md transition active:scale-95 cursor-pointer"
+              >
+                {isKm ? 'យល់ព្រម (បិទ)' : 'Close'}
+              </button>
+            </div>
+          ) : step === 'success' ? (
             /* Success Screen */
             <div className="py-8 text-center space-y-4 animate-scale-up">
               <div className="w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 flex items-center justify-center mx-auto shadow-md">

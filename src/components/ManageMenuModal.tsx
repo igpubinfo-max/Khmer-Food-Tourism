@@ -6,7 +6,7 @@ import {
   Store, BarChart3, ShieldCheck, Share2, Phone, MapPin, ExternalLink,
   MessageCircle, Copy, Check, HelpCircle, ArrowRight
 } from 'lucide-react';
-import { RestaurantMenuItem, isRestaurantPremiumActive, VIP_PLANS, VipPlanType } from '../types';
+import { RestaurantMenuItem, isRestaurantPremiumActive, isUserVipActive, VIP_PLANS, VipPlanType } from '../types';
 import {
   pickImageUsingNativeAndroidGallery,
   processAndCompressImageFile,
@@ -17,10 +17,12 @@ export const ManageMenuModal: React.FC = () => {
     isManageMenuModalOpen, 
     setIsManageMenuModalOpen, 
     managingRestaurant,
+    currentUser,
     addRestaurantMenuItem,
     updateRestaurantMenuItem,
     deleteRestaurantMenuItem,
     updateRestaurant,
+    deleteRestaurant,
     upgradeRestaurantToPremium,
     language,
     showToast,
@@ -55,7 +57,11 @@ export const ManageMenuModal: React.FC = () => {
   const [storeMapUrl, setStoreMapUrl] = useState(managingRestaurant?.mapUrl || '');
   const [storeCoverPhoto, setStoreCoverPhoto] = useState(managingRestaurant?.photoUrl || '');
   const [storeGalleryPhotos, setStoreGalleryPhotos] = useState<string[]>(managingRestaurant?.galleryPhotos || []);
+  const [storePromoVideoUrl, setStorePromoVideoUrl] = useState(managingRestaurant?.promoVideoUrl || '');
+  const [storeTelegramUrl, setStoreTelegramUrl] = useState(managingRestaurant?.telegramUrl || '');
+  const [storeFacebookUrl, setStoreFacebookUrl] = useState(managingRestaurant?.facebookUrl || '');
   const [newGalleryInput, setNewGalleryInput] = useState('');
+  const [confirmDeleteStore, setConfirmDeleteStore] = useState(false);
 
   // Sync state whenever managingRestaurant changes
   useEffect(() => {
@@ -68,8 +74,23 @@ export const ManageMenuModal: React.FC = () => {
       setStoreMapUrl(managingRestaurant.mapUrl || '');
       setStoreCoverPhoto(managingRestaurant.photoUrl || '');
       setStoreGalleryPhotos(managingRestaurant.galleryPhotos || []);
+      setStorePromoVideoUrl(managingRestaurant.promoVideoUrl || '');
+      setStoreTelegramUrl(managingRestaurant.telegramUrl || '');
+      setStoreFacebookUrl(managingRestaurant.facebookUrl || '');
+      setConfirmDeleteStore(false);
     }
   }, [managingRestaurant?.id]);
+
+  // Allow external triggers (e.g. ProfileView VIP feature cards) to open a specific tab
+  useEffect(() => {
+    if (isManageMenuModalOpen) {
+      const requestedTab = (window as any).__kft_manage_initial_tab;
+      if (requestedTab && ['menu', 'info', 'analytics', 'membership'].includes(requestedTab)) {
+        setMainTab(requestedTab);
+        (window as any).__kft_manage_initial_tab = undefined;
+      }
+    }
+  }, [isManageMenuModalOpen]);
 
   // Upgrade / Renewal fields
   const [transactionRef, setTransactionRef] = useState('');
@@ -79,9 +100,12 @@ export const ManageMenuModal: React.FC = () => {
   if (!isManageMenuModalOpen || !managingRestaurant) return null;
 
   const menuItems = managingRestaurant.menuItems || [];
-  const isPremiumActive = isRestaurantPremiumActive(managingRestaurant);
+  const isPremiumActive =
+    isRestaurantPremiumActive(managingRestaurant) ||
+    isUserVipActive(currentUser) ||
+    currentUser?.role === 'admin';
   const isExpired = managingRestaurant.membershipTier === 'premium' && !isPremiumActive;
-  const isFree = managingRestaurant.membershipTier === 'free';
+  const isFree = !isPremiumActive && !isExpired;
 
   // Analytics Metrics
   const viewsCount = managingRestaurant.analytics?.views || 86;
@@ -130,11 +154,11 @@ export const ManageMenuModal: React.FC = () => {
       setMainTab('membership');
       return;
     }
-    if (menuItems.length >= 5) {
+    if (menuItems.length >= 20) {
       showToast(
         isKm 
-          ? 'សមាជិកភាព Premium អនុញ្ញាតឱ្យបន្ថែមមុខម្ហូបអតិបរមាត្រឹម ៥ មុខប៉ុណ្ណោះ!' 
-          : 'Premium membership allows a maximum of 5 food menu items!',
+          ? 'សមាជិកភាព Premium VIP អនុញ្ញាតឱ្យបន្ថែមមុខម្ហូបអតិបរមាត្រឹម ២០ មុខប៉ុណ្ណោះ!' 
+          : 'Premium VIP membership allows a maximum of 20 food menu items!',
         'warning'
       );
       return;
@@ -219,15 +243,18 @@ export const ManageMenuModal: React.FC = () => {
       profileImage: finalCover,
       foodImages: storeGalleryPhotos,
       galleryPhotos: Array.from(new Set([finalCover, ...storeGalleryPhotos])),
+      promoVideoUrl: storePromoVideoUrl.trim() || undefined,
+      telegramUrl: storeTelegramUrl.trim() || undefined,
+      facebookUrl: storeFacebookUrl.trim() || undefined,
     });
 
-    showToast(isKm ? 'បានកែប្រែព័ត៌មានហាងដោយជោគជ័យ!' : 'Restaurant info saved successfully!', 'success');
+    showToast(isKm ? 'បានកែប្រែព័ត៌មានហាង រូបភាព និងវីដេអូ Reels ដោយជោគជ័យ!' : 'Restaurant info, photos, and video reel saved!', 'success');
   };
 
   const handleAddGalleryPhoto = (url: string) => {
     if (!url.trim()) return;
-    if (storeGalleryPhotos.length >= 6) {
-      showToast(isKm ? 'អាចបន្ថែមរូបភាព Gallery អតិបរមា ៦ សន្លឹក!' : 'Max 6 gallery photos allowed!', 'warning');
+    if (storeGalleryPhotos.length >= 30) {
+      showToast(isKm ? 'អាចបន្ថែមរូបភាព Gallery អតិបរមា ៣០ សន្លឹក!' : 'Max 30 gallery photos allowed!', 'warning');
       return;
     }
     if (!storeGalleryPhotos.includes(url.trim())) {
@@ -325,7 +352,7 @@ export const ManageMenuModal: React.FC = () => {
             }`}
           >
             <UtensilsCrossed className="w-3.5 h-3.5" />
-            <span>{isKm ? 'មុខម្ហូប (៥)' : 'Menu (5)'}</span>
+            <span>{isKm ? 'មុខម្ហូប (២០)' : 'Menu (20)'}</span>
           </button>
 
           <button
@@ -387,7 +414,7 @@ export const ManageMenuModal: React.FC = () => {
 
           <div className="text-right">
             <span className="text-xs font-bold text-[#064E3B] dark:text-emerald-400 font-mono">
-              {menuItems.length} / 5
+              {menuItems.length} / 20
             </span>
             <span className="text-[10px] text-slate-500 ml-1">
               {isKm ? 'មុខម្ហូប' : 'items'}
@@ -405,10 +432,10 @@ export const ManageMenuModal: React.FC = () => {
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <h3 className="font-bold text-[#0F172A] dark:text-white font-khmer text-xs">
-                      {isKm ? 'មុខម្ហូបក្នុងហាង (អតិបរមា ៥ មុខ)' : 'Food Menu Items (Max 5)'}
+                      {isKm ? 'មុខម្ហូបក្នុងហាង (អតិបរមា ២០ មុខ)' : 'Food Menu Items (Max 20)'}
                     </h3>
 
-                    {isPremiumActive && menuItems.length < 5 && (
+                    {isPremiumActive && menuItems.length < 20 && (
                       <button
                         onClick={handleStartAdd}
                         className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-xs shadow-xs font-khmer transition active:scale-95"
@@ -756,12 +783,12 @@ export const ManageMenuModal: React.FC = () => {
                 />
               </div>
 
-              {/* Multiple Food Photos */}
+              {/* Multiple Food Photos (Unlimited HD Photos for VIP) */}
               <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-xs text-[#0F172A] dark:text-white flex items-center gap-1.5">
                     <span>📸</span>
-                    <span>{isKm ? `រូបភាពមុខម្ហូបប្រចាំហាង (Food Photos - ${storeGalleryPhotos.length}/6 សន្លឹក)` : `Food Photos (${storeGalleryPhotos.length}/6)`}</span>
+                    <span>{isKm ? `រូបភាពមុខម្ហូបប្រចាំហាង HD (${storeGalleryPhotos.length} សន្លឹក - VIP ឥតកំណត់)` : `HD Food Photos (${storeGalleryPhotos.length} uploaded)`}</span>
                   </span>
                   <label className="px-2.5 py-1 rounded-lg bg-amber-500 text-slate-950 font-bold text-[10px] cursor-pointer">
                     <span>{isKm ? '+ បន្ថែមពី Gallery' : '+ Add from Gallery'}</span>
@@ -777,7 +804,7 @@ export const ManageMenuModal: React.FC = () => {
                           try {
                             const dataUrl = await processAndCompressImageFile(f);
                             if (dataUrl) {
-                              setStoreGalleryPhotos((prev) => [...prev, dataUrl].slice(0, 6));
+                              setStoreGalleryPhotos((prev) => [...prev, dataUrl].slice(0, 30));
                             }
                           } catch {
                             // ignore invalid file
@@ -794,13 +821,13 @@ export const ManageMenuModal: React.FC = () => {
                     placeholder="បញ្ចូលតំណភ្ជាប់រូបភាព Gallery URL..."
                     value={newGalleryInput}
                     onChange={e => setNewGalleryInput(e.target.value)}
-                    disabled={!isPremiumActive || storeGalleryPhotos.length >= 6}
+                    disabled={!isPremiumActive}
                     className="flex-1 px-3 py-1.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-mono disabled:opacity-50"
                   />
                   <button
                     type="button"
                     onClick={() => handleAddGalleryPhoto(newGalleryInput)}
-                    disabled={!isPremiumActive || !newGalleryInput.trim() || storeGalleryPhotos.length >= 6}
+                    disabled={!isPremiumActive || !newGalleryInput.trim()}
                     className="px-3 py-1.5 rounded-xl bg-[#064E3B] text-white font-bold text-xs disabled:opacity-40"
                   >
                     {isKm ? 'បន្ថែម' : 'Add'}
@@ -837,7 +864,7 @@ export const ManageMenuModal: React.FC = () => {
                         key={i}
                         type="button"
                         onClick={() => handleAddGalleryPhoto(url)}
-                        disabled={!isPremiumActive || storeGalleryPhotos.length >= 6}
+                        disabled={!isPremiumActive}
                         className="w-12 h-10 rounded-lg overflow-hidden shrink-0 border border-slate-300 hover:border-emerald-500 transition opacity-80 hover:opacity-100 disabled:opacity-30"
                       >
                         <img src={url} alt="sample" className="w-full h-full object-cover" />
@@ -847,13 +874,122 @@ export const ManageMenuModal: React.FC = () => {
                 </div>
               </div>
 
-              <div className="pt-2">
+              {/* VIP Feature: Food Video Reels (TikTok / Facebook / YouTube Video Link) */}
+              <div className="p-3.5 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-slate-800 rounded-2xl border border-amber-300 dark:border-amber-700/60 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-xs text-amber-900 dark:text-amber-300 flex items-center gap-1.5">
+                    <span>🎥</span>
+                    <span>{isKm ? 'វីដេអូម្ហូប Food Video Reels (TikTok / Facebook / YouTube)' : 'Food Video Reels (TikTok / FB / YouTube)'}</span>
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full bg-amber-500 text-slate-950 font-black text-[9px]">
+                    VIP UNLOCKED
+                  </span>
+                </div>
+                <p className="text-[10px] text-amber-800 dark:text-amber-200/80">
+                  {isKm
+                    ? 'បញ្ចូលតំណភ្ជាប់វីដេអូម្ហូបពី TikTok, Facebook Reels ឬ YouTube ដើម្បីឱ្យភ្ញៀវចុចមើលវីដេអូផ្ទាល់លើទំព័រហាងរបស់អ្នក!'
+                    : 'Add a TikTok, Facebook Reel, or YouTube video link so customers can watch your food video directly on your store page!'}
+                </p>
+                <div className="flex gap-2">
+                  <input
+                    type="url"
+                    value={storePromoVideoUrl}
+                    onChange={e => setStorePromoVideoUrl(e.target.value)}
+                    placeholder="https://www.tiktok.com/@.../video/... ឬ Facebook/YouTube link"
+                    className="flex-1 px-3 py-2 rounded-xl border border-amber-300 dark:border-amber-700 bg-white dark:bg-slate-900 text-xs font-mono text-[#0F172A] dark:text-white"
+                  />
+                  {storePromoVideoUrl.trim() && (
+                    <a
+                      href={storePromoVideoUrl.trim()}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-3 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs flex items-center gap-1 shrink-0"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                      <span>{isKm ? 'មើលវីដេអូ' : 'Preview'}</span>
+                    </a>
+                  )}
+                </div>
+              </div>
+
+              {/* VIP Feature: Direct Telegram & Facebook Contact Links */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
+                    {isKm ? '💬 តំណភ្ជាប់ Telegram ហាង' : '💬 Store Telegram Link'}
+                  </label>
+                  <input
+                    type="text"
+                    value={storeTelegramUrl}
+                    onChange={e => setStoreTelegramUrl(e.target.value)}
+                    placeholder="https://t.me/your_store"
+                    className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-mono text-[#0F172A] dark:text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
+                    {isKm ? '📘 តំណភ្ជាប់ Facebook Page ហាង' : '📘 Store Facebook Page Link'}
+                  </label>
+                  <input
+                    type="text"
+                    value={storeFacebookUrl}
+                    onChange={e => setStoreFacebookUrl(e.target.value)}
+                    placeholder="https://facebook.com/your_store"
+                    className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-mono text-[#0F172A] dark:text-white"
+                  />
+                </div>
+              </div>
+
+              <div className="pt-2 space-y-2.5">
                 <button
                   type="submit"
                   className="w-full py-3 rounded-2xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold shadow-md shadow-emerald-950/20 transition active:scale-[0.98]"
                 >
-                  {isKm ? 'រក្សាទុកការកែប្រែព័ត៌មានហាង' : 'Save Restaurant Info'}
+                  {isKm ? '💾 រក្សាទុកការកែប្រែព័ត៌មានហាង' : '💾 Save Restaurant Info'}
                 </button>
+
+                {/* Delete Restaurant Option (So user can delete existing store if they want to add another) */}
+                <div className="p-3 rounded-2xl bg-red-50 dark:bg-red-950/25 border border-red-200 dark:border-red-900/50 space-y-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="text-[11px] text-red-800 dark:text-red-300">
+                      <span className="font-bold block">
+                        {isKm ? '🗑️ ចង់ផ្លាស់ប្តូរហាងថ្មី ឬលុបហាងនេះចេញ?' : '🗑️ Want to replace or delete this restaurant?'}
+                      </span>
+                      <span className="text-[10px] opacity-85">
+                        {isKm
+                          ? 'គណនី VIP នីមួយៗអាចបន្ថែមហាងបាន ១។ ប្រសិនបើអ្នកចង់ប្តូរហាងថ្មី សូមកែប្រែខាងលើ ឬលុបហាងចាស់នេះជាមុនសិន។'
+                          : 'Each VIP user can add 1 restaurant. Edit above or delete this restaurant before adding a new one.'}
+                      </span>
+                    </div>
+                    {!confirmDeleteStore ? (
+                      <button
+                        type="button"
+                        onClick={() => setConfirmDeleteStore(true)}
+                        className="px-3 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-[11px] shrink-0 flex items-center gap-1 transition"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        <span>{isKm ? 'លុបហាង' : 'Delete'}</span>
+                      </button>
+                    ) : (
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => deleteRestaurant(managingRestaurant.id)}
+                          className="px-3 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-[11px] transition"
+                        >
+                          {isKm ? 'បញ្ជាក់លុប' : 'Confirm'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setConfirmDeleteStore(false)}
+                          className="px-2.5 py-2 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-[11px]"
+                        >
+                          {isKm ? 'ទេ' : 'No'}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             </form>
           )}

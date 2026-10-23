@@ -46,8 +46,17 @@ export interface GooglePlaceCachedItem {
   cachedAt: string;
 }
 
-const SMART_CACHE_STORAGE_KEY = 'kft_google_places_smart_cache_v2';
+const SMART_CACHE_STORAGE_KEY = 'kft_google_places_smart_cache_v3';
 const SMART_CACHE_STATS_KEY = 'kft_google_places_cache_stats_v1';
+
+function isValidSmartCachePlace(item: any): item is GooglePlaceCachedItem {
+  if (!item || typeof item !== 'object' || !item.placeId) return false;
+  // Purge legacy Nominatim items that had mismatched Malis/Romdeng storefront photos or non-restaurant POIs
+  if (String(item.placeId).startsWith('osm-kh-')) return false;
+  if (item.photoUrl === '/Shop/rest-1.jpg' && item.placeId !== 'gmap-pp-malis-restaurant') return false;
+  if (item.photoUrl === '/Shop/rest-2.jpg' && item.placeId !== 'gmap-pp-romdeng') return false;
+  return true;
+}
 
 /**
  * Sanitize any phone string into a clean dialable phone number (digits and optional leading +).
@@ -110,7 +119,7 @@ const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     openHours: '06:30 AM - 10:30 PM',
     rating: 4.7,
     reviewCount: 1420,
-    photoUrl: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80',
+    photoUrl: '/Shop/rest-1.jpg',
     googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5542,104.9305',
     source: 'cambodia_extended_directory',
     cachedAt: '2026-10-22T00:00:00.000Z',
@@ -128,7 +137,7 @@ const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     openHours: '11:00 AM - 10:00 PM',
     rating: 4.6,
     reviewCount: 980,
-    photoUrl: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80',
+    photoUrl: '/Shop/rest-2.jpg',
     googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5648,104.9231',
     source: 'cambodia_extended_directory',
     cachedAt: '2026-10-22T00:00:00.000Z',
@@ -146,7 +155,7 @@ const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     openHours: '10:30 AM - 09:30 PM',
     rating: 4.7,
     reviewCount: 640,
-    photoUrl: 'https://images.unsplash.com/photo-1544148103-0773bf10d330?w=800&auto=format&fit=crop&q=80',
+    photoUrl: '/Shop/rest-4.jpg',
     googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5588,104.9322',
     source: 'cambodia_extended_directory',
     cachedAt: '2026-10-22T00:00:00.000Z',
@@ -200,7 +209,7 @@ const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     openHours: '06:30 AM - 10:00 PM',
     rating: 4.6,
     reviewCount: 890,
-    photoUrl: 'https://images.unsplash.com/photo-1552566626-52f8b828add9?w=800&auto=format&fit=crop&q=80',
+    photoUrl: '/Shop/rest-7.jpg',
     googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5792,104.8965',
     source: 'cambodia_extended_directory',
     cachedAt: '2026-10-22T00:00:00.000Z',
@@ -218,7 +227,7 @@ const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     openHours: '04:00 PM - 11:30 PM',
     rating: 4.5,
     reviewCount: 1120,
-    photoUrl: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80',
+    photoUrl: '/Shop/rest-6.jpg',
     googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5478,104.9285',
     source: 'cambodia_extended_directory',
     cachedAt: '2026-10-22T00:00:00.000Z',
@@ -284,10 +293,15 @@ const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
  */
 export function getLocalSmartCache(): GooglePlaceCachedItem[] {
   try {
+    localStorage.removeItem('kft_google_places_smart_cache_v2');
+    localStorage.removeItem('kft_google_places_smart_cache_v1');
     const raw = localStorage.getItem(SMART_CACHE_STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) return parsed;
+      if (Array.isArray(parsed)) {
+        const valid = parsed.filter(isValidSmartCachePlace);
+        if (valid.length > 0) return valid;
+      }
     }
   } catch {
     // ignore
@@ -430,12 +444,15 @@ export async function searchCambodiaPlacesWithSmartCache(
     const cloudPool = await pullCloudDocument<GooglePlaceCachedItem[]>(
       'kft_cloud_google_places_cache_v1'
     );
-    if (Array.isArray(cloudPool) && cloudPool.length > cachePool.length) {
-      cachePool = cloudPool;
-      try {
-        localStorage.setItem(SMART_CACHE_STORAGE_KEY, JSON.stringify(cloudPool));
-      } catch {
-        // ignore
+    if (Array.isArray(cloudPool)) {
+      const cleanedCloudPool = cloudPool.filter(isValidSmartCachePlace);
+      if (cleanedCloudPool.length > cachePool.length) {
+        cachePool = cleanedCloudPool;
+        try {
+          localStorage.setItem(SMART_CACHE_STORAGE_KEY, JSON.stringify(cleanedCloudPool));
+        } catch {
+          // ignore
+        }
       }
     }
   }
@@ -511,11 +528,11 @@ export async function searchCambodiaPlacesWithSmartCache(
           const province = inferCambodiaProvinceFromAddressOrGps(address, lat, lng);
           const displayName = p.displayName?.text || cleanQuery;
 
-          // Build official matched Google Maps Place Photo URL
+          // Build official matched Google Maps Place Photo URL (never use another restaurant's storefront sign)
           let photoUrl =
             typeFilter === 'tourism'
               ? 'https://thumb.wikimedia.org/wikipedia/commons/thumb/4/41/Angkor_Wat.jpg/960px-Angkor_Wat.jpg'
-              : '/Shop/rest-1.jpg';
+              : '/foods/food-1.jpg';
           if (Array.isArray(p.photos) && p.photos.length > 0 && p.photos[0].name) {
             photoUrl = `https://places.googleapis.com/v1/${p.photos[0].name}/media?maxHeightPx=700&maxWidthPx=900&key=${encodeURIComponent(
               cfg.googleMapsApiKey
@@ -572,94 +589,8 @@ export async function searchCambodiaPlacesWithSmartCache(
     }
   }
 
-  // ==========================================================================
-  // STEP 3: Live Online Cambodia Map Search (Nominatim Cambodia + Wikimedia Photo)
-  //         Works immediately with $0 cost even before Google API Key is entered!
-  // ==========================================================================
-  try {
-    const osmQuery =
-      provinceFilter && provinceFilter !== 'ទាំងអស់'
-        ? `${cleanQuery} ${provinceFilter} Cambodia`
-        : `${cleanQuery} Cambodia`;
-    const osmUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
-      osmQuery
-    )}&countrycodes=kh&format=jsonv2&addressdetails=1&extratags=1&limit=6`;
-
-    const osmRes = await fetch(osmUrl, {
-      headers: {
-        'Accept-Language': 'km,en',
-      },
-    });
-
-    if (osmRes.ok) {
-      const osmRows = await osmRes.json();
-      if (Array.isArray(osmRows) && osmRows.length > 0) {
-        const mappedItems: GooglePlaceCachedItem[] = osmRows.map((row: any, idx: number) => {
-          const lat = parseFloat(row.lat) || 11.5564;
-          const lng = parseFloat(row.lon) || 104.9282;
-          const displayName = row.name || (row.display_name || '').split(',')[0] || cleanQuery;
-          const address = row.display_name || 'ភ្នំពេញ, កម្ពុជា';
-          const province = inferCambodiaProvinceFromAddressOrGps(address, lat, lng);
-          const phone = formatDisplayPhone(
-            row.extratags?.phone ||
-              row.extratags?.['contact:phone'] ||
-              row.extratags?.['phone:mobile'] ||
-              row.extratags?.['contact:mobile'] ||
-              ''
-          );
-          const openHours = row.extratags?.opening_hours || '07:00 AM - 09:00 PM';
-
-          const categoryType =
-            typeFilter === 'tourism' ||
-            row.category === 'tourism' ||
-            row.category === 'historic'
-              ? 'tourism'
-              : row.type === 'cafe'
-              ? 'cafe'
-              : 'restaurant';
-
-          const fallbackPhotos =
-            categoryType === 'tourism'
-              ? [
-                  'https://thumb.wikimedia.org/wikipedia/commons/thumb/4/41/Angkor_Wat.jpg/960px-Angkor_Wat.jpg',
-                  'https://thumb.wikimedia.org/wikipedia/commons/thumb/0/00/Phnom_Penh_Independence_Monument.jpg/960px-Phnom_Penh_Independence_Monument.jpg',
-                ]
-              : categoryType === 'cafe'
-              ? ['/Shop/rest-10.jpg', '/Shop/rest-20.jpg']
-              : ['/Shop/rest-1.jpg', '/Shop/rest-2.jpg'];
-
-          return {
-            placeId: `osm-kh-${row.place_id || Date.now() + idx}`,
-            nameKh: displayName,
-            nameEn: row.extratags?.['name:en'] || displayName,
-            category: categoryType,
-            province,
-            address,
-            lat,
-            lng,
-            phone,
-            openHours,
-            rating: 4.5,
-            reviewCount: 45 + idx * 12,
-            photoUrl: fallbackPhotos[idx % fallbackPhotos.length],
-            googleMapsUrl: `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`,
-            source: 'smart_cache_cloud',
-            cachedAt: new Date().toISOString(),
-          };
-        });
-
-        await saveToSmartCache(mappedItems);
-        return {
-          results: mappedItems,
-          fromSmartCache: false,
-          providerUsed: 'online_cambodia_map',
-        };
-      }
-    }
-  } catch (err) {
-    console.warn('Cambodia online map fallback error:', err);
-  }
-
+  // Do not fabricate unverified Nominatim POIs with mismatched storefront photos.
+  // Only verified directory restaurants and official Google Maps places with matched photos are returned.
   return { results: [], fromSmartCache: false, providerUsed: 'smart_cache' };
 }
 
