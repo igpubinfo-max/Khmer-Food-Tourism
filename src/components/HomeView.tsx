@@ -616,8 +616,8 @@ export const HomeView: React.FC = () => {
             isVip ? 'text-slate-900 font-medium' : 'text-emerald-100'
           }`}>
             {isKm
-              ? 'ស្វែងរកមុខម្ហូបប្រពៃណី ១០០+ មុខ រូបមន្តចម្អិន ភោជនីយដ្ឋាន ១០០+ ហាង និងតំបន់ទេសចរណ៍ស្រស់ត្រកាលទូទាំងប្រទេស'
-              : 'Discover 100+ authentic Khmer dishes, cooking recipes, 100+ restaurants, and breathtaking destinations.'}
+              ? 'ស្វែងរកមុខម្ហូបប្រពៃណី ២០០+ មុខ រូបមន្តចម្អិន ភោជនីយដ្ឋានល្បីៗ និងតំបន់ទេសចរណ៍ ៣០០ កន្លែងទូទាំង ២៥ រាជធានី-ខេត្ត'
+              : 'Discover 200+ authentic Khmer dishes, recipes, top restaurants, and 300 tourist destinations across all 25 provinces.'}
           </p>
 
           <div className="pt-2 flex items-center gap-2 flex-wrap">

@@ -277,23 +277,30 @@ export const AdminDashboard: React.FC = () => {
       >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 bg-[#064E3B] text-white shrink-0 border-b border-[#047857]">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-2xl bg-emerald-500/20 text-emerald-200 border border-emerald-400/30">
-              <Shield className="w-6 h-6" />
+          <div className="flex items-center gap-3.5">
+            <div className="relative shrink-0">
+              <img 
+                src={currentUser?.avatar || '/images/admin_profile.png'} 
+                alt="Chea Savuth Admin" 
+                className="w-12 h-12 rounded-2xl object-cover border-2 border-emerald-300 shadow-md ring-2 ring-emerald-400/30" 
+              />
+              <div className="absolute -bottom-1 -right-1 p-0.5 bg-emerald-600 rounded-full border border-white text-white shadow-xs">
+                <Shield className="w-3 h-3 text-white" />
+              </div>
             </div>
             <div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <h2 className="text-lg font-bold font-khmer text-white">
-                  {isKm ? 'ផ្ទាំងគ្រប់គ្រងរដ្ឋបាលជាន់ខ្ពស់' : 'Administrator Control Center'}
+                  {currentUser?.name || (isKm ? 'រដ្ឋបាលប្រព័ន្ធ (Chea Savuth)' : 'Chea Savuth (Admin)')}
                 </h2>
-                <span className="text-[10px] bg-[#059669] text-white font-bold px-2 py-0.5 rounded-full font-mono">
-                  SINGLE AUTHORIZED ADMIN
+                <span className="text-[10px] bg-[#059669] text-white font-bold px-2 py-0.5 rounded-full font-mono border border-emerald-400/40">
+                  OFFICIAL ADMIN
                 </span>
               </div>
               <p className="text-xs text-emerald-200 font-khmer">
                 {isKm 
-                  ? 'គ្រប់គ្រងមុខម្ហូប (100) ហាងអាហារ (200+) ទេសចរណ៍ ការទូទាត់ VIP និងសន្តិសុខ' 
-                  : 'Manage foods (100), restaurants (200+), destinations, VIP transactions, and security'}
+                  ? 'គ្រប់គ្រងមុខម្ហូប (200) ហាងអាហារ (200+) ទេសចរណ៍ (300) ការទូទាត់ VIP និងសន្តិសុខ' 
+                  : 'Manage foods (200), restaurants (200+), destinations (300), VIP transactions, and security'}
               </p>
             </div>
           </div>

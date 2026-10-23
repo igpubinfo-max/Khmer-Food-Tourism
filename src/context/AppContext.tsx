@@ -311,9 +311,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
         if (parsed && typeof parsed === 'object') {
-          // Keep Admin session active if logged in as Admin
-          if (parsed.role === 'admin' && parsed.id === 'admin-authorized-single') {
-            return parsed;
+          // Keep Admin session active if logged in as Admin and ensure official avatar is loaded
+          if (parsed.role === 'admin' || parsed.id === 'admin-authorized-single' || parsed.username === 'cheasavuth' || parsed.username === 'admin') {
+            return {
+              ...parsed,
+              avatar: '/images/admin_profile.png',
+            };
           }
           return parsed;
         }
@@ -575,7 +578,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [destinations, setDestinations] = useState<TouristDestination[]>(() => {
     try {
-      const saved = localStorage.getItem('kft_destinations_real_v6') || localStorage.getItem('kft_destinations_real_v5');
+      const saved = localStorage.getItem('kft_destinations_real_v7') || localStorage.getItem('kft_destinations_real_v6') || localStorage.getItem('kft_destinations_real_v5');
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length >= 100 && !String(parsed[0]?.photoUrl || '').includes('1569683795645')) {
@@ -596,7 +599,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
       }
     } catch (e) {
-      console.warn('Failed to parse kft_destinations_real_v6', e);
+      console.warn('Failed to parse kft_destinations_real_v7', e);
     }
     try {
       localStorage.removeItem('kft_destinations_google_v3');
@@ -604,6 +607,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       localStorage.removeItem('kft_destinations_100_v1');
       localStorage.removeItem('kft_destinations_v3');
       localStorage.removeItem('kft_destinations_v4');
+      localStorage.removeItem('kft_destinations_real_v5');
+      localStorage.removeItem('kft_destinations_real_v6');
     } catch {}
     return initialDestinations;
   });
@@ -1165,7 +1170,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return;
     }
     if (destinations && destinations.length > 0) {
-      scheduleStorageWrite('kft_destinations_real_v6', destinations, 1500);
+      scheduleStorageWrite('kft_destinations_real_v7', destinations, 1500);
     }
   }, [destinations]);
 
@@ -1604,15 +1609,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     await createAdminSession();
     recordSecurityAudit('ADMIN_LOGIN_SUCCESS', 'SUCCESS', 'AdminPortal', 'Authorized admin session established');
 
-    // Isolated single authorized administrator profile (private credentials protected)
+    // Isolated single authorized administrator profile with official profile photo
     const adminProfile: User = {
       id: 'admin-authorized-single',
-      name: 'រដ្ឋបាលប្រព័ន្ធ (System Admin)',
+      name: 'រដ្ឋបាលប្រព័ន្ធ (Chea Savuth / Admin)',
+      username: 'cheasavuth',
       email: 'admin@khmerfoodtourism.com',
       role: 'admin',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+      avatar: '/images/admin_profile.png',
       bio: 'ប្រព័ន្ធគ្រប់គ្រងរដ្ឋបាលផ្លូវការ (System Administrator)',
       createdAt: '2026-01-01',
+      membershipTier: 'premium_vip',
+      subscriptionStatus: 'active',
+      paymentStatus: 'verified',
     };
 
     setCurrentUser(adminProfile);
@@ -1657,12 +1666,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
       const adminProfile: User = {
         id: 'admin-authorized-single',
-        name: 'រដ្ឋបាលប្រព័ន្ធ (System Admin)',
+        name: 'រដ្ឋបាលប្រព័ន្ធ (Chea Savuth / Admin)',
+        username: 'cheasavuth',
         email: 'admin@khmerfoodtourism.com',
         role: 'admin',
-        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+        avatar: '/images/admin_profile.png',
         bio: 'ប្រព័ន្ធគ្រប់គ្រងរដ្ឋបាលផ្លូវការ (System Administrator)',
         createdAt: '2026-01-01',
+        membershipTier: 'premium_vip',
+        subscriptionStatus: 'active',
+        paymentStatus: 'verified',
       };
 
       setCurrentUser(adminProfile);

@@ -69,7 +69,7 @@ jobs:
           echo "=== SEARCHING FOR GENERATED APK FILES ==="
           find . -name "*.apk" -ls
           cd android/app/build/outputs/apk/debug
-          mv app-debug.apk KhmerFoodTourism-v1.8.6.apk
+          mv app-debug.apk KhmerFoodTourism-v1.8.7.apk
           ls -la
 
       # Play Store AAB build disabled during regular edits per user instruction (enable only when requested)
@@ -96,28 +96,25 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: v1.8.6
-          name: "Khmer Food & Tourism v1.8.6 (Strict VIP Permissions & Food Image Upload)"
+          tag_name: v1.8.7
+          name: "Khmer Food & Tourism v1.8.7 (Simplified Admin Fingerprint Login, Admin Avatar & 300 Destinations)"
           make_latest: true
           body: |
             ### 🇰🇭 កម្មវិធីទូរស័ព្ទដៃ អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism Mobile App)
             
-            **កំណែថ្មី v1.8.6 (Strict VIP Permissions & Food Image Upload):**
-            - 🔒 **១. ការពារសិទ្ធិ VIP លើការចុះបញ្ជី និងគ្រប់គ្រងហាង (Strict VIP Permissions Frontend & Backend):**
-              - មានតែគណនីដែលមានសមាជិកភាព VIP សកម្ម និងទទួលបានការអនុម័តពី Admin (Admin-Approved Active VIP) ឬគណនី Admin ប៉ុណ្ណោះដែលអាចចុះបញ្ជីហាង កែប្រែ និងគ្រប់គ្រងមុខម្ហូបបាន។
-              - អ្នកប្រើប្រាស់ទូទៅ (Regular Users), អ្នកមិនទាន់បង់ប្រាក់ (Unpaid Users), និងអ្នកដែលកំពុងរង់ចាំការអនុម័ត (Pending VIP) ត្រូវបានទប់ស្កាត់ទាំងស្រុង (Strict Barrier) មិនឱ្យចូលប្រើប្រាស់ផ្ទាំងចុះបញ្ជី ឬផ្ទាំងគ្រប់គ្រងឡើយ។
-              - គណនី VIP ដែលផុតកំណត់ (Expired VIP) នឹងត្រូវដកហូតសិទ្ធិភ្លាមៗ (Instant VIP Revocation) ដោយបញ្ជូនទៅកាន់ផ្ទាំងបន្តកញ្ចប់ VIP។
-              - រក្សាសិទ្ធិរដ្ឋបាល System Admin ពេញលេញ និងអចិន្ត្រៃយ៍ (Lifetime Master Access) ដោយមិនប៉ះពាល់ដល់ទិន្នន័យដែលមានស្រាប់។
-            - 📸 **២. មុខងារអាប់ឡូតរូបភាពម្ហូបពីទូរស័ព្ទ (Phone Gallery & Camera Food Image Upload):**
-              - អនុញ្ញាតឱ្យម្ចាស់ហាង VIP អាប់ឡូតរូបភាពម្ហូបផ្ទាល់ពី Gallery ឬថតចេញពី Camera នៅពេលបន្ថែម ឬកែប្រែមុខម្ហូប។
-              - រក្សាទុកមុខងារស្វែងរករូបភាពម្ហូប Online/AI (Auto-Search Matching Food Photos) ដោយឥតគិតថ្លៃ ទុកឱ្យម្ចាស់ហាងជ្រើសរើសតាមចំណង់ចំណូលចិត្ត។
-              - បង្ហាញរូបភាពជាមុន (Live Preview Card) ជាមួយប៊ូតុងប្តូររូបភាពថ្មី (Replace) និងលុបរូបភាព (Remove)។
-              - រូបភាពត្រូវបានបង្រួមទំហំ (Client-side Compression) យ៉ាងរលូន និងតភ្ជាប់ទៅកាន់មុខម្ហូបក្នុង Database យ៉ាងត្រឹមត្រូវ។
-            - 👆 **៣. ស្កេនមេដៃ Admin ចូលដោយស្វ័យប្រវត្តិ (Admin Biometric Fingerprint Auto-Fill):**
-              - រក្សាសុវត្ថិភាពខ្ពស់ជាមួយ Android Keystore (AES-256-GCM) ស្កេនមេដៃបំពេញ Username & Password និងចូល Admin ដោយស្វ័យប្រវត្តិ។
-              - ក្រោយប្រព័ន្ធផ្ទៀងផ្ទាត់ប្រតិបត្តិការជោគជ័យ គណនីរបស់អ្នកប្រើប្រាស់នឹងត្រូវបានដំឡើងទៅជា VIP ភ្លាមៗដោយស្វ័យប្រវត្ត (៩០ ថ្ងៃ)។
-              - បើកដំណើរការគ្រប់មុខងារពិសេស VIP ទាំងអស់ភ្លាមៗ ដោយមិនបង្ហាញផ្ទាំងរង់ចាំរដ្ឋបាលអនុម័ត (Pending Admin Approval) សម្រាប់ប្រតិបត្តិការដែលបានផ្ទៀងផ្ទាត់ត្រឹមត្រូវឡើយ។
-            - 📊 **៤. គ្រប់គ្រងស្ថានភាពទូទាត់ប្រាក់ទាំង ៦ កម្រិត (Comprehensive 6-State Payment Engine):**
+            **កំណែថ្មី v1.8.7 (Simplified Admin Fingerprint Login, Admin Profile Picture & 300 Tourist Destinations):**
+            - 👆 **១. សម្រួលការចូលគណនី Admin កាន់តែរហ័ស (Simplified 1-Tap Biometric Fingerprint Login):**
+              - លាក់ Username និង Password ជាលំនាំដើម ដោយបង្ហាញតែប៊ូតុងស្កេនមេដៃធំទូលាយ «👆 ស្កេនស្នាមមេដៃចូលរដ្ឋបាល» ចូលបានភ្លាមៗក្នុងរយៈពេលត្រឹមតែ ១ វិនាទី។
+              - ប្រសិនបើ Admin ប្រើប្រាស់ទូរស័ព្ទថ្មី ឬមិនទាន់ចុះឈ្មោះស្កេនមេដៃ ប្រព័ន្ធនឹងបង្ហាញទម្រង់ Username/Password សម្រាប់ចូលលើកដំបូង រួចចុះឈ្មោះចូល Android Keystore (AES-256-GCM) ដោយស្វ័យប្រវត្តិ។
+              - មានប៊ូតុងបិទបើក «🔑 ចូលដោយប្រើពាក្យសម្ងាត់» សម្រាប់ករណីចង់វាយពាក្យសម្ងាត់ដោយផ្ទាល់។
+            - 👤 **២. បង្ហាញរូបថត Profile Admin ដោយស្វ័យប្រវត្តិ (Automatic Admin Profile Picture Display):**
+              - ផ្ទុករូបថតផ្លូវការរបស់លោក Chea Savuth / Admin ដោយស្វ័យប្រវត្តិតាមការស្នើសុំ ទាំងនៅលើផ្ទាំង Admin Login, Navigation Header និងផ្ទាំងគ្រប់គ្រង Admin Dashboard។
+            - 🏛️ **៣. ពង្រីកមូលដ្ឋានទិន្នន័យទេសចរណ៍ឡើងដល់ ៣០០ កន្លែងពេញលេញ (300 Verified Cambodian Destinations):**
+              - ពង្រីកពី ១២៤ កន្លែង ឡើងដល់ ៣០០ កន្លែងពិតៗ (dest-1 ដល់ dest-300) គ្រប់ដណ្តប់គ្រប់រាជធានី-ខេត្តទាំង ២៥ ក្នុងព្រះរាជាណាចក្រកម្ពុជា។
+              - គ្មានការស្ទួនទិន្នន័យ (0 duplicates) ផ្ទៀងផ្ទាត់ឈ្មោះ ទីតាំង រូបភាពពិតៗកម្រិតច្បាស់ កូអរដោនេផែនទី និងការពិពណ៌នាលម្អិតទាំងភាសាខ្មែរ និងអង់គ្លេស។
+              - ភ្ជាប់មកជាមួយឯកសារតារាងបញ្ជី Excel & CSV ពេញលេញសម្រាប់ទាញយក។
+            - 🔒 **៤. រក្សាសុវត្ថិភាព VIP Permissions & Food Image Upload យ៉ាងពេញលេញ:**
+              - រក្សាប្រព័ន្ធការពារសិទ្ធិ VIP លើការចុះបញ្ជី និងគ្រប់គ្រងហាងយ៉ាងរឹងមាំ និងការអាប់ឡូតរូបភាពម្ហូបពី Camera / Gallery។
               - `Awaiting Payment` (រង់ចាំការទូទាត់)
               - `Verifying Payment` (កំពុងផ្ទៀងផ្ទាត់ការទូទាត់)
               - `Payment Successful` (ការទូទាត់ជោគជ័យ - VIP សកម្ម)
