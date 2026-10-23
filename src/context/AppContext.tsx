@@ -348,9 +348,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       localStorage.removeItem('kft_foods_v4');
       localStorage.removeItem('kft_foods_100_v1');
       localStorage.removeItem('kft_foods_100_v2');
+      localStorage.removeItem('kft_foods_100_v3');
     } catch {}
     try {
-      const saved = localStorage.getItem('kft_foods_200_v4') || localStorage.getItem('kft_foods_100_v3');
+      const saved = localStorage.getItem('kft_foods_200_v5') || localStorage.getItem('kft_foods_200_v4');
+      localStorage.removeItem('kft_foods_200_v4');
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length >= 50 && parsed[0]?.photoUrl?.startsWith('/foods/')) {
@@ -358,21 +360,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           const upgraded = parsed.map((f: FoodItem) => {
             const seed = initialMap.get(f.id);
             if (!seed) return f;
-            // Refresh food-101..food-200 if still using old generic Unsplash URL
-            if (
-              f.id.startsWith('food-') &&
-              parseInt(f.id.replace('food-', ''), 10) >= 101 &&
-              (!f.photoUrl || f.photoUrl.includes('images.unsplash.com'))
-            ) {
-              return {
-                ...f,
-                photoUrl: seed.photoUrl,
-                originalPhotoUrl: seed.originalPhotoUrl,
-                imageAuditStatus: seed.imageAuditStatus,
-                imageAuditNote: seed.imageAuditNote,
-              };
-            }
-            return f;
+            const hasCustomUpload = typeof f.photoUrl === 'string' && f.photoUrl.startsWith('data:');
+            return {
+              ...f,
+              photoUrl: hasCustomUpload ? f.photoUrl : seed.photoUrl,
+              originalPhotoUrl: seed.originalPhotoUrl,
+              imageAuditStatus: seed.imageAuditStatus,
+              imageAuditNote: seed.imageAuditNote,
+            };
           });
           const existingIds = new Set(upgraded.map((f: FoodItem) => f.id));
           const missingFromInitial = initialFoods.filter(f => !existingIds.has(f.id));
@@ -380,7 +375,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
       }
     } catch (e) {
-      console.warn('Failed to parse kft_foods_200_v4', e);
+      console.warn('Failed to parse kft_foods_200_v5', e);
     }
     return initialFoods;
   });
@@ -462,8 +457,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     try {
       localStorage.removeItem('kft_restaurants_real_v5');
       localStorage.removeItem('kft_restaurants_real_v6');
-      const saved = localStorage.getItem('kft_restaurants_real_v8') || localStorage.getItem('kft_restaurants_real_v7');
       localStorage.removeItem('kft_restaurants_real_v7');
+      const saved = localStorage.getItem('kft_restaurants_real_v9') || localStorage.getItem('kft_restaurants_real_v8');
+      localStorage.removeItem('kft_restaurants_real_v8');
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length >= 50) {
@@ -1107,7 +1103,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return;
     }
     if (foods && foods.length > 0) {
-      scheduleStorageWrite('kft_foods_200_v4', foods, 1500);
+      scheduleStorageWrite('kft_foods_200_v5', foods, 1500);
     }
   }, [foods]);
 
@@ -1117,7 +1113,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return;
     }
     if (restaurants && restaurants.length > 0) {
-      scheduleStorageWrite('kft_restaurants_real_v8', restaurants, 1200);
+      scheduleStorageWrite('kft_restaurants_real_v9', restaurants, 1200);
     }
   }, [restaurants]);
 

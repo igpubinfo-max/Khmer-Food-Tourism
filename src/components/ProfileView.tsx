@@ -773,7 +773,12 @@ export const ProfileView: React.FC = () => {
                     <div className="text-[9px] text-slate-300">{isKm ? 'ចែករំលែក' : 'Shares'}</div>
                   </div>
                 </div>
-                <div className="flex gap-2">
+                <div className="space-y-2 pt-1">
+                  <div className="p-2.5 rounded-xl bg-amber-500/15 border border-amber-400/40 text-[11px] text-amber-100 leading-relaxed font-khmer">
+                    {isKm
+                      ? '✨ ចុះបញ្ជីហាងមុន ហាងរបស់លោកអ្នកនឹងបង្ហាញមុនគេតាមលំដាប់លេខរៀង ដើម្បីងាយស្រួលឱ្យអតិថិជនស្វែងរក និងតាមដានស្ថិតិហាង។'
+                      : '✨ Register your restaurant early so it appears first in chronological order, making it easy for customers to find and track store analytics.'}
+                  </div>
                   {myRestaurants[0] ? (
                     <button
                       type="button"
@@ -782,17 +787,19 @@ export const ProfileView: React.FC = () => {
                         setManagingRestaurant(myRestaurants[0]);
                         setIsManageMenuModalOpen(true);
                       }}
-                      className="w-full py-2 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 font-black text-[11px] transition cursor-pointer"
+                      className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-amber-300 via-amber-400 to-yellow-500 hover:from-amber-400 hover:to-yellow-600 text-slate-950 font-black text-xs shadow-lg shadow-amber-500/25 border-2 border-white/60 flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer"
                     >
-                      {isKm ? '📊 បើកផ្ទាំងស្ថិតិលម្អិត & គ្រប់គ្រងហាង' : '📊 Open Full Store Analytics & Hub'}
+                      <Crown className="w-4 h-4 fill-slate-950 shrink-0" />
+                      <span>{isKm ? '📊 បើកផ្ទាំងស្ថិតិលម្អិត & គ្រប់គ្រងហាង VIP (1/1 ហាង)' : '📊 Open Full Store Analytics & Hub (1/1 Store)'}</span>
                     </button>
                   ) : (
                     <button
                       type="button"
                       onClick={() => setIsVipAddRestaurantModalOpen(true)}
-                      className="w-full py-2 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 font-black text-[11px] transition cursor-pointer"
+                      className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-amber-300 via-amber-400 to-yellow-500 hover:from-amber-400 hover:to-yellow-600 text-slate-950 font-black text-xs sm:text-sm shadow-lg shadow-amber-500/30 border-2 border-white/70 flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer"
                     >
-                      {isKm ? '+ ចុះបញ្ជីហាង VIP របស់អ្នក (១ ហាង) ដើម្បីតាមដានស្ថិតិហាង' : '+ Register Your VIP Store (1 Store) to Track Analytics'}
+                      <Crown className="w-4 h-4 fill-slate-950 shrink-0" />
+                      <span>{isKm ? '+ ចុះបញ្ជីហាង VIP របស់អ្នក (1 ហាង)' : '+ Register Your VIP Restaurant (1 Store)'}</span>
                     </button>
                   )}
                 </div>
@@ -834,7 +841,7 @@ export const ProfileView: React.FC = () => {
                       onClick={() => setIsVipAddRestaurantModalOpen(true)}
                       className="flex-1 py-2 px-3 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 font-black text-[11px] transition cursor-pointer"
                     >
-                      {isKm ? '+ បង្កើតហាង VIP & ដាក់វីដេអូ Reels' : '+ Create VIP Store & Add Video Reel'}
+                      {isKm ? '+ ចុះបញ្ជីហាង VIP របស់អ្នក (1 ហាង)' : '+ Register Your VIP Store (1 Store)'}
                     </button>
                   )}
                   <button
@@ -845,6 +852,49 @@ export const ProfileView: React.FC = () => {
                     {isKm ? '🔥 មើល Reels ល្បីៗ' : '🔥 Watch Trending Reels'}
                   </button>
                 </div>
+              </div>
+            )}
+
+            {/* Prominent Always-Visible VIP Store Registration / Management Banner */}
+            {selectedVipPowerPanel !== 'analytics' && (
+              <div className="mt-2 p-3.5 rounded-2xl bg-gradient-to-br from-[#064E3B] via-emerald-900 to-slate-900 text-white border-2 border-amber-400/70 shadow-md space-y-2.5">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-xs font-black text-amber-300 flex items-center gap-1.5">
+                    <Crown className="w-4 h-4 fill-amber-300 text-amber-300 shrink-0" />
+                    <span>{isKm ? 'សិទ្ធិចុះបញ្ជីហាង VIP ពិសេស' : 'VIP Store Priority Registration'}</span>
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[9px] font-black">
+                    {myRestaurants[0] ? '1/1 ហាង' : '១ គណនី = ១ ហាង'}
+                  </span>
+                </div>
+                <p className="text-[11px] text-amber-50/95 leading-relaxed font-medium">
+                  {isKm
+                    ? 'ចុះបញ្ជីហាងមុន ហាងរបស់លោកអ្នកនឹងបង្ហាញមុនគេតាមលំដាប់លេខរៀង ដើម្បីងាយស្រួលឱ្យអតិថិជនស្វែងរក និងតាមដានស្ថិតិហាង។'
+                    : 'Register your restaurant early so it appears first in chronological order, making it easy for customers to find and track store analytics.'}
+                </p>
+                {myRestaurants[0] ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      (window as any).__kft_manage_initial_tab = 'info';
+                      setManagingRestaurant(myRestaurants[0]);
+                      setIsManageMenuModalOpen(true);
+                    }}
+                    className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-amber-300 via-amber-400 to-yellow-500 hover:from-amber-400 hover:to-yellow-600 text-slate-950 font-black text-xs shadow-md border-2 border-white/70 flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer"
+                  >
+                    <Store className="w-4 h-4 shrink-0" />
+                    <span>{isKm ? '✏️ គ្រប់គ្រងហាង VIP របស់អ្នក (1/1 ហាង)' : '✏️ Manage Your VIP Store (1/1)'}</span>
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setIsVipAddRestaurantModalOpen(true)}
+                    className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-300 via-amber-400 to-yellow-500 hover:from-amber-400 hover:to-yellow-600 text-slate-950 font-black text-xs sm:text-sm shadow-lg shadow-amber-500/25 border-2 border-white/80 flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer"
+                  >
+                    <Crown className="w-4 h-4 fill-slate-950 shrink-0" />
+                    <span>{isKm ? '+ ចុះបញ្ជីហាង VIP របស់អ្នក (1 ហាង)' : '+ Register Your VIP Restaurant (1 Store)'}</span>
+                  </button>
+                )}
               </div>
             )}
           </div>
@@ -1360,21 +1410,28 @@ export const ProfileView: React.FC = () => {
       {activeSubTab === 'myrestaurant' && isOwner && (
         <div className="space-y-3 font-khmer">
           {myRestaurants.length === 0 ? (
-            <div className="text-center py-8 bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 p-6 space-y-3 shadow-xs">
-              <Store className="w-10 h-10 mx-auto text-[#059669]" />
-              <div>
-                <h4 className="font-bold text-xs text-[#0F172A] dark:text-white">
-                  {isKm ? 'មិនទាន់មានហាងអាហារដែលបានចុះបញ្ជីនៅឡើយទេ' : 'No registered restaurant found'}
+            <div className="text-center py-7 bg-gradient-to-br from-amber-50 via-white to-emerald-50 dark:from-slate-800 dark:via-slate-800 dark:to-emerald-950/40 rounded-3xl border-2 border-amber-400/70 p-6 space-y-3.5 shadow-md">
+              <div className="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-br from-amber-400 to-yellow-500 text-slate-950 flex items-center justify-center shadow-md">
+                <Store className="w-7 h-7" />
+              </div>
+              <div className="space-y-1.5">
+                <h4 className="font-bold text-sm text-[#0F172A] dark:text-white">
+                  {isKm ? 'ចុះបញ្ជីហាង VIP របស់អ្នក (1 ហាង)' : 'Register Your VIP Restaurant (1 Store)'}
                 </h4>
-                <p className="text-[10px] text-slate-500 mt-1">
-                  {isKm ? 'ចុះបញ្ជីហាងរបស់អ្នកដោយឥតគិតថ្លៃ ($0) ឬកញ្ចប់ VIP ($2.99 / 30 ថ្ងៃ ឬ $4.99 / 90 ថ្ងៃ) ដើម្បីផ្សព្វផ្សាយ!' : 'Register your restaurant for free ($0) or VIP ($2.99 / 30d or $4.99 / 90d)!'}
+                <p className="text-xs text-slate-700 dark:text-slate-200 leading-relaxed max-w-md mx-auto bg-amber-100/70 dark:bg-amber-950/40 border border-amber-300/60 dark:border-amber-500/40 rounded-2xl p-3 font-medium">
+                  {isKm
+                    ? 'ចុះបញ្ជីហាងមុន ហាងរបស់លោកអ្នកនឹងបង្ហាញមុនគេតាមលំដាប់លេខរៀង ដើម្បីងាយស្រួលឱ្យអតិថិជនស្វែងរក និងតាមដានស្ថិតិហាង។'
+                    : 'Register your restaurant early so it appears first in chronological order, making it easy for customers to find and track store analytics.'}
                 </p>
               </div>
               <button
                 onClick={() => isVip ? setIsVipAddRestaurantModalOpen(true) : setIsAddRestaurantModalOpen(true)}
-                className="px-4 py-2 rounded-xl bg-[#064E3B] text-white font-bold text-xs shadow-xs hover:bg-[#047857] transition active:scale-95"
+                className="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-slate-950 font-black text-xs sm:text-sm shadow-lg shadow-amber-500/25 border-2 border-white/80 inline-flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer"
               >
-                {isKm ? (isVip ? '+ បន្ថែមហាង VIP' : '+ ចុះបញ្ជីហាងឥឡូវនេះ') : (isVip ? '+ Add VIP Restaurant' : '+ Register Restaurant Now')}
+                <Crown className="w-4 h-4 fill-slate-950 shrink-0" />
+                <span>
+                  {isKm ? '+ ចុះបញ្ជីហាង VIP របស់អ្នក (1 ហាង)' : '+ Register Your VIP Restaurant (1 Store)'}
+                </span>
               </button>
             </div>
           ) : (

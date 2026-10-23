@@ -241,15 +241,24 @@ export const RestaurantView: React.FC = () => {
       </div>
 
       {/* Banner for VIP Restaurant Owners */}
-      <div className="p-3.5 rounded-2xl bg-gradient-to-r from-amber-600/90 via-amber-700 to-[#064E3B] text-white shadow-xs flex items-center justify-between border border-amber-400/40 font-khmer">
-        <div className="space-y-0.5">
-          <p className="font-bold text-xs text-white flex items-center gap-1.5">
-            <span>👑</span>
-            <span>{isKm ? 'ហាងសមាជិក VIP (VIP Restaurant Listings)' : 'VIP Restaurant Listings'}</span>
-          </p>
-          <p className="text-[10px] text-amber-100">
-            {isKm ? 'បន្ថែម និងកែប្រែទម្រង់ហាងផ្ទាល់ខ្លួន ទទួលបានអត្ថប្រយោជន៍ VIP ទាំង ១០ យ៉ាង!' : 'Add & manage your store with all 10 VIP benefits!'}
-          </p>
+      <div className="p-4 rounded-3xl bg-gradient-to-br from-amber-600 via-amber-700 to-[#064E3B] text-white shadow-lg border-2 border-amber-300/70 space-y-3 font-khmer">
+        <div className="flex items-start justify-between gap-2.5">
+          <div className="space-y-1">
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="text-base">👑</span>
+              <span className="font-black text-xs sm:text-sm text-white">
+                {isKm ? 'ចុះបញ្ជីហាង VIP របស់អ្នក (1 ហាង)' : 'Register Your VIP Restaurant (1 Store)'}
+              </span>
+              <span className="px-2 py-0.5 rounded-full bg-amber-300 text-slate-950 text-[9px] font-black">
+                {isUserAtOneStoreLimit ? '1/1 ហាង' : 'VIP 1 ហាង'}
+              </span>
+            </div>
+            <p className="text-[11px] text-amber-50 leading-relaxed font-medium">
+              {isKm
+                ? 'ចុះបញ្ជីហាងមុន ហាងរបស់លោកអ្នកនឹងបង្ហាញមុនគេតាមលំដាប់លេខរៀង ដើម្បីងាយស្រួលឱ្យអតិថិជនស្វែងរក និងតាមដានស្ថិតិហាង។'
+                : 'Register your restaurant early so it appears first in chronological order, making it easy for customers to find and track store analytics.'}
+            </p>
+          </div>
         </div>
         <button
           onClick={() => {
@@ -262,11 +271,14 @@ export const RestaurantView: React.FC = () => {
               setIsVipAddRestaurantModalOpen(true);
             }
           }}
-          className="px-3 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 text-xs font-black shrink-0 shadow transition active:scale-95 cursor-pointer"
+          className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-amber-300 via-amber-400 to-yellow-400 hover:from-amber-400 hover:to-yellow-500 text-slate-950 text-xs sm:text-sm font-black shadow-md border-2 border-white/80 flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer"
         >
-          {isUserAtOneStoreLimit
-            ? (isKm ? '✏️ គ្រប់គ្រងហាងខ្ញុំ' : '✏️ My Store')
-            : (isKm ? '+ បន្ថែមហាង' : '+ Add Store')}
+          <span>👑</span>
+          <span>
+            {isUserAtOneStoreLimit
+              ? (isKm ? '✏️ គ្រប់គ្រងហាង VIP របស់ខ្ញុំ (1/1 ហាង)' : '✏️ Manage My VIP Store (1/1)')
+              : (isKm ? '+ ចុះបញ្ជីហាង VIP របស់អ្នក (1 ហាង)' : '+ Register Your VIP Restaurant (1 Store)')}
+          </span>
         </button>
       </div>
 

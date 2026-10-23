@@ -711,15 +711,18 @@ export const HomeView: React.FC = () => {
           {/* User's Owned Restaurants on Home */}
           <div className="space-y-2 pt-1">
             {myRestaurants.length === 0 ? (
-              <div className="p-3 bg-white/70 dark:bg-slate-800/70 rounded-2xl border border-amber-300/50 flex items-center justify-between gap-2">
-                <div className="text-[11px] text-slate-700 dark:text-slate-200">
-                  {isKm ? '💡 លោកអ្នកមិនទាន់បានបន្ថែមហាងនៅឡើយទេ។ ចុចប៊ូតុងដើម្បីបង្កើតហាង VIP របស់អ្នក (១ គណនី = ១ ហាង)!' : 'You have not added any restaurant yet. Click Add to list your VIP shop (1 store per account)!'}
+              <div className="p-3.5 bg-gradient-to-br from-amber-50 via-white to-emerald-50 dark:from-slate-800 dark:via-slate-800 dark:to-emerald-950/50 rounded-2xl border-2 border-amber-400/70 space-y-2.5 shadow-sm">
+                <div className="text-[11px] text-slate-800 dark:text-slate-100 leading-relaxed font-medium">
+                  {isKm
+                    ? '✨ ចុះបញ្ជីហាងមុន ហាងរបស់លោកអ្នកនឹងបង្ហាញមុនគេតាមលំដាប់លេខរៀង ដើម្បីងាយស្រួលឱ្យអតិថិជនស្វែងរក និងតាមដានស្ថិតិហាង។'
+                    : '✨ Register your restaurant early so it appears first in chronological order, making it easy for customers to find and track store analytics.'}
                 </div>
                 <button
                   onClick={() => setIsVipAddRestaurantModalOpen(true)}
-                  className="px-3 py-1.5 bg-[#064E3B] hover:bg-[#047857] text-white rounded-xl text-[11px] font-bold shrink-0 transition cursor-pointer"
+                  className="w-full py-3 px-4 bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-slate-950 rounded-xl text-xs font-black shadow-md border-2 border-white/80 flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer"
                 >
-                  {isKm ? '+ បន្ថែមហាង' : '+ Add Shop'}
+                  <Crown className="w-4 h-4 fill-slate-950 shrink-0" />
+                  <span>{isKm ? '+ ចុះបញ្ជីហាង VIP របស់អ្នក (1 ហាង)' : '+ Register Your VIP Restaurant (1 Store)'}</span>
                 </button>
               </div>
             ) : (

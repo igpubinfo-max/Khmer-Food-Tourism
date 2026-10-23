@@ -241,14 +241,16 @@ export const VipAddRestaurantModal: React.FC = () => {
             <div>
               <div className="flex items-center gap-1.5">
                 <h3 className="font-moul text-sm sm:text-base text-white">
-                  {isKm ? 'បន្ថែមហាងផ្ទាល់ខ្លួន (VIP Store)' : 'Add My VIP Restaurant'}
+                  {isKm ? 'ចុះបញ្ជីហាង VIP របស់អ្នក (1 ហាង)' : 'Register Your VIP Restaurant (1 Store)'}
                 </h3>
                 <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[9px] font-black uppercase font-sans">
-                  VIP Power
+                  VIP 1 ហាង
                 </span>
               </div>
-              <p className="text-[11px] text-amber-100 font-khmer">
-                {isKm ? 'បន្ថែមរូបតំណាងហាង រូបភាពម្ហូប និងគ្រប់គ្រងមុខម្ហូបបានភ្លាមៗ' : 'Upload shop profile, food photos & manage menu'}
+              <p className="text-[11px] text-amber-100 font-khmer leading-relaxed mt-0.5">
+                {isKm
+                  ? 'ចុះបញ្ជីហាងមុន ហាងរបស់លោកអ្នកនឹងបង្ហាញមុនគេតាមលំដាប់លេខរៀង ដើម្បីងាយស្រួលឱ្យអតិថិជនស្វែងរក និងតាមដានស្ថិតិហាង។'
+                  : 'Register early so your restaurant appears first in chronological order for easy discovery and analytics tracking.'}
               </p>
             </div>
           </div>
