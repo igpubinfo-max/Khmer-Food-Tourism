@@ -1,13 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { FoodCard } from './FoodCard';
 import { FoodCategorySlug } from '../types';
 import { Search, Utensils, Plus, Sparkles } from 'lucide-react';
 
+const PAGE_BATCH_SIZE = 24;
+
 export const FoodView: React.FC = () => {
   const { foods, language, searchQuery, setSearchQuery, currentUser, setIsAdminOpen } = useApp();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [visibleCount, setVisibleCount] = useState<number>(PAGE_BATCH_SIZE);
+  const loadMoreTriggerRef = useRef<HTMLDivElement | null>(null);
   const isKm = language === 'km';
+
+  useEffect(() => {
+    setVisibleCount(PAGE_BATCH_SIZE);
+  }, [selectedCategory, searchQuery]);
 
   const categories = [
     { id: 'all', nameKh: 'ទាំងអស់', nameEn: 'All Foods' },
@@ -22,21 +30,43 @@ export const FoodView: React.FC = () => {
     { id: 'specialty', nameKh: 'មុខម្ហូបពិសេស', nameEn: 'Specialties' },
   ];
 
-  const filteredFoods = foods.filter((f) => {
-    // category filter
-    if (selectedCategory !== 'all' && f.categorySlug !== selectedCategory) {
-      return false;
-    }
-    // search filter
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      const matchName = f.nameKh.toLowerCase().includes(q) || f.nameEn.toLowerCase().includes(q);
-      const matchDesc = f.descriptionKh.toLowerCase().includes(q) || f.descriptionEn.toLowerCase().includes(q);
-      const matchIng = f.ingredients.some(i => i.nameKh.toLowerCase().includes(q) || i.nameEn.toLowerCase().includes(q));
-      if (!matchName && !matchDesc && !matchIng) return false;
-    }
-    return true;
-  });
+  const filteredFoods = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    return foods.filter((f) => {
+      if (selectedCategory !== 'all' && f.categorySlug !== selectedCategory) {
+        return false;
+      }
+      if (q) {
+        const matchName = f.nameKh.toLowerCase().includes(q) || f.nameEn.toLowerCase().includes(q);
+        const matchDesc = f.descriptionKh.toLowerCase().includes(q) || f.descriptionEn.toLowerCase().includes(q);
+        const matchIng = f.ingredients.some(i => i.nameKh.toLowerCase().includes(q) || i.nameEn.toLowerCase().includes(q));
+        if (!matchName && !matchDesc && !matchIng) return false;
+      }
+      return true;
+    });
+  }, [foods, selectedCategory, searchQuery]);
+
+  useEffect(() => {
+    const node = loadMoreTriggerRef.current;
+    if (!node || visibleCount >= filteredFoods.length) return;
+    if (typeof IntersectionObserver === 'undefined') return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          setVisibleCount((prev) => Math.min(filteredFoods.length, prev + PAGE_BATCH_SIZE));
+        }
+      },
+      { rootMargin: '320px' }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [visibleCount, filteredFoods.length]);
+
+  const displayedFoods = useMemo(
+    () => filteredFoods.slice(0, visibleCount),
+    [filteredFoods, visibleCount]
+  );
 
   return (
     <div className="max-w-md mx-auto px-4 py-3 space-y-4 pb-24">
@@ -102,11 +132,27 @@ export const FoodView: React.FC = () => {
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-3">
-          {filteredFoods.map((food) => (
-            <FoodCard key={food.id} food={food} />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-2 gap-3">
+            {displayedFoods.map((food) => (
+              <FoodCard key={food.id} food={food} />
+            ))}
+          </div>
+
+          {visibleCount < filteredFoods.length && (
+            <div ref={loadMoreTriggerRef} className="pt-2 flex justify-center">
+              <button
+                type="button"
+                onClick={() => setVisibleCount((prev) => Math.min(filteredFoods.length, prev + PAGE_BATCH_SIZE))}
+                className="px-4 py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-[#064E3B] dark:text-emerald-400 shadow-2xs font-khmer"
+              >
+                {isKm
+                  ? `បង្ហាញមុខម្ហូបបន្ថែម (${displayedFoods.length} / ${filteredFoods.length})`
+                  : `Show More Dishes (${displayedFoods.length} / ${filteredFoods.length})`}
+              </button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

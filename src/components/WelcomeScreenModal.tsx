@@ -38,7 +38,10 @@ export const WelcomeScreenModal: React.FC<WelcomeScreenModalProps> = ({ onComple
 
   useEffect(() => {
     const startTime = Date.now();
+    // Initial kick so CSS transition animates smoothly
+    const initialTick = setTimeout(() => setProgress(12.5), 60);
     const interval = setInterval(() => {
+      if (typeof document !== 'undefined' && document.hidden) return;
       const elapsed = Date.now() - startTime;
       const pct = Math.min(100, (elapsed / WELCOME_DURATION_MS) * 100);
       setProgress(pct);
@@ -46,9 +49,12 @@ export const WelcomeScreenModal: React.FC<WelcomeScreenModalProps> = ({ onComple
         clearInterval(interval);
         handleProceedToLogin();
       }
-    }, 50);
+    }, 1000);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearTimeout(initialTick);
+      clearInterval(interval);
+    };
   }, []);
 
   const benefits = [
@@ -125,7 +131,7 @@ export const WelcomeScreenModal: React.FC<WelcomeScreenModalProps> = ({ onComple
             className="w-full h-full object-cover"
           />
         </div>
-        <div className="absolute inset-0 bg-gradient-to-b from-[#022C22]/90 via-[#064E3B]/92 to-[#022C22]/98 backdrop-blur-[2px]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#022C22]/92 via-[#064E3B]/94 to-[#022C22]/98" />
       </div>
 
       {/* Main Content Container */}
@@ -192,7 +198,7 @@ export const WelcomeScreenModal: React.FC<WelcomeScreenModalProps> = ({ onComple
               return (
                 <div
                   key={idx}
-                  className="flex items-center gap-3 p-2.5 rounded-2xl bg-white/10 hover:bg-white/15 backdrop-blur-md border border-white/15 shadow-sm transition"
+                  className="flex items-center gap-3 p-2.5 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/15 shadow-sm transition"
                 >
                   <div
                     className={`w-9 h-9 rounded-xl bg-gradient-to-br ${item.color} flex items-center justify-center shrink-0 shadow-md`}
@@ -227,7 +233,7 @@ export const WelcomeScreenModal: React.FC<WelcomeScreenModalProps> = ({ onComple
             </div>
             <div className="w-full h-1.5 rounded-full bg-white/15 overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-amber-400 via-emerald-400 to-teal-300 transition-all duration-75"
+                className="h-full bg-gradient-to-r from-amber-400 via-emerald-400 to-teal-300 transition-all duration-1000 ease-linear"
                 style={{ width: `${progress}%` }}
               />
             </div>

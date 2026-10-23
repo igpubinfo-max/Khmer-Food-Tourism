@@ -1024,22 +1024,53 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   
   // Toast notifications
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'info' | 'warning' } | null>(null);
+  const toastTimerRef = useRef<number | null>(null);
 
   const showToast = (message: string, type: 'success' | 'info' | 'warning' = 'success') => {
+    if (toastTimerRef.current) {
+      window.clearTimeout(toastTimerRef.current);
+    }
     setToast({ message, type });
-    setTimeout(() => {
+    toastTimerRef.current = window.setTimeout(() => {
       setToast(null);
+      toastTimerRef.current = null;
     }, 3200);
+  };
+
+  // Non-blocking debounced localStorage writer to prevent CPU spikes & phone heating on large arrays
+  const storageWriteTimersRef = useRef<Record<string, number>>({});
+  const isInitialMountRef = useRef({
+    foods: true,
+    restaurants: true,
+    destinations: true,
+    posts: true,
+  });
+
+  const scheduleStorageWrite = (key: string, data: unknown, delayMs = 1000) => {
+    if (storageWriteTimersRef.current[key]) {
+      window.clearTimeout(storageWriteTimersRef.current[key]);
+    }
+    storageWriteTimersRef.current[key] = window.setTimeout(() => {
+      delete storageWriteTimersRef.current[key];
+      const performWrite = () => {
+        try {
+          localStorage.setItem(key, JSON.stringify(data));
+        } catch (e) {
+          console.warn(`Storage sync failed for ${key}:`, e);
+        }
+      };
+      if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+        (window as any).requestIdleCallback(performWrite, { timeout: 2000 });
+      } else {
+        performWrite();
+      }
+    }, delayMs);
   };
 
   // Sync to localStorage safely (guarded against QuotaExceeded or JSON corruption)
   useEffect(() => {
-    try {
-      if (users && users.length > 0) {
-        localStorage.setItem('kft_users_v4', JSON.stringify(users));
-      }
-    } catch (e) {
-      console.warn('Storage sync failed for users:', e);
+    if (users && users.length > 0) {
+      scheduleStorageWrite('kft_users_v4', users, 600);
     }
   }, [users]);
 
@@ -1071,22 +1102,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [currentUser]);
 
   useEffect(() => {
-    try {
-      if (foods && foods.length > 0) {
-        localStorage.setItem('kft_foods_200_v4', JSON.stringify(foods));
-      }
-    } catch (e) {
-      console.warn('Storage sync failed for foods:', e);
+    if (isInitialMountRef.current.foods) {
+      isInitialMountRef.current.foods = false;
+      return;
+    }
+    if (foods && foods.length > 0) {
+      scheduleStorageWrite('kft_foods_200_v4', foods, 1500);
     }
   }, [foods]);
 
   useEffect(() => {
-    try {
-      if (restaurants && restaurants.length > 0) {
-        localStorage.setItem('kft_restaurants_real_v8', JSON.stringify(restaurants));
-      }
-    } catch (e) {
-      console.warn('Storage sync failed for restaurants:', e);
+    if (isInitialMountRef.current.restaurants) {
+      isInitialMountRef.current.restaurants = false;
+      return;
+    }
+    if (restaurants && restaurants.length > 0) {
+      scheduleStorageWrite('kft_restaurants_real_v8', restaurants, 1200);
     }
   }, [restaurants]);
 
@@ -1117,22 +1148,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [currentUser?.id, currentUser?.membershipTier, currentUser?.subscriptionStatus, currentUser?.subscriptionExpiryDate]);
 
   useEffect(() => {
-    try {
-      if (destinations && destinations.length > 0) {
-        localStorage.setItem('kft_destinations_real_v6', JSON.stringify(destinations));
-      }
-    } catch (e) {
-      console.warn('Storage sync failed for destinations:', e);
+    if (isInitialMountRef.current.destinations) {
+      isInitialMountRef.current.destinations = false;
+      return;
+    }
+    if (destinations && destinations.length > 0) {
+      scheduleStorageWrite('kft_destinations_real_v6', destinations, 1500);
     }
   }, [destinations]);
 
   useEffect(() => {
-    try {
-      if (posts) {
-        localStorage.setItem('kft_posts_v6', JSON.stringify(posts));
-      }
-    } catch (e) {
-      console.warn('Storage sync failed for posts:', e);
+    if (isInitialMountRef.current.posts) {
+      isInitialMountRef.current.posts = false;
+      return;
+    }
+    if (posts) {
+      scheduleStorageWrite('kft_posts_v6', posts, 1000);
     }
   }, [posts]);
 
@@ -1183,8 +1214,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [supportTickets]);
 
   // Automatic & Manual Supabase Cloud Synchronization (Free Tier Compatible)
+  const cloudSyncInFlightRef = useRef(false);
+  const lastCloudSyncAtRef = useRef(0);
+
   const triggerCloudSyncNow = async (): Promise<boolean> => {
     if (!isSupabaseConfigured()) return false;
+    if (typeof document !== 'undefined' && document.hidden) return false;
+    const now = Date.now();
+    if (cloudSyncInFlightRef.current || now - lastCloudSyncAtRef.current < 15000) {
+      return false;
+    }
+    cloudSyncInFlightRef.current = true;
+    lastCloudSyncAtRef.current = now;
     try {
       let localVault: Record<string, any> = {};
       try {
@@ -1234,6 +1275,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } catch (err) {
       console.warn('Cloud sync error:', err);
       return false;
+    } finally {
+      cloudSyncInFlightRef.current = false;
     }
   };
 
@@ -2195,8 +2238,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
   };
 
-  // Restaurant Analytics (Views, Calls, Maps, Shares)
+  // Restaurant Analytics (Views, Calls, Maps, Shares) — Throttled to prevent duplicate re-renders
+  const recentTrackedViewsRef = useRef<Record<string, number>>({});
+
   const trackRestaurantView = (restaurantId: string) => {
+    const now = Date.now();
+    if (recentTrackedViewsRef.current[restaurantId] && now - recentTrackedViewsRef.current[restaurantId] < 30000) {
+      return;
+    }
+    recentTrackedViewsRef.current[restaurantId] = now;
     setRestaurants(prev => prev.map(r => {
       if (r.id !== restaurantId) return r;
       const cur = r.analytics || { views: 0, phoneClicks: 0, mapClicks: 0, shareClicks: 0 };

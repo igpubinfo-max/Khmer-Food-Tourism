@@ -29,7 +29,7 @@ export const Header: React.FC = () => {
   const isKm = language === 'km';
 
   return (
-    <header className="sticky top-0 z-40 bg-[#064E3B] backdrop-blur-md text-white shadow-md transition-all pt-[env(safe-area-inset-top,0px)] border-b border-[#047857]">
+    <header className="sticky top-0 z-40 bg-[#064E3B] text-white shadow-md pt-[env(safe-area-inset-top,0px)] border-b border-[#047857]">
       {/* Main Bar */}
       <div className="max-w-md mx-auto px-4 py-2.5 flex items-center justify-between gap-2">
         {/* Brand */}

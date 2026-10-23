@@ -9,7 +9,7 @@ interface RestaurantCardProps {
   restaurant: Restaurant;
 }
 
-export const RestaurantCard: React.FC<RestaurantCardProps> = ({ restaurant }) => {
+const RestaurantCardInner: React.FC<RestaurantCardProps> = ({ restaurant }) => {
   const { 
     language, setSelectedRestaurant, showToast,
     trackRestaurantView, trackRestaurantCall, trackRestaurantMap, trackRestaurantShare 
@@ -48,7 +48,8 @@ export const RestaurantCard: React.FC<RestaurantCardProps> = ({ restaurant }) =>
         trackRestaurantView(restaurant.id);
         setSelectedRestaurant(restaurant);
       }}
-      className={`group bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-xs hover:shadow-md transition-all duration-200 cursor-pointer flex flex-col ${
+      style={{ contentVisibility: 'auto', containIntrinsicSize: '280px' }}
+      className={`group bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-xs hover:shadow-md transition-colors duration-150 cursor-pointer flex flex-col ${
         isPremium 
           ? 'border-2 border-emerald-500/80 ring-1 ring-emerald-400/30' 
           : 'border border-slate-200/90 dark:border-slate-700/80'
@@ -59,13 +60,14 @@ export const RestaurantCard: React.FC<RestaurantCardProps> = ({ restaurant }) =>
         <img 
           src={restaurant.photoUrl} 
           alt={isKm ? restaurant.nameKh : restaurant.nameEn}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          className="w-full h-full object-cover"
           loading="lazy"
+          decoding="async"
         />
 
         {/* Province pill */}
         <div className="absolute top-2.5 left-2.5">
-          <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-[#064E3B]/90 backdrop-blur-md text-emerald-100 border border-emerald-400/30 shadow-xs font-khmer">
+          <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-[#064E3B]/95 text-emerald-100 border border-emerald-400/30 shadow-xs font-khmer">
             {isKm ? (restaurant.provinceKh || 'កម្ពុជា') : (restaurant.provinceEn || 'Cambodia')}
           </span>
         </div>
@@ -78,14 +80,14 @@ export const RestaurantCard: React.FC<RestaurantCardProps> = ({ restaurant }) =>
               <span>⭐ {isKm ? 'Premium VIP' : 'Premium'}</span>
             </span>
           ) : (
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-800/85 backdrop-blur-md text-slate-100 border border-slate-600/40 shadow-xs flex items-center gap-1 font-khmer">
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-900/90 text-slate-100 border border-slate-600/40 shadow-xs flex items-center gap-1 font-khmer">
               <span>🏷️ {isKm ? 'ឥតគិតថ្លៃ' : 'Free'}</span>
             </span>
           )}
-          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold backdrop-blur-md shadow-xs flex items-center gap-1 font-khmer ${
+          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold shadow-xs flex items-center gap-1 font-khmer ${
             restaurant.isVerified
-              ? 'bg-[#059669]/95 text-white border border-emerald-300/40'
-              : 'bg-slate-700/90 text-slate-200 border border-slate-600/40'
+              ? 'bg-[#059669] text-white border border-emerald-300/40'
+              : 'bg-slate-800/95 text-slate-200 border border-slate-600/40'
           }`}>
             {restaurant.isVerified ? (
               <>
@@ -100,13 +102,13 @@ export const RestaurantCard: React.FC<RestaurantCardProps> = ({ restaurant }) =>
             )}
           </span>
 
-          <span className="px-2 py-0.5 rounded-md bg-[#064E3B]/90 backdrop-blur-md text-emerald-100 text-xs font-bold border border-emerald-400/30">
+          <span className="px-2 py-0.5 rounded-md bg-[#064E3B]/95 text-emerald-100 text-xs font-bold border border-emerald-400/30">
             {restaurant.priceLevel || '$$'}
           </span>
         </div>
 
         {/* Reference Image Label (រូបភាពយោង) */}
-        <div className="absolute bottom-2.5 right-2.5 px-1.5 py-0.5 rounded-md bg-black/60 backdrop-blur-xs text-[9px] text-white/90 font-khmer border border-white/20 select-none pointer-events-none shadow-xs z-10">
+        <div className="absolute bottom-2.5 right-2.5 px-1.5 py-0.5 rounded-md bg-black/70 text-[9px] text-white/90 font-khmer border border-white/20 select-none pointer-events-none shadow-xs z-10">
           <span>{isKm ? 'រូបភាពយោង' : 'Reference photo'}</span>
         </div>
       </div>
@@ -207,3 +209,5 @@ export const RestaurantCard: React.FC<RestaurantCardProps> = ({ restaurant }) =>
     </div>
   );
 };
+
+export const RestaurantCard = React.memo(RestaurantCardInner);

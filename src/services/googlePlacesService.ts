@@ -416,6 +416,17 @@ export function inferCambodiaProvinceFromAddressOrGps(
   return 'ភ្នំពេញ';
 }
 
+let lastCloudCachePullAt = 0;
+const searchQueryMemoryCache = new Map<
+  string,
+  {
+    results: GooglePlaceCachedItem[];
+    fromSmartCache: boolean;
+    providerUsed: 'smart_cache' | 'google_maps_api' | 'online_cambodia_map';
+  }
+>();
+const resolvedPhoneMemoryCache = new Map<string, string>();
+
 /**
  * Search Places (Restaurants, Cafes, Streets, Tourist Attractions) in Phnom Penh & Cambodia
  * using Smart Cache First -> Supabase Shared Cache -> Google Maps Places API (with Matched Photos) -> Online Fallback.
@@ -430,17 +441,24 @@ export async function searchCambodiaPlacesWithSmartCache(
   providerUsed: 'smart_cache' | 'google_maps_api' | 'online_cambodia_map';
 }> {
   const cleanQuery = (query || '').trim();
-  if (!cleanQuery) {
+  if (!cleanQuery || cleanQuery.length < 2) {
     return { results: [], fromSmartCache: true, providerUsed: 'smart_cache' };
   }
 
   const qLower = cleanQuery.toLowerCase();
+  const memCacheKey = `${qLower}__${provinceFilter || 'all'}__${typeFilter}`;
+  const cachedResult = searchQueryMemoryCache.get(memCacheKey);
+  if (cachedResult) {
+    return cachedResult;
+  }
 
   // ==========================================================================
   // STEP 1: Check Local + Supabase Cloud Smart Cache FIRST ($0 Google Quota!)
   // ==========================================================================
   let cachePool = getLocalSmartCache();
-  if (isSupabaseConfigured()) {
+  const now = Date.now();
+  if (isSupabaseConfigured() && now - lastCloudCachePullAt > 10 * 60 * 1000) {
+    lastCloudCachePullAt = now;
     const cloudPool = await pullCloudDocument<GooglePlaceCachedItem[]>(
       'kft_cloud_google_places_cache_v1'
     );
@@ -482,11 +500,13 @@ export async function searchCambodiaPlacesWithSmartCache(
       matchedInCache.some((m) => m.placeId.startsWith('gmap-')))
   ) {
     incrementCacheStat('cacheHitsSavedQuota');
-    return {
+    const out = {
       results: matchedInCache,
       fromSmartCache: true,
-      providerUsed: 'smart_cache',
+      providerUsed: 'smart_cache' as const,
     };
+    searchQueryMemoryCache.set(memCacheKey, out);
+    return out;
   }
 
   // ==========================================================================
@@ -577,11 +597,13 @@ export async function searchCambodiaPlacesWithSmartCache(
         if (newCachedItems.length > 0) {
           // Immediately save into Smart Cache + Supabase Cloud so User #2 gets it for $0!
           await saveToSmartCache(newCachedItems);
-          return {
+          const out = {
             results: newCachedItems,
             fromSmartCache: false,
-            providerUsed: 'google_maps_api',
+            providerUsed: 'google_maps_api' as const,
           };
+          searchQueryMemoryCache.set(memCacheKey, out);
+          return out;
         }
       }
     } catch (err) {
@@ -591,7 +613,9 @@ export async function searchCambodiaPlacesWithSmartCache(
 
   // Do not fabricate unverified Nominatim POIs with mismatched storefront photos.
   // Only verified directory restaurants and official Google Maps places with matched photos are returned.
-  return { results: [], fromSmartCache: false, providerUsed: 'smart_cache' };
+  const emptyOut = { results: [], fromSmartCache: false, providerUsed: 'smart_cache' as const };
+  searchQueryMemoryCache.set(memCacheKey, emptyOut);
+  return emptyOut;
 }
 
 /**
@@ -603,6 +627,10 @@ export async function resolveRestaurantPhoneOnDemand(
   province?: string
 ): Promise<string> {
   if (!isGoogleMapsConfigured() || !name) return '';
+  const cacheKey = `${name.trim().toLowerCase()}__${(province || '').trim().toLowerCase()}`;
+  if (resolvedPhoneMemoryCache.has(cacheKey)) {
+    return resolvedPhoneMemoryCache.get(cacheKey) || '';
+  }
   const cfg = getCloudApiConfig();
   try {
     const queryText = province ? `${name} ${province} Cambodia` : `${name} Cambodia`;
@@ -626,11 +654,13 @@ export async function resolveRestaurantPhoneOnDemand(
       const found = formatDisplayPhone(
         first?.nationalPhoneNumber || first?.internationalPhoneNumber || ''
       );
+      resolvedPhoneMemoryCache.set(cacheKey, found);
       return found;
     }
   } catch {
     // ignore
   }
+  resolvedPhoneMemoryCache.set(cacheKey, '');
   return '';
 }
 

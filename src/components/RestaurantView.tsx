@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { RestaurantCard } from './RestaurantCard';
 import { isRestaurantPremiumActive, Restaurant, sortRestaurantsChronologically } from '../types';
@@ -8,6 +8,8 @@ import {
   convertGooglePlaceToRestaurant,
   GooglePlaceCachedItem,
 } from '../services/googlePlacesService';
+
+const RESTAURANT_BATCH_SIZE = 20;
 
 export const RestaurantView: React.FC = () => {
   const { 
@@ -24,11 +26,17 @@ export const RestaurantView: React.FC = () => {
 
   const [priceFilter, setPriceFilter] = useState<string>('all');
   const [verifiedFilter, setVerifiedFilter] = useState<'all' | 'verified' | 'unverified'>('all');
+  const [visibleCount, setVisibleCount] = useState<number>(RESTAURANT_BATCH_SIZE);
+  const loadMoreTriggerRef = useRef<HTMLDivElement | null>(null);
   const [smartCachePlaces, setSmartCachePlaces] = useState<GooglePlaceCachedItem[]>([]);
   const [isSearchingOnline, setIsSearchingOnline] = useState(false);
   const [cacheSourceLabel, setCacheSourceLabel] = useState<string>('');
 
   const isKm = language === 'km';
+
+  useEffect(() => {
+    setVisibleCount(RESTAURANT_BATCH_SIZE);
+  }, [selectedProvince, priceFilter, verifiedFilter, searchQuery]);
 
   useEffect(() => {
     const q = searchQuery.trim();
@@ -80,39 +88,65 @@ export const RestaurantView: React.FC = () => {
     { id: 'ពោធិ៍សាត់', nameKh: 'ពោធិ៍សាត់', nameEn: 'Pursat' },
   ];
 
-  const filteredRestaurants = restaurants.filter((r) => {
-    // only show approved restaurants unless owner or admin
-    if (r.status !== 'approved' && currentUser?.role !== 'admin' && currentUser?.id !== r.ownerId) {
-      return false;
-    }
-    // verification filter
-    if (verifiedFilter === 'verified' && !r.isVerified) return false;
-    if (verifiedFilter === 'unverified' && r.isVerified) return false;
-
-    // province filter
-    if (selectedProvince && !r.provinceKh.includes(selectedProvince)) {
-      return false;
-    }
-    // price filter
-    if (priceFilter !== 'all' && r.priceLevel !== priceFilter) {
-      return false;
-    }
-    // search
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      const matchName = r.nameKh.toLowerCase().includes(q) || r.nameEn.toLowerCase().includes(q);
-      const matchAddress = r.addressKh.toLowerCase().includes(q) || r.addressEn.toLowerCase().includes(q);
-      const matchDish = r.signatureDishesKh.some(d => d.toLowerCase().includes(q));
-      if (!matchName && !matchAddress && !matchDish) return false;
-    }
-    return true;
-  });
+  const filteredRestaurants = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    return restaurants.filter((r) => {
+      if (r.status !== 'approved' && currentUser?.role !== 'admin' && currentUser?.id !== r.ownerId) {
+        return false;
+      }
+      if (verifiedFilter === 'verified' && !r.isVerified) return false;
+      if (verifiedFilter === 'unverified' && r.isVerified) return false;
+      if (selectedProvince && !r.provinceKh.includes(selectedProvince)) {
+        return false;
+      }
+      if (priceFilter !== 'all' && r.priceLevel !== priceFilter) {
+        return false;
+      }
+      if (q) {
+        const matchName = r.nameKh.toLowerCase().includes(q) || r.nameEn.toLowerCase().includes(q);
+        const matchAddress = r.addressKh.toLowerCase().includes(q) || r.addressEn.toLowerCase().includes(q);
+        const matchDish = r.signatureDishesKh.some(d => d.toLowerCase().includes(q));
+        if (!matchName && !matchAddress && !matchDish) return false;
+      }
+      return true;
+    });
+  }, [restaurants, currentUser?.role, currentUser?.id, verifiedFilter, selectedProvince, priceFilter, searchQuery]);
 
   // Chronological order: restaurants added earlier appear first, newly added restaurants appear afterward
-  const sortedRestaurants = sortRestaurantsChronologically(filteredRestaurants);
+  const sortedRestaurants = useMemo(
+    () => sortRestaurantsChronologically(filteredRestaurants),
+    [filteredRestaurants]
+  );
 
-  const verifiedCount = restaurants.filter(r => r.isVerified).length;
-  const sampleCount = restaurants.filter(r => !r.isVerified).length;
+  const displayedRestaurants = useMemo(
+    () => sortedRestaurants.slice(0, visibleCount),
+    [sortedRestaurants, visibleCount]
+  );
+
+  useEffect(() => {
+    const node = loadMoreTriggerRef.current;
+    if (!node || visibleCount >= sortedRestaurants.length) return;
+    if (typeof IntersectionObserver === 'undefined') return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          setVisibleCount((prev) => Math.min(sortedRestaurants.length, prev + RESTAURANT_BATCH_SIZE));
+        }
+      },
+      { rootMargin: '320px' }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [visibleCount, sortedRestaurants.length]);
+
+  const { verifiedCount, sampleCount } = useMemo(() => {
+    let v = 0;
+    for (const r of restaurants) {
+      if (r.isVerified) v++;
+    }
+    return { verifiedCount: v, sampleCount: restaurants.length - v };
+  }, [restaurants]);
 
   return (
     <div className="max-w-md mx-auto px-4 py-3 space-y-4 pb-24">
@@ -258,10 +292,25 @@ export const RestaurantView: React.FC = () => {
 
       {/* Restaurant Cards List */}
       <div className="space-y-3">
-        {sortedRestaurants.length > 0 ? (
-          sortedRestaurants.map((restaurant) => (
-            <RestaurantCard key={restaurant.id} restaurant={restaurant} />
-          ))
+        {displayedRestaurants.length > 0 ? (
+          <>
+            {displayedRestaurants.map((restaurant) => (
+              <RestaurantCard key={restaurant.id} restaurant={restaurant} />
+            ))}
+            {visibleCount < sortedRestaurants.length && (
+              <div ref={loadMoreTriggerRef} className="pt-2 flex justify-center">
+                <button
+                  type="button"
+                  onClick={() => setVisibleCount((prev) => Math.min(sortedRestaurants.length, prev + RESTAURANT_BATCH_SIZE))}
+                  className="px-4 py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-[#064E3B] dark:text-emerald-400 shadow-2xs font-khmer"
+                >
+                  {isKm
+                    ? `បង្ហាញហាងបន្ថែម (${displayedRestaurants.length} / ${sortedRestaurants.length})`
+                    : `Show More Restaurants (${displayedRestaurants.length} / ${sortedRestaurants.length})`}
+                </button>
+              </div>
+            )}
+          </>
         ) : !isSearchingOnline && smartCachePlaces.length === 0 ? (
           <div className="py-12 text-center text-slate-400 space-y-2 font-khmer">
             <Store className="w-10 h-10 mx-auto text-slate-300" />

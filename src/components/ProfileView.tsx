@@ -854,7 +854,7 @@ export const ProfileView: React.FC = () => {
         <div className="p-4 rounded-3xl bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-amber-600/15 border border-amber-400/50 shadow-xs transition font-khmer">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 min-w-0">
-              <div className="p-2.5 rounded-2xl shrink-0 bg-amber-400 text-slate-900 shadow-sm animate-pulse">
+              <div className="p-2.5 rounded-2xl shrink-0 bg-amber-400 text-slate-900 shadow-sm">
                 <Clock className="w-5 h-5" />
               </div>
               <div className="min-w-0">
@@ -973,7 +973,7 @@ export const ProfileView: React.FC = () => {
                         : 'Support Messages / Payment History'}
                     </span>
                     {unreadAdminReplies > 0 && (
-                      <span className="px-2 py-0.5 rounded-full bg-red-600 text-white text-[10px] font-black animate-pulse">
+                      <span className="px-2 py-0.5 rounded-full bg-red-600 text-white text-[10px] font-black">
                         {isKm ? `${unreadAdminReplies} សារឆ្លើយតបថ្មីពី Admin` : `${unreadAdminReplies} New Reply`}
                       </span>
                     )}
@@ -1134,7 +1134,7 @@ export const ProfileView: React.FC = () => {
       <div className="p-4 rounded-3xl bg-gradient-to-br from-emerald-950 via-[#064E3B] to-slate-900 text-white border border-emerald-500/40 shadow-xs space-y-3 font-khmer">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping" />
+            <span className="w-2.5 h-2.5 rounded-full bg-amber-400" />
             <h3 className="font-moul text-xs sm:text-sm text-white">
               {isKm ? 'សេវាកម្មផ្ទាល់ខ្លួន (Personal Features)' : 'Personalized Features'}
             </h3>
@@ -1254,7 +1254,7 @@ export const ProfileView: React.FC = () => {
         {canScrollRight && (
           <button
             onClick={() => scrollTabs(150)}
-            className="absolute -right-2 top-1/2 -translate-y-1/2 z-10 p-1.5 rounded-full bg-white dark:bg-slate-800 shadow-md border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition active:scale-95 cursor-pointer animate-pulse"
+            className="absolute -right-2 top-1/2 -translate-y-1/2 z-10 p-1.5 rounded-full bg-white dark:bg-slate-800 shadow-md border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition active:scale-95 cursor-pointer"
             title={isKm ? 'រំកិលទៅស្តាំ (ការកំណត់ & VIP)' : 'Scroll right'}
           >
             <ChevronRight className="w-3.5 h-3.5" />

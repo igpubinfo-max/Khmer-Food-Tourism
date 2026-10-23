@@ -8,7 +8,7 @@ interface FoodCardProps {
   food: FoodItem;
 }
 
-export const FoodCard: React.FC<FoodCardProps> = ({ food }) => {
+const FoodCardInner: React.FC<FoodCardProps> = ({ food }) => {
   const { language, setSelectedFood, isBookmarked, toggleBookmark, showToast } = useApp();
   const bookmarked = isBookmarked(food.id);
   const isKm = language === 'km';
@@ -36,20 +36,22 @@ export const FoodCard: React.FC<FoodCardProps> = ({ food }) => {
   return (
     <div 
       onClick={() => setSelectedFood(food)}
-      className="group bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-xs hover:shadow-md border border-slate-200/90 dark:border-slate-700/80 transition-all duration-200 cursor-pointer flex flex-col"
+      style={{ contentVisibility: 'auto', containIntrinsicSize: '260px' }}
+      className="group bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-xs hover:shadow-md border border-slate-200/90 dark:border-slate-700/80 transition-colors duration-150 cursor-pointer flex flex-col"
     >
       {/* Image container */}
       <div className="relative aspect-4/3 w-full overflow-hidden bg-slate-100 dark:bg-slate-700">
         <img 
           src={food.photoUrl} 
           alt={language === 'km' ? food.nameKh : food.nameEn}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          className="w-full h-full object-cover"
           loading="lazy"
+          decoding="async"
         />
         
         {/* Category tag */}
         <div className="absolute top-2.5 left-2.5">
-          <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-[#064E3B]/90 backdrop-blur-md text-emerald-100 border border-emerald-400/30 shadow-xs">
+          <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-[#064E3B]/95 text-emerald-100 border border-emerald-400/30 shadow-xs">
             {language === 'km' ? food.categoryKh : food.categoryEn}
           </span>
         </div>
@@ -61,10 +63,10 @@ export const FoodCard: React.FC<FoodCardProps> = ({ food }) => {
             e.stopPropagation();
             toggleBookmark(food.id);
           }}
-          className={`absolute top-2.5 right-2.5 p-2 rounded-full backdrop-blur-md transition-transform active:scale-90 ${
+          className={`absolute top-2.5 right-2.5 p-2 rounded-full transition-transform active:scale-90 ${
             bookmarked 
               ? 'bg-rose-500 text-white shadow-md' 
-              : 'bg-white/90 dark:bg-slate-900/90 text-slate-700 dark:text-slate-300 hover:text-rose-500'
+              : 'bg-white/95 dark:bg-slate-900/95 text-slate-700 dark:text-slate-300 hover:text-rose-500'
           }`}
           title="រក្សាទុក"
         >
@@ -72,7 +74,7 @@ export const FoodCard: React.FC<FoodCardProps> = ({ food }) => {
         </button>
 
         {/* Reference Image Label (រូបភាពយោង) */}
-        <div className="absolute bottom-2.5 right-2.5 px-1.5 py-0.5 rounded-md bg-black/60 backdrop-blur-xs text-[9px] text-white/90 font-khmer border border-white/20 select-none pointer-events-none shadow-xs">
+        <div className="absolute bottom-2.5 right-2.5 px-1.5 py-0.5 rounded-md bg-black/70 text-[9px] text-white/90 font-khmer border border-white/20 select-none pointer-events-none shadow-xs">
           <span>{language === 'km' ? 'រូបភាពយោង' : 'Reference photo'}</span>
         </div>
       </div>
@@ -117,3 +119,5 @@ export const FoodCard: React.FC<FoodCardProps> = ({ food }) => {
     </div>
   );
 };
+
+export const FoodCard = React.memo(FoodCardInner);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { TouristCard } from './TouristCard';
 import { Compass, Sparkles, MapPin, Globe, Loader2, Plus } from 'lucide-react';
@@ -9,11 +9,19 @@ import {
   GooglePlaceCachedItem,
 } from '../services/googlePlacesService';
 
+const TOURISM_BATCH_SIZE = 20;
+
 export const TourismView: React.FC = () => {
   const { destinations, language, searchQuery, selectedProvince, setSelectedProvince, addDestination, showToast } = useApp();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [visibleCount, setVisibleCount] = useState<number>(TOURISM_BATCH_SIZE);
+  const loadMoreTriggerRef = useRef<HTMLDivElement | null>(null);
   const [smartCacheTourism, setSmartCacheTourism] = useState<GooglePlaceCachedItem[]>([]);
   const [isSearchingOnline, setIsSearchingOnline] = useState(false);
+
+  useEffect(() => {
+    setVisibleCount(TOURISM_BATCH_SIZE);
+  }, [selectedCategory, selectedProvince, searchQuery]);
 
   useEffect(() => {
     const q = searchQuery.trim();
@@ -52,27 +60,48 @@ export const TourismView: React.FC = () => {
     { id: 'mountain', nameKh: 'ភ្នំ & ឧទ្យានជាតិ', nameEn: 'Mountains' },
   ];
 
-  const filteredDestinations = destinations.filter((d) => {
-    // category filter
-    if (selectedCategory === 'trending_social') {
-      if (!d.isTrendingSocial) return false;
-    } else if (selectedCategory !== 'all' && d.categorySlug !== selectedCategory) {
-      return false;
-    }
-    // province filter
-    if (selectedProvince && !d.provinceKh.includes(selectedProvince)) {
-      return false;
-    }
-    // search filter
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      const matchName = d.nameKh.toLowerCase().includes(q) || d.nameEn.toLowerCase().includes(q);
-      const matchDesc = d.descriptionKh.toLowerCase().includes(q) || d.descriptionEn.toLowerCase().includes(q);
-      const matchProv = d.provinceKh.toLowerCase().includes(q) || d.provinceEn.toLowerCase().includes(q);
-      if (!matchName && !matchDesc && !matchProv) return false;
-    }
-    return true;
-  });
+  const filteredDestinations = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    return destinations.filter((d) => {
+      if (selectedCategory === 'trending_social') {
+        if (!d.isTrendingSocial) return false;
+      } else if (selectedCategory !== 'all' && d.categorySlug !== selectedCategory) {
+        return false;
+      }
+      if (selectedProvince && !d.provinceKh.includes(selectedProvince)) {
+        return false;
+      }
+      if (q) {
+        const matchName = d.nameKh.toLowerCase().includes(q) || d.nameEn.toLowerCase().includes(q);
+        const matchDesc = d.descriptionKh.toLowerCase().includes(q) || d.descriptionEn.toLowerCase().includes(q);
+        const matchProv = d.provinceKh.toLowerCase().includes(q) || d.provinceEn.toLowerCase().includes(q);
+        if (!matchName && !matchDesc && !matchProv) return false;
+      }
+      return true;
+    });
+  }, [destinations, selectedCategory, selectedProvince, searchQuery]);
+
+  const displayedDestinations = useMemo(
+    () => filteredDestinations.slice(0, visibleCount),
+    [filteredDestinations, visibleCount]
+  );
+
+  useEffect(() => {
+    const node = loadMoreTriggerRef.current;
+    if (!node || visibleCount >= filteredDestinations.length) return;
+    if (typeof IntersectionObserver === 'undefined') return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          setVisibleCount((prev) => Math.min(filteredDestinations.length, prev + TOURISM_BATCH_SIZE));
+        }
+      },
+      { rootMargin: '320px' }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [visibleCount, filteredDestinations.length]);
 
   return (
     <div className="max-w-md mx-auto px-4 py-3 space-y-4 pb-24">
@@ -119,9 +148,22 @@ export const TourismView: React.FC = () => {
         </div>
       ) : (
         <div className="space-y-3">
-          {filteredDestinations.map((dest) => (
+          {displayedDestinations.map((dest) => (
             <TouristCard key={dest.id} destination={dest} />
           ))}
+          {visibleCount < filteredDestinations.length && (
+            <div ref={loadMoreTriggerRef} className="pt-2 flex justify-center">
+              <button
+                type="button"
+                onClick={() => setVisibleCount((prev) => Math.min(filteredDestinations.length, prev + TOURISM_BATCH_SIZE))}
+                className="px-4 py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-[#064E3B] dark:text-emerald-400 shadow-2xs font-khmer"
+              >
+                {language === 'km'
+                  ? `បង្ហាញតំបន់ទេសចរណ៍បន្ថែម (${displayedDestinations.length} / ${filteredDestinations.length})`
+                  : `Show More Destinations (${displayedDestinations.length} / ${filteredDestinations.length})`}
+              </button>
+            </div>
+          )}
         </div>
       )}
 

@@ -38,7 +38,39 @@ import { RestaurantCheckInModal } from './components/RestaurantCheckInModal';
 import { Toast } from './components/Toast';
 
 const MainScreen: React.FC = () => {
-  const { activeTab, currentUser, setIsAuthModalOpen } = useApp();
+  const {
+    activeTab,
+    currentUser,
+    setIsAuthModalOpen,
+    selectedFood,
+    selectedRestaurant,
+    selectedDestination,
+    isAuthModalOpen,
+    isAddRestaurantModalOpen,
+    isManageMenuModalOpen,
+    managingRestaurant,
+    isAdminOpen,
+    isAdminLoginModalOpen,
+    isInstallModalOpen,
+    isSupportModalOpen,
+    isExitModalOpen,
+    isWhatToEatModalOpen,
+    isNearMeModalOpen,
+    isDailyDiscoveriesModalOpen,
+    isWishlistsModalOpen,
+    isAiTripPlannerModalOpen,
+    isNotificationsModalOpen,
+    isTrendingSocialModalOpen,
+    isTrendingFoodDetailModalOpen,
+    isAiCheckInModalOpen,
+    isAiFoodDiscoveryModalOpen,
+    isRestaurantCheckInModalOpen,
+    isUpgradeVipModalOpen,
+    isSupportTicketModalOpen,
+    isQrScannerModalOpen,
+    isVipAddRestaurantModalOpen,
+    toast,
+  } = useApp();
   const [showWelcomeScreen, setShowWelcomeScreen] = useState<boolean>(() => {
     try {
       return sessionStorage.getItem(WELCOME_SESSION_KEY) !== 'true';
@@ -63,9 +95,9 @@ const MainScreen: React.FC = () => {
     return (
       <div className="flex-1 flex flex-col w-full min-h-screen relative overflow-y-auto no-scrollbar bg-slate-950 items-center justify-center p-3 sm:p-4">
         <AuthModal isMandatoryGate={true} />
-        <ExitConfirmModal />
-        <AdminLoginModal />
-        <Toast />
+        {isExitModalOpen && <ExitConfirmModal />}
+        {isAdminLoginModalOpen && <AdminLoginModal />}
+        {toast && <Toast />}
       </div>
     );
   }
@@ -83,40 +115,40 @@ const MainScreen: React.FC = () => {
         {activeTab === 'profile' && <ProfileView />}
       </main>
 
-      {/* Detail Modals */}
-      <FoodDetailModal />
-      <RestaurantDetailModal />
-      <TouristDetailModal />
+      {/* Detail Modals — Conditionally Mounted to Save CPU, GPU & RAM */}
+      {selectedFood && <FoodDetailModal />}
+      {selectedRestaurant && <RestaurantDetailModal />}
+      {selectedDestination && <TouristDetailModal />}
       
-      {/* Creation & Action Modals */}
-      <AuthModal />
-      <AddRestaurantModal />
-      <ManageMenuModal />
-      <AdminDashboard />
-      <AdminLoginModal />
-      <InstallModal />
-      <SupportModal />
-      <ExitConfirmModal />
+      {/* Creation & Action Modals — Conditionally Mounted */}
+      {isAuthModalOpen && <AuthModal />}
+      {isAddRestaurantModalOpen && <AddRestaurantModal />}
+      {(isManageMenuModalOpen || managingRestaurant) && <ManageMenuModal />}
+      {isAdminOpen && <AdminDashboard />}
+      {isAdminLoginModalOpen && <AdminLoginModal />}
+      {isInstallModalOpen && <InstallModal />}
+      {isSupportModalOpen && <SupportModal />}
+      {isExitModalOpen && <ExitConfirmModal />}
 
-      {/* 6 Personalized Account Features & Viral Modals */}
-      <WhatToEatModal />
-      <NearMeModal />
-      <DailyDiscoveriesModal />
-      <WishlistsModal />
-      <AiTripPlannerModal />
-      <NotificationsModal />
-      <TrendingSocialModal />
-      <TrendingFoodDetailModal />
-      <AiCheckInModal />
-      <AiFoodDiscoveryModal />
-      <RestaurantCheckInModal />
-      <UpgradeVipModal />
-      <PaymentSupportModal />
-      <QrScannerModal />
-      <VipAddRestaurantModal />
+      {/* 6 Personalized Account Features & Viral Modals — Conditionally Mounted */}
+      {isWhatToEatModalOpen && <WhatToEatModal />}
+      {isNearMeModalOpen && <NearMeModal />}
+      {isDailyDiscoveriesModalOpen && <DailyDiscoveriesModal />}
+      {isWishlistsModalOpen && <WishlistsModal />}
+      {isAiTripPlannerModalOpen && <AiTripPlannerModal />}
+      {isNotificationsModalOpen && <NotificationsModal />}
+      {isTrendingSocialModalOpen && <TrendingSocialModal />}
+      {isTrendingFoodDetailModalOpen && <TrendingFoodDetailModal />}
+      {isAiCheckInModalOpen && <AiCheckInModal />}
+      {isAiFoodDiscoveryModalOpen && <AiFoodDiscoveryModal />}
+      {isRestaurantCheckInModalOpen && <RestaurantCheckInModal />}
+      {isUpgradeVipModalOpen && <UpgradeVipModal />}
+      {isSupportTicketModalOpen && <PaymentSupportModal />}
+      {isQrScannerModalOpen && <QrScannerModal />}
+      {isVipAddRestaurantModalOpen && <VipAddRestaurantModal />}
 
       {/* Notifications */}
-      <Toast />
+      {toast && <Toast />}
 
       {/* Mobile Bottom Navigation */}
       <BottomNav />

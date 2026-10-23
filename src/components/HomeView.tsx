@@ -879,7 +879,7 @@ export const HomeView: React.FC = () => {
       }`}>
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <div className="flex items-center gap-2">
-            <span className={`w-2.5 h-2.5 rounded-full ${isVip || currentUser?.role === 'admin' ? 'bg-amber-400 animate-ping' : 'bg-slate-500'}`} />
+            <span className={`w-2.5 h-2.5 rounded-full ${isVip || currentUser?.role === 'admin' ? 'bg-amber-400' : 'bg-slate-500'}`} />
             <div>
               <div className="flex items-center gap-1.5 flex-wrap">
                 <h3 className="font-moul text-xs sm:text-sm text-white flex items-center gap-1.5">
@@ -1177,7 +1177,7 @@ export const HomeView: React.FC = () => {
               <span className="text-xl">🔔</span>
               {isVip || currentUser?.role === 'admin' ? (
                 unreadNotificationsCount > 0 ? (
-                  <span className="px-1.5 py-0.2 rounded-full bg-rose-500 text-white text-[9px] font-black animate-pulse">
+                  <span className="px-1.5 py-0.2 rounded-full bg-rose-500 text-white text-[9px] font-black">
                     {unreadNotificationsCount} ថ្មី
                   </span>
                 ) : null

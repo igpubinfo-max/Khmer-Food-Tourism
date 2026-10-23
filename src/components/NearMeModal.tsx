@@ -66,7 +66,7 @@ export const NearMeModal: React.FC = () => {
           setUserCoords(fallback);
           setGeoStatus('fallback');
         },
-        { enableHighAccuracy: true, timeout: 8000 }
+        { enableHighAccuracy: false, timeout: 6000, maximumAge: 180000 }
       );
     } else {
       const fallback = provinceCenters[manualProvince] || provinceCenters['រាជធានីភ្នំពេញ'];
@@ -124,7 +124,7 @@ export const NearMeModal: React.FC = () => {
         <div className="p-4 bg-gradient-to-r from-[#064E3B] to-[#047857] text-white flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2.5">
             <div className="w-10 h-10 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center text-emerald-300 shadow-xs">
-              <Compass className="w-5 h-5 animate-pulse" />
+              <Compass className="w-5 h-5" />
             </div>
             <div>
               <h3 className="font-moul text-sm text-white">

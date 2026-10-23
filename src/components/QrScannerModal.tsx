@@ -54,6 +54,7 @@ export const QrScannerModal: React.FC = () => {
 
   const stopCamera = () => {
     if (animationFrameRef.current) {
+      clearTimeout(animationFrameRef.current);
       cancelAnimationFrame(animationFrameRef.current);
       animationFrameRef.current = null;
     }
@@ -76,7 +77,7 @@ export const QrScannerModal: React.FC = () => {
       }
 
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
+        video: { facingMode: 'environment', width: { ideal: 640 }, height: { ideal: 480 } }
       });
       streamRef.current = stream;
 
@@ -93,10 +94,14 @@ export const QrScannerModal: React.FC = () => {
     }
   };
 
-  // Continuous Video Scan Frame
+  // Throttled Video Scan Frame (4 FPS + max 540px width to prevent CPU overheating)
   const scanVideoFrame = () => {
+    if (typeof document !== 'undefined' && document.hidden) {
+      stopCamera();
+      return;
+    }
     if (!videoRef.current || !canvasRef.current || videoRef.current.readyState !== videoRef.current.HAVE_ENOUGH_DATA) {
-      animationFrameRef.current = requestAnimationFrame(scanVideoFrame);
+      animationFrameRef.current = window.setTimeout(scanVideoFrame, 250);
       return;
     }
 
@@ -104,8 +109,11 @@ export const QrScannerModal: React.FC = () => {
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
     if (!ctx) return;
 
-    canvas.width = videoRef.current.videoWidth;
-    canvas.height = videoRef.current.videoHeight;
+    const vw = videoRef.current.videoWidth || 640;
+    const vh = videoRef.current.videoHeight || 480;
+    const scale = vw > 540 ? 540 / vw : 1;
+    canvas.width = Math.round(vw * scale);
+    canvas.height = Math.round(vh * scale);
     ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
 
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -119,7 +127,7 @@ export const QrScannerModal: React.FC = () => {
       return;
     }
 
-    animationFrameRef.current = requestAnimationFrame(scanVideoFrame);
+    animationFrameRef.current = window.setTimeout(scanVideoFrame, 250);
   };
 
   const processQrDataUrl = async (dataUrl: string) => {
@@ -240,6 +248,14 @@ export const QrScannerModal: React.FC = () => {
     if (!isQrScannerModalOpen) {
       stopCamera();
     }
+    const handleVisibility = () => {
+      if (document.hidden) stopCamera();
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibility);
+      stopCamera();
+    };
   }, [isQrScannerModalOpen]);
 
   if (!isQrScannerModalOpen) return null;
