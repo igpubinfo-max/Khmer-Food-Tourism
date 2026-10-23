@@ -18,7 +18,8 @@ export const QrScannerModal: React.FC = () => {
     setIsQrScannerModalOpen, 
     language, 
     showToast,
-    openUpgradeVipModal
+    openUpgradeVipModal,
+    currentUser
   } = useApp();
 
   const isKm = language === 'km';
@@ -479,16 +480,18 @@ export const QrScannerModal: React.FC = () => {
                       <span>{isKm ? 'បើកក្នុង ABA Mobile ដើម្បីទូទាត់' : 'Open in ABA Mobile to Pay'}</span>
                     </button>
 
-                    <button
-                      onClick={() => {
-                        handleClose();
-                        openUpgradeVipModal();
-                      }}
-                      className="w-full py-2 px-4 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition"
-                    >
-                      <Zap className="w-4 h-4 fill-current" />
-                      <span>{isKm ? 'ដំឡើងគណនី Premium VIP' : 'Upgrade to Premium VIP'}</span>
-                    </button>
+                    {currentUser?.role !== 'admin' && (
+                      <button
+                        onClick={() => {
+                          handleClose();
+                          openUpgradeVipModal();
+                        }}
+                        className="w-full py-2 px-4 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition"
+                      >
+                        <Zap className="w-4 h-4 fill-current" />
+                        <span>{isKm ? 'ដំឡើងគណនី Premium VIP' : 'Upgrade to Premium VIP'}</span>
+                      </button>
+                    )}
                   </div>
                 )}
 

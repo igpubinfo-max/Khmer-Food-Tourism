@@ -67,25 +67,38 @@ export const Header: React.FC = () => {
             <span className="hidden xs:inline">{isKm ? 'ស្កេន QR' : 'Scan'}</span>
           </button>
 
-          {/* App Install QR Button */}
-          <button
-            onClick={() => setIsInstallModalOpen(true)}
-            className="flex items-center gap-1 px-2 py-1 rounded-full bg-[#065F46] hover:bg-[#047857] text-white text-[11px] font-bold border border-emerald-500/40 shadow-xs transition-all"
-            title={isKm ? 'ដំឡើងកម្មវិធីលើទូរស័ព្ទ (Install App)' : 'Install App'}
-          >
-            <QrCode className="w-3.5 h-3.5 text-emerald-200" />
-            <span className="hidden xs:inline">{isKm ? 'ដំឡើង' : 'Install'}</span>
-          </button>
+          {currentUser?.role === 'admin' ? (
+            <button
+              onClick={() => setIsAdminOpen(true)}
+              className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 text-[11px] font-black shadow-xs transition-all active:scale-95 cursor-pointer font-khmer"
+              title={isKm ? 'ផ្ទាំងគ្រប់គ្រងរដ្ឋបាល (Admin Dashboard)' : 'Admin Dashboard'}
+            >
+              <Shield className="w-3.5 h-3.5 fill-slate-950" />
+              <span>Admin</span>
+            </button>
+          ) : (
+            <>
+              {/* App Install QR Button */}
+              <button
+                onClick={() => setIsInstallModalOpen(true)}
+                className="flex items-center gap-1 px-2 py-1 rounded-full bg-[#065F46] hover:bg-[#047857] text-white text-[11px] font-bold border border-emerald-500/40 shadow-xs transition-all"
+                title={isKm ? 'ដំឡើងកម្មវិធីលើទូរស័ព្ទ (Install App)' : 'Install App'}
+              >
+                <QrCode className="w-3.5 h-3.5 text-emerald-200" />
+                <span className="hidden xs:inline">{isKm ? 'ដំឡើង' : 'Install'}</span>
+              </button>
 
-          {/* Support Our App Button */}
-          <button
-            onClick={() => setIsSupportModalOpen(true)}
-            className="flex items-center gap-1 px-2 py-1 rounded-full bg-[#10B981] hover:bg-[#059669] text-white text-[11px] font-bold shadow-xs transition-all"
-            title={isKm ? 'ជួយឧបត្ថម្ភគាំទ្រកម្មវិធី (Support App)' : 'Support App'}
-          >
-            <Heart className="w-3.5 h-3.5 fill-white text-white" />
-            <span className="hidden xs:inline">{isKm ? 'ឧបត្ថម្ភ' : 'Support'}</span>
-          </button>
+              {/* Support Our App Button */}
+              <button
+                onClick={() => setIsSupportModalOpen(true)}
+                className="flex items-center gap-1 px-2 py-1 rounded-full bg-[#10B981] hover:bg-[#059669] text-white text-[11px] font-bold shadow-xs transition-all"
+                title={isKm ? 'ជួយឧបត្ថម្ភគាំទ្រកម្មវិធី (Support App)' : 'Support App'}
+              >
+                <Heart className="w-3.5 h-3.5 fill-white text-white" />
+                <span className="hidden xs:inline">{isKm ? 'ឧបត្ថម្ភ' : 'Support'}</span>
+              </button>
+            </>
+          )}
 
           {/* Search Toggle */}
           <button

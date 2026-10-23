@@ -439,7 +439,24 @@ export const VERIFIED_NON_DISH_ITEMS_KB: IdentifiedNonDishItemInfo[] = [
 // ============================================================================
 // QUOTA MANAGEMENT
 // ============================================================================
-export function getAiDailyQuota(userMembershipTier?: string, userSubscriptionExpiry?: string): AiDailyUsageQuota {
+export function getAiDailyQuota(
+  userMembershipTier?: string, 
+  userSubscriptionExpiry?: string,
+  userRole?: string
+): AiDailyUsageQuota {
+  const isAdmin = userRole === 'admin' || userMembershipTier === 'admin';
+  if (isAdmin) {
+    const todayStr = new Date().toISOString().split('T')[0];
+    return {
+      tier: 'annual_vip_pro',
+      allowed: true,
+      usedToday: 0,
+      dailyLimit: -1,
+      remainingToday: 9999,
+      resetDate: todayStr,
+    };
+  }
+
   const isVipActive =
     userMembershipTier === 'premium_vip' &&
     userSubscriptionExpiry &&

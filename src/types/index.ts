@@ -1,6 +1,6 @@
-export const APP_VERSION = 'v1.8.3';
-export const APP_VERSION_NAME = '1.8.3';
-export const APP_BUILD_CODE = 55;
+export const APP_VERSION = 'v1.8.4';
+export const APP_VERSION_NAME = '1.8.4';
+export const APP_BUILD_CODE = 56;
 export const APP_RELEASE_DATE = '2026-10-23';
 
 export const VIP_ANNUAL_PRICE_USD = 4.99;
@@ -423,16 +423,20 @@ export const isRestaurantPremiumActive = (restaurant?: Restaurant | null): boole
   return new Date(restaurant.membershipExpiresAt).getTime() > Date.now();
 };
 
-// Helper to determine if a user has an active Premium VIP subscription
+// Helper to determine if a user has an active Premium VIP subscription (Admin always has lifetime active VIP)
 export const isUserVipActive = (user?: User | null): boolean => {
   if (!user) return false;
-  if (user.membershipTier !== 'premium_vip') return false;
-  if (!user.subscriptionExpiryDate) return false;
-  return new Date(user.subscriptionExpiryDate).getTime() > Date.now();
+  if (user.role === 'admin' || user.id === 'admin-authorized-single') return true;
+  if (user.membershipTier === 'premium_vip' && user.subscriptionExpiryDate) {
+    return new Date(user.subscriptionExpiryDate).getTime() > Date.now();
+  }
+  return false;
 };
 
 // Helper to calculate remaining days in VIP subscription
 export const getVipRemainingDays = (user?: User | null): number => {
+  if (!user) return 0;
+  if (user.role === 'admin' || user.id === 'admin-authorized-single') return 9999;
   if (!isUserVipActive(user) || !user?.subscriptionExpiryDate) return 0;
   const diffMs = new Date(user.subscriptionExpiryDate).getTime() - Date.now();
   return Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));

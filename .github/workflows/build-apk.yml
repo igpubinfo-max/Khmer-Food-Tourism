@@ -69,7 +69,7 @@ jobs:
           echo "=== SEARCHING FOR GENERATED APK FILES ==="
           find . -name "*.apk" -ls
           cd android/app/build/outputs/apk/debug
-          mv app-debug.apk KhmerFoodTourism-v1.8.3.apk
+          mv app-debug.apk KhmerFoodTourism-v1.8.4.apk
           ls -la
 
       # Play Store AAB build disabled during regular edits per user instruction (enable only when requested)
@@ -96,13 +96,21 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: v1.8.3
-          name: "Khmer Food & Tourism v1.8.3 (Admin Fingerprint Auto-Fill Credentials & Seamless Login)"
+          tag_name: v1.8.4
+          name: "Khmer Food & Tourism v1.8.4 (Supreme Admin Clean UI & 100 Foods Excel Sheet)"
           make_latest: true
           body: |
             ### 🇰🇭 កម្មវិធីទូរស័ព្ទដៃ អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism Mobile App)
             
-            **កំណែថ្មី v1.8.3 (Fingerprint Auto-Fill Username & Password + 1-Tap Admin Login):**
+            **កំណែថ្មី v1.8.4 (Supreme Admin Clean UI & 100 Foods Excel Sheet):**
+            - 🛡️ **១. លុបបំបាត់ប៊ូតុង Upgrade VIP និង Paywalls ចេញពីគណនី Admin ទាំងស្រុង:**
+              - Admin (cheasavuth) ទទួលបានសិទ្ធិ Lifetime Master VIP ដោយស្វ័យប្រវត្តិតាមរយៈ `isUserVipActive`។
+              - លាក់ផ្ទាំងចុះបញ្ជីហាង VIP, ប៊ូតុង Upgrade VIP, ប៊ូតុង Membership, ប៊ូតុង Payment Support និងប៊ូតុង Install App លើ Header, Home និង Profile សម្រាប់តែគណនី Admin ប៉ុណ្ណោះ។
+              - រក្សាទុកមុខងារ VIP និងប៊ូតុង Upgrade សម្រាប់តែគណនីអ្នកប្រើប្រាស់ និងហាងអាហារធម្មតាដដែល។
+            - 📊 **២. បង្កើតឯកសារ Excel & CSV មុខម្ហូបថ្មីទាំង ១០០មុខ (Food 101 ដល់ 200):**
+              - មាន Sheet ចំនួន ៣ (១០០ មុខម្ហូបថ្មី, ១០០ មុខម្ហូបដំបូង, និង ២០០ មុខម្ហូបសរុប) ជាមួយឈ្មោះខ្មែរ ឈ្មោះអង់គ្លេស ប្រភេទ គ្រឿងផ្សំសំខាន់ និងឈ្មោះឯកសាររូបថតគោលដៅ (Target Filename)។
+            - 👆 **៣. ស្កេនស្នាមមេដៃបំពេញព័ត៌មាន និងចូលដោយស្វ័យប្រវត្តិ (Biometric Auto-Fill & Instant Login):**
+              - ស្កេនមេដៃបំពេញ Username & Password និងចូលភ្លាមៗដោយសុវត្ថិភាព។
             - 👆 **១. ប្រព័ន្ធស្កេនស្នាមមេដៃបំពេញព័ត៌មាន និងចូលដោយស្វ័យប្រវត្តិ (Biometric Auto-Fill & Instant Login):**
               - នៅពេលចុច "ស្កេនស្នាមមេដៃបំពេញ & ចូលស្វ័យប្រវត្តិ" ប្រព័ន្ធ Android Keystore នឹងផ្ទៀងផ្ទាត់ស្នាមមេដៃ ហើយបំពេញឈ្មោះ (Username: cheasavuth) និងពាក្យសម្ងាត់ (Password) ទៅក្នុងប្រអប់បញ្ចូលភ្លាមៗ រួចចូលផ្ទាំងគ្រប់គ្រងរដ្ឋបាលភ្លាមដោយមិនបាច់វាយពាក្យសម្ងាត់ដោយដៃឡើយ។
               - រក្សាទុកពាក្យសម្ងាត់ចូលក្នុង hardware security chip (AndroidKeyStore AES-256-GCM) ដោយស្វ័យប្រវត្តិតាំងពីការ Login លើកដំបូង។

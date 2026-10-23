@@ -37,8 +37,8 @@ export const ProfileView: React.FC = () => {
   const isOwner = Boolean(
     currentUser &&
       (currentUser.role === 'owner' ||
-        currentUser.role === 'admin' ||
-        isVip ||
+        (currentUser.role === 'admin' && restaurants.some(r => r.ownerId === currentUser.id)) ||
+        (isVip && currentUser.role !== 'admin') ||
         restaurants.some(r => r.ownerId === currentUser.id))
   );
   const remainingDays = getVipRemainingDays(currentUser);
@@ -2042,26 +2042,28 @@ export const ProfileView: React.FC = () => {
       {/* Tab: Settings */}
       {activeSubTab === 'settings' && (
         <div className="p-4 bg-white dark:bg-slate-800 rounded-3xl border border-slate-200/90 dark:border-slate-700 space-y-3 text-xs font-khmer shadow-xs">
-          {/* VIP Membership Management */}
-          <div className="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-700">
-            <div>
-              <span className="font-medium text-[#0F172A] dark:text-slate-200 flex items-center gap-2">
-                <Crown className="w-4 h-4 text-amber-500" />
-                {isKm ? 'គ្រប់គ្រងសមាជិកភាព (VIP Membership)' : 'VIP Membership'}
-              </span>
-              <p className="text-[10px] text-slate-500 pl-6">
-                {isVip 
-                  ? (isKm ? `ស្ថានភាព៖ Premium VIP (${remainingDays} ថ្ងៃទៀត)` : `Status: Premium VIP (${remainingDays} days left)`)
-                  : (isKm ? 'ស្ថានភាព៖ គណនីឥតគិតថ្លៃ • $2.99/30ថ្ងៃ • $4.99/90ថ្ងៃ' : 'Status: Free User • $2.99/30d • $4.99/90d')}
-              </p>
+          {/* VIP Membership Management (Users only - Admin has lifetime master access) */}
+          {currentUser?.role !== 'admin' && (
+            <div className="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-700">
+              <div>
+                <span className="font-medium text-[#0F172A] dark:text-slate-200 flex items-center gap-2">
+                  <Crown className="w-4 h-4 text-amber-500" />
+                  {isKm ? 'គ្រប់គ្រងសមាជិកភាព (VIP Membership)' : 'VIP Membership'}
+                </span>
+                <p className="text-[10px] text-slate-500 pl-6">
+                  {isVip 
+                    ? (isKm ? `ស្ថានភាព៖ Premium VIP (${remainingDays} ថ្ងៃទៀត)` : `Status: Premium VIP (${remainingDays} days left)`)
+                    : (isKm ? 'ស្ថានភាព៖ គណនីឥតគិតថ្លៃ • $2.99/30ថ្ងៃ • $4.99/90ថ្ងៃ' : 'Status: Free User • $2.99/30d • $4.99/90d')}
+                </p>
+              </div>
+              <button
+                onClick={() => openUpgradeVipModal(Boolean(isVip))}
+                className="px-3 py-1 rounded-xl bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 font-bold border border-amber-300 hover:bg-amber-100 transition cursor-pointer"
+              >
+                {isVip ? (isKm ? 'គ្រប់គ្រង / បន្ត' : 'Manage / Renew') : (isKm ? 'ដំឡើង VIP' : 'Upgrade')}
+              </button>
             </div>
-            <button
-              onClick={() => openUpgradeVipModal(Boolean(isVip))}
-              className="px-3 py-1 rounded-xl bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 font-bold border border-amber-300 hover:bg-amber-100 transition cursor-pointer"
-            >
-              {isVip ? (isKm ? 'គ្រប់គ្រង / បន្ត' : 'Manage / Renew') : (isKm ? 'ដំឡើង VIP' : 'Upgrade')}
-            </button>
-          </div>
+          )}
 
           {/* Language Switch */}
           <div className="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-700">

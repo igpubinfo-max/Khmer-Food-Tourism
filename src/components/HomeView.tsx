@@ -537,7 +537,12 @@ export const HomeView: React.FC = () => {
                   <span>👋</span>
                 </span>
 
-                {isVip ? (
+                {currentUser.role === 'admin' ? (
+                  <span className="px-2.5 py-0.5 rounded-full bg-emerald-950 text-emerald-300 font-extrabold text-[10px] shadow-sm flex items-center gap-1 border border-emerald-400/80 font-mono">
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>SYSTEM ADMIN</span>
+                  </span>
+                ) : isVip ? (
                   <span className="px-2.5 py-0.5 rounded-full bg-slate-950 text-amber-300 font-extrabold text-[10px] shadow-sm flex items-center gap-1 border border-amber-300 font-mono">
                     <Crown className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
                     <span>PREMIUM VIP</span>
@@ -554,7 +559,24 @@ export const HomeView: React.FC = () => {
               </div>
 
               {/* Requirement 2 Message: "Unlock to be VIP account for advertising your Shop" */}
-              {isVip ? (
+              {currentUser.role === 'admin' ? (
+                <div className="p-2.5 rounded-2xl bg-emerald-900/40 border border-emerald-400/40 flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <ShieldCheck className="w-4 h-4 text-emerald-300 shrink-0" />
+                    <p className="text-xs font-bold text-emerald-100 leading-snug">
+                      {isKm 
+                        ? '🛡️ គណនីរដ្ឋបាលប្រព័ន្ធ៖ សិទ្ធិគ្រប់គ្រង និងកែប្រែទិន្នន័យពេញលេញ (Full Access)!' 
+                        : '🛡️ System Administrator: Full master access to all tools & listings!'}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setIsAdminOpen(true)}
+                    className="px-3 py-1 bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-[11px] rounded-xl shadow-xs transition active:scale-95 cursor-pointer shrink-0"
+                  >
+                    {isKm ? '🛠️ ផ្ទាំងគ្រប់គ្រង' : 'Dashboard'}
+                  </button>
+                </div>
+              ) : isVip ? (
                 <div className="p-2.5 rounded-2xl bg-white/40 border border-amber-600/30 flex items-center gap-2">
                   <Sparkles className="w-4 h-4 text-amber-900 shrink-0" />
                   <p className="text-xs font-bold text-slate-950 leading-snug">
@@ -655,8 +677,9 @@ export const HomeView: React.FC = () => {
         }`} />
       </div>
 
-      {/* 3. Manage Shop Panel: Enabled when VIP, Locked when not VIP */}
-      {isVip ? (
+      {/* 3. Manage Shop Panel: Enabled when VIP, Locked when not VIP (Non-Admin users only) */}
+      {currentUser?.role !== 'admin' && (
+        isVip ? (
         /* ENABLED VIP RESTAURANT MANAGEMENT CARD */
         <div className="p-4 sm:p-5 rounded-3xl bg-gradient-to-br from-amber-500/20 via-yellow-500/10 to-amber-600/20 border-2 border-amber-400/80 shadow-md space-y-3 font-khmer animate-in fade-in">
           <div className="flex items-center justify-between gap-3">
@@ -822,50 +845,52 @@ export const HomeView: React.FC = () => {
             </button>
           </div>
         </div>
+      ))}
+
+      {/* App Installation & Support Interactive Showcase Card (Non-Admin users only) */}
+      {currentUser?.role !== 'admin' && (
+        <div className="bg-white dark:bg-slate-800 rounded-3xl p-4 border border-slate-200/90 dark:border-slate-700 shadow-xs flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 flex items-center justify-center text-[#064E3B] dark:text-emerald-400 shadow-2xs shrink-0 border border-emerald-200/60">
+              <Smartphone className="w-6 h-6" />
+            </div>
+            <div>
+              <h4 className="font-bold text-[#0F172A] dark:text-white text-xs sm:text-sm font-khmer">
+                {isKm ? 'ដំឡើងកម្មវិធីទូរស័ព្ទដៃ' : 'Install Mobile App'}
+              </h4>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 font-khmer line-clamp-1">
+                {isKm ? 'ទាញយក Android APK ឬដំឡើងលើ Apple iOS' : 'Download Android APK or install on Apple iOS'}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-1.5 shrink-0">
+            <button
+              onClick={() => openInstallModal('android')}
+              className="flex items-center gap-1 px-2.5 py-2 bg-[#064E3B] hover:bg-[#047857] text-white rounded-xl shadow-xs transition text-xs font-bold font-khmer"
+              title={isKm ? 'ដំឡើង Android APK' : 'Install APK'}
+            >
+              <Smartphone className="w-3.5 h-3.5 text-emerald-300" />
+              <span>APK</span>
+            </button>
+            <button
+              onClick={() => openInstallModal('ios')}
+              className="flex items-center gap-1 px-2.5 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl shadow-xs transition text-xs font-bold font-khmer border border-slate-700"
+              title={isKm ? 'ដំឡើងលើ iPhone (iOS)' : 'Install on iOS'}
+            >
+              <Apple className="w-3.5 h-3.5 text-slate-200" />
+              <span>iOS</span>
+            </button>
+            <button
+              onClick={() => setIsSupportModalOpen(true)}
+              className="p-2 bg-[#10B981] hover:bg-[#059669] text-white rounded-xl shadow-xs transition"
+              title={isKm ? 'ជួយឧបត្ថម្ភ KHQR' : 'Support'}
+            >
+              <Heart className="w-4 h-4 fill-white" />
+            </button>
+          </div>
+        </div>
       )}
-
-      {/* App Installation & Support Interactive Showcase Card */}
-      <div className="bg-white dark:bg-slate-800 rounded-3xl p-4 border border-slate-200/90 dark:border-slate-700 shadow-xs flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 flex items-center justify-center text-[#064E3B] dark:text-emerald-400 shadow-2xs shrink-0 border border-emerald-200/60">
-            <Smartphone className="w-6 h-6" />
-          </div>
-          <div>
-            <h4 className="font-bold text-[#0F172A] dark:text-white text-xs sm:text-sm font-khmer">
-              {isKm ? 'ដំឡើងកម្មវិធីទូរស័ព្ទដៃ' : 'Install Mobile App'}
-            </h4>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400 font-khmer line-clamp-1">
-              {isKm ? 'ទាញយក Android APK ឬដំឡើងលើ Apple iOS' : 'Download Android APK or install on Apple iOS'}
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-1.5 shrink-0">
-          <button
-            onClick={() => openInstallModal('android')}
-            className="flex items-center gap-1 px-2.5 py-2 bg-[#064E3B] hover:bg-[#047857] text-white rounded-xl shadow-xs transition text-xs font-bold font-khmer"
-            title={isKm ? 'ដំឡើង Android APK' : 'Install APK'}
-          >
-            <Smartphone className="w-3.5 h-3.5 text-emerald-300" />
-            <span>APK</span>
-          </button>
-          <button
-            onClick={() => openInstallModal('ios')}
-            className="flex items-center gap-1 px-2.5 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl shadow-xs transition text-xs font-bold font-khmer border border-slate-700"
-            title={isKm ? 'ដំឡើងលើ iPhone (iOS)' : 'Install on iOS'}
-          >
-            <Apple className="w-3.5 h-3.5 text-slate-200" />
-            <span>iOS</span>
-          </button>
-          <button
-            onClick={() => setIsSupportModalOpen(true)}
-            className="p-2 bg-[#10B981] hover:bg-[#059669] text-white rounded-xl shadow-xs transition"
-            title={isKm ? 'ជួយឧបត្ថម្ភ KHQR' : 'Support'}
-          >
-            <Heart className="w-4 h-4 fill-white" />
-          </button>
-        </div>
-      </div>
 
       {/* Quick Category Icons */}
       <div className="flex items-center justify-between gap-1 overflow-x-auto no-scrollbar py-1">

@@ -110,7 +110,7 @@ export const AiFoodDiscoveryModal: React.FC = () => {
 
   // Quota status (All hooks MUST be declared before any early return!)
   const quota = useMemo(() => {
-    return getAiDailyQuota(currentUser?.membershipTier, currentUser?.subscriptionExpiryDate);
+    return getAiDailyQuota(currentUser?.membershipTier, currentUser?.subscriptionExpiryDate, currentUser?.role);
   }, [currentUser, isAnalyzing]);
 
   // Autocomplete suggestions when user types manual food name
@@ -409,7 +409,7 @@ export const AiFoodDiscoveryModal: React.FC = () => {
               </span>
             </div>
 
-            {quota.tier === 'free' && (
+            {quota.tier === 'free' && currentUser?.role !== 'admin' && (
               <button
                 onClick={openUpgradeVipModal}
                 className="px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-950 font-bold text-[10px] hover:bg-amber-300 transition flex items-center gap-1 shadow-xs"

@@ -718,6 +718,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isUpgradeVipModalOpen, setIsUpgradeVipModalOpen] = useState(false);
   const [isVipRenewMode, setIsVipRenewMode] = useState(false);
   const openUpgradeVipModal = (renewMode: boolean = false) => {
+    if (currentUser?.role === 'admin' || currentUser?.id === 'admin-authorized-single') {
+      showToast(
+        language === 'km' 
+          ? '🛡️ គណនី Admin មានសិទ្ធិពេញលេញគ្រប់មុខងារទាំងអស់រួចជាស្រេច (Lifetime Master Access)!' 
+          : 'Admin account has full lifetime access to all features!', 
+        'info'
+      );
+      return;
+    }
     setIsVipRenewMode(Boolean(renewMode));
     setIsUpgradeVipModalOpen(true);
   };
