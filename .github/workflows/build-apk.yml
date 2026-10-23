@@ -69,7 +69,7 @@ jobs:
           echo "=== SEARCHING FOR GENERATED APK FILES ==="
           find . -name "*.apk" -ls
           cd android/app/build/outputs/apk/debug
-          mv app-debug.apk KhmerFoodTourism-v1.8.2.apk
+          mv app-debug.apk KhmerFoodTourism-v1.8.3.apk
           ls -la
 
       # Play Store AAB build disabled during regular edits per user instruction (enable only when requested)
@@ -81,7 +81,7 @@ jobs:
       #     ./gradlew bundleRelease --no-daemon -x lint -x lintVitalRelease
       #     AAB_FILE=$(find app/build/outputs/bundle -name "*.aab" | head -n 1)
       #     echo "Found AAB: $AAB_FILE"
-      #     cp "$AAB_FILE" app/build/outputs/apk/debug/KhmerFoodTourism-v1.8.2.aab
+      #     cp "$AAB_FILE" app/build/outputs/apk/debug/KhmerFoodTourism-v1.8.3.aab
       #     cp app/khmerfood-upload-key.jks app/build/outputs/apk/debug/khmerfood-upload-key.jks
       #     ls -la app/build/outputs/apk/debug/
 
@@ -96,21 +96,18 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: v1.8.2
-          name: "Khmer Food & Tourism v1.8.2 (Fixed useEffect Error & Redesigned App Icon with Khmer Phka Phnhi Ornamentation)"
+          tag_name: v1.8.3
+          name: "Khmer Food & Tourism v1.8.3 (Admin Fingerprint Auto-Fill Credentials & Seamless Login)"
           make_latest: true
           body: |
             ### 🇰🇭 កម្មវិធីទូរស័ព្ទដៃ អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism Mobile App)
             
-            **កំណែថ្មី v1.8.2 (Fix useEffect ReferenceError & Redesigned Khmer Phka Phnhi App Icon):**
-            - 🛠️ **១. ជួសជុលបញ្ហា Error "useEffect is not defined":**
-              - បានបន្ថែម `useEffect` import ក្នុង `src/components/AdminDashboard.tsx` ដើម្បីដោះស្រាយបញ្ហាគាំងផ្ទាំង Error Boundary ពេលបើកកម្មវិធី។
-            - 🎨 **២. រចនារូបតំណាងកម្មវិធី (App Icon) ថ្មីយ៉ាងប្រណិតតាមក្បាច់ខ្មែរ:**
-              - រចនារូបចានជើងពានមាស (Royal Khmer Pedestal Bowl) យ៉ាងស្រស់ស្អាត មានស្រទាប់ពន្លឺមាសឆ្លុះ 3D និងជើងពានរាជ។
-              - រំលេចក្បាច់ផ្កាភ្ញីខ្មែរបុរាណ (Khmer Phka Phnhi Floral Motif)៖ ក្បាច់ផ្កាចន្ទន៍កណ្ដាល និងក្បាច់ភ្ញីទេសសងខាងយ៉ាងរស់រវើក។
-              - រំលេចកំពូលទាំងបីនៃប្រាសាទអង្គរវត្ត និងផ្សែងក្រអូបឈ្ងុយយ៉ាងទន់ភ្លន់ ព្រមទាំងដាក់កណ្តាលស៊ុមយ៉ាងសមសួន 100%។
-            - 👆 **៣. ប្រព័ន្ធស្កេនស្នាមមេដៃចូលគណនី Admin (Admin Biometric Fingerprint Login):**
-              - ប្រើប្រាស់ Android `BiometricPrompt` និង `AndroidKeyStore` (AES-256-GCM Hardware Security) សម្រាប់ចូលកម្មវិធីដោយស្កេនស្នាមមេដៃ ១ វិនាទី។
+            **កំណែថ្មី v1.8.3 (Fingerprint Auto-Fill Username & Password + 1-Tap Admin Login):**
+            - 👆 **១. ប្រព័ន្ធស្កេនស្នាមមេដៃបំពេញព័ត៌មាន និងចូលដោយស្វ័យប្រវត្តិ (Biometric Auto-Fill & Instant Login):**
+              - នៅពេលចុច "ស្កេនស្នាមមេដៃបំពេញ & ចូលស្វ័យប្រវត្តិ" ប្រព័ន្ធ Android Keystore នឹងផ្ទៀងផ្ទាត់ស្នាមមេដៃ ហើយបំពេញឈ្មោះ (Username: cheasavuth) និងពាក្យសម្ងាត់ (Password) ទៅក្នុងប្រអប់បញ្ចូលភ្លាមៗ រួចចូលផ្ទាំងគ្រប់គ្រងរដ្ឋបាលភ្លាមដោយមិនបាច់វាយពាក្យសម្ងាត់ដោយដៃឡើយ។
+              - រក្សាទុកពាក្យសម្ងាត់ចូលក្នុង hardware security chip (AndroidKeyStore AES-256-GCM) ដោយស្វ័យប្រវត្តិតាំងពីការ Login លើកដំបូង។
+            - 🎨 **២. រូបតំណាងកម្មវិធី (App Icon) ថ្មីបែបក្បាច់ខ្មែរ:**
+              - រូបចានជើងពានមាស និងក្បាច់ផ្កាភ្ញីខ្មែរបុរាណ (Phka Phnhi) រួមជាមួយកំពូលទាំងបីនៃប្រាសាទអង្គរវត្ត។
               - **ប្រព័ន្ធ Smart Cache ឆ្លាតវៃ៖** នៅពេលមានអ្នកប្រើស្វែងរកហាងថ្មីជាលើកទី ១ កម្មវិធីរក្សាទុកឈ្មោះ ទីតាំង GPS និងរូបភាពហាងនោះទុកក្នុង Database និង Smart Cache។ នៅពេលអ្នកប្រើទី ២ ទី ៣... ស្វែងរកហាងដដែល វាទាញយកមកបង្ហាញភ្លាមៗដោយមិនកាត់កូតា Google Maps ម្តងទៀតឡើយ!
             - ☁️ **២. ភ្ជាប់ប្រព័ន្ធ Supabase Cloud Database & Storage (Free Tier $0/ខែ):**
               - ធ្វើសមកាលកម្ម (Real-time Cloud Sync) សម្រាប់គណនីអ្នកប្រើប្រាស់ ហាងអាហារ និងរូបភាពភស្តុតាងបង់ប្រាក់ VIP រវាងទូរស័ព្ទអតិថិជនគ្រប់គ្នា និងទូរស័ព្ទ Admin។

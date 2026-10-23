@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   X, ShieldAlert, Lock, User as UserIcon, Eye, EyeOff, 
   KeyRound, CheckCircle2, ShieldCheck, AlertCircle, Clock, Fingerprint, Sparkles 
@@ -9,7 +9,8 @@ import {
   checkBiometricAvailability, 
   setSavedAdminUsername, 
   enrollAdminBiometric,
-  getSavedAdminUsername 
+  getSavedAdminUsername,
+  authenticateAdminWithBiometric 
 } from '../services/biometricService';
 
 export const AdminLoginModal: React.FC = () => {
@@ -23,7 +24,7 @@ export const AdminLoginModal: React.FC = () => {
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<'login' | 'change_password'>('login');
-  const [username, setUsername] = useState(() => getSavedAdminUsername() || '');
+  const [username, setUsername] = useState(() => getSavedAdminUsername() || 'cheasavuth');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberUsername, setRememberUsername] = useState(true);
@@ -31,6 +32,7 @@ export const AdminLoginModal: React.FC = () => {
   const [biometricAvailable, setBiometricAvailable] = useState(false);
   const [biometricEnrolled, setBiometricEnrolled] = useState(false);
   const [biometricLoading, setBiometricLoading] = useState(false);
+  const autoBiometricTriggeredRef = useRef(false);
 
   // Change password states
   const [currentAdminPass, setCurrentAdminPass] = useState('');
@@ -45,6 +47,7 @@ export const AdminLoginModal: React.FC = () => {
   // Check biometric availability and rate limiting on modal open
   useEffect(() => {
     if (isAdminLoginModalOpen) {
+      autoBiometricTriggeredRef.current = false;
       const status = checkAdminLoginAllowed();
       if (!status.allowed) {
         setLockoutSeconds(status.remainingLockoutSeconds);
@@ -58,6 +61,8 @@ export const AdminLoginModal: React.FC = () => {
         if (res.savedUsername) {
           setUsername(res.savedUsername);
           setRememberUsername(true);
+        } else {
+          setUsername('cheasavuth');
         }
       });
     }
@@ -95,9 +100,54 @@ export const AdminLoginModal: React.FC = () => {
 
     setBiometricLoading(true);
     try {
-      const success = await loginAdminWithBiometric();
-      if (!success) {
-        setErrorMsg(isKm ? 'ការស្កេនស្នាមមេដៃមិនជោគជ័យ ឬត្រូវបានបោះបង់។ សូមប្រើពាក្យសម្ងាត់។' : 'Biometric scan canceled or failed. Please use password.');
+      const bioAuth = await authenticateAdminWithBiometric();
+      if (!bioAuth.success) {
+        if (bioAuth.notEnrolled) {
+          // If user already typed password, offer to enroll immediately
+          if (password.trim()) {
+            try {
+              await enrollAdminBiometric(username || 'cheasavuth', password);
+              setBiometricEnrolled(true);
+              await loginAdmin(username || 'cheasavuth', password);
+              return;
+            } catch {}
+          }
+          setErrorMsg(
+            isKm 
+              ? 'មិនទាន់បានចុះបញ្ជីស្នាមមេដៃក្នុង Keystore ទេ។ សូមវាយពាក្យសម្ងាត់ចូលលើកដំបូងសិន!' 
+              : 'Fingerprint not enrolled yet. Please login with password first to activate.'
+          );
+        } else if (!bioAuth.fallbackToPassword) {
+          setErrorMsg(
+            isKm 
+              ? 'ការស្កេនស្នាមមេដៃមិនត្រូវគ្នាទេ! សូមសាកល្បងម្ដងទៀត ឬប្រើពាក្យសម្ងាត់។' 
+              : 'Biometric scan canceled or failed. Please use password.'
+          );
+        }
+        return;
+      }
+
+      // 1. AUTO-FILL USERNAME AND PASSWORD INTO FORM INPUTS
+      const filledUser = bioAuth.username || 'cheasavuth';
+      const filledPass = bioAuth.password || '';
+
+      setUsername(filledUser);
+      if (filledPass) {
+        setPassword(filledPass);
+      }
+
+      showToast(
+        isKm 
+          ? 'ស្កេនស្នាមមេដៃជោគជ័យ! បានបំពេញឈ្មោះ និងលេខសម្ងាត់ដោយស្វ័យប្រវត្តិ...' 
+          : 'Fingerprint verified! Auto-filling credentials & unlocking...',
+        'info'
+      );
+
+      // 2. Perform login seamlessly
+      if (filledPass) {
+        await loginAdmin(filledUser, filledPass);
+      } else {
+        await loginAdminWithBiometric();
       }
     } catch {
       setErrorMsg(isKm ? 'បរាជ័យក្នុងការស្កេនស្នាមមេដៃ' : 'Biometric error occurred');
@@ -124,6 +174,10 @@ export const AdminLoginModal: React.FC = () => {
     setLoading(true);
 
     try {
+      // 1. Save or remove username immediately
+      await setSavedAdminUsername(username, rememberUsername);
+
+      // 2. Perform Admin Login
       const success = await loginAdmin(username, password);
       if (!success) {
         const postCheck = checkAdminLoginAllowed();
@@ -143,13 +197,11 @@ export const AdminLoginModal: React.FC = () => {
           );
         }
       } else {
-        // Save or remove username
-        await setSavedAdminUsername(username, rememberUsername);
-
-        // Enroll biometric if requested and available
-        if (enableBiometric && !biometricEnrolled && biometricAvailable) {
+        // 3. Login was successful! Always enroll credentials in Android Keystore if biometric is enabled
+        if (enableBiometric && biometricAvailable) {
           try {
-            await enrollAdminBiometric(username, 'kft-admin-authenticated-token');
+            await enrollAdminBiometric(username, password);
+            setBiometricEnrolled(true);
           } catch (bioErr) {
             console.warn('Biometric auto-enroll skipped:', bioErr);
           }
@@ -284,16 +336,16 @@ export const AdminLoginModal: React.FC = () => {
 
           {activeTab === 'login' ? (
             <div className="space-y-4">
-              {/* 1. Biometric Fingerprint 1-Tap Login Card (When Enrolled) */}
-              {biometricAvailable && biometricEnrolled && (
+              {/* 1. Biometric Fingerprint 1-Tap Login Card */}
+              {biometricAvailable && (
                 <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-100 dark:from-emerald-950/70 dark:via-teal-950/50 dark:to-emerald-900/50 border-2 border-emerald-400/80 shadow-xs space-y-2.5">
                   <div className="flex items-center justify-between text-xs font-bold text-emerald-900 dark:text-emerald-200 font-khmer">
                     <span className="flex items-center gap-1.5">
                       <Fingerprint className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                      <span>{isKm ? 'ស្កេនស្នាមមេដៃរហ័ស (Fingerprint)' : 'Biometric Quick Access'}</span>
+                      <span>{isKm ? 'ស្កេនស្នាមមេដៃបំពេញ & ចូលស្វ័យប្រវត្តិ' : 'Fingerprint Auto-Fill & Login'}</span>
                     </span>
                     <span className="px-2 py-0.5 rounded-full bg-emerald-200 dark:bg-emerald-900 text-emerald-900 dark:text-emerald-200 text-[9px] font-mono font-bold">
-                      KEYSTORE SECURE
+                      {biometricEnrolled ? 'KEYSTORE ACTIVE' : 'KEYSTORE READY'}
                     </span>
                   </div>
                   
@@ -307,22 +359,22 @@ export const AdminLoginModal: React.FC = () => {
                     <span>
                       {biometricLoading 
                         ? (isKm ? 'កំពុងផ្ទៀងផ្ទាត់ស្នាមមេដៃ...' : 'Verifying Biometric...') 
-                        : (isKm ? '👆 ស្កេនស្នាមមេដៃចូល (Fingerprint Login)' : '👆 Login with Fingerprint')}
+                        : (isKm ? '👆 ស្កេនស្នាមមេដៃបំពេញ & ចូលស្វ័យប្រវត្តិ' : '👆 Scan Fingerprint to Auto-Fill & Login')}
                     </span>
                   </button>
                   <p className="text-[10px] text-center text-emerald-700 dark:text-emerald-300 font-khmer">
                     {isKm 
-                      ? 'Android BiometricPrompt & Keystore • ចូលរហ័សដោយមិនចាំបាច់វាយពាក្យសម្ងាត់' 
-                      : 'Protected by Android BiometricPrompt & Android KeyStore'}
+                      ? 'Android BiometricPrompt & Keystore • បំពេញឈ្មោះ និងលេខសម្ងាត់ចូលដោយស្វ័យប្រវត្តិ' 
+                      : 'Protected by Android BiometricPrompt & Android KeyStore • Auto-fills credentials'}
                   </p>
                 </div>
               )}
 
-              {biometricAvailable && biometricEnrolled && (
+              {biometricAvailable && (
                 <div className="flex items-center gap-3 py-0.5">
                   <div className="flex-1 h-px bg-slate-200 dark:bg-slate-700" />
                   <span className="text-[10px] text-slate-400 font-khmer">
-                    {isKm ? 'ឬ ចូលដោយប្រើពាក្យសម្ងាត់' : 'Or use password'}
+                    {isKm ? 'ឬ ចូលដោយប្រើពាក្យសម្ងាត់ផ្ទាល់' : 'Or use manual password'}
                   </span>
                   <div className="flex-1 h-px bg-slate-200 dark:bg-slate-700" />
                 </div>

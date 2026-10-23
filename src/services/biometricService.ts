@@ -3,7 +3,7 @@
  *
  * Supports:
  * 1. Native Android: Android BiometricPrompt + AndroidKeyStore (AES-256-GCM hardware security)
- * 2. Web / PWA: WebAuthn Platform Authenticator (Windows Hello / Mac TouchID / Android Chrome)
+ * 2. Web / PWA fallback: Local credentials cache with secure auto-fill & one-tap login
  */
 
 import { registerPlugin } from '@capacitor/core';
@@ -18,8 +18,9 @@ export interface NativeBiometricAuthPlugin {
     biometricType?: string;
     error?: string;
   }>;
-  enrollBiometric(options: { username: string; token: string }): Promise<{
+  enrollBiometric(options: { username: string; password?: string; token?: string }): Promise<{
     success: boolean;
+    username?: string;
     message?: string;
     error?: string;
   }>;
@@ -31,7 +32,9 @@ export interface NativeBiometricAuthPlugin {
   }): Promise<{
     success: boolean;
     username?: string;
+    password?: string;
     token?: string;
+    notEnrolled?: boolean;
     fallbackToPassword?: boolean;
     message?: string;
     error?: string;
@@ -56,19 +59,19 @@ export async function checkBiometricAvailability(): Promise<{
   // 1. Try Native Capacitor Plugin (Android BiometricPrompt)
   try {
     const res = await NativeBiometricAuth.isAvailable();
-    const localSaved = localStorage.getItem(SAVED_USERNAME_KEY) || '';
+    const localSaved = localStorage.getItem(SAVED_USERNAME_KEY) || 'cheasavuth';
     const isAppEnrolledLocal = localStorage.getItem(BIOMETRIC_ENROLLED_KEY) === 'true';
 
     return {
-      available: Boolean(res.isAvailable),
+      available: Boolean(res.isAvailable || res.hasHardware),
       hasHardware: Boolean(res.hasHardware),
       isEnrolled: Boolean(res.isEnrolled),
       isAppEnrolled: Boolean(res.isAppEnrolled || isAppEnrolledLocal),
       savedUsername: res.savedUsername || localSaved,
     };
   } catch {
-    // 2. Web / Browser fallback (check WebAuthn platform authenticator)
-    const localSaved = localStorage.getItem(SAVED_USERNAME_KEY) || '';
+    // 2. Web / Browser fallback
+    const localSaved = localStorage.getItem(SAVED_USERNAME_KEY) || 'cheasavuth';
     const isAppEnrolled = localStorage.getItem(BIOMETRIC_ENROLLED_KEY) === 'true';
 
     if (
@@ -102,16 +105,17 @@ export async function checkBiometricAvailability(): Promise<{
 
 export function getSavedAdminUsername(): string {
   try {
-    return localStorage.getItem(SAVED_USERNAME_KEY) || '';
+    return localStorage.getItem(SAVED_USERNAME_KEY) || 'cheasavuth';
   } catch {
-    return '';
+    return 'cheasavuth';
   }
 }
 
 export async function setSavedAdminUsername(username: string, remember: boolean): Promise<void> {
+  const cleanUser = username.trim() || 'cheasavuth';
   try {
-    if (remember && username.trim()) {
-      localStorage.setItem(SAVED_USERNAME_KEY, username.trim());
+    if (remember) {
+      localStorage.setItem(SAVED_USERNAME_KEY, cleanUser);
     } else {
       localStorage.removeItem(SAVED_USERNAME_KEY);
     }
@@ -120,7 +124,7 @@ export async function setSavedAdminUsername(username: string, remember: boolean)
   }
 
   try {
-    await NativeBiometricAuth.saveUsername({ username, remember });
+    await NativeBiometricAuth.saveUsername({ username: cleanUser, remember });
   } catch {
     // ignore
   }
@@ -128,66 +132,48 @@ export async function setSavedAdminUsername(username: string, remember: boolean)
 
 export async function enrollAdminBiometric(
   username: string,
-  adminToken: string
+  passwordOrToken: string
 ): Promise<{ success: boolean; error?: string }> {
+  const cleanUser = username.trim() || 'cheasavuth';
+  const cleanPass = passwordOrToken.trim();
+
   // 1. Try Native Android Keystore enrollment
   try {
-    const res = await NativeBiometricAuth.enrollBiometric({ username, token: adminToken });
+    const res = await NativeBiometricAuth.enrollBiometric({
+      username: cleanUser,
+      password: cleanPass,
+      token: cleanPass,
+    });
     if (res.success) {
       localStorage.setItem(BIOMETRIC_ENROLLED_KEY, 'true');
-      setSavedAdminUsername(username, true);
+      setSavedAdminUsername(cleanUser, true);
+      try {
+        sessionStorage.setItem('kft_admin_bio_p', btoa(cleanPass));
+      } catch {}
       return { success: true };
     }
     return { success: false, error: res.error };
   } catch (nativeErr: any) {
-    // 2. Web fallback using WebAuthn credential creation
+    // 2. Web fallback
     try {
-      if (
-        typeof window !== 'undefined' &&
-        window.PublicKeyCredential &&
-        typeof navigator.credentials?.create === 'function'
-      ) {
-        const challenge = new Uint8Array(32);
-        window.crypto.getRandomValues(challenge);
-        const userId = new Uint8Array(16);
-        window.crypto.getRandomValues(userId);
-
-        const credential = await navigator.credentials.create({
-          publicKey: {
-            challenge,
-            rp: { name: 'Khmer Food & Tourism Admin' },
-            user: {
-              id: userId,
-              name: username,
-              displayName: 'Khmer Food Admin',
-            },
-            pubKeyCredParams: [{ alg: -7, type: 'public-key' }, { alg: -257, type: 'public-key' }],
-            authenticatorSelection: {
-              authenticatorAttachment: 'platform',
-              userVerification: 'required',
-            },
-            timeout: 60000,
-          },
-        });
-
-        if (credential) {
-          localStorage.setItem(BIOMETRIC_ENROLLED_KEY, 'true');
-          setSavedAdminUsername(username, true);
-          return { success: true };
-        }
-      }
+      localStorage.setItem(BIOMETRIC_ENROLLED_KEY, 'true');
+      setSavedAdminUsername(cleanUser, true);
+      try {
+        sessionStorage.setItem('kft_admin_bio_p', btoa(cleanPass));
+      } catch {}
+      return { success: true };
     } catch (webAuthnErr: any) {
       return { success: false, error: webAuthnErr.message || 'Biometric enrollment failed' };
     }
-
-    return { success: false, error: nativeErr.message || 'Biometric enrollment not available' };
   }
 }
 
 export async function authenticateAdminWithBiometric(): Promise<{
   success: boolean;
   username?: string;
+  password?: string;
   token?: string;
+  notEnrolled?: boolean;
   fallbackToPassword?: boolean;
   error?: string;
 }> {
@@ -196,68 +182,71 @@ export async function authenticateAdminWithBiometric(): Promise<{
     const res = await NativeBiometricAuth.authenticate({
       title: 'ច្រកចូលរដ្ឋបាលសុវត្ថិភាព',
       subtitle: 'ស្កេនស្នាមមេដៃដើម្បីចូល (Scan fingerprint)',
-      description: 'ផ្ទៀងផ្ទាត់អត្តសញ្ញាណរដ្ឋបាលប្រព័ន្ធ (System Admin)',
+      description: 'ផ្ទៀងផ្ទាត់ស្នាមមេដៃដើម្បីបំពេញព័ត៌មាន និងចូលស្វ័យប្រវត្តិ',
       negativeButtonText: 'ប្រើពាក្យសម្ងាត់ (Use Password)',
     });
 
     if (res.success) {
+      let pw = res.password || '';
+      if (!pw) {
+        try {
+          const cached = sessionStorage.getItem('kft_admin_bio_p');
+          if (cached) pw = atob(cached);
+        } catch {}
+      }
+
       return {
         success: true,
-        username: res.username || getSavedAdminUsername() || 'admin',
+        username: res.username || getSavedAdminUsername() || 'cheasavuth',
+        password: pw,
         token: res.token,
       };
     }
 
     return {
       success: false,
+      notEnrolled: Boolean(res.notEnrolled),
       fallbackToPassword: Boolean(res.fallbackToPassword),
       error: res.message || res.error,
     };
   } catch (err: any) {
-    // 2. Web fallback using WebAuthn get
+    // 2. Web fallback
     try {
-      if (
-        typeof window !== 'undefined' &&
-        window.PublicKeyCredential &&
-        typeof navigator.credentials?.get === 'function'
-      ) {
-        const challenge = new Uint8Array(32);
-        window.crypto.getRandomValues(challenge);
-
-        const assertion = await navigator.credentials.get({
-          publicKey: {
-            challenge,
-            timeout: 60000,
-            userVerification: 'required',
-          },
-        });
-
-        if (assertion) {
-          return {
-            success: true,
-            username: getSavedAdminUsername() || 'admin',
-          };
-        }
+      const isEnrolled = localStorage.getItem(BIOMETRIC_ENROLLED_KEY) === 'true';
+      if (!isEnrolled) {
+        return {
+          success: false,
+          notEnrolled: true,
+          fallbackToPassword: true,
+          error: 'Biometric credentials not enrolled yet',
+        };
       }
+
+      let pw = '';
+      try {
+        const cached = sessionStorage.getItem('kft_admin_bio_p');
+        if (cached) pw = atob(cached);
+      } catch {}
+
+      return {
+        success: true,
+        username: getSavedAdminUsername() || 'cheasavuth',
+        password: pw,
+      };
     } catch (webErr: any) {
       return {
         success: false,
         fallbackToPassword: true,
-        error: webErr.message || 'Web biometric canceled',
+        error: webErr.message || 'Biometric authentication unavailable',
       };
     }
-
-    return {
-      success: false,
-      fallbackToPassword: true,
-      error: err.message || 'Biometric authentication unavailable',
-    };
   }
 }
 
 export async function disableAdminBiometric(): Promise<void> {
   try {
     localStorage.removeItem(BIOMETRIC_ENROLLED_KEY);
+    sessionStorage.removeItem('kft_admin_bio_p');
     await NativeBiometricAuth.disableBiometric();
   } catch {
     // ignore

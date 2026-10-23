@@ -1,6 +1,6 @@
-export const APP_VERSION = 'v1.8.2';
-export const APP_VERSION_NAME = '1.8.2';
-export const APP_BUILD_CODE = 54;
+export const APP_VERSION = 'v1.8.3';
+export const APP_VERSION_NAME = '1.8.3';
+export const APP_BUILD_CODE = 55;
 export const APP_RELEASE_DATE = '2026-10-23';
 
 export const VIP_ANNUAL_PRICE_USD = 4.99;
