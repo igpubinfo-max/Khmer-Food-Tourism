@@ -360,13 +360,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           const upgraded = parsed.map((f: FoodItem) => {
             const seed = initialMap.get(f.id);
             if (!seed) return f;
-            const hasCustomUpload = typeof f.photoUrl === 'string' && f.photoUrl.startsWith('data:');
+            const hasCustomUpload =
+              typeof f.photoUrl === 'string' &&
+              (f.photoUrl.startsWith('data:') ||
+                (f.imageAuditNote && (f.imageAuditNote.includes('Online') || f.imageAuditNote.includes('រដ្ឋបាល'))));
             return {
               ...f,
               photoUrl: hasCustomUpload ? f.photoUrl : seed.photoUrl,
               originalPhotoUrl: seed.originalPhotoUrl,
-              imageAuditStatus: seed.imageAuditStatus,
-              imageAuditNote: seed.imageAuditNote,
+              imageAuditStatus: hasCustomUpload ? f.imageAuditStatus : seed.imageAuditStatus,
+              imageAuditNote: hasCustomUpload ? f.imageAuditNote : seed.imageAuditNote,
             };
           });
           const existingIds = new Set(upgraded.map((f: FoodItem) => f.id));

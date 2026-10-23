@@ -1,24 +1,86 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
   X, Heart, Clock, Users, Flame, ChefHat, 
-  Share2, CheckCircle2, Circle, Volume2, Sparkles, Send, Bookmark
+  Share2, CheckCircle2, Circle, Volume2, Sparkles, Send, Bookmark, Globe, Check
 } from 'lucide-react';
 import {
   shareRichContent,
   formatRichShareText,
   copyTextNativeOrWeb,
 } from '../utils/androidMediaHelper';
+import { searchOnlineFoodImages, OnlineFoodImageCandidate } from '../services/onlineFoodImageService';
 
 export const FoodDetailModal: React.FC = () => {
   const { 
-    selectedFood, setSelectedFood, language, 
+    selectedFood, setSelectedFood, updateFood, language, 
     isBookmarked, toggleBookmark, showToast, openAddToWishlist 
   } = useApp();
   const [checkedIngredients, setCheckedIngredients] = useState<Record<number, boolean>>({});
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isSearchingOnline, setIsSearchingOnline] = useState(false);
+  const [onlineCandidates, setOnlineCandidates] = useState<OnlineFoodImageCandidate[]>([]);
+
+  useEffect(() => {
+    setOnlineCandidates([]);
+    setIsSearchingOnline(false);
+  }, [selectedFood?.id]);
 
   if (!selectedFood) return null;
+
+  const handleSearchOnlinePhoto = async () => {
+    setIsSearchingOnline(true);
+    try {
+      const results = await searchOnlineFoodImages({
+        nameKh: selectedFood.nameKh,
+        nameEn: selectedFood.nameEn,
+        categorySlug: selectedFood.categorySlug,
+        existingUrls: selectedFood.photoUrl ? [selectedFood.photoUrl] : [],
+      });
+      setOnlineCandidates(results);
+      if (results.length > 0) {
+        const best = results[0];
+        const updated = {
+          ...selectedFood,
+          photoUrl: best.url,
+          imageAuditStatus: 'verified' as const,
+          imageAuditNote: `រូបភាពស្វែងរកពី Online ដោយស្វ័យប្រវត្តិ (${best.source})`,
+        };
+        updateFood(updated);
+        setSelectedFood(updated);
+        showToast(
+          language === 'km'
+            ? `✨ បានរកឃើញ និងប្តូររូបភាពម្ហូបពី Online ចំនួន ${results.length} សន្លឹក!`
+            : `✨ Found ${results.length} online food photos!`,
+          'success'
+        );
+      }
+    } catch {
+      showToast(
+        language === 'km' ? 'មិនអាចស្វែងរករូបភាពពី Online បានទេ' : 'Failed to search online photos',
+        'warning'
+      );
+    } finally {
+      setIsSearchingOnline(false);
+    }
+  };
+
+  const handleSelectCandidate = (cand: OnlineFoodImageCandidate) => {
+    const updated = {
+      ...selectedFood,
+      photoUrl: cand.url,
+      imageAuditStatus: 'verified' as const,
+      imageAuditNote: `រូបភាពជ្រើសរើសពី Online (${cand.source})`,
+    };
+    updateFood(updated);
+    setSelectedFood(updated);
+    showToast(
+      language === 'km'
+        ? '✅ បានរក្សាទុករូបភាពម្ហូបពី Online រួចរាល់!'
+        : '✅ Online food photo saved!',
+      'success'
+    );
+  };
 
   const bookmarked = isBookmarked(selectedFood.id);
 
@@ -218,6 +280,78 @@ export const FoodDetailModal: React.FC = () => {
                   <span className="text-amber-500">★</span> {selectedFood.rating} <span className="font-normal text-slate-400">({selectedFood.reviewCount})</span>
                 </span>
               </div>
+            </div>
+
+            {/* Auto Online Food Photo Search Button ($0 Free) */}
+            <div className="p-3.5 rounded-2xl bg-gradient-to-br from-emerald-50 via-teal-50/70 to-amber-50/40 dark:from-slate-800 dark:via-slate-800/90 dark:to-slate-900 border-2 border-emerald-500/40 shadow-sm space-y-2.5">
+              <div className="flex items-center justify-between gap-2">
+                <span className="font-bold text-xs text-[#064E3B] dark:text-emerald-300 flex items-center gap-1.5 font-khmer">
+                  <Globe className="w-4 h-4 text-emerald-600 shrink-0" />
+                  {language === 'km'
+                    ? 'ប្តូរ ឬស្វែងរករូបភាពម្ហូបពី Online ដោយស្វ័យប្រវត្តិ'
+                    : 'Auto-Search Matching Food Photos Online'}
+                </span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 font-extrabold shrink-0">
+                  {language === 'km' ? 'ឥតគិតថ្លៃ $0' : 'FREE $0'}
+                </span>
+              </div>
+
+              <button
+                type="button"
+                disabled={isSearchingOnline}
+                onClick={handleSearchOnlinePhoto}
+                className="w-full py-2.5 px-3.5 rounded-xl bg-gradient-to-r from-emerald-600 via-[#064E3B] to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md transition active:scale-98 disabled:opacity-60 cursor-pointer font-khmer"
+              >
+                <Sparkles className={`w-4 h-4 text-amber-300 shrink-0 ${isSearchingOnline ? 'animate-spin' : ''}`} />
+                <span>
+                  {isSearchingOnline
+                    ? (language === 'km' ? 'កំពុងស្វែងរករូបភាពម្ហូបពី Online...' : 'Searching online food photos...')
+                    : (language === 'km'
+                        ? '🤖 ស្វែងរករូបភាពម្ហូបពី Online ដោយស្វ័យប្រវត្តិ (ឥតគិតថ្លៃ $0)'
+                        : '🤖 Auto-Search Matching Food Photos Online (Free $0)')}
+                </span>
+              </button>
+
+              {onlineCandidates.length > 0 && (
+                <div className="space-y-1.5 pt-1">
+                  <span className="text-[11px] font-bold text-emerald-800 dark:text-emerald-300 block font-khmer">
+                    {language === 'km'
+                      ? `✨ រកឃើញរូបភាពម្ហូបពី Online ចំនួន ${onlineCandidates.length} សន្លឹក (ចុចជ្រើសរើស)៖`
+                      : `✨ Found ${onlineCandidates.length} matching online photos (tap to select):`}
+                  </span>
+                  <div className="grid grid-cols-3 gap-2">
+                    {onlineCandidates.map((cand, idx) => {
+                      const isSelected = selectedFood.photoUrl === cand.url;
+                      return (
+                        <button
+                          key={`${cand.url}-${idx}`}
+                          type="button"
+                          onClick={() => handleSelectCandidate(cand)}
+                          className={`relative aspect-[4/3] rounded-xl overflow-hidden border-2 transition cursor-pointer group ${
+                            isSelected
+                              ? 'border-emerald-600 ring-2 ring-emerald-500/40'
+                              : 'border-slate-200 dark:border-slate-700 hover:border-emerald-400'
+                          }`}
+                        >
+                          <img
+                            src={cand.url}
+                            alt={cand.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition duration-200"
+                          />
+                          <div className="absolute bottom-0 inset-x-0 bg-black/70 text-white text-[9px] px-1.5 py-0.5 truncate">
+                            {cand.source}
+                          </div>
+                          {isSelected && (
+                            <div className="absolute top-1 right-1 w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center shadow">
+                              <Check className="w-3 h-3" />
+                            </div>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Attributes Grid */}

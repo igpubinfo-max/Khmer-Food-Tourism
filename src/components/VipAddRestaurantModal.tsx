@@ -18,6 +18,7 @@ import {
   pickImageUsingNativeAndroidGallery,
   processAndCompressImageFile,
 } from '../utils/androidMediaHelper';
+import { searchOnlineFoodImages, OnlineFoodImageCandidate } from '../services/onlineFoodImageService';
 
 export const VipAddRestaurantModal: React.FC = () => {
   const {
@@ -53,6 +54,35 @@ export const VipAddRestaurantModal: React.FC = () => {
   const [descriptionKh, setDescriptionKh] = useState('');
   const [signatureDish, setSignatureDish] = useState('');
   const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [isSearchingOnline, setIsSearchingOnline] = useState(false);
+  const [onlineCandidates, setOnlineCandidates] = useState<OnlineFoodImageCandidate[]>([]);
+
+  const handleSearchOnlineFoodPhotos = async () => {
+    setIsSearchingOnline(true);
+    try {
+      const queryKh = signatureDish.trim() || nameKh.trim() || 'ម្ហូបខ្មែរ';
+      const results = await searchOnlineFoodImages({
+        nameKh: queryKh,
+        nameEn: nameEn.trim() || queryKh,
+        categorySlug: 'soup',
+        existingUrls: [profilePhotoUrl, ...foodPhotos],
+      });
+      setOnlineCandidates(results);
+      if (results.length > 0) {
+        setFoodPhotos((prev) => (prev.includes(results[0].url) ? prev : [...prev, results[0].url]));
+        showToast(
+          isKm
+            ? `✨ រកឃើញរូបភាពម្ហូបពី Online ចំនួន ${results.length} សន្លឹក!`
+            : `✨ Found ${results.length} online food photos!`,
+          'success'
+        );
+      }
+    } catch {
+      showToast(isKm ? 'មិនអាចស្វែងរករូបភាពពី Online បានទេ' : 'Failed to search online food photos', 'warning');
+    } finally {
+      setIsSearchingOnline(false);
+    }
+  };
 
   const profileGalleryInputRef = useRef<HTMLInputElement>(null);
   const profileCameraInputRef = useRef<HTMLInputElement>(null);
@@ -627,6 +657,59 @@ export const VipAddRestaurantModal: React.FC = () => {
                 <span>{isKm ? 'ថតរូបម្ហូប (Camera)' : 'Camera Food Photo'}</span>
               </button>
             </div>
+
+            <button
+              type="button"
+              disabled={isSearchingOnline}
+              onClick={handleSearchOnlineFoodPhotos}
+              className="w-full py-2.5 px-3.5 rounded-xl bg-gradient-to-r from-emerald-600 via-[#064E3B] to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md transition active:scale-98 disabled:opacity-60 cursor-pointer"
+            >
+              <Sparkles className={`w-4 h-4 text-amber-300 shrink-0 ${isSearchingOnline ? 'animate-spin' : ''}`} />
+              <span>
+                {isSearchingOnline
+                  ? (isKm ? 'កំពុងស្វែងរករូបភាពម្ហូបពី Online...' : 'Searching online food photos...')
+                  : (isKm
+                      ? '🤖 ស្វែងរករូបភាពម្ហូបពី Online ដោយស្វ័យប្រវត្តិ (ឥតគិតថ្លៃ $0)'
+                      : '🤖 Auto-Search Matching Food Photos Online (Free $0)')}
+              </span>
+            </button>
+
+            {onlineCandidates.length > 0 && (
+              <div className="space-y-1.5 pt-1">
+                <span className="text-[11px] font-bold text-emerald-800 dark:text-emerald-300 block">
+                  {isKm
+                    ? `✨ រកឃើញរូបភាពម្ហូបពី Online ចំនួន ${onlineCandidates.length} សន្លឹក (ចុចជ្រើសរើសបន្ថែម)៖`
+                    : `✨ Found ${onlineCandidates.length} online food photos (tap to add):`}
+                </span>
+                <div className="grid grid-cols-3 gap-2">
+                  {onlineCandidates.map((cand, idx) => {
+                    const isAdded = foodPhotos.includes(cand.url);
+                    return (
+                      <button
+                        key={`${cand.url}-${idx}`}
+                        type="button"
+                        onClick={() => {
+                          setFoodPhotos((prev) =>
+                            prev.includes(cand.url) ? prev : [...prev, cand.url]
+                          );
+                          setProfilePhotoUrl(cand.url);
+                        }}
+                        className={`relative aspect-[4/3] rounded-xl overflow-hidden border-2 transition cursor-pointer ${
+                          isAdded
+                            ? 'border-emerald-600 ring-2 ring-emerald-500/40'
+                            : 'border-slate-200 dark:border-slate-700 hover:border-emerald-400'
+                        }`}
+                      >
+                        <img src={cand.url} alt={cand.title} className="w-full h-full object-cover" />
+                        <div className="absolute bottom-0 inset-x-0 bg-black/70 text-white text-[9px] px-1.5 py-0.5 truncate">
+                          {cand.source}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Description */}

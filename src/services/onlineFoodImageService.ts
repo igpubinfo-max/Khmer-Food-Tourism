@@ -9,6 +9,7 @@ import { FoodCategorySlug } from '../types';
 
 export interface OnlineFoodImageCandidate {
   url: string;
+  thumbUrl?: string;
   title: string;
   source: 'Wikimedia Commons' | 'TheMealDB' | 'Online Culinary Library';
 }

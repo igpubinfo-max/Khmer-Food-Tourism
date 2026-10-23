@@ -11,6 +11,7 @@ import {
   pickImageUsingNativeAndroidGallery,
   processAndCompressImageFile,
 } from '../utils/androidMediaHelper';
+import { searchOnlineFoodImages, OnlineFoodImageCandidate } from '../services/onlineFoodImageService';
 
 export const ManageMenuModal: React.FC = () => {
   const { 
@@ -47,6 +48,35 @@ export const ManageMenuModal: React.FC = () => {
   const [priceRiel, setPriceRiel] = useState('20000');
   const [dishPhotoUrl, setDishPhotoUrl] = useState('https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80');
   const [descriptionKh, setDescriptionKh] = useState('');
+  const [isSearchingOnlineDish, setIsSearchingOnlineDish] = useState(false);
+  const [onlineDishCandidates, setOnlineDishCandidates] = useState<OnlineFoodImageCandidate[]>([]);
+
+  const handleSearchOnlineDishPhotos = async () => {
+    setIsSearchingOnlineDish(true);
+    try {
+      const qKh = nameKh.trim() || storeNameKh.trim() || 'ម្ហូបខ្មែរ';
+      const results = await searchOnlineFoodImages({
+        nameKh: qKh,
+        nameEn: nameEn.trim() || qKh,
+        categorySlug: 'soup',
+        existingUrls: dishPhotoUrl ? [dishPhotoUrl] : [],
+      });
+      setOnlineDishCandidates(results);
+      if (results.length > 0) {
+        setDishPhotoUrl(results[0].url);
+        showToast(
+          isKm
+            ? `✨ រកឃើញរូបភាពម្ហូបពី Online ចំនួន ${results.length} សន្លឹក!`
+            : `✨ Found ${results.length} online food photos!`,
+          'success'
+        );
+      }
+    } catch {
+      showToast(isKm ? 'មិនអាចស្វែងរករូបភាពពី Online បានទេ' : 'Failed to search online food photos', 'warning');
+    } finally {
+      setIsSearchingOnlineDish(false);
+    }
+  };
 
   // Self-Service Store Info fields
   const [storeNameKh, setStoreNameKh] = useState(managingRestaurant?.nameKh || '');
@@ -614,6 +644,51 @@ export const ManageMenuModal: React.FC = () => {
                       onChange={e => setDishPhotoUrl(e.target.value)}
                       className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs mb-2 focus:ring-2 focus:ring-emerald-500/30 focus:border-[#059669] outline-none text-[#0F172A] dark:text-white font-mono text-[11px]"
                     />
+
+                    <button
+                      type="button"
+                      disabled={isSearchingOnlineDish}
+                      onClick={handleSearchOnlineDishPhotos}
+                      className="w-full mb-2.5 py-2.5 px-3.5 rounded-xl bg-gradient-to-r from-emerald-600 via-[#064E3B] to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md transition active:scale-98 disabled:opacity-60 cursor-pointer"
+                    >
+                      <Sparkles className={`w-4 h-4 text-amber-300 shrink-0 ${isSearchingOnlineDish ? 'animate-spin' : ''}`} />
+                      <span>
+                        {isSearchingOnlineDish
+                          ? (isKm ? 'កំពុងស្វែងរករូបភាពម្ហូបពី Online...' : 'Searching online food photos...')
+                          : (isKm
+                              ? '🤖 ស្វែងរករូបភាពម្ហូបពី Online ដោយស្វ័យប្រវត្តិ (ឥតគិតថ្លៃ $0)'
+                              : '🤖 Auto-Search Matching Food Photos Online (Free $0)')}
+                      </span>
+                    </button>
+
+                    {onlineDishCandidates.length > 0 && (
+                      <div className="space-y-1.5 mb-2.5">
+                        <span className="text-[11px] font-bold text-emerald-800 dark:text-emerald-300 block">
+                          {isKm
+                            ? `✨ រកឃើញរូបភាពម្ហូបពី Online ចំនួន ${onlineDishCandidates.length} សន្លឹក (ចុចជ្រើសរើស)៖`
+                            : `✨ Found ${onlineDishCandidates.length} online food photos (tap to select):`}
+                        </span>
+                        <div className="grid grid-cols-3 gap-2">
+                          {onlineDishCandidates.map((cand, idx) => (
+                            <button
+                              key={`${cand.url}-${idx}`}
+                              type="button"
+                              onClick={() => setDishPhotoUrl(cand.url)}
+                              className={`relative aspect-[4/3] rounded-xl overflow-hidden border-2 transition cursor-pointer ${
+                                dishPhotoUrl === cand.url
+                                  ? 'border-emerald-600 ring-2 ring-emerald-500/40'
+                                  : 'border-slate-200 dark:border-slate-700 hover:border-emerald-400'
+                              }`}
+                            >
+                              <img src={cand.url} alt={cand.title} className="w-full h-full object-cover" />
+                              <div className="absolute bottom-0 inset-x-0 bg-black/70 text-white text-[9px] px-1.5 py-0.5 truncate">
+                                {cand.source}
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                     
                     <div className="grid grid-cols-4 gap-2">
                       {sampleFoodPhotos.map((url, i) => (
