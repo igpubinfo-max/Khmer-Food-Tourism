@@ -11,7 +11,8 @@ import {
 import { useApp } from '../context/AppContext';
 
 export const WELCOME_SESSION_KEY = 'kft_welcome_shown_session_v1';
-const WELCOME_DURATION_MS = 8000; // 8 seconds: relaxed, comfortable reading time with instant Get Started skip button
+export const WELCOME_LOCAL_KEY = 'kft_welcome_shown_v2';
+const WELCOME_DURATION_MS = 3000; // Fast 3-second friendly intro with instant skip
 
 interface WelcomeScreenModalProps {
   onComplete: () => void;
@@ -28,20 +29,18 @@ export const WelcomeScreenModal: React.FC<WelcomeScreenModalProps> = ({ onComple
     setIsExiting(true);
     try {
       sessionStorage.setItem(WELCOME_SESSION_KEY, 'true');
+      localStorage.setItem(WELCOME_LOCAL_KEY, 'true');
     } catch {
       // ignore storage errors
     }
     setTimeout(() => {
       onComplete();
-    }, 180);
+    }, 120);
   };
 
   useEffect(() => {
     const startTime = Date.now();
-    // Initial kick so CSS transition animates smoothly
-    const initialTick = setTimeout(() => setProgress(12.5), 60);
     const interval = setInterval(() => {
-      if (typeof document !== 'undefined' && document.hidden) return;
       const elapsed = Date.now() - startTime;
       const pct = Math.min(100, (elapsed / WELCOME_DURATION_MS) * 100);
       setProgress(pct);
@@ -49,10 +48,9 @@ export const WelcomeScreenModal: React.FC<WelcomeScreenModalProps> = ({ onComple
         clearInterval(interval);
         handleProceedToLogin();
       }
-    }, 1000);
+    }, 200);
 
     return () => {
-      clearTimeout(initialTick);
       clearInterval(interval);
     };
   }, []);

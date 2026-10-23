@@ -13,7 +13,7 @@
  * - If not configured yet, safely falls back to local device storage without errors.
  */
 
-import { User, Restaurant, TouristDestination, RegistrationTransaction } from '../types';
+import { User, Restaurant, TouristDestination, RegistrationTransaction, isSeedRestaurantId } from '../types';
 
 export interface CloudApiConfig {
   supabaseUrl: string;
@@ -142,6 +142,23 @@ function getSupabaseHeaders(preferRepresentation = false): Record<string, string
 }
 
 /**
+ * Safe fetch with strict timeout (prevents app hanging on slow networks / unreachable cloud)
+ */
+async function fetchWithTimeout(url: string, options: RequestInit = {}, timeoutMs = 3500): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    });
+    return response;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/**
  * Test connection to Supabase REST API
  */
 export async function testSupabaseConnection(): Promise<{
@@ -159,10 +176,10 @@ export async function testSupabaseConnection(): Promise<{
 
   const start = Date.now();
   try {
-    const res = await fetch(`${cfg.supabaseUrl}/rest/v1/kft_app_kv_store?select=key&limit=1`, {
+    const res = await fetchWithTimeout(`${cfg.supabaseUrl}/rest/v1/kft_app_kv_store?select=key&limit=1`, {
       method: 'GET',
       headers: getSupabaseHeaders(false),
-    });
+    }, 3500);
     const latencyMs = Date.now() - start;
 
     if (res.ok) {
@@ -189,7 +206,7 @@ export async function testSupabaseConnection(): Promise<{
   } catch (err: any) {
     return {
       ok: false,
-      messageKh: `កំហុសបណ្តាញ៖ ${err?.message || 'មិនអាចភ្ជាប់ទៅកាន់ Supabase បានទេ'}`,
+      messageKh: `កំហុសបណ្តាញ៖ ${err?.name === 'AbortError' ? 'ការតភ្ជាប់លើសពេលកំណត់ (Timeout)' : (err?.message || 'មិនអាចភ្ជាប់ទៅកាន់ Supabase បានទេ')}`,
     };
   }
 }
@@ -205,7 +222,7 @@ export async function pushCloudDocument(key: string, payload: any): Promise<bool
   if (!cfg.enableAutoCloudSync) return false;
 
   try {
-    const res = await fetch(`${cfg.supabaseUrl}/rest/v1/kft_app_kv_store`, {
+    const res = await fetchWithTimeout(`${cfg.supabaseUrl}/rest/v1/kft_app_kv_store`, {
       method: 'POST',
       headers: getSupabaseHeaders(false),
       body: JSON.stringify({
@@ -213,7 +230,7 @@ export async function pushCloudDocument(key: string, payload: any): Promise<bool
         payload,
         updated_at: new Date().toISOString(),
       }),
-    });
+    }, 4000);
     return res.ok;
   } catch (err) {
     console.warn(`Supabase pushCloudDocument(${key}) error:`, err);
@@ -229,12 +246,13 @@ export async function pullCloudDocument<T>(key: string): Promise<T | null> {
   const cfg = getCloudApiConfig();
 
   try {
-    const res = await fetch(
+    const res = await fetchWithTimeout(
       `${cfg.supabaseUrl}/rest/v1/kft_app_kv_store?key=eq.${encodeURIComponent(key)}&select=payload,updated_at&limit=1`,
       {
         method: 'GET',
         headers: getSupabaseHeaders(false),
-      }
+      },
+      3500
     );
     if (!res.ok) return null;
     const rows = await res.json();
@@ -338,13 +356,13 @@ export async function syncAllAppDataWithSupabase(localState: {
     const restMap = new Map<string, Restaurant>();
     if (Array.isArray(cloudRests)) {
       for (const r of cloudRests) {
-        if (r && r.id && !/^rest-\d+$/.test(String(r.id))) {
+        if (r && r.id && !isSeedRestaurantId(String(r.id))) {
           restMap.set(r.id, r);
         }
       }
     }
     for (const r of localState.customRestaurants) {
-      if (r && r.id && !/^rest-\d+$/.test(String(r.id))) {
+      if (r && r.id && !isSeedRestaurantId(String(r.id))) {
         restMap.set(r.id, { ...(restMap.get(r.id) || {}), ...r });
       }
     }

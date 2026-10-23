@@ -73,7 +73,7 @@ const MainScreen: React.FC = () => {
   } = useApp();
   const [showWelcomeScreen, setShowWelcomeScreen] = useState<boolean>(() => {
     try {
-      return sessionStorage.getItem(WELCOME_SESSION_KEY) !== 'true';
+      return sessionStorage.getItem(WELCOME_SESSION_KEY) !== 'true' && localStorage.getItem('kft_welcome_shown_v2') !== 'true';
     } catch {
       return false;
     }

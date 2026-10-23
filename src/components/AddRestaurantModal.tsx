@@ -247,7 +247,7 @@ export const AddRestaurantModal: React.FC = () => {
       'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80';
     const combinedGallery = Array.from(new Set([finalProfile, ...foodPhotos]));
 
-    addRestaurant({
+    const created = addRestaurant({
       nameKh: nameKh.trim() || 'ហាងអាហារខ្មែរ',
       nameEn: nameEn.trim() || nameKh.trim() || 'Khmer Restaurant',
       provinceKh,
@@ -321,7 +321,7 @@ export const AddRestaurantModal: React.FC = () => {
     }
 
     setIsSubmitting(true);
-    const generatedRestId = `rest-${Date.now()}`;
+    const generatedRestId = `rest-vip-${Date.now()}`;
     const expiresAt = new Date(
       Date.now() + activePlan.durationDays * 24 * 60 * 60 * 1000
     ).toISOString();
@@ -331,7 +331,8 @@ export const AddRestaurantModal: React.FC = () => {
       'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80';
     const combinedGallery = Array.from(new Set([finalProfile, ...foodPhotos]));
 
-    addRestaurant({
+    const created = addRestaurant({
+      id: generatedRestId,
       nameKh: nameKh.trim() || 'ហាងអាហារខ្មែរ',
       nameEn: nameEn.trim() || nameKh.trim() || 'Khmer Restaurant',
       provinceKh,

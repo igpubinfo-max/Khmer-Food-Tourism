@@ -1,7 +1,7 @@
-export const APP_VERSION = 'v1.9.0';
-export const APP_VERSION_NAME = '1.9.0';
-export const APP_BUILD_CODE = 62;
-export const APP_RELEASE_DATE = '2026-10-23';
+export const APP_VERSION = 'v1.9.1';
+export const APP_VERSION_NAME = '1.9.1';
+export const APP_BUILD_CODE = 63;
+export const APP_RELEASE_DATE = '2026-10-24';
 
 export const VIP_ANNUAL_PRICE_USD = 4.99;
 export const VIP_SUBSCRIPTION_DAYS = 90;
@@ -413,6 +413,20 @@ export const sortRestaurantsChronologically = (list: Restaurant[]): Restaurant[]
     }
     return String(a.id || '').localeCompare(String(b.id || ''));
   });
+};
+
+// Helper to identify built-in seed restaurants (rest-1 to rest-250) vs user custom/VIP restaurants
+export const isSeedRestaurantId = (id: string | number): boolean => {
+  const str = String(id || '');
+  const match = str.match(/^rest-(\d+)$/);
+  if (!match) return false;
+  const num = parseInt(match[1], 10);
+  return num >= 1 && num <= 250;
+};
+
+export const isCustomRestaurant = (restaurant?: Restaurant | null): boolean => {
+  if (!restaurant || !restaurant.id) return false;
+  return !isSeedRestaurantId(restaurant.id);
 };
 
 // Helper to determine if a restaurant has an active Premium membership

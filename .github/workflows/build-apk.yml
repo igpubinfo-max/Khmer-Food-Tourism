@@ -69,7 +69,7 @@ jobs:
           echo "=== SEARCHING FOR GENERATED APK FILES ==="
           find . -name "*.apk" -ls
           cd android/app/build/outputs/apk/debug
-          mv app-debug.apk KhmerFoodTourism-v1.9.0.apk
+          mv app-debug.apk KhmerFoodTourism-v1.9.1.apk
           ls -la
 
       # Play Store AAB build disabled during regular edits per user instruction (enable only when requested)
@@ -96,22 +96,22 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: v1.9.0
-          name: "Khmer Food & Tourism v1.9.0 (Persistent Photo Override Vault, Real Koh Pen Bamboo Bridge & Version-Proof Storage)"
+          tag_name: v1.9.1
+          name: "Khmer Food & Tourism v1.9.1 (Instant PC Startup & VIP Store Submission Fix)"
           make_latest: true
           body: |
             ### 🇰🇭 កម្មវិធីទូរស័ព្ទដៃ អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism Mobile App)
             
-            **កំណែថ្មី v1.9.0 (Permanent Photo Overrides Vault, Real Koh Pen Bamboo Bridge & Anti-Reversion Guard):**
-            - 🔒 **១. ប្រព័ន្ធរក្សាទុករូបភាពអចិន្ត្រៃយ៍មិនបាត់បង់ពេល Update កម្មវិធី (Persistent Photo Overrides Vault):**
-              - បង្កើតថតផ្ទុកទិន្នន័យដាច់ដោយឡែក `kft_destination_photo_overrides_v1` សម្រាប់កត់ត្រារាល់រូបភាពដែល Admin បានកែប្រែដោយផ្ទាល់ (ទោះជា URL, File Upload, ឬ Base64)។
-              - រាល់ពេលអាប់ដេតកំណែថ្មី ឬដំឡើង APK ថ្មី រូបភាពដែល Admin បានកែប្រែនឹងត្រូវរក្សាទុកដដែល ១០០% មិន Revert ទៅរូបភាពដើម (Default) វិញដាច់ខាត។
-              - ការកែប្រែត្រូវអនុវត្តភ្លាមៗតែនៅពេលណាដែល Admin ចុចកែប្រែដោយផ្ទាល់ប៉ុណ្ណោះ។
-            - 🌉 **២. ធ្វើបច្ចុប្បន្នភាពរូបថតពិតនៃស្ពានឫស្សីកោះប៉ែន (Real Koh Pen Bamboo Bridge dest-77):**
-              - បានប្តូររូបថតស្ពានគីហ្សូណា (ស្ពានបេតុង) ចាស់ ទៅជារូបថតពិតជាក់ស្តែងនៃ «ស្ពានឫស្សីកោះប៉ែន» ខេត្តកំពង់ចាម ដែលជាស្ពានឫស្សីវែងបំផុតលើលោក (`/destinations/dest-77.jpg`)។
-            - 🛡️ **៣. សុវត្ថិភាពទិន្នន័យទេសចរណ៍ ៣០០ កន្លែង និងការការពារ Duplicate:**
-              - រក្សាការធ្វើសវនកម្មគ្មានទិន្នន័យត្រួតគ្នា (Zero Duplicates) និងប្រព័ន្ធទប់ស្កាត់ការ Duplicate ដោយស្វ័យប្រវត្តិ។
-              - រាល់ការផ្លាស់ប្តូររូបភាពរបស់ Admin ត្រូវបានរក្សាទុកជាអចិន្ត្រៃយ៍ និងមិនបាត់បង់ឡើយ។
+            **កំណែថ្មី v1.9.1 (Instant PC Startup & VIP Store Submission Fix):**
+            - ⚡ **១. ដោះស្រាយបញ្ហាកម្មវិធីបើកយឺតលើ PC (Instant PC Startup & Zero Hang):**
+              - បន្ថែម Timeout 3.5 វិនាទី និង AbortController លើរាល់ការហៅ Cloud API របស់ Supabase ការពារការកកស្ទះ (Hang up to 5 minutes) នៅពេលបណ្តាញ PC មានការរអាក់រអួល ឬ Firewall រារាំង។
+              - កំណត់ពន្យារពេលការ Sync Cloud លើកដំបូងចំនួន 1.2 វិនាទី ដើម្បីឱ្យផ្ទាំង UI របស់កម្មវិធីបង្ហាញឡើងភ្លាមៗ (< 50ms) ពី Local Cache។
+              - ដកចោលលក្ខខណ្ឌបង្កក Timer (`document.hidden`) ក្នុងផ្ទាំង Welcome Screen និងកាត់បន្ថយពេលវេលាបង្ហាញមកត្រឹម 3 វិនាទី រួមជាមួយការកត់ត្រា `kft_welcome_shown_v2` ក្នុង localStorage ការពារកុំឱ្យរាំងស្ទះដំណើរការបើកកម្មវិធីលើកក្រោយៗ។
+            - 🏪 **២. កែសម្រួលការចុះបញ្ជីហាង VIP ឱ្យដំណើរការត្រឹមត្រូវ ១០០% (VIP Restaurant Submission Fix):**
+              - ដោះស្រាយបញ្ហា Submit បង្កើតហាង VIP ថ្មីរួច ហើយបង្ហាញផ្ទាំងខុស «⛔ Unauthorized Restaurant - Malis Restaurant»: មុខងារ `addRestaurant` ឥឡូវប្រគល់ទិន្នន័យហាងថ្មីដែលទើបបង្កើតរួចដោយផ្ទាល់ ហើយបើកផ្ទាំង Manage Menu លើហាងរបស់ម្ចាស់នោះភ្លាមៗ។
+              - កែសម្រួល Regex `isSeedRestaurantId` មិនឱ្យច្រឡំលេខសម្គាល់ហាង VIP ថ្មី (`rest-vip-...`) ជាមួយហាងលំនាំដើម (`rest-1` ដល់ `rest-250`)។
+              - រក្សាទុកទិន្នន័យហាង VIP ថ្មីចូលក្នុង Persistent Local Storage ភ្លាមៗ និង Sync ទៅកាន់ Supabase Cloud ដោយស្វ័យប្រវត្តិ។
+            - 🔒 **៣. រក្សាទុកអចិន្ត្រៃយ៍នូវរូបថតតំបន់ទេសចរណ៍ ៣០០ កន្លែង និងមុខម្ហូប ២០០ មុខ ដោយគ្មានការបាត់បង់ទិន្នន័យ។**
           draft: false
           prerelease: false
           files: |

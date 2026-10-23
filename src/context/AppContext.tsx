@@ -4,7 +4,7 @@ import {
   Language, UserRole, AppSettings, RegistrationTransaction,
   RestaurantMenuItem, MembershipTier, isRestaurantPremiumActive, isUserVipActive, getVipRemainingDays,
   getVipAccountState, VipAccountState,
-  getRestaurantCreatedAtIso, sortRestaurantsChronologically,
+  getRestaurantCreatedAtIso, sortRestaurantsChronologically, isSeedRestaurantId,
   Wishlist, WishlistItem, TripPlan, AppNotification,
   TrendingFoodItem, AiCheckInSubmission,
   SupportTicket, SupportTicketMessage, SupportTicketStatus, VIP_PLANS
@@ -97,7 +97,7 @@ interface AppContextType {
   deleteFood: (id: string) => void;
   
   // Restaurant Actions
-  addRestaurant: (rest: Omit<Restaurant, 'id' | 'rating' | 'reviewCount' | 'status'> & { status?: 'approved' | 'pending' | 'rejected' }) => void;
+  addRestaurant: (rest: Omit<Restaurant, 'id' | 'rating' | 'reviewCount' | 'status'> & { status?: 'approved' | 'pending' | 'rejected' }) => Restaurant | null;
   updateRestaurant: (rest: Restaurant) => void;
   deleteRestaurant: (id: string) => void;
   approveRestaurant: (id: string) => void;
@@ -501,7 +501,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         const parsedOld = JSON.parse(oldSaved);
         if (Array.isArray(parsedOld)) {
           customLegacyRestaurants = parsedOld
-            .filter((r: any) => r && r.id && !/^rest-\d+$/.test(String(r.id)))
+            .filter((r: any) => r && r.id && !isSeedRestaurantId(String(r.id)))
             .map(normalizeRestaurant);
         }
       }
@@ -1092,6 +1092,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     restaurants: true,
     destinations: true,
     posts: true,
+    transactions: true,
+    supportTickets: true,
   });
 
   const scheduleStorageWrite = (key: string, data: unknown, delayMs = 1000) => {
@@ -1258,6 +1260,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [appSettings]);
 
   useEffect(() => {
+    if (isInitialMountRef.current.transactions) {
+      isInitialMountRef.current.transactions = false;
+      return;
+    }
     try {
       if (transactions) {
         localStorage.setItem('kft_transactions_v4', JSON.stringify(transactions));
@@ -1271,6 +1277,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [transactions]);
 
   useEffect(() => {
+    if (isInitialMountRef.current.supportTickets) {
+      isInitialMountRef.current.supportTickets = false;
+      return;
+    }
     try {
       if (supportTickets) {
         localStorage.setItem('kft_support_tickets_v1', JSON.stringify(supportTickets));
@@ -1303,7 +1313,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (rawVault) localVault = JSON.parse(rawVault);
       } catch {}
 
-      const customRests = restaurants.filter(r => !/^rest-\d+$/.test(r.id));
+      const customRests = restaurants.filter(r => !isSeedRestaurantId(r.id));
       const result = await syncAllAppDataWithSupabase({
         users,
         transactions,
@@ -1327,7 +1337,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             const map = new Map<string, Restaurant>();
             for (const r of prev) map.set(r.id, r);
             for (const r of result.mergedCustomRestaurants) {
-              if (r && r.id && !/^rest-\d+$/.test(String(r.id))) {
+              if (r && r.id && !isSeedRestaurantId(String(r.id))) {
                 map.set(r.id, normalizeRestaurant(r));
               }
             }
@@ -1351,8 +1361,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   useEffect(() => {
+    let syncTimer: any;
     if (isSupabaseConfigured()) {
-      triggerCloudSyncNow();
+      // Defer cloud sync so initial startup UI paints instantly (< 50ms) without waiting for network
+      syncTimer = setTimeout(() => {
+        triggerCloudSyncNow();
+      }, 1200);
     }
     // Handle direct shared deep links (?restaurant=..., ?food=..., ?destination=...)
     try {
@@ -1382,6 +1396,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
       }
     } catch {}
+
+    return () => {
+      if (syncTimer) clearTimeout(syncTimer);
+    };
   }, []);
 
   // Keep a mutable ref of current modal & navigation state for the native back-button listener
@@ -2108,7 +2126,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // Restaurant CRUD
-  const addRestaurant = (restData: Omit<Restaurant, 'id' | 'rating' | 'reviewCount' | 'status'> & { status?: 'approved' | 'pending' | 'rejected' }) => {
+  const addRestaurant = (restData: Omit<Restaurant, 'id' | 'rating' | 'reviewCount' | 'status'> & { id?: string; status?: 'approved' | 'pending' | 'rejected' }): Restaurant | null => {
     if (!currentUser) {
       showToast(
         language === 'km'
@@ -2117,7 +2135,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         'warning'
       );
       setIsAuthModalOpen(true);
-      return;
+      return null;
     }
 
     const isAdmin = 
@@ -2144,7 +2162,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           : '⚠️ Your VIP subscription has expired. Please renew your VIP membership!';
       }
       showToast(errorMsg, 'warning');
-      return;
+      return null;
     }
 
     if (!isAdmin) {
@@ -2158,11 +2176,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         );
         setManagingRestaurant(existingOwned);
         setIsManageMenuModalOpen(true);
-        return;
+        return existingOwned;
       }
     }
 
-    const isPremium = true; // All authorized listings are approved VIP
     const profileImg = restData.profileImage || restData.photoUrl || '/foods/food-1.jpg';
     const foodImgs = Array.isArray(restData.foodImages) && restData.foodImages.length > 0
       ? restData.foodImages
@@ -2177,7 +2194,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       profileImage: profileImg,
       galleryPhotos: foodImgs,
       foodImages: foodImgs,
-      id: `rest-${Date.now()}`,
+      id: restData.id || `rest-vip-${Date.now()}`,
       rating: 5.0,
       reviewCount: 1,
       ownerId: currentUser.id,
@@ -2191,11 +2208,30 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       created_at: restData.created_at || restData.createdAt || nowIso,
       createdAt: restData.created_at || restData.createdAt || nowIso,
     });
-    setRestaurants(prev => sortRestaurantsChronologically([...prev, newRest]));
+
+    setRestaurants(prev => {
+      const nextList = sortRestaurantsChronologically([...prev, newRest]);
+      try {
+        localStorage.setItem('kft_restaurants_real_v9', JSON.stringify(nextList));
+      } catch (e) {
+        console.warn('Immediate save failed for new restaurant:', e);
+      }
+      return nextList;
+    });
+
+    // Background push to Supabase Cloud if configured
+    try {
+      if (isSupabaseConfigured()) {
+        const customRests = [...restaurants.filter(r => !isSeedRestaurantId(r.id)), newRest];
+        pushCloudDocument('kft_cloud_custom_restaurants_v1', customRests);
+      }
+    } catch {}
+
     showToast(
       language === 'km' ? '🎉 ចុះបញ្ជីហាង VIP របស់អ្នកបានជោគជ័យ!' : '🎉 Registered your VIP Restaurant successfully!',
       'success'
     );
+    return newRest;
   };
 
   const updateRestaurant = (updated: Restaurant) => {

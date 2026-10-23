@@ -251,17 +251,14 @@ export const VipAddRestaurantModal: React.FC = () => {
       ownerPhone: phone.trim(),
     };
 
-    addRestaurant(newRestData);
+    const created = addRestaurant(newRestData);
     setIsVipAddRestaurantModalOpen(false);
     setFoodPhotos([]);
 
-    setTimeout(() => {
-      const added = restaurants[0];
-      if (added) {
-        setManagingRestaurant(added);
-        setIsManageMenuModalOpen(true);
-      }
-    }, 300);
+    if (created) {
+      setManagingRestaurant(created);
+      setIsManageMenuModalOpen(true);
+    }
 
     showToast(
       isKm
