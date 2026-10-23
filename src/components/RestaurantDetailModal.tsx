@@ -5,7 +5,7 @@ import {
   Send, Share2, UtensilsCrossed, Sparkles, CheckCircle2, AlertCircle, Copy, Camera, Bookmark,
   BarChart3, Video, Crown
 } from 'lucide-react';
-import { isRestaurantPremiumActive } from '../types';
+import { isRestaurantPremiumActive, isUserVipActive, getVipAccountState } from '../types';
 import { RestaurantImageModal } from './RestaurantImageModal';
 import {
   sanitizeDialablePhone,
@@ -32,7 +32,8 @@ export const RestaurantDetailModal: React.FC = () => {
     trackRestaurantMap,
     trackRestaurantShare,
     updateRestaurant,
-    openAddToWishlist
+    openAddToWishlist,
+    openUpgradeVipModal,
   } = useApp();
 
   const [activePhoto, setActivePhoto] = useState<string>('');
@@ -62,8 +63,13 @@ export const RestaurantDetailModal: React.FC = () => {
   const isKm = language === 'km';
   const isPremiumActive = isRestaurantPremiumActive(selectedRestaurant);
   const isOwner = Boolean(currentUser?.id && selectedRestaurant.ownerId === currentUser.id);
-  const isAdmin = currentUser?.role === 'admin';
-  const canEditShop = Boolean(isOwner || isAdmin);
+  const isAdmin = 
+    currentUser?.role === 'admin' || 
+    currentUser?.id === 'admin-authorized-single' || 
+    currentUser?.username === 'admin' || 
+    currentUser?.username === 'cheasavuth';
+  const isApprovedVip = isUserVipActive(currentUser);
+  const canEditShop = Boolean(isAdmin || (isOwner && isApprovedVip));
   const dialablePhone = sanitizeDialablePhone(selectedRestaurant.phone);
   const displayPhone = formatDisplayPhone(selectedRestaurant.phone);
 
@@ -307,7 +313,7 @@ export const RestaurantDetailModal: React.FC = () => {
 
           <div className="p-4 sm:p-6 space-y-5">
             {/* Owner / Admin Management Control Bar */}
-            {(isOwner || isAdmin) && (
+            {canEditShop ? (
               <div className="p-3.5 bg-emerald-50 dark:bg-slate-800 rounded-2xl border-2 border-emerald-500/60 flex items-center justify-between font-khmer">
                 <div>
                   <div className="font-bold text-xs text-[#064E3B] dark:text-emerald-400 flex items-center gap-1.5">
@@ -331,7 +337,28 @@ export const RestaurantDetailModal: React.FC = () => {
                   <span>{isKm ? 'គ្រប់គ្រងហាង & មុខម្ហូប' : 'Manage Store & Menu'}</span>
                 </button>
               </div>
-            )}
+            ) : isOwner ? (
+              <div className="p-3.5 bg-amber-50 dark:bg-amber-950/40 rounded-2xl border-2 border-amber-400/80 flex items-center justify-between gap-3 font-khmer">
+                <div>
+                  <div className="font-bold text-xs text-amber-900 dark:text-amber-200 flex items-center gap-1.5">
+                    <span>⚠️</span>
+                    <span>{isKm ? 'សមាជិកភាព VIP មិនទាន់សកម្ម' : 'VIP Membership Not Active'}</span>
+                  </div>
+                  <div className="text-[10px] text-slate-600 dark:text-slate-300">
+                    {isKm 
+                      ? 'សូមបន្ត ឬដំឡើងសមាជិកភាព VIP ដើម្បីកែប្រែហាង និងគ្រប់គ្រងមុខម្ហូប'
+                      : 'Please renew or upgrade VIP to manage this restaurant.'}
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => openUpgradeVipModal()}
+                  className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 text-slate-950 font-bold text-xs shadow transition cursor-pointer shrink-0"
+                >
+                  {isKm ? 'ដំឡើង VIP' : 'Upgrade VIP'}
+                </button>
+              </div>
+            ) : null}
 
             {/* Quick action bar: Maps, Call, Telegram, Facebook, and Share (Benefits 6, 7, 9) */}
             <div className="grid grid-cols-4 gap-1.5 sm:gap-2">
@@ -404,14 +431,14 @@ export const RestaurantDetailModal: React.FC = () => {
             </div>
 
             {/* VIP Food Video Reels Section (Benefit 5) */}
-            {(selectedRestaurant.promoVideoUrl || isOwner || isAdmin) && (
+            {(selectedRestaurant.promoVideoUrl || canEditShop) && (
               <div className="p-3.5 rounded-2xl bg-gradient-to-r from-amber-500/10 via-emerald-500/10 to-teal-500/10 border border-amber-400/50 space-y-2 text-xs font-khmer">
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-[#0F172A] dark:text-white flex items-center gap-1.5">
                     <Video className="w-4 h-4 text-amber-500" />
                     <span>{isKm ? 'វីដេអូផ្សព្វផ្សាយម្ហូប (Food Video Reels)' : 'Food Video Reels'}</span>
                   </span>
-                  {(isOwner || isAdmin) && (
+                  {canEditShop && (
                     <button
                       type="button"
                       onClick={() => {
@@ -554,7 +581,7 @@ export const RestaurantDetailModal: React.FC = () => {
                         : `Restaurant Food Menu (${selectedRestaurant.menuItems.length})`}
                     </span>
                   </h3>
-                  {isOwner && (
+                  {canEditShop && (
                     <button
                       onClick={() => {
                         setManagingRestaurant(selectedRestaurant);
@@ -608,7 +635,7 @@ export const RestaurantDetailModal: React.FC = () => {
                     <UtensilsCrossed className="w-4 h-4 text-[#059669]" />
                     <span>{isKm ? 'មុខម្ហូបប្រចាំហាង (Signature Dishes)' : 'Signature Menus'}</span>
                   </h3>
-                  {isOwner && (
+                  {canEditShop && (
                     <button
                       onClick={() => {
                         setManagingRestaurant(selectedRestaurant);

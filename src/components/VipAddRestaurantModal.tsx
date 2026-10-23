@@ -12,8 +12,12 @@ import {
   RefreshCw,
   Utensils,
   Edit2,
+  Lock,
+  Clock,
+  AlertCircle,
+  Crown,
 } from 'lucide-react';
-import { RestaurantPriceLevel } from '../types';
+import { RestaurantPriceLevel, isUserVipActive, getVipAccountState } from '../types';
 import {
   pickImageUsingNativeAndroidGallery,
   processAndCompressImageFile,
@@ -32,9 +36,20 @@ export const VipAddRestaurantModal: React.FC = () => {
     setIsManageMenuModalOpen,
     setManagingRestaurant,
     restaurants,
+    openUpgradeVipModal,
+    setIsAuthModalOpen,
   } = useApp();
 
   const isKm = language === 'km';
+  const isAdmin = 
+    currentUser?.role === 'admin' || 
+    currentUser?.id === 'admin-authorized-single' || 
+    currentUser?.username === 'admin' || 
+    currentUser?.username === 'cheasavuth';
+  const isApprovedVip = isUserVipActive(currentUser);
+  const vipState = getVipAccountState(currentUser);
+  const isAuthorized = isAdmin || isApprovedVip;
+
   const existingOwnedRestaurant =
     currentUser && currentUser.role !== 'admin'
       ? restaurants.find((r) => r.ownerId === currentUser.id)
@@ -293,8 +308,133 @@ export const VipAddRestaurantModal: React.FC = () => {
           </button>
         </div>
 
-        {/* Form Body or 1-Restaurant-Per-User Limit Guard */}
-        {existingOwnedRestaurant ? (
+        {/* Form Body or VIP Permission Guard or 1-Restaurant-Per-User Limit Guard */}
+        {!isAuthorized ? (
+          <div className="p-6 text-center space-y-4 font-khmer">
+            {!currentUser ? (
+              <div className="py-6 space-y-3">
+                <div className="w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-[#064E3B] dark:text-emerald-400 flex items-center justify-center mx-auto shadow-md">
+                  <Lock className="w-8 h-8" />
+                </div>
+                <h3 className="font-moul text-sm text-slate-900 dark:text-white">
+                  {isKm ? 'សូមចូលគណនីជាមុនសិន' : 'Please Sign In First'}
+                </h3>
+                <p className="text-xs text-slate-600 dark:text-slate-300 max-w-xs mx-auto leading-relaxed">
+                  {isKm
+                    ? 'លោកអ្នកត្រូវចូលគណនីដែលមានសមាជិកភាព VIP សកម្ម ដើម្បីចុះបញ្ជីហាង VIP របស់អ្នក។'
+                    : 'Please sign in with your active VIP account to register your restaurant.'}
+                </p>
+                <div className="pt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsVipAddRestaurantModalOpen(false);
+                      setIsAuthModalOpen(true);
+                    }}
+                    className="px-6 py-2.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-xs shadow-md transition cursor-pointer"
+                  >
+                    {isKm ? 'ចូលគណនីឥឡូវនេះ' : 'Sign In Now'}
+                  </button>
+                </div>
+              </div>
+            ) : vipState === 'pending_vip' ? (
+              <div className="py-6 space-y-3">
+                <div className="w-16 h-16 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-600 flex items-center justify-center mx-auto shadow-md ring-4 ring-amber-400/20">
+                  <Clock className="w-8 h-8 animate-pulse" />
+                </div>
+                <span className="px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-200 text-xs font-bold font-sans">
+                  PENDING_ADMIN_APPROVAL
+                </span>
+                <h3 className="font-moul text-sm text-slate-900 dark:text-white">
+                  {isKm ? '⏳ កំពុងរង់ចាំ Admin ពិនិត្យ និងអនុម័ត' : '⏳ Awaiting Admin Approval'}
+                </h3>
+                <p className="text-xs text-slate-600 dark:text-slate-300 max-w-sm mx-auto leading-relaxed">
+                  {isKm
+                    ? 'ការស្នើសុំសមាជិកភាព VIP របស់អ្នកត្រូវបានកត់ត្រា និងកំពុងស្ថិតក្នុងការពិនិត្យផ្ទៀងផ្ទាត់ដោយ Administrator។ មុខងារចុះបញ្ជីហាង VIP នឹងបើកដំណើរការភ្លាមៗក្រោយពេលទទួលបានការអនុម័ត!'
+                    : 'Your VIP request is awaiting Admin approval. Restaurant registration will unlock immediately upon approval!'}
+                </p>
+                <div className="pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsVipAddRestaurantModalOpen(false)}
+                    className="px-6 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs transition cursor-pointer"
+                  >
+                    {isKm ? 'យល់ព្រម (បិទ)' : 'Close'}
+                  </button>
+                </div>
+              </div>
+            ) : vipState === 'expired_vip' ? (
+              <div className="py-6 space-y-3">
+                <div className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-950/60 text-red-600 flex items-center justify-center mx-auto shadow-md ring-4 ring-red-400/20">
+                  <AlertCircle className="w-8 h-8" />
+                </div>
+                <span className="px-3 py-1 rounded-full bg-red-100 dark:bg-red-900/60 text-red-800 dark:text-red-200 text-xs font-bold font-sans">
+                  VIP_EXPIRED
+                </span>
+                <h3 className="font-moul text-sm text-slate-900 dark:text-white">
+                  {isKm ? '⚠️ សមាជិកភាព VIP បានផុតកំណត់' : '⚠️ VIP Membership Expired'}
+                </h3>
+                <p className="text-xs text-slate-600 dark:text-slate-300 max-w-sm mx-auto leading-relaxed">
+                  {isKm
+                    ? 'សមាជិកភាព VIP របស់លោកអ្នកបានផុតកំណត់ហើយ។ សូមបន្តកញ្ចប់ VIP ($2.99 / 30 ថ្ងៃ ឬ $4.99 / 90 ថ្ងៃ) ដើម្បីចុះបញ្ជីហាង VIP របស់អ្នក។'
+                    : 'Your VIP membership has expired. Please renew your VIP membership to register your restaurant.'}
+                </p>
+                <div className="pt-2 flex flex-col sm:flex-row gap-2 justify-center">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsVipAddRestaurantModalOpen(false);
+                      openUpgradeVipModal(true);
+                    }}
+                    className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 text-slate-950 font-black text-xs shadow-md transition cursor-pointer"
+                  >
+                    {isKm ? '✨ បន្តកញ្ចប់ VIP ឥឡូវនេះ' : '✨ Renew VIP Now'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsVipAddRestaurantModalOpen(false)}
+                    className="px-5 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs transition cursor-pointer"
+                  >
+                    {isKm ? 'បិទ' : 'Close'}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="py-6 space-y-3">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 text-slate-950 flex items-center justify-center mx-auto shadow-lg ring-4 ring-amber-400/20">
+                  <Crown className="w-8 h-8" />
+                </div>
+                <h3 className="font-moul text-sm text-slate-900 dark:text-white">
+                  {isKm ? '🔒 សម្រាប់តែសមាជិក VIP ដែលបានអនុម័ត' : '🔒 Approved VIP Only'}
+                </h3>
+                <p className="text-xs text-slate-600 dark:text-slate-300 max-w-sm mx-auto leading-relaxed">
+                  {isKm
+                    ? 'ការចុះបញ្ជីហាង គឺអនុញ្ញាតជូនតែសមាជិក VIP ដែលបានបង់ប្រាក់ និងទទួលបានការអនុម័តពី Administrator ប៉ុណ្ណោះ។ សូមដំឡើងទៅកញ្ចប់ VIP ($2.99 / 30 ថ្ងៃ ឬ $4.99 / 90 ថ្ងៃ) ដើម្បីចុះបញ្ជីហាង និងទទួលបានអត្ថប្រយោជន៍ទាំង ១០!'
+                    : 'Restaurant registration is exclusive to approved VIP members. Upgrade to VIP ($2.99 / 30 days or $4.99 / 90 days) to register your restaurant!'}
+                </p>
+                <div className="pt-2 flex flex-col sm:flex-row gap-2 justify-center">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsVipAddRestaurantModalOpen(false);
+                      openUpgradeVipModal();
+                    }}
+                    className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-500 text-slate-950 font-black text-xs shadow-md transition cursor-pointer"
+                  >
+                    {isKm ? '👑 ដំឡើងទៅកញ្ចប់ VIP ឥឡូវនេះ' : '👑 Upgrade to VIP Now'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsVipAddRestaurantModalOpen(false)}
+                    className="px-5 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs transition cursor-pointer"
+                  >
+                    {isKm ? 'បិទ' : 'Close'}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        ) : existingOwnedRestaurant ? (
           <div className="p-5 space-y-4 font-khmer text-xs">
             <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border-2 border-amber-400 space-y-2.5">
               <div className="flex items-center gap-2 text-amber-800 dark:text-amber-300 font-bold text-sm">

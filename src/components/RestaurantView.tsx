@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { RestaurantCard } from './RestaurantCard';
-import { isRestaurantPremiumActive, Restaurant, sortRestaurantsChronologically } from '../types';
+import { isRestaurantPremiumActive, Restaurant, sortRestaurantsChronologically, getVipAccountState } from '../types';
 import { Store, Plus, MapPin, Sparkles, PhoneCall, CheckCircle2, AlertCircle, Camera, Globe, Loader2, Edit2 } from 'lucide-react';
 import {
   searchCambodiaPlacesWithSmartCache,
@@ -18,7 +18,8 @@ export const RestaurantView: React.FC = () => {
     setIsVipAddRestaurantModalOpen,
     currentUser, setIsAuthModalOpen, setIsAiCheckInModalOpen,
     addRestaurant, showToast,
-    setManagingRestaurant, setIsManageMenuModalOpen
+    setManagingRestaurant, setIsManageMenuModalOpen,
+    openUpgradeVipModal
   } = useApp();
 
   const myExistingRest = currentUser ? restaurants.find((r) => r.ownerId === currentUser.id) : undefined;
@@ -180,7 +181,24 @@ export const RestaurantView: React.FC = () => {
             onClick={() => {
               if (!currentUser) {
                 setIsAuthModalOpen(true);
-              } else if (isUserAtOneStoreLimit && myExistingRest) {
+                return;
+              }
+              const state = getVipAccountState(currentUser);
+              if (state === 'pending_vip') {
+                showToast(isKm ? '⏳ គណនី VIP របស់អ្នកកំពុងរង់ចាំការពិនិត្យ និងអនុម័តពី Administrator។' : '⏳ VIP pending Admin approval.', 'info');
+                return;
+              }
+              if (state === 'expired_vip') {
+                showToast(isKm ? '⚠️ សមាជិកភាព VIP របស់អ្នកបានផុតកំណត់ហើយ! សូមបន្តសមាជិកភាព VIP។' : '⚠️ VIP expired. Please renew.', 'warning');
+                openUpgradeVipModal(true);
+                return;
+              }
+              if (state === 'regular_unpaid') {
+                showToast(isKm ? '🔒 សម្រាប់តែសមាជិក VIP ដែលបានអនុម័តប៉ុណ្ណោះ! សូមដំឡើងទៅកញ្ចប់ VIP។' : '🔒 VIP required!', 'warning');
+                openUpgradeVipModal();
+                return;
+              }
+              if (isUserAtOneStoreLimit && myExistingRest) {
                 setManagingRestaurant(myExistingRest);
                 setIsManageMenuModalOpen(true);
               } else {
@@ -272,7 +290,24 @@ export const RestaurantView: React.FC = () => {
             onClick={() => {
               if (!currentUser) {
                 setIsAuthModalOpen(true);
-              } else if (isUserAtOneStoreLimit && myExistingRest) {
+                return;
+              }
+              const state = getVipAccountState(currentUser);
+              if (state === 'pending_vip') {
+                showToast(isKm ? '⏳ ការស្នើសុំសមាជិកភាព VIP របស់អ្នកកំពុងរង់ចាំការពិនិត្យ និងអនុម័តពី Administrator។' : '⏳ VIP request pending Admin approval.', 'info');
+                return;
+              }
+              if (state === 'expired_vip') {
+                showToast(isKm ? '⚠️ សមាជិកភាព VIP របស់អ្នកបានផុតកំណត់ហើយ! សូមបន្តសមាជិកភាព VIP ដើម្បីចុះបញ្ជីហាង។' : '⚠️ VIP membership expired. Please renew.', 'warning');
+                openUpgradeVipModal(true);
+                return;
+              }
+              if (state === 'regular_unpaid') {
+                showToast(isKm ? '🔒 ការចុះបញ្ជីហាងគឺសម្រាប់តែសមាជិក VIP ដែលបានអនុម័តប៉ុណ្ណោះ! សូមដំឡើងទៅកញ្ចប់ VIP។' : '🔒 VIP required!', 'warning');
+                openUpgradeVipModal();
+                return;
+              }
+              if (isUserAtOneStoreLimit && myExistingRest) {
                 setManagingRestaurant(myExistingRest);
                 setIsManageMenuModalOpen(true);
               } else {

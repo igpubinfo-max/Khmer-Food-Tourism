@@ -1,12 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
   X, UtensilsCrossed, Plus, Trash2, Edit2, Sparkles, 
   AlertCircle, CheckCircle2, Image, DollarSign, Calendar, Clock,
   Store, BarChart3, ShieldCheck, Share2, Phone, MapPin, ExternalLink,
-  MessageCircle, Copy, Check, HelpCircle, ArrowRight
+  MessageCircle, Copy, Check, HelpCircle, ArrowRight, Camera, Upload, Lock, ShieldAlert
 } from 'lucide-react';
-import { RestaurantMenuItem, isRestaurantPremiumActive, isUserVipActive, VIP_PLANS, VipPlanType } from '../types';
+import { 
+  RestaurantMenuItem, isRestaurantPremiumActive, isUserVipActive, 
+  VIP_PLANS, VipPlanType, getVipAccountState, VipAccountState 
+} from '../types';
 import {
   pickImageUsingNativeAndroidGallery,
   processAndCompressImageFile,
@@ -27,6 +30,8 @@ export const ManageMenuModal: React.FC = () => {
     upgradeRestaurantToPremium,
     language,
     showToast,
+    openUpgradeVipModal,
+    setIsAuthModalOpen,
   } = useApp();
 
   const isKm = language === 'km';
@@ -50,6 +55,58 @@ export const ManageMenuModal: React.FC = () => {
   const [descriptionKh, setDescriptionKh] = useState('');
   const [isSearchingOnlineDish, setIsSearchingOnlineDish] = useState(false);
   const [onlineDishCandidates, setOnlineDishCandidates] = useState<OnlineFoodImageCandidate[]>([]);
+
+  const foodDishGalleryRef = useRef<HTMLInputElement>(null);
+  const foodDishCameraRef = useRef<HTMLInputElement>(null);
+  const [isUploadingDishPhoto, setIsUploadingDishPhoto] = useState(false);
+
+  const handleDishFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsUploadingDishPhoto(true);
+    try {
+      const dataUrl = await processAndCompressImageFile(file, 1000, 0.85);
+      if (dataUrl) {
+        setDishPhotoUrl(dataUrl);
+        showToast(
+          isKm ? '✅ បានផ្ទុករូបភាពមុខម្ហូបជោគជ័យ!' : '✅ Food photo uploaded successfully!',
+          'success'
+        );
+      }
+    } catch (err: any) {
+      showToast(err?.message || (isKm ? 'រូបភាពមិនត្រឹមត្រូវ' : 'Invalid image file'), 'error');
+    } finally {
+      setIsUploadingDishPhoto(false);
+      if (e.target) e.target.value = '';
+    }
+  };
+
+  const handlePickDishNativeGallery = async () => {
+    setIsUploadingDishPhoto(true);
+    try {
+      const nativeRes = await pickImageUsingNativeAndroidGallery();
+      if (nativeRes && !nativeRes.cancelled && nativeRes.dataUrl) {
+        setDishPhotoUrl(nativeRes.dataUrl);
+        showToast(
+          isKm ? '✅ បានជ្រើសរូបភាពពី Gallery ជោគជ័យ!' : '✅ Photo selected from Gallery!',
+          'success'
+        );
+        setIsUploadingDishPhoto(false);
+        return;
+      }
+    } catch {}
+    setIsUploadingDishPhoto(false);
+    foodDishGalleryRef.current?.click();
+  };
+
+  const handlePickDishCamera = () => {
+    foodDishCameraRef.current?.click();
+  };
+
+  const handleRemoveDishPhoto = () => {
+    setDishPhotoUrl('');
+    showToast(isKm ? 'បានលុបរូបភាពចេញ' : 'Photo removed', 'info');
+  };
 
   const handleSearchOnlineDishPhotos = async () => {
     setIsSearchingOnlineDish(true);
@@ -129,12 +186,20 @@ export const ManageMenuModal: React.FC = () => {
 
   if (!isManageMenuModalOpen || !managingRestaurant) return null;
 
+  const isAdmin = 
+    currentUser?.role === 'admin' || 
+    currentUser?.id === 'admin-authorized-single' || 
+    currentUser?.username === 'admin' || 
+    currentUser?.username === 'cheasavuth';
+
+  const isOwner = Boolean(currentUser?.id && managingRestaurant.ownerId === currentUser.id);
+  const isApprovedVip = isUserVipActive(currentUser);
+  const vipState = getVipAccountState(currentUser);
+  const isAuthorized = isAdmin || (isOwner && isApprovedVip);
+
   const menuItems = managingRestaurant.menuItems || [];
-  const isPremiumActive =
-    isRestaurantPremiumActive(managingRestaurant) ||
-    isUserVipActive(currentUser) ||
-    currentUser?.role === 'admin';
-  const isExpired = managingRestaurant.membershipTier === 'premium' && !isPremiumActive;
+  const isPremiumActive = isRestaurantPremiumActive(managingRestaurant) || isApprovedVip || isAdmin;
+  const isExpired = vipState === 'expired_vip' || (managingRestaurant.membershipTier === 'premium' && !isPremiumActive);
   const isFree = !isPremiumActive && !isExpired;
 
   // Analytics Metrics
@@ -373,6 +438,157 @@ export const ManageMenuModal: React.FC = () => {
           </button>
         </div>
 
+        {/* If Unauthorized: Display VIP Barrier */}
+        {!isAuthorized ? (
+          <div className="p-6 text-center space-y-4 font-khmer flex-1 overflow-y-auto">
+            {!currentUser ? (
+              <div className="py-8 space-y-3">
+                <div className="w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-[#064E3B] dark:text-emerald-400 flex items-center justify-center mx-auto shadow-md">
+                  <Lock className="w-8 h-8" />
+                </div>
+                <h3 className="font-moul text-sm text-slate-900 dark:text-white">
+                  {isKm ? 'សូមចូលគណនីជាមុនសិន' : 'Please Sign In First'}
+                </h3>
+                <p className="text-xs text-slate-600 dark:text-slate-300 max-w-xs mx-auto leading-relaxed">
+                  {isKm
+                    ? 'លោកអ្នកត្រូវចូលគណនីដែលមានសិទ្ធិ VIP ដើម្បីគ្រប់គ្រងហាង និងមុខម្ហូប។'
+                    : 'Please sign in to your approved VIP account to manage your restaurant and menu.'}
+                </p>
+                <div className="pt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsManageMenuModalOpen(false);
+                      setIsAuthModalOpen(true);
+                    }}
+                    className="px-6 py-2.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-xs shadow-md transition cursor-pointer"
+                  >
+                    {isKm ? 'ចូលគណនីឥឡូវនេះ' : 'Sign In Now'}
+                  </button>
+                </div>
+              </div>
+            ) : vipState === 'pending_vip' ? (
+              <div className="py-8 space-y-3">
+                <div className="w-16 h-16 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-600 flex items-center justify-center mx-auto shadow-md ring-4 ring-amber-400/20">
+                  <Clock className="w-8 h-8 animate-pulse" />
+                </div>
+                <span className="px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-200 text-xs font-bold font-sans">
+                  PENDING_ADMIN_APPROVAL
+                </span>
+                <h3 className="font-moul text-sm text-slate-900 dark:text-white">
+                  {isKm ? '⏳ កំពុងរង់ចាំ Admin ពិនិត្យ និងអនុម័ត' : '⏳ Awaiting Admin Approval'}
+                </h3>
+                <p className="text-xs text-slate-600 dark:text-slate-300 max-w-sm mx-auto leading-relaxed">
+                  {isKm
+                    ? 'ការស្នើសុំសមាជិកភាព VIP របស់អ្នកត្រូវបានកត់ត្រា និងកំពុងស្ថិតក្នុងការពិនិត្យផ្ទៀងផ្ទាត់ដោយ Administrator។ មុខងារគ្រប់គ្រងហាង និងបន្ថែមមុខម្ហូបនឹងបើកដំណើរការភ្លាមៗក្រោយពេលទទួលបានការអនុម័ត!'
+                    : 'Your VIP subscription request is currently pending Admin verification. Restaurant management will unlock immediately upon approval!'}
+                </p>
+                <div className="pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsManageMenuModalOpen(false)}
+                    className="px-6 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs transition cursor-pointer"
+                  >
+                    {isKm ? 'យល់ព្រម (បិទ)' : 'Close'}
+                  </button>
+                </div>
+              </div>
+            ) : vipState === 'expired_vip' ? (
+              <div className="py-8 space-y-3">
+                <div className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-950/60 text-red-600 flex items-center justify-center mx-auto shadow-md ring-4 ring-red-400/20">
+                  <AlertCircle className="w-8 h-8" />
+                </div>
+                <span className="px-3 py-1 rounded-full bg-red-100 dark:bg-red-900/60 text-red-800 dark:text-red-200 text-xs font-bold font-sans">
+                  VIP_EXPIRED
+                </span>
+                <h3 className="font-moul text-sm text-slate-900 dark:text-white">
+                  {isKm ? '⚠️ សមាជិកភាព VIP បានផុតកំណត់' : '⚠️ VIP Membership Expired'}
+                </h3>
+                <p className="text-xs text-slate-600 dark:text-slate-300 max-w-sm mx-auto leading-relaxed">
+                  {isKm
+                    ? 'សមាជិកភាព VIP របស់លោកអ្នកបានផុតកំណត់កាលបរិច្ឆេទហើយ។ សូមបន្តកញ្ចប់ VIP ($2.99 / 30 ថ្ងៃ ឬ $4.99 / 90 ថ្ងៃ) ដើម្បីបន្តគ្រប់គ្រងហាង និងមុខម្ហូប។'
+                    : 'Your VIP membership has expired. Please renew your VIP membership to continue managing your restaurant and menu items.'}
+                </p>
+                <div className="pt-2 flex flex-col sm:flex-row gap-2 justify-center">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsManageMenuModalOpen(false);
+                      openUpgradeVipModal(true);
+                    }}
+                    className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 text-slate-950 font-black text-xs shadow-md transition cursor-pointer"
+                  >
+                    {isKm ? '✨ បន្តកញ្ចប់ VIP ឥឡូវនេះ' : '✨ Renew VIP Now'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsManageMenuModalOpen(false)}
+                    className="px-5 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs transition cursor-pointer"
+                  >
+                    {isKm ? 'បិទ' : 'Close'}
+                  </button>
+                </div>
+              </div>
+            ) : !isOwner && !isAdmin ? (
+              <div className="py-8 space-y-3">
+                <div className="w-16 h-16 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-600 flex items-center justify-center mx-auto shadow-md">
+                  <ShieldAlert className="w-8 h-8" />
+                </div>
+                <h3 className="font-moul text-sm text-slate-900 dark:text-white">
+                  {isKm ? '⛔ គ្មានសិទ្ធិគ្រប់គ្រងហាងនេះទេ' : '⛔ Unauthorized Restaurant'}
+                </h3>
+                <p className="text-xs text-slate-600 dark:text-slate-300 max-w-sm mx-auto leading-relaxed">
+                  {isKm
+                    ? 'មានតែម្ចាស់ហាងផ្ទាល់ដែលមានសមាជិកភាព VIP សកម្ម ឬ Admin ប៉ុណ្ណោះដែលអាចគ្រប់គ្រងហាងនេះបាន។'
+                    : 'Only the approved VIP owner or Admin can manage this restaurant.'}
+                </p>
+                <div className="pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsManageMenuModalOpen(false)}
+                    className="px-6 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs transition cursor-pointer"
+                  >
+                    {isKm ? 'បិទ' : 'Close'}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="py-8 space-y-3">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 text-slate-950 flex items-center justify-center mx-auto shadow-lg ring-4 ring-amber-400/20">
+                  <Lock className="w-8 h-8" />
+                </div>
+                <h3 className="font-moul text-sm text-slate-900 dark:text-white">
+                  {isKm ? '🔒 សម្រាប់តែសមាជិក VIP ដែលបានអនុម័ត' : '🔒 Approved VIP Only'}
+                </h3>
+                <p className="text-xs text-slate-600 dark:text-slate-300 max-w-sm mx-auto leading-relaxed">
+                  {isKm
+                    ? 'ផ្ទាំងគ្រប់គ្រងម្ចាស់ហាង និងការបន្ថែមមុខម្ហូប គឺអនុញ្ញាតជូនតែសមាជិក VIP ដែលបានបង់ប្រាក់ និងទទួលបានការអនុម័តពី Admin ប៉ុណ្ណោះ។ សូមដំឡើងទៅកញ្ចប់ VIP ($2.99 / 30 ថ្ងៃ ឬ $4.99 / 90 ថ្ងៃ) ដើម្បីទទួលបានអត្ថប្រយោជន៍ទាំង ១០!'
+                    : 'Owner management is reserved exclusively for admin-approved VIP subscribers. Upgrade to VIP ($2.99 / 30 days or $4.99 / 90 days) to manage your restaurant and menu items!'}
+                </p>
+                <div className="pt-2 flex flex-col sm:flex-row gap-2 justify-center">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsManageMenuModalOpen(false);
+                      openUpgradeVipModal();
+                    }}
+                    className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-500 text-slate-950 font-black text-xs shadow-md transition cursor-pointer"
+                  >
+                    {isKm ? '👑 ដំឡើងទៅកញ្ចប់ VIP ឥឡូវនេះ' : '👑 Upgrade to VIP Now'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsManageMenuModalOpen(false)}
+                    className="px-5 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs transition cursor-pointer"
+                  >
+                    {isKm ? 'បិទ' : 'Close'}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          <>
         {/* 4 Main Management Tabs */}
         <div className="grid grid-cols-4 bg-slate-100 dark:bg-slate-800/80 p-1 border-b border-slate-200 dark:border-slate-700 text-center font-khmer">
           <button
@@ -638,18 +854,95 @@ export const ManageMenuModal: React.FC = () => {
 
                   <div>
                     <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
-                      {isKm ? 'រូបភាពមុខម្ហូប (Image URL)' : 'Dish Photo URL'}
+                      {isKm ? 'រូបភាពមុខម្ហូប (Phone Upload ឬ Online Search) *' : 'Dish Photo (Phone Upload or Online Search) *'}
                     </label>
+
+                    {/* Hidden Native / Web File Inputs */}
                     <input
-                      type="url"
-                      value={dishPhotoUrl}
-                      onChange={e => setDishPhotoUrl(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs mb-2 focus:ring-2 focus:ring-emerald-500/30 focus:border-[#059669] outline-none text-[#0F172A] dark:text-white font-mono text-[11px]"
+                      ref={foodDishGalleryRef}
+                      type="file"
+                      accept="image/jpeg,image/jpg,image/png,image/webp"
+                      onChange={handleDishFileSelect}
+                      className="hidden"
+                    />
+                    <input
+                      ref={foodDishCameraRef}
+                      type="file"
+                      accept="image/jpeg,image/jpg,image/png"
+                      capture="environment"
+                      onChange={handleDishFileSelect}
+                      className="hidden"
                     />
 
+                    {/* Active Selected Photo Preview Card (Requirement 2: Image Preview with Replace & Remove) */}
+                    {dishPhotoUrl && (
+                      <div className="p-3 mb-2.5 rounded-2xl bg-emerald-50 dark:bg-slate-800/90 border-2 border-emerald-500/60 flex items-center justify-between gap-3 shadow-xs">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <img
+                            src={dishPhotoUrl}
+                            alt="Dish preview"
+                            className="w-16 h-16 rounded-xl object-cover shrink-0 border border-emerald-300 shadow-xs"
+                          />
+                          <div className="min-w-0">
+                            <span className="inline-block px-2 py-0.5 rounded-full bg-[#064E3B] text-white text-[10px] font-bold">
+                              {isKm ? '✓ រូបភាពដែលបានជ្រើស' : '✓ Active Photo Selected'}
+                            </span>
+                            <p className="text-[11px] text-slate-600 dark:text-slate-300 truncate mt-1 font-mono">
+                              {dishPhotoUrl.startsWith('data:') 
+                                ? (isKm ? 'រូបថតផ្ទាល់ពីទូរស័ព្ទ (បានបង្ហាប់រួច)' : 'Phone Camera/Gallery Upload') 
+                                : dishPhotoUrl}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <button
+                            type="button"
+                            onClick={handlePickDishNativeGallery}
+                            className="p-2 rounded-xl bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-emerald-100 hover:text-[#064E3B] transition cursor-pointer"
+                            title={isKm ? 'ផ្លាស់ប្តូររូបភាព' : 'Change Photo'}
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleRemoveDishPhoto}
+                            className="p-2 rounded-xl bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-red-50 hover:text-red-600 transition cursor-pointer"
+                            title={isKm ? 'លុបរូបភាព' : 'Remove Photo'}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Option A: Phone Image Upload (Gallery or Camera) */}
+                    <div className="grid grid-cols-2 gap-2 mb-2.5">
+                      <button
+                        type="button"
+                        disabled={isUploadingDishPhoto}
+                        onClick={handlePickDishNativeGallery}
+                        className="py-2.5 px-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition active:scale-95 cursor-pointer disabled:opacity-50"
+                      >
+                        <Image className="w-4 h-4 text-slate-950" />
+                        <span>{isUploadingDishPhoto ? (isKm ? 'កំពុងដំណើរការ...' : 'Uploading...') : (isKm ? '🖼️ ជ្រើសពី Gallery' : '🖼️ Pick Gallery')}</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        disabled={isUploadingDishPhoto}
+                        onClick={handlePickDishCamera}
+                        className="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition active:scale-95 cursor-pointer disabled:opacity-50"
+                      >
+                        <Camera className="w-4 h-4 text-amber-300" />
+                        <span>{isUploadingDishPhoto ? (isKm ? 'កំពុងដំណើរការ...' : 'Uploading...') : (isKm ? '📸 ថតរូបពី Camera' : '📸 Take Photo')}</span>
+                      </button>
+                    </div>
+
+                    {/* Option B: Online AI Food Photo Search Button */}
                     <button
                       type="button"
-                      disabled={isSearchingOnlineDish}
+                      disabled={isSearchingOnlineDish || isUploadingDishPhoto}
                       onClick={handleSearchOnlineDishPhotos}
                       className="w-full mb-2.5 py-2.5 px-3.5 rounded-xl bg-gradient-to-r from-emerald-600 via-[#064E3B] to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md transition active:scale-98 disabled:opacity-60 cursor-pointer"
                     >
@@ -692,18 +985,31 @@ export const ManageMenuModal: React.FC = () => {
                       </div>
                     )}
                     
-                    <div className="grid grid-cols-4 gap-2">
-                      {sampleFoodPhotos.map((url, i) => (
-                        <div
-                          key={i}
-                          onClick={() => setDishPhotoUrl(url)}
-                          className={`aspect-16/10 rounded-lg overflow-hidden cursor-pointer border-2 transition ${
-                            dishPhotoUrl === url ? 'border-[#064E3B] ring-2 ring-emerald-300' : 'border-transparent opacity-70 hover:opacity-100'
-                          }`}
-                        >
-                          <img src={url} alt="sample" className="w-full h-full object-cover" />
-                        </div>
-                      ))}
+                    {/* Sample Photos & URL input fallback */}
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between text-[11px] text-slate-500">
+                        <span>{isKm ? 'រូបភាពគំរូ ឬតំណភ្ជាប់ URL' : 'Sample Photos or Direct URL'}</span>
+                      </div>
+                      <input
+                        type="url"
+                        value={dishPhotoUrl}
+                        onChange={e => setDishPhotoUrl(e.target.value)}
+                        placeholder="https://..."
+                        className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs focus:ring-2 focus:ring-emerald-500/30 focus:border-[#059669] outline-none text-[#0F172A] dark:text-white font-mono text-[11px]"
+                      />
+                      <div className="grid grid-cols-4 gap-2 pt-1">
+                        {sampleFoodPhotos.map((url, i) => (
+                          <div
+                            key={i}
+                            onClick={() => setDishPhotoUrl(url)}
+                            className={`aspect-16/10 rounded-lg overflow-hidden cursor-pointer border-2 transition ${
+                              dishPhotoUrl === url ? 'border-[#064E3B] ring-2 ring-emerald-300' : 'border-transparent opacity-70 hover:opacity-100'
+                            }`}
+                          >
+                            <img src={url} alt="sample" className="w-full h-full object-cover" />
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
 
@@ -1373,6 +1679,8 @@ export const ManageMenuModal: React.FC = () => {
           )}
 
         </div>
+        </>
+        )}
 
         {/* Footer */}
         <div className="p-3.5 bg-slate-50 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 flex justify-between items-center text-xs text-slate-500 font-khmer">

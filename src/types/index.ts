@@ -1,6 +1,6 @@
-export const APP_VERSION = 'v1.8.5';
-export const APP_VERSION_NAME = '1.8.5';
-export const APP_BUILD_CODE = 57;
+export const APP_VERSION = 'v1.8.6';
+export const APP_VERSION_NAME = '1.8.6';
+export const APP_BUILD_CODE = 58;
 export const APP_RELEASE_DATE = '2026-10-23';
 
 export const VIP_ANNUAL_PRICE_USD = 4.99;
@@ -419,24 +419,92 @@ export const sortRestaurantsChronologically = (list: Restaurant[]): Restaurant[]
 export const isRestaurantPremiumActive = (restaurant?: Restaurant | null): boolean => {
   if (!restaurant) return false;
   if (restaurant.membershipTier !== 'premium') return false;
+  if (restaurant.paymentStatus !== 'verified') return false;
   if (!restaurant.membershipExpiresAt) return false;
-  return new Date(restaurant.membershipExpiresAt).getTime() > Date.now();
+  const expiryTime = new Date(restaurant.membershipExpiresAt).getTime();
+  return !isNaN(expiryTime) && expiryTime > Date.now();
 };
 
-// Helper to determine if a user has an active Premium VIP subscription (Admin always has lifetime active VIP)
+export type VipAccountState = 'admin' | 'approved_vip' | 'pending_vip' | 'expired_vip' | 'regular_unpaid';
+
+// Helper to determine if a user has an active, admin-approved Premium VIP subscription (Admin always has lifetime active VIP)
 export const isUserVipActive = (user?: User | null): boolean => {
   if (!user) return false;
-  if (user.role === 'admin' || user.id === 'admin-authorized-single') return true;
-  if (user.membershipTier === 'premium_vip' && user.subscriptionExpiryDate) {
-    return new Date(user.subscriptionExpiryDate).getTime() > Date.now();
+  // System Admin always has lifetime active VIP access
+  if (
+    user.role === 'admin' || 
+    user.id === 'admin-authorized-single' || 
+    user.username === 'admin' || 
+    user.username === 'cheasavuth'
+  ) {
+    return true;
+  }
+  // VIP users must meet ALL criteria:
+  // 1. Membership tier must be 'premium_vip'
+  // 2. Subscription status must be 'active' (NOT pending, NOT expired, NOT cancelled)
+  // 3. Payment status must be 'verified' (approved by admin / verified payment)
+  // 4. Must have a valid subscriptionExpiryDate strictly in the future (> Date.now())
+  if (
+    user.membershipTier === 'premium_vip' &&
+    user.subscriptionStatus === 'active' &&
+    user.paymentStatus === 'verified' &&
+    user.subscriptionExpiryDate
+  ) {
+    const expiryTime = new Date(user.subscriptionExpiryDate).getTime();
+    if (!isNaN(expiryTime) && expiryTime > Date.now()) {
+      return true;
+    }
   }
   return false;
+};
+
+// Helper to classify user's exact VIP state (Admin, Approved VIP, Pending Admin Approval, Expired VIP, or Regular Unpaid)
+export const getVipAccountState = (user?: User | null): VipAccountState => {
+  if (!user) return 'regular_unpaid';
+  if (
+    user.role === 'admin' || 
+    user.id === 'admin-authorized-single' || 
+    user.username === 'admin' || 
+    user.username === 'cheasavuth'
+  ) {
+    return 'admin';
+  }
+  if (isUserVipActive(user)) {
+    return 'approved_vip';
+  }
+  // Check if expired
+  if (user.subscriptionExpiryDate) {
+    const expiryTime = new Date(user.subscriptionExpiryDate).getTime();
+    if (!isNaN(expiryTime) && expiryTime <= Date.now()) {
+      return 'expired_vip';
+    }
+  }
+  if (user.subscriptionStatus === 'expired') {
+    return 'expired_vip';
+  }
+  // Check if pending verification/approval
+  if (
+    user.subscriptionStatus === 'pending' ||
+    user.paymentStatus === 'paid_pending_approval' ||
+    user.paymentStatus === 'pending_verification' ||
+    user.paymentStatus === 'needs_more_info'
+  ) {
+    return 'pending_vip';
+  }
+  return 'regular_unpaid';
 };
 
 // Helper to calculate remaining days in VIP subscription
 export const getVipRemainingDays = (user?: User | null): number => {
   if (!user) return 0;
-  if (user.role === 'admin' || user.id === 'admin-authorized-single') return 9999;
+  if (
+    user.role === 'admin' || 
+    user.id === 'admin-authorized-single' || 
+    user.username === 'admin' || 
+    user.username === 'cheasavuth'
+  ) {
+    return 9999;
+  }
   if (!isUserVipActive(user) || !user?.subscriptionExpiryDate) return 0;
   const diffMs = new Date(user.subscriptionExpiryDate).getTime() - Date.now();
   return Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));

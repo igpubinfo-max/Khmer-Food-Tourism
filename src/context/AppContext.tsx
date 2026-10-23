@@ -3,6 +3,7 @@ import {
   User, FoodItem, Restaurant, TouristDestination, CommunityPost, 
   Language, UserRole, AppSettings, RegistrationTransaction,
   RestaurantMenuItem, MembershipTier, isRestaurantPremiumActive, isUserVipActive, getVipRemainingDays,
+  getVipAccountState, VipAccountState,
   getRestaurantCreatedAtIso, sortRestaurantsChronologically,
   Wishlist, WishlistItem, TripPlan, AppNotification,
   TrendingFoodItem, AiCheckInSubmission,
@@ -1067,9 +1068,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         localStorage.setItem('kft_current_user_v5', JSON.stringify(currentUser));
         
         // Automatic VIP subscription expiry enforcement
-        if (currentUser.membershipTier === 'premium_vip' && currentUser.subscriptionExpiryDate) {
+        const isAdminUser = 
+          currentUser.role === 'admin' || 
+          currentUser.id === 'admin-authorized-single' || 
+          currentUser.username === 'admin' || 
+          currentUser.username === 'cheasavuth';
+
+        if (!isAdminUser && currentUser.subscriptionExpiryDate) {
           const isExpired = new Date(currentUser.subscriptionExpiryDate).getTime() <= Date.now();
-          if (isExpired) {
+          if (isExpired && (currentUser.membershipTier === 'premium_vip' || currentUser.subscriptionStatus === 'active')) {
             const downgraded: User = {
               ...currentUser,
               membershipTier: 'free',
@@ -1107,31 +1114,50 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, [restaurants]);
 
-  // Automatically sync active VIP user membership onto any restaurant owned by currentUser
+  // Automatically sync active VIP user membership onto any restaurant owned by currentUser,
+  // and immediately revoke VIP tier if user is expired or not VIP
   useEffect(() => {
-    if (!currentUser || !isUserVipActive(currentUser)) return;
-    const expiry =
-      currentUser.subscriptionExpiryDate ||
-      new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString();
+    if (!currentUser) return;
+    const isVipApproved = isUserVipActive(currentUser);
+    const now = Date.now();
+
     setRestaurants(prev => {
       let changed = false;
       const next = prev.map(r => {
-        if (r.ownerId === currentUser.id && (!isRestaurantPremiumActive(r) || !r.isPromoted)) {
-          changed = true;
-          return {
-            ...r,
-            membershipTier: 'premium' as MembershipTier,
-            membershipExpiresAt: expiry,
-            isPromoted: true,
-            isVerified: true,
-            paymentStatus: 'verified' as const,
-          };
+        if (r.ownerId === currentUser.id) {
+          if (isVipApproved) {
+            const expiry =
+              currentUser.subscriptionExpiryDate ||
+              new Date(now + 90 * 24 * 60 * 60 * 1000).toISOString();
+            if (!isRestaurantPremiumActive(r) || !r.isPromoted) {
+              changed = true;
+              return {
+                ...r,
+                membershipTier: 'premium' as MembershipTier,
+                membershipExpiresAt: expiry,
+                isPromoted: true,
+                isVerified: true,
+                paymentStatus: 'verified' as const,
+              };
+            }
+          } else {
+            // User is NOT active VIP (expired, pending, or regular) -> revoke premium restaurant status
+            if (r.membershipTier === 'premium' || r.isPromoted) {
+              changed = true;
+              return {
+                ...r,
+                membershipTier: 'free' as MembershipTier,
+                isPromoted: false,
+                paymentStatus: 'unpaid' as const,
+              };
+            }
+          }
         }
         return r;
       });
       return changed ? next : prev;
     });
-  }, [currentUser?.id, currentUser?.membershipTier, currentUser?.subscriptionStatus, currentUser?.subscriptionExpiryDate]);
+  }, [currentUser?.id, currentUser?.membershipTier, currentUser?.subscriptionStatus, currentUser?.subscriptionExpiryDate, currentUser?.paymentStatus]);
 
   useEffect(() => {
     if (isInitialMountRef.current.destinations) {
@@ -2028,7 +2054,33 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return;
     }
 
-    const isAdmin = currentUser.role === 'admin';
+    const isAdmin = 
+      currentUser.role === 'admin' || 
+      currentUser.id === 'admin-authorized-single' || 
+      currentUser.username === 'admin' || 
+      currentUser.username === 'cheasavuth';
+
+    const isApprovedVip = isUserVipActive(currentUser);
+
+    // Strict VIP Permission Enforcement: Only approved VIP or Admin can register restaurants
+    if (!isAdmin && !isApprovedVip) {
+      const state = getVipAccountState(currentUser);
+      let errorMsg = language === 'km' 
+        ? '🔒 សិទ្ធិត្រូវបានបដិសេធ! មានតែសមាជិក VIP ដែលបានអនុម័តប៉ុណ្ណោះដែលអាចចុះបញ្ជីហាងបាន។ សូមដំឡើងទៅកញ្ចប់ VIP ($2.99 / 30 ថ្ងៃ ឬ $4.99 / 90 ថ្ងៃ)!' 
+        : '🔒 Permission denied! Only approved VIP members can register a restaurant. Please upgrade to VIP!';
+      if (state === 'pending_vip') {
+        errorMsg = language === 'km'
+          ? '⏳ គណនី VIP របស់អ្នកកំពុងរង់ចាំការពិនិត្យ និងអនុម័តពី Administrator។ សូមរង់ចាំការអនុម័តជាមុនសិន!'
+          : '⏳ Your VIP request is pending Admin approval. Please wait for approval before adding a restaurant!';
+      } else if (state === 'expired_vip') {
+        errorMsg = language === 'km'
+          ? '⚠️ សមាជិកភាព VIP របស់អ្នកបានផុតកំណត់ហើយ! សូមបន្តសមាជិកភាព VIP ដើម្បីចុះបញ្ជីហាង។'
+          : '⚠️ Your VIP subscription has expired. Please renew your VIP membership!';
+      }
+      showToast(errorMsg, 'warning');
+      return;
+    }
+
     if (!isAdmin) {
       const existingOwned = restaurants.find(r => r.ownerId === currentUser.id);
       if (existingOwned) {
@@ -2044,8 +2096,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
     }
 
-    const userVipActive = isUserVipActive(currentUser) || isAdmin;
-    const isPremium = restData.membershipTier === 'premium' || userVipActive;
+    const isPremium = true; // All authorized listings are approved VIP
     const profileImg = restData.profileImage || restData.photoUrl || '/foods/food-1.jpg';
     const foodImgs = Array.isArray(restData.foodImages) && restData.foodImages.length > 0
       ? restData.foodImages
@@ -2066,31 +2117,48 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       ownerId: currentUser.id,
       status: 'approved',
       isVerified: true,
-      isPromoted: isPremium,
-      membershipTier: isPremium ? 'premium' : 'free',
-      membershipExpiresAt: isPremium ? expiryIso : undefined,
-      paymentStatus: isPremium ? 'verified' : 'unpaid',
-      menuItems: isPremium ? (restData.menuItems || []).slice(0, 20) : [],
+      isPromoted: true,
+      membershipTier: 'premium',
+      membershipExpiresAt: expiryIso,
+      paymentStatus: 'verified',
+      menuItems: (restData.menuItems || []).slice(0, 20),
       created_at: restData.created_at || restData.createdAt || nowIso,
       createdAt: restData.created_at || restData.createdAt || nowIso,
     });
     setRestaurants(prev => sortRestaurantsChronologically([...prev, newRest]));
     showToast(
-      isPremium
-        ? (language === 'km' ? '🎉 ចុះបញ្ជីហាង Premium VIP រួចរាល់!' : '🎉 Registered as Premium VIP!')
-        : (language === 'km' ? '🎉 បានចុះបញ្ជីហាងឥតគិតថ្លៃ ($0 Free Listing) បានជោគជ័យ!' : '🎉 Free Restaurant Listing registered ($0)!'),
+      language === 'km' ? '🎉 ចុះបញ្ជីហាង VIP របស់អ្នកបានជោគជ័យ!' : '🎉 Registered your VIP Restaurant successfully!',
       'success'
     );
   };
 
   const updateRestaurant = (updated: Restaurant) => {
     const original = restaurants.find(r => r.id === updated.id);
-    const isAdmin = currentUser?.role === 'admin';
-    const isOwner = currentUser?.id && original?.ownerId === currentUser.id;
-    const isUnclaimed = !original?.ownerId;
+    const isAdmin = 
+      currentUser?.role === 'admin' || 
+      currentUser?.id === 'admin-authorized-single' || 
+      currentUser?.username === 'admin' || 
+      currentUser?.username === 'cheasavuth';
 
-    if (!isAdmin && !isOwner && !isUnclaimed) {
-      showToast(language === 'km' ? 'គ្មានសិទ្ធិកែប្រែហាងនេះទេ! មានតែម្ចាស់ហាង ឬ Admin ប៉ុណ្ណោះដែលអាចកែប្រែបាន។' : 'Unauthorized! Only the shop owner or Admin can edit this shop.', 'warning');
+    const isOwner = Boolean(currentUser?.id && original?.ownerId === currentUser.id);
+    const isApprovedVip = isUserVipActive(currentUser);
+
+    // Strict VIP Permission Enforcement: Only Admin or Approved VIP Owner can edit
+    if (!isAdmin && !(isOwner && isApprovedVip)) {
+      const state = getVipAccountState(currentUser);
+      let errorMsg = language === 'km' 
+        ? '🔒 គ្មានសិទ្ធិកែប្រែហាងនេះទេ! មានតែម្ចាស់ហាងដែលមានសមាជិកភាព VIP សកម្ម និងបានអនុម័ត ឬ Admin ប៉ុណ្ណោះដែលអាចកែប្រែបាន។' 
+        : '🔒 Unauthorized! Only approved VIP shop owners or Admin can edit this restaurant.';
+      if (isOwner && state === 'pending_vip') {
+        errorMsg = language === 'km'
+          ? '⏳ គណនី VIP របស់អ្នកកំពុងរង់ចាំការអនុម័តពី Admin។ មិនទាន់អាចកែប្រែព័ត៌មានហាងបាននៅឡើយទេ!'
+          : '⏳ Your VIP request is awaiting Admin approval. You cannot edit the restaurant yet.';
+      } else if (isOwner && state === 'expired_vip') {
+        errorMsg = language === 'km'
+          ? '⚠️ សមាជិកភាព VIP របស់អ្នកបានផុតកំណត់ហើយ! សូមបន្តកញ្ចប់ VIP ដើម្បីកែប្រែហាង។'
+          : '⚠️ Your VIP subscription has expired! Please renew to edit the restaurant.';
+      }
+      showToast(errorMsg, 'warning');
       return;
     }
 
@@ -2100,11 +2168,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       : (Array.isArray(updated.galleryPhotos) ? updated.galleryPhotos : (original?.foodImages || original?.galleryPhotos || []));
 
     const preservedCreatedAt = original?.created_at || original?.createdAt || updated.created_at || updated.createdAt || getRestaurantCreatedAtIso(original || updated);
-    const ownerVipActive = isOwner && isUserVipActive(currentUser);
-    const effectiveTier: MembershipTier =
-      ownerVipActive || original?.membershipTier === 'premium' || updated.membershipTier === 'premium'
-        ? 'premium'
-        : 'free';
+    const effectiveTier: MembershipTier = (isAdmin || isApprovedVip) ? 'premium' : 'free';
     const effectiveExpiry =
       original?.membershipExpiresAt ||
       currentUser?.subscriptionExpiryDate ||
@@ -2143,7 +2207,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (selectedRestaurant && selectedRestaurant.id === updated.id) {
       setSelectedRestaurant(safeUpdated);
     }
-    if (selectedRestaurant?.id === updated.id) setSelectedRestaurant(safeUpdated);
     if (managingRestaurant?.id === updated.id) setManagingRestaurant(safeUpdated);
     showToast(language === 'km' ? 'បានកែប្រែព័ត៌មានហាង និងរូបភាពរួចរាល់' : 'Restaurant details and photos updated!', 'success');
   };
@@ -2159,26 +2222,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return false;
     }
 
-    const isOwner = currentUser?.id && targetRest.ownerId === currentUser.id;
-    const isAdmin = currentUser?.role === 'admin';
-    if (!isOwner && !isAdmin) {
-      showToast(
-        language === 'km' 
-          ? 'លោកអ្នកគ្មានសិទ្ធិគ្រប់គ្រងមុខម្ហូបនៃហាងនេះទេ!' 
-          : 'Unauthorized: You can only manage your own restaurant!',
-        'warning'
-      );
-      return false;
-    }
+    const isAdmin = 
+      currentUser?.role === 'admin' || 
+      currentUser?.id === 'admin-authorized-single' || 
+      currentUser?.username === 'admin' || 
+      currentUser?.username === 'cheasavuth';
 
-    const hasVipAccess = isRestaurantPremiumActive(targetRest) || isUserVipActive(currentUser) || isAdmin;
-    if (!hasVipAccess) {
-      showToast(
-        language === 'km' 
-          ? 'ការចុះបញ្ជីឥតគិតថ្លៃមិនអាចបន្ថែមមុខម្ហូបបានទេ។ សូមដំឡើងទៅកញ្ចប់ VIP ($2.99 / 30 ថ្ងៃ ឬ $4.99 / 90 ថ្ងៃ)!' 
-          : 'Free listing cannot add food items. Please upgrade to VIP ($2.99 / 30 days or $4.99 / 90 days)!',
-        'warning'
-      );
+    const isOwner = Boolean(currentUser?.id && targetRest.ownerId === currentUser.id);
+    const isApprovedVip = isUserVipActive(currentUser);
+
+    // Strict VIP Permission Enforcement: Only Admin or Approved VIP Owner can add menu items
+    if (!isAdmin && !(isOwner && isApprovedVip)) {
+      const state = getVipAccountState(currentUser);
+      let errorMsg = language === 'km' 
+        ? '🔒 សិទ្ធិត្រូវបានបដិសេធ! មានតែម្ចាស់ហាង VIP ដែលបានអនុម័ត ឬ Admin ប៉ុណ្ណោះដែលអាចបន្ថែមមុខម្ហូបបាន។' 
+        : '🔒 Unauthorized! Only approved VIP shop owners or Admin can add food items.';
+      if (isOwner && state === 'pending_vip') {
+        errorMsg = language === 'km'
+          ? '⏳ គណនី VIP របស់អ្នកកំពុងរង់ចាំការអនុម័តពី Admin។ មិនទាន់អាចបន្ថែមមុខម្ហូបបាននៅឡើយទេ!'
+          : '⏳ Your VIP request is awaiting Admin approval.';
+      } else if (isOwner && state === 'expired_vip') {
+        errorMsg = language === 'km'
+          ? '⚠️ សមាជិកភាព VIP របស់អ្នកបានផុតកំណត់ហើយ! សូមបន្តកញ្ចប់ VIP ដើម្បីបន្ថែមមុខម្ហូប។'
+          : '⚠️ Your VIP subscription has expired! Please renew to add food items.';
+      }
+      showToast(errorMsg, 'warning');
       return false;
     }
 
@@ -2241,21 +2309,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const targetRest = restaurants.find(r => r.id === restaurantId);
     if (!targetRest) return false;
 
-    const isOwner = currentUser?.id && targetRest.ownerId === currentUser.id;
-    const isAdmin = currentUser?.role === 'admin';
-    if (!isOwner && !isAdmin) {
-      showToast(language === 'km' ? 'គ្មានសិទ្ធិកែប្រែ!' : 'Unauthorized!', 'warning');
-      return false;
-    }
+    const isAdmin = 
+      currentUser?.role === 'admin' || 
+      currentUser?.id === 'admin-authorized-single' || 
+      currentUser?.username === 'admin' || 
+      currentUser?.username === 'cheasavuth';
 
-    const hasVipAccess = isRestaurantPremiumActive(targetRest) || isUserVipActive(currentUser) || isAdmin;
-    if (!hasVipAccess) {
-      showToast(
-        language === 'km' 
-          ? 'សមាជិកភាព Premium បានផុតកំណត់ហើយ។ សូមបន្តសមាជិកភាពដើម្បីកែប្រែព័ត៌មាន!' 
-          : 'Membership expired. Please renew Premium VIP to edit menu items!',
-        'warning'
-      );
+    const isOwner = Boolean(currentUser?.id && targetRest.ownerId === currentUser.id);
+    const isApprovedVip = isUserVipActive(currentUser);
+
+    // Strict VIP Permission Enforcement: Only Admin or Approved VIP Owner can edit menu items
+    if (!isAdmin && !(isOwner && isApprovedVip)) {
+      const state = getVipAccountState(currentUser);
+      let errorMsg = language === 'km' 
+        ? '🔒 គ្មានសិទ្ធិកែប្រែមុខម្ហូបទេ! មានតែម្ចាស់ហាង VIP ដែលបានអនុម័ត ឬ Admin ប៉ុណ្ណោះដែលអាចកែប្រែបាន។' 
+        : '🔒 Unauthorized! Only approved VIP shop owners or Admin can edit food items.';
+      if (isOwner && state === 'pending_vip') {
+        errorMsg = language === 'km'
+          ? '⏳ គណនី VIP របស់អ្នកកំពុងរង់ចាំការអនុម័តពី Admin។'
+          : '⏳ Your VIP request is awaiting Admin approval.';
+      } else if (isOwner && state === 'expired_vip') {
+        errorMsg = language === 'km'
+          ? '⚠️ សមាជិកភាព VIP របស់អ្នកបានផុតកំណត់ហើយ! សូមបន្តកញ្ចប់ VIP ដើម្បីកែប្រែមុខម្ហូប។'
+          : '⚠️ Your VIP subscription has expired!';
+      }
+      showToast(errorMsg, 'warning');
       return false;
     }
 
@@ -2279,10 +2357,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const targetRest = restaurants.find(r => r.id === restaurantId);
     if (!targetRest) return false;
 
-    const isOwner = currentUser?.id && targetRest.ownerId === currentUser.id;
-    const isAdmin = currentUser?.role === 'admin';
-    if (!isOwner && !isAdmin) {
-      showToast(language === 'km' ? 'គ្មានសិទ្ធិលុប!' : 'Unauthorized!', 'warning');
+    const isAdmin = 
+      currentUser?.role === 'admin' || 
+      currentUser?.id === 'admin-authorized-single' || 
+      currentUser?.username === 'admin' || 
+      currentUser?.username === 'cheasavuth';
+
+    const isOwner = Boolean(currentUser?.id && targetRest.ownerId === currentUser.id);
+    const isApprovedVip = isUserVipActive(currentUser);
+
+    // Strict VIP Permission Enforcement: Only Admin or Approved VIP Owner can delete menu items
+    if (!isAdmin && !(isOwner && isApprovedVip)) {
+      showToast(language === 'km' ? '🔒 គ្មានសិទ្ធិលុបមុខម្ហូបទេ! មានតែម្ចាស់ហាង VIP ដែលបានអនុម័ត ឬ Admin ប៉ុណ្ណោះ។' : '🔒 Unauthorized!', 'warning');
       return false;
     }
 
@@ -2401,13 +2487,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const deleteRestaurant = (id: string) => {
     const target = restaurants.find(r => r.id === id);
     if (!target) return;
-    const isAdmin = currentUser?.role === 'admin';
+    const isAdmin = 
+      currentUser?.role === 'admin' || 
+      currentUser?.id === 'admin-authorized-single' || 
+      currentUser?.username === 'admin' || 
+      currentUser?.username === 'cheasavuth';
+
     const isOwner = Boolean(currentUser?.id && target.ownerId === currentUser.id);
-    if (!isAdmin && !isOwner) {
+    const isApprovedVip = isUserVipActive(currentUser);
+
+    if (!isAdmin && !(isOwner && isApprovedVip)) {
       showToast(
         language === 'km'
-          ? '⛔ គ្មានសិទ្ធិលុបហាងនេះទេ! មានតែម្ចាស់ហាង ឬ Admin ប៉ុណ្ណោះដែលអាចលុបបាន។'
-          : '⛔ Unauthorized! Only the restaurant owner or Admin can delete this restaurant.',
+          ? '⛔ គ្មានសិទ្ធិលុបហាងនេះទេ! មានតែម្ចាស់ហាង VIP ដែលបានអនុម័ត ឬ Admin ប៉ុណ្ណោះដែលអាចលុបបាន។'
+          : '⛔ Unauthorized! Only approved VIP shop owners or Admin can delete this restaurant.',
         'warning'
       );
       return;

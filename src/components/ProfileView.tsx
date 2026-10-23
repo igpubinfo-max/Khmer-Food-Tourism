@@ -9,7 +9,7 @@ import {
   Bot, Bell, Compass, Calendar, Bookmark, Plus, MapPin, Trash2, Share2, Tag, Utensils, ChevronRight, ChevronLeft,
   Edit2, Check, X as CloseIcon, Crown, Star, Zap, Award, Smartphone, Copy, ExternalLink, Clock, Lock, MessageSquare
 } from 'lucide-react';
-import { isRestaurantPremiumActive, isUserVipActive, getVipRemainingDays, TEN_VIP_BENEFITS, APP_VERSION, APP_BUILD_CODE } from '../types';
+import { isRestaurantPremiumActive, isUserVipActive, getVipAccountState, getVipRemainingDays, TEN_VIP_BENEFITS, APP_VERSION, APP_BUILD_CODE } from '../types';
 
 export const ProfileView: React.FC = () => {
   const { 
@@ -1583,7 +1583,24 @@ export const ProfileView: React.FC = () => {
                 </p>
               </div>
               <button
-                onClick={() => isVip ? setIsVipAddRestaurantModalOpen(true) : setIsAddRestaurantModalOpen(true)}
+                onClick={() => {
+                  if (isVip) {
+                    setIsVipAddRestaurantModalOpen(true);
+                    return;
+                  }
+                  const state = getVipAccountState(currentUser);
+                  if (state === 'pending_vip') {
+                    showToast(isKm ? '⏳ ការស្នើសុំសមាជិកភាព VIP របស់អ្នកកំពុងរង់ចាំការពិនិត្យ និងអនុម័តពី Administrator។' : '⏳ VIP request pending Admin approval.', 'info');
+                    return;
+                  }
+                  if (state === 'expired_vip') {
+                    showToast(isKm ? '⚠️ សមាជិកភាព VIP របស់អ្នកបានផុតកំណត់ហើយ! សូមបន្តសមាជិកភាព VIP។' : '⚠️ VIP membership expired. Please renew.', 'warning');
+                    openUpgradeVipModal(true);
+                    return;
+                  }
+                  showToast(isKm ? '🔒 ការចុះបញ្ជីហាងគឺសម្រាប់តែសមាជិក VIP ដែលបានអនុម័តប៉ុណ្ណោះ! សូមដំឡើងទៅកញ្ចប់ VIP។' : '🔒 VIP required!', 'warning');
+                  openUpgradeVipModal();
+                }}
                 className="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-slate-950 font-black text-xs sm:text-sm shadow-lg shadow-amber-500/25 border-2 border-white/80 inline-flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer"
               >
                 <Crown className="w-4 h-4 fill-slate-950 shrink-0" />

@@ -69,7 +69,7 @@ jobs:
           echo "=== SEARCHING FOR GENERATED APK FILES ==="
           find . -name "*.apk" -ls
           cd android/app/build/outputs/apk/debug
-          mv app-debug.apk KhmerFoodTourism-v1.8.5.apk
+          mv app-debug.apk KhmerFoodTourism-v1.8.6.apk
           ls -la
 
       # Play Store AAB build disabled during regular edits per user instruction (enable only when requested)
@@ -96,48 +96,25 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: v1.8.5
-          name: "Khmer Food & Tourism v1.8.5 (Fixed Biometric Auto-Fill & New Heritage App Icon)"
+          tag_name: v1.8.6
+          name: "Khmer Food & Tourism v1.8.6 (Strict VIP Permissions & Food Image Upload)"
           make_latest: true
           body: |
             ### 🇰🇭 កម្មវិធីទូរស័ព្ទដៃ អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism Mobile App)
             
-            **កំណែថ្មី v1.8.5 (Fixed Biometric Auto-Fill & New App Icon):**
-            - 👆 **១. កែសម្រួលប្រព័ន្ធស្កេនស្នាមមេដៃបំពេញព័ត៌មាន និងចូលដោយស្វ័យប្រវត្តិ (Fixed Biometric Auto-Fill & 1-Tap Login):**
-              - ដោះស្រាយបញ្ហាដែលស្កេនមេដៃហើយមិនបំពេញ Username & Password៖ ឥឡូវនេះនៅពេល Android BiometricPrompt ផ្ទៀងផ្ទាត់ស្នាមមេដៃជោគជ័យ ប្រព័ន្ធ Android Keystore (AES-256-GCM hardware chip) នឹងទាញយកឈ្មោះ និងពាក្យសម្ងាត់ដែលបានការពារដោយសុវត្ថិភាព មកបំពេញក្នុងប្រអប់បញ្ចូលទាំងពីរដោយស្វ័យប្រវត្តិភ្លាមៗ។
-              - បង្កើត session រដ្ឋបាលភ្លាមៗដោយគ្មានការទាមទារឱ្យវាយពាក្យសម្ងាត់ដោយដៃឡើយ។
-              - រក្សាទុកពាក្យសម្ងាត់ក្នុងទម្រង់ Ciphertext ក្នុង Android KeyStore តែប៉ុណ្ណោះ មិនរក្សាទុកជា Plain Text ដាច់ខាត។
-            - 🎨 **២. ប្តូររូបតំណាងកម្មវិធី (App Icon) ថ្មីតាមរូបដែលបានផ្តល់ជូន៖**
-              - ប្រើប្រាស់រូបភាពថ្មី “អាហារ & ទេសចរណ៍ខ្មែរ” ដែលមានកំពូលប្រាសាទអង្គរវត្តលើក្រដាសបុរាណ រួមជាមួយគ្រឿងទេស និងបន្លែខ្មែរស្រស់ៗ។
-              - កំណត់ទំហំ និងគម្លាតសុវត្ថិភាព (Safe Zone Padding 72%) យ៉ាងត្រឹមត្រូវ ដើម្បីឱ្យរូបតំណាងស្ថិតនៅចំកណ្តាលស៊ុមពេញលេញ មិនកាត់គែម មិនធ្លាក់ជ្រុងលើគ្រប់ទូរស័ព្ទ Android (Adaptive Icon & Legacy Icons)។
-            - 🛡️ **៣. សិទ្ធិ Admin ពេញលេញ និងចំណុចប្រទាក់ស្អាតបាត:**
-              - គណនី Admin មានសិទ្ធិ Lifetime Master VIP ដោយស្វ័យប្រវត្តិ គ្មានប៊ូតុង Upgrade VIP និងគ្មានផ្ទាំងរំខានឡើយ។
-              - គាំទ្រការភ្ជាប់ជាមួយ Backend AI Vision Proxy / Gemini Vision API ជាមួយប្រព័ន្ធ Cache និងការកំណត់កូតាប្រចាំថ្ងៃ (Free vs VIP)។
-            - 📸 **២. មុខងារ «អាប់ឡូតភស្តុតាងបង់ប្រាក់» នៅក្រោម ABA KHQR (VIP Payment Proof Upload):**
-              - បន្ថែមប៊ូតុង **«អាប់ឡូតភស្តុតាងបង់ប្រាក់»** នៅខាងក្រោមផ្នែកស្កេនកូដ ABA KHQR សម្រាប់ជ្រើសរើសរូបភាព Screenshot វិក្កយបត្រ (JPG, JPEG, PNG) ឬថតរូបផ្ទាល់។
-              - អាចពិនិត្យមើលរូបភាពជាមុន (Preview) និងប្តូររូបភាពថ្មីមុនពេលបញ្ជូនទៅកាន់រដ្ឋបាល (Admin)។
-            - 🛡️ **៣. ផ្ទាំងត្រួតពិនិត្យភស្តុតាងបង់ប្រាក់សម្រាប់ Admin (Admin Payment Proof Review & Approval):**
-              - បង្ហាញរូបភាពវិក្កយបត្រ (Thumbnail) និងប៊ូតុង **«🔍 មើលភស្តុតាងពេញ (View Proof)»** ពេញអេក្រង់ក្នុងផ្ទាំង Admin Dashboard។
-              - សកម្មភាពត្រួតពិនិត្យទាំង ៤ សម្រាប់ Admin៖ **មើលភស្តុតាងពេញ (View Proof)**, **អនុម័ត (Approve)**, **ស្នើសុំភស្តុតាងបន្ថែម (Request More Info)**, និង **បដិសេធ (Reject)**។
-              - រូបមន្ត និងគ្រឿងផ្សំត្រូវបានទាញចេញពីឃ្លាំងទិន្នន័យផ្លូវការ ១០០% គ្មានការបង្កើតគ្រឿងផ្សំក្លែងក្លាយឡើយ (Never invent ingredients)។
-            - 🍳 **២. ស្វែងរកមុខម្ហូបតាមគ្រឿងផ្សំដែលមាននៅផ្ទះ (Cook with What You Have):**
-              - ជ្រើសរើសគ្រឿងផ្សំដែលមាននៅផ្ទះដើម្បីទទួលបានបញ្ជីមុខម្ហូបខ្មែរដែលត្រូវគ្នា ព្រមទាំងបង្ហាញគ្រឿងផ្សំដែលខ្វះខាត។
-            - 🎯 **៣. ណែនាំមុខម្ហូបតាមចំណង់ចំណូលចិត្ត & សុខភាព (Personalized Taste & Diet Recommendations):**
-              - តម្រៀបតាមរសជាតិ (ផ្អែម ជូរ ហឹរ ដិត/ប្រៃ) របបអាហារ (ម្ហូបបួស Vegetarian, អាហារសុខភាព Healthy) ថវិកា និងរយៈពេលចម្អិន។
-            - 📍 **៤. ឆែកអ៊ីន & បញ្ជាក់ទីតាំងភោជនីយដ្ឋានពិតប្រាកដ (Smart Restaurant Discovery & GPS Check-in):**
-              - ថតរូបនៅហាង និងទាញយកទីតាំង GPS ដើម្បីស្វែងរកភោជនីយដ្ឋានដែលនៅជិតបំផុត។
-              - បញ្ជាក់សុពលភាពចម្ងាយ (Spatial Distance Verification ក្នុងរង្វង់ 500 ម៉ែត្រ) និងការពារទិន្នន័យផ្ទាល់ខ្លួន។
-            - 👑 **៥. កំណត់កញ្ចប់សមាជិកភាព VIP យ៉ាងច្បាស់លាស់ ($2.99 និង $9.99):**
-              - គម្រោងត្រីមាស $2.99 USD (៩០ ថ្ងៃ)៖ ស្កេន AI ១៥ ដង/ថ្ងៃ, Favorites រហូតដល់ ៣០, VIP Gold Badge, ភ្ជាប់ TikTok & Facebook។
-              - គម្រោងប្រចាំឆ្នាំ $9.99 USD (៣៦៥ ថ្ងៃ)៖ ស្កេន AI គ្មានដែនកំណត់ (Unlimited), Favorites គ្មានដែនកំណត់, អាទិភាពបង្ហាញហាង, មុខងារសុខភាពកម្រិតខ្ពស់។
-            - 📲 **១. បើក ABA Mobile ជាមួយ PayWay/KHQR Deep Link & ការណែនាំស្កេនលើទូរស័ព្ទដដែល (Direct Deep Link & Scanner Access):**
-              - បន្ថែមប៉ារ៉ាម៉ែត្រផ្លូវការ `abamobilebank://ababank.com?type=payway&qrcode=...` ក្នុង Native Plugin ដើម្បីបញ្ជូនកូដ KHQR ផ្ទាល់ទៅក្នុង ABA Mobile។
-              - រក្សាទុកកូដ QR ដោយស្វ័យប្រវត្តទៅក្នុង Photos / Gallery នៅពេលចុចប៊ូតុង។
-              - បន្ថែមការណែនាំជាជំហានច្បាស់លាស់៖ ក្នុង ABA Mobile ចុច "ABA Scan" -> ចុច "Upload QR" នៅខាងក្រោម ដើម្បីជ្រើសរូបភាព QR ដែលបានរក្សាទុក ដោយមិនបាច់ស្វែងរក។
-            - 💳 **២. លុបចោលប្រអប់វាយបញ្ចូលលេខកូដប្រតិបត្តិការដោយដៃ (Remove Manual Reference Input):**
-              - អ្នកប្រើប្រាស់មិនបាច់វាយបញ្ចូលលេខកូដធនាគារដោយដៃទៀតឡើយ។
-              - ជំនួសមកវិញនូវប៊ូតុងចុច ១-Click «ខ្ញុំបានបង់ប្រាក់រួចរាល់ • ផ្ទៀងផ្ទាត់ការទូទាត់ ($2.99 USD)» ងាយស្រួល សុវត្ថិភាព និងរហ័ស។
-            - 👑 **៣. ដំឡើង VIP ដោយស្វ័យប្រវត្ត ១០០% ក្រោយផ្ទៀងផ្ទាត់ជោគជ័យ (Automatic VIP Upgrade):**
+            **កំណែថ្មី v1.8.6 (Strict VIP Permissions & Food Image Upload):**
+            - 🔒 **១. ការពារសិទ្ធិ VIP លើការចុះបញ្ជី និងគ្រប់គ្រងហាង (Strict VIP Permissions Frontend & Backend):**
+              - មានតែគណនីដែលមានសមាជិកភាព VIP សកម្ម និងទទួលបានការអនុម័តពី Admin (Admin-Approved Active VIP) ឬគណនី Admin ប៉ុណ្ណោះដែលអាចចុះបញ្ជីហាង កែប្រែ និងគ្រប់គ្រងមុខម្ហូបបាន។
+              - អ្នកប្រើប្រាស់ទូទៅ (Regular Users), អ្នកមិនទាន់បង់ប្រាក់ (Unpaid Users), និងអ្នកដែលកំពុងរង់ចាំការអនុម័ត (Pending VIP) ត្រូវបានទប់ស្កាត់ទាំងស្រុង (Strict Barrier) មិនឱ្យចូលប្រើប្រាស់ផ្ទាំងចុះបញ្ជី ឬផ្ទាំងគ្រប់គ្រងឡើយ។
+              - គណនី VIP ដែលផុតកំណត់ (Expired VIP) នឹងត្រូវដកហូតសិទ្ធិភ្លាមៗ (Instant VIP Revocation) ដោយបញ្ជូនទៅកាន់ផ្ទាំងបន្តកញ្ចប់ VIP។
+              - រក្សាសិទ្ធិរដ្ឋបាល System Admin ពេញលេញ និងអចិន្ត្រៃយ៍ (Lifetime Master Access) ដោយមិនប៉ះពាល់ដល់ទិន្នន័យដែលមានស្រាប់។
+            - 📸 **២. មុខងារអាប់ឡូតរូបភាពម្ហូបពីទូរស័ព្ទ (Phone Gallery & Camera Food Image Upload):**
+              - អនុញ្ញាតឱ្យម្ចាស់ហាង VIP អាប់ឡូតរូបភាពម្ហូបផ្ទាល់ពី Gallery ឬថតចេញពី Camera នៅពេលបន្ថែម ឬកែប្រែមុខម្ហូប។
+              - រក្សាទុកមុខងារស្វែងរករូបភាពម្ហូប Online/AI (Auto-Search Matching Food Photos) ដោយឥតគិតថ្លៃ ទុកឱ្យម្ចាស់ហាងជ្រើសរើសតាមចំណង់ចំណូលចិត្ត។
+              - បង្ហាញរូបភាពជាមុន (Live Preview Card) ជាមួយប៊ូតុងប្តូររូបភាពថ្មី (Replace) និងលុបរូបភាព (Remove)។
+              - រូបភាពត្រូវបានបង្រួមទំហំ (Client-side Compression) យ៉ាងរលូន និងតភ្ជាប់ទៅកាន់មុខម្ហូបក្នុង Database យ៉ាងត្រឹមត្រូវ។
+            - 👆 **៣. ស្កេនមេដៃ Admin ចូលដោយស្វ័យប្រវត្តិ (Admin Biometric Fingerprint Auto-Fill):**
+              - រក្សាសុវត្ថិភាពខ្ពស់ជាមួយ Android Keystore (AES-256-GCM) ស្កេនមេដៃបំពេញ Username & Password និងចូល Admin ដោយស្វ័យប្រវត្តិ។
               - ក្រោយប្រព័ន្ធផ្ទៀងផ្ទាត់ប្រតិបត្តិការជោគជ័យ គណនីរបស់អ្នកប្រើប្រាស់នឹងត្រូវបានដំឡើងទៅជា VIP ភ្លាមៗដោយស្វ័យប្រវត្ត (៩០ ថ្ងៃ)។
               - បើកដំណើរការគ្រប់មុខងារពិសេស VIP ទាំងអស់ភ្លាមៗ ដោយមិនបង្ហាញផ្ទាំងរង់ចាំរដ្ឋបាលអនុម័ត (Pending Admin Approval) សម្រាប់ប្រតិបត្តិការដែលបានផ្ទៀងផ្ទាត់ត្រឹមត្រូវឡើយ។
             - 📊 **៤. គ្រប់គ្រងស្ថានភាពទូទាត់ប្រាក់ទាំង ៦ កម្រិត (Comprehensive 6-State Payment Engine):**

@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
-import { TrendingFoodCategorySlug, TrendingFoodItem, isUserVipActive, sortRestaurantsChronologically } from '../types';
+import { TrendingFoodCategorySlug, TrendingFoodItem, isUserVipActive, getVipAccountState, sortRestaurantsChronologically } from '../types';
 import { shareRichContent, copyTextNativeOrWeb } from '../utils/androidMediaHelper';
 import { 
   Sparkles, ChevronRight, Utensils, Store, Compass, 
@@ -712,6 +712,21 @@ export const HomeView: React.FC = () => {
             {currentUser?.role !== 'admin' && myRestaurants.length >= 1 ? (
               <button
                 onClick={() => {
+                  const state = getVipAccountState(currentUser);
+                  if (state === 'pending_vip') {
+                    showToast(isKm ? '⏳ គណនី VIP របស់អ្នកកំពុងរង់ចាំការអនុម័តពី Admin។' : '⏳ Your VIP request is pending Admin approval.', 'info');
+                    return;
+                  }
+                  if (state === 'expired_vip') {
+                    showToast(isKm ? '⚠️ សមាជិកភាព VIP បានផុតកំណត់ហើយ! សូមបន្តកញ្ចប់ VIP ដើម្បីកែប្រែហាង។' : '⚠️ VIP expired! Please renew.', 'warning');
+                    openUpgradeVipModal(true);
+                    return;
+                  }
+                  if (state === 'regular_unpaid') {
+                    showToast(isKm ? '🔒 សម្រាប់តែសមាជិក VIP ដែលបានអនុម័តប៉ុណ្ណោះ! សូមដំឡើងទៅកញ្ចប់ VIP។' : '🔒 Approved VIP only!', 'warning');
+                    openUpgradeVipModal();
+                    return;
+                  }
                   setManagingRestaurant(myRestaurants[0]);
                   setIsManageMenuModalOpen(true);
                 }}
@@ -722,7 +737,28 @@ export const HomeView: React.FC = () => {
               </button>
             ) : (
               <button
-                onClick={() => setIsVipAddRestaurantModalOpen(true)}
+                onClick={() => {
+                  if (!currentUser) {
+                    setIsAuthModalOpen(true);
+                    return;
+                  }
+                  const state = getVipAccountState(currentUser);
+                  if (state === 'pending_vip') {
+                    showToast(isKm ? '⏳ គណនី VIP របស់អ្នកកំពុងរង់ចាំការពិនិត្យ និងអនុម័តពី Administrator។' : '⏳ VIP pending Admin approval.', 'info');
+                    return;
+                  }
+                  if (state === 'expired_vip') {
+                    showToast(isKm ? '⚠️ សមាជិកភាព VIP របស់អ្នកបានផុតកំណត់ហើយ! សូមបន្តសមាជិកភាព VIP។' : '⚠️ VIP expired. Please renew.', 'warning');
+                    openUpgradeVipModal(true);
+                    return;
+                  }
+                  if (state === 'regular_unpaid') {
+                    showToast(isKm ? '🔒 ការចុះបញ្ជីហាងគឺសម្រាប់តែសមាជិក VIP ដែលបានអនុម័តប៉ុណ្ណោះ! សូមដំឡើងទៅកញ្ចប់ VIP។' : '🔒 VIP required to register a restaurant!', 'warning');
+                    openUpgradeVipModal();
+                    return;
+                  }
+                  setIsVipAddRestaurantModalOpen(true);
+                }}
                 className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 text-slate-950 font-bold text-xs shadow-xs transition flex items-center gap-1 shrink-0 active:scale-95 cursor-pointer"
               >
                 <Plus className="w-3.5 h-3.5" />
@@ -749,7 +785,28 @@ export const HomeView: React.FC = () => {
                   <div className="absolute bottom-1 right-4 w-1.5 h-1.5 rounded-full bg-amber-200 shadow-sm shadow-amber-300 vip-sparkle-dot pointer-events-none" style={{ animationDelay: '1.3s' }} />
 
                   <button
-                    onClick={() => setIsVipAddRestaurantModalOpen(true)}
+                    onClick={() => {
+                      if (!currentUser) {
+                        setIsAuthModalOpen(true);
+                        return;
+                      }
+                      const state = getVipAccountState(currentUser);
+                      if (state === 'pending_vip') {
+                        showToast(isKm ? '⏳ ការស្នើសុំសមាជិកភាព VIP របស់អ្នកកំពុងរង់ចាំការពិនិត្យ និងអនុម័តពី Administrator។' : '⏳ VIP request pending Admin approval.', 'info');
+                        return;
+                      }
+                      if (state === 'expired_vip') {
+                        showToast(isKm ? '⚠️ សមាជិកភាព VIP របស់អ្នកបានផុតកំណត់ហើយ! សូមបន្តសមាជិកភាព VIP ដើម្បីចុះបញ្ជីហាង។' : '⚠️ VIP membership expired. Please renew.', 'warning');
+                        openUpgradeVipModal(true);
+                        return;
+                      }
+                      if (state === 'regular_unpaid') {
+                        showToast(isKm ? '🔒 ការចុះបញ្ជីហាងគឺសម្រាប់តែសមាជិក VIP ដែលបានអនុម័តប៉ុណ្ណោះ! សូមដំឡើងទៅកញ្ចប់ VIP។' : '🔒 VIP required to register a restaurant!', 'warning');
+                        openUpgradeVipModal();
+                        return;
+                      }
+                      setIsVipAddRestaurantModalOpen(true);
+                    }}
                     className="relative w-full py-3.5 px-4 bg-gradient-to-r from-amber-300 via-amber-400 to-yellow-400 hover:from-amber-400 hover:to-yellow-500 text-slate-950 rounded-xl text-xs sm:text-sm font-black border-2 border-white/90 vip-glow-btn flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer shadow-lg"
                   >
                     <Crown className="w-4 h-4 fill-slate-950 shrink-0" />
@@ -782,6 +839,21 @@ export const HomeView: React.FC = () => {
                   <div className="flex items-center gap-1.5 shrink-0">
                     <button
                       onClick={() => {
+                        const state = getVipAccountState(currentUser);
+                        if (state === 'pending_vip') {
+                          showToast(isKm ? '⏳ គណនី VIP របស់អ្នកកំពុងរង់ចាំការអនុម័តពី Admin។' : '⏳ VIP pending Admin approval.', 'info');
+                          return;
+                        }
+                        if (state === 'expired_vip') {
+                          showToast(isKm ? '⚠️ សមាជិកភាព VIP របស់អ្នកបានផុតកំណត់ហើយ! សូមបន្តកញ្ចប់ VIP។' : '⚠️ VIP expired. Please renew.', 'warning');
+                          openUpgradeVipModal(true);
+                          return;
+                        }
+                        if (state === 'regular_unpaid') {
+                          showToast(isKm ? '🔒 សម្រាប់តែសមាជិក VIP ដែលបានអនុម័តប៉ុណ្ណោះ!' : '🔒 Approved VIP only!', 'warning');
+                          openUpgradeVipModal();
+                          return;
+                        }
                         setManagingRestaurant(shop);
                         setIsManageMenuModalOpen(true);
                       }}
