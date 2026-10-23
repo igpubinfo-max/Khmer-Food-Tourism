@@ -3,67 +3,8 @@ import { initial100Foods } from './seedFoods';
 import { initial100Restaurants } from './seedRestaurants';
 import { initial100Destinations } from './seedDestinations';
 
-export const initialUsers: User[] = [
-  {
-    id: 'user-vip-kimseng',
-    name: 'Chea Kimseng',
-    username: 'cheakimseng',
-    email: 'kimseng@khmerfoodtourism.com',
-    role: 'owner',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-    phone: '095 245 959',
-    bio: 'Premium VIP Food & Restaurant Owner — Verified Member',
-    restaurantName: 'ភោជនីយដ្ឋានខ្មែរ រស់ជាតិដើម',
-    createdAt: '2026-01-01',
-    membershipTier: 'premium_vip',
-    subscriptionStatus: 'active',
-    subscriptionStartDate: '2026-01-01T00:00:00.000Z',
-    subscriptionExpiryDate: '2027-12-31T23:59:59.000Z',
-    paymentStatus: 'verified',
-    paymentMethod: 'KHQR',
-    transactionRef: 'ABA-KHQR-095245959-VIP',
-    autoRenew: true,
-    socialAccounts: {
-      tiktok: {
-        connected: true,
-        username: '@cheakimseng',
-        displayName: 'Chea Kimseng',
-        avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-        profileUrl: 'https://www.tiktok.com/@cheakimseng',
-        connectedAt: '2026-01-15',
-        followersCount: '48.5K'
-      },
-      facebook: {
-        connected: true,
-        username: 'Chea Kimseng',
-        displayName: 'Chea Kimseng',
-        avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-        profileUrl: 'https://www.facebook.com/cheasavuth',
-        connectedAt: '2026-01-15'
-      }
-    }
-  },
-  {
-    id: 'owner-1',
-    name: 'សុខ គីមលី (ម្ចាស់ហាង)',
-    username: 'kimly_kep',
-    email: 'kimly@restaurant.com',
-    role: 'owner',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
-    phone: '098 765 432',
-    bio: 'ម្ចាស់ហាងអាហារគ្រឿងសមុទ្រស្រស់ និងម្រេចកំពត',
-    restaurantName: 'ភោជនីយដ្ឋាន គីមលី កំពត-កែប',
-    createdAt: '2026-01-15',
-    membershipTier: 'premium_vip',
-    subscriptionStatus: 'active',
-    subscriptionStartDate: '2026-01-15T00:00:00.000Z',
-    subscriptionExpiryDate: '2027-12-31T23:59:59.000Z',
-    paymentStatus: 'verified',
-    paymentMethod: 'KHQR',
-    transactionRef: 'ABA-KHQR-KIMLY-VIP',
-    autoRenew: true
-  },
-];
+// Registered user accounts database: Cleared per administrative directive (Backup preserved in /backup)
+export const initialUsers: User[] = [];
 
 export const initialAppSettings: AppSettings = {
   apkDownloadUrl: 'https://github.com/igpubinfo-max/Khmer-Food-Tourism/releases/download/v1.0.0/app-debug.apk',

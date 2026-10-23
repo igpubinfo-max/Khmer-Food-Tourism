@@ -29,7 +29,7 @@ export const AdminDashboard: React.FC = () => {
     restaurants, deleteRestaurant, approveRestaurant, toggleVerifyRestaurant,
     destinations, addDestination, updateDestination, deleteDestination,
     posts, deletePost,
-    users, updateUserRole,
+    users, updateUserRole, clearAllRegisteredUsers,
     transactions, verifyTransaction, rejectTransaction, requestMorePaymentInfo, getAuthorizedPaymentProof,
     appSettings, updateAppSettings, setAdminPassword, currentUser, showToast,
     aiCheckIns, approveAiCheckIn, rejectAiCheckIn, mergeAiCheckIn,
@@ -1843,35 +1843,106 @@ export const AdminDashboard: React.FC = () => {
           {/* USERS TAB */}
           {activeTab === 'users' && (
             <div className="space-y-4">
-              <h3 className="font-bold text-stone-900 dark:text-stone-100 font-khmer text-sm">
-                {isKm ? `អ្នកប្រើប្រាស់ក្នុងប្រព័ន្ធ (${users.length} គណនី)` : `User Accounts (${users.length})`}
-              </h3>
-              <div className="space-y-2 max-h-[50vh] overflow-y-auto no-scrollbar">
-                {users.map((u) => (
-                  <div key={u.id} className="p-3 bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <div className="flex items-center gap-3">
-                      <img src={u.avatar} alt="avatar" className="w-10 h-10 rounded-full object-cover" />
-                      <div>
-                        <h4 className="font-bold text-stone-900 dark:text-stone-100 font-khmer flex items-center gap-2">
-                          <span>{u.name}</span>
-                          <code className="text-[10px] font-mono text-stone-400">({u.id})</code>
-                        </h4>
-                        <p className="text-[10px] text-stone-400">{u.email} • 📞 {u.phone || 'N/A'}</p>
-                        {(u.role === 'vip' || u.vipPlanType || u.vipExpiryDate) && (
-                          <p className="text-[10px] text-emerald-700 dark:text-emerald-400 font-khmer mt-0.5">
-                            👑 គម្រោង៖ <strong>{u.vipPlanType === 'annual' ? 'VIP 90 Days ($4.99)' : 'VIP 30 Days ($2.99)'}</strong>
-                            {u.vipActivatedAt && ` • ថ្ងៃបើក៖ ${new Date(u.vipActivatedAt).toLocaleDateString()}`}
-                            {u.vipExpiryDate && ` • ថ្ងៃផុតកំណត់៖ ${new Date(u.vipExpiryDate).toLocaleDateString()}`}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                    <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-stone-100 dark:bg-stone-700 font-mono self-start sm:self-center">
-                      {u.role}
-                    </span>
-                  </div>
-                ))}
+              <div className="flex items-center justify-between gap-3 flex-wrap">
+                <div>
+                  <h3 className="font-bold text-stone-900 dark:text-stone-100 font-khmer text-sm">
+                    {isKm ? `អ្នកប្រើប្រាស់ក្នុងប្រព័ន្ធ (${users.length} គណនី)` : `User Accounts (${users.length})`}
+                  </h3>
+                  <p className="text-[11px] text-stone-500 font-khmer mt-0.5">
+                    {isKm ? 'គ្រប់គ្រងគណនីអ្នកប្រើប្រាស់ និងសមាជិកភាព VIP' : 'Manage registered accounts and VIP memberships'}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      // Trigger JSON backup download for admin
+                      const backupObj = {
+                        timestamp: new Date().toISOString(),
+                        appName: 'Khmer Food & Tourism',
+                        version: 'v1.8.0',
+                        users: users,
+                        count: users.length,
+                      };
+                      const blob = new Blob([JSON.stringify(backupObj, null, 2)], { type: 'application/json' });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement('a');
+                      a.href = url;
+                      a.download = `kft_users_backup_${new Date().toISOString().split('T')[0]}.json`;
+                      a.click();
+                      URL.revokeObjectURL(url);
+                      showToast(isKm ? 'បានទាញយក Backup ទិន្នន័យជោគជ័យ!' : 'Backup downloaded successfully!', 'success');
+                    }}
+                    className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-stone-700 hover:bg-slate-200 text-slate-700 dark:text-stone-200 font-khmer text-xs font-bold border border-slate-300 dark:border-stone-600 transition flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <span>📥 {isKm ? 'ទាញយក Backup' : 'Export Backup'}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      if (window.confirm(isKm 
+                        ? 'តើអ្នកពិតជាចង់សម្អាត និងលុបគណនីអ្នកប្រើប្រាស់ទាំងអស់ចេញពី Database មែនទេ?\n\n(ទិន្នន័យ Admin, មុខម្ហូប ២០០+, ហាងអាហារ ២២០+, និងតំបន់ទេសចរណ៍ ១២៤+ នឹងត្រូវបានរក្សាទុក ១០០% ដដែល)' 
+                        : 'Are you sure you want to purge all registered users from the database?\n\n(Admin credentials, 200+ foods, 220+ restaurants, and 124 destinations will remain completely intact)')) {
+                        await clearAllRegisteredUsers();
+                      }
+                    }}
+                    className="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 font-khmer text-xs font-bold border border-rose-300 dark:border-rose-800 transition flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>{isKm ? '🧹 សម្អាតគណនីទាំងអស់' : 'Purge All Users'}</span>
+                  </button>
+                </div>
               </div>
+
+              {users.length === 0 ? (
+                <div className="p-8 text-center bg-white dark:bg-stone-800 rounded-3xl border border-stone-200 dark:border-stone-700 space-y-3 font-khmer">
+                  <div className="w-14 h-14 rounded-full bg-emerald-100 dark:bg-emerald-950/70 text-[#064E3B] dark:text-emerald-300 mx-auto flex items-center justify-center">
+                    <CheckCircle2 className="w-7 h-7" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-sm text-stone-900 dark:text-stone-100">
+                      {isKm ? 'មូលដ្ឋានទិន្នន័យអ្នកប្រើប្រាស់ត្រូវបានសម្អាតស្អាត (Database Clean)' : 'User Database is Clean'}
+                    </h4>
+                    <p className="text-xs text-stone-500 max-w-sm mx-auto mt-1">
+                      {isKm 
+                        ? 'គ្មានគណនីអ្នកប្រើប្រាស់ទូទៅដែលបានចុះឈ្មោះក្នុងប្រព័ន្ធឡើយ។ គណនីរដ្ឋបាល (Admin), មុខម្ហូប (២០០+), ហាងអាហារ (២២០+) និងតំបន់ទេសចរណ៍ (១២៤+) ត្រូវបានរក្សាទុកសុវត្ថិភាព ១០០%។' 
+                        : 'No registered user accounts exist. System Admin, 200+ foods, 220+ restaurants, and 124 destinations are 100% intact.'}
+                    </p>
+                  </div>
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-700 text-[11px] font-bold">
+                    <span>✓ Database Verified & Active</span>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-2 max-h-[50vh] overflow-y-auto no-scrollbar">
+                  {users.map((u) => (
+                    <div key={u.id} className="p-3 bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div className="flex items-center gap-3">
+                        <img src={u.avatar} alt="avatar" className="w-10 h-10 rounded-full object-cover" />
+                        <div>
+                          <h4 className="font-bold text-stone-900 dark:text-stone-100 font-khmer flex items-center gap-2">
+                            <span>{u.name}</span>
+                            <code className="text-[10px] font-mono text-stone-400">({u.id})</code>
+                          </h4>
+                          <p className="text-[10px] text-stone-400">{u.email} • 📞 {u.phone || 'N/A'}</p>
+                          {(u.role === 'vip' || u.vipPlanType || u.vipExpiryDate) && (
+                            <p className="text-[10px] text-emerald-700 dark:text-emerald-400 font-khmer mt-0.5">
+                              👑 គម្រោង៖ <strong>{u.vipPlanType === 'annual' ? 'VIP 90 Days ($4.99)' : 'VIP 30 Days ($2.99)'}</strong>
+                              {u.vipActivatedAt && ` • ថ្ងៃបើក៖ ${new Date(u.vipActivatedAt).toLocaleDateString()}`}
+                              {u.vipExpiryDate && ` • ថ្ងៃផុតកំណត់៖ ${new Date(u.vipExpiryDate).toLocaleDateString()}`}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-stone-100 dark:bg-stone-700 font-mono self-start sm:self-center">
+                        {u.role}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 

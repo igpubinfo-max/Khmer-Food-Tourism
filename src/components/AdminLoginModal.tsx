@@ -1,24 +1,36 @@
 import React, { useState, useEffect } from 'react';
 import { 
   X, ShieldAlert, Lock, User as UserIcon, Eye, EyeOff, 
-  KeyRound, CheckCircle2, ShieldCheck, AlertCircle, Clock 
+  KeyRound, CheckCircle2, ShieldCheck, AlertCircle, Clock, Fingerprint, Sparkles 
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { checkAdminLoginAllowed } from '../utils/security';
+import { 
+  checkBiometricAvailability, 
+  setSavedAdminUsername, 
+  enrollAdminBiometric,
+  getSavedAdminUsername 
+} from '../services/biometricService';
 
 export const AdminLoginModal: React.FC = () => {
   const { 
     isAdminLoginModalOpen, 
     setIsAdminLoginModalOpen, 
     loginAdmin, 
+    loginAdminWithBiometric,
     setAdminPassword, 
     language 
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<'login' | 'change_password'>('login');
-  const [username, setUsername] = useState('');
+  const [username, setUsername] = useState(() => getSavedAdminUsername() || '');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberUsername, setRememberUsername] = useState(true);
+  const [enableBiometric, setEnableBiometric] = useState(true);
+  const [biometricAvailable, setBiometricAvailable] = useState(false);
+  const [biometricEnrolled, setBiometricEnrolled] = useState(false);
+  const [biometricLoading, setBiometricLoading] = useState(false);
 
   // Change password states
   const [currentAdminPass, setCurrentAdminPass] = useState('');
@@ -30,7 +42,7 @@ export const AdminLoginModal: React.FC = () => {
 
   const isKm = language === 'km';
 
-  // Check rate limiting on modal open
+  // Check biometric availability and rate limiting on modal open
   useEffect(() => {
     if (isAdminLoginModalOpen) {
       const status = checkAdminLoginAllowed();
@@ -39,6 +51,15 @@ export const AdminLoginModal: React.FC = () => {
       } else {
         setLockoutSeconds(0);
       }
+
+      checkBiometricAvailability().then(res => {
+        setBiometricAvailable(res.available || res.hasHardware);
+        setBiometricEnrolled(res.isAppEnrolled);
+        if (res.savedUsername) {
+          setUsername(res.savedUsername);
+          setRememberUsername(true);
+        }
+      });
     }
   }, [isAdminLoginModalOpen]);
 
@@ -58,6 +79,32 @@ export const AdminLoginModal: React.FC = () => {
   }, [lockoutSeconds]);
 
   if (!isAdminLoginModalOpen) return null;
+
+  const handleBiometricLogin = async () => {
+    setErrorMsg('');
+    const status = checkAdminLoginAllowed();
+    if (!status.allowed) {
+      setLockoutSeconds(status.remainingLockoutSeconds);
+      setErrorMsg(
+        isKm 
+          ? `គណនីរដ្ឋបាលត្រូវបានចាក់សោរបណ្តោះអាសន្ន។ សូមរង់ចាំ ${status.remainingLockoutSeconds} វិនាទី!` 
+          : `Admin login locked out for brute-force protection. Try again in ${status.remainingLockoutSeconds}s!`
+      );
+      return;
+    }
+
+    setBiometricLoading(true);
+    try {
+      const success = await loginAdminWithBiometric();
+      if (!success) {
+        setErrorMsg(isKm ? 'ការស្កេនស្នាមមេដៃមិនជោគជ័យ ឬត្រូវបានបោះបង់។ សូមប្រើពាក្យសម្ងាត់។' : 'Biometric scan canceled or failed. Please use password.');
+      }
+    } catch {
+      setErrorMsg(isKm ? 'បរាជ័យក្នុងការស្កេនស្នាមមេដៃ' : 'Biometric error occurred');
+    } finally {
+      setBiometricLoading(false);
+    }
+  };
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -96,8 +143,19 @@ export const AdminLoginModal: React.FC = () => {
           );
         }
       } else {
+        // Save or remove username
+        await setSavedAdminUsername(username, rememberUsername);
+
+        // Enroll biometric if requested and available
+        if (enableBiometric && !biometricEnrolled && biometricAvailable) {
+          try {
+            await enrollAdminBiometric(username, 'kft-admin-authenticated-token');
+          } catch (bioErr) {
+            console.warn('Biometric auto-enroll skipped:', bioErr);
+          }
+        }
+
         setPassword('');
-        setUsername('');
       }
     } catch {
       setErrorMsg(isKm ? 'មានបញ្ហាក្នុងការផ្ទៀងផ្ទាត់សុវត្ថិភាព' : 'Authentication error occurred');
@@ -225,78 +283,160 @@ export const AdminLoginModal: React.FC = () => {
           )}
 
           {activeTab === 'login' ? (
-            <form onSubmit={handleLoginSubmit} className="space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-[#0F172A] dark:text-slate-300 font-khmer mb-1.5">
-                  {isKm ? 'ឈ្មោះអ្នកគ្រប់គ្រង (Admin ID / Username)' : 'Admin ID / Username'}
-                </label>
-                <div className="relative">
-                  <UserIcon className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
-                  <input
-                    type="text"
-                    value={username}
-                    onChange={e => setUsername(e.target.value)}
-                    required
-                    disabled={lockoutSeconds > 0}
-                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#059669]/20 focus:border-[#059669] disabled:opacity-50"
-                    placeholder={isKm ? 'បញ្ចូលឈ្មោះអ្នកគ្រប់គ្រង' : 'Enter Admin ID'}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-[#0F172A] dark:text-slate-300 font-khmer mb-1.5">
-                  {isKm ? 'ពាក្យសម្ងាត់សុវត្ថិភាព (Password)' : 'Secure Password'}
-                </label>
-                <div className="relative">
-                  <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={e => setPassword(e.target.value)}
-                    required
-                    disabled={lockoutSeconds > 0}
-                    className="w-full pl-10 pr-10 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#059669]/20 focus:border-[#059669] disabled:opacity-50 font-mono"
-                    placeholder="••••••••••••"
-                  />
+            <div className="space-y-4">
+              {/* 1. Biometric Fingerprint 1-Tap Login Card (When Enrolled) */}
+              {biometricAvailable && biometricEnrolled && (
+                <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-100 dark:from-emerald-950/70 dark:via-teal-950/50 dark:to-emerald-900/50 border-2 border-emerald-400/80 shadow-xs space-y-2.5">
+                  <div className="flex items-center justify-between text-xs font-bold text-emerald-900 dark:text-emerald-200 font-khmer">
+                    <span className="flex items-center gap-1.5">
+                      <Fingerprint className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                      <span>{isKm ? 'ស្កេនស្នាមមេដៃរហ័ស (Fingerprint)' : 'Biometric Quick Access'}</span>
+                    </span>
+                    <span className="px-2 py-0.5 rounded-full bg-emerald-200 dark:bg-emerald-900 text-emerald-900 dark:text-emerald-200 text-[9px] font-mono font-bold">
+                      KEYSTORE SECURE
+                    </span>
+                  </div>
+                  
                   <button
                     type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3.5 top-3 text-slate-400 hover:text-slate-600"
+                    onClick={handleBiometricLogin}
+                    disabled={biometricLoading || lockoutSeconds > 0}
+                    className="w-full py-3.5 px-4 bg-gradient-to-r from-[#064E3B] to-[#047857] hover:from-[#047857] hover:to-[#064E3B] text-white font-bold rounded-xl shadow-md border border-emerald-400/40 flex items-center justify-center gap-2.5 transition active:scale-[0.98] cursor-pointer text-xs sm:text-sm font-khmer disabled:opacity-50"
                   >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    <Fingerprint className="w-5 h-5 text-emerald-300 animate-pulse" />
+                    <span>
+                      {biometricLoading 
+                        ? (isKm ? 'កំពុងផ្ទៀងផ្ទាត់ស្នាមមេដៃ...' : 'Verifying Biometric...') 
+                        : (isKm ? '👆 ស្កេនស្នាមមេដៃចូល (Fingerprint Login)' : '👆 Login with Fingerprint')}
+                    </span>
                   </button>
+                  <p className="text-[10px] text-center text-emerald-700 dark:text-emerald-300 font-khmer">
+                    {isKm 
+                      ? 'Android BiometricPrompt & Keystore • ចូលរហ័សដោយមិនចាំបាច់វាយពាក្យសម្ងាត់' 
+                      : 'Protected by Android BiometricPrompt & Android KeyStore'}
+                  </p>
                 </div>
-              </div>
+              )}
 
-              {/* Security Policy Badge */}
-              <div className="bg-slate-50 dark:bg-slate-800/40 rounded-xl p-3 border border-slate-200 dark:border-slate-700 text-[11px] text-[#0F172A] dark:text-slate-300 font-khmer space-y-1">
-                <div className="font-bold flex items-center gap-1.5 text-[#064E3B] dark:text-emerald-400">
-                  <ShieldCheck className="w-4 h-4 text-[#059669]" />
-                  <span>{isKm ? 'ស្តង់ដាសុវត្ថិភាពខ្ពស់បំផុត (Security Policy):' : 'Security Policy:'}</span>
+              {biometricAvailable && biometricEnrolled && (
+                <div className="flex items-center gap-3 py-0.5">
+                  <div className="flex-1 h-px bg-slate-200 dark:bg-slate-700" />
+                  <span className="text-[10px] text-slate-400 font-khmer">
+                    {isKm ? 'ឬ ចូលដោយប្រើពាក្យសម្ងាត់' : 'Or use password'}
+                  </span>
+                  <div className="flex-1 h-px bg-slate-200 dark:bg-slate-700" />
                 </div>
-                <p>
-                  {isKm 
-                    ? 'ប្រព័ន្ធប្រើប្រាស់ក្បួន PBKDF2-HMAC-SHA256 (100,000 Iterations) + Salt 32-byte និងការទប់ស្កាត់ការប៉ុនប៉ងទស្សន៍ទាយពាក្យសម្ងាត់ (Rate Limiting) ដោយស្វ័យប្រវត្តិ។' 
-                    : 'Protected by PBKDF2-HMAC-SHA256 (100,000 iterations), 32-byte salt, and brute-force lockout defenses.'}
-                </p>
-              </div>
+              )}
 
-              <button
-                type="submit"
-                disabled={loading || lockoutSeconds > 0}
-                className="w-full py-3.5 px-4 bg-[#064E3B] hover:bg-[#047857] text-white font-semibold rounded-2xl shadow-md shadow-emerald-950/20 active:scale-[0.98] transition-all font-khmer text-sm flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
-              >
-                <Lock className="w-4 h-4 text-emerald-300" />
-                <span>
-                  {loading 
-                    ? (isKm ? 'កំពុងផ្ទៀងផ្ទាត់សុវត្ថិភាព...' : 'Verifying...') 
-                    : lockoutSeconds > 0 
-                    ? (isKm ? `បានចាក់សោរ (${lockoutSeconds}s)` : `Locked (${lockoutSeconds}s)`)
-                    : (isKm ? 'ផ្ទៀងផ្ទាត់ និងចូលផ្ទាំងរដ្ឋបាល' : 'Authenticate & Unlock')}
-                </span>
-              </button>
-            </form>
+              {/* 2. Password Login Form (With Remember Username & Biometric Enrollment Option) */}
+              <form onSubmit={handleLoginSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold text-[#0F172A] dark:text-slate-300 font-khmer mb-1.5">
+                    {isKm ? 'ឈ្មោះអ្នកគ្រប់គ្រង (Admin ID / Username)' : 'Admin ID / Username'}
+                  </label>
+                  <div className="relative">
+                    <UserIcon className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+                    <input
+                      type="text"
+                      value={username}
+                      onChange={e => setUsername(e.target.value)}
+                      required
+                      disabled={lockoutSeconds > 0}
+                      className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#059669]/20 focus:border-[#059669] disabled:opacity-50"
+                      placeholder={isKm ? 'បញ្ចូលឈ្មោះអ្នកគ្រប់គ្រង' : 'Enter Admin ID'}
+                    />
+                  </div>
+                  {/* Remember Username Checkbox */}
+                  <div className="flex items-center justify-between mt-1.5 px-0.5">
+                    <label className="flex items-center gap-2 cursor-pointer select-none text-[11px] text-slate-600 dark:text-slate-400 font-khmer">
+                      <input
+                        type="checkbox"
+                        checked={rememberUsername}
+                        onChange={e => setRememberUsername(e.target.checked)}
+                        className="w-3.5 h-3.5 rounded text-[#059669] focus:ring-[#059669] border-slate-300 dark:border-slate-600 accent-[#059669]"
+                      />
+                      <span>{isKm ? 'ចងចាំឈ្មោះអ្នកគ្រប់គ្រង (Remember Username)' : 'Remember Username'}</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-[#0F172A] dark:text-slate-300 font-khmer mb-1.5">
+                    {isKm ? 'ពាក្យសម្ងាត់សុវត្ថិភាព (Password)' : 'Secure Password'}
+                  </label>
+                  <div className="relative">
+                    <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      value={password}
+                      onChange={e => setPassword(e.target.value)}
+                      required
+                      disabled={lockoutSeconds > 0}
+                      className="w-full pl-10 pr-10 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#059669]/20 focus:border-[#059669] disabled:opacity-50 font-mono"
+                      placeholder="••••••••••••"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3.5 top-3 text-slate-400 hover:text-slate-600 cursor-pointer"
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Biometric Enablement Option (When not yet enrolled) */}
+                {biometricAvailable && !biometricEnrolled && (
+                  <div className="p-3 bg-emerald-50/90 dark:bg-emerald-950/40 rounded-xl border border-emerald-300/80 dark:border-emerald-800 flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <Fingerprint className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                      <div className="text-[11px] font-khmer text-emerald-900 dark:text-emerald-200">
+                        <span className="font-bold block">
+                          {isKm ? 'បើកដំណើរការស្កេនស្នាមមេដៃ (Fingerprint)' : 'Enable Fingerprint Login'}
+                        </span>
+                        <span className="text-[10px] text-emerald-700 dark:text-emerald-300">
+                          {isKm ? 'ចូលលឿនលើកក្រោយតាមរយៈ Android Keystore' : 'Fast 1-tap login next time'}
+                        </span>
+                      </div>
+                    </div>
+                    <input
+                      type="checkbox"
+                      checked={enableBiometric}
+                      onChange={e => setEnableBiometric(e.target.checked)}
+                      className="w-4 h-4 rounded text-[#059669] focus:ring-[#059669] border-slate-300 dark:border-slate-600 accent-[#059669] cursor-pointer"
+                    />
+                  </div>
+                )}
+
+                {/* Security Policy Badge */}
+                <div className="bg-slate-50 dark:bg-slate-800/40 rounded-xl p-3 border border-slate-200 dark:border-slate-700 text-[11px] text-[#0F172A] dark:text-slate-300 font-khmer space-y-1">
+                  <div className="font-bold flex items-center gap-1.5 text-[#064E3B] dark:text-emerald-400">
+                    <ShieldCheck className="w-4 h-4 text-[#059669]" />
+                    <span>{isKm ? 'ស្តង់ដាសុវត្ថិភាពខ្ពស់បំផុត (Security Policy):' : 'Security Policy:'}</span>
+                  </div>
+                  <p>
+                    {isKm 
+                      ? 'ប្រព័ន្ធប្រើប្រាស់ក្បួន PBKDF2-HMAC-SHA256 (100,000 Iterations) + Salt 32-byte, Android KeyStore AES-GCM និងការទប់ស្កាត់ការប៉ុនប៉ងទស្សន៍ទាយពាក្យសម្ងាត់ (Rate Limiting) ដោយស្វ័យប្រវត្តិ។' 
+                      : 'Protected by PBKDF2-HMAC-SHA256 (100,000 iterations), Android KeyStore AES-GCM, and brute-force lockout defenses.'}
+                  </p>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading || lockoutSeconds > 0}
+                  className="w-full py-3.5 px-4 bg-[#064E3B] hover:bg-[#047857] text-white font-semibold rounded-2xl shadow-md shadow-emerald-950/20 active:scale-[0.98] transition-all font-khmer text-sm flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+                >
+                  <Lock className="w-4 h-4 text-emerald-300" />
+                  <span>
+                    {loading 
+                      ? (isKm ? 'កំពុងផ្ទៀងផ្ទាត់សុវត្ថិភាព...' : 'Verifying...') 
+                      : lockoutSeconds > 0 
+                      ? (isKm ? `បានចាក់សោរ (${lockoutSeconds}s)` : `Locked (${lockoutSeconds}s)`)
+                      : (isKm ? 'ផ្ទៀងផ្ទាត់ និងចូលផ្ទាំងរដ្ឋបាល' : 'Authenticate & Unlock')}
+                  </span>
+                </button>
+              </form>
+            </div>
           ) : (
             <form onSubmit={handleChangePasswordSubmit} className="space-y-3.5">
               <div>

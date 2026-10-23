@@ -69,7 +69,7 @@ jobs:
           echo "=== SEARCHING FOR GENERATED APK FILES ==="
           find . -name "*.apk" -ls
           cd android/app/build/outputs/apk/debug
-          mv app-debug.apk KhmerFoodTourism-v1.8.0.apk
+          mv app-debug.apk KhmerFoodTourism-v1.8.1.apk
           ls -la
 
       # Play Store AAB build disabled during regular edits per user instruction (enable only when requested)
@@ -81,7 +81,7 @@ jobs:
       #     ./gradlew bundleRelease --no-daemon -x lint -x lintVitalRelease
       #     AAB_FILE=$(find app/build/outputs/bundle -name "*.aab" | head -n 1)
       #     echo "Found AAB: $AAB_FILE"
-      #     cp "$AAB_FILE" app/build/outputs/apk/debug/KhmerFoodTourism-v1.8.0.aab
+      #     cp "$AAB_FILE" app/build/outputs/apk/debug/KhmerFoodTourism-v1.8.1.aab
       #     cp app/khmerfood-upload-key.jks app/build/outputs/apk/debug/khmerfood-upload-key.jks
       #     ls -la app/build/outputs/apk/debug/
 
@@ -96,23 +96,21 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: v1.8.0
-          name: "Khmer Food & Tourism v1.8.0 (Admin Auto-Search Tool, Centered App Icon & Clean Admin Portal)"
+          tag_name: v1.8.1
+          name: "Khmer Food & Tourism v1.8.1 (Admin Biometric Fingerprint Login & User Database Purged)"
           make_latest: true
           body: |
             ### 🇰🇭 កម្មវិធីទូរស័ព្ទដៃ អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism Mobile App)
             
-            **កំណែថ្មី v1.7.6 (220+ Verified Restaurants & Cafes, 124 Scenic Destinations, Matched Food Photos & $2.99/30d • $4.99/90d VIP Plans):**
-            - 🏪 **១. បន្ថែម និងធ្វើបច្ចុប្បន្នភាពហាងអាហារល្បីៗ កាហ្វេ (220 ហាង) និងតំបន់ទេសចរណ៍ (124 កន្លែង) ស្តង់ដារ Google Maps + Supabase Cloud:**
-              - ធ្វើបច្ចុប្បន្នភាពរូបភាព ទីតាំងផែនទី GPS (`https://www.google.com/maps/search/?api=1&query=lat,lng`) តម្លៃ និងពិន្ទុវាយតម្លៃ (Rating & Reviews) ដូចក្នុង Google Maps សម្រាប់ហាងអាហារ និងហាងកាហ្វេទាំង 220 កន្លែង និងតំបន់ទេសចរណ៍ទាំង 124 កន្លែងទូទាំង ២៥ ខេត្ត-រាជធានី រួមទាំង Sync ចូលទៅក្នុង Supabase Cloud។
-              - ផ្គូផ្គងរូបភាពមុខម្ហូបទាំង 100 មុខ និងមុខម្ហូបកំពុងល្បី (Trending Foods) ឱ្យត្រូវគ្នាជាមួយឈ្មោះម្ហូបពិតប្រាកដ 100%។
-            - 👑 **២. កែសម្រួលតម្លៃ និងរយៈពេលកញ្ចប់សមាជិកភាព VIP ថ្មី៖**
-              - កញ្ចប់ទី ១៖ **$2.99 USD សម្រាប់រយៈពេល 30 ថ្ងៃ (30 Days VIP)**។
-              - កញ្ចប់ទី ២៖ **$4.99 USD សម្រាប់រយៈពេល 90 ថ្ងៃ (90 Days VIP)**។
-            - 🔑 **៣. បន្ថែមប្រអប់បញ្ចូលសោរហ័ស Google Maps Places API Key (ប្រអប់ទី ៣) លើទំព័រដើម Admin Dashboard:**
-              - អាចចុច **📋 Paste & រក្សាទុកភ្លាម** ឬ **💾 Save Key** ក្នុងប្រអប់ទី ៣ បានភ្លាមៗ។
-            - 🗺️ **១. ភ្ជាប់ Google Maps Places API + ប្រព័ន្ធ Smart Cache (សន្សំកូតា $200/ខែ Free Credit):**
-              - ស្វែងរកហាងអាហារ កាហ្វេ ភោជនីយដ្ឋាន ផ្លូវ និងតំបន់ទេសចរណ៍ពិតៗនៅភ្នំពេញ និងទូទាំង ២៥ ខេត្ត-រាជធានី រួមទាំងរូបភាពហាងពិតៗ (`Place Photos`) និងទីតាំង GPS ដូចក្នុង Google Maps។
+            **កំណែថ្មី v1.8.1 (Admin Biometric Fingerprint Login via Android Keystore & Clean User Database):**
+            - 👆 **១. ប្រព័ន្ធស្កេនស្នាមមេដៃចូលគណនី Admin (Admin Biometric Fingerprint Login):**
+              - ប្រើប្រាស់បច្ចេកវិទ្យា Android `BiometricPrompt` និង `AndroidKeyStore` (AES-256-GCM Hardware Security) សម្រាប់ចូលកម្មវិធីដោយស្កេនស្នាមមេដៃបានលឿន ១ វិនាទី។
+              - មានមុខងារ "ចងចាំឈ្មោះអ្នកគ្រប់គ្រង (Remember Username)" ជួយបំពេញឈ្មោះដោយស្វ័យប្រវត្តិ។
+              - តម្រូវឱ្យវាយពាក្យសម្ងាត់លើកដំបូងដើម្បីចុះបញ្ជីស្នាមមេដៃ និងមានជម្រើស Fallback ប្រើពាក្យសម្ងាត់ជានិច្ច។
+            - 🧹 **២. សម្អាតទិន្នន័យគណនីអ្នកប្រើប្រាស់ចាស់ៗ (Purged Registered Users):**
+              - បានលុបគណនីអ្នកប្រើប្រាស់ចាស់ៗទាំងអស់ចេញពីប្រព័ន្ធ និង Database ដោយជោគជ័យ។
+              - រក្សាទុកគណនី Admin, លេខកូដសម្ងាត់ Admin, ការកំណត់ប្រព័ន្ធ, បញ្ជីមុខម្ហូប (200+ មុខ), ហាងអាហារ (220+ ហាង) និងតំបន់ទេសចរណ៍ (124 កន្លែង) គង់វង្ស ១០០%។
+              - បានបង្កើតឯកសារបម្រុងទុក (Backup) ទុកជាឯកសាររួចរាល់។
               - **ប្រព័ន្ធ Smart Cache ឆ្លាតវៃ៖** នៅពេលមានអ្នកប្រើស្វែងរកហាងថ្មីជាលើកទី ១ កម្មវិធីរក្សាទុកឈ្មោះ ទីតាំង GPS និងរូបភាពហាងនោះទុកក្នុង Database និង Smart Cache។ នៅពេលអ្នកប្រើទី ២ ទី ៣... ស្វែងរកហាងដដែល វាទាញយកមកបង្ហាញភ្លាមៗដោយមិនកាត់កូតា Google Maps ម្តងទៀតឡើយ!
             - ☁️ **២. ភ្ជាប់ប្រព័ន្ធ Supabase Cloud Database & Storage (Free Tier $0/ខែ):**
               - ធ្វើសមកាលកម្ម (Real-time Cloud Sync) សម្រាប់គណនីអ្នកប្រើប្រាស់ ហាងអាហារ និងរូបភាពភស្តុតាងបង់ប្រាក់ VIP រវាងទូរស័ព្ទអតិថិជនគ្រប់គ្នា និងទូរស័ព្ទ Admin។

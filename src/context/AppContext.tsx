@@ -33,6 +33,7 @@ import {
   syncAllAppDataWithSupabase,
   pushCloudDocument,
 } from '../services/supabaseService';
+import { authenticateAdminWithBiometric, setSavedAdminUsername } from '../services/biometricService';
 
 export type ActiveTab = 'home' | 'food' | 'restaurants' | 'tourism' | 'community' | 'profile';
 
@@ -51,6 +52,7 @@ interface AppContextType {
   logout: () => void;
   updateUserRole: (userId: string, newRole: UserRole) => void;
   updateCurrentUserProfile: (newName: string, newAvatar?: string) => void;
+  clearAllRegisteredUsers: () => Promise<{ success: boolean; count: number }>;
 
   // Social Account Linking (TikTok & Facebook)
   connectTikTokAccount: (username: string, displayName?: string, avatarUrl?: string) => Promise<{ success: boolean; error?: string }>;
@@ -60,6 +62,7 @@ interface AppContextType {
 
   // Admin Auth (Chea Savuth)
   loginAdmin: (username: string, password: string) => Promise<boolean>;
+  loginAdminWithBiometric: () => Promise<boolean>;
   setAdminPassword: (newPassword: string) => Promise<boolean>;
   
   // App Settings & QR Codes
@@ -281,65 +284,43 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [language, setLanguage] = useState<Language>('km');
   const [activeTab, setActiveTab] = useState<ActiveTab>('home');
   
-  // Local storage loaded states with fallbacks (v4 storage keys for 200+ dataset)
+  // Local storage loaded states with fallbacks (v5 storage keys: purged demo users per Admin directive)
   const [users, setUsers] = useState<User[]>(() => {
     try {
-      const saved = localStorage.getItem('kft_users_v4');
+      // Purge legacy user keys to clean previous registered users
+      ['kft_users_v4', 'kft_users_v3', 'kft_users_v2', 'kft_users_v1', 'kft_current_user_v4', 'kft_current_user_v3'].forEach(k => {
+        try { localStorage.removeItem(k); } catch(e) {}
+      });
+      const saved = localStorage.getItem('kft_users_v5');
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          // Purge deleted default user "ចាន់ថា វណ្ណៈ" from local user database
-          return parsed.filter(u => u.id !== 'user-1' && u.username !== 'vannak_chantha' && u.email !== 'vannak@gmail.com');
-        }
-      }
-    } catch (e) {
-      console.warn('Failed to parse kft_users_v4', e);
-    }
-    return initialUsers;
-  });
-
-  const [currentUser, setCurrentUser] = useState<User | null>(() => {
-    try {
-      const saved = localStorage.getItem('kft_current_user_v4');
-      if (saved && saved !== 'undefined' && saved !== 'null') {
-        const parsed = JSON.parse(saved);
-        if (parsed && typeof parsed === 'object') {
-          // Purge deleted default user "ចាន់ថា វណ្ណៈ"
-          if (parsed.id === 'user-1' || parsed.username === 'vannak_chantha' || parsed.email === 'vannak@gmail.com' || parsed.name === 'ចាន់ថា វណ្ណៈ') {
-            localStorage.removeItem('kft_current_user_v4');
-            return initialUsers[0];
-          }
-
-          // Ensure only verified VIP or default Admin/Owner account keeps active VIP status
-          const isDefaultOwner =
-            parsed.id === 'user-2' ||
-            parsed.role === 'admin' ||
-            parsed.username === 'kimseng' ||
-            parsed.email === 'cheakimseng@gmail.com';
-          if (isDefaultOwner || parsed.membershipTier === 'premium_vip') {
-            const expiry =
-              parsed.subscriptionExpiryDate &&
-              new Date(parsed.subscriptionExpiryDate).getTime() > Date.now()
-                ? parsed.subscriptionExpiryDate
-                : new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString();
-
-            return {
-              ...parsed,
-              membershipTier: 'premium_vip',
-              subscriptionStatus: 'active',
-              subscriptionExpiryDate: expiry,
-              paymentStatus: 'verified',
-              autoRenew: true,
-            };
-          }
-
+        if (Array.isArray(parsed)) {
           return parsed;
         }
       }
     } catch (e) {
-      console.warn('Failed to parse kft_current_user_v4', e);
+      console.warn('Failed to parse kft_users_v5', e);
     }
-    return initialUsers[0] || null; // Default to active VIP account (Chea Kimseng)
+    return initialUsers; // which is empty []
+  });
+
+  const [currentUser, setCurrentUser] = useState<User | null>(() => {
+    try {
+      const saved = localStorage.getItem('kft_current_user_v5');
+      if (saved && saved !== 'undefined' && saved !== 'null') {
+        const parsed = JSON.parse(saved);
+        if (parsed && typeof parsed === 'object') {
+          // Keep Admin session active if logged in as Admin
+          if (parsed.role === 'admin' && parsed.id === 'admin-authorized-single') {
+            return parsed;
+          }
+          return parsed;
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to parse kft_current_user_v5', e);
+    }
+    return null; // No demo user logged in by default
   });
 
   const [foods, setFoods] = useState<FoodItem[]>(() => {
@@ -1068,15 +1049,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Sync to localStorage safely (guarded against QuotaExceeded or JSON corruption)
   useEffect(() => {
-    if (users && users.length > 0) {
-      scheduleStorageWrite('kft_users_v4', users, 600);
-    }
+    scheduleStorageWrite('kft_users_v5', users, 600);
   }, [users]);
 
   useEffect(() => {
     try {
       if (currentUser) {
-        localStorage.setItem('kft_current_user_v4', JSON.stringify(currentUser));
+        localStorage.setItem('kft_current_user_v5', JSON.stringify(currentUser));
         
         // Automatic VIP subscription expiry enforcement
         if (currentUser.membershipTier === 'premium_vip' && currentUser.subscriptionExpiryDate) {
@@ -1092,8 +1071,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           }
         }
       } else {
-        localStorage.removeItem('kft_current_user_v4');
-        setIsAuthModalOpen(true);
+        localStorage.removeItem('kft_current_user_v5');
       }
     } catch (e) {
       console.warn('Storage sync failed for currentUser:', e);
@@ -1604,6 +1582,109 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return true;
   };
 
+  const loginAdminWithBiometric = async (): Promise<boolean> => {
+    const status = checkAdminLoginAllowed();
+    if (!status.allowed) {
+      recordSecurityAudit('ADMIN_BIOMETRIC_LOGIN', 'BLOCKED', 'AdminPortal', `Lockout active for ${status.remainingLockoutSeconds}s`);
+      showToast(
+        language === 'km' 
+          ? `គណនីរដ្ឋបាលត្រូវបានចាក់សោរបណ្តោះអាសន្ន។ សូមរង់ចាំ ${status.remainingLockoutSeconds} វិនាទី!` 
+          : `Admin login locked out. Try again in ${status.remainingLockoutSeconds}s!`, 
+        'warning'
+      );
+      return false;
+    }
+
+    try {
+      const bioAuth = await authenticateAdminWithBiometric();
+      if (!bioAuth.success) {
+        if (!bioAuth.fallbackToPassword) {
+          showToast(
+            language === 'km' 
+              ? 'ការស្កេនស្នាមមេដៃមិនត្រូវគ្នាទេ! សូមព្យាយាមម្តងទៀត ឬប្រើពាក្យសម្ងាត់។' 
+              : 'Biometric verification failed. Please try again or use password.',
+            'warning'
+          );
+        }
+        return false;
+      }
+
+      resetAdminLoginAttempts();
+      await createAdminSession();
+      recordSecurityAudit('ADMIN_BIOMETRIC_LOGIN_SUCCESS', 'SUCCESS', 'AdminPortal', 'Authorized admin biometric session established via Android BiometricPrompt & Keystore');
+
+      const adminProfile: User = {
+        id: 'admin-authorized-single',
+        name: 'រដ្ឋបាលប្រព័ន្ធ (System Admin)',
+        email: 'admin@khmerfoodtourism.com',
+        role: 'admin',
+        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+        bio: 'ប្រព័ន្ធគ្រប់គ្រងរដ្ឋបាលផ្លូវការ (System Administrator)',
+        createdAt: '2026-01-01',
+      };
+
+      setCurrentUser(adminProfile);
+      setIsAdminLoginModalOpen(false);
+      setIsAdminOpen(true);
+      showToast(
+        language === 'km' 
+          ? 'ចូលផ្ទាំងគ្រប់គ្រងរដ្ឋបាលតាមរយៈស្កេនស្នាមមេដៃជោគជ័យ!' 
+          : 'Admin portal unlocked via Biometric Fingerprint (Android Keystore)!', 
+        'success'
+      );
+      return true;
+    } catch (e: any) {
+      console.warn('Biometric authentication error:', e);
+      showToast(language === 'km' ? 'សូមប្រើពាក្យសម្ងាត់សុវត្ថិភាពដើម្បីចូល' : 'Please use password to authenticate', 'info');
+      return false;
+    }
+  };
+
+  const clearAllRegisteredUsers = async (): Promise<{ success: boolean; count: number }> => {
+    const count = users.length;
+    // 1. Clear users in state
+    setUsers([]);
+    // 2. Clear currentUser if not admin
+    if (currentUser && currentUser.role !== 'admin') {
+      setCurrentUser(null);
+      localStorage.removeItem('kft_current_user_v5');
+    }
+    // 3. Clear localStorage
+    localStorage.setItem('kft_users_v5', '[]');
+    
+    // 4. Clear user wishlists & trip plans
+    try {
+      const keysToRemove: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && (k.startsWith('kft_wishlists_') || k.startsWith('kft_trip_plans_') || k.startsWith('kft_support_tickets_'))) {
+          keysToRemove.push(k);
+        }
+      }
+      keysToRemove.forEach(k => localStorage.removeItem(k));
+    } catch {
+      // ignore
+    }
+
+    // 5. Clear cloud users from Supabase if configured
+    try {
+      if (isSupabaseConfigured()) {
+        await pushCloudDocument('kft_cloud_users_v1', []);
+      }
+    } catch (e) {
+      console.warn('Supabase cloud user purge error:', e);
+    }
+
+    recordSecurityAudit('USERS_DATABASE_PURGE', 'SUCCESS', 'AdminPortal', `Admin cleared all ${count} registered users`);
+    showToast(
+      language === 'km' 
+        ? `បានសម្អាតគណនីអ្នកប្រើប្រាស់ ${count} នាក់ចេញពី Database ដោយជោគជ័យ!` 
+        : `Successfully purged ${count} registered users from database!`, 
+      'success'
+    );
+    return { success: true, count };
+  };
+
   const setAdminPassword = async (newPassword: string): Promise<boolean> => {
     if (!newPassword || newPassword.length < 8) {
       showToast(language === 'km' ? 'ពាក្យសម្ងាត់ត្រូវមានយ៉ាងហោចណាស់ ៨ តួអក្សរ!' : 'Password must be at least 8 characters!', 'warning');
@@ -1742,7 +1823,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setCurrentUser(updated);
     setUsers(prev => prev.map(u => u.id === currentUser.id ? updated : u));
     try {
-      localStorage.setItem('kft_current_user_v4', JSON.stringify(updated));
+      localStorage.setItem('kft_current_user_v5', JSON.stringify(updated));
     } catch (e) {
       console.warn('Storage save error:', e);
     }
@@ -4194,7 +4275,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         logout,
         updateUserRole,
         updateCurrentUserProfile,
+        clearAllRegisteredUsers,
         loginAdmin,
+        loginAdminWithBiometric,
         setAdminPassword,
         appSettings,
         updateAppSettings,
