@@ -1,6 +1,6 @@
-export const APP_VERSION = 'v1.9.4';
-export const APP_VERSION_NAME = '1.9.4';
-export const APP_BUILD_CODE = 66;
+export const APP_VERSION = 'v1.9.5';
+export const APP_VERSION_NAME = '1.9.5';
+export const APP_BUILD_CODE = 67;
 export const APP_RELEASE_DATE = '2026-10-24';
 
 export interface DeletedUserRecord {
@@ -274,6 +274,42 @@ export interface RestaurantMenuItem {
   updatedAt?: string;
 }
 
+export interface AbaVerificationCheckItem {
+  passed: boolean;
+  expected: string;
+  detected: string;
+  reasonKh: string;
+  reasonEn: string;
+}
+
+export interface AbaReceiptVerificationReport {
+  status: 'verified' | 'flagged_manual_review' | 'rejected_mismatch';
+  canAutoApprove: boolean;
+  verifiedAt: string;
+  verificationMethod: 'hybrid_ai_and_transaction' | 'deterministic_transaction_and_ocr' | 'manual_fallback';
+  confidenceScore: number;
+  summaryKh: string;
+  summaryEn: string;
+  extractedReceipt?: {
+    isAbaReceipt: boolean;
+    trxId?: string;
+    amountUsd?: number;
+    currency?: string;
+    recipientName?: string;
+    recipientAccount?: string;
+    transactionDate?: string;
+    senderName?: string;
+    rawOcrText?: string;
+  };
+  checks: {
+    trxId: AbaVerificationCheckItem;
+    amount: AbaVerificationCheckItem;
+    date: AbaVerificationCheckItem;
+    recipient: AbaVerificationCheckItem;
+    antiReplay: AbaVerificationCheckItem;
+  };
+}
+
 export type TransactionType = 'restaurant_registration' | 'user_vip_upgrade';
 
 export interface RegistrationTransaction {
@@ -308,6 +344,7 @@ export interface RegistrationTransaction {
   verifiedAt?: string;
   verifiedBy?: string;
   notes?: string;
+  aiVerificationReport?: AbaReceiptVerificationReport;
 }
 
 export interface Restaurant {
@@ -818,4 +855,5 @@ export interface SupportTicket {
   messages: SupportTicketMessage[];
   createdAt: string;
   updatedAt: string;
+  aiVerificationReport?: AbaReceiptVerificationReport;
 }

@@ -8,8 +8,13 @@ import {
   Wishlist, WishlistItem, TripPlan, AppNotification,
   TrendingFoodItem, AiCheckInSubmission,
   SupportTicket, SupportTicketMessage, SupportTicketStatus, VIP_PLANS,
-  DeletedUserRecord
+  DeletedUserRecord, AbaReceiptVerificationReport
 } from '../types';
+import {
+  verifyAbaPaymentAndReceipt,
+  computeReceiptImageFingerprint,
+  recordVerifiedReceiptFingerprint,
+} from '../services/aiPaymentVerificationService';
 import { 
   verifyPaymentOnBackend, calculateVipDates, checkEligibleRestoration,
   VIP_ANNUAL_PRICE_USD, VIP_SUBSCRIPTION_DAYS, VIP_QUARTERLY_PRICE_USD, VIP_QUARTERLY_DAYS,
@@ -262,6 +267,7 @@ interface AppContextType {
     paymentDate?: string;
     paymentRef?: string;
     receiptUrl?: string;
+    aiVerificationReport?: AbaReceiptVerificationReport;
   }) => SupportTicket | null;
   replyToSupportTicket: (ticketId: string, message: string, attachmentUrl?: string) => boolean;
   updateSupportTicketStatus: (ticketId: string, status: SupportTicketStatus) => void;
@@ -3974,6 +3980,42 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       } catch {}
     }
 
+    // Run AI + Deterministic Receipt Verification if payment proof image is attached
+    let aiReport: AbaReceiptVerificationReport | undefined;
+    if (paymentProofData?.dataUrl) {
+      aiReport = await verifyAbaPaymentAndReceipt({
+        receiptDataUrl: paymentProofData.dataUrl,
+        expectedAmountUsd: validPrice,
+        expectedDurationDays: validDays,
+        submittedTrxId: cleanTrxRef,
+        submittedDate: nowIso.split('T')[0],
+        userId: currentUser.id,
+        existingTransactions: transactions,
+      });
+    }
+
+    const effectiveTrxRef =
+      aiReport?.extractedReceipt?.trxId && /^ABA-KHQR-/i.test(cleanTrxRef)
+        ? aiReport.extractedReceipt.trxId
+        : cleanTrxRef;
+
+    const isAutoVerified = Boolean(
+      aiReport && aiReport.canAutoApprove && aiReport.status === 'verified'
+    );
+
+    const { startDate, expiryDate } = calculateVipDates(
+      currentUser.subscriptionExpiryDate,
+      validDays
+    );
+
+    if (isAutoVerified && paymentProofData?.dataUrl) {
+      recordVerifiedReceiptFingerprint(
+        computeReceiptImageFingerprint(paymentProofData.dataUrl),
+        currentUser.id,
+        effectiveTrxRef
+      );
+    }
+
     const newTxn: RegistrationTransaction = {
       id: txnId,
       type: 'user_vip_upgrade',
@@ -3987,71 +4029,150 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       currency: 'USD',
       durationDays: validDays,
       membershipTier: 'premium_vip',
-      status: 'pending_verification',
+      status: isAutoVerified ? 'verified' : 'pending_verification',
       paymentMethod: 'KHQR',
-      transactionRef: cleanTrxRef,
+      transactionRef: effectiveTrxRef,
       paymentProofUrl: paymentProofData?.dataUrl,
       paymentProofUploadedAt: paymentProofData?.dataUrl ? formattedNow : undefined,
       paymentProofFileName: paymentProofData?.fileName,
       paymentProofMimeType: paymentProofData?.mimeType,
       createdAt: formattedNow,
-      notes: notes || `VIP ${validDays} Days ($${validPrice.toFixed(2)} USD) via ABA KHQR — Awaiting Admin Verification`
+      expiresAt: isAutoVerified ? expiryDate : undefined,
+      verifiedAt: isAutoVerified ? formattedNow : undefined,
+      verifiedBy: isAutoVerified
+        ? 'AI & Transaction Verification Engine (Kim Seng Verified)'
+        : undefined,
+      notes: aiReport
+        ? `${aiReport.summaryEn} | ${
+            notes || `VIP ${validDays} Days ($${validPrice.toFixed(2)} USD)`
+          }`
+        : notes ||
+          `VIP ${validDays} Days ($${validPrice.toFixed(2)} USD) via ABA KHQR — Awaiting Admin Verification`,
+      aiVerificationReport: aiReport,
     };
 
     setTransactions(prev => [newTxn, ...prev]);
     setIsVipRenewMode(false);
 
-    // Keep user on previous membership level ('free' unless already active VIP) while awaiting Admin approval
+    if (isAutoVerified) {
+      const activatedUser: User = {
+        ...currentUser,
+        membershipTier: 'premium_vip',
+        subscriptionStartDate: startDate,
+        subscriptionExpiryDate: expiryDate,
+        subscriptionStatus: 'active',
+        paymentStatus: 'verified',
+        paymentMethod: 'KHQR',
+        transactionRef: effectiveTrxRef,
+      };
+      setCurrentUser(activatedUser);
+      setUsers(prev => prev.map(u => (u.id === currentUser.id ? activatedUser : u)));
+
+      setRestaurants(prev =>
+        prev.map(r =>
+          r.ownerId === currentUser.id
+            ? {
+                ...r,
+                membershipTier: 'premium',
+                membershipExpiresAt: expiryDate,
+                isPromoted: true,
+                isVerified: true,
+                paymentStatus: 'verified',
+              }
+            : r
+        )
+      );
+
+      const userSuccessNotif: AppNotification = {
+        id: `notif-user-vip-auto-${Date.now()}`,
+        titleKh: `🎉 គណនី VIP (${validDays} ថ្ងៃ) ត្រូវបានផ្ទៀងផ្ទាត់ និងបើកដំណើរការ!`,
+        titleEn: `🎉 VIP (${validDays} Days) Verified & Activated!`,
+        messageKh: aiReport!.summaryKh,
+        messageEn: aiReport!.summaryEn,
+        type: 'system',
+        date: now.toISOString().split('T')[0],
+        isRead: false,
+      };
+      setNotifications(prev => [userSuccessNotif, ...prev]);
+
+      showToast(
+        language === 'km'
+          ? `🎉 ផ្ទៀងផ្ទាត់វិក្កយបត្រ ABA ជោគជ័យ! គណនី VIP (${validDays} ថ្ងៃ) ត្រូវបានបើកដំណើរការ!`
+          : `🎉 ABA Receipt Verified! VIP (${validDays} Days) is now active!`,
+        'success'
+      );
+      return { success: true, transactionId: txnId };
+    }
+
+    // Keep user on previous membership level ('free' unless already active VIP) while flagged for Manual Admin Review
     const pendingUser: User = {
       ...currentUser,
       membershipTier: isUserVipActive(currentUser) ? 'premium_vip' : 'free',
       subscriptionStatus: 'pending',
       paymentStatus: 'paid_pending_approval',
       paymentMethod: 'KHQR',
-      transactionRef: cleanTrxRef
+      transactionRef: effectiveTrxRef,
     };
 
     setCurrentUser(pendingUser);
-    setUsers(prev => prev.map(u => u.id === currentUser.id ? pendingUser : u));
+    setUsers(prev => prev.map(u => (u.id === currentUser.id ? pendingUser : u)));
 
     // Send Admin Notification
     const adminNotif: AppNotification = {
       id: `notif-admin-vip-${Date.now()}`,
-      titleKh: '👑 សំណើពិនិត្យការទូទាត់ VIP ថ្មី',
-      titleEn: '👑 New VIP Payment Verification Request',
-      messageKh: `អតិថិជន ${currentUser.name} (${currentUser.email}) បានបញ្ជូនសំណើពិនិត្យការទូទាត់ VIP ${validDays} ថ្ងៃ ($${validPrice.toFixed(2)} USD) តាម ABA KHQR (Ref: ${cleanTrxRef})${paymentProofData?.dataUrl ? ' ព្រមទាំងភ្ជាប់រូបភាពភស្តុតាងបង់ប្រាក់' : ''}។ សូមពិនិត្យភស្តុតាង និងរបាយការណ៍ធនាគារ ABA មុនពេលអនុម័ត។`,
-      messageEn: `Customer ${currentUser.name} (${currentUser.email}) submitted a VIP ${validDays} Days ($${validPrice.toFixed(2)} USD) payment verification request via ABA KHQR (Ref: ${cleanTrxRef})${paymentProofData?.dataUrl ? ' with payment proof image attached' : ''}. Please verify in ABA statement before approving.`,
+      titleKh:
+        aiReport?.status === 'rejected_mismatch'
+          ? '🚩 សំណើបង់ប្រាក់ VIP មានព័ត៌មានមិនត្រូវគ្នា (Flagged for Admin Review)'
+          : '👑 សំណើពិនិត្យការទូទាត់ VIP ថ្មី (Manual Admin Review)',
+      titleEn:
+        aiReport?.status === 'rejected_mismatch'
+          ? '🚩 VIP Payment Mismatch Flagged for Admin Review'
+          : '👑 New VIP Payment Verification Request (Manual Review)',
+      messageKh: aiReport
+        ? `${currentUser.name}: ${aiReport.summaryKh}`
+        : `អតិថិជន ${currentUser.name} (${currentUser.email}) បានបញ្ជូនសំណើពិនិត្យការទូទាត់ VIP ${validDays} ថ្ងៃ ($${validPrice.toFixed(2)} USD) តាម ABA KHQR (Ref: ${effectiveTrxRef})។ សូមពិនិត្យភស្តុតាងមុនពេលអនុម័ត។`,
+      messageEn: aiReport
+        ? `${currentUser.name}: ${aiReport.summaryEn}`
+        : `Customer ${currentUser.name} (${currentUser.email}) submitted a VIP ${validDays} Days ($${validPrice.toFixed(2)} USD) payment verification request via ABA KHQR (Ref: ${effectiveTrxRef}). Please verify before approving.`,
       type: 'system',
       date: now.toISOString().split('T')[0],
-      isRead: false
+      isRead: false,
     };
 
     // Send User Notification
     const userNotif: AppNotification = {
       id: `notif-user-vip-req-${Date.now() + 1}`,
-      titleKh: '⏳ កំពុងរង់ចាំ Admin ពិនិត្យការទូទាត់',
-      titleEn: '⏳ Pending Admin Payment Verification',
-      messageKh: `សំណើពិនិត្យការទូទាត់ប្រាក់ ($${validPrice.toFixed(2)} USD / ${validDays} ថ្ងៃ) របស់អ្នកត្រូវបានបញ្ជូនទៅរដ្ឋបាល។ គណនី VIP នឹងត្រូវបានបើកដំណើរការបន្ទាប់ពីរដ្ឋបាលពិនិត្យ និងអនុម័ត។`,
-      messageEn: `Your payment confirmation request ($${validPrice.toFixed(2)} USD / ${validDays} days) has been submitted. VIP will be activated after administrator verification and approval.`,
+      titleKh: '⏳ បានដាក់សញ្ញាសម្រាប់ Admin ត្រួតពិនិត្យផ្ទាល់',
+      titleEn: '⏳ Flagged for Manual Admin Payment Review',
+      messageKh: aiReport
+        ? aiReport.summaryKh
+        : `សំណើពិនិត្យការទូទាត់ប្រាក់ ($${validPrice.toFixed(2)} USD / ${validDays} ថ្ងៃ) របស់អ្នកត្រូវបានបញ្ជូនទៅរដ្ឋបាល។ គណនី VIP នឹងត្រូវបានបើកដំណើរការបន្ទាប់ពីរដ្ឋបាលពិនិត្យ និងអនុម័ត។`,
+      messageEn: aiReport
+        ? aiReport.summaryEn
+        : `Your payment confirmation request ($${validPrice.toFixed(2)} USD / ${validDays} days) has been submitted. VIP will be activated after administrator verification and approval.`,
       type: 'system',
       date: now.toISOString().split('T')[0],
-      isRead: false
+      isRead: false,
     };
 
     setNotifications(prev => [adminNotif, userNotif, ...prev]);
 
     showToast(
-      language === 'km' 
-        ? '⏳ បានបញ្ជូនសំណើរួចរាល់! កំពុងរង់ចាំ Admin ពិនិត្យការទូទាត់។' 
+      language === 'km'
+        ? aiReport?.status === 'rejected_mismatch'
+          ? '🚩 រកឃើញព័ត៌មានលើវិក្កយបត្រមិនត្រូវគ្នា! សំណើត្រូវបានបញ្ជូនឱ្យ Admin ត្រួតពិនិត្យផ្ទាល់។'
+          : '⏳ បានបញ្ជូនសំណើរួចរាល់! កំពុងរង់ចាំ Admin ពិនិត្យការទូទាត់។'
+        : aiReport?.status === 'rejected_mismatch'
+        ? '🚩 Receipt mismatch detected! Flagged for manual Admin review.'
         : '⏳ Request submitted! Awaiting Admin payment verification.',
-      'info'
+      aiReport?.status === 'rejected_mismatch' ? 'warning' : 'info'
     );
 
     return { success: true, transactionId: txnId };
   };
 
   // ============================================================================
-  // User–Admin Two-Way Support & Payment Verification Reply System (Requirement 1)
+  // User–Admin Two-Way Support & Payment Verification Reply System (Requirement 1 & 4)
   // ============================================================================
   const createSupportTicket = (input: {
     message: string;
@@ -4059,6 +4180,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     paymentDate?: string;
     paymentRef?: string;
     receiptUrl?: string;
+    aiVerificationReport?: AbaReceiptVerificationReport;
   }): SupportTicket | null => {
     if (!currentUser) {
       setIsAuthModalOpen(true);
@@ -4068,7 +4190,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const cleanMessage = (input.message || '').trim();
     if (!cleanMessage) {
       showToast(
-        language === 'km' ? 'សូមសរសេរសារពន្យល់ពីបញ្ហាការបង់ប្រាក់របស់អ្នក។' : 'Please enter a message explaining your payment issue.',
+        language === 'km'
+          ? 'សូមសរសេរសារពន្យល់ពីបញ្ហាការបង់ប្រាក់របស់អ្នក។'
+          : 'Please enter a message explaining your payment issue.',
         'warning'
       );
       return null;
@@ -4078,10 +4202,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const now = new Date();
     const nowIso = now.toISOString();
     const readableNow = nowIso.replace('T', ' ').slice(0, 16);
-    const ticketId = `SUP-${Date.now().toString(36).toUpperCase()}-${Math.floor(100 + Math.random() * 900)}`;
+    const ticketId = `SUP-${Date.now().toString(36).toUpperCase()}-${Math.floor(
+      100 + Math.random() * 900
+    )}`;
+
+    const aiReport = input.aiVerificationReport;
+    const isAutoApprovedByAi = Boolean(
+      input.receiptUrl &&
+        aiReport &&
+        aiReport.canAutoApprove &&
+        aiReport.status === 'verified'
+    );
 
     const userLatestTxn = transactions.find(t => t.userId === currentUser.id);
-    const autoRef = (input.paymentRef || currentUser.transactionRef || userLatestTxn?.transactionRef || `ABA-${Date.now().toString().slice(-6)}`).trim();
+    const autoRef = (
+      aiReport?.extractedReceipt?.trxId ||
+      input.paymentRef ||
+      currentUser.transactionRef ||
+      userLatestTxn?.transactionRef ||
+      `ABA-${Date.now().toString().slice(-6)}`
+    ).trim();
     const autoDate = (input.paymentDate || readableNow.slice(0, 10)).trim();
 
     const firstMsg: SupportTicketMessage = {
@@ -4093,6 +4233,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       attachmentUrl: input.receiptUrl,
       createdAt: readableNow,
     };
+
+    const messagesList: SupportTicketMessage[] = [firstMsg];
+
+    if (aiReport) {
+      const aiSystemMsg: SupportTicketMessage = {
+        id: `msg-ai-${Date.now() + 1}`,
+        senderRole: 'admin',
+        senderId: 'ai-payment-verifier',
+        senderName: '🤖 AI & Transaction Verifier',
+        message: `${aiReport.summaryKh}\n\n• អ្នកទទួល (Recipient): ${
+          aiReport.checks.recipient.passed ? '✅' : '❌'
+        } ${aiReport.checks.recipient.detected}\n• ចំនួនទឹកប្រាក់ (Amount): ${
+          aiReport.checks.amount.passed ? '✅' : '❌'
+        } ${aiReport.checks.amount.detected}\n• លេខប្រតិបត្តិការ (Trx. ID): ${
+          aiReport.checks.trxId.passed ? '✅' : '⚠️'
+        } ${aiReport.checks.trxId.detected}\n• កាលបរិច្ឆេទ (Date): ${
+          aiReport.checks.date.passed ? '✅' : '❌'
+        } ${aiReport.checks.date.detected}`,
+        createdAt: readableNow,
+      };
+      messagesList.push(aiSystemMsg);
+    }
 
     const newTicket: SupportTicket = {
       id: ticketId,
@@ -4107,23 +4269,92 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       paymentDate: autoDate,
       paymentRef: autoRef,
       receiptUrl: input.receiptUrl,
-      status: 'pending',
-      vipApproved: false,
-      unreadByAdmin: true,
-      unreadByUser: false,
-      messages: [firstMsg],
+      status: isAutoApprovedByAi ? 'resolved' : 'pending',
+      vipApproved: isAutoApprovedByAi,
+      vipApprovedAt: isAutoApprovedByAi ? readableNow : undefined,
+      unreadByAdmin: !isAutoApprovedByAi,
+      unreadByUser: Boolean(aiReport),
+      messages: messagesList,
       createdAt: readableNow,
       updatedAt: readableNow,
+      aiVerificationReport: aiReport,
     };
 
     setSupportTickets(prev => [newTicket, ...prev]);
 
-    // Also attach receipt to existing pending transaction or create a pending transaction so Admin can approve from either place
+    const { startDate, expiryDate } = calculateVipDates(
+      currentUser.subscriptionExpiryDate,
+      plan.durationDays
+    );
+
+    if (isAutoApprovedByAi && input.receiptUrl) {
+      recordVerifiedReceiptFingerprint(
+        computeReceiptImageFingerprint(input.receiptUrl),
+        currentUser.id,
+        autoRef
+      );
+
+      const activatedUser: User = {
+        ...currentUser,
+        membershipTier: 'premium_vip',
+        subscriptionStartDate: startDate,
+        subscriptionExpiryDate: expiryDate,
+        subscriptionStatus: 'active',
+        paymentStatus: 'verified',
+        paymentMethod: 'KHQR',
+        transactionRef: autoRef,
+      };
+      setCurrentUser(activatedUser);
+      setUsers(prev => prev.map(u => (u.id === currentUser.id ? activatedUser : u)));
+
+      setRestaurants(prev =>
+        prev.map(r =>
+          r.ownerId === currentUser.id
+            ? {
+                ...r,
+                membershipTier: 'premium',
+                membershipExpiresAt: expiryDate,
+                isPromoted: true,
+                isVerified: true,
+                paymentStatus: 'verified',
+              }
+            : r
+        )
+      );
+    }
+
+    // Also attach receipt to existing pending transaction or create a transaction record
     const existingPending = transactions.find(
-      t => t.userId === currentUser.id && (t.status === 'pending_verification' || t.status === 'needs_more_info')
+      t =>
+        t.userId === currentUser.id &&
+        (t.status === 'pending_verification' || t.status === 'needs_more_info')
     );
     if (existingPending && input.receiptUrl) {
-      uploadPaymentProofToTransaction(existingPending.id, input.receiptUrl, `support_receipt_${ticketId}.jpg`, 'image/jpeg');
+      uploadPaymentProofToTransaction(
+        existingPending.id,
+        input.receiptUrl,
+        `support_receipt_${ticketId}.jpg`,
+        'image/jpeg'
+      );
+      if (aiReport) {
+        setTransactions(prev =>
+          prev.map(t =>
+            t.id === existingPending.id
+              ? {
+                  ...t,
+                  transactionRef: autoRef,
+                  status: isAutoApprovedByAi ? 'verified' : 'pending_verification',
+                  verifiedAt: isAutoApprovedByAi ? readableNow : t.verifiedAt,
+                  verifiedBy: isAutoApprovedByAi
+                    ? 'AI & Transaction Verification (Kim Seng Verified)'
+                    : t.verifiedBy,
+                  expiresAt: isAutoApprovedByAi ? expiryDate : t.expiresAt,
+                  aiVerificationReport: aiReport,
+                }
+              : t
+          )
+        );
+      }
     } else if (!existingPending && input.receiptUrl) {
       const linkedTxn: RegistrationTransaction = {
         id: `TXN-SUP-${Date.now().toString(36).toUpperCase()}`,
@@ -4138,7 +4369,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         currency: 'USD',
         durationDays: plan.durationDays,
         membershipTier: 'premium_vip',
-        status: 'pending_verification',
+        status: isAutoApprovedByAi ? 'verified' : 'pending_verification',
         paymentMethod: 'KHQR',
         transactionRef: autoRef,
         paymentProofUrl: input.receiptUrl,
@@ -4146,17 +4377,37 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         paymentProofFileName: `support_receipt_${ticketId}.jpg`,
         paymentProofMimeType: 'image/jpeg',
         createdAt: readableNow,
-        notes: `[Support Ticket #${ticketId}] ${cleanMessage}`,
+        expiresAt: isAutoApprovedByAi ? expiryDate : undefined,
+        verifiedAt: isAutoApprovedByAi ? readableNow : undefined,
+        verifiedBy: isAutoApprovedByAi
+          ? 'AI & Transaction Verification (Kim Seng Verified)'
+          : undefined,
+        notes: `[Support Ticket #${ticketId}] ${
+          aiReport ? `${aiReport.summaryEn} | ` : ''
+        }${cleanMessage}`,
+        aiVerificationReport: aiReport,
       };
       setTransactions(prev => [linkedTxn, ...prev]);
     }
 
     const adminNotif: AppNotification = {
       id: `notif-sup-admin-${Date.now()}`,
-      titleKh: '💬 សារជំនួយបញ្ហាការបង់ប្រាក់ VIP ថ្មី',
-      titleEn: '💬 New VIP Payment Support Message',
-      messageKh: `អ្នកប្រើប្រាស់ ${currentUser.name} (ID: ${currentUser.id}) បានផ្ញើសារជំនួយសម្រាប់កញ្ចប់ ${plan.nameEn} ($${plan.priceUsd.toFixed(2)})៖ "${cleanMessage.slice(0, 80)}"`,
-      messageEn: `User ${currentUser.name} (ID: ${currentUser.id}) submitted a payment support ticket for ${plan.nameEn} ($${plan.priceUsd.toFixed(2)}): "${cleanMessage.slice(0, 80)}"`,
+      titleKh: isAutoApprovedByAi
+        ? '✅ AI បានផ្ទៀងផ្ទាត់វិក្កយបត្រ និងបើក VIP ជោគជ័យ'
+        : aiReport?.status === 'rejected_mismatch'
+        ? '🚩 សារជំនួយបង់ប្រាក់ VIP មានព័ត៌មានមិនត្រូវគ្នា (Flagged for Manual Review)'
+        : '💬 សារជំនួយបញ្ហាការបង់ប្រាក់ VIP ថ្មី (Manual Admin Review)',
+      titleEn: isAutoApprovedByAi
+        ? '✅ AI Verified ABA Receipt & Activated VIP'
+        : aiReport?.status === 'rejected_mismatch'
+        ? '🚩 VIP Support Receipt Mismatch (Flagged for Manual Review)'
+        : '💬 New VIP Payment Support Message (Manual Admin Review)',
+      messageKh: aiReport
+        ? `អ្នកប្រើប្រាស់ ${currentUser.name}: ${aiReport.summaryKh}`
+        : `អ្នកប្រើប្រាស់ ${currentUser.name} (ID: ${currentUser.id}) បានផ្ញើសារជំនួយសម្រាប់កញ្ចប់ ${plan.nameEn} ($${plan.priceUsd.toFixed(2)})៖ "${cleanMessage.slice(0, 80)}"`,
+      messageEn: aiReport
+        ? `User ${currentUser.name}: ${aiReport.summaryEn}`
+        : `User ${currentUser.name} (ID: ${currentUser.id}) submitted a payment support ticket for ${plan.nameEn} ($${plan.priceUsd.toFixed(2)}): "${cleanMessage.slice(0, 80)}"`,
       type: 'system',
       date: nowIso.split('T')[0],
       isRead: false,
@@ -4164,10 +4415,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setNotifications(prev => [adminNotif, ...prev]);
 
     showToast(
-      language === 'km'
-        ? '✅ បានផ្ញើសារជំនួយ និងវិក្កយបត្រទៅកាន់ Admin រួចរាល់! Admin នឹងឆ្លើយតបក្នុងពេលឆាប់ៗ។'
-        : '✅ Support message & receipt sent to Admin! You will receive a reply in the app.',
-      'success'
+      isAutoApprovedByAi
+        ? language === 'km'
+          ? `🎉 វិក្កយបត្រ ABA ត្រូវបានផ្ទៀងផ្ទាត់ជោគជ័យ! គណនី VIP (${plan.durationDays} ថ្ងៃ) ត្រូវបានបើកដំណើរការ!`
+          : `🎉 ABA Receipt verified! VIP (${plan.durationDays} Days) is now activated!`
+        : aiReport?.status === 'rejected_mismatch'
+        ? language === 'km'
+          ? '🚩 រកឃើញព័ត៌មានមិនត្រូវគ្នាលើវិក្កយបត្រ! បានដាក់សញ្ញាសម្រាប់ Admin ត្រួតពិនិត្យផ្ទាល់។'
+          : '🚩 Receipt mismatch detected! Flagged for manual Admin review.'
+        : language === 'km'
+        ? '✅ បានផ្ញើសារជំនួយ និងវិក្កយបត្រទៅកាន់ Admin ដើម្បីត្រួតពិនិត្យផ្ទាល់!'
+        : '✅ Support message & receipt flagged for manual Admin review!',
+      isAutoApprovedByAi ? 'success' : aiReport?.status === 'rejected_mismatch' ? 'warning' : 'info'
     );
     return newTicket;
   };

@@ -13,13 +13,17 @@ import {
   ShieldCheck,
   FileText,
   Sparkles,
+  AlertTriangle,
+  XCircle,
+  Loader2,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
-import { VIP_PLANS, SupportTicket } from '../types';
+import { VIP_PLANS, SupportTicket, AbaReceiptVerificationReport } from '../types';
 import {
   pickImageUsingNativeAndroidGallery,
   processAndCompressImageFile,
 } from '../utils/androidMediaHelper';
+import { verifyAbaPaymentAndReceipt } from '../services/aiPaymentVerificationService';
 import { Capacitor } from '@capacitor/core';
 
 export const PaymentSupportModal: React.FC = () => {
@@ -46,6 +50,8 @@ export const PaymentSupportModal: React.FC = () => {
   const [messageText, setMessageText] = useState<string>('');
   const [receiptDataUrl, setReceiptDataUrl] = useState<string>('');
   const [isUploading, setIsUploading] = useState<boolean>(false);
+  const [isVerifyingAi, setIsVerifyingAi] = useState<boolean>(false);
+  const [aiReport, setAiReport] = useState<AbaReceiptVerificationReport | null>(null);
 
   const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
   const [replyText, setReplyText] = useState<string>('');
@@ -65,12 +71,12 @@ export const PaymentSupportModal: React.FC = () => {
         setSelectedPlan(supportModalPrefill.planType);
       }
       const latestTxn = transactions.find((t) => t.userId === currentUser.id);
-      setPaymentRef(
+      const rawRef =
         supportModalPrefill?.paymentRef ||
-          currentUser.transactionRef ||
-          latestTxn?.transactionRef ||
-          `ABA-${Date.now().toString().slice(-6)}`
-      );
+        currentUser.transactionRef ||
+        latestTxn?.transactionRef ||
+        '';
+      setPaymentRef(/^ABA-KHQR-/i.test(rawRef) ? '' : rawRef);
       if (supportModalPrefill?.receiptUrl) {
         setReceiptDataUrl(supportModalPrefill.receiptUrl);
       }
@@ -86,6 +92,49 @@ export const PaymentSupportModal: React.FC = () => {
       }
     }
   }, [isSupportTicketModalOpen]);
+
+  // Automatically run AI + Deterministic Receipt Verification whenever a receipt image is attached or plan/ref changes
+  useEffect(() => {
+    let cancelled = false;
+    if (!receiptDataUrl || !currentUser) {
+      setAiReport(null);
+      setIsVerifyingAi(false);
+      return;
+    }
+
+    const planCfg = VIP_PLANS[selectedPlan];
+    setIsVerifyingAi(true);
+    verifyAbaPaymentAndReceipt({
+      receiptDataUrl,
+      expectedAmountUsd: planCfg.priceUsd,
+      expectedDurationDays: planCfg.durationDays,
+      submittedTrxId: paymentRef.trim(),
+      submittedDate: paymentDate,
+      userId: currentUser.id,
+      existingTransactions: transactions,
+    })
+      .then((report) => {
+        if (cancelled) return;
+        setAiReport(report);
+        // If AI/OCR extracted a real Trx. ID from the receipt and user hasn't typed one yet, auto-fill it
+        if (
+          report.extractedReceipt?.trxId &&
+          (!paymentRef.trim() || /^ABA-\d{6}$/i.test(paymentRef.trim()))
+        ) {
+          setPaymentRef(report.extractedReceipt.trxId);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setAiReport(null);
+      })
+      .finally(() => {
+        if (!cancelled) setIsVerifyingAi(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [receiptDataUrl, selectedPlan, paymentDate, paymentRef]);
 
   if (!isSupportTicketModalOpen || !currentUser) return null;
 
@@ -163,7 +212,7 @@ export const PaymentSupportModal: React.FC = () => {
     }
   };
 
-  const handleSubmitNewTicket = (e: React.FormEvent) => {
+  const handleSubmitNewTicket = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!messageText.trim()) {
       showToast(
@@ -175,17 +224,41 @@ export const PaymentSupportModal: React.FC = () => {
       return;
     }
 
+    let finalReport = aiReport;
+    if (receiptDataUrl && !finalReport) {
+      setIsVerifyingAi(true);
+      try {
+        finalReport = await verifyAbaPaymentAndReceipt({
+          receiptDataUrl,
+          expectedAmountUsd: currentPlanConfig.priceUsd,
+          expectedDurationDays: currentPlanConfig.durationDays,
+          submittedTrxId: paymentRef.trim(),
+          submittedDate: paymentDate,
+          userId: currentUser.id,
+          existingTransactions: transactions,
+        });
+        setAiReport(finalReport);
+      } finally {
+        setIsVerifyingAi(false);
+      }
+    }
+
     const created = createSupportTicket({
       message: messageText.trim(),
       planType: selectedPlan,
       paymentDate,
-      paymentRef: paymentRef.trim(),
+      paymentRef:
+        paymentRef.trim() ||
+        finalReport?.extractedReceipt?.trxId ||
+        `ABA-${Date.now().toString().slice(-6)}`,
       receiptUrl: receiptDataUrl || undefined,
+      aiVerificationReport: finalReport || undefined,
     });
 
     if (created) {
       setMessageText('');
       setReceiptDataUrl('');
+      setAiReport(null);
       setSelectedTicketId(created.id);
       setActiveTab('history');
     }
@@ -243,7 +316,7 @@ export const PaymentSupportModal: React.FC = () => {
 
   return (
     <div className="fixed inset-0 z-[130] flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
-      <div className="relative w-full max-w-xl bg-white rounded-3xl shadow-2xl border border-amber-200 overflow-hidden max-h-[92vh] flex flex-col">
+      <div className="relative w-full max-w-xl bg-white text-gray-900 rounded-3xl shadow-2xl border border-amber-200 overflow-hidden max-h-[92vh] flex flex-col">
         {/* Header */}
         <div className="bg-gradient-to-r from-amber-600 via-orange-600 to-red-600 px-5 py-4 text-white flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
@@ -361,6 +434,7 @@ export const PaymentSupportModal: React.FC = () => {
                       type="date"
                       value={paymentDate}
                       onChange={(e) => setPaymentDate(e.target.value)}
+                      style={{ color: '#000000' }}
                       className="font-bold text-gray-900 bg-transparent w-full focus:outline-none text-xs"
                     />
                   </div>
@@ -434,8 +508,9 @@ export const PaymentSupportModal: React.FC = () => {
                   type="text"
                   value={paymentRef}
                   onChange={(e) => setPaymentRef(e.target.value)}
-                  placeholder="ឧ. ABA-12345678"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 text-sm font-semibold focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                  placeholder="ឧ. 176121426630955 (Auto-detected from receipt)"
+                  style={{ color: '#000000', backgroundColor: '#ffffff' }}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 text-sm font-semibold focus:ring-2 focus:ring-amber-500 focus:outline-none"
                 />
               </div>
 
@@ -447,41 +522,172 @@ export const PaymentSupportModal: React.FC = () => {
                     : 'Attach ABA Payment Receipt or Screenshot:'}
                 </label>
                 {receiptDataUrl ? (
-                  <div className="relative rounded-2xl border-2 border-emerald-400 bg-emerald-50/40 p-3 flex items-center gap-3">
-                    <img
-                      src={receiptDataUrl}
-                      alt="Payment Receipt Preview"
-                      className="w-20 h-24 object-cover rounded-xl border border-emerald-300 shadow-sm"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-extrabold text-emerald-800 flex items-center gap-1">
-                        <CheckCircle2 className="w-4 h-4 shrink-0" />
-                        {language === 'km'
-                          ? 'បានភ្ជាប់រូបភាពវិក្កយបត្ររួចរាល់'
-                          : 'Payment receipt attached'}
-                      </p>
-                      <p className="text-[11px] text-gray-600 mt-0.5">
-                        {currentPlanConfig.nameEn} (${currentPlanConfig.priceUsd.toFixed(2)} /{' '}
-                        {currentPlanConfig.durationDays} days)
-                      </p>
-                      <div className="flex items-center gap-2 mt-2">
-                        <button
-                          type="button"
-                          onClick={() => handleChooseReceipt(false)}
-                          className="px-2.5 py-1 rounded-lg bg-white border border-gray-300 text-xs font-bold text-gray-700 hover:bg-gray-100"
-                        >
-                          {language === 'km' ? 'ប្តូររូបភាព' : 'Replace'}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setReceiptDataUrl('')}
-                          className="px-2.5 py-1 rounded-lg bg-red-50 border border-red-200 text-xs font-bold text-red-600 hover:bg-red-100 flex items-center gap-1"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                          {language === 'km' ? 'លុប' : 'Remove'}
-                        </button>
+                  <div className="space-y-2.5">
+                    <div className="relative rounded-2xl border-2 border-emerald-400 bg-emerald-50/40 p-3 flex items-center gap-3">
+                      <img
+                        src={receiptDataUrl}
+                        alt="Payment Receipt Preview"
+                        className="w-20 h-24 object-cover rounded-xl border border-emerald-300 shadow-sm"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-extrabold text-emerald-800 flex items-center gap-1">
+                          <CheckCircle2 className="w-4 h-4 shrink-0" />
+                          {language === 'km'
+                            ? 'បានភ្ជាប់រូបភាពវិក្កយបត្ររួចរាល់'
+                            : 'Payment receipt attached'}
+                        </p>
+                        <p className="text-[11px] text-gray-600 mt-0.5">
+                          {currentPlanConfig.nameEn} (${currentPlanConfig.priceUsd.toFixed(2)} /{' '}
+                          {currentPlanConfig.durationDays} days)
+                        </p>
+                        <div className="flex items-center gap-2 mt-2">
+                          <button
+                            type="button"
+                            onClick={() => handleChooseReceipt(false)}
+                            className="px-2.5 py-1 rounded-lg bg-white border border-gray-300 text-xs font-bold text-gray-700 hover:bg-gray-100"
+                          >
+                            {language === 'km' ? 'ប្តូររូបភាព' : 'Replace'}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setReceiptDataUrl('');
+                              setAiReport(null);
+                            }}
+                            className="px-2.5 py-1 rounded-lg bg-red-50 border border-red-200 text-xs font-bold text-red-600 hover:bg-red-100 flex items-center gap-1"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            {language === 'km' ? 'លុប' : 'Remove'}
+                          </button>
+                        </div>
                       </div>
                     </div>
+
+                    {/* AI & Transaction Payment Verification Result Card */}
+                    {isVerifyingAi ? (
+                      <div className="rounded-2xl border border-blue-200 bg-blue-50/80 p-3 flex items-center gap-2.5 text-xs font-bold text-blue-900">
+                        <Loader2 className="w-4 h-4 text-blue-600 animate-spin shrink-0" />
+                        <span>
+                          {language === 'km'
+                            ? '🤖 កំពុងផ្ទៀងផ្ទាត់វិក្កយបត្រ ABA (លេខ Trx. ID, ចំនួនទឹកប្រាក់, កាលបរិច្ឆេទ និងឈ្មោះគណនី Kim Seng)...'
+                            : '🤖 Verifying ABA receipt (Trx. ID, Amount, Date, and Recipient "Kim Seng")...'}
+                        </span>
+                      </div>
+                    ) : (
+                      aiReport && (
+                        <div
+                          className={`rounded-2xl border-2 p-3 space-y-2 ${
+                            aiReport.canAutoApprove
+                              ? 'border-emerald-400 bg-emerald-50/70'
+                              : aiReport.status === 'rejected_mismatch'
+                              ? 'border-red-300 bg-red-50/70'
+                              : 'border-amber-300 bg-amber-50/70'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <span
+                              className={`text-xs font-extrabold flex items-center gap-1.5 ${
+                                aiReport.canAutoApprove
+                                  ? 'text-emerald-800'
+                                  : aiReport.status === 'rejected_mismatch'
+                                  ? 'text-red-800'
+                                  : 'text-amber-900'
+                              }`}
+                            >
+                              {aiReport.canAutoApprove ? (
+                                <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                              ) : aiReport.status === 'rejected_mismatch' ? (
+                                <XCircle className="w-4 h-4 text-red-600 shrink-0" />
+                              ) : (
+                                <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+                              )}
+                              {aiReport.canAutoApprove
+                                ? language === 'km'
+                                  ? '✅ ផ្ទៀងផ្ទាត់វិក្កយបត្រជោគជ័យ (Verified)'
+                                  : '✅ Receipt & Transaction Verified'
+                                : language === 'km'
+                                ? '🚩 ត្រូវការ Admin ត្រួតពិនិត្យផ្ទាល់ (Flagged for Manual Review)'
+                                : '🚩 Flagged for Manual Admin Review'}
+                            </span>
+                            <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-white/80 border border-black/10 text-gray-800">
+                              Score: {aiReport.confidenceScore}%
+                            </span>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-1.5 text-[11px]">
+                            <div
+                              className={`p-2 rounded-xl border ${
+                                aiReport.checks.recipient.passed
+                                  ? 'bg-white border-emerald-200 text-emerald-900'
+                                  : 'bg-white border-red-200 text-red-900'
+                              }`}
+                            >
+                              <div className="font-bold text-[10px] text-gray-500">
+                                {language === 'km' ? 'អ្នកទទួល (Kim Seng)' : 'Recipient (Kim Seng)'}
+                              </div>
+                              <div className="font-extrabold truncate">
+                                {aiReport.checks.recipient.passed ? '✅ ' : '❌ '}
+                                {aiReport.checks.recipient.detected}
+                              </div>
+                            </div>
+
+                            <div
+                              className={`p-2 rounded-xl border ${
+                                aiReport.checks.amount.passed
+                                  ? 'bg-white border-emerald-200 text-emerald-900'
+                                  : 'bg-white border-red-200 text-red-900'
+                              }`}
+                            >
+                              <div className="font-bold text-[10px] text-gray-500">
+                                {language === 'km'
+                                  ? `ចំនួនទឹកប្រាក់ ($${currentPlanConfig.priceUsd.toFixed(2)})`
+                                  : `Amount ($${currentPlanConfig.priceUsd.toFixed(2)})`}
+                              </div>
+                              <div className="font-extrabold truncate">
+                                {aiReport.checks.amount.passed ? '✅ ' : '❌ '}
+                                {aiReport.checks.amount.detected}
+                              </div>
+                            </div>
+
+                            <div
+                              className={`p-2 rounded-xl border ${
+                                aiReport.checks.trxId.passed
+                                  ? 'bg-white border-emerald-200 text-emerald-900'
+                                  : 'bg-white border-amber-200 text-amber-900'
+                              }`}
+                            >
+                              <div className="font-bold text-[10px] text-gray-500">
+                                {language === 'km' ? 'លេខ Trx. ID' : 'ABA Trx. ID'}
+                              </div>
+                              <div className="font-extrabold truncate">
+                                {aiReport.checks.trxId.passed ? '✅ ' : '⚠️ '}
+                                {aiReport.checks.trxId.detected}
+                              </div>
+                            </div>
+
+                            <div
+                              className={`p-2 rounded-xl border ${
+                                aiReport.checks.date.passed
+                                  ? 'bg-white border-emerald-200 text-emerald-900'
+                                  : 'bg-white border-red-200 text-red-900'
+                              }`}
+                            >
+                              <div className="font-bold text-[10px] text-gray-500">
+                                {language === 'km' ? 'កាលបរិច្ឆេទវិក្កយបត្រ' : 'Receipt Date'}
+                              </div>
+                              <div className="font-extrabold truncate">
+                                {aiReport.checks.date.passed ? '✅ ' : '❌ '}
+                                {aiReport.checks.date.detected}
+                              </div>
+                            </div>
+                          </div>
+
+                          <p className="text-[11px] font-semibold text-gray-800 leading-snug">
+                            {language === 'km' ? aiReport.summaryKh : aiReport.summaryEn}
+                          </p>
+                        </div>
+                      )
+                    )}
                   </div>
                 ) : (
                   <button
@@ -525,7 +731,8 @@ export const PaymentSupportModal: React.FC = () => {
                       ? 'ឧ. ខ្ញុំបានបង់ប្រាក់តាម ABA រួចហើយសម្រាប់កញ្ចប់ VIP 30 ថ្ងៃ ($2.99) ប៉ុន្តែគណនី VIP មិនទាន់បើកដំណើរការទេ សូម Admin ជួយពិនិត្យវិក្កយបត្រ...'
                       : 'e.g., I already paid via ABA for VIP 30 Days ($2.99) but my VIP access is not active yet. Please verify my attached receipt...'
                   }
-                  className="w-full px-3.5 py-2.5 rounded-2xl border border-gray-300 text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                  style={{ color: '#000000', backgroundColor: '#ffffff' }}
+                  className="w-full px-3.5 py-2.5 rounded-2xl border border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 text-sm font-medium focus:ring-2 focus:ring-amber-500 focus:outline-none"
                   required
                 />
               </div>
@@ -723,7 +930,8 @@ export const PaymentSupportModal: React.FC = () => {
                                 ? 'សរសេរសារឆ្លើយតបទៅកាន់ Admin...'
                                 : 'Write a reply to Admin...'
                             }
-                            className="flex-1 px-3.5 py-2 rounded-xl border border-gray-300 text-xs sm:text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                            style={{ color: '#000000', backgroundColor: '#ffffff' }}
+                            className="flex-1 px-3.5 py-2 rounded-xl border border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 text-xs sm:text-sm font-medium focus:ring-2 focus:ring-amber-500 focus:outline-none"
                           />
                           <button
                             type="button"

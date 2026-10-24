@@ -69,7 +69,7 @@ jobs:
           echo "=== SEARCHING FOR GENERATED APK FILES ==="
           find . -name "*.apk" -ls
           cd android/app/build/outputs/apk/debug
-          mv app-debug.apk KhmerFoodTourism-v1.9.4.apk
+          mv app-debug.apk KhmerFoodTourism-v1.9.5.apk
           ls -la
 
       # Play Store AAB build disabled during regular edits per user instruction (enable only when requested)
@@ -96,8 +96,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: v1.9.4
-          name: "Khmer Food & Tourism v1.9.4 (200 Food Photos, New App Icon & Verified Travel Data)"
+          tag_name: v1.9.5
+          name: "Khmer Food & Tourism v1.9.5 (Safe Account Deletion, Full Admin Menu, Black Message Text & AI Payment Verification)"
           make_latest: true
           body: |
             ### 🇰🇭 កម្មវិធីទូរស័ព្ទដៃ អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism Mobile App)

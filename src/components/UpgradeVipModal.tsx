@@ -802,6 +802,21 @@ export const UpgradeVipModal: React.FC = () => {
 
               {/* Allow viewing or attaching/replacing Payment Proof while Pending */}
               <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 text-left space-y-2.5">
+                {userLatestVipTxn?.aiVerificationReport && (
+                  <div
+                    className={`p-2.5 rounded-xl border text-[11px] space-y-1 ${
+                      userLatestVipTxn.aiVerificationReport.canAutoApprove
+                        ? 'bg-emerald-50 border-emerald-300 text-emerald-900'
+                        : 'bg-amber-50 border-amber-300 text-amber-900'
+                    }`}
+                  >
+                    <div className="font-extrabold">
+                      {isKm
+                        ? userLatestVipTxn.aiVerificationReport.summaryKh
+                        : userLatestVipTxn.aiVerificationReport.summaryEn}
+                    </div>
+                  </div>
+                )}
                 {(paymentProofDraft?.dataUrl || userLatestVipTxn?.paymentProofUrl) && (
                   <div className="space-y-1">
                     <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300">

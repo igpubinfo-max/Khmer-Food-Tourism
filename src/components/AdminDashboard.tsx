@@ -51,6 +51,8 @@ export const AdminDashboard: React.FC = () => {
   const [inspectingTicketReceipt, setInspectingTicketReceipt] = useState<string | null>(null);
   const [ticketFilter, setTicketFilter] = useState<'all' | 'Pending' | 'Replied' | 'Resolved'>('all');
   const [userPendingDeletion, setUserPendingDeletion] = useState<User | null>(null);
+  const [selectedUserIdsForDeletion, setSelectedUserIdsForDeletion] = useState<string[]>([]);
+  const [usersPendingBatchDeletion, setUsersPendingBatchDeletion] = useState<User[]>([]);
   const [isDeletingUser, setIsDeletingUser] = useState(false);
 
   // Image Audit states
@@ -315,149 +317,185 @@ export const AdminDashboard: React.FC = () => {
           </button>
         </div>
 
-        {/* Tab Navigation */}
-        <div className="flex items-center gap-1 px-4 py-2 bg-white dark:bg-stone-950 border-b border-stone-200 dark:border-stone-800 overflow-x-auto no-scrollbar shrink-0 text-xs">
+        {/* Tab Navigation — All Menu Items Displayed Directly on Screen Without Swiping */}
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-1.5 px-3 py-2.5 bg-stone-100/90 dark:bg-stone-950 border-b border-stone-200 dark:border-stone-800 shrink-0 text-[11px] font-khmer">
           <button
+            type="button"
             onClick={() => setActiveTab('stats')}
-            className={`flex items-center gap-1.5 px-3 py-2.5 font-bold whitespace-nowrap border-b-2 transition ${
-              activeTab === 'stats' ? 'border-[#064E3B] text-[#064E3B] dark:border-emerald-400 dark:text-emerald-400' : 'border-transparent text-stone-400'
+            className={`flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl font-bold border transition cursor-pointer ${
+              activeTab === 'stats'
+                ? 'bg-[#064E3B] text-white border-[#064E3B] shadow-xs'
+                : 'bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-300 border-stone-200 dark:border-stone-800 hover:border-emerald-500/50'
             }`}
           >
-            <Shield className="w-4 h-4" />
-            <span>{isKm ? 'ទិដ្ឋភាពរួម' : 'Overview'}</span>
+            <Shield className="w-3.5 h-3.5 shrink-0" />
+            <span className="truncate">{isKm ? 'ទិដ្ឋភាពរួម' : 'Overview'}</span>
           </button>
 
           <button
+            type="button"
             onClick={() => setActiveTab('support_tickets')}
-            className={`flex items-center gap-1.5 px-3 py-2.5 font-bold whitespace-nowrap border-b-2 transition relative ${
-              activeTab === 'support_tickets' ? 'border-[#064E3B] text-[#064E3B] dark:border-emerald-400 dark:text-emerald-400' : 'border-transparent text-stone-400'
+            className={`flex items-center justify-center gap-1 px-2 py-2 rounded-xl font-bold border transition relative cursor-pointer ${
+              activeTab === 'support_tickets'
+                ? 'bg-[#064E3B] text-white border-[#064E3B] shadow-xs'
+                : 'bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-300 border-stone-200 dark:border-stone-800 hover:border-emerald-500/50'
             }`}
           >
-            <MessageSquare className="w-4 h-4 text-amber-500" />
-            <span>{isKm ? `សារជំនួយ & ឆ្លើយតប (${supportTickets.length})` : `Support & Replies (${supportTickets.length})`}</span>
+            <MessageSquare className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+            <span className="truncate">{isKm ? `សារជំនួយ (${supportTickets.length})` : `Support (${supportTickets.length})`}</span>
             {(unreadAdminTickets.length > 0 || pendingSupportTickets.length > 0) && (
-              <span className="px-1.5 py-0.2 bg-rose-600 text-white rounded-full text-[9px] font-bold animate-pulse">
+              <span className="px-1.5 py-0.2 bg-rose-600 text-white rounded-full text-[9px] font-bold animate-pulse shrink-0">
                 {unreadAdminTickets.length || pendingSupportTickets.length}
               </span>
             )}
           </button>
 
           <button
+            type="button"
             onClick={() => setActiveTab('transactions')}
-            className={`flex items-center gap-1.5 px-3 py-2.5 font-bold whitespace-nowrap border-b-2 transition relative ${
-              activeTab === 'transactions' ? 'border-[#064E3B] text-[#064E3B] dark:border-emerald-400 dark:text-emerald-400' : 'border-transparent text-stone-400'
+            className={`flex items-center justify-center gap-1 px-2 py-2 rounded-xl font-bold border transition relative cursor-pointer ${
+              activeTab === 'transactions'
+                ? 'bg-[#064E3B] text-white border-[#064E3B] shadow-xs'
+                : 'bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-300 border-stone-200 dark:border-stone-800 hover:border-emerald-500/50'
             }`}
           >
-            <CreditCard className="w-4 h-4" />
-            <span>{isKm ? `ការទូទាត់ VIP (${transactions.length})` : `VIP Payments (${transactions.length})`}</span>
+            <CreditCard className="w-3.5 h-3.5 shrink-0" />
+            <span className="truncate">{isKm ? `ការទូទាត់ (${transactions.length})` : `VIP Pay (${transactions.length})`}</span>
             {pendingTxns.length > 0 && (
-              <span className="px-1.5 py-0.2 bg-red-600 text-white rounded-full text-[9px] font-bold">
+              <span className="px-1.5 py-0.2 bg-red-600 text-white rounded-full text-[9px] font-bold shrink-0">
                 {pendingTxns.length}
               </span>
             )}
           </button>
 
           <button
+            type="button"
             onClick={() => setActiveTab('food')}
-            className={`flex items-center gap-1.5 px-3 py-2.5 font-bold whitespace-nowrap border-b-2 transition ${
-              activeTab === 'food' ? 'border-[#064E3B] text-[#064E3B] dark:border-emerald-400 dark:text-emerald-400' : 'border-transparent text-stone-400'
+            className={`flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl font-bold border transition cursor-pointer ${
+              activeTab === 'food'
+                ? 'bg-[#064E3B] text-white border-[#064E3B] shadow-xs'
+                : 'bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-300 border-stone-200 dark:border-stone-800 hover:border-emerald-500/50'
             }`}
           >
-            <Utensils className="w-4 h-4" />
-            <span>{isKm ? `មុខម្ហូប (${foods.length})` : `Foods (${foods.length})`}</span>
+            <Utensils className="w-3.5 h-3.5 shrink-0" />
+            <span className="truncate">{isKm ? `មុខម្ហូប (${foods.length})` : `Foods (${foods.length})`}</span>
           </button>
 
           <button
+            type="button"
             onClick={() => setActiveTab('image_audit')}
-            className={`flex items-center gap-1.5 px-3 py-2.5 font-bold whitespace-nowrap border-b-2 transition relative ${
-              activeTab === 'image_audit' ? 'border-[#064E3B] text-[#064E3B] dark:border-emerald-400 dark:text-emerald-400' : 'border-transparent text-stone-400'
+            className={`flex items-center justify-center gap-1 px-2 py-2 rounded-xl font-bold border transition relative cursor-pointer ${
+              activeTab === 'image_audit'
+                ? 'bg-[#064E3B] text-white border-[#064E3B] shadow-xs'
+                : 'bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-300 border-stone-200 dark:border-stone-800 hover:border-emerald-500/50'
             }`}
           >
-            <Sparkles className="w-4 h-4 text-[#059669]" />
-            <span>{isKm ? `សវនកម្មរូបភាព AI` : `AI Image Audit`}</span>
+            <Sparkles className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+            <span className="truncate">{isKm ? 'សវនកម្មរូបភាព' : 'Image Audit'}</span>
             {flaggedFoods.length > 0 && (
-              <span className="px-1.5 py-0.2 bg-amber-500 text-white rounded-full text-[9px] font-bold">
+              <span className="px-1.5 py-0.2 bg-amber-500 text-white rounded-full text-[9px] font-bold shrink-0">
                 {flaggedFoods.length}
               </span>
             )}
           </button>
 
           <button
+            type="button"
             onClick={() => setActiveTab('restaurants')}
-            className={`flex items-center gap-1.5 px-3 py-2.5 font-bold whitespace-nowrap border-b-2 transition relative ${
-              activeTab === 'restaurants' ? 'border-[#064E3B] text-[#064E3B] dark:border-emerald-400 dark:text-emerald-400' : 'border-transparent text-stone-400'
+            className={`flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl font-bold border transition relative cursor-pointer ${
+              activeTab === 'restaurants'
+                ? 'bg-[#064E3B] text-white border-[#064E3B] shadow-xs'
+                : 'bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-300 border-stone-200 dark:border-stone-800 hover:border-emerald-500/50'
             }`}
           >
-            <Store className="w-4 h-4" />
-            <span>{isKm ? `ហាងអាហារ (${restaurants.length})` : `Shops (${restaurants.length})`}</span>
+            <Store className="w-3.5 h-3.5 shrink-0" />
+            <span className="truncate">{isKm ? `ហាងអាហារ (${restaurants.length})` : `Shops (${restaurants.length})`}</span>
             {pendingRestaurants.length > 0 && (
-              <span className="w-2 h-2 rounded-full bg-red-500 absolute top-2 right-1" />
+              <span className="w-2 h-2 rounded-full bg-red-500 shrink-0" />
             )}
           </button>
 
           <button
+            type="button"
             onClick={() => setActiveTab('ai_checkins')}
-            className={`flex items-center gap-1.5 px-3 py-2.5 font-bold whitespace-nowrap border-b-2 transition relative ${
-              activeTab === 'ai_checkins' ? 'border-[#064E3B] text-[#064E3B] dark:border-emerald-400 dark:text-emerald-400' : 'border-transparent text-stone-400'
+            className={`flex items-center justify-center gap-1 px-2 py-2 rounded-xl font-bold border transition relative cursor-pointer ${
+              activeTab === 'ai_checkins'
+                ? 'bg-[#064E3B] text-white border-[#064E3B] shadow-xs'
+                : 'bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-300 border-stone-200 dark:border-stone-800 hover:border-emerald-500/50'
             }`}
           >
-            <Camera className="w-4 h-4 text-emerald-500" />
-            <span>{isKm ? `ការឆែកអ៊ីន AI (${aiCheckIns.length})` : `AI Check-ins (${aiCheckIns.length})`}</span>
+            <Camera className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+            <span className="truncate">{isKm ? `ឆែកអ៊ីន AI (${aiCheckIns.length})` : `AI Check-in (${aiCheckIns.length})`}</span>
             {aiCheckIns.filter(c => c.status === 'pending').length > 0 && (
-              <span className="px-1.5 py-0.2 bg-amber-500 text-white rounded-full text-[9px] font-bold">
+              <span className="px-1.5 py-0.2 bg-amber-500 text-white rounded-full text-[9px] font-bold shrink-0">
                 {aiCheckIns.filter(c => c.status === 'pending').length}
               </span>
             )}
           </button>
 
           <button
+            type="button"
             onClick={() => setActiveTab('destinations')}
-            className={`flex items-center gap-1.5 px-3 py-2.5 font-bold whitespace-nowrap border-b-2 transition ${
-              activeTab === 'destinations' ? 'border-[#064E3B] text-[#064E3B] dark:border-emerald-400 dark:text-emerald-400' : 'border-transparent text-stone-400'
+            className={`flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl font-bold border transition cursor-pointer ${
+              activeTab === 'destinations'
+                ? 'bg-[#064E3B] text-white border-[#064E3B] shadow-xs'
+                : 'bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-300 border-stone-200 dark:border-stone-800 hover:border-emerald-500/50'
             }`}
           >
-            <Compass className="w-4 h-4" />
-            <span>{isKm ? `ទេសចរណ៍ (${destinations.length})` : `Destinations (${destinations.length})`}</span>
+            <Compass className="w-3.5 h-3.5 shrink-0" />
+            <span className="truncate">{isKm ? `ទេសចរណ៍ (${destinations.length})` : `Tourism (${destinations.length})`}</span>
           </button>
 
           <button
+            type="button"
             onClick={() => setActiveTab('community')}
-            className={`flex items-center gap-1.5 px-3 py-2.5 font-bold whitespace-nowrap border-b-2 transition ${
-              activeTab === 'community' ? 'border-[#064E3B] text-[#064E3B] dark:border-emerald-400 dark:text-emerald-400' : 'border-transparent text-stone-400'
+            className={`flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl font-bold border transition cursor-pointer ${
+              activeTab === 'community'
+                ? 'bg-[#064E3B] text-white border-[#064E3B] shadow-xs'
+                : 'bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-300 border-stone-200 dark:border-stone-800 hover:border-emerald-500/50'
             }`}
           >
-            <MessageSquare className="w-4 h-4" />
-            <span>{isKm ? `សហគមន៍ (${posts.length})` : `Feed (${posts.length})`}</span>
+            <MessageSquare className="w-3.5 h-3.5 shrink-0" />
+            <span className="truncate">{isKm ? `សហគមន៍ (${posts.length})` : `Feed (${posts.length})`}</span>
           </button>
 
           <button
+            type="button"
             onClick={() => setActiveTab('users')}
-            className={`flex items-center gap-1.5 px-3 py-2.5 font-bold whitespace-nowrap border-b-2 transition ${
-              activeTab === 'users' ? 'border-[#064E3B] text-[#064E3B] dark:border-emerald-400 dark:text-emerald-400' : 'border-transparent text-stone-400'
+            className={`flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl font-bold border transition cursor-pointer ${
+              activeTab === 'users'
+                ? 'bg-[#064E3B] text-white border-[#064E3B] shadow-xs'
+                : 'bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-300 border-stone-200 dark:border-stone-800 hover:border-emerald-500/50'
             }`}
           >
-            <Users className="w-4 h-4" />
-            <span>{isKm ? `អ្នកប្រើ (${users.length})` : `Users (${users.length})`}</span>
+            <Users className="w-3.5 h-3.5 shrink-0" />
+            <span className="truncate">{isKm ? `អ្នកប្រើ (${users.length})` : `Users (${users.length})`}</span>
           </button>
 
           <button
+            type="button"
             onClick={() => setActiveTab('security')}
-            className={`flex items-center gap-1.5 px-3 py-2.5 font-bold whitespace-nowrap border-b-2 transition ${
-              activeTab === 'security' ? 'border-[#064E3B] text-[#064E3B] dark:border-emerald-400 dark:text-emerald-400' : 'border-transparent text-stone-400'
+            className={`flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl font-bold border transition cursor-pointer ${
+              activeTab === 'security'
+                ? 'bg-[#064E3B] text-white border-[#064E3B] shadow-xs'
+                : 'bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-300 border-stone-200 dark:border-stone-800 hover:border-emerald-500/50'
             }`}
           >
-            <ShieldAlert className="w-4 h-4 text-red-600" />
-            <span>{isKm ? 'សន្តិសុខ & Logs' : 'Security'}</span>
+            <ShieldAlert className="w-3.5 h-3.5 text-red-500 shrink-0" />
+            <span className="truncate">{isKm ? 'សន្តិសុខ & Logs' : 'Security'}</span>
           </button>
 
           <button
+            type="button"
             onClick={() => setActiveTab('settings')}
-            className={`flex items-center gap-1.5 px-3 py-2.5 font-bold whitespace-nowrap border-b-2 transition ${
-              activeTab === 'settings' ? 'border-[#064E3B] text-[#064E3B] dark:border-emerald-400 dark:text-emerald-400' : 'border-transparent text-stone-400'
+            className={`flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl font-bold border transition cursor-pointer ${
+              activeTab === 'settings'
+                ? 'bg-[#064E3B] text-white border-[#064E3B] shadow-xs'
+                : 'bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-300 border-stone-200 dark:border-stone-800 hover:border-emerald-500/50'
             }`}
           >
-            <Settings className="w-4 h-4" />
-            <span>{isKm ? 'ការកំណត់' : 'Settings'}</span>
+            <Settings className="w-3.5 h-3.5 shrink-0" />
+            <span className="truncate">{isKm ? 'ការកំណត់' : 'Settings'}</span>
           </button>
         </div>
 
@@ -768,13 +806,13 @@ export const AdminDashboard: React.FC = () => {
                         </div>
 
                         {/* Attached Receipt Image */}
-                        {ticket.receiptImageUrl && (
+                        {(ticket.receiptUrl || (ticket as any).receiptImageUrl) && (
                           <div className="p-2.5 rounded-xl bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-700 flex items-center justify-between gap-3">
                             <div className="flex items-center gap-3">
                               <img
-                                src={ticket.receiptImageUrl}
+                                src={ticket.receiptUrl || (ticket as any).receiptImageUrl}
                                 alt="User Receipt"
-                                onClick={() => setInspectingTicketReceipt(ticket.receiptImageUrl || null)}
+                                onClick={() => setInspectingTicketReceipt(ticket.receiptUrl || (ticket as any).receiptImageUrl || null)}
                                 className="w-16 h-16 object-cover rounded-lg border border-emerald-500 cursor-pointer hover:opacity-90"
                               />
                               <div className="font-khmer text-xs">
@@ -782,17 +820,74 @@ export const AdminDashboard: React.FC = () => {
                                   🧾 {isKm ? 'រូបភាពវិក្កយបត្របង់ប្រាក់ ABA ភ្ជាប់មកជាមួយ' : 'Attached ABA Payment Receipt'}
                                 </p>
                                 <p className="text-[10px] text-stone-500 font-mono">
-                                  {ticket.receiptFileName || 'aba_receipt.png'}
+                                  {(ticket as any).receiptFileName || 'aba_receipt.png'}
                                 </p>
                               </div>
                             </div>
                             <button
                               type="button"
-                              onClick={() => setInspectingTicketReceipt(ticket.receiptImageUrl || null)}
+                              onClick={() => setInspectingTicketReceipt(ticket.receiptUrl || (ticket as any).receiptImageUrl || null)}
                               className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-khmer font-bold text-xs cursor-pointer"
                             >
                               {isKm ? '🔍 មើលរូបពេញ' : '🔍 View Receipt'}
                             </button>
+                          </div>
+                        )}
+
+                        {/* AI & Transaction Payment Verification Report for Admin */}
+                        {ticket.aiVerificationReport && (
+                          <div
+                            className={`p-3 rounded-xl border font-khmer text-xs space-y-2 ${
+                              ticket.aiVerificationReport.canAutoApprove
+                                ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200'
+                                : 'bg-rose-50 dark:bg-rose-950/40 border-rose-300 dark:border-rose-800 text-rose-900 dark:text-rose-200'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between gap-2 font-bold">
+                              <span>
+                                🤖{' '}
+                                {ticket.aiVerificationReport.canAutoApprove
+                                  ? isKm
+                                    ? 'របាយការណ៍ AI & Transaction៖ ផ្ទៀងផ្ទាត់ត្រឹមត្រូវ 100%'
+                                    : 'AI & Transaction Report: 100% Verified'
+                                  : isKm
+                                  ? '🚩 របាយការណ៍ AI៖ រកឃើញព័ត៌មានមិនត្រូវគ្នា (ត្រូវការការត្រួតពិនិត្យផ្ទាល់ពី Admin)'
+                                  : '🚩 AI Report: Mismatch Detected (Flagged for Manual Admin Review)'}
+                              </span>
+                              <span className="font-mono text-[10px] px-2 py-0.5 rounded-full bg-white/80 dark:bg-stone-900 text-stone-800 dark:text-stone-200">
+                                Score: {ticket.aiVerificationReport.confidenceScore}%
+                              </span>
+                            </div>
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 text-[10px]">
+                              <div className="p-1.5 rounded-lg bg-white/80 dark:bg-stone-900/80 border border-black/10">
+                                <span className="text-stone-400 block">អ្នកទទួល (Kim Seng):</span>
+                                <strong>
+                                  {ticket.aiVerificationReport.checks.recipient.passed ? '✅ ' : '❌ '}
+                                  {ticket.aiVerificationReport.checks.recipient.detected}
+                                </strong>
+                              </div>
+                              <div className="p-1.5 rounded-lg bg-white/80 dark:bg-stone-900/80 border border-black/10">
+                                <span className="text-stone-400 block">ទឹកប្រាក់ (Amount):</span>
+                                <strong>
+                                  {ticket.aiVerificationReport.checks.amount.passed ? '✅ ' : '❌ '}
+                                  {ticket.aiVerificationReport.checks.amount.detected}
+                                </strong>
+                              </div>
+                              <div className="p-1.5 rounded-lg bg-white/80 dark:bg-stone-900/80 border border-black/10">
+                                <span className="text-stone-400 block">លេខ Trx. ID:</span>
+                                <strong>
+                                  {ticket.aiVerificationReport.checks.trxId.passed ? '✅ ' : '⚠️ '}
+                                  {ticket.aiVerificationReport.checks.trxId.detected}
+                                </strong>
+                              </div>
+                              <div className="p-1.5 rounded-lg bg-white/80 dark:bg-stone-900/80 border border-black/10">
+                                <span className="text-stone-400 block">កាលបរិច្ឆេទ (Date):</span>
+                                <strong>
+                                  {ticket.aiVerificationReport.checks.date.passed ? '✅ ' : '❌ '}
+                                  {ticket.aiVerificationReport.checks.date.detected}
+                                </strong>
+                              </div>
+                            </div>
                           </div>
                         )}
 
@@ -1054,6 +1149,62 @@ export const AdminDashboard: React.FC = () => {
                           {t.notes && (
                             <div className="text-[11px] text-amber-800 dark:text-amber-200 bg-amber-50 dark:bg-amber-950/50 p-2 rounded-xl border border-amber-200 dark:border-amber-800 font-khmer">
                               📝 <strong>សម្គាល់៖</strong> {t.notes}
+                            </div>
+                          )}
+
+                          {t.aiVerificationReport && (
+                            <div
+                              className={`p-2.5 rounded-xl border font-khmer text-[11px] space-y-1.5 ${
+                                t.aiVerificationReport.canAutoApprove
+                                  ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200'
+                                  : 'bg-rose-50 dark:bg-rose-950/40 border-rose-300 dark:border-rose-800 text-rose-900 dark:text-rose-200'
+                              }`}
+                            >
+                              <div className="font-bold flex items-center justify-between gap-2">
+                                <span>
+                                  🤖{' '}
+                                  {t.aiVerificationReport.canAutoApprove
+                                    ? isKm
+                                      ? 'AI & Transaction Verified (100%)'
+                                      : 'AI & Transaction Verified (100%)'
+                                    : isKm
+                                    ? '🚩 ដាក់សញ្ញាសម្រាប់ Admin ត្រួតពិនិត្យផ្ទាល់ (Flagged for Manual Review)'
+                                    : '🚩 Flagged for Manual Admin Review'}
+                                </span>
+                                <span className="font-mono text-[10px]">
+                                  Score: {t.aiVerificationReport.confidenceScore}%
+                                </span>
+                              </div>
+                              <div className="grid grid-cols-2 sm:grid-cols-4 gap-1 text-[10px]">
+                                <div className="p-1 rounded bg-white/80 dark:bg-stone-900/80">
+                                  <span className="text-stone-400">Kim Seng: </span>
+                                  <strong>
+                                    {t.aiVerificationReport.checks.recipient.passed ? '✅ ' : '❌ '}
+                                    {t.aiVerificationReport.checks.recipient.detected}
+                                  </strong>
+                                </div>
+                                <div className="p-1 rounded bg-white/80 dark:bg-stone-900/80">
+                                  <span className="text-stone-400">Amount: </span>
+                                  <strong>
+                                    {t.aiVerificationReport.checks.amount.passed ? '✅ ' : '❌ '}
+                                    {t.aiVerificationReport.checks.amount.detected}
+                                  </strong>
+                                </div>
+                                <div className="p-1 rounded bg-white/80 dark:bg-stone-900/80">
+                                  <span className="text-stone-400">Trx ID: </span>
+                                  <strong>
+                                    {t.aiVerificationReport.checks.trxId.passed ? '✅ ' : '⚠️ '}
+                                    {t.aiVerificationReport.checks.trxId.detected}
+                                  </strong>
+                                </div>
+                                <div className="p-1 rounded bg-white/80 dark:bg-stone-900/80">
+                                  <span className="text-stone-400">Date: </span>
+                                  <strong>
+                                    {t.aiVerificationReport.checks.date.passed ? '✅ ' : '❌ '}
+                                    {t.aiVerificationReport.checks.date.detected}
+                                  </strong>
+                                </div>
+                              </div>
                             </div>
                           )}
                         </div>
@@ -1850,320 +2001,444 @@ export const AdminDashboard: React.FC = () => {
           )}
 
           {/* USERS TAB */}
-          {activeTab === 'users' && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between gap-3 flex-wrap">
-                <div>
-                  <h3 className="font-bold text-stone-900 dark:text-stone-100 font-khmer text-sm">
-                    {isKm ? `អ្នកប្រើប្រាស់ក្នុងប្រព័ន្ធ (${users.length} គណនី)` : `User Accounts (${users.length})`}
-                  </h3>
-                  <p className="text-[11px] text-stone-500 font-khmer mt-0.5">
-                    {isKm ? 'គ្រប់គ្រងគណនីអ្នកប្រើប្រាស់ និងសមាជិកភាព VIP' : 'Manage registered accounts and VIP memberships'}
-                  </p>
-                </div>
+          {activeTab === 'users' && (() => {
+            const deletableUsers = users.filter(
+              u =>
+                u.role !== 'admin' &&
+                u.id !== 'admin-authorized-single' &&
+                u.username !== 'cheasavuth' &&
+                u.username !== 'admin'
+            );
+            const validSelectedIds = selectedUserIdsForDeletion.filter(id =>
+              deletableUsers.some(u => u.id === id)
+            );
+            const allDeletableSelected =
+              deletableUsers.length > 0 &&
+              validSelectedIds.length === deletableUsers.length;
 
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      // Trigger JSON backup download for admin
-                      const backupObj = {
-                        timestamp: new Date().toISOString(),
-                        appName: 'Khmer Food & Tourism',
-                        version: 'v1.8.0',
-                        users: users,
-                        count: users.length,
-                      };
-                      const blob = new Blob([JSON.stringify(backupObj, null, 2)], { type: 'application/json' });
-                      const url = URL.createObjectURL(blob);
-                      const a = document.createElement('a');
-                      a.href = url;
-                      a.download = `kft_users_backup_${new Date().toISOString().split('T')[0]}.json`;
-                      a.click();
-                      URL.revokeObjectURL(url);
-                      showToast(isKm ? 'បានទាញយក Backup ទិន្នន័យជោគជ័យ!' : 'Backup downloaded successfully!', 'success');
-                    }}
-                    className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-stone-700 hover:bg-slate-200 text-slate-700 dark:text-stone-200 font-khmer text-xs font-bold border border-slate-300 dark:border-stone-600 transition flex items-center gap-1.5 cursor-pointer"
-                  >
-                    <span>📥 {isKm ? 'ទាញយក Backup' : 'Export Backup'}</span>
-                  </button>
+            const toggleSelectUser = (userId: string) => {
+              setSelectedUserIdsForDeletion(prev =>
+                prev.includes(userId)
+                  ? prev.filter(id => id !== userId)
+                  : [...prev, userId]
+              );
+            };
 
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      if (window.confirm(isKm 
-                        ? 'តើអ្នកពិតជាចង់សម្អាត និងលុបគណនីអ្នកប្រើប្រាស់ទាំងអស់ចេញពី Database មែនទេ?\n\n(ទិន្នន័យ Admin, មុខម្ហូប ២០០+, ហាងអាហារ ២២០+, និងតំបន់ទេសចរណ៍ ១២៤+ នឹងត្រូវបានរក្សាទុក ១០០% ដដែល)' 
-                        : 'Are you sure you want to purge all registered users from the database?\n\n(Admin credentials, 200+ foods, 220+ restaurants, and 124 destinations will remain completely intact)')) {
-                        await clearAllRegisteredUsers();
-                      }
-                    }}
-                    className="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 font-khmer text-xs font-bold border border-rose-300 dark:border-rose-800 transition flex items-center gap-1.5 cursor-pointer"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                    <span>{isKm ? '🧹 សម្អាតគណនីទាំងអស់' : 'Purge All Users'}</span>
-                  </button>
-                </div>
-              </div>
+            const toggleSelectAllDeletable = () => {
+              if (allDeletableSelected) {
+                setSelectedUserIdsForDeletion([]);
+              } else {
+                setSelectedUserIdsForDeletion(deletableUsers.map(u => u.id));
+              }
+            };
 
-              {users.length === 0 ? (
-                <div className="p-8 text-center bg-white dark:bg-stone-800 rounded-3xl border border-stone-200 dark:border-stone-700 space-y-3 font-khmer">
-                  <div className="w-14 h-14 rounded-full bg-emerald-100 dark:bg-emerald-950/70 text-[#064E3B] dark:text-emerald-300 mx-auto flex items-center justify-center">
-                    <CheckCircle2 className="w-7 h-7" />
-                  </div>
+            const pendingDeleteTargets: User[] =
+              usersPendingBatchDeletion.length > 0
+                ? usersPendingBatchDeletion
+                : userPendingDeletion
+                ? [userPendingDeletion]
+                : [];
+
+            return (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between gap-3 flex-wrap">
                   <div>
-                    <h4 className="font-bold text-sm text-stone-900 dark:text-stone-100">
-                      {isKm ? 'មូលដ្ឋានទិន្នន័យអ្នកប្រើប្រាស់ត្រូវបានសម្អាតស្អាត (Database Clean)' : 'User Database is Clean'}
-                    </h4>
-                    <p className="text-xs text-stone-500 max-w-sm mx-auto mt-1">
-                      {isKm 
-                        ? 'គ្មានគណនីអ្នកប្រើប្រាស់ទូទៅដែលបានចុះឈ្មោះក្នុងប្រព័ន្ធឡើយ។ គណនីរដ្ឋបាល (Admin), មុខម្ហូប (២០០+), ហាងអាហារ (២២០+) និងតំបន់ទេសចរណ៍ (១២៤+) ត្រូវបានរក្សាទុកសុវត្ថិភាព ១០០%។' 
-                        : 'No registered user accounts exist. System Admin, 200+ foods, 220+ restaurants, and 124 destinations are 100% intact.'}
+                    <h3 className="font-bold text-stone-900 dark:text-stone-100 font-khmer text-sm">
+                      {isKm ? `អ្នកប្រើប្រាស់ក្នុងប្រព័ន្ធ (${users.length} គណនី)` : `User Accounts (${users.length})`}
+                    </h3>
+                    <p className="text-[11px] text-stone-500 font-khmer mt-0.5">
+                      {isKm
+                        ? 'ធីកប្រអប់ (Checkbox) លើគណនីដែលចង់លុប ដើម្បីបង្ហាញប៊ូតុងលុបគណនីដោយសុវត្ថិភាព'
+                        : 'Select user accounts using the checkboxes to reveal the Delete button'}
                     </p>
                   </div>
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-700 text-[11px] font-bold">
-                    <span>✓ Database Verified & Active</span>
+
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {deletableUsers.length > 0 && (
+                      <label className="px-3 py-1.5 rounded-xl bg-white dark:bg-stone-800 hover:bg-stone-100 text-stone-700 dark:text-stone-200 font-khmer text-xs font-bold border border-stone-300 dark:border-stone-600 transition flex items-center gap-2 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={allDeletableSelected}
+                          onChange={toggleSelectAllDeletable}
+                          className="w-4 h-4 rounded accent-rose-600 cursor-pointer"
+                        />
+                        <span>
+                          {isKm
+                            ? `ជ្រើសរើសទាំងអស់ (${deletableUsers.length})`
+                            : `Select All (${deletableUsers.length})`}
+                        </span>
+                      </label>
+                    )}
+
+                    {/* Delete button appears ONLY when at least one account is selected */}
+                    {validSelectedIds.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const targets = deletableUsers.filter(u =>
+                            validSelectedIds.includes(u.id)
+                          );
+                          if (targets.length > 0) {
+                            setUsersPendingBatchDeletion(targets);
+                          }
+                        }}
+                        className="px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-khmer text-xs font-bold border border-rose-700 shadow-md shadow-rose-600/25 transition flex items-center gap-1.5 cursor-pointer animate-fade-in"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        <span>
+                          {isKm
+                            ? `លុបគណនីដែលបានជ្រើសរើស (${validSelectedIds.length})`
+                            : `Delete Selected (${validSelectedIds.length})`}
+                        </span>
+                      </button>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const backupObj = {
+                          timestamp: new Date().toISOString(),
+                          appName: 'Khmer Food & Tourism',
+                          version: 'v1.9.5',
+                          users: users,
+                          count: users.length,
+                        };
+                        const blob = new Blob([JSON.stringify(backupObj, null, 2)], { type: 'application/json' });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `kft_users_backup_${new Date().toISOString().split('T')[0]}.json`;
+                        a.click();
+                        URL.revokeObjectURL(url);
+                        showToast(isKm ? 'បានទាញយក Backup ទិន្នន័យជោគជ័យ!' : 'Backup downloaded successfully!', 'success');
+                      }}
+                      className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-stone-700 hover:bg-slate-200 text-slate-700 dark:text-stone-200 font-khmer text-xs font-bold border border-slate-300 dark:border-stone-600 transition flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <span>📥 {isKm ? 'ទាញយក Backup' : 'Export Backup'}</span>
+                    </button>
                   </div>
                 </div>
-              ) : (
-                <div className="space-y-2 max-h-[52vh] overflow-y-auto no-scrollbar">
-                  {users.map((u) => {
-                    const isSystemAdmin =
-                      u.role === 'admin' ||
-                      u.id === 'admin-authorized-single' ||
-                      u.username === 'cheasavuth' ||
-                      u.username === 'admin';
-                    const userCustomRestsCount = restaurants.filter(
-                      r => !isSeedRestaurantId(r.id) && r.ownerId === u.id
-                    ).length;
-                    const userPostsCount = posts.filter(p => p.authorId === u.id).length;
-                    const userTxnsCount = transactions.filter(t => t.ownerId === u.id).length;
 
-                    return (
-                      <div key={u.id} className="p-3.5 bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                        <div className="flex items-start sm:items-center gap-3 min-w-0">
-                          <img src={u.avatar} alt="avatar" className="w-11 h-11 rounded-full object-cover border border-stone-200 dark:border-stone-600 shrink-0" />
-                          <div className="min-w-0">
-                            <h4 className="font-bold text-stone-900 dark:text-stone-100 font-khmer flex items-center gap-2 flex-wrap">
-                              <span>{u.name}</span>
-                              <code className="text-[10px] font-mono text-stone-400">({u.id})</code>
-                            </h4>
-                            <p className="text-[11px] text-stone-500 dark:text-stone-400 truncate">
-                              {u.email} • 📞 {u.phone || 'N/A'}
-                            </p>
-                            {(u.membershipTier === 'premium_vip' || u.subscriptionStatus === 'active' || u.vipPlanType || u.vipExpiryDate) && (
-                              <p className="text-[10px] text-emerald-700 dark:text-emerald-400 font-khmer mt-0.5">
-                                👑 គម្រោង៖ <strong>{u.vipPlanType === 'annual' ? 'VIP 90 Days ($4.99)' : 'VIP 30 Days ($2.99)'}</strong>
-                                {u.vipActivatedAt && ` • ថ្ងៃបើក៖ ${new Date(u.vipActivatedAt).toLocaleDateString()}`}
-                                {(u.vipExpiryDate || u.subscriptionExpiryDate) && ` • ថ្ងៃផុតកំណត់៖ ${new Date((u.vipExpiryDate || u.subscriptionExpiryDate)!).toLocaleDateString()}`}
-                              </p>
+                {users.length === 0 ? (
+                  <div className="p-8 text-center bg-white dark:bg-stone-800 rounded-3xl border border-stone-200 dark:border-stone-700 space-y-3 font-khmer">
+                    <div className="w-14 h-14 rounded-full bg-emerald-100 dark:bg-emerald-950/70 text-[#064E3B] dark:text-emerald-300 mx-auto flex items-center justify-center">
+                      <CheckCircle2 className="w-7 h-7" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-sm text-stone-900 dark:text-stone-100">
+                        {isKm ? 'មូលដ្ឋានទិន្នន័យអ្នកប្រើប្រាស់ត្រូវបានសម្អាតស្អាត (Database Clean)' : 'User Database is Clean'}
+                      </h4>
+                      <p className="text-xs text-stone-500 max-w-sm mx-auto mt-1">
+                        {isKm 
+                          ? 'គ្មានគណនីអ្នកប្រើប្រាស់ទូទៅដែលបានចុះឈ្មោះក្នុងប្រព័ន្ធឡើយ។ គណនីរដ្ឋបាល (Admin), មុខម្ហូប (២០០+), ហាងអាហារ (២២០+) និងតំបន់ទេសចរណ៍ (១២៤+) ត្រូវបានរក្សាទុកសុវត្ថិភាព ១០០%។' 
+                          : 'No registered user accounts exist. System Admin, 200+ foods, 220+ restaurants, and 124 destinations are 100% intact.'}
+                      </p>
+                    </div>
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-700 text-[11px] font-bold">
+                      <span>✓ Database Verified & Active</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-2 max-h-[52vh] overflow-y-auto no-scrollbar">
+                    {users.map((u) => {
+                      const isSystemAdmin =
+                        u.role === 'admin' ||
+                        u.id === 'admin-authorized-single' ||
+                        u.username === 'cheasavuth' ||
+                        u.username === 'admin';
+                      const isSelected = !isSystemAdmin && validSelectedIds.includes(u.id);
+                      const userCustomRestsCount = restaurants.filter(
+                        r => !isSeedRestaurantId(r.id) && r.ownerId === u.id
+                      ).length;
+                      const userPostsCount = posts.filter(p => p.authorId === u.id).length;
+                      const userTxnsCount = transactions.filter(t => t.ownerId === u.id).length;
+
+                      return (
+                        <div
+                          key={u.id}
+                          onClick={() => {
+                            if (!isSystemAdmin) toggleSelectUser(u.id);
+                          }}
+                          className={`p-3.5 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition ${
+                            isSelected
+                              ? 'bg-rose-50/70 dark:bg-rose-950/30 border-rose-400 dark:border-rose-700 shadow-xs'
+                              : 'bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-700'
+                          } ${!isSystemAdmin ? 'cursor-pointer' : ''}`}
+                        >
+                          <div className="flex items-start sm:items-center gap-3 min-w-0">
+                            {!isSystemAdmin ? (
+                              <input
+                                type="checkbox"
+                                checked={isSelected}
+                                onChange={() => toggleSelectUser(u.id)}
+                                onClick={e => e.stopPropagation()}
+                                title={isKm ? 'ជ្រើសរើសគណនីនេះដើម្បីលុប' : 'Select account for deletion'}
+                                className="w-4 h-4 mt-1 sm:mt-0 rounded accent-rose-600 cursor-pointer shrink-0"
+                              />
+                            ) : (
+                              <div className="w-4 h-4 shrink-0 flex items-center justify-center" title="System Admin (Protected)">
+                                <Shield className="w-3.5 h-3.5 text-emerald-600" />
+                              </div>
                             )}
-                            <div className="flex items-center gap-2 flex-wrap mt-1 text-[10px] text-stone-500 font-khmer">
-                              <span>🏪 ហាងផ្ទាល់ខ្លួន៖ <strong>{userCustomRestsCount}</strong></span>
-                              <span>•</span>
-                              <span>📝 បង្ហោះ៖ <strong>{userPostsCount}</strong></span>
-                              <span>•</span>
-                              <span>💳 ប្រតិបត្តិការ៖ <strong>{userTxnsCount}</strong></span>
+                            <img src={u.avatar} alt="avatar" className="w-11 h-11 rounded-full object-cover border border-stone-200 dark:border-stone-600 shrink-0" />
+                            <div className="min-w-0">
+                              <h4 className="font-bold text-stone-900 dark:text-stone-100 font-khmer flex items-center gap-2 flex-wrap">
+                                <span>{u.name}</span>
+                                <code className="text-[10px] font-mono text-stone-400">({u.id})</code>
+                              </h4>
+                              <p className="text-[11px] text-stone-500 dark:text-stone-400 truncate">
+                                {u.email} • 📞 {u.phone || 'N/A'}
+                              </p>
+                              {(u.membershipTier === 'premium_vip' || u.subscriptionStatus === 'active' || (u as any).vipPlanType || (u as any).vipExpiryDate) && (
+                                <p className="text-[10px] text-emerald-700 dark:text-emerald-400 font-khmer mt-0.5">
+                                  👑 គម្រោង៖ <strong>{(u as any).vipPlanType === 'annual' ? 'VIP 90 Days ($4.99)' : 'VIP 30 Days ($2.99)'}</strong>
+                                  {(u as any).vipActivatedAt && ` • ថ្ងៃបើក៖ ${new Date((u as any).vipActivatedAt).toLocaleDateString()}`}
+                                  {((u as any).vipExpiryDate || u.subscriptionExpiryDate) && ` • ថ្ងៃផុតកំណត់៖ ${new Date(((u as any).vipExpiryDate || u.subscriptionExpiryDate)!).toLocaleDateString()}`}
+                                </p>
+                              )}
+                              <div className="flex items-center gap-2 flex-wrap mt-1 text-[10px] text-stone-500 font-khmer">
+                                <span>🏪 ហាងផ្ទាល់ខ្លួន៖ <strong>{userCustomRestsCount}</strong></span>
+                                <span>•</span>
+                                <span>📝 បង្ហោះ៖ <strong>{userPostsCount}</strong></span>
+                                <span>•</span>
+                                <span>💳 ប្រតិបត្តិការ៖ <strong>{userTxnsCount}</strong></span>
+                              </div>
                             </div>
                           </div>
+
+                          <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
+                            <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold font-mono ${
+                              isSystemAdmin
+                                ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300'
+                                : u.membershipTier === 'premium_vip' || u.subscriptionStatus === 'active'
+                                  ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300'
+                                  : 'bg-stone-100 dark:bg-stone-700 text-stone-700 dark:text-stone-300'
+                            }`}>
+                              {u.membershipTier === 'premium_vip' && !isSystemAdmin ? 'VIP' : u.role}
+                            </span>
+
+                            {!isSystemAdmin && isSelected && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setUsersPendingBatchDeletion([u]);
+                                }}
+                                className="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white border border-rose-700 font-khmer text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-xs"
+                                title={isKm ? 'លុបគណនី និងទិន្នន័យពាក់ព័ន្ធទាំងអស់ជាអចិន្ត្រៃយ៍' : 'Permanently delete user account and all associated data'}
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                                <span>{isKm ? 'លុបគណនី' : 'Delete'}</span>
+                              </button>
+                            )}
+                          </div>
                         </div>
-
-                        <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
-                          <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold font-mono ${
-                            isSystemAdmin
-                              ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300'
-                              : u.membershipTier === 'premium_vip' || u.subscriptionStatus === 'active'
-                                ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300'
-                                : 'bg-stone-100 dark:bg-stone-700 text-stone-700 dark:text-stone-300'
-                          }`}>
-                            {u.membershipTier === 'premium_vip' && !isSystemAdmin ? 'VIP' : u.role}
-                          </span>
-
-                          {!isSystemAdmin && (
-                            <button
-                              type="button"
-                              onClick={() => setUserPendingDeletion(u)}
-                              className="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white dark:bg-rose-950/60 dark:hover:bg-rose-600 dark:text-rose-400 dark:hover:text-white border border-rose-200 dark:border-rose-800 font-khmer text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
-                              title={isKm ? 'លុបគណនី និងទិន្នន័យពាក់ព័ន្ធទាំងអស់ជាអចិន្ត្រៃយ៍' : 'Permanently delete user account and all associated data'}
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                              <span>{isKm ? 'លុបគណនី' : 'Delete Account'}</span>
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-
-              {/* Permanently Deleted / Blocked Users Registry */}
-              {deletedUsers && deletedUsers.length > 0 && (
-                <div className="mt-4 p-4 rounded-2xl bg-rose-50/60 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/50 space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-rose-700 dark:text-rose-400 font-khmer font-bold text-xs">
-                      <Ban className="w-4 h-4 shrink-0" />
-                      <span>
-                        {isKm
-                          ? `បញ្ជីគណនីដែលត្រូវបានលុបជាអចិន្ត្រៃយ៍ និងបិទសិទ្ធិចូលប្រើ (${deletedUsers.length})`
-                          : `Permanently Deleted & Blocked Accounts (${deletedUsers.length})`}
-                      </span>
-                    </div>
+                      );
+                    })}
                   </div>
-                  <div className="space-y-1.5 max-h-36 overflow-y-auto no-scrollbar">
-                    {deletedUsers.map(d => (
-                      <div
-                        key={d.id}
-                        className="px-3 py-2 rounded-xl bg-white/80 dark:bg-stone-900/60 border border-rose-200/70 dark:border-rose-900/40 flex items-center justify-between gap-2 text-[11px] font-khmer"
-                      >
-                        <div className="min-w-0">
-                          <span className="font-bold text-stone-800 dark:text-stone-200">{d.name}</span>{' '}
-                          <span className="text-stone-400 font-mono text-[10px]">({d.email || d.phone || d.id})</span>
-                        </div>
-                        <span className="px-2 py-0.5 rounded-full bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-300 font-bold text-[10px] shrink-0">
-                          🚫 {isKm ? 'បិទការចូលគណនីជាអចិន្ត្រៃយ៍' : 'Login Blocked'}
+                )}
+
+                {/* Permanently Deleted / Blocked Users Registry */}
+                {deletedUsers && deletedUsers.length > 0 && (
+                  <div className="mt-4 p-4 rounded-2xl bg-rose-50/60 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/50 space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-rose-700 dark:text-rose-400 font-khmer font-bold text-xs">
+                        <Ban className="w-4 h-4 shrink-0" />
+                        <span>
+                          {isKm
+                            ? `បញ្ជីគណនីដែលត្រូវបានលុបជាអចិន្ត្រៃយ៍ និងបិទសិទ្ធិចូលប្រើ (${deletedUsers.length})`
+                            : `Permanently Deleted & Blocked Accounts (${deletedUsers.length})`}
                         </span>
                       </div>
-                    ))}
+                    </div>
+                    <div className="space-y-1.5 max-h-36 overflow-y-auto no-scrollbar">
+                      {deletedUsers.map(d => (
+                        <div
+                          key={d.id}
+                          className="px-3 py-2 rounded-xl bg-white/80 dark:bg-stone-900/60 border border-rose-200/70 dark:border-rose-900/40 flex items-center justify-between gap-2 text-[11px] font-khmer"
+                        >
+                          <div className="min-w-0">
+                            <span className="font-bold text-stone-800 dark:text-stone-200">{d.name}</span>{' '}
+                            <span className="text-stone-400 font-mono text-[10px]">({d.email || d.phone || d.id})</span>
+                          </div>
+                          <span className="px-2 py-0.5 rounded-full bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-300 font-bold text-[10px] shrink-0">
+                            🚫 {isKm ? 'បិទការចូលគណនីជាអចិន្ត្រៃយ៍' : 'Login Blocked'}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {/* Confirmation Modal before Permanent User Account Deletion */}
-              {userPendingDeletion && (() => {
-                const target = userPendingDeletion;
-                const targetRestsCount = restaurants.filter(r => !isSeedRestaurantId(r.id) && r.ownerId === target.id).length;
-                const targetPostsCount = posts.filter(p => p.authorId === target.id).length;
-                const targetTxnsCount = transactions.filter(t => t.ownerId === target.id).length;
-                const targetTicketsCount = supportTickets.filter(
-                  t => t.userId === target.id || (target.email && t.userEmail?.toLowerCase() === target.email.toLowerCase())
-                ).length;
+                {/* Confirmation Modal before Permanent User Account Deletion */}
+                {pendingDeleteTargets.length > 0 && (() => {
+                  const targetIds = new Set(pendingDeleteTargets.map(t => t.id));
+                  const targetEmails = new Set(
+                    pendingDeleteTargets.map(t => (t.email || '').toLowerCase()).filter(Boolean)
+                  );
+                  const targetRestsCount = restaurants.filter(
+                    r => !isSeedRestaurantId(r.id) && r.ownerId && targetIds.has(r.ownerId)
+                  ).length;
+                  const targetPostsCount = posts.filter(p => targetIds.has(p.authorId)).length;
+                  const targetTxnsCount = transactions.filter(
+                    t => (t.ownerId && targetIds.has(t.ownerId)) || (t.userId && targetIds.has(t.userId))
+                  ).length;
+                  const targetTicketsCount = supportTickets.filter(
+                    t =>
+                      targetIds.has(t.userId) ||
+                      (t.userEmail && targetEmails.has(t.userEmail.toLowerCase()))
+                  ).length;
 
-                return (
-                  <div
-                    className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in"
-                    onClick={() => !isDeletingUser && setUserPendingDeletion(null)}
-                  >
+                  const closeDeletionModal = () => {
+                    if (isDeletingUser) return;
+                    setUserPendingDeletion(null);
+                    setUsersPendingBatchDeletion([]);
+                  };
+
+                  return (
                     <div
-                      className="w-full max-w-md bg-white dark:bg-stone-900 rounded-3xl border-2 border-rose-500/40 shadow-2xl overflow-hidden font-khmer"
-                      onClick={e => e.stopPropagation()}
+                      className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in"
+                      onClick={closeDeletionModal}
                     >
-                      {/* Warning Header */}
-                      <div className="p-5 bg-gradient-to-br from-rose-600 to-red-800 text-white flex items-center gap-3.5">
-                        <div className="w-12 h-12 rounded-2xl bg-white/15 border border-white/25 flex items-center justify-center shrink-0">
-                          <AlertTriangle className="w-6 h-6 text-amber-300" />
-                        </div>
-                        <div>
-                          <h3 className="font-bold text-base leading-snug">
-                            {isKm ? 'បញ្ជាក់ការលុបគណនីជាអចិន្ត្រៃយ៍' : 'Confirm Permanent Account Deletion'}
-                          </h3>
-                          <p className="text-[11px] text-rose-100 mt-0.5">
-                            {isKm ? 'សកម្មភាពនេះមិនអាចត្រឡប់ក្រោយវិញបានឡើយ!' : 'This action is permanent and cannot be undone!'}
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Modal Content */}
-                      <div className="p-5 space-y-4">
-                        {/* Target User Summary Card */}
-                        <div className="p-3.5 rounded-2xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 flex items-center gap-3">
-                          <img
-                            src={target.avatar}
-                            alt={target.name}
-                            className="w-12 h-12 rounded-full object-cover border-2 border-rose-400 shrink-0"
-                          />
-                          <div className="min-w-0 flex-1">
-                            <h4 className="font-bold text-sm text-stone-900 dark:text-stone-100 truncate">
-                              {target.name}
-                            </h4>
-                            <p className="text-xs text-stone-500 dark:text-stone-400 truncate">
-                              {target.email} {target.phone ? `• 📞 ${target.phone}` : ''}
-                            </p>
-                            <p className="text-[10px] font-mono text-stone-400 mt-0.5">
-                              ID: {target.id} • Role: {target.role.toUpperCase()}
+                      <div
+                        className="w-full max-w-md bg-white dark:bg-stone-900 rounded-3xl border-2 border-rose-500/40 shadow-2xl overflow-hidden font-khmer"
+                        onClick={e => e.stopPropagation()}
+                      >
+                        {/* Warning Header */}
+                        <div className="p-5 bg-gradient-to-br from-rose-600 to-red-800 text-white flex items-center gap-3.5">
+                          <div className="w-12 h-12 rounded-2xl bg-white/15 border border-white/25 flex items-center justify-center shrink-0">
+                            <AlertTriangle className="w-6 h-6 text-amber-300" />
+                          </div>
+                          <div>
+                            <h3 className="font-bold text-base leading-snug">
+                              {isKm
+                                ? `បញ្ជាក់ការលុបគណនីជាអចិន្ត្រៃយ៍ (${pendingDeleteTargets.length})`
+                                : `Confirm Permanent Deletion (${pendingDeleteTargets.length})`}
+                            </h3>
+                            <p className="text-[11px] text-rose-100 mt-0.5">
+                              {isKm ? 'សកម្មភាពនេះមិនអាចត្រឡប់ក្រោយវិញបានឡើយ!' : 'This action is permanent and cannot be undone!'}
                             </p>
                           </div>
                         </div>
 
-                        {/* Associated Data to be Deleted */}
-                        <div className="p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/70 space-y-2 text-xs">
-                          <p className="font-bold text-rose-800 dark:text-rose-300">
-                            {isKm
-                              ? 'តើអ្នកពិតជាចង់លុបគណនីនេះ និងទិន្នន័យពាក់ព័ន្ធទាំងអស់មែនទេ?'
-                              : 'Are you sure you want to permanently delete this account and all associated data?'}
-                          </p>
-                          <ul className="space-y-1.5 text-[11px] text-stone-700 dark:text-stone-300 pl-4 list-disc">
-                            <li>
-                              {isKm
-                                ? 'គណនីអ្នកប្រើប្រាស់ ព័ត៌មានផ្ទាល់ខ្លួន និងសមាជិកភាព VIP'
-                                : 'User profile, credentials & VIP membership status'}
-                            </li>
-                            <li>
-                              {isKm
-                                ? `ហាងអាហារដែលបានបង្កើតដោយគណនីនេះ (${targetRestsCount} ហាង)`
-                                : `Custom restaurants created by this user (${targetRestsCount} shops)`}
-                            </li>
-                            <li>
-                              {isKm
-                                ? `ការបង្ហោះក្នុងសហគមន៍ និងមតិយោបល់ (${targetPostsCount} ប្រកាស)`
-                                : `Community posts, likes & comments (${targetPostsCount} posts)`}
-                            </li>
-                            <li>
-                              {isKm
-                                ? `ប្រតិបត្តិការទូទាត់ប្រាក់ និងវិក្កយបត្រ (${targetTxnsCount} ប្រតិបត្តិការ)`
-                                : `Payment transactions & receipts (${targetTxnsCount} records)`}
-                            </li>
-                            <li>
-                              {isKm
-                                ? `សំណើជំនួយ (${targetTicketsCount}) បញ្ជីចំណូលចិត្ត និងផែនការធ្វើដំណើរ`
-                                : `Support tickets (${targetTicketsCount}), wishlists & saved trip plans`}
-                            </li>
-                            <li className="font-bold text-rose-600 dark:text-rose-400">
-                              {isKm
-                                ? '🚫 អ្នកប្រើប្រាស់នេះនឹងត្រូវបានបិទសិទ្ធិមិនឱ្យចូលគណនី (Log in) បានទៀតឡើយ!'
-                                : '🚫 Deleted user will be permanently blocked from logging in again!'}
-                            </li>
-                          </ul>
-                        </div>
+                        {/* Modal Content */}
+                        <div className="p-5 space-y-4">
+                          {/* Target Users List */}
+                          <div className="max-h-36 overflow-y-auto space-y-2 pr-1">
+                            {pendingDeleteTargets.map(target => (
+                              <div
+                                key={target.id}
+                                className="p-3 rounded-2xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 flex items-center gap-3"
+                              >
+                                <img
+                                  src={target.avatar}
+                                  alt={target.name}
+                                  className="w-10 h-10 rounded-full object-cover border-2 border-rose-400 shrink-0"
+                                />
+                                <div className="min-w-0 flex-1">
+                                  <h4 className="font-bold text-xs text-stone-900 dark:text-stone-100 truncate">
+                                    {target.name}
+                                  </h4>
+                                  <p className="text-[11px] text-stone-500 dark:text-stone-400 truncate">
+                                    {target.email} {target.phone ? `• 📞 ${target.phone}` : ''}
+                                  </p>
+                                  <p className="text-[10px] font-mono text-stone-400">
+                                    ID: {target.id}
+                                  </p>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
 
-                        {/* Action Buttons */}
-                        <div className="flex items-center gap-2.5 pt-1">
-                          <button
-                            type="button"
-                            disabled={isDeletingUser}
-                            onClick={() => setUserPendingDeletion(null)}
-                            className="flex-1 py-2.5 px-4 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200 font-bold text-xs transition cursor-pointer"
-                          >
-                            {isKm ? 'បោះបង់ (Cancel)' : 'Cancel'}
-                          </button>
-                          <button
-                            type="button"
-                            disabled={isDeletingUser}
-                            onClick={async () => {
-                              setIsDeletingUser(true);
-                              try {
-                                await deleteUserAccount(target.id);
-                                setUserPendingDeletion(null);
-                              } finally {
-                                setIsDeletingUser(false);
-                              }
-                            }}
-                            className="flex-1 py-2.5 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-lg shadow-rose-600/25 transition flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                            <span>
-                              {isDeletingUser
-                                ? (isKm ? 'កំពុងលុប...' : 'Deleting...')
-                                : (isKm ? 'យល់ព្រមលុបជាអចិន្ត្រៃយ៍' : 'Permanently Delete')}
-                            </span>
-                          </button>
+                          {/* Associated Data to be Deleted */}
+                          <div className="p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/70 space-y-2 text-xs">
+                            <p className="font-bold text-rose-800 dark:text-rose-300">
+                              {isKm
+                                ? `តើអ្នកពិតជាចង់លុបគណនីទាំង ${pendingDeleteTargets.length} នេះ និងទិន្នន័យពាក់ព័ន្ធទាំងអស់មែនទេ?`
+                                : `Are you sure you want to permanently delete ${pendingDeleteTargets.length} selected account(s) and all associated data?`}
+                            </p>
+                            <ul className="space-y-1.5 text-[11px] text-stone-700 dark:text-stone-300 pl-4 list-disc">
+                              <li>
+                                {isKm
+                                  ? 'គណនីអ្នកប្រើប្រាស់ ព័ត៌មានផ្ទាល់ខ្លួន និងសមាជិកភាព VIP'
+                                  : 'User profile, credentials & VIP membership status'}
+                              </li>
+                              <li>
+                                {isKm
+                                  ? `ហាងអាហារដែលបានបង្កើតដោយគណនីនេះ (${targetRestsCount} ហាង)`
+                                  : `Custom restaurants created by selected user(s) (${targetRestsCount} shops)`}
+                              </li>
+                              <li>
+                                {isKm
+                                  ? `ការបង្ហោះក្នុងសហគមន៍ និងមតិយោបល់ (${targetPostsCount} ប្រកាស)`
+                                  : `Community posts, likes & comments (${targetPostsCount} posts)`}
+                              </li>
+                              <li>
+                                {isKm
+                                  ? `ប្រតិបត្តិការទូទាត់ប្រាក់ និងវិក្កយបត្រ (${targetTxnsCount} ប្រតិបត្តិការ)`
+                                  : `Payment transactions & receipts (${targetTxnsCount} records)`}
+                              </li>
+                              <li>
+                                {isKm
+                                  ? `សំណើជំនួយ (${targetTicketsCount}) បញ្ជីចំណូលចិត្ត និងផែនការធ្វើដំណើរ`
+                                  : `Support tickets (${targetTicketsCount}), wishlists & saved trip plans`}
+                              </li>
+                              <li className="font-bold text-rose-600 dark:text-rose-400">
+                                {isKm
+                                  ? '🚫 គណនីដែលត្រូវបានលុបនឹងត្រូវបិទសិទ្ធិមិនឱ្យចូលគណនី (Log in) បានទៀតឡើយ!'
+                                  : '🚫 Deleted accounts will be permanently blocked from logging in again!'}
+                              </li>
+                            </ul>
+                          </div>
+
+                          {/* Action Buttons */}
+                          <div className="flex items-center gap-2.5 pt-1">
+                            <button
+                              type="button"
+                              disabled={isDeletingUser}
+                              onClick={closeDeletionModal}
+                              className="flex-1 py-2.5 px-4 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200 font-bold text-xs transition cursor-pointer"
+                            >
+                              {isKm ? 'បោះបង់ (Cancel)' : 'Cancel'}
+                            </button>
+                            <button
+                              type="button"
+                              disabled={isDeletingUser}
+                              onClick={async () => {
+                                setIsDeletingUser(true);
+                                try {
+                                  for (const target of pendingDeleteTargets) {
+                                    await deleteUserAccount(target.id);
+                                  }
+                                  setSelectedUserIdsForDeletion(prev =>
+                                    prev.filter(id => !targetIds.has(id))
+                                  );
+                                  setUserPendingDeletion(null);
+                                  setUsersPendingBatchDeletion([]);
+                                } finally {
+                                  setIsDeletingUser(false);
+                                }
+                              }}
+                              className="flex-1 py-2.5 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-lg shadow-rose-600/25 transition flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                              <span>
+                                {isDeletingUser
+                                  ? (isKm ? 'កំពុងលុប...' : 'Deleting...')
+                                  : (isKm
+                                      ? `យល់ព្រមលុបជាអចិន្ត្រៃយ៍ (${pendingDeleteTargets.length})`
+                                      : `Permanently Delete (${pendingDeleteTargets.length})`)}
+                              </span>
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })()}
-            </div>
-          )}
+                  );
+                })()}
+              </div>
+            );
+          })()}
 
           {/* SECURITY & AUDIT LOGS TAB */}
           {activeTab === 'security' && (
