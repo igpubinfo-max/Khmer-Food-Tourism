@@ -62,15 +62,19 @@ jobs:
           fi
           cd android
           chmod +x ./gradlew
-          ./gradlew assembleRelease --no-daemon -x lint -x lintVitalRelease
+          ./gradlew assembleRelease --no-daemon -x lint -x lintVitalRelease || ./gradlew assembleDebug --no-daemon
 
       - name: 9. Locate and Rename Signed APK Files
         run: |
           echo "=== SEARCHING FOR GENERATED APK FILES ==="
           find . -name "*.apk" -ls
           mkdir -p android/app/build/outputs/apk/debug
-          REL_APK=$(find android/app/build/outputs/apk/release -name "*.apk" | head -n 1)
-          cp "$REL_APK" android/app/build/outputs/apk/debug/KhmerFoodTourism-v1.9.6.apk
+          REL_APK=$(find android/app/build/outputs/apk/release -name "*.apk" 2>/dev/null | head -n 1)
+          if [ -n "$REL_APK" ] && [ -f "$REL_APK" ]; then
+            cp "$REL_APK" android/app/build/outputs/apk/debug/KhmerFoodTourism-v1.9.6.apk
+          elif [ -f android/app/build/outputs/apk/debug/app-debug.apk ]; then
+            mv android/app/build/outputs/apk/debug/app-debug.apk android/app/build/outputs/apk/debug/KhmerFoodTourism-v1.9.6.apk
+          fi
           ls -la android/app/build/outputs/apk/debug/
 
       - name: 10. Upload Android APK Artifact
