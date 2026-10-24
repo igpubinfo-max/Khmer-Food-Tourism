@@ -13,7 +13,7 @@
  * - If not configured yet, safely falls back to local device storage without errors.
  */
 
-import { User, Restaurant, TouristDestination, RegistrationTransaction, isSeedRestaurantId } from '../types';
+import { User, Restaurant, TouristDestination, RegistrationTransaction, DeletedUserRecord, isSeedRestaurantId } from '../types';
 
 export interface CloudApiConfig {
   supabaseUrl: string;
@@ -272,6 +272,7 @@ export async function pullCloudDocument<T>(key: string): Promise<T | null> {
  */
 export async function syncAllAppDataWithSupabase(localState: {
   users: User[];
+  deletedUsers?: DeletedUserRecord[];
   transactions: RegistrationTransaction[];
   customRestaurants: Restaurant[];
   customDestinations?: TouristDestination[];
@@ -279,6 +280,7 @@ export async function syncAllAppDataWithSupabase(localState: {
 }): Promise<{
   synced: boolean;
   mergedUsers: User[];
+  mergedDeletedUsers: DeletedUserRecord[];
   mergedTransactions: RegistrationTransaction[];
   mergedCustomRestaurants: Restaurant[];
   mergedPaymentProofsVault: Record<string, any>;
@@ -287,6 +289,7 @@ export async function syncAllAppDataWithSupabase(localState: {
     return {
       synced: false,
       mergedUsers: localState.users,
+      mergedDeletedUsers: localState.deletedUsers || [],
       mergedTransactions: localState.transactions,
       mergedCustomRestaurants: localState.customRestaurants,
       mergedPaymentProofsVault: localState.paymentProofsVault,
@@ -295,22 +298,51 @@ export async function syncAllAppDataWithSupabase(localState: {
 
   try {
     // 1. Pull existing cloud records
-    const [cloudUsers, cloudTxns, cloudRests, cloudProofs] = await Promise.all([
+    const [cloudUsers, cloudDeletedUsers, cloudTxns, cloudRests, cloudProofs] = await Promise.all([
       pullCloudDocument<User[]>('kft_cloud_users_v1'),
+      pullCloudDocument<DeletedUserRecord[]>('kft_cloud_deleted_users_v1'),
       pullCloudDocument<RegistrationTransaction[]>('kft_cloud_transactions_v1'),
       pullCloudDocument<Restaurant[]>('kft_cloud_custom_restaurants_v1'),
       pullCloudDocument<Record<string, any>>('kft_cloud_payment_proofs_v1'),
     ]);
 
-    // 2. Merge Users by ID (prefer VIP active / most recent status)
+    // 1b. Merge Deleted Users Registry (Permanent Blacklist)
+    const deletedMap = new Map<string, DeletedUserRecord>();
+    if (Array.isArray(cloudDeletedUsers)) {
+      for (const d of cloudDeletedUsers) {
+        if (d && d.id) deletedMap.set(d.id, d);
+      }
+    }
+    if (Array.isArray(localState.deletedUsers)) {
+      for (const d of localState.deletedUsers) {
+        if (d && d.id) deletedMap.set(d.id, { ...(deletedMap.get(d.id) || {}), ...d });
+      }
+    }
+    const mergedDeletedUsers = Array.from(deletedMap.values());
+    const deletedIds = new Set(mergedDeletedUsers.map(d => d.id));
+    const deletedEmails = new Set(mergedDeletedUsers.map(d => (d.email || '').toLowerCase().trim()).filter(Boolean));
+    const deletedPhones = new Set(mergedDeletedUsers.map(d => (d.phone || '').replace(/[\s-+]/g, '')).filter(p => p.length >= 7));
+
+    const isAccountDeleted = (u: Partial<User> | undefined | null): boolean => {
+      if (!u) return false;
+      if (u.id && deletedIds.has(u.id)) return true;
+      if (u.email && deletedEmails.has(u.email.toLowerCase().trim())) return true;
+      if (u.phone) {
+        const cleanP = u.phone.replace(/[\s-+]/g, '');
+        if (cleanP.length >= 7 && deletedPhones.has(cleanP)) return true;
+      }
+      return false;
+    };
+
+    // 2. Merge Users by ID (prefer VIP active / most recent status, strictly excluding deleted users)
     const userMap = new Map<string, User>();
     if (Array.isArray(cloudUsers)) {
       for (const u of cloudUsers) {
-        if (u && u.id) userMap.set(u.id, u);
+        if (u && u.id && !isAccountDeleted(u)) userMap.set(u.id, u);
       }
     }
     for (const u of localState.users) {
-      if (!u || !u.id) continue;
+      if (!u || !u.id || isAccountDeleted(u)) continue;
       const existing = userMap.get(u.id);
       if (!existing) {
         userMap.set(u.id, u);
@@ -327,15 +359,15 @@ export async function syncAllAppDataWithSupabase(localState: {
     }
     const mergedUsers = Array.from(userMap.values());
 
-    // 3. Merge Transactions by ID
+    // 3. Merge Transactions by ID (excluding transactions of deleted users)
     const txnMap = new Map<string, RegistrationTransaction>();
     if (Array.isArray(cloudTxns)) {
       for (const t of cloudTxns) {
-        if (t && t.id) txnMap.set(t.id, t);
+        if (t && t.id && (!t.ownerId || !deletedIds.has(t.ownerId))) txnMap.set(t.id, t);
       }
     }
     for (const t of localState.transactions) {
-      if (!t || !t.id) continue;
+      if (!t || !t.id || (t.ownerId && deletedIds.has(t.ownerId))) continue;
       const existing = txnMap.get(t.id);
       if (!existing) {
         txnMap.set(t.id, t);
@@ -352,17 +384,17 @@ export async function syncAllAppDataWithSupabase(localState: {
       (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
 
-    // 4. Merge Custom & Google Maps Smart-Cached Restaurants by ID (excluding built-in rest-1..220 seeds)
+    // 4. Merge Custom & Google Maps Smart-Cached Restaurants by ID (excluding built-in rest-1..250 seeds and deleted users' custom shops)
     const restMap = new Map<string, Restaurant>();
     if (Array.isArray(cloudRests)) {
       for (const r of cloudRests) {
-        if (r && r.id && !isSeedRestaurantId(String(r.id))) {
+        if (r && r.id && !isSeedRestaurantId(String(r.id)) && (!r.ownerId || !deletedIds.has(r.ownerId))) {
           restMap.set(r.id, r);
         }
       }
     }
     for (const r of localState.customRestaurants) {
-      if (r && r.id && !isSeedRestaurantId(String(r.id))) {
+      if (r && r.id && !isSeedRestaurantId(String(r.id)) && (!r.ownerId || !deletedIds.has(r.ownerId))) {
         restMap.set(r.id, { ...(restMap.get(r.id) || {}), ...r });
       }
     }
@@ -377,6 +409,7 @@ export async function syncAllAppDataWithSupabase(localState: {
     // 6. Push merged state back to Supabase Cloud
     await Promise.all([
       pushCloudDocument('kft_cloud_users_v1', mergedUsers),
+      pushCloudDocument('kft_cloud_deleted_users_v1', mergedDeletedUsers),
       pushCloudDocument('kft_cloud_transactions_v1', mergedTransactions),
       pushCloudDocument('kft_cloud_custom_restaurants_v1', mergedCustomRestaurants),
       pushCloudDocument('kft_cloud_payment_proofs_v1', mergedPaymentProofsVault),
@@ -385,6 +418,7 @@ export async function syncAllAppDataWithSupabase(localState: {
     return {
       synced: true,
       mergedUsers,
+      mergedDeletedUsers,
       mergedTransactions,
       mergedCustomRestaurants,
       mergedPaymentProofsVault,
@@ -394,6 +428,7 @@ export async function syncAllAppDataWithSupabase(localState: {
     return {
       synced: false,
       mergedUsers: localState.users,
+      mergedDeletedUsers: localState.deletedUsers || [],
       mergedTransactions: localState.transactions,
       mergedCustomRestaurants: localState.customRestaurants,
       mergedPaymentProofsVault: localState.paymentProofsVault,

@@ -7,7 +7,8 @@ import {
   getRestaurantCreatedAtIso, sortRestaurantsChronologically, isSeedRestaurantId,
   Wishlist, WishlistItem, TripPlan, AppNotification,
   TrendingFoodItem, AiCheckInSubmission,
-  SupportTicket, SupportTicketMessage, SupportTicketStatus, VIP_PLANS
+  SupportTicket, SupportTicketMessage, SupportTicketStatus, VIP_PLANS,
+  DeletedUserRecord
 } from '../types';
 import { 
   verifyPaymentOnBackend, calculateVipDates, checkEligibleRestoration,
@@ -47,12 +48,17 @@ interface AppContextType {
   // Auth & Users
   currentUser: User | null;
   users: User[];
+  deletedUsers: DeletedUserRecord[];
   login: (email: string, role?: UserRole) => boolean;
-  register: (name: string, email: string, role: UserRole, phone?: string, restaurantName?: string) => void;
-  loginWithGoogle: (profile: any) => void;
+  register: (name: string, email: string, role: UserRole, phone?: string, restaurantName?: string) => boolean;
+  loginWithGoogle: (profile: any) => boolean;
   logout: () => void;
   updateUserRole: (userId: string, newRole: UserRole) => void;
   updateCurrentUserProfile: (newName: string, newAvatar?: string) => void;
+  deleteUserAccount: (userId: string) => Promise<{
+    success: boolean;
+    deletedStats?: { restaurants: number; posts: number; transactions: number; tickets: number };
+  }>;
   clearAllRegisteredUsers: () => Promise<{ success: boolean; count: number }>;
 
   // Social Account Linking (TikTok & Facebook)
@@ -286,6 +292,42 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [language, setLanguage] = useState<Language>('km');
   const [activeTab, setActiveTab] = useState<ActiveTab>('home');
   
+  const [deletedUsers, setDeletedUsers] = useState<DeletedUserRecord[]>(() => {
+    try {
+      const saved = localStorage.getItem('kft_deleted_users_v1');
+      if (saved && saved !== 'undefined' && saved !== 'null') {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch (e) {
+      console.warn('Failed to parse kft_deleted_users_v1', e);
+    }
+    return [];
+  });
+
+  const checkIsUserDeleted = (
+    candidate: { id?: string; email?: string; phone?: string; username?: string } | null | undefined,
+    list: DeletedUserRecord[] = deletedUsers
+  ): boolean => {
+    if (!candidate || !Array.isArray(list) || list.length === 0) return false;
+    const candId = candidate.id ? String(candidate.id).trim() : '';
+    const candEmail = candidate.email ? String(candidate.email).toLowerCase().trim() : '';
+    const candUsername = candidate.username ? String(candidate.username).toLowerCase().trim() : '';
+    const candPhone = candidate.phone ? String(candidate.phone).replace(/[\s-+]/g, '') : '';
+
+    return list.some(d => {
+      if (!d) return false;
+      if (candId && d.id && d.id === candId) return true;
+      if (candEmail && d.email && d.email.toLowerCase().trim() === candEmail) return true;
+      if (candUsername && d.username && d.username.toLowerCase().trim() === candUsername) return true;
+      if (candPhone.length >= 7 && d.phone) {
+        const dPhone = d.phone.replace(/[\s-+]/g, '');
+        if (dPhone.length >= 7 && dPhone === candPhone) return true;
+      }
+      return false;
+    });
+  };
+
   // Local storage loaded states with fallbacks (v5 storage keys: purged demo users per Admin directive)
   const [users, setUsers] = useState<User[]>(() => {
     try {
@@ -293,11 +335,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       ['kft_users_v4', 'kft_users_v3', 'kft_users_v2', 'kft_users_v1', 'kft_current_user_v4', 'kft_current_user_v3'].forEach(k => {
         try { localStorage.removeItem(k); } catch(e) {}
       });
+      let localDeleted: DeletedUserRecord[] = [];
+      try {
+        const rawDel = localStorage.getItem('kft_deleted_users_v1');
+        if (rawDel) localDeleted = JSON.parse(rawDel) || [];
+      } catch {}
+
       const saved = localStorage.getItem('kft_users_v5');
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) {
-          return parsed;
+          return parsed.filter((u: User) => !checkIsUserDeleted(u, localDeleted));
         }
       }
     } catch (e) {
@@ -308,6 +356,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [currentUser, setCurrentUser] = useState<User | null>(() => {
     try {
+      let localDeleted: DeletedUserRecord[] = [];
+      try {
+        const rawDel = localStorage.getItem('kft_deleted_users_v1');
+        if (rawDel) localDeleted = JSON.parse(rawDel) || [];
+      } catch {}
+
       const saved = localStorage.getItem('kft_current_user_v5');
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
@@ -318,6 +372,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               ...parsed,
               avatar: '/images/admin_profile.png',
             };
+          }
+          if (checkIsUserDeleted(parsed, localDeleted)) {
+            localStorage.removeItem('kft_current_user_v5');
+            return null;
           }
           return parsed;
         }
@@ -1316,28 +1374,57 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const customRests = restaurants.filter(r => !isSeedRestaurantId(r.id));
       const result = await syncAllAppDataWithSupabase({
         users,
+        deletedUsers,
         transactions,
         customRestaurants: customRests,
         paymentProofsVault: localVault,
       });
 
       if (result.synced) {
-        if (result.mergedUsers.length >= users.length) {
-          setUsers(result.mergedUsers);
-          if (currentUser) {
+        if (Array.isArray(result.mergedDeletedUsers)) {
+          setDeletedUsers(result.mergedDeletedUsers);
+          try {
+            localStorage.setItem('kft_deleted_users_v1', JSON.stringify(result.mergedDeletedUsers));
+          } catch {}
+        }
+
+        setUsers(result.mergedUsers);
+        if (currentUser) {
+          const isAdminAccount =
+            currentUser.role === 'admin' ||
+            currentUser.id === 'admin-authorized-single' ||
+            currentUser.username === 'cheasavuth' ||
+            currentUser.username === 'admin';
+          if (!isAdminAccount && checkIsUserDeleted(currentUser, result.mergedDeletedUsers)) {
+            setCurrentUser(null);
+            try {
+              localStorage.removeItem('kft_current_user_v5');
+            } catch {}
+            showToast(
+              language === 'km'
+                ? '🚫 គណនីរបស់អ្នកត្រូវបានលុបជាអចិន្ត្រៃយ៍ដោយរដ្ឋបាល (Admin)។'
+                : '🚫 Your account has been permanently deleted by the Administrator.',
+              'warning'
+            );
+          } else {
             const matchedCurrent = result.mergedUsers.find(u => u.id === currentUser.id);
             if (matchedCurrent) setCurrentUser(matchedCurrent);
           }
         }
-        if (result.mergedTransactions.length >= transactions.length) {
+        if (result.mergedTransactions.length >= transactions.length || result.mergedDeletedUsers.length > 0) {
           setTransactions(result.mergedTransactions);
         }
         if (result.mergedCustomRestaurants.length > 0) {
+          const deletedIdSet = new Set((result.mergedDeletedUsers || []).map(d => d.id));
           setRestaurants(prev => {
             const map = new Map<string, Restaurant>();
-            for (const r of prev) map.set(r.id, r);
+            for (const r of prev) {
+              if (isSeedRestaurantId(String(r.id)) || !r.ownerId || !deletedIdSet.has(r.ownerId)) {
+                map.set(r.id, r);
+              }
+            }
             for (const r of result.mergedCustomRestaurants) {
-              if (r && r.id && !isSeedRestaurantId(String(r.id))) {
+              if (r && r.id && !isSeedRestaurantId(String(r.id)) && (!r.ownerId || !deletedIdSet.has(r.ownerId))) {
                 map.set(r.id, normalizeRestaurant(r));
               }
             }
@@ -1580,8 +1667,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const login = (identifier: string, role?: UserRole): boolean => {
     const clean = identifier.trim().toLowerCase();
     const cleanDigits = identifier.replace(/[\s-+]/g, '');
+    const isPhone = /^[0-9+ ]{7,15}$/.test(clean);
+    const emailVal = isPhone ? `user_${cleanDigits}@phone.kh` : (clean.includes('@') ? clean : `${clean}@user.kh`);
+
+    // 1. Strictly block permanently deleted accounts from logging back in
+    if (
+      checkIsUserDeleted({ id: clean, email: clean, phone: cleanDigits, username: clean }) ||
+      checkIsUserDeleted({ email: emailVal })
+    ) {
+      recordSecurityAudit('DELETED_USER_LOGIN_BLOCKED', 'BLOCKED', 'AuthModal', `Blocked login attempt by deleted account: ${identifier}`);
+      showToast(
+        language === 'km'
+          ? '🚫 គណនីនេះត្រូវបានលុបជាអចិន្ត្រៃយ៍ដោយរដ្ឋបាល (Admin) ហើយមិនអាចចូលប្រើប្រាស់បានទៀតទេ។'
+          : '🚫 This account has been permanently deleted by the Administrator and can no longer log in.',
+        'warning'
+      );
+      return false;
+    }
+
     const existing = users.find(u => 
       u.email.toLowerCase() === clean || 
+      u.email.toLowerCase() === emailVal ||
       (cleanDigits.length >= 7 && u.phone && u.phone.replace(/[\s-+]/g, '') === cleanDigits)
     );
     if (existing) {
@@ -1598,8 +1704,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     
     // Normal registration/login for users/owners only (NEVER grant admin role here)
     const assignedRole: UserRole = role === 'owner' ? 'owner' : 'user';
-    const isPhone = /^[0-9+ ]{7,15}$/.test(clean);
-    const emailVal = isPhone ? `user_${cleanDigits}@phone.kh` : (clean.includes('@') ? clean : `${clean}@user.kh`);
     const phoneVal = isPhone ? identifier.trim() : undefined;
     const nameVal = isPhone ? `អ្នកប្រើប្រាស់ ${identifier.trim()}` : clean.split('@')[0];
 
@@ -1766,8 +1870,212 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
+  const deleteUserAccount = async (userId: string): Promise<{
+    success: boolean;
+    deletedStats?: { restaurants: number; posts: number; transactions: number; tickets: number };
+  }> => {
+    const targetUser = users.find(u => u.id === userId);
+    if (!targetUser) {
+      showToast(language === 'km' ? 'រកមិនឃើញគណនីអ្នកប្រើប្រាស់នេះទេ!' : 'User account not found!', 'warning');
+      return { success: false };
+    }
+
+    // Protect Admin account from deletion
+    if (
+      targetUser.role === 'admin' ||
+      targetUser.id === 'admin-authorized-single' ||
+      targetUser.username === 'cheasavuth' ||
+      targetUser.username === 'admin'
+    ) {
+      showToast(language === 'km' ? 'មិនអនុញ្ញាតឱ្យលុបគណនីរដ្ឋបាលប្រព័ន្ធ (Admin) ឡើយ!' : 'Cannot delete the System Administrator account!', 'warning');
+      return { success: false };
+    }
+
+    // 1. Add user to permanent deleted/blacklisted users registry so they can never log in again
+    const deletedRecord: DeletedUserRecord = {
+      id: targetUser.id,
+      email: (targetUser.email || '').toLowerCase().trim(),
+      phone: targetUser.phone ? targetUser.phone.replace(/[\s-+]/g, '') : undefined,
+      username: targetUser.username ? targetUser.username.toLowerCase().trim() : undefined,
+      name: targetUser.name,
+      deletedAt: new Date().toISOString(),
+      deletedBy: currentUser?.name || 'Admin',
+    };
+    const nextDeletedUsers = [
+      ...deletedUsers.filter(d => d.id !== targetUser.id),
+      deletedRecord,
+    ];
+    setDeletedUsers(nextDeletedUsers);
+    try {
+      localStorage.setItem('kft_deleted_users_v1', JSON.stringify(nextDeletedUsers));
+    } catch {}
+
+    // 2. Remove user from active users list
+    const nextUsers = users.filter(u => u.id !== userId);
+    setUsers(nextUsers);
+    try {
+      localStorage.setItem('kft_users_v5', JSON.stringify(nextUsers));
+    } catch {}
+
+    // 3. Remove user's custom restaurants (never touch built-in seed restaurants rest-1..250)
+    const ownedCustomRests = restaurants.filter(r => !isSeedRestaurantId(r.id) && r.ownerId === userId);
+    const nextRestaurants = restaurants.filter(r => isSeedRestaurantId(r.id) || r.ownerId !== userId);
+    if (ownedCustomRests.length > 0) {
+      setRestaurants(nextRestaurants);
+      try {
+        localStorage.setItem('kft_restaurants_real_v9', JSON.stringify(nextRestaurants));
+      } catch {}
+      if (selectedRestaurant && !isSeedRestaurantId(selectedRestaurant.id) && selectedRestaurant.ownerId === userId) {
+        setSelectedRestaurant(null);
+      }
+      if (managingRestaurant && managingRestaurant.ownerId === userId) {
+        setManagingRestaurant(null);
+        setIsManageMenuModalOpen(false);
+      }
+    }
+
+    // 4. Remove user's community posts, likes, and comments
+    const userPostsCount = posts.filter(p => p.authorId === userId).length;
+    const nextPosts = posts
+      .filter(p => p.authorId !== userId)
+      .map(p => {
+        const hadLiked = (p.likedByUserIds || []).includes(userId);
+        return {
+          ...p,
+          likedByUserIds: (p.likedByUserIds || []).filter(id => id !== userId),
+          likesCount: hadLiked ? Math.max(0, p.likesCount - 1) : p.likesCount,
+          comments: (p.comments || []).filter(c => c.authorId !== userId && c.authorName !== targetUser.name),
+        };
+      });
+    setPosts(nextPosts);
+    try {
+      localStorage.setItem('kft_posts_v6', JSON.stringify(nextPosts));
+    } catch {}
+
+    // 5. Remove user's registration/VIP transactions & payment proof receipts
+    const userTxns = transactions.filter(t => t.ownerId === userId);
+    const nextTransactions = transactions.filter(t => t.ownerId !== userId);
+    setTransactions(nextTransactions);
+    try {
+      localStorage.setItem('kft_transactions_v4', JSON.stringify(nextTransactions));
+    } catch {}
+
+    let localVault: Record<string, any> = {};
+    try {
+      const rawVault = localStorage.getItem('kft_secure_payment_proofs_vault_v1');
+      if (rawVault) {
+        localVault = JSON.parse(rawVault) || {};
+        for (const t of userTxns) {
+          delete localVault[t.id];
+        }
+        localStorage.setItem('kft_secure_payment_proofs_vault_v1', JSON.stringify(localVault));
+      }
+    } catch {}
+
+    // 6. Remove user's support tickets
+    const targetEmailLower = (targetUser.email || '').toLowerCase().trim();
+    const userTicketsCount = supportTickets.filter(
+      t => t.userId === userId || (targetEmailLower && t.userEmail?.toLowerCase().trim() === targetEmailLower)
+    ).length;
+    const nextTickets = supportTickets.filter(
+      t => t.userId !== userId && (!targetEmailLower || t.userEmail?.toLowerCase().trim() !== targetEmailLower)
+    );
+    setSupportTickets(nextTickets);
+    try {
+      localStorage.setItem('kft_support_tickets_v1', JSON.stringify(nextTickets));
+    } catch {}
+
+    // 7. Remove user's AI check-in submissions
+    const nextAiCheckIns = aiCheckIns.filter(c => c.submittedByUserId !== userId);
+    if (nextAiCheckIns.length !== aiCheckIns.length) {
+      setAiCheckIns(nextAiCheckIns);
+      try {
+        localStorage.setItem('kft_ai_checkins_v1', JSON.stringify(nextAiCheckIns));
+      } catch {}
+    }
+
+    // 8. Remove user's local wishlists & trip plans
+    try {
+      localStorage.removeItem(`kft_wishlists_v2_${userId}`);
+      localStorage.removeItem(`kft_wishlists_${userId}`);
+      localStorage.removeItem(`kft_trip_plans_v2_${userId}`);
+      localStorage.removeItem(`kft_trip_plans_${userId}`);
+    } catch {}
+
+    // 9. If the deleted user is currently logged in on this device, terminate their session
+    if (currentUser?.id === userId) {
+      setCurrentUser(null);
+      try {
+        localStorage.removeItem('kft_current_user_v5');
+      } catch {}
+    }
+
+    // 10. Push updated collections to Supabase Cloud
+    try {
+      if (isSupabaseConfigured()) {
+        const customRests = nextRestaurants.filter(r => !isSeedRestaurantId(r.id));
+        await Promise.all([
+          pushCloudDocument('kft_cloud_users_v1', nextUsers),
+          pushCloudDocument('kft_cloud_deleted_users_v1', nextDeletedUsers),
+          pushCloudDocument('kft_cloud_transactions_v1', nextTransactions),
+          pushCloudDocument('kft_cloud_custom_restaurants_v1', customRests),
+          pushCloudDocument('kft_cloud_support_tickets_v1', nextTickets),
+          pushCloudDocument('kft_cloud_payment_proofs_v1', localVault),
+        ]);
+      }
+    } catch (e) {
+      console.warn('Supabase cloud user deletion sync error:', e);
+    }
+
+    recordSecurityAudit(
+      'USER_ACCOUNT_DELETED',
+      'SUCCESS',
+      'AdminPortal',
+      `Permanently deleted user ${targetUser.name} (${targetUser.id}, ${targetUser.email}) and all associated data`
+    );
+
+    showToast(
+      language === 'km'
+        ? `✅ បានលុបគណនី "${targetUser.name}" និងទិន្នន័យពាក់ព័ន្ធទាំងអស់ជាអចិន្ត្រៃយ៍!`
+        : `✅ Permanently deleted account "${targetUser.name}" and all associated data!`,
+      'success'
+    );
+
+    return {
+      success: true,
+      deletedStats: {
+        restaurants: ownedCustomRests.length,
+        posts: userPostsCount,
+        transactions: userTxns.length,
+        tickets: userTicketsCount,
+      },
+    };
+  };
+
   const clearAllRegisteredUsers = async (): Promise<{ success: boolean; count: number }> => {
     const count = users.length;
+    // Record all purged users into deletedUsers registry so they cannot auto-resurrect from cloud
+    const nowIso = new Date().toISOString();
+    const newDeletedList: DeletedUserRecord[] = [...deletedUsers];
+    for (const u of users) {
+      if (u.role === 'admin' || u.id === 'admin-authorized-single') continue;
+      if (!newDeletedList.some(d => d.id === u.id)) {
+        newDeletedList.push({
+          id: u.id,
+          email: (u.email || '').toLowerCase().trim(),
+          phone: u.phone ? u.phone.replace(/[\s-+]/g, '') : undefined,
+          username: u.username ? u.username.toLowerCase().trim() : undefined,
+          name: u.name,
+          deletedAt: nowIso,
+          deletedBy: currentUser?.name || 'Admin',
+        });
+      }
+    }
+    setDeletedUsers(newDeletedList);
+    try {
+      localStorage.setItem('kft_deleted_users_v1', JSON.stringify(newDeletedList));
+    } catch {}
+
     // 1. Clear users in state
     setUsers([]);
     // 2. Clear currentUser if not admin
@@ -1795,7 +2103,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // 5. Clear cloud users from Supabase if configured
     try {
       if (isSupabaseConfigured()) {
-        await pushCloudDocument('kft_cloud_users_v1', []);
+        await Promise.all([
+          pushCloudDocument('kft_cloud_users_v1', []),
+          pushCloudDocument('kft_cloud_deleted_users_v1', newDeletedList),
+        ]);
       }
     } catch (e) {
       console.warn('Supabase cloud user purge error:', e);
@@ -1837,7 +2148,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     showToast(language === 'km' ? 'បានរក្សាទុកការកំណត់កម្មវិធីជោគជ័យ!' : 'App settings updated!', 'success');
   };
 
-  const register = (name: string, emailOrPhone: string, role: UserRole, phone?: string, restaurantName?: string) => {
+  const register = (name: string, emailOrPhone: string, role: UserRole, phone?: string, restaurantName?: string): boolean => {
     // Enforce: only one authorized admin exists. Users can NEVER self-register as admin
     const safeRole: UserRole = role === 'admin' ? 'user' : role;
     const cleanId = emailOrPhone.trim();
@@ -1846,6 +2157,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const emailVal = isPhone ? `user_${cleanPhoneDigits}@phone.kh` : (cleanId.includes('@') ? cleanId : `${cleanId}@user.kh`);
     const phoneVal = phone ? phone.trim() : (isPhone ? cleanId : undefined);
     const displayName = name.trim() || (isPhone ? `អ្នកប្រើប្រាស់ ${cleanId}` : cleanId.split('@')[0]);
+
+    // Block permanently deleted accounts from re-registering or logging in
+    if (
+      checkIsUserDeleted({ email: cleanId, phone: cleanPhoneDigits }) ||
+      checkIsUserDeleted({ email: emailVal })
+    ) {
+      recordSecurityAudit('DELETED_USER_REGISTER_BLOCKED', 'BLOCKED', 'AuthModal', `Blocked registration attempt by deleted account: ${emailOrPhone}`);
+      showToast(
+        language === 'km'
+          ? '🚫 គណនីនេះត្រូវបានលុបជាអចិន្ត្រៃយ៍ដោយរដ្ឋបាល (Admin) ហើយមិនអាចចូលប្រើប្រាស់បានទៀតទេ។'
+          : '🚫 This account has been permanently deleted by the Administrator and can no longer log in.',
+        'warning'
+      );
+      return false;
+    }
 
     // Check if user already exists
     const existing = users.find(u => 
@@ -1856,7 +2182,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setCurrentUser(existing);
       showToast(language === 'km' ? `សូមស្វាគមន៍មកវិញ ${existing.name}!` : `Welcome back, ${existing.name}!`, 'success');
       setIsAuthModalOpen(false);
-      return;
+      return true;
     }
 
     const newUser: User = {
@@ -1875,6 +2201,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setCurrentUser(newUser);
     showToast(language === 'km' ? `សូមស្វាគមន៍មកកាន់កម្មវិធី ${displayName}!` : `Welcome to the app, ${displayName}!`, 'success');
     setIsAuthModalOpen(false);
+    return true;
   };
 
   const loginWithGoogle = (profile: {
@@ -1883,7 +2210,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     email: string;
     avatar?: string;
     phone?: string;
-  }) => {
+  }): boolean => {
+    // Strictly block permanently deleted accounts from logging in via Google
+    if (checkIsUserDeleted({ id: profile.id, email: profile.email, phone: profile.phone })) {
+      recordSecurityAudit('DELETED_USER_GOOGLE_LOGIN_BLOCKED', 'BLOCKED', 'AuthModal', `Blocked Google login attempt by deleted account: ${profile.email || profile.id}`);
+      showToast(
+        language === 'km'
+          ? '🚫 គណនីនេះត្រូវបានលុបជាអចិន្ត្រៃយ៍ដោយរដ្ឋបាល (Admin) ហើយមិនអាចចូលប្រើប្រាស់បានទៀតទេ។'
+          : '🚫 This account has been permanently deleted by the Administrator and can no longer log in.',
+        'warning'
+      );
+      return false;
+    }
+
     // Check if user already exists with this ID or Email
     const existing = users.find(u => 
       u.id === profile.id || 
@@ -1904,7 +2243,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setCurrentUser(updated);
       showToast(language === 'km' ? `សូមស្វាគមន៍មកវិញ ${updated.name}!` : `Welcome back, ${updated.name}!`, 'success');
       setIsAuthModalOpen(false);
-      return;
+      return true;
     }
 
     // Auto-create new user account with Google credentials
@@ -1926,6 +2265,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setCurrentUser(newUser);
     showToast(language === 'km' ? `សូមស្វាគមន៍មកកាន់កម្មវិធី ${newUser.name}!` : `Welcome to the app, ${newUser.name}!`, 'success');
     setIsAuthModalOpen(false);
+    return true;
   };
 
   const logout = () => {
@@ -4570,12 +4910,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setActiveTab,
         currentUser,
         users,
+        deletedUsers,
         login,
         register,
         loginWithGoogle,
         logout,
         updateUserRole,
         updateCurrentUserProfile,
+        deleteUserAccount,
         clearAllRegisteredUsers,
         loginAdmin,
         loginAdminWithBiometric,

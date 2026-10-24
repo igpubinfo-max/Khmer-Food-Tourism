@@ -1,7 +1,17 @@
-export const APP_VERSION = 'v1.9.2';
-export const APP_VERSION_NAME = '1.9.2';
-export const APP_BUILD_CODE = 64;
+export const APP_VERSION = 'v1.9.3';
+export const APP_VERSION_NAME = '1.9.3';
+export const APP_BUILD_CODE = 65;
 export const APP_RELEASE_DATE = '2026-10-24';
+
+export interface DeletedUserRecord {
+  id: string;
+  email: string;
+  phone?: string;
+  username?: string;
+  name: string;
+  deletedAt: string;
+  deletedBy: string;
+}
 
 export const VIP_ANNUAL_PRICE_USD = 4.99;
 export const VIP_SUBSCRIPTION_DAYS = 90;

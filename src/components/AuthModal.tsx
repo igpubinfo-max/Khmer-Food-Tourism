@@ -63,8 +63,10 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
                 isVerified: true,
                 verifiedAt: new Date().toISOString(),
               };
-              loginWithGoogle(profile);
-              showToast(isKm ? `សូមស្វាគមន៍ ${cleanName}!` : `Welcome ${cleanName}!`, 'success');
+              const ok = loginWithGoogle(profile);
+              if (ok) {
+                showToast(isKm ? `សូមស្វាគមន៍ ${cleanName}!` : `Welcome ${cleanName}!`, 'success');
+              }
               return;
             }
           }
@@ -79,8 +81,10 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
 
       // 2. Real Google OAuth 2.0 Web Popup from accounts.google.com (identical to Pacdora)
       const profile = await signInWithGoogleReal();
-      loginWithGoogle(profile);
-      showToast(isKm ? `សូមស្វាគមន៍ ${profile.name}!` : `Welcome ${profile.name}!`, 'success');
+      const ok = loginWithGoogle(profile);
+      if (ok) {
+        showToast(isKm ? `សូមស្វាគមន៍ ${profile.name}!` : `Welcome ${profile.name}!`, 'success');
+      }
       return;
     } catch (err: any) {
       console.warn('Google Sign-In notice:', err?.message || err);
@@ -109,9 +113,11 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
 
     setIsSubmitting(true);
     try {
-      register(name.trim(), email.trim().toLowerCase(), role, restaurantName.trim());
-      showToast(isKm ? 'បានបង្កើតគណនីជោគជ័យ!' : 'Account created successfully!', 'success');
-      setIsAuthModalOpen(false);
+      const ok = register(name.trim(), email.trim().toLowerCase(), role, undefined, restaurantName.trim());
+      if (ok) {
+        showToast(isKm ? 'បានបង្កើតគណនីជោគជ័យ!' : 'Account created successfully!', 'success');
+        setIsAuthModalOpen(false);
+      }
     } catch (err: any) {
       showToast(err?.message || (isKm ? 'មានបញ្ហាក្នុងការចុះឈ្មោះ' : 'Registration error'), 'warning');
     } finally {
@@ -133,8 +139,6 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
       if (success) {
         showToast(isKm ? 'ចូលគណនីបានជោគជ័យ!' : 'Signed in successfully!', 'success');
         setIsAuthModalOpen(false);
-      } else {
-        showToast(isKm ? 'រកមិនឃើញគណនីនេះទេ សូមចុះឈ្មោះថ្មី' : 'Account not found. Please sign up.', 'warning');
       }
     } finally {
       setIsSubmitting(false);

@@ -7,7 +7,7 @@ import {
   ShieldCheck, ShieldAlert, Clock, RefreshCw, FileText, Check, Ban,
   Sparkles, Image as ImageIcon, Search, Camera, Upload
 } from 'lucide-react';
-import { FoodCategorySlug, DestinationCategorySlug, UserRole, RegistrationTransaction, FoodItem, TouristDestination } from '../types';
+import { FoodCategorySlug, DestinationCategorySlug, UserRole, User, RegistrationTransaction, FoodItem, TouristDestination, isSeedRestaurantId } from '../types';
 import { getSecurityAuditLogs, SecurityAuditEntry, revokeAdminSession } from '../utils/security';
 import { FoodImageModal } from './FoodImageModal';
 import { TouristImageModal } from './TouristImageModal';
@@ -29,7 +29,7 @@ export const AdminDashboard: React.FC = () => {
     restaurants, deleteRestaurant, approveRestaurant, toggleVerifyRestaurant,
     destinations, addDestination, updateDestination, deleteDestination,
     posts, deletePost,
-    users, updateUserRole, clearAllRegisteredUsers,
+    users, deletedUsers, updateUserRole, deleteUserAccount, clearAllRegisteredUsers,
     transactions, verifyTransaction, rejectTransaction, requestMorePaymentInfo, getAuthorizedPaymentProof,
     appSettings, updateAppSettings, setAdminPassword, currentUser, showToast,
     aiCheckIns, approveAiCheckIn, rejectAiCheckIn, mergeAiCheckIn,
@@ -50,6 +50,8 @@ export const AdminDashboard: React.FC = () => {
   const [adminReplyDrafts, setAdminReplyDrafts] = useState<Record<string, string>>({});
   const [inspectingTicketReceipt, setInspectingTicketReceipt] = useState<string | null>(null);
   const [ticketFilter, setTicketFilter] = useState<'all' | 'Pending' | 'Replied' | 'Resolved'>('all');
+  const [userPendingDeletion, setUserPendingDeletion] = useState<User | null>(null);
+  const [isDeletingUser, setIsDeletingUser] = useState(false);
 
   // Image Audit states
   const [auditFilter, setAuditFilter] = useState<'all' | 'verified' | 'flagged'>('all');
@@ -1923,33 +1925,243 @@ export const AdminDashboard: React.FC = () => {
                   </div>
                 </div>
               ) : (
-                <div className="space-y-2 max-h-[50vh] overflow-y-auto no-scrollbar">
-                  {users.map((u) => (
-                    <div key={u.id} className="p-3 bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                      <div className="flex items-center gap-3">
-                        <img src={u.avatar} alt="avatar" className="w-10 h-10 rounded-full object-cover" />
-                        <div>
-                          <h4 className="font-bold text-stone-900 dark:text-stone-100 font-khmer flex items-center gap-2">
-                            <span>{u.name}</span>
-                            <code className="text-[10px] font-mono text-stone-400">({u.id})</code>
-                          </h4>
-                          <p className="text-[10px] text-stone-400">{u.email} • 📞 {u.phone || 'N/A'}</p>
-                          {(u.role === 'vip' || u.vipPlanType || u.vipExpiryDate) && (
-                            <p className="text-[10px] text-emerald-700 dark:text-emerald-400 font-khmer mt-0.5">
-                              👑 គម្រោង៖ <strong>{u.vipPlanType === 'annual' ? 'VIP 90 Days ($4.99)' : 'VIP 30 Days ($2.99)'}</strong>
-                              {u.vipActivatedAt && ` • ថ្ងៃបើក៖ ${new Date(u.vipActivatedAt).toLocaleDateString()}`}
-                              {u.vipExpiryDate && ` • ថ្ងៃផុតកំណត់៖ ${new Date(u.vipExpiryDate).toLocaleDateString()}`}
+                <div className="space-y-2 max-h-[52vh] overflow-y-auto no-scrollbar">
+                  {users.map((u) => {
+                    const isSystemAdmin =
+                      u.role === 'admin' ||
+                      u.id === 'admin-authorized-single' ||
+                      u.username === 'cheasavuth' ||
+                      u.username === 'admin';
+                    const userCustomRestsCount = restaurants.filter(
+                      r => !isSeedRestaurantId(r.id) && r.ownerId === u.id
+                    ).length;
+                    const userPostsCount = posts.filter(p => p.authorId === u.id).length;
+                    const userTxnsCount = transactions.filter(t => t.ownerId === u.id).length;
+
+                    return (
+                      <div key={u.id} className="p-3.5 bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div className="flex items-start sm:items-center gap-3 min-w-0">
+                          <img src={u.avatar} alt="avatar" className="w-11 h-11 rounded-full object-cover border border-stone-200 dark:border-stone-600 shrink-0" />
+                          <div className="min-w-0">
+                            <h4 className="font-bold text-stone-900 dark:text-stone-100 font-khmer flex items-center gap-2 flex-wrap">
+                              <span>{u.name}</span>
+                              <code className="text-[10px] font-mono text-stone-400">({u.id})</code>
+                            </h4>
+                            <p className="text-[11px] text-stone-500 dark:text-stone-400 truncate">
+                              {u.email} • 📞 {u.phone || 'N/A'}
                             </p>
+                            {(u.membershipTier === 'premium_vip' || u.subscriptionStatus === 'active' || u.vipPlanType || u.vipExpiryDate) && (
+                              <p className="text-[10px] text-emerald-700 dark:text-emerald-400 font-khmer mt-0.5">
+                                👑 គម្រោង៖ <strong>{u.vipPlanType === 'annual' ? 'VIP 90 Days ($4.99)' : 'VIP 30 Days ($2.99)'}</strong>
+                                {u.vipActivatedAt && ` • ថ្ងៃបើក៖ ${new Date(u.vipActivatedAt).toLocaleDateString()}`}
+                                {(u.vipExpiryDate || u.subscriptionExpiryDate) && ` • ថ្ងៃផុតកំណត់៖ ${new Date((u.vipExpiryDate || u.subscriptionExpiryDate)!).toLocaleDateString()}`}
+                              </p>
+                            )}
+                            <div className="flex items-center gap-2 flex-wrap mt-1 text-[10px] text-stone-500 font-khmer">
+                              <span>🏪 ហាងផ្ទាល់ខ្លួន៖ <strong>{userCustomRestsCount}</strong></span>
+                              <span>•</span>
+                              <span>📝 បង្ហោះ៖ <strong>{userPostsCount}</strong></span>
+                              <span>•</span>
+                              <span>💳 ប្រតិបត្តិការ៖ <strong>{userTxnsCount}</strong></span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
+                          <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold font-mono ${
+                            isSystemAdmin
+                              ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300'
+                              : u.membershipTier === 'premium_vip' || u.subscriptionStatus === 'active'
+                                ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300'
+                                : 'bg-stone-100 dark:bg-stone-700 text-stone-700 dark:text-stone-300'
+                          }`}>
+                            {u.membershipTier === 'premium_vip' && !isSystemAdmin ? 'VIP' : u.role}
+                          </span>
+
+                          {!isSystemAdmin && (
+                            <button
+                              type="button"
+                              onClick={() => setUserPendingDeletion(u)}
+                              className="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white dark:bg-rose-950/60 dark:hover:bg-rose-600 dark:text-rose-400 dark:hover:text-white border border-rose-200 dark:border-rose-800 font-khmer text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                              title={isKm ? 'លុបគណនី និងទិន្នន័យពាក់ព័ន្ធទាំងអស់ជាអចិន្ត្រៃយ៍' : 'Permanently delete user account and all associated data'}
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                              <span>{isKm ? 'លុបគណនី' : 'Delete Account'}</span>
+                            </button>
                           )}
                         </div>
                       </div>
-                      <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-stone-100 dark:bg-stone-700 font-mono self-start sm:self-center">
-                        {u.role}
-                      </span>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
+
+              {/* Permanently Deleted / Blocked Users Registry */}
+              {deletedUsers && deletedUsers.length > 0 && (
+                <div className="mt-4 p-4 rounded-2xl bg-rose-50/60 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/50 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-rose-700 dark:text-rose-400 font-khmer font-bold text-xs">
+                      <Ban className="w-4 h-4 shrink-0" />
+                      <span>
+                        {isKm
+                          ? `បញ្ជីគណនីដែលត្រូវបានលុបជាអចិន្ត្រៃយ៍ និងបិទសិទ្ធិចូលប្រើ (${deletedUsers.length})`
+                          : `Permanently Deleted & Blocked Accounts (${deletedUsers.length})`}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="space-y-1.5 max-h-36 overflow-y-auto no-scrollbar">
+                    {deletedUsers.map(d => (
+                      <div
+                        key={d.id}
+                        className="px-3 py-2 rounded-xl bg-white/80 dark:bg-stone-900/60 border border-rose-200/70 dark:border-rose-900/40 flex items-center justify-between gap-2 text-[11px] font-khmer"
+                      >
+                        <div className="min-w-0">
+                          <span className="font-bold text-stone-800 dark:text-stone-200">{d.name}</span>{' '}
+                          <span className="text-stone-400 font-mono text-[10px]">({d.email || d.phone || d.id})</span>
+                        </div>
+                        <span className="px-2 py-0.5 rounded-full bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-300 font-bold text-[10px] shrink-0">
+                          🚫 {isKm ? 'បិទការចូលគណនីជាអចិន្ត្រៃយ៍' : 'Login Blocked'}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Confirmation Modal before Permanent User Account Deletion */}
+              {userPendingDeletion && (() => {
+                const target = userPendingDeletion;
+                const targetRestsCount = restaurants.filter(r => !isSeedRestaurantId(r.id) && r.ownerId === target.id).length;
+                const targetPostsCount = posts.filter(p => p.authorId === target.id).length;
+                const targetTxnsCount = transactions.filter(t => t.ownerId === target.id).length;
+                const targetTicketsCount = supportTickets.filter(
+                  t => t.userId === target.id || (target.email && t.userEmail?.toLowerCase() === target.email.toLowerCase())
+                ).length;
+
+                return (
+                  <div
+                    className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in"
+                    onClick={() => !isDeletingUser && setUserPendingDeletion(null)}
+                  >
+                    <div
+                      className="w-full max-w-md bg-white dark:bg-stone-900 rounded-3xl border-2 border-rose-500/40 shadow-2xl overflow-hidden font-khmer"
+                      onClick={e => e.stopPropagation()}
+                    >
+                      {/* Warning Header */}
+                      <div className="p-5 bg-gradient-to-br from-rose-600 to-red-800 text-white flex items-center gap-3.5">
+                        <div className="w-12 h-12 rounded-2xl bg-white/15 border border-white/25 flex items-center justify-center shrink-0">
+                          <AlertTriangle className="w-6 h-6 text-amber-300" />
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-base leading-snug">
+                            {isKm ? 'បញ្ជាក់ការលុបគណនីជាអចិន្ត្រៃយ៍' : 'Confirm Permanent Account Deletion'}
+                          </h3>
+                          <p className="text-[11px] text-rose-100 mt-0.5">
+                            {isKm ? 'សកម្មភាពនេះមិនអាចត្រឡប់ក្រោយវិញបានឡើយ!' : 'This action is permanent and cannot be undone!'}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Modal Content */}
+                      <div className="p-5 space-y-4">
+                        {/* Target User Summary Card */}
+                        <div className="p-3.5 rounded-2xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 flex items-center gap-3">
+                          <img
+                            src={target.avatar}
+                            alt={target.name}
+                            className="w-12 h-12 rounded-full object-cover border-2 border-rose-400 shrink-0"
+                          />
+                          <div className="min-w-0 flex-1">
+                            <h4 className="font-bold text-sm text-stone-900 dark:text-stone-100 truncate">
+                              {target.name}
+                            </h4>
+                            <p className="text-xs text-stone-500 dark:text-stone-400 truncate">
+                              {target.email} {target.phone ? `• 📞 ${target.phone}` : ''}
+                            </p>
+                            <p className="text-[10px] font-mono text-stone-400 mt-0.5">
+                              ID: {target.id} • Role: {target.role.toUpperCase()}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Associated Data to be Deleted */}
+                        <div className="p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/70 space-y-2 text-xs">
+                          <p className="font-bold text-rose-800 dark:text-rose-300">
+                            {isKm
+                              ? 'តើអ្នកពិតជាចង់លុបគណនីនេះ និងទិន្នន័យពាក់ព័ន្ធទាំងអស់មែនទេ?'
+                              : 'Are you sure you want to permanently delete this account and all associated data?'}
+                          </p>
+                          <ul className="space-y-1.5 text-[11px] text-stone-700 dark:text-stone-300 pl-4 list-disc">
+                            <li>
+                              {isKm
+                                ? 'គណនីអ្នកប្រើប្រាស់ ព័ត៌មានផ្ទាល់ខ្លួន និងសមាជិកភាព VIP'
+                                : 'User profile, credentials & VIP membership status'}
+                            </li>
+                            <li>
+                              {isKm
+                                ? `ហាងអាហារដែលបានបង្កើតដោយគណនីនេះ (${targetRestsCount} ហាង)`
+                                : `Custom restaurants created by this user (${targetRestsCount} shops)`}
+                            </li>
+                            <li>
+                              {isKm
+                                ? `ការបង្ហោះក្នុងសហគមន៍ និងមតិយោបល់ (${targetPostsCount} ប្រកាស)`
+                                : `Community posts, likes & comments (${targetPostsCount} posts)`}
+                            </li>
+                            <li>
+                              {isKm
+                                ? `ប្រតិបត្តិការទូទាត់ប្រាក់ និងវិក្កយបត្រ (${targetTxnsCount} ប្រតិបត្តិការ)`
+                                : `Payment transactions & receipts (${targetTxnsCount} records)`}
+                            </li>
+                            <li>
+                              {isKm
+                                ? `សំណើជំនួយ (${targetTicketsCount}) បញ្ជីចំណូលចិត្ត និងផែនការធ្វើដំណើរ`
+                                : `Support tickets (${targetTicketsCount}), wishlists & saved trip plans`}
+                            </li>
+                            <li className="font-bold text-rose-600 dark:text-rose-400">
+                              {isKm
+                                ? '🚫 អ្នកប្រើប្រាស់នេះនឹងត្រូវបានបិទសិទ្ធិមិនឱ្យចូលគណនី (Log in) បានទៀតឡើយ!'
+                                : '🚫 Deleted user will be permanently blocked from logging in again!'}
+                            </li>
+                          </ul>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="flex items-center gap-2.5 pt-1">
+                          <button
+                            type="button"
+                            disabled={isDeletingUser}
+                            onClick={() => setUserPendingDeletion(null)}
+                            className="flex-1 py-2.5 px-4 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200 font-bold text-xs transition cursor-pointer"
+                          >
+                            {isKm ? 'បោះបង់ (Cancel)' : 'Cancel'}
+                          </button>
+                          <button
+                            type="button"
+                            disabled={isDeletingUser}
+                            onClick={async () => {
+                              setIsDeletingUser(true);
+                              try {
+                                await deleteUserAccount(target.id);
+                                setUserPendingDeletion(null);
+                              } finally {
+                                setIsDeletingUser(false);
+                              }
+                            }}
+                            className="flex-1 py-2.5 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-lg shadow-rose-600/25 transition flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                            <span>
+                              {isDeletingUser
+                                ? (isKm ? 'កំពុងលុប...' : 'Deleting...')
+                                : (isKm ? 'យល់ព្រមលុបជាអចិន្ត្រៃយ៍' : 'Permanently Delete')}
+                            </span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           )}
 
