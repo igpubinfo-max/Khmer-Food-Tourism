@@ -2,9 +2,9 @@ import React, { createContext, useContext, useState, useEffect, useRef } from 'r
 import { 
   User, FoodItem, Restaurant, TouristDestination, CommunityPost, 
   Language, UserRole, AppSettings, RegistrationTransaction,
-  RestaurantMenuItem, MembershipTier, isRestaurantPremiumActive, isUserVipActive, getVipRemainingDays,
+  RestaurantMenuItem, RestaurantReview, MembershipTier, isRestaurantPremiumActive, isUserVipActive, getVipRemainingDays,
   getVipAccountState, VipAccountState,
-  getRestaurantCreatedAtIso, sortRestaurantsChronologically, isSeedRestaurantId,
+  getRestaurantCreatedAtIso, getRestaurantCreatedAtMs, sortRestaurantsChronologically, isSeedRestaurantId, getRestaurantRatingSummary,
   Wishlist, WishlistItem, TripPlan, AppNotification,
   TrendingFoodItem, AiCheckInSubmission,
   SupportTicket, SupportTicketMessage, SupportTicketStatus, VIP_PLANS,
@@ -46,6 +46,7 @@ import {
   saveLocalMediaOverrides,
   recordPermanentFoodOverride,
   recordPermanentRestaurantOverride,
+  removePermanentRestaurantOverride,
   recordPermanentDestinationOverride,
   recordPermanentTrendingFoodOverride,
   applyFoodOverrides,
@@ -131,10 +132,11 @@ interface AppContextType {
   approveRestaurant: (id: string) => void;
   toggleVerifyRestaurant: (id: string) => void;
 
-  // Restaurant Menu Items (Max 5 for Active Premium)
+  // Restaurant Menu Items (Max 20 for Active Premium) & Genuine Customer Reviews
   addRestaurantMenuItem: (restaurantId: string, item: Omit<RestaurantMenuItem, 'id' | 'createdAt' | 'restaurantId'>) => boolean;
   updateRestaurantMenuItem: (restaurantId: string, item: RestaurantMenuItem) => boolean;
   deleteRestaurantMenuItem: (restaurantId: string, menuItemId: string) => boolean;
+  addRestaurantReview: (restaurantId: string, rating: number, comment?: string) => boolean;
   upgradeRestaurantToPremium: (restaurantId: string, transactionRef: string, paymentMethod?: 'KHQR' | 'Bakong' | 'BankTransfer') => void;
   
   // Restaurant Analytics (Views, Calls, Maps, Shares)
@@ -143,11 +145,15 @@ interface AppContextType {
   trackRestaurantMap: (restaurantId: string) => void;
   trackRestaurantShare: (restaurantId: string) => void;
   
-  // Managing Restaurant Modal
+  // Managing Restaurant Modal & Multi-Shop Isolation
   isManageMenuModalOpen: boolean;
   setIsManageMenuModalOpen: (open: boolean) => void;
   managingRestaurant: Restaurant | null;
   setManagingRestaurant: (rest: Restaurant | null) => void;
+  activeManagedShopId: string | null;
+  setActiveManagedShopId: (shopId: string | null) => void;
+  getOwnedRestaurantsForUser: (user?: User | null) => Restaurant[];
+  openManageMyVipStore: (preferredShopId?: string, initialTab?: 'menu' | 'info' | 'photos' | 'analytics' | 'membership') => void;
   
   // Destination Actions
   addDestination: (dest: Omit<TouristDestination, 'id' | 'rating' | 'reviewCount'>) => boolean | void;
@@ -522,9 +528,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     // Preserve exact matched photoUrl for each restaurant without cross-assigning another shop's storefront sign
     const photoUrl = r.photoUrl || r.profileImage || galleryPhotos[0] || '/foods/food-1.jpg';
+    const restId = r.id || `rest-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+    const isSeed = isSeedRestaurantId(restId);
+    const genuineReviews: RestaurantReview[] = Array.isArray(r.reviews)
+      ? r.reviews.filter((rev: any) => rev && typeof rev.rating === 'number' && rev.rating >= 1 && rev.rating <= 5)
+      : [];
+    const ratingSummary = getRestaurantRatingSummary({
+      id: restId,
+      rating: r.rating,
+      reviewCount: r.reviewCount,
+      reviews: genuineReviews,
+    });
 
     return {
-      id: r.id || `rest-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+      id: restId,
       nameKh: r.nameKh || 'ភោជនីយដ្ឋានខ្មែរ',
       nameEn: r.nameEn || r.nameKh || 'Khmer Restaurant',
       descriptionKh: r.descriptionKh || 'ភោជនីយដ្ឋានម្ហូបខ្មែររសជាតិដើម ផាសុកភាព និងអនាម័យខ្ពស់។',
@@ -550,8 +567,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       mapUrl: r.mapUrl || `https://maps.google.com/?q=${encodeURIComponent(r.nameKh || 'Cambodia')}`,
       latitude: typeof r.latitude === 'number' ? r.latitude : 11.5564,
       longitude: typeof r.longitude === 'number' ? r.longitude : 104.9282,
-      rating: typeof r.rating === 'number' ? r.rating : 4.8,
-      reviewCount: typeof r.reviewCount === 'number' ? r.reviewCount : 50,
+      rating: ratingSummary.averageRating,
+      reviewCount: ratingSummary.reviewCount,
+      reviews: genuineReviews,
       signatureDishesKh: Array.isArray(r.signatureDishesKh) && r.signatureDishesKh.length > 0
         ? r.signatureDishesKh 
         : ['ម្ហូបខ្មែរប្រពៃណី', 'ម្ហូបពិសេសប្រចាំហាង'],
@@ -562,21 +580,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       membershipExpiresAt,
       menuItems: Array.isArray(r.menuItems) ? r.menuItems : [],
       analytics: r.analytics && typeof r.analytics === 'object' ? {
-        views: typeof r.analytics.views === 'number' ? r.analytics.views : 65,
-        phoneClicks: typeof r.analytics.phoneClicks === 'number' ? r.analytics.phoneClicks : 14,
-        mapClicks: typeof r.analytics.mapClicks === 'number' ? r.analytics.mapClicks : 18,
-        shareClicks: typeof r.analytics.shareClicks === 'number' ? r.analytics.shareClicks : 9,
-      } : { views: 65, phoneClicks: 14, mapClicks: 18, shareClicks: 9 },
+        views: typeof r.analytics.views === 'number' ? r.analytics.views : (isSeed ? 65 : 0),
+        phoneClicks: typeof r.analytics.phoneClicks === 'number' ? r.analytics.phoneClicks : (isSeed ? 14 : 0),
+        mapClicks: typeof r.analytics.mapClicks === 'number' ? r.analytics.mapClicks : (isSeed ? 18 : 0),
+        shareClicks: typeof r.analytics.shareClicks === 'number' ? r.analytics.shareClicks : (isSeed ? 9 : 0),
+      } : (isSeed ? { views: 65, phoneClicks: 14, mapClicks: 18, shareClicks: 9 } : { views: 0, phoneClicks: 0, mapClicks: 0, shareClicks: 0 }),
       paymentStatus: r.paymentStatus || (membershipTier === 'premium' ? 'verified' : 'unpaid'),
       promotionalPrice: typeof r.promotionalPrice === 'number' ? r.promotionalPrice : 2.99,
       isPromoted,
       ownerId: r.ownerId,
+      ownerName: r.ownerName,
+      ownerEmail: r.ownerEmail,
+      ownerPhone: r.ownerPhone,
       paymentDate: r.paymentDate,
       promoVideoUrl: r.promoVideoUrl,
       telegramUrl: r.telegramUrl,
       facebookUrl: r.facebookUrl,
       created_at: getRestaurantCreatedAtIso(r),
       createdAt: getRestaurantCreatedAtIso(r),
+      updatedAt: r.updatedAt,
     };
   };
 
@@ -593,10 +615,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length >= 50) {
-          const seenNonAdminOwners = new Set<string>();
+          const seenIds = new Set<string>();
           const normalizedList: Restaurant[] = [];
           for (const r of parsed) {
-            const seed = r && r.id ? seedMap.get(String(r.id)) : undefined;
+            if (!r || !r.id) continue;
+            const rId = String(r.id);
+            if (seenIds.has(rId)) continue;
+            seenIds.add(rId);
+
+            const seed = seedMap.get(rId);
             if (seed) {
               const primaryImg = r.profileImage || r.photoUrl || '';
               const hasCustomPhoto =
@@ -641,6 +668,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 galleryPhotos: finalGallery,
                 foodImages: ov?.foodImages || finalGallery,
                 menuItems: ov?.menuItems || r.menuItems || [],
+                reviews: ov?.reviews || r.reviews || [],
                 addressKh: ov?.addressKh || seed.addressKh,
                 addressEn: seed.addressEn,
                 provinceKh: ov?.provinceKh || seed.provinceKh,
@@ -650,20 +678,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 createdAt: seed.created_at || getRestaurantCreatedAtIso(seed),
               }));
             } else {
-              // Enforce max 1 custom restaurant per non-admin user
-              const ownerId = r?.ownerId ? String(r.ownerId) : '';
-              const isAdminOwner = ownerId === 'admin-authorized-single';
-              if (ownerId && !isAdminOwner) {
-                if (seenNonAdminOwners.has(ownerId)) continue;
-                seenNonAdminOwners.add(ownerId);
-              }
               normalizedList.push(normalizeRestaurant(r));
             }
           }
           if (vaultChanged) {
             saveLocalMediaOverrides(vault);
           }
-          return sortRestaurantsChronologically(applyRestaurantOverrides(normalizedList, vault.restaurants));
+          return sortRestaurantsChronologically(
+            applyRestaurantOverrides(normalizedList, vault.restaurants).map(normalizeRestaurant)
+          );
         }
       }
     } catch (e) {
@@ -735,11 +758,44 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       return normalizeRestaurant(r);
     });
-    return sortRestaurantsChronologically(applyRestaurantOverrides([...baseRestaurants, ...customLegacyRestaurants], vault.restaurants));
+    return sortRestaurantsChronologically(
+      applyRestaurantOverrides([...baseRestaurants, ...customLegacyRestaurants], vault.restaurants).map(normalizeRestaurant)
+    );
   });
 
   const [isManageMenuModalOpen, setIsManageMenuModalOpen] = useState(false);
-  const [managingRestaurant, setManagingRestaurant] = useState<Restaurant | null>(null);
+  const [managingRestaurant, setManagingRestaurantState] = useState<Restaurant | null>(null);
+  const [activeManagedShopId, setActiveManagedShopIdState] = useState<string | null>(() => {
+    try {
+      return localStorage.getItem('kft_active_managed_shop_global') || null;
+    } catch {
+      return null;
+    }
+  });
+
+  const setActiveManagedShopId = (shopId: string | null) => {
+    setActiveManagedShopIdState(shopId);
+    try {
+      if (shopId) {
+        localStorage.setItem('kft_active_managed_shop_global', shopId);
+        if (currentUser?.id) {
+          localStorage.setItem(`kft_active_managed_shop_${currentUser.id}`, shopId);
+        }
+      } else {
+        localStorage.removeItem('kft_active_managed_shop_global');
+        if (currentUser?.id) {
+          localStorage.removeItem(`kft_active_managed_shop_${currentUser.id}`);
+        }
+      }
+    } catch {}
+  };
+
+  const setManagingRestaurant = (rest: Restaurant | null) => {
+    setManagingRestaurantState(rest);
+    if (rest?.id) {
+      setActiveManagedShopId(rest.id);
+    }
+  };
 
   const [transactions, setTransactions] = useState<RegistrationTransaction[]>(() => {
     try {
@@ -3342,7 +3398,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     if (!isAdmin) {
-      const existingOwned = restaurants.find(r => r.ownerId === currentUser.id);
+      const existingOwned = restaurants.find(
+        r => !isSeedRestaurantId(r.id) && (r.ownerId === currentUser.id || (currentUser.email && r.ownerEmail && r.ownerEmail.toLowerCase() === currentUser.email.toLowerCase()))
+      );
       if (existingOwned) {
         showToast(
           language === 'km'
@@ -3364,16 +3422,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const expiryIso =
       currentUser.subscriptionExpiryDate ||
       new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString();
+    const uniqueShopId = (restData as any).id || `rest-vip-${currentUser.id}-${Date.now()}`;
     const newRest: Restaurant = normalizeRestaurant({
       ...restData,
       photoUrl: profileImg,
       profileImage: profileImg,
       galleryPhotos: foodImgs,
       foodImages: foodImgs,
-      id: restData.id || `rest-vip-${Date.now()}`,
-      rating: 5.0,
-      reviewCount: 1,
+      id: uniqueShopId,
+      // Do NOT auto-assign a 5-star rating when registering a VIP shop; ratings come strictly from genuine customer reviews
+      rating: 0,
+      reviewCount: 0,
+      reviews: [],
       ownerId: currentUser.id,
+      ownerName: currentUser.name,
+      ownerEmail: currentUser.email,
+      ownerPhone: restData.phone || currentUser.phone,
       status: 'approved',
       isVerified: true,
       isPromoted: true,
@@ -3383,31 +3447,112 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       menuItems: (restData.menuItems || []).slice(0, 20),
       created_at: restData.created_at || restData.createdAt || nowIso,
       createdAt: restData.created_at || restData.createdAt || nowIso,
+      updatedAt: nowIso,
     });
 
+    recordPermanentRestaurantOverride(newRest);
+    setActiveManagedShopId(newRest.id);
+    setManagingRestaurantState(newRest);
+
     setRestaurants(prev => {
-      const nextList = sortRestaurantsChronologically([...prev, newRest]);
+      const nextList = sortRestaurantsChronologically([...prev.filter(r => r.id !== newRest.id), newRest]);
       try {
         localStorage.setItem('kft_restaurants_real_v9', JSON.stringify(nextList));
       } catch (e) {
         console.warn('Immediate save failed for new restaurant:', e);
       }
+      // Background push to Supabase Cloud if configured
+      try {
+        if (isSupabaseConfigured()) {
+          const customRests = nextList.filter(r => !isSeedRestaurantId(r.id));
+          pushCloudDocument('kft_cloud_custom_restaurants_v1', customRests);
+        }
+      } catch {}
       return nextList;
     });
-
-    // Background push to Supabase Cloud if configured
-    try {
-      if (isSupabaseConfigured()) {
-        const customRests = [...restaurants.filter(r => !isSeedRestaurantId(r.id)), newRest];
-        pushCloudDocument('kft_cloud_custom_restaurants_v1', customRests);
-      }
-    } catch {}
 
     showToast(
       language === 'km' ? '🎉 ចុះបញ្ជីហាង VIP របស់អ្នកបានជោគជ័យ!' : '🎉 Registered your VIP Restaurant successfully!',
       'success'
     );
     return newRest;
+  };
+
+  // Resolve all restaurants owned by a user, sorted newest/most-recently-updated first so the active shop is always prioritized
+  const getOwnedRestaurantsForUser = (targetUser: User | null = currentUser): Restaurant[] => {
+    if (!targetUser) return [];
+    const userEmailLower = (targetUser.email || '').trim().toLowerCase();
+    const matched = restaurants.filter(r => {
+      // Never match seed demo shop rest-19 ('owner-1') unless the user's id is literally 'owner-1'
+      if (isSeedRestaurantId(r.id) && r.ownerId !== targetUser.id) return false;
+      if (r.ownerId && r.ownerId === targetUser.id) return true;
+      if (userEmailLower && r.ownerEmail && r.ownerEmail.trim().toLowerCase() === userEmailLower) return true;
+      return false;
+    });
+    return [...matched].sort((a, b) => {
+      const aTime = a.updatedAt ? Date.parse(a.updatedAt) : getRestaurantCreatedAtMs(a);
+      const bTime = b.updatedAt ? Date.parse(b.updatedAt) : getRestaurantCreatedAtMs(b);
+      return (Number.isNaN(bTime) ? 0 : bTime) - (Number.isNaN(aTime) ? 0 : aTime);
+    });
+  };
+
+  // Always open the exact shop owned by the logged-in user (or preferredShopId)
+  const openManageMyVipStore = (
+    preferredShopId?: string,
+    initialTab?: 'menu' | 'info' | 'photos' | 'analytics' | 'membership'
+  ) => {
+    if (!currentUser) {
+      setIsAuthModalOpen(true);
+      return;
+    }
+    if (initialTab) {
+      (window as any).__kft_manage_initial_tab = initialTab;
+    }
+
+    // 1. If a specific shop ID was explicitly requested (e.g. from a RestaurantCard or switcher), load that exact shop
+    if (preferredShopId) {
+      const explicitShop = restaurants.find(r => r.id === preferredShopId);
+      if (explicitShop) {
+        setManagingRestaurant(explicitShop);
+        setIsManageMenuModalOpen(true);
+        return;
+      }
+    }
+
+    // 2. Look up shops owned by the logged-in user (sorted newest first)
+    const ownedShops = getOwnedRestaurantsForUser(currentUser);
+    if (ownedShops.length > 0) {
+      let savedShopId: string | null = activeManagedShopId;
+      try {
+        savedShopId = localStorage.getItem(`kft_active_managed_shop_${currentUser.id}`) || activeManagedShopId;
+      } catch {}
+      const preferredOwned = savedShopId ? ownedShops.find(r => r.id === savedShopId) : undefined;
+      const targetShop = preferredOwned || ownedShops[0];
+      setManagingRestaurant(targetShop);
+      setIsManageMenuModalOpen(true);
+      return;
+    }
+
+    // 3. If Admin has no personal shop under currentUser.id, check custom VIP shops sorted newest first
+    const isAdmin =
+      currentUser.role === 'admin' ||
+      currentUser.id === 'admin-authorized-single' ||
+      currentUser.username === 'admin' ||
+      currentUser.username === 'cheasavuth';
+    if (isAdmin) {
+      const customShops = [...restaurants.filter(r => !isSeedRestaurantId(r.id))].sort(
+        (a, b) => getRestaurantCreatedAtMs(b) - getRestaurantCreatedAtMs(a)
+      );
+      if (customShops.length > 0) {
+        const target = (activeManagedShopId && customShops.find(r => r.id === activeManagedShopId)) || customShops[0];
+        setManagingRestaurant(target);
+        setIsManageMenuModalOpen(true);
+        return;
+      }
+    }
+
+    // 4. If the user does not have a VIP shop yet, open the Register VIP Shop modal
+    setIsVipAddRestaurantModalOpen(true);
   };
 
   const updateRestaurant = (updated: Restaurant) => {
@@ -3564,31 +3709,35 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
 
     const updatedMenuItems = [...currentItems, newItem];
-    setRestaurants(prev => prev.map(r => {
-      if (r.id !== restaurantId) return r;
-      return {
-        ...r,
-        membershipTier: 'premium' as MembershipTier,
-        isPromoted: true,
-        menuItems: updatedMenuItems,
-      };
-    }));
+    const nowIso = new Date().toISOString();
+    const updatedRest: Restaurant = {
+      ...targetRest,
+      membershipTier: 'premium' as MembershipTier,
+      isPromoted: true,
+      menuItems: updatedMenuItems,
+      updatedAt: nowIso,
+    };
+
+    recordPermanentRestaurantOverride(updatedRest);
+
+    setRestaurants(prev => {
+      const next = prev.map(r => (r.id === restaurantId ? updatedRest : r));
+      try {
+        localStorage.setItem('kft_restaurants_real_v9', JSON.stringify(next));
+      } catch {}
+      if (!isSeedRestaurantId(restaurantId) && isSupabaseConfigured()) {
+        try {
+          pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter(r => !isSeedRestaurantId(r.id)));
+        } catch {}
+      }
+      return next;
+    });
 
     if (selectedRestaurant?.id === restaurantId) {
-      setSelectedRestaurant({
-        ...selectedRestaurant,
-        membershipTier: 'premium',
-        isPromoted: true,
-        menuItems: updatedMenuItems,
-      });
+      setSelectedRestaurant(updatedRest);
     }
     if (managingRestaurant?.id === restaurantId) {
-      setManagingRestaurant({
-        ...managingRestaurant,
-        membershipTier: 'premium',
-        isPromoted: true,
-        menuItems: updatedMenuItems,
-      });
+      setManagingRestaurant(updatedRest);
     }
 
     showToast(
@@ -3635,13 +3784,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const updatedMenuItems = (targetRest.menuItems || []).map(item => 
       item.id === updatedItem.id ? { ...updatedItem, updatedAt: new Date().toISOString().split('T')[0] } : item
     );
+    const updatedRest: Restaurant = {
+      ...targetRest,
+      menuItems: updatedMenuItems,
+      updatedAt: new Date().toISOString(),
+    };
 
-    setRestaurants(prev => prev.map(r => r.id === restaurantId ? { ...r, menuItems: updatedMenuItems } : r));
+    recordPermanentRestaurantOverride(updatedRest);
+
+    setRestaurants(prev => {
+      const next = prev.map(r => (r.id === restaurantId ? updatedRest : r));
+      try {
+        localStorage.setItem('kft_restaurants_real_v9', JSON.stringify(next));
+      } catch {}
+      if (!isSeedRestaurantId(restaurantId) && isSupabaseConfigured()) {
+        try {
+          pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter(r => !isSeedRestaurantId(r.id)));
+        } catch {}
+      }
+      return next;
+    });
     if (selectedRestaurant?.id === restaurantId) {
-      setSelectedRestaurant({ ...selectedRestaurant, menuItems: updatedMenuItems });
+      setSelectedRestaurant(updatedRest);
     }
     if (managingRestaurant?.id === restaurantId) {
-      setManagingRestaurant({ ...managingRestaurant, menuItems: updatedMenuItems });
+      setManagingRestaurant(updatedRest);
     }
 
     showToast(language === 'km' ? 'បានកែប្រែព័ត៌មានមុខម្ហូបជោគជ័យ!' : 'Menu item updated!', 'success');
@@ -3668,12 +3835,116 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     const updatedMenuItems = (targetRest.menuItems || []).filter(item => item.id !== menuItemId);
-    setRestaurants(prev => prev.map(r => r.id === restaurantId ? { ...r, menuItems: updatedMenuItems } : r));
+    const updatedRest: Restaurant = {
+      ...targetRest,
+      menuItems: updatedMenuItems,
+      updatedAt: new Date().toISOString(),
+    };
+
+    recordPermanentRestaurantOverride(updatedRest);
+
+    setRestaurants(prev => {
+      const next = prev.map(r => (r.id === restaurantId ? updatedRest : r));
+      try {
+        localStorage.setItem('kft_restaurants_real_v9', JSON.stringify(next));
+      } catch {}
+      if (!isSeedRestaurantId(restaurantId) && isSupabaseConfigured()) {
+        try {
+          pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter(r => !isSeedRestaurantId(r.id)));
+        } catch {}
+      }
+      return next;
+    });
     if (selectedRestaurant?.id === restaurantId) {
-      setSelectedRestaurant({ ...selectedRestaurant, menuItems: updatedMenuItems });
+      setSelectedRestaurant(updatedRest);
+    }
+    if (managingRestaurant?.id === restaurantId) {
+      setManagingRestaurant(updatedRest);
     }
 
-    showToast(language === 'km' ? 'បានលុបមុខម្ហូប!' : 'Menu item removed', 'info');
+    showToast(language === 'km' ? 'បានលុបមុខម្ហូបដោយជោគជ័យ!' : 'Menu item removed successfully!', 'info');
+    return true;
+  };
+
+  // Genuine Customer Review & Star Rating Submission (1 to 5 stars)
+  const addRestaurantReview = (restaurantId: string, rating: number, comment?: string): boolean => {
+    if (!currentUser) {
+      setIsAuthModalOpen(true);
+      showToast(
+        language === 'km'
+          ? 'សូមចូលគណនីជាមុនសិន ដើម្បីដាក់ផ្កាយវាយតម្លៃហាងអាហារ!'
+          : 'Please sign in first to submit a restaurant rating!',
+        'warning'
+      );
+      return false;
+    }
+
+    const targetRest = restaurants.find(r => r.id === restaurantId);
+    if (!targetRest) return false;
+
+    const clampedRating = Math.min(5, Math.max(1, Math.round(rating)));
+    const nowIso = new Date().toISOString();
+    const existingReviews = Array.isArray(targetRest.reviews) ? targetRest.reviews : [];
+
+    // Allow 1 review per customer per shop (if user already reviewed, update their review)
+    const existingIdx = existingReviews.findIndex(rev => rev.userId === currentUser.id);
+    const newReview: RestaurantReview = {
+      id: existingIdx >= 0 ? existingReviews[existingIdx].id : `rev-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      restaurantId,
+      userId: currentUser.id,
+      userName: currentUser.name,
+      userAvatar: currentUser.avatar,
+      rating: clampedRating,
+      comment: comment?.trim() || undefined,
+      createdAt: nowIso,
+    };
+
+    const nextReviews =
+      existingIdx >= 0
+        ? existingReviews.map((rev, idx) => (idx === existingIdx ? newReview : rev))
+        : [newReview, ...existingReviews];
+
+    const summary = getRestaurantRatingSummary({
+      ...targetRest,
+      reviews: nextReviews,
+    });
+
+    const updatedRest: Restaurant = {
+      ...targetRest,
+      reviews: nextReviews,
+      rating: summary.averageRating,
+      reviewCount: summary.reviewCount,
+      updatedAt: nowIso,
+    };
+
+    recordPermanentRestaurantOverride(updatedRest);
+
+    setRestaurants(prev => {
+      const next = prev.map(r => (r.id === restaurantId ? updatedRest : r));
+      try {
+        localStorage.setItem('kft_restaurants_real_v9', JSON.stringify(next));
+      } catch {}
+      if (!isSeedRestaurantId(restaurantId) && isSupabaseConfigured()) {
+        try {
+          pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter(r => !isSeedRestaurantId(r.id)));
+        } catch {}
+      }
+      return next;
+    });
+
+    if (selectedRestaurant?.id === restaurantId) {
+      setSelectedRestaurant(updatedRest);
+    }
+    if (managingRestaurant?.id === restaurantId) {
+      setManagingRestaurant(updatedRest);
+    }
+
+    showToast(
+      language === 'km'
+        ? `⭐ អរគុណសម្រាប់ការវាយតម្លៃ ${clampedRating} ផ្កាយ! (មធ្យមភាគ៖ ${summary.averageRating.toFixed(1)} ★ ពី ${summary.reviewCount} ការវាយតម្លៃ)`
+        : `⭐ Thank you for your ${clampedRating}-star review! (Average: ${summary.averageRating.toFixed(1)} ★ from ${summary.reviewCount} reviews)`,
+      'success'
+    );
     return true;
   };
 
@@ -3800,11 +4071,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       );
       return;
     }
-    setRestaurants(prev => prev.filter(r => r.id !== id));
+    removePermanentRestaurantOverride(id);
+    setRestaurants(prev => {
+      const next = prev.filter(r => r.id !== id);
+      try {
+        localStorage.setItem('kft_restaurants_real_v9', JSON.stringify(next));
+      } catch {}
+      if (isSupabaseConfigured()) {
+        try {
+          pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter(r => !isSeedRestaurantId(r.id)));
+        } catch {}
+      }
+      return next;
+    });
     if (selectedRestaurant?.id === id) setSelectedRestaurant(null);
     if (managingRestaurant?.id === id) {
-      setManagingRestaurant(null);
-      setIsManageMenuModalOpen(false);
+      const remainingOwned = restaurants.filter(r => r.id !== id && !isSeedRestaurantId(r.id) && r.ownerId === currentUser?.id);
+      if (remainingOwned.length > 0) {
+        setManagingRestaurant(remainingOwned[remainingOwned.length - 1]);
+      } else {
+        setManagingRestaurant(null);
+        setActiveManagedShopId(null);
+        setIsManageMenuModalOpen(false);
+      }
     }
     showToast(
       language === 'km'
@@ -6159,6 +6448,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         addRestaurantMenuItem,
         updateRestaurantMenuItem,
         deleteRestaurantMenuItem,
+        addRestaurantReview,
         upgradeRestaurantToPremium,
         trackRestaurantView,
         trackRestaurantCall,
@@ -6168,6 +6458,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setIsManageMenuModalOpen,
         managingRestaurant,
         setManagingRestaurant,
+        activeManagedShopId,
+        setActiveManagedShopId,
+        getOwnedRestaurantsForUser,
+        openManageMyVipStore,
         addDestination,
         updateDestination,
         deleteDestination,

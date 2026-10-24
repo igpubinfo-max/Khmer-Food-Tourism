@@ -4,11 +4,12 @@ import {
   X, UtensilsCrossed, Plus, Trash2, Edit2, Sparkles, 
   AlertCircle, CheckCircle2, Image, DollarSign, Calendar, Clock,
   Store, BarChart3, ShieldCheck, Share2, Phone, MapPin, ExternalLink,
-  MessageCircle, Copy, Check, HelpCircle, ArrowRight, Camera, Upload, Lock, ShieldAlert
+  MessageCircle, Copy, Check, HelpCircle, ArrowRight, Camera, Upload, Lock, ShieldAlert, Star
 } from 'lucide-react';
 import { 
-  RestaurantMenuItem, isRestaurantPremiumActive, isUserVipActive, 
-  VIP_PLANS, VipPlanType, getVipAccountState, VipAccountState 
+  RestaurantMenuItem, RestaurantPriceLevel, isRestaurantPremiumActive, isUserVipActive, 
+  VIP_PLANS, VipPlanType, getVipAccountState, VipAccountState,
+  getRestaurantRatingSummary, isSeedRestaurantId, getRestaurantCreatedAtMs
 } from '../types';
 import {
   pickImageUsingNativeAndroidGallery,
@@ -22,6 +23,8 @@ export const ManageMenuModal: React.FC = () => {
     isManageMenuModalOpen, 
     setIsManageMenuModalOpen, 
     managingRestaurant,
+    setManagingRestaurant,
+    restaurants,
     currentUser,
     addRestaurantMenuItem,
     updateRestaurantMenuItem,
@@ -29,6 +32,9 @@ export const ManageMenuModal: React.FC = () => {
     updateRestaurant,
     deleteRestaurant,
     upgradeRestaurantToPremium,
+    getOwnedRestaurantsForUser,
+    setActiveManagedShopId,
+    setIsVipAddRestaurantModalOpen,
     language,
     showToast,
     openUpgradeVipModal,
@@ -40,12 +46,14 @@ export const ManageMenuModal: React.FC = () => {
   const activePlan = VIP_PLANS[selectedVipPlan];
   const promoPrice = activePlan.priceUsd;
 
-  // Main Tabs: menu, info, analytics, membership
-  const [mainTab, setMainTab] = useState<'menu' | 'info' | 'analytics' | 'membership'>('menu');
+  // Main Tabs: menu, info, photos, analytics, membership
+  const [mainTab, setMainTab] = useState<'menu' | 'info' | 'photos' | 'analytics' | 'membership'>('menu');
 
   // Menu item form mode: list, add, edit
   const [menuMode, setMenuMode] = useState<'list' | 'add' | 'edit'>('list');
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
+  const [confirmDeleteMenuItemId, setConfirmDeleteMenuItemId] = useState<string | null>(null);
+  const [statusBanner, setStatusBanner] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   // Menu item fields
   const [nameKh, setNameKh] = useState('');
@@ -140,8 +148,11 @@ export const ManageMenuModal: React.FC = () => {
   const [storeNameKh, setStoreNameKh] = useState(managingRestaurant?.nameKh || '');
   const [storeNameEn, setStoreNameEn] = useState(managingRestaurant?.nameEn || '');
   const [storePhone, setStorePhone] = useState(managingRestaurant?.phone || '');
+  const [storeProvinceKh, setStoreProvinceKh] = useState(managingRestaurant?.provinceKh || 'រាជធានីភ្នំពេញ');
   const [storeAddressKh, setStoreAddressKh] = useState(managingRestaurant?.addressKh || '');
   const [storeOpeningHours, setStoreOpeningHours] = useState(managingRestaurant?.openingHoursKh || '');
+  const [storePriceLevel, setStorePriceLevel] = useState<RestaurantPriceLevel>(managingRestaurant?.priceLevel || '$$');
+  const [storeDescriptionKh, setStoreDescriptionKh] = useState(managingRestaurant?.descriptionKh || '');
   const [storeMapUrl, setStoreMapUrl] = useState(managingRestaurant?.mapUrl || '');
   const [storeCoverPhoto, setStoreCoverPhoto] = useState(managingRestaurant?.photoUrl || '');
   const [storeGalleryPhotos, setStoreGalleryPhotos] = useState<string[]>(managingRestaurant?.galleryPhotos || []);
@@ -151,21 +162,47 @@ export const ManageMenuModal: React.FC = () => {
   const [newGalleryInput, setNewGalleryInput] = useState('');
   const [confirmDeleteStore, setConfirmDeleteStore] = useState(false);
 
-  // Sync state whenever managingRestaurant changes
+  const isAdminUser =
+    currentUser?.role === 'admin' ||
+    currentUser?.id === 'admin-authorized-single' ||
+    currentUser?.username === 'admin' ||
+    currentUser?.username === 'cheasavuth';
+
+  // Ensure non-admin user ALWAYS opens their own shop (by unique shop_id and owner_id)
+  useEffect(() => {
+    if (!isManageMenuModalOpen || !currentUser) return;
+    const owned = getOwnedRestaurantsForUser(currentUser);
+    if (!isAdminUser && owned.length > 0) {
+      const isCurrentlyOwned = managingRestaurant && owned.some((r) => r.id === managingRestaurant.id);
+      if (!isCurrentlyOwned) {
+        setManagingRestaurant(owned[0]);
+      }
+    }
+  }, [isManageMenuModalOpen, currentUser?.id, managingRestaurant?.id]);
+
+  // Sync state whenever managingRestaurant changes (strictly isolated per shop_id)
   useEffect(() => {
     if (managingRestaurant) {
-      setStoreNameKh(managingRestaurant.nameKh || '');
-      setStoreNameEn(managingRestaurant.nameEn || '');
-      setStorePhone(managingRestaurant.phone || '');
-      setStoreAddressKh(managingRestaurant.addressKh || '');
-      setStoreOpeningHours(managingRestaurant.openingHoursKh || '');
-      setStoreMapUrl(managingRestaurant.mapUrl || '');
-      setStoreCoverPhoto(managingRestaurant.photoUrl || '');
-      setStoreGalleryPhotos(managingRestaurant.galleryPhotos || []);
-      setStorePromoVideoUrl(managingRestaurant.promoVideoUrl || '');
-      setStoreTelegramUrl(managingRestaurant.telegramUrl || '');
-      setStoreFacebookUrl(managingRestaurant.facebookUrl || '');
+      const fresh = restaurants.find((r) => r.id === managingRestaurant.id) || managingRestaurant;
+      setStoreNameKh(fresh.nameKh || '');
+      setStoreNameEn(fresh.nameEn || '');
+      setStorePhone(fresh.phone || '');
+      setStoreProvinceKh(fresh.provinceKh || 'រាជធានីភ្នំពេញ');
+      setStoreAddressKh(fresh.addressKh || '');
+      setStoreOpeningHours(fresh.openingHoursKh || '');
+      setStorePriceLevel(fresh.priceLevel || '$$');
+      setStoreDescriptionKh(fresh.descriptionKh || '');
+      setStoreMapUrl(fresh.mapUrl || '');
+      setStoreCoverPhoto(fresh.photoUrl || '');
+      setStoreGalleryPhotos(fresh.galleryPhotos || []);
+      setStorePromoVideoUrl(fresh.promoVideoUrl || '');
+      setStoreTelegramUrl(fresh.telegramUrl || '');
+      setStoreFacebookUrl(fresh.facebookUrl || '');
       setConfirmDeleteStore(false);
+      setConfirmDeleteMenuItemId(null);
+      setMenuMode('list');
+      setEditingItemId(null);
+      setStatusBanner(null);
     }
   }, [managingRestaurant?.id]);
 
@@ -173,7 +210,10 @@ export const ManageMenuModal: React.FC = () => {
   useEffect(() => {
     if (isManageMenuModalOpen) {
       const requestedTab = (window as any).__kft_manage_initial_tab;
-      if (requestedTab && ['menu', 'info', 'analytics', 'membership'].includes(requestedTab)) {
+      if (requestedTab === 'video') {
+        setMainTab('info');
+        (window as any).__kft_manage_initial_tab = undefined;
+      } else if (requestedTab && ['menu', 'info', 'photos', 'analytics', 'membership'].includes(requestedTab)) {
         setMainTab(requestedTab);
         (window as any).__kft_manage_initial_tab = undefined;
       }
@@ -193,10 +233,23 @@ export const ManageMenuModal: React.FC = () => {
     currentUser?.username === 'admin' || 
     currentUser?.username === 'cheasavuth';
 
-  const isOwner = Boolean(currentUser?.id && managingRestaurant.ownerId === currentUser.id);
+  const isOwner = Boolean(
+    currentUser &&
+      (managingRestaurant.ownerId === currentUser.id ||
+        (currentUser.email &&
+          managingRestaurant.ownerEmail &&
+          managingRestaurant.ownerEmail.trim().toLowerCase() === currentUser.email.trim().toLowerCase()))
+  );
   const isApprovedVip = isUserVipActive(currentUser);
   const vipState = getVipAccountState(currentUser);
   const isAuthorized = isAdmin || (isOwner && isApprovedVip);
+
+  const ratingSummary = getRestaurantRatingSummary(managingRestaurant);
+  const switchableShops = isAdmin
+    ? [...restaurants.filter((r) => !isSeedRestaurantId(r.id))].sort(
+        (a, b) => getRestaurantCreatedAtMs(b) - getRestaurantCreatedAtMs(a)
+      )
+    : getOwnedRestaurantsForUser(currentUser);
 
   const menuItems = managingRestaurant.menuItems || [];
   const isPremiumActive = isRestaurantPremiumActive(managingRestaurant) || isApprovedVip || isAdmin;
@@ -204,10 +257,10 @@ export const ManageMenuModal: React.FC = () => {
   const isFree = !isPremiumActive && !isExpired;
 
   // Analytics Metrics
-  const viewsCount = managingRestaurant.analytics?.views || 86;
-  const callsCount = managingRestaurant.analytics?.phoneClicks || 19;
-  const mapsCount = managingRestaurant.analytics?.mapClicks || 24;
-  const sharesCount = managingRestaurant.analytics?.shareClicks || 11;
+  const viewsCount = managingRestaurant.analytics?.views ?? 0;
+  const callsCount = managingRestaurant.analytics?.phoneClicks ?? 0;
+  const mapsCount = managingRestaurant.analytics?.mapClicks ?? 0;
+  const sharesCount = managingRestaurant.analytics?.shareClicks ?? 0;
 
   const origin = typeof window !== 'undefined' && window.location?.origin ? window.location.origin : 'https://khmerfoodtourism.com';
   const shareableUrl = `${origin}/?restaurant=${managingRestaurant.id}`;
@@ -228,15 +281,6 @@ export const ManageMenuModal: React.FC = () => {
     'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=80',
     'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80',
     'https://images.unsplash.com/photo-1512058564366-18510be2db19?w=800&auto=format&fit=crop&q=80',
-  ];
-
-  const sampleGalleryPhotos = [
-    'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80',
   ];
 
   const handleStartAdd = () => {
@@ -260,6 +304,7 @@ export const ManageMenuModal: React.FC = () => {
       return;
     }
     resetMenuForm();
+    setStatusBanner(null);
     setMenuMode('add');
   };
 
@@ -280,12 +325,17 @@ export const ManageMenuModal: React.FC = () => {
     setPriceRiel(item.priceRiel.toString());
     setDishPhotoUrl(item.photoUrl);
     setDescriptionKh(item.descriptionKh || '');
+    setStatusBanner(null);
     setMenuMode('edit');
   };
 
   const handleMenuSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!nameKh.trim()) {
+      setStatusBanner({
+        type: 'error',
+        text: isKm ? '⚠️ សូមបញ្ចូលឈ្មោះមុខម្ហូបជាភាសាខ្មែរ!' : '⚠️ Please enter the dish name in Khmer!',
+      });
       showToast(isKm ? 'សូមបញ្ចូលឈ្មោះមុខម្ហូប!' : 'Please enter food name!', 'warning');
       return;
     }
@@ -294,34 +344,56 @@ export const ManageMenuModal: React.FC = () => {
     const riel = parseInt(priceRiel) || Math.round(usd * 4100);
 
     if (menuMode === 'add') {
+      const savedName = nameKh.trim();
       const ok = addRestaurantMenuItem(managingRestaurant.id, {
-        nameKh: nameKh.trim(),
+        nameKh: savedName,
         nameEn: nameEn.trim(),
         priceUsd: usd,
         priceRiel: riel,
         photoUrl: dishPhotoUrl.trim() || sampleFoodPhotos[0],
         descriptionKh: descriptionKh.trim(),
       });
-      if (ok) resetMenuForm();
+      if (ok) {
+        resetMenuForm();
+        setStatusBanner({
+          type: 'success',
+          text: isKm
+            ? `✅ បានបន្ថែមមុខម្ហូប "${savedName}" ចូលក្នុងហាង "${managingRestaurant.nameKh}" ដោយជោគជ័យ!`
+            : `✅ Added "${savedName}" to "${managingRestaurant.nameEn || managingRestaurant.nameKh}"!`,
+        });
+      }
     } else if (menuMode === 'edit' && editingItemId) {
       const existing = menuItems.find(m => m.id === editingItemId);
       if (!existing) return;
+      const savedName = nameKh.trim();
       const ok = updateRestaurantMenuItem(managingRestaurant.id, {
         ...existing,
-        nameKh: nameKh.trim(),
+        nameKh: savedName,
         nameEn: nameEn.trim(),
         priceUsd: usd,
         priceRiel: riel,
         photoUrl: dishPhotoUrl.trim() || sampleFoodPhotos[0],
         descriptionKh: descriptionKh.trim(),
       });
-      if (ok) resetMenuForm();
+      if (ok) {
+        resetMenuForm();
+        setStatusBanner({
+          type: 'success',
+          text: isKm
+            ? `✅ បានរក្សាទុកការកែប្រែមុខម្ហូប "${savedName}" ដោយជោគជ័យ!`
+            : `✅ Updated dish "${savedName}" successfully!`,
+        });
+      }
     }
   };
 
   const handleSaveStoreInfo = (e: React.FormEvent) => {
     e.preventDefault();
     if (!storeNameKh.trim()) {
+      setStatusBanner({
+        type: 'error',
+        text: isKm ? '⚠️ សូមបញ្ចូលឈ្មោះហាងជាភាសាខ្មែរ!' : '⚠️ Please enter restaurant name in Khmer!',
+      });
       showToast(isKm ? 'សូមបញ្ចូលឈ្មោះហាងជាភាសាខ្មែរ!' : 'Please enter restaurant name!', 'warning');
       return;
     }
@@ -330,21 +402,50 @@ export const ManageMenuModal: React.FC = () => {
     updateRestaurant({
       ...managingRestaurant,
       nameKh: storeNameKh.trim(),
-      nameEn: storeNameEn.trim(),
+      nameEn: storeNameEn.trim() || storeNameKh.trim(),
       phone: storePhone.trim(),
+      provinceKh: storeProvinceKh.trim() || managingRestaurant.provinceKh,
       addressKh: storeAddressKh.trim(),
       openingHoursKh: storeOpeningHours.trim(),
+      priceLevel: storePriceLevel,
+      descriptionKh: storeDescriptionKh.trim(),
       mapUrl: storeMapUrl.trim(),
       photoUrl: finalCover,
       profileImage: finalCover,
       foodImages: storeGalleryPhotos,
-      galleryPhotos: Array.from(new Set([finalCover, ...storeGalleryPhotos])),
+      galleryPhotos: Array.from(new Set([finalCover, ...storeGalleryPhotos])).filter(Boolean),
       promoVideoUrl: storePromoVideoUrl.trim() || undefined,
       telegramUrl: storeTelegramUrl.trim() || undefined,
       facebookUrl: storeFacebookUrl.trim() || undefined,
+      updatedAt: new Date().toISOString(),
     });
 
-    showToast(isKm ? 'បានកែប្រែព័ត៌មានហាង រូបភាព និងវីដេអូ Reels ដោយជោគជ័យ!' : 'Restaurant info, photos, and video reel saved!', 'success');
+    setStatusBanner({
+      type: 'success',
+      text: isKm
+        ? `✅ បានរក្សាទុកព័ត៌មានហាង "${storeNameKh.trim()}" រូបភាព និងតម្លៃដោយជោគជ័យ!`
+        : `✅ Saved restaurant info & photos for "${storeNameEn.trim() || storeNameKh.trim()}"!`,
+    });
+    showToast(isKm ? '✅ បានរក្សាទុកព័ត៌មានហាង និងរូបភាពដោយជោគជ័យ!' : '✅ Restaurant info & photos saved!', 'success');
+  };
+
+  const handleSavePhotosOnly = () => {
+    const finalCover = storeCoverPhoto.trim() || storeGalleryPhotos[0] || managingRestaurant.photoUrl;
+    updateRestaurant({
+      ...managingRestaurant,
+      photoUrl: finalCover,
+      profileImage: finalCover,
+      foodImages: storeGalleryPhotos,
+      galleryPhotos: Array.from(new Set([finalCover, ...storeGalleryPhotos])).filter(Boolean),
+      updatedAt: new Date().toISOString(),
+    });
+    setStatusBanner({
+      type: 'success',
+      text: isKm
+        ? `✅ បានរក្សាទុករូបភាពហាងចំនួន ${Array.from(new Set([finalCover, ...storeGalleryPhotos])).filter(Boolean).length} សន្លឹកដោយជោគជ័យ!`
+        : '✅ Saved all restaurant photos successfully!',
+    });
+    showToast(isKm ? '✅ បានរក្សាទុករូបភាពហាងដោយជោគជ័យ!' : '✅ Restaurant photos saved!', 'success');
   };
 
   const handleAddGalleryPhoto = (url: string) => {
@@ -413,30 +514,96 @@ export const ManageMenuModal: React.FC = () => {
         className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] border border-slate-200 dark:border-slate-800"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
-        <div className="px-5 py-3.5 border-b border-[#047857] flex items-center justify-between bg-[#064E3B] text-white">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 bg-emerald-500/20 text-emerald-200 rounded-xl border border-emerald-400/30">
-              <Store className="w-5 h-5" />
+        {/* Header with Active Shop Identity & Shop Switcher */}
+        <div className="px-4 sm:px-5 py-3.5 border-b border-[#047857] bg-[#064E3B] text-white space-y-2.5">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-10 h-10 rounded-xl overflow-hidden bg-emerald-500/20 border border-emerald-400/40 shrink-0 flex items-center justify-center">
+                {managingRestaurant.photoUrl ? (
+                  <img
+                    src={managingRestaurant.photoUrl}
+                    alt={managingRestaurant.nameKh}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <Store className="w-5 h-5 text-emerald-200" />
+                )}
+              </div>
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <h2 className="font-moul text-xs sm:text-sm text-white leading-snug truncate">
+                    {isKm ? 'គ្រប់គ្រងហាង VIP របស់ខ្ញុំ' : 'Manage My VIP Store'}
+                  </h2>
+                  <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 font-black text-[9px]">
+                    ID: {managingRestaurant.id.slice(-8)}
+                  </span>
+                </div>
+                <p className="text-xs font-bold text-amber-200 font-khmer truncate">
+                  🏪 {isKm ? managingRestaurant.nameKh : (managingRestaurant.nameEn || managingRestaurant.nameKh)}
+                </p>
+              </div>
             </div>
-            <div>
-              <h2 className="font-moul text-sm text-white leading-snug">
-                {currentUser?.role === 'admin'
-                  ? (isKm ? 'គ្រប់គ្រង & កែប្រែហាង (Admin)' : 'Admin Restaurant Editor')
-                  : (isKm ? 'ផ្ទាំងគ្រប់គ្រងម្ចាស់ហាង' : 'Owner Management Hub')}
-              </h2>
-              <p className="text-[10px] text-emerald-200 font-khmer">
-                {isKm ? managingRestaurant.nameKh : managingRestaurant.nameEn}
-              </p>
-            </div>
+            <button
+              onClick={() => setIsManageMenuModalOpen(false)}
+              className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-emerald-200 hover:text-white transition shrink-0 cursor-pointer"
+              aria-label="Close"
+            >
+              <X className="w-5 h-5" />
+            </button>
           </div>
-          <button
-            onClick={() => setIsManageMenuModalOpen(false)}
-            className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-emerald-200 hover:text-white transition"
-            aria-label="Close"
-          >
-            <X className="w-5 h-5" />
-          </button>
+
+          {/* Multi-Shop Switcher Bar (Ensures Owner/Admin always edits the exact intended shop_id) */}
+          {switchableShops.length > 0 && (
+            <div className="pt-2 border-t border-emerald-700/70 flex flex-col gap-1.5 font-khmer">
+              <div className="flex items-center justify-between text-[10px] text-emerald-200">
+                <span>
+                  {isKm
+                    ? `ជ្រើសរើសហាងដែលអ្នកចង់កែប្រែ (${switchableShops.length} ហាង)៖`
+                    : `Select which store to manage (${switchableShops.length} stores):`}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsManageMenuModalOpen(false);
+                    setIsVipAddRestaurantModalOpen(true);
+                  }}
+                  className="px-2 py-0.5 rounded-lg bg-amber-400/20 hover:bg-amber-400/30 border border-amber-300/40 text-amber-200 font-bold text-[10px] transition cursor-pointer"
+                >
+                  {isKm ? '+ បន្ថែមហាងថ្មី' : '+ Add New Shop'}
+                </button>
+              </div>
+              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
+                {switchableShops.map((shop) => {
+                  const active = shop.id === managingRestaurant.id;
+                  return (
+                    <button
+                      key={shop.id}
+                      type="button"
+                      onClick={() => {
+                        setActiveManagedShopId(shop.id);
+                        setManagingRestaurant(shop);
+                      }}
+                      className={`px-2.5 py-1.5 rounded-xl text-[11px] font-bold flex items-center gap-1.5 shrink-0 transition cursor-pointer ${
+                        active
+                          ? 'bg-gradient-to-r from-amber-400 to-yellow-500 text-slate-950 shadow-sm ring-2 ring-white/50'
+                          : 'bg-emerald-950/60 hover:bg-emerald-900/80 text-emerald-100 border border-emerald-600/50'
+                      }`}
+                    >
+                      <img
+                        src={shop.photoUrl}
+                        alt={shop.nameKh}
+                        className="w-4 h-4 rounded-full object-cover shrink-0"
+                      />
+                      <span className="max-w-[130px] truncate">
+                        {isKm ? shop.nameKh : (shop.nameEn || shop.nameKh)}
+                      </span>
+                      {active && <span className="text-[9px] font-black">✓</span>}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* If Unauthorized: Display VIP Barrier */}
@@ -590,73 +757,99 @@ export const ManageMenuModal: React.FC = () => {
           </div>
         ) : (
           <>
-        {/* 4 Main Management Tabs */}
-        <div className="grid grid-cols-4 bg-slate-100 dark:bg-slate-800/80 p-1 border-b border-slate-200 dark:border-slate-700 text-center font-khmer">
+        {/* 5 Clearly Separated Management Sections */}
+        <div className="grid grid-cols-5 bg-slate-100 dark:bg-slate-800/80 p-1 border-b border-slate-200 dark:border-slate-700 text-center font-khmer gap-0.5">
           <button
-            onClick={() => { setMainTab('menu'); setMenuMode('list'); }}
-            className={`py-2 px-1 text-[11px] font-bold rounded-xl transition flex flex-col sm:flex-row items-center justify-center gap-1 ${
+            onClick={() => { setMainTab('menu'); setMenuMode('list'); setStatusBanner(null); }}
+            className={`py-2 px-1 text-[10px] sm:text-[11px] font-bold rounded-xl transition flex flex-col items-center justify-center gap-0.5 cursor-pointer ${
               mainTab === 'menu'
-                ? 'bg-white dark:bg-slate-900 text-[#064E3B] dark:text-emerald-400 shadow-xs'
+                ? 'bg-white dark:bg-slate-900 text-[#064E3B] dark:text-emerald-400 shadow-xs ring-1 ring-emerald-500/40'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
             }`}
           >
             <UtensilsCrossed className="w-3.5 h-3.5" />
-            <span>{isKm ? 'មុខម្ហូប (២០)' : 'Menu (20)'}</span>
+            <span className="leading-tight">{isKm ? '១. មុខម្ហូប' : '1. Menu'}</span>
           </button>
 
           <button
-            onClick={() => setMainTab('info')}
-            className={`py-2 px-1 text-[11px] font-bold rounded-xl transition flex flex-col sm:flex-row items-center justify-center gap-1 ${
+            onClick={() => { setMainTab('info'); setStatusBanner(null); }}
+            className={`py-2 px-1 text-[10px] sm:text-[11px] font-bold rounded-xl transition flex flex-col items-center justify-center gap-0.5 cursor-pointer ${
               mainTab === 'info'
-                ? 'bg-white dark:bg-slate-900 text-[#064E3B] dark:text-emerald-400 shadow-xs'
+                ? 'bg-white dark:bg-slate-900 text-[#064E3B] dark:text-emerald-400 shadow-xs ring-1 ring-emerald-500/40'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
             }`}
           >
             <Store className="w-3.5 h-3.5" />
-            <span>{isKm ? 'កែព័ត៌មានហាង' : 'Edit Store'}</span>
+            <span className="leading-tight">{isKm ? '២. ព័ត៌មានហាង' : '2. Info'}</span>
           </button>
 
           <button
-            onClick={() => setMainTab('analytics')}
-            className={`py-2 px-1 text-[11px] font-bold rounded-xl transition flex flex-col sm:flex-row items-center justify-center gap-1 ${
+            onClick={() => { setMainTab('photos'); setStatusBanner(null); }}
+            className={`py-2 px-1 text-[10px] sm:text-[11px] font-bold rounded-xl transition flex flex-col items-center justify-center gap-0.5 cursor-pointer ${
+              mainTab === 'photos'
+                ? 'bg-white dark:bg-slate-900 text-[#064E3B] dark:text-emerald-400 shadow-xs ring-1 ring-emerald-500/40'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+            }`}
+          >
+            <Camera className="w-3.5 h-3.5" />
+            <span className="leading-tight">{isKm ? '៣. រូបភាពហាង' : '3. Photos'}</span>
+          </button>
+
+          <button
+            onClick={() => { setMainTab('analytics'); setStatusBanner(null); }}
+            className={`py-2 px-1 text-[10px] sm:text-[11px] font-bold rounded-xl transition flex flex-col items-center justify-center gap-0.5 cursor-pointer ${
               mainTab === 'analytics'
-                ? 'bg-white dark:bg-slate-900 text-[#064E3B] dark:text-emerald-400 shadow-xs'
+                ? 'bg-white dark:bg-slate-900 text-[#064E3B] dark:text-emerald-400 shadow-xs ring-1 ring-emerald-500/40'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
             }`}
           >
             <BarChart3 className="w-3.5 h-3.5" />
-            <span>{isKm ? 'ស្ថិតិហាង' : 'Analytics'}</span>
+            <span className="leading-tight">{isKm ? '៤. ស្ថិតិ & ផ្កាយ' : '4. Stats'}</span>
           </button>
 
           <button
-            onClick={() => setMainTab('membership')}
-            className={`py-2 px-1 text-[11px] font-bold rounded-xl transition flex flex-col sm:flex-row items-center justify-center gap-1 ${
+            onClick={() => { setMainTab('membership'); setStatusBanner(null); }}
+            className={`py-2 px-1 text-[10px] sm:text-[11px] font-bold rounded-xl transition flex flex-col items-center justify-center gap-0.5 cursor-pointer ${
               mainTab === 'membership'
-                ? 'bg-white dark:bg-slate-900 text-[#064E3B] dark:text-emerald-400 shadow-xs'
+                ? 'bg-white dark:bg-slate-900 text-[#064E3B] dark:text-emerald-400 shadow-xs ring-1 ring-emerald-500/40'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
             }`}
           >
             <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-            <span>{isKm ? 'សមាជិក VIP' : 'VIP Plan'}</span>
+            <span className="leading-tight">{isKm ? '៥. គម្រោង VIP' : '5. VIP'}</span>
           </button>
         </div>
 
-        {/* Membership Status Pill Header */}
-        <div className="px-4 py-2.5 bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between text-xs font-khmer">
-          <div className="flex items-center gap-2">
+        {/* Status Bar: Separate VIP Status, Verification, and Customer Rating */}
+        <div className="px-4 py-2 bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between gap-2 text-xs font-khmer flex-wrap">
+          <div className="flex items-center gap-1.5 flex-wrap">
             {isPremiumActive ? (
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#064E3B] text-white flex items-center gap-1 shadow-xs">
-                <Sparkles className="w-3 h-3 text-emerald-300" />
-                <span>⭐ {isKm ? 'សមាជិកភាព VIP Premium សកម្ម' : 'VIP Premium Active'}</span>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#064E3B] text-white flex items-center gap-1 shadow-xs">
+                <Sparkles className="w-3 h-3 text-amber-300" />
+                <span>{isKm ? '👑 សមាជិក VIP' : '👑 VIP Active'}</span>
               </span>
             ) : isExpired ? (
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-700 flex items-center gap-1">
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-700 flex items-center gap-1">
                 <AlertCircle className="w-3 h-3" />
-                <span>⏳ {isKm ? 'Premium បានផុតកំណត់' : 'Premium Expired'}</span>
+                <span>⏳ {isKm ? 'ផុតកំណត់ VIP' : 'VIP Expired'}</span>
               </span>
             ) : (
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200">
-                🏷️ {isKm ? 'ចុះបញ្ជីឥតគិតថ្លៃ ($0 Free Listing)' : 'Free Listing ($0)'}
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200">
+                🏷️ {isKm ? 'ហាងធម្មតា' : 'Standard'}
+              </span>
+            )}
+
+            {/* Genuine Customer Rating Pill (Strictly separated from VIP status) */}
+            {ratingSummary.hasReviews ? (
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-300/60 flex items-center gap-1">
+                <Star className="w-3 h-3 text-amber-500 fill-amber-500" />
+                <span>
+                  {ratingSummary.averageRating.toFixed(1)} ({ratingSummary.reviewCount} {isKm ? 'ការវាយតម្លៃ' : 'reviews'})
+                </span>
+              </span>
+            ) : (
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-200/80 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+                {isKm ? 'មិនទាន់មានការវាយតម្លៃ' : 'No ratings yet'}
               </span>
             )}
           </div>
@@ -666,54 +859,90 @@ export const ManageMenuModal: React.FC = () => {
               {menuItems.length} / 20
             </span>
             <span className="text-[10px] text-slate-500 ml-1">
-              {isKm ? 'មុខម្ហូប' : 'items'}
+              {isKm ? 'មុខម្ហូប' : 'dishes'}
             </span>
           </div>
         </div>
 
+        {/* Clear Success / Error Feedback Banner */}
+        {statusBanner && (
+          <div
+            className={`mx-4 mt-3 p-3 rounded-2xl border flex items-center justify-between gap-2 text-xs font-khmer ${
+              statusBanner.type === 'success'
+                ? 'bg-emerald-50 dark:bg-emerald-950/50 border-emerald-400 text-emerald-900 dark:text-emerald-200'
+                : 'bg-red-50 dark:bg-red-950/50 border-red-400 text-red-800 dark:text-red-200'
+            }`}
+          >
+            <span className="font-bold">{statusBanner.text}</span>
+            <button
+              type="button"
+              onClick={() => setStatusBanner(null)}
+              className="p-1 rounded-lg hover:bg-black/10 text-current shrink-0 cursor-pointer"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
+
         {/* Body Content */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4 no-scrollbar text-xs">
 
-          {/* TAB 1: MENU ITEMS */}
+          {/* TAB 1: MENU ITEMS & PRICES */}
           {mainTab === 'menu' && (
             <div>
               {menuMode === 'list' && (
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-bold text-[#0F172A] dark:text-white font-khmer text-xs">
-                      {isKm ? 'មុខម្ហូបក្នុងហាង (អតិបរមា ២០ មុខ)' : 'Food Menu Items (Max 20)'}
-                    </h3>
-
-                    {isPremiumActive && menuItems.length < 20 && (
-                      <button
-                        onClick={handleStartAdd}
-                        className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-xs shadow-xs font-khmer transition active:scale-95"
-                      >
-                        <Plus className="w-3.5 h-3.5 text-emerald-200" />
-                        <span>{isKm ? 'បន្ថែមម្ហូបថ្មី' : 'Add Dish'}</span>
-                      </button>
-                    )}
+                <div className="space-y-3 font-khmer">
+                  {/* Friendly Khmer Step-by-Step Guide */}
+                  <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 flex items-center justify-between gap-3">
+                    <div className="space-y-0.5">
+                      <h3 className="font-bold text-[#064E3B] dark:text-emerald-300 text-xs">
+                        {isKm ? '📋 គ្រប់គ្រងមុខម្ហូប និងតម្លៃក្នុងហាងរបស់អ្នក' : '📋 Manage Your Store Menu & Prices'}
+                      </h3>
+                      <p className="text-[11px] text-slate-600 dark:text-slate-300">
+                        {isKm
+                          ? 'ចុច "+ បន្ថែមមុខម្ហូបថ្មី" ដើម្បីដាក់រូបម្ហូប និងតម្លៃ ឬចុច "កែប្រែ / លុប" លើមុខម្ហូបនីមួយៗ។'
+                          : 'Tap "+ Add New Dish" to add dishes with photos and prices, or Edit / Delete existing items.'}
+                      </p>
+                    </div>
                   </div>
 
+                  {isPremiumActive && menuItems.length < 20 && (
+                    <button
+                      type="button"
+                      onClick={handleStartAdd}
+                      className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-[#064E3B] to-[#047857] hover:from-[#047857] hover:to-[#065F46] text-white font-bold text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-98 cursor-pointer"
+                    >
+                      <Plus className="w-4 h-4 text-amber-300" />
+                      <span>{isKm ? '+ បន្ថែមមុខម្ហូបថ្មី (Add New Dish)' : '+ Add New Dish'}</span>
+                    </button>
+                  )}
+
                   {menuItems.length === 0 ? (
-                    <div className="py-10 text-center text-slate-400 space-y-2 font-khmer">
-                      <UtensilsCrossed className="w-10 h-10 mx-auto text-slate-300" />
-                      <p className="text-xs">
-                        {isKm ? 'ហាងនេះមិនទាន់មានមុខម្ហូបនៅឡើយទេ' : 'No menu items added yet'}
+                    <div className="py-8 px-4 text-center bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 text-slate-500 space-y-2.5 font-khmer">
+                      <UtensilsCrossed className="w-10 h-10 mx-auto text-emerald-600/60" />
+                      <p className="text-xs font-bold text-slate-700 dark:text-slate-200">
+                        {isKm ? 'ហាងនេះមិនទាន់មានមុខម្ហូបនៅឡើយទេ' : 'No menu items added to this shop yet'}
+                      </p>
+                      <p className="text-[11px] text-slate-500 max-w-xs mx-auto">
+                        {isKm
+                          ? 'បន្ថែមមុខម្ហូបឆ្ងាញ់ៗរបស់ហាងអ្នក ជាមួយរូបភាព និងតម្លៃ ដើម្បីទាក់ទាញអតិថិជន!'
+                          : 'Add your signature dishes with photos and prices so customers can see your menu!'}
                       </p>
                       {isPremiumActive ? (
                         <button
+                          type="button"
                           onClick={handleStartAdd}
-                          className="px-4 py-2 rounded-xl bg-[#064E3B] text-white font-bold text-xs hover:bg-[#047857] transition active:scale-95"
+                          className="px-5 py-2.5 rounded-xl bg-[#064E3B] text-white font-bold text-xs hover:bg-[#047857] transition active:scale-95 cursor-pointer"
                         >
-                          {isKm ? '+ បន្ថែមមុខម្ហូបដំបូង' : '+ Add First Menu Item'}
+                          {isKm ? '+ បន្ថែមមុខម្ហូបដំបូងឥឡូវនេះ' : '+ Add First Dish Now'}
                         </button>
                       ) : (
                         <button
+                          type="button"
                           onClick={() => setMainTab('membership')}
-                          className="px-4 py-2 rounded-xl bg-[#10B981] hover:bg-[#059669] text-white font-bold text-xs shadow-md transition active:scale-95"
+                          className="px-4 py-2 rounded-xl bg-[#10B981] hover:bg-[#059669] text-white font-bold text-xs shadow-md transition active:scale-95 cursor-pointer"
                         >
-                          {isKm ? '⭐ ដំឡើង VIP ($2.99 / $4.99) ដើម្បីបន្ថែមម្ហូប' : '⭐ Upgrade to VIP ($2.99 / $4.99) to add food items'}
+                          {isKm ? '⭐ ដំឡើង VIP ដើម្បីបន្ថែមម្ហូប' : '⭐ Upgrade to VIP to add food items'}
                         </button>
                       )}
                     </div>
@@ -722,54 +951,88 @@ export const ManageMenuModal: React.FC = () => {
                       {menuItems.map((item, index) => (
                         <div 
                           key={item.id}
-                          className="p-3 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 flex items-center gap-3 shadow-xs"
+                          className="p-3 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 space-y-2.5 shadow-xs"
                         >
-                          <div className="relative w-14 h-14 rounded-xl overflow-hidden bg-slate-100 shrink-0 border border-slate-200">
-                            <img src={item.photoUrl} alt={item.nameKh} className="w-full h-full object-cover" />
-                            <span className="absolute bottom-0 right-0 bg-black/65 text-white/90 text-[7px] px-1 rounded-tl-sm font-khmer select-none">
-                              {isKm ? 'រូបភាពយោង' : 'Ref'}
-                            </span>
-                          </div>
-
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-1.5">
-                              <span className="w-4 h-4 rounded-full bg-[#064E3B] text-white text-[9px] font-bold flex items-center justify-center shrink-0">
+                          <div className="flex items-center gap-3">
+                            <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-slate-100 shrink-0 border border-slate-200">
+                              <img src={item.photoUrl} alt={item.nameKh} className="w-full h-full object-cover" />
+                              <span className="absolute top-1 left-1 w-5 h-5 rounded-full bg-[#064E3B] text-white text-[10px] font-bold flex items-center justify-center shadow">
                                 {index + 1}
                               </span>
-                              <h4 className="font-bold text-[#0F172A] dark:text-white font-khmer text-xs truncate">
+                            </div>
+
+                            <div className="flex-1 min-w-0">
+                              <h4 className="font-bold text-[#0F172A] dark:text-white font-khmer text-xs sm:text-sm truncate">
                                 {item.nameKh}
                               </h4>
+                              {item.nameEn && (
+                                <p className="text-[10px] text-slate-500 truncate">{item.nameEn}</p>
+                              )}
+                              <div className="flex items-center gap-2 mt-1">
+                                <span className="px-2 py-0.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-[#064E3B] dark:text-emerald-400 font-black font-mono text-xs border border-emerald-200 dark:border-emerald-800">
+                                  ${item.priceUsd.toFixed(2)}
+                                </span>
+                                <span className="text-[11px] text-slate-500 font-mono">
+                                  ({item.priceRiel.toLocaleString()} ៛)
+                                </span>
+                              </div>
+                              {item.descriptionKh && (
+                                <p className="text-[10px] text-slate-500 font-khmer line-clamp-1 mt-0.5">{item.descriptionKh}</p>
+                              )}
                             </div>
-                            {item.nameEn && (
-                              <p className="text-[10px] text-slate-500 truncate">{item.nameEn}</p>
-                            )}
-                            <div className="flex items-center gap-2 mt-1">
-                              <span className="text-[#064E3B] dark:text-emerald-400 font-bold font-mono text-xs">${item.priceUsd.toFixed(2)}</span>
-                              <span className="text-[10px] text-slate-400 font-mono">({item.priceRiel.toLocaleString()} ៛)</span>
-                            </div>
-                            {item.descriptionKh && (
-                              <p className="text-[10px] text-slate-500 font-khmer line-clamp-1 mt-0.5">{item.descriptionKh}</p>
-                            )}
                           </div>
 
-                          {/* Action buttons */}
-                          <div className="flex items-center gap-1 shrink-0">
-                            <button
-                              onClick={() => handleStartEdit(item)}
-                              disabled={!isPremiumActive}
-                              className="p-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-emerald-50 hover:text-[#064E3B] transition disabled:opacity-40"
-                              title={isKm ? 'កែប្រែ' : 'Edit'}
-                            >
-                              <Edit2 className="w-3.5 h-3.5" />
-                            </button>
-                            <button
-                              onClick={() => deleteRestaurantMenuItem(managingRestaurant.id, item.id)}
-                              className="p-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-red-50 hover:text-red-600 transition"
-                              title={isKm ? 'លុប' : 'Delete'}
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
+                          {/* Clear Labeled Action Buttons + Safe Delete Confirmation */}
+                          {confirmDeleteMenuItemId === item.id ? (
+                            <div className="p-2.5 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 flex items-center justify-between gap-2">
+                              <span className="text-[11px] font-bold text-red-700 dark:text-red-300">
+                                {isKm ? `តើអ្នកពិតជាចង់លុប "${item.nameKh}" មែនទេ?` : `Delete "${item.nameKh}"?`}
+                              </span>
+                              <div className="flex items-center gap-1.5 shrink-0">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    deleteRestaurantMenuItem(managingRestaurant.id, item.id);
+                                    setConfirmDeleteMenuItemId(null);
+                                    setStatusBanner({
+                                      type: 'success',
+                                      text: isKm ? `🗑️ បានលុបមុខម្ហូប "${item.nameKh}" រួចរាល់!` : `🗑️ Deleted "${item.nameKh}"!`,
+                                    });
+                                  }}
+                                  className="px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold text-[11px] cursor-pointer"
+                                >
+                                  {isKm ? 'បាទ/ចាស លុប' : 'Yes, Delete'}
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setConfirmDeleteMenuItemId(null)}
+                                  className="px-3 py-1.5 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-[11px] cursor-pointer"
+                                >
+                                  {isKm ? 'បោះបង់' : 'Cancel'}
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="grid grid-cols-2 gap-2 pt-1 border-t border-slate-100 dark:border-slate-700/60">
+                              <button
+                                type="button"
+                                onClick={() => handleStartEdit(item)}
+                                disabled={!isPremiumActive}
+                                className="py-1.5 px-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 text-[#064E3B] dark:text-emerald-300 font-bold text-[11px] flex items-center justify-center gap-1.5 transition disabled:opacity-40 cursor-pointer"
+                              >
+                                <Edit2 className="w-3.5 h-3.5" />
+                                <span>{isKm ? '✏️ កែប្រែម្ហូប និងតម្លៃ' : '✏️ Edit Dish & Price'}</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setConfirmDeleteMenuItemId(item.id)}
+                                className="py-1.5 px-3 rounded-xl bg-red-50 dark:bg-red-950/30 hover:bg-red-100 text-red-600 dark:text-red-400 font-bold text-[11px] flex items-center justify-center gap-1.5 transition cursor-pointer"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                                <span>{isKm ? '🗑️ លុបមុខម្ហូប' : '🗑️ Delete Dish'}</span>
+                              </button>
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -780,23 +1043,27 @@ export const ManageMenuModal: React.FC = () => {
               {/* Menu Add / Edit Form */}
               {(menuMode === 'add' || menuMode === 'edit') && (
                 <form onSubmit={handleMenuSubmit} className="space-y-3 font-khmer">
-                  <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-2">
-                    <h3 className="font-bold text-xs text-[#064E3B] dark:text-emerald-400 flex items-center gap-1.5">
+                  <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 flex items-center justify-between gap-2">
+                    <h3 className="font-bold text-xs sm:text-sm text-[#064E3B] dark:text-emerald-300 flex items-center gap-1.5">
                       <UtensilsCrossed className="w-4 h-4" />
-                      <span>{menuMode === 'add' ? (isKm ? 'បន្ថែមមុខម្ហូបថ្មី' : 'Add Food Item') : (isKm ? 'កែប្រែមុខម្ហូប' : 'Edit Food Item')}</span>
+                      <span>
+                        {menuMode === 'add'
+                          ? (isKm ? '➕ បន្ថែមមុខម្ហូបថ្មី និងតម្លៃ' : '➕ Add New Dish & Price')
+                          : (isKm ? '✏️ កែប្រែមុខម្ហូប និងតម្លៃ' : '✏️ Edit Dish & Price')}
+                      </span>
                     </h3>
                     <button
                       type="button"
                       onClick={resetMenuForm}
-                      className="text-slate-400 hover:text-slate-600 text-xs"
+                      className="px-3 py-1 rounded-xl bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs hover:bg-slate-100 cursor-pointer"
                     >
-                      {isKm ? 'បោះបង់' : 'Cancel'}
+                      {isKm ? 'បោះបង់ (Cancel)' : 'Cancel'}
                     </button>
                   </div>
 
                   <div>
                     <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
-                      {isKm ? 'ឈ្មោះមុខម្ហូប (ជាភាសាខ្មែរ) *' : 'Dish Name (Khmer) *'}
+                      {isKm ? '១. ឈ្មោះមុខម្ហូប (ជាភាសាខ្មែរ) *' : '1. Dish Name (Khmer) *'}
                     </label>
                     <input
                       type="text"
@@ -804,27 +1071,27 @@ export const ManageMenuModal: React.FC = () => {
                       value={nameKh}
                       onChange={e => setNameKh(e.target.value)}
                       placeholder="ឧ. ត្រីដុតអំបិលម្ទេស ឬ សម្លកកូរ"
-                      className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs focus:ring-2 focus:ring-emerald-500/30 focus:border-[#059669] outline-none text-[#0F172A] dark:text-white"
+                      className="w-full px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs focus:ring-2 focus:ring-emerald-500/30 focus:border-[#059669] outline-none text-[#0F172A] dark:text-white"
                     />
                   </div>
 
                   <div>
                     <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
-                      {isKm ? 'ឈ្មោះមុខម្ហូប (English)' : 'Dish Name (English)'}
+                      {isKm ? '២. ឈ្មោះមុខម្ហូប (ជាភាសាអង់គ្លេស - មិនบังคับ)' : '2. Dish Name (English - Optional)'}
                     </label>
                     <input
                       type="text"
                       value={nameEn}
                       onChange={e => setNameEn(e.target.value)}
                       placeholder="e.g. Grilled Fish with Chili Salt"
-                      className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs focus:ring-2 focus:ring-emerald-500/30 focus:border-[#059669] outline-none text-[#0F172A] dark:text-white"
+                      className="w-full px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs focus:ring-2 focus:ring-emerald-500/30 focus:border-[#059669] outline-none text-[#0F172A] dark:text-white"
                     />
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
-                        {isKm ? 'តម្លៃ ($ USD) *' : 'Price ($ USD) *'}
+                        {isKm ? '៣. តម្លៃដុល្លារ ($ USD) *' : '3. Price ($ USD) *'}
                       </label>
                       <input
                         type="number"
@@ -836,26 +1103,58 @@ export const ManageMenuModal: React.FC = () => {
                           const val = parseFloat(e.target.value) || 0;
                           setPriceRiel((Math.round(val * 4100)).toString());
                         }}
-                        className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs focus:ring-2 focus:ring-emerald-500/30 focus:border-[#059669] outline-none text-[#0F172A] dark:text-white font-mono"
+                        className="w-full px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs focus:ring-2 focus:ring-emerald-500/30 focus:border-[#059669] outline-none text-[#0F172A] dark:text-white font-mono font-bold"
                       />
                     </div>
                     <div>
                       <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
-                        {isKm ? 'តម្លៃ (៛ រៀល)' : 'Price (KHR)'}
+                        {isKm ? '៤. តម្លៃរៀល (៛ KHR)' : '4. Price (KHR)'}
                       </label>
                       <input
                         type="number"
                         step="500"
                         value={priceRiel}
                         onChange={e => setPriceRiel(e.target.value)}
-                        className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs focus:ring-2 focus:ring-emerald-500/30 focus:border-[#059669] outline-none text-[#0F172A] dark:text-white font-mono"
+                        className="w-full px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs focus:ring-2 focus:ring-emerald-500/30 focus:border-[#059669] outline-none text-[#0F172A] dark:text-white font-mono font-bold"
                       />
                     </div>
                   </div>
 
                   <div>
                     <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
-                      {isKm ? 'រូបភាពមុខម្ហូប (Phone Upload ឬ Online Search) *' : 'Dish Photo (Phone Upload or Online Search) *'}
+                      {isKm ? '៥. ការពិពណ៌នាអំពីមុខម្ហូប (មិនបង្ខំ)' : '5. Short Dish Description (Optional)'}
+                    </label>
+                    <textarea
+                      rows={2}
+                      value={descriptionKh}
+                      onChange={e => setDescriptionKh(e.target.value)}
+                      placeholder="រៀបរាប់ពីរសជាតិ គ្រឿងផ្សំ និងរបៀបទទួលទាន..."
+                      className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs resize-none focus:ring-2 focus:ring-emerald-500/30 focus:border-[#059669] outline-none text-[#0F172A] dark:text-white"
+                    />
+                  </div>
+
+                  {/* Quick Save / Cancel Bar RIGHT HERE so mobile users never have to scroll past online photos to save */}
+                  <div className="grid grid-cols-2 gap-2.5 py-1">
+                    <button
+                      type="button"
+                      onClick={resetMenuForm}
+                      className="py-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs cursor-pointer"
+                    >
+                      {isKm ? 'បោះបង់ (Cancel)' : 'Cancel'}
+                    </button>
+                    <button
+                      type="submit"
+                      className="py-2.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-xs shadow-md transition active:scale-95 cursor-pointer"
+                    >
+                      {menuMode === 'add'
+                        ? (isKm ? '💾 រក្សាទុកមុខម្ហូប' : '💾 Save Dish')
+                        : (isKm ? '💾 រក្សាទុកការកែប្រែ' : '💾 Save Changes')}
+                    </button>
+                  </div>
+
+                  <div className="pt-1 border-t border-slate-200 dark:border-slate-700">
+                    <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
+                      {isKm ? '៦. រូបភាពមុខម្ហូប (ជ្រើសពីទូរស័ព្ទ ឬ ស្វែងរក Online) *' : '6. Dish Photo (Phone Upload or Online Search) *'}
                     </label>
 
                     {/* Hidden Native / Web File Inputs */}
@@ -1014,33 +1313,20 @@ export const ManageMenuModal: React.FC = () => {
                     </div>
                   </div>
 
-                  <div>
-                    <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
-                      {isKm ? 'ការពិពណ៌នាអំពីមុខម្ហូប' : 'Description'}
-                    </label>
-                    <textarea
-                      rows={2}
-                      value={descriptionKh}
-                      onChange={e => setDescriptionKh(e.target.value)}
-                      placeholder="រៀបរាប់ពីរសជាតិ គ្រឿងផ្សំ និងរបៀបទទួលទាន..."
-                      className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs resize-none focus:ring-2 focus:ring-emerald-500/30 focus:border-[#059669] outline-none text-[#0F172A] dark:text-white"
-                    />
-                  </div>
-
                   <div className="grid grid-cols-2 gap-3 pt-2">
                     <button
                       type="button"
                       onClick={resetMenuForm}
-                      className="py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold"
+                      className="py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold cursor-pointer"
                     >
-                      {isKm ? 'បោះបង់' : 'Cancel'}
+                      {isKm ? 'បោះបង់ (Cancel)' : 'Cancel'}
                     </button>
 
                     <button
                       type="submit"
-                      className="py-2.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold shadow-xs transition active:scale-95"
+                      className="py-2.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold shadow-xs transition active:scale-95 cursor-pointer"
                     >
-                      {menuMode === 'add' ? (isKm ? 'រក្សាទុកមុខម្ហូប' : 'Save Dish') : (isKm ? 'កែប្រែព័ត៌មាន' : 'Update Dish')}
+                      {menuMode === 'add' ? (isKm ? '💾 រក្សាទុកមុខម្ហូប' : '💾 Save Dish') : (isKm ? '💾 រក្សាទុកការកែប្រែ' : '💾 Update Dish')}
                     </button>
                   </div>
                 </form>
@@ -1048,41 +1334,49 @@ export const ManageMenuModal: React.FC = () => {
             </div>
           )}
 
-          {/* TAB 2: SELF-SERVICE STORE INFO EDITING (Benefit 4 & Benefit 2) */}
+          {/* TAB 2: STORE INFORMATION & PRICES */}
           {mainTab === 'info' && (
             <form onSubmit={handleSaveStoreInfo} className="space-y-3 font-khmer">
-              <div className="p-3 bg-emerald-50 dark:bg-emerald-950/30 rounded-2xl border border-emerald-200 dark:border-emerald-800 flex items-center gap-2">
-                <Store className="w-4 h-4 text-[#064E3B] dark:text-emerald-400 shrink-0" />
-                <span className="text-[11px] text-[#064E3B] dark:text-emerald-300 leading-snug">
-                  {isKm 
-                    ? 'កែប្រែព័ត៌មានហាង រូបភាព អាសយដ្ឋាន និងលេខទូរស័ព្ទដោយខ្លួនឯងបានគ្រប់ពេលវេលា។' 
-                    : 'Self-service editing of your restaurant name, multiple photos, phone, and address.'}
-                </span>
+              <div className="p-3 bg-emerald-50 dark:bg-emerald-950/30 rounded-2xl border border-emerald-200 dark:border-emerald-800 flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <Store className="w-4 h-4 text-[#064E3B] dark:text-emerald-400 shrink-0" />
+                  <span className="text-[11px] text-[#064E3B] dark:text-emerald-300 leading-snug font-bold">
+                    {isKm 
+                      ? '🏪 កែប្រែឈ្មោះហាង លេខទូរស័ព្ទ កម្រិតតម្លៃ និងអាសយដ្ឋាន' 
+                      : '🏪 Edit Store Name, Phone, Price Range & Address'}
+                  </span>
+                </div>
+                <button
+                  type="submit"
+                  className="px-3 py-1.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-[11px] shrink-0 shadow cursor-pointer"
+                >
+                  {isKm ? '💾 រក្សាទុក' : '💾 Save'}
+                </button>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
-                    {isKm ? 'ឈ្មោះហាង (ជាភាសាខ្មែរ) *' : 'Restaurant Name (Khmer) *'}
+                    {isKm ? '១. ឈ្មោះហាង (ជាភាសាខ្មែរ) *' : '1. Restaurant Name (Khmer) *'}
                   </label>
                   <input
                     type="text"
                     required
                     value={storeNameKh}
                     onChange={e => setStoreNameKh(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs focus:ring-2 focus:ring-emerald-500/30 focus:border-[#059669] outline-none text-[#0F172A] dark:text-white"
+                    className="w-full px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs focus:ring-2 focus:ring-emerald-500/30 focus:border-[#059669] outline-none text-[#0F172A] dark:text-white"
                   />
                 </div>
 
                 <div>
                   <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
-                    {isKm ? 'ឈ្មោះហាង (English)' : 'Restaurant Name (English)'}
+                    {isKm ? '២. ឈ្មោះហាង (ជាភាសាអង់គ្លេស)' : '2. Restaurant Name (English)'}
                   </label>
                   <input
                     type="text"
                     value={storeNameEn}
                     onChange={e => setStoreNameEn(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs focus:ring-2 focus:ring-emerald-500/30 focus:border-[#059669] outline-none text-[#0F172A] dark:text-white"
+                    className="w-full px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs focus:ring-2 focus:ring-emerald-500/30 focus:border-[#059669] outline-none text-[#0F172A] dark:text-white"
                   />
                 </div>
               </div>
@@ -1090,73 +1384,109 @@ export const ManageMenuModal: React.FC = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
-                    {isKm ? 'លេខទូរស័ព្ទទំនាក់ទំនង *' : 'Contact Phone *'}
+                    {isKm ? '៣. លេខទូរស័ព្ទទំនាក់ទំនង *' : '3. Contact Phone *'}
                   </label>
                   <input
                     type="tel"
                     required
                     value={storePhone}
                     onChange={e => setStorePhone(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs focus:ring-2 focus:ring-emerald-500/30 focus:border-[#059669] outline-none text-[#0F172A] dark:text-white font-mono"
+                    className="w-full px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs focus:ring-2 focus:ring-emerald-500/30 focus:border-[#059669] outline-none text-[#0F172A] dark:text-white font-mono"
                   />
                 </div>
 
                 <div>
                   <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
-                    {isKm ? 'ម៉ោងបើកដំណើរការ' : 'Opening Hours'}
+                    {isKm ? '៤. ម៉ោងបើកដំណើរការ' : '4. Opening Hours'}
                   </label>
                   <input
                     type="text"
                     value={storeOpeningHours}
                     onChange={e => setStoreOpeningHours(e.target.value)}
                     placeholder="ឧ. ០៧:០០ ព្រឹក - ០៩:០០ យប់"
-                    className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs focus:ring-2 focus:ring-emerald-500/30 focus:border-[#059669] outline-none text-[#0F172A] dark:text-white"
+                    className="w-full px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs focus:ring-2 focus:ring-emerald-500/30 focus:border-[#059669] outline-none text-[#0F172A] dark:text-white"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
+                    {isKm ? '៥. កម្រិតតម្លៃជាមធ្យមក្នុងហាង' : '5. Store Price Range'}
+                  </label>
+                  <div className="grid grid-cols-3 gap-1.5">
+                    {([
+                      { level: '$' as RestaurantPriceLevel, labelKh: '$ សមរម្យ', labelEn: '$ Budget' },
+                      { level: '$$' as RestaurantPriceLevel, labelKh: '$$ មធ្យម', labelEn: '$$ Mid' },
+                      { level: '$$$' as RestaurantPriceLevel, labelKh: '$$$ ប្រណីត', labelEn: '$$$ Fine' },
+                    ]).map((opt) => (
+                      <button
+                        key={opt.level}
+                        type="button"
+                        onClick={() => setStorePriceLevel(opt.level)}
+                        className={`py-2 px-2 rounded-xl border font-bold text-[11px] transition cursor-pointer ${
+                          storePriceLevel === opt.level
+                            ? 'bg-[#064E3B] text-white border-[#064E3B] shadow-xs'
+                            : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700'
+                        }`}
+                      >
+                        {isKm ? opt.labelKh : opt.labelEn}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
+                    {isKm ? '៦. ខេត្ត / រាជធានី' : '6. Province / City'}
+                  </label>
+                  <input
+                    type="text"
+                    value={storeProvinceKh}
+                    onChange={e => setStoreProvinceKh(e.target.value)}
+                    placeholder="ឧ. រាជធានីភ្នំពេញ ឬ សៀមរាប"
+                    className="w-full px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs focus:ring-2 focus:ring-emerald-500/30 focus:border-[#059669] outline-none text-[#0F172A] dark:text-white"
                   />
                 </div>
               </div>
 
               <div>
                 <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
-                  {isKm ? 'អាសយដ្ឋានហាង *' : 'Restaurant Address *'}
+                  {isKm ? '៧. អាសយដ្ឋានហាងលម្អិត *' : '7. Detailed Address *'}
                 </label>
                 <input
                   type="text"
                   required
                   value={storeAddressKh}
                   onChange={e => setStoreAddressKh(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs focus:ring-2 focus:ring-emerald-500/30 focus:border-[#059669] outline-none text-[#0F172A] dark:text-white"
+                  className="w-full px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs focus:ring-2 focus:ring-emerald-500/30 focus:border-[#059669] outline-none text-[#0F172A] dark:text-white"
                 />
               </div>
 
               <div>
                 <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
-                  {isKm ? 'តំណភ្ជាប់ Google Maps URL' : 'Google Maps URL'}
+                  {isKm ? '៨. ការពិពណ៌នាអំពីហាង និងមុខម្ហូបពិសេស' : '8. About Your Shop & Specialties'}
+                </label>
+                <textarea
+                  rows={2}
+                  value={storeDescriptionKh}
+                  onChange={e => setStoreDescriptionKh(e.target.value)}
+                  placeholder="រៀបរាប់ពីមុខម្ហូបប្រចាំហាង បរិយាកាស និងសេវាកម្ម..."
+                  className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs resize-none focus:ring-2 focus:ring-emerald-500/30 focus:border-[#059669] outline-none text-[#0F172A] dark:text-white"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
+                  {isKm ? '៩. តំណភ្ជាប់ផែនទី Google Maps URL' : '9. Google Maps URL'}
                 </label>
                 <input
                   type="url"
                   value={storeMapUrl}
                   onChange={e => setStoreMapUrl(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs focus:ring-2 focus:ring-emerald-500/30 focus:border-[#059669] outline-none text-[#0F172A] dark:text-white font-mono text-[11px]"
+                  className="w-full px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs focus:ring-2 focus:ring-emerald-500/30 focus:border-[#059669] outline-none text-[#0F172A] dark:text-white font-mono text-[11px]"
                 />
               </div>
-
-              {/* Unified Shop Multi-Photo Uploader (Multi-upload, Preview Lightbox, Reorder, Set Cover) */}
-              <ShopMultiPhotoUploader
-                photos={Array.from(new Set([storeCoverPhoto, ...storeGalleryPhotos])).filter(Boolean)}
-                onChangePhotos={(updated) => {
-                  if (updated.length > 0) {
-                    setStoreCoverPhoto(updated[0]);
-                    setStoreGalleryPhotos(updated.slice(1));
-                  } else {
-                    setStoreCoverPhoto('');
-                    setStoreGalleryPhotos([]);
-                  }
-                }}
-                shopName={storeNameKh}
-                isKm={isKm}
-                onToast={showToast}
-                maxPhotos={30}
-              />
 
               {/* VIP Feature: Food Video Reels (TikTok / Facebook / YouTube Video Link) */}
               <div className="p-3.5 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-slate-800 rounded-2xl border border-amber-300 dark:border-amber-700/60 space-y-2">
@@ -1169,11 +1499,6 @@ export const ManageMenuModal: React.FC = () => {
                     VIP UNLOCKED
                   </span>
                 </div>
-                <p className="text-[10px] text-amber-800 dark:text-amber-200/80">
-                  {isKm
-                    ? 'បញ្ចូលតំណភ្ជាប់វីដេអូម្ហូបពី TikTok, Facebook Reels ឬ YouTube ដើម្បីឱ្យភ្ញៀវចុចមើលវីដេអូផ្ទាល់លើទំព័រហាងរបស់អ្នក!'
-                    : 'Add a TikTok, Facebook Reel, or YouTube video link so customers can watch your food video directly on your store page!'}
-                </p>
                 <div className="flex gap-2">
                   <input
                     type="url"
@@ -1227,29 +1552,29 @@ export const ManageMenuModal: React.FC = () => {
               <div className="pt-2 space-y-2.5">
                 <button
                   type="submit"
-                  className="w-full py-3 rounded-2xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold shadow-md shadow-emerald-950/20 transition active:scale-[0.98]"
+                  className="w-full py-3 rounded-2xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold shadow-md shadow-emerald-950/20 transition active:scale-[0.98] cursor-pointer"
                 >
-                  {isKm ? '💾 រក្សាទុកការកែប្រែព័ត៌មានហាង' : '💾 Save Restaurant Info'}
+                  {isKm ? '💾 រក្សាទុកព័ត៌មានហាងទាំងអស់' : '💾 Save All Store Information'}
                 </button>
 
-                {/* Delete Restaurant Option (So user can delete existing store if they want to add another) */}
+                {/* Safe 2-Step Delete Store Confirmation */}
                 <div className="p-3 rounded-2xl bg-red-50 dark:bg-red-950/25 border border-red-200 dark:border-red-900/50 space-y-2">
                   <div className="flex items-center justify-between gap-2">
                     <div className="text-[11px] text-red-800 dark:text-red-300">
                       <span className="font-bold block">
-                        {isKm ? '🗑️ ចង់ផ្លាស់ប្តូរហាងថ្មី ឬលុបហាងនេះចេញ?' : '🗑️ Want to replace or delete this restaurant?'}
+                        {isKm ? `🗑️ លុបហាង "${managingRestaurant.nameKh}" នេះចេញ?` : `🗑️ Delete "${managingRestaurant.nameEn || managingRestaurant.nameKh}"?`}
                       </span>
                       <span className="text-[10px] opacity-85">
                         {isKm
-                          ? 'គណនី VIP នីមួយៗអាចបន្ថែមហាងបាន ១។ ប្រសិនបើអ្នកចង់ប្តូរហាងថ្មី សូមកែប្រែខាងលើ ឬលុបហាងចាស់នេះជាមុនសិន។'
-                          : 'Each VIP user can add 1 restaurant. Edit above or delete this restaurant before adding a new one.'}
+                          ? 'ការលុបហាងនឹងដកហាងនេះចេញពីបញ្ជី។ សូមបញ្ជាក់មុនពេលលុប។'
+                          : 'Deleting removes this store listing permanently. Please confirm before deleting.'}
                       </span>
                     </div>
                     {!confirmDeleteStore ? (
                       <button
                         type="button"
                         onClick={() => setConfirmDeleteStore(true)}
-                        className="px-3 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-[11px] shrink-0 flex items-center gap-1 transition"
+                        className="px-3 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-[11px] shrink-0 flex items-center gap-1 transition cursor-pointer"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                         <span>{isKm ? 'លុបហាង' : 'Delete'}</span>
@@ -1259,16 +1584,16 @@ export const ManageMenuModal: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => deleteRestaurant(managingRestaurant.id)}
-                          className="px-3 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-[11px] transition"
+                          className="px-3 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-[11px] transition cursor-pointer"
                         >
                           {isKm ? 'បញ្ជាក់លុប' : 'Confirm'}
                         </button>
                         <button
                           type="button"
                           onClick={() => setConfirmDeleteStore(false)}
-                          className="px-2.5 py-2 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-[11px]"
+                          className="px-2.5 py-2 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-[11px] cursor-pointer"
                         >
-                          {isKm ? 'ទេ' : 'No'}
+                          {isKm ? 'បោះបង់' : 'Cancel'}
                         </button>
                       </div>
                     )}
@@ -1278,9 +1603,77 @@ export const ManageMenuModal: React.FC = () => {
             </form>
           )}
 
-          {/* TAB 3: RESTAURANT ANALYTICS (Benefit 7 & Benefit 5) */}
+          {/* TAB 3: DEDICATED STORE PHOTOS & GALLERY SECTION */}
+          {mainTab === 'photos' && (
+            <div className="space-y-3.5 font-khmer">
+              <div className="p-3 bg-emerald-50 dark:bg-emerald-950/30 rounded-2xl border border-emerald-200 dark:border-emerald-800 flex items-center justify-between gap-2">
+                <div className="space-y-0.5">
+                  <h3 className="font-bold text-xs text-[#064E3B] dark:text-emerald-300 flex items-center gap-1.5">
+                    <Camera className="w-4 h-4" />
+                    <span>{isKm ? '📸 រូបភាពមុខហាង និងរូបភាពម្ហូប (រហូតដល់ ៣០ សន្លឹក)' : '📸 Store Cover & Food Gallery (Up to 30 Photos)'}</span>
+                  </h3>
+                  <p className="text-[11px] text-slate-600 dark:text-slate-300">
+                    {isKm
+                      ? 'រូបទី ១ គឺជារូបភាពមុខហាងគោល (Cover)។ បន្ទាប់ពីបន្ថែម ឬផ្លាស់ប្តូររូបភាព សូមចុចប៊ូតុង "💾 រក្សាទុករូបភាពហាង"។'
+                      : 'Photo #1 is your main storefront cover. Tap "Save Store Photos" after adding or reordering photos.'}
+                  </p>
+                </div>
+              </div>
+
+              <ShopMultiPhotoUploader
+                photos={Array.from(new Set([storeCoverPhoto, ...storeGalleryPhotos])).filter(Boolean)}
+                onChangePhotos={(updated) => {
+                  if (updated.length > 0) {
+                    setStoreCoverPhoto(updated[0]);
+                    setStoreGalleryPhotos(updated.slice(1));
+                  } else {
+                    setStoreCoverPhoto('');
+                    setStoreGalleryPhotos([]);
+                  }
+                }}
+                shopName={storeNameKh}
+                isKm={isKm}
+                onToast={showToast}
+                maxPhotos={30}
+              />
+
+              <button
+                type="button"
+                onClick={handleSavePhotosOnly}
+                className="w-full py-3 rounded-2xl bg-gradient-to-r from-[#064E3B] to-[#047857] hover:from-[#047857] hover:to-[#065F46] text-white font-bold text-xs sm:text-sm shadow-md transition active:scale-[0.98] cursor-pointer"
+              >
+                {isKm ? '💾 រក្សាទុករូបភាពហាងទាំងអស់ (Save Store Photos)' : '💾 Save All Store Photos'}
+              </button>
+            </div>
+          )}
+
+          {/* TAB 4: RESTAURANT ANALYTICS & GENUINE CUSTOMER RATINGS */}
           {mainTab === 'analytics' && (
             <div className="space-y-4 font-khmer">
+              {/* Genuine Customer Rating Summary Card (Clearly separated from VIP Status) */}
+              <div className="p-4 bg-amber-50/90 dark:bg-amber-950/30 rounded-2xl border border-amber-300 dark:border-amber-800 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-xs text-amber-900 dark:text-amber-300 flex items-center gap-1.5">
+                    <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
+                    <span>{isKm ? 'ការវាយតម្លៃពិតប្រាកដពីអតិថិជន (Customer Ratings)' : 'Genuine Customer Ratings'}</span>
+                  </span>
+                  {ratingSummary.hasReviews ? (
+                    <span className="px-2.5 py-0.5 rounded-full bg-amber-500 text-slate-950 font-black text-xs">
+                      ★ {ratingSummary.averageRating.toFixed(1)} ({ratingSummary.reviewCount})
+                    </span>
+                  ) : (
+                    <span className="px-2.5 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-[11px]">
+                      {isKm ? 'មិនទាន់មានការវាយតម្លៃ / No ratings yet' : 'No ratings yet'}
+                    </span>
+                  )}
+                </div>
+                <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
+                  {isKm
+                    ? 'ពិន្ទុផ្កាយត្រូវបានគណនាដោយស្វ័យប្រវត្តិពីការវាយតម្លៃពិតប្រាកដរបស់អតិថិជនតែប៉ុណ្ណោះ។ សមាជិកភាព VIP មិនបង្កើតពិន្ទុផ្កាយ 5 សិប្បនិម្មិតឡើយ។'
+                    : 'Star ratings are calculated strictly from genuine customer reviews. VIP status never auto-assigns a 5-star rating.'}
+                </p>
+              </div>
+
               {/* Analytics Header Summary */}
               <div className="p-4 bg-gradient-to-br from-emerald-50 to-white dark:from-slate-800 dark:to-emerald-950/30 rounded-2xl border border-emerald-200 dark:border-emerald-800">
                 <div className="flex items-center justify-between mb-2">

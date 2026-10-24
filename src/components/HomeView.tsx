@@ -28,14 +28,15 @@ export const HomeView: React.FC = () => {
     searchQuery: globalSearchQuery, setSearchQuery: setGlobalSearchQuery,
     setSelectedFood, setSelectedRestaurant,
     setIsVipAddRestaurantModalOpen, setIsManageMenuModalOpen, setManagingRestaurant,
+    getOwnedRestaurantsForUser, openManageMyVipStore, activeManagedShopId,
     openUpgradeVipModal, deleteRestaurant
   } = useApp();
 
   const isKm = language === 'km';
   const isVip = isUserVipActive(currentUser);
   const myRestaurants = useMemo(() => {
-    return currentUser ? sortRestaurantsChronologically(restaurants.filter(r => r.ownerId === currentUser.id)) : [];
-  }, [restaurants, currentUser]);
+    return getOwnedRestaurantsForUser(currentUser);
+  }, [restaurants, currentUser, activeManagedShopId]);
 
   // Active category filter, local search query, and AI random seed for AI Trending Food on Home
   const [selectedCategory, setSelectedCategory] = useState<TrendingFoodCategorySlug>('all');
@@ -785,13 +786,12 @@ export const HomeView: React.FC = () => {
                     openUpgradeVipModal();
                     return;
                   }
-                  setManagingRestaurant(myRestaurants[0]);
-                  setIsManageMenuModalOpen(true);
+                  openManageMyVipStore(myRestaurants[0]?.id);
                 }}
                 className="px-3.5 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-xs shadow-xs transition flex items-center gap-1 shrink-0 active:scale-95 cursor-pointer"
               >
                 <Edit2 className="w-3.5 h-3.5" />
-                <span>{isKm ? 'កែប្រែហាងខ្ញុំ' : 'Edit My Store'}</span>
+                <span>{isKm ? 'គ្រប់គ្រងហាងខ្ញុំ' : 'Manage My Store'}</span>
               </button>
             ) : (
               <button
@@ -912,8 +912,7 @@ export const HomeView: React.FC = () => {
                           openUpgradeVipModal();
                           return;
                         }
-                        setManagingRestaurant(shop);
-                        setIsManageMenuModalOpen(true);
+                        openManageMyVipStore(shop.id);
                       }}
                       className="px-2.5 py-1.5 bg-emerald-700 hover:bg-emerald-600 text-white rounded-xl text-[10px] font-bold shadow-xs transition flex items-center gap-1 cursor-pointer"
                       title={isKm ? 'គ្រប់គ្រងមុខម្ហូប & ព័ត៌មាន' : 'Manage Menu & Details'}

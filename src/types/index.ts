@@ -1,6 +1,6 @@
-export const APP_VERSION = 'v1.9.8';
-export const APP_VERSION_NAME = '1.9.8';
-export const APP_BUILD_CODE = 70;
+export const APP_VERSION = 'v1.9.9';
+export const APP_VERSION_NAME = '1.9.9';
+export const APP_BUILD_CODE = 71;
 export const APP_RELEASE_DATE = '2026-10-24';
 
 export interface DeletedUserRecord {
@@ -467,8 +467,21 @@ export interface RestaurantMenuItem {
   photoUrl: string;
   descriptionKh?: string;
   descriptionEn?: string;
+  categoryKh?: string;
+  isAvailable?: boolean;
   createdAt: string;
   updatedAt?: string;
+}
+
+export interface RestaurantReview {
+  id: string;
+  restaurantId: string;
+  userId: string;
+  userName: string;
+  userAvatar?: string;
+  rating: number; // 1 to 5
+  comment?: string;
+  createdAt: string;
 }
 
 export interface AbaVerificationCheckItem {
@@ -567,8 +580,12 @@ export interface Restaurant {
   longitude: number;
   rating: number;
   reviewCount: number;
+  reviews?: RestaurantReview[];
   signatureDishesKh: string[];
   ownerId?: string;
+  ownerName?: string;
+  ownerEmail?: string;
+  ownerPhone?: string;
   status: 'approved' | 'pending' | 'rejected';
   isVerified: boolean;
   isFeatured?: boolean;
@@ -600,6 +617,7 @@ export interface Restaurant {
   freeTrialExpiry?: string;
   created_at?: string;
   createdAt?: string;
+  updatedAt?: string;
 }
 
 // Helper to resolve original created_at ISO timestamp for chronological sorting
@@ -671,6 +689,63 @@ export const isSeedRestaurantId = (id: string | number): boolean => {
 export const isCustomRestaurant = (restaurant?: Restaurant | null): boolean => {
   if (!restaurant || !restaurant.id) return false;
   return !isSeedRestaurantId(restaurant.id);
+};
+
+// Helper to compute genuine customer rating & review count (VIP status never inflates rating)
+export const getRestaurantRatingSummary = (
+  restaurant?: Partial<Restaurant> | null
+): { hasReviews: boolean; averageRating: number; reviewCount: number } => {
+  if (!restaurant) {
+    return { hasReviews: false, averageRating: 0, reviewCount: 0 };
+  }
+
+  const genuineReviews = Array.isArray(restaurant.reviews)
+    ? restaurant.reviews.filter(
+        (rev) => rev && typeof rev.rating === 'number' && rev.rating >= 1 && rev.rating <= 5
+      )
+    : [];
+
+  // For custom/VIP user-registered shops, ONLY genuine customer reviews count
+  if (!isSeedRestaurantId(restaurant.id || '')) {
+    if (genuineReviews.length === 0) {
+      return { hasReviews: false, averageRating: 0, reviewCount: 0 };
+    }
+    const sum = genuineReviews.reduce((acc, r) => acc + r.rating, 0);
+    const avg = Math.round((sum / genuineReviews.length) * 10) / 10;
+    return {
+      hasReviews: true,
+      averageRating: avg,
+      reviewCount: genuineReviews.length,
+    };
+  }
+
+  // For built-in seed restaurants: if genuine reviews exist, merge with seed or use genuine
+  if (genuineReviews.length > 0) {
+    const baseCount = typeof restaurant.reviewCount === 'number' && restaurant.reviewCount > genuineReviews.length
+      ? restaurant.reviewCount - genuineReviews.length
+      : 0;
+    const baseRating = typeof restaurant.rating === 'number' && restaurant.rating > 0 ? restaurant.rating : 4.5;
+    const totalCount = baseCount + genuineReviews.length;
+    const sumGenuine = genuineReviews.reduce((acc, r) => acc + r.rating, 0);
+    const avg = Math.round(((baseRating * baseCount + sumGenuine) / totalCount) * 10) / 10;
+    return {
+      hasReviews: true,
+      averageRating: avg,
+      reviewCount: totalCount,
+    };
+  }
+
+  const seedCount = typeof restaurant.reviewCount === 'number' ? restaurant.reviewCount : 0;
+  const seedRating = typeof restaurant.rating === 'number' ? restaurant.rating : 0;
+  if (seedCount > 0 && seedRating > 0) {
+    return {
+      hasReviews: true,
+      averageRating: Math.round(seedRating * 10) / 10,
+      reviewCount: seedCount,
+    };
+  }
+
+  return { hasReviews: false, averageRating: 0, reviewCount: 0 };
 };
 
 // Helper to determine if a restaurant has an active Premium membership

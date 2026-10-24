@@ -36,6 +36,8 @@ export const VipAddRestaurantModal: React.FC = () => {
     showToast,
     setIsManageMenuModalOpen,
     setManagingRestaurant,
+    getOwnedRestaurantsForUser,
+    openManageMyVipStore,
     restaurants,
     openUpgradeVipModal,
     setIsAuthModalOpen,
@@ -51,9 +53,10 @@ export const VipAddRestaurantModal: React.FC = () => {
   const vipState = getVipAccountState(currentUser);
   const isAuthorized = isAdmin || isApprovedVip;
 
+  const ownedRestaurants = getOwnedRestaurantsForUser(currentUser);
   const existingOwnedRestaurant =
-    currentUser && currentUser.role !== 'admin'
-      ? restaurants.find((r) => r.ownerId === currentUser.id)
+    currentUser && !isAdmin
+      ? ownedRestaurants[0]
       : undefined;
 
   // Form Fields

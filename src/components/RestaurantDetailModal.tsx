@@ -3,9 +3,9 @@ import { useApp } from '../context/AppContext';
 import { 
   X, MapPin, Phone, Star, Clock, ExternalLink, 
   Send, Share2, UtensilsCrossed, Sparkles, CheckCircle2, AlertCircle, Copy, Camera, Bookmark,
-  BarChart3, Video, Crown
+  BarChart3, Video, Crown, Edit2, MessageSquare
 } from 'lucide-react';
-import { isRestaurantPremiumActive, isUserVipActive, getVipAccountState } from '../types';
+import { isRestaurantPremiumActive, isUserVipActive, getVipAccountState, getRestaurantRatingSummary } from '../types';
 import { RestaurantImageModal } from './RestaurantImageModal';
 import {
   sanitizeDialablePhone,
@@ -27,6 +27,8 @@ export const RestaurantDetailModal: React.FC = () => {
     currentUser,
     setManagingRestaurant,
     setIsManageMenuModalOpen,
+    openManageMyVipStore,
+    addRestaurantReview,
     trackRestaurantView,
     trackRestaurantCall,
     trackRestaurantMap,
@@ -38,6 +40,8 @@ export const RestaurantDetailModal: React.FC = () => {
 
   const [activePhoto, setActivePhoto] = useState<string>('');
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [userReviewStars, setUserReviewStars] = useState<number>(5);
+  const [userReviewComment, setUserReviewComment] = useState<string>('');
 
   useEffect(() => {
     if (selectedRestaurant) {
@@ -72,6 +76,7 @@ export const RestaurantDetailModal: React.FC = () => {
   const canEditShop = Boolean(isAdmin || (isOwner && isApprovedVip));
   const dialablePhone = sanitizeDialablePhone(selectedRestaurant.phone);
   const displayPhone = formatDisplayPhone(selectedRestaurant.phone);
+  const ratingSummary = getRestaurantRatingSummary(selectedRestaurant);
 
   const handleOpenPhotoEditor = () => {
     if (!currentUser) {
@@ -289,6 +294,25 @@ export const RestaurantDetailModal: React.FC = () => {
                 ) : (
                   <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-800/85 text-slate-100 border border-slate-600/40 shadow-xs font-khmer">
                     🏷️ {isKm ? 'ចុះបញ្ជីឥតគិតថ្លៃ ($0)' : 'Free Listing ($0)'}
+                  </span>
+                )}
+
+                {selectedRestaurant.isVerified && (
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-600/90 text-white border border-emerald-300/40 shadow-xs flex items-center gap-1 font-khmer">
+                    <CheckCircle2 className="w-3 h-3 text-white" />
+                    <span>{isKm ? 'ផ្ទៀងផ្ទាត់រួច' : 'Verified'}</span>
+                  </span>
+                )}
+
+                {ratingSummary.hasReviews ? (
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500 text-slate-950 shadow-xs flex items-center gap-1 font-khmer">
+                    <Star className="w-3 h-3 fill-current text-slate-950" />
+                    <span>{ratingSummary.averageRating.toFixed(1)} ({ratingSummary.reviewCount})</span>
+                  </span>
+                ) : (
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-900/80 text-slate-200 border border-white/20 shadow-xs flex items-center gap-1 font-khmer">
+                    <Star className="w-3 h-3 text-slate-300" />
+                    <span>{isKm ? 'មិនទាន់មានការវាយតម្លៃ' : 'No ratings yet'}</span>
                   </span>
                 )}
 
@@ -673,6 +697,132 @@ export const RestaurantDetailModal: React.FC = () => {
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed bg-slate-50 dark:bg-slate-800/50 p-3.5 rounded-xl border border-slate-200/90 dark:border-slate-700">
                 {isKm ? selectedRestaurant.descriptionKh : selectedRestaurant.descriptionEn}
               </p>
+            </div>
+
+            {/* Genuine Customer Reviews & Rating Section (Strictly Separate from VIP Status) */}
+            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200/90 dark:border-slate-700 space-y-3.5 font-khmer">
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <div>
+                  <h3 className="font-bold text-[#0F172A] dark:text-white text-sm flex items-center gap-1.5">
+                    <Star className="w-4 h-4 fill-current text-amber-500" />
+                    <span>{isKm ? 'ការវាយតម្លៃពិតប្រាកដពីអតិថិជន' : 'Genuine Customer Reviews'}</span>
+                  </h3>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
+                    {isKm
+                      ? 'ផ្អែកលើការវាយតម្លៃរបស់អតិថិជនពិតប្រាកដប៉ុណ្ណោះ (សមាជិកភាព VIP មិនប៉ះពាល់ដល់ផ្កាយវាយតម្លៃឡើយ)'
+                      : 'Based strictly on genuine customer reviews (VIP status never affects ratings)'}
+                  </p>
+                </div>
+
+                {ratingSummary.hasReviews ? (
+                  <div className="px-3 py-1.5 rounded-xl bg-amber-500/15 border border-amber-400/50 text-right">
+                    <div className="flex items-center gap-1 font-black text-sm text-amber-600 dark:text-amber-400 font-mono">
+                      <Star className="w-4 h-4 fill-current text-amber-500" />
+                      <span>{ratingSummary.averageRating.toFixed(1)} / 5.0</span>
+                    </div>
+                    <div className="text-[10px] text-slate-600 dark:text-slate-300">
+                      {isKm ? `${ratingSummary.reviewCount} ការវាយតម្លៃ` : `${ratingSummary.reviewCount} reviews`}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="px-3 py-1.5 rounded-xl bg-slate-200/70 dark:bg-slate-700/70 text-slate-600 dark:text-slate-300 text-xs font-bold flex items-center gap-1.5">
+                    <Star className="w-3.5 h-3.5 text-slate-400" />
+                    <span>{isKm ? 'មិនទាន់មានការវាយតម្លៃ (No ratings yet)' : 'No ratings yet'}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Submit Genuine Customer Rating Form */}
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const ok = addRestaurantReview(selectedRestaurant.id, userReviewStars, userReviewComment);
+                  if (ok) {
+                    setUserReviewComment('');
+                  }
+                }}
+                className="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 space-y-2.5"
+              >
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                    {isKm ? 'ដាក់ផ្កាយវាយតម្លៃហាងនេះ៖' : 'Rate this shop:'}
+                  </span>
+                  <div className="flex items-center gap-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => setUserReviewStars(star)}
+                        className="p-1 rounded-lg hover:bg-amber-50 dark:hover:bg-slate-800 transition active:scale-90 cursor-pointer"
+                        title={`${star} Stars`}
+                      >
+                        <Star
+                          className={`w-5 h-5 transition ${
+                            star <= userReviewStars
+                              ? 'fill-current text-amber-400'
+                              : 'text-slate-300 dark:text-slate-600'
+                          }`}
+                        />
+                      </button>
+                    ))}
+                    <span className="ml-1 text-xs font-bold font-mono text-amber-600 dark:text-amber-400">
+                      {userReviewStars}/5
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={userReviewComment}
+                    onChange={(e) => setUserReviewComment(e.target.value)}
+                    placeholder={
+                      isKm
+                        ? 'សរសេរមតិយោបល់របស់អ្នកអំពីរសជាតិម្ហូប និងសេវាកម្ម...'
+                        : 'Share your genuine experience with the food & service...'
+                    }
+                    className="flex-1 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500"
+                  />
+                  <button
+                    type="submit"
+                    className="px-3.5 py-2 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-xs shadow-xs transition active:scale-95 shrink-0 cursor-pointer"
+                  >
+                    {isKm ? 'ដាក់ផ្កាយ' : 'Submit'}
+                  </button>
+                </div>
+              </form>
+
+              {/* Recent Genuine Customer Reviews List */}
+              {Array.isArray(selectedRestaurant.reviews) && selectedRestaurant.reviews.length > 0 && (
+                <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                  {selectedRestaurant.reviews.slice(0, 10).map((rev) => (
+                    <div
+                      key={rev.id}
+                      className="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700/80 text-xs space-y-1"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-slate-800 dark:text-slate-200">{rev.userName}</span>
+                        <div className="flex items-center gap-0.5 text-amber-500">
+                          {Array.from({ length: 5 }).map((_, idx) => (
+                            <Star
+                              key={idx}
+                              className={`w-3 h-3 ${
+                                idx < rev.rating ? 'fill-current text-amber-400' : 'text-slate-300 dark:text-slate-600'
+                              }`}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                      {rev.comment && (
+                        <p className="text-slate-600 dark:text-slate-300 text-[11px] leading-snug">{rev.comment}</p>
+                      )}
+                      <span className="block text-[9px] text-slate-400 font-mono">
+                        {new Date(rev.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Social Share Bar */}

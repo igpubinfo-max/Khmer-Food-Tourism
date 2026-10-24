@@ -17,13 +17,24 @@ export const RestaurantView: React.FC = () => {
     selectedProvince, setSelectedProvince, setIsAddRestaurantModalOpen,
     setIsVipAddRestaurantModalOpen,
     currentUser, setIsAuthModalOpen, setIsAiCheckInModalOpen,
-    addRestaurant, showToast,
+    addRestaurant, deleteRestaurant, showToast,
     setManagingRestaurant, setIsManageMenuModalOpen,
+    activeManagedShopId, setActiveManagedShopId,
+    getOwnedRestaurantsForUser, openManageMyVipStore,
     openUpgradeVipModal
   } = useApp();
 
-  const myExistingRest = currentUser ? restaurants.find((r) => r.ownerId === currentUser.id) : undefined;
-  const isUserAtOneStoreLimit = Boolean(currentUser && currentUser.role !== 'admin' && myExistingRest);
+  const myOwnedRestaurants = useMemo(
+    () => getOwnedRestaurantsForUser(currentUser),
+    [restaurants, currentUser, activeManagedShopId]
+  );
+  const myExistingRest = useMemo(
+    () =>
+      (activeManagedShopId && myOwnedRestaurants.find((r) => r.id === activeManagedShopId)) ||
+      myOwnedRestaurants[0],
+    [myOwnedRestaurants, activeManagedShopId]
+  );
+  const isUserAtOneStoreLimit = Boolean(currentUser && myExistingRest);
 
   const [priceFilter, setPriceFilter] = useState<string>('all');
   const [verifiedFilter, setVerifiedFilter] = useState<'all' | 'verified' | 'unverified'>('all');
@@ -198,16 +209,15 @@ export const RestaurantView: React.FC = () => {
                 openUpgradeVipModal();
                 return;
               }
-              if (isUserAtOneStoreLimit && myExistingRest) {
-                setManagingRestaurant(myExistingRest);
-                setIsManageMenuModalOpen(true);
+              if (myExistingRest) {
+                openManageMyVipStore(myExistingRest.id);
               } else {
                 setIsVipAddRestaurantModalOpen(true);
               }
             }}
             className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-xs shadow-xs font-khmer transition cursor-pointer"
           >
-            {isUserAtOneStoreLimit ? (
+            {myExistingRest ? (
               <>
                 <Edit2 className="w-3.5 h-3.5 text-slate-950" />
                 <span>{isKm ? 'គ្រប់គ្រងហាងខ្ញុំ' : 'My Store'}</span>
@@ -261,23 +271,62 @@ export const RestaurantView: React.FC = () => {
       {/* Banner for VIP Restaurant Owners */}
       <div className="p-4 rounded-3xl bg-gradient-to-br from-amber-600 via-amber-700 to-[#064E3B] text-white shadow-lg border-2 border-amber-300/70 space-y-3 font-khmer">
         <div className="flex items-start justify-between gap-2.5">
-          <div className="space-y-1">
+          <div className="space-y-1 flex-1 min-w-0">
             <div className="flex items-center gap-1.5 flex-wrap">
               <span className="text-base">👑</span>
               <span className="font-black text-xs sm:text-sm text-white">
-                {isKm ? 'ចុះបញ្ជីហាង VIP របស់អ្នក (1 ហាង)' : 'Register Your VIP Restaurant (1 Store)'}
+                {myExistingRest
+                  ? (isKm ? `ហាង VIP របស់ខ្ញុំ៖ ${myExistingRest.nameKh}` : `My VIP Store: ${myExistingRest.nameEn || myExistingRest.nameKh}`)
+                  : (isKm ? 'ចុះបញ្ជីហាង VIP របស់អ្នក (1 ហាង)' : 'Register Your VIP Restaurant (1 Store)')}
               </span>
               <span className="px-2 py-0.5 rounded-full bg-amber-300 text-slate-950 text-[9px] font-black">
-                {isUserAtOneStoreLimit ? '1/1 ហាង' : 'VIP 1 ហាង'}
+                {myExistingRest ? `${myExistingRest.menuItems?.length || 0}/20 មុខម្ហូប` : 'VIP 1 ហាង'}
               </span>
             </div>
             <p className="text-[11px] text-amber-50 leading-relaxed font-medium">
-              {isKm
-                ? 'ចុះបញ្ជីហាងមុន ហាងរបស់លោកអ្នកនឹងបង្ហាញមុនគេតាមលំដាប់លេខរៀង ដើម្បីងាយស្រួលឱ្យអតិថិជនស្វែងរក និងតាមដានស្ថិតិហាង។'
-                : 'Register your restaurant early so it appears first in chronological order, making it easy for customers to find and track store analytics.'}
+              {myExistingRest
+                ? (isKm
+                    ? `📍 ${myExistingRest.addressKh} • ចុចប៊ូតុងខាងក្រោមដើម្បីបន្ថែមមុខម្ហូប កែតម្លៃ រូបភាព និងព័ត៌មានហាង "${myExistingRest.nameKh}"។`
+                    : `📍 ${myExistingRest.addressEn || myExistingRest.addressKh} • Tap below to manage menus, prices, photos & info.`)
+                : (isKm
+                    ? 'ចុះបញ្ជីហាងមុន ហាងរបស់លោកអ្នកនឹងបង្ហាញមុនគេតាមលំដាប់លេខរៀង ដើម្បីងាយស្រួលឱ្យអតិថិជនស្វែងរក និងតាមដានស្ថិតិហាង។'
+                    : 'Register your restaurant early so it appears first in chronological order, making it easy for customers to find and track store analytics.')}
             </p>
           </div>
         </div>
+
+        {/* Multi-Shop Selector Pill Bar (when user/Admin has multiple VIP shops) */}
+        {myOwnedRestaurants.length > 1 && (
+          <div className="p-2.5 rounded-2xl bg-black/25 border border-white/20 space-y-1.5">
+            <div className="text-[10px] font-bold text-amber-200 flex items-center justify-between">
+              <span>{isKm ? `🏪 ជ្រើសរើសហាងដែលអ្នកចង់គ្រប់គ្រង (${myOwnedRestaurants.length} ហាង)៖` : `🏪 Select shop to manage (${myOwnedRestaurants.length}):`}</span>
+            </div>
+            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
+              {myOwnedRestaurants.map((shop) => {
+                const isSelected = myExistingRest?.id === shop.id;
+                return (
+                  <button
+                    key={shop.id}
+                    type="button"
+                    onClick={() => {
+                      setActiveManagedShopId(shop.id);
+                      openManageMyVipStore(shop.id);
+                    }}
+                    className={`px-2.5 py-1.5 rounded-xl text-[11px] font-bold flex items-center gap-1.5 shrink-0 transition cursor-pointer ${
+                      isSelected
+                        ? 'bg-amber-300 text-slate-950 shadow-sm ring-2 ring-white'
+                        : 'bg-white/15 text-white hover:bg-white/25'
+                    }`}
+                  >
+                    <img src={shop.photoUrl} alt={shop.nameKh} className="w-4 h-4 rounded-full object-cover shrink-0" />
+                    <span className="truncate max-w-[130px]">{isKm ? shop.nameKh : (shop.nameEn || shop.nameKh)}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         <div className="relative p-1 rounded-2xl group">
           {/* Softly blinking glowing lights around border */}
           <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 opacity-70 blur-xs vip-glow-btn pointer-events-none" />
@@ -286,44 +335,56 @@ export const RestaurantView: React.FC = () => {
           <div className="absolute bottom-1 left-4 w-1.5 h-1.5 rounded-full bg-amber-200 shadow-sm shadow-amber-300 vip-sparkle-dot pointer-events-none" style={{ animationDelay: '0.4s' }} />
           <div className="absolute bottom-1 right-4 w-1.5 h-1.5 rounded-full bg-amber-200 shadow-sm shadow-amber-300 vip-sparkle-dot pointer-events-none" style={{ animationDelay: '1.3s' }} />
 
-          <button
-            onClick={() => {
-              if (!currentUser) {
-                setIsAuthModalOpen(true);
-                return;
-              }
-              const state = getVipAccountState(currentUser);
-              if (state === 'pending_vip') {
-                showToast(isKm ? '⏳ ការស្នើសុំសមាជិកភាព VIP របស់អ្នកកំពុងរង់ចាំការពិនិត្យ និងអនុម័តពី Administrator។' : '⏳ VIP request pending Admin approval.', 'info');
-                return;
-              }
-              if (state === 'expired_vip') {
-                showToast(isKm ? '⚠️ សមាជិកភាព VIP របស់អ្នកបានផុតកំណត់ហើយ! សូមបន្តសមាជិកភាព VIP ដើម្បីចុះបញ្ជីហាង។' : '⚠️ VIP membership expired. Please renew.', 'warning');
-                openUpgradeVipModal(true);
-                return;
-              }
-              if (state === 'regular_unpaid') {
-                showToast(isKm ? '🔒 ការចុះបញ្ជីហាងគឺសម្រាប់តែសមាជិក VIP ដែលបានអនុម័តប៉ុណ្ណោះ! សូមដំឡើងទៅកញ្ចប់ VIP។' : '🔒 VIP required!', 'warning');
-                openUpgradeVipModal();
-                return;
-              }
-              if (isUserAtOneStoreLimit && myExistingRest) {
-                setManagingRestaurant(myExistingRest);
-                setIsManageMenuModalOpen(true);
-              } else {
-                setIsVipAddRestaurantModalOpen(true);
-              }
-            }}
-            className="relative w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-300 via-amber-400 to-yellow-400 hover:from-amber-400 hover:to-yellow-500 text-slate-950 text-xs sm:text-sm font-black border-2 border-white/90 vip-glow-btn flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer shadow-lg"
-          >
-            <span className="text-base">👑</span>
-            <span>
-              {isUserAtOneStoreLimit
-                ? (isKm ? '✏️ គ្រប់គ្រងហាង VIP របស់ខ្ញុំ (1/1 ហាង)' : '✏️ Manage My VIP Store (1/1)')
-                : (isKm ? '+ ចុះបញ្ជីហាង VIP របស់អ្នក (1 ហាង)' : '+ Register Your VIP Restaurant (1 Store)')}
-            </span>
-            <span className="text-xs">✨</span>
-          </button>
+          <div className="relative flex flex-col sm:flex-row gap-2">
+            <button
+              onClick={() => {
+                if (!currentUser) {
+                  setIsAuthModalOpen(true);
+                  return;
+                }
+                const state = getVipAccountState(currentUser);
+                if (state === 'pending_vip') {
+                  showToast(isKm ? '⏳ ការស្នើសុំសមាជិកភាព VIP របស់អ្នកកំពុងរង់ចាំការពិនិត្យ និងអនុម័តពី Administrator។' : '⏳ VIP request pending Admin approval.', 'info');
+                  return;
+                }
+                if (state === 'expired_vip') {
+                  showToast(isKm ? '⚠️ សមាជិកភាព VIP របស់អ្នកបានផុតកំណត់ហើយ! សូមបន្តសមាជិកភាព VIP ដើម្បីចុះបញ្ជីហាង។' : '⚠️ VIP membership expired. Please renew.', 'warning');
+                  openUpgradeVipModal(true);
+                  return;
+                }
+                if (state === 'regular_unpaid') {
+                  showToast(isKm ? '🔒 ការចុះបញ្ជីហាងគឺសម្រាប់តែសមាជិក VIP ដែលបានអនុម័តប៉ុណ្ណោះ! សូមដំឡើងទៅកញ្ចប់ VIP។' : '🔒 VIP required!', 'warning');
+                  openUpgradeVipModal();
+                  return;
+                }
+                if (myExistingRest) {
+                  openManageMyVipStore(myExistingRest.id);
+                } else {
+                  setIsVipAddRestaurantModalOpen(true);
+                }
+              }}
+              className="flex-1 py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-300 via-amber-400 to-yellow-400 hover:from-amber-400 hover:to-yellow-500 text-slate-950 text-xs sm:text-sm font-black border-2 border-white/90 vip-glow-btn flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer shadow-lg"
+            >
+              <span className="text-base">👑</span>
+              <span className="truncate">
+                {myExistingRest
+                  ? (isKm ? `✏️ គ្រប់គ្រងហាង VIP របស់ខ្ញុំ (${myExistingRest.nameKh})` : `✏️ Manage My VIP Store (${myExistingRest.nameEn || myExistingRest.nameKh})`)
+                  : (isKm ? '+ ចុះបញ្ជីហាង VIP របស់អ្នក (1 ហាង)' : '+ Register Your VIP Restaurant (1 Store)')}
+              </span>
+              <span className="text-xs">✨</span>
+            </button>
+
+            {currentUser?.role === 'admin' && myExistingRest && (
+              <button
+                type="button"
+                onClick={() => setIsVipAddRestaurantModalOpen(true)}
+                className="py-3 px-3.5 rounded-xl bg-emerald-900/90 hover:bg-emerald-800 text-amber-200 border border-amber-300/60 text-xs font-bold flex items-center justify-center gap-1 transition active:scale-95 cursor-pointer shrink-0"
+              >
+                <Plus className="w-4 h-4" />
+                <span>{isKm ? 'បន្ថែមហាងថ្មី' : 'Add Store'}</span>
+              </button>
+            )}
+          </div>
         </div>
       </div>
 

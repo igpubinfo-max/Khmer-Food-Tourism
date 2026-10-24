@@ -24,6 +24,7 @@ export const ProfileView: React.FC = () => {
     setIsVipAddRestaurantModalOpen,
     connectTikTokAccount, disconnectTikTokAccount, connectFacebookAccount, disconnectFacebookAccount,
     setManagingRestaurant, setIsManageMenuModalOpen,
+    getOwnedRestaurantsForUser, openManageMyVipStore, activeManagedShopId,
     setSelectedFood, setSelectedRestaurant, setSelectedDestination,
     deleteRestaurant,
     resetAllData, showToast, updateCurrentUserProfile,
@@ -147,8 +148,8 @@ export const ProfileView: React.FC = () => {
   // User posts
   const myPosts = posts.filter(p => currentUser && p.authorId === currentUser.id);
 
-  // Owner restaurants
-  const myRestaurants = restaurants.filter(r => currentUser && r.ownerId === currentUser.id);
+  // Owner restaurants (sorted newest/active first via getOwnedRestaurantsForUser)
+  const myRestaurants = getOwnedRestaurantsForUser(currentUser);
 
   return (
     <div className="max-w-md mx-auto px-4 py-3 space-y-4 pb-24">

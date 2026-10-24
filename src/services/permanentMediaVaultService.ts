@@ -15,7 +15,7 @@
  * Default seed images NEVER overwrite any record present in this vault.
  */
 
-import { FoodItem, Restaurant, TouristDestination, TrendingFoodItem, RestaurantMenuItem } from '../types';
+import { FoodItem, Restaurant, TouristDestination, TrendingFoodItem, RestaurantMenuItem, RestaurantReview, RestaurantPriceLevel } from '../types';
 import { isSupabaseConfigured, pullCloudDocument, pushCloudDocument } from './supabaseService';
 
 export const VAULT_KEYS = {
@@ -52,6 +52,9 @@ export interface RestaurantMediaOverride {
   galleryPhotos?: string[];
   foodImages?: string[];
   menuItems?: RestaurantMenuItem[];
+  reviews?: RestaurantReview[];
+  rating?: number;
+  reviewCount?: number;
   nameKh?: string;
   nameEn?: string;
   descriptionKh?: string;
@@ -59,6 +62,14 @@ export interface RestaurantMediaOverride {
   addressKh?: string;
   provinceKh?: string;
   phone?: string;
+  openingHoursKh?: string;
+  priceLevel?: RestaurantPriceLevel;
+  promoVideoUrl?: string;
+  telegramUrl?: string;
+  facebookUrl?: string;
+  ownerId?: string;
+  ownerName?: string;
+  ownerEmail?: string;
   mapUrl?: string;
   latitude?: number;
   longitude?: number;
@@ -312,6 +323,9 @@ export function recordPermanentRestaurantOverride(rest: Restaurant): void {
     galleryPhotos: rest.galleryPhotos,
     foodImages: rest.foodImages,
     menuItems: rest.menuItems,
+    reviews: rest.reviews,
+    rating: rest.rating,
+    reviewCount: rest.reviewCount,
     nameKh: rest.nameKh,
     nameEn: rest.nameEn,
     descriptionKh: rest.descriptionKh,
@@ -319,6 +333,14 @@ export function recordPermanentRestaurantOverride(rest: Restaurant): void {
     addressKh: rest.addressKh,
     provinceKh: rest.provinceKh,
     phone: rest.phone,
+    openingHoursKh: rest.openingHoursKh,
+    priceLevel: rest.priceLevel,
+    promoVideoUrl: rest.promoVideoUrl,
+    telegramUrl: rest.telegramUrl,
+    facebookUrl: rest.facebookUrl,
+    ownerId: rest.ownerId,
+    ownerName: rest.ownerName,
+    ownerEmail: rest.ownerEmail,
     mapUrl: rest.mapUrl,
     latitude: rest.latitude,
     longitude: rest.longitude,
@@ -328,6 +350,19 @@ export function recordPermanentRestaurantOverride(rest: Restaurant): void {
   bundle.updatedAt = now;
   saveLocalMediaOverrides(bundle);
   pushMediaOverridesToCloud(bundle).catch(() => {});
+}
+
+/**
+ * Remove a deleted restaurant from the permanent override vault.
+ */
+export function removePermanentRestaurantOverride(restaurantId: string): void {
+  const bundle = loadLocalMediaOverrides();
+  if (bundle.restaurants[restaurantId]) {
+    delete bundle.restaurants[restaurantId];
+    bundle.updatedAt = new Date().toISOString();
+    saveLocalMediaOverrides(bundle);
+    pushMediaOverridesToCloud(bundle).catch(() => {});
+  }
 }
 
 /**
@@ -428,9 +463,12 @@ export function applyRestaurantOverrides(
       ...r,
       photoUrl,
       profileImage: ov.profileImage || photoUrl,
-      galleryPhotos: Array.isArray(ov.galleryPhotos) && ov.galleryPhotos.length > 0 ? ov.galleryPhotos : r.galleryPhotos,
-      foodImages: Array.isArray(ov.foodImages) && ov.foodImages.length > 0 ? ov.foodImages : r.foodImages,
-      menuItems: Array.isArray(ov.menuItems) && ov.menuItems.length > 0 ? ov.menuItems : r.menuItems,
+      galleryPhotos: Array.isArray(ov.galleryPhotos) ? ov.galleryPhotos : r.galleryPhotos,
+      foodImages: Array.isArray(ov.foodImages) ? ov.foodImages : r.foodImages,
+      menuItems: Array.isArray(ov.menuItems) ? ov.menuItems : r.menuItems,
+      reviews: Array.isArray(ov.reviews) ? ov.reviews : r.reviews,
+      rating: typeof ov.rating === 'number' ? ov.rating : r.rating,
+      reviewCount: typeof ov.reviewCount === 'number' ? ov.reviewCount : r.reviewCount,
       nameKh: ov.nameKh || r.nameKh,
       nameEn: ov.nameEn || r.nameEn,
       descriptionKh: ov.descriptionKh || r.descriptionKh,
@@ -438,6 +476,14 @@ export function applyRestaurantOverrides(
       addressKh: ov.addressKh || r.addressKh,
       provinceKh: ov.provinceKh || r.provinceKh,
       phone: ov.phone !== undefined ? ov.phone : r.phone,
+      openingHoursKh: ov.openingHoursKh || r.openingHoursKh,
+      priceLevel: ov.priceLevel || r.priceLevel,
+      promoVideoUrl: ov.promoVideoUrl !== undefined ? ov.promoVideoUrl : r.promoVideoUrl,
+      telegramUrl: ov.telegramUrl !== undefined ? ov.telegramUrl : r.telegramUrl,
+      facebookUrl: ov.facebookUrl !== undefined ? ov.facebookUrl : r.facebookUrl,
+      ownerId: ov.ownerId || r.ownerId,
+      ownerName: ov.ownerName || r.ownerName,
+      ownerEmail: ov.ownerEmail || r.ownerEmail,
       mapUrl: ov.mapUrl || r.mapUrl,
       latitude: typeof ov.latitude === 'number' ? ov.latitude : r.latitude,
       longitude: typeof ov.longitude === 'number' ? ov.longitude : r.longitude,
