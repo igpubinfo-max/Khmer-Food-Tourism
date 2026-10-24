@@ -21,129 +21,9 @@ interface AdditionalDishSeed {
   calories: number;
 }
 
-// Dish-specific verified Southeast Asian & Cambodian culinary photos (Wikimedia Commons)
-const DISH_SPECIFIC_PHOTOS: Record<string, string> = {
-  // Soups & Curries (food-101 .. food-116)
-  'food-101': '/foods/food-3.jpg',
-  'food-102': '/foods/food-10.jpg',
-  'food-103': '/foods/food-9.jpg',
-  'food-104': '/foods/food-57.jpg',
-  'food-105': '/foods/food-15.jpg',
-  'food-106': '/foods/food-7.jpg',
-  'food-107': '/foods/food-2.jpg',
-  'food-108': '/foods/food-55.jpg',
-  'food-109': '/foods/food-3.jpg',
-  'food-110': '/foods/food-5.jpg',
-  'food-111': '/foods/food-14.jpg',
-  'food-112': '/foods/food-11.jpg',
-  'food-113': '/foods/food-16.jpg',
-  'food-114': '/foods/food-54.jpg',
-  'food-115': '/foods/food-6.jpg',
-  'food-116': '/foods/food-15.jpg',
-
-  // Grilled & Roasted (food-117 .. food-130)
-  'food-117': '/foods/food-20.jpg',
-  'food-118': '/foods/food-21.jpg',
-  'food-119': '/foods/food-22.jpg',
-  'food-120': '/foods/food-19.jpg',
-  'food-121': '/foods/food-23.jpg',
-  'food-122': '/foods/food-25.jpg',
-  'food-123': '/foods/food-24.jpg',
-  'food-124': '/foods/food-63.jpg',
-  'food-125': '/foods/food-62.jpg',
-  'food-126': '/foods/food-58.jpg',
-  'food-127': '/foods/food-59.jpg',
-  'food-128': '/foods/food-24.jpg',
-  'food-129': '/foods/food-21.jpg',
-  'food-130': '/foods/food-34.jpg',
-
-  // Stir-Fry & Braised (food-131 .. food-146)
-  'food-131': '/foods/food-28.jpg',
-  'food-132': '/foods/food-72.jpg',
-  'food-133': '/foods/food-29.jpg',
-  'food-134': '/foods/food-30.jpg',
-  'food-135': '/foods/food-67.jpg',
-  'food-136': '/foods/food-68.jpg',
-  'food-137': '/foods/food-71.jpg',
-  'food-138': '/foods/food-69.jpg',
-  'food-139': '/foods/food-73.jpg',
-  'food-140': '/foods/food-8.jpg',
-  'food-141': '/foods/food-75.jpg',
-  'food-142': '/foods/food-74.jpg',
-  'food-143': '/foods/food-71.jpg',
-  'food-144': '/foods/food-67.jpg',
-  'food-145': '/foods/food-28.jpg',
-  'food-146': '/foods/food-74.jpg',
-
-  // Salads & Dips (food-147 .. food-156)
-  'food-147': '/foods/food-31.jpg',
-  'food-148': '/foods/food-76.jpg',
-  'food-149': '/foods/food-35.jpg',
-  'food-150': '/foods/food-35.jpg',
-  'food-151': '/foods/food-35.jpg',
-  'food-152': '/foods/food-32.jpg',
-  'food-153': '/foods/food-76.jpg',
-  'food-154': '/foods/food-33.jpg',
-  'food-155': '/foods/food-78.jpg',
-  'food-156': '/foods/food-80.jpg',
-
-  // Noodles (food-157 .. food-166)
-  'food-157': '/foods/food-81.jpg',
-  'food-158': '/foods/food-36.jpg',
-  'food-159': '/foods/food-40.jpg',
-  'food-160': '/foods/food-84.jpg',
-  'food-161': '/foods/food-38.jpg',
-  'food-162': '/foods/food-36.jpg',
-  'food-163': '/foods/food-82.jpg',
-  'food-164': '/foods/food-84.jpg',
-  'food-165': '/foods/food-39.jpg',
-  'food-166': '/foods/food-37.jpg',
-
-  // Rice & Porridge (food-167 .. food-176)
-  'food-167': '/foods/food-43.jpg',
-  'food-168': '/foods/food-41.jpg',
-  'food-169': '/foods/food-42.jpg',
-  'food-170': '/foods/food-89.jpg',
-  'food-171': '/foods/food-87.jpg',
-  'food-172': '/foods/food-88.jpg',
-  'food-173': '/foods/food-86.jpg',
-  'food-174': '/foods/food-42.jpg',
-  'food-175': '/foods/food-97.jpg',
-  'food-176': '/foods/food-43.jpg',
-
-  // Street Food & Snacks (food-177 .. food-184)
-  'food-177': '/foods/food-99.jpg',
-  'food-178': '/foods/food-83.jpg',
-  'food-179': '/foods/food-62.jpg',
-  'food-180': '/foods/food-64.jpg',
-  'food-181': 'https://images.unsplash.com/photo-1541696432-82c6da8ce7bf?w=800&auto=format&fit=crop&q=80',
-  'food-182': '/foods/food-61.jpg',
-  'food-183': '/foods/food-99.jpg',
-  'food-184': '/foods/food-50.jpg',
-
-  // Desserts & Traditional Cakes (food-185 .. food-192)
-  'food-185': '/foods/food-47.jpg',
-  'food-186': '/foods/food-48.jpg',
-  'food-187': '/foods/food-46.jpg',
-  'food-188': '/foods/food-92.jpg',
-  'food-189': '/foods/food-94.jpg',
-  'food-190': '/foods/food-90.jpg',
-  'food-191': '/foods/food-44.jpg',
-  'food-192': '/foods/food-95.jpg',
-
-  // Drinks & Beverages (food-193 .. food-200)
-  'food-193': 'https://upload.wikimedia.org/wikipedia/commons/a/a2/Sugar_cane_juice_in_Phnom_Penh_4.jpg',
-  'food-194': 'https://upload.wikimedia.org/wikipedia/commons/8/8a/Kafae_boran_Chiang_Mai.jpg',
-  'food-195': 'https://upload.wikimedia.org/wikipedia/commons/0/01/Borassus_flabellifer.jpg',
-  'food-196': 'https://upload.wikimedia.org/wikipedia/commons/a/a4/Nam_bai_bua_bok.JPG',
-  'food-197': 'https://images.unsplash.com/photo-1525385133512-2f3bdd039054?w=800&auto=format&fit=crop&q=80',
-  'food-198': 'https://upload.wikimedia.org/wikipedia/commons/0/0d/A_Hong_Kong_Style_Ice_Lemon_Tea_in_Cheung_Chau.jpg',
-  'food-199': 'https://upload.wikimedia.org/wikipedia/commons/2/2c/A_cup_of_hot_soy_milk_(3076343897).jpg',
-  'food-200': 'https://upload.wikimedia.org/wikipedia/commons/5/5f/Acai_rosa_soy_granita_in_habitu_cafe.jpg',
-};
-
+// Dedicated verified local photos (/foods/food-101.jpg .. /foods/food-200.jpg)
 function getMatchedOnlinePhotoUrl(_cat: FoodCategorySlug, _index: number, dishId: string): string {
-  return DISH_SPECIFIC_PHOTOS[dishId] || 'https://upload.wikimedia.org/wikipedia/commons/7/76/2016_Phnom_Penh%2C_Amok_trey_(02).jpg';
+  return `/foods/${dishId}.jpg`;
 }
 
 const RAW_100_NEW_DISHES: Array<{
@@ -607,7 +487,7 @@ const RAW_100_NEW_DISHES: Array<{
     herbEn: 'Red chili and crispy garlic bits',
   },
   {
-    nameKh: 'ឆាផ្កាខាត់ណាបង្គាស្រស់',
+    nameKh: 'ឆាផ្កាខាត់ណាខៀវ-ស បង្គាទន្លេស្រស់',
     nameEn: 'Broccoli & Cauliflower Stir-Fry with Fresh River Prawns',
     cat: 'stirfry',
     catKh: 'ម្ហូបឆា / ឆាបង្គាបន្លែ',
@@ -1239,10 +1119,10 @@ const RAW_100_NEW_DISHES: Array<{
     herbEn: 'Crisp lettuce and fresh garden herbs',
   },
   {
-    nameKh: 'នំកាចាយបំពងទឹកត្រីផ្អែមម្ទេស',
+    nameKh: 'នំកាឆាយបំពងទឹកត្រីផ្អែមម្ទេស',
     nameEn: 'Crispy Pan-Fried Garlic Chive Rice Cakes (Num Kachay)',
     cat: 'streetfood',
-    catKh: 'អាហារសម្រន់ / នំកាចាយ',
+    catKh: 'អាហារសម្រន់ / នំកាឆាយ',
     catEn: 'Street Food / Crispy Chive Cakes',
     mainIngKh: 'ម្សៅអង្ករដំណើប និងស្លឹកគូឆាយស្រស់ហាន់ (៣៥០ ក្រាម)',
     mainIngEn: 'Glutinous rice flour dough stuffed with fresh garlic chives (350g)',
@@ -1306,7 +1186,7 @@ const RAW_100_NEW_DISHES: Array<{
     herbEn: 'Kampot black pepper and garlic seasoning',
   },
   {
-    nameKh: 'នំគមស្នូលដូងស្ករត្នោត',
+    nameKh: 'នំគមស្លឹកចេកស្នូលដូងស្ករត្នោតបុរាណ',
     nameEn: 'Pyramid Sticky Rice Cake with Sweet Palm Sugar Coconut Filling (Num Kom)',
     cat: 'dessert',
     catKh: 'នំប្រពៃណីខ្មែរ / នំគម',
@@ -1621,8 +1501,8 @@ export const additional100Foods: FoodItem[] = RAW_100_NEW_DISHES.map((item, idx)
     descriptionEn: `${item.nameEn} is an authentic Cambodian culinary dish prepared with ${item.mainIngEn}, ${item.subIngEn}, and aromatic ${item.herbEn}.`,
     photoUrl: onlinePhotoUrl,
     originalPhotoUrl: onlinePhotoUrl,
-    imageAuditStatus: 'flagged_review',
-    imageAuditNote: `រូបភាពយោង (${item.nameKh})`,
+    imageAuditStatus: 'verified',
+    imageAuditNote: `រូបភាពម្ហូបខ្មែរពិតប្រាកដ (${item.nameKh})`,
     prepTime: item.cat === 'drink' ? '១០ នាទី' : '២០ នាទី',
     cookTime: item.cat === 'drink' ? '៥ នាទី' : '២៥ នាទី',
     servings: '២-៤ នាក់',

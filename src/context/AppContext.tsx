@@ -395,8 +395,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       localStorage.removeItem('kft_foods_100_v3');
     } catch {}
     try {
-      const saved = localStorage.getItem('kft_foods_200_v6') || localStorage.getItem('kft_foods_200_v5');
+      const saved = localStorage.getItem('kft_foods_200_v7') || localStorage.getItem('kft_foods_200_v6') || localStorage.getItem('kft_foods_200_v5');
       localStorage.removeItem('kft_foods_200_v5');
+      localStorage.removeItem('kft_foods_200_v6');
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length >= 50 && parsed[0]?.photoUrl?.startsWith('/foods/')) {
@@ -407,9 +408,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             const hasCustomUpload =
               typeof f.photoUrl === 'string' &&
               (f.photoUrl.startsWith('data:') ||
-                (f.imageAuditNote && (f.imageAuditNote.includes('Online') || f.imageAuditNote.includes('រដ្ឋបាល'))));
+                (f.imageAuditNote && f.imageAuditNote.includes('រដ្ឋបាល')));
             return {
               ...f,
+              nameKh: seed.nameKh,
+              nameEn: seed.nameEn,
               photoUrl: hasCustomUpload ? f.photoUrl : seed.photoUrl,
               originalPhotoUrl: seed.originalPhotoUrl,
               imageAuditStatus: hasCustomUpload ? f.imageAuditStatus : seed.imageAuditStatus,
@@ -422,7 +425,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
       }
     } catch (e) {
-      console.warn('Failed to parse kft_foods_200_v5', e);
+      console.warn('Failed to parse kft_foods_200_v7', e);
     }
     return initialFoods;
   });
@@ -644,12 +647,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (savedOverrides) photoOverrides = JSON.parse(savedOverrides) || {};
       } catch {}
 
-      const saved = localStorage.getItem('kft_destinations_real_v7') || localStorage.getItem('kft_destinations_real_v6') || localStorage.getItem('kft_destinations_real_v5');
+      const REMOVED_DUPLICATE_DEST_IDS = new Set(['dest-151', 'dest-171', 'dest-220', 'dest-262', 'dest-298']);
+      const saved = localStorage.getItem('kft_destinations_real_v8') || localStorage.getItem('kft_destinations_real_v7') || localStorage.getItem('kft_destinations_real_v6') || localStorage.getItem('kft_destinations_real_v5');
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length >= 100 && !String(parsed[0]?.photoUrl || '').includes('1569683795645')) {
           const initialMap = new Map(initialDestinations.map(d => [d.id, d]));
-          const upgraded = parsed.map((d: TouristDestination) => {
+          const filteredParsed = parsed.filter((d: TouristDestination) => !REMOVED_DUPLICATE_DEST_IDS.has(d.id));
+          const upgraded = filteredParsed.map((d: TouristDestination) => {
             const seed = initialMap.get(d.id);
             if (!seed) return d;
 
@@ -658,6 +663,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               return {
                 ...seed,
                 ...d,
+                nameKh: seed.nameKh,
+                nameEn: seed.nameEn,
+                provinceKh: seed.provinceKh,
+                provinceEn: seed.provinceEn,
+                addressKh: seed.addressKh,
                 photoUrl: photoOverrides[d.id].photoUrl,
                 isCustomPhoto: true,
                 photoUpdatedAt: photoOverrides[d.id].updatedAt,
@@ -668,34 +678,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             const isUserUpload = typeof d.photoUrl === 'string' && d.photoUrl.startsWith('data:');
             const hasCustomFlag = Boolean(d.isCustomPhoto);
 
-            // Outdated placeholder signatures that must be upgraded to new verified seed photos
-            const isOutdatedSeedPhoto = 
-              !d.photoUrl ||
-              d.photoUrl.includes('Aerial_View_of_Kizuna_Bridge') || // dest-77 old Kizuna bridge
-              d.photoUrl.includes('Mondulkiri_province_Northeastern_Cambodia.jpg') || // dest-58 old landscape
-              d.photoUrl.includes('Siem_Reap_Pubstreet.jpg') || // dest-123 old pub street duplicate
-              (d.id === 'dest-123' && (d.nameKh || '').includes('ផាប់ស្ទ្រីត'));
-
             let effectivePhoto = seed.photoUrl;
 
             if (isUserUpload || hasCustomFlag) {
               effectivePhoto = d.photoUrl;
               photoOverrides[d.id] = { photoUrl: d.photoUrl, updatedAt: d.photoUpdatedAt || new Date().toISOString() };
-            } else if (!isOutdatedSeedPhoto && d.photoUrl && d.photoUrl.trim() !== '') {
-              // Custom URL previously applied
-              if (d.photoUrl !== seed.photoUrl && !d.photoUrl.includes('Aerial_View_of_Kizuna_Bridge')) {
-                effectivePhoto = d.photoUrl;
-                photoOverrides[d.id] = { photoUrl: d.photoUrl, updatedAt: d.photoUpdatedAt || new Date().toISOString() };
-              } else {
-                effectivePhoto = seed.photoUrl;
-              }
             }
 
             return {
               ...seed,
               ...d,
+              nameKh: seed.nameKh,
+              nameEn: seed.nameEn,
+              provinceKh: seed.provinceKh,
+              provinceEn: seed.provinceEn,
+              addressKh: seed.addressKh,
               photoUrl: effectivePhoto,
-              isCustomPhoto: isUserUpload || hasCustomFlag || (effectivePhoto !== seed.photoUrl),
+              isCustomPhoto: isUserUpload || hasCustomFlag,
             };
           });
 
@@ -710,7 +709,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
       }
     } catch (e) {
-      console.warn('Failed to parse kft_destinations_real_v7', e);
+      console.warn('Failed to parse kft_destinations_real_v8', e);
     }
     try {
       localStorage.removeItem('kft_destinations_google_v3');
@@ -720,6 +719,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       localStorage.removeItem('kft_destinations_v4');
       localStorage.removeItem('kft_destinations_real_v5');
       localStorage.removeItem('kft_destinations_real_v6');
+      localStorage.removeItem('kft_destinations_real_v7');
     } catch {}
     return initialDestinations;
   });
@@ -1218,7 +1218,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return;
     }
     if (foods && foods.length > 0) {
-      scheduleStorageWrite('kft_foods_200_v6', foods, 1500);
+      scheduleStorageWrite('kft_foods_200_v7', foods, 1500);
     }
   }, [foods]);
 
@@ -1283,7 +1283,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return;
     }
     if (destinations && destinations.length > 0) {
-      scheduleStorageWrite('kft_destinations_real_v7', destinations, 1500);
+      scheduleStorageWrite('kft_destinations_real_v8', destinations, 1500);
     }
   }, [destinations]);
 

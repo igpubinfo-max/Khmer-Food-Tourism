@@ -38,7 +38,7 @@ export const Header: React.FC = () => {
           className="flex items-center gap-2.5 cursor-pointer group"
         >
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#059669] to-[#064E3B] p-0.5 shadow-md flex items-center justify-center border border-emerald-400/30">
-            <img src="/logo.svg" alt="Khmer Food" className="w-full h-full rounded-[10px] object-cover" />
+            <img src="/icon-192.png" alt="Khmer Food" className="w-full h-full rounded-[10px] object-cover" />
           </div>
           <div>
             <div className="flex items-center gap-1.5">

@@ -1,6 +1,6 @@
-export const APP_VERSION = 'v1.9.3';
-export const APP_VERSION_NAME = '1.9.3';
-export const APP_BUILD_CODE = 65;
+export const APP_VERSION = 'v1.9.4';
+export const APP_VERSION_NAME = '1.9.4';
+export const APP_BUILD_CODE = 66;
 export const APP_RELEASE_DATE = '2026-10-24';
 
 export interface DeletedUserRecord {

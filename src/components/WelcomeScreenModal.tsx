@@ -157,10 +157,7 @@ export const WelcomeScreenModal: React.FC<WelcomeScreenModalProps> = ({ onComple
                 <img
                   src="/icon-192.png"
                   alt="App Logo"
-                  className="w-14 h-14 object-contain"
-                  onError={(e) => {
-                    (e.currentTarget as HTMLImageElement).src = '/logo.svg';
-                  }}
+                  className="w-full h-full object-cover"
                 />
               </div>
             </div>
