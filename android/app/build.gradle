@@ -7,8 +7,8 @@ android {
         applicationId "com.khmerfood.tourism"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 67
-        versionName "1.9.5"
+        versionCode 68
+        versionName "1.9.6"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -24,6 +24,9 @@ android {
                 storePassword System.getenv("KEYSTORE_PASSWORD") ?: "KhmerFood2026PlayStore"
                 keyAlias System.getenv("KEY_ALIAS") ?: "khmerfood-upload"
                 keyPassword System.getenv("KEY_PASSWORD") ?: "KhmerFood2026PlayStore"
+                v1SigningEnabled true
+                v2SigningEnabled true
+                v3SigningEnabled true
             }
         }
     }
@@ -35,6 +38,11 @@ android {
             minifyEnabled false
             shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            if (file("khmerfood-upload-key.jks").exists()) {
+                signingConfig signingConfigs.release
+            }
         }
     }
     lint {

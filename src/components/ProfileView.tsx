@@ -247,7 +247,7 @@ export const ProfileView: React.FC = () => {
                       {isKm ? 'គណនីរដ្ឋបាលប្រព័ន្ធ (Private)' : 'System Administrator (Private)'}
                     </p>
                   ) : (
-                    <div className="mt-1 space-y-0.5">
+                    <div className="mt-1 space-y-1">
                       {currentUser.phone && (
                         <p className="text-xs sm:text-sm text-[#059669] font-mono font-bold flex items-center gap-1.5">
                           <span>📞</span> <span>{currentUser.phone}</span>
@@ -257,6 +257,45 @@ export const ProfileView: React.FC = () => {
                         <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-mono flex items-center gap-1.5">
                           <span>✉️</span> <span>{currentUser.email}</span>
                         </p>
+                      )}
+                      {isVip && currentUser.subscriptionExpiryDate && (
+                        <div className={`mt-1.5 p-2 rounded-xl border text-[11px] font-khmer flex items-center justify-between gap-2 ${
+                          remainingDays <= 3
+                            ? 'bg-rose-50 dark:bg-rose-950/60 border-rose-300 dark:border-rose-700 text-rose-800 dark:text-rose-200'
+                            : 'bg-amber-50 dark:bg-amber-950/40 border-amber-300 dark:border-amber-700 text-amber-950 dark:text-amber-200'
+                        }`}>
+                          <div>
+                            <p className="font-bold">
+                              📅 {isKm ? 'ថ្ងៃផុតកំណត់ VIP៖' : 'VIP Expiration Date:'}{' '}
+                              <span className="font-mono underline">{currentUser.subscriptionExpiryDate.split('T')[0]}</span>
+                            </p>
+                            <p className="font-extrabold mt-0.5">
+                              ⏳ {isKm ? `រយៈពេលនៅសល់៖ ${remainingDays} ថ្ងៃទៀត` : `Remaining Time: ${remainingDays} day(s) left`}
+                              {remainingDays <= 3 && (isKm ? ' (ជិតផុតកំណត់!)' : ' (Expiring Soon!)')}
+                            </p>
+                          </div>
+                          {remainingDays <= 3 && (
+                            <button
+                              onClick={() => openUpgradeVipModal(true)}
+                              className="px-2.5 py-1 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-black text-[10px] shrink-0 cursor-pointer"
+                            >
+                              {isKm ? 'បន្ត VIP' : 'Renew'}
+                            </button>
+                          )}
+                        </div>
+                      )}
+                      {!isVip && getVipAccountState(currentUser) === 'expired_vip' && (
+                        <div className="mt-1.5 p-2 rounded-xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800 text-[11px] font-khmer flex items-center justify-between gap-2 text-rose-700 dark:text-rose-300">
+                          <span>
+                            ⚠️ {isKm ? `ផុតកំណត់ VIP (${currentUser.subscriptionExpiryDate?.split('T')[0] || 'Expired'}) — គណនីធម្មតា` : `VIP Expired (${currentUser.subscriptionExpiryDate?.split('T')[0] || 'Expired'}) — Normal Account`}
+                          </span>
+                          <button
+                            onClick={() => openUpgradeVipModal(true)}
+                            className="px-2.5 py-1 rounded-lg bg-amber-400 text-slate-950 font-black text-[10px] shrink-0 cursor-pointer"
+                          >
+                            {isKm ? 'បន្ត VIP' : 'Renew'}
+                          </button>
+                        </div>
                       )}
                     </div>
                   )}

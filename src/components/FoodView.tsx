@@ -2,11 +2,17 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { FoodCard } from './FoodCard';
 import { FoodImageModal } from './FoodImageModal';
-import { FoodItem } from '../types';
+import {
+  FoodItem,
+  KHMER_FOOD_PRIMARY_CATEGORIES,
+  KhmerFoodPrimaryGroup,
+  classifyKhmerFoodPrimaryGroup,
+  organizeAndDeduplicateFoods
+} from '../types';
 import { Utensils, Plus, Sparkles, Globe, Check } from 'lucide-react';
 import { searchOnlineFoodImages, OnlineFoodImageCandidate } from '../services/onlineFoodImageService';
 
-const PAGE_BATCH_SIZE = 24;
+const PAGE_BATCH_SIZE = 48;
 
 export const FoodView: React.FC = () => {
   const { foods, updateFood, showToast, language, searchQuery, setSearchQuery, currentUser, setIsAdminOpen } = useApp();
@@ -80,24 +86,42 @@ export const FoodView: React.FC = () => {
     setVisibleCount(PAGE_BATCH_SIZE);
   }, [selectedCategory, searchQuery]);
 
+  // Deduplicate and sort all dishes in exact category order: សម្ល -> ឆា -> ស្ងោរ -> បង្អែម
+  const organizedFoods = useMemo(() => organizeAndDeduplicateFoods(foods), [foods]);
+
+  // Count dishes in each primary group
+  const categoryCounts = useMemo(() => {
+    const counts: Record<string, number> = {
+      all: organizedFoods.length,
+      samlor: 0,
+      cha: 0,
+      sngor: 0,
+      bong_aem: 0,
+    };
+    for (const f of organizedFoods) {
+      const grp = classifyKhmerFoodPrimaryGroup(f);
+      counts[grp] = (counts[grp] || 0) + 1;
+    }
+    return counts;
+  }, [organizedFoods]);
+
+  // Ordered exactly as requested: សម្ល, ឆា, ស្ងោរ, បង្អែម
   const categories = [
-    { id: 'all', nameKh: 'ទាំងអស់', nameEn: 'All Foods' },
-    { id: 'dessert', nameKh: 'បង្អែមខ្មែរ', nameEn: 'Khmer Desserts' },
-    { id: 'cake', nameKh: 'នំខ្មែរ & អាហារសម្រន់', nameEn: 'Traditional Cakes & Snacks' },
-    { id: 'rice', nameKh: 'ម្ហូបបាយ', nameEn: 'Rice Dishes' },
-    { id: 'noodles', nameKh: 'មី គុយទាវ & នំបញ្ចុក', nameEn: 'Noodle Dishes' },
-    { id: 'soup', nameKh: 'ស៊ុប សម្ល & បបរ', nameEn: 'Soups & Porridges' },
-    { id: 'grilled', nameKh: 'ម្ហូបអាំង ចៀន & ចំហុយ', nameEn: 'Grilled & Steamed' },
-    { id: 'stirfry', nameKh: 'ម្ហូបឆា', nameEn: 'Stir-fried' },
-    { id: 'salad', nameKh: 'ញាំ ភ្លា & ទឹកគ្រឿង', nameEn: 'Salads & Dips' },
-    { id: 'specialty', nameKh: 'មុខម្ហូបពិសេស', nameEn: 'Specialties' },
+    { id: 'all', nameKh: 'ទាំងអស់', nameEn: 'All Menus', emoji: '🍽️' },
+    { id: 'samlor', nameKh: '១. សម្ល', nameEn: '1. Samlor (Soup/Curry)', emoji: '🍲' },
+    { id: 'cha', nameKh: '២. ឆា', nameEn: '2. Cha (Stir-Fry)', emoji: '🥘' },
+    { id: 'sngor', nameKh: '៣. ស្ងោរ', nameEn: '3. Sngor (Boiled Soup)', emoji: '🥣' },
+    { id: 'bong_aem', nameKh: '៤. បង្អែម', nameEn: '4. Bong Aem (Dessert)', emoji: '🍨' },
   ];
 
   const filteredFoods = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
-    return foods.filter((f) => {
-      if (selectedCategory !== 'all' && f.categorySlug !== selectedCategory) {
-        return false;
+    return organizedFoods.filter((f) => {
+      if (selectedCategory !== 'all') {
+        const grp = classifyKhmerFoodPrimaryGroup(f);
+        if (grp !== selectedCategory && f.categorySlug !== selectedCategory) {
+          return false;
+        }
       }
       if (q) {
         const matchName = f.nameKh.toLowerCase().includes(q) || f.nameEn.toLowerCase().includes(q);
@@ -107,7 +131,7 @@ export const FoodView: React.FC = () => {
       }
       return true;
     });
-  }, [foods, selectedCategory, searchQuery]);
+  }, [organizedFoods, selectedCategory, searchQuery]);
 
   useEffect(() => {
     const node = loadMoreTriggerRef.current;
@@ -130,6 +154,27 @@ export const FoodView: React.FC = () => {
     () => filteredFoods.slice(0, visibleCount),
     [filteredFoods, visibleCount]
   );
+
+  // Group displayedFoods by primary category in exact order: សម្ល, ឆា, ស្ងោរ, បង្អែម
+  const groupedDisplayedSections = useMemo(() => {
+    const map: Record<KhmerFoodPrimaryGroup, FoodItem[]> = {
+      samlor: [],
+      cha: [],
+      sngor: [],
+      bong_aem: [],
+    };
+    for (const f of displayedFoods) {
+      const grp = classifyKhmerFoodPrimaryGroup(f);
+      map[grp].push(f);
+    }
+    return KHMER_FOOD_PRIMARY_CATEGORIES
+      .map((meta) => ({
+        meta,
+        items: map[meta.id],
+        totalInCategory: categoryCounts[meta.id] || 0,
+      }))
+      .filter((sec) => sec.items.length > 0);
+  }, [displayedFoods, categoryCounts]);
 
   return (
     <div className="max-w-md mx-auto px-4 py-3 space-y-4 pb-24">
@@ -275,27 +320,48 @@ export const FoodView: React.FC = () => {
         </div>
       )}
 
-      {/* Category Pills */}
-      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 font-khmer">
-        {categories.map((cat) => {
-          const active = selectedCategory === cat.id;
-          return (
-            <button
-              key={cat.id}
-              onClick={() => setSelectedCategory(cat.id)}
-              className={`px-3 py-1.5 rounded-full text-xs whitespace-nowrap transition-all duration-150 font-medium ${
-                active
-                  ? 'bg-[#064E3B] text-white font-bold shadow-xs scale-102'
-                  : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200/90 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'
-              }`}
-            >
-              {isKm ? cat.nameKh : cat.nameEn}
-            </button>
-          );
-        })}
+      {/* Ordered Primary Category Pills: ទាំងអស់ | ១. សម្ល | ២. ឆា | ៣. ស្ងោរ | ៤. បង្អែម */}
+      <div className="bg-white dark:bg-slate-800/90 p-2 rounded-2xl border border-emerald-500/20 shadow-2xs space-y-2 font-khmer">
+        <div className="flex items-center justify-between px-1">
+          <span className="text-[11px] font-bold text-[#064E3B] dark:text-emerald-300">
+            {isKm ? '📂 បញ្ជីមុខម្ហូបតាមផ្នែក (សម្ល • ឆា • ស្ងោរ • បង្អែម)៖' : '📂 Browse by Category (Samlor • Cha • Sngor • Dessert):'}
+          </span>
+          <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400">
+            {organizedFoods.length} {isKm ? 'មុខម្ហូប' : 'dishes'}
+          </span>
+        </div>
+        <div className="grid grid-cols-5 gap-1.5">
+          {categories.map((cat) => {
+            const active = selectedCategory === cat.id;
+            const count = categoryCounts[cat.id] ?? 0;
+            return (
+              <button
+                key={cat.id}
+                onClick={() => setSelectedCategory(cat.id)}
+                className={`flex flex-col items-center justify-center py-2 px-1 rounded-xl text-center transition-all duration-150 cursor-pointer border ${
+                  active
+                    ? 'bg-gradient-to-b from-[#064E3B] to-[#047857] text-white font-black border-amber-400 shadow-sm scale-[1.02]'
+                    : 'bg-slate-50 dark:bg-slate-900/60 text-slate-700 dark:text-slate-200 border-slate-200/80 dark:border-slate-700 hover:bg-emerald-50/60'
+                }`}
+              >
+                <span className="text-sm leading-none mb-1">{cat.emoji}</span>
+                <span className="text-[10px] sm:text-[11px] leading-tight truncate w-full">
+                  {isKm ? cat.nameKh : cat.nameEn.split(' (')[0]}
+                </span>
+                <span
+                  className={`mt-0.5 px-1.5 py-0.2 rounded-full text-[9px] font-bold ${
+                    active ? 'bg-amber-400 text-slate-950' : 'bg-slate-200/80 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
+                  }`}
+                >
+                  {count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      {/* Foods Grid */}
+      {/* Foods Grid Grouped by Category in Order: សម្ល -> ឆា -> ស្ងោរ -> បង្អែម */}
       {filteredFoods.length === 0 ? (
         <div className="p-8 text-center bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 space-y-2 font-khmer shadow-xs">
           <Utensils className="w-8 h-8 mx-auto text-slate-300" />
@@ -312,19 +378,49 @@ export const FoodView: React.FC = () => {
           )}
         </div>
       ) : (
-        <>
-          <div className="grid grid-cols-2 gap-3">
-            {displayedFoods.map((food) => (
-              <FoodCard key={food.id} food={food} />
-            ))}
-          </div>
+        <div className="space-y-6">
+          {groupedDisplayedSections.map((section) => (
+            <div key={section.meta.id} className="space-y-2.5">
+              {/* Category Section Banner Header */}
+              <div className="flex items-center justify-between px-3.5 py-2.5 rounded-2xl bg-gradient-to-r from-[#064E3B] via-[#047857] to-emerald-700 text-white shadow-sm border border-emerald-400/30 font-khmer">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-8 h-8 rounded-xl bg-white/15 flex items-center justify-center text-lg shrink-0 border border-white/20">
+                    {section.meta.emoji}
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <span className="px-1.5 py-0.2 rounded bg-amber-400 text-slate-950 text-[10px] font-black">
+                        {isKm ? `ផ្នែកទី ${section.meta.order}` : `Category #${section.meta.order}`}
+                      </span>
+                      <h3 className="font-moul text-xs sm:text-sm text-white truncate">
+                        {isKm ? section.meta.shortNameKh : section.meta.nameEn}
+                      </h3>
+                    </div>
+                    <p className="text-[10px] text-emerald-100 truncate mt-0.5">
+                      {isKm ? section.meta.subtitleKh : section.meta.subtitleEn}
+                    </p>
+                  </div>
+                </div>
+                <span className="px-2.5 py-1 rounded-full bg-white/20 text-white text-[10px] font-bold shrink-0 border border-white/25">
+                  {section.totalInCategory} {isKm ? 'មុខ' : 'items'}
+                </span>
+              </div>
+
+              {/* Dishes in this category */}
+              <div className="grid grid-cols-2 gap-3">
+                {section.items.map((food) => (
+                  <FoodCard key={food.id} food={food} />
+                ))}
+              </div>
+            </div>
+          ))}
 
           {visibleCount < filteredFoods.length && (
             <div ref={loadMoreTriggerRef} className="pt-2 flex justify-center">
               <button
                 type="button"
                 onClick={() => setVisibleCount((prev) => Math.min(filteredFoods.length, prev + PAGE_BATCH_SIZE))}
-                className="px-4 py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-[#064E3B] dark:text-emerald-400 shadow-2xs font-khmer"
+                className="px-4 py-2.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white text-xs font-bold shadow-sm font-khmer cursor-pointer transition"
               >
                 {isKm
                   ? `បង្ហាញមុខម្ហូបបន្ថែម (${displayedFoods.length} / ${filteredFoods.length})`
@@ -332,7 +428,7 @@ export const FoodView: React.FC = () => {
               </button>
             </div>
           )}
-        </>
+        </div>
       )}
 
       {editingFoodModal && (

@@ -1,6 +1,6 @@
-export const APP_VERSION = 'v1.9.5';
-export const APP_VERSION_NAME = '1.9.5';
-export const APP_BUILD_CODE = 67;
+export const APP_VERSION = 'v1.9.6';
+export const APP_VERSION_NAME = '1.9.6';
+export const APP_BUILD_CODE = 68;
 export const APP_RELEASE_DATE = '2026-10-24';
 
 export interface DeletedUserRecord {
@@ -252,6 +252,197 @@ export interface FoodItem {
   imageAuditStatus?: 'verified' | 'replaced' | 'flagged_review';
   imageAuditNote?: string;
   originalPhotoUrl?: string;
+  isCustomPhoto?: boolean;
+  photoUpdatedAt?: string;
+}
+
+export type KhmerFoodPrimaryGroup = 'samlor' | 'cha' | 'sngor' | 'bong_aem';
+
+export interface KhmerFoodPrimaryCategoryMeta {
+  id: KhmerFoodPrimaryGroup;
+  order: number;
+  nameKh: string;
+  shortNameKh: string;
+  nameEn: string;
+  subtitleKh: string;
+  subtitleEn: string;
+  emoji: string;
+}
+
+export const KHMER_FOOD_PRIMARY_CATEGORIES: KhmerFoodPrimaryCategoryMeta[] = [
+  {
+    id: 'samlor',
+    order: 1,
+    nameKh: 'សម្ល (Samlor & Curries)',
+    shortNameKh: 'សម្ល',
+    nameEn: 'Samlor & Curries',
+    subtitleKh: 'សម្លខ្មែរ សម្លកកូរ សម្លការី សម្លម្ជូរ អាម៉ុក ប្រហុកខ្ទិះ និងខ',
+    subtitleEn: 'Traditional Khmer Samlor, Curries, Amok, Stews & Braised Dishes',
+    emoji: '🍲'
+  },
+  {
+    id: 'cha',
+    order: 2,
+    nameKh: 'ឆា (Stir-Fry & Savory)',
+    shortNameKh: 'ឆា',
+    nameEn: 'Stir-Fry & Savory',
+    subtitleKh: 'ម្ហូបឆា ឡុកឡាក់ ឆាគ្រឿង ឆាក្តៅ មីឆា បាយឆា និងម្ហូបអាំង/ញាំ',
+    subtitleEn: 'Wok Stir-Fries, Lok Lak, Fried Noodles/Rice, Grilled & Salads',
+    emoji: '🥘'
+  },
+  {
+    id: 'sngor',
+    order: 3,
+    nameKh: 'ស្ងោរ (Boiled Soups & Broths)',
+    shortNameKh: 'ស្ងោរ',
+    nameEn: 'Boiled Soups & Broths',
+    subtitleKh: 'ស្ងោរជ្រក់ ស្ងោរម្រះ ស្ងោរង៉ាំង៉ូវ ស៊ុប បបរ និងគុយទាវទឹក',
+    subtitleEn: 'Clear Boiled Soups, Herbal Broths, Hotpots, Porridges & Noodle Soups',
+    emoji: '🥣'
+  },
+  {
+    id: 'bong_aem',
+    order: 4,
+    nameKh: 'បង្អែម (Khmer Desserts)',
+    shortNameKh: 'បង្អែម',
+    nameEn: 'Khmer Desserts & Cakes',
+    subtitleKh: 'បង្អែមខ្មែរ សង់ខ្យា ចេកខ្ទិះ នំប្រពៃណីខ្មែរ និងភេសជ្ជៈផ្អែម',
+    subtitleEn: 'Traditional Khmer Sweet Desserts, Custard, Pudding & Sweet Cakes',
+    emoji: '🍨'
+  }
+];
+
+export function classifyKhmerFoodPrimaryGroup(food: Pick<FoodItem, 'nameKh' | 'nameEn' | 'categorySlug' | 'categoryKh'>): KhmerFoodPrimaryGroup {
+  const kh = (food.nameKh || '').trim();
+  const en = (food.nameEn || '').toLowerCase();
+  const slug = food.categorySlug;
+
+  // 1. Check explicit prefix in Khmer name first for 100% accuracy on named dishes
+  if (kh.startsWith('បង្អែម') || kh.includes('សង់ខ្យា') || kh.includes('ចេកខ្ទិះ') || kh.includes('ទឹកកកឈូស') || kh.includes('ចាហួយ') || kh.includes('បាញ់ឌុក') || kh.includes('បាញ់ចានឿក') || kh.includes('តៅហ៊ូទឹកស្ករ')) {
+    return 'bong_aem';
+  }
+  if (kh.startsWith('ស្ងោរ') || kh.startsWith('ស៊ុប') || kh.startsWith('បបរ') || kh.includes('ស្ងោរ') || kh.includes('ង៉ាំង៉ូវ') || kh.includes('ឆ្នាំងភ្លើង') || kh.includes('យ៉ាវហន')) {
+    // Exclude sweet dessert porridges like បង្អែមបបរ
+    if (!kh.includes('បង្អែម') && slug !== 'dessert') {
+      return 'sngor';
+    }
+  }
+  if (kh.startsWith('សម្ល') || kh.includes('សម្ល') || kh.includes('ការី') || kh.includes('អាម៉ុក') || kh.includes('កកូរ') || kh.includes('ម្ជូរគ្រឿង') || kh.includes('ម្ជូរយួន') || kh.includes('ប្រហើរ') || kh.includes('ប្រហុកខ្ទិះ') || kh.includes('ប្រហុកគ្រឿង') || kh.includes('ប្រហុកចិញ្ច្រាំ') || kh.includes('ទឹកគ្រឿង') || kh.includes('កាពិផាវ') || kh.includes('ណាំយ៉ា') || kh.startsWith('ខ') || kh.includes('ខសាច់') || kh.includes('ខត្រី') || kh.includes('ខជើងជ្រូក') || kh.includes('ផាក់ឡូវ')) {
+    return 'samlor';
+  }
+  if (kh.startsWith('ឆា') || kh.includes('ឆា') || kh.includes('ឡុកឡាក់')) {
+    return 'cha';
+  }
+
+  // 2. Check Desserts & Traditional Sweet Cakes
+  if (slug === 'dessert') {
+    return 'bong_aem';
+  }
+  if (slug === 'cake') {
+    // Savory street cakes like បាញ់ឆែវ, នំប៉័ងប៉ាតេ, គួង, ណែម go to 'cha' (savory/pan-fried), while sweet cakes go to 'bong_aem'
+    if (kh.includes('បាញ់ឆែវ') || kh.includes('បាញ់ហយ') || kh.includes('នំប៉័ង') || kh.includes('គួង') || kh.includes('ណែម') || kh.includes('គូឆាយ')) {
+      return 'cha';
+    }
+    return 'bong_aem';
+  }
+
+  // 3. Check Noodle dishes: noodle soups with broth go to 'sngor' or 'samlor', stir-fried noodles go to 'cha'
+  if (slug === 'noodles') {
+    if (kh.includes('នំបញ្ចុក')) {
+      return 'samlor';
+    }
+    if (kh.includes('ឆា') || en.includes('fried') || en.includes('stir')) {
+      return 'cha';
+    }
+    return 'sngor';
+  }
+
+  // 4. Check Soup categorySlug: separate Samlor/Curry from Sngor/Clear Boiled Soup
+  if (slug === 'soup') {
+    if (en.includes('curry') || en.includes('samlor') || en.includes('korko') || en.includes('machu') || en.includes('amok') || kh.includes('ម្ជូរ')) {
+      return 'samlor';
+    }
+    return 'sngor';
+  }
+
+  // 5. All remaining Stir-fry, Grilled, Pan-fried, Rice, Salads -> 'cha'
+  return 'cha';
+}
+
+export function getFoodSubGroupSortKey(food: FoodItem, group: KhmerFoodPrimaryGroup): string {
+  const kh = (food.nameKh || '').trim();
+  if (group === 'samlor') {
+    if (kh.startsWith('សម្ល')) return `1_${kh}`;
+    if (kh.includes('ការី') || kh.includes('អាម៉ុក')) return `2_${kh}`;
+    if (kh.includes('ប្រហុក') || kh.includes('ទឹកគ្រឿង') || kh.includes('កាពិ')) return `3_${kh}`;
+    if (kh.startsWith('ខ') || kh.includes('ផាក់ឡូវ')) return `4_${kh}`;
+    return `5_${kh}`;
+  }
+  if (group === 'cha') {
+    if (kh.startsWith('ឆា')) return `1_${kh}`;
+    if (kh.includes('ឆា') || kh.includes('ឡុកឡាក់')) return `2_${kh}`;
+    if (kh.includes('អាំង') || kh.includes('ដុត') || kh.includes('បំពង') || kh.includes('ចៀន')) return `3_${kh}`;
+    if (kh.includes('ញាំ') || kh.includes('ភ្លា') || kh.includes('បុក')) return `4_${kh}`;
+    return `5_${kh}`;
+  }
+  if (group === 'sngor') {
+    if (kh.startsWith('ស្ងោរ')) return `1_${kh}`;
+    if (kh.includes('ស្ងោរ')) return `2_${kh}`;
+    if (kh.startsWith('ស៊ុប') || kh.includes('ឆ្នាំងភ្លើង')) return `3_${kh}`;
+    if (kh.startsWith('បបរ')) return `4_${kh}`;
+    return `5_${kh}`;
+  }
+  // bong_aem
+  if (kh.startsWith('បង្អែម')) return `1_${kh}`;
+  if (kh.includes('សង់ខ្យា') || kh.includes('ចេកខ្ទិះ') || kh.includes('បាញ់ឌុក')) return `2_${kh}`;
+  if (kh.startsWith('នំ')) return `3_${kh}`;
+  return `4_${kh}`;
+}
+
+export function organizeAndDeduplicateFoods(items: FoodItem[]): FoodItem[] {
+  const byId = new Map<string, FoodItem>();
+  const byNormName = new Map<string, FoodItem>();
+
+  for (const raw of items) {
+    if (!raw || !raw.id || !raw.nameKh) continue;
+    const normKh = raw.nameKh.replace(/\s+/g, '').trim();
+    const existingById = byId.get(raw.id);
+    const existingByName = byNormName.get(normKh);
+    const existing = existingById || existingByName;
+
+    if (!existing) {
+      byId.set(raw.id, raw);
+      byNormName.set(normKh, raw);
+    } else {
+      // Prefer item with custom Admin photo or newer photoUpdatedAt
+      const keepNew =
+        (raw.isCustomPhoto && !existing.isCustomPhoto) ||
+        (raw.photoUpdatedAt && (!existing.photoUpdatedAt || raw.photoUpdatedAt > existing.photoUpdatedAt));
+      if (keepNew) {
+        byId.delete(existing.id);
+        byId.set(raw.id, raw);
+        byNormName.set(normKh, raw);
+      }
+    }
+  }
+
+  const groupOrder: Record<KhmerFoodPrimaryGroup, number> = {
+    samlor: 1,
+    cha: 2,
+    sngor: 3,
+    bong_aem: 4
+  };
+
+  return Array.from(byId.values()).sort((a, b) => {
+    const ga = classifyKhmerFoodPrimaryGroup(a);
+    const gb = classifyKhmerFoodPrimaryGroup(b);
+    if (groupOrder[ga] !== groupOrder[gb]) {
+      return groupOrder[ga] - groupOrder[gb];
+    }
+    const ka = getFoodSubGroupSortKey(a, ga);
+    const kb = getFoodSubGroupSortKey(b, gb);
+    return ka.localeCompare(kb, 'km');
+  });
 }
 
 export type RestaurantPriceLevel = '$' | '$$' | '$$$' | '$$$$';

@@ -334,26 +334,64 @@ export async function syncAllAppDataWithSupabase(localState: {
       return false;
     };
 
-    // 2. Merge Users by ID (prefer VIP active / most recent status, strictly excluding deleted users)
+    const normalizeVipExpiryOnUser = (u: User): User => {
+      const isAdmin =
+        u.role === 'admin' ||
+        u.id === 'admin-authorized-single' ||
+        u.username === 'admin' ||
+        u.username === 'cheasavuth';
+      if (isAdmin) return u;
+      if (u.subscriptionExpiryDate) {
+        const expMs = new Date(u.subscriptionExpiryDate).getTime();
+        if (!Number.isNaN(expMs) && expMs <= Date.now()) {
+          if (u.membershipTier === 'premium_vip' || u.subscriptionStatus === 'active') {
+            return {
+              ...u,
+              membershipTier: 'free',
+              subscriptionStatus: 'expired',
+            };
+          }
+        }
+      } else if (u.membershipTier === 'premium_vip' || u.subscriptionStatus === 'active') {
+        return {
+          ...u,
+          membershipTier: 'free',
+          subscriptionStatus: 'expired',
+        };
+      }
+      return u;
+    };
+
+    // 2. Merge Users by ID (prefer valid non-expired VIP active / most recent status, strictly excluding deleted users)
     const userMap = new Map<string, User>();
     if (Array.isArray(cloudUsers)) {
-      for (const u of cloudUsers) {
-        if (u && u.id && !isAccountDeleted(u)) userMap.set(u.id, u);
+      for (const rawU of cloudUsers) {
+        if (rawU && rawU.id && !isAccountDeleted(rawU)) {
+          userMap.set(rawU.id, normalizeVipExpiryOnUser(rawU));
+        }
       }
     }
-    for (const u of localState.users) {
-      if (!u || !u.id || isAccountDeleted(u)) continue;
+    for (const rawU of localState.users) {
+      if (!rawU || !rawU.id || isAccountDeleted(rawU)) continue;
+      const u = normalizeVipExpiryOnUser(rawU);
       const existing = userMap.get(u.id);
       if (!existing) {
         userMap.set(u.id, u);
       } else {
-        // If either cloud or local was upgraded to VIP by Admin, preserve VIP status
-        const isCloudVip = existing.membershipTier === 'premium_vip' || existing.subscriptionStatus === 'active';
-        const isLocalVip = u.membershipTier === 'premium_vip' || u.subscriptionStatus === 'active';
-        if (isCloudVip && !isLocalVip) {
+        const isCloudValidVip =
+          existing.membershipTier === 'premium_vip' &&
+          existing.subscriptionStatus === 'active' &&
+          existing.subscriptionExpiryDate &&
+          new Date(existing.subscriptionExpiryDate).getTime() > Date.now();
+        const isLocalValidVip =
+          u.membershipTier === 'premium_vip' &&
+          u.subscriptionStatus === 'active' &&
+          u.subscriptionExpiryDate &&
+          new Date(u.subscriptionExpiryDate).getTime() > Date.now();
+        if (isCloudValidVip && !isLocalValidVip) {
           userMap.set(u.id, existing);
         } else {
-          userMap.set(u.id, { ...existing, ...u });
+          userMap.set(u.id, normalizeVipExpiryOnUser({ ...existing, ...u }));
         }
       }
     }

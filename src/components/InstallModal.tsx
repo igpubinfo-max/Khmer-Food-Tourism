@@ -22,7 +22,14 @@ export const InstallModal: React.FC = () => {
   const [copied, setCopied] = useState<boolean>(false);
 
   const isKm = language === 'km';
-  const apkDownloadTarget = appSettings.apkDownloadUrl || 'https://github.com/igpubinfo-max/Khmer-Food-Tourism/releases/download/v1.6.3/KhmerFoodTourism-v1.6.3.apk';
+  const LATEST_SIGNED_APK_URL = 'https://github.com/igpubinfo-max/Khmer-Food-Tourism/releases/download/v1.9.6/KhmerFoodTourism-v1.9.6.apk';
+  const apkDownloadTarget =
+    appSettings.apkDownloadUrl &&
+    !appSettings.apkDownloadUrl.includes('app-debug.apk') &&
+    appSettings.apkDownloadUrl.includes('v1.9.6')
+      ? appSettings.apkDownloadUrl
+      : LATEST_SIGNED_APK_URL;
+  const playStoreTarget = appSettings.playStoreUrl || 'https://play.google.com/store/apps/details?id=com.khmerfood.tourism';
   const iosWebTarget = 'https://igpubinfo-max.github.io/Khmer-Food-Tourism/';
 
   useEffect(() => {
@@ -152,7 +159,7 @@ export const InstallModal: React.FC = () => {
                   className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-[#064E3B] hover:bg-[#047857] text-white font-bold rounded-2xl shadow-md shadow-emerald-950/20 active:scale-[0.98] transition-all font-khmer text-xs"
                 >
                   <Download className="w-4 h-4 text-emerald-300" />
-                  <span>{isKm ? 'ទាញយកឯកសារ Android APK ផ្ទាល់ (Direct Download)' : 'Direct Download Android APK'}</span>
+                  <span>{isKm ? 'ទាញយកកម្មវិធី Android APK ផ្លូវការ (v1.9.6 Signed Release)' : 'Download Official Signed Android APK (v1.9.6)'}</span>
                 </a>
 
                 <button
@@ -164,17 +171,75 @@ export const InstallModal: React.FC = () => {
                 </button>
               </div>
 
-              {/* Official Store Status */}
-              <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-[#059669] flex items-center justify-center text-white shrink-0 font-bold">
-                  ▶
-                </div>
-                <div className="flex-1">
-                  <div className="font-bold text-slate-800 dark:text-slate-200 font-khmer text-xs">
-                    Google Play Store
+              {/* Official Google Play Store Option */}
+              <div className="p-3.5 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-slate-800 dark:to-slate-800/90 rounded-2xl border border-emerald-200 dark:border-emerald-800/60 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-9 h-9 rounded-xl bg-[#059669] flex items-center justify-center text-white shrink-0 font-bold shadow-xs">
+                    ▶
                   </div>
-                  <div className="text-[10px] text-slate-500 font-khmer">
-                    {isKm ? 'ស្ថានភាព៖ កំពុងត្រួតពិនិត្យផ្លូវការ (In Review) - សូមប្រើ Direct APK' : 'Status: Official Release in Review - Please use Direct APK'}
+                  <div className="min-w-0">
+                    <div className="font-bold text-slate-900 dark:text-white font-khmer text-xs flex items-center gap-1.5">
+                      <span>Google Play Store</span>
+                      <span className="px-1.5 py-0.2 rounded bg-emerald-600 text-white text-[9px] font-bold">
+                        VerifiedV2/V3
+                      </span>
+                    </div>
+                    <div className="text-[10px] text-slate-600 dark:text-slate-300 font-khmer leading-snug mt-0.5">
+                      {isKm
+                        ? 'ចុះហត្ថលេខាឌីជីថលផ្លូវការ (V1/V2/V3 Signed Release) • គាំទ្រប្រព័ន្ធ Google Play Protect ១០០%'
+                        : 'Signed with official V1/V2/V3 release certificate • 100% Google Play Protect compatible'}
+                    </div>
+                  </div>
+                </div>
+                <a
+                  href={playStoreTarget}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3 py-1.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white text-[10px] font-bold font-khmer shrink-0 shadow-2xs"
+                >
+                  {isKm ? 'Play Store' : 'Play Store'}
+                </a>
+              </div>
+
+              {/* Google Play Protect Safe Installation Guide in Khmer (Never Disable Play Protect!) */}
+              <div className="bg-amber-50/90 dark:bg-amber-950/30 rounded-2xl p-4 border-2 border-amber-300 dark:border-amber-700/70 space-y-2.5 font-khmer">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                  <h4 className="text-xs font-extrabold text-slate-900 dark:text-amber-200">
+                    {isKm
+                      ? '🛡️ វិធីដំឡើងដោយសុវត្ថិភាពជាមួយ Google Play Protect (មិនបាច់បិទ Play Protect ទេ!)'
+                      : '🛡️ Safe Installation with Google Play Protect (Keep Play Protect ON!)'}
+                  </h4>
+                </div>
+                <p className="text-[11px] text-slate-700 dark:text-slate-300 leading-relaxed">
+                  {isKm
+                    ? 'កម្មវិធីនេះត្រូវបានចុះហត្ថលេខាឌីជីថលផ្លូវការ (Official Release Signature)។ សូមកុំបិទ (Do NOT disable) Google Play Protect ឡើយ! ប្រសិនបើទូរស័ព្ទលោតផ្ទាំងសួរពេលដំឡើង សូមអនុវត្តតាមជំហានងាយៗខាងក្រោម៖'
+                    : 'This app is digitally signed with our official release key. Do NOT disable Google Play Protect! If Android shows a security prompt during installation, follow these safe steps:'}
+                </p>
+                <div className="space-y-2 text-[11px] text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-900/80 p-3 rounded-xl border border-amber-200 dark:border-slate-700">
+                  <div className="flex items-start gap-2">
+                    <span className="px-1.5 py-0.5 rounded bg-emerald-600 text-white font-bold text-[10px] shrink-0">ជំហាន ១</span>
+                    <span>
+                      {isKm
+                        ? 'នៅពេលលោតផ្ទាំង "App scan recommended" (ណែនាំឱ្យស្កេនកម្មវិធី) សូមចុចប៊ូតុងពណ៌ខៀវ «Scan app (ស្កេនកម្មវិធី)» ដើម្បីឱ្យ Google Play Protect ត្រួតពិនិត្យសុវត្ថិភាពដោយស្វ័យប្រវត្តិ។'
+                        : 'When "App scan recommended" appears, tap the blue "Scan app" button so Google Play Protect verifies the APK.'}
+                    </span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="px-1.5 py-0.5 rounded bg-emerald-600 text-white font-bold text-[10px] shrink-0">ជំហាន ២</span>
+                    <span>
+                      {isKm
+                        ? 'បន្ទាប់ពីស្កេនចប់ (ប្រហែល ២-៣ វិនាទី) ឬប្រសិនបើលោតផ្ទាំងបញ្ជាក់បន្ថែម សូមចុច «More details (ព័ត៌មានលម្អិតបន្ថែម)» រួចចុច «Install anyway / Install (ដំឡើង)»។'
+                        : 'Once the scan completes (or if prompted under "More details"), tap "Install" to finish installation.'}
+                    </span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="px-1.5 py-0.5 rounded bg-emerald-600 text-white font-bold text-[10px] shrink-0">ជំហាន ៣</span>
+                    <span>
+                      {isKm
+                        ? 'ប្រសិនបើទូរស័ព្ទសួរសិទ្ធិដំឡើងពី Browser (Chrome/Telegram) សូមបើកកុងតាក់ «Allow from this source (អនុញ្ញាតពីប្រភពនេះ)» រួចចុច Install ជាការស្រេច!'
+                        : 'If your browser (Chrome/Telegram) asks permission, toggle ON "Allow from this source" and tap Install!'}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -183,20 +248,20 @@ export const InstallModal: React.FC = () => {
               <div className="bg-slate-50 dark:bg-slate-800/80 rounded-2xl p-4 border border-slate-200 dark:border-slate-700 space-y-2">
                 <h4 className="text-xs font-bold text-[#064E3B] dark:text-emerald-400 font-khmer flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-[#059669]"></span>
-                  {isKm ? 'ការណែនាំដំឡើងលើទូរស័ព្ទ Android (៤ ជំហានងាយៗ)' : '4 Easy Installation Steps for Android'}
+                  {isKm ? 'សង្ខេបជំហានដំឡើងលើទូរស័ព្ទ Android (៤ ជំហានងាយៗ)' : '4 Easy Installation Steps for Android'}
                 </h4>
                 <ul className="text-[11px] text-slate-600 dark:text-slate-300 space-y-1.5 font-khmer pl-1">
                   <li className="flex items-start gap-2">
                     <span className="w-4 h-4 rounded-full bg-[#064E3B] text-white flex items-center justify-center text-[10px] shrink-0 mt-0.5">1</span>
-                    <span>{isKm ? 'ចុចប៊ូតុង "ទាញយកឯកសារ Android APK ផ្ទាល់" ឬស្កេន QR Code' : 'Click "Direct Download Android APK" or scan QR Code.'}</span>
+                    <span>{isKm ? 'ចុចប៊ូតុង "ទាញយកកម្មវិធី Android APK ផ្លូវការ" ឬស្កេន QR Code ខាងលើ' : 'Click "Download Official Signed Android APK" or scan QR Code.'}</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="w-4 h-4 rounded-full bg-[#064E3B] text-white flex items-center justify-center text-[10px] shrink-0 mt-0.5">2</span>
-                    <span>{isKm ? 'បើកឯកសារ app-debug.apk ដែលបានទាញយករួច' : 'Open the downloaded .apk file.'}</span>
+                    <span>{isKm ? 'បើកឯកសារ KhmerFoodTourism-v1.9.6.apk ដែលបានទាញយករួច' : 'Open the downloaded KhmerFoodTourism-v1.9.6.apk file.'}</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="w-4 h-4 rounded-full bg-[#064E3B] text-white flex items-center justify-center text-[10px] shrink-0 mt-0.5">3</span>
-                    <span>{isKm ? 'ប្រសិនបើទូរស័ព្ទសួរ សូមចុចអនុញ្ញាត "Install from this source" ឬ "ដំឡើងពីប្រភពនេះ"' : 'If prompted, enable "Install unknown apps / from this source".'}</span>
+                    <span>{isKm ? 'ពេលលោតផ្ទាំង Google Play Protect សូមចុច "Scan app (ស្កេនកម្មវិធី)" ដោយរក្សា Play Protect ឱ្យនៅបើកដដែល' : 'When Google Play Protect prompts, tap "Scan app" while keeping Play Protect enabled.'}</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="w-4 h-4 rounded-full bg-[#064E3B] text-white flex items-center justify-center text-[10px] shrink-0 mt-0.5">4</span>

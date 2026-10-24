@@ -41,6 +41,19 @@ import {
   pushCloudDocument,
 } from '../services/supabaseService';
 import { authenticateAdminWithBiometric, setSavedAdminUsername } from '../services/biometricService';
+import {
+  loadLocalMediaOverrides,
+  saveLocalMediaOverrides,
+  recordPermanentFoodOverride,
+  recordPermanentRestaurantOverride,
+  recordPermanentDestinationOverride,
+  recordPermanentTrendingFoodOverride,
+  applyFoodOverrides,
+  applyRestaurantOverrides,
+  applyDestinationOverrides,
+  applyTrendingFoodOverrides,
+  hydrateAndSyncMediaOverrides,
+} from '../services/permanentMediaVaultService';
 
 export type ActiveTab = 'home' | 'food' | 'restaurants' | 'tourism' | 'community' | 'profile';
 
@@ -393,47 +406,102 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
 
   const [foods, setFoods] = useState<FoodItem[]>(() => {
-    // Purge legacy caches to ensure authentic local food photos and recipes are loaded
+    // Purge ancient legacy caches
     try {
       localStorage.removeItem('kft_foods_v4');
       localStorage.removeItem('kft_foods_100_v1');
       localStorage.removeItem('kft_foods_100_v2');
       localStorage.removeItem('kft_foods_100_v3');
     } catch {}
+    const vault = loadLocalMediaOverrides();
     try {
-      const saved = localStorage.getItem('kft_foods_200_v7') || localStorage.getItem('kft_foods_200_v6') || localStorage.getItem('kft_foods_200_v5');
+      const saved =
+        localStorage.getItem('kft_foods_200_v7') ||
+        localStorage.getItem('kft_foods_200_v6') ||
+        localStorage.getItem('kft_foods_200_v5');
       localStorage.removeItem('kft_foods_200_v5');
       localStorage.removeItem('kft_foods_200_v6');
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length >= 50 && parsed[0]?.photoUrl?.startsWith('/foods/')) {
+        if (Array.isArray(parsed) && parsed.length >= 50) {
           const initialMap = new Map(initialFoods.map(f => [f.id, f]));
+          let vaultChanged = false;
           const upgraded = parsed.map((f: FoodItem) => {
             const seed = initialMap.get(f.id);
             if (!seed) return f;
-            const hasCustomUpload =
+
+            // Check if Admin previously customized this food item's photo or details
+            const existingOverride = vault.foods[f.id];
+            const isPhotoModifiedFromSeed =
               typeof f.photoUrl === 'string' &&
-              (f.photoUrl.startsWith('data:') ||
-                (f.imageAuditNote && f.imageAuditNote.includes('រដ្ឋបាល')));
+              f.photoUrl.trim().length > 0 &&
+              f.photoUrl !== seed.photoUrl &&
+              (f.isCustomPhoto ||
+                f.photoUrl.startsWith('data:') ||
+                f.photoUrl.startsWith('http://') ||
+                f.photoUrl.startsWith('https://') ||
+                (f.imageAuditNote && (f.imageAuditNote.includes('រដ្ឋបាល') || f.imageAuditNote.includes('Online'))));
+
+            if (isPhotoModifiedFromSeed && !existingOverride) {
+              vault.foods[f.id] = {
+                id: f.id,
+                photoUrl: f.photoUrl,
+                nameKh: f.nameKh,
+                nameEn: f.nameEn,
+                categorySlug: f.categorySlug,
+                categoryKh: f.categoryKh,
+                categoryEn: f.categoryEn,
+                descriptionKh: f.descriptionKh,
+                descriptionEn: f.descriptionEn,
+                priceRiel: f.priceRiel,
+                priceUsd: f.priceUsd,
+                imageAuditStatus: f.imageAuditStatus || 'verified',
+                imageAuditNote: f.imageAuditNote,
+                isCustomPhoto: true,
+                updatedAt: f.photoUpdatedAt || new Date().toISOString(),
+              };
+              vaultChanged = true;
+            }
+
+            const finalOverride = vault.foods[f.id];
+            if (finalOverride && finalOverride.photoUrl) {
+              return {
+                ...seed,
+                ...f,
+                nameKh: finalOverride.nameKh || seed.nameKh,
+                nameEn: finalOverride.nameEn || seed.nameEn,
+                photoUrl: finalOverride.photoUrl,
+                originalPhotoUrl: seed.originalPhotoUrl,
+                imageAuditStatus: finalOverride.imageAuditStatus || 'verified',
+                imageAuditNote: finalOverride.imageAuditNote || f.imageAuditNote,
+                isCustomPhoto: true,
+                photoUpdatedAt: finalOverride.updatedAt,
+              };
+            }
+
             return {
               ...f,
               nameKh: seed.nameKh,
               nameEn: seed.nameEn,
-              photoUrl: hasCustomUpload ? f.photoUrl : seed.photoUrl,
+              photoUrl: seed.photoUrl,
               originalPhotoUrl: seed.originalPhotoUrl,
-              imageAuditStatus: hasCustomUpload ? f.imageAuditStatus : seed.imageAuditStatus,
-              imageAuditNote: hasCustomUpload ? f.imageAuditNote : seed.imageAuditNote,
+              imageAuditStatus: seed.imageAuditStatus,
+              imageAuditNote: seed.imageAuditNote,
             };
           });
+          if (vaultChanged) {
+            saveLocalMediaOverrides(vault);
+          }
           const existingIds = new Set(upgraded.map((f: FoodItem) => f.id));
           const missingFromInitial = initialFoods.filter(f => !existingIds.has(f.id));
-          return missingFromInitial.length > 0 ? [...upgraded, ...missingFromInitial] : upgraded;
+          const combined = missingFromInitial.length > 0 ? [...upgraded, ...missingFromInitial] : upgraded;
+          return applyFoodOverrides(combined, vault.foods);
         }
       }
     } catch (e) {
       console.warn('Failed to parse kft_foods_200_v7', e);
     }
-    return initialFoods;
+    return applyFoodOverrides(initialFoods, vault.foods);
   });
 
   const normalizeRestaurant = (r: any): Restaurant => {
@@ -510,6 +578,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [restaurants, setRestaurants] = useState<Restaurant[]>(() => {
     const seedMap = new Map<string, Restaurant>(initialRestaurants.map(r => [r.id, r]));
+    const vault = loadLocalMediaOverrides();
+    let vaultChanged = false;
     try {
       localStorage.removeItem('kft_restaurants_real_v5');
       localStorage.removeItem('kft_restaurants_real_v6');
@@ -524,19 +594,52 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           for (const r of parsed) {
             const seed = r && r.id ? seedMap.get(String(r.id)) : undefined;
             if (seed) {
-              const hasCustomPhoto = typeof r.profileImage === 'string' && r.profileImage.startsWith('data:');
+              const primaryImg = r.profileImage || r.photoUrl || '';
+              const hasCustomPhoto =
+                typeof primaryImg === 'string' &&
+                primaryImg.trim().length > 0 &&
+                primaryImg !== seed.photoUrl &&
+                (primaryImg.startsWith('data:') || primaryImg.startsWith('http://') || primaryImg.startsWith('https://'));
+              const hasCustomGallery =
+                Array.isArray(r.galleryPhotos) &&
+                r.galleryPhotos.length > 0 &&
+                JSON.stringify(r.galleryPhotos) !== JSON.stringify(seed.galleryPhotos);
+
+              if ((hasCustomPhoto || hasCustomGallery) && !vault.restaurants[r.id]) {
+                vault.restaurants[r.id] = {
+                  id: r.id,
+                  photoUrl: hasCustomPhoto ? primaryImg : seed.photoUrl,
+                  profileImage: hasCustomPhoto ? primaryImg : seed.photoUrl,
+                  galleryPhotos: hasCustomGallery ? r.galleryPhotos : seed.galleryPhotos,
+                  foodImages: r.foodImages || r.galleryPhotos || seed.galleryPhotos,
+                  menuItems: r.menuItems,
+                  isCustomPhoto: true,
+                  updatedAt: new Date().toISOString(),
+                };
+                vaultChanged = true;
+              }
+
+              const ov = vault.restaurants[r.id];
+              const finalPhoto = ov?.photoUrl || (hasCustomPhoto ? primaryImg : seed.photoUrl);
+              const finalGallery =
+                (Array.isArray(ov?.galleryPhotos) && ov.galleryPhotos.length > 0)
+                  ? ov.galleryPhotos
+                  : (hasCustomGallery ? r.galleryPhotos : seed.galleryPhotos);
+
               normalizedList.push(normalizeRestaurant({
                 ...r,
-                nameKh: seed.nameKh,
-                nameEn: seed.nameEn,
-                descriptionKh: seed.descriptionKh,
-                descriptionEn: seed.descriptionEn,
-                photoUrl: hasCustomPhoto ? r.profileImage : seed.photoUrl,
-                profileImage: hasCustomPhoto ? r.profileImage : seed.photoUrl,
-                galleryPhotos: seed.galleryPhotos,
-                addressKh: seed.addressKh,
+                nameKh: ov?.nameKh || seed.nameKh,
+                nameEn: ov?.nameEn || seed.nameEn,
+                descriptionKh: ov?.descriptionKh || seed.descriptionKh,
+                descriptionEn: ov?.descriptionEn || seed.descriptionEn,
+                photoUrl: finalPhoto,
+                profileImage: finalPhoto,
+                galleryPhotos: finalGallery,
+                foodImages: ov?.foodImages || finalGallery,
+                menuItems: ov?.menuItems || r.menuItems || [],
+                addressKh: ov?.addressKh || seed.addressKh,
                 addressEn: seed.addressEn,
-                provinceKh: seed.provinceKh,
+                provinceKh: ov?.provinceKh || seed.provinceKh,
                 provinceEn: seed.provinceEn,
                 signatureDishesKh: seed.signatureDishesKh,
                 created_at: seed.created_at || getRestaurantCreatedAtIso(seed),
@@ -553,11 +656,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               normalizedList.push(normalizeRestaurant(r));
             }
           }
-          return sortRestaurantsChronologically(normalizedList);
+          if (vaultChanged) {
+            saveLocalMediaOverrides(vault);
+          }
+          return sortRestaurantsChronologically(applyRestaurantOverrides(normalizedList, vault.restaurants));
         }
       }
     } catch (e) {
-      console.warn('Failed to parse kft_restaurants_real_v8', e);
+      console.warn('Failed to parse kft_restaurants_real_v9', e);
     }
 
     // Preserve any user-created custom restaurants from previous storage key
@@ -625,7 +731,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       return normalizeRestaurant(r);
     });
-    return sortRestaurantsChronologically([...baseRestaurants, ...customLegacyRestaurants]);
+    return sortRestaurantsChronologically(applyRestaurantOverrides([...baseRestaurants, ...customLegacyRestaurants], vault.restaurants));
   });
 
   const [isManageMenuModalOpen, setIsManageMenuModalOpen] = useState(false);
@@ -711,7 +817,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
           const existingIds = new Set(upgraded.map((d: TouristDestination) => d.id));
           const missingFromInitial = initialDestinations.filter(d => !existingIds.has(d.id));
-          return missingFromInitial.length > 0 ? [...upgraded, ...missingFromInitial] : upgraded;
+          const combined = missingFromInitial.length > 0 ? [...upgraded, ...missingFromInitial] : upgraded;
+          return applyDestinationOverrides(combined);
         }
       }
     } catch (e) {
@@ -727,7 +834,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       localStorage.removeItem('kft_destinations_real_v6');
       localStorage.removeItem('kft_destinations_real_v7');
     } catch {}
-    return initialDestinations;
+    return applyDestinationOverrides(initialDestinations);
   });
 
   const [posts, setPosts] = useState<CommunityPost[]>(() => {
@@ -885,17 +992,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // AI Trending Food Discovery Section State
   const [trendingFoods, setTrendingFoods] = useState<TrendingFoodItem[]>(() => {
+    const vault = loadLocalMediaOverrides();
     try {
       localStorage.removeItem('kft_trending_foods_v2');
       const saved = localStorage.getItem('kft_trending_foods_v3');
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0 && String(parsed[0]?.photoUrl || '').startsWith('/foods/')) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return applyTrendingFoodOverrides(parsed, vault.trendingFoods);
+        }
       }
     } catch (e) {
       console.warn('Failed to parse kft_trending_foods_v3', e);
     }
-    return initialTrendingFoods;
+    return applyTrendingFoodOverrides(initialTrendingFoods, vault.trendingFoods);
   });
 
   const [selectedTrendingFood, setSelectedTrendingFood] = useState<TrendingFoodItem | null>(null);
@@ -1190,26 +1300,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     try {
       if (currentUser) {
         localStorage.setItem('kft_current_user_v5', JSON.stringify(currentUser));
-        
-        // Automatic VIP subscription expiry enforcement
-        const isAdminUser = 
-          currentUser.role === 'admin' || 
-          currentUser.id === 'admin-authorized-single' || 
-          currentUser.username === 'admin' || 
-          currentUser.username === 'cheasavuth';
-
-        if (!isAdminUser && currentUser.subscriptionExpiryDate) {
-          const isExpired = new Date(currentUser.subscriptionExpiryDate).getTime() <= Date.now();
-          if (isExpired && (currentUser.membershipTier === 'premium_vip' || currentUser.subscriptionStatus === 'active')) {
-            const downgraded: User = {
-              ...currentUser,
-              membershipTier: 'free',
-              subscriptionStatus: 'expired'
-            };
-            setCurrentUser(downgraded);
-            setUsers(prev => prev.map(u => u.id === currentUser.id ? downgraded : u));
-          }
-        }
       } else {
         localStorage.removeItem('kft_current_user_v5');
       }
@@ -1217,6 +1307,219 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       console.warn('Storage sync failed for currentUser:', e);
     }
   }, [currentUser]);
+
+  /**
+   * Requirement #4: Comprehensive VIP Expiration Reminders & Immediate Automatic Downgrade
+   * - Sends an automatic reminder every day during the last 3 days (3, 2, 1 days left) before a VIP account expires.
+   * - Immediately downgrades expired VIP accounts (`expiryMs <= Date.now()` or missing expiry date) to normal (`free`) accounts.
+   * - Revokes VIP status on restaurants owned by expired accounts.
+   * - Persists reminders and downgrades across app restarts (`localStorage` + `Supabase Cloud`).
+   */
+  useEffect(() => {
+    const enforceVipExpirationsAndReminders = () => {
+      const nowMs = Date.now();
+      const todayStr = new Date(nowMs).toISOString().split('T')[0];
+
+      const isAdminAccount = (u?: User | null) =>
+        Boolean(
+          u &&
+            (u.role === 'admin' ||
+              u.id === 'admin-authorized-single' ||
+              u.username === 'admin' ||
+              u.username === 'cheasavuth')
+        );
+
+      let reminderLog: Record<string, string> = {};
+      try {
+        const rawLog = localStorage.getItem('kft_vip_expiry_reminders_v1');
+        if (rawLog) reminderLog = JSON.parse(rawLog) || {};
+      } catch {}
+
+      let expiredNoticeLog: Record<string, string> = {};
+      try {
+        const rawExp = localStorage.getItem('kft_vip_expired_notices_v1');
+        if (rawExp) expiredNoticeLog = JSON.parse(rawExp) || {};
+      } catch {}
+
+      let reminderLogChanged = false;
+      let expiredNoticeLogChanged = false;
+      const newNotificationsToPush: AppNotification[] = [];
+      const expiredUserIds = new Set<string>();
+
+      const evaluateAccount = (u: User): { updatedUser: User; changed: boolean } => {
+        if (!u || isAdminAccount(u)) return { updatedUser: u, changed: false };
+
+        const expiryStr = u.subscriptionExpiryDate;
+        const expiryMs = expiryStr ? new Date(expiryStr).getTime() : NaN;
+        const hasValidFutureExpiry = !Number.isNaN(expiryMs) && expiryMs > nowMs;
+
+        // Case 1: Account has expired or has VIP tier without a valid future expiration date -> Immediate Downgrade!
+        if (!hasValidFutureExpiry && (u.membershipTier === 'premium_vip' || u.subscriptionStatus === 'active')) {
+          expiredUserIds.add(u.id);
+          const downgraded: User = {
+            ...u,
+            membershipTier: 'free',
+            subscriptionStatus: 'expired',
+          };
+
+          const expCycleKey = `${u.id}_${expiryStr || 'no_date'}`;
+          if (!expiredNoticeLog[expCycleKey]) {
+            expiredNoticeLog[expCycleKey] = todayStr;
+            expiredNoticeLogChanged = true;
+            const expFormatted = expiryStr ? expiryStr.split('T')[0] : todayStr;
+            newNotificationsToPush.push({
+              id: `notif-vip-expired-${u.id}-${nowMs}`,
+              titleKh: '⚠️ គណនី VIP របស់អ្នកបានផុតកំណត់ហើយ',
+              titleEn: '⚠️ Your VIP Account Has Expired',
+              messageKh: `សមាជិកភាព VIP នៃគណនី «${u.name}» បានផុតកំណត់នៅថ្ងៃទី ${expFormatted} ហើយត្រូវបានប្តូរមកជាគណនីធម្មតា (Normal Account) ដោយស្វ័យប្រវត្តិ។ សូមបន្តកញ្ចប់ VIP ដើម្បីទទួលបានអត្ថប្រយោជន៍ VIP ឡើងវិញ!`,
+              messageEn: `VIP membership for "${u.name}" expired on ${expFormatted} and has been automatically downgraded to a Normal Account. Renew VIP anytime to restore benefits!`,
+              type: 'system',
+              date: todayStr,
+              isRead: false,
+            });
+            if (currentUser?.id === u.id) {
+              showToast(
+                language === 'km'
+                  ? `⚠️ គណនី VIP របស់អ្នកបានផុតកំណត់ (${expFormatted}) ហើយត្រូវបានប្តូរមកជាគណនីធម្មតា!`
+                  : `⚠️ Your VIP membership expired (${expFormatted}) and was downgraded to a normal account!`,
+                'warning'
+              );
+            }
+          }
+
+          return { updatedUser: downgraded, changed: true };
+        }
+
+        // Case 2: Account is an active VIP -> Check if within the last 3 days (3, 2, or 1 days remaining)
+        if (
+          hasValidFutureExpiry &&
+          u.membershipTier === 'premium_vip' &&
+          u.subscriptionStatus === 'active' &&
+          u.paymentStatus === 'verified'
+        ) {
+          const remainingDays = Math.max(0, Math.ceil((expiryMs - nowMs) / (1000 * 60 * 60 * 24)));
+          if (remainingDays >= 1 && remainingDays <= 3) {
+            const reminderKey = `${u.id}_${todayStr}_day${remainingDays}`;
+            if (!reminderLog[reminderKey]) {
+              reminderLog[reminderKey] = new Date(nowMs).toISOString();
+              reminderLogChanged = true;
+              const expDateFormatted = expiryStr!.split('T')[0];
+
+              newNotificationsToPush.push({
+                id: `notif-vip-reminder-${u.id}-${todayStr}-d${remainingDays}`,
+                titleKh: `⏰ រំលឹក៖ គណនី VIP នឹងផុតកំណត់ក្នុងរយៈពេល ${remainingDays} ថ្ងៃទៀត!`,
+                titleEn: `⏰ Reminder: VIP Expires in ${remainingDays} Day${remainingDays > 1 ? 's' : ''}!`,
+                messageKh: `គណនី VIP របស់អ្នក («${u.name}») នឹងផុតកំណត់នៅថ្ងៃទី ${expDateFormatted} (នៅសល់ ${remainingDays} ថ្ងៃទៀត)។ សូមបន្តសមាជិកភាព VIP ឱ្យទាន់ពេល ដើម្បីរក្សាអត្ថប្រយោជន៍ហាង VIP របស់អ្នក!`,
+                messageEn: `Your VIP account ("${u.name}") expires on ${expDateFormatted} (${remainingDays} day${remainingDays > 1 ? 's' : ''} remaining). Please renew before expiration to keep your VIP benefits!`,
+                type: 'system',
+                date: todayStr,
+                isRead: false,
+              });
+
+              if (currentUser?.id === u.id) {
+                showToast(
+                  language === 'km'
+                    ? `⏰ រំលឹកប្រចាំថ្ងៃ៖ គណនី VIP របស់អ្នកនៅសល់ ${remainingDays} ថ្ងៃទៀត (ផុតកំណត់៖ ${expDateFormatted})!`
+                    : `⏰ Daily Reminder: Your VIP account has ${remainingDays} day(s) left (Expires: ${expDateFormatted})!`,
+                  'warning'
+                );
+              }
+            }
+          }
+        }
+
+        return { updatedUser: u, changed: false };
+      };
+
+      // 1. Check currentUser first
+      if (currentUser && !isAdminAccount(currentUser)) {
+        const res = evaluateAccount(currentUser);
+        if (res.changed) {
+          setCurrentUser(res.updatedUser);
+          try {
+            localStorage.setItem('kft_current_user_v5', JSON.stringify(res.updatedUser));
+          } catch {}
+        }
+      }
+
+      // 2. Check all registered users in users list
+      if (users.length > 0) {
+        let anyUserChanged = false;
+        const nextUsers = users.map((u) => {
+          const res = evaluateAccount(u);
+          if (res.changed) anyUserChanged = true;
+          return res.updatedUser;
+        });
+
+        if (anyUserChanged) {
+          setUsers(nextUsers);
+          try {
+            localStorage.setItem('kft_users_v5', JSON.stringify(nextUsers));
+            if (isSupabaseConfigured()) {
+              pushCloudDocument('kft_cloud_users_v1', nextUsers);
+            }
+          } catch {}
+        }
+      }
+
+      // 3. Immediately downgrade any restaurants owned by expired VIP accounts
+      if (expiredUserIds.size > 0) {
+        setRestaurants((prev) => {
+          let restChanged = false;
+          const nextRests = prev.map((r) => {
+            if (r.ownerId && expiredUserIds.has(r.ownerId) && (r.membershipTier === 'premium' || r.isPromoted)) {
+              restChanged = true;
+              return {
+                ...r,
+                membershipTier: 'free' as MembershipTier,
+                isPromoted: false,
+                paymentStatus: 'unpaid' as const,
+              };
+            }
+            return r;
+          });
+          if (restChanged) {
+            try {
+              localStorage.setItem('kft_restaurants_real_v9', JSON.stringify(nextRests));
+            } catch {}
+          }
+          return restChanged ? nextRests : prev;
+        });
+      }
+
+      if (reminderLogChanged) {
+        try {
+          localStorage.setItem('kft_vip_expiry_reminders_v1', JSON.stringify(reminderLog));
+        } catch {}
+      }
+      if (expiredNoticeLogChanged) {
+        try {
+          localStorage.setItem('kft_vip_expired_notices_v1', JSON.stringify(expiredNoticeLog));
+        } catch {}
+      }
+      if (newNotificationsToPush.length > 0) {
+        setNotifications((prev) => [...newNotificationsToPush, ...prev]);
+      }
+    };
+
+    enforceVipExpirationsAndReminders();
+
+    const intervalId = window.setInterval(enforceVipExpirationsAndReminders, 60000);
+    const onVisibility = () => {
+      if (typeof document !== 'undefined' && !document.hidden) {
+        enforceVipExpirationsAndReminders();
+      }
+    };
+    if (typeof document !== 'undefined') {
+      document.addEventListener('visibilitychange', onVisibility);
+    }
+    return () => {
+      window.clearInterval(intervalId);
+      if (typeof document !== 'undefined') {
+        document.removeEventListener('visibilitychange', onVisibility);
+      }
+    };
+  }, [currentUser, users]);
 
   useEffect(() => {
     if (isInitialMountRef.current.foods) {
@@ -1443,6 +1746,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             JSON.stringify(result.mergedPaymentProofsVault)
           );
         } catch {}
+
+        // Also synchronize permanent media overrides across Foods, Restaurants, Destinations & Trending Foods
+        try {
+          const syncedMediaBundle = await hydrateAndSyncMediaOverrides();
+          if (Object.keys(syncedMediaBundle.foods).length > 0) {
+            setFoods(prev => applyFoodOverrides(prev, syncedMediaBundle.foods));
+          }
+          if (Object.keys(syncedMediaBundle.restaurants).length > 0) {
+            setRestaurants(prev => applyRestaurantOverrides(prev, syncedMediaBundle.restaurants));
+          }
+          if (Object.keys(syncedMediaBundle.destinations).length > 0) {
+            setDestinations(prev => applyDestinationOverrides(prev, syncedMediaBundle.destinations));
+          }
+          if (Object.keys(syncedMediaBundle.trendingFoods).length > 0) {
+            setTrendingFoods(prev => applyTrendingFoodOverrides(prev, syncedMediaBundle.trendingFoods));
+          }
+        } catch (err) {
+          console.warn('Media overrides cloud sync warning:', err);
+        }
       }
       return result.synced;
     } catch (err) {
@@ -1454,6 +1776,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   useEffect(() => {
+    // Hydrate permanent media overrides from IndexedDB & Cloud on startup so Admin-replaced photos never revert
+    hydrateAndSyncMediaOverrides()
+      .then((bundle) => {
+        if (Object.keys(bundle.foods).length > 0) {
+          setFoods(prev => applyFoodOverrides(prev, bundle.foods));
+        }
+        if (Object.keys(bundle.restaurants).length > 0) {
+          setRestaurants(prev => applyRestaurantOverrides(prev, bundle.restaurants));
+        }
+        if (Object.keys(bundle.destinations).length > 0) {
+          setDestinations(prev => applyDestinationOverrides(prev, bundle.destinations));
+        }
+        if (Object.keys(bundle.trendingFoods).length > 0) {
+          setTrendingFoods(prev => applyTrendingFoodOverrides(prev, bundle.trendingFoods));
+        }
+      })
+      .catch(() => {});
+
     let syncTimer: any;
     if (isSupabaseConfigured()) {
       // Defer cloud sync so initial startup UI paints instantly (< 50ms) without waiting for network
@@ -2449,20 +2789,46 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Food CRUD
   const addFood = (foodData: Omit<FoodItem, 'id' | 'rating' | 'reviewCount'>) => {
+    const nowIso = new Date().toISOString();
     const newFood: FoodItem = {
       ...foodData,
       id: `food-${Date.now()}`,
       rating: 5.0,
       reviewCount: 1,
+      isCustomPhoto: true,
+      photoUpdatedAt: nowIso,
     };
-    setFoods(prev => [newFood, ...prev]);
+    recordPermanentFoodOverride(newFood);
+    setFoods(prev => {
+      const next = [newFood, ...prev];
+      try {
+        localStorage.setItem('kft_foods_200_v7', JSON.stringify(next));
+      } catch {
+        scheduleStorageWrite('kft_foods_200_v7', next, 500);
+      }
+      return next;
+    });
     showToast(language === 'km' ? 'បានបញ្ចូលមុខម្ហូបថ្មីដោយជោគជ័យ' : 'Food item added successfully!', 'success');
   };
 
   const updateFood = (updated: FoodItem) => {
-    setFoods(prev => prev.map(f => f.id === updated.id ? updated : f));
-    if (selectedFood?.id === updated.id) setSelectedFood(updated);
-    showToast(language === 'km' ? 'បានកែប្រែព័ត៌មានមុខម្ហូបរួចរាល់' : 'Food item updated!', 'success');
+    const customUpdated: FoodItem = {
+      ...updated,
+      isCustomPhoto: true,
+      photoUpdatedAt: new Date().toISOString(),
+    };
+    recordPermanentFoodOverride(customUpdated);
+    setFoods(prev => {
+      const next = prev.map(f => f.id === customUpdated.id ? customUpdated : f);
+      try {
+        localStorage.setItem('kft_foods_200_v7', JSON.stringify(next));
+      } catch {
+        scheduleStorageWrite('kft_foods_200_v7', next, 500);
+      }
+      return next;
+    });
+    if (selectedFood?.id === customUpdated.id) setSelectedFood(customUpdated);
+    showToast(language === 'km' ? 'បានកែប្រែព័ត៌មានមុខម្ហូប និងរក្សាទុករូបភាពជាអចិន្ត្រៃយ៍រួចរាល់!' : 'Food item and photo permanently saved!', 'success');
   };
 
   const deleteFood = (id: string) => {
@@ -2651,12 +3017,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       createdAt: preservedCreatedAt,
     });
 
-    setRestaurants(prev => prev.map(r => r.id === updated.id ? safeUpdated : r));
+    // Persist restaurant photo/details permanently in vault & local storage & cloud
+    recordPermanentRestaurantOverride(safeUpdated);
+
+    setRestaurants(prev => {
+      const next = prev.map(r => r.id === updated.id ? safeUpdated : r);
+      try {
+        localStorage.setItem('kft_restaurants_real_v9', JSON.stringify(next));
+      } catch {
+        scheduleStorageWrite('kft_restaurants_real_v9', next, 500);
+      }
+      if (!isSeedRestaurantId(safeUpdated.id) && isSupabaseConfigured()) {
+        try {
+          const customRests = next.filter(r => !isSeedRestaurantId(r.id));
+          pushCloudDocument('kft_cloud_custom_restaurants_v1', customRests);
+        } catch {}
+      }
+      return next;
+    });
     if (selectedRestaurant && selectedRestaurant.id === updated.id) {
       setSelectedRestaurant(safeUpdated);
     }
     if (managingRestaurant?.id === updated.id) setManagingRestaurant(safeUpdated);
-    showToast(language === 'km' ? 'បានកែប្រែព័ត៌មានហាង និងរូបភាពរួចរាល់' : 'Restaurant details and photos updated!', 'success');
+    showToast(language === 'km' ? 'បានកែប្រែព័ត៌មានហាង និងរក្សាទុករូបភាពជាអចិន្ត្រៃយ៍រួចរាល់!' : 'Restaurant details and photos permanently saved!', 'success');
   };
 
   // Restaurant Food Menu Items (Up to 20 items for Active VIP)
@@ -3036,27 +3419,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         language === 'km'
           ? `⚠️ ទីតាំងនេះមានរួចហើយ៖ «${dup.duplicate.nameKh}» (${dup.duplicate.provinceKh})`
           : `⚠️ Duplicate destination detected: "${dup.duplicate.nameEn}" (${dup.duplicate.provinceEn})`,
-        'error'
+        'warning'
       );
       return false;
     }
 
+    const nowIso = new Date().toISOString();
     const newDest: TouristDestination = {
       ...destData,
       id: `dest-${Date.now()}`,
       rating: 5.0,
       reviewCount: 1,
+      isCustomPhoto: true,
+      photoUpdatedAt: nowIso,
     };
+    recordPermanentDestinationOverride(newDest);
     setDestinations(prev => {
       const next = [newDest, ...prev];
       try {
-        localStorage.setItem('kft_destinations_real_v7', JSON.stringify(next));
+        localStorage.setItem('kft_destinations_real_v8', JSON.stringify(next));
       } catch (e) {
-        scheduleStorageWrite('kft_destinations_real_v7', next, 500);
+        scheduleStorageWrite('kft_destinations_real_v8', next, 500);
       }
       return next;
     });
-    showToast(language === 'km' ? 'បានបញ្ចូលតំបន់ទេសចរណ៍ថ្មី' : 'Destination added!', 'success');
+    showToast(language === 'km' ? 'បានបញ្ចូលតំបន់ទេសចរណ៍ថ្មីដោយជោគជ័យ' : 'Destination added!', 'success');
     return true;
   };
 
@@ -3067,25 +3454,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       photoUpdatedAt: new Date().toISOString(),
     };
 
-    // Persist to permanent photo overrides vault (guarantees preservation across app updates)
-    try {
-      const savedOverrides = localStorage.getItem('kft_destination_photo_overrides_v1');
-      const overrides = savedOverrides ? JSON.parse(savedOverrides) : {};
-      overrides[customUpdated.id] = {
-        photoUrl: customUpdated.photoUrl,
-        updatedAt: customUpdated.photoUpdatedAt,
-      };
-      localStorage.setItem('kft_destination_photo_overrides_v1', JSON.stringify(overrides));
-    } catch (e) {
-      console.warn('Failed to persist to photo overrides vault', e);
-    }
+    // Persist to permanent media overrides vault (localStorage + IndexedDB + Supabase Cloud)
+    recordPermanentDestinationOverride(customUpdated);
 
     setDestinations(prev => {
       const next = prev.map(d => d.id === customUpdated.id ? customUpdated : d);
       try {
-        localStorage.setItem('kft_destinations_real_v7', JSON.stringify(next));
+        localStorage.setItem('kft_destinations_real_v8', JSON.stringify(next));
       } catch (e) {
-        scheduleStorageWrite('kft_destinations_real_v7', next, 500);
+        scheduleStorageWrite('kft_destinations_real_v8', next, 500);
       }
       return next;
     });
@@ -4720,7 +5097,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // AI Trending Food Update
   const updateTrendingFood = (updated: TrendingFoodItem) => {
-    setTrendingFoods(prev => prev.map(item => item.id === updated.id ? updated : item));
+    recordPermanentTrendingFoodOverride(updated);
+    setTrendingFoods(prev => {
+      const next = prev.map(item => item.id === updated.id ? updated : item);
+      try {
+        localStorage.setItem('kft_trending_foods_v3', JSON.stringify(next));
+      } catch {
+        scheduleStorageWrite('kft_trending_foods_v3', next, 500);
+      }
+      return next;
+    });
   };
 
   // AI Smart Check-in & Auto Add Restaurant Engine

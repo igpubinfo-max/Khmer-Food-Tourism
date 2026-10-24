@@ -49,7 +49,7 @@ jobs:
           mkdir -p android/app/src/main/assets/public
           cp -rf dist/* android/app/src/main/assets/public/
 
-      - name: 8. Build Android Debug APK
+      - name: 8. Build Signed Android Release APK (V1/V2/V3 Play Protect Verified)
         run: |
           if [ ! -f android/app/khmerfood-upload-key.jks ]; then
             keytool -genkeypair -v -noprompt \
@@ -62,28 +62,16 @@ jobs:
           fi
           cd android
           chmod +x ./gradlew
-          ./gradlew assembleDebug --no-daemon
+          ./gradlew assembleRelease --no-daemon -x lint -x lintVitalRelease
 
-      - name: 9. Locate and Rename APK Files
+      - name: 9. Locate and Rename Signed APK Files
         run: |
           echo "=== SEARCHING FOR GENERATED APK FILES ==="
           find . -name "*.apk" -ls
-          cd android/app/build/outputs/apk/debug
-          mv app-debug.apk KhmerFoodTourism-v1.9.5.apk
-          ls -la
-
-      # Play Store AAB build disabled during regular edits per user instruction (enable only when requested)
-      # - name: 9b. Build Signed Play Store AAB
-      #   run: |
-      #     npm run build
-      #     cp -rf dist/* android/app/src/main/assets/public/
-      #     cd android
-      #     ./gradlew bundleRelease --no-daemon -x lint -x lintVitalRelease
-      #     AAB_FILE=$(find app/build/outputs/bundle -name "*.aab" | head -n 1)
-      #     echo "Found AAB: $AAB_FILE"
-      #     cp "$AAB_FILE" app/build/outputs/apk/debug/KhmerFoodTourism-v1.8.3.aab
-      #     cp app/khmerfood-upload-key.jks app/build/outputs/apk/debug/khmerfood-upload-key.jks
-      #     ls -la app/build/outputs/apk/debug/
+          mkdir -p android/app/build/outputs/apk/debug
+          REL_APK=$(find android/app/build/outputs/apk/release -name "*.apk" | head -n 1)
+          cp "$REL_APK" android/app/build/outputs/apk/debug/KhmerFoodTourism-v1.9.6.apk
+          ls -la android/app/build/outputs/apk/debug/
 
       - name: 10. Upload Android APK Artifact
         uses: actions/upload-artifact@v4
@@ -96,27 +84,26 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: v1.9.5
-          name: "Khmer Food & Tourism v1.9.5 (Safe Account Deletion, Full Admin Menu, Black Message Text & AI Payment Verification)"
+          tag_name: v1.9.6
+          name: "Khmer Food & Tourism v1.9.6 (Play Protect Signed APK, Adaptive Icon, Mobile Header Language Switch, VIP Expiry Reminders, Ordered Food Categories & Permanent Image Vault)"
           make_latest: true
           body: |
             ### 🇰🇭 កម្មវិធីទូរស័ព្ទដៃ អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism Mobile App)
             
-            **កំណែថ្មី v1.9.2 (Multiple Image Uploads at Once, Preview Lightbox & Reorder Controls):**
-            - 📸 **១. បន្ថែមមុខងារជ្រើសរូបភាពច្រើនសន្លឹកក្នុងពេលតែមួយពី Gallery (Multiple Image Upload in One Step):**
-              - អាប់ដេត Plugin Native Android ជាមួយ `Intent.EXTRA_ALLOW_MULTIPLE` និងមុខងារ Web Multi-file ឱ្យជ្រើសរើសរូបភាពច្រើនសន្លឹក (1, 3, 5, 10+ រូប) ពី Gallery ចូលក្នុងកម្មវិធីក្នុងពេលតែមួយ ដោយមិនចាំបាច់ផ្ទុកម្តងមួយសន្លឹកទៀតឡើយ។
-              - បង្ហាញផ្ទាំង Progress និងចំនួនរូបភាពដែលបានបញ្ចូលជោគជ័យភ្លាមៗ។
-            - 👁️ **២. ផ្ទាំងមើលរូបភាពធំ (Interactive Full-Screen Lightbox Preview):**
-              - ចុចលើរូបភាពណាមួយដើម្បីបើកមើលទំហំធំ ច្បាស់ត្រជាក់ភ្នែក ជាមួយប៊ូតុងរំកិលមើលរូបមុន/រូបបន្ទាប់ (Previous / Next) មុននឹងសម្រេចចិត្តរក្សាទុក។
-            - 🔄 **៣. រៀបចំលំដាប់លំដោយរូបភាព និងកំណត់រូបតំណាងហាងចម្បង (Reorder & Set Cover Photo):**
-              - ប៊ូតុងរំកិលទៅឆ្វេង (◀) និងទៅស្តាំ (▶) នៅលើគ្រប់រូបភាពនីមួយៗ សម្រាប់រៀបចំលំដាប់រូបភាពតាមចិត្ត។
-              - ប៊ូតុង «★ ដាក់ជារូបតំណាងហាង (Set as Main Cover)» សម្រាប់កំណត់រូបភាពណាមួយជារូបតំណាងហាងចម្បងបានភ្លាមៗ។
-              - ប៊ូតុងលុប (🗑️) សម្រាប់ដករូបភាពណាដែលមិនចង់បានចេញ។
-            - 💾 **៤. រក្សាទុកត្រឹមត្រូវ និងបង្ហាញគ្រប់រូបភាពទាំងអស់ក្នុងព័ត៌មានលម្អិតហាង (Shop Details):**
-              - រាល់រូបភាពទាំងអស់ត្រូវបានរក្សាទុកចូលក្នុង `photoUrl`, `profileImage`, `foodImages`, និង `galleryPhotos` ទាំងក្នុងទូរស័ព្ទ (Persistent Local Storage) និង Supabase Cloud ដោយសុវត្ថិភាព ១០០%។
+            **កំណែថ្មី v1.9.6 (Build 68):**
+            - 🛡️ **១. កែលម្អការដំឡើង Android APK និងប្រព័ន្ធសុវត្ថិភាព Google Play Protect (Official V1/V2/V3 Signed Release APK):**
+              - ចុះហត្ថលេខាឌីជីថលផ្លូវការ (Release Keystore V1/V2/V3 Signature) និងបន្ថែមការណែនាំជាភាសាខ្មែរច្បាស់លាស់សម្រាប់ការស្កេនសុវត្ថិភាពជាមួយ Google Play Protect («Scan app / ស្កេនកម្មវិធី») ដោយមិនចាំបាច់បិទ Play Protect ឡើយ។
+            - 🎨 **២. រចនារូបតំណាងកម្មវិធីថ្មីស្របតាមស្តង់ដារ Android Adaptive Icon:**
+              - រក្សាទុករូបភាពដើមទាំងស្រុង (ប្រាសាទអង្គរវត្ត មុខម្ហូបខ្មែរ និងអក្សរខ្មែរ «អាហារ & ទេសចរណ៍ខ្មែរ») ដោយមានស៊ុមពណ៌សមូលស្អាត និងគម្លាតសុវត្ថិភាព (Safe Padding) មិនឱ្យដាច់អក្សរ ឬរូបភាពលើគ្រប់ទូរស័ព្ទ Android។
+            - 🌐 **៣. ប្តូរទីតាំងប៊ូតុងប្តូរភាសា (EN / ខ្មែរ) មកជិតរូបបេះដូងក្នុងរបារខាងលើ (Top Navigation Bar):**
+              - រៀបចំប៊ូតុងបេះដូង (❤️) និងប៊ូតុងភាសា (🌐 EN/ខ្មែរ) ព្រមទាំងប៊ូតុងស្វែងរក (🔍) ឱ្យនៅជិតគ្នា ងាយស្រួលចុចលើអេក្រង់ទូរស័ព្ទដោយមិនលៀនចេញក្រៅអេក្រង់។
+            - ⏰ **៤. ប្រព័ន្ធរំលឹកថ្ងៃផុតកំណត់ VIP ប្រចាំថ្ងៃ (៣ ថ្ងៃចុងក្រោយ) និងទម្លាក់មកគណនីធម្មតាដោយស្វ័យប្រវត្តិ:**
+              - ផ្ញើសាររំលឹកដោយស្វ័យប្រវត្តិរៀងរាល់ថ្ងៃក្នុងរយៈពេល ៣ ថ្ងៃចុងក្រោយមុនផុតកំណត់ បង្ហាញកាលបរិច្ឆេទផុតកំណត់ និងចំនួនថ្ងៃនៅសល់យ៉ាងច្បាស់លាស់ និងទម្លាក់គណនីដែលផុតកំណត់មកជាគណនីធម្មតាភ្លាមៗ។
+            - 🍲 **៥. រៀបចំបញ្ជីមុខម្ហូបតាមលំដាប់ប្រភេទ៖ ១. សម្ល • ២. ឆា • ៣. ស្ងោរ • ៤. បង្អែម:**
+              - បែងចែកមុខម្ហូបខ្មែរទាំងអស់តាមក្រុមយ៉ាងត្រឹមត្រូវ ដោយគ្មានការស្ទួន និងងាយស្រួលស្វែងរក។
+            - 💾 **៦. ប្រព័ន្ធរក្សាទុករូបភាពជាអចិន្ត្រៃយ៍ (Permanent Media Override Vault):**
+              - រាល់រូបភាពដែល Admin បានផ្លាស់ប្តូរនៅក្នុងតំបន់ទេសចរណ៍ (Tourist Attractions) ហាងអាហារ (Shops) និងមុខម្ហូប (Food Menus) ត្រូវបានរក្សាទុកជាអចិន្ត្រៃយ៍ក្នុង Local Vault, IndexedDB និង Supabase Cloud ដោយមិនត្រឡប់ទៅរូបភាពដើមវិញឡើយនៅពេលអាប់ដេតកំណែថ្មី។
           draft: false
           prerelease: false
           files: |
             android/app/build/outputs/apk/debug/*.apk
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

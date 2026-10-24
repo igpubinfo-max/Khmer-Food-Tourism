@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
-import { TrendingFoodCategorySlug, TrendingFoodItem, isUserVipActive, getVipAccountState, sortRestaurantsChronologically } from '../types';
+import { TrendingFoodCategorySlug, TrendingFoodItem, isUserVipActive, getVipAccountState, getVipRemainingDays, sortRestaurantsChronologically } from '../types';
 import { shareRichContent, copyTextNativeOrWeb } from '../utils/androidMediaHelper';
 import { 
   Sparkles, ChevronRight, Utensils, Store, Compass, 
@@ -577,13 +577,71 @@ export const HomeView: React.FC = () => {
                   </button>
                 </div>
               ) : isVip ? (
-                <div className="p-2.5 rounded-2xl bg-white/40 border border-amber-600/30 flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-amber-900 shrink-0" />
-                  <p className="text-xs font-bold text-slate-950 leading-snug">
-                    {isKm 
-                      ? '🌟 គណនី VIP សកម្ម៖ ហាង និងមុខម្ហូបរបស់អ្នកត្រូវបានផ្សព្វផ្សាយជាអាទិភាពកំពូល!' 
-                      : '🌟 VIP Account Active: Your Shop & Dishes are featured at Top Priority!'}
-                  </p>
+                <div className="space-y-2">
+                  <div className="p-2.5 rounded-2xl bg-white/60 border border-amber-700/40 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-2xs">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <Sparkles className="w-4 h-4 text-amber-900 shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-xs font-extrabold text-slate-950 leading-snug">
+                          {isKm 
+                            ? '🌟 គណនី VIP សកម្ម៖ ហាង និងមុខម្ហូបរបស់អ្នកត្រូវបានផ្សព្វផ្សាយជាអាទិភាពកំពូល!' 
+                            : '🌟 VIP Account Active: Your Shop & Dishes are featured at Top Priority!'}
+                        </p>
+                        {currentUser.subscriptionExpiryDate && (
+                          <p className="text-[11px] font-bold text-slate-900 mt-0.5">
+                            📅 {isKm ? 'ថ្ងៃផុតកំណត់ VIP៖' : 'VIP Expires:'}{' '}
+                            <span className="font-mono underline">{currentUser.subscriptionExpiryDate.split('T')[0]}</span>
+                            {' • '}
+                            <span className="px-1.5 py-0.2 rounded bg-slate-950 text-amber-300 font-black">
+                              {isKm
+                                ? `នៅសល់ ${getVipRemainingDays(currentUser)} ថ្ងៃទៀត`
+                                : `${getVipRemainingDays(currentUser)} Days Left`}
+                            </span>
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Last 3 Days Daily Expiration Reminder Banner */}
+                  {getVipRemainingDays(currentUser) <= 3 && (
+                    <div className="p-3 rounded-2xl bg-rose-600 text-white border-2 border-white shadow-md flex items-center justify-between gap-2 animate-pulse">
+                      <div className="min-w-0">
+                        <p className="text-xs font-black leading-snug">
+                          {isKm
+                            ? `⏰ រំលឹកប្រចាំថ្ងៃ៖ គណនី VIP របស់អ្នកនៅសល់តែ ${getVipRemainingDays(currentUser)} ថ្ងៃទៀតប៉ុណ្ណោះ!`
+                            : `⏰ Daily Reminder: Only ${getVipRemainingDays(currentUser)} day(s) left on your VIP account!`}
+                        </p>
+                        <p className="text-[10px] text-rose-100 mt-0.5">
+                          {isKm
+                            ? `ផុតកំណត់នៅថ្ងៃទី ${currentUser.subscriptionExpiryDate?.split('T')[0]} — សូមបន្តកញ្ចប់ VIP មុនផុតកំណត់!`
+                            : `Expires on ${currentUser.subscriptionExpiryDate?.split('T')[0]} — Renew now to keep VIP benefits!`}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => openUpgradeVipModal(true)}
+                        className="px-3 py-1.5 rounded-xl bg-amber-300 hover:bg-amber-200 text-slate-950 font-black text-[11px] shrink-0 shadow cursor-pointer"
+                      >
+                        {isKm ? 'បន្ត VIP' : 'Renew VIP'}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : getVipAccountState(currentUser) === 'expired_vip' ? (
+                <div className="p-2.5 rounded-2xl bg-rose-950/80 border border-rose-400/60 flex items-center justify-between gap-2 text-white">
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold text-rose-200 leading-snug">
+                      {isKm
+                        ? `⚠️ គណនី VIP របស់អ្នកបានផុតកំណត់ (${currentUser.subscriptionExpiryDate?.split('T')[0] || 'Expired'}) ហើយត្រូវបានប្តូរមកជាគណនីធម្មតា`
+                        : `⚠️ Your VIP expired (${currentUser.subscriptionExpiryDate?.split('T')[0] || 'Expired'}) & was downgraded to a normal account`}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => openUpgradeVipModal(true)}
+                    className="px-3 py-1 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-[11px] shrink-0 shadow cursor-pointer"
+                  >
+                    {isKm ? 'បន្ត VIP ឡើងវិញ' : 'Renew VIP'}
+                  </button>
                 </div>
               ) : (
                 <div className="p-2.5 rounded-2xl bg-amber-400/20 border border-amber-300/40 flex items-center justify-between gap-2">

@@ -31,74 +31,73 @@ export const Header: React.FC = () => {
   return (
     <header className="sticky top-0 z-40 bg-[#064E3B] text-white shadow-md pt-[env(safe-area-inset-top,0px)] border-b border-[#047857]">
       {/* Main Bar */}
-      <div className="max-w-md mx-auto px-4 py-2.5 flex items-center justify-between gap-2">
+      <div className="max-w-md mx-auto px-2.5 sm:px-4 py-2 flex items-center justify-between gap-1.5">
         {/* Brand */}
         <div 
           onClick={() => setActiveTab('home')}
-          className="flex items-center gap-2.5 cursor-pointer group"
+          className="flex items-center gap-2 cursor-pointer group min-w-0 flex-1"
         >
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#059669] to-[#064E3B] p-0.5 shadow-md flex items-center justify-center border border-emerald-400/30">
-            <img src="/icon-192.png" alt="Khmer Food" className="w-full h-full rounded-[10px] object-cover" />
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white p-0.5 shadow-md flex items-center justify-center border border-emerald-300/60 shrink-0">
+            <img src="/icon-192.png" alt="Khmer Food" className="w-full h-full rounded-[9px] object-contain" />
           </div>
-          <div>
-            <div className="flex items-center gap-1.5">
-              <h1 className="font-moul text-sm sm:text-base tracking-wide text-white leading-tight drop-shadow-sm">
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-1 flex-wrap">
+              <h1 className="font-moul text-[12px] sm:text-sm tracking-wide text-white leading-tight drop-shadow-sm truncate">
                 អាហារ & ទេសចរណ៍ខ្មែរ
               </h1>
-              <span className="px-1.5 py-0.2 rounded-md bg-white/20 text-white font-mono text-[9px] font-bold border border-white/25">
+              <span className="px-1 py-0.2 rounded bg-white/20 text-white font-mono text-[8px] sm:text-[9px] font-bold border border-white/25 shrink-0">
                 {APP_VERSION}
               </span>
             </div>
-            <p className="text-[10px] text-emerald-200 font-medium tracking-wider uppercase">
+            <p className="text-[9px] sm:text-[10px] text-emerald-200 font-medium tracking-wider uppercase truncate">
               Khmer Food & Tourism
             </p>
           </div>
         </div>
 
-        {/* Action icons */}
-        <div className="flex items-center gap-1.5">
+        {/* Action icons — Responsive & Properly Aligned on Mobile */}
+        <div className="flex items-center gap-1 shrink-0">
           {/* Scan QR Code Button */}
           <button
             onClick={() => setIsQrScannerModalOpen(true)}
-            className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-800 hover:bg-emerald-700 text-white text-[11px] font-bold border border-emerald-400/50 shadow-xs transition-all active:scale-95"
+            className="w-7 h-7 sm:w-auto sm:px-2 sm:py-1 rounded-full bg-emerald-800 hover:bg-emerald-700 text-white text-[10px] font-bold border border-emerald-400/50 shadow-xs flex items-center justify-center gap-1 transition-all active:scale-95 shrink-0"
             title={isKm ? 'ស្កេន QR កូដ (Scan QR Code)' : 'Scan QR Code'}
           >
-            <Camera className="w-3.5 h-3.5 text-emerald-200" />
-            <span className="hidden xs:inline">{isKm ? 'ស្កេន QR' : 'Scan'}</span>
+            <Camera className="w-3.5 h-3.5 text-emerald-200 shrink-0" />
+            <span className="hidden sm:inline">{isKm ? 'ស្កេន' : 'Scan'}</span>
           </button>
 
-          {currentUser?.role === 'admin' ? (
-            <button
-              onClick={() => setIsAdminOpen(true)}
-              className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 text-[11px] font-black shadow-xs transition-all active:scale-95 cursor-pointer font-khmer"
-              title={isKm ? 'ផ្ទាំងគ្រប់គ្រងរដ្ឋបាល (Admin Dashboard)' : 'Admin Dashboard'}
-            >
-              <Shield className="w-3.5 h-3.5 fill-slate-950" />
-              <span>Admin</span>
-            </button>
-          ) : (
-            <>
-              {/* App Install QR Button */}
-              <button
-                onClick={() => setIsInstallModalOpen(true)}
-                className="flex items-center gap-1 px-2 py-1 rounded-full bg-[#065F46] hover:bg-[#047857] text-white text-[11px] font-bold border border-emerald-500/40 shadow-xs transition-all"
-                title={isKm ? 'ដំឡើងកម្មវិធីលើទូរស័ព្ទ (Install App)' : 'Install App'}
-              >
-                <QrCode className="w-3.5 h-3.5 text-emerald-200" />
-                <span className="hidden xs:inline">{isKm ? 'ដំឡើង' : 'Install'}</span>
-              </button>
+          {/* App Install QR Button */}
+          <button
+            onClick={() => setIsInstallModalOpen(true)}
+            className="w-7 h-7 sm:w-auto sm:px-2 sm:py-1 rounded-full bg-[#065F46] hover:bg-[#047857] text-white text-[10px] font-bold border border-emerald-500/40 shadow-xs flex items-center justify-center gap-1 transition-all active:scale-95 shrink-0"
+            title={isKm ? 'ដំឡើងកម្មវិធីលើទូរស័ព្ទ (Install App)' : 'Install App'}
+          >
+            <QrCode className="w-3.5 h-3.5 text-emerald-200 shrink-0" />
+            <span className="hidden sm:inline">{isKm ? 'ដំឡើង' : 'Install'}</span>
+          </button>
 
-              {/* Support Our App Button */}
-              <button
-                onClick={() => setIsSupportModalOpen(true)}
-                className="flex items-center gap-1 px-2 py-1 rounded-full bg-[#10B981] hover:bg-[#059669] text-white text-[11px] font-bold shadow-xs transition-all"
-                title={isKm ? 'ជួយឧបត្ថម្ភគាំទ្រកម្មវិធី (Support App)' : 'Support App'}
-              >
-                <Heart className="w-3.5 h-3.5 fill-white text-white" />
-                <span className="hidden xs:inline">{isKm ? 'ឧបត្ថម្ភ' : 'Support'}</span>
-              </button>
-            </>
-          )}
+          {/* Heart & Language Selector Area (Grouped Together for Easy Mobile Access) */}
+          <div className="flex items-center gap-1 bg-[#053F30]/90 p-0.5 rounded-full border border-emerald-400/40 shadow-xs shrink-0">
+            {/* Heart / Support Button */}
+            <button
+              onClick={() => setIsSupportModalOpen(true)}
+              className="w-7 h-7 rounded-full bg-[#10B981] hover:bg-[#059669] text-white flex items-center justify-center shadow-xs transition-all active:scale-95 shrink-0"
+              title={isKm ? 'ជួយឧបត្ថម្ភគាំទ្រកម្មវិធី (Support App)' : 'Support App'}
+            >
+              <Heart className="w-3.5 h-3.5 fill-white text-white shrink-0" />
+            </button>
+
+            {/* Language Selector (EN / KH) Right Next to Heart Icon */}
+            <button
+              onClick={() => setLanguage(isKm ? 'en' : 'km')}
+              className="flex items-center gap-0.5 px-2 h-7 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 text-[10px] font-black transition-all active:scale-95 shadow-xs shrink-0 cursor-pointer"
+              title="ផ្លាស់ប្តូរភាសា / Switch Language (EN/KH)"
+            >
+              <Globe className="w-3 h-3 text-slate-900 shrink-0" />
+              <span className="leading-none tracking-tight">{isKm ? 'EN' : 'ខ្មែរ'}</span>
+            </button>
+          </div>
 
           {/* Search Toggle */}
           <button
@@ -109,33 +108,25 @@ export const Header: React.FC = () => {
                 setTimeout(() => searchInputRef.current?.focus(), 100);
               }
             }}
-            className={`p-2 rounded-full transition-colors ${
-              isSearchVisible || searchQuery ? 'bg-white text-[#064E3B] shadow-xs' : 'hover:bg-[#065F46] text-emerald-100'
+            className={`w-7 h-7 rounded-full flex items-center justify-center transition-colors border shrink-0 ${
+              isSearchVisible || searchQuery
+                ? 'bg-white text-[#064E3B] border-white shadow-xs'
+                : 'bg-[#065F46]/80 hover:bg-[#065F46] text-emerald-100 border-emerald-500/40'
             }`}
             title={isKm ? 'ស្វែងរក' : 'Search'}
           >
-            <Search className="w-4 h-4" />
-          </button>
-
-          {/* Language Toggle */}
-          <button
-            onClick={() => setLanguage(isKm ? 'en' : 'km')}
-            className="flex items-center gap-1 px-2 py-1 rounded-full bg-[#065F46] hover:bg-[#047857] text-[11px] font-semibold text-emerald-100 hover:text-white transition-colors border border-emerald-500/40"
-            title="ផ្លាស់ប្តូរភាសា / Switch Language"
-          >
-            <Globe className="w-3.5 h-3.5 text-emerald-200" />
-            <span>{isKm ? 'EN' : 'ខ្មែរ'}</span>
+            <Search className="w-3.5 h-3.5 shrink-0" />
           </button>
 
           {/* Admin Action (Only visible when authenticated as admin) */}
           {currentUser?.role === 'admin' && (
             <button
               onClick={() => setIsAdminOpen(true)}
-              className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-gradient-to-r from-[#059669] to-[#047857] text-white border border-emerald-300/40 text-[11px] font-bold shadow-xs hover:brightness-110"
-              title="ផ្ទាំងគ្រប់គ្រងរដ្ឋបាល"
+              className="flex items-center gap-0.5 px-2 h-7 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 text-[10px] font-black shadow-xs transition-all active:scale-95 cursor-pointer font-khmer shrink-0"
+              title={isKm ? 'ផ្ទាំងគ្រប់គ្រងរដ្ឋបាល (Admin Dashboard)' : 'Admin Dashboard'}
             >
-              <Shield className="w-3.5 h-3.5 text-emerald-200" />
-              <span className="hidden sm:inline">Admin</span>
+              <Shield className="w-3 h-3 fill-slate-950 shrink-0" />
+              <span className="hidden xs:inline">Admin</span>
             </button>
           )}
         </div>
