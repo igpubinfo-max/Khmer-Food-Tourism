@@ -55,6 +55,14 @@ import {
   applyTrendingFoodOverrides,
   hydrateAndSyncMediaOverrides,
 } from '../services/permanentMediaVaultService';
+import {
+  GooglePlaceCachedItem,
+  convertGooglePlaceToRestaurant,
+  convertGooglePlaceToDestination,
+  findDuplicateRestaurantForGooglePlace,
+  findDuplicateDestinationForGooglePlace,
+  mergeGoogleMapsPlaceWithExistingRestaurant,
+} from '../services/googlePlacesService';
 
 export type ActiveTab = 'home' | 'food' | 'restaurants' | 'tourism' | 'community' | 'profile';
 
@@ -313,6 +321,24 @@ interface AppContextType {
   approveAiCheckIn: (id: string) => void;
   rejectAiCheckIn: (id: string, reason?: string) => void;
   mergeAiCheckIn: (checkInId: string, targetRestaurantId: string) => void;
+
+  // Google Maps Places Search & Admin Import Hub
+  isGoogleMapsSearchModalOpen: boolean;
+  setIsGoogleMapsSearchModalOpen: (open: boolean) => void;
+  googleMapsSearchInitialTab: 'restaurant' | 'tourism' | 'all';
+  openGoogleMapsSearchModal: (initialTab?: 'restaurant' | 'tourism' | 'all') => void;
+  importGooglePlaceToApp: (
+    place: GooglePlaceCachedItem,
+    customEdits?: {
+      nameKh?: string;
+      nameEn?: string;
+      category?: 'restaurant' | 'tourism';
+      provinceKh?: string;
+      addressKh?: string;
+      phone?: string;
+      photoUrl?: string;
+    }
+  ) => { imported: boolean; duplicate: boolean; type: 'restaurant' | 'tourism'; id: string; item?: Restaurant | TouristDestination };
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -538,6 +564,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       rating: r.rating,
       reviewCount: r.reviewCount,
       reviews: genuineReviews,
+      dataSource: r.dataSource,
+      googlePlaceId: r.googlePlaceId,
+      googleMapsMeta: r.googleMapsMeta,
     });
 
     return {
@@ -596,6 +625,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       promoVideoUrl: r.promoVideoUrl,
       telegramUrl: r.telegramUrl,
       facebookUrl: r.facebookUrl,
+      googlePlaceId: r.googlePlaceId,
+      dataSource: r.dataSource,
+      googleMapsMeta: r.googleMapsMeta,
+      isAdminEdited: Boolean(r.isAdminEdited),
+      adminEditedAt: r.adminEditedAt,
       created_at: getRestaurantCreatedAtIso(r),
       createdAt: getRestaurantCreatedAtIso(r),
       updatedAt: r.updatedAt,
@@ -983,6 +1017,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isQrScannerModalOpen, setIsQrScannerModalOpen] = useState(false);
   const [isVipAddRestaurantModalOpen, setIsVipAddRestaurantModalOpen] = useState(false);
   const [isAiFoodDiscoveryModalOpen, setIsAiFoodDiscoveryModalOpen] = useState(false);
+  const [isGoogleMapsSearchModalOpen, setIsGoogleMapsSearchModalOpen] = useState(false);
+  const [googleMapsSearchInitialTab, setGoogleMapsSearchInitialTab] = useState<'restaurant' | 'tourism' | 'all'>('all');
+  const openGoogleMapsSearchModal = (initialTab: 'restaurant' | 'tourism' | 'all' = 'all') => {
+    setGoogleMapsSearchInitialTab(initialTab);
+    setIsGoogleMapsSearchModalOpen(true);
+  };
   const [isRestaurantCheckInModalOpen, setIsRestaurantCheckInModalOpenRaw] = useState(false);
   const setIsRestaurantCheckInModalOpen = (open: boolean) => {
     if (open && currentUser?.role !== 'admin') {
@@ -3603,6 +3643,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       profileImage: profileImg,
       galleryPhotos: foodImgs,
       foodImages: foodImgs,
+      isAdminEdited: true,
+      adminEditedAt: new Date().toISOString(),
       created_at: preservedCreatedAt,
       createdAt: preservedCreatedAt,
     } : {
@@ -4201,10 +4243,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const updateDestination = (updated: TouristDestination) => {
+    const nowIso = new Date().toISOString();
     const customUpdated: TouristDestination = {
       ...updated,
       isCustomPhoto: true,
-      photoUpdatedAt: new Date().toISOString(),
+      photoUpdatedAt: nowIso,
+      isAdminEdited: true,
+      adminEditedAt: nowIso,
     };
 
     // Persist to permanent media overrides vault (localStorage + IndexedDB + Supabase Cloud)
@@ -4222,6 +4267,177 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (selectedDestination?.id === customUpdated.id) {
       setSelectedDestination(customUpdated);
     }
+  };
+
+  // Google Maps Places Import (Restaurants & Tourist Attractions) with Duplicate Prevention & Admin Data Separation
+  const importGooglePlaceToApp = (
+    place: GooglePlaceCachedItem,
+    customEdits?: {
+      nameKh?: string;
+      nameEn?: string;
+      category?: 'restaurant' | 'tourism';
+      provinceKh?: string;
+      addressKh?: string;
+      phone?: string;
+      photoUrl?: string;
+    }
+  ): { imported: boolean; duplicate: boolean; type: 'restaurant' | 'tourism'; id: string; item?: Restaurant | TouristDestination } => {
+    const targetCategory: 'restaurant' | 'tourism' = customEdits?.category || place.category || 'restaurant';
+    const hasCustomEdits = Boolean(
+      customEdits &&
+      (customEdits.nameKh || customEdits.nameEn || customEdits.provinceKh || customEdits.addressKh || customEdits.phone || customEdits.photoUrl)
+    );
+    const nowIso = new Date().toISOString();
+
+    if (targetCategory === 'tourism') {
+      const existingDest = findDuplicateDestinationForGooglePlace(place, destinations);
+      if (existingDest) {
+        // Refresh Google Maps metadata while preserving Admin-managed fields
+        const refreshedDest: TouristDestination = {
+          ...existingDest,
+          googlePlaceId: existingDest.googlePlaceId || place.placeId,
+          dataSource: existingDest.dataSource || 'google_maps',
+          nameKh: customEdits?.nameKh?.trim() || existingDest.nameKh,
+          nameEn: customEdits?.nameEn?.trim() || existingDest.nameEn,
+          provinceKh: customEdits?.provinceKh?.trim() || existingDest.provinceKh,
+          addressKh: customEdits?.addressKh?.trim() || existingDest.addressKh,
+          photoUrl: customEdits?.photoUrl?.trim() || existingDest.photoUrl,
+          isAdminEdited: existingDest.isAdminEdited || hasCustomEdits,
+          adminEditedAt: hasCustomEdits ? nowIso : existingDest.adminEditedAt,
+        };
+        recordPermanentDestinationOverride(refreshedDest);
+        setDestinations(prev => {
+          const next = prev.map(d => d.id === existingDest.id ? refreshedDest : d);
+          try {
+            localStorage.setItem('kft_destinations_real_v8', JSON.stringify(next));
+          } catch {}
+          return next;
+        });
+        showToast(
+          language === 'km'
+            ? `ℹ️ តំបន់ទេសចរណ៍ «${refreshedDest.nameKh}» មានក្នុងប្រព័ន្ធរួចហើយ (បានធ្វើបច្ចុប្បន្នភាពទិន្នន័យ Google Maps)`
+            : `ℹ️ "${refreshedDest.nameEn}" is already in the database (Google Maps metadata synced).`,
+          'info'
+        );
+        return { imported: false, duplicate: true, type: 'tourism', id: existingDest.id, item: refreshedDest };
+      }
+
+      const mappedDest = convertGooglePlaceToDestination(place);
+      const finalDest: TouristDestination = {
+        ...mappedDest,
+        nameKh: customEdits?.nameKh?.trim() || mappedDest.nameKh,
+        nameEn: customEdits?.nameEn?.trim() || mappedDest.nameEn,
+        provinceKh: customEdits?.provinceKh?.trim() || mappedDest.provinceKh,
+        addressKh: customEdits?.addressKh?.trim() || mappedDest.addressKh,
+        photoUrl: customEdits?.photoUrl?.trim() || mappedDest.photoUrl,
+        isCustomPhoto: Boolean(customEdits?.photoUrl?.trim()),
+        isAdminEdited: hasCustomEdits,
+        adminEditedAt: hasCustomEdits ? nowIso : undefined,
+      };
+
+      recordPermanentDestinationOverride(finalDest);
+      setDestinations(prev => {
+        const next = [finalDest, ...prev];
+        try {
+          localStorage.setItem('kft_destinations_real_v8', JSON.stringify(next));
+        } catch {
+          scheduleStorageWrite('kft_destinations_real_v8', next, 500);
+        }
+        return next;
+      });
+      showToast(
+        language === 'km'
+          ? `✅ បាននាំចូលតំបន់ទេសចរណ៍ «${finalDest.nameKh}» ពី Google Maps ជោគជ័យ!`
+          : `✅ Imported tourist attraction "${finalDest.nameEn}" from Google Maps!`,
+        'success'
+      );
+      return { imported: true, duplicate: false, type: 'tourism', id: finalDest.id, item: finalDest };
+    }
+
+    // Restaurant / Cafe / Food Shop import
+    const existingRest = findDuplicateRestaurantForGooglePlace(place, restaurants);
+    if (existingRest) {
+      const merged = mergeGoogleMapsPlaceWithExistingRestaurant(existingRest, place);
+      const finalMerged: Restaurant = normalizeRestaurant({
+        ...merged,
+        nameKh: customEdits?.nameKh?.trim() || merged.nameKh,
+        nameEn: customEdits?.nameEn?.trim() || merged.nameEn,
+        provinceKh: customEdits?.provinceKh?.trim() || merged.provinceKh,
+        addressKh: customEdits?.addressKh?.trim() || merged.addressKh,
+        phone: customEdits?.phone?.trim() || merged.phone,
+        photoUrl: customEdits?.photoUrl?.trim() || merged.photoUrl,
+        profileImage: customEdits?.photoUrl?.trim() || merged.profileImage || merged.photoUrl,
+        isAdminEdited: existingRest.isAdminEdited || hasCustomEdits,
+        adminEditedAt: hasCustomEdits ? nowIso : existingRest.adminEditedAt,
+      });
+
+      recordPermanentRestaurantOverride(finalMerged);
+      setRestaurants(prev => {
+        const next = prev.map(r => r.id === existingRest.id ? finalMerged : r);
+        try {
+          localStorage.setItem('kft_restaurants_real_v9', JSON.stringify(next));
+        } catch {}
+        if (!isSeedRestaurantId(finalMerged.id) && isSupabaseConfigured()) {
+          try {
+            pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter(r => !isSeedRestaurantId(r.id)));
+          } catch {}
+        }
+        return next;
+      });
+      showToast(
+        language === 'km'
+          ? `ℹ️ ហាង «${finalMerged.nameKh}» មានក្នុងប្រព័ន្ធរួចហើយ (រក្សាទុកព័ត៌មាន Admin និងធ្វើបច្ចុប្បន្នភាព Google Maps)`
+          : `ℹ️ "${finalMerged.nameEn}" already exists (Admin data preserved & Google Maps synced).`,
+        'info'
+      );
+      return { imported: false, duplicate: true, type: 'restaurant', id: existingRest.id, item: finalMerged };
+    }
+
+    const mappedRest = convertGooglePlaceToRestaurant(place);
+    const finalRest: Restaurant = normalizeRestaurant({
+      ...mappedRest,
+      nameKh: customEdits?.nameKh?.trim() || mappedRest.nameKh,
+      nameEn: customEdits?.nameEn?.trim() || mappedRest.nameEn,
+      provinceKh: customEdits?.provinceKh?.trim() || mappedRest.provinceKh,
+      addressKh: customEdits?.addressKh?.trim() || mappedRest.addressKh,
+      phone: customEdits?.phone?.trim() || mappedRest.phone,
+      photoUrl: customEdits?.photoUrl?.trim() || mappedRest.photoUrl,
+      profileImage: customEdits?.photoUrl?.trim() || mappedRest.profileImage || mappedRest.photoUrl,
+      membershipTier: 'free',
+      isPromoted: false,
+      status: 'approved',
+      isVerified: true,
+      dataSource: 'google_maps',
+      googlePlaceId: place.placeId,
+      googleMapsMeta: mappedRest.googleMapsMeta,
+      isAdminEdited: hasCustomEdits,
+      adminEditedAt: hasCustomEdits ? nowIso : undefined,
+      created_at: nowIso,
+      createdAt: nowIso,
+    });
+
+    recordPermanentRestaurantOverride(finalRest);
+    setRestaurants(prev => {
+      const next = sortRestaurantsChronologically([finalRest, ...prev]);
+      try {
+        localStorage.setItem('kft_restaurants_real_v9', JSON.stringify(next));
+      } catch {
+        scheduleStorageWrite('kft_restaurants_real_v9', next, 500);
+      }
+      if (isSupabaseConfigured()) {
+        try {
+          pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter(r => !isSeedRestaurantId(r.id)));
+        } catch {}
+      }
+      return next;
+    });
+    showToast(
+      language === 'km'
+        ? `✅ បាននាំចូលហាង «${finalRest.nameKh}» ពី Google Maps ចូលក្នុងបញ្ជីកម្មវិធីជោគជ័យ!`
+        : `✅ Imported "${finalRest.nameEn}" from Google Maps into the app directory!`,
+      'success'
+    );
+    return { imported: true, duplicate: false, type: 'restaurant', id: finalRest.id, item: finalRest };
   };
 
   const deleteDestination = (id: string) => {
@@ -6580,6 +6796,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         approveAiCheckIn,
         rejectAiCheckIn,
         mergeAiCheckIn,
+
+        // Google Maps Places Search & Admin Import Hub
+        isGoogleMapsSearchModalOpen,
+        setIsGoogleMapsSearchModalOpen,
+        googleMapsSearchInitialTab,
+        openGoogleMapsSearchModal,
+        importGooglePlaceToApp,
       }}
     >
       {children}

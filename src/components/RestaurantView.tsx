@@ -6,6 +6,7 @@ import { Store, Plus, MapPin, Sparkles, PhoneCall, CheckCircle2, AlertCircle, Ca
 import {
   searchCambodiaPlacesWithSmartCache,
   convertGooglePlaceToRestaurant,
+  findDuplicateRestaurantForGooglePlace,
   GooglePlaceCachedItem,
 } from '../services/googlePlacesService';
 
@@ -21,7 +22,9 @@ export const RestaurantView: React.FC = () => {
     setManagingRestaurant, setIsManageMenuModalOpen,
     activeManagedShopId, setActiveManagedShopId,
     getOwnedRestaurantsForUser, openManageMyVipStore,
-    openUpgradeVipModal
+    openUpgradeVipModal,
+    openGoogleMapsSearchModal,
+    importGooglePlaceToApp
   } = useApp();
 
   const myOwnedRestaurants = useMemo(
@@ -177,6 +180,16 @@ export const RestaurantView: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={() => openGoogleMapsSearchModal('restaurant')}
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-700 to-teal-700 hover:from-emerald-800 hover:to-teal-800 text-white font-bold text-xs shadow-xs font-khmer transition active:scale-95 cursor-pointer"
+            title={isKm ? 'ស្វែងរកហាងលើផែនទី Google Maps' : 'Search Shops on Google Maps'}
+          >
+            <Globe className="w-3.5 h-3.5 text-emerald-200" />
+            <span>{isKm ? 'Google Maps' : 'Google Maps'}</span>
+          </button>
+
           {currentUser?.role === 'admin' && (
             <button
               onClick={() => setIsAiCheckInModalOpen(true)}
@@ -466,47 +479,26 @@ export const RestaurantView: React.FC = () => {
               <div className="space-y-3">
                 {smartCachePlaces.map((place) => {
                   const mappedRest = convertGooglePlaceToRestaurant(place);
-                  const alreadyInApp = restaurants.some(
-                    (r) =>
-                      r.id === mappedRest.id ||
-                      r.nameKh.toLowerCase() === mappedRest.nameKh.toLowerCase()
-                  );
+                  const existingRest = findDuplicateRestaurantForGooglePlace(place, restaurants);
+                  const alreadyInApp = Boolean(existingRest);
                   return (
                     <div key={place.placeId} className="space-y-1.5">
-                      <RestaurantCard restaurant={mappedRest} />
-                      {!alreadyInApp && currentUser?.role === 'admin' && (
+                      <RestaurantCard restaurant={existingRest || mappedRest} />
+                      {currentUser?.role === 'admin' && (
                         <button
-                          onClick={() => {
-                            addRestaurant({
-                              nameKh: mappedRest.nameKh,
-                              nameEn: mappedRest.nameEn,
-                              descriptionKh: mappedRest.descriptionKh,
-                              descriptionEn: mappedRest.descriptionEn,
-                              photoUrl: mappedRest.photoUrl,
-                              addressKh: mappedRest.addressKh,
-                              addressEn: mappedRest.addressEn,
-                              provinceKh: mappedRest.provinceKh,
-                              provinceEn: mappedRest.provinceEn,
-                              phone: mappedRest.phone,
-                              openingHoursKh: mappedRest.openingHoursKh,
-                              openingHoursEn: mappedRest.openingHoursEn,
-                              priceLevel: mappedRest.priceLevel,
-                              mapUrl: mappedRest.mapUrl,
-                              latitude: mappedRest.latitude,
-                              longitude: mappedRest.longitude,
-                              signatureDishesKh: mappedRest.signatureDishesKh,
-                              isVerified: true,
-                              status: 'approved',
-                            });
-                            showToast(
-                              `បានរក្សាទុកហាង "${mappedRest.nameKh}" ចូលក្នុងបញ្ជីកម្មវិធី និង Smart Cache!`,
-                              'success'
-                            );
-                          }}
-                          className="w-full py-1.5 px-3 rounded-xl bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/50 dark:hover:bg-emerald-900/60 border border-emerald-300 dark:border-emerald-700 text-emerald-800 dark:text-emerald-300 text-xs font-bold flex items-center justify-center gap-1.5 transition"
+                          onClick={() => importGooglePlaceToApp(place)}
+                          className={`w-full py-1.5 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer ${
+                            alreadyInApp
+                              ? 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-700'
+                              : 'bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/50 dark:hover:bg-emerald-900/60 border-emerald-300 dark:border-emerald-700 text-emerald-800 dark:text-emerald-300'
+                          }`}
                         >
                           <Plus className="w-3.5 h-3.5" />
-                          <span>រក្សាទុកហាងនេះទុកក្នុងបញ្ជីកម្មវិធីអចិន្ត្រៃយ៍ (Save to Directory)</span>
+                          <span>
+                            {alreadyInApp
+                              ? '✓ មានក្នុងបញ្ជីរួចហើយ (ចុចដើម្បីធ្វើបច្ចុប្បន្នភាពទិន្នន័យ Google Maps)'
+                              : '📥 នាំចូលហាងនេះចូលក្នុងបញ្ជីកម្មវិធីអចិន្ត្រៃយ៍ (Import from Google Maps)'}
+                          </span>
                         </button>
                       )}
                     </div>

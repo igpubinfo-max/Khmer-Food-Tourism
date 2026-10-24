@@ -1,7 +1,26 @@
-export const APP_VERSION = 'v1.9.9';
-export const APP_VERSION_NAME = '1.9.9';
-export const APP_BUILD_CODE = 71;
+export const APP_VERSION = 'v2.0.0';
+export const APP_VERSION_NAME = '2.0.0';
+export const APP_BUILD_CODE = 72;
 export const APP_RELEASE_DATE = '2026-10-24';
+
+export interface GoogleMapsPlaceMetadata {
+  placeId: string;
+  fetchedAt: string;
+  originalName: string;
+  formattedAddress: string;
+  province: string;
+  latitude: number;
+  longitude: number;
+  googleMapsUri: string;
+  rating?: number;
+  userRatingCount?: number;
+  phone?: string;
+  openHours?: string;
+  photoUrls?: string[];
+  photoAttributions?: string[];
+  hasOfficialGooglePhoto?: boolean;
+  types?: string[];
+}
 
 export interface DeletedUserRecord {
   id: string;
@@ -260,6 +279,11 @@ export interface FoodItem {
   originalPhotoUrl?: string;
   isCustomPhoto?: boolean;
   photoUpdatedAt?: string;
+  googlePlaceId?: string;
+  dataSource?: 'seed' | 'admin' | 'google_maps';
+  googleMapsMeta?: GoogleMapsPlaceMetadata;
+  isAdminEdited?: boolean;
+  adminEditedAt?: string;
 }
 
 export type KhmerFoodPrimaryGroup = 'samlor' | 'cha' | 'sngor' | 'bong_aem';
@@ -618,6 +642,13 @@ export interface Restaurant {
   created_at?: string;
   createdAt?: string;
   updatedAt?: string;
+
+  // Google Maps Platform Source Separation & Admin Override Protection
+  googlePlaceId?: string;
+  dataSource?: 'seed' | 'admin' | 'vip_owner' | 'google_maps';
+  googleMapsMeta?: GoogleMapsPlaceMetadata;
+  isAdminEdited?: boolean;
+  adminEditedAt?: string;
 }
 
 // Helper to resolve original created_at ISO timestamp for chronological sorting
@@ -705,8 +736,15 @@ export const getRestaurantRatingSummary = (
       )
     : [];
 
-  // For custom/VIP user-registered shops, ONLY genuine customer reviews count
-  if (!isSeedRestaurantId(restaurant.id || '')) {
+  // For custom/VIP user-registered shops (not seed and not imported with Google Maps rating), ONLY genuine customer reviews count
+  const isGoogleMapsImportedWithReviews =
+    (restaurant.dataSource === 'google_maps' || String(restaurant.id || '').startsWith('gmap-') || Boolean(restaurant.googlePlaceId)) &&
+    typeof restaurant.rating === 'number' &&
+    restaurant.rating > 0 &&
+    typeof restaurant.reviewCount === 'number' &&
+    restaurant.reviewCount > 0;
+
+  if (!isSeedRestaurantId(restaurant.id || '') && !isGoogleMapsImportedWithReviews) {
     if (genuineReviews.length === 0) {
       return { hasReviews: false, averageRating: 0, reviewCount: 0 };
     }
@@ -966,6 +1004,11 @@ export interface TouristDestination {
   reviewerName?: string;
   isCustomPhoto?: boolean;
   photoUpdatedAt?: string;
+  googlePlaceId?: string;
+  dataSource?: 'seed' | 'admin' | 'google_maps';
+  googleMapsMeta?: GoogleMapsPlaceMetadata;
+  isAdminEdited?: boolean;
+  adminEditedAt?: string;
 }
 
 // User Wishlist Item & Custom Lists (បញ្ជីកន្លែងដែលចង់ទៅ)

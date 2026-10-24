@@ -155,7 +155,7 @@ export const WelcomeScreenModal: React.FC<WelcomeScreenModalProps> = ({ onComple
             <div className="w-18 h-18 rounded-3xl bg-gradient-to-br from-amber-400 via-emerald-600 to-[#064E3B] p-0.5 shadow-2xl">
               <div className="w-full h-full rounded-[22px] bg-[#022C22] flex items-center justify-center overflow-hidden">
                 <img
-                  src="/icon-192.png"
+                  src="/icon-192.png?v=2.0.0"
                   alt="App Logo"
                   className="w-full h-full object-cover"
                 />

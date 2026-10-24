@@ -6,13 +6,25 @@ import { DestinationCategorySlug } from '../types';
 import {
   searchCambodiaPlacesWithSmartCache,
   convertGooglePlaceToDestination,
+  findDuplicateDestinationForGooglePlace,
   GooglePlaceCachedItem,
 } from '../services/googlePlacesService';
 
 const TOURISM_BATCH_SIZE = 20;
 
 export const TourismView: React.FC = () => {
-  const { destinations, language, searchQuery, selectedProvince, setSelectedProvince, addDestination, showToast } = useApp();
+  const {
+    destinations,
+    language,
+    currentUser,
+    searchQuery,
+    selectedProvince,
+    setSelectedProvince,
+    addDestination,
+    showToast,
+    openGoogleMapsSearchModal,
+    importGooglePlaceToApp,
+  } = useApp();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [visibleCount, setVisibleCount] = useState<number>(TOURISM_BATCH_SIZE);
   const loadMoreTriggerRef = useRef<HTMLDivElement | null>(null);
@@ -106,16 +118,28 @@ export const TourismView: React.FC = () => {
   return (
     <div className="max-w-md mx-auto px-4 py-3 space-y-4 pb-24">
       {/* Title Bar */}
-      <div>
-        <h2 className="font-moul text-sm sm:text-base text-[#0F172A] dark:text-white flex items-center gap-2">
-          <Compass className="w-4 h-4 text-[#059669]" />
-          <span>{language === 'km' ? 'តំបន់ទេសចរណ៍ស្រស់ត្រកាល' : 'Scenic Destinations'}</span>
-        </h2>
-        <p className="text-[11px] text-slate-500 font-khmer">
-          {language === 'km' 
-            ? `មានទីតាំងទេសចរណ៍ចំនួន ${filteredDestinations.length} កន្លែង` 
-            : `Showing ${filteredDestinations.length} travel spots`}
-        </p>
+      <div className="flex items-center justify-between gap-2">
+        <div>
+          <h2 className="font-moul text-sm sm:text-base text-[#0F172A] dark:text-white flex items-center gap-2">
+            <Compass className="w-4 h-4 text-[#059669]" />
+            <span>{language === 'km' ? 'តំបន់ទេសចរណ៍ស្រស់ត្រកាល' : 'Scenic Destinations'}</span>
+          </h2>
+          <p className="text-[11px] text-slate-500 font-khmer">
+            {language === 'km' 
+              ? `មានទីតាំងទេសចរណ៍ចំនួន ${filteredDestinations.length} កន្លែង` 
+              : `Showing ${filteredDestinations.length} travel spots`}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => openGoogleMapsSearchModal('tourism')}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-700 to-teal-700 hover:from-emerald-800 hover:to-teal-800 text-white font-bold text-xs shadow-xs font-khmer transition active:scale-95 cursor-pointer shrink-0"
+          title={language === 'km' ? 'ស្វែងរកតំបន់ទេសចរណ៍លើផែនទី Google Maps' : 'Search Tourist Attractions on Google Maps'}
+        >
+          <Globe className="w-3.5 h-3.5 text-emerald-200" />
+          <span>{language === 'km' ? 'ស្វែងរកលើ Google Maps' : 'Google Maps'}</span>
+        </button>
       </div>
 
       {/* Category Pills */}
@@ -191,48 +215,26 @@ export const TourismView: React.FC = () => {
             <div className="space-y-3">
               {smartCacheTourism.map((place) => {
                 const mappedDest = convertGooglePlaceToDestination(place);
-                const alreadyInApp = destinations.some(
-                  (d) =>
-                    d.id === mappedDest.id ||
-                    d.nameKh.toLowerCase() === mappedDest.nameKh.toLowerCase()
-                );
+                const existingDest = findDuplicateDestinationForGooglePlace(place, destinations);
+                const alreadyInApp = Boolean(existingDest);
                 return (
                   <div key={place.placeId} className="space-y-1.5">
-                    <TouristCard destination={mappedDest} />
-                    {!alreadyInApp && (
+                    <TouristCard destination={existingDest || mappedDest} />
+                    {currentUser?.role === 'admin' && (
                       <button
-                        onClick={() => {
-                          addDestination({
-                            nameKh: mappedDest.nameKh,
-                            nameEn: mappedDest.nameEn,
-                            categorySlug: mappedDest.categorySlug,
-                            categoryKh: mappedDest.categoryKh,
-                            categoryEn: mappedDest.categoryEn,
-                            descriptionKh: mappedDest.descriptionKh,
-                            descriptionEn: mappedDest.descriptionEn,
-                            photoUrl: mappedDest.photoUrl,
-                            provinceKh: mappedDest.provinceKh,
-                            provinceEn: mappedDest.provinceEn,
-                            addressKh: mappedDest.addressKh,
-                            addressEn: mappedDest.addressEn,
-                            entranceFeeKh: mappedDest.entranceFeeKh,
-                            entranceFeeEn: mappedDest.entranceFeeEn,
-                            bestTimeToVisitKh: mappedDest.bestTimeToVisitKh,
-                            bestTimeToVisitEn: mappedDest.bestTimeToVisitEn,
-                            mapUrl: mappedDest.mapUrl,
-                            latitude: mappedDest.latitude,
-                            longitude: mappedDest.longitude,
-                            highlightsKh: mappedDest.highlightsKh,
-                          });
-                          showToast(
-                            `បានរក្សាទុកតំបន់ទេសចរណ៍ "${mappedDest.nameKh}" ចូលក្នុងបញ្ជីកម្មវិធី និង Smart Cache!`,
-                            'success'
-                          );
-                        }}
-                        className="w-full py-1.5 px-3 rounded-xl bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/50 dark:hover:bg-emerald-900/60 border border-emerald-300 dark:border-emerald-700 text-emerald-800 dark:text-emerald-300 text-xs font-bold flex items-center justify-center gap-1.5 transition"
+                        onClick={() => importGooglePlaceToApp(place, { category: 'tourism' })}
+                        className={`w-full py-1.5 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer ${
+                          alreadyInApp
+                            ? 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-700'
+                            : 'bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/50 dark:hover:bg-emerald-900/60 border-emerald-300 dark:border-emerald-700 text-emerald-800 dark:text-emerald-300'
+                        }`}
                       >
                         <Plus className="w-3.5 h-3.5" />
-                        <span>រក្សាទុកតំបន់ទេសចរណ៍នេះចូលក្នុងកម្មវិធីអចិន្ត្រៃយ៍</span>
+                        <span>
+                          {alreadyInApp
+                            ? '✓ មានក្នុងបញ្ជីរួចហើយ (ចុចដើម្បីធ្វើបច្ចុប្បន្នភាពទិន្នន័យ Google Maps)'
+                            : '📥 នាំចូលតំបន់ទេសចរណ៍នេះចូលក្នុងកម្មវិធីអចិន្ត្រៃយ៍ (Import from Google Maps)'}
+                        </span>
                       </button>
                     )}
                   </div>

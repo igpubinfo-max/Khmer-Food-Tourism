@@ -15,7 +15,7 @@
  * Default seed images NEVER overwrite any record present in this vault.
  */
 
-import { FoodItem, Restaurant, TouristDestination, TrendingFoodItem, RestaurantMenuItem, RestaurantReview, RestaurantPriceLevel } from '../types';
+import { FoodItem, Restaurant, TouristDestination, TrendingFoodItem, RestaurantMenuItem, RestaurantReview, RestaurantPriceLevel, GoogleMapsPlaceMetadata } from '../types';
 import { isSupabaseConfigured, pullCloudDocument, pushCloudDocument } from './supabaseService';
 
 export const VAULT_KEYS = {
@@ -73,6 +73,11 @@ export interface RestaurantMediaOverride {
   mapUrl?: string;
   latitude?: number;
   longitude?: number;
+  googlePlaceId?: string;
+  dataSource?: Restaurant['dataSource'];
+  googleMapsMeta?: GoogleMapsPlaceMetadata;
+  isAdminEdited?: boolean;
+  adminEditedAt?: string;
   isCustomPhoto: boolean;
   updatedAt: string;
 }
@@ -93,6 +98,11 @@ export interface DestinationMediaOverride {
   longitude?: number;
   entryFeeKh?: string;
   openingHoursKh?: string;
+  googlePlaceId?: string;
+  dataSource?: TouristDestination['dataSource'];
+  googleMapsMeta?: GoogleMapsPlaceMetadata;
+  isAdminEdited?: boolean;
+  adminEditedAt?: string;
   isCustomPhoto: boolean;
   updatedAt: string;
 }
@@ -344,6 +354,11 @@ export function recordPermanentRestaurantOverride(rest: Restaurant): void {
     mapUrl: rest.mapUrl,
     latitude: rest.latitude,
     longitude: rest.longitude,
+    googlePlaceId: rest.googlePlaceId,
+    dataSource: rest.dataSource,
+    googleMapsMeta: rest.googleMapsMeta,
+    isAdminEdited: rest.isAdminEdited ?? true,
+    adminEditedAt: rest.adminEditedAt || now,
     isCustomPhoto: true,
     updatedAt: now,
   };
@@ -387,12 +402,27 @@ export function recordPermanentDestinationOverride(dest: TouristDestination): vo
     longitude: dest.longitude,
     entryFeeKh: dest.entryFeeKh,
     openingHoursKh: dest.openingHoursKh,
+    googlePlaceId: dest.googlePlaceId,
+    dataSource: dest.dataSource,
+    googleMapsMeta: dest.googleMapsMeta,
+    isAdminEdited: dest.isAdminEdited ?? true,
+    adminEditedAt: dest.adminEditedAt || now,
     isCustomPhoto: true,
     updatedAt: now,
   };
   bundle.updatedAt = now;
   saveLocalMediaOverrides(bundle);
   pushMediaOverridesToCloud(bundle).catch(() => {});
+}
+
+export function removePermanentDestinationOverride(destId: string): void {
+  const bundle = loadLocalMediaOverrides();
+  if (bundle.destinations[destId]) {
+    delete bundle.destinations[destId];
+    bundle.updatedAt = new Date().toISOString();
+    saveLocalMediaOverrides(bundle);
+    pushMediaOverridesToCloud(bundle).catch(() => {});
+  }
 }
 
 /**
@@ -487,6 +517,11 @@ export function applyRestaurantOverrides(
       mapUrl: ov.mapUrl || r.mapUrl,
       latitude: typeof ov.latitude === 'number' ? ov.latitude : r.latitude,
       longitude: typeof ov.longitude === 'number' ? ov.longitude : r.longitude,
+      googlePlaceId: ov.googlePlaceId || r.googlePlaceId,
+      dataSource: ov.dataSource || r.dataSource,
+      googleMapsMeta: ov.googleMapsMeta || r.googleMapsMeta,
+      isAdminEdited: ov.isAdminEdited ?? r.isAdminEdited,
+      adminEditedAt: ov.adminEditedAt || r.adminEditedAt,
     };
   });
 }
@@ -518,6 +553,11 @@ export function applyDestinationOverrides(
       longitude: typeof ov.longitude === 'number' ? ov.longitude : d.longitude,
       entryFeeKh: ov.entryFeeKh || d.entryFeeKh,
       openingHoursKh: ov.openingHoursKh || d.openingHoursKh,
+      googlePlaceId: ov.googlePlaceId || d.googlePlaceId,
+      dataSource: ov.dataSource || d.dataSource,
+      googleMapsMeta: ov.googleMapsMeta || d.googleMapsMeta,
+      isAdminEdited: ov.isAdminEdited ?? d.isAdminEdited,
+      adminEditedAt: ov.adminEditedAt || d.adminEditedAt,
       isCustomPhoto: true,
       photoUpdatedAt: ov.updatedAt,
     };

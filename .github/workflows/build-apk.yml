@@ -71,9 +71,9 @@ jobs:
           mkdir -p android/app/build/outputs/apk/debug
           REL_APK=$(find android/app/build/outputs/apk/release -name "*.apk" 2>/dev/null | head -n 1)
           if [ -n "$REL_APK" ] && [ -f "$REL_APK" ]; then
-            cp "$REL_APK" android/app/build/outputs/apk/debug/KhmerFoodTourism-v1.9.9.apk
+            cp "$REL_APK" android/app/build/outputs/apk/debug/KhmerFoodTourism-v2.0.0.apk
           elif [ -f android/app/build/outputs/apk/debug/app-debug.apk ]; then
-            mv android/app/build/outputs/apk/debug/app-debug.apk android/app/build/outputs/apk/debug/KhmerFoodTourism-v1.9.9.apk
+            mv android/app/build/outputs/apk/debug/app-debug.apk android/app/build/outputs/apk/debug/KhmerFoodTourism-v2.0.0.apk
           fi
           ls -la android/app/build/outputs/apk/debug/
 
@@ -88,20 +88,20 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: v1.9.9
-          name: "Khmer Food & Tourism v1.9.9 (Genuine VIP Shop Ratings & Simplified VIP Store Management)"
+          tag_name: v2.0.0
+          name: "Khmer Food & Tourism v2.0.0 (Google Maps Search & Import Hub + New App Logo)"
           make_latest: true
           body: |
             ### 🇰🇭 កម្មវិធីទូរស័ព្ទដៃ អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism Mobile App)
             
-            **កំណែថ្មី v1.9.9 (Build 71):**
-            - ⭐ **១. កែសម្រួលប្រព័ន្ធផ្កាយ និងការវាយតម្លៃហាង VIP (Genuine Customer Rating Logic)៖**
-              - ហាង VIP ដែលទើបចុះឈ្មោះថ្មី **មិនត្រូវបានដាក់ផ្កាយ 5 (5.0 ★) ដោយស្វ័យប្រវត្តិទៀតឡើយ**។
-              - ប្រសិនបើហាងមិនទាន់មានអតិថិជនវាយតម្លៃ នឹងបង្ហាញ **«មិនទាន់មានការវាយតម្លៃ / No ratings yet»** យ៉ាងច្បាស់លាស់។
-              - គណនាពិន្ទុផ្កាយមធ្យម និងចំនួនការវាយតម្លៃដោយផ្អែកលើការវាយតម្លៃពិតប្រាកដពីអតិថិជនតែប៉ុណ្ណោះ ព្រមទាំងបែងចែកដាច់ដោយឡែករវាង **ផ្លាកសញ្ញា VIP** **ការផ្ទៀងផ្ទាត់ហាង (Verified)** និង **ពិន្ទុវាយតម្លៃរបស់អតិថិជន**។
-            - 🏪 **២. កែបញ្ហាបើកខុសហាង និងរចនាផ្ទាំង «គ្រប់គ្រងហាង VIP របស់ខ្ញុំ» ឱ្យងាយស្រួលប្រើបំផុត (Fix & Simplify VIP Store Management)៖**
-              - កែបញ្ហាដែលចុច «គ្រប់គ្រងហាង VIP របស់ខ្ញុំ» បើកចំហាងចាស់ខុស ដោយផ្ទុកហាងត្រឹមត្រូវតាម `shop_id` និង `owner_id` ព្រមទាំងមានរបារជ្រើសរើសប្តូរហាង (Multi-Shop Switcher) ភ្លាមៗ។
-              - រៀបចំផ្ទាំងគ្រប់គ្រងជា ៥ ផ្នែកដាច់ដោយឡែកពីគ្នា (`១. មុខម្ហូប`, `២. ព័ត៌មានហាង`, `៣. រូបភាពហាង`, `៤. ស្ថិតិ & ផ្កាយ`, `៥. គម្រោង VIP`) ជាមួយប៊ូតុង **បន្ថែមមុខម្ហូបថ្មី**, **កែប្រែ**, **លុប**, **រក្សាទុក** និងការបញ្ជាក់មុនពេលលុប។
+            **កំណែថ្មី v2.0.0 (Build 72):**
+            - 🗺️ **១. ភ្ជាប់ប្រព័ន្ធ Google Maps Platform API សម្រាប់ស្វែងរក និងនាំចូលហាង & តំបន់ទេសចរណ៍ពិតៗ (Google Maps Search & Import Hub)៖**
+              - អនុញ្ញាតឱ្យអ្នកប្រើប្រាស់ និង Admin ស្វែងរកហាង ភោជនីយដ្ឋាន កាហ្វេ និងតំបន់ទេសចរណ៍ពិតៗនៅកម្ពុជាតាមរយៈ **ឈ្មោះទីតាំង (Place Name)**, **ប្រភេទ (Category)**, **ខេត្ត/ក្រុងទាំង ២៥ (Province)** ឬ **ទីតាំងជិតខ្លួន (GPS Near Me)**។
+              - ទាញយកព័ត៌មានលម្អិត អាសយដ្ឋាន កូអរដោនេ GPS តំណភ្ជាប់ Google Maps ពិន្ទុផ្កាយ (Rating) ចំនួនការវាយតម្លៃ និងរូបភាពផ្លូវការពី Google Maps (ដោយមិនដាក់រូបភាពខុសទីតាំងជាដាច់ខាត)។
+              - អនុញ្ញាតឱ្យ Admin ពិនិត្យ កែសម្រួល និងនាំចូល (Single ឬ Batch Import) ទីតាំងដែលបានជ្រើសរើសចូលក្នុងមូលដ្ឋានទិន្នន័យកម្មវិធី ដោយមានប្រព័ន្ធការពារទិន្នន័យស្ទួន (`googlePlaceId` + ឈ្មោះ + កូអរដោនេ GPS) និងរក្សាទុកទិន្នន័យ Google Maps ដាច់ដោយឡែកពីព័ត៌មានដែល Admin បានកែសម្រួល។
+              - បន្ថែម Pagination, ការគ្រប់គ្រងកូតា API ប្រចាំថ្ងៃ (Daily Quota Limit), Smart Cache 30 ថ្ងៃ និងការបង្ហាញប្រភព `Powered by Google Maps` តាមគោលការណ៍ផ្លូវការ។
+            - 🎨 **២. ផ្លាស់ប្តូររូបសញ្ញា (App Icon Logo) ថ្មីផ្លូវការ៖**
+              - បានបំពាក់រូបសញ្ញា (Icon Logo) ថ្មីនៅលើគ្រប់ផ្នែកនៃកម្មវិធី ទាំង Android Launcher Icons, Web/PWA Icons និងក្បាលកម្មវិធី (Header & Welcome Screen)។
           draft: false
           prerelease: false
           files: |

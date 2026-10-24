@@ -34,7 +34,8 @@ export const AdminDashboard: React.FC = () => {
     appSettings, updateAppSettings, setAdminPassword, currentUser, showToast,
     aiCheckIns, approveAiCheckIn, rejectAiCheckIn, mergeAiCheckIn,
     setIsAiCheckInModalOpen, triggerCloudSyncNow,
-    supportTickets, replyToSupportTicket, updateSupportTicketStatus, approveVipFromSupportTicket, markSupportTicketRead
+    supportTickets, replyToSupportTicket, updateSupportTicketStatus, approveVipFromSupportTicket, markSupportTicketRead,
+    openGoogleMapsSearchModal
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<'stats' | 'support_tickets' | 'food' | 'restaurants' | 'destinations' | 'community' | 'users' | 'transactions' | 'settings' | 'security' | 'image_audit' | 'ai_checkins'>(() => {
@@ -603,6 +604,13 @@ export const AdminDashboard: React.FC = () => {
                     className="px-4 py-2 bg-[#064E3B] hover:bg-[#047857] text-white font-khmer font-bold text-xs rounded-xl transition cursor-pointer shrink-0"
                   >
                     💾 រក្សាទុកសោ (Save Key)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => openGoogleMapsSearchModal('all')}
+                    className="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-khmer font-bold text-xs rounded-xl transition cursor-pointer shrink-0 shadow-sm"
+                  >
+                    🗺️ ស្វែងរក & នាំចូលពី Google Maps
                   </button>
                 </div>
               </div>
@@ -1995,7 +2003,7 @@ export const AdminDashboard: React.FC = () => {
           {/* RESTAURANTS TAB */}
           {activeTab === 'restaurants' && (
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-2 flex-wrap">
                 <div>
                   <h3 className="font-bold text-[#0F172A] dark:text-stone-100 font-khmer text-sm">
                     {isKm ? `គ្រប់គ្រងហាងអាហារ (សរុប ${restaurants.length} ហាង)` : `Manage Restaurants (${restaurants.length} shops)`}
@@ -2004,6 +2012,13 @@ export const AdminDashboard: React.FC = () => {
                     {isKm ? `${verifiedRestaurantsCount} ហាងផ្ទៀងផ្ទាត់ផ្លូវការ • ${restaurants.length - verifiedRestaurantsCount} គំរូសហគមន៍` : `${verifiedRestaurantsCount} verified • ${restaurants.length - verifiedRestaurantsCount} community listings`}
                   </p>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => openGoogleMapsSearchModal('restaurant')}
+                  className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-khmer font-bold text-xs shadow-sm transition cursor-pointer"
+                >
+                  🗺️ {isKm ? 'ស្វែងរក & នាំចូលហាងពី Google Maps' : 'Import Shops from Google Maps'}
+                </button>
               </div>
 
               <div className="space-y-2 max-h-[50vh] overflow-y-auto no-scrollbar">
@@ -2172,13 +2187,22 @@ export const AdminDashboard: React.FC = () => {
                     {isKm ? 'គ្រប់គ្រងព័ត៌មាន និងផ្លាស់ប្តូររូបភាពតំបន់ទេសចរណ៍ពីទូរស័ព្ទ ឬកុំព្យូទ័រ' : 'Manage destinations and replace photos from phone or computer'}
                   </p>
                 </div>
-                <button
-                  onClick={() => setShowAddDestForm(!showAddDestForm)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#064E3B] text-white font-bold hover:bg-[#047857] font-khmer text-xs shadow-xs self-start sm:self-auto transition active:scale-95"
-                >
-                  <Plus className="w-3.5 h-3.5 text-emerald-200" />
-                  <span>{showAddDestForm ? 'បិទ' : 'បញ្ចូលកន្លែងថ្មី'}</span>
-                </button>
+                <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
+                  <button
+                    type="button"
+                    onClick={() => openGoogleMapsSearchModal('tourism')}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold font-khmer text-xs shadow-xs transition active:scale-95 cursor-pointer"
+                  >
+                    <span>🗺️ {isKm ? 'នាំចូលពី Google Maps' : 'Import from Google Maps'}</span>
+                  </button>
+                  <button
+                    onClick={() => setShowAddDestForm(!showAddDestForm)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#064E3B] text-white font-bold hover:bg-[#047857] font-khmer text-xs shadow-xs transition active:scale-95"
+                  >
+                    <Plus className="w-3.5 h-3.5 text-emerald-200" />
+                    <span>{showAddDestForm ? 'បិទ' : 'បញ្ចូលកន្លែងថ្មី'}</span>
+                  </button>
+                </div>
               </div>
 
               {/* Search & Province Filter */}

@@ -37,8 +37,8 @@ export const Header: React.FC = () => {
           onClick={() => setActiveTab('home')}
           className="flex items-center gap-2 cursor-pointer group min-w-0 flex-1"
         >
-          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white p-0.5 shadow-md flex items-center justify-center border border-emerald-300/60 shrink-0">
-            <img src="/icon-192.png" alt="Khmer Food" className="w-full h-full rounded-[9px] object-contain" />
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white p-0.5 shadow-md flex items-center justify-center border border-emerald-300/60 shrink-0 overflow-hidden">
+            <img src="/icon-192.png?v=2.0.0" alt="Khmer Food" className="w-full h-full rounded-[9px] object-cover" />
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1 flex-wrap">

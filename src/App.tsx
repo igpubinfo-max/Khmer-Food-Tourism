@@ -36,6 +36,7 @@ import { QrScannerModal } from './components/QrScannerModal';
 import { VipAddRestaurantModal } from './components/VipAddRestaurantModal';
 import { AiFoodDiscoveryModal } from './components/AiFoodDiscoveryModal';
 import { RestaurantCheckInModal } from './components/RestaurantCheckInModal';
+import { GoogleMapsPlaceSearchModal } from './components/GoogleMapsPlaceSearchModal';
 import { Toast } from './components/Toast';
 
 const MainScreen: React.FC = () => {
@@ -70,6 +71,7 @@ const MainScreen: React.FC = () => {
     isSupportTicketModalOpen,
     isQrScannerModalOpen,
     isVipAddRestaurantModalOpen,
+    isGoogleMapsSearchModalOpen,
     toast,
   } = useApp();
   const [showWelcomeScreen, setShowWelcomeScreen] = useState<boolean>(() => {
@@ -147,6 +149,7 @@ const MainScreen: React.FC = () => {
       {isSupportTicketModalOpen && <PaymentSupportModal />}
       {isQrScannerModalOpen && <QrScannerModal />}
       {isVipAddRestaurantModalOpen && <VipAddRestaurantModal />}
+      {isGoogleMapsSearchModalOpen && <GoogleMapsPlaceSearchModal />}
 
       {/* Notifications */}
       {toast && <Toast />}
