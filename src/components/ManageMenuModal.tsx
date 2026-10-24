@@ -8,8 +8,9 @@ import {
 } from 'lucide-react';
 import { 
   RestaurantMenuItem, RestaurantPriceLevel, isRestaurantPremiumActive, isUserVipActive, 
-  VIP_PLANS, VipPlanType, getVipAccountState, VipAccountState,
-  getRestaurantRatingSummary, isSeedRestaurantId, getRestaurantCreatedAtMs
+  VipPlanType, getVipAccountState,
+  getRestaurantRatingSummary, isSeedRestaurantId, getRestaurantCreatedAtMs,
+  getDynamicVipPlans, getDynamicVipBenefits
 } from '../types';
 import {
   pickImageUsingNativeAndroidGallery,
@@ -26,6 +27,8 @@ export const ManageMenuModal: React.FC = () => {
     setManagingRestaurant,
     restaurants,
     currentUser,
+    appSettings,
+    getCurrentUserStoreQuota,
     addRestaurantMenuItem,
     updateRestaurantMenuItem,
     deleteRestaurantMenuItem,
@@ -43,8 +46,11 @@ export const ManageMenuModal: React.FC = () => {
 
   const isKm = language === 'km';
   const [selectedVipPlan, setSelectedVipPlan] = useState<VipPlanType>('quarterly');
-  const activePlan = VIP_PLANS[selectedVipPlan];
+  const dynamicPlansMap = getDynamicVipPlans(appSettings);
+  const dynamicBenefits = getDynamicVipBenefits(appSettings);
+  const activePlan = dynamicPlansMap[selectedVipPlan];
   const promoPrice = activePlan.priceUsd;
+  const storeQuota = getCurrentUserStoreQuota();
 
   // Main Tabs: menu, info, photos, analytics, membership
   const [mainTab, setMainTab] = useState<'menu' | 'info' | 'photos' | 'analytics' | 'membership'>('menu');
@@ -558,22 +564,36 @@ export const ManageMenuModal: React.FC = () => {
           {/* Multi-Shop Switcher Bar (Ensures Owner/Admin always edits the exact intended shop_id) */}
           {switchableShops.length > 0 && (
             <div className="pt-2 border-t border-emerald-700/70 flex flex-col gap-1.5 font-khmer">
-              <div className="flex items-center justify-between text-[10px] text-emerald-200">
+              <div className="flex items-center justify-between text-[10px] text-emerald-200 flex-wrap gap-1">
                 <span>
                   {isKm
-                    ? `ជ្រើសរើសហាងដែលអ្នកចង់កែប្រែ (${switchableShops.length} ហាង)៖`
-                    : `Select which store to manage (${switchableShops.length} stores):`}
+                    ? `ជ្រើសរើសហាង (${storeQuota.usedStoresCount}/${storeQuota.totalAllowedStores === 999 ? '∞' : storeQuota.totalAllowedStores} ហាង)៖`
+                    : `Select store (${storeQuota.usedStoresCount}/${storeQuota.totalAllowedStores === 999 ? '∞' : storeQuota.totalAllowedStores} stores):`}
                 </span>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsManageMenuModalOpen(false);
-                    setIsVipAddRestaurantModalOpen(true);
-                  }}
-                  className="px-2 py-0.5 rounded-lg bg-amber-400/20 hover:bg-amber-400/30 border border-amber-300/40 text-amber-200 font-bold text-[10px] transition cursor-pointer"
-                >
-                  {isKm ? '+ បន្ថែមហាងថ្មី' : '+ Add New Shop'}
-                </button>
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsManageMenuModalOpen(false);
+                      setIsVipAddRestaurantModalOpen(true);
+                    }}
+                    className="px-2 py-0.5 rounded-lg bg-emerald-400/20 hover:bg-emerald-400/30 border border-emerald-300/40 text-emerald-100 font-bold text-[10px] transition cursor-pointer"
+                  >
+                    {isKm ? '🔄 ប្តូរហាងថ្មី ($0)' : '🔄 Replace ($0)'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsManageMenuModalOpen(false);
+                      setIsVipAddRestaurantModalOpen(true);
+                    }}
+                    className="px-2 py-0.5 rounded-lg bg-amber-400/20 hover:bg-amber-400/30 border border-amber-300/40 text-amber-200 font-bold text-[10px] transition cursor-pointer"
+                  >
+                    {storeQuota.canAddWithoutNewPayment
+                      ? (isKm ? '+ បន្ថែមហាងថ្មី ($0)' : '+ Add Store ($0)')
+                      : (isKm ? `+ បន្ថែមហាងថ្មី (+$${storeQuota.additionalStoreFeeUsd.toFixed(2)})` : `+ Add Store (+$${storeQuota.additionalStoreFeeUsd.toFixed(2)})`)}
+                  </button>
+                </div>
               </div>
               <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
                 {switchableShops.map((shop) => {
@@ -1377,21 +1397,40 @@ export const ManageMenuModal: React.FC = () => {
           {/* TAB 2: STORE INFORMATION & PRICES */}
           {mainTab === 'info' && (
             <form onSubmit={handleSaveStoreInfo} className="space-y-3 font-khmer">
-              <div className="p-3 bg-emerald-50 dark:bg-emerald-950/30 rounded-2xl border border-emerald-200 dark:border-emerald-800 flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  <Store className="w-4 h-4 text-[#064E3B] dark:text-emerald-400 shrink-0" />
-                  <span className="text-[11px] text-[#064E3B] dark:text-emerald-300 leading-snug font-bold">
-                    {isKm 
-                      ? '🏪 កែប្រែឈ្មោះហាង លេខទូរស័ព្ទ កម្រិតតម្លៃ និងអាសយដ្ឋាន' 
-                      : '🏪 Edit Store Name, Phone, Price Range & Address'}
-                  </span>
+              <div className="p-3 bg-emerald-50 dark:bg-emerald-950/30 rounded-2xl border border-emerald-200 dark:border-emerald-800 space-y-2">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <Store className="w-4 h-4 text-[#064E3B] dark:text-emerald-400 shrink-0" />
+                    <span className="text-[11px] text-[#064E3B] dark:text-emerald-300 leading-snug font-bold">
+                      {isKm 
+                        ? '🏪 កែប្រែព័ត៌មានហាង ឬប្តូរហាងថ្មី (ឥតគិតថ្លៃ $0.00)' 
+                        : '🏪 Edit Store Info or Replace Store (Free $0.00)'}
+                    </span>
+                  </div>
+                  <button
+                    type="submit"
+                    className="px-3 py-1.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-[11px] shrink-0 shadow cursor-pointer"
+                  >
+                    {isKm ? '💾 រក្សាទុក' : '💾 Save'}
+                  </button>
                 </div>
-                <button
-                  type="submit"
-                  className="px-3 py-1.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-[11px] shrink-0 shadow cursor-pointer"
-                >
-                  {isKm ? '💾 រក្សាទុក' : '💾 Save'}
-                </button>
+                <div className="flex items-center justify-between gap-2 pt-1.5 border-t border-emerald-200/70 dark:border-emerald-800/60 text-[10px] text-slate-600 dark:text-slate-300">
+                  <span>
+                    {isKm
+                      ? 'អ្នកអាចកែប្រែព័ត៌មានហាងនេះ ឬប្តូរដាក់ហាងថ្មីជំនួសហាងនេះដោយមិនបាច់បង់ប្រាក់បន្ថែមឡើយ ($0)។'
+                      : 'You can edit this store or replace it with a brand-new store at zero additional cost ($0).'}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsManageMenuModalOpen(false);
+                      setIsVipAddRestaurantModalOpen(true);
+                    }}
+                    className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 border border-emerald-400 text-[#064E3B] dark:text-emerald-300 font-bold text-[10px] shrink-0 hover:bg-emerald-100 transition cursor-pointer"
+                  >
+                    {isKm ? '🔄 ប្តូរហាងថ្មីជំនួស ($0)' : '🔄 Replace Store ($0)'}
+                  </button>
+                </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -1831,10 +1870,10 @@ export const ManageMenuModal: React.FC = () => {
             </div>
           )}
 
-          {/* TAB 4: VIP MEMBERSHIP PLAN & DIRECT SUPPORT (10 Benefits & Rules) */}
+          {/* TAB 5: VIP MEMBERSHIP PLAN & DIRECT SUPPORT (Dynamic Benefits & Rules) */}
           {mainTab === 'membership' && (
             <div className="space-y-4 font-khmer">
-              {/* Plan Selector ($2.99 for 30 Days or $4.99 for 90 Days) */}
+              {/* Plan Selector (Synchronized with Admin Settings) */}
               <div className="p-4 bg-emerald-50 dark:bg-emerald-950/30 rounded-2xl border-2 border-emerald-500/80 text-center space-y-2">
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#064E3B] text-white text-[10px] font-bold rounded-full shadow-xs">
                   <Sparkles className="w-3.5 h-3.5 text-emerald-200" />
@@ -1846,7 +1885,7 @@ export const ManageMenuModal: React.FC = () => {
                 </div>
                 <div className="grid grid-cols-2 gap-2 pt-1">
                   {(['quarterly', 'annual'] as VipPlanType[]).map((pk) => {
-                    const p = VIP_PLANS[pk];
+                    const p = dynamicPlansMap[pk];
                     const active = selectedVipPlan === pk;
                     return (
                       <button
@@ -1872,59 +1911,38 @@ export const ManageMenuModal: React.FC = () => {
                 </div>
                 <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-snug">
                   {isKm
-                    ? `ការទូទាត់តែមួយលើក $${activePlan.priceUsd.toFixed(2)} សម្រាប់រយៈពេល ${activePlan.durationDays} ថ្ងៃពេញ។`
-                    : `One-time payment of $${activePlan.priceUsd.toFixed(2)} for ${activePlan.durationDays} days.`}
+                    ? `ការទូទាត់តែមួយលើក $${activePlan.priceUsd.toFixed(2)} សម្រាប់រយៈពេល ${activePlan.durationDays} ថ្ងៃពេញ • រួមបញ្ចូលហាងទី ១ ឥតគិតថ្លៃ ($0) • បន្ថែមហាងបន្ទាប់ +$${storeQuota.additionalStoreFeeUsd.toFixed(2)} USD / ហាង។`
+                    : `One-time payment of $${activePlan.priceUsd.toFixed(2)} for ${activePlan.durationDays} days • Includes 1st Store Free ($0) • Additional stores +$${storeQuota.additionalStoreFeeUsd.toFixed(2)} USD / store.`}
                 </p>
               </div>
 
-              {/* 10 VIP Benefits Breakdown */}
+              {/* Dynamic VIP Benefits Breakdown */}
               <div className="p-4 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-2.5">
                 <h4 className="font-bold text-xs text-[#064E3B] dark:text-emerald-400 border-b border-slate-200 dark:border-slate-700 pb-1.5 flex items-center gap-1.5">
                   <Sparkles className="w-4 h-4 text-amber-500" />
-                  <span>{isKm ? 'អត្ថប្រយោជន៍ទាំង ១០ យ៉ាងនៃសមាជិកភាព VIP Premium' : '10 Full Benefits of Premium VIP Membership'}</span>
+                  <span>
+                    {isKm
+                      ? `អត្ថប្រយោជន៍ទាំង ${dynamicBenefits.length} យ៉ាងនៃសមាជិកភាព VIP Premium`
+                      : `${dynamicBenefits.length} Full Benefits of Premium VIP Membership`}
+                  </span>
                 </h4>
 
                 <div className="grid grid-cols-1 gap-1.5 text-[11px] text-slate-700 dark:text-slate-300">
-                  <div className="flex items-start gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#059669] shrink-0 mt-0.5" />
-                    <span><strong>1. {isKm ? 'បង្ហាញក្នុងបញ្ជីហាងឆ្នើម' : 'Featured restaurant listing'}</strong></span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#059669] shrink-0 mt-0.5" />
-                    <span><strong>2. {isKm ? 'រូបភាពហាងច្រើនសន្លឹក Gallery' : 'Multiple restaurant photos'}</strong></span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#059669] shrink-0 mt-0.5" />
-                    <span><strong>3. {isKm ? 'មុខម្ហូបរហូតដល់ ៥ មុខ ជាមួយរូបភាព និងតម្លៃ' : 'Up to 5 editable food menu items'}</strong></span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#059669] shrink-0 mt-0.5" />
-                    <span><strong>4. {isKm ? 'កែប្រែព័ត៌មានហាង រូបភាព និងលេខទូរស័ព្ទដោយខ្លួនឯង' : 'Self-service editing of name, photos, phone, address'}</strong></span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#059669] shrink-0 mt-0.5" />
-                    <span><strong>5. {isKm ? 'តំណភ្ជាប់ចែករំលែកទំព័រហាងផ្ទាល់' : 'A shareable restaurant page link'}</strong></span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#059669] shrink-0 mt-0.5" />
-                    <span><strong>6. {isKm ? 'ផ្លាកសញ្ញា Premium VIP លើបញ្ជី និងទំព័រហាង' : 'Premium VIP badge on listings & detail pages'}</strong></span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#059669] shrink-0 mt-0.5" />
-                    <span><strong>7. {isKm ? 'ស្ថិតិហាង (ចំនួនមើល ចុចទូរស័ព្ទ និងចុច Maps)' : 'Restaurant analytics (views, calls, maps)'}</strong></span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#059669] shrink-0 mt-0.5" />
-                    <span><strong>8. {isKm ? 'បង្ហាញក្នុងផ្នែកផ្សព្វផ្សាយ VIP ពិសេស' : 'Placement in dedicated Premium promotion section'}</strong></span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#059669] shrink-0 mt-0.5" />
-                    <span><strong>9. {isKm ? 'ប៊ូតុងខល ផែនទី និងចែករំលែករហ័ស' : 'Easy-to-access call, map, and share buttons'}</strong></span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#059669] shrink-0 mt-0.5" />
-                    <span><strong>10. {isKm ? 'សេវាជំនួយសមាជិក VIP ផ្ទាល់តាម Telegram' : 'VIP member support channel'}</strong></span>
-                  </div>
+                  {dynamicBenefits.map((b, idx) => (
+                    <div key={b.id || idx} className="flex items-start gap-2">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-[#059669] shrink-0 mt-0.5" />
+                      <span>
+                        <strong>
+                          {idx + 1}. {isKm ? b.titleKh : b.titleEn}
+                        </strong>
+                        {(b.descKh || b.descEn) && (
+                          <span className="text-[10px] text-slate-500 dark:text-slate-400 block">
+                            {isKm ? b.descKh : b.descEn}
+                          </span>
+                        )}
+                      </span>
+                    </div>
+                  ))}
                 </div>
               </div>
 
@@ -2018,7 +2036,11 @@ export const ManageMenuModal: React.FC = () => {
 
         {/* Footer */}
         <div className="p-3.5 bg-slate-50 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 flex justify-between items-center text-xs text-slate-500 font-khmer">
-          <span>{isKm ? 'សមាជិកភាព VIP (30 ថ្ងៃ $2.99 / 90 ថ្ងៃ $4.99)' : 'VIP Plans: 30 Days ($2.99) / 90 Days ($4.99)'}</span>
+          <span>
+            {isKm
+              ? `សមាជិកភាព VIP (${dynamicPlansMap.quarterly.durationDays} ថ្ងៃ $${dynamicPlansMap.quarterly.priceUsd.toFixed(2)} / ${dynamicPlansMap.annual.durationDays} ថ្ងៃ $${dynamicPlansMap.annual.priceUsd.toFixed(2)})`
+              : `VIP Plans: ${dynamicPlansMap.quarterly.durationDays} Days ($${dynamicPlansMap.quarterly.priceUsd.toFixed(2)}) / ${dynamicPlansMap.annual.durationDays} Days ($${dynamicPlansMap.annual.priceUsd.toFixed(2)})`}
+          </span>
           <button
             onClick={() => setIsManageMenuModalOpen(false)}
             className="px-4 py-1.5 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-xl transition font-medium"

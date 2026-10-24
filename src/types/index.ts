@@ -37,27 +37,31 @@ export interface DeletedUserRecord {
 export const VIP_ANNUAL_PRICE_USD = 4.99;
 export const VIP_SUBSCRIPTION_DAYS = 90;
 export const VIP_QUARTERLY_PRICE_USD = 2.99;
-export const VIP_QUARTERLY_DAYS = 30;
+export const VIP_QUARTERLY_DAYS = 10;
+export const DEFAULT_ADDITIONAL_STORE_FEE_USD = 10.0;
+export const DEFAULT_INCLUDED_FREE_STORES = 1;
 
 export interface VipPlanConfig {
   id: 'quarterly' | 'annual';
   nameEn: string;
   nameKh: string;
   priceUsd: number;
-  durationDays: 30 | 90;
+  durationDays: number;
   labelEn: string;
   labelKh: string;
+  priceKhrDisplay?: string;
 }
 
 export const VIP_PLANS: Record<'quarterly' | 'annual', VipPlanConfig> = {
   quarterly: {
     id: 'quarterly',
-    nameEn: 'VIP 30 Days',
-    nameKh: 'កញ្ចប់ VIP 30 ថ្ងៃ',
+    nameEn: 'VIP 10 Days',
+    nameKh: 'កញ្ចប់ VIP 10 ថ្ងៃ',
     priceUsd: 2.99,
-    durationDays: 30,
-    labelEn: 'VIP 30 Days ($2.99 / 30 days)',
-    labelKh: 'VIP 30 ថ្ងៃ ($2.99 / 30 ថ្ងៃ)'
+    durationDays: 10,
+    labelEn: 'VIP 10 Days ($2.99 / 10 days)',
+    labelKh: 'VIP 10 ថ្ងៃ ($2.99 / 10 ថ្ងៃ)',
+    priceKhrDisplay: '១២,២០០ រៀល'
   },
   annual: {
     id: 'annual',
@@ -66,7 +70,8 @@ export const VIP_PLANS: Record<'quarterly' | 'annual', VipPlanConfig> = {
     priceUsd: 4.99,
     durationDays: 90,
     labelEn: 'VIP 90 Days ($4.99 / 90 days)',
-    labelKh: 'VIP 90 ថ្ងៃ ($4.99 / 90 ថ្ងៃ)'
+    labelKh: 'VIP 90 ថ្ងៃ ($4.99 / 90 ថ្ងៃ)',
+    priceKhrDisplay: '២០,៤០០ រៀល'
   }
 };
 
@@ -91,7 +96,7 @@ export interface User {
   linkedProviders?: ('google' | 'phone' | 'email')[];
   createdAt: string;
 
-  // Premium VIP Subscription ($2.99 for 30 days or $4.99 for 90 days)
+  // Premium VIP Subscription ($2.99 for 10 days or $4.99 for 90 days, configurable by Admin)
   membershipTier?: 'free' | 'premium_vip';
   subscriptionStartDate?: string;
   subscriptionExpiryDate?: string;
@@ -104,6 +109,10 @@ export interface User {
   isDisabled?: boolean;
   disabledAt?: string;
   restoredAt?: string;
+
+  // Additional Store Slots purchased beyond the 1st free VIP store ($10 per additional store)
+  paidAdditionalStoreSlots?: number;
+  additionalStorePaymentIds?: string[];
 
   // Connected Social Accounts (TikTok & Facebook)
   socialAccounts?: UserSocialAccounts;
@@ -131,8 +140,10 @@ export interface VipBenefitItem {
   titleEn: string;
   descriptionKh: string;
   descriptionEn: string;
-  iconName: string;
-  category: 'profile' | 'promotion' | 'reach' | 'analytics';
+  descKh?: string;
+  descEn?: string;
+  iconName?: string;
+  category?: 'profile' | 'promotion' | 'reach' | 'analytics';
 }
 
 export const TEN_VIP_BENEFITS: VipBenefitItem[] = [
@@ -544,10 +555,10 @@ export interface AbaReceiptVerificationReport {
   };
 }
 
-export type TransactionType = 'restaurant_registration' | 'user_vip_upgrade';
+export type TransactionType = 'restaurant_registration' | 'user_vip_upgrade' | 'additional_store_slot';
 
 export interface RegistrationTransaction {
-  id: string; // e.g. "TXN-20261020-001" or "TXN-VIP-20261021-001"
+  id: string; // e.g. "TXN-20261020-001", "TXN-VIP-20261021-001", or "TXN-STORE-20261024-001"
   type?: TransactionType;
   restaurantId?: string;
   restaurantNameKh?: string;
@@ -558,10 +569,11 @@ export interface RegistrationTransaction {
   userId?: string;
   userName?: string;
   userEmail?: string;
-  planType?: 'quarterly' | 'annual';
+  planType?: 'quarterly' | 'annual' | 'additional_store';
+  storeSlotNumber?: number;
   amountUsd: number;
   currency?: 'USD' | 'KHR';
-  durationDays?: number; // 30 or 90 days
+  durationDays?: number; // e.g. 10 or 90 days (configurable by Admin)
   membershipTier?: 'premium' | 'premium_vip';
   status: 'pending_verification' | 'verified' | 'rejected' | 'needs_more_info' | 'failed' | 'cancelled';
   paymentMethod: 'KHQR' | 'Bakong' | 'BankTransfer' | 'Manual' | 'GooglePlayBilling' | 'Card';
@@ -689,6 +701,11 @@ export interface Restaurant {
 
   // AI Business Category Verification (Food vs Non-Food Store Gate)
   aiCategoryVerification?: AiStoreCategoryVerificationReport;
+
+  // Store Slot & Replacement Tracking
+  storeSlotNumber?: number;
+  replacedFromRestaurantId?: string;
+  replacedAt?: string;
 }
 
 // Helper to resolve original created_at ISO timestamp for chronological sorting
@@ -1179,6 +1196,21 @@ export interface AppSettings {
   promotionalFeeEnabled: boolean;
   promotionPeriodKh: string;
   promotionPeriodEn: string;
+
+  // Dynamic Admin-Configurable VIP Packages & Store Management Fees
+  vipShortDurationDays?: number; // Default: 10 days
+  vipShortPriceUsd?: number; // Default: $2.99
+  vipShortNameKh?: string; // Default: "កញ្ចប់ VIP 10 ថ្ងៃ"
+  vipShortNameEn?: string; // Default: "VIP 10 Days"
+  vipLongDurationDays?: number; // Default: 90 days
+  vipLongPriceUsd?: number; // Default: $4.99
+  vipLongNameKh?: string; // Default: "កញ្ចប់ VIP 90 ថ្ងៃ"
+  vipLongNameEn?: string; // Default: "VIP 90 Days"
+  additionalStoreFeeUsd?: number; // Default: $10.00 per additional store beyond the 1st
+  includedFreeStoresPerVip?: number; // Default: 1 store included with VIP
+  vipBenefitsList?: VipBenefitItem[]; // Configurable VIP benefits list
+  settingsUpdatedAt?: string;
+  settingsUpdatedBy?: string;
 }
 
 // User–Admin Two-Way Support & Payment Verification System
@@ -1200,10 +1232,10 @@ export interface SupportTicket {
   username: string;
   userEmail?: string;
   userPhone?: string;
-  paymentPlanId: 'quarterly' | 'annual';
-  paymentPlanLabel: string; // "VIP 30 Days ($2.99)" or "VIP 90 Days ($4.99)"
+  paymentPlanId: 'quarterly' | 'annual' | 'additional_store';
+  paymentPlanLabel: string; // e.g. "VIP 10 Days ($2.99)" or "VIP 90 Days ($4.99)" or "Additional Store (+$10.00)"
   amountUsd: number;
-  durationDays: 30 | 90;
+  durationDays: number;
   paymentDate: string;
   paymentRef: string;
   receiptUrl?: string;
@@ -1217,3 +1249,259 @@ export interface SupportTicket {
   updatedAt: string;
   aiVerificationReport?: AbaReceiptVerificationReport;
 }
+
+/**
+ * Helper to load persisted AppSettings from localStorage when not explicitly passed
+ */
+export const getStoredAppSettingsFallback = (): Partial<AppSettings> => {
+  try {
+    if (typeof localStorage !== 'undefined') {
+      const raw = localStorage.getItem('kft_settings_v4');
+      if (raw) {
+        return JSON.parse(raw);
+      }
+    }
+  } catch {
+    // ignore storage errors
+  }
+  return {};
+};
+
+/**
+ * Resolve dynamic VIP plans from centralized Admin settings (with safe defaults: 10 days @ $2.99, 90 days @ $4.99)
+ */
+export const getDynamicVipPlans = (
+  settings?: Partial<AppSettings> | null
+): Record<'quarterly' | 'annual', VipPlanConfig> => {
+  const s = settings || getStoredAppSettingsFallback();
+  const shortDays =
+    typeof s.vipShortDurationDays === 'number' && s.vipShortDurationDays >= 1
+      ? Math.round(s.vipShortDurationDays)
+      : VIP_QUARTERLY_DAYS;
+  const shortPrice =
+    typeof s.vipShortPriceUsd === 'number' && s.vipShortPriceUsd > 0
+      ? Math.round(s.vipShortPriceUsd * 100) / 100
+      : VIP_QUARTERLY_PRICE_USD;
+  const shortNameKh = (s.vipShortNameKh || '').trim() || `កញ្ចប់ VIP ${shortDays} ថ្ងៃ`;
+  const shortNameEn = (s.vipShortNameEn || '').trim() || `VIP ${shortDays} Days`;
+
+  const longDays =
+    typeof s.vipLongDurationDays === 'number' && s.vipLongDurationDays >= 1
+      ? Math.round(s.vipLongDurationDays)
+      : VIP_SUBSCRIPTION_DAYS;
+  const longPrice =
+    typeof s.vipLongPriceUsd === 'number' && s.vipLongPriceUsd > 0
+      ? Math.round(s.vipLongPriceUsd * 100) / 100
+      : VIP_ANNUAL_PRICE_USD;
+  const longNameKh = (s.vipLongNameKh || '').trim() || `កញ្ចប់ VIP ${longDays} ថ្ងៃ`;
+  const longNameEn = (s.vipLongNameEn || '').trim() || `VIP ${longDays} Days`;
+
+  return {
+    quarterly: {
+      id: 'quarterly',
+      nameEn: shortNameEn,
+      nameKh: shortNameKh,
+      priceUsd: shortPrice,
+      durationDays: shortDays,
+      labelEn: `${shortNameEn} ($${shortPrice.toFixed(2)} / ${shortDays} days)`,
+      labelKh: `${shortNameKh} ($${shortPrice.toFixed(2)} / ${shortDays} ថ្ងៃ)`,
+      priceKhrDisplay: `${Math.round(shortPrice * 4100).toLocaleString()} រៀល`,
+    },
+    annual: {
+      id: 'annual',
+      nameEn: longNameEn,
+      nameKh: longNameKh,
+      priceUsd: longPrice,
+      durationDays: longDays,
+      labelEn: `${longNameEn} ($${longPrice.toFixed(2)} / ${longDays} days)`,
+      labelKh: `${longNameKh} ($${longPrice.toFixed(2)} / ${longDays} ថ្ងៃ)`,
+      priceKhrDisplay: `${Math.round(longPrice * 4100).toLocaleString()} រៀល`,
+    },
+  };
+};
+
+/**
+ * Resolve dynamic VIP benefits list from centralized Admin settings
+ */
+export const getDynamicVipBenefits = (
+  settings?: Partial<AppSettings> | null
+): VipBenefitItem[] => {
+  const s = settings || getStoredAppSettingsFallback();
+  if (Array.isArray(s.vipBenefitsList) && s.vipBenefitsList.length > 0) {
+    return s.vipBenefitsList.map((b, idx) => ({
+      ...b,
+      id: b.id || idx + 1,
+      descriptionKh: b.descriptionKh || b.descKh || '',
+      descriptionEn: b.descriptionEn || b.descEn || '',
+      descKh: b.descKh || b.descriptionKh || '',
+      descEn: b.descEn || b.descriptionEn || '',
+    }));
+  }
+  return TEN_VIP_BENEFITS.map((b) => ({
+    ...b,
+    descKh: b.descriptionKh,
+    descEn: b.descriptionEn,
+  }));
+};
+
+/**
+ * Resolve dynamic additional-store fee (default $10.00 per additional store beyond the 1st)
+ */
+export const getAdditionalStoreFeeUsd = (
+  settings?: Partial<AppSettings> | null
+): number => {
+  const s = settings || getStoredAppSettingsFallback();
+  if (typeof s.additionalStoreFeeUsd === 'number' && s.additionalStoreFeeUsd >= 0) {
+    return Math.round(s.additionalStoreFeeUsd * 100) / 100;
+  }
+  return DEFAULT_ADDITIONAL_STORE_FEE_USD;
+};
+
+export interface UserStoreQuotaSummary {
+  isAdmin: boolean;
+  isVipActive: boolean;
+  includedFreeStores: number;
+  paidAdditionalStoreSlots: number;
+  paidAdditionalStores: number;
+  totalAllowedStores: number;
+  usedStoresCount: number;
+  remainingAvailableSlots: number;
+  additionalStoreFeeUsd: number;
+  ownedStores: Restaurant[];
+  verifiedAdditionalStoreTransactions: RegistrationTransaction[];
+  pendingAdditionalStoreTransaction: RegistrationTransaction | null;
+  pendingAdditionalStorePayments: number;
+  nextStoreSlotNumber: number;
+  canCreateNewStoreWithoutPayment: boolean;
+  canAddWithoutNewPayment: boolean;
+  canReplaceExistingStoreForFree: boolean;
+  canReplaceExistingFree: boolean;
+  canEditExistingFree: boolean;
+}
+
+/**
+ * Compute authoritative store limits, used stores, paid additional store slots, and pending payment state for a user
+ */
+export const getUserStoreQuotaSummary = (
+  user?: User | null,
+  restaurants?: Restaurant[] | null,
+  transactions?: RegistrationTransaction[] | null,
+  settings?: Partial<AppSettings> | null
+): UserStoreQuotaSummary => {
+  const s = settings || getStoredAppSettingsFallback();
+  const additionalStoreFeeUsd = getAdditionalStoreFeeUsd(s);
+  const includedFreeBase =
+    typeof s.includedFreeStoresPerVip === 'number' && s.includedFreeStoresPerVip >= 1
+      ? Math.round(s.includedFreeStoresPerVip)
+      : DEFAULT_INCLUDED_FREE_STORES;
+
+  if (!user) {
+    return {
+      isAdmin: false,
+      isVipActive: false,
+      includedFreeStores: 0,
+      paidAdditionalStoreSlots: 0,
+      paidAdditionalStores: 0,
+      totalAllowedStores: 0,
+      usedStoresCount: 0,
+      remainingAvailableSlots: 0,
+      additionalStoreFeeUsd,
+      ownedStores: [],
+      verifiedAdditionalStoreTransactions: [],
+      pendingAdditionalStoreTransaction: null,
+      pendingAdditionalStorePayments: 0,
+      nextStoreSlotNumber: 1,
+      canCreateNewStoreWithoutPayment: false,
+      canAddWithoutNewPayment: false,
+      canReplaceExistingStoreForFree: false,
+      canReplaceExistingFree: false,
+      canEditExistingFree: false,
+    };
+  }
+
+  const isAdmin =
+    user.role === 'admin' ||
+    user.id === 'admin-authorized-single' ||
+    user.username === 'admin' ||
+    user.username === 'cheasavuth';
+  const isVipActive = isUserVipActive(user);
+
+  const userEmailLower = (user.email || '').toLowerCase().trim();
+  const userPhoneClean = (user.phone || '').replace(/[\s-+]/g, '');
+
+  const ownedStores = Array.isArray(restaurants)
+    ? restaurants.filter((r) => {
+        if (!r || isSeedRestaurantId(r.id)) return false;
+        if (r.ownerId && r.ownerId === user.id) return true;
+        if (userEmailLower && r.ownerEmail && r.ownerEmail.toLowerCase().trim() === userEmailLower) {
+          return true;
+        }
+        return false;
+      })
+    : [];
+
+  const userAdditionalTxns = Array.isArray(transactions)
+    ? transactions.filter((t) => {
+        if (!t || t.type !== 'additional_store_slot') return false;
+        if (t.userId === user.id || t.ownerId === user.id) return true;
+        if (userEmailLower && t.userEmail && t.userEmail.toLowerCase().trim() === userEmailLower) {
+          return true;
+        }
+        if (
+          userPhoneClean.length >= 7 &&
+          t.ownerPhone &&
+          t.ownerPhone.replace(/[\s-+]/g, '') === userPhoneClean
+        ) {
+          return true;
+        }
+        return false;
+      })
+    : [];
+
+  const verifiedAdditionalStoreTransactions = userAdditionalTxns.filter(
+    (t) => t.status === 'verified'
+  );
+  const pendingAdditionalStoreTxns = userAdditionalTxns.filter(
+    (t) => t.status === 'pending_verification' || t.status === 'needs_more_info'
+  );
+  const pendingAdditionalStoreTransaction = pendingAdditionalStoreTxns[0] || null;
+
+  const paidAdditionalStoreSlots = Math.max(
+    typeof user.paidAdditionalStoreSlots === 'number' ? user.paidAdditionalStoreSlots : 0,
+    verifiedAdditionalStoreTransactions.length
+  );
+
+  const includedFreeStores = isAdmin ? 9999 : isVipActive ? includedFreeBase : 0;
+  const totalAllowedStores = isAdmin
+    ? 9999
+    : isVipActive
+    ? includedFreeStores + paidAdditionalStoreSlots
+    : 0;
+  const usedStoresCount = ownedStores.length;
+  const remainingAvailableSlots = Math.max(0, totalAllowedStores - usedStoresCount);
+  const canCreateNewStoreWithoutPayment = isAdmin || (isVipActive && remainingAvailableSlots > 0);
+  const canReplaceExistingStoreForFree = isAdmin || (isVipActive && usedStoresCount > 0);
+  const canEditExistingFree = isAdmin || isVipActive;
+
+  return {
+    isAdmin,
+    isVipActive,
+    includedFreeStores,
+    paidAdditionalStoreSlots,
+    paidAdditionalStores: paidAdditionalStoreSlots,
+    totalAllowedStores,
+    usedStoresCount,
+    remainingAvailableSlots,
+    additionalStoreFeeUsd,
+    ownedStores,
+    verifiedAdditionalStoreTransactions,
+    pendingAdditionalStoreTransaction,
+    pendingAdditionalStorePayments: pendingAdditionalStoreTxns.length,
+    nextStoreSlotNumber: Math.max(totalAllowedStores + 1, usedStoresCount + 1),
+    canCreateNewStoreWithoutPayment,
+    canAddWithoutNewPayment: canCreateNewStoreWithoutPayment,
+    canReplaceExistingStoreForFree,
+    canReplaceExistingFree: canReplaceExistingStoreForFree,
+    canEditExistingFree,
+  };
+};

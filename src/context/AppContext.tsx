@@ -8,7 +8,9 @@ import {
   Wishlist, WishlistItem, TripPlan, AppNotification,
   TrendingFoodItem, AiCheckInSubmission,
   SupportTicket, SupportTicketMessage, SupportTicketStatus, VIP_PLANS,
-  DeletedUserRecord, AbaReceiptVerificationReport
+  DeletedUserRecord, AbaReceiptVerificationReport,
+  getDynamicVipPlans, getDynamicVipBenefits, getAdditionalStoreFeeUsd,
+  getUserStoreQuotaSummary, UserStoreQuotaSummary
 } from '../types';
 import {
   verifyAbaPaymentAndReceipt,
@@ -22,7 +24,8 @@ import {
 import { 
   verifyPaymentOnBackend, calculateVipDates, checkEligibleRestoration,
   VIP_ANNUAL_PRICE_USD, VIP_SUBSCRIPTION_DAYS, VIP_QUARTERLY_PRICE_USD, VIP_QUARTERLY_DAYS,
-  PaymentVerificationRequest, verifyAbaPaymentTransaction, resolveAndValidateVipPlan
+  PaymentVerificationRequest, verifyAbaPaymentTransaction, resolveAndValidateVipPlan,
+  verifyAdditionalStorePaymentOnBackend, recordVerifiedTransaction
 } from '../services/paymentService';
 import { initialTrendingFoods } from '../data/seedTrendingFoods';
 import { findDuplicateRestaurant, mergeRestaurantRecords } from '../utils/duplicateDetector';
@@ -139,7 +142,21 @@ interface AppContextType {
   deleteFood: (id: string) => void;
   
   // Restaurant Actions
-  addRestaurant: (rest: Omit<Restaurant, 'id' | 'rating' | 'reviewCount' | 'status'> & { status?: 'approved' | 'pending' | 'rejected' }) => Restaurant | null;
+  addRestaurant: (
+    rest: Omit<Restaurant, 'id' | 'rating' | 'reviewCount' | 'status'> & { id?: string; status?: 'approved' | 'pending' | 'rejected' },
+    options?: { replaceRestaurantId?: string }
+  ) => Restaurant | null;
+  replaceExistingRestaurant: (
+    targetRestaurantId: string,
+    newRestData: Omit<Restaurant, 'id' | 'rating' | 'reviewCount' | 'status'> & { status?: 'approved' | 'pending' | 'rejected' }
+  ) => Restaurant | null;
+  submitAdditionalStorePaymentRequest: (
+    transactionRef?: string,
+    notes?: string,
+    paymentProofData?: { dataUrl: string; fileName?: string; mimeType?: string },
+    amountUsd?: number
+  ) => Promise<{ success: boolean; transactionId: string; autoVerified?: boolean; error?: string }>;
+  getCurrentUserStoreQuota: (targetUser?: User | null) => UserStoreQuotaSummary;
   updateRestaurant: (rest: Restaurant) => void;
   deleteRestaurant: (id: string) => void;
   approveRestaurant: (id: string) => void;
@@ -2255,9 +2272,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         transactions,
         customRestaurants: customRests,
         paymentProofsVault: localVault,
+        appSettings,
       });
 
       if (result.synced) {
+        if (result.mergedAppSettings) {
+          setAppSettings(prev => {
+            const nextSettings = { ...prev, ...result.mergedAppSettings };
+            try {
+              localStorage.setItem('kft_settings_v4', JSON.stringify(nextSettings));
+            } catch {}
+            return nextSettings;
+          });
+        }
+
         if (Array.isArray(result.mergedDeletedUsers)) {
           setDeletedUsers(result.mergedDeletedUsers);
           try {
@@ -3401,12 +3429,96 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const updateAppSettings = (newSettings: Partial<AppSettings>) => {
-    setAppSettings(prev => ({
-      ...prev,
-      ...newSettings,
-    }));
-    recordSecurityAudit('SETTINGS_UPDATE', 'SUCCESS', 'AppSettings', 'Application configuration updated');
-    showToast(language === 'km' ? 'បានរក្សាទុកការកំណត់កម្មវិធីជោគជ័យ!' : 'App settings updated!', 'success');
+    const isAdminAuthorized =
+      currentUser?.role === 'admin' ||
+      currentUser?.id === 'admin-authorized-single' ||
+      currentUser?.username === 'admin' ||
+      currentUser?.username === 'cheasavuth' ||
+      verifyAdminSession();
+
+    if (!isAdminAuthorized) {
+      recordSecurityAudit(
+        'SETTINGS_UPDATE_BLOCKED',
+        'BLOCKED',
+        'AppSettings',
+        `Unauthorized attempt to modify AppSettings by ${currentUser?.id || 'guest'}`
+      );
+      showToast(
+        language === 'km'
+          ? '⛔ គ្មានសិទ្ធិអនុញ្ញាត៖ មានតែគណនី Administrator ប៉ុណ្ណោះដែលអាចកែប្រែការកំណត់ប្រព័ន្ធបាន!'
+          : '⛔ Unauthorized: Only an authorized Administrator can modify system settings!',
+        'warning'
+      );
+      return;
+    }
+
+    const sanitized: Partial<AppSettings> = { ...newSettings };
+    if (sanitized.vipShortDurationDays !== undefined) {
+      sanitized.vipShortDurationDays = Math.max(1, Math.round(Number(sanitized.vipShortDurationDays) || 10));
+    }
+    if (sanitized.vipShortPriceUsd !== undefined) {
+      sanitized.vipShortPriceUsd = Math.max(0.5, Math.round((Number(sanitized.vipShortPriceUsd) || 2.99) * 100) / 100);
+    }
+    if (sanitized.vipLongDurationDays !== undefined) {
+      sanitized.vipLongDurationDays = Math.max(1, Math.round(Number(sanitized.vipLongDurationDays) || 90));
+    }
+    if (sanitized.vipLongPriceUsd !== undefined) {
+      sanitized.vipLongPriceUsd = Math.max(0.5, Math.round((Number(sanitized.vipLongPriceUsd) || 4.99) * 100) / 100);
+    }
+    if (sanitized.additionalStoreFeeUsd !== undefined) {
+      sanitized.additionalStoreFeeUsd = Math.max(0.5, Math.round((Number(sanitized.additionalStoreFeeUsd) || 10.0) * 100) / 100);
+    }
+    if (sanitized.includedFreeStoresPerVip !== undefined) {
+      sanitized.includedFreeStoresPerVip = Math.max(1, Math.round(Number(sanitized.includedFreeStoresPerVip) || 1));
+    }
+
+    const nowIso = new Date().toISOString();
+    setAppSettings(prev => {
+      const next: AppSettings = {
+        ...prev,
+        ...sanitized,
+        settingsUpdatedAt: nowIso,
+        settingsUpdatedBy: currentUser?.name || 'Admin',
+      };
+      // Automatically keep promotional banner text in sync with updated VIP durations & prices if not explicitly overridden
+      const shortDays = next.vipShortDurationDays || 10;
+      const shortPrice = next.vipShortPriceUsd || 2.99;
+      const longDays = next.vipLongDurationDays || 90;
+      const longPrice = next.vipLongPriceUsd || 4.99;
+      const extraStoreFee = next.additionalStoreFeeUsd || 10.0;
+      if (
+        sanitized.vipShortDurationDays !== undefined ||
+        sanitized.vipShortPriceUsd !== undefined ||
+        sanitized.vipLongDurationDays !== undefined ||
+        sanitized.vipLongPriceUsd !== undefined ||
+        sanitized.additionalStoreFeeUsd !== undefined
+      ) {
+        next.promotionalFeeUsd = shortPrice;
+        next.promotionPeriodKh = `កញ្ចប់ VIP ផ្លូវការ៖ $${shortPrice.toFixed(2)} សម្រាប់ ${shortDays} ថ្ងៃ ឬ $${longPrice.toFixed(2)} សម្រាប់ ${longDays} ថ្ងៃ • បន្ថែមហាងថ្មី៖ $${extraStoreFee.toFixed(2)} / ១ ហាង`;
+        next.promotionPeriodEn = `Official VIP Plans: $${shortPrice.toFixed(2)} for ${shortDays} Days or $${longPrice.toFixed(2)} for ${longDays} Days • Additional Store: $${extraStoreFee.toFixed(2)} / store`;
+      }
+      try {
+        localStorage.setItem('kft_settings_v4', JSON.stringify(next));
+        if (isSupabaseConfigured()) {
+          pushCloudDocument('kft_cloud_app_settings_v1', next);
+        }
+      } catch (e) {
+        console.warn('Failed to persist updated AppSettings:', e);
+      }
+      return next;
+    });
+    recordSecurityAudit(
+      'SETTINGS_UPDATE',
+      'SUCCESS',
+      'AppSettings',
+      `Admin updated centralized app settings at ${nowIso}`
+    );
+    showToast(
+      language === 'km'
+        ? '✅ បានរក្សាទុក និងធ្វើសមកាលកម្មការកំណត់ទូទាំងកម្មវិធីជោគជ័យ!'
+        : '✅ Saved and synchronized settings across the app!',
+      'success'
+    );
   };
 
   const register = (name: string, emailOrPhone: string, role: UserRole, phone?: string, restaurantName?: string): boolean => {
@@ -3841,8 +3953,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     showToast(language === 'km' ? 'បានលុបមុខម្ហូប' : 'Food item deleted', 'info');
   };
 
-  // Restaurant CRUD
-  const addRestaurant = (restData: Omit<Restaurant, 'id' | 'rating' | 'reviewCount' | 'status'> & { id?: string; status?: 'approved' | 'pending' | 'rejected' }): Restaurant | null => {
+  const getCurrentUserStoreQuota = (targetUser: User | null = currentUser): UserStoreQuotaSummary => {
+    return getUserStoreQuotaSummary(targetUser, restaurants, transactions, appSettings);
+  };
+
+  // Restaurant CRUD (Supports Free 1st VIP Store, Free Replace of Existing Store, and Paid $10 Additional Stores)
+  const addRestaurant = (
+    restData: Omit<Restaurant, 'id' | 'rating' | 'reviewCount' | 'status'> & { id?: string; status?: 'approved' | 'pending' | 'rejected' },
+    options?: { replaceRestaurantId?: string }
+  ): Restaurant | null => {
     if (!currentUser) {
       showToast(
         language === 'km'
@@ -3861,13 +3980,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       currentUser.username === 'cheasavuth';
 
     const isApprovedVip = isUserVipActive(currentUser);
+    const dynamicPlans = getDynamicVipPlans(appSettings);
 
     // Strict VIP Permission Enforcement: Only approved VIP or Admin can register restaurants
     if (!isAdmin && !isApprovedVip) {
       const state = getVipAccountState(currentUser);
       let errorMsg = language === 'km' 
-        ? '🔒 សិទ្ធិត្រូវបានបដិសេធ! មានតែសមាជិក VIP ដែលបានអនុម័តប៉ុណ្ណោះដែលអាចចុះបញ្ជីហាងបាន។ សូមដំឡើងទៅកញ្ចប់ VIP ($2.99 / 30 ថ្ងៃ ឬ $4.99 / 90 ថ្ងៃ)!' 
-        : '🔒 Permission denied! Only approved VIP members can register a restaurant. Please upgrade to VIP!';
+        ? `🔒 សិទ្ធិត្រូវបានបដិសេធ! មានតែសមាជិក VIP ដែលបានអនុម័តប៉ុណ្ណោះដែលអាចចុះបញ្ជីហាងបាន។ សូមដំឡើងទៅកញ្ចប់ VIP ($${dynamicPlans.quarterly.priceUsd.toFixed(2)} / ${dynamicPlans.quarterly.durationDays} ថ្ងៃ ឬ $${dynamicPlans.annual.priceUsd.toFixed(2)} / ${dynamicPlans.annual.durationDays} ថ្ងៃ)!` 
+        : `🔒 Permission denied! Only approved VIP members can register a restaurant. Please upgrade to VIP ($${dynamicPlans.quarterly.priceUsd.toFixed(2)} / ${dynamicPlans.quarterly.durationDays} days or $${dynamicPlans.annual.priceUsd.toFixed(2)} / ${dynamicPlans.annual.durationDays} days)!`;
       if (state === 'pending_vip') {
         errorMsg = language === 'km'
           ? '⏳ គណនី VIP របស់អ្នកកំពុងរង់ចាំការពិនិត្យ និងអនុម័តពី Administrator។ សូមរង់ចាំការអនុម័តជាមុនសិន!'
@@ -3881,21 +4001,45 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return null;
     }
 
-    if (!isAdmin) {
-      const existingOwned = restaurants.find(
-        r => !isSeedRestaurantId(r.id) && (r.ownerId === currentUser.id || (currentUser.email && r.ownerEmail && r.ownerEmail.toLowerCase() === currentUser.email.toLowerCase()))
+    const quota = getUserStoreQuotaSummary(currentUser, restaurants, transactions, appSettings);
+    const replaceTargetId = options?.replaceRestaurantId?.trim();
+    const targetToReplace = replaceTargetId
+      ? restaurants.find(r => r.id === replaceTargetId && !isSeedRestaurantId(r.id))
+      : undefined;
+
+    if (replaceTargetId) {
+      const isTargetOwner = Boolean(
+        targetToReplace &&
+          (isAdmin ||
+            targetToReplace.ownerId === currentUser.id ||
+            (currentUser.email &&
+              targetToReplace.ownerEmail &&
+              targetToReplace.ownerEmail.toLowerCase() === currentUser.email.toLowerCase()))
       );
-      if (existingOwned) {
+      if (!targetToReplace || !isTargetOwner) {
         showToast(
           language === 'km'
-            ? '⚠️ គណនីនីមួយៗអាចបន្ថែមហាងបានតែ ១ ប៉ុណ្ណោះ! សូមកែប្រែហាងដែលមានស្រាប់ ឬលុបហាងចាស់ជាមុនសិន។'
-            : '⚠️ Each user can add only ONE restaurant! Please edit or delete your existing restaurant first.',
+            ? '⚠️ រកមិនឃើញហាងចាស់ដែលត្រូវប្តូរ ឬអ្នកគ្មានសិទ្ធិប្តូរហាងនេះទេ!'
+            : '⚠️ Target store to replace was not found or you do not have permission!',
           'warning'
         );
-        setManagingRestaurant(existingOwned);
-        setIsManageMenuModalOpen(true);
-        return existingOwned;
+        return null;
       }
+    } else if (!isAdmin && quota.remainingAvailableSlots <= 0) {
+      // Server/Context enforcement: Additional stores beyond the allowed quota require verified $10 payment
+      recordSecurityAudit(
+        'ADDITIONAL_STORE_UNPAID_BLOCKED',
+        'BLOCKED',
+        'VipCreateStore',
+        `Blocked unpaid additional store creation by ${currentUser.name} (${currentUser.id}). Used: ${quota.usedStoresCount}/${quota.totalAllowedStores}`
+      );
+      showToast(
+        language === 'km'
+          ? `🔒 អ្នកបានប្រើប្រាស់កូតាហាងចំនួន ${quota.usedStoresCount}/${quota.totalAllowedStores} រួចហើយ! អ្នកអាចកែប្រែ ឬប្តូរហាងដែលមានស្រាប់ដោយឥតគិតថ្លៃ ($0) ឬបង់ប្រាក់ $${quota.additionalStoreFeeUsd.toFixed(2)} USD ដើម្បីបន្ថែមហាងថ្មីមួយទៀត។`
+          : `🔒 You have used ${quota.usedStoresCount}/${quota.totalAllowedStores} store slots! You can edit or replace your existing store for free ($0), or pay $${quota.additionalStoreFeeUsd.toFixed(2)} USD to add an additional store.`,
+        'warning'
+      );
+      return null;
     }
 
     const profileImg = restData.profileImage || restData.photoUrl || '/foods/food-1.jpg';
@@ -3966,7 +4110,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const expiryIso =
       currentUser.subscriptionExpiryDate ||
       new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString();
-    const uniqueShopId = (restData as any).id || `rest-vip-${currentUser.id}-${Date.now()}`;
+    const uniqueShopId = targetToReplace
+      ? targetToReplace.id
+      : (restData as any).id || `rest-vip-${currentUser.id}-${Date.now()}`;
+    const slotNumber = targetToReplace
+      ? targetToReplace.storeSlotNumber || 1
+      : quota.usedStoresCount + 1;
+
     const newRest: Restaurant = normalizeRestaurant({
       ...restData,
       photoUrl: profileImg,
@@ -3990,8 +4140,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       paymentStatus: 'verified',
       menuItems: (restData.menuItems || []).slice(0, 20),
       aiCategoryVerification: aiVerification,
-      created_at: restData.created_at || restData.createdAt || nowIso,
-      createdAt: restData.created_at || restData.createdAt || nowIso,
+      storeSlotNumber: slotNumber,
+      replacedFromRestaurantId: targetToReplace ? targetToReplace.id : undefined,
+      replacedAt: targetToReplace ? nowIso : undefined,
+      created_at: targetToReplace?.created_at || targetToReplace?.createdAt || restData.created_at || restData.createdAt || nowIso,
+      createdAt: targetToReplace?.created_at || targetToReplace?.createdAt || restData.created_at || restData.createdAt || nowIso,
       updatedAt: nowIso,
     });
 
@@ -4016,20 +4169,41 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return nextList;
     });
 
+    if (selectedRestaurant?.id === newRest.id) {
+      setSelectedRestaurant(newRest);
+    }
+
     if (isPendingManualReview) {
       showToast(
         language === 'km'
-          ? '⏳ សំណើបង្កើតហាងរបស់អ្នកត្រូវបានបញ្ជូនទៅកាន់ Admin ដើម្បីត្រួតពិនិត្យប្រភេទអាជីវកម្មម្ហូបអាហារជាមុនសិន!'
+          ? '⏳ សំណើបង្កើត/ប្តូរហាងរបស់អ្នកត្រូវបានបញ្ជូនទៅកាន់ Admin ដើម្បីត្រួតពិនិត្យប្រភេទអាជីវកម្មម្ហូបអាហារជាមុនសិន!'
           : '⏳ Your store submission has been sent to Admin for manual food-category verification!',
         'info'
       );
+    } else if (targetToReplace) {
+      showToast(
+        language === 'km'
+          ? `🔄 បានប្តូរហាងចាស់ដាក់ហាងថ្មី "${newRest.nameKh}" ជោគជ័យ (ដោយឥតគិតថ្លៃបន្ថែម $0)!`
+          : `🔄 Replaced existing store with "${newRest.nameEn || newRest.nameKh}" for free ($0)!`,
+        'success'
+      );
     } else {
       showToast(
-        language === 'km' ? '🎉 ចុះបញ្ជីហាងអាហារ VIP របស់អ្នកបានជោគជ័យ!' : '🎉 Registered your VIP Restaurant successfully!',
+        language === 'km'
+          ? `🎉 ចុះបញ្ជីហាងអាហារ VIP ទី ${slotNumber} របស់អ្នកបានជោគជ័យ!`
+          : `🎉 Registered your VIP Store #${slotNumber} successfully!`,
         'success'
       );
     }
     return newRest;
+  };
+
+  // Explicit helper to replace an existing store without paying the additional-store fee again
+  const replaceExistingRestaurant = (
+    targetRestaurantId: string,
+    newRestData: Omit<Restaurant, 'id' | 'rating' | 'reviewCount' | 'status'> & { status?: 'approved' | 'pending' | 'rejected' }
+  ): Restaurant | null => {
+    return addRestaurant(newRestData, { replaceRestaurantId: targetRestaurantId });
   };
 
   // Resolve all restaurants owned by a user, sorted newest/most-recently-updated first so the active shop is always prioritized
@@ -5286,21 +5460,127 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     const targetRestId = matchedTxn.restaurantId || '';
-    const targetUserId = matchedTxn.userId || '';
-    const validatedPlan = resolveAndValidateVipPlan({
-      planType: matchedTxn.planType,
-      durationDays: matchedTxn.durationDays,
-      amountUsd: matchedTxn.amountUsd,
-    });
-    const durationDays = validatedPlan.durationDays;
+    const targetUserId = matchedTxn.userId || matchedTxn.ownerId || '';
     const now = new Date();
     const verifiedTimestamp = now.toISOString().replace('T', ' ').slice(0, 16);
     const adminIdentity = currentUser.name || 'Chea Savuth (Admin)';
 
+    // Case 1: Approving an Additional Store Slot ($10 per additional store)
+    if (matchedTxn.type === 'additional_store_slot') {
+      if (matchedTxn.transactionRef) {
+        recordVerifiedTransaction(matchedTxn.transactionRef);
+      }
+
+      setTransactions(prev => prev.map(t => {
+        if (t.id !== txnId) return t;
+        return {
+          ...t,
+          status: 'verified',
+          verifiedAt: verifiedTimestamp,
+          verifiedBy: adminIdentity,
+        };
+      }));
+
+      try {
+        const rawLogs = localStorage.getItem('kft_admin_audit_logs_v1');
+        const logs = rawLogs ? JSON.parse(rawLogs) : [];
+        logs.unshift({
+          id: `audit_${Date.now()}`,
+          action: 'APPROVE_ADDITIONAL_STORE_PAYMENT',
+          txnId,
+          transactionRef: matchedTxn.transactionRef,
+          targetUserId,
+          amountUsd: matchedTxn.amountUsd,
+          storeSlotNumber: matchedTxn.storeSlotNumber,
+          adminId: currentUser.id,
+          adminName: adminIdentity,
+          timestamp: now.toISOString(),
+        });
+        localStorage.setItem('kft_admin_audit_logs_v1', JSON.stringify(logs.slice(0, 200)));
+      } catch {}
+
+      if (targetUserId) {
+        setUsers(prev => {
+          const nextUsers = prev.map(u => {
+            if (u.id !== targetUserId) return u;
+            const existingIds = Array.isArray(u.additionalStorePaymentIds) ? u.additionalStorePaymentIds : [];
+            const nextIds = Array.from(new Set([...existingIds, txnId]));
+            const nextSlots = Math.max((u.paidAdditionalStoreSlots || 0) + 1, nextIds.length);
+            return {
+              ...u,
+              paidAdditionalStoreSlots: nextSlots,
+              additionalStorePaymentIds: nextIds,
+            };
+          });
+          try {
+            localStorage.setItem('kft_users_v5', JSON.stringify(nextUsers));
+            if (isSupabaseConfigured()) {
+              pushCloudDocument('kft_cloud_users_v1', nextUsers);
+            }
+          } catch {}
+          return nextUsers;
+        });
+
+        if (currentUser?.id === targetUserId) {
+          setCurrentUser(prev => {
+            if (!prev) return null;
+            const existingIds = Array.isArray(prev.additionalStorePaymentIds) ? prev.additionalStorePaymentIds : [];
+            const nextIds = Array.from(new Set([...existingIds, txnId]));
+            const nextSlots = Math.max((prev.paidAdditionalStoreSlots || 0) + 1, nextIds.length);
+            return {
+              ...prev,
+              paidAdditionalStoreSlots: nextSlots,
+              additionalStorePaymentIds: nextIds,
+            };
+          });
+        }
+
+        const slotApprovalNotif: AppNotification = {
+          id: `notif-store-slot-approved-${Date.now()}`,
+          titleKh: '🏪 ការទូទាត់បន្ថែមហាងថ្មីត្រូវបានអនុម័ត!',
+          titleEn: '🏪 Additional Store Slot Payment Approved!',
+          messageKh: `រដ្ឋបាលបានពិនិត្យ និងអនុម័តការទូទាត់ $${matchedTxn.amountUsd.toFixed(2)} USD សម្រាប់បន្ថែមហាងថ្មីរបស់អ្នកដោយជោគជ័យ! ឥឡូវនេះអ្នកអាចបង្កើតហាងថ្មីបន្ថែមបានភ្លាមៗ។`,
+          messageEn: `Administrator approved your $${matchedTxn.amountUsd.toFixed(2)} USD payment for an additional store slot! You can now create your new store immediately.`,
+          type: 'system',
+          date: now.toISOString().split('T')[0],
+          isRead: false,
+        };
+        setNotifications(prev => [slotApprovalNotif, ...prev]);
+      }
+
+      showToast(
+        language === 'km'
+          ? `✅ បានផ្ទៀងផ្ទាត់ និងបើកសិទ្ធិបន្ថែមហាងថ្មី (+1 ហាង) ជូនអតិថិជនដោយជោគជ័យ!`
+          : `✅ Verified payment and unlocked +1 additional store slot for user!`,
+        'success'
+      );
+      return;
+    }
+
+    // Case 2: Standard VIP Membership Upgrade / Registration
+    const validatedPlan = resolveAndValidateVipPlan(
+      {
+        planType: matchedTxn.planType,
+        durationDays: matchedTxn.durationDays,
+        amountUsd: matchedTxn.amountUsd,
+      },
+      appSettings
+    );
+    // Preserve exact durationDays and amountUsd recorded at purchase time if present so historical purchases aren't unexpectedly altered
+    const durationDays =
+      typeof matchedTxn.durationDays === 'number' && matchedTxn.durationDays >= 1
+        ? matchedTxn.durationDays
+        : validatedPlan.durationDays;
+    const finalAmountUsd =
+      typeof matchedTxn.amountUsd === 'number' && matchedTxn.amountUsd > 0
+        ? matchedTxn.amountUsd
+        : validatedPlan.priceUsd;
+
     const matchedUserObj = users.find(u => u.id === targetUserId);
     const { startDate: calcStart, expiryDate: calcExpiry } = calculateVipDates(
       matchedUserObj?.subscriptionExpiryDate,
-      durationDays
+      durationDays,
+      appSettings
     );
 
     setTransactions(prev => prev.map(t => {
@@ -5308,7 +5588,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return {
         ...t,
         durationDays,
-        amountUsd: validatedPlan.priceUsd,
+        amountUsd: finalAmountUsd,
         planType: validatedPlan.id,
         status: 'verified',
         paymentStatus: 'verified',
@@ -6035,7 +6315,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return { success: false, transactionId: '', error: 'User authentication required' };
     }
 
-    const validatedPlan = resolveAndValidateVipPlan({ durationDays, amountUsd });
+    const validatedPlan = resolveAndValidateVipPlan({ durationDays, amountUsd }, appSettings);
     const validDays = validatedPlan.durationDays;
     const validPrice = validatedPlan.priceUsd;
     const planType: 'quarterly' | 'annual' = validatedPlan.id;
@@ -6073,16 +6353,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       `ABA-KHQR-${validDays}D-${Date.now().toString(36).toUpperCase()}`;
 
     // Validate request parameters on backend before creating pending approval request
-    const verification = await verifyAbaPaymentTransaction({
-      userId: currentUser.id,
-      userName: currentUser.name,
-      userEmail: currentUser.email,
-      durationDays: validDays,
-      amountUsd: validPrice,
-      transactionRef: cleanTrxRef,
-      paymentMethod: 'KHQR',
-      timestamp: Date.now()
-    });
+    const verification = await verifyAbaPaymentTransaction(
+      {
+        userId: currentUser.id,
+        userName: currentUser.name,
+        userEmail: currentUser.email,
+        durationDays: validDays,
+        amountUsd: validPrice,
+        transactionRef: cleanTrxRef,
+        paymentMethod: 'KHQR',
+        timestamp: Date.now()
+      },
+      appSettings
+    );
 
     if (!verification.success) {
       const errMsg = verification.error || 'Payment request validation failed';
@@ -6324,6 +6607,234 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
 
     return { success: true, transactionId: txnId };
+  };
+
+  // ============================================================================
+  // Submit Additional Store Slot Payment ($10 per additional store beyond the 1st)
+  // ============================================================================
+  const submitAdditionalStorePaymentRequest = async (
+    transactionRef?: string,
+    notes?: string,
+    paymentProofData?: { dataUrl: string; fileName?: string; mimeType?: string },
+    submittedAmountUsd?: number
+  ): Promise<{ success: boolean; transactionId: string; autoVerified?: boolean; error?: string }> => {
+    if (!currentUser) {
+      setIsAuthModalOpen(true);
+      return { success: false, transactionId: '', error: 'User authentication required' };
+    }
+
+    const isAdmin =
+      currentUser.role === 'admin' ||
+      currentUser.id === 'admin-authorized-single' ||
+      currentUser.username === 'admin' ||
+      currentUser.username === 'cheasavuth';
+    if (!isAdmin && !isUserVipActive(currentUser)) {
+      const msg =
+        language === 'km'
+          ? '🔒 មានតែគណនី VIP សកម្មប៉ុណ្ណោះដែលអាចបន្ថែមហាងថ្មីបាន។ សូមដំឡើង ឬបន្តសមាជិកភាព VIP ជាមុនសិន!'
+          : '🔒 Only active VIP accounts can purchase additional store slots. Please upgrade or renew VIP first!';
+      showToast(msg, 'warning');
+      return { success: false, transactionId: '', error: msg };
+    }
+
+    const quota = getUserStoreQuotaSummary(currentUser, restaurants, transactions, appSettings);
+    const requiredFee = quota.additionalStoreFeeUsd; // Default $10.00 (or Admin-configured fee)
+    const effectiveAmount =
+      typeof submittedAmountUsd === 'number' ? submittedAmountUsd : requiredFee;
+    const nextSlotNumber = quota.totalAllowedStores + 1;
+
+    // Prevent duplicate pending charges for additional store slots
+    if (quota.pendingAdditionalStoreTransaction) {
+      if (paymentProofData?.dataUrl) {
+        uploadPaymentProofToTransaction(
+          quota.pendingAdditionalStoreTransaction.id,
+          paymentProofData.dataUrl,
+          paymentProofData.fileName || 'aba_store_slot_receipt.png',
+          paymentProofData.mimeType || 'image/png'
+        );
+        return {
+          success: true,
+          transactionId: quota.pendingAdditionalStoreTransaction.id,
+          autoVerified: false,
+        };
+      }
+      const pendingMsg =
+        language === 'km'
+          ? `⏳ អ្នកមានសំណើទូទាត់បន្ថែមហាង ($${requiredFee.toFixed(2)}) កំពុងរង់ចាំ Admin ពិនិត្យរួចហើយ (${quota.pendingAdditionalStoreTransaction.id})។ ប្រព័ន្ធការពារមិនឱ្យគិតប្រាក់ស្ទួនឡើយ!`
+          : `⏳ You already have a pending additional-store payment request (${quota.pendingAdditionalStoreTransaction.id}). Duplicate charges are prevented!`;
+      showToast(pendingMsg, 'info');
+      return {
+        success: true,
+        transactionId: quota.pendingAdditionalStoreTransaction.id,
+        autoVerified: false,
+      };
+    }
+
+    const cleanTrxRef =
+      (transactionRef || '').trim().toUpperCase() ||
+      `ABA-STORE-SLOT${nextSlotNumber}-${Date.now().toString(36).toUpperCase()}`;
+
+    // Server-side validation of fee amount and anti-replay transaction ref
+    const backendCheck = await verifyAdditionalStorePaymentOnBackend(
+      {
+        userId: currentUser.id,
+        userName: currentUser.name,
+        userEmail: currentUser.email,
+        amountUsd: effectiveAmount,
+        transactionRef: cleanTrxRef,
+        paymentMethod: 'KHQR',
+        storeSlotNumber: nextSlotNumber,
+        timestamp: Date.now(),
+      },
+      appSettings,
+      false // Only record in ledger after receipt/manual verification succeeds
+    );
+
+    if (!backendCheck.success) {
+      const errMsg = backendCheck.error || 'Additional store payment verification failed.';
+      showToast(
+        language === 'km'
+          ? `ការផ្ទៀងផ្ទាត់ការបង់ប្រាក់បន្ថែមហាងបរាជ័យ៖ ${errMsg}`
+          : `Additional store payment invalid: ${errMsg}`,
+        'warning'
+      );
+      return { success: false, transactionId: '', error: errMsg };
+    }
+
+    const now = new Date();
+    const nowIso = now.toISOString();
+    const formattedNow = nowIso.replace('T', ' ').slice(0, 16);
+    const txnId = `TXN-STORE-${Date.now().toString(36).toUpperCase()}-${Math.floor(100 + Math.random() * 900)}`;
+
+    if (paymentProofData?.dataUrl) {
+      try {
+        const rawVault = localStorage.getItem('kft_secure_payment_proofs_vault_v1');
+        const vault = rawVault ? JSON.parse(rawVault) : {};
+        vault[txnId] = {
+          txnId,
+          userId: currentUser.id,
+          dataUrl: paymentProofData.dataUrl,
+          fileName: paymentProofData.fileName || 'aba_store_slot_receipt.png',
+          mimeType: paymentProofData.mimeType || 'image/png',
+          uploadedAt: nowIso,
+        };
+        localStorage.setItem('kft_secure_payment_proofs_vault_v1', JSON.stringify(vault));
+      } catch {}
+    }
+
+    let aiReport: AbaReceiptVerificationReport | undefined;
+    if (paymentProofData?.dataUrl) {
+      aiReport = await verifyAbaPaymentAndReceipt({
+        receiptDataUrl: paymentProofData.dataUrl,
+        expectedAmountUsd: requiredFee,
+        expectedDurationDays: 90,
+        submittedTrxId: cleanTrxRef,
+        submittedDate: nowIso.split('T')[0],
+        userId: currentUser.id,
+        existingTransactions: transactions,
+      });
+    }
+
+    const effectiveTrxRef =
+      aiReport?.extractedReceipt?.trxId && /^ABA-STORE-/i.test(cleanTrxRef)
+        ? aiReport.extractedReceipt.trxId
+        : cleanTrxRef;
+
+    const isAutoVerified = Boolean(
+      aiReport && aiReport.canAutoApprove && aiReport.status === 'verified'
+    );
+
+    if (isAutoVerified) {
+      recordVerifiedTransaction(effectiveTrxRef);
+      if (paymentProofData?.dataUrl) {
+        recordVerifiedReceiptFingerprint(
+          computeReceiptImageFingerprint(paymentProofData.dataUrl),
+          currentUser.id,
+          effectiveTrxRef
+        );
+      }
+    }
+
+    const newTxn: RegistrationTransaction = {
+      id: txnId,
+      type: 'additional_store_slot',
+      planType: 'additional_store',
+      storeSlotNumber: nextSlotNumber,
+      restaurantNameKh: `🏪 បន្ថែមហាងថ្មីទី ${nextSlotNumber} (+1 Store Slot)`,
+      restaurantNameEn: `Additional Store Slot #${nextSlotNumber}`,
+      userId: currentUser.id,
+      userName: currentUser.name,
+      userEmail: currentUser.email,
+      ownerId: currentUser.id,
+      ownerName: currentUser.name,
+      ownerPhone: currentUser.phone,
+      amountUsd: requiredFee,
+      currency: 'USD',
+      status: isAutoVerified ? 'verified' : 'pending_verification',
+      paymentMethod: 'KHQR',
+      transactionRef: effectiveTrxRef,
+      verificationSignature: backendCheck.verificationSignature,
+      paymentProofUrl: paymentProofData?.dataUrl,
+      paymentProofUploadedAt: paymentProofData?.dataUrl ? formattedNow : undefined,
+      paymentProofFileName: paymentProofData?.fileName,
+      paymentProofMimeType: paymentProofData?.mimeType,
+      createdAt: formattedNow,
+      verifiedAt: isAutoVerified ? formattedNow : undefined,
+      verifiedBy: isAutoVerified
+        ? 'AI & Server Transaction Verifier (Kim Seng Verified)'
+        : undefined,
+      notes:
+        notes ||
+        `Additional Store Slot #${nextSlotNumber} ($${requiredFee.toFixed(2)} USD) — ${
+          isAutoVerified ? 'Verified & Unlocked' : 'Awaiting Admin Verification'
+        }`,
+      aiVerificationReport: aiReport,
+    };
+
+    setTransactions(prev => [newTxn, ...prev]);
+
+    if (isAutoVerified) {
+      const existingIds = Array.isArray(currentUser.additionalStorePaymentIds)
+        ? currentUser.additionalStorePaymentIds
+        : [];
+      const nextIds = Array.from(new Set([...existingIds, txnId]));
+      const nextPaidSlots = Math.max(quota.paidAdditionalStoreSlots + 1, nextIds.length);
+      const updatedUser: User = {
+        ...currentUser,
+        paidAdditionalStoreSlots: nextPaidSlots,
+        additionalStorePaymentIds: nextIds,
+      };
+      setCurrentUser(updatedUser);
+      setUsers(prev => prev.map(u => (u.id === currentUser.id ? updatedUser : u)));
+
+      showToast(
+        language === 'km'
+          ? `🎉 ផ្ទៀងផ្ទាត់ការបង់ប្រាក់បន្ថែមហាង ($${requiredFee.toFixed(2)} USD) ជោគជ័យ! ឥឡូវនេះអ្នកអាចបង្កើតហាងទី ${nextSlotNumber} បានភ្លាមៗ!`
+          : `🎉 Verified $${requiredFee.toFixed(2)} USD additional-store payment! You can now create Store #${nextSlotNumber} immediately!`,
+        'success'
+      );
+      return { success: true, transactionId: txnId, autoVerified: true };
+    }
+
+    const adminNotif: AppNotification = {
+      id: `notif-admin-store-slot-${Date.now()}`,
+      titleKh: `🏪 សំណើពិនិត្យការទូទាត់បន្ថែមហាងថ្មីទី ${nextSlotNumber} ($${requiredFee.toFixed(2)})`,
+      titleEn: `🏪 New Additional Store #${nextSlotNumber} Payment Request ($${requiredFee.toFixed(2)})`,
+      messageKh: `សមាជិក VIP ${currentUser.name} បានបញ្ជូនសំណើទូទាត់ $${requiredFee.toFixed(2)} USD សម្រាប់បើកហាងទី ${nextSlotNumber} (Ref: ${effectiveTrxRef})។ សូមពិនិត្យក្នុងផ្ទាំង Admin -> ការទូទាត់។`,
+      messageEn: `VIP member ${currentUser.name} submitted a $${requiredFee.toFixed(2)} USD payment for Store Slot #${nextSlotNumber} (Ref: ${effectiveTrxRef}). Please review in Admin -> Transactions.`,
+      type: 'system',
+      date: nowIso.split('T')[0],
+      isRead: false,
+    };
+    setNotifications(prev => [adminNotif, ...prev]);
+
+    showToast(
+      language === 'km'
+        ? `⏳ បានបញ្ជូនភស្តុតាងបង់ប្រាក់បន្ថែមហាង ($${requiredFee.toFixed(2)}) រួចរាល់! កំពុងរង់ចាំ Admin ពិនិត្យ និងអនុម័ត។`
+        : `⏳ Additional store payment ($${requiredFee.toFixed(2)}) submitted! Awaiting Admin verification.`,
+      'info'
+    );
+    return { success: true, transactionId: txnId, autoVerified: false };
   };
 
   // ============================================================================
@@ -7532,6 +8043,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         updateFood,
         deleteFood,
         addRestaurant,
+        replaceExistingRestaurant,
+        submitAdditionalStorePaymentRequest,
+        getCurrentUserStoreQuota,
         updateRestaurant,
         deleteRestaurant,
         approveRestaurant,

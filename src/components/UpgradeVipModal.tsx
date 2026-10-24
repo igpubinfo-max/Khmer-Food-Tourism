@@ -8,15 +8,10 @@ import {
   CheckCircle, XCircle, Upload, Image as ImageIcon, Camera, Trash2, MessageSquareWarning
 } from 'lucide-react';
 import { 
-  TEN_VIP_BENEFITS, isUserVipActive, getVipRemainingDays,
-  APP_VERSION, APP_BUILD_CODE
+  isUserVipActive, getVipRemainingDays,
+  APP_VERSION, APP_BUILD_CODE,
+  getDynamicVipPlans, getDynamicVipBenefits, getAdditionalStoreFeeUsd
 } from '../types';
-import { 
-  VIP_ANNUAL_PRICE_USD, 
-  VIP_SUBSCRIPTION_DAYS,
-  VIP_QUARTERLY_PRICE_USD,
-  VIP_QUARTERLY_DAYS 
-} from '../services/paymentService';
 import {
   savePngDataUrlToGallery,
   pickImageUsingNativeAndroidGallery,
@@ -32,27 +27,6 @@ interface VipPlanOption {
   priceKhrApprox: string;
   isPopular?: boolean;
 }
-
-const VIP_PLANS: VipPlanOption[] = [
-  {
-    id: 'quarterly',
-    titleKh: 'VIP 30 ថ្ងៃ ($2.99 / 30 ថ្ងៃ)',
-    titleEn: 'VIP 30 Days ($2.99 / 30 days)',
-    days: VIP_QUARTERLY_DAYS, // 30
-    priceUsd: VIP_QUARTERLY_PRICE_USD, // 2.99
-    priceKhrApprox: '១២,២០០ រៀល',
-    isPopular: true
-  },
-  {
-    id: 'annual',
-    titleKh: 'VIP 90 ថ្ងៃ ($4.99 / 90 ថ្ងៃ)',
-    titleEn: 'VIP 90 Days ($4.99 / 90 days)',
-    days: VIP_SUBSCRIPTION_DAYS, // 90
-    priceUsd: VIP_ANNUAL_PRICE_USD, // 4.99
-    priceKhrApprox: '២០,៤០០ រៀល',
-    isPopular: false
-  }
-];
 
 // Strict Payment Status Flow (Requirement 6 + Admin Request More Info)
 export type PaymentStatusFlow = 
@@ -73,6 +47,7 @@ export const UpgradeVipModal: React.FC = () => {
     openSupportTicketModal,
     currentUser, 
     transactions,
+    appSettings,
     language,
     showToast,
     setIsAuthModalOpen,
@@ -85,8 +60,41 @@ export const UpgradeVipModal: React.FC = () => {
   const isVip = isUserVipActive(currentUser);
   const remainingDays = getVipRemainingDays(currentUser);
 
-  // Default plan: VIP 30 Days ($2.99 USD)
-  const [selectedPlan, setSelectedPlan] = useState<VipPlanOption>(VIP_PLANS[0]);
+  // Dynamically derive VIP plans, benefits, and additional store fee from Admin settings
+  const dynamicPlansList = useMemo<VipPlanOption[]>(() => {
+    const plans = getDynamicVipPlans(appSettings);
+    const shortPlan = plans.quarterly;
+    const longPlan = plans.annual;
+    return [
+      {
+        id: 'quarterly',
+        titleKh: `${shortPlan.nameKh} ($${shortPlan.priceUsd.toFixed(2)} / ${shortPlan.durationDays} ថ្ងៃ)`,
+        titleEn: `${shortPlan.nameEn} ($${shortPlan.priceUsd.toFixed(2)} / ${shortPlan.durationDays} days)`,
+        days: shortPlan.durationDays,
+        priceUsd: shortPlan.priceUsd,
+        priceKhrApprox: shortPlan.priceKhrDisplay || '១២,២០០ រៀល',
+        isPopular: true,
+      },
+      {
+        id: 'annual',
+        titleKh: `${longPlan.nameKh} ($${longPlan.priceUsd.toFixed(2)} / ${longPlan.durationDays} ថ្ងៃ)`,
+        titleEn: `${longPlan.nameEn} ($${longPlan.priceUsd.toFixed(2)} / ${longPlan.durationDays} days)`,
+        days: longPlan.durationDays,
+        priceUsd: longPlan.priceUsd,
+        priceKhrApprox: longPlan.priceKhrDisplay || '២០,៤០០ រៀល',
+        isPopular: false,
+      },
+    ];
+  }, [appSettings]);
+
+  const dynamicBenefits = useMemo(() => getDynamicVipBenefits(appSettings), [appSettings]);
+  const additionalStoreFeeUsd = useMemo(() => getAdditionalStoreFeeUsd(appSettings), [appSettings]);
+
+  const [selectedPlanId, setSelectedPlanId] = useState<'quarterly' | 'annual'>('quarterly');
+  const selectedPlan = useMemo(
+    () => dynamicPlansList.find(p => p.id === selectedPlanId) || dynamicPlansList[0],
+    [dynamicPlansList, selectedPlanId]
+  );
   
   // Payment Lifecycle State
   const [paymentState, setPaymentState] = useState<PaymentStatusFlow>('AWAITING_PAYMENT');
@@ -96,9 +104,9 @@ export const UpgradeVipModal: React.FC = () => {
   const [submittedTxnId, setSubmittedTxnId] = useState('');
   const [submissionTimestamp, setSubmissionTimestamp] = useState('');
   const [hasCopiedAccount, setHasCopiedAccount] = useState(false);
-  const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>('/images/aba_qr_code_only.png');
+  const [qrCodeDataUrl] = useState<string>('/images/aba_qr_code_only.png');
   const [customTxnRef, setCustomTxnRef] = useState<string>(() => 
-    `ABA-KHQR-30D-${Date.now().toString(36).toUpperCase()}`
+    `ABA-KHQR-10D-${Date.now().toString(36).toUpperCase()}`
   );
   const [sessionExpiryTime, setSessionExpiryTime] = useState<number>(() => Date.now() + 15 * 60 * 1000);
 
@@ -212,7 +220,7 @@ export const UpgradeVipModal: React.FC = () => {
   };
 
   const handleSelectPlan = (plan: VipPlanOption) => {
-    setSelectedPlan(plan);
+    setSelectedPlanId(plan.id);
     setCustomTxnRef(`ABA-KHQR-${plan.days}D-${Date.now().toString(36).toUpperCase()}`);
     setSessionExpiryTime(Date.now() + 15 * 60 * 1000);
     try {
@@ -611,8 +619,8 @@ export const UpgradeVipModal: React.FC = () => {
                   <RefreshCw className="w-4 h-4" />
                   <span>
                     {isKm
-                      ? '🔄 បន្តសុពលភាព VIP បន្ថែម ($2.99 / 30 ថ្ងៃ ឬ $4.99 / 90 ថ្ងៃ)'
-                      : '🔄 Renew / Extend VIP ($2.99 / 30 Days or $4.99 / 90 Days)'}
+                      ? `🔄 បន្តសុពលភាព VIP បន្ថែម ($${dynamicPlansList[0].priceUsd.toFixed(2)} / ${dynamicPlansList[0].days} ថ្ងៃ ឬ $${dynamicPlansList[1].priceUsd.toFixed(2)} / ${dynamicPlansList[1].days} ថ្ងៃ)`
+                      : `🔄 Renew / Extend VIP ($${dynamicPlansList[0].priceUsd.toFixed(2)} / ${dynamicPlansList[0].days} Days or $${dynamicPlansList[1].priceUsd.toFixed(2)} / ${dynamicPlansList[1].days} Days)`}
                   </span>
                 </button>
 
@@ -998,7 +1006,7 @@ export const UpgradeVipModal: React.FC = () => {
                 </span>
               </div>
 
-              {/* VIP Subscription Plan Selector (30 Days $2.99 or 90 Days $4.99) */}
+              {/* VIP Subscription Plan Selector (Synchronized with Admin Settings) */}
               <div className="space-y-2">
                 <label className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
                   <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
@@ -1006,7 +1014,7 @@ export const UpgradeVipModal: React.FC = () => {
                 </label>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                  {VIP_PLANS.map((plan) => {
+                  {dynamicPlansList.map((plan) => {
                     const isSelected = selectedPlan.id === plan.id;
                     return (
                       <div
@@ -1051,14 +1059,28 @@ export const UpgradeVipModal: React.FC = () => {
                     );
                   })}
                 </div>
+
+                {/* Store Quota & Additional Store Fee Policy Note */}
+                <div className="p-2.5 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/50 text-[11px] text-emerald-900 dark:text-emerald-200 flex items-start gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                  <span>
+                    {isKm
+                      ? `រួមបញ្ចូលការបង្កើតហាងទី ១ ឥតគិតថ្លៃ ($0) • កែប្រែ ឬប្តូរហាងចាស់ដាក់ហាងថ្មីមិនគិតថ្លៃ ($0) • បន្ថែមហាងបន្ទាប់ +$${additionalStoreFeeUsd.toFixed(2)} USD / ១ ហាង។`
+                      : `Includes 1st Store Free ($0) • Edit or Replace existing store Free ($0) • Add extra stores +$${additionalStoreFeeUsd.toFixed(2)} USD / store.`}
+                  </span>
+                </div>
               </div>
 
-              {/* 10 VIP Benefits Accordion / Preview */}
+              {/* Dynamic VIP Benefits Accordion / Preview */}
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
                   <h4 className="font-bold text-xs text-slate-900 dark:text-white flex items-center gap-1.5">
                     <Sparkles className="w-4 h-4 text-amber-500" />
-                    <span>{isKm ? 'អត្ថប្រយោជន៍ពិសេសទាំង ១០ យ៉ាងនៃ VIP៖' : '10 Exclusive VIP Benefits:'}</span>
+                    <span>
+                      {isKm
+                        ? `អត្ថប្រយោជន៍ពិសេសទាំង ${dynamicBenefits.length} យ៉ាងនៃ VIP៖`
+                        : `${dynamicBenefits.length} Exclusive VIP Benefits:`}
+                    </span>
                   </h4>
                   <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">
                     {isKm ? 'បើកក្រោយ Admin អនុម័ត' : 'Unlocks after Approval'}
@@ -1066,18 +1088,23 @@ export const UpgradeVipModal: React.FC = () => {
                 </div>
 
                 <div className="grid grid-cols-1 gap-1.5 max-h-32 overflow-y-auto pr-1">
-                  {TEN_VIP_BENEFITS.map((benefit) => (
+                  {dynamicBenefits.map((benefit, idx) => (
                     <div 
-                      key={benefit.id}
+                      key={benefit.id || idx}
                       className="p-2 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 flex items-start gap-2 text-[11px]"
                     >
                       <div className="w-4 h-4 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 flex items-center justify-center font-bold text-[9px] shrink-0 mt-0.5">
-                        {benefit.id}
+                        {idx + 1}
                       </div>
                       <div className="flex-1">
-                        <span className="font-bold text-slate-800 dark:text-slate-200">
+                        <span className="font-bold text-slate-800 dark:text-slate-200 block">
                           {isKm ? benefit.titleKh : benefit.titleEn}
                         </span>
+                        {(benefit.descKh || benefit.descEn) && (
+                          <span className="text-[10px] text-slate-500 dark:text-slate-400 block mt-0.5">
+                            {isKm ? benefit.descKh : benefit.descEn}
+                          </span>
+                        )}
                       </div>
                       <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" />
                     </div>

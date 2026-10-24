@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import {
   X,
@@ -19,12 +19,16 @@ import {
   ShieldCheck,
   ShieldAlert,
   Bot,
+  PlusCircle,
+  QrCode,
+  ArrowLeft,
 } from 'lucide-react';
 import {
   RestaurantPriceLevel,
   isUserVipActive,
   getVipAccountState,
   AiStoreCategoryVerificationReport,
+  getDynamicVipPlans,
 } from '../types';
 import {
   pickImageUsingNativeAndroidGallery,
@@ -42,6 +46,9 @@ export const VipAddRestaurantModal: React.FC = () => {
     isVipAddRestaurantModalOpen,
     setIsVipAddRestaurantModalOpen,
     addRestaurant,
+    replaceExistingRestaurant,
+    submitAdditionalStorePaymentRequest,
+    getCurrentUserStoreQuota,
     deleteRestaurant,
     currentUser,
     language,
@@ -53,6 +60,7 @@ export const VipAddRestaurantModal: React.FC = () => {
     restaurants,
     openUpgradeVipModal,
     setIsAuthModalOpen,
+    appSettings,
   } = useApp();
 
   const isKm = language === 'km';
@@ -65,11 +73,28 @@ export const VipAddRestaurantModal: React.FC = () => {
   const vipState = getVipAccountState(currentUser);
   const isAuthorized = isAdmin || isApprovedVip;
 
+  const dynamicPlans = getDynamicVipPlans(appSettings);
+  const quota = getCurrentUserStoreQuota(currentUser);
   const ownedRestaurants = getOwnedRestaurantsForUser(currentUser);
-  const existingOwnedRestaurant =
-    currentUser && !isAdmin
-      ? ownedRestaurants[0]
-      : undefined;
+
+  // Store Mode State:
+  // - 'hub': Shows existing stores + options to Edit ($0), Replace ($0), or Add Additional Store ($10)
+  // - 'create_form': Shows the store creation/replacement form (when user has available slot or is in Replace mode)
+  // - 'pay_additional_slot': Shows the $10 Additional Store Payment Checkout
+  const [viewMode, setViewMode] = useState<'auto' | 'hub' | 'create_form' | 'pay_additional_slot'>('auto');
+  const [replacingStoreId, setReplacingStoreId] = useState<string | null>(null);
+  const [confirmReplaceStoreId, setConfirmReplaceStoreId] = useState<string | null>(null);
+  const [confirmDeleteStoreId, setConfirmDeleteStoreId] = useState<string | null>(null);
+
+  // Additional Store Payment Checkout State ($10 per additional store)
+  const [slotTrxRef, setSlotTrxRef] = useState('');
+  const [slotProofData, setSlotProofData] = useState<{
+    dataUrl: string;
+    fileName?: string;
+    mimeType?: string;
+  } | null>(null);
+  const [isSubmittingSlotPayment, setIsSubmittingSlotPayment] = useState(false);
+  const slotFileInputRef = useRef<HTMLInputElement | null>(null);
 
   // Form Fields
   const [nameKh, setNameKh] = useState('');
@@ -85,6 +110,26 @@ export const VipAddRestaurantModal: React.FC = () => {
   const [signatureDish, setSignatureDish] = useState('');
   const [isVerifyingAi, setIsVerifyingAi] = useState(false);
   const [aiReport, setAiReport] = useState<AiStoreCategoryVerificationReport | null>(null);
+
+  const targetReplacingStore = useMemo(
+    () => (replacingStoreId ? ownedRestaurants.find((r) => r.id === replacingStoreId) || null : null),
+    [replacingStoreId, ownedRestaurants]
+  );
+
+  // Determine effective screen when user is authorized
+  const effectiveMode: 'hub' | 'create_form' | 'pay_additional_slot' = useMemo(() => {
+    if (replacingStoreId) return 'create_form';
+    if (viewMode === 'pay_additional_slot') return 'pay_additional_slot';
+    if (viewMode === 'create_form' && (isAdmin || quota.remainingAvailableSlots > 0)) {
+      return 'create_form';
+    }
+    if (viewMode === 'hub') return 'hub';
+    // Auto mode: if user has 0 stores yet and has an available slot, show create_form directly; otherwise show Store Hub
+    if (ownedRestaurants.length === 0 && (isAdmin || quota.remainingAvailableSlots > 0)) {
+      return 'create_form';
+    }
+    return 'hub';
+  }, [replacingStoreId, viewMode, isAdmin, quota.remainingAvailableSlots, ownedRestaurants.length]);
 
   // Live AI preview analysis as user types
   const liveAiPreview = useMemo(() => {
@@ -213,7 +258,9 @@ export const VipAddRestaurantModal: React.FC = () => {
         ownerPhone: phone.trim() || currentUser?.phone || '',
       };
 
-      const created = addRestaurant(newRestData);
+      const created = replacingStoreId
+        ? replaceExistingRestaurant(replacingStoreId, newRestData)
+        : addRestaurant(newRestData);
       if (!created) return;
 
       // Reset form state cleanly
@@ -224,6 +271,8 @@ export const VipAddRestaurantModal: React.FC = () => {
       setSignatureDish('');
       setShopPhotos(['/foods/food-1.jpg']);
       setAiReport(null);
+      setReplacingStoreId(null);
+      setViewMode('auto');
       setIsVipAddRestaurantModalOpen(false);
 
       setManagingRestaurant(created);
@@ -241,6 +290,108 @@ export const VipAddRestaurantModal: React.FC = () => {
     }
   };
 
+  const handlePickSlotReceiptFromGallery = async () => {
+    const picked = await pickImageUsingNativeAndroidGallery(1200, 0.84);
+    if (picked) {
+      setSlotProofData({
+        dataUrl: picked.dataUrl,
+        fileName: picked.fileName || 'aba_store_slot_receipt.jpg',
+        mimeType: picked.mimeType || 'image/jpeg',
+      });
+      showToast(
+        isKm
+          ? '📸 បានភ្ជាប់រូបភាពវិក្កយបត្របង់ប្រាក់បន្ថែមហាងជោគជ័យ!'
+          : '📸 Attached additional-store payment receipt!',
+        'success'
+      );
+      return;
+    }
+    slotFileInputRef.current?.click();
+  };
+
+  const handleSlotFileInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const dataUrl = await processAndCompressImageFile(file, 1200, 0.84);
+      setSlotProofData({
+        dataUrl,
+        fileName: file.name || 'aba_store_slot_receipt.jpg',
+        mimeType: file.type || 'image/jpeg',
+      });
+      showToast(
+        isKm
+          ? '📸 បានភ្ជាប់រូបភាពវិក្កយបត្របង់ប្រាក់បន្ថែមហាងជោគជ័យ!'
+          : '📸 Attached additional-store payment receipt!',
+        'success'
+      );
+    } catch {
+      showToast(
+        isKm ? 'មិនអាចអានឯកសាររូបភាពបានទេ' : 'Failed to process receipt image',
+        'warning'
+      );
+    } finally {
+      e.target.value = '';
+    }
+  };
+
+  const handleSubmitAdditionalStorePayment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!slotProofData?.dataUrl && (!slotTrxRef || slotTrxRef.trim().length < 5)) {
+      showToast(
+        isKm
+          ? 'សូមអាប់ឡូតរូបភាពវិក្កយបត្រ ABA ឬបញ្ចូលលេខប្រតិបត្តិការ (Trx ID) ឱ្យបានត្រឹមត្រូវ!'
+          : 'Please upload your ABA receipt screenshot or enter a valid Transaction ID!',
+        'warning'
+      );
+      return;
+    }
+
+    setIsSubmittingSlotPayment(true);
+    try {
+      const res = await submitAdditionalStorePaymentRequest(
+        slotTrxRef.trim(),
+        `Additional Store Slot #${quota.totalAllowedStores + 1} ($${quota.additionalStoreFeeUsd.toFixed(2)} USD)`,
+        slotProofData || undefined,
+        quota.additionalStoreFeeUsd
+      );
+      if (res.success) {
+        setSlotTrxRef('');
+        setSlotProofData(null);
+        if (res.autoVerified) {
+          // Slot immediately unlocked -> open store creation form!
+          setReplacingStoreId(null);
+          setViewMode('create_form');
+        } else {
+          setViewMode('hub');
+        }
+      }
+    } finally {
+      setIsSubmittingSlotPayment(false);
+    }
+  };
+
+  const beginReplaceStore = (store: typeof ownedRestaurants[0]) => {
+    setReplacingStoreId(store.id);
+    setConfirmReplaceStoreId(null);
+    setNameKh(store.nameKh || '');
+    setNameEn(store.nameEn || '');
+    setProvinceKh(store.provinceKh || 'រាជធានីភ្នំពេញ');
+    setProvinceEn(store.provinceEn || 'Phnom Penh');
+    setAddressKh(store.addressKh || '');
+    setPhone(store.phone || currentUser?.phone || '');
+    setOpeningHoursKh(store.openingHoursKh || '០៧:០០ ព្រឹក - ០៩:០០ យប់');
+    setShopPhotos(
+      Array.isArray(store.foodImages) && store.foodImages.length > 0
+        ? store.foodImages
+        : [store.photoUrl || '/foods/food-1.jpg']
+    );
+    setDescriptionKh(store.descriptionKh || '');
+    setSignatureDish(store.signatureDishesKh?.[0] || '');
+    setAiReport(null);
+    setViewMode('create_form');
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm animate-fade-in overflow-y-auto">
       <div
@@ -254,31 +405,47 @@ export const VipAddRestaurantModal: React.FC = () => {
               <Store className="w-5 h-5" />
             </div>
             <div>
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 flex-wrap">
                 <h3 className="font-moul text-sm sm:text-base text-white">
-                  {isKm ? 'ចុះបញ្ជីហាង VIP របស់អ្នក (1 ហាង)' : 'Register Your VIP Restaurant (1 Store)'}
+                  {replacingStoreId
+                    ? isKm
+                      ? '🔄 ប្តូរហាងចាស់ដាក់ហាងថ្មី (ឥតគិតថ្លៃ $0)'
+                      : '🔄 Replace Existing Store (Free $0)'
+                    : effectiveMode === 'pay_additional_slot'
+                    ? isKm
+                      ? `➕ បន្ថែមហាងថ្មី (+$${quota.additionalStoreFeeUsd.toFixed(2)} / ១ ហាង)`
+                      : `➕ Add Additional Store (+$${quota.additionalStoreFeeUsd.toFixed(2)} / store)`
+                    : isKm
+                    ? 'គ្រប់គ្រង និងចុះបញ្ជីហាង VIP របស់អ្នក'
+                    : 'Manage & Register Your VIP Stores'}
                 </h3>
                 <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[9px] font-black uppercase font-sans">
-                  VIP 1 ហាង
+                  {isAdmin
+                    ? 'ADMIN UNLIMITED'
+                    : `${quota.usedStoresCount}/${quota.totalAllowedStores} STORES`}
                 </span>
               </div>
               <p className="text-[11px] text-amber-100 font-khmer leading-relaxed mt-0.5">
                 {isKm
-                  ? 'ចុះបញ្ជីហាងមុន ហាងរបស់លោកអ្នកនឹងបង្ហាញមុនគេតាមលំដាប់លេខរៀង ដើម្បីងាយស្រួលឱ្យអតិថិជនស្វែងរក និងតាមដានស្ថិតិហាង។'
-                  : 'Register early so your restaurant appears first in chronological order for easy discovery and analytics tracking.'}
+                  ? `ហាងទី ១ ឥតគិតថ្លៃក្នុងកញ្ចប់ VIP • កែប្រែ ឬប្តូរហាងចាស់ឥតគិតថ្លៃ ($0) • បន្ថែមហាងថ្មីបន្ថែមទៀត $${quota.additionalStoreFeeUsd.toFixed(2)}/១ហាង`
+                  : `1st store included free with VIP • Edit or replace existing store for $0 • Additional stores $${quota.additionalStoreFeeUsd.toFixed(2)}/store`}
               </p>
             </div>
           </div>
 
           <button
-            onClick={() => setIsVipAddRestaurantModalOpen(false)}
+            onClick={() => {
+              setReplacingStoreId(null);
+              setViewMode('auto');
+              setIsVipAddRestaurantModalOpen(false);
+            }}
             className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white transition"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Form Body or VIP Permission Guard or 1-Restaurant-Per-User Limit Guard */}
+        {/* Form Body or VIP Permission Guard or Store Management Hub */}
         {!isAuthorized ? (
           <div className="p-6 text-center space-y-4 font-khmer">
             {!currentUser ? (
@@ -346,8 +513,8 @@ export const VipAddRestaurantModal: React.FC = () => {
                 </h3>
                 <p className="text-xs text-slate-600 dark:text-slate-300 max-w-sm mx-auto leading-relaxed">
                   {isKm
-                    ? 'សមាជិកភាព VIP របស់លោកអ្នកបានផុតកំណត់ហើយ។ សូមបន្តកញ្ចប់ VIP ($2.99 / 30 ថ្ងៃ ឬ $4.99 / 90 ថ្ងៃ) ដើម្បីចុះបញ្ជីហាង VIP របស់អ្នក។'
-                    : 'Your VIP membership has expired. Please renew your VIP membership to register your restaurant.'}
+                    ? `សមាជិកភាព VIP របស់លោកអ្នកបានផុតកំណត់ហើយ។ សូមបន្តកញ្ចប់ VIP ($${dynamicPlans.quarterly.priceUsd.toFixed(2)} / ${dynamicPlans.quarterly.durationDays} ថ្ងៃ ឬ $${dynamicPlans.annual.priceUsd.toFixed(2)} / ${dynamicPlans.annual.durationDays} ថ្ងៃ) ដើម្បីចុះបញ្ជីហាង VIP របស់អ្នក។`
+                    : `Your VIP membership has expired. Please renew your VIP membership ($${dynamicPlans.quarterly.priceUsd.toFixed(2)} / ${dynamicPlans.quarterly.durationDays} days or $${dynamicPlans.annual.priceUsd.toFixed(2)} / ${dynamicPlans.annual.durationDays} days) to register your restaurant.`}
                 </p>
                 <div className="pt-2 flex flex-col sm:flex-row gap-2 justify-center">
                   <button
@@ -379,8 +546,8 @@ export const VipAddRestaurantModal: React.FC = () => {
                 </h3>
                 <p className="text-xs text-slate-600 dark:text-slate-300 max-w-sm mx-auto leading-relaxed">
                   {isKm
-                    ? 'ការចុះបញ្ជីហាង គឺអនុញ្ញាតជូនតែសមាជិក VIP ដែលបានបង់ប្រាក់ និងទទួលបានការអនុម័តពី Administrator ប៉ុណ្ណោះ។ សូមដំឡើងទៅកញ្ចប់ VIP ($2.99 / 30 ថ្ងៃ ឬ $4.99 / 90 ថ្ងៃ) ដើម្បីចុះបញ្ជីហាង និងទទួលបានអត្ថប្រយោជន៍ទាំង ១០!'
-                    : 'Restaurant registration is exclusive to approved VIP members. Upgrade to VIP ($2.99 / 30 days or $4.99 / 90 days) to register your restaurant!'}
+                    ? `ការចុះបញ្ជីហាង គឺអនុញ្ញាតជូនតែសមាជិក VIP ដែលបានបង់ប្រាក់ និងទទួលបានការអនុម័តពី Administrator ប៉ុណ្ណោះ។ សូមដំឡើងទៅកញ្ចប់ VIP ($${dynamicPlans.quarterly.priceUsd.toFixed(2)} / ${dynamicPlans.quarterly.durationDays} ថ្ងៃ ឬ $${dynamicPlans.annual.priceUsd.toFixed(2)} / ${dynamicPlans.annual.durationDays} ថ្ងៃ) ដើម្បីចុះបញ្ជីហាងទី ១ ដោយឥតគិតថ្លៃ!`
+                    : `Restaurant registration is exclusive to approved VIP members. Upgrade to VIP ($${dynamicPlans.quarterly.priceUsd.toFixed(2)} / ${dynamicPlans.quarterly.durationDays} days or $${dynamicPlans.annual.priceUsd.toFixed(2)} / ${dynamicPlans.annual.durationDays} days) to register your 1st restaurant for free!`}
                 </p>
                 <div className="pt-2 flex flex-col sm:flex-row gap-2 justify-center">
                   <button
@@ -404,115 +571,449 @@ export const VipAddRestaurantModal: React.FC = () => {
               </div>
             )}
           </div>
-        ) : existingOwnedRestaurant ? (
-          <div className="p-5 space-y-4 font-khmer text-xs">
-            <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border-2 border-amber-400 space-y-2.5">
-              <div className="flex items-center gap-2 text-amber-800 dark:text-amber-300 font-bold text-sm">
-                <Store className="w-5 h-5 shrink-0" />
-                <span>
-                  {isKm
-                    ? 'គណនី VIP នីមួយៗអាចបង្កើតបានត្រឹមតែ ១ ហាងប៉ុណ្ណោះ'
-                    : 'Each VIP Account Can Add Only 1 Restaurant'}
+        ) : effectiveMode === 'pay_additional_slot' ? (
+          /* ============================================================================
+             ADDITIONAL STORE SLOT PAYMENT CHECKOUT ($10 per additional store beyond 1st)
+             ============================================================================ */
+          <form
+            onSubmit={handleSubmitAdditionalStorePayment}
+            className="p-5 space-y-4 overflow-y-auto max-h-[78vh] font-khmer text-xs"
+          >
+            <div className="flex items-center justify-between">
+              <button
+                type="button"
+                onClick={() => setViewMode('hub')}
+                className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-200 font-bold text-xs flex items-center gap-1.5 transition cursor-pointer"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>{isKm ? 'ត្រឡប់ទៅផ្ទាំងគ្រប់គ្រងហាង' : 'Back to Store Hub'}</span>
+              </button>
+              <span className="px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-300 font-mono font-bold text-[11px]">
+                Store Slot #{quota.totalAllowedStores + 1} • ${quota.additionalStoreFeeUsd.toFixed(2)} USD
+              </span>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-gradient-to-br from-emerald-950 via-slate-900 to-emerald-950 text-white border border-amber-400/50 space-y-2">
+              <div className="flex items-center justify-between">
+                <h4 className="font-bold text-sm text-amber-300 flex items-center gap-2">
+                  <PlusCircle className="w-4 h-4" />
+                  <span>
+                    {isKm
+                      ? `បើកសិទ្ធិបង្កើតហាងបន្ថែមទី ${quota.totalAllowedStores + 1}`
+                      : `Unlock Additional Store Slot #${quota.totalAllowedStores + 1}`}
+                  </span>
+                </h4>
+                <span className="text-lg font-black text-emerald-400 font-mono">
+                  ${quota.additionalStoreFeeUsd.toFixed(2)} USD
                 </span>
               </div>
-              <p className="text-[11px] text-slate-700 dark:text-slate-300 leading-relaxed">
+              <p className="text-[11px] text-slate-300 leading-relaxed">
                 {isKm
-                  ? `គណនីរបស់លោកអ្នកមានហាង "${existingOwnedRestaurant.nameKh}" រួចហើយ។ ប្រសិនបើលោកអ្នកចង់ផ្លាស់ប្តូរព័ត៌មាន សូមចុចកែប្រែហាងដែលមានស្រាប់ ឬលុបហាងចាស់ជាមុនសិន មុននឹងបន្ថែមហាងថ្មី។`
-                  : `You already own "${existingOwnedRestaurant.nameEn || existingOwnedRestaurant.nameKh}". Please edit your existing restaurant or delete it before adding a new one.`}
+                  ? `ហាងទី ១ ត្រូវបានផ្តល់ជូនដោយឥតគិតថ្លៃក្នុងកញ្ចប់ VIP ហើយអ្នកអាចកែប្រែ ឬប្តូរហាងចាស់ដោយឥតគិតថ្លៃ ($0)។ ប្រសិនបើអ្នកចង់រក្សាហាងចាស់ ហើយបន្ថែមហាងថ្មីមួយទៀត សូមទូទាត់ថ្លៃបន្ថែមហាង $${quota.additionalStoreFeeUsd.toFixed(2)} USD តាម ABA KHQR ខាងក្រោម។`
+                  : `Your 1st VIP store is free and can be edited or replaced anytime for $0. To keep your existing store(s) and add Store #${quota.totalAllowedStores + 1}, please complete the $${quota.additionalStoreFeeUsd.toFixed(2)} USD payment below.`}
               </p>
             </div>
 
-            <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-2.5">
-              <div className="flex items-center gap-3">
-                <img
-                  src={existingOwnedRestaurant.photoUrl}
-                  alt={existingOwnedRestaurant.nameKh}
-                  className="w-14 h-14 rounded-xl object-cover shrink-0 border border-amber-400"
+            {/* Official ABA KHQR Display */}
+            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row items-center gap-4">
+              <img
+                src={appSettings.supportQrImageUrl || '/aba-khqr-499.png'}
+                alt="ABA KHQR CHEA KIMSENG"
+                className="w-36 h-44 object-contain rounded-xl border border-amber-400 bg-white p-1.5 shadow-sm shrink-0"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = '/donation-qr.png';
+                }}
+              />
+              <div className="space-y-1.5 text-center sm:text-left flex-1">
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-bold text-[10px]">
+                  <QrCode className="w-3 h-3" />
+                  <span>ABA BANK / BAKONG KHQR</span>
+                </div>
+                <div className="font-bold text-sm text-slate-900 dark:text-white">
+                  {appSettings.supportAccountName || 'CHEA KIMSENG'} (095 245 959)
+                </div>
+                <div className="text-xs font-bold text-emerald-700 dark:text-emerald-400 font-mono">
+                  {isKm ? 'ទឹកប្រាក់ត្រូវបង់៖' : 'Amount Due:'} ${quota.additionalStoreFeeUsd.toFixed(2)} USD
+                </div>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                  {isKm
+                    ? '១. ស្កេនបង់ប្រាក់តាម ABA Mobile • ២. ថតរូបវិក្កយបត្រ (Screenshot) • ៣. អាប់ឡូតរូបភាពវិក្កយបត្រខាងក្រោមដើម្បីផ្ទៀងផ្ទាត់ និងបើកហាងថ្មីភ្លាមៗ!'
+                    : '1. Scan & pay via ABA Mobile • 2. Take a receipt screenshot • 3. Upload below to verify & unlock your new store slot!'}
+                </p>
+              </div>
+            </div>
+
+            {/* Receipt Upload & Transaction Reference */}
+            <div className="space-y-3">
+              <div>
+                <label className="block font-bold text-slate-800 dark:text-slate-200 mb-1">
+                  {isKm
+                    ? '១. អាប់ឡូតរូបភាពវិក្កយបត្រ ABA (Receipt Screenshot) *'
+                    : '1. Upload ABA Payment Receipt Screenshot *'}
+                </label>
+                <input
+                  ref={slotFileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleSlotFileInputChange}
+                  className="hidden"
                 />
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    <h4 className="font-bold text-sm text-slate-900 dark:text-white truncate">
-                      {isKm ? existingOwnedRestaurant.nameKh : existingOwnedRestaurant.nameEn}
-                    </h4>
-                    {existingOwnedRestaurant.status === 'approved' ? (
-                      <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 text-[10px] font-bold">
-                        {isKm ? '✅ អនុម័តរួចរាល់' : '✅ Approved'}
-                      </span>
-                    ) : existingOwnedRestaurant.status === 'pending' ? (
-                      <span className="px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-200 text-[10px] font-bold">
-                        {isKm ? '⏳ រង់ចាំ Admin ពិនិត្យ' : '⏳ Pending Admin Review'}
-                      </span>
-                    ) : (
-                      <span className="px-2 py-0.5 rounded-full bg-rose-100 dark:bg-rose-900/60 text-rose-700 dark:text-rose-300 text-[10px] font-bold">
-                        {isKm ? '🚫 ត្រូវបានបដិសេធ' : '🚫 Rejected'}
-                      </span>
-                    )}
+                {slotProofData?.dataUrl ? (
+                  <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-400 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <img
+                        src={slotProofData.dataUrl}
+                        alt="ABA Receipt Preview"
+                        className="w-14 h-14 object-cover rounded-xl border border-emerald-500 bg-white shrink-0"
+                      />
+                      <div className="min-w-0">
+                        <div className="font-bold text-emerald-900 dark:text-emerald-200 truncate">
+                          ✓ {slotProofData.fileName || 'aba_store_slot_receipt.jpg'}
+                        </div>
+                        <p className="text-[10px] text-emerald-700 dark:text-emerald-300">
+                          {isKm ? 'រួចរាល់សម្រាប់ផ្ទៀងផ្ទាត់ Server-Side' : 'Ready for server-side verification'}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handlePickSlotReceiptFromGallery}
+                      className="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-emerald-400 text-emerald-700 dark:text-emerald-300 font-bold text-[11px] shrink-0 cursor-pointer"
+                    >
+                      {isKm ? 'ប្តូររូបភាព' : 'Change'}
+                    </button>
                   </div>
-                  <p className="text-[11px] text-slate-500 truncate mt-0.5">
-                    📍 {existingOwnedRestaurant.addressKh}
-                  </p>
-                  <span className="inline-block mt-1 px-2 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 text-[10px] font-bold">
-                    🍽️ {existingOwnedRestaurant.menuItems?.length || 0} / 20 មុខម្ហូប
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handlePickSlotReceiptFromGallery}
+                    className="w-full py-3.5 px-4 rounded-2xl border-2 border-dashed border-emerald-500/60 hover:border-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/20 text-emerald-800 dark:text-emerald-300 font-bold text-xs flex items-center justify-center gap-2 transition cursor-pointer"
+                  >
+                    <Upload className="w-4 h-4" />
+                    <span>
+                      {isKm
+                        ? '📸 ចុចជ្រើសរើសរូបភាពវិក្កយបត្រ ABA ពីទូរស័ព្ទ'
+                        : '📸 Select ABA Receipt Screenshot from Phone'}
+                    </span>
+                  </button>
+                )}
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-800 dark:text-slate-200 mb-1">
+                  {isKm
+                    ? '២. លេខប្រតិបត្តិការ ABA (Transaction ID / Ref)'
+                    : '2. ABA Transaction ID / Reference'}
+                </label>
+                <input
+                  type="text"
+                  value={slotTrxRef}
+                  onChange={(e) => setSlotTrxRef(e.target.value)}
+                  placeholder={isKm ? 'ឧ. 58291038412 (ឬទុកឱ្យ AI អានពីវិក្កយបត្រ)' : 'e.g. 58291038412'}
+                  className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-mono text-xs focus:border-amber-500 focus:outline-none"
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={isSubmittingSlotPayment}
+              className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 disabled:opacity-60 text-slate-950 font-extrabold text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 transition cursor-pointer"
+            >
+              {isSubmittingSlotPayment ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  <span>
+                    {isKm ? 'កំពុងផ្ទៀងផ្ទាត់ការបង់ប្រាក់លើ Server...' : 'Verifying Payment on Server...'}
                   </span>
+                </>
+              ) : (
+                <>
+                  <ShieldCheck className="w-4 h-4" />
+                  <span>
+                    {isKm
+                      ? `✅ ផ្ទៀងផ្ទាត់ការបង់ប្រាក់ ($${quota.additionalStoreFeeUsd.toFixed(2)}) & បើកហាងទី ${quota.totalAllowedStores + 1}`
+                      : `✅ Verify Payment ($${quota.additionalStoreFeeUsd.toFixed(2)}) & Unlock Store #${quota.totalAllowedStores + 1}`}
+                  </span>
+                </>
+              )}
+            </button>
+          </form>
+        ) : effectiveMode === 'hub' ? (
+          /* ============================================================================
+             VIP STORE MANAGEMENT HUB:
+             1. Edit Existing Store (Free $0)
+             2. Replace Existing Store (Free $0 — with confirmation)
+             3. Add Additional Store ($10 per additional store beyond the 1st)
+             ============================================================================ */
+          <div className="p-5 space-y-4 overflow-y-auto max-h-[78vh] font-khmer text-xs">
+            {/* Store Quota & Payment Status Summary Banner */}
+            <div className="p-4 rounded-2xl bg-gradient-to-br from-slate-900 via-emerald-950 to-slate-900 text-white border border-amber-400/50 space-y-2.5">
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <div className="flex items-center gap-2 font-bold text-sm text-amber-300">
+                  <Store className="w-4 h-4 shrink-0" />
+                  <span>
+                    {isKm
+                      ? 'ស្ថានភាពកូតាហាង VIP និងការទូទាត់របស់អ្នក'
+                      : 'Your VIP Store Quota & Payment Status'}
+                  </span>
+                </div>
+                <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 font-mono text-[11px] font-bold">
+                  {isAdmin
+                    ? 'Unlimited (Admin)'
+                    : `${quota.usedStoresCount} / ${quota.totalAllowedStores} ${isKm ? 'ហាង' : 'Stores'}`}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2 text-center pt-1">
+                <div className="p-2 rounded-xl bg-white/10 border border-white/10">
+                  <div className="text-[10px] text-slate-300">
+                    {isKm ? 'ហាង VIP ឥតគិតថ្លៃ' : 'Free VIP Store'}
+                  </div>
+                  <div className="font-mono font-black text-sm text-white mt-0.5">
+                    {isAdmin ? '∞' : quota.includedFreeStores} {isKm ? 'ហាង ($0)' : '($0)'}
+                  </div>
+                </div>
+                <div className="p-2 rounded-xl bg-white/10 border border-white/10">
+                  <div className="text-[10px] text-slate-300">
+                    {isKm ? 'ហាងបន្ថែមបានទិញ' : 'Paid Extra Slots'}
+                  </div>
+                  <div className="font-mono font-black text-sm text-amber-300 mt-0.5">
+                    +{quota.paidAdditionalStoreSlots} {isKm ? 'ហាង' : 'Slots'}
+                  </div>
+                </div>
+                <div className="p-2 rounded-xl bg-white/10 border border-white/10">
+                  <div className="text-[10px] text-slate-300">
+                    {isKm ? 'កូតាទំនេរអាចបង្កើត' : 'Available Slots'}
+                  </div>
+                  <div className="font-mono font-black text-sm text-emerald-300 mt-0.5">
+                    {isAdmin ? '∞' : quota.remainingAvailableSlots} {isKm ? 'ហាង' : 'Open'}
+                  </div>
                 </div>
               </div>
 
-              {existingOwnedRestaurant.aiCategoryVerification && (
-                <div
-                  className={`p-2.5 rounded-xl border text-[11px] leading-relaxed ${
-                    existingOwnedRestaurant.status === 'approved'
-                      ? 'bg-emerald-50/80 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200'
-                      : existingOwnedRestaurant.status === 'pending'
-                        ? 'bg-amber-50/80 dark:bg-amber-950/30 border-amber-300 dark:border-amber-800 text-amber-800 dark:text-amber-200'
-                        : 'bg-rose-50/80 dark:bg-rose-950/30 border-rose-300 dark:border-rose-800 text-rose-800 dark:text-rose-200'
-                  }`}
-                >
-                  {isKm
-                    ? existingOwnedRestaurant.aiCategoryVerification.reasonKh
-                    : existingOwnedRestaurant.aiCategoryVerification.reasonEn}
-                </div>
-              )}
+              <p className="text-[11px] text-emerald-100/90 leading-relaxed pt-0.5">
+                {isKm
+                  ? `✅ លោកអ្នកអាចកែប្រែ (Edit) ឬប្តូរហាងដែលមានស្រាប់ដាក់ហាងថ្មី (Replace) បានគ្រប់ពេលដោយឥតគិតថ្លៃ ($0)។ ប្រសិនបើចង់បន្ថែមហាងថ្មីលើសពីហាងទី ១ តម្លៃគឺ $${quota.additionalStoreFeeUsd.toFixed(2)} USD ក្នុង ១ ហាងបន្ថែម។`
+                  : `✅ You can Edit or Replace your existing store anytime for free ($0). Adding an extra store beyond the 1st costs $${quota.additionalStoreFeeUsd.toFixed(2)} USD per additional store.`}
+              </p>
             </div>
 
-            <div className="space-y-2.5 pt-1">
-              <button
-                type="button"
-                onClick={() => {
-                  setIsVipAddRestaurantModalOpen(false);
-                  setManagingRestaurant(existingOwnedRestaurant);
-                  setIsManageMenuModalOpen(true);
-                }}
-                className="w-full py-3 rounded-2xl bg-gradient-to-r from-[#064E3B] to-emerald-600 hover:from-emerald-700 text-white font-bold text-xs shadow-md flex items-center justify-center gap-2 transition cursor-pointer"
-              >
-                <Edit2 className="w-4 h-4" />
+            {/* Pending Additional Store Payment Banner (if any) */}
+            {quota.pendingAdditionalStoreTransaction && (
+              <div className="p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border-2 border-amber-400 space-y-2">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-bold text-amber-900 dark:text-amber-200 flex items-center gap-1.5">
+                    <Clock className="w-4 h-4 text-amber-600 shrink-0" />
+                    <span>
+                      {isKm
+                        ? `⏳ សំណើទូទាត់បន្ថែមហាង ($${quota.pendingAdditionalStoreTransaction.amountUsd.toFixed(2)}) កំពុងរង់ចាំ Admin ផ្ទៀងផ្ទាត់`
+                        : `⏳ Additional Store Payment ($${quota.pendingAdditionalStoreTransaction.amountUsd.toFixed(2)}) Pending Verification`}
+                    </span>
+                  </span>
+                  <span className="font-mono text-[10px] font-bold text-amber-800 dark:text-amber-300">
+                    {quota.pendingAdditionalStoreTransaction.id}
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-700 dark:text-slate-300 leading-relaxed">
+                  {isKm
+                    ? 'ប្រព័ន្ធបានកត់ត្រាការបង់ប្រាក់របស់អ្នក និងការពារមិនឱ្យគិតប្រាក់ស្ទួនឡើយ។ កូតាហាងថ្មីនឹងបើកភ្លាមៗក្រោយពេល Admin អនុម័ត!'
+                    : 'Your payment is recorded and protected against duplicate charges. Your new store slot will unlock immediately upon Admin approval!'}
+                </p>
+              </div>
+            )}
+
+            {/* Existing Owned Stores List with Edit ($0), Replace ($0), and Delete (with Confirmation) */}
+            <div className="space-y-3">
+              <div className="font-bold text-slate-800 dark:text-slate-200 text-xs flex items-center justify-between">
                 <span>
                   {isKm
-                    ? '✏️ កែប្រែហាងដែលមានស្រាប់ (Edit Existing Restaurant)'
-                    : '✏️ Edit Existing Restaurant'}
+                    ? `🏪 ហាងរបស់អ្នកបច្ចុប្បន្ន (${ownedRestaurants.length})`
+                    : `🏪 Your Current Stores (${ownedRestaurants.length})`}
                 </span>
-              </button>
+                <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold">
+                  {isKm ? 'កែប្រែ ឬប្តូរហាង = $0 ឥតគិតថ្លៃ' : 'Edit or Replace = $0 Free'}
+                </span>
+              </div>
 
-              {deleteRestaurant && (
+              {ownedRestaurants.map((store, idx) => (
+                <div
+                  key={store.id}
+                  className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-3"
+                >
+                  <div className="flex items-center gap-3">
+                    <img
+                      src={store.photoUrl}
+                      alt={store.nameKh}
+                      className="w-14 h-14 rounded-xl object-cover shrink-0 border border-amber-400"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-800 dark:text-amber-300 font-mono text-[10px] font-bold">
+                          #{store.storeSlotNumber || idx + 1}
+                        </span>
+                        <h4 className="font-bold text-sm text-slate-900 dark:text-white truncate">
+                          {isKm ? store.nameKh : store.nameEn || store.nameKh}
+                        </h4>
+                        {store.status === 'approved' ? (
+                          <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 text-[10px] font-bold">
+                            {isKm ? '✅ អនុម័តរួច' : '✅ Approved'}
+                          </span>
+                        ) : store.status === 'pending' ? (
+                          <span className="px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-200 text-[10px] font-bold">
+                            {isKm ? '⏳ រង់ចាំពិនិត្យ' : '⏳ Pending'}
+                          </span>
+                        ) : (
+                          <span className="px-2 py-0.5 rounded-full bg-rose-100 dark:bg-rose-900/60 text-rose-700 dark:text-rose-300 text-[10px] font-bold">
+                            {isKm ? '🚫 បដិសេធ' : '🚫 Rejected'}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[11px] text-slate-500 truncate mt-0.5">
+                        📍 {store.addressKh}
+                      </p>
+                      <span className="inline-block mt-1 px-2 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 text-[10px] font-bold">
+                        🍽️ {store.menuItems?.length || 0} / 20 មុខម្ហូប
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Confirmation prompt before Replacing store */}
+                  {confirmReplaceStoreId === store.id && (
+                    <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/60 border border-amber-400 space-y-2">
+                      <p className="font-bold text-amber-900 dark:text-amber-200 text-[11px]">
+                        {isKm
+                          ? `🔄 តើអ្នកចង់ប្តូរហាង "${store.nameKh}" ដាក់ហាងថ្មីជំនួសដោយឥតគិតថ្លៃ ($0) មែនទេ?`
+                          : `🔄 Replace "${store.nameEn || store.nameKh}" with a new store for free ($0)?`}
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => beginReplaceStore(store)}
+                          className="flex-1 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs cursor-pointer"
+                        >
+                          {isKm ? '✅ យល់ព្រមប្តូរហាង ($0)' : '✅ Confirm Replace ($0)'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setConfirmReplaceStoreId(null)}
+                          className="px-3 py-2 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs cursor-pointer"
+                        >
+                          {isKm ? 'បោះបង់' : 'Cancel'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Confirmation prompt before Deleting store */}
+                  {confirmDeleteStoreId === store.id && (
+                    <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-400 space-y-2">
+                      <p className="font-bold text-rose-900 dark:text-rose-200 text-[11px]">
+                        {isKm
+                          ? `⚠️ បញ្ជាក់ការលុប៖ តើអ្នកពិតជាចង់លុបហាង "${store.nameKh}" មែនទេ? (កូតាហាងរបស់អ្នកនឹងនៅរក្សាទុកដដែល ដើម្បីបង្កើតហាងថ្មីជំនួសដោយមិនបាច់បង់ប្រាក់ម្តងទៀត)`
+                          : `⚠️ Confirm Deletion: Delete "${store.nameEn || store.nameKh}"? (Your store slot remains preserved so you can add a replacement store without paying again.)`}
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setConfirmDeleteStoreId(null);
+                            deleteRestaurant(store.id);
+                          }}
+                          className="flex-1 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs cursor-pointer"
+                        >
+                          {isKm ? '🗑️ បញ្ជាក់ការលុបហាង' : '🗑️ Confirm Delete'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setConfirmDeleteStoreId(null)}
+                          className="px-3 py-2 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs cursor-pointer"
+                        >
+                          {isKm ? 'បោះបង់' : 'Cancel'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Store Actions: Edit ($0), Replace ($0), Delete */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsVipAddRestaurantModalOpen(false);
+                        setManagingRestaurant(store);
+                        setIsManageMenuModalOpen(true);
+                      }}
+                      className="py-2.5 px-3 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs transition cursor-pointer"
+                    >
+                      <Edit2 className="w-3.5 h-3.5" />
+                      <span>{isKm ? '✏️ កែប្រែហាង ($0)' : '✏️ Edit Store ($0)'}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setConfirmDeleteStoreId(null);
+                        setConfirmReplaceStoreId(store.id);
+                      }}
+                      className="py-2.5 px-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs flex items-center justify-center gap-1.5 shadow-xs transition cursor-pointer"
+                    >
+                      <RefreshCw className="w-3.5 h-3.5" />
+                      <span>{isKm ? '🔄 ប្តូរដាក់ហាងថ្មី ($0)' : '🔄 Replace Store ($0)'}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setConfirmReplaceStoreId(null);
+                        setConfirmDeleteStoreId(store.id);
+                      }}
+                      className="py-2.5 px-3 rounded-xl bg-rose-100 hover:bg-rose-600 hover:text-white dark:bg-rose-950/50 text-rose-700 dark:text-rose-300 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>{isKm ? '🗑️ លុបហាង' : '🗑️ Delete'}</span>
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Action to Create New Store (if slot available) OR Pay $10 for Additional Store */}
+            <div className="pt-2 border-t border-slate-200 dark:border-slate-700 space-y-2.5">
+              {isAdmin || quota.remainingAvailableSlots > 0 ? (
                 <button
                   type="button"
                   onClick={() => {
-                    if (
-                      window.confirm(
-                        isKm
-                          ? `តើអ្នកពិតជាចង់លុបហាង "${existingOwnedRestaurant.nameKh}" មែនទេ? ក្រោយពេលលុប អ្នកអាចបង្កើតហាងថ្មីជំនួសវិញបានភ្លាមៗ។`
-                          : `Delete "${existingOwnedRestaurant.nameEn || existingOwnedRestaurant.nameKh}" so you can add a new restaurant?`
-                      )
-                    ) {
-                      deleteRestaurant(existingOwnedRestaurant.id);
-                    }
+                    setReplacingStoreId(null);
+                    setNameKh('');
+                    setNameEn('');
+                    setAddressKh('');
+                    setDescriptionKh('');
+                    setSignatureDish('');
+                    setShopPhotos(['/foods/food-1.jpg']);
+                    setAiReport(null);
+                    setViewMode('create_form');
                   }}
-                  className="w-full py-3 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-sm flex items-center justify-center gap-2 transition cursor-pointer"
+                  className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-[#064E3B] hover:from-emerald-700 text-white font-extrabold text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 transition cursor-pointer"
                 >
-                  <Trash2 className="w-4 h-4" />
+                  <PlusCircle className="w-4 h-4 text-amber-300" />
                   <span>
                     {isKm
-                      ? '🗑️ លុបហាងចាស់ដើម្បីបង្កើតថ្មី (Delete Existing Store)'
-                      : '🗑️ Delete Existing Store to Add New'}
+                      ? `➕ បង្កើតហាងថ្មីទី ${quota.usedStoresCount + 1} ឥឡូវនេះ (កូតាបានបើករួចរាល់ ✓)`
+                      : `➕ Create Store #${quota.usedStoresCount + 1} Now (Slot Unlocked ✓)`}
+                  </span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setViewMode('pay_additional_slot')}
+                  className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-500 text-slate-950 font-black text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 transition cursor-pointer"
+                >
+                  <PlusCircle className="w-4 h-4" />
+                  <span>
+                    {isKm
+                      ? `➕ បន្ថែមហាងថ្មីទី ${quota.totalAllowedStores + 1} (+$${quota.additionalStoreFeeUsd.toFixed(2)} USD / ១ ហាង)`
+                      : `➕ Add Additional Store #${quota.totalAllowedStores + 1} (+$${quota.additionalStoreFeeUsd.toFixed(2)} USD / store)`}
                   </span>
                 </button>
               )}
@@ -520,6 +1021,36 @@ export const VipAddRestaurantModal: React.FC = () => {
           </div>
         ) : (
         <form onSubmit={handleSubmit} className="p-5 space-y-4 overflow-y-auto max-h-[78vh] font-khmer text-xs">
+          {/* Back button when user has existing stores or is in Replace mode */}
+          {ownedRestaurants.length > 0 && (
+            <div className="flex items-center justify-between gap-2 pb-1">
+              <button
+                type="button"
+                onClick={() => {
+                  setReplacingStoreId(null);
+                  setViewMode('hub');
+                }}
+                className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-200 font-bold text-xs flex items-center gap-1.5 transition cursor-pointer"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>{isKm ? 'ត្រឡប់ទៅបញ្ជីហាងរបស់អ្នក' : 'Back to Your Stores'}</span>
+              </button>
+              {targetReplacingStore ? (
+                <span className="px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-300 font-bold text-[11px]">
+                  {isKm
+                    ? `🔄 កំពុងប្តូរហាង "${targetReplacingStore.nameKh}" ($0 ឥតគិតថ្លៃ)`
+                    : `🔄 Replacing "${targetReplacingStore.nameEn || targetReplacingStore.nameKh}" ($0 Free)`}
+                </span>
+              ) : (
+                <span className="px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/50 text-emerald-800 dark:text-emerald-300 font-bold text-[11px]">
+                  {isKm
+                    ? `🏪 បង្កើតហាងទី ${quota.usedStoresCount + 1}`
+                    : `🏪 Creating Store #${quota.usedStoresCount + 1}`}
+                </span>
+              )}
+            </div>
+          )}
+
           {/* AI Food-Business Policy Notice */}
           <div className="p-3 rounded-2xl bg-emerald-50/90 dark:bg-emerald-950/40 border border-emerald-400/50 flex items-start gap-2.5">
             <Bot className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
@@ -727,15 +1258,23 @@ export const VipAddRestaurantModal: React.FC = () => {
               <Sparkles className="w-4 h-4 text-amber-500" />
               <div>
                 <span className="font-bold text-slate-900 dark:text-white">
-                  {isKm ? 'សិទ្ធិ VIP ពេញលេញ (១០០% Unlocked)' : 'VIP Full Permissions'}
+                  {targetReplacingStore
+                    ? isKm
+                      ? 'ប្តូរហាងចាស់ដាក់ហាងថ្មីដោយឥតគិតថ្លៃ ($0)'
+                      : 'Replace Existing Store for Free ($0)'
+                    : isKm
+                    ? 'សិទ្ធិ VIP ពេញលេញ (១០០% Unlocked)'
+                    : 'VIP Full Permissions'}
                 </span>
                 <p className="text-[10px] text-slate-500 dark:text-slate-400">
-                  {isKm ? 'ឥតគិតថ្លៃចុះបញ្ជី • សកម្មតាមសុពលភាពគម្រោង VIP (30 ឬ 90 ថ្ងៃ)' : 'Zero registration fee • Active under VIP plan (30 or 90 days)'}
+                  {isKm
+                    ? `សកម្មតាមសុពលភាពគម្រោង VIP (${dynamicPlans.quarterly.durationDays} ឬ ${dynamicPlans.annual.durationDays} ថ្ងៃ)`
+                    : `Active under VIP plan (${dynamicPlans.quarterly.durationDays} or ${dynamicPlans.annual.durationDays} days)`}
                 </p>
               </div>
             </div>
             <span className="px-2 py-0.5 rounded-md bg-emerald-500 text-white font-black text-[10px]">
-              FREE FOR VIP
+              {targetReplacingStore ? 'REPLACE $0' : 'UNLOCKED'}
             </span>
           </div>
 
@@ -758,7 +1297,15 @@ export const VipAddRestaurantModal: React.FC = () => {
               ) : (
                 <>
                   <CheckCircle2 className="w-5 h-5 text-slate-950" />
-                  <span>{isKm ? '✨ បង្កើតហាងភ្លាមៗ (Create VIP Store) →' : '✨ Create VIP Restaurant Now →'}</span>
+                  <span>
+                    {targetReplacingStore
+                      ? isKm
+                        ? '🔄 បញ្ជាក់ការប្តូរដាក់ហាងថ្មីឥឡូវនេះ ($0) →'
+                        : '🔄 Confirm & Replace Store Now ($0) →'
+                      : isKm
+                      ? '✨ បង្កើតហាងភ្លាមៗ (Create VIP Store) →'
+                      : '✨ Create VIP Restaurant Now →'}
+                  </span>
                 </>
               )}
             </button>

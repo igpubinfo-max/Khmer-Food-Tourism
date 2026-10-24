@@ -1,42 +1,72 @@
 // Khmer Food & Tourism — Secure Payment & Subscription Verification Service
 // Google Play Billing + KHQR/Bakong + Credit Card Integration with Server-Side Verification Proofs
 
-import { User, RegistrationTransaction, VIP_PLANS, VipPlanConfig } from '../types';
+import {
+  User,
+  RegistrationTransaction,
+  VIP_PLANS,
+  VipPlanConfig,
+  AppSettings,
+  getDynamicVipPlans,
+  getAdditionalStoreFeeUsd,
+  DEFAULT_ADDITIONAL_STORE_FEE_USD,
+} from '../types';
 
 export const VIP_ANNUAL_PRICE_USD = 4.99;
 export const VIP_SUBSCRIPTION_DAYS = 90;
 export const VIP_QUARTERLY_PRICE_USD = 2.99;
-export const VIP_QUARTERLY_DAYS = 30;
+export const VIP_QUARTERLY_DAYS = 10;
+export const ADDITIONAL_STORE_FEE_USD = DEFAULT_ADDITIONAL_STORE_FEE_USD;
 export const GOOGLE_PLAY_PRODUCT_ID = 'com.khmerfoodtourism.subscription.vip.90days';
-export { VIP_PLANS };
+export { VIP_PLANS, getDynamicVipPlans, getAdditionalStoreFeeUsd };
 
 /**
  * Centralized backend plan validator.
- * Strictly maps any plan identifier, duration, or amount to one of the two official VIP plans:
- * - VIP 30 Days ($2.99 / 30 days)
- * - VIP 90 Days ($4.99 / 90 days)
- * Never trusts arbitrary client durations or prices.
+ * Dynamically resolves against the centralized Admin VIP settings (defaulting to VIP 10 Days @ $2.99 and VIP 90 Days @ $4.99).
+ * Never trusts arbitrary unverified client prices.
  */
-export function resolveAndValidateVipPlan(input?: {
-  planType?: 'quarterly' | 'annual' | string;
-  durationDays?: number;
-  amountUsd?: number;
-}): VipPlanConfig {
-  if (input?.planType === 'quarterly' || input?.durationDays === 30) {
-    return VIP_PLANS.quarterly;
+export function resolveAndValidateVipPlan(
+  input?: {
+    planType?: 'quarterly' | 'annual' | string;
+    durationDays?: number;
+    amountUsd?: number;
+  },
+  settings?: Partial<AppSettings> | null
+): VipPlanConfig {
+  const dynamicPlans = getDynamicVipPlans(settings);
+  if (input?.planType === 'quarterly') {
+    return dynamicPlans.quarterly;
   }
-  if (input?.planType === 'annual' || input?.durationDays === 90) {
-    return VIP_PLANS.annual;
+  if (input?.planType === 'annual') {
+    return dynamicPlans.annual;
+  }
+  if (typeof input?.durationDays === 'number') {
+    if (
+      input.durationDays === dynamicPlans.quarterly.durationDays ||
+      input.durationDays === 10 ||
+      input.durationDays === 30
+    ) {
+      return dynamicPlans.quarterly;
+    }
+    if (input.durationDays === dynamicPlans.annual.durationDays || input.durationDays === 90) {
+      return dynamicPlans.annual;
+    }
   }
   if (typeof input?.amountUsd === 'number') {
-    if (Math.abs(input.amountUsd - VIP_QUARTERLY_PRICE_USD) <= 0.05) {
-      return VIP_PLANS.quarterly;
+    if (
+      Math.abs(input.amountUsd - dynamicPlans.quarterly.priceUsd) <= 0.05 ||
+      Math.abs(input.amountUsd - VIP_QUARTERLY_PRICE_USD) <= 0.05
+    ) {
+      return dynamicPlans.quarterly;
     }
-    if (Math.abs(input.amountUsd - VIP_ANNUAL_PRICE_USD) <= 0.05) {
-      return VIP_PLANS.annual;
+    if (
+      Math.abs(input.amountUsd - dynamicPlans.annual.priceUsd) <= 0.05 ||
+      Math.abs(input.amountUsd - VIP_ANNUAL_PRICE_USD) <= 0.05
+    ) {
+      return dynamicPlans.annual;
     }
   }
-  return VIP_PLANS.quarterly;
+  return dynamicPlans.quarterly;
 }
 
 export interface PaymentVerificationRequest {
@@ -122,9 +152,17 @@ export function recordVerifiedTransaction(transactionRef: string): void {
   }
 }
 
-// Calculate 30-day or 90-day start and expiry dates with renewal extension support
-export function calculateVipDates(existingExpiry?: string, durationDays: number = VIP_SUBSCRIPTION_DAYS): { startDate: string; expiryDate: string; durationDays: number } {
-  const validDuration = durationDays === VIP_QUARTERLY_DAYS ? VIP_QUARTERLY_DAYS : VIP_SUBSCRIPTION_DAYS;
+// Calculate VIP start and expiry dates with renewal extension support & dynamic Admin durations
+export function calculateVipDates(
+  existingExpiry?: string,
+  durationDays?: number,
+  settings?: Partial<AppSettings> | null
+): { startDate: string; expiryDate: string; durationDays: number } {
+  const dynamicPlans = getDynamicVipPlans(settings);
+  let validDuration = dynamicPlans.annual.durationDays;
+  if (typeof durationDays === 'number' && durationDays >= 1) {
+    validDuration = Math.round(durationDays);
+  }
   const now = new Date();
   let startTime = now.getTime();
   
@@ -147,8 +185,10 @@ export function calculateVipDates(existingExpiry?: string, durationDays: number 
 
 // Server-side verification process
 export async function verifyPaymentOnBackend(
-  req: PaymentVerificationRequest
+  req: PaymentVerificationRequest,
+  settings?: Partial<AppSettings> | null
 ): Promise<PaymentVerificationResult> {
+  const dynamicPlans = getDynamicVipPlans(settings);
   // 1. Validate required fields
   if (!req.userId || !req.transactionRef || !req.userEmail) {
     return {
@@ -163,9 +203,9 @@ export async function verifyPaymentOnBackend(
     };
   }
 
-  // 2. Validate amount ($4.99 USD for 90 Days or $2.99 USD for 30 Days)
-  const isAnnualPrice = Math.abs(req.amountUsd - VIP_ANNUAL_PRICE_USD) <= 0.01;
-  const isQuarterlyPrice = Math.abs(req.amountUsd - VIP_QUARTERLY_PRICE_USD) <= 0.01;
+  // 2. Validate amount strictly against authoritative dynamic Admin VIP prices
+  const isAnnualPrice = Math.abs(req.amountUsd - dynamicPlans.annual.priceUsd) <= 0.02;
+  const isQuarterlyPrice = Math.abs(req.amountUsd - dynamicPlans.quarterly.priceUsd) <= 0.02;
 
   if (!isAnnualPrice && !isQuarterlyPrice) {
     return {
@@ -176,7 +216,7 @@ export async function verifyPaymentOnBackend(
       expiryDate: '',
       durationDays: 0,
       amountUsd: req.amountUsd,
-      error: `Invalid subscription price: expected $${VIP_ANNUAL_PRICE_USD} or $${VIP_QUARTERLY_PRICE_USD} USD.`
+      error: `Invalid subscription price: expected $${dynamicPlans.quarterly.priceUsd.toFixed(2)} or $${dynamicPlans.annual.priceUsd.toFixed(2)} USD.`
     };
   }
 
@@ -203,8 +243,10 @@ export async function verifyPaymentOnBackend(
   );
 
   // 5. Calculate subscription period
-  const duration = isQuarterlyPrice ? VIP_QUARTERLY_DAYS : VIP_SUBSCRIPTION_DAYS;
-  const { startDate, expiryDate, durationDays } = calculateVipDates(undefined, duration);
+  const duration = isQuarterlyPrice
+    ? dynamicPlans.quarterly.durationDays
+    : dynamicPlans.annual.durationDays;
+  const { startDate, expiryDate, durationDays } = calculateVipDates(undefined, duration, settings);
 
   // 6. Record to anti-duplicate ledger
   recordVerifiedTransaction(req.transactionRef);
@@ -233,8 +275,10 @@ export interface AbaPaymentVerificationRequest {
 }
 
 export async function verifyAbaPaymentTransaction(
-  req: AbaPaymentVerificationRequest
+  req: AbaPaymentVerificationRequest,
+  settings?: Partial<AppSettings> | null
 ): Promise<PaymentVerificationResult> {
+  const dynamicPlans = getDynamicVipPlans(settings);
   const cleanRef = req.transactionRef ? req.transactionRef.trim().toUpperCase() : '';
   if (!cleanRef || cleanRef.length < 5) {
     return {
@@ -243,15 +287,15 @@ export async function verifyAbaPaymentTransaction(
       verificationSignature: '',
       startDate: '',
       expiryDate: '',
-      durationDays: req.durationDays || VIP_QUARTERLY_DAYS,
+      durationDays: req.durationDays || dynamicPlans.quarterly.durationDays,
       amountUsd: req.amountUsd,
       error: 'Missing or invalid transaction reference from ABA Mobile.'
     };
   }
 
-  // Validate amount
-  const isAnnualPrice = Math.abs(req.amountUsd - VIP_ANNUAL_PRICE_USD) <= 0.01;
-  const isQuarterlyPrice = Math.abs(req.amountUsd - VIP_QUARTERLY_PRICE_USD) <= 0.01;
+  // Validate amount strictly against authoritative dynamic Admin VIP prices
+  const isAnnualPrice = Math.abs(req.amountUsd - dynamicPlans.annual.priceUsd) <= 0.02;
+  const isQuarterlyPrice = Math.abs(req.amountUsd - dynamicPlans.quarterly.priceUsd) <= 0.02;
   if (!isAnnualPrice && !isQuarterlyPrice) {
     return {
       success: false,
@@ -261,7 +305,7 @@ export async function verifyAbaPaymentTransaction(
       expiryDate: '',
       durationDays: req.durationDays,
       amountUsd: req.amountUsd,
-      error: `Invalid subscription price: expected $${VIP_ANNUAL_PRICE_USD} or $${VIP_QUARTERLY_PRICE_USD} USD.`
+      error: `Invalid subscription price: expected $${dynamicPlans.quarterly.priceUsd.toFixed(2)} or $${dynamicPlans.annual.priceUsd.toFixed(2)} USD.`
     };
   }
 
@@ -287,8 +331,13 @@ export async function verifyAbaPaymentTransaction(
     timestamp
   );
 
-  const duration = req.durationDays || (isQuarterlyPrice ? VIP_QUARTERLY_DAYS : VIP_SUBSCRIPTION_DAYS);
-  const { startDate, expiryDate, durationDays } = calculateVipDates(undefined, duration);
+  const duration =
+    req.durationDays && req.durationDays >= 1
+      ? req.durationDays
+      : isQuarterlyPrice
+      ? dynamicPlans.quarterly.durationDays
+      : dynamicPlans.annual.durationDays;
+  const { startDate, expiryDate, durationDays } = calculateVipDates(undefined, duration, settings);
 
   recordVerifiedTransaction(cleanRef);
 
@@ -300,6 +349,104 @@ export async function verifyAbaPaymentTransaction(
     expiryDate,
     durationDays,
     amountUsd: req.amountUsd
+  };
+}
+
+// Server-side verification for Additional Store Slot ($10 per additional store beyond the 1st)
+export interface AdditionalStorePaymentRequest {
+  userId: string;
+  userName: string;
+  userEmail: string;
+  amountUsd: number;
+  transactionRef: string;
+  paymentMethod: 'KHQR' | 'Bakong' | 'Card' | 'GooglePlayBilling';
+  storeSlotNumber?: number;
+  timestamp?: number;
+}
+
+export interface AdditionalStorePaymentVerificationResult {
+  success: boolean;
+  transactionRef: string;
+  verificationSignature: string;
+  verifiedAt: string;
+  amountUsd: number;
+  expectedAmountUsd: number;
+  storeSlotNumber: number;
+  error?: string;
+}
+
+export async function verifyAdditionalStorePaymentOnBackend(
+  req: AdditionalStorePaymentRequest,
+  settings?: Partial<AppSettings> | null,
+  recordInLedger: boolean = true
+): Promise<AdditionalStorePaymentVerificationResult> {
+  const expectedFee = getAdditionalStoreFeeUsd(settings);
+  const cleanRef = req.transactionRef ? req.transactionRef.trim().toUpperCase() : '';
+  const slotNum = req.storeSlotNumber && req.storeSlotNumber >= 2 ? req.storeSlotNumber : 2;
+
+  if (!req.userId || !cleanRef || cleanRef.length < 4) {
+    return {
+      success: false,
+      transactionRef: cleanRef,
+      verificationSignature: '',
+      verifiedAt: '',
+      amountUsd: req.amountUsd,
+      expectedAmountUsd: expectedFee,
+      storeSlotNumber: slotNum,
+      error: 'Missing required user ID or valid payment transaction reference.',
+    };
+  }
+
+  if (
+    typeof req.amountUsd !== 'number' ||
+    Number.isNaN(req.amountUsd) ||
+    Math.abs(req.amountUsd - expectedFee) > 0.02
+  ) {
+    return {
+      success: false,
+      transactionRef: cleanRef,
+      verificationSignature: '',
+      verifiedAt: '',
+      amountUsd: req.amountUsd,
+      expectedAmountUsd: expectedFee,
+      storeSlotNumber: slotNum,
+      error: `Invalid additional-store fee: expected $${expectedFee.toFixed(2)} USD, received $${Number(req.amountUsd || 0).toFixed(2)} USD.`,
+    };
+  }
+
+  if (checkDuplicateTransaction(cleanRef)) {
+    return {
+      success: false,
+      transactionRef: cleanRef,
+      verificationSignature: '',
+      verifiedAt: '',
+      amountUsd: req.amountUsd,
+      expectedAmountUsd: expectedFee,
+      storeSlotNumber: slotNum,
+      error: 'FRAUD_PREVENTION: Duplicate transaction reference detected. This payment reference has already been used.',
+    };
+  }
+
+  const timestamp = req.timestamp || Date.now();
+  const signature = await generateVerificationSignature(
+    req.userId,
+    cleanRef,
+    expectedFee,
+    timestamp
+  );
+
+  if (recordInLedger) {
+    recordVerifiedTransaction(cleanRef);
+  }
+
+  return {
+    success: true,
+    transactionRef: cleanRef,
+    verificationSignature: signature,
+    verifiedAt: new Date(timestamp).toISOString(),
+    amountUsd: expectedFee,
+    expectedAmountUsd: expectedFee,
+    storeSlotNumber: slotNum,
   };
 }
 

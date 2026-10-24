@@ -9,7 +9,10 @@ import {
   Bot, Bell, Compass, Calendar, Bookmark, Plus, MapPin, Trash2, Share2, Tag, Utensils, ChevronRight, ChevronLeft,
   Edit2, Check, X as CloseIcon, Crown, Star, Zap, Award, Smartphone, Copy, ExternalLink, Clock, Lock, MessageSquare
 } from 'lucide-react';
-import { isRestaurantPremiumActive, isUserVipActive, getVipAccountState, getVipRemainingDays, TEN_VIP_BENEFITS, APP_VERSION, APP_BUILD_CODE } from '../types';
+import {
+  isRestaurantPremiumActive, isUserVipActive, getVipAccountState, getVipRemainingDays,
+  APP_VERSION, APP_BUILD_CODE, getDynamicVipPlans, getDynamicVipBenefits
+} from '../types';
 import { tr } from '../utils/i18n';
 
 export const ProfileView: React.FC = () => {
@@ -32,12 +35,18 @@ export const ProfileView: React.FC = () => {
     openUpgradeVipModal,
     supportTickets, openSupportTicketModal, transactions,
     setActiveTab, setIsRestaurantCheckInModalOpen,
-    openGoogleMapsSearchModal
+    openGoogleMapsSearchModal,
+    appSettings, getCurrentUserStoreQuota
   } = useApp();
 
   const isKm = language === 'km';
   const isVip = isUserVipActive(currentUser);
   const vipAccountState = getVipAccountState(currentUser);
+  const storeQuota = getCurrentUserStoreQuota();
+  const dynamicPlans = getDynamicVipPlans(appSettings);
+  const shortPlan = dynamicPlans.quarterly;
+  const longPlan = dynamicPlans.annual;
+  const dynamicBenefits = getDynamicVipBenefits(appSettings);
   const isOwner = Boolean(
     currentUser &&
       (currentUser.role === 'owner' ||
@@ -1861,25 +1870,34 @@ export const ProfileView: React.FC = () => {
             </div>
           ) : (
             <>
-              <div className="flex items-center justify-between pb-1">
+              <div className="flex items-center justify-between pb-1 flex-wrap gap-2">
                 <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
                   {currentUser?.role === 'admin'
                     ? (isKm ? `ហាងរបស់ខ្ញុំ (${myRestaurants.length})` : `My Restaurants (${myRestaurants.length})`)
-                    : (isKm ? `ហាងរបស់ខ្ញុំ (${myRestaurants.length}/1 ហាង)` : `My Restaurant (${myRestaurants.length}/1)`)}
+                    : (isKm
+                        ? `ហាងរបស់ខ្ញុំ (${storeQuota.usedStoresCount}/${storeQuota.totalAllowedStores} ហាង)`
+                        : `My Stores (${storeQuota.usedStoresCount}/${storeQuota.totalAllowedStores})`)}
                 </span>
-                {currentUser?.role === 'admin' ? (
+                <div className="flex items-center gap-1.5 flex-wrap">
                   <button
                     onClick={() => setIsVipAddRestaurantModalOpen(true)}
-                    className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 text-slate-950 font-bold text-xs shadow-xs flex items-center gap-1 transition"
+                    className="px-2.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] shadow-xs flex items-center gap-1 transition cursor-pointer"
+                  >
+                    <RefreshCw className="w-3 h-3" />
+                    <span>{isKm ? 'ប្តូរហាងថ្មី ($0)' : 'Replace Store ($0)'}</span>
+                  </button>
+                  <button
+                    onClick={() => setIsVipAddRestaurantModalOpen(true)}
+                    className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 text-slate-950 font-bold text-[11px] shadow-xs flex items-center gap-1 transition cursor-pointer"
                   >
                     <Plus className="w-3.5 h-3.5" />
-                    <span>{isKm ? '+ បន្ថែមហាងថ្មី (Admin)' : '+ Add Shop (Admin)'}</span>
+                    <span>
+                      {storeQuota.canAddWithoutNewPayment
+                        ? (isKm ? '+ បន្ថែមហាងថ្មី ($0)' : '+ Add Store ($0)')
+                        : (isKm ? `+ បន្ថែមហាងថ្មី (+$${storeQuota.additionalStoreFeeUsd.toFixed(2)})` : `+ Add Store (+$${storeQuota.additionalStoreFeeUsd.toFixed(2)})`)}
+                    </span>
                   </button>
-                ) : (
-                  <span className="px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 text-[10px] font-bold">
-                    {isKm ? '១ គណនី = ១ ហាង (កែប្រែ ឬ លុប)' : '1 Store Limit (Edit or Delete)'}
-                  </span>
-                )}
+                </div>
               </div>
               {myRestaurants.map(restaurant => {
               const isPremium = isRestaurantPremiumActive(restaurant) || isVip || currentUser?.role === 'admin';
@@ -1963,8 +1981,17 @@ export const ProfileView: React.FC = () => {
                       </button>
 
                       <button
-                        onClick={() => deleteRestaurant(restaurant.id)}
-                        className="py-2 px-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs shadow-xs flex items-center justify-center gap-1 transition active:scale-95"
+                        onClick={() => {
+                          const confirmed = window.confirm(
+                            isKm
+                              ? `តើអ្នកពិតជាចង់លុបហាង "${restaurant.nameKh}" មែនទេ?\n(កូតាហាងរបស់អ្នកនឹងត្រូវបានរក្សាទុក ដើម្បីឱ្យអ្នកអាចបង្កើតហាងថ្មីជំនួសវិញដោយឥតគិតថ្លៃ $0)`
+                              : `Are you sure you want to delete "${restaurant.nameEn || restaurant.nameKh}"?\n(Your store slot will be preserved so you can create a replacement store for $0)`
+                          );
+                          if (confirmed) {
+                            deleteRestaurant(restaurant.id);
+                          }
+                        }}
+                        className="py-2 px-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs shadow-xs flex items-center justify-center gap-1 transition active:scale-95 cursor-pointer"
                         title={isKm ? 'លុបហាងដើម្បីបង្កើតហាងថ្មី' : 'Delete store'}
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -1995,7 +2022,9 @@ export const ProfileView: React.FC = () => {
                     {isKm ? 'ទំព័រសមាជិកភាព (VIP Membership Page)' : 'VIP Membership Page'}
                   </h4>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                    {isKm ? 'កញ្ចប់ $2.99 USD (30 ថ្ងៃ) ឬ $4.99 USD (90 ថ្ងៃ)' : '$2.99 USD (30 Days) or $4.99 USD (90 Days)'}
+                    {isKm
+                      ? `កញ្ចប់ $${shortPlan.priceUsd.toFixed(2)} USD (${shortPlan.durationDays} ថ្ងៃ) ឬ $${longPlan.priceUsd.toFixed(2)} USD (${longPlan.durationDays} ថ្ងៃ)`
+                      : `$${shortPlan.priceUsd.toFixed(2)} USD (${shortPlan.durationDays} Days) or $${longPlan.priceUsd.toFixed(2)} USD (${longPlan.durationDays} Days)`}
                   </p>
                 </div>
               </div>
@@ -2067,12 +2096,12 @@ export const ProfileView: React.FC = () => {
               <Crown className="w-4 h-4 fill-white" />
               <span>
                 {isVip 
-                  ? (isKm ? '🔄 បន្តសមាជិកភាព VIP ($2.99/30ថ្ងៃ • $4.99/90ថ្ងៃ)' : 'Renew VIP ($2.99/30d • $4.99/90d)')
+                  ? (isKm ? `🔄 បន្តសមាជិកភាព VIP ($${shortPlan.priceUsd.toFixed(2)}/${shortPlan.durationDays}ថ្ងៃ • $${longPlan.priceUsd.toFixed(2)}/${longPlan.durationDays}ថ្ងៃ)` : `Renew VIP ($${shortPlan.priceUsd.toFixed(2)}/${shortPlan.durationDays}d • $${longPlan.priceUsd.toFixed(2)}/${longPlan.durationDays}d)`)
                   : currentUser?.subscriptionStatus === 'pending'
                   ? (isKm ? '⏳ មើលស្ថានភាពសំណើដំឡើង VIP' : 'View Pending Request Status')
                   : currentUser?.subscriptionStatus === 'expired'
-                  ? (isKm ? '🔄 បន្តសមាជិកភាព VIP ឡើងវិញ ($2.99/30ថ្ងៃ • $4.99/90ថ្ងៃ)' : 'Renew VIP ($2.99/30d • $4.99/90d)')
-                  : (isKm ? '👑 ដំឡើងទៅជា Premium VIP ($2.99/30ថ្ងៃ • $4.99/90ថ្ងៃ)' : 'Upgrade to Premium VIP ($2.99/30d • $4.99/90d)')}
+                  ? (isKm ? `🔄 បន្តសមាជិកភាព VIP ឡើងវិញ ($${shortPlan.priceUsd.toFixed(2)}/${shortPlan.durationDays}ថ្ងៃ • $${longPlan.priceUsd.toFixed(2)}/${longPlan.durationDays}ថ្ងៃ)` : `Renew VIP ($${shortPlan.priceUsd.toFixed(2)}/${shortPlan.durationDays}d • $${longPlan.priceUsd.toFixed(2)}/${longPlan.durationDays}d)`)
+                  : (isKm ? `👑 ដំឡើងទៅជា Premium VIP ($${shortPlan.priceUsd.toFixed(2)}/${shortPlan.durationDays}ថ្ងៃ • $${longPlan.priceUsd.toFixed(2)}/${longPlan.durationDays}ថ្ងៃ)` : `Upgrade to Premium VIP ($${shortPlan.priceUsd.toFixed(2)}/${shortPlan.durationDays}d • $${longPlan.priceUsd.toFixed(2)}/${longPlan.durationDays}d)`)}
               </span>
             </button>
 
@@ -2090,17 +2119,21 @@ export const ProfileView: React.FC = () => {
             </button>
           </div>
 
-          {/* 10 Benefits Check-list */}
+          {/* Dynamic Benefits Check-list */}
           <div className="space-y-2">
             <h5 className="font-bold text-xs text-slate-900 dark:text-white flex items-center gap-1.5">
               <Sparkles className="w-4 h-4 text-amber-500" />
-              <span>{isKm ? 'អត្ថប្រយោជន៍ទាំង ១០ យ៉ាងនៃ Premium VIP:' : 'All 10 Premium VIP Benefits:'}</span>
+              <span>
+                {isKm
+                  ? `អត្ថប្រយោជន៍ទាំង ${dynamicBenefits.length} យ៉ាងនៃ Premium VIP:`
+                  : `All ${dynamicBenefits.length} Premium VIP Benefits:`}
+              </span>
             </h5>
 
             <div className="space-y-2">
-              {TEN_VIP_BENEFITS.map(b => (
+              {dynamicBenefits.map((b, idx) => (
                 <div 
-                  key={b.id}
+                  key={b.id || idx}
                   className="p-3 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 shadow-2xs flex items-start gap-2.5"
                 >
                   <div className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 text-xs font-bold font-mono ${
@@ -2108,7 +2141,7 @@ export const ProfileView: React.FC = () => {
                       ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' 
                       : 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
                   }`}>
-                    {b.id}
+                    {idx + 1}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
@@ -2122,7 +2155,7 @@ export const ProfileView: React.FC = () => {
                       </span>
                     </div>
                     <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
-                      {isKm ? b.descriptionKh : b.descriptionEn}
+                      {isKm ? b.descKh : b.descEn}
                     </p>
                   </div>
                 </div>

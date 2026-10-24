@@ -13,7 +13,7 @@
  * - If not configured yet, safely falls back to local device storage without errors.
  */
 
-import { User, Restaurant, TouristDestination, RegistrationTransaction, DeletedUserRecord, isSeedRestaurantId } from '../types';
+import { User, Restaurant, TouristDestination, RegistrationTransaction, DeletedUserRecord, AppSettings, isSeedRestaurantId } from '../types';
 
 export interface CloudApiConfig {
   supabaseUrl: string;
@@ -333,6 +333,7 @@ export async function syncAllAppDataWithSupabase(localState: {
   customRestaurants: Restaurant[];
   customDestinations?: TouristDestination[];
   paymentProofsVault: Record<string, any>;
+  appSettings?: AppSettings;
 }): Promise<{
   synced: boolean;
   mergedUsers: User[];
@@ -340,6 +341,7 @@ export async function syncAllAppDataWithSupabase(localState: {
   mergedTransactions: RegistrationTransaction[];
   mergedCustomRestaurants: Restaurant[];
   mergedPaymentProofsVault: Record<string, any>;
+  mergedAppSettings?: AppSettings;
 }> {
   if (!isSupabaseConfigured()) {
     return {
@@ -349,17 +351,19 @@ export async function syncAllAppDataWithSupabase(localState: {
       mergedTransactions: localState.transactions,
       mergedCustomRestaurants: localState.customRestaurants,
       mergedPaymentProofsVault: localState.paymentProofsVault,
+      mergedAppSettings: localState.appSettings,
     };
   }
 
   try {
     // 1. Pull existing cloud records
-    const [cloudUsers, cloudDeletedUsers, cloudTxns, cloudRests, cloudProofs] = await Promise.all([
+    const [cloudUsers, cloudDeletedUsers, cloudTxns, cloudRests, cloudProofs, cloudSettings] = await Promise.all([
       pullCloudDocument<User[]>('kft_cloud_users_v1'),
       pullCloudDocument<DeletedUserRecord[]>('kft_cloud_deleted_users_v1'),
       pullCloudDocument<RegistrationTransaction[]>('kft_cloud_transactions_v1'),
       pullCloudDocument<Restaurant[]>('kft_cloud_custom_restaurants_v1'),
       pullCloudDocument<Record<string, any>>('kft_cloud_payment_proofs_v1'),
+      pullCloudDocument<AppSettings>('kft_cloud_app_settings_v1'),
     ]);
 
     // 1b. Merge Deleted Users Registry (Permanent Blacklist)
@@ -526,10 +530,22 @@ export async function syncAllAppDataWithSupabase(localState: {
           subscriptionStartDate: localUser.subscriptionStartDate,
           subscriptionExpiryDate: localUser.subscriptionExpiryDate,
           paymentStatus: 'verified',
+          paidAdditionalStoreSlots: Math.max(
+            cloudUser.paidAdditionalStoreSlots || 0,
+            localUser.paidAdditionalStoreSlots || 0
+          ),
         });
       }
 
-      return normalizeVipExpiryOnUser({ ...cloudUser, ...localUser, id: cloudUser.id });
+      return normalizeVipExpiryOnUser({
+        ...cloudUser,
+        ...localUser,
+        id: cloudUser.id,
+        paidAdditionalStoreSlots: Math.max(
+          cloudUser.paidAdditionalStoreSlots || 0,
+          localUser.paidAdditionalStoreSlots || 0
+        ),
+      });
     };
 
     if (Array.isArray(cloudUsers)) {
@@ -600,6 +616,27 @@ export async function syncAllAppDataWithSupabase(localState: {
             paymentStatus: 'verified',
             paymentMethod: (bestTxn.paymentMethod as any) || usr.paymentMethod || 'KHQR',
             transactionRef: bestTxn.transactionRef || usr.transactionRef,
+          };
+        }
+      }
+
+      // Also reconcile verified additional_store_slot transactions so paidAdditionalStoreSlots is always accurate
+      const verifiedAdditionalStoreTxns = allTxnsForReconcile.filter(t => {
+        if (!t || t.type !== 'additional_store_slot' || t.status !== 'verified') return false;
+        return (
+          t.userId === usr.id ||
+          t.ownerId === usr.id ||
+          (usrEmail && t.userEmail && t.userEmail.toLowerCase().trim() === usrEmail)
+        );
+      });
+      if (verifiedAdditionalStoreTxns.length > 0) {
+        const uniqueVerifiedRefs = new Set(verifiedAdditionalStoreTxns.map(t => t.id));
+        const slotCount = Math.max(mergedUsers[i].paidAdditionalStoreSlots || 0, uniqueVerifiedRefs.size);
+        if (slotCount !== (mergedUsers[i].paidAdditionalStoreSlots || 0)) {
+          mergedUsers[i] = {
+            ...mergedUsers[i],
+            paidAdditionalStoreSlots: slotCount,
+            additionalStorePaymentIds: Array.from(uniqueVerifiedRefs),
           };
         }
       }
@@ -676,15 +713,35 @@ export async function syncAllAppDataWithSupabase(localState: {
       delete mergedPaymentProofsVault[delId];
     }
 
+    // 5b. Merge Centralized AppSettings (VIP durations, package prices, benefits, additional-store fee)
+    let mergedAppSettings: AppSettings | undefined = localState.appSettings;
+    if (cloudSettings && localState.appSettings) {
+      const cloudTime = cloudSettings.settingsUpdatedAt ? Date.parse(cloudSettings.settingsUpdatedAt) : 0;
+      const localTime = localState.appSettings.settingsUpdatedAt
+        ? Date.parse(localState.appSettings.settingsUpdatedAt)
+        : 0;
+      if (!Number.isNaN(cloudTime) && cloudTime > (Number.isNaN(localTime) ? 0 : localTime)) {
+        mergedAppSettings = { ...localState.appSettings, ...cloudSettings };
+      } else {
+        mergedAppSettings = { ...cloudSettings, ...localState.appSettings };
+      }
+    } else if (cloudSettings && !localState.appSettings) {
+      mergedAppSettings = cloudSettings;
+    }
+
     // 6. Push merged state back to Supabase Cloud
-    await Promise.all([
+    const pushPromises: Promise<boolean>[] = [
       pushCloudDocument('kft_cloud_users_v1', mergedUsers),
       pushCloudDocument('kft_cloud_deleted_users_v1', mergedDeletedUsers),
       pushCloudDocument('kft_cloud_transactions_v1', mergedTransactions),
       pushCloudDocument('kft_cloud_deleted_transactions_v1', Array.from(deletedTxnIdSet)),
       pushCloudDocument('kft_cloud_custom_restaurants_v1', mergedCustomRestaurants),
       pushCloudDocument('kft_cloud_payment_proofs_v1', mergedPaymentProofsVault),
-    ]);
+    ];
+    if (mergedAppSettings) {
+      pushPromises.push(pushCloudDocument('kft_cloud_app_settings_v1', mergedAppSettings));
+    }
+    await Promise.all(pushPromises);
 
     return {
       synced: true,
@@ -693,6 +750,7 @@ export async function syncAllAppDataWithSupabase(localState: {
       mergedTransactions,
       mergedCustomRestaurants,
       mergedPaymentProofsVault,
+      mergedAppSettings,
     };
   } catch (err) {
     console.warn('Supabase syncAllAppDataWithSupabase error:', err);
@@ -703,6 +761,7 @@ export async function syncAllAppDataWithSupabase(localState: {
       mergedTransactions: localState.transactions,
       mergedCustomRestaurants: localState.customRestaurants,
       mergedPaymentProofsVault: localState.paymentProofsVault,
+      mergedAppSettings: localState.appSettings,
     };
   }
 }

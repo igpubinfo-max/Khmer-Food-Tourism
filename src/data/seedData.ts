@@ -1,4 +1,4 @@
-import { FoodItem, Restaurant, TouristDestination, CommunityPost, User, AppSettings, RegistrationTransaction } from '../types';
+import { FoodItem, Restaurant, TouristDestination, CommunityPost, User, AppSettings, RegistrationTransaction, TEN_VIP_BENEFITS } from '../types';
 import { initial100Foods } from './seedFoods';
 import { initial100Restaurants } from './seedRestaurants';
 import { initial100Destinations } from './seedDestinations';
@@ -21,8 +21,19 @@ export const initialAppSettings: AppSettings = {
   isAdminInitialized: true,
   promotionalFeeUsd: 2.99,
   promotionalFeeEnabled: true,
-  promotionPeriodKh: 'កញ្ចប់ VIP ផ្លូវការ៖ $2.99 សម្រាប់ 30 ថ្ងៃ ឬ $4.99 សម្រាប់ 90 ថ្ងៃ',
-  promotionPeriodEn: 'Official VIP Plans: $2.99 for 30 Days or $4.99 for 90 Days',
+  promotionPeriodKh: 'កញ្ចប់ VIP ផ្លូវការ៖ $2.99 សម្រាប់ 10 ថ្ងៃ ឬ $4.99 សម្រាប់ 90 ថ្ងៃ • បន្ថែមហាងថ្មី៖ $10.00 / ១ ហាង',
+  promotionPeriodEn: 'Official VIP Plans: $2.99 for 10 Days or $4.99 for 90 Days • Additional Store: $10.00 / store',
+  vipShortDurationDays: 10,
+  vipShortPriceUsd: 2.99,
+  vipShortNameKh: 'កញ្ចប់ VIP 10 ថ្ងៃ',
+  vipShortNameEn: 'VIP 10 Days',
+  vipLongDurationDays: 90,
+  vipLongPriceUsd: 4.99,
+  vipLongNameKh: 'កញ្ចប់ VIP 90 ថ្ងៃ',
+  vipLongNameEn: 'VIP 90 Days',
+  additionalStoreFeeUsd: 10.0,
+  includedFreeStoresPerVip: 1,
+  vipBenefitsList: TEN_VIP_BENEFITS,
 };
 
 // 100+ Authentic Khmer Dishes

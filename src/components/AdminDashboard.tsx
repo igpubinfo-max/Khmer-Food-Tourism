@@ -7,7 +7,10 @@ import {
   ShieldCheck, ShieldAlert, Clock, RefreshCw, FileText, Check, Ban,
   Sparkles, Image as ImageIcon, Search, Camera, Upload
 } from 'lucide-react';
-import { FoodCategorySlug, DestinationCategorySlug, UserRole, User, RegistrationTransaction, FoodItem, TouristDestination, isSeedRestaurantId } from '../types';
+import {
+  FoodCategorySlug, DestinationCategorySlug, UserRole, User, RegistrationTransaction, FoodItem, TouristDestination, isSeedRestaurantId,
+  VipBenefitItem, TEN_VIP_BENEFITS, getDynamicVipBenefits, getAdditionalStoreFeeUsd
+} from '../types';
 import { getSecurityAuditLogs, SecurityAuditEntry, revokeAdminSession, getOfficialOwnershipCertificate, verifyAppOwnershipAndDomainIntegrity } from '../utils/security';
 import { FoodImageModal } from './FoodImageModal';
 import { TouristImageModal } from './TouristImageModal';
@@ -101,6 +104,41 @@ export const AdminDashboard: React.FC = () => {
   const [promotionalFeeUsd, setPromotionalFeeUsd] = useState(appSettings.promotionalFeeUsd || 2.99);
   const [promotionPeriodKh, setPromotionPeriodKh] = useState(appSettings.promotionPeriodKh || '');
   const [newAdminPass, setNewAdminPass] = useState('');
+
+  // Dynamic VIP Membership & Store Fee Admin Settings States
+  const [vipShortDurationDays, setVipShortDurationDays] = useState<number>(appSettings.vipShortDurationDays ?? 10);
+  const [vipShortPriceUsd, setVipShortPriceUsd] = useState<number>(appSettings.vipShortPriceUsd ?? 2.99);
+  const [vipShortNameKh, setVipShortNameKh] = useState<string>(appSettings.vipShortNameKh || `VIP ${appSettings.vipShortDurationDays ?? 10} ថ្ងៃ`);
+  const [vipShortNameEn, setVipShortNameEn] = useState<string>(appSettings.vipShortNameEn || `VIP ${appSettings.vipShortDurationDays ?? 10} Days`);
+  const [vipLongDurationDays, setVipLongDurationDays] = useState<number>(appSettings.vipLongDurationDays ?? 90);
+  const [vipLongPriceUsd, setVipLongPriceUsd] = useState<number>(appSettings.vipLongPriceUsd ?? 4.99);
+  const [vipLongNameKh, setVipLongNameKh] = useState<string>(appSettings.vipLongNameKh || `VIP ${appSettings.vipLongDurationDays ?? 90} ថ្ងៃ`);
+  const [vipLongNameEn, setVipLongNameEn] = useState<string>(appSettings.vipLongNameEn || `VIP ${appSettings.vipLongDurationDays ?? 90} Days`);
+  const [additionalStoreFeeUsd, setAdditionalStoreFeeUsd] = useState<number>(getAdditionalStoreFeeUsd(appSettings));
+  const [vipBenefitsDraft, setVipBenefitsDraft] = useState<VipBenefitItem[]>(() => getDynamicVipBenefits(appSettings));
+
+  // Keep Admin settings form synchronized when appSettings updates from Cloud Sync
+  useEffect(() => {
+    setApkUrl(appSettings.apkDownloadUrl);
+    setPlayStoreUrl(appSettings.playStoreUrl);
+    setAppStoreUrl(appSettings.appStoreUrl);
+    setSupportQrUrl(appSettings.supportQrImageUrl);
+    setBankName(appSettings.supportBankName);
+    setAccountName(appSettings.supportAccountName);
+    setSupportMessageKh(appSettings.supportMessageKh);
+    setPromotionalFeeUsd(appSettings.promotionalFeeUsd || 2.99);
+    setPromotionPeriodKh(appSettings.promotionPeriodKh || '');
+    setVipShortDurationDays(appSettings.vipShortDurationDays ?? 10);
+    setVipShortPriceUsd(appSettings.vipShortPriceUsd ?? 2.99);
+    setVipShortNameKh(appSettings.vipShortNameKh || `VIP ${appSettings.vipShortDurationDays ?? 10} ថ្ងៃ`);
+    setVipShortNameEn(appSettings.vipShortNameEn || `VIP ${appSettings.vipShortDurationDays ?? 10} Days`);
+    setVipLongDurationDays(appSettings.vipLongDurationDays ?? 90);
+    setVipLongPriceUsd(appSettings.vipLongPriceUsd ?? 4.99);
+    setVipLongNameKh(appSettings.vipLongNameKh || `VIP ${appSettings.vipLongDurationDays ?? 90} ថ្ងៃ`);
+    setVipLongNameEn(appSettings.vipLongNameEn || `VIP ${appSettings.vipLongDurationDays ?? 90} Days`);
+    setAdditionalStoreFeeUsd(getAdditionalStoreFeeUsd(appSettings));
+    setVipBenefitsDraft(getDynamicVipBenefits(appSettings));
+  }, [appSettings]);
 
   // Transaction filter & Full-Resolution Payment Proof Inspection Modal
   // Default to 'pending' so approved/rejected payment requests automatically hide/archive out of the pending queue
@@ -224,6 +262,26 @@ export const AdminDashboard: React.FC = () => {
       supportMessageKh,
       promotionalFeeUsd: Number(promotionalFeeUsd),
       promotionPeriodKh,
+      vipShortDurationDays: Math.max(1, Math.round(Number(vipShortDurationDays) || 10)),
+      vipShortPriceUsd: Math.max(0.01, Number(vipShortPriceUsd) || 2.99),
+      vipShortNameKh: vipShortNameKh.trim() || `VIP ${Math.max(1, Math.round(Number(vipShortDurationDays) || 10))} ថ្ងៃ`,
+      vipShortNameEn: vipShortNameEn.trim() || `VIP ${Math.max(1, Math.round(Number(vipShortDurationDays) || 10))} Days`,
+      vipLongDurationDays: Math.max(1, Math.round(Number(vipLongDurationDays) || 90)),
+      vipLongPriceUsd: Math.max(0.01, Number(vipLongPriceUsd) || 4.99),
+      vipLongNameKh: vipLongNameKh.trim() || `VIP ${Math.max(1, Math.round(Number(vipLongDurationDays) || 90))} ថ្ងៃ`,
+      vipLongNameEn: vipLongNameEn.trim() || `VIP ${Math.max(1, Math.round(Number(vipLongDurationDays) || 90))} Days`,
+      additionalStoreFeeUsd: Math.max(0, Number(additionalStoreFeeUsd)),
+      vipBenefitsList: vipBenefitsDraft.map((b, idx) => ({
+        id: idx + 1,
+        titleKh: b.titleKh.trim() || `អត្ថប្រយោជន៍ទី ${idx + 1}`,
+        titleEn: b.titleEn.trim() || `VIP Benefit #${idx + 1}`,
+        descriptionKh: (b.descriptionKh || b.descKh || '').trim(),
+        descriptionEn: (b.descriptionEn || b.descEn || '').trim(),
+        descKh: (b.descKh || b.descriptionKh || '').trim(),
+        descEn: (b.descEn || b.descriptionEn || '').trim(),
+        iconName: b.iconName || 'Sparkles',
+        category: b.category || 'promotion',
+      })),
     });
   };
 
@@ -1296,19 +1354,27 @@ export const AdminDashboard: React.FC = () => {
                                 <span className="font-bold text-[#064E3B] dark:text-emerald-400 font-mono text-sm">
                                   ${t.amountUsd.toFixed(2)} {t.currency || 'USD'}
                                 </span>
-                                {t.durationDays && (
+                                {t.type === 'additional_store_slot' ? (
+                                  <span className="px-2 py-0.5 rounded-md bg-purple-500/20 text-purple-800 dark:text-purple-300 font-mono text-[10px] font-bold">
+                                    🏪 ហាងបន្ថែមទី {t.storeSlotNumber || 2} (+1 Store Slot)
+                                  </span>
+                                ) : t.durationDays ? (
                                   <span className="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-800 dark:text-amber-300 font-mono text-[10px] font-bold">
                                     {t.durationDays} Days (
                                     {t.planType ||
-                                      (t.durationDays <= 30 ? '30 Days ($2.99)' : '90 Days ($4.99)')}
+                                      `${t.durationDays} Days ($${t.amountUsd.toFixed(2)})`}
                                     )
                                   </span>
-                                )}
+                                ) : null}
                               </div>
 
                               <div className="font-bold text-[#0F172A] dark:text-stone-100 font-khmer text-sm">
-                                {t.type === 'user_vip_upgrade'
-                                  ? `👑 ដំឡើងសមាជិកភាព VIP (${t.durationDays || 30} ថ្ងៃ)៖ ${
+                                {t.type === 'additional_store_slot'
+                                  ? `🏪 ស្នើសុំបើកសិទ្ធិបន្ថែមហាងថ្មីទី ${t.storeSlotNumber || 2} (+1 ហាង • $${t.amountUsd.toFixed(2)} USD)៖ ${
+                                      t.userName || t.ownerName || 'VIP Store Owner'
+                                    }`
+                                  : t.type === 'user_vip_upgrade'
+                                  ? `👑 ដំឡើងសមាជិកភាព VIP (${t.durationDays || 10} ថ្ងៃ)៖ ${
                                       t.userName || t.ownerName || 'User VIP'
                                     }`
                                   : t.restaurantNameKh}
@@ -1484,11 +1550,15 @@ export const AdminDashboard: React.FC = () => {
                                     <Check className="w-4 h-4 text-emerald-200" />
                                     <span>
                                       {isKm
-                                        ? t.type === 'user_vip_upgrade'
-                                          ? `✅ អនុម័តដំឡើង VIP (${t.durationDays || 90} ថ្ងៃ)`
+                                        ? t.type === 'additional_store_slot'
+                                          ? `✅ អនុម័តបើកហាងបន្ថែមទី ${t.storeSlotNumber || 2} (+1 ហាង)`
+                                          : t.type === 'user_vip_upgrade'
+                                          ? `✅ អនុម័តដំឡើង VIP (${t.durationDays || 10} ថ្ងៃ)`
                                           : 'ផ្ទៀងផ្ទាត់ & ធ្វើឱ្យសកម្ម'
+                                        : t.type === 'additional_store_slot'
+                                        ? `Approve Store Slot #${t.storeSlotNumber || 2} (+1 Store)`
                                         : t.type === 'user_vip_upgrade'
-                                        ? `Approve VIP (${t.durationDays || 90} Days)`
+                                        ? `Approve VIP (${t.durationDays || 10} Days)`
                                         : 'Verify & Activate'}
                                     </span>
                                   </button>
@@ -3180,6 +3250,334 @@ export const AdminDashboard: React.FC = () => {
           {/* SETTINGS TAB */}
           {activeTab === 'settings' && (
             <div className="space-y-6">
+              {/* Requirement 3 & 4: Admin VIP Membership Durations (10 Days & 90 Days), Prices, Benefits & Additional Store Fee ($10) */}
+              <div className="bg-white dark:bg-stone-800 p-5 rounded-3xl border-2 border-amber-500/40 shadow-sm space-y-5 font-khmer">
+                <div className="flex items-start justify-between gap-3 pb-3 border-b border-stone-200 dark:border-stone-700 flex-wrap">
+                  <div className="flex items-center gap-2.5">
+                    <div className="p-2.5 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 text-slate-950 shadow-sm">
+                      <Sparkles className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h4 className="font-moul text-stone-900 dark:text-stone-100 text-sm">
+                        {isKm
+                          ? '👑 ការកំណត់កញ្ចប់សមាជិកភាព VIP និងតម្លៃបន្ថែមហាង (Global Sync)'
+                          : '👑 Admin VIP Packages, Durations, Benefits & Store Fee Management'}
+                      </h4>
+                      <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-0.5">
+                        {isKm
+                          ? 'កែប្រែរយៈពេលកញ្ចប់ VIP (10 ថ្ងៃ និង 90 ថ្ងៃ) តម្លៃកញ្ចប់ អត្ថប្រយោជន៍ និងតម្លៃបន្ថែមហាង ($10/ហាង)។ ការកែប្រែនឹងធ្វើបច្ចុប្បន្នភាពដោយស្វ័យប្រវត្តិទូទាំងកម្មវិធី និង Server ដោយមិនប៉ះពាល់សមាជិកភាពដែលកំពុងសកម្មឡើយ។'
+                          : 'Modify VIP package durations (10 days & 90 days), prices, benefits, and additional store fee ($10/store). Changes synchronize globally without affecting active memberships.'}
+                      </p>
+                    </div>
+                  </div>
+                  {appSettings.settingsUpdatedAt && (
+                    <span className="px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 text-[10px] font-mono font-bold">
+                      Synced: {appSettings.settingsUpdatedAt.replace('T', ' ').slice(0, 16)}
+                    </span>
+                  )}
+                </div>
+
+                <form onSubmit={handleSaveSettings} className="space-y-4">
+                  {/* Short & Long VIP Packages Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Package 1: Short VIP Plan (Default 10 Days) */}
+                    <div className="p-4 rounded-2xl bg-amber-50/60 dark:bg-stone-900/80 border border-amber-300 dark:border-amber-800/60 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-xs text-amber-900 dark:text-amber-300">
+                          {isKm ? '📦 កញ្ចប់ VIP រយៈពេលខ្លី (ឧ. 10 ថ្ងៃ)' : '📦 Short VIP Package (e.g. 10 Days)'}
+                        </span>
+                        <span className="px-2 py-0.5 rounded-full bg-amber-500 text-slate-950 font-black text-[10px]">
+                          Plan #1
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2.5">
+                        <div>
+                          <label className="block text-[11px] font-bold text-stone-700 dark:text-stone-300 mb-1">
+                            {isKm ? 'រយៈពេល (ថ្ងៃ / Days) *' : 'Duration (Days) *'}
+                          </label>
+                          <input
+                            type="number"
+                            min={1}
+                            max={3650}
+                            required
+                            value={vipShortDurationDays}
+                            onChange={e => {
+                              const days = Math.max(1, parseInt(e.target.value) || 10);
+                              setVipShortDurationDays(days);
+                              setVipShortNameKh(`VIP ${days} ថ្ងៃ`);
+                              setVipShortNameEn(`VIP ${days} Days`);
+                            }}
+                            className="w-full px-3 py-2 rounded-xl border border-amber-300 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-white font-mono font-bold text-xs"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[11px] font-bold text-stone-700 dark:text-stone-300 mb-1">
+                            {isKm ? 'តម្លៃកញ្ចប់ ($ USD) *' : 'Package Price ($ USD) *'}
+                          </label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            min={0.01}
+                            required
+                            value={vipShortPriceUsd}
+                            onChange={e => setVipShortPriceUsd(parseFloat(e.target.value) || 0)}
+                            className="w-full px-3 py-2 rounded-xl border border-amber-300 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-white font-mono font-bold text-xs"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2.5">
+                        <div>
+                          <label className="block text-[11px] font-bold text-stone-700 dark:text-stone-300 mb-1">
+                            {isKm ? 'ឈ្មោះកញ្ចប់ (ខ្មែរ)' : 'Plan Name (Khmer)'}
+                          </label>
+                          <input
+                            type="text"
+                            value={vipShortNameKh}
+                            onChange={e => setVipShortNameKh(e.target.value)}
+                            className="w-full px-3 py-2 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-white text-xs"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[11px] font-bold text-stone-700 dark:text-stone-300 mb-1">
+                            {isKm ? 'ឈ្មោះកញ្ចប់ (English)' : 'Plan Name (English)'}
+                          </label>
+                          <input
+                            type="text"
+                            value={vipShortNameEn}
+                            onChange={e => setVipShortNameEn(e.target.value)}
+                            className="w-full px-3 py-2 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-white text-xs"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Package 2: Long VIP Plan (Default 90 Days) */}
+                    <div className="p-4 rounded-2xl bg-emerald-50/60 dark:bg-stone-900/80 border border-emerald-300 dark:border-emerald-800/60 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-xs text-emerald-900 dark:text-emerald-300">
+                          {isKm ? '📦 កញ្ចប់ VIP រយៈពេលវែង (ឧ. 90 ថ្ងៃ)' : '📦 Long VIP Package (e.g. 90 Days)'}
+                        </span>
+                        <span className="px-2 py-0.5 rounded-full bg-emerald-600 text-white font-black text-[10px]">
+                          Plan #2
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2.5">
+                        <div>
+                          <label className="block text-[11px] font-bold text-stone-700 dark:text-stone-300 mb-1">
+                            {isKm ? 'រយៈពេល (ថ្ងៃ / Days) *' : 'Duration (Days) *'}
+                          </label>
+                          <input
+                            type="number"
+                            min={1}
+                            max={3650}
+                            required
+                            value={vipLongDurationDays}
+                            onChange={e => {
+                              const days = Math.max(1, parseInt(e.target.value) || 90);
+                              setVipLongDurationDays(days);
+                              setVipLongNameKh(`VIP ${days} ថ្ងៃ`);
+                              setVipLongNameEn(`VIP ${days} Days`);
+                            }}
+                            className="w-full px-3 py-2 rounded-xl border border-emerald-300 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-white font-mono font-bold text-xs"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[11px] font-bold text-stone-700 dark:text-stone-300 mb-1">
+                            {isKm ? 'តម្លៃកញ្ចប់ ($ USD) *' : 'Package Price ($ USD) *'}
+                          </label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            min={0.01}
+                            required
+                            value={vipLongPriceUsd}
+                            onChange={e => setVipLongPriceUsd(parseFloat(e.target.value) || 0)}
+                            className="w-full px-3 py-2 rounded-xl border border-emerald-300 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-white font-mono font-bold text-xs"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2.5">
+                        <div>
+                          <label className="block text-[11px] font-bold text-stone-700 dark:text-stone-300 mb-1">
+                            {isKm ? 'ឈ្មោះកញ្ចប់ (ខ្មែរ)' : 'Plan Name (Khmer)'}
+                          </label>
+                          <input
+                            type="text"
+                            value={vipLongNameKh}
+                            onChange={e => setVipLongNameKh(e.target.value)}
+                            className="w-full px-3 py-2 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-white text-xs"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[11px] font-bold text-stone-700 dark:text-stone-300 mb-1">
+                            {isKm ? 'ឈ្មោះកញ្ចប់ (English)' : 'Plan Name (English)'}
+                          </label>
+                          <input
+                            type="text"
+                            value={vipLongNameEn}
+                            onChange={e => setVipLongNameEn(e.target.value)}
+                            className="w-full px-3 py-2 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-white text-xs"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Additional Store Fee Configuration ($10 per additional store beyond the 1st) */}
+                  <div className="p-4 rounded-2xl bg-purple-50/60 dark:bg-stone-900/80 border border-purple-300 dark:border-purple-800/60 space-y-2">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
+                      <div>
+                        <h5 className="font-bold text-xs text-purple-900 dark:text-purple-300 flex items-center gap-1.5">
+                          <Store className="w-4 h-4 text-purple-600" />
+                          <span>
+                            {isKm
+                              ? '🏪 តម្លៃបន្ថែមហាងថ្មីលើសពីហាងទី ១ (Additional Store Fee USD)'
+                              : '🏪 Additional Store Fee (Per Store Beyond First)'}
+                          </span>
+                        </h5>
+                        <p className="text-[11px] text-stone-600 dark:text-stone-400">
+                          {isKm
+                            ? 'ហាងទី ១ រួមបញ្ចូលឥតគិតថ្លៃ ($0) • ការកែប្រែ ឬប្តូរហាងចាស់ដាក់ហាងថ្មីគឺឥតគិតថ្លៃ ($0) • បន្ថែមហាងបន្ទាប់គិតថ្លៃតាមការកំណត់ខាងក្រោម៖'
+                            : '1st store is included free ($0) • Editing or replacing an existing store is free ($0) • Each additional store requires verified payment of:'}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-stone-700 dark:text-stone-300">$ USD:</span>
+                        <input
+                          type="number"
+                          step="0.50"
+                          min={0}
+                          required
+                          value={additionalStoreFeeUsd}
+                          onChange={e => setAdditionalStoreFeeUsd(Math.max(0, parseFloat(e.target.value) || 0))}
+                          className="w-28 px-3 py-2 rounded-xl border-2 border-purple-400 dark:border-purple-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-white font-mono font-black text-sm text-center"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Dynamic VIP Benefits List Editor */}
+                  <div className="p-4 rounded-2xl bg-stone-50 dark:bg-stone-900/80 border border-stone-200 dark:border-stone-700 space-y-3">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
+                      <div>
+                        <h5 className="font-bold text-xs text-stone-900 dark:text-stone-100">
+                          {isKm
+                            ? `✨ បញ្ជីអត្ថប្រយោជន៍សមាជិកភាព VIP (${vipBenefitsDraft.length} ចំណុច)`
+                            : `✨ VIP Membership Benefits (${vipBenefitsDraft.length} Items)`}
+                        </h5>
+                        <p className="text-[10px] text-stone-500">
+                          {isKm
+                            ? 'កែប្រែចំណងជើង ឬបន្ថែម/លុបអត្ថប្រយោជន៍ VIP ដែលបង្ហាញក្នុងទំព័រដំឡើង VIP និងទំព័រគ្រប់គ្រងហាង'
+                            : 'Edit, add, or remove VIP benefits shown across the app'}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setVipBenefitsDraft(prev => [
+                              ...prev,
+                              {
+                                id: prev.length + 1,
+                                titleKh: `អត្ថប្រយោជន៍ពិសេសទី ${prev.length + 1}`,
+                                titleEn: `Exclusive VIP Benefit #${prev.length + 1}`,
+                                descKh: 'អត្ថប្រយោជន៍បន្ថែមសម្រាប់សមាជិក VIP',
+                                descEn: 'Additional benefit for VIP members',
+                              },
+                            ])
+                          }
+                          className="px-2.5 py-1 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] flex items-center gap-1 cursor-pointer"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                          <span>{isKm ? 'បន្ថែមអត្ថប្រយោជន៍' : 'Add Benefit'}</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setVipBenefitsDraft(TEN_VIP_BENEFITS)}
+                          className="px-2.5 py-1 rounded-xl bg-stone-200 dark:bg-stone-700 hover:bg-stone-300 text-stone-700 dark:text-stone-200 font-bold text-[11px] cursor-pointer"
+                        >
+                          {isKm ? 'កំណត់លំនាំដើម (10)' : 'Reset Default (10)'}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+                      {vipBenefitsDraft.map((benefit, index) => (
+                        <div
+                          key={index}
+                          className="p-2.5 rounded-xl bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 flex items-start gap-2"
+                        >
+                          <span className="w-5 h-5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 font-bold text-[10px] flex items-center justify-center shrink-0 mt-1">
+                            {index + 1}
+                          </span>
+                          <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <input
+                              type="text"
+                              value={benefit.titleKh}
+                              onChange={e => {
+                                const val = e.target.value;
+                                setVipBenefitsDraft(prev =>
+                                  prev.map((item, idx) => (idx === index ? { ...item, titleKh: val } : item))
+                                );
+                              }}
+                              placeholder="ចំណងជើងអត្ថប្រយោជន៍ (ខ្មែរ)"
+                              className="px-2.5 py-1.5 rounded-lg border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-900 text-xs text-stone-900 dark:text-white font-bold"
+                            />
+                            <input
+                              type="text"
+                              value={benefit.titleEn}
+                              onChange={e => {
+                                const val = e.target.value;
+                                setVipBenefitsDraft(prev =>
+                                  prev.map((item, idx) => (idx === index ? { ...item, titleEn: val } : item))
+                                );
+                              }}
+                              placeholder="Benefit Title (English)"
+                              className="px-2.5 py-1.5 rounded-lg border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-900 text-xs text-stone-900 dark:text-white"
+                            />
+                          </div>
+                          {vipBenefitsDraft.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setVipBenefitsDraft(prev => prev.filter((_, idx) => idx !== index))
+                              }
+                              className="p-1.5 rounded-lg bg-rose-50 dark:bg-rose-950/50 text-rose-600 hover:bg-rose-100 transition cursor-pointer shrink-0"
+                              title={isKm ? 'លុបចំណុចនេះ' : 'Remove benefit'}
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-3 pt-1 flex-wrap">
+                    <p className="text-[11px] text-stone-500">
+                      {isKm
+                        ? '🔒 ការផ្លាស់ប្តូរតម្លៃ និងរយៈពេល នឹងអនុវត្តចំពោះការទិញថ្មីៗប៉ុណ្ណោះ ដោយរក្សាទុកសុពលភាពសមាជិកចាស់ និងប្រវត្តិទូទាត់ទាំងអស់។'
+                        : '🔒 Updated prices and durations apply to future purchases while preserving existing memberships and payment history.'}
+                    </p>
+                    <button
+                      type="submit"
+                      className="px-6 py-3 bg-gradient-to-r from-[#064E3B] to-[#047857] hover:from-[#047857] hover:to-[#065F46] text-white font-extrabold rounded-2xl shadow-md transition-all text-xs flex items-center gap-2 active:scale-95 cursor-pointer"
+                    >
+                      <CheckCircle2 className="w-4 h-4 text-amber-300" />
+                      <span>
+                        {isKm
+                          ? '💾 រក្សាទុក & ធ្វើបច្ចុប្បន្នភាពការកំណត់ VIP ទូទាំងកម្មវិធី'
+                          : '💾 Save & Synchronize VIP Settings Globally'}
+                      </span>
+                    </button>
+                  </div>
+                </form>
+              </div>
+
               {/* Installation & Store URLs */}
               <div className="bg-white dark:bg-stone-800 p-5 rounded-3xl border border-stone-200 dark:border-stone-700 shadow-sm space-y-4">
                 <div className="flex items-center gap-2.5 pb-2 border-b border-stone-200 dark:border-stone-700">
