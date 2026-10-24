@@ -1,0 +1,52 @@
+name: Build iOS App Store Package
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-ios:
+    runs-on: macos-latest
+
+    steps:
+      - name: 1. Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 2. Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: 3. Install Dependencies & Build Web Assets
+        run: |
+          npm install
+          npm run build
+          npx cap sync ios
+
+      - name: 4. Build iOS Archive (Xcode)
+        run: |
+          cd ios/App
+          xcodebuild -project App.xcodeproj \
+            -scheme App \
+            -configuration Release \
+            -sdk iphoneos \
+            -archivePath $RUNNER_TEMP/KhmerFoodTourism.xcarchive \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            archive
+
+      - name: 5. Package Unsigned .ipa Artifact
+        run: |
+          mkdir -p $RUNNER_TEMP/Payload
+          cp -r $RUNNER_TEMP/KhmerFoodTourism.xcarchive/Products/Applications/App.app $RUNNER_TEMP/Payload/
+          cd $RUNNER_TEMP
+          zip -r KhmerFoodTourism-v2.1.0-iOS.ipa Payload
+
+      - name: 6. Upload iOS Package Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Khmer-Food-Tourism-iOS-Package
+          path: ${{ runner.temp }}/KhmerFoodTourism-v2.1.0-iOS.ipa
