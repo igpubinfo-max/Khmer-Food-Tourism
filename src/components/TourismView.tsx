@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
+import { isUserVipActive } from '../types';
 import { TouristCard } from './TouristCard';
 import { Compass, Globe, Loader2, Plus } from 'lucide-react';
 import {
@@ -241,7 +242,7 @@ export const TourismView: React.FC = () => {
                 return (
                   <div key={place.placeId} className="space-y-1.5">
                     <TouristCard destination={existingDest || mappedDest} />
-                    {currentUser?.role === 'admin' && (
+                    {(currentUser?.role === 'admin' || isUserVipActive(currentUser)) && (
                       <button
                         onClick={() => importGooglePlaceToApp(place, { category: 'tourism' })}
                         className={`w-full py-1.5 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer ${

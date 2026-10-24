@@ -31,7 +31,8 @@ export const ProfileView: React.FC = () => {
     resetAllData, showToast, updateCurrentUserProfile,
     openUpgradeVipModal,
     supportTickets, openSupportTicketModal, transactions,
-    setActiveTab, setIsRestaurantCheckInModalOpen
+    setActiveTab, setIsRestaurantCheckInModalOpen,
+    openGoogleMapsSearchModal
   } = useApp();
 
   const isKm = language === 'km';
@@ -808,6 +809,18 @@ export const ProfileView: React.FC = () => {
                 <div className="text-[10px] text-emerald-200 truncate">{isKm ? 'ឆ្លើយតបសំណើអតិថិជន' : 'Resolve tickets'}</div>
               </div>
             </button>
+
+            <button
+              type="button"
+              onClick={() => openGoogleMapsSearchModal('all')}
+              className="p-3 rounded-2xl bg-emerald-500/30 hover:bg-emerald-500/40 border border-emerald-300/40 text-white font-bold text-xs flex items-center gap-2.5 transition active:scale-95 cursor-pointer sm:col-span-3"
+            >
+              <Globe className="w-4 h-4 shrink-0 text-amber-300" />
+              <div className="text-left">
+                <div className="font-bold text-amber-300">{isKm ? '🗺️ ស្វែងរកហាង & ទីតាំងលើ Google Maps (២៥ ខេត្ត/ក្រុង)' : '🗺️ Google Maps Places Search (25 Provinces)'}</div>
+                <div className="text-[10px] text-emerald-100">{isKm ? 'ស្វែងរកហាងកាហ្វេ ភោជនីយដ្ឋាន & តំបន់ទេសចរណ៍ទូទាំងកម្ពុជា' : 'Search cafés, restaurants & places across Cambodia'}</div>
+              </div>
+            </button>
           </div>
         </div>
       ) : isVip ? (
@@ -973,22 +986,21 @@ export const ProfileView: React.FC = () => {
 
               <button
                 type="button"
-                onClick={() => {
-                  if (myRestaurants[0]) {
-                    (window as any).__kft_manage_initial_tab = 'info';
-                    setManagingRestaurant(myRestaurants[0]);
-                    setIsManageMenuModalOpen(true);
-                  } else {
-                    setIsVipAddRestaurantModalOpen(true);
-                  }
-                }}
-                className="p-2.5 rounded-xl bg-amber-50/90 dark:bg-slate-800 border border-amber-300/70 dark:border-amber-500/40 hover:border-amber-400 flex items-center gap-2 text-left transition cursor-pointer active:scale-95"
+                onClick={() => openGoogleMapsSearchModal('all')}
+                className="p-2.5 rounded-xl bg-emerald-50/90 dark:bg-emerald-950/60 border border-emerald-400/70 hover:border-emerald-500 flex items-center gap-2 text-left transition cursor-pointer active:scale-95 col-span-2"
               >
-                <span className="text-base">📍</span>
+                <span className="text-base">🗺️</span>
                 <div className="min-w-0 flex-1">
-                  <div className="font-bold text-slate-900 dark:text-white truncate">{isKm ? 'Pin មាសលើផែនទី' : 'Golden Map Pin'}</div>
-                  <div className="text-[9px] text-emerald-600 dark:text-emerald-400 font-bold">{isKm ? '✓ នាំផ្លូវ 1-Tap Directions' : '✓ Direct 1-tap route'}</div>
+                  <div className="font-bold text-slate-900 dark:text-white truncate">
+                    {isKm ? 'ស្វែងរកទីតាំងលើ Google Maps (Places API)' : 'Google Maps Places Search (VIP Access)'}
+                  </div>
+                  <div className="text-[9px] text-emerald-700 dark:text-emerald-300 font-bold">
+                    {isKm ? '✓ ស្វែងរកហាងកាហ្វេ ភោជនីយដ្ឋាន & តំបន់ទេសចរណ៍ទូទាំងកម្ពុជា' : '✓ Search cafés, restaurants & places across Cambodia'}
+                  </div>
                 </div>
+                <span className="px-2 py-0.5 rounded-full bg-emerald-600 text-white text-[9px] font-black shrink-0">
+                  {isKm ? 'បើកស្វែងរក' : 'Search'}
+                </span>
               </button>
             </div>
 
@@ -1634,6 +1646,33 @@ export const ProfileView: React.FC = () => {
             <div className="text-xs font-bold text-white mt-1">
               {isKm ? 'ការជូនដំណឹង' : 'Notifications'}
             </div>
+          </button>
+
+          {/* G. ស្វែងរកទីតាំងលើ Google Maps (VIP & Admin) */}
+          <button
+            onClick={() => openGoogleMapsSearchModal('all')}
+            className="col-span-2 p-2.5 rounded-2xl bg-gradient-to-r from-emerald-700/60 to-teal-700/60 hover:from-emerald-700/80 hover:to-teal-700/80 border border-amber-400/50 text-left transition relative cursor-pointer flex items-center justify-between gap-2"
+          >
+            <div className="flex items-center gap-2">
+              <span className="text-lg">🗺️</span>
+              <div>
+                <div className="text-xs font-bold text-amber-300">
+                  {isKm ? 'ស្វែងរកហាង & ទីតាំងលើ Google Maps' : 'Google Maps Places Search'}
+                </div>
+                <div className="text-[10px] text-emerald-100">
+                  {isKm ? 'ហាងកាហ្វេ ភោជនីយដ្ឋាន និងតំបន់ទេសចរណ៍ទូទាំងកម្ពុជា' : 'Search cafés, restaurants & attractions across Cambodia'}
+                </div>
+              </div>
+            </div>
+            {!isVip && currentUser?.role !== 'admin' ? (
+              <span className="px-2 py-0.5 rounded-full bg-amber-400/25 border border-amber-300/50 text-amber-200 text-[9px] font-extrabold flex items-center gap-0.5 shrink-0">
+                <Lock className="w-2.5 h-2.5" /> VIP
+              </span>
+            ) : (
+              <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[9px] font-black shrink-0">
+                VIP Maps
+              </span>
+            )}
           </button>
         </div>
       </div>

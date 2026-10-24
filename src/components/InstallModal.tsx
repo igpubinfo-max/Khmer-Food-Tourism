@@ -22,11 +22,11 @@ export const InstallModal: React.FC = () => {
   const [copied, setCopied] = useState<boolean>(false);
 
   const isKm = language === 'km';
-  const LATEST_SIGNED_APK_URL = 'https://github.com/igpubinfo-max/Khmer-Food-Tourism/releases/download/v2.0.0/KhmerFoodTourism-v2.0.0.apk';
+  const LATEST_SIGNED_APK_URL = 'https://github.com/igpubinfo-max/Khmer-Food-Tourism/releases/download/v2.1.0/KhmerFoodTourism-v2.1.0.apk';
   const apkDownloadTarget =
     appSettings.apkDownloadUrl &&
     !appSettings.apkDownloadUrl.includes('app-debug.apk') &&
-    appSettings.apkDownloadUrl.includes('v2.0.0')
+    appSettings.apkDownloadUrl.includes('v2.1.0')
       ? appSettings.apkDownloadUrl
       : LATEST_SIGNED_APK_URL;
   const playStoreTarget = appSettings.playStoreUrl || 'https://play.google.com/store/apps/details?id=com.khmerfood.tourism';

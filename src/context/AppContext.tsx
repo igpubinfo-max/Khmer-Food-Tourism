@@ -1200,11 +1200,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isQrScannerModalOpen, setIsQrScannerModalOpen] = useState(false);
   const [isVipAddRestaurantModalOpen, setIsVipAddRestaurantModalOpen] = useState(false);
   const [isAiFoodDiscoveryModalOpen, setIsAiFoodDiscoveryModalOpen] = useState(false);
-  const [isGoogleMapsSearchModalOpen, setIsGoogleMapsSearchModalOpen] = useState(false);
+  const [isGoogleMapsSearchModalOpen, setIsGoogleMapsSearchModalOpenRaw] = useState(false);
   const [googleMapsSearchInitialTab, setGoogleMapsSearchInitialTab] = useState<'restaurant' | 'tourism' | 'all'>('all');
+  const setIsGoogleMapsSearchModalOpen = (open: boolean) => {
+    if (open && !verifyBackendVipFeatureAccess('ស្វែងរកទីតាំងលើ Google Maps', 'Google Maps Places Search')) {
+      return;
+    }
+    setIsGoogleMapsSearchModalOpenRaw(open);
+  };
   const openGoogleMapsSearchModal = (initialTab: 'restaurant' | 'tourism' | 'all' = 'all') => {
+    if (!verifyBackendVipFeatureAccess('ស្វែងរកទីតាំងលើ Google Maps', 'Google Maps Places Search')) {
+      return;
+    }
     setGoogleMapsSearchInitialTab(initialTab);
-    setIsGoogleMapsSearchModalOpen(true);
+    setIsGoogleMapsSearchModalOpenRaw(true);
   };
   const [isRestaurantCheckInModalOpen, setIsRestaurantCheckInModalOpenRaw] = useState(false);
   const setIsRestaurantCheckInModalOpen = (open: boolean) => {
@@ -1251,6 +1260,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setIsWishlistsModalOpenRaw(false);
     setIsAiTripPlannerModalOpenRaw(false);
     setIsNotificationsModalOpenRaw(false);
+    setIsGoogleMapsSearchModalOpenRaw(false);
   };
 
   // Authoritative Backend/Context VIP Verification for Personalized Features
@@ -4940,7 +4950,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
-  // Google Maps Places Import (Restaurants & Tourist Attractions) with Duplicate Prevention & Admin Data Separation
+  // Google Maps Places Import (Restaurants & Tourist Attractions) with Duplicate Prevention & Admin/VIP Backend Permission Check
   const importGooglePlaceToApp = (
     place: GooglePlaceCachedItem,
     customEdits?: {
@@ -4953,6 +4963,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       photoUrl?: string;
     }
   ): { imported: boolean; duplicate: boolean; type: 'restaurant' | 'tourism'; id: string; item?: Restaurant | TouristDestination } => {
+    if (!verifyBackendVipFeatureAccess('ស្វែងរកទីតាំងលើ Google Maps', 'Google Maps Places Search')) {
+      return { imported: false, duplicate: false, type: 'restaurant', id: '' };
+    }
     const targetCategory: 'restaurant' | 'tourism' = customEdits?.category || place.category || 'restaurant';
     const hasCustomEdits = Boolean(
       customEdits &&

@@ -5,6 +5,7 @@ import {
   Navigation, ShieldCheck, Database, Sparkles, SlidersHorizontal, Phone, Image as ImageIcon
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { isUserVipActive } from '../types';
 import { tr, translateProvinceName } from '../utils/i18n';
 import { translateDynamicTextToZh } from '../utils/zhDynamicTranslator';
 import {
@@ -64,6 +65,8 @@ const SEARCH_CATEGORIES: { id: GooglePlaceSearchCategory; labelKh: string; label
 ];
 
 const QUICK_SEARCH_PRESETS: { query: string; category: GooglePlaceSearchCategory; province: string; labelKh: string; labelEn: string; labelZh: string }[] = [
+  { query: 'coffee', category: 'all', province: 'ទាំងអស់', labelKh: '☕ ហាងកាហ្វេទូទាំងប្រទេស (Coffee Cambodia)', labelEn: '☕ Coffee Shops Nationwide', labelZh: '☕ 柬埔寨全国咖啡店' },
+  { query: 'ហាងកាហ្វេ', category: 'cafe', province: 'រាជធានីភ្នំពេញ', labelKh: '☕ ហាងកាហ្វេភ្នំពេញ (Phnom Penh Cafés)', labelEn: '☕ Phnom Penh Cafés', labelZh: '☕ 金边热门咖啡馆' },
   { query: 'ជំនោរក្បាលកោះ', category: 'restaurant', province: 'ទាំងអស់', labelKh: '🍽️ ជំនោរក្បាលកោះ (Chumnor Kbal Koh)', labelEn: '🍽️ Chumnor Kbal Koh', labelZh: '🍽️ 岛头微风餐厅 (Chumnor Kbal Koh)' },
   { query: 'ភោជនីយដ្ឋានម្ហូបខ្មែរល្បីៗ', category: 'restaurant', province: 'រាជធានីភ្នំពេញ', labelKh: '🍽️ ហាងម្ហូបខ្មែរភ្នំពេញ', labelEn: '🍽️ Phnom Penh Khmer Restaurants', labelZh: '🍽️ 金边知名高棉餐厅' },
   { query: 'ប្រាសាទបុរាណ និងរមណីយដ្ឋាន', category: 'temple', province: 'សៀមរាប', labelKh: '🛕 ប្រាសាទសៀមរាប', labelEn: '🛕 Siem Reap Temples', labelZh: '🛕 暹粒古迹寺庙' },
@@ -73,7 +76,7 @@ const QUICK_SEARCH_PRESETS: { query: string; category: GooglePlaceSearchCategory
   { query: 'ទឹកធ្លាក់ និងធម្មជាតិ', category: 'nature', province: 'មណ្ឌលគិរី', labelKh: '🌿 ទឹកធ្លាក់មណ្ឌលគិរី', labelEn: '🌿 Mondulkiri Waterfalls', labelZh: '🌿 蒙多基里瀑布与自然' },
 ];
 
-const ITEMS_PER_PAGE = 6;
+const ITEMS_PER_PAGE = 12;
 
 export const GoogleMapsPlaceSearchModal: React.FC = () => {
   const {
@@ -98,11 +101,15 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
       currentUser.username === 'admin' ||
       currentUser.username === 'cheasavuth')
   );
+  const isVipActive = Boolean(currentUser && isUserVipActive(currentUser));
+  const canManagePlaces = isAdmin || isVipActive;
 
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState<GooglePlaceSearchCategory>('all');
   const [province, setProvince] = useState<string>('ទាំងអស់');
+  const [searchScope, setSearchScope] = useState<'nationwide' | 'province' | 'nearby'>('nationwide');
   const [gpsLocation, setGpsLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [gpsRadiusKm, setGpsRadiusKm] = useState<number>(15);
   const [gpsLoading, setGpsLoading] = useState(false);
 
   const [results, setResults] = useState<GooglePlaceCachedItem[]>([]);
@@ -165,14 +172,25 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
     q?: string;
     cat?: GooglePlaceSearchCategory;
     prov?: string;
+    scope?: 'nationwide' | 'province' | 'nearby';
     loc?: { lat: number; lng: number } | null;
+    radiusKm?: number;
     pageToken?: string;
     append?: boolean;
+    forceLive?: boolean;
   }) => {
     const activeQuery = overrideParams?.q !== undefined ? overrideParams.q : query;
     const activeCat = overrideParams?.cat !== undefined ? overrideParams.cat : category;
     const activeProv = overrideParams?.prov !== undefined ? overrideParams.prov : province;
     const activeLoc = overrideParams?.loc !== undefined ? overrideParams.loc : gpsLocation;
+    const activeScope = overrideParams?.scope !== undefined
+      ? overrideParams.scope
+      : activeLoc
+      ? 'nearby'
+      : activeProv && activeProv !== 'ទាំងអស់'
+      ? 'province'
+      : searchScope;
+    const activeRadiusMeters = (overrideParams?.radiusKm ?? gpsRadiusKm) * 1000;
     const token = overrideParams?.pageToken;
     const isAppend = Boolean(overrideParams?.append);
 
@@ -188,15 +206,17 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
         query: activeQuery,
         category: activeCat,
         categoryFilter: activeCat,
-        province: activeProv,
-        provinceFilter: activeProv,
-        location: activeLoc ? { lat: activeLoc.lat, lng: activeLoc.lng, radiusMeters: 15000 } : undefined,
+        province: activeScope === 'nationwide' ? 'ទាំងអស់' : activeProv,
+        provinceFilter: activeScope === 'nationwide' ? 'ទាំងអស់' : activeProv,
+        searchScope: activeScope,
+        location: activeLoc ? { lat: activeLoc.lat, lng: activeLoc.lng, radiusMeters: activeRadiusMeters } : undefined,
         lat: activeLoc?.lat,
         lng: activeLoc?.lng,
-        radiusMeters: 15000,
+        radiusMeters: activeRadiusMeters,
         pageToken: token,
-        pageSize: 12,
+        pageSize: 20,
         language,
+        forceLiveApi: overrideParams?.forceLive,
       });
 
       const foundPlaces = response.places || response.results || [];
@@ -205,7 +225,11 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
         setResults(prev => {
           const existingIds = new Set(prev.map(p => p.placeId));
           const uniqueNew = foundPlaces.filter(p => !existingIds.has(p.placeId));
-          return [...prev, ...uniqueNew];
+          const merged = [...prev, ...uniqueNew];
+          // Automatically jump to the next page of results when user clicks Load More
+          const nextTotalPages = Math.max(1, Math.ceil(merged.length / ITEMS_PER_PAGE));
+          setCurrentPage(c => Math.min(nextTotalPages, c + 1));
+          return merged;
         });
       } else {
         setResults(foundPlaces);
@@ -248,6 +272,7 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
       pos => {
         const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
         setGpsLocation(coords);
+        setSearchScope('nearby');
         setGpsLoading(false);
         showToast(
           language === 'km'
@@ -255,7 +280,7 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
             : `📍 GPS Location locked (${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)})`,
           'success'
         );
-        executeSearch({ loc: coords });
+        executeSearch({ loc: coords, scope: 'nearby' });
       },
       () => {
         setGpsLoading(false);
@@ -439,13 +464,18 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                 <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-400/20 text-emerald-200 border border-emerald-300/30">
                   <Sparkles className="w-3 h-3" /> Places API (New)
                 </span>
+                {isVipActive && !isAdmin && (
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-400 text-slate-950 shadow-sm">
+                    👑 VIP Access
+                  </span>
+                )}
               </div>
               <p className="text-xs text-emerald-100/90 truncate mt-0.5">
                 {tr(
                   language,
-                  'ស្វែងរកតាមឈ្មោះ ប្រភេទ ខេត្ត/ក្រុង ឬ GPS ជិតអ្នក • ការពារទិន្នន័យស្ទួនដោយស្វ័យប្រវត្តិ',
-                  'Search by place name, category, province, or GPS location • Automatic duplicate protection',
-                  '按地点名称、类别、省份或 GPS 附近位置搜索 • 自动防重保护'
+                  'ស្វែងរកទូទាំងប្រទេសកម្ពុជា តាមខេត្ត/ក្រុង ឬ GPS ជិតអ្នក • ការពារទិន្នន័យស្ទួនដោយស្វ័យប្រវត្តិ',
+                  'Search nationwide across Cambodia, by province, or GPS nearby • Automatic duplicate protection',
+                  '支持全柬埔寨、按省份或 GPS 附近位置搜索 • 自动防重保护'
                 )}
               </p>
             </div>
@@ -462,6 +492,94 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
 
         {/* Search & Filter Controls */}
         <div className="p-4 sm:p-5 bg-slate-50 border-b border-slate-200 space-y-3 shrink-0">
+          {/* Search Scope Selector Bar (Nationwide / By Province / Nearby GPS) */}
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="text-[11px] font-extrabold text-slate-600 mr-1">
+                {tr(language, 'វិសាលភាពស្វែងរក៖', 'Search Scope:', '搜索范围：')}
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchScope('nationwide');
+                  setProvince('ទាំងអស់');
+                  setGpsLocation(null);
+                  if (query.trim()) {
+                    executeSearch({ scope: 'nationwide', prov: 'ទាំងអស់', loc: null });
+                  }
+                }}
+                className={`text-xs font-bold px-3 py-1.5 rounded-xl border transition-all cursor-pointer flex items-center gap-1.5 ${
+                  searchScope === 'nationwide' && province === 'ទាំងអស់' && !gpsLocation
+                    ? 'bg-emerald-700 text-white border-emerald-700 shadow-sm'
+                    : 'bg-white text-slate-700 border-slate-300 hover:border-emerald-400'
+                }`}
+              >
+                <span>🇰🇭</span>
+                <span>{tr(language, 'ទូទាំងប្រទេសកម្ពុជា (២៥ ខេត្ត/ក្រុង)', 'Nationwide Cambodia', '全柬埔寨（25省市）')}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchScope('province');
+                  setGpsLocation(null);
+                  const nextProv = province === 'ទាំងអស់' ? 'រាជធានីភ្នំពេញ' : province;
+                  setProvince(nextProv);
+                  if (query.trim()) {
+                    executeSearch({ scope: 'province', prov: nextProv, loc: null });
+                  }
+                }}
+                className={`text-xs font-bold px-3 py-1.5 rounded-xl border transition-all cursor-pointer flex items-center gap-1.5 ${
+                  (searchScope === 'province' || province !== 'ទាំងអស់') && !gpsLocation
+                    ? 'bg-emerald-700 text-white border-emerald-700 shadow-sm'
+                    : 'bg-white text-slate-700 border-slate-300 hover:border-emerald-400'
+                }`}
+              >
+                <span>🏙️</span>
+                <span>{tr(language, 'តាមខេត្ត/ក្រុង', 'By Province / City', '按省份/城市')}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleUseMyGpsLocation}
+                disabled={gpsLoading || isLoading}
+                className={`text-xs font-bold px-3 py-1.5 rounded-xl border transition-all cursor-pointer flex items-center gap-1.5 ${
+                  gpsLocation || searchScope === 'nearby'
+                    ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
+                    : 'bg-white text-slate-700 border-slate-300 hover:border-blue-400'
+                }`}
+              >
+                <Navigation className={`w-3.5 h-3.5 ${gpsLoading ? 'animate-ping' : ''}`} />
+                <span>{tr(language, 'ជិតខ្ញុំ (GPS Nearby)', 'Nearby Me (GPS)', '我附近 (GPS)')}</span>
+              </button>
+            </div>
+
+            {gpsLocation && (
+              <div className="flex items-center gap-1.5">
+                <span className="text-[11px] font-bold text-slate-600">
+                  {tr(language, 'រង្វង់ GPS៖', 'Radius:', '半径：')}
+                </span>
+                {[5, 15, 30, 50].map(km => (
+                  <button
+                    key={km}
+                    type="button"
+                    onClick={() => {
+                      setGpsRadiusKm(km);
+                      executeSearch({ loc: gpsLocation, radiusKm: km, scope: 'nearby' });
+                    }}
+                    className={`px-2 py-0.5 rounded-lg text-[11px] font-bold border cursor-pointer ${
+                      gpsRadiusKm === km
+                        ? 'bg-blue-600 text-white border-blue-600'
+                        : 'bg-white text-slate-600 border-slate-300 hover:bg-blue-50'
+                    }`}
+                  >
+                    {km}km
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
           <form
             onSubmit={e => {
               e.preventDefault();
@@ -478,9 +596,9 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                 onChange={e => setQuery(e.target.value)}
                 placeholder={tr(
                   language,
-                  'វាយឈ្មោះហាង ភោជនីយដ្ឋាន ឬតំបន់ទេសចរណ៍...',
-                  'Search shop, restaurant, or tourist attraction...',
-                  '输入店铺、餐厅或旅游景点名称（支持中文/高棉语/英文）...'
+                  'វាយឈ្មោះហាង (ឧ. coffee, café, ហាងកាហ្វេ, ភោជនីយដ្ឋាន)...',
+                  'Search coffee, café, restaurant, or tourist attraction...',
+                  '输入咖啡馆、餐厅或景点名称（如 coffee, café, ហាងកាហ្វេ）...'
                 )}
                 className="w-full pl-10 pr-8 py-2.5 rounded-xl border border-slate-300 bg-white text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium"
               />
@@ -502,6 +620,9 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                 onChange={e => {
                   const nextCat = e.target.value as GooglePlaceSearchCategory;
                   setCategory(nextCat);
+                  if (query.trim()) {
+                    executeSearch({ cat: nextCat });
+                  }
                 }}
                 className="w-full px-3 py-2.5 rounded-xl border border-slate-300 bg-white text-sm text-slate-800 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
               >
@@ -517,7 +638,17 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
             <div className="sm:col-span-2">
               <select
                 value={province}
-                onChange={e => setProvince(e.target.value)}
+                onChange={e => {
+                  const nextProv = e.target.value;
+                  setProvince(nextProv);
+                  setSearchScope(nextProv === 'ទាំងអស់' ? 'nationwide' : 'province');
+                  if (query.trim()) {
+                    executeSearch({
+                      prov: nextProv,
+                      scope: nextProv === 'ទាំងអស់' ? 'nationwide' : 'province',
+                    });
+                  }
+                }}
                 className="w-full px-3 py-2.5 rounded-xl border border-slate-300 bg-white text-sm text-slate-800 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
               >
                 {CAMBODIA_PROVINCES.map(prov => (
@@ -576,10 +707,12 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                     setQuery(preset.query);
                     setCategory(preset.category);
                     setProvince(preset.province);
+                    setSearchScope(preset.province === 'ទាំងអស់' ? 'nationwide' : 'province');
                     executeSearch({
                       q: preset.query,
                       cat: preset.category,
                       prov: preset.province,
+                      scope: preset.province === 'ទាំងអស់' ? 'nationwide' : 'province',
                     });
                   }}
                   className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-white border border-slate-200 hover:border-emerald-400 hover:bg-emerald-50 text-slate-700 transition-colors cursor-pointer"
@@ -592,10 +725,15 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
             {gpsLocation && (
               <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-[11px] font-bold">
                 <Navigation className="w-3 h-3" />
-                <span>GPS: {Number(gpsLocation.lat ?? 11.5564).toFixed(3)}, {Number(gpsLocation.lng ?? 104.9282).toFixed(3)} (15km)</span>
+                <span>
+                  GPS: {Number(gpsLocation.lat ?? 11.5564).toFixed(3)}, {Number(gpsLocation.lng ?? 104.9282).toFixed(3)} ({gpsRadiusKm}km)
+                </span>
                 <button
                   type="button"
-                  onClick={() => setGpsLocation(null)}
+                  onClick={() => {
+                    setGpsLocation(null);
+                    setSearchScope(province === 'ទាំងអស់' ? 'nationwide' : 'province');
+                  }}
                   className="ml-1 hover:text-red-600"
                 >
                   <X className="w-3 h-3" />
@@ -676,27 +814,52 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
           )}
         </div>
 
-        {/* Admin Batch Import Toolbar */}
-        {isAdmin && results.length > 0 && (
-          <div className="px-4 sm:px-6 py-2.5 bg-indigo-50 border-b border-indigo-200 flex items-center justify-between gap-2 flex-wrap shrink-0">
-            <div className="flex items-center gap-3">
-              <label className="inline-flex items-center gap-2 text-xs font-bold text-indigo-950 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={paginatedResults.length > 0 && paginatedResults.every(p => selectedPlaceIds.has(p.placeId))}
-                  onChange={handleSelectAllOnPage}
-                  className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500"
-                />
+        {/* Admin & Active VIP Batch Import + Results Count Toolbar */}
+        {results.length > 0 && (
+          <div className="px-4 sm:px-6 py-2.5 bg-indigo-50/90 border-b border-indigo-200 flex items-center justify-between gap-2 flex-wrap shrink-0">
+            <div className="flex items-center gap-3 flex-wrap">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-700 text-white text-xs font-extrabold shadow-sm">
+                <span>📊</span>
                 <span>
-                  {language === 'km'
-                    ? `ជ្រើសរើសទាំងអស់ក្នុងទំព័រនេះ (${selectedPlaceIds.size} បានជ្រើសរើស)`
-                    : `Select all on page (${selectedPlaceIds.size} selected)`}
+                  {tr(
+                    language,
+                    `រកឃើញសរុប ${results.length} ទីតាំងពិតប្រាកដ`,
+                    `Total Retrieved: ${results.length} Verified Places`,
+                    `共检索到 ${results.length} 个真实地点`
+                  )}
                 </span>
-              </label>
+              </span>
+
+              {canManagePlaces && (
+                <label className="inline-flex items-center gap-2 text-xs font-bold text-indigo-950 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={paginatedResults.length > 0 && paginatedResults.every(p => selectedPlaceIds.has(p.placeId))}
+                    onChange={handleSelectAllOnPage}
+                    className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500"
+                  />
+                  <span>
+                    {language === 'km'
+                      ? `ជ្រើសរើសទាំងអស់ក្នុងទំព័រនេះ (${selectedPlaceIds.size} បានជ្រើសរើស)`
+                      : `Select all on page (${selectedPlaceIds.size} selected)`}
+                  </span>
+                </label>
+              )}
             </div>
 
-            <div className="flex items-center gap-2">
-              {selectedPlaceIds.size > 0 && (
+            <div className="flex items-center gap-2 flex-wrap">
+              <button
+                type="button"
+                disabled={isLoading || isLoadingMore}
+                onClick={() => executeSearch({ forceLive: true })}
+                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 text-xs font-bold transition-all cursor-pointer"
+                title={tr(language, 'ទាញទិន្នន័យផ្ទាល់ថ្មីពីផែនទី', 'Refresh Live Map Results', '刷新实时地图结果')}
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
+                <span>{tr(language, 'ស្វែងរកផ្ទាល់ថ្មី', 'Refresh Live', '刷新实时数据')}</span>
+              </button>
+
+              {canManagePlaces && selectedPlaceIds.size > 0 && (
                 <button
                   type="button"
                   onClick={handleBatchImportSelected}
@@ -854,9 +1017,9 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
 
-                        {/* Admin Checkbox + Category Badge */}
+                        {/* Admin / VIP Checkbox + Category Badge */}
                         <div className="absolute top-2.5 left-2.5 flex items-center gap-2">
-                          {isAdmin && (
+                          {canManagePlaces && (
                             <input
                               type="checkbox"
                               checked={isSelected}
@@ -970,11 +1133,11 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                           </div>
                         </div>
 
-                        {/* Inline Admin Editor Before Import */}
-                        {isAdmin && isEditingThis && (
+                        {/* Inline Admin / VIP Editor Before Import */}
+                        {canManagePlaces && isEditingThis && (
                           <div className="p-3 rounded-xl bg-slate-50 border border-indigo-200 space-y-2 text-xs">
                             <div className="font-bold text-indigo-950 flex items-center justify-between">
-                              <span>✏️ ពិនិត្យ និងកែសម្រួលមុននាំចូល (Admin Override)</span>
+                              <span>✏️ ពិនិត្យ និងកែសម្រួលមុននាំចូល ({isAdmin ? 'Admin Override' : 'VIP Review'})</span>
                               <button
                                 type="button"
                                 onClick={() => setEditingPlaceId(null)}
@@ -1087,7 +1250,7 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                             </a>
                           </div>
 
-                          {isAdmin && (
+                          {canManagePlaces && (
                             <div className="flex items-center gap-1.5">
                               <button
                                 type="button"
@@ -1144,9 +1307,9 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                   <span className="text-xs font-bold text-slate-700 px-2">
                     {tr(
                       language,
-                      `ទំព័រ ${currentPage} នៃ ${totalPages} (សរុប ${results.length} ទីតាំង)`,
-                      `Page ${currentPage} of ${totalPages} (${results.length} places)`,
-                      `第 ${currentPage} / ${totalPages} 页（共 ${results.length} 个地点）`
+                      `ទំព័រ ${currentPage} នៃ ${totalPages} (បង្ហាញ ${(currentPage - 1) * ITEMS_PER_PAGE + 1}–${Math.min(currentPage * ITEMS_PER_PAGE, results.length)} នៃ ${results.length} ទីតាំង)`,
+                      `Page ${currentPage} of ${totalPages} (Showing ${(currentPage - 1) * ITEMS_PER_PAGE + 1}–${Math.min(currentPage * ITEMS_PER_PAGE, results.length)} of ${results.length} places)`,
+                      `第 ${currentPage} / ${totalPages} 页（显示 ${(currentPage - 1) * ITEMS_PER_PAGE + 1}–${Math.min(currentPage * ITEMS_PER_PAGE, results.length)} / 共 ${results.length} 个地点）`
                     )}
                   </span>
 
@@ -1161,28 +1324,48 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                   </button>
                 </div>
 
-                {nextPageToken && (
-                  <button
-                    type="button"
-                    disabled={isLoadingMore}
-                    onClick={() => executeSearch({ pageToken: nextPageToken, append: true })}
-                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-extrabold shadow-sm transition-all cursor-pointer"
-                  >
-                    {isLoadingMore ? (
-                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                    ) : (
-                      <PlusCircle className="w-3.5 h-3.5" />
-                    )}
-                    <span>
-                      {tr(
-                        language,
-                        'ទាញយកលទ្ធផលបន្ថែមពី Google Maps (Next Page)',
-                        'Load More Results from Google Maps',
-                        '从 Google 地图加载更多结果'
+                <div className="flex items-center gap-2">
+                  {currentPage < totalPages && (
+                    <button
+                      type="button"
+                      onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-100 hover:bg-emerald-200 text-emerald-900 text-xs font-extrabold transition-all cursor-pointer"
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                      <span>
+                        {tr(
+                          language,
+                          `មើលទំព័របន្ទាប់ (${currentPage + 1}/${totalPages})`,
+                          `Next Page (${currentPage + 1}/${totalPages})`,
+                          `查看下一页 (${currentPage + 1}/${totalPages})`
+                        )}
+                      </span>
+                    </button>
+                  )}
+
+                  {nextPageToken && (
+                    <button
+                      type="button"
+                      disabled={isLoadingMore}
+                      onClick={() => executeSearch({ pageToken: nextPageToken, append: true })}
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-extrabold shadow-sm transition-all cursor-pointer"
+                    >
+                      {isLoadingMore ? (
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <PlusCircle className="w-3.5 h-3.5" />
                       )}
-                    </span>
-                  </button>
-                )}
+                      <span>
+                        {tr(
+                          language,
+                          'ទាញយកលទ្ធផលបន្ថែមពី Google Maps (Load More)',
+                          'Load More Results from Google Maps',
+                          '从 Google 地图加载更多结果 (Load More)'
+                        )}
+                      </span>
+                    </button>
+                  )}
+                </div>
               </div>
             </>
           )}
@@ -1191,13 +1374,13 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
         {/* Footer Policy & Attribution Compliance */}
         <div className="px-4 sm:px-6 py-3 bg-white border-t border-slate-200 flex items-center justify-between gap-2 text-[11px] text-slate-500 shrink-0 flex-wrap">
           <div className="flex items-center gap-2">
-            <span className="font-bold text-slate-700">Google Maps Platform Compliance:</span>
+            <span className="font-bold text-slate-700">Google Maps Platform & OpenStreetMap Attribution:</span>
             <span>
               {tr(
                 language,
-                'រូបភាព និងទិន្នន័យផែនទីផ្តល់ដោយ Google Maps • រក្សាទុកព័ត៌មាន Admin ដាច់ដោយឡែកពី Google Metadata',
-                'Photos & map data powered by Google Maps • Admin records stored separately from Google Metadata',
-                '地图与照片数据由 Google 地图提供 • 管理员数据与 Google 元数据独立存储'
+                'រូបភាព និងទិន្នន័យផែនទីផ្តល់ដោយ Google Maps Platform & OpenStreetMap Contributors • រក្សាទុកព័ត៌មានកម្មវិធីដាច់ដោយឡែកពី Google Metadata',
+                'Map data & photos powered by Google Maps Platform & OpenStreetMap Contributors • App records stored separately from Google Metadata',
+                '地图与照片数据由 Google 地图平台及 OpenStreetMap 提供 • 应用数据与 Google 元数据独立存储'
               )}
             </span>
           </div>

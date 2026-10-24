@@ -9,7 +9,7 @@ import {
   Apple, Smartphone, Bot, Calendar, Bookmark, Bell, 
   UtensilsCrossed, MessageSquareQuote, Camera, Phone,
   Share2, Navigation, Eye, ExternalLink, Play, Shuffle, Search, RefreshCw,
-  Crown, Plus, Edit2, CheckCircle2, X, Tag, ChefHat, Copy, Video, Check, Lock, Trash2
+  Crown, Plus, Edit2, CheckCircle2, X, Tag, ChefHat, Copy, Video, Check, Lock, Trash2, Globe
 } from 'lucide-react';
 
 export const HomeView: React.FC = () => {
@@ -30,7 +30,7 @@ export const HomeView: React.FC = () => {
     setSelectedFood, setSelectedRestaurant,
     setIsVipAddRestaurantModalOpen, setIsManageMenuModalOpen, setManagingRestaurant,
     getOwnedRestaurantsForUser, openManageMyVipStore, activeManagedShopId,
-    openUpgradeVipModal, deleteRestaurant
+    openUpgradeVipModal, deleteRestaurant, openGoogleMapsSearchModal
   } = useApp();
 
   const isKm = language === 'km';
@@ -1120,8 +1120,8 @@ export const HomeView: React.FC = () => {
           </div>
         </div>
 
-        {/* Prominent AI Discovery & Admin-Only Restaurant Check-in Entry Cards */}
-        <div className={`grid grid-cols-1 ${currentUser?.role === 'admin' ? 'sm:grid-cols-2' : ''} gap-2.5`}>
+        {/* Prominent AI Discovery & Google Maps Places Search (Admin & VIP) Entry Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
           {/* 1. AI Food Discovery & Scanner */}
           <button
             onClick={() => setIsAiFoodDiscoveryModalOpen(true)}
@@ -1142,6 +1142,29 @@ export const HomeView: React.FC = () => {
             </div>
             <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[9px] font-black uppercase tracking-wider font-sans shrink-0">
               AI Vision
+            </span>
+          </button>
+
+          {/* 1a. Google Maps Places Search Menu (Admin & Active VIP) */}
+          <button
+            onClick={() => openGoogleMapsSearchModal('all')}
+            className="p-3.5 rounded-2xl bg-gradient-to-r from-emerald-800 via-teal-800 to-[#064E3B] text-white text-left shadow-md flex items-center justify-between transition hover:scale-[1.01] active:scale-98 cursor-pointer ring-2 ring-amber-400/50"
+          >
+            <div className="flex items-center gap-2.5">
+              <div className="w-10 h-10 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center shadow-sm shrink-0">
+                <Globe className="w-5 h-5" />
+              </div>
+              <div>
+                <span className="font-moul text-xs block text-amber-300">
+                  {isKm ? 'ស្វែងរកទីតាំងលើ Google Maps' : 'Google Maps Places Search'}
+                </span>
+                <span className="text-[10px] text-emerald-100 block">
+                  {isKm ? 'ហាងកាហ្វេ ភោជនីយដ្ឋាន & តំបន់ទេសចរណ៍ ២៥ ខេត្ត/ក្រុង' : 'Search Cafés, Shops & Places across Cambodia'}
+                </span>
+              </div>
+            </div>
+            <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[9px] font-black uppercase tracking-wider font-sans shrink-0">
+              {isVip || currentUser?.role === 'admin' ? 'VIP / Maps' : '🔒 VIP'}
             </span>
           </button>
 

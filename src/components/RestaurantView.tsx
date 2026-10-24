@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { RestaurantCard } from './RestaurantCard';
-import { isRestaurantPremiumActive, Restaurant, sortRestaurantsChronologically, getVipAccountState } from '../types';
+import { isRestaurantPremiumActive, Restaurant, sortRestaurantsChronologically, getVipAccountState, isUserVipActive } from '../types';
 import { Store, Plus, MapPin, Sparkles, PhoneCall, CheckCircle2, AlertCircle, Camera, Globe, Loader2, Edit2 } from 'lucide-react';
 import {
   searchCambodiaPlacesWithSmartCache,
@@ -531,7 +531,7 @@ export const RestaurantView: React.FC = () => {
                   return (
                     <div key={place.placeId} className="space-y-1.5">
                       <RestaurantCard restaurant={existingRest || mappedRest} />
-                      {currentUser?.role === 'admin' && (
+                      {(currentUser?.role === 'admin' || isUserVipActive(currentUser)) && (
                         <button
                           onClick={() => importGooglePlaceToApp(place)}
                           className={`w-full py-1.5 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer ${
