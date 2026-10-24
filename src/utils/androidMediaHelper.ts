@@ -16,6 +16,15 @@ interface NativeMediaLauncherPlugin {
     width?: number;
     height?: number;
   }>;
+  pickMultipleImagesFromGallery(options?: {
+    maxCount?: number;
+    maxDimension?: number;
+  }): Promise<{
+    success: boolean;
+    cancelled: boolean;
+    dataUrls: string[];
+    count?: number;
+  }>;
   shareContent(options: {
     title?: string;
     text?: string;
@@ -145,6 +154,66 @@ export async function pickImageUsingNativeAndroidGallery(): Promise<{
     console.warn('Native pickImageFromGallery error:', err);
     return { success: false, cancelled: false };
   }
+}
+
+/**
+ * Opens the native Android Photo/Gallery picker with MULTIPLE SELECTION enabled in one step.
+ * Allows users to select several photos from their phone gallery at once.
+ */
+export async function pickMultipleImagesUsingNativeAndroidGallery(
+  maxCount: number = 10,
+  maxDimension: number = 1200
+): Promise<{
+  success: boolean;
+  cancelled: boolean;
+  dataUrls: string[];
+}> {
+  if (!Capacitor.isNativePlatform()) {
+    return { success: false, cancelled: false, dataUrls: [] };
+  }
+  try {
+    const res = await NativeMediaLauncher.pickMultipleImagesFromGallery({
+      maxCount,
+      maxDimension,
+    });
+    if (!res || res.cancelled || !Array.isArray(res.dataUrls)) {
+      return { success: false, cancelled: Boolean(res?.cancelled), dataUrls: [] };
+    }
+    return {
+      success: res.dataUrls.length > 0,
+      cancelled: false,
+      dataUrls: res.dataUrls,
+    };
+  } catch (err) {
+    console.warn('Native pickMultipleImagesFromGallery error:', err);
+    return { success: false, cancelled: false, dataUrls: [] };
+  }
+}
+
+/**
+ * Validates and batch-compresses multiple File objects (up to maxCount) into Data URLs.
+ */
+export async function batchProcessAndCompressImageFiles(
+  files: File[],
+  maxCount: number = 10,
+  maxDimension: number = 1100,
+  quality: number = 0.82
+): Promise<string[]> {
+  const selectedFiles = Array.from(files || []).slice(0, maxCount);
+  const results: string[] = [];
+
+  for (const file of selectedFiles) {
+    try {
+      const dataUrl = await processAndCompressImageFile(file, maxDimension, quality);
+      if (dataUrl) {
+        results.push(dataUrl);
+      }
+    } catch (err) {
+      console.warn('Skipping unreadable or invalid image file:', file.name, err);
+    }
+  }
+
+  return results;
 }
 
 export const MAX_IMAGE_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB

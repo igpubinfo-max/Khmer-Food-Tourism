@@ -20,6 +20,7 @@ import android.provider.OpenableColumns;
 import android.util.Base64;
 import androidx.activity.result.ActivityResult;
 import androidx.core.content.FileProvider;
+import com.getcapacitor.JSArray;
 import com.getcapacitor.JSObject;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
@@ -249,7 +250,19 @@ public class NativeAbaLauncherPlugin extends Plugin {
         if (call == null) {
             return;
         }
-        if (result.getResultCode() != Activity.RESULT_OK || result.getData() == null || result.getData().getData() == null) {
+        if (result.getResultCode() != Activity.RESULT_OK || result.getData() == null) {
+            JSObject cancelledRet = new JSObject();
+            cancelledRet.put("success", false);
+            cancelledRet.put("cancelled", true);
+            call.resolve(cancelledRet);
+            return;
+        }
+
+        Uri uri = result.getData().getData();
+        if (uri == null && result.getData().getClipData() != null && result.getData().getClipData().getItemCount() > 0) {
+            uri = result.getData().getClipData().getItemAt(0).getUri();
+        }
+        if (uri == null) {
             JSObject cancelledRet = new JSObject();
             cancelledRet.put("success", false);
             cancelledRet.put("cancelled", true);
@@ -263,7 +276,6 @@ public class NativeAbaLauncherPlugin extends Plugin {
             return;
         }
 
-        Uri uri = result.getData().getData();
         ContentResolver resolver = context.getContentResolver();
 
         try {
@@ -338,6 +350,138 @@ public class NativeAbaLauncherPlugin extends Plugin {
         } catch (Exception e) {
             call.reject("Error reading selected image: " + e.getMessage());
         }
+    }
+
+    /**
+     * Helper method to convert an image Uri into an optimized Base64 data URL.
+     * Uses inSampleSize scaling to prevent OutOfMemoryError when reading high-resolution camera photos.
+     */
+    private String processUriToDataUrl(Context context, Uri uri, int maxDim) {
+        ContentResolver resolver = context.getContentResolver();
+        try {
+            BitmapFactory.Options opts = new BitmapFactory.Options();
+            opts.inJustDecodeBounds = true;
+            try (InputStream is = resolver.openInputStream(uri)) {
+                if (is != null) {
+                    BitmapFactory.decodeStream(is, null, opts);
+                }
+            }
+            if (opts.outWidth <= 0 || opts.outHeight <= 0) {
+                return null;
+            }
+
+            int origW = opts.outWidth;
+            int origH = opts.outHeight;
+            int sampleSize = 1;
+            while ((origW / sampleSize) > (maxDim * 1.5) || (origH / sampleSize) > (maxDim * 1.5)) {
+                sampleSize *= 2;
+            }
+
+            opts.inJustDecodeBounds = false;
+            opts.inSampleSize = sampleSize;
+
+            Bitmap bitmap;
+            try (InputStream is = resolver.openInputStream(uri)) {
+                if (is == null) return null;
+                bitmap = BitmapFactory.decodeStream(is, null, opts);
+            }
+            if (bitmap == null) return null;
+
+            int w = bitmap.getWidth();
+            int h = bitmap.getHeight();
+            if (w > maxDim || h > maxDim) {
+                if (w > h) {
+                    h = Math.round((float) h * maxDim / w);
+                    w = maxDim;
+                } else {
+                    w = Math.round((float) w * maxDim / h);
+                    h = maxDim;
+                }
+                Bitmap scaled = Bitmap.createScaledBitmap(bitmap, w, h, true);
+                if (scaled != bitmap) {
+                    bitmap.recycle();
+                    bitmap = scaled;
+                }
+            }
+
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 82, baos);
+            bitmap.recycle();
+
+            String base64 = Base64.encodeToString(baos.toByteArray(), Base64.NO_WRAP);
+            return "data:image/jpeg;base64," + base64;
+        } catch (Throwable t) {
+            return null;
+        }
+    }
+
+    /**
+     * Opens native Android Gallery with MULTI-SELECT enabled (Intent.EXTRA_ALLOW_MULTIPLE).
+     * Users can select several photos in one step, returned as an array of Data URLs.
+     */
+    @PluginMethod
+    public void pickMultipleImagesFromGallery(PluginCall call) {
+        try {
+            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+            intent.setType("image/*");
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
+            intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+            intent.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{"image/jpeg", "image/png", "image/webp"});
+            startActivityForResult(call, Intent.createChooser(intent, "Select Photos (Multiple)"), "handleMultipleGalleryPickResult");
+        } catch (Exception e) {
+            call.reject("Could not launch multi-gallery picker: " + e.getMessage());
+        }
+    }
+
+    @ActivityCallback
+    private void handleMultipleGalleryPickResult(PluginCall call, ActivityResult result) {
+        if (call == null) return;
+        if (result.getResultCode() != Activity.RESULT_OK || result.getData() == null) {
+            JSObject cancelledRet = new JSObject();
+            cancelledRet.put("success", false);
+            cancelledRet.put("cancelled", true);
+            cancelledRet.put("dataUrls", new JSArray());
+            cancelledRet.put("count", 0);
+            call.resolve(cancelledRet);
+            return;
+        }
+
+        Context context = getContext();
+        if (context == null) {
+            call.reject("Context is null");
+            return;
+        }
+
+        JSArray dataUrls = new JSArray();
+        int maxImages = call.getInt("maxCount", 12);
+        int maxDim = call.getInt("maxDimension", 1200);
+
+        Intent data = result.getData();
+        ClipData clipData = data.getClipData();
+        if (clipData != null) {
+            int count = Math.min(clipData.getItemCount(), maxImages);
+            for (int i = 0; i < count; i++) {
+                Uri uri = clipData.getItemAt(i).getUri();
+                if (uri != null) {
+                    String dataUrl = processUriToDataUrl(context, uri, maxDim);
+                    if (dataUrl != null) {
+                        dataUrls.put(dataUrl);
+                    }
+                }
+            }
+        } else if (data.getData() != null) {
+            String dataUrl = processUriToDataUrl(context, data.getData(), maxDim);
+            if (dataUrl != null) {
+                dataUrls.put(dataUrl);
+            }
+        }
+
+        JSObject ret = new JSObject();
+        ret.put("success", dataUrls.length() > 0);
+        ret.put("cancelled", false);
+        ret.put("dataUrls", dataUrls);
+        ret.put("count", dataUrls.length());
+        call.resolve(ret);
     }
 
     /**

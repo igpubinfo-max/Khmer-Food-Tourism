@@ -69,7 +69,7 @@ jobs:
           echo "=== SEARCHING FOR GENERATED APK FILES ==="
           find . -name "*.apk" -ls
           cd android/app/build/outputs/apk/debug
-          mv app-debug.apk KhmerFoodTourism-v1.9.1.apk
+          mv app-debug.apk KhmerFoodTourism-v1.9.2.apk
           ls -la
 
       # Play Store AAB build disabled during regular edits per user instruction (enable only when requested)
@@ -96,22 +96,24 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: v1.9.1
-          name: "Khmer Food & Tourism v1.9.1 (Instant PC Startup & VIP Store Submission Fix)"
+          tag_name: v1.9.2
+          name: "Khmer Food & Tourism v1.9.2 (Multiple Image Uploads, Preview & Reorder)"
           make_latest: true
           body: |
             ### 🇰🇭 កម្មវិធីទូរស័ព្ទដៃ អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism Mobile App)
             
-            **កំណែថ្មី v1.9.1 (Instant PC Startup & VIP Store Submission Fix):**
-            - ⚡ **១. ដោះស្រាយបញ្ហាកម្មវិធីបើកយឺតលើ PC (Instant PC Startup & Zero Hang):**
-              - បន្ថែម Timeout 3.5 វិនាទី និង AbortController លើរាល់ការហៅ Cloud API របស់ Supabase ការពារការកកស្ទះ (Hang up to 5 minutes) នៅពេលបណ្តាញ PC មានការរអាក់រអួល ឬ Firewall រារាំង។
-              - កំណត់ពន្យារពេលការ Sync Cloud លើកដំបូងចំនួន 1.2 វិនាទី ដើម្បីឱ្យផ្ទាំង UI របស់កម្មវិធីបង្ហាញឡើងភ្លាមៗ (< 50ms) ពី Local Cache។
-              - ដកចោលលក្ខខណ្ឌបង្កក Timer (`document.hidden`) ក្នុងផ្ទាំង Welcome Screen និងកាត់បន្ថយពេលវេលាបង្ហាញមកត្រឹម 3 វិនាទី រួមជាមួយការកត់ត្រា `kft_welcome_shown_v2` ក្នុង localStorage ការពារកុំឱ្យរាំងស្ទះដំណើរការបើកកម្មវិធីលើកក្រោយៗ។
-            - 🏪 **២. កែសម្រួលការចុះបញ្ជីហាង VIP ឱ្យដំណើរការត្រឹមត្រូវ ១០០% (VIP Restaurant Submission Fix):**
-              - ដោះស្រាយបញ្ហា Submit បង្កើតហាង VIP ថ្មីរួច ហើយបង្ហាញផ្ទាំងខុស «⛔ Unauthorized Restaurant - Malis Restaurant»: មុខងារ `addRestaurant` ឥឡូវប្រគល់ទិន្នន័យហាងថ្មីដែលទើបបង្កើតរួចដោយផ្ទាល់ ហើយបើកផ្ទាំង Manage Menu លើហាងរបស់ម្ចាស់នោះភ្លាមៗ។
-              - កែសម្រួល Regex `isSeedRestaurantId` មិនឱ្យច្រឡំលេខសម្គាល់ហាង VIP ថ្មី (`rest-vip-...`) ជាមួយហាងលំនាំដើម (`rest-1` ដល់ `rest-250`)។
-              - រក្សាទុកទិន្នន័យហាង VIP ថ្មីចូលក្នុង Persistent Local Storage ភ្លាមៗ និង Sync ទៅកាន់ Supabase Cloud ដោយស្វ័យប្រវត្តិ។
-            - 🔒 **៣. រក្សាទុកអចិន្ត្រៃយ៍នូវរូបថតតំបន់ទេសចរណ៍ ៣០០ កន្លែង និងមុខម្ហូប ២០០ មុខ ដោយគ្មានការបាត់បង់ទិន្នន័យ។**
+            **កំណែថ្មី v1.9.2 (Multiple Image Uploads at Once, Preview Lightbox & Reorder Controls):**
+            - 📸 **១. បន្ថែមមុខងារជ្រើសរូបភាពច្រើនសន្លឹកក្នុងពេលតែមួយពី Gallery (Multiple Image Upload in One Step):**
+              - អាប់ដេត Plugin Native Android ជាមួយ `Intent.EXTRA_ALLOW_MULTIPLE` និងមុខងារ Web Multi-file ឱ្យជ្រើសរើសរូបភាពច្រើនសន្លឹក (1, 3, 5, 10+ រូប) ពី Gallery ចូលក្នុងកម្មវិធីក្នុងពេលតែមួយ ដោយមិនចាំបាច់ផ្ទុកម្តងមួយសន្លឹកទៀតឡើយ។
+              - បង្ហាញផ្ទាំង Progress និងចំនួនរូបភាពដែលបានបញ្ចូលជោគជ័យភ្លាមៗ។
+            - 👁️ **២. ផ្ទាំងមើលរូបភាពធំ (Interactive Full-Screen Lightbox Preview):**
+              - ចុចលើរូបភាពណាមួយដើម្បីបើកមើលទំហំធំ ច្បាស់ត្រជាក់ភ្នែក ជាមួយប៊ូតុងរំកិលមើលរូបមុន/រូបបន្ទាប់ (Previous / Next) មុននឹងសម្រេចចិត្តរក្សាទុក។
+            - 🔄 **៣. រៀបចំលំដាប់លំដោយរូបភាព និងកំណត់រូបតំណាងហាងចម្បង (Reorder & Set Cover Photo):**
+              - ប៊ូតុងរំកិលទៅឆ្វេង (◀) និងទៅស្តាំ (▶) នៅលើគ្រប់រូបភាពនីមួយៗ សម្រាប់រៀបចំលំដាប់រូបភាពតាមចិត្ត។
+              - ប៊ូតុង «★ ដាក់ជារូបតំណាងហាង (Set as Main Cover)» សម្រាប់កំណត់រូបភាពណាមួយជារូបតំណាងហាងចម្បងបានភ្លាមៗ។
+              - ប៊ូតុងលុប (🗑️) សម្រាប់ដករូបភាពណាដែលមិនចង់បានចេញ។
+            - 💾 **៤. រក្សាទុកត្រឹមត្រូវ និងបង្ហាញគ្រប់រូបភាពទាំងអស់ក្នុងព័ត៌មានលម្អិតហាង (Shop Details):**
+              - រាល់រូបភាពទាំងអស់ត្រូវបានរក្សាទុកចូលក្នុង `photoUrl`, `profileImage`, `foodImages`, និង `galleryPhotos` ទាំងក្នុងទូរស័ព្ទ (Persistent Local Storage) និង Supabase Cloud ដោយសុវត្ថិភាព ១០០%។
           draft: false
           prerelease: false
           files: |

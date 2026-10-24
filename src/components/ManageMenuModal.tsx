@@ -15,6 +15,7 @@ import {
   processAndCompressImageFile,
 } from '../utils/androidMediaHelper';
 import { searchOnlineFoodImages, OnlineFoodImageCandidate } from '../services/onlineFoodImageService';
+import { ShopMultiPhotoUploader } from './ShopMultiPhotoUploader';
 
 export const ManageMenuModal: React.FC = () => {
   const { 
@@ -1139,123 +1140,23 @@ export const ManageMenuModal: React.FC = () => {
                 />
               </div>
 
-              {/* Cover Photo / Shop Profile Picture */}
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label className="font-bold text-[#0F172A] dark:text-slate-300">
-                    {isKm ? 'រូបភាពតំណាងហាង (Shop Profile Picture)' : 'Shop Profile Picture'}
-                  </label>
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      const res = await pickImageUsingNativeAndroidGallery();
-                      if (res.success && res.dataUrl) {
-                        setStoreCoverPhoto(res.dataUrl);
-                      }
-                    }}
-                    className="px-2.5 py-1 rounded-lg bg-[#064E3B] text-white font-bold text-[10px] cursor-pointer"
-                  >
-                    {isKm ? '📸 ជ្រើសពី Gallery' : '📸 From Gallery'}
-                  </button>
-                </div>
-                <input
-                  type="url"
-                  value={storeCoverPhoto}
-                  onChange={e => setStoreCoverPhoto(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs mb-2 focus:ring-2 focus:ring-emerald-500/30 focus:border-[#059669] outline-none text-[#0F172A] dark:text-white font-mono text-[11px]"
-                />
-              </div>
-
-              {/* Multiple Food Photos (Unlimited HD Photos for VIP) */}
-              <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-xs text-[#0F172A] dark:text-white flex items-center gap-1.5">
-                    <span>📸</span>
-                    <span>{isKm ? `រូបភាពមុខម្ហូបប្រចាំហាង HD (${storeGalleryPhotos.length} សន្លឹក - VIP ឥតកំណត់)` : `HD Food Photos (${storeGalleryPhotos.length} uploaded)`}</span>
-                  </span>
-                  <label className="px-2.5 py-1 rounded-lg bg-amber-500 text-slate-950 font-bold text-[10px] cursor-pointer">
-                    <span>{isKm ? '+ បន្ថែមពី Gallery' : '+ Add from Gallery'}</span>
-                    <input
-                      type="file"
-                      accept="image/jpeg,image/jpg,image/png,image/webp"
-                      multiple
-                      className="hidden"
-                      onChange={async (e) => {
-                        const files = Array.from(e.target.files || []);
-                        e.target.value = '';
-                        for (const f of files) {
-                          try {
-                            const dataUrl = await processAndCompressImageFile(f);
-                            if (dataUrl) {
-                              setStoreGalleryPhotos((prev) => [...prev, dataUrl].slice(0, 30));
-                            }
-                          } catch {
-                            // ignore invalid file
-                          }
-                        }
-                      }}
-                    />
-                  </label>
-                </div>
-
-                <div className="flex gap-2">
-                  <input
-                    type="url"
-                    placeholder="បញ្ចូលតំណភ្ជាប់រូបភាព Gallery URL..."
-                    value={newGalleryInput}
-                    onChange={e => setNewGalleryInput(e.target.value)}
-                    disabled={!isPremiumActive}
-                    className="flex-1 px-3 py-1.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-mono disabled:opacity-50"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => handleAddGalleryPhoto(newGalleryInput)}
-                    disabled={!isPremiumActive || !newGalleryInput.trim()}
-                    className="px-3 py-1.5 rounded-xl bg-[#064E3B] text-white font-bold text-xs disabled:opacity-40"
-                  >
-                    {isKm ? 'បន្ថែម' : 'Add'}
-                  </button>
-                </div>
-
-                {/* Gallery Thumbnails List */}
-                {storeGalleryPhotos.length > 0 && (
-                  <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 pt-1">
-                    {storeGalleryPhotos.map((photo, i) => (
-                      <div key={i} className="relative aspect-square rounded-xl overflow-hidden border border-slate-200 group">
-                        <img src={photo} alt="thumb" className="w-full h-full object-cover" />
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveGalleryPhoto(i)}
-                          className="absolute top-1 right-1 p-1 bg-black/70 text-white rounded-full hover:bg-red-600 transition"
-                          title="Remove"
-                        >
-                          <X className="w-3 h-3" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* Sample Presets */}
-                <div className="pt-1">
-                  <span className="text-[10px] text-slate-500 block mb-1">
-                    {isKm ? 'ជ្រើសរើសរូបគំរូបរិយាកាសហាងរហ័ស៖' : 'Quick select sample photos:'}
-                  </span>
-                  <div className="flex gap-1.5 overflow-x-auto no-scrollbar">
-                    {sampleGalleryPhotos.map((url, i) => (
-                      <button
-                        key={i}
-                        type="button"
-                        onClick={() => handleAddGalleryPhoto(url)}
-                        disabled={!isPremiumActive}
-                        className="w-12 h-10 rounded-lg overflow-hidden shrink-0 border border-slate-300 hover:border-emerald-500 transition opacity-80 hover:opacity-100 disabled:opacity-30"
-                      >
-                        <img src={url} alt="sample" className="w-full h-full object-cover" />
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
+              {/* Unified Shop Multi-Photo Uploader (Multi-upload, Preview Lightbox, Reorder, Set Cover) */}
+              <ShopMultiPhotoUploader
+                photos={Array.from(new Set([storeCoverPhoto, ...storeGalleryPhotos])).filter(Boolean)}
+                onChangePhotos={(updated) => {
+                  if (updated.length > 0) {
+                    setStoreCoverPhoto(updated[0]);
+                    setStoreGalleryPhotos(updated.slice(1));
+                  } else {
+                    setStoreCoverPhoto('');
+                    setStoreGalleryPhotos([]);
+                  }
+                }}
+                shopName={storeNameKh}
+                isKm={isKm}
+                onToast={showToast}
+                maxPhotos={30}
+              />
 
               {/* VIP Feature: Food Video Reels (TikTok / Facebook / YouTube Video Link) */}
               <div className="p-3.5 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-slate-800 rounded-2xl border border-amber-300 dark:border-amber-700/60 space-y-2">
