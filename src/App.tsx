@@ -152,15 +152,9 @@ const MainScreen: React.FC = () => {
         {activeTab === 'profile' && <ProfileView />}
       </main>
 
-      {/* Detail Modals — Conditionally Mounted to Save CPU, GPU & RAM */}
-      {selectedFood && <FoodDetailModal />}
-      {selectedRestaurant && <RestaurantDetailModal />}
-      {selectedDestination && <TouristDetailModal />}
-      
       {/* Creation & Action Modals — Conditionally Mounted */}
       {isAuthModalOpen && <AuthModal />}
       {isAddRestaurantModalOpen && <AddRestaurantModal />}
-      {(isManageMenuModalOpen || managingRestaurant) && <ManageMenuModal />}
       {isAdminOpen && <AdminDashboard />}
       {isAdminLoginModalOpen && <AdminLoginModal />}
       {isInstallModalOpen && <InstallModal />}
@@ -184,6 +178,12 @@ const MainScreen: React.FC = () => {
       {isQrScannerModalOpen && <QrScannerModal />}
       {isVipAddRestaurantModalOpen && <VipAddRestaurantModal />}
       {isGoogleMapsSearchModalOpen && <GoogleMapsPlaceSearchModal />}
+
+      {/* Detail & Edit Modals — Mounted Above Search Modals so Previews Open on Top */}
+      {selectedFood && <FoodDetailModal />}
+      {selectedRestaurant && <RestaurantDetailModal />}
+      {selectedDestination && <TouristDetailModal />}
+      {(isManageMenuModalOpen || managingRestaurant) && <ManageMenuModal />}
 
       {/* Notifications */}
       {toast && <Toast />}

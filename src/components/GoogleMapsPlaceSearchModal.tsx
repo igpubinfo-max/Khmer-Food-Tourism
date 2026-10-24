@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   Search, MapPin, Star, ExternalLink, X, CheckCircle, AlertTriangle,
   Globe, RefreshCw, PlusCircle, Edit3, Check, ChevronLeft, ChevronRight,
-  Navigation, ShieldCheck, Database, Sparkles, SlidersHorizontal, Phone, Image as ImageIcon
+  Navigation, ShieldCheck, Database, Sparkles, SlidersHorizontal, Phone, Image as ImageIcon, ArrowUp
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { isUserVipActive } from '../types';
@@ -146,6 +146,28 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
   const [quotaStats, setQuotaStats] = useState(() => getSmartCacheStats());
   const [customDailyLimit, setCustomDailyLimit] = useState(() => String(getSmartCacheStats().dailyApiLimit));
 
+  // Refs for smooth Android scrolling & automatic keyboard dismissal
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
+  const resultsAnchorRef = useRef<HTMLDivElement | null>(null);
+  const searchFormTopRef = useRef<HTMLDivElement | null>(null);
+
+  const scrollToResultsSection = () => {
+    setTimeout(() => {
+      if (resultsAnchorRef.current) {
+        resultsAnchorRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 90);
+  };
+
+  const scrollToSearchTop = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (searchFormTopRef.current) {
+      searchFormTopRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   const refreshQuotaStats = () => {
     const s = getSmartCacheStats();
     setQuotaStats(s);
@@ -194,6 +216,11 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
     const token = overrideParams?.pageToken;
     const isAppend = Boolean(overrideParams?.append);
 
+    // Dismiss Android soft keyboard so results are never covered
+    if (searchInputRef.current) {
+      searchInputRef.current.blur();
+    }
+
     if (isAppend) {
       setIsLoadingMore(true);
     } else {
@@ -231,10 +258,14 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
           setCurrentPage(c => Math.min(nextTotalPages, c + 1));
           return merged;
         });
+        scrollToResultsSection();
       } else {
         setResults(foundPlaces);
         setCurrentPage(1);
         setSelectedPlaceIds(new Set());
+        if (foundPlaces.length > 0) {
+          scrollToResultsSection();
+        }
       }
 
       setNextPageToken(response.nextPageToken);
@@ -443,17 +474,17 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
   if (!isGoogleMapsSearchModalOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/75 backdrop-blur-sm overflow-y-auto">
-      <div className="bg-white rounded-3xl max-w-5xl w-full max-h-[94vh] flex flex-col overflow-hidden shadow-2xl border border-emerald-200 animate-in fade-in zoom-in-95 duration-200">
-        {/* Top Header */}
-        <div className="bg-gradient-to-r from-emerald-900 via-teal-800 to-emerald-900 text-white px-4 sm:px-6 py-4 flex items-center justify-between gap-3 shrink-0">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-11 h-11 rounded-2xl bg-white/15 backdrop-blur-md flex items-center justify-center border border-white/25 shrink-0 shadow-inner">
-              <Globe className="w-6 h-6 text-emerald-300" />
+    <div className="fixed inset-0 z-[55] flex flex-col sm:items-center sm:justify-center p-0 sm:p-4 bg-black/75 backdrop-blur-sm overflow-hidden">
+      <div className="bg-white sm:rounded-3xl max-w-5xl w-full h-[100dvh] sm:h-auto sm:max-h-[94vh] flex flex-col overflow-hidden shadow-2xl border-0 sm:border border-emerald-200 animate-in fade-in zoom-in-95 duration-200">
+        {/* Top Header (Compact & Always Accessible) */}
+        <div className="bg-gradient-to-r from-emerald-900 via-teal-800 to-emerald-900 text-white px-3.5 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-2.5 shrink-0 z-30 shadow-md">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-white/15 backdrop-blur-md flex items-center justify-center border border-white/25 shrink-0 shadow-inner">
+              <Globe className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-300" />
             </div>
             <div className="min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="text-base sm:text-lg font-extrabold tracking-tight truncate">
+              <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                <h2 className="text-sm sm:text-lg font-extrabold tracking-tight truncate">
                   {tr(
                     language,
                     '🗺️ ស្វែងរកហាង & តំបន់ទេសចរណ៍លើ Google Maps',
@@ -461,16 +492,16 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                     '🗺️ 谷歌地图搜索 — 店铺与旅游景点'
                   )}
                 </h2>
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-400/20 text-emerald-200 border border-emerald-300/30">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-400/20 text-emerald-200 border border-emerald-300/30">
                   <Sparkles className="w-3 h-3" /> Places API (New)
                 </span>
                 {isVipActive && !isAdmin && (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-400 text-slate-950 shadow-sm">
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-400 text-slate-950 shadow-sm">
                     👑 VIP Access
                   </span>
                 )}
               </div>
-              <p className="text-xs text-emerald-100/90 truncate mt-0.5">
+              <p className="text-[11px] sm:text-xs text-emerald-100/90 truncate mt-0.5">
                 {tr(
                   language,
                   'ស្វែងរកទូទាំងប្រទេសកម្ពុជា តាមខេត្ត/ក្រុង ឬ GPS ជិតអ្នក • ការពារទិន្នន័យស្ទួនដោយស្វ័យប្រវត្តិ',
@@ -490,398 +521,417 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
           </button>
         </div>
 
-        {/* Search & Filter Controls */}
-        <div className="p-4 sm:p-5 bg-slate-50 border-b border-slate-200 space-y-3 shrink-0">
-          {/* Search Scope Selector Bar (Nationwide / By Province / Nearby GPS) */}
-          <div className="flex items-center justify-between gap-2 flex-wrap">
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="text-[11px] font-extrabold text-slate-600 mr-1">
-                {tr(language, 'វិសាលភាពស្វែងរក៖', 'Search Scope:', '搜索范围：')}
-              </span>
-              <button
-                type="button"
-                onClick={() => {
-                  setSearchScope('nationwide');
-                  setProvince('ទាំងអស់');
-                  setGpsLocation(null);
-                  if (query.trim()) {
-                    executeSearch({ scope: 'nationwide', prov: 'ទាំងអស់', loc: null });
-                  }
-                }}
-                className={`text-xs font-bold px-3 py-1.5 rounded-xl border transition-all cursor-pointer flex items-center gap-1.5 ${
-                  searchScope === 'nationwide' && province === 'ទាំងអស់' && !gpsLocation
-                    ? 'bg-emerald-700 text-white border-emerald-700 shadow-sm'
-                    : 'bg-white text-slate-700 border-slate-300 hover:border-emerald-400'
-                }`}
-              >
-                <span>🇰🇭</span>
-                <span>{tr(language, 'ទូទាំងប្រទេសកម្ពុជា (២៥ ខេត្ត/ក្រុង)', 'Nationwide Cambodia', '全柬埔寨（25省市）')}</span>
-              </button>
+        {/* Unified Scrollable Body — Eliminates Nested Scroll Traps & Fixed-Height Overflow on Android */}
+        <div
+          ref={scrollContainerRef}
+          className="flex-1 min-h-0 overflow-y-auto overscroll-contain touch-pan-y [-webkit-overflow-scrolling:touch] bg-slate-100/70"
+        >
+          {/* Search & Filter Controls */}
+          <div ref={searchFormTopRef} className="p-3.5 sm:p-5 bg-slate-50 border-b border-slate-200 space-y-2.5 sm:space-y-3">
+            {/* Search Scope Selector Bar (Nationwide / By Province / Nearby GPS) */}
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="text-[11px] font-extrabold text-slate-600 mr-1">
+                  {tr(language, 'វិសាលភាពស្វែងរក៖', 'Search Scope:', '搜索范围：')}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchScope('nationwide');
+                    setProvince('ទាំងអស់');
+                    setGpsLocation(null);
+                    if (query.trim()) {
+                      executeSearch({ scope: 'nationwide', prov: 'ទាំងអស់', loc: null });
+                    }
+                  }}
+                  className={`text-[11px] sm:text-xs font-bold px-2.5 sm:px-3 py-1.5 rounded-xl border transition-all cursor-pointer flex items-center gap-1 ${
+                    searchScope === 'nationwide' && province === 'ទាំងអស់' && !gpsLocation
+                      ? 'bg-emerald-700 text-white border-emerald-700 shadow-sm'
+                      : 'bg-white text-slate-700 border-slate-300 hover:border-emerald-400'
+                  }`}
+                >
+                  <span>🇰🇭</span>
+                  <span>{tr(language, 'ទូទាំងប្រទេសកម្ពុជា (២៥ ខេត្ត/ក្រុង)', 'Nationwide Cambodia', '全柬埔寨（25省市）')}</span>
+                </button>
 
-              <button
-                type="button"
-                onClick={() => {
-                  setSearchScope('province');
-                  setGpsLocation(null);
-                  const nextProv = province === 'ទាំងអស់' ? 'រាជធានីភ្នំពេញ' : province;
-                  setProvince(nextProv);
-                  if (query.trim()) {
-                    executeSearch({ scope: 'province', prov: nextProv, loc: null });
-                  }
-                }}
-                className={`text-xs font-bold px-3 py-1.5 rounded-xl border transition-all cursor-pointer flex items-center gap-1.5 ${
-                  (searchScope === 'province' || province !== 'ទាំងអស់') && !gpsLocation
-                    ? 'bg-emerald-700 text-white border-emerald-700 shadow-sm'
-                    : 'bg-white text-slate-700 border-slate-300 hover:border-emerald-400'
-                }`}
-              >
-                <span>🏙️</span>
-                <span>{tr(language, 'តាមខេត្ត/ក្រុង', 'By Province / City', '按省份/城市')}</span>
-              </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchScope('province');
+                    setGpsLocation(null);
+                    const nextProv = province === 'ទាំងអស់' ? 'រាជធានីភ្នំពេញ' : province;
+                    setProvince(nextProv);
+                    if (query.trim()) {
+                      executeSearch({ scope: 'province', prov: nextProv, loc: null });
+                    }
+                  }}
+                  className={`text-[11px] sm:text-xs font-bold px-2.5 sm:px-3 py-1.5 rounded-xl border transition-all cursor-pointer flex items-center gap-1 ${
+                    (searchScope === 'province' || province !== 'ទាំងអស់') && !gpsLocation
+                      ? 'bg-emerald-700 text-white border-emerald-700 shadow-sm'
+                      : 'bg-white text-slate-700 border-slate-300 hover:border-emerald-400'
+                  }`}
+                >
+                  <span>🏙️</span>
+                  <span>{tr(language, 'តាមខេត្ត/ក្រុង', 'By Province / City', '按省份/城市')}</span>
+                </button>
 
-              <button
-                type="button"
-                onClick={handleUseMyGpsLocation}
-                disabled={gpsLoading || isLoading}
-                className={`text-xs font-bold px-3 py-1.5 rounded-xl border transition-all cursor-pointer flex items-center gap-1.5 ${
-                  gpsLocation || searchScope === 'nearby'
-                    ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
-                    : 'bg-white text-slate-700 border-slate-300 hover:border-blue-400'
-                }`}
-              >
-                <Navigation className={`w-3.5 h-3.5 ${gpsLoading ? 'animate-ping' : ''}`} />
-                <span>{tr(language, 'ជិតខ្ញុំ (GPS Nearby)', 'Nearby Me (GPS)', '我附近 (GPS)')}</span>
-              </button>
+                <button
+                  type="button"
+                  onClick={handleUseMyGpsLocation}
+                  disabled={gpsLoading || isLoading}
+                  className={`text-[11px] sm:text-xs font-bold px-2.5 sm:px-3 py-1.5 rounded-xl border transition-all cursor-pointer flex items-center gap-1 ${
+                    gpsLocation || searchScope === 'nearby'
+                      ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
+                      : 'bg-white text-slate-700 border-slate-300 hover:border-blue-400'
+                  }`}
+                >
+                  <Navigation className={`w-3.5 h-3.5 ${gpsLoading ? 'animate-ping' : ''}`} />
+                  <span>{tr(language, 'ជិតខ្ញុំ (GPS Nearby)', 'Nearby Me (GPS)', '我附近 (GPS)')}</span>
+                </button>
+              </div>
+
+              {gpsLocation && (
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[11px] font-bold text-slate-600">
+                    {tr(language, 'រង្វង់ GPS៖', 'Radius:', '半径：')}
+                  </span>
+                  {[5, 15, 30, 50].map(km => (
+                    <button
+                      key={km}
+                      type="button"
+                      onClick={() => {
+                        setGpsRadiusKm(km);
+                        executeSearch({ loc: gpsLocation, radiusKm: km, scope: 'nearby' });
+                      }}
+                      className={`px-2 py-0.5 rounded-lg text-[11px] font-bold border cursor-pointer ${
+                        gpsRadiusKm === km
+                          ? 'bg-blue-600 text-white border-blue-600'
+                          : 'bg-white text-slate-600 border-slate-300 hover:bg-blue-50'
+                      }`}
+                    >
+                      {km}km
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
-            {gpsLocation && (
-              <div className="flex items-center gap-1.5">
-                <span className="text-[11px] font-bold text-slate-600">
-                  {tr(language, 'រង្វង់ GPS៖', 'Radius:', '半径：')}
-                </span>
-                {[5, 15, 30, 50].map(km => (
+            <form
+              onSubmit={e => {
+                e.preventDefault();
+                executeSearch();
+              }}
+              className="grid grid-cols-2 sm:grid-cols-12 gap-2"
+            >
+              {/* Keyword Input */}
+              <div className="col-span-2 sm:col-span-5 relative">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  value={query}
+                  onChange={e => setQuery(e.target.value)}
+                  placeholder={tr(
+                    language,
+                    'វាយឈ្មោះហាង (ឧ. បាយមាន់, coffee, ហាងកាហ្វេ, ភោជនីយដ្ឋាន)...',
+                    'Search coffee, café, restaurant, or tourist attraction...',
+                    '输入咖啡馆、餐厅或景点名称（如 coffee, café, ហាងកាហ្វេ）...'
+                  )}
+                  className="w-full pl-10 pr-8 py-2.5 rounded-xl border border-slate-300 bg-white text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium"
+                />
+                {query && (
                   <button
-                    key={km}
+                    type="button"
+                    onClick={() => setQuery('')}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+
+              {/* Category Selector (Side-by-side with Province on Mobile) */}
+              <div className="col-span-1 sm:col-span-3">
+                <select
+                  value={category}
+                  onChange={e => {
+                    const nextCat = e.target.value as GooglePlaceSearchCategory;
+                    setCategory(nextCat);
+                    if (query.trim()) {
+                      executeSearch({ cat: nextCat });
+                    }
+                  }}
+                  className="w-full px-2.5 sm:px-3 py-2.5 rounded-xl border border-slate-300 bg-white text-xs sm:text-sm text-slate-800 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                >
+                  {SEARCH_CATEGORIES.map(c => (
+                    <option key={c.id} value={c.id}>
+                      {c.emoji} {tr(language, c.labelKh, c.labelEn, c.labelZh)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Province Selector (Side-by-side with Category on Mobile) */}
+              <div className="col-span-1 sm:col-span-2">
+                <select
+                  value={province}
+                  onChange={e => {
+                    const nextProv = e.target.value;
+                    setProvince(nextProv);
+                    setSearchScope(nextProv === 'ទាំងអស់' ? 'nationwide' : 'province');
+                    if (query.trim()) {
+                      executeSearch({
+                        prov: nextProv,
+                        scope: nextProv === 'ទាំងអស់' ? 'nationwide' : 'province',
+                      });
+                    }
+                  }}
+                  className="w-full px-2.5 sm:px-3 py-2.5 rounded-xl border border-slate-300 bg-white text-xs sm:text-sm text-slate-800 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                >
+                  {CAMBODIA_PROVINCES.map(prov => (
+                    <option key={prov} value={prov}>
+                      📍{' '}
+                      {prov === 'ទាំងអស់'
+                        ? tr(language, 'គ្រប់ខេត្ត/ក្រុង', 'All Provinces', '全部省份/城市')
+                        : translateProvinceName(prov, prov, language)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Search Submit Button */}
+              <div className="col-span-2 sm:col-span-2 flex gap-1.5">
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="flex-1 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold text-sm py-2.5 px-3 rounded-xl shadow-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  {isLoading ? (
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Search className="w-4 h-4" />
+                  )}
+                  <span>{tr(language, 'ស្វែងរក', 'Search', '搜索')}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleUseMyGpsLocation}
+                  disabled={gpsLoading || isLoading}
+                  title={tr(language, 'ស្វែងរកទីតាំងជិតខ្ញុំ (GPS)', 'Search Near Me (GPS)', '搜索我附近的位置 (GPS)')}
+                  className={`px-3 py-2.5 rounded-xl border text-xs font-bold flex items-center justify-center transition-all cursor-pointer ${
+                    gpsLocation
+                      ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
+                      : 'bg-white text-slate-700 border-slate-300 hover:bg-blue-50 hover:border-blue-300'
+                  }`}
+                >
+                  <Navigation className={`w-4 h-4 ${gpsLoading ? 'animate-ping' : ''}`} />
+                </button>
+              </div>
+            </form>
+
+            {/* Quick Search Presets (Single Horizontal Scroll Row on Mobile, Wrap on Desktop) */}
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-1.5 overflow-x-auto sm:flex-wrap no-scrollbar py-0.5 max-w-full">
+                <span className="text-[11px] font-bold text-slate-500 mr-1 shrink-0">
+                  {tr(language, 'ស្វែងរករហ័ស៖', 'Quick Search:', '快捷搜索：')}
+                </span>
+                {QUICK_SEARCH_PRESETS.map((preset, idx) => (
+                  <button
+                    key={idx}
                     type="button"
                     onClick={() => {
-                      setGpsRadiusKm(km);
-                      executeSearch({ loc: gpsLocation, radiusKm: km, scope: 'nearby' });
+                      setQuery(preset.query);
+                      setCategory(preset.category);
+                      setProvince(preset.province);
+                      setSearchScope(preset.province === 'ទាំងអស់' ? 'nationwide' : 'province');
+                      executeSearch({
+                        q: preset.query,
+                        cat: preset.category,
+                        prov: preset.province,
+                        scope: preset.province === 'ទាំងអស់' ? 'nationwide' : 'province',
+                      });
                     }}
-                    className={`px-2 py-0.5 rounded-lg text-[11px] font-bold border cursor-pointer ${
-                      gpsRadiusKm === km
-                        ? 'bg-blue-600 text-white border-blue-600'
-                        : 'bg-white text-slate-600 border-slate-300 hover:bg-blue-50'
-                    }`}
+                    className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-white border border-slate-200 hover:border-emerald-400 hover:bg-emerald-50 text-slate-700 transition-colors cursor-pointer shrink-0"
                   >
-                    {km}km
+                    {tr(language, preset.labelKh, preset.labelEn, preset.labelZh)}
                   </button>
                 ))}
               </div>
-            )}
-          </div>
 
-          <form
-            onSubmit={e => {
-              e.preventDefault();
-              executeSearch();
-            }}
-            className="grid grid-cols-1 sm:grid-cols-12 gap-2.5"
-          >
-            {/* Keyword Input */}
-            <div className="sm:col-span-5 relative">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                value={query}
-                onChange={e => setQuery(e.target.value)}
-                placeholder={tr(
-                  language,
-                  'វាយឈ្មោះហាង (ឧ. coffee, café, ហាងកាហ្វេ, ភោជនីយដ្ឋាន)...',
-                  'Search coffee, café, restaurant, or tourist attraction...',
-                  '输入咖啡馆、餐厅或景点名称（如 coffee, café, ហាងកាហ្វេ）...'
-                )}
-                className="w-full pl-10 pr-8 py-2.5 rounded-xl border border-slate-300 bg-white text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium"
-              />
-              {query && (
-                <button
-                  type="button"
-                  onClick={() => setQuery('')}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              )}
-            </div>
-
-            {/* Category Selector */}
-            <div className="sm:col-span-3">
-              <select
-                value={category}
-                onChange={e => {
-                  const nextCat = e.target.value as GooglePlaceSearchCategory;
-                  setCategory(nextCat);
-                  if (query.trim()) {
-                    executeSearch({ cat: nextCat });
-                  }
-                }}
-                className="w-full px-3 py-2.5 rounded-xl border border-slate-300 bg-white text-sm text-slate-800 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
-              >
-                {SEARCH_CATEGORIES.map(c => (
-                  <option key={c.id} value={c.id}>
-                    {c.emoji} {tr(language, c.labelKh, c.labelEn, c.labelZh)}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Province Selector */}
-            <div className="sm:col-span-2">
-              <select
-                value={province}
-                onChange={e => {
-                  const nextProv = e.target.value;
-                  setProvince(nextProv);
-                  setSearchScope(nextProv === 'ទាំងអស់' ? 'nationwide' : 'province');
-                  if (query.trim()) {
-                    executeSearch({
-                      prov: nextProv,
-                      scope: nextProv === 'ទាំងអស់' ? 'nationwide' : 'province',
-                    });
-                  }
-                }}
-                className="w-full px-3 py-2.5 rounded-xl border border-slate-300 bg-white text-sm text-slate-800 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
-              >
-                {CAMBODIA_PROVINCES.map(prov => (
-                  <option key={prov} value={prov}>
-                    📍{' '}
-                    {prov === 'ទាំងអស់'
-                      ? tr(language, 'គ្រប់ខេត្ត/ក្រុង', 'All Provinces', '全部省份/城市')
-                      : translateProvinceName(prov, prov, language)}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Search Submit Button */}
-            <div className="sm:col-span-2 flex gap-1.5">
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="flex-1 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold text-sm py-2.5 px-3 rounded-xl shadow-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-              >
-                {isLoading ? (
-                  <RefreshCw className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Search className="w-4 h-4" />
-                )}
-                <span>{tr(language, 'ស្វែងរក', 'Search', '搜索')}</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={handleUseMyGpsLocation}
-                disabled={gpsLoading || isLoading}
-                title={tr(language, 'ស្វែងរកទីតាំងជិតខ្ញុំ (GPS)', 'Search Near Me (GPS)', '搜索我附近的位置 (GPS)')}
-                className={`px-3 py-2.5 rounded-xl border text-xs font-bold flex items-center justify-center transition-all cursor-pointer ${
-                  gpsLocation
-                    ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
-                    : 'bg-white text-slate-700 border-slate-300 hover:bg-blue-50 hover:border-blue-300'
-                }`}
-              >
-                <Navigation className={`w-4 h-4 ${gpsLoading ? 'animate-ping' : ''}`} />
-              </button>
-            </div>
-          </form>
-
-          {/* Quick Search Presets & GPS Status */}
-          <div className="flex items-center justify-between gap-2 flex-wrap">
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="text-[11px] font-bold text-slate-500 mr-1">
-                {tr(language, 'ស្វែងរករហ័ស៖', 'Quick Search:', '快捷搜索：')}
-              </span>
-              {QUICK_SEARCH_PRESETS.map((preset, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  onClick={() => {
-                    setQuery(preset.query);
-                    setCategory(preset.category);
-                    setProvince(preset.province);
-                    setSearchScope(preset.province === 'ទាំងអស់' ? 'nationwide' : 'province');
-                    executeSearch({
-                      q: preset.query,
-                      cat: preset.category,
-                      prov: preset.province,
-                      scope: preset.province === 'ទាំងអស់' ? 'nationwide' : 'province',
-                    });
-                  }}
-                  className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-white border border-slate-200 hover:border-emerald-400 hover:bg-emerald-50 text-slate-700 transition-colors cursor-pointer"
-                >
-                  {tr(language, preset.labelKh, preset.labelEn, preset.labelZh)}
-                </button>
-              ))}
-            </div>
-
-            {gpsLocation && (
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-[11px] font-bold">
-                <Navigation className="w-3 h-3" />
-                <span>
-                  GPS: {Number(gpsLocation.lat ?? 11.5564).toFixed(3)}, {Number(gpsLocation.lng ?? 104.9282).toFixed(3)} ({gpsRadiusKm}km)
-                </span>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setGpsLocation(null);
-                    setSearchScope(province === 'ទាំងអស់' ? 'nationwide' : 'province');
-                  }}
-                  className="ml-1 hover:text-red-600"
-                >
-                  <X className="w-3 h-3" />
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* API Usage & Quota Control Bar */}
-          <div className="flex items-center justify-between gap-2 pt-2 border-t border-slate-200/80 text-[11px] text-slate-600 flex-wrap">
-            <div className="flex items-center gap-3 flex-wrap">
-              <span className="inline-flex items-center gap-1 font-bold text-emerald-800 bg-emerald-100/80 px-2.5 py-0.5 rounded-full">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                Powered by Google Maps
-              </span>
-              <span>
-                📡 {tr(language, 'ចំនួនហៅ API ថ្ងៃនេះ៖', 'API Calls Today:', '今日 API 调用：')}{' '}
-                <strong className={quotaStats.dailyApiCallsCount >= quotaStats.dailyApiLimit ? 'text-red-600' : 'text-slate-900'}>
-                  {quotaStats.dailyApiCallsCount} / {quotaStats.dailyApiLimit}
-                </strong>
-              </span>
-              <span>
-                ⚡ {tr(language, 'ឃ្លាំងសម្ងាត់ឆ្លាតវៃ (៣០ ថ្ងៃ)៖', 'Smart Cache (30-Day TTL):', '智能缓存（30天）：')}{' '}
-                <strong className="text-emerald-700">
-                  {tr(
-                    language,
-                    `${quotaStats.totalCachedPlaces} ទីតាំង (សន្សំបាន ${quotaStats.cacheHitsSavedQuota} ដង $0)`,
-                    `${quotaStats.totalCachedPlaces} places (${quotaStats.cacheHitsSavedQuota} hits saved $0)`,
-                    `${quotaStats.totalCachedPlaces} 个地点（已节省 ${quotaStats.cacheHitsSavedQuota} 次调用 $0）`
-                  )}
-                </strong>
-              </span>
-              {fromCache && results.length > 0 && (
-                <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-bold">
-                  {tr(language, '⚡ ទាញពីឃ្លាំងសម្ងាត់ (0 API Cost)', '⚡ Loaded from Smart Cache ($0)', '⚡ 来自智能缓存（0 API 费用）')}
-                </span>
-              )}
-            </div>
-
-            {isAdmin && (
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setShowQuotaConfig(prev => !prev)}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-200/80 hover:bg-slate-300 text-slate-700 font-bold cursor-pointer"
-                >
-                  <SlidersHorizontal className="w-3 h-3" />
-                  {tr(language, 'កំណត់កូតា API', 'API Limit', 'API 配额设置')}
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Admin Daily Quota Config Drawer */}
-          {isAdmin && showQuotaConfig && (
-            <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-between gap-3 flex-wrap">
-              <div className="text-xs text-amber-900">
-                <strong>🛡️ ការគ្រប់គ្រងចំណាយ Google Maps API (Cost Control):</strong> កំណត់ចំនួនហៅ API អតិបរមាក្នុង ១ ថ្ងៃ។ ការស្វែងរកដដែលៗត្រូវបានរក្សាទុកក្នុង Smart Cache រយៈពេល ៣០ ថ្ងៃដោយមិនគិតថ្លៃ។
-              </div>
-              <div className="flex items-center gap-2">
-                <input
-                  type="number"
-                  min={10}
-                  max={5000}
-                  value={customDailyLimit}
-                  onChange={e => setCustomDailyLimit(e.target.value)}
-                  className="w-24 px-2.5 py-1 rounded-lg border border-amber-300 bg-white text-xs font-bold text-slate-800"
-                />
-                <button
-                  type="button"
-                  onClick={handleSaveDailyLimit}
-                  className="px-3 py-1 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold cursor-pointer"
-                >
-                  រក្សាទុក
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Admin & Active VIP Batch Import + Results Count Toolbar */}
-        {results.length > 0 && (
-          <div className="px-4 sm:px-6 py-2.5 bg-indigo-50/90 border-b border-indigo-200 flex items-center justify-between gap-2 flex-wrap shrink-0">
-            <div className="flex items-center gap-3 flex-wrap">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-700 text-white text-xs font-extrabold shadow-sm">
-                <span>📊</span>
-                <span>
-                  {tr(
-                    language,
-                    `រកឃើញសរុប ${results.length} ទីតាំងពិតប្រាកដ`,
-                    `Total Retrieved: ${results.length} Verified Places`,
-                    `共检索到 ${results.length} 个真实地点`
-                  )}
-                </span>
-              </span>
-
-              {canManagePlaces && (
-                <label className="inline-flex items-center gap-2 text-xs font-bold text-indigo-950 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={paginatedResults.length > 0 && paginatedResults.every(p => selectedPlaceIds.has(p.placeId))}
-                    onChange={handleSelectAllOnPage}
-                    className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500"
-                  />
+              {gpsLocation && (
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-[11px] font-bold shrink-0">
+                  <Navigation className="w-3 h-3" />
                   <span>
-                    {language === 'km'
-                      ? `ជ្រើសរើសទាំងអស់ក្នុងទំព័រនេះ (${selectedPlaceIds.size} បានជ្រើសរើស)`
-                      : `Select all on page (${selectedPlaceIds.size} selected)`}
+                    GPS: {Number(gpsLocation.lat ?? 11.5564).toFixed(3)}, {Number(gpsLocation.lng ?? 104.9282).toFixed(3)} ({gpsRadiusKm}km)
                   </span>
-                </label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setGpsLocation(null);
+                      setSearchScope(province === 'ទាំងអស់' ? 'nationwide' : 'province');
+                    }}
+                    className="ml-1 hover:text-red-600"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
               )}
             </div>
 
-            <div className="flex items-center gap-2 flex-wrap">
-              <button
-                type="button"
-                disabled={isLoading || isLoadingMore}
-                onClick={() => executeSearch({ forceLive: true })}
-                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 text-xs font-bold transition-all cursor-pointer"
-                title={tr(language, 'ទាញទិន្នន័យផ្ទាល់ថ្មីពីផែនទី', 'Refresh Live Map Results', '刷新实时地图结果')}
-              >
-                <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
-                <span>{tr(language, 'ស្វែងរកផ្ទាល់ថ្មី', 'Refresh Live', '刷新实时数据')}</span>
-              </button>
+            {/* API Usage & Quota Control Bar */}
+            <div className="flex items-center justify-between gap-2 pt-2 border-t border-slate-200/80 text-[10px] sm:text-[11px] text-slate-600 flex-wrap">
+              <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+                <span className="inline-flex items-center gap-1 font-bold text-emerald-800 bg-emerald-100/80 px-2 py-0.5 rounded-full">
+                  <ShieldCheck className="w-3 h-3 text-emerald-600" />
+                  Powered by Google Maps
+                </span>
+                <span>
+                  📡 {tr(language, 'ចំនួនហៅ API ថ្ងៃនេះ៖', 'API Calls Today:', '今日 API 调用：')}{' '}
+                  <strong className={quotaStats.dailyApiCallsCount >= quotaStats.dailyApiLimit ? 'text-red-600' : 'text-slate-900'}>
+                    {quotaStats.dailyApiCallsCount} / {quotaStats.dailyApiLimit}
+                  </strong>
+                </span>
+                <span>
+                  ⚡ {tr(language, 'ឃ្លាំងសម្ងាត់ឆ្លាតវៃ (៣០ ថ្ងៃ)៖', 'Smart Cache (30-Day TTL):', '智能缓存（30天）：')}{' '}
+                  <strong className="text-emerald-700">
+                    {tr(
+                      language,
+                      `${quotaStats.totalCachedPlaces} ទីតាំង (សន្សំបាន ${quotaStats.cacheHitsSavedQuota} ដង $0)`,
+                      `${quotaStats.totalCachedPlaces} places (${quotaStats.cacheHitsSavedQuota} hits saved $0)`,
+                      `${quotaStats.totalCachedPlaces} 个地点（已节省 ${quotaStats.cacheHitsSavedQuota} 次调用 $0）`
+                    )}
+                  </strong>
+                </span>
+                {fromCache && results.length > 0 && (
+                  <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-bold">
+                    {tr(language, '⚡ ទាញពីឃ្លាំងសម្ងាត់ (0 API Cost)', '⚡ Loaded from Smart Cache ($0)', '⚡ 来自智能缓存（0 API 费用）')}
+                  </span>
+                )}
+              </div>
 
-              {canManagePlaces && selectedPlaceIds.size > 0 && (
-                <button
-                  type="button"
-                  onClick={handleBatchImportSelected}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-sm transition-all cursor-pointer"
-                >
-                  <Database className="w-3.5 h-3.5" />
+              {isAdmin && (
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowQuotaConfig(prev => !prev)}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-200/80 hover:bg-slate-300 text-slate-700 font-bold cursor-pointer"
+                  >
+                    <SlidersHorizontal className="w-3 h-3" />
+                    {tr(language, 'កំណត់កូតា API', 'API Limit', 'API 配额设置')}
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Admin Daily Quota Config Drawer */}
+            {isAdmin && showQuotaConfig && (
+              <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-between gap-3 flex-wrap">
+                <div className="text-xs text-amber-900">
+                  <strong>🛡️ ការគ្រប់គ្រងចំណាយ Google Maps API (Cost Control):</strong> កំណត់ចំនួនហៅ API អតិបរមាក្នុង ១ ថ្ងៃ។ ការស្វែងរកដដែលៗត្រូវបានរក្សាទុកក្នុង Smart Cache រយៈពេល ៣០ ថ្ងៃដោយមិនគិតថ្លៃ។
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    min={10}
+                    max={5000}
+                    value={customDailyLimit}
+                    onChange={e => setCustomDailyLimit(e.target.value)}
+                    className="w-24 px-2.5 py-1 rounded-lg border border-amber-300 bg-white text-xs font-bold text-slate-800"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleSaveDailyLimit}
+                    className="px-3 py-1 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold cursor-pointer"
+                  >
+                    រក្សាទុក
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Anchor for Smooth Auto-Scroll to Results */}
+          <div ref={resultsAnchorRef} />
+
+          {/* Sticky Results Summary & Batch Import Toolbar */}
+          {results.length > 0 && (
+            <div className="sticky top-0 z-20 px-3.5 sm:px-6 py-2.5 bg-indigo-50/95 backdrop-blur-md border-b border-indigo-200 flex items-center justify-between gap-2 flex-wrap shadow-sm">
+              <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-700 text-white text-xs font-extrabold shadow-sm">
+                  <span>📊</span>
                   <span>
                     {tr(
                       language,
-                      `📥 នាំចូលទីតាំងដែលបានជ្រើស (${selectedPlaceIds.size}) ចូលកម្មវិធី`,
-                      `📥 Import Selected (${selectedPlaceIds.size}) to App`,
-                      `📥 将所选地点 (${selectedPlaceIds.size}) 导入应用`
+                      `រកឃើញសរុប ${results.length} ទីតាំងពិតប្រាកដ`,
+                      `Total Retrieved: ${results.length} Verified Places`,
+                      `共检索到 ${results.length} 个真实地点`
                     )}
                   </span>
-                </button>
-              )}
-            </div>
-          </div>
-        )}
+                </span>
 
-        {/* Main Content / Results List */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 bg-slate-100/70">
+                {canManagePlaces && (
+                  <label className="inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-bold text-indigo-950 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={paginatedResults.length > 0 && paginatedResults.every(p => selectedPlaceIds.has(p.placeId))}
+                      onChange={handleSelectAllOnPage}
+                      className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500"
+                    />
+                    <span>
+                      {language === 'km'
+                        ? `ជ្រើសរើសទាំងអស់ (${selectedPlaceIds.size})`
+                        : `Select page (${selectedPlaceIds.size})`}
+                    </span>
+                  </label>
+                )}
+              </div>
+
+              <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                <button
+                  type="button"
+                  onClick={scrollToSearchTop}
+                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 text-[11px] sm:text-xs font-bold transition-all cursor-pointer"
+                  title={tr(language, 'ត្រឡប់ទៅប្រអប់ស្វែងរកខាងលើ', 'Back to Search Box', '返回顶部搜索框')}
+                >
+                  <ArrowUp className="w-3.5 h-3.5 text-emerald-700" />
+                  <span>{tr(language, 'ទៅប្រអប់ស្វែងរក', 'Search Box', '返回搜索')}</span>
+                </button>
+
+                <button
+                  type="button"
+                  disabled={isLoading || isLoadingMore}
+                  onClick={() => executeSearch({ forceLive: true })}
+                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 text-[11px] sm:text-xs font-bold transition-all cursor-pointer"
+                  title={tr(language, 'ទាញទិន្នន័យផ្ទាល់ថ្មីពីផែនទី', 'Refresh Live Map Results', '刷新实时地图结果')}
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
+                  <span>{tr(language, 'ស្វែងរកផ្ទាល់ថ្មី', 'Refresh Live', '刷新实时数据')}</span>
+                </button>
+
+                {canManagePlaces && selectedPlaceIds.size > 0 && (
+                  <button
+                    type="button"
+                    onClick={handleBatchImportSelected}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] sm:text-xs font-bold shadow-sm transition-all cursor-pointer"
+                  >
+                    <Database className="w-3.5 h-3.5" />
+                    <span>
+                      {tr(
+                        language,
+                        `📥 នាំចូល (${selectedPlaceIds.size}) ចូលកម្មវិធី`,
+                        `📥 Import (${selectedPlaceIds.size})`,
+                        `📥 导入 (${selectedPlaceIds.size})`
+                      )}
+                    </span>
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Main Content / Results List */}
+          <div className="p-3.5 sm:p-6 space-y-4">
           {errorMsg && (
             <div className="p-4 rounded-2xl bg-amber-50 border border-amber-300 flex items-start gap-3 text-amber-900">
               <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
@@ -1293,11 +1343,14 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
 
               {/* Pagination & Load More from Google Maps */}
               <div className="flex items-center justify-between gap-3 pt-4 border-t border-slate-200 flex-wrap">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <button
                     type="button"
                     disabled={currentPage <= 1}
-                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    onClick={() => {
+                      setCurrentPage(p => Math.max(1, p - 1));
+                      scrollToResultsSection();
+                    }}
                     className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-white border border-slate-300 disabled:opacity-40 text-xs font-bold text-slate-700 hover:bg-slate-50 cursor-pointer"
                   >
                     <ChevronLeft className="w-4 h-4" />
@@ -1316,7 +1369,10 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                   <button
                     type="button"
                     disabled={currentPage >= totalPages}
-                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                    onClick={() => {
+                      setCurrentPage(p => Math.min(totalPages, p + 1));
+                      scrollToResultsSection();
+                    }}
                     className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-white border border-slate-300 disabled:opacity-40 text-xs font-bold text-slate-700 hover:bg-slate-50 cursor-pointer"
                   >
                     <span>{tr(language, 'ទំព័របន្ទាប់', 'Next', '下一页')}</span>
@@ -1324,11 +1380,14 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                   </button>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   {currentPage < totalPages && (
                     <button
                       type="button"
-                      onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                      onClick={() => {
+                        setCurrentPage(p => Math.min(totalPages, p + 1));
+                        scrollToResultsSection();
+                      }}
                       className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-100 hover:bg-emerald-200 text-emerald-900 text-xs font-extrabold transition-all cursor-pointer"
                     >
                       <ChevronRight className="w-4 h-4" />
@@ -1369,28 +1428,29 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
               </div>
             </>
           )}
-        </div>
-
-        {/* Footer Policy & Attribution Compliance */}
-        <div className="px-4 sm:px-6 py-3 bg-white border-t border-slate-200 flex items-center justify-between gap-2 text-[11px] text-slate-500 shrink-0 flex-wrap">
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-slate-700">Google Maps Platform & OpenStreetMap Attribution:</span>
-            <span>
-              {tr(
-                language,
-                'រូបភាព និងទិន្នន័យផែនទីផ្តល់ដោយ Google Maps Platform & OpenStreetMap Contributors • រក្សាទុកព័ត៌មានកម្មវិធីដាច់ដោយឡែកពី Google Metadata',
-                'Map data & photos powered by Google Maps Platform & OpenStreetMap Contributors • App records stored separately from Google Metadata',
-                '地图与照片数据由 Google 地图平台及 OpenStreetMap 提供 • 应用数据与 Google 元数据独立存储'
-              )}
-            </span>
           </div>
-          <button
-            type="button"
-            onClick={() => setIsGoogleMapsSearchModalOpen(false)}
-            className="px-4 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs cursor-pointer"
-          >
-            {tr(language, 'បិទផ្ទាំងស្វែងរក', 'Close', '关闭搜索窗口')}
-          </button>
+
+          {/* Footer Policy & Attribution Compliance (Inside Scroll Container with Android Safe Area Padding) */}
+          <div className="px-4 sm:px-6 pt-3 pb-16 sm:pb-5 bg-white border-t border-slate-200 flex items-center justify-between gap-2 text-[11px] text-slate-500 flex-wrap">
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-slate-700">Google Maps Platform & OpenStreetMap Attribution:</span>
+              <span>
+                {tr(
+                  language,
+                  'រូបភាព និងទិន្នន័យផែនទីផ្តល់ដោយ Google Maps Platform & OpenStreetMap Contributors • រក្សាទុកព័ត៌មានកម្មវិធីដាច់ដោយឡែកពី Google Metadata',
+                  'Map data & photos powered by Google Maps Platform & OpenStreetMap Contributors • App records stored separately from Google Metadata',
+                  '地图与照片数据由 Google 地图平台及 OpenStreetMap 提供 • 应用数据与 Google 元数据独立存储'
+                )}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsGoogleMapsSearchModalOpen(false)}
+              className="px-4 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs cursor-pointer"
+            >
+              {tr(language, 'បិទផ្ទាំងស្វែងរក', 'Close', '关闭搜索窗口')}
+            </button>
+          </div>
         </div>
       </div>
     </div>
