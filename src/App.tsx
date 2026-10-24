@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
 import { isUserVipActive } from './types';
+import { verifyAppOwnershipAndDomainIntegrity } from './utils/security';
 import { Header } from './components/Header';
 import { BottomNav } from './components/BottomNav';
 import { HomeView } from './components/HomeView';
@@ -72,8 +73,16 @@ const MainScreen: React.FC = () => {
     isQrScannerModalOpen,
     isVipAddRestaurantModalOpen,
     isGoogleMapsSearchModalOpen,
+    appSettings,
     toast,
   } = useApp();
+
+  // Intellectual Property & Anti-Clone Domain/Merchant Signature Verification
+  const ownershipCheck = useMemo(
+    () => verifyAppOwnershipAndDomainIntegrity(appSettings),
+    [appSettings]
+  );
+
   const [showWelcomeScreen, setShowWelcomeScreen] = useState<boolean>(() => {
     try {
       return sessionStorage.getItem(WELCOME_SESSION_KEY) !== 'true' && localStorage.getItem('kft_welcome_shown_v2') !== 'true';
@@ -81,6 +90,30 @@ const MainScreen: React.FC = () => {
       return false;
     }
   });
+
+  if (!ownershipCheck.isAuthentic) {
+    return (
+      <div className="flex-1 flex flex-col w-full min-h-screen bg-rose-950 text-white items-center justify-center p-6 text-center space-y-4">
+        <div className="w-16 h-16 rounded-2xl bg-rose-600 flex items-center justify-center text-3xl shadow-xl border-2 border-rose-300">
+          🛡️
+        </div>
+        <h1 className="text-lg font-extrabold tracking-tight text-amber-300">
+          ប្រព័ន្ធការពារកម្មសិទ្ធិបញ្ញា (Anti-Clone Security Lock)
+        </h1>
+        <p className="text-xs text-rose-100 leading-relaxed max-w-sm">
+          {ownershipCheck.tamperReasonKh}
+        </p>
+        <p className="text-[11px] text-rose-200/80 max-w-sm">
+          {ownershipCheck.tamperReasonEn}
+        </p>
+        <div className="p-3 rounded-xl bg-black/40 border border-rose-400/30 text-[10px] font-mono text-amber-200 space-y-1">
+          <div>OWNER: {ownershipCheck.certificate.ownerFullName}</div>
+          <div>ABA MERCHANT: {ownershipCheck.certificate.abaAccountNumber}</div>
+          <div>SEAL: {ownershipCheck.certificate.signatureHash}</div>
+        </div>
+      </div>
+    );
+  }
 
   if (showWelcomeScreen) {
     return (

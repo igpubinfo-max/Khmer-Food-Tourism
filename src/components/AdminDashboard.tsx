@@ -8,7 +8,7 @@ import {
   Sparkles, Image as ImageIcon, Search, Camera, Upload
 } from 'lucide-react';
 import { FoodCategorySlug, DestinationCategorySlug, UserRole, User, RegistrationTransaction, FoodItem, TouristDestination, isSeedRestaurantId } from '../types';
-import { getSecurityAuditLogs, SecurityAuditEntry, revokeAdminSession } from '../utils/security';
+import { getSecurityAuditLogs, SecurityAuditEntry, revokeAdminSession, getOfficialOwnershipCertificate, verifyAppOwnershipAndDomainIntegrity } from '../utils/security';
 import { FoodImageModal } from './FoodImageModal';
 import { TouristImageModal } from './TouristImageModal';
 import { searchOnlineFoodImages, OnlineFoodImageCandidate } from '../services/onlineFoodImageService';
@@ -2994,6 +2994,51 @@ export const AdminDashboard: React.FC = () => {
                   </p>
                 </div>
               </div>
+
+              {/* Intellectual Property & Anti-Clone Certificate Seal */}
+              {(() => {
+                const cert = getOfficialOwnershipCertificate();
+                const integrity = verifyAppOwnershipAndDomainIntegrity(appSettings);
+                return (
+                  <div className="p-4 rounded-3xl bg-gradient-to-br from-emerald-950 via-slate-900 to-emerald-950 text-white border-2 border-amber-400/70 shadow-lg space-y-2.5 font-khmer">
+                    <div className="flex items-center justify-between gap-2 flex-wrap">
+                      <div className="flex items-center gap-2">
+                        <ShieldCheck className="w-5 h-5 text-amber-400 shrink-0" />
+                        <h4 className="font-bold text-xs sm:text-sm text-amber-300">
+                          {isKm
+                            ? '🛡️ ត្រាកម្មសិទ្ធិបញ្ញា និងប្រព័ន្ធការពារការលួចចម្លង (Anti-Clone & IP Seal)'
+                            : '🛡️ Intellectual Property & Anti-Clone Protection Seal'}
+                        </h4>
+                      </div>
+                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-400/40">
+                        {integrity.isAuthentic ? '✓ VERIFIED AUTHENTIC' : '⚠️ TAMPER DETECTED'}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] bg-black/35 p-3 rounded-2xl border border-white/10 font-mono">
+                      <div>
+                        <span className="text-slate-400">ម្ចាស់កម្មសិទ្ធិផ្តាច់មុខ (Owner): </span>
+                        <strong className="text-amber-300">{cert.ownerFullName} (CHEA SAVUTH)</strong>
+                      </div>
+                      <div>
+                        <span className="text-slate-400">គណនីផ្លូវការ ABA KHQR: </span>
+                        <strong className="text-emerald-300">{cert.abaAccountNumber}</strong>
+                      </div>
+                      <div>
+                        <span className="text-slate-400">លេខកញ្ចប់កម្មវិធី (App ID): </span>
+                        <strong className="text-white">{cert.officialAppId}</strong>
+                      </div>
+                      <div>
+                        <span className="text-slate-400">ដែនអនុញ្ញាត (Authorized Domain): </span>
+                        <strong className="text-emerald-300">{integrity.detectedHostname}</strong>
+                      </div>
+                      <div className="sm:col-span-2 pt-1 border-t border-white/10 text-[10px] text-amber-200/90">
+                        SEAL SIGNATURE: {cert.signatureHash} • Copyright © {cert.copyrightYear}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
 
               {/* Audit Log Table */}
               <div className="bg-white dark:bg-stone-800 rounded-3xl border border-stone-200 dark:border-stone-700 overflow-hidden shadow-sm">

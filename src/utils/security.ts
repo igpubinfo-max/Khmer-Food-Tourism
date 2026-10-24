@@ -405,3 +405,116 @@ export const validateImageUpload = (
 
   return { valid: true };
 };
+
+// ==========================================
+// 7. INTELLECTUAL PROPERTY, DOMAIN & ANTI-CLONE SIGNATURE VERIFICATION
+// ==========================================
+export interface OwnershipCertificate {
+  ownerFullName: string;
+  adminMasterUsername: string;
+  abaAccountNumber: string;
+  abaMerchantName: string;
+  officialAppId: string;
+  officialDomains: string[];
+  signatureHash: string;
+  copyrightYear: string;
+}
+
+// Encoded master constants so simple global string find/replace does not easily strip the cryptographic seal
+const _O_NAME = [67, 72, 69, 65, 32, 75, 73, 77, 83, 69, 78, 71].map(c => String.fromCharCode(c)).join(''); // CHEA KIMSENG
+const _O_ABA = [48, 48, 48, 32, 54, 54, 48, 32, 50, 50, 55].map(c => String.fromCharCode(c)).join(''); // 000 660 227
+const _O_ADMIN = [99, 104, 101, 97, 115, 97, 118, 117, 116, 104].map(c => String.fromCharCode(c)).join(''); // cheasavuth
+const _O_APP_ID = 'com.khmerfood.tourism';
+const _O_SIGNATURE = 'KFT-IP-SEAL-CHEA-KIMSENG-SAVUTH-000660227-VERIFIED';
+
+export const getOfficialOwnershipCertificate = (): OwnershipCertificate => ({
+  ownerFullName: _O_NAME,
+  adminMasterUsername: _O_ADMIN,
+  abaAccountNumber: _O_ABA,
+  abaMerchantName: _O_NAME,
+  officialAppId: _O_APP_ID,
+  officialDomains: [
+    'igpubinfo-max.github.io',
+    'localhost',
+    '127.0.0.1',
+    'capacitor://localhost',
+    'http://localhost',
+    'https://localhost',
+  ],
+  signatureHash: _O_SIGNATURE,
+  copyrightYear: '2026–Perpetual',
+});
+
+export interface AntiCloneVerificationResult {
+  isAuthentic: boolean;
+  domainAuthorized: boolean;
+  merchantIntegrityPassed: boolean;
+  detectedHostname: string;
+  tamperReasonKh?: string;
+  tamperReasonEn?: string;
+  certificate: OwnershipCertificate;
+}
+
+/**
+ * Verifies that the running application has not been cloned onto an unauthorized public web domain
+ * and that the official ABA Merchant / Intellectual Property seal has not been tampered with.
+ */
+export const verifyAppOwnershipAndDomainIntegrity = (currentSettings?: {
+  supportAccountName?: string;
+}): AntiCloneVerificationResult => {
+  const cert = getOfficialOwnershipCertificate();
+  let hostname = 'localhost';
+  let protocol = 'https:';
+  try {
+    if (typeof window !== 'undefined' && window.location) {
+      hostname = (window.location.hostname || 'localhost').toLowerCase().trim();
+      protocol = window.location.protocol || 'https:';
+    }
+  } catch {}
+
+  const isLocalOrCapacitor =
+    !hostname ||
+    hostname === 'localhost' ||
+    hostname === '127.0.0.1' ||
+    hostname.startsWith('192.168.') ||
+    hostname.startsWith('10.') ||
+    protocol === 'capacitor:' ||
+    protocol === 'file:';
+
+  const isOfficialGithubPages =
+    hostname === 'igpubinfo-max.github.io' ||
+    hostname.endsWith('.igpubinfo-max.github.io');
+
+  const domainAuthorized = isLocalOrCapacitor || isOfficialGithubPages;
+
+  // Check if someone tampered with the merchant account name in settings
+  const configuredAccount = (currentSettings?.supportAccountName || _O_NAME).toUpperCase().trim();
+  const merchantIntegrityPassed =
+    configuredAccount === _O_NAME ||
+    configuredAccount.includes('KIMSENG') ||
+    configuredAccount.includes('SAVUTH');
+
+  const isAuthentic = domainAuthorized && merchantIntegrityPassed;
+
+  let tamperReasonKh: string | undefined;
+  let tamperReasonEn: string | undefined;
+
+  if (!domainAuthorized) {
+    tamperReasonKh = `⛔ រកឃើញការលួចចម្លងកម្មវិធីខុសច្បាប់លើដែន (Domain): "${hostname}"។ កម្មវិធីផ្លូវការគឺជាកម្មសិទ្ធិបញ្ញាផ្តាច់មុខរបស់លោក CHEA KIMSENG / CHEA SAVUTH (igpubinfo-max.github.io)។`;
+    tamperReasonEn = `⛔ Unauthorized clone detected on domain "${hostname}". This application is the exclusive intellectual property of CHEA KIMSENG / CHEA SAVUTH.`;
+  } else if (!merchantIntegrityPassed) {
+    tamperReasonKh = `⛔ រកឃើញការកែប្រែឈ្មោះម្ចាស់គណនីធនាគារខុសច្បាប់! កម្មសិទ្ធិផ្លូវការគឺរបស់ CHEA KIMSENG (${_O_ABA}) ប៉ុណ្ណោះ។`;
+    tamperReasonEn = `⛔ Unauthorized modification of official merchant ownership detected! Official owner: CHEA KIMSENG (${_O_ABA}).`;
+  }
+
+  return {
+    isAuthentic,
+    domainAuthorized,
+    merchantIntegrityPassed,
+    detectedHostname: hostname || 'capacitor-android',
+    tamperReasonKh,
+    tamperReasonEn,
+    certificate: cert,
+  };
+};
+
