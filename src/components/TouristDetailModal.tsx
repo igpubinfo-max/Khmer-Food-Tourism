@@ -6,6 +6,8 @@ import {
 } from 'lucide-react';
 import { TouristImageModal } from './TouristImageModal';
 import { TouristDestination } from '../types';
+import { tr } from '../utils/i18n';
+import { getLocalizedDestination } from '../utils/zhDynamicTranslator';
 import {
   shareRichContent,
   formatRichShareText,
@@ -76,6 +78,7 @@ export const TouristDetailModal: React.FC = () => {
   ]);
 
   if (!selectedDestination) return null;
+  const loc = getLocalizedDestination(selectedDestination, language);
 
   const handleSaveAdminDestination = (e: React.FormEvent) => {
     e.preventDefault();
@@ -452,26 +455,26 @@ export const TouristDetailModal: React.FC = () => {
             <img 
               key={selectedDestination.photoUrl}
               src={selectedDestination.photoUrl} 
-              alt={selectedDestination.nameKh}
+              alt={loc.name}
               className="w-full h-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" />
             
             <div className="absolute bottom-4 left-4 right-4 text-white">
               <span className="px-3 py-0.5 rounded-full text-xs font-bold bg-[#064E3B] text-emerald-100 border border-emerald-400/40 shadow mb-2 inline-block">
-                {language === 'km' ? selectedDestination.categoryKh : selectedDestination.categoryEn}
+                {loc.category}
               </span>
               <h2 className="text-xl sm:text-2xl font-bold font-moul leading-snug drop-shadow text-white">
-                {language === 'km' ? selectedDestination.nameKh : selectedDestination.nameEn}
+                {loc.name}
               </h2>
               <p className="text-xs text-emerald-200 font-medium">
-                {language === 'km' ? selectedDestination.nameEn : selectedDestination.nameKh}
+                {loc.subtitle}
               </p>
             </div>
 
             {/* Reference Image Label (រូបភាពយោង) */}
             <div className="absolute bottom-4 right-4 z-10 px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-xs text-[10px] text-white/90 font-khmer border border-white/20 select-none pointer-events-none shadow-xs">
-              <span>{language === 'km' ? 'រូបភាពយោង' : 'Reference photo'}</span>
+              <span>{tr(language, 'រូបភាពយោង', 'Reference photo', '参考图片')}</span>
             </div>
           </div>
 
@@ -485,7 +488,7 @@ export const TouristDetailModal: React.FC = () => {
                 className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold shadow-md transition active:scale-98"
               >
                 <Compass className="w-4 h-4" />
-                <span>{language === 'km' ? 'បើកមើលលើ Google Maps & នាំផ្លូវ' : 'Open in Google Maps & Get Directions'}</span>
+                <span>{tr(language, 'បើកមើលលើ Google Maps & នាំផ្លូវ', 'Open in Google Maps & Get Directions', '在 Google 地图中打开并导航')}</span>
                 <ExternalLink className="w-3.5 h-3.5 opacity-80" />
               </a>
             </div>
@@ -496,7 +499,7 @@ export const TouristDetailModal: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-rose-600 dark:text-rose-400 flex items-center gap-1.5">
                     <span>🔥</span>
-                    <span>{language === 'km' ? 'កន្លែងដើរលេងល្បីលើ TikTok & Facebook' : 'Viral & Trending on TikTok & FB'}</span>
+                    <span>{tr(language, 'កន្លែងដើរលេងល្បីលើ TikTok & Facebook', 'Viral & Trending on TikTok & FB', 'TikTok 与 Facebook 热门网红打卡点')}</span>
                   </span>
                   <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-gradient-to-r from-rose-600 to-pink-600 text-white shadow-xs">
                     {selectedDestination.socialViews || 'Trending'}
@@ -507,9 +510,9 @@ export const TouristDetailModal: React.FC = () => {
                     {selectedDestination.socialHashtag}
                   </p>
                 )}
-                {selectedDestination.socialHighlightKh && (
+                {loc.socialHighlight && (
                   <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
-                    {language === 'km' ? selectedDestination.socialHighlightKh : (selectedDestination.socialHighlightEn || selectedDestination.socialHighlightKh)}
+                    {loc.socialHighlight}
                   </p>
                 )}
               </div>
@@ -521,10 +524,10 @@ export const TouristDetailModal: React.FC = () => {
               <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 space-y-1">
                 <div className="flex items-center gap-2 text-[#064E3B] dark:text-emerald-400 font-bold text-xs">
                   <Ticket className="w-4 h-4 text-[#059669]" />
-                  <span>{language === 'km' ? 'សំបុត្រចូលទស្សនា' : 'Entrance Fee'}</span>
+                  <span>{tr(language, 'សំបុត្រចូលទស្សនា', 'Entrance Fee', '门票费用')}</span>
                 </div>
                 <p className="text-xs text-slate-700 dark:text-slate-200 font-medium leading-relaxed">
-                  {language === 'km' ? selectedDestination.entranceFeeKh : selectedDestination.entranceFeeEn}
+                  {loc.entranceFee}
                 </p>
               </div>
 
@@ -532,10 +535,10 @@ export const TouristDetailModal: React.FC = () => {
               <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 space-y-1">
                 <div className="flex items-center gap-2 text-[#064E3B] dark:text-emerald-400 font-bold text-xs">
                   <Calendar className="w-4 h-4 text-[#059669]" />
-                  <span>{language === 'km' ? 'ពេលវេលាល្អបំផុតដើម្បីមកលេង' : 'Best Time to Visit'}</span>
+                  <span>{tr(language, 'ពេលវេលាល្អបំផុតដើម្បីមកលេង', 'Best Time to Visit', '最佳游览时间')}</span>
                 </div>
                 <p className="text-xs text-slate-700 dark:text-slate-200 font-medium leading-relaxed">
-                  {language === 'km' ? selectedDestination.bestTimeToVisitKh : selectedDestination.bestTimeToVisitEn}
+                  {loc.bestTime}
                 </p>
               </div>
             </div>
@@ -545,10 +548,10 @@ export const TouristDetailModal: React.FC = () => {
               <MapPin className="w-4 h-4 text-[#059669] shrink-0 mt-0.5" />
               <div>
                 <p className="font-semibold text-[#0F172A] dark:text-white">
-                  {language === 'km' ? 'ទីតាំងភូមិសាស្ត្រ' : 'Location Address'}
+                  {tr(language, 'ទីតាំងភូមិសាស្ត្រ', 'Location Address', '详细地址')}
                 </p>
                 <p className="text-slate-600 dark:text-slate-400">
-                  {language === 'km' ? selectedDestination.addressKh : selectedDestination.addressEn}
+                  {loc.address}
                 </p>
               </div>
             </div>
@@ -557,21 +560,21 @@ export const TouristDetailModal: React.FC = () => {
             <div>
               <h3 className="font-bold text-[#0F172A] dark:text-white text-sm mb-1.5 flex items-center gap-1.5">
                 <Sparkles className="w-4 h-4 text-[#059669]" />
-                {language === 'km' ? 'ប្រវត្តិ និងទិដ្ឋភាពទូទៅ' : 'Overview & History'}
+                {tr(language, 'ប្រវត្តិ និងទិដ្ឋភាពទូទៅ', 'Overview & History', '历史与景点介绍')}
               </h3>
               <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed bg-slate-50 dark:bg-slate-800/50 p-3.5 rounded-xl border border-slate-200/90 dark:border-slate-700">
-                {language === 'km' ? selectedDestination.descriptionKh : selectedDestination.descriptionEn}
+                {loc.description}
               </p>
             </div>
 
             {/* Highlights List */}
-            {selectedDestination.highlightsKh && selectedDestination.highlightsKh.length > 0 && (
+            {loc.highlights && loc.highlights.length > 0 && (
               <div>
                 <h3 className="font-bold text-[#0F172A] dark:text-white text-sm mb-2">
-                  {language === 'km' ? 'ចំណុចលេចធ្លោមិនគួររំលង' : 'Key Highlights'}
+                  {tr(language, 'ចំណុចលេចធ្លោមិនគួររំលង', 'Key Highlights', '精彩亮点推荐')}
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {(selectedDestination.highlightsKh || []).map((hl, i) => (
+                  {loc.highlights.map((hl, i) => (
                     <div 
                       key={i}
                       className="p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 text-xs flex items-center gap-2"
@@ -587,7 +590,7 @@ export const TouristDetailModal: React.FC = () => {
             {/* Social Share Bar */}
             <div className="pt-2 border-t border-slate-200 dark:border-slate-800">
               <p className="text-xs font-semibold text-slate-500 mb-2.5 text-center">
-                {language === 'km' ? 'ចែករំលែកតំបន់ទេសចរណ៍នេះ' : 'Share this destination'}
+                {tr(language, 'ចែករំលែកតំបន់ទេសចរណ៍នេះ', 'Share this destination', '分享此旅游景点')}
               </p>
               
               <div className="flex items-center justify-center gap-2 flex-wrap">
@@ -597,7 +600,7 @@ export const TouristDetailModal: React.FC = () => {
                   className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white text-xs font-bold shadow transition active:scale-95"
                 >
                   <Share2 className="w-3.5 h-3.5" />
-                  <span>{language === 'km' ? 'ចែករំលែក (Share)' : 'Share App'}</span>
+                  <span>{tr(language, 'ចែករំលែក (Share)', 'Share App', '分享应用')}</span>
                 </button>
 
                 <button
@@ -623,7 +626,7 @@ export const TouristDetailModal: React.FC = () => {
                   onClick={handleCopyLink}
                   className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-medium border border-slate-300 dark:border-slate-700 transition active:scale-95"
                 >
-                  {language === 'km' ? 'ចម្លង' : 'Copy'}
+                  {tr(language, 'ចម្លង', 'Copy', '复制链接')}
                 </button>
               </div>
             </div>

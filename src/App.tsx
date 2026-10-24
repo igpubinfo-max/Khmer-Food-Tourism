@@ -43,6 +43,7 @@ import { Toast } from './components/Toast';
 const MainScreen: React.FC = () => {
   const {
     activeTab,
+    language,
     currentUser,
     setIsAuthModalOpen,
     selectedFood,
@@ -142,7 +143,7 @@ const MainScreen: React.FC = () => {
     <div className="flex-1 flex flex-col w-full min-h-screen relative overflow-y-auto no-scrollbar pb-16">
       <Header />
       
-      <main className="flex-1 w-full">
+      <main key={`lang-${language}`} className="flex-1 w-full">
         {activeTab === 'home' && <HomeView />}
         {activeTab === 'food' && <FoodView />}
         {activeTab === 'restaurants' && <RestaurantView />}

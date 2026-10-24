@@ -5,6 +5,8 @@ import {
   Navigation, ShieldCheck, Database, Sparkles, SlidersHorizontal, Phone, Image as ImageIcon
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { tr, translateProvinceName } from '../utils/i18n';
+import { translateDynamicTextToZh } from '../utils/zhDynamicTranslator';
 import {
   GooglePlaceCachedItem,
   GooglePlaceSearchCategory,
@@ -46,29 +48,29 @@ const CAMBODIA_PROVINCES = [
   'ត្បូងឃ្មុំ',
 ];
 
-const SEARCH_CATEGORIES: { id: GooglePlaceSearchCategory; labelKh: string; labelEn: string; emoji: string; group: 'all' | 'food' | 'tourism' }[] = [
-  { id: 'all', labelKh: 'ទាំងអស់ (All Places)', labelEn: 'All Places', emoji: '🌏', group: 'all' },
-  { id: 'restaurant', labelKh: 'ភោជនីយដ្ឋាន & អាហារដ្ឋាន', labelEn: 'Restaurants', emoji: '🍽️', group: 'food' },
-  { id: 'cafe', labelKh: 'ហាងកាហ្វេ & ភេសជ្ជៈ', labelEn: 'Cafés & Coffee', emoji: '☕', group: 'food' },
-  { id: 'street_food', labelKh: 'អាហារតាមផ្លូវ & ផ្សាររាត្រី', labelEn: 'Street Food & Night Markets', emoji: '🍜', group: 'food' },
-  { id: 'seafood', labelKh: 'អាហារគ្រឿងសមុទ្រ', labelEn: 'Seafood', emoji: '🦀', group: 'food' },
-  { id: 'bakery', labelKh: 'ហាងនំប៉័ង & បង្អែម', labelEn: 'Bakery & Desserts', emoji: '🥐', group: 'food' },
-  { id: 'tourism', labelKh: 'តំបន់ទេសចរណ៍ទូទៅ', labelEn: 'Tourist Attractions', emoji: '🏛️', group: 'tourism' },
-  { id: 'temple', labelKh: 'ប្រាសាទបុរាណ & វត្តអារាម', labelEn: 'Ancient Temples & Pagodas', emoji: '🛕', group: 'tourism' },
-  { id: 'nature', labelKh: 'ធម្មជាតិ & ទឹកធ្លាក់', labelEn: 'Nature & Waterfalls', emoji: '🌿', group: 'tourism' },
-  { id: 'beach', labelKh: 'ឆ្នេរសមុទ្រ & កោះ', labelEn: 'Beaches & Islands', emoji: '🏖️', group: 'tourism' },
-  { id: 'mountain', labelKh: 'ភ្នំ & ទេសភាព', labelEn: 'Mountains & Viewpoints', emoji: '⛰️', group: 'tourism' },
-  { id: 'resort', labelKh: 'រមណីយដ្ឋាន & អេកូទេសចរណ៍', labelEn: 'Resorts & Eco-Tourism', emoji: '🏕️', group: 'tourism' },
+const SEARCH_CATEGORIES: { id: GooglePlaceSearchCategory; labelKh: string; labelEn: string; labelZh: string; emoji: string; group: 'all' | 'food' | 'tourism' }[] = [
+  { id: 'all', labelKh: 'ទាំងអស់ (All Places)', labelEn: 'All Places', labelZh: '全部地点', emoji: '🌏', group: 'all' },
+  { id: 'restaurant', labelKh: 'ភោជនីយដ្ឋាន & អាហារដ្ឋាន', labelEn: 'Restaurants', labelZh: '餐厅与美食店', emoji: '🍽️', group: 'food' },
+  { id: 'cafe', labelKh: 'ហាងកាហ្វេ & ភេសជ្ជៈ', labelEn: 'Cafés & Coffee', labelZh: '咖啡厅与饮品', emoji: '☕', group: 'food' },
+  { id: 'street_food', labelKh: 'អាហារតាមផ្លូវ & ផ្សាររាត្រី', labelEn: 'Street Food & Night Markets', labelZh: '街头小吃与夜市', emoji: '🍜', group: 'food' },
+  { id: 'seafood', labelKh: 'អាហារគ្រឿងសមុទ្រ', labelEn: 'Seafood', labelZh: '海鲜餐厅', emoji: '🦀', group: 'food' },
+  { id: 'bakery', labelKh: 'ហាងនំប៉័ង & បង្អែម', labelEn: 'Bakery & Desserts', labelZh: '烘焙与甜品店', emoji: '🥐', group: 'food' },
+  { id: 'tourism', labelKh: 'តំបន់ទេសចរណ៍ទូទៅ', labelEn: 'Tourist Attractions', labelZh: '热门旅游景点', emoji: '🏛️', group: 'tourism' },
+  { id: 'temple', labelKh: 'ប្រាសាទបុរាណ & វត្តអារាម', labelEn: 'Ancient Temples & Pagodas', labelZh: '古迹寺庙与佛塔', emoji: '🛕', group: 'tourism' },
+  { id: 'nature', labelKh: 'ធម្មជាតិ & ទឹកធ្លាក់', labelEn: 'Nature & Waterfalls', labelZh: '自然生态与瀑布', emoji: '🌿', group: 'tourism' },
+  { id: 'beach', labelKh: 'ឆ្នេរសមុទ្រ & កោះ', labelEn: 'Beaches & Islands', labelZh: '海滩与海岛', emoji: '🏖️', group: 'tourism' },
+  { id: 'mountain', labelKh: 'ភ្នំ & ទេសភាព', labelEn: 'Mountains & Viewpoints', labelZh: '高山与观景台', emoji: '⛰️', group: 'tourism' },
+  { id: 'resort', labelKh: 'រមណីយដ្ឋាន & អេកូទេសចរណ៍', labelEn: 'Resorts & Eco-Tourism', labelZh: '度假村与生态旅游', emoji: '🏕️', group: 'tourism' },
 ];
 
-const QUICK_SEARCH_PRESETS: { query: string; category: GooglePlaceSearchCategory; province: string; labelKh: string }[] = [
-  { query: 'ជំនោរក្បាលកោះ', category: 'restaurant', province: 'ទាំងអស់', labelKh: '🍽️ ជំនោរក្បាលកោះ (Chumnor Kbal Koh)' },
-  { query: 'ភោជនីយដ្ឋានម្ហូបខ្មែរល្បីៗ', category: 'restaurant', province: 'រាជធានីភ្នំពេញ', labelKh: '🍽️ ហាងម្ហូបខ្មែរភ្នំពេញ' },
-  { query: 'ប្រាសាទបុរាណ និងរមណីយដ្ឋាន', category: 'temple', province: 'សៀមរាប', labelKh: '🛕 ប្រាសាទសៀមរាប' },
-  { query: 'អាហារគ្រឿងសមុទ្រ និងឆ្នេរ', category: 'seafood', province: 'កែប', labelKh: '🦀 គ្រឿងសមុទ្រកែប' },
-  { query: 'ហាងកាហ្វេ និងរមណីយដ្ឋានមាត់ព្រែក', category: 'cafe', province: 'កំពត', labelKh: '☕ កាហ្វេ & រមណីយដ្ឋានកំពត' },
-  { query: 'ឆ្នេរសមុទ្រ និងកោះស្អាតៗ', category: 'beach', province: 'ព្រះសីហនុ', labelKh: '🏖️ ឆ្នេរ & កោះព្រះសីហនុ' },
-  { query: 'ទឹកធ្លាក់ និងធម្មជាតិ', category: 'nature', province: 'មណ្ឌលគិរី', labelKh: '🌿 ទឹកធ្លាក់មណ្ឌលគិរី' },
+const QUICK_SEARCH_PRESETS: { query: string; category: GooglePlaceSearchCategory; province: string; labelKh: string; labelEn: string; labelZh: string }[] = [
+  { query: 'ជំនោរក្បាលកោះ', category: 'restaurant', province: 'ទាំងអស់', labelKh: '🍽️ ជំនោរក្បាលកោះ (Chumnor Kbal Koh)', labelEn: '🍽️ Chumnor Kbal Koh', labelZh: '🍽️ 岛头微风餐厅 (Chumnor Kbal Koh)' },
+  { query: 'ភោជនីយដ្ឋានម្ហូបខ្មែរល្បីៗ', category: 'restaurant', province: 'រាជធានីភ្នំពេញ', labelKh: '🍽️ ហាងម្ហូបខ្មែរភ្នំពេញ', labelEn: '🍽️ Phnom Penh Khmer Restaurants', labelZh: '🍽️ 金边知名高棉餐厅' },
+  { query: 'ប្រាសាទបុរាណ និងរមណីយដ្ឋាន', category: 'temple', province: 'សៀមរាប', labelKh: '🛕 ប្រាសាទសៀមរាប', labelEn: '🛕 Siem Reap Temples', labelZh: '🛕 暹粒古迹寺庙' },
+  { query: 'អាហារគ្រឿងសមុទ្រ និងឆ្នេរ', category: 'seafood', province: 'កែប', labelKh: '🦀 គ្រឿងសមុទ្រកែប', labelEn: '🦀 Kep Seafood', labelZh: '🦀 白马海鲜餐厅' },
+  { query: 'ហាងកាហ្វេ និងរមណីយដ្ឋានមាត់ព្រែក', category: 'cafe', province: 'កំពត', labelKh: '☕ កាហ្វេ & រមណីយដ្ឋានកំពត', labelEn: '☕ Kampot Riverside Cafés', labelZh: '☕ 贡布河畔咖啡与度假村' },
+  { query: 'ឆ្នេរសមុទ្រ និងកោះស្អាតៗ', category: 'beach', province: 'ព្រះសីហនុ', labelKh: '🏖️ ឆ្នេរ & កោះព្រះសីហនុ', labelEn: '🏖️ Sihanoukville Beaches & Islands', labelZh: '🏖️ 西哈努克海滩与海岛' },
+  { query: 'ទឹកធ្លាក់ និងធម្មជាតិ', category: 'nature', province: 'មណ្ឌលគិរី', labelKh: '🌿 ទឹកធ្លាក់មណ្ឌលគិរី', labelEn: '🌿 Mondulkiri Waterfalls', labelZh: '🌿 蒙多基里瀑布与自然' },
 ];
 
 const ITEMS_PER_PAGE = 6;
@@ -427,18 +429,24 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <h2 className="text-base sm:text-lg font-extrabold tracking-tight truncate">
-                  {language === 'km'
-                    ? '🗺️ ស្វែងរកហាង & តំបន់ទេសចរណ៍លើ Google Maps'
-                    : '🗺️ Google Maps Search — Shops & Tourist Attractions'}
+                  {tr(
+                    language,
+                    '🗺️ ស្វែងរកហាង & តំបន់ទេសចរណ៍លើ Google Maps',
+                    '🗺️ Google Maps Search — Shops & Tourist Attractions',
+                    '🗺️ 谷歌地图搜索 — 店铺与旅游景点'
+                  )}
                 </h2>
                 <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-400/20 text-emerald-200 border border-emerald-300/30">
                   <Sparkles className="w-3 h-3" /> Places API (New)
                 </span>
               </div>
               <p className="text-xs text-emerald-100/90 truncate mt-0.5">
-                {language === 'km'
-                  ? 'ស្វែងរកតាមឈ្មោះ ប្រភេទ ខេត្ត/ក្រុង ឬ GPS ជិតអ្នក • ការពារទិន្នន័យស្ទួនដោយស្វ័យប្រវត្តិ'
-                  : 'Search by place name, category, province, or GPS location • Automatic duplicate protection'}
+                {tr(
+                  language,
+                  'ស្វែងរកតាមឈ្មោះ ប្រភេទ ខេត្ត/ក្រុង ឬ GPS ជិតអ្នក • ការពារទិន្នន័យស្ទួនដោយស្វ័យប្រវត្តិ',
+                  'Search by place name, category, province, or GPS location • Automatic duplicate protection',
+                  '按地点名称、类别、省份或 GPS 附近位置搜索 • 自动防重保护'
+                )}
               </p>
             </div>
           </div>
@@ -446,7 +454,7 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
           <button
             onClick={() => setIsGoogleMapsSearchModalOpen(false)}
             className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors shrink-0"
-            title="Close"
+            title={tr(language, 'បិទ', 'Close', '关闭')}
           >
             <X className="w-5 h-5" />
           </button>
@@ -468,11 +476,12 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                 type="text"
                 value={query}
                 onChange={e => setQuery(e.target.value)}
-                placeholder={
-                  language === 'km'
-                    ? 'វាយឈ្មោះហាង ភោជនីយដ្ឋាន ឬតំបន់ទេសចរណ៍...'
-                    : 'Search shop, restaurant, or tourist attraction...'
-                }
+                placeholder={tr(
+                  language,
+                  'វាយឈ្មោះហាង ភោជនីយដ្ឋាន ឬតំបន់ទេសចរណ៍...',
+                  'Search shop, restaurant, or tourist attraction...',
+                  '输入店铺、餐厅或旅游景点名称（支持中文/高棉语/英文）...'
+                )}
                 className="w-full pl-10 pr-8 py-2.5 rounded-xl border border-slate-300 bg-white text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium"
               />
               {query && (
@@ -498,7 +507,7 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
               >
                 {SEARCH_CATEGORIES.map(c => (
                   <option key={c.id} value={c.id}>
-                    {c.emoji} {language === 'km' ? c.labelKh : c.labelEn}
+                    {c.emoji} {tr(language, c.labelKh, c.labelEn, c.labelZh)}
                   </option>
                 ))}
               </select>
@@ -513,7 +522,10 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
               >
                 {CAMBODIA_PROVINCES.map(prov => (
                   <option key={prov} value={prov}>
-                    📍 {prov === 'ទាំងអស់' ? (language === 'km' ? 'គ្រប់ខេត្ត/ក្រុង' : 'All Provinces') : prov}
+                    📍{' '}
+                    {prov === 'ទាំងអស់'
+                      ? tr(language, 'គ្រប់ខេត្ត/ក្រុង', 'All Provinces', '全部省份/城市')
+                      : translateProvinceName(prov, prov, language)}
                   </option>
                 ))}
               </select>
@@ -531,14 +543,14 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                 ) : (
                   <Search className="w-4 h-4" />
                 )}
-                <span>{language === 'km' ? 'ស្វែងរក' : 'Search'}</span>
+                <span>{tr(language, 'ស្វែងរក', 'Search', '搜索')}</span>
               </button>
 
               <button
                 type="button"
                 onClick={handleUseMyGpsLocation}
                 disabled={gpsLoading || isLoading}
-                title={language === 'km' ? 'ស្វែងរកទីតាំងជិតខ្ញុំ (GPS)' : 'Search Near Me (GPS)'}
+                title={tr(language, 'ស្វែងរកទីតាំងជិតខ្ញុំ (GPS)', 'Search Near Me (GPS)', '搜索我附近的位置 (GPS)')}
                 className={`px-3 py-2.5 rounded-xl border text-xs font-bold flex items-center justify-center transition-all cursor-pointer ${
                   gpsLocation
                     ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
@@ -554,7 +566,7 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
           <div className="flex items-center justify-between gap-2 flex-wrap">
             <div className="flex items-center gap-1.5 flex-wrap">
               <span className="text-[11px] font-bold text-slate-500 mr-1">
-                {language === 'km' ? 'ស្វែងរករហ័ស៖' : 'Quick Search:'}
+                {tr(language, 'ស្វែងរករហ័ស៖', 'Quick Search:', '快捷搜索：')}
               </span>
               {QUICK_SEARCH_PRESETS.map((preset, idx) => (
                 <button
@@ -572,7 +584,7 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                   }}
                   className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-white border border-slate-200 hover:border-emerald-400 hover:bg-emerald-50 text-slate-700 transition-colors cursor-pointer"
                 >
-                  {preset.labelKh}
+                  {tr(language, preset.labelKh, preset.labelEn, preset.labelZh)}
                 </button>
               ))}
             </div>
@@ -580,7 +592,7 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
             {gpsLocation && (
               <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-[11px] font-bold">
                 <Navigation className="w-3 h-3" />
-                <span>GPS: {gpsLocation.lat.toFixed(3)}, {gpsLocation.lng.toFixed(3)} (15km)</span>
+                <span>GPS: {Number(gpsLocation.lat ?? 11.5564).toFixed(3)}, {Number(gpsLocation.lng ?? 104.9282).toFixed(3)} (15km)</span>
                 <button
                   type="button"
                   onClick={() => setGpsLocation(null)}
@@ -600,18 +612,25 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                 Powered by Google Maps
               </span>
               <span>
-                📡 API Calls Today:{' '}
+                📡 {tr(language, 'ចំនួនហៅ API ថ្ងៃនេះ៖', 'API Calls Today:', '今日 API 调用：')}{' '}
                 <strong className={quotaStats.dailyApiCallsCount >= quotaStats.dailyApiLimit ? 'text-red-600' : 'text-slate-900'}>
                   {quotaStats.dailyApiCallsCount} / {quotaStats.dailyApiLimit}
                 </strong>
               </span>
               <span>
-                ⚡ Smart Cache (30-Day TTL):{' '}
-                <strong className="text-emerald-700">{quotaStats.totalCachedPlaces} places ({quotaStats.cacheHitsSavedQuota} hits saved $0)</strong>
+                ⚡ {tr(language, 'ឃ្លាំងសម្ងាត់ឆ្លាតវៃ (៣០ ថ្ងៃ)៖', 'Smart Cache (30-Day TTL):', '智能缓存（30天）：')}{' '}
+                <strong className="text-emerald-700">
+                  {tr(
+                    language,
+                    `${quotaStats.totalCachedPlaces} ទីតាំង (សន្សំបាន ${quotaStats.cacheHitsSavedQuota} ដង $0)`,
+                    `${quotaStats.totalCachedPlaces} places (${quotaStats.cacheHitsSavedQuota} hits saved $0)`,
+                    `${quotaStats.totalCachedPlaces} 个地点（已节省 ${quotaStats.cacheHitsSavedQuota} 次调用 $0）`
+                  )}
+                </strong>
               </span>
               {fromCache && results.length > 0 && (
                 <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-bold">
-                  ⚡ ទាញពីឃ្លាំងសម្ងាត់ (0 API Cost)
+                  {tr(language, '⚡ ទាញពីឃ្លាំងសម្ងាត់ (0 API Cost)', '⚡ Loaded from Smart Cache ($0)', '⚡ 来自智能缓存（0 API 费用）')}
                 </span>
               )}
             </div>
@@ -624,7 +643,7 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                   className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-200/80 hover:bg-slate-300 text-slate-700 font-bold cursor-pointer"
                 >
                   <SlidersHorizontal className="w-3 h-3" />
-                  {language === 'km' ? 'កំណត់កូតា API' : 'API Limit'}
+                  {tr(language, 'កំណត់កូតា API', 'API Limit', 'API 配额设置')}
                 </button>
               </div>
             )}
@@ -685,9 +704,12 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                 >
                   <Database className="w-3.5 h-3.5" />
                   <span>
-                    {language === 'km'
-                      ? `📥 នាំចូលទីតាំងដែលបានជ្រើស (${selectedPlaceIds.size}) ចូលកម្មវិធី`
-                      : `📥 Import Selected (${selectedPlaceIds.size}) to App`}
+                    {tr(
+                      language,
+                      `📥 នាំចូលទីតាំងដែលបានជ្រើស (${selectedPlaceIds.size}) ចូលកម្មវិធី`,
+                      `📥 Import Selected (${selectedPlaceIds.size}) to App`,
+                      `📥 将所选地点 (${selectedPlaceIds.size}) 导入应用`
+                    )}
                   </span>
                 </button>
               )}
@@ -701,7 +723,9 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
             <div className="p-4 rounded-2xl bg-amber-50 border border-amber-300 flex items-start gap-3 text-amber-900">
               <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
               <div className="text-xs sm:text-sm space-y-1">
-                <p className="font-bold">សារជូនដំណឹងពីប្រព័ន្ធ Google Maps API</p>
+                <p className="font-bold">
+                  {tr(language, 'សារជូនដំណឹងពីប្រព័ន្ធ Google Maps API', 'Google Maps API System Notice', 'Google Maps API 系统提示')}
+                </p>
                 <p>{errorMsg}</p>
               </div>
             </div>
@@ -711,14 +735,20 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
             <div className="py-16 text-center space-y-3">
               <RefreshCw className="w-10 h-10 text-emerald-600 animate-spin mx-auto" />
               <p className="text-sm font-bold text-slate-700">
-                {language === 'km'
-                  ? 'កំពុងស្វែងរកទិន្នន័យពិតពី Google Maps Platform...'
-                  : 'Searching real places on Google Maps Platform...'}
+                {tr(
+                  language,
+                  'កំពុងស្វែងរកទិន្នន័យពិតពី Google Maps Platform...',
+                  'Searching real places on Google Maps Platform...',
+                  '正在通过 Google Maps 平台搜索真实地点数据...'
+                )}
               </p>
               <p className="text-xs text-slate-500">
-                {language === 'km'
-                  ? 'ផ្ទៀងផ្ទាត់ឈ្មោះ អាសយដ្ឋាន កូអរដោនេ រូបភាពផ្លូវការ និងការពារទិន្នន័យស្ទួន'
-                  : 'Verifying names, coordinates, official photos, and checking for duplicates'}
+                {tr(
+                  language,
+                  'ផ្ទៀងផ្ទាត់ឈ្មោះ អាសយដ្ឋាន កូអរដោនេ រូបភាពផ្លូវការ និងការពារទិន្នន័យស្ទួន',
+                  'Verifying names, coordinates, official photos, and checking for duplicates',
+                  '正在核验地点名称、地址、GPS 坐标、官方照片并检查重复项'
+                )}
               </p>
             </div>
           ) : results.length === 0 ? (
@@ -729,23 +759,26 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
               <div className="space-y-2">
                 <h3 className="text-base font-extrabold text-slate-800">
                   {query.trim()
-                    ? (language === 'km'
-                        ? `រកមិនឃើញទីតាំង "${query}" ក្នុងឃ្លាំងទិន្នន័យកម្មវិធីទេ`
-                        : language === 'zh'
-                        ? `未在应用数据库中找到“${query}”`
-                        : `No cached results found for "${query}"`)
-                    : (language === 'km'
-                        ? 'ស្វែងរកហាង ភោជនីយដ្ឋាន និងតំបន់ទេសចរណ៍ពិតៗនៅកម្ពុជា'
-                        : language === 'zh'
-                        ? '搜索柬埔寨真实餐厅、店铺与旅游景点'
-                        : 'Search Real Shops, Restaurants & Tourist Attractions in Cambodia')}
+                    ? tr(
+                        language,
+                        `រកមិនឃើញទីតាំង "${query}" ក្នុងឃ្លាំងទិន្នន័យកម្មវិធីទេ`,
+                        `No cached results found for "${query}"`,
+                        `未在应用数据库中找到“${query}”`
+                      )
+                    : tr(
+                        language,
+                        'ស្វែងរកហាង ភោជនីយដ្ឋាន និងតំបន់ទេសចរណ៍ពិតៗនៅកម្ពុជា',
+                        'Search Real Shops, Restaurants & Tourist Attractions in Cambodia',
+                        '搜索柬埔寨真实餐厅、店铺与旅游景点'
+                      )}
                 </h3>
                 <p className="text-xs text-slate-500 leading-relaxed">
-                  {language === 'km'
-                    ? 'វាយបញ្ចូលឈ្មោះទីតាំងជាភាសាខ្មែរ អង់គ្លេស ឬចិន រួចចុច «ស្វែងរក» ឬចុចប៊ូតុងខាងក្រោមដើម្បីបើកស្វែងរកទីតាំងនេះផ្ទាល់នៅលើផែនទី Google Maps។'
-                    : language === 'zh'
-                    ? '支持输入高棉语、中文或英文名称搜索。如果未找到结果，请点击下方按钮直接在 Google 地图中打开搜索。'
-                    : 'Search by Khmer, English, or Chinese name, or tap the button below to open your search directly in Google Maps.'}
+                  {tr(
+                    language,
+                    'វាយបញ្ចូលឈ្មោះទីតាំងជាភាសាខ្មែរ អង់គ្លេស ឬចិន រួចចុច «ស្វែងរក» ឬចុចប៊ូតុងខាងក្រោមដើម្បីបើកស្វែងរកទីតាំងនេះផ្ទាល់នៅលើផែនទី Google Maps។',
+                    'Search by Khmer, English, or Chinese name, or tap the button below to open your search directly in Google Maps.',
+                    '支持输入高棉语、中文或英文名称搜索。如果未找到结果，请点击下方按钮直接在 Google 地图中打开搜索。'
+                  )}
                 </p>
                 {query.trim() && (
                   <div className="pt-2">
@@ -759,11 +792,12 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                     >
                       <ExternalLink className="w-4 h-4" />
                       <span>
-                        {language === 'km'
-                          ? `🗺️ បើកស្វែងរក "${query.trim()}" ផ្ទាល់នៅលើ Google Maps`
-                          : language === 'zh'
-                          ? `🗺️ 在 Google 地图中搜索 “${query.trim()}”`
-                          : `🗺️ Open "${query.trim()}" in Google Maps`}
+                        {tr(
+                          language,
+                          `🗺️ បើកស្វែងរក "${query.trim()}" ផ្ទាល់នៅលើ Google Maps`,
+                          `🗺️ Open "${query.trim()}" in Google Maps`,
+                          `🗺️ 在 Google 地图中搜索 “${query.trim()}”`
+                        )}
                       </span>
                     </a>
                   </div>
@@ -778,6 +812,26 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                   const isDup = Boolean(dupInfo?.isDuplicate);
                   const isSelected = selectedPlaceIds.has(place.placeId);
                   const isEditingThis = editingPlaceId === place.placeId;
+                  const safeLat = Number(place.latitude ?? place.lat ?? 11.5564);
+                  const safeLng = Number(place.longitude ?? place.lng ?? 104.9282);
+                  const safeRating = Number(place.rating ?? 0);
+                  const safeRatingCount = Number(place.userRatingCount ?? place.reviewCount ?? 0);
+                  const placeMapsHref =
+                    place.googleMapsUrl ||
+                    (place as any).mapUrl ||
+                    `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.nameKh || place.nameEn || 'Cambodia')}`;
+                  const displayTitle =
+                    language === 'km'
+                      ? place.nameKh || place.nameEn
+                      : language === 'zh'
+                      ? translateDynamicTextToZh(place.nameEn || place.nameKh) || place.nameEn || place.nameKh
+                      : place.nameEn || place.nameKh;
+                  const displayAddress =
+                    language === 'km'
+                      ? place.addressKh || place.addressEn
+                      : language === 'zh'
+                      ? translateDynamicTextToZh(place.addressEn || place.addressKh) || place.addressEn || place.addressKh
+                      : place.addressEn || place.addressKh;
 
                   return (
                     <div
@@ -794,7 +848,7 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                       <div className="relative h-44 bg-slate-900 overflow-hidden">
                         <img
                           src={place.photoUrl}
-                          alt={place.nameKh}
+                          alt={displayTitle}
                           className="w-full h-full object-cover"
                           loading="lazy"
                         />
@@ -817,11 +871,13 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                                 : 'bg-emerald-600 text-white'
                             }`}
                           >
-                            {place.category === 'tourism' ? '🏛️ តំបន់ទេសចរណ៍' : '🍽️ ហាងអាហារ / កាហ្វេ'}
+                            {place.category === 'tourism'
+                              ? tr(language, '🏛️ តំបន់ទេសចរណ៍', '🏛️ Tourist Spot', '🏛️ 旅游景点')
+                              : tr(language, '🍽️ ហាងអាហារ / កាហ្វេ', '🍽️ Restaurant / Café', '🍽️ 餐厅 / 咖啡馆')}
                           </span>
                           {place.provinceKh && (
                             <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-black/60 text-white backdrop-blur-sm">
-                              📍 {place.provinceKh}
+                              📍 {translateProvinceName(place.provinceKh, place.provinceEn || place.provinceKh, language)}
                             </span>
                           )}
                         </div>
@@ -831,7 +887,7 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                           {isDup ? (
                             <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-emerald-600 text-white shadow">
                               <CheckCircle className="w-3 h-3" />
-                              មានក្នុងកម្មវិធីរួចហើយ
+                              {tr(language, 'មានក្នុងកម្មវិធីរួចហើយ', 'In App', '已在应用中')}
                             </span>
                           ) : (
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/90 text-slate-800 shadow-sm">
@@ -844,23 +900,23 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                         <div className="absolute bottom-2.5 left-3 right-3 flex items-end justify-between gap-2 text-white">
                           <div className="min-w-0">
                             <h3 className="font-extrabold text-sm sm:text-base leading-snug truncate drop-shadow">
-                              {place.nameKh}
+                              {displayTitle}
                             </h3>
-                            {place.nameEn && place.nameEn !== place.nameKh && (
-                              <p className="text-[11px] text-white/85 truncate">{place.nameEn}</p>
+                            {place.nameKh && place.nameKh !== displayTitle && (
+                              <p className="text-[11px] text-white/85 truncate">{place.nameKh}</p>
                             )}
                           </div>
 
                           <div className="shrink-0 flex flex-col items-end">
-                            {place.userRatingCount > 0 ? (
+                            {safeRatingCount > 0 ? (
                               <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-amber-400 text-slate-950 font-extrabold text-xs shadow">
                                 <Star className="w-3.5 h-3.5 fill-slate-950" />
-                                <span>{place.rating.toFixed(1)}</span>
-                                <span className="text-[10px] font-semibold">({place.userRatingCount})</span>
+                                <span>{safeRating.toFixed(1)}</span>
+                                <span className="text-[10px] font-semibold">({safeRatingCount})</span>
                               </div>
                             ) : (
                               <span className="px-2 py-0.5 rounded-lg bg-black/60 text-white/90 text-[10px] font-semibold">
-                                No ratings yet
+                                {tr(language, 'មិនទាន់មានផ្កាយ', 'No ratings yet', '暂无评分')}
                               </span>
                             )}
                           </div>
@@ -872,12 +928,12 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                         <div className="space-y-1.5 text-xs text-slate-600">
                           <p className="flex items-start gap-1.5 line-clamp-2">
                             <MapPin className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
-                            <span>{place.addressKh}</span>
+                            <span>{displayAddress}</span>
                           </p>
 
                           <div className="flex items-center justify-between gap-2 text-[11px] text-slate-500 flex-wrap">
                             <span>
-                              🌐 GPS: {place.latitude.toFixed(4)}, {place.longitude.toFixed(4)}
+                              🌐 GPS: {safeLat.toFixed(4)}, {safeLng.toFixed(4)}
                             </span>
                             {place.phone && (
                               <span className="inline-flex items-center gap-1 text-slate-700 font-semibold">
@@ -891,15 +947,25 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                           <div className="pt-1 flex items-center justify-between gap-2 text-[10px] text-slate-400 border-t border-slate-100">
                             <span className="truncate">
                               {place.hasRealGooglePhoto
-                                ? `📸 រូបភាពផ្លូវការពី Google Maps ${
-                                    place.photoAttributions?.length
-                                      ? `(ផ្តល់ដោយ៖ ${place.photoAttributions[0]})`
-                                      : ''
-                                  }`
-                                : '🖼️ គ្មានរូបភាពលើ Google Maps (ប្រើស្លាកឈ្មោះទីតាំងពិត)'}
+                                ? tr(
+                                    language,
+                                    `📸 រូបភាពផ្លូវការពី Google Maps ${
+                                      place.photoAttributions?.length
+                                        ? `(ផ្តល់ដោយ៖ ${place.photoAttributions[0]})`
+                                        : ''
+                                    }`,
+                                    `📸 Official Google Maps Photo`,
+                                    `📸 Google 地图官方照片`
+                                  )
+                                : tr(
+                                    language,
+                                    '🖼️ គ្មានរូបភាពលើ Google Maps (ប្រើស្លាកឈ្មោះទីតាំងពិត)',
+                                    '🖼️ Verified Google Place Card',
+                                    '🖼️ 已验证 Google 地图地点'
+                                  )}
                             </span>
                             <span className="font-mono text-[9px] text-slate-400 shrink-0" title={place.placeId}>
-                              ID: {place.placeId.slice(0, 10)}…
+                              ID: {String(place.placeId || '').slice(0, 10)}…
                             </span>
                           </div>
                         </div>
@@ -1007,17 +1073,17 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                               onClick={() => handleOpenPlacePreview(place)}
                               className="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors cursor-pointer"
                             >
-                              {language === 'km' ? 'មើលព័ត៌មានលម្អិត' : 'View Details'}
+                              {tr(language, 'មើលព័ត៌មានលម្អិត', 'View Details', '查看详情')}
                             </button>
 
                             <a
-                              href={place.mapUrl}
+                              href={placeMapsHref}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold transition-colors"
                             >
                               <ExternalLink className="w-3.5 h-3.5" />
-                              <span>Google Maps</span>
+                              <span>{tr(language, 'បើក Google Maps', 'Google Maps', '打开谷歌地图')}</span>
                             </a>
                           </div>
 
@@ -1026,7 +1092,7 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                               <button
                                 type="button"
                                 onClick={() => startEditingBeforeImport(place)}
-                                title="ពិនិត្យ និងកែសម្រួលមុននាំចូល"
+                                title={tr(language, 'ពិនិត្យ និងកែសម្រួលមុននាំចូល', 'Review & Edit Before Import', '导入前编辑')}
                                 className="p-1.5 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-600 cursor-pointer"
                               >
                                 <Edit3 className="w-3.5 h-3.5" />
@@ -1044,12 +1110,12 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                                 {isDup ? (
                                   <>
                                     <RefreshCw className="w-3.5 h-3.5" />
-                                    <span>ធ្វើបច្ចុប្បន្នភាព Meta</span>
+                                    <span>{tr(language, 'ធ្វើបច្ចុប្បន្នភាព Meta', 'Sync Meta', '同步元数据')}</span>
                                   </>
                                 ) : (
                                   <>
                                     <PlusCircle className="w-3.5 h-3.5" />
-                                    <span>នាំចូលកម្មវិធី</span>
+                                    <span>{tr(language, 'នាំចូលកម្មវិធី', 'Import to App', '导入应用')}</span>
                                   </>
                                 )}
                               </button>
@@ -1072,13 +1138,16 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                     className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-white border border-slate-300 disabled:opacity-40 text-xs font-bold text-slate-700 hover:bg-slate-50 cursor-pointer"
                   >
                     <ChevronLeft className="w-4 h-4" />
-                    <span>{language === 'km' ? 'ទំព័រមុន' : 'Prev'}</span>
+                    <span>{tr(language, 'ទំព័រមុន', 'Prev', '上一页')}</span>
                   </button>
 
                   <span className="text-xs font-bold text-slate-700 px-2">
-                    {language === 'km'
-                      ? `ទំព័រ ${currentPage} នៃ ${totalPages} (សរុប ${results.length} ទីតាំង)`
-                      : `Page ${currentPage} of ${totalPages} (${results.length} places)`}
+                    {tr(
+                      language,
+                      `ទំព័រ ${currentPage} នៃ ${totalPages} (សរុប ${results.length} ទីតាំង)`,
+                      `Page ${currentPage} of ${totalPages} (${results.length} places)`,
+                      `第 ${currentPage} / ${totalPages} 页（共 ${results.length} 个地点）`
+                    )}
                   </span>
 
                   <button
@@ -1087,7 +1156,7 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                     onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                     className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-white border border-slate-300 disabled:opacity-40 text-xs font-bold text-slate-700 hover:bg-slate-50 cursor-pointer"
                   >
-                    <span>{language === 'km' ? 'ទំព័របន្ទាប់' : 'Next'}</span>
+                    <span>{tr(language, 'ទំព័របន្ទាប់', 'Next', '下一页')}</span>
                     <ChevronRight className="w-4 h-4" />
                   </button>
                 </div>
@@ -1105,9 +1174,12 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                       <PlusCircle className="w-3.5 h-3.5" />
                     )}
                     <span>
-                      {language === 'km'
-                        ? 'ទាញយកលទ្ធផលបន្ថែមពី Google Maps (Next Page)'
-                        : 'Load More Results from Google Maps'}
+                      {tr(
+                        language,
+                        'ទាញយកលទ្ធផលបន្ថែមពី Google Maps (Next Page)',
+                        'Load More Results from Google Maps',
+                        '从 Google 地图加载更多结果'
+                      )}
                     </span>
                   </button>
                 )}
@@ -1121,7 +1193,12 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
           <div className="flex items-center gap-2">
             <span className="font-bold text-slate-700">Google Maps Platform Compliance:</span>
             <span>
-              រូបភាព និងទិន្នន័យផែនទីផ្តល់ដោយ Google Maps • រក្សាទុកព័ត៌មាន Admin ដាច់ដោយឡែកពី Google Metadata
+              {tr(
+                language,
+                'រូបភាព និងទិន្នន័យផែនទីផ្តល់ដោយ Google Maps • រក្សាទុកព័ត៌មាន Admin ដាច់ដោយឡែកពី Google Metadata',
+                'Photos & map data powered by Google Maps • Admin records stored separately from Google Metadata',
+                '地图与照片数据由 Google 地图提供 • 管理员数据与 Google 元数据独立存储'
+              )}
             </span>
           </div>
           <button
@@ -1129,7 +1206,7 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
             onClick={() => setIsGoogleMapsSearchModalOpen(false)}
             className="px-4 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs cursor-pointer"
           >
-            {language === 'km' ? 'បិទផ្ទាំងស្វែងរក' : 'Close'}
+            {tr(language, 'បិទផ្ទាំងស្វែងរក', 'Close', '关闭搜索窗口')}
           </button>
         </div>
       </div>

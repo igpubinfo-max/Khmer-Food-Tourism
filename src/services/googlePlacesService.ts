@@ -66,11 +66,14 @@ export interface GooglePlaceCachedItem {
   addressKh?: string;
   lat: number;
   lng: number;
+  latitude?: number;
+  longitude?: number;
   phone: string;
   openHours: string;
   priceLevel?: RestaurantPriceLevel;
   rating: number;
   reviewCount: number;
+  userRatingCount?: number;
   photoUrl: string;
   photoUrls?: string[];
   photoAttributions?: string[];
@@ -911,12 +914,25 @@ export async function searchGoogleMapsPlacesAdvanced(
       errorMessageZh?: string;
     }
   ): GooglePlacesSearchResponse => {
-    const normalizedItems = items.map((it) => ({
-      ...it,
-      provinceKh: it.provinceKh || it.province,
-      addressKh: it.addressKh || it.address,
-      hasRealGooglePhoto: it.hasRealGooglePhoto ?? it.hasOfficialGooglePhoto,
-    }));
+    const normalizedItems = items.map((it) => {
+      const safeLat = Number.isFinite(Number(it.lat)) ? Number(it.lat) : Number.isFinite(Number(it.latitude)) ? Number(it.latitude) : 11.5564;
+      const safeLng = Number.isFinite(Number(it.lng)) ? Number(it.lng) : Number.isFinite(Number(it.longitude)) ? Number(it.longitude) : 104.9282;
+      const safeRating = Number.isFinite(Number(it.rating)) ? Number(it.rating) : 0;
+      const safeCount = Number.isFinite(Number(it.reviewCount)) ? Number(it.reviewCount) : Number.isFinite(Number(it.userRatingCount)) ? Number(it.userRatingCount) : 0;
+      return {
+        ...it,
+        lat: safeLat,
+        lng: safeLng,
+        latitude: safeLat,
+        longitude: safeLng,
+        rating: safeRating,
+        reviewCount: safeCount,
+        userRatingCount: safeCount,
+        provinceKh: it.provinceKh || it.province || 'រាជធានីភ្នំពេញ',
+        addressKh: it.addressKh || it.address || 'កម្ពុជា',
+        hasRealGooglePhoto: it.hasRealGooglePhoto ?? it.hasOfficialGooglePhoto ?? false,
+      };
+    });
     return {
       results: normalizedItems,
       places: normalizedItems,

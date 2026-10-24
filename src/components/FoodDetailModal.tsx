@@ -14,6 +14,8 @@ import {
 } from '../utils/androidMediaHelper';
 import { searchOnlineFoodImages, OnlineFoodImageCandidate } from '../services/onlineFoodImageService';
 import { FoodCategorySlug, FoodItem } from '../types';
+import { tr } from '../utils/i18n';
+import { getLocalizedFood } from '../utils/zhDynamicTranslator';
 
 export const FoodDetailModal: React.FC = () => {
   const { 
@@ -73,6 +75,7 @@ export const FoodDetailModal: React.FC = () => {
   }, [selectedFood?.id, isAdmin]);
 
   if (!selectedFood) return null;
+  const loc = getLocalizedFood(selectedFood, language);
 
   const handleSearchOnlinePhoto = async () => {
     setIsSearchingOnline(true);
@@ -620,7 +623,7 @@ export const FoodDetailModal: React.FC = () => {
           <div className="relative h-64 sm:h-72 w-full bg-slate-800">
             <img 
               src={selectedFood.photoUrl} 
-              alt={selectedFood.nameKh}
+              alt={loc.name}
               className="w-full h-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
@@ -628,19 +631,19 @@ export const FoodDetailModal: React.FC = () => {
             {/* Bottom info inside hero */}
             <div className="absolute bottom-4 left-4 right-4 text-white">
               <span className="px-3 py-1 rounded-full text-xs font-bold bg-[#064E3B] text-emerald-100 border border-emerald-400/40 shadow-xs mb-2 inline-block">
-                {language === 'km' ? selectedFood.categoryKh : selectedFood.categoryEn}
+                {loc.category}
               </span>
               <h2 className="text-xl sm:text-2xl font-bold font-moul leading-snug drop-shadow text-white">
-                {language === 'km' ? selectedFood.nameKh : selectedFood.nameEn}
+                {loc.name}
               </h2>
               <p className="text-xs text-emerald-200 font-medium">
-                {language === 'km' ? selectedFood.nameEn : selectedFood.nameKh}
+                {loc.subtitle}
               </p>
             </div>
 
             {/* Reference Image Label (រូបភាពយោង) */}
             <div className="absolute bottom-4 right-4 z-10 px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-xs text-[10px] text-white/90 font-khmer border border-white/20 select-none pointer-events-none shadow-xs">
-              <span>{language === 'km' ? 'រូបភាពយោង' : 'Reference photo'}</span>
+              <span>{tr(language, 'រូបភាពយោង', 'Reference photo', '参考图片')}</span>
             </div>
           </div>
 
@@ -649,10 +652,10 @@ export const FoodDetailModal: React.FC = () => {
             <div className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-200/90 dark:border-slate-700">
               <div className="flex items-center gap-2">
                 <span className="px-3 py-1 rounded-xl bg-[#064E3B] text-white font-bold text-xs font-khmer">
-                  {language === 'km' ? selectedFood.categoryKh : selectedFood.categoryEn}
+                  {loc.category}
                 </span>
                 <span className="text-xs text-slate-600 dark:text-slate-300 font-khmer">
-                  {language === 'km' ? 'មុខម្ហូបខ្មែរប្រពៃណី' : 'Traditional Khmer Recipe'}
+                  {tr(language, 'មុខម្ហូបខ្មែរប្រពៃណី', 'Traditional Khmer Recipe', '传统高棉食谱')}
                 </span>
               </div>
 
@@ -669,12 +672,15 @@ export const FoodDetailModal: React.FC = () => {
                 <div className="flex items-center justify-between gap-2">
                   <span className="font-bold text-xs text-[#064E3B] dark:text-emerald-300 flex items-center gap-1.5 font-khmer">
                     <Globe className="w-4 h-4 text-emerald-600 shrink-0" />
-                    {language === 'km'
-                      ? 'ប្តូរ ឬស្វែងរករូបភាពម្ហូបពី Online ដោយស្វ័យប្រវត្តិ (Admin)'
-                      : 'Auto-Search Matching Food Photos Online (Admin)'}
+                    {tr(
+                      language,
+                      'ប្តូរ ឬស្វែងរករូបភាពម្ហូបពី Online ដោយស្វ័យប្រវត្តិ (Admin)',
+                      'Auto-Search Matching Food Photos Online (Admin)',
+                      '自动在线搜索并匹配菜品照片（管理员）'
+                    )}
                   </span>
                   <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 font-extrabold shrink-0">
-                    {language === 'km' ? 'ឥតគិតថ្លៃ $0' : 'FREE $0'}
+                    {tr(language, 'ឥតគិតថ្លៃ $0', 'FREE $0', '免费 $0')}
                   </span>
                 </div>
 
@@ -687,19 +693,25 @@ export const FoodDetailModal: React.FC = () => {
                   <Sparkles className={`w-4 h-4 text-amber-300 shrink-0 ${isSearchingOnline ? 'animate-spin' : ''}`} />
                   <span>
                     {isSearchingOnline
-                      ? (language === 'km' ? 'កំពុងស្វែងរករូបភាពម្ហូបពី Online...' : 'Searching online food photos...')
-                      : (language === 'km'
-                          ? '🤖 ស្វែងរករូបភាពម្ហូបពី Online ដោយស្វ័យប្រវត្តិ (ឥតគិតថ្លៃ $0)'
-                          : '🤖 Auto-Search Matching Food Photos Online (Free $0)')}
+                      ? tr(language, 'កំពុងស្វែងរករូបភាពម្ហូបពី Online...', 'Searching online food photos...', '正在在线搜索菜品照片...')
+                      : tr(
+                          language,
+                          '🤖 ស្វែងរករូបភាពម្ហូបពី Online ដោយស្វ័យប្រវត្តិ (ឥតគិតថ្លៃ $0)',
+                          '🤖 Auto-Search Matching Food Photos Online (Free $0)',
+                          '🤖 自动在线搜索匹配菜品照片（免费 $0）'
+                        )}
                   </span>
                 </button>
 
                 {onlineCandidates.length > 0 && (
                   <div className="space-y-1.5 pt-1">
                     <span className="text-[11px] font-bold text-emerald-800 dark:text-emerald-300 block font-khmer">
-                      {language === 'km'
-                        ? `✨ រកឃើញរូបភាពម្ហូបពី Online ចំនួន ${onlineCandidates.length} សន្លឹក (ចុចជ្រើសរើស)៖`
-                        : `✨ Found ${onlineCandidates.length} matching online photos (tap to select):`}
+                      {tr(
+                        language,
+                        `✨ រកឃើញរូបភាពម្ហូបពី Online ចំនួន ${onlineCandidates.length} សន្លឹក (ចុចជ្រើសរើស)៖`,
+                        `✨ Found ${onlineCandidates.length} matching online photos (tap to select):`,
+                        `✨ 已找到 ${onlineCandidates.length} 张匹配照片（点击选择）：`
+                      )}
                     </span>
                     <div className="grid grid-cols-3 gap-2">
                       {onlineCandidates.map((cand, idx) => {
@@ -741,27 +753,29 @@ export const FoodDetailModal: React.FC = () => {
             <div className="grid grid-cols-4 gap-2 text-center">
               <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700">
                 <Clock className="w-4 h-4 mx-auto text-[#059669] mb-1" />
-                <p className="text-[10px] text-slate-400">{language === 'km' ? 'ចម្អិន' : 'Cook'}</p>
-                <p className="text-xs font-bold text-[#0F172A] dark:text-slate-200">{selectedFood.cookTime}</p>
+                <p className="text-[10px] text-slate-400">{tr(language, 'ចម្អិន', 'Cook', '烹饪时间')}</p>
+                <p className="text-xs font-bold text-[#0F172A] dark:text-slate-200">{loc.cookTime}</p>
               </div>
 
               <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700">
                 <Users className="w-4 h-4 mx-auto text-[#10B981] mb-1" />
-                <p className="text-[10px] text-slate-400">{language === 'km' ? 'ចំណុះ' : 'Serves'}</p>
-                <p className="text-xs font-bold text-[#0F172A] dark:text-slate-200">{selectedFood.servings}</p>
+                <p className="text-[10px] text-slate-400">{tr(language, 'ចំណុះ', 'Serves', '份量')}</p>
+                <p className="text-xs font-bold text-[#0F172A] dark:text-slate-200">{loc.servings}</p>
               </div>
 
               <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700">
                 <Flame className="w-4 h-4 mx-auto text-orange-500 mb-1" />
-                <p className="text-[10px] text-slate-400">{language === 'km' ? 'ថាមពល' : 'Energy'}</p>
-                <p className="text-xs font-bold text-[#0F172A] dark:text-slate-200">{selectedFood.calories} cal</p>
+                <p className="text-[10px] text-slate-400">{tr(language, 'ថាមពល', 'Energy', '热量')}</p>
+                <p className="text-xs font-bold text-[#0F172A] dark:text-slate-200">
+                  {selectedFood.calories} {tr(language, 'cal', 'cal', '千卡')}
+                </p>
               </div>
 
               <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700">
                 <ChefHat className="w-4 h-4 mx-auto text-[#064E3B] dark:text-emerald-400 mb-1" />
-                <p className="text-[10px] text-slate-400">{language === 'km' ? 'កម្រិត' : 'Level'}</p>
+                <p className="text-[10px] text-slate-400">{tr(language, 'កម្រិត', 'Level', '难度')}</p>
                 <p className="text-xs font-bold text-[#0F172A] dark:text-slate-200">
-                  {selectedFood.difficulty === 'easy' ? 'ងាយ' : selectedFood.difficulty === 'medium' ? 'មធ្យម' : 'ជំនាញ'}
+                  {loc.difficultyLabel}
                 </p>
               </div>
             </div>
@@ -770,10 +784,10 @@ export const FoodDetailModal: React.FC = () => {
             <div>
               <h3 className="font-bold text-[#0F172A] dark:text-white text-sm mb-1.5 flex items-center gap-1.5">
                 <Sparkles className="w-4 h-4 text-[#059669]" />
-                {language === 'km' ? 'អំពីមុខម្ហូបនេះ' : 'About this Dish'}
+                {tr(language, 'អំពីមុខម្ហូបនេះ', 'About this Dish', '关于这道菜')}
               </h3>
               <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed bg-slate-50 dark:bg-slate-800/50 p-3.5 rounded-xl border border-slate-200/90 dark:border-slate-800">
-                {language === 'km' ? selectedFood.descriptionKh : selectedFood.descriptionEn}
+                {loc.description}
               </p>
             </div>
 
@@ -781,15 +795,15 @@ export const FoodDetailModal: React.FC = () => {
             <div>
               <div className="flex items-center justify-between mb-2">
                 <h3 className="font-bold text-[#0F172A] dark:text-white text-sm">
-                  {language === 'km' ? 'គ្រឿងផ្សំចាំបាច់' : 'Ingredients Needed'}
+                  {tr(language, 'គ្រឿងផ្សំចាំបាច់', 'Ingredients Needed', '所需食材')}
                 </h3>
                 <span className="text-[11px] text-slate-400">
-                  {Object.values(checkedIngredients).filter(Boolean).length} / {(selectedFood.ingredients || []).length}
+                  {Object.values(checkedIngredients).filter(Boolean).length} / {loc.ingredients.length}
                 </span>
               </div>
 
               <div className="space-y-1.5">
-                {(selectedFood.ingredients || []).map((ing, idx) => {
+                {loc.ingredients.map((ing, idx) => {
                   const isChecked = !!checkedIngredients[idx];
                   return (
                     <div
@@ -807,7 +821,7 @@ export const FoodDetailModal: React.FC = () => {
                         ) : (
                           <Circle className="w-4 h-4 text-slate-300 shrink-0" />
                         )}
-                        <span className="font-medium">{language === 'km' ? ing.nameKh : ing.nameEn}</span>
+                        <span className="font-medium">{ing.name}</span>
                       </div>
                       <span className="font-semibold text-slate-500 dark:text-slate-400 text-[11px]">{ing.amount}</span>
                     </div>
@@ -819,11 +833,11 @@ export const FoodDetailModal: React.FC = () => {
             {/* Step-by-Step Cooking Directions */}
             <div>
               <h3 className="font-bold text-[#0F172A] dark:text-white text-sm mb-2.5">
-                {language === 'km' ? 'របៀបធ្វើ និងវិធីចម្អិនតាមលំដាប់' : 'Step-by-Step Instructions'}
+                {tr(language, 'របៀបធ្វើ និងវិធីចម្អិនតាមលំដាប់', 'Step-by-Step Instructions', '详细烹饪步骤')}
               </h3>
 
               <div className="space-y-3">
-                {(selectedFood.steps || []).map((st) => (
+                {loc.steps.map((st) => (
                   <div 
                     key={st.stepNumber}
                     className="p-3.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 shadow-2xs space-y-2"
@@ -833,13 +847,13 @@ export const FoodDetailModal: React.FC = () => {
                         {st.stepNumber}
                       </span>
                       <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-200 leading-relaxed font-normal pt-0.5">
-                        {language === 'km' ? st.instructionKh : st.instructionEn}
+                        {st.instruction}
                       </p>
                     </div>
 
-                    {st.tipKh && (
+                    {st.tip && (
                       <div className="ml-8 p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/40 text-[11px] text-[#064E3B] dark:text-emerald-300">
-                        💡 {st.tipKh}
+                        💡 {st.tip}
                       </div>
                     )}
                   </div>
@@ -850,7 +864,7 @@ export const FoodDetailModal: React.FC = () => {
             {/* Social Share Bar */}
             <div className="pt-2 border-t border-slate-200 dark:border-slate-800">
               <p className="text-xs font-semibold text-slate-500 mb-2.5 text-center">
-                {language === 'km' ? 'ចែករំលែកមុខម្ហូបនេះទៅកាន់មិត្តភក្តិ' : 'Share this recipe with friends'}
+                {tr(language, 'ចែករំលែកមុខម្ហូបនេះទៅកាន់មិត្តភក្តិ', 'Share this recipe with friends', '将此食谱分享给好友')}
               </p>
               
               <div className="flex items-center justify-center gap-2 flex-wrap">
@@ -861,7 +875,7 @@ export const FoodDetailModal: React.FC = () => {
                   className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white text-xs font-bold shadow transition active:scale-95"
                 >
                   <Share2 className="w-3.5 h-3.5" />
-                  <span>{language === 'km' ? 'ចែករំលែក (Share)' : 'Share App'}</span>
+                  <span>{tr(language, 'ចែករំលែក (Share)', 'Share App', '分享应用')}</span>
                 </button>
 
                 {/* Telegram */}
@@ -890,7 +904,7 @@ export const FoodDetailModal: React.FC = () => {
                   onClick={handleCopyLink}
                   className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-medium border border-slate-300 dark:border-slate-700 hover:bg-slate-200 transition active:scale-95"
                 >
-                  {language === 'km' ? 'ចម្លងតំណ' : 'Copy link'}
+                  {tr(language, 'ចម្លងតំណ', 'Copy link', '复制链接')}
                 </button>
               </div>
             </div>

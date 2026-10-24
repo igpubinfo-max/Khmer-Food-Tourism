@@ -11,6 +11,8 @@ import {
 } from '../types';
 import { Utensils, Plus, Sparkles, Globe, Check } from 'lucide-react';
 import { searchOnlineFoodImages, OnlineFoodImageCandidate } from '../services/onlineFoodImageService';
+import { tr } from '../utils/i18n';
+import { getLocalizedFood } from '../utils/zhDynamicTranslator';
 
 const PAGE_BATCH_SIZE = 48;
 
@@ -107,12 +109,19 @@ export const FoodView: React.FC = () => {
 
   // Ordered exactly as requested: សម្ល, ឆា, ស្ងោរ, បង្អែម
   const categories = [
-    { id: 'all', nameKh: 'ទាំងអស់', nameEn: 'All Menus', emoji: '🍽️' },
-    { id: 'samlor', nameKh: '១. សម្ល', nameEn: '1. Samlor (Soup/Curry)', emoji: '🍲' },
-    { id: 'cha', nameKh: '២. ឆា', nameEn: '2. Cha (Stir-Fry)', emoji: '🥘' },
-    { id: 'sngor', nameKh: '៣. ស្ងោរ', nameEn: '3. Sngor (Boiled Soup)', emoji: '🥣' },
-    { id: 'bong_aem', nameKh: '៤. បង្អែម', nameEn: '4. Bong Aem (Dessert)', emoji: '🍨' },
+    { id: 'all', nameKh: 'ទាំងអស់', nameEn: 'All Menus', nameZh: '全部菜品', emoji: '🍽️' },
+    { id: 'samlor', nameKh: '១. សម្ល', nameEn: '1. Samlor (Soup/Curry)', nameZh: '1. 传统汤与咖喱', emoji: '🍲' },
+    { id: 'cha', nameKh: '២. ឆា', nameEn: '2. Cha (Stir-Fry)', nameZh: '2. 风味热炒', emoji: '🥘' },
+    { id: 'sngor', nameKh: '៣. ស្ងោរ', nameEn: '3. Sngor (Boiled Soup)', nameZh: '3. 清炖鲜汤', emoji: '🥣' },
+    { id: 'bong_aem', nameKh: '៤. បង្អែម', nameEn: '4. Bong Aem (Dessert)', nameZh: '4. 高棉甜品', emoji: '🍨' },
   ];
+
+  const sectionZhMeta: Record<KhmerFoodPrimaryGroup, { titleZh: string; subtitleZh: string }> = {
+    samlor: { titleZh: '1. 高棉传统浓汤与咖喱 (Samlor)', subtitleZh: '正宗高棉浓汤、阿莫克与红绿咖喱' },
+    cha: { titleZh: '2. 高棉风味小炒与烤物 (Cha)', subtitleZh: '香茅热炒、摇摇牛肉、炙烤与凉拌菜' },
+    sngor: { titleZh: '3. 清炖鲜汤、米粉与主食 (Sngor)', subtitleZh: '酸汤、清汤、高棉米粉与特色饭面' },
+    bong_aem: { titleZh: '4. 传统高棉甜品与糕点 (Bong Aem)', subtitleZh: '椰奶甜汤、传统糕点与特色饮品' },
+  };
 
   const filteredFoods = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -124,9 +133,18 @@ export const FoodView: React.FC = () => {
         }
       }
       if (q) {
-        const matchName = f.nameKh.toLowerCase().includes(q) || f.nameEn.toLowerCase().includes(q);
-        const matchDesc = f.descriptionKh.toLowerCase().includes(q) || f.descriptionEn.toLowerCase().includes(q);
-        const matchIng = f.ingredients.some(i => i.nameKh.toLowerCase().includes(q) || i.nameEn.toLowerCase().includes(q));
+        const loc = getLocalizedFood(f, 'zh');
+        const matchName =
+          f.nameKh.toLowerCase().includes(q) ||
+          f.nameEn.toLowerCase().includes(q) ||
+          loc.name.toLowerCase().includes(q);
+        const matchDesc =
+          f.descriptionKh.toLowerCase().includes(q) ||
+          f.descriptionEn.toLowerCase().includes(q) ||
+          loc.description.toLowerCase().includes(q);
+        const matchIng = f.ingredients.some(
+          i => i.nameKh.toLowerCase().includes(q) || i.nameEn.toLowerCase().includes(q)
+        );
         if (!matchName && !matchDesc && !matchIng) return false;
       }
       return true;
@@ -183,12 +201,17 @@ export const FoodView: React.FC = () => {
         <div>
           <h2 className="font-moul text-sm sm:text-base text-[#0F172A] dark:text-white flex items-center gap-2">
             <Utensils className="w-4 h-4 text-[#059669]" />
-            <span>{isKm ? 'វិចិត្រសាលមុខម្ហូបខ្មែរ (100+ មុខ)' : 'Khmer Food Collection (100+ Dishes)'}</span>
+            <span>
+              {tr(language, 'វិចិត្រសាលមុខម្ហូបខ្មែរ (100+ មុខ)', 'Khmer Food Collection (100+ Dishes)', '高棉美食大全（100+ 道正宗菜品）')}
+            </span>
           </h2>
           <p className="text-[11px] text-slate-500 font-khmer">
-            {isKm 
-              ? `បង្ហាញ ${filteredFoods.length} លើ ${foods.length} មុខម្ហូបខ្មែរពិតៗ` 
-              : `Showing ${filteredFoods.length} of ${foods.length} authentic dishes`}
+            {tr(
+              language,
+              `បង្ហាញ ${filteredFoods.length} លើ ${foods.length} មុខម្ហូបខ្មែរពិតៗ`,
+              `Showing ${filteredFoods.length} of ${foods.length} authentic dishes`,
+              `当前显示 ${filteredFoods.length} / ${foods.length} 道正宗高棉菜品`
+            )}
           </p>
         </div>
 
@@ -198,7 +221,7 @@ export const FoodView: React.FC = () => {
             className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-xs shadow-xs font-khmer transition"
           >
             <Plus className="w-3.5 h-3.5 text-emerald-200" />
-            <span>{isKm ? 'បញ្ចូលម្ហូប' : 'Add Food'}</span>
+            <span>{tr(language, 'បញ្ចូលម្ហូប', 'Add Food', '添加菜品')}</span>
           </button>
         )}
       </div>
@@ -324,10 +347,15 @@ export const FoodView: React.FC = () => {
       <div className="bg-white dark:bg-slate-800/90 p-2 rounded-2xl border border-emerald-500/20 shadow-2xs space-y-2 font-khmer">
         <div className="flex items-center justify-between px-1">
           <span className="text-[11px] font-bold text-[#064E3B] dark:text-emerald-300">
-            {isKm ? '📂 បញ្ជីមុខម្ហូបតាមផ្នែក (សម្ល • ឆា • ស្ងោរ • បង្អែម)៖' : '📂 Browse by Category (Samlor • Cha • Sngor • Dessert):'}
+            {tr(
+              language,
+              '📂 បញ្ជីមុខម្ហូបតាមផ្នែក (សម្ល • ឆា • ស្ងោរ • បង្អែម)៖',
+              '📂 Browse by Category (Samlor • Cha • Sngor • Dessert):',
+              '📂 按分类浏览菜品（浓汤 • 热炒 • 清炖 • 甜品）：'
+            )}
           </span>
           <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400">
-            {organizedFoods.length} {isKm ? 'មុខម្ហូប' : 'dishes'}
+            {organizedFoods.length} {tr(language, 'មុខម្ហូប', 'dishes', '道菜品')}
           </span>
         </div>
         <div className="grid grid-cols-5 gap-1.5">
@@ -346,7 +374,7 @@ export const FoodView: React.FC = () => {
               >
                 <span className="text-sm leading-none mb-1">{cat.emoji}</span>
                 <span className="text-[10px] sm:text-[11px] leading-tight truncate w-full">
-                  {isKm ? cat.nameKh : cat.nameEn.split(' (')[0]}
+                  {tr(language, cat.nameKh, cat.nameEn.split(' (')[0], cat.nameZh)}
                 </span>
                 <span
                   className={`mt-0.5 px-1.5 py-0.2 rounded-full text-[9px] font-bold ${
@@ -366,54 +394,57 @@ export const FoodView: React.FC = () => {
         <div className="p-8 text-center bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 space-y-2 font-khmer shadow-xs">
           <Utensils className="w-8 h-8 mx-auto text-slate-300" />
           <p className="text-xs text-slate-500 font-medium">
-            {isKm ? 'មិនមានមុខម្ហូបដែលត្រូវគ្នានឹងការស្វែងរកទេ' : 'No matching dishes found'}
+            {tr(language, 'មិនមានមុខម្ហូបដែលត្រូវគ្នានឹងការស្វែងរកទេ', 'No matching dishes found', '未找到匹配的菜品')}
           </p>
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
               className="px-3 py-1 text-xs text-[#064E3B] font-bold hover:underline"
             >
-              {isKm ? 'សម្អាតការស្វែងរក' : 'Clear search'}
+              {tr(language, 'សម្អាតការស្វែងរក', 'Clear search', '清除搜索')}
             </button>
           )}
         </div>
       ) : (
         <div className="space-y-6">
-          {groupedDisplayedSections.map((section) => (
-            <div key={section.meta.id} className="space-y-2.5">
-              {/* Category Section Banner Header */}
-              <div className="flex items-center justify-between px-3.5 py-2.5 rounded-2xl bg-gradient-to-r from-[#064E3B] via-[#047857] to-emerald-700 text-white shadow-sm border border-emerald-400/30 font-khmer">
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="w-8 h-8 rounded-xl bg-white/15 flex items-center justify-center text-lg shrink-0 border border-white/20">
-                    {section.meta.emoji}
-                  </div>
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-1.5">
-                      <span className="px-1.5 py-0.2 rounded bg-amber-400 text-slate-950 text-[10px] font-black">
-                        {isKm ? `ផ្នែកទី ${section.meta.order}` : `Category #${section.meta.order}`}
-                      </span>
-                      <h3 className="font-moul text-xs sm:text-sm text-white truncate">
-                        {isKm ? section.meta.shortNameKh : section.meta.nameEn}
-                      </h3>
+          {groupedDisplayedSections.map((section) => {
+            const zhMeta = sectionZhMeta[section.meta.id];
+            return (
+              <div key={section.meta.id} className="space-y-2.5">
+                {/* Category Section Banner Header */}
+                <div className="flex items-center justify-between px-3.5 py-2.5 rounded-2xl bg-gradient-to-r from-[#064E3B] via-[#047857] to-emerald-700 text-white shadow-sm border border-emerald-400/30 font-khmer">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-8 h-8 rounded-xl bg-white/15 flex items-center justify-center text-lg shrink-0 border border-white/20">
+                      {section.meta.emoji}
                     </div>
-                    <p className="text-[10px] text-emerald-100 truncate mt-0.5">
-                      {isKm ? section.meta.subtitleKh : section.meta.subtitleEn}
-                    </p>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <span className="px-1.5 py-0.2 rounded bg-amber-400 text-slate-950 text-[10px] font-black">
+                          {tr(language, `ផ្នែកទី ${section.meta.order}`, `Category #${section.meta.order}`, `第 ${section.meta.order} 类`)}
+                        </span>
+                        <h3 className="font-moul text-xs sm:text-sm text-white truncate">
+                          {tr(language, section.meta.shortNameKh, section.meta.nameEn, zhMeta?.titleZh || section.meta.nameEn)}
+                        </h3>
+                      </div>
+                      <p className="text-[10px] text-emerald-100 truncate mt-0.5">
+                        {tr(language, section.meta.subtitleKh, section.meta.subtitleEn, zhMeta?.subtitleZh || section.meta.subtitleEn)}
+                      </p>
+                    </div>
                   </div>
+                  <span className="px-2.5 py-1 rounded-full bg-white/20 text-white text-[10px] font-bold shrink-0 border border-white/25">
+                    {section.totalInCategory} {tr(language, 'មុខ', 'items', '道菜')}
+                  </span>
                 </div>
-                <span className="px-2.5 py-1 rounded-full bg-white/20 text-white text-[10px] font-bold shrink-0 border border-white/25">
-                  {section.totalInCategory} {isKm ? 'មុខ' : 'items'}
-                </span>
-              </div>
 
-              {/* Dishes in this category */}
-              <div className="grid grid-cols-2 gap-3">
-                {section.items.map((food) => (
-                  <FoodCard key={food.id} food={food} />
-                ))}
+                {/* Dishes in this category */}
+                <div className="grid grid-cols-2 gap-3">
+                  {section.items.map((food) => (
+                    <FoodCard key={food.id} food={food} />
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
 
           {visibleCount < filteredFoods.length && (
             <div ref={loadMoreTriggerRef} className="pt-2 flex justify-center">
@@ -422,9 +453,12 @@ export const FoodView: React.FC = () => {
                 onClick={() => setVisibleCount((prev) => Math.min(filteredFoods.length, prev + PAGE_BATCH_SIZE))}
                 className="px-4 py-2.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white text-xs font-bold shadow-sm font-khmer cursor-pointer transition"
               >
-                {isKm
-                  ? `បង្ហាញមុខម្ហូបបន្ថែម (${displayedFoods.length} / ${filteredFoods.length})`
-                  : `Show More Dishes (${displayedFoods.length} / ${filteredFoods.length})`}
+                {tr(
+                  language,
+                  `បង្ហាញមុខម្ហូបបន្ថែម (${displayedFoods.length} / ${filteredFoods.length})`,
+                  `Show More Dishes (${displayedFoods.length} / ${filteredFoods.length})`,
+                  `加载更多菜品 (${displayedFoods.length} / ${filteredFoods.length})`
+                )}
               </button>
             </div>
           )}

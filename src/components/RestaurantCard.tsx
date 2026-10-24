@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Restaurant, isRestaurantPremiumActive, getRestaurantRatingSummary, isSeedRestaurantId } from '../types';
 import { useApp } from '../context/AppContext';
 import { MapPin, Phone, Star, Navigation, CheckCircle2, AlertCircle, Sparkles, Share2, Edit2 } from 'lucide-react';
 import { sanitizeDialablePhone, resolveRestaurantPhoneOnDemand } from '../services/googlePlacesService';
 import { shareRichContent } from '../utils/androidMediaHelper';
+import { tr } from '../utils/i18n';
+import { getLocalizedRestaurant } from '../utils/zhDynamicTranslator';
 
 interface RestaurantCardProps {
   restaurant: Restaurant;
@@ -25,22 +27,21 @@ const RestaurantCardInner: React.FC<RestaurantCardProps> = ({ restaurant }) => {
         (currentUser.email && restaurant.ownerEmail && restaurant.ownerEmail.toLowerCase() === currentUser.email.toLowerCase()))
   );
   const ratingSummary = getRestaurantRatingSummary(restaurant);
+  const loc = useMemo(() => getLocalizedRestaurant(restaurant, language), [restaurant, language]);
 
   const handleShare = (e: React.MouseEvent) => {
     e.stopPropagation();
     trackRestaurantShare(restaurant.id);
     shareRichContent(
       {
-        title: isKm ? restaurant.nameKh : restaurant.nameEn,
+        title: loc.name,
         nameKh: restaurant.nameKh,
         nameEn: restaurant.nameEn,
-        description: isKm ? restaurant.descriptionKh : restaurant.descriptionEn,
-        location: isKm
-          ? `${restaurant.addressKh} (${restaurant.provinceKh})`
-          : `${restaurant.addressEn} (${restaurant.provinceEn})`,
+        description: loc.description,
+        location: `${loc.address} (${loc.province})`,
         phone: restaurant.phone,
         priceDisplay: restaurant.priceLevel,
-        signatureDishes: restaurant.signatureDishesKh,
+        signatureDishes: loc.signatureDishes,
         photoUrl: restaurant.photoUrl,
         mapUrl: restaurant.mapUrl,
         itemType: 'restaurant',
@@ -68,7 +69,7 @@ const RestaurantCardInner: React.FC<RestaurantCardProps> = ({ restaurant }) => {
       <div className="relative aspect-16/9 w-full overflow-hidden bg-slate-100 dark:bg-slate-700">
         <img 
           src={restaurant.photoUrl} 
-          alt={isKm ? restaurant.nameKh : restaurant.nameEn}
+          alt={loc.name}
           className="w-full h-full object-cover"
           loading="lazy"
           decoding="async"
@@ -77,7 +78,7 @@ const RestaurantCardInner: React.FC<RestaurantCardProps> = ({ restaurant }) => {
         {/* Province pill & Owner/Admin shortcut */}
         <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 z-10">
           <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-[#064E3B]/95 text-emerald-100 border border-emerald-400/30 shadow-xs font-khmer">
-            {isKm ? (restaurant.provinceKh || 'កម្ពុជា') : (restaurant.provinceEn || 'Cambodia')}
+            {loc.province}
           </span>
           {(isMyShop || isAdmin) && (
             <button
@@ -87,10 +88,14 @@ const RestaurantCardInner: React.FC<RestaurantCardProps> = ({ restaurant }) => {
                 openManageMyVipStore(restaurant.id);
               }}
               className="px-2.5 py-0.5 rounded-full bg-amber-400 hover:bg-amber-500 text-slate-950 text-[10px] font-black shadow-md flex items-center gap-1 transition active:scale-90 font-khmer"
-              title={isKm ? 'គ្រប់គ្រងហាងនេះ' : 'Manage This Shop'}
+              title={tr(language, 'គ្រប់គ្រងហាងនេះ', 'Manage This Shop', '管理此店铺')}
             >
               <Edit2 className="w-3 h-3" />
-              <span>{isMyShop ? (isKm ? 'គ្រប់គ្រងហាងខ្ញុំ' : 'Manage My Shop') : (isKm ? 'កែប្រែ' : 'Edit')}</span>
+              <span>
+                {isMyShop
+                  ? tr(language, 'គ្រប់គ្រងហាងខ្ញុំ', 'Manage My Shop', '管理我的店铺')
+                  : tr(language, 'កែប្រែ', 'Edit', '编辑')}
+              </span>
             </button>
           )}
         </div>
@@ -100,11 +105,11 @@ const RestaurantCardInner: React.FC<RestaurantCardProps> = ({ restaurant }) => {
           {isRestaurantPremiumActive(restaurant) ? (
             <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-gradient-to-r from-[#064E3B] to-[#059669] text-white border border-emerald-300/40 shadow-xs flex items-center gap-1 font-khmer">
               <Sparkles className="w-3 h-3 text-emerald-200" />
-              <span>⭐ {isKm ? 'Premium VIP' : 'Premium'}</span>
+              <span>⭐ {tr(language, 'Premium VIP', 'Premium', 'VIP 尊享会员')}</span>
             </span>
           ) : (
             <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-900/90 text-slate-100 border border-slate-600/40 shadow-xs flex items-center gap-1 font-khmer">
-              <span>🏷️ {isKm ? 'ឥតគិតថ្លៃ' : 'Free'}</span>
+              <span>🏷️ {tr(language, 'ឥតគិតថ្លៃ', 'Free', '免费入驻')}</span>
             </span>
           )}
           <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold shadow-xs flex items-center gap-1 font-khmer ${
@@ -115,12 +120,12 @@ const RestaurantCardInner: React.FC<RestaurantCardProps> = ({ restaurant }) => {
             {restaurant.isVerified ? (
               <>
                 <CheckCircle2 className="w-3 h-3 text-white" />
-                <span>{isKm ? 'ផ្ទៀងផ្ទាត់រួច' : 'Verified'}</span>
+                <span>{tr(language, 'ផ្ទៀងផ្ទាត់រួច', 'Verified', '已认证')}</span>
               </>
             ) : (
               <>
                 <AlertCircle className="w-3 h-3 text-slate-300" />
-                <span>{isKm ? 'គំរូ / មិនទាន់ផ្ទៀងផ្ទាត់' : 'Sample'}</span>
+                <span>{tr(language, 'គំរូ / មិនទាន់ផ្ទៀងផ្ទាត់', 'Sample', '未认证')}</span>
               </>
             )}
           </span>
@@ -132,7 +137,7 @@ const RestaurantCardInner: React.FC<RestaurantCardProps> = ({ restaurant }) => {
 
         {/* Reference Image Label (រូបភាពយោង) */}
         <div className="absolute bottom-2.5 right-2.5 px-1.5 py-0.5 rounded-md bg-black/70 text-[9px] text-white/90 font-khmer border border-white/20 select-none pointer-events-none shadow-xs z-10">
-          <span>{isKm ? 'រូបភាពយោង' : 'Reference photo'}</span>
+          <span>{tr(language, 'រូបភាពយោង', 'Reference photo', '参考图片')}</span>
         </div>
       </div>
 
@@ -141,18 +146,18 @@ const RestaurantCardInner: React.FC<RestaurantCardProps> = ({ restaurant }) => {
         <div>
           <div className="flex items-start justify-between gap-1 mb-1">
             <h3 className="font-bold text-sm text-[#0F172A] dark:text-white group-hover:text-[#059669] transition line-clamp-1 font-khmer">
-              {isKm ? restaurant.nameKh : restaurant.nameEn}
+              {loc.name}
             </h3>
           </div>
 
           <div className="flex items-start gap-1 text-[11px] text-slate-500 dark:text-slate-400 mb-2 line-clamp-1 font-khmer">
             <MapPin className="w-3.5 h-3.5 text-[#059669] shrink-0 mt-0.5" />
-            <span>{isKm ? restaurant.addressKh : restaurant.addressEn}</span>
+            <span>{loc.address}</span>
           </div>
 
           {/* Signature dishes tags */}
           <div className="flex flex-wrap gap-1 mb-2.5">
-            {(restaurant.signatureDishesKh || []).slice(0, 2).map((dish, i) => (
+            {loc.signatureDishes.slice(0, 2).map((dish, i) => (
               <span key={i} className="px-2 py-0.5 rounded-md bg-slate-50 dark:bg-slate-700/60 text-slate-700 dark:text-slate-200 text-[10px] font-medium border border-slate-200/80 dark:border-slate-600/60 font-khmer">
                 🍽️ {dish}
               </span>
@@ -163,15 +168,15 @@ const RestaurantCardInner: React.FC<RestaurantCardProps> = ({ restaurant }) => {
         {/* Bottom actions — Customer Rating strictly separated from VIP status & Verification */}
         <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-700/60">
           {ratingSummary.hasReviews ? (
-            <div className="flex items-center gap-1 text-slate-700 dark:text-slate-200 font-semibold text-xs" title={isKm ? 'ការវាយតម្លៃពិតប្រាកដពីអតិថិជន' : 'Genuine customer rating'}>
+            <div className="flex items-center gap-1 text-slate-700 dark:text-slate-200 font-semibold text-xs" title={tr(language, 'ការវាយតម្លៃពិតប្រាកដពីអតិថិជន', 'Genuine customer rating', '真实顾客评分')}>
               <Star className="w-3.5 h-3.5 fill-current text-amber-500 shrink-0" />
               <span>{ratingSummary.averageRating.toFixed(1)}</span>
               <span className="text-slate-400 text-[10px]">({ratingSummary.reviewCount})</span>
             </div>
           ) : (
-            <div className="flex items-center gap-1 text-slate-400 dark:text-slate-500 text-[11px] font-khmer" title={isKm ? 'មិនទាន់មានអតិថិជនដាក់ផ្កាយវាយតម្លៃនៅឡើយទេ' : 'No customer ratings yet'}>
+            <div className="flex items-center gap-1 text-slate-400 dark:text-slate-500 text-[11px] font-khmer" title={tr(language, 'មិនទាន់មានអតិថិជនដាក់ផ្កាយវាយតម្លៃនៅឡើយទេ', 'No customer ratings yet', '暂无顾客评分')}>
               <Star className="w-3.5 h-3.5 text-slate-300 dark:text-slate-600 shrink-0" />
-              <span>{isKm ? 'មិនទាន់មានការវាយតម្លៃ' : 'No ratings yet'}</span>
+              <span>{tr(language, 'មិនទាន់មានការវាយតម្លៃ', 'No ratings yet', '暂无评分')}</span>
             </div>
           )}
 
@@ -196,9 +201,12 @@ const RestaurantCardInner: React.FC<RestaurantCardProps> = ({ restaurant }) => {
                   return;
                 }
                 showToast(
-                  isKm
-                    ? 'ហាងនេះមិនបានដាក់លេខទូរស័ព្ទលើផែនទីទេ — កំពុងបើកទីតាំងលើ Google Maps!'
-                    : 'Phone number not listed on map — opening Google Maps!',
+                  tr(
+                    language,
+                    'ហាងនេះមិនបានដាក់លេខទូរស័ព្ទលើផែនទីទេ — កំពុងបើកទីតាំងលើ Google Maps!',
+                    'Phone number not listed on map — opening Google Maps!',
+                    '该店铺未在地图上标注电话 — 正在打开 Google 地图！'
+                  ),
                   'warning'
                 );
                 if (restaurant.mapUrl) {
@@ -206,7 +214,7 @@ const RestaurantCardInner: React.FC<RestaurantCardProps> = ({ restaurant }) => {
                 }
               }}
               className="p-1.5 rounded-lg bg-emerald-50 text-[#064E3B] hover:bg-[#064E3B] hover:text-white dark:bg-emerald-950/40 dark:text-emerald-300 transition"
-              title={isKm ? 'ហៅទូរស័ព្ទទៅហាង' : 'Call restaurant'}
+              title={tr(language, 'ហៅទូរស័ព្ទទៅហាង', 'Call restaurant', '拨打餐厅电话')}
             >
               <Phone className="w-3.5 h-3.5" />
             </button>
@@ -220,7 +228,7 @@ const RestaurantCardInner: React.FC<RestaurantCardProps> = ({ restaurant }) => {
                 trackRestaurantMap(restaurant.id);
               }}
               className="p-1.5 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-600 hover:text-white dark:bg-blue-950/40 dark:text-blue-300 transition"
-              title={isKm ? 'មើលលើ Google Maps' : 'Open in Google Maps'}
+              title={tr(language, 'មើលលើ Google Maps', 'Open in Google Maps', '在 Google 地图中查看')}
             >
               <Navigation className="w-3.5 h-3.5" />
             </a>
@@ -229,7 +237,7 @@ const RestaurantCardInner: React.FC<RestaurantCardProps> = ({ restaurant }) => {
               type="button"
               onClick={handleShare}
               className="p-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-200 transition"
-              title={isKm ? 'ចែករំលែកតំណភ្ជាប់ហាង' : 'Share restaurant'}
+              title={tr(language, 'ចែករំលែកតំណភ្ជាប់ហាង', 'Share restaurant', '分享餐厅链接')}
             >
               <Share2 className="w-3.5 h-3.5" />
             </button>

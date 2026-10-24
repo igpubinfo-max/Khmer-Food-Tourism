@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { TouristDestination } from '../types';
 import { useApp } from '../context/AppContext';
-import { MapPin, Star, Heart, Ticket, Camera, Edit2 } from 'lucide-react';
+import { MapPin, Star, Heart, Ticket, Edit2 } from 'lucide-react';
+import { tr } from '../utils/i18n';
+import { getLocalizedDestination } from '../utils/zhDynamicTranslator';
 
 interface TouristCardProps {
   destination: TouristDestination;
@@ -11,6 +13,7 @@ const TouristCardInner: React.FC<TouristCardProps> = ({ destination }) => {
   const { language, setSelectedDestination, isBookmarked, toggleBookmark, currentUser } = useApp();
   const bookmarked = isBookmarked(destination.id);
   const isAdmin = currentUser?.role === 'admin';
+  const loc = useMemo(() => getLocalizedDestination(destination, language), [destination, language]);
 
   return (
     <div 
@@ -22,7 +25,7 @@ const TouristCardInner: React.FC<TouristCardProps> = ({ destination }) => {
       <div className="relative aspect-16/10 w-full overflow-hidden bg-slate-100 dark:bg-slate-700">
         <img 
           src={destination.photoUrl} 
-          alt={language === 'km' ? destination.nameKh : destination.nameEn}
+          alt={loc.name}
           className="w-full h-full object-cover"
           loading="lazy"
           decoding="async"
@@ -31,7 +34,7 @@ const TouristCardInner: React.FC<TouristCardProps> = ({ destination }) => {
         {/* Province pill & Viral Social Badge */}
         <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 flex-wrap z-10">
           <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-[#064E3B]/95 text-emerald-100 border border-emerald-400/30 shadow-xs">
-            {language === 'km' ? destination.provinceKh : destination.provinceEn}
+            {loc.province}
           </span>
           {destination.isTrendingSocial && (
             <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-gradient-to-r from-rose-600 via-pink-600 to-indigo-600 text-white border border-white/30 shadow-xs flex items-center gap-1 font-khmer">
@@ -50,7 +53,7 @@ const TouristCardInner: React.FC<TouristCardProps> = ({ destination }) => {
               setSelectedDestination(destination);
             }}
             className="absolute top-2.5 right-11 p-2 rounded-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold shadow-md transition-transform active:scale-90"
-            title={language === 'km' ? 'កែប្រែព័ត៌មានតំបន់ទេសចរណ៍ (Admin)' : 'Edit Destination (Admin)'}
+            title={tr(language, 'កែប្រែព័ត៌មានតំបន់ទេសចរណ៍ (Admin)', 'Edit Destination (Admin)', '编辑景点信息（管理员）')}
           >
             <Edit2 className="w-3.5 h-3.5" />
           </button>
@@ -68,19 +71,19 @@ const TouristCardInner: React.FC<TouristCardProps> = ({ destination }) => {
               ? 'bg-rose-500 text-white shadow-md' 
               : 'bg-white/95 dark:bg-slate-900/95 text-slate-600 hover:text-rose-500'
           }`}
-          title="រក្សាទុក"
+          title={tr(language, 'រក្សាទុក', 'Save', '收藏')}
         >
           <Heart className={`w-3.5 h-3.5 ${bookmarked ? 'fill-current' : ''}`} />
         </button>
 
         {/* Category tag */}
         <div className="absolute bottom-2.5 left-2.5 px-2 py-0.5 rounded-md bg-[#064E3B]/95 text-emerald-100 text-[10px] border border-emerald-400/30">
-          {language === 'km' ? destination.categoryKh : destination.categoryEn}
+          {loc.category}
         </div>
 
         {/* Reference Image Label (រូបភាពយោង) */}
         <div className="absolute bottom-2.5 right-2.5 px-1.5 py-0.5 rounded-md bg-black/70 text-[9px] text-white/90 font-khmer border border-white/20 select-none pointer-events-none shadow-xs z-10">
-          <span>{language === 'km' ? 'រូបភាពយោង' : 'Reference photo'}</span>
+          <span>{tr(language, 'រូបភាពយោង', 'Reference photo', '参考图片')}</span>
         </div>
       </div>
 
@@ -88,16 +91,16 @@ const TouristCardInner: React.FC<TouristCardProps> = ({ destination }) => {
       <div className="p-3.5 flex flex-col flex-1 justify-between">
         <div>
           <h3 className="font-bold text-sm text-[#0F172A] dark:text-white group-hover:text-[#059669] transition line-clamp-1 mb-1">
-            {language === 'km' ? destination.nameKh : destination.nameEn}
+            {loc.name}
           </h3>
 
           <div className="flex items-start gap-1 text-[11px] text-slate-500 dark:text-slate-400 mb-2 line-clamp-1">
             <MapPin className="w-3.5 h-3.5 text-[#059669] shrink-0 mt-0.5" />
-            <span>{language === 'km' ? destination.addressKh : destination.addressEn}</span>
+            <span>{loc.address}</span>
           </div>
 
           <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed mb-2.5">
-            {language === 'km' ? destination.descriptionKh : destination.descriptionEn}
+            {loc.description}
           </p>
         </div>
 
@@ -111,7 +114,7 @@ const TouristCardInner: React.FC<TouristCardProps> = ({ destination }) => {
 
           <div className="flex items-center gap-1 text-[#064E3B] dark:text-emerald-400 font-medium text-[10px]">
             <Ticket className="w-3 h-3" />
-            <span>{language === 'km' ? (destination.entranceFeeKh || destination.entryFeeKh || 'ឥតគិតថ្លៃ') : (destination.entranceFeeEn || destination.entryFeeEn || 'Free')}</span>
+            <span>{loc.entranceFee}</span>
           </div>
         </div>
       </div>

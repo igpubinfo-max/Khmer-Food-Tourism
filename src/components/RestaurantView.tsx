@@ -10,6 +10,7 @@ import {
   normalizeKhmerSearchText,
   GooglePlaceCachedItem,
 } from '../services/googlePlacesService';
+import { tr, translateProvince } from '../utils/i18n';
 
 const RESTAURANT_BATCH_SIZE = 20;
 
@@ -175,12 +176,15 @@ export const RestaurantView: React.FC = () => {
         <div>
           <h2 className="font-moul text-sm sm:text-base text-[#0F172A] dark:text-white flex items-center gap-2">
             <Store className="w-4 h-4 text-[#064E3B] dark:text-emerald-400" />
-            <span>{isKm ? 'បញ្ជីភោជនីយដ្ឋាន & ហាងអាហារ' : 'Restaurant Directory'}</span>
+            <span>{tr(language, 'បញ្ជីភោជនីយដ្ឋាន & ហាងអាហារ', 'Restaurant Directory', '餐厅与美食店铺名录')}</span>
           </h2>
           <p className="text-[11px] text-slate-500 font-khmer">
-            {isKm 
-              ? `បង្ហាញ ${filteredRestaurants.length} / ${restaurants.length} ហាង (${verifiedCount} ផ្ទៀងផ្ទាត់ផ្លូវការ)` 
-              : `Showing ${filteredRestaurants.length} of ${restaurants.length} (${verifiedCount} verified)`}
+            {tr(
+              language,
+              `បង្ហាញ ${filteredRestaurants.length} / ${restaurants.length} ហាង (${verifiedCount} ផ្ទៀងផ្ទាត់ផ្លូវការ)`,
+              `Showing ${filteredRestaurants.length} of ${restaurants.length} (${verifiedCount} verified)`,
+              `显示 ${filteredRestaurants.length} / ${restaurants.length} 家店铺（${verifiedCount} 家官方认证）`
+            )}
           </p>
         </div>
 
@@ -189,20 +193,20 @@ export const RestaurantView: React.FC = () => {
             type="button"
             onClick={() => openGoogleMapsSearchModal('restaurant')}
             className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-700 to-teal-700 hover:from-emerald-800 hover:to-teal-800 text-white font-bold text-xs shadow-xs font-khmer transition active:scale-95 cursor-pointer"
-            title={isKm ? 'ស្វែងរកហាងលើផែនទី Google Maps' : 'Search Shops on Google Maps'}
+            title={tr(language, 'ស្វែងរកហាងលើផែនទី Google Maps', 'Search Shops on Google Maps', '在 Google 地图上搜索餐厅')}
           >
             <Globe className="w-3.5 h-3.5 text-emerald-200" />
-            <span>{isKm ? 'Google Maps' : 'Google Maps'}</span>
+            <span>{tr(language, 'ស្វែងរក Google Maps', 'Google Maps Search', '谷歌地图搜索')}</span>
           </button>
 
           {currentUser?.role === 'admin' && (
             <button
               onClick={() => setIsAiCheckInModalOpen(true)}
               className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 text-white font-bold text-xs shadow-xs font-khmer transition active:scale-95"
-              title={isKm ? 'ឆែកអ៊ីន & បន្ថែមហាងដោយ AI (Administrator Only)' : 'AI Food Check-in (Admin Only)'}
+              title={tr(language, 'ឆែកអ៊ីន & បន្ថែមហាងដោយ AI (Administrator Only)', 'AI Food Check-in (Admin Only)', 'AI 探店打卡（仅限管理员）')}
             >
               <Camera className="w-3.5 h-3.5 text-emerald-200" />
-              <span>{isKm ? 'ឆែកអ៊ីន AI' : 'AI Check-in'}</span>
+              <span>{tr(language, 'ឆែកអ៊ីន AI', 'AI Check-in', 'AI 探店打卡')}</span>
             </button>
           )}
 
@@ -214,16 +218,16 @@ export const RestaurantView: React.FC = () => {
               }
               const state = getVipAccountState(currentUser);
               if (state === 'pending_vip') {
-                showToast(isKm ? '⏳ គណនី VIP របស់អ្នកកំពុងរង់ចាំការពិនិត្យ និងអនុម័តពី Administrator។' : '⏳ VIP pending Admin approval.', 'info');
+                showToast(tr(language, '⏳ គណនី VIP របស់អ្នកកំពុងរង់ចាំការពិនិត្យ និងអនុម័តពី Administrator។', '⏳ VIP pending Admin approval.', '⏳ 您的 VIP 申请正在等待管理员审核。'), 'info');
                 return;
               }
               if (state === 'expired_vip') {
-                showToast(isKm ? '⚠️ សមាជិកភាព VIP របស់អ្នកបានផុតកំណត់ហើយ! សូមបន្តសមាជិកភាព VIP។' : '⚠️ VIP expired. Please renew.', 'warning');
+                showToast(tr(language, '⚠️ សមាជិកភាព VIP របស់អ្នកបានផុតកំណត់ហើយ! សូមបន្តសមាជិកភាព VIP។', '⚠️ VIP expired. Please renew.', '⚠️ 您的 VIP 会员已到期，请续费。'), 'warning');
                 openUpgradeVipModal(true);
                 return;
               }
               if (state === 'regular_unpaid') {
-                showToast(isKm ? '🔒 សម្រាប់តែសមាជិក VIP ដែលបានអនុម័តប៉ុណ្ណោះ! សូមដំឡើងទៅកញ្ចប់ VIP។' : '🔒 VIP required!', 'warning');
+                showToast(tr(language, '🔒 សម្រាប់តែសមាជិក VIP ដែលបានអនុម័តប៉ុណ្ណោះ! សូមដំឡើងទៅកញ្ចប់ VIP។', '🔒 VIP required!', '🔒 仅限已认证 VIP 会员！请先升级 VIP。'), 'warning');
                 openUpgradeVipModal();
                 return;
               }
@@ -238,12 +242,12 @@ export const RestaurantView: React.FC = () => {
             {myExistingRest ? (
               <>
                 <Edit2 className="w-3.5 h-3.5 text-slate-950" />
-                <span>{isKm ? 'គ្រប់គ្រងហាងខ្ញុំ' : 'My Store'}</span>
+                <span>{tr(language, 'គ្រប់គ្រងហាងខ្ញុំ', 'My Store', '管理我的店铺')}</span>
               </>
             ) : (
               <>
                 <Plus className="w-3.5 h-3.5 text-slate-950" />
-                <span>{isKm ? 'បន្ថែមហាង VIP' : 'Add Store'}</span>
+                <span>{tr(language, 'បន្ថែមហាង VIP', 'Add Store', '添加 VIP 店铺')}</span>
               </>
             )}
           </button>
@@ -260,7 +264,7 @@ export const RestaurantView: React.FC = () => {
               : 'text-slate-600 dark:text-slate-300 hover:text-[#064E3B]'
           }`}
         >
-          {isKm ? `ទាំងអស់ (${restaurants.length})` : `All (${restaurants.length})`}
+          {tr(language, `ទាំងអស់ (${restaurants.length})`, `All (${restaurants.length})`, `全部 (${restaurants.length})`)}
         </button>
         <button
           onClick={() => setVerifiedFilter('verified')}
@@ -271,7 +275,7 @@ export const RestaurantView: React.FC = () => {
           }`}
         >
           <CheckCircle2 className="w-3.5 h-3.5" />
-          <span>{isKm ? `ផ្ទៀងផ្ទាត់ (${verifiedCount})` : `Verified (${verifiedCount})`}</span>
+          <span>{tr(language, `ផ្ទៀងផ្ទាត់ (${verifiedCount})`, `Verified (${verifiedCount})`, `已认证 (${verifiedCount})`)}</span>
         </button>
         <button
           onClick={() => setVerifiedFilter('unverified')}
@@ -282,7 +286,7 @@ export const RestaurantView: React.FC = () => {
           }`}
         >
           <AlertCircle className="w-3.5 h-3.5" />
-          <span>{isKm ? `គំរូ (${sampleCount})` : `Sample (${sampleCount})`}</span>
+          <span>{tr(language, `គំរូ (${sampleCount})`, `Sample (${sampleCount})`, `示例 (${sampleCount})`)}</span>
         </button>
       </div>
 
@@ -294,21 +298,39 @@ export const RestaurantView: React.FC = () => {
               <span className="text-base">👑</span>
               <span className="font-black text-xs sm:text-sm text-white">
                 {myExistingRest
-                  ? (isKm ? `ហាង VIP របស់ខ្ញុំ៖ ${myExistingRest.nameKh}` : `My VIP Store: ${myExistingRest.nameEn || myExistingRest.nameKh}`)
-                  : (isKm ? 'ចុះបញ្ជីហាង VIP របស់អ្នក (1 ហាង)' : 'Register Your VIP Restaurant (1 Store)')}
+                  ? tr(
+                      language,
+                      `ហាង VIP របស់ខ្ញុំ៖ ${myExistingRest.nameKh}`,
+                      `My VIP Store: ${myExistingRest.nameEn || myExistingRest.nameKh}`,
+                      `我的 VIP 店铺：${myExistingRest.nameEn || myExistingRest.nameKh}`
+                    )
+                  : tr(language, 'ចុះបញ្ជីហាង VIP របស់អ្នក (1 ហាង)', 'Register Your VIP Restaurant (1 Store)', '注册您的专属 VIP 餐厅（1 家店铺）')}
               </span>
               <span className="px-2 py-0.5 rounded-full bg-amber-300 text-slate-950 text-[9px] font-black">
-                {myExistingRest ? `${myExistingRest.menuItems?.length || 0}/20 មុខម្ហូប` : 'VIP 1 ហាង'}
+                {myExistingRest
+                  ? tr(
+                      language,
+                      `${myExistingRest.menuItems?.length || 0}/20 មុខម្ហូប`,
+                      `${myExistingRest.menuItems?.length || 0}/20 dishes`,
+                      `${myExistingRest.menuItems?.length || 0}/20 道菜品`
+                    )
+                  : tr(language, 'VIP 1 ហាង', 'VIP 1 Store', 'VIP 1 家店铺')}
               </span>
             </div>
             <p className="text-[11px] text-amber-50 leading-relaxed font-medium">
               {myExistingRest
-                ? (isKm
-                    ? `📍 ${myExistingRest.addressKh} • ចុចប៊ូតុងខាងក្រោមដើម្បីបន្ថែមមុខម្ហូប កែតម្លៃ រូបភាព និងព័ត៌មានហាង "${myExistingRest.nameKh}"។`
-                    : `📍 ${myExistingRest.addressEn || myExistingRest.addressKh} • Tap below to manage menus, prices, photos & info.`)
-                : (isKm
-                    ? 'ចុះបញ្ជីហាងមុន ហាងរបស់លោកអ្នកនឹងបង្ហាញមុនគេតាមលំដាប់លេខរៀង ដើម្បីងាយស្រួលឱ្យអតិថិជនស្វែងរក និងតាមដានស្ថិតិហាង។'
-                    : 'Register your restaurant early so it appears first in chronological order, making it easy for customers to find and track store analytics.')}
+                ? tr(
+                    language,
+                    `📍 ${myExistingRest.addressKh} • ចុចប៊ូតុងខាងក្រោមដើម្បីបន្ថែមមុខម្ហូប កែតម្លៃ រូបភាព និងព័ត៌មានហាង "${myExistingRest.nameKh}"។`,
+                    `📍 ${myExistingRest.addressEn || myExistingRest.addressKh} • Tap below to manage menus, prices, photos & info.`,
+                    `📍 ${myExistingRest.addressEn || myExistingRest.addressKh} • 点击下方按钮管理菜单、价格、图片与店铺信息。`
+                  )
+                : tr(
+                    language,
+                    'ចុះបញ្ជីហាងមុន ហាងរបស់លោកអ្នកនឹងបង្ហាញមុនគេតាមលំដាប់លេខរៀង ដើម្បីងាយស្រួលឱ្យអតិថិជនស្វែងរក និងតាមដានស្ថិតិហាង។',
+                    'Register your restaurant early so it appears first in chronological order, making it easy for customers to find and track store analytics.',
+                    '越早注册您的 VIP 餐厅，越能优先展示在推荐列表中，方便国内外顾客搜索并查看实时店铺访问统计。'
+                  )}
             </p>
           </div>
         </div>
@@ -317,7 +339,14 @@ export const RestaurantView: React.FC = () => {
         {myOwnedRestaurants.length > 1 && (
           <div className="p-2.5 rounded-2xl bg-black/25 border border-white/20 space-y-1.5">
             <div className="text-[10px] font-bold text-amber-200 flex items-center justify-between">
-              <span>{isKm ? `🏪 ជ្រើសរើសហាងដែលអ្នកចង់គ្រប់គ្រង (${myOwnedRestaurants.length} ហាង)៖` : `🏪 Select shop to manage (${myOwnedRestaurants.length}):`}</span>
+              <span>
+                {tr(
+                  language,
+                  `🏪 ជ្រើសរើសហាងដែលអ្នកចង់គ្រប់គ្រង (${myOwnedRestaurants.length} ហាង)៖`,
+                  `🏪 Select shop to manage (${myOwnedRestaurants.length}):`,
+                  `🏪 选择要管理的店铺（共 ${myOwnedRestaurants.length} 家）：`
+                )}
+              </span>
             </div>
             <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
               {myOwnedRestaurants.map((shop) => {
@@ -362,16 +391,16 @@ export const RestaurantView: React.FC = () => {
                 }
                 const state = getVipAccountState(currentUser);
                 if (state === 'pending_vip') {
-                  showToast(isKm ? '⏳ ការស្នើសុំសមាជិកភាព VIP របស់អ្នកកំពុងរង់ចាំការពិនិត្យ និងអនុម័តពី Administrator។' : '⏳ VIP request pending Admin approval.', 'info');
+                  showToast(tr(language, '⏳ ការស្នើសុំសមាជិកភាព VIP របស់អ្នកកំពុងរង់ចាំការពិនិត្យ និងអនុម័តពី Administrator។', '⏳ VIP request pending Admin approval.', '⏳ 您的 VIP 申请正在等待管理员审核。'), 'info');
                   return;
                 }
                 if (state === 'expired_vip') {
-                  showToast(isKm ? '⚠️ សមាជិកភាព VIP របស់អ្នកបានផុតកំណត់ហើយ! សូមបន្តសមាជិកភាព VIP ដើម្បីចុះបញ្ជីហាង។' : '⚠️ VIP membership expired. Please renew.', 'warning');
+                  showToast(tr(language, '⚠️ សមាជិកភាព VIP របស់អ្នកបានផុតកំណត់ហើយ! សូមបន្តសមាជិកភាព VIP ដើម្បីចុះបញ្ជីហាង។', '⚠️ VIP membership expired. Please renew.', '⚠️ 您的 VIP 会员已到期，请续费。'), 'warning');
                   openUpgradeVipModal(true);
                   return;
                 }
                 if (state === 'regular_unpaid') {
-                  showToast(isKm ? '🔒 ការចុះបញ្ជីហាងគឺសម្រាប់តែសមាជិក VIP ដែលបានអនុម័តប៉ុណ្ណោះ! សូមដំឡើងទៅកញ្ចប់ VIP។' : '🔒 VIP required!', 'warning');
+                  showToast(tr(language, '🔒 ការចុះបញ្ជីហាងគឺសម្រាប់តែសមាជិក VIP ដែលបានអនុម័តប៉ុណ្ណោះ! សូមដំឡើងទៅកញ្ចប់ VIP។', '🔒 VIP required!', '🔒 仅限已认证 VIP 会员！请先升级 VIP。'), 'warning');
                   openUpgradeVipModal();
                   return;
                 }
@@ -386,8 +415,18 @@ export const RestaurantView: React.FC = () => {
               <span className="text-base">👑</span>
               <span className="truncate">
                 {myExistingRest
-                  ? (isKm ? `✏️ គ្រប់គ្រងហាង VIP របស់ខ្ញុំ (${myExistingRest.nameKh})` : `✏️ Manage My VIP Store (${myExistingRest.nameEn || myExistingRest.nameKh})`)
-                  : (isKm ? '+ ចុះបញ្ជីហាង VIP របស់អ្នក (1 ហាង)' : '+ Register Your VIP Restaurant (1 Store)')}
+                  ? tr(
+                      language,
+                      `✏️ គ្រប់គ្រងហាង VIP របស់ខ្ញុំ (${myExistingRest.nameKh})`,
+                      `✏️ Manage My VIP Store (${myExistingRest.nameEn || myExistingRest.nameKh})`,
+                      `✏️ 管理我的 VIP 店铺 (${myExistingRest.nameEn || myExistingRest.nameKh})`
+                    )
+                  : tr(
+                      language,
+                      '+ ចុះបញ្ជីហាង VIP របស់អ្នក (1 ហាង)',
+                      '+ Register Your VIP Restaurant (1 Store)',
+                      '+ 注册您的专属 VIP 餐厅 (1 家店铺)'
+                    )}
               </span>
               <span className="text-xs">✨</span>
             </button>
@@ -399,7 +438,7 @@ export const RestaurantView: React.FC = () => {
                 className="py-3 px-3.5 rounded-xl bg-emerald-900/90 hover:bg-emerald-800 text-amber-200 border border-amber-300/60 text-xs font-bold flex items-center justify-center gap-1 transition active:scale-95 cursor-pointer shrink-0"
               >
                 <Plus className="w-4 h-4" />
-                <span>{isKm ? 'បន្ថែមហាងថ្មី' : 'Add Store'}</span>
+                <span>{tr(language, 'បន្ថែមហាងថ្មី', 'Add Store', '添加新店铺')}</span>
               </button>
             )}
           </div>
@@ -420,7 +459,7 @@ export const RestaurantView: React.FC = () => {
                   : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200/90 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'
               }`}
             >
-              {isKm ? p.nameKh : p.nameEn}
+              {language === 'km' ? p.nameKh : language === 'zh' ? translateProvince(p.nameEn, 'zh') : p.nameEn}
             </button>
           );
         })}
@@ -440,9 +479,12 @@ export const RestaurantView: React.FC = () => {
                   onClick={() => setVisibleCount((prev) => Math.min(sortedRestaurants.length, prev + RESTAURANT_BATCH_SIZE))}
                   className="px-4 py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-[#064E3B] dark:text-emerald-400 shadow-2xs font-khmer"
                 >
-                  {isKm
-                    ? `បង្ហាញហាងបន្ថែម (${displayedRestaurants.length} / ${sortedRestaurants.length})`
-                    : `Show More Restaurants (${displayedRestaurants.length} / ${sortedRestaurants.length})`}
+                  {tr(
+                    language,
+                    `បង្ហាញហាងបន្ថែម (${displayedRestaurants.length} / ${sortedRestaurants.length})`,
+                    `Show More Restaurants (${displayedRestaurants.length} / ${sortedRestaurants.length})`,
+                    `加载更多餐厅 (${displayedRestaurants.length} / ${sortedRestaurants.length})`
+                  )}
                 </button>
               </div>
             )}
@@ -451,7 +493,7 @@ export const RestaurantView: React.FC = () => {
           <div className="py-12 text-center text-slate-400 space-y-2 font-khmer">
             <Store className="w-10 h-10 mx-auto text-slate-300" />
             <p className="text-xs">
-              {isKm ? 'រកមិនឃើញហាងអាហារត្រូវនឹងលក្ខខណ្ឌស្វែងរកទេ' : 'No restaurants matched your filters'}
+              {tr(language, 'រកមិនឃើញហាងអាហារត្រូវនឹងលក្ខខណ្ឌស្វែងរកទេ', 'No restaurants matched your filters', '未找到符合筛选条件的餐厅')}
             </p>
           </div>
         ) : null}
