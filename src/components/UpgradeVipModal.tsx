@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import QRCode from 'qrcode';
 import { useApp } from '../context/AppContext';
 import { 
   X, Crown, Sparkles, AlertCircle, RefreshCw, 
@@ -54,10 +53,6 @@ const VIP_PLANS: VipPlanOption[] = [
     isPopular: false
   }
 ];
-
-// Official clean NBC Bakong KHQR for CHEA KIMSENG (ABA Bank USD 095 245 959 / 012 719 946)
-// Zero proprietary P2P token and zero PayWay checkout wrapper to guarantee 100% recognition by ABA Scan & Bakong
-const OFFICIAL_KHQR_USD_STRING = '00020101021129450016abaakhppxxx@abaa01090127199460208ABA Bank5204599953038405802KH5912KIMSENG CHEA6010Phnom Penh6213020909524595963047A76';
 
 // Strict Payment Status Flow (Requirement 6 + Admin Request More Info)
 export type PaymentStatusFlow = 
@@ -167,20 +162,6 @@ export const UpgradeVipModal: React.FC = () => {
       setPaymentState('AWAITING_PAYMENT');
     }
   }, [isUpgradeVipModalOpen, isVipRenewMode, currentUser, userLatestVipTxn]);
-
-  useEffect(() => {
-    QRCode.toDataURL(OFFICIAL_KHQR_USD_STRING, {
-      width: 600,
-      margin: 2,
-      errorCorrectionLevel: 'M',
-      color: {
-        dark: '#000000',
-        light: '#ffffff'
-      }
-    })
-      .then(url => setQrCodeDataUrl(url))
-      .catch(() => setQrCodeDataUrl('/images/aba_qr_code_only.png'));
-  }, []);
 
   if (!isUpgradeVipModalOpen) return null;
 

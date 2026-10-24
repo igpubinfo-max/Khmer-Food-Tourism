@@ -53,11 +53,32 @@ let lastSaveTimestamp = 0;
  * Includes duplicate-save prevention.
  */
 export async function savePngDataUrlToGallery(
-  dataUrl: string,
+  inputUrlOrDataUrl: string,
   fileName: string = `ABA-KHQR-${Date.now()}.png`
 ): Promise<{ saved: boolean; duplicate?: boolean; message: string }> {
-  if (!dataUrl || !dataUrl.startsWith('data:image/')) {
+  if (!inputUrlOrDataUrl) {
     throw new Error('រូបភាព QR មិនត្រឹមត្រូវសម្រាប់រក្សាទុក។');
+  }
+
+  let dataUrl = inputUrlOrDataUrl;
+  if (!dataUrl.startsWith('data:image/')) {
+    const resp = await fetch(dataUrl);
+    if (!resp.ok) {
+      throw new Error('មិនអាចទាញយករូបភាព QR ផ្លូវការបានទេ។');
+    }
+    const blob = await resp.blob();
+    dataUrl = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (typeof reader.result === 'string') {
+          resolve(reader.result);
+        } else {
+          reject(new Error('បរាជ័យក្នុងការអានរូបភាព QR។'));
+        }
+      };
+      reader.onerror = () => reject(new Error('បរាជ័យក្នុងការអានរូបភាព QR។'));
+      reader.readAsDataURL(blob);
+    });
   }
 
   const now = Date.now();

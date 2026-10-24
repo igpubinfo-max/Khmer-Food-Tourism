@@ -397,15 +397,36 @@ export async function syncAllAppDataWithSupabase(localState: {
     }
     const mergedUsers = Array.from(userMap.values());
 
-    // 3. Merge Transactions by ID (excluding transactions of deleted users)
+    // 3. Merge Transactions by ID (excluding transactions of deleted users and Admin-deleted transaction records)
+    let localDeletedTxnIds: string[] = [];
+    try {
+      const rawDelTxns = localStorage.getItem('kft_deleted_transactions_v1');
+      if (rawDelTxns) localDeletedTxnIds = JSON.parse(rawDelTxns);
+    } catch {}
+    const cloudDeletedTxnIds = await pullCloudDocument<string[]>('kft_cloud_deleted_transactions_v1');
+    const deletedTxnIdSet = new Set<string>([
+      ...(Array.isArray(localDeletedTxnIds) ? localDeletedTxnIds : []),
+      ...(Array.isArray(cloudDeletedTxnIds) ? cloudDeletedTxnIds : []),
+    ]);
+    try {
+      localStorage.setItem('kft_deleted_transactions_v1', JSON.stringify(Array.from(deletedTxnIdSet)));
+    } catch {}
+
     const txnMap = new Map<string, RegistrationTransaction>();
     if (Array.isArray(cloudTxns)) {
       for (const t of cloudTxns) {
-        if (t && t.id && (!t.ownerId || !deletedIds.has(t.ownerId))) txnMap.set(t.id, t);
+        if (
+          t &&
+          t.id &&
+          !deletedTxnIdSet.has(t.id) &&
+          (!t.ownerId || !deletedIds.has(t.ownerId))
+        ) {
+          txnMap.set(t.id, t);
+        }
       }
     }
     for (const t of localState.transactions) {
-      if (!t || !t.id || (t.ownerId && deletedIds.has(t.ownerId))) continue;
+      if (!t || !t.id || deletedTxnIdSet.has(t.id) || (t.ownerId && deletedIds.has(t.ownerId))) continue;
       const existing = txnMap.get(t.id);
       if (!existing) {
         txnMap.set(t.id, t);
@@ -438,17 +459,21 @@ export async function syncAllAppDataWithSupabase(localState: {
     }
     const mergedCustomRestaurants = Array.from(restMap.values());
 
-    // 5. Merge Payment Proofs Vault
+    // 5. Merge Payment Proofs Vault (excluding deleted transactions)
     const mergedPaymentProofsVault: Record<string, any> = {
       ...(cloudProofs || {}),
       ...(localState.paymentProofsVault || {}),
     };
+    for (const delId of deletedTxnIdSet) {
+      delete mergedPaymentProofsVault[delId];
+    }
 
     // 6. Push merged state back to Supabase Cloud
     await Promise.all([
       pushCloudDocument('kft_cloud_users_v1', mergedUsers),
       pushCloudDocument('kft_cloud_deleted_users_v1', mergedDeletedUsers),
       pushCloudDocument('kft_cloud_transactions_v1', mergedTransactions),
+      pushCloudDocument('kft_cloud_deleted_transactions_v1', Array.from(deletedTxnIdSet)),
       pushCloudDocument('kft_cloud_custom_restaurants_v1', mergedCustomRestaurants),
       pushCloudDocument('kft_cloud_payment_proofs_v1', mergedPaymentProofsVault),
     ]);

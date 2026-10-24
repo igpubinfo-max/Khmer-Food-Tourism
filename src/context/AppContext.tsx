@@ -106,6 +106,7 @@ interface AppContextType {
   verifyTransaction: (txnId: string) => void;
   rejectTransaction: (txnId: string, reason?: string) => void;
   requestMorePaymentInfo: (txnId: string, reason?: string) => void;
+  deleteTransactions: (txnIds: string[]) => { success: boolean; deletedCount: number };
   uploadPaymentProofToTransaction: (txnId: string, proofDataUrl: string, fileName?: string, mimeType?: string) => { success: boolean; error?: string };
   getAuthorizedPaymentProof: (txnId: string) => string | null;
   triggerCloudSyncNow?: () => Promise<boolean>;
@@ -1720,9 +1721,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             if (matchedCurrent) setCurrentUser(matchedCurrent);
           }
         }
-        if (result.mergedTransactions.length >= transactions.length || result.mergedDeletedUsers.length > 0) {
-          setTransactions(result.mergedTransactions);
-        }
+        setTransactions(result.mergedTransactions);
         if (result.mergedCustomRestaurants.length > 0) {
           const deletedIdSet = new Set((result.mergedDeletedUsers || []).map(d => d.id));
           setRestaurants(prev => {
@@ -3933,6 +3932,82 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
   };
 
+  // Delete Selected Payment Transaction Records (Admin Only)
+  // Strictly preserves all User Accounts and their VIP Membership / Expiration statuses!
+  const deleteTransactions = (txnIds: string[]): { success: boolean; deletedCount: number } => {
+    if (!currentUser || currentUser.role !== 'admin') {
+      showToast(
+        language === 'km'
+          ? '⛔ មានតែរដ្ឋបាលប្រព័ន្ធ (Admin) ប៉ុណ្ណោះដែលមានសិទ្ធិលុបកំណត់ត្រាទូទាត់!'
+          : '⛔ Only the Administrator can delete payment records!',
+        'warning'
+      );
+      return { success: false, deletedCount: 0 };
+    }
+
+    const idSet = new Set((txnIds || []).filter(Boolean));
+    if (idSet.size === 0) {
+      return { success: false, deletedCount: 0 };
+    }
+
+    const toDelete = transactions.filter(t => idSet.has(t.id));
+    if (toDelete.length === 0) {
+      return { success: false, deletedCount: 0 };
+    }
+
+    const remainingTxns = transactions.filter(t => !idSet.has(t.id));
+    setTransactions(remainingTxns);
+
+    try {
+      localStorage.setItem('kft_transactions_v4', JSON.stringify(remainingTxns));
+      const rawDel = localStorage.getItem('kft_deleted_transactions_v1');
+      const existingDel: string[] = rawDel ? JSON.parse(rawDel) : [];
+      const mergedDel = Array.from(new Set([...existingDel, ...Array.from(idSet)]));
+      localStorage.setItem('kft_deleted_transactions_v1', JSON.stringify(mergedDel));
+
+      const rawVault = localStorage.getItem('kft_secure_payment_proofs_vault_v1');
+      if (rawVault) {
+        const vault = JSON.parse(rawVault);
+        for (const delId of idSet) {
+          delete vault[delId];
+        }
+        localStorage.setItem('kft_secure_payment_proofs_vault_v1', JSON.stringify(vault));
+        if (isSupabaseConfigured()) {
+          pushCloudDocument('kft_cloud_payment_proofs_v1', vault);
+        }
+      }
+
+      if (isSupabaseConfigured()) {
+        pushCloudDocument('kft_cloud_transactions_v1', remainingTxns);
+        pushCloudDocument('kft_cloud_deleted_transactions_v1', mergedDel);
+      }
+
+      const rawLogs = localStorage.getItem('kft_admin_audit_logs_v1');
+      const logs = rawLogs ? JSON.parse(rawLogs) : [];
+      logs.unshift({
+        id: `audit_del_txn_${Date.now()}`,
+        action: 'DELETE_PAYMENT_RECORDS',
+        deletedCount: toDelete.length,
+        deletedTxnIds: Array.from(idSet),
+        adminId: currentUser.id,
+        adminName: currentUser.name || 'Chea Savuth (Admin)',
+        timestamp: new Date().toISOString(),
+      });
+      localStorage.setItem('kft_admin_audit_logs_v1', JSON.stringify(logs.slice(0, 200)));
+    } catch (e) {
+      console.warn('Error persisting deleted transactions:', e);
+    }
+
+    showToast(
+      language === 'km'
+        ? `🗑️ បានលុបកំណត់ត្រាទូទាត់ចំនួន ${toDelete.length} ដោយជោគជ័យ! (គណនីអ្នកប្រើប្រាស់ និងស្ថានភាព VIP រក្សាទុកដដែល)`
+        : `🗑️ Deleted ${toDelete.length} payment record(s) successfully! (User accounts and VIP status remain unchanged)`,
+      'info'
+    );
+
+    return { success: true, deletedCount: toDelete.length };
+  };
+
   // Secure Payment Proof Access Control (Owner & Authorized Admin Only)
   const getAuthorizedPaymentProof = (txnId: string): string | null => {
     if (!currentUser) return null;
@@ -5578,6 +5653,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         verifyTransaction,
         rejectTransaction,
         requestMorePaymentInfo,
+        deleteTransactions,
         uploadPaymentProofToTransaction,
         getAuthorizedPaymentProof,
         triggerCloudSyncNow,

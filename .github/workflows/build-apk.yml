@@ -71,9 +71,9 @@ jobs:
           mkdir -p android/app/build/outputs/apk/debug
           REL_APK=$(find android/app/build/outputs/apk/release -name "*.apk" 2>/dev/null | head -n 1)
           if [ -n "$REL_APK" ] && [ -f "$REL_APK" ]; then
-            cp "$REL_APK" android/app/build/outputs/apk/debug/KhmerFoodTourism-v1.9.6.apk
+            cp "$REL_APK" android/app/build/outputs/apk/debug/KhmerFoodTourism-v1.9.7.apk
           elif [ -f android/app/build/outputs/apk/debug/app-debug.apk ]; then
-            mv android/app/build/outputs/apk/debug/app-debug.apk android/app/build/outputs/apk/debug/KhmerFoodTourism-v1.9.6.apk
+            mv android/app/build/outputs/apk/debug/app-debug.apk android/app/build/outputs/apk/debug/KhmerFoodTourism-v1.9.7.apk
           fi
           ls -la android/app/build/outputs/apk/debug/
 
@@ -88,25 +88,20 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: v1.9.6
-          name: "Khmer Food & Tourism v1.9.6 (Play Protect Signed APK, Adaptive Icon, Mobile Header Language Switch, VIP Expiry Reminders, Ordered Food Categories & Permanent Image Vault)"
+          tag_name: v1.9.7
+          name: "Khmer Food & Tourism v1.9.7 (Official ABA KHQR Fix & Admin Payment Verification Archive/Delete Management)"
           make_latest: true
           body: |
             ### 🇰🇭 កម្មវិធីទូរស័ព្ទដៃ អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism Mobile App)
             
-            **កំណែថ្មី v1.9.6 (Build 68):**
-            - 🛡️ **១. កែលម្អការដំឡើង Android APK និងប្រព័ន្ធសុវត្ថិភាព Google Play Protect (Official V1/V2/V3 Signed Release APK):**
-              - ចុះហត្ថលេខាឌីជីថលផ្លូវការ (Release Keystore V1/V2/V3 Signature) និងបន្ថែមការណែនាំជាភាសាខ្មែរច្បាស់លាស់សម្រាប់ការស្កេនសុវត្ថិភាពជាមួយ Google Play Protect («Scan app / ស្កេនកម្មវិធី») ដោយមិនចាំបាច់បិទ Play Protect ឡើយ។
-            - 🎨 **២. រចនារូបតំណាងកម្មវិធីថ្មីស្របតាមស្តង់ដារ Android Adaptive Icon:**
-              - រក្សាទុករូបភាពដើមទាំងស្រុង (ប្រាសាទអង្គរវត្ត មុខម្ហូបខ្មែរ និងអក្សរខ្មែរ «អាហារ & ទេសចរណ៍ខ្មែរ») ដោយមានស៊ុមពណ៌សមូលស្អាត និងគម្លាតសុវត្ថិភាព (Safe Padding) មិនឱ្យដាច់អក្សរ ឬរូបភាពលើគ្រប់ទូរស័ព្ទ Android។
-            - 🌐 **៣. ប្តូរទីតាំងប៊ូតុងប្តូរភាសា (EN / ខ្មែរ) មកជិតរូបបេះដូងក្នុងរបារខាងលើ (Top Navigation Bar):**
-              - រៀបចំប៊ូតុងបេះដូង (❤️) និងប៊ូតុងភាសា (🌐 EN/ខ្មែរ) ព្រមទាំងប៊ូតុងស្វែងរក (🔍) ឱ្យនៅជិតគ្នា ងាយស្រួលចុចលើអេក្រង់ទូរស័ព្ទដោយមិនលៀនចេញក្រៅអេក្រង់។
-            - ⏰ **៤. ប្រព័ន្ធរំលឹកថ្ងៃផុតកំណត់ VIP ប្រចាំថ្ងៃ (៣ ថ្ងៃចុងក្រោយ) និងទម្លាក់មកគណនីធម្មតាដោយស្វ័យប្រវត្តិ:**
-              - ផ្ញើសាររំលឹកដោយស្វ័យប្រវត្តិរៀងរាល់ថ្ងៃក្នុងរយៈពេល ៣ ថ្ងៃចុងក្រោយមុនផុតកំណត់ បង្ហាញកាលបរិច្ឆេទផុតកំណត់ និងចំនួនថ្ងៃនៅសល់យ៉ាងច្បាស់លាស់ និងទម្លាក់គណនីដែលផុតកំណត់មកជាគណនីធម្មតាភ្លាមៗ។
-            - 🍲 **៥. រៀបចំបញ្ជីមុខម្ហូបតាមលំដាប់ប្រភេទ៖ ១. សម្ល • ២. ឆា • ៣. ស្ងោរ • ៤. បង្អែម:**
-              - បែងចែកមុខម្ហូបខ្មែរទាំងអស់តាមក្រុមយ៉ាងត្រឹមត្រូវ ដោយគ្មានការស្ទួន និងងាយស្រួលស្វែងរក។
-            - 💾 **៦. ប្រព័ន្ធរក្សាទុករូបភាពជាអចិន្ត្រៃយ៍ (Permanent Media Override Vault):**
-              - រាល់រូបភាពដែល Admin បានផ្លាស់ប្តូរនៅក្នុងតំបន់ទេសចរណ៍ (Tourist Attractions) ហាងអាហារ (Shops) និងមុខម្ហូប (Food Menus) ត្រូវបានរក្សាទុកជាអចិន្ត្រៃយ៍ក្នុង Local Vault, IndexedDB និង Supabase Cloud ដោយមិនត្រឡប់ទៅរូបភាពដើមវិញឡើយនៅពេលអាប់ដេតកំណែថ្មី។
+            **កំណែថ្មី v1.9.7 (Build 69):**
+            - 🏦 **១. ជួសជុលបញ្ហាស្កេន ABA KHQR ("Invalid QR Merchant Data")៖**
+              - ប្រើប្រាស់កូដទូទាត់ ABA KHQR ផ្លូវការដើមទាំងស្រុង (`KIMSENG CHEA`, គណនី USD: `095 245 959` / KHR: `012 719 946` ជាមួយស្តង់ដារ `abaP2P` Dual-Account របស់ធនាគារ ABA) ដោយមិនកែប្រែ ឬបង្កើតកូដក្លែងក្លាយ ដែលធានាថាការស្កេនតាមកម្មវិធី ABA Mobile ដំណើរការជោគជ័យ ១០០%។
+              - កែលម្អប្រព័ន្ធផ្ទៀងផ្ទាត់វិក្កយបត្រ AI/OCR ឱ្យស្គាល់វិក្កយបត្រផ្ទេរប្រាក់ផ្ទាល់ខ្លួនរបស់ ABA (`TRANSFER TO CHEA KIMSENG (095 245 959)`) បានយ៉ាងត្រឹមត្រូវ។
+            - 🗂️ **២. កែលម្អការគ្រប់គ្រងការផ្ទៀងផ្ទាត់ការទូទាត់ប្រាក់របស់ Admin (Admin Payment Verification Management)៖**
+              - លាក់ ឬបញ្ជូនសំណើទូទាត់ប្រាក់ដែល Admin បានអនុម័ត (Approved) ទៅកាន់បណ្ណសារប្រវត្តិ (`📦 បណ្ណសារប្រវត្តិ`) ដោយស្វ័យប្រវត្តិ ដើម្បីរក្សាបញ្ជីរង់ចាំពិនិត្យ (`⏳ រង់ចាំពិនិត្យ`) ឱ្យស្អាតជានិច្ច។
+              - បន្ថែមប្រអប់ធីក (Checkbox) សម្រាប់ជ្រើសរើសកំណត់ត្រាទូទាត់នីមួយៗ និងប៊ូតុងលុប (`🗑️ លុបកំណត់ត្រាទូទាត់ដែលបានជ្រើសរើស`) ព្រមទាំងផ្ទាំងបញ្ជាក់មុនពេលលុប (Confirmation Dialog)។
+              - ធានាសុវត្ថិភាព ១០០% ថាការលុបកំណត់ត្រាទូទាត់ប្រាក់ មិនលុបគណនីអ្នកប្រើប្រាស់ ឬផ្លាស់ប្តូរស្ថានភាព VIP ឡើយ។
           draft: false
           prerelease: false
           files: |

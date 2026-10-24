@@ -30,7 +30,7 @@ export const AdminDashboard: React.FC = () => {
     destinations, addDestination, updateDestination, deleteDestination,
     posts, deletePost,
     users, deletedUsers, updateUserRole, deleteUserAccount, clearAllRegisteredUsers,
-    transactions, verifyTransaction, rejectTransaction, requestMorePaymentInfo, getAuthorizedPaymentProof,
+    transactions, verifyTransaction, rejectTransaction, requestMorePaymentInfo, deleteTransactions, getAuthorizedPaymentProof,
     appSettings, updateAppSettings, setAdminPassword, currentUser, showToast,
     aiCheckIns, approveAiCheckIn, rejectAiCheckIn, mergeAiCheckIn,
     setIsAiCheckInModalOpen, triggerCloudSyncNow,
@@ -101,8 +101,11 @@ export const AdminDashboard: React.FC = () => {
   const [newAdminPass, setNewAdminPass] = useState('');
 
   // Transaction filter & Full-Resolution Payment Proof Inspection Modal
-  const [txnFilter, setTxnFilter] = useState<'all' | 'pending' | 'verified' | 'rejected'>('all');
+  // Default to 'pending' so approved/rejected payment requests automatically hide/archive out of the pending queue
+  const [txnFilter, setTxnFilter] = useState<'pending' | 'archived' | 'verified' | 'rejected' | 'all'>('pending');
   const [inspectingProofTxn, setInspectingProofTxn] = useState<RegistrationTransaction | null>(null);
+  const [selectedTxnIdsForDeletion, setSelectedTxnIdsForDeletion] = useState<string[]>([]);
+  const [txnsPendingDeletion, setTxnsPendingDeletion] = useState<RegistrationTransaction[]>([]);
 
   // Security audit logs state
   const [auditLogs, setAuditLogs] = useState<SecurityAuditEntry[]>(() => getSecurityAuditLogs());
@@ -122,6 +125,13 @@ export const AdminDashboard: React.FC = () => {
   const pendingTxns = transactions.filter(
     t => t.status === 'pending_verification' || t.status === 'needs_more_info'
   );
+  const archivedTxns = transactions.filter(
+    t => t.status !== 'pending_verification' && t.status !== 'needs_more_info'
+  );
+  const verifiedTxns = transactions.filter(t => t.status === 'verified');
+  const rejectedTxns = transactions.filter(
+    t => t.status === 'rejected' || t.status === 'failed' || t.status === 'cancelled'
+  );
   const pendingSupportTickets = supportTickets.filter(t => t.status === 'Pending');
   const unreadAdminTickets = supportTickets.filter(t => t.unreadByAdmin);
   const filteredSupportTickets = supportTickets.filter(t => {
@@ -133,6 +143,10 @@ export const AdminDashboard: React.FC = () => {
     if (txnFilter === 'all') return true;
     if (txnFilter === 'pending')
       return t.status === 'pending_verification' || t.status === 'needs_more_info';
+    if (txnFilter === 'archived')
+      return t.status !== 'pending_verification' && t.status !== 'needs_more_info';
+    if (txnFilter === 'rejected')
+      return t.status === 'rejected' || t.status === 'failed' || t.status === 'cancelled';
     return t.status === txnFilter;
   });
 
@@ -995,287 +1009,639 @@ export const AdminDashboard: React.FC = () => {
             </div>
           )}
 
-          {/* TRANSACTIONS TAB (VIP Registrations) */}
-          {activeTab === 'transactions' && (
-            <div className="space-y-5">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div>
-                  <h3 className="font-bold text-stone-900 dark:text-stone-100 font-khmer text-base">
-                    {isKm ? 'ការទូទាត់ប្រាក់ចុះបញ្ជីហាង VIP (VIP Registration Fee & Transactions)' : 'VIP Registration Transactions'}
-                  </h3>
-                  <p className="text-stone-500 font-khmer text-xs">
-                    {isKm ? 'ផ្ទៀងផ្ទាត់លេខកូដប្រតិបត្តិការ (Trx ID) ជាមួយធនាគារ មុននឹងធ្វើឱ្យហាងសកម្ម' : 'Verify bank transaction references before activating promoted restaurant listings'}
-                  </p>
-                </div>
+          {/* TRANSACTIONS TAB (VIP Registrations & Payment Verification Management) */}
+          {activeTab === 'transactions' && (() => {
+            const validSelectedTxnIds = selectedTxnIdsForDeletion.filter(id =>
+              transactions.some(t => t.id === id)
+            );
+            const allVisibleTxnsSelected =
+              filteredTransactions.length > 0 &&
+              filteredTransactions.every(t => validSelectedTxnIds.includes(t.id));
 
-                {/* Filter buttons */}
-                <div className="flex gap-1.5 bg-stone-100 dark:bg-stone-800 p-1 rounded-xl shrink-0">
-                  <button
-                    onClick={() => setTxnFilter('all')}
-                    className={`px-3 py-1.5 rounded-lg font-khmer font-semibold ${txnFilter === 'all' ? 'bg-white dark:bg-stone-700 shadow text-[#0F172A] dark:text-white' : 'text-stone-500'}`}
-                  >
-                    {isKm ? 'ទាំងអស់' : 'All'} ({transactions.length})
-                  </button>
-                  <button
-                    onClick={() => setTxnFilter('pending')}
-                    className={`px-3 py-1.5 rounded-lg font-khmer font-semibold ${txnFilter === 'pending' ? 'bg-[#064E3B] text-white shadow' : 'text-stone-500'}`}
-                  >
-                    {isKm ? 'រង់ចាំ' : 'Pending'} ({pendingTxns.length})
-                  </button>
-                  <button
-                    onClick={() => setTxnFilter('verified')}
-                    className={`px-3 py-1.5 rounded-lg font-khmer font-semibold ${txnFilter === 'verified' ? 'bg-[#059669] text-white shadow' : 'text-stone-500'}`}
-                  >
-                    {isKm ? 'ផ្ទៀងផ្ទាត់រួច' : 'Verified'}
-                  </button>
-                </div>
-              </div>
+            const toggleSelectTxn = (txnId: string) => {
+              setSelectedTxnIdsForDeletion(prev =>
+                prev.includes(txnId) ? prev.filter(id => id !== txnId) : [...prev, txnId]
+              );
+            };
 
-              {/* Transactions List */}
-              <div className="space-y-3">
-                {filteredTransactions.length === 0 ? (
-                  <div className="text-center py-8 text-stone-400 font-khmer">
-                    {isKm ? 'គ្មានប្រតិបត្តិការក្នុងប្រភេទនេះឡើយ' : 'No transactions found.'}
+            const toggleSelectAllVisibleTxns = () => {
+              const visibleIds = filteredTransactions.map(t => t.id);
+              if (allVisibleTxnsSelected) {
+                setSelectedTxnIdsForDeletion(prev => prev.filter(id => !visibleIds.includes(id)));
+              } else {
+                setSelectedTxnIdsForDeletion(prev => Array.from(new Set([...prev, ...visibleIds])));
+              }
+            };
+
+            return (
+              <div className="space-y-5">
+                <div className="flex flex-col gap-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                      <h3 className="font-bold text-stone-900 dark:text-stone-100 font-khmer text-base">
+                        {isKm
+                          ? 'គ្រប់គ្រងការផ្ទៀងផ្ទាត់ការទូទាត់ប្រាក់ VIP (Payment Verification & Archive)'
+                          : 'VIP Payment Verification & Archive Management'}
+                      </h3>
+                      <p className="text-stone-500 font-khmer text-xs mt-0.5">
+                        {isKm
+                          ? 'សំណើដែលបានអនុម័ត (Approved) នឹងត្រូវលាក់/បញ្ជូនទៅបណ្ណសារប្រវត្តិដោយស្វ័យប្រវត្តិ ដើម្បីរក្សាបញ្ជីរង់ចាំឱ្យស្អាត'
+                          : 'Approved requests automatically move to Archived History to keep the Pending Queue clean'}
+                      </p>
+                    </div>
+
+                    {/* Selection & Export Actions */}
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {filteredTransactions.length > 0 && (
+                        <label className="px-3 py-1.5 rounded-xl bg-white dark:bg-stone-800 hover:bg-stone-100 text-stone-700 dark:text-stone-200 font-khmer text-xs font-bold border border-stone-300 dark:border-stone-600 transition flex items-center gap-2 cursor-pointer select-none">
+                          <input
+                            type="checkbox"
+                            checked={allVisibleTxnsSelected}
+                            onChange={toggleSelectAllVisibleTxns}
+                            className="w-4 h-4 rounded accent-rose-600 cursor-pointer"
+                          />
+                          <span>
+                            {isKm
+                              ? `ជ្រើសរើសទាំងអស់ក្នុងទំព័រនេះ (${filteredTransactions.length})`
+                              : `Select All Visible (${filteredTransactions.length})`}
+                          </span>
+                        </label>
+                      )}
+
+                      {validSelectedTxnIds.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const targets = transactions.filter(t =>
+                              validSelectedTxnIds.includes(t.id)
+                            );
+                            if (targets.length > 0) {
+                              setTxnsPendingDeletion(targets);
+                            }
+                          }}
+                          className="px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-khmer text-xs font-bold border border-rose-700 shadow-md shadow-rose-600/25 transition flex items-center gap-1.5 cursor-pointer animate-fade-in"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          <span>
+                            {isKm
+                              ? `លុបកំណត់ត្រាទូទាត់ដែលបានជ្រើសរើស (${validSelectedTxnIds.length})`
+                              : `Delete Selected Records (${validSelectedTxnIds.length})`}
+                          </span>
+                        </button>
+                      )}
+
+                      {transactions.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const auditPayload = {
+                              exportedAt: new Date().toISOString(),
+                              appName: 'Khmer Food & Tourism',
+                              totalRecords: transactions.length,
+                              transactions: transactions.map(t => ({
+                                id: t.id,
+                                type: t.type,
+                                userId: t.userId,
+                                userName: t.userName || t.ownerName,
+                                userEmail: t.userEmail,
+                                amountUsd: t.amountUsd,
+                                durationDays: t.durationDays,
+                                status: t.status,
+                                transactionRef: t.transactionRef,
+                                createdAt: t.createdAt,
+                                verifiedAt: t.verifiedAt,
+                                verifiedBy: t.verifiedBy,
+                                notes: t.notes,
+                              })),
+                            };
+                            const blob = new Blob([JSON.stringify(auditPayload, null, 2)], {
+                              type: 'application/json',
+                            });
+                            const url = URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            a.download = `kft_payment_audit_history_${new Date()
+                              .toISOString()
+                              .split('T')[0]}.json`;
+                            a.click();
+                            URL.revokeObjectURL(url);
+                            showToast(
+                              isKm
+                                ? '📥 បានទាញយកបណ្ណសារប្រវត្តិទូទាត់សម្រាប់សវនកម្មជោគជ័យ!'
+                                : '📥 Exported payment audit history successfully!',
+                              'success'
+                            );
+                          }}
+                          className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-stone-700 hover:bg-slate-200 text-slate-700 dark:text-stone-200 font-khmer text-xs font-bold border border-slate-300 dark:border-stone-600 transition flex items-center gap-1.5 cursor-pointer"
+                        >
+                          <span>📥 {isKm ? 'រក្សាទុកប្រវត្តិសវនកម្ម' : 'Export Audit'}</span>
+                        </button>
+                      )}
+                    </div>
                   </div>
-                ) : (
-                  filteredTransactions.map((t) => {
-                    const authorizedProofUrl = getAuthorizedPaymentProof(t.id) || t.paymentProofUrl;
-                    return (
-                    <div 
-                      key={t.id} 
-                      className={`p-4 rounded-2xl border transition-all ${
-                        t.status === 'pending_verification' || t.status === 'needs_more_info'
-                          ? 'bg-slate-50 dark:bg-slate-900 border-slate-300 dark:border-slate-600' 
-                          : t.status === 'verified'
-                          ? 'bg-white dark:bg-stone-800 border-slate-200 dark:border-slate-700 dark:border-stone-700'
-                          : 'bg-red-50/40 dark:bg-stone-800 border-red-200'
+
+                  {/* Filter Tabs: Pending Queue (Default Clean View) vs Archived History */}
+                  <div className="flex flex-wrap gap-1.5 bg-stone-100 dark:bg-stone-800 p-1.5 rounded-2xl">
+                    <button
+                      type="button"
+                      onClick={() => setTxnFilter('pending')}
+                      className={`px-3 py-1.5 rounded-xl font-khmer text-xs font-bold transition cursor-pointer ${
+                        txnFilter === 'pending'
+                          ? 'bg-[#064E3B] text-white shadow'
+                          : 'text-stone-600 dark:text-stone-300 hover:bg-white/60 dark:hover:bg-stone-700'
                       }`}
                     >
-                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
-                        <div className="space-y-1.5 flex-1">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-mono font-bold text-[#0F172A] dark:text-stone-200">{t.id}</span>
-                            <span className={`px-2 py-0.5 rounded-full font-khmer font-bold text-[10px] ${
-                              t.status === 'verified' 
-                                ? 'bg-slate-100 text-[#064E3B] dark:bg-emerald-950/40 dark:text-emerald-400'
-                                : t.status === 'pending_verification'
-                                ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
-                                : t.status === 'needs_more_info'
-                                ? 'bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300'
-                                : 'bg-red-100 text-red-800'
-                            }`}>
-                              {t.status === 'verified'
-                                ? '✓ បានផ្ទៀងផ្ទាត់ & ធ្វើឱ្យសកម្ម'
-                                : t.status === 'pending_verification'
-                                ? '⏳ រង់ចាំការផ្ទៀងផ្ទាត់'
-                                : t.status === 'needs_more_info'
-                                ? '💬 រង់ចាំភស្តុតាងបន្ថែម'
-                                : '✕ បានបដិសេធ'}
-                            </span>
-                            <span className="font-bold text-[#064E3B] dark:text-emerald-400 font-mono text-sm">
-                              ${t.amountUsd.toFixed(2)} {t.currency || 'USD'}
-                            </span>
-                            {t.durationDays && (
-                              <span className="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-800 dark:text-amber-300 font-mono text-[10px] font-bold">
-                                {t.durationDays} Days ({t.planType || (t.durationDays <= 30 ? '30 Days ($2.99)' : '90 Days ($4.99)')})
-                              </span>
-                            )}
-                          </div>
+                      ⏳ {isKm ? 'រង់ចាំពិនិត្យ' : 'Pending Review'} ({pendingTxns.length})
+                    </button>
 
-                          <div className="font-bold text-[#0F172A] dark:text-stone-100 font-khmer text-sm">
-                            {t.type === 'user_vip_upgrade' 
-                              ? `👑 ដំឡើងសមាជិកភាព VIP (${t.durationDays || 30} ថ្ងៃ)៖ ${t.userName || t.ownerName || 'User VIP'}` 
-                              : t.restaurantNameKh}
-                          </div>
+                    <button
+                      type="button"
+                      onClick={() => setTxnFilter('archived')}
+                      className={`px-3 py-1.5 rounded-xl font-khmer text-xs font-bold transition cursor-pointer ${
+                        txnFilter === 'archived'
+                          ? 'bg-slate-800 text-white shadow'
+                          : 'text-stone-600 dark:text-stone-300 hover:bg-white/60 dark:hover:bg-stone-700'
+                      }`}
+                    >
+                      📦 {isKm ? 'បណ្ណសារប្រវត្តិ (អនុម័ត/បដិសេធ)' : 'Archived History'} ({archivedTxns.length})
+                    </button>
 
-                          <div className="text-[11px] text-stone-600 dark:text-stone-400 font-khmer flex flex-wrap gap-x-2 gap-y-1">
-                            <span>{t.type === 'user_vip_upgrade' ? 'អ្នកប្រើប្រាស់៖' : 'ម្ចាស់ហាង៖'} <strong>{t.userName || t.ownerName}</strong></span>
-                            {t.userId && <span>• ID: <code className="font-mono text-[10px]">{t.userId}</code></span>}
-                            {t.userEmail && <span>• ✉️ {t.userEmail}</span>}
-                            {t.ownerPhone && <span>• 📞 {t.ownerPhone}</span>}
-                            <span>• វិធីបង់៖ <strong className="font-mono">{t.paymentMethod}</strong></span>
-                            <span>• កាលបរិច្ឆេទ៖ {t.createdAt}</span>
-                          </div>
+                    <button
+                      type="button"
+                      onClick={() => setTxnFilter('verified')}
+                      className={`px-3 py-1.5 rounded-xl font-khmer text-xs font-bold transition cursor-pointer ${
+                        txnFilter === 'verified'
+                          ? 'bg-[#059669] text-white shadow'
+                          : 'text-stone-600 dark:text-stone-300 hover:bg-white/60 dark:hover:bg-stone-700'
+                      }`}
+                    >
+                      ✓ {isKm ? 'អនុម័តរួច' : 'Approved'} ({verifiedTxns.length})
+                    </button>
 
-                          <div className="p-2 bg-stone-100 dark:bg-stone-900 rounded-xl font-mono text-xs flex items-center justify-between">
-                            <span className="text-stone-500 font-khmer">Bank Ref / Trx ID:</span>
-                            <span className="font-bold text-[#064E3B] dark:text-emerald-400">{t.transactionRef}</span>
-                          </div>
+                    <button
+                      type="button"
+                      onClick={() => setTxnFilter('rejected')}
+                      className={`px-3 py-1.5 rounded-xl font-khmer text-xs font-bold transition cursor-pointer ${
+                        txnFilter === 'rejected'
+                          ? 'bg-rose-600 text-white shadow'
+                          : 'text-stone-600 dark:text-stone-300 hover:bg-white/60 dark:hover:bg-stone-700'
+                      }`}
+                    >
+                      ✕ {isKm ? 'បដិសេធ/មិនត្រឹមត្រូវ' : 'Rejected/Invalid'} ({rejectedTxns.length})
+                    </button>
 
-                          {/* PART 3 REQUIREMENT: Uploaded Payment Proof Thumbnail & Full-Resolution Inspection Button */}
-                          {authorizedProofUrl ? (
-                            <div className="p-2.5 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-300 dark:border-emerald-800/60 flex items-center justify-between gap-3">
-                              <div className="flex items-center gap-2.5">
-                                <img
-                                  src={authorizedProofUrl}
-                                  alt="Payment Proof Thumbnail"
-                                  onClick={() => setInspectingProofTxn(t)}
-                                  className="w-14 h-14 object-cover rounded-lg border border-emerald-400 cursor-pointer hover:opacity-90 transition bg-white"
+                    <button
+                      type="button"
+                      onClick={() => setTxnFilter('all')}
+                      className={`px-3 py-1.5 rounded-xl font-khmer text-xs font-bold transition cursor-pointer ${
+                        txnFilter === 'all'
+                          ? 'bg-white dark:bg-stone-700 shadow text-[#0F172A] dark:text-white'
+                          : 'text-stone-600 dark:text-stone-300 hover:bg-white/60 dark:hover:bg-stone-700'
+                      }`}
+                    >
+                      📋 {isKm ? 'ទាំងអស់' : 'All'} ({transactions.length})
+                    </button>
+                  </div>
+                </div>
+
+                {/* Transactions List */}
+                <div className="space-y-3">
+                  {filteredTransactions.length === 0 ? (
+                    <div className="p-8 text-center bg-white dark:bg-stone-800 rounded-3xl border border-stone-200 dark:border-stone-700 space-y-2.5 font-khmer">
+                      <div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-950/70 text-[#064E3B] dark:text-emerald-300 mx-auto flex items-center justify-center">
+                        <CheckCircle2 className="w-6 h-6" />
+                      </div>
+                      <h4 className="font-bold text-sm text-stone-900 dark:text-stone-100">
+                        {txnFilter === 'pending'
+                          ? isKm
+                            ? '🎉 បញ្ជីរង់ចាំពិនិត្យស្អាតល្អ! គ្មានសំណើទូទាត់កំពុងរង់ចាំទេ'
+                            : '🎉 Pending Queue is Clean! No payment requests awaiting review'
+                          : isKm
+                          ? 'គ្មានកំណត់ត្រាទូទាត់ក្នុងផ្នែកនេះឡើយ'
+                          : 'No payment records in this view'}
+                      </h4>
+                      {txnFilter === 'pending' && archivedTxns.length > 0 && (
+                        <p className="text-xs text-stone-500">
+                          {isKm
+                            ? `សំណើដែលបានអនុម័ត ឬបដិសេធចំនួន ${archivedTxns.length} ត្រូវបានរក្សាទុកក្នុង "📦 បណ្ណសារប្រវត្តិ"។`
+                            : `${archivedTxns.length} reviewed record(s) are safely stored in "📦 Archived History".`}
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    filteredTransactions.map((t) => {
+                      const authorizedProofUrl = getAuthorizedPaymentProof(t.id) || t.paymentProofUrl;
+                      const isTxnSelected = validSelectedTxnIds.includes(t.id);
+                      return (
+                        <div
+                          key={t.id}
+                          className={`p-4 rounded-2xl border transition-all ${
+                            isTxnSelected
+                              ? 'bg-rose-50/70 dark:bg-rose-950/30 border-rose-400 dark:border-rose-700 ring-1 ring-rose-400/30'
+                              : t.status === 'pending_verification' || t.status === 'needs_more_info'
+                              ? 'bg-slate-50 dark:bg-slate-900 border-slate-300 dark:border-slate-600'
+                              : t.status === 'verified'
+                              ? 'bg-white dark:bg-stone-800 border-slate-200 dark:border-slate-700'
+                              : 'bg-red-50/40 dark:bg-stone-800 border-red-200'
+                          }`}
+                        >
+                          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                            <div className="space-y-1.5 flex-1">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <input
+                                  type="checkbox"
+                                  checked={isTxnSelected}
+                                  onChange={() => toggleSelectTxn(t.id)}
+                                  title={
+                                    isKm
+                                      ? 'ជ្រើសរើសកំណត់ត្រាទូទាត់នេះដើម្បីលុប'
+                                      : 'Select this payment record for deletion'
+                                  }
+                                  className="w-4 h-4 rounded accent-rose-600 cursor-pointer shrink-0"
                                 />
-                                <div className="font-khmer text-xs">
-                                  <div className="font-bold text-emerald-900 dark:text-emerald-200 flex items-center gap-1">
-                                    <ImageIcon className="w-3.5 h-3.5 text-emerald-600" />
-                                    <span>{isKm ? 'ភស្តុតាងបង់ប្រាក់ (Payment Proof)' : 'Uploaded Payment Proof'}</span>
-                                  </div>
-                                  <p className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
-                                    {t.paymentProofFileName || 'aba_receipt.jpg'}{' '}
-                                    {t.paymentProofUploadedAt ? `• ${t.paymentProofUploadedAt}` : ''}
-                                  </p>
-                                </div>
+                                <span
+                                  onClick={() => toggleSelectTxn(t.id)}
+                                  className="font-mono font-bold text-[#0F172A] dark:text-stone-200 cursor-pointer"
+                                >
+                                  {t.id}
+                                </span>
+                                <span
+                                  className={`px-2 py-0.5 rounded-full font-khmer font-bold text-[10px] ${
+                                    t.status === 'verified'
+                                      ? 'bg-slate-100 text-[#064E3B] dark:bg-emerald-950/40 dark:text-emerald-400'
+                                      : t.status === 'pending_verification'
+                                      ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
+                                      : t.status === 'needs_more_info'
+                                      ? 'bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300'
+                                      : 'bg-red-100 text-red-800'
+                                  }`}
+                                >
+                                  {t.status === 'verified'
+                                    ? '✓ បានផ្ទៀងផ្ទាត់ & បញ្ជូនទៅបណ្ណសារ'
+                                    : t.status === 'pending_verification'
+                                    ? '⏳ រង់ចាំការផ្ទៀងផ្ទាត់'
+                                    : t.status === 'needs_more_info'
+                                    ? '💬 រង់ចាំភស្តុតាងបន្ថែម'
+                                    : '✕ បានបដិសេធ'}
+                                </span>
+                                <span className="font-bold text-[#064E3B] dark:text-emerald-400 font-mono text-sm">
+                                  ${t.amountUsd.toFixed(2)} {t.currency || 'USD'}
+                                </span>
+                                {t.durationDays && (
+                                  <span className="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-800 dark:text-amber-300 font-mono text-[10px] font-bold">
+                                    {t.durationDays} Days (
+                                    {t.planType ||
+                                      (t.durationDays <= 30 ? '30 Days ($2.99)' : '90 Days ($4.99)')}
+                                    )
+                                  </span>
+                                )}
                               </div>
 
-                              <button
-                                type="button"
-                                onClick={() => setInspectingProofTxn(t)}
-                                className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-khmer font-bold text-xs flex items-center gap-1.5 shadow-xs transition cursor-pointer shrink-0"
-                              >
-                                <Search className="w-3.5 h-3.5" />
-                                <span>{isKm ? '🔍 មើលភស្តុតាងពេញ' : '🔍 View Proof'}</span>
-                              </button>
-                            </div>
-                          ) : (
-                            <div className="p-2 rounded-xl bg-amber-50/60 dark:bg-slate-800/60 border border-amber-200 dark:border-slate-700 text-[11px] text-amber-800 dark:text-amber-300 font-khmer flex items-center justify-between">
-                              <span>⚠️ {isKm ? 'អ្នកប្រើប្រាស់មិនទាន់ភ្ជាប់រូបភាពវិក្កយបត្របង់ប្រាក់នៅឡើយទេ' : 'No payment proof screenshot attached yet'}</span>
-                            </div>
-                          )}
+                              <div className="font-bold text-[#0F172A] dark:text-stone-100 font-khmer text-sm">
+                                {t.type === 'user_vip_upgrade'
+                                  ? `👑 ដំឡើងសមាជិកភាព VIP (${t.durationDays || 30} ថ្ងៃ)៖ ${
+                                      t.userName || t.ownerName || 'User VIP'
+                                    }`
+                                  : t.restaurantNameKh}
+                              </div>
 
-                          {(t.verifiedBy || t.verifiedAt) && (
-                            <div className="text-[10px] text-slate-500 dark:text-slate-400 font-khmer flex items-center gap-2">
-                              <span>🛡️ ត្រួតពិនិត្យដោយ៖ <strong>{t.verifiedBy || 'Admin'}</strong></span>
-                              {t.verifiedAt && <span>• ពេលវេលា៖ {t.verifiedAt}</span>}
-                            </div>
-                          )}
-
-                          {t.notes && (
-                            <div className="text-[11px] text-amber-800 dark:text-amber-200 bg-amber-50 dark:bg-amber-950/50 p-2 rounded-xl border border-amber-200 dark:border-amber-800 font-khmer">
-                              📝 <strong>សម្គាល់៖</strong> {t.notes}
-                            </div>
-                          )}
-
-                          {t.aiVerificationReport && (
-                            <div
-                              className={`p-2.5 rounded-xl border font-khmer text-[11px] space-y-1.5 ${
-                                t.aiVerificationReport.canAutoApprove
-                                  ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200'
-                                  : 'bg-rose-50 dark:bg-rose-950/40 border-rose-300 dark:border-rose-800 text-rose-900 dark:text-rose-200'
-                              }`}
-                            >
-                              <div className="font-bold flex items-center justify-between gap-2">
+                              <div className="text-[11px] text-stone-600 dark:text-stone-400 font-khmer flex flex-wrap gap-x-2 gap-y-1">
                                 <span>
-                                  🤖{' '}
-                                  {t.aiVerificationReport.canAutoApprove
-                                    ? isKm
-                                      ? 'AI & Transaction Verified (100%)'
-                                      : 'AI & Transaction Verified (100%)'
-                                    : isKm
-                                    ? '🚩 ដាក់សញ្ញាសម្រាប់ Admin ត្រួតពិនិត្យផ្ទាល់ (Flagged for Manual Review)'
-                                    : '🚩 Flagged for Manual Admin Review'}
+                                  {t.type === 'user_vip_upgrade' ? 'អ្នកប្រើប្រាស់៖' : 'ម្ចាស់ហាង៖'}{' '}
+                                  <strong>{t.userName || t.ownerName}</strong>
                                 </span>
-                                <span className="font-mono text-[10px]">
-                                  Score: {t.aiVerificationReport.confidenceScore}%
+                                {t.userId && (
+                                  <span>
+                                    • ID: <code className="font-mono text-[10px]">{t.userId}</code>
+                                  </span>
+                                )}
+                                {t.userEmail && <span>• ✉️ {t.userEmail}</span>}
+                                {t.ownerPhone && <span>• 📞 {t.ownerPhone}</span>}
+                                <span>
+                                  • វិធីបង់៖ <strong className="font-mono">{t.paymentMethod}</strong>
+                                </span>
+                                <span>• កាលបរិច្ឆេទ៖ {t.createdAt}</span>
+                              </div>
+
+                              <div className="p-2 bg-stone-100 dark:bg-stone-900 rounded-xl font-mono text-xs flex items-center justify-between">
+                                <span className="text-stone-500 font-khmer">Bank Ref / Trx ID:</span>
+                                <span className="font-bold text-[#064E3B] dark:text-emerald-400">
+                                  {t.transactionRef}
                                 </span>
                               </div>
-                              <div className="grid grid-cols-2 sm:grid-cols-4 gap-1 text-[10px]">
-                                <div className="p-1 rounded bg-white/80 dark:bg-stone-900/80">
-                                  <span className="text-stone-400">Kim Seng: </span>
-                                  <strong>
-                                    {t.aiVerificationReport.checks.recipient.passed ? '✅ ' : '❌ '}
-                                    {t.aiVerificationReport.checks.recipient.detected}
-                                  </strong>
+
+                              {/* PART 3 REQUIREMENT: Uploaded Payment Proof Thumbnail & Full-Resolution Inspection Button */}
+                              {authorizedProofUrl ? (
+                                <div className="p-2.5 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-300 dark:border-emerald-800/60 flex items-center justify-between gap-3">
+                                  <div className="flex items-center gap-2.5">
+                                    <img
+                                      src={authorizedProofUrl}
+                                      alt="Payment Proof Thumbnail"
+                                      onClick={() => setInspectingProofTxn(t)}
+                                      className="w-14 h-14 object-cover rounded-lg border border-emerald-400 cursor-pointer hover:opacity-90 transition bg-white"
+                                    />
+                                    <div className="font-khmer text-xs">
+                                      <div className="font-bold text-emerald-900 dark:text-emerald-200 flex items-center gap-1">
+                                        <ImageIcon className="w-3.5 h-3.5 text-emerald-600" />
+                                        <span>
+                                          {isKm
+                                            ? 'ភស្តុតាងបង់ប្រាក់ (Payment Proof)'
+                                            : 'Uploaded Payment Proof'}
+                                        </span>
+                                      </div>
+                                      <p className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
+                                        {t.paymentProofFileName || 'aba_receipt.jpg'}{' '}
+                                        {t.paymentProofUploadedAt
+                                          ? `• ${t.paymentProofUploadedAt}`
+                                          : ''}
+                                      </p>
+                                    </div>
+                                  </div>
+
+                                  <button
+                                    type="button"
+                                    onClick={() => setInspectingProofTxn(t)}
+                                    className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-khmer font-bold text-xs flex items-center gap-1.5 shadow-xs transition cursor-pointer shrink-0"
+                                  >
+                                    <Search className="w-3.5 h-3.5" />
+                                    <span>{isKm ? '🔍 មើលភស្តុតាងពេញ' : '🔍 View Proof'}</span>
+                                  </button>
                                 </div>
-                                <div className="p-1 rounded bg-white/80 dark:bg-stone-900/80">
-                                  <span className="text-stone-400">Amount: </span>
-                                  <strong>
-                                    {t.aiVerificationReport.checks.amount.passed ? '✅ ' : '❌ '}
-                                    {t.aiVerificationReport.checks.amount.detected}
-                                  </strong>
+                              ) : (
+                                <div className="p-2 rounded-xl bg-amber-50/60 dark:bg-slate-800/60 border border-amber-200 dark:border-slate-700 text-[11px] text-amber-800 dark:text-amber-300 font-khmer flex items-center justify-between">
+                                  <span>
+                                    ⚠️{' '}
+                                    {isKm
+                                      ? 'អ្នកប្រើប្រាស់មិនទាន់ភ្ជាប់រូបភាពវិក្កយបត្របង់ប្រាក់នៅឡើយទេ'
+                                      : 'No payment proof screenshot attached yet'}
+                                  </span>
                                 </div>
-                                <div className="p-1 rounded bg-white/80 dark:bg-stone-900/80">
-                                  <span className="text-stone-400">Trx ID: </span>
-                                  <strong>
-                                    {t.aiVerificationReport.checks.trxId.passed ? '✅ ' : '⚠️ '}
-                                    {t.aiVerificationReport.checks.trxId.detected}
-                                  </strong>
+                              )}
+
+                              {(t.verifiedBy || t.verifiedAt) && (
+                                <div className="text-[10px] text-slate-500 dark:text-slate-400 font-khmer flex items-center gap-2">
+                                  <span>
+                                    🛡️ ត្រួតពិនិត្យដោយ៖ <strong>{t.verifiedBy || 'Admin'}</strong>
+                                  </span>
+                                  {t.verifiedAt && <span>• ពេលវេលា៖ {t.verifiedAt}</span>}
                                 </div>
-                                <div className="p-1 rounded bg-white/80 dark:bg-stone-900/80">
-                                  <span className="text-stone-400">Date: </span>
-                                  <strong>
-                                    {t.aiVerificationReport.checks.date.passed ? '✅ ' : '❌ '}
-                                    {t.aiVerificationReport.checks.date.detected}
-                                  </strong>
+                              )}
+
+                              {t.notes && (
+                                <div className="text-[11px] text-amber-800 dark:text-amber-200 bg-amber-50 dark:bg-amber-950/50 p-2 rounded-xl border border-amber-200 dark:border-amber-800 font-khmer">
+                                  📝 <strong>សម្គាល់៖</strong> {t.notes}
                                 </div>
+                              )}
+
+                              {t.aiVerificationReport && (
+                                <div
+                                  className={`p-2.5 rounded-xl border font-khmer text-[11px] space-y-1.5 ${
+                                    t.aiVerificationReport.canAutoApprove
+                                      ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200'
+                                      : 'bg-rose-50 dark:bg-rose-950/40 border-rose-300 dark:border-rose-800 text-rose-900 dark:text-rose-200'
+                                  }`}
+                                >
+                                  <div className="font-bold flex items-center justify-between gap-2">
+                                    <span>
+                                      🤖{' '}
+                                      {t.aiVerificationReport.canAutoApprove
+                                        ? isKm
+                                          ? 'AI & Transaction Verified (100%)'
+                                          : 'AI & Transaction Verified (100%)'
+                                        : isKm
+                                        ? '🚩 ដាក់សញ្ញាសម្រាប់ Admin ត្រួតពិនិត្យផ្ទាល់ (Flagged for Manual Review)'
+                                        : '🚩 Flagged for Manual Admin Review'}
+                                    </span>
+                                    <span className="font-mono text-[10px]">
+                                      Score: {t.aiVerificationReport.confidenceScore}%
+                                    </span>
+                                  </div>
+                                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-1 text-[10px]">
+                                    <div className="p-1 rounded bg-white/80 dark:bg-stone-900/80">
+                                      <span className="text-stone-400">Kim Seng: </span>
+                                      <strong>
+                                        {t.aiVerificationReport.checks.recipient.passed
+                                          ? '✅ '
+                                          : '❌ '}
+                                        {t.aiVerificationReport.checks.recipient.detected}
+                                      </strong>
+                                    </div>
+                                    <div className="p-1 rounded bg-white/80 dark:bg-stone-900/80">
+                                      <span className="text-stone-400">Amount: </span>
+                                      <strong>
+                                        {t.aiVerificationReport.checks.amount.passed ? '✅ ' : '❌ '}
+                                        {t.aiVerificationReport.checks.amount.detected}
+                                      </strong>
+                                    </div>
+                                    <div className="p-1 rounded bg-white/80 dark:bg-stone-900/80">
+                                      <span className="text-stone-400">Trx ID: </span>
+                                      <strong>
+                                        {t.aiVerificationReport.checks.trxId.passed ? '✅ ' : '⚠️ '}
+                                        {t.aiVerificationReport.checks.trxId.detected}
+                                      </strong>
+                                    </div>
+                                    <div className="p-1 rounded bg-white/80 dark:bg-stone-900/80">
+                                      <span className="text-stone-400">Date: </span>
+                                      <strong>
+                                        {t.aiVerificationReport.checks.date.passed ? '✅ ' : '❌ '}
+                                        {t.aiVerificationReport.checks.date.detected}
+                                      </strong>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Administrator Review Actions + Delete Selected Button */}
+                            <div className="flex sm:flex-col gap-2 shrink-0 flex-wrap">
+                              {(t.status === 'pending_verification' ||
+                                t.status === 'needs_more_info') && (
+                                <>
+                                  {authorizedProofUrl && (
+                                    <button
+                                      type="button"
+                                      onClick={() => setInspectingProofTxn(t)}
+                                      className="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-khmer font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition cursor-pointer"
+                                    >
+                                      <ImageIcon className="w-3.5 h-3.5 text-amber-400" />
+                                      <span>{isKm ? '🔍 មើលភស្តុតាងពេញ' : 'View Proof'}</span>
+                                    </button>
+                                  )}
+
+                                  <button
+                                    onClick={() => verifyTransaction(t.id)}
+                                    className="px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-[#064E3B] hover:from-emerald-700 hover:to-[#047857] text-white font-khmer font-bold text-xs flex items-center justify-center gap-1.5 shadow-md transition active:scale-95 cursor-pointer"
+                                  >
+                                    <Check className="w-4 h-4 text-emerald-200" />
+                                    <span>
+                                      {isKm
+                                        ? t.type === 'user_vip_upgrade'
+                                          ? `✅ អនុម័តដំឡើង VIP (${t.durationDays || 90} ថ្ងៃ)`
+                                          : 'ផ្ទៀងផ្ទាត់ & ធ្វើឱ្យសកម្ម'
+                                        : t.type === 'user_vip_upgrade'
+                                        ? `Approve VIP (${t.durationDays || 90} Days)`
+                                        : 'Verify & Activate'}
+                                    </span>
+                                  </button>
+
+                                  <button
+                                    onClick={() => {
+                                      const note = window.prompt(
+                                        isKm
+                                          ? 'បញ្ចូលសារស្នើសុំភស្តុតាងបន្ថែមពីអ្នកប្រើប្រាស់ (Request More Information)៖'
+                                          : 'Enter message requesting clearer payment proof from user:',
+                                        isKm
+                                          ? 'សូមអាប់ឡូតរូបភាពវិក្កយបត្របង់ប្រាក់ ABA ឱ្យបានច្បាស់លាស់ (បង្ហាញចំនួនទឹកប្រាក់ កាលបរិច្ឆេទ និងលេខប្រតិបត្តិការ)។'
+                                          : 'Please upload a clearer ABA receipt screenshot showing the amount, date, and transaction ID.'
+                                      );
+                                      if (note !== null) {
+                                        requestMorePaymentInfo(t.id, note.trim());
+                                      }
+                                    }}
+                                    className="px-3 py-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/60 hover:bg-amber-500 hover:text-slate-950 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700 font-khmer font-bold text-xs transition cursor-pointer"
+                                  >
+                                    <span>{isKm ? '💬 ស្នើសុំភស្តុតាងបន្ថែម' : 'Request More Info'}</span>
+                                  </button>
+
+                                  <button
+                                    onClick={() => {
+                                      const customReason = window.prompt(
+                                        isKm
+                                          ? 'បញ្ចូលមូលហេតុនៃការបដិសេធ (Rejection Reason)៖'
+                                          : 'Enter rejection reason:',
+                                        isKm
+                                          ? 'មិនឃើញមានប្រតិបត្តិការទូទាត់ក្នុងរបាយការណ៍ធនាគារ ABA ឡើយ។'
+                                          : 'Transaction could not be verified on ABA bank statement.'
+                                      );
+                                      if (customReason !== null) {
+                                        rejectTransaction(
+                                          t.id,
+                                          customReason.trim() ||
+                                            'Transaction ID could not be verified on bank statement.'
+                                        );
+                                      }
+                                    }}
+                                    className="px-3 py-1.5 rounded-xl bg-rose-50 dark:bg-rose-950/60 hover:bg-rose-600 hover:text-white text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800 font-khmer font-bold text-xs transition cursor-pointer"
+                                  >
+                                    <span>{isKm ? '❌ បដិសេធ' : 'Reject'}</span>
+                                  </button>
+                                </>
+                              )}
+
+                              {isTxnSelected && (
+                                <button
+                                  type="button"
+                                  onClick={() => setTxnsPendingDeletion([t])}
+                                  className="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white border border-rose-700 font-khmer font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition cursor-pointer"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                  <span>{isKm ? 'លុបកំណត់ត្រានេះ' : 'Delete Record'}</span>
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+
+                {/* Confirmation Modal Before Deleting Selected Payment Records */}
+                {txnsPendingDeletion.length > 0 && (
+                  <div
+                    className="fixed inset-0 z-[125] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in"
+                    onClick={() => setTxnsPendingDeletion([])}
+                  >
+                    <div
+                      className="w-full max-w-md bg-white dark:bg-stone-900 rounded-3xl border-2 border-rose-500/40 shadow-2xl overflow-hidden font-khmer"
+                      onClick={e => e.stopPropagation()}
+                    >
+                      <div className="p-5 bg-gradient-to-br from-rose-600 to-red-800 text-white flex items-center gap-3.5">
+                        <div className="w-12 h-12 rounded-2xl bg-white/15 border border-white/25 flex items-center justify-center shrink-0">
+                          <AlertTriangle className="w-6 h-6 text-amber-300" />
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-base leading-snug">
+                            {isKm
+                              ? `បញ្ជាក់ការលុបកំណត់ត្រាទូទាត់ (${txnsPendingDeletion.length})`
+                              : `Confirm Payment Record Deletion (${txnsPendingDeletion.length})`}
+                          </h3>
+                          <p className="text-[11px] text-rose-100 mt-0.5">
+                            {isKm
+                              ? 'លុបតែកំណត់ត្រាទូទាត់ដែលបានជ្រើសរើសប៉ុណ្ណោះ'
+                              : 'Only the selected payment records will be removed'}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="p-5 space-y-4">
+                        <div className="max-h-40 overflow-y-auto space-y-2 pr-1">
+                          {txnsPendingDeletion.map(item => (
+                            <div
+                              key={item.id}
+                              className="p-3 rounded-2xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-xs space-y-0.5"
+                            >
+                              <div className="flex items-center justify-between font-bold text-stone-900 dark:text-stone-100">
+                                <span className="font-mono text-[11px]">{item.id}</span>
+                                <span className="text-emerald-700 dark:text-emerald-400 font-mono">
+                                  ${item.amountUsd.toFixed(2)} USD
+                                </span>
+                              </div>
+                              <div className="text-[11px] text-stone-600 dark:text-stone-300">
+                                👤 {item.userName || item.ownerName} • Ref: {item.transactionRef}
                               </div>
                             </div>
-                          )}
+                          ))}
                         </div>
 
-                        {/* PART 3 REQUIREMENT: 4 Administrator Review Actions (View Proof, Approve, Request More Info, Reject) */}
-                        {(t.status === 'pending_verification' || t.status === 'needs_more_info') && (
-                          <div className="flex sm:flex-col gap-2 shrink-0 flex-wrap">
-                            {authorizedProofUrl && (
-                              <button
-                                type="button"
-                                onClick={() => setInspectingProofTxn(t)}
-                                className="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-khmer font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition cursor-pointer"
-                              >
-                                <ImageIcon className="w-3.5 h-3.5 text-amber-400" />
-                                <span>{isKm ? '🔍 មើលភស្តុតាងពេញ' : 'View Proof'}</span>
-                              </button>
-                            )}
+                        <div className="p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/70 space-y-1.5 text-xs">
+                          <p className="font-bold text-emerald-900 dark:text-emerald-300 flex items-center gap-1.5">
+                            <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                            <span>
+                              {isKm
+                                ? 'សុវត្ថិភាពគណនី និងស្ថានភាព VIP ត្រូវបានការពារ ១០០%៖'
+                                : 'User Account & VIP Status 100% Protected:'}
+                            </span>
+                          </p>
+                          <p className="text-[11px] text-stone-700 dark:text-stone-300 leading-relaxed">
+                            {isKm
+                              ? 'ការលុបកំណត់ត្រាទូទាត់នេះ នឹងមិនលុបគណនីរបស់អ្នកប្រើប្រាស់ ហើយក៏មិនផ្លាស់ប្តូរ ឬបិទសមាជិកភាព VIP របស់គាត់ឡើយ។'
+                              : 'Deleting these payment records will NEVER delete the user account or change their active VIP status.'}
+                          </p>
+                        </div>
 
-                            <button
-                              onClick={() => verifyTransaction(t.id)}
-                              className="px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-[#064E3B] hover:from-emerald-700 hover:to-[#047857] text-white font-khmer font-bold text-xs flex items-center justify-center gap-1.5 shadow-md transition active:scale-95 cursor-pointer"
-                            >
-                              <Check className="w-4 h-4 text-emerald-200" />
-                              <span>
-                                {isKm 
-                                  ? (t.type === 'user_vip_upgrade' ? `✅ អនុម័តដំឡើង VIP (${t.durationDays || 90} ថ្ងៃ)` : 'ផ្ទៀងផ្ទាត់ & ធ្វើឱ្យសកម្ម')
-                                  : (t.type === 'user_vip_upgrade' ? `Approve VIP (${t.durationDays || 90} Days)` : 'Verify & Activate')}
-                              </span>
-                            </button>
-
-                            <button
-                              onClick={() => {
-                                const note = window.prompt(
-                                  isKm
-                                    ? 'បញ្ចូលសារស្នើសុំភស្តុតាងបន្ថែមពីអ្នកប្រើប្រាស់ (Request More Information)៖'
-                                    : 'Enter message requesting clearer payment proof from user:',
-                                  isKm
-                                    ? 'សូមអាប់ឡូតរូបភាពវិក្កយបត្របង់ប្រាក់ ABA ឱ្យបានច្បាស់លាស់ (បង្ហាញចំនួនទឹកប្រាក់ កាលបរិច្ឆេទ និងលេខប្រតិបត្តិការ)។'
-                                    : 'Please upload a clearer ABA receipt screenshot showing the amount, date, and transaction ID.'
-                                );
-                                if (note !== null) {
-                                  requestMorePaymentInfo(t.id, note.trim());
-                                }
-                              }}
-                              className="px-3 py-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/60 hover:bg-amber-500 hover:text-slate-950 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700 font-khmer font-bold text-xs transition cursor-pointer"
-                            >
-                              <span>{isKm ? '💬 ស្នើសុំភស្តុតាងបន្ថែម' : 'Request More Info'}</span>
-                            </button>
-
-                            <button
-                              onClick={() => {
-                                const customReason = window.prompt(
-                                  isKm ? 'បញ្ចូលមូលហេតុនៃការបដិសេធ (Rejection Reason)៖' : 'Enter rejection reason:',
-                                  isKm ? 'មិនឃើញមានប្រតិបត្តិការទូទាត់ក្នុងរបាយការណ៍ធនាគារ ABA ឡើយ។' : 'Transaction could not be verified on ABA bank statement.'
-                                );
-                                if (customReason !== null) {
-                                  rejectTransaction(t.id, customReason.trim() || 'Transaction ID could not be verified on bank statement.');
-                                }
-                              }}
-                              className="px-3 py-1.5 rounded-xl bg-rose-50 dark:bg-rose-950/60 hover:bg-rose-600 hover:text-white text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800 font-khmer font-bold text-xs transition cursor-pointer"
-                            >
-                              <span>{isKm ? '❌ បដិសេធ' : 'Reject'}</span>
-                            </button>
-                          </div>
-                        )}
+                        <div className="flex items-center gap-2.5 pt-1">
+                          <button
+                            type="button"
+                            onClick={() => setTxnsPendingDeletion([])}
+                            className="flex-1 py-2.5 px-4 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200 font-bold text-xs transition cursor-pointer"
+                          >
+                            {isKm ? 'បោះបង់ (Cancel)' : 'Cancel'}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const idsToRemove = txnsPendingDeletion.map(item => item.id);
+                              deleteTransactions(idsToRemove);
+                              setSelectedTxnIdsForDeletion(prev =>
+                                prev.filter(id => !idsToRemove.includes(id))
+                              );
+                              setTxnsPendingDeletion([]);
+                            }}
+                            className="flex-1 py-2.5 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-lg shadow-rose-600/25 transition flex items-center justify-center gap-1.5 cursor-pointer"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                            <span>
+                              {isKm
+                                ? `យល់ព្រមលុបកំណត់ត្រា (${txnsPendingDeletion.length})`
+                                : `Delete Records (${txnsPendingDeletion.length})`}
+                            </span>
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  );
-                  })
+                  </div>
                 )}
-              </div>
 
               {/* Full-Resolution Payment Proof Inspection Lightbox Modal (Admin Review) */}
               {inspectingProofTxn && (
@@ -1415,7 +1781,8 @@ export const AdminDashboard: React.FC = () => {
                 </button>
               </div>
             </div>
-          )}
+            );
+          })()}
 
           {/* FOODS TAB */}
           {activeTab === 'food' && (
