@@ -93,9 +93,9 @@ interface AppContextType {
   clearAllRegisteredUsers: () => Promise<{ success: boolean; count: number }>;
 
   // Social Account Linking (TikTok & Facebook)
-  connectTikTokAccount: (username: string, displayName?: string, avatarUrl?: string) => Promise<{ success: boolean; error?: string }>;
+  connectTikTokAccount: (username: string, displayName?: string, profileUrl?: string, avatarUrl?: string) => Promise<{ success: boolean; error?: string }>;
   disconnectTikTokAccount: () => void;
-  connectFacebookAccount: (username: string, displayName?: string, avatarUrl?: string) => Promise<{ success: boolean; error?: string }>;
+  connectFacebookAccount: (username: string, displayName?: string, profileUrl?: string, avatarUrl?: string) => Promise<{ success: boolean; error?: string }>;
   disconnectFacebookAccount: () => void;
 
   // Admin Auth (Chea Savuth)
@@ -232,6 +232,9 @@ interface AppContextType {
   notificationsEnabled: boolean;
   setNotificationsEnabled: (enabled: boolean) => void;
   markNotificationAsRead: (id: string) => void;
+  toggleNotificationRead: (id: string) => void;
+  deleteNotification: (id: string) => void;
+  restoreDefaultNotifications: () => void;
   markAllNotificationsAsRead: () => void;
   clearAllNotifications: () => void;
   unreadNotificationsCount: number;
@@ -409,6 +412,56 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
   };
 
+  const sanitizeUserSocialAccounts = (u: User): User => {
+    if (!u || !u.socialAccounts) return u;
+    const isWebPageUrlNotImage = (url?: string) => {
+      if (!url) return false;
+      const lower = url.toLowerCase();
+      if (lower.startsWith('data:image/')) return false;
+      if (/\.(jpg|jpeg|png|webp|gif|svg|avif)(\?|$)/i.test(lower)) return false;
+      if (lower.includes('unsplash.com') || lower.includes('wikimedia.org') || lower.includes('googleusercontent.com') || lower.startsWith('/')) return false;
+      return lower.includes('tiktok.com/') || lower.includes('facebook.com/') || lower.includes('fb.com/');
+    };
+
+    let changed = false;
+    const nextSocial = { ...u.socialAccounts };
+
+    if (nextSocial.tiktok) {
+      const tk = { ...nextSocial.tiktok };
+      if (isWebPageUrlNotImage(tk.avatarUrl)) {
+        if (!tk.profileUrl) tk.profileUrl = tk.avatarUrl;
+        tk.avatarUrl = u.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80';
+        changed = true;
+      }
+      if (tk.followersCount === 'Verified') {
+        delete tk.followersCount;
+        changed = true;
+      }
+      nextSocial.tiktok = tk;
+    }
+
+    if (nextSocial.facebook) {
+      const fb = { ...nextSocial.facebook };
+      if (isWebPageUrlNotImage(fb.avatarUrl)) {
+        if (!fb.profileUrl) fb.profileUrl = fb.avatarUrl;
+        fb.avatarUrl = u.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80';
+        changed = true;
+      }
+      if (fb.displayName && (fb.displayName.startsWith('http://') || fb.displayName.startsWith('https://'))) {
+        fb.profileUrl = fb.displayName;
+        fb.displayName = fb.username || u.name;
+        changed = true;
+      }
+      if (fb.followersCount === 'Verified') {
+        delete fb.followersCount;
+        changed = true;
+      }
+      nextSocial.facebook = fb;
+    }
+
+    return changed ? { ...u, socialAccounts: nextSocial } : u;
+  };
+
   // Local storage loaded states with fallbacks (Preserves VIP accounts & users across all future app updates)
   const [users, setUsers] = useState<User[]>(() => {
     try {
@@ -423,7 +476,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) {
-          loadedUsers = parsed.filter((u: User) => !checkIsUserDeleted(u, localDeleted));
+          loadedUsers = parsed
+            .filter((u: User) => !checkIsUserDeleted(u, localDeleted))
+            .map(sanitizeUserSocialAccounts);
         }
       }
 
@@ -488,7 +543,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             localStorage.removeItem('kft_current_user_v5');
             return null;
           }
-          return parsed;
+          return sanitizeUserSocialAccounts(parsed);
         }
       }
     } catch (e) {
@@ -1404,41 +1459,52 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return [];
   });
 
-  // Helpful Notifications
+  // Helpful Notifications (with full Khmer, English & Simplified Chinese support + accurate targetIds & dates)
+  const getRelativeDateIso = (daysAgo: number): string => {
+    const d = new Date(Date.now() - daysAgo * 24 * 60 * 60 * 1000);
+    return d.toISOString().split('T')[0];
+  };
+
   const defaultNotificationsList: AppNotification[] = [
     {
       id: 'notif-1',
       titleKh: 'ប្រូម៉ូសិនពិសេស VIP 15%',
       titleEn: 'VIP Partner 15% Discount',
-      messageKh: 'ភោជនីយដ្ឋាន គីមលី កំពត-កែប ចុះ 15% សម្រាប់សមាជិក App នៅចុងសប្តាហ៍នេះ!',
-      messageEn: 'Kimly Restaurant Kampot-Kep offers 15% off for App members this weekend!',
+      titleZh: 'VIP 合作餐厅 85 折优惠 (减 15%)',
+      messageKh: 'ភោជនីយដ្ឋាន គីមលី គ្រឿងសមុទ្រកែប បញ្ចុះតម្លៃ 15% សម្រាប់សមាជិកកម្មវិធីនៅចុងសប្តាហ៍នេះ!',
+      messageEn: 'Kimly Seafood Restaurant (Kep) offers 15% off for App members this weekend!',
+      messageZh: '白马金莉海鲜餐厅 (Kimly Seafood Kep) 本周末为应用会员提供 85 折 (减 15%) 专属优惠！',
       type: 'promo',
-      date: '2026-10-21',
+      date: getRelativeDateIso(0),
       isRead: false,
       targetType: 'restaurant',
-      targetId: 'rest-1',
+      targetId: 'rest-19',
       discountPercent: 15,
     },
     {
       id: 'notif-2',
       titleKh: 'កន្លែង Review ល្បីថ្មីលើ TikTok & FB',
       titleEn: 'Trending Viral Spot on TikTok & FB',
-      messageKh: 'ខ្នងផ្សារ និងទឹកធ្លាក់ប៊ូស្រា កំពុងមានការ Review យ៉ាងកក្រើកលើ TikTok & Facebook!',
-      messageEn: 'Knong Phsar and Bousra Waterfall are viral sensation spots right now!',
+      titleZh: 'TikTok 与 Facebook 热门网红打卡地',
+      messageKh: 'ភ្នំខ្នងផ្សារ សមុទ្រពពក កំពុងមានការ Review យ៉ាងកក្រើកលើ TikTok និង Facebook!',
+      messageEn: 'Knong Phsar Mountain & Sea of Clouds is a viral sensation spot on TikTok & Facebook right now!',
+      messageZh: '农帕萨山云海 (Knong Phsar Sea of Clouds) 正在 TikTok 和 Facebook 上火爆刷屏！',
       type: 'new_spot',
-      date: '2026-10-20',
+      date: getRelativeDateIso(1),
       isRead: false,
       targetType: 'destination',
-      targetId: 'dest-92',
+      targetId: 'dest-229',
     },
     {
       id: 'notif-3',
       titleKh: 'មុខម្ហូបខ្មែរឆ្នើមប្រចាំថ្ងៃ',
-      titleEn: 'Daily Authentic Dish Pick',
-      messageKh: 'ថ្ងៃនេះសាកល្បងភ្លក្ស "អាម៉ុកត្រីអន្លក់ស្លឹកញ" រសជាតិដើមខ្មែរពិតៗ!',
-      messageEn: 'Try authentic Cambodian Fish Amok with Noni leaves today!',
-      type: 'discount',
-      date: '2026-10-19',
+      titleEn: 'Daily Authentic Khmer Dish Pick',
+      titleZh: '每日精选正宗高棉美食',
+      messageKh: 'ថ្ងៃនេះសាកល្បងភ្លក្ស «អាម៉ុកត្រីអន្លក់ស្លឹកញ» រសជាតិដើមខ្មែរពិតៗ និងមើលរូបមន្តចម្អិនលម្អិត!',
+      messageEn: 'Try authentic Cambodian Fish Amok with Noni leaves today and view the full recipe!',
+      messageZh: '今日推荐品尝正宗柬埔寨“诺丽叶阿莫克蒸鱼 (Fish Amok)”，点击查看完整食谱与做法！',
+      type: 'daily_dish',
+      date: getRelativeDateIso(2),
       isRead: true,
       targetType: 'food',
       targetId: 'food-1',
@@ -1450,7 +1516,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const saved = localStorage.getItem('kft_notifications_v1');
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const seedMap = new Map(defaultNotificationsList.map(item => [item.id, item]));
+          return parsed.map((n: AppNotification) => {
+            const seed = seedMap.get(n.id);
+            if (!seed) return n;
+            // Upgrade seed notification metadata (targetId, type, Chinese translation, and legacy static 2026-10 dates) while strictly preserving user's isRead state
+            const hasLegacyStaticDate = n.date === '2026-10-21' || n.date === '2026-10-20' || n.date === '2026-10-19';
+            return {
+              ...seed,
+              ...n,
+              titleKh: seed.titleKh,
+              titleEn: seed.titleEn,
+              titleZh: seed.titleZh,
+              messageKh: seed.messageKh,
+              messageEn: seed.messageEn,
+              messageZh: seed.messageZh,
+              type: seed.type,
+              targetType: seed.targetType,
+              targetId: seed.targetId,
+              discountPercent: seed.discountPercent,
+              date: hasLegacyStaticDate ? seed.date : (n.date || seed.date),
+              isRead: Boolean(n.isRead),
+            };
+          });
+        }
       }
     } catch (e) {
       console.warn('Failed to parse notifications', e);
@@ -3336,10 +3426,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     showToast(language === 'km' ? 'បានកែប្រែឈ្មោះជោគជ័យ!' : 'Name updated successfully!', 'success');
   };
 
-  // Social Account Linking (TikTok & Facebook)
+  // Social Account Linking (TikTok & Facebook) — Honest Profile Linking without false OAuth verification claims
   const connectTikTokAccount = async (
     rawUsername: string,
     displayName?: string,
+    profileUrlOrAvatar?: string,
     avatarUrl?: string
   ): Promise<{ success: boolean; error?: string }> => {
     if (!currentUser) {
@@ -3347,16 +3438,37 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return { success: false, error: 'Please sign in first' };
     }
 
-    const cleanUsername = rawUsername.trim().replace(/^@/, '');
+    // Extract clean username whether user entered "@savuth" or "https://www.tiktok.com/@savuth"
+    let cleanInput = rawUsername.trim();
+    const urlMatch = cleanInput.match(/tiktok\.com\/@?([a-zA-Z0-9._-]+)/i);
+    if (urlMatch && urlMatch[1]) {
+      cleanInput = urlMatch[1];
+    }
+    const cleanUsername = cleanInput.replace(/^@/, '').trim();
     if (!cleanUsername || cleanUsername.length < 2) {
-      const msg = language === 'km' ? 'សូមបញ្ចូលឈ្មោះគណនី TikTok ឱ្យបានត្រឹមត្រូវ!' : 'Please enter a valid TikTok username!';
+      const msg =
+        language === 'km'
+          ? 'សូមបញ្ចូលឈ្មោះគណនី TikTok (@username) ឱ្យបានត្រឹមត្រូវ!'
+          : language === 'zh'
+          ? '请输入有效的 TikTok 用户名 (@username)！'
+          : 'Please enter a valid TikTok username!';
       showToast(msg, 'warning');
       return { success: false, error: msg };
     }
 
     const formattedUsername = `@${cleanUsername}`;
     const nameToUse = displayName?.trim() || cleanUsername;
-    const avatar = avatarUrl || currentUser.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80';
+    const isThirdArgProfileUrl =
+      profileUrlOrAvatar &&
+      (profileUrlOrAvatar.includes('tiktok.com') || (!/\.(jpg|jpeg|png|webp|gif|svg)(\?|$)/i.test(profileUrlOrAvatar) && !profileUrlOrAvatar.startsWith('data:image/')));
+    const resolvedProfileUrl =
+      (isThirdArgProfileUrl ? profileUrlOrAvatar.trim() : '') ||
+      `https://www.tiktok.com/${formattedUsername}`;
+    const resolvedAvatar =
+      avatarUrl ||
+      (!isThirdArgProfileUrl && profileUrlOrAvatar ? profileUrlOrAvatar : '') ||
+      currentUser.avatar ||
+      'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80';
 
     const updatedUser: User = {
       ...currentUser,
@@ -3365,11 +3477,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         tiktok: {
           connected: true,
           username: formattedUsername,
+          handle: cleanUsername,
           displayName: nameToUse,
-          avatarUrl: avatar,
-          profileUrl: `https://www.tiktok.com/${formattedUsername}`,
+          avatarUrl: resolvedAvatar,
+          profileUrl: resolvedProfileUrl,
           connectedAt: new Date().toISOString().split('T')[0],
-          followersCount: 'Verified'
         }
       }
     };
@@ -3379,8 +3491,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     showToast(
       language === 'km' 
-        ? `បានភ្ជាប់គណនី TikTok (${formattedUsername}) ដោយជោគជ័យ! 🎉` 
-        : `Connected TikTok account (${formattedUsername}) successfully! 🎉`,
+        ? `បានភ្ជាប់តំណគណនី TikTok (${formattedUsername}) ដោយជោគជ័យ! 🎉` 
+        : language === 'zh'
+        ? `已成功关联 TikTok 账号 (${formattedUsername})！🎉`
+        : `Linked TikTok account (${formattedUsername}) successfully! 🎉`,
       'success'
     );
     return { success: true };
@@ -3398,7 +3512,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setCurrentUser(updatedUser);
     setUsers(prev => prev.map(u => u.id === currentUser.id ? updatedUser : u));
     showToast(
-      language === 'km' ? 'បានផ្តាច់ការភ្ជាប់គណនី TikTok រួចរាល់' : 'Disconnected TikTok account',
+      language === 'km'
+        ? 'បានផ្តាច់ការភ្ជាប់គណនី TikTok រួចរាល់'
+        : language === 'zh'
+        ? '已断开 TikTok 账号关联'
+        : 'Disconnected TikTok account',
       'info'
     );
   };
@@ -3406,6 +3524,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const connectFacebookAccount = async (
     rawName: string,
     displayName?: string,
+    profileUrlOrAvatar?: string,
     avatarUrl?: string
   ): Promise<{ success: boolean; error?: string }> => {
     if (!currentUser) {
@@ -3415,13 +3534,37 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     const cleanName = rawName.trim();
     if (!cleanName || cleanName.length < 2) {
-      const msg = language === 'km' ? 'សូមបញ្ចូលឈ្មោះគណនី Facebook ឱ្យបានត្រឹមត្រូវ!' : 'Please enter a valid Facebook account name!';
+      const msg =
+        language === 'km'
+          ? 'សូមបញ្ចូលឈ្មោះគណនី ឬ Page Facebook ឱ្យបានត្រឹមត្រូវ!'
+          : language === 'zh'
+          ? '请输入有效的 Facebook 账号或主页名称！'
+          : 'Please enter a valid Facebook account or page name!';
       showToast(msg, 'warning');
       return { success: false, error: msg };
     }
 
-    const nameToUse = displayName?.trim() || cleanName;
-    const avatar = avatarUrl || currentUser.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80';
+    // Handle legacy calls where 2nd arg was accidentally passed as a URL
+    const isSecondArgUrl = Boolean(displayName && /^https?:\/\//i.test(displayName.trim()));
+    const nameToUse = (!isSecondArgUrl && displayName?.trim()) ? displayName.trim() : cleanName;
+    const rawUrlCandidate = (isSecondArgUrl ? displayName!.trim() : profileUrlOrAvatar?.trim()) || '';
+    const isCandidateWebUrl =
+      rawUrlCandidate &&
+      (rawUrlCandidate.includes('facebook.com') ||
+        rawUrlCandidate.includes('fb.com') ||
+        (!/\.(jpg|jpeg|png|webp|gif|svg)(\?|$)/i.test(rawUrlCandidate) && !rawUrlCandidate.startsWith('data:image/')));
+
+    const resolvedProfileUrl = isCandidateWebUrl
+      ? (rawUrlCandidate.startsWith('http') ? rawUrlCandidate : `https://${rawUrlCandidate}`)
+      : cleanName.includes('facebook.com/') || cleanName.includes('fb.com/')
+      ? (cleanName.startsWith('http') ? cleanName : `https://${cleanName}`)
+      : `https://www.facebook.com/search/top?q=${encodeURIComponent(cleanName)}`;
+
+    const resolvedAvatar =
+      avatarUrl ||
+      (!isCandidateWebUrl && rawUrlCandidate ? rawUrlCandidate : '') ||
+      currentUser.avatar ||
+      'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80';
 
     const updatedUser: User = {
       ...currentUser,
@@ -3431,9 +3574,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           connected: true,
           username: cleanName,
           displayName: nameToUse,
-          avatarUrl: avatar,
-          profileUrl: `https://www.facebook.com/search/top?q=${encodeURIComponent(cleanName)}`,
-          connectedAt: new Date().toISOString().split('T')[0]
+          avatarUrl: resolvedAvatar,
+          profileUrl: resolvedProfileUrl,
+          connectedAt: new Date().toISOString().split('T')[0],
         }
       }
     };
@@ -3443,8 +3586,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     showToast(
       language === 'km' 
-        ? `បានភ្ជាប់គណនី Facebook (${nameToUse}) ដោយជោគជ័យ! 🎉` 
-        : `Connected Facebook account (${nameToUse}) successfully! 🎉`,
+        ? `បានភ្ជាប់តំណគណនី Facebook (${nameToUse}) ដោយជោគជ័យ! 🎉` 
+        : language === 'zh'
+        ? `已成功关联 Facebook 账号 (${nameToUse})！🎉`
+        : `Linked Facebook account (${nameToUse}) successfully! 🎉`,
       'success'
     );
     return { success: true };
@@ -3462,7 +3607,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setCurrentUser(updatedUser);
     setUsers(prev => prev.map(u => u.id === currentUser.id ? updatedUser : u));
     showToast(
-      language === 'km' ? 'បានផ្តាច់ការភ្ជាប់គណនី Facebook រួចរាល់' : 'Disconnected Facebook account',
+      language === 'km'
+        ? 'បានផ្តាច់ការភ្ជាប់គណនី Facebook រួចរាល់'
+        : language === 'zh'
+        ? '已断开 Facebook 账号关联'
+        : 'Disconnected Facebook account',
       'info'
     );
   };
@@ -6753,14 +6902,62 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
   };
 
+  const toggleNotificationRead = (id: string) => {
+    setNotifications(prev =>
+      prev.map(n => (n.id === id ? { ...n, isRead: !n.isRead } : n))
+    );
+  };
+
+  const deleteNotification = (id: string) => {
+    setNotifications(prev => prev.filter(n => n.id !== id));
+    showToast(
+      language === 'km'
+        ? 'បានលុបការជូនដំណឹងនេះរួចរាល់'
+        : language === 'zh'
+        ? '已删除该通知'
+        : 'Notification deleted',
+      'info'
+    );
+  };
+
+  const restoreDefaultNotifications = () => {
+    setNotifications(prev => {
+      const existingIds = new Set(prev.map(n => n.id));
+      const missingDefaults = defaultNotificationsList.filter(d => !existingIds.has(d.id));
+      return missingDefaults.length > 0 ? [...prev, ...missingDefaults] : defaultNotificationsList;
+    });
+    showToast(
+      language === 'km'
+        ? 'បានស្តារការជូនដំណឹងដើមឡើងវិញ!'
+        : language === 'zh'
+        ? '已恢复默认通知列表！'
+        : 'Restored default notifications!',
+      'success'
+    );
+  };
+
   const markAllNotificationsAsRead = () => {
     setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
-    showToast(language === 'km' ? 'បានសម្គាល់ថាបានអានទាំងអស់' : 'Marked all as read', 'info');
+    showToast(
+      language === 'km'
+        ? 'បានសម្គាល់ថាបានអានទាំងអស់'
+        : language === 'zh'
+        ? '已全部标记为已读'
+        : 'Marked all as read',
+      'info'
+    );
   };
 
   const clearAllNotifications = () => {
     setNotifications([]);
-    showToast(language === 'km' ? 'បានលុបការជូនដំណឹងទាំងអស់' : 'Cleared all notifications', 'info');
+    showToast(
+      language === 'km'
+        ? 'បានលុបការជូនដំណឹងទាំងអស់'
+        : language === 'zh'
+        ? '已清空所有通知'
+        : 'Cleared all notifications',
+      'info'
+    );
   };
 
   const unreadNotificationsCount = notificationsEnabled ? notifications.filter(n => !n.isRead).length : 0;
@@ -6915,6 +7112,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         notificationsEnabled,
         setNotificationsEnabled,
         markNotificationAsRead,
+        toggleNotificationRead,
+        deleteNotification,
+        restoreDefaultNotifications,
         markAllNotificationsAsRead,
         clearAllNotifications,
         unreadNotificationsCount,

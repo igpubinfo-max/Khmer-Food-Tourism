@@ -1075,9 +1075,11 @@ export interface AppNotification {
   id: string;
   titleKh: string;
   titleEn: string;
+  titleZh?: string;
   messageKh: string;
   messageEn: string;
-  type: 'promo' | 'new_spot' | 'discount' | 'system';
+  messageZh?: string;
+  type: 'promo' | 'new_spot' | 'discount' | 'daily_dish' | 'system';
   date: string;
   isRead: boolean;
   targetType?: 'restaurant' | 'destination' | 'food';

@@ -10,6 +10,7 @@ import {
   Edit2, Check, X as CloseIcon, Crown, Star, Zap, Award, Smartphone, Copy, ExternalLink, Clock, Lock, MessageSquare
 } from 'lucide-react';
 import { isRestaurantPremiumActive, isUserVipActive, getVipAccountState, getVipRemainingDays, TEN_VIP_BENEFITS, APP_VERSION, APP_BUILD_CODE } from '../types';
+import { tr } from '../utils/i18n';
 
 export const ProfileView: React.FC = () => {
   const { 
@@ -96,9 +97,12 @@ export const ProfileView: React.FC = () => {
   const openSocialConnect = (type: 'tiktok' | 'facebook') => {
     if (!isVip && currentUser?.role !== 'admin') {
       showToast(
-        isKm 
-          ? 'មុខងារភ្ជាប់គណនី TikTok & Facebook សម្រាប់តែគណនី VIP ប៉ុណ្ណោះ • សូមដំឡើង VIP ដើម្បីប្រើប្រាស់!' 
-          : 'Connecting TikTok & Facebook requires VIP • Please unlock VIP!',
+        tr(
+          language,
+          'មុខងារភ្ជាប់គណនី TikTok & Facebook សម្រាប់តែគណនី VIP ប៉ុណ្ណោះ • សូមដំឡើង VIP ដើម្បីប្រើប្រាស់!',
+          'Connecting TikTok & Facebook requires VIP • Please unlock VIP!',
+          '关联 TikTok 和 Facebook 仅限 VIP 会员 • 请升级 VIP！'
+        ),
         'info'
       );
       openUpgradeVipModal();
@@ -108,9 +112,10 @@ export const ProfileView: React.FC = () => {
     setSocialModalType(type);
     if (type === 'tiktok') {
       const existing = currentUser?.socialAccounts?.tiktok;
-      setSocialHandleInput(existing?.username || existing?.handle || '');
+      const cleanExistingHandle = (existing?.username || existing?.handle || '').replace(/^@/, '');
+      setSocialHandleInput(cleanExistingHandle);
       setSocialNameInput(existing?.displayName || currentUser?.name || '');
-      setSocialUrlInput(existing?.profileUrl || '');
+      setSocialUrlInput(existing?.profileUrl || (cleanExistingHandle ? `https://www.tiktok.com/@${cleanExistingHandle}` : ''));
     } else {
       const existing = currentUser?.socialAccounts?.facebook;
       setSocialHandleInput(existing?.username || '');
@@ -122,21 +127,32 @@ export const ProfileView: React.FC = () => {
   const handleSaveSocialConnect = () => {
     if (!socialModalType) return;
     if (socialModalType === 'tiktok') {
-      const cleanHandle = socialHandleInput.trim().replace(/^@/, '');
+      const cleanHandle = socialHandleInput.trim().replace(/^https?:\/\/(www\.)?tiktok\.com\/@?/i, '').replace(/^@/, '').split(/[/?#]/)[0].trim();
       if (!cleanHandle) {
-        showToast(isKm ? 'សូមបញ្ចូលឈ្មោះគណនី TikTok ត្រឹមត្រូវ' : 'Please enter TikTok handle', 'warning');
+        showToast(
+          tr(language, 'សូមបញ្ចូលឈ្មោះគណនី TikTok (@username) ឱ្យបានត្រឹមត្រូវ', 'Please enter a valid TikTok @username', '请输入有效的 TikTok 用户名 (@username)'),
+          'warning'
+        );
         return;
       }
-      connectTikTokAccount(cleanHandle, socialNameInput.trim() || cleanHandle, socialUrlInput.trim() || `https://www.tiktok.com/@${cleanHandle}`);
-      showToast(isKm ? 'បានភ្ជាប់គណនី TikTok ដោយជោគជ័យ!' : 'TikTok account connected successfully!', 'success');
+      const finalProfileUrl = socialUrlInput.trim() && /^https?:\/\//i.test(socialUrlInput.trim())
+        ? socialUrlInput.trim()
+        : `https://www.tiktok.com/@${cleanHandle}`;
+      connectTikTokAccount(cleanHandle, socialNameInput.trim() || cleanHandle, finalProfileUrl, currentUser?.avatar);
     } else {
       const cleanName = socialNameInput.trim() || socialHandleInput.trim();
       if (!cleanName) {
-        showToast(isKm ? 'សូមបញ្ចូលឈ្មោះគណនី Facebook ត្រឹមត្រូវ' : 'Please enter Facebook name', 'warning');
+        showToast(
+          tr(language, 'សូមបញ្ចូលឈ្មោះគណនី ឬផេក Facebook ឱ្យបានត្រឹមត្រូវ', 'Please enter your Facebook name or page', '请输入有效的 Facebook 账号或主页名称'),
+          'warning'
+        );
         return;
       }
-      connectFacebookAccount(cleanName, socialUrlInput.trim() || (socialHandleInput.trim() ? `https://www.facebook.com/${socialHandleInput.trim()}` : undefined));
-      showToast(isKm ? 'បានភ្ជាប់គណនី Facebook ដោយជោគជ័យ!' : 'Facebook account connected successfully!', 'success');
+      const cleanUsername = socialHandleInput.trim().replace(/^https?:\/\/(www\.)?facebook\.com\//i, '').replace(/^@/, '').split(/[/?#]/)[0].trim() || cleanName;
+      const finalProfileUrl = socialUrlInput.trim() && /^https?:\/\//i.test(socialUrlInput.trim())
+        ? socialUrlInput.trim()
+        : `https://www.facebook.com/${encodeURIComponent(cleanUsername)}`;
+      connectFacebookAccount(cleanUsername, cleanName, finalProfileUrl, currentUser?.avatar);
     }
     setSocialModalType(null);
   };
@@ -377,8 +393,8 @@ export const ProfileView: React.FC = () => {
               </div>
               <div>
                 <div className="flex items-center gap-1.5 flex-wrap">
-                  <h3 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white">
-                    {isKm ? 'គណនីបណ្ដាញសង្គមដែលបានភ្ជាប់' : 'Connected Social Accounts'}
+                  <h3 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white leading-relaxed">
+                    {tr(language, 'គណនីបណ្ដាញសង្គមដែលបានភ្ជាប់', 'Connected Social Accounts', '已关联的社交账号')}
                   </h3>
                   {isVip || currentUser.role === 'admin' ? (
                     <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 font-bold text-[9px] flex items-center gap-1 font-mono border border-emerald-300 dark:border-emerald-800">
@@ -388,14 +404,24 @@ export const ProfileView: React.FC = () => {
                   ) : (
                     <span className="px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold text-[9px] flex items-center gap-1 border border-slate-300 dark:border-slate-600">
                       <Lock className="w-2.5 h-2.5 text-amber-500" />
-                      <span>VIP Only</span>
+                      <span>{tr(language, 'សម្រាប់ VIP', 'VIP Only', '仅限 VIP')}</span>
                     </span>
                   )}
                 </div>
-                <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
+                <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
                   {isVip || currentUser.role === 'admin'
-                    ? (isKm ? 'ភ្ជាប់គណនី TikTok និង Facebook ដើម្បីផ្សព្វផ្សាយហាង និងវីដេអូ Review របស់អ្នក' : 'Connect TikTok and Facebook to promote your shop and food reviews')
-                    : (isKm ? 'មុខងារភ្ជាប់ TikTok & Facebook ត្រូវបានចាក់សោ • នឹងបើកដំណើរការបន្ទាប់ពីដំឡើងជាគណនី VIP' : 'Connecting TikTok & Facebook is locked • Will enable after upgrading to VIP account')}
+                    ? tr(
+                        language,
+                        'ភ្ជាប់តំណគណនី TikTok និង Facebook ដើម្បីផ្សព្វផ្សាយហាង និងវីដេអូ Review របស់អ្នក',
+                        'Link your TikTok and Facebook profiles to promote your shop and food reviews',
+                        '关联您的 TikTok 和 Facebook 主页，推广您的餐厅和美食测评视频'
+                      )
+                    : tr(
+                        language,
+                        'មុខងារភ្ជាប់ TikTok & Facebook ត្រូវបានចាក់សោ • នឹងបើកដំណើរការបន្ទាប់ពីដំឡើងជាគណនី VIP',
+                        'Connecting TikTok & Facebook is locked • Will enable after upgrading to VIP account',
+                        '关联 TikTok 和 Facebook 功能已锁定 • 升级为 VIP 会员后即可解锁'
+                      )}
                 </p>
               </div>
             </div>
@@ -406,7 +432,7 @@ export const ProfileView: React.FC = () => {
                 className="px-3 py-1 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 text-slate-950 font-extrabold text-[10px] shadow-xs flex items-center gap-1 transition active:scale-95 cursor-pointer shrink-0"
               >
                 <Crown className="w-3 h-3 fill-slate-950" />
-                <span>{isKm ? 'ដំឡើង VIP' : 'Unlock VIP'}</span>
+                <span>{tr(language, 'ដំឡើង VIP', 'Unlock VIP', '升级 VIP')}</span>
               </button>
             )}
           </div>
@@ -426,26 +452,35 @@ export const ProfileView: React.FC = () => {
                 {currentUser.socialAccounts?.tiktok?.connected ? (
                   <span className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-0.5">
                     <CheckCircle2 className="w-3 h-3" />
-                    <span>{isKm ? 'បានភ្ជាប់' : 'Connected'}</span>
+                    <span>{tr(language, 'បានភ្ជាប់តំណ', 'Profile Linked', '已关联')}</span>
                   </span>
                 ) : (
                   <span className="text-[9px] text-slate-400">
-                    {isKm ? 'មិនទាន់ភ្ជាប់' : 'Not Connected'}
+                    {tr(language, 'មិនទាន់ភ្ជាប់', 'Not Connected', '未关联')}
                   </span>
                 )}
               </div>
 
               {currentUser.socialAccounts?.tiktok?.connected ? (
                 <div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2.5">
                     <img 
-                      src={currentUser.socialAccounts.tiktok.avatarUrl || currentUser.avatar} 
-                      alt="TikTok" 
-                      className="w-9 h-9 rounded-xl object-cover border border-slate-300 shrink-0"
+                      src={
+                        currentUser.socialAccounts.tiktok.avatarUrl &&
+                        !/^https?:\/\/(www\.)?(tiktok|facebook|fb)\.com/i.test(currentUser.socialAccounts.tiktok.avatarUrl)
+                          ? currentUser.socialAccounts.tiktok.avatarUrl
+                          : currentUser.avatar
+                      } 
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = currentUser.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80';
+                      }}
+                      alt={currentUser.socialAccounts.tiktok.displayName || 'TikTok'} 
+                      className="w-9 h-9 rounded-xl object-cover border border-pink-400/50 shrink-0 bg-slate-900"
                     />
                     <div className="min-w-0 flex-1">
                       <div className="font-bold text-xs text-slate-900 dark:text-white truncate">
-                        {currentUser.socialAccounts.tiktok.displayName}
+                        {currentUser.socialAccounts.tiktok.displayName || currentUser.name}
                       </div>
                       <div className="text-[10px] font-mono text-pink-600 dark:text-pink-400 truncate">
                         @{currentUser.socialAccounts.tiktok.username.replace(/^@/, '')}
@@ -455,43 +490,62 @@ export const ProfileView: React.FC = () => {
 
                   <div className="flex items-center gap-1.5 pt-2">
                     <button
+                      onClick={() => {
+                        const cleanUser = currentUser.socialAccounts?.tiktok?.username?.replace(/^@/, '') || '';
+                        const targetUrl = currentUser.socialAccounts?.tiktok?.profileUrl || `https://www.tiktok.com/@${cleanUser}`;
+                        window.open(targetUrl, '_blank', 'noopener,noreferrer');
+                      }}
+                      className="py-1 px-2 rounded-lg bg-pink-50 dark:bg-pink-950/50 text-pink-700 dark:text-pink-300 hover:bg-pink-100 text-[10px] font-bold transition flex items-center gap-1 cursor-pointer border border-pink-200 dark:border-pink-800/60"
+                      title={tr(language, 'បើកមើលគណនី TikTok', 'Open TikTok Profile', '打开 TikTok 主页')}
+                    >
+                      <ExternalLink className="w-2.5 h-2.5" />
+                      <span>{tr(language, 'មើល', 'Open', '查看')}</span>
+                    </button>
+                    <button
                       onClick={() => openSocialConnect('tiktok')}
                       className="flex-1 py-1 px-2 rounded-lg bg-slate-200 dark:bg-slate-600 hover:bg-slate-300 text-slate-700 dark:text-slate-200 text-[10px] font-bold transition text-center cursor-pointer"
                     >
-                      {isKm ? '🔄 ភ្ជាប់ឡើងវិញ' : 'Reconnect'}
+                      {tr(language, '🔄 កែប្រែ', 'Edit Link', '修改')}
                     </button>
                     <button
                       onClick={() => {
-                        if (window.confirm(isKm ? 'តើអ្នកចង់ផ្តាច់គណនី TikTok នេះមែនទេ?' : 'Disconnect TikTok?')) {
+                        if (window.confirm(tr(language, 'តើអ្នកចង់ផ្តាច់គណនី TikTok នេះមែនទេ?', 'Disconnect TikTok account?', '确定要取消关联 TikTok 账号吗？'))) {
                           disconnectTikTokAccount();
-                          showToast(isKm ? 'បានផ្តាច់គណនី TikTok' : 'TikTok disconnected', 'info');
                         }
                       }}
-                      className="py-1 px-2 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 text-[10px] font-bold transition cursor-pointer"
+                      className="py-1 px-2 rounded-lg bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-300 hover:bg-rose-100 text-[10px] font-bold transition cursor-pointer"
                     >
-                      {isKm ? 'ផ្តាច់' : 'Disconnect'}
+                      {tr(language, 'ផ្តាច់', 'Disconnect', '解绑')}
                     </button>
                   </div>
                 </div>
               ) : (
                 <div className="pt-1">
-                  <p className="text-[10px] text-slate-500 mb-2">
-                    {isKm ? 'ភ្ជាប់ដើម្បីផ្សព្វផ្សាយវីដេអូម្ហូប និងកន្លែង Review របស់អ្នក' : 'Connect to feature your viral food review videos'}
+                  <p className="text-[10px] text-slate-500 mb-2 leading-relaxed">
+                    {tr(
+                      language,
+                      'ភ្ជាប់ដើម្បីផ្សព្វផ្សាយវីដេអូម្ហូប និងកន្លែង Review របស់អ្នក',
+                      'Connect to feature your viral food review videos',
+                      '关联以展示您的热门美食探店视频'
+                    )}
                   </p>
                   {isVip || currentUser.role === 'admin' ? (
                     <button
                       onClick={() => openSocialConnect('tiktok')}
                       className="w-full py-1.5 px-3 rounded-xl bg-black hover:bg-slate-900 text-white font-bold text-[11px] flex items-center justify-center gap-1.5 transition cursor-pointer"
                     >
-                      <span>+ ភ្ជាប់ TikTok</span>
+                      <span>{tr(language, '+ ភ្ជាប់ TikTok', '+ Connect TikTok', '+ 关联 TikTok')}</span>
                     </button>
                   ) : (
                     <button
                       onClick={() => {
                         showToast(
-                          isKm 
-                            ? 'មុខងារភ្ជាប់គណនី TikTok សម្រាប់តែគណនី VIP ប៉ុណ្ណោះ • សូមដំឡើង VIP ដើម្បីប្រើប្រាស់!' 
-                            : 'Connecting TikTok requires VIP • Please unlock VIP!',
+                          tr(
+                            language,
+                            'មុខងារភ្ជាប់គណនី TikTok សម្រាប់តែគណនី VIP ប៉ុណ្ណោះ • សូមដំឡើង VIP ដើម្បីប្រើប្រាស់!',
+                            'Connecting TikTok requires VIP • Please unlock VIP!',
+                            '关联 TikTok 仅限 VIP 会员 • 请升级 VIP！'
+                          ),
                           'info'
                         );
                         openUpgradeVipModal();
@@ -499,7 +553,7 @@ export const ProfileView: React.FC = () => {
                       className="w-full py-1.5 px-3 rounded-xl bg-slate-200 dark:bg-slate-700 hover:bg-amber-400 hover:text-slate-950 text-slate-700 dark:text-slate-200 font-bold text-[11px] flex items-center justify-center gap-1.5 transition cursor-pointer border border-slate-300 dark:border-slate-600"
                     >
                       <Lock className="w-3 h-3 text-amber-500" />
-                      <span>{isKm ? 'ដំឡើង VIP ដើម្បីភ្ជាប់ TikTok' : 'Unlock VIP to Connect'}</span>
+                      <span>{tr(language, 'ដំឡើង VIP ដើម្បីភ្ជាប់ TikTok', 'Unlock VIP to Connect', '升级 VIP 以关联 TikTok')}</span>
                     </button>
                   )}
                 </div>
@@ -520,72 +574,102 @@ export const ProfileView: React.FC = () => {
                 {currentUser.socialAccounts?.facebook?.connected ? (
                   <span className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-0.5">
                     <CheckCircle2 className="w-3 h-3" />
-                    <span>{isKm ? 'បានភ្ជាប់' : 'Connected'}</span>
+                    <span>{tr(language, 'បានភ្ជាប់តំណ', 'Profile Linked', '已关联')}</span>
                   </span>
                 ) : (
                   <span className="text-[9px] text-slate-400">
-                    {isKm ? 'មិនទាន់ភ្ជាប់' : 'Not Connected'}
+                    {tr(language, 'មិនទាន់ភ្ជាប់', 'Not Connected', '未关联')}
                   </span>
                 )}
               </div>
 
               {currentUser.socialAccounts?.facebook?.connected ? (
                 <div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2.5">
                     <img 
-                      src={currentUser.socialAccounts.facebook.avatarUrl || currentUser.avatar} 
-                      alt="Facebook" 
-                      className="w-9 h-9 rounded-xl object-cover border border-slate-300 shrink-0"
+                      src={
+                        currentUser.socialAccounts.facebook.avatarUrl &&
+                        !/^https?:\/\/(www\.)?(tiktok|facebook|fb)\.com/i.test(currentUser.socialAccounts.facebook.avatarUrl)
+                          ? currentUser.socialAccounts.facebook.avatarUrl
+                          : currentUser.avatar
+                      } 
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = currentUser.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80';
+                      }}
+                      alt={currentUser.socialAccounts.facebook.displayName || 'Facebook'} 
+                      className="w-9 h-9 rounded-xl object-cover border border-blue-400/50 shrink-0 bg-blue-950"
                     />
                     <div className="min-w-0 flex-1">
                       <div className="font-bold text-xs text-slate-900 dark:text-white truncate">
-                        {currentUser.socialAccounts.facebook.displayName}
+                        {currentUser.socialAccounts.facebook.displayName || currentUser.name}
                       </div>
                       <div className="text-[10px] font-mono text-blue-600 dark:text-blue-400 truncate">
-                        {currentUser.socialAccounts.facebook.profileUrl ? 'Verified Profile' : 'Connected'}
+                        {currentUser.socialAccounts.facebook.username
+                          ? `fb.com/${currentUser.socialAccounts.facebook.username.replace(/^@/, '')}`
+                          : tr(language, 'បានភ្ជាប់តំណគណនី', 'Profile Linked', '主页已关联')}
                       </div>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-1.5 pt-2">
                     <button
+                      onClick={() => {
+                        const cleanUser = currentUser.socialAccounts?.facebook?.username?.replace(/^@/, '') || '';
+                        const targetUrl = currentUser.socialAccounts?.facebook?.profileUrl || `https://www.facebook.com/${encodeURIComponent(cleanUser)}`;
+                        window.open(targetUrl, '_blank', 'noopener,noreferrer');
+                      }}
+                      className="py-1 px-2 rounded-lg bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 hover:bg-blue-100 text-[10px] font-bold transition flex items-center gap-1 cursor-pointer border border-blue-200 dark:border-blue-800/60"
+                      title={tr(language, 'បើកមើលគណនី Facebook', 'Open Facebook Profile', '打开 Facebook 主页')}
+                    >
+                      <ExternalLink className="w-2.5 h-2.5" />
+                      <span>{tr(language, 'មើល', 'Open', '查看')}</span>
+                    </button>
+                    <button
                       onClick={() => openSocialConnect('facebook')}
                       className="flex-1 py-1 px-2 rounded-lg bg-slate-200 dark:bg-slate-600 hover:bg-slate-300 text-slate-700 dark:text-slate-200 text-[10px] font-bold transition text-center cursor-pointer"
                     >
-                      {isKm ? '🔄 ភ្ជាប់ឡើងវិញ' : 'Reconnect'}
+                      {tr(language, '🔄 កែប្រែ', 'Edit Link', '修改')}
                     </button>
                     <button
                       onClick={() => {
-                        if (window.confirm(isKm ? 'តើអ្នកចង់ផ្តាច់គណនី Facebook នេះមែនទេ?' : 'Disconnect Facebook?')) {
+                        if (window.confirm(tr(language, 'តើអ្នកចង់ផ្តាច់គណនី Facebook នេះមែនទេ?', 'Disconnect Facebook account?', '确定要取消关联 Facebook 账号吗？'))) {
                           disconnectFacebookAccount();
-                          showToast(isKm ? 'បានផ្តាច់គណនី Facebook' : 'Facebook disconnected', 'info');
                         }
                       }}
-                      className="py-1 px-2 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 text-[10px] font-bold transition cursor-pointer"
+                      className="py-1 px-2 rounded-lg bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-300 hover:bg-rose-100 text-[10px] font-bold transition cursor-pointer"
                     >
-                      {isKm ? 'ផ្តាច់' : 'Disconnect'}
+                      {tr(language, 'ផ្តាច់', 'Disconnect', '解绑')}
                     </button>
                   </div>
                 </div>
               ) : (
                 <div className="pt-1">
-                  <p className="text-[10px] text-slate-500 mb-2">
-                    {isKm ? 'ភ្ជាប់គណនី Facebook ឬ Page ដើម្បីចែករំលែក និង Review ម្ហូប' : 'Connect Facebook account or page to share reviews'}
+                  <p className="text-[10px] text-slate-500 mb-2 leading-relaxed">
+                    {tr(
+                      language,
+                      'ភ្ជាប់គណនី Facebook ឬ Page ដើម្បីចែករំលែក និង Review ម្ហូប',
+                      'Connect Facebook account or page to share reviews',
+                      '关联 Facebook 账号或主页以分享美食测评'
+                    )}
                   </p>
                   {isVip || currentUser.role === 'admin' ? (
                     <button
                       onClick={() => openSocialConnect('facebook')}
                       className="w-full py-1.5 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-[11px] flex items-center justify-center gap-1.5 transition cursor-pointer"
                     >
-                      <span>+ ភ្ជាប់ Facebook</span>
+                      <span>{tr(language, '+ ភ្ជាប់ Facebook', '+ Connect Facebook', '+ 关联 Facebook')}</span>
                     </button>
                   ) : (
                     <button
                       onClick={() => {
                         showToast(
-                          isKm 
-                            ? 'មុខងារភ្ជាប់គណនី Facebook សម្រាប់តែគណនី VIP ប៉ុណ្ណោះ • សូមដំឡើង VIP ដើម្បីប្រើប្រាស់!' 
-                            : 'Connecting Facebook requires VIP • Please unlock VIP!',
+                          tr(
+                            language,
+                            'មុខងារភ្ជាប់គណនី Facebook សម្រាប់តែគណនី VIP ប៉ុណ្ណោះ • សូមដំឡើង VIP ដើម្បីប្រើប្រាស់!',
+                            'Connecting Facebook requires VIP • Please unlock VIP!',
+                            '关联 Facebook 仅限 VIP 会员 • 请升级 VIP！'
+                          ),
                           'info'
                         );
                         openUpgradeVipModal();
@@ -593,7 +677,7 @@ export const ProfileView: React.FC = () => {
                       className="w-full py-1.5 px-3 rounded-xl bg-slate-200 dark:bg-slate-700 hover:bg-amber-400 hover:text-slate-950 text-slate-700 dark:text-slate-200 font-bold text-[11px] flex items-center justify-center gap-1.5 transition cursor-pointer border border-slate-300 dark:border-slate-600"
                     >
                       <Lock className="w-3 h-3 text-amber-500" />
-                      <span>{isKm ? 'ដំឡើង VIP ដើម្បីភ្ជាប់ Facebook' : 'Unlock VIP to Connect'}</span>
+                      <span>{tr(language, 'ដំឡើង VIP ដើម្បីភ្ជាប់ Facebook', 'Unlock VIP to Connect', '升级 VIP 以关联 Facebook')}</span>
                     </button>
                   )}
                 </div>
@@ -2387,35 +2471,51 @@ export const ProfileView: React.FC = () => {
                 }`}>
                   {socialModalType === 'tiktok' ? '🎵 TikTok' : '📘 Facebook'}
                 </span>
-                <h4 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white">
-                  {isKm ? `ភ្ជាប់គណនី ${socialModalType === 'tiktok' ? 'TikTok' : 'Facebook'}` : `Connect ${socialModalType === 'tiktok' ? 'TikTok' : 'Facebook'}`}
+                <h4 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white leading-relaxed">
+                  {tr(
+                    language,
+                    `ភ្ជាប់គណនី ${socialModalType === 'tiktok' ? 'TikTok' : 'Facebook'}`,
+                    `Link ${socialModalType === 'tiktok' ? 'TikTok' : 'Facebook'} Profile`,
+                    `关联 ${socialModalType === 'tiktok' ? 'TikTok' : 'Facebook'} 主页`
+                  )}
                 </h4>
               </div>
               <button 
                 onClick={() => setSocialModalType(null)} 
-                className="p-1 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-white"
+                className="p-1 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer"
               >
                 <CloseIcon className="w-4 h-4" />
               </button>
             </div>
 
+            <div className="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200/80 dark:border-emerald-800/60 text-[11px] text-emerald-800 dark:text-emerald-300 leading-relaxed">
+              🔒 {tr(
+                language,
+                'សុវត្ថិភាព ១០០%៖ កម្មវិធីភ្ជាប់តែតំណភ្ជាប់សាធារណៈ (Public Profile Link) របស់អ្នកប៉ុណ្ណោះ ដោយមិនទាមទារពាក្យសម្ងាត់ឡើយ។',
+                '100% Safe: Links your public profile URL to your account and shop without asking for your password.',
+                '100% 安全：仅关联您的公开主页链接，绝不索要账号密码。'
+              )}
+            </div>
+
             <div className="space-y-3 text-xs">
               <div>
-                <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
-                  {socialModalType === 'tiktok' ? (isKm ? 'ឈ្មោះគណនី TikTok (@username):' : 'TikTok Handle (@username):') : (isKm ? 'ឈ្មោះគណនី Facebook:' : 'Facebook Account Name:')}
+                <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1 leading-relaxed">
+                  {socialModalType === 'tiktok'
+                    ? tr(language, 'ឈ្មោះគណនី TikTok (@username)៖', 'TikTok Handle (@username):', 'TikTok 用户名 (@username)：')
+                    : tr(language, 'ឈ្មោះគណនី ឬ Username Facebook៖', 'Facebook Username or Handle:', 'Facebook 用户名或账号：')}
                 </label>
                 <input
                   type="text"
                   value={socialHandleInput}
                   onChange={(e) => setSocialHandleInput(e.target.value)}
-                  placeholder={socialModalType === 'tiktok' ? '@cheakimseng' : 'Chea Kimseng'}
+                  placeholder={socialModalType === 'tiktok' ? '@cheakimseng' : 'cheakimseng'}
                   className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white outline-none focus:border-emerald-500"
                 />
               </div>
 
               <div>
-                <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
-                  {isKm ? 'ឈ្មោះបង្ហាញ (Display Name):' : 'Display Name:'}
+                <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1 leading-relaxed">
+                  {tr(language, 'ឈ្មោះបង្ហាញលើកាត (Display Name)៖', 'Display Name:', '显示名称 (Display Name)：')}
                 </label>
                 <input
                   type="text"
@@ -2427,11 +2527,11 @@ export const ProfileView: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
-                  {isKm ? 'តំណភ្ជាប់ Profile Link (ស្រេចចិត្ត):' : 'Profile URL (Optional):'}
+                <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1 leading-relaxed">
+                  {tr(language, 'តំណភ្ជាប់ Profile Link (ស្រេចចិត្ត)៖', 'Profile URL (Optional):', '主页链接 Profile URL（选填）：')}
                 </label>
                 <input
-                  type="text"
+                  type="url"
                   value={socialUrlInput}
                   onChange={(e) => setSocialUrlInput(e.target.value)}
                   placeholder={socialModalType === 'tiktok' ? 'https://www.tiktok.com/@username' : 'https://www.facebook.com/username'}
@@ -2444,16 +2544,16 @@ export const ProfileView: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setSocialModalType(null)}
-                className="flex-1 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold"
+                className="flex-1 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold cursor-pointer"
               >
-                {isKm ? 'បោះបង់' : 'Cancel'}
+                {tr(language, 'បោះបង់', 'Cancel', '取消')}
               </button>
               <button
                 type="button"
                 onClick={handleSaveSocialConnect}
-                className="flex-1 py-2 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white text-xs font-bold shadow-xs transition"
+                className="flex-1 py-2 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white text-xs font-bold shadow-xs transition cursor-pointer"
               >
-                {isKm ? 'រក្សាទុក' : 'Save'}
+                {tr(language, 'រក្សាទុកការភ្ជាប់', 'Save Link', '保存关联')}
               </button>
             </div>
           </div>
