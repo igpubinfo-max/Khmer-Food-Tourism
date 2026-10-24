@@ -28,6 +28,7 @@ import {
   initialDestinations, initialCommunityPosts, initialAppSettings, initialTransactions 
 } from '../data/seedData';
 import { hashPassword, verifyPassword } from '../utils/crypto';
+import { translateTextToChinese, useChineseDomTranslation } from '../utils/i18n';
 import { 
   hashPasswordPBKDF2, verifyPasswordPBKDF2, 
   checkAdminLoginAllowed, recordAdminLoginFailed, resetAdminLoginAttempts,
@@ -344,7 +345,32 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [language, setLanguage] = useState<Language>('km');
+  const [language, setLanguageState] = useState<Language>(() => {
+    try {
+      const saved = localStorage.getItem('kft_user_language_pref_v1');
+      if (saved === 'km' || saved === 'en' || saved === 'zh') {
+        return saved;
+      }
+    } catch {}
+    return 'km';
+  });
+
+  const setLanguage = (newLang: Language) => {
+    setLanguageState(newLang);
+    try {
+      localStorage.setItem('kft_user_language_pref_v1', newLang);
+      const rawUser = localStorage.getItem('kft_current_user_v5');
+      if (rawUser) {
+        const parsedUser = JSON.parse(rawUser);
+        if (parsedUser?.id) {
+          localStorage.setItem(`kft_lang_user_${parsedUser.id}`, newLang);
+        }
+      }
+    } catch {}
+  };
+
+  useChineseDomTranslation(language);
+
   const [activeTab, setActiveTab] = useState<ActiveTab>('home');
   
   const [deletedUsers, setDeletedUsers] = useState<DeletedUserRecord[]>(() => {
@@ -383,26 +409,56 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
   };
 
-  // Local storage loaded states with fallbacks (v5 storage keys: purged demo users per Admin directive)
+  // Local storage loaded states with fallbacks (Preserves VIP accounts & users across all future app updates)
   const [users, setUsers] = useState<User[]>(() => {
     try {
-      // Purge legacy user keys to clean previous registered users
-      ['kft_users_v4', 'kft_users_v3', 'kft_users_v2', 'kft_users_v1', 'kft_current_user_v4', 'kft_current_user_v3'].forEach(k => {
-        try { localStorage.removeItem(k); } catch(e) {}
-      });
       let localDeleted: DeletedUserRecord[] = [];
       try {
         const rawDel = localStorage.getItem('kft_deleted_users_v1');
         if (rawDel) localDeleted = JSON.parse(rawDel) || [];
       } catch {}
 
+      let loadedUsers: User[] = [];
       const saved = localStorage.getItem('kft_users_v5');
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) {
-          return parsed.filter((u: User) => !checkIsUserDeleted(u, localDeleted));
+          loadedUsers = parsed.filter((u: User) => !checkIsUserDeleted(u, localDeleted));
         }
       }
+
+      // Reconcile with local VIP Registry Backup (`kft_vip_registry_backup_v1`) so VIP status is never lost during updates
+      try {
+        const rawVipBackup = localStorage.getItem('kft_vip_registry_backup_v1');
+        if (rawVipBackup) {
+          const vipList: User[] = JSON.parse(rawVipBackup);
+          if (Array.isArray(vipList)) {
+            const byId = new Map<string, User>(loadedUsers.map(u => [u.id, u]));
+            for (const vipU of vipList) {
+              if (!vipU || !vipU.id || checkIsUserDeleted(vipU, localDeleted)) continue;
+              const existing = byId.get(vipU.id);
+              const expMs = vipU.subscriptionExpiryDate ? new Date(vipU.subscriptionExpiryDate).getTime() : 0;
+              if (expMs > Date.now() && vipU.membershipTier === 'premium_vip' && vipU.subscriptionStatus === 'active') {
+                if (!existing) {
+                  byId.set(vipU.id, vipU);
+                } else if (existing.subscriptionStatus !== 'cancelled') {
+                  byId.set(vipU.id, {
+                    ...existing,
+                    membershipTier: 'premium_vip',
+                    subscriptionStatus: 'active',
+                    subscriptionStartDate: vipU.subscriptionStartDate || existing.subscriptionStartDate,
+                    subscriptionExpiryDate: vipU.subscriptionExpiryDate,
+                    paymentStatus: 'verified',
+                  });
+                }
+              }
+            }
+            loadedUsers = Array.from(byId.values());
+          }
+        }
+      } catch {}
+
+      return loadedUsers;
     } catch (e) {
       console.warn('Failed to parse kft_users_v5', e);
     }
@@ -713,6 +769,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               }));
             } else {
               normalizedList.push(normalizeRestaurant(r));
+            }
+          }
+          // Ensure any newly added seed restaurants (e.g. Chumnor Kbal Koh - ជំនោរក្បាលកោះ) are also merged in
+          for (const seedRest of initialRestaurants) {
+            if (!seenIds.has(seedRest.id)) {
+              seenIds.add(seedRest.id);
+              normalizedList.push(normalizeRestaurant(seedRest));
             }
           }
           if (vaultChanged) {
@@ -1481,15 +1544,60 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }, delayMs);
   };
 
-  // Sync to localStorage safely (guarded against QuotaExceeded or JSON corruption)
+  // Sync to localStorage safely (guarded against QuotaExceeded or JSON corruption) + Maintain VIP Registry Backup
   useEffect(() => {
     scheduleStorageWrite('kft_users_v5', users, 600);
+    const activeVips = users.filter(
+      u => u.membershipTier === 'premium_vip' && u.subscriptionStatus === 'active' && u.subscriptionExpiryDate
+    );
+    if (activeVips.length > 0) {
+      scheduleStorageWrite('kft_vip_registry_backup_v1', activeVips, 800);
+      if (isSupabaseConfigured()) {
+        pushCloudDocument('kft_cloud_vip_backup_v1', activeVips);
+      }
+    }
+    if (isSupabaseConfigured() && users.length > 0) {
+      pushCloudDocument('kft_cloud_users_v1', users);
+    }
   }, [users]);
+
+  // Automatic Pre-Update Database & VIP Snapshot Backup whenever App Version changes
+  useEffect(() => {
+    try {
+      const lastBackedUpVersion = localStorage.getItem('kft_last_backed_up_version');
+      if (lastBackedUpVersion !== APP_VERSION) {
+        const activeVips = users.filter(
+          u => u.membershipTier === 'premium_vip' && u.subscriptionStatus === 'active'
+        );
+        const backupSnapshot = {
+          backedUpAt: new Date().toISOString(),
+          previousVersion: lastBackedUpVersion || 'pre-2.0.0',
+          targetVersion: APP_VERSION,
+          vipUsersCount: activeVips.length,
+          vipUsers: activeVips,
+          allUsersCount: users.length,
+          verifiedTransactions: transactions.filter(t => t.status === 'verified'),
+        };
+        localStorage.setItem('kft_pre_update_db_backup_v1', JSON.stringify(backupSnapshot));
+        localStorage.setItem('kft_last_backed_up_version', APP_VERSION);
+        if (isSupabaseConfigured() && activeVips.length > 0) {
+          pushCloudDocument('kft_cloud_vip_backup_v1', activeVips);
+        }
+      }
+    } catch (e) {
+      console.warn('Pre-update database backup warning:', e);
+    }
+  }, [users, transactions]);
 
   useEffect(() => {
     try {
       if (currentUser) {
         localStorage.setItem('kft_current_user_v5', JSON.stringify(currentUser));
+        const userLang = localStorage.getItem(`kft_lang_user_${currentUser.id}`);
+        if (userLang === 'km' || userLang === 'en' || userLang === 'zh') {
+          setLanguageState(userLang);
+          localStorage.setItem('kft_user_language_pref_v1', userLang);
+        }
       } else {
         localStorage.removeItem('kft_current_user_v5');
       }
@@ -1949,7 +2057,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               'warning'
             );
           } else {
-            const matchedCurrent = result.mergedUsers.find(u => u.id === currentUser.id);
+            const curEmail = (currentUser.email || '').toLowerCase().trim();
+            const curPhone = (currentUser.phone || '').replace(/[\s-+]/g, '');
+            const matchedCurrent = result.mergedUsers.find(
+              u =>
+                u.id === currentUser.id ||
+                (curEmail && u.email && u.email.toLowerCase().trim() === curEmail) ||
+                (curPhone.length >= 7 && u.phone && u.phone.replace(/[\s-+]/g, '') === curPhone)
+            );
             if (matchedCurrent) setCurrentUser(matchedCurrent);
           }
         }
@@ -2285,6 +2400,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setCurrentUser(existing);
       showToast(language === 'km' ? `សូមស្វាគមន៍មកវិញ ${existing.name}!` : `Welcome back, ${existing.name}!`, 'success');
       setIsAuthModalOpen(false);
+      if (isSupabaseConfigured()) {
+        setTimeout(() => { triggerCloudSyncNow(); }, 300);
+      }
       return true;
     }
     
@@ -2308,6 +2426,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setCurrentUser(newUser);
     showToast(language === 'km' ? `ចូលគណនីបានជោគជ័យ!` : `Logged in successfully!`, 'success');
     setIsAuthModalOpen(false);
+    // Trigger immediate cloud sync after login to automatically restore any VIP status from Supabase Cloud
+    if (isSupabaseConfigured()) {
+      setTimeout(() => { triggerCloudSyncNow(); }, 300);
+    }
     return true;
   };
 
@@ -3079,6 +3201,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setCurrentUser(existing);
       showToast(language === 'km' ? `សូមស្វាគមន៍មកវិញ ${existing.name}!` : `Welcome back, ${existing.name}!`, 'success');
       setIsAuthModalOpen(false);
+      if (isSupabaseConfigured()) {
+        setTimeout(() => { triggerCloudSyncNow(); }, 300);
+      }
       return true;
     }
 
@@ -3098,6 +3223,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setCurrentUser(newUser);
     showToast(language === 'km' ? `សូមស្វាគមន៍មកកាន់កម្មវិធី ${displayName}!` : `Welcome to the app, ${displayName}!`, 'success');
     setIsAuthModalOpen(false);
+    if (isSupabaseConfigured()) {
+      setTimeout(() => { triggerCloudSyncNow(); }, 300);
+    }
     return true;
   };
 
@@ -3149,6 +3277,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setCurrentUser(updated);
       showToast(language === 'km' ? `សូមស្វាគមន៍មកវិញ ${updated.name}!` : `Welcome back, ${updated.name}!`, 'success');
       setIsAuthModalOpen(false);
+      if (isSupabaseConfigured()) {
+        setTimeout(() => { triggerCloudSyncNow(); }, 300);
+      }
       return true;
     }
 
@@ -3171,6 +3302,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setCurrentUser(newUser);
     showToast(language === 'km' ? `សូមស្វាគមន៍មកកាន់កម្មវិធី ${newUser.name}!` : `Welcome to the app, ${newUser.name}!`, 'success');
     setIsAuthModalOpen(false);
+    if (isSupabaseConfigured()) {
+      setTimeout(() => { triggerCloudSyncNow(); }, 300);
+    }
     return true;
   };
 
@@ -4667,6 +4801,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         } : null);
       }
 
+      // Immediately push updated VIP user & transactions to Supabase Cloud and local backup vault
+      try {
+        const updatedUsersForCloud = users.map(u =>
+          u.id === targetUserId
+            ? {
+                ...u,
+                membershipTier: 'premium_vip' as const,
+                subscriptionStartDate: calcStart,
+                subscriptionExpiryDate: calcExpiry,
+                subscriptionStatus: 'active' as const,
+                paymentStatus: 'verified' as const,
+              }
+            : u
+        );
+        localStorage.setItem('kft_users_v5', JSON.stringify(updatedUsersForCloud));
+        localStorage.setItem('kft_vip_registry_backup_v1', JSON.stringify(
+          updatedUsersForCloud.filter(u => u.membershipTier === 'premium_vip')
+        ));
+        if (isSupabaseConfigured()) {
+          pushCloudDocument('kft_cloud_users_v1', updatedUsersForCloud);
+        }
+      } catch {}
+
       // Upgrade user's restaurants if any
       setRestaurants(prev => prev.map(r => {
         if (r.ownerId !== targetUserId) return r;
@@ -6018,6 +6175,32 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           : null
       );
     }
+
+    // Immediately push updated VIP user & backup to Supabase Cloud
+    try {
+      const updatedUsersForCloud = users.map(u =>
+        u.id === ticket.userId
+          ? {
+              ...u,
+              membershipTier: 'premium_vip' as const,
+              subscriptionStartDate: startDate,
+              subscriptionExpiryDate: expiryDate,
+              subscriptionStatus: 'active' as const,
+              paymentStatus: 'verified' as const,
+              paymentMethod: 'KHQR' as const,
+              transactionRef: ticket.paymentRef,
+            }
+          : u
+      );
+      localStorage.setItem('kft_users_v5', JSON.stringify(updatedUsersForCloud));
+      localStorage.setItem(
+        'kft_vip_registry_backup_v1',
+        JSON.stringify(updatedUsersForCloud.filter(u => u.membershipTier === 'premium_vip'))
+      );
+      if (isSupabaseConfigured()) {
+        pushCloudDocument('kft_cloud_users_v1', updatedUsersForCloud);
+      }
+    } catch {}
 
     // 2. Upgrade user's shops to premium
     setRestaurants(prev =>

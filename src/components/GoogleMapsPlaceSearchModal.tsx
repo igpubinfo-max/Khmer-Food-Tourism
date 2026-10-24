@@ -62,6 +62,7 @@ const SEARCH_CATEGORIES: { id: GooglePlaceSearchCategory; labelKh: string; label
 ];
 
 const QUICK_SEARCH_PRESETS: { query: string; category: GooglePlaceSearchCategory; province: string; labelKh: string }[] = [
+  { query: 'ជំនោរក្បាលកោះ', category: 'restaurant', province: 'ទាំងអស់', labelKh: '🍽️ ជំនោរក្បាលកោះ (Chumnor Kbal Koh)' },
   { query: 'ភោជនីយដ្ឋានម្ហូបខ្មែរល្បីៗ', category: 'restaurant', province: 'រាជធានីភ្នំពេញ', labelKh: '🍽️ ហាងម្ហូបខ្មែរភ្នំពេញ' },
   { query: 'ប្រាសាទបុរាណ និងរមណីយដ្ឋាន', category: 'temple', province: 'សៀមរាប', labelKh: '🛕 ប្រាសាទសៀមរាប' },
   { query: 'អាហារគ្រឿងសមុទ្រ និងឆ្នេរ', category: 'seafood', province: 'កែប', labelKh: '🦀 គ្រឿងសមុទ្រកែប' },
@@ -184,28 +185,42 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
       const response = await searchGoogleMapsPlacesAdvanced({
         query: activeQuery,
         category: activeCat,
+        categoryFilter: activeCat,
         province: activeProv,
+        provinceFilter: activeProv,
         location: activeLoc ? { lat: activeLoc.lat, lng: activeLoc.lng, radiusMeters: 15000 } : undefined,
+        lat: activeLoc?.lat,
+        lng: activeLoc?.lng,
+        radiusMeters: 15000,
         pageToken: token,
         pageSize: 12,
+        language,
       });
+
+      const foundPlaces = response.places || response.results || [];
 
       if (isAppend) {
         setResults(prev => {
           const existingIds = new Set(prev.map(p => p.placeId));
-          const uniqueNew = response.places.filter(p => !existingIds.has(p.placeId));
+          const uniqueNew = foundPlaces.filter(p => !existingIds.has(p.placeId));
           return [...prev, ...uniqueNew];
         });
       } else {
-        setResults(response.places);
+        setResults(foundPlaces);
         setCurrentPage(1);
         setSelectedPlaceIds(new Set());
       }
 
       setNextPageToken(response.nextPageToken);
-      setFromCache(response.fromCache);
-      if (response.errorMessage) {
-        setErrorMsg(response.errorMessage);
+      setFromCache(Boolean(response.fromCache ?? response.fromSmartCache));
+      const errText =
+        language === 'km'
+          ? response.errorMessageKh || response.errorMessage
+          : language === 'zh'
+          ? response.errorMessageZh || response.errorMessageEn || response.errorMessage
+          : response.errorMessageEn || response.errorMessage;
+      if (errText) {
+        setErrorMsg(errText);
       }
       refreshQuotaStats();
     } catch (err: any) {
@@ -586,13 +601,13 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
               </span>
               <span>
                 📡 API Calls Today:{' '}
-                <strong className={quotaStats.isQuotaReached ? 'text-red-600' : 'text-slate-900'}>
+                <strong className={quotaStats.dailyApiCallsCount >= quotaStats.dailyApiLimit ? 'text-red-600' : 'text-slate-900'}>
                   {quotaStats.dailyApiCallsCount} / {quotaStats.dailyApiLimit}
                 </strong>
               </span>
               <span>
                 ⚡ Smart Cache (30-Day TTL):{' '}
-                <strong className="text-emerald-700">{quotaStats.cachedItemsCount} places ({quotaStats.cacheHitsCount} hits saved $0)</strong>
+                <strong className="text-emerald-700">{quotaStats.totalCachedPlaces} places ({quotaStats.cacheHitsSavedQuota} hits saved $0)</strong>
               </span>
               {fromCache && results.length > 0 && (
                 <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-bold">
@@ -707,21 +722,52 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
               </p>
             </div>
           ) : results.length === 0 ? (
-            <div className="py-12 px-4 text-center max-w-lg mx-auto space-y-4">
+            <div className="py-10 px-4 text-center max-w-lg mx-auto space-y-4">
               <div className="w-16 h-16 rounded-3xl bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto shadow-inner">
                 <MapPin className="w-8 h-8" />
               </div>
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 <h3 className="text-base font-extrabold text-slate-800">
-                  {language === 'km'
-                    ? 'ស្វែងរកហាង ភោជនីយដ្ឋាន និងតំបន់ទេសចរណ៍ពិតៗនៅកម្ពុជា'
-                    : 'Search Real Shops, Restaurants & Tourist Attractions in Cambodia'}
+                  {query.trim()
+                    ? (language === 'km'
+                        ? `រកមិនឃើញទីតាំង "${query}" ក្នុងឃ្លាំងទិន្នន័យកម្មវិធីទេ`
+                        : language === 'zh'
+                        ? `未在应用数据库中找到“${query}”`
+                        : `No cached results found for "${query}"`)
+                    : (language === 'km'
+                        ? 'ស្វែងរកហាង ភោជនីយដ្ឋាន និងតំបន់ទេសចរណ៍ពិតៗនៅកម្ពុជា'
+                        : language === 'zh'
+                        ? '搜索柬埔寨真实餐厅、店铺与旅游景点'
+                        : 'Search Real Shops, Restaurants & Tourist Attractions in Cambodia')}
                 </h3>
                 <p className="text-xs text-slate-500 leading-relaxed">
                   {language === 'km'
-                    ? 'វាយបញ្ចូលឈ្មោះទីតាំង ជ្រើសរើសប្រភេទ ឬខេត្ត/ក្រុង រួចចុចប៊ូតុង «ស្វែងរក» ឬចុចលើប៊ូតុងស្វែងរករហ័សខាងលើ។ រាល់ទិន្នន័យពី Google Maps ត្រូវបានរក្សាទុកដាច់ដោយឡែកពីទិន្នន័យដែល Admin បានកែសម្រួល។'
-                    : 'Enter a place name, choose a category or province, and click Search. Google Maps data is kept separate from Admin-edited fields.'}
+                    ? 'វាយបញ្ចូលឈ្មោះទីតាំងជាភាសាខ្មែរ អង់គ្លេស ឬចិន រួចចុច «ស្វែងរក» ឬចុចប៊ូតុងខាងក្រោមដើម្បីបើកស្វែងរកទីតាំងនេះផ្ទាល់នៅលើផែនទី Google Maps។'
+                    : language === 'zh'
+                    ? '支持输入高棉语、中文或英文名称搜索。如果未找到结果，请点击下方按钮直接在 Google 地图中打开搜索。'
+                    : 'Search by Khmer, English, or Chinese name, or tap the button below to open your search directly in Google Maps.'}
                 </p>
+                {query.trim() && (
+                  <div className="pt-2">
+                    <a
+                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                        `${query.trim()} ${province !== 'ទាំងអស់' ? province : ''} Cambodia`.trim()
+                      )}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold shadow-md transition active:scale-95"
+                    >
+                      <ExternalLink className="w-4 h-4" />
+                      <span>
+                        {language === 'km'
+                          ? `🗺️ បើកស្វែងរក "${query.trim()}" ផ្ទាល់នៅលើ Google Maps`
+                          : language === 'zh'
+                          ? `🗺️ 在 Google 地图中搜索 “${query.trim()}”`
+                          : `🗺️ Open "${query.trim()}" in Google Maps`}
+                      </span>
+                    </a>
+                  </div>
+                )}
               </div>
             </div>
           ) : (

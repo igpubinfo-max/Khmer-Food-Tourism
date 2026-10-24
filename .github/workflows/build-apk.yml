@@ -49,7 +49,7 @@ jobs:
           mkdir -p android/app/src/main/assets/public
           cp -rf dist/* android/app/src/main/assets/public/
 
-      - name: 8. Build Signed Android Release APK (V1/V2/V3 Play Protect Verified)
+      - name: 8. Build Signed Android Release APK & Google Play Store AAB (V1/V2/V3 Play Protect Verified)
         run: |
           if [ ! -f android/app/khmerfood-upload-key.jks ]; then
             keytool -genkeypair -v -noprompt \
@@ -62,47 +62,51 @@ jobs:
           fi
           cd android
           chmod +x ./gradlew
-          ./gradlew assembleRelease --no-daemon -x lint -x lintVitalRelease || ./gradlew assembleDebug --no-daemon
+          ./gradlew assembleRelease bundleRelease --no-daemon -x lint -x lintVitalRelease || ./gradlew assembleDebug --no-daemon
 
-      - name: 9. Locate and Rename Signed APK Files
+      - name: 9. Locate and Rename Signed APK & Play Store AAB Files
         run: |
-          echo "=== SEARCHING FOR GENERATED APK FILES ==="
-          find . -name "*.apk" -ls
+          echo "=== SEARCHING FOR GENERATED APK & AAB FILES ==="
+          find . -name "*.apk" -o -name "*.aab" -ls
           mkdir -p android/app/build/outputs/apk/debug
           REL_APK=$(find android/app/build/outputs/apk/release -name "*.apk" 2>/dev/null | head -n 1)
           if [ -n "$REL_APK" ] && [ -f "$REL_APK" ]; then
-            cp "$REL_APK" android/app/build/outputs/apk/debug/KhmerFoodTourism-v2.0.0.apk
+            cp "$REL_APK" android/app/build/outputs/apk/debug/KhmerFoodTourism-v2.1.0.apk
           elif [ -f android/app/build/outputs/apk/debug/app-debug.apk ]; then
-            mv android/app/build/outputs/apk/debug/app-debug.apk android/app/build/outputs/apk/debug/KhmerFoodTourism-v2.0.0.apk
+            mv android/app/build/outputs/apk/debug/app-debug.apk android/app/build/outputs/apk/debug/KhmerFoodTourism-v2.1.0.apk
+          fi
+          REL_AAB=$(find android/app/build/outputs/bundle/release -name "*.aab" 2>/dev/null | head -n 1)
+          if [ -n "$REL_AAB" ] && [ -f "$REL_AAB" ]; then
+            cp "$REL_AAB" android/app/build/outputs/apk/debug/KhmerFoodTourism-v2.1.0-PlayStore.aab
           fi
           ls -la android/app/build/outputs/apk/debug/
 
-      - name: 10. Upload Android APK Artifact
+      - name: 10. Upload Android APK & AAB Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Khmer-Food-Tourism-APK
+          name: Khmer-Food-Tourism-Release-Packages
           path: |
             android/app/build/outputs/apk/debug/*.apk
+            android/app/build/outputs/apk/debug/*.aab
 
-      - name: 11. Publish GitHub Release with APK
+      - name: 11. Publish GitHub Release with APK & Play Store AAB
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: v2.0.0
-          name: "Khmer Food & Tourism v2.0.0 (Google Maps Search & Import Hub + New App Logo)"
+          tag_name: v2.1.0
+          name: "Khmer Food & Tourism v2.1.0 (3-Language KH/EN/ZH + Google Maps Search Fix + Balanced App Icon)"
           make_latest: true
           body: |
             ### 🇰🇭 កម្មវិធីទូរស័ព្ទដៃ អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism Mobile App)
             
-            **កំណែថ្មី v2.0.0 (Build 72):**
-            - 🗺️ **១. ភ្ជាប់ប្រព័ន្ធ Google Maps Platform API សម្រាប់ស្វែងរក និងនាំចូលហាង & តំបន់ទេសចរណ៍ពិតៗ (Google Maps Search & Import Hub)៖**
-              - អនុញ្ញាតឱ្យអ្នកប្រើប្រាស់ និង Admin ស្វែងរកហាង ភោជនីយដ្ឋាន កាហ្វេ និងតំបន់ទេសចរណ៍ពិតៗនៅកម្ពុជាតាមរយៈ **ឈ្មោះទីតាំង (Place Name)**, **ប្រភេទ (Category)**, **ខេត្ត/ក្រុងទាំង ២៥ (Province)** ឬ **ទីតាំងជិតខ្លួន (GPS Near Me)**។
-              - ទាញយកព័ត៌មានលម្អិត អាសយដ្ឋាន កូអរដោនេ GPS តំណភ្ជាប់ Google Maps ពិន្ទុផ្កាយ (Rating) ចំនួនការវាយតម្លៃ និងរូបភាពផ្លូវការពី Google Maps (ដោយមិនដាក់រូបភាពខុសទីតាំងជាដាច់ខាត)។
-              - អនុញ្ញាតឱ្យ Admin ពិនិត្យ កែសម្រួល និងនាំចូល (Single ឬ Batch Import) ទីតាំងដែលបានជ្រើសរើសចូលក្នុងមូលដ្ឋានទិន្នន័យកម្មវិធី ដោយមានប្រព័ន្ធការពារទិន្នន័យស្ទួន (`googlePlaceId` + ឈ្មោះ + កូអរដោនេ GPS) និងរក្សាទុកទិន្នន័យ Google Maps ដាច់ដោយឡែកពីព័ត៌មានដែល Admin បានកែសម្រួល។
-              - បន្ថែម Pagination, ការគ្រប់គ្រងកូតា API ប្រចាំថ្ងៃ (Daily Quota Limit), Smart Cache 30 ថ្ងៃ និងការបង្ហាញប្រភព `Powered by Google Maps` តាមគោលការណ៍ផ្លូវការ។
-            - 🎨 **២. ផ្លាស់ប្តូររូបសញ្ញា (App Icon Logo) ថ្មីផ្លូវការ៖**
-              - បានបំពាក់រូបសញ្ញា (Icon Logo) ថ្មីនៅលើគ្រប់ផ្នែកនៃកម្មវិធី ទាំង Android Launcher Icons, Web/PWA Icons និងក្បាលកម្មវិធី (Header & Welcome Screen)។
+            **កំណែថ្មី v2.1.0 (Build 73):**
+            - 🌐 **១. បន្ថែមភាសាចិនសាមញ្ញ (Simplified Chinese - 中文) ជាភាសាទី ៣ (រួមជាមួយ ខ្មែរ និង English)៖**
+              - អាចប្តូរភាសាភ្លាមៗដោយចុចតែ ១ ដង (`ខ្មែរ` | `EN` | `中文`) និងរក្សាទុកចំណូលចិត្តភាសារបស់អ្នកប្រើប្រាស់ម្នាក់ៗដោយស្វ័យប្រវត្តិ។
+            - 🗺️ **២. កែសម្រួលប្រព័ន្ធស្វែងរក Google Maps & បន្ថែម «ភោជនីយដ្ឋាន ជំនោរក្បាលកោះ»៖**
+              - គាំទ្រការស្វែងរកទីតាំងពិតៗជាភាសាខ្មែរ អង់គ្លេស និងចិន (រួមទាំងការលុប Zero-Width Space ក្នុងអក្សរខ្មែរ និងប៊ូតុងបើកស្វែងរកផ្ទាល់លើ Google Maps)។
+            - 🎨 **៣. កែសម្រួលទំហំរូបសញ្ញា (App Icon) ជាមួយស៊ុមពណ៌សស្មើស្អាតជុំវិញគ្រប់ជ្រុង។**
           draft: false
           prerelease: false
           files: |
             android/app/build/outputs/apk/debug/*.apk
+            android/app/build/outputs/apk/debug/*.aab

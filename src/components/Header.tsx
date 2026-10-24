@@ -16,17 +16,18 @@ export const Header: React.FC = () => {
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const provinces = [
-    { id: '', nameKh: 'គ្រប់ខេត្តក្រុង', nameEn: 'All Provinces' },
-    { id: 'រាជធានីភ្នំពេញ', nameKh: 'ភ្នំពេញ', nameEn: 'Phnom Penh' },
-    { id: 'ខេត្តសៀមរាប', nameKh: 'សៀមរាប', nameEn: 'Siem Reap' },
-    { id: 'ខេត្តបាត់ដំបង', nameKh: 'បាត់ដំបង', nameEn: 'Battambang' },
-    { id: 'ខេត្តកំពត', nameKh: 'កំពត', nameEn: 'Kampot' },
-    { id: 'ខេត្តកែប', nameKh: 'កែប', nameEn: 'Kep' },
-    { id: 'ខេត្តព្រះសីហនុ', nameKh: 'ព្រះសីហនុ', nameEn: 'Sihanoukville' },
-    { id: 'ខេត្តមណ្ឌលគិរី', nameKh: 'មណ្ឌលគិរី', nameEn: 'Mondulkiri' },
+    { id: '', nameKh: 'គ្រប់ខេត្តក្រុង', nameEn: 'All Provinces', nameZh: '全部省市' },
+    { id: 'រាជធានីភ្នំពេញ', nameKh: 'ភ្នំពេញ', nameEn: 'Phnom Penh', nameZh: '金边' },
+    { id: 'ខេត្តសៀមរាប', nameKh: 'សៀមរាប', nameEn: 'Siem Reap', nameZh: '暹粒' },
+    { id: 'ខេត្តបាត់ដំបង', nameKh: 'បាត់ដំបង', nameEn: 'Battambang', nameZh: '马德望' },
+    { id: 'ខេត្តកំពត', nameKh: 'កំពត', nameEn: 'Kampot', nameZh: '贡布' },
+    { id: 'ខេត្តកែប', nameKh: 'កែប', nameEn: 'Kep', nameZh: '白马' },
+    { id: 'ខេត្តព្រះសីហនុ', nameKh: 'ព្រះសីហនុ', nameEn: 'Sihanoukville', nameZh: '西哈努克港' },
+    { id: 'ខេត្តមណ្ឌលគិរី', nameKh: 'មណ្ឌលគិរី', nameEn: 'Mondulkiri', nameZh: '蒙多基里' },
   ];
 
   const isKm = language === 'km';
+  const isZh = language === 'zh';
 
   return (
     <header className="sticky top-0 z-40 bg-[#064E3B] text-white shadow-md pt-[env(safe-area-inset-top,0px)] border-b border-[#047857]">
@@ -38,19 +39,19 @@ export const Header: React.FC = () => {
           className="flex items-center gap-2 cursor-pointer group min-w-0 flex-1"
         >
           <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white p-0.5 shadow-md flex items-center justify-center border border-emerald-300/60 shrink-0 overflow-hidden">
-            <img src="/icon-192.png?v=2.0.0" alt="Khmer Food" className="w-full h-full rounded-[9px] object-cover" />
+            <img src="/icon-192.png?v=2.1.0" alt="Khmer Food" className="w-full h-full rounded-[9px] object-contain" />
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1 flex-wrap">
               <h1 className="font-moul text-[12px] sm:text-sm tracking-wide text-white leading-tight drop-shadow-sm truncate">
-                អាហារ & ទេសចរណ៍ខ្មែរ
+                {isZh ? '高棉美食与旅游' : 'អាហារ & ទេសចរណ៍ខ្មែរ'}
               </h1>
               <span className="px-1 py-0.2 rounded bg-white/20 text-white font-mono text-[8px] sm:text-[9px] font-bold border border-white/25 shrink-0">
                 {APP_VERSION}
               </span>
             </div>
             <p className="text-[9px] sm:text-[10px] text-emerald-200 font-medium tracking-wider uppercase truncate">
-              Khmer Food & Tourism
+              {isZh ? 'Khmer Food & Tourism • 柬埔寨指南' : 'Khmer Food & Tourism'}
             </p>
           </div>
         </div>
@@ -77,26 +78,47 @@ export const Header: React.FC = () => {
             <span className="hidden sm:inline">{isKm ? 'ដំឡើង' : 'Install'}</span>
           </button>
 
-          {/* Heart & Language Selector Area (Grouped Together for Easy Mobile Access) */}
-          <div className="flex items-center gap-1 bg-[#053F30]/90 p-0.5 rounded-full border border-emerald-400/40 shadow-xs shrink-0">
+          {/* Heart & 3-Language Selector Area (ខ្មែរ / EN / 中文) */}
+          <div className="flex items-center gap-0.5 bg-[#053F30]/90 p-0.5 rounded-full border border-emerald-400/40 shadow-xs shrink-0">
             {/* Heart / Support Button */}
             <button
               onClick={() => setIsSupportModalOpen(true)}
-              className="w-7 h-7 rounded-full bg-[#10B981] hover:bg-[#059669] text-white flex items-center justify-center shadow-xs transition-all active:scale-95 shrink-0"
-              title={isKm ? 'ជួយឧបត្ថម្ភគាំទ្រកម្មវិធី (Support App)' : 'Support App'}
+              className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-[#10B981] hover:bg-[#059669] text-white flex items-center justify-center shadow-xs transition-all active:scale-95 shrink-0"
+              title={isKm ? 'ជួយឧបត្ថម្ភគាំទ្រកម្មវិធី (Support App)' : isZh ? '支持我们 (Support App)' : 'Support App'}
             >
-              <Heart className="w-3.5 h-3.5 fill-white text-white shrink-0" />
+              <Heart className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-white text-white shrink-0" />
             </button>
 
-            {/* Language Selector (EN / KH) Right Next to Heart Icon */}
-            <button
-              onClick={() => setLanguage(isKm ? 'en' : 'km')}
-              className="flex items-center gap-0.5 px-2 h-7 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 text-[10px] font-black transition-all active:scale-95 shadow-xs shrink-0 cursor-pointer"
-              title="ផ្លាស់ប្តូរភាសា / Switch Language (EN/KH)"
-            >
-              <Globe className="w-3 h-3 text-slate-900 shrink-0" />
-              <span className="leading-none tracking-tight">{isKm ? 'EN' : 'ខ្មែរ'}</span>
-            </button>
+            {/* 3-Language Instant Switcher Pills: ខ្មែរ | EN | 中文 */}
+            {(['km', 'en', 'zh'] as const).map((langOption) => {
+              const isSelected = language === langOption;
+              const label = langOption === 'km' ? 'ខ្មែរ' : langOption === 'en' ? 'EN' : '中文';
+              return (
+                <button
+                  key={langOption}
+                  type="button"
+                  onClick={() => {
+                    setLanguage(langOption);
+                    showToast(
+                      langOption === 'km'
+                        ? '🇰🇭 បានប្តូរទៅជា ភាសាខ្មែរ'
+                        : langOption === 'zh'
+                        ? '🇨🇳 已切换为 简体中文 (中文)'
+                        : '🇬🇧 Switched to English',
+                      'info'
+                    );
+                  }}
+                  className={`px-1.5 h-6 sm:h-7 rounded-full text-[9px] sm:text-[10px] font-black transition-all active:scale-95 shrink-0 cursor-pointer flex items-center justify-center ${
+                    isSelected
+                      ? 'bg-amber-400 text-slate-950 shadow-xs'
+                      : 'text-emerald-100 hover:text-white hover:bg-emerald-800/70'
+                  }`}
+                  title="ប្តូរភាសា / Switch Language / 切换语言 (ខ្មែរ / EN / 中文)"
+                >
+                  {label}
+                </button>
+              );
+            })}
           </div>
 
           {/* Search Toggle */}
@@ -136,7 +158,7 @@ export const Header: React.FC = () => {
       <div className="bg-[#055a42] text-white/95 text-[11px] px-4 py-1.5 flex items-center justify-between border-t border-emerald-500/30 font-khmer">
         <div className="flex items-center gap-1.5 truncate">
           <Mail className="w-3.5 h-3.5 text-emerald-300 shrink-0" />
-          <span className="text-emerald-200 text-[10px]">{isKm ? 'មតិកែលម្អ (Feedback):' : 'Feedback:'}</span>
+          <span className="text-emerald-200 text-[10px]">{isKm ? 'មតិកែលម្អ (Feedback):' : isZh ? '意见反馈：' : 'Feedback:'}</span>
           <a 
             href="mailto:kftcam@gmail.com" 
             className="font-mono text-white underline hover:text-emerald-200 font-semibold text-[11px]"
@@ -149,16 +171,16 @@ export const Header: React.FC = () => {
           onClick={() => {
             if (navigator.clipboard && navigator.clipboard.writeText) {
               navigator.clipboard.writeText('kftcam@gmail.com').then(() => {
-                showToast(isKm ? 'បានចម្លងអ៊ីមែលជោគជ័យ!' : 'Email copied to clipboard!', 'success');
+                showToast(isKm ? 'បានចម្លងអ៊ីមែលជោគជ័យ!' : isZh ? '邮箱地址已复制！' : 'Email copied to clipboard!', 'success');
               }).catch(() => {});
             } else {
-              showToast(isKm ? 'បានចម្លងអ៊ីមែលជោគជ័យ!' : 'Email copied to clipboard!', 'success');
+              showToast(isKm ? 'បានចម្លងអ៊ីមែលជោគជ័យ!' : isZh ? '邮箱地址已复制！' : 'Email copied to clipboard!', 'success');
             }
           }}
           className="text-[10px] bg-white/15 hover:bg-white/25 px-2 py-0.5 rounded-md text-white font-khmer transition shrink-0 ml-2 border border-white/20 active:scale-95"
-          title={isKm ? 'ចម្លងអ៊ីមែល' : 'Copy Email'}
+          title={isKm ? 'ចម្លងអ៊ីមែល' : isZh ? '复制邮箱' : 'Copy Email'}
         >
-          {isKm ? 'ចម្លង' : 'Copy'}
+          {isKm ? 'ចម្លង' : isZh ? '复制' : 'Copy'}
         </button>
       </div>
 
@@ -172,7 +194,7 @@ export const Header: React.FC = () => {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={isKm ? 'ស្វែងរកម្ហូប, ហាងអាហារ, ឬកន្លែងដើរលេង...' : 'Search food, restaurant, or destination...'}
+              placeholder={isKm ? 'ស្វែងរកម្ហូប, ហាងអាហារ, ឬកន្លែងដើរលេង...' : isZh ? '搜索美食、餐厅或旅游景点（支持高棉语/中文/英文）...' : 'Search food, restaurant, or destination...'}
               className="w-full pl-9 pr-8 py-2 rounded-xl bg-[#047857]/70 border border-emerald-400/60 text-white placeholder-emerald-200/70 text-xs focus:outline-none focus:border-white focus:bg-[#047857] transition"
               autoFocus
             />
@@ -200,7 +222,7 @@ export const Header: React.FC = () => {
                       : 'bg-[#065F46] text-emerald-100 hover:bg-[#047857] hover:text-white'
                   }`}
                 >
-                  {isKm ? prov.nameKh : prov.nameEn}
+                  {isKm ? prov.nameKh : isZh ? prov.nameZh : prov.nameEn}
                 </button>
               );
             })}

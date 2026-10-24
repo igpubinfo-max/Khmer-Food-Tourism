@@ -7,6 +7,7 @@ import {
   searchCambodiaPlacesWithSmartCache,
   convertGooglePlaceToRestaurant,
   findDuplicateRestaurantForGooglePlace,
+  normalizeKhmerSearchText,
   GooglePlaceCachedItem,
 } from '../services/googlePlacesService';
 
@@ -104,7 +105,7 @@ export const RestaurantView: React.FC = () => {
   ];
 
   const filteredRestaurants = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
+    const q = normalizeKhmerSearchText(searchQuery);
     return restaurants.filter((r) => {
       if (r.status !== 'approved' && currentUser?.role !== 'admin' && currentUser?.id !== r.ownerId) {
         return false;
@@ -118,9 +119,13 @@ export const RestaurantView: React.FC = () => {
         return false;
       }
       if (q) {
-        const matchName = r.nameKh.toLowerCase().includes(q) || r.nameEn.toLowerCase().includes(q);
-        const matchAddress = r.addressKh.toLowerCase().includes(q) || r.addressEn.toLowerCase().includes(q);
-        const matchDish = r.signatureDishesKh.some(d => d.toLowerCase().includes(q));
+        const matchName =
+          normalizeKhmerSearchText(r.nameKh).includes(q) ||
+          normalizeKhmerSearchText(r.nameEn).includes(q);
+        const matchAddress =
+          normalizeKhmerSearchText(r.addressKh).includes(q) ||
+          normalizeKhmerSearchText(r.addressEn).includes(q);
+        const matchDish = r.signatureDishesKh.some((d) => normalizeKhmerSearchText(d).includes(q));
         if (!matchName && !matchAddress && !matchDish) return false;
       }
       return true;
@@ -505,7 +510,38 @@ export const RestaurantView: React.FC = () => {
                   );
                 })}
               </div>
-            ) : null}
+            ) : (
+              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-center space-y-2.5">
+                <p className="text-xs text-slate-600 dark:text-slate-300 font-medium">
+                  {isKm
+                    ? `រកមិនឃើញទីតាំង "${searchQuery.trim()}" ក្នុងឃ្លាំងទិន្នន័យទេ។ អ្នកអាចបើកស្វែងរកទីតាំងនេះផ្ទាល់នៅលើ Google Maps៖`
+                    : language === 'zh'
+                    ? `未在缓存中找到“${searchQuery.trim()}”，您可以直接在 Google 地图中搜索：`
+                    : `No cached results for "${searchQuery.trim()}". You can open this search directly in Google Maps:`}
+                </p>
+              </div>
+            )}
+
+            {/* Always provide a 1-click button to open the exact query in Google Maps */}
+            <div className="pt-1 flex flex-col sm:flex-row gap-2">
+              <a
+                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                  `${searchQuery.trim()} ${selectedProvince || ''} Cambodia`.trim()
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition active:scale-95"
+              >
+                <Globe className="w-3.5 h-3.5" />
+                <span>
+                  {isKm
+                    ? `🗺️ បើកស្វែងរក "${searchQuery.trim()}" ផ្ទាល់នៅលើ Google Maps`
+                    : language === 'zh'
+                    ? `🗺️ 在 Google 地图中搜索 “${searchQuery.trim()}”`
+                    : `🗺️ Open "${searchQuery.trim()}" in Google Maps`}
+                </span>
+              </a>
+            </div>
           </div>
         )}
       </div>

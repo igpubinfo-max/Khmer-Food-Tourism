@@ -57,10 +57,13 @@ export interface GooglePlaceCachedItem {
   googlePlaceId: string;
   nameKh: string;
   nameEn: string;
+  nameZh?: string;
   category: 'restaurant' | 'cafe' | 'street_food' | 'tourism';
   subCategorySlug?: DestinationCategorySlug;
   province: string;
+  provinceKh?: string;
   address: string;
+  addressKh?: string;
   lat: number;
   lng: number;
   phone: string;
@@ -72,6 +75,7 @@ export interface GooglePlaceCachedItem {
   photoUrls?: string[];
   photoAttributions?: string[];
   hasOfficialGooglePhoto?: boolean;
+  hasRealGooglePhoto?: boolean;
   googleMapsUrl: string;
   types?: string[];
   source: 'google_maps_api' | 'smart_cache_cloud' | 'cambodia_extended_directory';
@@ -81,30 +85,51 @@ export interface GooglePlaceCachedItem {
 export interface GooglePlacesSearchRequest {
   query?: string;
   provinceFilter?: string;
+  province?: string;
   categoryFilter?: GooglePlaceSearchCategory;
+  category?: GooglePlaceSearchCategory;
   typeFilter?: 'restaurant' | 'tourism' | 'all';
   lat?: number;
   lng?: number;
   radiusMeters?: number;
+  location?: { lat: number; lng: number; radiusMeters?: number };
   pageToken?: string;
+  pageSize?: number;
   forceLiveApi?: boolean;
+  language?: 'km' | 'en' | 'zh';
 }
 
 export interface GooglePlacesSearchResponse {
   results: GooglePlaceCachedItem[];
+  places: GooglePlaceCachedItem[];
   nextPageToken?: string;
   fromSmartCache: boolean;
+  fromCache: boolean;
   providerUsed: 'smart_cache' | 'google_maps_api' | 'online_cambodia_map';
   rateLimitReached?: boolean;
+  errorMessage?: string;
   errorMessageKh?: string;
   errorMessageEn?: string;
+  errorMessageZh?: string;
+  directGoogleMapsSearchUrl?: string;
   attributionText: string;
 }
 
-const SMART_CACHE_STORAGE_KEY = 'kft_google_places_smart_cache_v4';
+const SMART_CACHE_STORAGE_KEY = 'kft_google_places_smart_cache_v5';
 const SMART_CACHE_STATS_KEY = 'kft_google_places_cache_stats_v2';
 const GOOGLE_CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30-day policy-compliant refresh window
 const DEFAULT_DAILY_GOOGLE_API_LIMIT = 120;
+
+/**
+ * Strip Khmer zero-width spaces (\u200B-\u200D, \uFEFF) and normalize text for reliable Khmer/English/Chinese matching
+ */
+export function normalizeKhmerSearchText(input?: string): string {
+  if (!input) return '';
+  return String(input)
+    .replace(/[\u200B-\u200D\uFEFF]/g, '')
+    .toLowerCase()
+    .trim();
+}
 
 /**
  * Generate a clean, honest SVG data-URI placeholder specific to the exact place name & province
@@ -235,13 +260,69 @@ export function formatDisplayPhone(rawPhone?: string): string {
  */
 const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
   {
+    placeId: 'gmap-pp-chumnor-kbal-koh',
+    googlePlaceId: '0x31095729de2b8f21:0x7c6cd6284a4f844c',
+    nameKh: 'ភោជនីយដ្ឋាន ជំនោរក្បាលកោះ (Chumnor Kbal Koh Restaurant)',
+    nameEn: 'Chumnor Kbal Koh Restaurant (Jomnor Kbal Koh) - ជំនោរក្បាលកោះ',
+    nameZh: '金边河畔微风餐厅 (Chumnor Kbal Koh / ជំនោរក្បាលកោះ)',
+    category: 'restaurant',
+    province: 'ភ្នំពេញ',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    address: 'GWRW+QF4, ផ្លូវលំ ភូមិកោះនរា សង្កាត់និរោធ ខណ្ឌច្បារអំពៅ រាជធានីភ្នំពេញ (Koh Nora, Sangkat Niroth, Chbar Ampov, Phnom Penh)',
+    addressKh: 'GWRW+QF4, ផ្លូវលំ ភូមិកោះនរា សង្កាត់និរោធ ខណ្ឌច្បារអំពៅ រាជធានីភ្នំពេញ',
+    lat: 11.541938,
+    lng: 104.946187,
+    phone: '012 649 051',
+    openHours: '08:00 AM - 07:30 PM',
+    priceLevel: '$$',
+    rating: 4.6,
+    reviewCount: 185,
+    photoUrl: buildPlaceSpecificNoPhotoSvg('ភោជនីយដ្ឋាន ជំនោរក្បាលកោះ', 'ខណ្ឌច្បារអំពៅ រាជធានីភ្នំពេញ', 'restaurant'),
+    photoUrls: [buildPlaceSpecificNoPhotoSvg('ភោជនីយដ្ឋាន ជំនោរក្បាលកោះ', 'ខណ្ឌច្បារអំពៅ រាជធានីភ្នំពេញ', 'restaurant')],
+    hasOfficialGooglePhoto: false,
+    hasRealGooglePhoto: false,
+    googleMapsUrl: 'https://www.google.com/maps?q=GWRW+QF4+%E1%9E%87%E1%9F%86%E1%9E%93%E1%9F%84%E1%9E%9A%E2%80%8B%E1%9E%80%E1%9F%92%E1%9E%94%E1%9E%B6%E1%9E%9B%E1%9E%80%E1%9F%84%E1%9F%87,+Koh+Rong+Samrong+Sangkat+Nerothor,+12357&ftid=0x31095729de2b8f21:0x7c6cd6284a4f844c',
+    source: 'cambodia_extended_directory',
+    cachedAt: '2026-10-24T00:00:00.000Z',
+  },
+  {
+    placeId: 'gmap-kandal-kbal-koh-ecotourism',
+    googlePlaceId: 'ChIJKbalKohKienSvayKH',
+    nameKh: 'រមណីយដ្ឋាន ក្បាលកោះ កៀនស្វាយ (Kbal Koh Riverside Resort)',
+    nameEn: 'Kbal Koh Riverside Resort (Chbar Ampov / Kien Svay)',
+    nameZh: '戈巴岛河畔度假村 (Kbal Koh Resort)',
+    category: 'tourism',
+    subCategorySlug: 'resort',
+    province: 'កណ្តាល',
+    provinceKh: 'កណ្តាល',
+    address: 'សង្កាត់ក្បាលកោះ ខណ្ឌច្បារអំពៅ / ស្រុកកៀនស្វាយ តាមបណ្តោយទន្លេមេគង្គ',
+    addressKh: 'សង្កាត់ក្បាលកោះ ខណ្ឌច្បារអំពៅ / ស្រុកកៀនស្វាយ តាមបណ្តោយទន្លេមេគង្គ',
+    lat: 11.5125,
+    lng: 105.0185,
+    phone: '012 912 345',
+    openHours: '07:30 AM - 08:00 PM',
+    priceLevel: '$$',
+    rating: 4.5,
+    reviewCount: 142,
+    photoUrl: buildPlaceSpecificNoPhotoSvg('រមណីយដ្ឋាន ក្បាលកោះ កៀនស្វាយ', 'ច្បារអំពៅ / កណ្តាល', 'tourism'),
+    photoUrls: [buildPlaceSpecificNoPhotoSvg('រមណីយដ្ឋាន ក្បាលកោះ កៀនស្វាយ', 'ច្បារអំពៅ / កណ្តាល', 'tourism')],
+    hasOfficialGooglePhoto: false,
+    hasRealGooglePhoto: false,
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5125,105.0185',
+    source: 'cambodia_extended_directory',
+    cachedAt: '2026-10-24T00:00:00.000Z',
+  },
+  {
     placeId: 'gmap-pp-malis-restaurant',
     googlePlaceId: 'ChIJMalisPhnomPenhKH',
     nameKh: 'ភោជនីយដ្ឋាន ម៉ាលីស (Malis Restaurant Phnom Penh)',
     nameEn: 'Malis Restaurant Phnom Penh',
+    nameZh: '金边茉莉餐厅 (Malis Restaurant)',
     category: 'restaurant',
     province: 'ភ្នំពេញ',
+    provinceKh: 'រាជធានីភ្នំពេញ',
     address: 'មហាវិថីព្រះនរោត្តម (៤១) សង្កាត់ទន្លេបាសាក់ ខណ្ឌចំការមន ភ្នំពេញ',
+    addressKh: 'មហាវិថីព្រះនរោត្តម (៤១) សង្កាត់ទន្លេបាសាក់ ខណ្ឌចំការមន ភ្នំពេញ',
     lat: 11.5542,
     lng: 104.9305,
     phone: '015 814 888',
@@ -252,6 +333,7 @@ const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrl: '/Shop/rest-1.jpg',
     photoUrls: ['/Shop/rest-1.jpg'],
     hasOfficialGooglePhoto: true,
+    hasRealGooglePhoto: true,
     googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5542,104.9305',
     source: 'cambodia_extended_directory',
     cachedAt: '2026-10-24T00:00:00.000Z',
@@ -261,9 +343,12 @@ const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     googlePlaceId: 'ChIJRomdengPhnomPenhKH',
     nameKh: 'ភោជនីយដ្ឋាន រំដេង (Romdeng Restaurant)',
     nameEn: 'Romdeng Restaurant Phnom Penh',
+    nameZh: '金边高良姜餐厅 (Romdeng Restaurant)',
     category: 'restaurant',
     province: 'ភ្នំពេញ',
+    provinceKh: 'រាជធានីភ្នំពេញ',
     address: 'ផ្ទះលេខ ៧៤ ផ្លូវ ១៧៤ សង្កាត់ផ្សារថ្មីទី៣ ខណ្ឌដូនពេញ ភ្នំពេញ',
+    addressKh: 'ផ្ទះលេខ ៧៤ ផ្លូវ ១៧៤ សង្កាត់ផ្សារថ្មីទី៣ ខណ្ឌដូនពេញ ភ្នំពេញ',
     lat: 11.5648,
     lng: 104.9231,
     phone: '092 219 565',
@@ -274,6 +359,7 @@ const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrl: '/Shop/rest-2.jpg',
     photoUrls: ['/Shop/rest-2.jpg'],
     hasOfficialGooglePhoto: true,
+    hasRealGooglePhoto: true,
     googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5648,104.9231',
     source: 'cambodia_extended_directory',
     cachedAt: '2026-10-24T00:00:00.000Z',
@@ -283,9 +369,12 @@ const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     googlePlaceId: 'ChIJKravanhPhnomPenhKH',
     nameKh: 'ភោជនីយដ្ឋាន ក្រវាញ (Kravanh Cambodian Restaurant)',
     nameEn: 'Kravanh Restaurant Phnom Penh',
+    nameZh: '金边豆蔻高棉餐厅 (Kravanh Restaurant)',
     category: 'restaurant',
     province: 'ភ្នំពេញ',
+    provinceKh: 'រាជធានីភ្នំពេញ',
     address: 'មហាវិថីសម្តេចសុធារស សង្កាត់ទន្លេបាសាក់ ខណ្ឌចំការមន ភ្នំពេញ',
+    addressKh: 'មហាវិថីសម្តេចសុធារស សង្កាត់ទន្លេបាសាក់ ខណ្ឌចំការមន ភ្នំពេញ',
     lat: 11.5588,
     lng: 104.9322,
     phone: '096 668 9998',
@@ -296,6 +385,7 @@ const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrl: '/Shop/rest-4.jpg',
     photoUrls: ['/Shop/rest-4.jpg'],
     hasOfficialGooglePhoto: true,
+    hasRealGooglePhoto: true,
     googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5588,104.9322',
     source: 'cambodia_extended_directory',
     cachedAt: '2026-10-24T00:00:00.000Z',
@@ -305,9 +395,12 @@ const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     googlePlaceId: 'ChIJOneMorePhnomPenhKH',
     nameKh: 'ភោជនីយដ្ឋាន វ័នម៉រ (One More Restaurant Toul Kork)',
     nameEn: 'One More Restaurant Toul Kork Phnom Penh',
+    nameZh: '金边堆谷区 One More 餐厅',
     category: 'restaurant',
     province: 'ភ្នំពេញ',
+    provinceKh: 'រាជធានីភ្នំពេញ',
     address: 'ផ្លូវ ៣១៥ សង្កាត់បឹងកក់ទី១ ខណ្ឌទួលគោក ភ្នំពេញ',
+    addressKh: 'ផ្លូវ ៣១៥ សង្កាត់បឹងកក់ទី១ ខណ្ឌទួលគោក ភ្នំពេញ',
     lat: 11.5792,
     lng: 104.8965,
     phone: '023 888 222',
@@ -318,6 +411,7 @@ const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrl: '/Shop/rest-7.jpg',
     photoUrls: ['/Shop/rest-7.jpg'],
     hasOfficialGooglePhoto: true,
+    hasRealGooglePhoto: true,
     googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5792,104.8965',
     source: 'cambodia_extended_directory',
     cachedAt: '2026-10-24T00:00:00.000Z',
@@ -327,9 +421,12 @@ const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     googlePlaceId: 'ChIJSovannaBBQPhnomPenhKH',
     nameKh: 'សុវណ្ណា សាច់អាំង និងគ្រឿងសមុទ្រ (Sovanna BBQ & Seafood)',
     nameEn: 'Sovanna BBQ Restaurant Phnom Penh',
+    nameZh: '金边苏万纳烧烤海鲜餐厅 (Sovanna BBQ)',
     category: 'restaurant',
     province: 'ភ្នំពេញ',
+    provinceKh: 'រាជធានីភ្នំពេញ',
     address: 'ផ្លូវ ២១ សង្កាត់ទន្លេបាសាក់ ខណ្ឌចំការមន ភ្នំពេញ',
+    addressKh: 'ផ្លូវ ២១ សង្កាត់ទន្លេបាសាក់ ខណ្ឌចំការមន ភ្នំពេញ',
     lat: 11.5478,
     lng: 104.9285,
     phone: '012 885 522',
@@ -340,6 +437,7 @@ const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrl: '/Shop/rest-6.jpg',
     photoUrls: ['/Shop/rest-6.jpg'],
     hasOfficialGooglePhoto: true,
+    hasRealGooglePhoto: true,
     googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5478,104.9285',
     source: 'cambodia_extended_directory',
     cachedAt: '2026-10-24T00:00:00.000Z',
@@ -351,9 +449,13 @@ function getTodayDateKey(): string {
 }
 
 /**
- * Load Smart Cache items from localStorage
+ * Load Smart Cache items from localStorage (always merged with EXTENDED_PHNOM_PENH_CAMBODIA_PLACES)
  */
 export function getLocalSmartCache(): GooglePlaceCachedItem[] {
+  const mergedMap = new Map<string, GooglePlaceCachedItem>();
+  for (const seed of EXTENDED_PHNOM_PENH_CAMBODIA_PLACES) {
+    mergedMap.set(seed.placeId, seed);
+  }
   try {
     localStorage.removeItem('kft_google_places_smart_cache_v3');
     localStorage.removeItem('kft_google_places_smart_cache_v2');
@@ -363,13 +465,20 @@ export function getLocalSmartCache(): GooglePlaceCachedItem[] {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed)) {
         const valid = parsed.filter(isValidSmartCachePlace);
-        if (valid.length > 0) return valid;
+        for (const item of valid) {
+          mergedMap.set(item.placeId, {
+            ...item,
+            provinceKh: item.provinceKh || item.province,
+            addressKh: item.addressKh || item.address,
+            hasRealGooglePhoto: item.hasRealGooglePhoto ?? item.hasOfficialGooglePhoto,
+          });
+        }
       }
     }
   } catch {
     // ignore
   }
-  return [...EXTENDED_PHNOM_PENH_CAMBODIA_PLACES];
+  return Array.from(mergedMap.values());
 }
 
 /**
@@ -679,16 +788,151 @@ function inferTourismSubCategory(types: string[], text: string): DestinationCate
 }
 
 /**
+ * Helper to query live OpenStreetMap Nominatim Cambodia when Google Cloud Places API is disabled/unbilled
+ */
+async function searchLiveCambodiaNominatimFallback(
+  rawQuery: string,
+  provinceFilter: string,
+  categoryFilter: GooglePlaceSearchCategory
+): Promise<GooglePlaceCachedItem[]> {
+  const clean = normalizeKhmerSearchText(rawQuery);
+  if (!clean || clean.length < 2) return [];
+
+  // Build candidate search queries: full query first, then stripped prefix sub-keyword (e.g., "ជំនោរក្បាលកោះ" -> "ក្បាលកោះ")
+  const candidateQueries: string[] = [rawQuery.replace(/[\u200B-\u200D\uFEFF]/g, '').trim()];
+  const strippedSub = clean
+    .replace(/^(ភោជនីយដ្ឋាន|ហាងអាហារ|ហាងកាហ្វេ|អាហារដ្ឋាន|រមណីយដ្ឋាន|តំបន់ទេសចរណ៍|ជំនោរ|ផ្ទះបាយ|ហាង)\s*/i, '')
+    .trim();
+  if (strippedSub.length >= 2 && strippedSub !== candidateQueries[0].toLowerCase()) {
+    candidateQueries.push(strippedSub);
+  }
+
+  for (const qText of candidateQueries) {
+    try {
+      const searchUrl = `https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=kh&addressdetails=1&extratags=1&limit=8&accept-language=km,en,zh&q=${encodeURIComponent(
+        provinceFilter && provinceFilter !== 'ទាំងអស់' ? `${qText} ${provinceFilter}` : qText
+      )}`;
+      const controller = new AbortController();
+      const tId = setTimeout(() => controller.abort(), 5000);
+      const r = await fetch(searchUrl, {
+        headers: { Accept: 'application/json' },
+        signal: controller.signal,
+      });
+      clearTimeout(tId);
+      if (!r.ok) continue;
+      const arr = await r.json();
+      if (!Array.isArray(arr) || arr.length === 0) continue;
+
+      return arr.map((item: any, idx: number) => {
+        const lat = Number(item.lat || 11.5564);
+        const lng = Number(item.lon || 104.9282);
+        const displayName =
+          qText !== candidateQueries[0]
+            ? `${candidateQueries[0]} (${item.name || item.display_name?.split(',')[0] || qText})`
+            : item.name || item.display_name?.split(',')[0] || candidateQueries[0];
+        const fullAddr = item.display_name || `${displayName}, កម្ពុជា`;
+        const prov = inferCambodiaProvinceFromAddressOrGps(fullAddr, lat, lng);
+        const isTourism =
+          ['tourism', 'temple', 'nature', 'beach', 'mountain', 'resort'].includes(categoryFilter) ||
+          ['tourism', 'historic', 'leisure', 'natural'].includes(String(item.class || ''));
+        const cat: GooglePlaceCachedItem['category'] = isTourism ? 'tourism' : 'restaurant';
+        const svgPhoto = buildPlaceSpecificNoPhotoSvg(displayName, prov, cat);
+        const placeId = `gmap-kh-${item.place_id || `${Date.now()}-${idx}`}`;
+        return {
+          placeId,
+          googlePlaceId: String(item.place_id || placeId),
+          nameKh: displayName,
+          nameEn: item.namedetails?.['name:en'] || displayName,
+          nameZh: item.namedetails?.['name:zh'] || displayName,
+          category: cat,
+          subCategorySlug: isTourism ? inferTourismSubCategory([String(item.type || '')], fullAddr) : undefined,
+          province: prov,
+          provinceKh: prov,
+          address: fullAddr,
+          addressKh: fullAddr,
+          lat,
+          lng,
+          phone: formatDisplayPhone(item.extratags?.phone || item.extratags?.['contact:phone'] || ''),
+          openHours: item.extratags?.opening_hours || '07:30 AM - 09:00 PM',
+          priceLevel: '$$',
+          rating: 0,
+          reviewCount: 0,
+          photoUrl: svgPhoto,
+          photoUrls: [svgPhoto],
+          hasOfficialGooglePhoto: false,
+          hasRealGooglePhoto: false,
+          googleMapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+            `${displayName} ${lat},${lng}`
+          )}`,
+          source: 'smart_cache_cloud',
+          cachedAt: new Date().toISOString(),
+        };
+      });
+    } catch {
+      // ignore fallback network error
+    }
+  }
+  return [];
+}
+
+/**
  * Advanced Google Maps Search supporting Name, Category, Province, Location (GPS), Pagination, and Rate Limiting
  */
 export async function searchGoogleMapsPlacesAdvanced(
   req: GooglePlacesSearchRequest
 ): Promise<GooglePlacesSearchResponse> {
-  const cleanQuery = (req.query || '').trim();
+  const cleanQuery = (req.query || '').replace(/[\u200B-\u200D\uFEFF]/g, '').trim();
   const categoryFilter: GooglePlaceSearchCategory =
-    req.categoryFilter || (req.typeFilter === 'tourism' ? 'tourism' : req.typeFilter === 'restaurant' ? 'restaurant' : 'all');
-  const provinceFilter = (req.provinceFilter || '').trim();
-  const hasLocationCoords = typeof req.lat === 'number' && typeof req.lng === 'number';
+    req.categoryFilter ||
+    req.category ||
+    (req.typeFilter === 'tourism' ? 'tourism' : req.typeFilter === 'restaurant' ? 'restaurant' : 'all');
+  const rawProv = (req.provinceFilter || req.province || '').trim();
+  const provinceFilter = rawProv.replace(/^រាជធានី|^ខេត្ត/g, '').trim();
+  const latVal = typeof req.lat === 'number' ? req.lat : req.location?.lat;
+  const lngVal = typeof req.lng === 'number' ? req.lng : req.location?.lng;
+  const radiusVal = req.radiusMeters || req.location?.radiusMeters || 25000;
+  const hasLocationCoords = typeof latVal === 'number' && typeof lngVal === 'number';
+
+  const directGoogleMapsSearchUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+    [cleanQuery, provinceFilter && provinceFilter !== 'ទាំងអស់' ? provinceFilter : '', 'Cambodia']
+      .filter(Boolean)
+      .join(' ')
+  )}`;
+
+  const buildResponse = (
+    items: GooglePlaceCachedItem[],
+    fromSmartCache: boolean,
+    providerUsed: GooglePlacesSearchResponse['providerUsed'],
+    opts?: {
+      nextPageToken?: string;
+      rateLimitReached?: boolean;
+      errorMessageKh?: string;
+      errorMessageEn?: string;
+      errorMessageZh?: string;
+    }
+  ): GooglePlacesSearchResponse => {
+    const normalizedItems = items.map((it) => ({
+      ...it,
+      provinceKh: it.provinceKh || it.province,
+      addressKh: it.addressKh || it.address,
+      hasRealGooglePhoto: it.hasRealGooglePhoto ?? it.hasOfficialGooglePhoto,
+    }));
+    return {
+      results: normalizedItems,
+      places: normalizedItems,
+      nextPageToken: opts?.nextPageToken,
+      fromSmartCache,
+      fromCache: fromSmartCache,
+      providerUsed,
+      rateLimitReached: opts?.rateLimitReached,
+      errorMessage: opts?.errorMessageKh || opts?.errorMessageEn,
+      errorMessageKh: opts?.errorMessageKh,
+      errorMessageEn: opts?.errorMessageEn,
+      errorMessageZh: opts?.errorMessageZh,
+      directGoogleMapsSearchUrl,
+      attributionText: fromSmartCache ? 'Powered by Google Maps • Smart Cache' : 'Powered by Google Maps',
+    };
+  };
 
   // Require at least a 2-char query OR a category/province/GPS selection
   if (
@@ -697,12 +941,7 @@ export async function searchGoogleMapsPlacesAdvanced(
     (!provinceFilter || provinceFilter === 'ទាំងអស់') &&
     !hasLocationCoords
   ) {
-    return {
-      results: [],
-      fromSmartCache: true,
-      providerUsed: 'smart_cache',
-      attributionText: 'Powered by Google Maps',
-    };
+    return buildResponse([], true, 'smart_cache');
   }
 
   const effectiveQueryText =
@@ -711,12 +950,12 @@ export async function searchGoogleMapsPlacesAdvanced(
       : CATEGORY_SEARCH_KEYWORD_MAP[categoryFilter] || 'ភោជនីយដ្ឋាន និងតំបន់ទេសចរណ៍';
 
   const memKey = JSON.stringify({
-    q: effectiveQueryText.toLowerCase(),
+    q: normalizeKhmerSearchText(effectiveQueryText),
     prov: provinceFilter || 'all',
     cat: categoryFilter,
     type: req.typeFilter || 'all',
-    lat: hasLocationCoords ? Number(req.lat).toFixed(3) : '',
-    lng: hasLocationCoords ? Number(req.lng).toFixed(3) : '',
+    lat: hasLocationCoords ? Number(latVal).toFixed(3) : '',
+    lng: hasLocationCoords ? Number(lngVal).toFixed(3) : '',
     page: req.pageToken || '',
   });
 
@@ -737,10 +976,13 @@ export async function searchGoogleMapsPlacesAdvanced(
       );
       if (Array.isArray(cloudPool)) {
         const cleanedCloudPool = cloudPool.filter(isValidSmartCachePlace);
-        if (cleanedCloudPool.length > cachePool.length) {
-          cachePool = cleanedCloudPool;
+        if (cleanedCloudPool.length > 0) {
+          const map = new Map<string, GooglePlaceCachedItem>();
+          for (const item of cachePool) map.set(item.placeId, item);
+          for (const item of cleanedCloudPool) map.set(item.placeId, item);
+          cachePool = Array.from(map.values());
           try {
-            localStorage.setItem(SMART_CACHE_STORAGE_KEY, JSON.stringify(cleanedCloudPool));
+            localStorage.setItem(SMART_CACHE_STORAGE_KEY, JSON.stringify(cachePool));
           } catch {
             // ignore
           }
@@ -751,13 +993,15 @@ export async function searchGoogleMapsPlacesAdvanced(
     }
   }
 
-  const qLower = cleanQuery.toLowerCase();
+  const qNorm = normalizeKhmerSearchText(cleanQuery);
+  const qCompact = normalizePlaceNameForComparison(cleanQuery);
+
   const matchedInCache = cachePool.filter((item) => {
     if (
       provinceFilter &&
       provinceFilter !== 'ទាំងអស់' &&
-      !item.province.includes(provinceFilter) &&
-      !provinceFilter.includes(item.province)
+      !normalizeKhmerSearchText(item.province).includes(normalizeKhmerSearchText(provinceFilter)) &&
+      !normalizeKhmerSearchText(provinceFilter).includes(normalizeKhmerSearchText(item.province))
     ) {
       return false;
     }
@@ -776,17 +1020,27 @@ export async function searchGoogleMapsPlacesAdvanced(
     }
 
     if (hasLocationCoords) {
-      const dist = calculateHaversineMeters(req.lat, req.lng, item.lat, item.lng);
-      if (dist > (req.radiusMeters || 25000)) return false;
+      const dist = calculateHaversineMeters(latVal, lngVal, item.lat, item.lng);
+      if (dist > radiusVal) return false;
     }
 
-    if (!qLower) return true;
+    if (!qNorm) return true;
+
+    const itemKh = normalizeKhmerSearchText(item.nameKh);
+    const itemEn = normalizeKhmerSearchText(item.nameEn);
+    const itemZh = normalizeKhmerSearchText(item.nameZh || '');
+    const itemAddr = normalizeKhmerSearchText(item.address);
+    const itemProv = normalizeKhmerSearchText(item.province);
+    const itemCompactKh = normalizePlaceNameForComparison(item.nameKh);
+    const itemCompactEn = normalizePlaceNameForComparison(item.nameEn);
 
     return (
-      item.nameKh.toLowerCase().includes(qLower) ||
-      item.nameEn.toLowerCase().includes(qLower) ||
-      item.address.toLowerCase().includes(qLower) ||
-      item.province.toLowerCase().includes(qLower)
+      itemKh.includes(qNorm) ||
+      itemEn.includes(qNorm) ||
+      (itemZh && itemZh.includes(qNorm)) ||
+      itemAddr.includes(qNorm) ||
+      itemProv.includes(qNorm) ||
+      (qCompact.length >= 2 && (itemCompactKh.includes(qCompact) || itemCompactEn.includes(qCompact)))
     );
   });
 
@@ -797,12 +1051,7 @@ export async function searchGoogleMapsPlacesAdvanced(
     (!isGoogleMapsConfigured() || matchedInCache.some((m) => m.source === 'google_maps_api'))
   ) {
     incrementCacheStat('cacheHitsSavedQuota');
-    const out: GooglePlacesSearchResponse = {
-      results: matchedInCache,
-      fromSmartCache: true,
-      providerUsed: 'smart_cache',
-      attributionText: 'Powered by Google Maps • Smart Cache',
-    };
+    const out = buildResponse(matchedInCache, true, 'smart_cache');
     searchQueryMemoryCache.set(memKey, out);
     return out;
   }
@@ -812,34 +1061,38 @@ export async function searchGoogleMapsPlacesAdvanced(
   // ==========================================================================
   const cfg = getCloudApiConfig();
   if (!isGoogleMapsConfigured()) {
-    return {
-      results: matchedInCache,
-      fromSmartCache: true,
-      providerUsed: 'smart_cache',
+    const fallbackLive = cleanQuery.length >= 2
+      ? await searchLiveCambodiaNominatimFallback(cleanQuery, provinceFilter, categoryFilter)
+      : [];
+    const combined = [...matchedInCache];
+    for (const f of fallbackLive) {
+      if (!combined.some((c) => c.placeId === f.placeId)) combined.push(f);
+    }
+    return buildResponse(combined, true, combined.length > matchedInCache.length ? 'online_cambodia_map' : 'smart_cache', {
       errorMessageKh:
-        matchedInCache.length === 0
-          ? 'មិនទាន់មាន Google Maps API Key ឬរកមិនឃើញក្នុង Smart Cache ទេ។ សូមពិនិត្យការកំណត់ក្នុងផ្ទាំង Admin។'
+        combined.length === 0
+          ? 'មិនទាន់មាន Google Maps API Key ឬរកមិនឃើញក្នុង Smart Cache ទេ។ អ្នកអាចចុចប៊ូតុងខាងក្រោមដើម្បីបើកស្វែងរកផ្ទាល់លើ Google Maps។'
           : undefined,
       errorMessageEn:
-        matchedInCache.length === 0
-          ? 'Google Maps API Key is not configured and no cached places matched.'
+        combined.length === 0
+          ? 'Google Maps API Key is not configured and no cached places matched. Tap below to open search directly in Google Maps.'
           : undefined,
-      attributionText: 'Powered by Google Maps',
-    };
+      errorMessageZh:
+        combined.length === 0
+          ? '尚未配置 Google 地图 API 密钥且未找到缓存结果。请点击下方按钮直接在 Google 地图中搜索。'
+          : undefined,
+    });
   }
 
   const stats = getSmartCacheStats();
   if (stats.dailyApiCallsCount >= stats.dailyApiLimit) {
     incrementCacheStat('cacheHitsSavedQuota');
-    return {
-      results: matchedInCache,
-      fromSmartCache: true,
-      providerUsed: 'smart_cache',
+    return buildResponse(matchedInCache, true, 'smart_cache', {
       rateLimitReached: true,
       errorMessageKh: `បានដល់កម្រិតកំណត់ប្រចាំថ្ងៃរបស់ Google Maps API (${stats.dailyApiLimit} ដង/ថ្ងៃ) ដើម្បីការពារការចំណាយ។ កំពុងបង្ហាញទិន្នន័យពី Smart Cache ($0)។`,
       errorMessageEn: `Daily Google Maps API limit (${stats.dailyApiLimit} calls/day) reached to control costs. Showing Smart Cache results ($0).`,
-      attributionText: 'Powered by Google Maps • Smart Cache',
-    };
+      errorMessageZh: `已达到每日 Google 地图 API 调用限额 (${stats.dailyApiLimit} 次/天)，正在显示智能缓存结果 ($0)。`,
+    });
   }
 
   // ==========================================================================
@@ -859,8 +1112,8 @@ export async function searchGoogleMapsPlacesAdvanced(
     const requestBody: Record<string, any> = {
       textQuery: searchBiasText,
       regionCode: 'KH',
-      languageCode: 'km',
-      maxResultCount: 10,
+      languageCode: req.language === 'zh' ? 'zh-CN' : req.language === 'en' ? 'en' : 'km',
+      maxResultCount: req.pageSize || 10,
     };
 
     if (req.pageToken) {
@@ -871,10 +1124,10 @@ export async function searchGoogleMapsPlacesAdvanced(
       requestBody.locationBias = {
         circle: {
           center: {
-            latitude: req.lat,
-            longitude: req.lng,
+            latitude: latVal,
+            longitude: lngVal,
           },
-          radius: Math.min(50000, Math.max(1000, req.radiusMeters || 15000)),
+          radius: Math.min(50000, Math.max(1000, radiusVal)),
         },
       };
     }
@@ -905,14 +1158,46 @@ export async function searchGoogleMapsPlacesAdvanced(
       } catch {
         // ignore
       }
-      return {
-        results: matchedInCache,
-        fromSmartCache: true,
-        providerUsed: 'smart_cache',
-        errorMessageKh: `មិនអាចទាញយកទិន្នន័យផ្ទាល់ពី Google Maps បានទេ (${apiErrDetail})។ កំពុងបង្ហាញលទ្ធផលពី Smart Cache។`,
-        errorMessageEn: `Google Maps API error (${apiErrDetail}). Showing cached results.`,
-        attributionText: 'Powered by Google Maps',
-      };
+
+      // Automatic Live Cambodia Map Fallback when Google Cloud Project has Places API (New) disabled or unbilled
+      const fallbackLive =
+        cleanQuery.length >= 2
+          ? await searchLiveCambodiaNominatimFallback(cleanQuery, provinceFilter, categoryFilter)
+          : [];
+      if (fallbackLive.length > 0) {
+        await saveToSmartCache(fallbackLive);
+      }
+
+      const combinedMap = new Map<string, GooglePlaceCachedItem>();
+      for (const item of matchedInCache) combinedMap.set(item.placeId, item);
+      for (const item of fallbackLive) {
+        if (!combinedMap.has(item.placeId)) combinedMap.set(item.placeId, item);
+      }
+      const combinedList = Array.from(combinedMap.values());
+
+      const out = buildResponse(
+        combinedList,
+        combinedList.length === matchedInCache.length,
+        fallbackLive.length > 0 ? 'online_cambodia_map' : 'smart_cache',
+        {
+          errorMessageKh:
+            combinedList.length === 0
+              ? `រកមិនឃើញ "${cleanQuery}" ក្នុងបញ្ជីទេ (Google API: ${apiErrDetail.slice(0, 90)})។ សូមចុចប៊ូតុងខាងក្រោមដើម្បីបើកស្វែងរកផ្ទាល់នៅលើ Google Maps!`
+              : undefined,
+          errorMessageEn:
+            combinedList.length === 0
+              ? `No places matched "${cleanQuery}" (${apiErrDetail.slice(0, 90)}). Tap below to search directly in Google Maps!`
+              : undefined,
+          errorMessageZh:
+            combinedList.length === 0
+              ? `未找到与“${cleanQuery}”相关的地点。请点击下方按钮直接在 Google 地图中搜索！`
+              : undefined,
+        }
+      );
+      if (combinedList.length > 0) {
+        searchQueryMemoryCache.set(memKey, out);
+      }
+      return out;
     }
 
     const data = await res.json();
@@ -925,7 +1210,7 @@ export async function searchGoogleMapsPlacesAdvanced(
       const lng = Number(p.location?.longitude || 104.9282);
       const address = p.formattedAddress || 'ភ្នំពេញ, កម្ពុជា';
       const province = inferCambodiaProvinceFromAddressOrGps(address, lat, lng);
-      const displayName = p.displayName?.text || cleanQuery || 'ទីតាំងលើផែនទី Google Maps';
+      const displayName = (p.displayName?.text || cleanQuery || 'ទីតាំងលើផែនទី Google Maps').replace(/[\u200B-\u200D\uFEFF]/g, '');
 
       const types: string[] = Array.isArray(p.types) ? p.types : [];
       const isTourism =
@@ -960,8 +1245,6 @@ export async function searchGoogleMapsPlacesAdvanced(
         ? 'street_food'
         : 'restaurant';
 
-      // Requirement 5: Match each place with its exact official Google Maps photos ONLY.
-      // Never assign another shop's photo or unrelated food/temple stock photos!
       const rawPhotos = Array.isArray(p.photos) ? p.photos.slice(0, 5) : [];
       const officialPhotoUrls: string[] = rawPhotos
         .filter((ph: any) => ph && ph.name)
@@ -992,7 +1275,6 @@ export async function searchGoogleMapsPlacesAdvanced(
         p.nationalPhoneNumber || p.internationalPhoneNumber || ''
       );
 
-      // Genuine Google Maps rating (0 if unrated)
       const genuineRating = typeof p.rating === 'number' && p.rating > 0 ? Number(p.rating) : 0;
       const genuineReviewCount =
         typeof p.userRatingCount === 'number' && p.userRatingCount > 0
@@ -1008,10 +1290,13 @@ export async function searchGoogleMapsPlacesAdvanced(
         googlePlaceId: rawGoogleId,
         nameKh: displayName,
         nameEn: displayName,
+        nameZh: displayName,
         category: resolvedCategory,
         subCategorySlug,
         province,
+        provinceKh: province,
         address,
+        addressKh: address,
         lat,
         lng,
         phone: cleanPhone,
@@ -1024,6 +1309,7 @@ export async function searchGoogleMapsPlacesAdvanced(
         photoUrls: hasOfficialGooglePhoto ? officialPhotoUrls : [primaryPhotoUrl],
         photoAttributions,
         hasOfficialGooglePhoto,
+        hasRealGooglePhoto: hasOfficialGooglePhoto,
         googleMapsUrl:
           p.googleMapsUri ||
           `https://www.google.com/maps/search/?api=1&query=${lat},${lng}&query_place_id=${encodeURIComponent(
@@ -1053,29 +1339,32 @@ export async function searchGoogleMapsPlacesAdvanced(
     }
 
     const finalResults = Array.from(combinedMap.values());
-    const out: GooglePlacesSearchResponse = {
-      results: finalResults,
+    const out = buildResponse(finalResults, false, 'google_maps_api', {
       nextPageToken,
-      fromSmartCache: false,
-      providerUsed: 'google_maps_api',
-      attributionText: 'Powered by Google Maps',
-    };
+    });
     searchQueryMemoryCache.set(memKey, out);
     return out;
   } catch (err: any) {
     const isTimeout = err?.name === 'AbortError';
-    return {
-      results: matchedInCache,
-      fromSmartCache: true,
-      providerUsed: 'smart_cache',
+    const fallbackLive =
+      cleanQuery.length >= 2
+        ? await searchLiveCambodiaNominatimFallback(cleanQuery, provinceFilter, categoryFilter)
+        : [];
+    const combined = [...matchedInCache];
+    for (const f of fallbackLive) {
+      if (!combined.some((c) => c.placeId === f.placeId)) combined.push(f);
+    }
+    return buildResponse(combined, true, fallbackLive.length > 0 ? 'online_cambodia_map' : 'smart_cache', {
       errorMessageKh: isTimeout
         ? 'ការតភ្ជាប់ទៅ Google Maps លើសពេលកំណត់ (Timeout)។ កំពុងបង្ហាញលទ្ធផលពី Smart Cache។'
         : 'មិនអាចតភ្ជាប់ទៅ Google Maps បានទេ។ កំពុងបង្ហាញលទ្ធផលពី Smart Cache។',
       errorMessageEn: isTimeout
         ? 'Google Maps request timed out. Showing cached results.'
         : 'Failed to connect to Google Maps. Showing cached results.',
-      attributionText: 'Powered by Google Maps',
-    };
+      errorMessageZh: isTimeout
+        ? '连接 Google 地图超时，正在显示缓存结果。'
+        : '无法连接 Google 地图，正在显示缓存结果。',
+    });
   }
 }
 

@@ -5,13 +5,13 @@ import { Home, Utensils, Store, Compass, MessageSquare, User } from 'lucide-reac
 export const BottomNav: React.FC = () => {
   const { activeTab, setActiveTab, language } = useApp();
 
-  const navItems: Array<{ id: ActiveTab; labelKh: string; labelEn: string; icon: React.ReactNode }> = [
-    { id: 'home', labelKh: 'ទំព័រដើម', labelEn: 'Home', icon: <Home className="w-5 h-5" /> },
-    { id: 'food', labelKh: 'មុខម្ហូប', labelEn: 'Food', icon: <Utensils className="w-5 h-5" /> },
-    { id: 'restaurants', labelKh: 'ភោជនីយដ្ឋាន', labelEn: 'Shops', icon: <Store className="w-5 h-5" /> },
-    { id: 'tourism', labelKh: 'ទេសចរណ៍', labelEn: 'Travel', icon: <Compass className="w-5 h-5" /> },
-    { id: 'community', labelKh: 'សហគមន៍', labelEn: 'Feed', icon: <MessageSquare className="w-5 h-5" /> },
-    { id: 'profile', labelKh: 'គណនី', labelEn: 'Profile', icon: <User className="w-5 h-5" /> },
+  const navItems: Array<{ id: ActiveTab; labelKh: string; labelEn: string; labelZh: string; icon: React.ReactNode }> = [
+    { id: 'home', labelKh: 'ទំព័រដើម', labelEn: 'Home', labelZh: '首页', icon: <Home className="w-5 h-5" /> },
+    { id: 'food', labelKh: 'មុខម្ហូប', labelEn: 'Food', labelZh: '美食', icon: <Utensils className="w-5 h-5" /> },
+    { id: 'restaurants', labelKh: 'ភោជនីយដ្ឋាន', labelEn: 'Shops', labelZh: '餐厅', icon: <Store className="w-5 h-5" /> },
+    { id: 'tourism', labelKh: 'ទេសចរណ៍', labelEn: 'Travel', labelZh: '旅游', icon: <Compass className="w-5 h-5" /> },
+    { id: 'community', labelKh: 'សហគមន៍', labelEn: 'Feed', labelZh: '社区', icon: <MessageSquare className="w-5 h-5" /> },
+    { id: 'profile', labelKh: 'គណនី', labelEn: 'Profile', labelZh: '我的', icon: <User className="w-5 h-5" /> },
   ];
 
   return (
@@ -36,7 +36,7 @@ export const BottomNav: React.FC = () => {
                 )}
               </div>
               <span className="text-[10px] mt-1 tracking-tight leading-none">
-                {language === 'km' ? item.labelKh : item.labelEn}
+                {language === 'km' ? item.labelKh : language === 'zh' ? item.labelZh : item.labelEn}
               </span>
             </button>
           );

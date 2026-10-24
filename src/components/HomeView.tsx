@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { TrendingFoodCategorySlug, TrendingFoodItem, isUserVipActive, getVipAccountState, getVipRemainingDays, sortRestaurantsChronologically } from '../types';
+import { normalizeKhmerSearchText } from '../services/googlePlacesService';
 import { shareRichContent, copyTextNativeOrWeb } from '../utils/androidMediaHelper';
 import { 
   Sparkles, ChevronRight, Utensils, Store, Compass, 
@@ -139,31 +140,31 @@ export const HomeView: React.FC = () => {
 
   // Global Search Filtering across Foods, Restaurants, and Destinations
   const searchResults = useMemo(() => {
-    const q = (globalSearchQuery || '').toLowerCase().trim();
+    const q = normalizeKhmerSearchText(globalSearchQuery);
     if (!q) return null;
 
     const matchedFoods = foods.filter(f => 
-      f.nameKh.toLowerCase().includes(q) ||
-      f.nameEn.toLowerCase().includes(q) ||
-      (f.descriptionKh && f.descriptionKh.toLowerCase().includes(q)) ||
-      (f.categoryKh && f.categoryKh.toLowerCase().includes(q)) ||
-      (f.ingredients && f.ingredients.some(i => i.nameKh.toLowerCase().includes(q) || i.nameEn.toLowerCase().includes(q)))
+      normalizeKhmerSearchText(f.nameKh).includes(q) ||
+      normalizeKhmerSearchText(f.nameEn).includes(q) ||
+      (f.descriptionKh && normalizeKhmerSearchText(f.descriptionKh).includes(q)) ||
+      (f.categoryKh && normalizeKhmerSearchText(f.categoryKh).includes(q)) ||
+      (f.ingredients && f.ingredients.some(i => normalizeKhmerSearchText(i.nameKh).includes(q) || normalizeKhmerSearchText(i.nameEn).includes(q)))
     );
 
     const matchedRestaurants = sortRestaurantsChronologically(restaurants.filter(r =>
-      r.nameKh.toLowerCase().includes(q) ||
-      r.nameEn.toLowerCase().includes(q) ||
-      (r.addressKh && r.addressKh.toLowerCase().includes(q)) ||
-      (r.provinceKh && r.provinceKh.toLowerCase().includes(q)) ||
-      (r.signatureDishesKh && r.signatureDishesKh.some(d => d.toLowerCase().includes(q)))
+      normalizeKhmerSearchText(r.nameKh).includes(q) ||
+      normalizeKhmerSearchText(r.nameEn).includes(q) ||
+      (r.addressKh && normalizeKhmerSearchText(r.addressKh).includes(q)) ||
+      (r.provinceKh && normalizeKhmerSearchText(r.provinceKh).includes(q)) ||
+      (r.signatureDishesKh && r.signatureDishesKh.some(d => normalizeKhmerSearchText(d).includes(q)))
     ));
 
     const matchedDestinations = destinations.filter(d =>
-      d.nameKh.toLowerCase().includes(q) ||
-      d.nameEn.toLowerCase().includes(q) ||
-      (d.descriptionKh && d.descriptionKh.toLowerCase().includes(q)) ||
-      (d.provinceKh && d.provinceKh.toLowerCase().includes(q)) ||
-      (d.categoryKh && d.categoryKh.toLowerCase().includes(q))
+      normalizeKhmerSearchText(d.nameKh).includes(q) ||
+      normalizeKhmerSearchText(d.nameEn).includes(q) ||
+      (d.descriptionKh && normalizeKhmerSearchText(d.descriptionKh).includes(q)) ||
+      (d.provinceKh && normalizeKhmerSearchText(d.provinceKh).includes(q)) ||
+      (d.categoryKh && normalizeKhmerSearchText(d.categoryKh).includes(q))
     );
 
     const totalCount = matchedFoods.length + matchedRestaurants.length + matchedDestinations.length;
@@ -395,11 +396,32 @@ export const HomeView: React.FC = () => {
                 <p className="text-xs">
                   {isKm 
                     ? `រកមិនឃើញលទ្ធផលត្រូវនឹង "${globalSearchQuery}" ទេ` 
+                    : language === 'zh'
+                    ? `未找到与“${globalSearchQuery}”相关的结果`
                     : `No results found for "${globalSearchQuery}"`}
                 </p>
+                <div className="pt-1 flex justify-center">
+                  <a
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                      `${globalSearchQuery.trim()} Cambodia`
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm transition active:scale-95"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    <span>
+                      {isKm
+                        ? `🗺️ បើកស្វែងរក "${globalSearchQuery.trim()}" ផ្ទាល់នៅលើ Google Maps`
+                        : language === 'zh'
+                        ? `🗺️ 在 Google 地图中搜索 “${globalSearchQuery.trim()}”`
+                        : `🗺️ Open "${globalSearchQuery.trim()}" in Google Maps`}
+                    </span>
+                  </a>
+                </div>
                 <div className="flex items-center justify-center gap-1.5 flex-wrap pt-1 text-[11px]">
-                  <span className="text-slate-400">{isKm ? 'សាកល្បង៖' : 'Try:'}</span>
-                  {['សម្លការី', 'នំបញ្ចុក', 'អាម៉ុក', 'បាត់ដំបង', 'សៀមរាប'].map((tag) => (
+                  <span className="text-slate-400">{isKm ? 'សាកល្បង៖' : language === 'zh' ? '试试搜索：' : 'Try:'}</span>
+                  {['ជំនោរក្បាលកោះ', 'សម្លការី', 'នំបញ្ចុក', 'អាម៉ុក', 'បាត់ដំបង', 'សៀមរាប'].map((tag) => (
                     <button
                       key={tag}
                       onClick={() => setGlobalSearchQuery(tag)}

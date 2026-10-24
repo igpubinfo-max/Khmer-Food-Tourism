@@ -1,6 +1,6 @@
-export const APP_VERSION = 'v2.0.0';
-export const APP_VERSION_NAME = '2.0.0';
-export const APP_BUILD_CODE = 72;
+export const APP_VERSION = 'v2.1.0';
+export const APP_VERSION_NAME = '2.1.0';
+export const APP_BUILD_CODE = 73;
 export const APP_RELEASE_DATE = '2026-10-24';
 
 export interface GoogleMapsPlaceMetadata {
@@ -70,7 +70,7 @@ export const VIP_PLANS: Record<'quarterly' | 'annual', VipPlanConfig> = {
   }
 };
 
-export type Language = 'km' | 'en';
+export type Language = 'km' | 'en' | 'zh';
 
 export type UserRole = 'user' | 'owner' | 'admin';
 

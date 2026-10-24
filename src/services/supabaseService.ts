@@ -377,46 +377,177 @@ export async function syncAllAppDataWithSupabase(localState: {
       return u;
     };
 
-    // 2. Merge Users by ID (prefer valid non-expired VIP active / most recent status, strictly excluding deleted users)
+    // 2. Merge Users by ID & Email/Phone (preserve valid non-expired VIP across device changes / reinstallations)
     const userMap = new Map<string, User>();
+    const emailToIdMap = new Map<string, string>();
+    const phoneToIdMap = new Map<string, string>();
+
+    const registerUserLookups = (u: User) => {
+      if (u.email) emailToIdMap.set(u.email.toLowerCase().trim(), u.id);
+      if (u.phone) {
+        const cleanP = u.phone.replace(/[\s-+]/g, '');
+        if (cleanP.length >= 7) phoneToIdMap.set(cleanP, u.id);
+      }
+    };
+
+    const mergeTwoUserRecords = (cloudUser: User, localUser: User): User => {
+      const nowMs = Date.now();
+      const cloudExpMs = cloudUser.subscriptionExpiryDate ? new Date(cloudUser.subscriptionExpiryDate).getTime() : 0;
+      const localExpMs = localUser.subscriptionExpiryDate ? new Date(localUser.subscriptionExpiryDate).getTime() : 0;
+
+      const isCloudValidVip =
+        cloudUser.membershipTier === 'premium_vip' &&
+        cloudUser.subscriptionStatus === 'active' &&
+        cloudExpMs > nowMs;
+      const isLocalValidVip =
+        localUser.membershipTier === 'premium_vip' &&
+        localUser.subscriptionStatus === 'active' &&
+        localExpMs > nowMs;
+
+      const wasLocalCancelledAfterCloudStart =
+        localUser.subscriptionStatus === 'cancelled' &&
+        localUser.vipCancelledAt &&
+        (!cloudUser.subscriptionStartDate ||
+          new Date(localUser.vipCancelledAt).getTime() >= new Date(cloudUser.subscriptionStartDate).getTime());
+
+      const wasCloudCancelledAfterLocalStart =
+        cloudUser.subscriptionStatus === 'cancelled' &&
+        cloudUser.vipCancelledAt &&
+        (!localUser.subscriptionStartDate ||
+          new Date(cloudUser.vipCancelledAt).getTime() >= new Date(localUser.subscriptionStartDate).getTime());
+
+      if (wasLocalCancelledAfterCloudStart || wasCloudCancelledAfterLocalStart) {
+        const cancelledRec = wasLocalCancelledAfterCloudStart ? localUser : cloudUser;
+        return normalizeVipExpiryOnUser({
+          ...cloudUser,
+          ...localUser,
+          id: cloudUser.id, // Keep canonical cloud ID
+          membershipTier: 'free',
+          subscriptionStatus: 'cancelled',
+          subscriptionExpiryDate: undefined,
+          paymentStatus: 'cancelled',
+          vipCancelledAt: cancelledRec.vipCancelledAt,
+        });
+      }
+
+      if (isCloudValidVip && isLocalValidVip) {
+        // Keep whichever has the later expiration date so remaining days are never lost
+        const bestVip = cloudExpMs >= localExpMs ? cloudUser : localUser;
+        return normalizeVipExpiryOnUser({
+          ...cloudUser,
+          ...localUser,
+          id: cloudUser.id,
+          membershipTier: 'premium_vip',
+          subscriptionStatus: 'active',
+          subscriptionStartDate: bestVip.subscriptionStartDate,
+          subscriptionExpiryDate: bestVip.subscriptionExpiryDate,
+          paymentStatus: 'verified',
+          paymentMethod: bestVip.paymentMethod || localUser.paymentMethod || cloudUser.paymentMethod,
+          transactionRef: bestVip.transactionRef || localUser.transactionRef || cloudUser.transactionRef,
+        });
+      }
+
+      if (isCloudValidVip && !isLocalValidVip) {
+        return normalizeVipExpiryOnUser({
+          ...localUser,
+          ...cloudUser,
+          id: cloudUser.id,
+          membershipTier: 'premium_vip',
+          subscriptionStatus: 'active',
+          subscriptionStartDate: cloudUser.subscriptionStartDate,
+          subscriptionExpiryDate: cloudUser.subscriptionExpiryDate,
+          paymentStatus: 'verified',
+        });
+      }
+
+      if (isLocalValidVip && !isCloudValidVip) {
+        return normalizeVipExpiryOnUser({
+          ...cloudUser,
+          ...localUser,
+          id: cloudUser.id,
+          membershipTier: 'premium_vip',
+          subscriptionStatus: 'active',
+          subscriptionStartDate: localUser.subscriptionStartDate,
+          subscriptionExpiryDate: localUser.subscriptionExpiryDate,
+          paymentStatus: 'verified',
+        });
+      }
+
+      return normalizeVipExpiryOnUser({ ...cloudUser, ...localUser, id: cloudUser.id });
+    };
+
     if (Array.isArray(cloudUsers)) {
       for (const rawU of cloudUsers) {
         if (rawU && rawU.id && !isAccountDeleted(rawU)) {
-          userMap.set(rawU.id, normalizeVipExpiryOnUser(rawU));
+          const norm = normalizeVipExpiryOnUser(rawU);
+          userMap.set(norm.id, norm);
+          registerUserLookups(norm);
         }
       }
     }
     for (const rawU of localState.users) {
       if (!rawU || !rawU.id || isAccountDeleted(rawU)) continue;
       const u = normalizeVipExpiryOnUser(rawU);
-      const existing = userMap.get(u.id);
+      const emailKey = u.email ? u.email.toLowerCase().trim() : '';
+      const phoneKey = u.phone ? u.phone.replace(/[\s-+]/g, '') : '';
+      const matchedId =
+        (userMap.has(u.id) ? u.id : undefined) ||
+        (emailKey ? emailToIdMap.get(emailKey) : undefined) ||
+        (phoneKey.length >= 7 ? phoneToIdMap.get(phoneKey) : undefined);
+
+      const existing = matchedId ? userMap.get(matchedId) : undefined;
       if (!existing) {
         userMap.set(u.id, u);
+        registerUserLookups(u);
       } else {
-        const isCloudValidVip =
-          existing.membershipTier === 'premium_vip' &&
-          existing.subscriptionStatus === 'active' &&
-          existing.subscriptionExpiryDate &&
-          new Date(existing.subscriptionExpiryDate).getTime() > Date.now();
-        const isLocalValidVip =
-          u.membershipTier === 'premium_vip' &&
-          u.subscriptionStatus === 'active' &&
-          u.subscriptionExpiryDate &&
-          new Date(u.subscriptionExpiryDate).getTime() > Date.now();
-        const wasLocalCancelledAfterCloudStart =
-          u.subscriptionStatus === 'cancelled' &&
-          u.vipCancelledAt &&
-          (!existing.subscriptionStartDate ||
-            new Date(u.vipCancelledAt).getTime() >= new Date(existing.subscriptionStartDate).getTime());
-
-        if (isCloudValidVip && !isLocalValidVip && !wasLocalCancelledAfterCloudStart) {
-          userMap.set(u.id, existing);
-        } else {
-          userMap.set(u.id, normalizeVipExpiryOnUser({ ...existing, ...u }));
-        }
+        const merged = mergeTwoUserRecords(existing, u);
+        userMap.set(existing.id, merged);
+        registerUserLookups(merged);
       }
     }
     const mergedUsers = Array.from(userMap.values());
+
+    // 2b. Reconcile verified VIP transactions against mergedUsers:
+    // If a user has a verified VIP transaction whose expiresAt is still in the future (and was not cancelled by Admin after),
+    // automatically restore their VIP status, start date, and remaining days!
+    const allTxnsForReconcile = [
+      ...(Array.isArray(cloudTxns) ? cloudTxns : []),
+      ...(Array.isArray(localState.transactions) ? localState.transactions : []),
+    ];
+    for (let i = 0; i < mergedUsers.length; i++) {
+      const usr = mergedUsers[i];
+      if (usr.role === 'admin' || usr.subscriptionStatus === 'cancelled') continue;
+      const usrEmail = (usr.email || '').toLowerCase().trim();
+      const verifiedFutureTxns = allTxnsForReconcile.filter(t => {
+        if (!t || t.status !== 'verified' || !t.expiresAt) return false;
+        const expMs = new Date(t.expiresAt).getTime();
+        if (Number.isNaN(expMs) || expMs <= Date.now()) return false;
+        return (
+          t.userId === usr.id ||
+          t.ownerId === usr.id ||
+          (usrEmail && t.userEmail && t.userEmail.toLowerCase().trim() === usrEmail)
+        );
+      });
+      if (verifiedFutureTxns.length > 0) {
+        // Pick the transaction with the furthest future expiry date
+        verifiedFutureTxns.sort((a, b) => new Date(b.expiresAt!).getTime() - new Date(a.expiresAt!).getTime());
+        const bestTxn = verifiedFutureTxns[0];
+        const currentExpMs = usr.subscriptionExpiryDate ? new Date(usr.subscriptionExpiryDate).getTime() : 0;
+        const txnExpMs = new Date(bestTxn.expiresAt!).getTime();
+        if (usr.membershipTier !== 'premium_vip' || usr.subscriptionStatus !== 'active' || txnExpMs > currentExpMs) {
+          mergedUsers[i] = {
+            ...usr,
+            membershipTier: 'premium_vip',
+            subscriptionStatus: 'active',
+            subscriptionStartDate: usr.subscriptionStartDate || bestTxn.verifiedAt || bestTxn.createdAt,
+            subscriptionExpiryDate: bestTxn.expiresAt,
+            paymentStatus: 'verified',
+            paymentMethod: (bestTxn.paymentMethod as any) || usr.paymentMethod || 'KHQR',
+            transactionRef: bestTxn.transactionRef || usr.transactionRef,
+          };
+        }
+      }
+    }
 
     // 3. Merge Transactions by ID (excluding transactions of deleted users and Admin-deleted transaction records)
     let localDeletedTxnIds: string[] = [];
