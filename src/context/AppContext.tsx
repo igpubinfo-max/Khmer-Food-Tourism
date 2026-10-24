@@ -73,6 +73,9 @@ interface AppContextType {
   logout: () => void;
   updateUserRole: (userId: string, newRole: UserRole) => void;
   updateCurrentUserProfile: (newName: string, newAvatar?: string) => void;
+  cancelUserVip: (userId: string) => Promise<{ success: boolean }>;
+  restoreUserAccess: (userIdOrEmail: string) => Promise<{ success: boolean; restoredUser?: User; error?: string }>;
+  disableUserAccount: (userId: string) => Promise<{ success: boolean }>;
   deleteUserAccount: (userId: string) => Promise<{
     success: boolean;
     deletedStats?: { restaurants: number; posts: number; transactions: number; tickets: number };
@@ -938,13 +941,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setIsRestaurantCheckInModalOpenRaw(open);
   };
 
-  // 6 Personalized Account Features Modals
-  const [isWhatToEatModalOpen, setIsWhatToEatModalOpen] = useState(false);
-  const [isNearMeModalOpen, setIsNearMeModalOpen] = useState(false);
-  const [isDailyDiscoveriesModalOpen, setIsDailyDiscoveriesModalOpen] = useState(false);
-  const [isWishlistsModalOpen, setIsWishlistsModalOpen] = useState(false);
-  const [isAiTripPlannerModalOpen, setIsAiTripPlannerModalOpen] = useState(false);
-  const [isNotificationsModalOpen, setIsNotificationsModalOpen] = useState(false);
+  // 6 Personalized Account Features Modals (Locked for Free/Expired/Cancelled users, Verified on Backend/Context)
+  const [isWhatToEatModalOpen, setIsWhatToEatModalOpenRaw] = useState(false);
+  const [isNearMeModalOpen, setIsNearMeModalOpenRaw] = useState(false);
+  const [isDailyDiscoveriesModalOpen, setIsDailyDiscoveriesModalOpenRaw] = useState(false);
+  const [isWishlistsModalOpen, setIsWishlistsModalOpenRaw] = useState(false);
+  const [isAiTripPlannerModalOpen, setIsAiTripPlannerModalOpenRaw] = useState(false);
+  const [isNotificationsModalOpen, setIsNotificationsModalOpenRaw] = useState(false);
   const [isTrendingSocialModalOpen, setIsTrendingSocialModalOpen] = useState(false);
   const [isUpgradeVipModalOpen, setIsUpgradeVipModalOpen] = useState(false);
   const [isVipRenewMode, setIsVipRenewMode] = useState(false);
@@ -960,6 +963,96 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
     setIsVipRenewMode(Boolean(renewMode));
     setIsUpgradeVipModalOpen(true);
+  };
+
+  const closeAllPersonalizedFeatureModals = () => {
+    setIsWhatToEatModalOpenRaw(false);
+    setIsNearMeModalOpenRaw(false);
+    setIsDailyDiscoveriesModalOpenRaw(false);
+    setIsWishlistsModalOpenRaw(false);
+    setIsAiTripPlannerModalOpenRaw(false);
+    setIsNotificationsModalOpenRaw(false);
+  };
+
+  // Authoritative Backend/Context VIP Verification for Personalized Features
+  const verifyBackendVipFeatureAccess = (featureNameKh: string, featureNameEn: string): boolean => {
+    if (!currentUser) {
+      closeAllPersonalizedFeatureModals();
+      showToast(
+        language === 'km'
+          ? `🔒 សូមចូលគណនី និងបើកកញ្ចប់ VIP ដើម្បីប្រើប្រាស់មុខងារ «${featureNameKh}»!`
+          : `🔒 Please sign in and activate VIP to access "${featureNameEn}"!`,
+        'warning'
+      );
+      setIsAuthModalOpen(true);
+      return false;
+    }
+
+    const isAdmin =
+      currentUser.role === 'admin' ||
+      currentUser.id === 'admin-authorized-single' ||
+      currentUser.username === 'admin' ||
+      currentUser.username === 'cheasavuth';
+    if (isAdmin) return true;
+
+    // Cross-verify against authoritative backend/state users array
+    const backendUserRecord = users.find(u => u.id === currentUser.id) || currentUser;
+    const isBackendActiveVip =
+      !backendUserRecord.isDisabled &&
+      isUserVipActive(backendUserRecord) &&
+      isUserVipActive(currentUser);
+
+    if (!isBackendActiveVip) {
+      closeAllPersonalizedFeatureModals();
+      const vipState = getVipAccountState(backendUserRecord);
+      const isExpiredOrCancelled =
+        vipState === 'expired_vip' || backendUserRecord.subscriptionStatus === 'cancelled';
+
+      showToast(
+        language === 'km'
+          ? isExpiredOrCancelled
+            ? `🔒 សមាជិកភាព VIP របស់អ្នកបានផុតកំណត់ ឬត្រូវបានបោះបង់។ សូមបន្តកញ្ចប់ VIP ដើម្បីប្រើប្រាស់មុខងារ «${featureNameKh}»!`
+            : `🔒 មុខងារពិសេស «${featureNameKh}» អនុញ្ញាតសម្រាប់តែសមាជិក VIP ប៉ុណ្ណោះ។ សូមដំឡើងទៅ VIP ឥឡូវនេះ!`
+          : isExpiredOrCancelled
+          ? `🔒 Your VIP subscription has expired or was cancelled. Please renew VIP to access "${featureNameEn}"!`
+          : `🔒 Personalized Feature "${featureNameEn}" is locked for Free Users. Upgrade to VIP to unlock!`,
+        'warning'
+      );
+      openUpgradeVipModal(isExpiredOrCancelled);
+      return false;
+    }
+
+    return true;
+  };
+
+  const setIsWhatToEatModalOpen = (open: boolean) => {
+    if (open && !verifyBackendVipFeatureAccess('ថ្ងៃនេះញ៉ាំអី?', 'What to Eat Today?')) return;
+    setIsWhatToEatModalOpenRaw(open);
+  };
+
+  const setIsNearMeModalOpen = (open: boolean) => {
+    if (open && !verifyBackendVipFeatureAccess('នៅជិតខ្ញុំ (GPS)', 'Near Me (GPS)')) return;
+    setIsNearMeModalOpenRaw(open);
+  };
+
+  const setIsDailyDiscoveriesModalOpen = (open: boolean) => {
+    if (open && !verifyBackendVipFeatureAccess('អ្វីថ្មីថ្ងៃនេះ', 'Daily Picks')) return;
+    setIsDailyDiscoveriesModalOpenRaw(open);
+  };
+
+  const setIsWishlistsModalOpen = (open: boolean) => {
+    if (open && !verifyBackendVipFeatureAccess('បញ្ជីចង់ទៅ', 'My Wishlists')) return;
+    setIsWishlistsModalOpenRaw(open);
+  };
+
+  const setIsAiTripPlannerModalOpen = (open: boolean) => {
+    if (open && !verifyBackendVipFeatureAccess('ផែនការដើរលេង AI', 'AI Trip Planner')) return;
+    setIsAiTripPlannerModalOpenRaw(open);
+  };
+
+  const setIsNotificationsModalOpen = (open: boolean) => {
+    if (open && !verifyBackendVipFeatureAccess('ដំណឹង & ប្រូម៉ូសិន', 'Notifications & Promos')) return;
+    setIsNotificationsModalOpenRaw(open);
   };
   const [targetWishlistItem, setTargetWishlistItem] = useState<WishlistItem | null>(null);
 
@@ -1522,6 +1615,49 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
   }, [currentUser, users]);
 
+  // Automatically disable access and close any open Personalized Feature modals if currentUser is not an active VIP
+  useEffect(() => {
+    const isAdmin =
+      currentUser &&
+      (currentUser.role === 'admin' ||
+        currentUser.id === 'admin-authorized-single' ||
+        currentUser.username === 'admin' ||
+        currentUser.username === 'cheasavuth');
+    const backendUser = currentUser ? users.find(u => u.id === currentUser.id) || currentUser : null;
+    const hasActiveVip = Boolean(
+      isAdmin || (backendUser && !backendUser.isDisabled && isUserVipActive(backendUser) && isUserVipActive(currentUser))
+    );
+
+    if (!hasActiveVip) {
+      const anyPersonalizedModalOpen =
+        isWhatToEatModalOpen ||
+        isNearMeModalOpen ||
+        isDailyDiscoveriesModalOpen ||
+        isWishlistsModalOpen ||
+        isAiTripPlannerModalOpen ||
+        isNotificationsModalOpen;
+
+      if (anyPersonalizedModalOpen) {
+        closeAllPersonalizedFeatureModals();
+        if (currentUser) {
+          const isExpiredOrCancelled =
+            getVipAccountState(backendUser) === 'expired_vip' ||
+            backendUser?.subscriptionStatus === 'cancelled';
+          openUpgradeVipModal(isExpiredOrCancelled);
+        }
+      }
+    }
+  }, [
+    currentUser,
+    users,
+    isWhatToEatModalOpen,
+    isNearMeModalOpen,
+    isDailyDiscoveriesModalOpen,
+    isWishlistsModalOpen,
+    isAiTripPlannerModalOpen,
+    isNotificationsModalOpen,
+  ]);
+
   useEffect(() => {
     if (isInitialMountRef.current.foods) {
       isInitialMountRef.current.foods = false;
@@ -2041,6 +2177,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setIsAdminLoginModalOpen(true);
         return false;
       }
+      if (existing.isDisabled) {
+        showToast(
+          language === 'km'
+            ? '⚠️ គណនីនេះត្រូវបានផ្អាកជាបណ្តោះអាសន្ន។ សូមទាក់ទង Admin ដើម្បីស្តារសិទ្ធិចូលប្រើប្រាស់ឡើងវិញ (Restore User Access)។'
+            : '⚠️ This account has been disabled. Please contact Admin to Restore User Access.',
+          'warning'
+        );
+        return false;
+      }
       setCurrentUser(existing);
       showToast(language === 'km' ? `សូមស្វាគមន៍មកវិញ ${existing.name}!` : `Welcome back, ${existing.name}!`, 'success');
       setIsAuthModalOpen(false);
@@ -2215,6 +2360,307 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
+  /**
+   * Option 1 — Cancel VIP:
+   * Removes VIP status and benefits, downgrades to a normal ('free') user,
+   * and strictly preserves the account, email, password, and login access.
+   */
+  const cancelUserVip = async (userId: string): Promise<{ success: boolean }> => {
+    const targetUser = users.find(u => u.id === userId);
+    if (!targetUser) {
+      showToast(language === 'km' ? 'រកមិនឃើញគណនីអ្នកប្រើប្រាស់នេះទេ!' : 'User account not found!', 'warning');
+      return { success: false };
+    }
+
+    if (
+      targetUser.role === 'admin' ||
+      targetUser.id === 'admin-authorized-single' ||
+      targetUser.username === 'cheasavuth' ||
+      targetUser.username === 'admin'
+    ) {
+      showToast(language === 'km' ? 'មិនអាចបោះបង់សិទ្ធិ VIP របស់គណនីរដ្ឋបាលប្រព័ន្ធ (Admin) បានឡើយ!' : 'Cannot cancel VIP on System Administrator account!', 'warning');
+      return { success: false };
+    }
+
+    const nowIso = new Date().toISOString();
+    const downgradedUser: User = {
+      ...targetUser,
+      membershipTier: 'free',
+      subscriptionStatus: 'cancelled',
+      subscriptionExpiryDate: undefined,
+      paymentStatus: 'cancelled',
+      autoRenew: false,
+      vipCancelledAt: nowIso,
+      isDisabled: false,
+    };
+
+    // 1. Update users array while preserving account, email, passwordHash, and login access
+    const nextUsers = users.map(u => (u.id === userId ? downgradedUser : u));
+    setUsers(nextUsers);
+    try {
+      localStorage.setItem('kft_users_v5', JSON.stringify(nextUsers));
+    } catch {}
+
+    // 2. If this user is currently logged in, update currentUser and close any open VIP Personalized Feature modals
+    if (currentUser?.id === userId) {
+      setCurrentUser(downgradedUser);
+      closeAllPersonalizedFeatureModals();
+      try {
+        localStorage.setItem('kft_current_user_v5', JSON.stringify(downgradedUser));
+      } catch {}
+    }
+
+    // 3. Downgrade any custom restaurant owned by this user from VIP/premium to normal ('free')
+    let nextRestaurants = restaurants;
+    const hasPromotedShop = restaurants.some(
+      r => !isSeedRestaurantId(r.id) && r.ownerId === userId && (r.membershipTier === 'premium' || r.isPromoted)
+    );
+    if (hasPromotedShop) {
+      nextRestaurants = restaurants.map(r => {
+        if (!isSeedRestaurantId(r.id) && r.ownerId === userId) {
+          return {
+            ...r,
+            membershipTier: 'free' as MembershipTier,
+            isPromoted: false,
+            paymentStatus: 'unpaid' as const,
+            membershipExpiresAt: undefined,
+          };
+        }
+        return r;
+      });
+      setRestaurants(nextRestaurants);
+      try {
+        localStorage.setItem('kft_restaurants_real_v9', JSON.stringify(nextRestaurants));
+      } catch {}
+    }
+
+    // 4. Push notification to inform user
+    const cancelNotif: AppNotification = {
+      id: `notif-vip-cancelled-${userId}-${Date.now()}`,
+      titleKh: 'ℹ️ សមាជិកភាព VIP ត្រូវបានបោះបង់ (គណនីធម្មតា)',
+      titleEn: 'ℹ️ VIP Membership Cancelled (Normal Account)',
+      messageKh: `សមាជិកភាព VIP នៃគណនី «${targetUser.name}» (${targetUser.email}) ត្រូវបានបោះបង់ និងប្តូរមកជាគណនីធម្មតា (Normal User)។ គណនី អ៊ីមែល និងសិទ្ធិចូលប្រើប្រាស់កម្មវិធីរបស់អ្នកនៅរក្សាទុកដដែល។`,
+      messageEn: `VIP status for "${targetUser.name}" (${targetUser.email}) was cancelled and downgraded to a Normal User. Your account, email, and login access remain active.`,
+      type: 'system',
+      date: nowIso.split('T')[0],
+      isRead: false,
+    };
+    setNotifications(prev => [cancelNotif, ...prev]);
+
+    // 5. Sync to Supabase Cloud
+    try {
+      if (isSupabaseConfigured()) {
+        const customRests = nextRestaurants.filter(r => !isSeedRestaurantId(r.id));
+        await Promise.all([
+          pushCloudDocument('kft_cloud_users_v1', nextUsers),
+          pushCloudDocument('kft_cloud_custom_restaurants_v1', customRests),
+        ]);
+      }
+    } catch (e) {
+      console.warn('Supabase cloud cancelUserVip sync error:', e);
+    }
+
+    recordSecurityAudit(
+      'USER_VIP_CANCELLED',
+      'SUCCESS',
+      'AdminPortal',
+      `Cancelled VIP for user ${targetUser.name} (${targetUser.id}, ${targetUser.email}) and downgraded to normal user while preserving account login access`
+    );
+
+    showToast(
+      language === 'km'
+        ? `✅ បានបោះបង់ VIP របស់ "${targetUser.name}" មកជាគណនីធម្មតា (រក្សាទុកគណនី និងអ៊ីមែលដដែល)!`
+        : `✅ Cancelled VIP for "${targetUser.name}" and downgraded to normal user (account & login preserved)!`,
+      'success'
+    );
+
+    return { success: true };
+  };
+
+  /**
+   * Option 2 — Restore User Access:
+   * Reactivates a previously disabled or soft-deleted user account so the user can log in
+   * and use the program again with the same email. Blocks restoration if permanently deleted ('Delete Forever').
+   */
+  const restoreUserAccess = async (
+    userIdOrEmail: string
+  ): Promise<{ success: boolean; restoredUser?: User; error?: string }> => {
+    const cleanTarget = (userIdOrEmail || '').trim();
+    const cleanEmail = cleanTarget.toLowerCase();
+
+    // Check if the user is in deletedUsers registry
+    const matchedDeleted = deletedUsers.find(
+      d =>
+        d.id === cleanTarget ||
+        (d.email && d.email.toLowerCase().trim() === cleanEmail)
+    );
+
+    // Block restoration if permanently deleted via Option 3 (Delete Forever)
+    if (matchedDeleted && matchedDeleted.permanentlyDeleted === true) {
+      const errMsg =
+        language === 'km'
+          ? `🚫 គណនី "${matchedDeleted.name}" (${matchedDeleted.email}) ត្រូវបានលុបជាអចិន្ត្រៃយ៍ (Delete Forever) ហើយមិនអាចស្តារឡើងវិញបានទេ!`
+          : `🚫 Account "${matchedDeleted.name}" (${matchedDeleted.email}) was permanently deleted (Delete Forever) and cannot be restored!`;
+      showToast(errMsg, 'warning');
+      return { success: false, error: errMsg };
+    }
+
+    const nowIso = new Date().toISOString();
+    const existingActiveUser = users.find(
+      u =>
+        u.id === cleanTarget ||
+        (u.email && u.email.toLowerCase().trim() === cleanEmail)
+    );
+
+    let restoredUser: User;
+    if (existingActiveUser) {
+      restoredUser = {
+        ...existingActiveUser,
+        isDisabled: false,
+        disabledAt: undefined,
+        isVerified: true,
+        restoredAt: nowIso,
+      };
+    } else if (matchedDeleted) {
+      const snapshot = matchedDeleted.snapshotUser;
+      restoredUser = {
+        ...(snapshot || {}),
+        id: matchedDeleted.id || `user-${Date.now()}`,
+        name: matchedDeleted.name || snapshot?.name || matchedDeleted.email.split('@')[0],
+        email: matchedDeleted.email,
+        phone: matchedDeleted.phone || snapshot?.phone,
+        username: matchedDeleted.username || snapshot?.username,
+        role: snapshot?.role && snapshot.role !== 'admin' ? snapshot.role : 'user',
+        avatar:
+          snapshot?.avatar ||
+          'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
+        isVerified: true,
+        verifiedAt: snapshot?.verifiedAt || nowIso,
+        createdAt: snapshot?.createdAt || nowIso.split('T')[0],
+        membershipTier: 'free',
+        subscriptionStatus: undefined,
+        subscriptionExpiryDate: undefined,
+        isDisabled: false,
+        disabledAt: undefined,
+        restoredAt: nowIso,
+      };
+    } else {
+      const errMsg =
+        language === 'km'
+          ? 'រកមិនឃើញគណនីដែលត្រូវស្តារឡើងវិញទេ!'
+          : 'User account not found to restore!';
+      showToast(errMsg, 'warning');
+      return { success: false, error: errMsg };
+    }
+
+    // 1. Remove from deletedUsers registry if present
+    const nextDeletedUsers = deletedUsers.filter(
+      d =>
+        d.id !== restoredUser.id &&
+        (!d.email || d.email.toLowerCase().trim() !== restoredUser.email.toLowerCase().trim())
+    );
+    setDeletedUsers(nextDeletedUsers);
+    try {
+      localStorage.setItem('kft_deleted_users_v1', JSON.stringify(nextDeletedUsers));
+    } catch {}
+
+    // 2. Add or update in active users list
+    const nextUsers = existingActiveUser
+      ? users.map(u => (u.id === restoredUser.id ? restoredUser : u))
+      : [...users, restoredUser];
+    setUsers(nextUsers);
+    try {
+      localStorage.setItem('kft_users_v5', JSON.stringify(nextUsers));
+    } catch {}
+
+    if (currentUser?.id === restoredUser.id) {
+      setCurrentUser(restoredUser);
+      try {
+        localStorage.setItem('kft_current_user_v5', JSON.stringify(restoredUser));
+      } catch {}
+    }
+
+    // 3. Sync to Supabase Cloud
+    try {
+      if (isSupabaseConfigured()) {
+        await Promise.all([
+          pushCloudDocument('kft_cloud_users_v1', nextUsers),
+          pushCloudDocument('kft_cloud_deleted_users_v1', nextDeletedUsers),
+        ]);
+      }
+    } catch (e) {
+      console.warn('Supabase cloud restoreUserAccess sync error:', e);
+    }
+
+    recordSecurityAudit(
+      'USER_ACCESS_RESTORED',
+      'SUCCESS',
+      'AdminPortal',
+      `Restored user account access for ${restoredUser.name} (${restoredUser.id}, ${restoredUser.email})`
+    );
+
+    showToast(
+      language === 'km'
+        ? `✅ បានស្តារសិទ្ធិចូលប្រើប្រាស់គណនី "${restoredUser.name}" (${restoredUser.email}) ឡើងវិញដោយជោគជ័យ!`
+        : `✅ Successfully restored user access for "${restoredUser.name}" (${restoredUser.email})!`,
+      'success'
+    );
+
+    return { success: true, restoredUser };
+  };
+
+  /**
+   * Soft-disable user account (can be reactivated anytime via Restore User Access)
+   */
+  const disableUserAccount = async (userId: string): Promise<{ success: boolean }> => {
+    const targetUser = users.find(u => u.id === userId);
+    if (!targetUser) return { success: false };
+    if (
+      targetUser.role === 'admin' ||
+      targetUser.id === 'admin-authorized-single' ||
+      targetUser.username === 'cheasavuth' ||
+      targetUser.username === 'admin'
+    ) {
+      return { success: false };
+    }
+
+    const updatedUser: User = {
+      ...targetUser,
+      isDisabled: true,
+      disabledAt: new Date().toISOString(),
+    };
+    const nextUsers = users.map(u => (u.id === userId ? updatedUser : u));
+    setUsers(nextUsers);
+    try {
+      localStorage.setItem('kft_users_v5', JSON.stringify(nextUsers));
+    } catch {}
+
+    if (currentUser?.id === userId) {
+      setCurrentUser(null);
+      try {
+        localStorage.removeItem('kft_current_user_v5');
+      } catch {}
+    }
+
+    try {
+      if (isSupabaseConfigured()) {
+        await pushCloudDocument('kft_cloud_users_v1', nextUsers);
+      }
+    } catch {}
+
+    showToast(
+      language === 'km'
+        ? `⚠️ បានផ្អាកគណនី "${targetUser.name}" បណ្តោះអាសន្ន (អាចស្តារឡើងវិញបានតាមរយៈ Restore User Access)`
+        : `⚠️ Temporarily disabled "${targetUser.name}" (can be reactivated via Restore User Access)`,
+      'info'
+    );
+    return { success: true };
+  };
+
+  /**
+   * Option 3 — Delete Forever:
+   * Permanently deletes the entire account and all associated data after explicit confirmation.
+   */
   const deleteUserAccount = async (userId: string): Promise<{
     success: boolean;
     deletedStats?: { restaurants: number; posts: number; transactions: number; tickets: number };
@@ -2236,7 +2682,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return { success: false };
     }
 
-    // 1. Add user to permanent deleted/blacklisted users registry so they can never log in again
+    // 1. Add user to permanent deleted/blacklisted users registry with permanentlyDeleted: true so they can never log in or be restored
     const deletedRecord: DeletedUserRecord = {
       id: targetUser.id,
       email: (targetUser.email || '').toLowerCase().trim(),
@@ -2245,6 +2691,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       name: targetUser.name,
       deletedAt: new Date().toISOString(),
       deletedBy: currentUser?.name || 'Admin',
+      permanentlyDeleted: true,
     };
     const nextDeletedUsers = [
       ...deletedUsers.filter(d => d.id !== targetUser.id),
@@ -2524,6 +2971,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       (cleanPhoneDigits.length >= 7 && u.phone && u.phone.replace(/[\s-+]/g, '') === cleanPhoneDigits)
     );
     if (existing) {
+      if (existing.isDisabled) {
+        showToast(
+          language === 'km'
+            ? '⚠️ គណនីនេះត្រូវបានផ្អាកជាបណ្តោះអាសន្ន។ សូមទាក់ទង Admin ដើម្បីស្តារសិទ្ធិចូលប្រើប្រាស់ឡើងវិញ (Restore User Access)។'
+            : '⚠️ This account has been disabled. Please contact Admin to Restore User Access.',
+          'warning'
+        );
+        return false;
+      }
       setCurrentUser(existing);
       showToast(language === 'km' ? `សូមស្វាគមន៍មកវិញ ${existing.name}!` : `Welcome back, ${existing.name}!`, 'success');
       setIsAuthModalOpen(false);
@@ -2575,6 +3031,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
 
     if (existing) {
+      if (existing.isDisabled) {
+        showToast(
+          language === 'km'
+            ? '⚠️ គណនីនេះត្រូវបានផ្អាកជាបណ្តោះអាសន្ន។ សូមទាក់ទង Admin ដើម្បីស្តារសិទ្ធិចូលប្រើប្រាស់ឡើងវិញ (Restore User Access)។'
+            : '⚠️ This account has been disabled. Please contact Admin to Restore User Access.',
+          'warning'
+        );
+        return false;
+      }
       const updated: User = {
         ...existing,
         name: profile.name || existing.name,
@@ -5418,8 +5883,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     showToast(language === 'km' ? `បានច្របាច់បញ្ចូលគ្នាជាមួយ «${target.nameKh}» រួចរាល់!` : `Merged with "${target.nameKh}" successfully!`, 'success');
   };
 
-  // Wishlist methods
+  // Wishlist methods (VIP Access Controlled)
   const createWishlist = (nameKh: string, nameEn?: string, emoji: string = '📌') => {
+    if (!verifyBackendVipFeatureAccess('បញ្ជីចង់ទៅ', 'My Wishlists')) return;
     const newWl: Wishlist = {
       id: `wl-${Date.now()}`,
       userId: currentUser?.id || 'guest',
@@ -5439,6 +5905,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const addToWishlist = (wishlistId: string, item: Omit<WishlistItem, 'addedAt'>) => {
+    if (!verifyBackendVipFeatureAccess('បញ្ជីចង់ទៅ', 'My Wishlists')) return;
     setWishlists(prev => prev.map(w => {
       if (w.id !== wishlistId) return w;
       if (w.items.some(i => i.id === item.id)) {
@@ -5482,6 +5949,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     priceDisplay?: string; 
     rating?: number 
   }) => {
+    if (!verifyBackendVipFeatureAccess('បញ្ជីចង់ទៅ', 'My Wishlists')) return;
     setTargetWishlistItem({
       ...item,
       addedAt: new Date().toISOString(),
@@ -5489,8 +5957,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setIsWishlistsModalOpen(true);
   };
 
-  // AI Trip Planner methods
+  // AI Trip Planner methods (VIP Access Controlled)
   const saveTripPlan = (plan: TripPlan) => {
+    if (!verifyBackendVipFeatureAccess('ផែនការដើរលេង AI', 'AI Trip Planner')) return;
     setTripPlans(prev => [plan, ...prev.filter(p => p.id !== plan.id)]);
     showToast(language === 'km' ? 'បានរក្សាទុកផែនការដើរលេង!' : 'Trip plan saved!', 'success');
   };
@@ -5506,6 +5975,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     budgetLevel: 'budget' | 'medium' | 'luxury', 
     companion: 'solo' | 'couple' | 'friends' | 'family'
   ): TripPlan => {
+    verifyBackendVipFeatureAccess('ផែនការដើរលេង AI', 'AI Trip Planner');
     const provDestinations = destinations.filter(d => d.provinceKh.includes(provinceKh) || provinceKh.includes(d.provinceKh));
     const poolDest = provDestinations.length > 0 ? provDestinations : destinations;
     
@@ -5637,6 +6107,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         logout,
         updateUserRole,
         updateCurrentUserProfile,
+        cancelUserVip,
+        restoreUserAccess,
+        disableUserAccount,
         deleteUserAccount,
         clearAllRegisteredUsers,
         loginAdmin,

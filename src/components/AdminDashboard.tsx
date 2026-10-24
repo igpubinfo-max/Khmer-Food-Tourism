@@ -29,7 +29,7 @@ export const AdminDashboard: React.FC = () => {
     restaurants, deleteRestaurant, approveRestaurant, toggleVerifyRestaurant,
     destinations, addDestination, updateDestination, deleteDestination,
     posts, deletePost,
-    users, deletedUsers, updateUserRole, deleteUserAccount, clearAllRegisteredUsers,
+    users, deletedUsers, updateUserRole, cancelUserVip, restoreUserAccess, disableUserAccount, deleteUserAccount, clearAllRegisteredUsers,
     transactions, verifyTransaction, rejectTransaction, requestMorePaymentInfo, deleteTransactions, getAuthorizedPaymentProof,
     appSettings, updateAppSettings, setAdminPassword, currentUser, showToast,
     aiCheckIns, approveAiCheckIn, rejectAiCheckIn, mergeAiCheckIn,
@@ -54,6 +54,7 @@ export const AdminDashboard: React.FC = () => {
   const [selectedUserIdsForDeletion, setSelectedUserIdsForDeletion] = useState<string[]>([]);
   const [usersPendingBatchDeletion, setUsersPendingBatchDeletion] = useState<User[]>([]);
   const [isDeletingUser, setIsDeletingUser] = useState(false);
+  const [confirmDeleteForeverChecked, setConfirmDeleteForeverChecked] = useState(false);
 
   // Image Audit states
   const [auditFilter, setAuditFilter] = useState<'all' | 'verified' | 'flagged'>('all');
@@ -2437,7 +2438,7 @@ export const AdminDashboard: React.FC = () => {
                       </label>
                     )}
 
-                    {/* Delete button appears ONLY when at least one account is selected */}
+                    {/* Manage / Delete button appears ONLY when at least one account is selected */}
                     {validSelectedIds.length > 0 && (
                       <button
                         type="button"
@@ -2446,16 +2447,17 @@ export const AdminDashboard: React.FC = () => {
                             validSelectedIds.includes(u.id)
                           );
                           if (targets.length > 0) {
+                            setConfirmDeleteForeverChecked(false);
                             setUsersPendingBatchDeletion(targets);
                           }
                         }}
                         className="px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-khmer text-xs font-bold border border-rose-700 shadow-md shadow-rose-600/25 transition flex items-center gap-1.5 cursor-pointer animate-fade-in"
                       >
-                        <Trash2 className="w-3.5 h-3.5" />
+                        <Settings className="w-3.5 h-3.5" />
                         <span>
                           {isKm
-                            ? `លុបគណនីដែលបានជ្រើសរើស (${validSelectedIds.length})`
-                            : `Delete Selected (${validSelectedIds.length})`}
+                            ? `គ្រប់គ្រង / លុបគណនី (${validSelectedIds.length})`
+                            : `Manage / Delete Selected (${validSelectedIds.length})`}
                         </span>
                       </button>
                     )}
@@ -2584,18 +2586,19 @@ export const AdminDashboard: React.FC = () => {
                               {u.membershipTier === 'premium_vip' && !isSystemAdmin ? 'VIP' : u.role}
                             </span>
 
-                            {!isSystemAdmin && isSelected && (
+                            {!isSystemAdmin && (
                               <button
                                 type="button"
                                 onClick={(e) => {
                                   e.stopPropagation();
+                                  setConfirmDeleteForeverChecked(false);
                                   setUsersPendingBatchDeletion([u]);
                                 }}
                                 className="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white border border-rose-700 font-khmer text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-xs"
-                                title={isKm ? 'លុបគណនី និងទិន្នន័យពាក់ព័ន្ធទាំងអស់ជាអចិន្ត្រៃយ៍' : 'Permanently delete user account and all associated data'}
+                                title={isKm ? 'គ្រប់គ្រងគណនី (បោះបង់ VIP / ស្តារសិទ្ធិ / លុបជាអចិន្ត្រៃយ៍)' : 'Manage account (Cancel VIP / Restore Access / Delete Forever)'}
                               >
-                                <Trash2 className="w-3.5 h-3.5" />
-                                <span>{isKm ? 'លុបគណនី' : 'Delete'}</span>
+                                <Settings className="w-3.5 h-3.5" />
+                                <span>{isKm ? 'គ្រប់គ្រង / លុប' : 'Manage'}</span>
                               </button>
                             )}
                           </div>
@@ -2605,7 +2608,7 @@ export const AdminDashboard: React.FC = () => {
                   </div>
                 )}
 
-                {/* Permanently Deleted / Blocked Users Registry */}
+                {/* Deleted / Disabled Users Registry with Option to Restore Non-Permanently Deleted Accounts */}
                 {deletedUsers && deletedUsers.length > 0 && (
                   <div className="mt-4 p-4 rounded-2xl bg-rose-50/60 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/50 space-y-2.5">
                     <div className="flex items-center justify-between">
@@ -2613,31 +2616,50 @@ export const AdminDashboard: React.FC = () => {
                         <Ban className="w-4 h-4 shrink-0" />
                         <span>
                           {isKm
-                            ? `បញ្ជីគណនីដែលត្រូវបានលុបជាអចិន្ត្រៃយ៍ និងបិទសិទ្ធិចូលប្រើ (${deletedUsers.length})`
-                            : `Permanently Deleted & Blocked Accounts (${deletedUsers.length})`}
+                            ? `បញ្ជីគណនីដែលត្រូវបានលុប ឬបិទសិទ្ធិចូលប្រើ (${deletedUsers.length})`
+                            : `Deleted & Disabled Accounts (${deletedUsers.length})`}
                         </span>
                       </div>
                     </div>
-                    <div className="space-y-1.5 max-h-36 overflow-y-auto no-scrollbar">
-                      {deletedUsers.map(d => (
-                        <div
-                          key={d.id}
-                          className="px-3 py-2 rounded-xl bg-white/80 dark:bg-stone-900/60 border border-rose-200/70 dark:border-rose-900/40 flex items-center justify-between gap-2 text-[11px] font-khmer"
-                        >
-                          <div className="min-w-0">
-                            <span className="font-bold text-stone-800 dark:text-stone-200">{d.name}</span>{' '}
-                            <span className="text-stone-400 font-mono text-[10px]">({d.email || d.phone || d.id})</span>
+                    <div className="space-y-1.5 max-h-44 overflow-y-auto no-scrollbar">
+                      {deletedUsers.map(d => {
+                        const isPermDeleted = d.permanentlyDeleted === true;
+                        return (
+                          <div
+                            key={d.id}
+                            className="px-3 py-2 rounded-xl bg-white/80 dark:bg-stone-900/60 border border-rose-200/70 dark:border-rose-900/40 flex items-center justify-between gap-2 text-[11px] font-khmer"
+                          >
+                            <div className="min-w-0">
+                              <span className="font-bold text-stone-800 dark:text-stone-200">{d.name}</span>{' '}
+                              <span className="text-stone-400 font-mono text-[10px]">({d.email || d.phone || d.id})</span>
+                            </div>
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              {!isPermDeleted ? (
+                                <button
+                                  type="button"
+                                  onClick={async () => {
+                                    await restoreUserAccess(d.id || d.email);
+                                  }}
+                                  className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] flex items-center gap-1 cursor-pointer shadow-2xs transition"
+                                  title={isKm ? 'ស្តារសិទ្ធិចូលប្រើប្រាស់គណនីឡើងវិញ' : 'Restore User Access'}
+                                >
+                                  <RefreshCw className="w-3 h-3" />
+                                  <span>{isKm ? 'ស្តារគណនីឡើងវិញ (Restore)' : 'Restore Access'}</span>
+                                </button>
+                              ) : (
+                                <span className="px-2 py-0.5 rounded-full bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-300 font-bold text-[10px] shrink-0">
+                                  🚫 {isKm ? 'លុបជាអចិន្ត្រៃយ៍ (Delete Forever)' : 'Permanently Deleted'}
+                                </span>
+                              )}
+                            </div>
                           </div>
-                          <span className="px-2 py-0.5 rounded-full bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-300 font-bold text-[10px] shrink-0">
-                            🚫 {isKm ? 'បិទការចូលគណនីជាអចិន្ត្រៃយ៍' : 'Login Blocked'}
-                          </span>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 )}
 
-                {/* Confirmation Modal before Permanent User Account Deletion */}
+                {/* 3-Option Admin Account Management Dialog (Cancel VIP / Restore User Access / Delete Forever + Cancel) */}
                 {pendingDeleteTargets.length > 0 && (() => {
                   const targetIds = new Set(pendingDeleteTargets.map(t => t.id));
                   const targetEmails = new Set(
@@ -2658,54 +2680,75 @@ export const AdminDashboard: React.FC = () => {
 
                   const closeDeletionModal = () => {
                     if (isDeletingUser) return;
+                    setConfirmDeleteForeverChecked(false);
                     setUserPendingDeletion(null);
                     setUsersPendingBatchDeletion([]);
                   };
 
                   return (
                     <div
-                      className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in"
+                      className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in overflow-y-auto"
                       onClick={closeDeletionModal}
                     >
                       <div
-                        className="w-full max-w-md bg-white dark:bg-stone-900 rounded-3xl border-2 border-rose-500/40 shadow-2xl overflow-hidden font-khmer"
+                        className="w-full max-w-md bg-white dark:bg-stone-900 rounded-3xl border-2 border-stone-300 dark:border-stone-700 shadow-2xl overflow-hidden font-khmer my-auto"
                         onClick={e => e.stopPropagation()}
                       >
-                        {/* Warning Header */}
-                        <div className="p-5 bg-gradient-to-br from-rose-600 to-red-800 text-white flex items-center gap-3.5">
-                          <div className="w-12 h-12 rounded-2xl bg-white/15 border border-white/25 flex items-center justify-center shrink-0">
-                            <AlertTriangle className="w-6 h-6 text-amber-300" />
+                        {/* Header */}
+                        <div className="p-4 sm:p-5 bg-gradient-to-br from-slate-900 via-[#064E3B] to-emerald-900 text-white flex items-center justify-between gap-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-11 h-11 rounded-2xl bg-white/15 border border-white/25 flex items-center justify-center shrink-0">
+                              <Shield className="w-6 h-6 text-amber-300" />
+                            </div>
+                            <div>
+                              <h3 className="font-bold text-sm sm:text-base leading-snug">
+                                {isKm
+                                  ? `គ្រប់គ្រងគណនីអ្នកប្រើប្រាស់ (${pendingDeleteTargets.length})`
+                                  : `Admin Account Management (${pendingDeleteTargets.length})`}
+                              </h3>
+                              <p className="text-[11px] text-emerald-100 mt-0.5">
+                                {isKm
+                                  ? 'សូមជ្រើសរើសជម្រើសណាមួយក្នុងចំណោមជម្រើសទាំង ៣ ខាងក្រោម'
+                                  : 'Select one of the 3 account management options below'}
+                              </p>
+                            </div>
                           </div>
-                          <div>
-                            <h3 className="font-bold text-base leading-snug">
-                              {isKm
-                                ? `បញ្ជាក់ការលុបគណនីជាអចិន្ត្រៃយ៍ (${pendingDeleteTargets.length})`
-                                : `Confirm Permanent Deletion (${pendingDeleteTargets.length})`}
-                            </h3>
-                            <p className="text-[11px] text-rose-100 mt-0.5">
-                              {isKm ? 'សកម្មភាពនេះមិនអាចត្រឡប់ក្រោយវិញបានឡើយ!' : 'This action is permanent and cannot be undone!'}
-                            </p>
-                          </div>
+                          <button
+                            type="button"
+                            onClick={closeDeletionModal}
+                            className="p-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition cursor-pointer"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
                         </div>
 
                         {/* Modal Content */}
-                        <div className="p-5 space-y-4">
+                        <div className="p-4 sm:p-5 space-y-3.5 max-h-[80vh] overflow-y-auto">
                           {/* Target Users List */}
-                          <div className="max-h-36 overflow-y-auto space-y-2 pr-1">
+                          <div className="max-h-28 overflow-y-auto space-y-2 pr-1">
                             {pendingDeleteTargets.map(target => (
                               <div
                                 key={target.id}
-                                className="p-3 rounded-2xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 flex items-center gap-3"
+                                className="p-2.5 rounded-2xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 flex items-center gap-3"
                               >
                                 <img
                                   src={target.avatar}
                                   alt={target.name}
-                                  className="w-10 h-10 rounded-full object-cover border-2 border-rose-400 shrink-0"
+                                  className="w-10 h-10 rounded-full object-cover border-2 border-emerald-500 shrink-0"
                                 />
                                 <div className="min-w-0 flex-1">
-                                  <h4 className="font-bold text-xs text-stone-900 dark:text-stone-100 truncate">
-                                    {target.name}
-                                  </h4>
+                                  <div className="flex items-center gap-1.5 flex-wrap">
+                                    <h4 className="font-bold text-xs text-stone-900 dark:text-stone-100 truncate">
+                                      {target.name}
+                                    </h4>
+                                    <span className={`px-2 py-0.2 rounded-full text-[9px] font-bold ${
+                                      target.membershipTier === 'premium_vip' && target.subscriptionStatus === 'active'
+                                        ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300'
+                                        : 'bg-stone-200 dark:bg-stone-700 text-stone-700 dark:text-stone-300'
+                                    }`}>
+                                      {target.membershipTier === 'premium_vip' && target.subscriptionStatus === 'active' ? '👑 VIP' : 'Normal User'}
+                                    </span>
+                                  </div>
                                   <p className="text-[11px] text-stone-500 dark:text-stone-400 truncate">
                                     {target.email} {target.phone ? `• 📞 ${target.phone}` : ''}
                                   </p>
@@ -2717,60 +2760,116 @@ export const AdminDashboard: React.FC = () => {
                             ))}
                           </div>
 
-                          {/* Associated Data to be Deleted */}
-                          <div className="p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/70 space-y-2 text-xs">
-                            <p className="font-bold text-rose-800 dark:text-rose-300">
-                              {isKm
-                                ? `តើអ្នកពិតជាចង់លុបគណនីទាំង ${pendingDeleteTargets.length} នេះ និងទិន្នន័យពាក់ព័ន្ធទាំងអស់មែនទេ?`
-                                : `Are you sure you want to permanently delete ${pendingDeleteTargets.length} selected account(s) and all associated data?`}
-                            </p>
-                            <ul className="space-y-1.5 text-[11px] text-stone-700 dark:text-stone-300 pl-4 list-disc">
-                              <li>
+                          {/* OPTION 1: CANCEL VIP */}
+                          <div className="p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border-2 border-amber-300 dark:border-amber-700/70 space-y-2">
+                            <div className="flex items-start justify-between gap-2">
+                              <div>
+                                <h4 className="font-bold text-xs text-amber-900 dark:text-amber-200 flex items-center gap-1.5">
+                                  <span>1. បោះបង់សមាជិកភាព VIP (Cancel VIP)</span>
+                                </h4>
+                                <p className="text-[11px] text-amber-800/90 dark:text-amber-300/90 mt-0.5 leading-relaxed">
+                                  {isKm
+                                    ? 'ដកសិទ្ធិ និងអត្ថប្រយោជន៍ VIP ចេញ ហើយប្តូរមកជាអ្នកប្រើប្រាស់ធម្មតា (Normal User)។ គណនី អ៊ីមែល ពាក្យសម្ងាត់ និងសិទ្ធិចូលប្រើប្រាស់កម្មវិធីត្រូវបានរក្សាទុកដដែល ១០០%។'
+                                    : 'Remove VIP status and benefits, downgrade to a normal user, and preserve the account, email, password, and login access.'}
+                                </p>
+                              </div>
+                            </div>
+                            <button
+                              type="button"
+                              disabled={isDeletingUser}
+                              onClick={async () => {
+                                setIsDeletingUser(true);
+                                try {
+                                  for (const target of pendingDeleteTargets) {
+                                    await cancelUserVip(target.id);
+                                  }
+                                  setSelectedUserIdsForDeletion([]);
+                                  closeDeletionModal();
+                                } finally {
+                                  setIsDeletingUser(false);
+                                }
+                              }}
+                              className="w-full py-2.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-600 text-stone-950 font-extrabold text-xs shadow-sm transition flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                            >
+                              <Ban className="w-4 h-4" />
+                              <span>
                                 {isKm
-                                  ? 'គណនីអ្នកប្រើប្រាស់ ព័ត៌មានផ្ទាល់ខ្លួន និងសមាជិកភាព VIP'
-                                  : 'User profile, credentials & VIP membership status'}
-                              </li>
-                              <li>
-                                {isKm
-                                  ? `ហាងអាហារដែលបានបង្កើតដោយគណនីនេះ (${targetRestsCount} ហាង)`
-                                  : `Custom restaurants created by selected user(s) (${targetRestsCount} shops)`}
-                              </li>
-                              <li>
-                                {isKm
-                                  ? `ការបង្ហោះក្នុងសហគមន៍ និងមតិយោបល់ (${targetPostsCount} ប្រកាស)`
-                                  : `Community posts, likes & comments (${targetPostsCount} posts)`}
-                              </li>
-                              <li>
-                                {isKm
-                                  ? `ប្រតិបត្តិការទូទាត់ប្រាក់ និងវិក្កយបត្រ (${targetTxnsCount} ប្រតិបត្តិការ)`
-                                  : `Payment transactions & receipts (${targetTxnsCount} records)`}
-                              </li>
-                              <li>
-                                {isKm
-                                  ? `សំណើជំនួយ (${targetTicketsCount}) បញ្ជីចំណូលចិត្ត និងផែនការធ្វើដំណើរ`
-                                  : `Support tickets (${targetTicketsCount}), wishlists & saved trip plans`}
-                              </li>
-                              <li className="font-bold text-rose-600 dark:text-rose-400">
-                                {isKm
-                                  ? '🚫 គណនីដែលត្រូវបានលុបនឹងត្រូវបិទសិទ្ធិមិនឱ្យចូលគណនី (Log in) បានទៀតឡើយ!'
-                                  : '🚫 Deleted accounts will be permanently blocked from logging in again!'}
-                              </li>
-                            </ul>
+                                  ? 'បោះបង់ VIP (រក្សាទុកគណនី & អ៊ីមែល)'
+                                  : 'Cancel VIP (Keep Account & Login)'}
+                              </span>
+                            </button>
                           </div>
 
-                          {/* Action Buttons */}
-                          <div className="flex items-center gap-2.5 pt-1">
+                          {/* OPTION 2: RESTORE USER ACCESS */}
+                          <div className="p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 border-2 border-emerald-300 dark:border-emerald-700/70 space-y-2">
+                            <div>
+                              <h4 className="font-bold text-xs text-emerald-900 dark:text-emerald-200 flex items-center gap-1.5">
+                                <span>2. ស្តារសិទ្ធិចូលប្រើប្រាស់គណនីឡើងវិញ (Restore User Access)</span>
+                              </h4>
+                              <p className="text-[11px] text-emerald-800/90 dark:text-emerald-300/90 mt-0.5 leading-relaxed">
+                                {isKm
+                                  ? 'បើកដំណើរការគណនីដែលត្រូវបានផ្អាក ឬលុបបណ្តោះអាសន្នឡើងវិញ ដើម្បីឱ្យអ្នកប្រើប្រាស់អាចចូលប្រើកម្មវិធីជាមួយអ៊ីមែលដដែល (ស្តារបានតែគណនីដែលមិនទាន់លុបជាអចិន្ត្រៃយ៍ប៉ុណ្ណោះ)។'
+                                  : 'Reactivate a previously disabled or deleted user account so the user can log in and use the program again with the same email (only if not permanently deleted).'}
+                              </p>
+                            </div>
                             <button
                               type="button"
                               disabled={isDeletingUser}
-                              onClick={closeDeletionModal}
-                              className="flex-1 py-2.5 px-4 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200 font-bold text-xs transition cursor-pointer"
+                              onClick={async () => {
+                                setIsDeletingUser(true);
+                                try {
+                                  for (const target of pendingDeleteTargets) {
+                                    await restoreUserAccess(target.id || target.email);
+                                  }
+                                  setSelectedUserIdsForDeletion([]);
+                                  closeDeletionModal();
+                                } finally {
+                                  setIsDeletingUser(false);
+                                }
+                              }}
+                              className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-sm transition flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
                             >
-                              {isKm ? 'បោះបង់ (Cancel)' : 'Cancel'}
+                              <RefreshCw className="w-4 h-4" />
+                              <span>
+                                {isKm
+                                  ? 'ស្តារសិទ្ធិចូលប្រើប្រាស់គណនីឡើងវិញ (Restore User Access)'
+                                  : 'Restore User Access'}
+                              </span>
                             </button>
+                          </div>
+
+                          {/* OPTION 3: DELETE FOREVER */}
+                          <div className="p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border-2 border-rose-300 dark:border-rose-800/80 space-y-2.5 text-xs">
+                            <div>
+                              <h4 className="font-bold text-xs text-rose-800 dark:text-rose-300 flex items-center gap-1.5">
+                                <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
+                                <span>3. លុបគណនីជាអចិន្ត្រៃយ៍ (Delete Forever)</span>
+                              </h4>
+                              <p className="text-[11px] text-rose-700/90 dark:text-rose-300/90 mt-0.5 leading-relaxed">
+                                {isKm
+                                  ? `លុបគណនីទាំងស្រុង និងទិន្នន័យពាក់ព័ន្ធទាំងអស់ជាអចិន្ត្រៃយ៍ (ហាង ${targetRestsCount}, បង្ហោះ ${targetPostsCount}, ប្រតិបត្តិការ ${targetTxnsCount}, សំណើជំនួយ ${targetTicketsCount}) ហើយមិនអាចស្តារឡើងវិញបានឡើយ។`
+                                  : `Permanently delete the entire account and associated data (${targetRestsCount} shops, ${targetPostsCount} posts, ${targetTxnsCount} transactions, ${targetTicketsCount} tickets). Cannot be restored.`}
+                              </p>
+                            </div>
+
+                            {/* Explicit Confirmation Checkbox to prevent accidental permanent deletion */}
+                            <label className="flex items-start gap-2 p-2 rounded-xl bg-white/80 dark:bg-stone-900/70 border border-rose-300 dark:border-rose-800 cursor-pointer select-none">
+                              <input
+                                type="checkbox"
+                                checked={confirmDeleteForeverChecked}
+                                onChange={e => setConfirmDeleteForeverChecked(e.target.checked)}
+                                className="w-4 h-4 mt-0.5 rounded accent-rose-600 cursor-pointer shrink-0"
+                              />
+                              <span className="text-[11px] font-bold text-rose-800 dark:text-rose-200 leading-snug">
+                                {isKm
+                                  ? 'ខ្ញុំយល់ព្រម និងបញ្ជាក់ថាចង់លុបគណនីនេះជាអចិន្ត្រៃយ៍ (Delete Forever) ដោយមិនអាចត្រឡប់ក្រោយវិញបានទេ'
+                                  : 'I explicitly confirm that I want to permanently delete this account and all associated data forever'}
+                              </span>
+                            </label>
+
                             <button
                               type="button"
-                              disabled={isDeletingUser}
+                              disabled={isDeletingUser || !confirmDeleteForeverChecked}
                               onClick={async () => {
                                 setIsDeletingUser(true);
                                 try {
@@ -2780,22 +2879,33 @@ export const AdminDashboard: React.FC = () => {
                                   setSelectedUserIdsForDeletion(prev =>
                                     prev.filter(id => !targetIds.has(id))
                                   );
-                                  setUserPendingDeletion(null);
-                                  setUsersPendingBatchDeletion([]);
+                                  closeDeletionModal();
                                 } finally {
                                   setIsDeletingUser(false);
                                 }
                               }}
-                              className="flex-1 py-2.5 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-lg shadow-rose-600/25 transition flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                              className="w-full py-2.5 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-lg shadow-rose-600/25 transition flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                             >
                               <Trash2 className="w-4 h-4" />
                               <span>
                                 {isDeletingUser
                                   ? (isKm ? 'កំពុងលុប...' : 'Deleting...')
                                   : (isKm
-                                      ? `យល់ព្រមលុបជាអចិន្ត្រៃយ៍ (${pendingDeleteTargets.length})`
-                                      : `Permanently Delete (${pendingDeleteTargets.length})`)}
+                                      ? `លុបគណនីជាអចិន្ត្រៃយ៍ (Delete Forever)`
+                                      : `Delete Forever (${pendingDeleteTargets.length})`)}
                               </span>
+                            </button>
+                          </div>
+
+                          {/* Separate Cancel Button to close dialog without changes */}
+                          <div className="pt-1">
+                            <button
+                              type="button"
+                              disabled={isDeletingUser}
+                              onClick={closeDeletionModal}
+                              className="w-full py-2.5 px-4 rounded-xl bg-stone-200 hover:bg-stone-300 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-800 dark:text-stone-200 font-bold text-xs transition cursor-pointer"
+                            >
+                              {isKm ? 'បោះបង់ / បិទផ្ទាំងនេះ (Cancel)' : 'Cancel (Close Without Changes)'}
                             </button>
                           </div>
                         </div>

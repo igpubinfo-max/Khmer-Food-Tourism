@@ -34,6 +34,7 @@ export const ProfileView: React.FC = () => {
 
   const isKm = language === 'km';
   const isVip = isUserVipActive(currentUser);
+  const vipAccountState = getVipAccountState(currentUser);
   const isOwner = Boolean(
     currentUser &&
       (currentUser.role === 'owner' ||
@@ -45,14 +46,16 @@ export const ProfileView: React.FC = () => {
   const [selectedVipPowerPanel, setSelectedVipPowerPanel] = useState<'analytics' | 'reels' | 'photos' | 'rank' | null>('analytics');
 
   const [activeSubTab, setActiveSubTab] = useState<'bookmarks' | 'wishlists' | 'tripplans' | 'myposts' | 'settings' | 'myrestaurant' | 'membership'>(
-    currentUser?.role === 'admin' ? 'settings' : (isOwner ? 'myrestaurant' : 'wishlists')
+    currentUser?.role === 'admin' ? 'settings' : (isOwner ? 'myrestaurant' : (isVip ? 'wishlists' : 'bookmarks'))
   );
 
   useEffect(() => {
     if (currentUser?.role === 'admin' && activeSubTab === 'membership') {
       setActiveSubTab('settings');
+    } else if (!isVip && currentUser?.role !== 'admin' && (activeSubTab === 'wishlists' || activeSubTab === 'tripplans')) {
+      setActiveSubTab('bookmarks');
     }
-  }, [currentUser?.role, activeSubTab]);
+  }, [currentUser?.role, isVip, activeSubTab]);
   const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
   const [tempName, setTempName] = useState('');
@@ -1375,31 +1378,71 @@ export const ProfileView: React.FC = () => {
         </div>
       )}
 
-      {/* 6 Personalized Account Features Hub */}
-      <div className="p-4 rounded-3xl bg-gradient-to-br from-emerald-950 via-[#064E3B] to-slate-900 text-white border border-emerald-500/40 shadow-xs space-y-3 font-khmer">
-        <div className="flex items-center justify-between">
+      {/* 6 Personalized Account Features Hub (Strictly VIP Access Controlled) */}
+      <div className="p-4 rounded-3xl bg-gradient-to-br from-emerald-950 via-[#064E3B] to-slate-900 text-white border border-emerald-500/40 shadow-xs space-y-3 font-khmer relative overflow-hidden">
+        <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-amber-400" />
             <h3 className="font-moul text-xs sm:text-sm text-white">
               {isKm ? 'សេវាកម្មផ្ទាល់ខ្លួន (Personal Features)' : 'Personalized Features'}
             </h3>
           </div>
-          <span className="text-[10px] text-emerald-200">
-            {currentUser ? currentUser.name : (isKm ? 'ភ្ញៀវ' : 'Guest')}
-          </span>
+          {isVip || currentUser?.role === 'admin' ? (
+            <span className="px-2.5 py-0.5 rounded-full bg-emerald-400/20 border border-emerald-400/50 text-emerald-200 text-[10px] font-extrabold flex items-center gap-1">
+              <Crown className="w-3 h-3 text-amber-300" />
+              {isKm ? 'បើកដំណើរការ VIP' : 'VIP Unlocked'}
+            </span>
+          ) : (
+            <button
+              onClick={() => openUpgradeVipModal(vipAccountState === 'expired_vip' || currentUser?.subscriptionStatus === 'cancelled')}
+              className="px-2.5 py-1 rounded-full bg-gradient-to-r from-amber-400 to-yellow-500 text-stone-950 text-[10px] font-extrabold flex items-center gap-1 shadow-xs hover:brightness-105 cursor-pointer"
+            >
+              <Lock className="w-3 h-3" />
+              {isKm ? '🔒 សម្រាប់តែ VIP • ដំឡើងឥឡូវ' : '🔒 VIP Only • Upgrade'}
+            </button>
+          )}
         </div>
+
+        {!isVip && currentUser?.role !== 'admin' && (
+          <div className="p-2.5 rounded-2xl bg-amber-500/15 border border-amber-400/40 flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 text-[11px] text-amber-100 leading-snug">
+              <Lock className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+              <span>
+                {isKm
+                  ? vipAccountState === 'expired_vip' || currentUser?.subscriptionStatus === 'cancelled'
+                    ? 'សមាជិកភាព VIP របស់អ្នកបានផុតកំណត់ ឬត្រូវបានបោះបង់។ សូមបន្តកញ្ចប់ VIP ដើម្បីបើកសោមុខងារពិសេសទាំង ៦!'
+                    : 'មុខងារពិសេសផ្ទាល់ខ្លួនទាំង ៦ ត្រូវបានចាក់សោសម្រាប់គណនីធម្មតា (Free User)។ សូមដំឡើងទៅ VIP ដើម្បីប្រើប្រាស់!'
+                  : vipAccountState === 'expired_vip' || currentUser?.subscriptionStatus === 'cancelled'
+                  ? 'Your VIP has expired or was cancelled. Renew VIP to unlock all 6 Personalized Features!'
+                  : 'All 6 Personalized Features are locked for Free Users. Upgrade to VIP to unlock immediate access!'}
+              </span>
+            </div>
+            <button
+              onClick={() => openUpgradeVipModal(vipAccountState === 'expired_vip' || currentUser?.subscriptionStatus === 'cancelled')}
+              className="shrink-0 px-2.5 py-1 rounded-xl bg-amber-400 hover:bg-amber-300 text-stone-950 font-extrabold text-[10px] cursor-pointer"
+            >
+              {isKm ? 'ដំឡើង VIP' : 'Upgrade'}
+            </button>
+          </div>
+        )}
 
         <div className="grid grid-cols-2 gap-2">
           {/* A. ថ្ងៃនេះញ៉ាំអ្វី? */}
           <button
             onClick={() => setIsWhatToEatModalOpen(true)}
-            className="p-2.5 rounded-2xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/40 text-left transition"
+            className="p-2.5 rounded-2xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/40 text-left transition cursor-pointer"
           >
             <div className="flex items-center justify-between">
               <span className="text-lg">🍲</span>
-              <span className="px-1.5 py-0.2 rounded-full bg-amber-400 text-stone-900 text-[8px] font-black">
-                {isKm ? 'អាទិភាពខ្ពស់ ⭐' : 'High Priority'}
-              </span>
+              {!isVip && currentUser?.role !== 'admin' ? (
+                <span className="px-1.5 py-0.5 rounded-full bg-amber-400/25 border border-amber-300/50 text-amber-200 text-[9px] font-extrabold flex items-center gap-0.5">
+                  <Lock className="w-2.5 h-2.5" /> VIP
+                </span>
+              ) : (
+                <span className="px-1.5 py-0.2 rounded-full bg-amber-400 text-stone-900 text-[8px] font-black">
+                  {isKm ? 'អាទិភាពខ្ពស់ ⭐' : 'High Priority'}
+                </span>
+              )}
             </div>
             <div className="text-xs font-bold text-white mt-1">
               {isKm ? 'ថ្ងៃនេះញ៉ាំអ្វី?' : 'What to Eat Today?'}
@@ -1409,11 +1452,17 @@ export const ProfileView: React.FC = () => {
           {/* B. នៅជិតខ្ញុំ */}
           <button
             onClick={() => setIsNearMeModalOpen(true)}
-            className="p-2.5 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/15 text-left transition"
+            className="p-2.5 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/15 text-left transition cursor-pointer"
           >
             <div className="flex items-center justify-between">
               <span className="text-lg">📍</span>
-              <span className="text-[9px] font-mono text-emerald-300 font-bold">GPS</span>
+              {!isVip && currentUser?.role !== 'admin' ? (
+                <span className="px-1.5 py-0.5 rounded-full bg-amber-400/25 border border-amber-300/50 text-amber-200 text-[9px] font-extrabold flex items-center gap-0.5">
+                  <Lock className="w-2.5 h-2.5" /> VIP
+                </span>
+              ) : (
+                <span className="text-[9px] font-mono text-emerald-300 font-bold">GPS</span>
+              )}
             </div>
             <div className="text-xs font-bold text-white mt-1">
               {isKm ? 'នៅជិតខ្ញុំ' : 'Near Me'}
@@ -1423,11 +1472,17 @@ export const ProfileView: React.FC = () => {
           {/* C. កន្លែងថ្មីប្រចាំថ្ងៃ */}
           <button
             onClick={() => setIsDailyDiscoveriesModalOpen(true)}
-            className="p-2.5 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/15 text-left transition"
+            className="p-2.5 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/15 text-left transition cursor-pointer"
           >
             <div className="flex items-center justify-between">
               <span className="text-lg">✨</span>
-              <span className="text-[8px] text-amber-300 font-bold">Daily</span>
+              {!isVip && currentUser?.role !== 'admin' ? (
+                <span className="px-1.5 py-0.5 rounded-full bg-amber-400/25 border border-amber-300/50 text-amber-200 text-[9px] font-extrabold flex items-center gap-0.5">
+                  <Lock className="w-2.5 h-2.5" /> VIP
+                </span>
+              ) : (
+                <span className="text-[8px] text-amber-300 font-bold">Daily</span>
+              )}
             </div>
             <div className="text-xs font-bold text-white mt-1">
               {isKm ? 'កន្លែងថ្មីប្រចាំថ្ងៃ' : 'Daily Picks'}
@@ -1437,11 +1492,17 @@ export const ProfileView: React.FC = () => {
           {/* D. បញ្ជីកន្លែងដែលចង់ទៅ */}
           <button
             onClick={() => setIsWishlistsModalOpen(true)}
-            className="p-2.5 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/15 text-left transition"
+            className="p-2.5 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/15 text-left transition cursor-pointer"
           >
             <div className="flex items-center justify-between">
               <span className="text-lg">📑</span>
-              <span className="text-[9px] text-emerald-300 font-bold">{wishlists.length}</span>
+              {!isVip && currentUser?.role !== 'admin' ? (
+                <span className="px-1.5 py-0.5 rounded-full bg-amber-400/25 border border-amber-300/50 text-amber-200 text-[9px] font-extrabold flex items-center gap-0.5">
+                  <Lock className="w-2.5 h-2.5" /> VIP
+                </span>
+              ) : (
+                <span className="text-[9px] text-emerald-300 font-bold">{wishlists.length}</span>
+              )}
             </div>
             <div className="text-xs font-bold text-white mt-1">
               {isKm ? 'បញ្ជីកន្លែងចង់ទៅ' : 'My Wishlists'}
@@ -1451,11 +1512,17 @@ export const ProfileView: React.FC = () => {
           {/* E. ផែនការដើរលេង AI */}
           <button
             onClick={() => setIsAiTripPlannerModalOpen(true)}
-            className="p-2.5 rounded-2xl bg-teal-500/20 hover:bg-teal-500/30 border border-teal-400/30 text-left transition"
+            className="p-2.5 rounded-2xl bg-teal-500/20 hover:bg-teal-500/30 border border-teal-400/30 text-left transition cursor-pointer"
           >
             <div className="flex items-center justify-between">
               <span className="text-lg">🤖</span>
-              <span className="text-[8px] text-teal-300 font-bold">Smart AI</span>
+              {!isVip && currentUser?.role !== 'admin' ? (
+                <span className="px-1.5 py-0.5 rounded-full bg-amber-400/25 border border-amber-300/50 text-amber-200 text-[9px] font-extrabold flex items-center gap-0.5">
+                  <Lock className="w-2.5 h-2.5" /> VIP
+                </span>
+              ) : (
+                <span className="text-[8px] text-teal-300 font-bold">Smart AI</span>
+              )}
             </div>
             <div className="text-xs font-bold text-white mt-1">
               {isKm ? 'ផែនការដើរលេង AI' : 'AI Trip Planner'}
@@ -1465,15 +1532,19 @@ export const ProfileView: React.FC = () => {
           {/* F. ការជូនដំណឹង */}
           <button
             onClick={() => setIsNotificationsModalOpen(true)}
-            className="p-2.5 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/15 text-left transition relative"
+            className="p-2.5 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/15 text-left transition relative cursor-pointer"
           >
             <div className="flex items-center justify-between">
               <span className="text-lg">🔔</span>
-              {unreadNotificationsCount > 0 && (
+              {!isVip && currentUser?.role !== 'admin' ? (
+                <span className="px-1.5 py-0.5 rounded-full bg-amber-400/25 border border-amber-300/50 text-amber-200 text-[9px] font-extrabold flex items-center gap-0.5">
+                  <Lock className="w-2.5 h-2.5" /> VIP
+                </span>
+              ) : unreadNotificationsCount > 0 ? (
                 <span className="px-1.5 py-0.2 rounded-full bg-rose-500 text-white text-[8px] font-black">
                   {unreadNotificationsCount}
                 </span>
-              )}
+              ) : null}
             </div>
             <div className="text-xs font-bold text-white mt-1">
               {isKm ? 'ការជូនដំណឹង' : 'Notifications'}
@@ -1531,25 +1602,41 @@ export const ProfileView: React.FC = () => {
           )}
 
           <button
-            onClick={() => setActiveSubTab('wishlists')}
+            onClick={() => {
+              if (!isVip && currentUser?.role !== 'admin') {
+                setIsWishlistsModalOpen(true);
+                return;
+              }
+              setActiveSubTab('wishlists');
+            }}
             className={`py-2.5 font-bold text-center border-b-2 transition whitespace-nowrap px-3 ${
               activeSubTab === 'wishlists'
                 ? 'border-[#064E3B] text-[#064E3B] dark:border-emerald-400 dark:text-emerald-400'
                 : 'border-transparent text-slate-400 hover:text-slate-700'
             }`}
           >
-            {isKm ? `📄 បញ្ជីចង់ទៅ (${wishlists.length})` : `Lists (${wishlists.length})`}
+            {isKm
+              ? `📄 បញ្ជីចង់ទៅ ${!isVip && currentUser?.role !== 'admin' ? '🔒' : `(${wishlists.length})`}`
+              : `Lists ${!isVip && currentUser?.role !== 'admin' ? '🔒' : `(${wishlists.length})`}`}
           </button>
 
           <button
-            onClick={() => setActiveSubTab('tripplans')}
+            onClick={() => {
+              if (!isVip && currentUser?.role !== 'admin') {
+                setIsAiTripPlannerModalOpen(true);
+                return;
+              }
+              setActiveSubTab('tripplans');
+            }}
             className={`py-2.5 font-bold text-center border-b-2 transition whitespace-nowrap px-3 ${
               activeSubTab === 'tripplans'
                 ? 'border-[#064E3B] text-[#064E3B] dark:border-emerald-400 dark:text-emerald-400'
                 : 'border-transparent text-slate-400 hover:text-slate-700'
             }`}
           >
-            {isKm ? `🤖 ផែនការ AI (${tripPlans.length})` : `Plans (${tripPlans.length})`}
+            {isKm
+              ? `🤖 ផែនការ AI ${!isVip && currentUser?.role !== 'admin' ? '🔒' : `(${tripPlans.length})`}`
+              : `Plans ${!isVip && currentUser?.role !== 'admin' ? '🔒' : `(${tripPlans.length})`}`}
           </button>
 
           <button

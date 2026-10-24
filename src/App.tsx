@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
+import { isUserVipActive } from './types';
 import { Header } from './components/Header';
 import { BottomNav } from './components/BottomNav';
 import { HomeView } from './components/HomeView';
@@ -130,13 +131,13 @@ const MainScreen: React.FC = () => {
       {isSupportModalOpen && <SupportModal />}
       {isExitModalOpen && <ExitConfirmModal />}
 
-      {/* 6 Personalized Account Features & Viral Modals — Conditionally Mounted */}
-      {isWhatToEatModalOpen && <WhatToEatModal />}
-      {isNearMeModalOpen && <NearMeModal />}
-      {isDailyDiscoveriesModalOpen && <DailyDiscoveriesModal />}
-      {isWishlistsModalOpen && <WishlistsModal />}
-      {isAiTripPlannerModalOpen && <AiTripPlannerModal />}
-      {isNotificationsModalOpen && <NotificationsModal />}
+      {/* 6 Personalized Account Features — Strictly VIP Access Controlled & Conditionally Mounted */}
+      {isWhatToEatModalOpen && (isUserVipActive(currentUser) || currentUser?.role === 'admin') && <WhatToEatModal />}
+      {isNearMeModalOpen && (isUserVipActive(currentUser) || currentUser?.role === 'admin') && <NearMeModal />}
+      {isDailyDiscoveriesModalOpen && (isUserVipActive(currentUser) || currentUser?.role === 'admin') && <DailyDiscoveriesModal />}
+      {isWishlistsModalOpen && (isUserVipActive(currentUser) || currentUser?.role === 'admin') && <WishlistsModal />}
+      {isAiTripPlannerModalOpen && (isUserVipActive(currentUser) || currentUser?.role === 'admin') && <AiTripPlannerModal />}
+      {isNotificationsModalOpen && (isUserVipActive(currentUser) || currentUser?.role === 'admin') && <NotificationsModal />}
       {isTrendingSocialModalOpen && <TrendingSocialModal />}
       {isTrendingFoodDetailModalOpen && <TrendingFoodDetailModal />}
       {isAiCheckInModalOpen && <AiCheckInModal />}

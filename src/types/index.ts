@@ -1,6 +1,6 @@
-export const APP_VERSION = 'v1.9.7';
-export const APP_VERSION_NAME = '1.9.7';
-export const APP_BUILD_CODE = 69;
+export const APP_VERSION = 'v1.9.8';
+export const APP_VERSION_NAME = '1.9.8';
+export const APP_BUILD_CODE = 70;
 export const APP_RELEASE_DATE = '2026-10-24';
 
 export interface DeletedUserRecord {
@@ -11,6 +11,8 @@ export interface DeletedUserRecord {
   name: string;
   deletedAt: string;
   deletedBy: string;
+  permanentlyDeleted?: boolean;
+  snapshotUser?: User;
 }
 
 export const VIP_ANNUAL_PRICE_USD = 4.99;
@@ -79,6 +81,10 @@ export interface User {
   paymentMethod?: 'GooglePlayBilling' | 'KHQR' | 'Bakong' | 'Card' | 'Manual' | 'BankTransfer';
   transactionRef?: string;
   autoRenew?: boolean;
+  vipCancelledAt?: string;
+  isDisabled?: boolean;
+  disabledAt?: string;
+  restoredAt?: string;
 
   // Connected Social Accounts (TikTok & Facebook)
   socialAccounts?: UserSocialAccounts;
@@ -690,6 +696,9 @@ export const isUserVipActive = (user?: User | null): boolean => {
     user.username === 'cheasavuth'
   ) {
     return true;
+  }
+  if (user.isDisabled) {
+    return false;
   }
   // VIP users must meet ALL criteria:
   // 1. Membership tier must be 'premium_vip'

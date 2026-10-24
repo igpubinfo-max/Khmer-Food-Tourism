@@ -318,6 +318,21 @@ export async function syncAllAppDataWithSupabase(localState: {
         if (d && d.id) deletedMap.set(d.id, { ...(deletedMap.get(d.id) || {}), ...d });
       }
     }
+    // If a user in localState.users was explicitly restored by Admin (restoredAt), remove from deletedMap if not permanentlyDeleted
+    if (Array.isArray(localState.users)) {
+      for (const u of localState.users) {
+        if (u && u.id && u.restoredAt) {
+          const delRec = deletedMap.get(u.id);
+          if (delRec && !delRec.permanentlyDeleted) {
+            const restoredMs = new Date(u.restoredAt).getTime();
+            const deletedMs = delRec.deletedAt ? new Date(delRec.deletedAt).getTime() : 0;
+            if (restoredMs >= deletedMs) {
+              deletedMap.delete(u.id);
+            }
+          }
+        }
+      }
+    }
     const mergedDeletedUsers = Array.from(deletedMap.values());
     const deletedIds = new Set(mergedDeletedUsers.map(d => d.id));
     const deletedEmails = new Set(mergedDeletedUsers.map(d => (d.email || '').toLowerCase().trim()).filter(Boolean));
@@ -388,7 +403,13 @@ export async function syncAllAppDataWithSupabase(localState: {
           u.subscriptionStatus === 'active' &&
           u.subscriptionExpiryDate &&
           new Date(u.subscriptionExpiryDate).getTime() > Date.now();
-        if (isCloudValidVip && !isLocalValidVip) {
+        const wasLocalCancelledAfterCloudStart =
+          u.subscriptionStatus === 'cancelled' &&
+          u.vipCancelledAt &&
+          (!existing.subscriptionStartDate ||
+            new Date(u.vipCancelledAt).getTime() >= new Date(existing.subscriptionStartDate).getTime());
+
+        if (isCloudValidVip && !isLocalValidVip && !wasLocalCancelledAfterCloudStart) {
           userMap.set(u.id, existing);
         } else {
           userMap.set(u.id, normalizeVipExpiryOnUser({ ...existing, ...u }));

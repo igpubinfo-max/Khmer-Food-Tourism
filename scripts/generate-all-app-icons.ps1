@@ -1,6 +1,6 @@
 Add-Type -AssemblyName System.Drawing
 
-$srcPath = "C:\Users\igpub\.gemini\antigravity\brain\99e5a75e-66d8-483b-8911-48b6490d4423\.user_uploaded\media_1792741934240_9946a8cf.jpg"
+$srcPath = "C:\Users\igpub\.gemini\antigravity\brain\99e5a75e-66d8-483b-8911-48b6490d4423\.user_uploaded\media_1792823175999_707852ae.jpg"
 $projectRoot = "F:\Soft\System Program 2027 kimseng\KhmerFoodTourism"
 $resDir = Join-Path $projectRoot "android\app\src\main\res"
 
@@ -10,18 +10,24 @@ if (-not (Test-Path $srcPath)) {
 }
 
 $srcBmp = New-Object System.Drawing.Bitmap($srcPath)
+$w = $srcBmp.Width
 $h = $srcBmp.Height
+Write-Output "Loaded new source icon: ${w}x${h}"
 
-# Step 1: Create master 1024x1024 with transparent corners
+# Step 1: Create master 1024x1024 high-res icon preserving full aspect ratio & white rounded border
 $masterBmp = New-Object System.Drawing.Bitmap(1024, 1024, [System.Drawing.Imaging.PixelFormat]::Format32bppArgb)
 $g = [System.Drawing.Graphics]::FromImage($masterBmp)
 $g.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
 $g.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::HighQuality
 $g.PixelOffsetMode = [System.Drawing.Drawing2D.PixelOffsetMode]::HighQuality
-$g.Clear([System.Drawing.Color]::Transparent)
+$g.Clear([System.Drawing.Color]::White)
 
-$targetY = [int]([Math]::Round((1024 - $h) / 2))
-$g.DrawImage($srcBmp, 0, $targetY, 1024, $h)
+$scale = [Math]::Min(1024.0 / $w, 1024.0 / $h)
+$drawW = [int]([Math]::Round($w * $scale))
+$drawH = [int]([Math]::Round($h * $scale))
+$drawX = [int]([Math]::Round((1024 - $drawW) / 2))
+$drawY = [int]([Math]::Round((1024 - $drawH) / 2))
+$g.DrawImage($srcBmp, $drawX, $drawY, $drawW, $drawH)
 $g.Dispose()
 
 # Mask out the 4 corner black areas outside the rounded rectangle (radius = 210)
@@ -139,10 +145,25 @@ foreach ($d in $densities) {
     Write-Output "Generated icons for $($d.Name): Launcher=$($d.Launcher)x$($d.Launcher), Foreground=$($d.Foreground)x$($d.Foreground)"
 }
 
-# Generate 512x512 Play Store & Web Icon
+# Generate 1024x1024 master PNG
+$public1024 = Join-Path $projectRoot "public\android-app-icon-1024.png"
+$masterBmp.Save($public1024, [System.Drawing.Imaging.ImageFormat]::Png)
+
+# Generate 512x512 Play Store & Web Icons
 $icon512 = Resize-Image $masterBmp 512 512
 $publicIcon = Join-Path $projectRoot "public\icon.png"
+$publicIcon512 = Join-Path $projectRoot "public\icon-512.png"
 $icon512.Save($publicIcon, [System.Drawing.Imaging.ImageFormat]::Png)
+$icon512.Save($publicIcon512, [System.Drawing.Imaging.ImageFormat]::Png)
+
+$playStoreAsset1 = Join-Path $projectRoot "PlayStore-Assets\app-icon-512x512.png"
+if (Test-Path (Split-Path $playStoreAsset1)) {
+    $icon512.Save($playStoreAsset1, [System.Drawing.Imaging.ImageFormat]::Png)
+}
+$playStoreAsset2 = Join-Path $projectRoot "PlayStore-Assets\PlayStore-Assets\app-icon-512x512.png"
+if (Test-Path (Split-Path $playStoreAsset2)) {
+    $icon512.Save($playStoreAsset2, [System.Drawing.Imaging.ImageFormat]::Png)
+}
 
 $playStoreIcon = Join-Path $projectRoot "android\app\src\main\play_store_assets\icon_512.png"
 if (Test-Path (Split-Path $playStoreIcon)) {
@@ -150,10 +171,14 @@ if (Test-Path (Split-Path $playStoreIcon)) {
 }
 $icon512.Dispose()
 
-# Generate favicon.png
+# Generate 192x192 & 180x180 icons
 $favicon = Resize-Image $masterBmp 192 192
 $publicFavicon = Join-Path $projectRoot "public\favicon.png"
+$publicIcon192 = Join-Path $projectRoot "public\icon-192.png"
+$publicAppleTouch = Join-Path $projectRoot "public\apple-touch-icon.png"
 $favicon.Save($publicFavicon, [System.Drawing.Imaging.ImageFormat]::Png)
+$favicon.Save($publicIcon192, [System.Drawing.Imaging.ImageFormat]::Png)
+$favicon.Save($publicAppleTouch, [System.Drawing.Imaging.ImageFormat]::Png)
 $favicon.Dispose()
 
 Write-Output "Successfully updated all Android launcher icons, adaptive assets, and public icons!"

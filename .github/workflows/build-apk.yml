@@ -71,9 +71,9 @@ jobs:
           mkdir -p android/app/build/outputs/apk/debug
           REL_APK=$(find android/app/build/outputs/apk/release -name "*.apk" 2>/dev/null | head -n 1)
           if [ -n "$REL_APK" ] && [ -f "$REL_APK" ]; then
-            cp "$REL_APK" android/app/build/outputs/apk/debug/KhmerFoodTourism-v1.9.7.apk
+            cp "$REL_APK" android/app/build/outputs/apk/debug/KhmerFoodTourism-v1.9.8.apk
           elif [ -f android/app/build/outputs/apk/debug/app-debug.apk ]; then
-            mv android/app/build/outputs/apk/debug/app-debug.apk android/app/build/outputs/apk/debug/KhmerFoodTourism-v1.9.7.apk
+            mv android/app/build/outputs/apk/debug/app-debug.apk android/app/build/outputs/apk/debug/KhmerFoodTourism-v1.9.8.apk
           fi
           ls -la android/app/build/outputs/apk/debug/
 
@@ -88,20 +88,22 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: v1.9.7
-          name: "Khmer Food & Tourism v1.9.7 (Official ABA KHQR Fix & Admin Payment Verification Archive/Delete Management)"
+          tag_name: v1.9.8
+          name: "Khmer Food & Tourism v1.9.8 (3-Option Admin Account Management, VIP Personalized Features Lock & New App Icon)"
           make_latest: true
           body: |
             ### 🇰🇭 កម្មវិធីទូរស័ព្ទដៃ អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism Mobile App)
             
-            **កំណែថ្មី v1.9.7 (Build 69):**
-            - 🏦 **១. ជួសជុលបញ្ហាស្កេន ABA KHQR ("Invalid QR Merchant Data")៖**
-              - ប្រើប្រាស់កូដទូទាត់ ABA KHQR ផ្លូវការដើមទាំងស្រុង (`KIMSENG CHEA`, គណនី USD: `095 245 959` / KHR: `012 719 946` ជាមួយស្តង់ដារ `abaP2P` Dual-Account របស់ធនាគារ ABA) ដោយមិនកែប្រែ ឬបង្កើតកូដក្លែងក្លាយ ដែលធានាថាការស្កេនតាមកម្មវិធី ABA Mobile ដំណើរការជោគជ័យ ១០០%។
-              - កែលម្អប្រព័ន្ធផ្ទៀងផ្ទាត់វិក្កយបត្រ AI/OCR ឱ្យស្គាល់វិក្កយបត្រផ្ទេរប្រាក់ផ្ទាល់ខ្លួនរបស់ ABA (`TRANSFER TO CHEA KIMSENG (095 245 959)`) បានយ៉ាងត្រឹមត្រូវ។
-            - 🗂️ **២. កែលម្អការគ្រប់គ្រងការផ្ទៀងផ្ទាត់ការទូទាត់ប្រាក់របស់ Admin (Admin Payment Verification Management)៖**
-              - លាក់ ឬបញ្ជូនសំណើទូទាត់ប្រាក់ដែល Admin បានអនុម័ត (Approved) ទៅកាន់បណ្ណសារប្រវត្តិ (`📦 បណ្ណសារប្រវត្តិ`) ដោយស្វ័យប្រវត្តិ ដើម្បីរក្សាបញ្ជីរង់ចាំពិនិត្យ (`⏳ រង់ចាំពិនិត្យ`) ឱ្យស្អាតជានិច្ច។
-              - បន្ថែមប្រអប់ធីក (Checkbox) សម្រាប់ជ្រើសរើសកំណត់ត្រាទូទាត់នីមួយៗ និងប៊ូតុងលុប (`🗑️ លុបកំណត់ត្រាទូទាត់ដែលបានជ្រើសរើស`) ព្រមទាំងផ្ទាំងបញ្ជាក់មុនពេលលុប (Confirmation Dialog)។
-              - ធានាសុវត្ថិភាព ១០០% ថាការលុបកំណត់ត្រាទូទាត់ប្រាក់ មិនលុបគណនីអ្នកប្រើប្រាស់ ឬផ្លាស់ប្តូរស្ថានភាព VIP ឡើយ។
+            **កំណែថ្មី v1.9.8 (Build 70):**
+            - 🛡️ **១. ផ្ទាំងគ្រប់គ្រងគណនីអ្នកប្រើប្រាស់ ៣ ជម្រើសសម្រាប់ Admin (3-Option Admin Account Management Dialog)៖**
+              - **ជម្រើសទី ១ — បោះបង់សមាជិកភាព VIP (Cancel VIP)៖** ដកសិទ្ធិ និងអត្ថប្រយោជន៍ VIP ហើយប្តូរមកជាអ្នកប្រើប្រាស់ធម្មតា (Normal User) ដោយរក្សាទុកគណនី អ៊ីមែល ពាក្យសម្ងាត់ និងសិទ្ធិចូលប្រើប្រាស់ ១០០%។
+              - **ជម្រើសទី ២ — ស្តារសិទ្ធិចូលប្រើប្រាស់គណនីឡើងវិញ (Restore User Access)៖** បើកដំណើរការគណនីដែលត្រូវបានផ្អាក ឬលុបបណ្តោះអាសន្នឡើងវិញឱ្យអាចចូលប្រើកម្មវិធីជាមួយអ៊ីមែលដដែល (សម្រាប់គណនីដែលមិនទាន់លុបជាអចិន្ត្រៃយ៍)។
+              - **ជម្រើសទី ៣ — លុបគណនីជាអចិន្ត្រៃយ៍ (Delete Forever)៖** លុបគណនី និងទិន្នន័យពាក់ព័ន្ធទាំងអស់ជាអចិន្ត្រៃយ៍បន្ទាប់ពីធីកបញ្ជាក់យល់ព្រមយ៉ាងច្បាស់លាស់ ព្រមទាំងមានប៊ូតុង **បោះបង់ (Cancel)** ដាច់ដោយឡែក។
+            - 🔒 **២. ការគ្រប់គ្រងសិទ្ធិ VIP សម្រាប់មុខងារផ្ទាល់ខ្លួនទាំង ៦ (VIP Access Control for Personalized Features)៖**
+              - ចាក់សោមុខងារផ្ទាល់ខ្លួនទាំង ៦ (`ថ្ងៃនេះញ៉ាំអ្វី?`, `នៅជិតខ្ញុំ`, `កន្លែងថ្មីប្រចាំថ្ងៃ`, `បញ្ជីកន្លែងចង់ទៅ`, `ផែនការដើរលេង AI`, `ការជូនដំណឹង`) សម្រាប់អ្នកប្រើប្រាស់ឥតគិតថ្លៃ (Free Users) និងផ្ទៀងផ្ទាត់សិទ្ធិ VIP ទាំងលើផ្ទៃ UI និង Backend/Context។
+              - បិទសិទ្ធិប្រើប្រាស់ដោយស្វ័យប្រវត្តិ និងបង្ហាញផ្ទាំងដំឡើងទៅ VIP ភ្លាមៗនៅពេលគណនីផុតកំណត់ ឬត្រូវបានបោះបង់ VIP។
+            - 🎨 **៣. ប្តូររូបតំណាងកម្មវិធីថ្មី (New App Icon)៖**
+              - ធ្វើបច្ចុប្បន្នភាពរូបតំណាងកម្មវិធីថ្មីកម្រិតច្បាស់ខ្ពស់នៅគ្រប់ទំហំ Android Adaptive Launcher (`mipmap-*`) និង PWA Icons។
           draft: false
           prerelease: false
           files: |
