@@ -16,9 +16,9 @@ interface TouristImageModalProps {
 // Client-side image compression & resizing for smooth mobile experience
 const compressImageFile = (
   file: File, 
-  maxWidth = 1200, 
-  maxHeight = 800, 
-  quality = 0.85
+  maxWidth = 960, 
+  maxHeight = 640, 
+  quality = 0.80
 ): Promise<string> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -65,9 +65,9 @@ const compressImageFile = (
 // Compress large Data URL strings directly (to avoid localStorage quota overflow)
 const compressDataUrl = (
   dataUrl: string,
-  maxWidth = 1200,
-  maxHeight = 800,
-  quality = 0.85
+  maxWidth = 960,
+  maxHeight = 640,
+  quality = 0.80
 ): Promise<string> => {
   return new Promise((resolve) => {
     const img = new Image();
@@ -285,8 +285,8 @@ export const TouristImageModal: React.FC<TouristImageModalProps> = ({
 
     let finalPhotoUrl = check.normalizedUrl;
 
-    // If large Data URL (> 400KB), compress before storing to protect localStorage
-    if (finalPhotoUrl.startsWith('data:image/') && finalPhotoUrl.length > 400 * 1024) {
+    // If large Data URL (> 180KB), compress before storing to protect localStorage and speed up cloud sync
+    if (finalPhotoUrl.startsWith('data:image/') && finalPhotoUrl.length > 180 * 1024) {
       try {
         finalPhotoUrl = await compressDataUrl(finalPhotoUrl);
       } catch (compErr) {
@@ -297,6 +297,7 @@ export const TouristImageModal: React.FC<TouristImageModalProps> = ({
     const updated: TouristDestination = {
       ...destination,
       photoUrl: finalPhotoUrl,
+      galleryPhotos: [finalPhotoUrl],
       isCustomPhoto: true,
       photoUpdatedAt: new Date().toISOString(),
     };

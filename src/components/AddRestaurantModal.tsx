@@ -148,10 +148,11 @@ export const AddRestaurantModal: React.FC = () => {
     });
 
     setIsSubmitting(false);
+    if (!created) return;
     setIsAddRestaurantModalOpen(false);
     setStep(1);
     setSelectedTier('free');
-    setFoodPhotos([]);
+    setShopPhotos([]);
   };
 
   // 2. Next to Step 2 for Premium ($2.99 for 30 Days or $4.99 for 90 Days)
@@ -235,6 +236,11 @@ export const AddRestaurantModal: React.FC = () => {
       ownerPhone: phone.trim(),
     });
 
+    if (!created) {
+      setIsSubmitting(false);
+      return;
+    }
+
     addRegistrationTransaction({
       restaurantId: generatedRestId,
       restaurantNameKh: nameKh.trim(),
@@ -254,7 +260,7 @@ export const AddRestaurantModal: React.FC = () => {
     setIsAddRestaurantModalOpen(false);
     setStep(1);
     setTransactionRef('');
-    setFoodPhotos([]);
+    setShopPhotos([]);
   };
 
   return (

@@ -757,6 +757,43 @@ export const ManageMenuModal: React.FC = () => {
           </div>
         ) : (
           <>
+        {/* AI Category Verification Status Banner (Pending Admin Review or Rejected) */}
+        {(currentRest.status === 'pending' || currentRest.status === 'rejected') && (
+          <div
+            className={`px-4 py-2.5 border-b font-khmer text-xs flex items-start gap-2.5 ${
+              currentRest.status === 'pending'
+                ? 'bg-amber-50 dark:bg-amber-950/50 border-amber-300 dark:border-amber-800 text-amber-900 dark:text-amber-200'
+                : 'bg-rose-50 dark:bg-rose-950/50 border-rose-300 dark:border-rose-800 text-rose-900 dark:text-rose-200'
+            }`}
+          >
+            {currentRest.status === 'pending' ? (
+              <Clock className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5 animate-pulse" />
+            ) : (
+              <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
+            )}
+            <div className="space-y-0.5 flex-1">
+              <p className="font-bold">
+                {currentRest.status === 'pending'
+                  ? isKm
+                    ? '⏳ កំពុងរង់ចាំ Admin ពិនិត្យប្រភេទអាជីវកម្មម្ហូបអាហារ (Pending Admin Review)'
+                    : '⏳ Pending Admin Food-Category Review'
+                  : isKm
+                    ? '🚫 សំណើហាងត្រូវបានបដិសេធ (មិនមែនជាហាងលក់ម្ហូបអាហារចម្អិនស្រាប់)'
+                    : '🚫 Store Rejected (Non-Food Business)'}
+              </p>
+              <p className="text-[11px] leading-relaxed">
+                {currentRest.aiCategoryVerification
+                  ? isKm
+                    ? currentRest.aiCategoryVerification.reasonKh
+                    : currentRest.aiCategoryVerification.reasonEn
+                  : isKm
+                    ? 'សូមបន្ថែមមុខម្ហូបពិសេស និងរូបភាពម្ហូបអាហារឱ្យបានច្បាស់លាស់ ដើម្បីឱ្យ Admin អនុម័តដាក់បង្ហាញជាសាធារណៈ។'
+                    : 'Please add clear prepared food menu items and photos for Admin approval.'}
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* 5 Clearly Separated Management Sections */}
         <div className="grid grid-cols-5 bg-slate-100 dark:bg-slate-800/80 p-1 border-b border-slate-200 dark:border-slate-700 text-center font-khmer gap-0.5">
           <button

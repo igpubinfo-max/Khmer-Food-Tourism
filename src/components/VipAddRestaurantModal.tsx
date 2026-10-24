@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import {
   X,
@@ -16,14 +16,26 @@ import {
   Clock,
   AlertCircle,
   Crown,
+  ShieldCheck,
+  ShieldAlert,
+  Bot,
 } from 'lucide-react';
-import { RestaurantPriceLevel, isUserVipActive, getVipAccountState } from '../types';
+import {
+  RestaurantPriceLevel,
+  isUserVipActive,
+  getVipAccountState,
+  AiStoreCategoryVerificationReport,
+} from '../types';
 import {
   pickImageUsingNativeAndroidGallery,
   processAndCompressImageFile,
 } from '../utils/androidMediaHelper';
 import { searchOnlineFoodImages, OnlineFoodImageCandidate } from '../services/onlineFoodImageService';
 import { ShopMultiPhotoUploader } from './ShopMultiPhotoUploader';
+import {
+  analyzeFoodBusinessDeterministically,
+  verifyFoodBusinessOnServer,
+} from '../services/aiFoodBusinessVerifierService';
 
 export const VipAddRestaurantModal: React.FC = () => {
   const {
@@ -71,6 +83,25 @@ export const VipAddRestaurantModal: React.FC = () => {
   const [shopPhotos, setShopPhotos] = useState<string[]>(['/foods/food-1.jpg']);
   const [descriptionKh, setDescriptionKh] = useState('');
   const [signatureDish, setSignatureDish] = useState('');
+  const [isVerifyingAi, setIsVerifyingAi] = useState(false);
+  const [aiReport, setAiReport] = useState<AiStoreCategoryVerificationReport | null>(null);
+
+  // Live AI preview analysis as user types
+  const liveAiPreview = useMemo(() => {
+    if (!nameKh.trim() && !nameEn.trim() && !signatureDish.trim() && !descriptionKh.trim()) {
+      return null;
+    }
+    return analyzeFoodBusinessDeterministically({
+      nameKh: nameKh.trim(),
+      nameEn: nameEn.trim(),
+      signatureDishesKh: signatureDish.trim() ? [signatureDish.trim()] : [],
+      descriptionKh: descriptionKh.trim(),
+      addressKh: addressKh.trim(),
+      provinceKh,
+      photoUrl: shopPhotos[0] || '/foods/food-1.jpg',
+      foodImages: shopPhotos,
+    });
+  }, [nameKh, nameEn, signatureDish, descriptionKh, addressKh, provinceKh, shopPhotos]);
 
   if (!isVipAddRestaurantModalOpen) return null;
 
@@ -96,15 +127,45 @@ export const VipAddRestaurantModal: React.FC = () => {
     { nameKh: 'ខេត្តមណ្ឌលគិរី', nameEn: 'Mondulkiri' },
   ];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!nameKh.trim()) {
       showToast(isKm ? 'សូមបញ្ចូលឈ្មោះហាងជាភាសាខ្មែរ!' : 'Please enter restaurant name in Khmer!', 'warning');
       return;
     }
 
+    setIsVerifyingAi(true);
+    setAiReport(null);
+
     const finalProfile = (shopPhotos[0] || '').trim() || '/Shop/rest-1.jpg';
     const combinedGallery = Array.from(new Set([finalProfile, ...shopPhotos]));
+
+    // Run Server-Side AI Food-Business Verification before saving or publishing
+    const serverReport = await verifyFoodBusinessOnServer({
+      nameKh: nameKh.trim(),
+      nameEn: nameEn.trim() || nameKh.trim(),
+      descriptionKh: descriptionKh.trim(),
+      descriptionEn: nameEn.trim(),
+      signatureDishesKh: signatureDish.trim() ? [signatureDish.trim()] : [],
+      addressKh: addressKh.trim() || `${provinceKh} ប្រទេសកម្ពុជា`,
+      provinceKh,
+      phone: phone.trim(),
+      photoUrl: finalProfile,
+      profileImage: finalProfile,
+      foodImages: shopPhotos,
+      galleryPhotos: combinedGallery,
+      ownerId: currentUser?.id,
+      ownerName: currentUser?.name,
+    });
+
+    setIsVerifyingAi(false);
+    setAiReport(serverReport);
+
+    // 1. If AI determines the business is unrelated to prepared food -> Reject and explain in Khmer
+    if (serverReport.decision === 'rejected') {
+      showToast(isKm ? serverReport.reasonKh : serverReport.reasonEn, 'warning');
+      return;
+    }
 
     const newRestData = {
       nameKh: nameKh.trim(),
@@ -127,30 +188,25 @@ export const VipAddRestaurantModal: React.FC = () => {
       latitude: 11.5564,
       longitude: 104.9282,
       signatureDishesKh: signatureDish.trim() ? [signatureDish.trim()] : ['ម្ហូបពិសេសប្រចាំហាង'],
-      isFeatured: true,
-      isVerified: true,
+      isFeatured: serverReport.decision === 'approved',
+      isVerified: serverReport.decision === 'approved',
       membershipTier: 'premium' as const,
-      status: 'approved' as const,
+      status: (serverReport.decision === 'pending_review' ? 'pending' : 'approved') as 'approved' | 'pending' | 'rejected',
+      aiCategoryVerification: serverReport,
       ownerId: currentUser?.id,
       ownerName: currentUser?.name,
       ownerPhone: phone.trim(),
     };
 
     const created = addRestaurant(newRestData);
+    if (!created) return;
+
     setIsVipAddRestaurantModalOpen(false);
     setShopPhotos(['/foods/food-1.jpg']);
+    setAiReport(null);
 
-    if (created) {
-      setManagingRestaurant(created);
-      setIsManageMenuModalOpen(true);
-    }
-
-    showToast(
-      isKm
-        ? '🎉 បានបន្ថែមហាងថ្មីក្រោមសិទ្ធិ VIP ដោយជោគជ័យ! រូបភាពទាំងអស់ត្រូវបានរក្សាទុកត្រឹមត្រូវ។'
-        : '🎉 VIP Restaurant and all photos saved successfully! You can now manage your store.',
-      'success'
-    );
+    setManagingRestaurant(created);
+    setIsManageMenuModalOpen(true);
   };
 
   return (
@@ -334,23 +390,56 @@ export const VipAddRestaurantModal: React.FC = () => {
               </p>
             </div>
 
-            <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center gap-3">
-              <img
-                src={existingOwnedRestaurant.photoUrl}
-                alt={existingOwnedRestaurant.nameKh}
-                className="w-14 h-14 rounded-xl object-cover shrink-0 border border-amber-400"
-              />
-              <div className="min-w-0 flex-1">
-                <h4 className="font-bold text-sm text-slate-900 dark:text-white truncate">
-                  {isKm ? existingOwnedRestaurant.nameKh : existingOwnedRestaurant.nameEn}
-                </h4>
-                <p className="text-[11px] text-slate-500 truncate mt-0.5">
-                  📍 {existingOwnedRestaurant.addressKh}
-                </p>
-                <span className="inline-block mt-1 px-2 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 text-[10px] font-bold">
-                  🍽️ {existingOwnedRestaurant.menuItems?.length || 0} / 20 មុខម្ហូប
-                </span>
+            <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-2.5">
+              <div className="flex items-center gap-3">
+                <img
+                  src={existingOwnedRestaurant.photoUrl}
+                  alt={existingOwnedRestaurant.nameKh}
+                  className="w-14 h-14 rounded-xl object-cover shrink-0 border border-amber-400"
+                />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <h4 className="font-bold text-sm text-slate-900 dark:text-white truncate">
+                      {isKm ? existingOwnedRestaurant.nameKh : existingOwnedRestaurant.nameEn}
+                    </h4>
+                    {existingOwnedRestaurant.status === 'approved' ? (
+                      <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 text-[10px] font-bold">
+                        {isKm ? '✅ អនុម័តរួចរាល់' : '✅ Approved'}
+                      </span>
+                    ) : existingOwnedRestaurant.status === 'pending' ? (
+                      <span className="px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-200 text-[10px] font-bold">
+                        {isKm ? '⏳ រង់ចាំ Admin ពិនិត្យ' : '⏳ Pending Admin Review'}
+                      </span>
+                    ) : (
+                      <span className="px-2 py-0.5 rounded-full bg-rose-100 dark:bg-rose-900/60 text-rose-700 dark:text-rose-300 text-[10px] font-bold">
+                        {isKm ? '🚫 ត្រូវបានបដិសេធ' : '🚫 Rejected'}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-[11px] text-slate-500 truncate mt-0.5">
+                    📍 {existingOwnedRestaurant.addressKh}
+                  </p>
+                  <span className="inline-block mt-1 px-2 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 text-[10px] font-bold">
+                    🍽️ {existingOwnedRestaurant.menuItems?.length || 0} / 20 មុខម្ហូប
+                  </span>
+                </div>
               </div>
+
+              {existingOwnedRestaurant.aiCategoryVerification && (
+                <div
+                  className={`p-2.5 rounded-xl border text-[11px] leading-relaxed ${
+                    existingOwnedRestaurant.status === 'approved'
+                      ? 'bg-emerald-50/80 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200'
+                      : existingOwnedRestaurant.status === 'pending'
+                        ? 'bg-amber-50/80 dark:bg-amber-950/30 border-amber-300 dark:border-amber-800 text-amber-800 dark:text-amber-200'
+                        : 'bg-rose-50/80 dark:bg-rose-950/30 border-rose-300 dark:border-rose-800 text-rose-800 dark:text-rose-200'
+                  }`}
+                >
+                  {isKm
+                    ? existingOwnedRestaurant.aiCategoryVerification.reasonKh
+                    : existingOwnedRestaurant.aiCategoryVerification.reasonEn}
+                </div>
+              )}
             </div>
 
             <div className="space-y-2.5 pt-1">
@@ -399,6 +488,23 @@ export const VipAddRestaurantModal: React.FC = () => {
           </div>
         ) : (
         <form onSubmit={handleSubmit} className="p-5 space-y-4 overflow-y-auto max-h-[78vh] font-khmer text-xs">
+          {/* AI Food-Business Policy Notice */}
+          <div className="p-3 rounded-2xl bg-emerald-50/90 dark:bg-emerald-950/40 border border-emerald-400/50 flex items-start gap-2.5">
+            <Bot className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+            <div className="space-y-0.5 text-[11px] leading-relaxed">
+              <p className="font-bold text-emerald-900 dark:text-emerald-200">
+                {isKm
+                  ? '🤖 ប្រព័ន្ធ AI ត្រួតពិនិត្យប្រភេទអាជីវកម្មម្ហូបអាហារស្វ័យប្រវត្តិ'
+                  : '🤖 AI-Powered Food Business Category Verification'}
+              </p>
+              <p className="text-slate-600 dark:text-slate-300">
+                {isKm
+                  ? 'អនុញ្ញាតឱ្យបង្កើតហាងសម្រាប់តែ ភោជនីយដ្ឋាន អាហារដ្ឋាន តូបលក់ម្ហូប ហាងកាហ្វេ និងហាងលក់ម្ហូបអាហារចម្អិនស្រាប់ប៉ុណ្ណោះ។ ហាងគ្រឿងទេស ខោអាវ គ្រឿងអេឡិចត្រូនិក ឬអាជីវកម្មក្រៅពីអាហារនឹងត្រូវបដិសេធដោយស្វ័យប្រវត្តិ។'
+                  : 'Only restaurants, eateries, food stalls, cafés, and businesses selling prepared meals are allowed. Grocery stores, clothing shops, electronics, and non-food businesses will be rejected.'}
+              </p>
+            </div>
+          </div>
+
           {/* Store Name Inputs */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
@@ -534,6 +640,55 @@ export const VipAddRestaurantModal: React.FC = () => {
             />
           </div>
 
+          {/* Live AI Category Verification Status & Rejection Alert */}
+          {(aiReport || liveAiPreview) && (() => {
+            const activeReport = aiReport || liveAiPreview!;
+            const isRejected = activeReport.decision === 'rejected';
+            const isPending = activeReport.decision === 'pending_review';
+            return (
+              <div
+                className={`p-3.5 rounded-2xl border-2 space-y-1.5 transition-all ${
+                  isRejected
+                    ? 'bg-rose-50 dark:bg-rose-950/50 border-rose-500 text-rose-900 dark:text-rose-200'
+                    : isPending
+                      ? 'bg-amber-50 dark:bg-amber-950/40 border-amber-400 text-amber-900 dark:text-amber-200'
+                      : 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-500 text-emerald-900 dark:text-emerald-200'
+                }`}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-1.5 font-bold text-xs">
+                    {isRejected ? (
+                      <ShieldAlert className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0" />
+                    ) : isPending ? (
+                      <Clock className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                    ) : (
+                      <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                    )}
+                    <span>
+                      {isRejected
+                        ? isKm
+                          ? '🚫 មិនអនុញ្ញាត៖ អាជីវកម្មមិនមែនជាម្ហូបអាហារចម្អិនស្រាប់'
+                          : '🚫 Not Eligible: Non-Food Business Detected'
+                        : isPending
+                          ? isKm
+                            ? '⏳ ព័ត៌មានមិនទាន់ច្បាស់លាស់ (នឹងបញ្ជូនទៅ Admin ពិនិត្យ)'
+                            : '⏳ Uncertain Category (Will Send to Admin Review)'
+                          : isKm
+                            ? `✅ មានសិទ្ធិអនុម័ត៖ ${activeReport.detectedCategoryLabelKh}`
+                            : `✅ Eligible Food Business: ${activeReport.detectedCategoryLabelEn}`}
+                    </span>
+                  </div>
+                  <span className="px-2 py-0.5 rounded-full bg-black/10 dark:bg-white/10 text-[10px] font-mono font-bold">
+                    AI {activeReport.confidenceScore}%
+                  </span>
+                </div>
+                <p className="text-[11px] leading-relaxed">
+                  {isKm ? activeReport.reasonKh : activeReport.reasonEn}
+                </p>
+              </div>
+            );
+          })()}
+
           {/* VIP Instant Publish Card */}
           <div className="p-3 bg-gradient-to-r from-amber-500/15 via-emerald-500/10 to-teal-500/15 rounded-2xl border border-amber-400/40 flex items-center justify-between text-xs">
             <div className="flex items-center gap-2">
@@ -556,10 +711,24 @@ export const VipAddRestaurantModal: React.FC = () => {
           <div className="pt-2">
             <button
               type="submit"
-              className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-extrabold text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-98"
+              disabled={isVerifyingAi}
+              className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 disabled:opacity-60 text-slate-950 font-extrabold text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-98 cursor-pointer"
             >
-              <CheckCircle2 className="w-5 h-5 text-slate-950" />
-              <span>{isKm ? '✨ បង្កើតហាងភ្លាមៗ (Create VIP Store) →' : '✨ Create VIP Restaurant Now →'}</span>
+              {isVerifyingAi ? (
+                <>
+                  <RefreshCw className="w-5 h-5 text-slate-950 animate-spin" />
+                  <span>
+                    {isKm
+                      ? '🤖 កំពុងត្រួតពិនិត្យប្រភេទអាជីវកម្មដោយ AI...'
+                      : '🤖 Verifying Food Business Category with AI...'}
+                  </span>
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 className="w-5 h-5 text-slate-950" />
+                  <span>{isKm ? '✨ បង្កើតហាងភ្លាមៗ (Create VIP Store) →' : '✨ Create VIP Restaurant Now →'}</span>
+                </>
+              )}
             </button>
           </div>
         </form>

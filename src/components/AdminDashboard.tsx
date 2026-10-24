@@ -26,7 +26,7 @@ export const AdminDashboard: React.FC = () => {
   const { 
     isAdminOpen, setIsAdminOpen, language,
     foods, addFood, updateFood, deleteFood,
-    restaurants, deleteRestaurant, approveRestaurant, toggleVerifyRestaurant,
+    restaurants, deleteRestaurant, approveRestaurant, rejectRestaurant, toggleVerifyRestaurant,
     destinations, addDestination, updateDestination, deleteDestination,
     posts, deletePost,
     users, deletedUsers, updateUserRole, cancelUserVip, restoreUserAccess, disableUserAccount, deleteUserAccount, clearAllRegisteredUsers,
@@ -2021,14 +2021,90 @@ export const AdminDashboard: React.FC = () => {
                 </button>
               </div>
 
+              {pendingRestaurants.length > 0 && (
+                <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border-2 border-amber-400 space-y-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <h4 className="font-bold text-amber-900 dark:text-amber-200 font-khmer text-xs sm:text-sm flex items-center gap-1.5">
+                      <span>⏳ {isKm ? `ហាង VIP រង់ចាំការពិនិត្យប្រភេទអាជីវកម្មម្ហូបអាហារ (${pendingRestaurants.length})` : `Pending AI Food-Category Review (${pendingRestaurants.length})`}</span>
+                    </h4>
+                    <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 font-black text-[10px]">
+                      MANUAL REVIEW REQUIRED
+                    </span>
+                  </div>
+                  <div className="space-y-2">
+                    {pendingRestaurants.map((rest) => (
+                      <div
+                        key={`pending-${rest.id}`}
+                        className="p-3 rounded-xl bg-white dark:bg-stone-800 border border-amber-300 dark:border-amber-700 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                      >
+                        <div className="flex items-start gap-3 min-w-0">
+                          <img
+                            src={rest.photoUrl}
+                            alt={rest.nameKh}
+                            className="w-12 h-12 rounded-xl object-cover shrink-0 border border-amber-400"
+                          />
+                          <div className="min-w-0 space-y-0.5 font-khmer">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <h5 className="font-bold text-xs text-slate-900 dark:text-white truncate">
+                                {rest.nameKh} ({rest.nameEn})
+                              </h5>
+                              {rest.aiCategoryVerification && (
+                                <span className="px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-200 text-[9px] font-mono font-bold">
+                                  AI {rest.aiCategoryVerification.confidenceScore}%
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-[10px] text-slate-500 dark:text-slate-400">
+                              📍 {rest.provinceKh} • 📞 {rest.phone} • 🍽️ {(rest.signatureDishesKh || []).join(', ')}
+                            </p>
+                            {rest.aiCategoryVerification && (
+                              <p className="text-[10px] text-amber-800 dark:text-amber-300 leading-relaxed">
+                                {isKm ? rest.aiCategoryVerification.reasonKh : rest.aiCategoryVerification.reasonEn}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 shrink-0 self-end sm:self-center font-khmer">
+                          <button
+                            type="button"
+                            onClick={() => approveRestaurant(rest.id)}
+                            className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold shadow-xs transition cursor-pointer"
+                          >
+                            {isKm ? '✅ អនុម័តហាងអាហារ' : '✅ Approve Store'}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => rejectRestaurant(rest.id)}
+                            className="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-bold shadow-xs transition cursor-pointer"
+                          >
+                            {isKm ? '🚫 បដិសេធ' : '🚫 Reject'}
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="space-y-2 max-h-[50vh] overflow-y-auto no-scrollbar">
                 {restaurants.map((rest) => (
                   <div key={rest.id} className="p-3 bg-white dark:bg-stone-800 rounded-2xl border border-slate-200 dark:border-slate-700 dark:border-stone-700 flex items-center justify-between">
                     <div className="flex items-center gap-3 overflow-hidden">
                       <img src={rest.photoUrl} alt="rest" className="w-12 h-12 rounded-xl object-cover shrink-0 border border-slate-200 dark:border-slate-700" />
                       <div className="overflow-hidden">
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-1.5 flex-wrap">
                           <h4 className="font-bold text-[#0F172A] dark:text-stone-100 font-khmer truncate">{rest.nameKh}</h4>
+                          {rest.status === 'pending' && (
+                            <span className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 text-[9px] font-bold font-khmer">
+                              ⏳ រង់ចាំពិនិត្យ
+                            </span>
+                          )}
+                          {rest.status === 'rejected' && (
+                            <span className="px-1.5 py-0.5 rounded bg-rose-100 text-rose-700 text-[9px] font-bold font-khmer">
+                              🚫 បដិសេធ
+                            </span>
+                          )}
                           {rest.isVerified && <span className="text-[#059669] text-[10px] font-bold">✓ Verified</span>}
                           {rest.isPromoted && <span className="text-[#064E3B] dark:text-emerald-400 text-[10px] font-bold">★ Promoted</span>}
                         </div>
@@ -2039,6 +2115,14 @@ export const AdminDashboard: React.FC = () => {
                     </div>
 
                     <div className="flex items-center gap-2 shrink-0">
+                      {rest.status !== 'approved' && (
+                        <button
+                          onClick={() => approveRestaurant(rest.id)}
+                          className="px-2.5 py-1 rounded-lg text-[10px] font-bold font-khmer bg-emerald-600 text-white hover:bg-emerald-700 cursor-pointer"
+                        >
+                          {isKm ? 'អនុម័ត' : 'Approve'}
+                        </button>
+                      )}
                       <button
                         onClick={() => toggleVerifyRestaurant(rest.id)}
                         className={`px-2.5 py-1 rounded-lg text-[10px] font-bold font-khmer ${

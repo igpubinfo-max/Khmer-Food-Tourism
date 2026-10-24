@@ -18,9 +18,9 @@ interface FoodImageModalProps {
 // Compress and resize images smoothly client-side
 const compressImageFile = (
   file: File, 
-  maxWidth = 1000, 
-  maxHeight = 750, 
-  quality = 0.84
+  maxWidth = 900, 
+  maxHeight = 675, 
+  quality = 0.80
 ): Promise<string> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();

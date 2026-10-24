@@ -216,7 +216,7 @@ export async function testSupabaseConnection(): Promise<{
  * Using a unified JSONB table + structured columns makes Free Tier setup 1-click simple
  * and syncs Users, Transactions, Payment Proofs, and Smart-Cached Restaurants reliably.
  */
-export async function pushCloudDocument(key: string, payload: any): Promise<boolean> {
+export async function pushCloudDocument(key: string, payload: any, timeoutMs = 12000): Promise<boolean> {
   if (!isSupabaseConfigured()) return false;
   const cfg = getCloudApiConfig();
   if (!cfg.enableAutoCloudSync) return false;
@@ -230,7 +230,7 @@ export async function pushCloudDocument(key: string, payload: any): Promise<bool
         payload,
         updated_at: new Date().toISOString(),
       }),
-    }, 4000);
+    }, timeoutMs);
     return res.ok;
   } catch (err) {
     console.warn(`Supabase pushCloudDocument(${key}) error:`, err);
@@ -241,7 +241,7 @@ export async function pushCloudDocument(key: string, payload: any): Promise<bool
 /**
  * Pull a shared key-value document from Supabase `kft_app_kv_store` table.
  */
-export async function pullCloudDocument<T>(key: string): Promise<T | null> {
+export async function pullCloudDocument<T>(key: string, timeoutMs = 10000): Promise<T | null> {
   if (!isSupabaseConfigured()) return null;
   const cfg = getCloudApiConfig();
 
@@ -252,7 +252,7 @@ export async function pullCloudDocument<T>(key: string): Promise<T | null> {
         method: 'GET',
         headers: getSupabaseHeaders(false),
       },
-      3500
+      timeoutMs
     );
     if (!res.ok) return null;
     const rows = await res.json();
@@ -263,6 +263,62 @@ export async function pullCloudDocument<T>(key: string): Promise<T | null> {
   } catch (err) {
     console.warn(`Supabase pullCloudDocument(${key}) error:`, err);
     return null;
+  }
+}
+
+/**
+ * Pull all key-value documents matching a key prefix (e.g. `kft_ov_`) from Supabase `kft_app_kv_store`.
+ * Enables atomic per-record cloud storage for Admin-updated images so one item update never overwrites another.
+ */
+export async function pullCloudDocumentsByPrefix<T = any>(
+  prefix: string,
+  timeoutMs = 12000
+): Promise<Array<{ key: string; payload: T; updated_at?: string }>> {
+  if (!isSupabaseConfigured()) return [];
+  const cfg = getCloudApiConfig();
+
+  try {
+    const res = await fetchWithTimeout(
+      `${cfg.supabaseUrl}/rest/v1/kft_app_kv_store?key=like.${encodeURIComponent(prefix)}*&select=key,payload,updated_at&limit=1000`,
+      {
+        method: 'GET',
+        headers: getSupabaseHeaders(false),
+      },
+      timeoutMs
+    );
+    if (!res.ok) return [];
+    const rows = await res.json();
+    if (Array.isArray(rows)) {
+      return rows.filter(r => r && typeof r.key === 'string' && r.payload !== undefined);
+    }
+    return [];
+  } catch (err) {
+    console.warn(`Supabase pullCloudDocumentsByPrefix(${prefix}) error:`, err);
+    return [];
+  }
+}
+
+/**
+ * Delete a specific key from Supabase `kft_app_kv_store`.
+ */
+export async function deleteCloudDocument(key: string, timeoutMs = 8000): Promise<boolean> {
+  if (!isSupabaseConfigured()) return false;
+  const cfg = getCloudApiConfig();
+  if (!cfg.enableAutoCloudSync) return false;
+
+  try {
+    const res = await fetchWithTimeout(
+      `${cfg.supabaseUrl}/rest/v1/kft_app_kv_store?key=eq.${encodeURIComponent(key)}`,
+      {
+        method: 'DELETE',
+        headers: getSupabaseHeaders(false),
+      },
+      timeoutMs
+    );
+    return res.ok;
+  } catch (err) {
+    console.warn(`Supabase deleteCloudDocument(${key}) error:`, err);
+    return false;
   }
 }
 

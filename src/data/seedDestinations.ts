@@ -1052,7 +1052,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Resorts & Cultural Heritage",
     "descriptionKh": "ទស្សនាចម្ការម្រេចកំពត ដែលជាផលិតផលសម្គាល់ភូមិសាស្ត្រ (GI) ល្បីល្បាញលេខ ១ លើពិភពលោក។ ភ្ញៀវទេសចរអាចស្វែងយល់ពីរបៀបដាំដុះ បេះម្រេចខ្មៅ ក្រហម និងស ព្រមទាំងភ្លក្សរសជាតិម្ហូបឆាម្រេចខ្ចី។",
     "descriptionEn": "Tour world-renowned protected geographical indication (GI) pepper plantations. Learn about organic cultivating methods and sample exquisite black, red, and white peppercorns.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9b/Worker_At_A_Pepper_Farm_%28221383541%29.jpeg/960px-Worker_At_A_Pepper_Farm_%28221383541%29.jpeg",
+    "photoUrl": "/destinations/dest-31.webp",
     "provinceKh": "ខេត្តកំពត",
     "provinceEn": "Kampot",
     "addressKh": "ស្រុកទឹកឈូ និងស្រុកកំពង់ត្រាច ខេត្តកំពត",
@@ -1073,7 +1073,7 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": true,
     "galleryPhotos": [
-      "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9b/Worker_At_A_Pepper_Farm_%28221383541%29.jpeg/960px-Worker_At_A_Pepper_Farm_%28221383541%29.jpeg"
+      "/destinations/dest-31.webp"
     ]
   },
   {
@@ -1250,7 +1250,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Beaches & Tropical Islands",
     "descriptionKh": "ឆ្នេរខ្សាច់សមុទ្រដ៏ស្ងប់ស្ងាត់ មានជួរដើមឈើធំៗម្លប់ត្រឈឹងត្រឈៃ។ រូបសំណាកសិលាធរណី (ស្រីស្អាតចាំប្តី) និងរូបសំណាកក្តាមសេះយក្សកណ្តាលសមុទ្រ ជានិមិត្តរូបទេសចរណ៍ដ៏ល្បីនៃខេត្តកែប។",
     "descriptionEn": "Picturesque sheltered beach with shady almond trees, celebrated for its iconic Giant Blue Crab statue rising from the sea and the poignant Sela Thorani maiden sculpture.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1e/06-Kep_Beach_Cambodia-nX-21.jpg/960px-06-Kep_Beach_Cambodia-nX-21.jpg",
+    "photoUrl": "/destinations/dest-37.webp",
     "provinceKh": "ខេត្តកែប",
     "provinceEn": "Kep",
     "addressKh": "ក្រុងកែប ខេត្តកែប",
@@ -1281,7 +1281,7 @@ export const initial100Destinations: TouristDestination[] = [
     "reviewerQuoteEn": "Live fresh blue swimming crabs stir-fried on the spot with Kampot green pepper - sheer perfection!",
     "reviewerName": "Foodie Khmer Review",
     "galleryPhotos": [
-      "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1e/06-Kep_Beach_Cambodia-nX-21.jpg/960px-06-Kep_Beach_Cambodia-nX-21.jpg"
+      "/destinations/dest-37.webp"
     ]
   },
   {
@@ -1963,7 +1963,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Mountains & National Parks",
     "descriptionKh": "ទួលភ្នំពិសិដ្ឋដែលជាទីសក្ការបូជាធំបំផុតរបស់បងប្អូនជនជាតិដើមភាគតិចព្នង។ ពីលើកំពូលភ្នំអាចគយគន់ទេសភាពផ្ទះក្បឿងក្រុងសែនមនោរម្យ វាលស្មៅពណ៌មាស និងថ្ងៃលិចដ៏រ៉ូមែនទិក។",
     "descriptionEn": "Sacred indigenous mountain shrine offering sweeping 360-degree panoramic sunset views overlooking Sen Monorom town, pine groves, and golden grassy hills.",
-    "photoUrl": "/destinations/dest-58.jpg",
+    "photoUrl": "/destinations/dest-58.webp",
     "provinceKh": "ខេត្តមណ្ឌលគិរី",
     "provinceEn": "Mondulkiri",
     "addressKh": "ក្រុងសែនមនោរម្យ ខេត្តមណ្ឌលគិរី",
@@ -1984,7 +1984,7 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "/destinations/dest-58.jpg"
+      "/destinations/dest-58.webp"
     ]
   },
   {
@@ -1996,7 +1996,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Nature & Waterfalls",
     "descriptionKh": "ចំណុចគយគន់ទេសភាពព្រៃព្រឹក្សាដ៏ធំធេងលាតសន្ធឹងដាច់កន្ទុយភ្នែក ប្រៀបដូចជារលកសមុទ្រពណ៌បៃតងរំកិលតាមជួរភ្នំ។ ពេលព្រឹកព្រលឹមមានអ័ព្ទសក្បុសអណ្តែតលើកំពូលឈើដ៏ស្រស់ស្អាត។",
     "descriptionEn": "Iconic panoramic viewpoint gazing out over endless waves of canopy rainforest stretching to the horizon like a green ocean, veiled in morning mist.",
-    "photoUrl": "https://upload.wikimedia.org/wikipedia/commons/0/0c/Veal_thom.jpg",
+    "photoUrl": "/destinations/dest-59.webp",
     "provinceKh": "ខេត្តមណ្ឌលគិរី",
     "provinceEn": "Mondulkiri",
     "addressKh": "ស្រុកអូររាំង ចម្ងាយ ៥ គ.ម ពីក្រុងសែនមនោរម្យ",
@@ -2017,7 +2017,7 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": true,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/0/0c/Veal_thom.jpg"
+      "/destinations/dest-59.webp"
     ]
   },
   {
@@ -2029,7 +2029,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Nature & Waterfalls",
     "descriptionKh": "ទឹកធ្លាក់ធម្មជាតិកម្ពស់ ៥ ម៉ែត្រ និង ១០ ម៉ែត្រ ស្ថិតនៅក្បែរក្រុងសែនមនោរម្យ ព័ទ្ធជុំវិញដោយចម្ការកាហ្វេ និងចម្ការកៅស៊ូ។ ទីតាំងងាយស្រួលធ្វើដំណើរសម្រាប់សម្រាកញ៉ាំអាហារ។",
     "descriptionEn": "Charming three-step waterfall nestled in a shaded valley near coffee and rubber plantations, very convenient for family picnics near town.",
-    "photoUrl": "https://upload.wikimedia.org/wikipedia/commons/5/5a/Huay_Kaew_waterfall_mu_yang.jpg",
+    "photoUrl": "/destinations/dest-60.webp",
     "provinceKh": "ខេត្តមណ្ឌលគិរី",
     "provinceEn": "Mondulkiri",
     "addressKh": "ជាយក្រុងសែនមនោរម្យ ចម្ងាយ ៥ គ.ម",
@@ -2050,7 +2050,7 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/5/5a/Huay_Kaew_waterfall_mu_yang.jpg"
+      "/destinations/dest-60.webp"
     ]
   },
   {
@@ -2161,7 +2161,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Nature & Waterfalls",
     "descriptionKh": "ទឹកធ្លាក់កម្ពស់ ១២ ម៉ែត្រលើស្ទឹងកន្សែង ហ៊ុមព័ទ្ធដោយព្រៃឈើត្រឈឹងត្រឈៃ។ មានស្ពានយោលឈើកាត់ពីលើទឹកធ្លាក់សម្រាប់ថតរូប និងកាំជណ្តើរចុះទៅងូតទឹកលេងនៅខាងក្រោម។",
     "descriptionEn": "Lively 12-meter waterfall surrounded by rubber and fruit plantations, featuring a suspension footbridge crossing above the rushing waters.",
-    "photoUrl": "https://upload.wikimedia.org/wikipedia/commons/4/4e/Motorbike_ride_-_Ratanakiri%2C_Cambodia.jpg",
+    "photoUrl": "https://upload.wikimedia.org/wikipedia/commons/9/9c/Chrey_Thom_Waterfall_Mondulkiri.jpg",
     "provinceKh": "ខេត្តរតនគិរី",
     "provinceEn": "Ratanakiri",
     "addressKh": "ស្រុកបានលុង ចម្ងាយ ៦ គ.ម ពីក្រុងបានលុង",
@@ -2182,7 +2182,7 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/5/5a/Huay_Kaew_waterfall_mu_yang.jpg"
+      "https://upload.wikimedia.org/wikipedia/commons/9/9c/Chrey_Thom_Waterfall_Mondulkiri.jpg"
     ]
   },
   {
@@ -2194,7 +2194,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Nature & Waterfalls",
     "descriptionKh": "ទឹកធ្លាក់កម្ពស់ ១០ ម៉ែត្រហូរធ្លាក់កាត់ច្រាំងថ្មកំបោរចូលទៅក្នុងអាងទឹកធម្មជាតិដ៏ធំ។ ឈ្មោះកាទៀងត្រូវបានហៅតាមសត្វទៀង (សត្វទន្សោង) ដែលធ្លាប់មករកផឹកទឹកនៅទីនេះ។",
     "descriptionEn": "Gentle 10-meter waterfall flowing into a broad, calm swimming pool encircled by thick forest, named after wild ox (Kating) that historically gathered here.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c7/Ratanakiri_tribal_village_school.jpg/960px-Ratanakiri_tribal_village_school.jpg",
+    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7d/Tourists_at_Bou_Sra_Waterfall%2C_Mondulkiri%2C_Cambodia.jpg/960px-Tourists_at_Bou_Sra_Waterfall%2C_Mondulkiri%2C_Cambodia.jpg",
     "provinceKh": "ខេត្តរតនគិរី",
     "provinceEn": "Ratanakiri",
     "addressKh": "ស្រុកលំផាត់ ចម្ងាយ ៧ គ.ម ពីបានលុង",
@@ -2621,8 +2621,7 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": true,
     "galleryPhotos": [
-      "/destinations/dest-77.jpg",
-      "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e4/02-Bamboo_Bridge%2C_Kampong_Cham-nX-7.jpg/960px-02-Bamboo_Bridge%2C_Kampong_Cham-nX-7.jpg"
+      "/destinations/dest-77.jpg"
     ]
   },
   {
@@ -3030,7 +3029,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Nature & Waterfalls",
     "descriptionKh": "រមណីយដ្ឋានធម្មជាតិដែលមានស្ទឹងថ្លាត្រជាក់ហូរកាត់ថ្មរដិបរដុប ក្រោមម្លប់ព្រៃឈើធំៗ។ ជាកន្លែងពេញនិយមសម្រាប់អ្នកស្រុក និងភ្ញៀវទេសចរងូតទឹកកម្សាន្តនៅចុងសប្តាហ៍។",
     "descriptionEn": "Charming river resort with shallow stone-studded waters flowing through tranquil forest groves, ideal for weekend family splashing and dining.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3c/Global_Forest_Change_tree-cover_loss_year_in_Pursat%2C_2001-2024.png/960px-Global_Forest_Change_tree-cover_loss_year_in_Pursat%2C_2001-2024.png",
+    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/da/Forest_in_Mondulkiri.jpg/960px-Forest_in_Mondulkiri.jpg",
     "provinceKh": "ខេត្តពោធិ៍សាត់",
     "provinceEn": "Pursat",
     "addressKh": "ស្រុកភ្នំក្រវាញ ចម្ងាយ ១៦ គ.ម ពីក្រុងពោធិ៍សាត់",
@@ -3051,7 +3050,7 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d9/Phnum_Kravanh%2C_Cambodia_-_panoramio.jpg/960px-Phnum_Kravanh%2C_Cambodia_-_panoramio.jpg"
+      "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/da/Forest_in_Mondulkiri.jpg/960px-Forest_in_Mondulkiri.jpg"
     ]
   },
   {
@@ -3205,7 +3204,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Nature & Waterfalls",
     "descriptionKh": "ទឹកធ្លាក់ធម្មជាតិ ៧ ដំណាក់ដ៏ស្រស់ស្អាតកណ្តាលជ្រលងភ្នំឱរ៉ាល់។ ទឹកហូរកាត់ផ្ទាំងថ្មធំៗបង្កើតជាអាងហែលទឹកធម្មជាតិថ្លាឈ្វេង ហ៊ុមព័ទ្ធដោយព្រៃឈើស្រស់បំព្រង។",
     "descriptionEn": "Spectacular seven-tiered waterfall complex cascading through granite riverbeds into natural swimming lagoons near the foot of Mount Aural.",
-    "photoUrl": "https://upload.wikimedia.org/wikipedia/commons/5/5f/Kampong_Speu_banner.jpg",
+    "photoUrl": "/destinations/dest-95.webp",
     "provinceKh": "ខេត្តកំពង់ស្ពឺ",
     "provinceEn": "Kampong Speu",
     "addressKh": "ស្រុកឱរ៉ាល់ ខេត្តកំពង់ស្ពឺ",
@@ -3226,7 +3225,7 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a9/Kong_Rei_Mountain_by_Sovithya_-_panoramio.jpg/960px-Kong_Rei_Mountain_by_Sovithya_-_panoramio.jpg"
+      "/destinations/dest-95.webp"
     ]
   },
   {
@@ -3865,7 +3864,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Nature & Waterfalls",
     "descriptionKh": "ទឹកធ្លាក់ធម្មជាតិដ៏ល្បីល្បាញបំផុតនៅខេត្តប៉ៃលិន ហូរធ្លាក់ពីជួរភ្នំខៀវកាត់ផ្ទាំងថ្មធំៗជាច្រើនដំណាក់។ ទឹកថ្លាត្រជាក់ស្រេង សម្បូរទៅដោយម្លប់ឈើ និងក្យូសសម្រាកទទួលទានអាហារ។",
     "descriptionEn": "Scenic multi-tiered waterfall cascading down the lush slopes of the Blue Mountains, offering cool natural swimming pools and shaded bamboo huts.",
-    "photoUrl": "https://upload.wikimedia.org/wikipedia/commons/2/2e/Cambodia_Pailin_small.png",
+    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9c/Chrey_Thom_Waterfall_Mondulkiri.jpg/960px-Chrey_Thom_Waterfall_Mondulkiri.jpg",
     "provinceKh": "ខេត្តប៉ៃលិន",
     "provinceEn": "Pailin",
     "addressKh": "សង្កាត់អូរតាវ៉ៅ ក្រុងប៉ៃលិន",
@@ -3886,7 +3885,7 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/5/5a/Huay_Kaew_waterfall_mu_yang.jpg"
+      "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9c/Chrey_Thom_Waterfall_Mondulkiri.jpg/960px-Chrey_Thom_Waterfall_Mondulkiri.jpg"
     ]
   },
   {
@@ -5834,7 +5833,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Resorts & Cultural Heritage",
     "descriptionKh": "ច្រកទ្វារអន្តរជាតិចាំយាមជាច្រកព្រំដែនកម្ពុជា-ថៃ ជាប់មាត់សមុទ្រ មានសួនច្បារមាត់ទឹក ផ្សារទំនិញរួចពន្ធ និងទេសភាពភ្នំជាប់មាត់សមុទ្រដ៏ស្រស់បំព្រង។",
     "descriptionEn": "The southwestern coastal international border gateway between Cambodia and Thailand, offering duty-free shopping, scenic seaside cliffs, and sea-view promenades.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/50/Cambodge_Physique_Map_1927_Baudoin_Thai_Maritime_Border.jpg/960px-Cambodge_Physique_Map_1927_Baudoin_Thai_Maritime_Border.jpg",
+    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e1/Koh_Kong_Bridge.jpg/960px-Koh_Kong_Bridge.jpg",
     "provinceKh": "ខេត្តកោះកុង",
     "provinceEn": "Koh Kong",
     "addressKh": "ឃុំប៉ាក់ខ្លង ស្រុកមណ្ឌលសីមា ខេត្តកោះកុង",
@@ -5856,7 +5855,7 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Koh_Sdach_Archipelago_Koh_Kong.jpg/960px-Koh_Sdach_Archipelago_Koh_Kong.jpg"
+      "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e1/Koh_Kong_Bridge.jpg/960px-Koh_Kong_Bridge.jpg"
     ]
   },
   {
@@ -5868,7 +5867,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Historical Temple / Heritage",
     "descriptionKh": "ចេតិយឃុនឆាង ឃុនផែន ស្ថិតនៅលើដីកោះកណ្តាលដៃសមុទ្រកោះកុង ជាទីសក្ការៈបូជាប្រវត្តិសាស្ត្រជាប់ទាក់ទងនឹងរឿងព្រេងស្នេហាអមតៈឃុនឆាងឃុនផែន សាងសង់ឡើងតាំងពីសតវត្សរ៍ទី១៥។",
     "descriptionEn": "A historical cliffside shrine perched on a coastal rocky inlet in Koh Kong, steeped in the tragic folk legend of Khun Chhang and Khun Phaen dating back centuries.",
-    "photoUrl": "https://upload.wikimedia.org/wikipedia/commons/8/8c/Map_Koh_Kong_Province.png",
+    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b5/Peam_Krasop_Wildlife_Sanctuary_Koh_Kong.jpg/960px-Peam_Krasop_Wildlife_Sanctuary_Koh_Kong.jpg",
     "provinceKh": "ខេត្តកោះកុង",
     "provinceEn": "Koh Kong",
     "addressKh": "ឃុំប៉ាក់ខ្លង ស្រុកមណ្ឌលសីមា មុខទីរួមខេត្តកោះកុង",
@@ -5890,7 +5889,7 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Peam_Krasop_Mangrove_Sanctuary_Koh_Kong.jpg/960px-Peam_Krasop_Mangrove_Sanctuary_Koh_Kong.jpg"
+      "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b5/Peam_Krasop_Wildlife_Sanctuary_Koh_Kong.jpg/960px-Peam_Krasop_Wildlife_Sanctuary_Koh_Kong.jpg"
     ]
   },
   {
@@ -5902,7 +5901,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Nature & Waterfalls",
     "descriptionKh": "ទឹកធ្លាក់តាឆាតជាតំបន់រមណីយដ្ឋានទឹកជ្រោះធម្មជាតិកណ្តាលព្រៃភ្នំ មានទឹកធ្លាក់ ៣ ដំណាក់ ទឹកថ្លាត្រជាក់ និងមានអាងទឹកធម្មជាតិសម្រាប់ហែលលេងយ៉ាងសប្បាយរីករាយ។",
     "descriptionEn": "A tranquil 3-tiered waterfall flowing into crystalline natural pools within the Cardamom foothills, ideal for hiking and jungle swimming.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7d/Global_Forest_Change_tree-cover_loss_year_in_Koh_Kong%2C_2001-2024.png/960px-Global_Forest_Change_tree-cover_loss_year_in_Koh_Kong%2C_2001-2024.png",
+    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7c/Tatai_Waterfall%2C_Koh_Kong%2C_Cambodia.jpg/960px-Tatai_Waterfall%2C_Koh_Kong%2C_Cambodia.jpg",
     "provinceKh": "ខេត្តកោះកុង",
     "provinceEn": "Koh Kong",
     "addressKh": "ឃុំទួលគគីរ ស្រុកមណ្ឌលសីមា ខេត្តកោះកុង",
@@ -5924,7 +5923,7 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/Tatai_River_Waterfall_Koh_Kong.jpg/960px-Tatai_River_Waterfall_Koh_Kong.jpg"
+      "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7c/Tatai_Waterfall%2C_Koh_Kong%2C_Cambodia.jpg/960px-Tatai_Waterfall%2C_Koh_Kong%2C_Cambodia.jpg"
     ]
   },
   {
@@ -5936,7 +5935,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Nature & Waterfalls",
     "descriptionKh": "កោះអណ្តែតជាកោះធម្មជាតិលើដងស្ទឹងតាតៃ ហ៊ុមព័ទ្ធដោយព្រៃទឹកភ្លៀងជួរភ្នំក្រវាញ មានរីហ្ស៊តបណ្តែតទឹកបែបអេកូឡូស៊ីលំដាប់ប្រណិត និងការជិះទូកកាយ៉ាក់ទស្សនាជីវចម្រុះ។",
     "descriptionEn": "An exclusive river island on the Tatai River flanked by the Cardamom rainforest, famous for overwater luxury eco-lodges, river swimming, and serene kayaking.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7b/Cambodia_map_islands_north.jpg/960px-Cambodia_map_islands_north.jpg",
+    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1d/Tatai_River_Koh_Kong.jpg/960px-Tatai_River_Koh_Kong.jpg",
     "provinceKh": "ខេត្តកោះកុង",
     "provinceEn": "Koh Kong",
     "addressKh": "ឃុំតាតៃ ស្រុកកោះកុង ខេត្តកោះកុង",
@@ -5958,7 +5957,7 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": true,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/Tatai_River_Waterfall_Koh_Kong.jpg/960px-Tatai_River_Waterfall_Koh_Kong.jpg"
+      "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1d/Tatai_River_Koh_Kong.jpg/960px-Tatai_River_Koh_Kong.jpg"
     ]
   },
   {
@@ -6378,7 +6377,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Mountains & Caves",
     "descriptionKh": "តំបន់ខ្ពង់រាបវាលវែងជាតំបន់ភ្នំខ្ពស់កណ្តាលជួរភ្នំក្រវាញ មានអាកាសធាតុត្រជាក់ពេញមួយឆ្នាំ អ័ព្ទពពកហោះកាត់វាលស្មៅ និងចម្ការផ្លែឈើត្រូពិច ជាទីតាំងបោះតង់ និងគយគន់ធម្មជាតិដ៏អស្ចារ្យ។",
     "descriptionEn": "A cool misty highland plateau in the Cardamom range, celebrated for refreshing mountain breezes, orange groves, cloud seas, and scenic off-road expeditions.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/66/Pursat_Jade_Ptel_Roundabout.png/960px-Pursat_Jade_Ptel_Roundabout.png",
+    "photoUrl": "https://upload.wikimedia.org/wikipedia/commons/0/0c/Veal_thom.jpg",
     "provinceKh": "ខេត្តពោធិ៍សាត់",
     "provinceEn": "Pursat",
     "addressKh": "ស្រុកវាលវែង ខេត្តពោធិ៍សាត់",
@@ -6400,7 +6399,7 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": true,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Phnom_1500_mountain_road_Pursat.jpg/960px-Phnom_1500_mountain_road_Pursat.jpg"
+      "https://upload.wikimedia.org/wikipedia/commons/0/0c/Veal_thom.jpg"
     ]
   },
   {
@@ -6650,7 +6649,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Nature & Waterfalls",
     "descriptionKh": "អូរមេម៉ង់ជាតំបន់ស្ទឹងធម្មជាតិកណ្តាលព្រៃភ្នំនៃស្រុកកែវសីមា ល្បីល្បាញដោយសារប្រវត្តិរែងមាសធម្មជាតិរបស់អ្នកស្រុក និងជាជម្រកសត្វព្រៃកម្រក្នុងដែនជម្រកសត្វព្រៃកែវសីមា។",
     "descriptionEn": "A tranquil forest river valley in Keo Seima famed for historic traditional gold panning streams and pristine evergreen canopy trails.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d3/Global_Forest_Change_tree-cover_loss_year_in_Mondulkiri%2C_2001-2024.png/960px-Global_Forest_Change_tree-cover_loss_year_in_Mondulkiri%2C_2001-2024.png",
+    "photoUrl": "https://upload.wikimedia.org/wikipedia/commons/a/ad/Mondulkiri_province_Northeastern_Cambodia.jpg",
     "provinceKh": "ខេត្តមណ្ឌលគិរី",
     "provinceEn": "Mondulkiri",
     "addressKh": "ស្រុកកែវសីមា ខេត្តមណ្ឌលគិរី",
@@ -6672,7 +6671,7 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Bousra_Waterfall_Mondulkiri_Cambodia.jpg/960px-Bousra_Waterfall_Mondulkiri_Cambodia.jpg"
+      "https://upload.wikimedia.org/wikipedia/commons/a/ad/Mondulkiri_province_Northeastern_Cambodia.jpg"
     ]
   },
   {
@@ -6820,7 +6819,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Resorts & Cultural Heritage",
     "descriptionKh": "តំបន់រ៉ែត្បូងបរកែវ ល្បីល្បាញដោយសារការជីករ៉ែត្បូងកណ្តៀងពណ៌ខៀវ (Zircon) ពីក្នុងរូងដីបុរាណ ភ្ញៀវទេសចរអាចទស្សនាការរែងត្បូង ការច្នៃត្បូង និងទិញត្បូងធម្មជាតិពិតៗ។",
     "descriptionEn": "The historic gemstone district of Bokeo renowned for natural blue zircon mining, where visitors can witness traditional hand-dug gem pit shafts and lapidary markets.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7d/Cambodia%2C_Ochum.png/960px-Cambodia%2C_Ochum.png",
+    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/23/Yak_Loum_Crater_Lake%2C_Ratanakiri%2C_Cambodia.jpg/960px-Yak_Loum_Crater_Lake%2C_Ratanakiri%2C_Cambodia.jpg",
     "provinceKh": "ខេត្តរតនគិរី",
     "provinceEn": "Ratanakiri",
     "addressKh": "ស្រុកបរកែវ ចម្ងាយ ៣៦ គ.ម ពីក្រុងបានលុង",
@@ -6842,7 +6841,7 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Yeak_Laom_volcanic_lake_Ratanakiri.jpg/960px-Yeak_Laom_volcanic_lake_Ratanakiri.jpg"
+      "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/23/Yak_Loum_Crater_Lake%2C_Ratanakiri%2C_Cambodia.jpg/960px-Yak_Loum_Crater_Lake%2C_Ratanakiri%2C_Cambodia.jpg"
     ]
   },
   {
@@ -7500,7 +7499,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Historical Temple / Heritage",
     "descriptionKh": "ប្រាសាទព្រះធាតុបាស្រី ជាប្រាសាទបុរាណសាងឡើងពីថ្មភក់ និងថ្មបាយក្រៀមក្នុងសតវត្សរ៍ទី១០ ឧទ្ទិសដល់ព្រហ្មញ្ញសាសនា មានចេតិយបុរាណ និងចម្លាក់ផ្តែរទ្វារដ៏កម្រ។",
     "descriptionEn": "A 10th-century Hindu sanctuary of sandstone and laterite nestled in Tboung Khmum, famous for ancient stupas and intricately carved devatas and lintels.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/83/Global_Forest_Change_tree-cover_loss_year_in_Tboung_Khmum%2C_2001-2024.png/960px-Global_Forest_Change_tree-cover_loss_year_in_Tboung_Khmum%2C_2001-2024.png",
+    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/36/Han_Chey_Temple_Kampong_Cham.jpg/960px-Han_Chey_Temple_Kampong_Cham.jpg",
     "provinceKh": "ខេត្តត្បូងឃ្មុំ",
     "provinceEn": "Tboung Khmum",
     "addressKh": "ស្រុកអូររាំងឪ ខេត្តត្បូងឃ្មុំ",
@@ -7522,7 +7521,7 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Wat_Nokor_Bachey_Kampong_Cham.jpg/960px-Wat_Nokor_Bachey_Kampong_Cham.jpg"
+      "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/36/Han_Chey_Temple_Kampong_Cham.jpg/960px-Han_Chey_Temple_Kampong_Cham.jpg"
     ]
   },
   {
@@ -7811,7 +7810,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Mountains & Caves",
     "descriptionKh": "ភ្នំខ្នងក្រពើជាខ្នងភ្នំជាប់នឹងភ្នំខ្នងផ្សារ មានរាងដូចខ្នងសត្វក្រពើយក្ស សម្បូរដោយវាលស្មៅបៃតងស្រស់ស្អាត ផ្កាព្រៃចម្រុះពណ៌ និងចំណុចគយគន់ទេសភាពជួរភ្នំក្រវាញ ៣៦០ ដឺក្រេ។",
     "descriptionEn": "A majestic high-altitude ridge adjacent to Knong Phsar resembling a giant crocodile back, covered in undulating grasslands, wild orchids, and 360-degree mountain vistas.",
-    "photoUrl": "https://upload.wikimedia.org/wikipedia/commons/9/91/Cambodia-Kampong_Speu.png",
+    "photoUrl": "https://upload.wikimedia.org/wikipedia/commons/0/0c/Veal_thom.jpg",
     "provinceKh": "ខេត្តកំពង់ស្ពឺ",
     "provinceEn": "Kampong Speu",
     "addressKh": "ជួរភ្នំក្រវាញ ស្រុកឱរ៉ាល់ ខេត្តកំពង់ស្ពឺ",
@@ -7833,7 +7832,7 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Knong_Phsar_sea_of_clouds_Kampong_Speu.jpg/960px-Knong_Phsar_sea_of_clouds_Kampong_Speu.jpg"
+      "https://upload.wikimedia.org/wikipedia/commons/0/0c/Veal_thom.jpg"
     ]
   },
   {
@@ -7845,7 +7844,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Historical Temple / Heritage",
     "descriptionKh": "ក្រុមប្រាសាទបុរាណកំពង់លែង (ដូចជាប្រាសាទពណ្ណរាយ ប្រាសាទប្រុស និងប្រាសាទស្រី) សាងឡើងពីឥដ្ឋក្នុងសតវត្សរ៍ទី៨ សម័យចេនឡា មានក្បាច់ចម្លាក់ឥដ្ឋបុរាណ និងរឿងព្រេងនិទានប្រវត្តិសាស្ត្រ។",
     "descriptionEn": "A group of 8th-century Chenla brick temples scattered around Kampong Leang district across the Tonle Sap river, boasting pre-Angkorian brick carvings and legends.",
-    "photoUrl": "https://upload.wikimedia.org/wikipedia/commons/b/b9/Cambodia-Kampong_Chhnang.png",
+    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c8/Sambor_Prei_Kuk_Prasat_Boram.jpg/960px-Sambor_Prei_Kuk_Prasat_Boram.jpg",
     "provinceKh": "ខេត្តកំពង់ឆ្នាំង",
     "provinceEn": "Kampong Chhnang",
     "addressKh": "ស្រុកកំពង់លែង ឆ្លងសាឡាងពីក្រុងកំពង់ឆ្នាំង",
@@ -7867,7 +7866,7 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/Phnom_Neang_Kangrei_mountain_Kampong_Chhnang.jpg/960px-Phnom_Neang_Kangrei_mountain_Kampong_Chhnang.jpg"
+      "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c8/Sambor_Prei_Kuk_Prasat_Boram.jpg/960px-Sambor_Prei_Kuk_Prasat_Boram.jpg"
     ]
   },
   {
@@ -7879,7 +7878,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Mountains & Caves",
     "descriptionKh": "ភ្នំតាពេជ្រជារមណីយដ្ឋានធម្មជាតិ និងវប្បធម៌ មានព្រះវិហារលើកំពូលភ្នំ កាំជណ្តើរឡើងភ្នំ ព្រៃឈើម្លប់ត្រជាក់ និងចំណុចគយគន់ទេសភាពវាលស្រែខេត្តកំពង់ឆ្នាំងដ៏ធំល្វឹងល្វើយ។",
     "descriptionEn": "A peaceful natural and religious hilltop resort in Kampong Chhnang offering shaded stairway climbs, hilltop pagodas, and panoramic countryside vistas.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/50/Map_Kampong_Chhnang_Province.png/960px-Map_Kampong_Chhnang_Province.png",
+    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/43/Trockenreisfeld_In_der_Provinz_Mondulkiri%2C_Kambodscha.jpg/960px-Trockenreisfeld_In_der_Provinz_Mondulkiri%2C_Kambodscha.jpg",
     "provinceKh": "ខេត្តកំពង់ឆ្នាំង",
     "provinceEn": "Kampong Chhnang",
     "addressKh": "ស្រុករលាប្អៀរ ខេត្តកំពង់ឆ្នាំង",
@@ -7901,7 +7900,7 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/Phnom_Neang_Kangrei_mountain_Kampong_Chhnang.jpg/960px-Phnom_Neang_Kangrei_mountain_Kampong_Chhnang.jpg"
+      "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/43/Trockenreisfeld_In_der_Provinz_Mondulkiri%2C_Kambodscha.jpg/960px-Trockenreisfeld_In_der_Provinz_Mondulkiri%2C_Kambodscha.jpg"
     ]
   },
   {
@@ -8899,7 +8898,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Historical Temple / Heritage",
     "descriptionKh": "វត្តភ្នំឆ័ត្រ ស្ថិតនៅលើជួរភ្នំក្បែរព្រំដែនកម្ពុជា-ថៃ មានរូបសំណាកព្រះពុទ្ធដ៏ធំស្កឹមស្កៃលើចង្កេះភ្នំ ព្រៃឈើខៀវស្រងាត់ និងជាទីកន្លែងប្រតិបត្តិធម៌ដ៏ស្ងប់អារម្មណ៍។",
     "descriptionEn": "A mountain monastery near the Cambodian border crowned by an imposing seated Buddha image, blessed with tranquil forest paths, fresh air, and deep spiritual serenity.",
-    "photoUrl": "https://upload.wikimedia.org/wikipedia/commons/1/18/Cambodia_Banteay_Meanchey.png",
+    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/63/Banteay_Chhmar_Temple_Cambodia.jpg/960px-Banteay_Chhmar_Temple_Cambodia.jpg",
     "provinceKh": "ខេត្តបន្ទាយមានជ័យ",
     "provinceEn": "Banteay Meanchey",
     "addressKh": "ស្រុកស្វាយចេក ខេត្តបន្ទាយមានជ័យ",
@@ -8921,7 +8920,7 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/Buddha_statue_on_mountain_Cambodia.jpg/960px-Buddha_statue_on_mountain_Cambodia.jpg"
+      "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/63/Banteay_Chhmar_Temple_Cambodia.jpg/960px-Banteay_Chhmar_Temple_Cambodia.jpg"
     ]
   },
   {
@@ -8933,7 +8932,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Cultural & Historical Resort",
     "descriptionKh": "ភូមិចម្លាក់ថ្មស្រុកព្រះនេត្រព្រះ ជាមជ្ឈមណ្ឌលសិល្បៈចម្លាក់ថ្មភក់ និងថ្មកែវដ៏ល្បីល្បាញបំផុតនៅកម្ពុជា ដែលសិប្បករជំនាន់ក្រោយបានបន្តកេរដំណែលឆ្លាក់រូបព្រះពុទ្ធ និងក្បាច់រចនាខ្មែរយ៉ាងរស់រវើក។",
     "descriptionEn": "Cambodia's premier traditional sandstone sculpture community in Preah Net Preah, where master stonemasons preserve millennia-old stone-carving traditions passed down through generations.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/14/Map_Preah_Vihear_Province.png/960px-Map_Preah_Vihear_Province.png",
+    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/63/Banteay_Chhmar_Temple_Cambodia.jpg/960px-Banteay_Chhmar_Temple_Cambodia.jpg",
     "provinceKh": "ខេត្តបន្ទាយមានជ័យ",
     "provinceEn": "Banteay Meanchey",
     "addressKh": "ស្រុកព្រះនេត្រព្រះ ខេត្តបន្ទាយមានជ័យ",
@@ -8955,7 +8954,7 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Stone_carvers_in_Cambodia.jpg/960px-Stone_carvers_in_Cambodia.jpg"
+      "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/63/Banteay_Chhmar_Temple_Cambodia.jpg/960px-Banteay_Chhmar_Temple_Cambodia.jpg"
     ]
   },
   {
@@ -8967,7 +8966,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Historical Temple / Heritage",
     "descriptionKh": "បារាយណ៍មេបុណ្យបន្ទាយឆ្មារ ជាបារាយណ៍បុរាណទឹកថ្លាធំល្វឹងល្វើយកសាងក្នុងសម័យអង្គរ មានប្រាសាទមេបុណ្យតូចមួយនៅចំកណ្តាលបារាយណ៍ និងជាកន្លែងទស្សនាថ្ងៃលិចដ៏រ៉ូមែនទិក។",
     "descriptionEn": "An enormous ancient reservoir built during the Angkorian period beside Banteay Chhmar, featuring an island sanctuary in its center and spectacular golden sunset reflections.",
-    "photoUrl": "https://upload.wikimedia.org/wikipedia/commons/a/ac/Cambodia-Banteay_Meanchey.png",
+    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/63/Banteay_Chhmar_Temple_Cambodia.jpg/960px-Banteay_Chhmar_Temple_Cambodia.jpg",
     "provinceKh": "ខេត្តបន្ទាយមានជ័យ",
     "provinceEn": "Banteay Meanchey",
     "addressKh": "ឃុំបន្ទាយឆ្មារ ស្រុកថ្មពួក ខេត្តបន្ទាយមានជ័យ",
@@ -8989,7 +8988,7 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Banteay_Chhmar_Baray_Cambodia.jpg/960px-Banteay_Chhmar_Baray_Cambodia.jpg"
+      "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/63/Banteay_Chhmar_Temple_Cambodia.jpg/960px-Banteay_Chhmar_Temple_Cambodia.jpg"
     ]
   },
   {
@@ -9001,7 +9000,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Ecotourism / Nature",
     "descriptionKh": "តំបន់ទំនប់ទឹក និងអាងកំពីងពួយប៉ែកខាងត្បូងខេត្តបន្ទាយមានជ័យ ជាអាងស្តុកទឹកធម្មជាតិធំទូលាយ មានខ្ចុះលំហែ មាត់ទឹក និងទេសភាពជួរភ្នំធម្មជាតិខៀវស្រងាត់។",
     "descriptionEn": "A wide natural freshwater reservoir and irrigation park south of Banteay Meanchey, offering breezy waterside cabanas, seasonal lotus blossoms, and foothill views.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/bd/Map_Banteay_Meanchey_Province.png/960px-Map_Banteay_Meanchey_Province.png",
+    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/75/Kamping_Puoy_Lake_Battambang.jpg/960px-Kamping_Puoy_Lake_Battambang.jpg",
     "provinceKh": "ខេត្តបន្ទាយមានជ័យ",
     "provinceEn": "Banteay Meanchey",
     "addressKh": "ស្រុកមង្គលបូរី ខេត្តបន្ទាយមានជ័យ",
@@ -9023,7 +9022,7 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Lotus_Pond_Cambodia.jpg/960px-Lotus_Pond_Cambodia.jpg"
+      "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/75/Kamping_Puoy_Lake_Battambang.jpg/960px-Kamping_Puoy_Lake_Battambang.jpg"
     ]
   },
   {
@@ -9035,7 +9034,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Mountain & Nature Resort",
     "descriptionKh": "ច្រកជាំសាង៉ាំ ស្ថិតនៅលើកំពូលជួរភ្នំដងរែក ជាប់ព្រំដែនថៃ មានទេសភាពច្រាំងថ្មចោទខ្ពស់ត្រដែត មើលឃើញព្រៃឈើ និងវាលទំនាបខេត្តឧត្តរមានជ័យទាំងមូលយ៉ាងស្រស់ត្រកាល។",
     "descriptionEn": "A high-altitude mountain pass perched on the cliffs of the Dangrek Range overlooking the plains of Oddar Meanchey, offering breezy mountain viewpoints and cool misty air.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/76/Map_Oddar_Meanchey_Province.png/960px-Map_Oddar_Meanchey_Province.png",
+    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/87/Preah_Vihear_Temple_Cliff_View.jpg/960px-Preah_Vihear_Temple_Cliff_View.jpg",
     "provinceKh": "ខេត្តឧត្តរមានជ័យ",
     "provinceEn": "Oddar Meanchey",
     "addressKh": "ស្រុកអន្លង់វែង ខេត្តឧត្តរមានជ័យ",
@@ -9057,7 +9056,7 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": true,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Dangrek_Mountains_view_Cambodia.jpg/960px-Dangrek_Mountains_view_Cambodia.jpg"
+      "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/87/Preah_Vihear_Temple_Cliff_View.jpg/960px-Preah_Vihear_Temple_Cliff_View.jpg"
     ]
   },
   {
@@ -9069,7 +9068,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Mountain & Nature Resort",
     "descriptionKh": "រមណីយដ្ឋានភ្នំអូរស្មាច់ ស្ថិតនៅតំបន់ខ្ពង់រាបជួរភ្នំដងរែក មានព្រៃឈើក្រាស់ស្រស់បំព្រង អាកាសធាតុត្រជាក់ពេញមួយឆ្នាំ និងជាកន្លែងសម្រាកលំហែកាយតាមបែបធម្មជាតិ។",
     "descriptionEn": "A refreshing highland resort situated along the forested crest of the Dangrek Range in O'Smach, known for year-round cool mountain breezes and hiking trails.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/97/Global_Forest_Change_tree-cover_loss_year_in_Oddar_Meanchey%2C_2001-2024.png/960px-Global_Forest_Change_tree-cover_loss_year_in_Oddar_Meanchey%2C_2001-2024.png",
+    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/da/Forest_in_Mondulkiri.jpg/960px-Forest_in_Mondulkiri.jpg",
     "provinceKh": "ខេត្តឧត្តរមានជ័យ",
     "provinceEn": "Oddar Meanchey",
     "addressKh": "សង្កាត់អូរស្មាច់ ក្រុងសំរោង ខេត្តឧត្តរមានជ័យ",
@@ -9091,7 +9090,7 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Dangrek_cliffs_Oddar_Meanchey.jpg/960px-Dangrek_cliffs_Oddar_Meanchey.jpg"
+      "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/da/Forest_in_Mondulkiri.jpg/960px-Forest_in_Mondulkiri.jpg"
     ]
   },
   {
@@ -9341,7 +9340,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Waterfall / Rapids",
     "descriptionKh": "ទឹកធ្លាក់ក្បាលអូរជ្រា ជាទឹកធ្លាក់ធម្មជាតិច្រើនដំណាក់លាក់ខ្លួនក្នុងព្រៃភ្នំនៃខេត្តប៉ៃលិន ទឹកហូរកាត់ផ្ទាំងថ្មធំៗ បង្កើតបានជាអាងងូតទឹកធម្មជាតិថ្លាដូចកញ្ចក់។",
     "descriptionEn": "A secluded multi-tiered mountain waterfall tucked into the tropical forest slopes of Pailin, offering crystal pools among granite rocks and serene hiking paths.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8d/Pailin_banner.jpg/960px-Pailin_banner.jpg",
+    "photoUrl": "/destinations/dest-60.webp",
     "provinceKh": "ខេត្តប៉ៃលិន",
     "provinceEn": "Pailin",
     "addressKh": "ស្រុកសាលាក្រៅ ខេត្តប៉ៃលិន",
@@ -9363,7 +9362,7 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Waterfall_in_Cardamom_Mountains_Cambodia.jpg/960px-Waterfall_in_Cardamom_Mountains_Cambodia.jpg"
+      "/destinations/dest-60.webp"
     ]
   },
   {
@@ -9375,7 +9374,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Mountain & Nature Resort",
     "descriptionKh": "ភ្នំខៀវ ជាជួរភ្នំខ្ពស់ស្កឹមស្កៃគ្របដណ្តប់ដោយព្រៃឈើបៃតងរហូតពេញមួយឆ្នាំ មានអាកាសធាតុត្រជាក់ មានផ្លូវជិះកង់ភ្នំ ដើរព្រៃ និងចំណុចគយគន់ទេសភាពជួរភ្នំក្រវាញ។",
     "descriptionEn": "A high emerald peak enveloped in evergreen tropical mountain rainforest, prized for crisp highland breezes, mountain biking trails, and stunning vistas of the Cardamom Ranges.",
-    "photoUrl": "https://upload.wikimedia.org/wikipedia/commons/5/56/Global_Forest_Change_tree-cover_loss_year_in_Pailin%2C_2001-2024.png",
+    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/da/Forest_in_Mondulkiri.jpg/960px-Forest_in_Mondulkiri.jpg",
     "provinceKh": "ខេត្តប៉ៃលិន",
     "provinceEn": "Pailin",
     "addressKh": "ក្រុងប៉ៃលិន ខេត្តប៉ៃលិន",
@@ -9397,7 +9396,7 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Phnom_Khiev_Mountain_Pailin.jpg/960px-Phnom_Khiev_Mountain_Pailin.jpg"
+      "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/da/Forest_in_Mondulkiri.jpg/960px-Forest_in_Mondulkiri.jpg"
     ]
   },
   {
@@ -9443,7 +9442,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Ecotourism / Nature",
     "descriptionKh": "ប៉ៃលិនល្បីល្បាញទូទាំងប្រទេសដោយសារផ្លែ «តាង៉ែនប៉ៃលិន» (មៀនប៉ៃលិន) សាច់ក្រាស់ គ្រាប់តូច ផ្អែមស្រួយឆ្ងាញ់។ ភ្ញៀវទេសចរអាចចូលទស្សនាចម្ការ បេះផ្លែឈើ និងភ្លក្សរសជាតិស្រស់ៗពីដើម។",
     "descriptionEn": "The agricultural heartland of the famous Pailin Longan (Pailin Diamond Longan), offering scenic plantation strolls, fresh fruit picking, and agro-tourism tastings.",
-    "photoUrl": "https://upload.wikimedia.org/wikipedia/commons/e/e5/Cambodia-Pailin.png",
+    "photoUrl": "/destinations/dest-31.webp",
     "provinceKh": "ខេត្តប៉ៃលិន",
     "provinceEn": "Pailin",
     "addressKh": "ស្រុកសាលាក្រៅ ខេត្តប៉ៃលិន",
@@ -9465,7 +9464,7 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Longan_fruit_plantation.jpg/960px-Longan_fruit_plantation.jpg"
+      "/destinations/dest-31.webp"
     ]
   },
   {
@@ -9579,7 +9578,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Ecotourism / Nature",
     "descriptionKh": "បឹងព្រះ ជាបឹងធម្មជាតិដ៏ល្បីល្បាញគ្របដណ្តប់ដោយផ្កាឈូកពណ៌ផ្កាឈូកស្រស់បំព្រង មានស្ពានឈើដើរកាត់បឹង ខ្ចុះលំហែកណ្តាលទឹក និងជាកន្លែងថតរូបដ៏ស្រស់ស្អាត។",
     "descriptionEn": "A scenic natural lagoon carpeted with vibrant pink lotus flowers, wooden walkways stretching across the water, and cool waterside gazebos.",
-    "photoUrl": "https://upload.wikimedia.org/wikipedia/commons/8/89/Cambodia-Prey_Veng.png",
+    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/75/Kamping_Puoy_Lake_Battambang.jpg/960px-Kamping_Puoy_Lake_Battambang.jpg",
     "provinceKh": "ខេត្តព្រៃវែង",
     "provinceEn": "Prey Veng",
     "addressKh": "ស្រុកបាភ្នំ ខេត្តព្រៃវែង",
@@ -9601,7 +9600,7 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": true,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Lotus_lake_Prey_Veng.jpg/960px-Lotus_lake_Prey_Veng.jpg"
+      "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/75/Kamping_Puoy_Lake_Battambang.jpg/960px-Kamping_Puoy_Lake_Battambang.jpg"
     ]
   },
   {
@@ -9749,7 +9748,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Historical Temple / Heritage",
     "descriptionKh": "វត្តក្តីដូង ជាអារាមដ៏ស្ងប់ស្ងាត់សំបូរដោយដើមឈើធំៗ និងស្រះទឹកបុរាណ មានចេតិយតម្កល់អដ្ឋិធាតុបុព្វបុរស និងជាទីតាំងធ្វើបុណ្យទានប្រពៃណីដ៏សំខាន់របស់ប្រជាពលរដ្ឋ។",
     "descriptionEn": "A tranquil rural monastery nestled among tall palm groves and ancient ponds in Prey Veng, celebrated for Buddhist merit ceremonies and cultural traditions.",
-    "photoUrl": "https://upload.wikimedia.org/wikipedia/commons/0/0d/Cambodia_Prey_Veng.png",
+    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b1/Royal_Palace%2C_Phnom_Penh_Cambodia_1.jpg/960px-Royal_Palace%2C_Phnom_Penh_Cambodia_1.jpg",
     "provinceKh": "ខេត្តព្រៃវែង",
     "provinceEn": "Prey Veng",
     "addressKh": "ស្រុកពាមរក៍ ខេត្តព្រៃវែង",
@@ -9771,7 +9770,7 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/Cambodian_pagoda_compound.jpg/960px-Cambodian_pagoda_compound.jpg"
+      "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b1/Royal_Palace%2C_Phnom_Penh_Cambodia_1.jpg/960px-Royal_Palace%2C_Phnom_Penh_Cambodia_1.jpg"
     ]
   },
   {
@@ -9885,7 +9884,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Ecotourism / Nature",
     "descriptionKh": "ព្រៃសហគមន៍រមាសហែក ជាតំបន់ព្រៃឈើធម្មជាតិដ៏ធំមួយនៅភាគខាងជើងខេត្តស្វាយរៀង សំបូរដោយដើមឈើប្រណីត ផ្កាព្រៃរីកតាមរដូវ និងជាទីតាំងដ៏ស័ក្តិសមសម្រាប់ការដើរព្រៃ និងបោះតង់កម្សាន្ត។",
     "descriptionEn": "A community-managed native forest reserve in northern Svay Rieng filled with timber trees, seasonal wild blooms, walking paths, and peaceful camping areas.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/60/Map_Svay_Rieng_Province.png/960px-Map_Svay_Rieng_Province.png",
+    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/da/Forest_in_Mondulkiri.jpg/960px-Forest_in_Mondulkiri.jpg",
     "provinceKh": "ខេត្តស្វាយរៀង",
     "provinceEn": "Svay Rieng",
     "addressKh": "ស្រុករមាសហែក ខេត្តស្វាយរៀង",
@@ -9907,7 +9906,7 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Cambodia_community_forest.jpg/960px-Cambodia_community_forest.jpg"
+      "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/da/Forest_in_Mondulkiri.jpg/960px-Forest_in_Mondulkiri.jpg"
     ]
   },
   {
@@ -9953,7 +9952,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Ecotourism / Nature",
     "descriptionKh": "អាងទឹកស្វាយទាប ជាអាងស្តុកទឹកធម្មជាតិដ៏ធំទូលាយ មានខ្យល់ត្រជាក់បក់កាត់ផ្ទៃទឹក ខ្ចុះប្រក់ស្បូវអង្គុយលេង និងទូកទាទឹកកម្សាន្ត ជាទីលំហែដ៏ពេញនិយមសម្រាប់យុវវ័យ និងក្រុមគ្រួសារ។",
     "descriptionEn": "A wide, scenic freshwater reservoir in Svay Teab district fringed by weeping trees and open picnic kiosks, popular for paddle boating and waterside dining.",
-    "photoUrl": "https://upload.wikimedia.org/wikipedia/commons/8/89/Cambodia-Svay_Rieng.png",
+    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/75/Kamping_Puoy_Lake_Battambang.jpg/960px-Kamping_Puoy_Lake_Battambang.jpg",
     "provinceKh": "ខេត្តស្វាយរៀង",
     "provinceEn": "Svay Rieng",
     "addressKh": "ស្រុកស្វាយទាប ខេត្តស្វាយរៀង",
@@ -9975,7 +9974,7 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Svay_Rieng_reservoir_lake.jpg/960px-Svay_Rieng_reservoir_lake.jpg"
+      "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/75/Kamping_Puoy_Lake_Battambang.jpg/960px-Kamping_Puoy_Lake_Battambang.jpg"
     ]
   },
   {

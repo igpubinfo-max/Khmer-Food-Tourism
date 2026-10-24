@@ -15,6 +15,10 @@ import {
   computeReceiptImageFingerprint,
   recordVerifiedReceiptFingerprint,
 } from '../services/aiPaymentVerificationService';
+import {
+  analyzeFoodBusinessDeterministically,
+  verifyFoodBusinessOnServer,
+} from '../services/aiFoodBusinessVerifierService';
 import { 
   verifyPaymentOnBackend, calculateVipDates, checkEligibleRestoration,
   VIP_ANNUAL_PRICE_USD, VIP_SUBSCRIPTION_DAYS, VIP_QUARTERLY_PRICE_USD, VIP_QUARTERLY_DAYS,
@@ -139,6 +143,7 @@ interface AppContextType {
   updateRestaurant: (rest: Restaurant) => void;
   deleteRestaurant: (id: string) => void;
   approveRestaurant: (id: string) => void;
+  rejectRestaurant: (id: string, reasonKh?: string) => void;
   toggleVerifyRestaurant: (id: string) => void;
 
   // Restaurant Menu Items (Max 20 for Active Premium) & Genuine Customer Reviews
@@ -741,6 +746,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       googleMapsMeta: r.googleMapsMeta,
       isAdminEdited: Boolean(r.isAdminEdited),
       adminEditedAt: r.adminEditedAt,
+      aiCategoryVerification: r.aiCategoryVerification,
       created_at: getRestaurantCreatedAtIso(r),
       createdAt: getRestaurantCreatedAtIso(r),
       updatedAt: r.updatedAt,
@@ -776,10 +782,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 primaryImg.trim().length > 0 &&
                 primaryImg !== seed.photoUrl &&
                 (primaryImg.startsWith('data:') || primaryImg.startsWith('http://') || primaryImg.startsWith('https://'));
+              const seedGallery = Array.isArray(seed.galleryPhotos) && seed.galleryPhotos.length > 0
+                ? seed.galleryPhotos
+                : (Array.isArray(seed.foodImages) ? seed.foodImages : []);
               const hasCustomGallery =
+                Boolean(r.isAdminEdited) &&
                 Array.isArray(r.galleryPhotos) &&
                 r.galleryPhotos.length > 0 &&
-                JSON.stringify(r.galleryPhotos) !== JSON.stringify(seed.galleryPhotos);
+                JSON.stringify(r.galleryPhotos) !== JSON.stringify(seedGallery);
 
               if ((hasCustomPhoto || hasCustomGallery) && !vault.restaurants[r.id]) {
                 vault.restaurants[r.id] = {
@@ -963,74 +973,129 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
 
   const [destinations, setDestinations] = useState<TouristDestination[]>(() => {
-    try {
-      // 1. Load persistent overrides vault (stores explicit admin photo changes)
-      let photoOverrides: Record<string, { photoUrl: string; updatedAt?: string }> = {};
-      try {
-        const savedOverrides = localStorage.getItem('kft_destination_photo_overrides_v1');
-        if (savedOverrides) photoOverrides = JSON.parse(savedOverrides) || {};
-      } catch {}
+    const vault = loadLocalMediaOverrides();
+    let vaultChanged = false;
+    const isBrokenLegacyDestPhoto = (url?: string) =>
+      !url ||
+      url.includes('Huay_Kaew_waterfall_mu_yang.jpg') ||
+      url.includes('Global_Forest_Change_tree-cover_loss_year') ||
+      url.includes('1569683795645');
 
+    try {
       const REMOVED_DUPLICATE_DEST_IDS = new Set(['dest-151', 'dest-171', 'dest-220', 'dest-262', 'dest-298']);
-      const saved = localStorage.getItem('kft_destinations_real_v8') || localStorage.getItem('kft_destinations_real_v7') || localStorage.getItem('kft_destinations_real_v6') || localStorage.getItem('kft_destinations_real_v5');
+      const saved =
+        localStorage.getItem('kft_destinations_real_v8') ||
+        localStorage.getItem('kft_destinations_real_v7') ||
+        localStorage.getItem('kft_destinations_real_v6') ||
+        localStorage.getItem('kft_destinations_real_v5');
+      localStorage.removeItem('kft_destinations_real_v5');
+      localStorage.removeItem('kft_destinations_real_v6');
+      localStorage.removeItem('kft_destinations_real_v7');
+
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length >= 100 && !String(parsed[0]?.photoUrl || '').includes('1569683795645')) {
           const initialMap = new Map(initialDestinations.map(d => [d.id, d]));
-          const filteredParsed = parsed.filter((d: TouristDestination) => !REMOVED_DUPLICATE_DEST_IDS.has(d.id));
+          const filteredParsed = parsed.filter((d: TouristDestination) => d && d.id && !REMOVED_DUPLICATE_DEST_IDS.has(d.id));
           const upgraded = filteredParsed.map((d: TouristDestination) => {
             const seed = initialMap.get(d.id);
-            if (!seed) return d;
+            if (!seed) {
+              // Custom Admin-added or Google Maps imported destination
+              if (!vault.destinations[d.id] && d.photoUrl && !isBrokenLegacyDestPhoto(d.photoUrl)) {
+                vault.destinations[d.id] = {
+                  id: d.id,
+                  photoUrl: d.photoUrl,
+                  nameKh: d.nameKh,
+                  nameEn: d.nameEn,
+                  descriptionKh: d.descriptionKh,
+                  descriptionEn: d.descriptionEn,
+                  provinceKh: d.provinceKh,
+                  provinceEn: d.provinceEn,
+                  addressKh: d.addressKh,
+                  mapUrl: d.mapUrl,
+                  latitude: d.latitude,
+                  longitude: d.longitude,
+                  isCustomPhoto: true,
+                  updatedAt: d.photoUpdatedAt || new Date().toISOString(),
+                };
+                vaultChanged = true;
+              }
+              return d;
+            }
 
-            // PRIORITY 1: Persistent photo override vault (explicit admin customization)
-            if (photoOverrides[d.id]?.photoUrl) {
+            // PRIORITY 1: Unified Permanent Media Vault (explicit Admin customization)
+            const ov = vault.destinations[d.id];
+            if (ov && ov.photoUrl && !isBrokenLegacyDestPhoto(ov.photoUrl)) {
               return {
                 ...seed,
                 ...d,
-                nameKh: seed.nameKh,
-                nameEn: seed.nameEn,
-                provinceKh: seed.provinceKh,
-                provinceEn: seed.provinceEn,
-                addressKh: seed.addressKh,
-                photoUrl: photoOverrides[d.id].photoUrl,
+                nameKh: ov.nameKh || seed.nameKh,
+                nameEn: ov.nameEn || seed.nameEn,
+                descriptionKh: ov.descriptionKh || seed.descriptionKh,
+                descriptionEn: ov.descriptionEn || seed.descriptionEn,
+                provinceKh: ov.provinceKh || seed.provinceKh,
+                provinceEn: ov.provinceEn || seed.provinceEn,
+                addressKh: ov.addressKh || seed.addressKh,
+                photoUrl: ov.photoUrl,
+                galleryPhotos: [ov.photoUrl],
                 isCustomPhoto: true,
-                photoUpdatedAt: photoOverrides[d.id].updatedAt,
+                photoUpdatedAt: ov.updatedAt,
               };
             }
 
-            // PRIORITY 2: Check for user custom upload or explicit flag
+            // PRIORITY 2: Custom upload or Admin edit present in cached list
             const isUserUpload = typeof d.photoUrl === 'string' && d.photoUrl.startsWith('data:');
-            const hasCustomFlag = Boolean(d.isCustomPhoto);
+            const hasCustomFlag = Boolean(d.isCustomPhoto || d.isAdminEdited);
+            const isValidCustomPhoto =
+              (isUserUpload || hasCustomFlag) &&
+              typeof d.photoUrl === 'string' &&
+              d.photoUrl.trim().length > 0 &&
+              !isBrokenLegacyDestPhoto(d.photoUrl) &&
+              d.photoUrl !== seed.photoUrl;
 
-            let effectivePhoto = seed.photoUrl;
+            const effectivePhoto = isValidCustomPhoto ? d.photoUrl : seed.photoUrl;
 
-            if (isUserUpload || hasCustomFlag) {
-              effectivePhoto = d.photoUrl;
-              photoOverrides[d.id] = { photoUrl: d.photoUrl, updatedAt: d.photoUpdatedAt || new Date().toISOString() };
+            if (isValidCustomPhoto && !vault.destinations[d.id]) {
+              vault.destinations[d.id] = {
+                id: d.id,
+                photoUrl: d.photoUrl,
+                nameKh: d.isAdminEdited ? d.nameKh : seed.nameKh,
+                nameEn: d.isAdminEdited ? d.nameEn : seed.nameEn,
+                descriptionKh: d.isAdminEdited ? d.descriptionKh : seed.descriptionKh,
+                descriptionEn: d.isAdminEdited ? d.descriptionEn : seed.descriptionEn,
+                provinceKh: d.isAdminEdited ? d.provinceKh : seed.provinceKh,
+                provinceEn: d.isAdminEdited ? d.provinceEn : seed.provinceEn,
+                addressKh: d.isAdminEdited ? d.addressKh : seed.addressKh,
+                isAdminEdited: d.isAdminEdited,
+                adminEditedAt: d.adminEditedAt,
+                isCustomPhoto: true,
+                updatedAt: d.photoUpdatedAt || new Date().toISOString(),
+              };
+              vaultChanged = true;
             }
 
             return {
               ...seed,
               ...d,
-              nameKh: seed.nameKh,
-              nameEn: seed.nameEn,
-              provinceKh: seed.provinceKh,
-              provinceEn: seed.provinceEn,
-              addressKh: seed.addressKh,
+              nameKh: d.isAdminEdited ? d.nameKh : seed.nameKh,
+              nameEn: d.isAdminEdited ? d.nameEn : seed.nameEn,
+              provinceKh: d.isAdminEdited ? d.provinceKh : seed.provinceKh,
+              provinceEn: d.isAdminEdited ? d.provinceEn : seed.provinceEn,
+              addressKh: d.isAdminEdited ? d.addressKh : seed.addressKh,
               photoUrl: effectivePhoto,
-              isCustomPhoto: isUserUpload || hasCustomFlag,
+              galleryPhotos: [effectivePhoto],
+              isCustomPhoto: isValidCustomPhoto,
             };
           });
 
-          // Sync updated overrides vault
-          try {
-            localStorage.setItem('kft_destination_photo_overrides_v1', JSON.stringify(photoOverrides));
-          } catch {}
+          if (vaultChanged) {
+            saveLocalMediaOverrides(vault);
+          }
 
           const existingIds = new Set(upgraded.map((d: TouristDestination) => d.id));
           const missingFromInitial = initialDestinations.filter(d => !existingIds.has(d.id));
           const combined = missingFromInitial.length > 0 ? [...upgraded, ...missingFromInitial] : upgraded;
-          return applyDestinationOverrides(combined);
+          return applyDestinationOverrides(combined, vault.destinations);
         }
       }
     } catch (e) {
@@ -1046,7 +1111,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       localStorage.removeItem('kft_destinations_real_v6');
       localStorage.removeItem('kft_destinations_real_v7');
     } catch {}
-    return applyDestinationOverrides(initialDestinations);
+    return applyDestinationOverrides(initialDestinations, vault.destinations);
   });
 
   const [posts, setPosts] = useState<CommunityPost[]>(() => {
@@ -1613,6 +1678,66 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     supportTickets: true,
   });
 
+  // Compact bulk arrays before writing to localStorage so base64 photos already stored in VAULT_KEYS
+  // are never duplicated a second time in kft_destinations_real_v8 / kft_restaurants_real_v9 / kft_foods_200_v7.
+  const compactDataForBulkLocalStorage = (key: string, data: unknown): unknown => {
+    if (!Array.isArray(data)) return data;
+    try {
+      if (key === 'kft_destinations_real_v8') {
+        const seedDestMap = new Map(initialDestinations.map(d => [d.id, d.photoUrl]));
+        const ovMap = loadLocalMediaOverrides().destinations;
+        return (data as TouristDestination[]).map(d => {
+          if (d && ovMap[d.id] && typeof d.photoUrl === 'string' && d.photoUrl.startsWith('data:')) {
+            const fallbackUrl = seedDestMap.get(d.id) || '';
+            return {
+              ...d,
+              photoUrl: fallbackUrl,
+              galleryPhotos: fallbackUrl ? [fallbackUrl] : [],
+              isCustomPhoto: true,
+            };
+          }
+          return d;
+        });
+      }
+      if (key === 'kft_foods_200_v7') {
+        const seedFoodMap = new Map(initialFoods.map(f => [f.id, f.photoUrl]));
+        const ovMap = loadLocalMediaOverrides().foods;
+        return (data as FoodItem[]).map(f => {
+          if (f && ovMap[f.id] && typeof f.photoUrl === 'string' && f.photoUrl.startsWith('data:')) {
+            return {
+              ...f,
+              photoUrl: seedFoodMap.get(f.id) || '',
+              isCustomPhoto: true,
+            };
+          }
+          return f;
+        });
+      }
+      if (key === 'kft_restaurants_real_v9') {
+        const seedRestMap = new Map(initialRestaurants.map(r => [r.id, r.photoUrl]));
+        const ovMap = loadLocalMediaOverrides().restaurants;
+        return (data as Restaurant[]).map(r => {
+          if (r && ovMap[r.id] && typeof r.photoUrl === 'string' && r.photoUrl.startsWith('data:')) {
+            const fallbackUrl = seedRestMap.get(r.id) || '/foods/food-1.jpg';
+            return {
+              ...r,
+              photoUrl: fallbackUrl,
+              profileImage: fallbackUrl,
+              galleryPhotos: Array.isArray(r.galleryPhotos)
+                ? r.galleryPhotos.filter(g => !g.startsWith('data:'))
+                : [],
+              foodImages: Array.isArray(r.foodImages)
+                ? r.foodImages.filter(g => !g.startsWith('data:'))
+                : [],
+            };
+          }
+          return r;
+        });
+      }
+    } catch {}
+    return data;
+  };
+
   const scheduleStorageWrite = (key: string, data: unknown, delayMs = 1000) => {
     if (storageWriteTimersRef.current[key]) {
       window.clearTimeout(storageWriteTimersRef.current[key]);
@@ -1621,7 +1746,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       delete storageWriteTimersRef.current[key];
       const performWrite = () => {
         try {
-          localStorage.setItem(key, JSON.stringify(data));
+          const compacted = compactDataForBulkLocalStorage(key, data);
+          localStorage.setItem(key, JSON.stringify(compacted));
         } catch (e) {
           console.warn(`Storage sync failed for ${key}:`, e);
         }
@@ -2187,13 +2313,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         try {
           const syncedMediaBundle = await hydrateAndSyncMediaOverrides();
           if (Object.keys(syncedMediaBundle.foods).length > 0) {
-            setFoods(prev => applyFoodOverrides(prev, syncedMediaBundle.foods));
+            setFoods(prev => {
+              const next = applyFoodOverrides(prev, syncedMediaBundle.foods);
+              setSelectedFood(sel => (sel ? next.find(f => f.id === sel.id) || sel : null));
+              return next;
+            });
           }
           if (Object.keys(syncedMediaBundle.restaurants).length > 0) {
-            setRestaurants(prev => applyRestaurantOverrides(prev, syncedMediaBundle.restaurants));
+            setRestaurants(prev => {
+              const next = applyRestaurantOverrides(prev, syncedMediaBundle.restaurants);
+              setSelectedRestaurant(sel => (sel ? next.find(r => r.id === sel.id) || sel : null));
+              return next;
+            });
           }
           if (Object.keys(syncedMediaBundle.destinations).length > 0) {
-            setDestinations(prev => applyDestinationOverrides(prev, syncedMediaBundle.destinations));
+            setDestinations(prev => {
+              const next = applyDestinationOverrides(prev, syncedMediaBundle.destinations);
+              setSelectedDestination(sel => (sel ? next.find(d => d.id === sel.id) || sel : null));
+              return next;
+            });
           }
           if (Object.keys(syncedMediaBundle.trendingFoods).length > 0) {
             setTrendingFoods(prev => applyTrendingFoodOverrides(prev, syncedMediaBundle.trendingFoods));
@@ -2216,13 +2354,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     hydrateAndSyncMediaOverrides()
       .then((bundle) => {
         if (Object.keys(bundle.foods).length > 0) {
-          setFoods(prev => applyFoodOverrides(prev, bundle.foods));
+          setFoods(prev => {
+            const next = applyFoodOverrides(prev, bundle.foods);
+            setSelectedFood(cur => (cur ? next.find(f => f.id === cur.id) || cur : null));
+            return next;
+          });
         }
         if (Object.keys(bundle.restaurants).length > 0) {
-          setRestaurants(prev => applyRestaurantOverrides(prev, bundle.restaurants));
+          setRestaurants(prev => {
+            const next = applyRestaurantOverrides(prev, bundle.restaurants);
+            setSelectedRestaurant(cur => (cur ? next.find(r => r.id === cur.id) || cur : null));
+            return next;
+          });
         }
         if (Object.keys(bundle.destinations).length > 0) {
-          setDestinations(prev => applyDestinationOverrides(prev, bundle.destinations));
+          setDestinations(prev => {
+            const next = applyDestinationOverrides(prev, bundle.destinations);
+            setSelectedDestination(cur => (cur ? next.find(d => d.id === cur.id) || cur : null));
+            return next;
+          });
         }
         if (Object.keys(bundle.trendingFoods).length > 0) {
           setTrendingFoods(prev => applyTrendingFoodOverrides(prev, bundle.trendingFoods));
@@ -3645,7 +3795,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setFoods(prev => {
       const next = [newFood, ...prev];
       try {
-        localStorage.setItem('kft_foods_200_v7', JSON.stringify(next));
+        localStorage.setItem('kft_foods_200_v7', JSON.stringify(compactDataForBulkLocalStorage('kft_foods_200_v7', next)));
       } catch {
         scheduleStorageWrite('kft_foods_200_v7', next, 500);
       }
@@ -3664,7 +3814,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setFoods(prev => {
       const next = prev.map(f => f.id === customUpdated.id ? customUpdated : f);
       try {
-        localStorage.setItem('kft_foods_200_v7', JSON.stringify(next));
+        localStorage.setItem('kft_foods_200_v7', JSON.stringify(compactDataForBulkLocalStorage('kft_foods_200_v7', next)));
       } catch {
         scheduleStorageWrite('kft_foods_200_v7', next, 500);
       }
@@ -3741,6 +3891,66 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const foodImgs = Array.isArray(restData.foodImages) && restData.foodImages.length > 0
       ? restData.foodImages
       : (Array.isArray(restData.galleryPhotos) ? restData.galleryPhotos : []);
+
+    // Final Server/Context AI Business Category Verification before saving or publishing any store
+    const aiVerification =
+      restData.aiCategoryVerification ||
+      analyzeFoodBusinessDeterministically({
+        nameKh: restData.nameKh,
+        nameEn: restData.nameEn,
+        descriptionKh: restData.descriptionKh,
+        descriptionEn: restData.descriptionEn,
+        signatureDishesKh: restData.signatureDishesKh,
+        addressKh: restData.addressKh,
+        provinceKh: restData.provinceKh,
+        phone: restData.phone,
+        photoUrl: profileImg,
+        profileImage: profileImg,
+        foodImages: foodImgs,
+        galleryPhotos: restData.galleryPhotos,
+        menuItems: restData.menuItems,
+        ownerId: currentUser.id,
+        ownerName: currentUser.name,
+      });
+
+    // Trigger asynchronous server audit log & multimodal verification
+    verifyFoodBusinessOnServer({
+      nameKh: restData.nameKh,
+      nameEn: restData.nameEn,
+      descriptionKh: restData.descriptionKh,
+      descriptionEn: restData.descriptionEn,
+      signatureDishesKh: restData.signatureDishesKh,
+      addressKh: restData.addressKh,
+      provinceKh: restData.provinceKh,
+      phone: restData.phone,
+      photoUrl: profileImg,
+      profileImage: profileImg,
+      foodImages: foodImgs,
+      galleryPhotos: restData.galleryPhotos,
+      menuItems: restData.menuItems,
+      ownerId: currentUser.id,
+      ownerName: currentUser.name,
+    }).catch(() => {});
+
+    if (aiVerification.decision === 'rejected') {
+      recordSecurityAudit(
+        'VIP_STORE_REJECTED_NON_FOOD',
+        'BLOCKED',
+        'VipCreateStore',
+        `Rejected non-food store "${restData.nameKh}" (${aiVerification.detectedCategory})`
+      );
+      showToast(
+        language === 'km' ? aiVerification.reasonKh : aiVerification.reasonEn,
+        'warning'
+      );
+      return null;
+    }
+
+    const isPendingManualReview = !isAdmin && aiVerification.decision === 'pending_review';
+    const finalStatus: 'approved' | 'pending' | 'rejected' = isPendingManualReview ? 'pending' : 'approved';
+    const finalIsVerified = !isPendingManualReview;
+    const finalIsPromoted = !isPendingManualReview;
+
     const nowIso = new Date().toISOString();
     const expiryIso =
       currentUser.subscriptionExpiryDate ||
@@ -3761,13 +3971,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       ownerName: currentUser.name,
       ownerEmail: currentUser.email,
       ownerPhone: restData.phone || currentUser.phone,
-      status: 'approved',
-      isVerified: true,
-      isPromoted: true,
+      status: finalStatus,
+      isVerified: finalIsVerified,
+      isPromoted: finalIsPromoted,
       membershipTier: 'premium',
       membershipExpiresAt: expiryIso,
       paymentStatus: 'verified',
       menuItems: (restData.menuItems || []).slice(0, 20),
+      aiCategoryVerification: aiVerification,
       created_at: restData.created_at || restData.createdAt || nowIso,
       createdAt: restData.created_at || restData.createdAt || nowIso,
       updatedAt: nowIso,
@@ -3780,7 +3991,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setRestaurants(prev => {
       const nextList = sortRestaurantsChronologically([...prev.filter(r => r.id !== newRest.id), newRest]);
       try {
-        localStorage.setItem('kft_restaurants_real_v9', JSON.stringify(nextList));
+        localStorage.setItem('kft_restaurants_real_v9', JSON.stringify(compactDataForBulkLocalStorage('kft_restaurants_real_v9', nextList)));
       } catch (e) {
         console.warn('Immediate save failed for new restaurant:', e);
       }
@@ -3794,10 +4005,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return nextList;
     });
 
-    showToast(
-      language === 'km' ? '🎉 ចុះបញ្ជីហាង VIP របស់អ្នកបានជោគជ័យ!' : '🎉 Registered your VIP Restaurant successfully!',
-      'success'
-    );
+    if (isPendingManualReview) {
+      showToast(
+        language === 'km'
+          ? '⏳ សំណើបង្កើតហាងរបស់អ្នកត្រូវបានបញ្ជូនទៅកាន់ Admin ដើម្បីត្រួតពិនិត្យប្រភេទអាជីវកម្មម្ហូបអាហារជាមុនសិន!'
+          : '⏳ Your store submission has been sent to Admin for manual food-category verification!',
+        'info'
+      );
+    } else {
+      showToast(
+        language === 'km' ? '🎉 ចុះបញ្ជីហាងអាហារ VIP របស់អ្នកបានជោគជ័យ!' : '🎉 Registered your VIP Restaurant successfully!',
+        'success'
+      );
+    }
     return newRest;
   };
 
@@ -3913,6 +4133,54 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       ? updated.foodImages
       : (Array.isArray(updated.galleryPhotos) ? updated.galleryPhotos : (original?.foodImages || original?.galleryPhotos || []));
 
+    // Prevent VIP users from bypassing verification by editing an approved store into a non-food business
+    let updatedAiVerification = updated.aiCategoryVerification || original?.aiCategoryVerification;
+    let nextStatusAfterAiCheck: 'approved' | 'pending' | 'rejected' = original?.status || 'approved';
+    let nextIsVerifiedAfterAiCheck: boolean = original?.isVerified ?? true;
+    let nextIsPromotedAfterAiCheck: boolean = true;
+
+    if (!isAdmin && !isSeedRestaurantId(updated.id)) {
+      const aiCheck = analyzeFoodBusinessDeterministically({
+        nameKh: updated.nameKh,
+        nameEn: updated.nameEn,
+        descriptionKh: updated.descriptionKh,
+        descriptionEn: updated.descriptionEn,
+        signatureDishesKh: updated.signatureDishesKh,
+        addressKh: updated.addressKh,
+        provinceKh: updated.provinceKh,
+        phone: updated.phone,
+        photoUrl: profileImg,
+        profileImage: profileImg,
+        foodImages: foodImgs,
+        galleryPhotos: updated.galleryPhotos,
+        menuItems: updated.menuItems,
+        ownerId: currentUser?.id,
+        ownerName: currentUser?.name,
+      });
+
+      if (aiCheck.decision === 'rejected') {
+        recordSecurityAudit(
+          'VIP_STORE_EDIT_REJECTED_NON_FOOD',
+          'BLOCKED',
+          'VipEditStore',
+          `Blocked non-food edit on "${updated.nameKh}" (${aiCheck.detectedCategory})`
+        );
+        showToast(language === 'km' ? aiCheck.reasonKh : aiCheck.reasonEn, 'warning');
+        return;
+      }
+
+      updatedAiVerification = aiCheck;
+      if (aiCheck.decision === 'pending_review') {
+        nextStatusAfterAiCheck = 'pending';
+        nextIsVerifiedAfterAiCheck = false;
+        nextIsPromotedAfterAiCheck = false;
+      } else {
+        nextStatusAfterAiCheck = 'approved';
+        nextIsVerifiedAfterAiCheck = true;
+        nextIsPromotedAfterAiCheck = true;
+      }
+    }
+
     const preservedCreatedAt = original?.created_at || original?.createdAt || updated.created_at || updated.createdAt || getRestaurantCreatedAtIso(original || updated);
     const effectiveTier: MembershipTier = (isAdmin || isApprovedVip) ? 'premium' : 'free';
     const effectiveExpiry =
@@ -3938,10 +4206,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       foodImages: foodImgs,
       membershipTier: effectiveTier,
       membershipExpiresAt: effectiveExpiry,
-      isPromoted: effectiveTier === 'premium' ? true : Boolean(original?.isPromoted),
+      isPromoted: effectiveTier === 'premium' ? nextIsPromotedAfterAiCheck : Boolean(original?.isPromoted),
       paymentStatus: effectiveTier === 'premium' ? 'verified' : original?.paymentStatus,
-      status: original?.status || 'approved',
-      isVerified: original?.isVerified ?? true,
+      status: nextStatusAfterAiCheck,
+      isVerified: nextIsVerifiedAfterAiCheck,
+      aiCategoryVerification: updatedAiVerification,
       signatureDishesKh: Array.isArray(updated.signatureDishesKh) ? updated.signatureDishesKh : (original?.signatureDishesKh || ['ម្ហូបខ្មែរប្រពៃណី']),
       menuItems: Array.isArray(updated.menuItems) ? updated.menuItems : (original?.menuItems || []),
       promoVideoUrl: updated.promoVideoUrl !== undefined ? updated.promoVideoUrl : original?.promoVideoUrl,
@@ -3957,7 +4226,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setRestaurants(prev => {
       const next = prev.map(r => r.id === updated.id ? safeUpdated : r);
       try {
-        localStorage.setItem('kft_restaurants_real_v9', JSON.stringify(next));
+        localStorage.setItem('kft_restaurants_real_v9', JSON.stringify(compactDataForBulkLocalStorage('kft_restaurants_real_v9', next)));
       } catch {
         scheduleStorageWrite('kft_restaurants_real_v9', next, 500);
       }
@@ -4024,6 +4293,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         'warning'
       );
       return false;
+    }
+
+    // AI Anti-Bypass Check on Menu Item (block non-food merchandise in restaurant menu)
+    if (!isAdmin) {
+      const menuAiCheck = analyzeFoodBusinessDeterministically({
+        nameKh: targetRest.nameKh,
+        nameEn: targetRest.nameEn,
+        menuItems: [itemData],
+        photoUrl: itemData.photoUrl,
+      });
+      if (menuAiCheck.decision === 'rejected') {
+        showToast(
+          language === 'km' ? menuAiCheck.reasonKh : menuAiCheck.reasonEn,
+          'warning'
+        );
+        return false;
+      }
     }
 
     const newItem: RestaurantMenuItem = {
@@ -4429,8 +4715,107 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const approveRestaurant = (id: string) => {
-    setRestaurants(prev => prev.map(r => r.id === id ? { ...r, status: 'approved' } : r));
-    showToast(language === 'km' ? 'បានអនុម័តហាងអាហារជោគជ័យ' : 'Restaurant approved!', 'success');
+    const nowIso = new Date().toISOString();
+    setRestaurants(prev => {
+      const next = prev.map(r => {
+        if (r.id !== id) return r;
+        const approvedRest: Restaurant = {
+          ...r,
+          status: 'approved',
+          isVerified: true,
+          isPromoted: r.membershipTier === 'premium' ? true : Boolean(r.isPromoted),
+          updatedAt: nowIso,
+          aiCategoryVerification: r.aiCategoryVerification
+            ? {
+                ...r.aiCategoryVerification,
+                decision: 'approved',
+                isFoodBusiness: true,
+                reasonKh: `✅ ត្រូវបានពិនិត្យ និងអនុម័តដោយ Administrator ថាជាអាជីវកម្មម្ហូបអាហារត្រឹមត្រូវ។`,
+                reasonEn: `✅ Manually reviewed and approved by Administrator as an eligible food business.`,
+                verifiedAt: nowIso,
+                verifiedByModel: 'admin_manual_override',
+              }
+            : undefined,
+        };
+        recordPermanentRestaurantOverride(approvedRest);
+        if (managingRestaurant?.id === id) setManagingRestaurant(approvedRest);
+        if (selectedRestaurant?.id === id) setSelectedRestaurant(approvedRest);
+        return approvedRest;
+      });
+      try {
+        localStorage.setItem('kft_restaurants_real_v9', JSON.stringify(compactDataForBulkLocalStorage('kft_restaurants_real_v9', next)));
+      } catch {}
+      if (isSupabaseConfigured()) {
+        try {
+          pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter(r => !isSeedRestaurantId(r.id)));
+        } catch {}
+      }
+      return next;
+    });
+    showToast(
+      language === 'km'
+        ? '✅ បានអនុម័តហាងអាហារជោគជ័យ និងដាក់បង្ហាញជាសាធារណៈរួចរាល់!'
+        : '✅ Restaurant approved and published!',
+      'success'
+    );
+  };
+
+  const rejectRestaurant = (id: string, reasonKh?: string) => {
+    const nowIso = new Date().toISOString();
+    const defaultReasonKh =
+      reasonKh?.trim() ||
+      '🚫 សំណើបង្កើតហាងត្រូវបានបដិសេធដោយ Administrator ដោយសារមិនមែនជាភោជនីយដ្ឋាន ឬហាងលក់ម្ហូបអាហារចម្អិនស្រាប់។';
+    setRestaurants(prev => {
+      const next = prev.map(r => {
+        if (r.id !== id) return r;
+        const rejectedRest: Restaurant = {
+          ...r,
+          status: 'rejected',
+          isVerified: false,
+          isPromoted: false,
+          updatedAt: nowIso,
+          aiCategoryVerification: {
+            ...(r.aiCategoryVerification || {
+              detectedCategory: 'non_food_other',
+              detectedCategoryLabelKh: 'អាជីវកម្មមិនពាក់ព័ន្ធនឹងម្ហូបអាហារ',
+              detectedCategoryLabelEn: 'Non-Food Business',
+              confidenceScore: 100,
+              isBypassAttempt: false,
+              matchedFoodSignals: [],
+              flaggedNonFoodSignals: [],
+              photoAnalysisSummaryKh: '',
+              photoAnalysisSummaryEn: '',
+              verificationToken: `KFT-ADMIN-REJ-${Date.now()}`,
+            }),
+            decision: 'rejected',
+            isFoodBusiness: false,
+            reasonKh: defaultReasonKh,
+            reasonEn: '🚫 Store rejected by Administrator: Does not meet prepared-food business criteria.',
+            verifiedAt: nowIso,
+            verifiedByModel: 'admin_manual_override',
+          },
+        };
+        recordPermanentRestaurantOverride(rejectedRest);
+        if (managingRestaurant?.id === id) setManagingRestaurant(rejectedRest);
+        if (selectedRestaurant?.id === id) setSelectedRestaurant(rejectedRest);
+        return rejectedRest;
+      });
+      try {
+        localStorage.setItem('kft_restaurants_real_v9', JSON.stringify(compactDataForBulkLocalStorage('kft_restaurants_real_v9', next)));
+      } catch {}
+      if (isSupabaseConfigured()) {
+        try {
+          pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter(r => !isSeedRestaurantId(r.id)));
+        } catch {}
+      }
+      return next;
+    });
+    showToast(
+      language === 'km'
+        ? '🚫 បានបដិសេធសំណើបង្កើតហាងដែលមិនមែនជាអាហាររួចរាល់!'
+        : '🚫 Rejected non-food store submission!',
+      'info'
+    );
   };
 
   const toggleVerifyRestaurant = (id: string) => {
@@ -4515,7 +4900,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setDestinations(prev => {
       const next = [newDest, ...prev];
       try {
-        localStorage.setItem('kft_destinations_real_v8', JSON.stringify(next));
+        localStorage.setItem('kft_destinations_real_v8', JSON.stringify(compactDataForBulkLocalStorage('kft_destinations_real_v8', next)));
       } catch (e) {
         scheduleStorageWrite('kft_destinations_real_v8', next, 500);
       }
@@ -4529,6 +4914,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const nowIso = new Date().toISOString();
     const customUpdated: TouristDestination = {
       ...updated,
+      galleryPhotos: updated.photoUrl
+        ? [updated.photoUrl, ...(Array.isArray(updated.galleryPhotos) ? updated.galleryPhotos.filter(p => p && p !== updated.photoUrl && !p.startsWith('data:image/')) : [])].slice(0, 6)
+        : updated.galleryPhotos,
       isCustomPhoto: true,
       photoUpdatedAt: nowIso,
       isAdminEdited: true,
@@ -4541,7 +4929,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setDestinations(prev => {
       const next = prev.map(d => d.id === customUpdated.id ? customUpdated : d);
       try {
-        localStorage.setItem('kft_destinations_real_v8', JSON.stringify(next));
+        localStorage.setItem('kft_destinations_real_v8', JSON.stringify(compactDataForBulkLocalStorage('kft_destinations_real_v8', next)));
       } catch (e) {
         scheduleStorageWrite('kft_destinations_real_v8', next, 500);
       }
@@ -7040,6 +7428,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         updateRestaurant,
         deleteRestaurant,
         approveRestaurant,
+        rejectRestaurant,
         toggleVerifyRestaurant,
         addRestaurantMenuItem,
         updateRestaurantMenuItem,

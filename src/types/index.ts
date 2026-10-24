@@ -581,6 +581,43 @@ export interface RegistrationTransaction {
   aiVerificationReport?: AbaReceiptVerificationReport;
 }
 
+export type AiStoreCategoryDecision = 'approved' | 'pending_review' | 'rejected';
+
+export type DetectedBusinessSubCategory =
+  | 'restaurant'
+  | 'food_stall'
+  | 'cafe_bakery_dessert'
+  | 'noodle_rice_soup_eatery'
+  | 'grocery_raw_goods'
+  | 'clothing_fashion'
+  | 'electronics_mobile'
+  | 'cosmetics_salon'
+  | 'pharmacy_medical'
+  | 'hardware_construction'
+  | 'auto_motorcycle'
+  | 'real_estate_finance'
+  | 'non_food_other'
+  | 'uncertain_ambiguous';
+
+export interface AiStoreCategoryVerificationReport {
+  decision: AiStoreCategoryDecision;
+  isFoodBusiness: boolean;
+  detectedCategory: DetectedBusinessSubCategory;
+  detectedCategoryLabelKh: string;
+  detectedCategoryLabelEn: string;
+  confidenceScore: number; // 0 to 100
+  isBypassAttempt: boolean;
+  reasonKh: string;
+  reasonEn: string;
+  matchedFoodSignals: string[];
+  flaggedNonFoodSignals: string[];
+  photoAnalysisSummaryKh: string;
+  photoAnalysisSummaryEn: string;
+  verificationToken: string;
+  verifiedAt: string;
+  verifiedByModel: 'hybrid_gemini_and_rules_v1' | 'deterministic_semantic_guard_v1' | 'admin_manual_override';
+}
+
 export interface Restaurant {
   id: string;
   nameKh: string;
@@ -649,6 +686,9 @@ export interface Restaurant {
   googleMapsMeta?: GoogleMapsPlaceMetadata;
   isAdminEdited?: boolean;
   adminEditedAt?: string;
+
+  // AI Business Category Verification (Food vs Non-Food Store Gate)
+  aiCategoryVerification?: AiStoreCategoryVerificationReport;
 }
 
 // Helper to resolve original created_at ISO timestamp for chronological sorting

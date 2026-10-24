@@ -152,11 +152,12 @@ export const HomeView: React.FC = () => {
     );
 
     const matchedRestaurants = sortRestaurantsChronologically(restaurants.filter(r =>
-      normalizeKhmerSearchText(r.nameKh).includes(q) ||
+      (r.status === 'approved' || currentUser?.role === 'admin' || currentUser?.id === r.ownerId) &&
+      (normalizeKhmerSearchText(r.nameKh).includes(q) ||
       normalizeKhmerSearchText(r.nameEn).includes(q) ||
       (r.addressKh && normalizeKhmerSearchText(r.addressKh).includes(q)) ||
       (r.provinceKh && normalizeKhmerSearchText(r.provinceKh).includes(q)) ||
-      (r.signatureDishesKh && r.signatureDishesKh.some(d => normalizeKhmerSearchText(d).includes(q)))
+      (r.signatureDishesKh && r.signatureDishesKh.some(d => normalizeKhmerSearchText(d).includes(q))))
     ));
 
     const matchedDestinations = destinations.filter(d =>

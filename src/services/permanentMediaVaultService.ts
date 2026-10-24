@@ -16,7 +16,7 @@
  */
 
 import { FoodItem, Restaurant, TouristDestination, TrendingFoodItem, RestaurantMenuItem, RestaurantReview, RestaurantPriceLevel, GoogleMapsPlaceMetadata } from '../types';
-import { isSupabaseConfigured, pullCloudDocument, pushCloudDocument } from './supabaseService';
+import { isSupabaseConfigured, pullCloudDocument, pushCloudDocument, pullCloudDocumentsByPrefix, deleteCloudDocument } from './supabaseService';
 
 export const VAULT_KEYS = {
   FOODS: 'kft_permanent_food_overrides_v1',
@@ -25,6 +25,7 @@ export const VAULT_KEYS = {
   DESTINATIONS_LEGACY: 'kft_destination_photo_overrides_v1',
   TRENDING_FOODS: 'kft_permanent_trending_food_overrides_v1',
   CLOUD_DOC_KEY: 'kft_cloud_media_overrides_v1',
+  CLOUD_RECORD_PREFIX: 'kft_ov_',
 } as const;
 
 export interface FoodMediaOverride {
@@ -197,6 +198,30 @@ export async function loadBundleFromIdb(): Promise<AllMediaOverridesBundle | nul
   });
 }
 
+// Live in-memory master cache so that even if localStorage reaches its 5MB quota limit,
+// no Admin-replaced image is ever lost during subsequent edits in the session.
+let inMemoryMasterBundle: AllMediaOverridesBundle | null = null;
+
+function isObsoleteSeedPhoto(url?: string): boolean {
+  if (!url) return true;
+  return url.includes('Huay_Kaew_waterfall_mu_yang.jpg') || url.includes('Global_Forest_Change_tree-cover_loss_year');
+}
+
+function isFakeSeedRestaurantOverride(rec?: RestaurantMediaOverride | null): boolean {
+  if (!rec || !rec.id) return true;
+  const isSeedId = /^rest-\d+$/.test(String(rec.id).trim());
+  if (!isSeedId) return false;
+  const url = String(rec.photoUrl || rec.profileImage || '').trim();
+  const isStaticDefaultPath = /^\/(Shop\/rest-\d+|foods\/food-\d+)\.(jpg|jpeg|png|webp)$/i.test(url);
+  const hasCustomName = Boolean(rec.nameKh && rec.nameKh.trim().length > 0);
+  const hasReviews = Array.isArray(rec.reviews) && rec.reviews.length > 0;
+  const hasCustomMenu =
+    Array.isArray(rec.menuItems) &&
+    rec.menuItems.length > 0 &&
+    !(rec.id === 'rest-19' && rec.menuItems.length === 3 && rec.menuItems[0]?.id === 'menu-1');
+  return isStaticDefaultPath && !hasCustomName && !hasReviews && !hasCustomMenu;
+}
+
 function safeReadJsonMap<T>(key: string): Record<string, T> {
   try {
     const raw = localStorage.getItem(key);
@@ -212,11 +237,25 @@ function safeReadJsonMap<T>(key: string): Record<string, T> {
   return {};
 }
 
-function safeWriteJsonMap<T>(key: string, map: Record<string, T>): void {
+function safeWriteJsonMap<T>(key: string, map: Record<string, T>): boolean {
   try {
     localStorage.setItem(key, JSON.stringify(map));
+    return true;
   } catch (e) {
-    console.warn(`localStorage quota warning on ${key} (saved in IndexedDB & Cloud instead):`, e);
+    // Attempt to free obsolete legacy keys and retry once
+    try {
+      localStorage.removeItem(VAULT_KEYS.DESTINATIONS_LEGACY);
+      localStorage.removeItem('kft_destinations_real_v5');
+      localStorage.removeItem('kft_destinations_real_v6');
+      localStorage.removeItem('kft_destinations_real_v7');
+      localStorage.removeItem('kft_restaurants_real_v8');
+      localStorage.removeItem('kft_foods_200_v6');
+      localStorage.setItem(key, JSON.stringify(map));
+      return true;
+    } catch {
+      console.warn(`localStorage quota warning on ${key} (preserved in inMemoryMasterBundle, IndexedDB & Supabase Cloud):`, e);
+      return false;
+    }
   }
 }
 
@@ -227,9 +266,11 @@ export function loadLocalMediaOverrides(): AllMediaOverridesBundle {
   const legacyDest = safeReadJsonMap<{ photoUrl: string; updatedAt?: string }>(VAULT_KEYS.DESTINATIONS_LEGACY);
   const trendingFoods = safeReadJsonMap<TrendingFoodMediaOverride>(VAULT_KEYS.TRENDING_FOODS);
 
-  // Merge legacy destination photo overrides into the unified destinations vault
+  // Merge legacy destination photo overrides into the unified destinations vault & remove duplicate legacy key
+  let hadLegacy = false;
   for (const [id, val] of Object.entries(legacyDest)) {
-    if (val && val.photoUrl && !destinations[id]) {
+    hadLegacy = true;
+    if (val && val.photoUrl && !isObsoleteSeedPhoto(val.photoUrl) && !destinations[id]) {
       destinations[id] = {
         id,
         photoUrl: val.photoUrl,
@@ -238,21 +279,52 @@ export function loadLocalMediaOverrides(): AllMediaOverridesBundle {
       };
     }
   }
+  if (hadLegacy) {
+    try {
+      localStorage.removeItem(VAULT_KEYS.DESTINATIONS_LEGACY);
+    } catch {}
+  }
 
-  return {
+  // Strip any obsolete broken seed URLs from destinations vault
+  for (const [id, destOv] of Object.entries(destinations)) {
+    if (destOv && isObsoleteSeedPhoto(destOv.photoUrl)) {
+      delete destinations[id];
+    }
+  }
+
+  // Strip any accidental unedited seed restaurant entries from restaurants vault
+  for (const [id, restOv] of Object.entries(restaurants)) {
+    if (isFakeSeedRestaurantOverride(restOv)) {
+      delete restaurants[id];
+    }
+  }
+
+  const fromDisk: AllMediaOverridesBundle = {
     foods,
     restaurants,
     destinations,
     trendingFoods,
     updatedAt: new Date().toISOString(),
   };
+
+  if (inMemoryMasterBundle) {
+    inMemoryMasterBundle = mergeOverrideBundles(fromDisk, inMemoryMasterBundle);
+    return inMemoryMasterBundle;
+  }
+
+  inMemoryMasterBundle = fromDisk;
+  return inMemoryMasterBundle;
 }
 
 export function saveLocalMediaOverrides(bundle: AllMediaOverridesBundle): void {
+  inMemoryMasterBundle = bundle;
+  // Remove duplicate legacy key first to maximize available localStorage space
+  try {
+    localStorage.removeItem(VAULT_KEYS.DESTINATIONS_LEGACY);
+  } catch {}
   safeWriteJsonMap(VAULT_KEYS.FOODS, bundle.foods);
   safeWriteJsonMap(VAULT_KEYS.RESTAURANTS, bundle.restaurants);
   safeWriteJsonMap(VAULT_KEYS.DESTINATIONS, bundle.destinations);
-  safeWriteJsonMap(VAULT_KEYS.DESTINATIONS_LEGACY, bundle.destinations);
   safeWriteJsonMap(VAULT_KEYS.TRENDING_FOODS, bundle.trendingFoods);
   saveBundleToIdb(bundle).catch(() => {});
 }
@@ -263,15 +335,15 @@ export function mergeOverrideBundles(
 ): AllMediaOverridesBundle {
   if (!incoming) return base;
 
-  const mergeMaps = <T extends { updatedAt?: string }>(
+  const mergeMaps = <T extends { updatedAt?: string; photoUrl?: string }>(
     a: Record<string, T> = {},
     b: Record<string, T> = {}
   ): Record<string, T> => {
     const out: Record<string, T> = { ...a };
     for (const [id, itemB] of Object.entries(b)) {
-      if (!itemB) continue;
+      if (!itemB || isObsoleteSeedPhoto(itemB.photoUrl)) continue;
       const itemA = out[id];
-      if (!itemA) {
+      if (!itemA || isObsoleteSeedPhoto(itemA.photoUrl)) {
         out[id] = itemB;
       } else {
         const timeA = itemA.updatedAt ? new Date(itemA.updatedAt).getTime() : 0;
@@ -282,13 +354,47 @@ export function mergeOverrideBundles(
     return out;
   };
 
+  const mergedRestaurants = mergeMaps(base.restaurants, incoming.restaurants || {});
+  for (const [id, restOv] of Object.entries(mergedRestaurants)) {
+    if (isFakeSeedRestaurantOverride(restOv)) {
+      delete mergedRestaurants[id];
+    }
+  }
+
   return {
     foods: mergeMaps(base.foods, incoming.foods || {}),
-    restaurants: mergeMaps(base.restaurants, incoming.restaurants || {}),
+    restaurants: mergedRestaurants,
     destinations: mergeMaps(base.destinations, incoming.destinations || {}),
     trendingFoods: mergeMaps(base.trendingFoods, incoming.trendingFoods || {}),
     updatedAt: new Date().toISOString(),
   };
+}
+
+/**
+ * Push a single record override to its own dedicated Supabase key (`kft_ov_<type>_<id>`)
+ * AND safely merge-push the master bundle so no record can ever overwrite another.
+ */
+async function syncSingleOverrideRecordToCloud(
+  category: 'food' | 'rest' | 'dest' | 'trend',
+  recordId: string,
+  overridePayload: any,
+  localBundle: AllMediaOverridesBundle
+): Promise<void> {
+  if (!isSupabaseConfigured()) return;
+  const perRecordKey = `${VAULT_KEYS.CLOUD_RECORD_PREFIX}${category}_${recordId}`;
+  try {
+    // 1. Atomic per-record upsert (fast, small payload, zero risk of overwriting other records)
+    await pushCloudDocument(perRecordKey, overridePayload, 12000);
+
+    // 2. Pull existing master bundle first, merge with localBundle, then push merged master bundle
+    const remoteMaster = await pullCloudDocument<AllMediaOverridesBundle>(VAULT_KEYS.CLOUD_DOC_KEY, 10000);
+    const mergedMaster = remoteMaster ? mergeOverrideBundles(remoteMaster, localBundle) : localBundle;
+    inMemoryMasterBundle = mergedMaster;
+    saveLocalMediaOverrides(mergedMaster);
+    await pushCloudDocument(VAULT_KEYS.CLOUD_DOC_KEY, mergedMaster, 15000);
+  } catch (err) {
+    console.warn(`syncSingleOverrideRecordToCloud(${perRecordKey}) warning:`, err);
+  }
 }
 
 /**
@@ -297,7 +403,7 @@ export function mergeOverrideBundles(
 export function recordPermanentFoodOverride(food: FoodItem): void {
   const bundle = loadLocalMediaOverrides();
   const now = food.photoUpdatedAt || new Date().toISOString();
-  bundle.foods[food.id] = {
+  const overrideRecord: FoodMediaOverride = {
     id: food.id,
     photoUrl: food.photoUrl,
     nameKh: food.nameKh,
@@ -314,9 +420,10 @@ export function recordPermanentFoodOverride(food: FoodItem): void {
     isCustomPhoto: true,
     updatedAt: now,
   };
+  bundle.foods[food.id] = overrideRecord;
   bundle.updatedAt = now;
   saveLocalMediaOverrides(bundle);
-  pushMediaOverridesToCloud(bundle).catch(() => {});
+  syncSingleOverrideRecordToCloud('food', food.id, overrideRecord, bundle).catch(() => {});
 }
 
 /**
@@ -326,12 +433,17 @@ export function recordPermanentRestaurantOverride(rest: Restaurant): void {
   const bundle = loadLocalMediaOverrides();
   const now = new Date().toISOString();
   const primaryPhoto = rest.profileImage || rest.photoUrl;
-  bundle.restaurants[rest.id] = {
+  const dedupedGallery = Array.isArray(rest.galleryPhotos)
+    ? rest.galleryPhotos.filter((g) => g && g !== primaryPhoto)
+    : undefined;
+  const overrideRecord: RestaurantMediaOverride = {
     id: rest.id,
     photoUrl: primaryPhoto,
     profileImage: primaryPhoto,
-    galleryPhotos: rest.galleryPhotos,
-    foodImages: rest.foodImages,
+    galleryPhotos: dedupedGallery && dedupedGallery.length > 0 ? dedupedGallery : undefined,
+    foodImages: Array.isArray(rest.foodImages)
+      ? rest.foodImages.filter((g) => g && g !== primaryPhoto)
+      : undefined,
     menuItems: rest.menuItems,
     reviews: rest.reviews,
     rating: rest.rating,
@@ -362,9 +474,10 @@ export function recordPermanentRestaurantOverride(rest: Restaurant): void {
     isCustomPhoto: true,
     updatedAt: now,
   };
+  bundle.restaurants[rest.id] = overrideRecord;
   bundle.updatedAt = now;
   saveLocalMediaOverrides(bundle);
-  pushMediaOverridesToCloud(bundle).catch(() => {});
+  syncSingleOverrideRecordToCloud('rest', rest.id, overrideRecord, bundle).catch(() => {});
 }
 
 /**
@@ -376,6 +489,7 @@ export function removePermanentRestaurantOverride(restaurantId: string): void {
     delete bundle.restaurants[restaurantId];
     bundle.updatedAt = new Date().toISOString();
     saveLocalMediaOverrides(bundle);
+    deleteCloudDocument(`${VAULT_KEYS.CLOUD_RECORD_PREFIX}rest_${restaurantId}`).catch(() => {});
     pushMediaOverridesToCloud(bundle).catch(() => {});
   }
 }
@@ -386,10 +500,14 @@ export function removePermanentRestaurantOverride(restaurantId: string): void {
 export function recordPermanentDestinationOverride(dest: TouristDestination): void {
   const bundle = loadLocalMediaOverrides();
   const now = dest.photoUpdatedAt || new Date().toISOString();
-  bundle.destinations[dest.id] = {
+  // Avoid storing a duplicate copy of a 300KB base64 photoUrl inside galleryPhotos
+  const extraGallery = Array.isArray(dest.galleryPhotos)
+    ? dest.galleryPhotos.filter((g) => g && g !== dest.photoUrl && !isObsoleteSeedPhoto(g))
+    : undefined;
+  const overrideRecord: DestinationMediaOverride = {
     id: dest.id,
     photoUrl: dest.photoUrl,
-    galleryPhotos: dest.galleryPhotos,
+    galleryPhotos: extraGallery && extraGallery.length > 0 ? extraGallery : undefined,
     nameKh: dest.nameKh,
     nameEn: dest.nameEn,
     descriptionKh: dest.descriptionKh,
@@ -410,9 +528,10 @@ export function recordPermanentDestinationOverride(dest: TouristDestination): vo
     isCustomPhoto: true,
     updatedAt: now,
   };
+  bundle.destinations[dest.id] = overrideRecord;
   bundle.updatedAt = now;
   saveLocalMediaOverrides(bundle);
-  pushMediaOverridesToCloud(bundle).catch(() => {});
+  syncSingleOverrideRecordToCloud('dest', dest.id, overrideRecord, bundle).catch(() => {});
 }
 
 export function removePermanentDestinationOverride(destId: string): void {
@@ -421,6 +540,7 @@ export function removePermanentDestinationOverride(destId: string): void {
     delete bundle.destinations[destId];
     bundle.updatedAt = new Date().toISOString();
     saveLocalMediaOverrides(bundle);
+    deleteCloudDocument(`${VAULT_KEYS.CLOUD_RECORD_PREFIX}dest_${destId}`).catch(() => {});
     pushMediaOverridesToCloud(bundle).catch(() => {});
   }
 }
@@ -431,7 +551,7 @@ export function removePermanentDestinationOverride(destId: string): void {
 export function recordPermanentTrendingFoodOverride(item: TrendingFoodItem): void {
   const bundle = loadLocalMediaOverrides();
   const now = new Date().toISOString();
-  bundle.trendingFoods[item.id] = {
+  const overrideRecord: TrendingFoodMediaOverride = {
     id: item.id,
     photoUrl: item.photoUrl,
     foodNameKh: item.foodNameKh,
@@ -441,9 +561,10 @@ export function recordPermanentTrendingFoodOverride(item: TrendingFoodItem): voi
     priceRange: item.priceRange,
     updatedAt: now,
   };
+  bundle.trendingFoods[item.id] = overrideRecord;
   bundle.updatedAt = now;
   saveLocalMediaOverrides(bundle);
-  pushMediaOverridesToCloud(bundle).catch(() => {});
+  syncSingleOverrideRecordToCloud('trend', item.id, overrideRecord, bundle).catch(() => {});
 }
 
 /**
@@ -536,11 +657,14 @@ export function applyDestinationOverrides(
   if (!overridesMap || Object.keys(overridesMap).length === 0) return destinations;
   return destinations.map((d) => {
     const ov = overridesMap[d.id];
-    if (!ov || !ov.photoUrl) return d;
+    if (!ov || !ov.photoUrl || isObsoleteSeedPhoto(ov.photoUrl)) return d;
     return {
       ...d,
       photoUrl: ov.photoUrl,
-      galleryPhotos: Array.isArray(ov.galleryPhotos) && ov.galleryPhotos.length > 0 ? ov.galleryPhotos : d.galleryPhotos,
+      galleryPhotos:
+        Array.isArray(ov.galleryPhotos) && ov.galleryPhotos.length > 0
+          ? [ov.photoUrl, ...ov.galleryPhotos.filter((g) => g && g !== ov.photoUrl)]
+          : [ov.photoUrl],
       nameKh: ov.nameKh || d.nameKh,
       nameEn: ov.nameEn || d.nameEn,
       descriptionKh: ov.descriptionKh || d.descriptionKh,
@@ -588,21 +712,33 @@ export function applyTrendingFoodOverrides(
 }
 
 /**
- * Push media overrides bundle to Supabase Cloud.
+ * Push media overrides bundle to Supabase Cloud (pull-merge-push safe).
  */
 export async function pushMediaOverridesToCloud(bundle?: AllMediaOverridesBundle): Promise<boolean> {
   if (!isSupabaseConfigured()) return false;
-  const toPush = bundle || loadLocalMediaOverrides();
-  return pushCloudDocument(VAULT_KEYS.CLOUD_DOC_KEY, toPush);
+  const localToPush = bundle || loadLocalMediaOverrides();
+  try {
+    const remote = await pullCloudDocument<AllMediaOverridesBundle>(VAULT_KEYS.CLOUD_DOC_KEY, 10000);
+    const merged = remote ? mergeOverrideBundles(remote, localToPush) : localToPush;
+    inMemoryMasterBundle = merged;
+    return await pushCloudDocument(VAULT_KEYS.CLOUD_DOC_KEY, merged, 15000);
+  } catch {
+    return await pushCloudDocument(VAULT_KEYS.CLOUD_DOC_KEY, localToPush, 15000);
+  }
 }
 
 /**
- * Hydrate and synchronize permanent media overrides from IndexedDB and Supabase Cloud.
+ * Hydrate and synchronize permanent media overrides from:
+ *   1. In-memory master cache (`inMemoryMasterBundle`)
+ *   2. LocalStorage (`VAULT_KEYS`)
+ *   3. IndexedDB (`kft_permanent_media_vault_idb_v1`)
+ *   4. Supabase Cloud Master Bundle (`kft_cloud_media_overrides_v1`)
+ *   5. Supabase Cloud Atomic Per-Record Keys (`kft_ov_food_*`, `kft_ov_rest_*`, `kft_ov_dest_*`, `kft_ov_trend_*`)
  */
 export async function hydrateAndSyncMediaOverrides(): Promise<AllMediaOverridesBundle> {
   let current = loadLocalMediaOverrides();
 
-  // 1. Merge from IndexedDB (in case localStorage was cleared or hit 5MB limit)
+  // 1. Merge from IndexedDB (immune to 5MB localStorage quota limit)
   try {
     const idbBundle = await loadBundleFromIdb();
     if (idbBundle) {
@@ -610,21 +746,74 @@ export async function hydrateAndSyncMediaOverrides(): Promise<AllMediaOverridesB
     }
   } catch {}
 
-  // 2. Merge from Supabase Cloud (ensures reinstalls and new versions keep all Admin changes)
+  // 2. Merge from Supabase Cloud (both master bundle AND atomic per-record rows)
   if (isSupabaseConfigured()) {
     try {
-      const cloudBundle = await pullCloudDocument<AllMediaOverridesBundle>(VAULT_KEYS.CLOUD_DOC_KEY);
+      const [cloudBundle, perRecordRows] = await Promise.all([
+        pullCloudDocument<AllMediaOverridesBundle>(VAULT_KEYS.CLOUD_DOC_KEY, 12000),
+        pullCloudDocumentsByPrefix<any>(VAULT_KEYS.CLOUD_RECORD_PREFIX, 12000),
+      ]);
+
       if (cloudBundle) {
         current = mergeOverrideBundles(current, cloudBundle);
       }
-      // Push merged bundle back to cloud if we have any overrides
+
+      const existingPerRecordKeys = new Set<string>();
+      if (Array.isArray(perRecordRows) && perRecordRows.length > 0) {
+        const perRecordBundle: AllMediaOverridesBundle = {
+          foods: {},
+          restaurants: {},
+          destinations: {},
+          trendingFoods: {},
+          updatedAt: new Date().toISOString(),
+        };
+        for (const row of perRecordRows) {
+          existingPerRecordKeys.add(row.key);
+          const payload = row.payload;
+          if (!payload || !payload.id) continue;
+          if (row.key.startsWith('kft_ov_food_')) {
+            perRecordBundle.foods[payload.id] = payload;
+          } else if (row.key.startsWith('kft_ov_rest_')) {
+            perRecordBundle.restaurants[payload.id] = payload;
+          } else if (row.key.startsWith('kft_ov_dest_')) {
+            perRecordBundle.destinations[payload.id] = payload;
+          } else if (row.key.startsWith('kft_ov_trend_')) {
+            perRecordBundle.trendingFoods[payload.id] = payload;
+          }
+        }
+        current = mergeOverrideBundles(current, perRecordBundle);
+      }
+
+      // Backfill any missing atomic per-record keys in Supabase so every existing override has its own isolated cloud row
+      const backfillPromises: Promise<any>[] = [];
+      for (const [id, ov] of Object.entries(current.foods)) {
+        const k = `kft_ov_food_${id}`;
+        if (!existingPerRecordKeys.has(k)) backfillPromises.push(pushCloudDocument(k, ov, 10000));
+      }
+      for (const [id, ov] of Object.entries(current.restaurants)) {
+        const k = `kft_ov_rest_${id}`;
+        if (!existingPerRecordKeys.has(k)) backfillPromises.push(pushCloudDocument(k, ov, 10000));
+      }
+      for (const [id, ov] of Object.entries(current.destinations)) {
+        const k = `kft_ov_dest_${id}`;
+        if (!existingPerRecordKeys.has(k)) backfillPromises.push(pushCloudDocument(k, ov, 10000));
+      }
+      for (const [id, ov] of Object.entries(current.trendingFoods)) {
+        const k = `kft_ov_trend_${id}`;
+        if (!existingPerRecordKeys.has(k)) backfillPromises.push(pushCloudDocument(k, ov, 10000));
+      }
+      if (backfillPromises.length > 0) {
+        Promise.allSettled(backfillPromises).catch(() => {});
+      }
+
+      // Push merged master bundle back to cloud if we have any overrides
       const totalOverrides =
         Object.keys(current.foods).length +
         Object.keys(current.restaurants).length +
         Object.keys(current.destinations).length +
         Object.keys(current.trendingFoods).length;
       if (totalOverrides > 0) {
-        await pushCloudDocument(VAULT_KEYS.CLOUD_DOC_KEY, current);
+        await pushCloudDocument(VAULT_KEYS.CLOUD_DOC_KEY, current, 15000);
       }
     } catch {}
   }
