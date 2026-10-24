@@ -31,6 +31,7 @@ import {
   getPersonalizedRecommendations,
   getAiDailyQuota,
   recordAiScanUsage,
+  buildFoodSafetyAdvisory,
   AI_OBJECT_TYPE_METADATA,
   REQUIRED_UNCERTAIN_PROMPT_KH,
   REQUIRED_UNCERTAIN_PROMPT_EN,
@@ -305,8 +306,9 @@ export const AiFoodDiscoveryModal: React.FC = () => {
         messageKh: `✅ បានជ្រើសរើសមុខម្ហូប «${candidate.foodItem.nameKh}» ជាមួយរូបមន្តពិតប្រាកដ!`,
         messageEn: `✅ Selected "${candidate.foodItem.nameEn}" with verified recipe!`,
         detectedVisualFeatures: [meta.labelKh, candidate.foodItem.categoryKh],
-        disclaimerKh: 'រូបមន្ត និងគ្រឿងផ្សំត្រូវបានទាញចេញពីឃ្លាំងទិន្នន័យម្ហូបខ្មែរផ្លូវការ ១០០%។',
-        disclaimerEn: 'Recipes and ingredients are strictly verified from the official Cambodian database.',
+        disclaimerKh: 'រូបមន្ត និងគ្រឿងផ្សំត្រូវបានទាញចេញពីឃ្លាំងទិន្នន័យម្ហូបខ្មែរផ្លូវការ ១០០% ប៉ុន្តែមិនអាចបញ្ជាក់គ្រឿងផ្សំជាក់ស្តែងក្នុងចានរបស់អ្នកពីរូបភាពតែមួយមុខបានទេ។',
+        disclaimerEn: 'Recipes and ingredients are retrieved from the official Cambodian database, but actual ingredients in your dish cannot be 100% verified from an image alone.',
+        foodSafetyAdvisory: buildFoodSafetyAdvisory(candidate.foodItem, undefined, true),
         processingTimeMs: scanResult?.processingTimeMs || 120,
       });
       setShowAiSuggestionsHighlight(false);
@@ -338,6 +340,7 @@ export const AiFoodDiscoveryModal: React.FC = () => {
           ? '📦 សម្រាប់ផលិតផលវេចខ្ចប់ ប្រព័ន្ធមិនបង្កើតរូបមន្តធ្វើដោយខ្លួនឯងក្លែងក្លាយឡើយ។'
           : '💡 មុខម្ហូបខាងក្រោមគឺជាការណែនាំដែលអាចចម្អិនពីវត្ថុធាតុដើមនេះ មិនមែនជាឈ្មោះរបស់វត្ថុក្នុងរូបភាពឡើយ។',
         disclaimerEn: '💡 Dishes listed below are cooking recommendations using this ingredient.',
+        foodSafetyAdvisory: buildFoodSafetyAdvisory(undefined, candidate.nonDishInfo, false),
         processingTimeMs: scanResult?.processingTimeMs || 120,
       });
       setShowAiSuggestionsHighlight(false);
@@ -358,9 +361,9 @@ export const AiFoodDiscoveryModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm animate-fade-in overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/80 backdrop-blur-sm animate-fade-in overflow-hidden">
       <div
-        className="relative w-full max-w-xl bg-white dark:bg-slate-900 rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-emerald-500/30 my-auto max-h-[92vh]"
+        className="relative w-full max-w-xl bg-white dark:bg-slate-900 rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-emerald-500/30 h-[92dvh] sm:h-auto sm:max-h-[92dvh] min-h-0"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -461,7 +464,7 @@ export const AiFoodDiscoveryModal: React.FC = () => {
         </div>
 
         {/* Tab Body */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4 font-khmer text-xs">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain touch-pan-y p-4 sm:p-5 space-y-4 font-khmer text-xs">
           {/* TAB 1: AI PHOTO SCANNER (7-Part Ordered Display) */}
           {activeTab === 'scan' && (
             <div className="space-y-4">
@@ -625,11 +628,11 @@ export const AiFoodDiscoveryModal: React.FC = () => {
 
                         {/* Manual Food Name Input Box (Opens when «កែឈ្មោះម្ហូប» or «បញ្ចូលឈ្មោះដោយខ្លួនឯង» is clicked) */}
                         {(isEditingFoodName || scanResult.requiresUserConfirmation) && (
-                          <div className="p-3 rounded-2xl bg-white dark:bg-slate-900 border-2 border-amber-400/80 space-y-2 animate-fade-in">
+                          <div className="p-3 rounded-2xl bg-white dark:bg-slate-900 border-2 border-amber-400/80 space-y-2.5 animate-fade-in">
                             <label className="text-[11px] font-bold text-slate-800 dark:text-amber-300 block">
                               {isKm
-                                ? '✍️ វាយបញ្ចូលឈ្មោះម្ហូប ឬឈ្មោះវត្ថុអាហារពិតប្រាកដ៖'
-                                : '✍️ Enter the exact dish or food item name:'}
+                                ? '✍️ វាយបញ្ចូលឈ្មោះម្ហូប ឬជ្រើសរើសឈ្មោះម្ហូបរហ័សខាងក្រោម៖'
+                                : '✍️ Enter the exact dish name or tap a quick-select dish below:'}
                             </label>
                             <div className="flex gap-2">
                               <input
@@ -640,8 +643,8 @@ export const AiFoodDiscoveryModal: React.FC = () => {
                                 onKeyDown={(e) => e.key === 'Enter' && handleApplyManualFoodName()}
                                 placeholder={
                                   isKm
-                                    ? 'ឧ. អាម៉ុកត្រី, សម្លកកូរ, ល្ហុងទុំ, នំកង, បុកល្ហុង...'
-                                    : 'e.g. Fish Amok, Samlor Korko, Ripe Papaya, Num Kong...'
+                                    ? 'ឧ. កង្កែបបោកអាំង, អាម៉ុកត្រី, សម្លកកូរ, មាន់ដុត, បុកល្ហុង...'
+                                    : 'e.g. Stuffed Grilled Frog, Fish Amok, Samlor Korko...'
                                 }
                                 className="flex-1 px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs outline-none focus:border-emerald-500 font-bold"
                               />
@@ -655,26 +658,43 @@ export const AiFoodDiscoveryModal: React.FC = () => {
                               </button>
                             </div>
 
-                            {/* Live Verified Database Autocomplete Chips */}
-                            {manualNameSuggestions.length > 0 && (
-                              <div className="pt-1 space-y-1">
-                                <span className="text-[10px] text-slate-500 block">
-                                  {isKm ? 'ជ្រើសរើសរហ័សពីឃ្លាំងទិន្នន័យផ្លូវការ៖' : 'Quick select from verified database:'}
-                                </span>
-                                <div className="flex flex-wrap gap-1.5">
-                                  {manualNameSuggestions.map((f) => (
-                                    <button
-                                      key={f.id}
-                                      type="button"
-                                      onClick={() => handleApplyManualFoodName(f.nameKh)}
-                                      className="px-2.5 py-1 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 text-[10px] font-bold cursor-pointer transition"
-                                    >
-                                      {f.nameKh}
-                                    </button>
-                                  ))}
-                                </div>
+                            {/* Live Verified Database Autocomplete Chips OR Popular Quick-Select Chips */}
+                            <div className="pt-1 space-y-1.5">
+                              <span className="text-[10px] text-slate-500 block">
+                                {manualNameSuggestions.length > 0
+                                  ? isKm
+                                    ? 'ជ្រើសរើសរហ័សពីឃ្លាំងទិន្នន័យផ្លូវការ៖'
+                                    : 'Quick select from verified database:'
+                                  : isKm
+                                  ? 'មុខម្ហូបពេញនិយម (ចុច ១ ដងដើម្បីបង្ហាញរូបមន្តពេញ)៖'
+                                  : 'Popular Dishes (1-Tap Quick Confirm):'}
+                              </span>
+                              <div className="flex flex-wrap gap-1.5">
+                                {(manualNameSuggestions.length > 0
+                                  ? manualNameSuggestions.map((f) => ({ id: f.id, nameKh: f.nameKh, nameEn: f.nameEn }))
+                                  : [
+                                      { id: 'q-1', nameKh: 'កង្កែបបោកអាំងសៀមរាប', nameEn: 'Stuffed Roasted Frog' },
+                                      { id: 'q-2', nameKh: 'មាន់ដុតច្រាំងទន្លេកំពត', nameEn: 'Kampot Roasted Chicken' },
+                                      { id: 'q-3', nameKh: 'ត្រីរ៉ស់អាំងបាយដំណើបអំបិលម្ទេស', nameEn: 'Grilled Snakehead Fish' },
+                                      { id: 'q-4', nameKh: 'សាច់គោអាំងទឹកប្រហុក', nameEn: 'Grilled Beef Prahok Dip' },
+                                      { id: 'q-5', nameKh: 'អាម៉ុកត្រីស្លឹកញ', nameEn: 'Steamed Fish Amok' },
+                                      { id: 'q-6', nameKh: 'សម្លកកូរត្រីរ៉ស់', nameEn: 'Samlor Korko' },
+                                      { id: 'q-7', nameKh: 'នំបញ្ចុកសម្លខ្មែរ', nameEn: 'Num Banh Chok' },
+                                      { id: 'q-8', nameKh: 'បាយឡុកឡាក់សាច់គោ', nameEn: 'Beef Lok Lak' },
+                                      { id: 'q-9', nameKh: 'បុកល្ហុងក្ដាមប្រៃ', nameEn: 'Khmer Papaya Salad' },
+                                    ]
+                                ).map((item) => (
+                                  <button
+                                    key={item.id}
+                                    type="button"
+                                    onClick={() => handleApplyManualFoodName(item.nameKh)}
+                                    className="px-2.5 py-1 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 text-[10px] font-bold cursor-pointer transition"
+                                  >
+                                    {isKm ? item.nameKh : `${item.nameKh} (${item.nameEn})`}
+                                  </button>
+                                ))}
                               </div>
-                            )}
+                            </div>
                           </div>
                         )}
                       </div>
@@ -687,7 +707,7 @@ export const AiFoodDiscoveryModal: React.FC = () => {
                           <div className="flex items-start gap-2.5">
                             <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
                             <p className="text-slate-800 dark:text-amber-100 font-bold text-xs leading-relaxed">
-                              {isKm ? REQUIRED_UNCERTAIN_PROMPT_KH : REQUIRED_UNCERTAIN_PROMPT_EN}
+                              {isKm ? scanResult.messageKh || REQUIRED_UNCERTAIN_PROMPT_KH : scanResult.messageEn || REQUIRED_UNCERTAIN_PROMPT_EN}
                             </p>
                           </div>
 
@@ -710,14 +730,14 @@ export const AiFoodDiscoveryModal: React.FC = () => {
                               type="button"
                               onClick={() => {
                                 setShowAiSuggestionsHighlight(true);
-                                if (scanResult.candidateMatches.length === 1) {
+                                if (scanResult.candidateMatches.length >= 1) {
                                   handleSelectCandidate(scanResult.candidateMatches[0]);
                                 }
                               }}
                               className="py-2.5 px-3 rounded-2xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-[11px] shadow-xs flex items-center justify-center gap-1.5 cursor-pointer transition"
                             >
                               <CheckCircle2 className="w-3.5 h-3.5" />
-                              <span>{isKm ? 'ជ្រើសរើសឈ្មោះដែល AI ណែនាំ' : 'Select AI Suggestion'}</span>
+                              <span>{isKm ? 'បញ្ជាក់ឈ្មោះដែល AI ណែនាំ' : 'Confirm Top AI Match'}</span>
                             </button>
 
                             {/* Button 3: «ថតរូបម្ដងទៀត» */}
@@ -734,7 +754,7 @@ export const AiFoodDiscoveryModal: React.FC = () => {
                       )}
 
                       {/* ========================================================== */}
-                      {/* 4. IDENTIFICATION CONFIDENCE & UP TO 3 ALTERNATIVE MATCHES */}
+                      {/* 4. IDENTIFICATION CONFIDENCE & UP TO 4 ALTERNATIVE MATCHES */}
                       {/* ========================================================== */}
                       {scanResult.candidateMatches.length > 0 && (
                         <div
@@ -750,7 +770,7 @@ export const AiFoodDiscoveryModal: React.FC = () => {
                               : 'AI Suggested Matches Based on Visual Clues (Tap to confirm):'}
                           </span>
                           <div className="space-y-2">
-                            {scanResult.candidateMatches.slice(0, 3).map((c) => {
+                            {scanResult.candidateMatches.slice(0, 4).map((c) => {
                               const isCurrent = scanResult.identifiedNameKh === c.nameKh && !scanResult.requiresUserConfirmation;
                               return (
                                 <div
@@ -763,13 +783,17 @@ export const AiFoodDiscoveryModal: React.FC = () => {
                                   }`}
                                 >
                                   <div className="space-y-0.5">
-                                    <div className="flex items-center gap-2">
-                                      <span className="font-bold text-slate-900 dark:text-white">{c.nameKh}</span>
+                                    <div className="flex items-center gap-2 flex-wrap">
+                                      <span className="font-bold text-slate-900 dark:text-white">
+                                        {c.nameKh} <span className="text-[10px] font-normal text-slate-500">({c.nameEn})</span>
+                                      </span>
                                       <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 font-mono text-[10px] font-bold">
                                         {Math.round(c.confidenceScore * 100)}%
                                       </span>
                                     </div>
-                                    <p className="text-[10px] text-slate-500 dark:text-slate-400">{c.visualCluesKh}</p>
+                                    <p className="text-[10px] text-slate-500 dark:text-slate-400">
+                                      {isKm ? c.visualCluesKh : c.visualCluesEn}
+                                    </p>
                                   </div>
                                   <span className="px-2.5 py-1 rounded-xl bg-emerald-600 text-white text-[10px] font-bold shrink-0">
                                     {isKm ? 'ជ្រើសរើស' : 'Select'}
@@ -778,6 +802,87 @@ export const AiFoodDiscoveryModal: React.FC = () => {
                               );
                             })}
                           </div>
+                        </div>
+                      )}
+
+                      {/* ========================================================== */}
+                      {/* FOOD SAFETY, COOKING METHOD & POTENTIAL ALLERGEN ADVISORY  */}
+                      {/* ========================================================== */}
+                      {scanResult.foodSafetyAdvisory && (
+                        <div className="p-3.5 rounded-2xl bg-rose-50/70 dark:bg-rose-950/30 border border-rose-300 dark:border-rose-800/70 space-y-2.5">
+                          <div className="flex items-center justify-between gap-2 flex-wrap">
+                            <span className="font-bold text-rose-900 dark:text-rose-200 text-xs flex items-center gap-1.5">
+                              <Flame className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0" />
+                              <span>
+                                {isKm
+                                  ? 'សុវត្ថិភាពអាហារ វិធីចម្អិន & ការប្រុងប្រយ័ត្នអាលែកហ្ស៊ី៖'
+                                  : 'Food Safety, Cooking Method & Allergen Advisory:'}
+                              </span>
+                            </span>
+                            <span className="px-2 py-0.5 rounded-full bg-rose-200/80 dark:bg-rose-900/70 text-rose-900 dark:text-rose-200 text-[9px] font-bold">
+                              {isKm ? 'មិនអាចបញ្ជាក់ ១០០% ពីរូបភាពទេ' : 'Unverified from Image Alone'}
+                            </span>
+                          </div>
+
+                          {/* Cooking Method Summary */}
+                          <div className="p-2.5 rounded-xl bg-white/80 dark:bg-slate-900/80 border border-rose-200/60 dark:border-rose-800/50 text-[11px]">
+                            <strong className="text-slate-900 dark:text-white">
+                              {isKm ? '🔥 វិធីចម្អិន (Cooking Method)៖ ' : '🔥 Cooking Method: '}
+                            </strong>
+                            <span className="text-slate-700 dark:text-slate-300">
+                              {isKm
+                                ? scanResult.foodSafetyAdvisory.cookingMethodSummaryKh
+                                : scanResult.foodSafetyAdvisory.cookingMethodSummaryEn}
+                            </span>
+                          </div>
+
+                          {/* Potential Allergen Badges */}
+                          {scanResult.foodSafetyAdvisory.potentialAllergens.length > 0 && (
+                            <div className="space-y-1.5">
+                              <span className="text-[10px] font-bold text-rose-800 dark:text-rose-300 block">
+                                {isKm
+                                  ? '⚠️ សារធាតុដែលអាចបង្កអាលែកហ្ស៊ី ឬគ្រឿងផ្សំគួរប្រុងប្រយ័ត្ន៖'
+                                  : '⚠️ Potential Allergens & Sensitive Ingredients:'}
+                              </span>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                                {scanResult.foodSafetyAdvisory.potentialAllergens.map((alg) => (
+                                  <div
+                                    key={alg.id}
+                                    className={`p-2 rounded-xl border text-[10px] space-y-0.5 ${
+                                      alg.severity === 'high'
+                                        ? 'bg-rose-100/80 dark:bg-rose-950/60 border-rose-400/60 text-rose-950 dark:text-rose-200'
+                                        : 'bg-amber-100/70 dark:bg-amber-950/50 border-amber-400/60 text-amber-950 dark:text-amber-200'
+                                    }`}
+                                  >
+                                    <div className="font-bold flex items-center justify-between gap-1">
+                                      <span>
+                                        {language === 'km'
+                                          ? alg.labelKh
+                                          : language === 'zh'
+                                          ? alg.labelZh
+                                          : alg.labelEn}
+                                      </span>
+                                      <span className="px-1.5 py-0.2 rounded bg-black/10 dark:bg-white/10 text-[9px] uppercase">
+                                        {alg.severity === 'high' ? (isKm ? 'កម្រិតខ្ពស់' : 'High') : isKm ? 'មធ្យម' : 'Moderate'}
+                                      </span>
+                                    </div>
+                                    <p className="text-[9.5px] opacity-85 leading-snug">
+                                      {isKm ? alg.reasonKh : alg.reasonEn}
+                                    </p>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Strict Safety Note: Never claim ingredients are 100% verified from an image alone */}
+                          <p className="text-[10px] text-rose-800 dark:text-rose-300 leading-relaxed font-semibold">
+                            {language === 'km'
+                              ? scanResult.foodSafetyAdvisory.uncertainIngredientsNoteKh
+                              : language === 'zh'
+                              ? scanResult.foodSafetyAdvisory.uncertainIngredientsNoteZh
+                              : scanResult.foodSafetyAdvisory.uncertainIngredientsNoteEn}
+                          </p>
                         </div>
                       )}
 
@@ -825,7 +930,7 @@ export const AiFoodDiscoveryModal: React.FC = () => {
                           <div>
                             <span className="font-bold text-slate-900 dark:text-white block mb-2 flex items-center gap-1.5">
                               <ChefHat className="w-4 h-4 text-emerald-600" />
-                              <span>{isKm ? '៥. គ្រឿងផ្សំ និងបរិមាណពិតប្រាកដ (រូបមន្តពិត ១០០%)៖' : '5. Verified Ingredients & Quantities:'}</span>
+                              <span>{isKm ? '៥. គ្រឿងផ្សំទូទៅតាមរូបមន្តប្រពៃណី៖' : '5. Traditional Recipe Ingredients & Quantities:'}</span>
                             </span>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
                               {scanResult.primaryMatch.ingredients.map((ing, idx) => (
@@ -833,37 +938,47 @@ export const AiFoodDiscoveryModal: React.FC = () => {
                                   key={idx}
                                   className="px-2.5 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-emerald-500/25 flex items-center justify-between text-[11px]"
                                 >
-                                  <span className="font-bold text-slate-800 dark:text-slate-200">{ing.nameKh}</span>
+                                  <span className="font-bold text-slate-800 dark:text-slate-200">
+                                    {isKm ? ing.nameKh : `${ing.nameEn} (${ing.nameKh})`}
+                                  </span>
                                   <span className="text-emerald-700 dark:text-emerald-400 font-semibold">{ing.amount}</span>
                                 </div>
                               ))}
                             </div>
                           </div>
 
-                          {/* 6. STEP-BY-STEP COOKING INSTRUCTIONS IN KHMER */}
-                          {scanResult.primaryMatch.cookingSteps && scanResult.primaryMatch.cookingSteps.length > 0 && (
-                            <div className="pt-2 border-t border-slate-200 dark:border-slate-700">
-                              <span className="font-bold text-slate-900 dark:text-white block mb-2 flex items-center gap-1.5">
-                                <ListChecks className="w-4 h-4 text-amber-500" />
-                                <span>{isKm ? '៦. របៀបធ្វើ និងជំហានចម្អិនលម្អិត៖' : '6. Step-by-Step Cooking Instructions:'}</span>
-                              </span>
-                              <div className="space-y-2">
-                                {scanResult.primaryMatch.cookingSteps.map((step) => (
-                                  <div
-                                    key={step.stepNumber}
-                                    className="p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-700 flex items-start gap-2.5"
-                                  >
-                                    <span className="w-5 h-5 rounded-full bg-emerald-600 text-white font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">
-                                      {step.stepNumber}
-                                    </span>
-                                    <p className="text-[11px] text-slate-700 dark:text-slate-300 leading-relaxed">
-                                      {isKm ? step.instructionKh : step.instructionEn}
-                                    </p>
-                                  </div>
-                                ))}
+                          {/* 6. STEP-BY-STEP COOKING INSTRUCTIONS IN KHMER & ENGLISH */}
+                          {(() => {
+                            const dishSteps =
+                              scanResult.primaryMatch.steps ||
+                              (scanResult.primaryMatch as unknown as { cookingSteps?: typeof scanResult.primaryMatch.steps })
+                                .cookingSteps ||
+                              [];
+                            if (!dishSteps || dishSteps.length === 0) return null;
+                            return (
+                              <div className="pt-2 border-t border-slate-200 dark:border-slate-700">
+                                <span className="font-bold text-slate-900 dark:text-white block mb-2 flex items-center gap-1.5">
+                                  <ListChecks className="w-4 h-4 text-amber-500" />
+                                  <span>{isKm ? '៦. របៀបធ្វើ និងជំហានចម្អិនលម្អិត៖' : '6. Step-by-Step Cooking Instructions:'}</span>
+                                </span>
+                                <div className="space-y-2">
+                                  {dishSteps.map((step) => (
+                                    <div
+                                      key={step.stepNumber}
+                                      className="p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-700 flex items-start gap-2.5"
+                                    >
+                                      <span className="w-5 h-5 rounded-full bg-emerald-600 text-white font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">
+                                        {step.stepNumber}
+                                      </span>
+                                      <p className="text-[11px] text-slate-700 dark:text-slate-300 leading-relaxed">
+                                        {isKm ? step.instructionKh : step.instructionEn || step.instructionKh}
+                                      </p>
+                                    </div>
+                                  ))}
+                                </div>
                               </div>
-                            </div>
-                          )}
+                            );
+                          })()}
 
                           {/* 7. PREPARATION TIME, COOKING TIME, SERVING SIZE & VERIFIED CALORIES */}
                           <div className="pt-2 border-t border-slate-200 dark:border-slate-700">

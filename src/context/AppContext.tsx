@@ -5142,7 +5142,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const newPost: CommunityPost = {
       id: `post-${Date.now()}`,
       authorId: currentUser?.id || 'anon',
-      authorName: currentUser?.name || (language === 'km' ? 'អ្នកប្រើប្រាស់ទូទៅ' : 'Khmer Foodie'),
+      authorName: currentUser?.name || 'អ្នកដំណើរខ្មែរ (Khmer Traveler)',
       authorAvatar: currentUser?.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
       authorRole: currentUser?.role || 'user',
       titleKh,
@@ -5153,11 +5153,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       likesCount: 0,
       likedByUserIds: [],
       comments: [],
-      createdAt: language === 'km' ? 'អម្បាញ់មិញ' : 'Just now',
+      createdAt: 'អម្បាញ់មិញ',
       status: 'approved',
     };
     setPosts(prev => [newPost, ...prev]);
-    showToast(language === 'km' ? 'បានចែករំលែកការបង្ហោះបានជោគជ័យ 🎉' : 'Post shared successfully! 🎉', 'success');
+    showToast(
+      language === 'km'
+        ? 'បានចែករំលែកការបង្ហោះបានជោគជ័យ 🎉'
+        : language === 'zh'
+        ? '动态已成功发布到社区 🎉'
+        : 'Post shared successfully! 🎉',
+      'success'
+    );
   };
 
   const toggleLikePost = (postId: string) => {
@@ -5165,6 +5172,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       showToast(
         language === 'km' 
           ? 'សូមចុះឈ្មោះ ឬចូលគណនី ដើម្បីចុច Like' 
+          : language === 'zh'
+          ? '请先登录或注册账号后再点赞'
           : 'Please sign in or register to like posts',
         'info'
       );
@@ -5191,6 +5200,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       showToast(
         language === 'km' 
           ? 'សូមចុះឈ្មោះ ឬចូលគណនី ដើម្បីបញ្ចេញមតិយោបល់' 
+          : language === 'zh'
+          ? '请先登录或注册账号后再发表评论'
           : 'Please sign in or register to comment',
         'info'
       );
@@ -5201,10 +5212,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const newComment = {
       id: `c-${Date.now()}`,
       authorId: currentUser?.id || 'guest',
-      authorName: currentUser?.name || (language === 'km' ? 'អ្នកប្រើប្រាស់' : 'Khmer Foodie'),
+      authorName: currentUser?.name || 'អ្នកដំណើរខ្មែរ',
       authorAvatar: currentUser?.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
       text,
-      createdAt: language === 'km' ? 'អម្បាញ់មិញ' : 'Just now',
+      createdAt: 'អម្បាញ់មិញ',
     };
     setPosts(prev => prev.map(p => {
       if (p.id !== postId) return p;
@@ -5213,12 +5224,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         comments: [...p.comments, newComment],
       };
     }));
-    showToast(language === 'km' ? 'បានបញ្ចេញមតិយោបល់' : 'Comment added', 'info');
+    showToast(
+      language === 'km'
+        ? 'បានបញ្ចេញមតិយោបល់'
+        : language === 'zh'
+        ? '评论已发表'
+        : 'Comment added',
+      'info'
+    );
   };
 
   const deletePost = (postId: string) => {
     setPosts(prev => prev.filter(p => p.id !== postId));
-    showToast(language === 'km' ? 'បានលុបការបង្ហោះ' : 'Post deleted', 'info');
+    showToast(
+      language === 'km'
+        ? 'បានលុបការបង្ហោះ'
+        : language === 'zh'
+        ? '动态已删除'
+        : 'Post deleted',
+      'info'
+    );
   };
 
   // Transactions & $4.99 Registration Payment

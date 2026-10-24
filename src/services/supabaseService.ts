@@ -92,11 +92,11 @@ export function saveCloudApiConfig(partial: Partial<CloudApiConfig>): CloudApiCo
         provider: updated.aiVisionBackendUrl
           ? 'backend_proxy'
           : updated.geminiApiKey
-          ? 'gemini_direct'
-          : 'none',
-        backendEndpointUrl: updated.aiVisionBackendUrl,
+          ? 'gemini_vision'
+          : 'gemini_vision',
+        backendProxyUrl: updated.aiVisionBackendUrl,
         apiKey: updated.geminiApiKey,
-        modelName: 'gemini-2.5-flash',
+        modelName: 'gemini-2.0-flash',
         timeoutMs: 10000,
       };
       localStorage.setItem('kft_ai_vision_config_v1', JSON.stringify(aiVisionCfg));

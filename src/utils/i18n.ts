@@ -378,6 +378,32 @@ export const EXACT_EN_TO_ZH_MAP: Record<string, string> = {
   'Khmer': '高棉语 (ខ្មែរ)',
   'English': '英语 (English)',
   'Simplified Chinese': '简体中文 (中文)',
+
+  // Community Feed & Create Post Modal
+  'Community Feed': '美食与旅游社区',
+  'Share delicious food, recipes & travel': '分享地道美食、传统食谱与精彩旅程',
+  'Post': '发布动态',
+  'Owner': '店主',
+  'Admin': '管理员',
+  'Write a comment...': '写下您的评论...',
+  'Please log in to like posts': '请先登录后再点赞',
+  'Please log in to comment': '请先登录后再发表评论',
+  'Comment added!': '评论发表成功！',
+  'Delete this post?': '确定要删除这条动态吗？',
+  'Post deleted': '动态已删除',
+  'Create Community Post': '发布社区动态',
+  'Share your food experience, recipe, or travel spot': '分享您的美食体验、烹饪食谱或旅游打卡点',
+  'Post Title': '动态标题',
+  'Category': '分类标签',
+  'Location / Province': '所在地点 / 省份',
+  'Description / Story / Recipe': '详细内容 / 美食故事 / 食谱做法',
+  'Photo (Upload or URL)': '配图（上传照片或输入链接）',
+  'Publish Post': '立即发布动态',
+  'Khmer Food': '高棉美食',
+  'Cooking Recipe': '烹饪食谱',
+  'Food Review': '探店点评',
+  'Travel / Tour': '旅游打卡',
+  'Dessert & Drink': '甜品与饮品',
 };
 
 /**
@@ -449,7 +475,7 @@ export function translateTextToChinese(text: string): string {
   // If it's a multi-word English sentence/label in the UI, translate dynamically
   if (/^[A-Za-z0-9\s,.'":;!?()&/•+-]{4,}$/.test(trimmed) && !/^https?:\/\//i.test(trimmed)) {
     const dyn = translateDynamicTextToZh(trimmed);
-    if (dyn && dyn !== trimmed) {
+    if (dyn && dyn !== trimmed && /[\u4E00-\u9FFF]/.test(dyn)) {
       return text.replace(trimmed, dyn);
     }
   }

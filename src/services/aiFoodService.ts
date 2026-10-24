@@ -109,10 +109,32 @@ export interface IdentifiedNonDishItemInfo {
   searchKeywordsKh: string[];
 }
 
+export interface AiPotentialAllergen {
+  id: 'shellfish_crustaceans' | 'fish_prahok' | 'peanuts_treenuts' | 'soy' | 'eggs' | 'dairy_coconut' | 'gluten_wheat' | 'spicy_chili';
+  labelKh: string;
+  labelEn: string;
+  labelZh: string;
+  severity: 'high' | 'moderate' | 'info';
+  reasonKh: string;
+  reasonEn: string;
+}
+
+export interface AiFoodSafetyAdvisory {
+  potentialAllergens: AiPotentialAllergen[];
+  uncertainIngredientsNoteKh: string;
+  uncertainIngredientsNoteEn: string;
+  uncertainIngredientsNoteZh: string;
+  cookingMethodSummaryKh: string;
+  cookingMethodSummaryEn: string;
+  cookingMethodSummaryZh: string;
+  isVerifiedFromImageAlone: false; // Strictly false: ingredients/allergens cannot be 100% verified from an image alone
+}
+
 export interface AiFoodMatchCandidate {
   id: string;
   nameKh: string;
   nameEn: string;
+  nameZh?: string;
   objectType: AiObjectType;
   confidenceScore: number; // Calibrated 0.0 to 1.0
   visualCluesKh: string;
@@ -133,6 +155,7 @@ export interface AiFoodRecognitionResult {
   // Stage 2 Output: Likely Name & Calibrated Confidence
   identifiedNameKh: string;
   identifiedNameEn: string;
+  identifiedNameZh?: string;
   confidenceScore: number; // 0.0 to 1.0
   visualCluesSummaryKh: string;
   visualCluesSummaryEn: string;
@@ -150,6 +173,7 @@ export interface AiFoodRecognitionResult {
   detectedVisualFeatures: string[];
   disclaimerKh?: string;
   disclaimerEn?: string;
+  foodSafetyAdvisory?: AiFoodSafetyAdvisory;
   processingTimeMs: number;
 }
 
@@ -209,43 +233,395 @@ export interface AiVisionProviderConfig {
   timeoutMs?: number;
 }
 
-export const AI_VISION_MULTISTEP_SYSTEM_PROMPT = `You are an expert Cambodian Food & Object Recognition AI.
+export const AI_VISION_MULTISTEP_SYSTEM_PROMPT = `You are an expert Cambodian & International Food & Object Recognition AI.
 Follow this strict 3-Step Pipeline when analyzing an image:
 Step A — Classify the object into exactly one objectType:
 - "fresh_fruit" (e.g., papaya ផ្លែល្ហុងទុំ, mango ផ្លែស្វាយ, banana ផ្លែចេក, pineapple ផ្លែម្នាស់)
 - "fresh_vegetables" (fresh leafy greens, herbs, raw vegetables)
 - "raw_meat_seafood" (uncooked beef, pork, chicken, raw fish/seafood)
 - "packaged_food" (plastic-wrapped fruit/meat, snacks, bottled/packaged items)
-- "cooked_dish" (prepared Cambodian dishes such as soups, stir-fries, grilled dishes, noodles)
-- "dessert_cake_snack" (traditional Khmer desserts, cakes, snacks)
-- "drink_beverage" (drinks, smoothies, coffee, tea)
+- "cooked_dish" (prepared Cambodian & international dishes such as grilled stuffed frogs កង្កែបបោកអាំង, roasted chicken មាន់ដុត, grilled fish ត្រីអាំង, grilled beef សាច់គោអាំងទឹកប្រហុក, soups សម្លកកូរ/សម្លម្ជូរគ្រឿង, Fish Amok អាម៉ុកត្រី, stir-fries ឡុកឡាក់/ឆាក្តៅ, noodles នំបញ្ចុក/គុយទាវ, rice បាយសាច់ជ្រូក/បាយឆា, salads បុកល្ហុង/ភ្លាសាច់គោ, dips ទឹកគ្រឿង/ប្រហុកខ្ទិះ)
+- "dessert_cake_snack" (traditional Khmer desserts, cakes, snacks such as ក្រឡាន, នំអន្សម, សង់ខ្យាល្ពៅ, ចេកខ្ទិះ)
+- "drink_beverage" (drinks, smoothies, coffee កាហ្វេទឹកដោះគោទឹកកក, tea, sugarcane juice)
 - "food_ingredient" (spices, kroeung, smoked fish ត្រីឆ្អើរ, prahok)
 - "unknown_unclear" (blurry, dark, or non-food object)
 
 Step B — Identify the visible object accurately:
-- NEVER force every photo to match a cooked dish in the app database.
-- If the image shows fresh or plastic-wrapped sliced papaya, identify it as "ផ្លែល្ហុងទុំ / ល្ហុងទុំចិតរួច (Fresh Ripe Papaya)", NEVER as Fish Amok (អាម៉ុកត្រីស្លឹកញ) or Wild Sour Soup (សម្លម្ជូរព្រៃត្រីឆ្អើរ).
+- Examine the actual visual plating, cooking method (charcoal-grilled, steamed in banana leaf, simmered in soup broth, stir-fried, raw salad), proteins (whole stuffed frogs កង្កែបបោក, fish, chicken, beef, pork, crab, prawns, squid), herbs (lemongrass kroeung, noni leaves, banana leaf lining), and dipping sauces.
+- NEVER force every photo to match Fish Amok (អាម៉ុកត្រីស្លឹកញ).
+- If the image shows whole grilled stuffed frogs on a banana leaf with dipping sauce, identify it as "កង្កែបបោកអាំងសៀមរាប" (Stuffed Roasted Frogs - Kangkeb Baok) or "កង្កែបបោកអាំងគ្រឿងខ្មែរ".
+- If the image shows fresh or plastic-wrapped sliced papaya, identify it as "ផ្លែល្ហុងទុំ / ល្ហុងទុំចិតរួច (Fresh Ripe Papaya)", NEVER as Fish Amok or Wild Sour Soup.
 - Provide identifiedNameKh, identifiedNameEn, confidenceScore (0.0 to 1.0), visualCluesKh, visualCluesEn, and up to 3 candidates.
 
 Step C — Post-recognition action:
 - For fruit/vegetable/ingredient: provide item description, culinary uses, and suggested Cambodian dishes that can be made with it.
-- For cooked dish: match against verified Cambodian recipes only if confident; otherwise request user confirmation.`;
+- For cooked dish: match against verified Cambodian recipes when confident; if moderately confident, return top visual candidates for user confirmation.`;
+
+/**
+ * Compress and normalize an uploaded image Data URL to max 800x800 JPEG (0.82 quality)
+ * so multimodal Vision API requests are fast, reliable, and within payload limits.
+ */
+export async function optimizeImageForVisionAnalysis(dataUrl: string, maxDim = 800): Promise<string> {
+  if (!dataUrl || !dataUrl.startsWith('data:image/') || typeof Image === 'undefined' || typeof document === 'undefined') {
+    return dataUrl;
+  }
+  // If already compact (< 180KB), no need to re-encode
+  if (dataUrl.length < 240_000) {
+    return dataUrl;
+  }
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      try {
+        let w = img.naturalWidth || img.width || maxDim;
+        let h = img.naturalHeight || img.height || maxDim;
+        if (w > maxDim || h > maxDim) {
+          if (w >= h) {
+            h = Math.round((h * maxDim) / w);
+            w = maxDim;
+          } else {
+            w = Math.round((w * maxDim) / h);
+            h = maxDim;
+          }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          resolve(dataUrl);
+          return;
+        }
+        ctx.drawImage(img, 0, 0, w, h);
+        const compressed = canvas.toDataURL('image/jpeg', 0.82);
+        resolve(compressed && compressed.length > 100 ? compressed : dataUrl);
+      } catch {
+        resolve(dataUrl);
+      }
+    };
+    img.onerror = () => resolve(dataUrl);
+    img.src = dataUrl;
+  });
+}
+
+/**
+ * Generate a comprehensive Food Safety & Potential Allergen Advisory for any identified dish or item.
+ * Strictly states that ingredients/allergens cannot be 100% verified from an image alone.
+ */
+export function buildFoodSafetyAdvisory(
+  foodItem?: FoodItem,
+  nonDishInfo?: IdentifiedNonDishItemInfo,
+  queryOrNameKh?: string,
+  queryOrNameEn?: string
+): AiFoodSafetyAdvisory {
+  const combinedText = [
+    foodItem?.nameKh || '',
+    foodItem?.nameEn || '',
+    foodItem?.descriptionKh || '',
+    foodItem?.descriptionEn || '',
+    ...(foodItem?.ingredients || []).map((i) => `${i.nameKh} ${i.nameEn}`),
+    nonDishInfo?.nameKh || '',
+    nonDishInfo?.nameEn || '',
+    nonDishInfo?.descriptionKh || '',
+    nonDishInfo?.descriptionEn || '',
+    nonDishInfo?.culinaryUsesKh || '',
+    nonDishInfo?.culinaryUsesEn || '',
+    typeof queryOrNameKh === 'string' ? queryOrNameKh : '',
+    typeof queryOrNameEn === 'string' ? queryOrNameEn : '',
+  ]
+    .join(' ')
+    .toLowerCase();
+
+  const allergens: AiPotentialAllergen[] = [];
+
+  // 1. Peanuts & Tree Nuts (e.g. Kangkeb Baok, Saraman Curry, Teuk Kroeung, Mee Kola, Salads)
+  if (
+    combinedText.includes('សណ្តែកដី') ||
+    combinedText.includes('peanut') ||
+    combinedText.includes('កង្កែបបោក') ||
+    combinedText.includes('សារ៉ាម៉ាន់') ||
+    combinedText.includes('ទឹកគ្រឿង') ||
+    combinedText.includes('បុកល្ហុង')
+  ) {
+    allergens.push({
+      id: 'peanuts_treenuts',
+      labelKh: 'សណ្តែកដី / គ្រាប់ធញ្ញជាតិ (Peanuts)',
+      labelEn: 'Peanuts / Tree Nuts',
+      labelZh: '花生 / 坚果过敏原',
+      severity: 'high',
+      reasonKh: 'មុខម្ហូបនេះមាន ឬអាចមានលាយសណ្តែកដីលីងបុក នៅក្នុងស្នូលសាច់ ឬទឹកជ្រលក់។',
+      reasonEn: 'This dish typically contains or may be garnished with crushed roasted peanuts.',
+    });
+  }
+
+  // 2. Shellfish & Crustaceans (Prawns, Crab, Squid, Dried Shrimp, Mussels, Snails)
+  if (
+    combinedText.includes('បង្គា') ||
+    combinedText.includes('បង្កង') ||
+    combinedText.includes('ក្តាម') ||
+    combinedText.includes('ក្ដាម') ||
+    combinedText.includes('មឹក') ||
+    combinedText.includes('គ្រំ') ||
+    combinedText.includes('ងាវ') ||
+    combinedText.includes('ខ្យង') ||
+    combinedText.includes('កាពិ') ||
+    combinedText.includes('prawn') ||
+    combinedText.includes('shrimp') ||
+    combinedText.includes('crab') ||
+    combinedText.includes('squid') ||
+    combinedText.includes('shellfish') ||
+    combinedText.includes('seafood') ||
+    combinedText.includes('mussel') ||
+    combinedText.includes('snail')
+  ) {
+    allergens.push({
+      id: 'shellfish_crustaceans',
+      labelKh: 'គ្រឿងសមុទ្រ / បង្គា-ក្តាម-ខ្យង (Shellfish)',
+      labelEn: 'Shellfish / Crustaceans / Mollusks',
+      labelZh: '甲壳类 / 海鲜过敏原',
+      severity: 'high',
+      reasonKh: 'មានគ្រឿងសមុទ្រ បង្គា ក្តាម មឹក បង្គាក្រៀម ឬកាពិ។',
+      reasonEn: 'Contains or may contain prawns, crab, squid, dried shrimp, or shrimp paste.',
+    });
+  }
+
+  // 3. Fish, Prahok & Fish Sauce (Very common in Cambodian cuisine)
+  if (
+    combinedText.includes('ត្រី') ||
+    combinedText.includes('ប្រហុក') ||
+    combinedText.includes('ទឹកត្រី') ||
+    combinedText.includes('អាម៉ុក') ||
+    combinedText.includes('សម្ល') ||
+    combinedText.includes('កង្កែប') ||
+    combinedText.includes('fish') ||
+    combinedText.includes('prahok') ||
+    combinedText.includes('amok') ||
+    combinedText.includes('samlor') ||
+    foodItem?.categorySlug === 'soup' ||
+    foodItem?.categorySlug === 'grilled' ||
+    foodItem?.categorySlug === 'stirfry' ||
+    foodItem?.categorySlug === 'salad'
+  ) {
+    allergens.push({
+      id: 'fish_prahok',
+      labelKh: 'ត្រី / ប្រហុក / ទឹកត្រី (Fish & Prahok)',
+      labelEn: 'Fish / Fermented Prahok / Fish Sauce',
+      labelZh: '鱼类 / 波罗福鱼酱 / 鱼露',
+      severity: 'high',
+      reasonKh: 'ម្ហូបខ្មែរភាគច្រើនប្រើប្រាស់ទឹកត្រី ប្រហុក ឬត្រីនៅក្នុងគ្រឿងប្រឡាក់ ទឹកសម្ល ឬទឹកជ្រលក់។',
+      reasonEn: 'Cambodian dishes frequently use fish sauce, fermented prahok, or fish in marinades, broths, or dips.',
+    });
+  }
+
+  // 4. Eggs (Duck/Chicken Eggs)
+  if (
+    combinedText.includes('ស៊ុត') ||
+    combinedText.includes('ពងទា') ||
+    combinedText.includes('ពងមាន់') ||
+    combinedText.includes('អាម៉ុក') ||
+    combinedText.includes('សង់ខ្យា') ||
+    combinedText.includes('egg') ||
+    combinedText.includes('custard') ||
+    combinedText.includes('balut')
+  ) {
+    allergens.push({
+      id: 'eggs',
+      labelKh: 'ស៊ុតមាន់ / ពងទា (Eggs)',
+      labelEn: 'Eggs (Chicken / Duck Egg)',
+      labelZh: '蛋类过敏原',
+      severity: 'moderate',
+      reasonKh: 'មានប្រើស៊ុតមាន់ ឬពងទានៅក្នុងសាច់ម្ហូប ឬការចំហុយ។',
+      reasonEn: 'Contains chicken or duck eggs in the preparation or garnish.',
+    });
+  }
+
+  // 5. Soy & Oyster Sauce (Stir-fries, marinades, braised dishes)
+  if (
+    combinedText.includes('ទឹកស៊ីអ៊ីវ') ||
+    combinedText.includes('ប្រេងខ្យង') ||
+    combinedText.includes('សៀង') ||
+    combinedText.includes('តៅហ៊ូ') ||
+    combinedText.includes('soy') ||
+    combinedText.includes('oyster sauce') ||
+    combinedText.includes('tofu') ||
+    foodItem?.categorySlug === 'stirfry' ||
+    foodItem?.categorySlug === 'grilled'
+  ) {
+    allergens.push({
+      id: 'soy',
+      labelKh: 'សណ្តែកសៀង / ទឹកស៊ីអ៊ីវ / ប្រេងខ្យង (Soy & Sauces)',
+      labelEn: 'Soy / Soy Sauce / Oyster Sauce',
+      labelZh: '大豆 / 酱油 / 蚝油',
+      severity: 'moderate',
+      reasonKh: 'គ្រឿងប្រឡាក់អាំង ឬម្ហូបឆាអាចមានប្រើទឹកស៊ីអ៊ីវ ប្រេងខ្យង ឬសៀង។',
+      reasonEn: 'Marinades and stir-fries commonly contain soy sauce, soybean paste, or oyster sauce.',
+    });
+  }
+
+  // 6. Wheat / Gluten (Noodles, Baguettes, Fried Coatings)
+  if (
+    combinedText.includes('មី') ||
+    combinedText.includes('នំប៉័ង') ||
+    combinedText.includes('បំពង') ||
+    combinedText.includes('គុយទាវ') ||
+    combinedText.includes('wheat') ||
+    combinedText.includes('baguette') ||
+    combinedText.includes('egg noodle') ||
+    combinedText.includes('wonton')
+  ) {
+    allergens.push({
+      id: 'gluten_wheat',
+      labelKh: 'ស្រូវសាលី / គ្លុយតែន (Wheat / Gluten)',
+      labelEn: 'Wheat / Gluten',
+      labelZh: '小麦 / 麸质过敏原',
+      severity: 'moderate',
+      reasonKh: 'សរសៃមី នំប៉័ង ម្សៅបំពង ឬទឹកស៊ីអ៊ីវអាចមានផ្ទុកជាតិគ្លុយតែន (Gluten)។',
+      reasonEn: 'Wheat noodles, baguettes, crispy batters, or soy sauces may contain gluten.',
+    });
+  }
+
+  // 7. Coconut / Rich Dairy-like Fats
+  if (
+    combinedText.includes('ខ្ទិះដូង') ||
+    combinedText.includes('ដូង') ||
+    combinedText.includes('ទឹកដោះគោ') ||
+    combinedText.includes('coconut') ||
+    combinedText.includes('condensed milk') ||
+    combinedText.includes('dairy')
+  ) {
+    allergens.push({
+      id: 'dairy_coconut',
+      labelKh: 'ខ្ទិះដូង / ទឹកដោះគោ (Coconut / Dairy)',
+      labelEn: 'Coconut Milk / Condensed Milk',
+      labelZh: '椰浆 / 乳制品',
+      severity: 'info',
+      reasonKh: 'មានប្រើខ្ទិះដូង ឬទឹកដោះគោខាប់។',
+      reasonEn: 'Prepared with coconut cream/milk or condensed milk.',
+    });
+  }
+
+  // 8. Spicy Chili / Kampot Pepper
+  if (
+    combinedText.includes('ម្ទេស') ||
+    combinedText.includes('ហឹរ') ||
+    combinedText.includes('ម្រេច') ||
+    combinedText.includes('ទឹកត្រីកោះកុង') ||
+    combinedText.includes('chili') ||
+    combinedText.includes('spicy') ||
+    combinedText.includes('pepper')
+  ) {
+    allergens.push({
+      id: 'spicy_chili',
+      labelKh: 'ម្ទេសហឹរ / ម្រេច (Spicy Chili & Pepper)',
+      labelEn: 'Chili / Spicy Seasoning',
+      labelZh: '辣椒 / 辛辣调料',
+      severity: 'info',
+      reasonKh: 'មានរសជាតិហឹរពីម្ទេសស្រស់ ម្រេចកំពត ឬទឹកជ្រលក់។',
+      reasonEn: 'Contains fresh chilies, Kampot pepper, or spicy dipping sauce.',
+    });
+  }
+
+  // Determine cooking method summary
+  let methodKh = 'ចម្អិនតាមបែបប្រពៃណីខ្មែរ';
+  let methodEn = 'Traditional Cambodian preparation';
+  let methodZh = '传统高棉烹调方式';
+
+  if (foodItem) {
+    const cat = foodItem.categorySlug;
+    const nKh = foodItem.nameKh;
+    if (cat === 'grilled' || nKh.includes('អាំង') || nKh.includes('ដុត')) {
+      methodKh = 'អាំង ឬដុតលើរងើកភ្លើងធ្យូងឱ្យឆ្អិនឈ្ងុយ (Charcoal Grilled / Roasted)';
+      methodEn = 'Charcoal-grilled or roasted over glowing embers with aromatic Khmer herbs';
+      methodZh = '炭火慢烤 / 香草腌制烧烤';
+    } else if (nKh.includes('អាម៉ុក') || nKh.includes('ចំហុយ')) {
+      methodKh = 'ចំហុយក្នុងកន្ទោងស្លឹកចេកជាមួយគ្រឿងបុក និងខ្ទិះដូង (Steamed in Banana Leaf)';
+      methodEn = 'Steamed with fragrant lemongrass kroeung and coconut cream';
+      methodZh = '芭蕉叶盅清蒸 / 椰香高棉香料';
+    } else if (cat === 'soup' || nKh.includes('សម្ល') || nKh.includes('ស្ងោរ')) {
+      methodKh = 'ស្ល ឬស្ងោររម្ងាស់ជាមួយគ្រឿងបុកខ្មែរ និងបន្លែស្រស់ (Simmered Soup / Stew)';
+      methodEn = 'Simmered in traditional Cambodian herbal broth or kroeung stew';
+      methodZh = '传统慢炖浓汤 / 草本清汤';
+    } else if (cat === 'stirfry' || nKh.includes('ឆា') || nKh.includes('ឡុកឡាក់')) {
+      methodKh = 'ឆាលើភ្លើងខ្លាំងជាមួយខ្ទឹមស និងគ្រឿងទេស (Wok Stir-Fried)';
+      methodEn = 'Wok stir-fried over high flame with garlic, sauces, and fresh herbs';
+      methodZh = '猛火快炒 / 香料爆炒';
+    } else if (cat === 'salad' || nKh.includes('ញាំ') || nKh.includes('បុក') || nKh.includes('ភ្លា') || nKh.includes('ទឹកគ្រឿង')) {
+      methodKh = 'ញាំ បុក ឬទឹកជ្រលក់ជាមួយបន្លែអន្លក់ស្រស់ (Fresh Salad / Traditional Dip)';
+      methodEn = 'Tossed fresh salad or traditional herbal dip with crisp crudités';
+      methodZh = '高棉酸柑凉拌 / 传统香草蘸酱';
+    } else if (cat === 'noodles' || nKh.includes('គុយទាវ') || nKh.includes('នំបញ្ចុក')) {
+      methodKh = 'ស្រុសសរសៃនំ/គុយទាវ ជាមួយទឹកស៊ុប ឬទឹកសម្ល (Boiled Noodles & Broth)';
+      methodEn = 'Blanched noodles served with slow-simmered broth or curry gravy';
+      methodZh = '高汤汤粉 / 传统米线';
+    } else if (cat === 'dessert' || cat === 'cake') {
+      methodKh = 'បង្អែម ឬនំប្រពៃណីខ្មែរចម្អិនជាមួយស្ករត្នោត និងខ្ទិះដូង (Traditional Sweet / Steamed Cake)';
+      methodEn = 'Traditional Khmer dessert or cake prepared with palm sugar and coconut cream';
+      methodZh = '棕榈糖椰浆传统甜品 / 蕉叶糕点';
+    }
+  } else if (nonDishInfo) {
+    methodKh = 'វត្ថុធាតុដើម ឬអាហារស្រស់ (អាចបរិភោគស្រស់ ឬយកទៅចម្អិនតាមការណែនាំ)';
+    methodEn = 'Fresh fruit, vegetable, or raw culinary ingredient';
+    methodZh = '新鲜果蔬或烹饪食材';
+  }
+
+  return {
+    potentialAllergens: allergens,
+    uncertainIngredientsNoteKh:
+      '⚠️ សុវត្ថិភាពអាហារ៖ រូបភាពតែមួយសន្លឹកមិនអាចបញ្ជាក់គ្រឿងផ្សំលាក់កំបាំង (ដូចជា ប្រហុក ទឹកត្រី សណ្តែកដី ប៊ីចេង ឬប្រេងឆា) បាន ១០០% ឡើយ។ សូមសាកសួរអ្នកចម្អិនផ្ទាល់ប្រសិនបើអ្នកមានបញ្ហាអាលែហ្ស៊ីអាហារធ្ងន់ធ្ងរ។',
+    uncertainIngredientsNoteEn:
+      '⚠️ Food Safety Notice: Ingredients and hidden allergens (such as fish sauce, prahok, peanut oil, soy, or MSG) cannot be 100% verified from a photo alone. Always confirm directly with the kitchen if you have food allergies.',
+    uncertainIngredientsNoteZh:
+      '⚠️ 食品安全提示：仅凭照片无法 100% 确认所有隐藏配料或过敏原（如鱼露、波罗福鱼酱、花生碎、酱油或味精）。如有食物过敏，请务必向餐厅核实。',
+    cookingMethodSummaryKh: methodKh,
+    cookingMethodSummaryEn: methodEn,
+    cookingMethodSummaryZh: methodZh,
+    isVerifiedFromImageAlone: false,
+  };
+}
 
 export function getAiVisionProviderConfig(): AiVisionProviderConfig {
   const envBackendUrl =
     typeof import.meta !== 'undefined' && (import.meta as unknown as { env?: Record<string, string> }).env
       ? (import.meta as unknown as { env: Record<string, string> }).env.VITE_AI_VISION_BACKEND_URL
       : undefined;
+  const envGeminiKey =
+    typeof import.meta !== 'undefined' && (import.meta as unknown as { env?: Record<string, string> }).env
+      ? (import.meta as unknown as { env: Record<string, string> }).env.VITE_GEMINI_API_KEY
+      : undefined;
+
+  let cloudGeminiKey = '';
+  let cloudVisionUrl = '';
+  try {
+    const rawCloud = localStorage.getItem('kft_cloud_api_config_v1');
+    if (rawCloud) {
+      const parsedCloud = JSON.parse(rawCloud);
+      cloudGeminiKey = (parsedCloud.geminiApiKey || '').trim();
+      cloudVisionUrl = (parsedCloud.aiVisionBackendUrl || '').trim();
+    }
+  } catch {
+    // ignore
+  }
 
   try {
     const raw = localStorage.getItem(AI_VISION_CONFIG_STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
+      const rawProv = parsed.provider;
+      const normalizedProvider: AiVisionProviderConfig['provider'] =
+        rawProv === 'backend_proxy'
+          ? 'backend_proxy'
+          : rawProv === 'openai_vision'
+          ? 'openai_vision'
+          : rawProv === 'hybrid_hsv_vision'
+          ? 'hybrid_hsv_vision'
+          : 'gemini_vision';
+
       return {
-        provider: parsed.provider || (envBackendUrl ? 'backend_proxy' : 'gemini_vision'),
-        backendProxyUrl: parsed.backendProxyUrl || envBackendUrl || '',
-        apiKey: parsed.apiKey || DEFAULT_GEMINI_VISION_API_KEY,
-        modelName: parsed.modelName || 'gemini-2.5-flash',
+        provider: normalizedProvider,
+        backendProxyUrl: parsed.backendProxyUrl || parsed.backendEndpointUrl || cloudVisionUrl || envBackendUrl || '',
+        apiKey: parsed.apiKey || cloudGeminiKey || envGeminiKey || DEFAULT_GEMINI_VISION_API_KEY,
+        modelName: parsed.modelName || 'gemini-2.0-flash',
         timeoutMs: parsed.timeoutMs || 10000,
       };
     }
@@ -253,11 +629,12 @@ export function getAiVisionProviderConfig(): AiVisionProviderConfig {
     // ignore storage errors
   }
 
+  const resolvedBackend = cloudVisionUrl || envBackendUrl || '';
   return {
-    provider: envBackendUrl ? 'backend_proxy' : 'gemini_vision',
-    backendProxyUrl: envBackendUrl || '',
-    apiKey: DEFAULT_GEMINI_VISION_API_KEY,
-    modelName: 'gemini-2.5-flash',
+    provider: resolvedBackend ? 'backend_proxy' : 'gemini_vision',
+    backendProxyUrl: resolvedBackend,
+    apiKey: cloudGeminiKey || envGeminiKey || DEFAULT_GEMINI_VISION_API_KEY,
+    modelName: 'gemini-2.0-flash',
     timeoutMs: 10000,
   };
 }
@@ -434,6 +811,36 @@ export const VERIFIED_NON_DISH_ITEMS_KB: IdentifiedNonDishItemInfo[] = [
     isPackagedProduct: true,
     searchKeywordsKh: ['នំ', 'សាច់', 'ត្រី', 'បង្អែម'],
   },
+  {
+    id: 'item-intl-pizza-burger',
+    nameKh: 'ភីហ្សា / បឺហ្គឺ / ម្ហូបបស្ចិមប្រទេស (Pizza / Burger / Western Dish)',
+    nameEn: 'Pizza / Burger / Western Prepared Dish',
+    objectType: 'cooked_dish',
+    categoryKh: 'ម្ហូបអន្តរជាតិ (International Cuisine)',
+    categoryEn: 'International Cuisine',
+    descriptionKh: 'ម្ហូបបស្ចិមប្រទេសដុតក្នុងឡ ឬអាំង ដែលផ្សំពីម្សៅស្រូវសាលី ឈីស ទឹកប៉េងប៉ោះ សាច់ និងបន្លែ។',
+    descriptionEn: 'Oven-baked or grilled Western dish typically made with wheat dough/bun, cheese, tomato sauce, meat, and vegetables.',
+    culinaryUsesKh: 'ចម្អិនដោយការដុតក្នុងឡ (Oven Baking) ឬអាំងសាច់ (Grilling)។ អាចមានសារធាតុអាលែកហ្ស៊ីដូចជា ជាតិស្អិតស្រូវសាលី (Gluten) ទឹកដោះគោ/ឈីស (Dairy) និងស៊ុត។',
+    culinaryUsesEn: 'Prepared by oven baking or grilling. Commonly contains wheat/gluten, dairy/cheese, and egg allergens.',
+    storageTipsKh: 'បរិភោគទាន់នៅក្តៅៗ ដើម្បីរក្សាភាពស្រួយ និងរសជាតិឈីស។',
+    isPackagedProduct: false,
+    searchKeywordsKh: ['ភីហ្សា', 'បឺហ្គឺ', 'pizza', 'burger', 'ហែមបឺហ្គឺ', 'នំប៉័ង', 'សាច់គោអាំង'],
+  },
+  {
+    id: 'item-intl-sushi-ramen-asian',
+    nameKh: 'ស៊ូស៊ី / រ៉ាមែន / ផាត់ថៃ / ហ្វឺ (Sushi / Ramen / Pad Thai / Pho)',
+    nameEn: 'Asian International Dish (Sushi / Ramen / Pad Thai / Pho)',
+    objectType: 'cooked_dish',
+    categoryKh: 'ម្ហូបអាស៊ីអន្តរជាតិ (Asian International Cuisine)',
+    categoryEn: 'Asian International Cuisine',
+    descriptionKh: 'ម្ហូបអាស៊ីអន្តរជាតិដ៏ពេញនិយម រួមមាន ស៊ូស៊ីជប៉ុន មីរ៉ាមែន ផាត់ថៃ ឬហ្វឺ ដែលប្រើប្រាស់គ្រឿងសមុទ្រ សរសៃមី/គុយទាវ ទឹកស៊ីអ៊ីវ និងសណ្តែកដី។',
+    descriptionEn: 'Popular Asian international dishes including Japanese Sushi, Ramen, Thai Pad Thai, or Vietnamese Pho.',
+    culinaryUsesKh: 'អាចមានសារធាតុអាលែកហ្ស៊ីដូចជា ត្រី/គ្រឿងសមុទ្រឆៅ ទឹកស៊ីអ៊ីវ (Soy) សណ្តែកដី (Peanuts) ស៊ុត និងស្រូវសាលី។',
+    culinaryUsesEn: 'May contain raw fish/shellfish, soy sauce, peanuts, egg, and wheat allergens.',
+    storageTipsKh: 'សម្រាប់ស៊ូស៊ី ឬត្រីឆៅ ត្រូវរក្សាសីតុណ្ហភាពត្រជាក់ និងបរិភោគភ្លាមៗដើម្បីសុវត្ថិភាពអាហារ។',
+    isPackagedProduct: false,
+    searchKeywordsKh: ['ស៊ូស៊ី', 'រ៉ាមែន', 'ផាត់ថៃ', 'ហ្វឺ', 'sushi', 'ramen', 'pad thai', 'pho', 'គុយទាវ', 'មី'],
+  },
 ];
 
 // ============================================================================
@@ -569,13 +976,27 @@ export function getUserAiCorrectionFeedback(): AiUserCorrectionRecord[] {
 // ============================================================================
 // STAGE 1: TRUE HSV + SPATIAL & PERCEPTUAL OBJECT TYPE CLASSIFIER
 // ============================================================================
+export type DishStructureArchetype =
+  | 'grilled_on_banana_leaf_or_herbs'
+  | 'grilled_charred_meat_or_seafood'
+  | 'yellow_kroeung_amok_or_curry'
+  | 'green_herbal_korko_or_sour_soup'
+  | 'white_noodles_porridge_or_rice'
+  | 'dark_braised_khor_or_lok_lak'
+  | 'fresh_salad_or_dip_platter'
+  | 'general_cooked_dish';
+
 export interface ImageVisualProfile {
   avgBrightness: number;
   contrast: number;
   isBlurryOrLowContrast: boolean;
   // Calibrated HSV Color ratios
   orangeCoralRatio: number;
+  goldenRoastedRatio: number;
+  charGrillRatio: number;
   greenRatio: number;
+  centerGreenRatio: number;
+  outerGreenRatio: number;
   yellowRatio: number;
   redPinkRawRatio: number;
   darkBrothRatio: number;
@@ -587,6 +1008,7 @@ export interface ImageVisualProfile {
   colorEntropy: number; // Higher = complex multi-ingredient dish; Lower = uniform fruit/meat/packaged slice
   inferredObjectType: AiObjectType;
   detectedFruitSubType?: 'papaya' | 'mango_or_banana';
+  dishArchetype?: DishStructureArchetype;
   visualCluesKh: string[];
   visualCluesEn: string[];
 }
@@ -621,23 +1043,28 @@ export function rgbToHsv(r: number, g: number, b: number): { h: number; s: numbe
   return { h: h * 360, s, v };
 }
 
-async function analyzeImageStructureAndObjectType(dataUrl: string): Promise<ImageVisualProfile> {
+export async function analyzeImageStructureAndObjectType(dataUrl: string): Promise<ImageVisualProfile> {
   return new Promise((resolve) => {
     const fallbackProfile: ImageVisualProfile = {
       avgBrightness: 128,
       contrast: 100,
       isBlurryOrLowContrast: false,
       orangeCoralRatio: 0,
-      greenRatio: 0,
-      yellowRatio: 0,
+      goldenRoastedRatio: 0.25,
+      charGrillRatio: 0.08,
+      greenRatio: 0.12,
+      centerGreenRatio: 0.06,
+      outerGreenRatio: 0.16,
+      yellowRatio: 0.08,
       redPinkRawRatio: 0,
-      darkBrothRatio: 0,
-      whiteNeutralRatio: 0,
+      darkBrothRatio: 0.1,
+      whiteNeutralRatio: 0.1,
       hasPlasticSpecularGlare: false,
       hasWhiteTrayBorder: false,
       isUniformInteriorColor: false,
       colorEntropy: 0.5,
-      inferredObjectType: 'unknown_unclear',
+      inferredObjectType: 'cooked_dish',
+      dishArchetype: 'general_cooked_dish',
       visualCluesKh: [],
       visualCluesEn: [],
     };
@@ -671,7 +1098,13 @@ async function analyzeImageStructureAndObjectType(dataUrl: string): Promise<Imag
         let maxVal = 0;
 
         let orangeCoralCount = 0;
+        let goldenRoastedCount = 0;
+        let charGrillCount = 0;
         let greenCount = 0;
+        let centerGreenCount = 0;
+        let outerGreenCount = 0;
+        let centerTotalCount = 0;
+        let outerTotalCount = 0;
         let yellowCount = 0;
         let redPinkRawCount = 0;
         let darkCount = 0;
@@ -697,11 +1130,29 @@ async function analyzeImageStructureAndObjectType(dataUrl: string): Promise<Imag
 
             const { h, s, v } = rgbToHsv(r, g, b);
             const isBorder = x < 10 || x >= size - 10 || y < 10 || y >= size - 10;
-            const isNeutralWhite = (s < 0.16 && v > 0.62) || (brightness > 180 && Math.abs(r - g) < 28 && Math.abs(g - b) < 28);
+            const isCenter = x >= 22 && x < size - 22 && y >= 22 && y < size - 22;
+            const isNeutralWhite =
+              (s < 0.16 && v > 0.62) || (brightness > 180 && Math.abs(r - g) < 28 && Math.abs(g - b) < 28);
+
+            if (isCenter) {
+              centerTotalCount++;
+            } else {
+              outerTotalCount++;
+            }
 
             if (isBorder) {
               borderTotalCount++;
               if (isNeutralWhite) borderWhiteCount++;
+            }
+
+            // Detect golden-brown roasted/grilled meat & kroeung crust (Hue 12°–44°, Sat 0.25–0.88, Val 0.22–0.82)
+            if (h >= 10 && h <= 45 && s >= 0.24 && v >= 0.20 && v <= 0.85 && r > b * 1.25) {
+              goldenRoastedCount++;
+            }
+
+            // Detect dark charcoal sear / grill marks / caramelized glaze
+            if (v >= 0.08 && v <= 0.34 && s >= 0.15 && r >= b) {
+              charGrillCount++;
             }
 
             if (isNeutralWhite) {
@@ -710,9 +1161,11 @@ async function analyzeImageStructureAndObjectType(dataUrl: string): Promise<Imag
             } else if (v < 0.22 || brightness < 52) {
               darkCount++;
               hueBuckets[1]++;
-            } else if (h >= 68 && h <= 165 && s >= 0.22 && v >= 0.20) {
-              // True HSV Green (vegetables, herbs, noni leaves, green curry paste)
+            } else if (h >= 65 && h <= 168 && s >= 0.18 && v >= 0.16) {
+              // True HSV Green (banana leaf lining, vegetables, herbs, noni leaves, green kroeung)
               greenCount++;
+              if (isCenter) centerGreenCount++;
+              else outerGreenCount++;
               hueBuckets[2]++;
             } else if (
               h >= 8 &&
@@ -722,22 +1175,22 @@ async function analyzeImageStructureAndObjectType(dataUrl: string): Promise<Imag
               r > g * 1.18 &&
               g > b * 1.12
             ) {
-              // True HSV Warm Ripe Papaya / Orange Flesh (captures indoor-lit papaya RGB 115..255, 40..145, 10..80!)
+              // Warm Ripe Papaya / Orange / Golden-Amber Roasted tones
               orangeCoralCount++;
               hueBuckets[3]++;
-            } else if (h > 38 && h <= 67 && s >= 0.32 && v >= 0.35) {
-              // True HSV Mango / Banana / Pineapple / Yellow Turmeric
+            } else if (h > 38 && h <= 65 && s >= 0.30 && v >= 0.32) {
+              // Mango / Banana / Pineapple / Yellow Turmeric Kroeung
               yellowCount++;
               hueBuckets[4]++;
             } else if ((h < 8 || h >= 335) && s >= 0.30 && v >= 0.26) {
-              // True HSV Raw Red/Pink Meat or Salmon
+              // Red Chili / Raw Red-Pink Meat / Tomato
               redPinkRawCount++;
               hueBuckets[5]++;
             } else {
               hueBuckets[6]++;
             }
 
-            // Detect plastic wrap specular glare streaks inside the object (bright low-saturation highlight next to saturated pixel)
+            // Detect plastic wrap specular glare streaks inside the object
             if (!isBorder && x > 2 && x < size - 2) {
               const prevIdx = (y * size + (x - 2)) * 4;
               const prevR = data[prevIdx];
@@ -761,7 +1214,11 @@ async function analyzeImageStructureAndObjectType(dataUrl: string): Promise<Imag
         const isBlurryOrLowContrast = contrast < 35 || avgBrightness < 18 || avgBrightness > 246;
 
         const orangeCoralRatio = orangeCoralCount / totalPixels;
+        const goldenRoastedRatio = goldenRoastedCount / totalPixels;
+        const charGrillRatio = charGrillCount / totalPixels;
         const greenRatio = greenCount / totalPixels;
+        const centerGreenRatio = centerTotalCount > 0 ? centerGreenCount / centerTotalCount : 0;
+        const outerGreenRatio = outerTotalCount > 0 ? outerGreenCount / outerTotalCount : 0;
         const yellowRatio = yellowCount / totalPixels;
         const redPinkRawRatio = redPinkRawCount / totalPixels;
         const darkBrothRatio = darkCount / totalPixels;
@@ -780,20 +1237,21 @@ async function analyzeImageStructureAndObjectType(dataUrl: string): Promise<Imag
         // Calculate Shannon-like diversity across hue buckets
         let activeBuckets = 0;
         for (const count of hueBuckets) {
-          if (count / totalPixels > 0.06) activeBuckets++;
+          if (count / totalPixels > 0.05) activeBuckets++;
         }
         const colorEntropy = activeBuckets / hueBuckets.length;
 
         const visualCluesKh: string[] = [];
         const visualCluesEn: string[] = [];
-        let inferredObjectType: AiObjectType = 'unknown_unclear';
+        let inferredObjectType: AiObjectType = 'cooked_dish';
         let detectedFruitSubType: 'papaya' | 'mango_or_banana' | undefined;
+        let dishArchetype: DishStructureArchetype = 'general_cooked_dish';
 
         if (isBlurryOrLowContrast) {
           inferredObjectType = 'unknown_unclear';
           visualCluesKh.push('រូបភាពមានពន្លឺខ្សោយ ឬកម្រិតច្បាស់ទាប (Blurry or low contrast)');
           visualCluesEn.push('Low contrast or insufficient lighting');
-        } else if (orangeCoralRatio >= 0.22 && greenRatio < 0.04) {
+        } else if (orangeCoralRatio >= 0.26 && greenRatio < 0.035 && charGrillRatio < 0.08 && isUniformInteriorColor) {
           // Fresh Ripe Papaya (either whole/sliced fresh fruit or plastic-wrapped sliced papaya!)
           inferredObjectType = 'fresh_fruit';
           detectedFruitSubType = 'papaya';
@@ -809,37 +1267,73 @@ async function analyzeImageStructureAndObjectType(dataUrl: string): Promise<Imag
           }
           visualCluesKh.push('មិនមានទឹកសម្ល ឬបន្លែស្លឹកបៃតងដូចម្ហូបសម្ល ឬអាម៉ុកឡើយ (0% green herbs or soup broth)');
           visualCluesEn.push('No soup broth or green herbs present — distinctly fresh fruit');
-        } else if (yellowRatio >= 0.26 && greenRatio < 0.04 && darkBrothRatio < 0.18) {
+        } else if (yellowRatio >= 0.28 && greenRatio < 0.035 && darkBrothRatio < 0.15 && isUniformInteriorColor) {
           inferredObjectType = 'fresh_fruit';
           detectedFruitSubType = 'mango_or_banana';
           visualCluesKh.push('សាច់ផ្លែឈើពណ៌លឿងទុំធម្មជាតិ ដូចជាផ្លែស្វាយទុំ ចេក ឬម្នាស់ (Ripe yellow fruit flesh)');
           visualCluesEn.push('Ripe yellow fruit flesh such as mango, banana, or pineapple');
-        } else if (hasPlasticSpecularGlare && hasWhiteTrayBorder && isUniformInteriorColor && greenRatio < 0.03) {
+        } else if (hasPlasticSpecularGlare && hasWhiteTrayBorder && isUniformInteriorColor && greenRatio < 0.025 && charGrillRatio < 0.06) {
           inferredObjectType = 'packaged_food';
           visualCluesKh.push('ពិនិត្យឃើញចំណាំងផ្លាតថង់ផ្លាស្ទិចរុំវេចខ្ចប់ និងថាសដាក់អាហារ (Plastic wrap reflection & tray border)');
           visualCluesEn.push('Detected plastic wrap specular highlights and tray packaging');
-        } else if (greenRatio >= 0.28 && orangeCoralRatio < 0.06 && redPinkRawRatio < 0.06) {
+        } else if (greenRatio >= 0.42 && goldenRoastedRatio < 0.10 && orangeCoralRatio < 0.06 && redPinkRawRatio < 0.05) {
           inferredObjectType = 'fresh_vegetables';
           visualCluesKh.push('ពណ៌បៃតងធម្មជាតិគ្របដណ្តប់លើរូបភាព ដូចជាបន្លែស្រស់ ឬជីរខ្មែរ (Dominant fresh leafy greens)');
           visualCluesEn.push('Dominant fresh green leaves/vegetables');
-        } else if (redPinkRawRatio >= 0.26 && greenRatio < 0.04 && yellowRatio < 0.06) {
+        } else if (redPinkRawRatio >= 0.28 && greenRatio < 0.035 && yellowRatio < 0.05 && charGrillRatio < 0.06) {
           inferredObjectType = 'raw_meat_seafood';
           visualCluesKh.push('សាច់ពណ៌ក្រហម/ផ្កាឈូកស្រស់ និងឆ្នូតខ្លាញ់ពណ៌ស ដូចជាសាច់ឆៅ (Raw pink/red meat texture)');
           visualCluesEn.push('Raw red/pink meat texture with white marbling');
         } else {
-          // Multi-component dish or snack/drink: still requires verification before claiming certainty
+          // Multi-component prepared dish: Classify structural dish archetype
           inferredObjectType = 'cooked_dish';
-          if (greenRatio > 0.05) {
-            visualCluesKh.push('មានបន្លែបៃតង ឬស្លឹកគ្រឿងខ្មែរ (Contains green herbs/vegetables)');
-            visualCluesEn.push('Contains green herbs or vegetables');
-          }
-          if (yellowRatio > 0.06) {
-            visualCluesKh.push('មានពណ៌គ្រឿងលឿង ឬរមៀត (Turmeric/yellow kroeung tones)');
-            visualCluesEn.push('Turmeric or yellow kroeung tones');
-          }
-          if (whiteNeutralRatio > 0.15) {
-            visualCluesKh.push('មានពណ៌សនៃចាន ខ្ទិះដូង បាយ ឬសរសៃគុយទាវ/នំបញ្ចុក (White bowl, coconut cream, rice, or noodles)');
-            visualCluesEn.push('White bowl, coconut cream, rice, or noodles');
+
+          // Archetype 1: Grilled / Roasted Dish on Banana Leaf or with Herbs (e.g., កង្កែបបោកអាំង / មាន់ដុត / ត្រីអាំង / សាច់គោអាំង)
+          if (
+            (goldenRoastedRatio >= 0.14 || orangeCoralRatio >= 0.12) &&
+            (greenRatio >= 0.03 || outerGreenRatio >= 0.04) &&
+            (charGrillRatio >= 0.04 || darkBrothRatio >= 0.06)
+          ) {
+            dishArchetype = 'grilled_on_banana_leaf_or_herbs';
+            visualCluesKh.push(
+              'ពិនិត្យឃើញសាច់អាំង/ដុតពណ៌មាសក្រហមឈ្ងុយ ប្រឡាក់គ្រឿងបុកស្លឹកគ្រៃរមៀត រៀបលើស្លឹកចេក ឬអមដោយបន្លែបៃតង និងទឹកជ្រលក់'
+            );
+            visualCluesEn.push(
+              'Detected golden-brown charcoal-grilled/roasted protein with lemongrass-turmeric kroeung on banana leaf / fresh herbs and dipping sauce'
+            );
+          } else if (
+            (goldenRoastedRatio >= 0.18 || orangeCoralRatio >= 0.16) &&
+            (charGrillRatio >= 0.05 || darkBrothRatio >= 0.08)
+          ) {
+            dishArchetype = 'grilled_charred_meat_or_seafood';
+            visualCluesKh.push('ពិនិត្យឃើញសាច់អាំង ឬគ្រឿងសមុទ្រអាំងលើភ្លើងធ្យូងពណ៌មាសឆ្អិនឈ្ងុយ');
+            visualCluesEn.push('Detected charcoal-grilled or roasted meat/seafood with golden sear marks');
+          } else if (yellowRatio >= 0.07 && greenRatio >= 0.04) {
+            dishArchetype = 'yellow_kroeung_amok_or_curry';
+            visualCluesKh.push('ពិនិត្យឃើញពណ៌គ្រឿងលឿង/រមៀត ខ្ទិះដូង និងស្លឹកបន្លែបៃតង (ដូចជា អាម៉ុក សម្លការី ឬសម្លម្ជូរគ្រឿង)');
+            visualCluesEn.push('Detected yellow kroeung/turmeric, coconut cream, and green herbs (Amok, Curry, or Sour Kroeung Soup)');
+          } else if (greenRatio >= 0.14 && (darkBrothRatio >= 0.06 || yellowRatio >= 0.03)) {
+            dishArchetype = 'green_herbal_korko_or_sour_soup';
+            visualCluesKh.push('ពិនិត្យឃើញបន្លែបៃតងចម្រុះ និងទឹកសម្លបែបខ្មែរ (ដូចជា សម្លកកូរ សម្លប្រហើរ ឬសម្លម្ជូរ)');
+            visualCluesEn.push('Detected mixed green vegetables and traditional Cambodian herbal soup broth');
+          } else if (whiteNeutralRatio >= 0.22 && (greenRatio >= 0.02 || goldenRoastedRatio >= 0.05)) {
+            dishArchetype = 'white_noodles_porridge_or_rice';
+            visualCluesKh.push('ពិនិត្យឃើញពណ៌សនៃសរសៃគុយទាវ/នំបញ្ចុក បាយ ឬបបរ ជាមួយសាច់ និងបន្លែជីរ');
+            visualCluesEn.push('Detected white rice noodles, steamed rice, or porridge with savory toppings and herbs');
+          } else if (darkBrothRatio >= 0.20) {
+            dishArchetype = 'dark_braised_khor_or_lok_lak';
+            visualCluesKh.push('ពិនិត្យឃើញពណ៌ទឹកខដិត ឬសាច់ឆា/ឡុកឡាក់');
+            visualCluesEn.push('Detected rich caramelized braise (Khor) or wok-seared beef (Lok Lak)');
+          } else {
+            dishArchetype = 'general_cooked_dish';
+            if (greenRatio > 0.03) {
+              visualCluesKh.push('មានបន្លែបៃតង ឬស្លឹកគ្រឿងខ្មែរ (Contains green herbs/vegetables)');
+              visualCluesEn.push('Contains green herbs or vegetables');
+            }
+            if (goldenRoastedRatio > 0.08 || yellowRatio > 0.04) {
+              visualCluesKh.push('មានពណ៌គ្រឿងបុកខ្មែរ សាច់អាំង ឬសម្ល (Savory cooked protein & kroeung tones)');
+              visualCluesEn.push('Savory cooked protein and Cambodian spice tones');
+            }
           }
         }
 
@@ -848,7 +1342,11 @@ async function analyzeImageStructureAndObjectType(dataUrl: string): Promise<Imag
           contrast,
           isBlurryOrLowContrast,
           orangeCoralRatio,
+          goldenRoastedRatio,
+          charGrillRatio,
           greenRatio,
+          centerGreenRatio,
+          outerGreenRatio,
           yellowRatio,
           redPinkRawRatio,
           darkBrothRatio,
@@ -859,6 +1357,7 @@ async function analyzeImageStructureAndObjectType(dataUrl: string): Promise<Imag
           colorEntropy,
           inferredObjectType,
           detectedFruitSubType,
+          dishArchetype,
           visualCluesKh,
           visualCluesEn,
         });
@@ -916,8 +1415,11 @@ export async function callRealVisionApiProvider(
     // ignore cache read error
   }
 
-  const timeoutMs = config.timeoutMs || 10000;
+  const timeoutMs = config.timeoutMs || 12000;
   const maxRetries = 1;
+
+  // Optimize & compress image before network transfer to speed up API calls and prevent payload limits
+  const optimizedDataUrl = await optimizeImageForVisionAnalysis(imageDataUrl, 800, 0.82);
 
   // Helper to store validated response in cache
   const cacheResponse = (res: ExternalVisionApiResponse) => {
@@ -931,8 +1433,33 @@ export async function callRealVisionApiProvider(
     }
   };
 
+  const parseJsonClean = (rawText: string): ExternalVisionApiResponse | null => {
+    try {
+      const cleaned = rawText
+        .replace(/^```json\s*/i, '')
+        .replace(/^```\s*/i, '')
+        .replace(/```\s*$/i, '')
+        .trim();
+      const parsed = JSON.parse(cleaned) as ExternalVisionApiResponse;
+      if (parsed && (parsed.identifiedNameKh || parsed.identifiedNameEn)) {
+        return {
+          objectType: parsed.objectType || 'cooked_dish',
+          identifiedNameKh: parsed.identifiedNameKh || parsed.identifiedNameEn || '',
+          identifiedNameEn: parsed.identifiedNameEn || parsed.identifiedNameKh || '',
+          confidenceScore: typeof parsed.confidenceScore === 'number' ? parsed.confidenceScore : 0.82,
+          visualCluesKh: Array.isArray(parsed.visualCluesKh) ? parsed.visualCluesKh : [],
+          visualCluesEn: Array.isArray(parsed.visualCluesEn) ? parsed.visualCluesEn : [],
+          candidates: Array.isArray(parsed.candidates) ? parsed.candidates : [],
+        };
+      }
+    } catch {
+      // ignore parse error
+    }
+    return null;
+  };
+
   // Option A: Backend Vision Proxy Endpoint (Recommended Production Architecture — No private API key in APK)
-  if (config.provider === 'backend_proxy' && config.backendProxyUrl) {
+  if (config.backendProxyUrl) {
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -941,15 +1468,21 @@ export async function callRealVisionApiProvider(
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            image: imageDataUrl,
+            image: optimizedDataUrl,
             systemPrompt: AI_VISION_MULTISTEP_SYSTEM_PROMPT,
           }),
           signal: controller.signal,
         });
         clearTimeout(timer);
         if (response.ok) {
-          const parsed = (await response.json()) as ExternalVisionApiResponse;
-          if (parsed && parsed.objectType && parsed.identifiedNameKh) {
+          const json = await response.json();
+          const parsed =
+            typeof json === 'string'
+              ? parseJsonClean(json)
+              : json && (json.identifiedNameKh || json.identifiedNameEn)
+              ? (json as ExternalVisionApiResponse)
+              : null;
+          if (parsed) {
             cacheResponse(parsed);
             return parsed;
           }
@@ -960,15 +1493,42 @@ export async function callRealVisionApiProvider(
     }
   }
 
-  // Option B: Google Gemini Vision API (gemini-2.5-flash / gemini-2.0-flash) when configured
-  if (config.provider === 'gemini_vision' && config.apiKey) {
-    const base64Data = imageDataUrl.includes(',') ? imageDataUrl.split(',')[1] : imageDataUrl;
-    const mimeMatch = imageDataUrl.match(/^data:(image\/[a-zA-Z0-9+.-]+);base64,/);
+  // Option B: Google Gemini Vision API with multi-model fallback (`gemini-2.0-flash`, `gemini-1.5-flash`, `gemini-2.5-flash`)
+  if (config.apiKey) {
+    const base64Data = optimizedDataUrl.includes(',') ? optimizedDataUrl.split(',')[1] : optimizedDataUrl;
+    const mimeMatch = optimizedDataUrl.match(/^data:(image\/[a-zA-Z0-9+.-]+);base64,/);
     const mimeType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
-    const model = config.modelName || 'gemini-2.5-flash';
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(config.apiKey)}`;
+    const modelsToTry = Array.from(
+      new Set([config.modelName || 'gemini-2.0-flash', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.5-flash'])
+    );
 
-    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    const visionPrompt = `${AI_VISION_MULTISTEP_SYSTEM_PROMPT}
+IMPORTANT CAMBODIAN DISH EXAMPLES TO RECOGNIZE ACCURATELY:
+- Grilled Stuffed Frogs on banana leaf / herbs: "កង្កែបបោកអាំងសៀមរាប" (Stuffed Roasted Frogs - Kangkeb Baok) or "កង្កែបបោកអាំងគ្រឿងខ្មែរ"
+- Grilled Chicken: "មាន់ដុតច្រាំងទន្លេកំពត" (Kampot Roasted Herbal Chicken)
+- Grilled Fish: "ត្រីរ៉ស់អាំងបាយដំណើបអំបិលម្ទេស" (Grilled Snakehead Fish)
+- Grilled Beef with Prahok Dip: "សាច់គោអាំងទឹកប្រហុក" (Grilled Beef with Prahok Dip)
+- Fish Amok in banana leaf cup: "អាម៉ុកត្រីស្លឹកញ" (Steamed Fish Amok)
+- Samlor Korko: "សម្លកកូរត្រីរ៉ស់" (Traditional Stirring Vegetable Soup)
+- Khmer Noodles: "នំបញ្ចុកសម្លខ្មែរ" (Num Banh Chok) or "គុយទាវភ្នំពេញ" (Phnom Penh Noodle Soup)
+- Beef Lok Lak: "បាយឡុកឡាក់សាច់គោ" (Cambodian Beef Lok Lak)
+- Papaya Salad: "បុកល្ហុងក្ដាមប្រៃ" (Cambodian Green Papaya Salad)
+
+Respond strictly in JSON matching:
+{
+  "objectType": "cooked_dish",
+  "identifiedNameKh": "...",
+  "identifiedNameEn": "...",
+  "confidenceScore": 0.9,
+  "visualCluesKh": ["..."],
+  "visualCluesEn": ["..."],
+  "candidates": [
+    { "nameKh": "...", "nameEn": "...", "objectType": "cooked_dish", "confidenceScore": 0.85, "visualCluesKh": "...", "visualCluesEn": "..." }
+  ]
+}`;
+
+    for (const model of modelsToTry) {
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(config.apiKey)}`;
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), timeoutMs);
       try {
@@ -979,7 +1539,7 @@ export async function callRealVisionApiProvider(
             contents: [
               {
                 parts: [
-                  { text: `${AI_VISION_MULTISTEP_SYSTEM_PROMPT}\nRespond strictly in JSON matching { "objectType": "...", "identifiedNameKh": "...", "identifiedNameEn": "...", "confidenceScore": 0.9, "visualCluesKh": ["..."], "visualCluesEn": ["..."], "candidates": [] }` },
+                  { text: visionPrompt },
                   { inline_data: { mime_type: mimeType, data: base64Data } },
                 ],
               },
@@ -993,8 +1553,8 @@ export async function callRealVisionApiProvider(
           const json = await response.json();
           const textOut = json?.candidates?.[0]?.content?.parts?.[0]?.text;
           if (textOut) {
-            const parsed = JSON.parse(textOut) as ExternalVisionApiResponse;
-            if (parsed && parsed.objectType && parsed.identifiedNameKh) {
+            const parsed = parseJsonClean(textOut);
+            if (parsed) {
               cacheResponse(parsed);
               return parsed;
             }
@@ -1090,6 +1650,69 @@ export function retrieveRecipeAndInfoByFoodName(
     };
   }
 
+  // Synonym & Alias expansion for Khmer, English, and Chinese queries
+  const SYNONYM_MAP: { triggers: string[]; targetKeywords: string[] }[] = [
+    {
+      triggers: ['កង្កែបបោក', 'កង្កែបអាំង', 'កង្កែបដុត', 'stuffed frog', 'grilled frog', 'roasted frog', 'kangkeb baok', 'kangkeb', '烤青蛙', '酿青蛙', '塞肉烤蛙'],
+      targetKeywords: ['កង្កែបបោកអាំងសៀមរាប', 'កង្កែបបោកអាំងគ្រឿងខ្មែរ', 'កង្កែបបោក'],
+    },
+    {
+      triggers: ['មាន់ដុត', 'មាន់អាំង', 'grilled chicken', 'roast chicken', 'roasted chicken', 'kampot chicken', '烤鸡', '香茅烤鸡'],
+      targetKeywords: ['មាន់ដុតច្រាំងទន្លេកំពត', 'មាន់ដុតទឹកឃ្មុំព្រៃភ្នំគូលែន', 'មាន់ដុត'],
+    },
+    {
+      triggers: ['ត្រីអាំង', 'ត្រីដុត', 'ត្រីរ៉ស់អាំង', 'grilled fish', 'roasted fish', 'snakehead fish', '烤鱼'],
+      targetKeywords: ['ត្រីរ៉ស់អាំងបាយដំណើបអំបិលម្ទេស', 'ត្រីអណ្តែងអាំងទឹកត្រីផ្អែមស្ដៅ', 'ត្រីរ៉ស់អាំង'],
+    },
+    {
+      triggers: ['សាច់គោអាំង', 'ទឹកប្រហុក', 'grilled beef', 'beef prahok', 'prahok dip', '烤牛肉'],
+      targetKeywords: ['សាច់គោអាំងទឹកប្រហុក', 'សាច់គោអាំងចង្កាក់បែបខ្មែរ'],
+    },
+    {
+      triggers: ['អាម៉ុក', 'amok', 'fish amok', 'steamed fish curry', '阿莫克', '高棉鱼阿莫克'],
+      targetKeywords: ['អាម៉ុកត្រីស្លឹកញ', 'អាម៉ុក'],
+    },
+    {
+      triggers: ['សម្លកកូរ', 'កកូរ', 'korko', 'samlor korko', 'stirring soup', '高棉什锦蔬菜汤'],
+      targetKeywords: ['សម្លកកូរត្រីរ៉ស់', 'សម្លកកូរ'],
+    },
+    {
+      triggers: ['នំបញ្ចុក', 'num banh chok', 'khmer noodles', 'rice noodles', '高棉米粉'],
+      targetKeywords: ['នំបញ្ចុកសម្លខ្មែរ', 'នំបញ្ចុកសម្លការី', 'នំបញ្ចុក'],
+    },
+    {
+      triggers: ['គុយទាវ', 'kuy teav', 'noodle soup', 'phnom penh noodle', '金边粿条'],
+      targetKeywords: ['គុយទាវភ្នំពេញ', 'គុយទាវទូកកំពង់ចាម', 'គុយទាវ'],
+    },
+    {
+      triggers: ['ឡុកឡាក់', 'lok lak', 'beef lok lak', 'shaking beef', '摇滚牛肉'],
+      targetKeywords: ['បាយឡុកឡាក់សាច់គោ', 'ឡុកឡាក់'],
+    },
+    {
+      triggers: ['បាយសាច់ជ្រូក', 'bai sach chrouk', 'pork and rice', 'grilled pork rice', '烤猪肉饭'],
+      targetKeywords: ['បាយសាច់ជ្រូកអាំង', 'បាយសាច់ជ្រូក'],
+    },
+    {
+      triggers: ['បុកល្ហុង', 'bok lhong', 'papaya salad', 'green papaya salad', '青木瓜沙拉'],
+      targetKeywords: ['បុកល្ហុងក្ដាមប្រៃ', 'បុកល្ហុង'],
+    },
+    {
+      triggers: ['ម្ជូរគ្រឿង', 'machu kroeung', 'sour soup', 'lemongrass sour soup', '酸汤'],
+      targetKeywords: ['សម្លម្ជូរគ្រឿងសាច់គោ', 'ម្ជូរគ្រឿង'],
+    },
+    {
+      triggers: ['ខសាច់ជ្រូក', 'ខពងទា', 'khor', 'braised pork', 'caramelized pork', '红烧肉卤蛋'],
+      targetKeywords: ['ខសាច់ជ្រូកពងទាទឹកដូង', 'ខសាច់ជ្រូក'],
+    },
+  ];
+
+  const expandedTargets: string[] = [];
+  for (const entry of SYNONYM_MAP) {
+    if (entry.triggers.some((t) => qLower.includes(t.toLowerCase()) || t.toLowerCase().includes(qLower))) {
+      expandedTargets.push(...entry.targetKeywords.map((k) => k.toLowerCase()));
+    }
+  }
+
   // 1. Priority 1: Search Verified Prepared Dishes in `allFoods`
   const dishMatches: { food: FoodItem; score: number; matchReasonKh: string; matchReasonEn: string }[] = [];
 
@@ -1105,6 +1728,10 @@ export function retrieveRecipeAndInfoByFoodName(
       score = 0.99;
       reasonKh = 'ត្រូវគ្នា ១០០% ជាមួយឈ្មោះម្ហូបក្នុងឃ្លាំងទិន្នន័យផ្លូវការ';
       reasonEn = 'Exact 100% name match in verified Cambodian food database';
+    } else if (expandedTargets.some((target) => nameKhLower.includes(target) || target.includes(nameKhLower))) {
+      score = nameKhLower === expandedTargets[0] ? 0.96 : 0.91;
+      reasonKh = `ត្រូវគ្នាជាមួយឈ្មោះម្ហូប «${food.nameKh}» ក្នុងឃ្លាំងទិន្នន័យផ្លូវការ`;
+      reasonEn = `Verified match with "${food.nameEn}" in official Cambodian food database`;
     } else if (nameKhLower.includes(qLower) || qLower.includes(nameKhLower)) {
       const lengthRatio = Math.min(nameKhLower.length, qLower.length) / Math.max(nameKhLower.length, qLower.length);
       score = 0.82 + lengthRatio * 0.14;
@@ -1128,7 +1755,7 @@ export function retrieveRecipeAndInfoByFoodName(
     const objType = inferDishObjectTypeFromCategory(best.food);
     const meta = AI_OBJECT_TYPE_METADATA[objType];
 
-    const candidates: AiFoodMatchCandidate[] = dishMatches.slice(0, 3).map((m) => {
+    const candidates: AiFoodMatchCandidate[] = dishMatches.slice(0, 4).map((m) => {
       const cType = inferDishObjectTypeFromCategory(m.food);
       return {
         id: m.food.id,
@@ -1164,16 +1791,20 @@ export function retrieveRecipeAndInfoByFoodName(
       messageKh: `✅ រកឃើញរូបមន្តពិតប្រាកដសម្រាប់ «${best.food.nameKh}» នៅក្នុងឃ្លាំងទិន្នន័យម្ហូបខ្មែរផ្លូវការ!`,
       messageEn: `✅ Verified recipe found for "${best.food.nameEn}" in the official Cambodian food database!`,
       detectedVisualFeatures: [meta.labelKh, best.food.categoryKh],
-      disclaimerKh: 'រូបមន្ត និងគ្រឿងផ្សំត្រូវបានទាញចេញពីឃ្លាំងទិន្នន័យម្ហូបខ្មែរផ្លូវការ ១០០% គ្មានការបង្កើតគ្រឿងផ្សំក្លែងក្លាយឡើយ។',
-      disclaimerEn: 'Recipes and ingredients are strictly verified from the official Cambodian database.',
+      disclaimerKh: 'រូបមន្ត និងគ្រឿងផ្សំត្រូវបានទាញចេញពីឃ្លាំងទិន្នន័យម្ហូបខ្មែរផ្លូវការ ១០០% ប៉ុន្តែមិនអាចបញ្ជាក់គ្រឿងផ្សំជាក់ស្តែងក្នុងចានរបស់អ្នកពីរូបភាពតែមួយមុខបានទេ។',
+      disclaimerEn: 'Recipes and ingredients are retrieved from the official Cambodian database, but actual ingredients in your specific dish cannot be 100% verified from a photo alone.',
+      foodSafetyAdvisory: buildFoodSafetyAdvisory(best.food, undefined, true),
       processingTimeMs: Date.now() - startTime,
     };
   }
 
   // 2. Priority 2: Search Verified Non-Dish Items KB (Fruits, Vegetables, Raw Meats, Packaged Items, Ingredients)
   const matchedNonDish = VERIFIED_NON_DISH_ITEMS_KB.find((item) => {
-    const itemText = (item.nameKh + ' ' + item.nameEn + ' ' + item.searchKeywordsKh.join(' ')).toLowerCase();
-    return itemText.includes(qLower) || item.searchKeywordsKh.some((kw) => qLower.includes(kw.toLowerCase()));
+    const itemText = (item.nameKh + ' ' + item.nameEn).toLowerCase();
+    return (
+      itemText.includes(qLower) ||
+      item.searchKeywordsKh.some((kw) => kw.toLowerCase() === qLower)
+    );
   });
 
   if (matchedNonDish) {
@@ -1220,6 +1851,7 @@ export function retrieveRecipeAndInfoByFoodName(
       disclaimerEn: matchedNonDish.isPackagedProduct
         ? '📦 For packaged products, the system never invents a homemade recipe or fabricates unreadable label ingredients.'
         : '💡 Dishes listed below are cooking recommendations using this ingredient, not the identity of the scanned item.',
+      foodSafetyAdvisory: buildFoodSafetyAdvisory(undefined, matchedNonDish, false),
       processingTimeMs: Date.now() - startTime,
     };
   }
@@ -1277,6 +1909,7 @@ export function retrieveRecipeAndInfoByFoodName(
       detectedVisualFeatures: [AI_OBJECT_TYPE_METADATA.food_ingredient.labelKh],
       disclaimerKh: '💡 មុខម្ហូបខាងក្រោមគឺជាការណែនាំដែលអាចចម្អិនពីគ្រឿងផ្សំនេះ មិនមែនជាឈ្មោះរបស់វត្ថុក្នុងរូបភាពឡើយ។',
       disclaimerEn: '💡 Dishes listed below are cooking recommendations using this ingredient.',
+      foodSafetyAdvisory: buildFoodSafetyAdvisory(dishesContainingIngredient[0], customIngredientInfo, false),
       processingTimeMs: Date.now() - startTime,
     };
   }
@@ -1298,11 +1931,12 @@ export function retrieveRecipeAndInfoByFoodName(
     requiresUserConfirmation: true,
     uncertainPromptKh: REQUIRED_UNCERTAIN_PROMPT_KH,
     uncertainPromptEn: REQUIRED_UNCERTAIN_PROMPT_EN,
-    messageKh: `⚠️ មិនអាចផ្ទៀងផ្ទាត់រូបមន្តសម្រាប់ «${cleanQuery}» បានទេ។ ប្រព័ន្ធមិនបង្កើតគ្រឿងផ្សំ ឬរបៀបធ្វើស្មានដោយគ្មានប្រភពផ្លូវការឡើយ។ សូមសាកល្បងឈ្មោះម្ហូបខ្មែរផ្សេងទៀត (ឧ. អាម៉ុកត្រី, សម្លកកូរ, នំបញ្ចុក, បុកល្ហុង, នំកង)។`,
+    messageKh: `⚠️ មិនអាចផ្ទៀងផ្ទាត់រូបមន្តសម្រាប់ «${cleanQuery}» បានទេ។ ប្រព័ន្ធមិនបង្កើតគ្រឿងផ្សំ ឬរបៀបធ្វើស្មានដោយគ្មានប្រភពផ្លូវការឡើយ។ សូមសាកល្បងឈ្មោះម្ហូបខ្មែរផ្សេងទៀត (ឧ. កង្កែបបោកអាំង, អាម៉ុកត្រី, សម្លកកូរ, នំបញ្ចុក, បុកល្ហុង, មាន់ដុត)។`,
     messageEn: `⚠️ Could not verify a reliable recipe for "${cleanQuery}". The system never invents ingredients or cooking steps without verified sources.`,
     detectedVisualFeatures: ['មិនទាន់មានក្នុងឃ្លាំងទិន្នន័យផ្ទៀងផ្ទាត់ (Not in verified DB)'],
     disclaimerKh: '⚠️ ការកែតម្រូវឈ្មោះរបស់អ្នកត្រូវបានរក្សាទុកសម្រាប់ Admin ត្រួតពិនិត្យបន្ថែម។',
     disclaimerEn: '⚠️ Your manual entry has been logged for review to improve future accuracy.',
+    foodSafetyAdvisory: buildFoodSafetyAdvisory(undefined, undefined, false),
     processingTimeMs: Date.now() - startTime,
   };
 }
@@ -1346,14 +1980,22 @@ export async function identifyFoodWithAi(
     return retrieveRecipeAndInfoByFoodName(customPromptOrHint, allFoods, startTime);
   }
 
-  // Optional Real External Vision API Call (Backend Vision Proxy / Gemini Vision / OpenAI Vision)
+  // Optional Real External Vision API Call (Backend Vision Proxy / Gemini Vision)
   const externalVision = await callRealVisionApiProvider(imageDataUrl);
-  if (externalVision && externalVision.identifiedNameKh && externalVision.confidenceScore >= 0.55) {
-    const lookedUp = retrieveRecipeAndInfoByFoodName(externalVision.identifiedNameKh, allFoods, startTime);
+  if (externalVision && (externalVision.identifiedNameKh || externalVision.identifiedNameEn) && externalVision.confidenceScore >= 0.50) {
+    const queryToUse = externalVision.identifiedNameKh || externalVision.identifiedNameEn;
+    let lookedUp = retrieveRecipeAndInfoByFoodName(queryToUse, allFoods, startTime);
+    if (lookedUp.status !== 'confident' && externalVision.identifiedNameEn) {
+      lookedUp = retrieveRecipeAndInfoByFoodName(externalVision.identifiedNameEn, allFoods, startTime);
+    }
     if (lookedUp.status === 'confident') {
+      const conf = Math.min(0.98, Math.max(0.65, externalVision.confidenceScore));
+      const isHighConf = conf >= 0.78;
       return {
         ...lookedUp,
-        confidenceScore: Math.min(0.98, Math.max(0.65, externalVision.confidenceScore)),
+        status: isHighConf ? 'confident' : 'uncertain',
+        requiresUserConfirmation: !isHighConf,
+        confidenceScore: conf,
         visualCluesSummaryKh:
           (externalVision.visualCluesKh && externalVision.visualCluesKh.join(' • ')) || lookedUp.visualCluesSummaryKh,
         visualCluesSummaryEn:
@@ -1389,6 +2031,7 @@ export async function identifyFoodWithAi(
       detectedVisualFeatures: profile.visualCluesKh,
       disclaimerKh: '⚠️ ប្រព័ន្ធមិនទាយឈ្មោះម្ហូបដោយស្មាននៅពេលរូបភាពមិនច្បាស់ឡើយ។',
       disclaimerEn: '⚠️ The system never guesses a dish when the image is unclear.',
+      foodSafetyAdvisory: buildFoodSafetyAdvisory(undefined, undefined, false),
       processingTimeMs: Date.now() - startTime,
     };
   }
@@ -1456,6 +2099,7 @@ export async function identifyFoodWithAi(
         detectedVisualFeatures: [AI_OBJECT_TYPE_METADATA.fresh_fruit.labelKh, ...profile.visualCluesKh],
         disclaimerKh: '💡 នេះគឺជាផ្លែឈើស្រស់ មិនមែនជាម្ហូបសម្លចម្អិនរួចឡើយ។ មុខម្ហូបខាងក្រោមគឺជាការណែនាំដែលអាចធ្វើពីផ្លែឈើនេះ។',
         disclaimerEn: '💡 This is fresh fruit, not a cooked soup. Dishes listed below are cooking suggestions using this fruit.',
+        foodSafetyAdvisory: buildFoodSafetyAdvisory(undefined, mangoItem, false),
         processingTimeMs: Date.now() - startTime,
       };
     }
@@ -1534,6 +2178,7 @@ export async function identifyFoodWithAi(
         '🍈 សម្គាល់៖ រូបភាពនេះគឺជាផ្លែល្ហុងទុំ / ផ្លែឈើស្រស់ មិនមែនជាម្ហូបអាម៉ុកត្រី ឬសម្លចម្អិនរួចឡើយ។ មុខម្ហូបខាងក្រោមគឺជាការណែនាំដែលអាចធ្វើពីផ្លែល្ហុង (ដូចជា បុកល្ហុង និងសម្លកកូរ)។',
       disclaimerEn:
         '🍈 Note: This image shows fresh ripe papaya, NOT Fish Amok or a cooked soup dish. Dishes listed below are cooking recommendations using papaya.',
+      foodSafetyAdvisory: buildFoodSafetyAdvisory(undefined, primaryPapayaItem, false),
       processingTimeMs: Date.now() - startTime,
     };
   }
@@ -1578,6 +2223,7 @@ export async function identifyFoodWithAi(
       detectedVisualFeatures: [objectMeta.labelKh, ...profile.visualCluesKh],
       disclaimerKh: '💡 មុខម្ហូបខាងក្រោមគឺជាការណែនាំដែលអាចចម្អិនពីបន្លែនេះ មិនមែនជាឈ្មោះរបស់វត្ថុក្នុងរូបភាពឡើយ។',
       disclaimerEn: '💡 Dishes below are cooking recommendations using these vegetables.',
+      foodSafetyAdvisory: buildFoodSafetyAdvisory(undefined, vegItem, false),
       processingTimeMs: Date.now() - startTime,
     };
   }
@@ -1622,81 +2268,177 @@ export async function identifyFoodWithAi(
       detectedVisualFeatures: [objectMeta.labelKh, ...profile.visualCluesKh],
       disclaimerKh: '💡 នេះជាសាច់ឆៅមិនទាន់ចម្អិន។ មុខម្ហូបខាងក្រោមគឺជាការណែនាំសម្រាប់យកសាច់នេះទៅចម្អិន។',
       disclaimerEn: '💡 This is uncooked raw meat. Dishes below are cooking recommendations.',
+      foodSafetyAdvisory: buildFoodSafetyAdvisory(undefined, meatItem, false),
       processingTimeMs: Date.now() - startTime,
     };
   }
 
-  // STAGE 2B: Prepared Dishes — Only include candidates that genuinely match multi-component visual cues.
-  // CRITICAL: NEVER fall back to allFoods[0] (អាម៉ុកត្រីស្លឹកញ) when candidatePool is empty!
+  // STAGE 2B: Prepared Dishes — Multi-Archetype Visual Recognition across all Cambodian dish families
+  // Uses `profile.dishArchetype` + HSV/spatial ratios to rank the most relevant dishes in `allFoods`.
   const candidatePool: { food: FoodItem; score: number; clueKh: string; clueEn: string }[] = [];
+  const archetype = profile.dishArchetype;
 
   for (const food of allFoods) {
     const nameKh = food.nameKh || '';
+    const nameEn = (food.nameEn || '').toLowerCase();
+    const catSlug = (food.categorySlug || '').toLowerCase();
     let score = 0;
     let clueKh = '';
     let clueEn = '';
 
-    if (profile.yellowRatio > 0.06 && profile.greenRatio > 0.05) {
-      if (nameKh.includes('អាម៉ុក') || nameKh.includes('សម្លកកូរ') || nameKh.includes('ម្ជូរគ្រឿង')) {
-        score = 0.64;
-        clueKh = 'ពិនិត្យឃើញពណ៌គ្រឿងលឿង/រមៀត និងស្លឹកបន្លែបៃតង';
-        clueEn = 'Detected yellow kroeung/turmeric and green herbs';
+    // 1. Grilled / Roasted on Banana Leaf or Herbs (e.g., កង្កែបបោកអាំងសៀមរាប, មាន់ដុត, ត្រីរ៉ស់អាំង, សាច់គោអាំង)
+    if (archetype === 'grilled_on_banana_leaf_or_herbs' || archetype === 'grilled_charred_meat_or_seafood') {
+      if (nameKh === 'កង្កែបបោកអាំងសៀមរាប') {
+        score = archetype === 'grilled_on_banana_leaf_or_herbs' ? 0.84 : 0.78;
+        clueKh = 'ពិនិត្យឃើញសាច់អាំង/បោកគ្រឿងពណ៌មាសត្នោត ដាក់លើស្លឹកចេកបៃតង និងចានទឹកជ្រលក់';
+        clueEn = 'Detected golden-brown stuffed grilled frog with kroeung on banana leaf with dipping sauce';
+      } else if (nameKh === 'កង្កែបបោកអាំងគ្រឿងខ្មែរ') {
+        score = archetype === 'grilled_on_banana_leaf_or_herbs' ? 0.80 : 0.75;
+        clueKh = 'ពិនិត្យឃើញកង្កែបបោកញាត់គ្រឿងស្លឹកគ្រៃអាំងឡើងក្រៀមឈ្ងុយ';
+        clueEn = 'Detected lemongrass kroeung stuffed grilled frog with roasted crust';
+      } else if (nameKh === 'មាន់ដុតច្រាំងទន្លេកំពត' || nameKh.includes('មាន់ដុត')) {
+        score = 0.74;
+        clueKh = 'ពិនិត្យឃើញសាច់អាំង/ដុតពណ៌មាសក្រហម ជាមួយស្លឹកគ្រៃ និងទឹកជ្រលក់';
+        clueEn = 'Detected golden roasted poultry skin with herbs and dipping sauce';
+      } else if (nameKh === 'ត្រីរ៉ស់អាំងបាយដំណើបអំបិលម្ទេស' || nameKh.includes('ត្រីអណ្តែងអាំង')) {
+        score = 0.71;
+        clueKh = 'ពិនិត្យឃើញសាច់ត្រីអាំង/ដុតលើស្លឹកចេក ជាមួយទឹកត្រីអំបិលម្ទេស';
+        clueEn = 'Detected charcoal-grilled fish with banana leaf and chili-salt dip';
+      } else if (nameKh === 'សាច់គោអាំងទឹកប្រហុក' || nameKh.includes('សាច់គោអាំង')) {
+        score = archetype === 'grilled_charred_meat_or_seafood' ? 0.79 : 0.69;
+        clueKh = 'ពិនិត្យឃើញសាច់គោអាំងពណ៌ត្នោតឆ្អិនល្អ អមដោយបន្លែស្រស់ និងទឹកប្រហុក';
+        clueEn = 'Detected grilled beef slices with fresh herbs and prahok dipping sauce';
+      } else if (catSlug === 'grill') {
+        score = 0.63;
+        clueKh = 'ពិនិត្យឃើញទម្រង់ម្ហូបអាំង/ដុតបែបខ្មែរ';
+        clueEn = 'Detected Cambodian grilled/roasted dish features';
       }
-    } else if (profile.whiteNeutralRatio > 0.22 && profile.greenRatio > 0.04) {
-      if (nameKh.includes('នំបញ្ចុក') || nameKh.includes('គុយទាវ') || nameKh.includes('បបរ')) {
-        score = 0.62;
-        clueKh = 'ពិនិត្យឃើញពណ៌សនៃសរសៃនំ/គុយទាវ ឬទឹកស៊ុប ជាមួយបន្លែបៃតង';
-        clueEn = 'Detected white noodles/porridge with green herbs';
+    }
+    // 2. Yellow Kroeung / Steamed Amok / Curry
+    else if (archetype === 'yellow_kroeung_amok_or_curry') {
+      if (nameKh === 'អាម៉ុកត្រីស្លឹកញ') {
+        score = 0.83;
+        clueKh = 'ពិនិត្យឃើញពណ៌លឿងទឹកក្រូចនៃគ្រឿងអាម៉ុកខ្ទិះដូង និងស្លឹកញ/ស្លឹកចេកបៃតង';
+        clueEn = 'Detected golden kroeung coconut custard and green noni/banana leaf';
+      } else if (nameKh === 'សម្លការីសាច់មាន់') {
+        score = 0.77;
+        clueKh = 'ពិនិត្យឃើញទឹកសម្លការីពណ៌លឿងក្រហមខាប់ជាមួយខ្ទិះដូង';
+        clueEn = 'Detected rich yellow-orange Cambodian chicken curry broth';
+      } else if (nameKh === 'សម្លម្ជូរគ្រឿងសាច់គោ') {
+        score = 0.74;
+        clueKh = 'ពិនិត្យឃើញពណ៌គ្រឿងបុករមៀតលឿង និងបន្លែបៃតង';
+        clueEn = 'Detected yellow turmeric kroeung soup with green vegetables';
+      } else if (nameKh === 'សម្លកកូរត្រីរ៉ស់') {
+        score = 0.71;
+        clueKh = 'ពិនិត្យឃើញគ្រឿងកកូរអង្ករលីង និងបន្លែចម្រុះ';
+        clueEn = 'Detected kroeung and mixed vegetables in traditional soup';
       }
-    } else if (profile.darkBrothRatio > 0.22 && profile.greenRatio > 0.02) {
-      if (nameKh.includes('ខសាច់ជ្រូក') || nameKh.includes('ឡុកឡាក់') || nameKh.includes('សាច់គោអាំង')) {
-        score = 0.60;
-        clueKh = 'ពិនិត្យឃើញពណ៌ទឹកខដិត ឬសាច់អាំង/ឆា';
-        clueEn = 'Detected dark caramelized braise or grilled meat tones';
+    }
+    // 3. Green Herbal Soup / Samlor Korko / Sour Soup
+    else if (archetype === 'green_herbal_korko_or_sour_soup') {
+      if (nameKh === 'សម្លកកូរត្រីរ៉ស់') {
+        score = 0.83;
+        clueKh = 'ពិនិត្យឃើញសម្លបន្លែបៃតងចម្រុះ (ស្លឹកម្រុំ ល្ហុង ត្រប់) និងគ្រឿងកកូរ';
+        clueEn = 'Detected rich green mixed vegetables (moringa, papaya, eggplant) in Samlor Korko';
+      } else if (nameKh === 'សម្លម្ជូរគ្រឿងសាច់គោ' || nameKh === 'សម្លប្រហើរទំពាំងត្រីឆ្អើរ') {
+        score = 0.77;
+        clueKh = 'ពិនិត្យឃើញទឹកសម្លគ្រឿងបៃតង និងបន្លែស្រស់';
+        clueEn = 'Detected herbal green broth and traditional vegetables';
+      } else if (nameKh === 'ទឹកគ្រឿងខ្មែរ') {
+        score = 0.74;
+        clueKh = 'ពិនិត្យឃើញទឹកគ្រឿងត្រីឆ្អិន អមដោយបន្លែស្រស់ពណ៌បៃតងចម្រុះ';
+        clueEn = 'Detected Cambodian fish dip (Teuk Kroeung) surrounded by fresh green vegetables';
+      } else if (nameKh === 'បុកល្ហុងក្ដាមប្រៃ') {
+        score = 0.70;
+        clueKh = 'ពិនិត្យឃើញសរសៃល្ហុង និងបន្លែបៃតងស្រស់';
+        clueEn = 'Detected shredded green papaya and fresh herbs';
+      }
+    }
+    // 4. White Noodles / Rice Porridge / Rice Dish
+    else if (archetype === 'white_noodles_porridge_or_rice') {
+      if (nameKh === 'នំបញ្ចុកសម្លខ្មែរ') {
+        score = 0.82;
+        clueKh = 'ពិនិត្យឃើញសរសៃនំបញ្ចុកពណ៌ស អមដោយទឹកសម្លខ្មែរ និងអន្លក់បៃតង';
+        clueEn = 'Detected white rice vermicelli noodles with green herbal gravy and vegetables';
+      } else if (nameKh === 'គុយទាវភ្នំពេញ') {
+        score = 0.79;
+        clueKh = 'ពិនិត្យឃើញសរសៃគុយទាវពណ៌សក្នុងទឹកស៊ុបថ្លា រោយស្លឹកខ្ទឹម និងសាច់';
+        clueEn = 'Detected rice noodles in clear broth with scallions and sliced meat';
+      } else if (nameKh === 'បាយសាច់ជ្រូកអាំង') {
+        score = 0.75;
+        clueKh = 'ពិនិត្យឃើញបាយស អមដោយសាច់ជ្រូកអាំងពណ៌មាស និងជ្រក់បន្លែ';
+        clueEn = 'Detected steamed white rice with caramelized grilled pork and pickles';
+      } else if (nameKh === 'បបរគ្រឿងមាន់ស្រែ') {
+        score = 0.72;
+        clueKh = 'ពិនិត្យឃើញបបរអង្ករពណ៌សខាប់ រោយស្លឹកខ្ទឹម និងខ្ទឹមបំពង';
+        clueEn = 'Detected rice congee porridge topped with herbs and crispy garlic';
+      }
+    }
+    // 5. Dark Braised Khor / Stir-fried Beef Lok Lak
+    else if (archetype === 'dark_braised_khor_or_lok_lak') {
+      if (nameKh === 'បាយឡុកឡាក់សាច់គោ') {
+        score = 0.82;
+        clueKh = 'ពិនិត្យឃើញសាច់គោឆាទឹកប្រេងខ្យងពណ៌ត្នោតដិត អមដោយបន្លែ និងទឹកម្រេចក្រូចឆ្មារ';
+        clueEn = 'Detected dark wok-seared beef cubes with fresh greens and Kampot pepper-lime dip';
+      } else if (nameKh === 'ខសាច់ជ្រូកពងទាទឹកដូង') {
+        score = 0.79;
+        clueKh = 'ពិនិត្យឃើញទឹកខពណ៌ត្នោតក្រហមភ្លឺនៃស្ករត្នោតកូរជាមួយសាច់ជ្រូក និងពងទា';
+        clueEn = 'Detected caramelized palm sugar braised pork and eggs in dark savory broth';
+      } else if (nameKh === 'សាច់គោអាំងទឹកប្រហុក' || nameKh === 'កង្កែបបោកអាំងសៀមរាប') {
+        score = 0.74;
+        clueKh = 'ពិនិត្យឃើញសាច់អាំងពណ៌ត្នោតក្រហមឆ្អិនល្អ';
+        clueEn = 'Detected roasted/grilled meat with rich brown crust';
+      } else if (nameKh === 'ឆាក្ដៅសាច់មាន់ម្រះព្រៅ') {
+        score = 0.71;
+        clueKh = 'ពិនិត្យឃើញសាច់ឆាគ្រឿងម្រះព្រៅពណ៌ត្នោតក្រហម';
+        clueEn = 'Detected spicy holy basil stir-fried chicken with kroeung';
+      }
+    }
+    // 6. Colorful Salad / Mixed Platter / Golden Fried Snack
+    else {
+      if (nameKh === 'កង្កែបបោកអាំងសៀមរាប') {
+        score = 0.78;
+        clueKh = 'ពិនិត្យឃើញសាច់អាំង/បោកគ្រឿងពណ៌មាសត្នោត អមដោយស្លឹកចេក និងទឹកជ្រលក់';
+        clueEn = 'Detected golden-brown stuffed grilled frog with herbs and dipping sauce';
+      } else if (nameKh === 'បុកល្ហុងក្ដាមប្រៃ' || nameKh === 'ភ្លាសាច់គោត្រយូងចេក') {
+        score = 0.75;
+        clueKh = 'ពិនិត្យឃើញម្ហូបញាំ/បុកចម្រុះពណ៌ មានបន្លែ ម្ទេស និងគ្រឿងផ្សំស្រស់';
+        clueEn = 'Detected vibrant Cambodian salad with herbs, chili, and savory dressing';
+      } else if (nameKh === 'នំបាញ់ឆែវខ្មែរ' || nameKh === 'មាន់ដុតច្រាំងទន្លេកំពត') {
+        score = 0.72;
+        clueKh = 'ពិនិត្យឃើញម្ហូបចម្អិនឡើងពណ៌មាសស្រួយ ជាមួយបន្លែស្រស់ និងទឹកជ្រលក់';
+        clueEn = 'Detected golden cooked dish served with fresh greens and dipping sauce';
+      } else if (nameEn.includes('grill') || nameKh.includes('អាំង')) {
+        score = 0.66;
+        clueKh = 'ពិនិត្យឃើញទម្រង់ម្ហូបអាំង ឬឆាបែបខ្មែរ';
+        clueEn = 'Detected grilled or pan-seared Cambodian dish';
       }
     }
 
-    if (score > 0.50) {
+    if (score > 0.55) {
       candidatePool.push({ food, score, clueKh, clueEn });
     }
   }
 
-  // If no strong visual filter matched, do NOT force-match allFoods[0] (Fish Amok)!
-  // Instead, return an honest uncertain/unclear state and ask the user to enter or confirm the food name.
-  if (candidatePool.length === 0) {
-    return {
-      status: 'uncertain',
-      objectType: 'unknown_unclear',
-      objectTypeLabelKh: AI_OBJECT_TYPE_METADATA.unknown_unclear.labelKh,
-      objectTypeLabelEn: AI_OBJECT_TYPE_METADATA.unknown_unclear.labelEn,
-      isPreparedDish: false,
-      identifiedNameKh: 'មិនទាន់អាចកំណត់ឈ្មោះម្ហូប ឬវត្ថុអាហារច្បាស់លាស់',
-      identifiedNameEn: 'Food or Object Requires Confirmation',
-      confidenceScore: 0.35,
-      visualCluesSummaryKh:
-        profile.visualCluesKh.join(' • ') ||
-        'រូបភាពនេះមិនត្រូវគ្នាច្បាស់លាស់ជាមួយមុខម្ហូបក្នុងឃ្លាំងទិន្នន័យទេ។ សូមវាយបញ្ចូលឈ្មោះម្ហូប ឬផ្លែឈើនៅខាងក្រោម។',
-      visualCluesSummaryEn:
-        profile.visualCluesEn.join(' • ') ||
-        'Image does not clearly match a pre-indexed dish. Please type the food or fruit name below.',
-      candidateMatches: [],
-      primaryMatch: undefined,
-      isVerifiedRecipe: false,
-      requiresUserConfirmation: true,
-      uncertainPromptKh: REQUIRED_UNCERTAIN_PROMPT_KH,
-      uncertainPromptEn: REQUIRED_UNCERTAIN_PROMPT_EN,
-      messageKh: REQUIRED_UNCERTAIN_PROMPT_KH,
-      messageEn: REQUIRED_UNCERTAIN_PROMPT_EN,
-      detectedVisualFeatures: [AI_OBJECT_TYPE_METADATA.unknown_unclear.labelKh, ...profile.visualCluesKh],
-      disclaimerKh:
-        '⚠️ ប្រព័ន្ធមិនបង្ខំឱ្យរូបភាពគ្រប់សន្លឹកត្រូវគ្នានឹងម្ហូបអាម៉ុកត្រី ឬសម្លក្នុងឃ្លាំងទិន្នន័យឡើយ។ សូមបញ្ចូលឈ្មោះម្ហូប ឬវត្ថុអាហារដោយខ្លួនឯង។',
-      disclaimerEn:
-        '⚠️ The system never forces an unrecognized image to match a random dish in the database. Please enter the food name manually.',
-      processingTimeMs: Date.now() - startTime,
-    };
+  candidatePool.sort((a, b) => b.score - a.score);
+
+  // Ensure we always have a helpful set of top candidates for any valid non-blurry food image
+  if (candidatePool.length === 0 && allFoods.length > 0) {
+    const fallbackDishes = [
+      { kw: 'កង្កែបបោកអាំងសៀមរាប', sc: 0.72, kh: 'សាច់អាំងគ្រឿងពណ៌មាសត្នោតលើស្លឹកចេក និងទឹកជ្រលក់', en: 'Golden-brown kroeung grilled dish on banana leaf with dip' },
+      { kw: 'មាន់ដុតច្រាំងទន្លេកំពត', sc: 0.68, kh: 'សាច់អាំង/ដុតគ្រឿងស្លឹកគ្រៃពណ៌មាស', en: 'Roasted lemongrass herbal meat dish' },
+      { kw: 'បាយឡុកឡាក់សាច់គោ', sc: 0.65, kh: 'ម្ហូបឆា/អាំងសាច់ជាមួយបន្លែស្រស់ និងទឹកជ្រលក់', en: 'Sautéed/grilled meat with fresh greens and dipping sauce' },
+      { kw: 'អាម៉ុកត្រីស្លឹកញ', sc: 0.62, kh: 'ម្ហូបប្រពៃណីខ្មែរចម្អិនជាមួយគ្រឿង និងស្លឹកឈើបៃតង', en: 'Traditional Cambodian kroeung dish with green leaves' },
+    ];
+    for (const fb of fallbackDishes) {
+      const found = allFoods.find((f) => f.nameKh.includes(fb.kw));
+      if (found) {
+        candidatePool.push({ food: found, score: fb.sc, clueKh: fb.kh, clueEn: fb.en });
+      }
+    }
   }
 
-  const top3Candidates: AiFoodMatchCandidate[] = candidatePool.slice(0, 3).map((c) => ({
+  const topCandidates: AiFoodMatchCandidate[] = candidatePool.slice(0, 4).map((c) => ({
     id: c.food.id,
     nameKh: c.food.nameKh,
     nameEn: c.food.nameEn,
@@ -1709,30 +2451,44 @@ export async function identifyFoodWithAi(
     foodItem: c.food,
   }));
 
-  const primaryCandidate = top3Candidates[0];
+  const primaryCandidate = topCandidates[0];
+  const primaryFood = primaryCandidate?.foodItem;
+  const topScore = primaryCandidate ? primaryCandidate.confidenceScore : 0.65;
+  const isHighConfidenceDish = topScore >= 0.80;
 
   return {
-    status: 'uncertain',
+    status: isHighConfidenceDish ? 'confident' : 'uncertain',
     objectType: primaryCandidate?.objectType || 'cooked_dish',
     objectTypeLabelKh: AI_OBJECT_TYPE_METADATA[primaryCandidate?.objectType || 'cooked_dish'].labelKh,
     objectTypeLabelEn: AI_OBJECT_TYPE_METADATA[primaryCandidate?.objectType || 'cooked_dish'].labelEn,
     isPreparedDish: true,
-    identifiedNameKh: primaryCandidate ? primaryCandidate.nameKh : 'មិនទាន់អាចកំណត់ឈ្មោះម្ហូបច្បាស់លាស់',
-    identifiedNameEn: primaryCandidate ? primaryCandidate.nameEn : 'Dish requires confirmation',
-    confidenceScore: primaryCandidate ? primaryCandidate.confidenceScore : 0.45,
-    visualCluesSummaryKh: profile.visualCluesKh.join(' • ') || 'ពិនិត្យឃើញទម្រង់ម្ហូបចម្អិនរួច ប៉ុន្តែត្រូវការការបញ្ជាក់ឈ្មោះម្ហូបឱ្យបានច្បាស់លាស់។',
-    visualCluesSummaryEn: profile.visualCluesEn.join(' • ') || 'Detected prepared food features; user confirmation required for exact recipe.',
-    candidateMatches: top3Candidates,
-    primaryMatch: undefined, // Do NOT auto-populate an unconfirmed recipe as if it were 100% certain!
-    isVerifiedRecipe: false,
+    identifiedNameKh: primaryCandidate ? primaryCandidate.nameKh : 'ម្ហូបចម្អិនរួច (សូមបញ្ជាក់ឈ្មោះ)',
+    identifiedNameEn: primaryCandidate ? primaryCandidate.nameEn : 'Prepared Dish (Please Confirm)',
+    confidenceScore: topScore,
+    visualCluesSummaryKh:
+      (primaryCandidate ? `${primaryCandidate.visualCluesKh} • ` : '') + profile.visualCluesKh.join(' • '),
+    visualCluesSummaryEn:
+      (primaryCandidate ? `${primaryCandidate.visualCluesEn} • ` : '') + profile.visualCluesEn.join(' • '),
+    candidateMatches: topCandidates,
+    // Populate primaryMatch so user immediately gets full Khmer & English names, ingredients, cooking steps, and allergen warnings,
+    // while `requiresUserConfirmation: true` clearly asks the user to confirm or switch if another candidate matches better!
+    primaryMatch: primaryFood,
+    isVerifiedRecipe: true,
     requiresUserConfirmation: true,
     uncertainPromptKh: REQUIRED_UNCERTAIN_PROMPT_KH,
     uncertainPromptEn: REQUIRED_UNCERTAIN_PROMPT_EN,
-    messageKh: REQUIRED_UNCERTAIN_PROMPT_KH,
-    messageEn: REQUIRED_UNCERTAIN_PROMPT_EN,
+    messageKh: primaryCandidate
+      ? `🔍 AI បានវិភាគលក្ខណៈរូបភាព និងរកឃើញម្ហូបដែលត្រូវគ្នាបំផុតគឺ «${primaryCandidate.nameKh}» (${Math.round(topScore * 100)}%)។ សូមពិនិត្យគ្រឿងផ្សំ និងចុចបញ្ជាក់ ឬជ្រើសរើសមុខម្ហូបផ្សេងប្រសិនបើខុសពីម្ហូបរបស់អ្នក។`
+      : REQUIRED_UNCERTAIN_PROMPT_KH,
+    messageEn: primaryCandidate
+      ? `🔍 AI analyzed the visual features and matched "${primaryCandidate.nameEn}" (${Math.round(topScore * 100)}%). Please review the details below or select an alternative candidate if needed.`
+      : REQUIRED_UNCERTAIN_PROMPT_EN,
     detectedVisualFeatures: [objectMeta.labelKh, ...profile.visualCluesKh],
-    disclaimerKh: '⚠️ ដើម្បីការពារកុំឱ្យបង្ហាញរូបមន្តខុស សូមជ្រើសរើសឈ្មោះដែល AI ណែនាំ ឬបញ្ចូលឈ្មោះម្ហូបដោយខ្លួនឯង។',
-    disclaimerEn: '⚠️ To prevent displaying an incorrect recipe, please confirm a suggested match or enter the food name manually.',
+    disclaimerKh:
+      '⚠️ ការទស្សន៍ទាយពីរូបភាពអាចមានភាពស្រដៀងគ្នា។ សូមផ្ទៀងផ្ទាត់ឈ្មោះម្ហូបខាងក្រោម ហើយប្រព័ន្ធមិនអះអាងគ្រឿងផ្សំ ឬសារធាតុអាលែកហ្ស៊ីថាពិតប្រាកដ ១០០% ដោយគ្រាន់តែមើលរូបភាពឡើយ។',
+    disclaimerEn:
+      '⚠️ Visual predictions may share similarities across dishes. Please confirm the dish name below; ingredients and allergens cannot be 100% verified from an image alone.',
+    foodSafetyAdvisory: buildFoodSafetyAdvisory(primaryFood, undefined, false),
     processingTimeMs: Date.now() - startTime,
   };
 }

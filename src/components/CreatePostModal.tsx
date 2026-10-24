@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { X, Image, MapPin, Tag, Plus, Send } from 'lucide-react';
+import { tr } from '../utils/i18n';
 
 export const CreatePostModal: React.FC = () => {
   const { 
@@ -33,7 +34,7 @@ export const CreatePostModal: React.FC = () => {
     }
 
     addPost(
-      titleKh || (language === 'km' ? 'ចែករំលែកបទពិសោធន៍ម្ហូប និងដំណើរកម្សាន្ត' : 'Sharing food & travel experience'),
+      titleKh || tr(language, 'ចែករំលែកបទពិសោធន៍ម្ហូប និងដំណើរកម្សាន្ត', 'Sharing food & travel experience', '分享美食与旅游体验'),
       descriptionKh,
       photoUrl,
       categoryTag,
@@ -54,7 +55,7 @@ export const CreatePostModal: React.FC = () => {
           <div className="flex items-center gap-2">
             <Plus className="w-5 h-5 text-emerald-200" />
             <h2 className="font-moul text-sm sm:text-base text-white">
-              {language === 'km' ? 'ចែករំលែកការបង្ហោះថ្មី' : 'Share New Post'}
+              {tr(language, 'ចែករំលែកការបង្ហោះថ្មី', 'Share New Post', '发布新动态')}
             </h2>
           </div>
           <button
@@ -70,14 +71,19 @@ export const CreatePostModal: React.FC = () => {
           {/* Title */}
           <div>
             <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
-              {language === 'km' ? 'ចំណងជើងការបង្ហោះ *' : 'Post Title *'}
+              {tr(language, 'ចំណងជើងការបង្ហោះ *', 'Post Title *', '动态标题 *')}
             </label>
             <input
               type="text"
               required
               value={titleKh}
               onChange={(e) => setTitleKh(e.target.value)}
-              placeholder="ឧទាហរណ៍៖ អាហារពេលល្ងាចដ៏ឈ្ងុយឆ្ងាញ់នៅមាត់ស្ទឹងបាត់ដំបង!"
+              placeholder={tr(
+                language,
+                'ឧទាហរណ៍៖ អាហារពេលល្ងាចដ៏ឈ្ងុយឆ្ងាញ់នៅមាត់ស្ទឹងបាត់ដំបង!',
+                'e.g. Delicious dinner by the Battambang river!',
+                '例如：在马德望河畔享用美味晚餐！'
+              )}
               className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:border-[#059669] text-[#0F172A] dark:text-white"
             />
           </div>
@@ -85,14 +91,19 @@ export const CreatePostModal: React.FC = () => {
           {/* Description */}
           <div>
             <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
-              {language === 'km' ? 'ការពិពណ៌នា / រូបមន្ត / ការចែករំលែក *' : 'Description / Recipe / Experience *'}
+              {tr(language, 'ការពិពណ៌នា / រូបមន្ត / ការចែករំលែក *', 'Description / Recipe / Experience *', '详细描述 / 食谱做法 / 体验分享 *')}
             </label>
             <textarea
               rows={3}
               required
               value={descriptionKh}
               onChange={(e) => setDescriptionKh(e.target.value)}
-              placeholder="សរសេររៀបរាប់ពីរសជាតិអាហារ របៀបចម្អិន ឬបទពិសោធន៍ដើរលេង..."
+              placeholder={tr(
+                language,
+                'សរសេររៀបរាប់ពីរសជាតិអាហារ របៀបចម្អិន ឬបទពិសោធន៍ដើរលេង...',
+                'Share the food taste, cooking recipe, or travel story...',
+                '写下美食风味、烹饪做法或旅行心得...'
+              )}
               className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:border-[#059669] resize-none text-[#0F172A] dark:text-white"
             />
           </div>
@@ -102,32 +113,32 @@ export const CreatePostModal: React.FC = () => {
             <div>
               <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
                 <Tag className="w-3.5 h-3.5 inline mr-1 text-[#059669]" />
-                {language === 'km' ? 'ស្លាកប្រធានបទ' : 'Category Tag'}
+                {tr(language, 'ស្លាកប្រធានបទ', 'Category Tag', '分类标签')}
               </label>
               <select
                 value={categoryTag}
                 onChange={(e) => setCategoryTag(e.target.value)}
                 className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:border-[#059669] text-[#0F172A] dark:text-white font-khmer"
               >
-                <option value="ម្ហូបខ្មែរ">ម្ហូបខ្មែរ (Khmer Food)</option>
-                <option value="រូបមន្តម្ហូប">រូបមន្តម្ហូប (Cooking Recipe)</option>
-                <option value="ហាងអាហារឆ្ងាញ់">ហាងអាហារឆ្ងាញ់ (Food Review)</option>
-                <option value="ដំណើរកម្សាន្ត">ដំណើរកម្សាន្ត (Travel / Tour)</option>
-                <option value="គ្រឿងសមុទ្រ">គ្រឿងសមុទ្រ (Seafood)</option>
-                <option value="បង្អែម & ភេសជ្ជៈ">បង្អែម & ភេសជ្ជៈ (Dessert & Drink)</option>
+                <option value="ម្ហូបខ្មែរ">{tr(language, 'ម្ហូបខ្មែរ (Khmer Food)', 'Khmer Food', '高棉美食 (Khmer Food)')}</option>
+                <option value="រូបមន្តម្ហូប">{tr(language, 'រូបមន្តម្ហូប (Cooking Recipe)', 'Cooking Recipe', '烹饪食谱 (Cooking Recipe)')}</option>
+                <option value="ហាងអាហារឆ្ងាញ់">{tr(language, 'ហាងអាហារឆ្ងាញ់ (Food Review)', 'Food Review', '探店点评 (Food Review)')}</option>
+                <option value="ដំណើរកម្សាន្ត">{tr(language, 'ដំណើរកម្សាន្ត (Travel / Tour)', 'Travel / Tour', '旅游打卡 (Travel / Tour)')}</option>
+                <option value="គ្រឿងសមុទ្រ">{tr(language, 'គ្រឿងសមុទ្រ (Seafood)', 'Seafood', '海鲜美食 (Seafood)')}</option>
+                <option value="បង្អែម & ភេសជ្ជៈ">{tr(language, 'បង្អែម & ភេសជ្ជៈ (Dessert & Drink)', 'Dessert & Drink', '甜品与饮品 (Dessert & Drink)')}</option>
               </select>
             </div>
 
             <div>
               <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
                 <MapPin className="w-3.5 h-3.5 inline mr-1 text-rose-600" />
-                {language === 'km' ? 'ទីតាំង / ខេត្ត' : 'Location / Province'}
+                {tr(language, 'ទីតាំង / ខេត្ត', 'Location / Province', '所在地点 / 省份')}
               </label>
               <input
                 type="text"
                 value={locationName}
                 onChange={(e) => setLocationName(e.target.value)}
-                placeholder="រាជធានីភ្នំពេញ, សៀមរាប..."
+                placeholder={tr(language, 'រាជធានីភ្នំពេញ, សៀមរាប...', 'Phnom Penh, Siem Reap...', '金边市, 暹粒省...')}
                 className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:border-[#059669] text-[#0F172A] dark:text-white"
               />
             </div>
@@ -137,7 +148,7 @@ export const CreatePostModal: React.FC = () => {
           <div>
             <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
               <Image className="w-3.5 h-3.5 inline mr-1 text-[#059669]" />
-              {language === 'km' ? 'រូបភាពដែលត្រូវបង្ហោះ (Photo URL)' : 'Photo URL'}
+              {tr(language, 'រូបភាពដែលត្រូវបង្ហោះ (Photo URL)', 'Photo URL', '配图链接 (Photo URL)')}
             </label>
             <input
               type="url"
@@ -148,7 +159,7 @@ export const CreatePostModal: React.FC = () => {
             />
 
             <p className="text-[10px] text-slate-400 mb-1">
-              {language === 'km' ? 'ជ្រើសរើសរូបភាពគំរូស្អាតៗ៖' : 'Or choose a photo from presets:'}
+              {tr(language, 'ជ្រើសរើសរូបភាពគំរូស្អាតៗ៖', 'Or choose a photo from presets:', '或从精选预设配图中选择：')}
             </p>
             <div className="grid grid-cols-6 gap-1.5">
               {samplePhotos.map((url, i) => (
@@ -173,7 +184,7 @@ export const CreatePostModal: React.FC = () => {
             >
               <Send className="w-4 h-4" />
               <span>
-                {language === 'km' ? 'បង្ហោះទៅកាន់សហគមន៍' : 'Publish to Community Feed'}
+                {tr(language, 'បង្ហោះទៅកាន់សហគមន៍', 'Publish to Community Feed', '发布到社区动态')}
               </span>
             </button>
           </div>
