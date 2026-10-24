@@ -120,11 +120,26 @@ export const VipAddRestaurantModal: React.FC = () => {
     { nameKh: 'ខេត្តបាត់ដំបង', nameEn: 'Battambang' },
     { nameKh: 'ខេត្តកំពត', nameEn: 'Kampot' },
     { nameKh: 'ខេត្តកែប', nameEn: 'Kep' },
-    { nameKh: 'ខេត្តព្រះសីហនុ', nameEn: 'Sihanoukville' },
+    { nameKh: 'ខេត្តព្រះសីហនុ', nameEn: 'Preah Sihanouk' },
     { nameKh: 'ខេត្តកោះកុង', nameEn: 'Koh Kong' },
-    { nameKh: 'ខេត្តកំពង់ចាម', nameEn: 'Kampong Cham' },
-    { nameKh: 'ខេត្តកំពង់ស្ពឺ', nameEn: 'Kampong Speu' },
     { nameKh: 'ខេត្តមណ្ឌលគិរី', nameEn: 'Mondulkiri' },
+    { nameKh: 'ខេត្តរតនគិរី', nameEn: 'Ratanakiri' },
+    { nameKh: 'ខេត្តកណ្តាល', nameEn: 'Kandal' },
+    { nameKh: 'ខេត្តកំពង់ចាម', nameEn: 'Kampong Cham' },
+    { nameKh: 'ខេត្តកំពង់ឆ្នាំង', nameEn: 'Kampong Chhnang' },
+    { nameKh: 'ខេត្តកំពង់ស្ពឺ', nameEn: 'Kampong Speu' },
+    { nameKh: 'ខេត្តកំពង់ធំ', nameEn: 'Kampong Thom' },
+    { nameKh: 'ខេត្តក្រចេះ', nameEn: 'Kratie' },
+    { nameKh: 'ខេត្តតាកែវ', nameEn: 'Takeo' },
+    { nameKh: 'ខេត្តព្រៃវែង', nameEn: 'Prey Veng' },
+    { nameKh: 'ខេត្តស្វាយរៀង', nameEn: 'Svay Rieng' },
+    { nameKh: 'ខេត្តពោធិ៍សាត់', nameEn: 'Pursat' },
+    { nameKh: 'ខេត្តបន្ទាយមានជ័យ', nameEn: 'Banteay Meanchey' },
+    { nameKh: 'ខេត្តប៉ៃលិន', nameEn: 'Pailin' },
+    { nameKh: 'ខេត្តឧត្តរមានជ័យ', nameEn: 'Oddar Meanchey' },
+    { nameKh: 'ខេត្តព្រះវិហារ', nameEn: 'Preah Vihear' },
+    { nameKh: 'ខេត្តស្ទឹងត្រែង', nameEn: 'Stung Treng' },
+    { nameKh: 'ខេត្តត្បូងឃ្មុំ', nameEn: 'Tboung Khmum' },
   ];
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -137,76 +152,93 @@ export const VipAddRestaurantModal: React.FC = () => {
     setIsVerifyingAi(true);
     setAiReport(null);
 
-    const finalProfile = (shopPhotos[0] || '').trim() || '/Shop/rest-1.jpg';
-    const combinedGallery = Array.from(new Set([finalProfile, ...shopPhotos]));
+    try {
+      const finalProfile = (shopPhotos[0] || '').trim() || '/Shop/rest-1.jpg';
+      const combinedGallery = Array.from(new Set([finalProfile, ...shopPhotos])).filter(Boolean);
 
-    // Run Server-Side AI Food-Business Verification before saving or publishing
-    const serverReport = await verifyFoodBusinessOnServer({
-      nameKh: nameKh.trim(),
-      nameEn: nameEn.trim() || nameKh.trim(),
-      descriptionKh: descriptionKh.trim(),
-      descriptionEn: nameEn.trim(),
-      signatureDishesKh: signatureDish.trim() ? [signatureDish.trim()] : [],
-      addressKh: addressKh.trim() || `${provinceKh} ប្រទេសកម្ពុជា`,
-      provinceKh,
-      phone: phone.trim(),
-      photoUrl: finalProfile,
-      profileImage: finalProfile,
-      foodImages: shopPhotos,
-      galleryPhotos: combinedGallery,
-      ownerId: currentUser?.id,
-      ownerName: currentUser?.name,
-    });
+      // Run Server-Side AI Food-Business Verification before saving or publishing
+      const serverReport = await verifyFoodBusinessOnServer({
+        nameKh: nameKh.trim(),
+        nameEn: nameEn.trim() || nameKh.trim(),
+        descriptionKh: descriptionKh.trim(),
+        descriptionEn: nameEn.trim(),
+        signatureDishesKh: signatureDish.trim() ? [signatureDish.trim()] : [],
+        addressKh: addressKh.trim() || `${provinceKh} ប្រទេសកម្ពុជា`,
+        provinceKh,
+        phone: phone.trim(),
+        photoUrl: finalProfile,
+        profileImage: finalProfile,
+        foodImages: shopPhotos,
+        galleryPhotos: combinedGallery,
+        ownerId: currentUser?.id,
+        ownerName: currentUser?.name,
+      });
 
-    setIsVerifyingAi(false);
-    setAiReport(serverReport);
+      setAiReport(serverReport);
 
-    // 1. If AI determines the business is unrelated to prepared food -> Reject and explain in Khmer
-    if (serverReport.decision === 'rejected') {
-      showToast(isKm ? serverReport.reasonKh : serverReport.reasonEn, 'warning');
-      return;
+      // 1. If AI determines the business is unrelated to prepared food -> Reject and explain in Khmer
+      if (serverReport.decision === 'rejected') {
+        showToast(isKm ? serverReport.reasonKh : serverReport.reasonEn, 'warning');
+        return;
+      }
+
+      const newRestData = {
+        nameKh: nameKh.trim(),
+        nameEn: nameEn.trim() || nameKh.trim(),
+        descriptionKh: descriptionKh.trim() || 'ភោជនីយដ្ឋានម្ហូបខ្មែររសជាតិដើម ផាសុកភាព និងអនាម័យខ្ពស់។',
+        descriptionEn: nameEn.trim() ? `${nameEn.trim()} authentic restaurant.` : 'Authentic Khmer restaurant.',
+        photoUrl: finalProfile,
+        profileImage: finalProfile,
+        foodImages: shopPhotos,
+        galleryPhotos: combinedGallery,
+        addressKh: addressKh.trim() || `${provinceKh} ប្រទេសកម្ពុជា`,
+        addressEn: `${provinceEn}, Cambodia`,
+        provinceKh,
+        provinceEn,
+        phone: phone.trim() || currentUser?.phone || '012 345 678',
+        openingHoursKh,
+        openingHoursEn: '07:00 AM - 09:00 PM',
+        priceLevel,
+        mapUrl: `https://maps.google.com/?q=${encodeURIComponent(nameKh.trim())}`,
+        latitude: 11.5564,
+        longitude: 104.9282,
+        signatureDishesKh: signatureDish.trim() ? [signatureDish.trim()] : ['ម្ហូបពិសេសប្រចាំហាង'],
+        isFeatured: serverReport.decision === 'approved',
+        isVerified: serverReport.decision === 'approved',
+        membershipTier: 'premium' as const,
+        status: (serverReport.decision === 'pending_review' ? 'pending' : 'approved') as 'approved' | 'pending' | 'rejected',
+        aiCategoryVerification: serverReport,
+        ownerId: currentUser?.id,
+        ownerName: currentUser?.name,
+        ownerPhone: phone.trim() || currentUser?.phone || '',
+      };
+
+      const created = addRestaurant(newRestData);
+      if (!created) return;
+
+      // Reset form state cleanly
+      setNameKh('');
+      setNameEn('');
+      setAddressKh('');
+      setDescriptionKh('');
+      setSignatureDish('');
+      setShopPhotos(['/foods/food-1.jpg']);
+      setAiReport(null);
+      setIsVipAddRestaurantModalOpen(false);
+
+      setManagingRestaurant(created);
+      setIsManageMenuModalOpen(true);
+    } catch (err: any) {
+      console.error('Error creating VIP shop:', err);
+      showToast(
+        isKm
+          ? 'មានបញ្ហាបច្ចេកទេសពេលបង្កើតហាង។ សូមពិនិត្យព័ត៌មាន រួចព្យាយាមម្ដងទៀត!'
+          : 'An unexpected error occurred while creating your shop. Please try again!',
+        'warning'
+      );
+    } finally {
+      setIsVerifyingAi(false);
     }
-
-    const newRestData = {
-      nameKh: nameKh.trim(),
-      nameEn: nameEn.trim() || nameKh.trim(),
-      descriptionKh: descriptionKh.trim() || 'ភោជនីយដ្ឋានម្ហូបខ្មែររសជាតិដើម ផាសុកភាព និងអនាម័យខ្ពស់។',
-      descriptionEn: nameEn.trim() ? `${nameEn.trim()} authentic restaurant.` : 'Authentic Khmer restaurant.',
-      photoUrl: finalProfile,
-      profileImage: finalProfile,
-      foodImages: shopPhotos,
-      galleryPhotos: combinedGallery,
-      addressKh: addressKh.trim() || `${provinceKh} ប្រទេសកម្ពុជា`,
-      addressEn: `${provinceEn}, Cambodia`,
-      provinceKh,
-      provinceEn,
-      phone: phone.trim() || '012 345 678',
-      openingHoursKh,
-      openingHoursEn: '07:00 AM - 09:00 PM',
-      priceLevel,
-      mapUrl: `https://maps.google.com/?q=${encodeURIComponent(nameKh)}`,
-      latitude: 11.5564,
-      longitude: 104.9282,
-      signatureDishesKh: signatureDish.trim() ? [signatureDish.trim()] : ['ម្ហូបពិសេសប្រចាំហាង'],
-      isFeatured: serverReport.decision === 'approved',
-      isVerified: serverReport.decision === 'approved',
-      membershipTier: 'premium' as const,
-      status: (serverReport.decision === 'pending_review' ? 'pending' : 'approved') as 'approved' | 'pending' | 'rejected',
-      aiCategoryVerification: serverReport,
-      ownerId: currentUser?.id,
-      ownerName: currentUser?.name,
-      ownerPhone: phone.trim(),
-    };
-
-    const created = addRestaurant(newRestData);
-    if (!created) return;
-
-    setIsVipAddRestaurantModalOpen(false);
-    setShopPhotos(['/foods/food-1.jpg']);
-    setAiReport(null);
-
-    setManagingRestaurant(created);
-    setIsManageMenuModalOpen(true);
   };
 
   return (

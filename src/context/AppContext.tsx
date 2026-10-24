@@ -1790,6 +1790,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Automatic Pre-Update Database & VIP Snapshot Backup whenever App Version changes
   useEffect(() => {
     try {
+      const APP_VERSION = '2.1.0';
       const lastBackedUpVersion = localStorage.getItem('kft_last_backed_up_version');
       if (lastBackedUpVersion !== APP_VERSION) {
         const activeVips = users.filter(
@@ -7214,12 +7215,80 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     companion: 'solo' | 'couple' | 'friends' | 'family'
   ): TripPlan => {
     verifyBackendVipFeatureAccess('ផែនការដើរលេង AI', 'AI Trip Planner');
-    const provDestinations = destinations.filter(d => d.provinceKh.includes(provinceKh) || provinceKh.includes(d.provinceKh));
+
+    const normalizeProvKey = (s: string) =>
+      (s || '')
+        .replace(/^ខេត្ត|^រាជធានី|^ក្រុង/g, '')
+        .replace(/ណ្ដ/g, 'ណ្ត')
+        .replace(/\s+/g, '')
+        .trim();
+
+    const targetCore = normalizeProvKey(provinceKh);
+
+    const PROVINCE_EN_MAP: Record<string, { en: string; specialtyKh: string; specialtyEn: string }> = {
+      'ភ្នំពេញ': { en: 'Phnom Penh', specialtyKh: 'គុយទាវភ្នំពេញ និងអាម៉ុកត្រី', specialtyEn: 'Phnom Penh Noodle Soup & Fish Amok' },
+      'សៀមរាប': { en: 'Siem Reap', specialtyKh: 'នំបញ្ចុកសម្លប្រហើរសៀមរាប និងប្រហុកខ្ទិះ', specialtyEn: 'Siem Reap Nom Banh Chok & Prahok Ktis' },
+      'កំពត': { en: 'Kampot', specialtyKh: 'ក្ដាមឆាម្រេចកំពត និងទុរេនកំពត', specialtyEn: 'Kampot Pepper Crab & Durian' },
+      'ព្រះសីហនុ': { en: 'Preah Sihanouk', specialtyKh: 'គ្រឿងសមុទ្រអាំងស្រស់ៗ និងមឹកអាំងទឹកត្រីកោះកុង', specialtyEn: 'Fresh Grilled Seafood & Squid' },
+      'មណ្ឌលគិរី': { en: 'Mondulkiri', specialtyKh: 'សម្លព្រង់ក្នុងបំពង់ឫស្សី និងកាហ្វេមណ្ឌលគិរី', specialtyEn: 'Bamboo Tube Soup & Mondulkiri Highland Coffee' },
+      'កែប': { en: 'Kep', specialtyKh: 'ក្ដាមសេះឆាម្រេចខ្ចី និងត្រីដុតអំបិលម្ទេស', specialtyEn: 'Kep Blue Crab with Green Pepper' },
+      'បាត់ដំបង': { en: 'Battambang', specialtyKh: 'ណែមបាត់ដំបង និងគុយទាវបាត់ដំបង', specialtyEn: 'Battambang Fermented Fish Rolls & Noodles' },
+      'កោះកុង': { en: 'Koh Kong', specialtyKh: 'បង្គា និងក្ដាមស្រស់ទឹកត្រីកោះកុង', specialtyEn: 'Koh Kong Fresh Prawns & Spicy Dipping Sauce' },
+      'រតនគិរី': { en: 'Ratanakiri', specialtyKh: 'សាច់គោអាំងភ្នំ និងបាយបំពង់ឫស្សី', specialtyEn: 'Highland Grilled Beef & Bamboo Sticky Rice' },
+      'កណ្តាល': { en: 'Kandal', specialtyKh: 'មាន់ដុតស្អាង និងត្រីទន្លេមេគង្គស្រស់ៗ', specialtyEn: 'Mekong River Fish & Roasted Free-Range Chicken' },
+      'កំពង់ចាម': { en: 'Kampong Cham', specialtyKh: 'នំបញ្ចុកកំពង់ចាម និងក្រឡានថ្មគោល', specialtyEn: 'Kampong Cham Rice Noodles & Kralan' },
+      'កំពង់ឆ្នាំង': { en: 'Kampong Chhnang', specialtyKh: 'ត្រីឆ្អើរទន្លេសាប និងសម្លម្ជូរត្រីស្រស់', specialtyEn: 'Tonle Sap Smoked Fish & Sour Fish Soup' },
+      'កំពង់ស្ពឺ': { en: 'Kampong Speu', specialtyKh: 'មាន់ដុតគិរីរម្យ និងបង្អែមស្ករត្នោតកំពង់ស្ពឺ', specialtyEn: 'Kirirom Roasted Chicken & Palm Sugar Desserts' },
+      'កំពង់ធំ': { en: 'Kampong Thom', specialtyKh: 'ត្រីប្រហុកស្ទឹងសែន និងនំបញ្ចុកសម្លខ្មែរ', specialtyEn: 'Stung Sen River Fish Specialties' },
+      'ក្រចេះ': { en: 'Kratie', specialtyKh: 'ក្រឡានថ្មគ្រែ និងត្រីទន្លេមេគង្គចំហុយ', specialtyEn: 'Thma Krae Kralan Bamboo Rice & Mekong Fish' },
+      'តាកែវ': { en: 'Takeo', specialtyKh: 'បង្កងទឹកសាបតាកែវ និងពងទាកូនតាកែវ', specialtyEn: 'Takeo Giant Freshwater Prawns' },
+      'ព្រៃវែង': { en: 'Prey Veng', specialtyKh: 'ត្រីស្រែដុត និងម្ហូបខ្មែរតាមដងទន្លេ', specialtyEn: 'Countryside Grilled Fish & River Delicacies' },
+      'ស្វាយរៀង': { en: 'Svay Rieng', specialtyKh: 'បាញ់ស៊ុងស្វាយរៀង និងសាច់គោអាំងទឹកប្រហុក', specialtyEn: 'Svay Rieng Banh Sung Vermicelli & Grilled Beef' },
+      'ពោធិ៍សាត់': { en: 'Pursat', specialtyKh: 'ត្រីឆ្អើរពោធិ៍សាត់ និងក្រូចពោធិ៍សាត់ផ្អែមឆ្ងាញ់', specialtyEn: 'Pursat Smoked Fish & Sweet Oranges' },
+      'បន្ទាយមានជ័យ': { en: 'Banteay Meanchey', specialtyKh: 'បាយមាន់សិរីសោភ័ណ និងសម្លកកូរខ្មែរ', specialtyEn: 'Serei Saophoan Chicken Rice & Samlor Korko' },
+      'ប៉ៃលិន': { en: 'Pailin', specialtyKh: 'មីកូឡាប៉ៃលិន និងផ្លែតាង៉ែនប៉ៃលិន', specialtyEn: 'Pailin Mee Kola Noodles & Longan' },
+      'ឧត្តរមានជ័យ': { en: 'Oddar Meanchey', specialtyKh: 'មាន់ដុតជើងភ្នំដងរែក និងសម្លម្ជូរព្រៃ', specialtyEn: 'Dangrek Mountain Roasted Chicken' },
+      'ព្រះវិហារ': { en: 'Preah Vihear', specialtyKh: 'សាច់គោអាំងទឹកប្រហុក និងបាយដំណើបភ្នំត្បែង', specialtyEn: 'Preah Vihear Grilled Beef with Prahok Dip' },
+      'ស្ទឹងត្រែង': { en: 'Stung Treng', specialtyKh: 'ត្រីប៉ាស៊ីអ៊ីទន្លេមេគង្គ និងសម្លម្ជូរត្រីទន្លេ', specialtyEn: 'Mekong Pase Ee Fish & River Fish Soup' },
+      'ត្បូងឃ្មុំ': { en: 'Tboung Khmum', specialtyKh: 'គុយទាវ និងម្ហូបប្រពៃណីតាមដងទន្លេមេគង្គ', specialtyEn: 'Traditional Mekong Countryside Cuisine' },
+    };
+
+    const meta = PROVINCE_EN_MAP[targetCore] || {
+      en: provinceKh,
+      specialtyKh: 'ម្ហូបខ្មែរប្រពៃណីប្រចាំតំបន់',
+      specialtyEn: 'Authentic Regional Khmer Cuisine',
+    };
+
+    const provDestinations = destinations.filter(d => {
+      const dCore = normalizeProvKey(d.provinceKh);
+      return dCore === targetCore || dCore.includes(targetCore) || targetCore.includes(dCore);
+    });
     const poolDest = provDestinations.length > 0 ? provDestinations : destinations;
     
-    const provRestaurants = restaurants.filter(r => r.provinceKh.includes(provinceKh) || provinceKh.includes(r.provinceKh));
+    const provRestaurants = restaurants.filter(r => {
+      const rCore = normalizeProvKey(r.provinceKh);
+      return rCore === targetCore || rCore.includes(targetCore) || targetCore.includes(rCore);
+    });
     const poolRest = provRestaurants.length > 0 ? provRestaurants : restaurants;
-    
+
+    const companionLabelKh =
+      companion === 'solo'
+        ? 'ដំណើរកម្សាន្តម្នាក់ឯងបែបផ្សងព្រេង'
+        : companion === 'couple'
+        ? 'ដំណើរកម្សាន្តគូស្នេហ៍រ៉ូមែនទិក'
+        : companion === 'family'
+        ? 'ដំណើរកម្សាន្តគ្រួសារដ៏កក់ក្តៅ'
+        : 'ដំណើរកម្សាន្តជួបជុំមិត្តភក្តិសប្បាយៗ';
+
+    const companionLabelEn =
+      companion === 'solo'
+        ? 'Solo Adventure'
+        : companion === 'couple'
+        ? 'Romantic Couple Getaway'
+        : companion === 'family'
+        ? 'Family Vacation'
+        : 'Friends Group Trip';
+
     const days: any[] = [];
     const costPerDay = budgetLevel === 'budget' ? 35 : budgetLevel === 'medium' ? 75 : 160;
 
@@ -7232,51 +7301,51 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
       days.push({
         dayNumber: i,
-        titleKh: `ថ្ងៃទី ${i}៖ ដំណើរកម្សាន្ត និងស្វែងយល់រសជាតិនៅ${provinceKh}`,
-        titleEn: `Day ${i}: Exploring & Dining in ${provinceKh}`,
+        titleKh: `ថ្ងៃទី ${i}៖ ដំណើរកម្សាន្ត និងស្វែងយល់រសជាតិនៅ${provinceKh} (${companionLabelKh})`,
+        titleEn: `Day ${i}: Exploring & Dining in ${meta.en} (${companionLabelEn})`,
         dayEstimatedCostUsd: costPerDay,
         activities: [
           {
             timePeriod: 'morning',
             titleKh: 'ពេលព្រឹក៖ ទស្សនាទីតាំងទេសចរណ៍ និងថតរូបអនុស្សាវរីយ៍',
             titleEn: 'Morning: Scenic Sightseeing & Photography',
-            descKh: `ទស្សនាកម្សាន្តនៅ «${dest1.nameKh}» រីករាយជាមួយទេសភាពស្រស់ត្រកាល និងខ្យល់អាកាសបរិសុទ្ធ។`,
-            descEn: `Visit ${dest1.nameEn} and enjoy scenic panoramic views.`,
+            descKh: `ទស្សនាកម្សាន្តនៅ «${dest1.nameKh}» (${provinceKh}) រីករាយជាមួយទេសភាពស្រស់ត្រកាល និងខ្យល់អាកាសបរិសុទ្ធ។ ${dest1.descriptionKh ? dest1.descriptionKh.slice(0, 90) + '...' : ''}`,
+            descEn: `Visit ${dest1.nameEn || dest1.nameKh} in ${meta.en} and enjoy scenic panoramic views.`,
             placeNameKh: dest1.nameKh,
             photoUrl: dest1.photoUrl,
-            estimatedCostUsd: budgetLevel === 'budget' ? 5 : 15,
+            estimatedCostUsd: budgetLevel === 'budget' ? 5 : budgetLevel === 'medium' ? 15 : 30,
           },
           {
             timePeriod: 'lunch',
             titleKh: 'ពេលថ្ងៃត្រង់៖ អាហារថ្ងៃត្រង់រសជាតិដើមខ្មែរឆ្ងាញ់ពិសា',
             titleEn: 'Lunch: Authentic Local Cuisine',
-            descKh: `ពិសាអាហារថ្ងៃត្រង់នៅ «${rest1.nameKh}» ភ្លក្សម្ហូបពិសេស ${rest1.signatureDishesKh?.[0] || foodPick.nameKh}។`,
-            descEn: `Enjoy lunch at ${rest1.nameEn}.`,
+            descKh: `ពិសាអាហារថ្ងៃត្រង់នៅ «${rest1.nameKh}» ភ្លក្សម្ហូបពិសេសប្រចាំខេត្ត (${meta.specialtyKh} / ${rest1.signatureDishesKh?.[0] || foodPick.nameKh})។`,
+            descEn: `Enjoy lunch at ${rest1.nameEn || rest1.nameKh} featuring ${meta.specialtyEn}.`,
             placeNameKh: rest1.nameKh,
-            dishNameKh: rest1.signatureDishesKh?.[0] || foodPick.nameKh,
+            dishNameKh: rest1.signatureDishesKh?.[0] || meta.specialtyKh || foodPick.nameKh,
             photoUrl: rest1.photoUrl,
-            estimatedCostUsd: budgetLevel === 'budget' ? 10 : 25,
+            estimatedCostUsd: budgetLevel === 'budget' ? 10 : budgetLevel === 'medium' ? 25 : 50,
           },
           {
             timePeriod: 'afternoon',
             titleKh: 'ពេលរសៀល៖ ផ្សងព្រេង និងទស្សនាកន្លែងល្បីប្រចាំតំបន់',
-            titleEn: 'Afternoon: Adventure & Highlights',
-            descKh: `បន្តដំណើរទៅកាន់ «${dest2.nameKh}» ថតរូប Review ចែករំលែកលើ TikTok/Facebook។`,
-            descEn: `Explore ${dest2.nameEn}.`,
+            titleEn: 'Afternoon: Adventure & Regional Highlights',
+            descKh: `បន្តដំណើរទៅកាន់ «${dest2.nameKh}» ស្វែងយល់ពីវប្បធម៌ ធម្មជាតិ និងថតរូប Review ស្អាតៗនៅ${provinceKh}។`,
+            descEn: `Explore ${dest2.nameEn || dest2.nameKh} in ${meta.en}.`,
             placeNameKh: dest2.nameKh,
             photoUrl: dest2.photoUrl,
-            estimatedCostUsd: budgetLevel === 'budget' ? 5 : 15,
+            estimatedCostUsd: budgetLevel === 'budget' ? 5 : budgetLevel === 'medium' ? 15 : 30,
           },
           {
             timePeriod: 'dinner',
             titleKh: 'ពេលល្ងាច៖ អាហារពេលរាត្រី និងសម្រាកលម្ហែកាយ',
             titleEn: 'Dinner: Evening Dining & Relaxation',
-            descKh: `អាហារពេលល្ងាចនៅ «${rest2.nameKh}» ជាមួយបរិយាកាសកក់ក្តៅ និងម្ហូបឆ្ងាញ់ៗ។`,
-            descEn: `Dine at ${rest2.nameEn}.`,
+            descKh: `អាហារពេលល្ងាចនៅ «${rest2.nameKh}» ជាមួយបរិយាកាសកក់ក្តៅសម្រាប់${companionLabelKh} និងភ្លក្សមុខម្ហូប ${rest2.signatureDishesKh?.[0] || meta.specialtyKh}។`,
+            descEn: `Dine at ${rest2.nameEn || rest2.nameKh} in ${meta.en}.`,
             placeNameKh: rest2.nameKh,
-            dishNameKh: rest2.signatureDishesKh?.[0] || 'ម្ហូបពិសេសប្រចាំហាង',
+            dishNameKh: rest2.signatureDishesKh?.[0] || meta.specialtyKh,
             photoUrl: rest2.photoUrl,
-            estimatedCostUsd: budgetLevel === 'budget' ? 15 : 35,
+            estimatedCostUsd: budgetLevel === 'budget' ? 15 : budgetLevel === 'medium' ? 20 : 50,
           },
         ],
       });
@@ -7286,7 +7355,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       id: `plan-${Date.now()}`,
       userId: currentUser?.id || 'guest',
       provinceKh,
-      provinceEn: provinceKh,
+      provinceEn: meta.en,
       durationDays,
       budgetLevel,
       companion,

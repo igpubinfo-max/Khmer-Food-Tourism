@@ -30,7 +30,7 @@ export const HomeView: React.FC = () => {
     setSelectedFood, setSelectedRestaurant,
     setIsVipAddRestaurantModalOpen, setIsManageMenuModalOpen, setManagingRestaurant,
     getOwnedRestaurantsForUser, openManageMyVipStore, activeManagedShopId,
-    openUpgradeVipModal, deleteRestaurant, openGoogleMapsSearchModal
+    openUpgradeVipModal, deleteRestaurant, openGoogleMapsSearchModal, setIsAdminOpen
   } = useApp();
 
   const isKm = language === 'km';

@@ -675,11 +675,26 @@ export const AddRestaurantModal: React.FC = () => {
                   <option value="ខេត្តបាត់ដំបង">ខេត្តបាត់ដំបង (Battambang)</option>
                   <option value="ខេត្តកំពត">ខេត្តកំពត (Kampot)</option>
                   <option value="ខេត្តកែប">ខេត្តកែប (Kep)</option>
-                  <option value="ខេត្តព្រះសីហនុ">ខេត្តព្រះសីហនុ (Sihanoukville)</option>
+                  <option value="ខេត្តព្រះសីហនុ">ខេត្តព្រះសីហនុ (Preah Sihanouk)</option>
+                  <option value="ខេត្តកោះកុង">ខេត្តកោះកុង (Koh Kong)</option>
                   <option value="ខេត្តមណ្ឌលគិរី">ខេត្តមណ្ឌលគិរី (Mondulkiri)</option>
                   <option value="ខេត្តរតនគិរី">ខេត្តរតនគិរី (Ratanakiri)</option>
-                  <option value="ខេត្តកោះកុង">ខេត្តកោះកុង (Koh Kong)</option>
+                  <option value="ខេត្តកណ្តាល">ខេត្តកណ្តាល (Kandal)</option>
                   <option value="ខេត្តកំពង់ចាម">ខេត្តកំពង់ចាម (Kampong Cham)</option>
+                  <option value="ខេត្តកំពង់ឆ្នាំង">ខេត្តកំពង់ឆ្នាំង (Kampong Chhnang)</option>
+                  <option value="ខេត្តកំពង់ស្ពឺ">ខេត្តកំពង់ស្ពឺ (Kampong Speu)</option>
+                  <option value="ខេត្តកំពង់ធំ">ខេត្តកំពង់ធំ (Kampong Thom)</option>
+                  <option value="ខេត្តក្រចេះ">ខេត្តក្រចេះ (Kratie)</option>
+                  <option value="ខេត្តតាកែវ">ខេត្តតាកែវ (Takeo)</option>
+                  <option value="ខេត្តព្រៃវែង">ខេត្តព្រៃវែង (Prey Veng)</option>
+                  <option value="ខេត្តស្វាយរៀង">ខេត្តស្វាយរៀង (Svay Rieng)</option>
+                  <option value="ខេត្តពោធិ៍សាត់">ខេត្តពោធិ៍សាត់ (Pursat)</option>
+                  <option value="ខេត្តបន្ទាយមានជ័យ">ខេត្តបន្ទាយមានជ័យ (Banteay Meanchey)</option>
+                  <option value="ខេត្តប៉ៃលិន">ខេត្តប៉ៃលិន (Pailin)</option>
+                  <option value="ខេត្តឧត្តរមានជ័យ">ខេត្តឧត្តរមានជ័យ (Oddar Meanchey)</option>
+                  <option value="ខេត្តព្រះវិហារ">ខេត្តព្រះវិហារ (Preah Vihear)</option>
+                  <option value="ខេត្តស្ទឹងត្រែង">ខេត្តស្ទឹងត្រែង (Stung Treng)</option>
+                  <option value="ខេត្តត្បូងឃ្មុំ">ខេត្តត្បូងឃ្មុំ (Tboung Khmum)</option>
                 </select>
               </div>
 

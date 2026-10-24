@@ -1,15 +1,54 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
   X, Sparkles, Bot, Calendar, DollarSign, Users, MapPin, 
-  Clock, CheckCircle, Share2, BookmarkCheck, ArrowRight, RefreshCw, Send 
+  Clock, CheckCircle, Share2, BookmarkCheck, ArrowRight, RefreshCw, Send, Compass, Utensils
 } from 'lucide-react';
 import { TripPlan } from '../types';
+
+export interface CambodiaProvinceTripOption {
+  id: string;
+  nameKh: string;
+  shortKh: string;
+  nameEn: string;
+  nameZh: string;
+  highlightKh: string;
+  highlightEn: string;
+}
+
+export const ALL_25_CAMBODIA_PROVINCES: CambodiaProvinceTripOption[] = [
+  { id: 'ខេត្តសៀមរាប', nameKh: 'ខេត្តសៀមរាប', shortKh: 'សៀមរាប', nameEn: 'Siem Reap', nameZh: '暹粒省', highlightKh: 'ប្រាសាទអង្គរវត្ត ភ្នំគូលែន ផាប់ស្ទ្រីត និងភូមិវប្បធម៌', highlightEn: 'Angkor Wat, Phnom Kulen & Pub Street' },
+  { id: 'ខេត្តកំពត', nameKh: 'ខេត្តកំពត', shortKh: 'កំពត', nameEn: 'Kampot', nameZh: '贡布省', highlightKh: 'ឧទ្យានជាតិភ្នំបូកគោ ព្រែកកំពត និងចម្ការម្រេចកំពត', highlightEn: 'Bokor Mountain, Kampot River & Pepper Farms' },
+  { id: 'ខេត្តព្រះសីហនុ', nameKh: 'ខេត្តព្រះសីហនុ', shortKh: 'ព្រះសីហនុ', nameEn: 'Preah Sihanouk', nameZh: '西哈努克省', highlightKh: 'ឆ្នេរអូរឈើទាល កោះរ៉ុង កោះរ៉ុងសន្លឹម និងទឹកធ្លាក់ក្បាលឆាយ', highlightEn: 'Otres Beach, Koh Rong Islands & Kbal Chhay' },
+  { id: 'ខេត្តមណ្ឌលគិរី', nameKh: 'ខេត្តមណ្ឌលគិរី', shortKh: 'មណ្ឌលគិរី', nameEn: 'Mondulkiri', nameZh: '蒙多基里省', highlightKh: 'ទឹកធ្លាក់ប៊ូស្រា សមុទ្រឈើ និងដែនជម្រកសត្វដំរី', highlightEn: 'Bousra Waterfall, Sea Forest & Elephant Sanctuary' },
+  { id: 'រាជធានីភ្នំពេញ', nameKh: 'រាជធានីភ្នំពេញ', shortKh: 'ភ្នំពេញ', nameEn: 'Phnom Penh', nameZh: '金边市', highlightKh: 'ព្រះបរមរាជវាំង វត្តភ្នំ មាត់ទន្លេចតុមុខ និងផ្សារធំថ្មី', highlightEn: 'Royal Palace, Wat Phnom, Riverside & Central Market' },
+  { id: 'ខេត្តកែប', nameKh: 'ខេត្តកែប', shortKh: 'កែប', nameEn: 'Kep', nameZh: '白马省', highlightKh: 'ឆ្នេរកែប ផ្សារក្ដាម កោះទន្សាយ និងឧទ្យានជាតិកែប', highlightEn: 'Kep Beach, Crab Market, Rabbit Island & National Park' },
+  { id: 'ខេត្តបាត់ដំបង', nameKh: 'ខេត្តបាត់ដំបង', shortKh: 'បាត់ដំបង', nameEn: 'Battambang', nameZh: '马德望省', highlightKh: 'ភ្នំសំពៅ ឡូរីបាត់ដំបង ប្រាសាទបាណន់ និងស្ទឹងសង្កែ', highlightEn: 'Phnom Sampeau, Bamboo Train & Wat Banan' },
+  { id: 'ខេត្តកោះកុង', nameKh: 'ខេត្តកោះកុង', shortKh: 'កោះកុង', nameEn: 'Koh Kong', nameZh: '国公省', highlightKh: 'ទឹកធ្លាក់តាតៃ ព្រៃកោងកាងពាមក្រសោប និងតំបន់អារ៉ែង', highlightEn: 'Tatai Waterfall, Peam Krasop Mangroves & Areng Valley' },
+  { id: 'ខេត្តរតនគិរី', nameKh: 'ខេត្តរតនគិរី', shortKh: 'រតនគិរី', nameEn: 'Ratanakiri', nameZh: '拉达那基里省', highlightKh: 'បឹងយក្សឡោម ទឹកធ្លាក់កាចាញ ទឹកធ្លាក់ចាអុង និងវាលថ្មរំប្លង់', highlightEn: 'Yeak Laom Lake, Kachanh & Cha Ong Waterfalls' },
+  { id: 'ខេត្តកណ្តាល', nameKh: 'ខេត្តកណ្តាល', shortKh: 'កណ្តាល', nameEn: 'Kandal', nameZh: '干拉省', highlightKh: 'ភ្នំព្រះរាជទ្រព្យ (ឧត្តុង្គ) កោះឧកញ៉ាតី និងរមណីយដ្ឋានភ្នំធន់មន្ទ', highlightEn: 'Oudong Mountain, Koh Dach Silk Island & Mekong Cruises' },
+  { id: 'ខេត្តកំពង់ចាម', nameKh: 'ខេត្តកំពង់ចាម', shortKh: 'កំពង់ចាម', nameEn: 'Kampong Cham', nameZh: '磅湛省', highlightKh: 'ស្ពានឫស្សីកោះប៉ែន ប្រាសាទនគរបាជ័យ និងភ្នំប្រុសភ្នំស្រី', highlightEn: 'Koh Paen Bamboo Bridge, Wat Nokor & Phnom Pros' },
+  { id: 'ខេត្តកំពង់ឆ្នាំង', nameKh: 'ខេត្តកំពង់ឆ្នាំង', shortKh: 'កំពង់ឆ្នាំង', nameEn: 'Kampong Chhnang', nameZh: '磅清扬省', highlightKh: 'ភូមិស្មូនឆ្នាំងអណ្តូងឫស្សី ភូមិបណ្តែតទឹក និងភ្នំសន្ទTouch', highlightEn: 'Andoung Russei Pottery Village & Floating Villages' },
+  { id: 'ខេត្តកំពង់ស្ពឺ', nameKh: 'ខេត្តកំពង់ស្ពឺ', shortKh: 'កំពង់ស្ពឺ', nameEn: 'Kampong Speu', nameZh: '磅士卑省', highlightKh: 'ឧទ្យានជាតិគិរីរម្យ ទឹកធ្លាក់ជ្រាវ និងភ្នំឱរ៉ាល់', highlightEn: 'Kirirom Pine National Park, Chambok & Chreav Waterfall' },
+  { id: 'ខេត្តកំពង់ធំ', nameKh: 'ខេត្តកំពង់ធំ', shortKh: 'កំពង់ធំ', nameEn: 'Kampong Thom', nameZh: '磅同省', highlightKh: 'ប្រាសាទសំបូរព្រៃគុក (បេតិកភណ្ឌពិភពលោក) និងភ្នំសន្ទុក', highlightEn: 'Sambor Prei Kuk UNESCO Temples & Phnom Santuk' },
+  { id: 'ខេត្តក្រចេះ', nameKh: 'ខេត្តក្រចេះ', shortKh: 'ក្រចេះ', nameEn: 'Kratie', nameZh: '桔井省', highlightKh: 'អន្លង់ផ្សោតកាំពី កោះទ្រង់ និងប្រាសាទសសរ ១០០', highlightEn: 'Kampi Irrawaddy Dolphins, Koh Trong & 100-Pillar Pagoda' },
+  { id: 'ខេត្តតាកែវ', nameKh: 'ខេត្តតាកែវ', shortKh: 'តាកែវ', nameEn: 'Takeo', nameZh: '茶胶省', highlightKh: 'ភ្នំដា ប្រាសាទភ្នំជីសូរ ប្រាសាទតាព្រហ្មទន្លេបាទី និងភ្នំតាម៉ៅ', highlightEn: 'Phnom Da, Phnom Chisor, Tonle Bati & Phnom Tamao Zoo' },
+  { id: 'ខេត្តព្រៃវែង', nameKh: 'ខេត្តព្រៃវែង', shortKh: 'ព្រៃវែង', nameEn: 'Prey Veng', nameZh: '波罗勉省', highlightKh: 'រមណីយដ្ឋានបាភ្នំ ស្ពានអ្នកលឿង និងបឹងស្នេហ៍ទួលព័ន្ធតាឡី', highlightEn: 'Ba Phnom Resort, Neak Loeung Bridge & Boeung Sne Bird Sanctuary' },
+  { id: 'ខេត្តស្វាយរៀង', nameKh: 'ខេត្តស្វាយរៀង', shortKh: 'ស្វាយរៀង', nameEn: 'Svay Rieng', nameZh: '柴桢省', highlightKh: 'ប្រាសាទបាសាក់ រមណីយដ្ឋានព្រៃគគីរ និងមាត់ទន្លេវ៉ៃគោ', highlightEn: 'Prasat Basak, Prey Koki Eco-Park & Waiko Riverfront' },
+  { id: 'ខេត្តពោធិ៍សាត់', nameKh: 'ខេត្តពោធិ៍សាត់', shortKh: 'ពោធិ៍សាត់', nameEn: 'Pursat', nameZh: '菩萨省', highlightKh: 'ភ្នំ ១៥០០ (វាលវែង) ទឹកធ្លាក់ច្រកល្អៀង និងបូជនីយដ្ឋានអ្នកតាឃ្លាំងមឿង', highlightEn: 'Phnom 1500 Veal Veng, Chrok La Eang Waterfall & Kampong Luong' },
+  { id: 'ខេត្តបន្ទាយមានជ័យ', nameKh: 'ខេត្តបន្ទាយមានជ័យ', shortKh: 'បន្ទាយមានជ័យ', nameEn: 'Banteay Meanchey', nameZh: '卜迭棉芷省', highlightKh: 'ប្រាសាទបន្ទាយឆ្មារ ប្រាសាទបន្ទាយទ័ព និងអាងទឹកត្រពាំងថ្ម', highlightEn: 'Banteay Chhmar Temple, Banteay Top & Trapeang Thma Crane Sanctuary' },
+  { id: 'ខេត្តប៉ៃលិន', nameKh: 'ខេត្តប៉ៃលិន', shortKh: 'ប៉ៃលិន', nameEn: 'Pailin', nameZh: '拜林省', highlightKh: 'ភ្នំយ៉ាត ទឹកធ្លាក់ភ្នំខៀវ (អូរតាវ៉ៅ) និងចម្ការតាង៉ែនប៉ៃលិន', highlightEn: 'Phnom Yat Pagoda, Phnom Khiev Waterfall & Longan Orchards' },
+  { id: 'ខេត្តឧត្តរមានជ័យ', nameKh: 'ខេត្តឧត្តរមានជ័យ', shortKh: 'ឧត្តរមានជ័យ', nameEn: 'Oddar Meanchey', nameZh: '奥多棉芷省', highlightKh: 'តំបន់ប្រវត្តិសាស្ត្រអន្លង់វែង ស្ពានទ័ព និងជួរភ្នំដងរែក', highlightEn: 'Anlong Veng Historical Site, Spean Toap & Dangrek Mountains' },
+  { id: 'ខេត្តព្រះវិហារ', nameKh: 'ខេត្តព្រះវិហារ', shortKh: 'ព្រះវិហារ', nameEn: 'Preah Vihear', nameZh: '柏威夏省', highlightKh: 'ប្រាសាទព្រះវិហារ ប្រាសាទកោះកេរ និងប្រាសាទព្រះខ័នកំពង់ស្វាយ', highlightEn: 'Preah Vihear UNESCO Temple, Koh Ker Pyramid & Preah Khan' },
+  { id: 'ខេត្តស្ទឹងត្រែង', nameKh: 'ខេត្តស្ទឹងត្រែង', shortKh: 'ស្ទឹងត្រែង', nameEn: 'Stung Treng', nameZh: '上丁省', highlightKh: 'តំបន់រ៉ាមសារទន្លេមេគង្គ ទឹកធ្លាក់សុភមិត្ត និងកោះហាន', highlightEn: 'Mekong Ramsar Wetlands, Sopheakmit Waterfall & Koh Han' },
+  { id: 'ខេត្តត្បូងឃ្មុំ', nameKh: 'ខេត្តត្បូងឃ្មុំ', shortKh: 'ត្បូងឃ្មុំ', nameEn: 'Tboung Khmum', nameZh: '特本克蒙省', highlightKh: 'រមណីយដ្ឋានទឹកធ្លាក់ហោង ប្រាសាទព្រះធាតុបាស្រី និងចម្ការកៅស៊ូជប់', highlightEn: 'Haong Waterfall, Preah Theat Basrei Temple & Chup Rubber Estate' },
+];
 
 export const AiTripPlannerModal: React.FC = () => {
   const { 
     isAiTripPlannerModalOpen, setIsAiTripPlannerModalOpen,
-    generateAiTripPlan, saveTripPlan, language, showToast 
+    generateAiTripPlan, saveTripPlan, language, showToast,
+    destinations, restaurants, setSelectedDestination, setSelectedRestaurant
   } = useApp();
 
   const isKm = language === 'km';
@@ -25,20 +64,21 @@ export const AiTripPlannerModal: React.FC = () => {
   const [generatedPlan, setGeneratedPlan] = useState<TripPlan | null>(null);
   const [activeDayTab, setActiveDayTab] = useState<number>(1);
 
-  if (!isAiTripPlannerModalOpen) return null;
+  const selectedProvinceMeta = useMemo(() => {
+    const found =
+      ALL_25_CAMBODIA_PROVINCES.find(p => p.id === selectedProvince) ||
+      ALL_25_CAMBODIA_PROVINCES[0];
+    const core = found.shortKh.replace(/ណ្ដ/g, 'ណ្ត').trim();
+    const destCount = destinations.filter(d =>
+      (d.provinceKh || '').replace(/ណ្ដ/g, 'ណ្ត').includes(core)
+    ).length;
+    const restCount = restaurants.filter(r =>
+      (r.provinceKh || '').replace(/ណ្ដ/g, 'ណ្ត').includes(core)
+    ).length;
+    return { ...found, destCount, restCount };
+  }, [selectedProvince, destinations, restaurants]);
 
-  // Provinces list
-  const popularProvinces = [
-    'ខេត្តសៀមរាប',
-    'ខេត្តកំពត',
-    'ខេត្តព្រះសីហនុ',
-    'ខេត្តមណ្ឌលគិរី',
-    'រាជធានីភ្នំពេញ',
-    'ខេត្តកែប',
-    'ខេត្តបាត់ដំបង',
-    'ខេត្តកោះកុង',
-    'ខេត្តរតនគិរី',
-  ];
+  if (!isAiTripPlannerModalOpen) return null;
 
   const handleGenerate = () => {
     setIsGenerating(true);
@@ -112,7 +152,7 @@ export const AiTripPlannerModal: React.FC = () => {
         </div>
 
         {/* Content Body */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar font-khmer">
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain touch-pan-y [-webkit-overflow-scrolling:touch] p-4 pb-8 space-y-4 font-khmer">
           {/* AI Generating Loading State */}
           {isGenerating ? (
             <div className="py-16 text-center space-y-4">
@@ -131,26 +171,73 @@ export const AiTripPlannerModal: React.FC = () => {
           ) : !generatedPlan ? (
             /* Input Form Screen */
             <div className="space-y-4">
-              {/* 1. Destination Province */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                  <MapPin className="w-4 h-4 text-emerald-600" />
-                  <span>{isKm ? '១. ជ្រើសរើសខេត្តគោលដៅ៖' : '1. Select Province:'}</span>
-                </label>
+              {/* 1. Destination Province (All 25 Cambodian Provinces & Capital City) */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between gap-2">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                    <MapPin className="w-4 h-4 text-emerald-600" />
+                    <span>
+                      {isKm
+                        ? '១. ជ្រើសរើសខេត្តគោលដៅ (ទាំង ២៥ ខេត្ត/រាជធានី)៖'
+                        : '1. Select Province / City (All 25):'}
+                    </span>
+                  </label>
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold">
+                    25 ខេត្ត/រាជធានី
+                  </span>
+                </div>
+
+                {/* Full 25-Province Dropdown Selector */}
+                <select
+                  value={selectedProvince}
+                  onChange={e => setSelectedProvince(e.target.value)}
+                  className="w-full px-3 py-2.5 rounded-xl border border-emerald-500/40 bg-slate-50 dark:bg-slate-800 text-xs font-bold text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                >
+                  {ALL_25_CAMBODIA_PROVINCES.map((prov, idx) => (
+                    <option key={prov.id} value={prov.id}>
+                      {idx + 1}. {isKm ? `${prov.nameKh} (${prov.nameEn})` : `${prov.nameEn} (${prov.nameKh})`}
+                    </option>
+                  ))}
+                </select>
+
+                {/* All 25 Selectable Province Buttons Grid */}
                 <div className="grid grid-cols-3 gap-1.5">
-                  {popularProvinces.map(p => (
+                  {ALL_25_CAMBODIA_PROVINCES.map(p => (
                     <button
-                      key={p}
-                      onClick={() => setSelectedProvince(p)}
-                      className={`p-2 rounded-xl text-xs font-bold transition text-center truncate ${
-                        selectedProvince === p
-                          ? 'bg-[#064E3B] text-white shadow-xs'
-                          : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700'
+                      key={p.id}
+                      type="button"
+                      onClick={() => setSelectedProvince(p.id)}
+                      className={`p-2 rounded-xl text-xs font-bold transition text-center truncate cursor-pointer ${
+                        selectedProvince === p.id
+                          ? 'bg-[#064E3B] text-white shadow-xs ring-1 ring-emerald-400/50'
+                          : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-emerald-500/50'
                       }`}
                     >
-                      {p.replace('ខេត្ត', '').replace('រាជធានី', '')}
+                      {isKm ? p.shortKh : p.nameEn}
                     </button>
                   ))}
+                </div>
+
+                {/* Selected Province Tourism & Dining Info Preview */}
+                <div className="p-2.5 rounded-xl bg-emerald-50/80 dark:bg-slate-800/90 border border-emerald-500/30 space-y-1 text-[11px]">
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <span className="font-bold text-[#064E3B] dark:text-emerald-400">
+                      📍 {isKm ? selectedProvinceMeta.nameKh : selectedProvinceMeta.nameEn}
+                    </span>
+                    <div className="flex items-center gap-2 text-[10px] font-bold text-slate-600 dark:text-slate-300">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white dark:bg-slate-700">
+                        <Compass className="w-3 h-3 text-emerald-500" />
+                        {selectedProvinceMeta.destCount} {isKm ? 'តំបន់ទេសចរណ៍' : 'Spots'}
+                      </span>
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white dark:bg-slate-700">
+                        <Utensils className="w-3 h-3 text-amber-500" />
+                        {selectedProvinceMeta.restCount} {isKm ? 'ហាងអាហារ' : 'Shops'}
+                      </span>
+                    </div>
+                  </div>
+                  <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
+                    ✨ {isKm ? selectedProvinceMeta.highlightKh : selectedProvinceMeta.highlightEn}
+                  </p>
                 </div>
               </div>
 

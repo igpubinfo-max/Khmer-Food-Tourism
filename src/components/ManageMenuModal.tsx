@@ -227,6 +227,9 @@ export const ManageMenuModal: React.FC = () => {
 
   if (!isManageMenuModalOpen || !managingRestaurant) return null;
 
+  const currentRest =
+    restaurants.find((r) => r.id === managingRestaurant.id) || managingRestaurant;
+
   const isAdmin = 
     currentUser?.role === 'admin' || 
     currentUser?.id === 'admin-authorized-single' || 
