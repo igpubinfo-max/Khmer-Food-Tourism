@@ -2283,7 +2283,7 @@ export const ProfileView: React.FC = () => {
                   <h4 className="font-bold text-xs text-[#0F172A] dark:text-white font-khmer">
                     {isKm ? 'មុខម្ហូបដែលបានរក្សាទុក' : 'Saved Recipes'}
                   </h4>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 gap-4">
                     {savedFoods.map(f => <FoodCard key={f.id} food={f} />)}
                   </div>
                 </div>

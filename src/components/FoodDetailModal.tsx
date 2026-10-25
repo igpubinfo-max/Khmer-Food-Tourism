@@ -251,7 +251,6 @@ export const FoodDetailModal: React.FC = () => {
     nameEn: selectedFood.nameEn,
     description: isKm ? selectedFood.descriptionKh : selectedFood.descriptionEn,
     location: isKm ? `${selectedFood.categoryKh} • កម្ពុជា` : `${selectedFood.categoryEn} • Cambodia`,
-    priceDisplay: `${selectedFood.priceRiel.toLocaleString()} ៛ ($${selectedFood.priceUsd.toFixed(2)})`,
     signatureDishes: (selectedFood.ingredients || []).slice(0, 4).map(i => (isKm ? i.nameKh : i.nameEn)),
     photoUrl: selectedFood.photoUrl,
     itemType: 'food' as const,
@@ -339,7 +338,7 @@ export const FoodDetailModal: React.FC = () => {
                 nameEn: selectedFood.nameEn,
                 photoUrl: selectedFood.photoUrl,
                 categoryKh: selectedFood.categoryKh,
-                priceDisplay: `${selectedFood.priceRiel.toLocaleString()} ៛`,
+                priceDisplay: selectedFood.calories ? `${selectedFood.calories} kcal` : undefined,
                 rating: selectedFood.rating,
               })}
               className="p-2.5 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur-md shadow transition active:scale-90 text-amber-300"
@@ -801,7 +800,7 @@ export const FoodDetailModal: React.FC = () => {
                   subtitle: language === 'km' ? selectedFood.nameEn : selectedFood.nameKh,
                   photoUrl: selectedFood.photoUrl,
                   lines: [
-                    `💰 ${(selectedFood.priceUsd ?? 0).toFixed(2)} · ${(selectedFood.priceRiel ?? 0).toLocaleString()} ៛`,
+                    selectedFood.calories ? `🔥 ${selectedFood.calories} kcal · ⭐ ${selectedFood.rating ?? 4.8}` : `⭐ ${selectedFood.rating ?? 4.8}`,
                     getDishTags(selectedFood).slice(0, 3).map((t) => `${t.emoji} ${tagLabel(t, language)}`).join('  '),
                   ].filter(Boolean),
                 })}

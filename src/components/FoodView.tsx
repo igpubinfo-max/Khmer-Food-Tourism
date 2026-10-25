@@ -347,7 +347,7 @@ export const FoodView: React.FC = () => {
                 </div>
 
                 {/* Dishes in this category */}
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 gap-4">
                   {section.items.map((food) => (
                     <FoodCard key={food.id} food={food} />
                   ))}

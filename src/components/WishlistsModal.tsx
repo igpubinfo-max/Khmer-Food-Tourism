@@ -242,7 +242,7 @@ export const WishlistsModal: React.FC = () => {
                     <h4 className="font-bold text-xs sm:text-sm text-[#0F172A] dark:text-white truncate mt-0.5">
                       {getWishlistItemDisplayName(item)}
                     </h4>
-                    {item.priceDisplay && (
+                    {item.priceDisplay && item.type !== 'food' && (
                       <span className="text-[11px] font-mono text-[#059669] font-bold">
                         {item.priceDisplay}
                       </span>

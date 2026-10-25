@@ -573,7 +573,7 @@ export function buildCuratedCambodiaDiscoveryItems(
       sourcePlatform: 'wikimedia_api',
       targetType: 'food',
       targetId: food.id,
-      priceDisplay: `${(food.priceRiel || 12000).toLocaleString()} ៛`,
+      priceDisplay: food.calories ? `${food.calories} kcal` : undefined,
       rating: food.rating || 4.9,
       isNewToday: idx < 3,
       tagsKh: [food.categoryKh || 'ម្ហូបខ្មែរ', 'រូបមន្តចម្អិន'],
