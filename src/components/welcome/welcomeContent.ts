@@ -22,6 +22,23 @@ export const WELCOME_IMAGES = {
 
 export const WELCOME_SLIDES: WelcomeSlide[] = [
   {
+    id: 'passport',
+    image: WELCOME_IMAGES.hero.src,
+    imageWidth: WELCOME_IMAGES.hero.width,
+    imageHeight: WELCOME_IMAGES.hero.height,
+    objectPosition: '88% 50%',
+    headline: {
+      km: 'ស្វែងយល់ពីម្ហូប និងទេសចរណ៍កម្ពុជា',
+      en: 'Discover Cambodian Food & Travel',
+      zh: '探索柬埔寨美食与旅游',
+    },
+    sub: {
+      km: 'កត់ត្រាម្ហូបដែលអ្នកបានភ្លក់ ហើយអញ្ជើញមិត្តភក្តិ',
+      en: 'Record every dish you try and invite your friends.',
+      zh: '记录每道尝过的菜，并邀请好友。',
+    },
+  },
+  {
     id: 'food',
     image: WELCOME_IMAGES.hero.src,
     imageWidth: WELCOME_IMAGES.hero.width,
@@ -53,23 +70,6 @@ export const WELCOME_SLIDES: WelcomeSlide[] = [
       km: 'ភោជនីយដ្ឋាន និងទីកន្លែងទេសចរណ៍ទូទាំងកម្ពុជា',
       en: 'Restaurants, cafés and sights across Cambodia.',
       zh: '遍布柬埔寨的餐厅、咖啡馆与景点。',
-    },
-  },
-  {
-    id: 'passport',
-    image: WELCOME_IMAGES.hero.src,
-    imageWidth: WELCOME_IMAGES.hero.width,
-    imageHeight: WELCOME_IMAGES.hero.height,
-    objectPosition: '88% 50%',
-    headline: {
-      km: 'ស្វែងយល់ពីម្ហូប និងទេសចរណ៍កម្ពុជា',
-      en: 'Discover Cambodian Food & Travel',
-      zh: '探索柬埔寨美食与旅游',
-    },
-    sub: {
-      km: 'បោះត្រាម្ហូបដែលអ្នកបានភ្លក់ ហើយអញ្ជើញមិត្តភក្តិ',
-      en: 'Stamp every dish you try and invite your friends.',
-      zh: '为每道尝过的菜盖章，并邀请好友。',
     },
   },
 ];

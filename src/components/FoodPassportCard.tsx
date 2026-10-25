@@ -32,7 +32,7 @@ export const FoodPassportCard: React.FC = () => {
       tr(language, `បានភ្លក់ ${count} / ${total} មុខ (${pct}%)`, `Tried ${count} / ${total} dishes (${pct}%)`, `已品尝 ${count} / ${total} 道菜（${pct}%）`),
       unlocked.length > 0
         ? `🏅 ${unlocked.slice(0, 3).map((b) => badgeTitle(b, language)).join(' · ')}`
-        : tr(language, 'កំពុងប្រមូលត្រា...', 'Collecting stamps...', '正在收集印章...'),
+        : tr(language, 'កំពុងកត់ត្រា...', 'Recording dishes...', '正在记录菜品...'),
     ],
   });
 
@@ -92,9 +92,9 @@ export const FoodPassportCard: React.FC = () => {
         <p className="text-xs text-slate-500 dark:text-slate-400">
           {tr(
             language,
-            'ចុចប៊ូតុង «ខ្ញុំបានភ្លក់» លើមុខម្ហូប ដើម្បីប្រមូលត្រា។',
-            'Tap “I tried it” on any dish to collect your first stamp.',
-            '在任意菜品上点击“我吃过了”，收集第一枚印章。'
+            'ចុចប៊ូតុង «ខ្ញុំបានភ្លក់» លើមុខម្ហូប ដើម្បីកត់ត្រា។',
+            'Tap “I tried it” on any dish to record your first dish.',
+            '在任意菜品上点击“我吃过了”，记录第一道菜。'
           )}
         </p>
       )}

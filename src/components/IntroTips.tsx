@@ -34,9 +34,9 @@ export const IntroTips: React.FC = () => {
       title: tr(language, 'ស្វែងយល់ពីម្ហូប និងទេសចរណ៍កម្ពុជា', 'Discover Cambodian Food & Travel', '探索柬埔寨美食与旅游'),
       body: tr(
         language,
-        'ចុច «ខ្ញុំបានភ្លក់» លើម្ហូបនីមួយៗ ដើម្បីប្រមូលត្រា និងឡើងកម្រិត។',
-        'Tap “I tried it” on each dish to collect stamps and level up.',
-        '在每道菜上点击“我吃过了”，收集印章并升级。'
+        'ចុច «ខ្ញុំបានភ្លក់» លើម្ហូបនីមួយៗ ដើម្បីកត់ត្រា និងឡើងកម្រិត។',
+        'Tap “I tried it” on each dish to record dishes and level up.',
+        '在每道菜上点击“我吃过了”，记录菜品并升级。'
       ),
     },
     {

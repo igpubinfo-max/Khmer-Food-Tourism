@@ -235,7 +235,7 @@ export const SmartHubMenuModal: React.FC<Props> = ({ onClose }) => {
               <span className={`${iconBox} bg-emerald-100 text-emerald-700`}><BadgeCheck className="w-5 h-5" /></span>
               <span className="min-w-0 flex-1">
                 <span className="block text-sm font-bold text-slate-900 dark:text-white">
-                  {tr(language, 'ប្រមូលត្រាម្ហូប', 'Discover & Stamp Collection', '探索与印章收集')}
+                  {tr(language, 'កត់ត្រាម្ហូប', 'Discover & Dish Record', '探索与美食记录')}
                 </span>
                 <span className="block text-xs text-slate-500 dark:text-slate-400">
                   {level.emoji} {levelTitle(level, language)} · {stampCount} / {organizedFoods.length}
