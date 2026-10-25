@@ -71,9 +71,11 @@ jobs:
           mkdir -p android/app/build/outputs/apk/debug
           REL_APK=$(find android/app/build/outputs/apk/release -name "*.apk" 2>/dev/null | head -n 1)
           if [ -n "$REL_APK" ] && [ -f "$REL_APK" ]; then
-            cp "$REL_APK" android/app/build/outputs/apk/debug/KhmerFoodTourism-v2.1.0.apk
+            cp "$REL_APK" android/app/build/outputs/apk/debug/KhmerFoodTourism-v2.2.0.apk
+            cp "$REL_APK" android/app/build/outputs/apk/debug/KhmerFoodTourism-latest.apk
           elif [ -f android/app/build/outputs/apk/debug/app-debug.apk ]; then
-            mv android/app/build/outputs/apk/debug/app-debug.apk android/app/build/outputs/apk/debug/KhmerFoodTourism-v2.1.0.apk
+            cp android/app/build/outputs/apk/debug/app-debug.apk android/app/build/outputs/apk/debug/KhmerFoodTourism-v2.2.0.apk
+            cp android/app/build/outputs/apk/debug/app-debug.apk android/app/build/outputs/apk/debug/KhmerFoodTourism-latest.apk
           fi
           ls -la android/app/build/outputs/apk/debug/
 
@@ -88,17 +90,16 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: v2.1.0
-          name: "Khmer Food & Tourism v2.1.0 (Build 87: Faster startup - lazy-loaded screens and offline banner)"
+          tag_name: v2.2.0
+          name: "Khmer Food & Tourism v2.2.0"
           make_latest: true
           body: |
             ### 🇰🇭 កម្មវិធីទូរស័ព្ទដៃ អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism Mobile App)
             
-            **កំណែថ្មី v2.1.0 (APK Only):**
-            - 🍲 **១. ស្លាកម្ហូប និងតម្រង (Dish Tags & Filters)៖**
-              - បង្ហាញស្លាកម្ហូបដែលបានមកពីរូបមន្ត (ស្រាល, អាំង/ចំហុយ, សម្បូរប្រូតេអ៊ីន, ហឹរ ...) និងតម្រងតាមខេត្ត។ ព័ត៌មានទូទៅអំពីម្ហូបប៉ុណ្ណោះ មិនមែនជាដំបូន្មានវេជ្ជសាស្ត្រទេ។
-            - 🇨🇳 **២. ការត្រួតពិនិត្យសុក្រឹតភាពភាសាចិន និងទិន្នន័យ (Chinese Translation & Data Accuracy Audit)៖**
-              - កែសម្រួលពាក្យបច្ចេកទេសម្ហូបខ្មែរជាភាសាចិនឱ្យត្រឹមត្រូវតាមស្តង់ដារ (高棉阿莫克蒸鱼, 柬式黑椒摇滚牛肉粒, 高棉发酵鱼酱) និងផ្ទៀងផ្ទាត់ម៉ោងបើក-បិទ ព្រមទាំងមុខម្ហូបប្រចាំហាងទាំង ៥២ កន្លែង។
+            **កំណែថ្មី v2.2.0 (Official Signed APK):**
+            - 📍 **Nearby Places (កន្លែងនៅជិតខ្ញុំ)៖** Direct shortcut to discover food & sights near your location.
+            - 🍲 **Online Food Discovery & Trending Khmer Food៖** Automated discovery of authentic Khmer dishes and recipes from verified sources.
+            - ✨ **Commercial UI & Performance Polish៖** App typography, refined layout, and zero-data-loss seamless updates.
           draft: false
           prerelease: false
           files: |

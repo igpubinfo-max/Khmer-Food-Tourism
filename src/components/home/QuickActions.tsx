@@ -4,7 +4,8 @@ import { tr } from '../../utils/i18n';
 
 export interface QuickActionHandlers {
   onWhatToEat: () => void;
-  onCheckIn: () => void;
+  onNearMe?: () => void;
+  onCheckIn?: () => void;
 }
 
 interface Props extends QuickActionHandlers {
@@ -13,13 +14,16 @@ interface Props extends QuickActionHandlers {
   showVipLock: boolean;
 }
 
-/** Exactly 4 big quick-action cards (each >= 88px tall, easy to tap). */
+/** Exactly 2 big quick-action cards (each >= 88px tall, easy to tap). */
 export const QuickActions: React.FC<Props> = ({
   language,
   showVipLock,
   onWhatToEat,
+  onNearMe,
   onCheckIn,
 }) => {
+  const handleNearMeAction = onNearMe || onCheckIn || (() => {});
+
   const cards = [
     {
       id: 'eat',
@@ -31,13 +35,13 @@ export const QuickActions: React.FC<Props> = ({
       onClick: onWhatToEat,
     },
     {
-      id: 'checkin',
-      emoji: '✅',
-      title: tr(language, 'ឆែកអ៊ីន', 'Check in', '打卡'),
-      sub: tr(language, 'បញ្ជាក់ទីតាំងហាង', 'Confirm a place', '确认店铺位置'),
-      bg: 'from-rose-50 to-pink-50 border-rose-200 dark:from-rose-950/40 dark:to-slate-800 dark:border-rose-700/50',
-      lock: false,
-      onClick: onCheckIn,
+      id: 'nearme',
+      emoji: '📍',
+      title: tr(language, 'កន្លែងនៅជិតខ្ញុំ', 'Nearby Places', '附近好去处'),
+      sub: tr(language, 'ហាង និងកន្លែងដើរលេងក្បែរអ្នក', 'Food & sights around you', '身边的美食与景点'),
+      bg: 'from-emerald-50 to-teal-50 border-emerald-200 dark:from-emerald-950/40 dark:to-slate-800 dark:border-emerald-700/50',
+      lock: true,
+      onClick: handleNearMeAction,
     },
   ];
 

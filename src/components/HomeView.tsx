@@ -30,6 +30,7 @@ export const HomeView: React.FC = () => {
     setIsInstallModalOpen, setIsSupportModalOpen,
     openInstallModal, setSelectedDestination,
     setIsWhatToEatModalOpen,
+    setIsNearMeModalOpen,
     setIsDailyDiscoveriesModalOpen,
     setIsNotificationsModalOpen,
     setIsTrendingSocialModalOpen, unreadNotificationsCount,
@@ -602,7 +603,8 @@ export const HomeView: React.FC = () => {
                 language={language}
                 showVipLock={!canUseVipActions}
                 onWhatToEat={requireVip(() => setIsWhatToEatModalOpen(true))}
-                onCheckIn={handleQuickCheckIn}
+                onNearMe={requireVip(() => setIsNearMeModalOpen(true))}
+                onCheckIn={requireVip(() => setIsNearMeModalOpen(true))}
               />
 
               {/* 3. Today's discovery */}

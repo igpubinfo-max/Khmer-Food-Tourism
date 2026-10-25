@@ -41,6 +41,7 @@ const GoogleMapsPlaceSearchModal = lazy(() => import('./components/GoogleMapsPla
 import { Toast } from './components/Toast';
 import { RatePrompt } from './components/RatePrompt';
 import { OfflineBanner } from './components/OfflineBanner';
+import { UpdateAvailableBanner } from './components/UpdateAvailableBanner';
 import { SMART_HUB_EVENT } from './utils/smartHub';
 import { useBodyScrollLock } from './utils/useBodyScrollLock';
 
@@ -193,6 +194,7 @@ const MainScreen: React.FC = () => {
   return (
     <div className="flex-1 flex flex-col w-full min-h-screen relative overflow-y-auto no-scrollbar pb-16">
       <Header />
+      <UpdateAvailableBanner />
       
       <main key={`lang-${language}`} className="flex-1 w-full">
         <Suspense
