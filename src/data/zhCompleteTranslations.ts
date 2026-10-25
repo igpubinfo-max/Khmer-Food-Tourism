@@ -2639,7 +2639,20 @@ export const EXACT_RESTAURANT_NAME_ZH_MAP: Record<string, string> = {
   "Angkor Heritage Garden Dining Siem Reap": "暹粒通往吴哥窟林荫大道高棉花园餐厅",
   "Wat Bo Morning Kuyteav & Khmer Breakfast House": "暹粒沃波寺路早茶大骨粿条与高棉早餐馆",
   "Authentic Kampot Home Kitchen": "贡布正宗高棉家常菜平价餐厅",
-  "Chumnor Kbal Koh Restaurant (Jomnor Kbal Koh) - ជំនោរក្បាលកោះ": "金边铁桥头克巴岛清风河畔餐厅（Chumnor Kbal Koh）"
+  "Chumnor Kbal Koh Restaurant (Jomnor Kbal Koh) - ជំនោរក្បាលកោះ": "金边铁桥头克巴岛清风河畔餐厅（Chumnor Kbal Koh）",
+  "Boeng Takeo Lakeside Restaurant": "茶胶省茶胶湖畔大头虾景观餐厅",
+  "Tonle Sap Riverside Restaurant Kampong Chhnang": "磅清扬省洞里萨河畔鲜鱼陶锅餐厅",
+  "Ta Khmao Bassac Riverside Restaurant": "干丹省大金欧百色河畔脆皮烤鸭餐厅",
+  "Stung Treng Sekong Confluence Restaurant": "上丁省湄公与色公河交汇处巴伊鱼餐厅",
+  "Kinyei Specialty Cafe & Bistro Battambang": "马德望金艺精品咖啡烘焙与轻食馆（Kinyei Cafe）",
+  "Kep Oceanfront Dining Pavilion": "白马螃蟹市场海景鲜蟹凉亭餐厅",
+  "Nyam Coastal Restaurant Sihanoukville": "西哈努克港高棉风味与海岸海鲜餐厅（Nyam）",
+  "Serei Saophoan Heritage Garden Restaurant": "卜迭棉芷省诗梳风传统花园高棉餐厅",
+  "Chbar Mon Palm Garden Restaurant": "磅士卑省芷森市糖棕花园烤鸡餐厅",
+  "Neak Loeung Mekong View Restaurant": "波罗勉省乃良大桥湄公河景大虾餐厅",
+  "Waiko Riverside Restaurant Svay Rieng": "柴桢省威哥河畔传统煎饼与河鲜餐厅",
+  "Suong Heritage Family Restaurant": "特本克蒙省苏翁市高棉传统合家欢餐厅",
+  "Samraong Lakefront Restaurant Oddar Meanchey": "奥多棉芷省森隆湖畔高棉烤鸡与鲜鱼餐厅"
 };
 
 export const REST_DESC_PATTERN_ZH_MAP: Record<string, string> = {
@@ -2758,7 +2771,15 @@ export const REST_DESC_PATTERN_ZH_MAP: Record<string, string> = {
   "Lush garden restaurant on the way to Angkor Wat serving classic Khmer lunch and dinner sets for families and travelers.": "位于暹粒通往吴哥窟林荫大道旁的热带花园餐厅，为家庭与各国旅客供应经典高棉午晚餐盛宴。",
   "Beloved morning eatery on Wat Bo Road serving steaming bowls of pork bone kuyteav, chicken rice porridge, and iced coffee.": "暹粒沃波寺路上备受喜爱的早茶名店，供应热气腾腾的猪骨清汤粿条、鲜美鸡肉粥与香浓冰咖啡。",
   "Homestyle Kampot family restaurant serving hearty Cambodian lunch and dinner dishes at friendly local prices.": "贡布温馨亲切的家常菜馆，以实惠亲民的价格供应分量十足的正宗高棉午晚餐菜肴。",
-  "Chumnor Kbal Koh Restaurant (Jomnor Kbal Koh) is a popular riverside dining and relaxation spot in Koh Nora, Sangkat Niroth, Khan Chbar Ampov, Phnom Penh.": "位于金边铁桥头区尼罗分区克巴岛湄公河畔的热门亲水休闲餐厅，江风清凉，水亭雅致，主打现烤河鱼、烤土鸡与地道高棉美食。"
+  "Chumnor Kbal Koh Restaurant (Jomnor Kbal Koh) is a popular riverside dining and relaxation spot in Koh Nora, Sangkat Niroth, Khan Chbar Ampov, Phnom Penh.": "位于金边铁桥头区尼罗分区克巴岛湄公河畔的热门亲水休闲餐厅，江风清凉，水亭雅致，主打现烤河鱼、烤土鸡与地道高棉美食。",
+  "Award-winning specialty coffee roastery and bistro in central Battambang serving artisan espresso, Battambang spring rolls, and fresh brunch dishes.": "马德望市中心屡获殊荣的精品咖啡烘焙与轻食馆，供应冠军咖啡师手冲浓缩咖啡、马德望鲜春卷与精致早午餐。",
+  "Scenic organic pepper estate bistro in Kampot famous for Beef Lok Lak with fresh green Kampot peppercorns and red pepper curries.": "坐落于贡布有机胡椒庄园内的风景餐厅，以贡布青胡椒炒高棉摇滚牛肉粒（Lok Lak）与红胡椒咖喱享誉海内外。",
+  "Garden restaurant in Serei Saophoan serving traditional Khmer Samlor Korko, Prahok Ktis, and salt-crusted grilled river fish.": "位于诗梳风市的花园餐厅，主打传统高棉什锦蔬菜汤（Samlor Korko）、椰奶肉末发酵鱼酱（Prahok Ktis）与盐烤鲜河鱼。",
+  "Palm garden restaurant in Chbar Mon famous for Kampong Speu palm-sugar roasted chicken, beef sour soup, and fresh palm fruit desserts.": "位于磅士卑省芷森市的糖棕花园餐厅，以地理标志棕榈糖烤走地鸡、高棉酸汤牛肉与鲜嫩糖棕果甜品闻名。",
+  "Mekong riverside restaurant near Neak Loeung Bridge serving fresh Mekong river fish, grilled giant river prawns, and sour soups.": "毗邻乃良跨江大桥的湄公河畔餐厅，主打现捕湄公河鲜鱼、炭烤巨型大头虾与地道乡村酸汤。",
+  "Waiko riverfront restaurant in Svay Rieng City serving crispy Svay Rieng Banh Chao, smoked fish sour soup, and regional dishes.": "位于柴桢市威哥河畔的景观餐厅，供应酥脆柴桢姜黄煎饼（Banh Chao）、烟熏鱼酸汤与地方特色名菜。",
+  "Spacious family restaurant in Suong City, Tboung Khmum serving traditional Khmer dishes, Beef Lok Lak, and country chicken curry.": "特本克蒙省苏翁市宽敞舒适的合家欢餐厅，供应传统高棉菜肴、柬式黑椒摇滚牛肉粒（Lok Lak）与走地鸡红咖喱。",
+  "Scenic lakefront restaurant in Samraong City, Oddar Meanchey serving fresh lake fish, honey-roasted country chicken, and Khmer beef salad.": "位于奥多棉芷省森隆湖畔的风景餐厅，主打鲜活湖鱼、野生蜂蜜烤土鸡与酸辣香蕉花拌牛肉。"
 };
 
 const EXACT_HIGHLIGHT_MAP: Record<string, { en: string; zh: string }> = {

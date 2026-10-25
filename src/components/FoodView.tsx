@@ -9,15 +9,20 @@ import {
   classifyKhmerFoodPrimaryGroup,
   organizeAndDeduplicateFoods
 } from '../types';
-import { Utensils, Plus, Sparkles, Globe, Check } from 'lucide-react';
+import { Utensils, Plus, Sparkles, Globe, Check, HeartPulse, ShieldCheck, AlertTriangle, ChevronDown, ChevronUp, Info } from 'lucide-react';
 import { searchOnlineFoodImages, OnlineFoodImageCandidate } from '../services/onlineFoodImageService';
 import { tr } from '../utils/i18n';
 import { getLocalizedFood } from '../utils/zhDynamicTranslator';
+import {
+  HEALTHY_NUTRITION_CONDITIONS_DATA,
+  NUTRITION_GUIDE_MEDICAL_DISCLAIMER,
+  NutritionConditionId
+} from '../data/healthyNutritionGuideData';
 
 const PAGE_BATCH_SIZE = 48;
 
 export const FoodView: React.FC = () => {
-  const { foods, updateFood, showToast, language, searchQuery, setSearchQuery, currentUser, setIsAdminOpen } = useApp();
+  const { foods, updateFood, showToast, language, searchQuery, setSearchQuery, currentUser, setIsAdminOpen, setSelectedFood } = useApp();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [visibleCount, setVisibleCount] = useState<number>(PAGE_BATCH_SIZE);
   const [showOnlineSearchPanel, setShowOnlineSearchPanel] = useState<boolean>(true);
@@ -25,8 +30,16 @@ export const FoodView: React.FC = () => {
   const [isSearchingOnline, setIsSearchingOnline] = useState<boolean>(false);
   const [onlineCandidates, setOnlineCandidates] = useState<OnlineFoodImageCandidate[]>([]);
   const [editingFoodModal, setEditingFoodModal] = useState<FoodItem | null>(null);
+  const [showNutritionGuide, setShowNutritionGuide] = useState<boolean>(false);
+  const [selectedConditionId, setSelectedConditionId] = useState<NutritionConditionId>('diabetes');
   const loadMoreTriggerRef = useRef<HTMLDivElement | null>(null);
   const isKm = language === 'km';
+  const activeConditionGuide = useMemo(
+    () =>
+      HEALTHY_NUTRITION_CONDITIONS_DATA.find((c) => c.id === selectedConditionId) ||
+      HEALTHY_NUTRITION_CONDITIONS_DATA[0],
+    [selectedConditionId]
+  );
 
   const activeFoodForOnline = useMemo(() => {
     if (selectedFoodIdForOnline) {
@@ -223,6 +236,259 @@ export const FoodView: React.FC = () => {
             <Plus className="w-3.5 h-3.5 text-emerald-200" />
             <span>{tr(language, 'បញ្ចូលម្ហូប', 'Add Food', '添加菜品')}</span>
           </button>
+        )}
+      </div>
+
+      {/* Healthy Food & Disease-Friendly Nutrition Guide Banner & Expandable Panel */}
+      <div className="rounded-2xl border-2 border-emerald-500/40 bg-gradient-to-br from-emerald-50 via-white to-teal-50/80 dark:from-slate-800 dark:via-slate-900 dark:to-emerald-950/60 shadow-sm overflow-hidden font-khmer">
+        <button
+          type="button"
+          onClick={() => setShowNutritionGuide((prev) => !prev)}
+          className="w-full p-3.5 flex items-center justify-between gap-2.5 text-left hover:bg-emerald-500/5 transition cursor-pointer"
+        >
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#064E3B] to-[#059669] text-white flex items-center justify-center shadow-sm shrink-0">
+              <HeartPulse className="w-5 h-5 text-amber-300" />
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="px-2 py-0.5 rounded-full bg-[#064E3B] text-amber-300 text-[9px] font-black uppercase tracking-wide">
+                  {tr(language, 'ពិនិត្យផ្ទៀងផ្ទាត់វេជ្ជសាស្ត្រ', 'Medically Reviewed', '医学营养审核')}
+                </span>
+                <h3 className="font-moul text-xs sm:text-sm text-[#064E3B] dark:text-emerald-300 truncate">
+                  {tr(
+                    language,
+                    'មគ្គុទ្ទេសក៍អាហារសុខភាព និងរបបអាហារតាមជំងឺ',
+                    'Healthy Food & Disease-Friendly Nutrition Guide',
+                    '健康饮食与慢性病适宜膳食指南'
+                  )}
+                </h3>
+              </div>
+              <p className="text-[11px] text-slate-600 dark:text-slate-300 mt-0.5 line-clamp-1">
+                {tr(
+                  language,
+                  'ទឹកនោមផ្អែម • លើសសម្ពាធឈាម • លើសខ្លាញ់ • ហ្គោត • រលាកក្រពះ • ម្ហូបខ្មែរសមស្រប',
+                  'Diabetes • High Blood Pressure • High Cholesterol • Gout • Gastritis • Cambodian Dishes',
+                  '糖尿病 • 高血压 • 高血脂 • 痛风 • 胃炎 • 适宜高棉菜推荐'
+                )}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-[#064E3B] text-white text-[10px] font-bold shrink-0 shadow-2xs">
+            <span>{showNutritionGuide ? tr(language, 'បិទ', 'Hide', '收起') : tr(language, 'បើកមើល', 'Explore', '展开指南')}</span>
+            {showNutritionGuide ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+          </div>
+        </button>
+
+        {showNutritionGuide && activeConditionGuide && (
+          <div className="px-3.5 pb-4 pt-2 border-t border-emerald-500/20 space-y-3">
+            {/* Condition Selector Tabs */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+              {HEALTHY_NUTRITION_CONDITIONS_DATA.map((cond) => {
+                const isSelected = cond.id === selectedConditionId;
+                return (
+                  <button
+                    key={cond.id}
+                    type="button"
+                    onClick={() => setSelectedConditionId(cond.id)}
+                    className={`flex items-center gap-1.5 p-2 rounded-xl text-left border transition cursor-pointer ${
+                      isSelected
+                        ? 'bg-[#064E3B] text-white border-amber-400 shadow-xs font-bold'
+                        : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:border-emerald-400'
+                    }`}
+                  >
+                    <span className="text-base shrink-0">{cond.emoji}</span>
+                    <div className="min-w-0">
+                      <p className="text-[11px] font-bold leading-tight truncate">
+                        {tr(language, cond.nameKh, cond.nameEn, cond.nameZh)}
+                      </p>
+                      <p className={`text-[9px] truncate ${isSelected ? 'text-emerald-200' : 'text-slate-400'}`}>
+                        {tr(language, cond.shortSubtitleKh, cond.shortSubtitleEn, cond.shortSubtitleZh)}
+                      </p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Condition Overview */}
+            <div className="p-3 rounded-xl bg-white dark:bg-slate-800/90 border border-emerald-500/25 space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <h4 className="font-bold text-xs text-[#064E3B] dark:text-emerald-300 flex items-center gap-1.5">
+                  <span>{activeConditionGuide.emoji}</span>
+                  <span>{tr(language, activeConditionGuide.nameKh, activeConditionGuide.nameEn, activeConditionGuide.nameZh)}</span>
+                </h4>
+                <span className="text-[9px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300">
+                  {activeConditionGuide.trustedSources.join(' • ')}
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-700 dark:text-slate-300 leading-relaxed">
+                {tr(language, activeConditionGuide.overviewKh, activeConditionGuide.overviewEn, activeConditionGuide.overviewZh)}
+              </p>
+              <div className="space-y-1 pt-1">
+                {(language === 'km'
+                  ? activeConditionGuide.keyNutritionalPrinciplesKh
+                  : language === 'zh'
+                  ? activeConditionGuide.keyNutritionalPrinciplesZh
+                  : activeConditionGuide.keyNutritionalPrinciplesEn
+                ).map((principle, idx) => (
+                  <div key={idx} className="flex items-start gap-1.5 text-[10px] text-emerald-900 dark:text-emerald-200">
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                    <span>{principle}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* 1. Healthy Foods to Choose */}
+            <div className="space-y-1.5">
+              <h5 className="text-[11px] font-extrabold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5">
+                <Check className="w-3.5 h-3.5 text-emerald-600" />
+                <span>
+                  {tr(
+                    language,
+                    '១. អាហារសុខភាពដែលគួរជ្រើសរើស និងអត្ថប្រយោជន៍អាហារូបត្ថម្ភ៖',
+                    '1. Healthy Foods to Choose & Nutritional Benefits:',
+                    '1. 推荐选择的健康食材与营养益处：'
+                  )}
+                </span>
+              </h5>
+              <div className="grid grid-cols-1 gap-2">
+                {activeConditionGuide.healthyFoodsToChoose.map((item, idx) => (
+                  <div
+                    key={idx}
+                    className="p-2.5 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-500/25 space-y-1"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-bold text-[11px] text-[#064E3B] dark:text-emerald-200">
+                        {item.emoji} {tr(language, item.nameKh, item.nameEn, item.nameZh)}
+                      </span>
+                      <span className="text-[9px] px-1.5 py-0.5 rounded bg-white dark:bg-slate-800 text-emerald-700 dark:text-emerald-300 font-semibold border border-emerald-500/20">
+                        {tr(language, item.portionTipKh, item.portionTipEn, item.portionTipZh)}
+                      </span>
+                    </div>
+                    <p className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-400">
+                      🔬 {tr(language, item.keyNutrientsKh, item.keyNutrientsEn, item.keyNutrientsZh)}
+                    </p>
+                    <p className="text-[10px] text-slate-600 dark:text-slate-300 leading-relaxed">
+                      {tr(language, item.nutritionalBenefitKh, item.nutritionalBenefitEn, item.nutritionalBenefitZh)}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* 2. Suitable Cambodian Dishes */}
+            <div className="space-y-1.5">
+              <h5 className="text-[11px] font-extrabold text-[#064E3B] dark:text-amber-300 flex items-center gap-1.5">
+                <Utensils className="w-3.5 h-3.5 text-amber-600" />
+                <span>
+                  {tr(
+                    language,
+                    '២. មុខម្ហូបខ្មែរសមស្រប និងតិចនិកចម្អិនដើម្បីសុខភាព៖',
+                    '2. Suitable Cambodian Dishes & Healthy Cooking Modifications:',
+                    '2. 适宜的高棉传统菜肴与健康烹饪建议：'
+                  )}
+                </span>
+              </h5>
+              <div className="grid grid-cols-1 gap-2">
+                {activeConditionGuide.suitableCambodianDishes.map((dish) => {
+                  const matchedFood = foods.find((f) => f.id === dish.foodId);
+                  return (
+                    <div
+                      key={dish.foodId}
+                      className="p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-amber-400/40 shadow-2xs space-y-1.5"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="font-bold text-[11px] text-slate-900 dark:text-white">
+                          🍲 {tr(language, dish.nameKh, dish.nameEn, dish.nameZh)}
+                        </span>
+                        {matchedFood && (
+                          <button
+                            type="button"
+                            onClick={() => setSelectedFood(matchedFood)}
+                            className="px-2 py-0.5 rounded-lg bg-[#064E3B] hover:bg-[#047857] text-amber-300 text-[9px] font-bold shrink-0 cursor-pointer transition"
+                          >
+                            {tr(language, 'មើលរូបមន្តពេញ', 'View Recipe', '查看完整食谱')}
+                          </button>
+                        )}
+                      </div>
+                      <p className="text-[10px] text-slate-600 dark:text-slate-300 leading-relaxed">
+                        <strong className="text-emerald-700 dark:text-emerald-300">
+                          {tr(language, 'អត្ថប្រយោជន៍៖ ', 'Why it suits: ', '适宜原因：')}
+                        </strong>
+                        {tr(language, dish.whySuitableKh, dish.whySuitableEn, dish.whySuitableZh)}
+                      </p>
+                      <p className="text-[10px] text-amber-900 dark:text-amber-200 bg-amber-50/80 dark:bg-amber-950/30 px-2 py-1 rounded-lg border border-amber-400/20">
+                        💡 {tr(language, dish.healthyCookingModificationKh, dish.healthyCookingModificationEn, dish.healthyCookingModificationZh)}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* 3. Foods to Limit or Avoid */}
+            <div className="space-y-1.5">
+              <h5 className="text-[11px] font-extrabold text-rose-700 dark:text-rose-300 flex items-center gap-1.5">
+                <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />
+                <span>
+                  {tr(
+                    language,
+                    '៣. អាហារដែលគួរកាត់បន្ថយ ឬជៀសវាង៖',
+                    '3. Foods to Limit or Avoid:',
+                    '3. 建议减少或避免的食物：'
+                  )}
+                </span>
+              </h5>
+              <div className="grid grid-cols-1 gap-1.5">
+                {activeConditionGuide.foodsToLimitOrAvoid.map((avoid, idx) => (
+                  <div
+                    key={idx}
+                    className="p-2 rounded-xl bg-rose-50/70 dark:bg-rose-950/30 border border-rose-400/30 space-y-0.5"
+                  >
+                    <p className="font-bold text-[11px] text-rose-800 dark:text-rose-200">
+                      {avoid.emoji} {tr(language, avoid.nameKh, avoid.nameEn, avoid.nameZh)}
+                    </p>
+                    <p className="text-[10px] text-slate-600 dark:text-slate-300 leading-relaxed">
+                      {tr(language, avoid.reasonToLimitKh, avoid.reasonToLimitEn, avoid.reasonToLimitZh)}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Medical Disclaimer & Individual Variation Note */}
+            <div className="p-2.5 rounded-xl bg-amber-50/90 dark:bg-slate-800/90 border border-amber-400/50 space-y-1">
+              <div className="flex items-center gap-1.5 text-[10px] font-bold text-amber-900 dark:text-amber-300">
+                <Info className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                <span>
+                  {tr(
+                    language,
+                    NUTRITION_GUIDE_MEDICAL_DISCLAIMER.titleKh,
+                    NUTRITION_GUIDE_MEDICAL_DISCLAIMER.titleEn,
+                    NUTRITION_GUIDE_MEDICAL_DISCLAIMER.titleZh
+                  )}
+                </span>
+              </div>
+              <p className="text-[10px] text-slate-700 dark:text-slate-300 leading-relaxed">
+                {tr(
+                  language,
+                  activeConditionGuide.individualVariationNoteKh,
+                  activeConditionGuide.individualVariationNoteEn,
+                  activeConditionGuide.individualVariationNoteZh
+                )}
+              </p>
+              <p className="text-[9px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                {tr(
+                  language,
+                  NUTRITION_GUIDE_MEDICAL_DISCLAIMER.bodyKh,
+                  NUTRITION_GUIDE_MEDICAL_DISCLAIMER.bodyEn,
+                  NUTRITION_GUIDE_MEDICAL_DISCLAIMER.bodyZh
+                )}
+              </p>
+            </div>
+          </div>
         )}
       </div>
 

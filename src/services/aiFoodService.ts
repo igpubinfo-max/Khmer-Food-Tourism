@@ -16,6 +16,14 @@
 
 import { FoodItem } from '../types';
 import {
+  NutritionConditionId,
+  NutritionFoodItemRecommendation,
+  SuitableCambodianDishGuide,
+  DiseaseNutritionConditionGuide,
+  NUTRITION_GUIDE_MEDICAL_DISCLAIMER,
+  HEALTHY_NUTRITION_CONDITIONS_DATA,
+} from '../data/healthyNutritionGuideData';
+import {
   generateMultiTurnHealthAnswer,
   createHealthConversationSession,
   loadHealthConversationSession,
@@ -32,6 +40,8 @@ import {
 } from './aiHealthKnowledgeEngine';
 
 export {
+  NUTRITION_GUIDE_MEDICAL_DISCLAIMER,
+  HEALTHY_NUTRITION_CONDITIONS_DATA,
   createHealthConversationSession,
   loadHealthConversationSession,
   saveHealthConversationSession,
@@ -42,6 +52,10 @@ export {
   HEALTH_QUICK_QUESTIONS_TRILINGUAL,
 };
 export type {
+  NutritionConditionId,
+  NutritionFoodItemRecommendation,
+  SuitableCambodianDishGuide,
+  DiseaseNutritionConditionGuide,
   SafetyEscalationLevel,
   SafetyEscalationBanner,
   HealthConversationTurn,
@@ -79,12 +93,16 @@ export interface DishNutritionProfile {
   matchingGoals: HealthGoalId[];
   keyNutrientsKh: string[];
   keyNutrientsEn: string[];
+  keyNutrientsZh?: string[];
   healthBenefitsKh: string;
   healthBenefitsEn: string;
+  healthBenefitsZh?: string;
   healthyCookingTipKh: string;
   healthyCookingTipEn: string;
+  healthyCookingTipZh?: string;
   cautionNoteKh?: string;
   cautionNoteEn?: string;
+  cautionNoteZh?: string;
 }
 
 export interface HealthGoalMetadata {
@@ -92,10 +110,13 @@ export interface HealthGoalMetadata {
   icon: string;
   labelKh: string;
   labelEn: string;
+  labelZh?: string;
   shortLabelKh: string;
   shortLabelEn: string;
+  shortLabelZh?: string;
   descriptionKh: string;
   descriptionEn: string;
+  descriptionZh?: string;
   targetCaloriesPerMeal: string;
 }
 
@@ -103,12 +124,15 @@ export interface DailyMealPlanSlot {
   slotId: 'breakfast' | 'lunch' | 'dinner';
   labelKh: string;
   labelEn: string;
+  labelZh?: string;
   timeRangeKh: string;
   timeRangeEn: string;
+  timeRangeZh?: string;
   dish: FoodItem;
   nutrition: DishNutritionProfile;
   portionTipKh: string;
   portionTipEn: string;
+  portionTipZh?: string;
 }
 
 export interface DailyBalancedMealPlan {
@@ -123,8 +147,10 @@ export interface DailyBalancedMealPlan {
   meals: DailyMealPlanSlot[];
   snackAndHydrationKh: string;
   snackAndHydrationEn: string;
+  snackAndHydrationZh?: string;
   healthyPlateAdviceKh: string;
   healthyPlateAdviceEn: string;
+  healthyPlateAdviceZh?: string;
 }
 
 export interface HealthQaAnswer {
@@ -670,10 +696,13 @@ export function getDishNutritionProfile(food: FoodItem): DishNutritionProfile {
 
   // Deterministic subtle variation by dish id number so dishes don't look identically cloned
   const idNum = parseInt(food.id.replace(/\D+/g, ''), 10) || 1;
-  const mod = (idNum % 7) - 3;
-  calories = Math.max(180, calories + mod * 8);
   protein = Math.max(4, Math.round(protein + (idNum % 5) - 2));
+  carbs = Math.max(6, Math.round(carbs + ((idNum % 7) - 3) * 1.5));
+  fat = Number(Math.max(2, fat + ((idNum % 5) - 2) * 0.5).toFixed(1));
   fiber = Number(Math.max(1.5, fiber + ((idNum % 4) - 1.5) * 0.4).toFixed(1));
+
+  // Strictly calculate verified Atwater calories from macronutrients (4 kcal/g protein, 4 kcal/g carbs, 9 kcal/g fat, 2 kcal/g fermentable fiber)
+  calories = Math.round(protein * 4 + carbs * 4 + fat * 9 + fiber * 2);
 
   const sodiumLevel: 'low' | 'medium' | 'high' =
     sodiumMg <= 540 ? 'low' : sodiumMg <= 680 ? 'medium' : 'high';
@@ -730,28 +759,35 @@ export function getDishNutritionProfile(food: FoodItem): DishNutritionProfile {
   // Key Nutrients tags
   const keyNutrientsKh: string[] = [];
   const keyNutrientsEn: string[] = [];
+  const keyNutrientsZh: string[] = [];
   if (nameKh.includes('ត្រី') || ingText.includes('ត្រី')) {
     keyNutrientsKh.push('ប្រូតេអ៊ីនត្រី & Omega-3');
     keyNutrientsEn.push('Fish Lean Protein & Omega-3');
+    keyNutrientsZh.push('鱼肉优质瘦蛋白与 Omega-3');
   } else if (protein >= 22) {
     keyNutrientsKh.push('ប្រូតេអ៊ីនជំនួយសាច់ដុំ');
     keyNutrientsEn.push('Muscle-Supporting Protein');
+    keyNutrientsZh.push('支持肌肉健康的优质蛋白');
   }
   if (ingText.includes('ម្រុំ') || isKorko) {
     keyNutrientsKh.push('វីតាមីន A, C & ជាតិដែក (ស្លឹកម្រុំ)');
     keyNutrientsEn.push('Vitamins A, C & Iron (Moringa)');
+    keyNutrientsZh.push('维生素 A、C 与铁（辣木叶）');
   }
   if (ingText.includes('ស្លឹកគ្រៃ') || ingText.includes('រមៀត') || nameKh.includes('គ្រឿង')) {
     keyNutrientsKh.push('សារធាតុប្រឆាំងការរលាក (គ្រឿងទេសខ្មែរ)');
     keyNutrientsEn.push('Anti-inflammatory Khmer Herbs');
+    keyNutrientsZh.push('天然抗炎高棉草本香料');
   }
   if (fiber >= 5.0) {
     keyNutrientsKh.push('ជាតិសរសៃខ្ពស់ពីបន្លែធម្មជាតិ');
     keyNutrientsEn.push('High Dietary Fiber from Greens');
+    keyNutrientsZh.push('来自天然时蔬的高膳食纤维');
   }
   if (keyNutrientsKh.length === 0) {
     keyNutrientsKh.push('ថាមពល និងវីតាមីនចម្រុះ');
     keyNutrientsEn.push('Balanced Energy & Micronutrients');
+    keyNutrientsZh.push('均衡日常能量与微量营养素');
   }
 
   // Health benefits & Healthy cooking modification tips
@@ -759,71 +795,102 @@ export function getDishNutritionProfile(food: FoodItem): DishNutritionProfile {
     'ផ្តល់ប្រូតេអ៊ីន និងថាមពលប្រចាំថ្ងៃ រួមជាមួយវីតាមីនពីបន្លែ និងគ្រឿងទេសធម្មជាតិខ្មែរ។';
   let healthBenefitsEn =
     'Provides balanced protein and daily energy enriched with vitamins from Cambodian herbs and vegetables.';
+  let healthBenefitsZh =
+    '提供均衡的蛋白质与日常能量，并富含高棉天然蔬菜与草本香料中的多种维生素。';
   let healthyCookingTipKh =
     'ប្រើប្រេងឆាតិច (១ ស្លាបព្រាបាយ) បន្ថែមបន្លែបៃតងឱ្យបានច្រើន និងកាត់បន្ថយការប្រើប៊ីចេង ឬអំបិលលើសកម្រិត។';
   let healthyCookingTipEn =
     'Use minimal cooking oil (1 tbsp), add generous leafy greens, and reduce added salt or MSG.';
+  let healthyCookingTipZh =
+    '烹调时少放食用油（约 1 汤匙），多加新鲜绿叶蔬菜，并减少食盐、鱼露与味精用量。';
   let cautionNoteKh: string | undefined;
   let cautionNoteEn: string | undefined;
+  let cautionNoteZh: string | undefined;
 
   if (isKorko) {
     healthBenefitsKh =
       'ជា «ស្តេចសម្លសុខភាពខ្មែរ» សម្បូរបន្លែចម្រុះ ស្លឹកម្រុំ ល្ហុង ត្រប់ និងត្រី ដែលផ្តល់ជាតិសរសៃ វីតាមីន A, C ជាតិដែក និងកាល់ស្យូមខ្ពស់បំផុត។';
     healthBenefitsEn =
       'Cambodia’s premier multi-vegetable health soup, rich in moringa, green papaya, fish protein, iron, and dietary fiber.';
+    healthBenefitsZh =
+      '被誉为“高棉第一养生浓汤”，汇聚辣木叶、青木瓜、紫茄与鲜鱼蛋白，富含膳食纤维、铁、钙与维生素 A、C。';
     healthyCookingTipKh =
       'ដាក់ប្រហុកក្នុងបរិមាណល្មម (កាត់បន្ថយ ២៥-៣០% សម្រាប់អ្នកលើសឈាម) និងដាក់ស្លឹកម្រុំនៅចុងបញ្ចប់ដើម្បីរក្សាវីតាមីន។';
     healthyCookingTipEn =
       'Use moderate prahok (reduce by 25–30% for blood pressure control) and add moringa leaves at the very end.';
+    healthyCookingTipZh =
+      '适量减少高棉发酵鱼酱（Prahok）用量（控盐人群可减量 25%–30%），并在起锅前放入辣木叶以保留维生素。';
   } else if (isClearSoup) {
     healthBenefitsKh =
       'សម្លទឹកថ្លាកាឡូរីទាប សម្បូរជាតិទឹក ប្រូតេអ៊ីនងាយរំលាយ និងគ្រឿងទេសជួយសម្រួលក្រពះ និងបង្កើនភាពស៊ាំ។';
     healthBenefitsEn =
       'Low-calorie clear herbal broth that hydrates, delivers lean protein, and supports gentle digestion.';
+    healthBenefitsZh =
+      '低热量高棉草本清汤，补充水分与易消化瘦蛋白，有助于温和护胃与日常健康。';
     healthyCookingTipKh =
       'ប្រើរសជាតិជូរធម្មជាតិពីអំពិលទុំ ក្រូចឆ្មា ឬស្លឹកម្ជូរ ជំនួសការបន្ថែមអំបិល និងស្ករច្រើន។';
     healthyCookingTipEn =
       'Rely on natural sourness from tamarind, lime, or sour leaves rather than excess salt or sugar.';
+    healthyCookingTipZh =
+      '善用罗望子、鲜青柠或酸叶的天然果酸提味，替代过多食盐与白糖。';
   } else if (isAmok) {
     healthBenefitsKh =
       'ចម្អិនដោយការចំហុយ (មិនបំពងខ្លាញ់) ផ្តល់ប្រូតេអ៊ីនខ្ពស់ពីត្រី ស្លឹកញ និងគ្រឿងបុករមៀតដែលជួយប្រឆាំងការរលាក។';
     healthBenefitsEn =
       'Steamed rather than fried, offering lean fish protein, noni leaves (Slok Ngor), and anti-inflammatory turmeric kroeung.';
+    healthBenefitsZh =
+      '采用清蒸而非油炸工艺，富含黑鱼优质蛋白、抗氧化诺丽叶（Slok Ngor）以及抗炎姜黄香茅泥。';
     healthyCookingTipKh =
       'ប្រើខ្ទិះដូងស្រស់ក្នុងបរិមាណល្មម ហើយបន្ថែមស្លឹកញ ឬបន្លែទ្រាប់បាតឱ្យបានច្រើន។';
     healthyCookingTipEn =
       'Use a moderate amount of coconut cream and increase the bed of steamed noni leaves or greens.';
+    healthyCookingTipZh =
+      '使用适量鲜椰浆，并在蒸盅底部多铺一层嫩诺丽叶或绿叶蔬菜。';
   } else if (isSalad) {
     healthBenefitsKh =
       'សម្បូរបន្លែស្រស់ ជីរខ្មែរ វីតាមីន C និងជាតិសរសៃខ្ពស់ ជួយគ្រប់គ្រងទម្ងន់ និងសម្រួលប្រព័ន្ធរំលាយអាហារ។';
     healthBenefitsEn =
       'Packed with raw vegetables, fresh Cambodian herbs, Vitamin C, and fiber for weight and digestive support.';
+    healthBenefitsZh =
+      '富含爽脆生鲜蔬菜、高棉香草、维生素 C 与膳食纤维，有助于控制体重与促进肠道蠕动。';
     healthyCookingTipKh =
       'លាយទឹកត្រីជូរអែមដោយបន្ថយស្ករស ហើយប្រើទឹកក្រូចឆ្មាស្រស់ និងខ្ទឹមសឱ្យបានច្រើន។';
     healthyCookingTipEn =
       'Prepare the dressing with extra fresh lime juice and garlic while cutting added sugar in half.';
+    healthyCookingTipZh =
+      '调制凉拌汁时多用鲜榨青柠汁与蒜蓉，将添加糖减半。';
   } else if (isDessert) {
     healthBenefitsKh =
       'ផ្តល់ថាមពលរហ័សពីគ្រាប់ធញ្ញជាតិ ល្ពៅ ចេក ឬសណ្តែក ប៉ុន្តែមានជាតិស្ករ និងខ្ទិះដូងខ្ពស់។';
     healthBenefitsEn =
       'Provides quick energy from pumpkin, banana, or mung beans, though naturally higher in sugar and coconut cream.';
+    healthBenefitsZh =
+      '由南瓜、香蕉、绿豆或糯米提供快速能量，但天然糖分与椰浆脂肪含量较高。';
     healthyCookingTipKh =
       'កាត់បន្ថយស្ករ ៣០-៤០% និងទទួលទានក្នុងចំណែកតូចល្មមបន្ទាប់ពីអាហារថ្ងៃត្រង់។';
     healthyCookingTipEn =
       'Reduce sugar by 30–40% when cooking and enjoy a modest portion after lunch rather than late at night.';
+    healthyCookingTipZh =
+      '制作时建议减糖 30%–40%，并在午餐后少量品尝，避免夜间食用。';
     cautionNoteKh = 'អ្នកមានជំងឺទឹកនោមផ្អែម ឬកំពុងសម្រកទម្ងន់ គួរទទួលទានក្នុងបរិមាណតិចតួចបំផុត។';
     cautionNoteEn = 'Individuals managing blood sugar or weight should consume only small portions occasionally.';
+    cautionNoteZh = '糖尿病或控制体重人群请严格限制食用分量。';
   } else if (isFermentedDip) {
     healthBenefitsKh =
       'សម្បូរប្រូតេអ៊ីន និងទទួលទានផ្ទាប់ជាមួយបន្លែស្រស់ច្រើនមុខ (ត្រសក់ ត្រប់ ស្ពៃ ត្រកួន) ដែលផ្តល់ជាតិសរសៃខ្ពស់។';
     healthBenefitsEn =
       'Served with an abundant platter of fresh raw and blanched Cambodian vegetables rich in fiber.';
+    healthBenefitsZh =
+      '搭配黄瓜、脆茄、包菜、空心菜等丰盛的新鲜时蔬拼盘食用，膳食纤维极为丰富。';
     healthyCookingTipKh =
       'ញ៉ាំបន្លែស្រស់ផ្ទាប់ឱ្យបាន ៣ ដងនៃបរិមាណទឹកជ្រលក់ ដើម្បីទទួលបានប៉ូតាស្យូមជួយតុល្យភាពជាតិប្រៃ។';
     healthyCookingTipEn =
       'Eat 3 parts fresh vegetables for every small dip to balance sodium intake with natural potassium.';
+    healthyCookingTipZh =
+      '多吃配菜少蘸酱（3份鲜蔬配1小口蘸酱），利用蔬菜中的钾平衡钠摄入。';
     cautionNoteKh = 'មានកម្រិតជាតិប្រៃ (សូដ្យូម) ខ្ពស់ អ្នកលើសសម្ពាធឈាមគួរកាត់បន្ថយបរិមាណប្រហុក/អំបិល។';
     cautionNoteEn = 'Higher in sodium; individuals with high blood pressure should reduce prahok and added salt.';
+    cautionNoteZh = '钠（盐分）含量较高，高血压人群应减少发酵鱼酱（Prahok）与食盐用量。';
   }
 
   return {
@@ -842,12 +909,16 @@ export function getDishNutritionProfile(food: FoodItem): DishNutritionProfile {
     matchingGoals,
     keyNutrientsKh,
     keyNutrientsEn,
+    keyNutrientsZh,
     healthBenefitsKh,
     healthBenefitsEn,
+    healthBenefitsZh,
     healthyCookingTipKh,
     healthyCookingTipEn,
+    healthyCookingTipZh,
     cautionNoteKh,
     cautionNoteEn,
+    cautionNoteZh,
   };
 }
 

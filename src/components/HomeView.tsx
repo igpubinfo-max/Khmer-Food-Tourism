@@ -1122,7 +1122,7 @@ export const HomeView: React.FC = () => {
 
         {/* Prominent AI Discovery & Google Maps Places Search (Admin & VIP) Entry Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-          {/* 1. AI Health & Nutrition Assistant */}
+          {/* 1. Healthy Food & Disease-Friendly Nutrition Guide */}
           <button
             onClick={() => setIsAiFoodDiscoveryModalOpen(true)}
             className="p-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 via-[#064E3B] to-teal-800 text-white text-left shadow-md flex items-center justify-between transition hover:scale-[1.01] active:scale-98 cursor-pointer ring-2 ring-emerald-400/30"
@@ -1133,15 +1133,23 @@ export const HomeView: React.FC = () => {
               </div>
               <div>
                 <span className="font-moul text-xs block text-white">
-                  {isKm ? 'ជំនួយការ AI សុខភាព & អាហារូបត្ថម្ភ' : 'AI Health & Nutrition Assistant'}
+                  {language === 'km'
+                    ? 'មគ្គុទ្ទេសក៍អាហារសុខភាព និងរបបអាហារតាមជំងឺ'
+                    : language === 'zh'
+                    ? '健康饮食与慢性病适宜膳食指南'
+                    : 'Healthy Food & Disease-Friendly Nutrition Guide'}
                 </span>
                 <span className="text-[10px] text-emerald-200 block">
-                  {isKm ? 'ម្ហូបសុខភាព • ផែនការអាហារ ៣ ពេល & សួរ-ឆ្លើយខ្មែរ' : 'Healthy Khmer Dishes, 3-Meal Plan & Q&A'}
+                  {language === 'km'
+                    ? 'ទឹកនោមផ្អែម • លើសឈាម • ខ្លាញ់ • ហ្គោត • រលាកក្រពះ & ម្ហូបខ្មែរសមស្រប'
+                    : language === 'zh'
+                    ? '糖尿病 • 高血压 • 高血脂 • 痛风 • 胃炎与适宜高棉菜推荐'
+                    : 'Diabetes • High BP • Cholesterol • Gout • Gastritis & Khmer Dishes'}
                 </span>
               </div>
             </div>
             <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[9px] font-black uppercase tracking-wider font-sans shrink-0">
-              Health AI
+              {language === 'km' ? 'អាហារសុខភាព' : language === 'zh' ? '营养指南' : 'Nutrition Guide'}
             </span>
           </button>
 

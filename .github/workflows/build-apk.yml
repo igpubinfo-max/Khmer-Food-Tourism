@@ -89,18 +89,17 @@ jobs:
         if: github.ref == 'refs/heads/main'
         with:
           tag_name: v2.1.0
-          name: "Khmer Food & Tourism v2.1.0 (Build 81: Multi-Turn Trilingual AI Health Assistant + Welcome Screen Update + Verified 52 Restaurants)"
+          name: "Khmer Food & Tourism v2.1.0 (Build 82: Healthy Food & Disease-Friendly Nutrition Guide + Trilingual Chinese Audit + 52 Verified Restaurants)"
           make_latest: true
           body: |
             ### 🇰🇭 កម្មវិធីទូរស័ព្ទដៃ អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism Mobile App)
             
-            **កំណែថ្មី v2.1.0 (Build 81 — APK Only):**
-            - 🩺 **១. ជំនួយការ AI សុខភាព និងអាហារូបត្ថម្ភ ៣ ភាសា & សន្ទនាបន្តគ្នាច្រើនដង (Multi-Turn Trilingual AI Health Assistant)៖**
-              - គាំទ្រការសួរសំណួរបន្តគ្នា ១០+ ដងក្នុងមួយការសន្ទនា (Context-Aware Follow-Up) ជាភាសាខ្មែរ អង់គ្លេស និងចិនសាមញ្ញ រួមទាំងប្រព័ន្ធប្រកាសអាសន្នវេជ្ជសាស្ត្រ ៤ កម្រិត (Emergency 119, Urgent, Medication Safety, High-Risk Care)។
-            - 🏛️ **២. ផ្ទាំងស្វាគមន៍ថ្មី (Welcome Screen Logo & AI Health Card)៖**
-              - ពង្រីករូបសញ្ញាផ្លូវការឱ្យធំច្បាស់ល្អ និងបន្ថែមកាត «ជំនួយការ AI សុខភាព និងអាហារូបត្ថម្ភ (សួរ AI អំពីសុខភាព)» នៅខាងក្រោមកាតទីកន្លែងទេសចរណ៍ និងផែនទីជិតខ្ញុំ។
-            - 🏪 **៣. ម៉ឺនុយភោជនីយដ្ឋាន និងហាងពិតប្រាកដទាំង ៥២ (Verified 52 Genuine Restaurants)៖**
-              - បំបែកទិន្នន័យភោជនីយដ្ឋានចេញពីមុខម្ហូប លុបទិន្នន័យស្ទួន និងប្រើប្រាស់រូបភាពហាងពិតប្រាកដទាំង ៥២ កន្លែងទូទាំង ២៥ រាជធានី-ខេត្ត។
+            **កំណែថ្មី v2.1.0 (Build 82 — APK Only):**
+            - 🩺 **១. មគ្គុទ្ទេសក៍អាហារសុខភាព និងរបបអាហារតាមជំងឺ (Healthy Food & Disease-Friendly Nutrition Guide)៖**
+              - ជំនួសការជជែក AI បើកចំហ ដោយមូលដ្ឋានទិន្នន័យអាហារសុខភាពដែលពិនិត្យផ្ទៀងផ្ទាត់វេជ្ជសាស្ត្រ (Medically Reviewed Food Database) សម្រាប់ជំងឺទឹកនោមផ្អែម លើសសម្ពាធឈាម លើសជាតិខ្លាញ់ ជំងឺសន្លាក់ហ្គោត រលាកក្រពះ និងការគ្រប់គ្រងទម្ងន់ ជា ៣ ភាសា (ខ្មែរ • អង់គ្លេស • ចិនសាមញ្ញ)។
+              - ផ្តល់ជូនតែការណែនាំអាហារសុខភាព អាហារគួរជៀសវាង និងម្ហូបខ្មែរសមស្រប ដោយគ្មានការណែនាំថ្នាំពេទ្យ ឬអាហារបំប៉នឡើយ។
+            - 🇨🇳 **២. ការត្រួតពិនិត្យសុក្រឹតភាពភាសាចិន និងទិន្នន័យ (Chinese Translation & Data Accuracy Audit)៖**
+              - កែសម្រួលពាក្យបច្ចេកទេសម្ហូបខ្មែរជាភាសាចិនឱ្យត្រឹមត្រូវតាមស្តង់ដារ (高棉阿莫克蒸鱼, 柬式黑椒摇滚牛肉粒, 高棉发酵鱼酱) និងផ្ទៀងផ្ទាត់ម៉ោងបើក-បិទ ព្រមទាំងមុខម្ហូបប្រចាំហាងទាំង ៥២ កន្លែង។
           draft: false
           prerelease: false
           files: |

@@ -1,59 +1,34 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import {
   X,
-  Sparkles,
   HeartPulse,
   Utensils,
   Search,
   ChevronRight,
   RefreshCw,
-  Send,
-  Scale,
   Droplets,
   ShieldCheck,
   Leaf,
   Calendar,
-  MessageSquareHeart,
   CheckCircle2,
   AlertCircle,
   BookOpen,
-  Activity,
-  RotateCcw,
-  AlertTriangle,
-  PhoneCall,
-  Lock,
-  HelpCircle,
-  MessageCircle,
-  ChevronDown,
-  ChevronUp,
+  Info,
 } from 'lucide-react';
 import { FoodItem } from '../types';
 import {
   HEALTH_GOALS_CATALOG,
   KHMER_SUPERFOODS_ENCYCLOPEDIA,
-  HEALTH_QUICK_QUESTIONS_TRILINGUAL,
-  MEDICAL_DISCLAIMER_KH,
-  MEDICAL_DISCLAIMER_EN,
   HealthGoalId,
-  HealthQaAnswer,
-  UserHealthMetricsInput,
-  HealthConversationSession,
-  HealthConversationTurn,
   getRecommendedDishesByHealthGoal,
   generateBalancedDailyMealPlan,
-  answerHealthAndNutritionQuestion,
-  calculateUserHealthMetrics,
-  loadUserHealthMetricsInput,
-  saveUserHealthMetricsInput,
   searchByHomeIngredients,
-  getDailyHealthyEatingSpotlight,
-  loadHealthConversationSession,
-  askHealthAssistantInSession,
-  retryHealthTurnInSession,
-  resetHealthConversationSession,
-  detectQueryLanguage,
+  HEALTHY_NUTRITION_CONDITIONS_DATA,
+  NUTRITION_GUIDE_MEDICAL_DISCLAIMER,
+  NutritionConditionId,
 } from '../services/aiFoodService';
+import { getLocalizedFood } from '../utils/zhDynamicTranslator';
 
 const COMMON_HEALTHY_KHMER_INGREDIENTS = [
   'ស្លឹកម្រុំ',
@@ -76,9 +51,6 @@ const COMMON_HEALTHY_KHMER_INGREDIENTS = [
   'សណ្តែកគួរ',
 ];
 
-const MEDICAL_DISCLAIMER_ZH =
-  '⚕️ 医疗免责声明：本 AI 健康与营养助手依据世界卫生组织 (WHO) 及柬埔寨卫生部指南提供循证营养与症状科普，仅供健康参考，不能替代执业医师的当面诊断或处方治疗。如遇胸痛、呼吸困难或高烧不退等紧急症状，请立即拨打 119 或前往医院急诊。';
-
 export const AiFoodDiscoveryModal: React.FC = () => {
   const {
     isAiFoodDiscoveryModalOpen,
@@ -87,7 +59,6 @@ export const AiFoodDiscoveryModal: React.FC = () => {
     language,
     showToast,
     setSelectedFood,
-    currentUser,
   } = useApp();
 
   // Support Khmer ('km'), English ('en'), and Simplified Chinese ('zh')
@@ -105,46 +76,20 @@ export const AiFoodDiscoveryModal: React.FC = () => {
   const isZh = assistantLang === 'zh';
   const tr = (km: string, en: string, zh: string) => (isKm ? km : isZh ? zh : en);
 
-  const accountKey = currentUser?.id || currentUser?.email || 'guest';
-
-  // 5 Main Tabs of the AI Health & Nutrition Assistant
+  // 5 Main Structured Tabs of the Healthy Food & Disease-Friendly Nutrition Guide
   const [activeTab, setActiveTab] = useState<
-    'qa' | 'healthy_dishes' | 'meal_plan' | 'ingredients' | 'superfoods'
-  >('qa');
+    'condition_guide' | 'healthy_dishes' | 'meal_plan' | 'ingredients' | 'superfoods'
+  >('condition_guide');
 
-  // Tab 1: Multi-Turn Conversational Health Q&A + Personal BMI/Calorie Calculator States
-  const [questionInput, setQuestionInput] = useState<string>('');
-  const [session, setSession] = useState<HealthConversationSession>(() =>
-    loadHealthConversationSession(accountKey, assistantLang)
-  );
-  const [isLoadingTurn, setIsLoadingTurn] = useState<boolean>(false);
-  const [errorBanner, setErrorBanner] = useState<string | null>(null);
-  const [expandedTurnIds, setExpandedTurnIds] = useState<Record<string, boolean>>({});
-  const [showCalculator, setShowCalculator] = useState<boolean>(false);
-  const [healthProfile, setHealthProfile] = useState<UserHealthMetricsInput>(() =>
-    loadUserHealthMetricsInput()
-  );
+  // Tab 1: Medically Reviewed Disease-Friendly Nutrition Guide state
+  const [selectedConditionId, setSelectedConditionId] =
+    useState<NutritionConditionId>('diabetes');
 
-  const latestTurnRef = useRef<HTMLDivElement | null>(null);
-  const lastSubmitTimestampRef = useRef<number>(0);
-
-  // Reload session when user account changes
-  useEffect(() => {
-    const loaded = loadHealthConversationSession(accountKey, assistantLang);
-    setSession(loaded);
-  }, [accountKey]);
-
-  // Seed initial welcome turn if session has 0 turns so user sees immediate helpful context
-  const initialDefaultAnswer = useMemo(
+  const activeCondition = useMemo(
     () =>
-      answerHealthAndNutritionQuestion(
-        HEALTH_QUICK_QUESTIONS_TRILINGUAL[0].questionKh,
-        foods,
-        null,
-        1,
-        assistantLang
-      ),
-    [foods, assistantLang]
+      HEALTHY_NUTRITION_CONDITIONS_DATA.find((c) => c.id === selectedConditionId) ||
+      HEALTHY_NUTRITION_CONDITIONS_DATA[0],
+    [selectedConditionId]
   );
 
   // Tab 2: Healthy Dishes & Nutrition Filter States
@@ -163,15 +108,6 @@ export const AiFoodDiscoveryModal: React.FC = () => {
     'ស្លឹកគ្រៃ',
   ]);
   const [customIngredientInput, setCustomIngredientInput] = useState<string>('');
-
-  // Computed Daily Spotlight
-  const dailySpotlight = useMemo(() => getDailyHealthyEatingSpotlight(), []);
-
-  // Computed Personal BMI, Calorie & Hydration Summary
-  const metricsSummary = useMemo(
-    () => calculateUserHealthMetrics(healthProfile),
-    [healthProfile]
-  );
 
   // Computed Healthy Dishes List
   const healthyDishesList = useMemo(
@@ -197,112 +133,6 @@ export const AiFoodDiscoveryModal: React.FC = () => {
     setIsAiFoodDiscoveryModalOpen(false);
   };
 
-  const handleAskQuestion = (overrideQuestion?: string) => {
-    const rawQ = (overrideQuestion !== undefined ? overrideQuestion : questionInput).trim();
-    if (!rawQ) {
-      setErrorBanner(
-        tr(
-          'សូមវាយបញ្ចូលសំណួរអំពីសុខភាព រោគសញ្ញា ឬឈ្មោះមុខម្ហូបជាមុនសិន!',
-          'Please enter a health symptom, nutrition question, or dish name first!',
-          '请先输入您的健康症状、营养问题或柬埔寨菜名！'
-        )
-      );
-      return;
-    }
-
-    // Rate-limit guard against accidental double-taps (<150ms)
-    const now = Date.now();
-    if (isLoadingTurn || now - lastSubmitTimestampRef.current < 150) {
-      return;
-    }
-    lastSubmitTimestampRef.current = now;
-    setErrorBanner(null);
-    setIsLoadingTurn(true);
-
-    // Automatically detect language if user typed explicitly in Khmer, Chinese, or English
-    const detectedLang = detectQueryLanguage(rawQ, assistantLang);
-    if (detectedLang !== assistantLang) {
-      setAssistantLang(detectedLang);
-    }
-
-    try {
-      const { updatedSession, turn } = askHealthAssistantInSession(
-        session,
-        rawQ,
-        foods,
-        detectedLang
-      );
-
-      setSession({ ...updatedSession });
-      setExpandedTurnIds((prev) => ({ ...prev, [turn.turnId]: true }));
-      setQuestionInput('');
-      setIsLoadingTurn(false);
-
-      setTimeout(() => {
-        latestTurnRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }, 60);
-    } catch (err) {
-      setIsLoadingTurn(false);
-      setErrorBanner(
-        tr(
-          'មានបញ្ហាបច្ចេកទេសក្នុងការវិភាគសំណួរ។ សូមចុច «សួរម្តងទៀត» ដើម្បីព្យាយាមម្តងទៀត។',
-          'Unable to process your question right now. Please tap Retry.',
-          '处理问题时出现异常，请点击“重试”。'
-        )
-      );
-    }
-  };
-
-  const handleRetryTurn = (turnId: string) => {
-    setErrorBanner(null);
-    setIsLoadingTurn(true);
-    try {
-      const { updatedSession, turn: retriedTurn } = retryHealthTurnInSession(
-        session,
-        turnId,
-        foods,
-        assistantLang
-      );
-      setSession({ ...updatedSession });
-      if (retriedTurn) {
-        setExpandedTurnIds((prev) => ({ ...prev, [retriedTurn.turnId]: true }));
-      }
-      setIsLoadingTurn(false);
-      showToast(
-        tr(
-          '🔄 បានវិភាគ និងឆ្លើយសំណួរឡើងវិញដោយជោគជ័យ!',
-          '🔄 Successfully re-analyzed your health question!',
-          '🔄 已重新分析并更新健康解答！'
-        ),
-        'success'
-      );
-    } catch {
-      setIsLoadingTurn(false);
-    }
-  };
-
-  const handleStartNewConversation = () => {
-    const fresh = resetHealthConversationSession(accountKey, assistantLang);
-    setSession(fresh);
-    setExpandedTurnIds({});
-    setQuestionInput('');
-    setErrorBanner(null);
-    showToast(
-      tr(
-        '✨ បានចាប់ផ្តើមការសន្ទនាសុខភាពថ្មី!',
-        '✨ Started a new health conversation!',
-        '✨ 已开启新的健康咨询对话！'
-      ),
-      'info'
-    );
-  };
-
-  const handleUpdateHealthProfile = (patch: Partial<UserHealthMetricsInput>) => {
-    const next = { ...healthProfile, ...patch };
-    setHealthProfile(next);
-    saveUserHealthMetricsInput(next);
-  };
-
   const handleOpenDishRecipe = (food: FoodItem) => {
     setSelectedFood(food);
   };
@@ -322,390 +152,6 @@ export const AiFoodDiscoveryModal: React.FC = () => {
     setCustomIngredientInput('');
   };
 
-  // Helper to render localized fields from a HealthQaAnswer
-  const getAnswerText = (ans: HealthQaAnswer, lang: 'km' | 'en' | 'zh') => {
-    const badge =
-      lang === 'km'
-        ? ans.categoryBadgeKh
-        : lang === 'zh'
-        ? ans.categoryBadgeZh || ans.categoryBadgeEn
-        : ans.categoryBadgeEn;
-    const summary =
-      lang === 'km'
-        ? ans.summaryKh
-        : lang === 'zh'
-        ? ans.summaryZh || ans.summaryEn
-        : ans.summaryEn;
-    const bullets =
-      lang === 'km'
-        ? ans.bulletPointsKh
-        : lang === 'zh'
-        ? ans.bulletPointsZh || ans.bulletPointsEn
-        : ans.bulletPointsEn;
-    const choose =
-      lang === 'km'
-        ? ans.foodsToChooseKh
-        : lang === 'zh'
-        ? ans.foodsToChooseZh || ans.foodsToChooseEn
-        : ans.foodsToChooseEn;
-    const limit =
-      lang === 'km'
-        ? ans.foodsToLimitKh
-        : lang === 'zh'
-        ? ans.foodsToLimitZh || ans.foodsToLimitEn
-        : ans.foodsToLimitEn;
-    const advisory =
-      lang === 'km'
-        ? ans.medicalAdvisoryKh
-        : lang === 'zh'
-        ? ans.medicalAdvisoryZh || ans.medicalAdvisoryEn
-        : ans.medicalAdvisoryEn;
-    const sources =
-      lang === 'km'
-        ? ans.trustedSourcesKh || ['អង្គការសុខភាពពិភពលោក (WHO)', 'ក្រសួងសុខាភិបាលកម្ពុជា (MoH)']
-        : lang === 'zh'
-        ? ans.trustedSourcesZh || ['世界卫生组织 (WHO)', '柬埔寨卫生部 (MoH Cambodia)']
-        : ans.trustedSourcesEn || ['World Health Organization (WHO)', 'Ministry of Health Cambodia'];
-    const uncertainty =
-      lang === 'km'
-        ? ans.uncertaintyNoteKh
-        : lang === 'zh'
-        ? ans.uncertaintyNoteZh
-        : ans.uncertaintyNoteEn;
-    const followUps =
-      lang === 'km'
-        ? ans.followUpSuggestionsKh || []
-        : lang === 'zh'
-        ? ans.followUpSuggestionsZh || []
-        : ans.followUpSuggestionsEn || [];
-
-    return {
-      badge,
-      summary,
-      bullets,
-      choose,
-      limit,
-      advisory,
-      sources,
-      uncertainty,
-      followUps,
-    };
-  };
-
-  // Render a single clinical answer card (used for both active turns and initial welcome card)
-  const renderClinicalAnswerCard = (
-    ans: HealthQaAnswer,
-    turn?: HealthConversationTurn,
-    isLatest = true
-  ) => {
-    const content = getAnswerText(ans, assistantLang);
-    const safety = ans.safetyEscalation;
-    const safetyLevel = ans.safetyLevel || safety?.level || 'standard';
-    const isCollapsed =
-      turn && !isLatest && expandedTurnIds[turn.turnId] === false;
-
-    const safetyBannerStyles =
-      safetyLevel === 'emergency'
-        ? 'bg-red-600 text-white border-red-700 shadow-lg'
-        : safetyLevel === 'urgent'
-        ? 'bg-amber-500 text-slate-950 border-amber-600 shadow-md'
-        : safetyLevel === 'medication_caution'
-        ? 'bg-indigo-600 text-white border-indigo-700 shadow-sm'
-        : safetyLevel === 'high_risk_care'
-        ? 'bg-purple-700 text-white border-purple-800 shadow-sm'
-        : '';
-
-    return (
-      <div
-        key={turn ? turn.turnId : 'initial-welcome-answer'}
-        ref={isLatest ? latestTurnRef : undefined}
-        className={`rounded-2xl bg-white border-2 transition-all ${
-          safetyLevel === 'emergency'
-            ? 'border-red-500 shadow-xl'
-            : safetyLevel === 'urgent'
-            ? 'border-amber-400 shadow-lg'
-            : isLatest
-            ? 'border-emerald-500/60 shadow-md'
-            : 'border-slate-200 shadow-xs'
-        } overflow-hidden`}
-      >
-        {/* User Question Bubble Header (when part of multi-turn conversation) */}
-        {turn && (
-          <div className="bg-gradient-to-r from-emerald-900 via-emerald-800 to-teal-900 text-white px-4 py-2.5 flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2 min-w-0">
-              <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[10px] font-black shrink-0">
-                {tr(
-                  `សំណួរទី ${turn.turnNumber}`,
-                  `Turn #${turn.turnNumber}`,
-                  `第 ${turn.turnNumber} 问`
-                )}
-              </span>
-              {turn.isFollowUp && (
-                <span className="px-2 py-0.5 rounded-full bg-emerald-400/20 border border-emerald-300/40 text-emerald-100 text-[10px] font-bold shrink-0">
-                  {tr('🔗 សំណួរបន្ត (Context)', '🔗 Follow-Up Context', '🔗 上下文追问')}
-                </span>
-              )}
-              <p className="text-xs sm:text-sm font-extrabold text-white truncate">
-                «{turn.question}»
-              </p>
-            </div>
-
-            <div className="flex items-center gap-1.5 shrink-0">
-              <button
-                onClick={() => handleRetryTurn(turn.turnId)}
-                title={tr('សួរម្តងទៀត', 'Retry question', '重试此问题')}
-                className="px-2 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-emerald-100 text-[10px] font-bold flex items-center gap-1 transition cursor-pointer"
-              >
-                <RotateCcw className="w-3 h-3" />
-                <span>{tr('សួរម្តងទៀត', 'Retry', '重试')}</span>
-              </button>
-              {!isLatest && (
-                <button
-                  onClick={() =>
-                    setExpandedTurnIds((prev) => ({
-                      ...prev,
-                      [turn.turnId]: isCollapsed ? true : false,
-                    }))
-                  }
-                  className="p-1 rounded-lg bg-white/10 hover:bg-white/20 text-white cursor-pointer"
-                >
-                  {isCollapsed ? (
-                    <ChevronDown className="w-4 h-4" />
-                  ) : (
-                    <ChevronUp className="w-4 h-4" />
-                  )}
-                </button>
-              )}
-            </div>
-          </div>
-        )}
-
-        <div className="p-4 space-y-3.5">
-          {/* 4-Tier Safety Escalation Banner (Emergency / Urgent / Medication / High-Risk) */}
-          {safety && safetyLevel !== 'standard' && (
-            <div className={`p-3.5 rounded-2xl border ${safetyBannerStyles} space-y-1.5`}>
-              <div className="flex items-center justify-between gap-2 flex-wrap">
-                <div className="flex items-center gap-1.5 font-extrabold text-xs sm:text-sm">
-                  <AlertTriangle className="w-4 h-4 shrink-0" />
-                  <span>
-                    {tr(safety.titleKh, safety.titleEn, safety.titleZh)}
-                  </span>
-                </div>
-                {safetyLevel === 'emergency' && (
-                  <a
-                    href="tel:119"
-                    className="px-3 py-1 rounded-xl bg-white text-red-700 font-black text-xs flex items-center gap-1 shadow-sm hover:bg-red-50 transition"
-                  >
-                    <PhoneCall className="w-3.5 h-3.5" />
-                    <span>{tr('ហៅ 119 ភ្លាមៗ', 'Call 119 ER', '立即拨打 119')}</span>
-                  </a>
-                )}
-              </div>
-              <p className="text-xs leading-relaxed font-medium opacity-95">
-                {tr(safety.messageKh, safety.messageEn, safety.messageZh)}
-              </p>
-              <p className="text-[11px] font-extrabold pt-0.5 opacity-95">
-                👉 {tr(safety.actionCalloutKh, safety.actionCalloutEn, safety.actionCalloutZh)}
-              </p>
-            </div>
-          )}
-
-          {/* Category Badge & Evidence-Based Indicator */}
-          <div className="flex items-center justify-between gap-2 flex-wrap">
-            <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-900 text-xs font-extrabold">
-              {content.badge}
-            </span>
-            <span className="text-[10px] font-bold text-emerald-700 flex items-center gap-1">
-              <ShieldCheck className="w-3.5 h-3.5" />
-              {tr(
-                'ផ្អែកលើគោលការណ៍វេជ្ជសាស្ត្រ WHO & MoH',
-                'WHO & MoH Evidence-Based Guidance',
-                '基于 WHO 与柬埔寨卫生部循证指南'
-              )}
-            </span>
-          </div>
-
-          {/* Direct Clinical Summary */}
-          <p className="text-xs sm:text-sm text-slate-800 leading-relaxed font-medium bg-emerald-50/70 p-3.5 rounded-xl border border-emerald-200/80">
-            {content.summary}
-          </p>
-
-          {!isCollapsed && (
-            <>
-              {/* Key Clinical & Nutritional Guidelines */}
-              <div className="space-y-1.5">
-                <h4 className="text-xs font-extrabold text-slate-900">
-                  {tr(
-                    '📌 ការណែនាំវេជ្ជសាស្ត្រ និងអាហារូបត្ថម្ភសំខាន់ៗ៖',
-                    '📌 Key Clinical & Nutritional Guidelines:',
-                    '📌 关键医学与营养护理建议：'
-                  )}
-                </h4>
-                <div className="space-y-1.5">
-                  {content.bullets.map((pt, i) => (
-                    <div
-                      key={i}
-                      className="text-xs text-slate-700 bg-slate-50 p-2.5 rounded-xl border border-slate-200/80 leading-relaxed"
-                    >
-                      {pt}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Foods to Choose vs Foods to Limit */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                <div className="p-3 rounded-xl bg-emerald-50/80 border border-emerald-200 space-y-1.5">
-                  <h5 className="text-xs font-extrabold text-emerald-900 flex items-center gap-1">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                    <span>
-                      {tr(
-                        'អាហារគួរជ្រើសរើស (Recommended)',
-                        'Foods to Prioritize',
-                        '推荐优先选择的食物'
-                      )}
-                    </span>
-                  </h5>
-                  <div className="flex flex-wrap gap-1">
-                    {content.choose.map((item, idx) => (
-                      <span
-                        key={idx}
-                        className="px-2 py-0.5 rounded-lg bg-white border border-emerald-200 text-emerald-900 text-[11px] font-semibold"
-                      >
-                        ✓ {item}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="p-3 rounded-xl bg-rose-50/80 border border-rose-200 space-y-1.5">
-                  <h5 className="text-xs font-extrabold text-rose-900 flex items-center gap-1">
-                    <AlertCircle className="w-3.5 h-3.5 text-rose-600" />
-                    <span>
-                      {tr(
-                        'អាហារគួរតម ឬកាត់បន្ថយ (Avoid / Limit)',
-                        'Foods to Avoid or Limit',
-                        '应避免或限制的食物'
-                      )}
-                    </span>
-                  </h5>
-                  <div className="flex flex-wrap gap-1">
-                    {content.limit.map((item, idx) => (
-                      <span
-                        key={idx}
-                        className="px-2 py-0.5 rounded-lg bg-white border border-rose-200 text-rose-900 text-[11px] font-semibold"
-                      >
-                        ✕ {item}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Medical Advisory & Uncertainty Explanation */}
-              <div className="p-3 rounded-xl bg-amber-50/90 border border-amber-200/90 space-y-1.5 text-[11px] text-amber-950">
-                <p className="font-bold leading-relaxed">{content.advisory}</p>
-                {content.uncertainty && (
-                  <p className="text-slate-600 leading-relaxed flex items-start gap-1.5 pt-1 border-t border-amber-200/60">
-                    <HelpCircle className="w-3.5 h-3.5 text-amber-700 shrink-0 mt-0.5" />
-                    <span>{content.uncertainty}</span>
-                  </p>
-                )}
-                <div className="flex items-center justify-between gap-2 flex-wrap pt-1 text-[10px] text-emerald-900 font-semibold">
-                  <span>
-                    📚 {tr('ប្រភពវេជ្ជសាស្ត្រ៖ ', 'Trusted Sources: ', '权威医学来源：')}
-                    {content.sources.join(' • ')}
-                  </span>
-                  <span className="inline-flex items-center gap-1 text-slate-500">
-                    <Lock className="w-3 h-3" />
-                    {tr(
-                      'ឯកជនភាពត្រូវបានការពារ',
-                      'Privacy Protected',
-                      '隐私受保护'
-                    )}
-                  </span>
-                </div>
-              </div>
-
-              {/* Recommended Cambodian Dishes with 1-Tap Recipe View */}
-              {ans.recommendedDishes && ans.recommendedDishes.length > 0 && (
-                <div className="space-y-2 pt-1">
-                  <h4 className="text-xs font-extrabold text-slate-900 flex items-center justify-between">
-                    <span>
-                      {tr(
-                        '🍲 មុខម្ហូបខ្មែរសុខភាពដែលណែនាំ (ចុចមើលរូបមន្តចម្អិន)៖',
-                        '🍲 Recommended Healthy Cambodian Dishes (Tap for Recipe):',
-                        '🍲 推荐的健康柬埔寨菜肴（点击查看食谱）：'
-                      )}
-                    </span>
-                  </h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                    {ans.recommendedDishes.map(({ food, nutrition }) => (
-                      <div
-                        key={food.id}
-                        onClick={() => handleOpenDishRecipe(food)}
-                        className="p-2.5 rounded-2xl bg-slate-50 hover:bg-emerald-50/70 border border-slate-200 hover:border-emerald-400 transition flex items-center gap-3 cursor-pointer group"
-                      >
-                        <img
-                          src={food.photoUrl}
-                          alt={food.nameKh}
-                          className="w-16 h-16 rounded-xl object-cover shrink-0 border border-slate-200"
-                        />
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center justify-between gap-1">
-                            <p className="text-xs font-extrabold text-slate-900 truncate group-hover:text-emerald-800">
-                              {isKm ? food.nameKh : food.nameEn}
-                            </p>
-                            <span className="px-1.5 py-0.5 rounded-md bg-emerald-600 text-white text-[10px] font-bold shrink-0">
-                              {nutrition.healthScore}/100
-                            </span>
-                          </div>
-                          <p className="text-[11px] text-slate-600 mt-0.5">
-                            🔥 {nutrition.caloriesKcal} kcal • 💪 {nutrition.proteinG}g • 🌿{' '}
-                            {nutrition.fiberG}g fiber
-                          </p>
-                          <span className="text-[10px] text-emerald-700 font-bold inline-flex items-center gap-0.5 mt-1">
-                            {tr('មើលរូបមន្តសុខភាព', 'View Recipe', '查看健康食谱')}
-                            <ChevronRight className="w-3 h-3" />
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Contextual Follow-Up Question Chips for Multi-Turn Conversation */}
-              {content.followUps.length > 0 && (
-                <div className="pt-2 border-t border-slate-200/80 space-y-2">
-                  <span className="text-[11px] font-extrabold text-emerald-900 flex items-center gap-1.5">
-                    <MessageCircle className="w-3.5 h-3.5 text-emerald-600" />
-                    {tr(
-                      '💬 សួរសំណួរបន្តអំពីប្រធានបទនេះ (ចុចដើម្បីសួរបន្តបានច្រើនដង)៖',
-                      '💬 Ask a follow-up question on this topic (Multi-turn context):',
-                      '💬 继续追问此健康话题（支持连续多轮上下文对话）：'
-                    )}
-                  </span>
-                  <div className="flex flex-wrap gap-1.5">
-                    {content.followUps.map((fUp, idx) => (
-                      <button
-                        key={idx}
-                        onClick={() => handleAskQuestion(fUp)}
-                        className="px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-600 hover:text-white border border-emerald-300 text-emerald-950 text-[11px] font-bold transition cursor-pointer text-left shadow-2xs"
-                      >
-                        ↪ {fUp}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </>
-          )}
-        </div>
-      </div>
-    );
-  };
-
   return (
     <div className="fixed inset-0 z-[110] bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
       <div className="bg-white w-full max-w-2xl rounded-3xl shadow-2xl border border-emerald-500/30 overflow-hidden flex flex-col max-h-[94vh] font-khmer animate-in fade-in zoom-in-95 duration-200">
@@ -719,9 +165,9 @@ export const AiFoodDiscoveryModal: React.FC = () => {
               <div className="flex items-center gap-1.5 flex-wrap">
                 <h2 className="font-moul text-sm sm:text-base text-amber-300 truncate">
                   {tr(
-                    'ជំនួយការ AI សុខភាព និងអាហារូបត្ថម្ភ',
-                    'AI Health & Nutrition Assistant',
-                    'AI 医疗健康与营养助手'
+                    'មគ្គុទ្ទេសក៍អាហារសុខភាព និងរបបអាហារតាមជំងឺ',
+                    'Healthy Food & Disease-Friendly Nutrition Guide',
+                    '健康饮食与慢性病适宜膳食指南'
                   )}
                 </h2>
                 <span className="px-2 py-0.5 rounded-full bg-emerald-400/20 border border-emerald-300/40 text-emerald-100 text-[10px] font-bold">
@@ -730,9 +176,9 @@ export const AiFoodDiscoveryModal: React.FC = () => {
               </div>
               <p className="text-[11px] text-emerald-100/90 truncate">
                 {tr(
-                  'ឆ្លើយសំណួរសុខភាពបន្តគ្នាច្រើនដង ណែនាំម្ហូបសុខភាព និងការពារសុវត្ថិភាពវេជ្ជសាស្ត្រ',
-                  'Multi-turn clinical Q&A, healthy Khmer recipes & medical safety guidance',
-                  '支持多轮连续健康问诊、柬埔寨健康食谱与医疗安全预警'
+                  'ការណែនាំអាហារសុខភាព អាហារគួរជៀសវាង និងម្ហូបខ្មែរសមស្របតាមស្ថានភាពសុខភាព',
+                  'Medically reviewed food recommendations, foods to limit & suitable Cambodian dishes',
+                  '经医学审核的健康食材推荐、饮食禁忌与慢性病适宜柬埔寨菜肴指南'
                 )}
               </p>
             </div>
@@ -777,11 +223,11 @@ export const AiFoodDiscoveryModal: React.FC = () => {
           <div className="flex items-center gap-1.5">
             {[
               {
-                id: 'qa',
-                icon: MessageSquareHeart,
-                labelKh: '💬 សួរ AI សុខភាព',
-                labelEn: '💬 Ask Health AI',
-                labelZh: '💬 AI 健康问诊',
+                id: 'condition_guide',
+                icon: HeartPulse,
+                labelKh: '🩺 របបអាហារតាមជំងឺ',
+                labelEn: '🩺 Disease Diet Guide',
+                labelZh: '🩺 慢病膳食指南',
               },
               {
                 id: 'healthy_dishes',
@@ -858,247 +304,274 @@ export const AiFoodDiscoveryModal: React.FC = () => {
         {/* Main Scrollable Content Area */}
         <div className="flex-1 overflow-y-auto p-3.5 sm:p-5 space-y-4 bg-slate-50">
           {/* ===================================================================
-              TAB 1: MULTI-TURN CONVERSATIONAL HEALTH Q&A + WELLNESS CALCULATOR
+              TAB 1: STRUCTURED HEALTHY FOOD & DISEASE-FRIENDLY NUTRITION GUIDE
              =================================================================== */}
-          {activeTab === 'qa' && (
+          {activeTab === 'condition_guide' && activeCondition && (
             <div className="space-y-4">
-              {/* Session Status & New Conversation Control Bar */}
-              <div className="px-3.5 py-2.5 rounded-2xl bg-emerald-950 text-white flex items-center justify-between gap-2 flex-wrap shadow-sm">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="inline-flex items-center gap-1.5 text-xs font-extrabold text-amber-300">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                    {tr(
-                      `សន្ទនាសុខភាព (${session.turns.length} សំណួរ)`,
-                      `Active Session (${session.turns.length} turns)`,
-                      `当前对话 (${session.turns.length} 轮问答)`
-                    )}
-                  </span>
-                  <span className="text-[10px] text-emerald-200/80 px-2 py-0.5 rounded-full bg-white/10">
-                    ID: {session.sessionId.slice(-8)}
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setShowCalculator((v) => !v)}
-                    className="px-2.5 py-1 rounded-xl bg-white/10 hover:bg-white/20 text-amber-300 text-[11px] font-extrabold flex items-center gap-1 transition cursor-pointer"
-                  >
-                    <Scale className="w-3.5 h-3.5" />
-                    <span>
-                      {showCalculator
-                        ? tr('លាក់ BMI', 'Hide BMI', '隐藏 BMI')
-                        : tr('គណនា BMI', 'BMI Tool', '计算 BMI')}
-                    </span>
-                  </button>
-
-                  {session.turns.length > 0 && (
-                    <button
-                      onClick={handleStartNewConversation}
-                      className="px-2.5 py-1 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 text-[11px] font-extrabold flex items-center gap-1 shadow-xs transition cursor-pointer"
-                    >
-                      <RefreshCw className="w-3 h-3" />
-                      <span>
-                        {tr('សន្ទនាថ្មី', 'New Chat', '新对话')}
-                      </span>
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* Collapsible Personal BMI, Calorie & Hydration Calculator */}
-              {showCalculator && (
-                <div className="p-4 rounded-2xl bg-white border-2 border-amber-300/80 shadow-md space-y-3 animate-in fade-in duration-150">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-xs sm:text-sm font-extrabold text-slate-900 flex items-center gap-1.5">
-                      <Activity className="w-4 h-4 text-emerald-600" />
-                      <span>
-                        {tr(
-                          'គណនាសន្ទស្សន៍ទម្ងន់ (BMI) កាឡូរី និងបរិមាណទឹកប្រចាំថ្ងៃ',
-                          'Personal BMI, Daily Calorie & Hydration Calculator',
-                          '个人 BMI、每日热量与饮水量计算器'
-                        )}
-                      </span>
-                    </h4>
-                    <span
-                      className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${metricsSummary.bmiColorClass}`}
-                    >
-                      {isKm ? metricsSummary.bmiCategoryKh : metricsSummary.bmiCategoryEn}
-                    </span>
-                  </div>
-
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                    <div>
-                      <label className="text-[11px] font-bold text-slate-600 block mb-1">
-                        {tr('ទម្ងន់ (kg)', 'Weight (kg)', '体重 (kg)')}
-                      </label>
-                      <input
-                        type="number"
-                        min={30}
-                        max={200}
-                        value={healthProfile.weightKg}
-                        onChange={(e) =>
-                          handleUpdateHealthProfile({ weightKg: Number(e.target.value) })
-                        }
-                        className="w-full px-2.5 py-1.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-900"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[11px] font-bold text-slate-600 block mb-1">
-                        {tr('កម្ពស់ (cm)', 'Height (cm)', '身高 (cm)')}
-                      </label>
-                      <input
-                        type="number"
-                        min={120}
-                        max={220}
-                        value={healthProfile.heightCm}
-                        onChange={(e) =>
-                          handleUpdateHealthProfile({ heightCm: Number(e.target.value) })
-                        }
-                        className="w-full px-2.5 py-1.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-900"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[11px] font-bold text-slate-600 block mb-1">
-                        {tr('អាយុ (ឆ្នាំ)', 'Age (years)', '年龄 (岁)')}
-                      </label>
-                      <input
-                        type="number"
-                        min={12}
-                        max={100}
-                        value={healthProfile.age}
-                        onChange={(e) =>
-                          handleUpdateHealthProfile({ age: Number(e.target.value) })
-                        }
-                        className="w-full px-2.5 py-1.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-900"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[11px] font-bold text-slate-600 block mb-1">
-                        {tr('ភេទ', 'Gender', '性别')}
-                      </label>
-                      <select
-                        value={healthProfile.gender}
-                        onChange={(e) =>
-                          handleUpdateHealthProfile({
-                            gender: e.target.value as 'male' | 'female',
-                          })
-                        }
-                        className="w-full px-2.5 py-1.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-900 bg-white"
-                      >
-                        <option value="male">{tr('ប្រុស (Male)', 'Male', '男 (Male)')}</option>
-                        <option value="female">{tr('ស្រី (Female)', 'Female', '女 (Female)')}</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-950 leading-relaxed">
-                    {isKm
-                      ? metricsSummary.personalizedAdviceKh
-                      : metricsSummary.personalizedAdviceEn}
-                  </div>
-                </div>
-              )}
-
-              {/* Search / Ask Health AI Input Box */}
-              <div className="p-3.5 rounded-2xl bg-white border-2 border-emerald-500/40 shadow-sm space-y-3">
-                <label className="text-xs font-extrabold text-slate-800 flex items-center justify-between gap-1.5 flex-wrap">
-                  <span className="flex items-center gap-1.5">
-                    <Sparkles className="w-4 h-4 text-amber-500" />
+              {/* Condition Selector Grid */}
+              <div className="p-3.5 rounded-2xl bg-white border border-emerald-500/30 shadow-xs space-y-2.5">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <span className="text-xs font-extrabold text-[#064E3B] flex items-center gap-1.5">
+                    <ShieldCheck className="w-4 h-4 text-emerald-600" />
                     <span>
                       {tr(
-                        'សួរសំណួរអំពីសុខភាព រោគសញ្ញា ឬម្ហូបខ្មែរ (អាចសួរបន្តគ្នា ១០+ សំណួរ)៖',
-                        'Ask any symptom, health, or nutrition question (10+ multi-turn support):',
-                        '输入任何症状、疾病或饮食问题（支持 10+ 轮连续上下文追问）：'
+                        'ជ្រើសរើសស្ថានភាពសុខភាព ដើម្បីមើលការណែនាំអាហារូបត្ថម្ភ៖',
+                        'Select a Health Condition for Food & Nutrition Guidance:',
+                        '请选择健康状况，查看循证营养与高棉膳食建议：'
                       )}
                     </span>
                   </span>
-                </label>
-
-                <div className="flex items-center gap-2">
-                  <input
-                    type="text"
-                    value={questionInput}
-                    onChange={(e) => {
-                      setQuestionInput(e.target.value);
-                      if (errorBanner) setErrorBanner(null);
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') handleAskQuestion();
-                    }}
-                    placeholder={tr(
-                      'ឧ. គ្រុនផ្ដាសាយ, ឈឺបេះដូង, ឈឺ ក, រលាកពោះវៀន, ទឹកនោមផ្អែម, តើគួរផឹកទឹកអ្វី?...',
-                      'e.g., Flu & fever, chest pain, sore throat, enteritis, diabetes, what to drink next?...',
-                      '例如：感冒发烧、胸痛、喉咙痛、肠炎腹泻、糖尿病、接下来该喝什么？...'
-                    )}
-                    className="flex-1 px-3.5 py-2.5 rounded-xl border border-slate-300 focus:border-emerald-600 focus:outline-none text-xs sm:text-sm text-slate-900"
-                  />
-                  <button
-                    onClick={() => handleAskQuestion()}
-                    disabled={isLoadingTurn}
-                    className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 disabled:opacity-60 text-white font-bold text-xs flex items-center gap-1.5 shadow-md transition cursor-pointer shrink-0"
-                  >
-                    <Send className="w-3.5 h-3.5" />
-                    <span>
-                      {isLoadingTurn
-                        ? tr('កំពុងវិភាគ...', 'Analyzing...', '分析中...')
-                        : tr('សួរ AI', 'Ask AI', '提问 AI')}
-                    </span>
-                  </button>
-                </div>
-
-                {/* Error / Validation Recovery Banner */}
-                {errorBanner && (
-                  <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-900 text-xs font-bold flex items-center justify-between gap-2">
-                    <span>⚠️ {errorBanner}</span>
-                    <button
-                      onClick={() => setErrorBanner(null)}
-                      className="text-[11px] underline cursor-pointer"
-                    >
-                      {tr('បិទ', 'Dismiss', '关闭')}
-                    </button>
-                  </div>
-                )}
-
-                {/* Popular Quick-Tap Trilingual Health & Symptom Questions */}
-                <div className="space-y-1.5">
-                  <span className="text-[11px] font-bold text-slate-500 block">
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-900 text-[10px] font-bold">
                     {tr(
-                      '💡 ចុចជ្រើសរើសប្រធានបទសុខភាព ឬរោគសញ្ញាខាងក្រោមដើម្បីសួរភ្លាមៗ៖',
-                      '💡 Tap a clinical topic or symptom below for instant guidance:',
-                      '💡 点击下方常见症状或慢病主题立即获取解答：'
+                      'ណែនាំអាហារសុទ្ធសាធ • គ្មានវេជ្ជបញ្ជាថ្នាំ',
+                      'Food Guidance Only • No Medication Advice',
+                      '纯饮食营养建议 • 不含药物处方'
                     )}
                   </span>
-                  <div className="flex flex-wrap gap-1.5">
-                    {HEALTH_QUICK_QUESTIONS_TRILINGUAL.map((qItem) => (
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {HEALTHY_NUTRITION_CONDITIONS_DATA.map((cond) => {
+                    const selected = cond.id === selectedConditionId;
+                    return (
                       <button
-                        key={qItem.id}
-                        onClick={() =>
-                          handleAskQuestion(
-                            tr(qItem.questionKh, qItem.questionEn, qItem.questionZh)
-                          )
-                        }
-                        className="px-2.5 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-900 text-[11px] font-bold transition cursor-pointer text-left"
+                        key={cond.id}
+                        type="button"
+                        onClick={() => setSelectedConditionId(cond.id)}
+                        className={`p-2.5 rounded-xl border text-left transition flex items-center gap-2 cursor-pointer ${
+                          selected
+                            ? 'bg-gradient-to-r from-[#064E3B] to-emerald-800 text-white border-amber-400 shadow-sm'
+                            : 'bg-slate-50 hover:bg-emerald-50/70 text-slate-800 border-slate-200'
+                        }`}
                       >
-                        {tr(qItem.badgeKh, qItem.badgeEn, qItem.badgeZh)}
+                        <span className="text-xl shrink-0">{cond.emoji}</span>
+                        <div className="min-w-0">
+                          <p className="text-xs font-extrabold leading-tight truncate">
+                            {tr(cond.nameKh, cond.nameEn, cond.nameZh)}
+                          </p>
+                          <p
+                            className={`text-[10px] truncate mt-0.5 ${
+                              selected ? 'text-amber-200' : 'text-slate-500'
+                            }`}
+                          >
+                            {tr(cond.shortSubtitleKh, cond.shortSubtitleEn, cond.shortSubtitleZh)}
+                          </p>
+                        </div>
                       </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Condition Overview & Core Nutritional Principles */}
+              <div className="p-4 rounded-2xl bg-white border-2 border-emerald-500/40 shadow-xs space-y-3">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <h3 className="font-moul text-xs sm:text-sm text-[#064E3B] flex items-center gap-2">
+                    <span>{activeCondition.emoji}</span>
+                    <span>
+                      {tr(activeCondition.nameKh, activeCondition.nameEn, activeCondition.nameZh)}
+                    </span>
+                  </h3>
+                  <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[10px] font-bold">
+                    📚 {activeCondition.trustedSources.join(' • ')}
+                  </span>
+                </div>
+
+                <p className="text-xs sm:text-sm text-slate-700 leading-relaxed bg-emerald-50/60 p-3 rounded-xl border border-emerald-200/80">
+                  {tr(
+                    activeCondition.overviewKh,
+                    activeCondition.overviewEn,
+                    activeCondition.overviewZh
+                  )}
+                </p>
+
+                <div className="space-y-1.5">
+                  <h4 className="text-xs font-extrabold text-slate-900">
+                    {tr(
+                      '📌 គោលការណ៍អាហារូបត្ថម្ភសំខាន់ៗ៖',
+                      '📌 Key Nutritional Principles:',
+                      '📌 核心营养膳食原则：'
+                    )}
+                  </h4>
+                  <div className="grid grid-cols-1 gap-1.5">
+                    {(isKm
+                      ? activeCondition.keyNutritionalPrinciplesKh
+                      : isZh
+                      ? activeCondition.keyNutritionalPrinciplesZh
+                      : activeCondition.keyNutritionalPrinciplesEn
+                    ).map((principle, idx) => (
+                      <div
+                        key={idx}
+                        className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 text-xs text-slate-800 flex items-start gap-2 leading-relaxed"
+                      >
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                        <span>{principle}</span>
+                      </div>
                     ))}
                   </div>
                 </div>
               </div>
 
-              {/* Multi-Turn Conversation Thread */}
-              <div className="space-y-4">
-                {session.turns.length === 0 ? (
-                  renderClinicalAnswerCard(initialDefaultAnswer, undefined, true)
-                ) : (
-                  session.turns.map((turn, idx) =>
-                    renderClinicalAnswerCard(
-                      turn.answer,
-                      turn,
-                      idx === session.turns.length - 1
-                    )
-                  )
-                )}
+              {/* 1. Healthy Foods to Choose & Nutritional Benefits */}
+              <div className="p-4 rounded-2xl bg-white border border-emerald-200 shadow-xs space-y-3">
+                <h4 className="text-xs sm:text-sm font-extrabold text-emerald-900 flex items-center gap-1.5">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>
+                    {tr(
+                      '១. អាហារសុខភាពដែលគួរជ្រើសរើស និងអត្ថប្រយោជន៍អាហារូបត្ថម្ភ',
+                      '1. Healthy Foods to Choose & Nutritional Benefits',
+                      '1. 推荐优先选择的健康食物与营养益处'
+                    )}
+                  </span>
+                </h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  {activeCondition.healthyFoodsToChoose.map((item, idx) => (
+                    <div
+                      key={idx}
+                      className="p-3 rounded-xl bg-emerald-50/60 border border-emerald-200/90 space-y-1.5"
+                    >
+                      <div className="flex items-center justify-between gap-1.5">
+                        <span className="text-xs font-extrabold text-[#064E3B]">
+                          {item.emoji} {tr(item.nameKh, item.nameEn, item.nameZh)}
+                        </span>
+                      </div>
+                      <p className="text-[11px] font-bold text-emerald-800">
+                        🔬 {tr(item.keyNutrientsKh, item.keyNutrientsEn, item.keyNutrientsZh)}
+                      </p>
+                      <p className="text-[11px] text-slate-700 leading-relaxed">
+                        {tr(
+                          item.nutritionalBenefitKh,
+                          item.nutritionalBenefitEn,
+                          item.nutritionalBenefitZh
+                        )}
+                      </p>
+                      <p className="text-[10px] font-semibold text-teal-900 bg-white/90 px-2 py-1 rounded-lg border border-emerald-200/60">
+                        🍽️ {tr(item.portionTipKh, item.portionTipEn, item.portionTipZh)}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* 2. Suitable Cambodian Dishes */}
+              <div className="p-4 rounded-2xl bg-white border border-amber-300/80 shadow-xs space-y-3">
+                <h4 className="text-xs sm:text-sm font-extrabold text-slate-900 flex items-center gap-1.5">
+                  <Utensils className="w-4 h-4 text-amber-600 shrink-0" />
+                  <span>
+                    {tr(
+                      '២. មុខម្ហូបខ្មែរសមស្រប និងតិចនិកចម្អិនដើម្បីសុខភាព',
+                      '2. Suitable Cambodian Dishes & Healthy Cooking Tips',
+                      '2. 适宜的柬埔寨传统菜肴与健康烹饪方法'
+                    )}
+                  </span>
+                </h4>
+                <div className="grid grid-cols-1 gap-2.5">
+                  {activeCondition.suitableCambodianDishes.map((dish) => {
+                    const matchedFood = foods.find((f) => f.id === dish.foodId);
+                    return (
+                      <div
+                        key={dish.foodId}
+                        className="p-3 rounded-xl bg-amber-50/40 border border-amber-200/90 flex flex-col sm:flex-row items-start gap-3"
+                      >
+                        {matchedFood && (
+                          <img
+                            src={matchedFood.photoUrl}
+                            alt={matchedFood.nameKh}
+                            className="w-20 h-20 rounded-xl object-cover shrink-0 border border-amber-200"
+                          />
+                        )}
+                        <div className="min-w-0 flex-1 space-y-1">
+                          <div className="flex items-center justify-between gap-2 flex-wrap">
+                            <h5 className="text-xs sm:text-sm font-extrabold text-slate-900">
+                              🍲 {tr(dish.nameKh, dish.nameEn, dish.nameZh)}
+                            </h5>
+                            {matchedFood && (
+                              <button
+                                type="button"
+                                onClick={() => handleOpenDishRecipe(matchedFood)}
+                                className="px-2.5 py-1 rounded-lg bg-[#064E3B] hover:bg-[#047857] text-amber-300 text-[10px] font-bold flex items-center gap-1 cursor-pointer transition"
+                              >
+                                <span>{tr('មើលរូបមន្តពេញ', 'View Recipe', '查看完整食谱')}</span>
+                                <ChevronRight className="w-3 h-3" />
+                              </button>
+                            )}
+                          </div>
+                          <p className="text-[11px] text-slate-700 leading-relaxed">
+                            <strong className="text-emerald-800">
+                              {tr('អត្ថប្រយោជន៍៖ ', 'Why it is suitable: ', '适宜原因：')}
+                            </strong>
+                            {tr(dish.whySuitableKh, dish.whySuitableEn, dish.whySuitableZh)}
+                          </p>
+                          <p className="text-[11px] text-amber-950 bg-amber-100/70 px-2.5 py-1 rounded-lg border border-amber-300/60">
+                            👩‍🍳{' '}
+                            {tr(
+                              dish.healthyCookingModificationKh,
+                              dish.healthyCookingModificationEn,
+                              dish.healthyCookingModificationZh
+                            )}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* 3. Foods to Limit or Avoid */}
+              <div className="p-4 rounded-2xl bg-white border border-rose-200 shadow-xs space-y-3">
+                <h4 className="text-xs sm:text-sm font-extrabold text-rose-900 flex items-center gap-1.5">
+                  <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                  <span>
+                    {tr(
+                      '៣. អាហារដែលគួរកាត់បន្ថយ ឬជៀសវាង',
+                      '3. Foods to Limit or Avoid',
+                      '3. 建议减少或避免食用的食物'
+                    )}
+                  </span>
+                </h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  {activeCondition.foodsToLimitOrAvoid.map((avoid, idx) => (
+                    <div
+                      key={idx}
+                      className="p-3 rounded-xl bg-rose-50/70 border border-rose-200 space-y-1"
+                    >
+                      <p className="text-xs font-extrabold text-rose-900">
+                        {avoid.emoji} {tr(avoid.nameKh, avoid.nameEn, avoid.nameZh)}
+                      </p>
+                      <p className="text-[11px] text-slate-700 leading-relaxed">
+                        {tr(
+                          avoid.reasonToLimitKh,
+                          avoid.reasonToLimitEn,
+                          avoid.reasonToLimitZh
+                        )}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Hydration & Individual Variation Notice */}
+              <div className="p-3.5 rounded-2xl bg-sky-50 border border-sky-200 space-y-2 text-xs text-sky-950">
+                <p className="font-bold flex items-start gap-1.5 leading-relaxed">
+                  <Droplets className="w-4 h-4 text-sky-600 shrink-0 mt-0.5" />
+                  <span>
+                    {tr(
+                      activeCondition.dailyHydrationTipKh,
+                      activeCondition.dailyHydrationTipEn,
+                      activeCondition.dailyHydrationTipZh
+                    )}
+                  </span>
+                </p>
+                <p className="text-[11px] text-slate-700 pt-1.5 border-t border-sky-200/80 flex items-start gap-1.5 leading-relaxed">
+                  <Info className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                  <span>
+                    {tr(
+                      activeCondition.individualVariationNoteKh,
+                      activeCondition.individualVariationNoteEn,
+                      activeCondition.individualVariationNoteZh
+                    )}
+                  </span>
+                </p>
               </div>
             </div>
           )}
@@ -1158,6 +631,7 @@ export const AiFoodDiscoveryModal: React.FC = () => {
               <div className="space-y-2.5">
                 {healthyDishesList.slice(0, 24).map(({ food, nutrition }) => {
                   const isExpanded = expandedDishId === food.id;
+                  const locFood = getLocalizedFood(food, assistantLang);
                   return (
                     <div
                       key={food.id}
@@ -1173,7 +647,7 @@ export const AiFoodDiscoveryModal: React.FC = () => {
                           <div className="flex items-start justify-between gap-2">
                             <div>
                               <h4 className="text-xs sm:text-sm font-extrabold text-slate-900">
-                                {isKm ? food.nameKh : food.nameEn}
+                                {tr(food.nameKh, food.nameEn, locFood.name)}
                               </h4>
                               <p className="text-[11px] text-slate-500">
                                 {isKm ? food.nameEn : food.nameKh}
@@ -1208,7 +682,11 @@ export const AiFoodDiscoveryModal: React.FC = () => {
                           <strong className="text-emerald-900">
                             {tr('✨ អត្ថប្រយោជន៍សុខភាព៖ ', '✨ Health Benefit: ', '✨ 健康益处：')}
                           </strong>
-                          {isKm ? nutrition.healthBenefitsKh : nutrition.healthBenefitsEn}
+                          {tr(
+                            nutrition.healthBenefitsKh,
+                            nutrition.healthBenefitsEn,
+                            nutrition.healthBenefitsZh || nutrition.healthBenefitsEn
+                          )}
                         </p>
                         {isExpanded && (
                           <p className="pt-1 border-t border-emerald-200/60 text-emerald-950">
@@ -1219,9 +697,11 @@ export const AiFoodDiscoveryModal: React.FC = () => {
                                 '👩‍🍳 健康烹饪技巧：'
                               )}
                             </strong>
-                            {isKm
-                              ? nutrition.healthyCookingTipKh
-                              : nutrition.healthyCookingTipEn}
+                            {tr(
+                              nutrition.healthyCookingTipKh,
+                              nutrition.healthyCookingTipEn,
+                              nutrition.healthyCookingTipZh || nutrition.healthyCookingTipEn
+                            )}
                           </p>
                         )}
                       </div>
@@ -1557,8 +1037,21 @@ export const AiFoodDiscoveryModal: React.FC = () => {
           )}
 
           {/* Evidence-Based Medical Disclaimer Footer */}
-          <div className="p-3 rounded-2xl bg-amber-50/90 border border-amber-200 text-[11px] text-amber-950 leading-relaxed">
-            {tr(MEDICAL_DISCLAIMER_KH, MEDICAL_DISCLAIMER_EN, MEDICAL_DISCLAIMER_ZH)}
+          <div className="p-3 rounded-2xl bg-amber-50/90 border border-amber-200 text-[11px] text-amber-950 leading-relaxed space-y-1">
+            <p className="font-extrabold">
+              {tr(
+                NUTRITION_GUIDE_MEDICAL_DISCLAIMER.titleKh,
+                NUTRITION_GUIDE_MEDICAL_DISCLAIMER.titleEn,
+                NUTRITION_GUIDE_MEDICAL_DISCLAIMER.titleZh
+              )}
+            </p>
+            <p>
+              {tr(
+                NUTRITION_GUIDE_MEDICAL_DISCLAIMER.bodyKh,
+                NUTRITION_GUIDE_MEDICAL_DISCLAIMER.bodyEn,
+                NUTRITION_GUIDE_MEDICAL_DISCLAIMER.bodyZh
+              )}
+            </p>
           </div>
         </div>
       </div>
