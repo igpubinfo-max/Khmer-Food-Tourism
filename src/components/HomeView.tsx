@@ -1046,10 +1046,10 @@ export const HomeView: React.FC = () => {
           </h4>
           <p className="text-[11px] text-slate-600 dark:text-slate-400">
             {language === 'km'
-              ? 'ចែករំលែកមុខម្ហូប ទេសចរណ៍ និងមគ្គុទ្ទេសក៍អាហារសុខភាព'
+              ? 'ចែករំលែកមុខម្ហូប ទេសចរណ៍ និងរូបមន្តចម្អិន'
               : language === 'zh'
-              ? '分享美食、旅游与健康饮食指南'
-              : 'Share Khmer food, travel & the healthy food guide'}
+              ? '分享美食、旅游与食谱'
+              : 'Share Khmer food, travel & recipes'}
           </p>
         </div>
         <span className="px-3 py-1.5 rounded-xl bg-[#064E3B] text-white text-[11px] font-bold shrink-0">
@@ -1123,34 +1123,34 @@ export const HomeView: React.FC = () => {
 
         {/* Prominent AI Discovery & Google Maps Places Search (Admin & VIP) Entry Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-          {/* 1. Healthy Food & Disease-Friendly Nutrition Guide (opens the Food tab: single entry point) */}
+          {/* 1. Browse Khmer dishes (opens the Food tab: single entry point) */}
           <button
             onClick={() => setActiveTab('food')}
             className="p-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 via-[#064E3B] to-teal-800 text-white text-left shadow-md flex items-center justify-between transition hover:scale-[1.01] active:scale-98 cursor-pointer ring-2 ring-emerald-400/30"
           >
             <div className="flex items-center gap-2.5">
               <div className="w-10 h-10 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center shadow-sm shrink-0">
-                <HeartPulse className="w-5 h-5 stroke-[2.4]" />
+                <Utensils className="w-5 h-5 stroke-[2.4]" />
               </div>
               <div>
                 <span className="font-moul text-xs block text-white">
                   {language === 'km'
-                    ? 'មគ្គុទ្ទេសក៍អាហារសុខភាព និងរបបអាហារតាមជំងឺ'
+                    ? 'ស្វែងរកម្ហូបខ្មែរ'
                     : language === 'zh'
-                    ? '健康饮食与慢性病适宜膳食指南'
-                    : 'Healthy Food & Disease-Friendly Nutrition Guide'}
+                    ? '探索高棉美食'
+                    : 'Discover Cambodian Food'}
                 </span>
                 <span className="text-[10px] text-emerald-200 block">
                   {language === 'km'
-                    ? 'ទឹកនោមផ្អែម • លើសឈាម • ខ្លាញ់ • ហ្គោត • រលាកក្រពះ & ម្ហូបខ្មែរសមស្រប'
+                    ? 'ស្លាកម្ហូប • តម្រង • រូបមន្តចម្អិន'
                     : language === 'zh'
-                    ? '糖尿病 • 高血压 • 高血脂 • 痛风 • 胃炎与适宜高棉菜推荐'
-                    : 'Diabetes • High BP • Cholesterol • Gout • Gastritis & Khmer Dishes'}
+                    ? '菜品标签 • 筛选 • 详细食谱'
+                    : 'Dish tags • Filters • Full recipes'}
                 </span>
               </div>
             </div>
             <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[9px] font-black uppercase tracking-wider font-sans shrink-0">
-              {language === 'km' ? 'អាហារសុខភាព' : language === 'zh' ? '营养指南' : 'Nutrition Guide'}
+              {language === 'km' ? 'ម្ហូប' : language === 'zh' ? '美食' : 'Food'}
             </span>
           </button>
 

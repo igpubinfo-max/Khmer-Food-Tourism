@@ -16,6 +16,7 @@ import { searchOnlineFoodImages, OnlineFoodImageCandidate } from '../services/on
 import { FoodCategorySlug, FoodItem } from '../types';
 import { tr } from '../utils/i18n';
 import { getLocalizedFood } from '../utils/zhDynamicTranslator';
+import { DishTagChips } from './DishTagChips';
 
 export const FoodDetailModal: React.FC = () => {
   const { 
@@ -780,6 +781,9 @@ export const FoodDetailModal: React.FC = () => {
               <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed bg-slate-50 dark:bg-slate-800/50 p-3.5 rounded-xl border border-slate-200/90 dark:border-slate-800">
                 {loc.description}
               </p>
+              <div className="mt-2.5">
+                <DishTagChips food={selectedFood} language={language} />
+              </div>
             </div>
 
             {/* Ingredients Checklist */}

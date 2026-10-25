@@ -12,9 +12,9 @@ export const InviteFriendsCard: React.FC = () => {
   const handleInvite = () => {
     const message = tr(
       language,
-      `🇰🇭 ខ្ញុំ${name ? ` (${name})` : ''} កំពុងប្រើកម្មវិធី «អាហារ & ទេសចរណ៍ខ្មែរ» — រកម្ហូបឆ្ងាញ់ ហាង និងកន្លែងទេសចរណ៍ និងមគ្គុទ្ទេសក៍អាហារសុខភាព។ មកសាកល្បងជាមួយខ្ញុំ! / I'm using “Khmer Food & Tourism” — join me!`,
-      `🇰🇭 ${name ? `${name} here — ` : ''}I'm using “Khmer Food & Tourism” to find great Khmer dishes, restaurants, travel spots and a healthy food guide. Come try it with me! / ខ្ញុំកំពុងប្រើកម្មវិធី «អាហារ & ទេសចរណ៍ខ្មែរ»`,
-      `🇰🇭 ${name ? `我是${name}，` : ''}我正在用“高棉美食与旅游”找美食、餐厅、景点和健康饮食指南，一起来试试吧！/ Khmer Food & Tourism`
+      `🇰🇭 ខ្ញុំ${name ? ` (${name})` : ''} កំពុងប្រើកម្មវិធី «អាហារ & ទេសចរណ៍ខ្មែរ» — រកម្ហូបឆ្ងាញ់ ហាង និងកន្លែងទេសចរណ៍។ មកសាកល្បងជាមួយខ្ញុំ! / I'm using “Khmer Food & Tourism” — join me!`,
+      `🇰🇭 ${name ? `${name} here — ` : ''}I'm using “Khmer Food & Tourism” to find great Khmer dishes, restaurants and travel spots. Come try it with me! / ខ្ញុំកំពុងប្រើកម្មវិធី «អាហារ & ទេសចរណ៍ខ្មែរ»`,
+      `🇰🇭 ${name ? `我是${name}，` : ''}我正在用“高棉美食与旅游”找美食、餐厅和旅游景点，一起来试试吧！/ Khmer Food & Tourism`
     );
     shareText(
       language,

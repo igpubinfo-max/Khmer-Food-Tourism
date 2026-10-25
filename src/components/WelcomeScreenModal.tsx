@@ -8,7 +8,6 @@ import {
   ArrowRight,
   Heart,
   Leaf,
-  HeartPulse,
   Sparkles,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
@@ -313,9 +312,9 @@ export const WelcomeScreenModal: React.FC<WelcomeScreenModalProps> = ({ onComple
               <div className="relative z-10 flex items-center gap-3">
                 {/* Health Icon Badge */}
                 <div className="relative w-12 h-12 sm:w-13 sm:h-13 rounded-2xl bg-gradient-to-br from-[#16a34a] via-[#15803d] to-[#14532d] border-2 border-white shadow-md flex items-center justify-center text-white shrink-0">
-                  <HeartPulse className="w-6 h-6 stroke-[2.3] text-white" />
+                  <Utensils className="w-6 h-6 stroke-[2.3] text-white" />
                   <span className="absolute -top-1.5 -right-1.5 px-1.5 py-0.2 rounded-full bg-amber-400 text-[#14532d] text-[8px] font-black uppercase tracking-wider shadow-xs border border-white">
-                    GUIDE
+                    FOOD
                   </span>
                 </div>
 
@@ -323,36 +322,28 @@ export const WelcomeScreenModal: React.FC<WelcomeScreenModalProps> = ({ onComple
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5 flex-wrap">
                     <h3 className="text-[13.5px] sm:text-[14.5px] font-extrabold text-[#14532d] leading-tight">
-                      {isKm
-                        ? 'មគ្គុទ្ទេសក៍អាហារសុខភាព និងរបបអាហារតាមជំងឺ'
-                        : isZh
-                        ? '健康饮食与慢性病适宜膳食指南'
-                        : 'Healthy Food & Disease-Friendly Nutrition Guide'}
+                      {isKm ? 'ស្វែងរកម្ហូបខ្មែរ និងទីកន្លែងទេសចរណ៍' : isZh ? '探索高棉美食与景点' : 'Discover Cambodian Food & Places'}
                     </h3>
                     <span className="text-[9.5px] font-extrabold text-emerald-700 bg-emerald-100/90 border border-emerald-300/70 px-1.5 py-0.5 rounded-md uppercase font-sans">
-                      {isZh ? '医学营养指南' : 'Nutrition Guide'}
+                      {isKm ? 'ម្ហូប' : isZh ? '美食' : 'Food'}
                     </span>
                   </div>
                   <p className="text-[11px] sm:text-[11.5px] font-bold text-slate-700 leading-snug mt-0.5">
                     {isKm
-                      ? 'ណែនាំអាហារសុខភាព អាហារគួរជៀសវាង និងម្ហូបខ្មែរសម្រាប់ទឹកនោមផ្អែម លើសឈាម ខ្លាញ់ ហ្គោត និងក្រពះ'
+                      ? 'រកមើលមុខម្ហូបខ្មែរ រូបមន្តចម្អិន ស្លាកម្ហូប ហាង និងកន្លែងទេសចរណ៍'
                       : isZh
-                      ? '提供糖尿病、高血压、高血脂、痛风及胃炎的循证健康食材、饮食禁忌与适宜高棉菜推荐'
-                      : 'Evidence-based healthy foods, foods to limit & Cambodian dishes for diabetes, BP, cholesterol, gout & gastritis'}
+                      ? '浏览高棉菜肴、食谱、菜品标签、餐厅与旅游景点'
+                      : 'Browse Khmer dishes, recipes, dish tags, restaurants and travel spots'}
                   </p>
                 </div>
               </div>
 
-              {/* Prominent "Explore Healthy Food Guide" CTA Button */}
+              {/* Prominent "Explore Khmer Food" CTA Button */}
               <div className="relative z-10 mt-2.5 flex items-center justify-between gap-2 px-3.5 py-2 rounded-xl bg-gradient-to-r from-[#15803d] via-[#16a34a] to-[#2e7d32] group-hover:brightness-105 text-white shadow-sm transition">
                 <div className="flex items-center gap-1.5 min-w-0">
                   <Sparkles className="w-4 h-4 text-amber-300 fill-amber-300 shrink-0" />
                   <span className="text-xs sm:text-[13px] font-extrabold tracking-wide truncate">
-                    {isKm
-                      ? 'មើលមគ្គុទ្ទេសក៍អាហារសុខភាព (Healthy Nutrition Guide)'
-                      : isZh
-                      ? '查看健康饮食与慢病膳食指南 (Nutrition Guide)'
-                      : 'Explore Healthy Food & Nutrition Guide'}
+                    {isKm ? 'ស្វែងរកម្ហូបខ្មែរ' : isZh ? '探索高棉美食' : 'Explore Khmer Food'}
                   </span>
                 </div>
                 <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center shrink-0 group-hover:translate-x-0.5 transition-transform">

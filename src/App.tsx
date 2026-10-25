@@ -35,7 +35,6 @@ const UpgradeVipModal = lazy(() => import('./components/UpgradeVipModal').then((
 const PaymentSupportModal = lazy(() => import('./components/PaymentSupportModal').then((m) => ({ default: m.PaymentSupportModal })));
 const QrScannerModal = lazy(() => import('./components/QrScannerModal').then((m) => ({ default: m.QrScannerModal })));
 const VipAddRestaurantModal = lazy(() => import('./components/VipAddRestaurantModal').then((m) => ({ default: m.VipAddRestaurantModal })));
-const AiFoodDiscoveryModal = lazy(() => import('./components/AiFoodDiscoveryModal').then((m) => ({ default: m.AiFoodDiscoveryModal })));
 const RestaurantCheckInModal = lazy(() => import('./components/RestaurantCheckInModal').then((m) => ({ default: m.RestaurantCheckInModal })));
 const GoogleMapsPlaceSearchModal = lazy(() => import('./components/GoogleMapsPlaceSearchModal').then((m) => ({ default: m.GoogleMapsPlaceSearchModal })));
 import { Toast } from './components/Toast';
@@ -71,8 +70,6 @@ const MainScreen: React.FC = () => {
     isTrendingSocialModalOpen,
     isTrendingFoodDetailModalOpen,
     isAiCheckInModalOpen,
-    isAiFoodDiscoveryModalOpen,
-    setIsAiFoodDiscoveryModalOpen,
     isRestaurantCheckInModalOpen,
     isUpgradeVipModalOpen,
     isSupportTicketModalOpen,
@@ -154,7 +151,6 @@ const MainScreen: React.FC = () => {
     return (
       <div className="flex-1 flex flex-col w-full min-h-screen relative overflow-y-auto no-scrollbar bg-slate-950 items-center justify-center p-3 sm:p-4">
         <AuthModal isMandatoryGate={true} />
-        <Suspense fallback={null}>{isAiFoodDiscoveryModalOpen && <AiFoodDiscoveryModal />}</Suspense>
         {selectedFood && <FoodDetailModal />}
         {isExitModalOpen && <ExitConfirmModal />}
         {isAdminLoginModalOpen && <AdminLoginModal />}
@@ -206,7 +202,6 @@ const MainScreen: React.FC = () => {
       {isTrendingSocialModalOpen && <TrendingSocialModal />}
       {isTrendingFoodDetailModalOpen && <TrendingFoodDetailModal />}
       {isAiCheckInModalOpen && <AiCheckInModal />}
-      {isAiFoodDiscoveryModalOpen && <AiFoodDiscoveryModal />}
       {isRestaurantCheckInModalOpen && <RestaurantCheckInModal />}
       {isUpgradeVipModalOpen && <UpgradeVipModal />}
       {isSupportTicketModalOpen && <PaymentSupportModal />}

@@ -1,5 +1,4 @@
 import type { FoodItem } from '../types';
-import { HEALTHY_NUTRITION_CONDITIONS_DATA, NutritionConditionId } from '../data/healthyNutritionGuideData';
 
 export interface ProvinceFilterOption {
   id: string;
@@ -60,17 +59,3 @@ export function detectDishProvince(food: FoodItem): string | null {
   provinceCache.set(key, found);
   return found;
 }
-
-/** Food ids that the reviewed nutrition guide lists as suitable for a condition. */
-export function getSuitableFoodIds(conditionId: NutritionConditionId): Set<string> {
-  const cond = HEALTHY_NUTRITION_CONDITIONS_DATA.find((c) => c.id === conditionId);
-  return new Set((cond?.suitableCambodianDishes ?? []).map((d) => d.foodId));
-}
-
-export const CONDITION_FILTER_OPTIONS = HEALTHY_NUTRITION_CONDITIONS_DATA.map((c) => ({
-  id: c.id,
-  icon: c.icon,
-  kh: c.badgeKh,
-  en: c.badgeEn,
-  zh: c.badgeZh,
-}));

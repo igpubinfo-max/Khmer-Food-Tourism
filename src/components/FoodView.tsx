@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { FoodCard } from './FoodCard';
-import { FoodImageModal } from './FoodImageModal';
 import {
   FoodItem,
   KHMER_FOOD_PRIMARY_CATEGORIES,
@@ -9,103 +8,27 @@ import {
   classifyKhmerFoodPrimaryGroup,
   organizeAndDeduplicateFoods
 } from '../types';
-import { Utensils, Plus, Sparkles, Globe, Check, HeartPulse, ShieldCheck, AlertTriangle, ChevronDown, ChevronUp, Info, Share2, CalendarDays } from 'lucide-react';
-import { shareText } from '../utils/shareApp';
-import { DISH_PROVINCES, CONDITION_FILTER_OPTIONS, detectDishProvince, getSuitableFoodIds } from '../utils/foodFilters';
-import { searchOnlineFoodImages, OnlineFoodImageCandidate } from '../services/onlineFoodImageService';
+import { Utensils } from 'lucide-react';
+import { DISH_PROVINCES, detectDishProvince } from '../utils/foodFilters';
+import { TAG_FILTERS, TAG_ESTIMATE_NOTE, GENERAL_FOOD_INFO_NOTE, matchesTagFilter, TagFilterId } from '../utils/dishTags';
 import { tr } from '../utils/i18n';
 import { getLocalizedFood } from '../utils/zhDynamicTranslator';
-import {
-  HEALTHY_NUTRITION_CONDITIONS_DATA,
-  NUTRITION_GUIDE_MEDICAL_DISCLAIMER,
-  NutritionConditionId
-} from '../data/healthyNutritionGuideData';
 
 const PAGE_BATCH_SIZE = 48;
 
 export const FoodView: React.FC = () => {
-  const { foods, updateFood, showToast, language, searchQuery, setSearchQuery, currentUser, setIsAdminOpen, setSelectedFood, setIsAiFoodDiscoveryModalOpen } = useApp();
+  const { foods, language, searchQuery, setSearchQuery } = useApp();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [visibleCount, setVisibleCount] = useState<number>(PAGE_BATCH_SIZE);
-  const [showOnlineSearchPanel, setShowOnlineSearchPanel] = useState<boolean>(true);
-  const [selectedFoodIdForOnline, setSelectedFoodIdForOnline] = useState<string>('');
-  const [isSearchingOnline, setIsSearchingOnline] = useState<boolean>(false);
-  const [onlineCandidates, setOnlineCandidates] = useState<OnlineFoodImageCandidate[]>([]);
-  const [editingFoodModal, setEditingFoodModal] = useState<FoodItem | null>(null);
-  const [showNutritionGuide, setShowNutritionGuide] = useState<boolean>(false);
-  const [selectedConditionId, setSelectedConditionId] = useState<NutritionConditionId>('diabetes');
   const [provinceFilter, setProvinceFilter] = useState<string>('');
-  const [conditionFilter, setConditionFilter] = useState<NutritionConditionId | ''>('');
+  const [tagFilter, setTagFilter] = useState<TagFilterId>('all');
   const loadMoreTriggerRef = useRef<HTMLDivElement | null>(null);
   const isKm = language === 'km';
-  const shareTip = (title: string, body: string) =>
-    shareText(language, title, `💡 ${title}\n${body}`, showToast);
-  const activeConditionGuide = useMemo(
-    () =>
-      HEALTHY_NUTRITION_CONDITIONS_DATA.find((c) => c.id === selectedConditionId) ||
-      HEALTHY_NUTRITION_CONDITIONS_DATA[0],
-    [selectedConditionId]
-  );
 
-  const activeFoodForOnline = useMemo(() => {
-    if (selectedFoodIdForOnline) {
-      const found = foods.find((f) => f.id === selectedFoodIdForOnline);
-      if (found) return found;
-    }
-    return foods[0] || null;
-  }, [foods, selectedFoodIdForOnline]);
-
-  const handleRunOnlineFoodSearch = async (targetFood?: FoodItem | null) => {
-    const food = targetFood || activeFoodForOnline;
-    if (!food) return;
-    setShowOnlineSearchPanel(true);
-    setSelectedFoodIdForOnline(food.id);
-    setIsSearchingOnline(true);
-    try {
-      const results = await searchOnlineFoodImages({
-        nameKh: food.nameKh,
-        nameEn: food.nameEn,
-        categorySlug: food.categorySlug,
-        existingUrls: food.photoUrl ? [food.photoUrl] : [],
-      });
-      setOnlineCandidates(results);
-      if (results.length > 0) {
-        showToast(
-          isKm
-            ? `✨ រកឃើញរូបភាពម្ហូបពី Online ចំនួន ${results.length} សន្លឹកសម្រាប់ «${food.nameKh}»!`
-            : `✨ Found ${results.length} online photos for "${food.nameEn}"!`,
-          'success'
-        );
-      }
-    } catch {
-      showToast(
-        isKm ? 'មិនអាចស្វែងរករូបភាពពី Online បានទេ' : 'Failed to search online food photos',
-        'warning'
-      );
-    } finally {
-      setIsSearchingOnline(false);
-    }
-  };
-
-  const handleApplyCandidatePhoto = (cand: OnlineFoodImageCandidate) => {
-    if (!activeFoodForOnline) return;
-    updateFood({
-      ...activeFoodForOnline,
-      photoUrl: cand.url,
-      imageAuditStatus: 'verified',
-      imageAuditNote: `រូបភាពជ្រើសរើសពី Online (${cand.source})`,
-    });
-    showToast(
-      isKm
-        ? `✅ បានប្តូររូបភាព «${activeFoodForOnline.nameKh}» ពី Online រួចរាល់!`
-        : `✅ Updated photo for "${activeFoodForOnline.nameEn}"!`,
-      'success'
-    );
-  };
 
   useEffect(() => {
     setVisibleCount(PAGE_BATCH_SIZE);
-  }, [selectedCategory, searchQuery, provinceFilter, conditionFilter]);
+  }, [selectedCategory, searchQuery, provinceFilter, tagFilter]);
 
   // Deduplicate and sort all dishes in exact category order: សម្ល -> ឆា -> ស្ងោរ -> បង្អែម
   const organizedFoods = useMemo(() => organizeAndDeduplicateFoods(foods), [foods]);
@@ -144,9 +67,8 @@ export const FoodView: React.FC = () => {
 
   const filteredFoods = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
-    const suitableIds = conditionFilter ? getSuitableFoodIds(conditionFilter) : null;
     return organizedFoods.filter((f) => {
-      if (suitableIds && !suitableIds.has(f.id)) return false;
+      if (!matchesTagFilter(f, tagFilter)) return false;
       if (provinceFilter && detectDishProvince(f) !== provinceFilter) return false;
       if (selectedCategory !== 'all') {
         const grp = classifyKhmerFoodPrimaryGroup(f);
@@ -171,7 +93,7 @@ export const FoodView: React.FC = () => {
       }
       return true;
     });
-  }, [organizedFoods, selectedCategory, searchQuery, provinceFilter, conditionFilter]);
+  }, [organizedFoods, selectedCategory, searchQuery, provinceFilter, tagFilter]);
 
   // Provinces that actually appear in dish names/descriptions (no empty filter options)
   const provinceOptions = useMemo(() => {
@@ -183,11 +105,11 @@ export const FoodView: React.FC = () => {
     return DISH_PROVINCES.filter((p) => counts.has(p.id)).map((p) => ({ ...p, count: counts.get(p.id) || 0 }));
   }, [organizedFoods]);
 
-  const hasActiveFilters = selectedCategory !== 'all' || Boolean(provinceFilter) || Boolean(conditionFilter) || Boolean(searchQuery.trim());
+  const hasActiveFilters = selectedCategory !== 'all' || Boolean(provinceFilter) || tagFilter !== 'all' || Boolean(searchQuery.trim());
   const resetAllFilters = () => {
     setSelectedCategory('all');
     setProvinceFilter('');
-    setConditionFilter('');
+    setTagFilter('all');
     setSearchQuery('');
   };
 
@@ -258,431 +180,7 @@ export const FoodView: React.FC = () => {
         {/* Admin entry removed from Food tab: Admin Dashboard opens only from Profile */}
       </div>
 
-      {/* Healthy Food & Disease-Friendly Nutrition Guide Banner & Expandable Panel */}
-      <div className="rounded-2xl border-2 border-emerald-500/40 bg-gradient-to-br from-emerald-50 via-white to-teal-50/80 dark:from-slate-800 dark:via-slate-900 dark:to-emerald-950/60 shadow-sm overflow-hidden font-khmer">
-        <button
-          type="button"
-          onClick={() => setShowNutritionGuide((prev) => !prev)}
-          className="w-full p-3.5 flex items-center justify-between gap-2.5 text-left hover:bg-emerald-500/5 transition cursor-pointer"
-        >
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#064E3B] to-[#059669] text-white flex items-center justify-center shadow-sm shrink-0">
-              <HeartPulse className="w-5 h-5 text-amber-300" />
-            </div>
-            <div className="min-w-0">
-              <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="px-2 py-0.5 rounded-full bg-[#064E3B] text-amber-300 text-[9px] font-black uppercase tracking-wide">
-                  {tr(language, 'ពិនិត្យផ្ទៀងផ្ទាត់វេជ្ជសាស្ត្រ', 'Medically Reviewed', '医学营养审核')}
-                </span>
-                <h3 className="font-moul text-xs sm:text-sm text-[#064E3B] dark:text-emerald-300 truncate">
-                  {tr(
-                    language,
-                    'មគ្គុទ្ទេសក៍អាហារសុខភាព និងរបបអាហារតាមជំងឺ',
-                    'Healthy Food & Disease-Friendly Nutrition Guide',
-                    '健康饮食与慢性病适宜膳食指南'
-                  )}
-                </h3>
-              </div>
-              <p className="text-[11px] text-slate-600 dark:text-slate-300 mt-0.5 line-clamp-1">
-                {tr(
-                  language,
-                  'ទឹកនោមផ្អែម • លើសសម្ពាធឈាម • លើសខ្លាញ់ • ហ្គោត • រលាកក្រពះ • ម្ហូបខ្មែរសមស្រប',
-                  'Diabetes • High Blood Pressure • High Cholesterol • Gout • Gastritis • Cambodian Dishes',
-                  '糖尿病 • 高血压 • 高血脂 • 痛风 • 胃炎 • 适宜高棉菜推荐'
-                )}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-[#064E3B] text-white text-[10px] font-bold shrink-0 shadow-2xs">
-            <span>{showNutritionGuide ? tr(language, 'បិទ', 'Hide', '收起') : tr(language, 'បើកមើល', 'Explore', '展开指南')}</span>
-            {showNutritionGuide ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-          </div>
-        </button>
 
-        {showNutritionGuide && activeConditionGuide && (
-          <div className="px-3.5 pb-4 pt-2 border-t border-emerald-500/20 space-y-3">
-            {/* Condition Selector Tabs */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
-              {HEALTHY_NUTRITION_CONDITIONS_DATA.map((cond) => {
-                const isSelected = cond.id === selectedConditionId;
-                return (
-                  <button
-                    key={cond.id}
-                    type="button"
-                    onClick={() => setSelectedConditionId(cond.id)}
-                    className={`flex items-center gap-1.5 p-2 rounded-xl text-left border transition cursor-pointer ${
-                      isSelected
-                        ? 'bg-[#064E3B] text-white border-amber-400 shadow-xs font-bold'
-                        : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:border-emerald-400'
-                    }`}
-                  >
-                    <span className="text-base shrink-0">{cond.icon}</span>
-                    <div className="min-w-0">
-                      <p className="text-[11px] font-bold leading-tight truncate">
-                        {tr(language, cond.badgeKh, cond.badgeEn, cond.badgeZh)}
-                      </p>
-                      <p className={`text-[9px] truncate ${isSelected ? 'text-emerald-200' : 'text-slate-400'}`}>
-                        {tr(language, cond.titleKh, cond.titleEn, cond.titleZh)}
-                      </p>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Condition Overview */}
-            <div className="p-3 rounded-xl bg-white dark:bg-slate-800/90 border border-emerald-500/25 space-y-2">
-              <div className="flex items-center justify-between gap-2">
-                <h4 className="font-bold text-xs text-[#064E3B] dark:text-emerald-300 flex items-center gap-1.5">
-                  <span>{activeConditionGuide.icon}</span>
-                  <span>{tr(language, activeConditionGuide.badgeKh, activeConditionGuide.badgeEn, activeConditionGuide.badgeZh)}</span>
-                </h4>
-                <span className="text-[9px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300">
-                  {(language === 'km' ? activeConditionGuide.reviewedSourcesKh : language === 'zh' ? activeConditionGuide.reviewedSourcesZh : activeConditionGuide.reviewedSourcesEn).join(' • ')}
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-700 dark:text-slate-300 leading-relaxed">
-                {tr(language, activeConditionGuide.overviewKh, activeConditionGuide.overviewEn, activeConditionGuide.overviewZh)}
-              </p>
-              <div className="space-y-1 pt-1">
-                {(language === 'km'
-                  ? activeConditionGuide.nutritionalPrinciplesKh
-                  : language === 'zh'
-                  ? activeConditionGuide.nutritionalPrinciplesZh
-                  : activeConditionGuide.nutritionalPrinciplesEn
-                ).map((principle, idx) => (
-                  <div key={idx} className="flex items-start gap-1.5 text-[10px] text-emerald-900 dark:text-emerald-200">
-                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
-                    <span>{principle}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* 1. Healthy Foods to Choose */}
-            <div className="space-y-1.5">
-              <h5 className="text-[11px] font-extrabold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5">
-                <Check className="w-3.5 h-3.5 text-emerald-600" />
-                <span>
-                  {tr(
-                    language,
-                    '១. អាហារសុខភាពដែលគួរជ្រើសរើស និងអត្ថប្រយោជន៍អាហារូបត្ថម្ភ៖',
-                    '1. Healthy Foods to Choose & Nutritional Benefits:',
-                    '1. 推荐选择的健康食材与营养益处：'
-                  )}
-                </span>
-              </h5>
-              <div className="grid grid-cols-1 gap-2">
-                {activeConditionGuide.healthyFoodsToChoose.map((item, idx) => (
-                  <div
-                    key={idx}
-                    className="p-2.5 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-500/25 space-y-1"
-                  >
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="font-bold text-[11px] text-[#064E3B] dark:text-emerald-200">
-                        🥗 {tr(language, item.nameKh, item.nameEn, item.nameZh)}
-                      </span>
-                      <div className="flex items-center gap-1 shrink-0">
-                        <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-emerald-600 text-white font-bold">
-                          ✓ {tr(language, 'គួរញ៉ាំច្រើន', 'Eat More', '多吃')}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            shareTip(
-                              `${tr(language, item.nameKh, item.nameEn, item.nameZh)} — ${tr(language, activeConditionGuide.badgeKh, activeConditionGuide.badgeEn, activeConditionGuide.badgeZh)}`,
-                              tr(language, item.benefitOrReasonKh, item.benefitOrReasonEn, item.benefitOrReasonZh)
-                            )
-                          }
-                          className="w-6 h-6 rounded-full bg-white dark:bg-slate-800 border border-emerald-300 text-emerald-700 flex items-center justify-center cursor-pointer active:scale-95"
-                          title={tr(language, 'ចែករំលែកគន្លឹះ', 'Share Tip', '分享小贴士')}
-                          aria-label={tr(language, 'ចែករំលែកគន្លឹះ', 'Share Tip', '分享小贴士')}
-                        >
-                          <Share2 className="w-3 h-3" />
-                        </button>
-                      </div>
-                    </div>
-                    <p className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-400">
-                      🔬 {tr(language, item.keyNutrientsKh, item.keyNutrientsEn, item.keyNutrientsZh)}
-                    </p>
-                    <p className="text-[10px] text-slate-600 dark:text-slate-300 leading-relaxed">
-                      {tr(language, item.benefitOrReasonKh, item.benefitOrReasonEn, item.benefitOrReasonZh)}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* 2. Suitable Cambodian Dishes */}
-            <div className="space-y-1.5">
-              <h5 className="text-[11px] font-extrabold text-[#064E3B] dark:text-amber-300 flex items-center gap-1.5">
-                <Utensils className="w-3.5 h-3.5 text-amber-600" />
-                <span>
-                  {tr(
-                    language,
-                    '២. មុខម្ហូបខ្មែរសមស្រប និងតិចនិកចម្អិនដើម្បីសុខភាព៖',
-                    '2. Suitable Cambodian Dishes & Healthy Cooking Modifications:',
-                    '2. 适宜的高棉传统菜肴与健康烹饪建议：'
-                  )}
-                </span>
-              </h5>
-              <div className="grid grid-cols-1 gap-2">
-                {activeConditionGuide.suitableCambodianDishes.map((dish) => {
-                  const matchedFood = foods.find((f) => f.id === dish.foodId);
-                  return (
-                    <div
-                      key={dish.foodId}
-                      className="p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-amber-400/40 shadow-2xs space-y-1.5"
-                    >
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="font-bold text-[11px] text-slate-900 dark:text-white">
-                          🍲 {tr(language, dish.nameKh, dish.nameEn, dish.nameZh)}
-                        </span>
-                        {matchedFood && (
-                          <button
-                            type="button"
-                            onClick={() => setSelectedFood(matchedFood)}
-                            className="px-2 py-0.5 rounded-lg bg-[#064E3B] hover:bg-[#047857] text-amber-300 text-[9px] font-bold shrink-0 cursor-pointer transition"
-                          >
-                            {tr(language, 'មើលរូបមន្តពេញ', 'View Recipe', '查看完整食谱')}
-                          </button>
-                        )}
-                      </div>
-                      <p className="text-[10px] text-slate-600 dark:text-slate-300 leading-relaxed">
-                        <strong className="text-emerald-700 dark:text-emerald-300">
-                          {tr(language, 'អត្ថប្រយោជន៍៖ ', 'Why it suits: ', '适宜原因：')}
-                        </strong>
-                        {tr(language, dish.whySuitableKh, dish.whySuitableEn, dish.whySuitableZh)}
-                      </p>
-                      <div className="flex items-start gap-1.5 text-[10px] text-blue-900 dark:text-blue-200 bg-blue-50 dark:bg-blue-950/30 px-2 py-1.5 rounded-lg border border-blue-300/50">
-                        <span className="shrink-0 px-1.5 py-0.5 rounded-full bg-blue-600 text-white text-[9px] font-bold">
-                          💡 {tr(language, 'គន្លឹះចម្អិន', 'Cooking tip', '烹饪小贴士')}
-                        </span>
-                        <span className="flex-1 leading-relaxed">
-                          {tr(language, dish.healthyCookingTipKh, dish.healthyCookingTipEn, dish.healthyCookingTipZh)}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            shareTip(
-                              tr(language, dish.nameKh, dish.nameEn, dish.nameZh),
-                              tr(language, dish.healthyCookingTipKh, dish.healthyCookingTipEn, dish.healthyCookingTipZh)
-                            )
-                          }
-                          className="w-8 h-8 -my-1 rounded-full bg-white dark:bg-slate-800 border border-blue-300 text-blue-700 flex items-center justify-center shrink-0 cursor-pointer active:scale-95"
-                          title={tr(language, 'ចែករំលែកគន្លឹះ', 'Share Tip', '分享小贴士')}
-                          aria-label={tr(language, 'ចែករំលែកគន្លឹះ', 'Share Tip', '分享小贴士')}
-                        >
-                          <Share2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* 3. Foods to Limit or Avoid */}
-            <div className="space-y-1.5">
-              <h5 className="text-[11px] font-extrabold text-rose-700 dark:text-rose-300 flex items-center gap-1.5">
-                <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />
-                <span>
-                  {tr(
-                    language,
-                    '៣. អាហារដែលគួរកាត់បន្ថយ ឬជៀសវាង៖',
-                    '3. Foods to Limit or Avoid:',
-                    '3. 建议减少或避免的食物：'
-                  )}
-                </span>
-              </h5>
-              <div className="grid grid-cols-1 gap-1.5">
-                {activeConditionGuide.foodsToLimitOrAvoid.map((avoid, idx) => (
-                  <div
-                    key={idx}
-                    className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-400/50 space-y-1"
-                  >
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="font-bold text-[11px] text-amber-900 dark:text-amber-200">
-                        ⚠️ {tr(language, avoid.nameKh, avoid.nameEn, avoid.nameZh)}
-                      </p>
-                      <div className="flex items-center gap-1 shrink-0">
-                        <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-amber-500 text-slate-950 font-bold">
-                          {tr(language, 'កាត់បន្ថយ', 'Limit', '少吃')}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            shareTip(
-                              tr(language, avoid.nameKh, avoid.nameEn, avoid.nameZh),
-                              tr(language, avoid.benefitOrReasonKh, avoid.benefitOrReasonEn, avoid.benefitOrReasonZh)
-                            )
-                          }
-                          className="w-8 h-8 rounded-full bg-white dark:bg-slate-800 border border-amber-400 text-amber-700 flex items-center justify-center cursor-pointer active:scale-95"
-                          title={tr(language, 'ចែករំលែកគន្លឹះ', 'Share Tip', '分享小贴士')}
-                          aria-label={tr(language, 'ចែករំលែកគន្លឹះ', 'Share Tip', '分享小贴士')}
-                        >
-                          <Share2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </div>
-                    <p className="text-[10px] text-slate-600 dark:text-slate-300 leading-relaxed">
-                      {tr(language, avoid.benefitOrReasonKh, avoid.benefitOrReasonEn, avoid.benefitOrReasonZh)}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Medical Disclaimer & Individual Variation Note */}
-            <div className="p-2.5 rounded-xl bg-amber-50/90 dark:bg-slate-800/90 border border-amber-400/50 space-y-1">
-              <div className="flex items-center gap-1.5 text-[10px] font-bold text-amber-900 dark:text-amber-300">
-                <Info className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-                <span>
-                  {tr(language, 'ចំណាំអំពីអាហារូបត្ថម្ភ', 'Nutrition & Medical Notice', '营养与健康声明')}
-                </span>
-              </div>
-              <p className="text-[10px] text-slate-700 dark:text-slate-300 leading-relaxed">
-                {tr(
-                  language,
-                  activeConditionGuide.individualVariationNoteKh,
-                  activeConditionGuide.individualVariationNoteEn,
-                  activeConditionGuide.individualVariationNoteZh
-                )}
-              </p>
-              <p className="text-[9px] text-slate-500 dark:text-slate-400 leading-relaxed">
-                {tr(
-                  language,
-                  NUTRITION_GUIDE_MEDICAL_DISCLAIMER.km,
-                  NUTRITION_GUIDE_MEDICAL_DISCLAIMER.en,
-                  NUTRITION_GUIDE_MEDICAL_DISCLAIMER.zh
-                )}
-              </p>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Prominent Online Food Photo Auto-Search Card (ឥតគិតថ្លៃ $0) - ADMIN ONLY per Requirement #1 */}
-      {currentUser?.role === 'admin' && (
-        <div className="p-3.5 rounded-2xl bg-gradient-to-br from-[#064E3B] via-emerald-900 to-teal-900 text-white border-2 border-amber-400/60 shadow-lg space-y-2.5 font-khmer">
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center shadow shrink-0">
-                <Globe className="w-4 h-4" />
-              </div>
-              <div>
-                <h3 className="font-bold text-xs text-amber-300 leading-snug">
-                  {isKm
-                    ? 'ស្វែងរក និងប្តូររូបភាពម្ហូបពី Online ដោយស្វ័យប្រវត្តិ (Admin)'
-                    : 'Auto-Search & Match Food Photos Online (Admin)'}
-                </h3>
-                <p className="text-[10px] text-emerald-200">
-                  {isKm
-                    ? 'Wikimedia Commons • TheMealDB • ឥតគិតថ្លៃ $0'
-                    : 'Wikimedia Commons • TheMealDB • 100% Free ($0)'}
-                </p>
-              </div>
-            </div>
-            <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[10px] font-black shrink-0">
-              {isKm ? 'ឥតគិតថ្លៃ $0' : 'FREE $0'}
-            </span>
-          </div>
-
-          <button
-            type="button"
-            disabled={isSearchingOnline}
-            onClick={() => handleRunOnlineFoodSearch(activeFoodForOnline)}
-            className="w-full py-2.5 px-3.5 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-extrabold text-xs flex items-center justify-center gap-2 shadow-md transition active:scale-98 cursor-pointer"
-          >
-            <Sparkles className={`w-4 h-4 text-slate-950 shrink-0 ${isSearchingOnline ? 'animate-spin' : ''}`} />
-            <span>
-              {isSearchingOnline
-                ? (isKm ? 'កំពុងស្វែងរករូបភាពម្ហូបពី Online...' : 'Searching online food photos...')
-                : (isKm
-                    ? '🤖 ស្វែងរករូបភាពម្ហូបពី Online ដោយស្វ័យប្រវត្តិ (ឥតគិតថ្លៃ $0)'
-                    : '🤖 Auto-Search Matching Food Photos Online (Free $0)')}
-            </span>
-          </button>
-
-          {showOnlineSearchPanel && activeFoodForOnline && (
-            <div className="pt-2 border-t border-white/15 space-y-2.5">
-              <div className="flex flex-col sm:flex-row gap-2">
-                <select
-                  value={activeFoodForOnline.id}
-                  onChange={(e) => {
-                    const nextFood = foods.find((f) => f.id === e.target.value);
-                    setSelectedFoodIdForOnline(e.target.value);
-                    if (nextFood) {
-                      handleRunOnlineFoodSearch(nextFood);
-                    }
-                  }}
-                  className="flex-1 px-3 py-2 rounded-xl bg-slate-900/90 border border-emerald-400/40 text-white text-xs font-bold focus:outline-none"
-                >
-                  {foods.map((f) => (
-                    <option key={f.id} value={f.id}>
-                      {f.nameKh} ({f.nameEn})
-                    </option>
-                  ))}
-                </select>
-
-                <button
-                  type="button"
-                  onClick={() => setEditingFoodModal(activeFoodForOnline)}
-                  className="px-3 py-2 rounded-xl bg-white/15 hover:bg-white/25 text-amber-200 font-bold text-[11px] border border-amber-300/30 transition cursor-pointer shrink-0"
-                >
-                  {isKm ? '⚙️ បើកផ្ទាំងគ្រប់គ្រងរូបពេញ' : '⚙️ Open Full Photo Editor'}
-                </button>
-              </div>
-
-              {onlineCandidates.length > 0 && (
-                <div className="space-y-1.5">
-                  <p className="text-[11px] font-bold text-amber-200">
-                    {isKm
-                      ? `✨ រកឃើញរូបភាពម្ហូបពី Online ចំនួន ${onlineCandidates.length} សន្លឹកសម្រាប់ «${activeFoodForOnline.nameKh}» (ចុចជ្រើសរើស)៖`
-                      : `✨ Found ${onlineCandidates.length} matching photos for "${activeFoodForOnline.nameEn}" (tap to apply):`}
-                  </p>
-                  <div className="grid grid-cols-3 gap-2">
-                    {onlineCandidates.map((cand, idx) => {
-                      const isSelected = activeFoodForOnline.photoUrl === cand.url;
-                      return (
-                        <button
-                          key={`${cand.url}-${idx}`}
-                          type="button"
-                          onClick={() => handleApplyCandidatePhoto(cand)}
-                          className={`relative aspect-[4/3] rounded-xl overflow-hidden border-2 transition cursor-pointer group ${
-                            isSelected
-                              ? 'border-amber-400 ring-2 ring-amber-400/50'
-                              : 'border-white/20 hover:border-amber-300'
-                          }`}
-                        >
-                          <img
-                            src={cand.url}
-                            alt={cand.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition duration-200"
-                          />
-                          {cand.confidenceScore && (
-                            <span className="absolute top-1 left-1 px-1.5 py-0.2 rounded bg-emerald-900/90 text-amber-300 text-[8px] font-black font-mono border border-amber-400/40">
-                              #{idx + 1} • {cand.confidenceScore}%
-                            </span>
-                          )}
-                          <div className="absolute bottom-0 inset-x-0 bg-black/80 text-white text-[9px] px-1.5 py-0.5 truncate font-khmer">
-                            {cand.title || cand.source}
-                          </div>
-                          {isSelected && (
-                            <div className="absolute top-1 right-1 w-5 h-5 rounded-full bg-amber-400 text-slate-950 flex items-center justify-center shadow">
-                              <Check className="w-3 h-3" />
-                            </div>
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      )}
 
       {/* Ordered Primary Category Pills: ទាំងអស់ | ១. សម្ល | ២. ឆា | ៣. ស្ងោរ | ៤. បង្អែម */}
       <div className="bg-white dark:bg-slate-800/90 p-2 rounded-2xl border border-emerald-500/20 shadow-2xs space-y-2 font-khmer">
@@ -731,8 +229,35 @@ export const FoodView: React.FC = () => {
       </div>
 
       {/* Foods Grid Grouped by Category in Order: សម្ល -> ឆា -> ស្ងោរ -> បង្អែម */}
-      {/* Simple filters: province + healthy condition, with ONE reset button */}
-      <div className="grid grid-cols-2 gap-2 font-khmer">
+      {/* Dish tag filter (estimated from the recipe) */}
+      <div className="space-y-1.5 font-khmer">
+        <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-4 px-4 pb-1">
+          {TAG_FILTERS.map((t) => {
+            const active = tagFilter === t.id;
+            return (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => setTagFilter(t.id)}
+                aria-pressed={active}
+                className={`shrink-0 min-h-[44px] px-3.5 rounded-full text-sm font-bold border transition cursor-pointer ${
+                  active
+                    ? 'bg-[#064E3B] text-white border-[#064E3B]'
+                    : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-300 dark:border-slate-600'
+                }`}
+              >
+                {t.emoji} {tr(language, t.labelKh, t.labelEn, t.labelZh)}
+              </button>
+            );
+          })}
+        </div>
+        <p className="text-[11px] text-slate-400">
+          ℹ️ {tr(language, TAG_ESTIMATE_NOTE.km, TAG_ESTIMATE_NOTE.en, TAG_ESTIMATE_NOTE.zh)}
+        </p>
+      </div>
+
+      {/* Province filter with ONE reset button */}
+      <div className="grid grid-cols-1 gap-2 font-khmer">
         <label className="block">
           <span className="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">
             📍 {tr(language, 'ខេត្ត', 'Province', '省份')}
@@ -750,28 +275,11 @@ export const FoodView: React.FC = () => {
             ))}
           </select>
         </label>
-        <label className="block">
-          <span className="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">
-            🩺 {tr(language, 'សមស្របនឹង', 'Suits', '适合')}
-          </span>
-          <select
-            value={conditionFilter}
-            onChange={(e) => setConditionFilter(e.target.value as NutritionConditionId | '')}
-            className="w-full min-h-[44px] px-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-sm text-slate-900 dark:text-white"
-          >
-            <option value="">{tr(language, 'ទាំងអស់', 'Any', '不限')}</option>
-            {CONDITION_FILTER_OPTIONS.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.icon} {tr(language, c.kh, c.en, c.zh)}
-              </option>
-            ))}
-          </select>
-        </label>
         {hasActiveFilters && (
           <button
             type="button"
             onClick={resetAllFilters}
-            className="col-span-2 min-h-[44px] rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 text-sm font-bold active:scale-[0.98] transition cursor-pointer"
+            className="min-h-[44px] rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 text-sm font-bold active:scale-[0.98] transition cursor-pointer"
           >
             ↺ {tr(language, 'កំណត់តម្រងឡើងវិញ', 'Reset filters', '重置筛选')}
           </button>
@@ -848,22 +356,9 @@ export const FoodView: React.FC = () => {
         </div>
       )}
 
-      {editingFoodModal && (
-        <FoodImageModal
-          food={editingFoodModal}
-          isOpen={Boolean(editingFoodModal)}
-          onClose={() => setEditingFoodModal(null)}
-          onSave={(updated) => {
-            updateFood(updated);
-            setEditingFoodModal(null);
-            showToast(
-              isKm ? '✅ បានរក្សាទុករូបភាពមុខម្ហូបរួចរាល់!' : '✅ Food photo saved!',
-              'success'
-            );
-          }}
-          isKm={isKm}
-        />
-      )}
+      <p className="text-center text-[11px] text-slate-400 font-khmer pt-2">
+        {tr(language, GENERAL_FOOD_INFO_NOTE.km, GENERAL_FOOD_INFO_NOTE.en, GENERAL_FOOD_INFO_NOTE.zh)}
+      </p>
     </div>
   );
 };

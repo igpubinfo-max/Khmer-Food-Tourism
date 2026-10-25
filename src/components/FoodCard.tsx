@@ -5,7 +5,7 @@ import { Star, Heart, Flame, Share2, Edit2 } from 'lucide-react';
 import { shareRichContent } from '../utils/androidMediaHelper';
 import { tr } from '../utils/i18n';
 import { getLocalizedFood } from '../utils/zhDynamicTranslator';
-import { getDishNutritionProfile } from '../services/aiFoodService';
+import { getDisplayTags, tagLabel } from '../utils/dishTags';
 
 interface FoodCardProps {
   food: FoodItem;
@@ -17,14 +17,7 @@ const FoodCardInner: React.FC<FoodCardProps> = ({ food }) => {
   const isKm = language === 'km';
   const isAdmin = currentUser?.role === 'admin';
   const loc = useMemo(() => getLocalizedFood(food, language), [food, language]);
-  const nutrition = useMemo(() => getDishNutritionProfile(food), [food]);
-  const kcal = food.calories ?? nutrition.caloriesKcal;
-  const sodiumLabel =
-    nutrition.sodiumLevel === 'low'
-      ? tr(language, 'ទាប', 'Low', '低')
-      : nutrition.sodiumLevel === 'high'
-      ? tr(language, 'ខ្ពស់', 'High', '高')
-      : tr(language, 'មធ្យម', 'Med', '中');
+  const tags = useMemo(() => getDisplayTags(food, 3), [food]);
 
   const handleShareFood = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -123,22 +116,25 @@ const FoodCardInner: React.FC<FoodCardProps> = ({ food }) => {
           <p className="text-xs font-bold text-[#064E3B] dark:text-emerald-300 mb-2">
             💰 ${(food.priceUsd ?? 0).toFixed(2)} <span className="text-slate-400 font-medium">· {food.priceRiel.toLocaleString()} ៛</span>
           </p>
-
-          {/* 3 key nutrition facts (estimates; calories use the dish's stored value when available) */}
-          <div className="grid grid-cols-3 gap-1 mb-2.5" title={tr(language, 'តម្លៃប៉ាន់ស្មាន', 'Approximate values', '数值为估算')}>
-            <div className="rounded-lg bg-orange-50 dark:bg-orange-950/30 px-1 py-1 text-center">
-              <div className="text-[11px] font-bold text-orange-700 dark:text-orange-300">{kcal}</div>
-              <div className="text-[9px] text-slate-500">{tr(language, 'កាឡូរី', 'kcal', '千卡')}</div>
+          {/* Up to 3 recipe-derived tags (estimated from the recipe, no health claims) */}
+          {tags.length > 0 && (
+            <div className="flex flex-wrap gap-1 mb-2.5" title={tr(language, 'ប៉ាន់ស្មានពីរូបមន្ត', 'Estimated from the recipe', '根据食谱估算')}>
+              {tags.map((tg) => (
+                <span
+                  key={tg.id}
+                  className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+                    tg.tone === 'green'
+                      ? 'bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800'
+                      : tg.tone === 'blue'
+                      ? 'bg-blue-50 text-blue-800 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800'
+                      : 'bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800'
+                  }`}
+                >
+                  {tg.emoji} {tagLabel(tg, language)}
+                </span>
+              ))}
             </div>
-            <div className="rounded-lg bg-emerald-50 dark:bg-emerald-950/30 px-1 py-1 text-center">
-              <div className="text-[11px] font-bold text-emerald-700 dark:text-emerald-300">≈{nutrition.proteinG}g</div>
-              <div className="text-[9px] text-slate-500">{tr(language, 'ប្រូតេអ៊ីន', 'protein', '蛋白质')}</div>
-            </div>
-            <div className="rounded-lg bg-sky-50 dark:bg-sky-950/30 px-1 py-1 text-center">
-              <div className="text-[11px] font-bold text-sky-700 dark:text-sky-300">{sodiumLabel}</div>
-              <div className="text-[9px] text-slate-500">{tr(language, 'ជាតិប្រៃ', 'sodium', '钠')}</div>
-            </div>
-          </div>
+          )}
         </div>
 
         {/* Footer meta */}

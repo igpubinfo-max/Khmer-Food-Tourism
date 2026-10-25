@@ -55,9 +55,9 @@ export function shareApp(lang: Language, showToast?: ToastFn) {
     pick(lang, 'អាហារ & ទេសចរណ៍ខ្មែរ', 'Khmer Food & Tourism', '高棉美食与旅游'),
     pick(
       lang,
-      '🇰🇭 សាកល្បងកម្មវិធី «អាហារ & ទេសចរណ៍ខ្មែរ» — មុខម្ហូបខ្មែរ ភោជនីយដ្ឋាន ទេសចរណ៍ និងមគ្គុទ្ទេសក៍អាហារសុខភាព!',
-      '🇰🇭 Try “Khmer Food & Tourism” — Khmer dishes, restaurants, travel spots and a healthy food guide!',
-      '🇰🇭 推荐“高棉美食与旅游”应用——高棉菜肴、餐厅、景点与健康饮食指南！'
+      '🇰🇭 សាកល្បងកម្មវិធី «អាហារ & ទេសចរណ៍ខ្មែរ» — មុខម្ហូបខ្មែរ រូបមន្តចម្អិន ភោជនីយដ្ឋាន និងកន្លែងទេសចរណ៍!',
+      '🇰🇭 Try “Khmer Food & Tourism” — Khmer dishes, recipes, restaurants and travel spots!',
+      '🇰🇭 推荐“高棉美食与旅游”应用——高棉菜肴、食谱、餐厅与旅游景点！'
     ),
     showToast
   );
