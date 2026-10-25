@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useApp } from '../context/AppContext';
-import { Search, X, Mail, MoreVertical, Camera, Download, Heart } from 'lucide-react';
+import { Search, X, Mail, MoreVertical, Camera, Download, Heart, LayoutGrid } from 'lucide-react';
+import { openSmartHub } from '../utils/smartHub';
 import { Capacitor } from '@capacitor/core';
 import { APP_VERSION } from '../types';
 
@@ -103,6 +104,17 @@ export const Header: React.FC = () => {
               );
             })}
           </div>
+
+          {/* Smart Menu: dish tags + travel & food tools in one place */}
+          <button
+            type="button"
+            onClick={openSmartHub}
+            className="w-9 h-9 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 flex items-center justify-center shadow-md ring-2 ring-white/30 transition-all active:scale-95 shrink-0 cursor-pointer"
+            title={isKm ? 'ម៉ឺនុយពិសេស & ជម្រើសម្ហូបសុខភាព' : isZh ? '智能菜单与健康饮食筛选' : 'Smart Menu & Healthy Filter'}
+            aria-label={isKm ? 'ម៉ឺនុយពិសេស & ជម្រើសម្ហូបសុខភាព' : isZh ? '智能菜单与健康饮食筛选' : 'Smart Menu & Healthy Filter'}
+          >
+            <LayoutGrid className="w-4 h-4 shrink-0" />
+          </button>
 
           {/* Search Toggle */}
           <button

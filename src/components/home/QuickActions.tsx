@@ -4,8 +4,6 @@ import { tr } from '../../utils/i18n';
 
 export interface QuickActionHandlers {
   onWhatToEat: () => void;
-  onNearMe: () => void;
-  onPlanTrip: () => void;
   onCheckIn: () => void;
 }
 
@@ -20,8 +18,6 @@ export const QuickActions: React.FC<Props> = ({
   language,
   showVipLock,
   onWhatToEat,
-  onNearMe,
-  onPlanTrip,
   onCheckIn,
 }) => {
   const cards = [
@@ -33,24 +29,6 @@ export const QuickActions: React.FC<Props> = ({
       bg: 'from-amber-50 to-orange-50 border-amber-200 dark:from-amber-950/40 dark:to-slate-800 dark:border-amber-700/50',
       lock: true,
       onClick: onWhatToEat,
-    },
-    {
-      id: 'near',
-      emoji: '📍',
-      title: tr(language, 'នៅជិតខ្ញុំ', 'Near me', '附近'),
-      sub: tr(language, 'ហាង & កន្លែងក្បែរខ្លួន', 'Places around you', '身边的餐厅与景点'),
-      bg: 'from-emerald-50 to-teal-50 border-emerald-200 dark:from-emerald-950/40 dark:to-slate-800 dark:border-emerald-700/50',
-      lock: true,
-      onClick: onNearMe,
-    },
-    {
-      id: 'trip',
-      emoji: '🧭',
-      title: tr(language, 'រៀបផែនការដើរលេង (AI)', 'Plan my trip (AI)', 'AI 行程规划'),
-      sub: tr(language, 'AI រៀបចំផ្លូវឱ្យ', 'Automatic itinerary', '自动生成行程'),
-      bg: 'from-sky-50 to-blue-50 border-sky-200 dark:from-sky-950/40 dark:to-slate-800 dark:border-sky-700/50',
-      lock: true,
-      onClick: onPlanTrip,
     },
     {
       id: 'checkin',

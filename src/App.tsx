@@ -1,4 +1,4 @@
-import React, { useState, useMemo, lazy, Suspense } from 'react';
+import React, { useState, useMemo, useEffect, lazy, Suspense } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
 import { isUserVipActive } from './types';
 import { verifyAppOwnershipAndDomainIntegrity } from './utils/security';
@@ -11,6 +11,7 @@ import { TourismView } from './components/TourismView';
 import { CommunityFeed } from './components/CommunityFeed';
 const ProfileView = lazy(() => import('./components/ProfileView').then((m) => ({ default: m.ProfileView })));
 const IntroTips = lazy(() => import('./components/IntroTips').then((m) => ({ default: m.IntroTips })));
+const SmartHubMenuModal = lazy(() => import('./components/SmartHubMenuModal').then((m) => ({ default: m.SmartHubMenuModal })));
 import { FoodDetailModal } from './components/FoodDetailModal';
 import { RestaurantDetailModal } from './components/RestaurantDetailModal';
 import { TouristDetailModal } from './components/TouristDetailModal';
@@ -41,6 +42,7 @@ const GoogleMapsPlaceSearchModal = lazy(() => import('./components/GoogleMapsPla
 import { Toast } from './components/Toast';
 import { RatePrompt } from './components/RatePrompt';
 import { OfflineBanner } from './components/OfflineBanner';
+import { SMART_HUB_EVENT } from './utils/smartHub';
 
 const MainScreen: React.FC = () => {
   const {
@@ -93,6 +95,14 @@ const MainScreen: React.FC = () => {
       return true;
     }
   });
+
+  // Smart Menu (opened from the Header button or the Home banner via a window event)
+  const [isSmartHubOpen, setIsSmartHubOpen] = useState(false);
+  useEffect(() => {
+    const open = () => setIsSmartHubOpen(true);
+    window.addEventListener(SMART_HUB_EVENT, open);
+    return () => window.removeEventListener(SMART_HUB_EVENT, open);
+  }, []);
 
   if (!ownershipCheck.isAuthentic) {
     return (
@@ -167,6 +177,11 @@ const MainScreen: React.FC = () => {
       </main>
 
       <OfflineBanner />
+
+      {/* Smart Menu: dish tags + travel & food tools in one place */}
+      <Suspense fallback={null}>
+        {isSmartHubOpen && <SmartHubMenuModal onClose={() => setIsSmartHubOpen(false)} />}
+      </Suspense>
 
       {/* First-run intro (shown once, skippable) */}
       <Suspense fallback={null}>

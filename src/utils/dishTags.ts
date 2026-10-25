@@ -143,22 +143,30 @@ export function tagLabel(tag: DishTag, lang: Language): string {
   return lang === 'km' ? tag.labelKh : lang === 'zh' ? tag.labelZh : tag.labelEn;
 }
 
-export type TagFilterId = 'all' | 'light' | 'vegetarian_friendly' | 'grilled_steamed' | 'protein_rich' | 'spicy';
+export type TagFilterId =
+  | 'all'
+  | 'light'
+  | 'steamed_boiled'
+  | 'grilled'
+  | 'vegetable_rich'
+  | 'protein_rich'
+  | 'vegetarian_friendly'
+  | 'spicy';
 
 export const TAG_FILTERS: Array<{ id: TagFilterId; labelKh: string; labelEn: string; labelZh: string; emoji: string }> = [
   { id: 'all', labelKh: 'ទាំងអស់', labelEn: 'All', labelZh: '全部', emoji: '🍽️' },
-  { id: 'light', labelKh: 'ស្រាល', labelEn: 'Light', labelZh: '清淡', emoji: '🪶' },
-  { id: 'vegetarian_friendly', labelKh: 'សមស្របអ្នកញ៉ាំបួស', labelEn: 'Vegetarian-friendly', labelZh: '素食友好', emoji: '🌱' },
-  { id: 'grilled_steamed', labelKh: 'អាំង/ចំហុយ', labelEn: 'Grilled/Steamed', labelZh: '烧烤/蒸煮', emoji: '♨️' },
-  { id: 'protein_rich', labelKh: 'សម្បូរប្រូតេអ៊ីន', labelEn: 'Protein-rich', labelZh: '蛋白质丰富', emoji: '💪' },
-  { id: 'spicy', labelKh: 'ហឹរ', labelEn: 'Spicy', labelZh: '辣', emoji: '🌶️' },
+  { id: 'light', labelKh: DISH_TAG_DEFS.light.labelKh, labelEn: DISH_TAG_DEFS.light.labelEn, labelZh: DISH_TAG_DEFS.light.labelZh, emoji: DISH_TAG_DEFS.light.emoji },
+  { id: 'steamed_boiled', labelKh: DISH_TAG_DEFS.steamed_boiled.labelKh, labelEn: DISH_TAG_DEFS.steamed_boiled.labelEn, labelZh: DISH_TAG_DEFS.steamed_boiled.labelZh, emoji: DISH_TAG_DEFS.steamed_boiled.emoji },
+  { id: 'grilled', labelKh: DISH_TAG_DEFS.grilled.labelKh, labelEn: DISH_TAG_DEFS.grilled.labelEn, labelZh: DISH_TAG_DEFS.grilled.labelZh, emoji: DISH_TAG_DEFS.grilled.emoji },
+  { id: 'vegetable_rich', labelKh: DISH_TAG_DEFS.vegetable_rich.labelKh, labelEn: DISH_TAG_DEFS.vegetable_rich.labelEn, labelZh: DISH_TAG_DEFS.vegetable_rich.labelZh, emoji: DISH_TAG_DEFS.vegetable_rich.emoji },
+  { id: 'protein_rich', labelKh: DISH_TAG_DEFS.protein_rich.labelKh, labelEn: DISH_TAG_DEFS.protein_rich.labelEn, labelZh: DISH_TAG_DEFS.protein_rich.labelZh, emoji: DISH_TAG_DEFS.protein_rich.emoji },
+  { id: 'vegetarian_friendly', labelKh: DISH_TAG_DEFS.vegetarian_friendly.labelKh, labelEn: DISH_TAG_DEFS.vegetarian_friendly.labelEn, labelZh: DISH_TAG_DEFS.vegetarian_friendly.labelZh, emoji: DISH_TAG_DEFS.vegetarian_friendly.emoji },
+  { id: 'spicy', labelKh: DISH_TAG_DEFS.spicy.labelKh, labelEn: DISH_TAG_DEFS.spicy.labelEn, labelZh: DISH_TAG_DEFS.spicy.labelZh, emoji: DISH_TAG_DEFS.spicy.emoji },
 ];
 
 export function matchesTagFilter(food: FoodItem, filter: TagFilterId): boolean {
   if (filter === 'all') return true;
-  const ids = getDishTagIds(food);
-  if (filter === 'grilled_steamed') return ids.includes('grilled') || ids.includes('steamed_boiled');
-  return ids.includes(filter as DishTagId);
+  return getDishTagIds(food).includes(filter as DishTagId);
 }
 
 export const TAG_ESTIMATE_NOTE = {

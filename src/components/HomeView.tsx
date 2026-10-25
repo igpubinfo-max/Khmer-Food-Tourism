@@ -3,9 +3,10 @@ import { useApp } from '../context/AppContext';
 import { TrendingFoodCategorySlug, TrendingFoodItem, isUserVipActive, getVipAccountState, getVipRemainingDays, sortRestaurantsChronologically } from '../types';
 import { normalizeKhmerSearchText } from '../services/googlePlacesService';
 import { shareRichContent, copyTextNativeOrWeb } from '../utils/androidMediaHelper';
-import { shareApp } from '../utils/shareApp';
 import { HomeGreetingSearch } from './home/HomeGreetingSearch';
 import { QuickActions } from './home/QuickActions';
+import { SmartMenuBanner } from './home/SmartMenuBanner';
+import { openSmartHub } from '../utils/smartHub';
 import { TodayDiscovery } from './home/TodayDiscovery';
 import { TrendingFoodsRow } from './home/TrendingFoodsRow';
 import { HomeSkeleton, HomeEmptyState } from './home/HomeStates';
@@ -15,7 +16,7 @@ import {
   MapPin, Heart, Flame, QrCode, Download, ShieldCheck,
   Apple, Smartphone, Bot, Calendar, Bookmark, Bell, 
   UtensilsCrossed, MessageSquareQuote, Camera, Phone,
-  Share2, Navigation, Eye, ExternalLink, Play, Shuffle, Search, RefreshCw,
+  Navigation, Eye, ExternalLink, Play, Shuffle, Search, RefreshCw,
   Crown, Plus, Edit2, CheckCircle2, X, Tag, ChefHat, Copy, Video, Check, Lock, Trash2, Globe, HeartPulse
 } from 'lucide-react';
 
@@ -26,9 +27,9 @@ export const HomeView: React.FC = () => {
     currentUser, setIsAuthModalOpen,
     setIsInstallModalOpen, setIsSupportModalOpen,
     openInstallModal, setSelectedDestination,
-    setIsWhatToEatModalOpen, setIsNearMeModalOpen,
-    setIsDailyDiscoveriesModalOpen, setIsWishlistsModalOpen,
-    setIsAiTripPlannerModalOpen, setIsNotificationsModalOpen,
+    setIsWhatToEatModalOpen,
+    setIsDailyDiscoveriesModalOpen,
+    setIsNotificationsModalOpen,
     setIsTrendingSocialModalOpen, unreadNotificationsCount,
     trendingFoods, setSelectedTrendingFood, setIsTrendingFoodDetailModalOpen,
     setIsAiCheckInModalOpen, showToast,
@@ -564,13 +565,12 @@ export const HomeView: React.FC = () => {
             <HomeSkeleton />
           ) : (
             <>
-              {/* 2. Four quick-action cards */}
+              {/* 2. Smart Menu (one entry for tags, trips, near me, favorites, stamps, share, offline) + 2 quick actions */}
+              <SmartMenuBanner language={language} onOpen={openSmartHub} />
               <QuickActions
                 language={language}
                 showVipLock={!canUseVipActions}
                 onWhatToEat={requireVip(() => setIsWhatToEatModalOpen(true))}
-                onNearMe={requireVip(() => setIsNearMeModalOpen(true))}
-                onPlanTrip={requireVip(() => setIsAiTripPlannerModalOpen(true))}
                 onCheckIn={handleQuickCheckIn}
               />
 
@@ -1030,32 +1030,7 @@ export const HomeView: React.FC = () => {
           </div>
         </div>
       ))}
-
-      {/* Recommend / Share App with Friends */}
-      <button
-        type="button"
-        onClick={() => shareApp(language, showToast)}
-        className="w-full p-4 rounded-3xl bg-gradient-to-r from-emerald-50 via-white to-amber-50 dark:from-slate-800 dark:via-slate-800 dark:to-slate-800 border-2 border-emerald-300/70 shadow-xs flex items-center gap-3 text-left transition hover:shadow-md active:scale-[0.99] cursor-pointer font-khmer"
-      >
-        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#10B981] to-[#064E3B] text-white flex items-center justify-center shadow-sm shrink-0">
-          <Share2 className="w-6 h-6" />
-        </div>
-        <div className="min-w-0 flex-1">
-          <h4 className="font-bold text-[#064E3B] dark:text-emerald-300 text-xs sm:text-sm">
-            {language === 'km' ? 'ណែនាំកម្មវិធីនេះដល់មិត្តភក្តិ' : language === 'zh' ? '推荐给好友' : 'Recommend to Friends'}
-          </h4>
-          <p className="text-[11px] text-slate-600 dark:text-slate-400">
-            {language === 'km'
-              ? 'ចែករំលែកមុខម្ហូប ទេសចរណ៍ និងរូបមន្តចម្អិន'
-              : language === 'zh'
-              ? '分享美食、旅游与食谱'
-              : 'Share Khmer food, travel & recipes'}
-          </p>
-        </div>
-        <span className="px-3 py-1.5 rounded-xl bg-[#064E3B] text-white text-[11px] font-bold shrink-0">
-          {language === 'km' ? 'ចែករំលែក' : language === 'zh' ? '分享' : 'Share'}
-        </span>
-      </button>
+      {/* Share / invite now lives in the Smart Menu */}
 
       {/* Install / Scan QR / Support now live only in the Header "more" menu (single entry point) */}
 
@@ -1218,39 +1193,6 @@ export const HomeView: React.FC = () => {
             </div>
           </button>
 
-          {/* D. បញ្ជីកន្លែងដែលចង់ទៅ */}
-          <button
-            onClick={() => {
-              if (!isVip && currentUser?.role !== 'admin') {
-                showToast(isKm ? 'មុខងារ "បញ្ជីកន្លែងចង់ទៅ" សម្រាប់តែគណនី VIP • សូមដំឡើង VIP ដើម្បីប្រើប្រាស់!' : '"Wishlists" is exclusive to VIP • Please unlock VIP!', 'info');
-                openUpgradeVipModal();
-                return;
-              }
-              setIsWishlistsModalOpen(true);
-            }}
-            className={`p-3 rounded-2xl border text-left transition group active:scale-95 relative ${
-              isVip || currentUser?.role === 'admin'
-                ? 'bg-white/10 hover:bg-white/15 border-white/15 cursor-pointer'
-                : 'bg-white/5 border-white/10 hover:border-amber-400/40 opacity-80 cursor-pointer'
-            }`}
-          >
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="text-xl">📑</span>
-              {isVip || currentUser?.role === 'admin' ? (
-                <span className="text-[9px] text-emerald-300 font-bold">Lists</span>
-              ) : (
-                <span className="px-1.5 py-0.5 rounded-full bg-slate-900/80 text-amber-300 text-[8px] font-bold flex items-center gap-0.5 border border-amber-400/30">
-                  <Lock className="w-2.5 h-2.5" /> VIP
-                </span>
-              )}
-            </div>
-            <div className="text-xs font-bold text-white group-hover:text-emerald-300">
-              {isKm ? 'បញ្ជីកន្លែងចង់ទៅ' : 'Wishlists'}
-            </div>
-            <div className="text-[10px] text-slate-300 line-clamp-1 mt-0.5">
-              {isKm ? 'ហាងចង់សាក គ្រួសារ' : 'Custom trip lists'}
-            </div>
-          </button>
 
 
           {/* F. ការជូនដំណឹងដែលមានប្រយោជន៍ */}

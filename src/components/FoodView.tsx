@@ -11,6 +11,7 @@ import {
 import { Utensils } from 'lucide-react';
 import { DISH_PROVINCES, detectDishProvince } from '../utils/foodFilters';
 import { TAG_FILTERS, TAG_ESTIMATE_NOTE, GENERAL_FOOD_INFO_NOTE, matchesTagFilter, TagFilterId } from '../utils/dishTags';
+import { TAG_FILTER_EVENT, consumePendingTagFilter } from '../utils/smartHub';
 import { tr } from '../utils/i18n';
 import { getLocalizedFood } from '../utils/zhDynamicTranslator';
 
@@ -21,10 +22,28 @@ export const FoodView: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [visibleCount, setVisibleCount] = useState<number>(PAGE_BATCH_SIZE);
   const [provinceFilter, setProvinceFilter] = useState<string>('');
-  const [tagFilter, setTagFilter] = useState<TagFilterId>('all');
+  // A tag chosen in the Smart Menu before this screen mounted (in-memory handoff, no storage)
+  const [initialTag] = useState<TagFilterId | null>(() => consumePendingTagFilter());
+  const [tagFilter, setTagFilter] = useState<TagFilterId>(initialTag ?? 'all');
   const loadMoreTriggerRef = useRef<HTMLDivElement | null>(null);
   const isKm = language === 'km';
 
+
+  // Smart Menu -> Food tab: pre-select the exact tag and show all matching dishes
+  useEffect(() => {
+    if (initialTag) setSearchQuery('');
+    const onTag = (e: Event) => {
+      const id = (e as CustomEvent<TagFilterId>).detail;
+      consumePendingTagFilter();
+      setTagFilter(id);
+      setSelectedCategory('all');
+      setProvinceFilter('');
+      setSearchQuery('');
+    };
+    window.addEventListener(TAG_FILTER_EVENT, onTag);
+    return () => window.removeEventListener(TAG_FILTER_EVENT, onTag);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     setVisibleCount(PAGE_BATCH_SIZE);
