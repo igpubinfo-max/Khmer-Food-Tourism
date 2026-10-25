@@ -3,13 +3,14 @@ import { useApp } from '../context/AppContext';
 import { TrendingFoodCategorySlug, TrendingFoodItem, isUserVipActive, getVipAccountState, getVipRemainingDays, sortRestaurantsChronologically } from '../types';
 import { normalizeKhmerSearchText } from '../services/googlePlacesService';
 import { shareRichContent, copyTextNativeOrWeb } from '../utils/androidMediaHelper';
+import { shareApp } from '../utils/shareApp';
 import { 
   Sparkles, ChevronRight, Utensils, Store, Compass, 
   MapPin, Heart, Flame, QrCode, Download, ShieldCheck,
   Apple, Smartphone, Bot, Calendar, Bookmark, Bell, 
   UtensilsCrossed, MessageSquareQuote, Camera, Phone,
   Share2, Navigation, Eye, ExternalLink, Play, Shuffle, Search, RefreshCw,
-  Crown, Plus, Edit2, CheckCircle2, X, Tag, ChefHat, Copy, Video, Check, Lock, Trash2, Globe, HeartPulse
+  Crown, Plus, Edit2, CheckCircle2, X, Tag, ChefHat, Copy, Video, Check, Lock, Trash2, Globe, HeartPulse, Share2
 } from 'lucide-react';
 
 export const HomeView: React.FC = () => {
@@ -30,7 +31,8 @@ export const HomeView: React.FC = () => {
     setSelectedFood, setSelectedRestaurant,
     setIsVipAddRestaurantModalOpen, setIsManageMenuModalOpen, setManagingRestaurant,
     getOwnedRestaurantsForUser, openManageMyVipStore, activeManagedShopId,
-    openUpgradeVipModal, deleteRestaurant, openGoogleMapsSearchModal, setIsAdminOpen
+    openUpgradeVipModal, deleteRestaurant, openGoogleMapsSearchModal, setIsAdminOpen,
+    setIsQrScannerModalOpen
   } = useApp();
 
   const isKm = language === 'km';
@@ -702,55 +704,7 @@ export const HomeView: React.FC = () => {
               : 'Discover 200+ authentic Khmer dishes, recipes, top restaurants, and 300 tourist destinations across all 25 provinces.'}
           </p>
 
-          <div className="pt-2 flex items-center gap-2 flex-wrap">
-            <button
-              onClick={() => setActiveTab('food')}
-              className={`px-4 py-2 rounded-xl font-bold text-xs shadow-xs transition active:scale-95 flex items-center gap-1 font-khmer ${
-                isVip 
-                  ? 'bg-slate-950 hover:bg-slate-900 text-amber-300' 
-                  : 'bg-[#10B981] hover:bg-[#059669] text-white'
-              }`}
-            >
-              <Utensils className="w-3.5 h-3.5" />
-              <span>{isKm ? 'មើលមុខម្ហូប' : 'Explore Food'}</span>
-            </button>
-
-            <button
-              onClick={() => openInstallModal('android')}
-              className={`px-3.5 py-2 rounded-xl font-medium text-xs border transition flex items-center gap-1.5 font-khmer ${
-                isVip 
-                  ? 'bg-slate-950/15 hover:bg-slate-950/25 text-slate-950 border-slate-950/20' 
-                  : 'bg-white/15 hover:bg-white/25 text-white border-white/20'
-              }`}
-            >
-              <Smartphone className={`w-3.5 h-3.5 ${isVip ? 'text-slate-950' : 'text-emerald-200'}`} />
-              <span>{isKm ? 'ដំឡើង APK' : 'Install APK'}</span>
-            </button>
-
-            <button
-              onClick={() => openInstallModal('ios')}
-              className={`px-3.5 py-2 rounded-xl font-medium text-xs border transition flex items-center gap-1.5 font-khmer ${
-                isVip 
-                  ? 'bg-slate-950/15 hover:bg-slate-950/25 text-slate-950 border-slate-950/20' 
-                  : 'bg-white/15 hover:bg-white/25 text-white border-white/20'
-              }`}
-            >
-              <Apple className={`w-3.5 h-3.5 ${isVip ? 'text-slate-950' : 'text-emerald-200'}`} />
-              <span>{isKm ? 'សម្រាប់ iOS' : 'For iOS'}</span>
-            </button>
-
-            <button
-              onClick={() => setIsSupportModalOpen(true)}
-              className={`px-3.5 py-2 rounded-xl font-medium text-xs shadow-xs transition flex items-center gap-1.5 font-khmer ${
-                isVip 
-                  ? 'bg-amber-600 hover:bg-amber-700 text-white' 
-                  : 'bg-[#065F46] hover:bg-[#047857] text-white border border-emerald-400/40'
-              }`}
-            >
-              <Heart className="w-3.5 h-3.5 fill-white text-white" />
-              <span>{isKm ? 'ជួយគាំទ្រ' : 'Support'}</span>
-            </button>
-          </div>
+          {/* Hero shortcuts removed: Food lives in the bottom tab bar; Install/Support live in the single Install card below */}
         </div>
 
         {/* Decorative background shape */}
@@ -999,6 +953,32 @@ export const HomeView: React.FC = () => {
         </div>
       ))}
 
+      {/* Recommend / Share App with Friends */}
+      <button
+        type="button"
+        onClick={() => shareApp(language, showToast)}
+        className="w-full p-4 rounded-3xl bg-gradient-to-r from-emerald-50 via-white to-amber-50 dark:from-slate-800 dark:via-slate-800 dark:to-slate-800 border-2 border-emerald-300/70 shadow-xs flex items-center gap-3 text-left transition hover:shadow-md active:scale-[0.99] cursor-pointer font-khmer"
+      >
+        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#10B981] to-[#064E3B] text-white flex items-center justify-center shadow-sm shrink-0">
+          <Share2 className="w-6 h-6" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <h4 className="font-bold text-[#064E3B] dark:text-emerald-300 text-xs sm:text-sm">
+            {language === 'km' ? 'ណែនាំកម្មវិធីនេះដល់មិត្តភក្តិ' : language === 'zh' ? '推荐给好友' : 'Recommend to Friends'}
+          </h4>
+          <p className="text-[11px] text-slate-600 dark:text-slate-400">
+            {language === 'km'
+              ? 'ចែករំលែកមុខម្ហូប ទេសចរណ៍ និងមគ្គុទ្ទេសក៍អាហារសុខភាព'
+              : language === 'zh'
+              ? '分享美食、旅游与健康饮食指南'
+              : 'Share Khmer food, travel & the healthy food guide'}
+          </p>
+        </div>
+        <span className="px-3 py-1.5 rounded-xl bg-[#064E3B] text-white text-[11px] font-bold shrink-0">
+          {language === 'km' ? 'ចែករំលែក' : language === 'zh' ? '分享' : 'Share'}
+        </span>
+      </button>
+
       {/* App Installation & Support Interactive Showcase Card (Non-Admin users only) */}
       {currentUser?.role !== 'admin' && (
         <div className="bg-white dark:bg-slate-800 rounded-3xl p-4 border border-slate-200/90 dark:border-slate-700 shadow-xs flex items-center justify-between gap-3">
@@ -1017,6 +997,13 @@ export const HomeView: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-1.5 shrink-0">
+            <button
+              onClick={() => setIsQrScannerModalOpen(true)}
+              className="p-2 bg-emerald-50 hover:bg-emerald-100 text-[#064E3B] rounded-xl border border-emerald-200 shadow-xs transition"
+              title={isKm ? 'ស្កេន QR កូដ' : language === 'zh' ? '扫描二维码' : 'Scan QR Code'}
+            >
+              <Camera className="w-4 h-4" />
+            </button>
             <button
               onClick={() => openInstallModal('android')}
               className="flex items-center gap-1 px-2.5 py-2 bg-[#064E3B] hover:bg-[#047857] text-white rounded-xl shadow-xs transition text-xs font-bold font-khmer"
@@ -1044,21 +1031,7 @@ export const HomeView: React.FC = () => {
         </div>
       )}
 
-      {/* Quick Category Icons */}
-      <div className="flex items-center justify-between gap-1 overflow-x-auto no-scrollbar py-1">
-        {quickCategories.map((cat, i) => (
-          <button
-            key={i}
-            onClick={() => setActiveTab(cat.tab as any)}
-            className="flex flex-col items-center p-2 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700/80 shadow-2xs min-w-[70px] hover:border-emerald-500 transition active:scale-95"
-          >
-            <span className="text-xl mb-1">{cat.icon}</span>
-            <span className="text-[10px] font-bold text-[#0F172A] dark:text-slate-200 text-center">
-              {isKm ? cat.labelKh : cat.labelEn}
-            </span>
-          </button>
-        ))}
-      </div>
+      {/* Quick category icon row removed: identical to the bottom tab bar */}
 
       {/* 6 Personalized Account Features Suite (មជ្ឈមណ្ឌលផ្ទាល់ខ្លួនសម្រាប់គណនី) */}
       {/* Locked for Free Users, Fully Enabled for VIP Members per Requirement 2 */}
@@ -1122,9 +1095,9 @@ export const HomeView: React.FC = () => {
 
         {/* Prominent AI Discovery & Google Maps Places Search (Admin & VIP) Entry Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-          {/* 1. Healthy Food & Disease-Friendly Nutrition Guide */}
+          {/* 1. Healthy Food & Disease-Friendly Nutrition Guide (opens the Food tab: single entry point) */}
           <button
-            onClick={() => setIsAiFoodDiscoveryModalOpen(true)}
+            onClick={() => setActiveTab('food')}
             className="p-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 via-[#064E3B] to-teal-800 text-white text-left shadow-md flex items-center justify-between transition hover:scale-[1.01] active:scale-98 cursor-pointer ring-2 ring-emerald-400/30"
           >
             <div className="flex items-center gap-2.5">
@@ -1176,30 +1149,7 @@ export const HomeView: React.FC = () => {
             </span>
           </button>
 
-          {/* 1b. Auto Online Food Photo Search ($0 Free) - ADMIN ONLY per Requirement #1 */}
-          {currentUser?.role === 'admin' && (
-            <button
-              onClick={() => setActiveTab('food')}
-              className="p-3.5 rounded-2xl bg-gradient-to-r from-teal-700 via-emerald-800 to-[#064E3B] text-white text-left shadow-md flex items-center justify-between transition hover:scale-[1.01] active:scale-98 cursor-pointer ring-2 ring-amber-400/50"
-            >
-              <div className="flex items-center gap-2.5">
-                <div className="w-10 h-10 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center shadow-sm shrink-0 font-bold text-base">
-                  🤖
-                </div>
-                <div>
-                  <span className="font-bold text-xs block text-amber-300 font-khmer">
-                    {isKm ? '🤖 ស្វែងរករូបភាពម្ហូបពី Online ដោយស្វ័យប្រវត្តិ (Admin)' : '🤖 Auto-Search Food Photos Online (Admin)'}
-                  </span>
-                  <span className="text-[10px] text-emerald-200 block font-khmer">
-                    {isKm ? 'ប្តូររូបភាពមុខម្ហូបពី Online • ឥតគិតថ្លៃ $0' : 'Wikimedia & TheMealDB • Free $0'}
-                  </span>
-                </div>
-              </div>
-              <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[9px] font-black uppercase tracking-wider font-sans shrink-0">
-                {isKm ? 'ឥតគិតថ្លៃ $0' : 'FREE $0'}
-              </span>
-            </button>
-          )}
+          {/* Admin photo auto-search shortcut removed: it already lives inside the Food tab (admin panel) */}
 
           {/* 2. Restaurant Check-in & GPS Location (Admin Only per Requirement #3) */}
           {currentUser?.role === 'admin' && (

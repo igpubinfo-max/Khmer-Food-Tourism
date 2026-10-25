@@ -1,13 +1,13 @@
 import React, { useState, useRef } from 'react';
 import { useApp } from '../context/AppContext';
-import { Search, Heart, Globe, Shield, User as UserIcon, X, QrCode, Download, ShieldCheck, Mail, Camera } from 'lucide-react';
+import { Search, Shield, X, Mail, Share2 } from 'lucide-react';
 import { APP_VERSION } from '../types';
+import { shareApp } from '../utils/shareApp';
 
 export const Header: React.FC = () => {
   const { 
-    language, setLanguage, bookmarks, setActiveTab, 
-    currentUser, setIsAuthModalOpen, setIsAdminOpen, setIsAdminLoginModalOpen,
-    setIsInstallModalOpen, setIsSupportModalOpen, setIsQrScannerModalOpen,
+    language, setLanguage, setActiveTab, 
+    currentUser, setIsAdminOpen,
     searchQuery, setSearchQuery, selectedProvince, setSelectedProvince,
     showToast
   } = useApp();
@@ -58,37 +58,8 @@ export const Header: React.FC = () => {
 
         {/* Action icons — Responsive & Properly Aligned on Mobile */}
         <div className="flex items-center gap-1 shrink-0">
-          {/* Scan QR Code Button */}
-          <button
-            onClick={() => setIsQrScannerModalOpen(true)}
-            className="w-7 h-7 sm:w-auto sm:px-2 sm:py-1 rounded-full bg-emerald-800 hover:bg-emerald-700 text-white text-[10px] font-bold border border-emerald-400/50 shadow-xs flex items-center justify-center gap-1 transition-all active:scale-95 shrink-0"
-            title={isKm ? 'ស្កេន QR កូដ (Scan QR Code)' : 'Scan QR Code'}
-          >
-            <Camera className="w-3.5 h-3.5 text-emerald-200 shrink-0" />
-            <span className="hidden sm:inline">{isKm ? 'ស្កេន' : 'Scan'}</span>
-          </button>
-
-          {/* App Install QR Button */}
-          <button
-            onClick={() => setIsInstallModalOpen(true)}
-            className="w-7 h-7 sm:w-auto sm:px-2 sm:py-1 rounded-full bg-[#065F46] hover:bg-[#047857] text-white text-[10px] font-bold border border-emerald-500/40 shadow-xs flex items-center justify-center gap-1 transition-all active:scale-95 shrink-0"
-            title={isKm ? 'ដំឡើងកម្មវិធីលើទូរស័ព្ទ (Install App)' : 'Install App'}
-          >
-            <QrCode className="w-3.5 h-3.5 text-emerald-200 shrink-0" />
-            <span className="hidden sm:inline">{isKm ? 'ដំឡើង' : 'Install'}</span>
-          </button>
-
-          {/* Heart & 3-Language Selector Area (ខ្មែរ / EN / 中文) */}
+          {/* 3-Language Selector (ខ្មែរ / EN / 中文) */}
           <div className="flex items-center gap-0.5 bg-[#053F30]/90 p-0.5 rounded-full border border-emerald-400/40 shadow-xs shrink-0">
-            {/* Heart / Support Button */}
-            <button
-              onClick={() => setIsSupportModalOpen(true)}
-              className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-[#10B981] hover:bg-[#059669] text-white flex items-center justify-center shadow-xs transition-all active:scale-95 shrink-0"
-              title={isKm ? 'ជួយឧបត្ថម្ភគាំទ្រកម្មវិធី (Support App)' : isZh ? '支持我们 (Support App)' : 'Support App'}
-            >
-              <Heart className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-white text-white shrink-0" />
-            </button>
-
             {/* 3-Language Instant Switcher Pills: ខ្មែរ | EN | 中文 */}
             {(['km', 'en', 'zh'] as const).map((langOption) => {
               const isSelected = language === langOption;
@@ -138,6 +109,16 @@ export const Header: React.FC = () => {
             title={isKm ? 'ស្វែងរក' : 'Search'}
           >
             <Search className="w-3.5 h-3.5 shrink-0" />
+          </button>
+
+          {/* Single clean Share App action */}
+          <button
+            onClick={() => shareApp(language, showToast)}
+            className="w-7 h-7 rounded-full bg-[#10B981] hover:bg-[#059669] text-white flex items-center justify-center shadow-xs transition-all active:scale-95 shrink-0"
+            title={isKm ? 'ចែករំលែកកម្មវិធី' : isZh ? '分享应用' : 'Share App'}
+            aria-label={isKm ? 'ចែករំលែកកម្មវិធី' : isZh ? '分享应用' : 'Share App'}
+          >
+            <Share2 className="w-3.5 h-3.5 shrink-0" />
           </button>
 
           {/* Admin Action (Only visible when authenticated as admin) */}

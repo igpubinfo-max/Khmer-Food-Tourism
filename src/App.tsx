@@ -134,12 +134,12 @@ const MainScreen: React.FC = () => {
             setActiveTab('home');
             setIsNearMeModalOpen(true);
           } else if (targetSection === 'ai_health') {
-            setActiveTab('home');
-            setIsAiFoodDiscoveryModalOpen(true);
+            // Single entry point: the Nutrition Guide lives inside the Food tab
+            setActiveTab('food');
           } else {
             setActiveTab('home');
           }
-          if (!currentUser && targetSection !== 'ai_health') {
+          if (!currentUser) {
             setIsAuthModalOpen(true);
           }
         }}

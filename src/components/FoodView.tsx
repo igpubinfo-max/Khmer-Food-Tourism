@@ -9,7 +9,8 @@ import {
   classifyKhmerFoodPrimaryGroup,
   organizeAndDeduplicateFoods
 } from '../types';
-import { Utensils, Plus, Sparkles, Globe, Check, HeartPulse, ShieldCheck, AlertTriangle, ChevronDown, ChevronUp, Info } from 'lucide-react';
+import { Utensils, Plus, Sparkles, Globe, Check, HeartPulse, ShieldCheck, AlertTriangle, ChevronDown, ChevronUp, Info, Share2, CalendarDays } from 'lucide-react';
+import { shareText } from '../utils/shareApp';
 import { searchOnlineFoodImages, OnlineFoodImageCandidate } from '../services/onlineFoodImageService';
 import { tr } from '../utils/i18n';
 import { getLocalizedFood } from '../utils/zhDynamicTranslator';
@@ -22,7 +23,7 @@ import {
 const PAGE_BATCH_SIZE = 48;
 
 export const FoodView: React.FC = () => {
-  const { foods, updateFood, showToast, language, searchQuery, setSearchQuery, currentUser, setIsAdminOpen, setSelectedFood } = useApp();
+  const { foods, updateFood, showToast, language, searchQuery, setSearchQuery, currentUser, setIsAdminOpen, setSelectedFood, setIsAiFoodDiscoveryModalOpen } = useApp();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [visibleCount, setVisibleCount] = useState<number>(PAGE_BATCH_SIZE);
   const [showOnlineSearchPanel, setShowOnlineSearchPanel] = useState<boolean>(true);
@@ -34,6 +35,8 @@ export const FoodView: React.FC = () => {
   const [selectedConditionId, setSelectedConditionId] = useState<NutritionConditionId>('diabetes');
   const loadMoreTriggerRef = useRef<HTMLDivElement | null>(null);
   const isKm = language === 'km';
+  const shareTip = (title: string, body: string) =>
+    shareText(language, title, `💡 ${title}\n${body}`, showToast);
   const activeConditionGuide = useMemo(
     () =>
       HEALTHY_NUTRITION_CONDITIONS_DATA.find((c) => c.id === selectedConditionId) ||
@@ -363,15 +366,34 @@ export const FoodView: React.FC = () => {
                       <span className="font-bold text-[11px] text-[#064E3B] dark:text-emerald-200">
                         {item.emoji} {tr(language, item.nameKh, item.nameEn, item.nameZh)}
                       </span>
-                      <span className="text-[9px] px-1.5 py-0.5 rounded bg-white dark:bg-slate-800 text-emerald-700 dark:text-emerald-300 font-semibold border border-emerald-500/20">
-                        {tr(language, item.portionTipKh, item.portionTipEn, item.portionTipZh)}
-                      </span>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-emerald-600 text-white font-bold">
+                          ✓ {tr(language, 'គួរញ៉ាំច្រើន', 'Eat More', '多吃')}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            shareTip(
+                              `${tr(language, item.nameKh, item.nameEn, item.nameZh)} — ${tr(language, activeConditionGuide.nameKh, activeConditionGuide.nameEn, activeConditionGuide.nameZh)}`,
+                              tr(language, item.nutritionalBenefitKh, item.nutritionalBenefitEn, item.nutritionalBenefitZh)
+                            )
+                          }
+                          className="w-6 h-6 rounded-full bg-white dark:bg-slate-800 border border-emerald-300 text-emerald-700 flex items-center justify-center cursor-pointer active:scale-95"
+                          title={tr(language, 'ចែករំលែកគន្លឹះ', 'Share Tip', '分享小贴士')}
+                          aria-label={tr(language, 'ចែករំលែកគន្លឹះ', 'Share Tip', '分享小贴士')}
+                        >
+                          <Share2 className="w-3 h-3" />
+                        </button>
+                      </div>
                     </div>
                     <p className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-400">
                       🔬 {tr(language, item.keyNutrientsKh, item.keyNutrientsEn, item.keyNutrientsZh)}
                     </p>
                     <p className="text-[10px] text-slate-600 dark:text-slate-300 leading-relaxed">
                       {tr(language, item.nutritionalBenefitKh, item.nutritionalBenefitEn, item.nutritionalBenefitZh)}
+                    </p>
+                    <p className="text-[9px] text-emerald-800 dark:text-emerald-300 font-semibold">
+                      🍽️ {tr(language, item.portionTipKh, item.portionTipEn, item.portionTipZh)}
                     </p>
                   </div>
                 ))}
