@@ -465,12 +465,9 @@ export const TouristDetailModal: React.FC = () => {
               <span className="px-3 py-0.5 rounded-full text-xs font-bold bg-[#064E3B] text-emerald-100 border border-emerald-400/40 shadow mb-2 inline-block">
                 {loc.category}
               </span>
-              <h2 className="text-xl sm:text-2xl font-bold font-moul leading-snug drop-shadow text-white">
+              <h2 className="text-xl sm:text-2xl font-extrabold font-moul leading-snug drop-shadow text-white">
                 {loc.name}
               </h2>
-              <p className="text-xs text-emerald-200 font-medium">
-                {loc.subtitle}
-              </p>
             </div>
 
             {/* Reference Image Label (រូបភាពយោង) */}
@@ -559,11 +556,11 @@ export const TouristDetailModal: React.FC = () => {
 
             {/* Description */}
             <div>
-              <h3 className="font-bold text-[#0F172A] dark:text-white text-sm mb-1.5 flex items-center gap-1.5">
+              <h3 className="font-bold text-[#0F172A] dark:text-white text-base mb-1.5 flex items-center gap-1.5">
                 <Sparkles className="w-4 h-4 text-[#059669]" />
                 {tr(language, 'ប្រវត្តិ និងទិដ្ឋភាពទូទៅ', 'Overview & History', '历史与景点介绍')}
               </h3>
-              <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed bg-slate-50 dark:bg-slate-800/50 p-3.5 rounded-xl border border-slate-200/90 dark:border-slate-700">
+              <p className="text-sm sm:text-base text-slate-700 dark:text-slate-300 leading-relaxed bg-slate-50 dark:bg-slate-800/50 p-3.5 rounded-xl border border-slate-200/90 dark:border-slate-700">
                 {loc.description}
               </p>
             </div>
@@ -571,14 +568,14 @@ export const TouristDetailModal: React.FC = () => {
             {/* Highlights List */}
             {loc.highlights && loc.highlights.length > 0 && (
               <div>
-                <h3 className="font-bold text-[#0F172A] dark:text-white text-sm mb-2">
+                <h3 className="font-bold text-[#0F172A] dark:text-white text-base mb-2">
                   {tr(language, 'ចំណុចលេចធ្លោមិនគួររំលង', 'Key Highlights', '精彩亮点推荐')}
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {loc.highlights.map((hl, i) => (
                     <div 
                       key={i}
-                      className="p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 text-xs flex items-center gap-2"
+                      className="p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 text-xs sm:text-sm flex items-center gap-2"
                     >
                       <span className="w-2 h-2 rounded-full bg-[#10B981] shrink-0" />
                       <span className="font-medium text-[#0F172A] dark:text-slate-200">{hl}</span>
@@ -611,7 +608,7 @@ export const TouristDetailModal: React.FC = () => {
                   className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white text-xs font-bold shadow transition active:scale-95"
                 >
                   <Share2 className="w-3.5 h-3.5" />
-                  <span>{tr(language, 'ចែករំលែក (Share)', 'Share App', '分享应用')}</span>
+                  <span>{tr(language, 'ចែករំលែក', 'Share App', '分享应用')}</span>
                 </button>
 
                 <button

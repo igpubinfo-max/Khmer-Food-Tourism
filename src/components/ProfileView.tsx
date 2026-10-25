@@ -203,7 +203,7 @@ export const ProfileView: React.FC = () => {
                         autoFocus
                         value={tempName}
                         onChange={(e) => setTempName(e.target.value)}
-                        placeholder={isKm ? 'វាយឈ្មោះថ្មី...' : 'Enter new name...'}
+                        placeholder={tr(language, 'វាយឈ្មោះថ្មី...', 'Enter new name...', '输入新名称...')}
                         className="w-full max-w-[180px] px-2.5 py-1 text-xs font-bold rounded-lg border-2 border-emerald-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500/20"
                       />
                       <button
@@ -214,14 +214,14 @@ export const ProfileView: React.FC = () => {
                           setIsEditingName(false);
                         }}
                         className="p-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition"
-                        title={isKm ? 'រក្សាទុក' : 'Save'}
+                        title={tr(language, 'រក្សាទុក', 'Save', '保存')}
                       >
                         <Check className="w-3.5 h-3.5" />
                       </button>
                       <button
                         onClick={() => setIsEditingName(false)}
                         className="p-1.5 rounded-lg bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 text-slate-600 dark:text-slate-300 transition"
-                        title={isKm ? 'បោះបង់' : 'Cancel'}
+                        title={tr(language, 'បោះបង់', 'Cancel', '取消')}
                       >
                         <CloseIcon className="w-3.5 h-3.5" />
                       </button>
@@ -237,7 +237,7 @@ export const ProfileView: React.FC = () => {
                           setIsEditingName(true);
                         }}
                         className="p-1 rounded-lg bg-slate-100 hover:bg-emerald-100 dark:bg-slate-700 dark:hover:bg-emerald-950/50 text-slate-500 hover:text-emerald-700 dark:text-slate-400 dark:hover:text-emerald-300 transition"
-                        title={isKm ? 'កែប្រែឈ្មោះ' : 'Edit Name'}
+                        title={tr(language, 'កែប្រែឈ្មោះ', 'Edit Name', '修改名称')}
                       >
                         <Edit2 className="w-3 h-3" />
                       </button>
@@ -249,21 +249,21 @@ export const ProfileView: React.FC = () => {
                     {currentUser.role === 'admin' ? (
                       <span className="inline-flex items-center gap-1 px-3 py-0.5 rounded-full text-[11px] font-black bg-rose-100 text-rose-800 dark:bg-rose-950/80 dark:text-rose-300 border border-rose-300 dark:border-rose-700 shadow-2xs font-khmer">
                         <Shield className="w-3.5 h-3.5 text-rose-600 fill-rose-600" />
-                        <span>🛡️ Administrator</span>
+                        <span>🛡️ {tr(language, 'អ្នកគ្រប់គ្រងប្រព័ន្ធ', 'Administrator', '系统管理员')}</span>
                       </span>
                     ) : isVip ? (
                       <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black bg-gradient-to-r from-amber-200 to-amber-300 text-amber-950 border border-amber-400 shadow-2xs font-khmer">
                         <Crown className="w-3.5 h-3.5 fill-amber-700 text-amber-700" />
-                        <span>{isKm ? 'Premium VIP 🌟' : 'Premium VIP 🌟'}</span>
+                        <span>{tr(language, 'សមាជិក VIP 🌟', 'Premium VIP 🌟', '尊享 VIP 🌟')}</span>
                       </span>
                     ) : (
                       <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-600 shadow-2xs font-khmer">
-                        <span>{isKm ? 'គណនីឥតគិតថ្លៃ (Free)' : 'Free User'}</span>
+                        <span>{tr(language, 'គណនីឥតគិតថ្លៃ', 'Free User', '免费账户')}</span>
                       </span>
                     )}
                     <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 shadow-2xs font-khmer">
                       <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                      <span>{isKm ? 'គណនីបានផ្ទៀងផ្ទាត់ ✓' : 'Verified Account ✓'}</span>
+                      <span>{tr(language, 'គណនីបានផ្ទៀងផ្ទាត់ ✓', 'Verified Account ✓', '已认证账户 ✓')}</span>
                     </span>
                     {currentUser.role !== 'admin' && (
                       <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold font-khmer ${
@@ -271,14 +271,16 @@ export const ProfileView: React.FC = () => {
                           ? 'bg-amber-100 text-amber-900 border border-amber-300' 
                           : 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200 border border-slate-300'
                       }`}>
-                        {currentUser.role === 'owner' ? '🏪 ម្ចាស់ហាង' : '👤 អ្នកប្រើប្រាស់'}
+                        {currentUser.role === 'owner'
+                          ? tr(language, '🏪 ម្ចាស់ហាង', '🏪 Store Owner', '🏪 店主')
+                          : tr(language, '👤 អ្នកប្រើប្រាស់', '👤 Member', '👤 普通用户')}
                       </span>
                     )}
                   </div>
 
                   {currentUser.role === 'admin' ? (
                     <p className="text-xs text-rose-600 font-medium font-khmer mt-1">
-                      {isKm ? 'គណនីរដ្ឋបាលប្រព័ន្ធ (Private)' : 'System Administrator (Private)'}
+                      {tr(language, 'គណនីរដ្ឋបាលប្រព័ន្ធ', 'System Administrator', '系统管理员账户')}
                     </p>
                   ) : (
                     <div className="mt-1 space-y-1">
@@ -300,12 +302,12 @@ export const ProfileView: React.FC = () => {
                         }`}>
                           <div>
                             <p className="font-bold">
-                              📅 {isKm ? 'ថ្ងៃផុតកំណត់ VIP៖' : 'VIP Expiration Date:'}{' '}
+                              📅 {tr(language, 'ថ្ងៃផុតកំណត់ VIP៖', 'VIP Expiration Date:', 'VIP 到期日期：')}{' '}
                               <span className="font-mono underline">{currentUser.subscriptionExpiryDate.split('T')[0]}</span>
                             </p>
                             <p className="font-extrabold mt-0.5">
-                              ⏳ {isKm ? `រយៈពេលនៅសល់៖ ${remainingDays} ថ្ងៃទៀត` : `Remaining Time: ${remainingDays} day(s) left`}
-                              {remainingDays <= 3 && (isKm ? ' (ជិតផុតកំណត់!)' : ' (Expiring Soon!)')}
+                              ⏳ {tr(language, `រយៈពេលនៅសល់៖ ${remainingDays} ថ្ងៃទៀត`, `Remaining Time: ${remainingDays} day(s) left`, `剩余时间：${remainingDays} 天`)}
+                              {remainingDays <= 3 && tr(language, ' (ជិតផុតកំណត់!)', ' (Expiring Soon!)', '（即将到期！）')}
                             </p>
                           </div>
                           {remainingDays <= 3 && (
@@ -313,7 +315,7 @@ export const ProfileView: React.FC = () => {
                               onClick={() => openUpgradeVipModal(true)}
                               className="px-2.5 py-1 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-black text-[10px] shrink-0 cursor-pointer"
                             >
-                              {isKm ? 'បន្ត VIP' : 'Renew'}
+                              {tr(language, 'បន្ត VIP', 'Renew', '续费')}
                             </button>
                           )}
                         </div>
@@ -321,13 +323,13 @@ export const ProfileView: React.FC = () => {
                       {!isVip && getVipAccountState(currentUser) === 'expired_vip' && (
                         <div className="mt-1.5 p-2 rounded-xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800 text-[11px] font-khmer flex items-center justify-between gap-2 text-rose-700 dark:text-rose-300">
                           <span>
-                            ⚠️ {isKm ? `ផុតកំណត់ VIP (${currentUser.subscriptionExpiryDate?.split('T')[0] || 'Expired'}) — គណនីធម្មតា` : `VIP Expired (${currentUser.subscriptionExpiryDate?.split('T')[0] || 'Expired'}) — Normal Account`}
+                            ⚠️ {tr(language, `ផុតកំណត់ VIP (${currentUser.subscriptionExpiryDate?.split('T')[0] || ''}) — គណនីធម្មតា`, `VIP Expired (${currentUser.subscriptionExpiryDate?.split('T')[0] || 'Expired'}) — Normal Account`, `VIP 已过期（${currentUser.subscriptionExpiryDate?.split('T')[0] || ''}）— 普通账户`)}
                           </span>
                           <button
                             onClick={() => openUpgradeVipModal(true)}
                             className="px-2.5 py-1 rounded-lg bg-amber-400 text-slate-950 font-black text-[10px] shrink-0 cursor-pointer"
                           >
-                            {isKm ? 'បន្ត VIP' : 'Renew'}
+                            {tr(language, 'បន្ត VIP', 'Renew', '续费')}
                           </button>
                         </div>
                       )}
@@ -339,15 +341,15 @@ export const ProfileView: React.FC = () => {
               {/* Direct Quick Log Out Button in Profile Header */}
               <button
                 onClick={() => {
-                  if (window.confirm(isKm ? 'តើអ្នកពិតជាចង់ចាកចេញពីគណនីមែនទេ?' : 'Are you sure you want to log out?')) {
+                  if (window.confirm(tr(language, 'តើអ្នកពិតជាចង់ចាកចេញពីគណនីមែនទេ?', 'Are you sure you want to log out?', '您确定要退出登录吗？'))) {
                     logout();
                   }
                 }}
                 className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/60 dark:hover:bg-rose-900/60 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800 text-xs font-bold transition shadow-2xs cursor-pointer active:scale-95 shrink-0"
-                title={isKm ? 'ចាកចេញពីគណនី (Sign Out)' : 'Sign Out of Account'}
+                title={tr(language, 'ចាកចេញពីគណនី', 'Sign Out of Account', '退出登录')}
               >
                 <LogOut className="w-3.5 h-3.5" />
-                <span className="hidden xs:inline">{isKm ? 'ចាកចេញ' : 'Log Out'}</span>
+                <span className="hidden xs:inline">{tr(language, 'ចាកចេញ', 'Log Out', '退出')}</span>
               </button>
             </div>
 
@@ -365,19 +367,19 @@ export const ProfileView: React.FC = () => {
               <UserIcon className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="font-bold text-sm text-[#0F172A] dark:text-white">
-                {isKm ? 'សូមចូលគណនីរបស់អ្នក' : 'Please Sign In'}
+              <h3 className="font-bold text-base text-[#0F172A] dark:text-white">
+                {tr(language, 'សូមចូលគណនីរបស់អ្នក', 'Please Sign In', '请登录您的账户')}
               </h3>
-              <p className="text-xs text-slate-500">
-                {isKm ? 'ដើម្បីរក្សាទុកម្ហូប ចែករំលែក និងចុះបញ្ជីហាង' : 'To save recipes, share posts & manage shops'}
+              <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+                {tr(language, 'ដើម្បីរក្សាទុកម្ហូប ចែករំលែក និងចុះបញ្ជីហាង', 'To save recipes, share posts & manage shops', '登录以收藏食谱、分享动态并管理店铺')}
               </p>
             </div>
             <div className="flex justify-center">
               <button
                 onClick={() => setIsAuthModalOpen(true)}
-                className="w-full sm:w-auto px-8 py-2.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-xs shadow-xs font-khmer transition"
+                className="w-full sm:w-auto px-8 py-2.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-xs sm:text-sm shadow-xs font-khmer transition"
               >
-                {isKm ? 'ចូលគណនី / ចុះឈ្មោះ' : 'Sign In / Register'}
+                {tr(language, 'ចូលគណនី / ចុះឈ្មោះ', 'Sign In / Register', '登录 / 注册')}
               </button>
             </div>
           </div>

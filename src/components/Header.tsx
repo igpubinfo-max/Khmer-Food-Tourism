@@ -59,14 +59,18 @@ export const Header: React.FC = () => {
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1 flex-wrap">
               <h1 className="font-moul text-[12px] sm:text-sm tracking-wide text-white leading-tight drop-shadow-sm truncate">
-                {isZh ? '高棉美食与旅游' : 'អាហារ & ទេសចរណ៍ខ្មែរ'}
+                {isKm ? 'អាហារ និងទេសចរណ៍ខ្មែរ' : isZh ? '高棉美食与旅游' : 'Khmer Food & Tourism'}
               </h1>
               <span className="px-1 py-0.2 rounded bg-white/20 text-white font-mono text-[8px] sm:text-[9px] font-bold border border-white/25 shrink-0">
                 {APP_VERSION}
               </span>
             </div>
-            <p className="text-[9px] sm:text-[10px] text-emerald-200 font-medium tracking-wider uppercase truncate">
-              {isZh ? 'Khmer Food & Tourism • 柬埔寨指南' : 'Khmer Food & Tourism'}
+            <p className="text-[10px] sm:text-[11px] text-emerald-200 font-medium tracking-wide truncate">
+              {isKm
+                ? 'មគ្គុទ្ទេសក៍ម្ហូប និងទេសចរណ៍កម្ពុជា'
+                : isZh
+                ? '柬埔寨正宗美食与旅游指南'
+                : 'Cambodia Food & Travel Guide'}
             </p>
           </div>
         </div>
@@ -89,17 +93,17 @@ export const Header: React.FC = () => {
                       langOption === 'km'
                         ? '🇰🇭 បានប្តូរទៅជា ភាសាខ្មែរ'
                         : langOption === 'zh'
-                        ? '🇨🇳 已切换为 简体中文 (中文)'
+                        ? '🇨🇳 已切换为 简体中文'
                         : '🇬🇧 Switched to English',
                       'info'
                     );
                   }}
-                  className={`px-1.5 h-6 sm:h-7 rounded-full text-[9px] sm:text-[10px] font-black transition-all active:scale-95 shrink-0 cursor-pointer flex items-center justify-center ${
+                  className={`px-2 h-6 sm:h-7 rounded-full text-[10px] sm:text-[11px] font-black transition-all active:scale-95 shrink-0 cursor-pointer flex items-center justify-center ${
                     isSelected
                       ? 'bg-amber-400 text-slate-950 shadow-xs'
                       : 'text-emerald-100 hover:text-white hover:bg-emerald-800/70'
                   }`}
-                  title="ប្តូរភាសា / Switch Language / 切换语言 (ខ្មែរ / EN / 中文)"
+                  title={isKm ? 'ប្តូរភាសា' : isZh ? '切换语言' : 'Switch Language'}
                 >
                   {label}
                 </button>
@@ -211,13 +215,13 @@ export const Header: React.FC = () => {
       </div>
 
       {/* Feedback Email Bar below action icons */}
-      <div className="bg-[#055a42] text-white/95 text-[11px] px-4 py-1.5 flex items-center justify-between border-t border-emerald-500/30 font-khmer">
+      <div className="bg-[#055a42] text-white/95 text-xs px-4 py-1.5 flex items-center justify-between border-t border-emerald-500/30 font-khmer">
         <div className="flex items-center gap-1.5 truncate">
           <Mail className="w-3.5 h-3.5 text-emerald-300 shrink-0" />
-          <span className="text-emerald-200 text-[10px]">{isKm ? 'មតិកែលម្អ (Feedback):' : isZh ? '意见反馈：' : 'Feedback:'}</span>
+          <span className="text-emerald-200 text-[11px]">{isKm ? 'មតិកែលម្អ៖' : isZh ? '意见反馈：' : 'Feedback:'}</span>
           <a 
             href="mailto:kftcam@gmail.com" 
-            className="font-mono text-white underline hover:text-emerald-200 font-semibold text-[11px]"
+            className="font-mono text-white underline hover:text-emerald-200 font-semibold text-xs"
           >
             kftcam@gmail.com
           </a>
@@ -233,7 +237,7 @@ export const Header: React.FC = () => {
               showToast(isKm ? 'បានចម្លងអ៊ីមែលជោគជ័យ!' : isZh ? '邮箱地址已复制！' : 'Email copied to clipboard!', 'success');
             }
           }}
-          className="text-[10px] bg-white/15 hover:bg-white/25 px-2 py-0.5 rounded-md text-white font-khmer transition shrink-0 ml-2 border border-white/20 active:scale-95"
+          className="text-[11px] bg-white/15 hover:bg-white/25 px-2.5 py-0.5 rounded-md text-white font-khmer transition shrink-0 ml-2 border border-white/20 active:scale-95"
           title={isKm ? 'ចម្លងអ៊ីមែល' : isZh ? '复制邮箱' : 'Copy Email'}
         >
           {isKm ? 'ចម្លង' : isZh ? '复制' : 'Copy'}
@@ -250,8 +254,8 @@ export const Header: React.FC = () => {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={isKm ? 'ស្វែងរកម្ហូប, ហាងអាហារ, ឬកន្លែងដើរលេង...' : isZh ? '搜索美食、餐厅或旅游景点（支持高棉语/中文/英文）...' : 'Search food, restaurant, or destination...'}
-              className="w-full pl-9 pr-8 py-2 rounded-xl bg-[#047857]/70 border border-emerald-400/60 text-white placeholder-emerald-200/70 text-xs focus:outline-none focus:border-white focus:bg-[#047857] transition"
+              placeholder={isKm ? 'ស្វែងរកម្ហូប ហាងអាហារ ឬកន្លែងដើរលេង...' : isZh ? '搜索美食、餐厅或旅游景点...' : 'Search food, restaurant, or destination...'}
+              className="w-full pl-9 pr-8 py-2 rounded-xl bg-[#047857]/70 border border-emerald-400/60 text-white placeholder-emerald-200/70 text-xs sm:text-sm focus:outline-none focus:border-white focus:bg-[#047857] transition"
               autoFocus
             />
             {searchQuery && (

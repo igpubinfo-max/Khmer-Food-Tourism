@@ -228,11 +228,11 @@ export const SmartHubHealthySection: React.FC<Props> = ({ foods, onViewAll, onOp
             >
               <img src={f.photoUrl} alt={name(f)} loading="lazy" decoding="async" className="w-16 h-16 rounded-xl object-cover shrink-0 bg-slate-200" />
               <span className="min-w-0 flex-1">
-                <span className="block text-sm font-bold text-slate-900 dark:text-white truncate">{name(f)}</span>
-                <span className="inline-block mt-0.5 px-1.5 py-0.5 rounded-full bg-orange-100 text-orange-700 text-[11px] font-extrabold">
-                  🔥 {f.calories ?? '—'} kcal
+                <span className="block text-sm font-bold text-slate-900 dark:text-white leading-snug line-clamp-2">{name(f)}</span>
+                <span className="inline-block mt-0.5 px-2 py-0.5 rounded-full bg-orange-100 text-orange-700 text-xs font-extrabold">
+                  🔥 {f.calories ?? '—'} {tr(language, 'គីឡូកាឡូរី', 'kcal', '千卡')}
                 </span>
-                <span className="block mt-0.5 text-[11px] leading-snug text-slate-500 dark:text-slate-400 line-clamp-2">{tagCookingTip(selDef, language)}</span>
+                <span className="block mt-0.5 text-xs leading-snug text-slate-500 dark:text-slate-400 line-clamp-2">{tagCookingTip(selDef, language)}</span>
               </span>
               <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
             </button>
@@ -269,12 +269,12 @@ export const SmartHubHealthySection: React.FC<Props> = ({ foods, onViewAll, onOp
               onClick={() => m.food && onOpenFood(m.food)}
               className="rounded-xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 p-1.5 text-center cursor-pointer active:scale-[0.97] disabled:opacity-50"
             >
-              <span className="block text-[11px] font-extrabold text-slate-600 dark:text-slate-300">{m.emoji} {m.label}</span>
+              <span className="block text-xs font-extrabold text-slate-600 dark:text-slate-300">{m.emoji} {m.label}</span>
               {m.food ? (
                 <>
                   <img src={m.food.photoUrl} alt={name(m.food)} loading="lazy" decoding="async" className="mt-1 w-full aspect-square rounded-lg object-cover bg-slate-200" />
-                  <span className="block mt-1 text-[11px] font-bold text-slate-900 dark:text-white leading-tight line-clamp-2 min-h-[28px]">{name(m.food)}</span>
-                  <span className="block text-[11px] font-extrabold text-orange-600">🔥 {m.food.calories} kcal</span>
+                  <span className="block mt-1 text-xs font-bold text-slate-900 dark:text-white leading-tight line-clamp-2 min-h-[30px]">{name(m.food)}</span>
+                  <span className="block text-[11px] font-extrabold text-orange-600">🔥 {m.food.calories} {tr(language, 'គីឡូកាឡូរី', 'kcal', '千卡')}</span>
                 </>
               ) : (
                 <span className="block mt-3 text-[11px] text-slate-400">—</span>
@@ -284,7 +284,7 @@ export const SmartHubHealthySection: React.FC<Props> = ({ foods, onViewAll, onOp
         </div>
         <div className="flex items-center justify-between gap-2">
           <span className="text-xs font-extrabold text-emerald-800 dark:text-emerald-300">
-            {tr(language, `សរុបប្រហែល ${plan.totalKcal} kcal`, `Total ≈ ${plan.totalKcal} kcal`, `合计约 ${plan.totalKcal} kcal`)}
+            {tr(language, `សរុបប្រហែល ${plan.totalKcal} គីឡូកាឡូរី`, `Total ≈ ${plan.totalKcal} kcal`, `合计约 ${plan.totalKcal} 千卡`)}
           </span>
           <button
             type="button"

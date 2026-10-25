@@ -1,8 +1,8 @@
 import React from 'react';
 import { MapPin, ChevronRight } from 'lucide-react';
 import type { TrendingFoodItem, Language } from '../../types';
-import { tr } from '../../utils/i18n';
-import { translateSignatureDish } from '../../utils/zhDynamicTranslator';
+import { tr, translateProvinceName } from '../../utils/i18n';
+import { translateSignatureDish, sanitizeStrictLanguageText } from '../../utils/zhDynamicTranslator';
 
 interface Props {
   language: Language;
@@ -31,24 +31,25 @@ export const TrendingFoodsRow: React.FC<Props> = ({ language, items, onOpen, onE
     </div>
     <div className="flex gap-3 overflow-x-auto no-scrollbar snap-x snap-mandatory -mx-4 px-4 pb-1">
       {items.map((item) => {
-        const name =
+        const rawName =
           language === 'km'
             ? item.foodNameKh
             : language === 'zh'
             ? translateSignatureDish(item.foodNameKh, 'zh')
             : item.foodNameEn;
-        const province = language === 'km' ? item.provinceKh : item.provinceEn;
+        const name = sanitizeStrictLanguageText(rawName, language);
+        const province = translateProvinceName(item.provinceKh, item.provinceEn, language);
         return (
           <button
             key={item.id}
             type="button"
             onClick={() => onOpen(item)}
-            className="snap-start shrink-0 w-44 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs overflow-hidden text-left active:scale-[0.97] transition cursor-pointer"
+            className="snap-start shrink-0 w-48 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs overflow-hidden text-left active:scale-[0.97] transition cursor-pointer"
           >
             <img src={item.photoUrl} alt={name} loading="lazy" className="w-full h-28 object-cover bg-slate-100" />
-            <span className="block p-2.5">
-              <span className="block text-sm font-bold text-slate-900 dark:text-white leading-snug line-clamp-2 min-h-[2.5rem]">{name}</span>
-              <span className="mt-1 flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
+            <span className="block p-3">
+              <span className="block text-sm sm:text-base font-bold text-slate-900 dark:text-white leading-snug line-clamp-2 min-h-[2.6rem]">{name}</span>
+              <span className="mt-1 flex items-center gap-1 text-xs font-medium text-slate-500 dark:text-slate-400">
                 <MapPin className="w-3.5 h-3.5 shrink-0" />
                 <span className="truncate">{province}</span>
               </span>

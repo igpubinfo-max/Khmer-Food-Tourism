@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { shareRichContent } from '../utils/androidMediaHelper';
 import { tr, translateProvince } from '../utils/i18n';
-import { translateDynamicTextToZh } from '../utils/zhDynamicTranslator';
+import { translateDynamicTextToZh, sanitizeStrictLanguageText } from '../utils/zhDynamicTranslator';
 
 export const TrendingFoodDetailModal: React.FC = () => {
   const { 
@@ -24,25 +24,44 @@ export const TrendingFoodDetailModal: React.FC = () => {
   if (!isTrendingFoodDetailModalOpen || !selectedTrendingFood) return null;
 
   const item = selectedTrendingFood;
-  const displayFoodName =
+  const rawFoodName =
     language === 'km'
       ? item.foodNameKh
       : language === 'zh'
       ? translateDynamicTextToZh(item.foodNameEn) || item.foodNameEn
       : item.foodNameEn;
-  const displayCat =
+  const displayFoodName = sanitizeStrictLanguageText(rawFoodName, language);
+  const rawCat =
     language === 'km'
       ? item.categoryKh
       : language === 'zh'
       ? translateDynamicTextToZh(item.categoryEn) || item.categoryEn
       : item.categoryEn;
+  const displayCat = sanitizeStrictLanguageText(rawCat, language);
   const displayProv = translateProvince(item.provinceKh || item.provinceEn, language);
-  const displayDesc =
+  const rawDesc =
     language === 'km'
       ? item.descriptionKh
       : language === 'zh'
       ? translateDynamicTextToZh(item.descriptionEn) || item.descriptionEn
       : item.descriptionEn;
+  const displayDesc = sanitizeStrictLanguageText(rawDesc, language);
+  const displayRestName = sanitizeStrictLanguageText(
+    language === 'km'
+      ? item.restaurantNameKh
+      : language === 'zh'
+      ? translateDynamicTextToZh(item.restaurantNameEn) || item.restaurantNameEn
+      : item.restaurantNameEn,
+    language
+  );
+  const displayAddress = sanitizeStrictLanguageText(
+    language === 'km'
+      ? item.addressKh
+      : language === 'zh'
+      ? translateDynamicTextToZh(item.addressEn) || item.addressEn
+      : item.addressEn,
+    language
+  );
 
   const handleClose = () => {
     setIsTrendingFoodDetailModalOpen(false);
@@ -144,30 +163,30 @@ export const TrendingFoodDetailModal: React.FC = () => {
 
           {/* Title overlay */}
           <div className="absolute bottom-3 left-3 right-16 font-khmer">
-            <span className="px-2 py-0.5 rounded-md bg-emerald-600/90 text-white text-[9px] font-bold">
+            <span className="px-2 py-0.5 rounded-md bg-emerald-600/90 text-white text-[10px] font-bold">
               {displayCat}
             </span>
             <h3 className="font-moul text-base sm:text-lg text-white drop-shadow mt-1 leading-snug">
               {displayFoodName}
             </h3>
             <p className="text-xs text-emerald-200 font-bold truncate">
-              🏪 {isKm ? item.restaurantNameKh : item.restaurantNameEn}
+              🏪 {displayRestName}
             </p>
           </div>
         </div>
 
         {/* Modal Body */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 font-khmer text-xs">
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 font-khmer text-xs sm:text-sm">
           {/* Reviewer Highlight Quote */}
           {item.reviewerQuoteKh && (
             <div className="p-3 rounded-2xl bg-gradient-to-br from-rose-50 to-pink-50 dark:from-rose-950/40 dark:to-pink-950/30 border border-rose-200 dark:border-rose-900/60 flex items-start gap-2.5">
               <MessageSquareQuote className="w-5 h-5 text-rose-500 shrink-0 mt-0.5" />
               <div>
-                <p className="text-slate-800 dark:text-rose-100 italic leading-relaxed text-xs">
-                  "{isKm ? item.reviewerQuoteKh : (item.reviewerQuoteEn || item.reviewerQuoteKh)}"
+                <p className="text-slate-800 dark:text-rose-100 italic leading-relaxed text-xs sm:text-sm">
+                  "{language === 'km' ? item.reviewerQuoteKh : language === 'zh' ? translateDynamicTextToZh(item.reviewerQuoteEn || item.reviewerQuoteKh) : (item.reviewerQuoteEn || item.reviewerQuoteKh)}"
                 </p>
                 {item.reviewerName && (
-                  <span className="text-[10px] text-rose-600 dark:text-rose-400 font-bold block mt-1">
+                  <span className="text-[11px] text-rose-600 dark:text-rose-400 font-bold block mt-1">
                     — {item.reviewerName}
                   </span>
                 )}
@@ -177,11 +196,11 @@ export const TrendingFoodDetailModal: React.FC = () => {
 
           {/* Description */}
           <div className="space-y-1">
-            <h4 className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+            <h4 className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5 text-sm">
               <Sparkles className="w-4 h-4 text-emerald-500" />
               <span>{tr(language, 'ការពិពណ៌នាអំពីមុខម្ហូប', 'Food Description', '美食详细介绍')}</span>
             </h4>
-            <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-xs">
+            <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-xs sm:text-sm">
               {displayDesc}
             </p>
           </div>
@@ -194,8 +213,8 @@ export const TrendingFoodDetailModal: React.FC = () => {
                 <span className="font-bold text-slate-900 dark:text-white block">
                   {displayProv}
                 </span>
-                <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                  {isKm ? item.addressKh : item.addressEn}
+                <span className="text-xs text-slate-500 dark:text-slate-400">
+                  {displayAddress}
                 </span>
               </div>
             </div>

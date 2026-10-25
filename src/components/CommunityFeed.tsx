@@ -177,17 +177,17 @@ export const CommunityFeed: React.FC = () => {
               </div>
 
               {/* Title & Tag */}
-              <div className="px-3.5 pb-2">
+              <div className="px-3.5 pb-2.5">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/40 text-[#064E3B] dark:text-emerald-300 text-[10px] font-bold border border-emerald-200 dark:border-emerald-800">
-                    <Tag className="w-2.5 h-2.5 text-[#059669]" />
+                  <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/40 text-[#064E3B] dark:text-emerald-300 text-xs font-bold border border-emerald-200 dark:border-emerald-800">
+                    <Tag className="w-3 h-3 text-[#059669]" />
                     {loc.categoryTag}
                   </span>
                 </div>
-                <h3 className="font-bold text-sm text-[#0F172A] dark:text-white">
+                <h3 className="font-extrabold text-base sm:text-lg text-[#0F172A] dark:text-white leading-snug">
                   {loc.title}
                 </h3>
-                <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 leading-relaxed whitespace-pre-line">
+                <p className="text-sm text-slate-600 dark:text-slate-300 mt-1 leading-relaxed whitespace-pre-line">
                   {loc.description}
                 </p>
               </div>

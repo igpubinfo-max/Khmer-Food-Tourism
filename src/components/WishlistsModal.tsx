@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 import { WishlistItem } from '../types';
 import { tr, translateProvince } from '../utils/i18n';
-import { translateDynamicTextToZh } from '../utils/zhDynamicTranslator';
+import { translateDynamicTextToZh, sanitizeStrictLanguageText } from '../utils/zhDynamicTranslator';
 
 const DEFAULT_WISHLIST_ZH_NAMES: Record<string, string> = {
   'Places to Visit': '想去的景点',
@@ -32,15 +32,15 @@ export const WishlistsModal: React.FC = () => {
   if (!isWishlistsModalOpen) return null;
 
   const getWishlistDisplayName = (w: { nameKh: string; nameEn: string }) => {
-    if (language === 'km') return w.nameKh;
-    if (language === 'zh') return DEFAULT_WISHLIST_ZH_NAMES[w.nameEn] || translateDynamicTextToZh(w.nameEn) || w.nameEn;
-    return w.nameEn;
+    if (language === 'km') return sanitizeStrictLanguageText(w.nameKh, 'km');
+    if (language === 'zh') return sanitizeStrictLanguageText(DEFAULT_WISHLIST_ZH_NAMES[w.nameEn] || translateDynamicTextToZh(w.nameEn) || w.nameEn, 'zh');
+    return sanitizeStrictLanguageText(w.nameEn, 'en');
   };
 
   const getWishlistItemDisplayName = (item: WishlistItem) => {
-    if (language === 'km') return item.nameKh;
-    if (language === 'zh') return translateDynamicTextToZh(item.nameEn || item.nameKh) || item.nameEn || item.nameKh;
-    return item.nameEn || item.nameKh;
+    if (language === 'km') return sanitizeStrictLanguageText(item.nameKh, 'km');
+    if (language === 'zh') return sanitizeStrictLanguageText(translateDynamicTextToZh(item.nameEn || item.nameKh) || item.nameEn || item.nameKh, 'zh');
+    return sanitizeStrictLanguageText(item.nameEn || item.nameKh, 'en');
   };
 
   const handleCreateList = (e: React.FormEvent) => {

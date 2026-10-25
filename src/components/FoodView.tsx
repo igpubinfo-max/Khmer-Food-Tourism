@@ -83,17 +83,17 @@ export const FoodView: React.FC = () => {
   // Ordered exactly as requested: សម្ល, ឆា, ស្ងោរ, បង្អែម
   const categories = [
     { id: 'all', nameKh: 'ទាំងអស់', nameEn: 'All Menus', nameZh: '全部菜品', emoji: '🍽️' },
-    { id: 'samlor', nameKh: '១. សម្ល', nameEn: '1. Samlor (Soup/Curry)', nameZh: '1. 传统汤与咖喱', emoji: '🍲' },
-    { id: 'cha', nameKh: '២. ឆា', nameEn: '2. Cha (Stir-Fry)', nameZh: '2. 风味热炒', emoji: '🥘' },
-    { id: 'sngor', nameKh: '៣. ស្ងោរ', nameEn: '3. Sngor (Boiled Soup)', nameZh: '3. 清炖鲜汤', emoji: '🥣' },
-    { id: 'bong_aem', nameKh: '៤. បង្អែម', nameEn: '4. Bong Aem (Dessert)', nameZh: '4. 高棉甜品', emoji: '🍨' },
+    { id: 'samlor', nameKh: '១. សម្ល', nameEn: '1. Soups & Curries', nameZh: '1. 浓汤/咖喱', emoji: '🍲' },
+    { id: 'cha', nameKh: '២. ឆា', nameEn: '2. Stir-Fry & Grill', nameZh: '2. 热炒/烧烤', emoji: '🥘' },
+    { id: 'sngor', nameKh: '៣. ស្ងោរ', nameEn: '3. Boiled Soups', nameZh: '3. 清汤/汤粉', emoji: '🥣' },
+    { id: 'bong_aem', nameKh: '៤. បង្អែម', nameEn: '4. Desserts', nameZh: '4. 高棉甜品', emoji: '🍨' },
   ];
 
   const sectionZhMeta: Record<KhmerFoodPrimaryGroup, { titleZh: string; subtitleZh: string }> = {
-    samlor: { titleZh: '1. 高棉传统浓汤与咖喱 (Samlor)', subtitleZh: '正宗高棉浓汤、阿莫克与红绿咖喱' },
-    cha: { titleZh: '2. 高棉风味小炒与烤物 (Cha)', subtitleZh: '香茅热炒、摇摇牛肉、炙烤与凉拌菜' },
-    sngor: { titleZh: '3. 清炖鲜汤、米粉与主食 (Sngor)', subtitleZh: '酸汤、清汤、高棉米粉与特色饭面' },
-    bong_aem: { titleZh: '4. 传统高棉甜品与糕点 (Bong Aem)', subtitleZh: '椰奶甜汤、传统糕点与特色饮品' },
+    samlor: { titleZh: '1. 高棉传统浓汤与咖喱', subtitleZh: '正宗高棉浓汤、阿莫克与红绿咖喱' },
+    cha: { titleZh: '2. 高棉风味小炒与烤物', subtitleZh: '香茅热炒、摇滚牛肉粒、炙烤与凉拌菜' },
+    sngor: { titleZh: '3. 清炖鲜汤、米粉与主食', subtitleZh: '酸汤、清汤、高棉米粉与特色饭面' },
+    bong_aem: { titleZh: '4. 传统高棉甜品与糕点', subtitleZh: '椰奶甜汤、传统糕点与特色饮品' },
   };
 
   const filteredFoods = useMemo(() => {
@@ -192,13 +192,13 @@ export const FoodView: React.FC = () => {
       {/* Header bar */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="font-moul text-sm sm:text-base text-[#0F172A] dark:text-white flex items-center gap-2">
-            <Utensils className="w-4 h-4 text-[#059669]" />
+          <h2 className="font-moul text-base sm:text-lg text-[#0F172A] dark:text-white flex items-center gap-2">
+            <Utensils className="w-5 h-5 text-[#059669]" />
             <span>
-              {tr(language, 'វិចិត្រសាលមុខម្ហូបខ្មែរ (100+ មុខ)', 'Khmer Food Collection (100+ Dishes)', '高棉美食大全（100+ 道正宗菜品）')}
+              {tr(language, 'វិចិត្រសាលមុខម្ហូបខ្មែរ (២០០ មុខ)', 'Khmer Food Collection (200 Dishes)', '高棉美食大全（200 道正宗菜品）')}
             </span>
           </h2>
-          <p className="text-[11px] text-slate-500 font-khmer">
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-khmer mt-0.5">
             {tr(
               language,
               `បង្ហាញ ${filteredFoods.length} លើ ${foods.length} មុខម្ហូបខ្មែរពិតៗ`,
@@ -214,17 +214,17 @@ export const FoodView: React.FC = () => {
 
 
       {/* Ordered Primary Category Pills: ទាំងអស់ | ១. សម្ល | ២. ឆា | ៣. ស្ងោរ | ៤. បង្អែម */}
-      <div className="bg-white dark:bg-slate-800/90 p-2 rounded-2xl border border-emerald-500/20 shadow-2xs space-y-2 font-khmer">
+      <div className="bg-white dark:bg-slate-800/90 p-2.5 rounded-2xl border border-emerald-500/20 shadow-2xs space-y-2 font-khmer">
         <div className="flex items-center justify-between px-1">
-          <span className="text-[11px] font-bold text-[#064E3B] dark:text-emerald-300">
+          <span className="text-xs sm:text-sm font-bold text-[#064E3B] dark:text-emerald-300">
             {tr(
               language,
               '📂 បញ្ជីមុខម្ហូបតាមផ្នែក (សម្ល • ឆា • ស្ងោរ • បង្អែម)៖',
-              '📂 Browse by Category (Samlor • Cha • Sngor • Dessert):',
+              '📂 Browse by Category (Soups • Stir-Fry • Broths • Desserts):',
               '📂 按分类浏览菜品（浓汤 • 热炒 • 清炖 • 甜品）：'
             )}
           </span>
-          <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400">
+          <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
             {organizedFoods.length} {tr(language, 'មុខម្ហូប', 'dishes', '道菜品')}
           </span>
         </div>
@@ -236,18 +236,18 @@ export const FoodView: React.FC = () => {
               <button
                 key={cat.id}
                 onClick={() => setSelectedCategory(cat.id)}
-                className={`flex flex-col items-center justify-center py-2 px-1 rounded-xl text-center transition-all duration-150 cursor-pointer border ${
+                className={`flex flex-col items-center justify-center py-2.5 px-1 rounded-xl text-center transition-all duration-150 cursor-pointer border ${
                   active
                     ? 'bg-gradient-to-b from-[#064E3B] to-[#047857] text-white font-black border-amber-400 shadow-sm scale-[1.02]'
                     : 'bg-slate-50 dark:bg-slate-900/60 text-slate-700 dark:text-slate-200 border-slate-200/80 dark:border-slate-700 hover:bg-emerald-50/60'
                 }`}
               >
-                <span className="text-sm leading-none mb-1">{cat.emoji}</span>
-                <span className="text-[10px] sm:text-[11px] leading-tight truncate w-full">
-                  {tr(language, cat.nameKh, cat.nameEn.split(' (')[0], cat.nameZh)}
+                <span className="text-base leading-none mb-1">{cat.emoji}</span>
+                <span className="text-[11px] sm:text-xs font-bold leading-tight truncate w-full">
+                  {tr(language, cat.nameKh, cat.nameEn, cat.nameZh)}
                 </span>
                 <span
-                  className={`mt-0.5 px-1.5 py-0.2 rounded-full text-[9px] font-bold ${
+                  className={`mt-1 px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
                     active ? 'bg-amber-400 text-slate-950' : 'bg-slate-200/80 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
                   }`}
                 >
@@ -263,7 +263,7 @@ export const FoodView: React.FC = () => {
       {/* Dish tag filter (estimated from the recipe — VIP-only for healthy tags) */}
       <div className="space-y-2 font-khmer">
         <div className="flex items-center justify-between gap-2">
-          <span className="text-[11px] font-bold text-[#064E3B] dark:text-emerald-300 flex items-center gap-1.5">
+          <span className="text-xs sm:text-sm font-bold text-[#064E3B] dark:text-emerald-300 flex items-center gap-1.5">
             <span>🥗 {tr(language, 'ស្លាកម្ហូបសុខភាព (VIP)៖', 'Healthy Dish Tags (VIP):', '健康菜品标签 (VIP)：')}</span>
             {!canUseVip && (
               <span className="px-2 py-0.5 rounded-full bg-slate-900 text-amber-300 text-[10px] font-extrabold inline-flex items-center gap-0.5">
@@ -276,9 +276,9 @@ export const FoodView: React.FC = () => {
             <button
               type="button"
               onClick={() => openUpgradeVipModal()}
-              className="px-2.5 py-1 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 text-[11px] font-extrabold inline-flex items-center gap-1 shadow-2xs active:scale-95 transition cursor-pointer"
+              className="px-3 py-1 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-extrabold inline-flex items-center gap-1 shadow-2xs active:scale-95 transition cursor-pointer"
             >
-              <Crown className="w-3 h-3" />
+              <Crown className="w-3.5 h-3.5" />
               <span>{tr(language, 'ដំឡើង VIP', 'Upgrade VIP', '升级 VIP')}</span>
             </button>
           )}
@@ -308,7 +308,7 @@ export const FoodView: React.FC = () => {
                   setTagFilter(t.id);
                 }}
                 aria-pressed={active}
-                className={`shrink-0 min-h-[40px] px-3 rounded-full text-xs sm:text-sm font-bold border transition cursor-pointer inline-flex items-center gap-1.5 ${
+                className={`shrink-0 min-h-[40px] px-3.5 rounded-full text-xs sm:text-sm font-bold border transition cursor-pointer inline-flex items-center gap-1.5 ${
                   active
                     ? 'bg-[#064E3B] text-white border-[#064E3B]'
                     : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-300 dark:border-slate-600'
@@ -316,7 +316,7 @@ export const FoodView: React.FC = () => {
               >
                 <span>{t.emoji} {tr(language, t.labelKh, t.labelEn, t.labelZh)}</span>
                 {isLockedTag && (
-                  <span className="px-1.5 py-0.5 rounded-full bg-slate-900 text-amber-300 text-[9px] font-extrabold inline-flex items-center gap-0.5">
+                  <span className="px-1.5 py-0.5 rounded-full bg-slate-900 text-amber-300 text-[10px] font-extrabold inline-flex items-center gap-0.5">
                     <Lock className="w-2.5 h-2.5" />
                     VIP
                   </span>
@@ -325,7 +325,7 @@ export const FoodView: React.FC = () => {
             );
           })}
         </div>
-        <p className="text-[11px] text-slate-400">
+        <p className="text-xs text-slate-500 dark:text-slate-400">
           ℹ️ {tr(language, TAG_ESTIMATE_NOTE.km, TAG_ESTIMATE_NOTE.en, TAG_ESTIMATE_NOTE.zh)}
         </p>
       </div>
@@ -333,13 +333,13 @@ export const FoodView: React.FC = () => {
       {/* Province filter with ONE reset button */}
       <div className="grid grid-cols-1 gap-2 font-khmer">
         <label className="block">
-          <span className="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">
+          <span className="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">
             📍 {tr(language, 'ខេត្ត', 'Province', '省份')}
           </span>
           <select
             value={provinceFilter}
             onChange={(e) => setProvinceFilter(e.target.value)}
-            className="w-full min-h-[44px] px-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-sm text-slate-900 dark:text-white"
+            className="w-full min-h-[44px] px-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-sm font-semibold text-slate-900 dark:text-white"
           >
             <option value="">{tr(language, 'គ្រប់ខេត្ត', 'All provinces', '全部省份')}</option>
             {provinceOptions.map((p) => (
@@ -363,10 +363,10 @@ export const FoodView: React.FC = () => {
       {filteredFoods.length === 0 ? (
         <div className="p-8 text-center bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 space-y-2 font-khmer shadow-xs">
           <Utensils className="w-8 h-8 mx-auto text-slate-300" />
-          <p className="text-xs text-slate-500 font-medium">
+          <p className="text-sm text-slate-600 dark:text-slate-300 font-semibold">
             {tr(language, 'មិនមានមុខម្ហូបដែលត្រូវគ្នានឹងការស្វែងរកទេ', 'No matching dishes found', '未找到匹配的菜品')}
           </p>
-          <p className="text-[11px] text-slate-400">
+          <p className="text-xs text-slate-400">
             {tr(language, 'សូមប្រើប៊ូតុង «កំណត់តម្រងឡើងវិញ» ខាងលើ', 'Use the "Reset filters" button above', '请使用上方“重置筛选”按钮')}
           </p>
         </div>
@@ -375,28 +375,28 @@ export const FoodView: React.FC = () => {
           {groupedDisplayedSections.map((section) => {
             const zhMeta = sectionZhMeta[section.meta.id];
             return (
-              <div key={section.meta.id} className="space-y-2.5">
+              <div key={section.meta.id} className="space-y-3">
                 {/* Category Section Banner Header */}
-                <div className="flex items-center justify-between px-3.5 py-2.5 rounded-2xl bg-gradient-to-r from-[#064E3B] via-[#047857] to-emerald-700 text-white shadow-sm border border-emerald-400/30 font-khmer">
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <div className="w-8 h-8 rounded-xl bg-white/15 flex items-center justify-center text-lg shrink-0 border border-white/20">
+                <div className="flex items-center justify-between px-4 py-3 rounded-2xl bg-gradient-to-r from-[#064E3B] via-[#047857] to-emerald-700 text-white shadow-sm border border-emerald-400/30 font-khmer">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center text-xl shrink-0 border border-white/20">
                       {section.meta.emoji}
                     </div>
                     <div className="min-w-0">
-                      <div className="flex items-center gap-1.5">
-                        <span className="px-1.5 py-0.2 rounded bg-amber-400 text-slate-950 text-[10px] font-black">
+                      <div className="flex items-center gap-2">
+                        <span className="px-2 py-0.5 rounded bg-amber-400 text-slate-950 text-[11px] font-black">
                           {tr(language, `ផ្នែកទី ${section.meta.order}`, `Category #${section.meta.order}`, `第 ${section.meta.order} 类`)}
                         </span>
-                        <h3 className="font-moul text-xs sm:text-sm text-white truncate">
-                          {tr(language, section.meta.shortNameKh, section.meta.nameEn, zhMeta?.titleZh || section.meta.nameEn)}
+                        <h3 className="font-moul text-sm sm:text-base text-white truncate">
+                          {tr(language, section.meta.nameKh, section.meta.nameEn, zhMeta?.titleZh || section.meta.nameEn)}
                         </h3>
                       </div>
-                      <p className="text-[10px] text-emerald-100 truncate mt-0.5">
+                      <p className="text-xs text-emerald-100 truncate mt-0.5">
                         {tr(language, section.meta.subtitleKh, section.meta.subtitleEn, zhMeta?.subtitleZh || section.meta.subtitleEn)}
                       </p>
                     </div>
                   </div>
-                  <span className="px-2.5 py-1 rounded-full bg-white/20 text-white text-[10px] font-bold shrink-0 border border-white/25">
+                  <span className="px-2.5 py-1 rounded-full bg-white/20 text-white text-xs font-bold shrink-0 border border-white/25">
                     {section.totalInCategory} {tr(language, 'មុខ', 'items', '道菜')}
                   </span>
                 </div>
@@ -416,7 +416,7 @@ export const FoodView: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setVisibleCount((prev) => Math.min(filteredFoods.length, prev + PAGE_BATCH_SIZE))}
-                className="px-4 py-2.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white text-xs font-bold shadow-sm font-khmer cursor-pointer transition"
+                className="px-5 py-3 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white text-sm font-bold shadow-sm font-khmer cursor-pointer transition"
               >
                 {tr(
                   language,
@@ -430,7 +430,7 @@ export const FoodView: React.FC = () => {
         </div>
       )}
 
-      <p className="text-center text-[11px] text-slate-400 font-khmer pt-2">
+      <p className="text-center text-xs text-slate-400 font-khmer pt-2">
         {tr(language, GENERAL_FOOD_INFO_NOTE.km, GENERAL_FOOD_INFO_NOTE.en, GENERAL_FOOD_INFO_NOTE.zh)}
       </p>
     </div>

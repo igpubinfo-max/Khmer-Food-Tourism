@@ -313,9 +313,6 @@ export const WhatToEatModal: React.FC = () => {
                     <h2 className="font-moul text-base sm:text-lg text-white drop-shadow">
                       {currentLoc.name}
                     </h2>
-                    <p className="text-xs text-emerald-300 font-medium">
-                      {currentLoc.subtitle}
-                    </p>
                   </div>
                 </div>
 
@@ -327,7 +324,7 @@ export const WhatToEatModal: React.FC = () => {
                         {tr(language, 'ថាមពលអាហារូបត្ថម្ភ', 'Nutritional Energy', '营养热量')}
                       </div>
                       <div className="text-base font-black text-[#064E3B] dark:text-emerald-400">
-                        {currentDish.calories} {tr(language, 'kcal', 'kcal', '千卡')}
+                        {currentDish.calories} {tr(language, 'គីឡូកាឡូរី', 'kcal', '千卡')}
                       </div>
                     </div>
 
@@ -347,7 +344,7 @@ export const WhatToEatModal: React.FC = () => {
                     </div>
                   </div>
 
-                  <p className="text-xs text-slate-600 dark:text-slate-300 line-clamp-2 leading-relaxed">
+                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 line-clamp-2 leading-relaxed">
                     {currentLoc.description}
                   </p>
 
@@ -390,7 +387,7 @@ export const WhatToEatModal: React.FC = () => {
                         nameEn: currentDish.nameEn,
                         photoUrl: currentDish.photoUrl,
                         categoryKh: currentDish.categoryKh,
-                        priceDisplay: `${currentDish.calories} kcal`,
+                        priceDisplay: `${currentDish.calories} ${tr(language, 'គីឡូកាឡូរី', 'kcal', '千卡')}`,
                         rating: currentDish.rating,
                       })}
                       className="p-2.5 bg-emerald-100 hover:bg-emerald-200 dark:bg-slate-700 text-[#064E3B] dark:text-emerald-300 rounded-xl transition shadow-xs"
@@ -409,7 +406,7 @@ export const WhatToEatModal: React.FC = () => {
             <div className="space-y-2 font-khmer">
               <h4 className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1">
                 <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                <span>{tr(language, 'ជម្រើសគួរពិចារណាផ្សេងទៀត (AI Alternative Picks)៖', 'Other AI alternative picks:', '其他 AI 精选备选菜品：')}</span>
+                <span>{tr(language, 'ជម្រើសគួរពិចារណាផ្សេងទៀត៖', 'Other AI alternative picks:', '其他 AI 精选备选菜品：')}</span>
               </h4>
               <div className="grid grid-cols-2 gap-2">
                 {alternativeDishes.map(d => {
@@ -425,11 +422,11 @@ export const WhatToEatModal: React.FC = () => {
                     >
                       <img src={d.photoUrl} alt={dLoc.name} className="w-10 h-10 rounded-xl object-cover shrink-0 group-hover:scale-105 transition-transform" />
                       <div className="min-w-0">
-                        <div className="text-[11px] font-bold text-[#0F172A] dark:text-white truncate">
+                        <div className="text-xs font-bold text-[#0F172A] dark:text-white truncate">
                           {dLoc.name}
                         </div>
-                        <div className="text-[10px] text-emerald-600 font-mono font-bold">
-                          {d.calories} {tr(language, 'kcal', 'kcal', '千卡')}
+                        <div className="text-[11px] text-emerald-600 font-mono font-bold">
+                          {d.calories} {tr(language, 'គីឡូកាឡូរី', 'kcal', '千卡')}
                         </div>
                       </div>
                     </div>
@@ -448,7 +445,7 @@ export const WhatToEatModal: React.FC = () => {
             className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-500 hover:from-amber-600 hover:to-amber-500 text-stone-900 font-black text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-[0.98] font-khmer cursor-pointer"
           >
             <Shuffle className={`w-5 h-5 ${isSpinning ? 'animate-spin' : ''}`} />
-            <span>{tr(language, '« បង្ហាញម្ហូបផ្សេងទៀត » (AI ជ្រើសម្ហូបថ្មី)', '« Show Another Dish » (AI Generate)', '« 换一道菜 »（AI 重新推荐）')}</span>
+            <span>{tr(language, '« បង្ហាញម្ហូបផ្សេងទៀត »', '« Show Another Dish »', '« 换一道菜 »')}</span>
           </button>
         </div>
       </div>

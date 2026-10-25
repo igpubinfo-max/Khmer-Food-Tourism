@@ -35,7 +35,7 @@ export const BottomNav: React.FC = () => {
                   <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#059669] dark:bg-emerald-400" />
                 )}
               </div>
-              <span className="text-[10px] mt-1 tracking-tight leading-none">
+              <span className="text-[11px] sm:text-xs font-bold mt-1 tracking-tight leading-none">
                 {language === 'km' ? item.labelKh : language === 'zh' ? item.labelZh : item.labelEn}
               </span>
             </button>

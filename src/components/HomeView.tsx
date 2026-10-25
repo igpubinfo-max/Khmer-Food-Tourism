@@ -3,6 +3,8 @@ import { useApp } from '../context/AppContext';
 import { TrendingFoodCategorySlug, TrendingFoodItem, isUserVipActive, getVipAccountState, getVipRemainingDays, sortRestaurantsChronologically } from '../types';
 import { normalizeKhmerSearchText } from '../services/googlePlacesService';
 import { shareRichContent, copyTextNativeOrWeb } from '../utils/androidMediaHelper';
+import { tr } from '../utils/i18n';
+import { getLocalizedFood, getLocalizedRestaurant, getLocalizedDestination } from '../utils/zhDynamicTranslator';
 import { HomeGreetingSearch } from './home/HomeGreetingSearch';
 import { QuickActions } from './home/QuickActions';
 import { SmartMenuBanner } from './home/SmartMenuBanner';
@@ -367,15 +369,15 @@ export const HomeView: React.FC = () => {
           <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-700">
             <div className="flex items-center gap-1.5">
               <Search className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-              <h3 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white">
-                {isKm ? `លទ្ធផលស្វែងរក (${searchResults.totalCount})` : `Search Results (${searchResults.totalCount})`}
+              <h3 className="font-bold text-sm text-slate-900 dark:text-white">
+                {tr(language, `លទ្ធផលស្វែងរក (${searchResults.totalCount})`, `Search Results (${searchResults.totalCount})`, `搜索结果 (${searchResults.totalCount})`)}
               </h3>
             </div>
             <button
               onClick={() => setGlobalSearchQuery('')}
               className="text-xs text-rose-500 hover:text-rose-600 font-bold flex items-center gap-0.5"
             >
-              <span>{isKm ? 'បិទការស្វែងរក' : 'Close'}</span>
+              <span>{tr(language, 'បិទការស្វែងរក', 'Close', '关闭')}</span>
               <X className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -384,46 +386,46 @@ export const HomeView: React.FC = () => {
           <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar text-xs">
             <button
               onClick={() => setSearchTab('all')}
-              className={`px-3 py-1 rounded-xl font-bold transition text-[11px] ${
+              className={`px-3 py-1 rounded-xl font-bold transition text-xs ${
                 searchTab === 'all'
                   ? 'bg-emerald-600 text-white shadow-xs'
                   : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
               }`}
             >
-              {isKm ? `ទាំងអស់ (${searchResults.totalCount})` : `All (${searchResults.totalCount})`}
+              {tr(language, `ទាំងអស់ (${searchResults.totalCount})`, `All (${searchResults.totalCount})`, `全部 (${searchResults.totalCount})`)}
             </button>
             <button
               onClick={() => setSearchTab('food')}
-              className={`px-3 py-1 rounded-xl font-bold transition text-[11px] flex items-center gap-1 ${
+              className={`px-3 py-1 rounded-xl font-bold transition text-xs flex items-center gap-1 ${
                 searchTab === 'food'
                   ? 'bg-emerald-600 text-white shadow-xs'
                   : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
               }`}
             >
               <span>🍲</span>
-              <span>{isKm ? `មុខម្ហូប (${searchResults.foods.length})` : `Dishes (${searchResults.foods.length})`}</span>
+              <span>{tr(language, `មុខម្ហូប (${searchResults.foods.length})`, `Dishes (${searchResults.foods.length})`, `美食 (${searchResults.foods.length})`)}</span>
             </button>
             <button
               onClick={() => setSearchTab('restaurants')}
-              className={`px-3 py-1 rounded-xl font-bold transition text-[11px] flex items-center gap-1 ${
+              className={`px-3 py-1 rounded-xl font-bold transition text-xs flex items-center gap-1 ${
                 searchTab === 'restaurants'
                   ? 'bg-emerald-600 text-white shadow-xs'
                   : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
               }`}
             >
               <span>🏪</span>
-              <span>{isKm ? `ហាងអាហារ (${searchResults.restaurants.length})` : `Restaurants (${searchResults.restaurants.length})`}</span>
+              <span>{tr(language, `ហាងអាហារ (${searchResults.restaurants.length})`, `Restaurants (${searchResults.restaurants.length})`, `餐厅 (${searchResults.restaurants.length})`)}</span>
             </button>
             <button
               onClick={() => setSearchTab('tourism')}
-              className={`px-3 py-1 rounded-xl font-bold transition text-[11px] flex items-center gap-1 ${
+              className={`px-3 py-1 rounded-xl font-bold transition text-xs flex items-center gap-1 ${
                 searchTab === 'tourism'
                   ? 'bg-emerald-600 text-white shadow-xs'
                   : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
               }`}
             >
               <span>🏛️</span>
-              <span>{isKm ? `ទេសចរណ៍ (${searchResults.destinations.length})` : `Places (${searchResults.destinations.length})`}</span>
+              <span>{tr(language, `ទេសចរណ៍ (${searchResults.destinations.length})`, `Places (${searchResults.destinations.length})`, `景点 (${searchResults.destinations.length})`)}</span>
             </button>
           </div>
 
@@ -432,12 +434,13 @@ export const HomeView: React.FC = () => {
             {searchResults.totalCount === 0 ? (
               <div className="py-8 text-center text-slate-500 space-y-2.5">
                 <Search className="w-8 h-8 mx-auto text-slate-400 stroke-1" />
-                <p className="text-xs">
-                  {isKm 
-                    ? `រកមិនឃើញលទ្ធផលត្រូវនឹង "${globalSearchQuery}" ទេ` 
-                    : language === 'zh'
-                    ? `未找到与“${globalSearchQuery}”相关的结果`
-                    : `No results found for "${globalSearchQuery}"`}
+                <p className="text-xs sm:text-sm">
+                  {tr(
+                    language,
+                    `រកមិនឃើញលទ្ធផលត្រូវនឹង "${globalSearchQuery}" ទេ`,
+                    `No results found for "${globalSearchQuery}"`,
+                    `未找到与“${globalSearchQuery}”相关的结果`
+                  )}
                 </p>
                 <div className="pt-1 flex justify-center">
                   <a
@@ -450,17 +453,23 @@ export const HomeView: React.FC = () => {
                   >
                     <ExternalLink className="w-3.5 h-3.5" />
                     <span>
-                      {isKm
-                        ? `🗺️ បើកស្វែងរក "${globalSearchQuery.trim()}" ផ្ទាល់នៅលើ Google Maps`
-                        : language === 'zh'
-                        ? `🗺️ 在 Google 地图中搜索 “${globalSearchQuery.trim()}”`
-                        : `🗺️ Open "${globalSearchQuery.trim()}" in Google Maps`}
+                      {tr(
+                        language,
+                        `🗺️ បើកស្វែងរក "${globalSearchQuery.trim()}" ផ្ទាល់នៅលើ Google Maps`,
+                        `🗺️ Open "${globalSearchQuery.trim()}" in Google Maps`,
+                        `🗺️ 在 Google 地图中搜索 “${globalSearchQuery.trim()}”`
+                      )}
                     </span>
                   </a>
                 </div>
-                <div className="flex items-center justify-center gap-1.5 flex-wrap pt-1 text-[11px]">
-                  <span className="text-slate-400">{isKm ? 'សាកល្បង៖' : language === 'zh' ? '试试搜索：' : 'Try:'}</span>
-                  {['ជំនោរក្បាលកោះ', 'សម្លការី', 'នំបញ្ចុក', 'អាម៉ុក', 'បាត់ដំបង', 'សៀមរាប'].map((tag) => (
+                <div className="flex items-center justify-center gap-1.5 flex-wrap pt-1 text-xs">
+                  <span className="text-slate-400">{tr(language, 'សាកល្បង៖', 'Try:', '试试搜索：')}</span>
+                  {(language === 'km'
+                    ? ['ជំនោរក្បាលកោះ', 'សម្លការី', 'នំបញ្ចុក', 'អាម៉ុក', 'បាត់ដំបង', 'សៀមរាប']
+                    : language === 'zh'
+                    ? ['阿莫克', '金边', '暹粒', '贡布', '白马']
+                    : ['Amok', 'Samlor Korko', 'Lok Lak', 'Phnom Penh', 'Siem Reap']
+                  ).map((tag) => (
                     <button
                       key={tag}
                       onClick={() => setGlobalSearchQuery(tag)}
@@ -474,85 +483,94 @@ export const HomeView: React.FC = () => {
             ) : (
               <>
                 {/* Foods */}
-                {(searchTab === 'all' || searchTab === 'food') && searchResults.foods.map((food) => (
-                  <div
-                    key={`food-${food.id}`}
-                    onClick={() => setSelectedFood(food)}
-                    className="p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-700/50 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 border border-slate-200/80 dark:border-slate-600 flex items-center justify-between gap-3 cursor-pointer transition group"
-                  >
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <img src={food.photoUrl} alt={food.nameKh} className="w-12 h-12 rounded-xl object-cover shrink-0 border border-slate-200" />
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-1.5">
-                          <span className="px-1.5 py-0.2 rounded-md bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 text-[9px] font-bold">
-                            🍲 មុខម្ហូប
-                          </span>
-                          <h4 className="font-bold text-xs text-slate-900 dark:text-white truncate group-hover:text-emerald-600">
-                            {isKm ? food.nameKh : food.nameEn}
-                          </h4>
+                {(searchTab === 'all' || searchTab === 'food') && searchResults.foods.map((food) => {
+                  const locF = getLocalizedFood(food, language);
+                  return (
+                    <div
+                      key={`food-${food.id}`}
+                      onClick={() => setSelectedFood(food)}
+                      className="p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-700/50 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 border border-slate-200/80 dark:border-slate-600 flex items-center justify-between gap-3 cursor-pointer transition group"
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <img src={food.photoUrl} alt={locF.name} className="w-12 h-12 rounded-xl object-cover shrink-0 border border-slate-200" />
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <span className="px-1.5 py-0.5 rounded-md bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 text-[10px] font-bold">
+                              🍲 {tr(language, 'មុខម្ហូប', 'Dish', '菜品')}
+                            </span>
+                            <h4 className="font-bold text-sm text-slate-900 dark:text-white truncate group-hover:text-emerald-600">
+                              {locF.name}
+                            </h4>
+                          </div>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                            {locF.description}
+                          </p>
                         </div>
-                        <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
-                          {isKm ? food.descriptionKh : food.descriptionEn}
-                        </p>
                       </div>
+                      <ChevronRight className="w-4 h-4 text-slate-400 shrink-0 group-hover:translate-x-0.5 transition" />
                     </div>
-                    <ChevronRight className="w-4 h-4 text-slate-400 shrink-0 group-hover:translate-x-0.5 transition" />
-                  </div>
-                ))}
+                  );
+                })}
 
                 {/* Restaurants */}
-                {(searchTab === 'all' || searchTab === 'restaurants') && searchResults.restaurants.map((rest) => (
-                  <div
-                    key={`rest-${rest.id}`}
-                    onClick={() => setSelectedRestaurant(rest)}
-                    className="p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-700/50 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 border border-slate-200/80 dark:border-slate-600 flex items-center justify-between gap-3 cursor-pointer transition group"
-                  >
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <img src={rest.photoUrl} alt={rest.nameKh} className="w-12 h-12 rounded-xl object-cover shrink-0 border border-slate-200" />
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-1.5">
-                          <span className="px-1.5 py-0.2 rounded-md bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 text-[9px] font-bold">
-                            🏪 ហាងអាហារ
-                          </span>
-                          <h4 className="font-bold text-xs text-slate-900 dark:text-white truncate group-hover:text-emerald-600">
-                            {isKm ? rest.nameKh : rest.nameEn}
-                          </h4>
+                {(searchTab === 'all' || searchTab === 'restaurants') && searchResults.restaurants.map((rest) => {
+                  const locR = getLocalizedRestaurant(rest, language);
+                  return (
+                    <div
+                      key={`rest-${rest.id}`}
+                      onClick={() => setSelectedRestaurant(rest)}
+                      className="p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-700/50 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 border border-slate-200/80 dark:border-slate-600 flex items-center justify-between gap-3 cursor-pointer transition group"
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <img src={rest.photoUrl} alt={locR.name} className="w-12 h-12 rounded-xl object-cover shrink-0 border border-slate-200" />
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <span className="px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 text-[10px] font-bold">
+                              🏪 {tr(language, 'ហាងអាហារ', 'Restaurant', '餐厅')}
+                            </span>
+                            <h4 className="font-bold text-sm text-slate-900 dark:text-white truncate group-hover:text-emerald-600">
+                              {locR.name}
+                            </h4>
+                          </div>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                            📍 {locR.address} • 📞 {rest.phone}
+                          </p>
                         </div>
-                        <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
-                          📍 {rest.addressKh} • 📞 {rest.phone}
-                        </p>
                       </div>
+                      <ChevronRight className="w-4 h-4 text-slate-400 shrink-0 group-hover:translate-x-0.5 transition" />
                     </div>
-                    <ChevronRight className="w-4 h-4 text-slate-400 shrink-0 group-hover:translate-x-0.5 transition" />
-                  </div>
-                ))}
+                  );
+                })}
 
                 {/* Destinations */}
-                {(searchTab === 'all' || searchTab === 'tourism') && searchResults.destinations.map((dest) => (
-                  <div
-                    key={`dest-${dest.id}`}
-                    onClick={() => setSelectedDestination(dest)}
-                    className="p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-700/50 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 border border-slate-200/80 dark:border-slate-600 flex items-center justify-between gap-3 cursor-pointer transition group"
-                  >
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <img src={dest.photoUrl} alt={dest.nameKh} className="w-12 h-12 rounded-xl object-cover shrink-0 border border-slate-200" />
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-1.5">
-                          <span className="px-1.5 py-0.2 rounded-md bg-teal-100 text-teal-800 dark:bg-teal-950 dark:text-teal-300 text-[9px] font-bold">
-                            🏛️ ទេសចរណ៍
-                          </span>
-                          <h4 className="font-bold text-xs text-slate-900 dark:text-white truncate group-hover:text-emerald-600">
-                            {isKm ? dest.nameKh : dest.nameEn}
-                          </h4>
+                {(searchTab === 'all' || searchTab === 'tourism') && searchResults.destinations.map((dest) => {
+                  const locD = getLocalizedDestination(dest, language);
+                  return (
+                    <div
+                      key={`dest-${dest.id}`}
+                      onClick={() => setSelectedDestination(dest)}
+                      className="p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-700/50 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 border border-slate-200/80 dark:border-slate-600 flex items-center justify-between gap-3 cursor-pointer transition group"
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <img src={dest.photoUrl} alt={locD.name} className="w-12 h-12 rounded-xl object-cover shrink-0 border border-slate-200" />
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <span className="px-1.5 py-0.5 rounded-md bg-teal-100 text-teal-800 dark:bg-teal-950 dark:text-teal-300 text-[10px] font-bold">
+                              🏛️ {tr(language, 'ទេសចរណ៍', 'Place', '景点')}
+                            </span>
+                            <h4 className="font-bold text-sm text-slate-900 dark:text-white truncate group-hover:text-emerald-600">
+                              {locD.name}
+                            </h4>
+                          </div>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                            📍 {locD.province} ({locD.category})
+                          </p>
                         </div>
-                        <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
-                          📍 {dest.provinceKh} ({dest.categoryKh})
-                        </p>
                       </div>
+                      <ChevronRight className="w-4 h-4 text-slate-400 shrink-0 group-hover:translate-x-0.5 transition" />
                     </div>
-                    <ChevronRight className="w-4 h-4 text-slate-400 shrink-0 group-hover:translate-x-0.5 transition" />
-                  </div>
-                ))}
+                  );
+                })}
               </>
             )}
           </div>

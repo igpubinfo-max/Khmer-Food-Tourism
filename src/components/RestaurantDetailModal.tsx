@@ -328,12 +328,9 @@ export const RestaurantDetailModal: React.FC = () => {
                 </span>
               </div>
 
-              <h2 className="text-lg sm:text-xl font-bold font-moul leading-snug drop-shadow text-white">
+              <h2 className="text-xl sm:text-2xl font-extrabold font-moul leading-snug drop-shadow text-white">
                 {loc.name}
               </h2>
-              <p className="text-xs text-emerald-200 font-medium">
-                {loc.subtitle}
-              </p>
             </div>
 
             {/* Reference Image Label (រូបភាពយោង) */}
@@ -669,17 +666,14 @@ export const RestaurantDetailModal: React.FC = () => {
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between">
-                            <h4 className="font-bold text-[#0F172A] dark:text-white text-xs truncate">
+                            <h4 className="font-bold text-[#0F172A] dark:text-white text-sm truncate">
                               {itemDisplayName}
                             </h4>
                             <span className="text-[#064E3B] dark:text-emerald-400 font-bold font-mono text-xs ml-2">${(item.priceUsd ?? 0).toFixed(2)}</span>
                           </div>
-                          {item.nameEn && language !== 'en' && (
-                            <p className="text-[10px] text-slate-500 truncate">{item.nameEn}</p>
-                          )}
-                          <p className="text-[10px] text-slate-500 font-mono">({item.priceRiel.toLocaleString()} ៛)</p>
+                          <p className="text-[11px] text-slate-500 font-mono">({item.priceRiel.toLocaleString()} ៛)</p>
                           {itemDesc && (
-                            <p className="text-[10px] text-slate-600 dark:text-slate-300 line-clamp-1 mt-0.5">
+                            <p className="text-xs text-slate-600 dark:text-slate-300 line-clamp-1 mt-0.5">
                               {itemDesc}
                             </p>
                           )}
@@ -695,7 +689,7 @@ export const RestaurantDetailModal: React.FC = () => {
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="font-bold text-[#0F172A] dark:text-white text-sm flex items-center gap-1.5">
                     <UtensilsCrossed className="w-4 h-4 text-[#059669]" />
-                    <span>{tr(language, 'មុខម្ហូបប្រចាំហាង (Signature Dishes)', 'Signature Menus', '本店招牌特色菜')}</span>
+                    <span>{tr(language, 'មុខម្ហូបប្រចាំហាង', 'Signature Menus', '本店招牌特色菜')}</span>
                   </h3>
                   {canEditShop && (
                     <button
@@ -714,7 +708,7 @@ export const RestaurantDetailModal: React.FC = () => {
                   {loc.signatureDishes.map((dish, i) => (
                     <div 
                       key={i}
-                      className="flex items-center gap-2.5 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 text-xs text-slate-800 dark:text-slate-200"
+                      className="flex items-center gap-2.5 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 text-xs sm:text-sm text-slate-800 dark:text-slate-200"
                     >
                       <span className="w-5 h-5 rounded-full bg-[#064E3B] text-white text-[10px] font-bold flex items-center justify-center shrink-0">
                         {i + 1}
@@ -728,11 +722,11 @@ export const RestaurantDetailModal: React.FC = () => {
 
             {/* Description */}
             <div className="font-khmer">
-              <h3 className="font-bold text-[#0F172A] dark:text-white text-sm mb-1.5 flex items-center gap-1.5">
+              <h3 className="font-bold text-[#0F172A] dark:text-white text-base mb-1.5 flex items-center gap-1.5">
                 <Sparkles className="w-4 h-4 text-[#059669]" />
                 <span>{tr(language, 'អំពីភោជនីយដ្ឋាន', 'About the Restaurant', '关于本店')}</span>
               </h3>
-              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed bg-slate-50 dark:bg-slate-800/50 p-3.5 rounded-xl border border-slate-200/90 dark:border-slate-700">
+              <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed bg-slate-50 dark:bg-slate-800/50 p-3.5 rounded-xl border border-slate-200/90 dark:border-slate-700">
                 {loc.description}
               </p>
             </div>
@@ -768,7 +762,7 @@ export const RestaurantDetailModal: React.FC = () => {
                 ) : (
                   <div className="px-3 py-1.5 rounded-xl bg-slate-200/70 dark:bg-slate-700/70 text-slate-600 dark:text-slate-300 text-xs font-bold flex items-center gap-1.5">
                     <Star className="w-3.5 h-3.5 text-slate-400" />
-                    <span>{tr(language, 'មិនទាន់មានការវាយតម្លៃ (No ratings yet)', 'No ratings yet', '暂无顾客评分')}</span>
+                    <span>{tr(language, 'មិនទាន់មានការវាយតម្លៃ', 'No ratings yet', '暂无顾客评分')}</span>
                   </div>
                 )}
               </div>
@@ -878,12 +872,12 @@ export const RestaurantDetailModal: React.FC = () => {
                   getSpec={() => ({
                     kind: 'place',
                     emoji: '🏪',
-                    title: isKm ? selectedRestaurant.nameKh : selectedRestaurant.nameEn,
-                    subtitle: isKm ? selectedRestaurant.nameEn : selectedRestaurant.nameKh,
+                    title: loc.name,
+                    subtitle: loc.province,
                     photoUrl: activePhoto || selectedRestaurant.photoUrl,
                     lines: [
-                      `📍 ${isKm ? selectedRestaurant.addressKh : selectedRestaurant.addressEn}`,
-                      ...((selectedRestaurant.signatureDishesKh || []).slice(0, 2).map((d: string) => `🍽️ ${d}`)),
+                      `📍 ${loc.address}`,
+                      ...((loc.signatureDishes || []).slice(0, 2).map((d: string) => `🍽️ ${d}`)),
                     ],
                   })}
                 />
@@ -893,7 +887,7 @@ export const RestaurantDetailModal: React.FC = () => {
                   className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white text-xs font-bold shadow transition active:scale-95"
                 >
                   <Share2 className="w-3.5 h-3.5" />
-                  <span>{tr(language, 'ចែករំលែក (Share)', 'Share App', '分享应用')}</span>
+                  <span>{tr(language, 'ចែករំលែក', 'Share App', '分享应用')}</span>
                 </button>
 
                 <button

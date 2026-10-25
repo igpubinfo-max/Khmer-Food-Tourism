@@ -1686,6 +1686,8 @@ const SOCIAL_HIGHLIGHT_ZH_MAP: Record<string, string> = {
  * Get localized fields for a TouristDestination in KM, EN, or ZH
  */
 export function getLocalizedDestination(dest: TouristDestination, lang: Language) {
+  const highlightsEnList = (dest as { highlightsEn?: string[] }).highlightsEn;
+
   if (lang === 'km') {
     return {
       name: sanitizeStrictLanguageText(dest.nameKh, 'km'),
@@ -1697,7 +1699,7 @@ export function getLocalizedDestination(dest: TouristDestination, lang: Language
       description: dest.descriptionKh,
       entranceFee: dest.entranceFeeKh || dest.entryFeeKh || 'ឥតគិតថ្លៃ',
       bestTime: dest.bestTimeToVisitKh || 'ពេញមួយឆ្នាំ',
-      highlights: (dest.highlightsKh || []).map((h) => sanitizeStrictLanguageText(h, 'km')),
+      highlights: (dest.highlightsKh || []).map((h: string) => sanitizeStrictLanguageText(h, 'km')),
       socialHighlight: dest.socialHighlightKh || '',
     };
   }
@@ -1714,9 +1716,9 @@ export function getLocalizedDestination(dest: TouristDestination, lang: Language
       entranceFee: sanitizeStrictLanguageText(dest.entranceFeeEn || dest.entryFeeEn || 'Free Entry', 'en'),
       bestTime: sanitizeStrictLanguageText(dest.bestTimeToVisitEn || 'All year round', 'en'),
       highlights:
-        dest.highlightsEn && dest.highlightsEn.length > 0
-          ? dest.highlightsEn.map((h) => sanitizeStrictLanguageText(h, 'en'))
-          : (dest.highlightsKh || []).map((h) => sanitizeStrictLanguageText(translateDestinationHighlight(h, 'en'), 'en')),
+        highlightsEnList && highlightsEnList.length > 0
+          ? highlightsEnList.map((h: string) => sanitizeStrictLanguageText(h, 'en'))
+          : (dest.highlightsKh || []).map((h: string) => sanitizeStrictLanguageText(translateDestinationHighlight(h, 'en'), 'en')),
       socialHighlight: sanitizeStrictLanguageText(
         dest.socialHighlightEn || (dest.socialHighlightKh ? translateDestinationHighlight(dest.socialHighlightKh, 'en') : ''),
         'en'
@@ -1739,8 +1741,8 @@ export function getLocalizedDestination(dest: TouristDestination, lang: Language
   const zhAddress = sanitizeStrictLanguageText(translateAddressToZh(dest.addressEn || '', zhProv), 'zh');
 
   const zhHighlights = (dest.highlightsKh && dest.highlightsKh.length > 0
-    ? dest.highlightsKh.map((h) => sanitizeStrictLanguageText(translateDestinationHighlight(h, 'zh'), 'zh'))
-    : (dest.highlightsEn || []).map((h) => sanitizeStrictLanguageText(translateDynamicTextToZh(h), 'zh')));
+    ? dest.highlightsKh.map((h: string) => sanitizeStrictLanguageText(translateDestinationHighlight(h, 'zh'), 'zh'))
+    : (highlightsEnList || []).map((h: string) => sanitizeStrictLanguageText(translateDynamicTextToZh(h), 'zh')));
 
   const rawZhSocialHighlight = dest.socialHighlightEn
     ? SOCIAL_HIGHLIGHT_ZH_MAP[dest.socialHighlightEn] || translateDynamicTextToZh(dest.socialHighlightEn)

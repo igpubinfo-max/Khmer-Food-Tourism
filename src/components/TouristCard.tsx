@@ -33,12 +33,21 @@ const TouristCardInner: React.FC<TouristCardProps> = ({ destination }) => {
 
         {/* Province pill & Viral Social Badge */}
         <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 flex-wrap z-10">
-          <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-[#064E3B]/95 text-emerald-100 border border-emerald-400/30 shadow-xs">
+          <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-[#064E3B]/95 text-emerald-100 border border-emerald-400/30 shadow-xs">
             {loc.province}
           </span>
           {destination.isTrendingSocial && (
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-gradient-to-r from-rose-600 via-pink-600 to-indigo-600 text-white border border-white/30 shadow-xs flex items-center gap-1 font-khmer">
-              <span>🔥 {destination.socialViews || 'TikTok & FB'}</span>
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-gradient-to-r from-rose-600 via-pink-600 to-indigo-600 text-white border border-white/30 shadow-xs flex items-center gap-1 font-khmer">
+              <span>
+                🔥{' '}
+                {destination.socialViews
+                  ? language === 'km'
+                    ? destination.socialViews.replace(/views/gi, 'ដង').replace(/M\+/gi, 'លាន+')
+                    : language === 'zh'
+                    ? destination.socialViews.replace(/views/gi, '次浏览').replace(/M\+/gi, '百万+')
+                    : destination.socialViews
+                  : 'TikTok & FB'}
+              </span>
             </span>
           )}
         </div>
@@ -53,7 +62,7 @@ const TouristCardInner: React.FC<TouristCardProps> = ({ destination }) => {
               setSelectedDestination(destination);
             }}
             className="absolute top-2.5 right-11 p-2 rounded-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold shadow-md transition-transform active:scale-90"
-            title={tr(language, 'កែប្រែព័ត៌មានតំបន់ទេសចរណ៍ (Admin)', 'Edit Destination (Admin)', '编辑景点信息（管理员）')}
+            title={tr(language, 'កែប្រែព័ត៌មានតំបន់ទេសចរណ៍', 'Edit Destination (Admin)', '编辑景点信息（管理员）')}
           >
             <Edit2 className="w-3.5 h-3.5" />
           </button>
@@ -77,43 +86,43 @@ const TouristCardInner: React.FC<TouristCardProps> = ({ destination }) => {
         </button>
 
         {/* Category tag */}
-        <div className="absolute bottom-2.5 left-2.5 px-2 py-0.5 rounded-md bg-[#064E3B]/95 text-emerald-100 text-[10px] border border-emerald-400/30">
+        <div className="absolute bottom-2.5 left-2.5 px-2.5 py-0.5 rounded-md bg-[#064E3B]/95 text-emerald-100 text-xs font-bold border border-emerald-400/30">
           {loc.category}
         </div>
 
         {/* Reference Image Label (រូបភាពយោង) */}
-        <div className="absolute bottom-2.5 right-2.5 px-1.5 py-0.5 rounded-md bg-black/70 text-[9px] text-white/90 font-khmer border border-white/20 select-none pointer-events-none shadow-xs z-10">
+        <div className="absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded-md bg-black/70 text-[10px] text-white/90 font-khmer border border-white/20 select-none pointer-events-none shadow-xs z-10">
           <span>{tr(language, 'រូបភាពយោង', 'Reference photo', '参考图片')}</span>
         </div>
       </div>
 
       {/* Info */}
-      <div className="p-3.5 flex flex-col flex-1 justify-between">
+      <div className="p-4 flex flex-col flex-1 justify-between">
         <div>
-          <h3 className="font-bold text-sm text-[#0F172A] dark:text-white group-hover:text-[#059669] transition line-clamp-1 mb-1">
+          <h3 className="font-extrabold text-base sm:text-lg text-[#0F172A] dark:text-white group-hover:text-[#059669] transition line-clamp-2 leading-snug mb-1.5">
             {loc.name}
           </h3>
 
-          <div className="flex items-start gap-1 text-[11px] text-slate-500 dark:text-slate-400 mb-2 line-clamp-1">
-            <MapPin className="w-3.5 h-3.5 text-[#059669] shrink-0 mt-0.5" />
+          <div className="flex items-start gap-1 text-xs sm:text-sm text-slate-600 dark:text-slate-300 mb-2 line-clamp-1">
+            <MapPin className="w-4 h-4 text-[#059669] shrink-0 mt-0.5" />
             <span>{loc.address}</span>
           </div>
 
-          <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed mb-2.5">
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 line-clamp-2 leading-relaxed mb-3">
             {loc.description}
           </p>
         </div>
 
         {/* Bottom meta */}
-        <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-700/60 text-[11px]">
-          <div className="flex items-center gap-1 text-slate-700 dark:text-slate-200 font-semibold">
-            <Star className="w-3.5 h-3.5 fill-current text-amber-500" />
+        <div className="flex items-center justify-between pt-2.5 border-t border-slate-100 dark:border-slate-700/60 text-xs sm:text-sm">
+          <div className="flex items-center gap-1 text-slate-700 dark:text-slate-200 font-bold">
+            <Star className="w-4 h-4 fill-current text-amber-500" />
             <span>{destination.rating ?? 4.8}</span>
-            <span className="text-slate-400 text-[10px]">({destination.reviewCount ?? 0})</span>
+            <span className="text-slate-400 text-xs">({destination.reviewCount ?? 0})</span>
           </div>
 
-          <div className="flex items-center gap-1 text-[#064E3B] dark:text-emerald-400 font-medium text-[10px]">
-            <Ticket className="w-3 h-3" />
+          <div className="flex items-center gap-1 text-[#064E3B] dark:text-emerald-400 font-bold text-xs">
+            <Ticket className="w-3.5 h-3.5" />
             <span>{loc.entranceFee}</span>
           </div>
         </div>
