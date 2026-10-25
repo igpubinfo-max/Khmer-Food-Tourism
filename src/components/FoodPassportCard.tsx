@@ -26,7 +26,7 @@ export const FoodPassportCard: React.FC = () => {
   const getSpec = () => ({
     kind: 'passport' as const,
     emoji: level.emoji,
-    title: tr(language, 'លិខិតឆ្លងដែនម្ហូបខ្មែររបស់ខ្ញុំ', 'My Cambodian Food Passport', '我的高棉美食护照'),
+    title: tr(language, 'ស្វែងយល់ពីម្ហូប និងទេសចរណ៍កម្ពុជា', 'Discover Cambodian Food & Travel', '探索柬埔寨美食与旅游'),
     subtitle: `${level.emoji} ${levelTitle(level, language)}${currentUser?.name ? ` · ${currentUser.name}` : ''}`,
     lines: [
       tr(language, `បានភ្លក់ ${count} / ${total} មុខ (${pct}%)`, `Tried ${count} / ${total} dishes (${pct}%)`, `已品尝 ${count} / ${total} 道菜（${pct}%）`),
@@ -44,7 +44,7 @@ export const FoodPassportCard: React.FC = () => {
         </div>
         <div className="min-w-0 flex-1">
           <h4 className="font-moul text-sm text-[#064E3B] dark:text-emerald-300">
-            🛂 {tr(language, 'លិខិតឆ្លងដែនម្ហូបខ្មែរ', 'Cambodian Food Passport', '高棉美食护照')}
+            🧭 {tr(language, 'ស្វែងយល់ពីម្ហូប និងទេសចរណ៍កម្ពុជា', 'Discover Cambodian Food & Travel', '探索柬埔寨美食与旅游')}
           </h4>
           <p className="text-sm font-bold text-slate-800 dark:text-white">{levelTitle(level, language)}</p>
           <p className="text-xs text-slate-500 dark:text-slate-400">

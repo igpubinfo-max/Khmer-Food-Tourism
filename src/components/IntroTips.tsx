@@ -30,8 +30,8 @@ export const IntroTips: React.FC = () => {
       ),
     },
     {
-      emoji: '🛂',
-      title: tr(language, 'ប្រមូលលិខិតឆ្លងដែនម្ហូប', 'Collect your Food Passport', '收集你的美食护照'),
+      emoji: '🧭',
+      title: tr(language, 'ស្វែងយល់ពីម្ហូប និងទេសចរណ៍កម្ពុជា', 'Discover Cambodian Food & Travel', '探索柬埔寨美食与旅游'),
       body: tr(
         language,
         'ចុច «ខ្ញុំបានភ្លក់» លើម្ហូបនីមួយៗ ដើម្បីប្រមូលត្រា និងឡើងកម្រិត។',

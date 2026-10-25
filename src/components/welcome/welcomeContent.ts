@@ -62,9 +62,9 @@ export const WELCOME_SLIDES: WelcomeSlide[] = [
     imageHeight: WELCOME_IMAGES.hero.height,
     objectPosition: '88% 50%',
     headline: {
-      km: 'ប្រមូលលិខិតឆ្លងដែនម្ហូប ហើយចែករំលែក',
-      en: 'Collect your Food Passport & share with friends',
-      zh: '收集美食护照，分享给好友',
+      km: 'ស្វែងយល់ពីម្ហូប និងទេសចរណ៍កម្ពុជា',
+      en: 'Discover Cambodian Food & Travel',
+      zh: '探索柬埔寨美食与旅游',
     },
     sub: {
       km: 'បោះត្រាម្ហូបដែលអ្នកបានភ្លក់ ហើយអញ្ជើញមិត្តភក្តិ',

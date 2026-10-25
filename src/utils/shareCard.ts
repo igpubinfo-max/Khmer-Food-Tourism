@@ -110,7 +110,7 @@ export async function renderShareCard(spec: ShareCardSpec): Promise<string> {
     ctx.font = `220px ${font}`;
     ctx.textAlign = 'center';
     ctx.fillStyle = 'rgba(255,255,255,0.9)';
-    ctx.fillText(spec.emoji || (spec.kind === 'place' ? '📍' : spec.kind === 'passport' ? '🛂' : '🍲'), W / 2, PHOTO_H / 2 + 80);
+    ctx.fillText(spec.emoji || (spec.kind === 'place' ? '📍' : spec.kind === 'passport' ? '🧭' : '🍲'), W / 2, PHOTO_H / 2 + 80);
   }
 
   // Fade from photo into card body

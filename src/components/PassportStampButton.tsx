@@ -24,7 +24,7 @@ export const PassportStampButton: React.FC<Props> = ({ foodId, language, showToa
     if (nowStamped) {
       recordMeaningfulAction('favorite');
       showToast?.(
-        tr(language, '🛂 បានបោះត្រាក្នុងលិខិតឆ្លងដែនម្ហូប!', '🛂 Stamped in your Food Passport!', '🛂 已盖章到你的美食护照！'),
+        tr(language, '🧭 បានបន្ថែមទៅ ស្វែងយល់ពីម្ហូប និងទេសចរណ៍កម្ពុជា!', '🧭 Added to Discover Cambodian Food & Travel!', '🧭 已加入探索柬埔寨美食与旅游！'),
         'success'
       );
     }
