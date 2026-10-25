@@ -4,11 +4,12 @@ import {
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { isUserVipActive, organizeAndDeduplicateFoods } from '../types';
+import type { FoodItem } from '../types';
 import { tr } from '../utils/i18n';
-import { DISH_TAG_DEFS, getDishTagIds, TAG_ESTIMATE_NOTE, GENERAL_FOOD_INFO_NOTE, TagFilterId } from '../utils/dishTags';
-import type { DishTagId } from '../utils/dishTags';
+import type { TagFilterId, DishTagId } from '../utils/dishTags';
 import { requestTagFilter } from '../utils/smartHub';
 import { useFoodPassport, getPassportLevel, levelTitle } from '../utils/foodPassport';
+import { SmartHubHealthySection } from './SmartHubHealthySection';
 import { FoodTripTemplates } from './FoodTripTemplates';
 import { FoodPassportCard } from './FoodPassportCard';
 import { InviteFriendsCard } from './InviteFriendsCard';
@@ -17,21 +18,11 @@ interface Props {
   onClose: () => void;
 }
 
-// The six tag cards (recipe-based estimates only: no health/medical claims)
-const HUB_TAGS: DishTagId[] = ['light', 'steamed_boiled', 'grilled', 'vegetable_rich', 'protein_rich', 'vegetarian_friendly'];
-
-const toneBg = (tone: 'green' | 'blue' | 'amber') =>
-  tone === 'green'
-    ? 'bg-emerald-50 border-emerald-300 text-emerald-900 dark:bg-emerald-950/40 dark:border-emerald-700 dark:text-emerald-200'
-    : tone === 'blue'
-    ? 'bg-blue-50 border-blue-300 text-blue-900 dark:bg-blue-950/40 dark:border-blue-700 dark:text-blue-200'
-    : 'bg-amber-50 border-amber-300 text-amber-900 dark:bg-amber-950/40 dark:border-amber-700 dark:text-amber-200';
-
 /** One unified menu: dish tags + trips, near me, favorites, stamp collection, share/invite and offline status. */
 export const SmartHubMenuModal: React.FC<Props> = ({ onClose }) => {
   const {
     language, foods, restaurants, destinations, bookmarks, currentUser, showToast,
-    setActiveTab, setIsNearMeModalOpen, setIsAiTripPlannerModalOpen, setIsWishlistsModalOpen, openUpgradeVipModal,
+    setActiveTab, setSelectedFood, setIsNearMeModalOpen, setIsAiTripPlannerModalOpen, setIsWishlistsModalOpen, openUpgradeVipModal,
   } = useApp();
   const [openPanel, setOpenPanel] = useState<'trips' | 'stamps' | null>(null);
   const [online, setOnline] = useState<boolean>(() => (typeof navigator === 'undefined' ? true : navigator.onLine !== false));
@@ -49,11 +40,6 @@ export const SmartHubMenuModal: React.FC<Props> = ({ onClose }) => {
   }, []);
 
   const organizedFoods = useMemo(() => organizeAndDeduplicateFoods(foods), [foods]);
-  const tagCounts = useMemo(() => {
-    const counts: Partial<Record<DishTagId, number>> = {};
-    for (const f of organizedFoods) for (const id of getDishTagIds(f)) counts[id] = (counts[id] || 0) + 1;
-    return counts;
-  }, [organizedFoods]);
 
   const canUseVip = isUserVipActive(currentUser) || currentUser?.role === 'admin';
   const { level } = getPassportLevel(stampCount);
@@ -62,6 +48,11 @@ export const SmartHubMenuModal: React.FC<Props> = ({ onClose }) => {
     requestTagFilter(id as TagFilterId);
     setActiveTab('food');
     onClose();
+  };
+
+  const openFood = (food: FoodItem) => {
+    onClose();
+    setSelectedFood(food);
   };
 
   const vipOnly = (open: () => void) => () => {
@@ -120,50 +111,8 @@ export const SmartHubMenuModal: React.FC<Props> = ({ onClose }) => {
         </div>
 
         <div className="flex-1 overflow-y-auto overscroll-contain p-4 space-y-6">
-          {/* SECTION 1: Healthy Eating Tags */}
-          <section className="space-y-2.5">
-            <div>
-              <h3 className="font-moul text-sm text-[#064E3B] dark:text-emerald-300">
-                🥗 {tr(language, 'ស្លាកម្ហូបសុខភាព', 'Healthy Eating Tags', '健康饮食标签')}
-              </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                {tr(
-                  language,
-                  'ជ្រើសរើសម្ហូបតាមស្លាក — ប៉ាន់ស្មានពីរូបមន្តប៉ុណ្ណោះ',
-                  'Pick dishes by tag — estimated from the recipe only',
-                  '按标签挑选菜肴——仅根据食谱估算'
-                )}
-              </p>
-            </div>
-            <div className="grid grid-cols-2 gap-2.5">
-              {HUB_TAGS.map((id) => {
-                const def = DISH_TAG_DEFS[id];
-                const n = tagCounts[id] || 0;
-                return (
-                  <button
-                    key={id}
-                    type="button"
-                    onClick={() => pickTag(id)}
-                    className={`min-h-[84px] p-3 rounded-2xl border-2 text-left flex flex-col justify-between active:scale-[0.97] transition motion-reduce:transition-none cursor-pointer ${toneBg(def.tone)}`}
-                  >
-                    <span className="text-2xl leading-none" aria-hidden="true">{def.emoji}</span>
-                    <span>
-                      <span className="block text-sm font-extrabold leading-tight">
-                        {tr(language, def.labelKh, def.labelEn, def.labelZh)}
-                      </span>
-                      <span className="block text-xs opacity-80">
-                        {n} {tr(language, 'មុខ', 'dishes', '道菜')}
-                      </span>
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-            <p className="text-[11px] text-slate-400">
-              ℹ️ {tr(language, TAG_ESTIMATE_NOTE.km, TAG_ESTIMATE_NOTE.en, TAG_ESTIMATE_NOTE.zh)} ·{' '}
-              {tr(language, GENERAL_FOOD_INFO_NOTE.km, GENERAL_FOOD_INFO_NOTE.en, GENERAL_FOOD_INFO_NOTE.zh)}
-            </p>
-          </section>
+          {/* SECTION 1: Healthy Dish Tags (cards, inline dishes, 3-meal idea) */}
+          <SmartHubHealthySection foods={organizedFoods} onViewAll={pickTag} onOpenFood={openFood} />
 
           {/* SECTION 2: Smart Travel & Food Tools */}
           <section className="space-y-2.5">
