@@ -1,7 +1,7 @@
 export const APP_VERSION = 'v2.1.0';
 export const APP_VERSION_NAME = '2.1.0';
-export const APP_BUILD_CODE = 73;
-export const APP_RELEASE_DATE = '2026-10-24';
+export const APP_BUILD_CODE = 75;
+export const APP_RELEASE_DATE = '2026-10-25';
 
 export interface GoogleMapsPlaceMetadata {
   placeId: string;
@@ -95,6 +95,11 @@ export interface User {
   authProvider?: 'google' | 'phone' | 'email';
   linkedProviders?: ('google' | 'phone' | 'email')[];
   createdAt: string;
+  registeredAtIso?: string;
+  lastLoginAt?: string;
+  lastActiveAt?: string;
+  googleSub?: string;
+  legacyIds?: string[];
 
   // Premium VIP Subscription ($2.99 for 10 days or $4.99 for 90 days, configurable by Admin)
   membershipTier?: 'free' | 'premium_vip';

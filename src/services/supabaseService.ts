@@ -13,7 +13,7 @@
  * - If not configured yet, safely falls back to local device storage without errors.
  */
 
-import { User, Restaurant, TouristDestination, RegistrationTransaction, DeletedUserRecord, AppSettings, isSeedRestaurantId } from '../types';
+import { User, Restaurant, TouristDestination, RegistrationTransaction, DeletedUserRecord, AppSettings, SupportTicket, isSeedRestaurantId } from '../types';
 
 export interface CloudApiConfig {
   supabaseUrl: string;
@@ -248,15 +248,11 @@ export async function pullCloudDocument<T>(key: string, timeoutMs = 10000): Prom
 
   try {
     const res = await fetchWithTimeout(
-      `${cfg.supabaseUrl}/rest/v1/kft_app_kv_store?key=eq.${encodeURIComponent(key)}&select=payload,updated_at&limit=1&_t=${Date.now()}`,
+      `${cfg.supabaseUrl}/rest/v1/kft_app_kv_store?key=eq.${encodeURIComponent(key)}&select=payload,updated_at&limit=1`,
       {
         method: 'GET',
         cache: 'no-store',
-        headers: {
-          ...getSupabaseHeaders(false),
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          Pragma: 'no-cache',
-        },
+        headers: getSupabaseHeaders(false),
       },
       timeoutMs
     );
@@ -354,15 +350,11 @@ export async function fetchAuthoritativeAppSettingsFromServer(
 
   try {
     const res = await fetchWithTimeout(
-      `${cfg.supabaseUrl}/rest/v1/kft_app_kv_store?key=in.(%22kft_cloud_admin_vip_pricing_v2%22,%22kft_cloud_app_settings_v1%22)&select=key,payload,updated_at&_t=${Date.now()}`,
+      `${cfg.supabaseUrl}/rest/v1/kft_app_kv_store?key=in.(%22kft_cloud_admin_vip_pricing_v2%22,%22kft_cloud_app_settings_v1%22)&select=key,payload,updated_at`,
       {
         method: 'GET',
         cache: 'no-store',
-        headers: {
-          ...getSupabaseHeaders(false),
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          Pragma: 'no-cache',
-        },
+        headers: getSupabaseHeaders(false),
       },
       timeoutMs
     );
@@ -523,13 +515,10 @@ export async function pullCloudKeysManifestByPrefix(
 
   try {
     const res = await fetchWithTimeout(
-      `${cfg.supabaseUrl}/rest/v1/kft_app_kv_store?key=like.${encodeURIComponent(prefix)}*&select=key,updated_at&limit=1000&_t=${Date.now()}`,
+      `${cfg.supabaseUrl}/rest/v1/kft_app_kv_store?key=like.${encodeURIComponent(prefix)}*&select=key,updated_at&limit=1000`,
       {
         method: 'GET',
-        headers: {
-          ...getSupabaseHeaders(false),
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-        },
+        headers: getSupabaseHeaders(false),
         cache: 'no-store',
       },
       timeoutMs
@@ -559,13 +548,10 @@ export async function pullCloudDocumentsByKeys<T = any>(
   try {
     const inList = keys.map(k => `"${k.replace(/"/g, '')}"`).join(',');
     const res = await fetchWithTimeout(
-      `${cfg.supabaseUrl}/rest/v1/kft_app_kv_store?key=in.(${encodeURIComponent(inList)})&select=key,payload,updated_at&_t=${Date.now()}`,
+      `${cfg.supabaseUrl}/rest/v1/kft_app_kv_store?key=in.(${encodeURIComponent(inList)})&select=key,payload,updated_at`,
       {
         method: 'GET',
-        headers: {
-          ...getSupabaseHeaders(false),
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-        },
+        headers: getSupabaseHeaders(false),
         cache: 'no-store',
       },
       timeoutMs
@@ -606,16 +592,433 @@ export async function deleteCloudDocument(key: string, timeoutMs = 8000): Promis
   }
 }
 
+export const USER_RECORD_PREFIX = 'kft_user_';
+
+/**
+ * Determine a deterministic canonical User ID so the same person (across Android APK, Web OAuth,
+ * or Email/Phone sign-in) always maps to a single unified account without creating duplicates.
+ */
+export function getCanonicalUserId(u: Partial<User>): string {
+  const rawId = String(u.id || '').trim();
+  const cleanEmail = String(u.email || '').trim().toLowerCase();
+  const cleanPhone = String(u.phone || '').replace(/[\s-+()]/g, '');
+
+  // Preserve protected built-in IDs
+  if (rawId === 'admin-authorized-single') return 'admin-authorized-single';
+  if (rawId === 'user-vip-kimseng' || cleanEmail === 'kimseng@khmerfoodtourism.com') return 'user-vip-kimseng';
+  if (rawId === 'owner-1' || cleanEmail === 'kimly@restaurant.com') return 'owner-1';
+  if (rawId === 'owner-2' || rawId === 'owner-3' || rawId === 'user-1') return rawId;
+
+  // Canonical ID for Google accounts (or Gmail accounts created via Google OAuth)
+  if (cleanEmail && cleanEmail.includes('@')) {
+    const emailSlug = cleanEmail.replace(/[^a-z0-9]/g, '_');
+    if (
+      u.authProvider === 'google' ||
+      rawId.startsWith('google-') ||
+      (Array.isArray(u.linkedProviders) && u.linkedProviders.includes('google'))
+    ) {
+      return `google-${emailSlug}`;
+    }
+    if (!rawId || /^user-\d+$/.test(rawId) || /^owner-\d+$/.test(rawId)) {
+      return `${u.role === 'owner' ? 'owner' : 'user'}-${emailSlug}`;
+    }
+    return rawId;
+  }
+
+  if (cleanPhone.length >= 7) {
+    if (!rawId || /^user-\d+$/.test(rawId)) {
+      return `user-phone-${cleanPhone}`;
+    }
+    return rawId;
+  }
+
+  return rawId || `user-${Date.now()}`;
+}
+
+export function normalizeVipExpiryOnUser(u: User): User {
+  const isAdmin =
+    u.role === 'admin' ||
+    u.id === 'admin-authorized-single' ||
+    u.username === 'admin' ||
+    u.username === 'cheasavuth';
+  if (isAdmin) return u;
+  if (u.subscriptionExpiryDate) {
+    const expMs = new Date(u.subscriptionExpiryDate).getTime();
+    if (!Number.isNaN(expMs) && expMs <= Date.now()) {
+      if (u.membershipTier === 'premium_vip' || u.subscriptionStatus === 'active') {
+        return {
+          ...u,
+          membershipTier: 'free',
+          subscriptionStatus: 'expired',
+        };
+      }
+    }
+  } else if (u.membershipTier === 'premium_vip' || u.subscriptionStatus === 'active') {
+    return {
+      ...u,
+      membershipTier: 'free',
+      subscriptionStatus: 'expired',
+    };
+  }
+  return u;
+}
+
+/**
+ * Merge two User records representing the same person, preserving:
+ * - Canonical ID + all legacy IDs (so transactions/shops/posts/tickets always link properly)
+ * - Earliest valid registration date (`createdAt` / `registeredAtIso`)
+ * - Latest login / activity date (`lastLoginAt` / `lastActiveAt`)
+ * - Active non-expired VIP membership with furthest expiration date
+ * - Highest `paidAdditionalStoreSlots` and merged `linkedProviders`
+ */
+export function mergeTwoUserRecordsCanonical(first: User, second: User): User {
+  const canonicalId = getCanonicalUserId({
+    ...first,
+    ...second,
+    email: second.email || first.email,
+    phone: second.phone || first.phone,
+    authProvider: second.authProvider === 'google' || first.authProvider === 'google' ? 'google' : (second.authProvider || first.authProvider),
+  });
+
+  const legacyIdSet = new Set<string>();
+  for (const idCandidate of [
+    first.id,
+    second.id,
+    ...(Array.isArray(first.legacyIds) ? first.legacyIds : []),
+    ...(Array.isArray(second.legacyIds) ? second.legacyIds : []),
+  ]) {
+    if (idCandidate && idCandidate !== canonicalId) {
+      legacyIdSet.add(idCandidate);
+    }
+  }
+
+  // Earliest registration date
+  const parseValidMs = (d?: string): number => {
+    if (!d) return 0;
+    const ms = new Date(d).getTime();
+    return Number.isNaN(ms) ? 0 : ms;
+  };
+  const firstCreatedMs = parseValidMs(first.registeredAtIso || first.createdAt);
+  const secondCreatedMs = parseValidMs(second.registeredAtIso || second.createdAt);
+  let earliestCreatedIso = first.createdAt || second.createdAt || new Date().toISOString().split('T')[0];
+  let earliestRegisteredIso = first.registeredAtIso || second.registeredAtIso || first.createdAt || second.createdAt;
+  if (firstCreatedMs > 0 && secondCreatedMs > 0) {
+    if (secondCreatedMs < firstCreatedMs) {
+      earliestCreatedIso = second.createdAt || earliestCreatedIso;
+      earliestRegisteredIso = second.registeredAtIso || second.createdAt || earliestRegisteredIso;
+    } else {
+      earliestCreatedIso = first.createdAt || earliestCreatedIso;
+      earliestRegisteredIso = first.registeredAtIso || first.createdAt || earliestRegisteredIso;
+    }
+  }
+
+  // Latest login / active timestamp
+  const firstLoginMs = parseValidMs(first.lastLoginAt || first.lastActiveAt || first.verifiedAt);
+  const secondLoginMs = parseValidMs(second.lastLoginAt || second.lastActiveAt || second.verifiedAt);
+  const latestLoginAt =
+    secondLoginMs >= firstLoginMs
+      ? (second.lastLoginAt || second.lastActiveAt || second.verifiedAt || first.lastLoginAt)
+      : (first.lastLoginAt || first.lastActiveAt || first.verifiedAt || second.lastLoginAt);
+
+  // Providers
+  const linkedSet = new Set<'google' | 'apple' | 'phone' | 'email'>([
+    ...(Array.isArray(first.linkedProviders) ? first.linkedProviders : []),
+    ...(Array.isArray(second.linkedProviders) ? second.linkedProviders : []),
+  ]);
+  if (first.authProvider) linkedSet.add(first.authProvider);
+  if (second.authProvider) linkedSet.add(second.authProvider);
+
+  const mergedRole =
+    first.role === 'admin' || second.role === 'admin'
+      ? 'admin'
+      : first.role === 'owner' || second.role === 'owner'
+      ? 'owner'
+      : 'user';
+
+  const baseMerged: User = {
+    ...first,
+    ...second,
+    id: canonicalId,
+    name:
+      second.name && !second.name.includes('@')
+        ? second.name
+        : first.name || second.name || 'User',
+    email: (second.email || first.email || '').trim().toLowerCase(),
+    phone: second.phone || first.phone || undefined,
+    role: mergedRole,
+    avatar:
+      second.avatar && !second.avatar.includes('photo-1535713875002')
+        ? second.avatar
+        : first.avatar || second.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
+    restaurantId: second.restaurantId || first.restaurantId,
+    authProvider:
+      first.authProvider === 'google' || second.authProvider === 'google'
+        ? 'google'
+        : second.authProvider || first.authProvider || 'email',
+    linkedProviders: Array.from(linkedSet),
+    isVerified: Boolean(first.isVerified || second.isVerified),
+    verifiedAt: first.verifiedAt || second.verifiedAt,
+    createdAt: earliestCreatedIso,
+    registeredAtIso: earliestRegisteredIso,
+    lastLoginAt: latestLoginAt,
+    lastActiveAt: second.lastActiveAt || first.lastActiveAt || latestLoginAt,
+    googleSub: second.googleSub || first.googleSub,
+    legacyIds: legacyIdSet.size > 0 ? Array.from(legacyIdSet) : undefined,
+    paidAdditionalStoreSlots: Math.max(
+      first.paidAdditionalStoreSlots || 0,
+      second.paidAdditionalStoreSlots || 0
+    ),
+    additionalStorePaymentIds: Array.from(
+      new Set([
+        ...(Array.isArray(first.additionalStorePaymentIds) ? first.additionalStorePaymentIds : []),
+        ...(Array.isArray(second.additionalStorePaymentIds) ? second.additionalStorePaymentIds : []),
+      ])
+    ),
+  };
+
+  const nowMs = Date.now();
+  const firstExpMs = parseValidMs(first.subscriptionExpiryDate);
+  const secondExpMs = parseValidMs(second.subscriptionExpiryDate);
+
+  const isFirstValidVip =
+    first.membershipTier === 'premium_vip' &&
+    first.subscriptionStatus === 'active' &&
+    firstExpMs > nowMs;
+  const isSecondValidVip =
+    second.membershipTier === 'premium_vip' &&
+    second.subscriptionStatus === 'active' &&
+    secondExpMs > nowMs;
+
+  const wasSecondCancelledAfterFirstStart =
+    second.subscriptionStatus === 'cancelled' &&
+    second.vipCancelledAt &&
+    (!first.subscriptionStartDate ||
+      parseValidMs(second.vipCancelledAt) >= parseValidMs(first.subscriptionStartDate));
+
+  const wasFirstCancelledAfterSecondStart =
+    first.subscriptionStatus === 'cancelled' &&
+    first.vipCancelledAt &&
+    (!second.subscriptionStartDate ||
+      parseValidMs(first.vipCancelledAt) >= parseValidMs(second.subscriptionStartDate));
+
+  if (wasSecondCancelledAfterFirstStart || wasFirstCancelledAfterSecondStart) {
+    const cancelledRec = wasSecondCancelledAfterFirstStart ? second : first;
+    return normalizeVipExpiryOnUser({
+      ...baseMerged,
+      membershipTier: 'free',
+      subscriptionStatus: 'cancelled',
+      subscriptionExpiryDate: undefined,
+      paymentStatus: 'cancelled',
+      vipCancelledAt: cancelledRec.vipCancelledAt,
+    });
+  }
+
+  if (isFirstValidVip && isSecondValidVip) {
+    const bestVip = firstExpMs >= secondExpMs ? first : second;
+    return normalizeVipExpiryOnUser({
+      ...baseMerged,
+      membershipTier: 'premium_vip',
+      subscriptionStatus: 'active',
+      subscriptionStartDate: bestVip.subscriptionStartDate,
+      subscriptionExpiryDate: bestVip.subscriptionExpiryDate,
+      paymentStatus: 'verified',
+      paymentMethod: bestVip.paymentMethod || second.paymentMethod || first.paymentMethod,
+      transactionRef: bestVip.transactionRef || second.transactionRef || first.transactionRef,
+    });
+  }
+
+  if (isFirstValidVip || isSecondValidVip) {
+    const activeVip = isFirstValidVip ? first : second;
+    return normalizeVipExpiryOnUser({
+      ...baseMerged,
+      membershipTier: 'premium_vip',
+      subscriptionStatus: 'active',
+      subscriptionStartDate: activeVip.subscriptionStartDate,
+      subscriptionExpiryDate: activeVip.subscriptionExpiryDate,
+      paymentStatus: 'verified',
+      paymentMethod: activeVip.paymentMethod || baseMerged.paymentMethod,
+      transactionRef: activeVip.transactionRef || baseMerged.transactionRef,
+    });
+  }
+
+  return normalizeVipExpiryOnUser(baseMerged);
+}
+
+/**
+ * Deduplicate and normalize an array of users so every unique person appears EXACTLY ONCE,
+ * matching by canonical ID, legacy IDs, lowercase email, googleSub, or 7+ digit phone number.
+ */
+export function deduplicateAndNormalizeUsers(
+  rawUsers: Array<User | null | undefined>,
+  deletedUsers: DeletedUserRecord[] = []
+): User[] {
+  const deletedIds = new Set(deletedUsers.map(d => d.id).filter(Boolean));
+  const deletedEmails = new Set(
+    deletedUsers.map(d => (d.email || '').toLowerCase().trim()).filter(Boolean)
+  );
+  const deletedPhones = new Set(
+    deletedUsers
+      .map(d => (d.phone || '').replace(/[\s-+()]/g, ''))
+      .filter(p => p.length >= 7)
+  );
+
+  const isAccountDeleted = (u: Partial<User> | undefined | null): boolean => {
+    if (!u) return true;
+    // Never delete system admin or protected owner accounts unless explicitly in deletedIds
+    if (
+      u.role === 'admin' ||
+      u.id === 'admin-authorized-single' ||
+      u.username === 'admin' ||
+      u.username === 'cheasavuth'
+    ) {
+      return true; // Exclude admin from regular users array (Admin is handled separately by ADMIN_USER)
+    }
+    if (u.id && deletedIds.has(u.id)) return true;
+    if (u.email && deletedEmails.has(u.email.toLowerCase().trim())) return true;
+    if (u.phone) {
+      const cleanP = u.phone.replace(/[\s-+()]/g, '');
+      if (cleanP.length >= 7 && deletedPhones.has(cleanP)) return true;
+    }
+    return false;
+  };
+
+  const canonicalMap = new Map<string, User>();
+  const emailToCanonical = new Map<string, string>();
+  const phoneToCanonical = new Map<string, string>();
+  const legacyIdToCanonical = new Map<string, string>();
+  const googleSubToCanonical = new Map<string, string>();
+
+  const indexUser = (u: User) => {
+    legacyIdToCanonical.set(u.id, u.id);
+    if (Array.isArray(u.legacyIds)) {
+      for (const lid of u.legacyIds) {
+        if (lid) legacyIdToCanonical.set(lid, u.id);
+      }
+    }
+    if (u.email) {
+      emailToCanonical.set(u.email.toLowerCase().trim(), u.id);
+    }
+    if (u.phone) {
+      const cleanP = u.phone.replace(/[\s-+()]/g, '');
+      if (cleanP.length >= 7) phoneToCanonical.set(cleanP, u.id);
+    }
+    if (u.googleSub) {
+      googleSubToCanonical.set(u.googleSub, u.id);
+    }
+  };
+
+  for (const item of rawUsers) {
+    if (!item || (!item.id && !item.email && !item.phone) || isAccountDeleted(item)) continue;
+
+    const cleanEmail = (item.email || '').trim().toLowerCase();
+    const cleanPhone = (item.phone || '').replace(/[\s-+()]/g, '');
+    if (!cleanEmail && cleanPhone.length < 7 && (!item.name || item.name === 'Member')) {
+      continue;
+    }
+    const targetCanonicalId = getCanonicalUserId(item);
+
+    const existingKey =
+      (canonicalMap.has(targetCanonicalId) ? targetCanonicalId : undefined) ||
+      (item.id ? legacyIdToCanonical.get(item.id) : undefined) ||
+      (cleanEmail ? emailToCanonical.get(cleanEmail) : undefined) ||
+      (item.googleSub ? googleSubToCanonical.get(item.googleSub) : undefined) ||
+      (cleanPhone.length >= 7 ? phoneToCanonical.get(cleanPhone) : undefined);
+
+    if (!existingKey || !canonicalMap.has(existingKey)) {
+      const legacyIds = item.id && item.id !== targetCanonicalId ? [item.id] : item.legacyIds;
+      const normalized: User = normalizeVipExpiryOnUser({
+        ...item,
+        id: targetCanonicalId,
+        email: cleanEmail || item.email || '',
+        createdAt: item.createdAt || new Date().toISOString().split('T')[0],
+        registeredAtIso: item.registeredAtIso || item.createdAt || new Date().toISOString(),
+        legacyIds: legacyIds && legacyIds.length > 0 ? Array.from(new Set(legacyIds)) : undefined,
+      });
+      canonicalMap.set(normalized.id, normalized);
+      indexUser(normalized);
+    } else {
+      const existing = canonicalMap.get(existingKey)!;
+      const merged = mergeTwoUserRecordsCanonical(existing, item);
+      if (existingKey !== merged.id) {
+        canonicalMap.delete(existingKey);
+      }
+      canonicalMap.set(merged.id, merged);
+      indexUser(merged);
+    }
+  }
+
+  return Array.from(canonicalMap.values());
+}
+
+/**
+ * Atomic per-user cloud persistence:
+ * Immediately writes `kft_user_<canonicalId>` to Supabase AND pulls, merges, and updates `kft_cloud_users_v1`
+ * so no device can ever overwrite or lose a newly registered or logged-in user.
+ */
+export async function upsertSingleUserToCloud(
+  user: User,
+  deletedUsers: DeletedUserRecord[] = []
+): Promise<User[]> {
+  if (!user || user.role === 'admin' || user.id === 'admin-authorized-single') {
+    return [];
+  }
+  const canonicalList = deduplicateAndNormalizeUsers([user], deletedUsers);
+  if (canonicalList.length === 0) return [];
+  const canonicalUser = canonicalList[0];
+
+  if (!isSupabaseConfigured()) return [canonicalUser];
+
+  try {
+    // 1. Write atomic per-user row immediately (cannot be overwritten by any other user's device)
+    const atomicKey = `${USER_RECORD_PREFIX}${canonicalUser.id}`;
+    await pushCloudDocument(atomicKey, canonicalUser);
+
+    // 2. Pull latest cloud users (v2 + v1) + per-user atomic records, merge with canonicalUser, and push back
+    const [cloudUsersV2, cloudUsersV1, atomicUserRows, cloudDeleted] = await Promise.all([
+      pullCloudDocument<User[]>('kft_cloud_users_v2'),
+      pullCloudDocument<User[]>('kft_cloud_users_v1'),
+      pullCloudDocumentsByPrefix<User>(USER_RECORD_PREFIX),
+      pullCloudDocument<DeletedUserRecord[]>('kft_cloud_deleted_users_v1'),
+    ]);
+
+    const allDeleted = [
+      ...deletedUsers,
+      ...(Array.isArray(cloudDeleted) ? cloudDeleted : []),
+    ];
+
+    const merged = deduplicateAndNormalizeUsers(
+      [
+        ...(Array.isArray(cloudUsersV2) ? cloudUsersV2 : []),
+        ...(Array.isArray(cloudUsersV1) ? cloudUsersV1 : []),
+        ...atomicUserRows.map(r => r.payload),
+        canonicalUser,
+      ],
+      allDeleted
+    );
+
+    await Promise.all([
+      pushCloudDocument('kft_cloud_users_v2', merged),
+      pushCloudDocument('kft_cloud_users_v1', merged),
+    ]);
+    return merged;
+  } catch (err) {
+    console.warn('upsertSingleUserToCloud warning:', err);
+    return [canonicalUser];
+  }
+}
+
 /**
  * Synchronize Users, Transactions, Payment Proofs Vault, and Custom/Cached Restaurants
  * between this device and Supabase Cloud.
  */
 export async function syncAllAppDataWithSupabase(localState: {
   users: User[];
+  currentUser?: User | null;
   deletedUsers?: DeletedUserRecord[];
   transactions: RegistrationTransaction[];
   customRestaurants: Restaurant[];
   customDestinations?: TouristDestination[];
+  supportTickets?: SupportTicket[];
   paymentProofsVault: Record<string, any>;
   appSettings?: AppSettings;
 }): Promise<{
@@ -630,7 +1033,10 @@ export async function syncAllAppDataWithSupabase(localState: {
   if (!isSupabaseConfigured()) {
     return {
       synced: false,
-      mergedUsers: localState.users,
+      mergedUsers: deduplicateAndNormalizeUsers(
+        [...(localState.users || []), localState.currentUser || undefined],
+        localState.deletedUsers || []
+      ),
       mergedDeletedUsers: localState.deletedUsers || [],
       mergedTransactions: localState.transactions,
       mergedCustomRestaurants: localState.customRestaurants,
@@ -640,12 +1046,28 @@ export async function syncAllAppDataWithSupabase(localState: {
   }
 
   try {
-    // 1. Pull existing cloud records
-    const [cloudUsers, cloudDeletedUsers, cloudTxns, cloudRests, cloudProofs, cloudSettingsV2, cloudSettingsV1] = await Promise.all([
+    // 1. Pull existing cloud records including v2 users, v1 users, atomic per-user rows (`kft_user_*`), and VIP backups
+    const [
+      cloudUsersV2,
+      cloudUsers,
+      atomicUserDocs,
+      cloudVipBackup,
+      cloudDeletedUsers,
+      cloudTxns,
+      cloudRests,
+      cloudTickets,
+      cloudProofs,
+      cloudSettingsV2,
+      cloudSettingsV1,
+    ] = await Promise.all([
+      pullCloudDocument<User[]>('kft_cloud_users_v2'),
       pullCloudDocument<User[]>('kft_cloud_users_v1'),
+      pullCloudDocumentsByPrefix<User>(USER_RECORD_PREFIX),
+      pullCloudDocument<Record<string, Partial<User>>>('kft_cloud_vip_backup_v1'),
       pullCloudDocument<DeletedUserRecord[]>('kft_cloud_deleted_users_v1'),
       pullCloudDocument<RegistrationTransaction[]>('kft_cloud_transactions_v1'),
       pullCloudDocument<Restaurant[]>('kft_cloud_custom_restaurants_v1'),
+      pullCloudDocument<SupportTicket[]>('kft_cloud_support_tickets_v1'),
       pullCloudDocument<Record<string, any>>('kft_cloud_payment_proofs_v1'),
       pullCloudDocument<AppSettings>('kft_cloud_admin_vip_pricing_v2'),
       pullCloudDocument<AppSettings>('kft_cloud_app_settings_v1'),
@@ -681,213 +1103,130 @@ export async function syncAllAppDataWithSupabase(localState: {
     }
     const mergedDeletedUsers = Array.from(deletedMap.values());
     const deletedIds = new Set(mergedDeletedUsers.map(d => d.id));
-    const deletedEmails = new Set(mergedDeletedUsers.map(d => (d.email || '').toLowerCase().trim()).filter(Boolean));
-    const deletedPhones = new Set(mergedDeletedUsers.map(d => (d.phone || '').replace(/[\s-+]/g, '')).filter(p => p.length >= 7));
 
-    const isAccountDeleted = (u: Partial<User> | undefined | null): boolean => {
-      if (!u) return false;
-      if (u.id && deletedIds.has(u.id)) return true;
-      if (u.email && deletedEmails.has(u.email.toLowerCase().trim())) return true;
-      if (u.phone) {
-        const cleanP = u.phone.replace(/[\s-+]/g, '');
-        if (cleanP.length >= 7 && deletedPhones.has(cleanP)) return true;
-      }
-      return false;
-    };
-
-    const normalizeVipExpiryOnUser = (u: User): User => {
-      const isAdmin =
-        u.role === 'admin' ||
-        u.id === 'admin-authorized-single' ||
-        u.username === 'admin' ||
-        u.username === 'cheasavuth';
-      if (isAdmin) return u;
-      if (u.subscriptionExpiryDate) {
-        const expMs = new Date(u.subscriptionExpiryDate).getTime();
-        if (!Number.isNaN(expMs) && expMs <= Date.now()) {
-          if (u.membershipTier === 'premium_vip' || u.subscriptionStatus === 'active') {
-            return {
-              ...u,
-              membershipTier: 'free',
-              subscriptionStatus: 'expired',
-            };
-          }
-        }
-      } else if (u.membershipTier === 'premium_vip' || u.subscriptionStatus === 'active') {
-        return {
-          ...u,
-          membershipTier: 'free',
-          subscriptionStatus: 'expired',
-        };
-      }
-      return u;
-    };
-
-    // 2. Merge Users by ID & Email/Phone (preserve valid non-expired VIP across device changes / reinstallations)
-    const userMap = new Map<string, User>();
-    const emailToIdMap = new Map<string, string>();
-    const phoneToIdMap = new Map<string, string>();
-
-    const registerUserLookups = (u: User) => {
-      if (u.email) emailToIdMap.set(u.email.toLowerCase().trim(), u.id);
-      if (u.phone) {
-        const cleanP = u.phone.replace(/[\s-+]/g, '');
-        if (cleanP.length >= 7) phoneToIdMap.set(cleanP, u.id);
-      }
-    };
-
-    const mergeTwoUserRecords = (cloudUser: User, localUser: User): User => {
-      const nowMs = Date.now();
-      const cloudExpMs = cloudUser.subscriptionExpiryDate ? new Date(cloudUser.subscriptionExpiryDate).getTime() : 0;
-      const localExpMs = localUser.subscriptionExpiryDate ? new Date(localUser.subscriptionExpiryDate).getTime() : 0;
-
-      const isCloudValidVip =
-        cloudUser.membershipTier === 'premium_vip' &&
-        cloudUser.subscriptionStatus === 'active' &&
-        cloudExpMs > nowMs;
-      const isLocalValidVip =
-        localUser.membershipTier === 'premium_vip' &&
-        localUser.subscriptionStatus === 'active' &&
-        localExpMs > nowMs;
-
-      const wasLocalCancelledAfterCloudStart =
-        localUser.subscriptionStatus === 'cancelled' &&
-        localUser.vipCancelledAt &&
-        (!cloudUser.subscriptionStartDate ||
-          new Date(localUser.vipCancelledAt).getTime() >= new Date(cloudUser.subscriptionStartDate).getTime());
-
-      const wasCloudCancelledAfterLocalStart =
-        cloudUser.subscriptionStatus === 'cancelled' &&
-        cloudUser.vipCancelledAt &&
-        (!localUser.subscriptionStartDate ||
-          new Date(cloudUser.vipCancelledAt).getTime() >= new Date(localUser.subscriptionStartDate).getTime());
-
-      if (wasLocalCancelledAfterCloudStart || wasCloudCancelledAfterLocalStart) {
-        const cancelledRec = wasLocalCancelledAfterCloudStart ? localUser : cloudUser;
-        return normalizeVipExpiryOnUser({
-          ...cloudUser,
-          ...localUser,
-          id: cloudUser.id, // Keep canonical cloud ID
-          membershipTier: 'free',
-          subscriptionStatus: 'cancelled',
-          subscriptionExpiryDate: undefined,
-          paymentStatus: 'cancelled',
-          vipCancelledAt: cancelledRec.vipCancelledAt,
-        });
-      }
-
-      if (isCloudValidVip && isLocalValidVip) {
-        // Keep whichever has the later expiration date so remaining days are never lost
-        const bestVip = cloudExpMs >= localExpMs ? cloudUser : localUser;
-        return normalizeVipExpiryOnUser({
-          ...cloudUser,
-          ...localUser,
-          id: cloudUser.id,
-          membershipTier: 'premium_vip',
-          subscriptionStatus: 'active',
-          subscriptionStartDate: bestVip.subscriptionStartDate,
-          subscriptionExpiryDate: bestVip.subscriptionExpiryDate,
-          paymentStatus: 'verified',
-          paymentMethod: bestVip.paymentMethod || localUser.paymentMethod || cloudUser.paymentMethod,
-          transactionRef: bestVip.transactionRef || localUser.transactionRef || cloudUser.transactionRef,
-        });
-      }
-
-      if (isCloudValidVip && !isLocalValidVip) {
-        return normalizeVipExpiryOnUser({
-          ...localUser,
-          ...cloudUser,
-          id: cloudUser.id,
-          membershipTier: 'premium_vip',
-          subscriptionStatus: 'active',
-          subscriptionStartDate: cloudUser.subscriptionStartDate,
-          subscriptionExpiryDate: cloudUser.subscriptionExpiryDate,
-          paymentStatus: 'verified',
-        });
-      }
-
-      if (isLocalValidVip && !isCloudValidVip) {
-        return normalizeVipExpiryOnUser({
-          ...cloudUser,
-          ...localUser,
-          id: cloudUser.id,
-          membershipTier: 'premium_vip',
-          subscriptionStatus: 'active',
-          subscriptionStartDate: localUser.subscriptionStartDate,
-          subscriptionExpiryDate: localUser.subscriptionExpiryDate,
-          paymentStatus: 'verified',
-          paidAdditionalStoreSlots: Math.max(
-            cloudUser.paidAdditionalStoreSlots || 0,
-            localUser.paidAdditionalStoreSlots || 0
-          ),
-        });
-      }
-
-      return normalizeVipExpiryOnUser({
-        ...cloudUser,
-        ...localUser,
-        id: cloudUser.id,
-        paidAdditionalStoreSlots: Math.max(
-          cloudUser.paidAdditionalStoreSlots || 0,
-          localUser.paidAdditionalStoreSlots || 0
-        ),
-      });
-    };
-
-    if (Array.isArray(cloudUsers)) {
-      for (const rawU of cloudUsers) {
-        if (rawU && rawU.id && !isAccountDeleted(rawU)) {
-          const norm = normalizeVipExpiryOnUser(rawU);
-          userMap.set(norm.id, norm);
-          registerUserLookups(norm);
-        }
-      }
-    }
-    for (const rawU of localState.users) {
-      if (!rawU || !rawU.id || isAccountDeleted(rawU)) continue;
-      const u = normalizeVipExpiryOnUser(rawU);
-      const emailKey = u.email ? u.email.toLowerCase().trim() : '';
-      const phoneKey = u.phone ? u.phone.replace(/[\s-+]/g, '') : '';
-      const matchedId =
-        (userMap.has(u.id) ? u.id : undefined) ||
-        (emailKey ? emailToIdMap.get(emailKey) : undefined) ||
-        (phoneKey.length >= 7 ? phoneToIdMap.get(phoneKey) : undefined);
-
-      const existing = matchedId ? userMap.get(matchedId) : undefined;
-      if (!existing) {
-        userMap.set(u.id, u);
-        registerUserLookups(u);
-      } else {
-        const merged = mergeTwoUserRecords(existing, u);
-        userMap.set(existing.id, merged);
-        registerUserLookups(merged);
-      }
-    }
-    const mergedUsers = Array.from(userMap.values());
-
-    // 2b. Reconcile verified VIP transactions against mergedUsers:
-    // If a user has a verified VIP transaction whose expiresAt is still in the future (and was not cancelled by Admin after),
-    // automatically restore their VIP status, start date, and remaining days!
-    const allTxnsForReconcile = [
+    // 1c. Reconstruct any missing non-deleted users from Transactions, Support Tickets, Custom Restaurants, and VIP Backup
+    const allTxnsCombined = [
       ...(Array.isArray(cloudTxns) ? cloudTxns : []),
       ...(Array.isArray(localState.transactions) ? localState.transactions : []),
     ];
+    const allTicketsCombined = [
+      ...(Array.isArray(cloudTickets) ? cloudTickets : []),
+      ...(Array.isArray(localState.supportTickets) ? localState.supportTickets : []),
+    ];
+
+    const recoveredUsersFromActivity: User[] = [];
+    for (const t of allTxnsCombined) {
+      if (!t) continue;
+      const uid = t.userId || t.ownerId;
+      const uEmail = (t.userEmail || '').trim().toLowerCase();
+      const uPhone = (t.phone || '').replace(/[\s-+()]/g, '');
+      // Skip nameless seed owner placeholders that have no email, phone, or userName
+      if (!uEmail && uPhone.length < 7 && !t.userName) continue;
+      if (!uid && !uEmail) continue;
+      if (uid && deletedIds.has(uid)) continue;
+      const isGoogle = String(uid || '').startsWith('google-') || uEmail.endsWith('@gmail.com');
+      const createdDate = t.createdAt ? t.createdAt.split('T')[0] : new Date().toISOString().split('T')[0];
+      recoveredUsersFromActivity.push({
+        id: uid || `user-${uEmail.replace(/[^a-z0-9]/g, '_')}`,
+        name: t.userName || (uEmail ? uEmail.split('@')[0] : 'Member'),
+        email: uEmail,
+        phone: t.phone || undefined,
+        role: t.type === 'restaurant_registration' ? 'owner' : 'user',
+        avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
+        authProvider: isGoogle ? 'google' : 'email',
+        linkedProviders: [isGoogle ? 'google' : 'email'],
+        isVerified: true,
+        createdAt: createdDate,
+        registeredAtIso: t.createdAt || new Date().toISOString(),
+        lastActiveAt: t.verifiedAt || t.createdAt,
+        membershipTier: t.status === 'verified' && t.expiresAt && new Date(t.expiresAt).getTime() > Date.now() ? 'premium_vip' : 'free',
+        subscriptionStatus: t.status === 'verified' && t.expiresAt && new Date(t.expiresAt).getTime() > Date.now() ? 'active' : 'none',
+        subscriptionStartDate: t.status === 'verified' ? (t.verifiedAt || t.createdAt) : undefined,
+        subscriptionExpiryDate: t.status === 'verified' ? t.expiresAt : undefined,
+        paymentStatus: t.status === 'verified' ? 'verified' : t.status === 'pending_verification' ? 'pending_verification' : 'unpaid',
+        paymentMethod: (t.paymentMethod as any) || undefined,
+        transactionRef: t.transactionRef || undefined,
+      });
+    }
+
+    for (const tk of allTicketsCombined) {
+      if (!tk || !tk.userId || tk.userId === 'guest') continue;
+      if (deletedIds.has(tk.userId)) continue;
+      const uEmail = (tk.userEmail || '').trim().toLowerCase();
+      const isGoogle = String(tk.userId).startsWith('google-') || uEmail.endsWith('@gmail.com');
+      recoveredUsersFromActivity.push({
+        id: tk.userId,
+        name: tk.userName || (uEmail ? uEmail.split('@')[0] : 'Member'),
+        email: uEmail,
+        phone: tk.userPhone || undefined,
+        role: tk.userRole === 'owner' ? 'owner' : 'user',
+        avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
+        authProvider: isGoogle ? 'google' : 'email',
+        linkedProviders: [isGoogle ? 'google' : 'email'],
+        isVerified: true,
+        createdAt: tk.createdAt ? tk.createdAt.split('T')[0] : new Date().toISOString().split('T')[0],
+        registeredAtIso: tk.createdAt,
+        lastActiveAt: tk.updatedAt || tk.createdAt,
+      });
+    }
+
+    if (cloudVipBackup && typeof cloudVipBackup === 'object') {
+      for (const [key, val] of Object.entries(cloudVipBackup)) {
+        if (!val || typeof val !== 'object') continue;
+        const emailFromKey = key.startsWith('email:') ? key.slice(6) : (val.email || '');
+        const idFromKey = key.startsWith('id:') ? key.slice(3) : (val.id || '');
+        if (!idFromKey && !emailFromKey) continue;
+        recoveredUsersFromActivity.push({
+          id: idFromKey || `google-${emailFromKey.replace(/[^a-z0-9]/g, '_')}`,
+          name: val.name || (emailFromKey ? emailFromKey.split('@')[0] : 'VIP Member'),
+          email: emailFromKey,
+          phone: val.phone,
+          role: val.role || 'user',
+          avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
+          membershipTier: val.membershipTier,
+          subscriptionStatus: val.subscriptionStatus,
+          subscriptionStartDate: val.subscriptionStartDate,
+          subscriptionExpiryDate: val.subscriptionExpiryDate,
+          paymentStatus: val.paymentStatus,
+          paymentMethod: val.paymentMethod,
+          transactionRef: val.transactionRef,
+          paidAdditionalStoreSlots: val.paidAdditionalStoreSlots,
+          additionalStorePaymentIds: val.additionalStorePaymentIds,
+        });
+      }
+    }
+
+    // 2. Deduplicate & Normalize Users across all sources (Cloud v2 + Cloud v1 + Atomic per-user rows + Local users + CurrentUser + Recovered activity)
+    const mergedUsers = deduplicateAndNormalizeUsers(
+      [
+        ...recoveredUsersFromActivity,
+        ...(Array.isArray(cloudUsersV2) ? cloudUsersV2 : []),
+        ...(Array.isArray(cloudUsers) ? cloudUsers : []),
+        ...atomicUserDocs.map(doc => doc.payload),
+        ...(Array.isArray(localState.users) ? localState.users : []),
+        localState.currentUser && localState.currentUser.role !== 'admin' ? localState.currentUser : undefined,
+      ],
+      mergedDeletedUsers
+    );
+
+    // 2b. Reconcile verified VIP transactions against mergedUsers (matching canonical ID, legacyIds, or email)
     for (let i = 0; i < mergedUsers.length; i++) {
       const usr = mergedUsers[i];
       if (usr.role === 'admin' || usr.subscriptionStatus === 'cancelled') continue;
       const usrEmail = (usr.email || '').toLowerCase().trim();
-      const verifiedFutureTxns = allTxnsForReconcile.filter(t => {
+      const usrIdSet = new Set<string>([usr.id, ...(Array.isArray(usr.legacyIds) ? usr.legacyIds : [])]);
+
+      const verifiedFutureTxns = allTxnsCombined.filter(t => {
         if (!t || t.status !== 'verified' || !t.expiresAt) return false;
         const expMs = new Date(t.expiresAt).getTime();
         if (Number.isNaN(expMs) || expMs <= Date.now()) return false;
         return (
-          t.userId === usr.id ||
-          t.ownerId === usr.id ||
+          (t.userId && usrIdSet.has(t.userId)) ||
+          (t.ownerId && usrIdSet.has(t.ownerId)) ||
           (usrEmail && t.userEmail && t.userEmail.toLowerCase().trim() === usrEmail)
         );
       });
       if (verifiedFutureTxns.length > 0) {
-        // Pick the transaction with the furthest future expiry date
         verifiedFutureTxns.sort((a, b) => new Date(b.expiresAt!).getTime() - new Date(a.expiresAt!).getTime());
         const bestTxn = verifiedFutureTxns[0];
         const currentExpMs = usr.subscriptionExpiryDate ? new Date(usr.subscriptionExpiryDate).getTime() : 0;
@@ -906,12 +1245,32 @@ export async function syncAllAppDataWithSupabase(localState: {
         }
       }
 
+      // Also reconcile pending_verification VIP transactions if user has no active VIP
+      if (mergedUsers[i].membershipTier !== 'premium_vip') {
+        const pendingVipTxn = allTxnsCombined.find(t => {
+          if (!t || t.status !== 'pending_verification') return false;
+          return (
+            (t.userId && usrIdSet.has(t.userId)) ||
+            (t.ownerId && usrIdSet.has(t.ownerId)) ||
+            (usrEmail && t.userEmail && t.userEmail.toLowerCase().trim() === usrEmail)
+          );
+        });
+        if (pendingVipTxn && mergedUsers[i].paymentStatus !== 'verified') {
+          mergedUsers[i] = {
+            ...mergedUsers[i],
+            paymentStatus: 'pending_verification',
+            subscriptionStatus: mergedUsers[i].subscriptionStatus || 'pending',
+            transactionRef: pendingVipTxn.transactionRef || mergedUsers[i].transactionRef,
+          };
+        }
+      }
+
       // Also reconcile verified additional_store_slot transactions so paidAdditionalStoreSlots is always accurate
-      const verifiedAdditionalStoreTxns = allTxnsForReconcile.filter(t => {
+      const verifiedAdditionalStoreTxns = allTxnsCombined.filter(t => {
         if (!t || t.type !== 'additional_store_slot' || t.status !== 'verified') return false;
         return (
-          t.userId === usr.id ||
-          t.ownerId === usr.id ||
+          (t.userId && usrIdSet.has(t.userId)) ||
+          (t.ownerId && usrIdSet.has(t.ownerId)) ||
           (usrEmail && t.userEmail && t.userEmail.toLowerCase().trim() === usrEmail)
         );
       });
@@ -962,7 +1321,6 @@ export async function syncAllAppDataWithSupabase(localState: {
       if (!existing) {
         txnMap.set(t.id, t);
       } else {
-        // Prefer verified/rejected/needs_more_info over pending_verification
         if (existing.status !== 'pending_verification' && t.status === 'pending_verification') {
           txnMap.set(t.id, existing);
         } else {
@@ -1000,7 +1358,6 @@ export async function syncAllAppDataWithSupabase(localState: {
     }
 
     // 5b. Resolve Centralized AppSettings: Server (`kft_cloud_app_settings_v1`) is the single source of truth!
-    // Regular user syncs must NEVER overwrite server settings with stale local caches.
     let mergedAppSettings: AppSettings | undefined = localState.appSettings;
     if (cloudSettings) {
       mergedAppSettings = normalizeAuthoritativeAppSettings(cloudSettings, localState.appSettings);
@@ -1016,8 +1373,10 @@ export async function syncAllAppDataWithSupabase(localState: {
       mergedAppSettings = normalizeAuthoritativeAppSettings(localState.appSettings);
     }
 
-    // 6. Push merged state back to Supabase Cloud (only seed kft_cloud_app_settings_v1 if missing on server)
+    // 6. Push merged state back to Supabase Cloud AND backfill atomic `kft_user_<id>` rows for every active user
+    const existingAtomicKeySet = new Set(atomicUserDocs.map(d => d.key));
     const pushPromises: Promise<boolean>[] = [
+      pushCloudDocument('kft_cloud_users_v2', mergedUsers),
       pushCloudDocument('kft_cloud_users_v1', mergedUsers),
       pushCloudDocument('kft_cloud_deleted_users_v1', mergedDeletedUsers),
       pushCloudDocument('kft_cloud_transactions_v1', mergedTransactions),
@@ -1025,6 +1384,16 @@ export async function syncAllAppDataWithSupabase(localState: {
       pushCloudDocument('kft_cloud_custom_restaurants_v1', mergedCustomRestaurants),
       pushCloudDocument('kft_cloud_payment_proofs_v1', mergedPaymentProofsVault),
     ];
+
+    // Ensure every active user has an atomic `kft_user_<id>` record in Supabase
+    for (const u of mergedUsers) {
+      const atomicKey = `${USER_RECORD_PREFIX}${u.id}`;
+      const isCurrentUser = localState.currentUser && localState.currentUser.id === u.id;
+      if (!existingAtomicKeySet.has(atomicKey) || isCurrentUser) {
+        pushPromises.push(pushCloudDocument(atomicKey, u));
+      }
+    }
+
     if (!cloudSettings && mergedAppSettings) {
       pushPromises.push(pushCloudDocument('kft_cloud_app_settings_v1', mergedAppSettings));
     }
@@ -1043,7 +1412,10 @@ export async function syncAllAppDataWithSupabase(localState: {
     console.warn('Supabase syncAllAppDataWithSupabase error:', err);
     return {
       synced: false,
-      mergedUsers: localState.users,
+      mergedUsers: deduplicateAndNormalizeUsers(
+        [...(localState.users || []), localState.currentUser || undefined],
+        localState.deletedUsers || []
+      ),
       mergedDeletedUsers: localState.deletedUsers || [],
       mergedTransactions: localState.transactions,
       mergedCustomRestaurants: localState.customRestaurants,

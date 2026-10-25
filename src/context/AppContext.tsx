@@ -47,9 +47,14 @@ import {
   isSupabaseConfigured,
   syncAllAppDataWithSupabase,
   pushCloudDocument,
+  deleteCloudDocument,
   fetchAuthoritativeAppSettingsFromServer,
   saveAuthoritativeAppSettingsToServer,
   normalizeAuthoritativeAppSettings,
+  getCanonicalUserId,
+  deduplicateAndNormalizeUsers,
+  upsertSingleUserToCloud,
+  USER_RECORD_PREFIX,
 } from '../services/supabaseService';
 import { authenticateAdminWithBiometric, setSavedAdminUsername } from '../services/biometricService';
 import {
@@ -137,7 +142,10 @@ interface AppContextType {
   deleteTransactions: (txnIds: string[]) => { success: boolean; deletedCount: number };
   uploadPaymentProofToTransaction: (txnId: string, proofDataUrl: string, fileName?: string, mimeType?: string) => { success: boolean; error?: string };
   getAuthorizedPaymentProof: (txnId: string) => string | null;
-  triggerCloudSyncNow?: () => Promise<boolean>;
+  triggerCloudSyncNow?: (force?: boolean) => Promise<boolean>;
+  isSyncingUsers?: boolean;
+  lastUsersSyncedAt?: string | null;
+  syncUsersNow?: () => Promise<boolean>;
   
   // Bookmarks
   bookmarks: string[];
@@ -512,38 +520,35 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
       }
 
+      // Also include any active non-admin session stored in `kft_current_user_v5` so a logged-in user is never missing from `users`
+      try {
+        const savedCur = localStorage.getItem('kft_current_user_v5');
+        if (savedCur && savedCur !== 'undefined' && savedCur !== 'null') {
+          const parsedCur = JSON.parse(savedCur);
+          if (
+            parsedCur &&
+            typeof parsedCur === 'object' &&
+            parsedCur.role !== 'admin' &&
+            parsedCur.id !== 'admin-authorized-single' &&
+            !checkIsUserDeleted(parsedCur, localDeleted)
+          ) {
+            loadedUsers.push(sanitizeUserSocialAccounts(parsedCur));
+          }
+        }
+      } catch {}
+
       // Reconcile with local VIP Registry Backup (`kft_vip_registry_backup_v1`) so VIP status is never lost during updates
       try {
         const rawVipBackup = localStorage.getItem('kft_vip_registry_backup_v1');
         if (rawVipBackup) {
           const vipList: User[] = JSON.parse(rawVipBackup);
           if (Array.isArray(vipList)) {
-            const byId = new Map<string, User>(loadedUsers.map(u => [u.id, u]));
-            for (const vipU of vipList) {
-              if (!vipU || !vipU.id || checkIsUserDeleted(vipU, localDeleted)) continue;
-              const existing = byId.get(vipU.id);
-              const expMs = vipU.subscriptionExpiryDate ? new Date(vipU.subscriptionExpiryDate).getTime() : 0;
-              if (expMs > Date.now() && vipU.membershipTier === 'premium_vip' && vipU.subscriptionStatus === 'active') {
-                if (!existing) {
-                  byId.set(vipU.id, vipU);
-                } else if (existing.subscriptionStatus !== 'cancelled') {
-                  byId.set(vipU.id, {
-                    ...existing,
-                    membershipTier: 'premium_vip',
-                    subscriptionStatus: 'active',
-                    subscriptionStartDate: vipU.subscriptionStartDate || existing.subscriptionStartDate,
-                    subscriptionExpiryDate: vipU.subscriptionExpiryDate,
-                    paymentStatus: 'verified',
-                  });
-                }
-              }
-            }
-            loadedUsers = Array.from(byId.values());
+            loadedUsers.push(...vipList.filter(v => v && !checkIsUserDeleted(v, localDeleted)));
           }
         }
       } catch {}
 
-      return loadedUsers;
+      return deduplicateAndNormalizeUsers(loadedUsers, localDeleted);
     } catch (e) {
       console.warn('Failed to parse kft_users_v5', e);
     }
@@ -1826,6 +1831,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // Sync to localStorage safely (guarded against QuotaExceeded or JSON corruption) + Maintain VIP Registry Backup
+  // IMPORTANT: Never blindly overwrite `kft_cloud_users_v1` here without pulling & merging from Supabase first!
   useEffect(() => {
     scheduleStorageWrite('kft_users_v5', users, 600);
     const activeVips = users.filter(
@@ -1833,12 +1839,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
     if (activeVips.length > 0) {
       scheduleStorageWrite('kft_vip_registry_backup_v1', activeVips, 800);
-      if (isSupabaseConfigured()) {
-        pushCloudDocument('kft_cloud_vip_backup_v1', activeVips);
-      }
-    }
-    if (isSupabaseConfigured() && users.length > 0) {
-      pushCloudDocument('kft_cloud_users_v1', users);
     }
   }, [users]);
 
@@ -1862,9 +1862,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         };
         localStorage.setItem('kft_pre_update_db_backup_v1', JSON.stringify(backupSnapshot));
         localStorage.setItem('kft_last_backed_up_version', APP_VERSION);
-        if (isSupabaseConfigured() && activeVips.length > 0) {
-          pushCloudDocument('kft_cloud_vip_backup_v1', activeVips);
-        }
       }
     } catch (e) {
       console.warn('Pre-update database backup warning:', e);
@@ -1879,6 +1876,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (userLang === 'km' || userLang === 'en' || userLang === 'zh') {
           setLanguageState(userLang);
           localStorage.setItem('kft_user_language_pref_v1', userLang);
+        }
+        // Guarantee that any logged-in non-admin user is ALWAYS in `users` and synced to their atomic cloud row
+        const isAdmin =
+          currentUser.role === 'admin' ||
+          currentUser.id === 'admin-authorized-single' ||
+          currentUser.username === 'admin' ||
+          currentUser.username === 'cheasavuth';
+        if (!isAdmin && !checkIsUserDeleted(currentUser)) {
+          setUsers(prev => {
+            const merged = deduplicateAndNormalizeUsers([...prev, currentUser], deletedUsers);
+            if (merged.length !== prev.length || !prev.some(u => u.id === getCanonicalUserId(currentUser))) {
+              return merged;
+            }
+            return prev;
+          });
+          if (isSupabaseConfigured()) {
+            upsertSingleUserToCloud(currentUser, deletedUsers).catch(() => {});
+          }
         }
       } else {
         localStorage.removeItem('kft_current_user_v5');
@@ -2035,9 +2050,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           setUsers(nextUsers);
           try {
             localStorage.setItem('kft_users_v5', JSON.stringify(nextUsers));
-            if (isSupabaseConfigured()) {
-              pushCloudDocument('kft_cloud_users_v1', nextUsers);
-            }
           } catch {}
         }
       }
@@ -2413,17 +2425,45 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Automatic & Manual Supabase Cloud Synchronization (Free Tier Compatible)
   const cloudSyncInFlightRef = useRef(false);
+  const pendingForcedSyncRef = useRef(false);
   const lastCloudSyncAtRef = useRef(0);
+  const [isSyncingUsers, setIsSyncingUsers] = useState(false);
+  const [lastUsersSyncedAt, setLastUsersSyncedAt] = useState<string | null>(null);
 
-  const triggerCloudSyncNow = async (): Promise<boolean> => {
+  // Mutable ref holding the latest live state so `triggerCloudSyncNow` NEVER reads a stale render closure!
+  const latestSyncStateRef = useRef({
+    users,
+    currentUser,
+    deletedUsers,
+    transactions,
+    restaurants,
+    supportTickets,
+  });
+  latestSyncStateRef.current = {
+    users,
+    currentUser,
+    deletedUsers,
+    transactions,
+    restaurants,
+    supportTickets,
+  };
+
+  const triggerCloudSyncNow = async (force: boolean = false): Promise<boolean> => {
     if (!isSupabaseConfigured()) return false;
-    if (typeof document !== 'undefined' && document.hidden) return false;
+    if (!force && typeof document !== 'undefined' && document.hidden) return false;
     const now = Date.now();
-    if (cloudSyncInFlightRef.current || now - lastCloudSyncAtRef.current < 15000) {
+    if (cloudSyncInFlightRef.current) {
+      if (force) {
+        pendingForcedSyncRef.current = true;
+      }
+      return false;
+    }
+    if (!force && now - lastCloudSyncAtRef.current < 15000) {
       return false;
     }
     cloudSyncInFlightRef.current = true;
     lastCloudSyncAtRef.current = now;
+    setIsSyncingUsers(true);
     try {
       let localVault: Record<string, any> = {};
       try {
@@ -2431,17 +2471,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (rawVault) localVault = JSON.parse(rawVault);
       } catch {}
 
-      const customRests = restaurants.filter(r => !isSeedRestaurantId(r.id));
+      const snap = latestSyncStateRef.current;
+      const customRests = snap.restaurants.filter(r => !isSeedRestaurantId(r.id));
       const result = await syncAllAppDataWithSupabase({
-        users,
-        deletedUsers,
-        transactions,
+        users: snap.users,
+        currentUser: snap.currentUser,
+        deletedUsers: snap.deletedUsers,
+        transactions: snap.transactions,
         customRestaurants: customRests,
+        supportTickets: snap.supportTickets,
         paymentProofsVault: localVault,
         appSettings: appSettingsRef.current,
       });
 
       if (result.synced) {
+        setLastUsersSyncedAt(new Date().toISOString());
         if (result.mergedAppSettings) {
           setAppSettings(prev => {
             const nextSettings = normalizeAuthoritativeAppSettings(result.mergedAppSettings!, prev);
@@ -2456,20 +2500,44 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
         if (Array.isArray(result.mergedDeletedUsers)) {
           setDeletedUsers(result.mergedDeletedUsers);
+          latestSyncStateRef.current.deletedUsers = result.mergedDeletedUsers;
           try {
             localStorage.setItem('kft_deleted_users_v1', JSON.stringify(result.mergedDeletedUsers));
           } catch {}
         }
 
-        setUsers(result.mergedUsers);
-        if (currentUser) {
+        // Merge with latest live state in case a user logged in or registered while the sync request was in flight!
+        setUsers(prev => {
+          const liveCur = latestSyncStateRef.current.currentUser;
+          const nonAdminCur =
+            liveCur &&
+            liveCur.role !== 'admin' &&
+            liveCur.id !== 'admin-authorized-single' &&
+            liveCur.username !== 'admin' &&
+            liveCur.username !== 'cheasavuth'
+              ? liveCur
+              : undefined;
+          const finalMerged = deduplicateAndNormalizeUsers(
+            [...result.mergedUsers, ...prev, nonAdminCur],
+            result.mergedDeletedUsers
+          );
+          latestSyncStateRef.current.users = finalMerged;
+          try {
+            localStorage.setItem('kft_users_v5', JSON.stringify(finalMerged));
+          } catch {}
+          return finalMerged;
+        });
+
+        const liveCurrentUser = latestSyncStateRef.current.currentUser;
+        if (liveCurrentUser) {
           const isAdminAccount =
-            currentUser.role === 'admin' ||
-            currentUser.id === 'admin-authorized-single' ||
-            currentUser.username === 'cheasavuth' ||
-            currentUser.username === 'admin';
-          if (!isAdminAccount && checkIsUserDeleted(currentUser, result.mergedDeletedUsers)) {
+            liveCurrentUser.role === 'admin' ||
+            liveCurrentUser.id === 'admin-authorized-single' ||
+            liveCurrentUser.username === 'cheasavuth' ||
+            liveCurrentUser.username === 'admin';
+          if (!isAdminAccount && checkIsUserDeleted(liveCurrentUser, result.mergedDeletedUsers)) {
             setCurrentUser(null);
+            latestSyncStateRef.current.currentUser = null;
             try {
               localStorage.removeItem('kft_current_user_v5');
             } catch {}
@@ -2479,19 +2547,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 : '🚫 Your account has been permanently deleted by the Administrator.',
               'warning'
             );
-          } else {
-            const curEmail = (currentUser.email || '').toLowerCase().trim();
-            const curPhone = (currentUser.phone || '').replace(/[\s-+]/g, '');
+          } else if (!isAdminAccount) {
+            const curEmail = (liveCurrentUser.email || '').toLowerCase().trim();
+            const curPhone = (liveCurrentUser.phone || '').replace(/[\s-+]/g, '');
+            const canonicalCurId = getCanonicalUserId(liveCurrentUser);
             const matchedCurrent = result.mergedUsers.find(
               u =>
-                u.id === currentUser.id ||
+                u.id === liveCurrentUser.id ||
+                u.id === canonicalCurId ||
+                (Array.isArray(u.legacyIds) && u.legacyIds.includes(liveCurrentUser.id)) ||
                 (curEmail && u.email && u.email.toLowerCase().trim() === curEmail) ||
                 (curPhone.length >= 7 && u.phone && u.phone.replace(/[\s-+]/g, '') === curPhone)
             );
-            if (matchedCurrent) setCurrentUser(matchedCurrent);
+            if (matchedCurrent) {
+              setCurrentUser(matchedCurrent);
+              latestSyncStateRef.current.currentUser = matchedCurrent;
+            }
           }
         }
         setTransactions(result.mergedTransactions);
+        latestSyncStateRef.current.transactions = result.mergedTransactions;
         if (result.mergedCustomRestaurants.length > 0) {
           const deletedIdSet = new Set((result.mergedDeletedUsers || []).map(d => d.id));
           setRestaurants(prev => {
@@ -2553,7 +2628,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return false;
     } finally {
       cloudSyncInFlightRef.current = false;
+      setIsSyncingUsers(false);
+      if (pendingForcedSyncRef.current) {
+        pendingForcedSyncRef.current = false;
+        setTimeout(() => {
+          triggerCloudSyncNow(true);
+        }, 150);
+      }
     }
+  };
+
+  const syncUsersNow = async (): Promise<boolean> => {
+    return triggerCloudSyncNow(true);
   };
 
   useEffect(() => {
@@ -2595,11 +2681,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       .catch(() => {});
 
     let syncTimer: any;
+    let periodicSyncInterval: any;
+    const handleVisibilityCloudSync = () => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+        triggerCloudSyncNow(false);
+      }
+    };
     if (isSupabaseConfigured()) {
       // Defer cloud sync so initial startup UI paints instantly (< 50ms) without waiting for network
       syncTimer = setTimeout(() => {
-        triggerCloudSyncNow();
-      }, 1200);
+        triggerCloudSyncNow(true);
+      }, 900);
+      periodicSyncInterval = setInterval(() => {
+        if (typeof document === 'undefined' || !document.hidden) {
+          triggerCloudSyncNow(false);
+        }
+      }, 20000);
+      if (typeof document !== 'undefined') {
+        document.addEventListener('visibilitychange', handleVisibilityCloudSync);
+      }
     }
     // Handle direct shared deep links (?restaurant=..., ?food=..., ?destination=...)
     try {
@@ -2632,6 +2732,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     return () => {
       if (syncTimer) clearTimeout(syncTimer);
+      if (periodicSyncInterval) clearInterval(periodicSyncInterval);
+      if (typeof document !== 'undefined') {
+        document.removeEventListener('visibilitychange', handleVisibilityCloudSync);
+      }
     };
   }, []);
 
@@ -2815,6 +2919,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const cleanDigits = identifier.replace(/[\s-+]/g, '');
     const isPhone = /^[0-9+ ]{7,15}$/.test(clean);
     const emailVal = isPhone ? `user_${cleanDigits}@phone.kh` : (clean.includes('@') ? clean : `${clean}@user.kh`);
+    const nowIso = new Date().toISOString();
 
     // 1. Strictly block permanently deleted accounts from logging back in
     if (
@@ -2851,11 +2956,37 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         );
         return false;
       }
-      setCurrentUser(existing);
-      showToast(language === 'km' ? `សូមស្វាគមន៍មកវិញ ${existing.name}!` : `Welcome back, ${existing.name}!`, 'success');
+      const updatedExisting: User = {
+        ...existing,
+        lastLoginAt: nowIso,
+        lastActiveAt: nowIso,
+      };
+      setUsers(prev => {
+        const next = deduplicateAndNormalizeUsers(
+          prev.map(u => (u.id === existing.id ? updatedExisting : u)),
+          deletedUsers
+        );
+        latestSyncStateRef.current.users = next;
+        try {
+          localStorage.setItem('kft_users_v5', JSON.stringify(next));
+        } catch {}
+        return next;
+      });
+      setCurrentUser(updatedExisting);
+      latestSyncStateRef.current.currentUser = updatedExisting;
+      showToast(language === 'km' ? `សូមស្វាគមន៍មកវិញ ${updatedExisting.name}!` : `Welcome back, ${updatedExisting.name}!`, 'success');
       setIsAuthModalOpen(false);
       if (isSupabaseConfigured()) {
-        setTimeout(() => { triggerCloudSyncNow(); }, 300);
+        upsertSingleUserToCloud(updatedExisting, deletedUsers)
+          .then(cloudMerged => {
+            if (Array.isArray(cloudMerged) && cloudMerged.length > 0) {
+              setUsers(prev => deduplicateAndNormalizeUsers([...cloudMerged, ...prev], deletedUsers));
+            }
+            triggerCloudSyncNow(true);
+          })
+          .catch(() => {
+            triggerCloudSyncNow(true);
+          });
       }
       return true;
     }
@@ -2865,24 +2996,46 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const phoneVal = isPhone ? identifier.trim() : undefined;
     const nameVal = isPhone ? `អ្នកប្រើប្រាស់ ${identifier.trim()}` : clean.split('@')[0];
 
-    const newUser: User = {
-      id: `user-${Date.now()}`,
+    const candidateUser: User = {
+      id: getCanonicalUserId({ email: emailVal, phone: phoneVal, role: assignedRole, authProvider: isPhone ? 'phone' : 'email' }),
       name: nameVal,
       email: emailVal,
       phone: phoneVal,
       role: assignedRole,
+      authProvider: isPhone ? 'phone' : 'email',
+      linkedProviders: [isPhone ? 'phone' : 'email'],
       isVerified: true,
-      verifiedAt: new Date().toISOString(),
+      verifiedAt: nowIso,
       avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
-      createdAt: new Date().toISOString().split('T')[0],
+      createdAt: nowIso.split('T')[0],
+      registeredAtIso: nowIso,
+      lastLoginAt: nowIso,
+      lastActiveAt: nowIso,
     };
-    setUsers(prev => [...prev, newUser]);
-    setCurrentUser(newUser);
+    setUsers(prev => {
+      const next = deduplicateAndNormalizeUsers([...prev, candidateUser], deletedUsers);
+      latestSyncStateRef.current.users = next;
+      try {
+        localStorage.setItem('kft_users_v5', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+    setCurrentUser(candidateUser);
+    latestSyncStateRef.current.currentUser = candidateUser;
     showToast(language === 'km' ? `ចូលគណនីបានជោគជ័យ!` : `Logged in successfully!`, 'success');
     setIsAuthModalOpen(false);
-    // Trigger immediate cloud sync after login to automatically restore any VIP status from Supabase Cloud
+    // Immediately persist atomic user record & trigger forced cloud sync
     if (isSupabaseConfigured()) {
-      setTimeout(() => { triggerCloudSyncNow(); }, 300);
+      upsertSingleUserToCloud(candidateUser, deletedUsers)
+        .then(cloudMerged => {
+          if (Array.isArray(cloudMerged) && cloudMerged.length > 0) {
+            setUsers(prev => deduplicateAndNormalizeUsers([...cloudMerged, ...prev], deletedUsers));
+          }
+          triggerCloudSyncNow(true);
+        })
+        .catch(() => {
+          triggerCloudSyncNow(true);
+        });
     }
     return true;
   };
@@ -3124,6 +3277,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (isSupabaseConfigured()) {
         const customRests = nextRestaurants.filter(r => !isSeedRestaurantId(r.id));
         await Promise.all([
+          pushCloudDocument(`${USER_RECORD_PREFIX}${downgradedUser.id}`, downgradedUser),
+          pushCloudDocument('kft_cloud_users_v2', nextUsers),
           pushCloudDocument('kft_cloud_users_v1', nextUsers),
           pushCloudDocument('kft_cloud_custom_restaurants_v1', customRests),
         ]);
@@ -3256,6 +3411,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     try {
       if (isSupabaseConfigured()) {
         await Promise.all([
+          pushCloudDocument(`${USER_RECORD_PREFIX}${restoredUser.id}`, restoredUser),
+          pushCloudDocument('kft_cloud_users_v2', nextUsers),
           pushCloudDocument('kft_cloud_users_v1', nextUsers),
           pushCloudDocument('kft_cloud_deleted_users_v1', nextDeletedUsers),
         ]);
@@ -3316,7 +3473,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     try {
       if (isSupabaseConfigured()) {
-        await pushCloudDocument('kft_cloud_users_v1', nextUsers);
+        await Promise.all([
+          pushCloudDocument(`${USER_RECORD_PREFIX}${updatedUser.id}`, updatedUser),
+          pushCloudDocument('kft_cloud_users_v2', nextUsers),
+          pushCloudDocument('kft_cloud_users_v1', nextUsers),
+        ]);
       }
     } catch {}
 
@@ -3474,11 +3635,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       } catch {}
     }
 
-    // 10. Push updated collections to Supabase Cloud
+    // 10. Push updated collections to Supabase Cloud AND delete atomic `kft_user_<id>` rows
     try {
       if (isSupabaseConfigured()) {
         const customRests = nextRestaurants.filter(r => !isSeedRestaurantId(r.id));
+        const atomicDeletes = [
+          deleteCloudDocument(`${USER_RECORD_PREFIX}${targetUser.id}`),
+          ...(Array.isArray(targetUser.legacyIds)
+            ? targetUser.legacyIds.map(lid => deleteCloudDocument(`${USER_RECORD_PREFIX}${lid}`))
+            : []),
+        ];
         await Promise.all([
+          ...atomicDeletes,
+          pushCloudDocument('kft_cloud_users_v2', nextUsers),
           pushCloudDocument('kft_cloud_users_v1', nextUsers),
           pushCloudDocument('kft_cloud_deleted_users_v1', nextDeletedUsers),
           pushCloudDocument('kft_cloud_transactions_v1', nextTransactions),
@@ -3729,9 +3898,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const cleanId = emailOrPhone.trim();
     const isPhone = /^[0-9+ ]{7,15}$/.test(cleanId);
     const cleanPhoneDigits = (phone || (isPhone ? cleanId : '')).replace(/[\s-+]/g, '');
-    const emailVal = isPhone ? `user_${cleanPhoneDigits}@phone.kh` : (cleanId.includes('@') ? cleanId : `${cleanId}@user.kh`);
+    const emailVal = (isPhone ? `user_${cleanPhoneDigits}@phone.kh` : (cleanId.includes('@') ? cleanId : `${cleanId}@user.kh`)).toLowerCase();
     const phoneVal = phone ? phone.trim() : (isPhone ? cleanId : undefined);
     const displayName = name.trim() || (isPhone ? `អ្នកប្រើប្រាស់ ${cleanId}` : cleanId.split('@')[0]);
+    const nowIso = new Date().toISOString();
 
     // Block permanently deleted accounts from re-registering or logging in
     if (
@@ -3763,33 +3933,88 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         );
         return false;
       }
-      setCurrentUser(existing);
-      showToast(language === 'km' ? `សូមស្វាគមន៍មកវិញ ${existing.name}!` : `Welcome back, ${existing.name}!`, 'success');
+      const updatedExisting: User = {
+        ...existing,
+        name: displayName || existing.name,
+        phone: phoneVal || existing.phone,
+        lastLoginAt: nowIso,
+        lastActiveAt: nowIso,
+      };
+      setUsers(prev => {
+        const next = deduplicateAndNormalizeUsers(
+          prev.map(u => (u.id === existing.id ? updatedExisting : u)),
+          deletedUsers
+        );
+        latestSyncStateRef.current.users = next;
+        try {
+          localStorage.setItem('kft_users_v5', JSON.stringify(next));
+        } catch {}
+        return next;
+      });
+      setCurrentUser(updatedExisting);
+      latestSyncStateRef.current.currentUser = updatedExisting;
+      showToast(language === 'km' ? `សូមស្វាគមន៍មកវិញ ${updatedExisting.name}!` : `Welcome back, ${updatedExisting.name}!`, 'success');
       setIsAuthModalOpen(false);
       if (isSupabaseConfigured()) {
-        setTimeout(() => { triggerCloudSyncNow(); }, 300);
+        upsertSingleUserToCloud(updatedExisting, deletedUsers)
+          .then(cloudMerged => {
+            if (Array.isArray(cloudMerged) && cloudMerged.length > 0) {
+              setUsers(prev => deduplicateAndNormalizeUsers([...cloudMerged, ...prev], deletedUsers));
+            }
+            triggerCloudSyncNow(true);
+          })
+          .catch(() => {
+            triggerCloudSyncNow(true);
+          });
       }
       return true;
     }
 
     const newUser: User = {
-      id: `user-${Date.now()}`,
+      id: getCanonicalUserId({
+        email: emailVal,
+        phone: phoneVal,
+        role: safeRole,
+        authProvider: isPhone ? 'phone' : 'email',
+      }),
       name: displayName,
       email: emailVal,
       role: safeRole,
       phone: phoneVal,
       restaurantName,
+      authProvider: isPhone ? 'phone' : 'email',
+      linkedProviders: [isPhone ? 'phone' : 'email'],
       isVerified: true,
-      verifiedAt: new Date().toISOString(),
+      verifiedAt: nowIso,
       avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
-      createdAt: new Date().toISOString().split('T')[0],
+      createdAt: nowIso.split('T')[0],
+      registeredAtIso: nowIso,
+      lastLoginAt: nowIso,
+      lastActiveAt: nowIso,
     };
-    setUsers(prev => [...prev, newUser]);
+    setUsers(prev => {
+      const next = deduplicateAndNormalizeUsers([...prev, newUser], deletedUsers);
+      latestSyncStateRef.current.users = next;
+      try {
+        localStorage.setItem('kft_users_v5', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
     setCurrentUser(newUser);
+    latestSyncStateRef.current.currentUser = newUser;
     showToast(language === 'km' ? `សូមស្វាគមន៍មកកាន់កម្មវិធី ${displayName}!` : `Welcome to the app, ${displayName}!`, 'success');
     setIsAuthModalOpen(false);
     if (isSupabaseConfigured()) {
-      setTimeout(() => { triggerCloudSyncNow(); }, 300);
+      upsertSingleUserToCloud(newUser, deletedUsers)
+        .then(cloudMerged => {
+          if (Array.isArray(cloudMerged) && cloudMerged.length > 0) {
+            setUsers(prev => deduplicateAndNormalizeUsers([...cloudMerged, ...prev], deletedUsers));
+          }
+          triggerCloudSyncNow(true);
+        })
+        .catch(() => {
+          triggerCloudSyncNow(true);
+        });
     }
     return true;
   };
@@ -3800,10 +4025,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     email: string;
     avatar?: string;
     phone?: string;
+    googleSub?: string;
   }): boolean => {
+    const cleanEmail = (profile.email || '').trim().toLowerCase();
+    const canonicalGoogleId = getCanonicalUserId({
+      id: profile.id,
+      email: cleanEmail,
+      authProvider: 'google',
+    });
+    const nowIso = new Date().toISOString();
+
     // Strictly block permanently deleted accounts from logging in via Google
-    if (checkIsUserDeleted({ id: profile.id, email: profile.email, phone: profile.phone })) {
-      recordSecurityAudit('DELETED_USER_GOOGLE_LOGIN_BLOCKED', 'BLOCKED', 'AuthModal', `Blocked Google login attempt by deleted account: ${profile.email || profile.id}`);
+    if (
+      checkIsUserDeleted({ id: profile.id, email: cleanEmail, phone: profile.phone }) ||
+      checkIsUserDeleted({ id: canonicalGoogleId, email: cleanEmail })
+    ) {
+      recordSecurityAudit('DELETED_USER_GOOGLE_LOGIN_BLOCKED', 'BLOCKED', 'AuthModal', `Blocked Google login attempt by deleted account: ${cleanEmail || profile.id}`);
       showToast(
         language === 'km'
           ? '🚫 គណនីនេះត្រូវបានលុបជាអចិន្ត្រៃយ៍ដោយរដ្ឋបាល (Admin) ហើយមិនអាចចូលប្រើប្រាស់បានទៀតទេ។'
@@ -3813,10 +4050,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return false;
     }
 
-    // Check if user already exists with this ID or Email
+    // Check if user already exists with this canonical ID, legacy ID, or Email
     const existing = users.find(u => 
+      u.id === canonicalGoogleId ||
       u.id === profile.id || 
-      (profile.email && u.email.toLowerCase() === profile.email.toLowerCase())
+      (Array.isArray(u.legacyIds) && (u.legacyIds.includes(profile.id) || u.legacyIds.includes(canonicalGoogleId))) ||
+      (cleanEmail && u.email.toLowerCase().trim() === cleanEmail)
     );
 
     if (existing) {
@@ -3829,46 +4068,100 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         );
         return false;
       }
+      const legacySet = new Set<string>([
+        ...(Array.isArray(existing.legacyIds) ? existing.legacyIds : []),
+      ]);
+      if (existing.id !== canonicalGoogleId) legacySet.add(existing.id);
+      if (profile.id && profile.id !== canonicalGoogleId) legacySet.add(profile.id);
+
       const updated: User = {
         ...existing,
+        id: canonicalGoogleId,
         name: profile.name || existing.name,
+        email: cleanEmail || existing.email,
         avatar: profile.avatar || existing.avatar,
         authProvider: 'google',
         linkedProviders: Array.from(new Set([...(existing.linkedProviders || []), 'google'])),
         isVerified: true,
-        verifiedAt: existing.verifiedAt || new Date().toISOString(),
+        verifiedAt: existing.verifiedAt || nowIso,
+        lastLoginAt: nowIso,
+        lastActiveAt: nowIso,
+        googleSub: profile.googleSub || existing.googleSub,
+        legacyIds: legacySet.size > 0 ? Array.from(legacySet) : undefined,
       };
-      setUsers(prev => prev.map(u => u.id === existing.id ? updated : u));
+      setUsers(prev => {
+        const next = deduplicateAndNormalizeUsers(
+          prev.map(u => (u.id === existing.id ? updated : u)),
+          deletedUsers
+        );
+        latestSyncStateRef.current.users = next;
+        try {
+          localStorage.setItem('kft_users_v5', JSON.stringify(next));
+        } catch {}
+        return next;
+      });
       setCurrentUser(updated);
+      latestSyncStateRef.current.currentUser = updated;
       showToast(language === 'km' ? `សូមស្វាគមន៍មកវិញ ${updated.name}!` : `Welcome back, ${updated.name}!`, 'success');
       setIsAuthModalOpen(false);
       if (isSupabaseConfigured()) {
-        setTimeout(() => { triggerCloudSyncNow(); }, 300);
+        upsertSingleUserToCloud(updated, deletedUsers)
+          .then(cloudMerged => {
+            if (Array.isArray(cloudMerged) && cloudMerged.length > 0) {
+              setUsers(prev => deduplicateAndNormalizeUsers([...cloudMerged, ...prev], deletedUsers));
+            }
+            triggerCloudSyncNow(true);
+          })
+          .catch(() => {
+            triggerCloudSyncNow(true);
+          });
       }
       return true;
     }
 
-    // Auto-create new user account with Google credentials
+    // Auto-create new user account with Google credentials & canonical ID
     const newUser: User = {
-      id: profile.id,
-      name: profile.name,
-      email: profile.email,
+      id: canonicalGoogleId,
+      name: profile.name || (cleanEmail ? cleanEmail.split('@')[0] : 'Google User'),
+      email: cleanEmail,
       role: 'user',
       avatar: profile.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
       phone: profile.phone,
       authProvider: 'google',
       linkedProviders: ['google'],
       isVerified: true,
-      verifiedAt: new Date().toISOString(),
-      createdAt: new Date().toISOString().split('T')[0],
+      verifiedAt: nowIso,
+      createdAt: nowIso.split('T')[0],
+      registeredAtIso: nowIso,
+      lastLoginAt: nowIso,
+      lastActiveAt: nowIso,
+      googleSub: profile.googleSub,
+      legacyIds: profile.id && profile.id !== canonicalGoogleId ? [profile.id] : undefined,
     };
 
-    setUsers(prev => [...prev, newUser]);
+    setUsers(prev => {
+      const next = deduplicateAndNormalizeUsers([...prev, newUser], deletedUsers);
+      latestSyncStateRef.current.users = next;
+      try {
+        localStorage.setItem('kft_users_v5', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
     setCurrentUser(newUser);
+    latestSyncStateRef.current.currentUser = newUser;
     showToast(language === 'km' ? `សូមស្វាគមន៍មកកាន់កម្មវិធី ${newUser.name}!` : `Welcome to the app, ${newUser.name}!`, 'success');
     setIsAuthModalOpen(false);
     if (isSupabaseConfigured()) {
-      setTimeout(() => { triggerCloudSyncNow(); }, 300);
+      upsertSingleUserToCloud(newUser, deletedUsers)
+        .then(cloudMerged => {
+          if (Array.isArray(cloudMerged) && cloudMerged.length > 0) {
+            setUsers(prev => deduplicateAndNormalizeUsers([...cloudMerged, ...prev], deletedUsers));
+          }
+          triggerCloudSyncNow(true);
+        })
+        .catch(() => {
+          triggerCloudSyncNow(true);
+        });
     }
     return true;
   };
@@ -3876,6 +4169,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const logout = () => {
     revokeAdminSession();
     setCurrentUser(null);
+    latestSyncStateRef.current.currentUser = null;
     setIsAdminOpen(false);
     showToast(language === 'km' ? 'បានចាកចេញពីគណនី' : 'Logged out', 'info');
   };
@@ -3889,14 +4183,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       ...currentUser,
       name: cleanName,
       avatar: newAvatar || currentUser.avatar,
+      lastActiveAt: new Date().toISOString(),
     };
 
     setCurrentUser(updated);
-    setUsers(prev => prev.map(u => u.id === currentUser.id ? updated : u));
+    latestSyncStateRef.current.currentUser = updated;
+    setUsers(prev => {
+      const next = deduplicateAndNormalizeUsers(
+        prev.map(u => (u.id === currentUser.id ? updated : u)),
+        deletedUsers
+      );
+      latestSyncStateRef.current.users = next;
+      return next;
+    });
     try {
       localStorage.setItem('kft_current_user_v5', JSON.stringify(updated));
     } catch (e) {
       console.warn('Storage save error:', e);
+    }
+    if (isSupabaseConfigured() && updated.role !== 'admin') {
+      upsertSingleUserToCloud(updated, deletedUsers).catch(() => {});
     }
     showToast(language === 'km' ? 'បានកែប្រែឈ្មោះជោគជ័យ!' : 'Name updated successfully!', 'success');
   };
@@ -8263,6 +8569,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         uploadPaymentProofToTransaction,
         getAuthorizedPaymentProof,
         triggerCloudSyncNow,
+        isSyncingUsers,
+        lastUsersSyncedAt,
+        syncUsersNow,
         isExitModalOpen,
         setIsExitModalOpen,
         exitAppNow,

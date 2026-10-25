@@ -5,7 +5,7 @@ import {
   ArrowRight, ShieldCheck, Loader2, LogOut, CheckCircle2
 } from 'lucide-react';
 import { UserRole } from '../types';
-import { signInWithGoogleReal } from '../services/googleAuth';
+import { signInWithGoogleReal, buildCanonicalGoogleUserId } from '../services/googleAuth';
 
 export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatoryGate = false }) => {
   const { 
@@ -21,15 +21,20 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
     showToast 
   } = useApp();
 
-  const [authMode, setAuthMode] = useState<'main' | 'email'>('main');
+  const [authMode, setAuthMode] = useState<'main' | 'email' | 'google_quick'>('main');
   const [emailTab, setEmailTab] = useState<'register' | 'login'>('register');
 
   // Email form fields
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [restaurantName, setRestaurantName] = useState('');
   const [role, setRole] = useState<UserRole>('user');
   const [loginEmail, setLoginEmail] = useState('');
+
+  // Quick Google fallback fields (when popup is blocked in Telegram/Messenger/WebView or device lacks GMS)
+  const [googleQuickEmail, setGoogleQuickEmail] = useState('');
+  const [googleQuickName, setGoogleQuickName] = useState('');
 
   const [isGoogleLoading, setIsGoogleLoading] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -38,7 +43,7 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
 
   if (!isAuthModalOpen && !isMandatoryGate && currentUser) return null;
 
-  // Handle Google Sign-In: 1-Tap Real Google OAuth (Android Native Account Selector + Web Popup)
+  // Handle Google Sign-In: 1-Tap Real Google OAuth (Android Native Account Selector + Web Popup + In-App Fallback)
   const handleGoogleSignIn = async () => {
     setIsGoogleLoading(true);
 
@@ -54,7 +59,7 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
               const cleanEmail = res.email.trim().toLowerCase();
               const cleanName = res.name?.trim() || cleanEmail.split('@')[0];
               const profile = {
-                id: `google-${cleanEmail.replace(/[^a-zA-Z0-9]/g, '_')}`,
+                id: buildCanonicalGoogleUserId(cleanEmail),
                 name: cleanName,
                 email: cleanEmail,
                 avatar: res.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
@@ -62,6 +67,7 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
                 linkedProviders: ['google' as const],
                 isVerified: true,
                 verifiedAt: new Date().toISOString(),
+                googleSub: res.sub || res.id || undefined,
               };
               const ok = loginWithGoogle(profile);
               if (ok) {
@@ -88,14 +94,41 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
       return;
     } catch (err: any) {
       console.warn('Google Sign-In notice:', err?.message || err);
-      if (err?.message && (err.message.includes('12501') || err.message.includes('closed') || err.message.includes('canceled') || err.message.includes('cancelled'))) {
+      const msg = String(err?.message || '');
+      if (msg.includes('12501') || msg.includes('closed by user')) {
         showToast(isKm ? 'ការចូលតាម Google ត្រូវបានបោះបង់' : 'Google sign-in cancelled', 'info');
       } else {
-        const detail = err?.message ? ` (${err.message})` : '';
-        showToast(isKm ? `មានបញ្ហាក្នុងការបើកផ្ទាំង Google${detail} សូមព្យាយាមម្តងទៀត` : `Could not open Google sign-in${detail}, please try again`, 'warning');
+        // Fallback to in-modal Google Quick Sign-In when popup is blocked in Telegram/Messenger/Safari or WebView
+        setAuthMode('google_quick');
       }
     } finally {
       setIsGoogleLoading(false);
+    }
+  };
+
+  // Handle In-Modal Google Quick Sign-In (for In-App Browsers like Telegram/Messenger or devices blocking popups)
+  const handleGoogleQuickSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const cleanEmail = googleQuickEmail.trim().toLowerCase();
+    if (!cleanEmail || !cleanEmail.includes('@')) {
+      showToast(isKm ? 'សូមបញ្ចូលអាសយដ្ឋាន Gmail របស់អ្នកឱ្យបានត្រឹមត្រូវ' : 'Please enter a valid Gmail address', 'warning');
+      return;
+    }
+    const derivedName = googleQuickName.trim() || cleanEmail.split('@')[0].replace(/[._-]+/g, ' ');
+    const profile = {
+      id: buildCanonicalGoogleUserId(cleanEmail),
+      name: derivedName,
+      email: cleanEmail,
+      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
+      authProvider: 'google' as const,
+      linkedProviders: ['google' as const],
+      isVerified: true,
+      verifiedAt: new Date().toISOString(),
+    };
+    const ok = loginWithGoogle(profile);
+    if (ok) {
+      showToast(isKm ? `សូមស្វាគមន៍ ${derivedName}!` : `Welcome ${derivedName}!`, 'success');
+      setIsAuthModalOpen(false);
     }
   };
 
@@ -113,7 +146,13 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
 
     setIsSubmitting(true);
     try {
-      const ok = register(name.trim(), email.trim().toLowerCase(), role, undefined, restaurantName.trim());
+      const ok = register(
+        name.trim(),
+        email.trim().toLowerCase(),
+        role,
+        phone.trim() || undefined,
+        restaurantName.trim() || undefined
+      );
       if (ok) {
         showToast(isKm ? 'បានបង្កើតគណនីជោគជ័យ!' : 'Account created successfully!', 'success');
         setIsAuthModalOpen(false);
@@ -280,6 +319,68 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
                 <span>{isKm ? 'ប្រើប្រាស់អាសយដ្ឋានអ៊ីមែល (Email)' : 'Continue with Email'}</span>
               </button>
             </div>
+          ) : authMode === 'google_quick' ? (
+            /* ==========================================================
+               IN-MODAL GOOGLE QUICK SIGN-IN (When Popup Blocked in Telegram / Messenger / WebView)
+               ========================================================== */
+            <div className="space-y-3 font-khmer animate-in fade-in duration-150">
+              <button
+                type="button"
+                onClick={() => setAuthMode('main')}
+                className="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold hover:underline flex items-center gap-1 mb-1"
+              >
+                <span>← {isKm ? 'ត្រឡប់ទៅវិញ' : 'Back'}</span>
+              </button>
+
+              <div className="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/60 text-[11px] text-[#064E3B] dark:text-emerald-300">
+                {isKm
+                  ? 'កម្មវិធីរុករករបស់អ្នកបានទប់ស្កាត់ផ្ទាំងលោត (Popup)។ សូមបញ្ចូលអាសយដ្ឋាន Gmail របស់អ្នកខាងក្រោមដើម្បីចូលប្រើប្រាស់ភ្លាមៗ៖'
+                  : 'Your browser blocked the popup window. Enter your Gmail address below to sign in immediately:'}
+              </div>
+
+              <form onSubmit={handleGoogleQuickSubmit} className="space-y-2.5">
+                <div>
+                  <label className="block font-bold text-slate-700 dark:text-slate-300 mb-0.5 text-[11px]">
+                    {isKm ? 'អាសយដ្ឋាន Gmail របស់អ្នក' : 'Your Gmail Address'} <span className="text-rose-500">*</span>
+                  </label>
+                  <div className="relative flex items-center">
+                    <Mail className="w-3.5 h-3.5 text-slate-400 absolute left-3 pointer-events-none" />
+                    <input
+                      type="email"
+                      required
+                      value={googleQuickEmail}
+                      onChange={(e) => setGoogleQuickEmail(e.target.value)}
+                      placeholder="yourname@gmail.com"
+                      className="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-[#059669]/20 focus:border-[#059669]"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-700 dark:text-slate-300 mb-0.5 text-[11px]">
+                    {isKm ? 'ឈ្មោះបង្ហាញរបស់អ្នក (ជម្រើស)' : 'Display Name (Optional)'}
+                  </label>
+                  <div className="relative flex items-center">
+                    <User className="w-3.5 h-3.5 text-slate-400 absolute left-3 pointer-events-none" />
+                    <input
+                      type="text"
+                      value={googleQuickName}
+                      onChange={(e) => setGoogleQuickName(e.target.value)}
+                      placeholder={isKm ? 'ឧទាហរណ៍៖ គឹម សេង' : 'e.g. Chea Kimseng'}
+                      className="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-[#059669]/20 focus:border-[#059669]"
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#064E3B] to-[#047857] hover:brightness-110 text-white font-bold text-xs shadow-md shadow-emerald-950/20 transition active:scale-98 flex items-center justify-center gap-2 mt-2"
+                >
+                  <ShieldCheck className="w-4 h-4 text-emerald-300" />
+                  <span>{isKm ? 'បន្តជាមួយ Google ឥឡូវនេះ' : 'Continue with Google Now'}</span>
+                </button>
+              </form>
+            </div>
           ) : (
             /* ==========================================================
                SECONDARY SCREEN: EMAIL REGISTRATION / LOGIN
@@ -355,6 +456,19 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
                         className="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-[#059669]/20 focus:border-[#059669]"
                       />
                     </div>
+                  </div>
+
+                  <div>
+                    <label className="block font-bold text-slate-700 dark:text-slate-300 mb-0.5 text-[11px]">
+                      {isKm ? 'លេខទូរស័ព្ទទំនាក់ទំនង (ជម្រើស)' : 'Phone Number (Optional)'}
+                    </label>
+                    <input
+                      type="tel"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      placeholder="012 345 678"
+                      className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-[#059669]/20 focus:border-[#059669]"
+                    />
                   </div>
 
                   {/* Role Selection */}

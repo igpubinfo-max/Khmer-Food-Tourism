@@ -36,7 +36,7 @@ export const AdminDashboard: React.FC = () => {
     transactions, verifyTransaction, rejectTransaction, requestMorePaymentInfo, deleteTransactions, getAuthorizedPaymentProof,
     appSettings, updateAppSettings, setAdminPassword, currentUser, showToast,
     aiCheckIns, approveAiCheckIn, rejectAiCheckIn, mergeAiCheckIn,
-    setIsAiCheckInModalOpen, triggerCloudSyncNow,
+    setIsAiCheckInModalOpen, triggerCloudSyncNow, isSyncingUsers, lastUsersSyncedAt, syncUsersNow,
     supportTickets, replyToSupportTicket, updateSupportTicketStatus, approveVipFromSupportTicket, markSupportTicketRead,
     openGoogleMapsSearchModal
   } = useApp();
@@ -51,6 +51,31 @@ export const AdminDashboard: React.FC = () => {
       delete (window as any).__kft_admin_tab;
     }
   }, [isAdminOpen]);
+
+  // Real-time User Management synchronization whenever Admin Dashboard opens or switches to 'users' tab
+  useEffect(() => {
+    if (!isAdminOpen) return;
+    if (syncUsersNow) {
+      syncUsersNow();
+    } else if (triggerCloudSyncNow) {
+      triggerCloudSyncNow(true);
+    }
+    if (activeTab === 'users') {
+      const interval = setInterval(() => {
+        if (typeof document === 'undefined' || !document.hidden) {
+          if (syncUsersNow) {
+            syncUsersNow();
+          } else if (triggerCloudSyncNow) {
+            triggerCloudSyncNow(true);
+          }
+        }
+      }, 8000);
+      return () => clearInterval(interval);
+    }
+  }, [isAdminOpen, activeTab]);
+
+  const [userSearchQuery, setUserSearchQuery] = useState('');
+  const [userTypeFilter, setUserTypeFilter] = useState<'all' | 'vip' | 'owner' | 'regular'>('all');
   const [adminReplyDrafts, setAdminReplyDrafts] = useState<Record<string, string>>({});
   const [inspectingTicketReceipt, setInspectingTicketReceipt] = useState<string | null>(null);
   const [ticketFilter, setTicketFilter] = useState<'all' | 'Pending' | 'Replied' | 'Resolved'>('all');
@@ -2649,21 +2674,92 @@ export const AdminDashboard: React.FC = () => {
                 ? [userPendingDeletion]
                 : [];
 
+            const vipUsersCount = deletableUsers.filter(
+              u => u.membershipTier === 'premium_vip' && u.subscriptionStatus === 'active'
+            ).length;
+            const ownerUsersCount = deletableUsers.filter(u => u.role === 'owner').length;
+            const googleUsersCount = deletableUsers.filter(
+              u => u.authProvider === 'google' || u.id.startsWith('google-')
+            ).length;
+
+            const filteredDisplayUsers = deletableUsers
+              .filter(u => {
+                if (userTypeFilter === 'vip') {
+                  return u.membershipTier === 'premium_vip' && u.subscriptionStatus === 'active';
+                }
+                if (userTypeFilter === 'owner') {
+                  return u.role === 'owner';
+                }
+                if (userTypeFilter === 'regular') {
+                  return u.membershipTier !== 'premium_vip' && u.role !== 'owner';
+                }
+                return true;
+              })
+              .filter(u => {
+                if (!userSearchQuery.trim()) return true;
+                const q = userSearchQuery.trim().toLowerCase();
+                return (
+                  (u.name || '').toLowerCase().includes(q) ||
+                  (u.email || '').toLowerCase().includes(q) ||
+                  (u.phone || '').toLowerCase().includes(q) ||
+                  (u.id || '').toLowerCase().includes(q)
+                );
+              })
+              .sort((a, b) => {
+                const aVip = a.membershipTier === 'premium_vip' && a.subscriptionStatus === 'active' ? 1 : 0;
+                const bVip = b.membershipTier === 'premium_vip' && b.subscriptionStatus === 'active' ? 1 : 0;
+                if (bVip !== aVip) return bVip - aVip;
+                const aMs = new Date(a.lastLoginAt || a.registeredAtIso || a.createdAt || 0).getTime() || 0;
+                const bMs = new Date(b.lastLoginAt || b.registeredAtIso || b.createdAt || 0).getTime() || 0;
+                return bMs - aMs;
+              });
+
             return (
               <div className="space-y-4">
                 <div className="flex items-center justify-between gap-3 flex-wrap">
                   <div>
-                    <h3 className="font-bold text-stone-900 dark:text-stone-100 font-khmer text-sm">
-                      {isKm ? `អ្នកប្រើប្រាស់ក្នុងប្រព័ន្ធ (${users.length} គណនី)` : `User Accounts (${users.length})`}
+                    <h3 className="font-bold text-stone-900 dark:text-stone-100 font-khmer text-sm flex items-center gap-2">
+                      <span>
+                        {isKm ? `អ្នកប្រើប្រាស់ក្នុងប្រព័ន្ធ (${deletableUsers.length} គណនី)` : `User Accounts (${deletableUsers.length})`}
+                      </span>
+                      {lastUsersSyncedAt && (
+                        <span className="text-[10px] font-normal px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                          ✓ {isKm ? 'ធ្វើសមកាលកម្ម៖' : 'Synced:'} {new Date(lastUsersSyncedAt).toLocaleTimeString()}
+                        </span>
+                      )}
                     </h3>
                     <p className="text-[11px] text-stone-500 font-khmer mt-0.5">
                       {isKm
-                        ? 'ធីកប្រអប់ (Checkbox) លើគណនីដែលចង់លុប ដើម្បីបង្ហាញប៊ូតុងលុបគណនីដោយសុវត្ថិភាព'
-                        : 'Select user accounts using the checkboxes to reveal the Delete button'}
+                        ? 'គណនីនីមួយៗត្រូវបានរក្សាទុក និងបង្ហាញតែ ១ គត់ ដោយភ្ជាប់ជាមួយប្រវត្តិ VIP ថ្ងៃចុះឈ្មោះ និងសកម្មភាពពេញលេញ'
+                        : 'Each user is securely saved and displayed once with VIP status, registration date, and activity records'}
                     </p>
                   </div>
 
                   <div className="flex items-center gap-2 flex-wrap">
+                    <button
+                      type="button"
+                      disabled={isSyncingUsers}
+                      onClick={async () => {
+                        const ok = syncUsersNow
+                          ? await syncUsersNow()
+                          : triggerCloudSyncNow
+                          ? await triggerCloudSyncNow(true)
+                          : false;
+                        if (ok) {
+                          showToast(
+                            isKm
+                              ? `✅ បានធ្វើសមកាលកម្មបញ្ជីអ្នកប្រើប្រាស់ពី Cloud ជោគជ័យ (${deletableUsers.length} គណនី)!`
+                              : `✅ Synchronized user accounts from Cloud (${deletableUsers.length} users)!`,
+                            'success'
+                          );
+                        }
+                      }}
+                      className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white font-khmer text-xs font-bold border border-emerald-700 transition flex items-center gap-1.5 cursor-pointer shadow-xs"
+                    >
+                      <RefreshCw className={`w-3.5 h-3.5 ${isSyncingUsers ? 'animate-spin' : ''}`} />
+                      <span>{isKm ? 'ធ្វើសមកាលកម្មឥឡូវនេះ' : 'Sync Users Now'}</span>
+                    </button>
+
                     {deletableUsers.length > 0 && (
                       <label className="px-3 py-1.5 rounded-xl bg-white dark:bg-stone-800 hover:bg-stone-100 text-stone-700 dark:text-stone-200 font-khmer text-xs font-bold border border-stone-300 dark:border-stone-600 transition flex items-center gap-2 cursor-pointer select-none">
                         <input
@@ -2710,9 +2806,9 @@ export const AdminDashboard: React.FC = () => {
                         const backupObj = {
                           timestamp: new Date().toISOString(),
                           appName: 'Khmer Food & Tourism',
-                          version: 'v1.9.5',
-                          users: users,
-                          count: users.length,
+                          version: 'v2.1.0',
+                          users: deletableUsers,
+                          count: deletableUsers.length,
                         };
                         const blob = new Blob([JSON.stringify(backupObj, null, 2)], { type: 'application/json' });
                         const url = URL.createObjectURL(blob);
@@ -2730,19 +2826,75 @@ export const AdminDashboard: React.FC = () => {
                   </div>
                 </div>
 
-                {users.length === 0 ? (
+                {/* User Summary KPI Cards & Search / Filter Bar */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 font-khmer">
+                  <div className="p-3 rounded-2xl bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700">
+                    <div className="text-[11px] text-stone-500">{isKm ? 'គណនីសរុប' : 'Total Users'}</div>
+                    <div className="text-lg font-black text-stone-900 dark:text-stone-100 mt-0.5">{deletableUsers.length}</div>
+                  </div>
+                  <div className="p-3 rounded-2xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/60">
+                    <div className="text-[11px] text-amber-800 dark:text-amber-300">{isKm ? 'សមាជិក VIP សកម្ម' : 'Active VIP'}</div>
+                    <div className="text-lg font-black text-amber-700 dark:text-amber-300 mt-0.5">👑 {vipUsersCount}</div>
+                  </div>
+                  <div className="p-3 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/60">
+                    <div className="text-[11px] text-emerald-800 dark:text-emerald-300">{isKm ? 'ម្ចាស់ហាងអាហារ' : 'Shop Owners'}</div>
+                    <div className="text-lg font-black text-emerald-700 dark:text-emerald-300 mt-0.5">🏪 {ownerUsersCount}</div>
+                  </div>
+                  <div className="p-3 rounded-2xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800/60">
+                    <div className="text-[11px] text-blue-800 dark:text-blue-300">{isKm ? 'ចូលតាម Google' : 'Google Sign-In'}</div>
+                    <div className="text-lg font-black text-blue-700 dark:text-blue-300 mt-0.5">G {googleUsersCount}</div>
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
+                  <div className="relative flex-1">
+                    <Search className="w-4 h-4 text-stone-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    <input
+                      type="text"
+                      value={userSearchQuery}
+                      onChange={e => setUserSearchQuery(e.target.value)}
+                      placeholder={isKm ? 'ស្វែងរកតាមឈ្មោះ អ៊ីមែល លេខទូរស័ព្ទ ឬ User ID...' : 'Search by name, email, phone, or User ID...'}
+                      className="w-full pl-9 pr-3 py-2 rounded-xl bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-xs font-khmer text-stone-800 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+                    />
+                  </div>
+                  <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar font-khmer">
+                    {([
+                      { id: 'all', label: isKm ? `ទាំងអស់ (${deletableUsers.length})` : `All (${deletableUsers.length})` },
+                      { id: 'vip', label: isKm ? `👑 VIP (${vipUsersCount})` : `👑 VIP (${vipUsersCount})` },
+                      { id: 'owner', label: isKm ? `🏪 ម្ចាស់ហាង (${ownerUsersCount})` : `🏪 Owners (${ownerUsersCount})` },
+                      { id: 'regular', label: isKm ? '👤 ទូទៅ' : '👤 Regular' },
+                    ] as const).map(f => (
+                      <button
+                        key={f.id}
+                        type="button"
+                        onClick={() => setUserTypeFilter(f.id)}
+                        className={`px-3 py-1.5 rounded-xl text-[11px] font-bold whitespace-nowrap transition cursor-pointer ${
+                          userTypeFilter === f.id
+                            ? 'bg-[#064E3B] text-white shadow-xs'
+                            : 'bg-white dark:bg-stone-800 text-stone-600 dark:text-stone-300 border border-stone-200 dark:border-stone-700'
+                        }`}
+                      >
+                        {f.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {filteredDisplayUsers.length === 0 ? (
                   <div className="p-8 text-center bg-white dark:bg-stone-800 rounded-3xl border border-stone-200 dark:border-stone-700 space-y-3 font-khmer">
                     <div className="w-14 h-14 rounded-full bg-emerald-100 dark:bg-emerald-950/70 text-[#064E3B] dark:text-emerald-300 mx-auto flex items-center justify-center">
                       <CheckCircle2 className="w-7 h-7" />
                     </div>
                     <div>
                       <h4 className="font-bold text-sm text-stone-900 dark:text-stone-100">
-                        {isKm ? 'មូលដ្ឋានទិន្នន័យអ្នកប្រើប្រាស់ត្រូវបានសម្អាតស្អាត (Database Clean)' : 'User Database is Clean'}
+                        {userSearchQuery.trim() || userTypeFilter !== 'all'
+                          ? (isKm ? 'រកមិនឃើញគណនីដែលត្រូវនឹងការស្វែងរកនេះទេ' : 'No matching user accounts found')
+                          : (isKm ? 'មូលដ្ឋានទិន្នន័យអ្នកប្រើប្រាស់ត្រូវបានសម្អាតស្អាត (Database Clean)' : 'User Database is Clean')}
                       </h4>
                       <p className="text-xs text-stone-500 max-w-sm mx-auto mt-1">
                         {isKm 
-                          ? 'គ្មានគណនីអ្នកប្រើប្រាស់ទូទៅដែលបានចុះឈ្មោះក្នុងប្រព័ន្ធឡើយ។ គណនីរដ្ឋបាល (Admin), មុខម្ហូប (២០០+), ហាងអាហារ (២២០+) និងតំបន់ទេសចរណ៍ (១២៤+) ត្រូវបានរក្សាទុកសុវត្ថិភាព ១០០%។' 
-                          : 'No registered user accounts exist. System Admin, 200+ foods, 220+ restaurants, and 124 destinations are 100% intact.'}
+                          ? 'ចុចប៊ូតុង «ធ្វើសមកាលកម្មឥឡូវនេះ» ដើម្បីទាញយកគណនីថ្មីៗពីម៉ាស៊ីនមេ Cloud ភ្លាមៗ។' 
+                          : 'Click "Sync Users Now" to fetch the latest accounts from the Cloud server.'}
                       </p>
                     </div>
                     <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-700 text-[11px] font-bold">
@@ -2751,18 +2903,46 @@ export const AdminDashboard: React.FC = () => {
                   </div>
                 ) : (
                   <div className="space-y-2 max-h-[52vh] overflow-y-auto no-scrollbar">
-                    {users.map((u) => {
+                    {filteredDisplayUsers.map((u) => {
                       const isSystemAdmin =
                         u.role === 'admin' ||
                         u.id === 'admin-authorized-single' ||
                         u.username === 'cheasavuth' ||
                         u.username === 'admin';
                       const isSelected = !isSystemAdmin && validSelectedIds.includes(u.id);
+                      const userIdSet = new Set<string>([
+                        u.id,
+                        ...(Array.isArray(u.legacyIds) ? u.legacyIds : []),
+                      ]);
+                      const uEmailLower = (u.email || '').toLowerCase().trim();
+
                       const userCustomRestsCount = restaurants.filter(
-                        r => !isSeedRestaurantId(r.id) && r.ownerId === u.id
+                        r =>
+                          !isSeedRestaurantId(r.id) &&
+                          ((r.ownerId && userIdSet.has(r.ownerId)) ||
+                            (uEmailLower && r.ownerEmail && r.ownerEmail.toLowerCase().trim() === uEmailLower))
                       ).length;
-                      const userPostsCount = posts.filter(p => p.authorId === u.id).length;
-                      const userTxnsCount = transactions.filter(t => t.ownerId === u.id).length;
+                      const userPostsCount = posts.filter(
+                        p => p.authorId && userIdSet.has(p.authorId)
+                      ).length;
+                      const userTxnsCount = transactions.filter(
+                        t =>
+                          (t.userId && userIdSet.has(t.userId)) ||
+                          (t.ownerId && userIdSet.has(t.ownerId)) ||
+                          (uEmailLower && t.userEmail && t.userEmail.toLowerCase().trim() === uEmailLower)
+                      ).length;
+                      const userTicketsCount = supportTickets.filter(
+                        tk =>
+                          (tk.userId && userIdSet.has(tk.userId)) ||
+                          (uEmailLower && tk.userEmail && tk.userEmail.toLowerCase().trim() === uEmailLower)
+                      ).length;
+
+                      const providerLabel =
+                        u.authProvider === 'google' || u.id.startsWith('google-')
+                          ? 'Google'
+                          : u.authProvider === 'phone'
+                          ? 'Phone'
+                          : 'Email';
 
                       return (
                         <div
@@ -2795,31 +2975,70 @@ export const AdminDashboard: React.FC = () => {
                             <div className="min-w-0">
                               <h4 className="font-bold text-stone-900 dark:text-stone-100 font-khmer flex items-center gap-2 flex-wrap">
                                 <span>{u.name}</span>
+                                <span className="px-1.5 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 text-[9px] font-mono">
+                                  {providerLabel}
+                                </span>
                                 <code className="text-[10px] font-mono text-stone-400">({u.id})</code>
                               </h4>
                               <p className="text-[11px] text-stone-500 dark:text-stone-400 truncate">
-                                {u.email} • 📞 {u.phone || 'N/A'}
+                                {u.email || 'N/A'} • 📞 {u.phone || 'N/A'}
                               </p>
-                              {(u.membershipTier === 'premium_vip' || u.subscriptionStatus === 'active' || (u as any).vipPlanType || (u as any).vipExpiryDate) && (() => {
+                              {(u.membershipTier === 'premium_vip' || u.subscriptionStatus === 'active' || u.paymentStatus === 'pending_verification' || (u as any).vipPlanType || (u as any).vipExpiryDate) && (() => {
                                 const userVerifiedVipTxn = transactions.find(
-                                  t => t.userId === u.id && t.type === 'user_vip_upgrade' && t.status === 'verified'
+                                  t =>
+                                    ((t.userId && userIdSet.has(t.userId)) ||
+                                      (t.ownerId && userIdSet.has(t.ownerId)) ||
+                                      (uEmailLower && t.userEmail?.toLowerCase().trim() === uEmailLower)) &&
+                                    t.type === 'user_vip_upgrade' &&
+                                    t.status === 'verified'
                                 );
-                                const recordedDays = userVerifiedVipTxn?.durationDays || ((u as any).vipPlanType === 'annual' ? appSettings.vipLongDurationDays : appSettings.vipShortDurationDays);
-                                const recordedPrice = userVerifiedVipTxn?.amountUsd ?? ((u as any).vipPlanType === 'annual' ? appSettings.vipLongPriceUsd : appSettings.vipShortPriceUsd);
-                                return (
-                                  <p className="text-[10px] text-emerald-700 dark:text-emerald-400 font-khmer mt-0.5">
-                                    👑 គម្រោង៖ <strong>{`VIP ${recordedDays} Days ($${Number(recordedPrice).toFixed(2)})`}</strong>
-                                    {(u as any).vipActivatedAt && ` • ថ្ងៃបើក៖ ${new Date((u as any).vipActivatedAt).toLocaleDateString()}`}
-                                    {((u as any).vipExpiryDate || u.subscriptionExpiryDate) && ` • ថ្ងៃផុតកំណត់៖ ${new Date(((u as any).vipExpiryDate || u.subscriptionExpiryDate)!).toLocaleDateString()}`}
-                                  </p>
+                                const userPendingVipTxn = transactions.find(
+                                  t =>
+                                    ((t.userId && userIdSet.has(t.userId)) ||
+                                      (t.ownerId && userIdSet.has(t.ownerId)) ||
+                                      (uEmailLower && t.userEmail?.toLowerCase().trim() === uEmailLower)) &&
+                                    t.status === 'pending_verification'
                                 );
+                                if (u.membershipTier === 'premium_vip' || u.subscriptionStatus === 'active') {
+                                  const recordedDays = userVerifiedVipTxn?.durationDays || ((u as any).vipPlanType === 'annual' ? appSettings.vipLongDurationDays : appSettings.vipShortDurationDays);
+                                  const recordedPrice = userVerifiedVipTxn?.amountUsd ?? ((u as any).vipPlanType === 'annual' ? appSettings.vipLongPriceUsd : appSettings.vipShortPriceUsd);
+                                  return (
+                                    <p className="text-[10px] text-emerald-700 dark:text-emerald-400 font-khmer mt-0.5">
+                                      👑 គម្រោង៖ <strong>{`VIP ${recordedDays} Days ($${Number(recordedPrice).toFixed(2)})`}</strong>
+                                      {(u.subscriptionStartDate || (u as any).vipActivatedAt) && ` • ថ្ងៃបើក៖ ${new Date((u.subscriptionStartDate || (u as any).vipActivatedAt)!).toLocaleDateString()}`}
+                                      {((u as any).vipExpiryDate || u.subscriptionExpiryDate) && ` • ថ្ងៃផុតកំណត់៖ ${new Date(((u as any).vipExpiryDate || u.subscriptionExpiryDate)!).toLocaleDateString()}`}
+                                    </p>
+                                  );
+                                }
+                                if (userPendingVipTxn || u.paymentStatus === 'pending_verification') {
+                                  return (
+                                    <p className="text-[10px] text-amber-600 dark:text-amber-400 font-khmer mt-0.5">
+                                      ⏳ កំពុងរង់ចាំការផ្ទៀងផ្ទាត់ការទូទាត់ VIP ({userPendingVipTxn?.transactionRef || u.transactionRef || 'Pending'})
+                                    </p>
+                                  );
+                                }
+                                return null;
                               })()}
                               <div className="flex items-center gap-2 flex-wrap mt-1 text-[10px] text-stone-500 font-khmer">
+                                <span>📅 ចុះឈ្មោះ៖ <strong>{u.createdAt ? u.createdAt.split('T')[0] : 'N/A'}</strong></span>
+                                {(u.lastLoginAt || u.lastActiveAt || u.verifiedAt) && (
+                                  <>
+                                    <span>•</span>
+                                    <span>🕒 សកម្មភាពចុងក្រោយ៖ <strong>{new Date((u.lastLoginAt || u.lastActiveAt || u.verifiedAt)!).toLocaleDateString()}</strong></span>
+                                  </>
+                                )}
+                                <span>•</span>
                                 <span>🏪 ហាងផ្ទាល់ខ្លួន៖ <strong>{userCustomRestsCount}</strong></span>
                                 <span>•</span>
                                 <span>📝 បង្ហោះ៖ <strong>{userPostsCount}</strong></span>
                                 <span>•</span>
                                 <span>💳 ប្រតិបត្តិការ៖ <strong>{userTxnsCount}</strong></span>
+                                {userTicketsCount > 0 && (
+                                  <>
+                                    <span>•</span>
+                                    <span>💬 សំណើជំនួយ៖ <strong>{userTicketsCount}</strong></span>
+                                  </>
+                                )}
                               </div>
                             </div>
                           </div>
@@ -2830,9 +3049,15 @@ export const AdminDashboard: React.FC = () => {
                                 ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300'
                                 : u.membershipTier === 'premium_vip' || u.subscriptionStatus === 'active'
                                   ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300'
-                                  : 'bg-stone-100 dark:bg-stone-700 text-stone-700 dark:text-stone-300'
+                                  : u.paymentStatus === 'pending_verification'
+                                    ? 'bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-300'
+                                    : 'bg-stone-100 dark:bg-stone-700 text-stone-700 dark:text-stone-300'
                             }`}>
-                              {u.membershipTier === 'premium_vip' && !isSystemAdmin ? 'VIP' : u.role}
+                              {u.membershipTier === 'premium_vip' && !isSystemAdmin
+                                ? 'VIP'
+                                : u.paymentStatus === 'pending_verification'
+                                  ? 'PENDING VIP'
+                                  : u.role}
                             </span>
 
                             {!isSystemAdmin && (

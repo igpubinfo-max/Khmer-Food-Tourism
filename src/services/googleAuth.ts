@@ -10,10 +10,16 @@ export interface GoogleUserProfile {
   name: string;
   email: string;
   avatar: string;
+  googleSub?: string;
   authProvider: 'google';
   linkedProviders: ['google'];
   isVerified: boolean;
   verifiedAt: string;
+}
+
+export function buildCanonicalGoogleUserId(email: string): string {
+  const cleanEmail = (email || '').trim().toLowerCase();
+  return `google-${cleanEmail.replace(/[^a-z0-9]/g, '_')}`;
 }
 
 /**
@@ -42,11 +48,13 @@ export const signInWithGoogleReal = (): Promise<GoogleUserProfile> => {
                 });
                 const data = await res.json();
                 if (data?.email) {
+                  const cleanEmail = String(data.email).trim().toLowerCase();
                   const profile: GoogleUserProfile = {
-                    id: `google-${data.sub || data.email.replace(/[^a-zA-Z0-9]/g, '_')}`,
-                    name: data.name || data.email.split('@')[0],
-                    email: data.email.toLowerCase(),
+                    id: buildCanonicalGoogleUserId(cleanEmail),
+                    name: data.name || cleanEmail.split('@')[0],
+                    email: cleanEmail,
                     avatar: data.picture || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
+                    googleSub: data.sub ? String(data.sub) : undefined,
                     authProvider: 'google',
                     linkedProviders: ['google'],
                     isVerified: true,
@@ -111,11 +119,13 @@ export const signInWithGoogleReal = (): Promise<GoogleUserProfile> => {
               });
               const data = await res.json();
               if (data?.email) {
+                const cleanEmail = String(data.email).trim().toLowerCase();
                 resolve({
-                  id: `google-${data.sub || data.email.replace(/[^a-zA-Z0-9]/g, '_')}`,
-                  name: data.name || data.email.split('@')[0],
-                  email: data.email.toLowerCase(),
+                  id: buildCanonicalGoogleUserId(cleanEmail),
+                  name: data.name || cleanEmail.split('@')[0],
+                  email: cleanEmail,
                   avatar: data.picture || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
+                  googleSub: data.sub ? String(data.sub) : undefined,
                   authProvider: 'google',
                   linkedProviders: ['google'],
                   isVerified: true,
