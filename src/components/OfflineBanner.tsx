@@ -33,16 +33,26 @@ export const OfflineBanner: React.FC = () => {
       aria-live="polite"
       className="fixed left-0 right-0 bottom-16 z-40 px-4 pointer-events-none"
     >
-      <div className="max-w-md mx-auto px-3 py-2 rounded-xl bg-slate-900/95 text-white text-xs font-semibold flex items-center gap-2 shadow-lg font-khmer">
-        <WifiOff className="w-4 h-4 text-amber-300 shrink-0" />
-        <span>
-          {tr(
-            language,
-            'របៀបគ្មានអ៊ីនធឺណិត — កំពុងបង្ហាញទិន្នន័យដែលបានរក្សាទុក',
-            'Offline mode — showing saved data',
-            '离线模式 — 正在显示已保存的数据'
-          )}
-        </span>
+      <div className="max-w-md mx-auto px-3.5 py-2.5 rounded-2xl bg-slate-900/95 border border-amber-400/30 text-white text-xs flex items-start gap-2.5 shadow-xl font-khmer">
+        <WifiOff className="w-4 h-4 text-amber-300 shrink-0 mt-0.5" />
+        <div className="min-w-0 leading-snug">
+          <div className="font-extrabold text-amber-300">
+            {tr(
+              language,
+              'ប្រើបានទោះគ្មានអ៊ីនធឺណិត — មិនត្រូវការអ៊ីនធឺណិត',
+              'Works Offline — No Internet Required',
+              '支持离线使用 — 无需网络连接'
+            )}
+          </div>
+          <div className="text-[11px] text-slate-200 mt-0.5">
+            {tr(
+              language,
+              'អាចមើលម្ហូប រូបមន្ត និងមុខម្ហូបដែលបានរក្សាទុក។ ការស្វែងរកអនឡាញ និងផែនទីផ្ទាល់ ត្រូវការអ៊ីនធឺណិត។',
+              'Browse saved dishes, recipes, and favorites offline. Online search and live maps require internet.',
+              '可离线浏览菜肴、食谱与收藏内容；在线搜索与实时地图需连接网络。'
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -10,7 +10,6 @@ import { RestaurantView } from './components/RestaurantView';
 import { TourismView } from './components/TourismView';
 import { CommunityFeed } from './components/CommunityFeed';
 const ProfileView = lazy(() => import('./components/ProfileView').then((m) => ({ default: m.ProfileView })));
-const IntroTips = lazy(() => import('./components/IntroTips').then((m) => ({ default: m.IntroTips })));
 const SmartHubMenuModal = lazy(() => import('./components/SmartHubMenuModal').then((m) => ({ default: m.SmartHubMenuModal })));
 import { FoodDetailModal } from './components/FoodDetailModal';
 import { RestaurantDetailModal } from './components/RestaurantDetailModal';
@@ -215,11 +214,6 @@ const MainScreen: React.FC = () => {
       {/* Smart Menu: dish tags + travel & food tools in one place */}
       <Suspense fallback={null}>
         {isSmartHubOpen && <SmartHubMenuModal onClose={() => setIsSmartHubOpen(false)} />}
-      </Suspense>
-
-      {/* First-run intro (shown once, skippable) */}
-      <Suspense fallback={null}>
-        <IntroTips />
       </Suspense>
 
       {/* Creation & Action Modals — Conditionally Mounted (lazy-loaded chunks) */}

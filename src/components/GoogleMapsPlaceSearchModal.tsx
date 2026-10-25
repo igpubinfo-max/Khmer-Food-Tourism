@@ -526,6 +526,27 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
           ref={scrollContainerRef}
           className="flex-1 min-h-0 overflow-y-auto overscroll-contain touch-pan-y [-webkit-overflow-scrolling:touch] bg-slate-100/70"
         >
+          {typeof navigator !== 'undefined' && navigator.onLine === false && (
+            <div className="mx-3.5 sm:mx-5 mt-3 p-3 rounded-2xl bg-amber-50 border border-amber-300 text-amber-900 text-xs flex items-start gap-2.5">
+              <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+              <div className="leading-snug">
+                <span className="font-extrabold">
+                  {tr(
+                    language,
+                    'ឧបករណ៍កំពុងគ្មានអ៊ីនធឺណិត៖ ',
+                    'Device is Offline: ',
+                    '当前处于离线状态：'
+                  )}
+                </span>
+                {tr(
+                  language,
+                  'ការស្វែងរក Google Maps ផ្ទាល់ត្រូវការអ៊ីនធឺណិត ប៉ុន្តែអ្នកនៅតែអាចស្វែងរកទីតាំងដែលបានរក្សាទុកក្នុងឧបករណ៍បាន។',
+                  'Live Google Maps search requires an internet connection, but you can still search locally cached places.',
+                  '实时 Google 地图搜索需要网络连接，但您仍可搜索本地已缓存的地点。'
+                )}
+              </div>
+            </div>
+          )}
           {/* Search & Filter Controls */}
           <div ref={searchFormTopRef} className="p-3.5 sm:p-5 bg-slate-50 border-b border-slate-200 space-y-2.5 sm:space-y-3">
             {/* Search Scope Selector Bar (Nationwide / By Province / Nearby GPS) */}

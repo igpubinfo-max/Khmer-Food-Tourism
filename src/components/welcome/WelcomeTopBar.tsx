@@ -5,12 +5,12 @@ import { WELCOME_IMAGES, LANGUAGE_SWITCH } from './welcomeContent';
 interface Props {
   language: Language;
   onLanguage: (lang: Language) => void;
-  onSkip: () => void;
-  skipLabel: string;
+  onSkip?: () => void;
+  skipLabel?: string;
 }
 
-/** Top bar: small round logo (left), compact KM | EN | 中 switch + Skip (right). Nothing else. */
-export const WelcomeTopBar: React.FC<Props> = ({ language, onLanguage, onSkip, skipLabel }) => (
+/** Top bar: small round logo (left) and compact KM | EN | 中 switch (right). */
+export const WelcomeTopBar: React.FC<Props> = ({ language, onLanguage }) => (
   <div
     className="absolute top-0 inset-x-0 z-20 flex items-center justify-between gap-2 px-4"
     style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 10px)' }}
@@ -38,7 +38,7 @@ export const WelcomeTopBar: React.FC<Props> = ({ language, onLanguage, onSkip, s
               type="button"
               onClick={() => onLanguage(l.code)}
               aria-pressed={active}
-              className={`min-w-[44px] min-h-[44px] px-2 rounded-full text-xs font-extrabold transition-colors motion-reduce:transition-none cursor-pointer ${
+              className={`min-w-[44px] min-h-[40px] px-2.5 rounded-full text-xs font-extrabold transition-colors motion-reduce:transition-none cursor-pointer ${
                 active ? 'bg-amber-400 text-slate-950' : 'text-white/90 hover:text-white'
               }`}
             >
@@ -47,15 +47,6 @@ export const WelcomeTopBar: React.FC<Props> = ({ language, onLanguage, onSkip, s
           );
         })}
       </div>
-
-      <button
-        type="button"
-        onClick={onSkip}
-        className="min-h-[44px] px-3 rounded-full text-sm font-bold text-white/95 hover:text-white underline-offset-4 hover:underline cursor-pointer"
-        style={{ textShadow: '0 1px 4px rgba(0,0,0,0.8)' }}
-      >
-        {skipLabel}
-      </button>
     </div>
   </div>
 );
