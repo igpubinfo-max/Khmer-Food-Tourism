@@ -635,7 +635,7 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                     language,
                     'វាយឈ្មោះហាង (ឧ. បាយមាន់, coffee, ហាងកាហ្វេ, ភោជនីយដ្ឋាន)...',
                     'Search coffee, café, restaurant, or tourist attraction...',
-                    '输入咖啡馆、餐厅或景点名称（如 coffee, café, ហាងកាហ្វេ）...'
+                    '输入咖啡馆、餐厅或景点名称（如 coffee, café）...'
                   )}
                   className="w-full pl-10 pr-8 py-2.5 rounded-xl border border-slate-300 bg-white text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium"
                 />

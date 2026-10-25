@@ -272,7 +272,7 @@ const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     googlePlaceId: '0x31095729de2b8f21:0x7c6cd6284a4f844c',
     nameKh: 'ភោជនីយដ្ឋាន ជំនោរក្បាលកោះ (Chumnor Kbal Koh Restaurant)',
     nameEn: 'Chumnor Kbal Koh Restaurant (Jomnor Kbal Koh) - ជំនោរក្បាលកោះ',
-    nameZh: '金边河畔微风餐厅 (Chumnor Kbal Koh / ជំនោរក្បាលកោះ)',
+    nameZh: '金边河畔微风餐厅 (Chumnor Kbal Koh)',
     category: 'restaurant',
     province: 'ភ្នំពេញ',
     provinceKh: 'រាជធានីភ្នំពេញ',

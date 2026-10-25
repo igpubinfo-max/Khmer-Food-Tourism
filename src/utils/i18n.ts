@@ -6,6 +6,7 @@ import {
   EXACT_DESTINATION_NAME_ZH_MAP,
   translateDynamicTextToZh,
 } from './zhDynamicTranslator';
+import { ZH_UI_EXTRA } from '../data/zhUiExtra';
 
 /**
  * Helper for 3-language inline selection: Khmer ('km'), English ('en'), Simplified Chinese ('zh')
@@ -449,6 +450,9 @@ export function translateTextToChinese(text: string): string {
 
   if (EXACT_EN_TO_ZH_MAP[trimmed]) {
     return text.replace(trimmed, EXACT_EN_TO_ZH_MAP[trimmed]);
+  }
+  if (ZH_UI_EXTRA[trimmed]) {
+    return text.replace(trimmed, () => ZH_UI_EXTRA[trimmed]);
   }
   if (CAMBODIA_PROVINCE_ZH_MAP[trimmed]) {
     return text.replace(trimmed, CAMBODIA_PROVINCE_ZH_MAP[trimmed]);
