@@ -1,30 +1,31 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   Utensils,
-  BookOpen,
-  Sparkles,
-  Flame,
-  Heart,
+  Store,
   MapPin,
+  Navigation,
+  ChevronRight,
   ArrowRight,
+  Heart,
+  Leaf,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
-export const WELCOME_SESSION_KEY = 'kft_welcome_shown_session_v1';
-export const WELCOME_LOCAL_KEY = 'kft_welcome_shown_v2';
-const WELCOME_DURATION_MS = 3000; // Fast 3-second friendly intro with instant skip
+export const WELCOME_SESSION_KEY = 'kft_welcome_shown_session_v3';
+export const WELCOME_LOCAL_KEY = 'kft_welcome_shown_v3';
+
+export type WelcomeTargetSection = 'home' | 'food' | 'restaurants' | 'tourism' | 'nearby';
 
 interface WelcomeScreenModalProps {
-  onComplete: () => void;
+  onComplete: (targetSection?: WelcomeTargetSection) => void;
 }
 
 export const WelcomeScreenModal: React.FC<WelcomeScreenModalProps> = ({ onComplete }) => {
-  const { language } = useApp();
+  const { language, setLanguage } = useApp();
   const isKm = language === 'km';
-  const [progress, setProgress] = useState(0);
   const [isExiting, setIsExiting] = useState(false);
 
-  const handleProceedToLogin = () => {
+  const handleProceed = (targetSection: WelcomeTargetSection = 'home') => {
     if (isExiting) return;
     setIsExiting(true);
     try {
@@ -34,214 +35,288 @@ export const WelcomeScreenModal: React.FC<WelcomeScreenModalProps> = ({ onComple
       // ignore storage errors
     }
     setTimeout(() => {
-      onComplete();
+      onComplete(targetSection);
     }, 120);
   };
 
-  useEffect(() => {
-    const startTime = Date.now();
-    const interval = setInterval(() => {
-      const elapsed = Date.now() - startTime;
-      const pct = Math.min(100, (elapsed / WELCOME_DURATION_MS) * 100);
-      setProgress(pct);
-      if (elapsed >= WELCOME_DURATION_MS) {
-        clearInterval(interval);
-        handleProceedToLogin();
-      }
-    }, 200);
-
-    return () => {
-      clearInterval(interval);
-    };
-  }, []);
-
-  const benefits = [
+  const featureCards: Array<{
+    id: WelcomeTargetSection;
+    image: string;
+    titleKh: string;
+    titleEn: string;
+    icon: React.FC<{ className?: string }>;
+    badgeBg: string;
+    cardBg: string;
+    cardBorder: string;
+    chevronBg: string;
+    chevronText: string;
+  }> = [
     {
+      id: 'food',
+      image: '/welcome/card-food.jpg',
+      titleKh: 'ស្វែងរក ម្ហូប',
+      titleEn: 'FOOD & DISHES',
       icon: Utensils,
-      color: 'from-emerald-500 to-teal-600',
-      titleKh: 'ស្វែងយល់មុខម្ហូបខ្មែរឆ្ងាញ់ៗ និងពេញនិយម',
-      titleEn: 'Discover delicious and popular Khmer foods.',
+      badgeBg: 'bg-[#f59e0b]',
+      cardBg: 'bg-[#fdfaf3]',
+      cardBorder: 'border-amber-200/70',
+      chevronBg: 'bg-[#fde6c4]',
+      chevronText: 'text-[#d97706]',
     },
     {
-      icon: BookOpen,
-      color: 'from-amber-500 to-orange-600',
-      titleKh: 'មើលរូបភាព ឈ្មោះ ការពិពណ៌នា និងរូបមន្តចម្អិន',
-      titleEn: 'Explore food photos, names, descriptions, and recipes.',
+      id: 'restaurants',
+      image: '/welcome/card-shops.jpg',
+      titleKh: 'ហាង និងអាជីវកម្ម',
+      titleEn: 'SHOPS & RESTAURANTS',
+      icon: Store,
+      badgeBg: 'bg-[#ef5350]',
+      cardBg: 'bg-[#fdf6f7]',
+      cardBorder: 'border-rose-200/70',
+      chevronBg: 'bg-[#fbd5d8]',
+      chevronText: 'text-[#e11d48]',
     },
     {
-      icon: Sparkles,
-      color: 'from-purple-500 to-indigo-600',
-      titleKh: 'ប្រើប្រាស់ AI ជួយស្គាល់មុខម្ហូបតាមរយៈរូបថត',
-      titleEn: 'Use AI to help identify foods from photos.',
-    },
-    {
-      icon: Flame,
-      color: 'from-rose-500 to-red-600',
-      titleKh: 'ស្វែងរកមុខម្ហូប និងហាងអាហារកំពុងល្បី',
-      titleEn: 'Discover trending foods and restaurants.',
-    },
-    {
-      icon: Heart,
-      color: 'from-pink-500 to-rose-600',
-      titleKh: 'រក្សាទុកមុខម្ហូបដែលចូលចិត្តដើម្បីងាយស្រួលមើល',
-      titleEn: 'Save favorite foods for easy access.',
-    },
-    {
+      id: 'tourism',
+      image: '/welcome/card-travel.jpg',
+      titleKh: 'ទីកន្លែងទេសចរណ៍',
+      titleEn: 'TRAVEL & ATTRACTIONS',
       icon: MapPin,
-      color: 'from-cyan-500 to-blue-600',
-      titleKh: 'ស្វែងរកភោជនីយដ្ឋានថ្មីៗ និងចែករំលែកបទពិសោធន៍អាហារ',
-      titleEn: 'Discover new restaurants and share food experiences.',
+      badgeBg: 'bg-[#3b82f6]',
+      cardBg: 'bg-[#f5f8fd]',
+      cardBorder: 'border-blue-200/70',
+      chevronBg: 'bg-[#d3e3fd]',
+      chevronText: 'text-[#2563eb]',
+    },
+    {
+      id: 'nearby',
+      image: '/welcome/card-maps.jpg',
+      titleKh: 'ផែនទីជិតខ្ញុំ',
+      titleEn: 'MAPS & NEARBY',
+      icon: Navigation,
+      badgeBg: 'bg-[#43a047]',
+      cardBg: 'bg-[#f4fbf6]',
+      cardBorder: 'border-emerald-200/70',
+      chevronBg: 'bg-[#d1f2d9]',
+      chevronText: 'text-[#15803d]',
     },
   ];
 
-  const remainingSeconds = Math.max(
-    1,
-    Math.ceil(((100 - progress) / 100) * (WELCOME_DURATION_MS / 1000))
-  );
-
   return (
     <div
-      className={`fixed inset-0 z-[120] flex items-center justify-center bg-[#022C22] text-white overflow-y-auto transition-opacity duration-200 ${
+      className={`fixed inset-0 z-[120] flex items-center justify-center bg-[#0f291e] overflow-y-auto transition-opacity duration-200 font-khmer ${
         isExiting ? 'opacity-0' : 'opacity-100'
       }`}
     >
-      {/* Food-Themed Background Collage with Warm Royal Emerald Overlay */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="grid grid-cols-2 h-full w-full opacity-25 scale-105">
+      {/* Mobile-First Centered Frame Matching Reference Layout */}
+      <div className="relative w-full max-w-[440px] min-h-screen sm:min-h-[92vh] sm:my-3 sm:rounded-[34px] bg-[#fafaf9] shadow-2xl overflow-hidden flex flex-col justify-between">
+        {/* ===================================================================
+            1. HERO SECTION (Cambodian Food Platter + Angkor Wat Sunrise)
+           =================================================================== */}
+        <div className="relative w-full h-[300px] sm:h-[325px] shrink-0 overflow-hidden select-none">
+          {/* Clean Photorealistic Hero Background */}
           <img
-            src="/foods/food-1.jpg"
-            alt="Fish Amok"
-            className="w-full h-full object-cover"
+            src="/welcome/hero-bg.jpg"
+            alt="Khmer Food & Angkor Wat"
+            className="absolute inset-0 w-full h-full object-cover object-center"
           />
-          <img
-            src="/foods/food-27.jpg"
-            alt="Kampot Pepper Crab"
-            className="w-full h-full object-cover"
-          />
-          <img
-            src="/foods/food-37.jpg"
-            alt="Nom Banh Chok"
-            className="w-full h-full object-cover"
-          />
-          <img
-            src="/foods/food-26.jpg"
-            alt="Beef Lok Lak"
-            className="w-full h-full object-cover"
-          />
-        </div>
-        <div className="absolute inset-0 bg-gradient-to-b from-[#022C22]/92 via-[#064E3B]/94 to-[#022C22]/98" />
-      </div>
 
-      {/* Main Content Container */}
-      <div className="relative z-10 w-full max-w-md mx-auto px-5 py-6 flex flex-col justify-between min-h-screen">
-        {/* Top Brand & Hero Food Showcase */}
-        <div className="text-center space-y-3 pt-1 animate-in fade-in slide-in-from-top-3 duration-300">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-400/15 border border-amber-400/40 text-amber-300 text-[11px] font-khmer font-bold shadow-sm">
-            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-            <span>
-              {isKm
-                ? 'សូមស្វាគមន៍មកកាន់ មគ្គុទ្ទេសក៍ម្ហូបអាហារ និងទេសចរណ៍ខ្មែរ'
-                : 'Welcome to Khmer Food & Tourism Guide'}
-            </span>
-          </div>
+          {/* Subtle Top & Center Readability Gradient Overlay */}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background:
+                'linear-gradient(180deg, rgba(10,36,22,0.55) 0%, rgba(12,42,25,0.42) 56%, rgba(250,250,249,0.0) 92%, rgba(250,250,249,1) 100%)',
+            }}
+          />
 
-          {/* App Logo + Featured Dish Thumbnails */}
-          <div className="flex items-center justify-center gap-3 py-1">
-            <img
-              src="/foods/food-1.jpg"
-              alt="Amok"
-              className="w-14 h-14 rounded-2xl object-cover border-2 border-emerald-400/40 shadow-lg -rotate-6"
-            />
-            <div className="w-18 h-18 rounded-3xl bg-gradient-to-br from-amber-400 via-emerald-600 to-[#064E3B] p-0.5 shadow-2xl">
-              <div className="w-full h-full rounded-[22px] bg-[#022C22] flex items-center justify-center overflow-hidden">
-                <img
-                  src="/icon-192.png?v=2.0.0"
-                  alt="App Logo"
-                  className="w-full h-full object-cover"
-                />
-              </div>
+          {/* Top-Right Compact Language Switcher (Preserving Language Selection) */}
+          <div className="relative z-20 flex justify-end px-3.5 pt-2.5">
+            <div className="inline-flex items-center gap-1 bg-black/40 backdrop-blur-md p-0.5 rounded-full border border-white/25">
+              <button
+                type="button"
+                onClick={() => setLanguage('km')}
+                className={`px-2 py-0.5 rounded-full text-[10px] font-bold transition cursor-pointer ${
+                  language === 'km'
+                    ? 'bg-amber-400 text-slate-950 shadow-xs'
+                    : 'text-white/90 hover:text-white'
+                }`}
+              >
+                🇰🇭 ខ្មែរ
+              </button>
+              <button
+                type="button"
+                onClick={() => setLanguage('en')}
+                className={`px-2 py-0.5 rounded-full text-[10px] font-bold transition cursor-pointer ${
+                  language === 'en'
+                    ? 'bg-amber-400 text-slate-950 shadow-xs'
+                    : 'text-white/90 hover:text-white'
+                }`}
+              >
+                🇬🇧 EN
+              </button>
+              <button
+                type="button"
+                onClick={() => setLanguage('zh')}
+                className={`px-2 py-0.5 rounded-full text-[10px] font-bold transition cursor-pointer ${
+                  language === 'zh'
+                    ? 'bg-amber-400 text-slate-950 shadow-xs'
+                    : 'text-white/90 hover:text-white'
+                }`}
+              >
+                🇨🇳 中文
+              </button>
             </div>
-            <img
-              src="/foods/food-27.jpg"
-              alt="Pepper Crab"
-              className="w-14 h-14 rounded-2xl object-cover border-2 border-amber-400/40 shadow-lg rotate-6"
-            />
           </div>
 
-          <div>
-            <h1 className="text-xl sm:text-2xl font-moul text-amber-300 tracking-normal drop-shadow leading-relaxed">
-              {isKm ? 'មរតកម្ហូបអាហារ និងទេសចរណ៍ខ្មែរ' : 'Khmer Food Collection & Tourism'}
-            </h1>
-            <p className="text-xs text-emerald-100/90 font-battambang mt-1">
+          {/* Hero Logo Badge + Cambodian Green & Gold Title */}
+          <div className="relative z-10 px-4 pt-1 flex items-start gap-3">
+            {/* Rounded Square White App Logo Frame */}
+            <div className="w-[88px] h-[88px] sm:w-[96px] sm:h-[96px] rounded-[24px] bg-white p-1.5 shadow-[0_8px_24px_rgba(0,0,0,0.35)] ring-2 ring-white/90 shrink-0">
+              <img
+                src="/welcome/welcome-logo.jpg"
+                alt="Khmer Food & Tourism Logo"
+                className="w-full h-full rounded-[19px] object-cover"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src = '/icon-192.png?v=2.0.0';
+                }}
+              />
+            </div>
+
+            {/* Green & Gold 3D-Styled Khmer Headline + English Subtitle */}
+            <div className="flex-1 min-w-0 pt-0.5 text-center sm:text-left">
+              <div className="inline-block relative">
+                <h1
+                  className="font-moul text-[20px] sm:text-[22px] leading-[1.35] tracking-normal text-[#fef08a]"
+                  style={{
+                    textShadow:
+                      '0 2px 0 #14532d, 0 -1px 0 #14532d, 2px 0 0 #14532d, -2px 0 0 #14532d, 0 4px 10px rgba(0,0,0,0.65)',
+                  }}
+                >
+                  ស្វែងរក ម្ហូប
+                  <span className="block text-[16px] sm:text-[18px] text-[#bbf7d0] mt-0.5">
+                    និង ទីកន្លែងទេសចរណ៍{' '}
+                    <Leaf className="w-4 h-4 inline-block text-lime-300 fill-lime-400 -mt-1" />
+                  </span>
+                </h1>
+              </div>
+
+              <p
+                className="text-[11px] sm:text-xs font-black tracking-[0.06em] text-white uppercase mt-1"
+                style={{ textShadow: '0 2px 6px rgba(0,0,0,0.85)' }}
+              >
+                KHMER FOOD & TOURISM
+              </p>
+            </div>
+          </div>
+
+          {/* Subtitle & Green Brushstroke Banner */}
+          <div className="relative z-10 px-4 mt-2 flex flex-col items-center text-center">
+            <p
+              className="text-xs sm:text-[13px] font-extrabold text-white tracking-wide"
+              style={{ textShadow: '0 2px 6px rgba(0,0,0,0.9)' }}
+            >
               {isKm
-                ? 'កម្មវិធីប្រមូលផ្តុំមុខម្ហូបខ្មែរ ភោជនីយដ្ឋាន និងតំបន់ទេសចរណ៍ទូទាំង ២៥ ខេត្ត-រាជធានី'
-                : 'Discover Authentic Cambodian Cuisine, Restaurants & Scenic Destinations'}
+                ? 'ម្ហូបឆ្ងាញ់ ទីកន្លែងស្អាត ទៅតែមួយកន្លែង'
+                : 'Delicious Food & Scenic Places — All in One Place'}
             </p>
+
+            {/* Green Brushstroke Pill Badge */}
+            <div className="mt-1.5 px-5 py-1 rounded-full bg-gradient-to-r from-[#1b5e20]/95 via-[#2e7d32] to-[#1b5e20]/95 border border-lime-300/40 shadow-lg">
+              <span className="text-xs sm:text-[13px] font-extrabold text-[#fde047] italic tracking-wide drop-shadow-xs">
+                {isKm ? 'គ្រប់អ្វីនៅក្នុងកម្មវិធីតែមួយ!' : 'Everything in a Single App!'}
+              </span>
+            </div>
           </div>
         </div>
 
-        {/* 6 Key Benefits List */}
-        <div className="my-3 space-y-2 font-khmer">
-          <div className="text-[11px] font-bold text-amber-300 uppercase tracking-wider px-1 flex items-center justify-between">
-            <span>{isKm ? '✨ អត្ថប្រយោជន៍សំខាន់ៗនៃកម្មវិធី៖' : '✨ Key App Benefits:'}</span>
-            <span className="text-[10px] text-emerald-300 font-mono">200+ Dishes • AI Vision</span>
-          </div>
-
-          <div className="space-y-2">
-            {benefits.map((item, idx) => {
-              const Icon = item.icon;
+        {/* ===================================================================
+            2. FOUR VISUAL FEATURE CARDS (2x2 Grid)
+           =================================================================== */}
+        <div className="relative z-20 -mt-3 px-3.5 pb-4 flex-1 flex flex-col justify-between bg-[#fafaf9] rounded-t-[26px]">
+          <div className="grid grid-cols-2 gap-3 pt-1">
+            {featureCards.map((card) => {
+              const Icon = card.icon;
               return (
-                <div
-                  key={idx}
-                  className="flex items-center gap-3 p-2.5 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/15 shadow-sm transition"
+                <button
+                  key={card.id}
+                  type="button"
+                  onClick={() => handleProceed(card.id)}
+                  className={`group rounded-[22px] ${card.cardBg} border ${card.cardBorder} shadow-[0_4px_14px_rgba(0,0,0,0.07)] hover:shadow-md overflow-hidden text-left transition-all duration-150 hover:scale-[1.01] active:scale-98 cursor-pointer flex flex-col`}
                 >
-                  <div
-                    className={`w-9 h-9 rounded-xl bg-gradient-to-br ${item.color} flex items-center justify-center shrink-0 shadow-md`}
-                  >
-                    <Icon className="w-4 h-4 text-white" />
+                  {/* Card Photo Header + Overlapping Circular Badge */}
+                  <div className="relative w-full h-[88px] sm:h-[96px]">
+                    <img
+                      src={card.image}
+                      alt={card.titleEn}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <div
+                      className={`absolute left-3 -bottom-4 w-9 h-9 sm:w-10 sm:h-10 rounded-full ${card.badgeBg} border-[3px] border-white shadow-md flex items-center justify-center text-white`}
+                    >
+                      <Icon className="w-4 h-4 sm:w-4.5 sm:h-4.5 stroke-[2.4]" />
+                    </div>
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-xs font-bold text-white leading-snug">
-                      {isKm ? item.titleKh : item.titleEn}
-                    </p>
-                    <p className="text-[10px] text-emerald-200/85 truncate">
-                      {isKm ? item.titleEn : item.titleKh}
-                    </p>
+
+                  {/* Card Text + Right Circular Chevron */}
+                  <div className="pt-5 pb-3 px-3 flex items-end justify-between gap-1 flex-1">
+                    <div className="min-w-0">
+                      <h3 className="text-[13px] sm:text-[14px] font-extrabold text-slate-900 leading-tight truncate">
+                        {card.titleKh}
+                      </h3>
+                      <p className="text-[9.5px] sm:text-[10px] font-extrabold text-slate-600 uppercase tracking-tight mt-0.5 truncate font-sans">
+                        {card.titleEn}
+                      </p>
+                    </div>
+                    <div
+                      className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full ${card.chevronBg} ${card.chevronText} flex items-center justify-center shrink-0 group-hover:translate-x-0.5 transition-transform`}
+                    >
+                      <ChevronRight className="w-4 h-4 stroke-[2.8]" />
+                    </div>
                   </div>
-                </div>
+                </button>
               );
             })}
           </div>
-        </div>
 
-        {/* Bottom Countdown Progress & "Get Started" Button */}
-        <div className="space-y-2.5 pt-2 font-khmer">
-          {/* Smooth Countdown Progress Bar */}
-          <div className="space-y-1">
-            <div className="flex items-center justify-between text-[10px] text-emerald-200/90">
-              <span>
-                {isKm
-                  ? `កំពុងបន្តទៅកាន់ផ្ទាំងចូលគណនីក្នុងរយៈពេល ${remainingSeconds} វិនាទី...`
-                  : `Continuing to Login screen in ${remainingSeconds}s...`}
-              </span>
-              <span className="font-mono font-bold text-amber-300">{Math.round(progress)}%</span>
+          {/* ===================================================================
+              3. PAGINATION DOTS + PROMINENT "GET STARTED" BUTTON + FOOTER
+             =================================================================== */}
+          <div className="pt-3 space-y-3">
+            {/* 3 Pagination Indicator Dots (Green Active + 2 Gray) */}
+            <div className="flex items-center justify-center gap-2">
+              <span className="w-4 h-2 rounded-full bg-[#43a047]" />
+              <span className="w-2 h-2 rounded-full bg-slate-300" />
+              <span className="w-2 h-2 rounded-full bg-slate-300" />
             </div>
-            <div className="w-full h-1.5 rounded-full bg-white/15 overflow-hidden">
-              <div
-                className="h-full bg-gradient-to-r from-amber-400 via-emerald-400 to-teal-300 transition-all duration-1000 ease-linear"
-                style={{ width: `${progress}%` }}
-              />
+
+            {/* Prominent Golden-Orange Pill "Get Started" Button */}
+            <button
+              type="button"
+              onClick={() => handleProceed('home')}
+              className="w-full py-3 px-6 rounded-full bg-gradient-to-r from-[#f6c343] via-[#f08c2b] to-[#e05326] hover:brightness-105 text-white shadow-[0_8px_22px_rgba(224,83,38,0.38)] flex items-center justify-between transition active:scale-98 cursor-pointer"
+            >
+              <span className="w-6" />
+              <div className="text-center leading-tight">
+                <span className="block text-[16px] sm:text-[18px] font-extrabold tracking-wide drop-shadow-xs">
+                  ចាប់ផ្តើមប្រើកម្មវិធី
+                </span>
+                <span className="block text-[11px] sm:text-xs font-extrabold uppercase tracking-widest text-white/95 font-sans mt-0.5">
+                  GET STARTED
+                </span>
+              </div>
+              <ArrowRight className="w-6 h-6 stroke-[2.6] text-white shrink-0" />
+            </button>
+
+            {/* Footer Heart Tagline */}
+            <div className="flex items-center justify-center gap-1.5 text-center pb-0.5">
+              <Heart className="w-4 h-4 text-rose-500 fill-rose-500 shrink-0" />
+              <span className="text-xs font-extrabold text-slate-700">
+                {isKm
+                  ? 'ស្វែងរក កាន់តែងាយស្រួល ជាមួយកម្មវិធីយើង'
+                  : 'Discover Cambodia More Easily With Our App'}
+              </span>
             </div>
           </div>
-
-          <button
-            type="button"
-            onClick={handleProceedToLogin}
-            className="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500 hover:brightness-110 text-slate-950 font-bold text-sm shadow-xl shadow-amber-500/25 flex items-center justify-center gap-2 transition active:scale-98 cursor-pointer"
-          >
-            <span>{isKm ? 'ចាប់ផ្តើមប្រើប្រាស់ឥឡូវនេះ (Get Started)' : 'Get Started Now'}</span>
-            <ArrowRight className="w-4 h-4 stroke-[2.5]" />
-          </button>
         </div>
       </div>
     </div>

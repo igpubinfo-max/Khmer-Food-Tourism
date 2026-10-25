@@ -324,8 +324,13 @@ export const FoodView: React.FC = () => {
                             alt={cand.title}
                             className="w-full h-full object-cover group-hover:scale-105 transition duration-200"
                           />
-                          <div className="absolute bottom-0 inset-x-0 bg-black/75 text-white text-[9px] px-1.5 py-0.5 truncate">
-                            {cand.source}
+                          {cand.confidenceScore && (
+                            <span className="absolute top-1 left-1 px-1.5 py-0.2 rounded bg-emerald-900/90 text-amber-300 text-[8px] font-black font-mono border border-amber-400/40">
+                              #{idx + 1} • {cand.confidenceScore}%
+                            </span>
+                          )}
+                          <div className="absolute bottom-0 inset-x-0 bg-black/80 text-white text-[9px] px-1.5 py-0.5 truncate font-khmer">
+                            {cand.title || cand.source}
                           </div>
                           {isSelected && (
                             <div className="absolute top-1 right-1 w-5 h-5 rounded-full bg-amber-400 text-slate-950 flex items-center justify-center shadow">

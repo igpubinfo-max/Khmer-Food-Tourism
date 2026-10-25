@@ -1,6 +1,6 @@
 export const APP_VERSION = 'v2.1.0';
 export const APP_VERSION_NAME = '2.1.0';
-export const APP_BUILD_CODE = 78;
+export const APP_BUILD_CODE = 79;
 export const APP_RELEASE_DATE = '2026-10-25';
 
 export interface GoogleMapsPlaceMetadata {
@@ -1141,12 +1141,58 @@ export interface AppNotification {
   messageKh: string;
   messageEn: string;
   messageZh?: string;
-  type: 'promo' | 'new_spot' | 'discount' | 'daily_dish' | 'system';
+  type: 'promo' | 'new_spot' | 'discount' | 'daily_dish' | 'event' | 'local_news' | 'system';
   date: string;
+  timestampIso?: string;
   isRead: boolean;
-  targetType?: 'restaurant' | 'destination' | 'food';
+  targetType?: 'restaurant' | 'destination' | 'food' | 'daily_discovery' | 'external';
   targetId?: string;
   discountPercent?: number;
+  photoUrl?: string;
+  provinceKh?: string;
+  provinceEn?: string;
+  sourceName?: string;
+  sourceUrl?: string;
+  latitude?: number;
+  longitude?: number;
+}
+
+export type DailyDiscoveryCategory =
+  | 'all'
+  | 'restaurant'
+  | 'attraction'
+  | 'promotion'
+  | 'event'
+  | 'local_news'
+  | 'food';
+
+export interface DailyDiscoveryItem {
+  id: string;
+  category: Exclude<DailyDiscoveryCategory, 'all'>;
+  titleKh: string;
+  titleEn: string;
+  titleZh?: string;
+  summaryKh: string;
+  summaryEn: string;
+  summaryZh?: string;
+  photoUrl: string;
+  provinceKh: string;
+  provinceEn: string;
+  addressKh?: string;
+  latitude?: number;
+  longitude?: number;
+  publishedAt: string; // ISO 8601 timestamp
+  sourceName: string;
+  sourceUrl: string;
+  sourcePlatform: 'supabase_live' | 'google_maps' | 'facebook_public' | 'tiktok_public' | 'tourism_ministry' | 'wikimedia_api' | 'open_meteo' | 'vip_partner';
+  targetType: 'restaurant' | 'destination' | 'food' | 'external';
+  targetId?: string;
+  discountPercent?: number;
+  priceDisplay?: string;
+  rating?: number;
+  isNewToday?: boolean;
+  tagsKh?: string[];
+  tagsEn?: string[];
 }
 
 export interface CommentItem {

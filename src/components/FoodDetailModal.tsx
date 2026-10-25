@@ -88,19 +88,10 @@ export const FoodDetailModal: React.FC = () => {
       });
       setOnlineCandidates(results);
       if (results.length > 0) {
-        const best = results[0];
-        const updated = {
-          ...selectedFood,
-          photoUrl: best.url,
-          imageAuditStatus: 'verified' as const,
-          imageAuditNote: `រូបភាពស្វែងរកពី Online ដោយស្វ័យប្រវត្តិ (${best.source})`,
-        };
-        updateFood(updated);
-        setSelectedFood(updated);
         showToast(
           language === 'km'
-            ? `✨ បានរកឃើញ និងប្តូររូបភាពម្ហូបពី Online ចំនួន ${results.length} សន្លឹក!`
-            : `✨ Found ${results.length} online food photos!`,
+            ? `✨ រកឃើញរូបភាពម្ហូបចំនួន ${results.length} សន្លឹក! សូមចុចលើរូបភាពខាងក្រោមដើម្បីជ្រើសរើស។`
+            : `✨ Found ${results.length} matching dish photos! Tap a photo below to apply.`,
           'success'
         );
       }

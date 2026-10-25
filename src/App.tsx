@@ -43,9 +43,11 @@ import { Toast } from './components/Toast';
 const MainScreen: React.FC = () => {
   const {
     activeTab,
+    setActiveTab,
     language,
     currentUser,
     setIsAuthModalOpen,
+    setIsNearMeModalOpen,
     selectedFood,
     selectedRestaurant,
     selectedDestination,
@@ -86,9 +88,9 @@ const MainScreen: React.FC = () => {
 
   const [showWelcomeScreen, setShowWelcomeScreen] = useState<boolean>(() => {
     try {
-      return sessionStorage.getItem(WELCOME_SESSION_KEY) !== 'true' && localStorage.getItem('kft_welcome_shown_v2') !== 'true';
+      return sessionStorage.getItem(WELCOME_SESSION_KEY) !== 'true';
     } catch {
-      return false;
+      return true;
     }
   });
 
@@ -119,9 +121,23 @@ const MainScreen: React.FC = () => {
   if (showWelcomeScreen) {
     return (
       <WelcomeScreenModal
-        onComplete={() => {
+        onComplete={(targetSection) => {
           setShowWelcomeScreen(false);
-          setIsAuthModalOpen(true);
+          if (targetSection === 'food') {
+            setActiveTab('food');
+          } else if (targetSection === 'restaurants') {
+            setActiveTab('restaurants');
+          } else if (targetSection === 'tourism') {
+            setActiveTab('tourism');
+          } else if (targetSection === 'nearby') {
+            setActiveTab('home');
+            setIsNearMeModalOpen(true);
+          } else {
+            setActiveTab('home');
+          }
+          if (!currentUser) {
+            setIsAuthModalOpen(true);
+          }
         }}
       />
     );

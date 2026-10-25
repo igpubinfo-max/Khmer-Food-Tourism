@@ -28,6 +28,7 @@ import {
   verifyAdditionalStorePaymentOnBackend, recordVerifiedTransaction
 } from '../services/paymentService';
 import { initialTrendingFoods } from '../data/seedTrendingFoods';
+import { buildDynamicNotificationsList } from '../services/dailyDiscoveryAndNotificationService';
 import { findDuplicateRestaurant, mergeRestaurantRecords } from '../utils/duplicateDetector';
 import { recordSubmissionTimestamp, checkSubmissionRateLimit } from '../services/aiCheckInService';
 import { 
@@ -1374,7 +1375,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const setIsDailyDiscoveriesModalOpen = (open: boolean) => {
-    if (open && !verifyBackendVipFeatureAccess('អ្វីថ្មីថ្ងៃនេះ', 'Daily Picks')) return;
     setIsDailyDiscoveriesModalOpenRaw(open);
   };
 
@@ -1389,7 +1389,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const setIsNotificationsModalOpen = (open: boolean) => {
-    if (open && !verifyBackendVipFeatureAccess('ដំណឹង & ប្រូម៉ូសិន', 'Notifications & Promos')) return;
     setIsNotificationsModalOpenRaw(open);
   };
   const [targetWishlistItem, setTargetWishlistItem] = useState<WishlistItem | null>(null);
@@ -1589,51 +1588,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return d.toISOString().split('T')[0];
   };
 
-  const defaultNotificationsList: AppNotification[] = [
-    {
-      id: 'notif-1',
-      titleKh: 'ប្រូម៉ូសិនពិសេស VIP 15%',
-      titleEn: 'VIP Partner 15% Discount',
-      titleZh: 'VIP 合作餐厅 85 折优惠 (减 15%)',
-      messageKh: 'ភោជនីយដ្ឋាន គីមលី គ្រឿងសមុទ្រកែប បញ្ចុះតម្លៃ 15% សម្រាប់សមាជិកកម្មវិធីនៅចុងសប្តាហ៍នេះ!',
-      messageEn: 'Kimly Seafood Restaurant (Kep) offers 15% off for App members this weekend!',
-      messageZh: '白马金莉海鲜餐厅 (Kimly Seafood Kep) 本周末为应用会员提供 85 折 (减 15%) 专属优惠！',
-      type: 'promo',
-      date: getRelativeDateIso(0),
-      isRead: false,
-      targetType: 'restaurant',
-      targetId: 'rest-19',
-      discountPercent: 15,
-    },
-    {
-      id: 'notif-2',
-      titleKh: 'កន្លែង Review ល្បីថ្មីលើ TikTok & FB',
-      titleEn: 'Trending Viral Spot on TikTok & FB',
-      titleZh: 'TikTok 与 Facebook 热门网红打卡地',
-      messageKh: 'ភ្នំខ្នងផ្សារ សមុទ្រពពក កំពុងមានការ Review យ៉ាងកក្រើកលើ TikTok និង Facebook!',
-      messageEn: 'Knong Phsar Mountain & Sea of Clouds is a viral sensation spot on TikTok & Facebook right now!',
-      messageZh: '农帕萨山云海 (Knong Phsar Sea of Clouds) 正在 TikTok 和 Facebook 上火爆刷屏！',
-      type: 'new_spot',
-      date: getRelativeDateIso(1),
-      isRead: false,
-      targetType: 'destination',
-      targetId: 'dest-229',
-    },
-    {
-      id: 'notif-3',
-      titleKh: 'មុខម្ហូបខ្មែរឆ្នើមប្រចាំថ្ងៃ',
-      titleEn: 'Daily Authentic Khmer Dish Pick',
-      titleZh: '每日精选正宗高棉美食',
-      messageKh: 'ថ្ងៃនេះសាកល្បងភ្លក្ស «អាម៉ុកត្រីអន្លក់ស្លឹកញ» រសជាតិដើមខ្មែរពិតៗ និងមើលរូបមន្តចម្អិនលម្អិត!',
-      messageEn: 'Try authentic Cambodian Fish Amok with Noni leaves today and view the full recipe!',
-      messageZh: '今日推荐品尝正宗柬埔寨“诺丽叶阿莫克蒸鱼 (Fish Amok)”，点击查看完整食谱与做法！',
-      type: 'daily_dish',
-      date: getRelativeDateIso(2),
-      isRead: true,
-      targetType: 'food',
-      targetId: 'food-1',
-    },
-  ];
+  const defaultNotificationsList: AppNotification[] = buildDynamicNotificationsList(
+    foods,
+    restaurants,
+    destinations
+  );
 
   const [notifications, setNotifications] = useState<AppNotification[]>(() => {
     try {
@@ -1642,10 +1601,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
           const seedMap = new Map(defaultNotificationsList.map(item => [item.id, item]));
-          return parsed.map((n: AppNotification) => {
+          const upgradedExisting = parsed.map((n: AppNotification) => {
             const seed = seedMap.get(n.id);
             if (!seed) return n;
-            // Upgrade seed notification metadata (targetId, type, Chinese translation, and legacy static 2026-10 dates) while strictly preserving user's isRead state
             const hasLegacyStaticDate = n.date === '2026-10-21' || n.date === '2026-10-20' || n.date === '2026-10-19';
             return {
               ...seed,
@@ -1660,10 +1618,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               targetType: seed.targetType,
               targetId: seed.targetId,
               discountPercent: seed.discountPercent,
+              photoUrl: seed.photoUrl,
+              provinceKh: seed.provinceKh,
+              provinceEn: seed.provinceEn,
+              sourceName: seed.sourceName,
+              sourceUrl: seed.sourceUrl,
+              timestampIso: seed.timestampIso,
               date: hasLegacyStaticDate ? seed.date : (n.date || seed.date),
               isRead: Boolean(n.isRead),
             };
           });
+          const existingIds = new Set(upgradedExisting.map((x: AppNotification) => x.id));
+          const newDefaults = defaultNotificationsList.filter(d => !existingIds.has(d.id));
+          return [...upgradedExisting, ...newDefaults];
         }
       }
     } catch (e) {

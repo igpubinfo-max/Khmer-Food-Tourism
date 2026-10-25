@@ -1,70 +1,65 @@
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import {
   X,
-  Camera,
-  Image as ImageIcon,
   Sparkles,
-  AlertCircle,
-  CheckCircle2,
-  Clock,
-  ChefHat,
+  HeartPulse,
   Flame,
   Utensils,
   Search,
-  Filter,
-  Crown,
   ChevronRight,
   RefreshCw,
-  Edit3,
-  Package,
-  Layers,
-  ListChecks,
+  Send,
+  Scale,
+  Droplets,
+  ShieldCheck,
+  Leaf,
+  Calendar,
+  MessageSquareHeart,
+  CheckCircle2,
+  AlertCircle,
+  BookOpen,
+  Activity,
 } from 'lucide-react';
 import { FoodItem } from '../types';
 import {
-  identifyFoodWithAi,
-  retrieveRecipeAndInfoByFoodName,
-  saveUserAiCorrectionFeedback,
-  findRecommendedDishesForIngredient,
+  HEALTH_GOALS_CATALOG,
+  KHMER_SUPERFOODS_ENCYCLOPEDIA,
+  POPULAR_KHMER_HEALTH_QUESTIONS,
+  MEDICAL_DISCLAIMER_KH,
+  MEDICAL_DISCLAIMER_EN,
+  HealthGoalId,
+  HealthQaAnswer,
+  UserHealthMetricsInput,
+  getRecommendedDishesByHealthGoal,
+  generateBalancedDailyMealPlan,
+  answerHealthAndNutritionQuestion,
+  calculateUserHealthMetrics,
+  loadUserHealthMetricsInput,
+  saveUserHealthMetricsInput,
   searchByHomeIngredients,
-  getPersonalizedRecommendations,
-  getAiDailyQuota,
-  recordAiScanUsage,
-  buildFoodSafetyAdvisory,
-  AI_OBJECT_TYPE_METADATA,
-  REQUIRED_UNCERTAIN_PROMPT_KH,
-  REQUIRED_UNCERTAIN_PROMPT_EN,
-  AiFoodRecognitionResult,
-  AiFoodMatchCandidate,
-  HomeIngredientsMatchResult,
-  TastePreference,
-  DietaryPreference,
-  BudgetLevel,
-  MaxPrepTime,
+  getDailyHealthyEatingSpotlight,
 } from '../services/aiFoodService';
 
-const COMMON_KHMER_INGREDIENTS = [
-  'សាច់មាន់',
-  'សាច់ជ្រូក',
+const COMMON_HEALTHY_KHMER_INGREDIENTS = [
+  'ស្លឹកម្រុំ',
   'ត្រីរ៉ស់',
-  'សាច់គោ',
-  'បង្គា',
-  'ស៊ុតមាន់',
-  'ខ្ទិះដូង',
+  'សាច់មាន់',
   'ស្លឹកគ្រៃ',
   'រមៀត',
+  'ខ្ញី',
   'រំដេង',
-  'ស្ករត្នោត',
-  'ទឹកត្រី',
-  'ប្រហុក',
-  'ម្ទេស',
-  'ខ្ទឹមស',
-  'ស្លឹកក្រូចសើច',
-  'ត្រកួន',
   'ល្ហុង',
-  'ចេកទុំ',
-  'ម្សៅដំណើប',
+  'ត្រកួន',
+  'ម្រះ',
+  'បង្គា',
+  'ស៊ុតមាន់',
+  'សាច់គោ',
+  'ស្លឹកក្រូចសើច',
+  'ខ្ទឹមស',
+  'ត្រប់',
+  'ល្ពៅ',
+  'សណ្តែកគួរ',
 ];
 
 export const AiFoodDiscoveryModal: React.FC = () => {
@@ -72,1388 +67,1010 @@ export const AiFoodDiscoveryModal: React.FC = () => {
     isAiFoodDiscoveryModalOpen,
     setIsAiFoodDiscoveryModalOpen,
     foods,
-    restaurants,
-    currentUser,
     language,
     showToast,
-    openUpgradeVipModal,
     setSelectedFood,
-    setSelectedRestaurant,
   } = useApp();
 
   const isKm = language === 'km';
 
-  // Active Tab: 'scan' | 'ingredients' | 'preferences'
-  const [activeTab, setActiveTab] = useState<'scan' | 'ingredients' | 'preferences'>('scan');
+  // 5 Main Tabs of the AI Health & Nutrition Assistant
+  const [activeTab, setActiveTab] = useState<
+    'qa' | 'healthy_dishes' | 'meal_plan' | 'ingredients' | 'superfoods'
+  >('qa');
 
-  // Scanner States
-  const [photoDataUrl, setPhotoDataUrl] = useState<string>('');
-  const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
-  const [customHint, setCustomHint] = useState<string>('');
-  const [scanResult, setScanResult] = useState<AiFoodRecognitionResult | null>(null);
-  const [isEditingFoodName, setIsEditingFoodName] = useState<boolean>(false);
-  const [showAiSuggestionsHighlight, setShowAiSuggestionsHighlight] = useState<boolean>(false);
-  const [assistantCategoryFilter, setAssistantCategoryFilter] = useState<string>('all');
+  // Tab 1: Khmer Health Q&A + Personal BMI/Calorie Calculator States
+  const [questionInput, setQuestionInput] = useState<string>('');
+  const [currentAnswer, setCurrentAnswer] = useState<HealthQaAnswer | null>(() =>
+    answerHealthAndNutritionQuestion(POPULAR_KHMER_HEALTH_QUESTIONS[0].questionKh, foods)
+  );
+  const [showCalculator, setShowCalculator] = useState<boolean>(false);
+  const [healthProfile, setHealthProfile] = useState<UserHealthMetricsInput>(() =>
+    loadUserHealthMetricsInput()
+  );
 
-  // Ingredients Search States
-  const [selectedIngredients, setSelectedIngredients] = useState<string[]>([]);
+  // Tab 2: Healthy Dishes & Nutrition Filter States
+  const [selectedGoal, setSelectedGoal] = useState<HealthGoalId>('all');
+  const [dishSearchQuery, setDishSearchQuery] = useState<string>('');
+  const [expandedDishId, setExpandedDishId] = useState<string | null>(null);
+
+  // Tab 3: Balanced Daily Meal Planner (3 Meals) States
+  const [mealPlanGoal, setMealPlanGoal] = useState<HealthGoalId>('weight_loss');
+  const [mealPlanIndex, setMealPlanIndex] = useState<number>(0);
+
+  // Tab 4: Healthy Home Ingredients Matcher States
+  const [selectedIngredients, setSelectedIngredients] = useState<string[]>([
+    'ត្រីរ៉ស់',
+    'ស្លឹកម្រុំ',
+    'ស្លឹកគ្រៃ',
+  ]);
   const [customIngredientInput, setCustomIngredientInput] = useState<string>('');
 
-  // Preference Filter States
-  const [tastePref, setTastePref] = useState<TastePreference>('all');
-  const [dietaryPref, setDietaryPref] = useState<DietaryPreference>('all');
-  const [budgetPref, setBudgetPref] = useState<BudgetLevel>('all');
-  const [prepTimePref, setPrepTimePref] = useState<MaxPrepTime>('all');
-  const [searchPrefQuery, setSearchPrefQuery] = useState<string>('');
+  // Computed Daily Spotlight
+  const dailySpotlight = useMemo(() => getDailyHealthyEatingSpotlight(), []);
 
-  const cameraInputRef = useRef<HTMLInputElement>(null);
-  const galleryInputRef = useRef<HTMLInputElement>(null);
-  const manualNameInputRef = useRef<HTMLInputElement>(null);
+  // Computed Personal BMI, Calorie & Hydration Summary
+  const metricsSummary = useMemo(
+    () => calculateUserHealthMetrics(healthProfile),
+    [healthProfile]
+  );
 
-  // Quota status (All hooks MUST be declared before any early return!)
-  const quota = useMemo(() => {
-    return getAiDailyQuota(currentUser?.membershipTier, currentUser?.subscriptionExpiryDate, currentUser?.role);
-  }, [currentUser, isAnalyzing]);
+  // Computed Healthy Dishes List
+  const healthyDishesList = useMemo(
+    () => getRecommendedDishesByHealthGoal(selectedGoal, foods, dishSearchQuery),
+    [selectedGoal, foods, dishSearchQuery]
+  );
 
-  // Autocomplete suggestions when user types manual food name
-  const manualNameSuggestions = useMemo(() => {
-    const q = customHint.trim().toLowerCase();
-    if (!q || q.length < 1) return [];
-    return foods
-      .filter(
-        (f) =>
-          (f.nameKh || '').toLowerCase().includes(q) ||
-          (f.nameEn || '').toLowerCase().includes(q)
-      )
-      .slice(0, 6);
-  }, [customHint, foods]);
+  // Computed Daily 3-Meal Balanced Plan
+  const dailyMealPlan = useMemo(
+    () => generateBalancedDailyMealPlan(mealPlanGoal, foods, mealPlanIndex),
+    [mealPlanGoal, foods, mealPlanIndex]
+  );
 
-  // Ingredients Search computation
-  const ingredientResults: HomeIngredientsMatchResult[] = useMemo(() => {
-    if (selectedIngredients.length === 0) return [];
-    return searchByHomeIngredients(selectedIngredients, foods);
-  }, [selectedIngredients, foods]);
+  // Computed Home Ingredients Match Results
+  const ingredientMatchResults = useMemo(
+    () => searchByHomeIngredients(selectedIngredients, foods),
+    [selectedIngredients, foods]
+  );
 
-  // Preferences Filter computation
-  const preferenceResults: FoodItem[] = useMemo(() => {
-    return getPersonalizedRecommendations(
-      {
-        taste: tastePref,
-        dietary: dietaryPref,
-        budget: budgetPref,
-        maxPrepTime: prepTimePref,
-        searchQuery: searchPrefQuery,
-      },
-      foods
-    );
-  }, [tastePref, dietaryPref, budgetPref, prepTimePref, searchPrefQuery, foods]);
-
-  // Matching restaurants for identified food
-  const matchingRestaurants = useMemo(() => {
-    if (!scanResult?.primaryMatch) return [];
-    const dishNameKh = (scanResult.primaryMatch.nameKh || '').toLowerCase();
-    const dishNameEn = (scanResult.primaryMatch.nameEn || '').toLowerCase();
-    return restaurants
-      .filter((r) => {
-        const sigs = (r.signatureDishesKh || []).map((s) => s.toLowerCase());
-        return (
-          sigs.some((s) => dishNameKh.includes(s) || s.includes(dishNameKh)) ||
-          (r.descriptionKh || '').toLowerCase().includes(dishNameKh) ||
-          (r.descriptionEn || '').toLowerCase().includes(dishNameEn)
-        );
-      })
-      .slice(0, 3);
-  }, [scanResult, restaurants]);
-
-  // Early return strictly AFTER all React hooks
   if (!isAiFoodDiscoveryModalOpen) return null;
 
   const handleClose = () => {
     setIsAiFoodDiscoveryModalOpen(false);
   };
 
-  const handleRetakePhoto = () => {
-    setPhotoDataUrl('');
-    setScanResult(null);
-    setCustomHint('');
-    setIsEditingFoodName(false);
-    setShowAiSuggestionsHighlight(false);
-  };
-
-  // Image Upload & 4-Stage AI Scan Handler
-  const handleImageSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (!quota.allowed) {
+  const handleAskQuestion = (overrideQuestion?: string) => {
+    const q = (overrideQuestion !== undefined ? overrideQuestion : questionInput).trim();
+    if (!q) {
       showToast(
         isKm
-          ? '⚠️ អ្នកបានប្រើប្រាស់កូតា AI អស់សម្រាប់ថ្ងៃនេះហើយ (៣ លើក)។ សូមដំឡើងជា VIP ដើម្បីស្កេនបន្ថែម!'
-          : '⚠️ Daily AI scan limit reached (3 scans). Please upgrade to VIP for more scans!',
+          ? 'សូមវាយបញ្ចូលសំណួរអំពីសុខភាព ឬឈ្មោះមុខម្ហូបជាមុនសិន!'
+          : 'Please enter a health or nutrition question first!',
         'warning'
       );
-      openUpgradeVipModal();
       return;
     }
-
-    try {
-      const reader = new FileReader();
-      reader.onload = async (event) => {
-        const dataUrl = event.target?.result as string;
-        setPhotoDataUrl(dataUrl);
-        setIsAnalyzing(true);
-        setScanResult(null);
-        setCustomHint('');
-        setIsEditingFoodName(false);
-        setShowAiSuggestionsHighlight(false);
-
-        await new Promise((r) => setTimeout(r, 550));
-
-        // Run 4-Stage Vision Analysis Pipeline without arbitrary dish guessing
-        const result = await identifyFoodWithAi(dataUrl, foods);
-        setScanResult(result);
-        setIsAnalyzing(false);
-
-        recordAiScanUsage();
-
-        if (result.status === 'confident') {
-          showToast(isKm ? '✅ AI បានសម្គាល់មុខម្ហូបជោគជ័យ!' : '✅ Food recognized successfully!', 'success');
-        } else if (result.status === 'uncertain') {
-          showToast(
-            isKm
-              ? '🔍 បានកំណត់ប្រភេទវត្ថុក្នុងរូបភាព សូមបញ្ជាក់ ឬជ្រើសរើសឈ្មោះម្ហូប!'
-              : '🔍 Object type identified! Please confirm or enter the food name.',
-            'info'
-          );
-        } else {
-          showToast(
-            isKm ? '⚠️ រូបភាពមិនទាន់ច្បាស់ សូមបញ្ចូលឈ្មោះម្ហូប ឬថតរូបម្ដងទៀត' : '⚠️ Unclear image, please enter name or retake',
-            'warning'
-          );
-        }
-      };
-      reader.readAsDataURL(file);
-    } catch {
-      setIsAnalyzing(false);
-      showToast(isKm ? 'បរាជ័យក្នុងការអានរូបថត' : 'Failed to read photo', 'warning');
+    const ans = answerHealthAndNutritionQuestion(q, foods);
+    setCurrentAnswer(ans);
+    if (overrideQuestion !== undefined) {
+      setQuestionInput(overrideQuestion);
     }
-  };
-
-  // Manual Name Search & Correction Handler (Step 5 & Step 6 «កែឈ្មោះម្ហូប» / «បញ្ចូលឈ្មោះដោយខ្លួនឯង»)
-  const handleApplyManualFoodName = (overrideName?: string) => {
-    const query = (overrideName !== undefined ? overrideName : customHint).trim();
-    if (!query) {
-      showToast(
-        isKm
-          ? 'សូមវាយបញ្ចូលឈ្មោះម្ហូប ឬឈ្មោះវត្ថុអាហារជាមុនសិន!'
-          : 'Please type a dish or food item name first!',
-        'warning'
-      );
-      manualNameInputRef.current?.focus();
-      return;
-    }
-
-    const updatedResult = retrieveRecipeAndInfoByFoodName(query, foods);
-    saveUserAiCorrectionFeedback(
-      scanResult?.objectType || 'unknown_unclear',
-      scanResult?.identifiedNameKh || 'Unknown',
-      query,
-      updatedResult.primaryMatch?.id
+    showToast(
+      isKm
+        ? '✅ AI បានវិភាគ និងផ្តល់ការណែនាំអាហារូបត្ថម្ភជូនអ្នក!'
+        : '✅ AI Nutrition analysis ready!',
+      'success'
     );
-
-    setScanResult(updatedResult);
-    setCustomHint(query);
-    setIsEditingFoodName(false);
-    setShowAiSuggestionsHighlight(false);
-
-    if (updatedResult.isVerifiedRecipe) {
-      showToast(
-        isKm
-          ? `✅ បានទាញយកគ្រឿងផ្សំ និងរបៀបធ្វើសម្រាប់ «${updatedResult.identifiedNameKh}»!`
-          : `✅ Loaded verified details for "${updatedResult.identifiedNameEn}"!`,
-        'success'
-      );
-    } else {
-      showToast(
-        isKm
-          ? `⚠️ រកមិនឃើញរូបមន្តផ្លូវការសម្រាប់ «${query}» ទេ`
-          : `⚠️ Could not find a verified recipe for "${query}"`,
-        'warning'
-      );
-    }
   };
 
-  // Select AI Suggested Candidate Handler («ជ្រើសរើសឈ្មោះដែល AI ណែនាំ»)
-  const handleSelectCandidate = (candidate: AiFoodMatchCandidate) => {
-    const meta = AI_OBJECT_TYPE_METADATA[candidate.objectType];
-    if (candidate.foodItem) {
-      setScanResult({
-        status: 'confident',
-        objectType: candidate.objectType,
-        objectTypeLabelKh: meta.labelKh,
-        objectTypeLabelEn: meta.labelEn,
-        isPreparedDish: true,
-        identifiedNameKh: candidate.foodItem.nameKh,
-        identifiedNameEn: candidate.foodItem.nameEn,
-        confidenceScore: candidate.confidenceScore,
-        visualCluesSummaryKh: candidate.visualCluesKh,
-        visualCluesSummaryEn: candidate.visualCluesEn,
-        candidateMatches: scanResult?.candidateMatches || [candidate],
-        primaryMatch: candidate.foodItem,
-        isVerifiedRecipe: true,
-        requiresUserConfirmation: false,
-        uncertainPromptKh: REQUIRED_UNCERTAIN_PROMPT_KH,
-        uncertainPromptEn: REQUIRED_UNCERTAIN_PROMPT_EN,
-        messageKh: `✅ បានបញ្ជាក់មុខម្ហូប «${candidate.foodItem.nameKh}» ជាមួយរូបមន្តផ្លូវការ!`,
-        messageEn: `✅ Confirmed "${candidate.foodItem.nameEn}" with verified recipe!`,
-        detectedVisualFeatures: [meta.labelKh, candidate.foodItem.categoryKh],
-        disclaimerKh: 'រូបមន្ត និងគ្រឿងផ្សំត្រូវបានទាញចេញពីឃ្លាំងទិន្នន័យម្ហូបខ្មែរផ្លូវការ ប៉ុន្តែមិនអាចបញ្ជាក់គ្រឿងផ្សំជាក់ស្តែងក្នុងចានរបស់អ្នកពីរូបភាពតែមួយមុខបានទេ។',
-        disclaimerEn: 'Recipes and ingredients are retrieved from the official Cambodian database, but actual ingredients in your dish cannot be verified from an image alone.',
-        foodSafetyAdvisory: buildFoodSafetyAdvisory(candidate.foodItem, undefined, true),
-        processingTimeMs: scanResult?.processingTimeMs || 120,
-      });
-      setShowAiSuggestionsHighlight(false);
-      showToast(isKm ? `✅ បានជ្រើសរើស «${candidate.foodItem.nameKh}»` : `✅ Selected "${candidate.foodItem.nameEn}"`, 'success');
-    } else if (candidate.nonDishInfo) {
-      const recDishes = findRecommendedDishesForIngredient(candidate.nonDishInfo.searchKeywordsKh, foods, 4);
-      setScanResult({
-        status: 'confident',
-        objectType: candidate.objectType,
-        objectTypeLabelKh: meta.labelKh,
-        objectTypeLabelEn: meta.labelEn,
-        isPreparedDish: false,
-        identifiedNameKh: candidate.nonDishInfo.nameKh,
-        identifiedNameEn: candidate.nonDishInfo.nameEn,
-        confidenceScore: candidate.confidenceScore,
-        visualCluesSummaryKh: candidate.visualCluesKh,
-        visualCluesSummaryEn: candidate.visualCluesEn,
-        candidateMatches: scanResult?.candidateMatches || [candidate],
-        nonDishItemInfo: candidate.nonDishInfo,
-        recommendedDishesFromIngredient: recDishes,
-        isVerifiedRecipe: true,
-        requiresUserConfirmation: false,
-        uncertainPromptKh: REQUIRED_UNCERTAIN_PROMPT_KH,
-        uncertainPromptEn: REQUIRED_UNCERTAIN_PROMPT_EN,
-        messageKh: `✅ បានបញ្ជាក់អត្តសញ្ញាណជា «${candidate.nonDishInfo.nameKh}»!`,
-        messageEn: `✅ Confirmed as "${candidate.nonDishInfo.nameEn}"!`,
-        detectedVisualFeatures: [meta.labelKh, candidate.nonDishInfo.categoryKh],
-        disclaimerKh: candidate.nonDishInfo.isPackagedProduct
-          ? '📦 សម្រាប់ផលិតផលវេចខ្ចប់ ប្រព័ន្ធមិនបង្កើតរូបមន្តធ្វើដោយខ្លួនឯងក្លែងក្លាយឡើយ។'
-          : '💡 មុខម្ហូបខាងក្រោមគឺជាការណែនាំដែលអាចចម្អិនពីវត្ថុធាតុដើមនេះ មិនមែនជាឈ្មោះរបស់វត្ថុក្នុងរូបភាពឡើយ។',
-        disclaimerEn: '💡 Dishes listed below are cooking recommendations using this ingredient.',
-        foodSafetyAdvisory: buildFoodSafetyAdvisory(undefined, candidate.nonDishInfo, false),
-        processingTimeMs: scanResult?.processingTimeMs || 120,
-      });
-      setShowAiSuggestionsHighlight(false);
-      showToast(isKm ? `✅ បានជ្រើសរើស «${candidate.nonDishInfo.nameKh}»` : `✅ Selected "${candidate.nonDishInfo.nameEn}"`, 'success');
-    }
+  const handleUpdateHealthProfile = (patch: Partial<UserHealthMetricsInput>) => {
+    const next = { ...healthProfile, ...patch };
+    setHealthProfile(next);
+    saveUserHealthMetricsInput(next);
   };
 
-  const handleToggleIngredient = (ing: string) => {
-    setSelectedIngredients((prev) => (prev.includes(ing) ? prev.filter((i) => i !== ing) : [...prev, ing]));
+  const handleOpenDishRecipe = (food: FoodItem) => {
+    setSelectedFood(food);
+  };
+
+  const toggleIngredient = (ing: string) => {
+    setSelectedIngredients((prev) =>
+      prev.includes(ing) ? prev.filter((i) => i !== ing) : [...prev, ing]
+    );
   };
 
   const handleAddCustomIngredient = () => {
-    const trimmed = customIngredientInput.trim();
-    if (trimmed && !selectedIngredients.includes(trimmed)) {
-      setSelectedIngredients((prev) => [...prev, trimmed]);
-      setCustomIngredientInput('');
+    const val = customIngredientInput.trim();
+    if (!val) return;
+    if (!selectedIngredients.includes(val)) {
+      setSelectedIngredients((prev) => [...prev, val]);
     }
+    setCustomIngredientInput('');
   };
 
-  const categoryFilteredDishes = foods
-    .filter((f) => {
-      if (assistantCategoryFilter === 'all') return false;
-      const slug = (f.categorySlug || '').toLowerCase();
-      const nameKh = f.nameKh || '';
-      if (assistantCategoryFilter === 'balut_snack') {
-        return nameKh.includes('ពងទាកូន') || nameKh.includes('បាញ់ឆែវ') || nameKh.includes('លតឆា') || slug === 'specialty';
-      }
-      return slug === assistantCategoryFilter;
-    })
-    .slice(0, 8);
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/80 backdrop-blur-sm animate-fade-in overflow-hidden">
-      <div
-        className="relative w-full max-w-xl bg-white dark:bg-slate-900 rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-emerald-500/30 h-[92dvh] sm:h-auto sm:max-h-[92dvh] min-h-0"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="px-5 py-4 bg-gradient-to-r from-[#064E3B] via-[#047857] to-teal-700 text-white shrink-0">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <div className="p-2 rounded-2xl bg-amber-400 text-slate-950 shadow-md">
-                <Sparkles className="w-5 h-5 fill-slate-950" />
-              </div>
-              <div>
-                <h3 className="font-moul text-sm sm:text-base text-white flex items-center gap-2">
-                  <span>{isKm ? 'ជំនួយការ AI ស្វែងរកមុខម្ហូប' : 'AI Cambodian Food Assistant'}</span>
-                  <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[10px] font-black font-sans">
-                    AI Assistant
-                  </span>
-                </h3>
-                <p className="text-[11px] text-emerald-200 font-khmer">
+    <div className="fixed inset-0 z-[110] bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
+      <div className="bg-white w-full max-w-2xl rounded-3xl shadow-2xl border border-emerald-500/30 overflow-hidden flex flex-col max-h-[94vh] font-khmer animate-in fade-in zoom-in-95 duration-200">
+        {/* Top Royal Emerald & Gold Header */}
+        <div className="bg-gradient-to-r from-[#064E3B] via-emerald-800 to-teal-900 text-white px-4 py-3.5 flex items-center justify-between border-b border-amber-400/30 shrink-0">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-amber-300 via-amber-400 to-emerald-400 text-slate-950 flex items-center justify-center shadow-lg shrink-0 ring-2 ring-white/30">
+              <HeartPulse className="w-6 h-6 stroke-[2.4]" />
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <h2 className="font-moul text-sm sm:text-base text-amber-300 truncate">
                   {isKm
-                    ? 'ណែនាំមុខម្ហូបដែលទំនងបំផុតតាមរូបភាព • ជ្រើសរើសបញ្ជាក់ ១ ប៉ះ'
-                    : 'Suggests Closest Dish Matches with Confidence Scores • 1-Tap Confirm'}
-                </p>
+                    ? 'ជំនួយការ AI សុខភាព និងអាហារូបត្ថម្ភ'
+                    : 'AI Health & Nutrition Assistant'}
+                </h2>
+                <span className="px-2 py-0.5 rounded-full bg-emerald-400/20 border border-emerald-300/40 text-emerald-100 text-[10px] font-bold">
+                  {isKm ? '២០០ មុខម្ហូបខ្មែរ' : '200 Khmer Dishes'}
+                </span>
               </div>
+              <p className="text-[11px] text-emerald-100/90 truncate">
+                {isKm
+                  ? 'ណែនាំអាហារសុខភាព រៀបចំផែនការអាហារ ៣ ពេល និងឆ្លើយសំណួរអាហារូបត្ថម្ភជាភាសាខ្មែរ'
+                  : 'Healthy Khmer recipes, balanced meal planning & evidence-based nutrition Q&A'}
+              </p>
             </div>
-
-            <button
-              onClick={handleClose}
-              className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white transition cursor-pointer"
-            >
-              <X className="w-5 h-5" />
-            </button>
           </div>
 
-          {/* Daily Quota Bar */}
-          <div className="mt-3 pt-2.5 border-t border-white/15 flex items-center justify-between text-[11px]">
-            <div className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-              <span>
-                {quota.dailyLimit === -1 ? (
-                  <strong className="text-amber-300">{isKm ? 'VIP គ្មានដែនកំណត់ (Unlimited)' : 'VIP Unlimited Scans'}</strong>
-                ) : (
-                  <span>
-                    {isKm ? 'កូតា AI ថ្ងៃនេះ៖ ' : 'Daily AI Quota: '}
-                    <strong className="text-amber-300">{quota.remainingToday}</strong> / {quota.dailyLimit} {isKm ? 'លើក' : 'left'}
-                  </span>
-                )}
-              </span>
-            </div>
+          <button
+            onClick={handleClose}
+            className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition shrink-0 cursor-pointer"
+            aria-label="Close"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
 
-            {quota.tier === 'free' && currentUser?.role !== 'admin' && (
+        {/* 5 Interactive Navigation Tabs */}
+        <div className="bg-emerald-950/95 px-2.5 py-2 flex items-center gap-1.5 overflow-x-auto no-scrollbar border-b border-emerald-800/60 shrink-0">
+          {[
+            {
+              id: 'qa',
+              icon: MessageSquareHeart,
+              labelKh: '💬 សួរ AI សុខភាព',
+              labelEn: '💬 Ask Health AI',
+            },
+            {
+              id: 'healthy_dishes',
+              icon: Utensils,
+              labelKh: '🥗 ម្ហូបសុខភាព',
+              labelEn: '🥗 Healthy Dishes',
+            },
+            {
+              id: 'meal_plan',
+              icon: Calendar,
+              labelKh: '📅 ផែនការ ៣ ពេល',
+              labelEn: '📅 3-Meal Plan',
+            },
+            {
+              id: 'ingredients',
+              icon: Search,
+              labelKh: '🧺 គ្រឿងផ្សំក្នុងផ្ទះ',
+              labelEn: '🧺 Home Ingredients',
+            },
+            {
+              id: 'superfoods',
+              icon: Leaf,
+              labelKh: '🌿 ឱសថគ្រឿងទេសខ្មែរ',
+              labelEn: '🌿 Khmer Herbs',
+            },
+          ].map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
+            return (
               <button
-                onClick={openUpgradeVipModal}
-                className="px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-950 font-bold text-[10px] hover:bg-amber-300 transition flex items-center gap-1 shadow-xs"
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as any)}
+                className={`px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 whitespace-nowrap transition cursor-pointer ${
+                  isActive
+                    ? 'bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 shadow-md'
+                    : 'bg-white/10 text-emerald-100 hover:bg-white/15'
+                }`}
               >
-                <Crown className="w-3 h-3 fill-slate-950" />
-                <span>{isKm ? 'ដំឡើង VIP (+១៥/ថ្ងៃ)' : 'Upgrade VIP'}</span>
+                <Icon className="w-3.5 h-3.5 shrink-0" />
+                <span>{isKm ? tab.labelKh : tab.labelEn}</span>
               </button>
-            )}
-          </div>
+            );
+          })}
         </div>
 
-        {/* Tab Switcher */}
-        <div className="flex border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 shrink-0 text-xs font-bold font-khmer">
-          <button
-            onClick={() => setActiveTab('scan')}
-            className={`flex-1 py-3 px-2 flex items-center justify-center gap-1.5 border-b-2 transition ${
-              activeTab === 'scan'
-                ? 'border-emerald-600 text-emerald-700 dark:text-emerald-400 bg-white dark:bg-slate-900'
-                : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
-            }`}
-          >
-            <Camera className="w-4 h-4" />
-            <span>{isKm ? 'ជំនួយការរូបថត AI' : 'AI Photo Assistant'}</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('ingredients')}
-            className={`flex-1 py-3 px-2 flex items-center justify-center gap-1.5 border-b-2 transition ${
-              activeTab === 'ingredients'
-                ? 'border-emerald-600 text-emerald-700 dark:text-emerald-400 bg-white dark:bg-slate-900'
-                : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
-            }`}
-          >
-            <ChefHat className="w-4 h-4" />
-            <span>{isKm ? 'រកតាមគ្រឿងផ្សំ' : 'By Ingredients'}</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('preferences')}
-            className={`flex-1 py-3 px-2 flex items-center justify-center gap-1.5 border-b-2 transition ${
-              activeTab === 'preferences'
-                ? 'border-emerald-600 text-emerald-700 dark:text-emerald-400 bg-white dark:bg-slate-900'
-                : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
-            }`}
-          >
-            <Filter className="w-4 h-4" />
-            <span>{isKm ? 'ចំណង់ចំណូលចិត្ត' : 'Preferences'}</span>
-          </button>
-        </div>
-
-        {/* Tab Body */}
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain touch-pan-y p-4 sm:p-5 space-y-4 font-khmer text-xs">
-          {/* TAB 1: AI PHOTO SCANNER (7-Part Ordered Display) */}
-          {activeTab === 'scan' && (
+        {/* Main Scrollable Content Area */}
+        <div className="flex-1 overflow-y-auto p-3.5 sm:p-5 space-y-4 bg-slate-50">
+          {/* ===================================================================
+              TAB 1: KHMER HEALTH & NUTRITION Q&A + DAILY WELLNESS CALCULATOR
+             =================================================================== */}
+          {activeTab === 'qa' && (
             <div className="space-y-4">
-              {!photoDataUrl ? (
-                <div className="p-6 border-2 border-dashed border-emerald-500/40 rounded-3xl bg-emerald-50/30 dark:bg-slate-800/40 text-center space-y-3">
-                  <div className="w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 flex items-center justify-center mx-auto shadow-sm">
-                    <Camera className="w-8 h-8" />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-sm text-slate-900 dark:text-white">
-                      {isKm ? 'ថត ឬជ្រើសរើសរូបថតម្ហូបខ្មែរ ផ្លែឈើ បន្លែ ឬអាហារសម្រន់' : 'Take or upload a photo of Cambodian food, fruit, or snacks'}
-                    </h4>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto">
-                      {isKm
-                        ? 'ជំនួយការ AI នឹងវិភាគពណ៌ និងទម្រង់រូបភាព ដើម្បីណែនាំមុខម្ហូបដែលទំនងបំផុតនៅលំដាប់ទី ១ អមដោយជម្រើសរូបភាពសម្រាប់អ្នកចុចបញ្ជាក់'
-                        : 'AI Assistant analyzes visual features to rank the most likely dish #1 along with visual candidates for your confirmation.'}
-                    </p>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2 max-w-xs mx-auto pt-2">
-                    <button
-                      onClick={() => cameraInputRef.current?.click()}
-                      className="py-2.5 px-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-[#064E3B] text-white font-bold flex items-center justify-center gap-1.5 shadow-md active:scale-95 transition cursor-pointer"
-                    >
-                      <Camera className="w-4 h-4" />
-                      <span>{isKm ? 'ថតរូបភ្លាមៗ' : 'Take Photo'}</span>
-                    </button>
-
-                    <button
-                      onClick={() => galleryInputRef.current?.click()}
-                      className="py-2.5 px-3 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-bold flex items-center justify-center gap-1.5 border border-slate-200 dark:border-slate-700 active:scale-95 transition cursor-pointer"
-                    >
-                      <ImageIcon className="w-4 h-4 text-emerald-600" />
-                      <span>{isKm ? 'ជ្រើសពី Gallery' : 'Gallery'}</span>
-                    </button>
-                  </div>
-
-                  <input
-                    ref={cameraInputRef}
-                    type="file"
-                    accept="image/*"
-                    capture="environment"
-                    className="hidden"
-                    onChange={handleImageSelected}
-                  />
-                  <input
-                    ref={galleryInputRef}
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handleImageSelected}
-                  />
+              {/* Daily Healthy Eating Spotlight Banner */}
+              <div className="p-3.5 rounded-2xl bg-gradient-to-br from-emerald-50 via-teal-50 to-amber-50 border border-emerald-200/80 shadow-sm space-y-2">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <span className="px-2.5 py-0.5 rounded-full bg-emerald-700 text-white text-[10px] font-bold">
+                    {isKm ? dailySpotlight.badgeKh : dailySpotlight.badgeEn}
+                  </span>
+                  <button
+                    onClick={() => setShowCalculator((v) => !v)}
+                    className="px-2.5 py-1 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 text-[11px] font-extrabold flex items-center gap-1 shadow-xs transition cursor-pointer"
+                  >
+                    <Scale className="w-3.5 h-3.5" />
+                    <span>
+                      {showCalculator
+                        ? isKm
+                          ? 'លាក់តារាងគណនា BMI'
+                          : 'Hide BMI Calculator'
+                        : isKm
+                        ? 'គណនា BMI & កាឡូរីប្រចាំថ្ងៃ'
+                        : 'BMI & Daily Calorie Tool'}
+                    </span>
+                  </button>
                 </div>
-              ) : (
-                <div className="space-y-4">
-                  {/* ========================================================== */}
-                  {/* 1. SCANNED IMAGE                                           */}
-                  {/* ========================================================== */}
-                  <div className="relative rounded-2xl overflow-hidden bg-slate-950 max-h-56 flex items-center justify-center border border-slate-200 dark:border-slate-700">
-                    <img src={photoDataUrl} alt="Scanned food" className="w-full h-56 object-cover" />
+                <h3 className="text-xs sm:text-sm font-extrabold text-emerald-950">
+                  {isKm ? dailySpotlight.titleKh : dailySpotlight.titleEn}
+                </h3>
+                <p className="text-xs text-slate-700 leading-relaxed">
+                  {isKm ? dailySpotlight.tipKh : dailySpotlight.tipEn}
+                </p>
 
-                    <button
-                      onClick={handleRetakePhoto}
-                      className="absolute top-3 right-3 px-3 py-1.5 rounded-full bg-black/75 hover:bg-black/90 text-white text-[11px] font-bold backdrop-blur-sm transition flex items-center gap-1 cursor-pointer"
+                {/* Quick Summary Strip of User's Current Target */}
+                <div className="grid grid-cols-3 gap-2 pt-1">
+                  <div className="p-2 rounded-xl bg-white/90 border border-emerald-200/70 text-center">
+                    <span className="text-[10px] text-slate-500 block">
+                      {isKm ? 'BMI របស់អ្នក' : 'Your BMI'}
+                    </span>
+                    <span className="text-xs sm:text-sm font-black text-emerald-800">
+                      {metricsSummary.bmi}
+                    </span>
+                  </div>
+                  <div className="p-2 rounded-xl bg-white/90 border border-emerald-200/70 text-center">
+                    <span className="text-[10px] text-slate-500 block">
+                      {isKm ? 'កាឡូរីគោលដៅ/ថ្ងៃ' : 'Daily Target'}
+                    </span>
+                    <span className="text-xs sm:text-sm font-black text-amber-700">
+                      {metricsSummary.dailyCalorieTargetKcal} kcal
+                    </span>
+                  </div>
+                  <div className="p-2 rounded-xl bg-white/90 border border-emerald-200/70 text-center">
+                    <span className="text-[10px] text-slate-500 block">
+                      {isKm ? 'ទឹកស្អាត/ថ្ងៃ' : 'Daily Water'}
+                    </span>
+                    <span className="text-xs sm:text-sm font-black text-sky-700">
+                      {metricsSummary.dailyWaterLiters} L
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Collapsible Personal BMI, Calorie & Hydration Calculator */}
+              {showCalculator && (
+                <div className="p-4 rounded-2xl bg-white border-2 border-amber-300/80 shadow-md space-y-3 animate-in fade-in duration-150">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-xs sm:text-sm font-extrabold text-slate-900 flex items-center gap-1.5">
+                      <Activity className="w-4 h-4 text-emerald-600" />
+                      <span>
+                        {isKm
+                          ? 'គណនាសន្ទស្សន៍ទម្ងន់ (BMI) កាឡូរី និងបរិមាណទឹកប្រចាំថ្ងៃ'
+                          : 'Personal BMI, Daily Calorie & Hydration Calculator'}
+                      </span>
+                    </h4>
+                    <span
+                      className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${metricsSummary.bmiColorClass}`}
                     >
-                      <RefreshCw className="w-3.5 h-3.5" />
-                      <span>{isKm ? 'ប្តូររូបថត' : 'Retake'}</span>
-                    </button>
-
-                    {isAnalyzing && (
-                      <div className="absolute inset-0 bg-slate-950/75 backdrop-blur-xs flex flex-col items-center justify-center space-y-2 text-white p-4 text-center">
-                        <div className="w-10 h-10 border-3 border-amber-400 border-t-transparent rounded-full animate-spin" />
-                        <span className="font-bold text-xs">
-                          {isKm
-                            ? 'កំពុងវិភាគទម្រង់រូបភាព និងប្រៀបធៀបជាមួយឃ្លាំងទិន្នន័យម្ហូបខ្មែរ ២០០ មុខ...'
-                            : 'Analyzing visual features against 200 Cambodian dishes...'}
-                        </span>
-                      </div>
-                    )}
+                      {isKm ? metricsSummary.bmiCategoryKh : metricsSummary.bmiCategoryEn}
+                    </span>
                   </div>
 
-                  {scanResult && !isAnalyzing && (
-                    <div className="space-y-3.5 animate-fade-in">
-                      {/* ========================================================== */}
-                      {/* 2. IDENTIFIED OBJECT TYPE (Step One Requirement)           */}
-                      {/* ========================================================== */}
-                      <div className="p-3.5 rounded-2xl bg-slate-100 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 space-y-1.5">
-                        <div className="flex items-center justify-between gap-2 flex-wrap">
-                          <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                            <Layers className="w-3.5 h-3.5 text-emerald-500" />
-                            <span>{isKm ? '១. ប្រភេទវត្ថុដែលពិនិត្យឃើញក្នុងរូបភាព៖' : '1. Identified Object Type:'}</span>
-                          </span>
-                          <span
-                            className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold ${
-                              AI_OBJECT_TYPE_METADATA[scanResult.objectType]?.badgeColor || 'bg-emerald-600 text-white'
-                            }`}
-                          >
-                            {isKm ? scanResult.objectTypeLabelKh : scanResult.objectTypeLabelEn}
-                          </span>
-                        </div>
-                        {scanResult.visualCluesSummaryKh && (
-                          <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
-                            <strong className="text-slate-800 dark:text-slate-200">
-                              {isKm ? 'ភស្តុតាងរូបភាព៖ ' : 'Visual Clues: '}
-                            </strong>
-                            {isKm ? scanResult.visualCluesSummaryKh : scanResult.visualCluesSummaryEn}
-                          </p>
-                        )}
-                      </div>
-
-                      {/* ========================================================== */}
-                      {/* 3. MOST LIKELY FOOD NAME (#1 RANKED) + 1-TAP CONFIRM/EDIT  */}
-                      {/* ========================================================== */}
-                      <div className="p-4 rounded-3xl bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-slate-800/90 dark:to-slate-800/60 border-2 border-emerald-500/40 space-y-3">
-                        <div className="flex items-start justify-between gap-2.5">
-                          <div className="flex items-start gap-3 min-w-0">
-                            {scanResult.primaryMatch?.photoUrl && (
-                              <img
-                                src={scanResult.primaryMatch.photoUrl}
-                                alt={scanResult.identifiedNameKh}
-                                className="w-16 h-16 rounded-2xl object-cover border-2 border-emerald-500/40 shadow-sm shrink-0"
-                              />
-                            )}
-                            <div className="space-y-1 min-w-0">
-                              <div className="flex items-center gap-1.5 flex-wrap">
-                                <span
-                                  className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                                    scanResult.status === 'confident' && !scanResult.requiresUserConfirmation
-                                      ? 'bg-emerald-600 text-white'
-                                      : 'bg-amber-500 text-slate-950'
-                                  }`}
-                                >
-                                  {scanResult.status === 'confident' && !scanResult.requiresUserConfirmation
-                                    ? isKm
-                                      ? '✅ បានបញ្ជាក់មុខម្ហូប'
-                                      : '✅ Confirmed Match'
-                                    : isKm
-                                    ? '🤖 លទ្ធផលទំនងបំផុត #1 (សូមបញ្ជាក់)'
-                                    : '🤖 #1 Likely Match (Please Confirm)'}
-                                </span>
-                                {scanResult.confidenceScore > 0 && (
-                                  <span className="px-2 py-0.5 rounded-full bg-slate-900/10 dark:bg-white/10 text-slate-800 dark:text-amber-300 font-mono text-[10px] font-black">
-                                    {Math.round(scanResult.confidenceScore * 100)}% {isKm ? 'ភាពស្រដៀង' : 'Match'}
-                                  </span>
-                                )}
-                              </div>
-
-                              <h3 className="font-moul text-base text-slate-900 dark:text-white pt-0.5 leading-snug">
-                                {scanResult.identifiedNameKh}
-                              </h3>
-                              <p className="text-xs text-slate-600 dark:text-slate-300 font-sans font-medium">
-                                {scanResult.identifiedNameEn}
-                              </p>
-                            </div>
-                          </div>
-
-                          {/* Visible «កែឈ្មោះម្ហូប» Button */}
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setIsEditingFoodName((prev) => !prev);
-                              setTimeout(() => manualNameInputRef.current?.focus(), 80);
-                            }}
-                            className="px-3 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-[11px] shadow-xs flex items-center gap-1.5 cursor-pointer shrink-0 transition"
-                          >
-                            <Edit3 className="w-3.5 h-3.5" />
-                            <span>{isKm ? 'កែឈ្មោះម្ហូប' : 'Edit Name'}</span>
-                          </button>
-                        </div>
-
-                        {/* Manual Food Name Input + 1-Tap Category Filter Assistant */}
-                        {(isEditingFoodName || scanResult.requiresUserConfirmation) && (
-                          <div className="p-3 rounded-2xl bg-white dark:bg-slate-900 border-2 border-amber-400/80 space-y-2.5 animate-fade-in">
-                            <label className="text-[11px] font-bold text-slate-800 dark:text-amber-300 block">
-                              {isKm
-                                ? '✍️ វាយបញ្ចូលឈ្មោះម្ហូប ឬត្រងតាមប្រភេទម្ហូបខាងក្រោម៖'
-                                : '✍️ Type the dish name or filter by category below:'}
-                            </label>
-                            <div className="flex gap-2">
-                              <input
-                                ref={manualNameInputRef}
-                                type="text"
-                                value={customHint}
-                                onChange={(e) => setCustomHint(e.target.value)}
-                                onKeyDown={(e) => e.key === 'Enter' && handleApplyManualFoodName()}
-                                placeholder={
-                                  isKm
-                                    ? 'ឧ. ពងទាកូន, ឆាគ្រឿងអន្ទង់, ត្រីងៀតអាំង, ញាំមីសួរ, អាម៉ុកត្រី...'
-                                    : 'e.g. Balut, Stir-fried Eel, Dried Fish, Glass Noodle Salad...'
-                                }
-                                className="flex-1 px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs outline-none focus:border-emerald-500 font-bold"
-                              />
-                              <button
-                                type="button"
-                                onClick={() => handleApplyManualFoodName()}
-                                className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition cursor-pointer shrink-0 flex items-center gap-1"
-                              >
-                                <Search className="w-3.5 h-3.5" />
-                                <span>{isKm ? 'ស្វែងរករូបមន្ត' : 'Find Recipe'}</span>
-                              </button>
-                            </div>
-
-                            {/* 1-Tap Category Filter Pills */}
-                            <div className="pt-1 space-y-1.5">
-                              <span className="text-[10px] text-slate-500 block">
-                                {isKm ? 'ត្រងមុខម្ហូបតាមប្រភេទ (ចុច ១ ដង)៖' : 'Filter dishes by category (1-Tap):'}
-                              </span>
-                              <div className="flex flex-wrap gap-1">
-                                {[
-                                  { slug: 'all', kh: 'ពេញនិយម', en: 'Popular' },
-                                  { slug: 'balut_snack', kh: '🥚 ពងទាកូន/សម្រន់', en: '🥚 Balut/Snacks' },
-                                  { slug: 'stirfry', kh: '🥘 ឆា/ខ', en: '🥘 Stir-fry/Braise' },
-                                  { slug: 'grill', kh: '🔥 អាំង/ដុត', en: '🔥 Grill/Roast' },
-                                  { slug: 'salad', kh: '🥗 ញាំ/បុក/ភ្លា', en: '🥗 Salads' },
-                                  { slug: 'soup', kh: '🍲 សម្ល/ការី', en: '🍲 Soups/Curry' },
-                                  { slug: 'noodles', kh: '🍜 គុយទាវ/នំបញ្ចុក', en: '🍜 Noodles' },
-                                  { slug: 'dessert', kh: '🍰 បង្អែម/នំ', en: '🍰 Desserts' },
-                                ].map((cat) => (
-                                  <button
-                                    key={cat.slug}
-                                    type="button"
-                                    onClick={() => setAssistantCategoryFilter(cat.slug)}
-                                    className={`px-2 py-1 rounded-lg text-[10px] font-bold cursor-pointer transition border ${
-                                      assistantCategoryFilter === cat.slug
-                                        ? 'bg-emerald-600 text-white border-emerald-600'
-                                        : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-emerald-500'
-                                    }`}
-                                  >
-                                    {isKm ? cat.kh : cat.en}
-                                  </button>
-                                ))}
-                              </div>
-                            </div>
-
-                            {/* Live Verified Database Autocomplete Chips OR Category/Popular Quick-Select Chips */}
-                            <div className="pt-1 space-y-1.5">
-                              <span className="text-[10px] text-slate-500 block">
-                                {manualNameSuggestions.length > 0
-                                  ? isKm
-                                    ? 'ជ្រើសរើសរហ័សពីឃ្លាំងទិន្នន័យផ្លូវការ៖'
-                                    : 'Quick select from verified database:'
-                                  : isKm
-                                  ? 'ចុច ១ ដងលើឈ្មោះម្ហូបខាងក្រោមដើម្បីបង្ហាញរូបមន្តពេញ៖'
-                                  : 'Tap any dish below to load its full recipe:'}
-                              </span>
-                              <div className="flex flex-wrap gap-1.5">
-                                {(manualNameSuggestions.length > 0
-                                  ? manualNameSuggestions.map((f) => ({ id: f.id, nameKh: f.nameKh, nameEn: f.nameEn }))
-                                  : categoryFilteredDishes.length > 0
-                                  ? categoryFilteredDishes.map((f) => ({ id: f.id, nameKh: f.nameKh, nameEn: f.nameEn }))
-                                  : [
-                                      { id: 'q-balut', nameKh: 'ពងទាកូនទឹកម្រេចក្រូចឆ្មាកំពត', nameEn: 'Balut with Kampot Lime & Pepper' },
-                                      { id: 'q-eel', nameKh: 'ឆាគ្រឿងអន្ទង់ស្លឹកម្រះព្រៅ', nameEn: 'Spicy Stir-Fried Eel' },
-                                      { id: 'q-fish', nameKh: 'ត្រីងៀតអាំងជ្រលក់ទឹកអម្ពិលទុំ', nameEn: 'Grilled Sun-Dried Fish with Tamarind Dip' },
-                                      { id: 'q-salad', nameKh: 'ញាំមីសួរគ្រឿងសមុទ្របង្គាមឹក', nameEn: 'Glass Noodle Seafood Salad' },
-                                      { id: 'q-frog', nameKh: 'កង្កែបបោកអាំងសៀមរាប', nameEn: 'Stuffed Roasted Frog' },
-                                      { id: 'q-chicken', nameKh: 'មាន់ដុតច្រាំងទន្លេកំពត', nameEn: 'Kampot Roasted Chicken' },
-                                      { id: 'q-amok', nameKh: 'អាម៉ុកត្រីស្លឹកញ', nameEn: 'Steamed Fish Amok' },
-                                      { id: 'q-korko', nameKh: 'សម្លកកូរត្រីរ៉ស់', nameEn: 'Samlor Korko' },
-                                      { id: 'q-noodle', nameKh: 'នំបញ្ចុកសម្លខ្មែរ', nameEn: 'Num Banh Chok' },
-                                      { id: 'q-loklak', nameKh: 'បាយឡុកឡាក់សាច់គោ', nameEn: 'Beef Lok Lak' },
-                                    ]
-                                ).map((item) => (
-                                  <button
-                                    key={item.id}
-                                    type="button"
-                                    onClick={() => handleApplyManualFoodName(item.nameKh)}
-                                    className="px-2.5 py-1 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 text-[10px] font-bold cursor-pointer transition"
-                                  >
-                                    {isKm ? item.nameKh : `${item.nameKh} (${item.nameEn})`}
-                                  </button>
-                                ))}
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* ========================================================== */}
-                      {/* STEP 5 AI ASSISTANT CONFIRMATION & 3 ACTION BUTTONS        */}
-                      {/* ========================================================== */}
-                      {scanResult.requiresUserConfirmation && (
-                        <div className="p-4 rounded-3xl bg-amber-50 dark:bg-amber-950/40 border-2 border-amber-400/70 space-y-3">
-                          <div className="flex items-start gap-2.5">
-                            <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-                            <p className="text-slate-800 dark:text-amber-100 font-bold text-xs leading-relaxed">
-                              {isKm ? scanResult.messageKh || REQUIRED_UNCERTAIN_PROMPT_KH : scanResult.messageEn || REQUIRED_UNCERTAIN_PROMPT_EN}
-                            </p>
-                          </div>
-
-                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
-                            {/* Button 1: Confirm #1 AI Match */}
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setShowAiSuggestionsHighlight(false);
-                                if (scanResult.candidateMatches.length >= 1) {
-                                  handleSelectCandidate(scanResult.candidateMatches[0]);
-                                }
-                              }}
-                              className="py-2.5 px-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] shadow-xs flex items-center justify-center gap-1.5 cursor-pointer transition"
-                            >
-                              <CheckCircle2 className="w-3.5 h-3.5" />
-                              <span>{isKm ? '✅ បញ្ជាក់មុខម្ហូប #1 នេះ' : '✅ Confirm #1 Match'}</span>
-                            </button>
-
-                            {/* Button 2: Enter Name Manually */}
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setIsEditingFoodName(true);
-                                setTimeout(() => manualNameInputRef.current?.focus(), 80);
-                              }}
-                              className="py-2.5 px-3 rounded-2xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-[11px] shadow-xs flex items-center justify-center gap-1.5 cursor-pointer transition"
-                            >
-                              <Edit3 className="w-3.5 h-3.5" />
-                              <span>{isKm ? 'ស្វែងរកឈ្មោះផ្សេង' : 'Search Dish Name'}</span>
-                            </button>
-
-                            {/* Button 3: Retake Photo */}
-                            <button
-                              type="button"
-                              onClick={handleRetakePhoto}
-                              className="py-2.5 px-3 rounded-2xl bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-[11px] flex items-center justify-center gap-1.5 cursor-pointer transition"
-                            >
-                              <Camera className="w-3.5 h-3.5" />
-                              <span>{isKm ? 'ថតរូបម្ដងទៀត' : 'Retake Photo'}</span>
-                            </button>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* ========================================================== */}
-                      {/* 4. RANKED CANDIDATE MATCHES WITH VISUAL THUMBNAILS         */}
-                      {/* ========================================================== */}
-                      {scanResult.candidateMatches.length > 0 && (
-                        <div
-                          className={`p-3.5 rounded-2xl border space-y-2.5 transition ${
-                            showAiSuggestionsHighlight
-                              ? 'bg-amber-50/90 dark:bg-amber-950/40 border-amber-400 ring-2 ring-amber-400/50'
-                              : 'bg-slate-50 dark:bg-slate-800/70 border-slate-200 dark:border-slate-700'
-                          }`}
-                        >
-                          <div className="flex items-center justify-between gap-2">
-                            <span className="font-bold text-slate-800 dark:text-slate-200 block text-xs">
-                              {isKm
-                                ? 'ជម្រើសដែលជំនួយការ AI ណែនាំតាមលំដាប់ភាពស្រដៀង (ចុចដើម្បីបញ្ជាក់)៖'
-                                : 'Ranked AI Suggested Matches with Confidence Scores (Tap to confirm):'}
-                            </span>
-                          </div>
-                          <div className="space-y-2">
-                            {scanResult.candidateMatches.slice(0, 5).map((c, idx) => {
-                              const isCurrent = scanResult.identifiedNameKh === c.nameKh && !scanResult.requiresUserConfirmation;
-                              return (
-                                <div
-                                  key={c.id}
-                                  onClick={() => handleSelectCandidate(c)}
-                                  className={`p-2.5 rounded-2xl border cursor-pointer transition flex items-center justify-between gap-2.5 ${
-                                    isCurrent
-                                      ? 'bg-emerald-50 dark:bg-emerald-950/50 border-emerald-500 ring-1 ring-emerald-500/40'
-                                      : idx === 0
-                                      ? 'bg-white dark:bg-slate-900 border-emerald-500/60 hover:border-emerald-500'
-                                      : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 hover:border-emerald-500'
-                                  }`}
-                                >
-                                  <div className="flex items-center gap-2.5 min-w-0">
-                                    {c.foodItem?.photoUrl ? (
-                                      <img
-                                        src={c.foodItem.photoUrl}
-                                        alt={c.nameKh}
-                                        className="w-12 h-12 rounded-xl object-cover border border-slate-200 dark:border-slate-700 shrink-0"
-                                      />
-                                    ) : (
-                                      <div className="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-700 flex items-center justify-center font-bold text-xs shrink-0">
-                                        #{idx + 1}
-                                      </div>
-                                    )}
-                                    <div className="space-y-0.5 min-w-0">
-                                      <div className="flex items-center gap-1.5 flex-wrap">
-                                        <span
-                                          className={`px-1.5 py-0.5 rounded text-[9px] font-black ${
-                                            idx === 0
-                                              ? 'bg-amber-400 text-slate-950'
-                                              : 'bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
-                                          }`}
-                                        >
-                                          #{idx + 1}
-                                        </span>
-                                        <span className="font-bold text-slate-900 dark:text-white truncate">
-                                          {c.nameKh}{' '}
-                                          <span className="text-[10px] font-normal text-slate-500">({c.nameEn})</span>
-                                        </span>
-                                        <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 font-mono text-[10px] font-bold">
-                                          {Math.round(c.confidenceScore * 100)}%
-                                        </span>
-                                      </div>
-                                      <p className="text-[10px] text-slate-500 dark:text-slate-400 line-clamp-2">
-                                        {isKm ? c.visualCluesKh : c.visualCluesEn}
-                                      </p>
-                                    </div>
-                                  </div>
-                                  <span
-                                    className={`px-2.5 py-1.5 rounded-xl text-[10px] font-bold shrink-0 ${
-                                      isCurrent
-                                        ? 'bg-emerald-700 text-white'
-                                        : 'bg-emerald-600 hover:bg-emerald-700 text-white'
-                                    }`}
-                                  >
-                                    {isCurrent ? (isKm ? 'បានបញ្ជាក់' : 'Confirmed') : isKm ? 'ជ្រើសរើស' : 'Confirm'}
-                                  </span>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* ========================================================== */}
-                      {/* FOOD SAFETY, COOKING METHOD & POTENTIAL ALLERGEN ADVISORY  */}
-                      {/* ========================================================== */}
-                      {scanResult.foodSafetyAdvisory && (
-                        <div className="p-3.5 rounded-2xl bg-rose-50/70 dark:bg-rose-950/30 border border-rose-300 dark:border-rose-800/70 space-y-2.5">
-                          <div className="flex items-center justify-between gap-2 flex-wrap">
-                            <span className="font-bold text-rose-900 dark:text-rose-200 text-xs flex items-center gap-1.5">
-                              <Flame className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0" />
-                              <span>
-                                {isKm
-                                  ? 'សុវត្ថិភាពអាហារ វិធីចម្អិន & ការប្រុងប្រយ័ត្នអាលែកហ្ស៊ី៖'
-                                  : 'Food Safety, Cooking Method & Allergen Advisory:'}
-                              </span>
-                            </span>
-                            <span className="px-2 py-0.5 rounded-full bg-rose-200/80 dark:bg-rose-900/70 text-rose-900 dark:text-rose-200 text-[9px] font-bold">
-                              {isKm ? 'មិនអាចបញ្ជាក់ទាំងស្រុងពីរូបភាពទេ' : 'Unverified from Image Alone'}
-                            </span>
-                          </div>
-
-                          {/* Cooking Method Summary */}
-                          <div className="p-2.5 rounded-xl bg-white/80 dark:bg-slate-900/80 border border-rose-200/60 dark:border-rose-800/50 text-[11px]">
-                            <strong className="text-slate-900 dark:text-white">
-                              {isKm ? '🔥 វិធីចម្អិន (Cooking Method)៖ ' : '🔥 Cooking Method: '}
-                            </strong>
-                            <span className="text-slate-700 dark:text-slate-300">
-                              {isKm
-                                ? scanResult.foodSafetyAdvisory.cookingMethodSummaryKh
-                                : scanResult.foodSafetyAdvisory.cookingMethodSummaryEn}
-                            </span>
-                          </div>
-
-                          {/* Potential Allergen Badges */}
-                          {scanResult.foodSafetyAdvisory.potentialAllergens.length > 0 && (
-                            <div className="space-y-1.5">
-                              <span className="text-[10px] font-bold text-rose-800 dark:text-rose-300 block">
-                                {isKm
-                                  ? '⚠️ សារធាតុដែលអាចបង្កអាលែកហ្ស៊ី ឬគ្រឿងផ្សំគួរប្រុងប្រយ័ត្ន៖'
-                                  : '⚠️ Potential Allergens & Sensitive Ingredients:'}
-                              </span>
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-                                {scanResult.foodSafetyAdvisory.potentialAllergens.map((alg) => (
-                                  <div
-                                    key={alg.id}
-                                    className={`p-2 rounded-xl border text-[10px] space-y-0.5 ${
-                                      alg.severity === 'high'
-                                        ? 'bg-rose-100/80 dark:bg-rose-950/60 border-rose-400/60 text-rose-950 dark:text-rose-200'
-                                        : 'bg-amber-100/70 dark:bg-amber-950/50 border-amber-400/60 text-amber-950 dark:text-amber-200'
-                                    }`}
-                                  >
-                                    <div className="font-bold flex items-center justify-between gap-1">
-                                      <span>
-                                        {language === 'km'
-                                          ? alg.labelKh
-                                          : language === 'zh'
-                                          ? alg.labelZh
-                                          : alg.labelEn}
-                                      </span>
-                                      <span className="px-1.5 py-0.2 rounded bg-black/10 dark:bg-white/10 text-[9px] uppercase">
-                                        {alg.severity === 'high' ? (isKm ? 'កម្រិតខ្ពស់' : 'High') : isKm ? 'មធ្យម' : 'Moderate'}
-                                      </span>
-                                    </div>
-                                    <p className="text-[9.5px] opacity-85 leading-snug">
-                                      {isKm ? alg.reasonKh : alg.reasonEn}
-                                    </p>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Strict Safety Note: Never claim ingredients are 100% verified from an image alone */}
-                          <p className="text-[10px] text-rose-800 dark:text-rose-300 leading-relaxed font-semibold">
-                            {language === 'km'
-                              ? scanResult.foodSafetyAdvisory.uncertainIngredientsNoteKh
-                              : language === 'zh'
-                              ? scanResult.foodSafetyAdvisory.uncertainIngredientsNoteZh
-                              : scanResult.foodSafetyAdvisory.uncertainIngredientsNoteEn}
-                          </p>
-                        </div>
-                      )}
-
-                      {/* Unverified Manual Name Warning (Step 4 & Step 5: Never invent recipes!) */}
-                      {scanResult.status === 'unverified_manual_name' && (
-                        <div className="p-4 rounded-3xl bg-rose-50 dark:bg-rose-950/40 border border-rose-300 dark:border-rose-700 text-center space-y-2">
-                          <AlertCircle className="w-7 h-7 text-rose-600 mx-auto" />
-                          <h4 className="font-bold text-rose-900 dark:text-rose-200">
-                            {isKm
-                              ? `មិនអាចផ្ទៀងផ្ទាត់រូបមន្តសម្រាប់ «${scanResult.identifiedNameKh}» បានទេ`
-                              : `Could not verify recipe for "${scanResult.identifiedNameEn}"`}
-                          </h4>
-                          <p className="text-slate-600 dark:text-slate-300 text-[11px]">{scanResult.messageKh}</p>
-                        </div>
-                      )}
-
-                      {/* ========================================================== */}
-                      {/* CASE A: PREPARED DISH — 5. INGREDIENTS, 6. INSTRUCTIONS,   */}
-                      {/*         7. PREP TIME, SERVING SIZE & VERIFIED CALORIES     */}
-                      {/* ========================================================== */}
-                      {scanResult.primaryMatch && (
-                        <div className="p-4 rounded-3xl bg-white dark:bg-slate-800/90 border-2 border-emerald-500/50 space-y-4 shadow-sm">
-                          <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-3">
-                            <div>
-                              <span className="px-2 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 text-[10px] font-bold">
-                                {scanResult.primaryMatch.categoryKh}
-                              </span>
-                              <h4 className="font-moul text-sm text-slate-900 dark:text-white mt-1">
-                                {scanResult.primaryMatch.nameKh} ({scanResult.primaryMatch.nameEn})
-                              </h4>
-                            </div>
-                            <button
-                              onClick={() => {
-                                handleClose();
-                                setSelectedFood(scanResult.primaryMatch!);
-                              }}
-                              className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] shadow-sm flex items-center gap-1 cursor-pointer shrink-0"
-                            >
-                              <span>{isKm ? 'ទំព័រម្ហូបពេញ' : 'Open Dish Page'}</span>
-                              <ChevronRight className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-
-                          {/* 5. INGREDIENTS WITH REALISTIC QUANTITIES */}
-                          <div>
-                            <span className="font-bold text-slate-900 dark:text-white block mb-2 flex items-center gap-1.5">
-                              <ChefHat className="w-4 h-4 text-emerald-600" />
-                              <span>{isKm ? '៥. គ្រឿងផ្សំទូទៅតាមរូបមន្តប្រពៃណី៖' : '5. Traditional Recipe Ingredients & Quantities:'}</span>
-                            </span>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-                              {scanResult.primaryMatch.ingredients.map((ing, idx) => (
-                                <div
-                                  key={idx}
-                                  className="px-2.5 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-emerald-500/25 flex items-center justify-between text-[11px]"
-                                >
-                                  <span className="font-bold text-slate-800 dark:text-slate-200">
-                                    {isKm ? ing.nameKh : `${ing.nameEn} (${ing.nameKh})`}
-                                  </span>
-                                  <span className="text-emerald-700 dark:text-emerald-400 font-semibold">{ing.amount}</span>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-
-                          {/* 6. STEP-BY-STEP COOKING INSTRUCTIONS IN KHMER & ENGLISH */}
-                          {(() => {
-                            const dishSteps =
-                              scanResult.primaryMatch.steps ||
-                              (scanResult.primaryMatch as unknown as { cookingSteps?: typeof scanResult.primaryMatch.steps })
-                                .cookingSteps ||
-                              [];
-                            if (!dishSteps || dishSteps.length === 0) return null;
-                            return (
-                              <div className="pt-2 border-t border-slate-200 dark:border-slate-700">
-                                <span className="font-bold text-slate-900 dark:text-white block mb-2 flex items-center gap-1.5">
-                                  <ListChecks className="w-4 h-4 text-amber-500" />
-                                  <span>{isKm ? '៦. របៀបធ្វើ និងជំហានចម្អិនលម្អិត៖' : '6. Step-by-Step Cooking Instructions:'}</span>
-                                </span>
-                                <div className="space-y-2">
-                                  {dishSteps.map((step) => (
-                                    <div
-                                      key={step.stepNumber}
-                                      className="p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-700 flex items-start gap-2.5"
-                                    >
-                                      <span className="w-5 h-5 rounded-full bg-emerald-600 text-white font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">
-                                        {step.stepNumber}
-                                      </span>
-                                      <p className="text-[11px] text-slate-700 dark:text-slate-300 leading-relaxed">
-                                        {isKm ? step.instructionKh : step.instructionEn || step.instructionKh}
-                                      </p>
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            );
-                          })()}
-
-                          {/* 7. PREPARATION TIME, COOKING TIME, SERVING SIZE & VERIFIED CALORIES */}
-                          <div className="pt-2 border-t border-slate-200 dark:border-slate-700">
-                            <span className="font-bold text-slate-900 dark:text-white block mb-2 flex items-center gap-1.5">
-                              <Clock className="w-4 h-4 text-emerald-600" />
-                              <span>
-                                {isKm
-                                  ? '៧. រយៈពេលរៀបចំ ចម្អិន ចំនួនសម្រាប់បរិភោគ និងកាឡូរី៖'
-                                  : '7. Prep Time, Cook Time, Servings & Nutritional Info:'}
-                              </span>
-                            </span>
-                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
-                              <div className="p-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
-                                <span className="text-[10px] text-slate-500 block">{isKm ? 'រៀបចំគ្រឿង' : 'Prep Time'}</span>
-                                <strong className="text-slate-800 dark:text-slate-200">{scanResult.primaryMatch.prepTime}</strong>
-                              </div>
-                              <div className="p-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
-                                <span className="text-[10px] text-slate-500 block">{isKm ? 'រយៈពេលចម្អិន' : 'Cook Time'}</span>
-                                <strong className="text-slate-800 dark:text-slate-200">{scanResult.primaryMatch.cookTime}</strong>
-                              </div>
-                              <div className="p-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
-                                <span className="text-[10px] text-slate-500 block">{isKm ? 'សម្រាប់បរិភោគ' : 'Servings'}</span>
-                                <strong className="text-slate-800 dark:text-slate-200">{scanResult.primaryMatch.servings}</strong>
-                              </div>
-                              <div className="p-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
-                                <span className="text-[10px] text-slate-500 block">{isKm ? 'កាឡូរីប៉ាន់ស្មាន' : 'Calories'}</span>
-                                <strong className="text-emerald-700 dark:text-emerald-400">
-                                  {scanResult.primaryMatch.calories
-                                    ? `${scanResult.primaryMatch.calories} kcal`
-                                    : isKm
-                                    ? 'មិនមានទិន្នន័យបញ្ជាក់'
-                                    : 'N/A'}
-                                </strong>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Matching Restaurants */}
-                          {matchingRestaurants.length > 0 && (
-                            <div className="pt-2 border-t border-slate-200 dark:border-slate-700">
-                              <span className="font-bold text-slate-900 dark:text-white block mb-1.5 flex items-center gap-1">
-                                <Utensils className="w-3.5 h-3.5 text-amber-500" />
-                                <span>{isKm ? 'ភោជនីយដ្ឋានល្បីដែលមានមុខម្ហូបនេះ៖' : 'Famous Restaurants Serving This:'}</span>
-                              </span>
-                              <div className="space-y-1.5">
-                                {matchingRestaurants.map((r) => (
-                                  <div
-                                    key={r.id}
-                                    onClick={() => {
-                                      handleClose();
-                                      setSelectedRestaurant(r);
-                                    }}
-                                    className="p-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 flex items-center justify-between cursor-pointer hover:border-amber-400 transition"
-                                  >
-                                    <div>
-                                      <span className="font-bold text-slate-800 dark:text-slate-200 block">{r.nameKh}</span>
-                                      <span className="text-[10px] text-slate-500">{r.provinceKh}</span>
-                                    </div>
-                                    <span className="text-[10px] text-amber-600 font-bold flex items-center gap-0.5">
-                                      ⭐ {r.rating} ({r.reviewCount})
-                                    </span>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      )}
-
-                      {/* ========================================================== */}
-                      {/* CASE B: NON-DISH ITEM (FRUIT, VEGETABLE, RAW MEAT,         */}
-                      {/*         PACKAGED FOOD, OR INGREDIENT) — Step 3 Requirement */}
-                      {/* ========================================================== */}
-                      {!scanResult.primaryMatch && scanResult.nonDishItemInfo && (
-                        <div className="p-4 rounded-3xl bg-white dark:bg-slate-800/90 border-2 border-amber-500/40 space-y-3.5">
-                          <div className="flex items-center gap-2">
-                            <Package className="w-4 h-4 text-amber-500 shrink-0" />
-                            <h4 className="font-bold text-slate-900 dark:text-white text-xs">
-                              {isKm
-                                ? 'ព័ត៌មានអំពីវត្ថុអាហារ / គ្រឿងផ្សំដែលពិនិត្យឃើញ៖'
-                                : 'Identified Food Item / Ingredient Information:'}
-                            </h4>
-                          </div>
-
-                          <p className="text-[11px] text-slate-700 dark:text-slate-300 leading-relaxed">
-                            {isKm ? scanResult.nonDishItemInfo.descriptionKh : scanResult.nonDishItemInfo.descriptionEn}
-                          </p>
-
-                          <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 space-y-1.5 text-[11px]">
-                            <div>
-                              <strong className="text-emerald-700 dark:text-emerald-400">
-                                {isKm ? 'ការប្រើប្រាស់ក្នុងមុខម្ហូបខ្មែរ៖ ' : 'Culinary Uses: '}
-                              </strong>
-                              <span className="text-slate-700 dark:text-slate-300">
-                                {isKm ? scanResult.nonDishItemInfo.culinaryUsesKh : scanResult.nonDishItemInfo.culinaryUsesEn}
-                              </span>
-                            </div>
-                            <div>
-                              <strong className="text-amber-700 dark:text-amber-400">
-                                {isKm ? 'ការរក្សាទុក៖ ' : 'Storage Tips: '}
-                              </strong>
-                              <span className="text-slate-700 dark:text-slate-300">{scanResult.nonDishItemInfo.storageTipsKh}</span>
-                            </div>
-                          </div>
-
-                          {scanResult.disclaimerKh && (
-                            <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/50 border border-amber-300/60 dark:border-amber-700 text-[10px] text-amber-900 dark:text-amber-200 font-semibold">
-                              {isKm ? scanResult.disclaimerKh : scanResult.disclaimerEn}
-                            </div>
-                          )}
-
-                          {/* Clearly Labeled Recommended Dishes Using This Ingredient */}
-                          {scanResult.recommendedDishesFromIngredient &&
-                            scanResult.recommendedDishesFromIngredient.length > 0 && (
-                              <div className="pt-2 border-t border-slate-200 dark:border-slate-700 space-y-2">
-                                <span className="font-bold text-slate-900 dark:text-white block text-xs">
-                                  {isKm
-                                    ? '🍲 មុខម្ហូបណែនាំដែលអាចចម្អិនពីវត្ថុធាតុដើមនេះ (Recommended Dishes Using This Ingredient)៖'
-                                    : '🍲 Recommended Dishes You Can Cook With This Ingredient:'}
-                                </span>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                  {scanResult.recommendedDishesFromIngredient.map((dish) => (
-                                    <div
-                                      key={dish.id}
-                                      onClick={() => {
-                                        handleSelectCandidate({
-                                          id: dish.id,
-                                          nameKh: dish.nameKh,
-                                          nameEn: dish.nameEn,
-                                          objectType: 'cooked_dish',
-                                          confidenceScore: 0.95,
-                                          visualCluesKh: `មុខម្ហូបណែនាំដែលប្រើប្រាស់គ្រឿងផ្សំនេះ`,
-                                          visualCluesEn: `Recommended dish using this ingredient`,
-                                          matchReasonKh: `មុខម្ហូបណែនាំ`,
-                                          matchReasonEn: `Recommended Dish`,
-                                          foodItem: dish,
-                                        });
-                                      }}
-                                      className="p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:border-emerald-500 cursor-pointer transition flex items-center justify-between gap-2"
-                                    >
-                                      <div className="truncate">
-                                        <span className="font-bold text-slate-900 dark:text-white block truncate">
-                                          {dish.nameKh}
-                                        </span>
-                                        <span className="text-[10px] text-emerald-600 dark:text-emerald-400">
-                                          {isKm ? 'ចុចមើលរូបមន្ត និងរបៀបធ្វើ' : 'Tap to view recipe'}
-                                        </span>
-                                      </div>
-                                      <ChevronRight className="w-4 h-4 text-emerald-600 shrink-0" />
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-                        </div>
-                      )}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                    <div>
+                      <label className="text-[11px] font-bold text-slate-600 block mb-1">
+                        {isKm ? 'ទម្ងន់ (kg)' : 'Weight (kg)'}
+                      </label>
+                      <input
+                        type="number"
+                        min={30}
+                        max={200}
+                        value={healthProfile.weightKg}
+                        onChange={(e) =>
+                          handleUpdateHealthProfile({ weightKg: Number(e.target.value) })
+                        }
+                        className="w-full px-2.5 py-1.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-900"
+                      />
                     </div>
-                  )}
+                    <div>
+                      <label className="text-[11px] font-bold text-slate-600 block mb-1">
+                        {isKm ? 'កម្ពស់ (cm)' : 'Height (cm)'}
+                      </label>
+                      <input
+                        type="number"
+                        min={120}
+                        max={220}
+                        value={healthProfile.heightCm}
+                        onChange={(e) =>
+                          handleUpdateHealthProfile({ heightCm: Number(e.target.value) })
+                        }
+                        className="w-full px-2.5 py-1.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-900"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[11px] font-bold text-slate-600 block mb-1">
+                        {isKm ? 'អាយុ (ឆ្នាំ)' : 'Age (years)'}
+                      </label>
+                      <input
+                        type="number"
+                        min={12}
+                        max={100}
+                        value={healthProfile.age}
+                        onChange={(e) =>
+                          handleUpdateHealthProfile({ age: Number(e.target.value) })
+                        }
+                        className="w-full px-2.5 py-1.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-900"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[11px] font-bold text-slate-600 block mb-1">
+                        {isKm ? 'ភេទ' : 'Gender'}
+                      </label>
+                      <select
+                        value={healthProfile.gender}
+                        onChange={(e) =>
+                          handleUpdateHealthProfile({
+                            gender: e.target.value as 'male' | 'female',
+                          })
+                        }
+                        className="w-full px-2.5 py-1.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-900 bg-white"
+                      >
+                        <option value="male">{isKm ? 'ប្រុស (Male)' : 'Male'}</option>
+                        <option value="female">{isKm ? 'ស្រី (Female)' : 'Female'}</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-950 leading-relaxed">
+                    {isKm
+                      ? metricsSummary.personalizedAdviceKh
+                      : metricsSummary.personalizedAdviceEn}
+                  </div>
                 </div>
               )}
-            </div>
-          )}
 
-          {/* TAB 2: SEARCH BY HOME INGREDIENTS */}
-          {activeTab === 'ingredients' && (
-            <div className="space-y-4">
-              <div>
-                <h4 className="font-bold text-slate-900 dark:text-white">
-                  {isKm ? 'ជ្រើសរើសគ្រឿងផ្សំដែលអ្នកមាននៅផ្ទះ' : 'Select ingredients available at home'}
-                </h4>
-                <p className="text-slate-500 dark:text-slate-400 text-[11px]">
-                  {isKm ? 'AI នឹងផ្គូផ្គង និងបង្ហាញមុខម្ហូបខ្មែរដែលអ្នកអាចចម្អិនបានភ្លាមៗ' : 'AI finds what Cambodian dishes you can cook right now.'}
-                </p>
-              </div>
+              {/* Search / Ask Health AI Input Box */}
+              <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-3">
+                <label className="text-xs font-extrabold text-slate-800 flex items-center gap-1.5">
+                  <Sparkles className="w-4 h-4 text-amber-500" />
+                  <span>
+                    {isKm
+                      ? 'សួរសំណួរអំពីសុខភាព អាហារូបត្ថម្ភ ឬឈ្មោះមុខម្ហូបខ្មែរ (ភាសាខ្មែរ / English)៖'
+                      : 'Ask any question about health, nutrition, or a Cambodian dish:'}
+                  </span>
+                </label>
 
-              <div className="flex flex-wrap gap-1.5 max-h-40 overflow-y-auto p-1">
-                {COMMON_KHMER_INGREDIENTS.map((ing) => {
-                  const isSelected = selectedIngredients.includes(ing);
-                  return (
-                    <button
-                      key={ing}
-                      onClick={() => handleToggleIngredient(ing)}
-                      className={`px-2.5 py-1 rounded-xl text-[11px] font-bold transition cursor-pointer flex items-center gap-1 ${
-                        isSelected
-                          ? 'bg-emerald-600 text-white shadow-xs'
-                          : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200'
-                      }`}
-                    >
-                      <span>{ing}</span>
-                      {isSelected && <X className="w-3 h-3" />}
-                    </button>
-                  );
-                })}
-              </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={questionInput}
+                    onChange={(e) => setQuestionInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') handleAskQuestion();
+                    }}
+                    placeholder={
+                      isKm
+                        ? 'ឧ. តើអ្នកមានជំងឺទឹកនោមផ្អែមគួរញ៉ាំម្ហូបអ្វី? ឬ វាយឈ្មោះម្ហូបដូចជា «អាម៉ុកត្រី»...'
+                        : 'e.g., Best Khmer foods for blood sugar, weight loss, or type a dish name...'
+                    }
+                    className="flex-1 px-3.5 py-2.5 rounded-xl border border-slate-300 focus:border-emerald-600 focus:outline-none text-xs sm:text-sm text-slate-900"
+                  />
+                  <button
+                    onClick={() => handleAskQuestion()}
+                    className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-bold text-xs flex items-center gap-1.5 shadow-md transition cursor-pointer shrink-0"
+                  >
+                    <Send className="w-3.5 h-3.5" />
+                    <span>{isKm ? 'សួរ AI' : 'Ask AI'}</span>
+                  </button>
+                </div>
 
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={customIngredientInput}
-                  onChange={(e) => setCustomIngredientInput(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleAddCustomIngredient()}
-                  placeholder={isKm ? 'បញ្ចូលគ្រឿងផ្សំផ្សេងទៀត...' : 'Enter custom ingredient...'}
-                  className="flex-1 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs outline-none focus:border-emerald-500"
-                />
-                <button
-                  onClick={handleAddCustomIngredient}
-                  className="px-4 py-2 rounded-xl bg-[#064E3B] text-white font-bold text-xs hover:bg-[#047857] transition cursor-pointer"
-                >
-                  {isKm ? '+ បន្ថែម' : '+ Add'}
-                </button>
-              </div>
-
-              {selectedIngredients.length > 0 && (
-                <div className="space-y-2 pt-2 border-t border-slate-200 dark:border-slate-800">
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-slate-900 dark:text-white">
-                      {isKm ? `មុខម្ហូបផ្គូផ្គងបាន (${ingredientResults.length} មុខ)៖` : `Matched Dishes (${ingredientResults.length}):`}
-                    </span>
-                    <button onClick={() => setSelectedIngredients([])} className="text-[10px] text-rose-500 hover:underline">
-                      {isKm ? 'ជម្រះទាំងអស់' : 'Clear all'}
-                    </button>
-                  </div>
-
-                  <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
-                    {ingredientResults.slice(0, 10).map((res) => (
-                      <div
-                        key={res.foodItem.id}
-                        onClick={() => {
-                          handleClose();
-                          setSelectedFood(res.foodItem);
-                        }}
-                        className="p-3 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-emerald-500 transition cursor-pointer flex items-center justify-between gap-3"
+                {/* Popular Quick-Tap Khmer Health Questions */}
+                <div className="space-y-1.5">
+                  <span className="text-[11px] font-bold text-slate-500 block">
+                    {isKm
+                      ? '💡 ចុចជ្រើសរើសសំណួរពេញនិយមខាងក្រោមដើម្បីមើលចម្លើយភ្លាមៗ៖'
+                      : '💡 Tap a popular health question below for instant answers:'}
+                  </span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {POPULAR_KHMER_HEALTH_QUESTIONS.map((qItem) => (
+                      <button
+                        key={qItem.id}
+                        onClick={() =>
+                          handleAskQuestion(isKm ? qItem.questionKh : qItem.questionEn)
+                        }
+                        className="px-2.5 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-900 text-[11px] font-bold transition cursor-pointer text-left"
                       >
-                        <div className="flex items-center gap-2.5">
-                          <img src={res.foodItem.photoUrl} alt={res.foodItem.nameKh} className="w-12 h-12 rounded-xl object-cover" />
-                          <div>
-                            <span className="font-bold text-slate-900 dark:text-white block">{res.foodItem.nameKh}</span>
-                            <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">
-                              {isKm
-                                ? `មានគ្រឿងផ្សំ ${res.matchedIngredientsCount}/${res.totalDishIngredients} មុខ`
-                                : `Has ${res.matchedIngredientsCount}/${res.totalDishIngredients} items`}
-                            </span>
-                            {res.missingIngredients.length > 0 && (
-                              <span className="text-[9px] text-slate-400 block truncate max-w-[200px]">
-                                {isKm
-                                  ? `ខ្វះ៖ ${res.missingIngredients.slice(0, 2).join(', ')}`
-                                  : `Missing: ${res.missingIngredients.slice(0, 2).join(', ')}`}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="text-right shrink-0">
-                          <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 font-mono font-bold text-[10px]">
-                            {res.matchPercentage}%
-                          </span>
-                        </div>
-                      </div>
+                        {isKm ? qItem.badgeKh : qItem.questionEn}
+                      </button>
                     ))}
                   </div>
                 </div>
+              </div>
+
+              {/* AI Health & Nutrition Structured Response Card */}
+              {currentAnswer && (
+                <div className="p-4 rounded-2xl bg-white border-2 border-emerald-500/30 shadow-md space-y-3.5">
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-900 text-xs font-extrabold">
+                      {isKm ? currentAnswer.categoryBadgeKh : currentAnswer.categoryBadgeEn}
+                    </span>
+                    <span className="text-[10px] font-bold text-emerald-700 flex items-center gap-1">
+                      <ShieldCheck className="w-3.5 h-3.5" />
+                      {isKm ? 'ផ្អែកលើគោលការណ៍អាហារូបត្ថម្ភវេជ្ជសាស្ត្រ' : 'Evidence-Based Guidance'}
+                    </span>
+                  </div>
+
+                  <p className="text-xs sm:text-sm text-slate-800 leading-relaxed font-medium bg-emerald-50/60 p-3 rounded-xl border border-emerald-100">
+                    {isKm ? currentAnswer.summaryKh : currentAnswer.summaryEn}
+                  </p>
+
+                  {/* Key Takeaways */}
+                  <div className="space-y-1.5">
+                    <h4 className="text-xs font-extrabold text-slate-900">
+                      {isKm
+                        ? '📌 គោលការណ៍អាហារូបត្ថម្ភសំខាន់ៗ៖'
+                        : '📌 Key Nutritional Guidelines:'}
+                    </h4>
+                    <div className="space-y-1.5">
+                      {(isKm ? currentAnswer.bulletPointsKh : currentAnswer.bulletPointsEn).map(
+                        (pt, i) => (
+                          <div
+                            key={i}
+                            className="text-xs text-slate-700 bg-slate-50 p-2.5 rounded-xl border border-slate-200/80 leading-relaxed"
+                          >
+                            {pt}
+                          </div>
+                        )
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Foods to Choose vs Foods to Limit */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <div className="p-3 rounded-xl bg-emerald-50/80 border border-emerald-200 space-y-1.5">
+                      <h5 className="text-xs font-extrabold text-emerald-900 flex items-center gap-1">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                        <span>
+                          {isKm ? 'អាហារគួរជ្រើសរើស (Recommended)' : 'Foods to Prioritize'}
+                        </span>
+                      </h5>
+                      <div className="flex flex-wrap gap-1">
+                        {(isKm
+                          ? currentAnswer.foodsToChooseKh
+                          : currentAnswer.foodsToChooseEn
+                        ).map((item, idx) => (
+                          <span
+                            key={idx}
+                            className="px-2 py-0.5 rounded-lg bg-white border border-emerald-200 text-emerald-900 text-[11px] font-semibold"
+                          >
+                            ✓ {item}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="p-3 rounded-xl bg-rose-50/80 border border-rose-200 space-y-1.5">
+                      <h5 className="text-xs font-extrabold text-rose-900 flex items-center gap-1">
+                        <AlertCircle className="w-3.5 h-3.5 text-rose-600" />
+                        <span>
+                          {isKm ? 'អាហារគួរកាត់បន្ថយ (Limit)' : 'Foods to Limit'}
+                        </span>
+                      </h5>
+                      <div className="flex flex-wrap gap-1">
+                        {(isKm
+                          ? currentAnswer.foodsToLimitKh
+                          : currentAnswer.foodsToLimitEn
+                        ).map((item, idx) => (
+                          <span
+                            key={idx}
+                            className="px-2 py-0.5 rounded-lg bg-white border border-rose-200 text-rose-900 text-[11px] font-semibold"
+                          >
+                            ✕ {item}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Recommended Cambodian Dishes with 1-Tap Recipe View */}
+                  <div className="space-y-2 pt-1">
+                    <h4 className="text-xs font-extrabold text-slate-900 flex items-center justify-between">
+                      <span>
+                        {isKm
+                          ? '🍲 មុខម្ហូបខ្មែរសុខភាពដែលណែនាំ (ចុចមើលរូបមន្តចម្អិន)៖'
+                          : '🍲 Recommended Healthy Cambodian Dishes (Tap for Recipe):'}
+                      </span>
+                    </h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      {currentAnswer.recommendedDishes.map(({ food, nutrition }) => (
+                        <div
+                          key={food.id}
+                          onClick={() => handleOpenDishRecipe(food)}
+                          className="p-2.5 rounded-2xl bg-slate-50 hover:bg-emerald-50/70 border border-slate-200 hover:border-emerald-400 transition flex items-center gap-3 cursor-pointer group"
+                        >
+                          <img
+                            src={food.photoUrl}
+                            alt={food.nameKh}
+                            className="w-16 h-16 rounded-xl object-cover shrink-0 border border-slate-200"
+                          />
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center justify-between gap-1">
+                              <p className="text-xs font-extrabold text-slate-900 truncate group-hover:text-emerald-800">
+                                {isKm ? food.nameKh : food.nameEn}
+                              </p>
+                              <span className="px-1.5 py-0.5 rounded-md bg-emerald-600 text-white text-[10px] font-bold shrink-0">
+                                {nutrition.healthScore}/100
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-slate-600 mt-0.5">
+                              🔥 {nutrition.caloriesKcal} kcal • 💪 {nutrition.proteinG}g • 🌿{' '}
+                              {nutrition.fiberG}g fiber
+                            </p>
+                            <span className="text-[10px] text-emerald-700 font-bold inline-flex items-center gap-0.5 mt-1">
+                              {isKm ? 'មើលរូបមន្តសុខភាព' : 'View Recipe'}
+                              <ChevronRight className="w-3 h-3" />
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               )}
             </div>
           )}
 
-          {/* TAB 3: PERSONALIZED PREFERENCES & DIET */}
-          {activeTab === 'preferences' && (
+          {/* ===================================================================
+              TAB 2: HEALTHY CAMBODIAN DISHES & NUTRITION ANALYZER (200 DISHES)
+             =================================================================== */}
+          {activeTab === 'healthy_dishes' && (
             <div className="space-y-3.5">
+              {/* Goal Selector Pills */}
+              <div className="space-y-2">
+                <label className="text-xs font-extrabold text-slate-800 block">
+                  {isKm
+                    ? '🎯 ជ្រើសរើសគោលដៅសុខភាពរបស់អ្នក៖'
+                    : '🎯 Filter Cambodian Dishes by Health Goal:'}
+                </label>
+                <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
+                  {HEALTH_GOALS_CATALOG.map((g) => {
+                    const active = selectedGoal === g.id;
+                    return (
+                      <button
+                        key={g.id}
+                        onClick={() => setSelectedGoal(g.id)}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition cursor-pointer flex items-center gap-1.5 ${
+                          active
+                            ? 'bg-emerald-700 text-white shadow-sm'
+                            : 'bg-white border border-slate-200 text-slate-700 hover:bg-emerald-50'
+                        }`}
+                      >
+                        <span>{g.icon}</span>
+                        <span>{isKm ? g.shortLabelKh : g.shortLabelEn}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Search Bar for Any of the 200 Dishes */}
               <div className="relative">
-                <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
+                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
-                  value={searchPrefQuery}
-                  onChange={(e) => setSearchPrefQuery(e.target.value)}
-                  placeholder={isKm ? 'ស្វែងរកឈ្មោះម្ហូប ឬគ្រឿងផ្សំ...' : 'Search dish name or ingredient...'}
-                  className="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs outline-none focus:border-emerald-500"
+                  value={dishSearchQuery}
+                  onChange={(e) => setDishSearchQuery(e.target.value)}
+                  placeholder={
+                    isKm
+                      ? 'ស្វែងរកមុខម្ហូប ឬគ្រឿងផ្សំ (ក្នុងចំណោម ២០០ មុខម្ហូបខ្មែរ)...'
+                      : 'Search any of the 200 Cambodian dishes for nutrition facts...'
+                  }
+                  className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-white border border-slate-300 text-xs sm:text-sm text-slate-900 focus:border-emerald-600 focus:outline-none"
                 />
               </div>
 
-              <div className="space-y-1.5">
-                <label className="font-bold text-slate-700 dark:text-slate-300 block">
-                  {isKm ? 'រសជាតិដែលចូលចិត្ត (Taste Preference)៖' : 'Taste Preference:'}
-                </label>
-                <div className="grid grid-cols-5 gap-1.5">
-                  {[
-                    { id: 'all', labelKh: 'ទាំងអស់', labelEn: 'All' },
-                    { id: 'sweet', labelKh: 'ផ្អែម', labelEn: 'Sweet' },
-                    { id: 'sour', labelKh: 'ជូរ', labelEn: 'Sour' },
-                    { id: 'spicy', labelKh: 'ហឹរ', labelEn: 'Spicy' },
-                    { id: 'savory', labelKh: 'ដិត/ប្រៃ', labelEn: 'Savory' },
-                  ].map((t) => (
-                    <button
-                      key={t.id}
-                      onClick={() => setTastePref(t.id as TastePreference)}
-                      className={`py-1.5 px-1 rounded-xl text-[10px] font-bold transition text-center cursor-pointer ${
-                        tastePref === t.id
-                          ? 'bg-amber-500 text-slate-950 shadow-xs'
-                          : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
-                      }`}
-                    >
-                      {isKm ? t.labelKh : t.labelEn}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="font-bold text-slate-700 dark:text-slate-300 block">
-                  {isKm ? 'របបអាហារ (Dietary Preference)៖' : 'Dietary Preference:'}
-                </label>
-                <div className="grid grid-cols-3 gap-2">
-                  {[
-                    { id: 'all', labelKh: 'ទូទៅ', labelEn: 'Regular' },
-                    { id: 'vegetarian', labelKh: 'ម្ហូបបួស (Vegetarian)', labelEn: 'Vegetarian' },
-                    { id: 'healthy', labelKh: 'សុខភាព (Healthy)', labelEn: 'Healthy' },
-                  ].map((d) => (
-                    <button
-                      key={d.id}
-                      onClick={() => setDietaryPref(d.id as DietaryPreference)}
-                      className={`py-2 px-1 rounded-xl text-[10px] font-bold transition text-center cursor-pointer ${
-                        dietaryPref === d.id
-                          ? 'bg-emerald-600 text-white shadow-xs'
-                          : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
-                      }`}
-                    >
-                      {isKm ? d.labelKh : d.labelEn}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="font-bold text-slate-700 dark:text-slate-300 block">
-                  {isKm ? 'ថវិកា (Budget)៖' : 'Budget Level:'}
-                </label>
-                <div className="grid grid-cols-4 gap-1.5">
-                  {[
-                    { id: 'all', label: 'ទាំងអស់' },
-                    { id: 'budget', label: '< $3.00' },
-                    { id: 'medium', label: '$3 - $6' },
-                    { id: 'premium', label: '> $6.00' },
-                  ].map((b) => (
-                    <button
-                      key={b.id}
-                      onClick={() => setBudgetPref(b.id as BudgetLevel)}
-                      className={`py-1.5 px-1 rounded-xl text-[10px] font-bold transition text-center cursor-pointer ${
-                        budgetPref === b.id
-                          ? 'bg-[#064E3B] text-white shadow-xs'
-                          : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
-                      }`}
-                    >
-                      {b.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-2 pt-2 border-t border-slate-200 dark:border-slate-800">
-                <span className="font-bold text-slate-900 dark:text-white block">
-                  {isKm ? `លទ្ធផលណែនាំ (${preferenceResults.length} មុខ)៖` : `Recommended Results (${preferenceResults.length}):`}
-                </span>
-
-                <div className="grid grid-cols-2 gap-2 max-h-56 overflow-y-auto pr-1">
-                  {preferenceResults.slice(0, 8).map((f) => (
+              {/* Dish Nutrition Cards */}
+              <div className="space-y-2.5">
+                {healthyDishesList.slice(0, 24).map(({ food, nutrition }) => {
+                  const isExpanded = expandedDishId === food.id;
+                  return (
                     <div
-                      key={f.id}
-                      onClick={() => {
-                        handleClose();
-                        setSelectedFood(f);
-                      }}
-                      className="p-2 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-emerald-500 transition cursor-pointer flex items-center gap-2"
+                      key={food.id}
+                      className="p-3 rounded-2xl bg-white border border-slate-200 shadow-xs hover:border-emerald-400 transition space-y-2.5"
                     >
-                      <img src={f.photoUrl} alt={f.nameKh} className="w-10 h-10 rounded-xl object-cover shrink-0" />
-                      <div className="truncate">
-                        <span className="font-bold text-slate-800 dark:text-slate-200 block truncate">{f.nameKh}</span>
-                        <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">
-                          ${(f.priceUsd || 0).toFixed(2)}
-                        </span>
+                      <div className="flex items-start gap-3">
+                        <img
+                          src={food.photoUrl}
+                          alt={food.nameKh}
+                          className="w-20 h-20 rounded-xl object-cover shrink-0 border border-slate-200"
+                        />
+                        <div className="min-w-0 flex-1 space-y-1">
+                          <div className="flex items-start justify-between gap-2">
+                            <div>
+                              <h4 className="text-xs sm:text-sm font-extrabold text-slate-900">
+                                {isKm ? food.nameKh : food.nameEn}
+                              </h4>
+                              <p className="text-[11px] text-slate-500">
+                                {isKm ? food.nameEn : food.nameKh}
+                              </p>
+                            </div>
+                            <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-900 text-[10px] font-extrabold shrink-0">
+                              ❤️ {nutrition.healthScore}/100
+                            </span>
+                          </div>
+
+                          {/* Macro Pills */}
+                          <div className="flex flex-wrap gap-1.5 pt-0.5">
+                            <span className="px-2 py-0.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 text-[10px] font-bold">
+                              🔥 {nutrition.caloriesKcal} kcal
+                            </span>
+                            <span className="px-2 py-0.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-900 text-[10px] font-bold">
+                              💪 ប្រូតេអ៊ីន {nutrition.proteinG}g
+                            </span>
+                            <span className="px-2 py-0.5 rounded-lg bg-teal-50 border border-teal-200 text-teal-900 text-[10px] font-bold">
+                              🌿 ជាតិសរសៃ {nutrition.fiberG}g
+                            </span>
+                            <span className="px-2 py-0.5 rounded-lg bg-slate-100 text-slate-700 text-[10px] font-semibold">
+                              🍚 កាបូអ៊ីដ្រាត {nutrition.carbsG}g • ខ្លាញ់ {nutrition.fatG}g
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Health Benefits & Cooking Tip */}
+                      <div className="p-2.5 rounded-xl bg-emerald-50/60 border border-emerald-100 text-xs text-slate-700 space-y-1">
+                        <p>
+                          <strong className="text-emerald-900">
+                            {isKm ? '✨ អត្ថប្រយោជន៍សុខភាព៖ ' : '✨ Health Benefit: '}
+                          </strong>
+                          {isKm ? nutrition.healthBenefitsKh : nutrition.healthBenefitsEn}
+                        </p>
+                        {isExpanded && (
+                          <p className="pt-1 border-t border-emerald-200/60 text-emerald-950">
+                            <strong>
+                              {isKm
+                                ? '👩‍🍳 គន្លឹះចម្អិនឱ្យកាន់តែល្អសម្រាប់សុខភាព៖ '
+                                : '👩‍🍳 Healthy Cooking Tip: '}
+                            </strong>
+                            {isKm
+                              ? nutrition.healthyCookingTipKh
+                              : nutrition.healthyCookingTipEn}
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="flex items-center justify-between gap-2 pt-0.5">
+                        <button
+                          onClick={() =>
+                            setExpandedDishId(isExpanded ? null : food.id)
+                          }
+                          className="text-[11px] font-bold text-emerald-700 hover:underline cursor-pointer"
+                        >
+                          {isExpanded
+                            ? isKm
+                              ? '▲ បង្រួមព័ត៌មានលម្អិត'
+                              : '▲ Less Details'
+                            : isKm
+                            ? '▼ មើលគន្លឹះចម្អិនសុខភាព & ជាតិប្រៃ/ស្ករ'
+                            : '▼ Healthy Cooking Tip & Sodium/Sugar'}
+                        </button>
+
+                        <button
+                          onClick={() => handleOpenDishRecipe(food)}
+                          className="px-3 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-[11px] font-bold flex items-center gap-1 transition cursor-pointer"
+                        >
+                          <BookOpen className="w-3.5 h-3.5" />
+                          <span>{isKm ? 'មើលរូបមន្តចម្អិន' : 'Full Recipe'}</span>
+                        </button>
                       </div>
                     </div>
-                  ))}
-                </div>
+                  );
+                })}
               </div>
             </div>
           )}
+
+          {/* ===================================================================
+              TAB 3: BALANCED DAILY MEAL PLANNER (3 MEALS + HYDRATION)
+             =================================================================== */}
+          {activeTab === 'meal_plan' && (
+            <div className="space-y-4">
+              <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-3">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <div>
+                    <h3 className="text-xs sm:text-sm font-extrabold text-slate-900">
+                      {isKm
+                        ? '📅 ផែនការអាហារសុខភាពប្រចាំថ្ងៃ (៣ ពេលក្នុងមួយថ្ងៃ)'
+                        : '📅 Personalized Daily Balanced Meal Plan (3 Meals)'}
+                    </h3>
+                    <p className="text-[11px] text-slate-600">
+                      {isKm
+                        ? 'រៀបចំតុល្យភាពកាឡូរី ប្រូតេអ៊ីន និងបន្លែតាមគោលដៅសុខភាពរបស់អ្នក'
+                        : 'Balanced Cambodian breakfast, lunch & dinner tailored to your goal'}
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      setMealPlanIndex((idx) => idx + 1);
+                      showToast(
+                        isKm
+                          ? '🔄 បានបង្កើតផែនការអាហារសុខភាព ៣ ពេលថ្មី!'
+                          : '🔄 Generated a fresh 3-meal plan!',
+                        'info'
+                      );
+                    }}
+                    className="px-3 py-2 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 text-xs font-extrabold flex items-center gap-1.5 shadow-sm transition cursor-pointer"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5" />
+                    <span>
+                      {isKm ? 'ប្ដូរមុខម្ហូបប្រចាំថ្ងៃថ្មី' : 'New Daily Menu'}
+                    </span>
+                  </button>
+                </div>
+
+                {/* Goal Selector for Meal Plan */}
+                <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
+                  {HEALTH_GOALS_CATALOG.slice(0, 6).map((g) => (
+                    <button
+                      key={g.id}
+                      onClick={() => {
+                        setMealPlanGoal(g.id);
+                        setMealPlanIndex(0);
+                      }}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition cursor-pointer ${
+                        mealPlanGoal === g.id
+                          ? 'bg-emerald-700 text-white'
+                          : 'bg-slate-100 text-slate-700 hover:bg-emerald-50'
+                      }`}
+                    >
+                      {g.icon} {isKm ? g.shortLabelKh : g.shortLabelEn}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Total Daily Macros Summary Banner */}
+                <div className="grid grid-cols-4 gap-2 p-2.5 rounded-xl bg-emerald-900 text-white text-center">
+                  <div>
+                    <span className="text-[10px] text-emerald-200 block">
+                      {isKm ? 'កាឡូរីសរុប' : 'Total kcal'}
+                    </span>
+                    <span className="text-xs sm:text-sm font-black text-amber-300">
+                      {dailyMealPlan.totalCaloriesKcal} kcal
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-emerald-200 block">
+                      {isKm ? 'ប្រូតេអ៊ីនសរុប' : 'Protein'}
+                    </span>
+                    <span className="text-xs sm:text-sm font-black">
+                      {dailyMealPlan.totalProteinG}g
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-emerald-200 block">
+                      {isKm ? 'ជាតិសរសៃ' : 'Fiber'}
+                    </span>
+                    <span className="text-xs sm:text-sm font-black text-emerald-300">
+                      {dailyMealPlan.totalFiberG}g
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-emerald-200 block">
+                      {isKm ? 'ជាតិប្រៃសរុប' : 'Sodium'}
+                    </span>
+                    <span className="text-xs sm:text-sm font-black">
+                      {dailyMealPlan.totalSodiumMg}mg
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* 3 Meal Slots: Breakfast, Lunch, Dinner */}
+              <div className="space-y-3">
+                {dailyMealPlan.meals.map((slot) => (
+                  <div
+                    key={slot.slotId}
+                    className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-2.5"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-extrabold text-emerald-900">
+                        {isKm ? slot.labelKh : slot.labelEn}
+                      </span>
+                      <span className="text-[11px] text-slate-500 font-semibold">
+                        ⏰ {isKm ? slot.timeRangeKh : slot.timeRangeEn}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={slot.dish.photoUrl}
+                        alt={slot.dish.nameKh}
+                        className="w-20 h-20 rounded-xl object-cover shrink-0 border border-slate-200"
+                      />
+                      <div className="min-w-0 flex-1 space-y-1">
+                        <h4 className="text-xs sm:text-sm font-extrabold text-slate-900">
+                          {isKm ? slot.dish.nameKh : slot.dish.nameEn}
+                        </h4>
+                        <div className="flex flex-wrap gap-1.5">
+                          <span className="px-2 py-0.5 rounded-md bg-amber-50 text-amber-900 text-[10px] font-bold">
+                            🔥 {slot.nutrition.caloriesKcal} kcal
+                          </span>
+                          <span className="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-900 text-[10px] font-bold">
+                            💪 {slot.nutrition.proteinG}g protein
+                          </span>
+                          <span className="px-2 py-0.5 rounded-md bg-teal-50 text-teal-900 text-[10px] font-bold">
+                            🌿 {slot.nutrition.fiberG}g fiber
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-600 leading-relaxed">
+                          💡 {isKm ? slot.portionTipKh : slot.portionTipEn}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => handleOpenDishRecipe(slot.dish)}
+                        className="px-2.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-[11px] font-bold shrink-0 cursor-pointer"
+                      >
+                        {isKm ? 'រូបមន្ត' : 'Recipe'}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Hydration & 2:1:1 Healthy Plate Guide */}
+              <div className="p-3.5 rounded-2xl bg-sky-50 border border-sky-200 space-y-1.5 text-xs text-sky-950">
+                <p className="font-bold flex items-center gap-1.5">
+                  <Droplets className="w-4 h-4 text-sky-600 shrink-0" />
+                  <span>
+                    {isKm
+                      ? dailyMealPlan.snackAndHydrationKh
+                      : dailyMealPlan.snackAndHydrationEn}
+                  </span>
+                </p>
+                <p className="text-emerald-900 font-semibold pt-1 border-t border-sky-200/70">
+                  {isKm
+                    ? dailyMealPlan.healthyPlateAdviceKh
+                    : dailyMealPlan.healthyPlateAdviceEn}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* ===================================================================
+              TAB 4: HEALTHY HOME INGREDIENTS MATCHER
+             =================================================================== */}
+          {activeTab === 'ingredients' && (
+            <div className="space-y-4">
+              <div className="p-3.5 rounded-2xl bg-white border border-slate-200 space-y-3">
+                <h3 className="text-xs sm:text-sm font-extrabold text-slate-900">
+                  {isKm
+                    ? '🧺 ជ្រើសរើសគ្រឿងផ្សំដែលអ្នកមានក្នុងផ្ទះបាយ ដើម្បីស្វែងរកមុខម្ហូបសុខភាព៖'
+                    : '🧺 Select ingredients you have at home to find healthy Cambodian dishes:'}
+                </h3>
+
+                <div className="flex flex-wrap gap-1.5">
+                  {COMMON_HEALTHY_KHMER_INGREDIENTS.map((ing) => {
+                    const active = selectedIngredients.includes(ing);
+                    return (
+                      <button
+                        key={ing}
+                        onClick={() => toggleIngredient(ing)}
+                        className={`px-2.5 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+                          active
+                            ? 'bg-emerald-700 text-white shadow-xs'
+                            : 'bg-slate-100 text-slate-700 hover:bg-emerald-50'
+                        }`}
+                      >
+                        {active ? '✓ ' : '+ '}
+                        {ing}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="flex items-center gap-2 pt-1">
+                  <input
+                    type="text"
+                    value={customIngredientInput}
+                    onChange={(e) => setCustomIngredientInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') handleAddCustomIngredient();
+                    }}
+                    placeholder={
+                      isKm
+                        ? 'បន្ថែមគ្រឿងផ្សំផ្សេងទៀត...'
+                        : 'Add another ingredient...'
+                    }
+                    className="flex-1 px-3 py-2 rounded-xl border border-slate-300 text-xs text-slate-900"
+                  />
+                  <button
+                    onClick={handleAddCustomIngredient}
+                    className="px-3.5 py-2 rounded-xl bg-emerald-700 text-white text-xs font-bold cursor-pointer"
+                  >
+                    {isKm ? 'បន្ថែម' : 'Add'}
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-2.5">
+                {ingredientMatchResults.map((res) => (
+                  <div
+                    key={res.food.id}
+                    onClick={() => handleOpenDishRecipe(res.food)}
+                    className="p-3 rounded-2xl bg-white border border-slate-200 hover:border-emerald-400 transition flex items-center gap-3 cursor-pointer"
+                  >
+                    <img
+                      src={res.food.photoUrl}
+                      alt={res.food.nameKh}
+                      className="w-18 h-18 rounded-xl object-cover shrink-0 border border-slate-200"
+                    />
+                    <div className="min-w-0 flex-1 space-y-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <h4 className="text-xs sm:text-sm font-extrabold text-slate-900 truncate">
+                          {isKm ? res.food.nameKh : res.food.nameEn}
+                        </h4>
+                        <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-900 text-[10px] font-bold shrink-0">
+                          ❤️ {res.nutrition.healthScore}/100
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-600">
+                        🔥 {res.nutrition.caloriesKcal} kcal • 💪 {res.nutrition.proteinG}g
+                        protein • ត្រូវគ្នា៖ {res.matchedIngredients.join(', ')}
+                      </p>
+                      <p className="text-[11px] text-emerald-800 line-clamp-1">
+                        👩‍🍳 {isKm ? res.nutrition.healthyCookingTipKh : res.nutrition.healthyCookingTipEn}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ===================================================================
+              TAB 5: KHMER SUPERFOODS & MEDICINAL HERBS ENCYCLOPEDIA
+             =================================================================== */}
+          {activeTab === 'superfoods' && (
+            <div className="space-y-3">
+              {KHMER_SUPERFOODS_ENCYCLOPEDIA.map((herb) => (
+                <div
+                  key={herb.id}
+                  className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-2"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-2xl">{herb.emoji}</span>
+                    <div>
+                      <h4 className="text-xs sm:text-sm font-extrabold text-emerald-950">
+                        {isKm ? herb.nameKh : herb.nameEn}
+                      </h4>
+                      <span className="text-[11px] font-bold text-amber-700">
+                        ✨ {isKm ? herb.keyVitaminsKh : herb.keyVitaminsEn}
+                      </span>
+                    </div>
+                  </div>
+                  <p className="text-xs text-slate-700 leading-relaxed">
+                    {isKm ? herb.benefitsKh : herb.benefitsEn}
+                  </p>
+                  <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-[11px] text-emerald-950">
+                    <strong>{isKm ? '💡 គន្លឹះប្រើប្រាស់៖ ' : '💡 Best Usage Tip: '}</strong>
+                    {isKm ? herb.bestUsageTipKh : herb.bestUsageTipEn}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Evidence-Based Medical Disclaimer Footer */}
+          <div className="p-3 rounded-2xl bg-amber-50/90 border border-amber-200 text-[11px] text-amber-950 leading-relaxed">
+            {isKm ? MEDICAL_DISCLAIMER_KH : MEDICAL_DISCLAIMER_EN}
+          </div>
         </div>
       </div>
     </div>

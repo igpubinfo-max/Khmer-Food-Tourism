@@ -9,7 +9,7 @@ import {
   Apple, Smartphone, Bot, Calendar, Bookmark, Bell, 
   UtensilsCrossed, MessageSquareQuote, Camera, Phone,
   Share2, Navigation, Eye, ExternalLink, Play, Shuffle, Search, RefreshCw,
-  Crown, Plus, Edit2, CheckCircle2, X, Tag, ChefHat, Copy, Video, Check, Lock, Trash2, Globe
+  Crown, Plus, Edit2, CheckCircle2, X, Tag, ChefHat, Copy, Video, Check, Lock, Trash2, Globe, HeartPulse
 } from 'lucide-react';
 
 export const HomeView: React.FC = () => {
@@ -1122,26 +1122,26 @@ export const HomeView: React.FC = () => {
 
         {/* Prominent AI Discovery & Google Maps Places Search (Admin & VIP) Entry Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-          {/* 1. AI Food Discovery & Scanner */}
+          {/* 1. AI Health & Nutrition Assistant */}
           <button
             onClick={() => setIsAiFoodDiscoveryModalOpen(true)}
             className="p-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 via-[#064E3B] to-teal-800 text-white text-left shadow-md flex items-center justify-between transition hover:scale-[1.01] active:scale-98 cursor-pointer ring-2 ring-emerald-400/30"
           >
             <div className="flex items-center gap-2.5">
               <div className="w-10 h-10 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center shadow-sm shrink-0">
-                <Camera className="w-5 h-5 fill-slate-950" />
+                <HeartPulse className="w-5 h-5 stroke-[2.4]" />
               </div>
               <div>
                 <span className="font-moul text-xs block text-white">
-                  {isKm ? 'ស្កេនសម្គាល់មុខម្ហូប AI' : 'AI Food Scanner'}
+                  {isKm ? 'ជំនួយការ AI សុខភាព & អាហារូបត្ថម្ភ' : 'AI Health & Nutrition Assistant'}
                 </span>
                 <span className="text-[10px] text-emerald-200 block">
-                  {isKm ? 'ស្គាល់ម្ហូបខ្មែរ • រូបមន្តពិត ១០០%' : 'Cambodian Food Vision & Recipes'}
+                  {isKm ? 'ម្ហូបសុខភាព • ផែនការអាហារ ៣ ពេល & សួរ-ឆ្លើយខ្មែរ' : 'Healthy Khmer Dishes, 3-Meal Plan & Q&A'}
                 </span>
               </div>
             </div>
             <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[9px] font-black uppercase tracking-wider font-sans shrink-0">
-              AI Vision
+              Health AI
             </span>
           </button>
 
@@ -1294,34 +1294,19 @@ export const HomeView: React.FC = () => {
           {/* C. កន្លែងថ្មីប្រចាំថ្ងៃ */}
           <button
             onClick={() => {
-              if (!isVip && currentUser?.role !== 'admin') {
-                showToast(isKm ? 'មុខងារ "កន្លែងថ្មីប្រចាំថ្ងៃ" សម្រាប់តែគណនី VIP • សូមដំឡើង VIP ដើម្បីប្រើប្រាស់!' : '"Daily Picks" is exclusive to VIP • Please unlock VIP!', 'info');
-                openUpgradeVipModal();
-                return;
-              }
               setIsDailyDiscoveriesModalOpen(true);
             }}
-            className={`p-3 rounded-2xl border text-left transition group active:scale-95 relative ${
-              isVip || currentUser?.role === 'admin'
-                ? 'bg-white/10 hover:bg-white/15 border-white/15 cursor-pointer'
-                : 'bg-white/5 border-white/10 hover:border-amber-400/40 opacity-80 cursor-pointer'
-            }`}
+            className="p-3 rounded-2xl border text-left transition group active:scale-95 relative bg-white/10 hover:bg-white/15 border-white/15 cursor-pointer"
           >
             <div className="flex items-center justify-between mb-1.5">
               <span className="text-xl">✨</span>
-              {isVip || currentUser?.role === 'admin' ? (
-                <span className="text-[9px] text-amber-300 font-bold">Daily</span>
-              ) : (
-                <span className="px-1.5 py-0.5 rounded-full bg-slate-900/80 text-amber-300 text-[8px] font-bold flex items-center gap-0.5 border border-amber-400/30">
-                  <Lock className="w-2.5 h-2.5" /> VIP
-                </span>
-              )}
+              <span className="text-[9px] text-amber-300 font-bold">Daily Live</span>
             </div>
             <div className="text-xs font-bold text-white group-hover:text-emerald-300">
-              {isKm ? 'កន្លែងថ្មីប្រចាំថ្ងៃ' : 'Daily Picks'}
+              {isKm ? 'កន្លែងថ្មីប្រចាំថ្ងៃ' : 'Daily New Places'}
             </div>
             <div className="text-[10px] text-slate-300 line-clamp-1 mt-0.5">
-              {isKm ? 'ស្វែងយល់ថ្ងៃនេះ' : 'Daily hidden gems'}
+              {isKm ? 'ហាង ទេសចរណ៍ & ព្រឹត្តិការណ៍ថ្មី' : 'New spots, events & news'}
             </div>
           </button>
 
@@ -1398,38 +1383,25 @@ export const HomeView: React.FC = () => {
           {/* F. ការជូនដំណឹងដែលមានប្រយោជន៍ */}
           <button
             onClick={() => {
-              if (!isVip && currentUser?.role !== 'admin') {
-                showToast(isKm ? 'មុខងារ "ការជូនដំណឹង" សម្រាប់តែគណនី VIP • សូមដំឡើង VIP ដើម្បីប្រើប្រាស់!' : '"Notifications" is exclusive to VIP • Please unlock VIP!', 'info');
-                openUpgradeVipModal();
-                return;
-              }
               setIsNotificationsModalOpen(true);
             }}
-            className={`p-3 rounded-2xl border text-left transition group active:scale-95 relative ${
-              isVip || currentUser?.role === 'admin'
-                ? 'bg-white/10 hover:bg-white/15 border-white/15 cursor-pointer'
-                : 'bg-white/5 border-white/10 hover:border-amber-400/40 opacity-80 cursor-pointer'
-            }`}
+            className="p-3 rounded-2xl border text-left transition group active:scale-95 relative bg-white/10 hover:bg-white/15 border-white/15 cursor-pointer"
           >
             <div className="flex items-center justify-between mb-1.5">
               <span className="text-xl">🔔</span>
-              {isVip || currentUser?.role === 'admin' ? (
-                unreadNotificationsCount > 0 ? (
-                  <span className="px-1.5 py-0.2 rounded-full bg-rose-500 text-white text-[9px] font-black">
-                    {unreadNotificationsCount} ថ្មី
-                  </span>
-                ) : null
-              ) : (
-                <span className="px-1.5 py-0.5 rounded-full bg-slate-900/80 text-amber-300 text-[8px] font-bold flex items-center gap-0.5 border border-amber-400/30">
-                  <Lock className="w-2.5 h-2.5" /> VIP
+              {unreadNotificationsCount > 0 ? (
+                <span className="px-1.5 py-0.2 rounded-full bg-rose-500 text-white text-[9px] font-black">
+                  {unreadNotificationsCount} {isKm ? 'ថ្មី' : 'New'}
                 </span>
+              ) : (
+                <span className="text-[9px] text-emerald-300 font-bold">Alerts</span>
               )}
             </div>
             <div className="text-xs font-bold text-white group-hover:text-emerald-300">
               {isKm ? 'ការជូនដំណឹង' : 'Notifications'}
             </div>
             <div className="text-[10px] text-slate-300 line-clamp-1 mt-0.5">
-              {isKm ? 'ប្រូម៉ូសិនហាង & បញ្ចុះតម្លៃ' : 'Promos & updates'}
+              {isKm ? 'ប្រូម៉ូសិនហាង & ព្រឹត្តិការណ៍' : 'Promos, events & news'}
             </div>
           </button>
         </div>
