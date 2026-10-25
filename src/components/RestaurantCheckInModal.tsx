@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
+import { recordMeaningfulAction } from '../utils/engagement';
 import { 
   X, Camera, Image as ImageIcon, MapPin, CheckCircle2, 
   AlertCircle, Star, Sparkles, Navigation, Send, Store, ShieldCheck, PlusCircle, Search
@@ -206,6 +207,7 @@ export const RestaurantCheckInModal: React.FC = () => {
 
     setIsSubmitting(true);
     await new Promise(r => setTimeout(r, 500));
+    recordMeaningfulAction('check_in');
 
     const lat = gps?.latitude || 11.5564;
     const lng = gps?.longitude || 104.9282;

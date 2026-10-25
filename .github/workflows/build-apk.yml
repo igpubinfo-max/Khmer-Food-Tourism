@@ -89,7 +89,7 @@ jobs:
         if: github.ref == 'refs/heads/main'
         with:
           tag_name: v2.1.0
-          name: "Khmer Food & Tourism v2.1.0 (Build 84: Simplified Home - greeting, 4 quick actions, daily discovery, trending, collapsed More)"
+          name: "Khmer Food & Tourism v2.1.0 (Build 85: Share and growth - invite friends, favorites, rating prompt)"
           make_latest: true
           body: |
             ### 🇰🇭 កម្មវិធីទូរស័ព្ទដៃ អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism Mobile App)

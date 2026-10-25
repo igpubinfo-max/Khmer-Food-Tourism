@@ -36,6 +36,7 @@ import {
   initialDestinations, initialCommunityPosts, initialAppSettings, initialTransactions 
 } from '../data/seedData';
 import { hashPassword, verifyPassword } from '../utils/crypto';
+import { recordMeaningfulAction } from '../utils/engagement';
 import { translateTextToChinese, useChineseDomTranslation } from '../utils/i18n';
 import { 
   hashPasswordPBKDF2, verifyPasswordPBKDF2, 
@@ -2880,6 +2881,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setIsAuthModalOpen(true);
       return;
     }
+    if (!bookmarks.includes(id)) recordMeaningfulAction('favorite');
     setBookmarks(prev => {
       const exists = prev.includes(id);
       const updated = exists ? prev.filter(item => item !== id) : [...prev, id];

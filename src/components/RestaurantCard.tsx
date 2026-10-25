@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { Restaurant, isRestaurantPremiumActive, getRestaurantRatingSummary, isSeedRestaurantId } from '../types';
 import { useApp } from '../context/AppContext';
-import { MapPin, Phone, Star, Navigation, CheckCircle2, AlertCircle, Sparkles, Share2, Edit2 } from 'lucide-react';
+import { MapPin, Phone, Star, Navigation, CheckCircle2, AlertCircle, Sparkles, Share2, Edit2, Heart } from 'lucide-react';
 import { sanitizeDialablePhone, resolveRestaurantPhoneOnDemand } from '../services/googlePlacesService';
 import { shareRichContent } from '../utils/androidMediaHelper';
 import { tr } from '../utils/i18n';
@@ -15,8 +15,10 @@ const RestaurantCardInner: React.FC<RestaurantCardProps> = ({ restaurant }) => {
   const { 
     language, setSelectedRestaurant, showToast, currentUser,
     openManageMyVipStore,
-    trackRestaurantView, trackRestaurantCall, trackRestaurantMap, trackRestaurantShare 
+    trackRestaurantView, trackRestaurantCall, trackRestaurantMap, trackRestaurantShare,
+    isBookmarked, toggleBookmark
   } = useApp();
+  const bookmarked = isBookmarked(restaurant.id);
   const isKm = language === 'km';
   const isPremium = isRestaurantPremiumActive(restaurant);
   const isAdmin = currentUser?.role === 'admin';
@@ -241,6 +243,23 @@ const RestaurantCardInner: React.FC<RestaurantCardProps> = ({ restaurant }) => {
             >
               <Navigation className="w-3.5 h-3.5" />
             </a>
+
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleBookmark(restaurant.id);
+              }}
+              aria-pressed={bookmarked}
+              className={`p-1.5 rounded-lg transition ${
+                bookmarked
+                  ? 'bg-rose-500 text-white'
+                  : 'bg-rose-50 text-rose-600 hover:bg-rose-100 dark:bg-rose-950/40 dark:text-rose-300'
+              }`}
+              title={tr(language, 'រក្សាទុកជាចំណូលចិត្ត', 'Save to favorites', '加入收藏')}
+            >
+              <Heart className={`w-3.5 h-3.5 ${bookmarked ? 'fill-current' : ''}`} />
+            </button>
 
             <button
               type="button"

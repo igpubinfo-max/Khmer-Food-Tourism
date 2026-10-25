@@ -1,4 +1,5 @@
 import type { Language } from '../types';
+import { PLAY_STORE_URL, recordMeaningfulAction } from './engagement';
 
 export const APP_SHARE_URL = 'https://igpubinfo-max.github.io/Khmer-Food-Tourism/';
 
@@ -17,10 +18,11 @@ export async function shareText(
   showToast?: ToastFn,
   url: string = APP_SHARE_URL
 ): Promise<boolean> {
-  const fullText = `${text}\n${url}`;
+  const fullText = `${text}\n${url}\n📲 Google Play: ${PLAY_STORE_URL}`;
   try {
     if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
-      await navigator.share({ title, text, url });
+      await navigator.share({ title, text: `${text}\n📲 Google Play: ${PLAY_STORE_URL}`, url });
+      recordMeaningfulAction('share');
       return true;
     }
   } catch (err) {
@@ -30,6 +32,7 @@ export async function shareText(
   try {
     if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
       await navigator.clipboard.writeText(fullText);
+      recordMeaningfulAction('share');
       showToast?.(
         pick(lang, 'បានចម្លងសម្រាប់ចែករំលែករួចរាល់!', 'Copied to clipboard — paste it to share!', '已复制，可粘贴分享给好友！'),
         'success'

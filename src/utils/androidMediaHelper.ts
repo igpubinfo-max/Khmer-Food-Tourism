@@ -1,4 +1,5 @@
 import { Capacitor, registerPlugin } from '@capacitor/core';
+import { PLAY_STORE_URL, recordMeaningfulAction } from './engagement';
 import jsQR from 'jsqr';
 
 interface NativeMediaLauncherPlugin {
@@ -499,6 +500,11 @@ export function formatRichShareText(options: RichShareOptions): {
 
   lines.push(`🔗 ${isKm ? 'តំណភ្ជាប់ផ្ទាល់៖' : 'Direct Link:'} ${directLink}`);
 
+  // Short bilingual recommendation line + Play Store link (placeholder id until the app is published)
+  lines.push('');
+  lines.push('🇰🇭 រកឃើញក្នុងកម្មវិធី «អាហារ & ទេសចរណ៍ខ្មែរ» — Found on “Khmer Food & Tourism”');
+  lines.push(`📲 Google Play: ${PLAY_STORE_URL}`);
+
   return {
     title: titleHeader,
     fullText: lines.join('\n'),
@@ -547,7 +553,7 @@ export async function copyTextNativeOrWeb(text: string, label: string = 'Khmer F
  * (with photo attachment, name, description, location, and direct links for Telegram, Facebook,
  * Messenger, WhatsApp, and other installed apps), or Web Share API / Clipboard fallback.
  */
-export async function shareRichContent(
+async function shareRichContentInner(
   options: RichShareOptions,
   onToast?: (msg: string, type?: 'success' | 'info' | 'warning') => void
 ): Promise<boolean> {
@@ -619,4 +625,14 @@ export async function shareRichContent(
     );
   }
   return copied;
+}
+
+/** Public share entry point: shares, and counts a successful share as a meaningful action. */
+export async function shareRichContent(
+  options: RichShareOptions,
+  onToast?: (msg: string, type?: 'success' | 'info' | 'warning') => void
+): Promise<boolean> {
+  const ok = await shareRichContentInner(options, onToast);
+  if (ok) recordMeaningfulAction('share');
+  return ok;
 }

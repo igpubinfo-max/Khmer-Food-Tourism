@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { FoodCard } from './FoodCard';
+import { RestaurantCard } from './RestaurantCard';
+import { InviteFriendsCard } from './InviteFriendsCard';
 import { TouristCard } from './TouristCard';
 import { PrivacyPolicyModal } from './PrivacyPolicyModal';
 import { 
@@ -170,6 +172,7 @@ export const ProfileView: React.FC = () => {
   // Bookmarked items
   const savedFoods = foods.filter(f => bookmarks.includes(f.id));
   const savedDestinations = destinations.filter(d => bookmarks.includes(d.id));
+  const savedRestaurants = restaurants.filter(r => bookmarks.includes(r.id));
 
   // User posts
   const myPosts = posts.filter(p => currentUser && p.authorId === currentUser.id);
@@ -1440,6 +1443,9 @@ export const ProfileView: React.FC = () => {
         );
       })()}
 
+      {/* Invite friends (personal referral message) */}
+      <InviteFriendsCard />
+
       {/* App Installation & Support Buttons Showcase - Users Only */}
       {currentUser?.role !== 'admin' && (
         <div className="grid grid-cols-1 gap-2.5">
@@ -1758,7 +1764,7 @@ export const ProfileView: React.FC = () => {
                 : 'border-transparent text-slate-400 hover:text-slate-700'
             }`}
           >
-            {isKm ? `❤️ ចំណូលចិត្ត (${savedFoods.length + savedDestinations.length})` : `Saved (${savedFoods.length + savedDestinations.length})`}
+            {isKm ? `❤️ ចំណូលចិត្ត (${savedFoods.length + savedDestinations.length + savedRestaurants.length})` : `Saved (${savedFoods.length + savedDestinations.length + savedRestaurants.length})`}
           </button>
 
           <button
@@ -2261,7 +2267,7 @@ export const ProfileView: React.FC = () => {
       {/* Tab: Bookmarks */}
       {activeSubTab === 'bookmarks' && (
         <div className="space-y-4">
-          {savedFoods.length === 0 && savedDestinations.length === 0 ? (
+          {savedFoods.length === 0 && savedDestinations.length === 0 && savedRestaurants.length === 0 ? (
             <div className="text-center py-8 text-slate-400 text-xs space-y-1 font-khmer">
               <Heart className="w-8 h-8 mx-auto text-slate-300" />
               <p>{isKm ? 'មិនទាន់មានមុខម្ហូប ឬកន្លែងកម្សាន្តដែលបានរក្សាទុកនៅឡើយទេ' : 'No saved items yet'}</p>
@@ -2286,6 +2292,17 @@ export const ProfileView: React.FC = () => {
                   </h4>
                   <div className="space-y-3">
                     {savedDestinations.map(d => <TouristCard key={d.id} destination={d} />)}
+                  </div>
+                </div>
+              )}
+
+              {savedRestaurants.length > 0 && (
+                <div className="space-y-2 pt-2">
+                  <h4 className="font-bold text-xs text-[#0F172A] dark:text-white font-khmer">
+                    {isKm ? 'ហាងដែលបានរក្សាទុក' : language === 'zh' ? '收藏的餐厅' : 'Saved Restaurants'}
+                  </h4>
+                  <div className="space-y-3">
+                    {savedRestaurants.map(r => <RestaurantCard key={r.id} restaurant={r} />)}
                   </div>
                 </div>
               )}

@@ -39,6 +39,7 @@ import { AiFoodDiscoveryModal } from './components/AiFoodDiscoveryModal';
 import { RestaurantCheckInModal } from './components/RestaurantCheckInModal';
 import { GoogleMapsPlaceSearchModal } from './components/GoogleMapsPlaceSearchModal';
 import { Toast } from './components/Toast';
+import { RatePrompt } from './components/RatePrompt';
 
 const MainScreen: React.FC = () => {
   const {
@@ -209,6 +210,9 @@ const MainScreen: React.FC = () => {
 
       {/* Notifications */}
       {toast && <Toast />}
+
+      {/* One-time gentle rating prompt (after 5th meaningful action) */}
+      <RatePrompt />
 
       {/* Mobile Bottom Navigation */}
       <BottomNav />
