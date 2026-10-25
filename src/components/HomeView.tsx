@@ -4,6 +4,12 @@ import { TrendingFoodCategorySlug, TrendingFoodItem, isUserVipActive, getVipAcco
 import { normalizeKhmerSearchText } from '../services/googlePlacesService';
 import { shareRichContent, copyTextNativeOrWeb } from '../utils/androidMediaHelper';
 import { shareApp } from '../utils/shareApp';
+import { HomeGreetingSearch } from './home/HomeGreetingSearch';
+import { QuickActions } from './home/QuickActions';
+import { TodayDiscovery } from './home/TodayDiscovery';
+import { TrendingFoodsRow } from './home/TrendingFoodsRow';
+import { HomeSkeleton, HomeEmptyState } from './home/HomeStates';
+import { MoreSection } from './home/MoreSection';
 import { 
   Sparkles, ChevronRight, Utensils, Store, Compass, 
   MapPin, Heart, Flame, QrCode, Download, ShieldCheck,
@@ -228,6 +234,50 @@ export const HomeView: React.FC = () => {
     { labelKh: 'ទឹកធ្លាក់ & ភ្នំ', labelEn: 'Nature', icon: '🏞️', tab: 'tourism' },
   ];
 
+  // ---- Phase 2: daily discovery picks (deterministic per day, uses already-merged data so admin photo overrides win) ----
+  const todaySeed = useMemo(() => {
+    const d = new Date();
+    return d.getFullYear() * 372 + d.getMonth() * 31 + d.getDate();
+  }, []);
+  const featuredFood = useMemo(() => (foods.length ? foods[todaySeed % foods.length] : null), [foods, todaySeed]);
+  const featuredRestaurant = useMemo(() => {
+    const approved = restaurants.filter((r) => r.status === 'approved' && r.photoUrl);
+    return approved.length ? approved[todaySeed % approved.length] : null;
+  }, [restaurants, todaySeed]);
+  const isHomeLoading = foods.length === 0 && restaurants.length === 0 && trendingFoods.length === 0;
+  const canUseVipActions = isVip || currentUser?.role === 'admin';
+  const txt = (km: string, en: string, zh: string) => (language === 'km' ? km : language === 'zh' ? zh : en);
+  const requireVip = (open: () => void) => () => {
+    if (!canUseVipActions) {
+      showToast(
+        txt(
+          'មុខងារនេះសម្រាប់គណនី VIP • សូមដំឡើង VIP ដើម្បីប្រើប្រាស់!',
+          'This feature is for VIP accounts — please unlock VIP!',
+          '此功能仅限 VIP 账户，请先开通 VIP！'
+        ),
+        'info'
+      );
+      openUpgradeVipModal();
+      return;
+    }
+    open();
+  };
+  const handleQuickCheckIn = () => {
+    if (currentUser?.role === 'admin') {
+      setIsAiCheckInModalOpen(true);
+      return;
+    }
+    showToast(
+      txt(
+        'ជ្រើសរើសហាងមួយ ដើម្បីមើលព័ត៌មាន និងទីតាំង',
+        'Pick a shop to see its details and location',
+        '请选择一家店铺查看详情与位置'
+      ),
+      'info'
+    );
+    setActiveTab('restaurants');
+  };
+
   const foodCategoryChips: { id: TrendingFoodCategorySlug; labelKh: string; labelEn: string; icon: string }[] = [
     { id: 'all', labelKh: 'ទាំងអស់', labelEn: 'All', icon: '🔥' },
     { id: 'street_food', labelKh: 'អាហារតាមផ្លូវ', labelEn: 'Street Food', icon: '🍢' },
@@ -302,28 +352,13 @@ export const HomeView: React.FC = () => {
 
   return (
     <div className="max-w-md mx-auto px-4 py-3 space-y-5 pb-24 font-khmer">
-      {/* 1. Fast Global Top Search Bar */}
-      <div className="relative">
-        <div className="relative flex items-center">
-          <Search className="w-4 h-4 text-emerald-600 dark:text-emerald-400 absolute left-3.5 pointer-events-none" />
-          <input
-            type="text"
-            value={globalSearchQuery}
-            onChange={(e) => setGlobalSearchQuery(e.target.value)}
-            placeholder={isKm ? 'ស្វែងរកមុខម្ហូប, គ្រឿងផ្សំ, ហាងអាហារ, ឬទីតាំងទេសចរណ៍...' : 'Search food, dishes, ingredients, restaurants, places...'}
-            className="w-full pl-10 pr-9 py-2.5 rounded-2xl bg-white dark:bg-slate-800 border-2 border-emerald-500/30 text-slate-900 dark:text-white placeholder-slate-400 text-xs shadow-xs focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 font-khmer transition"
-          />
-          {globalSearchQuery && (
-            <button
-              onClick={() => setGlobalSearchQuery('')}
-              className="absolute right-2.5 p-1 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-white transition"
-              title={isKm ? 'សម្អាតការស្វែងរក' : 'Clear search'}
-            >
-              <X className="w-4 h-4" />
-            </button>
-          )}
-        </div>
-      </div>
+      {/* 1. Greeting + one big search bar */}
+      <HomeGreetingSearch
+        language={language}
+        userName={currentUser?.name}
+        query={globalSearchQuery}
+        onChange={setGlobalSearchQuery}
+      />
 
       {/* 2. Global Live Search Results Dropdown/Panel */}
       {searchResults && (
@@ -523,6 +558,55 @@ export const HomeView: React.FC = () => {
         </div>
       )}
 
+      {!searchResults && (
+        <>
+          {isHomeLoading ? (
+            <HomeSkeleton />
+          ) : (
+            <>
+              {/* 2. Four quick-action cards */}
+              <QuickActions
+                language={language}
+                showVipLock={!canUseVipActions}
+                onWhatToEat={requireVip(() => setIsWhatToEatModalOpen(true))}
+                onNearMe={requireVip(() => setIsNearMeModalOpen(true))}
+                onPlanTrip={requireVip(() => setIsAiTripPlannerModalOpen(true))}
+                onCheckIn={handleQuickCheckIn}
+              />
+
+              {/* 3. Today's discovery */}
+              <TodayDiscovery
+                language={language}
+                food={featuredFood}
+                restaurant={featuredRestaurant}
+                onOpenFood={setSelectedFood}
+                onOpenRestaurant={setSelectedRestaurant}
+              />
+
+              {/* 4. Trending foods (horizontal) */}
+              {trendingFoods.length > 0 ? (
+                <TrendingFoodsRow
+                  language={language}
+                  items={trendingFoods.slice(0, 10)}
+                  onOpen={handleOpenFoodDetail}
+                />
+              ) : (
+                <HomeEmptyState
+                  language={language}
+                  emoji="🔥"
+                  title={txt('មិនទាន់មានម្ហូបពេញនិយម', 'No trending foods yet', '暂无热门美食')}
+                  message={txt('សូមមើលមុខម្ហូបទាំងអស់ក្នុងផ្ទាំងម្ហូប', 'Browse all dishes in the Food tab.', '请到“美食”页浏览全部菜品。')}
+                  actionLabel={txt('មើលមុខម្ហូប', 'Browse foods', '浏览美食')}
+                  onAction={() => setActiveTab('food')}
+                />
+              )}
+            </>
+          )}
+        </>
+      )}
+
+      {/* 5. Everything else, collapsed under "More" */}
+      <MoreSection language={language}>
       {/* Hero Banner (Turns GOLD when user upgrades to VIP) */}
       <div className={`relative rounded-3xl overflow-hidden p-5 transition-all duration-300 ${
         isVip 
@@ -1345,6 +1429,7 @@ export const HomeView: React.FC = () => {
           </p>
         </div>
       )}
+      </MoreSection>
     </div>
   );
 };
