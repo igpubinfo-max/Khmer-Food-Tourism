@@ -49,7 +49,6 @@ const MainScreen: React.FC = () => {
     language,
     currentUser,
     setIsAuthModalOpen,
-    setIsNearMeModalOpen,
     selectedFood,
     selectedRestaurant,
     selectedDestination,
@@ -122,23 +121,9 @@ const MainScreen: React.FC = () => {
   if (showWelcomeScreen) {
     return (
       <WelcomeScreenModal
-        onComplete={(targetSection) => {
+        onComplete={() => {
           setShowWelcomeScreen(false);
-          if (targetSection === 'food') {
-            setActiveTab('food');
-          } else if (targetSection === 'restaurants') {
-            setActiveTab('restaurants');
-          } else if (targetSection === 'tourism') {
-            setActiveTab('tourism');
-          } else if (targetSection === 'nearby') {
-            setActiveTab('home');
-            setIsNearMeModalOpen(true);
-          } else if (targetSection === 'ai_health') {
-            // Single entry point: the Nutrition Guide lives inside the Food tab
-            setActiveTab('food');
-          } else {
-            setActiveTab('home');
-          }
+          setActiveTab('home');
           if (!currentUser) {
             setIsAuthModalOpen(true);
           }
