@@ -8100,7 +8100,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categorySlug": "mountain",
     "categoryKh": "ភ្នំ & រូងភ្នំ",
     "categoryEn": "Mountains & Caves",
-    "descriptionKh": "ល្អាងអន្លង់ព្រះជារូងភ្នំធម្មជាតិដ៏ជ្រៅកណ្តាលជួរភ្នំក្រវាញខាងកើត មានថ្មដុះថ្មយ้อยចាំងពន្លឺផ្លេកៗ និងប្រភពទឹកក្រោមដីថ្លាត្រជាក់ ជាទីទាក់ទាញទេសចរណ៍ផ្សងព្រេង។",
+    "descriptionKh": "ល្អាងអន្លង់ព្រះជារូងភ្នំធម្មជាតិដ៏ជ្រៅកណ្តាលជួរភ្នំក្រវាញខាងកើត មានថ្មដុះថ្មសំយុងចាំងពន្លឺផ្លេកៗ និងប្រភពទឹកក្រោមដីថ្លាត្រជាក់ ជាទីទាក់ទាញទេសចរណ៍ផ្សងព្រេង។",
     "descriptionEn": "A natural cavern system featuring crystalline stalactites, stalagmites, and cool subterranean spring water pools in western Kampong Chhnang.",
     "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/bd/Irrigation_Barrier_2_-_Campong_Chhnang_Cambodia_%2810705531556%29.jpg/960px-Irrigation_Barrier_2_-_Campong_Chhnang_Cambodia_%2810705531556%29.jpg",
     "provinceKh": "ខេត្តកំពង់ឆ្នាំង",
@@ -8117,7 +8117,7 @@ export const initial100Destinations: TouristDestination[] = [
     "rating": 4.6,
     "reviewCount": 820,
     "highlightsKh": [
-      "រូងភ្នំថ្មដុះថ្មយ้อยធម្មជាតិចម្លែកភ្នែក",
+      "រូងភ្នំថ្មដុះថ្មសំយុងធម្មជាតិចម្លែកភ្នែក",
       "ទឹកជ្រោះក្រោមដីហូរត្រជាក់ស្រេង",
       "បទពិសោធន៍ដើររូងភ្នំបែបផ្សងព្រេង",
       "ព្រៃភ្នំធម្មជាតិអភិរក្ស"
@@ -10201,8 +10201,8 @@ export const initial100Destinations: TouristDestination[] = [
     "categorySlug": "nature",
     "categoryKh": "ធម្មជាតិ & ទឹកធ្លាក់",
     "categoryEn": "Nature & Waterfalls",
-    "descriptionKh": "រមណីយដ្ឋាន ក្បាលកោះ កៀនស្វាយ (Kbal Koh Riverside Resort) មានទីតាំងស្ថិតនៅ សង្កាត់ក្បាលកោះ ខណ្ឌច្បារអំពៅ / ស្រុកកៀនស្វាយ តាមបណ្តោយទន្លេមេគង្គ។ ទាញយកទិន្នន័យ និងទីតាំង GPS ពិតប្រាកដពីផែនទី Google Maps។",
-    "descriptionEn": "Kbal Koh Riverside Resort (Chbar Ampov / Kien Svay) located at សង្កាត់ក្បាលកោះ ខណ្ឌច្បារអំពៅ / ស្រុកកៀនស្វាយ តាមបណ្តោយទន្លេមេគង្គ. Imported via Google Maps Platform.",
+    "descriptionKh": "រមណីយដ្ឋាន ក្បាលកោះ កៀនស្វាយ (Kbal Koh Riverside Resort) មានទីតាំងស្ថិតនៅសង្កាត់ក្បាលកោះ ខណ្ឌច្បារអំពៅ និងស្រុកកៀនស្វាយ តាមបណ្តោយដងទន្លេមេគង្គ មានកញ្ចុះមាត់ទឹកខ្យល់អាកាសត្រជាក់ សួនទឹកកម្សាន្ត និងម្ហូបត្រីទន្លេស្រស់ៗ។",
+    "descriptionEn": "A scenic Mekong riverside eco-resort located in Kbal Koh along the Chbar Ampov and Kien Svay border, featuring breezy waterside bamboo pavilions, a family water park, and fresh grilled river fish and roasted country chicken.",
     "photoUrl": "/destinations/gmap-kandal-kbal-koh-ecotourism.jpg",
     "provinceKh": "កណ្តាល",
     "provinceEn": "Kandal",

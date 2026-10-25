@@ -2,9 +2,11 @@ import React from 'react';
 import { useApp } from '../context/AppContext';
 import { 
   X, MapPin, Phone, Share2, ExternalLink, Flame, 
-  Calendar, Heart, Sparkles, Navigation, Bookmark, MessageSquareQuote 
+  Calendar, Sparkles, Navigation, Bookmark, MessageSquareQuote 
 } from 'lucide-react';
 import { shareRichContent } from '../utils/androidMediaHelper';
+import { tr, translateProvince } from '../utils/i18n';
+import { translateDynamicTextToZh } from '../utils/zhDynamicTranslator';
 
 export const TrendingFoodDetailModal: React.FC = () => {
   const { 
@@ -22,6 +24,25 @@ export const TrendingFoodDetailModal: React.FC = () => {
   if (!isTrendingFoodDetailModalOpen || !selectedTrendingFood) return null;
 
   const item = selectedTrendingFood;
+  const displayFoodName =
+    language === 'km'
+      ? item.foodNameKh
+      : language === 'zh'
+      ? translateDynamicTextToZh(item.foodNameEn) || item.foodNameEn
+      : item.foodNameEn;
+  const displayCat =
+    language === 'km'
+      ? item.categoryKh
+      : language === 'zh'
+      ? translateDynamicTextToZh(item.categoryEn) || item.categoryEn
+      : item.categoryEn;
+  const displayProv = translateProvince(item.provinceKh || item.provinceEn, language);
+  const displayDesc =
+    language === 'km'
+      ? item.descriptionKh
+      : language === 'zh'
+      ? translateDynamicTextToZh(item.descriptionEn) || item.descriptionEn
+      : item.descriptionEn;
 
   const handleClose = () => {
     setIsTrendingFoodDetailModalOpen(false);
@@ -32,7 +53,7 @@ export const TrendingFoodDetailModal: React.FC = () => {
     if (item.phone) {
       window.open(`tel:${item.phone}`, '_self');
     } else {
-      showToast(isKm ? 'មិនមានលេខទូរស័ព្ទសម្រាប់ហាងនេះទេ' : 'No phone number available', 'info');
+      showToast(tr(language, 'មិនមានលេខទូរស័ព្ទសម្រាប់ហាងនេះទេ', 'No phone number available', '该店铺暂无联系电话'), 'info');
     }
   };
 
@@ -85,7 +106,7 @@ export const TrendingFoodDetailModal: React.FC = () => {
         <div className="relative aspect-16/10 w-full overflow-hidden bg-slate-950 shrink-0">
           <img 
             src={item.photoUrl} 
-            alt={item.foodNameKh}
+            alt={displayFoodName}
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
@@ -118,16 +139,16 @@ export const TrendingFoodDetailModal: React.FC = () => {
 
           {/* Location / Village Scenery Label */}
           <span className="absolute bottom-2 right-3 bg-black/70 text-white/90 text-[8px] px-2 py-0.5 rounded-sm font-khmer shadow-sm">
-            {isKm ? 'រូបភាពទីតាំង / ភូមិដ្ឋាន' : 'Location / Village Scenery'}
+            {tr(language, 'រូបភាពទីតាំង / ភូមិដ្ឋាន', 'Location / Village Scenery', '实景 / 探店参考图')}
           </span>
 
           {/* Title overlay */}
           <div className="absolute bottom-3 left-3 right-16 font-khmer">
             <span className="px-2 py-0.5 rounded-md bg-emerald-600/90 text-white text-[9px] font-bold">
-              {isKm ? item.categoryKh : item.categoryEn}
+              {displayCat}
             </span>
             <h3 className="font-moul text-base sm:text-lg text-white drop-shadow mt-1 leading-snug">
-              {isKm ? item.foodNameKh : item.foodNameEn}
+              {displayFoodName}
             </h3>
             <p className="text-xs text-emerald-200 font-bold truncate">
               🏪 {isKm ? item.restaurantNameKh : item.restaurantNameEn}
@@ -158,10 +179,10 @@ export const TrendingFoodDetailModal: React.FC = () => {
           <div className="space-y-1">
             <h4 className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
               <Sparkles className="w-4 h-4 text-emerald-500" />
-              <span>{isKm ? 'ការពិពណ៌នាអំពីមុខម្ហូប' : 'Food Description'}</span>
+              <span>{tr(language, 'ការពិពណ៌នាអំពីមុខម្ហូប', 'Food Description', '美食详细介绍')}</span>
             </h4>
             <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-xs">
-              {isKm ? item.descriptionKh : item.descriptionEn}
+              {displayDesc}
             </p>
           </div>
 
@@ -171,7 +192,7 @@ export const TrendingFoodDetailModal: React.FC = () => {
               <MapPin className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
               <div>
                 <span className="font-bold text-slate-900 dark:text-white block">
-                  {isKm ? item.provinceKh : item.provinceEn}
+                  {displayProv}
                 </span>
                 <span className="text-[11px] text-slate-500 dark:text-slate-400">
                   {isKm ? item.addressKh : item.addressEn}
@@ -182,7 +203,7 @@ export const TrendingFoodDetailModal: React.FC = () => {
             {item.priceDisplay && (
               <div className="flex items-center justify-between pt-1 border-t border-slate-200 dark:border-slate-700/60">
                 <span className="text-slate-500 dark:text-slate-400">
-                  {isKm ? 'តម្លៃប្រហាក់ប្រហែល៖' : 'Estimated Price:'}
+                  {tr(language, 'តម្លៃប្រហាក់ប្រហែល៖', 'Estimated Price:', '参考价格：')}
                 </span>
                 <span className="font-bold text-[#064E3B] dark:text-emerald-400 font-mono">
                   {item.priceDisplay}
@@ -193,7 +214,7 @@ export const TrendingFoodDetailModal: React.FC = () => {
             <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 pt-1 border-t border-slate-200 dark:border-slate-700/60">
               <span className="flex items-center gap-1">
                 <Calendar className="w-3.5 h-3.5" />
-                <span>{isKm ? 'កាលបរិច្ឆេទធ្វើបច្ចុប្បន្នភាព៖' : 'Last Updated:'}</span>
+                <span>{tr(language, 'កាលបរិច្ឆេទធ្វើបច្ចុប្បន្នភាព៖', 'Last Updated:', '更新时间：')}</span>
               </span>
               <span className="font-mono text-slate-600 dark:text-slate-300">
                 {item.lastUpdated}
@@ -212,7 +233,7 @@ export const TrendingFoodDetailModal: React.FC = () => {
               <div className="flex items-center gap-2">
                 <Flame className="w-4 h-4 text-rose-500" />
                 <span className="font-bold">
-                  {isKm ? 'មើលវីដេអូ ឬការ Review ដើមលើបណ្តាញសង្គម' : 'View Original Social Review'}
+                  {tr(language, 'មើលវីដេអូ ឬការ Review ដើមលើបណ្តាញសង្គម', 'View Original Social Review', '查看社交媒体原帖或视频评价')}
                 </span>
               </div>
               <ExternalLink className="w-4 h-4 text-slate-400" />
@@ -228,7 +249,7 @@ export const TrendingFoodDetailModal: React.FC = () => {
             className="py-2.5 px-1 bg-[#064E3B] hover:bg-[#047857] text-white rounded-xl shadow-xs font-bold flex flex-col items-center justify-center gap-1 transition"
           >
             <Navigation className="w-4 h-4 text-emerald-300" />
-            <span className="text-[10px]">{isKm ? 'នាំផ្លូវ' : 'Map'}</span>
+            <span className="text-[10px]">{tr(language, 'នាំផ្លូវ', 'Map', '地图导航')}</span>
           </button>
 
           {/* 2. Call */}
@@ -241,7 +262,7 @@ export const TrendingFoodDetailModal: React.FC = () => {
             }`}
           >
             <Phone className="w-4 h-4" />
-            <span className="text-[10px]">{isKm ? 'ទូរស័ព្ទ' : 'Call'}</span>
+            <span className="text-[10px]">{tr(language, 'ទូរស័ព្ទ', 'Call', '拨打电话')}</span>
           </button>
 
           {/* 3. Share */}
@@ -250,7 +271,7 @@ export const TrendingFoodDetailModal: React.FC = () => {
             className="py-2.5 px-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-800 dark:text-white rounded-xl border border-slate-200 dark:border-slate-600 font-bold flex flex-col items-center justify-center gap-1 transition"
           >
             <Share2 className="w-4 h-4 text-slate-600 dark:text-slate-300" />
-            <span className="text-[10px]">{isKm ? 'ចែករំលែក' : 'Share'}</span>
+            <span className="text-[10px]">{tr(language, 'ចែករំលែក', 'Share', '分享')}</span>
           </button>
 
           {/* 4. Save / Wishlist */}
@@ -270,7 +291,7 @@ export const TrendingFoodDetailModal: React.FC = () => {
             className="py-2.5 px-1 bg-amber-500 hover:bg-amber-600 text-white rounded-xl shadow-xs font-bold flex flex-col items-center justify-center gap-1 transition"
           >
             <Bookmark className="w-4 h-4 fill-white text-white" />
-            <span className="text-[10px]">{isKm ? 'រក្សាទុក' : 'Save'}</span>
+            <span className="text-[10px]">{tr(language, 'រក្សាទុក', 'Save', '收藏')}</span>
           </button>
         </div>
       </div>

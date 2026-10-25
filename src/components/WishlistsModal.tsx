@@ -1,10 +1,17 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
-  X, Bookmark, Plus, Trash2, Heart, Store, 
-  ChefHat, Mountain, ChevronRight, Check, ListPlus 
+  X, Bookmark, Plus, Trash2, Check, ListPlus 
 } from 'lucide-react';
-import { Wishlist, WishlistItem } from '../types';
+import { WishlistItem } from '../types';
+import { tr, translateProvince } from '../utils/i18n';
+import { translateDynamicTextToZh } from '../utils/zhDynamicTranslator';
+
+const DEFAULT_WISHLIST_ZH_NAMES: Record<string, string> = {
+  'Places to Visit': '想去的景点',
+  'Must-Try Dishes': '必尝的高棉美食',
+  'Favorite Restaurants': '收藏的美味餐厅',
+};
 
 export const WishlistsModal: React.FC = () => {
   const { 
@@ -15,7 +22,6 @@ export const WishlistsModal: React.FC = () => {
     foods, restaurants, destinations 
   } = useApp();
 
-  const isKm = language === 'km';
   const [activeListId, setActiveListId] = useState<string>(wishlists[0]?.id || 'wl-default-1');
   const [isCreatingList, setIsCreatingList] = useState(false);
   const [newListTitle, setNewListTitle] = useState('');
@@ -24,6 +30,18 @@ export const WishlistsModal: React.FC = () => {
   const activeWishlist = wishlists.find(w => w.id === activeListId) || wishlists[0];
 
   if (!isWishlistsModalOpen) return null;
+
+  const getWishlistDisplayName = (w: { nameKh: string; nameEn: string }) => {
+    if (language === 'km') return w.nameKh;
+    if (language === 'zh') return DEFAULT_WISHLIST_ZH_NAMES[w.nameEn] || translateDynamicTextToZh(w.nameEn) || w.nameEn;
+    return w.nameEn;
+  };
+
+  const getWishlistItemDisplayName = (item: WishlistItem) => {
+    if (language === 'km') return item.nameKh;
+    if (language === 'zh') return translateDynamicTextToZh(item.nameEn || item.nameKh) || item.nameEn || item.nameKh;
+    return item.nameEn || item.nameKh;
+  };
 
   const handleCreateList = (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,10 +87,10 @@ export const WishlistsModal: React.FC = () => {
             </div>
             <div>
               <h3 className="font-moul text-sm text-white">
-                {isKm ? 'បញ្ជីកន្លែងដែលចង់ទៅ' : 'My Travel & Food Wishlists'}
+                {tr(language, 'បញ្ជីកន្លែងដែលចង់ទៅ', 'My Travel & Food Wishlists', '我的旅行与美食心愿单')}
               </h3>
               <p className="text-[11px] text-emerald-100 font-khmer">
-                {isKm ? 'បង្កើតបញ្ជីផ្ទាល់ខ្លួនតាមចំណង់ចំណូលចិត្ត' : 'Personalized wishlists saved to your account'}
+                {tr(language, 'បង្កើតបញ្ជីផ្ទាល់ខ្លួនតាមចំណង់ចំណូលចិត្ត', 'Personalized wishlists saved to your account', '按您的喜好创建并管理专属收藏清单')}
               </p>
             </div>
           </div>
@@ -94,10 +112,10 @@ export const WishlistsModal: React.FC = () => {
               <img src={targetWishlistItem.photoUrl} alt="" className="w-10 h-10 rounded-xl object-cover shrink-0" />
               <div className="min-w-0">
                 <div className="text-[10px] text-amber-800 dark:text-amber-300 font-bold">
-                  {isKm ? 'ជ្រើសរើសបញ្ជីដើម្បីរក្សាទុក៖' : 'Save to which wishlist?'}
+                  {tr(language, 'ជ្រើសរើសបញ្ជីដើម្បីរក្សាទុក៖', 'Save to which wishlist?', '选择要保存到的心愿单：')}
                 </div>
                 <div className="text-xs font-bold text-slate-800 dark:text-white truncate">
-                  {isKm ? targetWishlistItem.nameKh : targetWishlistItem.nameEn}
+                  {getWishlistItemDisplayName(targetWishlistItem)}
                 </div>
               </div>
             </div>
@@ -111,7 +129,7 @@ export const WishlistsModal: React.FC = () => {
               className="px-3 py-1.5 bg-[#064E3B] hover:bg-[#047857] text-white rounded-xl text-xs font-bold shadow-xs shrink-0 flex items-center gap-1"
             >
               <Check className="w-3.5 h-3.5" />
-              <span>{isKm ? 'រក្សាទុក' : 'Save Here'}</span>
+              <span>{tr(language, 'រក្សាទុក', 'Save Here', '保存在此')}</span>
             </button>
           </div>
         )}
@@ -129,7 +147,7 @@ export const WishlistsModal: React.FC = () => {
               }`}
             >
               <span>{w.emoji}</span>
-              <span>{isKm ? w.nameKh : w.nameEn}</span>
+              <span>{getWishlistDisplayName(w)}</span>
               <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${
                 activeListId === w.id ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-slate-600 text-slate-500'
               }`}>
@@ -141,7 +159,7 @@ export const WishlistsModal: React.FC = () => {
           <button
             onClick={() => setIsCreatingList(true)}
             className="p-1.5 rounded-xl bg-emerald-100 hover:bg-emerald-200 text-[#064E3B] transition shadow-2xs shrink-0"
-            title={isKm ? 'បង្កើតបញ្ជីថ្មី' : 'Create New List'}
+            title={tr(language, 'បង្កើតបញ្ជីថ្មី', 'Create New List', '新建心愿单')}
           >
             <Plus className="w-4 h-4" />
           </button>
@@ -152,7 +170,7 @@ export const WishlistsModal: React.FC = () => {
           <form onSubmit={handleCreateList} className="p-3 bg-emerald-50 dark:bg-slate-800 border-b border-emerald-100 dark:border-slate-700 space-y-2 shrink-0 font-khmer">
             <div className="text-xs font-bold text-[#064E3B] dark:text-emerald-400 flex items-center gap-1">
               <ListPlus className="w-4 h-4" />
-              <span>{isKm ? 'បង្កើតបញ្ជីផ្ទាល់ខ្លួនថ្មី' : 'Create Custom Wishlist'}</span>
+              <span>{tr(language, 'បង្កើតបញ្ជីផ្ទាល់ខ្លួនថ្មី', 'Create Custom Wishlist', '新建自定义心愿单')}</span>
             </div>
 
             <div className="flex gap-2">
@@ -170,7 +188,7 @@ export const WishlistsModal: React.FC = () => {
                 type="text"
                 value={newListTitle}
                 onChange={e => setNewListTitle(e.target.value)}
-                placeholder={isKm ? 'ឧទាហរណ៍៖ កន្លែងចង់ទៅជាមួយមិត្តភក្តិ...' : 'e.g. Weekend Trips with Friends...'}
+                placeholder={tr(language, 'ឧទាហរណ៍៖ កន្លែងចង់ទៅជាមួយមិត្តភក្តិ...', 'e.g. Weekend Trips with Friends...', '例如：周末与朋友必去清单...')}
                 className="flex-1 p-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-xs text-slate-900 dark:text-white"
                 autoFocus
               />
@@ -179,7 +197,7 @@ export const WishlistsModal: React.FC = () => {
                 type="submit"
                 className="px-3 py-2 bg-[#064E3B] hover:bg-[#047857] text-white rounded-xl text-xs font-bold shadow-xs"
               >
-                {isKm ? 'បង្កើត' : 'Add'}
+                {tr(language, 'បង្កើត', 'Add', '创建')}
               </button>
 
               <button
@@ -187,7 +205,7 @@ export const WishlistsModal: React.FC = () => {
                 onClick={() => setIsCreatingList(false)}
                 className="px-2 py-2 bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-xl text-xs"
               >
-                {isKm ? 'បោះបង់' : 'Cancel'}
+                {tr(language, 'បោះបង់', 'Cancel', '取消')}
               </button>
             </div>
           </form>
@@ -209,14 +227,20 @@ export const WishlistsModal: React.FC = () => {
                   <div className="min-w-0">
                     <div className="flex items-center gap-1.5">
                       <span className="px-1.5 py-0.2 rounded-md bg-emerald-100 text-[#064E3B] text-[9px] font-bold">
-                        {item.type === 'food' ? '🍲 ម្ហូប' : item.type === 'restaurant' ? '🏪 ហាង' : '🌄 ទេសចរណ៍'}
+                        {item.type === 'food'
+                          ? tr(language, '🍲 ម្ហូប', '🍲 Dish', '🍲 美食')
+                          : item.type === 'restaurant'
+                          ? tr(language, '🏪 ហាង', '🏪 Shop', '🏪 餐厅')
+                          : tr(language, '🌄 ទេសចរណ៍', '🌄 Spot', '🌄 景点')}
                       </span>
                       {item.provinceKh && (
-                        <span className="text-[10px] text-slate-500 truncate">{item.provinceKh}</span>
+                        <span className="text-[10px] text-slate-500 truncate">
+                          {translateProvince(item.provinceKh, language)}
+                        </span>
                       )}
                     </div>
                     <h4 className="font-bold text-xs sm:text-sm text-[#0F172A] dark:text-white truncate mt-0.5">
-                      {isKm ? item.nameKh : item.nameEn}
+                      {getWishlistItemDisplayName(item)}
                     </h4>
                     {item.priceDisplay && (
                       <span className="text-[11px] font-mono text-[#059669] font-bold">
@@ -229,7 +253,7 @@ export const WishlistsModal: React.FC = () => {
                 <button
                   onClick={() => removeFromWishlist(activeWishlist.id, item.id)}
                   className="p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition shrink-0"
-                  title={isKm ? 'ដកចេញ' : 'Remove'}
+                  title={tr(language, 'ដកចេញ', 'Remove', '移除')}
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
@@ -242,10 +266,20 @@ export const WishlistsModal: React.FC = () => {
               </div>
               <div>
                 <h4 className="font-bold text-sm text-[#0F172A] dark:text-white">
-                  {isKm ? `បញ្ជី «${activeWishlist?.nameKh}» នៅទទេស្អាត` : 'This wishlist is empty'}
+                  {tr(
+                    language,
+                    `បញ្ជី «${activeWishlist?.nameKh}» នៅទទេស្អាត`,
+                    'This wishlist is empty',
+                    `「${activeWishlist ? getWishlistDisplayName(activeWishlist) : ''}」心愿单暂无内容`
+                  )}
                 </h4>
                 <p className="text-xs text-slate-500 max-w-xs mx-auto mt-1">
-                  {isKm ? 'ចុចលើរូបបេះដូង ❤️ ឬប៊ូតុង "ដាក់ក្នុងបញ្ជី" លើមុខម្ហូប ហាង ឬកន្លែងដើរលេង ដើម្បីរក្សាទុកក្នុងបញ្ជីនេះ។' : 'Tap the heart icon or "Add to Wishlist" on any food, restaurant or destination.'}
+                  {tr(
+                    language,
+                    'ចុចលើរូបបេះដូង ❤️ ឬប៊ូតុង "ដាក់ក្នុងបញ្ជី" លើមុខម្ហូប ហាង ឬកន្លែងដើរលេង ដើម្បីរក្សាទុកក្នុងបញ្ជីនេះ។',
+                    'Tap the heart icon or "Add to Wishlist" on any food, restaurant or destination.',
+                    '点击任意菜品、餐厅或景点上的爱心 ❤️ 或“加入心愿单”按钮即可收藏到此列表。'
+                  )}
                 </p>
               </div>
             </div>
@@ -257,7 +291,7 @@ export const WishlistsModal: React.FC = () => {
           <div className="p-3 bg-slate-50 dark:bg-slate-800/80 border-t border-slate-200 dark:border-slate-800 flex justify-end shrink-0 font-khmer">
             <button
               onClick={() => {
-                if (window.confirm(isKm ? `តើលោកអ្នកចង់លុបបញ្ជី «${activeWishlist.nameKh}» មែនទេ?` : 'Delete this list?')) {
+                if (window.confirm(tr(language, `តើលោកអ្នកចង់លុបបញ្ជី «${activeWishlist.nameKh}» មែនទេ?`, 'Delete this list?', '确定要删除此心愿单吗？'))) {
                   deleteWishlist(activeWishlist.id);
                   setActiveListId(wishlists[0]?.id || 'wl-default-1');
                 }
@@ -265,7 +299,7 @@ export const WishlistsModal: React.FC = () => {
               className="text-xs text-rose-600 hover:text-rose-700 font-bold flex items-center gap-1"
             >
               <Trash2 className="w-3.5 h-3.5" />
-              <span>{isKm ? 'លុបបញ្ជីនេះ' : 'Delete this wishlist'}</span>
+              <span>{tr(language, 'លុបបញ្ជីនេះ', 'Delete this wishlist', '删除此心愿单')}</span>
             </button>
           </div>
         )}

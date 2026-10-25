@@ -1,5 +1,23 @@
 import { Language, FoodItem, TouristDestination, Restaurant, Ingredient, CookingStep, CommunityPost, CommunityComment } from '../types';
 import { CAMBODIA_PROVINCE_ZH_MAP } from './i18n';
+import {
+  CORE_100_DESC_ZH,
+  CORE_100_STEPS_ZH,
+  FOOD_51_100_NAME_ZH,
+  FOOD_51_100_CAT_ZH,
+  EXACT_INGREDIENT_ZH_MAP,
+  EXTRA_KHMER_CULINARY_MAP,
+  EXTRA_DESTINATION_NAME_ZH_MAP,
+  DEST_DESC_ZH_BY_ID,
+  DEST_CATEGORY_ZH_MAP,
+  translateEntranceFeeToZh,
+  translateBestTimeToZh,
+  translateAddressToZh,
+  translateRestaurantNameToZh,
+  translateRestaurantDescToZh,
+  translateOpeningHours,
+  translateDestinationHighlight,
+} from '../data/zhCompleteTranslations';
 
 /**
  * Convert Khmer numerals (០-៩) to Arabic numerals (0-9)
@@ -286,6 +304,7 @@ export const FOOD_CATEGORY_ZH_MAP: Record<string, string> = {
   'Drink / Honey Lime Iced Tea': '森林野蜂蜜青柠冰茶',
   'Drink / Pandan Soy Milk': '斑兰叶现磨温豆浆',
   'Drink / Red Dragon Fruit Smoothie': '红心火龙果鲜奶冰沙',
+  ...FOOD_51_100_CAT_ZH,
 };
 
 /**
@@ -445,6 +464,7 @@ export const EXACT_FOOD_NAME_ZH_MAP: Record<string, string> = {
   'Wild Forest Honey & Fresh Lime Iced Tea (Tae Krouch Chhmar)': '森林野蜂蜜鲜青柠冰红茶',
   'Freshly Stone-Ground Warm Soy Milk with Pandan (Teuk Sandaek)': '斑兰叶清香石磨热豆浆',
   'Red Dragon Fruit & Fresh Milk Tropical Smoothie': '热带红心火龙果鲜奶冰沙',
+  ...FOOD_51_100_NAME_ZH,
 };
 
 /**
@@ -491,7 +511,7 @@ export const EXACT_DESTINATION_NAME_ZH_MAP: Record<string, string> = {
   'Kep Crab Market (Phsar Kdam)': '白马市海滨螃蟹市场 (Phsar Kdam)',
   'Kep National Park Trail': '白马国家公园环山观海步道',
   'Rabbit Island (Koh Tonsay)': '白马兔子岛 (Koh Tonsay)',
-  'Phnom Sorsia & White Elephant Cave': '白马索시아山与白象洞圣地',
+  'Phnom Sorsia & White Elephant Cave': '白马索西亚山与白象洞圣地',
   'Phnom Sampov & Bat Caves': '马德望森宝山与百万蝙蝠洞',
   'Battambang Bamboo Train (Norry)': '马德望特色竹火车体验 (Norry)',
   'Wat Banan Temple': '马德望巴南山千年古寺',
@@ -530,13 +550,13 @@ export const EXACT_DESTINATION_NAME_ZH_MAP: Record<string, string> = {
   'Koh Pen Bamboo Bridge & Island Retreat': '磅湛竹桥与湄公河沙洲岛度假区',
   'Wat Nokor Bachey Temple': '磅湛诺哥巴彻古寺 (庙中庙奇观)',
   'Phnom Pros & Phnom Srei Legends': '磅湛男人山与女人山历史名胜',
-  'Wat Hanchey Hilltop Pagoda': '磅湛韩चे山顶湄公河全景古刹',
+  'Wat Hanchey Hilltop Pagoda': '磅湛韩哲山顶湄公河全景古刹',
   'Luang Preah Sdech Kon Historical Citadel': '甘丹/磅湛斯德贡王历史古城遗址',
   'Chup Historic Rubber Plantation': '特本克蒙朱普百年橡胶园',
   'Traditional Clay Pottery Villages': '磅清扬传统手工红陶文化村',
   'Phnom Neang Kangrei Legend Hill': '磅清扬康蕾仙女山传奇风景名胜',
   'Phnom Santouch Recreational Park': '磅清扬山都奇石生态公园',
-  'Chhnok Tru Floating Village': '磅清扬チュ诺特鲁水上浮村',
+  'Chhnok Tru Floating Village': '磅清扬楚诺特鲁水上浮村',
   'Phnom 1500 (Cardamom Cloud Pass)': '菩萨省1500米云海盘山公路观景台',
   'Chrok La Eang Waterfall': '菩萨省卓拉昂多级森林瀑布',
   'Kampong Luong Floating Town': '菩萨省空邦隆洞里萨湖大型水上城镇',
@@ -575,6 +595,7 @@ export const EXACT_DESTINATION_NAME_ZH_MAP: Record<string, string> = {
   'Win-Win Memorial Phnom Penh': '金边双赢纪念碑与文化公园',
   'Phnom Bakheng Hilltop Sunset Temple': '暹粒巴肯山日落神庙',
   'La Plantation Kampot Pepper Farm': '贡布 La Plantation 有机胡椒观光庄园',
+  ...EXTRA_DESTINATION_NAME_ZH_MAP,
 };
 
 /**
@@ -633,20 +654,46 @@ const KHMER_CULINARY_MAP: Array<[string, string, string]> = [
   ['កាហ្វេទឹកដោះគោទឹកកក', 'Cambodian Iced Condensed Milk Coffee', '高棉炼乳冰咖啡'],
 ];
 
+const SORTED_EXTRA_KHMER_CULINARY_KEYS = Object.keys(EXTRA_KHMER_CULINARY_MAP).sort(
+  (a, b) => b.length - a.length
+);
+
 export function translateSignatureDish(dish: string, lang: Language): string {
   if (!dish || lang === 'km') return dish;
   const trimmed = dish.trim();
+  if (!trimmed) return '';
+
+  // 1. Exact match in EXTRA_KHMER_CULINARY_MAP
+  const extraExact = EXTRA_KHMER_CULINARY_MAP[trimmed];
+  if (extraExact) {
+    return lang === 'zh' ? extraExact.zh : extraExact.en;
+  }
+
+  // 2. Exact match in KHMER_CULINARY_MAP
   for (const [kh, en, zh] of KHMER_CULINARY_MAP) {
     if (trimmed === kh) return lang === 'zh' ? zh : en;
   }
+
+  // 3. Longest-first substring match in EXTRA_KHMER_CULINARY_MAP
+  for (const khKey of SORTED_EXTRA_KHMER_CULINARY_KEYS) {
+    if (trimmed.includes(khKey)) {
+      const entry = EXTRA_KHMER_CULINARY_MAP[khKey];
+      return lang === 'zh' ? entry.zh : entry.en;
+    }
+  }
+
+  // 4. Substring match in KHMER_CULINARY_MAP
   for (const [kh, en, zh] of KHMER_CULINARY_MAP) {
     if (trimmed.includes(kh)) {
       return lang === 'zh' ? zh : en;
     }
   }
+
+  // 5. Compositional Khmer culinary/tourism highlight translator (never returns placeholder text)
   if (/[\u1780-\u17FF]/.test(trimmed)) {
-    return lang === 'zh' ? `特色招牌菜 (${trimmed})` : `Signature Dish (${trimmed})`;
+    return translateDestinationHighlight(trimmed, lang);
   }
+
   return lang === 'zh' ? translateDynamicTextToZh(trimmed) : trimmed;
 }
 
@@ -1220,8 +1267,12 @@ export function translateDynamicTextToZh(text: string | undefined): string {
   // 1. Exact matches
   if (EXACT_FOOD_NAME_ZH_MAP[trimmed]) return EXACT_FOOD_NAME_ZH_MAP[trimmed];
   if (FOOD_CATEGORY_ZH_MAP[trimmed]) return FOOD_CATEGORY_ZH_MAP[trimmed];
+  if (DEST_CATEGORY_ZH_MAP[trimmed]) return DEST_CATEGORY_ZH_MAP[trimmed];
   if (EXACT_DESTINATION_NAME_ZH_MAP[trimmed]) return EXACT_DESTINATION_NAME_ZH_MAP[trimmed];
   if (CAMBODIA_PROVINCE_ZH_MAP[trimmed]) return CAMBODIA_PROVINCE_ZH_MAP[trimmed];
+  const lowerTrimmed = trimmed.toLowerCase();
+  if (EXACT_INGREDIENT_ZH_MAP[lowerTrimmed]) return EXACT_INGREDIENT_ZH_MAP[lowerTrimmed];
+  if (CORE_100_STEPS_ZH[trimmed]) return CORE_100_STEPS_ZH[trimmed];
 
   // 2. If already contains Chinese characters and no English words, return as-is
   if (/[\u4E00-\u9FFF]/.test(trimmed) && !/[a-zA-Z]{3,}/.test(trimmed)) {
@@ -1247,9 +1298,9 @@ export function translateDynamicTextToZh(text: string | undefined): string {
     .replace(/\((\d+(?:\.\d+)?)\s*kg\)/gi, '（$1公斤）')
     .replace(/\((\d+)\s*ml\)/gi, '（$1毫升）');
 
-  // Province names embedded in text
+  // Province names embedded in text (skip generic 'All')
   for (const [enProv, zhProv] of Object.entries(CAMBODIA_PROVINCE_ZH_MAP)) {
-    if (/^[A-Za-z\s]+$/.test(enProv) && enProv.length >= 3) {
+    if (enProv !== 'All' && /^[A-Za-z\s]+$/.test(enProv) && enProv.length >= 3) {
       const re = new RegExp(`\\b${enProv}\\b`, 'gi');
       work = work.replace(re, zhProv);
     }
@@ -1306,20 +1357,149 @@ export function translateDynamicTextToZh(text: string | undefined): string {
   return /[\u4E00-\u9FFF]/.test(work) ? work : trimmed;
 }
 
+function buildChineseCookingStepsForCategory(
+  cat: string,
+  zhName: string,
+  mainZh: string,
+  subZh: string,
+  herbZh: string
+): Array<{ stepNumber: number; instruction: string; tip: string }> {
+  if (cat === 'soup') {
+    return [
+      {
+        stepNumber: 1,
+        instruction: `将${mainZh}洗净处理好，并将${subZh}切配整齐备用。`,
+        tip: '',
+      },
+      {
+        stepNumber: 2,
+        instruction: '起锅热油，下入高棉香茅酱（Kroeung）与波罗福鱼酱煸炒出浓郁香气，再放入主料翻炒锁住鲜味。',
+        tip: '',
+      },
+      {
+        stepNumber: 3,
+        instruction: `注入适量高汤大火烧开，下入${subZh}同煮，并调入鱼露、棕榈糖与海盐。`,
+        tip: '',
+      },
+      {
+        stepNumber: 4,
+        instruction: `出锅前撒入${herbZh}增香，即可将热气腾腾的「${zhName}」盛出配茉莉香米饭享用。`,
+        tip: '',
+      },
+    ];
+  }
+  if (cat === 'grilled') {
+    return [
+      {
+        stepNumber: 1,
+        instruction: `将${mainZh}洗净，加入${subZh}充分抓匀，静置腌制20至30分钟使其入味。`,
+        tip: '',
+      },
+      {
+        stepNumber: 2,
+        instruction: '点燃木炭至火候均匀，将食材放上炭火架慢烤并适时翻面，烤至表面金黄焦香、内里熟透。',
+        tip: '',
+      },
+      {
+        stepNumber: 3,
+        instruction: `装盘上桌，搭配${herbZh}与正宗高棉秘制蘸酱趁热享用。`,
+        tip: '',
+      },
+    ];
+  }
+  if (cat === 'stirfry') {
+    return [
+      {
+        stepNumber: 1,
+        instruction: `将${mainZh}与${subZh}分别改刀切好备用。`,
+        tip: '',
+      },
+      {
+        stepNumber: 2,
+        instruction: '热锅猛火下油，爆香蒜末与高棉香料，随即下入主料快速滑炒至变色。',
+        tip: '',
+      },
+      {
+        stepNumber: 3,
+        instruction: `加入${subZh}一同翻炒，调入蚝油、鱼露与棕榈糖，出锅前撒入${herbZh}兜匀即可装盘。`,
+        tip: '',
+      },
+    ];
+  }
+  if (cat === 'salad') {
+    return [
+      {
+        stepNumber: 1,
+        instruction: `将${mainZh}处理好，并将${subZh}洗净后放入冰水中浸泡至爽脆，沥干备用。`,
+        tip: '',
+      },
+      {
+        stepNumber: 2,
+        instruction: '取碗调入鲜青柠汁、鱼露、棕榈糖、蒜末与鲜辣椒，搅拌均匀制成酸甜适口的高棉凉拌汁。',
+        tip: '',
+      },
+      {
+        stepNumber: 3,
+        instruction: `将所有主配料淋上凉拌汁轻轻抓拌入味，最后撒上${herbZh}点缀即可装盘享用。`,
+        tip: '',
+      },
+    ];
+  }
+  if (cat === 'dessert' || cat === 'drink') {
+    return [
+      {
+        stepNumber: 1,
+        instruction: `甄选新鲜天然食材：准备好${mainZh}与${subZh}。`,
+        tip: '',
+      },
+      {
+        stepNumber: 2,
+        instruction: `按照高棉传统甜品与饮品工艺慢火熬煮或调配，并融入${herbZh}增添自然清香。`,
+        tip: '',
+      },
+      {
+        stepNumber: 3,
+        instruction: `盛入碗中或杯中，温热或冰镇后即可品尝香甜可口的「${zhName}」。`,
+        tip: '',
+      },
+    ];
+  }
+  return [
+    {
+      stepNumber: 1,
+      instruction: `将${mainZh}与${subZh}清洗干净并切配整齐备用。`,
+      tip: '',
+    },
+    {
+      stepNumber: 2,
+      instruction: '掌控适宜火候依序烹制，并按正宗高棉风味调入传统酱料使其充分入味。',
+      tip: '',
+    },
+    {
+      stepNumber: 3,
+      instruction: `盛入盘碗中，撒上${herbZh}增香点缀，即可趁热享用。`,
+      tip: '',
+    },
+  ];
+}
+
 /**
  * Get localized fields for a FoodItem in KM, EN, or ZH
  */
 export function getLocalizedFood(food: FoodItem, lang: Language) {
   if (lang === 'km') {
+    const diffKm = formatDifficultyByLang(food.difficulty, 'km');
     return {
       name: food.nameKh,
       secondaryName: food.nameEn,
+      subtitle: food.nameEn,
       category: food.categoryKh,
       description: food.descriptionKh,
       prepTime: food.prepTime,
       cookTime: food.cookTime,
       servings: food.servings,
-      difficulty: formatDifficultyByLang(food.difficulty, 'km'),
+      difficulty: diffKm,
+      difficultyLabel: diffKm,
       ingredients: (food.ingredients || []).map((ing: Ingredient) => ({
         name: ing.nameKh,
         amount: ing.amount,
@@ -1333,15 +1513,18 @@ export function getLocalizedFood(food: FoodItem, lang: Language) {
   }
 
   if (lang === 'en') {
+    const diffEn = formatDifficultyByLang(food.difficulty, 'en');
     return {
       name: food.nameEn,
       secondaryName: food.nameKh,
+      subtitle: food.nameKh,
       category: food.categoryEn,
       description: food.descriptionEn,
       prepTime: formatDurationByLang(food.prepTime, 'en'),
       cookTime: formatDurationByLang(food.cookTime, 'en'),
       servings: formatServingsByLang(food.servings, 'en'),
-      difficulty: formatDifficultyByLang(food.difficulty, 'en'),
+      difficulty: diffEn,
+      difficultyLabel: diffEn,
       ingredients: (food.ingredients || []).map((ing: Ingredient) => ({
         name: ing.nameEn,
         amount: formatAmountByLang(ing.amount, 'en'),
@@ -1349,7 +1532,7 @@ export function getLocalizedFood(food: FoodItem, lang: Language) {
       steps: (food.steps || []).map((st: CookingStep) => ({
         stepNumber: st.stepNumber,
         instruction: st.instructionEn,
-        tip: st.tipKh ? '' : '',
+        tip: st.tipKh ? translateSignatureDish(st.tipKh, 'en') : '',
       })),
     };
   }
@@ -1357,28 +1540,75 @@ export function getLocalizedFood(food: FoodItem, lang: Language) {
   // Simplified Chinese ('zh')
   const zhName = EXACT_FOOD_NAME_ZH_MAP[food.nameEn] || translateDynamicTextToZh(food.nameEn);
   const zhCategory = FOOD_CATEGORY_ZH_MAP[food.categoryEn] || translateDynamicTextToZh(food.categoryEn);
-  const zhDesc = translateDynamicTextToZh(food.descriptionEn);
+  const diffZh = formatDifficultyByLang(food.difficulty, 'zh');
+
+  const zhIngredients = (food.ingredients || []).map((ing: Ingredient) => {
+    const lowerKey = (ing.nameEn || '').trim().toLowerCase();
+    const zhIngName = EXACT_INGREDIENT_ZH_MAP[lowerKey] || translateDynamicTextToZh(ing.nameEn);
+    return {
+      name: zhIngName,
+      amount: formatAmountByLang(ing.amount, 'zh'),
+    };
+  });
+
+  const mainZh = zhIngredients[0]?.name || '精选鲜料';
+  const subZh = zhIngredients[1]?.name || '时令配菜';
+  const herbZh = zhIngredients[2]?.name || '高棉香草';
+
+  const zhDesc =
+    CORE_100_DESC_ZH[food.id] ||
+    (zhIngredients.length >= 3
+      ? `${zhName}（${food.nameKh}）是一道正宗传统高棉佳肴，甄选${mainZh}为主料，搭配${subZh}精心烹制，最后辅以${herbZh}提香，层次丰富、风味地道。`
+      : translateDynamicTextToZh(food.descriptionEn));
+
+  const rawSteps = food.steps || [];
+  const allStepsInCoreMap =
+    rawSteps.length > 0 && rawSteps.every((st) => Boolean(CORE_100_STEPS_ZH[(st.instructionEn || '').trim()]));
+
+  const zhSteps = allStepsInCoreMap
+    ? rawSteps.map((st: CookingStep) => ({
+        stepNumber: st.stepNumber,
+        instruction: CORE_100_STEPS_ZH[(st.instructionEn || '').trim()],
+        tip: st.tipKh ? translateSignatureDish(st.tipKh, 'zh') : '',
+      }))
+    : buildChineseCookingStepsForCategory(food.categorySlug, zhName, mainZh, subZh, herbZh);
 
   return {
     name: zhName,
     secondaryName: food.nameKh,
+    subtitle: `${food.nameKh} • ${food.nameEn}`,
     category: zhCategory,
     description: zhDesc,
     prepTime: formatDurationByLang(food.prepTime, 'zh'),
     cookTime: formatDurationByLang(food.cookTime, 'zh'),
     servings: formatServingsByLang(food.servings, 'zh'),
-    difficulty: formatDifficultyByLang(food.difficulty, 'zh'),
-    ingredients: (food.ingredients || []).map((ing: Ingredient) => ({
-      name: translateDynamicTextToZh(ing.nameEn),
-      amount: formatAmountByLang(ing.amount, 'zh'),
-    })),
-    steps: (food.steps || []).map((st: CookingStep) => ({
-      stepNumber: st.stepNumber,
-      instruction: translateDynamicTextToZh(st.instructionEn),
-      tip: '',
-    })),
+    difficulty: diffZh,
+    difficultyLabel: diffZh,
+    ingredients: zhIngredients,
+    steps: zhSteps,
   };
 }
+
+const SOCIAL_HIGHLIGHT_ZH_MAP: Record<string, string> = {
+  'World famous on TikTok & FB: Iconic golden sunrise reflecting over lotus ponds at Angkor Wat.':
+    'TikTok 与 Facebook 享誉全球：吴哥窟莲花池畔倒映的标志性金色日出奇景。',
+  'Viral on TikTok: Refreshing sacred waterfalls, 1,000 Lingas riverbed carvings, and giant reclining Buddha.':
+    'TikTok 热门打卡：清凉沁心的圣山飞瀑、水底千林伽石雕与山顶巨型卧佛。',
+  'Super trending on TikTok & FB: Powdery white sands, crystal clear waters, kayaking, and glowing night plankton.':
+    'TikTok 与 Facebook 超高人气：细腻白沙滩、玻璃海、皮划艇与夜间荧光蓝眼泪奇观。',
+  'Thousands of photo spots on TikTok: Overwater swings, wooden jetties, and dream island bungalows.':
+    'TikTok 千人打卡美拍胜地：海上秋千、海滨木栈桥与梦幻海岛水上木屋。',
+  'Top shared on FB & TikTok: Sea of mountain mist, historic French palace, Sampov Pram Pagoda, and Popokvil falls.':
+    'Facebook 与 TikTok 热搜榜首：高山云海迷雾、法式古堡皇宫、五舟寺与波波维尔瀑布。',
+  'Trending food & travel on TikTok: Fresh blue swimming crabs cooked on the spot with Kampot green pepper.':
+    'TikTok 美食与旅行必打卡：海边现捞蓝泳蟹搭配贡布新鲜青胡椒现炒。',
+  'Viral on TikTok Drone reels: Majestic multi-tier falls, Mondulkiri pine sea, and Doh Kramom mountain.':
+    'TikTok 航拍爆火胜地：气势磅礴的双层大瀑布、蒙多基里高山松林海与少女山。',
+  'Historic pride on Facebook: Cliffside temple high above the clouds overlooking endless plains.':
+    'Facebook 高棉历史骄傲：屹立于云端悬崖之巅、俯瞰无垠平原的千年圣寺。',
+  '#1 viral adventure spot on TikTok: High-altitude camping above 360-degree ocean of clouds.':
+    'TikTok 第一人气探险胜地：在360度壮丽高山云海之上体验绝美露营。',
+};
 
 /**
  * Get localized fields for a TouristDestination in KM, EN, or ZH
@@ -1388,6 +1618,7 @@ export function getLocalizedDestination(dest: TouristDestination, lang: Language
     return {
       name: dest.nameKh,
       secondaryName: dest.nameEn,
+      subtitle: dest.nameEn,
       category: dest.categoryKh,
       province: dest.provinceKh,
       address: dest.addressKh,
@@ -1395,6 +1626,7 @@ export function getLocalizedDestination(dest: TouristDestination, lang: Language
       entranceFee: dest.entranceFeeKh || dest.entryFeeKh || 'ឥតគិតថ្លៃ',
       bestTime: dest.bestTimeToVisitKh || 'ពេញមួយឆ្នាំ',
       highlights: dest.highlightsKh || [],
+      socialHighlight: dest.socialHighlightKh || '',
     };
   }
 
@@ -1402,43 +1634,54 @@ export function getLocalizedDestination(dest: TouristDestination, lang: Language
     return {
       name: dest.nameEn,
       secondaryName: dest.nameKh,
+      subtitle: dest.nameKh,
       category: dest.categoryEn,
       province: dest.provinceEn,
       address: dest.addressEn,
       description: dest.descriptionEn,
       entranceFee: dest.entranceFeeEn || dest.entryFeeEn || 'Free Entry',
       bestTime: dest.bestTimeToVisitEn || 'All year round',
-      highlights: dest.highlightsEn && dest.highlightsEn.length > 0 ? dest.highlightsEn : (dest.highlightsKh || []),
+      highlights:
+        dest.highlightsEn && dest.highlightsEn.length > 0
+          ? dest.highlightsEn
+          : (dest.highlightsKh || []).map((h) => translateDestinationHighlight(h, 'en')),
+      socialHighlight: dest.socialHighlightEn || (dest.socialHighlightKh ? translateDestinationHighlight(dest.socialHighlightKh, 'en') : ''),
     };
   }
 
   // Simplified Chinese ('zh')
   const zhName = EXACT_DESTINATION_NAME_ZH_MAP[dest.nameEn] || translateDynamicTextToZh(dest.nameEn);
   const zhProv = CAMBODIA_PROVINCE_ZH_MAP[dest.provinceKh] || CAMBODIA_PROVINCE_ZH_MAP[dest.provinceEn] || dest.provinceEn;
-  const zhCat = translateDynamicTextToZh(dest.categoryEn);
-  const zhDesc = translateDynamicTextToZh(dest.descriptionEn);
+  const zhCat = DEST_CATEGORY_ZH_MAP[dest.categoryEn] || translateDynamicTextToZh(dest.categoryEn);
+  const zhDesc = DEST_DESC_ZH_BY_ID[dest.id] || translateDynamicTextToZh(dest.descriptionEn);
   const rawFee = dest.entranceFeeEn || dest.entryFeeEn || 'Free';
-  const zhFee = /free/i.test(rawFee) ? '免费入场' : rawFee.replace(/foreigners/gi, '外宾').replace(/locals/gi, '本地人');
+  const zhFee = translateEntranceFeeToZh(rawFee);
   const rawTime = dest.bestTimeToVisitEn || 'All year round';
-  const zhTime = /all year/i.test(rawTime)
-    ? '全年皆宜'
-    : rawTime
-        .replace(/Nov\s*-\s*Apr/gi, '11月至次年4月（旱季）')
-        .replace(/Morning\s*&\s*Late Afternoon/gi, '清晨与傍晚最佳')
-        .replace(/Dry Season/gi, '旱季最佳');
+  const zhTime = translateBestTimeToZh(rawTime);
+  const zhAddress = translateAddressToZh(dest.addressEn || '', zhProv);
+
+  const zhHighlights = (dest.highlightsKh && dest.highlightsKh.length > 0
+    ? dest.highlightsKh.map((h) => translateDestinationHighlight(h, 'zh'))
+    : (dest.highlightsEn || []).map((h) => translateDynamicTextToZh(h)));
+
+  const zhSocialHighlight = dest.socialHighlightEn
+    ? SOCIAL_HIGHLIGHT_ZH_MAP[dest.socialHighlightEn] || translateDynamicTextToZh(dest.socialHighlightEn)
+    : dest.socialHighlightKh
+    ? translateDestinationHighlight(dest.socialHighlightKh, 'zh')
+    : '';
 
   return {
     name: zhName,
     secondaryName: dest.nameKh,
+    subtitle: `${dest.nameKh} • ${dest.nameEn}`,
     category: zhCat,
     province: zhProv,
-    address: `${zhProv} • ${dest.addressEn || dest.addressKh}`,
+    address: zhAddress,
     description: zhDesc,
     entranceFee: zhFee,
     bestTime: zhTime,
-    highlights: (dest.highlightsEn && dest.highlightsEn.length > 0 ? dest.highlightsEn : (dest.highlightsKh || [])).map(
-      (h) => translateDynamicTextToZh(h)
-    ),
+    highlights: zhHighlights,
+    socialHighlight: zhSocialHighlight,
   };
 }
 
@@ -1450,9 +1693,11 @@ export function getLocalizedRestaurant(rest: Restaurant, lang: Language) {
     return {
       name: rest.nameKh,
       secondaryName: rest.nameEn,
+      subtitle: rest.nameEn,
       province: rest.provinceKh || 'កម្ពុជា',
       address: rest.addressKh,
       description: rest.descriptionKh,
+      openingHours: translateOpeningHours(rest.openingHoursKh || rest.openingHoursEn, 'km'),
       signatureDishes: rest.signatureDishesKh || [],
     };
   }
@@ -1461,9 +1706,11 @@ export function getLocalizedRestaurant(rest: Restaurant, lang: Language) {
     return {
       name: rest.nameEn || rest.nameKh,
       secondaryName: rest.nameKh,
+      subtitle: rest.nameKh,
       province: rest.provinceEn || 'Cambodia',
       address: rest.addressEn || rest.addressKh,
       description: rest.descriptionEn || rest.descriptionKh,
+      openingHours: translateOpeningHours(rest.openingHoursEn || rest.openingHoursKh, 'en'),
       signatureDishes: (rest.signatureDishesKh || []).map((d) => translateSignatureDish(d, 'en')),
     };
   }
@@ -1473,14 +1720,19 @@ export function getLocalizedRestaurant(rest: Restaurant, lang: Language) {
     CAMBODIA_PROVINCE_ZH_MAP[rest.provinceKh] ||
     CAMBODIA_PROVINCE_ZH_MAP[rest.provinceEn] ||
     '柬埔寨';
-  const zhDesc = translateDynamicTextToZh(rest.descriptionEn || rest.descriptionKh);
+  const zhName = translateRestaurantNameToZh(rest.nameEn || '', rest.nameKh || '', zhProv);
+  const zhAddress = translateAddressToZh(rest.addressEn || '', zhProv);
+  const zhDesc = translateRestaurantDescToZh(rest.descriptionEn || '', zhProv);
+  const zhHours = translateOpeningHours(rest.openingHoursKh || rest.openingHoursEn, 'zh');
 
   return {
-    name: rest.nameEn ? `${rest.nameEn}` : rest.nameKh,
+    name: zhName,
     secondaryName: rest.nameKh,
+    subtitle: `${rest.nameKh} • ${rest.nameEn}`,
     province: zhProv,
-    address: `${zhProv} (${rest.addressEn || rest.addressKh})`,
+    address: zhAddress,
     description: zhDesc,
+    openingHours: zhHours,
     signatureDishes: (rest.signatureDishesKh || []).map((d) => translateSignatureDish(d, 'zh')),
   };
 }

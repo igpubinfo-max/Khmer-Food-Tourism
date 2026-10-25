@@ -1277,7 +1277,7 @@ export function answerHealthAndNutritionQuestion(
     };
   }
 
-  // 8. Gout / Joint Pain / Uric Acid (សន្លាក់ / អាស៊ីតអ៊ុយរិក / เกาต์ / gout)
+  // 8. Gout / Joint Pain / Uric Acid (សន្លាក់ / អាស៊ីតអ៊ុយរិក / gout)
   if (
     q.includes('សន្លាក់') ||
     q.includes('អាស៊ីត') ||

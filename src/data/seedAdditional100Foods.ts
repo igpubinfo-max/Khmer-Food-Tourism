@@ -386,7 +386,7 @@ const RAW_100_NEW_DISHES: Array<{
     cat: 'grilled',
     catKh: 'ម្ហូបអាំង / ត្រីងៀតអាំង',
     catEn: 'Grilled / Sun-Dried Fish',
-    mainIngKh: 'ត្រីរ៉ស់ងៀត ឬត្រីช्डោរងៀត (៣៥០ ក្រាម)',
+    mainIngKh: 'ត្រីរ៉ស់ងៀត ឬត្រីឆ្ដោរងៀត (៣៥០ ក្រាម)',
     mainIngEn: 'Sun-dried salted snakehead fish (350g)',
     subIngKh: 'ទឹកអម្ពិលទុំ ស្ករត្នោត និងម្ទេសហាន់',
     subIngEn: 'Sweet palm sugar tamarind dipping sauce with chili',
@@ -941,7 +941,7 @@ const RAW_100_NEW_DISHES: Array<{
     catKh: 'បាយ & បបរ / បបរគ្រឿងមាន់',
     catEn: 'Porridge / Chicken Congee',
     mainIngKh: 'អង្ករផ្កាម្លិះ សាច់មាន់ស្រែហែក និងឈាមជ្រូក (៤៥០ ក្រាម)',
-    mainIngEn: 'Jasmine rice porridge, shredded country chicken, and猪blood cubes (450g)',
+    mainIngEn: 'Jasmine rice porridge, shredded country chicken, and pork blood cubes (450g)',
     subIngKh: 'ឆៃប៉ូវប្រៃ សណ្តែកបណ្តុះ និងខ្ទឹមសបំពង',
     subIngEn: 'Preserved radish, bean sprouts, and golden fried garlic',
     herbKh: 'ជីរវ៉ាន់ស៊ុយ ស្លឹកខ្ទឹម ខ្ញីហាន់ និងម្រេចកំពត',
@@ -1358,35 +1358,66 @@ const RAW_100_NEW_DISHES: Array<{
   },
 ];
 
+const VERIFIED_CALORIES_101_200: Record<string, number> = {
+  'food-101': 285, 'food-102': 195, 'food-103': 230, 'food-104': 490,
+  'food-105': 330, 'food-106': 245, 'food-107': 385, 'food-108': 255,
+  'food-109': 265, 'food-110': 210, 'food-111': 250, 'food-112': 275,
+  'food-113': 470, 'food-114': 185, 'food-115': 240, 'food-116': 215,
+  'food-117': 280, 'food-118': 430, 'food-119': 315, 'food-120': 395,
+  'food-121': 240, 'food-122': 275, 'food-123': 465, 'food-124': 310,
+  'food-125': 260, 'food-126': 370, 'food-127': 265, 'food-128': 485,
+  'food-129': 455, 'food-130': 210, 'food-131': 345, 'food-132': 360,
+  'food-133': 390, 'food-134': 155, 'food-135': 225, 'food-136': 245,
+  'food-137': 250, 'food-138': 285, 'food-139': 335, 'food-140': 530,
+  'food-141': 325, 'food-142': 350, 'food-143': 340, 'food-144': 230,
+  'food-145': 245, 'food-146': 365, 'food-147': 275, 'food-148': 235,
+  'food-149': 265, 'food-150': 230, 'food-151': 185, 'food-152': 295,
+  'food-153': 255, 'food-154': 240, 'food-155': 320, 'food-156': 195,
+  'food-157': 440, 'food-158': 415, 'food-159': 435, 'food-160': 465,
+  'food-161': 480, 'food-162': 375, 'food-163': 335, 'food-164': 390,
+  'food-165': 515, 'food-166': 410, 'food-167': 485, 'food-168': 510,
+  'food-169': 315, 'food-170': 265, 'food-171': 520, 'food-172': 460,
+  'food-173': 495, 'food-174': 290, 'food-175': 430, 'food-176': 465,
+  'food-177': 295, 'food-178': 410, 'food-179': 175, 'food-180': 310,
+  'food-181': 245, 'food-182': 340, 'food-183': 280, 'food-184': 190,
+  'food-185': 325, 'food-186': 285, 'food-187': 430, 'food-188': 260,
+  'food-189': 290, 'food-190': 365, 'food-191': 240, 'food-192': 310,
+  'food-193': 180, 'food-194': 215, 'food-195': 145, 'food-196': 310,
+  'food-197': 110, 'food-198': 125, 'food-199': 155, 'food-200': 195,
+};
+
 function buildStepsForCategory(
   cat: FoodCategorySlug,
   nameKh: string,
   nameEn: string,
   mainIngKh: string,
   subIngKh: string,
-  herbKh: string
+  herbKh: string,
+  mainIngEn: string,
+  subIngEn: string,
+  herbEn: string
 ): Array<{ stepNumber: number; instructionKh: string; instructionEn: string }> {
   if (cat === 'soup') {
     return [
       {
         stepNumber: 1,
         instructionKh: `លាងសម្អាត ${mainIngKh} និងហាន់បន្លែ (${subIngKh}) ទុកឱ្យស្អាត។`,
-        instructionEn: `Clean and prepare the main protein and fresh vegetables for ${nameEn}.`,
+        instructionEn: `Wash and prepare ${mainIngEn} along with ${subIngEn}.`,
       },
       {
         stepNumber: 2,
         instructionKh: 'ដាក់ឆ្នាំងឆាគ្រឿង និងប្រហុកឱ្យឈ្ងុយ រួចដាក់សាច់ចូលកូរឱ្យចូលជាតិ។',
-        instructionEn: 'Sauté aromatic herbs/paste until fragrant, then sear the protein to lock in flavor.',
+        instructionEn: 'Sauté the aromatic kroeung and prahok base until fragrant, then sear the protein to lock in flavor.',
       },
       {
         stepNumber: 3,
         instructionKh: `ចាក់ទឹកស៊ុបដាំឱ្យពុះ បង់ ${subIngKh} និងភ្លក្សរសជាតិដោយទឹកត្រី ស្ករត្នោត និងអំបិល។`,
-        instructionEn: 'Pour in water or broth, bring to a boil, add vegetables, and season with fish sauce and palm sugar.',
+        instructionEn: `Pour in broth and bring to a boil, add ${subIngEn}, and season with fish sauce, palm sugar, and sea salt.`,
       },
       {
         stepNumber: 4,
         instructionKh: `បង់ ${herbKh} ចូលមុនលើកចុះ ដើម្បីឱ្យសម្ល "${nameKh}" មានក្លិនក្រអូបឈ្ងុយឆ្ងាញ់។`,
-        instructionEn: 'Finish with fresh Cambodian herbs right before serving hot with steamed jasmine rice.',
+        instructionEn: `Fold in ${herbEn} right before serving "${nameEn}" piping hot with steamed jasmine rice.`,
       },
     ];
   }
@@ -1395,17 +1426,17 @@ function buildStepsForCategory(
       {
         stepNumber: 1,
         instructionKh: `លាងសម្អាត ${mainIngKh} រួចប្រឡាក់ជាមួយ ${subIngKh} ទុក ២០-៣០ នាទីឱ្យចូលជាតិ។`,
-        instructionEn: `Clean and marinate the main ingredients for ${nameEn} for 20-30 minutes.`,
+        instructionEn: `Clean ${mainIngEn} and marinate thoroughly with ${subIngEn} for 20-30 minutes.`,
       },
       {
         stepNumber: 2,
         instructionKh: 'បង្កាត់ភ្លើងធ្យូងឱ្យរងើកល្មម រួចដាក់អាំងប្រែសងខាងរហូតដល់ឆ្អិនក្រហមឈ្ងុយ។',
-        instructionEn: 'Grill over medium glowing charcoal, turning evenly until golden brown and smoky.',
+        instructionEn: 'Grill over glowing charcoal embers, turning evenly until golden brown, smoky, and cooked through.',
       },
       {
         stepNumber: 3,
         instructionKh: `រៀបដាក់ចាន ញ៉ាំផ្ទាប់ជាមួយ ${herbKh} និងទឹកជ្រលក់រសជាតិដើម។`,
-        instructionEn: 'Plate and serve hot alongside fresh herbs and traditional dipping sauce.',
+        instructionEn: `Arrange on a platter and serve hot with ${herbEn} and traditional Cambodian dipping sauce.`,
       },
     ];
   }
@@ -1414,17 +1445,17 @@ function buildStepsForCategory(
       {
         stepNumber: 1,
         instructionKh: `រៀបចំហាន់ ${mainIngKh} និង ${subIngKh} ទុកឱ្យរួចរាល់។`,
-        instructionEn: `Slice and prep the meat, seafood, and vegetables for ${nameEn}.`,
+        instructionEn: `Slice and prepare ${mainIngEn} together with ${subIngEn}.`,
       },
       {
         stepNumber: 2,
         instructionKh: 'ដាក់ខ្ទះឱ្យក្តៅ ចាក់ប្រេងបំពងខ្ទឹមស និងគ្រឿងឱ្យឈ្ងុយ រួចដាក់សាច់ចូលឆាដោយភ្លើងខ្លាំង។',
-        instructionEn: 'Heat wok over high flame, sauté garlic and aromatics, then stir-fry the protein.',
+        instructionEn: 'Heat the wok over high flame, sauté crushed garlic and aromatics until fragrant, then stir-fry the main protein.',
       },
       {
         stepNumber: 3,
         instructionKh: `ដាក់ ${subIngKh} ចូល ថែមប្រេងខ្យង ទឹកត្រី ស្ករត្នោត រួចបង់ ${herbKh} លើកចុះភ្លាមៗ។`,
-        instructionEn: 'Toss in vegetables and sauces, finish with fresh herbs, and serve immediately.',
+        instructionEn: `Add ${subIngEn}, season with oyster sauce, fish sauce, and palm sugar, then toss in ${herbEn} and serve immediately.`,
       },
     ];
   }
@@ -1433,17 +1464,17 @@ function buildStepsForCategory(
       {
         stepNumber: 1,
         instructionKh: `រៀបចំ ${mainIngKh} និងលាងបន្លែ (${subIngKh}) ត្រាំទឹកកកឱ្យស្រួយល្អ។`,
-        instructionEn: `Prepare the protein and chill crisp vegetables for ${nameEn}.`,
+        instructionEn: `Prepare ${mainIngEn} and chill ${subIngEn} in ice water until crisp.`,
       },
       {
         stepNumber: 2,
         instructionKh: 'លាយទឹកជ្រលក់ ឬទឹកញាំដោយប្រើទឹកក្រូចឆ្មារ ទឹកត្រី ស្ករត្នោត ខ្ទឹមស និងម្ទេសឱ្យជូរប្រៃផ្អែមល្មម។',
-        instructionEn: 'Whisk fresh lime juice, fish sauce, palm sugar, garlic, and chili for a balanced dressing.',
+        instructionEn: 'Whisk fresh lime juice, fish sauce, palm sugar, minced garlic, and chili into a balanced sweet-sour dressing.',
       },
       {
         stepNumber: 3,
         instructionKh: `ច្របល់គ្រឿងទាំងអស់ចូលគ្នា រោយ ${herbKh} ពីលើ រួចដួសដាក់ចានទទួលទាន។`,
-        instructionEn: 'Toss gently with fresh Cambodian herbs and roasted peanuts just before serving.',
+        instructionEn: `Toss everything gently with ${herbEn} just before plating and serving.`,
       },
     ];
   }
@@ -1452,17 +1483,17 @@ function buildStepsForCategory(
       {
         stepNumber: 1,
         instructionKh: `រៀបចំគ្រឿងផ្សំធម្មជាតិស្រស់ៗ៖ ${mainIngKh} និង ${subIngKh}។`,
-        instructionEn: `Select and prepare fresh ingredients for ${nameEn}.`,
+        instructionEn: `Select and prepare fresh natural ingredients: ${mainIngEn} and ${subIngEn}.`,
       },
       {
         stepNumber: 2,
         instructionKh: `ចម្អិន ឬលាយផ្សំតាមរូបមន្តប្រពៃណីខ្មែរ រួចបន្ថែម ${herbKh} ឱ្យមានក្លិនក្រអូបឈ្ងុយ។`,
-        instructionEn: 'Prepare with authentic palm sugar or coconut cream and infuse with natural pandan/herbs.',
+        instructionEn: `Simmer or blend according to traditional Cambodian methods and infuse with ${herbEn}.`,
       },
       {
         stepNumber: 3,
         instructionKh: `ដួសដាក់ចាន ឬកែវ រៀបចំទទួលទាន "${nameKh}" ដោយរសជាតិផ្អែមឆ្ងាញ់។`,
-        instructionEn: 'Serve chilled or warm according to traditional Cambodian style.',
+        instructionEn: `Portion into serving bowls or glasses and enjoy "${nameEn}" warm or chilled.`,
       },
     ];
   }
@@ -1470,17 +1501,17 @@ function buildStepsForCategory(
     {
       stepNumber: 1,
       instructionKh: `រៀបចំ ${mainIngKh} និងគ្រឿងផ្សំ (${subIngKh}) ឱ្យស្អាតល្អ។`,
-      instructionEn: `Prepare the main ingredients and aromatics for ${nameEn}.`,
+      instructionEn: `Prepare ${mainIngEn} and ${subIngEn} cleanly for cooking.`,
     },
     {
       stepNumber: 2,
       instructionKh: 'ចម្អិនតាមលំដាប់លំដោយដោយប្រើភ្លើងល្មម និងផ្សំរសជាតិបែបខ្មែរដើម។',
-      instructionEn: 'Cook over balanced heat and season to authentic Cambodian taste.',
+      instructionEn: 'Cook over balanced heat and season to authentic Cambodian culinary standards.',
     },
     {
       stepNumber: 3,
       instructionKh: `រៀបដាក់ចាន បន្ថែម ${herbKh} ពីលើ រួចទទួលទានក្តៅៗ។`,
-      instructionEn: 'Garnish with fresh herbs and serve hot.',
+      instructionEn: `Transfer to a serving plate, garnish generously with ${herbEn}, and serve hot.`,
     },
   ];
 }
@@ -1506,7 +1537,7 @@ export const additional100Foods: FoodItem[] = RAW_100_NEW_DISHES.map((item, idx)
     prepTime: item.cat === 'drink' ? '១០ នាទី' : '២០ នាទី',
     cookTime: item.cat === 'drink' ? '៥ នាទី' : '២៥ នាទី',
     servings: '២-៤ នាក់',
-    calories: item.cat === 'drink' ? 160 : item.cat === 'salad' ? 240 : 340,
+    calories: VERIFIED_CALORIES_101_200[id] ?? (item.cat === 'drink' ? 160 : item.cat === 'salad' ? 240 : 340),
     difficulty: 'medium',
     priceRiel: 0,
     priceUsd: 0,
@@ -1529,7 +1560,10 @@ export const additional100Foods: FoodItem[] = RAW_100_NEW_DISHES.map((item, idx)
       item.nameEn,
       item.mainIngKh,
       item.subIngKh,
-      item.herbKh
+      item.herbKh,
+      item.mainIngEn,
+      item.subIngEn,
+      item.herbEn
     ),
   };
 });

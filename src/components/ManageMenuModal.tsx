@@ -1137,7 +1137,7 @@ export const ManageMenuModal: React.FC = () => {
 
                   <div>
                     <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
-                      {isKm ? '២. ឈ្មោះមុខម្ហូប (ជាភាសាអង់គ្លេស - មិនบังคับ)' : '2. Dish Name (English - Optional)'}
+                      {isKm ? '២. ឈ្មោះមុខម្ហូប (ជាភាសាអង់គ្លេស - មិនបង្ខំ)' : '2. Dish Name (English - Optional)'}
                     </label>
                     <input
                       type="text"

@@ -2,9 +2,11 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
   X, Sparkles, Shuffle, Utensils, DollarSign, MapPin, 
-  Star, Clock, ChefHat, Heart, Compass, Flame, Sun, Sunset, Moon, Coffee
+  Star, Clock, ChefHat, Heart, Sun, Sunset, Moon, Coffee
 } from 'lucide-react';
 import { FoodItem } from '../types';
+import { tr } from '../utils/i18n';
+import { getLocalizedFood, getLocalizedRestaurant } from '../utils/zhDynamicTranslator';
 
 export const WhatToEatModal: React.FC = () => {
   const { 
@@ -12,8 +14,6 @@ export const WhatToEatModal: React.FC = () => {
     foods, restaurants, language, setSelectedFood, 
     openAddToWishlist 
   } = useApp();
-
-  const isKm = language === 'km';
 
   // Filters: Budget, Category, Meal Time
   const [budgetFilter, setBudgetFilter] = useState<'all' | 'budget' | 'medium' | 'premium'>('all');
@@ -32,6 +32,7 @@ export const WhatToEatModal: React.FC = () => {
         slug: 'breakfast',
         labelKh: 'អាហារពេលព្រឹក',
         labelEn: 'Breakfast Recommendation',
+        labelZh: '早餐美食推荐',
         icon: Coffee,
         accent: 'from-amber-500 to-orange-500'
       };
@@ -40,6 +41,7 @@ export const WhatToEatModal: React.FC = () => {
         slug: 'lunch',
         labelKh: 'អាហារថ្ងៃត្រង់',
         labelEn: 'Lunch Recommendation',
+        labelZh: '午餐美食推荐',
         icon: Sun,
         accent: 'from-emerald-500 to-teal-600'
       };
@@ -48,6 +50,7 @@ export const WhatToEatModal: React.FC = () => {
         slug: 'afternoon',
         labelKh: 'អាហារសម្រន់ & បង្អែម',
         labelEn: 'Afternoon Treats',
+        labelZh: '下午茶与甜点推荐',
         icon: Sparkles,
         accent: 'from-pink-500 to-rose-500'
       };
@@ -56,6 +59,7 @@ export const WhatToEatModal: React.FC = () => {
         slug: 'dinner',
         labelKh: 'អាហារពេលល្ងាច',
         labelEn: 'Dinner Recommendation',
+        labelZh: '晚餐美食推荐',
         icon: Sunset,
         accent: 'from-indigo-600 to-purple-600'
       };
@@ -64,6 +68,7 @@ export const WhatToEatModal: React.FC = () => {
         slug: 'night',
         labelKh: 'អាហារពេលយប់',
         labelEn: 'Late Night Cravings',
+        labelZh: '宵夜美食推荐',
         icon: Moon,
         accent: 'from-slate-700 to-slate-900'
       };
@@ -73,14 +78,10 @@ export const WhatToEatModal: React.FC = () => {
   // Filter candidate dishes
   const matchingFoods = useMemo(() => {
     return foods.filter(food => {
-      // Budget filter
       if (budgetFilter === 'budget' && food.priceUsd > 3.0) return false;
       if (budgetFilter === 'medium' && (food.priceUsd < 3.0 || food.priceUsd > 7.0)) return false;
       if (budgetFilter === 'premium' && food.priceUsd <= 7.0) return false;
-
-      // Category filter
       if (categoryFilter !== 'all' && food.categorySlug !== categoryFilter) return false;
-
       return true;
     });
   }, [foods, budgetFilter, categoryFilter]);
@@ -93,12 +94,10 @@ export const WhatToEatModal: React.FC = () => {
     if (activeDishList.length === 0) return foods[0];
     if (activeDishList.length === 1) return activeDishList[0];
 
-    // Filter out already seen dishes in this session if possible
     let unseenCandidates = activeDishList.filter(f => 
       f.id !== excludeId && !seenDishIdsRef.current.has(f.id)
     );
 
-    // If all candidates have been seen, reset the history to start a fresh cycle
     if (unseenCandidates.length === 0) {
       seenDishIdsRef.current.clear();
       unseenCandidates = activeDishList.filter(f => f.id !== excludeId);
@@ -124,13 +123,16 @@ export const WhatToEatModal: React.FC = () => {
     return activeDishList.find(f => f.id === currentDishId) || activeDishList[0] || foods[0];
   }, [activeDishList, currentDishId, foods]);
 
+  const currentLoc = useMemo(
+    () => (currentDish ? getLocalizedFood(currentDish, language) : null),
+    [currentDish, language]
+  );
+
   // 2 Distinct Alternative Dishes randomly picked from candidates
   const alternativeDishes = useMemo(() => {
     if (activeDishList.length <= 1) return [];
     const pool = activeDishList.filter(f => f.id !== currentDish?.id);
     if (pool.length === 0) return [];
-
-    // Shuffle pool to pick 2 completely distinct items
     const shuffled = [...pool].sort(() => 0.5 - Math.random());
     return shuffled.slice(0, 2);
   }, [activeDishList, currentDish?.id]);
@@ -145,7 +147,6 @@ export const WhatToEatModal: React.FC = () => {
 
   if (!isWhatToEatModalOpen) return null;
 
-  // AI Re-roll / Spin handler with random shuffle
   const handleShowAnother = () => {
     setIsSpinning(true);
     setTimeout(() => {
@@ -172,14 +173,19 @@ export const WhatToEatModal: React.FC = () => {
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="font-moul text-sm text-white">
-                  {isKm ? 'ថ្ងៃនេះញ៉ាំអ្វី?' : 'What to Eat Today?'}
+                  {tr(language, 'ថ្ងៃនេះញ៉ាំអ្វី?', 'What to Eat Today?', '今天吃什么？')}
                 </h3>
                 <span className="px-2 py-0.5 rounded-full bg-amber-400 text-stone-900 text-[10px] font-bold shadow-xs">
-                  {isKm ? 'អាទិភាពខ្ពស់ ⭐' : 'High Priority ⭐'}
+                  {tr(language, 'អាទិភាពខ្ពស់ ⭐', 'High Priority ⭐', '智能推荐 ⭐')}
                 </span>
               </div>
               <p className="text-[11px] text-emerald-100 font-khmer">
-                {isKm ? 'AI ជួយស្នើម្ហូបប្លែកៗឆ្លាតវៃតាមថវិកា និងចំណង់ចំណូលចិត្ត' : 'Smart AI generated recommendations from 235 authentic dishes'}
+                {tr(
+                  language,
+                  'AI ជួយស្នើម្ហូបប្លែកៗឆ្លាតវៃតាមថវិកា និងចំណង់ចំណូលចិត្ត',
+                  `Smart AI recommendations from ${foods.length} authentic dishes`,
+                  `AI 根据您的预算与口味从 ${foods.length} 道正宗高棉菜中智能推荐`
+                )}
               </p>
             </div>
           </div>
@@ -195,10 +201,17 @@ export const WhatToEatModal: React.FC = () => {
         <div className="px-4 py-2 bg-gradient-to-r from-amber-500/10 via-emerald-500/10 to-teal-500/10 border-b border-emerald-100/60 dark:border-slate-800 flex items-center justify-between text-xs font-khmer shrink-0">
           <div className="flex items-center gap-2 text-[#064E3B] dark:text-emerald-300 font-bold text-[11px]">
             <MealIcon className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-            <span>{isKm ? `AI ណែនាំសម្រាប់ ${currentMealInfo.labelKh} ពេលនេះ` : `AI Pick for ${currentMealInfo.labelEn}`}</span>
+            <span>
+              {tr(
+                language,
+                `AI ណែនាំសម្រាប់ ${currentMealInfo.labelKh} ពេលនេះ`,
+                `AI Pick for ${currentMealInfo.labelEn}`,
+                `AI 当前时段推荐：${currentMealInfo.labelZh}`
+              )}
+            </span>
           </div>
           <span className="text-[10px] text-slate-500 font-mono font-medium">
-            {activeDishList.length} {isKm ? 'មុខម្ហូប' : 'dishes'}
+            {activeDishList.length} {tr(language, 'មុខម្ហូប', 'dishes', '道菜')}
           </span>
         </div>
 
@@ -208,13 +221,13 @@ export const WhatToEatModal: React.FC = () => {
           <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar text-xs font-khmer">
             <span className="text-[11px] font-bold text-slate-500 shrink-0 flex items-center gap-1 mr-1">
               <DollarSign className="w-3.5 h-3.5 text-emerald-600" />
-              {isKm ? 'ថវិកា៖' : 'Budget:'}
+              {tr(language, 'ថវិកា៖', 'Budget:', '预算：')}
             </span>
             {[
-              { id: 'all', labelKh: 'ទាំងអស់', labelEn: 'All' },
-              { id: 'budget', labelKh: '< $3 សន្សំសំចៃ', labelEn: '< $3 Budget' },
-              { id: 'medium', labelKh: '$3-$7 មធ្យម', labelEn: '$3-$7 Medium' },
-              { id: 'premium', labelKh: '> $7 ពិសេស', labelEn: '> $7 Special' },
+              { id: 'all', labelKh: 'ទាំងអស់', labelEn: 'All', labelZh: '全部' },
+              { id: 'budget', labelKh: '< $3 សន្សំសំចៃ', labelEn: '< $3 Budget', labelZh: '< $3 实惠' },
+              { id: 'medium', labelKh: '$3-$7 មធ្យម', labelEn: '$3-$7 Medium', labelZh: '$3-$7 适中' },
+              { id: 'premium', labelKh: '> $7 ពិសេស', labelEn: '> $7 Special', labelZh: '> $7 精品' },
             ].map(b => (
               <button
                 key={b.id}
@@ -225,7 +238,7 @@ export const WhatToEatModal: React.FC = () => {
                     : 'bg-white dark:bg-slate-700/80 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-600'
                 }`}
               >
-                {isKm ? b.labelKh : b.labelEn}
+                {tr(language, b.labelKh, b.labelEn, b.labelZh)}
               </button>
             ))}
           </div>
@@ -233,16 +246,16 @@ export const WhatToEatModal: React.FC = () => {
           {/* Category row */}
           <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar text-xs font-khmer">
             <span className="text-[11px] font-bold text-slate-500 shrink-0 mr-1">
-              {isKm ? 'ចំណូលចិត្ត៖' : 'Category:'}
+              {tr(language, 'ចំណូលចិត្ត៖', 'Category:', '分类：')}
             </span>
             {[
-              { id: 'all', labelKh: 'ទាំងអស់' },
-              { id: 'soup', labelKh: 'សម្ល/ស៊ុប' },
-              { id: 'grilled', labelKh: 'អាំង/បំពង' },
-              { id: 'stirfry', labelKh: 'ឆា' },
-              { id: 'salad', labelKh: 'ញាំ/ភ្លា' },
-              { id: 'noodles', labelKh: 'គុយទាវ/នំបញ្ចុក' },
-              { id: 'dessert', labelKh: 'បង្អែម' },
+              { id: 'all', labelKh: 'ទាំងអស់', labelEn: 'All', labelZh: '全部' },
+              { id: 'soup', labelKh: 'សម្ល/ស៊ុប', labelEn: 'Soup & Curry', labelZh: '汤品/咖喱' },
+              { id: 'grilled', labelKh: 'អាំង/បំពង', labelEn: 'Grilled & Fried', labelZh: '烧烤/煎炸' },
+              { id: 'stirfry', labelKh: 'ឆា', labelEn: 'Stir-Fry', labelZh: '热炒' },
+              { id: 'salad', labelKh: 'ញាំ/ភ្លា', labelEn: 'Salads & Dips', labelZh: '凉拌/蘸酱' },
+              { id: 'noodles', labelKh: 'គុយទាវ/នំបញ្ចុក', labelEn: 'Noodles', labelZh: '粉面' },
+              { id: 'dessert', labelKh: 'បង្អែម', labelEn: 'Desserts', labelZh: '甜品' },
             ].map(c => (
               <button
                 key={c.id}
@@ -253,7 +266,7 @@ export const WhatToEatModal: React.FC = () => {
                     : 'bg-white dark:bg-slate-700/80 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600'
                 }`}
               >
-                {c.labelKh}
+                {tr(language, c.labelKh, c.labelEn, c.labelZh)}
               </button>
             ))}
           </div>
@@ -261,14 +274,14 @@ export const WhatToEatModal: React.FC = () => {
 
         {/* Content body */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar">
-          {currentDish && (
+          {currentDish && currentLoc && (
             <div className={`transition-all duration-300 ${isSpinning ? 'opacity-30 scale-95 blur-[1px]' : 'opacity-100 scale-100'}`}>
               {/* Highlight Recommended Dish Card */}
               <div className="relative rounded-3xl overflow-hidden bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 shadow-md">
                 <div className="relative aspect-16/10 w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
                   <img 
                     src={currentDish.photoUrl} 
-                    alt={currentDish.nameKh} 
+                    alt={currentLoc.name} 
                     className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                     loading="lazy"
                   />
@@ -278,25 +291,25 @@ export const WhatToEatModal: React.FC = () => {
                   <div className="absolute top-3 left-3 flex items-center gap-1.5">
                     <span className="px-2.5 py-1 rounded-full bg-amber-400 text-stone-900 text-xs font-black shadow-xs flex items-center gap-1 font-khmer">
                       <Sparkles className="w-3.5 h-3.5 fill-current text-amber-900" />
-                      {isKm ? 'AI ស្នើឡើងសម្រាប់អ្នក!' : 'AI Top Pick!'}
+                      {tr(language, 'AI ស្នើឡើងសម្រាប់អ្នក!', 'AI Top Pick!', 'AI 为您精选！')}
                     </span>
                     <span className="px-2 py-1 rounded-full bg-black/60 backdrop-blur-xs text-white text-[11px] font-bold">
-                      {isKm ? currentDish.categoryKh : currentDish.categoryEn}
+                      {currentLoc.category}
                     </span>
                   </div>
 
                   {/* Reference label */}
                   <span className="absolute bottom-2 right-2 bg-black/60 text-white/80 text-[8px] px-1.5 py-0.5 rounded-xs font-khmer select-none">
-                    {isKm ? 'រូបភាពយោង' : 'Reference photo'}
+                    {tr(language, 'រូបភាពយោង', 'Reference photo', '参考图片')}
                   </span>
 
                   {/* Title overlay */}
                   <div className="absolute bottom-3 left-3 right-3 text-white">
                     <h2 className="font-moul text-base sm:text-lg text-white drop-shadow">
-                      {isKm ? currentDish.nameKh : currentDish.nameEn}
+                      {currentLoc.name}
                     </h2>
                     <p className="text-xs text-emerald-300 font-medium">
-                      {currentDish.nameEn}
+                      {currentLoc.subtitle}
                     </p>
                   </div>
                 </div>
@@ -306,10 +319,10 @@ export const WhatToEatModal: React.FC = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="text-xs text-slate-500">
-                        {isKm ? 'តម្លៃប៉ាន់ស្មាន' : 'Estimated price'}
+                        {tr(language, 'ថាមពលអាហារូបត្ថម្ភ', 'Nutritional Energy', '营养热量')}
                       </div>
                       <div className="text-base font-black text-[#064E3B] dark:text-emerald-400">
-                        {currentDish.priceRiel.toLocaleString()} ៛ <span className="text-xs text-slate-500 font-normal">(${currentDish.priceUsd.toFixed(2)})</span>
+                        {currentDish.calories} {tr(language, 'kcal', 'kcal', '千卡')}
                       </div>
                     </div>
 
@@ -320,17 +333,17 @@ export const WhatToEatModal: React.FC = () => {
                       </div>
                       <div className="flex items-center gap-1">
                         <Clock className="w-4 h-4 text-emerald-600" />
-                        <span>{currentDish.cookTime}</span>
+                        <span>{currentLoc.cookTime}</span>
                       </div>
                       <div className="flex items-center gap-1">
                         <ChefHat className="w-4 h-4 text-emerald-600" />
-                        <span className="capitalize">{currentDish.difficulty}</span>
+                        <span className="capitalize">{currentLoc.difficultyLabel}</span>
                       </div>
                     </div>
                   </div>
 
                   <p className="text-xs text-slate-600 dark:text-slate-300 line-clamp-2 leading-relaxed">
-                    {isKm ? currentDish.descriptionKh : currentDish.descriptionEn}
+                    {currentLoc.description}
                   </p>
 
                   {/* Restaurants Serving It */}
@@ -338,14 +351,17 @@ export const WhatToEatModal: React.FC = () => {
                     <div className="p-2.5 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/40 space-y-1.5">
                       <div className="text-[11px] font-bold text-[#064E3B] dark:text-emerald-400 flex items-center gap-1">
                         <MapPin className="w-3.5 h-3.5 text-emerald-600" />
-                        <span>{isKm ? 'ហាងឆ្ងាញ់ៗដែលមានលក់ម្ហូបនេះ៖' : 'Recommended restaurants serving this:'}</span>
+                        <span>{tr(language, 'ហាងឆ្ងាញ់ៗដែលមានលក់ម្ហូបនេះ៖', 'Recommended restaurants serving this:', '推荐品尝此菜品的餐厅：')}</span>
                       </div>
-                      {servingRestaurants.map(r => (
-                        <div key={r.id} className="flex items-center justify-between text-xs text-slate-700 dark:text-slate-200">
-                          <span className="font-bold truncate">{r.nameKh}</span>
-                          <span className="text-[10px] text-slate-500 shrink-0">{r.provinceKh}</span>
-                        </div>
-                      ))}
+                      {servingRestaurants.map(r => {
+                        const rLoc = getLocalizedRestaurant(r, language);
+                        return (
+                          <div key={r.id} className="flex items-center justify-between text-xs text-slate-700 dark:text-slate-200">
+                            <span className="font-bold truncate">{rLoc.name}</span>
+                            <span className="text-[10px] text-slate-500 shrink-0">{rLoc.province}</span>
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
 
@@ -359,7 +375,7 @@ export const WhatToEatModal: React.FC = () => {
                       className="flex-1 py-2.5 px-3 bg-[#064E3B] hover:bg-[#047857] text-white rounded-xl text-xs font-bold font-khmer shadow-xs transition flex items-center justify-center gap-1.5"
                     >
                       <ChefHat className="w-4 h-4 text-emerald-300" />
-                      <span>{isKm ? 'មើលរបៀបធ្វើ / រូបមន្ត' : 'View Recipe Steps'}</span>
+                      <span>{tr(language, 'មើលរបៀបធ្វើ / រូបមន្ត', 'View Recipe Steps', '查看食谱与烹饪步骤')}</span>
                     </button>
                     <button
                       onClick={() => openAddToWishlist({
@@ -369,11 +385,11 @@ export const WhatToEatModal: React.FC = () => {
                         nameEn: currentDish.nameEn,
                         photoUrl: currentDish.photoUrl,
                         categoryKh: currentDish.categoryKh,
-                        priceDisplay: `${currentDish.priceRiel.toLocaleString()} ៛`,
+                        priceDisplay: `${currentDish.calories} kcal`,
                         rating: currentDish.rating,
                       })}
                       className="p-2.5 bg-emerald-100 hover:bg-emerald-200 dark:bg-slate-700 text-[#064E3B] dark:text-emerald-300 rounded-xl transition shadow-xs"
-                      title={isKm ? 'ដាក់ក្នុងបញ្ជីចង់ញ៉ាំ' : 'Add to Wishlist'}
+                      title={tr(language, 'ដាក់ក្នុងបញ្ជីចង់ញ៉ាំ', 'Add to Wishlist', '加入心愿单')}
                     >
                       <Heart className="w-4 h-4 fill-emerald-600" />
                     </button>
@@ -388,29 +404,32 @@ export const WhatToEatModal: React.FC = () => {
             <div className="space-y-2 font-khmer">
               <h4 className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1">
                 <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                <span>{isKm ? 'ជម្រើសគួរពិចារណាផ្សេងទៀត (AI Alternative Picks)៖' : 'Other AI alternative picks:'}</span>
+                <span>{tr(language, 'ជម្រើសគួរពិចារណាផ្សេងទៀត (AI Alternative Picks)៖', 'Other AI alternative picks:', '其他 AI 精选备选菜品：')}</span>
               </h4>
               <div className="grid grid-cols-2 gap-2">
-                {alternativeDishes.map(d => (
-                  <div
-                    key={d.id}
-                    onClick={() => {
-                      setCurrentDishId(d.id);
-                      seenDishIdsRef.current.add(d.id);
-                    }}
-                    className="p-2 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/90 dark:border-slate-700 flex items-center gap-2 cursor-pointer hover:border-emerald-500 transition shadow-2xs group"
-                  >
-                    <img src={d.photoUrl} alt={d.nameKh} className="w-10 h-10 rounded-xl object-cover shrink-0 group-hover:scale-105 transition-transform" />
-                    <div className="min-w-0">
-                      <div className="text-[11px] font-bold text-[#0F172A] dark:text-white truncate">
-                        {isKm ? d.nameKh : d.nameEn}
-                      </div>
-                      <div className="text-[10px] text-emerald-600 font-mono font-bold">
-                        {d.priceRiel.toLocaleString()} ៛
+                {alternativeDishes.map(d => {
+                  const dLoc = getLocalizedFood(d, language);
+                  return (
+                    <div
+                      key={d.id}
+                      onClick={() => {
+                        setCurrentDishId(d.id);
+                        seenDishIdsRef.current.add(d.id);
+                      }}
+                      className="p-2 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/90 dark:border-slate-700 flex items-center gap-2 cursor-pointer hover:border-emerald-500 transition shadow-2xs group"
+                    >
+                      <img src={d.photoUrl} alt={dLoc.name} className="w-10 h-10 rounded-xl object-cover shrink-0 group-hover:scale-105 transition-transform" />
+                      <div className="min-w-0">
+                        <div className="text-[11px] font-bold text-[#0F172A] dark:text-white truncate">
+                          {dLoc.name}
+                        </div>
+                        <div className="text-[10px] text-emerald-600 font-mono font-bold">
+                          {d.calories} {tr(language, 'kcal', 'kcal', '千卡')}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}
@@ -424,7 +443,7 @@ export const WhatToEatModal: React.FC = () => {
             className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-500 hover:from-amber-600 hover:to-amber-500 text-stone-900 font-black text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-[0.98] font-khmer cursor-pointer"
           >
             <Shuffle className={`w-5 h-5 ${isSpinning ? 'animate-spin' : ''}`} />
-            <span>{isKm ? '« បង្ហាញម្ហូបផ្សេងទៀត » (AI ជ្រើសម្ហូបថ្មី)' : '« Show Another Dish » (AI Generate)'}</span>
+            <span>{tr(language, '« បង្ហាញម្ហូបផ្សេងទៀត » (AI ជ្រើសម្ហូបថ្មី)', '« Show Another Dish » (AI Generate)', '« 换一道菜 »（AI 重新推荐）')}</span>
           </button>
         </div>
       </div>

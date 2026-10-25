@@ -8,7 +8,7 @@ import {
 import { isRestaurantPremiumActive, isUserVipActive, getVipAccountState, getRestaurantRatingSummary } from '../types';
 import { RestaurantImageModal } from './RestaurantImageModal';
 import { tr } from '../utils/i18n';
-import { getLocalizedRestaurant } from '../utils/zhDynamicTranslator';
+import { getLocalizedRestaurant, translateSignatureDish, translateDynamicTextToZh } from '../utils/zhDynamicTranslator';
 import {
   sanitizeDialablePhone,
   formatDisplayPhone,
@@ -195,9 +195,12 @@ export const RestaurantDetailModal: React.FC = () => {
     const ok = await copyTextNativeOrWeb(fullText, title);
     if (ok) {
       showToast(
-        isKm
-          ? 'បានចម្លងឈ្មោះ ពិពណ៌នា ទីតាំង និងតំណភ្ជាប់ហាងជោគជ័យ!'
-          : 'Restaurant details & link copied to clipboard!',
+        tr(
+          language,
+          'បានចម្លងឈ្មោះ ពិពណ៌នា ទីតាំង និងតំណភ្ជាប់ហាងជោគជ័យ!',
+          'Restaurant details & link copied to clipboard!',
+          '已成功复制餐厅名称、介绍、地址与链接！'
+        ),
         'success'
       );
     }
@@ -214,7 +217,7 @@ export const RestaurantDetailModal: React.FC = () => {
           <button
             onClick={() => setSelectedRestaurant(null)}
             className="p-2.5 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur-md text-white shadow pointer-events-auto transition active:scale-90"
-            title="បិទ"
+            title={tr(language, 'បិទ', 'Close', '关闭')}
           >
             <X className="w-4 h-4" />
           </button>
@@ -233,7 +236,7 @@ export const RestaurantDetailModal: React.FC = () => {
                 rating: selectedRestaurant.rating,
               })}
               className="p-2.5 rounded-full bg-black/60 hover:bg-black/80 backdrop-blur-md text-white shadow transition active:scale-95 border border-white/20"
-              title={isKm ? 'ដាក់ក្នុងបញ្ជីចង់ទៅ' : 'Add to Wishlist'}
+              title={tr(language, 'ដាក់ក្នុងបញ្ជីចង់ទៅ', 'Add to Wishlist', '加入心愿单')}
             >
               <Bookmark className="w-4 h-4 text-amber-300" />
             </button>
@@ -245,10 +248,10 @@ export const RestaurantDetailModal: React.FC = () => {
                   setIsManageMenuModalOpen(true);
                 }}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-400 hover:bg-amber-500 text-slate-950 text-xs font-black shadow transition active:scale-95 font-khmer border border-white/50"
-                title={isKm ? 'កែប្រែព័ត៌មាន & រូបភាពហាង (Admin)' : 'Edit Store Details & Photos (Admin)'}
+                title={tr(language, 'កែប្រែព័ត៌មាន & រូបភាពហាង (Admin)', 'Edit Store Details & Photos (Admin)', '编辑店铺信息与照片（管理员）')}
               >
                 <Edit2 className="w-3.5 h-3.5" />
-                <span>{isKm ? 'កែប្រែហាង (Admin)' : 'Edit Store'}</span>
+                <span>{tr(language, 'កែប្រែហាង (Admin)', 'Edit Store', '编辑店铺')}</span>
               </button>
             )}
 
@@ -256,10 +259,10 @@ export const RestaurantDetailModal: React.FC = () => {
               type="button"
               onClick={handleOpenPhotoEditor}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/60 hover:bg-black/80 backdrop-blur-md text-white text-xs font-bold shadow transition active:scale-95 font-khmer border border-white/20"
-              title={isKm ? 'ប្តូររូបភាពហាងផ្ទាល់ខ្លួន' : 'Change Shop Photo'}
+              title={tr(language, 'ប្តូររូបភាពហាងផ្ទាល់ខ្លួន', 'Change Shop Photo', '更换店铺照片')}
             >
               <Camera className="w-3.5 h-3.5 text-emerald-300" />
-              <span>{isKm ? 'ប្តូររូបភាព' : 'Change Photo'}</span>
+              <span>{tr(language, 'ប្តូររូបភាព', 'Change Photo', '更换照片')}</span>
             </button>
             <button
               type="button"
@@ -267,7 +270,7 @@ export const RestaurantDetailModal: React.FC = () => {
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold shadow transition active:scale-95"
             >
               <Phone className="w-3.5 h-3.5" />
-              <span>{isKm ? 'ហៅទូរស័ព្ទ' : 'Call'}</span>
+              <span>{tr(language, 'ហៅទូរស័ព្ទ', 'Call', '致电')}</span>
             </button>
           </div>
         </div>
@@ -639,36 +642,50 @@ export const RestaurantDetailModal: React.FC = () => {
                 </div>
 
                 <div className="grid grid-cols-1 gap-2.5">
-                  {selectedRestaurant.menuItems.map((item, i) => (
-                    <div 
-                      key={item.id || i}
-                      className="p-3 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 shadow-xs flex items-center gap-3"
-                    >
-                      <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-slate-100 shrink-0 border border-slate-200 dark:border-slate-700">
-                        <img src={item.photoUrl} alt={item.nameKh} className="w-full h-full object-cover" />
-                        <span className="absolute bottom-0 right-0 bg-black/65 text-white/90 text-[7px] px-1 rounded-tl-sm font-khmer select-none">
-                          {tr(language, 'រូបភាពយោង', 'Ref', '参考图')}
-                        </span>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <h4 className="font-bold text-[#0F172A] dark:text-white text-xs truncate">
-                            {language === 'km' ? item.nameKh : (item.nameEn || item.nameKh)}
-                          </h4>
-                          <span className="text-[#064E3B] dark:text-emerald-400 font-bold font-mono text-xs ml-2">${(item.priceUsd ?? 0).toFixed(2)}</span>
+                  {selectedRestaurant.menuItems.map((item, i) => {
+                    const itemDisplayName =
+                      language === 'km'
+                        ? item.nameKh
+                        : language === 'zh'
+                        ? translateSignatureDish(item.nameKh || item.nameEn || '', 'zh')
+                        : item.nameEn || translateSignatureDish(item.nameKh || '', 'en');
+                    const itemDesc =
+                      language === 'km'
+                        ? item.descriptionKh
+                        : item.descriptionKh
+                        ? translateSignatureDish(item.descriptionKh, language)
+                        : '';
+                    return (
+                      <div 
+                        key={item.id || i}
+                        className="p-3 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 shadow-xs flex items-center gap-3"
+                      >
+                        <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-slate-100 shrink-0 border border-slate-200 dark:border-slate-700">
+                          <img src={item.photoUrl} alt={itemDisplayName} className="w-full h-full object-cover" />
+                          <span className="absolute bottom-0 right-0 bg-black/65 text-white/90 text-[7px] px-1 rounded-tl-sm font-khmer select-none">
+                            {tr(language, 'រូបភាពយោង', 'Ref', '参考图')}
+                          </span>
                         </div>
-                        {item.nameEn && (
-                          <p className="text-[10px] text-slate-500 truncate">{item.nameEn}</p>
-                        )}
-                        <p className="text-[10px] text-slate-500 font-mono">({item.priceRiel.toLocaleString()} ៛)</p>
-                        {item.descriptionKh && (
-                          <p className="text-[10px] text-slate-600 dark:text-slate-300 line-clamp-1 mt-0.5">
-                            {item.descriptionKh}
-                          </p>
-                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between">
+                            <h4 className="font-bold text-[#0F172A] dark:text-white text-xs truncate">
+                              {itemDisplayName}
+                            </h4>
+                            <span className="text-[#064E3B] dark:text-emerald-400 font-bold font-mono text-xs ml-2">${(item.priceUsd ?? 0).toFixed(2)}</span>
+                          </div>
+                          {item.nameEn && language !== 'en' && (
+                            <p className="text-[10px] text-slate-500 truncate">{item.nameEn}</p>
+                          )}
+                          <p className="text-[10px] text-slate-500 font-mono">({item.priceRiel.toLocaleString()} ៛)</p>
+                          {itemDesc && (
+                            <p className="text-[10px] text-slate-600 dark:text-slate-300 line-clamp-1 mt-0.5">
+                              {itemDesc}
+                            </p>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             ) : (
@@ -725,12 +742,15 @@ export const RestaurantDetailModal: React.FC = () => {
                 <div>
                   <h3 className="font-bold text-[#0F172A] dark:text-white text-sm flex items-center gap-1.5">
                     <Star className="w-4 h-4 fill-current text-amber-500" />
-                    <span>{isKm ? 'ការវាយតម្លៃពិតប្រាកដពីអតិថិជន' : 'Genuine Customer Reviews'}</span>
+                    <span>{tr(language, 'ការវាយតម្លៃពិតប្រាកដពីអតិថិជន', 'Genuine Customer Reviews', '真实顾客评价与评分')}</span>
                   </h3>
                   <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
-                    {isKm
-                      ? 'ផ្អែកលើការវាយតម្លៃរបស់អតិថិជនពិតប្រាកដប៉ុណ្ណោះ (សមាជិកភាព VIP មិនប៉ះពាល់ដល់ផ្កាយវាយតម្លៃឡើយ)'
-                      : 'Based strictly on genuine customer reviews (VIP status never affects ratings)'}
+                    {tr(
+                      language,
+                      'ផ្អែកលើការវាយតម្លៃរបស់អតិថិជនពិតប្រាកដប៉ុណ្ណោះ (សមាជិកភាព VIP មិនប៉ះពាល់ដល់ផ្កាយវាយតម្លៃឡើយ)',
+                      'Based strictly on genuine customer reviews (VIP status never affects ratings)',
+                      '完全基于真实顾客评价计算（VIP 会员身份绝不影响星级评分）'
+                    )}
                   </p>
                 </div>
 
@@ -741,13 +761,13 @@ export const RestaurantDetailModal: React.FC = () => {
                       <span>{ratingSummary.averageRating.toFixed(1)} / 5.0</span>
                     </div>
                     <div className="text-[10px] text-slate-600 dark:text-slate-300">
-                      {isKm ? `${ratingSummary.reviewCount} ការវាយតម្លៃ` : `${ratingSummary.reviewCount} reviews`}
+                      {tr(language, `${ratingSummary.reviewCount} ការវាយតម្លៃ`, `${ratingSummary.reviewCount} reviews`, `${ratingSummary.reviewCount} 条评价`)}
                     </div>
                   </div>
                 ) : (
                   <div className="px-3 py-1.5 rounded-xl bg-slate-200/70 dark:bg-slate-700/70 text-slate-600 dark:text-slate-300 text-xs font-bold flex items-center gap-1.5">
                     <Star className="w-3.5 h-3.5 text-slate-400" />
-                    <span>{isKm ? 'មិនទាន់មានការវាយតម្លៃ (No ratings yet)' : 'No ratings yet'}</span>
+                    <span>{tr(language, 'មិនទាន់មានការវាយតម្លៃ (No ratings yet)', 'No ratings yet', '暂无顾客评分')}</span>
                   </div>
                 )}
               </div>
@@ -765,7 +785,7 @@ export const RestaurantDetailModal: React.FC = () => {
               >
                 <div className="flex items-center justify-between gap-2 flex-wrap">
                   <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
-                    {isKm ? 'ដាក់ផ្កាយវាយតម្លៃហាងនេះ៖' : 'Rate this shop:'}
+                    {tr(language, 'ដាក់ផ្កាយវាយតម្លៃហាងនេះ៖', 'Rate this shop:', '为本店打分：')}
                   </span>
                   <div className="flex items-center gap-1">
                     {[1, 2, 3, 4, 5].map((star) => (
@@ -796,18 +816,19 @@ export const RestaurantDetailModal: React.FC = () => {
                     type="text"
                     value={userReviewComment}
                     onChange={(e) => setUserReviewComment(e.target.value)}
-                    placeholder={
-                      isKm
-                        ? 'សរសេរមតិយោបល់របស់អ្នកអំពីរសជាតិម្ហូប និងសេវាកម្ម...'
-                        : 'Share your genuine experience with the food & service...'
-                    }
+                    placeholder={tr(
+                      language,
+                      'សរសេរមតិយោបល់របស់អ្នកអំពីរសជាតិម្ហូប និងសេវាកម្ម...',
+                      'Share your genuine experience with the food & service...',
+                      '分享您对本店菜品口味与服务体验的真实评价...'
+                    )}
                     className="flex-1 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500"
                   />
                   <button
                     type="submit"
                     className="px-3.5 py-2 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-xs shadow-xs transition active:scale-95 shrink-0 cursor-pointer"
                   >
-                    {isKm ? 'ដាក់ផ្កាយ' : 'Submit'}
+                    {tr(language, 'ដាក់ផ្កាយ', 'Submit', '提交评价')}
                   </button>
                 </div>
               </form>
@@ -848,7 +869,7 @@ export const RestaurantDetailModal: React.FC = () => {
             {/* Social Share Bar */}
             <div className="pt-2 border-t border-slate-200 dark:border-slate-800 font-khmer">
               <p className="text-xs font-semibold text-slate-500 mb-2.5 text-center">
-                {isKm ? 'ចែករំលែកទីតាំងហាងនេះ' : 'Share this restaurant'}
+                {tr(language, 'ចែករំលែកទីតាំងហាងនេះ', 'Share this restaurant', '将此餐厅分享给好友')}
               </p>
               
               <div className="flex items-center justify-center gap-2 flex-wrap">
@@ -858,7 +879,7 @@ export const RestaurantDetailModal: React.FC = () => {
                   className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white text-xs font-bold shadow transition active:scale-95"
                 >
                   <Share2 className="w-3.5 h-3.5" />
-                  <span>{isKm ? 'ចែករំលែក (Share)' : 'Share App'}</span>
+                  <span>{tr(language, 'ចែករំលែក (Share)', 'Share App', '分享应用')}</span>
                 </button>
 
                 <button
@@ -884,7 +905,7 @@ export const RestaurantDetailModal: React.FC = () => {
                   onClick={handleCopyLink}
                   className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-medium border border-slate-300 dark:border-slate-700 transition active:scale-95"
                 >
-                  {isKm ? 'ចម្លង' : 'Copy'}
+                  {tr(language, 'ចម្លង', 'Copy', '复制链接')}
                 </button>
               </div>
             </div>

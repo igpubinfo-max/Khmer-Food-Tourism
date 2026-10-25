@@ -3493,7 +3493,7 @@ export const initial100Restaurants: Restaurant[] = [
     "signatureDishesKh": [
       "គុយទាវភ្នំពេញគ្រឿងក្នុង",
       "បាយសាច់ជ្រូកអាំងពងទាខ",
-      "មីគោកសាច់แดง",
+      "មីគោកសាច់សាស៊ីវ",
       "កាហ្វេទឹកដោះគោឆៅ"
     ],
     "status": "approved",
@@ -4635,7 +4635,7 @@ export const initial100Restaurants: Restaurant[] = [
     created_at: '2026-01-01T02:01:00.000Z',
     "nameKh": "ភោជនីយដ្ឋាន ឆ្នេរអូរត្រេះ គ្រឿងសមុទ្រស្រស់",
     "nameEn": "Otres Beach Fresh Seafood & Sunset Grill",
-    "descriptionKh": "ហាងអាហារមាត់ឆ្នេរអូរត្រេះ ល្បីខាងគ្រឿងសមុទ្រអាំងធ្យូង ក្តាមថ្ម អอยស្ទ័រស្រស់ និងភេសជ្ជៈត្រជាក់ៗក្រោមខ្យល់សមុទ្រ។",
+    "descriptionKh": "ហាងអាហារមាត់ឆ្នេរអូរត្រេះ ល្បីខាងគ្រឿងសមុទ្រអាំងធ្យូង ក្តាមថ្ម អយស្ទ័រស្រស់ និងភេសជ្ជៈត្រជាក់ៗក្រោមខ្យល់សមុទ្រ។",
     "descriptionEn": "Laid-back beachfront grill on Otres Beach famous for BBQ seafood skewers, fresh oysters, and traditional Khmer coastal dishes.",
     "photoUrl": "/foods/food-25.jpg",
     "galleryPhotos": [
@@ -4656,7 +4656,7 @@ export const initial100Restaurants: Restaurant[] = [
     "rating": 4.7,
     "reviewCount": 797,
     "signatureDishesKh": [
-      "អอยស្ទ័រស្រស់ទឹកត្រីកោះកុង",
+      "អយស្ទ័រស្រស់ទឹកត្រីកោះកុង",
       "ត្រីសមុទ្រអាំងអំបិលម្ទេស",
       "ឆាក្តៅគ្រឿងសមុទ្រម្រះព្រៅ",
       "បង្គាបំពងម្សៅស្រួយ"
@@ -7572,7 +7572,7 @@ export const initial100Restaurants: Restaurant[] = [
     "reviewCount": 722,
     "signatureDishesKh": [
       "បង្គាឆាខ្ទឹមសប៊ឺ",
-      "ក្តាមថ្មឆាผงការី",
+      "ក្តាមថ្មឆាគ្រឿងការី",
       "សម្លស្ងោរជ្រក់ត្រីតុកកែ",
       "លៀសសមុទ្រឆាអំពិលទុំ"
     ],
