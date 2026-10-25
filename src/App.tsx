@@ -10,6 +10,7 @@ import { RestaurantView } from './components/RestaurantView';
 import { TourismView } from './components/TourismView';
 import { CommunityFeed } from './components/CommunityFeed';
 const ProfileView = lazy(() => import('./components/ProfileView').then((m) => ({ default: m.ProfileView })));
+const IntroTips = lazy(() => import('./components/IntroTips').then((m) => ({ default: m.IntroTips })));
 import { FoodDetailModal } from './components/FoodDetailModal';
 import { RestaurantDetailModal } from './components/RestaurantDetailModal';
 import { TouristDetailModal } from './components/TouristDetailModal';
@@ -181,6 +182,11 @@ const MainScreen: React.FC = () => {
       </main>
 
       <OfflineBanner />
+
+      {/* First-run intro (shown once, skippable) */}
+      <Suspense fallback={null}>
+        <IntroTips />
+      </Suspense>
 
       {/* Creation & Action Modals — Conditionally Mounted (lazy-loaded chunks) */}
       <Suspense fallback={null}>

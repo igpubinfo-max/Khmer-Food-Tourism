@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { FoodTripTemplates } from './FoodTripTemplates';
 import { useApp } from '../context/AppContext';
 import { 
   X, Sparkles, Bot, Calendar, DollarSign, Users, MapPin, 
@@ -205,6 +206,9 @@ export const AiTripPlannerModal: React.FC = () => {
           ) : !generatedPlan ? (
             /* Input Form Screen */
             <div className="space-y-4">
+              {/* Ready-made 1-Day Food Trips (static, offline) */}
+              <FoodTripTemplates />
+
               {/* 1. Destination Province (All 25 Cambodian Provinces & Capital City) */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between gap-2">

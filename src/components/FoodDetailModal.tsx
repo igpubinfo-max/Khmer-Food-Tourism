@@ -17,6 +17,10 @@ import { FoodCategorySlug, FoodItem } from '../types';
 import { tr } from '../utils/i18n';
 import { getLocalizedFood } from '../utils/zhDynamicTranslator';
 import { DishTagChips } from './DishTagChips';
+import { PassportStampButton } from './PassportStampButton';
+import { ShareCardButton } from './ShareCardButton';
+import { WhereToEat } from './WhereToEat';
+import { getDishTags, tagLabel } from '../utils/dishTags';
 
 export const FoodDetailModal: React.FC = () => {
   const { 
@@ -785,6 +789,25 @@ export const FoodDetailModal: React.FC = () => {
                 <DishTagChips food={selectedFood} language={language} />
               </div>
             </div>
+
+            {/* Food Passport stamp + share-as-card + where to eat */}
+            <div className="flex flex-wrap gap-2">
+              <PassportStampButton foodId={selectedFood.id} language={language} showToast={showToast} variant="full" />
+              <ShareCardButton
+                getSpec={() => ({
+                  kind: 'dish',
+                  emoji: '🍲',
+                  title: loc.name,
+                  subtitle: language === 'km' ? selectedFood.nameEn : selectedFood.nameKh,
+                  photoUrl: selectedFood.photoUrl,
+                  lines: [
+                    `💰 ${(selectedFood.priceUsd ?? 0).toFixed(2)} · ${(selectedFood.priceRiel ?? 0).toLocaleString()} ៛`,
+                    getDishTags(selectedFood).slice(0, 3).map((t) => `${t.emoji} ${tagLabel(t, language)}`).join('  '),
+                  ].filter(Boolean),
+                })}
+              />
+            </div>
+            <WhereToEat food={selectedFood} />
 
             {/* Ingredients Checklist */}
             <div>

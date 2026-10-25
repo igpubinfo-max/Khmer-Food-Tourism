@@ -3,6 +3,7 @@ import { useApp } from '../context/AppContext';
 import { FoodCard } from './FoodCard';
 import { RestaurantCard } from './RestaurantCard';
 import { InviteFriendsCard } from './InviteFriendsCard';
+import { FoodPassportCard } from './FoodPassportCard';
 import { TouristCard } from './TouristCard';
 import { PrivacyPolicyModal } from './PrivacyPolicyModal';
 import { 
@@ -1442,6 +1443,9 @@ export const ProfileView: React.FC = () => {
           </div>
         );
       })()}
+
+      {/* Cambodian Food Passport */}
+      <FoodPassportCard />
 
       {/* Invite friends (personal referral message) */}
       <InviteFriendsCard />

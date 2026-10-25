@@ -13,6 +13,7 @@ import {
   formatRichShareText,
   copyTextNativeOrWeb,
 } from '../utils/androidMediaHelper';
+import { ShareCardButton } from './ShareCardButton';
 
 export const TouristDetailModal: React.FC = () => {
   const { 
@@ -594,6 +595,16 @@ export const TouristDetailModal: React.FC = () => {
               </p>
               
               <div className="flex items-center justify-center gap-2 flex-wrap">
+                <ShareCardButton
+                  getSpec={() => ({
+                    kind: 'place',
+                    emoji: '🏛️',
+                    title: loc.name,
+                    subtitle: loc.category,
+                    photoUrl: selectedDestination.photoUrl,
+                    lines: [`📍 ${loc.address}`, ...(loc.highlights || []).slice(0, 2).map((h: string) => `✨ ${h}`)],
+                  })}
+                />
                 <button
                   type="button"
                   onClick={handleShareNative}

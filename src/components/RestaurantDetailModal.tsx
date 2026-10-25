@@ -19,6 +19,7 @@ import {
   formatRichShareText,
   copyTextNativeOrWeb,
 } from '../utils/androidMediaHelper';
+import { ShareCardButton } from './ShareCardButton';
 
 export const RestaurantDetailModal: React.FC = () => {
   const { 
@@ -873,6 +874,19 @@ export const RestaurantDetailModal: React.FC = () => {
               </p>
               
               <div className="flex items-center justify-center gap-2 flex-wrap">
+                <ShareCardButton
+                  getSpec={() => ({
+                    kind: 'place',
+                    emoji: '🏪',
+                    title: isKm ? selectedRestaurant.nameKh : selectedRestaurant.nameEn,
+                    subtitle: isKm ? selectedRestaurant.nameEn : selectedRestaurant.nameKh,
+                    photoUrl: activePhoto || selectedRestaurant.photoUrl,
+                    lines: [
+                      `📍 ${isKm ? selectedRestaurant.addressKh : selectedRestaurant.addressEn}`,
+                      ...((selectedRestaurant.signatureDishesKh || []).slice(0, 2).map((d: string) => `🍽️ ${d}`)),
+                    ],
+                  })}
+                />
                 <button
                   type="button"
                   onClick={handleShare}

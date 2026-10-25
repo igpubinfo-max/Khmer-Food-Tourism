@@ -6,6 +6,7 @@ import { shareRichContent } from '../utils/androidMediaHelper';
 import { tr } from '../utils/i18n';
 import { getLocalizedFood } from '../utils/zhDynamicTranslator';
 import { getDisplayTags, tagLabel } from '../utils/dishTags';
+import { PassportStampButton } from './PassportStampButton';
 
 interface FoodCardProps {
   food: FoodItem;
@@ -145,6 +146,7 @@ const FoodCardInner: React.FC<FoodCardProps> = ({ food }) => {
             <span className="text-slate-400 text-[10px]">({food.reviewCount ?? 0})</span>
           </div>
 
+          <PassportStampButton foodId={food.id} language={language} showToast={showToast} />
           <button
             type="button"
             onClick={handleShareFood}
