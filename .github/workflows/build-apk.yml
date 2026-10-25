@@ -72,10 +72,8 @@ jobs:
           REL_APK=$(find android/app/build/outputs/apk/release -name "*.apk" 2>/dev/null | head -n 1)
           if [ -n "$REL_APK" ] && [ -f "$REL_APK" ]; then
             cp "$REL_APK" android/app/build/outputs/apk/debug/KhmerFoodTourism-v2.2.0.apk
-            cp "$REL_APK" android/app/build/outputs/apk/debug/KhmerFoodTourism-latest.apk
           elif [ -f android/app/build/outputs/apk/debug/app-debug.apk ]; then
             cp android/app/build/outputs/apk/debug/app-debug.apk android/app/build/outputs/apk/debug/KhmerFoodTourism-v2.2.0.apk
-            cp android/app/build/outputs/apk/debug/app-debug.apk android/app/build/outputs/apk/debug/KhmerFoodTourism-latest.apk
           fi
           ls -la android/app/build/outputs/apk/debug/
 
@@ -84,7 +82,7 @@ jobs:
         with:
           name: Khmer-Food-Tourism-Release-Packages
           path: |
-            android/app/build/outputs/apk/debug/*.apk
+            android/app/build/outputs/apk/debug/KhmerFoodTourism-v2.2.0.apk
 
       - name: 11. Publish GitHub Release with Signed APK
         uses: softprops/action-gh-release@v2
@@ -103,4 +101,4 @@ jobs:
           draft: false
           prerelease: false
           files: |
-            android/app/build/outputs/apk/debug/*.apk
+            android/app/build/outputs/apk/debug/KhmerFoodTourism-v2.2.0.apk
