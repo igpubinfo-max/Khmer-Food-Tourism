@@ -15,6 +15,38 @@
  */
 
 import { FoodItem } from '../types';
+import {
+  generateMultiTurnHealthAnswer,
+  createHealthConversationSession,
+  loadHealthConversationSession,
+  saveHealthConversationSession,
+  askHealthAssistantInSession,
+  retryHealthTurnInSession,
+  resetHealthConversationSession,
+  detectQueryLanguage,
+  HEALTH_QUICK_QUESTIONS_TRILINGUAL,
+  SafetyEscalationLevel,
+  SafetyEscalationBanner,
+  HealthConversationTurn,
+  HealthConversationSession,
+} from './aiHealthKnowledgeEngine';
+
+export {
+  createHealthConversationSession,
+  loadHealthConversationSession,
+  saveHealthConversationSession,
+  askHealthAssistantInSession,
+  retryHealthTurnInSession,
+  resetHealthConversationSession,
+  detectQueryLanguage,
+  HEALTH_QUICK_QUESTIONS_TRILINGUAL,
+};
+export type {
+  SafetyEscalationLevel,
+  SafetyEscalationBanner,
+  HealthConversationTurn,
+  HealthConversationSession,
+};
 
 export type HealthGoalId =
   | 'all'
@@ -97,21 +129,43 @@ export interface DailyBalancedMealPlan {
 
 export interface HealthQaAnswer {
   id: string;
+  topicId?: string;
+  turnNumber?: number;
+  isFollowUp?: boolean;
+  previousTopicId?: string | null;
+  safetyLevel?: SafetyEscalationLevel;
+  safetyEscalation?: SafetyEscalationBanner;
   questionKh: string;
   questionEn: string;
+  questionZh?: string;
   categoryBadgeKh: string;
   categoryBadgeEn: string;
+  categoryBadgeZh?: string;
   summaryKh: string;
   summaryEn: string;
+  summaryZh?: string;
   bulletPointsKh: string[];
   bulletPointsEn: string[];
+  bulletPointsZh?: string[];
   foodsToChooseKh: string[];
   foodsToChooseEn: string[];
+  foodsToChooseZh?: string[];
   foodsToLimitKh: string[];
   foodsToLimitEn: string[];
+  foodsToLimitZh?: string[];
   recommendedDishes: Array<{ food: FoodItem; nutrition: DishNutritionProfile }>;
   medicalAdvisoryKh: string;
   medicalAdvisoryEn: string;
+  medicalAdvisoryZh?: string;
+  trustedSourcesKh?: string[];
+  trustedSourcesEn?: string[];
+  trustedSourcesZh?: string[];
+  uncertaintyNoteKh?: string;
+  uncertaintyNoteEn?: string;
+  uncertaintyNoteZh?: string;
+  followUpSuggestionsKh?: string[];
+  followUpSuggestionsEn?: string[];
+  followUpSuggestionsZh?: string[];
 }
 
 export interface KhmerSuperfoodItem {
@@ -970,427 +1024,18 @@ export function generateBalancedDailyMealPlan(
  */
 export function answerHealthAndNutritionQuestion(
   rawQuery: string,
-  foods: FoodItem[]
+  foods: FoodItem[],
+  previousTopicId: string | null = null,
+  turnNumber = 1,
+  preferredLang: 'km' | 'en' | 'zh' = 'km'
 ): HealthQaAnswer {
-  const q = (rawQuery || '').trim().toLowerCase();
-
-  const pickTopDishes = (goal: HealthGoalId, count = 4) =>
-    getRecommendedDishesByHealthGoal(goal, foods).slice(0, count);
-
-  // 1. Check if the user is asking about a specific Cambodian dish in our 200-dish database!
-  const matchedSpecificDish = foods.find((f) => {
-    const kh = (f.nameKh || '').trim().toLowerCase();
-    const en = (f.nameEn || '').trim().toLowerCase();
-    return (kh.length >= 3 && q.includes(kh)) || (en.length >= 4 && q.includes(en));
-  });
-
-  if (matchedSpecificDish && !q.includes('សម្លកកូរ និងស្លឹកម្រុំ')) {
-    const nut = getDishNutritionProfile(matchedSpecificDish);
-    const related = getRecommendedDishesByHealthGoal(
-      nut.matchingGoals[0] || 'all',
-      foods
-    )
-      .filter((x) => x.food.id !== matchedSpecificDish.id)
-      .slice(0, 3);
-
-    return {
-      id: `dish-${matchedSpecificDish.id}`,
-      questionKh: rawQuery,
-      questionEn: rawQuery,
-      categoryBadgeKh: `🍲 វិភាគអាហារូបត្ថម្ភ៖ ${matchedSpecificDish.nameKh}`,
-      categoryBadgeEn: `🍲 Dish Nutrition Analysis: ${matchedSpecificDish.nameEn}`,
-      summaryKh: `«${matchedSpecificDish.nameKh}» មានពិន្ទុសុខភាព ${nut.healthScore}/100 ផ្តល់ថាមពលប្រមាណ ${nut.caloriesKcal} kcal ប្រូតេអ៊ីន ${nut.proteinG}g កាបូអ៊ីដ្រាត ${nut.carbsG}g ខ្លាញ់ ${nut.fatG}g និងជាតិសរសៃ ${nut.fiberG}g ក្នុងមួយចំណែក។ ${nut.healthBenefitsKh}`,
-      summaryEn: `"${matchedSpecificDish.nameEn}" has a Health Score of ${nut.healthScore}/100, providing ~${nut.caloriesKcal} kcal, ${nut.proteinG}g protein, ${nut.carbsG}g carbs, ${nut.fatG}g fat, and ${nut.fiberG}g fiber per serving. ${nut.healthBenefitsEn}`,
-      bulletPointsKh: [
-        `⚡ ថាមពល និងសារធាតុចិញ្ចឹម៖ ${nut.caloriesKcal} kcal | ប្រូតេអ៊ីន ${nut.proteinG}g | ជាតិសរសៃ ${nut.fiberG}g`,
-        `🧂 កម្រិតជាតិប្រៃ (សូដ្យូម)៖ ${nut.sodiumLevel === 'low' ? 'ទាបល្អ' : nut.sodiumLevel === 'medium' ? 'មធ្យម' : 'ខ្ពស់ (គួរកាត់បន្ថយអំបិល/ប្រហុក)'} (~${nut.sodiumMg} mg)`,
-        `🌿 សារធាតុសំខាន់ៗ៖ ${nut.keyNutrientsKh.join(' • ')}`,
-        `👩‍🍳 គន្លឹះចម្អិនឱ្យកាន់តែល្អសម្រាប់សុខភាព៖ ${nut.healthyCookingTipKh}`,
-      ],
-      bulletPointsEn: [
-        `⚡ Macros per serving: ${nut.caloriesKcal} kcal | Protein ${nut.proteinG}g | Fiber ${nut.fiberG}g`,
-        `🧂 Sodium level: ${nut.sodiumLevel.toUpperCase()} (~${nut.sodiumMg} mg)`,
-        `🌿 Key Nutrients: ${nut.keyNutrientsEn.join(' • ')}`,
-        `👩‍🍳 Healthy Cooking Tip: ${nut.healthyCookingTipEn}`,
-      ],
-      foodsToChooseKh: ['បន្លែបៃតងស្រស់បន្ថែម', 'បាយសម្រូបក្នុងបរិមាណល្មម', 'ទឹកស្អាត ១-២ កែវ'],
-      foodsToChooseEn: ['Extra fresh leafy greens', 'Moderate portion of brown rice', '1–2 glasses of water'],
-      foodsToLimitKh: ['ការថែមទឹកត្រី ឬប៊ីចេងបន្ថែមលើតុអាហារ', 'ភេសជ្ជៈផ្អែមពេលញ៉ាំបាយ'],
-      foodsToLimitEn: ['Adding extra fish sauce or MSG at the table', 'Sugary soft drinks with meals'],
-      recommendedDishes: [{ food: matchedSpecificDish, nutrition: nut }, ...related],
-      medicalAdvisoryKh: nut.cautionNoteKh || MEDICAL_DISCLAIMER_KH,
-      medicalAdvisoryEn: nut.cautionNoteEn || MEDICAL_DISCLAIMER_EN,
-    };
-  }
-
-  // 2. Diabetes / Blood Sugar (ទឹកនោមផ្អែម / ជាតិស្ករ)
-  if (
-    q.includes('ទឹកនោមផ្អែម') ||
-    q.includes('ជាតិស្ករ') ||
-    q.includes('ផ្អែម') ||
-    q.includes('diabetes') ||
-    q.includes('sugar') ||
-    q.includes('glucose')
-  ) {
-    return {
-      id: 'qa-diabetes',
-      questionKh: rawQuery,
-      questionEn: rawQuery,
-      categoryBadgeKh: '🩸 ការគ្រប់គ្រងជាតិស្ករក្នុងឈាម & ជំងឺទឹកនោមផ្អែម',
-      categoryBadgeEn: '🩸 Blood Sugar & Diabetes Nutrition Guide',
-      summaryKh:
-        'សម្រាប់អ្នកមានជំងឺទឹកនោមផ្អែម ឬចង់គ្រប់គ្រងជាតិស្ករ គោលការណ៍សំខាន់បំផុតគឺជ្រើសរើសមុខម្ហូបខ្មែរដែលសម្បូរបន្លែបៃតង ជាតិសរសៃខ្ពស់ និងប្រូតេអ៊ីនត្រី (ដូចជា សម្លកកូរ សម្លម្ជូរ ស្ងោរជ្រក់ត្រី អាម៉ុកត្រី និងទឹកគ្រឿងបន្លែស្រស់) ដោយកាត់បន្ថយបរិមាណបាយស និងជៀសវាងការថែមស្ករច្រើនក្នុងម្ហូប។',
-      summaryEn:
-        'For managing blood sugar and diabetes, prioritize Cambodian dishes rich in non-starchy leafy vegetables, dietary fiber, and lean fish protein (such as Samlor Korko, clear sour soups, steamed Fish Amok, and Tuk Kroeung with raw vegetables) while moderating white rice portions.',
-      bulletPointsKh: [
-        '🍽️ អនុវត្តរូបមន្តចាន ២:១:១៖ ដាក់បន្លែបៃតងឱ្យបានកន្លះចាន (៥០%) ត្រី ឬសាច់គ្មានខ្លាញ់ ២៥% និងបាយសម្រូបត្រឹម ២៥% (ប្រហែល ១ កូនចានតូច)។',
-        '🥗 ញ៉ាំបន្លែ និងសាច់មុនញ៉ាំបាយ៖ ការទទួលទានជាតិសរសៃពីបន្លែមុន ជួយពន្យឺតការស្រូបយកជាតិស្ករទៅក្នុងឈាមក្រោយអាហារ។',
-        '🥒 បន្លែខ្មែរល្អបំផុត៖ ស្លឹកម្រុំ ម្រះ ត្រកួន ស្ពៃបៃតង ត្រសក់ ត្រប់ និងផ្កាខាត់ណា។',
-        '🚫 ជៀសវាងភេសជ្ជៈផ្អែម ទឹកផ្លែឈើកំប៉ុង និងកាត់បន្ថយស្ករត្នោត/ស្ករសពេលឆា ឬខ។',
-      ],
-      bulletPointsEn: [
-        '🍽️ Follow the 2:1:1 Plate Method: 50% leafy vegetables, 25% lean fish/poultry, and 25% brown or red rice.',
-        '🥗 Eat vegetables and protein first before rice to slow post-meal glucose spikes.',
-        '🥒 Best Cambodian vegetables: Moringa leaves, bitter melon (Mrah), water spinach, cucumber, and eggplant.',
-        '🚫 Avoid sugary beverages and minimize added sugar in braised (Khor) or stir-fried dishes.',
-      ],
-      foodsToChooseKh: ['សម្លកកូរត្រីស្លឹកម្រុំ', 'ស្ងោរម្រះសồiសាច់', 'ស្ងោរជ្រក់ត្រីរ៉ស់', 'ទឹកគ្រឿងបន្លែស្រស់', 'បាយសម្រូប'],
-      foodsToChooseEn: ['Samlor Korko with Moringa', 'Stuffed Bitter Melon Soup', 'Clear Sour Fish Soup', 'Tuk Kroeung with Greens', 'Cambodian Brown Rice'],
-      foodsToLimitKh: ['បង្អែមខ្ទិះដូងផ្អែមខ្លាំង', 'ខសាច់ជ្រូកដាក់ស្ករច្រើន', 'បាយសច្រើនពេកក្នុងមួយពេល', 'ភេសជ្ជៈប៉ូវកម្លាំង និងទឹកក្រូច'],
-      foodsToLimitEn: ['Sweet coconut desserts', 'Heavily sweetened braised pork (Khor)', 'Large portions of white rice', 'Sweetened drinks & sodas'],
-      recommendedDishes: pickTopDishes('blood_sugar', 4),
-      medicalAdvisoryKh:
-        '⚕️ សូមតាមដានកម្រិតជាតិស្ករក្នុងឈាមជាប្រចាំ និងពិគ្រោះជាមួយគ្រូពេទ្យជំនាញមុនផ្លាស់ប្តូររបបអាហារប្រសិនបើអ្នកកំពុងប្រើថ្នាំបញ្ចុះជាតិស្ករ ឬអាំងស៊ុយលីន។',
-      medicalAdvisoryEn:
-        '⚕️ Monitor blood glucose regularly and consult your physician before making major dietary changes if taking insulin or glucose-lowering medication.',
-    };
-  }
-
-  // 3. Hypertension / High Blood Pressure / Heart (លើសឈាម / សម្ពាធឈាម / បេះដូង / ប្រៃ)
-  if (
-    q.includes('លើសឈាម') ||
-    q.includes('សម្ពាធឈាម') ||
-    q.includes('បេះដូង') ||
-    q.includes('ប្រៃ') ||
-    q.includes('ខ្លាញ់') ||
-    q.includes('blood pressure') ||
-    q.includes('hypertension') ||
-    q.includes('heart') ||
-    q.includes('sodium')
-  ) {
-    return {
-      id: 'qa-hypertension',
-      questionKh: rawQuery,
-      questionEn: rawQuery,
-      categoryBadgeKh: '❤️ សុខភាពបេះដូង & ការគ្រប់គ្រងសម្ពាធឈាម (DASH Diet ខ្មែរ)',
-      categoryBadgeEn: '❤️ Heart Health & Blood Pressure Guide',
-      summaryKh:
-        'អ្នកមានសម្ពាធឈាមខ្ពស់ (លើសឈាម) ឬចង់ថែរក្សាបេះដូង គួរកំណត់បរិមាណជាតិប្រៃ (សូដ្យូមតិចជាង ២,០០០ mg ក្នុងមួយថ្ងៃ ឬស្មើអំបិលតិចជាង ១ ស្លាបព្រាកាហ្វេ)។ គួរជ្រើសរើសមុខម្ហូបចំហុយ ស្ងោរ សម្លប្រហើរ និងប្រើក្លិនក្រអូបពីស្លឹកគ្រៃ រមៀត ខ្ញី ក្រូចឆ្មា ជំនួសការប្រើទឹកត្រី និងប្រហុកច្រើន។',
-      summaryEn:
-        'To support healthy blood pressure and heart health, keep daily sodium below 2,000 mg. Choose steamed, grilled, or clear herbal soups flavored with lemongrass, lime, ginger, and turmeric rather than heavy fish sauce or fermented salted fish.',
-      bulletPointsKh: [
-        '🍋 ប្រើរសជាតិជូរ និងក្រអូបធម្មជាតិ៖ បន្ថែមស្លឹកគ្រៃ ស្លឹកក្រូចសើច ខ្ញី រំដេង និងក្រូចឆ្មា ដើម្បីឱ្យម្ហូបឆ្ងាញ់ដោយប្រើអំបិល/ទឹកត្រីតិច។',
-        '🥬 បង្កើនប៉ូតាស្យូមធម្មជាតិ៖ បន្លែបៃតង ស្លឹកម្រុំ ល្ហុង និងចេក មានប៉ូតាស្យូមជួយបញ្ចេញជាតិសូដ្យូមលើសពីរាងកាយ។',
-        '🐟 ជ្រើសរើសត្រីទឹកសាប និងសាច់មាន់បកស្បែក ជំនួសសាច់ជ្រូកបីជាន់ និងអាហារបំពង។',
-        '🥣 នៅពេលញ៉ាំគុយទាវ ឬស៊ុប គួរទទួលទានសាច់ និងបន្លែ ហើយកុំហុតទឹកស៊ុបអស់ពីចាន (ព្រោះជាតិប្រៃភាគច្រើនរលាយក្នុងទឹកស៊ុប)។',
-      ],
-      bulletPointsEn: [
-        '🍋 Flavor with herbs: Use lemongrass, kaffir lime leaf, ginger, and fresh lime to reduce fish sauce and salt by 30–40%.',
-        '🥬 Boost Potassium: Leafy greens, moringa, and papaya supply potassium to counterbalance sodium.',
-        '🐟 Choose steamed or grilled freshwater fish and skinless poultry over fatty meats.',
-        '🥣 Leave part of the noodle broth behind to cut sodium intake significantly.',
-      ],
-      foodsToChooseKh: ['អាម៉ុកត្រីចំហុយ', 'ស្ងោរជ្រក់ត្រីរ៉ស់', 'សម្លប្រហើរត្រីបន្លែចម្រុះ', 'ត្រីចំហុយខ្ញី', 'ញាំមីសួរគ្រឿងសមុទ្រ (ប្រៃតិច)'],
-      foodsToChooseEn: ['Steamed Fish Amok', 'Clear Lemongrass Fish Soup', 'Samlor Praher with Greens', 'Steamed Fish with Ginger', 'Light Seafood Glass Noodle Salad'],
-      foodsToLimitKh: ['ត្រីងៀតប្រៃខ្លាំង', 'ប្រហុក ផ្អក ម៉ាំ ក្នុងបរិមាណច្រើន', 'សាច់ក្រក និងផាក់ឡូវ', 'អាហារបំពងខ្លាញ់ច្រើន'],
-      foodsToLimitEn: ['Heavily salted dried fish', 'Large amounts of Prahok or fermented pastes', 'Processed sausages & braised offal', 'Deep-fried foods'],
-      recommendedDishes: pickTopDishes('heart_bp', 4),
-      medicalAdvisoryKh:
-        '⚕️ ប្រសិនបើលោកអ្នកមានជំងឺលើសសម្ពាធឈាម សូមវាស់សម្ពាធឈាមជាប្រចាំ និងលេបថ្នាំតាមវេជ្ជបញ្ជារបស់គ្រូពេទ្យឱ្យបានទៀងទាត់។',
-      medicalAdvisoryEn:
-        '⚕️ Monitor your blood pressure regularly and continue taking prescribed antihypertensive medications as directed by your doctor.',
-    };
-  }
-
-  // 4. Weight Loss / Calorie Balance (សម្រកទម្ងន់ / ធាត់ / កាឡូរី)
-  if (
-    q.includes('សម្រកទម្ងន់') ||
-    q.includes('ស្រកទម្ងន់') ||
-    q.includes('ធាត់') ||
-    q.includes('កាឡូរី') ||
-    q.includes('weight') ||
-    q.includes('diet') ||
-    q.includes('calorie') ||
-    q.includes('slim')
-  ) {
-    return {
-      id: 'qa-weight-loss',
-      questionKh: rawQuery,
-      questionEn: rawQuery,
-      categoryBadgeKh: '⚖️ ផែនការសម្រកទម្ងន់ប្រកបដោយសុខភាពល្អ',
-      categoryBadgeEn: '⚖️ Healthy Weight Management Guide',
-      summaryKh:
-        'ការសម្រកទម្ងន់ប្រកបដោយសុខភាពល្អ និងមាននិរន្តរភាព មិនមែនជាការបង្អត់អាហារឡើយ ប៉ុន្តែគឺជាការជ្រើសរើសមុខម្ហូបខ្មែរដែលមានកាឡូរីទាប (២៥០-៣៩០ kcal ក្នុងមួយពេល) សម្បូរប្រូតេអ៊ីន និងបន្លែជាតិសរសៃខ្ពស់ ដើម្បីឱ្យឆ្អែតបានយូរ និងរក្សាសាច់ដុំ។',
-      summaryEn:
-        'Sustainable weight loss does not require skipping meals. Instead, choose high-volume, nutrient-dense Cambodian soups, salads, and steamed fish dishes (250–390 kcal/meal) rich in protein and fiber to stay full longer.',
-      bulletPointsKh: [
-        '🌅 អាហារពេលព្រឹក៖ នំបញ្ចុកសម្លប្រហើរ (ដាក់បន្លែស្រស់ច្រើន) ឬបបរត្រី/បបរមាន់ក្តៅៗ។',
-        '☀️ អាហារថ្ងៃត្រង់៖ សម្លកកូរ ឬអាម៉ុកត្រី ឬភ្លាសាច់គោ ជាមួយបាយសម្រូប ១ កូនចានតូច។',
-        '🌙 អាហារពេលល្ងាច (មុនម៉ោង ៧ យប់)៖ ស្ងោរជ្រក់ត្រី ឬសម្លម្ជូរគ្រឿងបន្លែច្រើន ជាមួយបាយកន្លះកូនចាន។',
-        '🚶‍♂️ គួបផ្សំការដើរ ឬហាត់ប្រាណយ៉ាងតិច ៣០ នាទីក្នុងមួយថ្ងៃ និងផឹកទឹក ២ លីត្រ។',
-      ],
-      bulletPointsEn: [
-        '🌅 Breakfast: Num Banh Chok with herbal fish gravy and extra fresh vegetables, or warm fish porridge.',
-        '☀️ Lunch: Samlor Korko, Steamed Fish Amok, or Cambodian Beef Salad with 1 small bowl of brown rice.',
-        '🌙 Dinner (before 7 PM): Clear sour fish soup (Samlor Machu / Sngor Chruk) with generous greens and half-rice.',
-        '🚶‍♂️ Combine with 30 minutes of daily brisk walking and 2L of water.',
-      ],
-      foodsToChooseKh: ['សម្លកកូរត្រី', 'ស្ងោរជ្រក់ត្រីរ៉ស់', 'ភ្លាសាច់គោបន្លែស្រស់', 'ញាំមីសួរគ្រឿងសមុទ្រ', 'នំបញ្ចុកសម្លប្រហើរ'],
-      foodsToChooseEn: ['Samlor Korko', 'Clear Sour Fish Soup', 'Cambodian Beef Lime Salad', 'Seafood Glass Noodle Salad', 'Num Banh Chok'],
-      foodsToLimitKh: ['អាហារបំពងខ្លាញ់ច្រើន', 'សម្លខ្ទិះដូងខាប់ៗពេលយប់', 'ភេសជ្ជៈទឹកដោះគោខាប់/តែគុជផ្អែម', 'ការញ៉ាំអាហារយប់ជ្រៅ'],
-      foodsToLimitEn: ['Deep-fried snacks', 'Heavy coconut cream curries at night', 'Sweetened condensed milk drinks / boba', 'Late-night heavy meals'],
-      recommendedDishes: pickTopDishes('weight_loss', 4),
-      medicalAdvisoryKh: MEDICAL_DISCLAIMER_KH,
-      medicalAdvisoryEn: MEDICAL_DISCLAIMER_EN,
-    };
-  }
-
-  // 5. Samlor Korko & Moringa (សម្លកកូរ / ម្រុំ)
-  if (q.includes('សម្លកកូរ') || q.includes('ម្រុំ') || q.includes('korko') || q.includes('moringa')) {
-    return {
-      id: 'qa-korko-moringa',
-      questionKh: rawQuery,
-      questionEn: rawQuery,
-      categoryBadgeKh: '🌿 អត្ថប្រយោជន៍នៃសម្លកកូរ និងស្លឹកម្រុំ',
-      categoryBadgeEn: '🌿 Health Benefits of Samlor Korko & Moringa',
-      summaryKh:
-        '«សម្លកកូរ» ត្រូវបានអ្នកជំនាញអាហារូបត្ថម្ភចាត់ទុកជាមុខម្ហូបសុខភាពដ៏ល្អឯកបំផុតមួយរបស់កម្ពុជា ព្រោះវាប្រមូលផ្តុំបន្លែធម្មជាតិពី ៧ ទៅ ១០ មុខ (ស្លឹកម្រុំ ល្ហុងខ្ចី ត្រប់ ល្ពៅ សណ្តែកគួរ ចេកខ្ចី ស្លឹកបាស) រួមជាមួយត្រីទឹកសាប និងគ្រឿងបុករមៀត-ស្លឹកគ្រៃ។',
-      summaryEn:
-        'Samlor Korko is celebrated by nutritionists as one of Cambodia’s healthiest traditional dishes, combining 7–10 varieties of nutrient-rich local vegetables (moringa, green papaya, pumpkin, eggplant, long beans) with freshwater fish and turmeric-lemongrass kroeung.',
-      bulletPointsKh: [
-        '🌿 ស្លឹកម្រុំ (Moringa)៖ សម្បូរវីតាមីន A (ជំនួយភ្នែក) វីតាមីន C (បង្កើនភាពស៊ាំ) កាល់ស្យូម និងជាតិដែក (បង្កើនគ្រាប់ឈាម)។',
-        '🦠 ជំនួយប្រព័ន្ធរំលាយអាហារ៖ ជាតិសរសៃខ្ពស់ពីបន្លែចម្រុះ និងអង់ស៊ីមពីល្ហុងខ្ចី ជួយសម្រួលពោះវៀន និងការពារការទល់លាមក។',
-        '🐟 ប្រូតេអ៊ីនល្អ និងខ្លាញ់ទាប៖ ផ្តល់ប្រូតេអ៊ីនប្រមាណ ២៤g ក្នុងមួយចាន ដោយមានកាឡូរីត្រឹមតែ ~២៩៥ kcal ប៉ុណ្ណោះ។',
-        '👩‍🍳 គន្លឹះចម្អិន៖ កាត់បន្ថយបរិមាណប្រហុកបន្តិចប្រសិនបើចម្អិនសម្រាប់អ្នកលើសសម្ពាធឈាម។',
-      ],
-      bulletPointsEn: [
-        '🌿 Moringa Superfood: High in Vitamin A, Vitamin C, Calcium, and Iron.',
-        '🦠 Digestive Health: Abundant prebiotic fiber from 7+ vegetables plus natural enzymes from green papaya.',
-        '🐟 Lean Protein: ~24g of protein with only ~295 kcal per serving.',
-        '👩‍🍳 Cooking Tip: Use moderate prahok to keep sodium heart-friendly.',
-      ],
-      foodsToChooseKh: ['សម្លកកូរត្រីស្លឹកម្រុំ', 'សម្លប្រហើរត្រីស្លឹកម្រុំ', 'ស្ងោរជ្រក់ត្រី', 'ទឹកគ្រឿងបន្លែចម្រុះ'],
-      foodsToChooseEn: ['Samlor Korko with Moringa', 'Samlor Praher with Moringa', 'Clear Fish Soup', 'Tuk Kroeung with Fresh Greens'],
-      foodsToLimitKh: ['ការប្រើប្រហុក ឬអំបិលប្រៃពេក', 'ការរំងាស់ស្លឹកម្រុំយូរពេកដែលធ្វើឱ្យបាត់បង់វីតាមីន C'],
-      foodsToLimitEn: ['Excessive salted prahok', 'Overboiling moringa leaves for too long'],
-      recommendedDishes: pickTopDishes('gut_fiber', 4),
-      medicalAdvisoryKh: MEDICAL_DISCLAIMER_KH,
-      medicalAdvisoryEn: MEDICAL_DISCLAIMER_EN,
-    };
-  }
-
-  // 6. High Protein / Fitness / Muscle (ប្រូតេអ៊ីន / សាច់ដុំ / ហាត់ប្រាណ)
-  if (
-    q.includes('ប្រូតេអ៊ីន') ||
-    q.includes('សាច់ដុំ') ||
-    q.includes('ហាត់ប្រាណ') ||
-    q.includes('កម្លាំង') ||
-    q.includes('protein') ||
-    q.includes('muscle') ||
-    q.includes('gym') ||
-    q.includes('fitness')
-  ) {
-    return {
-      id: 'qa-protein',
-      questionKh: rawQuery,
-      questionEn: rawQuery,
-      categoryBadgeKh: '💪 អាហារខ្មែរសម្បូរប្រូតេអ៊ីនខ្ពស់ & ជំនួយសាច់ដុំ',
-      categoryBadgeEn: '💪 High-Protein Cambodian Dishes for Strength & Fitness',
-      summaryKh:
-        'មុខម្ហូបខ្មែរមានប្រភពប្រូតេអ៊ីនធម្មជាតិដ៏ល្អឥតខ្ចោះពីត្រីទឹកសាប (ត្រីរ៉ស់ ត្រីឆ្ដោ ត្រីកេះ) សាច់មាន់ស្រែ សាច់គោ បង្គា និងស៊ុត ដែលផ្តល់ប្រូតេអ៊ីនពី ២៤g ដល់ ៣០g ក្នុងមួយចំណែក ជួយកសាង និងជួសជុលសាច់ដុំយ៉ាងមានប្រសិទ្ធភាព។',
-      summaryEn:
-        'Cambodian cuisine offers clean, high-protein dishes made from freshwater snakehead fish, free-range chicken, lean beef, shrimp, and eggs—delivering 24–30g of protein per serving to fuel muscle recovery.',
-      bulletPointsKh: [
-        '🐟 ត្រីអាំង ត្រីចំហុយ និងអាម៉ុកត្រី៖ ផ្តល់ប្រូតេអ៊ីនសុទ្ធ និងខ្លាញ់ល្អ Omega-3 ដោយមិនមានខ្លាញ់ឆ្អែតខ្ពស់។',
-        '🥩 ភ្លាសាច់គោ និងឆាគ្រឿងសាច់គោ/សាច់មាន់៖ សម្បូរប្រូតេអ៊ីន ជាតិដែក និងវីតាមីន B12 ជួយបង្កើនថាមពល។',
-        '🥚 បន្ថែមស៊ុតស្ងោរ ១-២ គ្រាប់ ឬតៅហ៊ូក្នុងសម្ល ដើម្បីបង្កើនបរិមាណប្រូតេអ៊ីនប្រចាំថ្ងៃ។',
-        '🍚 គួបផ្សំជាមួយបាយសម្រូប ឬដំឡូងជ្វា ដើម្បីផ្តល់ថាមពលមុន និងក្រោយហាត់ប្រាណ។',
-      ],
-      bulletPointsEn: [
-        '🐟 Grilled, steamed, and Amok fish dishes provide lean protein and anti-inflammatory Omega-3s.',
-        '🥩 Beef Lok Lak (lean cut), Beef Lime Salad (Pleah), and Kroeung Chicken Stir-fry supply iron, zinc, and B12.',
-        '🥚 Add boiled eggs or tofu to soups to easily hit your daily protein target.',
-        '🍚 Pair with Cambodian brown rice for sustained workout energy.',
-      ],
-      foodsToChooseKh: ['អាម៉ុកត្រីរ៉ស់', 'មាន់ដុតស្លឹកគ្រៃ (បកស្បែក)', 'ភ្លាសាច់គោ', 'ឆាគ្រឿងសាច់គោសណ្ដែកគួរ', 'ស្ងោរជ្រក់ត្រីរ៉ស់'],
-      foodsToChooseEn: ['Steamed Fish Amok', 'Lemongrass Grilled Chicken', 'Beef Lime Salad (Pleah)', 'Beef Kroeung with Long Beans', 'Clear Fish Soup'],
-      foodsToLimitKh: ['សាច់ជ្រូកបីជាន់ខ្លាញ់ច្រើន', 'ស្បែកមាន់បំពង', 'ភេសជ្ជៈមានជាតិអាល់កុលក្រោយហាត់ប្រាណ'],
-      foodsToLimitEn: ['Fatty pork belly cuts', 'Deep-fried poultry skin', 'Alcoholic beverages post-workout'],
-      recommendedDishes: pickTopDishes('high_protein', 4),
-      medicalAdvisoryKh: MEDICAL_DISCLAIMER_KH,
-      medicalAdvisoryEn: MEDICAL_DISCLAIMER_EN,
-    };
-  }
-
-  // 7. Pregnancy & Iron / Anemia (មានផ្ទៃពោះ / ខ្វះគ្រាប់ឈាម / ជាតិដែក)
-  if (
-    q.includes('ផ្ទៃពោះ') ||
-    q.includes('គ្រាប់ឈាម') ||
-    q.includes('ជាតិដែក') ||
-    q.includes('កូន') ||
-    q.includes('pregnant') ||
-    q.includes('pregnancy') ||
-    q.includes('iron') ||
-    q.includes('anemia')
-  ) {
-    return {
-      id: 'qa-pregnancy-iron',
-      questionKh: rawQuery,
-      questionEn: rawQuery,
-      categoryBadgeKh: '🫄 អាហារូបត្ថម្ភសម្រាប់ស្ត្រីមានផ្ទៃពោះ & បង្កើនគ្រាប់ឈាម',
-      categoryBadgeEn: '🫄 Pregnancy & Iron-Rich Nutrition Guide',
-      summaryKh:
-        'ស្ត្រីមានផ្ទៃពោះ ស្ត្រីបំបៅដោះកូន និងអ្នកខ្វះគ្រាប់ឈាម ត្រូវការជាតិដែក (Iron) អាស៊ីតហ្វូលិក (Folate) កាល់ស្យូម និងប្រូតេអ៊ីនខ្ពស់។ ម្ហូបខ្មែរដូចជា សម្លកកូរស្លឹកម្រុំ ឆាខ្ញីសាច់មាន់/ថ្លើមឆ្អិនល្អ ស្ងោរត្រី និងបន្លែបៃតងចាស់ គឺជាប្រភពសារធាតុចិញ្ចឹមដ៏ល្អបំផុត។',
-      summaryEn:
-        'Expectant mothers and individuals preventing anemia need extra iron, folate, calcium, and protein. Traditional Cambodian dishes featuring moringa leaves, well-cooked fish, ginger poultry, and dark leafy greens provide essential maternal nutrients.',
-      bulletPointsKh: [
-        '🌿 ស្លឹកម្រុំ ស្ពៃខ្មៅ និងត្រកួន៖ សម្បូរជាតិដែក និងអាស៊ីតហ្វូលិក (Folate) ជួយការលូតលាស់ប្រព័ន្ធប្រសាទទារក។',
-        '🍖 ប្រូតេអ៊ីន និងជាតិដែកពីសាច់៖ សាច់គោគ្មានខ្លាញ់ ត្រីទឹកសាប សាច់មាន់ និងស៊ុតដែលចម្អិនឆ្អិនល្អ ១០០%។',
-        '🍊 ញ៉ាំផ្លែឈើសម្បូរវីតាមីន C (ដូចជាក្រូច ឬត្របែក) ក្រោយអាហារ ដើម្បីជួយឱ្យរាងកាយស្រូបយកជាតិដែកពីបន្លែបានល្អ។',
-        '⚠️ សុវត្ថិភាពអាហារ៖ ស្ត្រីមានផ្ទៃពោះត្រូវជៀសវាងអាហារឆៅ ឬមិនទាន់ឆ្អិនល្អ (ដូចជា ភ្លាសាច់គោឆៅ ឬប្រហុកឆៅ)។',
-      ],
-      bulletPointsEn: [
-        '🌿 Moringa & Dark Leafy Greens: Rich in folate and iron for healthy fetal development and red blood cells.',
-        '🍖 Fully Cooked Protein: Lean beef, freshwater fish, chicken, and eggs cooked thoroughly.',
-        '🍊 Pair meals with Vitamin C fruits (oranges, guava) to boost iron absorption.',
-        '⚠️ Food Safety: Pregnant women must avoid raw or undercooked meat/fish (such as raw beef salad or uncooked fermented paste).',
-      ],
-      foodsToChooseKh: ['សម្លកកូរត្រីស្លឹកម្រុំ', 'ឆាខ្ញីសាច់មាន់', 'ស្ងោរជ្រក់ត្រីរ៉ស់', 'អាម៉ុកត្រីចំហុយឆ្អិនល្អ', 'បបរមាន់/បបរត្រីក្តៅៗ'],
-      foodsToChooseEn: ['Samlor Korko with Moringa', 'Ginger Chicken Stir-Fry', 'Clear Fish Soup', 'Well-Steamed Fish Amok', 'Warm Chicken or Fish Porridge'],
-      foodsToLimitKh: ['ភ្លាសាច់ឆៅ ឬអាហារមិនទាន់ឆ្អិនល្អ', 'ត្រីធំៗដែលមានជាតិបារតខ្ពស់', 'កាហ្វេអ៊ីនច្រើនពេក និងគ្រឿងស្រវឹង'],
-      foodsToLimitEn: ['Raw or undercooked meat/seafood', 'Unpasteurized or raw fermented items', 'Excess caffeine and all alcohol'],
-      recommendedDishes: pickTopDishes('gut_fiber', 4),
-      medicalAdvisoryKh:
-        '⚕️ ស្ត្រីមានផ្ទៃពោះគួរទៅពិនិត្យសុខភាពមុនសម្រាល និងទទួលទានគ្រាប់ថ្នាំជាតិដែក/អាស៊ីតហ្វូលិកតាមការណែនាំរបស់ឆ្មប ឬគ្រូពេទ្យជំនាញ។',
-      medicalAdvisoryEn:
-        '⚕️ Attend regular prenatal checkups and take prenatal iron/folic acid supplements as prescribed by your healthcare provider.',
-    };
-  }
-
-  // 8. Gout / Joint Pain / Uric Acid (សន្លាក់ / អាស៊ីតអ៊ុយរិក / gout)
-  if (
-    q.includes('សន្លាក់') ||
-    q.includes('អាស៊ីត') ||
-    q.includes('អ៊ុយរិក') ||
-    q.includes('gout') ||
-    q.includes('uric') ||
-    q.includes('joint')
-  ) {
-    return {
-      id: 'qa-gout',
-      questionKh: rawQuery,
-      questionEn: rawQuery,
-      categoryBadgeKh: '🦴 របបអាហារសម្រាប់អ្នកឈឺសន្លាក់ & លើសអាស៊ីតអ៊ុយរិក (Gout)',
-      categoryBadgeEn: '🦴 Gout & Uric Acid Dietary Guide',
-      summaryKh:
-        'អ្នកមានបញ្ហាលើសអាស៊ីតអ៊ុយរិក (Gout / ឈឺសន្លាក់) គួរកាត់បន្ថយអាហារដែលសម្បូរសារធាតុ Purine ខ្ពស់ (ដូចជា គ្រឿងក្នុងសត្វ សាច់ក្រហមច្រើន គ្រឿងសមុទ្រមួយចំនួន និងស្រាបៀរ) ហើយប្តូរមកញ៉ាំមុខម្ហូបបន្លែ ត្រីទឹកសាបក្នុងបរិមាណល្មម ស៊ុត តៅហ៊ូ និងផឹកទឹកឱ្យបានច្រើន។',
-      summaryEn:
-        'To manage high uric acid and gout, limit high-purine foods (organ meats, heavy red meat, certain shellfish, and beer) while choosing vegetable-forward Cambodian soups, eggs, tofu, moderate freshwater fish, and plenty of water.',
-      bulletPointsKh: [
-        '💧 ផឹកទឹកស្អាតឱ្យបាន ២.៥ - ៣ លីត្រក្នុងមួយថ្ងៃ ដើម្បីជួយតម្រងនោមបញ្ចេញអាស៊ីតអ៊ុយរិកតាមទឹកនោម។',
-        '🥦 បង្កើនការញ៉ាំបន្លែបៃតង ល្ពៅ ត្រសក់ ត្រឡាច និងផ្លែឈើសម្បូរវីតាមីន C។',
-        '🥚 ប្រភពប្រូតេអ៊ីនសុវត្ថិភាព៖ ស៊ុត តៅហ៊ូ សាច់មាន់ និងត្រីទឹកសាបក្នុងបរិមាណល្មម។',
-        '🚫 តមដាច់ខាត៖ ស្រាបៀរ គ្រឿងស្រវឹង គ្រឿងក្នុងសត្វ (ថ្លើម ពោះវៀន) និងភេសជ្ជៈមានជាតិស្ករ Fructose ខ្ពស់។',
-      ],
-      bulletPointsEn: [
-        '💧 Drink 2.5–3L of water daily to help flush uric acid through the kidneys.',
-        '🥦 Favor gourd vegetables (winter melon, pumpkin, cucumber), leafy greens, and Vitamin C fruits.',
-        '🥚 Choose eggs, tofu, poultry, and moderate portions of freshwater fish.',
-        '🚫 Avoid beer, alcohol, organ meats (offal/Pak Lov), and fructose-sweetened drinks.',
-      ],
-      foodsToChooseKh: ['សម្លប្រហើរបន្លែចម្រុះ', 'ស្ងោរត្រឡាច', 'ឆាបន្លែគ្រប់មុខ', 'បបរសត្រី/ស៊ុត'],
-      foodsToChooseEn: ['Vegetable Samlor Praher', 'Winter Melon Clear Soup', 'Mixed Vegetable Stir-Fry', 'Rice Porridge with Egg/Fish'],
-      foodsToLimitKh: ['ផាក់ឡូវ និងគ្រឿងក្នុងសត្វ', 'គ្រឿងសមុទ្រ (បង្គា មឹក ក្តាម) ច្រើនពេក', 'សាច់គោច្រើនពេក', 'ស្រាបៀរ និងទឹកក្រូចផ្អែម'],
-      foodsToLimitEn: ['Braised offal (Pak Lov) & organ meats', 'Large amounts of shellfish', 'Heavy red meat portions', 'Beer & sugary sodas'],
-      recommendedDishes: pickTopDishes('light_digest', 4),
-      medicalAdvisoryKh: MEDICAL_DISCLAIMER_KH,
-      medicalAdvisoryEn: MEDICAL_DISCLAIMER_EN,
-    };
-  }
-
-  // 9. Stomach / Gastritis / Digestion (ក្រពះ / រំលាយអាហារ / ឆ្អល់ពោះ)
-  if (
-    q.includes('ក្រពះ') ||
-    q.includes('រំលាយអាហារ') ||
-    q.includes('ឆ្អល់') ||
-    q.includes('ពោះវៀន') ||
-    q.includes('stomach') ||
-    q.includes('digest') ||
-    q.includes('gastritis')
-  ) {
-    return {
-      id: 'qa-stomach',
-      questionKh: rawQuery,
-      questionEn: rawQuery,
-      categoryBadgeKh: '🥣 អាហារសម្រាប់អ្នកឈឺក្រពះ & ស្រួលរំលាយអាហារ',
-      categoryBadgeEn: '🥣 Gentle Stomach & Digestive Care Guide',
-      summaryKh:
-        'សម្រាប់អ្នកមានបញ្ហារលាកក្រពះ ឆ្អល់ពោះ ឬពិបាករំលាយអាហារ គួរជ្រើសរើសមុខម្ហូបខ្មែរដែលចម្អិនឆ្អិនទន់ល្អ ក្តៅឧណ្ហៗ មិនហឹរ និងមិនជូរខ្លាំងពេក (ដូចជា បបរមាន់ បបរត្រី ស្ងោរត្រឡាច សម្លប្រហើរ និងត្រីចំហុយខ្ញី)។',
-      summaryEn:
-        'For gastritis, acid reflux, or sensitive digestion, choose warm, soft-cooked, non-spicy Cambodian dishes such as fish or chicken rice porridge (Borbor), winter melon soup, Samlor Praher, and steamed fish with ginger.',
-      bulletPointsKh: [
-        '🥣 បែងចែកអាហារជាចំណែកតូចល្មម និងញ៉ាំឱ្យទៀងម៉ោង កុំទុកឱ្យពោះទទេរយូរពេក។',
-        '🫚 ប្រើខ្ញីស្រស់ និងរមៀតក្នុងម្ហូប៖ ជួយបន្ថយការរលាកភ្នាសក្រពះ និងកាត់បន្ថយខ្យល់ក្នុងពោះ។',
-        '🥬 ចម្អិនបន្លែឱ្យឆ្អិនទន់ល្អ (ដូចជាក្នុងសម្ល ឬស្ងោរ) ជំនួសការញ៉ាំបន្លែឆៅរឹងៗពេលកំពុងឈឺក្រពះ។',
-        '🚫 ជៀសវាងម្ទេសហឹរខ្លាំង ម្ជូរខ្លាំង អាហារផ្អាប់ កាហ្វេពេលពោះទទេរ និងការញ៉ាំភ្លាមទម្រេតខ្លួនគេងភ្លាម។',
-      ],
-      bulletPointsEn: [
-        '🥣 Eat regular, moderate meals and avoid skipping meals.',
-        '🫚 Include fresh ginger and turmeric to soothe the gastric lining and reduce bloating.',
-        '🥬 Prefer tender cooked vegetables in soups over tough raw vegetables during flare-ups.',
-        '🚫 Avoid heavy chili, extreme sourness, coffee on an empty stomach, and lying down right after eating.',
-      ],
-      foodsToChooseKh: ['បបរត្រីរ៉ស់ខ្ញីស្រស់', 'បបរសាច់មាន់', 'ស្ងោរត្រឡាចសាច់ជ្រូកចិញ្ច្រាំ', 'សម្លកកូរ (មិនដាក់ម្ទេស)', 'ត្រីចំហុយខ្ញី'],
-      foodsToChooseEn: ['Fish Porridge with Fresh Ginger', 'Chicken Rice Porridge', 'Winter Melon Soup', 'Mild Samlor Korko', 'Steamed Fish with Ginger'],
-      foodsToLimitKh: ['បុកល្ហុងហឹរខ្លាំង', 'សម្លម្ជូរដែលជូរខ្លាំងពេលពោះទទេរ', 'អាហារបំពងខ្លាញ់ច្រើន', 'កាហ្វេខ្មៅពេលព្រឹកមុនញ៉ាំបាយ'],
-      foodsToLimitEn: ['Very spicy papaya salad', 'Extremely sour dishes on an empty stomach', 'Greasy deep-fried foods', 'Black coffee before breakfast'],
-      recommendedDishes: pickTopDishes('light_digest', 4),
-      medicalAdvisoryKh: MEDICAL_DISCLAIMER_KH,
-      medicalAdvisoryEn: MEDICAL_DISCLAIMER_EN,
-    };
-  }
-
-  // Default comprehensive Healthy Cambodian Eating answer
-  return {
-    id: 'qa-general-wellness',
-    questionKh: rawQuery,
-    questionEn: rawQuery,
-    categoryBadgeKh: '🌿 មគ្គុទ្ទេសក៍អាហារូបត្ថម្ភ និងម្ហូបសុខភាពខ្មែរ',
-    categoryBadgeEn: '🌿 Healthy Cambodian Nutrition & Balanced Diet Guide',
-    summaryKh:
-      'ម្ហូបប្រពៃណីខ្មែរមានមូលដ្ឋានគ្រឹះល្អប្រសើរណាស់សម្រាប់សុខភាព ព្រោះសម្បូរទៅដោយត្រីទឹកសាប បន្លែបៃតងតាមរដូវ និងគ្រឿងទេសឱសថធម្មជាតិ (ស្លឹកគ្រៃ រមៀត ខ្ញី រំដេង ស្លឹកម្រុំ)។ ដើម្បីទទួលបានសុខភាពល្អបំផុត សូមអនុវត្តរូបមន្តចានអាហារ ២:១:១ និងកាត់បន្ថយអំបិល ស្ករ និងខ្លាញ់ពេលចម្អិន។',
-    summaryEn:
-      'Traditional Cambodian cuisine provides an excellent foundation for lifelong health thanks to abundant freshwater fish, seasonal leafy greens, and medicinal herbs (lemongrass, turmeric, ginger, galangal, moringa). Follow the 2:1:1 balanced plate rule and moderate added salt, sugar, and oil.',
-    bulletPointsKh: [
-      '🍽️ រូបមន្តចានអាហារសុខភាព ២:១:១៖ បន្លែចម្រុះ ៥០% + ត្រី/សាច់គ្មានខ្លាញ់ ២៥% + បាយសម្រូប ២៥%។',
-      '🌿 ជ្រើសរើសមុខម្ហូបស្ល ស្ងោរ ចំហុយ អាំង និងញាំ ឱ្យបានញឹកញាប់ជាងអាហារបំពង ឬខផ្អែមប្រៃខ្លាំង។',
-      '🧂 កាត់បន្ថយការប្រើអំបិល ទឹកត្រី ប្រហុក និងប៊ីចេង មកកម្រិតល្មម ដើម្បីការពារសម្ពាធឈាម និងតម្រងនោម។',
-      '💧 ផឹកទឹកស្អាត ២ ទៅ ២.៥ លីត្រក្នុងមួយថ្ងៃ និងធ្វើលំហាត់ប្រាណយ៉ាងតិច ៣០ នាទីជារៀងរាល់ថ្ងៃ។',
-    ],
-    bulletPointsEn: [
-      '🍽️ 2:1:1 Healthy Plate: 50% vegetables + 25% lean fish/protein + 25% brown/red rice.',
-      '🌿 Prefer herbal soups, steamed dishes, grilled fish, and fresh salads over deep-fried meals.',
-      '🧂 Moderate salt, fish sauce, prahok, and MSG to protect blood pressure and kidney health.',
-      '💧 Drink 2.0–2.5L of water daily and stay physically active for at least 30 minutes a day.',
-    ],
-    foodsToChooseKh: ['សម្លកកូរត្រីស្លឹកម្រុំ', 'អាម៉ុកត្រីចំហុយ', 'ស្ងោរជ្រក់ត្រីរ៉ស់', 'សម្លប្រហើរបន្លែចម្រុះ', 'ភ្លាសាច់គោបន្លែស្រស់'],
-    foodsToChooseEn: ['Samlor Korko with Moringa', 'Steamed Fish Amok', 'Clear Lemongrass Fish Soup', 'Vegetable Samlor Praher', 'Cambodian Beef Salad'],
-    foodsToLimitKh: ['អាហារបំពងខ្លាញ់ច្រើន', 'បង្អែម និងភេសជ្ជៈផ្អែមខ្លាំង', 'អាហារប្រៃខ្លាំងលើសកម្រិត'],
-    foodsToLimitEn: ['Deep-fried greasy foods', 'Sugary drinks and heavy desserts', 'Excessively salted dishes'],
-    recommendedDishes: pickTopDishes('all', 4),
-    medicalAdvisoryKh: MEDICAL_DISCLAIMER_KH,
-    medicalAdvisoryEn: MEDICAL_DISCLAIMER_EN,
-  };
+  return generateMultiTurnHealthAnswer(
+    rawQuery,
+    foods,
+    previousTopicId || undefined,
+    turnNumber,
+    preferredLang
+  ).answer;
 }
 
 /**

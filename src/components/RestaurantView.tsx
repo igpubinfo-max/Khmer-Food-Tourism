@@ -42,6 +42,7 @@ export const RestaurantView: React.FC = () => {
   const isUserAtOneStoreLimit = Boolean(currentUser && myExistingRest);
 
   const [priceFilter, setPriceFilter] = useState<string>('all');
+  const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [verifiedFilter, setVerifiedFilter] = useState<'all' | 'verified' | 'unverified'>('all');
   const [visibleCount, setVisibleCount] = useState<number>(RESTAURANT_BATCH_SIZE);
   const loadMoreTriggerRef = useRef<HTMLDivElement | null>(null);
@@ -51,9 +52,71 @@ export const RestaurantView: React.FC = () => {
 
   const isKm = language === 'km';
 
+  const classifyRestaurantCategory = (r: Restaurant): string => {
+    const text = `${r.nameKh || ''} ${r.nameEn || ''} ${r.descriptionKh || ''} ${r.descriptionEn || ''} ${(r.signatureDishesKh || []).join(' ')}`.toLowerCase();
+    if (
+      text.includes('កាហ្វេ') ||
+      text.includes('cafe') ||
+      text.includes('coffee') ||
+      text.includes('roastery') ||
+      text.includes('atelier') ||
+      text.includes('kinyei')
+    ) {
+      return 'cafe_bistro';
+    }
+    if (
+      text.includes('សាច់អាំង') ||
+      text.includes('bbq') ||
+      text.includes('grill') ||
+      text.includes('សុវណ្ណា') ||
+      text.includes('sovanna')
+    ) {
+      return 'bbq_grill';
+    }
+    if (
+      text.includes('សមុទ្រ') ||
+      text.includes('seafood') ||
+      text.includes('crab') ||
+      text.includes('មាត់ទន្លេ') ||
+      text.includes('មាត់បឹង') ||
+      text.includes('មាត់ព្រែក') ||
+      text.includes('riverside') ||
+      text.includes('lake') ||
+      text.includes('sailing') ||
+      text.includes('bopha') ||
+      text.includes('ក្បាលកោះ')
+    ) {
+      return 'seafood_riverside';
+    }
+    if (
+      r.priceLevel === '$$$' ||
+      text.includes('ម្លិះ') ||
+      text.includes('malis') ||
+      text.includes('wat damnak') ||
+      text.includes('chanrey tree') ||
+      text.includes('ក្រវាញ') ||
+      text.includes('kravanh') ||
+      text.includes('viroth') ||
+      text.includes('រំដេង') ||
+      text.includes('romdeng')
+    ) {
+      return 'khmer_fine_dining';
+    }
+    return 'family_garden';
+  };
+
+  const restaurantCategories = [
+    { id: 'all', nameKh: 'គ្រប់ប្រភេទហាង', nameEn: 'All Restaurants', nameZh: '全部餐厅' },
+    { id: 'khmer_fine_dining', nameKh: 'ម្ហូបខ្មែរប្រណីត', nameEn: 'Khmer Fine Dining', nameZh: '高端柬式料理' },
+    { id: 'seafood_riverside', nameKh: 'គ្រឿងសមុទ្រ & មាត់ទន្លេ', nameEn: 'Seafood & Riverside', nameZh: '海鲜与河畔餐厅' },
+    { id: 'family_garden', nameKh: 'ភោជនីយដ្ឋានគ្រួសារ & សួន', nameEn: 'Family & Garden', nameZh: '家庭与花园餐厅' },
+    { id: 'cafe_bistro', nameKh: 'កាហ្វេ & ប៊ីស្រ្តូ', nameEn: 'Cafe & Bistro', nameZh: '咖啡与简餐' },
+    { id: 'bbq_grill', nameKh: 'សាច់អាំង & ជួបជុំ', nameEn: 'BBQ & Grill', nameZh: '烧烤与聚餐' },
+  ];
+
   useEffect(() => {
     setVisibleCount(RESTAURANT_BATCH_SIZE);
-  }, [selectedProvince, priceFilter, verifiedFilter, searchQuery]);
+  }, [selectedProvince, priceFilter, categoryFilter, verifiedFilter, searchQuery]);
 
   useEffect(() => {
     const q = searchQuery.trim();
@@ -107,7 +170,18 @@ export const RestaurantView: React.FC = () => {
 
   const filteredRestaurants = useMemo(() => {
     const q = normalizeKhmerSearchText(searchQuery);
+    const seenNames = new Set<string>();
     return restaurants.filter((r) => {
+      // Strictly exclude any non-restaurant records (food dishes or tourist attractions)
+      if (!r || !r.id || String(r.id).startsWith('food-') || String(r.id).startsWith('dest-')) {
+        return false;
+      }
+      if (
+        r.aiCategoryVerification?.detectedType &&
+        r.aiCategoryVerification.detectedType !== 'restaurant'
+      ) {
+        return false;
+      }
       if (r.status !== 'approved' && currentUser?.role !== 'admin' && currentUser?.id !== r.ownerId) {
         return false;
       }
@@ -117,6 +191,9 @@ export const RestaurantView: React.FC = () => {
         return false;
       }
       if (priceFilter !== 'all' && r.priceLevel !== priceFilter) {
+        return false;
+      }
+      if (categoryFilter !== 'all' && classifyRestaurantCategory(r) !== categoryFilter) {
         return false;
       }
       if (q) {
@@ -129,9 +206,13 @@ export const RestaurantView: React.FC = () => {
         const matchDish = r.signatureDishesKh.some((d) => normalizeKhmerSearchText(d).includes(q));
         if (!matchName && !matchAddress && !matchDish) return false;
       }
+      // Deduplicate by normalized Khmer+English name within the same province
+      const dedupKey = `${normalizeKhmerSearchText(r.nameKh)}|${normalizeKhmerSearchText(r.provinceKh)}`;
+      if (seenNames.has(dedupKey)) return false;
+      seenNames.add(dedupKey);
       return true;
     });
-  }, [restaurants, currentUser?.role, currentUser?.id, verifiedFilter, selectedProvince, priceFilter, searchQuery]);
+  }, [restaurants, currentUser?.role, currentUser?.id, verifiedFilter, selectedProvince, priceFilter, categoryFilter, searchQuery]);
 
   // Chronological order: restaurants added earlier appear first, newly added restaurants appear afterward
   const sortedRestaurants = useMemo(
@@ -443,6 +524,27 @@ export const RestaurantView: React.FC = () => {
             )}
           </div>
         </div>
+      </div>
+
+      {/* Restaurant Category Filter Pills */}
+      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 font-khmer">
+        {restaurantCategories.map((cat) => {
+          const active = categoryFilter === cat.id;
+          return (
+            <button
+              key={cat.id}
+              type="button"
+              onClick={() => setCategoryFilter(cat.id)}
+              className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+                active
+                  ? 'bg-emerald-700 text-white shadow-xs ring-1 ring-emerald-400/50'
+                  : 'bg-emerald-50/80 dark:bg-slate-800 text-emerald-900 dark:text-emerald-200 border border-emerald-200/80 dark:border-slate-700 hover:bg-emerald-100/70'
+              }`}
+            >
+              {language === 'km' ? cat.nameKh : language === 'zh' ? cat.nameZh : cat.nameEn}
+            </button>
+          );
+        })}
       </div>
 
       {/* Location Filter Pills */}

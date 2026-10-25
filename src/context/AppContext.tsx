@@ -700,7 +700,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       : foodImages;
 
     // Preserve exact matched photoUrl for each restaurant without cross-assigning another shop's storefront sign
-    const photoUrl = r.photoUrl || r.profileImage || galleryPhotos[0] || '/foods/food-1.jpg';
+    // Never allow a food dish photo (/foods/...) or broken path (/restaurants/...) as the restaurant's primary photoUrl
+    const rawPhoto = r.photoUrl || r.profileImage || galleryPhotos[0] || '/Shop/rest-1.jpg';
+    const photoUrl =
+      typeof rawPhoto === 'string' && !rawPhoto.startsWith('/foods/') && !rawPhoto.startsWith('/restaurants/')
+        ? rawPhoto
+        : '/Shop/rest-1.jpg';
+    const rawProfile = r.profileImage || photoUrl;
+    const cleanProfileImage =
+      typeof rawProfile === 'string' && !rawProfile.startsWith('/foods/') && !rawProfile.startsWith('/restaurants/')
+        ? rawProfile
+        : photoUrl;
     const restId = r.id || `rest-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
     const isSeed = isSeedRestaurantId(restId);
     const genuineReviews: RestaurantReview[] = Array.isArray(r.reviews)
@@ -723,7 +733,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       descriptionKh: r.descriptionKh || 'ភោជនីយដ្ឋានម្ហូបខ្មែររសជាតិដើម ផាសុកភាព និងអនាម័យខ្ពស់។',
       descriptionEn: r.descriptionEn || 'Authentic traditional Khmer restaurant.',
       photoUrl,
-      profileImage: r.profileImage || photoUrl,
+      profileImage: cleanProfileImage,
       galleryPhotos,
       foodImages,
       addressKh: r.addressKh || 'រាជធានីភ្នំពេញ កម្ពុជា',
@@ -792,25 +802,33 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       localStorage.removeItem('kft_restaurants_real_v5');
       localStorage.removeItem('kft_restaurants_real_v6');
       localStorage.removeItem('kft_restaurants_real_v7');
-      const saved = localStorage.getItem('kft_restaurants_real_v9') || localStorage.getItem('kft_restaurants_real_v8');
       localStorage.removeItem('kft_restaurants_real_v8');
+      const saved = localStorage.getItem('kft_restaurants_real_v10') || localStorage.getItem('kft_restaurants_real_v9');
+      localStorage.removeItem('kft_restaurants_real_v9');
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length >= 50) {
+        if (Array.isArray(parsed) && parsed.length >= 40) {
           const seenIds = new Set<string>();
           const normalizedList: Restaurant[] = [];
           for (const r of parsed) {
             if (!r || !r.id) continue;
             const rId = String(r.id);
             if (seenIds.has(rId)) continue;
-            seenIds.add(rId);
 
             const seed = seedMap.get(rId);
+            // Skip removed legacy template clones & dish-named seed entries unless owned by a real user
+            if (!seed && isSeedRestaurantId(rId) && (!r.ownerId || r.ownerId === 'owner-1')) {
+              continue;
+            }
+            seenIds.add(rId);
+
             if (seed) {
               const primaryImg = r.profileImage || r.photoUrl || '';
               const hasCustomPhoto =
                 typeof primaryImg === 'string' &&
                 primaryImg.trim().length > 0 &&
+                !primaryImg.startsWith('/foods/') &&
+                !primaryImg.startsWith('/restaurants/') &&
                 primaryImg !== seed.photoUrl &&
                 (primaryImg.startsWith('data:') || primaryImg.startsWith('http://') || primaryImg.startsWith('https://'));
               const seedGallery = Array.isArray(seed.galleryPhotos) && seed.galleryPhotos.length > 0
@@ -837,7 +855,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               }
 
               const ov = vault.restaurants[r.id];
-              const finalPhoto = ov?.photoUrl || (hasCustomPhoto ? primaryImg : seed.photoUrl);
+              const ovPhotoValid =
+                ov?.photoUrl && !ov.photoUrl.startsWith('/foods/') && !ov.photoUrl.startsWith('/restaurants/');
+              const finalPhoto = ovPhotoValid ? ov!.photoUrl! : (hasCustomPhoto ? primaryImg : seed.photoUrl);
               const finalGallery =
                 (Array.isArray(ov?.galleryPhotos) && ov.galleryPhotos.length > 0)
                   ? ov.galleryPhotos
@@ -1748,7 +1768,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           return f;
         });
       }
-      if (key === 'kft_restaurants_real_v9') {
+      if (key === 'kft_restaurants_real_v10') {
         const seedRestMap = new Map(initialRestaurants.map(r => [r.id, r.photoUrl]));
         return (data as Restaurant[]).map(r => {
           if (
@@ -1757,7 +1777,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             r.photoUrl.startsWith('data:') &&
             isOverridePersistedInLocalStorage('restaurants', r.id)
           ) {
-            const fallbackUrl = seedRestMap.get(r.id) || '/foods/food-1.jpg';
+            const fallbackUrl = seedRestMap.get(r.id) || '/Shop/rest-1.jpg';
             return {
               ...r,
               photoUrl: fallbackUrl,
@@ -2041,7 +2061,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           });
           if (restChanged) {
             try {
-              localStorage.setItem('kft_restaurants_real_v9', JSON.stringify(nextRests));
+              localStorage.setItem('kft_restaurants_real_v10', JSON.stringify(nextRests));
             } catch {}
           }
           return restChanged ? nextRests : prev;
@@ -2141,7 +2161,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return;
     }
     if (restaurants && restaurants.length > 0) {
-      scheduleStorageWrite('kft_restaurants_real_v9', restaurants, 1200);
+      scheduleStorageWrite('kft_restaurants_real_v10', restaurants, 1200);
     }
   }, [restaurants]);
 

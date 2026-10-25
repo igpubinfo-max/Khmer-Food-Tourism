@@ -8,13 +8,21 @@ import {
   ArrowRight,
   Heart,
   Leaf,
+  HeartPulse,
+  Sparkles,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 export const WELCOME_SESSION_KEY = 'kft_welcome_shown_session_v3';
 export const WELCOME_LOCAL_KEY = 'kft_welcome_shown_v3';
 
-export type WelcomeTargetSection = 'home' | 'food' | 'restaurants' | 'tourism' | 'nearby';
+export type WelcomeTargetSection =
+  | 'home'
+  | 'food'
+  | 'restaurants'
+  | 'tourism'
+  | 'nearby'
+  | 'ai_health';
 
 interface WelcomeScreenModalProps {
   onComplete: (targetSection?: WelcomeTargetSection) => void;
@@ -23,6 +31,7 @@ interface WelcomeScreenModalProps {
 export const WelcomeScreenModal: React.FC<WelcomeScreenModalProps> = ({ onComplete }) => {
   const { language, setLanguage } = useApp();
   const isKm = language === 'km';
+  const isZh = language === 'zh';
   const [isExiting, setIsExiting] = useState(false);
 
   const handleProceed = (targetSection: WelcomeTargetSection = 'home') => {
@@ -169,15 +178,15 @@ export const WelcomeScreenModal: React.FC<WelcomeScreenModalProps> = ({ onComple
           </div>
 
           {/* Hero Logo Badge + Cambodian Green & Gold Title */}
-          <div className="relative z-10 px-4 pt-1 flex items-start gap-3">
-            {/* Rounded Square White App Logo Frame */}
-            <div className="w-[88px] h-[88px] sm:w-[96px] sm:h-[96px] rounded-[24px] bg-white p-1.5 shadow-[0_8px_24px_rgba(0,0,0,0.35)] ring-2 ring-white/90 shrink-0">
+          <div className="relative z-10 px-3.5 pt-0.5 flex items-center gap-3">
+            {/* Enlarged Official App Logo Preserving Exact Original Proportions & Clarity */}
+            <div className="w-[114px] h-[114px] sm:w-[126px] sm:h-[126px] shrink-0 flex items-center justify-center">
               <img
-                src="/welcome/welcome-logo.jpg"
-                alt="Khmer Food & Tourism Logo"
-                className="w-full h-full rounded-[19px] object-cover"
+                src="/welcome/welcome-logo.png"
+                alt="Khmer Food & Tourism Official Logo"
+                className="w-full h-full object-contain drop-shadow-[0_10px_24px_rgba(0,0,0,0.5)] select-none"
                 onError={(e) => {
-                  (e.currentTarget as HTMLImageElement).src = '/icon-192.png?v=2.0.0';
+                  (e.currentTarget as HTMLImageElement).src = '/welcome/welcome-logo.jpg';
                 }}
               />
             </div>
@@ -186,14 +195,14 @@ export const WelcomeScreenModal: React.FC<WelcomeScreenModalProps> = ({ onComple
             <div className="flex-1 min-w-0 pt-0.5 text-center sm:text-left">
               <div className="inline-block relative">
                 <h1
-                  className="font-moul text-[20px] sm:text-[22px] leading-[1.35] tracking-normal text-[#fef08a]"
+                  className="font-moul text-[19px] sm:text-[21px] leading-[1.35] tracking-normal text-[#fef08a]"
                   style={{
                     textShadow:
                       '0 2px 0 #14532d, 0 -1px 0 #14532d, 2px 0 0 #14532d, -2px 0 0 #14532d, 0 4px 10px rgba(0,0,0,0.65)',
                   }}
                 >
                   ស្វែងរក ម្ហូប
-                  <span className="block text-[16px] sm:text-[18px] text-[#bbf7d0] mt-0.5">
+                  <span className="block text-[15px] sm:text-[17px] text-[#bbf7d0] mt-0.5">
                     និង ទីកន្លែងទេសចរណ៍{' '}
                     <Leaf className="w-4 h-4 inline-block text-lime-300 fill-lime-400 -mt-1" />
                   </span>
@@ -210,72 +219,143 @@ export const WelcomeScreenModal: React.FC<WelcomeScreenModalProps> = ({ onComple
           </div>
 
           {/* Subtitle & Green Brushstroke Banner */}
-          <div className="relative z-10 px-4 mt-2 flex flex-col items-center text-center">
+          <div className="relative z-10 px-4 mt-1.5 flex flex-col items-center text-center">
             <p
               className="text-xs sm:text-[13px] font-extrabold text-white tracking-wide"
               style={{ textShadow: '0 2px 6px rgba(0,0,0,0.9)' }}
             >
               {isKm
                 ? 'ម្ហូបឆ្ងាញ់ ទីកន្លែងស្អាត ទៅតែមួយកន្លែង'
+                : isZh
+                ? '美味佳肴与优美景点，尽在一处'
                 : 'Delicious Food & Scenic Places — All in One Place'}
             </p>
 
             {/* Green Brushstroke Pill Badge */}
-            <div className="mt-1.5 px-5 py-1 rounded-full bg-gradient-to-r from-[#1b5e20]/95 via-[#2e7d32] to-[#1b5e20]/95 border border-lime-300/40 shadow-lg">
+            <div className="mt-1 px-5 py-1 rounded-full bg-gradient-to-r from-[#1b5e20]/95 via-[#2e7d32] to-[#1b5e20]/95 border border-lime-300/40 shadow-lg">
               <span className="text-xs sm:text-[13px] font-extrabold text-[#fde047] italic tracking-wide drop-shadow-xs">
-                {isKm ? 'គ្រប់អ្វីនៅក្នុងកម្មវិធីតែមួយ!' : 'Everything in a Single App!'}
+                {isKm
+                  ? 'គ្រប់អ្វីនៅក្នុងកម្មវិធីតែមួយ!'
+                  : isZh
+                  ? '一站式全功能应用！'
+                  : 'Everything in a Single App!'}
               </span>
             </div>
           </div>
         </div>
 
         {/* ===================================================================
-            2. FOUR VISUAL FEATURE CARDS (2x2 Grid)
+            2. FOUR VISUAL FEATURE CARDS (2x2 Grid) + AI HEALTH ASSISTANT CARD
            =================================================================== */}
-        <div className="relative z-20 -mt-3 px-3.5 pb-4 flex-1 flex flex-col justify-between bg-[#fafaf9] rounded-t-[26px]">
-          <div className="grid grid-cols-2 gap-3 pt-1">
-            {featureCards.map((card) => {
-              const Icon = card.icon;
-              return (
-                <button
-                  key={card.id}
-                  type="button"
-                  onClick={() => handleProceed(card.id)}
-                  className={`group rounded-[22px] ${card.cardBg} border ${card.cardBorder} shadow-[0_4px_14px_rgba(0,0,0,0.07)] hover:shadow-md overflow-hidden text-left transition-all duration-150 hover:scale-[1.01] active:scale-98 cursor-pointer flex flex-col`}
-                >
-                  {/* Card Photo Header + Overlapping Circular Badge */}
-                  <div className="relative w-full h-[88px] sm:h-[96px]">
-                    <img
-                      src={card.image}
-                      alt={card.titleEn}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                    <div
-                      className={`absolute left-3 -bottom-4 w-9 h-9 sm:w-10 sm:h-10 rounded-full ${card.badgeBg} border-[3px] border-white shadow-md flex items-center justify-center text-white`}
-                    >
-                      <Icon className="w-4 h-4 sm:w-4.5 sm:h-4.5 stroke-[2.4]" />
+        <div className="relative z-20 -mt-3 px-3.5 pb-3.5 flex-1 flex flex-col justify-between bg-[#fafaf9] rounded-t-[26px]">
+          <div className="space-y-2.5 pt-1">
+            <div className="grid grid-cols-2 gap-2.5">
+              {featureCards.map((card) => {
+                const Icon = card.icon;
+                return (
+                  <button
+                    key={card.id}
+                    type="button"
+                    onClick={() => handleProceed(card.id)}
+                    className={`group rounded-[20px] ${card.cardBg} border ${card.cardBorder} shadow-[0_4px_14px_rgba(0,0,0,0.07)] hover:shadow-md overflow-hidden text-left transition-all duration-150 hover:scale-[1.01] active:scale-98 cursor-pointer flex flex-col`}
+                  >
+                    {/* Card Photo Header + Overlapping Circular Badge */}
+                    <div className="relative w-full h-[80px] sm:h-[88px]">
+                      <img
+                        src={card.image}
+                        alt={card.titleEn}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                      <div
+                        className={`absolute left-3 -bottom-3.5 w-8 h-8 sm:w-9 sm:h-9 rounded-full ${card.badgeBg} border-[2.5px] border-white shadow-md flex items-center justify-center text-white`}
+                      >
+                        <Icon className="w-4 h-4 stroke-[2.4]" />
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Card Text + Right Circular Chevron */}
-                  <div className="pt-5 pb-3 px-3 flex items-end justify-between gap-1 flex-1">
-                    <div className="min-w-0">
-                      <h3 className="text-[13px] sm:text-[14px] font-extrabold text-slate-900 leading-tight truncate">
-                        {card.titleKh}
-                      </h3>
-                      <p className="text-[9.5px] sm:text-[10px] font-extrabold text-slate-600 uppercase tracking-tight mt-0.5 truncate font-sans">
-                        {card.titleEn}
-                      </p>
+                    {/* Card Text + Right Circular Chevron */}
+                    <div className="pt-4 pb-2.5 px-3 flex items-end justify-between gap-1 flex-1">
+                      <div className="min-w-0">
+                        <h3 className="text-[12.5px] sm:text-[13.5px] font-extrabold text-slate-900 leading-tight truncate">
+                          {card.titleKh}
+                        </h3>
+                        <p className="text-[9px] sm:text-[9.5px] font-extrabold text-slate-600 uppercase tracking-tight mt-0.5 truncate font-sans">
+                          {card.titleEn}
+                        </p>
+                      </div>
+                      <div
+                        className={`w-6 h-6 rounded-full ${card.chevronBg} ${card.chevronText} flex items-center justify-center shrink-0 group-hover:translate-x-0.5 transition-transform`}
+                      >
+                        <ChevronRight className="w-3.5 h-3.5 stroke-[2.8]" />
+                      </div>
                     </div>
-                    <div
-                      className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full ${card.chevronBg} ${card.chevronText} flex items-center justify-center shrink-0 group-hover:translate-x-0.5 transition-transform`}
-                    >
-                      <ChevronRight className="w-4 h-4 stroke-[2.8]" />
-                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* PROMINENT AI HEALTH ASSISTANT CARD (Directly Below Travel & Maps Cards) */}
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={() => handleProceed('ai_health')}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  handleProceed('ai_health');
+                }
+              }}
+              className="group w-full rounded-[22px] bg-gradient-to-br from-[#f0fdf4] via-white to-[#dcfce7]/90 border-2 border-[#43a047]/45 shadow-[0_6px_18px_rgba(21,128,61,0.12)] hover:shadow-[0_8px_22px_rgba(21,128,61,0.18)] p-3 text-left transition-all duration-150 hover:scale-[1.005] active:scale-99 cursor-pointer relative overflow-hidden"
+            >
+              {/* Subtle Decorative Medical Leaf Glow */}
+              <div className="absolute -right-6 -top-6 w-24 h-24 rounded-full bg-emerald-200/40 blur-xl pointer-events-none" />
+
+              <div className="relative z-10 flex items-center gap-3">
+                {/* Health Icon Badge */}
+                <div className="relative w-12 h-12 sm:w-13 sm:h-13 rounded-2xl bg-gradient-to-br from-[#16a34a] via-[#15803d] to-[#14532d] border-2 border-white shadow-md flex items-center justify-center text-white shrink-0">
+                  <HeartPulse className="w-6 h-6 stroke-[2.3] text-white animate-pulse" />
+                  <span className="absolute -top-1.5 -right-1.5 px-1.5 py-0.2 rounded-full bg-amber-400 text-[#14532d] text-[8px] font-black uppercase tracking-wider shadow-xs border border-white">
+                    AI
+                  </span>
+                </div>
+
+                {/* Title & Short Khmer Description */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <h3 className="text-[13.5px] sm:text-[14.5px] font-extrabold text-[#14532d] leading-tight">
+                      ជំនួយការ AI សុខភាព និងអាហារូបត្ថម្ភ
+                    </h3>
+                    <span className="text-[9.5px] font-extrabold text-emerald-700 bg-emerald-100/90 border border-emerald-300/70 px-1.5 py-0.5 rounded-md uppercase font-sans">
+                      AI Health Assistant
+                    </span>
                   </div>
-                </button>
-              );
-            })}
+                  <p className="text-[11px] sm:text-[11.5px] font-bold text-slate-700 leading-snug mt-0.5">
+                    {isKm
+                      ? 'ពិគ្រោះបញ្ហាសុខភាព ណែនាំម្ហូបសុខភាព និងអាហារូបត្ថម្ភប្រចាំថ្ងៃដោយឥតគិតថ្លៃ'
+                      : isZh
+                      ? '免费咨询健康症状、营养饮食建议与柬埔寨健康食谱（支持连续追问）'
+                      : 'ពិគ្រោះបញ្ហាសុខភាព និងអាហារូបត្ថម្ភ • Ask health, symptom & nutrition questions anytime'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Prominent "Ask AI About Health" CTA Button */}
+              <div className="relative z-10 mt-2.5 flex items-center justify-between gap-2 px-3.5 py-2 rounded-xl bg-gradient-to-r from-[#15803d] via-[#16a34a] to-[#2e7d32] group-hover:brightness-105 text-white shadow-sm transition">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <Sparkles className="w-4 h-4 text-amber-300 fill-amber-300 shrink-0" />
+                  <span className="text-xs sm:text-[13px] font-extrabold tracking-wide truncate">
+                    {isKm
+                      ? 'សួរ AI អំពីសុខភាព (Ask AI About Health)'
+                      : isZh
+                      ? '向 AI 咨询健康 (Ask AI About Health)'
+                      : 'Ask AI About Health (សួរ AI អំពីសុខភាព)'}
+                  </span>
+                </div>
+                <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center shrink-0 group-hover:translate-x-0.5 transition-transform">
+                  <ArrowRight className="w-3.5 h-3.5 stroke-[2.8] text-white" />
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* ===================================================================

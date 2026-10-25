@@ -70,6 +70,7 @@ const MainScreen: React.FC = () => {
     isTrendingFoodDetailModalOpen,
     isAiCheckInModalOpen,
     isAiFoodDiscoveryModalOpen,
+    setIsAiFoodDiscoveryModalOpen,
     isRestaurantCheckInModalOpen,
     isUpgradeVipModalOpen,
     isSupportTicketModalOpen,
@@ -132,10 +133,13 @@ const MainScreen: React.FC = () => {
           } else if (targetSection === 'nearby') {
             setActiveTab('home');
             setIsNearMeModalOpen(true);
+          } else if (targetSection === 'ai_health') {
+            setActiveTab('home');
+            setIsAiFoodDiscoveryModalOpen(true);
           } else {
             setActiveTab('home');
           }
-          if (!currentUser) {
+          if (!currentUser && targetSection !== 'ai_health') {
             setIsAuthModalOpen(true);
           }
         }}
@@ -148,6 +152,8 @@ const MainScreen: React.FC = () => {
     return (
       <div className="flex-1 flex flex-col w-full min-h-screen relative overflow-y-auto no-scrollbar bg-slate-950 items-center justify-center p-3 sm:p-4">
         <AuthModal isMandatoryGate={true} />
+        {isAiFoodDiscoveryModalOpen && <AiFoodDiscoveryModal />}
+        {selectedFood && <FoodDetailModal />}
         {isExitModalOpen && <ExitConfirmModal />}
         {isAdminLoginModalOpen && <AdminLoginModal />}
         {toast && <Toast />}

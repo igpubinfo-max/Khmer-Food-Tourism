@@ -49,7 +49,7 @@ jobs:
           mkdir -p android/app/src/main/assets/public
           cp -rf dist/* android/app/src/main/assets/public/
 
-      - name: 8. Build Signed Android Release APK & Google Play Store AAB (V1/V2/V3 Play Protect Verified)
+      - name: 8. Build Signed Android Release APK Only (V1/V2/V3 Play Protect Verified)
         run: |
           if [ ! -f android/app/khmerfood-upload-key.jks ]; then
             keytool -genkeypair -v -noprompt \
@@ -62,12 +62,12 @@ jobs:
           fi
           cd android
           chmod +x ./gradlew
-          ./gradlew assembleRelease bundleRelease --no-daemon -x lint -x lintVitalRelease || ./gradlew assembleDebug --no-daemon
+          ./gradlew assembleRelease --no-daemon -x lint -x lintVitalRelease || ./gradlew assembleDebug --no-daemon
 
-      - name: 9. Locate and Rename Signed APK & Play Store AAB Files
+      - name: 9. Locate and Rename Signed APK File
         run: |
-          echo "=== SEARCHING FOR GENERATED APK & AAB FILES ==="
-          find . -name "*.apk" -o -name "*.aab" -ls
+          echo "=== SEARCHING FOR GENERATED APK FILE ==="
+          find . -name "*.apk" -ls
           mkdir -p android/app/build/outputs/apk/debug
           REL_APK=$(find android/app/build/outputs/apk/release -name "*.apk" 2>/dev/null | head -n 1)
           if [ -n "$REL_APK" ] && [ -f "$REL_APK" ]; then
@@ -75,39 +75,33 @@ jobs:
           elif [ -f android/app/build/outputs/apk/debug/app-debug.apk ]; then
             mv android/app/build/outputs/apk/debug/app-debug.apk android/app/build/outputs/apk/debug/KhmerFoodTourism-v2.1.0.apk
           fi
-          REL_AAB=$(find android/app/build/outputs/bundle/release -name "*.aab" 2>/dev/null | head -n 1)
-          if [ -n "$REL_AAB" ] && [ -f "$REL_AAB" ]; then
-            cp "$REL_AAB" android/app/build/outputs/apk/debug/KhmerFoodTourism-v2.1.0-PlayStore.aab
-          fi
           ls -la android/app/build/outputs/apk/debug/
 
-      - name: 10. Upload Android APK & AAB Artifacts
+      - name: 10. Upload Android APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Khmer-Food-Tourism-Release-Packages
           path: |
             android/app/build/outputs/apk/debug/*.apk
-            android/app/build/outputs/apk/debug/*.aab
 
-      - name: 11. Publish GitHub Release with APK & Play Store AAB
+      - name: 11. Publish GitHub Release with Signed APK
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
           tag_name: v2.1.0
-          name: "Khmer Food & Tourism v2.1.0 (Build 79: AI Health & Nutrition Assistant + Redesigned Welcome Screen + Dynamic Daily Places)"
+          name: "Khmer Food & Tourism v2.1.0 (Build 81: Multi-Turn Trilingual AI Health Assistant + Welcome Screen Update + Verified 52 Restaurants)"
           make_latest: true
           body: |
             ### 🇰🇭 កម្មវិធីទូរស័ព្ទដៃ អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism Mobile App)
             
-            **កំណែថ្មី v2.1.0 (Build 79):**
-            - 🥗 **១. មុខងារថ្មី៖ ជំនួយការ AI សុខភាព និងអាហារូបត្ថម្ភ (New AI Health & Nutrition Assistant)៖**
-              - ជំនួសមុខងារស្កេនម្ហូបចាស់ ដោយប្រព័ន្ធ AI ណែនាំអាហារសុខភាពខ្មែរ រៀបចំផែនការអាហារសុខភាព ៣ ពេលប្រចាំថ្ងៃ (អាហារពេលព្រឹក ថ្ងៃត្រង់ ល្ងាច) គណនា BMI/កាឡូរី/បរិមាណទឹក វិភាគព័ត៌មានអាហារូបត្ថម្ភលើមុខម្ហូបខ្មែរទាំង ២០០ មុខ និងឆ្លើយសំណួរអំពីសុខភាព-អាហារូបត្ថម្ភជាភាសាខ្មែរ និងអង់គ្លេស (ចំណាយ API $0)។
-            - 🏛️ **២. រចនាបថផ្ទាំងស្វាគមន៍ថ្មី (Redesigned Premium Cambodian Welcome Screen)៖**
-              - រចនាផ្ទាំងស្វាគមន៍ថ្មីតាមគំរូស្តង់ដារ រួមមានរូបភាពម្ហូបខ្មែរ និងប្រាសាទអង្គរវត្ត កាតមុខងារសំខាន់ៗទាំង ៤ (`ស្វែងរក ម្ហូប`, `ហាង និងអាជីវកម្ម`, `ទីកន្លែងទេសចរណ៍`, `ផែនទីជិតខ្ញុំ`) និងប៊ូតុង `ចាប់ផ្តើមប្រើកម្មវិធី / GET STARTED`។
-            - ✨ **៣. ប្រព័ន្ធ «កន្លែងថ្មីប្រចាំថ្ងៃ» និង «ការជូនដំណឹង» ឆ្លាតវៃថ្មី (Upgraded Dynamic Daily New Places & 12+ Smart Notifications)៖**
-              - បន្ថែមប្រភេទ របារស្វែងរក តម្រងខេត្ត/ក្រុង ការណែនាំតាមទីតាំងជិតអ្នក (`📍 នៅជិតខ្ញុំ / Near Me`) និងការកំណត់ចំណូលចិត្តការជូនដំណឹងផ្ទាល់ខ្លួន។
+            **កំណែថ្មី v2.1.0 (Build 81 — APK Only):**
+            - 🩺 **១. ជំនួយការ AI សុខភាព និងអាហារូបត្ថម្ភ ៣ ភាសា & សន្ទនាបន្តគ្នាច្រើនដង (Multi-Turn Trilingual AI Health Assistant)៖**
+              - គាំទ្រការសួរសំណួរបន្តគ្នា ១០+ ដងក្នុងមួយការសន្ទនា (Context-Aware Follow-Up) ជាភាសាខ្មែរ អង់គ្លេស និងចិនសាមញ្ញ រួមទាំងប្រព័ន្ធប្រកាសអាសន្នវេជ្ជសាស្ត្រ ៤ កម្រិត (Emergency 119, Urgent, Medication Safety, High-Risk Care)។
+            - 🏛️ **២. ផ្ទាំងស្វាគមន៍ថ្មី (Welcome Screen Logo & AI Health Card)៖**
+              - ពង្រីករូបសញ្ញាផ្លូវការឱ្យធំច្បាស់ល្អ និងបន្ថែមកាត «ជំនួយការ AI សុខភាព និងអាហារូបត្ថម្ភ (សួរ AI អំពីសុខភាព)» នៅខាងក្រោមកាតទីកន្លែងទេសចរណ៍ និងផែនទីជិតខ្ញុំ។
+            - 🏪 **៣. ម៉ឺនុយភោជនីយដ្ឋាន និងហាងពិតប្រាកដទាំង ៥២ (Verified 52 Genuine Restaurants)៖**
+              - បំបែកទិន្នន័យភោជនីយដ្ឋានចេញពីមុខម្ហូប លុបទិន្នន័យស្ទួន និងប្រើប្រាស់រូបភាពហាងពិតប្រាកដទាំង ៥២ កន្លែងទូទាំង ២៥ រាជធានី-ខេត្ត។
           draft: false
           prerelease: false
           files: |
             android/app/build/outputs/apk/debug/*.apk
-            android/app/build/outputs/apk/debug/*.aab

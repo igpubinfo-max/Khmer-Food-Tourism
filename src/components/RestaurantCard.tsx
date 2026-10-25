@@ -68,11 +68,20 @@ const RestaurantCardInner: React.FC<RestaurantCardProps> = ({ restaurant }) => {
       {/* Cover image */}
       <div className="relative aspect-16/9 w-full overflow-hidden bg-slate-100 dark:bg-slate-700">
         <img 
-          src={restaurant.photoUrl} 
+          src={
+            restaurant.photoUrl && !restaurant.photoUrl.startsWith('/foods/')
+              ? restaurant.photoUrl
+              : restaurant.profileImage && !restaurant.profileImage.startsWith('/foods/')
+              ? restaurant.profileImage
+              : '/Shop/rest-1.jpg'
+          } 
           alt={loc.name}
           className="w-full h-full object-cover"
           loading="lazy"
           decoding="async"
+          onError={(e) => {
+            (e.currentTarget as HTMLImageElement).src = '/Shop/rest-1.jpg';
+          }}
         />
 
         {/* Province pill & Owner/Admin shortcut */}
