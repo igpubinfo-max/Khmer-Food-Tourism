@@ -23,13 +23,15 @@ try {
   console.warn('Version migration warning:', e);
 }
 
-// 1. Pre-boot cache sanitation: Purge invalid or corrupt values
+// 1. Pre-boot cache sanitation: Purge invalid or corrupt values and clear legacy VIP settings caches
 try {
+  localStorage.removeItem('kft_settings_v3');
+  localStorage.removeItem('kft_settings_v4');
   const keysToCheck = [
     'kft_current_user_v4', 'kft_users_v4', 'kft_foods_100_v1', 'kft_foods_100_v2',
     'kft_restaurants_membership_v2', 'kft_destinations_100_v1',
     'kft_posts_v4', 'kft_posts_v3', 'kft_bookmarks_v4', 'kft_bookmarks_v3',
-    'kft_settings_v4', 'kft_settings_v3', 'kft_transactions_v4'
+    'kft_settings_v5', 'kft_transactions_v4'
   ];
   keysToCheck.forEach(key => {
     const raw = localStorage.getItem(key);

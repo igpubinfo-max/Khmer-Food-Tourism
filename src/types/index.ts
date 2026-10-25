@@ -1,6 +1,6 @@
 export const APP_VERSION = 'v2.1.0';
 export const APP_VERSION_NAME = '2.1.0';
-export const APP_BUILD_CODE = 76;
+export const APP_BUILD_CODE = 77;
 export const APP_RELEASE_DATE = '2026-10-25';
 
 export interface GoogleMapsPlaceMetadata {
@@ -34,10 +34,10 @@ export interface DeletedUserRecord {
   snapshotUser?: User;
 }
 
-export const VIP_ANNUAL_PRICE_USD = 4.99;
+export const VIP_ANNUAL_PRICE_USD = 24.99;
 export const VIP_SUBSCRIPTION_DAYS = 90;
-export const VIP_QUARTERLY_PRICE_USD = 2.99;
-export const VIP_QUARTERLY_DAYS = 10;
+export const VIP_QUARTERLY_PRICE_USD = 9.99;
+export const VIP_QUARTERLY_DAYS = 30;
 export const DEFAULT_ADDITIONAL_STORE_FEE_USD = 10.0;
 export const DEFAULT_INCLUDED_FREE_STORES = 1;
 
@@ -55,23 +55,23 @@ export interface VipPlanConfig {
 export const VIP_PLANS: Record<'quarterly' | 'annual', VipPlanConfig> = {
   quarterly: {
     id: 'quarterly',
-    nameEn: 'VIP 10 Days',
-    nameKh: 'កញ្ចប់ VIP 10 ថ្ងៃ',
-    priceUsd: 2.99,
-    durationDays: 10,
-    labelEn: 'VIP 10 Days ($2.99 / 10 days)',
-    labelKh: 'VIP 10 ថ្ងៃ ($2.99 / 10 ថ្ងៃ)',
-    priceKhrDisplay: '១២,២០០ រៀល'
+    nameEn: 'VIP 30 Days',
+    nameKh: 'VIP 30 ថ្ងៃ',
+    priceUsd: 9.99,
+    durationDays: 30,
+    labelEn: 'VIP 30 Days ($9.99 / 30 days)',
+    labelKh: 'VIP 30 ថ្ងៃ ($9.99 / 30 ថ្ងៃ)',
+    priceKhrDisplay: '៤០,៩៥៩ រៀល'
   },
   annual: {
     id: 'annual',
     nameEn: 'VIP 90 Days',
-    nameKh: 'កញ្ចប់ VIP 90 ថ្ងៃ',
-    priceUsd: 4.99,
+    nameKh: 'VIP 90 ថ្ងៃ',
+    priceUsd: 24.99,
     durationDays: 90,
-    labelEn: 'VIP 90 Days ($4.99 / 90 days)',
-    labelKh: 'VIP 90 ថ្ងៃ ($4.99 / 90 ថ្ងៃ)',
-    priceKhrDisplay: '២០,៤០០ រៀល'
+    labelEn: 'VIP 90 Days ($24.99 / 90 days)',
+    labelKh: 'VIP 90 ថ្ងៃ ($24.99 / 90 ថ្ងៃ)',
+    priceKhrDisplay: '១០២,៤៥៩ រៀល'
   }
 };
 
@@ -1262,7 +1262,9 @@ export interface SupportTicket {
 export const getStoredAppSettingsFallback = (): Partial<AppSettings> => {
   try {
     if (typeof localStorage !== 'undefined') {
-      const raw = localStorage.getItem('kft_settings_v4');
+      localStorage.removeItem('kft_settings_v3');
+      localStorage.removeItem('kft_settings_v4');
+      const raw = localStorage.getItem('kft_settings_v5');
       if (raw) {
         return JSON.parse(raw);
       }
@@ -1274,32 +1276,36 @@ export const getStoredAppSettingsFallback = (): Partial<AppSettings> => {
 };
 
 /**
- * Resolve dynamic VIP plans from centralized Admin settings (with safe defaults: 10 days @ $2.99, 90 days @ $4.99)
+ * Resolve dynamic VIP plans from centralized Admin settings (with safe defaults: 30 days @ $9.99, 90 days @ $24.99)
  */
 export const getDynamicVipPlans = (
   settings?: Partial<AppSettings> | null
 ): Record<'quarterly' | 'annual', VipPlanConfig> => {
   const s = settings || getStoredAppSettingsFallback();
+  const isObsoleteLegacyDefault =
+    Number(s.settingsVersion || 0) < 13 &&
+    (Number(s.vipShortPriceUsd) === 2.99 || Number(s.vipLongPriceUsd) === 4.99);
+
   const shortDays =
-    typeof s.vipShortDurationDays === 'number' && s.vipShortDurationDays >= 1
+    !isObsoleteLegacyDefault && typeof s.vipShortDurationDays === 'number' && s.vipShortDurationDays >= 1
       ? Math.round(s.vipShortDurationDays)
       : VIP_QUARTERLY_DAYS;
   const shortPrice =
-    typeof s.vipShortPriceUsd === 'number' && s.vipShortPriceUsd > 0
+    !isObsoleteLegacyDefault && typeof s.vipShortPriceUsd === 'number' && s.vipShortPriceUsd > 0
       ? Math.round(s.vipShortPriceUsd * 100) / 100
       : VIP_QUARTERLY_PRICE_USD;
-  const shortNameKh = (s.vipShortNameKh || '').trim() || `កញ្ចប់ VIP ${shortDays} ថ្ងៃ`;
+  const shortNameKh = (s.vipShortNameKh || '').trim() || `VIP ${shortDays} ថ្ងៃ`;
   const shortNameEn = (s.vipShortNameEn || '').trim() || `VIP ${shortDays} Days`;
 
   const longDays =
-    typeof s.vipLongDurationDays === 'number' && s.vipLongDurationDays >= 1
+    !isObsoleteLegacyDefault && typeof s.vipLongDurationDays === 'number' && s.vipLongDurationDays >= 1
       ? Math.round(s.vipLongDurationDays)
       : VIP_SUBSCRIPTION_DAYS;
   const longPrice =
-    typeof s.vipLongPriceUsd === 'number' && s.vipLongPriceUsd > 0
+    !isObsoleteLegacyDefault && typeof s.vipLongPriceUsd === 'number' && s.vipLongPriceUsd > 0
       ? Math.round(s.vipLongPriceUsd * 100) / 100
       : VIP_ANNUAL_PRICE_USD;
-  const longNameKh = (s.vipLongNameKh || '').trim() || `កញ្ចប់ VIP ${longDays} ថ្ងៃ`;
+  const longNameKh = (s.vipLongNameKh || '').trim() || `VIP ${longDays} ថ្ងៃ`;
   const longNameEn = (s.vipLongNameEn || '').trim() || `VIP ${longDays} Days`;
 
   return {

@@ -29,11 +29,14 @@ export const initialAppSettings: AppSettings = {
   vipShortNameEn: 'VIP 30 Days',
   vipLongDurationDays: 90,
   vipLongPriceUsd: 24.99,
-  vipLongNameKh: 'កញ្ចប់ VIP 90 ថ្ងៃ',
+  vipLongNameKh: 'VIP 90 ថ្ងៃ',
   vipLongNameEn: 'VIP 90 Days',
   additionalStoreFeeUsd: 10.0,
   includedFreeStoresPerVip: 1,
   vipBenefitsList: TEN_VIP_BENEFITS,
+  settingsVersion: 14,
+  settingsUpdatedAt: '2026-10-25T05:15:00.000Z',
+  settingsUpdatedBy: 'រដ្ឋបាលប្រព័ន្ធ (Chea Savuth / Admin)',
 };
 
 // 100+ Authentic Khmer Dishes

@@ -126,17 +126,17 @@ export const AdminDashboard: React.FC = () => {
   const [bankName, setBankName] = useState(appSettings.supportBankName);
   const [accountName, setAccountName] = useState(appSettings.supportAccountName);
   const [supportMessageKh, setSupportMessageKh] = useState(appSettings.supportMessageKh);
-  const [promotionalFeeUsd, setPromotionalFeeUsd] = useState(appSettings.promotionalFeeUsd || 2.99);
+  const [promotionalFeeUsd, setPromotionalFeeUsd] = useState(appSettings.promotionalFeeUsd || 9.99);
   const [promotionPeriodKh, setPromotionPeriodKh] = useState(appSettings.promotionPeriodKh || '');
   const [newAdminPass, setNewAdminPass] = useState('');
 
   // Dynamic VIP Membership & Store Fee Admin Settings States
-  const [vipShortDurationDays, setVipShortDurationDays] = useState<number>(appSettings.vipShortDurationDays ?? 10);
-  const [vipShortPriceUsd, setVipShortPriceUsd] = useState<number>(appSettings.vipShortPriceUsd ?? 2.99);
-  const [vipShortNameKh, setVipShortNameKh] = useState<string>(appSettings.vipShortNameKh || `VIP ${appSettings.vipShortDurationDays ?? 10} ថ្ងៃ`);
-  const [vipShortNameEn, setVipShortNameEn] = useState<string>(appSettings.vipShortNameEn || `VIP ${appSettings.vipShortDurationDays ?? 10} Days`);
+  const [vipShortDurationDays, setVipShortDurationDays] = useState<number>(appSettings.vipShortDurationDays ?? 30);
+  const [vipShortPriceUsd, setVipShortPriceUsd] = useState<number>(appSettings.vipShortPriceUsd ?? 9.99);
+  const [vipShortNameKh, setVipShortNameKh] = useState<string>(appSettings.vipShortNameKh || `VIP ${appSettings.vipShortDurationDays ?? 30} ថ្ងៃ`);
+  const [vipShortNameEn, setVipShortNameEn] = useState<string>(appSettings.vipShortNameEn || `VIP ${appSettings.vipShortDurationDays ?? 30} Days`);
   const [vipLongDurationDays, setVipLongDurationDays] = useState<number>(appSettings.vipLongDurationDays ?? 90);
-  const [vipLongPriceUsd, setVipLongPriceUsd] = useState<number>(appSettings.vipLongPriceUsd ?? 4.99);
+  const [vipLongPriceUsd, setVipLongPriceUsd] = useState<number>(appSettings.vipLongPriceUsd ?? 24.99);
   const [vipLongNameKh, setVipLongNameKh] = useState<string>(appSettings.vipLongNameKh || `VIP ${appSettings.vipLongDurationDays ?? 90} ថ្ងៃ`);
   const [vipLongNameEn, setVipLongNameEn] = useState<string>(appSettings.vipLongNameEn || `VIP ${appSettings.vipLongDurationDays ?? 90} Days`);
   const [additionalStoreFeeUsd, setAdditionalStoreFeeUsd] = useState<number>(getAdditionalStoreFeeUsd(appSettings));
@@ -151,14 +151,14 @@ export const AdminDashboard: React.FC = () => {
     setBankName(appSettings.supportBankName);
     setAccountName(appSettings.supportAccountName);
     setSupportMessageKh(appSettings.supportMessageKh);
-    setPromotionalFeeUsd(appSettings.promotionalFeeUsd || 2.99);
+    setPromotionalFeeUsd(appSettings.promotionalFeeUsd || 9.99);
     setPromotionPeriodKh(appSettings.promotionPeriodKh || '');
-    setVipShortDurationDays(appSettings.vipShortDurationDays ?? 10);
-    setVipShortPriceUsd(appSettings.vipShortPriceUsd ?? 2.99);
-    setVipShortNameKh(appSettings.vipShortNameKh || `VIP ${appSettings.vipShortDurationDays ?? 10} ថ្ងៃ`);
-    setVipShortNameEn(appSettings.vipShortNameEn || `VIP ${appSettings.vipShortDurationDays ?? 10} Days`);
+    setVipShortDurationDays(appSettings.vipShortDurationDays ?? 30);
+    setVipShortPriceUsd(appSettings.vipShortPriceUsd ?? 9.99);
+    setVipShortNameKh(appSettings.vipShortNameKh || `VIP ${appSettings.vipShortDurationDays ?? 30} ថ្ងៃ`);
+    setVipShortNameEn(appSettings.vipShortNameEn || `VIP ${appSettings.vipShortDurationDays ?? 30} Days`);
     setVipLongDurationDays(appSettings.vipLongDurationDays ?? 90);
-    setVipLongPriceUsd(appSettings.vipLongPriceUsd ?? 4.99);
+    setVipLongPriceUsd(appSettings.vipLongPriceUsd ?? 24.99);
     setVipLongNameKh(appSettings.vipLongNameKh || `VIP ${appSettings.vipLongDurationDays ?? 90} ថ្ងៃ`);
     setVipLongNameEn(appSettings.vipLongNameEn || `VIP ${appSettings.vipLongDurationDays ?? 90} Days`);
     setAdditionalStoreFeeUsd(getAdditionalStoreFeeUsd(appSettings));
@@ -287,12 +287,12 @@ export const AdminDashboard: React.FC = () => {
       supportMessageKh,
       promotionalFeeUsd: Number(promotionalFeeUsd),
       promotionPeriodKh,
-      vipShortDurationDays: Math.max(1, Math.round(Number(vipShortDurationDays) || 10)),
-      vipShortPriceUsd: Math.max(0.01, Number(vipShortPriceUsd) || 2.99),
-      vipShortNameKh: vipShortNameKh.trim() || `VIP ${Math.max(1, Math.round(Number(vipShortDurationDays) || 10))} ថ្ងៃ`,
-      vipShortNameEn: vipShortNameEn.trim() || `VIP ${Math.max(1, Math.round(Number(vipShortDurationDays) || 10))} Days`,
+      vipShortDurationDays: Math.max(1, Math.round(Number(vipShortDurationDays) || 30)),
+      vipShortPriceUsd: Math.max(0.01, Number(vipShortPriceUsd) || 9.99),
+      vipShortNameKh: vipShortNameKh.trim() || `VIP ${Math.max(1, Math.round(Number(vipShortDurationDays) || 30))} ថ្ងៃ`,
+      vipShortNameEn: vipShortNameEn.trim() || `VIP ${Math.max(1, Math.round(Number(vipShortDurationDays) || 30))} Days`,
       vipLongDurationDays: Math.max(1, Math.round(Number(vipLongDurationDays) || 90)),
-      vipLongPriceUsd: Math.max(0.01, Number(vipLongPriceUsd) || 4.99),
+      vipLongPriceUsd: Math.max(0.01, Number(vipLongPriceUsd) || 24.99),
       vipLongNameKh: vipLongNameKh.trim() || `VIP ${Math.max(1, Math.round(Number(vipLongDurationDays) || 90))} ថ្ងៃ`,
       vipLongNameEn: vipLongNameEn.trim() || `VIP ${Math.max(1, Math.round(Number(vipLongDurationDays) || 90))} Days`,
       additionalStoreFeeUsd: Math.max(0, Number(additionalStoreFeeUsd)),
@@ -755,8 +755,8 @@ export const AdminDashboard: React.FC = () => {
                   </h3>
                   <p className="text-stone-500 font-khmer text-xs">
                     {isKm
-                      ? `ពិនិត្យសារបញ្ហាការបង់ប្រាក់ ABA រូបវិក្កយបត្រ ឆ្លើយតបទៅអ្នកប្រើប្រាស់ផ្ទាល់ និងអនុម័តបើក VIP (${appSettings.vipShortDurationDays ?? 10} ថ្ងៃ $${Number(appSettings.vipShortPriceUsd ?? 2.99).toFixed(2)} ឬ ${appSettings.vipLongDurationDays ?? 90} ថ្ងៃ $${Number(appSettings.vipLongPriceUsd ?? 4.99).toFixed(2)})`
-                      : `Inspect user ABA payment issues, receipts, reply in-app, and approve & activate VIP (${appSettings.vipShortDurationDays ?? 10} Days $${Number(appSettings.vipShortPriceUsd ?? 2.99).toFixed(2)} or ${appSettings.vipLongDurationDays ?? 90} Days $${Number(appSettings.vipLongPriceUsd ?? 4.99).toFixed(2)})`}
+                      ? `ពិនិត្យសារបញ្ហាការបង់ប្រាក់ ABA រូបវិក្កយបត្រ ឆ្លើយតបទៅអ្នកប្រើប្រាស់ផ្ទាល់ និងអនុម័តបើក VIP (${appSettings.vipShortDurationDays ?? 30} ថ្ងៃ $${Number(appSettings.vipShortPriceUsd ?? 9.99).toFixed(2)} ឬ ${appSettings.vipLongDurationDays ?? 90} ថ្ងៃ $${Number(appSettings.vipLongPriceUsd ?? 24.99).toFixed(2)})`
+                      : `Inspect user ABA payment issues, receipts, reply in-app, and approve & activate VIP (${appSettings.vipShortDurationDays ?? 30} Days $${Number(appSettings.vipShortPriceUsd ?? 9.99).toFixed(2)} or ${appSettings.vipLongDurationDays ?? 90} Days $${Number(appSettings.vipLongPriceUsd ?? 24.99).toFixed(2)})`}
                   </p>
                 </div>
 

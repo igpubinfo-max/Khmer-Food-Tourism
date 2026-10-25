@@ -12,10 +12,10 @@ import {
   DEFAULT_ADDITIONAL_STORE_FEE_USD,
 } from '../types';
 
-export const VIP_ANNUAL_PRICE_USD = 4.99;
+export const VIP_ANNUAL_PRICE_USD = 24.99;
 export const VIP_SUBSCRIPTION_DAYS = 90;
-export const VIP_QUARTERLY_PRICE_USD = 2.99;
-export const VIP_QUARTERLY_DAYS = 10;
+export const VIP_QUARTERLY_PRICE_USD = 9.99;
+export const VIP_QUARTERLY_DAYS = 30;
 export const ADDITIONAL_STORE_FEE_USD = DEFAULT_ADDITIONAL_STORE_FEE_USD;
 export const GOOGLE_PLAY_PRODUCT_ID = 'com.khmerfoodtourism.subscription.vip.90days';
 export { VIP_PLANS, getDynamicVipPlans, getAdditionalStoreFeeUsd };

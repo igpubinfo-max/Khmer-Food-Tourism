@@ -761,7 +761,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         shareClicks: typeof r.analytics.shareClicks === 'number' ? r.analytics.shareClicks : (isSeed ? 9 : 0),
       } : (isSeed ? { views: 65, phoneClicks: 14, mapClicks: 18, shareClicks: 9 } : { views: 0, phoneClicks: 0, mapClicks: 0, shareClicks: 0 }),
       paymentStatus: r.paymentStatus || (membershipTier === 'premium' ? 'verified' : 'unpaid'),
-      promotionalPrice: typeof r.promotionalPrice === 'number' ? r.promotionalPrice : 2.99,
+      promotionalPrice: typeof r.promotionalPrice === 'number' ? r.promotionalPrice : 9.99,
       isPromoted,
       ownerId: r.ownerId,
       ownerName: r.ownerName,
@@ -1207,7 +1207,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [appSettings, setAppSettings] = useState<AppSettings>(() => {
     try {
       localStorage.removeItem('kft_settings_v3');
-      const saved = localStorage.getItem('kft_settings_v4');
+      localStorage.removeItem('kft_settings_v4');
+      const saved = localStorage.getItem('kft_settings_v5');
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
         if (parsed && typeof parsed === 'object') {
@@ -1215,7 +1216,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
       }
     } catch (e) {
-      console.warn('Failed to parse kft_settings_v4', e);
+      console.warn('Failed to parse kft_settings_v5', e);
     }
     return normalizeAuthoritativeAppSettings(initialAppSettings);
   });
@@ -2255,7 +2256,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     try {
       if (appSettings) {
-        localStorage.setItem('kft_settings_v4', JSON.stringify(appSettings));
+        localStorage.removeItem('kft_settings_v3');
+        localStorage.removeItem('kft_settings_v4');
+        localStorage.setItem('kft_settings_v5', JSON.stringify(appSettings));
       }
     } catch (e) {
       console.warn('Storage sync failed for appSettings:', e);
@@ -2334,7 +2337,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return task;
   };
 
-  // Immediately refresh authoritative VIP settings whenever any VIP, Checkout, Support, Store, or Profile view opens
+  // Immediately refresh authoritative VIP settings whenever any VIP, Checkout, Support, Store, or Profile view opens or when account switches
   useEffect(() => {
     if (
       isUpgradeVipModalOpen ||
@@ -2343,7 +2346,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       isAddRestaurantModalOpen ||
       isManageMenuModalOpen ||
       isAdminOpen ||
-      activeTab === 'profile'
+      activeTab === 'profile' ||
+      Boolean(currentUser?.id)
     ) {
       refreshAppSettingsFromServer(true);
     }
@@ -2355,6 +2359,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     isManageMenuModalOpen,
     isAdminOpen,
     activeTab,
+    currentUser?.id,
   ]);
 
   // Listen for cross-tab / BroadcastChannel / window focus / periodic live updates to VIP pricing
@@ -2368,7 +2373,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
 
     const handleStorageEvent = (e: StorageEvent) => {
-      if (e.key === 'kft_settings_v4' && e.newValue) {
+      if (e.key === 'kft_settings_v5' && e.newValue) {
         try {
           const parsed = JSON.parse(e.newValue);
           if (parsed && typeof parsed === 'object') {
@@ -2481,7 +2486,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             appSettingsRef.current = nextSettings;
             try {
               localStorage.removeItem('kft_settings_v3');
-              localStorage.setItem('kft_settings_v4', JSON.stringify(nextSettings));
+              localStorage.removeItem('kft_settings_v4');
+              localStorage.setItem('kft_settings_v5', JSON.stringify(nextSettings));
             } catch {}
             return nextSettings;
           });
@@ -3787,16 +3793,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     const sanitized: Partial<AppSettings> = { ...newSettings };
     if (sanitized.vipShortDurationDays !== undefined) {
-      sanitized.vipShortDurationDays = Math.max(1, Math.round(Number(sanitized.vipShortDurationDays) || 10));
+      sanitized.vipShortDurationDays = Math.max(1, Math.round(Number(sanitized.vipShortDurationDays) || 30));
     }
     if (sanitized.vipShortPriceUsd !== undefined) {
-      sanitized.vipShortPriceUsd = Math.max(0.5, Math.round((Number(sanitized.vipShortPriceUsd) || 2.99) * 100) / 100);
+      sanitized.vipShortPriceUsd = Math.max(0.5, Math.round((Number(sanitized.vipShortPriceUsd) || 9.99) * 100) / 100);
     }
     if (sanitized.vipLongDurationDays !== undefined) {
       sanitized.vipLongDurationDays = Math.max(1, Math.round(Number(sanitized.vipLongDurationDays) || 90));
     }
     if (sanitized.vipLongPriceUsd !== undefined) {
-      sanitized.vipLongPriceUsd = Math.max(0.5, Math.round((Number(sanitized.vipLongPriceUsd) || 4.99) * 100) / 100);
+      sanitized.vipLongPriceUsd = Math.max(0.5, Math.round((Number(sanitized.vipLongPriceUsd) || 24.99) * 100) / 100);
     }
     if (sanitized.additionalStoreFeeUsd !== undefined) {
       sanitized.additionalStoreFeeUsd = Math.max(0.5, Math.round((Number(sanitized.additionalStoreFeeUsd) || 10.0) * 100) / 100);
@@ -3806,7 +3812,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     const nowIso = new Date().toISOString();
-    const nextVersion = Math.max(1, Number(appSettingsRef.current.settingsVersion || 1) + 1);
+    const nextVersion = Math.max(14, Number(appSettingsRef.current.settingsVersion || 14) + 1);
     const mergedCandidate: AppSettings = normalizeAuthoritativeAppSettings(
       {
         ...appSettingsRef.current,
@@ -3840,8 +3846,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setSettingsSyncError(null);
 
     try {
-      localStorage.setItem('kft_settings_v4', JSON.stringify(mergedCandidate));
       localStorage.removeItem('kft_settings_v3');
+      localStorage.removeItem('kft_settings_v4');
+      localStorage.setItem('kft_settings_v5', JSON.stringify(mergedCandidate));
     } catch (e) {
       console.warn('Failed to persist updated AppSettings locally:', e);
     }

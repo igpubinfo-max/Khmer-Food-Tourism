@@ -75,7 +75,7 @@ export const UpgradeVipModal: React.FC = () => {
         titleEn: `${shortPlan.nameEn} ($${shortPlan.priceUsd.toFixed(2)} / ${shortPlan.durationDays} days)`,
         days: shortPlan.durationDays,
         priceUsd: shortPlan.priceUsd,
-        priceKhrApprox: shortPlan.priceKhrDisplay || '១២,២០០ រៀល',
+        priceKhrApprox: shortPlan.priceKhrDisplay || '៤០,៩៥៩ រៀល',
         isPopular: true,
       },
       {
@@ -84,7 +84,7 @@ export const UpgradeVipModal: React.FC = () => {
         titleEn: `${longPlan.nameEn} ($${longPlan.priceUsd.toFixed(2)} / ${longPlan.durationDays} days)`,
         days: longPlan.durationDays,
         priceUsd: longPlan.priceUsd,
-        priceKhrApprox: longPlan.priceKhrDisplay || '២០,៤០០ រៀល',
+        priceKhrApprox: longPlan.priceKhrDisplay || '១០២,៤៥៩ រៀល',
         isPopular: false,
       },
     ];
@@ -116,7 +116,7 @@ export const UpgradeVipModal: React.FC = () => {
   const [hasCopiedAccount, setHasCopiedAccount] = useState(false);
   const [qrCodeDataUrl] = useState<string>('/images/aba_qr_code_only.png');
   const [customTxnRef, setCustomTxnRef] = useState<string>(() => 
-    `ABA-KHQR-10D-${Date.now().toString(36).toUpperCase()}`
+    `ABA-KHQR-30D-${Date.now().toString(36).toUpperCase()}`
   );
   const [sessionExpiryTime, setSessionExpiryTime] = useState<number>(() => Date.now() + 15 * 60 * 1000);
 

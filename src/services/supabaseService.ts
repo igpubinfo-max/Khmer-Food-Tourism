@@ -276,21 +276,39 @@ export function normalizeAuthoritativeAppSettings(
   raw: Partial<AppSettings>,
   fallback?: Partial<AppSettings>
 ): AppSettings {
-  const merged = { ...(fallback || {}), ...(raw || {}) } as AppSettings;
+  const rawVer = Number(raw?.settingsVersion || 0);
+  const fbVer = Number(fallback?.settingsVersion || 0);
+  const rawTime = raw?.settingsUpdatedAt ? Date.parse(raw.settingsUpdatedAt) || 0 : 0;
+  const fbTime = fallback?.settingsUpdatedAt ? Date.parse(fallback.settingsUpdatedAt) || 0 : 0;
+
+  // Never allow a stale local cache with an older settingsVersion/timestamp to overwrite a newer seed or server payload
+  const preferFallback =
+    Boolean(fallback) &&
+    (fbVer > rawVer || (fbVer === rawVer && fbTime > rawTime));
+
+  const merged = (preferFallback
+    ? { ...(raw || {}), ...(fallback || {}) }
+    : { ...(fallback || {}), ...(raw || {}) }) as AppSettings;
+
+  // Automatically upgrade any legacy pre-v13 $2.99 / $4.99 cached settings to the authoritative $9.99 / $24.99 plans
+  const isObsoleteLegacyDefault =
+    Number(merged.settingsVersion || 0) < 13 &&
+    (Number(merged.vipShortPriceUsd) === 2.99 || Number(merged.vipLongPriceUsd) === 4.99);
+
   const shortDays =
-    typeof merged.vipShortDurationDays === 'number' && merged.vipShortDurationDays >= 1
+    !isObsoleteLegacyDefault && typeof merged.vipShortDurationDays === 'number' && merged.vipShortDurationDays >= 1
       ? Math.round(merged.vipShortDurationDays)
       : 30;
   const shortPrice =
-    typeof merged.vipShortPriceUsd === 'number' && merged.vipShortPriceUsd > 0
+    !isObsoleteLegacyDefault && typeof merged.vipShortPriceUsd === 'number' && merged.vipShortPriceUsd > 0
       ? Math.round(merged.vipShortPriceUsd * 100) / 100
       : 9.99;
   const longDays =
-    typeof merged.vipLongDurationDays === 'number' && merged.vipLongDurationDays >= 1
+    !isObsoleteLegacyDefault && typeof merged.vipLongDurationDays === 'number' && merged.vipLongDurationDays >= 1
       ? Math.round(merged.vipLongDurationDays)
       : 90;
   const longPrice =
-    typeof merged.vipLongPriceUsd === 'number' && merged.vipLongPriceUsd > 0
+    !isObsoleteLegacyDefault && typeof merged.vipLongPriceUsd === 'number' && merged.vipLongPriceUsd > 0
       ? Math.round(merged.vipLongPriceUsd * 100) / 100
       : 24.99;
   const extraStoreFee =
@@ -304,11 +322,12 @@ export function normalizeAuthoritativeAppSettings(
 
   const shortNameKh = (merged.vipShortNameKh || '').trim() || `VIP ${shortDays} ថ្ងៃ`;
   const shortNameEn = (merged.vipShortNameEn || '').trim() || `VIP ${shortDays} Days`;
-  const longNameKh = (merged.vipLongNameKh || '').trim() || `កញ្ចប់ VIP ${longDays} ថ្ងៃ`;
+  const longNameKh = (merged.vipLongNameKh || '').trim() || `VIP ${longDays} ថ្ងៃ`;
   const longNameEn = (merged.vipLongNameEn || '').trim() || `VIP ${longDays} Days`;
 
   return {
     ...merged,
+    settingsVersion: Math.max(14, Number(merged.settingsVersion || 0)),
     supportAccountName: merged.supportAccountName || 'CHEA KIMSENG',
     vipShortDurationDays: shortDays,
     vipShortPriceUsd: shortPrice,
@@ -352,21 +371,31 @@ export async function fetchAuthoritativeAppSettingsFromServer(
       pullCloudDocument<Partial<AppSettings>>('kft_cloud_app_settings_v1', timeoutMs),
     ]);
 
-    const chosenPayload = v2Payload || v1Payload;
+    let chosenPayload = v2Payload || v1Payload;
+    if (v2Payload && v1Payload) {
+      chosenPayload = normalizeAuthoritativeAppSettings(v2Payload, v1Payload);
+    }
     if (chosenPayload && typeof chosenPayload === 'object') {
       const normalized = normalizeAuthoritativeAppSettings(chosenPayload, fallback);
       if (
-        v2Payload &&
-        (!v1Payload ||
-          Number(v1Payload.vipShortPriceUsd) !== normalized.vipShortPriceUsd ||
-          Number(v1Payload.vipLongPriceUsd) !== normalized.vipLongPriceUsd)
+        !v2Payload ||
+        Number(v2Payload.vipShortPriceUsd) !== normalized.vipShortPriceUsd ||
+        Number(v2Payload.vipLongPriceUsd) !== normalized.vipLongPriceUsd
+      ) {
+        pushCloudDocument('kft_cloud_admin_vip_pricing_v2', normalized, 6000).catch(() => {});
+      }
+      if (
+        !v1Payload ||
+        Number(v1Payload.vipShortPriceUsd) !== normalized.vipShortPriceUsd ||
+        Number(v1Payload.vipLongPriceUsd) !== normalized.vipLongPriceUsd
       ) {
         pushCloudDocument('kft_cloud_app_settings_v1', normalized, 6000).catch(() => {});
       }
       try {
         if (typeof localStorage !== 'undefined') {
           localStorage.removeItem('kft_settings_v3');
-          localStorage.setItem('kft_settings_v4', JSON.stringify(normalized));
+          localStorage.removeItem('kft_settings_v4');
+          localStorage.setItem('kft_settings_v5', JSON.stringify(normalized));
         }
       } catch {
         // ignore localStorage errors
@@ -413,7 +442,8 @@ export async function saveAuthoritativeAppSettingsToServer(
   try {
     if (typeof localStorage !== 'undefined') {
       localStorage.removeItem('kft_settings_v3');
-      localStorage.setItem('kft_settings_v4', JSON.stringify(normalized));
+      localStorage.removeItem('kft_settings_v4');
+      localStorage.setItem('kft_settings_v5', JSON.stringify(normalized));
     }
   } catch {
     // ignore storage errors
@@ -1360,17 +1390,30 @@ export async function syncAllAppDataWithSupabase(localState: {
       delete mergedPaymentProofsVault[delId];
     }
 
-    // 5b. Resolve Centralized AppSettings: Server (`kft_cloud_app_settings_v1`) is the single source of truth!
+    // 5b. Resolve Centralized AppSettings: Server (`kft_cloud_admin_vip_pricing_v2` & `kft_cloud_app_settings_v1`) is the single source of truth!
     let mergedAppSettings: AppSettings | undefined = localState.appSettings;
-    if (cloudSettings) {
-      mergedAppSettings = normalizeAuthoritativeAppSettings(cloudSettings, localState.appSettings);
+    const authoritativeCloudSettings =
+      cloudSettingsV2 && cloudSettingsV1
+        ? normalizeAuthoritativeAppSettings(cloudSettingsV2, cloudSettingsV1)
+        : cloudSettings;
+    if (authoritativeCloudSettings) {
+      mergedAppSettings = normalizeAuthoritativeAppSettings(authoritativeCloudSettings, localState.appSettings);
       try {
         if (typeof localStorage !== 'undefined') {
           localStorage.removeItem('kft_settings_v3');
-          localStorage.setItem('kft_settings_v4', JSON.stringify(mergedAppSettings));
+          localStorage.removeItem('kft_settings_v4');
+          localStorage.setItem('kft_settings_v5', JSON.stringify(mergedAppSettings));
         }
       } catch {
         // ignore storage errors
+      }
+      // Self-heal kft_cloud_app_settings_v1 if an older client overwrote it with stale prices
+      if (
+        !cloudSettingsV1 ||
+        Number(cloudSettingsV1.vipShortPriceUsd) !== mergedAppSettings.vipShortPriceUsd ||
+        Number(cloudSettingsV1.vipLongPriceUsd) !== mergedAppSettings.vipLongPriceUsd
+      ) {
+        pushCloudDocument('kft_cloud_app_settings_v1', mergedAppSettings).catch(() => {});
       }
     } else if (localState.appSettings) {
       mergedAppSettings = normalizeAuthoritativeAppSettings(localState.appSettings);
