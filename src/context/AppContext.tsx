@@ -47,11 +47,15 @@ import {
   isSupabaseConfigured,
   syncAllAppDataWithSupabase,
   pushCloudDocument,
+  fetchAuthoritativeAppSettingsFromServer,
+  saveAuthoritativeAppSettingsToServer,
+  normalizeAuthoritativeAppSettings,
 } from '../services/supabaseService';
 import { authenticateAdminWithBiometric, setSavedAdminUsername } from '../services/biometricService';
 import {
   loadLocalMediaOverrides,
   saveLocalMediaOverrides,
+  isOverridePersistedInLocalStorage,
   recordPermanentFoodOverride,
   recordPermanentRestaurantOverride,
   removePermanentRestaurantOverride,
@@ -61,6 +65,7 @@ import {
   applyRestaurantOverrides,
   applyDestinationOverrides,
   applyTrendingFoodOverrides,
+  hydrateFromLocalIdbImmediate,
   hydrateAndSyncMediaOverrides,
 } from '../services/permanentMediaVaultService';
 import {
@@ -113,6 +118,9 @@ interface AppContextType {
   // App Settings & QR Codes
   appSettings: AppSettings;
   updateAppSettings: (newSettings: Partial<AppSettings>) => void;
+  isRefreshingSettings?: boolean;
+  settingsSyncError?: string | null;
+  refreshAppSettingsFromServer?: (silent?: boolean) => Promise<AppSettings | null>;
   
   // Data lists
   foods: FoodItem[];
@@ -328,7 +336,7 @@ interface AppContextType {
   }) => SupportTicket | null;
   replyToSupportTicket: (ticketId: string, message: string, attachmentUrl?: string) => boolean;
   updateSupportTicketStatus: (ticketId: string, status: SupportTicketStatus) => void;
-  approveVipFromSupportTicket: (ticketId: string, durationDays?: 30 | 90, adminNote?: string) => void;
+  approveVipFromSupportTicket: (ticketId: string, durationDays?: number, adminNote?: string) => void;
   markSupportTicketRead: (ticketId: string) => void;
 
   // AI Trending Food Discovery Section
@@ -1040,9 +1048,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               return d;
             }
 
+            const isBundledStaticTempleSeed =
+              typeof seed.photoUrl === 'string' && seed.photoUrl.startsWith('/destinations/dest-');
+            const seedTime = seed.photoUpdatedAt ? new Date(seed.photoUpdatedAt).getTime() : 0;
+
             // PRIORITY 1: Unified Permanent Media Vault (explicit Admin customization)
             const ov = vault.destinations[d.id];
             if (ov && ov.photoUrl && !isBrokenLegacyDestPhoto(ov.photoUrl)) {
+              const ovTime = ov.updatedAt ? new Date(ov.updatedAt).getTime() : 0;
+              const useOvPhoto =
+                !isBundledStaticTempleSeed ||
+                ov.photoUrl.startsWith('/destinations/dest-') ||
+                (ov.photoUrl.startsWith('data:') && ovTime > seedTime + 1000);
+              const chosenPhoto = useOvPhoto ? ov.photoUrl : seed.photoUrl;
               return {
                 ...seed,
                 ...d,
@@ -1053,18 +1071,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 provinceKh: ov.provinceKh || seed.provinceKh,
                 provinceEn: ov.provinceEn || seed.provinceEn,
                 addressKh: ov.addressKh || seed.addressKh,
-                photoUrl: ov.photoUrl,
-                galleryPhotos: [ov.photoUrl],
+                photoUrl: chosenPhoto,
+                galleryPhotos: [chosenPhoto],
                 isCustomPhoto: true,
-                photoUpdatedAt: ov.updatedAt,
+                photoUpdatedAt: ovTime >= seedTime ? ov.updatedAt : seed.photoUpdatedAt,
               };
             }
 
             // PRIORITY 2: Custom upload or Admin edit present in cached list
             const isUserUpload = typeof d.photoUrl === 'string' && d.photoUrl.startsWith('data:');
+            const cachedTime = d.photoUpdatedAt ? new Date(d.photoUpdatedAt).getTime() : 0;
             const hasCustomFlag = Boolean(d.isCustomPhoto || d.isAdminEdited);
             const isValidCustomPhoto =
-              (isUserUpload || hasCustomFlag) &&
+              (isUserUpload || (!isBundledStaticTempleSeed && hasCustomFlag)) &&
+              (!isBundledStaticTempleSeed || cachedTime > seedTime + 1000) &&
               typeof d.photoUrl === 'string' &&
               d.photoUrl.trim().length > 0 &&
               !isBrokenLegacyDestPhoto(d.photoUrl) &&
@@ -1094,14 +1114,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             return {
               ...seed,
               ...d,
-              nameKh: d.isAdminEdited ? d.nameKh : seed.nameKh,
-              nameEn: d.isAdminEdited ? d.nameEn : seed.nameEn,
-              provinceKh: d.isAdminEdited ? d.provinceKh : seed.provinceKh,
-              provinceEn: d.isAdminEdited ? d.provinceEn : seed.provinceEn,
-              addressKh: d.isAdminEdited ? d.addressKh : seed.addressKh,
+              nameKh: d.isAdminEdited && !isBundledStaticTempleSeed ? d.nameKh : seed.nameKh,
+              nameEn: d.isAdminEdited && !isBundledStaticTempleSeed ? d.nameEn : seed.nameEn,
+              descriptionKh: d.isAdminEdited && !isBundledStaticTempleSeed ? d.descriptionKh : seed.descriptionKh,
+              descriptionEn: d.isAdminEdited && !isBundledStaticTempleSeed ? d.descriptionEn : seed.descriptionEn,
+              provinceKh: d.isAdminEdited && !isBundledStaticTempleSeed ? d.provinceKh : seed.provinceKh,
+              provinceEn: d.isAdminEdited && !isBundledStaticTempleSeed ? d.provinceEn : seed.provinceEn,
+              addressKh: d.isAdminEdited && !isBundledStaticTempleSeed ? d.addressKh : seed.addressKh,
               photoUrl: effectivePhoto,
               galleryPhotos: [effectivePhoto],
-              isCustomPhoto: isValidCustomPhoto,
+              isCustomPhoto: isValidCustomPhoto || Boolean(seed.isCustomPhoto),
+              photoUpdatedAt: isValidCustomPhoto ? d.photoUpdatedAt : seed.photoUpdatedAt,
             };
           });
 
@@ -1177,23 +1200,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [appSettings, setAppSettings] = useState<AppSettings>(() => {
     try {
-      const saved = localStorage.getItem('kft_settings_v4') || localStorage.getItem('kft_settings_v3');
+      localStorage.removeItem('kft_settings_v3');
+      const saved = localStorage.getItem('kft_settings_v4');
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
         if (parsed && typeof parsed === 'object') {
-          return { 
-            ...initialAppSettings, 
-            ...parsed,
-            supportAccountName: 'CHEA KIMSENG',
-            promotionalFeeUsd: 2.99,
-          };
+          return normalizeAuthoritativeAppSettings(parsed, initialAppSettings);
         }
       }
     } catch (e) {
-      console.warn('Failed to parse kft_settings', e);
+      console.warn('Failed to parse kft_settings_v4', e);
     }
-    return initialAppSettings;
+    return normalizeAuthoritativeAppSettings(initialAppSettings);
   });
+  const [isRefreshingSettings, setIsRefreshingSettings] = useState(false);
+  const [settingsSyncError, setSettingsSyncError] = useState<string | null>(null);
+  const appSettingsRef = useRef<AppSettings>(appSettings);
+  useEffect(() => {
+    appSettingsRef.current = appSettings;
+  }, [appSettings]);
 
   // Modal & selection states
   const [selectedFood, setSelectedFood] = useState<FoodItem | null>(null);
@@ -1705,16 +1730,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     supportTickets: true,
   });
 
-  // Compact bulk arrays before writing to localStorage so base64 photos already stored in VAULT_KEYS
+  // Compact bulk arrays before writing to localStorage so base64 photos already confirmed persisted in VAULT_KEYS
   // are never duplicated a second time in kft_destinations_real_v8 / kft_restaurants_real_v9 / kft_foods_200_v7.
+  // Never strip a `data:` photo unless `isOverridePersistedInLocalStorage` confirms the override is safely on disk in localStorage.
   const compactDataForBulkLocalStorage = (key: string, data: unknown): unknown => {
     if (!Array.isArray(data)) return data;
     try {
       if (key === 'kft_destinations_real_v8') {
         const seedDestMap = new Map(initialDestinations.map(d => [d.id, d.photoUrl]));
-        const ovMap = loadLocalMediaOverrides().destinations;
         return (data as TouristDestination[]).map(d => {
-          if (d && ovMap[d.id] && typeof d.photoUrl === 'string' && d.photoUrl.startsWith('data:')) {
+          if (
+            d &&
+            typeof d.photoUrl === 'string' &&
+            d.photoUrl.startsWith('data:') &&
+            isOverridePersistedInLocalStorage('destinations', d.id)
+          ) {
             const fallbackUrl = seedDestMap.get(d.id) || '';
             return {
               ...d,
@@ -1728,9 +1758,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       if (key === 'kft_foods_200_v7') {
         const seedFoodMap = new Map(initialFoods.map(f => [f.id, f.photoUrl]));
-        const ovMap = loadLocalMediaOverrides().foods;
         return (data as FoodItem[]).map(f => {
-          if (f && ovMap[f.id] && typeof f.photoUrl === 'string' && f.photoUrl.startsWith('data:')) {
+          if (
+            f &&
+            typeof f.photoUrl === 'string' &&
+            f.photoUrl.startsWith('data:') &&
+            isOverridePersistedInLocalStorage('foods', f.id)
+          ) {
             return {
               ...f,
               photoUrl: seedFoodMap.get(f.id) || '',
@@ -1742,9 +1776,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       if (key === 'kft_restaurants_real_v9') {
         const seedRestMap = new Map(initialRestaurants.map(r => [r.id, r.photoUrl]));
-        const ovMap = loadLocalMediaOverrides().restaurants;
         return (data as Restaurant[]).map(r => {
-          if (r && ovMap[r.id] && typeof r.photoUrl === 'string' && r.photoUrl.startsWith('data:')) {
+          if (
+            r &&
+            typeof r.photoUrl === 'string' &&
+            r.photoUrl.startsWith('data:') &&
+            isOverridePersistedInLocalStorage('restaurants', r.id)
+          ) {
             const fallbackUrl = seedRestMap.get(r.id) || '/foods/food-1.jpg';
             return {
               ...r,
@@ -2245,6 +2283,134 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, [supportTickets]);
 
+  // Authoritative Server-Side VIP Pricing & Settings Refresh (Single Source of Truth)
+  const settingsFetchInFlightRef = useRef<Promise<AppSettings | null> | null>(null);
+
+  const refreshAppSettingsFromServer = async (silent: boolean = true): Promise<AppSettings | null> => {
+    if (!isSupabaseConfigured()) {
+      return appSettingsRef.current;
+    }
+    if (settingsFetchInFlightRef.current) {
+      return settingsFetchInFlightRef.current;
+    }
+
+    setIsRefreshingSettings(true);
+    const task = (async () => {
+      try {
+        const res = await fetchAuthoritativeAppSettingsFromServer(appSettingsRef.current);
+        if (res.ok && res.settings) {
+          setSettingsSyncError(null);
+          setAppSettings(prev => {
+            const next = normalizeAuthoritativeAppSettings(res.settings!, prev);
+            appSettingsRef.current = next;
+            return next;
+          });
+          return res.settings;
+        }
+        if (!res.ok && res.error) {
+          setSettingsSyncError(res.error);
+          if (!silent) {
+            showToast(
+              language === 'km'
+                ? `⚠️ មិនអាចទាញយកតម្លៃ VIP ថ្មីបំផុតពី Server បានទេ៖ ${res.error}`
+                : `⚠️ Could not load latest VIP settings from server: ${res.error}`,
+              'warning'
+            );
+          }
+        }
+        return appSettingsRef.current;
+      } catch (err: any) {
+        const msg = err?.message || 'Unable to load latest VIP settings from server.';
+        setSettingsSyncError(msg);
+        return appSettingsRef.current;
+      } finally {
+        setIsRefreshingSettings(false);
+        settingsFetchInFlightRef.current = null;
+      }
+    })();
+
+    settingsFetchInFlightRef.current = task;
+    return task;
+  };
+
+  // Immediately refresh authoritative VIP settings whenever any VIP, Checkout, Support, Store, or Profile view opens
+  useEffect(() => {
+    if (
+      isUpgradeVipModalOpen ||
+      isSupportTicketModalOpen ||
+      isVipAddRestaurantModalOpen ||
+      isAddRestaurantModalOpen ||
+      isManageMenuModalOpen ||
+      isAdminOpen ||
+      activeTab === 'profile'
+    ) {
+      refreshAppSettingsFromServer(true);
+    }
+  }, [
+    isUpgradeVipModalOpen,
+    isSupportTicketModalOpen,
+    isVipAddRestaurantModalOpen,
+    isAddRestaurantModalOpen,
+    isManageMenuModalOpen,
+    isAdminOpen,
+    activeTab,
+  ]);
+
+  // Listen for cross-tab / BroadcastChannel / window focus / periodic live updates to VIP pricing
+  useEffect(() => {
+    refreshAppSettingsFromServer(true);
+
+    const handleVisibilityOrFocus = () => {
+      if (typeof document === 'undefined' || !document.hidden) {
+        refreshAppSettingsFromServer(true);
+      }
+    };
+
+    const handleStorageEvent = (e: StorageEvent) => {
+      if (e.key === 'kft_settings_v4' && e.newValue) {
+        try {
+          const parsed = JSON.parse(e.newValue);
+          if (parsed && typeof parsed === 'object') {
+            setAppSettings(prev => normalizeAuthoritativeAppSettings(parsed, prev));
+          }
+        } catch {}
+      }
+    };
+
+    let bc: BroadcastChannel | null = null;
+    try {
+      if (typeof BroadcastChannel !== 'undefined') {
+        bc = new BroadcastChannel('kft_vip_settings_sync_channel');
+        bc.onmessage = (ev) => {
+          if (ev?.data?.type === 'VIP_SETTINGS_UPDATED' && ev.data.settings) {
+            setAppSettings(prev => normalizeAuthoritativeAppSettings(ev.data.settings, prev));
+            setSettingsSyncError(null);
+          }
+        };
+      }
+    } catch {}
+
+    window.addEventListener('focus', handleVisibilityOrFocus);
+    document.addEventListener('visibilitychange', handleVisibilityOrFocus);
+    window.addEventListener('storage', handleStorageEvent);
+
+    const pollInterval = setInterval(() => {
+      if (typeof document === 'undefined' || !document.hidden) {
+        refreshAppSettingsFromServer(true);
+      }
+    }, 15000);
+
+    return () => {
+      window.removeEventListener('focus', handleVisibilityOrFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityOrFocus);
+      window.removeEventListener('storage', handleStorageEvent);
+      clearInterval(pollInterval);
+      try {
+        bc?.close();
+      } catch {}
+    };
+  }, []);
+
   // Automatic & Manual Supabase Cloud Synchronization (Free Tier Compatible)
   const cloudSyncInFlightRef = useRef(false);
   const lastCloudSyncAtRef = useRef(0);
@@ -2272,14 +2438,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         transactions,
         customRestaurants: customRests,
         paymentProofsVault: localVault,
-        appSettings,
+        appSettings: appSettingsRef.current,
       });
 
       if (result.synced) {
         if (result.mergedAppSettings) {
           setAppSettings(prev => {
-            const nextSettings = { ...prev, ...result.mergedAppSettings };
+            const nextSettings = normalizeAuthoritativeAppSettings(result.mergedAppSettings!, prev);
+            appSettingsRef.current = nextSettings;
             try {
+              localStorage.removeItem('kft_settings_v3');
               localStorage.setItem('kft_settings_v4', JSON.stringify(nextSettings));
             } catch {}
             return nextSettings;
@@ -2389,34 +2557,41 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   useEffect(() => {
-    // Hydrate permanent media overrides from IndexedDB & Cloud on startup so Admin-replaced photos never revert
+    const applyHydratedBundle = (bundle: ReturnType<typeof loadLocalMediaOverrides>) => {
+      if (Object.keys(bundle.foods).length > 0) {
+        setFoods(prev => {
+          const next = applyFoodOverrides(prev, bundle.foods);
+          setSelectedFood(cur => (cur ? next.find(f => f.id === cur.id) || cur : null));
+          return next;
+        });
+      }
+      if (Object.keys(bundle.restaurants).length > 0) {
+        setRestaurants(prev => {
+          const next = applyRestaurantOverrides(prev, bundle.restaurants);
+          setSelectedRestaurant(cur => (cur ? next.find(r => r.id === cur.id) || cur : null));
+          return next;
+        });
+      }
+      if (Object.keys(bundle.destinations).length > 0) {
+        setDestinations(prev => {
+          const next = applyDestinationOverrides(prev, bundle.destinations);
+          setSelectedDestination(cur => (cur ? next.find(d => d.id === cur.id) || cur : null));
+          return next;
+        });
+      }
+      if (Object.keys(bundle.trendingFoods).length > 0) {
+        setTrendingFoods(prev => applyTrendingFoodOverrides(prev, bundle.trendingFoods));
+      }
+    };
+
+    // 1. Immediately hydrate from local IndexedDB (<15ms, zero network wait)
+    hydrateFromLocalIdbImmediate()
+      .then(applyHydratedBundle)
+      .catch(() => {});
+
+    // 2. Hydrate & delta-sync from Supabase Cloud in background so Admin-replaced photos sync across all devices
     hydrateAndSyncMediaOverrides()
-      .then((bundle) => {
-        if (Object.keys(bundle.foods).length > 0) {
-          setFoods(prev => {
-            const next = applyFoodOverrides(prev, bundle.foods);
-            setSelectedFood(cur => (cur ? next.find(f => f.id === cur.id) || cur : null));
-            return next;
-          });
-        }
-        if (Object.keys(bundle.restaurants).length > 0) {
-          setRestaurants(prev => {
-            const next = applyRestaurantOverrides(prev, bundle.restaurants);
-            setSelectedRestaurant(cur => (cur ? next.find(r => r.id === cur.id) || cur : null));
-            return next;
-          });
-        }
-        if (Object.keys(bundle.destinations).length > 0) {
-          setDestinations(prev => {
-            const next = applyDestinationOverrides(prev, bundle.destinations);
-            setSelectedDestination(cur => (cur ? next.find(d => d.id === cur.id) || cur : null));
-            return next;
-          });
-        }
-        if (Object.keys(bundle.trendingFoods).length > 0) {
-          setTrendingFoods(prev => applyTrendingFoodOverrides(prev, bundle.trendingFoods));
-        }
-      })
+      .then(applyHydratedBundle)
       .catch(() => {});
 
     let syncTimer: any;
@@ -3473,50 +3648,77 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     const nowIso = new Date().toISOString();
-    setAppSettings(prev => {
-      const next: AppSettings = {
-        ...prev,
+    const nextVersion = Math.max(1, Number(appSettingsRef.current.settingsVersion || 1) + 1);
+    const mergedCandidate: AppSettings = normalizeAuthoritativeAppSettings(
+      {
+        ...appSettingsRef.current,
         ...sanitized,
+        settingsVersion: nextVersion,
         settingsUpdatedAt: nowIso,
         settingsUpdatedBy: currentUser?.name || 'Admin',
-      };
-      // Automatically keep promotional banner text in sync with updated VIP durations & prices if not explicitly overridden
-      const shortDays = next.vipShortDurationDays || 10;
-      const shortPrice = next.vipShortPriceUsd || 2.99;
-      const longDays = next.vipLongDurationDays || 90;
-      const longPrice = next.vipLongPriceUsd || 4.99;
-      const extraStoreFee = next.additionalStoreFeeUsd || 10.0;
-      if (
-        sanitized.vipShortDurationDays !== undefined ||
-        sanitized.vipShortPriceUsd !== undefined ||
-        sanitized.vipLongDurationDays !== undefined ||
-        sanitized.vipLongPriceUsd !== undefined ||
-        sanitized.additionalStoreFeeUsd !== undefined
-      ) {
-        next.promotionalFeeUsd = shortPrice;
-        next.promotionPeriodKh = `កញ្ចប់ VIP ផ្លូវការ៖ $${shortPrice.toFixed(2)} សម្រាប់ ${shortDays} ថ្ងៃ ឬ $${longPrice.toFixed(2)} សម្រាប់ ${longDays} ថ្ងៃ • បន្ថែមហាងថ្មី៖ $${extraStoreFee.toFixed(2)} / ១ ហាង`;
-        next.promotionPeriodEn = `Official VIP Plans: $${shortPrice.toFixed(2)} for ${shortDays} Days or $${longPrice.toFixed(2)} for ${longDays} Days • Additional Store: $${extraStoreFee.toFixed(2)} / store`;
+      },
+      appSettingsRef.current
+    );
+
+    const shortDays = mergedCandidate.vipShortDurationDays;
+    const shortPrice = mergedCandidate.vipShortPriceUsd;
+    const longDays = mergedCandidate.vipLongDurationDays;
+    const longPrice = mergedCandidate.vipLongPriceUsd;
+    const extraStoreFee = mergedCandidate.additionalStoreFeeUsd;
+    if (
+      sanitized.vipShortDurationDays !== undefined ||
+      sanitized.vipShortPriceUsd !== undefined ||
+      sanitized.vipLongDurationDays !== undefined ||
+      sanitized.vipLongPriceUsd !== undefined ||
+      sanitized.additionalStoreFeeUsd !== undefined
+    ) {
+      mergedCandidate.promotionalFeeUsd = shortPrice;
+      mergedCandidate.promotionPeriodKh = `កញ្ចប់ VIP ផ្លូវការ៖ $${shortPrice.toFixed(2)} សម្រាប់ ${shortDays} ថ្ងៃ ឬ $${longPrice.toFixed(2)} សម្រាប់ ${longDays} ថ្ងៃ • បន្ថែមហាងថ្មី៖ $${extraStoreFee.toFixed(2)} / ១ ហាង`;
+      mergedCandidate.promotionPeriodEn = `Official VIP Plans: $${shortPrice.toFixed(2)} for ${shortDays} Days or $${longPrice.toFixed(2)} for ${longDays} Days • Additional Store: $${extraStoreFee.toFixed(2)} / store`;
+    }
+
+    appSettingsRef.current = mergedCandidate;
+    setAppSettings(mergedCandidate);
+    setSettingsSyncError(null);
+
+    try {
+      localStorage.setItem('kft_settings_v4', JSON.stringify(mergedCandidate));
+      localStorage.removeItem('kft_settings_v3');
+    } catch (e) {
+      console.warn('Failed to persist updated AppSettings locally:', e);
+    }
+
+    try {
+      if (typeof BroadcastChannel !== 'undefined') {
+        const bc = new BroadcastChannel('kft_vip_settings_sync_channel');
+        bc.postMessage({ type: 'VIP_SETTINGS_UPDATED', settings: mergedCandidate });
+        bc.close();
       }
-      try {
-        localStorage.setItem('kft_settings_v4', JSON.stringify(next));
-        if (isSupabaseConfigured()) {
-          pushCloudDocument('kft_cloud_app_settings_v1', next);
+    } catch {}
+
+    if (isSupabaseConfigured()) {
+      saveAuthoritativeAppSettingsToServer(mergedCandidate).then(res => {
+        if (!res.ok) {
+          const errMsg =
+            language === 'km'
+              ? '⚠️ បានរក្សាទុកក្នុងឧបករណ៍ ប៉ុន្តែមិនទាន់អាចធ្វើសមកាលកម្មទៅម៉ាស៊ីនមេ (Server) បានទេ។ សូមពិនិត្យអ៊ីនធឺណិត!'
+              : '⚠️ Saved locally, but failed to sync new prices to the server. Please check your connection!';
+          setSettingsSyncError(errMsg);
+          showToast(errMsg, 'warning');
         }
-      } catch (e) {
-        console.warn('Failed to persist updated AppSettings:', e);
-      }
-      return next;
-    });
+      });
+    }
+
     recordSecurityAudit(
       'SETTINGS_UPDATE',
       'SUCCESS',
       'AppSettings',
-      `Admin updated centralized app settings at ${nowIso}`
+      `Admin updated centralized app settings (v${nextVersion}) at ${nowIso}: Short=$${shortPrice}/${shortDays}d, Long=$${longPrice}/${longDays}d, ExtraStore=$${extraStoreFee}`
     );
     showToast(
       language === 'km'
-        ? '✅ បានរក្សាទុក និងធ្វើសមកាលកម្មការកំណត់ទូទាំងកម្មវិធីជោគជ័យ!'
-        : '✅ Saved and synchronized settings across the app!',
+        ? '✅ បានរក្សាទុក និងធ្វើសមកាលកម្មតម្លៃកញ្ចប់ VIP ទូទាំងកម្មវិធីជោគជ័យ!'
+        : '✅ Saved and synchronized VIP package prices across the app!',
       'success'
     );
   };
@@ -4752,6 +4954,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const targetRest = restaurants.find(r => r.id === restaurantId);
     if (!targetRest) return;
 
+    const dynamicPlans = getDynamicVipPlans(appSettingsRef.current);
+    const shortPlan = dynamicPlans.quarterly;
+    const longPlan = dynamicPlans.annual;
+
     addRegistrationTransaction({
       restaurantId,
       restaurantNameKh: targetRest.nameKh,
@@ -4759,11 +4965,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       ownerId: currentUser?.id || targetRest.ownerId || 'owner-guest',
       ownerName: currentUser?.name || 'Restaurant Owner',
       ownerPhone: targetRest.phone,
-      amountUsd: VIP_QUARTERLY_PRICE_USD,
-      durationDays: VIP_QUARTERLY_DAYS,
+      amountUsd: shortPlan.priceUsd,
+      durationDays: shortPlan.durationDays,
       paymentMethod,
       transactionRef: transactionRef.trim(),
-      notes: 'VIP 30 Days ($2.99) or VIP 90 Days ($4.99) Membership. 10 VIP Benefits.',
+      notes: `${shortPlan.nameEn} ($${shortPlan.priceUsd.toFixed(2)}) or ${longPlan.nameEn} ($${longPlan.priceUsd.toFixed(2)}) Membership.`,
     });
 
     setRestaurants(prev => prev.map(r => {
@@ -6124,18 +6330,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return { success: true };
   };
 
-  // User VIP Upgrade & Renewal Methods ($2.99 / 30 Days or $4.99 / 90 Days)
+  // User VIP Upgrade & Renewal Methods (Dynamic Admin-Configured Prices & Durations)
   const upgradeCurrentUserToVip = async (
     paymentMethod: 'GooglePlayBilling' | 'KHQR' | 'Bakong' | 'Card',
     transactionRef: string,
     last4?: string,
-    amountUsd: number = VIP_QUARTERLY_PRICE_USD,
-    durationDays: number = VIP_QUARTERLY_DAYS
+    amountUsd?: number,
+    durationDays?: number
   ): Promise<{ success: boolean; error?: string }> => {
     if (!currentUser) {
       setIsAuthModalOpen(true);
       return { success: false, error: 'Please sign in first.' };
     }
+
+    const latestSettings = await refreshAppSettingsFromServer(true);
+    const resolvedPlan = resolveAndValidateVipPlan(
+      { durationDays, amountUsd },
+      latestSettings
+    );
+    const effectiveAmountUsd = amountUsd ?? resolvedPlan.priceUsd;
+    const effectiveDurationDays = durationDays ?? resolvedPlan.durationDays;
 
     try {
       const req: PaymentVerificationRequest = {
@@ -6144,13 +6358,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         userName: currentUser.name,
         paymentMethod,
         transactionRef,
-        amountUsd,
+        amountUsd: effectiveAmountUsd,
+        durationDays: effectiveDurationDays,
+        planType: resolvedPlan.id,
         nonce: `vip_nonce_${Date.now()}`,
         timestamp: Date.now(),
         paymentToken: last4 ? `card_${last4}` : undefined
       };
 
-      const result = await verifyPaymentOnBackend(req);
+      const result = await verifyPaymentOnBackend(req, latestSettings);
       if (!result.success) {
         const failedTxn: RegistrationTransaction = {
           id: `TXN-VIP-FAIL-${Date.now().toString(36).toUpperCase()}`,
@@ -6158,8 +6374,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           userId: currentUser.id,
           userName: currentUser.name,
           userEmail: currentUser.email,
-          amountUsd,
-          durationDays,
+          amountUsd: effectiveAmountUsd,
+          durationDays: effectiveDurationDays,
           membershipTier: 'premium_vip',
           status: 'failed',
           paymentMethod,
@@ -6203,7 +6419,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         userEmail: currentUser.email,
         ownerId: currentUser.id,
         ownerName: currentUser.name,
-        amountUsd,
+        planType: resolvedPlan.id,
+        amountUsd: resolvedPlan.priceUsd,
         durationDays: result.durationDays,
         membershipTier: 'premium_vip',
         status: 'verified',
@@ -6214,7 +6431,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         expiresAt: result.expiryDate,
         verifiedAt: new Date().toISOString().replace('T', ' ').slice(0, 16),
         verifiedBy: paymentMethod === 'GooglePlayBilling' ? 'Google Play Billing Server' : 'Secure ABA KHQR Payment Engine',
-        notes: `${result.durationDays}-day Premium VIP membership activated successfully ($${amountUsd} USD)`
+        notes: `${result.durationDays}-day Premium VIP membership activated successfully ($${resolvedPlan.priceUsd.toFixed(2)} USD)`
       };
 
       setTransactions(prev => [verifiedTxn, ...prev]);
@@ -6248,12 +6465,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const renewCurrentUserVip = async (
     _paymentMethod: 'GooglePlayBilling' | 'KHQR' | 'Bakong' | 'Card',
     transactionRef: string,
-    durationDays: number = VIP_QUARTERLY_DAYS,
-    amountUsd: number = VIP_QUARTERLY_PRICE_USD
+    durationDays?: number,
+    amountUsd?: number
   ): Promise<{ success: boolean; error?: string }> => {
     if (!currentUser) return { success: false, error: 'Please sign in first.' };
 
-    const validatedPlan = resolveAndValidateVipPlan({ durationDays, amountUsd });
+    const latestSettings = await refreshAppSettingsFromServer(true);
+    const validatedPlan = resolveAndValidateVipPlan({ durationDays, amountUsd }, latestSettings);
     const reqRes = await submitVipUpgradeRequest(
       validatedPlan.durationDays,
       validatedPlan.priceUsd,
@@ -6304,8 +6522,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Submit VIP Upgrade Request for Administrator Review & Approval (Never activates VIP directly)
   const submitVipUpgradeRequest = async (
-    durationDays: number = VIP_QUARTERLY_DAYS,
-    amountUsd: number = VIP_QUARTERLY_PRICE_USD,
+    durationDays?: number,
+    amountUsd?: number,
     transactionRef?: string,
     notes?: string,
     paymentProofData?: { dataUrl: string; fileName?: string; mimeType?: string }
@@ -6315,7 +6533,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return { success: false, transactionId: '', error: 'User authentication required' };
     }
 
-    const validatedPlan = resolveAndValidateVipPlan({ durationDays, amountUsd }, appSettings);
+    const latestSettings = await refreshAppSettingsFromServer(true);
+    const validatedPlan = resolveAndValidateVipPlan({ durationDays, amountUsd }, latestSettings);
     const validDays = validatedPlan.durationDays;
     const validPrice = validatedPlan.priceUsd;
     const planType: 'quarterly' | 'annual' = validatedPlan.id;
@@ -6864,7 +7083,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return null;
     }
 
-    const plan = resolveAndValidateVipPlan({ planType: input.planType || 'quarterly' });
+    const plan = resolveAndValidateVipPlan(
+      { planType: input.planType || 'quarterly' },
+      appSettingsRef.current
+    );
     const now = new Date();
     const nowIso = now.toISOString();
     const readableNow = nowIso.replace('T', ' ').slice(0, 16);
@@ -6950,7 +7172,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     const { startDate, expiryDate } = calculateVipDates(
       currentUser.subscriptionExpiryDate,
-      plan.durationDays
+      plan.durationDays,
+      appSettingsRef.current
     );
 
     if (isAutoApprovedByAi && input.receiptUrl) {
@@ -7202,7 +7425,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
   };
 
-  const approveVipFromSupportTicket = (ticketId: string, durationDays?: 30 | 90, adminNote?: string) => {
+  const approveVipFromSupportTicket = (ticketId: string, durationDays?: number, adminNote?: string) => {
     if (!currentUser || currentUser.role !== 'admin') {
       showToast(
         language === 'km'
@@ -7216,15 +7439,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const ticket = supportTickets.find(t => t.id === ticketId);
     if (!ticket) return;
 
-    const validatedPlan = resolveAndValidateVipPlan({
-      durationDays: durationDays || ticket.durationDays,
-      amountUsd: ticket.amountUsd,
-    });
-    const finalDays = validatedPlan.durationDays;
-    const finalPrice = validatedPlan.priceUsd;
+    const validatedPlan = resolveAndValidateVipPlan(
+      {
+        planType: ticket.paymentPlanId,
+        durationDays: durationDays || ticket.durationDays,
+        amountUsd: ticket.amountUsd,
+      },
+      appSettingsRef.current
+    );
+    const finalDays =
+      typeof durationDays === 'number' && durationDays >= 1
+        ? durationDays
+        : typeof ticket.durationDays === 'number' && ticket.durationDays >= 1
+        ? ticket.durationDays
+        : validatedPlan.durationDays;
+    const finalPrice =
+      typeof ticket.amountUsd === 'number' && ticket.amountUsd > 0
+        ? ticket.amountUsd
+        : validatedPlan.priceUsd;
 
     const targetUser = users.find(u => u.id === ticket.userId);
-    const { startDate, expiryDate } = calculateVipDates(targetUser?.subscriptionExpiryDate, finalDays);
+    const { startDate, expiryDate } = calculateVipDates(
+      targetUser?.subscriptionExpiryDate,
+      finalDays,
+      appSettingsRef.current
+    );
     const now = new Date();
     const readableNow = now.toISOString().replace('T', ' ').slice(0, 16);
     const expiryDateFormatted = expiryDate.split('T')[0];
@@ -8008,6 +8247,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setAdminPassword,
         appSettings,
         updateAppSettings,
+        isRefreshingSettings,
+        settingsSyncError,
+        refreshAppSettingsFromServer,
         foods,
         restaurants,
         destinations,

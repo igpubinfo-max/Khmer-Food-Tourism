@@ -730,8 +730,8 @@ export const AdminDashboard: React.FC = () => {
                   </h3>
                   <p className="text-stone-500 font-khmer text-xs">
                     {isKm
-                      ? 'ពិនិត្យសារបញ្ហាការបង់ប្រាក់ ABA រូបវិក្កយបត្រ ឆ្លើយតបទៅអ្នកប្រើប្រាស់ផ្ទាល់ និងអនុម័តបើក VIP (30 ថ្ងៃ $2.99 ឬ 90 ថ្ងៃ $4.99)'
-                      : 'Inspect user ABA payment issues, receipts, reply in-app, and approve & activate VIP (30 Days $2.99 or 90 Days $4.99)'}
+                      ? `ពិនិត្យសារបញ្ហាការបង់ប្រាក់ ABA រូបវិក្កយបត្រ ឆ្លើយតបទៅអ្នកប្រើប្រាស់ផ្ទាល់ និងអនុម័តបើក VIP (${appSettings.vipShortDurationDays ?? 10} ថ្ងៃ $${Number(appSettings.vipShortPriceUsd ?? 2.99).toFixed(2)} ឬ ${appSettings.vipLongDurationDays ?? 90} ថ្ងៃ $${Number(appSettings.vipLongPriceUsd ?? 4.99).toFixed(2)})`
+                      : `Inspect user ABA payment issues, receipts, reply in-app, and approve & activate VIP (${appSettings.vipShortDurationDays ?? 10} Days $${Number(appSettings.vipShortPriceUsd ?? 2.99).toFixed(2)} or ${appSettings.vipLongDurationDays ?? 90} Days $${Number(appSettings.vipLongPriceUsd ?? 4.99).toFixed(2)})`}
                   </p>
                 </div>
 
@@ -1820,43 +1820,107 @@ export const AdminDashboard: React.FC = () => {
                 </div>
               )}
 
-              {/* Promotional Settings Editor */}
+              {/* Unified VIP Package Pricing & Store Fee Editor (Synchronized with Settings Tab) */}
               <div className="p-5 bg-white dark:bg-stone-800 rounded-3xl border border-slate-200 dark:border-slate-700 dark:border-stone-700 space-y-3 font-khmer">
-                <h4 className="font-bold text-[#0F172A] dark:text-stone-100 text-sm flex items-center gap-1.5">
-                  <Settings className="w-4 h-4 text-[#059669]" />
-                  <span>{isKm ? 'ការកំណត់តម្លៃប្រូម៉ូសិនចុះបញ្ជីហាង' : 'Promotional Pricing Configuration'}</span>
-                </h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <h4 className="font-bold text-[#0F172A] dark:text-stone-100 text-sm flex items-center gap-1.5">
+                    <Settings className="w-4 h-4 text-[#059669]" />
+                    <span>
+                      {isKm
+                        ? '👑 ការកំណត់តម្លៃកញ្ចប់ VIP និងតម្លៃបន្ថែមហាង (ធ្វើសមកាលកម្មទូទាំងកម្មវិធី)'
+                        : '👑 VIP Package Pricing & Additional Store Fee (Global Sync)'}
+                    </span>
+                  </h4>
+                  {appSettings.settingsUpdatedAt && (
+                    <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 text-[10px] font-mono font-bold">
+                      v{appSettings.settingsVersion || 1} • {appSettings.settingsUpdatedAt.replace('T', ' ').slice(0, 16)}
+                    </span>
+                  )}
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-5 gap-3 text-xs">
                   <div>
                     <label className="block font-semibold mb-1">
-                      {isKm ? 'តម្លៃប្រូម៉ូសិន (USD)' : 'Promotional Fee (USD)'}
+                      {isKm ? 'កញ្ចប់ទី ១ រយៈពេល (ថ្ងៃ)' : 'Plan #1 Duration (Days)'}
                     </label>
                     <input
                       type="number"
-                      step="0.01"
-                      value={promotionalFeeUsd}
-                      onChange={e => setPromotionalFeeUsd(parseFloat(e.target.value) || 2.99)}
+                      min={1}
+                      value={vipShortDurationDays}
+                      onChange={e => {
+                        const days = Math.max(1, parseInt(e.target.value) || 10);
+                        setVipShortDurationDays(days);
+                        setVipShortNameKh(`VIP ${days} ថ្ងៃ`);
+                        setVipShortNameEn(`VIP ${days} Days`);
+                      }}
                       className="w-full px-3 py-2 rounded-xl border bg-stone-50 dark:bg-stone-700 font-mono font-bold"
                     />
                   </div>
                   <div>
                     <label className="block font-semibold mb-1">
-                      {isKm ? 'សារប្រូម៉ូសិន (Khmer Notice)' : 'Promotion Notice (Khmer)'}
+                      {isKm ? 'កញ្ចប់ទី ១ តម្លៃ ($ USD)' : 'Plan #1 Price ($ USD)'}
                     </label>
                     <input
-                      type="text"
-                      value={promotionPeriodKh}
-                      onChange={e => setPromotionPeriodKh(e.target.value)}
-                      placeholder="តម្លៃគម្រោង VIP៖ $2.99 (30 ថ្ងៃ) / $4.99 (90 ថ្ងៃ)"
-                      className="w-full px-3 py-2 rounded-xl border bg-stone-50 dark:bg-stone-700 font-khmer"
+                      type="number"
+                      step="0.01"
+                      min={0.5}
+                      value={vipShortPriceUsd}
+                      onChange={e => {
+                        const val = parseFloat(e.target.value) || 0;
+                        setVipShortPriceUsd(val);
+                        setPromotionalFeeUsd(val);
+                      }}
+                      className="w-full px-3 py-2 rounded-xl border bg-stone-50 dark:bg-stone-700 font-mono font-bold"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-semibold mb-1">
+                      {isKm ? 'កញ្ចប់ទី ២ រយៈពេល (ថ្ងៃ)' : 'Plan #2 Duration (Days)'}
+                    </label>
+                    <input
+                      type="number"
+                      min={1}
+                      value={vipLongDurationDays}
+                      onChange={e => {
+                        const days = Math.max(1, parseInt(e.target.value) || 90);
+                        setVipLongDurationDays(days);
+                        setVipLongNameKh(`VIP ${days} ថ្ងៃ`);
+                        setVipLongNameEn(`VIP ${days} Days`);
+                      }}
+                      className="w-full px-3 py-2 rounded-xl border bg-stone-50 dark:bg-stone-700 font-mono font-bold"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-semibold mb-1">
+                      {isKm ? 'កញ្ចប់ទី ២ តម្លៃ ($ USD)' : 'Plan #2 Price ($ USD)'}
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min={0.5}
+                      value={vipLongPriceUsd}
+                      onChange={e => setVipLongPriceUsd(parseFloat(e.target.value) || 0)}
+                      className="w-full px-3 py-2 rounded-xl border bg-stone-50 dark:bg-stone-700 font-mono font-bold"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-semibold mb-1">
+                      {isKm ? 'តម្លៃបន្ថែមហាង ($ USD)' : 'Extra Store Fee ($ USD)'}
+                    </label>
+                    <input
+                      type="number"
+                      step="0.50"
+                      min={0.5}
+                      value={additionalStoreFeeUsd}
+                      onChange={e => setAdditionalStoreFeeUsd(parseFloat(e.target.value) || 0)}
+                      className="w-full px-3 py-2 rounded-xl border bg-stone-50 dark:bg-stone-700 font-mono font-bold"
                     />
                   </div>
                 </div>
                 <button
                   onClick={handleSaveSettings}
-                  className="px-4 py-2 bg-[#064E3B] hover:bg-[#047857] text-white font-bold rounded-xl text-xs transition active:scale-95 shadow-xs"
+                  className="px-4 py-2 bg-[#064E3B] hover:bg-[#047857] text-white font-bold rounded-xl text-xs transition active:scale-95 shadow-xs cursor-pointer"
                 >
-                  {isKm ? 'រក្សាទុកការកំណត់ប្រូម៉ូសិន' : 'Save Promotional Settings'}
+                  {isKm ? '💾 រក្សាទុក & ធ្វើសមកាលកម្មតម្លៃ VIP ទូទាំងកម្មវិធី' : '💾 Save & Sync VIP Prices Globally'}
                 </button>
               </div>
             </div>
@@ -2736,13 +2800,20 @@ export const AdminDashboard: React.FC = () => {
                               <p className="text-[11px] text-stone-500 dark:text-stone-400 truncate">
                                 {u.email} • 📞 {u.phone || 'N/A'}
                               </p>
-                              {(u.membershipTier === 'premium_vip' || u.subscriptionStatus === 'active' || (u as any).vipPlanType || (u as any).vipExpiryDate) && (
-                                <p className="text-[10px] text-emerald-700 dark:text-emerald-400 font-khmer mt-0.5">
-                                  👑 គម្រោង៖ <strong>{(u as any).vipPlanType === 'annual' ? 'VIP 90 Days ($4.99)' : 'VIP 30 Days ($2.99)'}</strong>
-                                  {(u as any).vipActivatedAt && ` • ថ្ងៃបើក៖ ${new Date((u as any).vipActivatedAt).toLocaleDateString()}`}
-                                  {((u as any).vipExpiryDate || u.subscriptionExpiryDate) && ` • ថ្ងៃផុតកំណត់៖ ${new Date(((u as any).vipExpiryDate || u.subscriptionExpiryDate)!).toLocaleDateString()}`}
-                                </p>
-                              )}
+                              {(u.membershipTier === 'premium_vip' || u.subscriptionStatus === 'active' || (u as any).vipPlanType || (u as any).vipExpiryDate) && (() => {
+                                const userVerifiedVipTxn = transactions.find(
+                                  t => t.userId === u.id && t.type === 'user_vip_upgrade' && t.status === 'verified'
+                                );
+                                const recordedDays = userVerifiedVipTxn?.durationDays || ((u as any).vipPlanType === 'annual' ? appSettings.vipLongDurationDays : appSettings.vipShortDurationDays);
+                                const recordedPrice = userVerifiedVipTxn?.amountUsd ?? ((u as any).vipPlanType === 'annual' ? appSettings.vipLongPriceUsd : appSettings.vipShortPriceUsd);
+                                return (
+                                  <p className="text-[10px] text-emerald-700 dark:text-emerald-400 font-khmer mt-0.5">
+                                    👑 គម្រោង៖ <strong>{`VIP ${recordedDays} Days ($${Number(recordedPrice).toFixed(2)})`}</strong>
+                                    {(u as any).vipActivatedAt && ` • ថ្ងៃបើក៖ ${new Date((u as any).vipActivatedAt).toLocaleDateString()}`}
+                                    {((u as any).vipExpiryDate || u.subscriptionExpiryDate) && ` • ថ្ងៃផុតកំណត់៖ ${new Date(((u as any).vipExpiryDate || u.subscriptionExpiryDate)!).toLocaleDateString()}`}
+                                  </p>
+                                );
+                              })()}
                               <div className="flex items-center gap-2 flex-wrap mt-1 text-[10px] text-stone-500 font-khmer">
                                 <span>🏪 ហាងផ្ទាល់ខ្លួន៖ <strong>{userCustomRestsCount}</strong></span>
                                 <span>•</span>

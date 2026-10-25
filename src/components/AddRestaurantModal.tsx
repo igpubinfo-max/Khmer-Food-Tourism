@@ -23,7 +23,7 @@ import {
   AlertCircle,
   Crown,
 } from 'lucide-react';
-import { RestaurantPriceLevel, VIP_PLANS, VipPlanType, isUserVipActive, getVipAccountState } from '../types';
+import { RestaurantPriceLevel, getDynamicVipPlans, VipPlanType, isUserVipActive, getVipAccountState } from '../types';
 import { ShopMultiPhotoUploader } from './ShopMultiPhotoUploader';
 import {
   pickImageUsingNativeAndroidGallery,
@@ -37,6 +37,7 @@ export const AddRestaurantModal: React.FC = () => {
     addRestaurant,
     deleteRestaurant,
     addRegistrationTransaction,
+    appSettings,
     language,
     currentUser,
     setIsAuthModalOpen,
@@ -87,7 +88,8 @@ export const AddRestaurantModal: React.FC = () => {
   if (!isAddRestaurantModalOpen) return null;
 
   const isKm = language === 'km';
-  const activePlan = VIP_PLANS[selectedVipPlan];
+  const dynamicPlans = getDynamicVipPlans(appSettings);
+  const activePlan = dynamicPlans[selectedVipPlan];
 
   // 1. Free Registration Handler ($0 Free Listing)
   const handleFreeRegistration = (e?: React.FormEvent) => {
@@ -372,8 +374,8 @@ export const AddRestaurantModal: React.FC = () => {
                 </h3>
                 <p className="text-xs text-slate-600 dark:text-slate-300 max-w-sm mx-auto leading-relaxed">
                   {isKm
-                    ? 'សមាជិកភាព VIP របស់លោកអ្នកបានផុតកំណត់ហើយ។ សូមបន្តកញ្ចប់ VIP ($2.99 / 30 ថ្ងៃ ឬ $4.99 / 90 ថ្ងៃ) ដើម្បីចុះបញ្ជីហាងរបស់អ្នក។'
-                    : 'Your VIP membership has expired. Please renew your VIP membership to register your restaurant.'}
+                    ? `សមាជិកភាព VIP របស់លោកអ្នកបានផុតកំណត់ហើយ។ សូមបន្តកញ្ចប់ VIP ($${dynamicPlans.quarterly.priceUsd.toFixed(2)} / ${dynamicPlans.quarterly.durationDays} ថ្ងៃ ឬ $${dynamicPlans.annual.priceUsd.toFixed(2)} / ${dynamicPlans.annual.durationDays} ថ្ងៃ) ដើម្បីចុះបញ្ជីហាងរបស់អ្នក។`
+                    : `Your VIP membership has expired. Please renew your VIP membership ($${dynamicPlans.quarterly.priceUsd.toFixed(2)} / ${dynamicPlans.quarterly.durationDays} days or $${dynamicPlans.annual.priceUsd.toFixed(2)} / ${dynamicPlans.annual.durationDays} days) to register your restaurant.`}
                 </p>
                 <div className="pt-2 flex flex-col sm:flex-row gap-2 justify-center">
                   <button
@@ -405,8 +407,8 @@ export const AddRestaurantModal: React.FC = () => {
                 </h3>
                 <p className="text-xs text-slate-600 dark:text-slate-300 max-w-sm mx-auto leading-relaxed">
                   {isKm
-                    ? 'ការចុះបញ្ជីហាង គឺអនុញ្ញាតជូនតែសមាជិក VIP ដែលបានបង់ប្រាក់ និងទទួលបានការអនុម័តពី Administrator ប៉ុណ្ណោះ។ សូមដំឡើងទៅកញ្ចប់ VIP ($2.99 / 30 ថ្ងៃ ឬ $4.99 / 90 ថ្ងៃ) ដើម្បីចុះបញ្ជីហាង និងទទួលបានអត្ថប្រយោជន៍ទាំង ១០!'
-                    : 'Restaurant registration is exclusive to approved VIP members. Upgrade to VIP ($2.99 / 30 days or $4.99 / 90 days) to register your restaurant!'}
+                    ? `ការចុះបញ្ជីហាង គឺអនុញ្ញាតជូនតែសមាជិក VIP ដែលបានបង់ប្រាក់ និងទទួលបានការអនុម័តពី Administrator ប៉ុណ្ណោះ។ សូមដំឡើងទៅកញ្ចប់ VIP ($${dynamicPlans.quarterly.priceUsd.toFixed(2)} / ${dynamicPlans.quarterly.durationDays} ថ្ងៃ ឬ $${dynamicPlans.annual.priceUsd.toFixed(2)} / ${dynamicPlans.annual.durationDays} ថ្ងៃ) ដើម្បីចុះបញ្ជីហាង និងទទួលបានអត្ថប្រយោជន៍ទាំង ១០!`
+                    : `Restaurant registration is exclusive to approved VIP members. Upgrade to VIP ($${dynamicPlans.quarterly.priceUsd.toFixed(2)} / ${dynamicPlans.quarterly.durationDays} days or $${dynamicPlans.annual.priceUsd.toFixed(2)} / ${dynamicPlans.annual.durationDays} days) to register your restaurant!`}
                 </p>
                 <div className="pt-2 flex flex-col sm:flex-row gap-2 justify-center">
                   <button
@@ -579,7 +581,9 @@ export const AddRestaurantModal: React.FC = () => {
                       <li>✓ {isKm ? 'រូបតំណាងហាង & រូបភាពម្ហូបច្រើនសន្លឹក' : 'Shop profile & multiple food photos'}</li>
                       <li>✓ {isKm ? 'កែប្រែព័ត៌មានហាងដោយខ្លួនឯង' : 'Self-service editing'}</li>
                       <li className="text-[#059669] font-medium pt-0.5">
-                        ✓ {isKm ? 'VIP 30 ថ្ងៃ ($2.99) ឬ 90 ថ្ងៃ ($4.99)' : 'VIP 30 Days ($2.99) or 90 Days ($4.99)'}
+                        ✓ {isKm
+                          ? `${dynamicPlans.quarterly.nameKh} ($${dynamicPlans.quarterly.priceUsd.toFixed(2)}) ឬ ${dynamicPlans.annual.nameKh} ($${dynamicPlans.annual.priceUsd.toFixed(2)})`
+                          : `${dynamicPlans.quarterly.nameEn} ($${dynamicPlans.quarterly.priceUsd.toFixed(2)}) or ${dynamicPlans.annual.nameEn} ($${dynamicPlans.annual.priceUsd.toFixed(2)})`}
                       </li>
                     </ul>
                   </div>
@@ -599,7 +603,7 @@ export const AddRestaurantModal: React.FC = () => {
               {selectedTier === 'premium' && (
                 <div className="grid grid-cols-2 gap-2 mt-2.5">
                   {(['quarterly', 'annual'] as VipPlanType[]).map((planKey) => {
-                    const p = VIP_PLANS[planKey];
+                    const p = dynamicPlans[planKey];
                     const active = selectedVipPlan === planKey;
                     return (
                       <button

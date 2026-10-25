@@ -48,6 +48,9 @@ export const UpgradeVipModal: React.FC = () => {
     currentUser, 
     transactions,
     appSettings,
+    isRefreshingSettings,
+    settingsSyncError,
+    refreshAppSettingsFromServer,
     language,
     showToast,
     setIsAuthModalOpen,
@@ -130,7 +133,9 @@ export const UpgradeVipModal: React.FC = () => {
 
   // Synchronize UI with real backend/persisted status whenever modal opens or user/transactions change
   useEffect(() => {
-    if (!isUpgradeVipModalOpen || !currentUser) return;
+    if (!isUpgradeVipModalOpen) return;
+    refreshAppSettingsFromServer(true);
+    if (!currentUser) return;
 
     // Requirement 6 Fix: When user clicks "បន្ត VIP" (Renew VIP), always open AWAITING_PAYMENT so it never auto-approves!
     if (isVipRenewMode) {
@@ -461,13 +466,15 @@ export const UpgradeVipModal: React.FC = () => {
     setErrorMessage('');
 
     try {
-      await new Promise(r => setTimeout(r, 800));
+      const latestSettings = await refreshAppSettingsFromServer(true);
+      const livePlans = getDynamicVipPlans(latestSettings);
+      const liveSelectedPlan = livePlans[selectedPlan.id];
 
       const reqResult = await submitVipUpgradeRequest(
-        selectedPlan.days,
-        selectedPlan.priceUsd,
+        liveSelectedPlan.durationDays,
+        liveSelectedPlan.priceUsd,
         customTxnRef,
-        `VIP Upgrade Request (${selectedPlan.days} Days / $${selectedPlan.priceUsd.toFixed(2)} USD) via ABA KHQR — Pending Admin Verification`,
+        `VIP Upgrade Request (${liveSelectedPlan.durationDays} Days / $${liveSelectedPlan.priceUsd.toFixed(2)} USD) via ABA KHQR — Pending Admin Verification`,
         paymentProofDraft || undefined
       );
 
@@ -1008,10 +1015,34 @@ export const UpgradeVipModal: React.FC = () => {
 
               {/* VIP Subscription Plan Selector (Synchronized with Admin Settings) */}
               <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-                  <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
-                  <span>{isKm ? 'ជ្រើសរើសកញ្ចប់សមាជិកភាព VIP៖' : 'Select VIP Subscription Plan:'}</span>
-                </label>
+                <div className="flex items-center justify-between gap-2">
+                  <label className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                    <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
+                    <span>{isKm ? 'ជ្រើសរើសកញ្ចប់សមាជិកភាព VIP៖' : 'Select VIP Subscription Plan:'}</span>
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => refreshAppSettingsFromServer(true)}
+                    disabled={isRefreshingSettings}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-[10px] font-bold bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 hover:bg-amber-200 transition cursor-pointer disabled:opacity-60"
+                  >
+                    <RefreshCw className={`w-3 h-3 ${isRefreshingSettings ? 'animate-spin' : ''}`} />
+                    <span>{isKm ? 'ផ្ទុកតម្លៃថ្មី' : 'Refresh Prices'}</span>
+                  </button>
+                </div>
+
+                {settingsSyncError && (
+                  <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/50 border border-amber-300 dark:border-amber-700 text-[11px] text-amber-900 dark:text-amber-200 flex items-center justify-between gap-2">
+                    <span>{settingsSyncError}</span>
+                    <button
+                      type="button"
+                      onClick={() => refreshAppSettingsFromServer(true)}
+                      className="px-2 py-1 rounded-lg bg-amber-600 text-white font-bold shrink-0 cursor-pointer"
+                    >
+                      {isKm ? 'ព្យាយាមម្តងទៀត' : 'Retry'}
+                    </button>
+                  </div>
+                )}
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   {dynamicPlansList.map((plan) => {

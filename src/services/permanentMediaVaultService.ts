@@ -16,7 +16,15 @@
  */
 
 import { FoodItem, Restaurant, TouristDestination, TrendingFoodItem, RestaurantMenuItem, RestaurantReview, RestaurantPriceLevel, GoogleMapsPlaceMetadata } from '../types';
-import { isSupabaseConfigured, pullCloudDocument, pushCloudDocument, pullCloudDocumentsByPrefix, deleteCloudDocument } from './supabaseService';
+import {
+  isSupabaseConfigured,
+  pullCloudDocument,
+  pushCloudDocument,
+  pullCloudDocumentsByPrefix,
+  pullCloudKeysManifestByPrefix,
+  pullCloudDocumentsByKeys,
+  deleteCloudDocument,
+} from './supabaseService';
 
 export const VAULT_KEYS = {
   FOODS: 'kft_permanent_food_overrides_v1',
@@ -316,6 +324,30 @@ export function loadLocalMediaOverrides(): AllMediaOverridesBundle {
   return inMemoryMasterBundle;
 }
 
+/**
+ * Check whether an override's photo is actually persisted in synchronous `localStorage`
+ * (as opposed to only living in `inMemoryMasterBundle` / `IndexedDB` when localStorage hits its 5MB limit).
+ * Used by `compactDataForBulkLocalStorage` so it never strips a custom `data:` photo unless `localStorage`
+ * has safely stored that override on disk.
+ */
+export function isOverridePersistedInLocalStorage(
+  category: 'foods' | 'restaurants' | 'destinations',
+  id: string
+): boolean {
+  try {
+    const key =
+      category === 'foods'
+        ? VAULT_KEYS.FOODS
+        : category === 'restaurants'
+        ? VAULT_KEYS.RESTAURANTS
+        : VAULT_KEYS.DESTINATIONS;
+    const diskMap = safeReadJsonMap<{ photoUrl?: string }>(key);
+    return Boolean(diskMap[id] && diskMap[id].photoUrl && diskMap[id].photoUrl!.trim().length > 0);
+  } catch {
+    return false;
+  }
+}
+
 export function saveLocalMediaOverrides(bundle: AllMediaOverridesBundle): void {
   inMemoryMasterBundle = bundle;
   // Remove duplicate legacy key first to maximize available localStorage space
@@ -324,7 +356,28 @@ export function saveLocalMediaOverrides(bundle: AllMediaOverridesBundle): void {
   } catch {}
   safeWriteJsonMap(VAULT_KEYS.FOODS, bundle.foods);
   safeWriteJsonMap(VAULT_KEYS.RESTAURANTS, bundle.restaurants);
-  safeWriteJsonMap(VAULT_KEYS.DESTINATIONS, bundle.destinations);
+  const destWritten = safeWriteJsonMap(VAULT_KEYS.DESTINATIONS, bundle.destinations);
+  if (!destWritten) {
+    // If all base64 destination photos exceed localStorage's 5MB limit, prioritize storing the newest overrides
+    // in localStorage while preserving 100% of overrides in IndexedDB and inMemoryMasterBundle.
+    try {
+      const entries = Object.entries(bundle.destinations).sort((a, b) => {
+        const tA = a[1]?.updatedAt ? new Date(a[1].updatedAt).getTime() : 0;
+        const tB = b[1]?.updatedAt ? new Date(b[1].updatedAt).getTime() : 0;
+        return tB - tA;
+      });
+      const trimmed: Record<string, DestinationMediaOverride> = {};
+      let approxBytes = 0;
+      for (const [k, v] of entries) {
+        const entrySize = JSON.stringify(v).length;
+        if (approxBytes + entrySize < 2_400_000) {
+          trimmed[k] = v;
+          approxBytes += entrySize;
+        }
+      }
+      safeWriteJsonMap(VAULT_KEYS.DESTINATIONS, trimmed);
+    } catch {}
+  }
   safeWriteJsonMap(VAULT_KEYS.TRENDING_FOODS, bundle.trendingFoods);
   saveBundleToIdb(bundle).catch(() => {});
 }
@@ -658,13 +711,29 @@ export function applyDestinationOverrides(
   return destinations.map((d) => {
     const ov = overridesMap[d.id];
     if (!ov || !ov.photoUrl || isObsoleteSeedPhoto(ov.photoUrl)) return d;
+
+    const isBundledStaticTemplePhoto =
+      typeof d.photoUrl === 'string' && d.photoUrl.startsWith('/destinations/dest-');
+    const ovTime = ov.updatedAt ? new Date(ov.updatedAt).getTime() : 0;
+    const destTime = d.photoUpdatedAt ? new Date(d.photoUpdatedAt).getTime() : 0;
+
+    // Never allow an older non-custom URL to downgrade a baked-in `/destinations/dest-*.jpg` photo,
+    // and if the baked-in photo has the exact same timestamp as the base64 override, prefer the fast static `/destinations/dest-*.jpg` asset
+    // unless the override has a strictly newer timestamp (`ovTime > destTime + 1000`).
+    const useOverridePhoto =
+      !isBundledStaticTemplePhoto ||
+      ov.photoUrl.startsWith('/destinations/dest-') ||
+      (ov.photoUrl.startsWith('data:') && ovTime > destTime + 1000);
+
+    const effectivePhotoUrl = useOverridePhoto ? ov.photoUrl : d.photoUrl;
+
     return {
       ...d,
-      photoUrl: ov.photoUrl,
+      photoUrl: effectivePhotoUrl,
       galleryPhotos:
         Array.isArray(ov.galleryPhotos) && ov.galleryPhotos.length > 0
-          ? [ov.photoUrl, ...ov.galleryPhotos.filter((g) => g && g !== ov.photoUrl)]
-          : [ov.photoUrl],
+          ? [effectivePhotoUrl, ...ov.galleryPhotos.filter((g) => g && g !== effectivePhotoUrl && g !== ov.photoUrl)]
+          : [effectivePhotoUrl],
       nameKh: ov.nameKh || d.nameKh,
       nameEn: ov.nameEn || d.nameEn,
       descriptionKh: ov.descriptionKh || d.descriptionKh,
@@ -683,7 +752,7 @@ export function applyDestinationOverrides(
       isAdminEdited: ov.isAdminEdited ?? d.isAdminEdited,
       adminEditedAt: ov.adminEditedAt || d.adminEditedAt,
       isCustomPhoto: true,
-      photoUpdatedAt: ov.updatedAt,
+      photoUpdatedAt: ovTime >= destTime ? ov.updatedAt : d.photoUpdatedAt,
     };
   });
 }
@@ -728,38 +797,68 @@ export async function pushMediaOverridesToCloud(bundle?: AllMediaOverridesBundle
 }
 
 /**
- * Hydrate and synchronize permanent media overrides from:
- *   1. In-memory master cache (`inMemoryMasterBundle`)
- *   2. LocalStorage (`VAULT_KEYS`)
- *   3. IndexedDB (`kft_permanent_media_vault_idb_v1`)
- *   4. Supabase Cloud Master Bundle (`kft_cloud_media_overrides_v1`)
- *   5. Supabase Cloud Atomic Per-Record Keys (`kft_ov_food_*`, `kft_ov_rest_*`, `kft_ov_dest_*`, `kft_ov_trend_*`)
+ * Fast local-only hydration from `localStorage` + `IndexedDB` (<15ms, zero network wait).
+ * Called immediately on startup so custom photos stored in IndexedDB render before any network request.
  */
-export async function hydrateAndSyncMediaOverrides(): Promise<AllMediaOverridesBundle> {
+export async function hydrateFromLocalIdbImmediate(): Promise<AllMediaOverridesBundle> {
   let current = loadLocalMediaOverrides();
-
-  // 1. Merge from IndexedDB (immune to 5MB localStorage quota limit)
   try {
     const idbBundle = await loadBundleFromIdb();
     if (idbBundle) {
       current = mergeOverrideBundles(current, idbBundle);
+      inMemoryMasterBundle = current;
     }
   } catch {}
+  return current;
+}
 
-  // 2. Merge from Supabase Cloud (both master bundle AND atomic per-record rows)
+/**
+ * Hydrate and synchronize permanent media overrides from:
+ *   1. In-memory master cache (`inMemoryMasterBundle`)
+ *   2. LocalStorage (`VAULT_KEYS`)
+ *   3. IndexedDB (`kft_permanent_media_vault_idb_v1`)
+ *   4. Supabase Cloud Atomic Per-Record Keys (`kft_ov_food_*`, `kft_ov_rest_*`, `kft_ov_dest_*`, `kft_ov_trend_*`)
+ *      via lightweight manifest check + chunked batch downloads so large base64 images never time out
+ *   5. Supabase Cloud Master Bundle (`kft_cloud_media_overrides_v1`)
+ */
+export async function hydrateAndSyncMediaOverrides(): Promise<AllMediaOverridesBundle> {
+  let current = await hydrateFromLocalIdbImmediate();
+
+  // Merge from Supabase Cloud using manifest-first delta sync + chunked batching
   if (isSupabaseConfigured()) {
     try {
-      const [cloudBundle, perRecordRows] = await Promise.all([
-        pullCloudDocument<AllMediaOverridesBundle>(VAULT_KEYS.CLOUD_DOC_KEY, 12000),
-        pullCloudDocumentsByPrefix<any>(VAULT_KEYS.CLOUD_RECORD_PREFIX, 12000),
-      ]);
+      const manifest = await pullCloudKeysManifestByPrefix(VAULT_KEYS.CLOUD_RECORD_PREFIX, 8000);
+      const existingPerRecordKeys = new Set<string>();
+      const keysToFetch: string[] = [];
 
-      if (cloudBundle) {
-        current = mergeOverrideBundles(current, cloudBundle);
+      if (Array.isArray(manifest) && manifest.length > 0) {
+        for (const item of manifest) {
+          existingPerRecordKeys.add(item.key);
+          const remoteMs = item.updated_at ? new Date(item.updated_at).getTime() : 0;
+          let localUpdatedAt: string | undefined;
+          if (item.key.startsWith('kft_ov_food_')) {
+            const id = item.key.slice('kft_ov_food_'.length);
+            localUpdatedAt = current.foods[id]?.updatedAt;
+          } else if (item.key.startsWith('kft_ov_rest_')) {
+            const id = item.key.slice('kft_ov_rest_'.length);
+            localUpdatedAt = current.restaurants[id]?.updatedAt;
+          } else if (item.key.startsWith('kft_ov_dest_')) {
+            const id = item.key.slice('kft_ov_dest_'.length);
+            localUpdatedAt = current.destinations[id]?.updatedAt;
+          } else if (item.key.startsWith('kft_ov_trend_')) {
+            const id = item.key.slice('kft_ov_trend_'.length);
+            localUpdatedAt = current.trendingFoods[id]?.updatedAt;
+          }
+          const localMs = localUpdatedAt ? new Date(localUpdatedAt).getTime() : 0;
+          if (!localUpdatedAt || remoteMs > localMs + 1000) {
+            keysToFetch.push(item.key);
+          }
+        }
       }
 
-      const existingPerRecordKeys = new Set<string>();
-      if (Array.isArray(perRecordRows) && perRecordRows.length > 0) {
+      // Fetch any missing or newer per-record overrides in small batches of 6 keys so requests never time out
+      if (keysToFetch.length > 0) {
+        const BATCH_SIZE = 6;
         const perRecordBundle: AllMediaOverridesBundle = {
           foods: {},
           restaurants: {},
@@ -767,21 +866,32 @@ export async function hydrateAndSyncMediaOverrides(): Promise<AllMediaOverridesB
           trendingFoods: {},
           updatedAt: new Date().toISOString(),
         };
-        for (const row of perRecordRows) {
-          existingPerRecordKeys.add(row.key);
-          const payload = row.payload;
-          if (!payload || !payload.id) continue;
-          if (row.key.startsWith('kft_ov_food_')) {
-            perRecordBundle.foods[payload.id] = payload;
-          } else if (row.key.startsWith('kft_ov_rest_')) {
-            perRecordBundle.restaurants[payload.id] = payload;
-          } else if (row.key.startsWith('kft_ov_dest_')) {
-            perRecordBundle.destinations[payload.id] = payload;
-          } else if (row.key.startsWith('kft_ov_trend_')) {
-            perRecordBundle.trendingFoods[payload.id] = payload;
+        for (let i = 0; i < keysToFetch.length; i += BATCH_SIZE) {
+          const batchKeys = keysToFetch.slice(i, i + BATCH_SIZE);
+          const rows = await pullCloudDocumentsByKeys<any>(batchKeys, 15000);
+          for (const row of rows) {
+            const payload = row.payload;
+            if (!payload || !payload.id) continue;
+            if (row.key.startsWith('kft_ov_food_')) {
+              perRecordBundle.foods[payload.id] = payload;
+            } else if (row.key.startsWith('kft_ov_rest_')) {
+              perRecordBundle.restaurants[payload.id] = payload;
+            } else if (row.key.startsWith('kft_ov_dest_')) {
+              perRecordBundle.destinations[payload.id] = payload;
+            } else if (row.key.startsWith('kft_ov_trend_')) {
+              perRecordBundle.trendingFoods[payload.id] = payload;
+            }
           }
         }
         current = mergeOverrideBundles(current, perRecordBundle);
+      }
+
+      // Also pull master bundle if manifest returned empty or had no per-record keys yet
+      if (existingPerRecordKeys.size === 0) {
+        const cloudBundle = await pullCloudDocument<AllMediaOverridesBundle>(VAULT_KEYS.CLOUD_DOC_KEY, 15000);
+        if (cloudBundle) {
+          current = mergeOverrideBundles(current, cloudBundle);
+        }
       }
 
       // Backfill any missing atomic per-record keys in Supabase so every existing override has its own isolated cloud row
@@ -804,16 +914,6 @@ export async function hydrateAndSyncMediaOverrides(): Promise<AllMediaOverridesB
       }
       if (backfillPromises.length > 0) {
         Promise.allSettled(backfillPromises).catch(() => {});
-      }
-
-      // Push merged master bundle back to cloud if we have any overrides
-      const totalOverrides =
-        Object.keys(current.foods).length +
-        Object.keys(current.restaurants).length +
-        Object.keys(current.destinations).length +
-        Object.keys(current.trendingFoods).length;
-      if (totalOverrides > 0) {
-        await pushCloudDocument(VAULT_KEYS.CLOUD_DOC_KEY, current, 15000);
       }
     } catch {}
   }

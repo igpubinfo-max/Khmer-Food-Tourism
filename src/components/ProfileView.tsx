@@ -1287,8 +1287,8 @@ export const ProfileView: React.FC = () => {
                 
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-khmer truncate">
                   {isKm 
-                    ? 'ដំឡើងទៅជា Premium VIP ($2.99/30ថ្ងៃ ឬ $4.99/90ថ្ងៃ) ដើម្បីដោះសោសក្តានុពលទាំង ១០!' 
-                    : 'Upgrade to Premium VIP ($2.99/30d or $4.99/90d) to unlock all 10 powers!'}
+                    ? `ដំឡើងទៅជា Premium VIP ($${shortPlan.priceUsd.toFixed(2)}/${shortPlan.durationDays}ថ្ងៃ ឬ $${longPlan.priceUsd.toFixed(2)}/${longPlan.durationDays}ថ្ងៃ) ដើម្បីដោះសោសក្តានុពលទាំង ${dynamicBenefits.length}!` 
+                    : `Upgrade to Premium VIP ($${shortPlan.priceUsd.toFixed(2)}/${shortPlan.durationDays}d or $${longPlan.priceUsd.toFixed(2)}/${longPlan.durationDays}d) to unlock all ${dynamicBenefits.length} powers!`}
                 </p>
               </div>
             </div>
@@ -1412,7 +1412,11 @@ export const ProfileView: React.FC = () => {
                   >
                     <div>
                       <span className="font-bold text-slate-800 dark:text-slate-200">
-                        VIP {txn.durationDays === 30 ? '30 Days ($2.99)' : '90 Days ($4.99)'}
+                        {txn.type === 'additional_store_fee'
+                          ? isKm
+                            ? `បន្ថែមហាងថ្មី ($${Number(txn.amountUsd || 0).toFixed(2)})`
+                            : `Extra Store ($${Number(txn.amountUsd || 0).toFixed(2)})`
+                          : `VIP ${txn.durationDays || shortPlan.durationDays} ${isKm ? 'ថ្ងៃ' : 'Days'} ($${Number(txn.amountUsd ?? shortPlan.priceUsd).toFixed(2)})`}
                       </span>
                       <span className="text-slate-400 ml-2 font-mono">{txn.transactionRef}</span>
                     </div>
@@ -1946,24 +1950,24 @@ export const ProfileView: React.FC = () => {
                     {isPremium && (restaurant.membershipExpiresAt || currentUser?.subscriptionExpiryDate) && (
                       <p className="text-[10px] text-slate-700 dark:text-slate-300">
                         {isKm 
-                          ? `📅 ផុតកំណត់នៅថ្ងៃទី៖ ${new Date(restaurant.membershipExpiresAt || currentUser?.subscriptionExpiryDate || '').toLocaleDateString()} (កញ្ចប់ VIP $2.99 / 30 ថ្ងៃ ឬ $4.99 / 90 ថ្ងៃ)` 
-                          : `Valid until: ${new Date(restaurant.membershipExpiresAt || currentUser?.subscriptionExpiryDate || '').toLocaleDateString()} (VIP $2.99 / 30d or $4.99 / 90d)`}
+                          ? `📅 ផុតកំណត់នៅថ្ងៃទី៖ ${new Date(restaurant.membershipExpiresAt || currentUser?.subscriptionExpiryDate || '').toLocaleDateString()} (កញ្ចប់ VIP $${shortPlan.priceUsd.toFixed(2)} / ${shortPlan.durationDays} ថ្ងៃ ឬ $${longPlan.priceUsd.toFixed(2)} / ${longPlan.durationDays} ថ្ងៃ)` 
+                          : `Valid until: ${new Date(restaurant.membershipExpiresAt || currentUser?.subscriptionExpiryDate || '').toLocaleDateString()} (VIP $${shortPlan.priceUsd.toFixed(2)} / ${shortPlan.durationDays}d or $${longPlan.priceUsd.toFixed(2)} / ${longPlan.durationDays}d)`}
                       </p>
                     )}
 
                     {isFree && (
                       <p className="text-[10px] text-slate-500">
                         {isKm 
-                          ? 'គណនីឥតគិតថ្លៃមិនអាចបន្ថែមមុខម្ហូបបានទេ។ ដំឡើងទៅកញ្ចប់ VIP ($2.99 / 30 ថ្ងៃ ឬ $4.99 / 90 ថ្ងៃ) ដើម្បីបន្ថែមម្ហូប!' 
-                          : 'Free listing cannot add food items. Upgrade to VIP ($2.99 / 30 days or $4.99 / 90 days) to add food items!'}
+                          ? `គណនីឥតគិតថ្លៃមិនអាចបន្ថែមមុខម្ហូបបានទេ។ ដំឡើងទៅកញ្ចប់ VIP ($${shortPlan.priceUsd.toFixed(2)} / ${shortPlan.durationDays} ថ្ងៃ ឬ $${longPlan.priceUsd.toFixed(2)} / ${longPlan.durationDays} ថ្ងៃ) ដើម្បីបន្ថែមម្ហូប!` 
+                          : `Free listing cannot add food items. Upgrade to VIP ($${shortPlan.priceUsd.toFixed(2)} / ${shortPlan.durationDays} days or $${longPlan.priceUsd.toFixed(2)} / ${longPlan.durationDays} days) to add food items!`}
                       </p>
                     )}
 
                     {isExpired && (
                       <p className="text-[10px] text-red-600">
                         {isKm 
-                          ? 'សមាជិកភាព VIP បានផុតកំណត់ហើយ។ ទិន្នន័យមុខម្ហូបទាំងអស់ត្រូវបានរក្សាទុកដដែល។ សូមបន្តសមាជិកភាព VIP ($2.99 / 30 ថ្ងៃ ឬ $4.99 / 90 ថ្ងៃ)។' 
-                          : 'VIP expired. All food items are retained. Renew VIP ($2.99 / 30 days or $4.99 / 90 days).'}
+                          ? `សមាជិកភាព VIP បានផុតកំណត់ហើយ។ ទិន្នន័យមុខម្ហូបទាំងអស់ត្រូវបានរក្សាទុកដដែល។ សូមបន្តសមាជិកភាព VIP ($${shortPlan.priceUsd.toFixed(2)} / ${shortPlan.durationDays} ថ្ងៃ ឬ $${longPlan.priceUsd.toFixed(2)} / ${longPlan.durationDays} ថ្ងៃ)។` 
+                          : `VIP expired. All food items are retained. Renew VIP ($${shortPlan.priceUsd.toFixed(2)} / ${shortPlan.durationDays} days or $${longPlan.priceUsd.toFixed(2)} / ${longPlan.durationDays} days).`}
                       </p>
                     )}
 
@@ -2353,7 +2357,9 @@ export const ProfileView: React.FC = () => {
                 <p className="text-[10px] text-slate-500 pl-6">
                   {isVip 
                     ? (isKm ? `ស្ថានភាព៖ Premium VIP (${remainingDays} ថ្ងៃទៀត)` : `Status: Premium VIP (${remainingDays} days left)`)
-                    : (isKm ? 'ស្ថានភាព៖ គណនីឥតគិតថ្លៃ • $2.99/30ថ្ងៃ • $4.99/90ថ្ងៃ' : 'Status: Free User • $2.99/30d • $4.99/90d')}
+                    : (isKm
+                        ? `ស្ថានភាព៖ គណនីឥតគិតថ្លៃ • $${shortPlan.priceUsd.toFixed(2)}/${shortPlan.durationDays}ថ្ងៃ • $${longPlan.priceUsd.toFixed(2)}/${longPlan.durationDays}ថ្ងៃ`
+                        : `Status: Free User • $${shortPlan.priceUsd.toFixed(2)}/${shortPlan.durationDays}d • $${longPlan.priceUsd.toFixed(2)}/${longPlan.durationDays}d`)}
                 </p>
               </div>
               <button

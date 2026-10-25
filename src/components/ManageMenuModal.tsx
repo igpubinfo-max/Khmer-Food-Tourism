@@ -296,8 +296,8 @@ export const ManageMenuModal: React.FC = () => {
     if (!isPremiumActive) {
       showToast(
         isKm 
-          ? 'ការចុះបញ្ជីឥតគិតថ្លៃមិនអាចបន្ថែមមុខម្ហូបបានទេ។ សូមដំឡើងទៅ VIP 30 ថ្ងៃ ($2.99) ឬ VIP 90 ថ្ងៃ ($4.99)!' 
-          : 'Free listing cannot add food items. Please upgrade to VIP 30 Days ($2.99) or VIP 90 Days ($4.99)!',
+          ? `ការចុះបញ្ជីឥតគិតថ្លៃមិនអាចបន្ថែមមុខម្ហូបបានទេ។ សូមដំឡើងទៅ ${dynamicPlansMap.quarterly.nameKh} ($${dynamicPlansMap.quarterly.priceUsd.toFixed(2)}) ឬ ${dynamicPlansMap.annual.nameKh} ($${dynamicPlansMap.annual.priceUsd.toFixed(2)})!` 
+          : `Free listing cannot add food items. Please upgrade to ${dynamicPlansMap.quarterly.nameEn} ($${dynamicPlansMap.quarterly.priceUsd.toFixed(2)}) or ${dynamicPlansMap.annual.nameEn} ($${dynamicPlansMap.annual.priceUsd.toFixed(2)})!`,
         'warning'
       );
       setMainTab('membership');
@@ -321,8 +321,8 @@ export const ManageMenuModal: React.FC = () => {
     if (!isPremiumActive) {
       showToast(
         isKm 
-          ? 'សមាជិកភាពបានផុតកំណត់ហើយ មិនអាចកែប្រែបានទេ។ សូមបន្តសមាជិកភាព VIP ($2.99 ឬ $4.99)!' 
-          : 'Membership expired. Please renew VIP ($2.99 or $4.99) to edit menu items!',
+          ? `សមាជិកភាពបានផុតកំណត់ហើយ មិនអាចកែប្រែបានទេ។ សូមបន្តសមាជិកភាព VIP ($${dynamicPlansMap.quarterly.priceUsd.toFixed(2)} ឬ $${dynamicPlansMap.annual.priceUsd.toFixed(2)})!` 
+          : `Membership expired. Please renew VIP ($${dynamicPlansMap.quarterly.priceUsd.toFixed(2)} or $${dynamicPlansMap.annual.priceUsd.toFixed(2)}) to edit menu items!`,
         'warning'
       );
       return;
@@ -697,8 +697,8 @@ export const ManageMenuModal: React.FC = () => {
                 </h3>
                 <p className="text-xs text-slate-600 dark:text-slate-300 max-w-sm mx-auto leading-relaxed">
                   {isKm
-                    ? 'សមាជិកភាព VIP របស់លោកអ្នកបានផុតកំណត់កាលបរិច្ឆេទហើយ។ សូមបន្តកញ្ចប់ VIP ($2.99 / 30 ថ្ងៃ ឬ $4.99 / 90 ថ្ងៃ) ដើម្បីបន្តគ្រប់គ្រងហាង និងមុខម្ហូប។'
-                    : 'Your VIP membership has expired. Please renew your VIP membership to continue managing your restaurant and menu items.'}
+                    ? `សមាជិកភាព VIP របស់លោកអ្នកបានផុតកំណត់កាលបរិច្ឆេទហើយ។ សូមបន្តកញ្ចប់ VIP ($${dynamicPlansMap.quarterly.priceUsd.toFixed(2)} / ${dynamicPlansMap.quarterly.durationDays} ថ្ងៃ ឬ $${dynamicPlansMap.annual.priceUsd.toFixed(2)} / ${dynamicPlansMap.annual.durationDays} ថ្ងៃ) ដើម្បីបន្តគ្រប់គ្រងហាង និងមុខម្ហូប។`
+                    : `Your VIP membership has expired. Please renew your VIP membership ($${dynamicPlansMap.quarterly.priceUsd.toFixed(2)} / ${dynamicPlansMap.quarterly.durationDays} days or $${dynamicPlansMap.annual.priceUsd.toFixed(2)} / ${dynamicPlansMap.annual.durationDays} days) to continue managing your restaurant and menu items.`}
                 </p>
                 <div className="pt-2 flex flex-col sm:flex-row gap-2 justify-center">
                   <button
@@ -753,8 +753,8 @@ export const ManageMenuModal: React.FC = () => {
                 </h3>
                 <p className="text-xs text-slate-600 dark:text-slate-300 max-w-sm mx-auto leading-relaxed">
                   {isKm
-                    ? 'ផ្ទាំងគ្រប់គ្រងម្ចាស់ហាង និងការបន្ថែមមុខម្ហូប គឺអនុញ្ញាតជូនតែសមាជិក VIP ដែលបានបង់ប្រាក់ និងទទួលបានការអនុម័តពី Admin ប៉ុណ្ណោះ។ សូមដំឡើងទៅកញ្ចប់ VIP ($2.99 / 30 ថ្ងៃ ឬ $4.99 / 90 ថ្ងៃ) ដើម្បីទទួលបានអត្ថប្រយោជន៍ទាំង ១០!'
-                    : 'Owner management is reserved exclusively for admin-approved VIP subscribers. Upgrade to VIP ($2.99 / 30 days or $4.99 / 90 days) to manage your restaurant and menu items!'}
+                    ? `ផ្ទាំងគ្រប់គ្រងម្ចាស់ហាង និងការបន្ថែមមុខម្ហូប គឺអនុញ្ញាតជូនតែសមាជិក VIP ដែលបានបង់ប្រាក់ និងទទួលបានការអនុម័តពី Admin ប៉ុណ្ណោះ។ សូមដំឡើងទៅកញ្ចប់ VIP ($${dynamicPlansMap.quarterly.priceUsd.toFixed(2)} / ${dynamicPlansMap.quarterly.durationDays} ថ្ងៃ ឬ $${dynamicPlansMap.annual.priceUsd.toFixed(2)} / ${dynamicPlansMap.annual.durationDays} ថ្ងៃ) ដើម្បីទទួលបានអត្ថប្រយោជន៍ទាំង ${dynamicBenefits.length}!`
+                    : `Owner management is reserved exclusively for admin-approved VIP subscribers. Upgrade to VIP ($${dynamicPlansMap.quarterly.priceUsd.toFixed(2)} / ${dynamicPlansMap.quarterly.durationDays} days or $${dynamicPlansMap.annual.priceUsd.toFixed(2)} / ${dynamicPlansMap.annual.durationDays} days) to manage your restaurant and menu items!`}
                 </p>
                 <div className="pt-2 flex flex-col sm:flex-row gap-2 justify-center">
                   <button

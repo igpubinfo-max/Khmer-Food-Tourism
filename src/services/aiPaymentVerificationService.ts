@@ -418,7 +418,7 @@ export function isOfficialKimSengRecipient(
 export async function verifyAbaPaymentAndReceipt(params: {
   receiptDataUrl?: string;
   expectedAmountUsd: number;
-  expectedDurationDays: 30 | 90;
+  expectedDurationDays: number;
   submittedTrxId?: string;
   submittedDate?: string;
   userId?: string;

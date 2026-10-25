@@ -16,9 +16,10 @@ import {
   AlertTriangle,
   XCircle,
   Loader2,
+  RefreshCw,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
-import { VIP_PLANS, SupportTicket, AbaReceiptVerificationReport } from '../types';
+import { getDynamicVipPlans, SupportTicket, AbaReceiptVerificationReport } from '../types';
 import {
   pickImageUsingNativeAndroidGallery,
   processAndCompressImageFile,
@@ -30,6 +31,10 @@ export const PaymentSupportModal: React.FC = () => {
   const {
     language,
     currentUser,
+    appSettings,
+    isRefreshingSettings,
+    settingsSyncError,
+    refreshAppSettingsFromServer,
     isSupportTicketModalOpen,
     setIsSupportTicketModalOpen,
     supportModalPrefill,
@@ -40,6 +45,8 @@ export const PaymentSupportModal: React.FC = () => {
     transactions,
     showToast,
   } = useApp();
+
+  const dynamicPlans = getDynamicVipPlans(appSettings);
 
   const [activeTab, setActiveTab] = useState<'new' | 'history'>('new');
   const [selectedPlan, setSelectedPlan] = useState<'quarterly' | 'annual'>('quarterly');
@@ -67,6 +74,7 @@ export const PaymentSupportModal: React.FC = () => {
 
   useEffect(() => {
     if (isSupportTicketModalOpen && currentUser) {
+      refreshAppSettingsFromServer(true);
       if (supportModalPrefill?.planType) {
         setSelectedPlan(supportModalPrefill.planType);
       }
@@ -93,7 +101,9 @@ export const PaymentSupportModal: React.FC = () => {
     }
   }, [isSupportTicketModalOpen]);
 
-  // Automatically run AI + Deterministic Receipt Verification whenever a receipt image is attached or plan/ref changes
+  const currentPlanConfig = dynamicPlans[selectedPlan];
+
+  // Automatically run AI + Deterministic Receipt Verification whenever a receipt image is attached or plan/ref/price changes
   useEffect(() => {
     let cancelled = false;
     if (!receiptDataUrl || !currentUser) {
@@ -102,7 +112,7 @@ export const PaymentSupportModal: React.FC = () => {
       return;
     }
 
-    const planCfg = VIP_PLANS[selectedPlan];
+    const planCfg = dynamicPlans[selectedPlan];
     setIsVerifyingAi(true);
     verifyAbaPaymentAndReceipt({
       receiptDataUrl,
@@ -134,11 +144,16 @@ export const PaymentSupportModal: React.FC = () => {
     return () => {
       cancelled = true;
     };
-  }, [receiptDataUrl, selectedPlan, paymentDate, paymentRef]);
+  }, [
+    receiptDataUrl,
+    selectedPlan,
+    paymentDate,
+    paymentRef,
+    currentPlanConfig.priceUsd,
+    currentPlanConfig.durationDays,
+  ]);
 
   if (!isSupportTicketModalOpen || !currentUser) return null;
-
-  const currentPlanConfig = VIP_PLANS[selectedPlan];
 
   const handleChooseReceipt = async (isReply: boolean = false) => {
     if (Capacitor.isNativePlatform()) {
@@ -224,14 +239,22 @@ export const PaymentSupportModal: React.FC = () => {
       return;
     }
 
+    const latestSettings = await refreshAppSettingsFromServer(true);
+    const livePlans = getDynamicVipPlans(latestSettings);
+    const livePlanCfg = livePlans[selectedPlan];
+
     let finalReport = aiReport;
-    if (receiptDataUrl && !finalReport) {
+    if (
+      receiptDataUrl &&
+      (!finalReport ||
+        Math.abs((finalReport.checks.amount.expected ? parseFloat(finalReport.checks.amount.expected.replace(/[^0-9.]/g, '')) : 0) - livePlanCfg.priceUsd) > 0.01)
+    ) {
       setIsVerifyingAi(true);
       try {
         finalReport = await verifyAbaPaymentAndReceipt({
           receiptDataUrl,
-          expectedAmountUsd: currentPlanConfig.priceUsd,
-          expectedDurationDays: currentPlanConfig.durationDays,
+          expectedAmountUsd: livePlanCfg.priceUsd,
+          expectedDurationDays: livePlanCfg.durationDays,
           submittedTrxId: paymentRef.trim(),
           submittedDate: paymentDate,
           userId: currentUser.id,
@@ -441,13 +464,38 @@ export const PaymentSupportModal: React.FC = () => {
                 </div>
               </div>
 
-              {/* Select Purchased VIP Plan ($2.99 / 30 Days or $4.99 / 90 Days) */}
+              {/* Select Purchased VIP Plan (Dynamic Admin-Configured Prices & Durations) */}
               <div>
-                <label className="block text-xs font-extrabold text-gray-800 mb-1.5">
-                  {language === 'km'
-                    ? 'ជ្រើសរើសកញ្ចប់ VIP ដែលអ្នកបានបង់ប្រាក់៖'
-                    : 'Select the VIP Plan You Paid For:'}
-                </label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-xs font-extrabold text-gray-800">
+                    {language === 'km'
+                      ? 'ជ្រើសរើសកញ្ចប់ VIP ដែលអ្នកបានបង់ប្រាក់៖'
+                      : 'Select the VIP Plan You Paid For:'}
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => refreshAppSettingsFromServer(true)}
+                    disabled={isRefreshingSettings}
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-bold bg-amber-100 text-amber-800 hover:bg-amber-200 transition disabled:opacity-60"
+                  >
+                    <RefreshCw className={`w-3 h-3 ${isRefreshingSettings ? 'animate-spin' : ''}`} />
+                    {language === 'km' ? 'ផ្ទុកតម្លៃថ្មី' : 'Refresh Prices'}
+                  </button>
+                </div>
+
+                {settingsSyncError && (
+                  <div className="mb-2 p-2.5 rounded-xl bg-amber-50 border border-amber-300 text-[11px] font-semibold text-amber-900 flex items-center justify-between gap-2">
+                    <span>{settingsSyncError}</span>
+                    <button
+                      type="button"
+                      onClick={() => refreshAppSettingsFromServer(true)}
+                      className="px-2 py-1 rounded-lg bg-amber-600 text-white font-bold shrink-0"
+                    >
+                      {language === 'km' ? 'ព្យាយាមម្តងទៀត' : 'Retry'}
+                    </button>
+                  </div>
+                )}
+
                 <div className="grid grid-cols-2 gap-2.5">
                   <button
                     type="button"
@@ -460,14 +508,14 @@ export const PaymentSupportModal: React.FC = () => {
                   >
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-extrabold text-gray-900">
-                        VIP 30 Days
+                        {language === 'km' ? dynamicPlans.quarterly.nameKh : dynamicPlans.quarterly.nameEn}
                       </span>
                       <Crown className="w-4 h-4 text-amber-500" />
                     </div>
                     <div className="text-lg font-black text-amber-600 mt-1">
-                      $2.99{' '}
+                      ${dynamicPlans.quarterly.priceUsd.toFixed(2)}{' '}
                       <span className="text-xs font-semibold text-gray-600">
-                        / 30 {language === 'km' ? 'ថ្ងៃ' : 'days'}
+                        / {dynamicPlans.quarterly.durationDays} {language === 'km' ? 'ថ្ងៃ' : 'days'}
                       </span>
                     </div>
                   </button>
@@ -483,14 +531,14 @@ export const PaymentSupportModal: React.FC = () => {
                   >
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-extrabold text-gray-900">
-                        VIP 90 Days
+                        {language === 'km' ? dynamicPlans.annual.nameKh : dynamicPlans.annual.nameEn}
                       </span>
                       <Sparkles className="w-4 h-4 text-orange-500" />
                     </div>
                     <div className="text-lg font-black text-orange-600 mt-1">
-                      $4.99{' '}
+                      ${dynamicPlans.annual.priceUsd.toFixed(2)}{' '}
                       <span className="text-xs font-semibold text-gray-600">
-                        / 90 {language === 'km' ? 'ថ្ងៃ' : 'days'}
+                        / {dynamicPlans.annual.durationDays} {language === 'km' ? 'ថ្ងៃ' : 'days'}
                       </span>
                     </div>
                   </button>
@@ -728,8 +776,8 @@ export const PaymentSupportModal: React.FC = () => {
                   onChange={(e) => setMessageText(e.target.value)}
                   placeholder={
                     language === 'km'
-                      ? 'ឧ. ខ្ញុំបានបង់ប្រាក់តាម ABA រួចហើយសម្រាប់កញ្ចប់ VIP 30 ថ្ងៃ ($2.99) ប៉ុន្តែគណនី VIP មិនទាន់បើកដំណើរការទេ សូម Admin ជួយពិនិត្យវិក្កយបត្រ...'
-                      : 'e.g., I already paid via ABA for VIP 30 Days ($2.99) but my VIP access is not active yet. Please verify my attached receipt...'
+                      ? `ឧ. ខ្ញុំបានបង់ប្រាក់តាម ABA រួចហើយសម្រាប់កញ្ចប់ ${currentPlanConfig.nameKh} ($${currentPlanConfig.priceUsd.toFixed(2)}) ប៉ុន្តែគណនី VIP មិនទាន់បើកដំណើរការទេ សូម Admin ជួយពិនិត្យវិក្កយបត្រ...`
+                      : `e.g., I already paid via ABA for ${currentPlanConfig.nameEn} ($${currentPlanConfig.priceUsd.toFixed(2)}) but my VIP access is not active yet. Please verify my attached receipt...`
                   }
                   style={{ color: '#000000', backgroundColor: '#ffffff' }}
                   className="w-full px-3.5 py-2.5 rounded-2xl border border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 text-sm font-medium focus:ring-2 focus:ring-amber-500 focus:outline-none"

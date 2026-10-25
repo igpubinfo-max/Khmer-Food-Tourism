@@ -1052,7 +1052,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Resorts & Cultural Heritage",
     "descriptionKh": "ទស្សនាចម្ការម្រេចកំពត ដែលជាផលិតផលសម្គាល់ភូមិសាស្ត្រ (GI) ល្បីល្បាញលេខ ១ លើពិភពលោក។ ភ្ញៀវទេសចរអាចស្វែងយល់ពីរបៀបដាំដុះ បេះម្រេចខ្មៅ ក្រហម និងស ព្រមទាំងភ្លក្សរសជាតិម្ហូបឆាម្រេចខ្ចី។",
     "descriptionEn": "Tour world-renowned protected geographical indication (GI) pepper plantations. Learn about organic cultivating methods and sample exquisite black, red, and white peppercorns.",
-    "photoUrl": "/destinations/dest-31.webp",
+    "photoUrl": "/destinations/dest-31.jpg",
     "provinceKh": "ខេត្តកំពត",
     "provinceEn": "Kampot",
     "addressKh": "ស្រុកទឹកឈូ និងស្រុកកំពង់ត្រាច ខេត្តកំពត",
@@ -1073,8 +1073,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": true,
     "galleryPhotos": [
-      "/destinations/dest-31.webp"
-    ]
+      "/destinations/dest-31.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-24T09:44:46.241Z"
   },
   {
     "id": "dest-32",
@@ -1250,7 +1252,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Beaches & Tropical Islands",
     "descriptionKh": "ឆ្នេរខ្សាច់សមុទ្រដ៏ស្ងប់ស្ងាត់ មានជួរដើមឈើធំៗម្លប់ត្រឈឹងត្រឈៃ។ រូបសំណាកសិលាធរណី (ស្រីស្អាតចាំប្តី) និងរូបសំណាកក្តាមសេះយក្សកណ្តាលសមុទ្រ ជានិមិត្តរូបទេសចរណ៍ដ៏ល្បីនៃខេត្តកែប។",
     "descriptionEn": "Picturesque sheltered beach with shady almond trees, celebrated for its iconic Giant Blue Crab statue rising from the sea and the poignant Sela Thorani maiden sculpture.",
-    "photoUrl": "/destinations/dest-37.webp",
+    "photoUrl": "/destinations/dest-37.jpg",
     "provinceKh": "ខេត្តកែប",
     "provinceEn": "Kep",
     "addressKh": "ក្រុងកែប ខេត្តកែប",
@@ -1281,8 +1283,10 @@ export const initial100Destinations: TouristDestination[] = [
     "reviewerQuoteEn": "Live fresh blue swimming crabs stir-fried on the spot with Kampot green pepper - sheer perfection!",
     "reviewerName": "Foodie Khmer Review",
     "galleryPhotos": [
-      "/destinations/dest-37.webp"
-    ]
+      "/destinations/dest-37.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-24T09:40:23.788Z"
   },
   {
     "id": "dest-38",
@@ -1963,7 +1967,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Mountains & National Parks",
     "descriptionKh": "ទួលភ្នំពិសិដ្ឋដែលជាទីសក្ការបូជាធំបំផុតរបស់បងប្អូនជនជាតិដើមភាគតិចព្នង។ ពីលើកំពូលភ្នំអាចគយគន់ទេសភាពផ្ទះក្បឿងក្រុងសែនមនោរម្យ វាលស្មៅពណ៌មាស និងថ្ងៃលិចដ៏រ៉ូមែនទិក។",
     "descriptionEn": "Sacred indigenous mountain shrine offering sweeping 360-degree panoramic sunset views overlooking Sen Monorom town, pine groves, and golden grassy hills.",
-    "photoUrl": "/destinations/dest-58.webp",
+    "photoUrl": "/destinations/dest-58.jpg",
     "provinceKh": "ខេត្តមណ្ឌលគិរី",
     "provinceEn": "Mondulkiri",
     "addressKh": "ក្រុងសែនមនោរម្យ ខេត្តមណ្ឌលគិរី",
@@ -1984,8 +1988,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "/destinations/dest-58.webp"
-    ]
+      "/destinations/dest-58.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-24T09:52:08.183Z"
   },
   {
     "id": "dest-59",
@@ -1996,7 +2002,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Nature & Waterfalls",
     "descriptionKh": "ចំណុចគយគន់ទេសភាពព្រៃព្រឹក្សាដ៏ធំធេងលាតសន្ធឹងដាច់កន្ទុយភ្នែក ប្រៀបដូចជារលកសមុទ្រពណ៌បៃតងរំកិលតាមជួរភ្នំ។ ពេលព្រឹកព្រលឹមមានអ័ព្ទសក្បុសអណ្តែតលើកំពូលឈើដ៏ស្រស់ស្អាត។",
     "descriptionEn": "Iconic panoramic viewpoint gazing out over endless waves of canopy rainforest stretching to the horizon like a green ocean, veiled in morning mist.",
-    "photoUrl": "/destinations/dest-59.webp",
+    "photoUrl": "/destinations/dest-59.jpg",
     "provinceKh": "ខេត្តមណ្ឌលគិរី",
     "provinceEn": "Mondulkiri",
     "addressKh": "ស្រុកអូររាំង ចម្ងាយ ៥ គ.ម ពីក្រុងសែនមនោរម្យ",
@@ -2017,8 +2023,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": true,
     "galleryPhotos": [
-      "/destinations/dest-59.webp"
-    ]
+      "/destinations/dest-59.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-24T09:50:29.874Z"
   },
   {
     "id": "dest-60",
@@ -2029,7 +2037,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Nature & Waterfalls",
     "descriptionKh": "ទឹកធ្លាក់ធម្មជាតិកម្ពស់ ៥ ម៉ែត្រ និង ១០ ម៉ែត្រ ស្ថិតនៅក្បែរក្រុងសែនមនោរម្យ ព័ទ្ធជុំវិញដោយចម្ការកាហ្វេ និងចម្ការកៅស៊ូ។ ទីតាំងងាយស្រួលធ្វើដំណើរសម្រាប់សម្រាកញ៉ាំអាហារ។",
     "descriptionEn": "Charming three-step waterfall nestled in a shaded valley near coffee and rubber plantations, very convenient for family picnics near town.",
-    "photoUrl": "/destinations/dest-60.webp",
+    "photoUrl": "/destinations/dest-60.jpg",
     "provinceKh": "ខេត្តមណ្ឌលគិរី",
     "provinceEn": "Mondulkiri",
     "addressKh": "ជាយក្រុងសែនមនោរម្យ ចម្ងាយ ៥ គ.ម",
@@ -2050,8 +2058,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "/destinations/dest-60.webp"
-    ]
+      "/destinations/dest-60.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-24T10:46:00.875Z"
   },
   {
     "id": "dest-61",
@@ -2194,7 +2204,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Nature & Waterfalls",
     "descriptionKh": "ទឹកធ្លាក់កម្ពស់ ១០ ម៉ែត្រហូរធ្លាក់កាត់ច្រាំងថ្មកំបោរចូលទៅក្នុងអាងទឹកធម្មជាតិដ៏ធំ។ ឈ្មោះកាទៀងត្រូវបានហៅតាមសត្វទៀង (សត្វទន្សោង) ដែលធ្លាប់មករកផឹកទឹកនៅទីនេះ។",
     "descriptionEn": "Gentle 10-meter waterfall flowing into a broad, calm swimming pool encircled by thick forest, named after wild ox (Kating) that historically gathered here.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7d/Tourists_at_Bou_Sra_Waterfall%2C_Mondulkiri%2C_Cambodia.jpg/960px-Tourists_at_Bou_Sra_Waterfall%2C_Mondulkiri%2C_Cambodia.jpg",
+    "photoUrl": "/destinations/dest-65.jpg",
     "provinceKh": "ខេត្តរតនគិរី",
     "provinceEn": "Ratanakiri",
     "addressKh": "ស្រុកលំផាត់ ចម្ងាយ ៧ គ.ម ពីបានលុង",
@@ -2215,8 +2225,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7d/Tourists_at_Bou_Sra_Waterfall%2C_Mondulkiri%2C_Cambodia.jpg/960px-Tourists_at_Bou_Sra_Waterfall%2C_Mondulkiri%2C_Cambodia.jpg"
-    ]
+      "/destinations/dest-65.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-24T16:25:49.367Z"
   },
   {
     "id": "dest-66",
@@ -2765,7 +2777,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Resorts & Cultural Heritage",
     "descriptionKh": "ចម្ការកៅស៊ូដំបូងបង្អស់ និងធំបំផុតនៅកម្ពុជា ដាំដុះតាំងពីសម័យបារាំងក្នុងទសវត្សរ៍ឆ្នាំ ១៩២០។ ដើមកៅស៊ូធំៗដុះត្រង់ជួររាប់ម៉ឺនដើម បង្កើតជាផ្លូវរូងម្លប់បៃតងយ៉ាងស្រស់ស្អាត។",
     "descriptionEn": "Cambodia oldest and largest rubber plantation established in the 1920s by Michelin. The cathedral-like avenues of towering rubber trees are a photographer dream.",
-    "photoUrl": "https://upload.wikimedia.org/wikipedia/commons/1/19/Rubber_collector%2C_Know_Indonesia..._Know_Your_Friend%2C_p17.jpg",
+    "photoUrl": "/destinations/dest-82.jpg",
     "provinceKh": "ខេត្តត្បូងឃ្មុំ",
     "provinceEn": "Tboung Khmum",
     "addressKh": "ស្រុកត្បូងឃ្មុំ ខេត្តត្បូងឃ្មុំ",
@@ -2786,8 +2798,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/1/19/Rubber_collector%2C_Know_Indonesia..._Know_Your_Friend%2C_p17.jpg"
-    ]
+      "/destinations/dest-82.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-24T16:27:20.293Z"
   },
   {
     "id": "dest-83",
@@ -2831,7 +2845,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Mountains & National Parks",
     "descriptionKh": "ភ្នំធម្មជាតិរាងដូចស្ត្រីកំពុងដេកផ្ងារសណ្តូកខ្លួន កណ្តាលវាលទំនាបមាត់ទន្លេ។ ជាប់ទាក់ទងនឹងរឿងព្រេងនិទានបុរាណខ្មែររឿង «នាងកង្រី និងចៅពុទ្ធិសែន»។",
     "descriptionEn": "Distinctive ridge resembling a sleeping maiden lying on her back, steeped in the famous tragic Khmer legend of Neang Kangrei and Prince Puthisen.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/23/Cardamom_sunset.jpg/960px-Cardamom_sunset.jpg",
+    "photoUrl": "/destinations/dest-84.jpg",
     "provinceKh": "ខេត្តកំពង់ឆ្នាំង",
     "provinceEn": "Kampong Chhnang",
     "addressKh": "ស្រុកកំពង់លែង ទល់មុខក្រុងកំពង់ឆ្នាំង",
@@ -2852,8 +2866,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/23/Cardamom_sunset.jpg/960px-Cardamom_sunset.jpg"
-    ]
+      "/destinations/dest-84.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-24T16:29:54.858Z"
   },
   {
     "id": "dest-85",
@@ -3095,7 +3111,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Mountains & National Parks",
     "descriptionKh": "ដំបូលនៃប្រទេសកម្ពុជា ដែលជាកំពូលភ្នំខ្ពស់ជាងគេបំផុតកម្ពស់ ១,៨១៣ ម៉ែត្រ។ ជាគោលដៅផ្សងព្រេងឡើងភ្នំ Trekking ដ៏ល្បីល្បាញបំផុត សម្បូរដោយព្រៃស្លែបុរាណ និងអាកាសធាតុត្រជាក់លើកំពូលភ្នំ។",
     "descriptionEn": "The rooftop of Cambodia, standing at 1,813 meters above sea level. The ultimate multi-day mountain trekking expedition through mossy cloud forests.",
-    "photoUrl": "https://upload.wikimedia.org/wikipedia/commons/6/6a/Chreao_Waterfall%2C_Amleang_commune%2C_Thpong_district%2C_Kampong_Speu_province%2C_Cambodia%2C19.8.2017.jpg",
+    "photoUrl": "/destinations/dest-92.jpg",
     "provinceKh": "ខេត្តកំពង់ស្ពឺ",
     "provinceEn": "Kampong Speu",
     "addressKh": "ស្រុកឱរ៉ាល់ ជួរភ្នំក្រវាញ ខេត្តកំពង់ស្ពឺ",
@@ -3126,8 +3142,10 @@ export const initial100Destinations: TouristDestination[] = [
     "reviewerQuoteEn": "Camping above a 360-degree ocean of clouds, breathtaking views that make every step worthwhile!",
     "reviewerName": "Adventure Boys KH",
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/a/a7/Phom_Aoral.jpg"
-    ]
+      "/destinations/dest-92.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-24T16:31:06.441Z"
   },
   {
     "id": "dest-93",
@@ -3204,7 +3222,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Nature & Waterfalls",
     "descriptionKh": "ទឹកធ្លាក់ធម្មជាតិ ៧ ដំណាក់ដ៏ស្រស់ស្អាតកណ្តាលជ្រលងភ្នំឱរ៉ាល់។ ទឹកហូរកាត់ផ្ទាំងថ្មធំៗបង្កើតជាអាងហែលទឹកធម្មជាតិថ្លាឈ្វេង ហ៊ុមព័ទ្ធដោយព្រៃឈើស្រស់បំព្រង។",
     "descriptionEn": "Spectacular seven-tiered waterfall complex cascading through granite riverbeds into natural swimming lagoons near the foot of Mount Aural.",
-    "photoUrl": "/destinations/dest-95.webp",
+    "photoUrl": "/destinations/dest-95.jpg",
     "provinceKh": "ខេត្តកំពង់ស្ពឺ",
     "provinceEn": "Kampong Speu",
     "addressKh": "ស្រុកឱរ៉ាល់ ខេត្តកំពង់ស្ពឺ",
@@ -3225,8 +3243,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "/destinations/dest-95.webp"
-    ]
+      "/destinations/dest-95.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-24T10:29:01.979Z"
   },
   {
     "id": "dest-96",
@@ -3237,7 +3257,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Mountains & National Parks",
     "descriptionKh": "តំបន់ទេសភាពជួរភ្នំ និងទំនប់ទឹកធារាសាស្ត្រដ៏ធំល្វឹងល្វើយ។ ជាទីតាំងទស្សនាថ្ងៃលិចមាត់បឹង បោះតង់កម្សាន្ត និងជិះកង់ភ្នំគយគន់ធម្មជាតិស្រុកស្រែជនបទ។",
     "descriptionEn": "Rolling countryside scenery featuring expansive reservoir lakes, scenic cycling routes, and tranquil lakeside camping zones.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/84/Cambodia_%2C_Kampong_Speu_-_panoramio.jpg/960px-Cambodia_%2C_Kampong_Speu_-_panoramio.jpg",
+    "photoUrl": "/destinations/dest-96.jpg",
     "provinceKh": "ខេត្តកំពង់ស្ពឺ",
     "provinceEn": "Kampong Speu",
     "addressKh": "ស្រុកភ្នំស្រួច ខេត្តកំពង់ស្ពឺ",
@@ -3258,8 +3278,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a9/Kong_Rei_Mountain_by_Sovithya_-_panoramio.jpg/960px-Kong_Rei_Mountain_by_Sovithya_-_panoramio.jpg"
-    ]
+      "/destinations/dest-96.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-24T16:33:17.329Z"
   },
   {
     "id": "dest-97",
@@ -3270,7 +3292,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Historical Temple / Heritage",
     "descriptionKh": "អតីតរាជធានីខ្មែរពីឆ្នាំ ១៦១៨ ដល់ ១៨៦៦។ ភ្នំនេះមានរាងដូចសត្វនាគ កម្ពស់ ៥០៩ កាំជណ្តើរ លើកំពូលភ្នំមានចេតិយតម្កល់ព្រះបរមសារីរិកធាតុ និងព្រះអដ្ឋិធាតុនៃអតីតព្រះមហាក្សត្រខ្មែរជាច្រើនជំនាន់។",
     "descriptionEn": "The historic royal capital of Cambodia from 1618 to 1866. A dragon-shaped ridge with 509 steps crowned with royal stupas housing the ashes of ancient monarchs.",
-    "photoUrl": "https://upload.wikimedia.org/wikipedia/commons/1/12/Oudong_01.jpg",
+    "photoUrl": "/destinations/dest-97.jpg",
     "provinceKh": "ខេត្តកណ្តាល",
     "provinceEn": "Kandal",
     "addressKh": "ស្រុកពញាឮ ចម្ងាយ ៤០ គ.ម ពីរាជធានីភ្នំពេញ",
@@ -3291,8 +3313,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": true,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/1/12/Oudong_01.jpg"
-    ]
+      "/destinations/dest-97.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-24T16:48:38.087Z"
   },
   {
     "id": "dest-98",
@@ -3798,7 +3822,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Mountains & National Parks",
     "descriptionKh": "តំបន់ប្រវត្តិសាស្ត្រជួរភ្នំដងរែក ដែលជាសមរភូមិចុងក្រោយនៃសង្គ្រាមស៊ីវិលកម្ពុជា។ ពីលើកំពូលភ្នំអាចមើលឃើញទេសភាពជ្រោះចោតដ៏ស្រស់ស្អាត និងទស្សនាទីតាំងប្រវត្តិសាស្ត្រចុងក្រោយនៃរបបខ្មែរក្រហម។",
     "descriptionEn": "Historical mountain ridge overlooking the plains below, marking the final stronghold of the Khmer Rouge civil war, today a peaceful clifftop historical site.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d9/Dongrakfrommawidaeng1.jpg/960px-Dongrakfrommawidaeng1.jpg",
+    "photoUrl": "/destinations/dest-113.jpg",
     "provinceKh": "ខេត្តឧត្តរមានជ័យ",
     "provinceEn": "Oddar Meanchey",
     "addressKh": "ស្រុកអន្លង់វែង ជួរភ្នំដងរែក",
@@ -3819,8 +3843,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d9/Dongrakfrommawidaeng1.jpg/960px-Dongrakfrommawidaeng1.jpg"
-    ]
+      "/destinations/dest-113.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-24T16:35:53.725Z"
   },
   {
     "id": "dest-114",
@@ -3930,7 +3956,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Resorts & Cultural Heritage",
     "descriptionKh": "រមណីយដ្ឋានប្រវត្តិសាស្ត្រ និងវប្បធម៌ក្បែរដងទន្លេវ៉ៃកូ សម្បូរទៅដោយដើមឈើធំៗ និងព្រះវិហារបុរាណ។ ជាទីតាំងសក្ការបូជា និងសម្រាកលម្ហែកាយដ៏ពេញនិយមបំផុតរបស់ខេត្តស្វាយរៀង។",
     "descriptionEn": "Tranquil historical riverside park along the Waiko River with ancient trees, Buddhist pagodas, and lush picnic grounds.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c3/Svay_Rieng_University_2011.jpg/960px-Svay_Rieng_University_2011.jpg",
+    "photoUrl": "/destinations/dest-117.jpg",
     "provinceKh": "ខេត្តស្វាយរៀង",
     "provinceEn": "Svay Rieng",
     "addressKh": "ស្រុកស្វាយជ្រំ ចម្ងាយ ៨.៥ គ.ម ពីក្រុងស្វាយរៀង",
@@ -3951,8 +3977,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a3/One_of_many_temples_in_Sambor_Prei_Kuk.jpg/960px-One_of_many_temples_in_Sambor_Prei_Kuk.jpg"
-    ]
+      "/destinations/dest-117.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-24T16:38:42.253Z"
   },
   {
     "id": "dest-118",
@@ -3996,7 +4024,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Mountains & National Parks",
     "descriptionKh": "ភ្នំប្រវត្តិសាស្ត្រដ៏ពិសិដ្ឋដែលជាអតីតរាជធានីបុរាណនៃអាណាចក្រនគរភ្នំ (សម័យហ្វូណន)។ លើកំពូលភ្នំមានវត្តវិហារបុរាណ រូងថ្មប្រវត្តិសាស្ត្រ និងទេសភាពវាលស្រែខេត្តព្រៃវែង។",
     "descriptionEn": "Sacred mountain steeped in history, once a vital spiritual center of the ancient Funan Kingdom, offering hilltop shrines, caves, and expansive rural panoramas.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/41/Golden_rice_field_in_Prey_Veng_Province.jpg/960px-Golden_rice_field_in_Prey_Veng_Province.jpg",
+    "photoUrl": "/destinations/dest-119.jpg",
     "provinceKh": "ខេត្តព្រៃវែង",
     "provinceEn": "Prey Veng",
     "addressKh": "ស្រុកបាភ្នំ ចម្ងាយ ៤៥ គ.ម ពីក្រុងព្រៃវែង",
@@ -4017,8 +4045,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/2/2a/Countryside_of_Cambodia.jpg"
-    ]
+      "/destinations/dest-119.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-24T16:39:35.001Z"
   },
   {
     "id": "dest-120",
@@ -4099,7 +4129,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Historical Temple / Heritage",
     "descriptionKh": "និមិត្តរូបនៃសន្តិភាព និងស្ថាបត្យកម្មខ្មែរសម័យទំនើបដ៏ស្កឹមស្កៃ មានចម្លាក់ប្រវត្តិសាស្ត្រ និងសួនច្បារធំទូលាយ។",
     "descriptionEn": "Grand monument symbolizing peace and national reconciliation featuring intricate Khmer bas-reliefs and expansive gardens.",
-    "photoUrl": "https://upload.wikimedia.org/wikipedia/commons/c/cf/Phnom_Penh_city_at_night.jpg",
+    "photoUrl": "/destinations/dest-122.jpg",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
     "addressKh": "មហាវិថីឈ្នះឈ្នះ សង្កាត់ព្រែកតាសេក ខណ្ឌជ្រោយចង្វារ ភ្នំពេញ",
@@ -4120,8 +4150,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/c/cf/Phnom_Penh_city_at_night.jpg"
-    ]
+      "/destinations/dest-122.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-25T02:05:00.251Z"
   },
   {
     "id": "dest-123",
@@ -4303,7 +4335,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Historical Temple / Heritage",
     "descriptionKh": "ព្រលានជល់ដំរីជាថែវវេទិកាប្រវែង ៣០០ ម៉ែត្រ ស្ថិតនៅមុខព្រះបរមរាជវាំងចាស់អង្គរធំ លម្អដោយចម្លាក់ក្បួនដំរីចម្បាំង និងគ្រុឌទ្រទ្រង់ កសាងឡើងក្នុងរជ្ជកាលព្រះបាទជ័យវរ្ម័នទី៧ សម្រាប់ទតពិធីព្យុហយាត្រា និងជល់ដំរី។",
     "descriptionEn": "A 300-meter-long stone terrace in Angkor Thom decorated with bas-reliefs of elephants and garudas, utilized by King Jayavarman VII as a royal viewing platform for military parades and public ceremonies.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1a/Tonle_Sap_Siem_Reap_Cambodia_Girl-begging-for-money-with-snake-01.jpg/960px-Tonle_Sap_Siem_Reap_Cambodia_Girl-begging-for-money-with-snake-01.jpg",
+    "photoUrl": "/destinations/dest-128.jpg",
     "provinceKh": "ខេត្តសៀមរាប",
     "provinceEn": "Siem Reap",
     "addressKh": "ទល់មុខទីលានជល់ដំរី ក្រុងអង្គរធំ",
@@ -4325,8 +4357,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": true,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Terrace_of_the_Elephants_Angkor_Thom.jpg/960px-Terrace_of_the_Elephants_Angkor_Thom.jpg"
-    ]
+      "/destinations/dest-128.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-24T16:41:17.176Z"
   },
   {
     "id": "dest-129",
@@ -4337,7 +4371,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Historical Temple / Heritage",
     "descriptionKh": "ព្រលានស្តេចគំលង់ស្ថិតនៅចុងខាងជើងព្រលានជល់ដំរី កសាងក្នុងសតវត្សរ៍ទី១២ ល្បីល្បាញដោយសារជញ្ជាំងថ្មឆ្លាក់លម្អិត ៧ ជាន់ នៃពួកនាគ យក្ស គ្រុឌ និងអាទិទេពពិភពក្រោមដី រួមជាមួយរូបបដិមាព្រះយមរាជ។",
     "descriptionEn": "An intricately carved 12th-century terrace adorned with seven tiers of underworld deities, demons, and celestial beings, crowned with a mysterious statue representing the Dharmaraja or Yama.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0e/Common_imperial_%28Cheritra_freja_evansi%29_Siem_Reap.jpg/960px-Common_imperial_%28Cheritra_freja_evansi%29_Siem_Reap.jpg",
+    "photoUrl": "/destinations/dest-129.jpg",
     "provinceKh": "ខេត្តសៀមរាប",
     "provinceEn": "Siem Reap",
     "addressKh": "ខាងជើងព្រលានជល់ដំរី ក្រុងអង្គរធំ",
@@ -4359,8 +4393,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/7/75/Terrace_of_the_Leper_King_Angkor_Thom.jpg/960px-Terrace_of_the_Leper_King_Angkor_Thom.jpg"
-    ]
+      "/destinations/dest-129.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-24T16:42:56.949Z"
   },
   {
     "id": "dest-130",
@@ -4371,7 +4407,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Historical Temple / Heritage",
     "descriptionKh": "ប្រាសាទនាគព័ន្ធជាប្រាសាទកោះលើផ្ទៃទឹកដ៏អស្ចារ្យ កណ្តាលបារាយណ៍ជ័យតដាក កសាងឡើងក្នុងរជ្ជកាលព្រះបាទជ័យវរ្ម័នទី៧ ជាមន្ទីរព្យាបាលរោគបុរាណតំណាងឱ្យបឹងពិសិដ្ឋអនវតប្តាលើភ្នំហិមពាន្ត។",
     "descriptionEn": "A unique island temple situated on a circular sanctuary in the middle of Jayatataka Baray, built by Jayavarman VII as a sacred hospital symbolizing the healing waters of Lake Anavatapta.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a6/Neak_Pean%2C_Angkor%2C_Camboya%2C_2013-08-17%2C_DD_01.JPG/960px-Neak_Pean%2C_Angkor%2C_Camboya%2C_2013-08-17%2C_DD_01.JPG",
+    "photoUrl": "/destinations/dest-130.jpg",
     "provinceKh": "ខេត្តសៀមរាប",
     "provinceEn": "Siem Reap",
     "addressKh": "កណ្តាលបារាយណ៍ជ័យតដាក ក្រុងសៀមរាប",
@@ -4393,8 +4429,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": true,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Neak_Pean_Angkor_Cambodia.jpg/960px-Neak_Pean_Angkor_Cambodia.jpg"
-    ]
+      "/destinations/dest-130.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-24T16:44:35.373Z"
   },
   {
     "id": "dest-131",
@@ -4405,7 +4443,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Historical Temple / Heritage",
     "descriptionKh": "ប្រាសាទតាសោម កសាងនៅចុងសតវត្សរ៍ទី១២ ដោយព្រះបាទជ័យវរ្ម័នទី៧ ឧទ្ទិសដល់ព្រះបិតា។ ប្រាសាទនេះល្បីល្បាញដោយសារខ្លោងទ្វារខាងកើតដែលត្រូវដើមជ្រៃយក្សដុះស្រោបពីលើយ៉ាងអស្ចារ្យ ជានិមិត្តរូបដ៏ល្បីនៃអង្គរ។",
     "descriptionEn": "A late 12th-century Buddhist temple dedicated to the father of King Jayavarman VII, internationally renowned for its iconic eastern gopura completely strangled by the roots of a giant sacred fig tree.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8d/Musiciens_au_temple_de_Thma_Bay_kaek_Cambodge.jpg/960px-Musiciens_au_temple_de_Thma_Bay_kaek_Cambodge.jpg",
+    "photoUrl": "/destinations/dest-131.jpg",
     "provinceKh": "ខេត្តសៀមរាប",
     "provinceEn": "Siem Reap",
     "addressKh": "ខាងកើតប្រាសាទនាគព័ន្ធ ក្រុងសៀមរាប",
@@ -4427,8 +4465,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Ta_Som_temple_gopura_tree.jpg/960px-Ta_Som_temple_gopura_tree.jpg"
-    ]
+      "/destinations/dest-131.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-24T16:50:59.450Z"
   },
   {
     "id": "dest-132",
@@ -4473,7 +4513,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Historical Temple / Heritage",
     "descriptionKh": "ប្រាសាទចៅសាយទេវតា កសាងឡើងនៅពាក់កណ្តាលសតវត្សរ៍ទី១២ ក្នុងរជ្ជកាលព្រះបាទសូរ្យវរ្ម័នទី២ ទល់មុខប្រាសាទធម្មនន្ទ ឧទ្ទិសដល់ព្រហ្មញ្ញសាសនា មានក្បាច់ចម្លាក់ទេពអប្សរ និងក្បាច់លម្អលើថ្មភក់ដ៏រស់រវើក។",
     "descriptionEn": "A 12th-century Hindu temple located east of Angkor Thom, built in the Angkor Wat style, renowned for its beautifully restored devata carvings and elegant sandstone layout.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/29/Golden_birdwing_%28Troides_aeacus_aeacus%29_female_Siem_Reap.jpg/960px-Golden_birdwing_%28Troides_aeacus_aeacus%29_female_Siem_Reap.jpg",
+    "photoUrl": "/destinations/dest-133.jpg",
     "provinceKh": "ខេត្តសៀមរាប",
     "provinceEn": "Siem Reap",
     "addressKh": "ខាងកើតខ្លោងទ្វារជ័យ ក្រុងអង្គរធំ",
@@ -4495,8 +4535,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/Chau_Say_Tevoda_Angkor.jpg/960px-Chau_Say_Tevoda_Angkor.jpg"
-    ]
+      "/destinations/dest-133.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-24T16:46:13.104Z"
   },
   {
     "id": "dest-134",
@@ -4568,14 +4610,14 @@ export const initial100Destinations: TouristDestination[] = [
   },
   {
     "id": "dest-136",
-    "nameKh": "ប្រាសាទបេងមាលា",
-    "nameEn": "Beng Mealea Jungle Temple",
+    "nameKh": "ប្រាសាទបឹងមាលា",
+    "nameEn": "Boeng Mealea Jungle Temple",
     "categorySlug": "temple",
     "categoryKh": "ប្រាសាទបុរាណ / បេតិកភណ្ឌ",
     "categoryEn": "Historical Temple / Heritage",
-    "descriptionKh": "ប្រាសាទបេងមាលាជាមហាប្រាសាទថ្មភក់កណ្តាលព្រៃជ្រៅ កសាងក្នុងសតវត្សរ៍ទី១២ តាមប្លង់ប្រហាក់ប្រហែលអង្គរវត្ត។ ប្រាសាទនេះនៅរក្សាភាពអាថ៌កំបាំងដែលរុំព័ទ្ធដោយដើមឈើយក្ស និងលិចកណ្តាលព្រៃធម្មជាតិ។",
+    "descriptionKh": "ប្រាសាទបឹងមាលាជាមហាប្រាសាទថ្មភក់កណ្តាលព្រៃជ្រៅ កសាងក្នុងសតវត្សរ៍ទី១២ តាមប្លង់ប្រហាក់ប្រហែលអង្គរវត្ត។ ប្រាសាទនេះនៅរក្សាភាពអាថ៌កំបាំងដែលរុំព័ទ្ធដោយដើមឈើយក្ស និងលិចកណ្តាលព្រៃធម្មជាតិ។",
     "descriptionEn": "A colossal 12th-century Hindu temple swallowed by the jungle, sharing the same grand layout as Angkor Wat. Famous for its moss-covered sandstone ruins and atmospheric elevated wooden walkways.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/92/12th_century_Angkor_Thommanon_temple%2C_Siem_Reap_Cambodia.jpg/960px-12th_century_Angkor_Thommanon_temple%2C_Siem_Reap_Cambodia.jpg",
+    "photoUrl": "/destinations/dest-136.jpg",
     "provinceKh": "ខេត្តសៀមរាប",
     "provinceEn": "Siem Reap",
     "addressKh": "ស្រុកស្វាយលើ ចម្ងាយប្រមាណ ៦០ គ.ម ពីក្រុងសៀមរាប",
@@ -4597,8 +4639,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": true,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Beng_Mealea_jungle_temple_Cambodia.jpg/960px-Beng_Mealea_jungle_temple_Cambodia.jpg"
-    ]
+      "/destinations/dest-136.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-25T02:05:56.420Z"
   },
   {
     "id": "dest-137",
@@ -5221,7 +5265,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Historical Temple / Heritage",
     "descriptionKh": "វត្តក្រោម ស្ថិតនៅជិតឆ្នេរហាវ៉ៃ និងស្ពានតេជោមរកត ជាអារាមពុទ្ធសាសនាដ៏ស្ងប់ស្ងាត់ មានសាលាបាលី ចម្លាក់ព្រះពុទ្ធប្រវត្តិ និងរូបសំណាកព្រះពុទ្ធចូលនិព្វានយ៉ាងធំ។",
     "descriptionEn": "A serene coastal temple dedicated to Buddhist education and meditation, featuring detailed wall murals illustrating the life of Buddha and a peaceful reclining Buddha shrine near Hawaii Beach.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5b/Preah_Sihanouk_National_Park_08.jpg/960px-Preah_Sihanouk_National_Park_08.jpg",
+    "photoUrl": "/destinations/dest-156.jpg",
     "provinceKh": "ខេត្តព្រះសីហនុ",
     "provinceEn": "Preah Sihanouk",
     "addressKh": "ផ្លូវសន្តិភាព សង្កាត់លេខ ៣ ក្បែរឆ្នេរហាវ៉ៃ",
@@ -5243,8 +5287,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Wat_Krom_Sihanoukville.jpg/960px-Wat_Krom_Sihanoukville.jpg"
-    ]
+      "/destinations/dest-156.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-24T16:58:34.971Z"
   },
   {
     "id": "dest-157",
@@ -5357,7 +5403,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Historical Temple / Heritage",
     "descriptionKh": "វត្តសំពៅប្រាំ កសាងឡើងក្នុងឆ្នាំ ១៩២៤ ដោយព្រះបាទស៊ីសុវត្ថិមុនីវង្ស លើកំពូលភ្នំបូកគោ។ វត្តនេះលេចធ្លោដោយសារផ្ទាំងថ្មធម្មជាតិធំៗ ៥ មានរាងដូចសំពៅសមុទ្រ ជាប់មាត់ជ្រោះដ៏ចោតដែលអាចមើលឃើញឆ្នេរសមុទ្រ។",
     "descriptionEn": "A sacred Buddhist monastery built in 1924 by King Sisowath Monivong on Bokor Hill, celebrated for five massive natural rock formations resembling five sailing ships perched above sheer sea cliffs.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/78/2016_Kampot%2C_Muzeum_Prowincji_Kampot_%2805%29.jpg/960px-2016_Kampot%2C_Muzeum_Prowincji_Kampot_%2805%29.jpg",
+    "photoUrl": "/destinations/dest-160.jpg",
     "provinceKh": "ខេត្តកំពត",
     "provinceEn": "Kampot",
     "addressKh": "លើកំពូលភ្នំបូកគោ ក្រុងបូកគោ",
@@ -5379,8 +5425,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": true,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Wat_Sampov_Pram_Bokor_Hill.jpg/960px-Wat_Sampov_Pram_Bokor_Hill.jpg"
-    ]
+      "/destinations/dest-160.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-24T16:54:58.965Z"
   },
   {
     "id": "dest-161",
@@ -5629,7 +5677,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Historical Temple / Heritage",
     "descriptionKh": "វត្តសមាធិ ស្ថិតនៅលើជម្រាលភ្នំកែប ហ៊ុមព័ទ្ធដោយព្រៃឈើធម្មជាតិដ៏ស្ងប់ស្ងាត់ មានព្រះវិហារពណ៌មាស និងទីធ្លាគយគន់ទេសភាពឆ្នេរសមុទ្រកែប និងកោះនានាយ៉ាងស្រស់ត្រកាល។",
     "descriptionEn": "A tranquil hillside Buddhist meditation temple nestled in the slopes of Kep Mountain, offering golden pagodas, spiritual peace, and scenic vistas over the Gulf of Thailand.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cb/06-Kep_Crab_Market_Cambodia-nX-13.jpg/960px-06-Kep_Crab_Market_Cambodia-nX-13.jpg",
+    "photoUrl": "/destinations/dest-168.jpg",
     "provinceKh": "ខេត្តកែប",
     "provinceEn": "Kep",
     "addressKh": "ជម្រាលភ្នំឧទ្យានជាតិកែប ក្រុងកែប",
@@ -5651,8 +5699,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Kep_National_Park_trail_Cambodia.jpg/960px-Kep_National_Park_trail_Cambodia.jpg"
-    ]
+      "/destinations/dest-168.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-24T16:57:18.498Z"
   },
   {
     "id": "dest-169",
@@ -5867,7 +5917,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Historical Temple / Heritage",
     "descriptionKh": "ចេតិយឃុនឆាង ឃុនផែន ស្ថិតនៅលើដីកោះកណ្តាលដៃសមុទ្រកោះកុង ជាទីសក្ការៈបូជាប្រវត្តិសាស្ត្រជាប់ទាក់ទងនឹងរឿងព្រេងស្នេហាអមតៈឃុនឆាងឃុនផែន សាងសង់ឡើងតាំងពីសតវត្សរ៍ទី១៥។",
     "descriptionEn": "A historical cliffside shrine perched on a coastal rocky inlet in Koh Kong, steeped in the tragic folk legend of Khun Chhang and Khun Phaen dating back centuries.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b5/Peam_Krasop_Wildlife_Sanctuary_Koh_Kong.jpg/960px-Peam_Krasop_Wildlife_Sanctuary_Koh_Kong.jpg",
+    "photoUrl": "/destinations/dest-176.jpg",
     "provinceKh": "ខេត្តកោះកុង",
     "provinceEn": "Koh Kong",
     "addressKh": "ឃុំប៉ាក់ខ្លង ស្រុកមណ្ឌលសីមា មុខទីរួមខេត្តកោះកុង",
@@ -5889,8 +5939,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b5/Peam_Krasop_Wildlife_Sanctuary_Koh_Kong.jpg/960px-Peam_Krasop_Wildlife_Sanctuary_Koh_Kong.jpg"
-    ]
+      "/destinations/dest-176.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-25T02:08:11.481Z"
   },
   {
     "id": "dest-177",
@@ -6003,7 +6055,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Historical Temple / Heritage",
     "descriptionKh": "ប្រាសាទស្នឹង ជាប្រាសាទឥដ្ឋ និងថ្មភក់សាងសង់ឡើងក្នុងសតវត្សរ៍ទី១២ ក្នុងរជ្ជកាលព្រះបាទសូរ្យវរ្ម័នទី២។ ប្រាសាទនេះមានពីរផ្នែក គឺប្រាសាទស្នឹងកើត និងប្រាសាទស្នឹងលិច ដែលលម្អដោយចម្លាក់រឿងទេវកថាហិណ្ឌូ។",
     "descriptionEn": "A 12th-century Hindu brick and sandstone sanctuary comprising East Sneung and West Sneung temples, built under King Suryavarman II with carved lintels depicting Hindu myths.",
-    "photoUrl": "https://upload.wikimedia.org/wikipedia/commons/6/63/Reflection_pool_at_the_Baha%27i_Local_House_of_Worship_in_Battambang_Cambodia_OCT_21_22_2017.jpg",
+    "photoUrl": "/destinations/dest-180.jpg",
     "provinceKh": "ខេត្តបាត់ដំបង",
     "provinceEn": "Battambang",
     "addressKh": "ឃុំស្នឹង ស្រុកបាណន់ ចម្ងាយ ២២ គ.ម ពីក្រុងបាត់ដំបង",
@@ -6025,8 +6077,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b2/Wat_Banan_mountain_temple_Battambang.jpg/960px-Wat_Banan_mountain_temple_Battambang.jpg"
-    ]
+      "/destinations/dest-180.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-24T17:00:26.262Z"
   },
   {
     "id": "dest-181",
@@ -6139,7 +6193,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Historical Temple / Heritage",
     "descriptionKh": "វត្តសំរោងក្នុងជាអារាមបុរាណកសាងឡើងនៅឆ្នាំ ១៧០៧ ជាវត្តចំណាស់ជាងគេមួយនៅបាត់ដំបង មានព្រះវិហារបុរាណស្ថាបត្យកម្មក្បាច់ឈើប្រណិត និងស្តូបអនុស្សាវរីយ៍ប្រវត្តិសាស្ត្រ។",
     "descriptionEn": "One of the oldest Buddhist temples in Battambang founded in 1707, featuring exquisite wooden-carved ordination halls and a poignant historical memorial stupa.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3d/Cambodia_Kun_Khmer_Battambang_2006_Ian_Taylor_01.jpg/960px-Cambodia_Kun_Khmer_Battambang_2006_Ian_Taylor_01.jpg",
+    "photoUrl": "/destinations/dest-184.jpg",
     "provinceKh": "ខេត្តបាត់ដំបង",
     "provinceEn": "Battambang",
     "addressKh": "ឃុំសំរោងក្នុង ស្រុកឯកភ្នំ ខេត្តបាត់ដំបង",
@@ -6161,8 +6215,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Wat_Ek_Phnom_Battambang.jpg/960px-Wat_Ek_Phnom_Battambang.jpg"
-    ]
+      "/destinations/dest-184.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-24T17:01:28.909Z"
   },
   {
     "id": "dest-185",
@@ -6241,7 +6297,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Historical Temple / Heritage",
     "descriptionKh": "វត្តដំរីស កសាងនៅពាក់កណ្តាលសតវត្សរ៍ទី១៩ មានរូបសំណាកដំរីសធំៗយាមខ្លោងទ្វារ និងក្បាច់ចម្លាក់លម្អិតយ៉ាងប្រណិតលើជញ្ជាំងព្រះវិហារ បង្ហាញពីប្រវត្តិសាស្ត្រ និងសិល្បៈស្ថាបត្យកម្មខ្មែររុងរឿង។",
     "descriptionEn": "A striking mid-19th century Buddhist temple in central Battambang guarded by statues of majestic white elephants, famous for its vivid bas-relief carvings and historic murals.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/68/2022.08-516-248ap1_Large_bags_with_Citrus_hystrix_leaves_for_sale_in_Phou_Puy_Wholesale_Vegetable_Market_in_Battambang%2C_Cambodia_sat27aug2022-1516h.jpg/960px-2022.08-516-248ap1_Large_bags_with_Citrus_hystrix_leaves_for_sale_in_Phou_Puy_Wholesale_Vegetable_Market_in_Battambang%2C_Cambodia_sat27aug2022-1516h.jpg",
+    "photoUrl": "/destinations/dest-187.jpg",
     "provinceKh": "ខេត្តបាត់ដំបង",
     "provinceEn": "Battambang",
     "addressKh": "ផ្លូវលេខ ៣ កណ្តាលក្រុងបាត់ដំបង",
@@ -6263,8 +6319,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Wat_Ek_Phnom_Battambang.jpg/960px-Wat_Ek_Phnom_Battambang.jpg"
-    ]
+      "/destinations/dest-187.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-24T17:02:26.762Z"
   },
   {
     "id": "dest-188",
@@ -6717,7 +6775,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Historical Temple / Heritage",
     "descriptionKh": "ភ្នំឥសីបតមៈ ស្ថិតនៅក្បែរក្រុងបានលុង មានព្រះពុទ្ធបដិមាចូលនិព្វានធំស្កឹមស្កៃលើកំពូលភ្នំ អាចគយគន់ទេសភាពក្រុងបានលុង និងជួរភ្នំខេត្តរតនគិរីទាំងមូលយ៉ាងស្រស់ត្រកាល។",
     "descriptionEn": "A peaceful hilltop Buddhist temple overlooking Banlung, crowned by a large outdoor reclining Buddha statue and offering sweeping panoramic vistas over Ratanakiri highlands.",
-    "photoUrl": "https://upload.wikimedia.org/wikipedia/commons/0/0e/Stung_Treng-Ratanakiri_road.jpg",
+    "photoUrl": "/destinations/dest-201.jpg",
     "provinceKh": "ខេត្តរតនគិរី",
     "provinceEn": "Ratanakiri",
     "addressKh": "ខាងលិចក្រុងបានលុង ខេត្តរតនគិរី",
@@ -6739,8 +6797,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Yeak_Laom_volcanic_lake_Ratanakiri.jpg/960px-Yeak_Laom_volcanic_lake_Ratanakiri.jpg"
-    ]
+      "/destinations/dest-201.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-24T17:04:45.384Z"
   },
   {
     "id": "dest-202",
@@ -7227,7 +7287,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Historical Temple / Heritage",
     "descriptionKh": "ប្រាសាទអណ្តែត ជាប្រាសាទឥដ្ឋទោលសាងឡើងលើទួលខ្ពស់ក្នុងសតវត្សរ៍ទី៧ ក្នុងរជ្ជកាលព្រះបាទជ័យវរ្ម័នទី១ ឧទ្ទិសដល់ព្រះហរិហរៈ (រួមបញ្ចូលព្រះវិស្ណុ និងព្រះសិវៈ) ជាស្នាដៃកំពូលនៃសិល្បៈរចនាបថប្រាសាទអណ្តែត។",
     "descriptionEn": "A magnificent 7th-century brick sanctuary perched on a high earthen mound, famous as the origin site of the world-acclaimed Harihara masterpiece statue.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4f/Kampong_Thom%2C_Cambodge_F%C3%AAte_populaire_la_nuit.jpg/960px-Kampong_Thom%2C_Cambodge_F%C3%AAte_populaire_la_nuit.jpg",
+    "photoUrl": "/destinations/dest-216.jpg",
     "provinceKh": "ខេត្តកំពង់ធំ",
     "provinceEn": "Kampong Thom",
     "addressKh": "ឃុំសាន់គរ ស្រុកកំពង់ស្វាយ ខេត្តកំពង់ធំ",
@@ -7249,8 +7309,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Prasat_Tao_Lion_Temple_Sambor_Prei_Kuk.jpg/960px-Prasat_Tao_Lion_Temple_Sambor_Prei_Kuk.jpg"
-    ]
+      "/destinations/dest-216.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-25T02:10:04.093Z"
   },
   {
     "id": "dest-217",
@@ -7499,7 +7561,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Historical Temple / Heritage",
     "descriptionKh": "ប្រាសាទព្រះធាតុបាស្រី ជាប្រាសាទបុរាណសាងឡើងពីថ្មភក់ និងថ្មបាយក្រៀមក្នុងសតវត្សរ៍ទី១០ ឧទ្ទិសដល់ព្រហ្មញ្ញសាសនា មានចេតិយបុរាណ និងចម្លាក់ផ្តែរទ្វារដ៏កម្រ។",
     "descriptionEn": "A 10th-century Hindu sanctuary of sandstone and laterite nestled in Tboung Khmum, famous for ancient stupas and intricately carved devatas and lintels.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/36/Han_Chey_Temple_Kampong_Cham.jpg/960px-Han_Chey_Temple_Kampong_Cham.jpg",
+    "photoUrl": "/destinations/dest-225.jpg",
     "provinceKh": "ខេត្តត្បូងឃ្មុំ",
     "provinceEn": "Tboung Khmum",
     "addressKh": "ស្រុកអូររាំងឪ ខេត្តត្បូងឃ្មុំ",
@@ -7521,8 +7583,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/36/Han_Chey_Temple_Kampong_Cham.jpg/960px-Han_Chey_Temple_Kampong_Cham.jpg"
-    ]
+      "/destinations/dest-225.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-25T02:11:38.730Z"
   },
   {
     "id": "dest-226",
@@ -7567,7 +7631,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Historical Temple / Heritage",
     "descriptionKh": "វត្តព្រះធាតុជាអារាមប្រវត្តិសាស្ត្រដ៏ចំណាស់មួយក្នុងខេត្តត្បូងឃ្មុំ មានចេតិយបុរាណតម្កល់ព្រះសារីរិកធាតុ និងព្រះវិហារក្បាច់ខ្មែរបុរាណ ជាទីសក្ការៈបូជាដ៏ពិសិដ្ឋរបស់ពុទ្ធសាសនិកជន។",
     "descriptionEn": "A revered historic Buddhist monastery housing ancient stupas with sacred relics and traditional Khmer pagoda artistry, standing as a spiritual heartland in Tboung Khmum.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/46/Kizuna_Bridge_%28Kampong_Cham_-_Tboung_Khmum%29.jpg/960px-Kizuna_Bridge_%28Kampong_Cham_-_Tboung_Khmum%29.jpg",
+    "photoUrl": "/destinations/dest-227.jpg",
     "provinceKh": "ខេត្តត្បូងឃ្មុំ",
     "provinceEn": "Tboung Khmum",
     "addressKh": "ស្រុកត្បូងឃ្មុំ ខេត្តត្បូងឃ្មុំ",
@@ -7589,8 +7653,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Wat_Nokor_Bachey_Kampong_Cham.jpg/960px-Wat_Nokor_Bachey_Kampong_Cham.jpg"
-    ]
+      "/destinations/dest-227.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-24T17:10:15.243Z"
   },
   {
     "id": "dest-228",
@@ -7844,7 +7910,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Historical Temple / Heritage",
     "descriptionKh": "ក្រុមប្រាសាទបុរាណកំពង់លែង (ដូចជាប្រាសាទពណ្ណរាយ ប្រាសាទប្រុស និងប្រាសាទស្រី) សាងឡើងពីឥដ្ឋក្នុងសតវត្សរ៍ទី៨ សម័យចេនឡា មានក្បាច់ចម្លាក់ឥដ្ឋបុរាណ និងរឿងព្រេងនិទានប្រវត្តិសាស្ត្រ។",
     "descriptionEn": "A group of 8th-century Chenla brick temples scattered around Kampong Leang district across the Tonle Sap river, boasting pre-Angkorian brick carvings and legends.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c8/Sambor_Prei_Kuk_Prasat_Boram.jpg/960px-Sambor_Prei_Kuk_Prasat_Boram.jpg",
+    "photoUrl": "/destinations/dest-235.jpg",
     "provinceKh": "ខេត្តកំពង់ឆ្នាំង",
     "provinceEn": "Kampong Chhnang",
     "addressKh": "ស្រុកកំពង់លែង ឆ្លងសាឡាងពីក្រុងកំពង់ឆ្នាំង",
@@ -7866,8 +7932,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c8/Sambor_Prei_Kuk_Prasat_Boram.jpg/960px-Sambor_Prei_Kuk_Prasat_Boram.jpg"
-    ]
+      "/destinations/dest-235.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-25T02:13:01.220Z"
   },
   {
     "id": "dest-236",
@@ -7912,7 +7980,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Historical Temple / Heritage",
     "descriptionKh": "វត្តភ្នំរ៉ាបាក់ ជាអារាមពុទ្ធសាសនាដ៏ចំណាស់មួយសាងសង់លើជម្រាលភ្នំថ្មធម្មជាតិ មានរូងភ្នំថ្មកែវ ផ្ទាំងថ្មដុះចម្លែកៗ និងព្រះពុទ្ធបដិមាក្នុងរូងភ្នំយ៉ាងស័ក្តិសិទ្ធិ។",
     "descriptionEn": "A historic cave temple complex situated amidst weathered rock formations and natural grottoes on Mount Rabak, revered for sacred meditation caves.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/71/Irrigation_barrier_-_Campong_Chhnang_Cambodia_%2810705691653%29.jpg/960px-Irrigation_barrier_-_Campong_Chhnang_Cambodia_%2810705691653%29.jpg",
+    "photoUrl": "/destinations/dest-237.jpg",
     "provinceKh": "ខេត្តកំពង់ឆ្នាំង",
     "provinceEn": "Kampong Chhnang",
     "addressKh": "ស្រុករលាប្អៀរ ខេត្តកំពង់ឆ្នាំង",
@@ -7934,8 +8002,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Ondong_Rossey_pottery_village_Kampong_Chhnang.jpg/960px-Ondong_Rossey_pottery_village_Kampong_Chhnang.jpg"
-    ]
+      "/destinations/dest-237.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-25T02:13:59.881Z"
   },
   {
     "id": "dest-238",
@@ -8082,7 +8152,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Historical Temple / Heritage",
     "descriptionKh": "វត្តវិហារសួគ៌ជាអារាមបុរាណដ៏ពិសិដ្ឋ កសាងក្នុងសម័យព្រះបាទបក្សីចាំក្រុង ល្បីល្បាញដោយសារពិធីប្រណាំងក្របី និងចំបាប់បុរាណខ្មែរជារៀងរាល់ថ្ងៃភ្ជុំបិណ្ឌធំ ដែលទាក់ទាញភ្ញៀវទេសចររាប់ម៉ឺននាក់។",
     "descriptionEn": "A revered ancient Buddhist temple dating from the Angkorian era, world-famous for hosting the traditional annual Buffalo Race and Khmer wrestling festival during Pchum Ben.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ee/Bavet_Kandal%2C_Krong_Bavet%2C_Cambodia_-_panoramio.jpg/960px-Bavet_Kandal%2C_Krong_Bavet%2C_Cambodia_-_panoramio.jpg",
+    "photoUrl": "/destinations/dest-242.jpg",
     "provinceKh": "ខេត្តកណ្តាល",
     "provinceEn": "Kandal",
     "addressKh": "ឃុំវិហារសួគ៌ ស្រុកខ្សាច់កណ្តាល ខេត្តកណ្តាល",
@@ -8104,8 +8174,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": true,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/Phnom_Oudong_royal_stupas_Cambodia.jpg/960px-Phnom_Oudong_royal_stupas_Cambodia.jpg"
-    ]
+      "/destinations/dest-242.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-24T17:15:32.467Z"
   },
   {
     "id": "dest-243",
@@ -8116,7 +8188,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Historical Temple / Heritage",
     "descriptionKh": "វត្តស្វាយអណ្តែតជាជម្រកដើមនៃល្ខោនខោលខ្មែរវត្តស្វាយអណ្តែត ដែលត្រូវបានចុះបញ្ជីជាបេតិកភណ្ឌវប្បធម៌អរូបីនៃមនុស្សជាតិរបស់យូណេស្កូក្នុងឆ្នាំ ២០១៨ មានការសម្តែងរឿងរាមកេរ្តិ៍ប្រពៃណី។",
     "descriptionEn": "The historic birthplace and guardian temple of Lakhon Khol masked theater, inscribed on the UNESCO Intangible Cultural Heritage list in 2018 for its Ramayana masked dance drama.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e5/Bavet_Kandal%2C_Krong_Bavet%2C_Cambodia_-_panoramio_%281%29.jpg/960px-Bavet_Kandal%2C_Krong_Bavet%2C_Cambodia_-_panoramio_%281%29.jpg",
+    "photoUrl": "/destinations/dest-243.jpg",
     "provinceKh": "ខេត្តកណ្តាល",
     "provinceEn": "Kandal",
     "addressKh": "ឃុំសារិកាកែវ ស្រុកខ្សាច់កណ្តាល ខេត្តកណ្តាល",
@@ -8138,8 +8210,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": true,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/Phnom_Oudong_royal_stupas_Cambodia.jpg/960px-Phnom_Oudong_royal_stupas_Cambodia.jpg"
-    ]
+      "/destinations/dest-243.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-24T17:13:12.628Z"
   },
   {
     "id": "dest-244",
@@ -8252,7 +8326,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Historical Temple / Heritage",
     "descriptionKh": "ប្រាសាទភ្នំបាយ៉ង់កោរ កសាងឡើងក្នុងសតវត្សរ៍ទី៧ ក្នុងរជ្ជកាលព្រះបាទភវវរ្ម័នទី២ និងព្រះបាទឥសានវរ្ម័នទី១ លើកំពូលភ្នំកម្ពស់ ៣១៣ ម៉ែត្រ មានកាំជណ្តើរ ៤៣៨ កាំ និងទេសភាពធម្មជាតិស្រស់ត្រកាល។",
     "descriptionEn": "A 7th-century Chenla hilltop mountain temple built atop a 313-meter peak, reached via 438 stone steps and commanding panoramic views over the southern plains.",
-    "photoUrl": "https://upload.wikimedia.org/wikipedia/commons/b/bc/Takeo_Independence_Monument_4051.jpg",
+    "photoUrl": "/destinations/dest-247.jpg",
     "provinceKh": "ខេត្តតាកែវ",
     "provinceEn": "Takeo",
     "addressKh": "ឃុំព្រះបាទជាន់ជុំ ស្រុកគិរីវង់ ខេត្តតាកែវ",
@@ -8274,8 +8348,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/Phnom_Da_Funan_temple_Takeo.jpg/960px-Phnom_Da_Funan_temple_Takeo.jpg"
-    ]
+      "/destinations/dest-247.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-24T17:16:27.090Z"
   },
   {
     "id": "dest-248",
@@ -8286,7 +8362,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Historical Temple / Heritage",
     "descriptionKh": "ជណ្តើរភ្នំជីសូរមានកាំជណ្តើរថ្មបុរាណ ៤១២ កាំ តភ្ជាប់ពីប្រាសាទសេននិមិត្ត និងប្រាសាទសេនភូវាំង ឡើងទៅកាន់កំពូលប្រាសាទភ្នំជីសូរ មានទេសភាពស្រស់ស្អាតកាត់ជួរដើមឈើធំៗ។",
     "descriptionEn": "The monumental 412-step ancient grand stairway leading up the ridge of Phnom Chisor, connecting the lower royal pavilions to the hilltop Angkorian sanctuary.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/66/Takeo_Psar_Nat.JPG/960px-Takeo_Psar_Nat.JPG",
+    "photoUrl": "/destinations/dest-248.jpg",
     "provinceKh": "ខេត្តតាកែវ",
     "provinceEn": "Takeo",
     "addressKh": "ស្រុកសំរោង ខេត្តតាកែវ",
@@ -8308,19 +8384,21 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/Phnom_Da_Funan_temple_Takeo.jpg/960px-Phnom_Da_Funan_temple_Takeo.jpg"
-    ]
+      "/destinations/dest-248.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-24T17:17:35.184Z"
   },
   {
     "id": "dest-249",
-    "nameKh": "វត្តពោធិ៍ក្បាលជោរ តាកែវ",
-    "nameEn": "Wat Po Kbal Chor Pagoda",
+    "nameKh": "វត្តពោធិ៍ជោរ តាកែវ",
+    "nameEn": "Wat Po Chor Pagoda",
     "categorySlug": "temple",
     "categoryKh": "ប្រាសាទបុរាណ / បេតិកភណ្ឌ",
     "categoryEn": "Historical Temple / Heritage",
     "descriptionKh": "វត្តពោធិ៍ក្បាលជោរ ជាអារាមបុរាណល្បីល្បាញដោយសារព្រះវិហារឈើបុរាណ និងដើមពោធិ៍ធំៗចំណាស់រាប់រយឆ្នាំ ជាទីតាំងសក្ការៈបូជាប្រវត្តិសាស្ត្រក្នុងខេត្តតាកែវ។",
     "descriptionEn": "A revered traditional Buddhist monastery known for historic wooden architecture, ancient giant Bodhi trees, and peaceful monastic surroundings.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/45/Takeo_Provinz%2C_Reisfeld.jpg/960px-Takeo_Provinz%2C_Reisfeld.jpg",
+    "photoUrl": "/destinations/dest-249.jpg",
     "provinceKh": "ខេត្តតាកែវ",
     "provinceEn": "Takeo",
     "addressKh": "ស្រុកទ្រាំង ខេត្តតាកែវ",
@@ -8342,8 +8420,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Ta_Prohm_temple_Tonle_Bati_Takeo.jpg/960px-Ta_Prohm_temple_Tonle_Bati_Takeo.jpg"
-    ]
+      "/destinations/dest-249.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-25T02:17:47.748Z"
   },
   {
     "id": "dest-250",
@@ -8422,7 +8502,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Historical Temple / Heritage",
     "descriptionKh": "វត្តព្រះស្រីគ្រប់លក្ខណ៍ និងវត្តវិហារធំសំបូរ មានប្រវត្តិសាស្ត្រទាក់ទងនឹងរឿងព្រេងនិទានក្រពើធន់ និងព្រះនាងក្រពុំឈូក ជាទីសក្ការបូជាយ៉ាងស័ក្តិសិទ្ធិរបស់ពលរដ្ឋខេត្តក្រចេះ និងពុទ្ធសាសនិកទូទាំងប្រទេស។",
     "descriptionEn": "A revered sacred historic site in Sambor tied to the legendary folklore of Crocodile Nen Thun and Princess Srey Krup Leak, featuring century-old stupas and cultural heritage shrines.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2d/Backstreet_Scene_-_Kratie_-_Cambodia_%2848403230376%29.jpg/960px-Backstreet_Scene_-_Kratie_-_Cambodia_%2848403230376%29.jpg",
+    "photoUrl": "/destinations/dest-252.jpg",
     "provinceKh": "ខេត្តក្រចេះ",
     "provinceEn": "Kratie",
     "addressKh": "ឃុំសំបូរ ស្រុកសំបូរ ខេត្តក្រចេះ",
@@ -8444,8 +8524,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Wat_Sarsar_Muoiy_Roi_Kratie.jpg/960px-Wat_Sarsar_Muoiy_Roi_Kratie.jpg"
-    ]
+      "/destinations/dest-252.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-24T17:18:35.359Z"
   },
   {
     "id": "dest-253",
@@ -8558,7 +8640,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Historical Temple / Heritage",
     "descriptionKh": "អារាមវត្តកោះសំបុកស្ថិតនៅលើកូនភ្នំជាប់ទន្លេមេគង្គ សំបូរដោយព្រៃឈើធំៗ និងកុដិសមាធិ ព្រមទាំងមានទិដ្ឋភាពមើលឃើញដងទន្លេមេគង្គយ៉ាងវែងអន្លាយ។",
     "descriptionEn": "A serene forest hermitage and timber monastery perched atop Sambok Hill along the Mekong, revered for meditation practice and commanding river vistas.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/ff/Still_Life_with_Cart_and_Temple_Frieze_-_Outside_Wat_Krong_Kracheh_-_Kratie_-_Cambodia_-_02_%2848403370472%29.jpg/960px-Still_Life_with_Cart_and_Temple_Frieze_-_Outside_Wat_Krong_Kracheh_-_Kratie_-_Cambodia_-_02_%2848403370472%29.jpg",
+    "photoUrl": "/destinations/dest-256.jpg",
     "provinceKh": "ខេត្តក្រចេះ",
     "provinceEn": "Kratie",
     "addressKh": "ឃុំសំបុក ស្រុកចិត្របុរី ខេត្តក្រចេះ",
@@ -8580,8 +8662,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/Phnom_Sambok_Kratie_Cambodia.jpg/960px-Phnom_Sambok_Kratie_Cambodia.jpg"
-    ]
+      "/destinations/dest-256.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-24T17:19:37.678Z"
   },
   {
     "id": "dest-257",

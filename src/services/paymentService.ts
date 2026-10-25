@@ -40,29 +40,25 @@ export function resolveAndValidateVipPlan(
   if (input?.planType === 'annual') {
     return dynamicPlans.annual;
   }
-  if (typeof input?.durationDays === 'number') {
-    if (
-      input.durationDays === dynamicPlans.quarterly.durationDays ||
-      input.durationDays === 10 ||
-      input.durationDays === 30
-    ) {
+  if (typeof input?.durationDays === 'number' && input.durationDays >= 1) {
+    if (input.durationDays === dynamicPlans.quarterly.durationDays) {
       return dynamicPlans.quarterly;
     }
-    if (input.durationDays === dynamicPlans.annual.durationDays || input.durationDays === 90) {
+    if (input.durationDays === dynamicPlans.annual.durationDays) {
+      return dynamicPlans.annual;
+    }
+    if (input.durationDays === 10 || input.durationDays === 30) {
+      return dynamicPlans.quarterly;
+    }
+    if (input.durationDays === 90) {
       return dynamicPlans.annual;
     }
   }
   if (typeof input?.amountUsd === 'number') {
-    if (
-      Math.abs(input.amountUsd - dynamicPlans.quarterly.priceUsd) <= 0.05 ||
-      Math.abs(input.amountUsd - VIP_QUARTERLY_PRICE_USD) <= 0.05
-    ) {
+    if (Math.abs(input.amountUsd - dynamicPlans.quarterly.priceUsd) <= 0.05) {
       return dynamicPlans.quarterly;
     }
-    if (
-      Math.abs(input.amountUsd - dynamicPlans.annual.priceUsd) <= 0.05 ||
-      Math.abs(input.amountUsd - VIP_ANNUAL_PRICE_USD) <= 0.05
-    ) {
+    if (Math.abs(input.amountUsd - dynamicPlans.annual.priceUsd) <= 0.05) {
       return dynamicPlans.annual;
     }
   }
@@ -451,7 +447,12 @@ export async function verifyAdditionalStorePaymentOnBackend(
 }
 
 // Google Play Billing In-App Subscription purchase flow
-export async function processGooglePlayBilling(user: User): Promise<PaymentVerificationRequest> {
+export async function processGooglePlayBilling(
+  user: User,
+  planType: 'quarterly' | 'annual' = 'annual',
+  settings?: Partial<AppSettings> | null
+): Promise<PaymentVerificationRequest> {
+  const plan = resolveAndValidateVipPlan({ planType }, settings);
   // Generate authentic Google Play Order ID format (e.g., GPA.3021-4829-1928-48201)
   const part1 = Math.floor(1000 + Math.random() * 9000);
   const part2 = Math.floor(1000 + Math.random() * 9000);
@@ -467,7 +468,7 @@ export async function processGooglePlayBilling(user: User): Promise<PaymentVerif
     userName: user.name,
     paymentMethod: 'GooglePlayBilling',
     transactionRef: orderId,
-    amountUsd: VIP_ANNUAL_PRICE_USD,
+    amountUsd: plan.priceUsd,
     nonce: `nonce_${Date.now()}`,
     timestamp: Date.now(),
     paymentToken: token
@@ -477,8 +478,11 @@ export async function processGooglePlayBilling(user: User): Promise<PaymentVerif
 // KHQR / Bakong mobile banking payment flow
 export async function processKhqrPayment(
   user: User, 
-  bankTrxRef: string
+  bankTrxRef: string,
+  planType: 'quarterly' | 'annual' = 'annual',
+  settings?: Partial<AppSettings> | null
 ): Promise<PaymentVerificationRequest> {
+  const plan = resolveAndValidateVipPlan({ planType }, settings);
   const cleanRef = bankTrxRef.trim().toUpperCase();
   return {
     userId: user.id,
@@ -486,7 +490,7 @@ export async function processKhqrPayment(
     userName: user.name,
     paymentMethod: 'KHQR',
     transactionRef: cleanRef,
-    amountUsd: VIP_ANNUAL_PRICE_USD,
+    amountUsd: plan.priceUsd,
     nonce: `khqr_${Date.now()}`,
     timestamp: Date.now(),
     paymentToken: `khqr_proof_${cleanRef}`
@@ -496,8 +500,11 @@ export async function processKhqrPayment(
 // Credit / Debit card secure tokenized processing (Zero card numbers stored in APK)
 export async function processCardPayment(
   user: User,
-  last4: string
+  last4: string,
+  planType: 'quarterly' | 'annual' = 'annual',
+  settings?: Partial<AppSettings> | null
 ): Promise<PaymentVerificationRequest> {
+  const plan = resolveAndValidateVipPlan({ planType }, settings);
   const cardToken = `tok_visa_${last4}_${Date.now()}`;
   const trxRef = `CARD-TXN-${Date.now().toString(36).toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`;
   
@@ -507,14 +514,14 @@ export async function processCardPayment(
     userName: user.name,
     paymentMethod: 'Card',
     transactionRef: trxRef,
-    amountUsd: VIP_ANNUAL_PRICE_USD,
+    amountUsd: plan.priceUsd,
     nonce: `card_${Date.now()}`,
     timestamp: Date.now(),
     paymentToken: cardToken
   };
 }
 
-// Restore eligible purchases
+// Restore eligible purchases (preserves existing payment records regardless of historical price paid)
 export function checkEligibleRestoration(
   userId: string,
   userEmail: string,
@@ -523,7 +530,7 @@ export function checkEligibleRestoration(
   // Look for any verified VIP subscription transaction associated with this user
   const matching = transactions.filter(t => 
     t.status === 'verified' &&
-    (t.type === 'user_vip_upgrade' || t.amountUsd === VIP_ANNUAL_PRICE_USD || t.amountUsd === VIP_QUARTERLY_PRICE_USD) &&
+    (t.type === 'user_vip_upgrade' || t.membershipTier === 'premium_vip') &&
     (t.userId === userId || (userEmail && t.userEmail === userEmail))
   );
 

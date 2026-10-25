@@ -240,6 +240,7 @@ export async function pushCloudDocument(key: string, payload: any, timeoutMs = 1
 
 /**
  * Pull a shared key-value document from Supabase `kft_app_kv_store` table.
+ * Uses strict cache-busting so mobile WebViews and browsers never return stale cached payloads.
  */
 export async function pullCloudDocument<T>(key: string, timeoutMs = 10000): Promise<T | null> {
   if (!isSupabaseConfigured()) return null;
@@ -247,10 +248,15 @@ export async function pullCloudDocument<T>(key: string, timeoutMs = 10000): Prom
 
   try {
     const res = await fetchWithTimeout(
-      `${cfg.supabaseUrl}/rest/v1/kft_app_kv_store?key=eq.${encodeURIComponent(key)}&select=payload,updated_at&limit=1`,
+      `${cfg.supabaseUrl}/rest/v1/kft_app_kv_store?key=eq.${encodeURIComponent(key)}&select=payload,updated_at&limit=1&_t=${Date.now()}`,
       {
         method: 'GET',
-        headers: getSupabaseHeaders(false),
+        cache: 'no-store',
+        headers: {
+          ...getSupabaseHeaders(false),
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          Pragma: 'no-cache',
+        },
       },
       timeoutMs
     );
@@ -264,6 +270,212 @@ export async function pullCloudDocument<T>(key: string, timeoutMs = 10000): Prom
     console.warn(`Supabase pullCloudDocument(${key}) error:`, err);
     return null;
   }
+}
+
+/**
+ * Normalize and sanitize AppSettings so VIP prices, durations, names, promotional banners,
+ * and additional-store fees are always consistent across all screens and payment checks.
+ */
+export function normalizeAuthoritativeAppSettings(
+  raw: Partial<AppSettings>,
+  fallback?: Partial<AppSettings>
+): AppSettings {
+  const merged = { ...(fallback || {}), ...(raw || {}) } as AppSettings;
+  const shortDays =
+    typeof merged.vipShortDurationDays === 'number' && merged.vipShortDurationDays >= 1
+      ? Math.round(merged.vipShortDurationDays)
+      : 10;
+  const shortPrice =
+    typeof merged.vipShortPriceUsd === 'number' && merged.vipShortPriceUsd > 0
+      ? Math.round(merged.vipShortPriceUsd * 100) / 100
+      : 2.99;
+  const longDays =
+    typeof merged.vipLongDurationDays === 'number' && merged.vipLongDurationDays >= 1
+      ? Math.round(merged.vipLongDurationDays)
+      : 90;
+  const longPrice =
+    typeof merged.vipLongPriceUsd === 'number' && merged.vipLongPriceUsd > 0
+      ? Math.round(merged.vipLongPriceUsd * 100) / 100
+      : 4.99;
+  const extraStoreFee =
+    typeof merged.additionalStoreFeeUsd === 'number' && merged.additionalStoreFeeUsd >= 0
+      ? Math.round(merged.additionalStoreFeeUsd * 100) / 100
+      : 10.0;
+  const includedFree =
+    typeof merged.includedFreeStoresPerVip === 'number' && merged.includedFreeStoresPerVip >= 1
+      ? Math.round(merged.includedFreeStoresPerVip)
+      : 1;
+
+  const shortNameKh = (merged.vipShortNameKh || '').trim() || `VIP ${shortDays} ថ្ងៃ`;
+  const shortNameEn = (merged.vipShortNameEn || '').trim() || `VIP ${shortDays} Days`;
+  const longNameKh = (merged.vipLongNameKh || '').trim() || `កញ្ចប់ VIP ${longDays} ថ្ងៃ`;
+  const longNameEn = (merged.vipLongNameEn || '').trim() || `VIP ${longDays} Days`;
+
+  return {
+    ...merged,
+    supportAccountName: merged.supportAccountName || 'CHEA KIMSENG',
+    vipShortDurationDays: shortDays,
+    vipShortPriceUsd: shortPrice,
+    vipShortNameKh: shortNameKh,
+    vipShortNameEn: shortNameEn,
+    vipLongDurationDays: longDays,
+    vipLongPriceUsd: longPrice,
+    vipLongNameKh: longNameKh,
+    vipLongNameEn: longNameEn,
+    additionalStoreFeeUsd: extraStoreFee,
+    includedFreeStoresPerVip: includedFree,
+    promotionalFeeUsd: shortPrice,
+    promotionPeriodKh: `កញ្ចប់ VIP ផ្លូវការ៖ $${shortPrice.toFixed(2)} សម្រាប់ ${shortDays} ថ្ងៃ ឬ $${longPrice.toFixed(2)} សម្រាប់ ${longDays} ថ្ងៃ • បន្ថែមហាងថ្មី៖ $${extraStoreFee.toFixed(2)} / ១ ហាង`,
+    promotionPeriodEn: `Official VIP Plans: $${shortPrice.toFixed(2)} for ${shortDays} Days or $${longPrice.toFixed(2)} for ${longDays} Days • Additional Store: $${extraStoreFee.toFixed(2)} / store`,
+  };
+}
+
+/**
+ * Fetch the authoritative Admin-configured AppSettings directly from the server (`kft_cloud_app_settings_v1`).
+ * Immediately invalidates outdated local caches (`kft_settings_v3`) and updates `kft_settings_v4`.
+ */
+export async function fetchAuthoritativeAppSettingsFromServer(
+  fallback?: Partial<AppSettings>,
+  timeoutMs = 6000
+): Promise<{
+  ok: boolean;
+  settings: AppSettings | null;
+  updatedAt?: string;
+  error?: string;
+}> {
+  if (!isSupabaseConfigured()) {
+    return {
+      ok: false,
+      settings: null,
+      error: 'Cloud server is not configured.',
+    };
+  }
+  const cfg = getCloudApiConfig();
+
+  try {
+    const res = await fetchWithTimeout(
+      `${cfg.supabaseUrl}/rest/v1/kft_app_kv_store?key=in.(%22kft_cloud_admin_vip_pricing_v2%22,%22kft_cloud_app_settings_v1%22)&select=key,payload,updated_at&_t=${Date.now()}`,
+      {
+        method: 'GET',
+        cache: 'no-store',
+        headers: {
+          ...getSupabaseHeaders(false),
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          Pragma: 'no-cache',
+        },
+      },
+      timeoutMs
+    );
+
+    if (!res.ok) {
+      return {
+        ok: false,
+        settings: null,
+        error: `Failed to fetch server VIP settings (HTTP ${res.status}).`,
+      };
+    }
+
+    const rows = await res.json();
+    if (Array.isArray(rows) && rows.length > 0) {
+      const v2Row = rows.find((r: any) => r?.key === 'kft_cloud_admin_vip_pricing_v2' && r?.payload);
+      const v1Row = rows.find((r: any) => r?.key === 'kft_cloud_app_settings_v1' && r?.payload);
+      const chosenRow = v2Row || v1Row;
+      if (chosenRow?.payload) {
+        const normalized = normalizeAuthoritativeAppSettings(chosenRow.payload, fallback);
+        // Self-heal kft_cloud_app_settings_v1 if an older client overwrote it
+        if (
+          v2Row?.payload &&
+          (!v1Row?.payload ||
+            Number(v1Row.payload.vipShortPriceUsd) !== normalized.vipShortPriceUsd ||
+            Number(v1Row.payload.vipLongPriceUsd) !== normalized.vipLongPriceUsd)
+        ) {
+          pushCloudDocument('kft_cloud_app_settings_v1', normalized, 6000).catch(() => {});
+        }
+        try {
+          if (typeof localStorage !== 'undefined') {
+            localStorage.removeItem('kft_settings_v3');
+            localStorage.setItem('kft_settings_v4', JSON.stringify(normalized));
+          }
+        } catch {
+          // ignore localStorage errors
+        }
+        return {
+          ok: true,
+          settings: normalized,
+          updatedAt: chosenRow.updated_at || normalized.settingsUpdatedAt,
+        };
+      }
+    }
+
+    return {
+      ok: true,
+      settings: null,
+    };
+  } catch (err: any) {
+    return {
+      ok: false,
+      settings: null,
+      error:
+        err?.name === 'AbortError'
+          ? 'Server request timed out while loading VIP settings.'
+          : err?.message || 'Network error while loading server VIP settings.',
+    };
+  }
+}
+
+/**
+ * Authoritative Admin-only save for centralized VIP settings (`kft_cloud_admin_vip_pricing_v2` & `kft_cloud_app_settings_v1`).
+ * Increments `settingsVersion`, writes directly to the server, and invalidates stale local caches.
+ */
+export async function saveAuthoritativeAppSettingsToServer(
+  settings: AppSettings,
+  timeoutMs = 8000
+): Promise<{
+  ok: boolean;
+  settings: AppSettings;
+  error?: string;
+}> {
+  const nextVersion = (Number(settings.settingsVersion) || 0) + 1;
+  const nowIso = new Date().toISOString();
+  const normalized = normalizeAuthoritativeAppSettings({
+    ...settings,
+    settingsVersion: nextVersion,
+    settingsUpdatedAt: nowIso,
+  });
+
+  try {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.removeItem('kft_settings_v3');
+      localStorage.setItem('kft_settings_v4', JSON.stringify(normalized));
+    }
+  } catch {
+    // ignore storage errors
+  }
+
+  if (!isSupabaseConfigured()) {
+    return {
+      ok: false,
+      settings: normalized,
+      error: 'Cloud server is not configured.',
+    };
+  }
+
+  const [pushedV2, pushedV1] = await Promise.all([
+    pushCloudDocument('kft_cloud_admin_vip_pricing_v2', normalized, timeoutMs),
+    pushCloudDocument('kft_cloud_app_settings_v1', normalized, timeoutMs),
+  ]);
+  if (!pushedV2 && !pushedV1) {
+    return {
+      ok: false,
+      settings: normalized,
+      error: 'Could not save VIP settings to cloud server. Please check your connection and try again.',
+    };
+  }
+
+  return {
+    ok: true,
+    settings: normalized,
+  };
 }
 
 /**
@@ -294,6 +506,78 @@ export async function pullCloudDocumentsByPrefix<T = any>(
     return [];
   } catch (err) {
     console.warn(`Supabase pullCloudDocumentsByPrefix(${prefix}) error:`, err);
+    return [];
+  }
+}
+
+/**
+ * Lightweight manifest fetch of all keys and `updated_at` timestamps matching a prefix (e.g. `kft_ov_`)
+ * without downloading multi-megabyte base64 payloads at once.
+ */
+export async function pullCloudKeysManifestByPrefix(
+  prefix: string,
+  timeoutMs = 8000
+): Promise<Array<{ key: string; updated_at: string }>> {
+  if (!isSupabaseConfigured()) return [];
+  const cfg = getCloudApiConfig();
+
+  try {
+    const res = await fetchWithTimeout(
+      `${cfg.supabaseUrl}/rest/v1/kft_app_kv_store?key=like.${encodeURIComponent(prefix)}*&select=key,updated_at&limit=1000&_t=${Date.now()}`,
+      {
+        method: 'GET',
+        headers: {
+          ...getSupabaseHeaders(false),
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+        },
+        cache: 'no-store',
+      },
+      timeoutMs
+    );
+    if (!res.ok) return [];
+    const rows = await res.json();
+    if (Array.isArray(rows)) {
+      return rows.filter(r => r && typeof r.key === 'string');
+    }
+    return [];
+  } catch (err) {
+    console.warn(`Supabase pullCloudKeysManifestByPrefix(${prefix}) error:`, err);
+    return [];
+  }
+}
+
+/**
+ * Fetch specific keys in a small batch so large base64 images never time out on mobile networks.
+ */
+export async function pullCloudDocumentsByKeys<T = any>(
+  keys: string[],
+  timeoutMs = 15000
+): Promise<Array<{ key: string; payload: T; updated_at?: string }>> {
+  if (!isSupabaseConfigured() || !Array.isArray(keys) || keys.length === 0) return [];
+  const cfg = getCloudApiConfig();
+
+  try {
+    const inList = keys.map(k => `"${k.replace(/"/g, '')}"`).join(',');
+    const res = await fetchWithTimeout(
+      `${cfg.supabaseUrl}/rest/v1/kft_app_kv_store?key=in.(${encodeURIComponent(inList)})&select=key,payload,updated_at&_t=${Date.now()}`,
+      {
+        method: 'GET',
+        headers: {
+          ...getSupabaseHeaders(false),
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+        },
+        cache: 'no-store',
+      },
+      timeoutMs
+    );
+    if (!res.ok) return [];
+    const rows = await res.json();
+    if (Array.isArray(rows)) {
+      return rows.filter(r => r && typeof r.key === 'string' && r.payload !== undefined);
+    }
+    return [];
+  } catch (err) {
+    console.warn('Supabase pullCloudDocumentsByKeys error:', err);
     return [];
   }
 }
@@ -357,14 +641,16 @@ export async function syncAllAppDataWithSupabase(localState: {
 
   try {
     // 1. Pull existing cloud records
-    const [cloudUsers, cloudDeletedUsers, cloudTxns, cloudRests, cloudProofs, cloudSettings] = await Promise.all([
+    const [cloudUsers, cloudDeletedUsers, cloudTxns, cloudRests, cloudProofs, cloudSettingsV2, cloudSettingsV1] = await Promise.all([
       pullCloudDocument<User[]>('kft_cloud_users_v1'),
       pullCloudDocument<DeletedUserRecord[]>('kft_cloud_deleted_users_v1'),
       pullCloudDocument<RegistrationTransaction[]>('kft_cloud_transactions_v1'),
       pullCloudDocument<Restaurant[]>('kft_cloud_custom_restaurants_v1'),
       pullCloudDocument<Record<string, any>>('kft_cloud_payment_proofs_v1'),
+      pullCloudDocument<AppSettings>('kft_cloud_admin_vip_pricing_v2'),
       pullCloudDocument<AppSettings>('kft_cloud_app_settings_v1'),
     ]);
+    const cloudSettings = cloudSettingsV2 || cloudSettingsV1;
 
     // 1b. Merge Deleted Users Registry (Permanent Blacklist)
     const deletedMap = new Map<string, DeletedUserRecord>();
@@ -713,23 +999,24 @@ export async function syncAllAppDataWithSupabase(localState: {
       delete mergedPaymentProofsVault[delId];
     }
 
-    // 5b. Merge Centralized AppSettings (VIP durations, package prices, benefits, additional-store fee)
+    // 5b. Resolve Centralized AppSettings: Server (`kft_cloud_app_settings_v1`) is the single source of truth!
+    // Regular user syncs must NEVER overwrite server settings with stale local caches.
     let mergedAppSettings: AppSettings | undefined = localState.appSettings;
-    if (cloudSettings && localState.appSettings) {
-      const cloudTime = cloudSettings.settingsUpdatedAt ? Date.parse(cloudSettings.settingsUpdatedAt) : 0;
-      const localTime = localState.appSettings.settingsUpdatedAt
-        ? Date.parse(localState.appSettings.settingsUpdatedAt)
-        : 0;
-      if (!Number.isNaN(cloudTime) && cloudTime > (Number.isNaN(localTime) ? 0 : localTime)) {
-        mergedAppSettings = { ...localState.appSettings, ...cloudSettings };
-      } else {
-        mergedAppSettings = { ...cloudSettings, ...localState.appSettings };
+    if (cloudSettings) {
+      mergedAppSettings = normalizeAuthoritativeAppSettings(cloudSettings, localState.appSettings);
+      try {
+        if (typeof localStorage !== 'undefined') {
+          localStorage.removeItem('kft_settings_v3');
+          localStorage.setItem('kft_settings_v4', JSON.stringify(mergedAppSettings));
+        }
+      } catch {
+        // ignore storage errors
       }
-    } else if (cloudSettings && !localState.appSettings) {
-      mergedAppSettings = cloudSettings;
+    } else if (localState.appSettings) {
+      mergedAppSettings = normalizeAuthoritativeAppSettings(localState.appSettings);
     }
 
-    // 6. Push merged state back to Supabase Cloud
+    // 6. Push merged state back to Supabase Cloud (only seed kft_cloud_app_settings_v1 if missing on server)
     const pushPromises: Promise<boolean>[] = [
       pushCloudDocument('kft_cloud_users_v1', mergedUsers),
       pushCloudDocument('kft_cloud_deleted_users_v1', mergedDeletedUsers),
@@ -738,7 +1025,7 @@ export async function syncAllAppDataWithSupabase(localState: {
       pushCloudDocument('kft_cloud_custom_restaurants_v1', mergedCustomRestaurants),
       pushCloudDocument('kft_cloud_payment_proofs_v1', mergedPaymentProofsVault),
     ];
-    if (mergedAppSettings) {
+    if (!cloudSettings && mergedAppSettings) {
       pushPromises.push(pushCloudDocument('kft_cloud_app_settings_v1', mergedAppSettings));
     }
     await Promise.all(pushPromises);

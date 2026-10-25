@@ -1209,6 +1209,7 @@ export interface AppSettings {
   additionalStoreFeeUsd?: number; // Default: $10.00 per additional store beyond the 1st
   includedFreeStoresPerVip?: number; // Default: 1 store included with VIP
   vipBenefitsList?: VipBenefitItem[]; // Configurable VIP benefits list
+  settingsVersion?: number; // Monotonically increasing server configuration version
   settingsUpdatedAt?: string;
   settingsUpdatedBy?: string;
 }
