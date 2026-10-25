@@ -2,7 +2,7 @@ import type { FoodItem, Language } from '../types';
 
 /**
  * Dish tags derived ONLY from existing recipe data (calories, ingredients, cooking steps, category).
- * Transparent keyword rules, no health claims. Labelled in the UI as "Estimated from the recipe".
+ * Transparent keyword rules, no health claims. Labelled in the UI as a recipe-based guide.
  * Never produces low-salt / low-sugar / diabetic / heart-healthy / disease-related tags.
  */
 export type DishTagId =
@@ -215,9 +215,9 @@ export function matchesTagFilter(food: FoodItem, filter: TagFilterId, isVipAutho
 }
 
 export const TAG_ESTIMATE_NOTE = {
-  km: 'ប៉ាន់ស្មានពីរូបមន្ត',
-  en: 'Estimated from the recipe',
-  zh: '根据食谱估算',
+  km: 'ណែនាំផ្អែកលើរូបមន្ត',
+  en: 'Recipe-based guide',
+  zh: '根据食谱精选',
 };
 
 export const GENERAL_FOOD_INFO_NOTE = {

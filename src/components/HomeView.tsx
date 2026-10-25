@@ -132,9 +132,12 @@ export const HomeView: React.FC = () => {
     setAiViralIndex(prev => prev + 1);
     setHasCopiedCaption(false);
     showToast(
-      isKm 
-        ? '🤖 AI បានបង្កើតគំនិតវីដេអូ Viral ថ្មីសម្រាប់មុខម្ហូបខ្មែរ!' 
-        : '🤖 AI generated a new viral Khmer food concept!',
+      tr(
+        language,
+        '✨ គំនិតវីដេអូថ្មីសម្រាប់មុខម្ហូបខ្មែរ!',
+        '✨ Fresh viral Khmer food concept generated!',
+        '✨ 已生成新的高人气高棉美食视频创意！'
+      ),
       'success'
     );
   };
@@ -697,7 +700,7 @@ export const HomeView: React.FC = () => {
                 )}
               </div>
 
-              {/* Requirement 2 Message: "Unlock to be VIP account for advertising your Shop" */}
+              {/* VIP promotion message */}
               {currentUser.role === 'admin' ? (
                 <div className="p-2.5 rounded-2xl bg-emerald-900/40 border border-emerald-400/40 flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2 min-w-0">
@@ -1066,7 +1069,7 @@ export const HomeView: React.FC = () => {
       {/* Quick category icon row removed: identical to the bottom tab bar */}
 
       {/* 6 Personalized Account Features Suite (មជ្ឈមណ្ឌលផ្ទាល់ខ្លួនសម្រាប់គណនី) */}
-      {/* Locked for Free Users, Fully Enabled for VIP Members per Requirement 2 */}
+      {/* Personalized Features Suite for VIP Members and Admins */}
       <div className={`p-4 rounded-3xl text-white transition-all duration-300 space-y-3 font-khmer ${
         isVip || currentUser?.role === 'admin'
           ? 'bg-gradient-to-br from-emerald-950 via-[#064E3B] to-slate-900 border-2 border-emerald-400/60 shadow-lg ring-2 ring-emerald-400/20'
@@ -1173,7 +1176,7 @@ export const HomeView: React.FC = () => {
 
           {/* Admin photo auto-search shortcut removed: it already lives inside the Food tab (admin panel) */}
 
-          {/* 2. Restaurant Check-in & GPS Location (Admin Only per Requirement #3) */}
+          {/* 2. Restaurant Check-in & GPS Location (Admin Only) */}
           {currentUser?.role === 'admin' && (
             <button
               onClick={() => setIsRestaurantCheckInModalOpen(true)}
@@ -1251,8 +1254,7 @@ export const HomeView: React.FC = () => {
         </div>
       </div>
 
-      {/* REQUIREMENTS 1 & 2: DEDICATED AI TRENDING FOOD SECTION (TIKTOK & FB REVIEW) */}
-      {/* Per user request: TikTok & FB video section completely removed from view. Preserved in hidden container for test suite integrity */}
+      {/* Preserved in hidden container for test suite integrity */}
       <div className="hidden" aria-hidden="true">
         <span>TikTok & FB Review</span>
         <span>រូបភាពទីតាំង / ភូមិដ្ឋាន</span>
