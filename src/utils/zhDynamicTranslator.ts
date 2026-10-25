@@ -1395,7 +1395,7 @@ function buildChineseCookingStepsForCategory(
       },
       {
         stepNumber: 2,
-        instruction: '起锅热油，下入高棉香茅酱（Kroeung）与波罗福鱼酱煸炒出浓郁香气，再放入主料翻炒锁住鲜味。',
+        instruction: '起锅热油，下入高棉香茅酱与波罗福鱼酱煸炒出浓郁香气，再放入主料翻炒锁住鲜味。',
         tip: '',
       },
       {
@@ -1506,67 +1506,116 @@ function buildChineseCookingStepsForCategory(
 }
 
 /**
+ * Strictly sanitize localized strings so no unintended language mixing occurs:
+ * - When `km`: strips English parentheticals like `(Samlor & Curries)` while keeping Khmer text intact
+ * - When `en`: strips Khmer characters `[\u1780-\u17FF]` and empty parentheticals
+ * - When `zh`: strips Khmer characters `[\u1780-\u17FF]` and Latin transliteration parentheticals like `(Kari Sach Moan)` or `（Fish Amok）` while preserving numeric units like `（400克）` or `($10)`
+ */
+export function sanitizeStrictLanguageText(input: string | undefined, lang: Language): string {
+  if (!input) return '';
+  let out = input.trim();
+  if (!out) return '';
+
+  if (lang === 'km') {
+    out = out
+      .replace(/\s*\([A-Za-z0-9\s&'.,/+-]+\)/g, '')
+      .replace(/\s*-\s*[A-Za-z0-9\s&'.,/+-]+$/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+    return out || input.trim();
+  }
+
+  if (lang === 'en') {
+    out = out
+      .replace(/\s*[\(（][^\)）]*[\u1780-\u17FF]+[^\)）]*[\)）]/g, '')
+      .replace(/\s*[-–—•·]\s*[\u1780-\u17FF\s]+/g, '')
+      .replace(/[\u1780-\u17FF]+/g, '')
+      .replace(/\(\s*\)/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+    return out || input.trim();
+  }
+
+  // Simplified Chinese ('zh')
+  out = out
+    .replace(/\s*[\(（][^\)）]*[\u1780-\u17FF]+[^\)）]*[\)）]/g, '')
+    .replace(/[\u1780-\u17FF]+/g, '')
+    // Strip Latin transliteration parentheticals (e.g. "(Kari Sach Moan)", "（Fish Amok）", "(BKK1)")
+    .replace(/\s*[\(（][A-Za-z][A-Za-z0-9\s&'.,/+-]*[\)）]/g, '')
+    .replace(/\(\s*\)/g, '')
+    .replace(/（\s*）/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return out || input.trim();
+}
+
+/**
  * Get localized fields for a FoodItem in KM, EN, or ZH
  */
 export function getLocalizedFood(food: FoodItem, lang: Language) {
   if (lang === 'km') {
     const diffKm = formatDifficultyByLang(food.difficulty, 'km');
+    const cleanKmName = sanitizeStrictLanguageText(food.nameKh, 'km');
     return {
-      name: food.nameKh,
-      secondaryName: food.nameEn,
-      subtitle: food.nameEn,
-      category: food.categoryKh,
-      description: food.descriptionKh,
+      name: cleanKmName,
+      secondaryName: '',
+      subtitle: '',
+      category: sanitizeStrictLanguageText(food.categoryKh, 'km'),
+      description: sanitizeStrictLanguageText(food.descriptionKh, 'km'),
       prepTime: food.prepTime,
       cookTime: food.cookTime,
       servings: food.servings,
       difficulty: diffKm,
       difficultyLabel: diffKm,
       ingredients: (food.ingredients || []).map((ing: Ingredient) => ({
-        name: ing.nameKh,
+        name: sanitizeStrictLanguageText(ing.nameKh, 'km'),
         amount: ing.amount,
       })),
       steps: (food.steps || []).map((st: CookingStep) => ({
         stepNumber: st.stepNumber,
-        instruction: st.instructionKh,
-        tip: st.tipKh || '',
+        instruction: sanitizeStrictLanguageText(st.instructionKh, 'km'),
+        tip: st.tipKh ? sanitizeStrictLanguageText(st.tipKh, 'km') : '',
       })),
     };
   }
 
   if (lang === 'en') {
     const diffEn = formatDifficultyByLang(food.difficulty, 'en');
+    const cleanEnName = sanitizeStrictLanguageText(food.nameEn, 'en');
     return {
-      name: food.nameEn,
-      secondaryName: food.nameKh,
-      subtitle: food.nameKh,
-      category: food.categoryEn,
-      description: food.descriptionEn,
+      name: cleanEnName,
+      secondaryName: '',
+      subtitle: '',
+      category: sanitizeStrictLanguageText(food.categoryEn, 'en'),
+      description: sanitizeStrictLanguageText(food.descriptionEn, 'en'),
       prepTime: formatDurationByLang(food.prepTime, 'en'),
       cookTime: formatDurationByLang(food.cookTime, 'en'),
       servings: formatServingsByLang(food.servings, 'en'),
       difficulty: diffEn,
       difficultyLabel: diffEn,
       ingredients: (food.ingredients || []).map((ing: Ingredient) => ({
-        name: ing.nameEn,
+        name: sanitizeStrictLanguageText(ing.nameEn, 'en'),
         amount: formatAmountByLang(ing.amount, 'en'),
       })),
       steps: (food.steps || []).map((st: CookingStep) => ({
         stepNumber: st.stepNumber,
-        instruction: st.instructionEn,
-        tip: st.tipKh ? translateSignatureDish(st.tipKh, 'en') : '',
+        instruction: sanitizeStrictLanguageText(st.instructionEn, 'en'),
+        tip: st.tipKh ? sanitizeStrictLanguageText(translateSignatureDish(st.tipKh, 'en'), 'en') : '',
       })),
     };
   }
 
   // Simplified Chinese ('zh')
-  const zhName = EXACT_FOOD_NAME_ZH_MAP[food.nameEn] || translateDynamicTextToZh(food.nameEn);
-  const zhCategory = FOOD_CATEGORY_ZH_MAP[food.categoryEn] || translateDynamicTextToZh(food.categoryEn);
+  const rawZhName = EXACT_FOOD_NAME_ZH_MAP[food.nameEn] || translateDynamicTextToZh(food.nameEn);
+  const zhName = sanitizeStrictLanguageText(rawZhName, 'zh');
+  const rawZhCategory = FOOD_CATEGORY_ZH_MAP[food.categoryEn] || translateDynamicTextToZh(food.categoryEn);
+  const zhCategory = sanitizeStrictLanguageText(rawZhCategory, 'zh');
   const diffZh = formatDifficultyByLang(food.difficulty, 'zh');
 
   const zhIngredients = (food.ingredients || []).map((ing: Ingredient) => {
     const lowerKey = (ing.nameEn || '').trim().toLowerCase();
-    const zhIngName = EXACT_INGREDIENT_ZH_MAP[lowerKey] || translateDynamicTextToZh(ing.nameEn);
+    const rawZhIngName = EXACT_INGREDIENT_ZH_MAP[lowerKey] || translateDynamicTextToZh(ing.nameEn);
+    const zhIngName = sanitizeStrictLanguageText(rawZhIngName, 'zh');
     return {
       name: zhIngName,
       amount: formatAmountByLang(ing.amount, 'zh'),
@@ -1577,11 +1626,12 @@ export function getLocalizedFood(food: FoodItem, lang: Language) {
   const subZh = zhIngredients[1]?.name || '时令配菜';
   const herbZh = zhIngredients[2]?.name || '高棉香草';
 
-  const zhDesc =
+  const rawZhDesc =
     CORE_100_DESC_ZH[food.id] ||
     (zhIngredients.length >= 3
-      ? `${zhName}（${food.nameKh}）是一道正宗传统高棉佳肴，甄选${mainZh}为主料，搭配${subZh}精心烹制，最后辅以${herbZh}提香，层次丰富、风味地道。`
+      ? `${zhName}是一道正宗传统高棉佳肴，甄选${mainZh}为主料，搭配${subZh}精心烹制，最后辅以${herbZh}提香，层次丰富、风味地道。`
       : translateDynamicTextToZh(food.descriptionEn));
+  const zhDesc = sanitizeStrictLanguageText(rawZhDesc, 'zh');
 
   const rawSteps = food.steps || [];
   const allStepsInCoreMap =
@@ -1590,15 +1640,15 @@ export function getLocalizedFood(food: FoodItem, lang: Language) {
   const zhSteps = allStepsInCoreMap
     ? rawSteps.map((st: CookingStep) => ({
         stepNumber: st.stepNumber,
-        instruction: CORE_100_STEPS_ZH[(st.instructionEn || '').trim()],
-        tip: st.tipKh ? translateSignatureDish(st.tipKh, 'zh') : '',
+        instruction: sanitizeStrictLanguageText(CORE_100_STEPS_ZH[(st.instructionEn || '').trim()], 'zh'),
+        tip: st.tipKh ? sanitizeStrictLanguageText(translateSignatureDish(st.tipKh, 'zh'), 'zh') : '',
       }))
     : buildChineseCookingStepsForCategory(food.categorySlug, zhName, mainZh, subZh, herbZh);
 
   return {
     name: zhName,
-    secondaryName: food.nameKh,
-    subtitle: `${food.nameKh} • ${food.nameEn}`,
+    secondaryName: '',
+    subtitle: '',
     category: zhCategory,
     description: zhDesc,
     prepTime: formatDurationByLang(food.prepTime, 'zh'),
@@ -1638,64 +1688,71 @@ const SOCIAL_HIGHLIGHT_ZH_MAP: Record<string, string> = {
 export function getLocalizedDestination(dest: TouristDestination, lang: Language) {
   if (lang === 'km') {
     return {
-      name: dest.nameKh,
-      secondaryName: dest.nameEn,
-      subtitle: dest.nameEn,
-      category: dest.categoryKh,
+      name: sanitizeStrictLanguageText(dest.nameKh, 'km'),
+      secondaryName: '',
+      subtitle: '',
+      category: sanitizeStrictLanguageText(dest.categoryKh, 'km'),
       province: dest.provinceKh,
       address: dest.addressKh,
       description: dest.descriptionKh,
       entranceFee: dest.entranceFeeKh || dest.entryFeeKh || 'ឥតគិតថ្លៃ',
       bestTime: dest.bestTimeToVisitKh || 'ពេញមួយឆ្នាំ',
-      highlights: dest.highlightsKh || [],
+      highlights: (dest.highlightsKh || []).map((h) => sanitizeStrictLanguageText(h, 'km')),
       socialHighlight: dest.socialHighlightKh || '',
     };
   }
 
   if (lang === 'en') {
     return {
-      name: dest.nameEn,
-      secondaryName: dest.nameKh,
-      subtitle: dest.nameKh,
-      category: dest.categoryEn,
-      province: dest.provinceEn,
-      address: dest.addressEn,
-      description: dest.descriptionEn,
-      entranceFee: dest.entranceFeeEn || dest.entryFeeEn || 'Free Entry',
-      bestTime: dest.bestTimeToVisitEn || 'All year round',
+      name: sanitizeStrictLanguageText(dest.nameEn, 'en'),
+      secondaryName: '',
+      subtitle: '',
+      category: sanitizeStrictLanguageText(dest.categoryEn, 'en'),
+      province: sanitizeStrictLanguageText(dest.provinceEn, 'en'),
+      address: sanitizeStrictLanguageText(dest.addressEn, 'en'),
+      description: sanitizeStrictLanguageText(dest.descriptionEn, 'en'),
+      entranceFee: sanitizeStrictLanguageText(dest.entranceFeeEn || dest.entryFeeEn || 'Free Entry', 'en'),
+      bestTime: sanitizeStrictLanguageText(dest.bestTimeToVisitEn || 'All year round', 'en'),
       highlights:
         dest.highlightsEn && dest.highlightsEn.length > 0
-          ? dest.highlightsEn
-          : (dest.highlightsKh || []).map((h) => translateDestinationHighlight(h, 'en')),
-      socialHighlight: dest.socialHighlightEn || (dest.socialHighlightKh ? translateDestinationHighlight(dest.socialHighlightKh, 'en') : ''),
+          ? dest.highlightsEn.map((h) => sanitizeStrictLanguageText(h, 'en'))
+          : (dest.highlightsKh || []).map((h) => sanitizeStrictLanguageText(translateDestinationHighlight(h, 'en'), 'en')),
+      socialHighlight: sanitizeStrictLanguageText(
+        dest.socialHighlightEn || (dest.socialHighlightKh ? translateDestinationHighlight(dest.socialHighlightKh, 'en') : ''),
+        'en'
+      ),
     };
   }
 
   // Simplified Chinese ('zh')
-  const zhName = EXACT_DESTINATION_NAME_ZH_MAP[dest.nameEn] || translateDynamicTextToZh(dest.nameEn);
+  const rawZhName = EXACT_DESTINATION_NAME_ZH_MAP[dest.nameEn] || translateDynamicTextToZh(dest.nameEn);
+  const zhName = sanitizeStrictLanguageText(rawZhName, 'zh');
   const zhProv = CAMBODIA_PROVINCE_ZH_MAP[dest.provinceKh] || CAMBODIA_PROVINCE_ZH_MAP[dest.provinceEn] || dest.provinceEn;
-  const zhCat = DEST_CATEGORY_ZH_MAP[dest.categoryEn] || translateDynamicTextToZh(dest.categoryEn);
-  const zhDesc = DEST_DESC_ZH_BY_ID[dest.id] || translateDynamicTextToZh(dest.descriptionEn);
+  const rawZhCat = DEST_CATEGORY_ZH_MAP[dest.categoryEn] || translateDynamicTextToZh(dest.categoryEn);
+  const zhCat = sanitizeStrictLanguageText(rawZhCat, 'zh');
+  const rawZhDesc = DEST_DESC_ZH_BY_ID[dest.id] || translateDynamicTextToZh(dest.descriptionEn);
+  const zhDesc = sanitizeStrictLanguageText(rawZhDesc, 'zh');
   const rawFee = dest.entranceFeeEn || dest.entryFeeEn || 'Free';
-  const zhFee = translateEntranceFeeToZh(rawFee);
+  const zhFee = sanitizeStrictLanguageText(translateEntranceFeeToZh(rawFee), 'zh');
   const rawTime = dest.bestTimeToVisitEn || 'All year round';
-  const zhTime = translateBestTimeToZh(rawTime);
-  const zhAddress = translateAddressToZh(dest.addressEn || '', zhProv);
+  const zhTime = sanitizeStrictLanguageText(translateBestTimeToZh(rawTime), 'zh');
+  const zhAddress = sanitizeStrictLanguageText(translateAddressToZh(dest.addressEn || '', zhProv), 'zh');
 
   const zhHighlights = (dest.highlightsKh && dest.highlightsKh.length > 0
-    ? dest.highlightsKh.map((h) => translateDestinationHighlight(h, 'zh'))
-    : (dest.highlightsEn || []).map((h) => translateDynamicTextToZh(h)));
+    ? dest.highlightsKh.map((h) => sanitizeStrictLanguageText(translateDestinationHighlight(h, 'zh'), 'zh'))
+    : (dest.highlightsEn || []).map((h) => sanitizeStrictLanguageText(translateDynamicTextToZh(h), 'zh')));
 
-  const zhSocialHighlight = dest.socialHighlightEn
+  const rawZhSocialHighlight = dest.socialHighlightEn
     ? SOCIAL_HIGHLIGHT_ZH_MAP[dest.socialHighlightEn] || translateDynamicTextToZh(dest.socialHighlightEn)
     : dest.socialHighlightKh
     ? translateDestinationHighlight(dest.socialHighlightKh, 'zh')
     : '';
+  const zhSocialHighlight = sanitizeStrictLanguageText(rawZhSocialHighlight, 'zh');
 
   return {
     name: zhName,
-    secondaryName: dest.nameKh,
-    subtitle: `${dest.nameKh} • ${dest.nameEn}`,
+    secondaryName: '',
+    subtitle: '',
     category: zhCat,
     province: zhProv,
     address: zhAddress,
@@ -1713,27 +1770,27 @@ export function getLocalizedDestination(dest: TouristDestination, lang: Language
 export function getLocalizedRestaurant(rest: Restaurant, lang: Language) {
   if (lang === 'km') {
     return {
-      name: rest.nameKh,
-      secondaryName: rest.nameEn,
-      subtitle: rest.nameEn,
+      name: sanitizeStrictLanguageText(rest.nameKh, 'km'),
+      secondaryName: '',
+      subtitle: '',
       province: rest.provinceKh || 'កម្ពុជា',
       address: rest.addressKh,
       description: rest.descriptionKh,
       openingHours: translateOpeningHours(rest.openingHoursKh || rest.openingHoursEn, 'km'),
-      signatureDishes: rest.signatureDishesKh || [],
+      signatureDishes: (rest.signatureDishesKh || []).map((d) => sanitizeStrictLanguageText(d, 'km')),
     };
   }
 
   if (lang === 'en') {
     return {
-      name: rest.nameEn || rest.nameKh,
-      secondaryName: rest.nameKh,
-      subtitle: rest.nameKh,
-      province: rest.provinceEn || 'Cambodia',
-      address: rest.addressEn || rest.addressKh,
-      description: rest.descriptionEn || rest.descriptionKh,
+      name: sanitizeStrictLanguageText(rest.nameEn || rest.nameKh, 'en'),
+      secondaryName: '',
+      subtitle: '',
+      province: sanitizeStrictLanguageText(rest.provinceEn || 'Cambodia', 'en'),
+      address: sanitizeStrictLanguageText(rest.addressEn || rest.addressKh, 'en'),
+      description: sanitizeStrictLanguageText(rest.descriptionEn || rest.descriptionKh, 'en'),
       openingHours: translateOpeningHours(rest.openingHoursEn || rest.openingHoursKh, 'en'),
-      signatureDishes: (rest.signatureDishesKh || []).map((d) => translateSignatureDish(d, 'en')),
+      signatureDishes: (rest.signatureDishesKh || []).map((d) => sanitizeStrictLanguageText(translateSignatureDish(d, 'en'), 'en')),
     };
   }
 
@@ -1742,20 +1799,21 @@ export function getLocalizedRestaurant(rest: Restaurant, lang: Language) {
     CAMBODIA_PROVINCE_ZH_MAP[rest.provinceKh] ||
     CAMBODIA_PROVINCE_ZH_MAP[rest.provinceEn] ||
     '柬埔寨';
-  const zhName = translateRestaurantNameToZh(rest.nameEn || '', rest.nameKh || '', zhProv);
-  const zhAddress = translateAddressToZh(rest.addressEn || '', zhProv);
-  const zhDesc = translateRestaurantDescToZh(rest.descriptionEn || '', zhProv);
+  const rawZhName = translateRestaurantNameToZh(rest.nameEn || '', rest.nameKh || '', zhProv);
+  const zhName = sanitizeStrictLanguageText(rawZhName, 'zh');
+  const zhAddress = sanitizeStrictLanguageText(translateAddressToZh(rest.addressEn || '', zhProv), 'zh');
+  const zhDesc = sanitizeStrictLanguageText(translateRestaurantDescToZh(rest.descriptionEn || '', zhProv), 'zh');
   const zhHours = translateOpeningHours(rest.openingHoursKh || rest.openingHoursEn, 'zh');
 
   return {
     name: zhName,
-    secondaryName: rest.nameKh,
-    subtitle: `${rest.nameKh} • ${rest.nameEn}`,
+    secondaryName: '',
+    subtitle: '',
     province: zhProv,
     address: zhAddress,
     description: zhDesc,
     openingHours: zhHours,
-    signatureDishes: (rest.signatureDishesKh || []).map((d) => translateSignatureDish(d, 'zh')),
+    signatureDishes: (rest.signatureDishesKh || []).map((d) => sanitizeStrictLanguageText(translateSignatureDish(d, 'zh'), 'zh')),
   };
 }
 
@@ -1793,9 +1851,9 @@ const COMMUNITY_LOCATION_MAP: Record<string, { km: string; en: string; zh: strin
 
 const COMMUNITY_AUTHOR_MAP: Record<string, { km: string; en: string; zh: string }> = {
   'អ្នកដំណើរខ្មែរ (Khmer Traveler)': {
-    km: 'អ្នកដំណើរខ្មែរ (Khmer Traveler)',
+    km: 'អ្នកដំណើរខ្មែរ',
     en: 'Khmer Traveler',
-    zh: '高棉旅行家 (Khmer Traveler)',
+    zh: '高棉旅行家',
   },
   'អ្នកដំណើរខ្មែរ': {
     km: 'អ្នកដំណើរខ្មែរ',
@@ -1805,17 +1863,17 @@ const COMMUNITY_AUTHOR_MAP: Record<string, { km: string; en: string; zh: string 
   'សុខ គីមលី (ម្ចាស់ហាង)': {
     km: 'សុខ គីមលី (ម្ចាស់ហាង)',
     en: 'Sok Kimly (Shop Owner)',
-    zh: 'Sok Kimly (店主)',
+    zh: '苏金莉（店主）',
   },
   'សុខ គីមលី': {
     km: 'សុខ គីមលី',
     en: 'Sok Kimly',
-    zh: 'Sok Kimly (店主)',
+    zh: '苏金莉（店主）',
   },
   'ក្រុមការងាររដ្ឋបាល (Admin)': {
-    km: 'ក្រុមការងាររដ្ឋបាល (Admin)',
+    km: 'ក្រុមការងាររដ្ឋបាល',
     en: 'Admin Team',
-    zh: '官方管理团队 (Admin)',
+    zh: '官方管理团队',
   },
 };
 
@@ -1833,7 +1891,7 @@ const COMMUNITY_POST_CONTENT_MAP: Record<
   },
   'post-2': {
     titleEn: 'Sharing the Authentic Traditional Steamed Fish Amok with Noni Leaves Recipe',
-    titleZh: '分享传统正宗诺丽叶高棉鱼阿莫克（Fish Amok）秘制食谱',
+    titleZh: '分享传统正宗诺丽叶高棉阿莫克蒸鱼秘制食谱',
     descEn:
       'Hello everyone! Today I am sharing how to steam Fish Amok so the fish stays tender and silky: avoid steaming over overly high heat, and always use thick, freshly pressed first-press coconut cream for the most fragrant aroma. Give it a try!',
     descZh:
@@ -1931,8 +1989,9 @@ function translateDynamicKhmerOrEnglishPostText(raw: string, lang: Language): st
 
 export function getLocalizedComment(comment: CommunityComment, lang: Language) {
   if (lang === 'km') {
+    const authorObjKm = COMMUNITY_AUTHOR_MAP[comment.authorName];
     return {
-      authorName: comment.authorName,
+      authorName: authorObjKm ? authorObjKm.km : sanitizeStrictLanguageText(comment.authorName, 'km'),
       text: comment.text,
       createdAt: comment.createdAt,
     };
@@ -1943,8 +2002,8 @@ export function getLocalizedComment(comment: CommunityComment, lang: Language) {
     ? authorObj[lang]
     : lang === 'zh'
     ? comment.authorName
-        .replace(/\(ម្ចាស់ហាង\)/g, '(店主)')
-        .replace(/\(Admin\)/gi, '(管理员)')
+        .replace(/\(ម្ចាស់ហាង\)/g, '（店主）')
+        .replace(/\(Admin\)/gi, '（管理员）')
     : comment.authorName.replace(/\(ម្ចាស់ហាង\)/g, '(Shop Owner)');
 
   const exactComment = COMMUNITY_COMMENT_TEXT_MAP[comment.id];
@@ -1977,8 +2036,9 @@ export function getLocalizedCommunityPost(post: CommunityPost, lang: Language) {
     : post.locationName;
 
   if (lang === 'km') {
+    const authorObjKm = COMMUNITY_AUTHOR_MAP[post.authorName];
     return {
-      authorName: post.authorName,
+      authorName: authorObjKm ? authorObjKm.km : sanitizeStrictLanguageText(post.authorName, 'km'),
       title: post.titleKh,
       description: post.descriptionKh,
       categoryTag: localizedCategory,

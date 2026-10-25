@@ -319,7 +319,7 @@ export const KHMER_FOOD_PRIMARY_CATEGORIES: KhmerFoodPrimaryCategoryMeta[] = [
   {
     id: 'samlor',
     order: 1,
-    nameKh: 'សម្ល (Samlor & Curries)',
+    nameKh: 'សម្ល និងការី',
     shortNameKh: 'សម្ល',
     nameEn: 'Samlor & Curries',
     subtitleKh: 'សម្លខ្មែរ សម្លកកូរ សម្លការី សម្លម្ជូរ អាម៉ុក ប្រហុកខ្ទិះ និងខ',
@@ -329,7 +329,7 @@ export const KHMER_FOOD_PRIMARY_CATEGORIES: KhmerFoodPrimaryCategoryMeta[] = [
   {
     id: 'cha',
     order: 2,
-    nameKh: 'ឆា (Stir-Fry & Savory)',
+    nameKh: 'ឆា អាំង និងញាំ',
     shortNameKh: 'ឆា',
     nameEn: 'Stir-Fry & Savory',
     subtitleKh: 'ម្ហូបឆា ឡុកឡាក់ ឆាគ្រឿង ឆាក្តៅ មីឆា បាយឆា និងម្ហូបអាំង/ញាំ',
@@ -339,7 +339,7 @@ export const KHMER_FOOD_PRIMARY_CATEGORIES: KhmerFoodPrimaryCategoryMeta[] = [
   {
     id: 'sngor',
     order: 3,
-    nameKh: 'ស្ងោរ (Boiled Soups & Broths)',
+    nameKh: 'ស្ងោរ ស៊ុប និងបបរ',
     shortNameKh: 'ស្ងោរ',
     nameEn: 'Boiled Soups & Broths',
     subtitleKh: 'ស្ងោរជ្រក់ ស្ងោរម្រះ ស្ងោរង៉ាំង៉ូវ ស៊ុប បបរ និងគុយទាវទឹក',
@@ -349,7 +349,7 @@ export const KHMER_FOOD_PRIMARY_CATEGORIES: KhmerFoodPrimaryCategoryMeta[] = [
   {
     id: 'bong_aem',
     order: 4,
-    nameKh: 'បង្អែម (Khmer Desserts)',
+    nameKh: 'បង្អែម និងនំខ្មែរ',
     shortNameKh: 'បង្អែម',
     nameEn: 'Khmer Desserts & Cakes',
     subtitleKh: 'បង្អែមខ្មែរ សង់ខ្យា ចេកខ្ទិះ នំប្រពៃណីខ្មែរ និងភេសជ្ជៈផ្អែម',
