@@ -7,6 +7,7 @@ import {
 import { FoodItem } from '../types';
 import { tr } from '../utils/i18n';
 import { getLocalizedFood, getLocalizedRestaurant } from '../utils/zhDynamicTranslator';
+import { useBodyScrollLock } from '../utils/useBodyScrollLock';
 
 export const WhatToEatModal: React.FC = () => {
   const { 
@@ -23,6 +24,7 @@ export const WhatToEatModal: React.FC = () => {
   // Current dish index and history of seen dish IDs to prevent repetition
   const [currentDishId, setCurrentDishId] = useState<string>('');
   const seenDishIdsRef = useRef<Set<string>>(new Set());
+  useBodyScrollLock(isWhatToEatModalOpen);
 
   // Determine current mealtime in Cambodia
   const currentMealInfo = useMemo(() => {
@@ -159,9 +161,12 @@ export const WhatToEatModal: React.FC = () => {
   const MealIcon = currentMealInfo.icon;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-xs p-0 sm:p-4 animate-in fade-in duration-200">
+    <div
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-xs p-0 sm:p-4 animate-in fade-in duration-200 overscroll-none"
+      onClick={() => setIsWhatToEatModalOpen(false)}
+    >
       <div 
-        className="w-full max-w-md bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-2xl max-h-[92vh] flex flex-col overflow-hidden"
+        className="w-full max-w-md bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-2xl max-h-[92dvh] flex flex-col overflow-hidden overscroll-contain"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
@@ -273,7 +278,7 @@ export const WhatToEatModal: React.FC = () => {
         </div>
 
         {/* Content body */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar">
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 space-y-4 no-scrollbar [-webkit-overflow-scrolling:touch]">
           {currentDish && currentLoc && (
             <div className={`transition-all duration-300 ${isSpinning ? 'opacity-30 scale-95 blur-[1px]' : 'opacity-100 scale-100'}`}>
               {/* Highlight Recommended Dish Card */}

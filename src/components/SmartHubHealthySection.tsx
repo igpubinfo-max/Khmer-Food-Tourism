@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { RefreshCw, ChevronRight } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import type { FoodItem } from '../types';
@@ -29,21 +29,21 @@ interface Props {
   onOpenFood: (food: FoodItem) => void;
 }
 
-const Thumb: React.FC<{ food: FoodItem; size: string }> = ({ food, size }) => (
-  <img
-    src={food.photoUrl}
-    alt=""
-    loading="lazy"
-    decoding="async"
-    className={`${size} rounded-full object-cover border-2 border-white dark:border-slate-800 bg-slate-200`}
-  />
-);
-
-/** Healthy dish tags: rich category cards, inline recommended dishes and a daily 3-meal idea. */
+/** Healthy dish tags: compact 2-column category cards, inline recommended dishes and a daily 3-meal idea. */
 export const SmartHubHealthySection: React.FC<Props> = ({ foods, onViewAll, onOpenFood }) => {
   const { language } = useApp();
   const [selected, setSelected] = useState<DishTagId>('light');
   const [seed, setSeed] = useState(1);
+  const recommendedRef = useRef<HTMLDivElement | null>(null);
+
+  const handleSelectTag = (id: DishTagId) => {
+    setSelected(id);
+    if (typeof window !== 'undefined') {
+      window.requestAnimationFrame(() => {
+        recommendedRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      });
+    }
+  };
 
   // Matches per tag, best-rated first, photo-first so cards always look appetizing
   const byTag = useMemo(() => {
@@ -82,46 +82,37 @@ export const SmartHubHealthySection: React.FC<Props> = ({ foods, onViewAll, onOp
         </p>
       </div>
 
-      {/* 6 category cards */}
-      <div className="grid grid-cols-1 gap-2.5">
+      {/* 6 compact category cards in a responsive 2-column grid */}
+      <div className="grid grid-cols-2 gap-2">
         {HUB_TAGS.map((id) => {
           const def = DISH_TAG_DEFS[id];
           const list = byTag[id] || [];
-          const thumbs = list.filter((f) => !!f.photoUrl).slice(0, 3);
           const isSel = id === selected;
           return (
             <button
               key={id}
               type="button"
-              onClick={() => setSelected(id)}
+              onClick={() => handleSelectTag(id)}
               aria-pressed={isSel}
-              className={`p-3 rounded-2xl border-2 text-left active:scale-[0.98] transition motion-reduce:transition-none cursor-pointer ${isSel ? toneRing(def.tone) : ''} ${toneBg(def.tone)}`}
+              className={`p-2.5 rounded-xl border text-left flex flex-col justify-between gap-1 active:scale-[0.98] transition motion-reduce:transition-none cursor-pointer ${isSel ? toneRing(def.tone) : ''} ${toneBg(def.tone)}`}
             >
-              <span className="flex items-center gap-2">
-                <span className="text-2xl leading-none" aria-hidden="true">{def.emoji}</span>
-                <span className="flex-1 min-w-0 text-sm font-extrabold leading-tight">{tr(language, def.labelKh, def.labelEn, def.labelZh)}</span>
-                <span className="px-2 py-0.5 rounded-full bg-white/80 dark:bg-slate-900/60 text-xs font-extrabold shrink-0">
-                  {list.length} {tr(language, 'មុខ', 'dishes', '道菜')}
+              <span className="flex items-center justify-between gap-1.5">
+                <span className="flex items-center gap-1.5 min-w-0">
+                  <span className="text-lg leading-none shrink-0" aria-hidden="true">{def.emoji}</span>
+                  <span className="text-xs font-extrabold leading-tight truncate">{tr(language, def.labelKh, def.labelEn, def.labelZh)}</span>
+                </span>
+                <span className="px-1.5 py-0.5 rounded-full bg-white/80 dark:bg-slate-900/70 text-[10px] font-extrabold shrink-0">
+                  {list.length} {tr(language, 'មុខ', 'dishes', '道')}
                 </span>
               </span>
-              <span className="block mt-1.5 text-[11px] leading-snug opacity-90">{tagBenefit(def, language)}</span>
-              {thumbs.length > 0 && (
-                <span className="mt-2 flex items-center gap-2">
-                  <span className="flex -space-x-2 shrink-0">
-                    {thumbs.map((f) => <Thumb key={f.id} food={f} size="w-9 h-9" />)}
-                  </span>
-                  <span className="min-w-0 text-[11px] font-semibold opacity-90 truncate">
-                    {list.slice(0, 2).map(name).join(' · ')}
-                  </span>
-                </span>
-              )}
+              <span className="block text-[10px] leading-snug opacity-85 line-clamp-2">{tagBenefit(def, language)}</span>
             </button>
           );
         })}
       </div>
 
       {/* Inline recommended dishes */}
-      <div className="p-3 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-2.5">
+      <div ref={recommendedRef} className="p-3 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-2.5">
         <h4 className="text-sm font-extrabold text-slate-900 dark:text-white">
           {selDef.emoji} {tr(language, 'ម្ហូបណែនាំក្នុងប្រភេទនេះ', 'Recommended Dishes in This Category', '本分类推荐菜品')}
           <span className="font-semibold text-slate-500 dark:text-slate-400"> · {tr(language, selDef.labelKh, selDef.labelEn, selDef.labelZh)}</span>

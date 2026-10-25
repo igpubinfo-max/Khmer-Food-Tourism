@@ -9,6 +9,7 @@ import { tr } from '../utils/i18n';
 import type { TagFilterId, DishTagId } from '../utils/dishTags';
 import { requestTagFilter } from '../utils/smartHub';
 import { useFoodPassport, getPassportLevel, levelTitle } from '../utils/foodPassport';
+import { useBodyScrollLock } from '../utils/useBodyScrollLock';
 import { SmartHubHealthySection } from './SmartHubHealthySection';
 import { FoodTripTemplates } from './FoodTripTemplates';
 import { FoodPassportCard } from './FoodPassportCard';
@@ -27,6 +28,7 @@ export const SmartHubMenuModal: React.FC<Props> = ({ onClose }) => {
   const [openPanel, setOpenPanel] = useState<'trips' | 'stamps' | null>(null);
   const [online, setOnline] = useState<boolean>(() => (typeof navigator === 'undefined' ? true : navigator.onLine !== false));
   const { count: stampCount } = useFoodPassport();
+  useBodyScrollLock(true);
 
   useEffect(() => {
     const up = () => setOnline(true);
@@ -81,13 +83,13 @@ export const SmartHubMenuModal: React.FC<Props> = ({ onClose }) => {
 
   return (
     <div
-      className="fixed inset-0 z-[45] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-xs p-0 sm:p-4 animate-in fade-in duration-200 motion-reduce:animate-none"
+      className="fixed inset-0 z-[45] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-xs p-0 sm:p-4 animate-in fade-in duration-200 motion-reduce:animate-none overscroll-none"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
     >
       <div
-        className="w-full max-w-md max-h-[94vh] flex flex-col rounded-t-3xl sm:rounded-3xl bg-slate-50 dark:bg-slate-900 shadow-2xl overflow-hidden font-khmer"
+        className="w-full max-w-md max-h-[94dvh] flex flex-col rounded-t-3xl sm:rounded-3xl bg-slate-50 dark:bg-slate-900 shadow-2xl overflow-hidden font-khmer overscroll-contain"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -110,7 +112,7 @@ export const SmartHubMenuModal: React.FC<Props> = ({ onClose }) => {
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto overscroll-contain p-4 space-y-6">
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-3.5 space-y-5 [-webkit-overflow-scrolling:touch]">
           {/* SECTION 1: Healthy Dish Tags (cards, inline dishes, 3-meal idea) */}
           <SmartHubHealthySection foods={organizedFoods} onViewAll={pickTag} onOpenFood={openFood} />
 

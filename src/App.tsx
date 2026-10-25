@@ -43,6 +43,7 @@ import { Toast } from './components/Toast';
 import { RatePrompt } from './components/RatePrompt';
 import { OfflineBanner } from './components/OfflineBanner';
 import { SMART_HUB_EVENT } from './utils/smartHub';
+import { useBodyScrollLock } from './utils/useBodyScrollLock';
 
 const MainScreen: React.FC = () => {
   const {
@@ -103,6 +104,39 @@ const MainScreen: React.FC = () => {
     window.addEventListener(SMART_HUB_EVENT, open);
     return () => window.removeEventListener(SMART_HUB_EVENT, open);
   }, []);
+
+  const hasVipAccess = isUserVipActive(currentUser) || currentUser?.role === 'admin';
+  const isAnyModalOpen = Boolean(
+    isSmartHubOpen ||
+    selectedFood ||
+    selectedRestaurant ||
+    selectedDestination ||
+    isAuthModalOpen ||
+    isAddRestaurantModalOpen ||
+    isManageMenuModalOpen ||
+    managingRestaurant ||
+    isAdminOpen ||
+    isAdminLoginModalOpen ||
+    isInstallModalOpen ||
+    isSupportModalOpen ||
+    isExitModalOpen ||
+    (isWhatToEatModalOpen && hasVipAccess) ||
+    (isNearMeModalOpen && hasVipAccess) ||
+    (isDailyDiscoveriesModalOpen && hasVipAccess) ||
+    (isWishlistsModalOpen && hasVipAccess) ||
+    (isAiTripPlannerModalOpen && hasVipAccess) ||
+    (isNotificationsModalOpen && hasVipAccess) ||
+    isTrendingSocialModalOpen ||
+    isTrendingFoodDetailModalOpen ||
+    isAiCheckInModalOpen ||
+    isRestaurantCheckInModalOpen ||
+    isUpgradeVipModalOpen ||
+    isSupportTicketModalOpen ||
+    isQrScannerModalOpen ||
+    isVipAddRestaurantModalOpen ||
+    isGoogleMapsSearchModalOpen
+  );
+  useBodyScrollLock(isAnyModalOpen);
 
   if (!ownershipCheck.isAuthentic) {
     return (
