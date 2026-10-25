@@ -2981,7 +2981,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Mountains & National Parks",
     "descriptionKh": "ខ្សែផ្លូវកាត់ជួរភ្នំក្រវាញដ៏ស្រស់ស្អាតបំផុតនៅកម្ពុជា ដែលបត់បែនដូចសត្វពស់វែកកាត់តាមជម្រាលភ្នំកម្ពស់ ១,៥០០ ម៉ែត្រ។ មានអ័ព្ទសក្បុសអណ្តែតកាត់ និងទឹកធ្លាក់បុប្ផាលាក់ខ្លួន។",
     "descriptionEn": "Spectacular winding serpentine mountain highway curving through the Cardamom peaks at 1,500m elevation, celebrated for breathtaking cloud seas and waterfalls.",
-    "photoUrl": "https://upload.wikimedia.org/wikipedia/commons/a/a7/Phom_Aoral.jpg",
+    "photoUrl": "/destinations/dest-87.jpg",
     "provinceKh": "ខេត្តពោធិ៍សាត់",
     "provinceEn": "Pursat",
     "addressKh": "ស្រុកវាលវែង ចម្ងាយ ១២០ គ.ម ពីក្រុងពោធិ៍សាត់",
@@ -3002,8 +3002,11 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": true,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/a/a7/Phom_Aoral.jpg"
-    ]
+      "/destinations/dest-87.jpg"
+    ],
+    "isCustomPhoto": true,
+    "isAdminEdited": true,
+    "photoUpdatedAt": "2026-10-25T04:42:29.498Z"
   },
   {
     "id": "dest-88",
@@ -3083,7 +3086,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Nature & Waterfalls",
     "descriptionKh": "រមណីយដ្ឋានធម្មជាតិដែលមានស្ទឹងថ្លាត្រជាក់ហូរកាត់ថ្មរដិបរដុប ក្រោមម្លប់ព្រៃឈើធំៗ។ ជាកន្លែងពេញនិយមសម្រាប់អ្នកស្រុក និងភ្ញៀវទេសចរងូតទឹកកម្សាន្តនៅចុងសប្តាហ៍។",
     "descriptionEn": "Charming river resort with shallow stone-studded waters flowing through tranquil forest groves, ideal for weekend family splashing and dining.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/da/Forest_in_Mondulkiri.jpg/960px-Forest_in_Mondulkiri.jpg",
+    "photoUrl": "/destinations/dest-90.jpg",
     "provinceKh": "ខេត្តពោធិ៍សាត់",
     "provinceEn": "Pursat",
     "addressKh": "ស្រុកភ្នំក្រវាញ ចម្ងាយ ១៦ គ.ម ពីក្រុងពោធិ៍សាត់",
@@ -3104,8 +3107,11 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/da/Forest_in_Mondulkiri.jpg/960px-Forest_in_Mondulkiri.jpg"
-    ]
+      "/destinations/dest-90.jpg"
+    ],
+    "isCustomPhoto": true,
+    "isAdminEdited": true,
+    "photoUpdatedAt": "2026-10-25T04:59:30.695Z"
   },
   {
     "id": "dest-91",
@@ -3116,7 +3122,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Mountains & National Parks",
     "descriptionKh": "តំបន់ខ្ពង់រាបភ្នំដាច់ស្រយាលកណ្តាលជួរភ្នំក្រវាញ ដែលជាជម្រកសត្វក្រពើភ្នំកម្រ (Siamese Crocodile) និងបឹងធម្មជាតិដ៏ស្ងប់ស្ងាត់។ ស័ក្តិសមសម្រាប់អ្នកស្រឡាញ់ការផ្សងព្រេងបោះតង់។",
     "descriptionEn": "Remote highland plateau deep in the Cardamoms, sanctuary for the critically endangered Siamese crocodile, offering eco-homestays and jungle boat tours.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e7/Cambodia_2014_-_panoramio_%286%29.jpg/960px-Cambodia_2014_-_panoramio_%286%29.jpg",
+    "photoUrl": "/destinations/dest-91.jpg",
     "provinceKh": "ខេត្តពោធិ៍សាត់",
     "provinceEn": "Pursat",
     "addressKh": "ឃុំអូរសោម ស្រុកវាលវែង",
@@ -3137,8 +3143,11 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e7/Cambodia_2014_-_panoramio_%286%29.jpg/960px-Cambodia_2014_-_panoramio_%286%29.jpg"
-    ]
+      "/destinations/dest-91.jpg"
+    ],
+    "isCustomPhoto": true,
+    "isAdminEdited": true,
+    "photoUpdatedAt": "2026-10-25T05:00:21.846Z"
   },
   {
     "id": "dest-92",
@@ -3567,7 +3576,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Nature & Waterfalls",
     "descriptionKh": "ទីតាំងល្អបំផុតនៅលើពិភពលោកសម្រាប់គយគន់សត្វផ្សោតក្បាលត្រឡោកទន្លេមេគង្គ (Irrawaddy Dolphins) ដ៏កម្របំផុត។ ភ្ញៀវទេសចរជិះទូកកាណូតកណ្តាលទន្លេមេគង្គមើលហ្វូងសត្វផ្សោតលោតដកដង្ហើម។",
     "descriptionEn": "The premier deep pool sanctuary on the Mekong River to encounter critically endangered freshwater Irrawaddy dolphins from local wooden eco-boats.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cf/20171123_Sunset_over_Mekong_Kratie_3996_DxO.jpg/960px-20171123_Sunset_over_Mekong_Kratie_3996_DxO.jpg",
+    "photoUrl": "/destinations/dest-104.jpg",
     "provinceKh": "ខេត្តក្រចេះ",
     "provinceEn": "Kratie",
     "addressKh": "ឃុំសំបុក ស្រុកចិត្របុរី ចម្ងាយ ១៥ គ.ម ពីក្រុងក្រចេះ",
@@ -3588,8 +3597,11 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": true,
     "galleryPhotos": [
-      "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cf/20171123_Sunset_over_Mekong_Kratie_3996_DxO.jpg/960px-20171123_Sunset_over_Mekong_Kratie_3996_DxO.jpg"
-    ]
+      "/destinations/dest-104.jpg"
+    ],
+    "isCustomPhoto": true,
+    "isAdminEdited": true,
+    "photoUpdatedAt": "2026-10-25T05:05:34.078Z"
   },
   {
     "id": "dest-105",
@@ -3666,7 +3678,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Mountains & National Parks",
     "descriptionKh": "ភ្នំធម្មជាតិកម្ពស់ខ្ពស់មាត់ទន្លេមេគង្គ មានកាំជណ្តើរ ៣០០ កាំអមដោយរូបសំណាកព្រះសង្ឃតម្រៀបជួរ។ លើកំពូលភ្នំមានវត្តអារាមសមាធិដ៏ស្ងប់ស្ងាត់ និងទេសភាពទន្លេមេគង្គដ៏ស្រស់បំព្រង។",
     "descriptionEn": "Peaceful spiritual hill climbed via 300 steps flanked by statues of monks carrying alms bowls, leading to meditation hermitages and panoramic river views.",
-    "photoUrl": "https://upload.wikimedia.org/wikipedia/commons/a/af/Budisti%C4%8Dko_sveti%C5%A1te_u_Banlungu_24.1.2018.jpg",
+    "photoUrl": "/destinations/dest-107.jpg",
     "provinceKh": "ខេត្តក្រចេះ",
     "provinceEn": "Kratie",
     "addressKh": "ឃុំសំបុក ស្រុកចិត្របុរី ចម្ងាយ ១០ គ.ម ពីក្រុងក្រចេះ",
@@ -3687,8 +3699,11 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/a/af/Budisti%C4%8Dko_sveti%C5%A1te_u_Banlungu_24.1.2018.jpg"
-    ]
+      "/destinations/dest-107.jpg"
+    ],
+    "isCustomPhoto": true,
+    "isAdminEdited": true,
+    "photoUpdatedAt": "2026-10-25T05:08:01.099Z"
   },
   {
     "id": "dest-108",
@@ -7767,7 +7782,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Mountains & Caves",
     "descriptionKh": "ភ្នំខ្នងផ្សារកម្ពស់ជាង ១,០០០ ម៉ែត្រ លើជួរភ្នំក្រវាញ ជាទីតាំងឡើងភ្នំបោះតង់ដ៏ល្បីល្បាញបំផុតនៅកម្ពុជា មានវាលស្មៅបៃតងរលកខៀវស្រងាត់ និងសមុទ្រពពកហោះក្រាលកាត់ជើងពេលព្រឹកព្រលឹម។",
     "descriptionEn": "Cambodia legendary trekking pinnacle in the Cardamom range rising over 1,000 meters, famous for boundless alpine grasslands, cloud inversions, and star-filled skies.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0c/Cambodia_%2C_Kampong_Speu_-_panoramio_%282%29.jpg/960px-Cambodia_%2C_Kampong_Speu_-_panoramio_%282%29.jpg",
+    "photoUrl": "/destinations/dest-229.jpg",
     "provinceKh": "ខេត្តកំពង់ស្ពឺ",
     "provinceEn": "Kampong Speu",
     "addressKh": "ឃុំតាសាល ស្រុកឱរ៉ាល់ ខេត្តកំពង់ស្ពឺ",
@@ -7794,8 +7809,11 @@ export const initial100Destinations: TouristDestination[] = [
     "socialViews": "4.2M+ Views",
     "socialLikes": "320K Likes",
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Knong_Phsar_sea_of_clouds_Kampong_Speu.jpg/960px-Knong_Phsar_sea_of_clouds_Kampong_Speu.jpg"
-    ]
+      "/destinations/dest-229.jpg"
+    ],
+    "isCustomPhoto": true,
+    "isAdminEdited": true,
+    "photoUpdatedAt": "2026-10-25T05:34:26.119Z"
   },
   {
     "id": "dest-230",
@@ -8152,7 +8170,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Resorts & Cultural Heritage",
     "descriptionKh": "គៀនស្វាយក្រៅជារមណីយដ្ឋានកម្សាន្តមាត់ព្រែកដ៏ពេញនិយមបំផុតក្បែររាជធានីភ្នំពេញ មានក្យូសបណ្តែតទឹកតម្រៀបជួរ ម្ហូបស្រុកស្រែ (មាន់ដុត ត្រីអាំង បាញ់ឆែវ) និងផ្លែឈើស្រស់ៗបេះពីចម្ការ។",
     "descriptionEn": "A beloved weekend river retreat on the Prek Thnot canal near Phnom Penh, famous for overwater bamboo huts, roast chicken, grilled river fish, and seasonal fruit orchards.",
-    "photoUrl": "https://upload.wikimedia.org/wikipedia/commons/0/05/Udong_Cambodia_1970.jpg",
+    "photoUrl": "/destinations/dest-240.jpg",
     "provinceKh": "ខេត្តកណ្តាល",
     "provinceEn": "Kandal",
     "addressKh": "ស្រុកកៀនស្វាយ តាមបណ្តោយផ្លូវជាតិលេខ ១",
@@ -8174,8 +8192,11 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": true,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Koh_Dach_Silk_Island_Mekong.jpg/960px-Koh_Dach_Silk_Island_Mekong.jpg"
-    ]
+      "/destinations/dest-240.jpg"
+    ],
+    "isCustomPhoto": true,
+    "isAdminEdited": true,
+    "photoUpdatedAt": "2026-10-25T05:36:05.275Z"
   },
   {
     "id": "dest-241",

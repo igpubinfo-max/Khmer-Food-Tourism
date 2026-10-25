@@ -93,6 +93,7 @@ export const AiFoodDiscoveryModal: React.FC = () => {
   const [scanResult, setScanResult] = useState<AiFoodRecognitionResult | null>(null);
   const [isEditingFoodName, setIsEditingFoodName] = useState<boolean>(false);
   const [showAiSuggestionsHighlight, setShowAiSuggestionsHighlight] = useState<boolean>(false);
+  const [assistantCategoryFilter, setAssistantCategoryFilter] = useState<string>('all');
 
   // Ingredients Search States
   const [selectedIngredients, setSelectedIngredients] = useState<string[]>([]);
@@ -303,11 +304,11 @@ export const AiFoodDiscoveryModal: React.FC = () => {
         requiresUserConfirmation: false,
         uncertainPromptKh: REQUIRED_UNCERTAIN_PROMPT_KH,
         uncertainPromptEn: REQUIRED_UNCERTAIN_PROMPT_EN,
-        messageKh: `✅ បានជ្រើសរើសមុខម្ហូប «${candidate.foodItem.nameKh}» ជាមួយរូបមន្តពិតប្រាកដ!`,
-        messageEn: `✅ Selected "${candidate.foodItem.nameEn}" with verified recipe!`,
+        messageKh: `✅ បានបញ្ជាក់មុខម្ហូប «${candidate.foodItem.nameKh}» ជាមួយរូបមន្តផ្លូវការ!`,
+        messageEn: `✅ Confirmed "${candidate.foodItem.nameEn}" with verified recipe!`,
         detectedVisualFeatures: [meta.labelKh, candidate.foodItem.categoryKh],
-        disclaimerKh: 'រូបមន្ត និងគ្រឿងផ្សំត្រូវបានទាញចេញពីឃ្លាំងទិន្នន័យម្ហូបខ្មែរផ្លូវការ ១០០% ប៉ុន្តែមិនអាចបញ្ជាក់គ្រឿងផ្សំជាក់ស្តែងក្នុងចានរបស់អ្នកពីរូបភាពតែមួយមុខបានទេ។',
-        disclaimerEn: 'Recipes and ingredients are retrieved from the official Cambodian database, but actual ingredients in your dish cannot be 100% verified from an image alone.',
+        disclaimerKh: 'រូបមន្ត និងគ្រឿងផ្សំត្រូវបានទាញចេញពីឃ្លាំងទិន្នន័យម្ហូបខ្មែរផ្លូវការ ប៉ុន្តែមិនអាចបញ្ជាក់គ្រឿងផ្សំជាក់ស្តែងក្នុងចានរបស់អ្នកពីរូបភាពតែមួយមុខបានទេ។',
+        disclaimerEn: 'Recipes and ingredients are retrieved from the official Cambodian database, but actual ingredients in your dish cannot be verified from an image alone.',
         foodSafetyAdvisory: buildFoodSafetyAdvisory(candidate.foodItem, undefined, true),
         processingTimeMs: scanResult?.processingTimeMs || 120,
       });
@@ -360,6 +361,18 @@ export const AiFoodDiscoveryModal: React.FC = () => {
     }
   };
 
+  const categoryFilteredDishes = foods
+    .filter((f) => {
+      if (assistantCategoryFilter === 'all') return false;
+      const slug = (f.categorySlug || '').toLowerCase();
+      const nameKh = f.nameKh || '';
+      if (assistantCategoryFilter === 'balut_snack') {
+        return nameKh.includes('ពងទាកូន') || nameKh.includes('បាញ់ឆែវ') || nameKh.includes('លតឆា') || slug === 'specialty';
+      }
+      return slug === assistantCategoryFilter;
+    })
+    .slice(0, 8);
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/80 backdrop-blur-sm animate-fade-in overflow-hidden">
       <div
@@ -375,15 +388,15 @@ export const AiFoodDiscoveryModal: React.FC = () => {
               </div>
               <div>
                 <h3 className="font-moul text-sm sm:text-base text-white flex items-center gap-2">
-                  <span>{isKm ? 'ស្វែងរក & ស្គាល់មុខម្ហូប AI' : 'AI Cambodian Food Discovery'}</span>
+                  <span>{isKm ? 'ជំនួយការ AI ស្វែងរកមុខម្ហូប' : 'AI Cambodian Food Assistant'}</span>
                   <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[10px] font-black font-sans">
-                    AI Vision
+                    AI Assistant
                   </span>
                 </h3>
                 <p className="text-[11px] text-emerald-200 font-khmer">
                   {isKm
-                    ? 'បែងចែកប្រភេទវត្ថុមុន • ស្គាល់ឈ្មោះម្ហូប • រូបមន្តពិតប្រាកដ ១០០%'
-                    : 'Object Classification First • Honest Identification • Verified Recipes'}
+                    ? 'ណែនាំមុខម្ហូបដែលទំនងបំផុតតាមរូបភាព • ជ្រើសរើសបញ្ជាក់ ១ ប៉ះ'
+                    : 'Suggests Closest Dish Matches with Confidence Scores • 1-Tap Confirm'}
                 </p>
               </div>
             </div>
@@ -435,7 +448,7 @@ export const AiFoodDiscoveryModal: React.FC = () => {
             }`}
           >
             <Camera className="w-4 h-4" />
-            <span>{isKm ? 'ស្កេនរូបថត AI' : 'AI Photo Scan'}</span>
+            <span>{isKm ? 'ជំនួយការរូបថត AI' : 'AI Photo Assistant'}</span>
           </button>
 
           <button
@@ -475,12 +488,12 @@ export const AiFoodDiscoveryModal: React.FC = () => {
                   </div>
                   <div>
                     <h4 className="font-bold text-sm text-slate-900 dark:text-white">
-                      {isKm ? 'ថត ឬជ្រើសរើសរូបថតម្ហូប ផ្លែឈើ បន្លែ ឬអាហារវេចខ្ចប់' : 'Take or upload a photo of food, fruit, vegetables, or packaged items'}
+                      {isKm ? 'ថត ឬជ្រើសរើសរូបថតម្ហូបខ្មែរ ផ្លែឈើ បន្លែ ឬអាហារសម្រន់' : 'Take or upload a photo of Cambodian food, fruit, or snacks'}
                     </h4>
                     <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto">
                       {isKm
-                        ? 'AI នឹងវិភាគប្រភេទវត្ថុក្នុងរូបភាពជាមុន (ផ្លែឈើ បន្លែ សាច់ឆៅ អាហារវេចខ្ចប់ ឬម្ហូបចម្អិនរួច) មុននឹងបង្ហាញរូបមន្តពិតប្រាកដ'
-                        : 'AI first classifies the visible object type before identifying the food and retrieving verified recipes.'}
+                        ? 'ជំនួយការ AI នឹងវិភាគពណ៌ និងទម្រង់រូបភាព ដើម្បីណែនាំមុខម្ហូបដែលទំនងបំផុតនៅលំដាប់ទី ១ អមដោយជម្រើសរូបភាពសម្រាប់អ្នកចុចបញ្ជាក់'
+                        : 'AI Assistant analyzes visual features to rank the most likely dish #1 along with visual candidates for your confirmation.'}
                     </p>
                   </div>
 
@@ -539,8 +552,8 @@ export const AiFoodDiscoveryModal: React.FC = () => {
                         <div className="w-10 h-10 border-3 border-amber-400 border-t-transparent rounded-full animate-spin" />
                         <span className="font-bold text-xs">
                           {isKm
-                            ? 'ជំហានទី ១៖ កំពុងកំណត់ប្រភេទវត្ថុក្នុងរូបភាព & វិភាគលក្ខណៈសម្គាល់...'
-                            : 'Step 1: Classifying object type & analyzing visual features...'}
+                            ? 'កំពុងវិភាគទម្រង់រូបភាព និងប្រៀបធៀបជាមួយឃ្លាំងទិន្នន័យម្ហូបខ្មែរ ២០០ មុខ...'
+                            : 'Analyzing visual features against 200 Cambodian dishes...'}
                         </span>
                       </div>
                     )}
@@ -576,43 +589,52 @@ export const AiFoodDiscoveryModal: React.FC = () => {
                       </div>
 
                       {/* ========================================================== */}
-                      {/* 3. MOST LIKELY FOOD NAME + VISIBLE «កែឈ្មោះម្ហូប» BUTTON    */}
+                      {/* 3. MOST LIKELY FOOD NAME (#1 RANKED) + 1-TAP CONFIRM/EDIT  */}
                       {/* ========================================================== */}
                       <div className="p-4 rounded-3xl bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-slate-800/90 dark:to-slate-800/60 border-2 border-emerald-500/40 space-y-3">
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="space-y-1">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span
-                                className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                                  scanResult.status === 'confident'
-                                    ? 'bg-emerald-600 text-white'
-                                    : 'bg-amber-500 text-slate-950'
-                                }`}
-                              >
-                                {scanResult.status === 'confident'
-                                  ? isKm
-                                    ? 'បានផ្ទៀងផ្ទាត់ឈ្មោះម្ហូប'
-                                    : 'Verified Match'
-                                  : isKm
-                                  ? 'ការប៉ាន់ស្មានបឋម (ត្រូវការបញ្ជាក់)'
-                                  : 'Preliminary Match (Confirm Below)'}
-                              </span>
-                              {scanResult.confidenceScore > 0 && (
-                                <span className="px-2 py-0.5 rounded-full bg-slate-900/10 dark:bg-white/10 text-slate-800 dark:text-amber-300 font-mono text-[10px] font-black">
-                                  {Math.round(scanResult.confidenceScore * 100)}% Confidence
+                        <div className="flex items-start justify-between gap-2.5">
+                          <div className="flex items-start gap-3 min-w-0">
+                            {scanResult.primaryMatch?.photoUrl && (
+                              <img
+                                src={scanResult.primaryMatch.photoUrl}
+                                alt={scanResult.identifiedNameKh}
+                                className="w-16 h-16 rounded-2xl object-cover border-2 border-emerald-500/40 shadow-sm shrink-0"
+                              />
+                            )}
+                            <div className="space-y-1 min-w-0">
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <span
+                                  className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                                    scanResult.status === 'confident' && !scanResult.requiresUserConfirmation
+                                      ? 'bg-emerald-600 text-white'
+                                      : 'bg-amber-500 text-slate-950'
+                                  }`}
+                                >
+                                  {scanResult.status === 'confident' && !scanResult.requiresUserConfirmation
+                                    ? isKm
+                                      ? '✅ បានបញ្ជាក់មុខម្ហូប'
+                                      : '✅ Confirmed Match'
+                                    : isKm
+                                    ? '🤖 លទ្ធផលទំនងបំផុត #1 (សូមបញ្ជាក់)'
+                                    : '🤖 #1 Likely Match (Please Confirm)'}
                                 </span>
-                              )}
-                            </div>
+                                {scanResult.confidenceScore > 0 && (
+                                  <span className="px-2 py-0.5 rounded-full bg-slate-900/10 dark:bg-white/10 text-slate-800 dark:text-amber-300 font-mono text-[10px] font-black">
+                                    {Math.round(scanResult.confidenceScore * 100)}% {isKm ? 'ភាពស្រដៀង' : 'Match'}
+                                  </span>
+                                )}
+                              </div>
 
-                            <h3 className="font-moul text-base text-slate-900 dark:text-white pt-1">
-                              {scanResult.identifiedNameKh}
-                            </h3>
-                            <p className="text-xs text-slate-600 dark:text-slate-300 font-sans font-medium">
-                              {scanResult.identifiedNameEn}
-                            </p>
+                              <h3 className="font-moul text-base text-slate-900 dark:text-white pt-0.5 leading-snug">
+                                {scanResult.identifiedNameKh}
+                              </h3>
+                              <p className="text-xs text-slate-600 dark:text-slate-300 font-sans font-medium">
+                                {scanResult.identifiedNameEn}
+                              </p>
+                            </div>
                           </div>
 
-                          {/* Visible «កែឈ្មោះម្ហូប» Button (Section 6 Requirement) */}
+                          {/* Visible «កែឈ្មោះម្ហូប» Button */}
                           <button
                             type="button"
                             onClick={() => {
@@ -622,17 +644,17 @@ export const AiFoodDiscoveryModal: React.FC = () => {
                             className="px-3 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-[11px] shadow-xs flex items-center gap-1.5 cursor-pointer shrink-0 transition"
                           >
                             <Edit3 className="w-3.5 h-3.5" />
-                            <span>{isKm ? 'កែឈ្មោះម្ហូប' : 'Edit Food Name'}</span>
+                            <span>{isKm ? 'កែឈ្មោះម្ហូប' : 'Edit Name'}</span>
                           </button>
                         </div>
 
-                        {/* Manual Food Name Input Box (Opens when «កែឈ្មោះម្ហូប» or «បញ្ចូលឈ្មោះដោយខ្លួនឯង» is clicked) */}
+                        {/* Manual Food Name Input + 1-Tap Category Filter Assistant */}
                         {(isEditingFoodName || scanResult.requiresUserConfirmation) && (
                           <div className="p-3 rounded-2xl bg-white dark:bg-slate-900 border-2 border-amber-400/80 space-y-2.5 animate-fade-in">
                             <label className="text-[11px] font-bold text-slate-800 dark:text-amber-300 block">
                               {isKm
-                                ? '✍️ វាយបញ្ចូលឈ្មោះម្ហូប ឬជ្រើសរើសឈ្មោះម្ហូបរហ័សខាងក្រោម៖'
-                                : '✍️ Enter the exact dish name or tap a quick-select dish below:'}
+                                ? '✍️ វាយបញ្ចូលឈ្មោះម្ហូប ឬត្រងតាមប្រភេទម្ហូបខាងក្រោម៖'
+                                : '✍️ Type the dish name or filter by category below:'}
                             </label>
                             <div className="flex gap-2">
                               <input
@@ -643,8 +665,8 @@ export const AiFoodDiscoveryModal: React.FC = () => {
                                 onKeyDown={(e) => e.key === 'Enter' && handleApplyManualFoodName()}
                                 placeholder={
                                   isKm
-                                    ? 'ឧ. កង្កែបបោកអាំង, អាម៉ុកត្រី, សម្លកកូរ, មាន់ដុត, បុកល្ហុង...'
-                                    : 'e.g. Stuffed Grilled Frog, Fish Amok, Samlor Korko...'
+                                    ? 'ឧ. ពងទាកូន, ឆាគ្រឿងអន្ទង់, ត្រីងៀតអាំង, ញាំមីសួរ, អាម៉ុកត្រី...'
+                                    : 'e.g. Balut, Stir-fried Eel, Dried Fish, Glass Noodle Salad...'
                                 }
                                 className="flex-1 px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs outline-none focus:border-emerald-500 font-bold"
                               />
@@ -658,7 +680,39 @@ export const AiFoodDiscoveryModal: React.FC = () => {
                               </button>
                             </div>
 
-                            {/* Live Verified Database Autocomplete Chips OR Popular Quick-Select Chips */}
+                            {/* 1-Tap Category Filter Pills */}
+                            <div className="pt-1 space-y-1.5">
+                              <span className="text-[10px] text-slate-500 block">
+                                {isKm ? 'ត្រងមុខម្ហូបតាមប្រភេទ (ចុច ១ ដង)៖' : 'Filter dishes by category (1-Tap):'}
+                              </span>
+                              <div className="flex flex-wrap gap-1">
+                                {[
+                                  { slug: 'all', kh: 'ពេញនិយម', en: 'Popular' },
+                                  { slug: 'balut_snack', kh: '🥚 ពងទាកូន/សម្រន់', en: '🥚 Balut/Snacks' },
+                                  { slug: 'stirfry', kh: '🥘 ឆា/ខ', en: '🥘 Stir-fry/Braise' },
+                                  { slug: 'grill', kh: '🔥 អាំង/ដុត', en: '🔥 Grill/Roast' },
+                                  { slug: 'salad', kh: '🥗 ញាំ/បុក/ភ្លា', en: '🥗 Salads' },
+                                  { slug: 'soup', kh: '🍲 សម្ល/ការី', en: '🍲 Soups/Curry' },
+                                  { slug: 'noodles', kh: '🍜 គុយទាវ/នំបញ្ចុក', en: '🍜 Noodles' },
+                                  { slug: 'dessert', kh: '🍰 បង្អែម/នំ', en: '🍰 Desserts' },
+                                ].map((cat) => (
+                                  <button
+                                    key={cat.slug}
+                                    type="button"
+                                    onClick={() => setAssistantCategoryFilter(cat.slug)}
+                                    className={`px-2 py-1 rounded-lg text-[10px] font-bold cursor-pointer transition border ${
+                                      assistantCategoryFilter === cat.slug
+                                        ? 'bg-emerald-600 text-white border-emerald-600'
+                                        : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-emerald-500'
+                                    }`}
+                                  >
+                                    {isKm ? cat.kh : cat.en}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+
+                            {/* Live Verified Database Autocomplete Chips OR Category/Popular Quick-Select Chips */}
                             <div className="pt-1 space-y-1.5">
                               <span className="text-[10px] text-slate-500 block">
                                 {manualNameSuggestions.length > 0
@@ -666,22 +720,25 @@ export const AiFoodDiscoveryModal: React.FC = () => {
                                     ? 'ជ្រើសរើសរហ័សពីឃ្លាំងទិន្នន័យផ្លូវការ៖'
                                     : 'Quick select from verified database:'
                                   : isKm
-                                  ? 'មុខម្ហូបពេញនិយម (ចុច ១ ដងដើម្បីបង្ហាញរូបមន្តពេញ)៖'
-                                  : 'Popular Dishes (1-Tap Quick Confirm):'}
+                                  ? 'ចុច ១ ដងលើឈ្មោះម្ហូបខាងក្រោមដើម្បីបង្ហាញរូបមន្តពេញ៖'
+                                  : 'Tap any dish below to load its full recipe:'}
                               </span>
                               <div className="flex flex-wrap gap-1.5">
                                 {(manualNameSuggestions.length > 0
                                   ? manualNameSuggestions.map((f) => ({ id: f.id, nameKh: f.nameKh, nameEn: f.nameEn }))
+                                  : categoryFilteredDishes.length > 0
+                                  ? categoryFilteredDishes.map((f) => ({ id: f.id, nameKh: f.nameKh, nameEn: f.nameEn }))
                                   : [
-                                      { id: 'q-1', nameKh: 'កង្កែបបោកអាំងសៀមរាប', nameEn: 'Stuffed Roasted Frog' },
-                                      { id: 'q-2', nameKh: 'មាន់ដុតច្រាំងទន្លេកំពត', nameEn: 'Kampot Roasted Chicken' },
-                                      { id: 'q-3', nameKh: 'ត្រីរ៉ស់អាំងបាយដំណើបអំបិលម្ទេស', nameEn: 'Grilled Snakehead Fish' },
-                                      { id: 'q-4', nameKh: 'សាច់គោអាំងទឹកប្រហុក', nameEn: 'Grilled Beef Prahok Dip' },
-                                      { id: 'q-5', nameKh: 'អាម៉ុកត្រីស្លឹកញ', nameEn: 'Steamed Fish Amok' },
-                                      { id: 'q-6', nameKh: 'សម្លកកូរត្រីរ៉ស់', nameEn: 'Samlor Korko' },
-                                      { id: 'q-7', nameKh: 'នំបញ្ចុកសម្លខ្មែរ', nameEn: 'Num Banh Chok' },
-                                      { id: 'q-8', nameKh: 'បាយឡុកឡាក់សាច់គោ', nameEn: 'Beef Lok Lak' },
-                                      { id: 'q-9', nameKh: 'បុកល្ហុងក្ដាមប្រៃ', nameEn: 'Khmer Papaya Salad' },
+                                      { id: 'q-balut', nameKh: 'ពងទាកូនទឹកម្រេចក្រូចឆ្មាកំពត', nameEn: 'Balut with Kampot Lime & Pepper' },
+                                      { id: 'q-eel', nameKh: 'ឆាគ្រឿងអន្ទង់ស្លឹកម្រះព្រៅ', nameEn: 'Spicy Stir-Fried Eel' },
+                                      { id: 'q-fish', nameKh: 'ត្រីងៀតអាំងជ្រលក់ទឹកអម្ពិលទុំ', nameEn: 'Grilled Sun-Dried Fish with Tamarind Dip' },
+                                      { id: 'q-salad', nameKh: 'ញាំមីសួរគ្រឿងសមុទ្របង្គាមឹក', nameEn: 'Glass Noodle Seafood Salad' },
+                                      { id: 'q-frog', nameKh: 'កង្កែបបោកអាំងសៀមរាប', nameEn: 'Stuffed Roasted Frog' },
+                                      { id: 'q-chicken', nameKh: 'មាន់ដុតច្រាំងទន្លេកំពត', nameEn: 'Kampot Roasted Chicken' },
+                                      { id: 'q-amok', nameKh: 'អាម៉ុកត្រីស្លឹកញ', nameEn: 'Steamed Fish Amok' },
+                                      { id: 'q-korko', nameKh: 'សម្លកកូរត្រីរ៉ស់', nameEn: 'Samlor Korko' },
+                                      { id: 'q-noodle', nameKh: 'នំបញ្ចុកសម្លខ្មែរ', nameEn: 'Num Banh Chok' },
+                                      { id: 'q-loklak', nameKh: 'បាយឡុកឡាក់សាច់គោ', nameEn: 'Beef Lok Lak' },
                                     ]
                                 ).map((item) => (
                                   <button
@@ -700,7 +757,7 @@ export const AiFoodDiscoveryModal: React.FC = () => {
                       </div>
 
                       {/* ========================================================== */}
-                      {/* STEP 5 UNCERTAIN PROMPT & 3 REQUIRED ACTION BUTTONS        */}
+                      {/* STEP 5 AI ASSISTANT CONFIRMATION & 3 ACTION BUTTONS        */}
                       {/* ========================================================== */}
                       {scanResult.requiresUserConfirmation && (
                         <div className="p-4 rounded-3xl bg-amber-50 dark:bg-amber-950/40 border-2 border-amber-400/70 space-y-3">
@@ -712,35 +769,35 @@ export const AiFoodDiscoveryModal: React.FC = () => {
                           </div>
 
                           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
-                            {/* Button 1: «បញ្ចូលឈ្មោះដោយខ្លួនឯង» */}
+                            {/* Button 1: Confirm #1 AI Match */}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setShowAiSuggestionsHighlight(false);
+                                if (scanResult.candidateMatches.length >= 1) {
+                                  handleSelectCandidate(scanResult.candidateMatches[0]);
+                                }
+                              }}
+                              className="py-2.5 px-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] shadow-xs flex items-center justify-center gap-1.5 cursor-pointer transition"
+                            >
+                              <CheckCircle2 className="w-3.5 h-3.5" />
+                              <span>{isKm ? '✅ បញ្ជាក់មុខម្ហូប #1 នេះ' : '✅ Confirm #1 Match'}</span>
+                            </button>
+
+                            {/* Button 2: Enter Name Manually */}
                             <button
                               type="button"
                               onClick={() => {
                                 setIsEditingFoodName(true);
                                 setTimeout(() => manualNameInputRef.current?.focus(), 80);
                               }}
-                              className="py-2.5 px-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] shadow-xs flex items-center justify-center gap-1.5 cursor-pointer transition"
-                            >
-                              <Edit3 className="w-3.5 h-3.5" />
-                              <span>{isKm ? 'បញ្ចូលឈ្មោះដោយខ្លួនឯង' : 'Enter Name Manually'}</span>
-                            </button>
-
-                            {/* Button 2: «ជ្រើសរើសឈ្មោះដែល AI ណែនាំ» */}
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setShowAiSuggestionsHighlight(true);
-                                if (scanResult.candidateMatches.length >= 1) {
-                                  handleSelectCandidate(scanResult.candidateMatches[0]);
-                                }
-                              }}
                               className="py-2.5 px-3 rounded-2xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-[11px] shadow-xs flex items-center justify-center gap-1.5 cursor-pointer transition"
                             >
-                              <CheckCircle2 className="w-3.5 h-3.5" />
-                              <span>{isKm ? 'បញ្ជាក់ឈ្មោះដែល AI ណែនាំ' : 'Confirm Top AI Match'}</span>
+                              <Edit3 className="w-3.5 h-3.5" />
+                              <span>{isKm ? 'ស្វែងរកឈ្មោះផ្សេង' : 'Search Dish Name'}</span>
                             </button>
 
-                            {/* Button 3: «ថតរូបម្ដងទៀត» */}
+                            {/* Button 3: Retake Photo */}
                             <button
                               type="button"
                               onClick={handleRetakePhoto}
@@ -754,49 +811,82 @@ export const AiFoodDiscoveryModal: React.FC = () => {
                       )}
 
                       {/* ========================================================== */}
-                      {/* 4. IDENTIFICATION CONFIDENCE & UP TO 4 ALTERNATIVE MATCHES */}
+                      {/* 4. RANKED CANDIDATE MATCHES WITH VISUAL THUMBNAILS         */}
                       {/* ========================================================== */}
                       {scanResult.candidateMatches.length > 0 && (
                         <div
-                          className={`p-3.5 rounded-2xl border space-y-2 transition ${
+                          className={`p-3.5 rounded-2xl border space-y-2.5 transition ${
                             showAiSuggestionsHighlight
                               ? 'bg-amber-50/90 dark:bg-amber-950/40 border-amber-400 ring-2 ring-amber-400/50'
                               : 'bg-slate-50 dark:bg-slate-800/70 border-slate-200 dark:border-slate-700'
                           }`}
                         >
-                          <span className="font-bold text-slate-800 dark:text-slate-200 block text-xs">
-                            {isKm
-                              ? 'ជម្រើសដែល AI ណែនាំតាមភស្តុតាងរូបភាព (ចុចជ្រើសរើស ១ ក្នុងចំណោមខាងក្រោម)៖'
-                              : 'AI Suggested Matches Based on Visual Clues (Tap to confirm):'}
-                          </span>
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="font-bold text-slate-800 dark:text-slate-200 block text-xs">
+                              {isKm
+                                ? 'ជម្រើសដែលជំនួយការ AI ណែនាំតាមលំដាប់ភាពស្រដៀង (ចុចដើម្បីបញ្ជាក់)៖'
+                                : 'Ranked AI Suggested Matches with Confidence Scores (Tap to confirm):'}
+                            </span>
+                          </div>
                           <div className="space-y-2">
-                            {scanResult.candidateMatches.slice(0, 4).map((c) => {
+                            {scanResult.candidateMatches.slice(0, 5).map((c, idx) => {
                               const isCurrent = scanResult.identifiedNameKh === c.nameKh && !scanResult.requiresUserConfirmation;
                               return (
                                 <div
                                   key={c.id}
                                   onClick={() => handleSelectCandidate(c)}
-                                  className={`p-2.5 rounded-2xl border cursor-pointer transition flex items-center justify-between gap-2 ${
+                                  className={`p-2.5 rounded-2xl border cursor-pointer transition flex items-center justify-between gap-2.5 ${
                                     isCurrent
-                                      ? 'bg-emerald-50 dark:bg-emerald-950/50 border-emerald-500'
+                                      ? 'bg-emerald-50 dark:bg-emerald-950/50 border-emerald-500 ring-1 ring-emerald-500/40'
+                                      : idx === 0
+                                      ? 'bg-white dark:bg-slate-900 border-emerald-500/60 hover:border-emerald-500'
                                       : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 hover:border-emerald-500'
                                   }`}
                                 >
-                                  <div className="space-y-0.5">
-                                    <div className="flex items-center gap-2 flex-wrap">
-                                      <span className="font-bold text-slate-900 dark:text-white">
-                                        {c.nameKh} <span className="text-[10px] font-normal text-slate-500">({c.nameEn})</span>
-                                      </span>
-                                      <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 font-mono text-[10px] font-bold">
-                                        {Math.round(c.confidenceScore * 100)}%
-                                      </span>
+                                  <div className="flex items-center gap-2.5 min-w-0">
+                                    {c.foodItem?.photoUrl ? (
+                                      <img
+                                        src={c.foodItem.photoUrl}
+                                        alt={c.nameKh}
+                                        className="w-12 h-12 rounded-xl object-cover border border-slate-200 dark:border-slate-700 shrink-0"
+                                      />
+                                    ) : (
+                                      <div className="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-700 flex items-center justify-center font-bold text-xs shrink-0">
+                                        #{idx + 1}
+                                      </div>
+                                    )}
+                                    <div className="space-y-0.5 min-w-0">
+                                      <div className="flex items-center gap-1.5 flex-wrap">
+                                        <span
+                                          className={`px-1.5 py-0.5 rounded text-[9px] font-black ${
+                                            idx === 0
+                                              ? 'bg-amber-400 text-slate-950'
+                                              : 'bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
+                                          }`}
+                                        >
+                                          #{idx + 1}
+                                        </span>
+                                        <span className="font-bold text-slate-900 dark:text-white truncate">
+                                          {c.nameKh}{' '}
+                                          <span className="text-[10px] font-normal text-slate-500">({c.nameEn})</span>
+                                        </span>
+                                        <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 font-mono text-[10px] font-bold">
+                                          {Math.round(c.confidenceScore * 100)}%
+                                        </span>
+                                      </div>
+                                      <p className="text-[10px] text-slate-500 dark:text-slate-400 line-clamp-2">
+                                        {isKm ? c.visualCluesKh : c.visualCluesEn}
+                                      </p>
                                     </div>
-                                    <p className="text-[10px] text-slate-500 dark:text-slate-400">
-                                      {isKm ? c.visualCluesKh : c.visualCluesEn}
-                                    </p>
                                   </div>
-                                  <span className="px-2.5 py-1 rounded-xl bg-emerald-600 text-white text-[10px] font-bold shrink-0">
-                                    {isKm ? 'ជ្រើសរើស' : 'Select'}
+                                  <span
+                                    className={`px-2.5 py-1.5 rounded-xl text-[10px] font-bold shrink-0 ${
+                                      isCurrent
+                                        ? 'bg-emerald-700 text-white'
+                                        : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                                    }`}
+                                  >
+                                    {isCurrent ? (isKm ? 'បានបញ្ជាក់' : 'Confirmed') : isKm ? 'ជ្រើសរើស' : 'Confirm'}
                                   </span>
                                 </div>
                               );
@@ -820,7 +910,7 @@ export const AiFoodDiscoveryModal: React.FC = () => {
                               </span>
                             </span>
                             <span className="px-2 py-0.5 rounded-full bg-rose-200/80 dark:bg-rose-900/70 text-rose-900 dark:text-rose-200 text-[9px] font-bold">
-                              {isKm ? 'មិនអាចបញ្ជាក់ ១០០% ពីរូបភាពទេ' : 'Unverified from Image Alone'}
+                              {isKm ? 'មិនអាចបញ្ជាក់ទាំងស្រុងពីរូបភាពទេ' : 'Unverified from Image Alone'}
                             </span>
                           </div>
 
