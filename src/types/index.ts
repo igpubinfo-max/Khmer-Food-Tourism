@@ -1,6 +1,6 @@
 export const APP_VERSION = 'v2.1.0';
 export const APP_VERSION_NAME = '2.1.0';
-export const APP_BUILD_CODE = 75;
+export const APP_BUILD_CODE = 76;
 export const APP_RELEASE_DATE = '2026-10-25';
 
 export interface GoogleMapsPlaceMetadata {

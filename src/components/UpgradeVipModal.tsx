@@ -92,6 +92,13 @@ export const UpgradeVipModal: React.FC = () => {
 
   const dynamicBenefits = useMemo(() => getDynamicVipBenefits(appSettings), [appSettings]);
   const additionalStoreFeeUsd = useMemo(() => getAdditionalStoreFeeUsd(appSettings), [appSettings]);
+  const isVipConfigValid = useMemo(
+    () =>
+      dynamicPlansList.length >= 2 &&
+      dynamicPlansList.every(p => Number.isFinite(p.priceUsd) && p.priceUsd > 0 && Number.isFinite(p.days) && p.days > 0) &&
+      dynamicBenefits.length > 0,
+    [dynamicPlansList, dynamicBenefits]
+  );
 
   const [selectedPlanId, setSelectedPlanId] = useState<'quarterly' | 'annual'>('quarterly');
   const selectedPlan = useMemo(
@@ -979,8 +986,8 @@ export const UpgradeVipModal: React.FC = () => {
             </div>
           )}
 
-          {/* STATE 1: AWAITING_PAYMENT (Payment Screen First) */}
-          {paymentState === 'AWAITING_PAYMENT' && (
+          {/* STATE 1: AWAITING_PAYMENT (Payment Screen First - Only shown when pricing & benefits are valid) */}
+          {paymentState === 'AWAITING_PAYMENT' && isVipConfigValid && (
             <div className="space-y-4">
               
               {/* Current Account Status Pill */}
@@ -1020,29 +1027,7 @@ export const UpgradeVipModal: React.FC = () => {
                     <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
                     <span>{isKm ? 'ជ្រើសរើសកញ្ចប់សមាជិកភាព VIP៖' : 'Select VIP Subscription Plan:'}</span>
                   </label>
-                  <button
-                    type="button"
-                    onClick={() => refreshAppSettingsFromServer(true)}
-                    disabled={isRefreshingSettings}
-                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-[10px] font-bold bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 hover:bg-amber-200 transition cursor-pointer disabled:opacity-60"
-                  >
-                    <RefreshCw className={`w-3 h-3 ${isRefreshingSettings ? 'animate-spin' : ''}`} />
-                    <span>{isKm ? 'ផ្ទុកតម្លៃថ្មី' : 'Refresh Prices'}</span>
-                  </button>
                 </div>
-
-                {settingsSyncError && (
-                  <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/50 border border-amber-300 dark:border-amber-700 text-[11px] text-amber-900 dark:text-amber-200 flex items-center justify-between gap-2">
-                    <span>{settingsSyncError}</span>
-                    <button
-                      type="button"
-                      onClick={() => refreshAppSettingsFromServer(true)}
-                      className="px-2 py-1 rounded-lg bg-amber-600 text-white font-bold shrink-0 cursor-pointer"
-                    >
-                      {isKm ? 'ព្យាយាមម្តងទៀត' : 'Retry'}
-                    </button>
-                  </div>
-                )}
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   {dynamicPlansList.map((plan) => {

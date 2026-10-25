@@ -472,29 +472,7 @@ export const PaymentSupportModal: React.FC = () => {
                       ? 'ជ្រើសរើសកញ្ចប់ VIP ដែលអ្នកបានបង់ប្រាក់៖'
                       : 'Select the VIP Plan You Paid For:'}
                   </label>
-                  <button
-                    type="button"
-                    onClick={() => refreshAppSettingsFromServer(true)}
-                    disabled={isRefreshingSettings}
-                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-bold bg-amber-100 text-amber-800 hover:bg-amber-200 transition disabled:opacity-60"
-                  >
-                    <RefreshCw className={`w-3 h-3 ${isRefreshingSettings ? 'animate-spin' : ''}`} />
-                    {language === 'km' ? 'ផ្ទុកតម្លៃថ្មី' : 'Refresh Prices'}
-                  </button>
                 </div>
-
-                {settingsSyncError && (
-                  <div className="mb-2 p-2.5 rounded-xl bg-amber-50 border border-amber-300 text-[11px] font-semibold text-amber-900 flex items-center justify-between gap-2">
-                    <span>{settingsSyncError}</span>
-                    <button
-                      type="button"
-                      onClick={() => refreshAppSettingsFromServer(true)}
-                      className="px-2 py-1 rounded-lg bg-amber-600 text-white font-bold shrink-0"
-                    >
-                      {language === 'km' ? 'ព្យាយាមម្តងទៀត' : 'Retry'}
-                    </button>
-                  </div>
-                )}
 
                 <div className="grid grid-cols-2 gap-2.5">
                   <button

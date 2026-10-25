@@ -280,11 +280,11 @@ export function normalizeAuthoritativeAppSettings(
   const shortDays =
     typeof merged.vipShortDurationDays === 'number' && merged.vipShortDurationDays >= 1
       ? Math.round(merged.vipShortDurationDays)
-      : 10;
+      : 30;
   const shortPrice =
     typeof merged.vipShortPriceUsd === 'number' && merged.vipShortPriceUsd > 0
       ? Math.round(merged.vipShortPriceUsd * 100) / 100
-      : 2.99;
+      : 9.99;
   const longDays =
     typeof merged.vipLongDurationDays === 'number' && merged.vipLongDurationDays >= 1
       ? Math.round(merged.vipLongDurationDays)
@@ -292,7 +292,7 @@ export function normalizeAuthoritativeAppSettings(
   const longPrice =
     typeof merged.vipLongPriceUsd === 'number' && merged.vipLongPriceUsd > 0
       ? Math.round(merged.vipLongPriceUsd * 100) / 100
-      : 4.99;
+      : 24.99;
   const extraStoreFee =
     typeof merged.additionalStoreFeeUsd === 'number' && merged.additionalStoreFeeUsd >= 0
       ? Math.round(merged.additionalStoreFeeUsd * 100) / 100
@@ -341,76 +341,51 @@ export async function fetchAuthoritativeAppSettingsFromServer(
 }> {
   if (!isSupabaseConfigured()) {
     return {
-      ok: false,
-      settings: null,
-      error: 'Cloud server is not configured.',
+      ok: true,
+      settings: fallback ? normalizeAuthoritativeAppSettings(fallback) : null,
     };
   }
-  const cfg = getCloudApiConfig();
 
   try {
-    const res = await fetchWithTimeout(
-      `${cfg.supabaseUrl}/rest/v1/kft_app_kv_store?key=in.(%22kft_cloud_admin_vip_pricing_v2%22,%22kft_cloud_app_settings_v1%22)&select=key,payload,updated_at`,
-      {
-        method: 'GET',
-        cache: 'no-store',
-        headers: getSupabaseHeaders(false),
-      },
-      timeoutMs
-    );
+    const [v2Payload, v1Payload] = await Promise.all([
+      pullCloudDocument<Partial<AppSettings>>('kft_cloud_admin_vip_pricing_v2', timeoutMs),
+      pullCloudDocument<Partial<AppSettings>>('kft_cloud_app_settings_v1', timeoutMs),
+    ]);
 
-    if (!res.ok) {
-      return {
-        ok: false,
-        settings: null,
-        error: `Failed to fetch server VIP settings (HTTP ${res.status}).`,
-      };
-    }
-
-    const rows = await res.json();
-    if (Array.isArray(rows) && rows.length > 0) {
-      const v2Row = rows.find((r: any) => r?.key === 'kft_cloud_admin_vip_pricing_v2' && r?.payload);
-      const v1Row = rows.find((r: any) => r?.key === 'kft_cloud_app_settings_v1' && r?.payload);
-      const chosenRow = v2Row || v1Row;
-      if (chosenRow?.payload) {
-        const normalized = normalizeAuthoritativeAppSettings(chosenRow.payload, fallback);
-        // Self-heal kft_cloud_app_settings_v1 if an older client overwrote it
-        if (
-          v2Row?.payload &&
-          (!v1Row?.payload ||
-            Number(v1Row.payload.vipShortPriceUsd) !== normalized.vipShortPriceUsd ||
-            Number(v1Row.payload.vipLongPriceUsd) !== normalized.vipLongPriceUsd)
-        ) {
-          pushCloudDocument('kft_cloud_app_settings_v1', normalized, 6000).catch(() => {});
-        }
-        try {
-          if (typeof localStorage !== 'undefined') {
-            localStorage.removeItem('kft_settings_v3');
-            localStorage.setItem('kft_settings_v4', JSON.stringify(normalized));
-          }
-        } catch {
-          // ignore localStorage errors
-        }
-        return {
-          ok: true,
-          settings: normalized,
-          updatedAt: chosenRow.updated_at || normalized.settingsUpdatedAt,
-        };
+    const chosenPayload = v2Payload || v1Payload;
+    if (chosenPayload && typeof chosenPayload === 'object') {
+      const normalized = normalizeAuthoritativeAppSettings(chosenPayload, fallback);
+      if (
+        v2Payload &&
+        (!v1Payload ||
+          Number(v1Payload.vipShortPriceUsd) !== normalized.vipShortPriceUsd ||
+          Number(v1Payload.vipLongPriceUsd) !== normalized.vipLongPriceUsd)
+      ) {
+        pushCloudDocument('kft_cloud_app_settings_v1', normalized, 6000).catch(() => {});
       }
+      try {
+        if (typeof localStorage !== 'undefined') {
+          localStorage.removeItem('kft_settings_v3');
+          localStorage.setItem('kft_settings_v4', JSON.stringify(normalized));
+        }
+      } catch {
+        // ignore localStorage errors
+      }
+      return {
+        ok: true,
+        settings: normalized,
+        updatedAt: normalized.settingsUpdatedAt,
+      };
     }
 
     return {
       ok: true,
-      settings: null,
+      settings: fallback ? normalizeAuthoritativeAppSettings(fallback) : null,
     };
-  } catch (err: any) {
+  } catch {
     return {
-      ok: false,
-      settings: null,
-      error:
-        err?.name === 'AbortError'
-          ? 'Server request timed out while loading VIP settings.'
-          : err?.message || 'Network error while loading server VIP settings.',
+      ok: true,
+      settings: fallback ? normalizeAuthoritativeAppSettings(fallback) : null,
     };
   }
 }
@@ -546,22 +521,32 @@ export async function pullCloudDocumentsByKeys<T = any>(
   const cfg = getCloudApiConfig();
 
   try {
-    const inList = keys.map(k => `"${k.replace(/"/g, '')}"`).join(',');
-    const res = await fetchWithTimeout(
-      `${cfg.supabaseUrl}/rest/v1/kft_app_kv_store?key=in.(${encodeURIComponent(inList)})&select=key,payload,updated_at`,
-      {
-        method: 'GET',
-        headers: getSupabaseHeaders(false),
-        cache: 'no-store',
-      },
-      timeoutMs
+    const results = await Promise.allSettled(
+      keys.map(async k => {
+        const res = await fetchWithTimeout(
+          `${cfg.supabaseUrl}/rest/v1/kft_app_kv_store?key=eq.${encodeURIComponent(k)}&select=key,payload,updated_at&limit=1`,
+          {
+            method: 'GET',
+            headers: getSupabaseHeaders(false),
+            cache: 'no-store',
+          },
+          timeoutMs
+        );
+        if (!res.ok) return null;
+        const rows = await res.json();
+        if (Array.isArray(rows) && rows.length > 0 && rows[0]?.payload !== undefined) {
+          return rows[0] as { key: string; payload: T; updated_at?: string };
+        }
+        return null;
+      })
     );
-    if (!res.ok) return [];
-    const rows = await res.json();
-    if (Array.isArray(rows)) {
-      return rows.filter(r => r && typeof r.key === 'string' && r.payload !== undefined);
+    const out: Array<{ key: string; payload: T; updated_at?: string }> = [];
+    for (const r of results) {
+      if (r.status === 'fulfilled' && r.value) {
+        out.push(r.value);
+      }
     }
-    return [];
+    return out;
   } catch (err) {
     console.warn('Supabase pullCloudDocumentsByKeys error:', err);
     return [];
@@ -1343,7 +1328,25 @@ export async function syncAllAppDataWithSupabase(localState: {
     }
     for (const r of localState.customRestaurants) {
       if (r && r.id && !isSeedRestaurantId(String(r.id)) && (!r.ownerId || !deletedIds.has(r.ownerId))) {
-        restMap.set(r.id, { ...(restMap.get(r.id) || {}), ...r });
+        const existing = restMap.get(r.id);
+        if (!existing) {
+          restMap.set(r.id, r);
+        } else {
+          const existingMs = new Date(existing.photoUpdatedAt || existing.adminEditedAt || existing.createdAt || 0).getTime() || 0;
+          const localMs = new Date(r.photoUpdatedAt || r.adminEditedAt || r.createdAt || 0).getTime() || 0;
+          const base = localMs >= existingMs ? { ...existing, ...r } : { ...r, ...existing };
+          const bestPhoto =
+            r.photoUrl?.startsWith('data:') && localMs >= existingMs
+              ? r.photoUrl
+              : existing.photoUrl?.startsWith('data:')
+              ? existing.photoUrl
+              : base.photoUrl || existing.photoUrl || r.photoUrl;
+          restMap.set(r.id, {
+            ...base,
+            photoUrl: bestPhoto,
+            profileImage: base.profileImage?.startsWith('data:') ? base.profileImage : bestPhoto,
+          });
+        }
       }
     }
     const mergedCustomRestaurants = Array.from(restMap.values());

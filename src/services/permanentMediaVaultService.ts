@@ -16,6 +16,7 @@
  */
 
 import { FoodItem, Restaurant, TouristDestination, TrendingFoodItem, RestaurantMenuItem, RestaurantReview, RestaurantPriceLevel, GoogleMapsPlaceMetadata } from '../types';
+import { initial100Destinations } from '../data/seedDestinations';
 import {
   isSupabaseConfigured,
   pullCloudDocument,
@@ -25,6 +26,10 @@ import {
   pullCloudDocumentsByKeys,
   deleteCloudDocument,
 } from './supabaseService';
+
+const IMMUTABLE_SEED_DEST_MAP = new Map<string, TouristDestination>(
+  initial100Destinations.map((d) => [d.id, d])
+);
 
 export const VAULT_KEYS = {
   FOODS: 'kft_permanent_food_overrides_v1',
@@ -455,7 +460,7 @@ async function syncSingleOverrideRecordToCloud(
  */
 export function recordPermanentFoodOverride(food: FoodItem): void {
   const bundle = loadLocalMediaOverrides();
-  const now = food.photoUpdatedAt || new Date().toISOString();
+  const now = new Date().toISOString();
   const overrideRecord: FoodMediaOverride = {
     id: food.id,
     photoUrl: food.photoUrl,
@@ -552,7 +557,7 @@ export function removePermanentRestaurantOverride(restaurantId: string): void {
  */
 export function recordPermanentDestinationOverride(dest: TouristDestination): void {
   const bundle = loadLocalMediaOverrides();
-  const now = dest.photoUpdatedAt || new Date().toISOString();
+  const now = new Date().toISOString();
   // Avoid storing a duplicate copy of a 300KB base64 photoUrl inside galleryPhotos
   const extraGallery = Array.isArray(dest.galleryPhotos)
     ? dest.galleryPhotos.filter((g) => g && g !== dest.photoUrl && !isObsoleteSeedPhoto(g))
@@ -659,7 +664,9 @@ export function applyRestaurantOverrides(
   overridesMap: Record<string, RestaurantMediaOverride> = loadLocalMediaOverrides().restaurants
 ): Restaurant[] {
   if (!overridesMap || Object.keys(overridesMap).length === 0) return restaurants;
-  return restaurants.map((r) => {
+  const seenIds = new Set<string>();
+  const mapped = restaurants.map((r) => {
+    seenIds.add(r.id);
     const ov = overridesMap[r.id];
     if (!ov) return r;
     const photoUrl = ov.photoUrl || ov.profileImage || r.photoUrl;
@@ -696,36 +703,101 @@ export function applyRestaurantOverrides(
       googleMapsMeta: ov.googleMapsMeta || r.googleMapsMeta,
       isAdminEdited: ov.isAdminEdited ?? r.isAdminEdited,
       adminEditedAt: ov.adminEditedAt || r.adminEditedAt,
+      isCustomPhoto: true,
+      photoUpdatedAt: ov.updatedAt || r.photoUpdatedAt,
     };
   });
+
+  // Also append any custom VIP/Admin restaurants present in overridesMap that aren't in the list yet
+  for (const [ovId, ov] of Object.entries(overridesMap)) {
+    if (!seenIds.has(ovId) && ov && ov.nameKh && (ov.photoUrl || ov.profileImage)) {
+      seenIds.add(ovId);
+      const photoUrl = ov.photoUrl || ov.profileImage || '/Shop/rest-1.jpg';
+      mapped.push({
+        id: ovId,
+        nameKh: ov.nameKh,
+        nameEn: ov.nameEn || ov.nameKh,
+        descriptionKh: ov.descriptionKh || 'ភោជនីយដ្ឋានម្ហូបខ្មែររសជាតិដើម ផាសុកភាព និងអនាម័យខ្ពស់។',
+        descriptionEn: ov.descriptionEn || 'Authentic Cambodian restaurant.',
+        photoUrl,
+        profileImage: ov.profileImage || photoUrl,
+        galleryPhotos: Array.isArray(ov.galleryPhotos) && ov.galleryPhotos.length > 0 ? ov.galleryPhotos : [photoUrl],
+        foodImages: Array.isArray(ov.foodImages) ? ov.foodImages : [],
+        menuItems: Array.isArray(ov.menuItems) ? ov.menuItems : [],
+        reviews: Array.isArray(ov.reviews) ? ov.reviews : [],
+        addressKh: ov.addressKh || 'ភ្នំពេញ',
+        addressEn: ov.addressKh || 'Phnom Penh',
+        provinceKh: ov.provinceKh || 'រាជធានីភ្នំពេញ',
+        provinceEn: 'Phnom Penh',
+        phone: ov.phone || '',
+        openingHoursKh: ov.openingHoursKh || '០៧:០០ ព្រឹក - ០៩:០០ យប់',
+        openingHoursEn: '07:00 AM - 09:00 PM',
+        priceLevel: ov.priceLevel || '$$',
+        mapUrl: ov.mapUrl || 'https://maps.google.com',
+        latitude: typeof ov.latitude === 'number' ? ov.latitude : 11.5564,
+        longitude: typeof ov.longitude === 'number' ? ov.longitude : 104.9282,
+        rating: typeof ov.rating === 'number' && ov.rating > 0 ? ov.rating : 4.9,
+        reviewCount: typeof ov.reviewCount === 'number' ? ov.reviewCount : 1,
+        signatureDishesKh: ['ម្ហូបប្រចាំហាង'],
+        promoVideoUrl: ov.promoVideoUrl,
+        telegramUrl: ov.telegramUrl,
+        facebookUrl: ov.facebookUrl,
+        ownerId: ov.ownerId,
+        ownerName: ov.ownerName,
+        ownerEmail: ov.ownerEmail,
+        googlePlaceId: ov.googlePlaceId,
+        dataSource: ov.dataSource,
+        googleMapsMeta: ov.googleMapsMeta,
+        status: 'approved',
+        isVerified: true,
+        isPromoted: Boolean(ov.ownerId),
+        membershipTier: ov.ownerId ? 'premium' : 'free',
+        paymentStatus: ov.ownerId ? 'paid' : 'unpaid',
+        isAdminEdited: ov.isAdminEdited ?? true,
+        adminEditedAt: ov.adminEditedAt || ov.updatedAt,
+        isCustomPhoto: true,
+        photoUpdatedAt: ov.updatedAt,
+        createdAt: ov.adminEditedAt || ov.updatedAt || new Date().toISOString(),
+      });
+    }
+  }
+
+  return mapped;
 }
 
 /**
  * Apply permanent destination overrides on top of any destination list (seed or cached).
+ * Compares override timestamps strictly against the immutable seed (`IMMUTABLE_SEED_DEST_MAP`)
+ * so that `compactDataForBulkLocalStorage` can never cause a custom photo to revert to an older seed photo.
  */
 export function applyDestinationOverrides(
   destinations: TouristDestination[],
   overridesMap: Record<string, DestinationMediaOverride> = loadLocalMediaOverrides().destinations
 ): TouristDestination[] {
   if (!overridesMap || Object.keys(overridesMap).length === 0) return destinations;
-  return destinations.map((d) => {
+  const seenIds = new Set<string>();
+  const mapped = destinations.map((d) => {
+    seenIds.add(d.id);
     const ov = overridesMap[d.id];
     if (!ov || !ov.photoUrl || isObsoleteSeedPhoto(ov.photoUrl)) return d;
 
-    const isBundledStaticTemplePhoto =
-      typeof d.photoUrl === 'string' && d.photoUrl.startsWith('/destinations/dest-');
+    const seedItem = IMMUTABLE_SEED_DEST_MAP.get(d.id);
+    const seedPhotoUrl = seedItem?.photoUrl || '';
+    const isSeedBundledStaticPhoto =
+      typeof seedPhotoUrl === 'string' && seedPhotoUrl.startsWith('/destinations/');
+    const seedTime = seedItem?.photoUpdatedAt ? new Date(seedItem.photoUpdatedAt).getTime() : 0;
     const ovTime = ov.updatedAt ? new Date(ov.updatedAt).getTime() : 0;
-    const destTime = d.photoUpdatedAt ? new Date(d.photoUpdatedAt).getTime() : 0;
 
-    // Never allow an older non-custom URL to downgrade a baked-in `/destinations/dest-*.jpg` photo,
-    // and if the baked-in photo has the exact same timestamp as the base64 override, prefer the fast static `/destinations/dest-*.jpg` asset
-    // unless the override has a strictly newer timestamp (`ovTime > destTime + 1000`).
+    // If the seed already has this exact override baked into `/destinations/<id>.jpg` (`seedTime >= ovTime - 1000`),
+    // use the fast static `/destinations/<id>.jpg` asset.
+    // Otherwise (if `ov` is newer than the seed OR the seed is not a baked `/destinations/` file), always use `ov.photoUrl`!
     const useOverridePhoto =
-      !isBundledStaticTemplePhoto ||
-      ov.photoUrl.startsWith('/destinations/dest-') ||
-      (ov.photoUrl.startsWith('data:') && ovTime > destTime + 1000);
+      !isSeedBundledStaticPhoto ||
+      ov.photoUrl.startsWith('/destinations/') ||
+      ovTime > seedTime + 1000 ||
+      seedTime === 0;
 
-    const effectivePhotoUrl = useOverridePhoto ? ov.photoUrl : d.photoUrl;
+    const effectivePhotoUrl = useOverridePhoto ? ov.photoUrl : seedPhotoUrl;
 
     return {
       ...d,
@@ -752,9 +824,52 @@ export function applyDestinationOverrides(
       isAdminEdited: ov.isAdminEdited ?? d.isAdminEdited,
       adminEditedAt: ov.adminEditedAt || d.adminEditedAt,
       isCustomPhoto: true,
-      photoUpdatedAt: ovTime >= destTime ? ov.updatedAt : d.photoUpdatedAt,
+      photoUpdatedAt: ovTime >= seedTime ? (ov.updatedAt || d.photoUpdatedAt) : (seedItem?.photoUpdatedAt || d.photoUpdatedAt),
     };
   });
+
+  // Also append any custom/imported destinations present in overridesMap that aren't in the array yet
+  for (const [ovId, ov] of Object.entries(overridesMap)) {
+    if (!seenIds.has(ovId) && ov && ov.photoUrl && !isObsoleteSeedPhoto(ov.photoUrl) && ov.nameKh) {
+      seenIds.add(ovId);
+      mapped.push({
+        id: ovId,
+        nameKh: ov.nameKh,
+        nameEn: ov.nameEn || ov.nameKh,
+        categorySlug: 'nature',
+        categoryKh: 'ធម្មជាតិ & រមណីយដ្ឋាន',
+        categoryEn: 'Nature & Resorts',
+        descriptionKh: ov.descriptionKh || ov.nameKh,
+        descriptionEn: ov.descriptionEn || ov.nameEn || ov.nameKh,
+        photoUrl: ov.photoUrl,
+        galleryPhotos: Array.isArray(ov.galleryPhotos) && ov.galleryPhotos.length > 0 ? ov.galleryPhotos : [ov.photoUrl],
+        provinceKh: ov.provinceKh || 'កម្ពុជា',
+        provinceEn: ov.provinceEn || 'Cambodia',
+        addressKh: ov.addressKh || ov.provinceKh || 'កម្ពុជា',
+        addressEn: ov.provinceEn || 'Cambodia',
+        entranceFeeKh: ov.entryFeeKh || 'ចូលទស្សនាឥតគិតថ្លៃ ($0)',
+        entranceFeeEn: 'Free Entry ($0)',
+        bestTimeToVisitKh: ov.openingHoursKh || '០៧:០០ ព្រឹក - ០៦:០០ ល្ងាច',
+        bestTimeToVisitEn: '07:00 AM - 06:00 PM',
+        mapUrl: ov.mapUrl || 'https://www.google.com/maps',
+        latitude: typeof ov.latitude === 'number' ? ov.latitude : 11.5564,
+        longitude: typeof ov.longitude === 'number' ? ov.longitude : 104.9282,
+        rating: 4.8,
+        reviewCount: 120,
+        highlightsKh: [ov.nameKh],
+        isFeatured: false,
+        googlePlaceId: ov.googlePlaceId,
+        dataSource: ov.dataSource,
+        googleMapsMeta: ov.googleMapsMeta,
+        isAdminEdited: true,
+        adminEditedAt: ov.adminEditedAt || ov.updatedAt,
+        isCustomPhoto: true,
+        photoUpdatedAt: ov.updatedAt,
+      });
+    }
+  }
+
+  return mapped;
 }
 
 /**
@@ -836,6 +951,7 @@ export async function hydrateAndSyncMediaOverrides(): Promise<AllMediaOverridesB
           existingPerRecordKeys.add(item.key);
           const remoteMs = item.updated_at ? new Date(item.updated_at).getTime() : 0;
           let localUpdatedAt: string | undefined;
+          let seedUpdatedAtMs = 0;
           if (item.key.startsWith('kft_ov_food_')) {
             const id = item.key.slice('kft_ov_food_'.length);
             localUpdatedAt = current.foods[id]?.updatedAt;
@@ -845,12 +961,19 @@ export async function hydrateAndSyncMediaOverrides(): Promise<AllMediaOverridesB
           } else if (item.key.startsWith('kft_ov_dest_')) {
             const id = item.key.slice('kft_ov_dest_'.length);
             localUpdatedAt = current.destinations[id]?.updatedAt;
+            const seedDest = IMMUTABLE_SEED_DEST_MAP.get(id);
+            if (seedDest?.photoUrl?.startsWith('/destinations/') && seedDest.photoUpdatedAt) {
+              seedUpdatedAtMs = new Date(seedDest.photoUpdatedAt).getTime() || 0;
+            }
           } else if (item.key.startsWith('kft_ov_trend_')) {
             const id = item.key.slice('kft_ov_trend_'.length);
             localUpdatedAt = current.trendingFoods[id]?.updatedAt;
           }
-          const localMs = localUpdatedAt ? new Date(localUpdatedAt).getTime() : 0;
-          if (!localUpdatedAt || remoteMs > localMs + 1000) {
+          const localMs = Math.max(
+            localUpdatedAt ? new Date(localUpdatedAt).getTime() || 0 : 0,
+            seedUpdatedAtMs
+          );
+          if (localMs === 0 || remoteMs > localMs + 1000) {
             keysToFetch.push(item.key);
           }
         }
@@ -894,26 +1017,28 @@ export async function hydrateAndSyncMediaOverrides(): Promise<AllMediaOverridesB
         }
       }
 
-      // Backfill any missing atomic per-record keys in Supabase so every existing override has its own isolated cloud row
-      const backfillPromises: Promise<any>[] = [];
-      for (const [id, ov] of Object.entries(current.foods)) {
-        const k = `kft_ov_food_${id}`;
-        if (!existingPerRecordKeys.has(k)) backfillPromises.push(pushCloudDocument(k, ov, 10000));
-      }
-      for (const [id, ov] of Object.entries(current.restaurants)) {
-        const k = `kft_ov_rest_${id}`;
-        if (!existingPerRecordKeys.has(k)) backfillPromises.push(pushCloudDocument(k, ov, 10000));
-      }
-      for (const [id, ov] of Object.entries(current.destinations)) {
-        const k = `kft_ov_dest_${id}`;
-        if (!existingPerRecordKeys.has(k)) backfillPromises.push(pushCloudDocument(k, ov, 10000));
-      }
-      for (const [id, ov] of Object.entries(current.trendingFoods)) {
-        const k = `kft_ov_trend_${id}`;
-        if (!existingPerRecordKeys.has(k)) backfillPromises.push(pushCloudDocument(k, ov, 10000));
-      }
-      if (backfillPromises.length > 0) {
-        Promise.allSettled(backfillPromises).catch(() => {});
+      // Backfill any missing atomic per-record keys in Supabase ONLY if manifest succeeded (`existingPerRecordKeys.size > 0`)
+      if (existingPerRecordKeys.size > 0) {
+        const backfillPromises: Promise<any>[] = [];
+        for (const [id, ov] of Object.entries(current.foods)) {
+          const k = `kft_ov_food_${id}`;
+          if (!existingPerRecordKeys.has(k)) backfillPromises.push(pushCloudDocument(k, ov, 10000));
+        }
+        for (const [id, ov] of Object.entries(current.restaurants)) {
+          const k = `kft_ov_rest_${id}`;
+          if (!existingPerRecordKeys.has(k)) backfillPromises.push(pushCloudDocument(k, ov, 10000));
+        }
+        for (const [id, ov] of Object.entries(current.destinations)) {
+          const k = `kft_ov_dest_${id}`;
+          if (!existingPerRecordKeys.has(k)) backfillPromises.push(pushCloudDocument(k, ov, 10000));
+        }
+        for (const [id, ov] of Object.entries(current.trendingFoods)) {
+          const k = `kft_ov_trend_${id}`;
+          if (!existingPerRecordKeys.has(k)) backfillPromises.push(pushCloudDocument(k, ov, 10000));
+        }
+        if (backfillPromises.length > 0) {
+          Promise.allSettled(backfillPromises).catch(() => {});
+        }
       }
     } catch {}
   }

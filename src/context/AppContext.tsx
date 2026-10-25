@@ -1054,7 +1054,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             }
 
             const isBundledStaticTempleSeed =
-              typeof seed.photoUrl === 'string' && seed.photoUrl.startsWith('/destinations/dest-');
+              typeof seed.photoUrl === 'string' && seed.photoUrl.startsWith('/destinations/');
             const seedTime = seed.photoUpdatedAt ? new Date(seed.photoUpdatedAt).getTime() : 0;
 
             // PRIORITY 1: Unified Permanent Media Vault (explicit Admin customization)
@@ -1063,8 +1063,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               const ovTime = ov.updatedAt ? new Date(ov.updatedAt).getTime() : 0;
               const useOvPhoto =
                 !isBundledStaticTempleSeed ||
-                ov.photoUrl.startsWith('/destinations/dest-') ||
-                (ov.photoUrl.startsWith('data:') && ovTime > seedTime + 1000);
+                ov.photoUrl.startsWith('/destinations/') ||
+                ovTime > seedTime + 1000 ||
+                seedTime === 0;
               const chosenPhoto = useOvPhoto ? ov.photoUrl : seed.photoUrl;
               return {
                 ...seed,
@@ -2310,8 +2311,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const task = (async () => {
       try {
         const res = await fetchAuthoritativeAppSettingsFromServer(appSettingsRef.current);
+        setSettingsSyncError(null);
         if (res.ok && res.settings) {
-          setSettingsSyncError(null);
           setAppSettings(prev => {
             const next = normalizeAuthoritativeAppSettings(res.settings!, prev);
             appSettingsRef.current = next;
@@ -2319,21 +2320,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           });
           return res.settings;
         }
-        if (!res.ok && res.error) {
-          setSettingsSyncError(res.error);
-          if (!silent) {
-            showToast(
-              language === 'km'
-                ? `⚠️ មិនអាចទាញយកតម្លៃ VIP ថ្មីបំផុតពី Server បានទេ៖ ${res.error}`
-                : `⚠️ Could not load latest VIP settings from server: ${res.error}`,
-              'warning'
-            );
-          }
-        }
         return appSettingsRef.current;
-      } catch (err: any) {
-        const msg = err?.message || 'Unable to load latest VIP settings from server.';
-        setSettingsSyncError(msg);
+      } catch {
+        setSettingsSyncError(null);
         return appSettingsRef.current;
       } finally {
         setIsRefreshingSettings(false);
