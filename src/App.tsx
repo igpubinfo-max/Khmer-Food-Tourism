@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, lazy, Suspense } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
 import { isUserVipActive } from './types';
 import { verifyAppOwnershipAndDomainIntegrity } from './utils/security';
@@ -9,37 +9,38 @@ import { FoodView } from './components/FoodView';
 import { RestaurantView } from './components/RestaurantView';
 import { TourismView } from './components/TourismView';
 import { CommunityFeed } from './components/CommunityFeed';
-import { ProfileView } from './components/ProfileView';
+const ProfileView = lazy(() => import('./components/ProfileView').then((m) => ({ default: m.ProfileView })));
 import { FoodDetailModal } from './components/FoodDetailModal';
 import { RestaurantDetailModal } from './components/RestaurantDetailModal';
 import { TouristDetailModal } from './components/TouristDetailModal';
 import { AuthModal } from './components/AuthModal';
 import { WelcomeScreenModal, WELCOME_SESSION_KEY } from './components/WelcomeScreenModal';
-import { AddRestaurantModal } from './components/AddRestaurantModal';
-import { ManageMenuModal } from './components/ManageMenuModal';
-import { AdminDashboard } from './components/AdminDashboard';
+const AddRestaurantModal = lazy(() => import('./components/AddRestaurantModal').then((m) => ({ default: m.AddRestaurantModal })));
+const ManageMenuModal = lazy(() => import('./components/ManageMenuModal').then((m) => ({ default: m.ManageMenuModal })));
+const AdminDashboard = lazy(() => import('./components/AdminDashboard').then((m) => ({ default: m.AdminDashboard })));
 import { AdminLoginModal } from './components/AdminLoginModal';
-import { InstallModal } from './components/InstallModal';
-import { SupportModal } from './components/SupportModal';
+const InstallModal = lazy(() => import('./components/InstallModal').then((m) => ({ default: m.InstallModal })));
+const SupportModal = lazy(() => import('./components/SupportModal').then((m) => ({ default: m.SupportModal })));
 import { ExitConfirmModal } from './components/ExitConfirmModal';
-import { WhatToEatModal } from './components/WhatToEatModal';
-import { NearMeModal } from './components/NearMeModal';
-import { DailyDiscoveriesModal } from './components/DailyDiscoveriesModal';
-import { WishlistsModal } from './components/WishlistsModal';
-import { AiTripPlannerModal } from './components/AiTripPlannerModal';
-import { NotificationsModal } from './components/NotificationsModal';
-import { TrendingSocialModal } from './components/TrendingSocialModal';
-import { TrendingFoodDetailModal } from './components/TrendingFoodDetailModal';
-import { AiCheckInModal } from './components/AiCheckInModal';
-import { UpgradeVipModal } from './components/UpgradeVipModal';
-import { PaymentSupportModal } from './components/PaymentSupportModal';
-import { QrScannerModal } from './components/QrScannerModal';
-import { VipAddRestaurantModal } from './components/VipAddRestaurantModal';
-import { AiFoodDiscoveryModal } from './components/AiFoodDiscoveryModal';
-import { RestaurantCheckInModal } from './components/RestaurantCheckInModal';
-import { GoogleMapsPlaceSearchModal } from './components/GoogleMapsPlaceSearchModal';
+const WhatToEatModal = lazy(() => import('./components/WhatToEatModal').then((m) => ({ default: m.WhatToEatModal })));
+const NearMeModal = lazy(() => import('./components/NearMeModal').then((m) => ({ default: m.NearMeModal })));
+const DailyDiscoveriesModal = lazy(() => import('./components/DailyDiscoveriesModal').then((m) => ({ default: m.DailyDiscoveriesModal })));
+const WishlistsModal = lazy(() => import('./components/WishlistsModal').then((m) => ({ default: m.WishlistsModal })));
+const AiTripPlannerModal = lazy(() => import('./components/AiTripPlannerModal').then((m) => ({ default: m.AiTripPlannerModal })));
+const NotificationsModal = lazy(() => import('./components/NotificationsModal').then((m) => ({ default: m.NotificationsModal })));
+const TrendingSocialModal = lazy(() => import('./components/TrendingSocialModal').then((m) => ({ default: m.TrendingSocialModal })));
+const TrendingFoodDetailModal = lazy(() => import('./components/TrendingFoodDetailModal').then((m) => ({ default: m.TrendingFoodDetailModal })));
+const AiCheckInModal = lazy(() => import('./components/AiCheckInModal').then((m) => ({ default: m.AiCheckInModal })));
+const UpgradeVipModal = lazy(() => import('./components/UpgradeVipModal').then((m) => ({ default: m.UpgradeVipModal })));
+const PaymentSupportModal = lazy(() => import('./components/PaymentSupportModal').then((m) => ({ default: m.PaymentSupportModal })));
+const QrScannerModal = lazy(() => import('./components/QrScannerModal').then((m) => ({ default: m.QrScannerModal })));
+const VipAddRestaurantModal = lazy(() => import('./components/VipAddRestaurantModal').then((m) => ({ default: m.VipAddRestaurantModal })));
+const AiFoodDiscoveryModal = lazy(() => import('./components/AiFoodDiscoveryModal').then((m) => ({ default: m.AiFoodDiscoveryModal })));
+const RestaurantCheckInModal = lazy(() => import('./components/RestaurantCheckInModal').then((m) => ({ default: m.RestaurantCheckInModal })));
+const GoogleMapsPlaceSearchModal = lazy(() => import('./components/GoogleMapsPlaceSearchModal').then((m) => ({ default: m.GoogleMapsPlaceSearchModal })));
 import { Toast } from './components/Toast';
 import { RatePrompt } from './components/RatePrompt';
+import { OfflineBanner } from './components/OfflineBanner';
 
 const MainScreen: React.FC = () => {
   const {
@@ -153,7 +154,7 @@ const MainScreen: React.FC = () => {
     return (
       <div className="flex-1 flex flex-col w-full min-h-screen relative overflow-y-auto no-scrollbar bg-slate-950 items-center justify-center p-3 sm:p-4">
         <AuthModal isMandatoryGate={true} />
-        {isAiFoodDiscoveryModalOpen && <AiFoodDiscoveryModal />}
+        <Suspense fallback={null}>{isAiFoodDiscoveryModalOpen && <AiFoodDiscoveryModal />}</Suspense>
         {selectedFood && <FoodDetailModal />}
         {isExitModalOpen && <ExitConfirmModal />}
         {isAdminLoginModalOpen && <AdminLoginModal />}
@@ -167,15 +168,26 @@ const MainScreen: React.FC = () => {
       <Header />
       
       <main key={`lang-${language}`} className="flex-1 w-full">
-        {activeTab === 'home' && <HomeView />}
-        {activeTab === 'food' && <FoodView />}
-        {activeTab === 'restaurants' && <RestaurantView />}
-        {activeTab === 'tourism' && <TourismView />}
-        {activeTab === 'community' && <CommunityFeed />}
-        {activeTab === 'profile' && <ProfileView />}
+        <Suspense
+          fallback={
+            <div className="max-w-md mx-auto px-4 py-10 text-center text-sm text-slate-400 animate-pulse" aria-busy="true">
+              …
+            </div>
+          }
+        >
+          {activeTab === 'home' && <HomeView />}
+          {activeTab === 'food' && <FoodView />}
+          {activeTab === 'restaurants' && <RestaurantView />}
+          {activeTab === 'tourism' && <TourismView />}
+          {activeTab === 'community' && <CommunityFeed />}
+          {activeTab === 'profile' && <ProfileView />}
+        </Suspense>
       </main>
 
-      {/* Creation & Action Modals — Conditionally Mounted */}
+      <OfflineBanner />
+
+      {/* Creation & Action Modals — Conditionally Mounted (lazy-loaded chunks) */}
+      <Suspense fallback={null}>
       {isAuthModalOpen && <AuthModal />}
       {isAddRestaurantModalOpen && <AddRestaurantModal />}
       {isAdminOpen && <AdminDashboard />}
@@ -207,6 +219,7 @@ const MainScreen: React.FC = () => {
       {selectedRestaurant && <RestaurantDetailModal />}
       {selectedDestination && <TouristDetailModal />}
       {(isManageMenuModalOpen || managingRestaurant) && <ManageMenuModal />}
+      </Suspense>
 
       {/* Notifications */}
       {toast && <Toast />}

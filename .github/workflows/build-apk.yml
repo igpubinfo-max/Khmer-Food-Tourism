@@ -89,7 +89,7 @@ jobs:
         if: github.ref == 'refs/heads/main'
         with:
           tag_name: v2.1.0
-          name: "Khmer Food & Tourism v2.1.0 (Build 86: Food Guide polish - filters, color badges, nutrition cards)"
+          name: "Khmer Food & Tourism v2.1.0 (Build 87: Faster startup - lazy-loaded screens and offline banner)"
           make_latest: true
           body: |
             ### 🇰🇭 កម្មវិធីទូរស័ព្ទដៃ អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism Mobile App)
