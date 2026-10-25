@@ -353,16 +353,7 @@ export const ProfileView: React.FC = () => {
               </p>
             )}
 
-            {/* Admin Portal Shortcut ONLY if Admin */}
-            {currentUser.role === 'admin' && (
-              <button
-                onClick={() => setIsAdminOpen(true)}
-                className="w-full py-2.5 px-3 rounded-2xl bg-gradient-to-r from-[#064E3B] to-[#059669] hover:from-[#047857] hover:to-[#064E3B] text-white border border-emerald-400/30 font-bold text-xs shadow-xs flex items-center justify-center gap-2 transition font-khmer"
-              >
-                <Shield className="w-4 h-4 text-emerald-200" />
-                <span>{isKm ? 'ចូលផ្ទាំងគ្រប់គ្រងរដ្ឋបាល (Admin Dashboard)' : 'Open Admin Dashboard'}</span>
-              </button>
-            )}
+            {/* Admin shortcut under bio removed: single Admin entry is the Admin panel below */}
           </div>
         ) : (
           <div className="text-center py-4 space-y-3 font-khmer">
@@ -1451,24 +1442,7 @@ export const ProfileView: React.FC = () => {
 
       {/* App Installation & Support Buttons Showcase - Users Only */}
       {currentUser?.role !== 'admin' && (
-        <div className="grid grid-cols-2 gap-2.5">
-          <button
-            onClick={() => setIsInstallModalOpen(true)}
-            className="p-3 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/90 dark:border-slate-700 shadow-xs flex items-center gap-2.5 hover:bg-slate-50 dark:hover:bg-slate-700/60 transition text-left"
-          >
-            <div className="p-2 rounded-xl bg-[#064E3B] text-white shrink-0">
-              <Download className="w-4 h-4 text-emerald-200" />
-            </div>
-            <div>
-              <div className="text-xs font-bold text-[#0F172A] dark:text-white font-khmer">
-                {isKm ? 'ដំឡើង APK' : 'Install App'}
-              </div>
-              <div className="text-[10px] text-slate-500 font-khmer">
-                {isKm ? 'ទាញយក APK ផ្ទាល់' : 'Direct APK Download'}
-              </div>
-            </div>
-          </button>
-
+        <div className="grid grid-cols-1 gap-2.5">
           <button
             onClick={() => setIsSupportModalOpen(true)}
             className="p-3 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/90 dark:border-slate-700 shadow-xs flex items-center gap-2.5 hover:bg-slate-50 dark:hover:bg-slate-700/60 transition text-left"
@@ -2442,13 +2416,7 @@ export const ProfileView: React.FC = () => {
                 </p>
               </div>
             </div>
-            <button
-              onClick={() => setIsInstallModalOpen(true)}
-              className="px-2.5 py-1 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-[11px] font-bold transition flex items-center gap-1 border border-slate-200 dark:border-slate-600 shadow-2xs"
-            >
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-              <span>{isKm ? 'ពិនិត្យកំណែថ្មី' : 'Check Updates'}</span>
-            </button>
+            
           </div>
 
           {/* Reset App Data */}

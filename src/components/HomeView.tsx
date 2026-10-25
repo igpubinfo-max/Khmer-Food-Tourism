@@ -10,7 +10,7 @@ import {
   Apple, Smartphone, Bot, Calendar, Bookmark, Bell, 
   UtensilsCrossed, MessageSquareQuote, Camera, Phone,
   Share2, Navigation, Eye, ExternalLink, Play, Shuffle, Search, RefreshCw,
-  Crown, Plus, Edit2, CheckCircle2, X, Tag, ChefHat, Copy, Video, Check, Lock, Trash2, Globe, HeartPulse, Share2
+  Crown, Plus, Edit2, CheckCircle2, X, Tag, ChefHat, Copy, Video, Check, Lock, Trash2, Globe, HeartPulse
 } from 'lucide-react';
 
 export const HomeView: React.FC = () => {
@@ -595,12 +595,6 @@ export const HomeView: React.FC = () => {
                         : '🛡️ System Administrator: Full master access to all tools & listings!'}
                     </p>
                   </div>
-                  <button
-                    onClick={() => setIsAdminOpen(true)}
-                    className="px-3 py-1 bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-[11px] rounded-xl shadow-xs transition active:scale-95 cursor-pointer shrink-0"
-                  >
-                    {isKm ? '🛠️ ផ្ទាំងគ្រប់គ្រង' : 'Dashboard'}
-                  </button>
                 </div>
               ) : isVip ? (
                 <div className="space-y-2">
@@ -979,57 +973,7 @@ export const HomeView: React.FC = () => {
         </span>
       </button>
 
-      {/* App Installation & Support Interactive Showcase Card (Non-Admin users only) */}
-      {currentUser?.role !== 'admin' && (
-        <div className="bg-white dark:bg-slate-800 rounded-3xl p-4 border border-slate-200/90 dark:border-slate-700 shadow-xs flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 flex items-center justify-center text-[#064E3B] dark:text-emerald-400 shadow-2xs shrink-0 border border-emerald-200/60">
-              <Smartphone className="w-6 h-6" />
-            </div>
-            <div>
-              <h4 className="font-bold text-[#0F172A] dark:text-white text-xs sm:text-sm font-khmer">
-                {isKm ? 'ដំឡើងកម្មវិធីទូរស័ព្ទដៃ' : 'Install Mobile App'}
-              </h4>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 font-khmer line-clamp-1">
-                {isKm ? 'ទាញយក Android APK ឬដំឡើងលើ Apple iOS' : 'Download Android APK or install on Apple iOS'}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-1.5 shrink-0">
-            <button
-              onClick={() => setIsQrScannerModalOpen(true)}
-              className="p-2 bg-emerald-50 hover:bg-emerald-100 text-[#064E3B] rounded-xl border border-emerald-200 shadow-xs transition"
-              title={isKm ? 'ស្កេន QR កូដ' : language === 'zh' ? '扫描二维码' : 'Scan QR Code'}
-            >
-              <Camera className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => openInstallModal('android')}
-              className="flex items-center gap-1 px-2.5 py-2 bg-[#064E3B] hover:bg-[#047857] text-white rounded-xl shadow-xs transition text-xs font-bold font-khmer"
-              title={isKm ? 'ដំឡើង Android APK' : 'Install APK'}
-            >
-              <Smartphone className="w-3.5 h-3.5 text-emerald-300" />
-              <span>APK</span>
-            </button>
-            <button
-              onClick={() => openInstallModal('ios')}
-              className="flex items-center gap-1 px-2.5 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl shadow-xs transition text-xs font-bold font-khmer border border-slate-700"
-              title={isKm ? 'ដំឡើងលើ iPhone (iOS)' : 'Install on iOS'}
-            >
-              <Apple className="w-3.5 h-3.5 text-slate-200" />
-              <span>iOS</span>
-            </button>
-            <button
-              onClick={() => setIsSupportModalOpen(true)}
-              className="p-2 bg-[#10B981] hover:bg-[#059669] text-white rounded-xl shadow-xs transition"
-              title={isKm ? 'ជួយឧបត្ថម្ភ KHQR' : 'Support'}
-            >
-              <Heart className="w-4 h-4 fill-white" />
-            </button>
-          </div>
-        </div>
-      )}
+      {/* Install / Scan QR / Support now live only in the Header "more" menu (single entry point) */}
 
       {/* Quick category icon row removed: identical to the bottom tab bar */}
 
@@ -1370,11 +1314,6 @@ export const HomeView: React.FC = () => {
       <div className="hidden" aria-hidden="true">
         <span>TikTok & FB Review</span>
         <span>រូបភាពទីតាំង / ភូមិដ្ឋាន</span>
-        {currentUser?.role === 'admin' && (
-          <button onClick={() => setIsAiCheckInModalOpen(true)}>
-            AI Food Check-in ឆែកអ៊ីន & បន្ថែមហាង
-          </button>
-        )}
         {displayTrendingFoods.slice(0, 1).map((food) => (
           <div key={food.id}>
             <button onClick={(e) => handleMap(e, food)}>Map</button>

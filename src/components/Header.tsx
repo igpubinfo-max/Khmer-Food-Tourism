@@ -1,19 +1,31 @@
 import React, { useState, useRef } from 'react';
 import { useApp } from '../context/AppContext';
-import { Search, Shield, X, Mail, Share2 } from 'lucide-react';
+import { Search, X, Mail, MoreVertical, Camera, Download, Heart } from 'lucide-react';
+import { Capacitor } from '@capacitor/core';
 import { APP_VERSION } from '../types';
-import { shareApp } from '../utils/shareApp';
 
 export const Header: React.FC = () => {
   const { 
     language, setLanguage, setActiveTab, 
-    currentUser, setIsAdminOpen,
     searchQuery, setSearchQuery, selectedProvince, setSelectedProvince,
-    showToast
+    showToast, setIsQrScannerModalOpen, setIsInstallModalOpen, setIsSupportModalOpen
   } = useApp();
 
   const [isSearchVisible, setIsSearchVisible] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // Hide "Install App" automatically when already running as the native app / installed PWA
+  const isAppInstalled = (() => {
+    try {
+      if (Capacitor.isNativePlatform()) return true;
+      if (typeof window !== 'undefined' && window.matchMedia?.('(display-mode: standalone)').matches) return true;
+      if ((navigator as unknown as { standalone?: boolean }).standalone) return true;
+    } catch {
+      // ignore
+    }
+    return false;
+  })();
 
   const provinces = [
     { id: '', nameKh: 'គ្រប់ខេត្តក្រុង', nameEn: 'All Provinces', nameZh: '全部省市' },
@@ -111,27 +123,56 @@ export const Header: React.FC = () => {
             <Search className="w-3.5 h-3.5 shrink-0" />
           </button>
 
-          {/* Single clean Share App action */}
-          <button
-            onClick={() => shareApp(language, showToast)}
-            className="w-7 h-7 rounded-full bg-[#10B981] hover:bg-[#059669] text-white flex items-center justify-center shadow-xs transition-all active:scale-95 shrink-0"
-            title={isKm ? 'ចែករំលែកកម្មវិធី' : isZh ? '分享应用' : 'Share App'}
-            aria-label={isKm ? 'ចែករំលែកកម្មវិធី' : isZh ? '分享应用' : 'Share App'}
-          >
-            <Share2 className="w-3.5 h-3.5 shrink-0" />
-          </button>
-
-          {/* Admin Action (Only visible when authenticated as admin) */}
-          {currentUser?.role === 'admin' && (
+          {/* Single overflow "more" menu: Scan QR, Install App, Support */}
+          <div className="relative shrink-0">
             <button
-              onClick={() => setIsAdminOpen(true)}
-              className="flex items-center gap-0.5 px-2 h-7 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 text-[10px] font-black shadow-xs transition-all active:scale-95 cursor-pointer font-khmer shrink-0"
-              title={isKm ? 'ផ្ទាំងគ្រប់គ្រងរដ្ឋបាល (Admin Dashboard)' : 'Admin Dashboard'}
+              type="button"
+              onClick={() => setIsMenuOpen((v) => !v)}
+              className={`w-9 h-9 rounded-full flex items-center justify-center transition-colors border shrink-0 ${
+                isMenuOpen
+                  ? 'bg-white text-[#064E3B] border-white shadow-xs'
+                  : 'bg-[#065F46]/80 hover:bg-[#065F46] text-emerald-100 border-emerald-500/40'
+              }`}
+              title={isKm ? 'ម៉ឺនុយបន្ថែម' : isZh ? '更多' : 'More'}
+              aria-label={isKm ? 'ម៉ឺនុយបន្ថែម' : isZh ? '更多' : 'More'}
+              aria-expanded={isMenuOpen}
             >
-              <Shield className="w-3 h-3 fill-slate-950 shrink-0" />
-              <span className="hidden xs:inline">Admin</span>
+              <MoreVertical className="w-4 h-4 shrink-0" />
             </button>
-          )}
+            {isMenuOpen && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setIsMenuOpen(false)} />
+                <div className="absolute right-0 top-11 z-50 w-56 rounded-2xl bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden font-khmer">
+                  <button
+                    type="button"
+                    onClick={() => { setIsMenuOpen(false); setIsQrScannerModalOpen(true); }}
+                    className="w-full min-h-[44px] px-4 flex items-center gap-3 text-sm font-semibold hover:bg-emerald-50 dark:hover:bg-slate-700 text-left"
+                  >
+                    <Camera className="w-4 h-4 text-emerald-700" />
+                    <span>{isKm ? 'ស្កេន QR កូដ' : isZh ? '扫描二维码' : 'Scan QR Code'}</span>
+                  </button>
+                  {!isAppInstalled && (
+                    <button
+                      type="button"
+                      onClick={() => { setIsMenuOpen(false); setIsInstallModalOpen(true); }}
+                      className="w-full min-h-[44px] px-4 flex items-center gap-3 text-sm font-semibold hover:bg-emerald-50 dark:hover:bg-slate-700 text-left border-t border-slate-100 dark:border-slate-700"
+                    >
+                      <Download className="w-4 h-4 text-emerald-700" />
+                      <span>{isKm ? 'ដំឡើងកម្មវិធី' : isZh ? '安装应用' : 'Install App'}</span>
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => { setIsMenuOpen(false); setIsSupportModalOpen(true); }}
+                    className="w-full min-h-[44px] px-4 flex items-center gap-3 text-sm font-semibold hover:bg-emerald-50 dark:hover:bg-slate-700 text-left border-t border-slate-100 dark:border-slate-700"
+                  >
+                    <Heart className="w-4 h-4 text-rose-500 fill-rose-500" />
+                    <span>{isKm ? 'ជួយឧបត្ថម្ភកម្មវិធី' : isZh ? '支持我们' : 'Support the App'}</span>
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
 

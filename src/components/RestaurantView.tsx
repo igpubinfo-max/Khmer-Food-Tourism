@@ -280,16 +280,7 @@ export const RestaurantView: React.FC = () => {
             <span>{tr(language, 'ស្វែងរក Google Maps', 'Google Maps Search', '谷歌地图搜索')}</span>
           </button>
 
-          {currentUser?.role === 'admin' && (
-            <button
-              onClick={() => setIsAiCheckInModalOpen(true)}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 text-white font-bold text-xs shadow-xs font-khmer transition active:scale-95"
-              title={tr(language, 'ឆែកអ៊ីន & បន្ថែមហាងដោយ AI (Administrator Only)', 'AI Food Check-in (Admin Only)', 'AI 探店打卡（仅限管理员）')}
-            >
-              <Camera className="w-3.5 h-3.5 text-emerald-200" />
-              <span>{tr(language, 'ឆែកអ៊ីន AI', 'AI Check-in', 'AI 探店打卡')}</span>
-            </button>
-          )}
+          {/* AI Check-in entry removed here: single primary entry lives on Home */}
 
           <button
             onClick={() => {

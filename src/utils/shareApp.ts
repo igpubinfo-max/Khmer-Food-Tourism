@@ -2,7 +2,7 @@ import type { Language } from '../types';
 
 export const APP_SHARE_URL = 'https://igpubinfo-max.github.io/Khmer-Food-Tourism/';
 
-type ToastFn = (msg: string, type?: 'success' | 'info' | 'warning' | 'error') => void;
+type ToastFn = (msg: string, type?: 'success' | 'info' | 'warning') => void;
 
 const pick = (lang: Language, km: string, en: string, zh: string) =>
   lang === 'km' ? km : lang === 'zh' ? zh : en;

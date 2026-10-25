@@ -231,15 +231,7 @@ export const FoodView: React.FC = () => {
           </p>
         </div>
 
-        {currentUser?.role === 'admin' && (
-          <button
-            onClick={() => setIsAdminOpen(true)}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-xs shadow-xs font-khmer transition"
-          >
-            <Plus className="w-3.5 h-3.5 text-emerald-200" />
-            <span>{tr(language, 'បញ្ចូលម្ហូប', 'Add Food', '添加菜品')}</span>
-          </button>
-        )}
+        {/* Admin entry removed from Food tab: Admin Dashboard opens only from Profile */}
       </div>
 
       {/* Healthy Food & Disease-Friendly Nutrition Guide Banner & Expandable Panel */}
@@ -300,13 +292,13 @@ export const FoodView: React.FC = () => {
                         : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:border-emerald-400'
                     }`}
                   >
-                    <span className="text-base shrink-0">{cond.emoji}</span>
+                    <span className="text-base shrink-0">{cond.icon}</span>
                     <div className="min-w-0">
                       <p className="text-[11px] font-bold leading-tight truncate">
-                        {tr(language, cond.nameKh, cond.nameEn, cond.nameZh)}
+                        {tr(language, cond.badgeKh, cond.badgeEn, cond.badgeZh)}
                       </p>
                       <p className={`text-[9px] truncate ${isSelected ? 'text-emerald-200' : 'text-slate-400'}`}>
-                        {tr(language, cond.shortSubtitleKh, cond.shortSubtitleEn, cond.shortSubtitleZh)}
+                        {tr(language, cond.titleKh, cond.titleEn, cond.titleZh)}
                       </p>
                     </div>
                   </button>
@@ -318,11 +310,11 @@ export const FoodView: React.FC = () => {
             <div className="p-3 rounded-xl bg-white dark:bg-slate-800/90 border border-emerald-500/25 space-y-2">
               <div className="flex items-center justify-between gap-2">
                 <h4 className="font-bold text-xs text-[#064E3B] dark:text-emerald-300 flex items-center gap-1.5">
-                  <span>{activeConditionGuide.emoji}</span>
-                  <span>{tr(language, activeConditionGuide.nameKh, activeConditionGuide.nameEn, activeConditionGuide.nameZh)}</span>
+                  <span>{activeConditionGuide.icon}</span>
+                  <span>{tr(language, activeConditionGuide.badgeKh, activeConditionGuide.badgeEn, activeConditionGuide.badgeZh)}</span>
                 </h4>
                 <span className="text-[9px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300">
-                  {activeConditionGuide.trustedSources.join(' • ')}
+                  {(language === 'km' ? activeConditionGuide.reviewedSourcesKh : language === 'zh' ? activeConditionGuide.reviewedSourcesZh : activeConditionGuide.reviewedSourcesEn).join(' • ')}
                 </span>
               </div>
               <p className="text-[11px] text-slate-700 dark:text-slate-300 leading-relaxed">
@@ -330,10 +322,10 @@ export const FoodView: React.FC = () => {
               </p>
               <div className="space-y-1 pt-1">
                 {(language === 'km'
-                  ? activeConditionGuide.keyNutritionalPrinciplesKh
+                  ? activeConditionGuide.nutritionalPrinciplesKh
                   : language === 'zh'
-                  ? activeConditionGuide.keyNutritionalPrinciplesZh
-                  : activeConditionGuide.keyNutritionalPrinciplesEn
+                  ? activeConditionGuide.nutritionalPrinciplesZh
+                  : activeConditionGuide.nutritionalPrinciplesEn
                 ).map((principle, idx) => (
                   <div key={idx} className="flex items-start gap-1.5 text-[10px] text-emerald-900 dark:text-emerald-200">
                     <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
@@ -364,7 +356,7 @@ export const FoodView: React.FC = () => {
                   >
                     <div className="flex items-center justify-between gap-2">
                       <span className="font-bold text-[11px] text-[#064E3B] dark:text-emerald-200">
-                        {item.emoji} {tr(language, item.nameKh, item.nameEn, item.nameZh)}
+                        🥗 {tr(language, item.nameKh, item.nameEn, item.nameZh)}
                       </span>
                       <div className="flex items-center gap-1 shrink-0">
                         <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-emerald-600 text-white font-bold">
@@ -374,8 +366,8 @@ export const FoodView: React.FC = () => {
                           type="button"
                           onClick={() =>
                             shareTip(
-                              `${tr(language, item.nameKh, item.nameEn, item.nameZh)} — ${tr(language, activeConditionGuide.nameKh, activeConditionGuide.nameEn, activeConditionGuide.nameZh)}`,
-                              tr(language, item.nutritionalBenefitKh, item.nutritionalBenefitEn, item.nutritionalBenefitZh)
+                              `${tr(language, item.nameKh, item.nameEn, item.nameZh)} — ${tr(language, activeConditionGuide.badgeKh, activeConditionGuide.badgeEn, activeConditionGuide.badgeZh)}`,
+                              tr(language, item.benefitOrReasonKh, item.benefitOrReasonEn, item.benefitOrReasonZh)
                             )
                           }
                           className="w-6 h-6 rounded-full bg-white dark:bg-slate-800 border border-emerald-300 text-emerald-700 flex items-center justify-center cursor-pointer active:scale-95"
@@ -390,10 +382,7 @@ export const FoodView: React.FC = () => {
                       🔬 {tr(language, item.keyNutrientsKh, item.keyNutrientsEn, item.keyNutrientsZh)}
                     </p>
                     <p className="text-[10px] text-slate-600 dark:text-slate-300 leading-relaxed">
-                      {tr(language, item.nutritionalBenefitKh, item.nutritionalBenefitEn, item.nutritionalBenefitZh)}
-                    </p>
-                    <p className="text-[9px] text-emerald-800 dark:text-emerald-300 font-semibold">
-                      🍽️ {tr(language, item.portionTipKh, item.portionTipEn, item.portionTipZh)}
+                      {tr(language, item.benefitOrReasonKh, item.benefitOrReasonEn, item.benefitOrReasonZh)}
                     </p>
                   </div>
                 ))}
@@ -442,7 +431,7 @@ export const FoodView: React.FC = () => {
                         {tr(language, dish.whySuitableKh, dish.whySuitableEn, dish.whySuitableZh)}
                       </p>
                       <p className="text-[10px] text-amber-900 dark:text-amber-200 bg-amber-50/80 dark:bg-amber-950/30 px-2 py-1 rounded-lg border border-amber-400/20">
-                        💡 {tr(language, dish.healthyCookingModificationKh, dish.healthyCookingModificationEn, dish.healthyCookingModificationZh)}
+                        💡 {tr(language, dish.healthyCookingTipKh, dish.healthyCookingTipEn, dish.healthyCookingTipZh)}
                       </p>
                     </div>
                   );
@@ -470,10 +459,10 @@ export const FoodView: React.FC = () => {
                     className="p-2 rounded-xl bg-rose-50/70 dark:bg-rose-950/30 border border-rose-400/30 space-y-0.5"
                   >
                     <p className="font-bold text-[11px] text-rose-800 dark:text-rose-200">
-                      {avoid.emoji} {tr(language, avoid.nameKh, avoid.nameEn, avoid.nameZh)}
+                      ⚠️ {tr(language, avoid.nameKh, avoid.nameEn, avoid.nameZh)}
                     </p>
                     <p className="text-[10px] text-slate-600 dark:text-slate-300 leading-relaxed">
-                      {tr(language, avoid.reasonToLimitKh, avoid.reasonToLimitEn, avoid.reasonToLimitZh)}
+                      {tr(language, avoid.benefitOrReasonKh, avoid.benefitOrReasonEn, avoid.benefitOrReasonZh)}
                     </p>
                   </div>
                 ))}
@@ -485,12 +474,7 @@ export const FoodView: React.FC = () => {
               <div className="flex items-center gap-1.5 text-[10px] font-bold text-amber-900 dark:text-amber-300">
                 <Info className="w-3.5 h-3.5 text-amber-600 shrink-0" />
                 <span>
-                  {tr(
-                    language,
-                    NUTRITION_GUIDE_MEDICAL_DISCLAIMER.titleKh,
-                    NUTRITION_GUIDE_MEDICAL_DISCLAIMER.titleEn,
-                    NUTRITION_GUIDE_MEDICAL_DISCLAIMER.titleZh
-                  )}
+                  {tr(language, 'ចំណាំអំពីអាហារូបត្ថម្ភ', 'Nutrition & Medical Notice', '营养与健康声明')}
                 </span>
               </div>
               <p className="text-[10px] text-slate-700 dark:text-slate-300 leading-relaxed">
@@ -504,9 +488,9 @@ export const FoodView: React.FC = () => {
               <p className="text-[9px] text-slate-500 dark:text-slate-400 leading-relaxed">
                 {tr(
                   language,
-                  NUTRITION_GUIDE_MEDICAL_DISCLAIMER.bodyKh,
-                  NUTRITION_GUIDE_MEDICAL_DISCLAIMER.bodyEn,
-                  NUTRITION_GUIDE_MEDICAL_DISCLAIMER.bodyZh
+                  NUTRITION_GUIDE_MEDICAL_DISCLAIMER.km,
+                  NUTRITION_GUIDE_MEDICAL_DISCLAIMER.en,
+                  NUTRITION_GUIDE_MEDICAL_DISCLAIMER.zh
                 )}
               </p>
             </div>

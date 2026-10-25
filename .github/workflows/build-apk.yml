@@ -89,7 +89,7 @@ jobs:
         if: github.ref == 'refs/heads/main'
         with:
           tag_name: v2.1.0
-          name: "Khmer Food & Tourism v2.1.0 (Build 82: Healthy Food & Disease-Friendly Nutrition Guide + Trilingual Chinese Audit + 52 Verified Restaurants)"
+          name: "Khmer Food & Tourism v2.1.0 (Build 83: Cleaner UI - single header menu, de-duplicated buttons, Nutrition Guide fixes)"
           make_latest: true
           body: |
             ### 🇰🇭 កម្មវិធីទូរស័ព្ទដៃ អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism Mobile App)

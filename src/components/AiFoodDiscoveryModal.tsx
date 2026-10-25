@@ -344,17 +344,17 @@ export const AiFoodDiscoveryModal: React.FC = () => {
                             : 'bg-slate-50 hover:bg-emerald-50/70 text-slate-800 border-slate-200'
                         }`}
                       >
-                        <span className="text-xl shrink-0">{cond.emoji}</span>
+                        <span className="text-xl shrink-0">{cond.icon}</span>
                         <div className="min-w-0">
                           <p className="text-xs font-extrabold leading-tight truncate">
-                            {tr(cond.nameKh, cond.nameEn, cond.nameZh)}
+                            {tr(cond.badgeKh, cond.badgeEn, cond.badgeZh)}
                           </p>
                           <p
                             className={`text-[10px] truncate mt-0.5 ${
                               selected ? 'text-amber-200' : 'text-slate-500'
                             }`}
                           >
-                            {tr(cond.shortSubtitleKh, cond.shortSubtitleEn, cond.shortSubtitleZh)}
+                            {tr(cond.titleKh, cond.titleEn, cond.titleZh)}
                           </p>
                         </div>
                       </button>
@@ -367,13 +367,13 @@ export const AiFoodDiscoveryModal: React.FC = () => {
               <div className="p-4 rounded-2xl bg-white border-2 border-emerald-500/40 shadow-xs space-y-3">
                 <div className="flex items-center justify-between gap-2 flex-wrap">
                   <h3 className="font-moul text-xs sm:text-sm text-[#064E3B] flex items-center gap-2">
-                    <span>{activeCondition.emoji}</span>
+                    <span>{activeCondition.icon}</span>
                     <span>
-                      {tr(activeCondition.nameKh, activeCondition.nameEn, activeCondition.nameZh)}
+                      {tr(activeCondition.badgeKh, activeCondition.badgeEn, activeCondition.badgeZh)}
                     </span>
                   </h3>
                   <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[10px] font-bold">
-                    📚 {activeCondition.trustedSources.join(' • ')}
+                    📚 {(isKm ? activeCondition.reviewedSourcesKh : isZh ? activeCondition.reviewedSourcesZh : activeCondition.reviewedSourcesEn).join(' • ')}
                   </span>
                 </div>
 
@@ -395,10 +395,10 @@ export const AiFoodDiscoveryModal: React.FC = () => {
                   </h4>
                   <div className="grid grid-cols-1 gap-1.5">
                     {(isKm
-                      ? activeCondition.keyNutritionalPrinciplesKh
+                      ? activeCondition.nutritionalPrinciplesKh
                       : isZh
-                      ? activeCondition.keyNutritionalPrinciplesZh
-                      : activeCondition.keyNutritionalPrinciplesEn
+                      ? activeCondition.nutritionalPrinciplesZh
+                      : activeCondition.nutritionalPrinciplesEn
                     ).map((principle, idx) => (
                       <div
                         key={idx}
@@ -432,7 +432,7 @@ export const AiFoodDiscoveryModal: React.FC = () => {
                     >
                       <div className="flex items-center justify-between gap-1.5">
                         <span className="text-xs font-extrabold text-[#064E3B]">
-                          {item.emoji} {tr(item.nameKh, item.nameEn, item.nameZh)}
+                          🥗 {tr(item.nameKh, item.nameEn, item.nameZh)}
                         </span>
                       </div>
                       <p className="text-[11px] font-bold text-emerald-800">
@@ -440,13 +440,10 @@ export const AiFoodDiscoveryModal: React.FC = () => {
                       </p>
                       <p className="text-[11px] text-slate-700 leading-relaxed">
                         {tr(
-                          item.nutritionalBenefitKh,
-                          item.nutritionalBenefitEn,
-                          item.nutritionalBenefitZh
+                          item.benefitOrReasonKh,
+                          item.benefitOrReasonEn,
+                          item.benefitOrReasonZh
                         )}
-                      </p>
-                      <p className="text-[10px] font-semibold text-teal-900 bg-white/90 px-2 py-1 rounded-lg border border-emerald-200/60">
-                        🍽️ {tr(item.portionTipKh, item.portionTipEn, item.portionTipZh)}
                       </p>
                     </div>
                   ))}
@@ -505,9 +502,9 @@ export const AiFoodDiscoveryModal: React.FC = () => {
                           <p className="text-[11px] text-amber-950 bg-amber-100/70 px-2.5 py-1 rounded-lg border border-amber-300/60">
                             👩‍🍳{' '}
                             {tr(
-                              dish.healthyCookingModificationKh,
-                              dish.healthyCookingModificationEn,
-                              dish.healthyCookingModificationZh
+                              dish.healthyCookingTipKh,
+                              dish.healthyCookingTipEn,
+                              dish.healthyCookingTipZh
                             )}
                           </p>
                         </div>
@@ -536,13 +533,13 @@ export const AiFoodDiscoveryModal: React.FC = () => {
                       className="p-3 rounded-xl bg-rose-50/70 border border-rose-200 space-y-1"
                     >
                       <p className="text-xs font-extrabold text-rose-900">
-                        {avoid.emoji} {tr(avoid.nameKh, avoid.nameEn, avoid.nameZh)}
+                        ⚠️ {tr(avoid.nameKh, avoid.nameEn, avoid.nameZh)}
                       </p>
                       <p className="text-[11px] text-slate-700 leading-relaxed">
                         {tr(
-                          avoid.reasonToLimitKh,
-                          avoid.reasonToLimitEn,
-                          avoid.reasonToLimitZh
+                          avoid.benefitOrReasonKh,
+                          avoid.benefitOrReasonEn,
+                          avoid.benefitOrReasonZh
                         )}
                       </p>
                     </div>
@@ -556,9 +553,9 @@ export const AiFoodDiscoveryModal: React.FC = () => {
                   <Droplets className="w-4 h-4 text-sky-600 shrink-0 mt-0.5" />
                   <span>
                     {tr(
-                      activeCondition.dailyHydrationTipKh,
-                      activeCondition.dailyHydrationTipEn,
-                      activeCondition.dailyHydrationTipZh
+                      activeCondition.hydrationAndLifestyleFoodTipKh,
+                      activeCondition.hydrationAndLifestyleFoodTipEn,
+                      activeCondition.hydrationAndLifestyleFoodTipZh
                     )}
                   </span>
                 </p>
@@ -1037,21 +1034,12 @@ export const AiFoodDiscoveryModal: React.FC = () => {
           )}
 
           {/* Evidence-Based Medical Disclaimer Footer */}
-          <div className="p-3 rounded-2xl bg-amber-50/90 border border-amber-200 text-[11px] text-amber-950 leading-relaxed space-y-1">
-            <p className="font-extrabold">
-              {tr(
-                NUTRITION_GUIDE_MEDICAL_DISCLAIMER.titleKh,
-                NUTRITION_GUIDE_MEDICAL_DISCLAIMER.titleEn,
-                NUTRITION_GUIDE_MEDICAL_DISCLAIMER.titleZh
-              )}
-            </p>
-            <p>
-              {tr(
-                NUTRITION_GUIDE_MEDICAL_DISCLAIMER.bodyKh,
-                NUTRITION_GUIDE_MEDICAL_DISCLAIMER.bodyEn,
-                NUTRITION_GUIDE_MEDICAL_DISCLAIMER.bodyZh
-              )}
-            </p>
+          <div className="p-3 rounded-2xl bg-amber-50/90 border border-amber-200 text-[11px] text-amber-950 leading-relaxed">
+            {tr(
+              NUTRITION_GUIDE_MEDICAL_DISCLAIMER.km,
+              NUTRITION_GUIDE_MEDICAL_DISCLAIMER.en,
+              NUTRITION_GUIDE_MEDICAL_DISCLAIMER.zh
+            )}
           </div>
         </div>
       </div>
