@@ -46,25 +46,40 @@ export const SmartHubMenuModal: React.FC<Props> = ({ onClose }) => {
   const canUseVip = isUserVipActive(currentUser) || currentUser?.role === 'admin';
   const { level } = getPassportLevel(stampCount);
 
+  const triggerVipUpgrade = () => {
+    showToast(
+      tr(language, 'មុខងារនេះសម្រាប់គណនី VIP • សូមដំឡើង VIP!', 'This feature is for VIP accounts — please unlock VIP!', '此功能仅限 VIP 账户，请先开通 VIP！'),
+      'info'
+    );
+    onClose();
+    openUpgradeVipModal();
+  };
+
   const pickTag = (id: DishTagId) => {
-    requestTagFilter(id as TagFilterId);
+    if (!canUseVip) {
+      triggerVipUpgrade();
+      return;
+    }
+    if (!requestTagFilter(id as TagFilterId, currentUser)) {
+      triggerVipUpgrade();
+      return;
+    }
     setActiveTab('food');
     onClose();
   };
 
   const openFood = (food: FoodItem) => {
+    if (!canUseVip) {
+      triggerVipUpgrade();
+      return;
+    }
     onClose();
     setSelectedFood(food);
   };
 
   const vipOnly = (open: () => void) => () => {
     if (!canUseVip) {
-      showToast(
-        tr(language, 'មុខងារនេះសម្រាប់គណនី VIP • សូមដំឡើង VIP!', 'This feature is for VIP accounts — please unlock VIP!', '此功能仅限 VIP 账户，请先开通 VIP！'),
-        'info'
-      );
-      onClose();
-      openUpgradeVipModal();
+      triggerVipUpgrade();
       return;
     }
     onClose();
@@ -114,7 +129,7 @@ export const SmartHubMenuModal: React.FC<Props> = ({ onClose }) => {
 
         <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-3.5 space-y-5 [-webkit-overflow-scrolling:touch]">
           {/* SECTION 1: Healthy Dish Tags (cards, inline dishes, 3-meal idea) */}
-          <SmartHubHealthySection foods={organizedFoods} onViewAll={pickTag} onOpenFood={openFood} />
+          <SmartHubHealthySection foods={organizedFoods} onViewAll={pickTag} onOpenFood={openFood} onUpgradeVip={triggerVipUpgrade} />
 
           {/* SECTION 2: Smart Travel & Food Tools */}
           <section className="space-y-2.5">
@@ -142,8 +157,19 @@ export const SmartHubMenuModal: React.FC<Props> = ({ onClose }) => {
               </span>
             </button>
 
-            {/* 1-Day food trips (free) */}
-            <button type="button" className={rowCls} onClick={() => setOpenPanel(openPanel === 'trips' ? null : 'trips')} aria-expanded={openPanel === 'trips'}>
+            {/* 1-Day food trips (VIP) */}
+            <button
+              type="button"
+              className={rowCls}
+              onClick={() => {
+                if (!canUseVip) {
+                  triggerVipUpgrade();
+                  return;
+                }
+                setOpenPanel(openPanel === 'trips' ? null : 'trips');
+              }}
+              aria-expanded={canUseVip && openPanel === 'trips'}
+            >
               <span className={`${iconBox} bg-amber-100 text-amber-700`}><Compass className="w-5 h-5" /></span>
               <span className="min-w-0 flex-1">
                 <span className="block text-sm font-bold text-slate-900 dark:text-white">
@@ -153,9 +179,13 @@ export const SmartHubMenuModal: React.FC<Props> = ({ onClose }) => {
                   {tr(language, 'ផែនការរួចរាល់ + ផែនទី', 'Ready-made itineraries + maps', '现成行程 + 地图')}
                 </span>
               </span>
-              <ChevronDown className={`w-5 h-5 text-slate-400 transition-transform motion-reduce:transition-none ${openPanel === 'trips' ? 'rotate-180' : ''}`} />
+              {!canUseVip ? (
+                <span className="px-1.5 py-0.5 rounded-full bg-slate-900 text-amber-300 text-[10px] font-bold flex items-center gap-0.5"><Lock className="w-3 h-3" />VIP</span>
+              ) : (
+                <ChevronDown className={`w-5 h-5 text-slate-400 transition-transform motion-reduce:transition-none ${openPanel === 'trips' ? 'rotate-180' : ''}`} />
+              )}
             </button>
-            {openPanel === 'trips' && <FoodTripTemplates />}
+            {canUseVip && openPanel === 'trips' && <FoodTripTemplates />}
 
             {/* AI Trip Planner (VIP) */}
             <button type="button" className={rowCls} onClick={vipOnly(() => setIsAiTripPlannerModalOpen(true))}>
@@ -201,8 +231,19 @@ export const SmartHubMenuModal: React.FC<Props> = ({ onClose }) => {
               </span>
             </button>
 
-            {/* Stamp collection */}
-            <button type="button" className={rowCls} onClick={() => setOpenPanel(openPanel === 'stamps' ? null : 'stamps')} aria-expanded={openPanel === 'stamps'}>
+            {/* Stamp collection (VIP) */}
+            <button
+              type="button"
+              className={rowCls}
+              onClick={() => {
+                if (!canUseVip) {
+                  triggerVipUpgrade();
+                  return;
+                }
+                setOpenPanel(openPanel === 'stamps' ? null : 'stamps');
+              }}
+              aria-expanded={canUseVip && openPanel === 'stamps'}
+            >
               <span className={`${iconBox} bg-emerald-100 text-emerald-700`}><BadgeCheck className="w-5 h-5" /></span>
               <span className="min-w-0 flex-1">
                 <span className="block text-sm font-bold text-slate-900 dark:text-white">
@@ -212,9 +253,13 @@ export const SmartHubMenuModal: React.FC<Props> = ({ onClose }) => {
                   {level.emoji} {levelTitle(level, language)} · {stampCount} / {organizedFoods.length}
                 </span>
               </span>
-              <ChevronDown className={`w-5 h-5 text-slate-400 transition-transform motion-reduce:transition-none ${openPanel === 'stamps' ? 'rotate-180' : ''}`} />
+              {!canUseVip ? (
+                <span className="px-1.5 py-0.5 rounded-full bg-slate-900 text-amber-300 text-[10px] font-bold flex items-center gap-0.5"><Lock className="w-3 h-3" />VIP</span>
+              ) : (
+                <ChevronDown className={`w-5 h-5 text-slate-400 transition-transform motion-reduce:transition-none ${openPanel === 'stamps' ? 'rotate-180' : ''}`} />
+              )}
             </button>
-            {openPanel === 'stamps' && <FoodPassportCard />}
+            {canUseVip && openPanel === 'stamps' && <FoodPassportCard />}
 
             {/* Share & recommend */}
             <InviteFriendsCard />

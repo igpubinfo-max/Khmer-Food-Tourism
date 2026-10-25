@@ -8,33 +8,38 @@ import {
   classifyKhmerFoodPrimaryGroup,
   organizeAndDeduplicateFoods
 } from '../types';
-import { Utensils } from 'lucide-react';
+import { Utensils, Lock, Crown } from 'lucide-react';
 import { DISH_PROVINCES, detectDishProvince } from '../utils/foodFilters';
 import { TAG_FILTERS, TAG_ESTIMATE_NOTE, GENERAL_FOOD_INFO_NOTE, matchesTagFilter, TagFilterId } from '../utils/dishTags';
-import { TAG_FILTER_EVENT, consumePendingTagFilter } from '../utils/smartHub';
+import { TAG_FILTER_EVENT, consumePendingTagFilter, hasSpecialAndHealthyFoodVipAccess } from '../utils/smartHub';
 import { tr } from '../utils/i18n';
 import { getLocalizedFood } from '../utils/zhDynamicTranslator';
 
 const PAGE_BATCH_SIZE = 48;
 
 export const FoodView: React.FC = () => {
-  const { foods, language, searchQuery, setSearchQuery } = useApp();
+  const { foods, language, searchQuery, setSearchQuery, currentUser, openUpgradeVipModal, showToast } = useApp();
+  const canUseVip = hasSpecialAndHealthyFoodVipAccess(currentUser);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [visibleCount, setVisibleCount] = useState<number>(PAGE_BATCH_SIZE);
   const [provinceFilter, setProvinceFilter] = useState<string>('');
-  // A tag chosen in the Smart Menu before this screen mounted (in-memory handoff, no storage)
-  const [initialTag] = useState<TagFilterId | null>(() => consumePendingTagFilter());
-  const [tagFilter, setTagFilter] = useState<TagFilterId>(initialTag ?? 'all');
+  // A tag chosen in the Smart Menu before this screen mounted (in-memory handoff, no storage, VIP-verified)
+  const [initialTag] = useState<TagFilterId | null>(() => consumePendingTagFilter(currentUser));
+  const [tagFilter, setTagFilter] = useState<TagFilterId>(canUseVip && initialTag ? initialTag : 'all');
   const loadMoreTriggerRef = useRef<HTMLDivElement | null>(null);
   const isKm = language === 'km';
 
 
-  // Smart Menu -> Food tab: pre-select the exact tag and show all matching dishes
+  // Smart Menu -> Food tab: pre-select the exact tag and show all matching dishes (VIP-only)
   useEffect(() => {
-    if (initialTag) setSearchQuery('');
+    if (canUseVip && initialTag) setSearchQuery('');
     const onTag = (e: Event) => {
       const id = (e as CustomEvent<TagFilterId>).detail;
-      consumePendingTagFilter();
+      consumePendingTagFilter(currentUser);
+      if (!hasSpecialAndHealthyFoodVipAccess(currentUser)) {
+        setTagFilter('all');
+        return;
+      }
       setTagFilter(id);
       setSelectedCategory('all');
       setProvinceFilter('');
@@ -43,7 +48,14 @@ export const FoodView: React.FC = () => {
     window.addEventListener(TAG_FILTER_EVENT, onTag);
     return () => window.removeEventListener(TAG_FILTER_EVENT, onTag);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [canUseVip, currentUser]);
+
+  // Reset healthy tag filter if user logs out or loses VIP status
+  useEffect(() => {
+    if (!canUseVip && tagFilter !== 'all') {
+      setTagFilter('all');
+    }
+  }, [canUseVip, tagFilter]);
 
   useEffect(() => {
     setVisibleCount(PAGE_BATCH_SIZE);
@@ -87,7 +99,7 @@ export const FoodView: React.FC = () => {
   const filteredFoods = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     return organizedFoods.filter((f) => {
-      if (!matchesTagFilter(f, tagFilter)) return false;
+      if (!matchesTagFilter(f, tagFilter, canUseVip)) return false;
       if (provinceFilter && detectDishProvince(f) !== provinceFilter) return false;
       if (selectedCategory !== 'all') {
         const grp = classifyKhmerFoodPrimaryGroup(f);
@@ -248,24 +260,67 @@ export const FoodView: React.FC = () => {
       </div>
 
       {/* Foods Grid Grouped by Category in Order: សម្ល -> ឆា -> ស្ងោរ -> បង្អែម */}
-      {/* Dish tag filter (estimated from the recipe) */}
-      <div className="space-y-1.5 font-khmer">
+      {/* Dish tag filter (estimated from the recipe — VIP-only for healthy tags) */}
+      <div className="space-y-2 font-khmer">
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-[11px] font-bold text-[#064E3B] dark:text-emerald-300 flex items-center gap-1.5">
+            <span>🥗 {tr(language, 'ស្លាកម្ហូបសុខភាព (VIP)៖', 'Healthy Dish Tags (VIP):', '健康菜品标签 (VIP)：')}</span>
+            {!canUseVip && (
+              <span className="px-2 py-0.5 rounded-full bg-slate-900 text-amber-300 text-[10px] font-extrabold inline-flex items-center gap-0.5">
+                <Lock className="w-2.5 h-2.5" />
+                <span>VIP</span>
+              </span>
+            )}
+          </span>
+          {!canUseVip && (
+            <button
+              type="button"
+              onClick={() => openUpgradeVipModal()}
+              className="px-2.5 py-1 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 text-[11px] font-extrabold inline-flex items-center gap-1 shadow-2xs active:scale-95 transition cursor-pointer"
+            >
+              <Crown className="w-3 h-3" />
+              <span>{tr(language, 'ដំឡើង VIP', 'Upgrade VIP', '升级 VIP')}</span>
+            </button>
+          )}
+        </div>
         <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-4 px-4 pb-1">
           {TAG_FILTERS.map((t) => {
             const active = tagFilter === t.id;
+            const isLockedTag = !canUseVip && t.id !== 'all';
             return (
               <button
                 key={t.id}
                 type="button"
-                onClick={() => setTagFilter(t.id)}
+                onClick={() => {
+                  if (isLockedTag) {
+                    showToast(
+                      tr(
+                        language,
+                        'មុខងារស្លាកម្ហូបសុខភាពសម្រាប់គណនី VIP • សូមដំឡើង VIP!',
+                        'Healthy Dish Tags are for VIP accounts — please upgrade to VIP!',
+                        '健康菜品标签仅限 VIP 账户，请先升级 VIP！'
+                      ),
+                      'info'
+                    );
+                    openUpgradeVipModal();
+                    return;
+                  }
+                  setTagFilter(t.id);
+                }}
                 aria-pressed={active}
-                className={`shrink-0 min-h-[44px] px-3.5 rounded-full text-sm font-bold border transition cursor-pointer ${
+                className={`shrink-0 min-h-[40px] px-3 rounded-full text-xs sm:text-sm font-bold border transition cursor-pointer inline-flex items-center gap-1.5 ${
                   active
                     ? 'bg-[#064E3B] text-white border-[#064E3B]'
                     : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-300 dark:border-slate-600'
                 }`}
               >
-                {t.emoji} {tr(language, t.labelKh, t.labelEn, t.labelZh)}
+                <span>{t.emoji} {tr(language, t.labelKh, t.labelEn, t.labelZh)}</span>
+                {isLockedTag && (
+                  <span className="px-1.5 py-0.5 rounded-full bg-slate-900 text-amber-300 text-[9px] font-extrabold inline-flex items-center gap-0.5">
+                    <Lock className="w-2.5 h-2.5" />
+                    VIP
+                  </span>
+                )}
               </button>
             );
           })}

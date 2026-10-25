@@ -208,8 +208,9 @@ export const TAG_FILTERS: Array<{ id: TagFilterId; labelKh: string; labelEn: str
   { id: 'spicy', labelKh: DISH_TAG_DEFS.spicy.labelKh, labelEn: DISH_TAG_DEFS.spicy.labelEn, labelZh: DISH_TAG_DEFS.spicy.labelZh, emoji: DISH_TAG_DEFS.spicy.emoji },
 ];
 
-export function matchesTagFilter(food: FoodItem, filter: TagFilterId): boolean {
+export function matchesTagFilter(food: FoodItem, filter: TagFilterId, isVipAuthorized = true): boolean {
   if (filter === 'all') return true;
+  if (!isVipAuthorized) return true;
   return getDishTagIds(food).includes(filter as DishTagId);
 }
 

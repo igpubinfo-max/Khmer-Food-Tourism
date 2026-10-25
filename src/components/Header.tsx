@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useApp } from '../context/AppContext';
-import { Search, X, Mail, MoreVertical, Camera, Download, Heart, LayoutGrid } from 'lucide-react';
-import { openSmartHub } from '../utils/smartHub';
+import { Search, X, Mail, MoreVertical, Camera, Download, Heart, LayoutGrid, Lock } from 'lucide-react';
+import { openSmartHub, hasSpecialAndHealthyFoodVipAccess } from '../utils/smartHub';
 import { Capacitor } from '@capacitor/core';
 import { APP_VERSION } from '../types';
 
@@ -9,8 +9,10 @@ export const Header: React.FC = () => {
   const { 
     language, setLanguage, setActiveTab, 
     searchQuery, setSearchQuery, selectedProvince, setSelectedProvince,
-    showToast, setIsQrScannerModalOpen, setIsInstallModalOpen, setIsSupportModalOpen
+    showToast, setIsQrScannerModalOpen, setIsInstallModalOpen, setIsSupportModalOpen,
+    currentUser, openUpgradeVipModal
   } = useApp();
+  const canUseVip = hasSpecialAndHealthyFoodVipAccess(currentUser);
 
   const [isSearchVisible, setIsSearchVisible] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -45,14 +47,14 @@ export const Header: React.FC = () => {
   return (
     <header className="sticky top-0 z-40 bg-[#064E3B] text-white shadow-md pt-[env(safe-area-inset-top,0px)] border-b border-[#047857]">
       {/* Main Bar */}
-      <div className="max-w-md mx-auto px-2.5 sm:px-4 py-2 flex items-center justify-between gap-1.5">
+      <div className="max-w-md mx-auto px-2.5 sm:px-4 py-2 flex items-center justify-between gap-2">
         {/* Brand */}
         <div 
           onClick={() => setActiveTab('home')}
-          className="flex items-center gap-2 cursor-pointer group min-w-0 flex-1"
+          className="flex items-center gap-2.5 cursor-pointer group min-w-0 flex-1"
         >
-          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white p-0.5 shadow-md flex items-center justify-center border border-emerald-300/60 shrink-0 overflow-hidden">
-            <img src="/icon-192.png?v=2.1.0" alt="Khmer Food" className="w-full h-full rounded-[9px] object-contain" />
+          <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-white p-0.5 shadow-md flex items-center justify-center border border-emerald-300/60 shrink-0 overflow-hidden">
+            <img src="/icon-192.png?v=2.1.0" alt="Khmer Food" className="w-full h-full rounded-[13px] object-contain" />
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1 flex-wrap">
@@ -105,15 +107,35 @@ export const Header: React.FC = () => {
             })}
           </div>
 
-          {/* Smart Menu: dish tags + travel & food tools in one place */}
+          {/* Smart Menu: dish tags + travel & food tools in one place (VIP-gated) */}
           <button
             type="button"
-            onClick={openSmartHub}
-            className="w-9 h-9 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 flex items-center justify-center shadow-md ring-2 ring-white/30 transition-all active:scale-95 shrink-0 cursor-pointer"
-            title={isKm ? 'ម៉ឺនុយពិសេស & ជម្រើសម្ហូបសុខភាព' : isZh ? '智能菜单与健康饮食筛选' : 'Smart Menu & Healthy Filter'}
-            aria-label={isKm ? 'ម៉ឺនុយពិសេស & ជម្រើសម្ហូបសុខភាព' : isZh ? '智能菜单与健康饮食筛选' : 'Smart Menu & Healthy Filter'}
+            onClick={() => {
+              if (!canUseVip) {
+                showToast(
+                  isKm
+                    ? 'មុខងារម៉ឺនុយពិសេស & ម្ហូបសុខភាព សម្រាប់គណនី VIP • សូមដំឡើង VIP!'
+                    : isZh
+                    ? '特色菜单与健康饮食功能仅限 VIP 账户，请先升级 VIP！'
+                    : 'Special Food & Healthy Food is for VIP accounts — please upgrade to VIP!',
+                  'info'
+                );
+                openUpgradeVipModal();
+                return;
+              }
+              openSmartHub();
+            }}
+            className="relative w-9 h-9 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 flex items-center justify-center shadow-md ring-2 ring-white/30 transition-all active:scale-95 shrink-0 cursor-pointer"
+            title={isKm ? 'ម៉ឺនុយពិសេស & ជម្រើសម្ហូបសុខភាព (VIP)' : isZh ? '智能菜单与健康饮食筛选 (VIP)' : 'Smart Menu & Healthy Filter (VIP)'}
+            aria-label={isKm ? 'ម៉ឺនុយពិសេស & ជម្រើសម្ហូបសុខភាព (VIP)' : isZh ? '智能菜单与健康饮食筛选 (VIP)' : 'Smart Menu & Healthy Filter (VIP)'}
           >
             <LayoutGrid className="w-4 h-4 shrink-0" />
+            {!canUseVip && (
+              <span className="absolute -top-1 -right-1 px-1 py-0.2 rounded-full bg-slate-900 text-amber-300 text-[7px] font-black border border-amber-400 flex items-center gap-0.5 leading-none shadow-xs">
+                <Lock className="w-2 h-2" />
+                VIP
+              </span>
+            )}
           </button>
 
           {/* Search Toggle */}

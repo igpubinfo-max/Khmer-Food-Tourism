@@ -566,7 +566,12 @@ export const HomeView: React.FC = () => {
           ) : (
             <>
               {/* 2. Smart Menu (one entry for tags, trips, near me, favorites, stamps, share, offline) + 2 quick actions */}
-              <SmartMenuBanner language={language} onOpen={openSmartHub} />
+              <SmartMenuBanner
+                language={language}
+                onOpen={requireVip(openSmartHub)}
+                showVipLock={!canUseVipActions}
+                onUpgradeVip={openUpgradeVipModal}
+              />
               <QuickActions
                 language={language}
                 showVipLock={!canUseVipActions}

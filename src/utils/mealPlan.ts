@@ -39,7 +39,10 @@ function pick(pool: FoodItem[], seed: number, used: Set<string>): FoodItem | nul
   return chosen;
 }
 
-export function buildMealPlan(foods: FoodItem[], seed: number): MealPlan {
+export function buildMealPlan(foods: FoodItem[], seed: number, isVipAuthorized = true): MealPlan {
+  if (!isVipAuthorized) {
+    return { breakfast: null, lunch: null, dinner: null, totalKcal: 0 };
+  }
   const mains = foods.filter((f) => !isSweet(f) && kcal(f) > 0 && !!f.photoUrl);
   const used = new Set<string>();
 

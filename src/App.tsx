@@ -96,17 +96,19 @@ const MainScreen: React.FC = () => {
     }
   });
 
-  // Smart Menu (opened from the Header button or the Home banner via a window event)
+  // Smart Menu (opened from the Header button or the Home banner via a window event — strictly VIP-controlled)
   const [isSmartHubOpen, setIsSmartHubOpen] = useState(false);
+  const hasVipAccess = isUserVipActive(currentUser) || currentUser?.role === 'admin';
   useEffect(() => {
-    const open = () => setIsSmartHubOpen(true);
+    const open = () => {
+      if (!hasVipAccess) return;
+      setIsSmartHubOpen(true);
+    };
     window.addEventListener(SMART_HUB_EVENT, open);
     return () => window.removeEventListener(SMART_HUB_EVENT, open);
-  }, []);
-
-  const hasVipAccess = isUserVipActive(currentUser) || currentUser?.role === 'admin';
+  }, [hasVipAccess]);
   const isAnyModalOpen = Boolean(
-    isSmartHubOpen ||
+    (isSmartHubOpen && hasVipAccess) ||
     selectedFood ||
     selectedRestaurant ||
     selectedDestination ||
@@ -211,9 +213,9 @@ const MainScreen: React.FC = () => {
 
       <OfflineBanner />
 
-      {/* Smart Menu: dish tags + travel & food tools in one place */}
+      {/* Smart Menu: dish tags + travel & food tools in one place (Strictly VIP Access Controlled) */}
       <Suspense fallback={null}>
-        {isSmartHubOpen && <SmartHubMenuModal onClose={() => setIsSmartHubOpen(false)} />}
+        {isSmartHubOpen && hasVipAccess && <SmartHubMenuModal onClose={() => setIsSmartHubOpen(false)} />}
       </Suspense>
 
       {/* Creation & Action Modals — Conditionally Mounted (lazy-loaded chunks) */}

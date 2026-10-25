@@ -1,5 +1,5 @@
 import React, { useMemo, useRef, useState } from 'react';
-import { RefreshCw, ChevronRight } from 'lucide-react';
+import { RefreshCw, ChevronRight, Lock, Crown, CheckCircle2 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import type { FoodItem } from '../types';
 import { tr } from '../utils/i18n';
@@ -8,6 +8,7 @@ import {
 } from '../utils/dishTags';
 import type { DishTagId } from '../utils/dishTags';
 import { buildMealPlan } from '../utils/mealPlan';
+import { hasSpecialAndHealthyFoodVipAccess } from '../utils/smartHub';
 import { getLocalizedFood } from '../utils/zhDynamicTranslator';
 
 // The six tag cards (recipe-based estimates only: no health/medical claims)
@@ -27,16 +28,22 @@ interface Props {
   foods: FoodItem[];
   onViewAll: (id: DishTagId) => void;
   onOpenFood: (food: FoodItem) => void;
+  onUpgradeVip?: () => void;
 }
 
-/** Healthy dish tags: compact 2-column category cards, inline recommended dishes and a daily 3-meal idea. */
-export const SmartHubHealthySection: React.FC<Props> = ({ foods, onViewAll, onOpenFood }) => {
-  const { language } = useApp();
+/** Healthy dish tags: compact 2-column category cards, inline recommended dishes and a daily 3-meal idea (VIP-only). */
+export const SmartHubHealthySection: React.FC<Props> = ({ foods, onViewAll, onOpenFood, onUpgradeVip }) => {
+  const { language, currentUser, openUpgradeVipModal } = useApp();
+  const canUseVip = hasSpecialAndHealthyFoodVipAccess(currentUser);
   const [selected, setSelected] = useState<DishTagId>('light');
   const [seed, setSeed] = useState(1);
   const recommendedRef = useRef<HTMLDivElement | null>(null);
 
   const handleSelectTag = (id: DishTagId) => {
+    if (!canUseVip) {
+      (onUpgradeVip || openUpgradeVipModal)();
+      return;
+    }
     setSelected(id);
     if (typeof window !== 'undefined') {
       window.requestAnimationFrame(() => {
@@ -45,10 +52,11 @@ export const SmartHubHealthySection: React.FC<Props> = ({ foods, onViewAll, onOp
     }
   };
 
-  // Matches per tag, best-rated first, photo-first so cards always look appetizing
+  // Matches per tag, best-rated first, photo-first so cards always look appetizing (computed only for verified VIP accounts)
   const byTag = useMemo(() => {
     const map: Record<string, FoodItem[]> = {};
     for (const id of HUB_TAGS) map[id] = [];
+    if (!canUseVip) return map;
     for (const f of foods) {
       for (const id of getDishTagIds(f)) if (map[id]) map[id].push(f);
     }
@@ -56,9 +64,99 @@ export const SmartHubHealthySection: React.FC<Props> = ({ foods, onViewAll, onOp
       map[id].sort((a, b) => Number(!!b.photoUrl) - Number(!!a.photoUrl) || (b.rating || 0) - (a.rating || 0) || (b.reviewCount || 0) - (a.reviewCount || 0));
     }
     return map;
-  }, [foods]);
+  }, [foods, canUseVip]);
 
-  const plan = useMemo(() => buildMealPlan(foods, seed), [foods, seed]);
+  const plan = useMemo(() => buildMealPlan(foods, seed, canUseVip), [foods, seed, canUseVip]);
+
+  if (!canUseVip) {
+    return (
+      <section className="space-y-2.5">
+        <div className="flex items-center justify-between gap-2">
+          <div>
+            <h3 className="font-moul text-sm text-[#064E3B] dark:text-emerald-300 flex items-center gap-1.5">
+              <span>🥗 {tr(language, 'ស្លាកម្ហូបសុខភាព & ម៉ឺនុយពិសេស', 'Special Food & Healthy Food', '特色菜单与健康饮食')}</span>
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              {tr(language, 'មុខងារពិសេសសម្រាប់សមាជិក VIP ប៉ុណ្ណោះ', 'Exclusive feature for VIP members only', 'VIP 会员专属功能')}
+            </p>
+          </div>
+          <span className="px-2.5 py-1 rounded-full bg-slate-900 text-amber-300 text-xs font-extrabold inline-flex items-center gap-1 shadow-xs shrink-0 border border-amber-400/40">
+            <Lock className="w-3.5 h-3.5" />
+            <span>VIP</span>
+          </span>
+        </div>
+
+        <div className="p-4 rounded-2xl bg-gradient-to-br from-slate-900 via-[#064E3B] to-slate-900 text-white border-2 border-amber-400/50 shadow-lg space-y-3">
+          <div className="flex items-start gap-3">
+            <div className="w-11 h-11 rounded-2xl bg-amber-400 text-slate-950 flex items-center justify-center shrink-0 shadow-md">
+              <Crown className="w-6 h-6" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-400/20 border border-amber-300/40 text-amber-300 text-[10px] font-extrabold mb-1">
+                <Lock className="w-3 h-3" />
+                <span>{tr(language, 'សម្រាប់សមាជិក VIP', 'VIP Members Only', '仅限 VIP 会员')}</span>
+              </div>
+              <h4 className="text-sm font-extrabold text-white leading-snug">
+                {tr(
+                  language,
+                  'ដោះសោម៉ឺនុយពិសេស & ជម្រើសម្ហូបសុខភាព',
+                  'Unlock Special Food & Healthy Food Menu',
+                  '解锁特色菜单与健康饮食指南'
+                )}
+              </h4>
+              <p className="text-xs text-emerald-100/90 mt-1 leading-relaxed">
+                {tr(
+                  language,
+                  'ដំឡើងទៅគណនី VIP ដើម្បីប្រើប្រាស់ស្លាកម្ហូបសុខភាពទាំង ៦ ប្រភេទ ឈុតម្ហូបសុខភាពប្រចាំថ្ងៃ ៣ ពេល និងមុខងារពិសេសទាំងអស់។',
+                  'Upgrade to VIP to access all 6 healthy dish categories, daily balanced 3-meal ideas, and special food filters.',
+                  '升级至 VIP 会员，即可使用全部 6 大健康菜品分类、每日均衡三餐搭配及特色美食筛选功能。'
+                )}
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-1.5 text-[11px] text-emerald-100">
+            {HUB_TAGS.map((id) => {
+              const def = DISH_TAG_DEFS[id];
+              return (
+                <div
+                  key={id}
+                  className="px-2.5 py-1.5 rounded-xl bg-white/10 border border-white/15 flex items-center justify-between gap-1.5"
+                >
+                  <span className="truncate font-bold">
+                    {def.emoji} {tr(language, def.labelKh, def.labelEn, def.labelZh)}
+                  </span>
+                  <Lock className="w-3 h-3 text-amber-300 shrink-0" />
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="pt-1 flex flex-col gap-1.5">
+            <button
+              type="button"
+              onClick={() => (onUpgradeVip || openUpgradeVipModal)()}
+              className="w-full min-h-[48px] rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:brightness-105 text-slate-950 text-sm font-extrabold flex items-center justify-center gap-2 shadow-md active:scale-[0.98] transition cursor-pointer"
+            >
+              <Crown className="w-4 h-4" />
+              <span>{tr(language, 'ដំឡើងទៅ VIP ឥឡូវនេះ', 'Upgrade to VIP Now', '立即升级 VIP')}</span>
+            </button>
+            <div className="flex items-center justify-center gap-1.5 text-[11px] text-emerald-200/90">
+              <CheckCircle2 className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+              <span>
+                {tr(
+                  language,
+                  'បើកដំណើរការភ្លាមៗបន្ទាប់ពីផ្ទៀងផ្ទាត់ការទូទាត់',
+                  'Instant access once your VIP subscription is verified',
+                  'VIP 订阅验证通过后立即解锁全部功能'
+                )}
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   const selDef = DISH_TAG_DEFS[selected];
   const selList = byTag[selected] || [];
