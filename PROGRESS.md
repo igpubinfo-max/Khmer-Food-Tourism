@@ -7,7 +7,7 @@ Bundle before (Build 87): main `index` 896.5 kB + shared `x` 2,135.1 kB (initial
 - [x] Phase A â€” branch (working tree already clean on main; no backup commit needed; branch `test-ui-apk` created)
 - [x] Task 1 / Phase C1 — removed Auto-Search card from FoodView (state, handlers, imports). onlineFoodImageService + FoodImageModal kept: still used by AdminDashboard/FoodDetailModal/ManageMenuModal (C1 says keep those)
 - [x] Phase B — disease guide removed; AiFoodDiscoveryModal, aiFoodService, aiHealthKnowledgeEngine, healthyNutritionGuideData moved to docs/archive (modal was already unreachable); dishTags.ts + chips + tag filter + footer note added; HomeView/Welcome/share/release text neutralized. Gate: tsc 350 (<355), lint 0 errors, build OK, main chunk 896.5 -> 728.2 kB
-- [ ] Phase C2 â€” duplicate-button audit (report only)
+- [x] Phase C2 — audit done. Minimal fixes: removed Home member-hub duplicates of the quick-action cards (What to eat, Near me, AI Trip) and the duplicate admin AI Check-in button. Remaining intentional duplicates: Wishlists (Home + Profile), Trip planner/Wishlists links inside Profile tabs, Google Maps search (per-screen contexts), Admin deep links inside Profile admin panel.
 - [ ] Phase D â€” growth features (passport, share cards, trip templates, where-to-eat, intro)
 - [ ] Phase E â€” versionCode 88, Push_Test_Branch.bat, push, instructions
 

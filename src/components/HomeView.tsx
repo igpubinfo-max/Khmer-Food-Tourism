@@ -1097,17 +1097,7 @@ export const HomeView: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-2">
-            {/* AI Food Check-in Quick Button inside Member Hub (Administrator Only) */}
-            {currentUser?.role === 'admin' && (
-              <button
-                onClick={() => setIsAiCheckInModalOpen(true)}
-                className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white text-[10px] font-bold shadow-md flex items-center gap-1 active:scale-95 transition"
-                title={isKm ? 'ឆែកអ៊ីន & បន្ថែមហាងដោយ AI (Administrator Only)' : 'AI Food Check-in (Admin Only)'}
-              >
-                <Camera className="w-3.5 h-3.5" />
-                <span>{isKm ? 'ឆែកអ៊ីន AI' : 'AI Check-in'}</span>
-              </button>
-            )}
+            {/* AI Check-in lives only in the Quick Actions "Check in" card (single entry point) */}
 
             {!isVip && currentUser?.role !== 'admin' && (
               <button
@@ -1207,75 +1197,7 @@ export const HomeView: React.FC = () => {
 
         {/* 6 Feature Buttons Grid - Enabled for VIP, Prompts Upgrade for Free Users */}
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-          {/* A. ថ្ងៃនេះញ៉ាំអ្វី? */}
-          <button
-            onClick={() => {
-              if (!isVip && currentUser?.role !== 'admin') {
-                showToast(isKm ? 'មុខងារ "ថ្ងៃនេះញ៉ាំអ្វី?" សម្រាប់តែគណនី VIP • សូមដំឡើង VIP ដើម្បីប្រើប្រាស់!' : '"What to Eat Today" is exclusive to VIP • Please unlock VIP!', 'info');
-                openUpgradeVipModal();
-                return;
-              }
-              setIsWhatToEatModalOpen(true);
-            }}
-            className={`p-3 rounded-2xl border text-left transition group active:scale-95 relative overflow-hidden ${
-              isVip || currentUser?.role === 'admin'
-                ? 'bg-gradient-to-br from-amber-500/20 to-amber-600/30 border-amber-400/50 hover:border-amber-400 cursor-pointer'
-                : 'bg-white/5 border-white/10 hover:border-amber-400/40 opacity-80 cursor-pointer'
-            }`}
-          >
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="text-xl">🍲</span>
-              {isVip || currentUser?.role === 'admin' ? (
-                <span className="px-1.5 py-0.5 rounded-full bg-amber-400 text-stone-900 text-[9px] font-black shadow-xs">
-                  {isKm ? 'អាទិភាពខ្ពស់ ⭐' : 'High Priority ⭐'}
-                </span>
-              ) : (
-                <span className="px-1.5 py-0.5 rounded-full bg-slate-900/80 text-amber-300 text-[8px] font-bold flex items-center gap-0.5 border border-amber-400/30">
-                  <Lock className="w-2.5 h-2.5" /> VIP
-                </span>
-              )}
-            </div>
-            <div className="text-xs font-bold text-white group-hover:text-amber-300">
-              {isKm ? 'ថ្ងៃនេះញ៉ាំអ្វី?' : 'What to Eat Today?'}
-            </div>
-            <div className="text-[10px] text-amber-200/80 line-clamp-1 mt-0.5">
-              {isKm ? 'ជ្រើសរើសម្ហូបតាមថវិកា' : 'Smart meal match'}
-            </div>
-          </button>
 
-          {/* B. នៅជិតខ្ញុំ */}
-          <button
-            onClick={() => {
-              if (!isVip && currentUser?.role !== 'admin') {
-                showToast(isKm ? 'មុខងារ "នៅជិតខ្ញុំ" សម្រាប់តែគណនី VIP • សូមដំឡើង VIP ដើម្បីប្រើប្រាស់!' : '"Near Me" is exclusive to VIP • Please unlock VIP!', 'info');
-                openUpgradeVipModal();
-                return;
-              }
-              setIsNearMeModalOpen(true);
-            }}
-            className={`p-3 rounded-2xl border text-left transition group active:scale-95 relative ${
-              isVip || currentUser?.role === 'admin'
-                ? 'bg-white/10 hover:bg-white/15 border-white/15 cursor-pointer'
-                : 'bg-white/5 border-white/10 hover:border-amber-400/40 opacity-80 cursor-pointer'
-            }`}
-          >
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="text-xl">📍</span>
-              {isVip || currentUser?.role === 'admin' ? (
-                <span className="text-[10px] font-mono text-emerald-300 font-bold">GPS</span>
-              ) : (
-                <span className="px-1.5 py-0.5 rounded-full bg-slate-900/80 text-amber-300 text-[8px] font-bold flex items-center gap-0.5 border border-amber-400/30">
-                  <Lock className="w-2.5 h-2.5" /> VIP
-                </span>
-              )}
-            </div>
-            <div className="text-xs font-bold text-white group-hover:text-emerald-300">
-              {isKm ? 'នៅជិតខ្ញុំ' : 'Near Me'}
-            </div>
-            <div className="text-[10px] text-slate-300 line-clamp-1 mt-0.5">
-              {isKm ? 'រកហាង & កន្លែងក្បែរខ្លួន' : 'Places & distances'}
-            </div>
-          </button>
 
           {/* C. កន្លែងថ្មីប្រចាំថ្ងៃ */}
           <button
@@ -1330,41 +1252,6 @@ export const HomeView: React.FC = () => {
             </div>
           </button>
 
-          {/* E. ផែនការដើរលេង AI */}
-          <button
-            onClick={() => {
-              if (!isVip && currentUser?.role !== 'admin') {
-                showToast(isKm ? 'មុខងារ "ផែនការដើរលេង AI" សម្រាប់តែគណនី VIP • សូមដំឡើង VIP ដើម្បីប្រើប្រាស់!' : '"AI Trip Planner" is exclusive to VIP • Please unlock VIP!', 'info');
-                openUpgradeVipModal();
-                return;
-              }
-              setIsAiTripPlannerModalOpen(true);
-            }}
-            className={`p-3 rounded-2xl border text-left transition group active:scale-95 relative ${
-              isVip || currentUser?.role === 'admin'
-                ? 'bg-gradient-to-br from-teal-500/20 to-emerald-600/30 border-teal-400/40 cursor-pointer'
-                : 'bg-white/5 border-white/10 hover:border-amber-400/40 opacity-80 cursor-pointer'
-            }`}
-          >
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="text-xl">🤖</span>
-              {isVip || currentUser?.role === 'admin' ? (
-                <span className="px-1.5 py-0.2 rounded-full bg-teal-400/30 text-teal-200 text-[9px] font-bold">
-                  Smart AI
-                </span>
-              ) : (
-                <span className="px-1.5 py-0.5 rounded-full bg-slate-900/80 text-amber-300 text-[8px] font-bold flex items-center gap-0.5 border border-amber-400/30">
-                  <Lock className="w-2.5 h-2.5" /> VIP
-                </span>
-              )}
-            </div>
-            <div className="text-xs font-bold text-white group-hover:text-teal-300">
-              {isKm ? 'ផែនការដើរលេង AI' : 'AI Trip Planner'}
-            </div>
-            <div className="text-[10px] text-teal-200/80 line-clamp-1 mt-0.5">
-              {isKm ? 'AI រៀបចំផ្លូវស្វ័យប្រវត្តិ' : 'Automated itinerary'}
-            </div>
-          </button>
 
           {/* F. ការជូនដំណឹងដែលមានប្រយោជន៍ */}
           <button
