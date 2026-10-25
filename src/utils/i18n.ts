@@ -299,7 +299,6 @@ export const EXACT_EN_TO_ZH_MAP: Record<string, string> = {
   'Ingredients Needed': '所需食材清单',
   'Step-by-Step Instructions': '详细烹饪步骤',
   'Share this recipe with friends': '将这道美食食谱分享给好友',
-  'Share App': '分享应用',
   'Copy link': '复制链接',
   'No matching dishes found': '未找到匹配的菜品',
   'Clear search': '清除搜索',

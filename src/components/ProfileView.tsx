@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { FoodCard } from './FoodCard';
 import { RestaurantCard } from './RestaurantCard';
-import { InviteFriendsCard } from './InviteFriendsCard';
 import { FoodPassportCard } from './FoodPassportCard';
 import { TouristCard } from './TouristCard';
 import { PrivacyPolicyModal } from './PrivacyPolicyModal';
@@ -1448,9 +1447,6 @@ export const ProfileView: React.FC = () => {
 
       {/* Cambodian Food Passport */}
       <FoodPassportCard />
-
-      {/* Invite friends (personal referral message) */}
-      <InviteFriendsCard />
 
       {/* App Installation & Support Buttons Showcase - Users Only */}
       {currentUser?.role !== 'admin' && (

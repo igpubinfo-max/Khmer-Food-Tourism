@@ -9,11 +9,9 @@ import { TouristDestination } from '../types';
 import { tr } from '../utils/i18n';
 import { getLocalizedDestination } from '../utils/zhDynamicTranslator';
 import {
-  shareRichContent,
   formatRichShareText,
   copyTextNativeOrWeb,
 } from '../utils/androidMediaHelper';
-import { ShareCardButton } from './ShareCardButton';
 
 export const TouristDetailModal: React.FC = () => {
   const { 
@@ -142,10 +140,6 @@ export const TouristDetailModal: React.FC = () => {
     itemType: 'destination' as const,
     itemId: selectedDestination.id,
     isKm,
-  };
-
-  const handleShareNative = () => {
-    shareRichContent(sharePayload, showToast);
   };
 
   const handleShareTelegram = () => {
@@ -592,25 +586,6 @@ export const TouristDetailModal: React.FC = () => {
               </p>
               
               <div className="flex items-center justify-center gap-2 flex-wrap">
-                <ShareCardButton
-                  getSpec={() => ({
-                    kind: 'place',
-                    emoji: '🏛️',
-                    title: loc.name,
-                    subtitle: loc.category,
-                    photoUrl: selectedDestination.photoUrl,
-                    lines: [`📍 ${loc.address}`, ...(loc.highlights || []).slice(0, 2).map((h: string) => `✨ ${h}`)],
-                  })}
-                />
-                <button
-                  type="button"
-                  onClick={handleShareNative}
-                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white text-xs font-bold shadow transition active:scale-95"
-                >
-                  <Share2 className="w-3.5 h-3.5" />
-                  <span>{tr(language, 'ចែករំលែក', 'Share App', '分享应用')}</span>
-                </button>
-
                 <button
                   type="button"
                   onClick={handleShareTelegram}

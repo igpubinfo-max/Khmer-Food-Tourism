@@ -13,7 +13,6 @@ import { useBodyScrollLock } from '../utils/useBodyScrollLock';
 import { SmartHubHealthySection } from './SmartHubHealthySection';
 import { FoodTripTemplates } from './FoodTripTemplates';
 import { FoodPassportCard } from './FoodPassportCard';
-import { InviteFriendsCard } from './InviteFriendsCard';
 
 interface Props {
   onClose: () => void;
@@ -260,9 +259,6 @@ export const SmartHubMenuModal: React.FC<Props> = ({ onClose }) => {
               )}
             </button>
             {canUseVip && openPanel === 'stamps' && <FoodPassportCard />}
-
-            {/* Share & recommend */}
-            <InviteFriendsCard />
 
             {/* Offline status */}
             <div

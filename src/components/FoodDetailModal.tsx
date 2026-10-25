@@ -6,7 +6,6 @@ import {
   Edit2, Save, Upload, Camera, ArrowLeft
 } from 'lucide-react';
 import {
-  shareRichContent,
   formatRichShareText,
   copyTextNativeOrWeb,
   pickImageUsingNativeAndroidGallery,
@@ -18,9 +17,7 @@ import { tr } from '../utils/i18n';
 import { getLocalizedFood } from '../utils/zhDynamicTranslator';
 import { DishTagChips } from './DishTagChips';
 import { PassportStampButton } from './PassportStampButton';
-import { ShareCardButton } from './ShareCardButton';
 import { WhereToEat } from './WhereToEat';
-import { getDishTags, tagLabel } from '../utils/dishTags';
 
 export const FoodDetailModal: React.FC = () => {
   const { 
@@ -268,10 +265,6 @@ export const FoodDetailModal: React.FC = () => {
     itemType: 'food' as const,
     itemId: selectedFood.id,
     isKm,
-  };
-
-  const handleShareNative = () => {
-    shareRichContent(sharePayload, showToast);
   };
 
   // Social Sharing
@@ -806,22 +799,9 @@ export const FoodDetailModal: React.FC = () => {
               </div>
             </div>
 
-            {/* Food Passport stamp + share-as-card + where to eat */}
+            {/* Food Passport stamp + where to eat */}
             <div className="flex flex-wrap gap-2">
               <PassportStampButton foodId={selectedFood.id} language={language} showToast={showToast} variant="full" />
-              <ShareCardButton
-                getSpec={() => ({
-                  kind: 'dish',
-                  emoji: '🍲',
-                  title: loc.name,
-                  subtitle: loc.category,
-                  photoUrl: selectedFood.photoUrl,
-                  lines: [
-                    selectedFood.calories ? `🔥 ${selectedFood.calories} ${tr(language, 'គីឡូកាឡូរី', 'kcal', '千卡')} · ⭐ ${selectedFood.rating ?? 4.8}` : `⭐ ${selectedFood.rating ?? 4.8}`,
-                    getDishTags(selectedFood).slice(0, 3).map((t) => `${t.emoji} ${tagLabel(t, language)}`).join('  '),
-                  ].filter(Boolean),
-                })}
-              />
             </div>
             <WhereToEat food={selectedFood} />
 
@@ -902,16 +882,6 @@ export const FoodDetailModal: React.FC = () => {
               </p>
               
               <div className="flex items-center justify-center gap-2 flex-wrap">
-                {/* Native Share Sheet */}
-                <button
-                  type="button"
-                  onClick={handleShareNative}
-                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white text-xs sm:text-sm font-bold shadow transition active:scale-95"
-                >
-                  <Share2 className="w-3.5 h-3.5" />
-                  <span>{tr(language, 'ចែករំលែកកម្មវិធី', 'Share App', '分享应用')}</span>
-                </button>
-
                 {/* Telegram */}
                 <button
                   type="button"

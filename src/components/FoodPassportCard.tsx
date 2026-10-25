@@ -9,11 +9,10 @@ import {
   badgeTitle,
 } from '../utils/foodPassport';
 import { organizeAndDeduplicateFoods } from '../types';
-import { ShareCardButton } from './ShareCardButton';
 
-/** Profile card: Cambodian Food Passport progress, level title, badges, and a share-as-card button. */
+/** Profile card: Cambodian Food Passport progress, level title, and badges. */
 export const FoodPassportCard: React.FC = () => {
-  const { language, foods, currentUser } = useApp();
+  const { language, foods } = useApp();
   const { stamps, count } = useFoodPassport();
   const allFoods = useMemo(() => organizeAndDeduplicateFoods(foods), [foods]);
   const total = allFoods.length;
@@ -22,19 +21,6 @@ export const FoodPassportCard: React.FC = () => {
   const unlocked = badges.filter((b) => b.unlocked);
   const inProgress = badges.filter((b) => !b.unlocked && b.have > 0).slice(0, 4);
   const pct = total > 0 ? Math.min(100, Math.round((count / total) * 100)) : 0;
-
-  const getSpec = () => ({
-    kind: 'passport' as const,
-    emoji: level.emoji,
-    title: tr(language, 'ស្វែងយល់ពីម្ហូប និងទេសចរណ៍កម្ពុជា', 'Discover Cambodian Food & Travel', '探索柬埔寨美食与旅游'),
-    subtitle: `${level.emoji} ${levelTitle(level, language)}${currentUser?.name ? ` · ${currentUser.name}` : ''}`,
-    lines: [
-      tr(language, `បានភ្លក់ ${count} / ${total} មុខ (${pct}%)`, `Tried ${count} / ${total} dishes (${pct}%)`, `已品尝 ${count} / ${total} 道菜（${pct}%）`),
-      unlocked.length > 0
-        ? `🏅 ${unlocked.slice(0, 3).map((b) => badgeTitle(b, language)).join(' · ')}`
-        : tr(language, 'កំពុងកត់ត្រា...', 'Recording dishes...', '正在记录菜品...'),
-    ],
-  });
 
   return (
     <div className="p-4 rounded-3xl bg-gradient-to-br from-emerald-50 via-white to-amber-50 dark:from-slate-800 dark:via-slate-800 dark:to-emerald-950/40 border-2 border-emerald-400/60 shadow-xs space-y-3 font-khmer">
@@ -98,8 +84,6 @@ export const FoodPassportCard: React.FC = () => {
           )}
         </p>
       )}
-
-      <ShareCardButton getSpec={getSpec} />
     </div>
   );
 };

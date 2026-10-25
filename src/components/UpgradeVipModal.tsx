@@ -17,6 +17,7 @@ import {
   pickImageUsingNativeAndroidGallery,
 } from '../utils/androidMediaHelper';
 import { Capacitor } from '@capacitor/core';
+import { tr } from '../utils/i18n';
 
 interface VipPlanOption {
   id: 'annual' | 'quarterly';
@@ -212,9 +213,12 @@ export const UpgradeVipModal: React.FC = () => {
           });
           setIsProcessingProofImage(false);
           showToast(
-            isKm
-              ? '✅ បានជ្រើសរើសរូបភាពវិក្កយបត្រពី Gallery រួចរាល់!'
-              : '✅ Selected payment receipt from Gallery!',
+            tr(
+              language,
+              '✅ បានជ្រើសរើសរូបភាពវិក្កយបត្រពី Gallery រួចរាល់!',
+              '✅ Selected payment receipt from Gallery!',
+              '✅ 已从相册选择付款凭证截图！'
+            ),
             'success'
           );
           return;
@@ -253,12 +257,12 @@ export const UpgradeVipModal: React.FC = () => {
       const result = await savePngDataUrlToGallery(qrCodeDataUrl, fileName);
       showToast(
         result.duplicate
-          ? (isKm ? '✅ រូបភាព QR នេះត្រូវបានរក្សាទុករួចហើយនៅក្នុង Gallery / Photos!' : '✅ QR image is already saved in your Gallery / Photos!')
-          : (isKm ? '✅ បានរក្សាទុករូបភាព QR ទៅក្នុង Gallery / Photos រួចរាល់! បើក ABA Scan រួចចុច Upload QR ដើម្បីបង់ប្រាក់។' : '✅ QR saved to Gallery / Photos! Open ABA Scan and tap Upload QR to pay.'),
+          ? tr(language, '✅ រូបភាព QR នេះត្រូវបានរក្សាទុករួចហើយនៅក្នុង Gallery!', '✅ QR image is already saved in your Gallery!', '✅ 二维码图片已保存在相册中！')
+          : tr(language, '✅ បានរក្សាទុករូបភាព QR ទៅក្នុង Gallery រួចរាល់!', '✅ QR saved to Gallery!', '✅ 二维码已保存到相册！'),
         'success'
       );
     } catch (err: any) {
-      showToast(err?.message || (isKm ? 'សូម Screenshot រូបភាព QR ដើម្បីស្កេន' : 'Please screenshot QR to scan'), 'warning');
+      showToast(err?.message || tr(language, 'សូម Screenshot រូបភាព QR ដើម្បីស្កេន', 'Please screenshot QR to scan', '请截图保存二维码进行扫描'), 'warning');
     }
   };
 
@@ -267,9 +271,12 @@ export const UpgradeVipModal: React.FC = () => {
     setHasCopiedAccount(true);
     setTimeout(() => setHasCopiedAccount(false), 3000);
     showToast(
-      isKm 
-        ? '✅ បានចម្លងលេខគណនី ABA៖ 095 245 959 (CHEA KIMSENG)!' 
-        : '✅ Copied ABA Account: 095 245 959 (CHEA KIMSENG)!',
+      tr(
+        language,
+        '✅ បានចម្លងលេខគណនី ABA៖ 095 245 959 (CHEA KIMSENG)!',
+        '✅ Copied ABA Account: 095 245 959 (CHEA KIMSENG)!',
+        '✅ 已复制 ABA 账号：095 245 959 (CHEA KIMSENG)！'
+      ),
       'success'
     );
   };
@@ -318,9 +325,12 @@ export const UpgradeVipModal: React.FC = () => {
     }
 
     showToast(
-      isKm 
-        ? '📲 កំពុងបើក ABA Mobile... សូមចុច "ABA Scan" រួចចុច "Upload QR" ដើម្បីជ្រើសរើសរូបភាព QR ដែលបានរក្សាទុក!' 
-        : '📲 Opening ABA Mobile... Tap "ABA Scan" then "Upload QR" to select the saved QR image!',
+      tr(
+        language,
+        '📲 កំពុងបើក ABA Mobile...',
+        '📲 Opening ABA Mobile...',
+        '📲 正在打开 ABA Mobile...'
+      ),
       'info'
     );
   };
@@ -413,16 +423,19 @@ export const UpgradeVipModal: React.FC = () => {
         }
         setIsProcessingProofImage(false);
         showToast(
-          isKm
-            ? '✅ បានជ្រើសរើសរូបភាពភស្តុតាងបង់ប្រាក់រួចរាល់! សូមពិនិត្យមើលរូបភាពមុនពេលបញ្ជូន។'
-            : '✅ Payment proof image ready! Preview it below before submitting.',
+          tr(
+            language,
+            '✅ បានជ្រើសរើសវិក្កយបត្របង់ប្រាក់រួចរាល់!',
+            '✅ Payment receipt ready!',
+            '✅ 付款凭证已准备就绪！'
+          ),
           'success'
         );
       };
       img.onerror = () => {
         setIsProcessingProofImage(false);
         showToast(
-          isKm ? 'មិនអាចអានឯកសាររូបភាពនេះបានទេ' : 'Could not read image file',
+          tr(language, 'មិនអាចអានឯកសាររូបភាពនេះបានទេ', 'Could not read image file', '无法读取此图片文件'),
           'warning'
         );
       };
@@ -544,7 +557,7 @@ export const UpgradeVipModal: React.FC = () => {
               </div>
               <div>
                 <h3 className="font-moul text-sm sm:text-base text-white flex items-center gap-1.5 flex-wrap">
-                  <span>{isKm ? 'ដំឡើងទៅជា Premium VIP' : 'Upgrade to Premium VIP'}</span>
+                  <span>{tr(language, 'ដំឡើងទៅជា Premium VIP', 'Upgrade to Premium VIP', '升级为尊享 VIP')}</span>
                   <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-900 text-[10px] font-black font-sans">
                     VIP
                   </span>
@@ -553,7 +566,7 @@ export const UpgradeVipModal: React.FC = () => {
                   </span>
                 </h3>
                 <p className="text-[11px] text-amber-200 font-khmer">
-                  {isKm ? 'កញ្ចប់សមាជិកភាព VIP • អនុម័តដោយរដ្ឋបាលផ្លូវការ' : 'Premium VIP Subscription • Official Admin Verification'}
+                  {tr(language, 'កញ្ចប់សមាជិកភាព VIP • អនុម័តដោយរដ្ឋបាលផ្លូវការ', 'Premium VIP Subscription • Official Admin Verification', 'VIP 会员套餐 · 官方管理员审核')}
                 </p>
               </div>
             </div>
@@ -561,6 +574,7 @@ export const UpgradeVipModal: React.FC = () => {
             <button
               onClick={handleClose}
               className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white transition cursor-pointer"
+              title={tr(language, 'បិទ', 'Close', '关闭')}
             >
               <X className="w-5 h-5" />
             </button>
@@ -582,40 +596,32 @@ export const UpgradeVipModal: React.FC = () => {
               </div>
 
               <div>
-                <span className="px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-200 text-xs font-bold font-sans">
-                  PAYMENT VERIFIED • VIP ACTIVE
-                </span>
                 <h4 className="font-moul text-lg text-slate-900 dark:text-white mt-2">
-                  {isKm ? '🎉 សមាជិកភាព VIP ត្រូវបានអនុម័ត!' : '🎉 VIP Membership Approved!'}
+                  {tr(language, '🎉 សមាជិកភាព VIP ត្រូវបានអនុម័ត!', '🎉 VIP Membership Approved!', '🎉 VIP 会员已获批生效！')}
                 </h4>
                 <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 max-w-sm mx-auto leading-relaxed">
-                  {isKm 
-                    ? `រដ្ឋបាលបានផ្ទៀងផ្ទាត់ការទូទាត់ និងអនុម័តគណនី Premium VIP របស់អ្នករួចរាល់ (នៅសល់ ${remainingDays} ថ្ងៃ)!` 
-                    : `Administrator verified your payment and activated your Premium VIP account (${remainingDays} days remaining)!`}
+                  {tr(
+                    language,
+                    `រដ្ឋបាលបានផ្ទៀងផ្ទាត់ការទូទាត់ និងអនុម័តគណនី Premium VIP របស់អ្នករួចរាល់ (នៅសល់ ${remainingDays} ថ្ងៃ)!`,
+                    `Administrator verified your payment and activated your Premium VIP account (${remainingDays} days remaining)!`,
+                    `管理员已核实您的付款并开通尊享 VIP 会员（剩余 ${remainingDays} 天）！`
+                  )}
                 </p>
               </div>
 
               <div className="p-4 bg-slate-50 dark:bg-slate-800/80 rounded-2xl border border-slate-200 dark:border-slate-700 text-xs text-left space-y-2">
                 <div className="flex items-center justify-between pb-1.5 border-b border-slate-200 dark:border-slate-700">
-                  <span className="text-slate-500">{isKm ? 'ស្ថានភាពគណនី៖' : 'Account Status:'}</span>
+                  <span className="text-slate-500">{tr(language, 'ស្ថានភាពគណនី៖', 'Account Status:', '账户状态：')}</span>
                   <span className="font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
                     <CheckCircle2 className="w-3.5 h-3.5" />
-                    <span>{isKm ? `VIP សកម្ម (${remainingDays} ថ្ងៃ)` : `VIP Active (${remainingDays} Days)`}</span>
+                    <span>{tr(language, `VIP សកម្ម (${remainingDays} ថ្ងៃ)`, `VIP Active (${remainingDays} Days)`, `VIP 已生效（${remainingDays} 天）`)}</span>
                   </span>
                 </div>
                 {currentUser?.subscriptionExpiryDate && (
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-500">{isKm ? 'ថ្ងៃផុតកំណត់៖' : 'Expiration Date:'}</span>
+                    <span className="text-slate-500">{tr(language, 'ថ្ងៃផុតកំណត់៖', 'Expiration Date:', '到期日期：')}</span>
                     <span className="font-mono font-bold text-slate-900 dark:text-white">
                       {currentUser.subscriptionExpiryDate.split('T')[0]}
-                    </span>
-                  </div>
-                )}
-                {currentUser?.transactionRef && (
-                  <div className="flex items-center justify-between text-[11px] pt-1 border-t border-slate-200 dark:border-slate-700">
-                    <span className="text-slate-500">Ref:</span>
-                    <span className="font-mono text-slate-600 dark:text-slate-400 truncate max-w-[200px]">
-                      {currentUser.transactionRef}
                     </span>
                   </div>
                 )}
@@ -632,9 +638,12 @@ export const UpgradeVipModal: React.FC = () => {
                 >
                   <RefreshCw className="w-4 h-4" />
                   <span>
-                    {isKm
-                      ? `🔄 បន្តសុពលភាព VIP បន្ថែម ($${dynamicPlansList[0].priceUsd.toFixed(2)} / ${dynamicPlansList[0].days} ថ្ងៃ ឬ $${dynamicPlansList[1].priceUsd.toFixed(2)} / ${dynamicPlansList[1].days} ថ្ងៃ)`
-                      : `🔄 Renew / Extend VIP ($${dynamicPlansList[0].priceUsd.toFixed(2)} / ${dynamicPlansList[0].days} Days or $${dynamicPlansList[1].priceUsd.toFixed(2)} / ${dynamicPlansList[1].days} Days)`}
+                    {tr(
+                      language,
+                      `🔄 បន្តសុពលភាព VIP ($${dynamicPlansList[0].priceUsd.toFixed(2)} / ${dynamicPlansList[0].days} ថ្ងៃ)`,
+                      `🔄 Renew VIP ($${dynamicPlansList[0].priceUsd.toFixed(2)} / ${dynamicPlansList[0].days} Days)`,
+                      `🔄 续费 VIP 会员 ($${dynamicPlansList[0].priceUsd.toFixed(2)} / ${dynamicPlansList[0].days} 天)`
+                    )}
                   </span>
                 </button>
 
@@ -642,14 +651,14 @@ export const UpgradeVipModal: React.FC = () => {
                   onClick={handleClose}
                   className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-[#064E3B] hover:from-emerald-700 hover:to-[#047857] text-white font-extrabold text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-98 cursor-pointer"
                 >
-                  <span>{isKm ? '🚀 បន្តប្រើប្រាស់កម្មវិធី (រួចរាល់)' : '🚀 Continue to App (Done)'}</span>
+                  <span>{tr(language, '🚀 បន្តប្រើប្រាស់កម្មវិធី', '🚀 Continue to App', '🚀 继续使用应用')}</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
             </div>
           )}
 
-          {/* STATE 2B: NEEDS_MORE_INFO (Displayed when Admin requests clearer payment proof) */}
+          {/* STATE 2B: NEEDS_MORE_INFO */}
           {paymentState === 'NEEDS_MORE_INFO' && (
             <div className="py-5 text-center space-y-4 animate-fade-in">
               <div className="w-16 h-16 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-600 flex items-center justify-center mx-auto shadow-md ring-4 ring-amber-400/20">
@@ -657,40 +666,28 @@ export const UpgradeVipModal: React.FC = () => {
               </div>
 
               <div>
-                <span className="px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-200 text-xs font-bold font-sans">
-                  ACTION REQUIRED • UPLOAD CLEARER PROOF
-                </span>
                 <h4 className="font-moul text-base text-slate-900 dark:text-white mt-2">
-                  {isKm ? '💬 រដ្ឋបាលស្នើសុំភស្តុតាងបង់ប្រាក់បន្ថែម' : '💬 Admin Requested Clearer Payment Proof'}
+                  {tr(language, '💬 រដ្ឋបាលស្នើសុំវិក្កយបត្របង់ប្រាក់បន្ថែម', '💬 Admin Requested Clearer Receipt', '💬 管理员请求上传更清晰的付款凭证')}
                 </h4>
                 <p className="text-xs text-amber-700 dark:text-amber-300 mt-1 max-w-sm mx-auto leading-relaxed font-semibold">
                   {userLatestVipTxn?.adminRequestNote ||
                     userLatestVipTxn?.notes ||
-                    (isKm
-                      ? 'សូមអាប់ឡូតរូបភាពវិក្កយបត្របង់ប្រាក់ ABA ឱ្យបានច្បាស់លាស់ (បង្ហាញចំនួនទឹកប្រាក់ កាលបរិច្ឆេទ និងលេខប្រតិបត្តិការ)។'
-                      : 'Please upload a clearer ABA payment receipt screenshot showing the amount, date, and transaction ID.')}
+                    tr(
+                      language,
+                      'សូមអាប់ឡូតរូបភាពវិក្កយបត្របង់ប្រាក់ ABA ឱ្យបានច្បាស់លាស់។',
+                      'Please upload a clearer ABA payment receipt screenshot.',
+                      '请上传清晰的 ABA 付款凭证截图。'
+                    )}
                 </p>
               </div>
 
-              {/* Upload / Preview New Proof Card */}
               <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border-2 border-amber-400/60 text-left space-y-3">
                 {(paymentProofDraft?.dataUrl || userLatestVipTxn?.paymentProofUrl) && (
-                  <div className="space-y-1.5">
-                    <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300">
-                      {paymentProofDraft
-                        ? isKm
-                          ? '📸 រូបភាពភស្តុតាងថ្មីដែលបានជ្រើសរើស៖'
-                          : '📸 Selected New Payment Proof:'
-                        : isKm
-                        ? '🖼️ រូបភាពភស្តុតាងចាស់៖'
-                        : '🖼️ Previous Payment Proof:'}
-                    </span>
-                    <img
-                      src={paymentProofDraft?.dataUrl || userLatestVipTxn?.paymentProofUrl}
-                      alt="Payment Proof Preview"
-                      className="w-full max-h-56 object-contain rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-1"
-                    />
-                  </div>
+                  <img
+                    src={paymentProofDraft?.dataUrl || userLatestVipTxn?.paymentProofUrl}
+                    alt="Payment Proof Preview"
+                    className="w-full max-h-56 object-contain rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-1"
+                  />
                 )}
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -700,7 +697,7 @@ export const UpgradeVipModal: React.FC = () => {
                     className="py-2.5 px-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs flex items-center justify-center gap-1.5 shadow-sm transition cursor-pointer"
                   >
                     <Upload className="w-4 h-4" />
-                    <span>{isKm ? 'អាប់ឡូតភស្តុតាងបង់ប្រាក់' : 'Upload Payment Proof'}</span>
+                    <span>{tr(language, 'អាប់ឡូតវិក្កយបត្រ', 'Upload Receipt', '上传付款凭证')}</span>
                   </button>
                   <button
                     type="button"
@@ -708,7 +705,7 @@ export const UpgradeVipModal: React.FC = () => {
                     className="py-2.5 px-3 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-800 dark:text-white font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
                   >
                     <Camera className="w-4 h-4" />
-                    <span>{isKm ? 'ថតរូបវិក្កយបត្រផ្ទាល់' : 'Take Photo of Receipt'}</span>
+                    <span>{tr(language, 'ថតរូបវិក្កយបត្រ', 'Take Photo', '拍摄凭证')}</span>
                   </button>
                 </div>
 
@@ -719,11 +716,7 @@ export const UpgradeVipModal: React.FC = () => {
                     className="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-md transition cursor-pointer"
                   >
                     <CheckCircle2 className="w-4 h-4" />
-                    <span>
-                      {isKm
-                        ? '📤 បញ្ជូនភស្តុតាងបង់ប្រាក់ថ្មីទៅកាន់ Admin'
-                        : '📤 Submit Updated Proof to Admin'}
-                    </span>
+                    <span>{tr(language, '📤 បញ្ជូនវិក្កយបត្រថ្មីទៅ Admin', '📤 Submit Updated Receipt to Admin', '📤 提交新凭证给管理员')}</span>
                   </button>
                 )}
               </div>
@@ -732,12 +725,12 @@ export const UpgradeVipModal: React.FC = () => {
                 onClick={handleClose}
                 className="w-full py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold transition shadow-md cursor-pointer"
               >
-                {isKm ? 'បិទផ្ទាំងនេះបណ្តោះអាសន្ន' : 'Close for Now'}
+                {tr(language, 'បិទផ្ទាំងនេះ', 'Close', '关闭')}
               </button>
             </div>
           )}
 
-          {/* STATE 2: PENDING_ADMIN_APPROVAL (Displayed when user clicks confirmation button — VIP is NOT active) */}
+          {/* STATE 2: PENDING_ADMIN_APPROVAL */}
           {paymentState === 'PENDING_ADMIN_APPROVAL' && (
             <div className="py-5 text-center space-y-4 animate-fade-in">
               <div className="w-16 h-16 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-600 flex items-center justify-center mx-auto shadow-md ring-4 ring-amber-400/20">
@@ -745,92 +738,43 @@ export const UpgradeVipModal: React.FC = () => {
               </div>
 
               <div>
-                <span className="px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-200 text-xs font-bold font-sans">
-                  PENDING_ADMIN_APPROVAL
-                </span>
                 <h4 className="font-moul text-base text-slate-900 dark:text-white mt-2">
-                  {isKm ? '⏳ កំពុងរង់ចាំ Admin ពិនិត្យការទូទាត់' : '⏳ Awaiting Admin Payment Verification'}
+                  {tr(language, '⏳ កំពុងរង់ចាំ Admin អនុម័ត', '⏳ Pending Admin Approval', '⏳ 等待管理员审核')}
                 </h4>
                 <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 max-w-sm mx-auto leading-relaxed">
-                  {isKm 
-                    ? 'សំណើផ្ទៀងផ្ទាត់ការទូទាត់របស់អ្នកត្រូវបានកត់ត្រាទុកក្នុងប្រព័ន្ធ។ រដ្ឋបាល (Admin) នឹងពិនិត្យផ្ទៀងផ្ទាត់ទឹកប្រាក់ក្នុងគណនី ABA ជាមុនសិន មុននឹងបើកដំណើរការគណនី VIP ជូនលោកអ្នក។' 
-                    : 'Your payment verification request has been recorded. An administrator will verify the actual receipt in ABA before activating your VIP membership.'}
+                  {tr(
+                    language,
+                    'សំណើរបស់អ្នកត្រូវបានបញ្ជូនរួចរាល់។ Admin នឹងពិនិត្យវិក្កយបត្រ ABA និងបើកដំណើរការ VIP ជូនអ្នក។',
+                    'Your request has been submitted. Admin will verify your ABA receipt and activate VIP.',
+                    '您的申请已提交，管理员核实 ABA 付款凭证后将为您开通 VIP。'
+                  )}
                 </p>
               </div>
 
               <div className="p-4 bg-slate-50 dark:bg-slate-800/80 rounded-2xl border border-slate-200 dark:border-slate-700 text-xs text-left space-y-2">
-                <div className="flex items-center justify-between pb-1.5 border-b border-slate-200 dark:border-slate-700">
-                  <span className="text-slate-500">{isKm ? 'ស្ថានភាពគណនីបច្ចុប្បន្ន៖' : 'Current Account Level:'}</span>
-                  <span className="font-bold text-amber-600 dark:text-amber-400">
-                    {isKm ? 'គណនីធម្មតា (មិនទាន់បើក VIP)' : 'Free Account (VIP Locked)'}
-                  </span>
-                </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-500">{isKm ? 'ស្ថានភាពសំណើ៖' : 'Request Status:'}</span>
-                  <span className="font-bold text-sky-600 dark:text-sky-400">
-                    {isKm ? 'កំពុងរង់ចាំ Admin អនុម័ត' : 'Pending Admin Approval'}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-slate-500">{isKm ? 'កញ្ចប់ដែលបានស្នើសុំ៖' : 'Requested Plan:'}</span>
+                  <span className="text-slate-500">{tr(language, 'កញ្ចប់ដែលបានស្នើសុំ៖', 'Requested Plan:', '申请套餐：')}</span>
                   <span className="font-bold text-slate-900 dark:text-white">
-                    ${(userLatestVipTxn?.amountUsd || selectedPlan.priceUsd).toFixed(2)} USD ({userLatestVipTxn?.durationDays || selectedPlan.days} {isKm ? 'ថ្ងៃ' : 'Days'})
+                    ${(userLatestVipTxn?.amountUsd || selectedPlan.priceUsd).toFixed(2)} USD ({userLatestVipTxn?.durationDays || selectedPlan.days} {tr(language, 'ថ្ងៃ', 'Days', '天')})
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-500">{isKm ? 'លេខសម្គាល់សំណើ (Ref)៖' : 'Payment Ref:'}</span>
-                  <span className="font-mono font-bold text-slate-700 dark:text-slate-300">
-                    {userLatestVipTxn?.transactionRef || customTxnRef}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-slate-500">{isKm ? 'ពេលវេលាបញ្ជូន៖' : 'Submitted At:'}</span>
-                  <span className="font-mono text-slate-600 dark:text-slate-400">
-                    {submissionTimestamp || userLatestVipTxn?.createdAt || new Date().toISOString().replace('T', ' ').slice(0, 16)}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between pt-1 border-t border-slate-200 dark:border-slate-700">
-                  <span className="text-slate-500">{isKm ? 'ភស្តុតាងបង់ប្រាក់៖' : 'Payment Proof:'}</span>
+                  <span className="text-slate-500">{tr(language, 'ភស្តុតាងបង់ប្រាក់៖', 'Payment Receipt:', '付款凭证：')}</span>
                   <span className={`font-bold ${userLatestVipTxn?.paymentProofUrl || paymentProofDraft ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'}`}>
                     {userLatestVipTxn?.paymentProofUrl || paymentProofDraft
-                      ? isKm
-                        ? '✅ បានភ្ជាប់រូបភាពវិក្កយបត្រ'
-                        : '✅ Receipt Image Attached'
-                      : isKm
-                      ? 'មិនទាន់ភ្ជាប់រូបភាព (អាចអាប់ឡូតខាងក្រោម)'
-                      : 'Not attached yet (Upload below)'}
+                      ? tr(language, '✅ បានភ្ជាប់វិក្កយបត្រ', '✅ Receipt Attached', '✅ 已附上凭证')
+                      : tr(language, 'មិនទាន់ភ្ជាប់រូបភាព', 'Not attached yet', '尚未附上凭证')}
                   </span>
                 </div>
               </div>
 
-              {/* Allow viewing or attaching/replacing Payment Proof while Pending */}
               <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 text-left space-y-2.5">
-                {userLatestVipTxn?.aiVerificationReport && (
-                  <div
-                    className={`p-2.5 rounded-xl border text-[11px] space-y-1 ${
-                      userLatestVipTxn.aiVerificationReport.canAutoApprove
-                        ? 'bg-emerald-50 border-emerald-300 text-emerald-900'
-                        : 'bg-amber-50 border-amber-300 text-amber-900'
-                    }`}
-                  >
-                    <div className="font-extrabold">
-                      {isKm
-                        ? userLatestVipTxn.aiVerificationReport.summaryKh
-                        : userLatestVipTxn.aiVerificationReport.summaryEn}
-                    </div>
-                  </div>
-                )}
                 {(paymentProofDraft?.dataUrl || userLatestVipTxn?.paymentProofUrl) && (
-                  <div className="space-y-1">
-                    <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300">
-                      {isKm ? '📸 រូបភាពភស្តុតាងបង់ប្រាក់របស់អ្នក៖' : '📸 Your Uploaded Payment Proof:'}
-                    </span>
-                    <img
-                      src={paymentProofDraft?.dataUrl || userLatestVipTxn?.paymentProofUrl}
-                      alt="Uploaded Payment Proof"
-                      className="w-full max-h-48 object-contain rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-1"
-                    />
-                  </div>
+                  <img
+                    src={paymentProofDraft?.dataUrl || userLatestVipTxn?.paymentProofUrl}
+                    alt="Uploaded Payment Proof"
+                    className="w-full max-h-48 object-contain rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-1"
+                  />
                 )}
 
                 <div className="flex flex-wrap items-center gap-2">
@@ -842,12 +786,8 @@ export const UpgradeVipModal: React.FC = () => {
                     <Upload className="w-3.5 h-3.5" />
                     <span>
                       {userLatestVipTxn?.paymentProofUrl || paymentProofDraft
-                        ? isKm
-                          ? 'ប្តូររូបភាពភស្តុតាងបង់ប្រាក់'
-                          : 'Replace Payment Proof'
-                        : isKm
-                        ? 'អាប់ឡូតភស្តុតាងបង់ប្រាក់'
-                        : 'Upload Payment Proof'}
+                        ? tr(language, 'ប្តូរវិក្កយបត្របង់ប្រាក់', 'Replace Receipt', '更换付款凭证')
+                        : tr(language, 'អាប់ឡូតវិក្កយបត្របង់ប្រាក់', 'Upload Receipt', '上传付款凭证')}
                     </span>
                   </button>
 
@@ -858,36 +798,17 @@ export const UpgradeVipModal: React.FC = () => {
                       className="py-2 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm transition cursor-pointer"
                     >
                       <CheckCircle2 className="w-3.5 h-3.5" />
-                      <span>{isKm ? 'រក្សាទុកភស្តុតាងថ្មី' : 'Save New Proof'}</span>
+                      <span>{tr(language, 'រក្សាទុកវិក្កយបត្រថ្មី', 'Save New Receipt', '保存新凭证')}</span>
                     </button>
                   )}
                 </div>
               </div>
 
-              <div className="p-3 bg-amber-50 dark:bg-amber-950/40 rounded-2xl border border-amber-300 dark:border-amber-800/60 text-[11px] text-amber-900 dark:text-amber-200 text-left">
-                {isKm 
-                  ? '🔒 សម្គាល់សុវត្ថិភាព៖ មុខងារ VIP នឹងត្រូវបានបើកដំណើរការដោយស្វ័យប្រវត្តិភ្លាមៗ បន្ទាប់ពីរដ្ឋបាលពិនិត្យឃើញទឹកប្រាក់ចូលក្នុងគណនី ABA និងចុចអនុម័ត (Approve)។' 
-                  : '🔒 Security Note: VIP features will unlock automatically once the administrator confirms receipt in ABA and approves your request.'}
-              </div>
-
-              <button
-                type="button"
-                onClick={handleOpenContactAdminSupport}
-                className="w-full py-2.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-extrabold transition shadow-md cursor-pointer flex items-center justify-center gap-1.5"
-              >
-                <MessageSquareWarning className="w-4 h-4" />
-                <span>
-                  {isKm
-                    ? '💬 ទាក់ទង Admin / បញ្ហាការបង់ប្រាក់ VIP (ផ្ញើសារ & វិក្កយបត្រ)'
-                    : '💬 Contact Admin / Payment Support (Send Message & Receipt)'}
-                </span>
-              </button>
-
               <button
                 onClick={handleClose}
                 className="w-full py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold transition shadow-md cursor-pointer"
               >
-                {isKm ? 'យល់ព្រម (បិទផ្ទាំងនេះ)' : 'Understood (Close)'}
+                {tr(language, 'យល់ព្រម', 'Close', '关闭')}
               </button>
             </div>
           )}
@@ -900,14 +821,17 @@ export const UpgradeVipModal: React.FC = () => {
               </div>
 
               <div>
-                <span className="px-3 py-1 rounded-full bg-rose-100 dark:bg-rose-950/60 text-rose-800 dark:text-rose-200 text-xs font-bold font-sans">
-                  REJECTED
-                </span>
                 <h4 className="font-moul text-sm text-slate-900 dark:text-white mt-2">
-                  {isKm ? '❌ សំណើទូទាត់ត្រូវបានបដិសេធដោយ Admin' : '❌ Payment Request Rejected'}
+                  {tr(language, '❌ សំណើទូទាត់ត្រូវបានបដិសេធដោយ Admin', '❌ Payment Request Rejected', '❌ 付款申请未通过审核')}
                 </h4>
                 <p className="text-xs text-rose-600 dark:text-rose-400 mt-1 max-w-sm mx-auto leading-relaxed">
-                  {userLatestVipTxn?.notes || (isKm ? 'រដ្ឋបាលមិនឃើញមានប្រតិបត្តិការទូទាត់ប្រាក់នេះក្នុងរបាយការណ៍ធនាគារ ABA ឡើយ។ សូមពិនិត្យ និងព្យាយាមបង់ប្រាក់ម្តងទៀត។' : 'Administrator could not verify this payment in the ABA bank statement. Please check and retry payment.')}
+                  {userLatestVipTxn?.notes ||
+                    tr(
+                      language,
+                      'រដ្ឋបាលមិនឃើញមានប្រតិបត្តិការទូទាត់ប្រាក់នេះឡើយ។ សូមពិនិត្យ និងព្យាយាមម្តងទៀត។',
+                      'Administrator could not verify this payment. Please check and retry.',
+                      '管理员未能核实此笔付款，请检查后重试。'
+                    )}
                 </p>
               </div>
 
@@ -915,7 +839,7 @@ export const UpgradeVipModal: React.FC = () => {
                 onClick={handleRestartSession}
                 className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition cursor-pointer shadow-md"
               >
-                {isKm ? '🔄 បង្កើតសំណើទូទាត់ប្រាក់ថ្មី' : '🔄 Start New Payment Request'}
+                {tr(language, '🔄 បង្កើតសំណើទូទាត់ប្រាក់ថ្មី', '🔄 Start New Payment Request', '🔄 重新发起付款申请')}
               </button>
             </div>
           )}
@@ -928,14 +852,17 @@ export const UpgradeVipModal: React.FC = () => {
               </div>
 
               <div>
-                <span className="px-3 py-1 rounded-full bg-rose-100 dark:bg-rose-950/60 text-rose-800 dark:text-rose-200 text-xs font-bold font-sans">
-                  PAYMENT_FAILED
-                </span>
                 <h4 className="font-moul text-sm text-slate-900 dark:text-white mt-2">
-                  {isKm ? 'សំណើទូទាត់មិនជោគជ័យ' : 'Payment Request Failed'}
+                  {tr(language, 'សំណើទូទាត់មិនជោគជ័យ', 'Payment Request Failed', '付款申请提交失败')}
                 </h4>
                 <p className="text-xs text-rose-600 dark:text-rose-400 mt-1 max-w-sm mx-auto leading-relaxed">
-                  {errorMessage || (isKm ? 'សូមបញ្ចប់ការបង់ប្រាក់ក្នុង ABA Mobile រួចព្យាយាមម្តងទៀត។' : 'Please complete the transfer in ABA Mobile and try again.')}
+                  {errorMessage ||
+                    tr(
+                      language,
+                      'សូមបញ្ចប់ការបង់ប្រាក់ក្នុង ABA Mobile រួចព្យាយាមម្តងទៀត។',
+                      'Please complete the transfer in ABA Mobile and try again.',
+                      '请在 ABA Mobile 中完成转账后重试。'
+                    )}
                 </p>
               </div>
 
@@ -944,13 +871,13 @@ export const UpgradeVipModal: React.FC = () => {
                   onClick={handleRestartSession}
                   className="py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition cursor-pointer shadow-md"
                 >
-                  {isKm ? '🔄 ព្យាយាមម្តងទៀត' : '🔄 Try Again'}
+                  {tr(language, '🔄 ព្យាយាមម្តងទៀត', '🔄 Try Again', '🔄 重试')}
                 </button>
                 <button
                   onClick={() => setPaymentState('AWAITING_PAYMENT')}
                   className="py-2.5 px-4 rounded-xl border border-slate-300 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition cursor-pointer"
                 >
-                  {isKm ? 'ត្រឡប់ក្រោយ' : 'Back'}
+                  {tr(language, 'ត្រឡប់ក្រោយ', 'Back', '返回')}
                 </button>
               </div>
             </div>
@@ -964,16 +891,16 @@ export const UpgradeVipModal: React.FC = () => {
               </div>
 
               <div>
-                <span className="px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-200 text-xs font-bold font-sans">
-                  EXPIRED
-                </span>
                 <h4 className="font-moul text-sm text-slate-900 dark:text-white mt-2">
-                  {isKm ? 'វគ្គទូទាត់ប្រាក់បានផុតកំណត់' : 'Payment Session Expired'}
+                  {tr(language, 'វគ្គទូទាត់ប្រាក់បានផុតកំណត់', 'Payment Session Expired', '付款会话已过期')}
                 </h4>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto leading-relaxed">
-                  {isKm 
-                    ? 'វគ្គទូទាត់កូដ QR នេះបានផុតកំណត់ដើម្បីសុវត្ថិភាព។ សូមចុចប៊ូតុងខាងក្រោមដើម្បីបង្កើតវគ្គទូទាត់ថ្មី។' 
-                    : 'This payment session has timed out for security. Tap below to start a fresh session.'}
+                  {tr(
+                    language,
+                    'វគ្គទូទាត់នេះបានផុតកំណត់។ សូមចុចប៊ូតុងខាងក្រោមដើម្បីបង្កើតវគ្គទូទាត់ថ្មី។',
+                    'This payment session has timed out. Tap below to start a new session.',
+                    '此付款会话已超时，请点击下方按钮重新开始。'
+                  )}
                 </p>
               </div>
 
@@ -981,288 +908,164 @@ export const UpgradeVipModal: React.FC = () => {
                 onClick={handleRestartSession}
                 className="w-full py-2.5 px-4 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white text-xs font-bold transition shadow-md cursor-pointer"
               >
-                {isKm ? '🔄 បង្កើតវគ្គទូទាត់ថ្មី' : '🔄 Start New Payment Session'}
+                {tr(language, '🔄 បង្កើតវគ្គទូទាត់ថ្មី', '🔄 Start New Payment Session', '🔄 开始新的付款会话')}
               </button>
             </div>
           )}
 
-          {/* STATE 1: AWAITING_PAYMENT (Payment Screen First - Only shown when pricing & benefits are valid) */}
+          {/* STATE 1: AWAITING_PAYMENT — Clean, Short 4-Step VIP Payment Screen */}
           {paymentState === 'AWAITING_PAYMENT' && isVipConfigValid && (
             <div className="space-y-4">
-              
-              {/* Current Account Status Pill */}
-              <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex items-center justify-between text-xs">
-                <span className="text-slate-600 dark:text-slate-400">
-                  {isKm ? 'ស្ថានភាពគណនីបច្ចុប្បន្ន៖' : 'Current Account Status:'}
-                </span>
-                {isVip ? (
-                  <span className="inline-flex items-center gap-1 font-bold text-amber-600 dark:text-amber-400">
-                    <Crown className="w-3.5 h-3.5 fill-amber-500" />
-                    <span>{isKm ? `Premium VIP (នៅសល់ ${remainingDays} ថ្ងៃ)` : `Premium VIP (${remainingDays} days left)`}</span>
-                  </span>
-                ) : (
-                  <span className="font-bold text-slate-700 dark:text-slate-300">
-                    {isKm ? 'គណនីឥតគិតថ្លៃ (Free User)' : 'Free User'}
-                  </span>
-                )}
-              </div>
-
-              {/* AWAITING_PAYMENT STATUS BADGE */}
-              <div className="p-2.5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700/60 flex items-center justify-between text-xs">
-                <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping" />
-                  <span className="font-bold text-amber-900 dark:text-amber-200">
-                    {isKm ? 'ស្ថានភាព៖ រង់ចាំការទូទាត់ (AWAITING_PAYMENT)' : 'Status: AWAITING_PAYMENT'}
-                  </span>
-                </div>
-                <span className="px-2 py-0.5 rounded-full bg-amber-200 dark:bg-amber-800 text-amber-900 dark:text-amber-100 font-mono text-[10px] font-bold">
-                  ${selectedPlan.priceUsd.toFixed(2)} USD
-                </span>
-              </div>
-
-              {/* VIP Subscription Plan Selector (Synchronized with Admin Settings) */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between gap-2">
-                  <label className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-                    <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
-                    <span>{isKm ? 'ជ្រើសរើសកញ្ចប់សមាជិកភាព VIP៖' : 'Select VIP Subscription Plan:'}</span>
-                  </label>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                  {dynamicPlansList.map((plan) => {
-                    const isSelected = selectedPlan.id === plan.id;
-                    return (
-                      <div
-                        key={plan.id}
-                        onClick={() => handleSelectPlan(plan)}
-                        className={`relative p-3.5 rounded-2xl border-2 cursor-pointer transition text-left flex flex-col justify-between ${
-                          isSelected 
-                            ? 'bg-gradient-to-br from-amber-500/15 via-orange-500/10 to-amber-600/20 border-amber-500 shadow-sm ring-2 ring-amber-400/30'
-                            : 'bg-white dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 hover:border-amber-300'
-                        }`}
-                      >
-                        {plan.isPopular && (
-                          <span className="absolute -top-2.5 right-3 px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[9px] font-black uppercase tracking-wider font-sans shadow-xs">
-                            {isKm ? 'ពេញនិយម (Popular)' : 'Popular'}
-                          </span>
-                        )}
-
-                        <div>
-                          <div className="text-xs font-bold text-slate-900 dark:text-white flex items-center justify-between">
-                            <span>{isKm ? plan.titleKh : plan.titleEn}</span>
-                            <div className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${
-                              isSelected ? 'border-amber-500 bg-amber-500 text-white' : 'border-slate-300'
-                            }`}>
-                              {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
-                            </div>
-                          </div>
-
-                          <div className="mt-2 flex items-baseline gap-1">
-                            <span className="font-moul text-xl sm:text-2xl text-slate-900 dark:text-white font-mono">
-                              ${plan.priceUsd.toFixed(2)}
-                            </span>
-                            <span className="text-[11px] text-slate-600 dark:text-slate-400 font-bold">
-                              USD / {plan.days} {isKm ? 'ថ្ងៃ' : 'Days'}
-                            </span>
-                          </div>
-                        </div>
-
-                        <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">
-                          {isKm ? `ប្រហែល ${plan.priceKhrApprox} • សុពលភាព ${plan.days} ថ្ងៃពេញ` : `Approx ${plan.priceKhrApprox} • Full ${plan.days} Days`}
-                        </p>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* Store Quota & Additional Store Fee Policy Note */}
-                <div className="p-2.5 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/50 text-[11px] text-emerald-900 dark:text-emerald-200 flex items-start gap-2">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
-                  <span>
-                    {isKm
-                      ? `រួមបញ្ចូលការបង្កើតហាងទី ១ ឥតគិតថ្លៃ ($0) • កែប្រែ ឬប្តូរហាងចាស់ដាក់ហាងថ្មីមិនគិតថ្លៃ ($0) • បន្ថែមហាងបន្ទាប់ +$${additionalStoreFeeUsd.toFixed(2)} USD / ១ ហាង។`
-                      : `Includes 1st Store Free ($0) • Edit or Replace existing store Free ($0) • Add extra stores +$${additionalStoreFeeUsd.toFixed(2)} USD / store.`}
-                  </span>
-                </div>
-              </div>
-
-              {/* Dynamic VIP Benefits Accordion / Preview */}
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <h4 className="font-bold text-xs text-slate-900 dark:text-white flex items-center gap-1.5">
-                    <Sparkles className="w-4 h-4 text-amber-500" />
-                    <span>
-                      {isKm
-                        ? `អត្ថប្រយោជន៍ពិសេសទាំង ${dynamicBenefits.length} យ៉ាងនៃ VIP៖`
-                        : `${dynamicBenefits.length} Exclusive VIP Benefits:`}
-                    </span>
-                  </h4>
-                  <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">
-                    {isKm ? 'បើកក្រោយ Admin អនុម័ត' : 'Unlocks after Approval'}
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-1 gap-1.5 max-h-32 overflow-y-auto pr-1">
-                  {dynamicBenefits.map((benefit, idx) => (
-                    <div 
-                      key={benefit.id || idx}
-                      className="p-2 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 flex items-start gap-2 text-[11px]"
+              {/* VIP Plan Selector */}
+              <div className="grid grid-cols-2 gap-2.5">
+                {dynamicPlansList.map((plan) => {
+                  const isSelected = selectedPlan.id === plan.id;
+                  return (
+                    <div
+                      key={plan.id}
+                      onClick={() => handleSelectPlan(plan)}
+                      className={`relative p-3 rounded-2xl border-2 cursor-pointer transition text-left flex flex-col justify-between ${
+                        isSelected
+                          ? 'bg-gradient-to-br from-amber-500/15 via-orange-500/10 to-amber-600/20 border-amber-500 shadow-sm ring-2 ring-amber-400/30'
+                          : 'bg-white dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 hover:border-amber-300'
+                      }`}
                     >
-                      <div className="w-4 h-4 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 flex items-center justify-center font-bold text-[9px] shrink-0 mt-0.5">
-                        {idx + 1}
-                      </div>
-                      <div className="flex-1">
-                        <span className="font-bold text-slate-800 dark:text-slate-200 block">
-                          {isKm ? benefit.titleKh : benefit.titleEn}
+                      {plan.isPopular && (
+                        <span className="absolute -top-2.5 right-2.5 px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[9px] font-black uppercase tracking-wider font-sans shadow-xs">
+                          {tr(language, 'ពេញនិយម', 'Popular', '热门')}
                         </span>
-                        {(benefit.descKh || benefit.descEn) && (
-                          <span className="text-[10px] text-slate-500 dark:text-slate-400 block mt-0.5">
-                            {isKm ? benefit.descKh : benefit.descEn}
-                          </span>
-                        )}
+                      )}
+                      <div className="flex items-center justify-between gap-1">
+                        <span className="text-xs font-bold text-slate-900 dark:text-white truncate">
+                          {tr(language, `${plan.days} ថ្ងៃ`, `${plan.days} Days`, `${plan.days} 天`)}
+                        </span>
+                        <div
+                          className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${
+                            isSelected ? 'border-amber-500 bg-amber-500 text-white' : 'border-slate-300'
+                          }`}
+                        >
+                          {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                        </div>
                       </div>
-                      <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" />
+                      <div className="mt-1.5 flex items-baseline gap-1">
+                        <span className="font-moul text-lg sm:text-xl text-slate-900 dark:text-white font-mono">
+                          ${plan.priceUsd.toFixed(2)}
+                        </span>
+                        <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold">USD</span>
+                      </div>
                     </div>
-                  ))}
-                </div>
+                  );
+                })}
               </div>
 
-              {/* Requirement 1: Official Clean ABA KHQR Payment Box */}
-              <div className="space-y-2.5 pt-1">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-                    <QrCode className="w-4 h-4 text-emerald-600" />
-                    <span>{isKm ? 'ស្កេនទូទាត់កូដ ABA KHQR៖' : 'Scan to Pay via ABA KHQR:'}</span>
-                  </label>
+              {/* STEP 1 & 2: Scan or save ABA KHQR + Pay $9.99 via ABA Mobile */}
+              <div className="p-4 rounded-3xl bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 shadow-sm flex flex-col items-center space-y-3">
+                <div className="w-full flex items-center justify-between">
+                  <span className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-1.5">
+                    <QrCode className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span>
+                      {tr(
+                        language,
+                        '១. ស្កេន ឬរក្សាទុក ABA KHQR',
+                        '1. Scan or save ABA KHQR',
+                        '1. 扫描或保存 ABA KHQR'
+                      )}
+                    </span>
+                  </span>
                   <span className="px-2 py-0.5 rounded-full bg-emerald-600 text-white text-[9px] font-bold font-mono">
                     Bakong KHQR
                   </span>
                 </div>
 
-                <div className="p-4 rounded-3xl bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 shadow-sm flex flex-col items-center justify-center space-y-3">
-                  
-                  {/* Clickable Clean Square ABA QR Code */}
-                  <div 
-                    onClick={handleLaunchAbaApp}
-                    className="relative p-2 bg-white rounded-2xl shadow-sm border-2 border-emerald-500/40 max-w-[230px] cursor-pointer hover:shadow-lg transition active:scale-98 group"
-                    title={isKm ? 'ចុចលើរូប QR ដើម្បីរក្សាទុក QR និងបើកកម្មវិធី ABA Mobile' : 'Click QR to save QR and open ABA Mobile'}
-                  >
-                    <img 
-                      src={qrCodeDataUrl} 
-                      alt="Official Payment QR Code" 
-                      className="w-full h-auto object-contain rounded-xl block bg-white"
-                    />
-                    <div className="absolute inset-0 bg-[#004B87]/15 opacity-0 group-hover:opacity-100 transition rounded-xl flex items-center justify-center pointer-events-none">
-                      <span className="px-3 py-1.5 rounded-full bg-[#004B87] text-white text-[11px] font-bold shadow-lg flex items-center gap-1">
-                        <ExternalLink className="w-3.5 h-3.5" />
-                        <span>{isKm ? '👆 ចុចដើម្បីបើក ABA Mobile' : '👆 Tap to open ABA Mobile'}</span>
-                      </span>
-                    </div>
-                  </div>
+                {/* Clickable Clean Square ABA QR Code */}
+                <div
+                  onClick={handleLaunchAbaApp}
+                  className="relative p-2 bg-white rounded-2xl shadow-sm border-2 border-emerald-500/40 max-w-[220px] cursor-pointer hover:shadow-lg transition active:scale-98 group"
+                >
+                  <img
+                    src={qrCodeDataUrl}
+                    alt="ABA KHQR"
+                    className="w-full h-auto object-contain rounded-xl block bg-white"
+                  />
+                </div>
 
-                  {/* 1-Tap Action: Save QR & Open ABA Mobile cleanly */}
+                {/* Account Name & Phone Number */}
+                <div className="w-full p-2.5 rounded-xl bg-sky-50 dark:bg-slate-800/80 border border-sky-200 dark:border-slate-700 flex items-center justify-between text-xs">
+                  <span className="font-bold text-slate-900 dark:text-white">
+                    {tr(language, 'ឈ្មោះគណនី៖', 'Account Name:', '账户名称：')} CHEA KIMSENG
+                  </span>
+                  <span className="font-mono font-bold text-[#004B87] dark:text-sky-400">
+                    095 245 959
+                  </span>
+                </div>
+
+                {/* Save QR & Copy Phone Buttons */}
+                <div className="grid grid-cols-2 gap-2 w-full">
                   <button
-                    onClick={handleLaunchAbaApp}
-                    className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-[#004B87] via-[#005a9e] to-[#004B87] hover:from-[#003966] hover:to-[#003966] text-white font-extrabold text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-98 cursor-pointer ring-4 ring-sky-500/20"
+                    type="button"
+                    onClick={handleSaveQrImage}
+                    className="py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer border border-slate-200 dark:border-slate-700"
                   >
-                    <ExternalLink className="w-4 h-4 text-sky-200" />
-                    <span>
-                      {isKm 
-                        ? `📲 រក្សាទុក QR & បើក ABA Mobile ($${selectedPlan.priceUsd.toFixed(2)}) →` 
-                        : `📲 Save QR & Open ABA Mobile ($${selectedPlan.priceUsd.toFixed(2)}) →`}
-                    </span>
+                    <Download className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>{tr(language, 'រក្សាទុក QR', 'Save QR', '保存二维码')}</span>
                   </button>
 
-                  {/* Step-by-Step Guidance */}
-                  <div className="w-full p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800/60 text-xs space-y-1.5 text-left">
-                    <div className="flex items-center gap-1.5 font-bold text-amber-900 dark:text-amber-200">
-                      <Sparkles className="w-4 h-4 text-amber-600 shrink-0" />
-                      <span>{isKm ? 'របៀបបង់ប្រាក់ងាយៗលើទូរស័ព្ទដដែល៖' : 'Simple Guide on the same phone:'}</span>
-                    </div>
-                    <ol className="list-decimal list-inside space-y-1 text-[11px] text-slate-700 dark:text-slate-300">
-                      <li>
-                        <span className="font-bold">{isKm ? 'ជំហាន ១៖ ' : 'Step 1: '}</span>
-                        {isKm ? 'ក្នុង ABA Mobile ចុចលើ ' : 'In ABA Mobile, tap '}
-                        <strong className="text-[#004B87] dark:text-sky-400 font-sans">"ABA Scan"</strong>
-                      </li>
-                      <li>
-                        <span className="font-bold">{isKm ? 'ជំហាន ២៖ ' : 'Step 2: '}</span>
-                        {isKm ? 'ចុចប៊ូតុង ' : 'Tap '}
-                        <strong className="text-emerald-700 dark:text-emerald-400 font-sans">"Upload QR"</strong>
-                        {isKm ? ' នៅខាងក្រោម ដើម្បីជ្រើសរូបភាព QR ដែលបានរក្សាទុក' : ' at bottom to choose the saved QR'}
-                      </li>
-                      <li>
-                        <span className="font-bold">{isKm ? 'ជំហាន ៣៖ ' : 'Step 3: '}</span>
-                        {isKm ? `ផ្ទេរ $${selectedPlan.priceUsd.toFixed(2)} រួចចុចប៊ូតុងខាងក្រោមដើម្បីស្នើសុំ Admin ពិនិត្យ!` : `Pay $${selectedPlan.priceUsd.toFixed(2)}, then tap the button below to request Admin approval!`}
-                      </li>
-                    </ol>
-                  </div>
-
-                  {/* Utility actions: Save QR and Copy Account */}
-                  <div className="grid grid-cols-2 gap-2 w-full pt-0.5">
-                    <button
-                      type="button"
-                      onClick={handleSaveQrImage}
-                      className="py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer border border-slate-200 dark:border-slate-700 shadow-2xs"
-                    >
-                      <Download className="w-3.5 h-3.5 text-emerald-600" />
-                      <span>{isKm ? 'រក្សាទុក QR ក្នុង Photos' : 'Save QR to Photos'}</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={handleCopyAccount}
-                      className="py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer border border-slate-200 dark:border-slate-700 shadow-2xs"
-                      title={isKm ? 'ចម្លងលេខគណនី 095 245 959' : 'Copy 095 245 959'}
-                    >
-                      {hasCopiedAccount ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5 text-amber-500" />}
-                      <span>{hasCopiedAccount ? (isKm ? 'បានចម្លង!' : 'Copied!') : (isKm ? 'ចម្លង 095 245 959' : 'Copy 095 245 959')}</span>
-                    </button>
-                  </div>
-
-                  {/* Payment guidance note */}
-                  <div className="w-full p-2.5 rounded-xl bg-sky-50 dark:bg-slate-800/80 border border-sky-200 dark:border-slate-700 text-[11px] text-slate-600 dark:text-slate-300 text-left">
-                    <div className="flex items-center justify-between pb-1">
-                      <span className="font-bold text-slate-900 dark:text-white">
-                        {isKm ? 'ម្ចាស់គណនីទទួល៖' : 'Account Name:'} CHEA KIMSENG
-                      </span>
-                      <span className="font-mono font-bold text-[#004B87] dark:text-sky-400">
-                        095 245 959
-                      </span>
-                    </div>
-                    <p className="text-[10px] text-slate-500 dark:text-slate-400">
-                      {isKm 
-                        ? '💡 ក្រោយពីផ្ទេរប្រាក់ក្នុង ABA Mobile រួចរាល់ សូមអាប់ឡូតរូបភាពវិក្កយបត្របង់ប្រាក់ និងចុចបញ្ជូនសំណើទៅកាន់ Admin នៅខាងក្រោម។' 
-                        : '💡 After transferring in ABA Mobile, upload your payment receipt screenshot and submit your request for Admin approval below.'}
-                    </p>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={handleCopyAccount}
+                    className="py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer border border-slate-200 dark:border-slate-700"
+                  >
+                    {hasCopiedAccount ? (
+                      <Check className="w-3.5 h-3.5 text-emerald-600" />
+                    ) : (
+                      <Copy className="w-3.5 h-3.5 text-amber-500" />
+                    )}
+                    <span>
+                      {hasCopiedAccount
+                        ? tr(language, 'បានចម្លង!', 'Copied!', '已复制！')
+                        : tr(language, 'ចម្លង 095 245 959', 'Copy 095 245 959', '复制 095 245 959')}
+                    </span>
+                  </button>
                 </div>
+
+                {/* STEP 2 Button: Pay $9.99 via ABA Mobile */}
+                <button
+                  onClick={handleLaunchAbaApp}
+                  className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-[#004B87] via-[#005a9e] to-[#004B87] hover:from-[#003966] hover:to-[#003966] text-white font-extrabold text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-98 cursor-pointer ring-4 ring-sky-500/20"
+                >
+                  <ExternalLink className="w-4 h-4 text-sky-200 shrink-0" />
+                  <span>
+                    {tr(
+                      language,
+                      `២. បង់ប្រាក់ $${selectedPlan.priceUsd.toFixed(2)} តាម ABA Mobile`,
+                      `2. Pay $${selectedPlan.priceUsd.toFixed(2)} via ABA Mobile`,
+                      `2. 通过 ABA Mobile 支付 $${selectedPlan.priceUsd.toFixed(2)}`
+                    )}
+                  </span>
+                </button>
               </div>
 
-              {/* PART 2 REQUIREMENT: UPLOAD PAYMENT PROOF IMMEDIATELY BELOW ABA KHQR */}
+              {/* STEP 3: Upload the payment receipt */}
               <div className="p-4 rounded-3xl bg-white dark:bg-slate-800/90 border-2 border-emerald-500/40 shadow-sm space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
-                    <ImageIcon className="w-4 h-4 text-emerald-600" />
-                    <span>{isKm ? 'អាប់ឡូតភស្តុតាងបង់ប្រាក់ (Payment Proof)៖' : 'Upload Payment Proof:'}</span>
+                  <span className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-1.5">
+                    <ImageIcon className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span>
+                      {tr(
+                        language,
+                        '៣. អាប់ឡូតវិក្កយបត្របង់ប្រាក់',
+                        '3. Upload the payment receipt',
+                        '3. 上传付款凭证截图'
+                      )}
+                    </span>
                   </span>
                   <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 text-[10px] font-bold font-mono">
-                    JPG / JPEG / PNG
+                    JPG / PNG
                   </span>
                 </div>
 
-                <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
-                  {isKm
-                    ? '📸 សូមភ្ជាប់រូបភាព Screenshot វិក្កយបត្របង់ប្រាក់ ABA ($' +
-                      selectedPlan.priceUsd.toFixed(2) +
-                      ' USD) ដើម្បីឱ្យរដ្ឋបាល (Admin) ពិនិត្យ និងអនុម័តគណនី VIP របស់អ្នកបានរហ័ស។'
-                    : `📸 Attach your ABA payment receipt screenshot ($${selectedPlan.priceUsd.toFixed(2)} USD) so the Administrator can verify and approve your VIP upgrade quickly.`}
-                </p>
-
-                {/* Preview Selected Payment Proof Before Submission */}
                 {paymentProofDraft && (
-                  <div className="p-3 rounded-2xl bg-emerald-50/70 dark:bg-slate-900/90 border border-emerald-300 dark:border-emerald-700/60 space-y-2 animate-fade-in">
+                  <div className="p-2.5 rounded-2xl bg-emerald-50/70 dark:bg-slate-900/90 border border-emerald-300 dark:border-emerald-700/60 space-y-2 animate-fade-in">
                     <div className="flex items-center justify-between text-xs">
                       <span className="font-bold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5 truncate">
                         <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
@@ -1272,7 +1075,7 @@ export const UpgradeVipModal: React.FC = () => {
                         type="button"
                         onClick={() => setPaymentProofDraft(null)}
                         className="p-1 rounded-lg bg-rose-100 dark:bg-rose-950/60 text-rose-600 hover:bg-rose-200 transition cursor-pointer shrink-0"
-                        title={isKm ? 'លុបរូបភាព' : 'Remove image'}
+                        title={tr(language, 'លុបរូបភាព', 'Remove image', '删除图片')}
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -1280,12 +1083,11 @@ export const UpgradeVipModal: React.FC = () => {
                     <img
                       src={paymentProofDraft.dataUrl}
                       alt="Selected Payment Proof Preview"
-                      className="w-full max-h-56 object-contain rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 p-1"
+                      className="w-full max-h-48 object-contain rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 p-1"
                     />
                   </div>
                 )}
 
-                {/* Clearly Visible Button: «អាប់ឡូតភស្តុតាងបង់ប្រាក់» */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <button
                     type="button"
@@ -1293,15 +1095,11 @@ export const UpgradeVipModal: React.FC = () => {
                     disabled={isProcessingProofImage}
                     className="py-3 px-4 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-950 font-extrabold text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-98 cursor-pointer"
                   >
-                    <Upload className="w-4 h-4" />
+                    <Upload className="w-4 h-4 shrink-0" />
                     <span>
                       {paymentProofDraft
-                        ? isKm
-                          ? 'ប្តូររូបភាពភស្តុតាងថ្មី'
-                          : 'Replace Payment Proof'
-                        : isKm
-                        ? 'អាប់ឡូតភស្តុតាងបង់ប្រាក់'
-                        : 'Upload Payment Proof'}
+                        ? tr(language, 'ប្តូរវិក្កយបត្រថ្មី', 'Replace Receipt', '更换付款凭证')
+                        : tr(language, 'អាប់ឡូតវិក្កយបត្រ', 'Upload Receipt', '上传付款凭证')}
                     </span>
                   </button>
 
@@ -1311,25 +1109,28 @@ export const UpgradeVipModal: React.FC = () => {
                     disabled={isProcessingProofImage}
                     className="py-3 px-4 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-800 dark:text-white font-bold text-xs flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-600 transition active:scale-98 cursor-pointer"
                   >
-                    <Camera className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                    <span>{isKm ? 'ថតរូបវិក្កយបត្រផ្ទាល់' : 'Take Receipt Photo'}</span>
+                    <Camera className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                    <span>{tr(language, 'ថតរូបវិក្កយបត្រ', 'Take Photo', '拍摄凭证')}</span>
                   </button>
                 </div>
               </div>
 
-              {/* Requirement 2 & 3: SUBMIT FOR ADMIN VERIFICATION (Never activates VIP directly!) */}
-              <div className="p-4 rounded-3xl bg-amber-50/60 dark:bg-slate-800/80 border-2 border-amber-500/40 space-y-3">
+              {/* STEP 4: Submit for Admin approval */}
+              <div className="p-4 rounded-3xl bg-amber-50/60 dark:bg-slate-800/80 border-2 border-amber-500/40 space-y-2.5">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
-                    <BadgeCheck className="w-4 h-4 text-amber-600" />
-                    <span>{isKm ? 'ស្នើសុំការត្រួតពិនិត្យពីរដ្ឋបាល (Admin Verification)៖' : 'Request Admin Verification:'}</span>
-                  </span>
-                  <span className="text-[10px] text-amber-700 dark:text-amber-400 font-mono font-bold">
-                    Admin Approval Required
+                  <span className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-1.5">
+                    <BadgeCheck className="w-4 h-4 text-amber-600 shrink-0" />
+                    <span>
+                      {tr(
+                        language,
+                        '៤. បញ្ជូនសំណើទៅ Admin អនុម័ត',
+                        '4. Submit for Admin approval',
+                        '4. 提交管理员审核'
+                      )}
+                    </span>
                   </span>
                 </div>
 
-                {/* Payment Confirmation Request Button */}
                 <button
                   onClick={handleSubmitPaymentForAdminApproval}
                   disabled={isSubmittingRequest || isProcessingProofImage}
@@ -1337,57 +1138,23 @@ export const UpgradeVipModal: React.FC = () => {
                 >
                   {isSubmittingRequest ? (
                     <>
-                      <RefreshCw className="w-4 h-4 animate-spin text-white" />
-                      <span>{isKm ? 'កំពុងបញ្ជូនសំណើ និងភស្តុតាងទៅកាន់ Admin...' : 'Submitting request & proof to Admin...'}</span>
+                      <RefreshCw className="w-4 h-4 animate-spin text-white shrink-0" />
+                      <span>{tr(language, 'កំពុងបញ្ជូនទៅ Admin...', 'Submitting to Admin...', '正在提交审核...')}</span>
                     </>
                   ) : (
                     <>
-                      <CheckCircle2 className="w-4 h-4 text-emerald-200" />
+                      <CheckCircle2 className="w-4 h-4 text-emerald-200 shrink-0" />
                       <span>
-                        {isKm 
-                          ? `💳 ខ្ញុំបានបង់ប្រាក់រួចរាល់ • បញ្ជូនសំណើទៅ Admin ($${selectedPlan.priceUsd.toFixed(2)} USD)` 
-                          : `💳 I Have Paid • Submit for Admin Review ($${selectedPlan.priceUsd.toFixed(2)} USD)`}
+                        {tr(
+                          language,
+                          `បញ្ជូនសំណើទៅ Admin អនុម័ត ($${selectedPlan.priceUsd.toFixed(2)})`,
+                          `Submit for Admin approval ($${selectedPlan.priceUsd.toFixed(2)})`,
+                          `提交管理员审核 ($${selectedPlan.priceUsd.toFixed(2)})`
+                        )}
                       </span>
                     </>
                   )}
                 </button>
-
-                <p className="text-[10px] text-center text-slate-500 dark:text-slate-400 leading-relaxed">
-                  {isKm 
-                    ? '🔒 ការអាប់ឡូតភស្តុតាងបង់ប្រាក់មិនបើកដំណើរការ VIP ដោយស្វ័យប្រវត្តិឡើយ។ គណនី VIP នឹងត្រូវបានបើកដំណើរការក្រោយពេល Admin ពិនិត្យ និងអនុម័តប៉ុណ្ណោះ។' 
-                    : '🔒 Uploading payment proof does not automatically activate VIP. VIP is activated only after Admin reviews and approves your payment.'}
-                </p>
-
-                {/* Requirement 1: Direct Contact Admin / Payment Support Button inside VIP Subscription Section */}
-                <button
-                  type="button"
-                  onClick={handleOpenContactAdminSupport}
-                  className="w-full py-2.5 px-4 rounded-xl bg-white dark:bg-slate-900 hover:bg-amber-50 dark:hover:bg-slate-800 border-2 border-amber-500/60 text-amber-800 dark:text-amber-300 font-extrabold text-xs flex items-center justify-center gap-2 transition cursor-pointer shadow-xs"
-                >
-                  <MessageSquareWarning className="w-4 h-4 text-amber-600 shrink-0" />
-                  <span>
-                    {isKm
-                      ? '💬 បានបង់ប្រាក់រួចតែមិនទាន់បើក VIP? ទាក់ទង Admin ផ្ទាល់នៅទីនេះ'
-                      : '💬 Paid via ABA but VIP not active? Contact Admin / Payment Support'}
-                  </span>
-                </button>
-              </div>
-
-              {/* Restore Purchases & Security Guarantee */}
-              <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800 text-[11px]">
-                <button
-                  onClick={handleRestore}
-                  disabled={isRestoring}
-                  className="text-[#059669] hover:underline flex items-center gap-1 font-bold cursor-pointer"
-                >
-                  <RefreshCw className={`w-3.5 h-3.5 ${isRestoring ? 'animate-spin' : ''}`} />
-                  <span>{isKm ? 'ស្តារការជាវឡើងវិញ' : 'Restore Purchases'}</span>
-                </button>
-
-                <div className="flex items-center gap-1 text-slate-400">
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>{isKm ? 'គាំទ្រ GooglePlayBilling & KHQR' : 'GooglePlayBilling & KHQR Supported'}</span>
-                </div>
               </div>
             </div>
           )}

@@ -45,20 +45,3 @@ export async function shareText(
   showToast?.(pick(lang, 'មិនអាចចែករំលែកបានទេ', 'Unable to share right now', '暂时无法分享'), 'warning');
   return false;
 }
-
-/**
- * Share / recommend the whole app to friends.
- */
-export function shareApp(lang: Language, showToast?: ToastFn) {
-  return shareText(
-    lang,
-    pick(lang, 'អាហារ & ទេសចរណ៍ខ្មែរ', 'Khmer Food & Tourism', '高棉美食与旅游'),
-    pick(
-      lang,
-      '🇰🇭 សាកល្បងកម្មវិធី «អាហារ & ទេសចរណ៍ខ្មែរ» — មុខម្ហូបខ្មែរ រូបមន្តចម្អិន ភោជនីយដ្ឋាន និងកន្លែងទេសចរណ៍!',
-      '🇰🇭 Try “Khmer Food & Tourism” — Khmer dishes, recipes, restaurants and travel spots!',
-      '🇰🇭 推荐“高棉美食与旅游”应用——高棉菜肴、食谱、餐厅与旅游景点！'
-    ),
-    showToast
-  );
-}

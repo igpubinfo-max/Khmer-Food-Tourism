@@ -19,7 +19,6 @@ import {
   formatRichShareText,
   copyTextNativeOrWeb,
 } from '../utils/androidMediaHelper';
-import { ShareCardButton } from './ShareCardButton';
 
 export const RestaurantDetailModal: React.FC = () => {
   const { 
@@ -868,28 +867,6 @@ export const RestaurantDetailModal: React.FC = () => {
               </p>
               
               <div className="flex items-center justify-center gap-2 flex-wrap">
-                <ShareCardButton
-                  getSpec={() => ({
-                    kind: 'place',
-                    emoji: '🏪',
-                    title: loc.name,
-                    subtitle: loc.province,
-                    photoUrl: activePhoto || selectedRestaurant.photoUrl,
-                    lines: [
-                      `📍 ${loc.address}`,
-                      ...((loc.signatureDishes || []).slice(0, 2).map((d: string) => `🍽️ ${d}`)),
-                    ],
-                  })}
-                />
-                <button
-                  type="button"
-                  onClick={handleShare}
-                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white text-xs font-bold shadow transition active:scale-95"
-                >
-                  <Share2 className="w-3.5 h-3.5" />
-                  <span>{tr(language, 'ចែករំលែក', 'Share App', '分享应用')}</span>
-                </button>
-
                 <button
                   type="button"
                   onClick={handleShareTelegram}
