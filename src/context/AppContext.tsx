@@ -804,8 +804,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       localStorage.removeItem('kft_restaurants_real_v6');
       localStorage.removeItem('kft_restaurants_real_v7');
       localStorage.removeItem('kft_restaurants_real_v8');
-      const saved = localStorage.getItem('kft_restaurants_real_v10') || localStorage.getItem('kft_restaurants_real_v9');
+      const saved =
+        localStorage.getItem('kft_restaurants_real_v11') ||
+        localStorage.getItem('kft_restaurants_real_v10') ||
+        localStorage.getItem('kft_restaurants_real_v9');
       localStorage.removeItem('kft_restaurants_real_v9');
+      localStorage.removeItem('kft_restaurants_real_v10');
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length >= 40) {
@@ -826,6 +830,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             if (seed) {
               const primaryImg = r.profileImage || r.photoUrl || '';
               const hasCustomPhoto =
+                Boolean(r.isAdminEdited) &&
                 typeof primaryImg === 'string' &&
                 primaryImg.trim().length > 0 &&
                 !primaryImg.startsWith('/foods/') &&
@@ -857,7 +862,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
               const ov = vault.restaurants[r.id];
               const ovPhotoValid =
-                ov?.photoUrl && !ov.photoUrl.startsWith('/foods/') && !ov.photoUrl.startsWith('/restaurants/');
+                ov?.photoUrl &&
+                !ov.photoUrl.startsWith('/foods/') &&
+                !ov.photoUrl.startsWith('/restaurants/') &&
+                (ov.photoUrl.startsWith('data:') || ov.photoUrl.startsWith('http://') || ov.photoUrl.startsWith('https://'));
               const finalPhoto = ovPhotoValid ? ov!.photoUrl! : (hasCustomPhoto ? primaryImg : seed.photoUrl);
               const finalGallery =
                 (Array.isArray(ov?.galleryPhotos) && ov.galleryPhotos.length > 0)
@@ -1769,7 +1777,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           return f;
         });
       }
-      if (key === 'kft_restaurants_real_v10') {
+      if (key === 'kft_restaurants_real_v11') {
         const seedRestMap = new Map(initialRestaurants.map(r => [r.id, r.photoUrl]));
         return (data as Restaurant[]).map(r => {
           if (
@@ -1835,7 +1843,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Automatic Pre-Update Database & VIP Snapshot Backup whenever App Version changes
   useEffect(() => {
     try {
-      const APP_VERSION = '2.1.0';
+      const APP_VERSION = '2.2.0';
       const lastBackedUpVersion = localStorage.getItem('kft_last_backed_up_version');
       if (lastBackedUpVersion !== APP_VERSION) {
         const activeVips = users.filter(
@@ -2062,7 +2070,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           });
           if (restChanged) {
             try {
-              localStorage.setItem('kft_restaurants_real_v10', JSON.stringify(nextRests));
+              localStorage.setItem('kft_restaurants_real_v11', JSON.stringify(nextRests));
             } catch {}
           }
           return restChanged ? nextRests : prev;
@@ -2162,7 +2170,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return;
     }
     if (restaurants && restaurants.length > 0) {
-      scheduleStorageWrite('kft_restaurants_real_v10', restaurants, 1200);
+      scheduleStorageWrite('kft_restaurants_real_v11', restaurants, 1200);
     }
   }, [restaurants]);
 

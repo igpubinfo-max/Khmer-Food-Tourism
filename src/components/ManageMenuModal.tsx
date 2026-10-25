@@ -216,7 +216,7 @@ export const ManageMenuModal: React.FC = () => {
   useEffect(() => {
     if (isManageMenuModalOpen) {
       const requestedTab = (window as any).__kft_manage_initial_tab;
-      if (requestedTab === 'video') {
+      if (requestedTab === 'video' || (requestedTab === 'photos' && !isAdminUser)) {
         setMainTab('info');
         (window as any).__kft_manage_initial_tab = undefined;
       } else if (requestedTab && ['menu', 'info', 'photos', 'analytics', 'membership'].includes(requestedTab)) {
@@ -407,7 +407,12 @@ export const ManageMenuModal: React.FC = () => {
       return;
     }
 
-    const finalCover = storeCoverPhoto.trim() || managingRestaurant.photoUrl;
+    const finalCover = isAdmin
+      ? (storeCoverPhoto.trim() || managingRestaurant.photoUrl)
+      : managingRestaurant.photoUrl;
+    const finalGallery = isAdmin
+      ? Array.from(new Set([finalCover, ...storeGalleryPhotos])).filter(Boolean)
+      : (managingRestaurant.galleryPhotos || [managingRestaurant.photoUrl]);
     updateRestaurant({
       ...managingRestaurant,
       nameKh: storeNameKh.trim(),
@@ -421,8 +426,8 @@ export const ManageMenuModal: React.FC = () => {
       mapUrl: storeMapUrl.trim(),
       photoUrl: finalCover,
       profileImage: finalCover,
-      foodImages: storeGalleryPhotos,
-      galleryPhotos: Array.from(new Set([finalCover, ...storeGalleryPhotos])).filter(Boolean),
+      foodImages: isAdmin ? storeGalleryPhotos : (managingRestaurant.foodImages || []),
+      galleryPhotos: finalGallery,
       promoVideoUrl: storePromoVideoUrl.trim() || undefined,
       telegramUrl: storeTelegramUrl.trim() || undefined,
       facebookUrl: storeFacebookUrl.trim() || undefined,
@@ -439,6 +444,15 @@ export const ManageMenuModal: React.FC = () => {
   };
 
   const handleSavePhotosOnly = () => {
+    if (!isAdmin) {
+      showToast(
+        isKm
+          ? '⚠️ មានតែអ្នកគ្រប់គ្រងប្រព័ន្ធ (Admin) ប៉ុណ្ណោះដែលអាចផ្លាស់ប្តូររូបភាពហាងបាន!'
+          : '⚠️ Only an Administrator can upload or replace shop photos!',
+        'warning'
+      );
+      return;
+    }
     const finalCover = storeCoverPhoto.trim() || storeGalleryPhotos[0] || managingRestaurant.photoUrl;
     updateRestaurant({
       ...managingRestaurant,
@@ -817,8 +831,8 @@ export const ManageMenuModal: React.FC = () => {
           </div>
         )}
 
-        {/* 5 Clearly Separated Management Sections */}
-        <div className="grid grid-cols-5 bg-slate-100 dark:bg-slate-800/80 p-1 border-b border-slate-200 dark:border-slate-700 text-center font-khmer gap-0.5">
+        {/* Clearly Separated Management Sections */}
+        <div className={`grid ${isAdmin ? 'grid-cols-5' : 'grid-cols-4'} bg-slate-100 dark:bg-slate-800/80 p-1 border-b border-slate-200 dark:border-slate-700 text-center font-khmer gap-0.5`}>
           <button
             onClick={() => { setMainTab('menu'); setMenuMode('list'); setStatusBanner(null); }}
             className={`py-2 px-1 text-[10px] sm:text-[11px] font-bold rounded-xl transition flex flex-col items-center justify-center gap-0.5 cursor-pointer ${
@@ -843,17 +857,19 @@ export const ManageMenuModal: React.FC = () => {
             <span className="leading-tight">{isKm ? '២. ព័ត៌មានហាង' : '2. Info'}</span>
           </button>
 
-          <button
-            onClick={() => { setMainTab('photos'); setStatusBanner(null); }}
-            className={`py-2 px-1 text-[10px] sm:text-[11px] font-bold rounded-xl transition flex flex-col items-center justify-center gap-0.5 cursor-pointer ${
-              mainTab === 'photos'
-                ? 'bg-white dark:bg-slate-900 text-[#064E3B] dark:text-emerald-400 shadow-xs ring-1 ring-emerald-500/40'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
-            }`}
-          >
-            <Camera className="w-3.5 h-3.5" />
-            <span className="leading-tight">{isKm ? '៣. រូបភាពហាង' : '3. Photos'}</span>
-          </button>
+          {isAdmin && (
+            <button
+              onClick={() => { setMainTab('photos'); setStatusBanner(null); }}
+              className={`py-2 px-1 text-[10px] sm:text-[11px] font-bold rounded-xl transition flex flex-col items-center justify-center gap-0.5 cursor-pointer ${
+                mainTab === 'photos'
+                  ? 'bg-white dark:bg-slate-900 text-[#064E3B] dark:text-emerald-400 shadow-xs ring-1 ring-emerald-500/40'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+              }`}
+            >
+              <Camera className="w-3.5 h-3.5" />
+              <span className="leading-tight">{isKm ? '៣. រូបភាពហាង' : '3. Photos'}</span>
+            </button>
+          )}
 
           <button
             onClick={() => { setMainTab('analytics'); setStatusBanner(null); }}
@@ -1682,8 +1698,8 @@ export const ManageMenuModal: React.FC = () => {
             </form>
           )}
 
-          {/* TAB 3: DEDICATED STORE PHOTOS & GALLERY SECTION */}
-          {mainTab === 'photos' && (
+          {/* TAB 3: DEDICATED STORE PHOTOS & GALLERY SECTION (ADMIN ONLY) */}
+          {mainTab === 'photos' && isAdmin && (
             <div className="space-y-3.5 font-khmer">
               <div className="p-3 bg-emerald-50 dark:bg-emerald-950/30 rounded-2xl border border-emerald-200 dark:border-emerald-800 flex items-center justify-between gap-2">
                 <div className="space-y-0.5">

@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
-import { Restaurant, isRestaurantPremiumActive, getRestaurantRatingSummary, isSeedRestaurantId } from '../types';
+import { Restaurant, getRestaurantRatingSummary } from '../types';
 import { useApp } from '../context/AppContext';
-import { MapPin, Phone, Star, Navigation, CheckCircle2, AlertCircle, Sparkles, Share2, Edit2, Heart } from 'lucide-react';
+import { MapPin, Phone, Star, Navigation, CheckCircle2, AlertCircle, Share2, Edit2, Heart } from 'lucide-react';
 import { sanitizeDialablePhone, resolveRestaurantPhoneOnDemand } from '../services/googlePlacesService';
 import { shareRichContent } from '../utils/androidMediaHelper';
 import { tr } from '../utils/i18n';
@@ -20,14 +20,11 @@ const RestaurantCardInner: React.FC<RestaurantCardProps> = ({ restaurant }) => {
   } = useApp();
   const bookmarked = isBookmarked(restaurant.id);
   const isKm = language === 'km';
-  const isPremium = isRestaurantPremiumActive(restaurant);
-  const isAdmin = currentUser?.role === 'admin';
-  const isMyShop = Boolean(
-    currentUser?.id &&
-      !isSeedRestaurantId(restaurant.id) &&
-      (restaurant.ownerId === currentUser.id ||
-        (currentUser.email && restaurant.ownerEmail && restaurant.ownerEmail.toLowerCase() === currentUser.email.toLowerCase()))
-  );
+  const isAdmin =
+    currentUser?.role === 'admin' ||
+    currentUser?.id === 'admin-authorized-single' ||
+    currentUser?.username === 'admin' ||
+    currentUser?.username === 'cheasavuth';
   const ratingSummary = getRestaurantRatingSummary(restaurant);
   const loc = useMemo(() => getLocalizedRestaurant(restaurant, language), [restaurant, language]);
 
@@ -61,19 +58,15 @@ const RestaurantCardInner: React.FC<RestaurantCardProps> = ({ restaurant }) => {
         setSelectedRestaurant(restaurant);
       }}
       style={{ contentVisibility: 'auto', containIntrinsicSize: '280px' }}
-      className={`group bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-xs hover:shadow-md transition-colors duration-150 cursor-pointer flex flex-col ${
-        isPremium 
-          ? 'border-2 border-emerald-500/80 ring-1 ring-emerald-400/30' 
-          : 'border border-slate-200/90 dark:border-slate-700/80'
-      }`}
+      className="group bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-xs hover:shadow-md transition-colors duration-150 cursor-pointer flex flex-col border border-slate-200/90 dark:border-slate-700/80"
     >
       {/* Cover image */}
       <div className="relative aspect-16/9 w-full overflow-hidden bg-slate-100 dark:bg-slate-700">
         <img 
           src={
-            restaurant.photoUrl && !restaurant.photoUrl.startsWith('/foods/')
+            restaurant.photoUrl && !restaurant.photoUrl.startsWith('/foods/') && !restaurant.photoUrl.startsWith('/restaurants/')
               ? restaurant.photoUrl
-              : restaurant.profileImage && !restaurant.profileImage.startsWith('/foods/')
+              : restaurant.profileImage && !restaurant.profileImage.startsWith('/foods/') && !restaurant.profileImage.startsWith('/restaurants/')
               ? restaurant.profileImage
               : '/Shop/rest-1.jpg'
           } 
@@ -86,12 +79,12 @@ const RestaurantCardInner: React.FC<RestaurantCardProps> = ({ restaurant }) => {
           }}
         />
 
-        {/* Province pill & Owner/Admin shortcut */}
+        {/* Province pill & Admin shortcut */}
         <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 z-10">
           <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-[#064E3B]/95 text-emerald-100 border border-emerald-400/30 shadow-xs font-khmer">
             {loc.province}
           </span>
-          {(isMyShop || isAdmin) && (
+          {isAdmin && (
             <button
               type="button"
               onClick={(e) => {
@@ -99,30 +92,16 @@ const RestaurantCardInner: React.FC<RestaurantCardProps> = ({ restaurant }) => {
                 openManageMyVipStore(restaurant.id);
               }}
               className="px-2.5 py-0.5 rounded-full bg-amber-400 hover:bg-amber-500 text-slate-950 text-xs font-black shadow-md flex items-center gap-1 transition active:scale-90 font-khmer"
-              title={tr(language, 'គ្រប់គ្រងហាងនេះ', 'Manage This Shop', '管理此店铺')}
+              title={tr(language, 'គ្រប់គ្រងហាងនេះ (Admin)', 'Manage Shop (Admin)', '管理店铺（管理员）')}
             >
               <Edit2 className="w-3 h-3" />
-              <span>
-                {isMyShop
-                  ? tr(language, 'គ្រប់គ្រងហាងខ្ញុំ', 'Manage My Shop', '管理我的店铺')
-                  : tr(language, 'កែប្រែ', 'Edit', '编辑')}
-              </span>
+              <span>{tr(language, 'កែប្រែ', 'Edit', '编辑')}</span>
             </button>
           )}
         </div>
 
-        {/* Verification & Membership Badge */}
+        {/* Verification & Price Level Badge */}
         <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5 flex-wrap justify-end">
-          {isRestaurantPremiumActive(restaurant) ? (
-            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-gradient-to-r from-[#064E3B] to-[#059669] text-white border border-emerald-300/40 shadow-xs flex items-center gap-1 font-khmer">
-              <Sparkles className="w-3 h-3 text-emerald-200" />
-              <span>⭐ {tr(language, 'VIP ពិសេស', 'Premium VIP', 'VIP 尊享会员')}</span>
-            </span>
-          ) : (
-            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-900/90 text-slate-100 border border-slate-600/40 shadow-xs flex items-center gap-1 font-khmer">
-              <span>🏷️ {tr(language, 'ឥតគិតថ្លៃ', 'Free', '免费入驻')}</span>
-            </span>
-          )}
           <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold shadow-xs flex items-center gap-1 font-khmer ${
             restaurant.isVerified
               ? 'bg-[#059669] text-white border border-emerald-300/40'
@@ -147,7 +126,7 @@ const RestaurantCardInner: React.FC<RestaurantCardProps> = ({ restaurant }) => {
         </div>
 
         {/* Reference Image Label (រូបភាពយោង) */}
-        <div className="absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded-md bg-black/70 text-[10px] text-white/90 font-khmer border border-white/20 select-none pointer-events-none shadow-xs z-10">
+        <div className="absolute bottom-2 right-2.5 px-1.5 py-0.5 rounded bg-black/55 backdrop-blur-xs text-[8px] sm:text-[9px] text-white/85 font-khmer border border-white/15 select-none pointer-events-none shadow-2xs z-10">
           <span>{tr(language, 'រូបភាពយោង', 'Reference photo', '参考图片')}</span>
         </div>
       </div>

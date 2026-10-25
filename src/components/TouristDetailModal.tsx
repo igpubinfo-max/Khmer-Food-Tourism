@@ -455,7 +455,7 @@ export const TouristDetailModal: React.FC = () => {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" />
             
-            <div className="absolute bottom-4 left-4 right-4 text-white">
+            <div className="absolute bottom-3.5 left-4 right-24 text-white">
               <span className="px-3 py-0.5 rounded-full text-xs font-bold bg-[#064E3B] text-emerald-100 border border-emerald-400/40 shadow mb-2 inline-block">
                 {loc.category}
               </span>
@@ -465,7 +465,7 @@ export const TouristDetailModal: React.FC = () => {
             </div>
 
             {/* Reference Image Label (រូបភាពយោង) */}
-            <div className="absolute bottom-4 right-4 z-10 px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-xs text-[10px] text-white/90 font-khmer border border-white/20 select-none pointer-events-none shadow-xs">
+            <div className="absolute bottom-2.5 right-3 z-10 px-1.5 py-0.5 rounded bg-black/55 backdrop-blur-xs text-[8px] sm:text-[9px] text-white/85 font-khmer border border-white/15 select-none pointer-events-none shadow-2xs">
               <span>{tr(language, 'រូបភាពយោង', 'Reference photo', '参考图片')}</span>
             </div>
           </div>

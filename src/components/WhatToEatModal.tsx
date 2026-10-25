@@ -304,13 +304,13 @@ export const WhatToEatModal: React.FC = () => {
                   </div>
 
                   {/* Reference label */}
-                  <span className="absolute bottom-2 right-2 bg-black/60 text-white/80 text-[8px] px-1.5 py-0.5 rounded-xs font-khmer select-none">
+                  <span className="absolute bottom-2 right-2.5 z-10 bg-black/55 backdrop-blur-xs text-white/85 text-[8px] sm:text-[9px] px-1.5 py-0.5 rounded border border-white/15 font-khmer select-none pointer-events-none">
                     {tr(language, 'រូបភាពយោង', 'Reference photo', '参考图片')}
                   </span>
 
                   {/* Title overlay */}
-                  <div className="absolute bottom-3 left-3 right-3 text-white">
-                    <h2 className="font-moul text-base sm:text-lg text-white drop-shadow">
+                  <div className="absolute bottom-3 left-3 right-24 text-white">
+                    <h2 className="font-moul text-base sm:text-lg text-white drop-shadow leading-snug">
                       {currentLoc.name}
                     </h2>
                   </div>

@@ -5,7 +5,7 @@ import {
   Send, Share2, UtensilsCrossed, Sparkles, CheckCircle2, AlertCircle, Copy, Camera, Bookmark,
   BarChart3, Video, Crown, Edit2, MessageSquare
 } from 'lucide-react';
-import { isRestaurantPremiumActive, isUserVipActive, getVipAccountState, getRestaurantRatingSummary } from '../types';
+import { isUserVipActive, getRestaurantRatingSummary } from '../types';
 import { RestaurantImageModal } from './RestaurantImageModal';
 import { tr } from '../utils/i18n';
 import { getLocalizedRestaurant, translateSignatureDish, translateDynamicTextToZh } from '../utils/zhDynamicTranslator';
@@ -68,7 +68,6 @@ export const RestaurantDetailModal: React.FC = () => {
 
   const isKm = language === 'km';
   const loc = getLocalizedRestaurant(selectedRestaurant, language);
-  const isPremiumActive = isRestaurantPremiumActive(selectedRestaurant);
   const isOwner = Boolean(currentUser?.id && selectedRestaurant.ownerId === currentUser.id);
   const isAdmin = 
     currentUser?.role === 'admin' || 
@@ -82,18 +81,14 @@ export const RestaurantDetailModal: React.FC = () => {
   const ratingSummary = getRestaurantRatingSummary(selectedRestaurant);
 
   const handleOpenPhotoEditor = () => {
-    if (!currentUser) {
+    if (!isAdmin) {
       showToast(
-        isKm ? 'សូមចូលគណនីជាមុនសិនដើម្បីកែប្រែរូបភាពហាង!' : 'Please log in first to edit shop photos!',
-        'warning'
-      );
-      return;
-    }
-    if (!canEditShop) {
-      showToast(
-        isKm
-          ? '⚠️ មានតែម្ចាស់ហាងផ្ទាល់ ឬ Admin ប៉ុណ្ណោះដែលអាចកែប្រែរូបភាពហាងនេះបាន!'
-          : '⚠️ Only the shop owner or an administrator can edit this shop!',
+        tr(
+          language,
+          '⚠️ មានតែអ្នកគ្រប់គ្រងប្រព័ន្ធ (Admin) ប៉ុណ្ណោះដែលអាចប្តូរ ឬផ្ទុកឡើងរូបភាពហាងបាន!',
+          '⚠️ Only an Administrator can upload or replace shop photos!',
+          '⚠️ 仅限系统管理员 (Admin) 上传或更换店铺图片！'
+        ),
         'warning'
       );
       return;
@@ -255,15 +250,17 @@ export const RestaurantDetailModal: React.FC = () => {
               </button>
             )}
 
-            <button
-              type="button"
-              onClick={handleOpenPhotoEditor}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/60 hover:bg-black/80 backdrop-blur-md text-white text-xs font-bold shadow transition active:scale-95 font-khmer border border-white/20"
-              title={tr(language, 'ប្តូររូបភាពហាងផ្ទាល់ខ្លួន', 'Change Shop Photo', '更换店铺照片')}
-            >
-              <Camera className="w-3.5 h-3.5 text-emerald-300" />
-              <span>{tr(language, 'ប្តូររូបភាព', 'Change Photo', '更换照片')}</span>
-            </button>
+            {isAdmin && (
+              <button
+                type="button"
+                onClick={handleOpenPhotoEditor}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/60 hover:bg-black/80 backdrop-blur-md text-white text-xs font-bold shadow transition active:scale-95 font-khmer border border-white/20"
+                title={tr(language, 'ប្តូររូបភាពហាង (Admin)', 'Change Shop Photo (Admin)', '更换店铺照片（管理员）')}
+              >
+                <Camera className="w-3.5 h-3.5 text-emerald-300" />
+                <span>{tr(language, 'ប្តូររូបភាព', 'Change Photo', '更换照片')}</span>
+              </button>
+            )}
             <button
               type="button"
               onClick={handleCallRestaurant}
@@ -286,22 +283,11 @@ export const RestaurantDetailModal: React.FC = () => {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
             
-            <div className="absolute bottom-4 left-4 right-4 text-white">
-              <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+            <div className="absolute bottom-3.5 left-4 right-24 text-white">
+              <div className="flex items-center gap-1.5 mb-1.5 flex-wrap">
                 <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#064E3B]/90 text-emerald-100 border border-emerald-400/30 shadow-xs font-khmer">
                   {loc.province}
                 </span>
-
-                {isPremiumActive ? (
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-gradient-to-r from-[#064E3B] to-[#059669] text-white border border-emerald-300/40 shadow-xs flex items-center gap-1 font-khmer">
-                    <Sparkles className="w-3 h-3 text-emerald-200" />
-                    <span>⭐ {tr(language, 'សមាជិកភាព VIP Premium', 'VIP Premium Member', 'VIP 尊享会员')}</span>
-                  </span>
-                ) : (
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-800/85 text-slate-100 border border-slate-600/40 shadow-xs font-khmer">
-                    🏷️ {tr(language, 'ចុះបញ្ជីឥតគិតថ្លៃ ($0)', 'Free Listing ($0)', '免费入驻 ($0)')}
-                  </span>
-                )}
 
                 {selectedRestaurant.isVerified && (
                   <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-600/90 text-white border border-emerald-300/40 shadow-xs flex items-center gap-1 font-khmer">
@@ -327,13 +313,13 @@ export const RestaurantDetailModal: React.FC = () => {
                 </span>
               </div>
 
-              <h2 className="text-xl sm:text-2xl font-extrabold font-moul leading-snug drop-shadow text-white">
+              <h2 className="text-lg sm:text-xl font-extrabold font-moul leading-snug drop-shadow text-white">
                 {loc.name}
               </h2>
             </div>
 
             {/* Reference Image Label (រូបភាពយោង) */}
-            <div className="absolute bottom-2.5 right-3 z-10 px-1.5 py-0.5 rounded-md bg-black/60 backdrop-blur-xs text-[9px] text-white/90 font-khmer border border-white/20 select-none pointer-events-none shadow-xs">
+            <div className="absolute bottom-2.5 right-3 z-10 px-1.5 py-0.5 rounded bg-black/55 backdrop-blur-xs text-[8px] sm:text-[9px] text-white/85 font-khmer border border-white/15 select-none pointer-events-none shadow-2xs">
               <span>{tr(language, 'រូបភាពយោង', 'Reference photo', '参考图片')}</span>
             </div>
           </div>
@@ -525,14 +511,14 @@ export const RestaurantDetailModal: React.FC = () => {
                     )}
                   </span>
                 </span>
-                {canEditShop && (
+                {isAdmin && (
                   <button
                     type="button"
                     onClick={handleOpenPhotoEditor}
                     className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-gradient-to-r from-[#064E3B] to-[#059669] hover:brightness-110 text-white font-khmer font-bold text-xs shadow-xs transition active:scale-95 cursor-pointer"
                   >
                     <Camera className="w-3.5 h-3.5 text-emerald-200" />
-                    <span>{tr(language, 'កែរូបហាង & រូបម្ហូប', 'Edit Shop & Food Photos', '编辑店铺与菜品照片')}</span>
+                    <span>{tr(language, 'កែរូបហាង & រូបម្ហូប (Admin)', 'Edit Shop & Food Photos (Admin)', '编辑店铺与菜品照片（管理员）')}</span>
                   </button>
                 )}
               </div>

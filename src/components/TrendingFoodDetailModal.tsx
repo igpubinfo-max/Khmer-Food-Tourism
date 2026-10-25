@@ -157,12 +157,12 @@ export const TrendingFoodDetailModal: React.FC = () => {
           </div>
 
           {/* Location / Village Scenery Label */}
-          <span className="absolute bottom-2 right-3 bg-black/70 text-white/90 text-[8px] px-2 py-0.5 rounded-sm font-khmer shadow-sm">
-            {tr(language, 'រូបភាពទីតាំង / ភូមិដ្ឋាន', 'Location / Village Scenery', '实景 / 探店参考图')}
+          <span className="absolute bottom-2.5 right-3 z-10 bg-black/55 backdrop-blur-xs text-white/85 text-[8px] sm:text-[9px] px-1.5 py-0.5 rounded font-khmer border border-white/15 select-none pointer-events-none shadow-2xs">
+            {tr(language, 'រូបភាពយោង', 'Reference photo', '参考图片')}
           </span>
 
           {/* Title overlay */}
-          <div className="absolute bottom-3 left-3 right-16 font-khmer">
+          <div className="absolute bottom-3 left-3 right-24 font-khmer">
             <span className="px-2 py-0.5 rounded-md bg-emerald-600/90 text-white text-[10px] font-bold">
               {displayCat}
             </span>

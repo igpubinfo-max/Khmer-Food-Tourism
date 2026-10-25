@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useApp } from '../context/AppContext';
-import { Search, X, Mail, MoreVertical, Camera, Download, Heart, LayoutGrid, Lock } from 'lucide-react';
+import { Search, X, MoreVertical, Camera, Download, Heart, LayoutGrid, Lock, RefreshCw } from 'lucide-react';
 import { openSmartHub, hasSpecialAndHealthyFoodVipAccess } from '../utils/smartHub';
 import { Capacitor } from '@capacitor/core';
 import { APP_VERSION } from '../types';
@@ -47,39 +47,40 @@ export const Header: React.FC = () => {
   return (
     <header className="sticky top-0 z-40 bg-[#064E3B] text-white shadow-md pt-[env(safe-area-inset-top,0px)] border-b border-[#047857]">
       {/* Main Bar */}
-      <div className="max-w-md mx-auto px-2.5 sm:px-4 py-2 flex items-center justify-between gap-2">
+      <div className="max-w-md mx-auto px-3 sm:px-4 py-2.5 flex items-center justify-between gap-2">
         {/* Brand */}
         <div 
           onClick={() => setActiveTab('home')}
           className="flex items-center gap-2.5 cursor-pointer group min-w-0 flex-1"
         >
-          <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-white p-0.5 shadow-md flex items-center justify-center border border-emerald-300/60 shrink-0 overflow-hidden">
-            <img src="/icon-192.png?v=2.1.0" alt="Khmer Food" className="w-full h-full rounded-[13px] object-contain" />
+          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-white p-0.5 shadow-md flex items-center justify-center border border-emerald-300/60 shrink-0 overflow-hidden">
+            <img src="/icon-192.png?v=2.2.0" alt="Khmer Food" className="w-full h-full rounded-[13px] object-contain" />
           </div>
           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-1 flex-wrap">
-              <h1 className="font-moul text-[12px] sm:text-sm tracking-wide text-white leading-tight drop-shadow-sm truncate">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <h1 className="font-moul text-[11px] sm:text-sm tracking-wide text-white leading-snug drop-shadow-sm truncate">
                 {isKm ? 'អាហារ និងទេសចរណ៍ខ្មែរ' : isZh ? '高棉美食与旅游' : 'Khmer Food & Tourism'}
               </h1>
-              <span className="px-1 py-0.2 rounded bg-white/20 text-white font-mono text-[8px] sm:text-[9px] font-bold border border-white/25 shrink-0">
+            </div>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <span className="px-1.5 py-0.2 rounded-md bg-emerald-950/70 text-emerald-200 font-mono text-[8px] sm:text-[9px] font-bold border border-emerald-400/30 shrink-0">
                 {APP_VERSION}
               </span>
+              <p className="text-[10px] sm:text-[11px] text-emerald-200/95 font-medium truncate">
+                {isKm
+                  ? 'មគ្គុទ្ទេសក៍ម្ហូប និងទេសចរណ៍'
+                  : isZh
+                  ? '柬埔寨正宗美食与旅游指南'
+                  : 'Cambodia Food & Travel'}
+              </p>
             </div>
-            <p className="text-[10px] sm:text-[11px] text-emerald-200 font-medium tracking-wide truncate">
-              {isKm
-                ? 'មគ្គុទ្ទេសក៍ម្ហូប និងទេសចរណ៍កម្ពុជា'
-                : isZh
-                ? '柬埔寨正宗美食与旅游指南'
-                : 'Cambodia Food & Travel Guide'}
-            </p>
           </div>
         </div>
 
         {/* Action icons — Responsive & Properly Aligned on Mobile */}
         <div className="flex items-center gap-1 shrink-0">
           {/* 3-Language Selector (ខ្មែរ / EN / 中文) */}
-          <div className="flex items-center gap-0.5 bg-[#053F30]/90 p-0.5 rounded-full border border-emerald-400/40 shadow-xs shrink-0">
-            {/* 3-Language Instant Switcher Pills: ខ្មែរ | EN | 中文 */}
+          <div className="flex items-center gap-0.5 bg-[#053F30]/95 p-0.5 rounded-full border border-emerald-400/40 shadow-xs shrink-0">
             {(['km', 'en', 'zh'] as const).map((langOption) => {
               const isSelected = language === langOption;
               const label = langOption === 'km' ? 'ខ្មែរ' : langOption === 'en' ? 'EN' : '中文';
@@ -98,7 +99,7 @@ export const Header: React.FC = () => {
                       'info'
                     );
                   }}
-                  className={`px-2 h-6 sm:h-7 rounded-full text-[10px] sm:text-[11px] font-black transition-all active:scale-95 shrink-0 cursor-pointer flex items-center justify-center ${
+                  className={`px-1.5 sm:px-2 h-6 sm:h-7 rounded-full text-[9px] sm:text-[11px] font-black transition-all active:scale-95 shrink-0 cursor-pointer flex items-center justify-center ${
                     isSelected
                       ? 'bg-amber-400 text-slate-950 shadow-xs'
                       : 'text-emerald-100 hover:text-white hover:bg-emerald-800/70'
@@ -129,7 +130,7 @@ export const Header: React.FC = () => {
               }
               openSmartHub();
             }}
-            className="relative w-9 h-9 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 flex items-center justify-center shadow-md ring-2 ring-white/30 transition-all active:scale-95 shrink-0 cursor-pointer"
+            className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 flex items-center justify-center shadow-md ring-2 ring-white/30 transition-all active:scale-95 shrink-0 cursor-pointer"
             title={isKm ? 'ម៉ឺនុយពិសេស & ជម្រើសម្ហូបសុខភាព (VIP)' : isZh ? '智能菜单与健康饮食筛选 (VIP)' : 'Smart Menu & Healthy Filter (VIP)'}
             aria-label={isKm ? 'ម៉ឺនុយពិសេស & ជម្រើសម្ហូបសុខភាព (VIP)' : isZh ? '智能菜单与健康饮食筛选 (VIP)' : 'Smart Menu & Healthy Filter (VIP)'}
           >
@@ -151,22 +152,22 @@ export const Header: React.FC = () => {
                 setTimeout(() => searchInputRef.current?.focus(), 100);
               }
             }}
-            className={`w-7 h-7 rounded-full flex items-center justify-center transition-colors border shrink-0 ${
+            className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors border shrink-0 ${
               isSearchVisible || searchQuery
                 ? 'bg-white text-[#064E3B] border-white shadow-xs'
                 : 'bg-[#065F46]/80 hover:bg-[#065F46] text-emerald-100 border-emerald-500/40'
             }`}
-            title={isKm ? 'ស្វែងរក' : 'Search'}
+            title={isKm ? 'ស្វែងរក' : isZh ? '搜索' : 'Search'}
           >
             <Search className="w-3.5 h-3.5 shrink-0" />
           </button>
 
-          {/* Single overflow "more" menu: Scan QR, Install App, Support */}
+          {/* Single overflow "more" menu: Scan QR, Update/Install App, Support */}
           <div className="relative shrink-0">
             <button
               type="button"
               onClick={() => setIsMenuOpen((v) => !v)}
-              className={`w-9 h-9 rounded-full flex items-center justify-center transition-colors border shrink-0 ${
+              className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center transition-colors border shrink-0 ${
                 isMenuOpen
                   ? 'bg-white text-[#064E3B] border-white shadow-xs'
                   : 'bg-[#065F46]/80 hover:bg-[#065F46] text-emerald-100 border-emerald-500/40'
@@ -189,16 +190,22 @@ export const Header: React.FC = () => {
                     <Camera className="w-4 h-4 text-emerald-700" />
                     <span>{isKm ? 'ស្កេន QR កូដ' : isZh ? '扫描二维码' : 'Scan QR Code'}</span>
                   </button>
-                  {!isAppInstalled && (
-                    <button
-                      type="button"
-                      onClick={() => { setIsMenuOpen(false); setIsInstallModalOpen(true); }}
-                      className="w-full min-h-[44px] px-4 flex items-center gap-3 text-sm font-semibold hover:bg-emerald-50 dark:hover:bg-slate-700 text-left border-t border-slate-100 dark:border-slate-700"
-                    >
+                  <button
+                    type="button"
+                    onClick={() => { setIsMenuOpen(false); setIsInstallModalOpen(true); }}
+                    className="w-full min-h-[44px] px-4 flex items-center gap-3 text-sm font-semibold hover:bg-emerald-50 dark:hover:bg-slate-700 text-left border-t border-slate-100 dark:border-slate-700"
+                  >
+                    {isAppInstalled ? (
+                      <RefreshCw className="w-4 h-4 text-emerald-700" />
+                    ) : (
                       <Download className="w-4 h-4 text-emerald-700" />
-                      <span>{isKm ? 'ដំឡើងកម្មវិធី' : isZh ? '安装应用' : 'Install App'}</span>
-                    </button>
-                  )}
+                    )}
+                    <span>
+                      {isAppInstalled
+                        ? (isKm ? 'ពិនិត្យអាប់ដេតកម្មវិធី' : isZh ? '检查应用更新' : 'Check for App Update')
+                        : (isKm ? 'ដំឡើងកម្មវិធី' : isZh ? '安装应用' : 'Install App')}
+                    </span>
+                  </button>
                   <button
                     type="button"
                     onClick={() => { setIsMenuOpen(false); setIsSupportModalOpen(true); }}
@@ -212,36 +219,6 @@ export const Header: React.FC = () => {
             )}
           </div>
         </div>
-      </div>
-
-      {/* Feedback Email Bar below action icons */}
-      <div className="bg-[#055a42] text-white/95 text-xs px-4 py-1.5 flex items-center justify-between border-t border-emerald-500/30 font-khmer">
-        <div className="flex items-center gap-1.5 truncate">
-          <Mail className="w-3.5 h-3.5 text-emerald-300 shrink-0" />
-          <span className="text-emerald-200 text-[11px]">{isKm ? 'មតិកែលម្អ៖' : isZh ? '意见反馈：' : 'Feedback:'}</span>
-          <a 
-            href="mailto:kftcam@gmail.com" 
-            className="font-mono text-white underline hover:text-emerald-200 font-semibold text-xs"
-          >
-            kftcam@gmail.com
-          </a>
-        </div>
-        <button
-          type="button"
-          onClick={() => {
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-              navigator.clipboard.writeText('kftcam@gmail.com').then(() => {
-                showToast(isKm ? 'បានចម្លងអ៊ីមែលជោគជ័យ!' : isZh ? '邮箱地址已复制！' : 'Email copied to clipboard!', 'success');
-              }).catch(() => {});
-            } else {
-              showToast(isKm ? 'បានចម្លងអ៊ីមែលជោគជ័យ!' : isZh ? '邮箱地址已复制！' : 'Email copied to clipboard!', 'success');
-            }
-          }}
-          className="text-[11px] bg-white/15 hover:bg-white/25 px-2.5 py-0.5 rounded-md text-white font-khmer transition shrink-0 ml-2 border border-white/20 active:scale-95"
-          title={isKm ? 'ចម្លងអ៊ីមែល' : isZh ? '复制邮箱' : 'Copy Email'}
-        >
-          {isKm ? 'ចម្លង' : isZh ? '复制' : 'Copy'}
-        </button>
       </div>
 
       {/* Expandable Search & Province Filter Bar */}

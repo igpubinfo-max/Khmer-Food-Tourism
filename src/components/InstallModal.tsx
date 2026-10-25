@@ -5,6 +5,8 @@ import {
 } from 'lucide-react';
 import QRCode from 'qrcode';
 import { useApp } from '../context/AppContext';
+import { APP_VERSION, APP_BUILD_CODE } from '../types';
+import { tr } from '../utils/i18n';
 
 export const InstallModal: React.FC = () => {
   const { 
@@ -22,11 +24,11 @@ export const InstallModal: React.FC = () => {
   const [copied, setCopied] = useState<boolean>(false);
 
   const isKm = language === 'km';
-  const LATEST_SIGNED_APK_URL = 'https://github.com/igpubinfo-max/Khmer-Food-Tourism/releases/download/v2.1.0/KhmerFoodTourism-v2.1.0.apk';
+  const LATEST_SIGNED_APK_URL = 'https://github.com/igpubinfo-max/Khmer-Food-Tourism/releases/download/v2.2.0/KhmerFoodTourism-v2.2.0.apk';
   const apkDownloadTarget =
     appSettings.apkDownloadUrl &&
     !appSettings.apkDownloadUrl.includes('app-debug.apk') &&
-    appSettings.apkDownloadUrl.includes('v2.1.0')
+    appSettings.apkDownloadUrl.includes('v2.2.0')
       ? appSettings.apkDownloadUrl
       : LATEST_SIGNED_APK_URL;
   const playStoreTarget = appSettings.playStoreUrl || 'https://play.google.com/store/apps/details?id=com.khmerfood.tourism';
@@ -81,10 +83,15 @@ export const InstallModal: React.FC = () => {
             </div>
             <div>
               <h2 className="text-base sm:text-lg font-bold font-khmer text-white">
-                {isKm ? 'ទាញយក និងដំឡើងកម្មវិធីទូរស័ព្ទដៃ' : 'Download & Install Mobile App'}
+                {tr(language, 'ទាញយក និងអាប់ដេតកម្មវិធីទូរស័ព្ទដៃ', 'Download & Update Mobile App', '下载与更新手机应用')}
               </h2>
               <p className="text-[11px] text-emerald-200 font-khmer">
-                {isKm ? 'គាំទ្រប្រព័ន្ធ Android និង Apple iOS (iPhone)' : 'Supported on Android & Apple iOS (iPhone)'}
+                {tr(
+                  language,
+                  `កំណែចុងក្រោយ ${APP_VERSION} (Build ${APP_BUILD_CODE}) • អាប់ដេតដោយមិនបាត់ទិន្នន័យ`,
+                  `Latest ${APP_VERSION} (Build ${APP_BUILD_CODE}) • Seamless in-place update`,
+                  `最新版本 ${APP_VERSION} (Build ${APP_BUILD_CODE}) • 覆盖更新不丢失数据`
+                )}
               </p>
             </div>
           </div>
@@ -159,7 +166,14 @@ export const InstallModal: React.FC = () => {
                   className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-[#064E3B] hover:bg-[#047857] text-white font-bold rounded-2xl shadow-md shadow-emerald-950/20 active:scale-[0.98] transition-all font-khmer text-xs"
                 >
                   <Download className="w-4 h-4 text-emerald-300" />
-                  <span>{isKm ? 'ទាញយកកម្មវិធី Android APK ផ្លូវការ (v1.9.6 Signed Release)' : 'Download Official Signed Android APK (v1.9.6)'}</span>
+                  <span>
+                    {tr(
+                      language,
+                      `ទាញយក / អាប់ដេត Android APK ផ្លូវការ (${APP_VERSION} Build ${APP_BUILD_CODE})`,
+                      `Download / Update Official Android APK (${APP_VERSION} Build ${APP_BUILD_CODE})`,
+                      `下载 / 更新官方 Android APK (${APP_VERSION} Build ${APP_BUILD_CODE})`
+                    )}
+                  </span>
                 </a>
 
                 <button
@@ -167,7 +181,11 @@ export const InstallModal: React.FC = () => {
                   className="w-full flex items-center justify-center gap-1.5 py-2.5 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-medium rounded-2xl transition font-khmer text-xs border border-slate-200 dark:border-slate-700"
                 >
                   {copied ? <CheckCircle className="w-4 h-4 text-[#059669]" /> : <Share2 className="w-4 h-4 text-slate-500" />}
-                  <span>{copied ? (isKm ? 'បានចម្លងរួចរាល់!' : 'Copied!') : (isKm ? 'ចម្លងតំណភ្ជាប់ APK' : 'Copy APK Download Link')}</span>
+                  <span>
+                    {copied
+                      ? tr(language, 'បានចម្លងរួចរាល់!', 'Copied!', '已复制！')
+                      : tr(language, 'ចម្លងតំណភ្ជាប់ APK', 'Copy APK Download Link', '复制 APK 下载链接')}
+                  </span>
                 </button>
               </div>
 
@@ -257,7 +275,14 @@ export const InstallModal: React.FC = () => {
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="w-4 h-4 rounded-full bg-[#064E3B] text-white flex items-center justify-center text-[10px] shrink-0 mt-0.5">2</span>
-                    <span>{isKm ? 'បើកឯកសារ KhmerFoodTourism-v1.9.6.apk ដែលបានទាញយករួច' : 'Open the downloaded KhmerFoodTourism-v1.9.6.apk file.'}</span>
+                    <span>
+                      {tr(
+                        language,
+                        `បើកឯកសារ KhmerFoodTourism-${APP_VERSION}.apk ដែលបានទាញយករួច (ដំឡើងជាន់លើកំណែចាស់ដោយមិនបាច់លុបកម្មវិធីចាស់ទេ)`,
+                        `Open the downloaded KhmerFoodTourism-${APP_VERSION}.apk file (installs directly over your existing app without uninstalling).`,
+                        `打开下载好的 KhmerFoodTourism-${APP_VERSION}.apk 文件（直接覆盖安装，无需卸载旧版）。`
+                      )}
+                    </span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="w-4 h-4 rounded-full bg-[#064E3B] text-white flex items-center justify-center text-[10px] shrink-0 mt-0.5">3</span>
@@ -404,12 +429,19 @@ export const InstallModal: React.FC = () => {
 
         {/* Footer */}
         <div className="p-4 bg-slate-50 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 flex justify-between items-center text-xs text-slate-500 font-khmer">
-          <span>{isKm ? 'កំណែចុងក្រោយ (v1.6.3)' : 'Release v1.6.3'}</span>
+          <span>
+            {tr(
+              language,
+              `កំណែចុងក្រោយ (${APP_VERSION} • Build ${APP_BUILD_CODE})`,
+              `Latest Release (${APP_VERSION} • Build ${APP_BUILD_CODE})`,
+              `最新版本 (${APP_VERSION} • Build ${APP_BUILD_CODE})`
+            )}
+          </span>
           <button
             onClick={() => setIsInstallModalOpen(false)}
             className="px-4 py-1.5 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-xl transition font-medium"
           >
-            {isKm ? 'បិទ' : 'Close'}
+            {tr(language, 'បិទ', 'Close', '关闭')}
           </button>
         </div>
       </div>

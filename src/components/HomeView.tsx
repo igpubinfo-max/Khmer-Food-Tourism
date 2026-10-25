@@ -355,10 +355,15 @@ export const HomeView: React.FC = () => {
 
   return (
     <div className="max-w-md mx-auto px-4 py-3 space-y-5 pb-24 font-khmer">
-      {/* 1. Greeting + one big search bar */}
+      {/* 1. Greeting + User Profile Card + one big search bar */}
       <HomeGreetingSearch
         language={language}
         userName={currentUser?.name}
+        currentUser={currentUser}
+        isVip={isVip}
+        onSignIn={() => setIsAuthModalOpen(true)}
+        onExploreProfile={() => setActiveTab('profile')}
+        onUpgradeVip={() => openUpgradeVipModal()}
         query={globalSearchQuery}
         onChange={setGlobalSearchQuery}
       />

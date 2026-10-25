@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import {
   X, Flame, MapPin, Eye, ExternalLink, Navigation, Phone, Share2, Calendar,
-  UtensilsCrossed, RefreshCw, Info, Plus, ChefHat, CheckCircle2, Globe, ChevronDown
+  UtensilsCrossed, RefreshCw, Info, Plus, ChefHat, CheckCircle2, Globe, ChevronDown, Play
 } from 'lucide-react';
 import { TrendingFoodCategorySlug } from '../types';
 import { shareRichContent } from '../utils/androidMediaHelper';
@@ -182,21 +182,69 @@ export const TrendingSocialModal: React.FC = () => {
     { id: 'ខេត្តកំពង់ស្ពឺ', labelKh: 'កំពង់ស្ពឺ', labelEn: 'Kampong Speu', labelZh: '磅士卑省' },
   ];
 
+  const openExternalVideoOrLinkSafely = (rawUrl?: string, fallbackQuery?: string) => {
+    const targetUrl =
+      rawUrl && /^https?:\/\//i.test(rawUrl.trim())
+        ? rawUrl.trim()
+        : `https://www.youtube.com/results?search_query=${encodeURIComponent(
+            (fallbackQuery || 'Cambodian food') + ' Khmer food'
+          )}`;
+    try {
+      const opened = window.open(targetUrl, '_blank', 'noopener,noreferrer');
+      if (!opened) {
+        const a = document.createElement('a');
+        a.href = targetUrl;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }
+    } catch {
+      try {
+        window.location.assign(targetUrl);
+      } catch {
+        showToast(
+          tr(
+            language,
+            'មិនអាចបើកតំណវីដេអូបានទេ សូមព្យាយាមម្តងទៀត',
+            'Could not open video link, please try again',
+            '无法打开视频链接，请重试'
+          ),
+          'warning'
+        );
+      }
+    }
+  };
+
   const handleOpenItem = (item: OnlineFoodDiscoveryItem) => {
+    const url = item.sourceUrl || item.trendingItem?.videoUrl || item.trendingItem?.sourceUrl;
+    const isVideoPlatform =
+      item.platform === 'youtube' ||
+      item.platform === 'tiktok' ||
+      Boolean(url && /youtube\.com|youtu\.be|tiktok\.com|fb\.watch/i.test(url));
+
+    if (isVideoPlatform && url) {
+      openExternalVideoOrLinkSafely(url, item.titleEn || item.titleKh);
+      return;
+    }
+
     if (item.trendingItem) {
       setSelectedTrendingFood(item.trendingItem);
       setIsTrendingFoodDetailModalOpen(true);
       return;
     }
+
+    if (url) {
+      openExternalVideoOrLinkSafely(url, item.titleEn || item.titleKh);
+      return;
+    }
+
     if (item.matchedFoodId) {
       const f = foods.find((x) => x.id === item.matchedFoodId);
       if (f) {
         setSelectedFood(f);
-        return;
       }
-    }
-    if (item.sourceUrl) {
-      window.open(item.sourceUrl, '_blank', 'noopener,noreferrer');
     }
   };
 
@@ -538,6 +586,15 @@ export const TrendingSocialModal: React.FC = () => {
                       </span>
                     </div>
 
+                    {/* Center Play Overlay for YouTube / Video Items */}
+                    {(item.platform === 'youtube' || item.platform === 'tiktok') && (
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <div className="w-11 h-11 rounded-full bg-red-600/90 group-hover:bg-red-600 text-white flex items-center justify-center shadow-lg border-2 border-white/80 transition transform group-hover:scale-110">
+                          <Play className="w-5 h-5 fill-current ml-0.5" />
+                        </div>
+                      </div>
+                    )}
+
                     {/* Title & Source Attribution Overlay */}
                     <div className="absolute bottom-2.5 left-3 right-3">
                       <h4 className="font-moul text-xs sm:text-sm text-white drop-shadow leading-snug line-clamp-2">
@@ -608,10 +665,23 @@ export const TrendingSocialModal: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => handleOpenItem(item)}
-                        className="py-1.5 px-2 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/50 text-[#064E3B] dark:text-emerald-300 rounded-xl font-bold text-[10px] flex items-center justify-center gap-1 transition cursor-pointer"
+                        className={`py-1.5 px-2 rounded-xl font-bold text-[10px] flex items-center justify-center gap-1 transition cursor-pointer ${
+                          item.platform === 'youtube' || item.platform === 'tiktok'
+                            ? 'bg-red-600 hover:bg-red-700 text-white shadow-xs'
+                            : 'bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/50 text-[#064E3B] dark:text-emerald-300'
+                        }`}
                       >
-                        <Eye className="w-3 h-3" />
-                        <span>{tr(language, 'មើល', 'Open', '查看')}</span>
+                        {item.platform === 'youtube' || item.platform === 'tiktok' ? (
+                          <>
+                            <Play className="w-3 h-3 fill-current" />
+                            <span>{tr(language, 'ចាក់វីដេអូ', 'Play', '播放')}</span>
+                          </>
+                        ) : (
+                          <>
+                            <Eye className="w-3 h-3" />
+                            <span>{tr(language, 'មើល', 'Open', '查看')}</span>
+                          </>
+                        )}
                       </button>
 
                       <button
