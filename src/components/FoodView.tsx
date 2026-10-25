@@ -11,6 +11,7 @@ import {
 } from '../types';
 import { Utensils, Plus, Sparkles, Globe, Check, HeartPulse, ShieldCheck, AlertTriangle, ChevronDown, ChevronUp, Info, Share2, CalendarDays } from 'lucide-react';
 import { shareText } from '../utils/shareApp';
+import { DISH_PROVINCES, CONDITION_FILTER_OPTIONS, detectDishProvince, getSuitableFoodIds } from '../utils/foodFilters';
 import { searchOnlineFoodImages, OnlineFoodImageCandidate } from '../services/onlineFoodImageService';
 import { tr } from '../utils/i18n';
 import { getLocalizedFood } from '../utils/zhDynamicTranslator';
@@ -33,6 +34,8 @@ export const FoodView: React.FC = () => {
   const [editingFoodModal, setEditingFoodModal] = useState<FoodItem | null>(null);
   const [showNutritionGuide, setShowNutritionGuide] = useState<boolean>(false);
   const [selectedConditionId, setSelectedConditionId] = useState<NutritionConditionId>('diabetes');
+  const [provinceFilter, setProvinceFilter] = useState<string>('');
+  const [conditionFilter, setConditionFilter] = useState<NutritionConditionId | ''>('');
   const loadMoreTriggerRef = useRef<HTMLDivElement | null>(null);
   const isKm = language === 'km';
   const shareTip = (title: string, body: string) =>
@@ -102,7 +105,7 @@ export const FoodView: React.FC = () => {
 
   useEffect(() => {
     setVisibleCount(PAGE_BATCH_SIZE);
-  }, [selectedCategory, searchQuery]);
+  }, [selectedCategory, searchQuery, provinceFilter, conditionFilter]);
 
   // Deduplicate and sort all dishes in exact category order: សម្ល -> ឆា -> ស្ងោរ -> បង្អែម
   const organizedFoods = useMemo(() => organizeAndDeduplicateFoods(foods), [foods]);
@@ -141,7 +144,10 @@ export const FoodView: React.FC = () => {
 
   const filteredFoods = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
+    const suitableIds = conditionFilter ? getSuitableFoodIds(conditionFilter) : null;
     return organizedFoods.filter((f) => {
+      if (suitableIds && !suitableIds.has(f.id)) return false;
+      if (provinceFilter && detectDishProvince(f) !== provinceFilter) return false;
       if (selectedCategory !== 'all') {
         const grp = classifyKhmerFoodPrimaryGroup(f);
         if (grp !== selectedCategory && f.categorySlug !== selectedCategory) {
@@ -165,7 +171,25 @@ export const FoodView: React.FC = () => {
       }
       return true;
     });
-  }, [organizedFoods, selectedCategory, searchQuery]);
+  }, [organizedFoods, selectedCategory, searchQuery, provinceFilter, conditionFilter]);
+
+  // Provinces that actually appear in dish names/descriptions (no empty filter options)
+  const provinceOptions = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const f of organizedFoods) {
+      const id = detectDishProvince(f);
+      if (id) counts.set(id, (counts.get(id) || 0) + 1);
+    }
+    return DISH_PROVINCES.filter((p) => counts.has(p.id)).map((p) => ({ ...p, count: counts.get(p.id) || 0 }));
+  }, [organizedFoods]);
+
+  const hasActiveFilters = selectedCategory !== 'all' || Boolean(provinceFilter) || Boolean(conditionFilter) || Boolean(searchQuery.trim());
+  const resetAllFilters = () => {
+    setSelectedCategory('all');
+    setProvinceFilter('');
+    setConditionFilter('');
+    setSearchQuery('');
+  };
 
   useEffect(() => {
     const node = loadMoreTriggerRef.current;
@@ -430,9 +454,28 @@ export const FoodView: React.FC = () => {
                         </strong>
                         {tr(language, dish.whySuitableKh, dish.whySuitableEn, dish.whySuitableZh)}
                       </p>
-                      <p className="text-[10px] text-amber-900 dark:text-amber-200 bg-amber-50/80 dark:bg-amber-950/30 px-2 py-1 rounded-lg border border-amber-400/20">
-                        💡 {tr(language, dish.healthyCookingTipKh, dish.healthyCookingTipEn, dish.healthyCookingTipZh)}
-                      </p>
+                      <div className="flex items-start gap-1.5 text-[10px] text-blue-900 dark:text-blue-200 bg-blue-50 dark:bg-blue-950/30 px-2 py-1.5 rounded-lg border border-blue-300/50">
+                        <span className="shrink-0 px-1.5 py-0.5 rounded-full bg-blue-600 text-white text-[9px] font-bold">
+                          💡 {tr(language, 'គន្លឹះចម្អិន', 'Cooking tip', '烹饪小贴士')}
+                        </span>
+                        <span className="flex-1 leading-relaxed">
+                          {tr(language, dish.healthyCookingTipKh, dish.healthyCookingTipEn, dish.healthyCookingTipZh)}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            shareTip(
+                              tr(language, dish.nameKh, dish.nameEn, dish.nameZh),
+                              tr(language, dish.healthyCookingTipKh, dish.healthyCookingTipEn, dish.healthyCookingTipZh)
+                            )
+                          }
+                          className="w-8 h-8 -my-1 rounded-full bg-white dark:bg-slate-800 border border-blue-300 text-blue-700 flex items-center justify-center shrink-0 cursor-pointer active:scale-95"
+                          title={tr(language, 'ចែករំលែកគន្លឹះ', 'Share Tip', '分享小贴士')}
+                          aria-label={tr(language, 'ចែករំលែកគន្លឹះ', 'Share Tip', '分享小贴士')}
+                        >
+                          <Share2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </div>
                   );
                 })}
@@ -456,11 +499,32 @@ export const FoodView: React.FC = () => {
                 {activeConditionGuide.foodsToLimitOrAvoid.map((avoid, idx) => (
                   <div
                     key={idx}
-                    className="p-2 rounded-xl bg-rose-50/70 dark:bg-rose-950/30 border border-rose-400/30 space-y-0.5"
+                    className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-400/50 space-y-1"
                   >
-                    <p className="font-bold text-[11px] text-rose-800 dark:text-rose-200">
-                      ⚠️ {tr(language, avoid.nameKh, avoid.nameEn, avoid.nameZh)}
-                    </p>
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="font-bold text-[11px] text-amber-900 dark:text-amber-200">
+                        ⚠️ {tr(language, avoid.nameKh, avoid.nameEn, avoid.nameZh)}
+                      </p>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-amber-500 text-slate-950 font-bold">
+                          {tr(language, 'កាត់បន្ថយ', 'Limit', '少吃')}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            shareTip(
+                              tr(language, avoid.nameKh, avoid.nameEn, avoid.nameZh),
+                              tr(language, avoid.benefitOrReasonKh, avoid.benefitOrReasonEn, avoid.benefitOrReasonZh)
+                            )
+                          }
+                          className="w-8 h-8 rounded-full bg-white dark:bg-slate-800 border border-amber-400 text-amber-700 flex items-center justify-center cursor-pointer active:scale-95"
+                          title={tr(language, 'ចែករំលែកគន្លឹះ', 'Share Tip', '分享小贴士')}
+                          aria-label={tr(language, 'ចែករំលែកគន្លឹះ', 'Share Tip', '分享小贴士')}
+                        >
+                          <Share2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
                     <p className="text-[10px] text-slate-600 dark:text-slate-300 leading-relaxed">
                       {tr(language, avoid.benefitOrReasonKh, avoid.benefitOrReasonEn, avoid.benefitOrReasonZh)}
                     </p>
@@ -667,20 +731,62 @@ export const FoodView: React.FC = () => {
       </div>
 
       {/* Foods Grid Grouped by Category in Order: សម្ល -> ឆា -> ស្ងោរ -> បង្អែម */}
+      {/* Simple filters: province + healthy condition, with ONE reset button */}
+      <div className="grid grid-cols-2 gap-2 font-khmer">
+        <label className="block">
+          <span className="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">
+            📍 {tr(language, 'ខេត្ត', 'Province', '省份')}
+          </span>
+          <select
+            value={provinceFilter}
+            onChange={(e) => setProvinceFilter(e.target.value)}
+            className="w-full min-h-[44px] px-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-sm text-slate-900 dark:text-white"
+          >
+            <option value="">{tr(language, 'គ្រប់ខេត្ត', 'All provinces', '全部省份')}</option>
+            {provinceOptions.map((p) => (
+              <option key={p.id} value={p.id}>
+                {tr(language, p.kh, p.en, p.zh)} ({p.count})
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="block">
+          <span className="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">
+            🩺 {tr(language, 'សមស្របនឹង', 'Suits', '适合')}
+          </span>
+          <select
+            value={conditionFilter}
+            onChange={(e) => setConditionFilter(e.target.value as NutritionConditionId | '')}
+            className="w-full min-h-[44px] px-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-sm text-slate-900 dark:text-white"
+          >
+            <option value="">{tr(language, 'ទាំងអស់', 'Any', '不限')}</option>
+            {CONDITION_FILTER_OPTIONS.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.icon} {tr(language, c.kh, c.en, c.zh)}
+              </option>
+            ))}
+          </select>
+        </label>
+        {hasActiveFilters && (
+          <button
+            type="button"
+            onClick={resetAllFilters}
+            className="col-span-2 min-h-[44px] rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 text-sm font-bold active:scale-[0.98] transition cursor-pointer"
+          >
+            ↺ {tr(language, 'កំណត់តម្រងឡើងវិញ', 'Reset filters', '重置筛选')}
+          </button>
+        )}
+      </div>
+
       {filteredFoods.length === 0 ? (
         <div className="p-8 text-center bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 space-y-2 font-khmer shadow-xs">
           <Utensils className="w-8 h-8 mx-auto text-slate-300" />
           <p className="text-xs text-slate-500 font-medium">
             {tr(language, 'មិនមានមុខម្ហូបដែលត្រូវគ្នានឹងការស្វែងរកទេ', 'No matching dishes found', '未找到匹配的菜品')}
           </p>
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery('')}
-              className="px-3 py-1 text-xs text-[#064E3B] font-bold hover:underline"
-            >
-              {tr(language, 'សម្អាតការស្វែងរក', 'Clear search', '清除搜索')}
-            </button>
-          )}
+          <p className="text-[11px] text-slate-400">
+            {tr(language, 'សូមប្រើប៊ូតុង «កំណត់តម្រងឡើងវិញ» ខាងលើ', 'Use the "Reset filters" button above', '请使用上方“重置筛选”按钮')}
+          </p>
         </div>
       ) : (
         <div className="space-y-6">

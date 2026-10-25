@@ -5,6 +5,7 @@ import { Star, Heart, Flame, Share2, Edit2 } from 'lucide-react';
 import { shareRichContent } from '../utils/androidMediaHelper';
 import { tr } from '../utils/i18n';
 import { getLocalizedFood } from '../utils/zhDynamicTranslator';
+import { getDishNutritionProfile } from '../services/aiFoodService';
 
 interface FoodCardProps {
   food: FoodItem;
@@ -16,6 +17,14 @@ const FoodCardInner: React.FC<FoodCardProps> = ({ food }) => {
   const isKm = language === 'km';
   const isAdmin = currentUser?.role === 'admin';
   const loc = useMemo(() => getLocalizedFood(food, language), [food, language]);
+  const nutrition = useMemo(() => getDishNutritionProfile(food), [food]);
+  const kcal = food.calories ?? nutrition.caloriesKcal;
+  const sodiumLabel =
+    nutrition.sodiumLevel === 'low'
+      ? tr(language, 'ទាប', 'Low', '低')
+      : nutrition.sodiumLevel === 'high'
+      ? tr(language, 'ខ្ពស់', 'High', '高')
+      : tr(language, 'មធ្យម', 'Med', '中');
 
   const handleShareFood = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -40,7 +49,7 @@ const FoodCardInner: React.FC<FoodCardProps> = ({ food }) => {
   return (
     <div 
       onClick={() => setSelectedFood(food)}
-      style={{ contentVisibility: 'auto', containIntrinsicSize: '260px' }}
+      style={{ contentVisibility: 'auto', containIntrinsicSize: '340px' }}
       className="group bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-xs hover:shadow-md border border-slate-200/90 dark:border-slate-700/80 transition-colors duration-150 cursor-pointer flex flex-col"
     >
       {/* Image container */}
@@ -83,14 +92,15 @@ const FoodCardInner: React.FC<FoodCardProps> = ({ food }) => {
             e.stopPropagation();
             toggleBookmark(food.id);
           }}
-          className={`absolute top-2.5 right-2.5 p-2 rounded-full transition-transform active:scale-90 ${
+          className={`absolute top-1.5 right-1.5 w-10 h-10 flex items-center justify-center rounded-full transition-transform active:scale-90 ${
             bookmarked 
               ? 'bg-rose-500 text-white shadow-md' 
               : 'bg-white/95 dark:bg-slate-900/95 text-slate-700 dark:text-slate-300 hover:text-rose-500'
           }`}
+          aria-pressed={bookmarked}
           title={tr(language, 'រក្សាទុក', 'Save', '收藏')}
         >
-          <Heart className={`w-3.5 h-3.5 ${bookmarked ? 'fill-current' : ''}`} />
+          <Heart className={`w-4 h-4 ${bookmarked ? 'fill-current' : ''}`} />
         </button>
 
         {/* Reference Image Label (រូបភាពយោង) */}
@@ -102,14 +112,33 @@ const FoodCardInner: React.FC<FoodCardProps> = ({ food }) => {
       {/* Content */}
       <div className="p-3.5 flex flex-col flex-1 justify-between">
         <div>
-          <div className="flex items-center justify-between gap-1 mb-1">
+          <div className="mb-1">
             <h3 className="font-bold text-sm text-[#0F172A] dark:text-white group-hover:text-[#059669] transition line-clamp-1">
               {loc.name}
             </h3>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1">
+              {language === 'km' ? food.nameEn : language === 'en' ? food.nameKh : `${food.nameKh} · ${food.nameEn}`}
+            </p>
           </div>
-          <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed mb-2.5">
-            {loc.description}
+          <p className="text-xs font-bold text-[#064E3B] dark:text-emerald-300 mb-2">
+            💰 ${(food.priceUsd ?? 0).toFixed(2)} <span className="text-slate-400 font-medium">· {food.priceRiel.toLocaleString()} ៛</span>
           </p>
+
+          {/* 3 key nutrition facts (estimates; calories use the dish's stored value when available) */}
+          <div className="grid grid-cols-3 gap-1 mb-2.5" title={tr(language, 'តម្លៃប៉ាន់ស្មាន', 'Approximate values', '数值为估算')}>
+            <div className="rounded-lg bg-orange-50 dark:bg-orange-950/30 px-1 py-1 text-center">
+              <div className="text-[11px] font-bold text-orange-700 dark:text-orange-300">{kcal}</div>
+              <div className="text-[9px] text-slate-500">{tr(language, 'កាឡូរី', 'kcal', '千卡')}</div>
+            </div>
+            <div className="rounded-lg bg-emerald-50 dark:bg-emerald-950/30 px-1 py-1 text-center">
+              <div className="text-[11px] font-bold text-emerald-700 dark:text-emerald-300">≈{nutrition.proteinG}g</div>
+              <div className="text-[9px] text-slate-500">{tr(language, 'ប្រូតេអ៊ីន', 'protein', '蛋白质')}</div>
+            </div>
+            <div className="rounded-lg bg-sky-50 dark:bg-sky-950/30 px-1 py-1 text-center">
+              <div className="text-[11px] font-bold text-sky-700 dark:text-sky-300">{sodiumLabel}</div>
+              <div className="text-[9px] text-slate-500">{tr(language, 'ជាតិប្រៃ', 'sodium', '钠')}</div>
+            </div>
+          </div>
         </div>
 
         {/* Footer meta */}
@@ -120,20 +149,15 @@ const FoodCardInner: React.FC<FoodCardProps> = ({ food }) => {
             <span className="text-slate-400 text-[10px]">({food.reviewCount ?? 0})</span>
           </div>
 
-          <div className="flex items-center gap-1.5">
-            <div className="flex items-center gap-0.5 text-slate-500 text-[10px]">
-              <Flame className="w-3 h-3 text-orange-500" />
-              <span>{food.calories ?? 320} {tr(language, 'kcal', 'kcal', '千卡')}</span>
-            </div>
-            <button
-              type="button"
-              onClick={handleShareFood}
-              className="p-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-200 transition"
-              title={tr(language, 'ចែករំលែកមុខម្ហូប', 'Share dish', '分享菜品')}
-            >
-              <Share2 className="w-3 h-3" />
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={handleShareFood}
+            className="min-w-[44px] min-h-[36px] px-2 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-200 transition flex items-center justify-center gap-1 text-[11px] font-semibold"
+            title={tr(language, 'ចែករំលែកមុខម្ហូប', 'Share dish', '分享菜品')}
+          >
+            <Share2 className="w-3.5 h-3.5" />
+            <span>{tr(language, 'ចែក', 'Share', '分享')}</span>
+          </button>
         </div>
       </div>
     </div>
