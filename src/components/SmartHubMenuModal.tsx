@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
-  X, Compass, Navigation, Heart, BadgeCheck, Wifi, WifiOff, Bot, ChevronDown, Lock,
+  X, Compass, Navigation, Heart, BadgeCheck, Wifi, WifiOff, Bot, ChevronDown, Lock, Flame,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { isUserVipActive, organizeAndDeduplicateFoods } from '../types';
@@ -23,7 +23,7 @@ interface Props {
 export const SmartHubMenuModal: React.FC<Props> = ({ onClose }) => {
   const {
     language, foods, restaurants, destinations, bookmarks, currentUser, showToast,
-    setActiveTab, setSelectedFood, setIsNearMeModalOpen, setIsAiTripPlannerModalOpen, setIsWishlistsModalOpen, openUpgradeVipModal,
+    setActiveTab, setSelectedFood, setIsNearMeModalOpen, setIsAiTripPlannerModalOpen, setIsWishlistsModalOpen, setIsTrendingSocialModalOpen, openUpgradeVipModal,
   } = useApp();
   const [openPanel, setOpenPanel] = useState<'trips' | 'stamps' | null>(null);
   const [online, setOnline] = useState<boolean>(() => (typeof navigator === 'undefined' ? true : navigator.onLine !== false));
@@ -121,6 +121,26 @@ export const SmartHubMenuModal: React.FC<Props> = ({ onClose }) => {
             <h3 className="font-moul text-sm text-[#064E3B] dark:text-emerald-300">
               🧭 {tr(language, 'ឧបករណ៍ទេសចរណ៍ និងម្ហូបឆ្លាតវៃ', 'Smart Travel & Food Tools', '智能出行与美食工具')}
             </h3>
+
+            {/* Trending Khmer Food & Online Discovery */}
+            <button
+              type="button"
+              className={rowCls}
+              onClick={() => {
+                onClose();
+                setIsTrendingSocialModalOpen(true);
+              }}
+            >
+              <span className={`${iconBox} bg-rose-100 text-rose-600`}><Flame className="w-5 h-5" /></span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-sm font-bold text-slate-900 dark:text-white">
+                  {tr(language, 'ម្ហូបខ្មែរកំពុងពេញនិយម (Online)', 'Trending Khmer Food & Online Discovery', '热门高棉美食（在线发现）')}
+                </span>
+                <span className="block text-xs text-slate-500 dark:text-slate-400">
+                  {tr(language, 'YouTube • TikTok • Facebook • Wikipedia', 'YouTube · TikTok · Facebook · Wikipedia', 'YouTube · TikTok · Facebook · 维基百科')}
+                </span>
+              </span>
+            </button>
 
             {/* 1-Day food trips (free) */}
             <button type="button" className={rowCls} onClick={() => setOpenPanel(openPanel === 'trips' ? null : 'trips')} aria-expanded={openPanel === 'trips'}>

@@ -589,6 +589,7 @@ export const HomeView: React.FC = () => {
                   language={language}
                   items={trendingFoods.slice(0, 10)}
                   onOpen={handleOpenFoodDetail}
+                  onExploreAll={() => setIsTrendingSocialModalOpen(true)}
                 />
               ) : (
                 <HomeEmptyState

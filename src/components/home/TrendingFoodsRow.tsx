@@ -1,5 +1,5 @@
 import React from 'react';
-import { MapPin } from 'lucide-react';
+import { MapPin, ChevronRight } from 'lucide-react';
 import type { TrendingFoodItem, Language } from '../../types';
 import { tr } from '../../utils/i18n';
 import { translateSignatureDish } from '../../utils/zhDynamicTranslator';
@@ -8,14 +8,27 @@ interface Props {
   language: Language;
   items: TrendingFoodItem[];
   onOpen: (item: TrendingFoodItem) => void;
+  onExploreAll?: () => void;
 }
 
 /** Horizontal, swipeable list of trending foods. */
-export const TrendingFoodsRow: React.FC<Props> = ({ language, items, onOpen }) => (
+export const TrendingFoodsRow: React.FC<Props> = ({ language, items, onOpen, onExploreAll }) => (
   <section className="space-y-2.5">
-    <h3 className="font-moul text-base text-[#064E3B] dark:text-emerald-300">
-      🔥 {tr(language, 'ម្ហូបកំពុងពេញនិយម', 'Trending foods', '热门美食')}
-    </h3>
+    <div className="flex items-center justify-between gap-2">
+      <h3 className="font-moul text-base text-[#064E3B] dark:text-emerald-300">
+        🔥 {tr(language, 'ម្ហូបកំពុងពេញនិយម', 'Trending Khmer Food', '热门高棉美食')}
+      </h3>
+      {onExploreAll && (
+        <button
+          type="button"
+          onClick={onExploreAll}
+          className="px-2.5 py-1 rounded-full bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 text-xs font-extrabold flex items-center gap-0.5 active:scale-95 transition cursor-pointer"
+        >
+          <span>{tr(language, 'ស្វែងរកតាមអនឡាញ', 'Online Discovery', '在线美食发现')}</span>
+          <ChevronRight className="w-3.5 h-3.5" />
+        </button>
+      )}
+    </div>
     <div className="flex gap-3 overflow-x-auto no-scrollbar snap-x snap-mandatory -mx-4 px-4 pb-1">
       {items.map((item) => {
         const name =
