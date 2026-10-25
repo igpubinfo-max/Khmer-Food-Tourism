@@ -2,7 +2,8 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import {
   X, Flame, MapPin, Eye, ExternalLink, Navigation, Phone, Share2, Calendar,
-  UtensilsCrossed, RefreshCw, Info, Plus, ChefHat, CheckCircle2, Globe, ChevronDown, Play
+  UtensilsCrossed, RefreshCw, Info, Plus, ChefHat, CheckCircle2, Globe, ChevronDown, Play,
+  Search, AlertCircle, RotateCcw
 } from 'lucide-react';
 import { TrendingFoodCategorySlug } from '../types';
 import { shareRichContent } from '../utils/androidMediaHelper';
@@ -10,6 +11,8 @@ import { tr, translateProvince } from '../utils/i18n';
 import { translateDynamicTextToZh } from '../utils/zhDynamicTranslator';
 import {
   fetchOnlineFoodDiscoveryFeed,
+  searchAndDiscoverSocialFood,
+  extractEmbedPlayerInfo,
   addCustomDiscoveryUrl,
   DiscoveryPlatformId,
   OnlineFoodDiscoveryItem,
@@ -30,6 +33,7 @@ export const TrendingSocialModal: React.FC = () => {
   } = useApp();
 
   const isKm = language === 'km';
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [platformFilter, setPlatformFilter] = useState<'all' | DiscoveryPlatformId>('all');
   const [categoryFilter, setCategoryFilter] = useState<TrendingFoodCategorySlug>('all');
   const [provinceFilter, setProvinceFilter] = useState<string>('all');
@@ -38,17 +42,24 @@ export const TrendingSocialModal: React.FC = () => {
   const [apiStatuses, setApiStatuses] = useState<PlatformApiStatus[]>([]);
   const [lastCheckedAt, setLastCheckedAt] = useState<string>('');
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
+  const [hasError, setHasError] = useState<boolean>(false);
   const [cooldownSec, setCooldownSec] = useState<number>(0);
   const [showStatusPanel, setShowStatusPanel] = useState<boolean>(false);
   const [showAddUrlPanel, setShowAddUrlPanel] = useState<boolean>(false);
   const [customUrlInput, setCustomUrlInput] = useState<string>('');
   const [isAddingUrl, setIsAddingUrl] = useState<boolean>(false);
 
+  // Active inline video player tracking
+  const [activePlayerItemId, setActivePlayerItemId] = useState<string | null>(null);
+
   const loadFeed = useCallback(
     async (force = false) => {
       setIsRefreshing(true);
+      setHasError(false);
       try {
-        const res = await fetchOnlineFoodDiscoveryFeed({
+        const res = await searchAndDiscoverSocialFood({
+          query: searchQuery,
+          platform: platformFilter,
           foods,
           trendingFoods,
           forceRefresh: force,
@@ -81,11 +92,22 @@ export const TrendingSocialModal: React.FC = () => {
             );
           }
         }
+      } catch {
+        setHasError(true);
+        showToast(
+          tr(
+            language,
+            '⚠️ មិនអាចទាញយកទិន្នន័យអនឡាញបានទេ សូមពិនិត្យការតភ្ជាប់អ៊ីនធឺណិត',
+            '⚠️ Could not reach online discovery feed. Please check connection.',
+            '⚠️ 无法连接在线发现源，请检查网络连接。'
+          ),
+          'warning'
+        );
       } finally {
         setIsRefreshing(false);
       }
     },
-    [foods, trendingFoods, language, showToast]
+    [foods, trendingFoods, language, showToast, searchQuery, platformFilter]
   );
 
   // Automatic load on open + scheduled refresh check every 30 minutes while open
@@ -106,6 +128,13 @@ export const TrendingSocialModal: React.FC = () => {
     }, 1000);
     return () => clearInterval(t);
   }, [cooldownSec]);
+
+  // Stop inline video when modal closes
+  useEffect(() => {
+    if (!isTrendingSocialModalOpen) {
+      setActivePlayerItemId(null);
+    }
+  }, [isTrendingSocialModalOpen]);
 
   const handleAddCustomUrl = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -154,9 +183,14 @@ export const TrendingSocialModal: React.FC = () => {
       ) {
         return false;
       }
+      if (searchQuery.trim()) {
+        const q = searchQuery.trim().toLowerCase();
+        const hay = `${item.titleKh} ${item.titleEn} ${item.titleZh || ''} ${item.descriptionKh} ${item.descriptionEn} ${item.sourceName} ${item.matchedFoodNameKh || ''} ${item.matchedFoodNameEn || ''}`.toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
       return true;
     });
-  }, [discoveryItems, platformFilter, categoryFilter, provinceFilter]);
+  }, [discoveryItems, platformFilter, categoryFilter, provinceFilter, searchQuery]);
 
   if (!isTrendingSocialModalOpen) return null;
 
@@ -217,14 +251,15 @@ export const TrendingSocialModal: React.FC = () => {
     }
   };
 
-  const handleOpenItem = (item: OnlineFoodDiscoveryItem) => {
-    const url = item.sourceUrl || item.trendingItem?.videoUrl || item.trendingItem?.sourceUrl;
-    const isVideoPlatform =
-      item.platform === 'youtube' ||
-      item.platform === 'tiktok' ||
-      Boolean(url && /youtube\.com|youtu\.be|tiktok\.com|fb\.watch/i.test(url));
+  const handlePlayOrOpenItem = (item: OnlineFoodDiscoveryItem) => {
+    const playerInfo = extractEmbedPlayerInfo(item);
+    if (playerInfo.canInlineEmbed && playerInfo.embedUrl) {
+      setActivePlayerItemId((prev) => (prev === item.id ? null : item.id));
+      return;
+    }
 
-    if (isVideoPlatform && url) {
+    const url = item.sourceUrl || item.trendingItem?.videoUrl || item.trendingItem?.sourceUrl;
+    if (url) {
       openExternalVideoOrLinkSafely(url, item.titleEn || item.titleKh);
       return;
     }
@@ -235,25 +270,16 @@ export const TrendingSocialModal: React.FC = () => {
       return;
     }
 
-    if (url) {
-      openExternalVideoOrLinkSafely(url, item.titleEn || item.titleKh);
-      return;
-    }
-
     if (item.matchedFoodId) {
       const f = foods.find((x) => x.id === item.matchedFoodId);
-      if (f) {
-        setSelectedFood(f);
-      }
+      if (f) setSelectedFood(f);
     }
   };
 
   const handleOpenRecipeDish = (foodId?: string) => {
     if (!foodId) return;
     const f = foods.find((x) => x.id === foodId);
-    if (f) {
-      setSelectedFood(f);
-    }
+    if (f) setSelectedFood(f);
   };
 
   const handleCall = (phone?: string) => {
@@ -298,6 +324,13 @@ export const TrendingSocialModal: React.FC = () => {
       },
       showToast
     );
+  };
+
+  const handleResetFilters = () => {
+    setSearchQuery('');
+    setPlatformFilter('all');
+    setCategoryFilter('all');
+    setProvinceFilter('all');
   };
 
   const formattedLastChecked = lastCheckedAt
@@ -377,6 +410,35 @@ export const TrendingSocialModal: React.FC = () => {
           </div>
         </div>
 
+        {/* Search Input Bar (Multilingual km / en / zh) */}
+        <div className="p-2.5 bg-slate-900 border-b border-slate-800 shrink-0">
+          <div className="relative flex items-center">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3 pointer-events-none" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder={tr(
+                language,
+                'ស្វែងរកមុខម្ហូបខ្មែរ វីដេអូ ឬប្រភព (YouTube, TikTok, FB)...',
+                'Search Khmer dishes, videos or sources (YouTube, TikTok, FB)...',
+                '搜索高棉美食、视频或来源 (YouTube, TikTok, FB)...'
+              )}
+              className="w-full pl-9 pr-8 py-2 rounded-2xl bg-slate-800/90 border border-slate-700/80 text-xs text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-rose-500 font-khmer shadow-inner"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="absolute right-2.5 p-1 rounded-full text-slate-400 hover:text-white transition cursor-pointer"
+                title={tr(language, 'សម្អាតការស្វែងរក', 'Clear search', '清除搜索')}
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+        </div>
+
         {/* Action & Transparency Bar: API Status + Add Video Link */}
         <div className="px-3 py-2 bg-slate-900 text-white border-b border-slate-800 flex items-center justify-between gap-2 shrink-0 font-khmer text-[11px]">
           <button
@@ -399,7 +461,7 @@ export const TrendingSocialModal: React.FC = () => {
           </button>
         </div>
 
-        {/* Expandable Platform API Transparency Panel (Rule #8) */}
+        {/* Expandable Platform API Transparency Panel */}
         {showStatusPanel && (
           <div className="p-3 bg-slate-950 text-slate-200 border-b border-slate-800 space-y-2 shrink-0 font-khmer text-[11px] max-h-56 overflow-y-auto">
             <div className="font-bold text-amber-300 flex items-center gap-1.5">
@@ -536,10 +598,58 @@ export const TrendingSocialModal: React.FC = () => {
 
         {/* List of Discovered & Trending Khmer Food Items */}
         <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 space-y-4 no-scrollbar font-khmer text-xs [-webkit-overflow-scrolling:touch]">
-          {filteredItems.length === 0 ? (
-            <div className="py-12 text-center text-slate-400 space-y-2">
-              <UtensilsCrossed className="w-10 h-10 mx-auto text-slate-500" />
-              <p>{tr(language, 'មិនមានមុខម្ហូបត្រូវនឹងការស្វែងរកនេះទេ', 'No food discoveries matching this filter', '未找到符合筛选条件的美食内容')}</p>
+          {/* Loading Skeleton */}
+          {isRefreshing && discoveryItems.length === 0 ? (
+            <div className="space-y-4">
+              {[1, 2, 3].map((sk) => (
+                <div key={sk} className="rounded-3xl bg-white dark:bg-slate-800 p-3 border border-slate-200 dark:border-slate-700 animate-pulse space-y-3">
+                  <div className="aspect-16/9 w-full bg-slate-200 dark:bg-slate-700 rounded-2xl" />
+                  <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-3/4" />
+                  <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded w-1/2" />
+                </div>
+              ))}
+            </div>
+          ) : hasError && discoveryItems.length === 0 ? (
+            /* Error State with Retry Button */
+            <div className="py-12 text-center text-slate-400 space-y-3">
+              <AlertCircle className="w-12 h-12 mx-auto text-rose-500" />
+              <p className="text-sm font-bold text-white">
+                {tr(
+                  language,
+                  'មិនអាចទាញទិន្នន័យបានទេ សូមពិនិត្យការតភ្ជាប់អ៊ីនធឺណិត',
+                  'Failed to load social feed. Please check your connection.',
+                  '无法加载内容，请检查网络连接。'
+                )}
+              </p>
+              <button
+                type="button"
+                onClick={() => loadFeed(true)}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs cursor-pointer shadow-md"
+              >
+                <RotateCcw className="w-4 h-4" />
+                <span>{tr(language, 'សាកល្បងម្ដងទៀត', 'Retry', '重试')}</span>
+              </button>
+            </div>
+          ) : filteredItems.length === 0 ? (
+            /* Empty State with Reset Filters Button */
+            <div className="py-12 text-center text-slate-400 space-y-3">
+              <UtensilsCrossed className="w-12 h-12 mx-auto text-slate-500" />
+              <p className="text-sm font-bold text-slate-300">
+                {tr(
+                  language,
+                  'រកមិនឃើញមុខម្ហូបត្រូវនឹងការស្វែងរកនេះទេ',
+                  'No food discoveries matching this filter',
+                  '未找到符合筛选条件的美食内容'
+                )}
+              </p>
+              <button
+                type="button"
+                onClick={handleResetFilters}
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-rose-400 font-bold text-xs cursor-pointer border border-slate-700 shadow-sm"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>{tr(language, 'សម្អាតតម្រងទាំងអស់', 'Reset Filters', '重置所有筛选')}</span>
+              </button>
             </div>
           ) : (
             filteredItems.map((item) => {
@@ -557,54 +667,88 @@ export const TrendingSocialModal: React.FC = () => {
                   : item.descriptionEn;
               const displayProv = translateProvince(item.provinceKh || item.provinceEn, language);
 
+              const playerInfo = extractEmbedPlayerInfo(item);
+              const isPlayingInline = activePlayerItemId === item.id;
+
               return (
                 <div
                   key={item.id}
                   className="rounded-3xl overflow-hidden bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 shadow-sm space-y-3 transition hover:shadow-md"
                 >
-                  {/* Thumbnail Banner */}
-                  <div
-                    onClick={() => handleOpenItem(item)}
-                    className="group relative aspect-16/9 w-full overflow-hidden bg-slate-900 cursor-pointer"
-                  >
-                    <img
-                      src={item.thumbnailUrl}
-                      alt={displayTitle}
-                      className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
-                      loading="lazy"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
-
-                    {/* Platform & Verification Status Badge */}
-                    <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 flex-wrap">
-                      <span className={`px-2 py-0.5 rounded-full text-[9px] font-black shadow-xs ${platformBadgeStyle(item.platform)}`}>
-                        {platformLabel(item.platform)}
-                      </span>
-                      <span className="px-2 py-0.5 rounded-full bg-black/70 text-emerald-200 text-[9px] font-bold backdrop-blur-xs flex items-center gap-1 border border-white/15">
-                        <CheckCircle2 className="w-2.5 h-2.5 text-emerald-400" />
-                        <span>{tr(language, item.verificationBadgeKh, item.verificationBadgeEn, item.verificationBadgeZh)}</span>
-                      </span>
-                    </div>
-
-                    {/* Center Play Overlay for YouTube / Video Items */}
-                    {(item.platform === 'youtube' || item.platform === 'tiktok') && (
-                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <div className="w-11 h-11 rounded-full bg-red-600/90 group-hover:bg-red-600 text-white flex items-center justify-center shadow-lg border-2 border-white/80 transition transform group-hover:scale-110">
-                          <Play className="w-5 h-5 fill-current ml-0.5" />
-                        </div>
+                  {/* Inline Embed Player OR Thumbnail Banner */}
+                  {isPlayingInline && playerInfo.canInlineEmbed && playerInfo.embedUrl ? (
+                    <div className="relative aspect-16/9 w-full bg-black overflow-hidden shadow-inner">
+                      <iframe
+                        src={playerInfo.embedUrl}
+                        title={displayTitle}
+                        className="w-full h-full border-0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowFullScreen
+                      />
+                      <div className="absolute top-2 right-2 flex items-center gap-1.5 z-10">
+                        <button
+                          type="button"
+                          onClick={() => openExternalVideoOrLinkSafely(item.sourceUrl, displayTitle)}
+                          className="px-2 py-1 rounded-lg bg-black/80 hover:bg-black text-white text-[10px] font-bold flex items-center gap-1 border border-white/20 backdrop-blur-xs cursor-pointer"
+                          title={tr(language, 'បើកក្នុងកម្មវិធីដើម', 'Open in App', '在应用中打开')}
+                        >
+                          <ExternalLink className="w-3 h-3 text-rose-400" />
+                          <span>{tr(language, 'បើកក្នុង App', 'Open App', '在应用中打开')}</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setActivePlayerItemId(null)}
+                          className="px-2 py-1 rounded-lg bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold flex items-center gap-1 shadow-md cursor-pointer"
+                        >
+                          <X className="w-3 h-3" />
+                          <span>{tr(language, 'បិទ', 'Close', '关闭')}</span>
+                        </button>
                       </div>
-                    )}
-
-                    {/* Title & Source Attribution Overlay */}
-                    <div className="absolute bottom-2.5 left-3 right-3">
-                      <h4 className="font-moul text-xs sm:text-sm text-white drop-shadow leading-snug line-clamp-2">
-                        {displayTitle}
-                      </h4>
-                      <p className="text-[10px] text-amber-200 font-bold truncate mt-0.5">
-                        📡 {item.sourceName} • 📍 {displayProv}
-                      </p>
                     </div>
-                  </div>
+                  ) : (
+                    <div
+                      onClick={() => handlePlayOrOpenItem(item)}
+                      className="group relative aspect-16/9 w-full overflow-hidden bg-slate-900 cursor-pointer"
+                    >
+                      <img
+                        src={item.thumbnailUrl}
+                        alt={displayTitle}
+                        className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                        loading="lazy"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
+
+                      {/* Platform & Verification Status Badge */}
+                      <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 flex-wrap">
+                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-black shadow-xs ${platformBadgeStyle(item.platform)}`}>
+                          {platformLabel(item.platform)}
+                        </span>
+                        <span className="px-2 py-0.5 rounded-full bg-black/70 text-emerald-200 text-[9px] font-bold backdrop-blur-xs flex items-center gap-1 border border-white/15">
+                          <CheckCircle2 className="w-2.5 h-2.5 text-emerald-400" />
+                          <span>{tr(language, item.verificationBadgeKh, item.verificationBadgeEn, item.verificationBadgeZh)}</span>
+                        </span>
+                      </div>
+
+                      {/* Center Play Overlay for Video Platforms */}
+                      {(item.platform === 'youtube' || item.platform === 'tiktok' || item.platform === 'facebook') && (
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                          <div className="w-11 h-11 rounded-full bg-red-600/90 group-hover:bg-red-600 text-white flex items-center justify-center shadow-lg border-2 border-white/80 transition transform group-hover:scale-110">
+                            <Play className="w-5 h-5 fill-current ml-0.5" />
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Title & Source Attribution Overlay */}
+                      <div className="absolute bottom-2.5 left-3 right-3">
+                        <h4 className="font-moul text-xs sm:text-sm text-white drop-shadow leading-snug line-clamp-2">
+                          {displayTitle}
+                        </h4>
+                        <p className="text-[10px] text-amber-200 font-bold truncate mt-0.5">
+                          📡 {item.sourceName} • 📍 {displayProv}
+                        </p>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Content Details */}
                   <div className="p-3 pt-0 space-y-2.5">
@@ -612,7 +756,7 @@ export const TrendingSocialModal: React.FC = () => {
                       {displayDesc}
                     </p>
 
-                    {/* Matched Cambodian Dish Chip (opens the dish recipe modal in 1 tap) */}
+                    {/* Matched Cambodian Dish Chip (opens recipe modal in 1 tap) */}
                     {item.matchedFoodId && (
                       <div className="flex items-center justify-between gap-2 p-2 rounded-xl bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800">
                         <div className="flex items-center gap-1.5 min-w-0">
@@ -664,18 +808,27 @@ export const TrendingSocialModal: React.FC = () => {
                     <div className="grid grid-cols-4 gap-1.5 pt-1">
                       <button
                         type="button"
-                        onClick={() => handleOpenItem(item)}
+                        onClick={() => handlePlayOrOpenItem(item)}
                         className={`py-1.5 px-2 rounded-xl font-bold text-[10px] flex items-center justify-center gap-1 transition cursor-pointer ${
-                          item.platform === 'youtube' || item.platform === 'tiktok'
-                            ? 'bg-red-600 hover:bg-red-700 text-white shadow-xs'
+                          item.platform === 'youtube' || item.platform === 'tiktok' || item.platform === 'facebook'
+                            ? isPlayingInline
+                              ? 'bg-slate-700 text-white'
+                              : 'bg-red-600 hover:bg-red-700 text-white shadow-xs'
                             : 'bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/50 text-[#064E3B] dark:text-emerald-300'
                         }`}
                       >
-                        {item.platform === 'youtube' || item.platform === 'tiktok' ? (
-                          <>
-                            <Play className="w-3 h-3 fill-current" />
-                            <span>{tr(language, 'ចាក់វីដេអូ', 'Play', '播放')}</span>
-                          </>
+                        {item.platform === 'youtube' || item.platform === 'tiktok' || item.platform === 'facebook' ? (
+                          isPlayingInline ? (
+                            <>
+                              <X className="w-3 h-3" />
+                              <span>{tr(language, 'បិទ', 'Close', '关闭')}</span>
+                            </>
+                          ) : (
+                            <>
+                              <Play className="w-3 h-3 fill-current" />
+                              <span>{tr(language, 'ចាក់វីដេអូ', 'Play', '播放')}</span>
+                            </>
+                          )
                         ) : (
                           <>
                             <Eye className="w-3 h-3" />

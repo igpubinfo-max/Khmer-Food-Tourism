@@ -802,3 +802,179 @@ function readCache(foods: FoodItem[], trending: TrendingFoodItem[]): OnlineDisco
     return null;
   }
 }
+
+
+export interface EmbedPlayerInfo {
+  canInlineEmbed: boolean;
+  embedUrl: string | null;
+  platform: DiscoveryPlatformId;
+  videoId?: string;
+}
+
+/**
+ * Extracts iframe player embed URL safely for YouTube, TikTok, and Facebook.
+ * Marks canInlineEmbed=false for profile / non-video URLs so they cleanly open in app/browser.
+ */
+export function extractEmbedPlayerInfo(item: OnlineFoodDiscoveryItem): EmbedPlayerInfo {
+  const url = (item.sourceUrl || item.trendingItem?.videoUrl || item.trendingItem?.sourceUrl || '').trim();
+  if (!url) {
+    return { canInlineEmbed: false, embedUrl: null, platform: item.platform };
+  }
+
+  // 1. YouTube: extract 11-char video ID
+  if (item.platform === 'youtube' || /youtube\.com|youtu\.be/i.test(url)) {
+    let vid: string | null = null;
+    const mWatch = url.match(/[?&]v=([a-zA-Z0-9_-]{11})/);
+    if (mWatch) vid = mWatch[1];
+    if (!vid) {
+      const mShort = url.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
+      if (mShort) vid = mShort[1];
+    }
+    if (!vid) {
+      const mEmbed = url.match(/embed\/([a-zA-Z0-9_-]{11})/);
+      if (mEmbed) vid = mEmbed[1];
+    }
+    if (!vid && item.id.startsWith('yt-api-')) {
+      vid = item.id.replace('yt-api-', '');
+    } else if (!vid && item.id.startsWith('yt-live-')) {
+      vid = item.id.replace('yt-live-', '');
+    }
+
+    if (vid && vid.length >= 10) {
+      return {
+        canInlineEmbed: true,
+        embedUrl: `https://www.youtube-nocookie.com/embed/${vid}?autoplay=1&playsinline=1&rel=0`,
+        platform: 'youtube',
+        videoId: vid,
+      };
+    }
+    return { canInlineEmbed: false, embedUrl: null, platform: 'youtube' };
+  }
+
+  // 2. TikTok: extract video ID from /video/(\d+)
+  if (item.platform === 'tiktok' || /tiktok\.com/i.test(url)) {
+    const mVid = url.match(/\/video\/(\d+)/i);
+    if (mVid && mVid[1]) {
+      return {
+        canInlineEmbed: true,
+        embedUrl: `https://www.tiktok.com/player/v1/${mVid[1]}?autoplay=1`,
+        platform: 'tiktok',
+        videoId: mVid[1],
+      };
+    }
+    return { canInlineEmbed: false, embedUrl: null, platform: 'tiktok' };
+  }
+
+  // 3. Facebook: public video link
+  if (item.platform === 'facebook' || /facebook\.com|fb\.watch/i.test(url)) {
+    if (/\/videos\//i.test(url) || /fb\.watch/i.test(url) || url.includes('/watch/?v=')) {
+      return {
+        canInlineEmbed: true,
+        embedUrl: `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false`,
+        platform: 'facebook',
+      };
+    }
+    return { canInlineEmbed: false, embedUrl: null, platform: 'facebook' };
+  }
+
+  return { canInlineEmbed: false, embedUrl: null, platform: item.platform };
+}
+
+export interface SearchSocialOptions {
+  query?: string;
+  platform?: 'all' | DiscoveryPlatformId;
+  foods?: FoodItem[];
+  trendingFoods?: TrendingFoodItem[];
+  forceRefresh?: boolean;
+}
+
+export interface SearchSocialResult extends OnlineDiscoveryFeedResult {
+  fromBackendEdge: boolean;
+}
+
+const SUPABASE_BASE_URL = (import.meta as any)?.env?.VITE_SUPABASE_URL || 'https://ryvltobwuwuulazqjnza.supabase.co';
+const SUPABASE_ANON_KEY = (import.meta as any)?.env?.VITE_SUPABASE_ANON_KEY || 'sb_publishable_h5ufAaA0qAL3s-ebprATsw_8AApv71l';
+
+/**
+ * Unified discovery and search for YouTube, TikTok, Facebook, and Wikipedia.
+ * 1. Queries backend Edge Function (with live YouTube API, TikTok Display API & Meta Graph API).
+ * 2. Gracefully falls back to client-side oEmbed, Wikipedia MediaWiki API & curated links.
+ * 3. Filters and ranks results by Cambodian culinary relevance.
+ */
+export async function searchAndDiscoverSocialFood(
+  options: SearchSocialOptions = {}
+): Promise<SearchSocialResult> {
+  const { query = '', platform = 'all', foods = initialFoods, trendingFoods = initialTrendingFoods, forceRefresh = false } = options;
+
+  let backendItems: OnlineFoodDiscoveryItem[] = [];
+  let fromBackendEdge = false;
+
+  // Try Supabase Edge Function first (with 4.5s timeout)
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 4500);
+    const edgeEndpoint = `${SUPABASE_BASE_URL}/functions/v1/social-food-discovery`;
+    const res = await fetch(edgeEndpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+      },
+      body: JSON.stringify({ query, platform }),
+      signal: controller.signal,
+    });
+    clearTimeout(timeout);
+
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data?.items) && data.items.length > 0) {
+        backendItems = data.items.map((it: any) => {
+          const match = matchCambodianDish(`${it.titleEn || it.titleKh} ${it.descriptionEn || it.descriptionKh}`, foods);
+          return {
+            ...it,
+            matchedFoodId: it.matchedFoodId || match?.food?.id,
+            matchedFoodNameKh: it.matchedFoodNameKh || match?.food?.nameKh,
+            matchedFoodNameEn: it.matchedFoodNameEn || match?.food?.nameEn,
+          };
+        });
+        fromBackendEdge = true;
+      }
+    }
+  } catch {
+    // Edge function unreachable or offline; smoothly fallback
+  }
+
+  // Fetch base discovery feed (live Wikipedia API + official oEmbed YouTube/TikTok + verified links)
+  const baseFeed = await fetchOnlineFoodDiscoveryFeed({
+    foods,
+    trendingFoods,
+    forceRefresh,
+  });
+
+  // Merge and deduplicate
+  let combined = deduplicateAndRankDiscoveries([...backendItems, ...baseFeed.items]);
+
+  // Apply query filter if specified
+  const qClean = query.trim().toLowerCase();
+  if (qClean) {
+    combined = combined.filter((item) => {
+      const inTitle = (item.titleKh + ' ' + item.titleEn + ' ' + (item.titleZh || '')).toLowerCase();
+      const inDesc = (item.descriptionKh + ' ' + item.descriptionEn + ' ' + (item.descriptionZh || '')).toLowerCase();
+      const inSrc = (item.sourceName + ' ' + (item.authorHandle || '')).toLowerCase();
+      const inFood = ((item.matchedFoodNameKh || '') + ' ' + (item.matchedFoodNameEn || '')).toLowerCase();
+      return inTitle.includes(qClean) || inDesc.includes(qClean) || inSrc.includes(qClean) || inFood.includes(qClean);
+    });
+  }
+
+  // Apply platform filter if not 'all'
+  if (platform !== 'all') {
+    combined = combined.filter((item) => item.platform === platform);
+  }
+
+  return {
+    ...baseFeed,
+    items: combined,
+    fromBackendEdge,
+  };
+}
