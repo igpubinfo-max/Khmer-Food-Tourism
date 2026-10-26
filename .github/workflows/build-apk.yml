@@ -1,4 +1,4 @@
-name: Build Android APK
+name: Build Android APK & Play Store AAB
 
 on:
   push:
@@ -49,7 +49,7 @@ jobs:
           mkdir -p android/app/src/main/assets/public
           cp -rf dist/* android/app/src/main/assets/public/
 
-      - name: 8. Build Signed Android Release APK Only (V1/V2/V3 Play Protect Verified)
+      - name: 8. Build Signed Android Release APK & Play Store AAB
         run: |
           if [ ! -f android/app/khmerfood-upload-key.jks ]; then
             keytool -genkeypair -v -noprompt \
@@ -63,11 +63,12 @@ jobs:
           cd android
           chmod +x ./gradlew
           ./gradlew assembleRelease --no-daemon -x lint -x lintVitalRelease || ./gradlew assembleDebug --no-daemon
+          ./gradlew bundleRelease --no-daemon -x lint -x lintVitalRelease
 
-      - name: 9. Locate and Rename Signed APK File
+      - name: 9. Locate and Rename Signed APK and AAB Files
         run: |
-          echo "=== SEARCHING FOR GENERATED APK FILE ==="
-          find . -name "*.apk" -ls
+          echo "=== SEARCHING FOR GENERATED APK & AAB FILES ==="
+          find . -name "*.apk" -o -name "*.aab" -ls
           mkdir -p android/app/build/outputs/apk/debug
           REL_APK=$(find android/app/build/outputs/apk/release -name "*.apk" 2>/dev/null | head -n 1)
           if [ -n "$REL_APK" ] && [ -f "$REL_APK" ]; then
@@ -75,16 +76,21 @@ jobs:
           elif [ -f android/app/build/outputs/apk/debug/app-debug.apk ]; then
             cp android/app/build/outputs/apk/debug/app-debug.apk android/app/build/outputs/apk/debug/KhmerFoodTourism-v2.2.0.apk
           fi
+          REL_AAB=$(find android/app/build/outputs/bundle/release -name "*.aab" 2>/dev/null | head -n 1)
+          if [ -n "$REL_AAB" ] && [ -f "$REL_AAB" ]; then
+            cp "$REL_AAB" android/app/build/outputs/apk/debug/KhmerFoodTourism-v2.2.0-PlayStore.aab
+          fi
           ls -la android/app/build/outputs/apk/debug/
 
-      - name: 10. Upload Android APK Artifact
+      - name: 10. Upload Android Packages Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Khmer-Food-Tourism-Release-Packages
           path: |
             android/app/build/outputs/apk/debug/KhmerFoodTourism-v2.2.0.apk
+            android/app/build/outputs/apk/debug/KhmerFoodTourism-v2.2.0-PlayStore.aab
 
-      - name: 11. Publish GitHub Release with Signed APK
+      - name: 11. Publish GitHub Release with Signed APK & Play Store AAB
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
@@ -94,11 +100,17 @@ jobs:
           body: |
             ### 🇰🇭 កម្មវិធីទូរស័ព្ទដៃ អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism Mobile App)
             
-            **កំណែថ្មី v2.2.0 (Official Signed APK):**
-            - 📍 **Nearby Places (កន្លែងនៅជិតខ្ញុំ)៖** Direct shortcut to discover food & sights near your location.
-            - 🍲 **Online Food Discovery & Trending Khmer Food៖** Automated discovery of authentic Khmer dishes and recipes from verified sources.
-            - ✨ **Commercial UI & Performance Polish៖** App typography, refined layout, and zero-data-loss seamless updates.
+            **កំណែផ្លូវការ v2.2.0 (Official Signed Production Packages):**
+            - 📦 **KhmerFoodTourism-v2.2.0.apk:** Direct install APK for Android devices.
+            - 🚀 **KhmerFoodTourism-v2.2.0-PlayStore.aab:** Signed Android App Bundle for Google Play Store distribution.
+            - 🔒 **6-Digit Admin PIN & Anti-Tamper Security:** Mandatory cryptographic PIN verification step & HMAC-SHA256 session integrity seal.
+            - 👑 **Synchronized VIP Pricing:** 30 Days ($4.99), 60 Days ($6.99), and Additional Store Package ($5.00).
+            - 🎲 **Session-Based Random Order:** Freshly shuffled shops and tourist attractions on every app open.
+            - 🗺️ **Geographic 1-Day Trip Planner:** Province filtering & instant GPS location detection.
+            - 💎 **3D Luxury VIP Card:** Deep emerald & gold metallic styling with shine effects.
+            - 📺 **YouTube Trending Feed:** Real-time YouTube-only video discovery with 60-second background auto-refresh.
           draft: false
           prerelease: false
           files: |
             android/app/build/outputs/apk/debug/KhmerFoodTourism-v2.2.0.apk
+            android/app/build/outputs/apk/debug/KhmerFoodTourism-v2.2.0-PlayStore.aab
