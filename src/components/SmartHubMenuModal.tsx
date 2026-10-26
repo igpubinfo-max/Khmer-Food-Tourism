@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
-  X, Compass, Navigation, Heart, BadgeCheck, Wifi, WifiOff, Bot, ChevronDown, Lock, Flame,
+  X, Compass, Navigation, Heart, BadgeCheck, Wifi, WifiOff, Route, ChevronDown, Lock, Flame,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { isUserVipActive, organizeAndDeduplicateFoods } from '../types';
@@ -132,8 +132,9 @@ export const SmartHubMenuModal: React.FC<Props> = ({ onClose }) => {
 
           {/* SECTION 2: Smart Travel & Food Tools */}
           <section className="space-y-2.5">
-            <h3 className="font-moul text-sm text-[#064E3B] dark:text-emerald-300">
-              🧭 {tr(language, 'ឧបករណ៍ទេសចរណ៍ និងម្ហូបឆ្លាតវៃ', 'Smart Travel & Food Tools', '智能出行与美食工具')}
+            <h3 className="font-moul text-sm text-[#064E3B] dark:text-emerald-300 flex items-center gap-1.5">
+              <Compass className="w-4 h-4 text-amber-500 shrink-0" />
+              <span>{tr(language, 'ឧបករណ៍ទេសចរណ៍ និងម្ហូបឆ្លាតវៃ', 'Smart Travel & Food Tools', '智能出行与美食工具')}</span>
             </h3>
 
             {/* 1-Day food trips (VIP) */}
@@ -166,15 +167,15 @@ export const SmartHubMenuModal: React.FC<Props> = ({ onClose }) => {
             </button>
             {canUseVip && openPanel === 'trips' && <FoodTripTemplates />}
 
-            {/* AI Trip Planner (VIP) */}
+            {/* Smart Trip Planner (VIP) */}
             <button type="button" className={rowCls} onClick={vipOnly(() => setIsAiTripPlannerModalOpen(true))}>
-              <span className={`${iconBox} bg-sky-100 text-sky-700`}><Bot className="w-5 h-5" /></span>
+              <span className={`${iconBox} bg-sky-100 text-sky-700`}><Route className="w-5 h-5" /></span>
               <span className="min-w-0 flex-1">
                 <span className="block text-sm font-bold text-slate-900 dark:text-white">
-                  {tr(language, 'រៀបផែនការដើរលេង (AI)', 'AI Trip Planner', 'AI 行程规划')}
+                  {tr(language, 'រៀបផែនការធ្វើដំណើរឆ្លាតវៃ', 'Smart Trip Planner', '智能行程规划')}
                 </span>
                 <span className="block text-xs text-slate-500 dark:text-slate-400">
-                  {tr(language, 'AI រៀបចំផ្លូវតាមថវិកា', 'Itinerary built for your budget', '按预算自动生成行程')}
+                  {tr(language, 'រៀបចំផ្លូវដើរលេង និងម្ហូបតាមថវិកា', 'Custom route & dining built for your budget', '按预算量身定制出行与美食路线')}
                 </span>
               </span>
               {!canUseVip && <span className="px-1.5 py-0.5 rounded-full bg-slate-900 text-amber-300 text-[10px] font-bold flex items-center gap-0.5"><Lock className="w-3 h-3" />VIP</span>}

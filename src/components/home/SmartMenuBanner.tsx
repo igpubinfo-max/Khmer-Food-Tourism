@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronRight, Lock, Crown, Sparkles, Leaf, Route, MapPin, Heart, Flame } from 'lucide-react';
+import { ChevronRight, Lock, Crown, UtensilsCrossed, Leaf, Route, MapPin, Heart, Flame } from 'lucide-react';
 import type { Language } from '../../types';
 import { tr } from '../../utils/i18n';
 
@@ -36,8 +36,8 @@ export const SmartMenuBanner: React.FC<Props> = ({ language, onOpen, showVipLock
         onClick={onOpen}
         className="relative w-full p-4 pb-3 flex items-center gap-3 text-left active:scale-[0.99] transition motion-reduce:transition-none cursor-pointer"
       >
-        <span className="relative w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-200 via-amber-400 to-yellow-600 text-slate-950 flex items-center justify-center shrink-0 shadow-lg shadow-amber-500/30">
-          <Sparkles className="w-7 h-7" />
+        <span className="relative w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-200 via-amber-400 to-yellow-600 text-slate-950 flex items-center justify-center shrink-0 shadow-lg shadow-amber-500/30 border border-amber-100/60">
+          <UtensilsCrossed className="w-7 h-7 stroke-[2.2]" />
           {showVipLock && (
             <span className="kft-key-wiggle absolute -top-2 -right-2 w-6 h-6 rounded-full bg-slate-950 border border-amber-300 text-amber-300 flex items-center justify-center shadow">
               <Lock className="w-3 h-3" />
@@ -51,7 +51,7 @@ export const SmartMenuBanner: React.FC<Props> = ({ language, onOpen, showVipLock
             {tr(language, 'ពិសេសសម្រាប់ VIP', 'VIP Exclusive', 'VIP 专享')}
           </span>
           <span className="block font-moul text-[15px] leading-snug text-amber-100 mt-0.5">
-            {tr(language, 'មានអ្វីនៅខាងក្នុង? ✨', "What's inside? ✨", '里面有什么？✨')}
+            {tr(language, 'មានអ្វីនៅខាងក្នុង?', "What's inside?", '里面有什么？')}
           </span>
           <span className="block text-[11px] text-emerald-100/90 mt-0.5 leading-snug">
             {tr(

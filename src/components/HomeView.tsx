@@ -640,19 +640,21 @@ export const HomeView: React.FC = () => {
               {/* Highlights strip: live counts, tap to jump */}
               <div className="grid grid-cols-3 gap-2">
                 {[
-                  { emoji: '🍲', n: foods.length, label: txt('មុខម្ហូប', 'Dishes', '美食'), tab: 'food', tone: 'from-amber-400 to-orange-500' },
-                  { emoji: '🏪', n: restaurants.length, label: txt('ហាងអាហារ', 'Places', '餐厅'), tab: 'restaurants', tone: 'from-emerald-500 to-teal-600' },
-                  { emoji: '🏛️', n: destinations.length, label: txt('កន្លែងទេសចរណ៍', 'Sights', '景点'), tab: 'tourism', tone: 'from-sky-500 to-indigo-600' },
+                  { Icon: Utensils, n: foods.length, label: txt('មុខម្ហូប', 'Dishes', '美食'), tab: 'food' },
+                  { Icon: Store, n: restaurants.length, label: txt('ហាងអាហារ', 'Places', '餐厅'), tab: 'restaurants' },
+                  { Icon: Compass, n: destinations.length, label: txt('កន្លែងទេសចរណ៍', 'Sights', '景点'), tab: 'tourism' },
                 ].map((s) => (
                   <button
                     key={s.tab}
                     type="button"
                     onClick={() => setActiveTab(s.tab as any)}
-                    className={`rounded-2xl bg-gradient-to-br ${s.tone} text-white p-2.5 text-center shadow-md active:scale-95 transition cursor-pointer`}
+                    className="rounded-2xl bg-white dark:bg-slate-800/90 border border-emerald-900/15 dark:border-emerald-700/40 p-2.5 text-center shadow-xs hover:border-amber-400 active:scale-95 transition cursor-pointer flex flex-col items-center"
                   >
-                    <span className="block text-xl leading-none">{s.emoji}</span>
-                    <span className="block text-lg font-black font-mono leading-tight mt-1">{s.n}+</span>
-                    <span className="block text-[11px] font-bold opacity-95">{s.label}</span>
+                    <span className="w-8 h-8 rounded-xl bg-emerald-950/90 dark:bg-emerald-900/60 text-amber-300 flex items-center justify-center shadow-xs">
+                      <s.Icon className="w-4 h-4" />
+                    </span>
+                    <span className="block text-base font-black font-mono text-[#064E3B] dark:text-amber-300 leading-tight mt-1.5">{s.n}+</span>
+                    <span className="block text-[11px] font-bold text-slate-700 dark:text-slate-300">{s.label}</span>
                   </button>
                 ))}
               </div>

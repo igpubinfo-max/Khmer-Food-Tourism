@@ -1,5 +1,5 @@
 import React from 'react';
-import { MapPin, Star, Shuffle } from 'lucide-react';
+import { MapPin, Star, Shuffle, Compass, Utensils, Store } from 'lucide-react';
 import type { FoodItem, Restaurant, Language } from '../../types';
 import { tr } from '../../utils/i18n';
 import { getLocalizedFood, getLocalizedRestaurant } from '../../utils/zhDynamicTranslator';
@@ -42,8 +42,9 @@ export const TodayDiscovery: React.FC<Props> = ({ language, foods, restaurants, 
             className="absolute inset-0 w-full h-full object-cover bg-slate-200"
           />
           <span className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
-          <span className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[10px] font-black">
-            🍲 {tr(language, 'ម្ហូប', 'Dish', '美食')}
+          <span className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[10px] font-black inline-flex items-center gap-1">
+            <Utensils className="w-3 h-3" />
+            <span>{tr(language, 'ម្ហូប', 'Dish', '美食')}</span>
           </span>
           <span className="absolute bottom-0 inset-x-0 p-3">
             <span className="block text-sm font-extrabold text-white leading-snug line-clamp-2 drop-shadow">{loc.name}</span>
@@ -70,8 +71,9 @@ export const TodayDiscovery: React.FC<Props> = ({ language, foods, restaurants, 
             className="absolute inset-0 w-full h-full object-cover bg-slate-200"
           />
           <span className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
-          <span className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full bg-emerald-500 text-white text-[10px] font-black">
-            🏪 {tr(language, 'ហាង', 'Place', '餐厅')}
+          <span className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full bg-emerald-600 text-white text-[10px] font-black inline-flex items-center gap-1">
+            <Store className="w-3 h-3" />
+            <span>{tr(language, 'ហាង', 'Place', '餐厅')}</span>
           </span>
           <span className="absolute bottom-0 inset-x-0 p-3">
             <span className="block text-sm font-extrabold text-white leading-snug line-clamp-2 drop-shadow">{loc.name}</span>
@@ -90,8 +92,9 @@ export const TodayDiscovery: React.FC<Props> = ({ language, foods, restaurants, 
   return (
     <section className="space-y-2.5">
       <div className="flex items-center justify-between gap-2">
-        <h3 className="font-moul text-base text-[#064E3B] dark:text-emerald-300">
-          ✨ {tr(language, 'រកឃើញថ្មីថ្ងៃនេះ', "Today's discovery", '今日发现')}
+        <h3 className="font-moul text-base text-[#064E3B] dark:text-emerald-300 flex items-center gap-2">
+          <Compass className="w-4 h-4 text-amber-500 shrink-0" />
+          <span>{tr(language, 'រកឃើញថ្មីថ្ងៃនេះ', "Today's discovery", '今日发现')}</span>
         </h3>
         {onShuffle && (
           <button

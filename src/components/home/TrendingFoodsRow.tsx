@@ -1,5 +1,5 @@
 import React from 'react';
-import { MapPin, ChevronRight } from 'lucide-react';
+import { MapPin, ChevronRight, Flame } from 'lucide-react';
 import type { TrendingFoodItem, Language } from '../../types';
 import { AutoMarquee } from './AutoMarquee';
 import { tr, translateProvinceName } from '../../utils/i18n';
@@ -16,8 +16,9 @@ interface Props {
 export const TrendingFoodsRow: React.FC<Props> = ({ language, items, onOpen, onExploreAll }) => (
   <section className="space-y-2.5">
     <div className="flex items-center justify-between gap-2">
-      <h3 className="font-moul text-base text-[#064E3B] dark:text-emerald-300">
-        🔥 {tr(language, 'ម្ហូបកំពុងពេញនិយម', 'Trending Khmer Food', '热门高棉美食')}
+      <h3 className="font-moul text-base text-[#064E3B] dark:text-emerald-300 flex items-center gap-2">
+        <Flame className="w-4 h-4 text-amber-500 shrink-0" />
+        <span>{tr(language, 'ម្ហូបកំពុងពេញនិយម', 'Trending Khmer Food', '热门高棉美食')}</span>
       </h3>
       {onExploreAll && (
         <button
