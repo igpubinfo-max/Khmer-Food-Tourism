@@ -78,7 +78,7 @@ export const AdminDashboard: React.FC = () => {
   const [userTypeFilter, setUserTypeFilter] = useState<'all' | 'vip' | 'owner' | 'regular'>('all');
   const [adminReplyDrafts, setAdminReplyDrafts] = useState<Record<string, string>>({});
   const [inspectingTicketReceipt, setInspectingTicketReceipt] = useState<string | null>(null);
-  const [ticketFilter, setTicketFilter] = useState<'all' | 'Pending' | 'Replied' | 'Resolved'>('all');
+  const [ticketFilter, setTicketFilter] = useState<'all' | 'pending' | 'replied' | 'resolved'>('all');
   const [userPendingDeletion, setUserPendingDeletion] = useState<User | null>(null);
   const [selectedUserIdsForDeletion, setSelectedUserIdsForDeletion] = useState<string[]>([]);
   const [usersPendingBatchDeletion, setUsersPendingBatchDeletion] = useState<User[]>([]);
@@ -228,11 +228,11 @@ export const AdminDashboard: React.FC = () => {
   const rejectedTxns = transactions.filter(
     t => t.status === 'rejected' || t.status === 'failed' || t.status === 'cancelled'
   );
-  const pendingSupportTickets = supportTickets.filter(t => t.status === 'Pending');
+  const pendingSupportTickets = supportTickets.filter(t => String(t.status || '').toLowerCase() === 'pending');
   const unreadAdminTickets = supportTickets.filter(t => t.unreadByAdmin);
   const filteredSupportTickets = supportTickets.filter(t => {
     if (ticketFilter === 'all') return true;
-    return t.status === ticketFilter;
+    return String(t.status || '').toLowerCase() === ticketFilter.toLowerCase();
   });
 
   const filteredTransactions = transactions.filter(t => {
@@ -725,27 +725,27 @@ export const AdminDashboard: React.FC = () => {
             <div className="space-y-6">
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <div className="p-4 rounded-2xl bg-white dark:bg-stone-800 border border-slate-200 dark:border-slate-700 dark:border-stone-700 shadow-xs">
-                  <span className="text-stone-400 font-khmer text-xs">មុខម្ហូបខ្មែរសរុប</span>
+                  <span className="text-stone-400 font-khmer text-xs">{isKm ? 'មុខម្ហូបខ្មែរសរុប' : 'Total Khmer Dishes'}</span>
                   <p className="text-2xl font-bold text-[#064E3B] dark:text-emerald-400 font-mono mt-2">{foods.length}</p>
                   <span className="text-[10px] text-[#059669] font-bold">✓ 200+ Disconnected Prices</span>
                 </div>
 
                 <div className="p-4 rounded-2xl bg-white dark:bg-stone-800 border border-slate-200 dark:border-slate-700 dark:border-stone-700 shadow-xs">
-                  <span className="text-stone-400 font-khmer text-xs">ហាងអាហារសរុប</span>
+                  <span className="text-stone-400 font-khmer text-xs">{isKm ? 'ហាងអាហារសរុប' : 'Total Restaurants'}</span>
                   <p className="text-2xl font-bold text-[#059669] font-mono mt-2">{restaurants.length}</p>
-                  <span className="text-[10px] text-stone-500 font-khmer">{verifiedRestaurantsCount} ហាងផ្ទៀងផ្ទាត់ផ្លូវការ</span>
+                  <span className="text-[10px] text-stone-500 font-khmer">{verifiedRestaurantsCount} {isKm ? 'ហាងផ្ទៀងផ្ទាត់ផ្លូវការ' : 'Verified Stores'}</span>
                 </div>
 
                 <div className="p-4 rounded-2xl bg-white dark:bg-stone-800 border border-slate-200 dark:border-slate-700 dark:border-stone-700 shadow-xs">
-                  <span className="text-stone-400 font-khmer text-xs">ប្រតិបត្តិការ VIP</span>
+                  <span className="text-stone-400 font-khmer text-xs">{isKm ? 'ប្រតិបត្តិការ VIP' : 'VIP Transactions'}</span>
                   <p className="text-2xl font-bold text-[#064E3B] dark:text-emerald-400 font-mono mt-2">{transactions.length}</p>
-                  <span className="text-[10px] text-[#059669] font-bold font-khmer">{pendingTxns.length} រង់ចាំផ្ទៀងផ្ទាត់</span>
+                  <span className="text-[10px] text-[#059669] font-bold font-khmer">{pendingTxns.length} {isKm ? 'រង់ចាំផ្ទៀងផ្ទាត់' : 'Pending Approval'}</span>
                 </div>
 
                 <div className="p-4 rounded-2xl bg-white dark:bg-stone-800 border border-slate-200 dark:border-slate-700 dark:border-stone-700 shadow-xs">
-                  <span className="text-stone-400 font-khmer text-xs">តំបន់ទេសចរណ៍</span>
+                  <span className="text-stone-400 font-khmer text-xs">{isKm ? 'តំបន់ទេសចរណ៍' : 'Tourist Destinations'}</span>
                   <p className="text-2xl font-bold text-[#0F172A] dark:text-stone-100 font-mono mt-2">{destinations.length}</p>
-                  <span className="text-[10px] text-[#059669] font-bold font-khmer">២៥ ខេត្តក្រុង</span>
+                  <span className="text-[10px] text-[#059669] font-bold font-khmer">{isKm ? '២៥ ខេត្តក្រុង' : '25 Provinces'}</span>
                 </div>
               </div>
 
@@ -882,23 +882,37 @@ export const AdminDashboard: React.FC = () => {
 
                 {/* Status Filter */}
                 <div className="flex gap-1 bg-stone-100 dark:bg-stone-800 p-1 rounded-xl shrink-0">
-                  {(['all', 'Pending', 'Replied', 'Resolved'] as const).map((status) => (
-                    <button
-                      key={status}
-                      onClick={() => setTicketFilter(status)}
-                      className={`px-2.5 py-1.5 rounded-lg font-khmer font-semibold text-xs transition ${
-                        ticketFilter === status
-                          ? 'bg-[#064E3B] text-white shadow'
-                          : 'text-stone-500 hover:text-stone-800 dark:hover:text-stone-200'
-                      }`}
-                    >
-                      {status === 'all'
+                  {(['all', 'pending', 'replied', 'resolved'] as const).map((status) => {
+                    const label =
+                      status === 'all'
                         ? isKm
                           ? `ទាំងអស់ (${supportTickets.length})`
                           : `All (${supportTickets.length})`
-                        : status}
-                    </button>
-                  ))}
+                        : status === 'pending'
+                        ? isKm
+                          ? `រង់ចាំ (${pendingSupportTickets.length})`
+                          : `Pending (${pendingSupportTickets.length})`
+                        : status === 'replied'
+                        ? isKm
+                          ? 'បានឆ្លើយតប'
+                          : 'Replied'
+                        : isKm
+                        ? 'ដោះស្រាយរួច'
+                        : 'Resolved';
+                    return (
+                      <button
+                        key={status}
+                        onClick={() => setTicketFilter(status)}
+                        className={`px-2.5 py-1.5 rounded-lg font-khmer font-semibold text-xs transition ${
+                          ticketFilter === status
+                            ? 'bg-[#064E3B] text-white shadow'
+                            : 'text-stone-500 hover:text-stone-800 dark:hover:text-stone-200'
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 

@@ -139,10 +139,10 @@ export const RestaurantView: React.FC = () => {
         setSmartCachePlaces(res.results);
         setCacheSourceLabel(
           res.fromSmartCache
-            ? 'Smart Cache ($0 កូតា Google)'
+            ? tr(language, 'Smart Cache ($0 កូតា Google)', 'Smart Cache ($0 Google Quota)', '智能缓存（$0 谷歌配额）')
             : res.providerUsed === 'google_maps_api'
-            ? 'Google Maps Places API + រក្សាទុកចូល Smart Cache'
-            : 'ផែនទីអនឡាញកម្ពុជា + រក្សាទុកចូល Smart Cache'
+            ? tr(language, 'Google Maps Places API + រក្សាទុកចូល Smart Cache', 'Google Maps Places API + Saved to Smart Cache', '谷歌地图 API + 已存至智能缓存')
+            : tr(language, 'ផែនទីអនឡាញកម្ពុជា + រក្សាទុកចូល Smart Cache', 'Cambodia Online Map + Saved to Smart Cache', '柬埔寨在线地图 + 已存至智能缓存')
         );
         setIsSearchingOnline(false);
       }
@@ -616,7 +616,7 @@ export const RestaurantView: React.FC = () => {
             {isSearchingOnline ? (
               <div className="py-6 flex items-center justify-center gap-2 text-xs text-slate-500">
                 <Loader2 className="w-4 h-4 animate-spin text-emerald-600" />
-                <span>កំពុងស្វែងរកហាងពិតៗនៅភ្នំពេញ និងទូទាំងប្រទេស...</span>
+                <span>{tr(language, 'កំពុងស្វែងរកហាងពិតៗនៅភ្នំពេញ និងទូទាំងប្រទេស...', 'Searching verified restaurants across Cambodia...', '正在搜索柬埔寨各地真实餐厅...')}</span>
               </div>
             ) : smartCachePlaces.length > 0 ? (
               <div className="space-y-3">
@@ -639,8 +639,8 @@ export const RestaurantView: React.FC = () => {
                           <Plus className="w-3.5 h-3.5" />
                           <span>
                             {alreadyInApp
-                              ? '✓ មានក្នុងបញ្ជីរួចហើយ (ចុចដើម្បីធ្វើបច្ចុប្បន្នភាពទិន្នន័យ Google Maps)'
-                              : '📥 នាំចូលហាងនេះចូលក្នុងបញ្ជីកម្មវិធីអចិន្ត្រៃយ៍ (Import from Google Maps)'}
+                              ? tr(language, '✓ មានក្នុងបញ្ជីរួចហើយ (ចុចដើម្បីធ្វើបច្ចុប្បន្នភាពទិន្នន័យ Google Maps)', '✓ Already in Directory (Tap to sync Google Maps data)', '✓ 已在目录中（点击同步谷歌地图数据）')
+                              : tr(language, '📥 នាំចូលហាងនេះចូលក្នុងបញ្ជីកម្មវិធីអចិន្ត្រៃយ៍ (Import from Google Maps)', '📥 Import Restaurant into Permanent Directory', '📥 将此餐厅永久导入应用目录')}
                           </span>
                         </button>
                       )}

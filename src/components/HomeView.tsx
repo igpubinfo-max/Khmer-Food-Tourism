@@ -985,10 +985,10 @@ export const HomeView: React.FC = () => {
                         {isKm ? shop.nameKh : shop.nameEn}
                       </h4>
                       <p className="text-[10px] text-slate-500 truncate mt-0.5">
-                        📍 {shop.addressKh} • 📞 {shop.phone}
+                        📍 {isKm ? shop.addressKh : (shop.addressEn || shop.addressKh)} • 📞 {shop.phone}
                       </p>
                       <span className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400">
-                        {shop.menuItems?.length || 0} / 20 មុខម្ហូបក្នុងហាង (VIP)
+                        {shop.menuItems?.length || 0} / 20 {isKm ? 'មុខម្ហូបក្នុងហាង (VIP)' : 'Store Menu Items (VIP)'}
                       </span>
                     </div>
                   </div>
@@ -1220,9 +1220,9 @@ export const HomeView: React.FC = () => {
 
           {/* C. កន្លែងថ្មីប្រចាំថ្ងៃ */}
           <button
-            onClick={() => {
+            onClick={requireVip(() => {
               setIsDailyDiscoveriesModalOpen(true);
-            }}
+            })}
             className="p-3 rounded-2xl border text-left transition group active:scale-95 relative bg-white/10 hover:bg-white/15 border-white/15 cursor-pointer"
           >
             <div className="flex items-center justify-between mb-1.5">
@@ -1241,9 +1241,9 @@ export const HomeView: React.FC = () => {
 
           {/* F. ការជូនដំណឹងដែលមានប្រយោជន៍ */}
           <button
-            onClick={() => {
+            onClick={requireVip(() => {
               setIsNotificationsModalOpen(true);
-            }}
+            })}
             className="p-3 rounded-2xl border text-left transition group active:scale-95 relative bg-white/10 hover:bg-white/15 border-white/15 cursor-pointer"
           >
             <div className="flex items-center justify-between mb-1.5">

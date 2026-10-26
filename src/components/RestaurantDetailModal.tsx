@@ -273,13 +273,20 @@ export const RestaurantDetailModal: React.FC = () => {
         </div>
 
         {/* Scrollable Body */}
-        <div className="overflow-y-auto flex-1 no-scrollbar pb-6">
+        <div className="overflow-y-auto flex-1 no-scrollbar pb-[calc(env(safe-area-inset-bottom,0px)+24px)]">
           {/* Hero Image */}
           <div className="relative h-60 sm:h-64 w-full bg-slate-800">
             <img 
               src={activePhoto || selectedRestaurant.photoUrl} 
               alt={loc.name}
               className="w-full h-full object-cover transition-all duration-300"
+              onError={(e) => {
+                const target = e.currentTarget;
+                if (!target.dataset.fallback) {
+                  target.dataset.fallback = '1';
+                  target.src = '/welcome/places.webp';
+                }
+              }}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
             

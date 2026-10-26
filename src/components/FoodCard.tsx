@@ -53,6 +53,13 @@ const FoodCardInner: React.FC<FoodCardProps> = ({ food }) => {
           className="w-full h-full object-cover"
           loading="lazy"
           decoding="async"
+          onError={(e) => {
+            const target = e.currentTarget;
+            if (!target.dataset.fallback) {
+              target.dataset.fallback = '1';
+              target.src = '/welcome/hero-bg.webp';
+            }
+          }}
         />
         
         {/* Category tag */}

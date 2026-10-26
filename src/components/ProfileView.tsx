@@ -811,9 +811,9 @@ export const ProfileView: React.FC = () => {
               <div className="text-left flex-1 min-w-0">
                 <div className="font-bold flex items-center justify-between">
                   <span>{isKm ? '📩 សារជំនួយ & សំបុត្រ' : '📩 Support Tickets'}</span>
-                  {supportTickets.filter(t => t.status === 'open').length > 0 && (
+                  {supportTickets.filter(t => String(t.status || '').toLowerCase() === 'pending' || t.unreadByAdmin).length > 0 && (
                     <span className="px-1.5 py-0.2 rounded-full bg-rose-500 text-white text-[9px] font-black">
-                      {supportTickets.filter(t => t.status === 'open').length}
+                      {supportTickets.filter(t => String(t.status || '').toLowerCase() === 'pending' || t.unreadByAdmin).length}
                     </span>
                   )}
                 </div>
@@ -1158,7 +1158,7 @@ export const ProfileView: React.FC = () => {
                     <span>{isKm ? 'សិទ្ធិចុះបញ្ជីហាង VIP ពិសេស' : 'VIP Store Priority Registration'}</span>
                   </span>
                   <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[9px] font-black">
-                    {myRestaurants[0] ? '1/1 ហាង' : '១ គណនី = ១ ហាង'}
+                    {myRestaurants[0] ? (isKm ? '1/1 ហាង' : '1/1 Store') : (isKm ? '១ គណនី = ១ ហាង' : '1 Account = 1 Store')}
                   </span>
                 </div>
                 <p className="text-[11px] text-amber-50/95 leading-relaxed font-medium">

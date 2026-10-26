@@ -83,12 +83,15 @@ jobs:
             cd ios/App
             xcodebuild -resolvePackageDependencies -project App.xcodeproj -scheme App
 
+            IOS_BUILD_NUM=$((112 + ${{ github.run_number }}))
+            echo "Setting iOS CURRENT_PROJECT_VERSION to $IOS_BUILD_NUM"
             xcodebuild archive \
               -project App.xcodeproj \
               -scheme App \
               -configuration Release \
               -destination "generic/platform=iOS" \
               -archivePath build/App.xcarchive \
+              CURRENT_PROJECT_VERSION="$IOS_BUILD_NUM" \
               DEVELOPMENT_TEAM=79L24WMX4R \
               CODE_SIGN_STYLE=Manual \
               CODE_SIGN_IDENTITY="Apple Distribution" \

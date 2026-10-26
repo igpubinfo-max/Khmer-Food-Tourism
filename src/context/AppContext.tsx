@@ -1851,7 +1851,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Automatic Pre-Update Database & VIP Snapshot Backup whenever App Version changes
   useEffect(() => {
     try {
-      const APP_VERSION = '2.2.0';
+      const APP_VERSION = '2.3.1';
       const lastBackedUpVersion = localStorage.getItem('kft_last_backed_up_version');
       if (lastBackedUpVersion !== APP_VERSION) {
         const activeVips = users.filter(
@@ -2776,6 +2776,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Keep a mutable ref of current modal & navigation state for the native back-button listener
   const appNavStateRef = useRef({
+    currentUser,
     isExitModalOpen,
     selectedFood,
     selectedRestaurant,
@@ -2783,15 +2784,33 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     isAuthModalOpen,
     isAddPostModalOpen,
     isAddRestaurantModalOpen,
+    isVipAddRestaurantModalOpen,
+    isManageMenuModalOpen,
+    managingRestaurant,
     isAdminOpen,
     isAdminLoginModalOpen,
     isInstallModalOpen,
     isSupportModalOpen,
+    isWhatToEatModalOpen,
+    isNearMeModalOpen,
+    isDailyDiscoveriesModalOpen,
+    isWishlistsModalOpen,
+    isAiTripPlannerModalOpen,
+    isNotificationsModalOpen,
+    isTrendingSocialModalOpen,
+    isTrendingFoodDetailModalOpen,
+    isAiCheckInModalOpen,
+    isRestaurantCheckInModalOpen,
+    isUpgradeVipModalOpen,
+    isSupportTicketModalOpen,
+    isQrScannerModalOpen,
+    isGoogleMapsSearchModalOpen,
     activeTab,
   });
 
   useEffect(() => {
     appNavStateRef.current = {
+      currentUser,
       isExitModalOpen,
       selectedFood,
       selectedRestaurant,
@@ -2799,16 +2818,38 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       isAuthModalOpen,
       isAddPostModalOpen,
       isAddRestaurantModalOpen,
+      isVipAddRestaurantModalOpen,
+      isManageMenuModalOpen,
+      managingRestaurant,
       isAdminOpen,
       isAdminLoginModalOpen,
       isInstallModalOpen,
       isSupportModalOpen,
+      isWhatToEatModalOpen,
+      isNearMeModalOpen,
+      isDailyDiscoveriesModalOpen,
+      isWishlistsModalOpen,
+      isAiTripPlannerModalOpen,
+      isNotificationsModalOpen,
+      isTrendingSocialModalOpen,
+      isTrendingFoodDetailModalOpen,
+      isAiCheckInModalOpen,
+      isRestaurantCheckInModalOpen,
+      isUpgradeVipModalOpen,
+      isSupportTicketModalOpen,
+      isQrScannerModalOpen,
+      isGoogleMapsSearchModalOpen,
       activeTab,
     };
   }, [
-    isExitModalOpen, selectedFood, selectedRestaurant, selectedDestination,
-    isAuthModalOpen, isAddPostModalOpen, isAddRestaurantModalOpen,
-    isAdminOpen, isAdminLoginModalOpen, isInstallModalOpen, isSupportModalOpen,
+    currentUser, isExitModalOpen, selectedFood, selectedRestaurant, selectedDestination,
+    isAuthModalOpen, isAddPostModalOpen, isAddRestaurantModalOpen, isVipAddRestaurantModalOpen,
+    isManageMenuModalOpen, managingRestaurant, isAdminOpen, isAdminLoginModalOpen,
+    isInstallModalOpen, isSupportModalOpen, isWhatToEatModalOpen, isNearMeModalOpen,
+    isDailyDiscoveriesModalOpen, isWishlistsModalOpen, isAiTripPlannerModalOpen,
+    isNotificationsModalOpen, isTrendingSocialModalOpen, isTrendingFoodDetailModalOpen,
+    isAiCheckInModalOpen, isRestaurantCheckInModalOpen, isUpgradeVipModalOpen,
+    isSupportTicketModalOpen, isQrScannerModalOpen, isGoogleMapsSearchModalOpen,
     activeTab,
   ]);
 
@@ -2846,8 +2887,73 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setSelectedDestination(null);
         return;
       }
+      if (state.isManageMenuModalOpen || state.managingRestaurant) {
+        setIsManageMenuModalOpen(false);
+        setManagingRestaurant(null);
+        return;
+      }
+      if (state.isTrendingFoodDetailModalOpen) {
+        setIsTrendingFoodDetailModalOpen(false);
+        return;
+      }
+      if (state.isTrendingSocialModalOpen) {
+        setIsTrendingSocialModalOpen(false);
+        return;
+      }
+      if (state.isSupportTicketModalOpen) {
+        setIsSupportTicketModalOpen(false);
+        return;
+      }
+      if (state.isUpgradeVipModalOpen) {
+        setIsUpgradeVipModalOpen(false);
+        return;
+      }
+      if (state.isVipAddRestaurantModalOpen) {
+        setIsVipAddRestaurantModalOpen(false);
+        return;
+      }
+      if (state.isGoogleMapsSearchModalOpen) {
+        setIsGoogleMapsSearchModalOpen(false);
+        return;
+      }
+      if (state.isQrScannerModalOpen) {
+        setIsQrScannerModalOpen(false);
+        return;
+      }
+      if (state.isAiCheckInModalOpen) {
+        setIsAiCheckInModalOpen(false);
+        return;
+      }
+      if (state.isRestaurantCheckInModalOpen) {
+        setIsRestaurantCheckInModalOpen(false);
+        return;
+      }
+      if (state.isWhatToEatModalOpen) {
+        setIsWhatToEatModalOpen(false);
+        return;
+      }
+      if (state.isNearMeModalOpen) {
+        setIsNearMeModalOpen(false);
+        return;
+      }
+      if (state.isDailyDiscoveriesModalOpen) {
+        setIsDailyDiscoveriesModalOpen(false);
+        return;
+      }
+      if (state.isWishlistsModalOpen) {
+        setIsWishlistsModalOpen(false);
+        return;
+      }
+      if (state.isAiTripPlannerModalOpen) {
+        setIsAiTripPlannerModalOpen(false);
+        return;
+      }
+      if (state.isNotificationsModalOpen) {
+        setIsNotificationsModalOpen(false);
+        return;
+      }
       if (state.isAuthModalOpen) {
-        if (!currentUser) {
+        if (!state.currentUser) {
           exitAppNow();
           return;
         }
@@ -3291,7 +3397,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       });
       setRestaurants(nextRestaurants);
       try {
-        localStorage.setItem('kft_restaurants_real_v9', JSON.stringify(nextRestaurants));
+        localStorage.setItem('kft_restaurants_real_v11', JSON.stringify(nextRestaurants));
       } catch {}
     }
 
@@ -3584,7 +3690,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (ownedCustomRests.length > 0) {
       setRestaurants(nextRestaurants);
       try {
-        localStorage.setItem('kft_restaurants_real_v9', JSON.stringify(nextRestaurants));
+        localStorage.setItem('kft_restaurants_real_v11', JSON.stringify(nextRestaurants));
       } catch {}
       if (selectedRestaurant && !isSeedRestaurantId(selectedRestaurant.id) && selectedRestaurant.ownerId === userId) {
         setSelectedRestaurant(null);
@@ -3774,6 +3880,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (isSupabaseConfigured()) {
         await Promise.all([
           pushCloudDocument('kft_cloud_users_v1', []),
+          pushCloudDocument('kft_cloud_users_v2', []),
           pushCloudDocument('kft_cloud_deleted_users_v1', newDeletedList),
         ]);
       }
@@ -4735,7 +4842,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setRestaurants(prev => {
       const nextList = sortRestaurantsChronologically([...prev.filter(r => r.id !== newRest.id), newRest]);
       try {
-        localStorage.setItem('kft_restaurants_real_v9', JSON.stringify(compactDataForBulkLocalStorage('kft_restaurants_real_v9', nextList)));
+        localStorage.setItem('kft_restaurants_real_v11', JSON.stringify(compactDataForBulkLocalStorage('kft_restaurants_real_v9', nextList)));
       } catch (e) {
         console.warn('Immediate save failed for new restaurant:', e);
       }
@@ -4991,7 +5098,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setRestaurants(prev => {
       const next = prev.map(r => r.id === updated.id ? safeUpdated : r);
       try {
-        localStorage.setItem('kft_restaurants_real_v9', JSON.stringify(compactDataForBulkLocalStorage('kft_restaurants_real_v9', next)));
+        localStorage.setItem('kft_restaurants_real_v11', JSON.stringify(compactDataForBulkLocalStorage('kft_restaurants_real_v9', next)));
       } catch {
         scheduleStorageWrite('kft_restaurants_real_v9', next, 500);
       }
@@ -5099,7 +5206,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setRestaurants(prev => {
       const next = prev.map(r => (r.id === restaurantId ? updatedRest : r));
       try {
-        localStorage.setItem('kft_restaurants_real_v9', JSON.stringify(next));
+        localStorage.setItem('kft_restaurants_real_v11', JSON.stringify(next));
       } catch {}
       if (!isSeedRestaurantId(restaurantId) && isSupabaseConfigured()) {
         try {
@@ -5171,7 +5278,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setRestaurants(prev => {
       const next = prev.map(r => (r.id === restaurantId ? updatedRest : r));
       try {
-        localStorage.setItem('kft_restaurants_real_v9', JSON.stringify(next));
+        localStorage.setItem('kft_restaurants_real_v11', JSON.stringify(next));
       } catch {}
       if (!isSeedRestaurantId(restaurantId) && isSupabaseConfigured()) {
         try {
@@ -5222,7 +5329,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setRestaurants(prev => {
       const next = prev.map(r => (r.id === restaurantId ? updatedRest : r));
       try {
-        localStorage.setItem('kft_restaurants_real_v9', JSON.stringify(next));
+        localStorage.setItem('kft_restaurants_real_v11', JSON.stringify(next));
       } catch {}
       if (!isSeedRestaurantId(restaurantId) && isSupabaseConfigured()) {
         try {
@@ -5298,7 +5405,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setRestaurants(prev => {
       const next = prev.map(r => (r.id === restaurantId ? updatedRest : r));
       try {
-        localStorage.setItem('kft_restaurants_real_v9', JSON.stringify(next));
+        localStorage.setItem('kft_restaurants_real_v11', JSON.stringify(next));
       } catch {}
       if (!isSeedRestaurantId(restaurantId) && isSupabaseConfigured()) {
         try {
@@ -5455,7 +5562,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setRestaurants(prev => {
       const next = prev.filter(r => r.id !== id);
       try {
-        localStorage.setItem('kft_restaurants_real_v9', JSON.stringify(next));
+        localStorage.setItem('kft_restaurants_real_v11', JSON.stringify(next));
       } catch {}
       if (isSupabaseConfigured()) {
         try {
@@ -5512,7 +5619,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return approvedRest;
       });
       try {
-        localStorage.setItem('kft_restaurants_real_v9', JSON.stringify(compactDataForBulkLocalStorage('kft_restaurants_real_v9', next)));
+        localStorage.setItem('kft_restaurants_real_v11', JSON.stringify(compactDataForBulkLocalStorage('kft_restaurants_real_v9', next)));
       } catch {}
       if (isSupabaseConfigured()) {
         try {
@@ -5570,7 +5677,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return rejectedRest;
       });
       try {
-        localStorage.setItem('kft_restaurants_real_v9', JSON.stringify(compactDataForBulkLocalStorage('kft_restaurants_real_v9', next)));
+        localStorage.setItem('kft_restaurants_real_v11', JSON.stringify(compactDataForBulkLocalStorage('kft_restaurants_real_v9', next)));
       } catch {}
       if (isSupabaseConfigured()) {
         try {
@@ -5818,7 +5925,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setRestaurants(prev => {
         const next = prev.map(r => r.id === existingRest.id ? finalMerged : r);
         try {
-          localStorage.setItem('kft_restaurants_real_v9', JSON.stringify(next));
+          localStorage.setItem('kft_restaurants_real_v11', JSON.stringify(next));
         } catch {}
         if (!isSeedRestaurantId(finalMerged.id) && isSupabaseConfigured()) {
           try {
@@ -5863,7 +5970,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setRestaurants(prev => {
       const next = sortRestaurantsChronologically([finalRest, ...prev]);
       try {
-        localStorage.setItem('kft_restaurants_real_v9', JSON.stringify(next));
+        localStorage.setItem('kft_restaurants_real_v11', JSON.stringify(next));
       } catch {
         scheduleStorageWrite('kft_restaurants_real_v9', next, 500);
       }

@@ -29,6 +29,13 @@ const TouristCardInner: React.FC<TouristCardProps> = ({ destination }) => {
           className="w-full h-full object-cover"
           loading="lazy"
           decoding="async"
+          onError={(e) => {
+            const target = e.currentTarget;
+            if (!target.dataset.fallback) {
+              target.dataset.fallback = '1';
+              target.src = '/welcome/places.webp';
+            }
+          }}
         />
 
         {/* Province pill & Viral Social Badge */}

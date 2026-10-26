@@ -108,6 +108,7 @@ export async function sealUserSession(user: User): Promise<User> {
   const seal = await computeUserIntegritySeal(user);
   const sealed = { ...user, integritySeal: seal };
   try {
+    localStorage.setItem('kft_current_user_v5', JSON.stringify(sealed));
     localStorage.setItem('kft_current_user_v4', JSON.stringify(sealed));
   } catch {}
   return sealed;
@@ -166,7 +167,7 @@ export async function verifyAndSanitizeUserSession(
     let cloudUsersList: User[] = authoritativeCloudUsers || [];
     if (!cloudUsersList.length) {
       try {
-        const rawCloud = localStorage.getItem('kft_cloud_users_v2') || localStorage.getItem('kft_users_v4');
+        const rawCloud = localStorage.getItem('kft_cloud_users_v2') || localStorage.getItem('kft_users_v5') || localStorage.getItem('kft_users_v4');
         if (rawCloud) {
           const parsed = JSON.parse(rawCloud);
           if (Array.isArray(parsed)) cloudUsersList = parsed;
@@ -214,6 +215,7 @@ export async function verifyAndSanitizeUserSession(
 
   if (tampered) {
     try {
+      localStorage.setItem('kft_current_user_v5', JSON.stringify(sanitized));
       localStorage.setItem('kft_current_user_v4', JSON.stringify(sanitized));
     } catch {}
   }
@@ -226,7 +228,7 @@ export async function verifyAndSanitizeUserSession(
  */
 export function sanitizeStartupCurrentUser(): { tampered: boolean; user: any | null } {
   try {
-    const raw = localStorage.getItem('kft_current_user_v4');
+    const raw = localStorage.getItem('kft_current_user_v5') || localStorage.getItem('kft_current_user_v4');
     if (!raw) return { tampered: false, user: null };
     const parsed = JSON.parse(raw);
     if (!parsed || typeof parsed !== 'object') return { tampered: false, user: null };
@@ -260,7 +262,7 @@ export function sanitizeStartupCurrentUser(): { tampered: boolean; user: any | n
     if (isVip) {
       let isCloudApproved = false;
       try {
-        const cloudRaw = localStorage.getItem('kft_cloud_users_v2') || localStorage.getItem('kft_users_v4');
+        const cloudRaw = localStorage.getItem('kft_cloud_users_v2') || localStorage.getItem('kft_users_v5') || localStorage.getItem('kft_users_v4');
         if (cloudRaw) {
           const cloudList = JSON.parse(cloudRaw);
           if (Array.isArray(cloudList)) {
@@ -284,6 +286,7 @@ export function sanitizeStartupCurrentUser(): { tampered: boolean; user: any | n
     }
 
     if (tampered) {
+      localStorage.setItem('kft_current_user_v5', JSON.stringify(parsed));
       localStorage.setItem('kft_current_user_v4', JSON.stringify(parsed));
     }
 

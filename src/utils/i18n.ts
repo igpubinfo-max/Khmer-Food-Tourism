@@ -606,7 +606,9 @@ export function useChineseDomTranslation(language: Language): void {
           if (translated !== raw) {
             isApplying = true;
             try {
-              mutatedTextNodes.set(textNode, raw);
+              if (!mutatedTextNodes.has(textNode)) {
+                mutatedTextNodes.set(textNode, raw);
+              }
               textNode.nodeValue = translated;
             } finally {
               isApplying = false;

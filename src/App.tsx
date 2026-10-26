@@ -56,6 +56,7 @@ const MainScreen: React.FC = () => {
     selectedRestaurant,
     selectedDestination,
     isAuthModalOpen,
+    isAddPostModalOpen,
     isAddRestaurantModalOpen,
     isManageMenuModalOpen,
     managingRestaurant,
@@ -113,7 +114,10 @@ const MainScreen: React.FC = () => {
     selectedFood ||
     selectedRestaurant ||
     selectedDestination ||
+    showWelcomeScreen ||
+    !currentUser ||
     isAuthModalOpen ||
+    isAddPostModalOpen ||
     isAddRestaurantModalOpen ||
     isManageMenuModalOpen ||
     managingRestaurant ||
@@ -192,7 +196,7 @@ const MainScreen: React.FC = () => {
   }
 
   return (
-    <div className="flex-1 flex flex-col w-full min-h-screen relative overflow-y-auto no-scrollbar pb-16">
+    <div className="flex-1 flex flex-col w-full min-h-screen relative overflow-y-auto no-scrollbar pb-[calc(env(safe-area-inset-bottom,0px)+68px)]">
       <Header />
       <UpdateAvailableBanner />
       

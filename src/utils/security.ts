@@ -211,14 +211,33 @@ interface AdminSessionPayload {
 // Memory-only session secret generated at runtime (never committed or leaked to disk)
 let ephemeralSessionSecret: CryptoKey | null = null;
 
+const SESSION_HMAC_RAW_KEY = 'kft_admin_hmac_raw_v1';
+
 const getSessionSigningKey = async (): Promise<CryptoKey> => {
   if (ephemeralSessionSecret) return ephemeralSessionSecret;
-  ephemeralSessionSecret = await crypto.subtle.generateKey(
-    { name: 'HMAC', hash: 'SHA-256' },
-    false,
-    ['sign', 'verify']
-  );
-  return ephemeralSessionSecret;
+  try {
+    let rawHex = sessionStorage.getItem(SESSION_HMAC_RAW_KEY);
+    if (!rawHex || rawHex.length !== 64) {
+      rawHex = generateSaltHex(32);
+      sessionStorage.setItem(SESSION_HMAC_RAW_KEY, rawHex);
+    }
+    const keyBytes = new Uint8Array(rawHex.match(/.{1,2}/g)!.map((b) => parseInt(b, 16)));
+    ephemeralSessionSecret = await crypto.subtle.importKey(
+      'raw',
+      keyBytes,
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['sign', 'verify']
+    );
+    return ephemeralSessionSecret;
+  } catch {
+    ephemeralSessionSecret = await crypto.subtle.generateKey(
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['sign', 'verify']
+    );
+    return ephemeralSessionSecret;
+  }
 };
 
 export const createAdminSession = async (): Promise<string> => {

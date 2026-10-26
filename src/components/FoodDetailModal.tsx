@@ -216,6 +216,15 @@ export const FoodDetailModal: React.FC = () => {
     }));
   };
 
+  // Ensure speechSynthesis always stops if modal unmounts or dish changes via back button
+  useEffect(() => {
+    return () => {
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, [selectedFood?.id]);
+
   // Text to Speech for Recipe in active language
   const handleSpeak = () => {
     if (!('speechSynthesis' in window)) {
@@ -388,7 +397,7 @@ export const FoodDetailModal: React.FC = () => {
         </div>
 
         {/* Scrollable Body */}
-        <div className="overflow-y-auto flex-1 no-scrollbar pb-6">
+        <div className="overflow-y-auto flex-1 no-scrollbar pb-[calc(env(safe-area-inset-bottom,0px)+24px)]">
           {isEditingAdminFood ? (
             /* ADMIN EDIT FOOD FORM */
             <form onSubmit={handleSaveAdminFood} className="p-4 sm:p-6 space-y-4 font-khmer pt-16">

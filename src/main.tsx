@@ -12,9 +12,9 @@ try {
   console.warn('Startup anti-tamper integrity check warning:', e);
 }
 
-// 1. Version Migration: Safe non-destructive upgrade to v2.3.0 (Build 111)
+// 1. Version Migration: Safe non-destructive upgrade to v2.3.1 (Build 111)
 try {
-  const CURRENT_VER = '2.3.0';
+  const CURRENT_VER = '2.3.1';
   const installedVer = localStorage.getItem('kft_app_installed_ver');
   if (installedVer !== CURRENT_VER) {
     // Keep all existing user accounts, credentials, and v5 data intact
