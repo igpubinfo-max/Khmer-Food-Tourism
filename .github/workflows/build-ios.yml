@@ -14,10 +14,10 @@ jobs:
       - name: 1. Checkout repository
         uses: actions/checkout@v4
 
-      - name: 2. Setup Node.js 20
+      - name: 2. Setup Node.js 22 (Required by Capacitor 8 CLI)
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: 'npm'
 
       - name: 3. Install Dependencies
@@ -28,30 +28,27 @@ jobs:
 
       - name: 5. Sync Capacitor iOS Platform
         run: |
-          npx cap add ios || npx cap sync ios
+          if [ ! -d "ios/App" ]; then
+            npx cap add ios
+          fi
+          npx cap sync ios
 
       - name: 6. Generate Compliant 1024x1024 RGB App Store Icon (Zero Transparency)
         run: |
+          pip3 install Pillow --break-system-packages || pip3 install Pillow || true
           python3 -c "
           import os
           try:
               from PIL import Image
               src_path = 'public/welcome/welcome-hero-icon.png'
               if not os.path.exists(src_path):
-                  src_path = 'dist/favicon.ico'
-              
+                  src_path = 'PlayStore_Assets/PlayStore_Icon_512x512.png'
               img = Image.open(src_path).convert('RGBA')
-              # Create opaque 1024x1024 background (Deep Emerald #064E3B matching brand)
               canvas = Image.new('RGB', (1024, 1024), (6, 78, 59))
-              
-              # Scale icon maintaining aspect ratio with pleasant margin
               img.thumbnail((880, 880), Image.Resampling.LANCZOS)
               x = (1024 - img.width) // 2
               y = (1024 - img.height) // 2
-              
-              # Composite using alpha channel
               canvas.paste(img, (x, y), mask=img.split()[3])
-              
               out_dir = 'ios/App/App/Assets.xcassets/AppIcon.appiconset'
               os.makedirs(out_dir, exist_ok=True)
               out_path = os.path.join(out_dir, 'AppIcon-512@2x.png')
@@ -70,31 +67,86 @@ jobs:
           fi
 
       - name: 8. Build & Archive Xcode Release
+        env:
+          APPSTORE_ISSUER_ID: ${{ secrets.APPSTORE_ISSUER_ID }}
+          APPSTORE_KEY_ID: ${{ secrets.APPSTORE_KEY_ID }}
+          APPSTORE_PRIVATE_KEY: ${{ secrets.APPSTORE_PRIVATE_KEY }}
         run: |
+          set -e
           cd ios/App
           mkdir -p build
-          
-          # Clean and archive release
-          xcodebuild archive \
-            -project App.xcodeproj \
-            -scheme App \
-            -configuration Release \
-            -archivePath build/App.xcarchive \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO \
-            CODE_SIGN_IDENTITY="" \
-            | xcbeautify || true
-          
-          # Package IPA from archive for inspection / distribution
-          if [ -d "build/App.xcarchive/Products/Applications/App.app" ]; then
-            mkdir -p build/Payload
-            cp -r "build/App.xcarchive/Products/Applications/App.app" build/Payload/
-            cd build
-            zip -r KhmerFoodTourism-v2.3.0.ipa Payload
-            rm -rf Payload
-            cd ..
-            echo "=== IPA PACKAGED SUCCESSFULLY ==="
-            ls -lh build/KhmerFoodTourism-v2.3.0.ipa
+
+          # Resolve Swift Package Manager dependencies first
+          xcodebuild -resolvePackageDependencies -project App.xcodeproj -scheme App
+
+          if [ -n "$APPSTORE_PRIVATE_KEY" ] && [ -n "$APPSTORE_KEY_ID" ] && [ -n "$APPSTORE_ISSUER_ID" ]; then
+            echo "=== Building Signed App Store Archive with App Store Connect API Key ==="
+            mkdir -p ~/.appstoreconnect/private_keys
+            KEY_PATH="$HOME/.appstoreconnect/private_keys/AuthKey_${APPSTORE_KEY_ID}.p8"
+            echo "$APPSTORE_PRIVATE_KEY" > "$KEY_PATH"
+
+            xcodebuild archive \
+              -project App.xcodeproj \
+              -scheme App \
+              -configuration Release \
+              -destination "generic/platform=iOS" \
+              -archivePath build/App.xcarchive \
+              DEVELOPMENT_TEAM=79L24WMX4R \
+              CODE_SIGN_STYLE=Automatic \
+              -allowProvisioningUpdates \
+              -authenticationKeyPath "$KEY_PATH" \
+              -authenticationKeyID "$APPSTORE_KEY_ID" \
+              -authenticationKeyIssuerID "$APPSTORE_ISSUER_ID"
+
+            cat > build/ExportOptions.plist <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key>
+            <string>app-store-connect</string>
+            <key>teamID</key>
+            <string>79L24WMX4R</string>
+            <key>uploadSymbols</key>
+            <true/>
+            <key>destination</key>
+            <string>export</string>
+          </dict>
+          </plist>
+          EOF
+
+            xcodebuild -exportArchive \
+              -archivePath build/App.xcarchive \
+              -exportOptionsPlist build/ExportOptions.plist \
+              -exportPath build/export \
+              -allowProvisioningUpdates \
+              -authenticationKeyPath "$KEY_PATH" \
+              -authenticationKeyID "$APPSTORE_KEY_ID" \
+              -authenticationKeyIssuerID "$APPSTORE_ISSUER_ID"
+
+            cp build/export/*.ipa build/KhmerFoodTourism-v2.3.1.ipa
+          else
+            echo "=== Building Release Archive (Unsigned IPA Package) ==="
+            xcodebuild archive \
+              -project App.xcodeproj \
+              -scheme App \
+              -configuration Release \
+              -destination "generic/platform=iOS" \
+              -archivePath build/App.xcarchive \
+              CODE_SIGNING_REQUIRED=NO \
+              CODE_SIGNING_ALLOWED=NO \
+              CODE_SIGN_IDENTITY=""
+
+            if [ -d "build/App.xcarchive/Products/Applications/App.app" ]; then
+              mkdir -p build/Payload
+              cp -r "build/App.xcarchive/Products/Applications/App.app" build/Payload/
+              cd build
+              zip -qry KhmerFoodTourism-v2.3.1.ipa Payload
+              rm -rf Payload
+              cd ..
+              echo "=== IPA PACKAGED SUCCESSFULLY ==="
+              ls -lh build/KhmerFoodTourism-v2.3.1.ipa
+            fi
           fi
 
       - name: 9. Optional Upload to Apple App Store Connect / TestFlight
@@ -104,25 +156,19 @@ jobs:
           APPSTORE_KEY_ID: ${{ secrets.APPSTORE_KEY_ID }}
           APPSTORE_PRIVATE_KEY: ${{ secrets.APPSTORE_PRIVATE_KEY }}
         run: |
-          echo "Preparing App Store Connect API authentication..."
-          mkdir -p ~/.appstoreconnect/private_keys
-          echo "$APPSTORE_PRIVATE_KEY" > ~/.appstoreconnect/private_keys/AuthKey_${APPSTORE_KEY_ID}.p8
-          
-          IPA_PATH="ios/App/build/KhmerFoodTourism-v2.3.0.ipa"
+          IPA_PATH="ios/App/build/KhmerFoodTourism-v2.3.1.ipa"
           if [ -f "$IPA_PATH" ]; then
             echo "Uploading $IPA_PATH to Apple App Store Connect / TestFlight..."
             xcrun altool --upload-app \
               -f "$IPA_PATH" \
               -t ios \
               --apiKey "$APPSTORE_KEY_ID" \
-              --apiIssuer "$APPSTORE_ISSUER_ID" \
-              || echo "App Store Connect upload step executed with status: $?"
+              --apiIssuer "$APPSTORE_ISSUER_ID"
           fi
 
       - name: 10. Upload iOS Release Packages Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Khmer-Food-Tourism-iOS-Release-Packages
+          name: Khmer-Food-Tourism-iOS-v2.3.1-Package
           path: |
-            ios/App/build/KhmerFoodTourism-v2.3.0.ipa
-            ios/App/build/App.xcarchive
+            ios/App/build/KhmerFoodTourism-v2.3.1.ipa
