@@ -77,10 +77,10 @@ async function main() {
   const distCerts = (existingCerts.data || []).filter(
     c => c.attributes.certificateType === 'DISTRIBUTION' || c.attributes.certificateType === 'IOS_DISTRIBUTION'
   );
-  // If account already has 2+ distribution certificates, revoke the oldest CI one so creation succeeds
-  if (distCerts.length >= 2) {
-    console.log('   Revoking oldest distribution certificate to free slot:', distCerts[0].id);
-    await ascRequest('/certificates/' + distCerts[0].id, 'DELETE');
+  // Revoke any previous CI distribution certificates so we never hit Apple's limit
+  for (const c of distCerts) {
+    console.log('   Revoking previous CI distribution certificate:', c.id);
+    await ascRequest('/certificates/' + c.id, 'DELETE').catch(() => {});
   }
 
   console.log('4. Creating Apple Distribution Certificate via API...');
@@ -100,7 +100,7 @@ async function main() {
   const p12Path = path.join(workDir, 'dist.p12');
   fs.writeFileSync(cerDerPath, Buffer.from(certContentBase64, 'base64'));
   execSync(`openssl x509 -inform DER -in "${cerDerPath}" -out "${cerPemPath}"`);
-  execSync(`openssl pkcs12 -export -out "${p12Path}" -inkey "${keyPath}" -in "${cerPemPath}" -passout pass:kft1234`);
+  execSync(`openssl pkcs12 -export -legacy -out "${p12Path}" -inkey "${keyPath}" -in "${cerPemPath}" -passout pass:kft1234`);
   console.log('   Created Distribution Certificate ID:', certId);
 
   console.log('5. Creating App Store Provisioning Profile via API...');
@@ -138,9 +138,11 @@ async function main() {
   console.log('   Installed Provisioning Profile:', profileName, 'UUID:', profileUuid);
 
   console.log('6. Importing Certificate & Private Key into macOS Keychain...');
-  const keychainPath = 'build.keychain-db';
+  const keychainPath = path.join(process.env.HOME, 'Library/Keychains/build.keychain-db');
   const keychainPass = 'kft1234';
-  execSync(`security create-keychain -p "${keychainPass}" "${keychainPath}" || true`);
+  execSync(`security delete-keychain "${keychainPath}" 2>/dev/null || true`);
+  execSync(`security create-keychain -p "${keychainPass}" "${keychainPath}"`);
+  execSync(`security list-keychains -d user -s "${keychainPath}" login.keychain-db`);
   execSync(`security default-keychain -s "${keychainPath}"`);
   execSync(`security unlock-keychain -p "${keychainPass}" "${keychainPath}"`);
   execSync(`security set-keychain-settings -t 3600 -u "${keychainPath}"`);
@@ -149,7 +151,7 @@ async function main() {
   const wwdrPath = path.join(workDir, 'AppleWWDRCAG3.cer');
   execSync(`curl -sL "https://www.apple.com/certificateauthority/AppleWWDRCAG3.cer" -o "${wwdrPath}"`);
   execSync(`security import "${wwdrPath}" -k "${keychainPath}" -T /usr/bin/codesign -T /usr/bin/security || true`);
-  execSync(`security import "${p12Path}" -k "${keychainPath}" -P "kft1234" -T /usr/bin/codesign -T /usr/bin/security`);
+  execSync(`security import "${p12Path}" -k "${keychainPath}" -P "kft1234" -T /usr/bin/codesign -T /usr/bin/security -T /usr/bin/productbuild`);
   execSync(`security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "${keychainPass}" "${keychainPath}"`);
   execSync(`security find-identity -v -p codesigning "${keychainPath}"`, { stdio: 'inherit' });
 
