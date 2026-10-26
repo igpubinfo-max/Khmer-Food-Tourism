@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronRight, Lock, Crown, Sparkles, Leaf, Route, MapPin, Heart } from 'lucide-react';
+import { ChevronRight, Lock, Crown, Sparkles, Leaf, Route, MapPin, Heart, Flame } from 'lucide-react';
 import type { Language } from '../../types';
 import { tr } from '../../utils/i18n';
 
@@ -20,6 +20,7 @@ export const SmartMenuBanner: React.FC<Props> = ({ language, onOpen, showVipLock
     { icon: Route, label: tr(language, 'ដំណើរ ១ ថ្ងៃ', '1-day trip', '一日行程') },
     { icon: MapPin, label: tr(language, 'នៅជិតខ្ញុំ', 'Near me', '附近') },
     { icon: Heart, label: tr(language, 'ចំណូលចិត្ត', 'Favorites', '收藏') },
+    { icon: Flame, label: tr(language, 'កំពុងពេញនិយម', 'Trending', '热门') },
   ];
 
   return (

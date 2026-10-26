@@ -124,3 +124,16 @@
 @media (prefers-reduced-motion: reduce) {
   .kft-premium-card, .kft-shimmer-bar, .kft-key-wiggle { animation: none; }
 }
+
+/* ===== Home auto-scrolling rows (right -> left, slow) ===== */
+@keyframes kft-marquee-rtl {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.kft-marquee-track { animation: kft-marquee-rtl 40s linear infinite; will-change: transform; }
+.kft-marquee-viewport:hover .kft-marquee-track,
+.kft-marquee-viewport:active .kft-marquee-track { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  .kft-marquee-viewport { overflow-x: auto; }
+  .kft-marquee-track { animation: none; }
+}

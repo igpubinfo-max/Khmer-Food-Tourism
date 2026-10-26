@@ -1,6 +1,7 @@
 import React from 'react';
 import { MapPin, ChevronRight } from 'lucide-react';
 import type { TrendingFoodItem, Language } from '../../types';
+import { AutoMarquee } from './AutoMarquee';
 import { tr, translateProvinceName } from '../../utils/i18n';
 import { translateSignatureDish, sanitizeStrictLanguageText } from '../../utils/zhDynamicTranslator';
 
@@ -29,7 +30,7 @@ export const TrendingFoodsRow: React.FC<Props> = ({ language, items, onOpen, onE
         </button>
       )}
     </div>
-    <div className="flex gap-3 overflow-x-auto no-scrollbar snap-x snap-mandatory -mx-4 px-4 pb-1">
+    <AutoMarquee durationSec={Math.max(36, (items || []).length * 6)}>
       {(items || []).map((item) => {
         if (!item || !item.id) return null;
         const safeKh = item.foodNameKh || item.foodNameEn || 'ម្ហូបខ្មែរ';
@@ -51,7 +52,7 @@ export const TrendingFoodsRow: React.FC<Props> = ({ language, items, onOpen, onE
             key={item.id}
             type="button"
             onClick={() => onOpen(item)}
-            className="snap-start shrink-0 w-48 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs overflow-hidden text-left active:scale-[0.97] transition cursor-pointer"
+            className="shrink-0 w-48 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs overflow-hidden text-left active:scale-[0.97] transition cursor-pointer"
           >
             <img
               src={item.photoUrl || '/welcome/hero-bg.webp'}
@@ -73,6 +74,6 @@ export const TrendingFoodsRow: React.FC<Props> = ({ language, items, onOpen, onE
           </button>
         );
       })}
-    </div>
+    </AutoMarquee>
   </section>
 );

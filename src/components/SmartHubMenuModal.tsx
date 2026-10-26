@@ -136,26 +136,6 @@ export const SmartHubMenuModal: React.FC<Props> = ({ onClose }) => {
               🧭 {tr(language, 'ឧបករណ៍ទេសចរណ៍ និងម្ហូបឆ្លាតវៃ', 'Smart Travel & Food Tools', '智能出行与美食工具')}
             </h3>
 
-            {/* Trending Khmer Food & Online Discovery */}
-            <button
-              type="button"
-              className={rowCls}
-              onClick={() => {
-                onClose();
-                setIsTrendingSocialModalOpen(true);
-              }}
-            >
-              <span className={`${iconBox} bg-rose-100 text-rose-600`}><Flame className="w-5 h-5" /></span>
-              <span className="min-w-0 flex-1">
-                <span className="block text-sm font-bold text-slate-900 dark:text-white">
-                  {tr(language, 'ម្ហូបខ្មែរកំពុងពេញនិយម (YouTube)', 'Trending Khmer Food (YouTube)', '热门高棉美食（YouTube）')}
-                </span>
-                <span className="block text-xs text-slate-500 dark:text-slate-400">
-                  {tr(language, 'វីដេអូពេញនិយម YouTube', 'Trending YouTube Videos', 'YouTube 热门视频')}
-                </span>
-              </span>
-            </button>
-
             {/* 1-Day food trips (VIP) */}
             <button
               type="button"
@@ -227,6 +207,26 @@ export const SmartHubMenuModal: React.FC<Props> = ({ onClose }) => {
               </span>
               <span className="min-w-[32px] h-8 px-2 rounded-full bg-rose-500 text-white text-sm font-extrabold flex items-center justify-center" aria-label={`${bookmarks.length}`}>
                 {bookmarks.length}
+              </span>
+            </button>
+
+            {/* Trending Khmer Food & Online Discovery */}
+            <button
+              type="button"
+              className={rowCls}
+              onClick={() => {
+                onClose();
+                setIsTrendingSocialModalOpen(true);
+              }}
+            >
+              <span className={`${iconBox} bg-rose-100 text-rose-600`}><Flame className="w-5 h-5" /></span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-sm font-bold text-slate-900 dark:text-white">
+                  {tr(language, 'ម្ហូបខ្មែរកំពុងពេញនិយម (YouTube)', 'Trending Khmer Food (YouTube)', '热门高棉美食（YouTube）')}
+                </span>
+                <span className="block text-xs text-slate-500 dark:text-slate-400">
+                  {tr(language, 'វីដេអូពេញនិយម YouTube', 'Trending YouTube Videos', 'YouTube 热门视频')}
+                </span>
               </span>
             </button>
 

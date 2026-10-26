@@ -256,11 +256,31 @@ export const HomeView: React.FC = () => {
     const d = new Date();
     return d.getFullYear() * 372 + d.getMonth() * 31 + d.getDate();
   }, []);
-  const featuredFood = useMemo(() => (foods.length ? foods[todaySeed % foods.length] : null), [foods, todaySeed]);
-  const featuredRestaurant = useMemo(() => {
-    const approved = restaurants.filter((r) => r.status === 'approved' && r.photoUrl);
-    return approved.length ? approved[todaySeed % approved.length] : null;
-  }, [restaurants, todaySeed]);
+  // Random picks on every Home visit (and on "Shuffle"); photos come from merged app data so admin overrides win
+  const [discoverySeed, setDiscoverySeed] = useState(0);
+  const pickRandom = <T,>(list: T[], n: number): T[] => {
+    const a = [...list];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a.slice(0, n);
+  };
+  const discoveryFoods = useMemo(
+    () => pickRandom(foods.filter((f) => f && f.id && f.photoUrl), 6),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [foods.length, discoverySeed]
+  );
+  const discoveryRestaurants = useMemo(
+    () => pickRandom(restaurants.filter((r) => r && r.id && r.status === 'approved' && r.photoUrl), 6),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [restaurants.length, discoverySeed]
+  );
+  const randomTrending = useMemo(
+    () => pickRandom(trendingFoods.filter((t) => t && t.id), 12),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [trendingFoods.length, discoverySeed]
+  );
   const isHomeLoading = foods.length === 0 && restaurants.length === 0 && trendingFoods.length === 0;
   const canUseVipActions = isVip || currentUser?.role === 'admin';
   const txt = (km: string, en: string, zh: string) => (language === 'km' ? km : language === 'zh' ? zh : en);
@@ -617,20 +637,41 @@ export const HomeView: React.FC = () => {
                 onCheckIn={requireVip(() => setIsNearMeModalOpen(true))}
               />
 
+              {/* Highlights strip: live counts, tap to jump */}
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { emoji: '🍲', n: foods.length, label: txt('មុខម្ហូប', 'Dishes', '美食'), tab: 'food', tone: 'from-amber-400 to-orange-500' },
+                  { emoji: '🏪', n: restaurants.length, label: txt('ហាងអាហារ', 'Places', '餐厅'), tab: 'restaurants', tone: 'from-emerald-500 to-teal-600' },
+                  { emoji: '🏛️', n: destinations.length, label: txt('កន្លែងទេសចរណ៍', 'Sights', '景点'), tab: 'tourism', tone: 'from-sky-500 to-indigo-600' },
+                ].map((s) => (
+                  <button
+                    key={s.tab}
+                    type="button"
+                    onClick={() => setActiveTab(s.tab as any)}
+                    className={`rounded-2xl bg-gradient-to-br ${s.tone} text-white p-2.5 text-center shadow-md active:scale-95 transition cursor-pointer`}
+                  >
+                    <span className="block text-xl leading-none">{s.emoji}</span>
+                    <span className="block text-lg font-black font-mono leading-tight mt-1">{s.n}+</span>
+                    <span className="block text-[11px] font-bold opacity-95">{s.label}</span>
+                  </button>
+                ))}
+              </div>
+
               {/* 3. Today's discovery */}
               <TodayDiscovery
                 language={language}
-                food={featuredFood}
-                restaurant={featuredRestaurant}
+                foods={discoveryFoods}
+                restaurants={discoveryRestaurants}
+                onShuffle={() => setDiscoverySeed((s) => s + 1)}
                 onOpenFood={setSelectedFood}
                 onOpenRestaurant={setSelectedRestaurant}
               />
 
               {/* 4. Trending foods (horizontal) */}
-              {trendingFoods.length > 0 ? (
+              {randomTrending.length > 0 ? (
                 <TrendingFoodsRow
                   language={language}
-                  items={trendingFoods.slice(0, 10)}
+                  items={randomTrending}
                   onOpen={handleOpenFoodDetail}
                   onExploreAll={() => setIsTrendingSocialModalOpen(true)}
                 />

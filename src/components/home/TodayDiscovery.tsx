@@ -1,69 +1,110 @@
 import React from 'react';
-import { ChevronRight, MapPin, Star } from 'lucide-react';
+import { MapPin, Star, Shuffle } from 'lucide-react';
 import type { FoodItem, Restaurant, Language } from '../../types';
 import { tr } from '../../utils/i18n';
 import { getLocalizedFood, getLocalizedRestaurant } from '../../utils/zhDynamicTranslator';
+import { AutoMarquee } from './AutoMarquee';
 
 interface Props {
   language: Language;
-  food: FoodItem | null;
-  restaurant: Restaurant | null;
+  foods: FoodItem[];
+  restaurants: Restaurant[];
   onOpenFood: (food: FoodItem) => void;
   onOpenRestaurant: (restaurant: Restaurant) => void;
+  onShuffle?: () => void;
 }
 
-/** "Today's discovery": 1 featured dish + 1 featured place. Photos come from the already-merged app data (admin overrides win). */
-export const TodayDiscovery: React.FC<Props> = ({ language, food, restaurant, onOpenFood, onOpenRestaurant }) => {
-  if (!food && !restaurant) return null;
-  const locFood = food ? getLocalizedFood(food, language) : null;
-  const locRest = restaurant ? getLocalizedRestaurant(restaurant, language) : null;
+const FALLBACK_IMG = '/welcome/hero-bg.webp';
+
+/** "Today's discovery": random mix of dishes and places that slowly glides right-to-left. */
+export const TodayDiscovery: React.FC<Props> = ({ language, foods, restaurants, onOpenFood, onOpenRestaurant, onShuffle }) => {
+  if (!foods.length && !restaurants.length) return null;
+
+  // Interleave dishes and places so the strip feels varied
+  const cards: React.ReactNode[] = [];
+  const max = Math.max(foods.length, restaurants.length);
+  for (let i = 0; i < max; i++) {
+    const food = foods[i];
+    if (food) {
+      const loc = getLocalizedFood(food, language);
+      cards.push(
+        <button
+          key={`f-${food.id}`}
+          type="button"
+          onClick={() => onOpenFood(food)}
+          className="relative shrink-0 w-44 h-56 rounded-3xl overflow-hidden text-left shadow-lg active:scale-[0.97] transition cursor-pointer"
+        >
+          <img
+            src={food.photoUrl || FALLBACK_IMG}
+            alt={loc.name}
+            loading="lazy"
+            onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = FALLBACK_IMG; }}
+            className="absolute inset-0 w-full h-full object-cover bg-slate-200"
+          />
+          <span className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
+          <span className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[10px] font-black">
+            🍲 {tr(language, 'ម្ហូប', 'Dish', '美食')}
+          </span>
+          <span className="absolute bottom-0 inset-x-0 p-3">
+            <span className="block text-sm font-extrabold text-white leading-snug line-clamp-2 drop-shadow">{loc.name}</span>
+            <span className="block text-[11px] text-amber-200 line-clamp-1 mt-0.5">{loc.category}</span>
+          </span>
+        </button>
+      );
+    }
+    const rest = restaurants[i];
+    if (rest) {
+      const loc = getLocalizedRestaurant(rest, language);
+      cards.push(
+        <button
+          key={`r-${rest.id}`}
+          type="button"
+          onClick={() => onOpenRestaurant(rest)}
+          className="relative shrink-0 w-44 h-56 rounded-3xl overflow-hidden text-left shadow-lg active:scale-[0.97] transition cursor-pointer"
+        >
+          <img
+            src={rest.photoUrl || FALLBACK_IMG}
+            alt={loc.name}
+            loading="lazy"
+            onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = FALLBACK_IMG; }}
+            className="absolute inset-0 w-full h-full object-cover bg-slate-200"
+          />
+          <span className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
+          <span className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full bg-emerald-500 text-white text-[10px] font-black">
+            🏪 {tr(language, 'ហាង', 'Place', '餐厅')}
+          </span>
+          <span className="absolute bottom-0 inset-x-0 p-3">
+            <span className="block text-sm font-extrabold text-white leading-snug line-clamp-2 drop-shadow">{loc.name}</span>
+            <span className="flex items-center gap-2 text-[11px] text-emerald-200 mt-0.5">
+              <span className="inline-flex items-center gap-0.5 truncate"><MapPin className="w-3 h-3" />{loc.province}</span>
+              {typeof rest.rating === 'number' && rest.rating > 0 && (
+                <span className="inline-flex items-center gap-0.5 text-amber-300"><Star className="w-3 h-3 fill-amber-300" />{rest.rating.toFixed(1)}</span>
+              )}
+            </span>
+          </span>
+        </button>
+      );
+    }
+  }
 
   return (
     <section className="space-y-2.5">
-      <h3 className="font-moul text-base text-[#064E3B] dark:text-emerald-300">
-        ✨ {tr(language, 'រកឃើញថ្មីថ្ងៃនេះ', "Today's discovery", '今日发现')}
-      </h3>
-      <div className="grid grid-cols-1 gap-3">
-        {food && locFood && (
+      <div className="flex items-center justify-between gap-2">
+        <h3 className="font-moul text-base text-[#064E3B] dark:text-emerald-300">
+          ✨ {tr(language, 'រកឃើញថ្មីថ្ងៃនេះ', "Today's discovery", '今日发现')}
+        </h3>
+        {onShuffle && (
           <button
             type="button"
-            onClick={() => onOpenFood(food)}
-            className="w-full min-h-[96px] flex items-center gap-3 p-2.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs text-left active:scale-[0.98] transition cursor-pointer"
+            onClick={onShuffle}
+            className="px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs font-extrabold flex items-center gap-1 active:scale-95 transition cursor-pointer"
           >
-            <img src={food.photoUrl} alt={locFood.name} loading="lazy" className="w-24 h-24 rounded-xl object-cover shrink-0 bg-slate-100" />
-            <span className="min-w-0 flex-1">
-              <span className="inline-block px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 text-xs font-bold">
-                🍲 {tr(language, 'ម្ហូបប្រចាំថ្ងៃ', 'Dish of the day', '今日菜品')}
-              </span>
-              <span className="block mt-1 text-base sm:text-lg font-extrabold text-slate-900 dark:text-white leading-snug line-clamp-2">{locFood.name}</span>
-              <span className="block text-xs text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5">{locFood.category}</span>
-            </span>
-            <ChevronRight className="w-5 h-5 text-slate-400 shrink-0" />
-          </button>
-        )}
-        {restaurant && locRest && (
-          <button
-            type="button"
-            onClick={() => onOpenRestaurant(restaurant)}
-            className="w-full min-h-[96px] flex items-center gap-3 p-2.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs text-left active:scale-[0.98] transition cursor-pointer"
-          >
-            <img src={restaurant.photoUrl} alt={locRest.name} loading="lazy" className="w-24 h-24 rounded-xl object-cover shrink-0 bg-slate-100" />
-            <span className="min-w-0 flex-1">
-              <span className="inline-block px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-bold">
-                🏪 {tr(language, 'ហាងណែនាំ', 'Featured place', '推荐餐厅')}
-              </span>
-              <span className="block mt-1 text-base font-bold text-slate-900 dark:text-white leading-snug line-clamp-2">{locRest.name}</span>
-              <span className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-                <span className="inline-flex items-center gap-0.5"><MapPin className="w-3.5 h-3.5" />{locRest.province}</span>
-                {typeof restaurant.rating === 'number' && (
-                  <span className="inline-flex items-center gap-0.5"><Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />{restaurant.rating.toFixed(1)}</span>
-                )}
-              </span>
-            </span>
-            <ChevronRight className="w-5 h-5 text-slate-400 shrink-0" />
+            <Shuffle className="w-3.5 h-3.5" />
+            <span>{tr(language, 'ប្តូរថ្មី', 'Shuffle', '换一批')}</span>
           </button>
         )}
       </div>
+      <AutoMarquee durationSec={Math.max(30, cards.length * 7)}>{cards}</AutoMarquee>
     </section>
   );
 };
