@@ -191,7 +191,7 @@ export const ProfileView: React.FC = () => {
                 <img 
                   src={currentUser.avatar} 
                   alt={currentUser.name} 
-                  className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border-2 border-[#059669] shadow-md ring-4 ring-emerald-500/20 shrink-0"
+                  className={`w-16 h-16 sm:w-22 sm:h-22 ${currentUser.role === 'admin' ? 'rounded-full ring-4 ring-emerald-400/40' : 'rounded-2xl ring-4 ring-emerald-500/20'} object-cover border-2 border-[#059669] shadow-md shrink-0`}
                 />
                 <div className="flex-1 min-w-0">
                   {/* Large Prominent Account Name & Quick Edit */}

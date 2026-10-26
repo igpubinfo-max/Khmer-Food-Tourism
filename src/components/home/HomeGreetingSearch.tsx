@@ -53,7 +53,7 @@ export const HomeGreetingSearch: React.FC<Props> = ({
             <img
               src={currentUser.avatar}
               alt={currentUser.name}
-              className="w-11 h-11 rounded-xl object-cover border-2 border-amber-300/80 shadow-xs shrink-0 bg-white"
+              className={`w-12 h-12 sm:w-14 sm:h-14 ${currentUser.role === 'admin' ? 'rounded-full ring-2 ring-emerald-300' : 'rounded-2xl'} object-cover border-2 border-amber-300/80 shadow-xs shrink-0 bg-white`}
             />
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1.5 flex-wrap">

@@ -377,7 +377,7 @@ export const TrendingSocialModal: React.FC = () => {
                   {tr(language, 'ម្ហូបខ្មែរកំពុងពេញនិយមលើអនឡាញ', 'Trending Khmer Food Discovery', '热门高棉美食在线发现')}
                 </h3>
                 <span className="px-2 py-0.5 rounded-full bg-rose-500 text-white text-[9px] font-bold shadow-xs">
-                  YouTube · TikTok · FB · Wiki
+                  YouTube · Wikipedia
                 </span>
               </div>
               <p className="text-[11px] text-pink-200 font-khmer truncate">
@@ -447,7 +447,7 @@ export const TrendingSocialModal: React.FC = () => {
             className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-300 font-bold border border-slate-700 cursor-pointer"
           >
             <Info className="w-3.5 h-3.5 shrink-0" />
-            <span>{tr(language, 'ស្ថានភាព API តាមវេទិកា (៤)', 'Platform API Status (4)', '各平台 API 状态 (4)')}</span>
+            <span>{tr(language, 'ស្ថានភាព API តាមវេទិកា (២)', 'Platform API Status (2)', '各平台 API 状态 (2)')}</span>
             <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showStatusPanel ? 'rotate-180' : ''}`} />
           </button>
 
@@ -518,7 +518,7 @@ export const TrendingSocialModal: React.FC = () => {
                 required
                 value={customUrlInput}
                 onChange={(e) => setCustomUrlInput(e.target.value)}
-                placeholder="https://www.youtube.com/watch?v=... or https://www.tiktok.com/..."
+                placeholder="https://www.youtube.com/watch?v=..."
                 className="flex-1 px-3 py-1.5 rounded-xl bg-slate-800 border border-slate-700 text-xs text-white"
               />
               <button
@@ -730,7 +730,7 @@ export const TrendingSocialModal: React.FC = () => {
                       </div>
 
                       {/* Center Play Overlay for Video Platforms */}
-                      {(item.platform === 'youtube' || item.platform === 'tiktok' || item.platform === 'facebook') && (
+                      {item.platform === 'youtube' && (
                         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                           <div className="w-11 h-11 rounded-full bg-red-600/90 group-hover:bg-red-600 text-white flex items-center justify-center shadow-lg border-2 border-white/80 transition transform group-hover:scale-110">
                             <Play className="w-5 h-5 fill-current ml-0.5" />
@@ -810,14 +810,14 @@ export const TrendingSocialModal: React.FC = () => {
                         type="button"
                         onClick={() => handlePlayOrOpenItem(item)}
                         className={`py-1.5 px-2 rounded-xl font-bold text-[10px] flex items-center justify-center gap-1 transition cursor-pointer ${
-                          item.platform === 'youtube' || item.platform === 'tiktok' || item.platform === 'facebook'
+                          item.platform === 'youtube'
                             ? isPlayingInline
                               ? 'bg-slate-700 text-white'
                               : 'bg-red-600 hover:bg-red-700 text-white shadow-xs'
                             : 'bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/50 text-[#064E3B] dark:text-emerald-300'
                         }`}
                       >
-                        {item.platform === 'youtube' || item.platform === 'tiktok' || item.platform === 'facebook' ? (
+                        {item.platform === 'youtube' ? (
                           isPlayingInline ? (
                             <>
                               <X className="w-3 h-3" />

@@ -2,12 +2,12 @@ import { FoodItem, TrendingFoodCategorySlug, TrendingFoodItem } from '../types';
 import { initialFoods } from '../data/seedData';
 import { initialTrendingFoods } from '../data/seedTrendingFoods';
 
-export const ONLINE_DISCOVERY_CACHE_KEY = 'kft_v3_online_discovery_cache';
+export const ONLINE_DISCOVERY_CACHE_KEY = 'kft_v4_online_discovery_cache';
 export const ONLINE_DISCOVERY_CUSTOM_URLS_KEY = 'kft_v3_online_discovery_custom_urls';
 export const ONLINE_DISCOVERY_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 export const MANUAL_REFRESH_COOLDOWN_MS = 5 * 60 * 1000; // 5 minutes
 
-export type DiscoveryPlatformId = 'youtube' | 'tiktok' | 'facebook' | 'web_wiki';
+export type DiscoveryPlatformId = 'youtube' | 'web_wiki';
 
 export interface PlatformApiStatus {
   platform: DiscoveryPlatformId;

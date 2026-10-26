@@ -365,7 +365,7 @@ export const AdminLoginModal: React.FC = () => {
                     <img
                       src="/images/admin_profile.png"
                       alt="Chea Savuth Admin"
-                      className="w-36 h-36 rounded-3xl object-cover border-4 border-emerald-400 shadow-2xl ring-4 ring-emerald-500/30"
+                      className="w-36 h-36 sm:w-44 sm:h-44 rounded-full object-cover border-4 border-emerald-400 shadow-2xl ring-4 ring-emerald-500/30"
                     />
                     <div className="absolute -bottom-1 -right-1 p-1.5 bg-emerald-600 rounded-full border-2 border-white text-white shadow-md">
                       <ShieldCheck className="w-5 h-5 text-white" />
