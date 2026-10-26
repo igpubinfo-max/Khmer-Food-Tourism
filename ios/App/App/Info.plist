@@ -68,13 +68,15 @@
 	<true/>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
-	<key>NSCameraUsageDescription</key>
-	<string>Khmer Food &amp; Tourism needs access to your camera so you can take photos of dishes for AI Food Recognition, upload restaurant menu photos, and share food reviews in the Community Feed.</string>
+		<key>NSCameraUsageDescription</key>
+	<string>Khmer Food &amp; Tourism needs camera access to photograph dishes for AI recognition, scan QR codes, and upload restaurant food photos / កម្មវិធីត្រូវការសិទ្ធិប្រើកាមេរ៉ាដើម្បីថតរូបម្ហូប ស្កេន QR Code និងបង្ហោះរូបភាពហាង</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Khmer Food &amp; Tourism needs access to your photo library so you can select food photos for AI Food Recognition, upload restaurant store and menu images, and attach payment screenshots.</string>
+	<string>Khmer Food &amp; Tourism needs photo library access to upload restaurant dishes, attach payment receipts, and save food cards / កម្មវិធីត្រូវការសិទ្ធិមើលវិចិត្រសាលរូបភាពដើម្បីជ្រើសរើសរូបម្ហូប និងបង្កាន់ដៃបង់ប្រាក់</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Khmer Food &amp; Tourism needs permission to save QR codes and food photos to your photo library.</string>
+	<string>Khmer Food &amp; Tourism needs permission to save KHQR payment codes and food photos to your photo library / កម្មវិធីត្រូវការសិទ្ធិរក្សាទុករូបភាព QR Code និងរូបម្ហូបក្នុងទូរស័ព្ទរបស់អ្នក</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Khmer Food &amp; Tourism uses your location while using the app to show nearby Khmer restaurants, cafes, and tourist attractions in Cambodia and calculate travel distances.</string>
+	<string>Khmer Food &amp; Tourism uses your GPS location to display nearby restaurants, attractions, and distance calculations / កម្មវិធីត្រូវការទីតាំង GPS ដើម្បីបង្ហាញភោជនីយដ្ឋាន និងរមណីយដ្ឋានទេសចរណ៍នៅក្បែរអ្នក</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Khmer Food &amp; Tourism uses Face ID for secure administrator login / កម្មវិធីប្រើប្រាស់ Face ID សម្រាប់ការផ្ទៀងផ្ទាត់សុវត្ថិភាពអ្នកគ្រប់គ្រង</string>
 </dict>
 </plist>
