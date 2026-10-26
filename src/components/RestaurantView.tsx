@@ -506,10 +506,13 @@ export const RestaurantView: React.FC = () => {
               <span className="text-xs">✨</span>
             </button>
 
-            {currentUser?.role === 'admin' && myExistingRest && (
+            {myExistingRest && (
               <button
                 type="button"
-                onClick={() => setIsVipAddRestaurantModalOpen(true)}
+                onClick={() => {
+                  (window as any).__kft_vip_store_initial_mode = { mode: "create" };
+                  setIsVipAddRestaurantModalOpen(true);
+                }}
                 className="py-3 px-3.5 rounded-xl bg-emerald-900/90 hover:bg-emerald-800 text-amber-200 border border-amber-300/60 text-xs font-bold flex items-center justify-center gap-1 transition active:scale-95 cursor-pointer shrink-0"
               >
                 <Plus className="w-4 h-4" />

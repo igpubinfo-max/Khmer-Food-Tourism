@@ -1582,17 +1582,15 @@ export const getUserStoreQuotaSummary = (
     verifiedAdditionalStoreTransactions.length
   );
 
-  const includedFreeStores = isAdmin ? 9999 : isVipActive ? includedFreeBase : 0;
+  const includedFreeStores = isAdmin ? 9999 : Math.max(1, includedFreeBase);
   const totalAllowedStores = isAdmin
     ? 9999
-    : isVipActive
-    ? includedFreeStores + paidAdditionalStoreSlots
-    : 0;
+    : includedFreeStores + paidAdditionalStoreSlots;
   const usedStoresCount = ownedStores.length;
   const remainingAvailableSlots = Math.max(0, totalAllowedStores - usedStoresCount);
-  const canCreateNewStoreWithoutPayment = isAdmin || (isVipActive && remainingAvailableSlots > 0);
-  const canReplaceExistingStoreForFree = isAdmin || (isVipActive && usedStoresCount > 0);
-  const canEditExistingFree = isAdmin || isVipActive;
+  const canCreateNewStoreWithoutPayment = isAdmin || remainingAvailableSlots > 0;
+  const canReplaceExistingStoreForFree = isAdmin || usedStoresCount > 0;
+  const canEditExistingFree = true;
 
   return {
     isAdmin,

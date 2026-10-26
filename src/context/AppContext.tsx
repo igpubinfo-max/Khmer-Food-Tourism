@@ -4733,24 +4733,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const isApprovedVip = isUserVipActive(currentUser);
     const dynamicPlans = getDynamicVipPlans(appSettings);
 
-    // Strict VIP Permission Enforcement: Only approved VIP or Admin can register restaurants
-    if (!isAdmin && !isApprovedVip) {
-      const state = getVipAccountState(currentUser);
-      let errorMsg = language === 'km' 
-        ? `🔒 សិទ្ធិត្រូវបានបដិសេធ! មានតែសមាជិក VIP ដែលបានអនុម័តប៉ុណ្ណោះដែលអាចចុះបញ្ជីហាងបាន។ សូមដំឡើងទៅកញ្ចប់ VIP ($${dynamicPlans.quarterly.priceUsd.toFixed(2)} / ${dynamicPlans.quarterly.durationDays} ថ្ងៃ ឬ $${dynamicPlans.annual.priceUsd.toFixed(2)} / ${dynamicPlans.annual.durationDays} ថ្ងៃ)!` 
-        : `🔒 Permission denied! Only approved VIP members can register a restaurant. Please upgrade to VIP ($${dynamicPlans.quarterly.priceUsd.toFixed(2)} / ${dynamicPlans.quarterly.durationDays} days or $${dynamicPlans.annual.priceUsd.toFixed(2)} / ${dynamicPlans.annual.durationDays} days)!`;
-      if (state === 'pending_vip') {
-        errorMsg = language === 'km'
-          ? '⏳ គណនី VIP របស់អ្នកកំពុងរង់ចាំការពិនិត្យ និងអនុម័តពី Administrator។ សូមរង់ចាំការអនុម័តជាមុនសិន!'
-          : '⏳ Your VIP request is pending Admin approval. Please wait for approval before adding a restaurant!';
-      } else if (state === 'expired_vip') {
-        errorMsg = language === 'km'
-          ? '⚠️ សមាជិកភាព VIP របស់អ្នកបានផុតកំណត់ហើយ! សូមបន្តសមាជិកភាព VIP ដើម្បីចុះបញ្ជីហាង។'
-          : '⚠️ Your VIP subscription has expired. Please renew your VIP membership!';
-      }
-      showToast(errorMsg, 'warning');
-      return null;
-    }
+    // Basic 1st store registration is open to signed-in users; VIP unlocks full 20 dishes & 30 photos
 
     const quota = getUserStoreQuotaSummary(currentUser, restaurants, transactions, appSettings);
     const replaceTargetId = options?.replaceRestaurantId?.trim();
@@ -4899,12 +4882,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       updatedAt: nowIso,
     });
 
+    lastLocalRestaurantEditAtRef.current = Date.now();
     recordPermanentRestaurantOverride(newRest);
     setActiveManagedShopId(newRest.id);
     setManagingRestaurantState(newRest);
 
     setRestaurants(prev => {
       const nextList = sortRestaurantsChronologically([...prev.filter(r => r.id !== newRest.id), newRest]);
+      latestSyncStateRef.current.restaurants = nextList;
       try {
         localStorage.setItem('kft_restaurants_real_v11', JSON.stringify(compactDataForBulkLocalStorage('kft_restaurants_real_v9', nextList)));
       } catch (e) {
@@ -5156,10 +5141,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
 
     // Persist restaurant photo/details permanently in vault & local storage & cloud
+    lastLocalRestaurantEditAtRef.current = Date.now();
     recordPermanentRestaurantOverride(safeUpdated);
 
     setRestaurants(prev => {
       const next = prev.map(r => r.id === updated.id ? safeUpdated : r);
+      latestSyncStateRef.current.restaurants = next;
       try {
         localStorage.setItem('kft_restaurants_real_v11', JSON.stringify(compactDataForBulkLocalStorage('kft_restaurants_real_v9', next)));
       } catch {

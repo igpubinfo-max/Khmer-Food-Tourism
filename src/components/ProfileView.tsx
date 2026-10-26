@@ -1872,14 +1872,20 @@ export const ProfileView: React.FC = () => {
                 </span>
                 <div className="flex items-center gap-1.5 flex-wrap">
                   <button
-                    onClick={() => setIsVipAddRestaurantModalOpen(true)}
+                    onClick={() => {
+                      (window as any).__kft_vip_store_initial_mode = { mode: "replace", storeId: myRestaurants[0]?.id };
+                      setIsVipAddRestaurantModalOpen(true);
+                    }}
                     className="px-2.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] shadow-xs flex items-center gap-1 transition cursor-pointer"
                   >
                     <RefreshCw className="w-3 h-3" />
                     <span>{isKm ? 'ប្តូរហាងថ្មី ($0)' : 'Replace Store ($0)'}</span>
                   </button>
                   <button
-                    onClick={() => setIsVipAddRestaurantModalOpen(true)}
+                    onClick={() => {
+                      (window as any).__kft_vip_store_initial_mode = { mode: "create" };
+                      setIsVipAddRestaurantModalOpen(true);
+                    }}
                     className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 text-slate-950 font-bold text-[11px] shadow-xs flex items-center gap-1 transition cursor-pointer"
                   >
                     <Plus className="w-3.5 h-3.5" />

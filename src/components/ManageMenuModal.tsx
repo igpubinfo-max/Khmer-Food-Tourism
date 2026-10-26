@@ -659,6 +659,7 @@ export const ManageMenuModal: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => {
+                      (window as any).__kft_vip_store_initial_mode = { mode: "replace", storeId: managingRestaurant.id };
                       setIsManageMenuModalOpen(false);
                       setIsVipAddRestaurantModalOpen(true);
                     }}
@@ -669,6 +670,7 @@ export const ManageMenuModal: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => {
+                      (window as any).__kft_vip_store_initial_mode = { mode: "create" };
                       setIsManageMenuModalOpen(false);
                       setIsVipAddRestaurantModalOpen(true);
                     }}
@@ -1524,6 +1526,7 @@ export const ManageMenuModal: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => {
+                      (window as any).__kft_vip_store_initial_mode = { mode: "replace", storeId: managingRestaurant.id };
                       setIsManageMenuModalOpen(false);
                       setIsVipAddRestaurantModalOpen(true);
                     }}

@@ -917,24 +917,21 @@ export function analyzeFoodBusinessDeterministically(
     };
   }
 
-  // CASE B: Check for Gibberish / Too Short / Meaningless Input -> REJECT or PENDING_REVIEW
-  const cleanNameOnly = `${nameKh}${nameEn}`.replace(/[\s0-9.,!@#$%^&*()_+\-=]/g, '');
-  if (cleanNameOnly.length < 2 || /^(test|testing|asdf|qwerty|abc|xxx|123)+$/i.test(cleanNameOnly)) {
-    const labels = getSubCategoryLabels('uncertain_ambiguous');
+  // CASE B: Check for Empty Input -> REJECT
+  const cleanNameOnly = `${nameKh}${nameEn}`.replace(/[\s.,!@#$%^&*()_+\-=]/g, '');
+  if (cleanNameOnly.length < 1) {
     return {
       decision: 'rejected',
       isFoodBusiness: false,
       detectedCategory: 'non_food_other',
-      detectedCategoryLabelKh: 'ឈ្មោះហាងមិនត្រឹមត្រូវ ឬមិនមែនជាហាងអាហារ',
-      detectedCategoryLabelEn: 'Invalid or Unrecognizable Store Name',
+      detectedCategoryLabelKh: 'ឈ្មោះហាងមិនត្រឹមត្រូវ',
+      detectedCategoryLabelEn: 'Invalid Store Name',
       confidenceScore: 92,
-      isBypassAttempt: true,
-      reasonKh:
-        '🚫 បដិសេធការបង្កើតហាង៖ ឈ្មោះហាង ឬព័ត៌មានមិនត្រឹមត្រូវ។ សូមបញ្ចូលឈ្មោះភោជនីយដ្ឋាន ហាងអាហារ និងមុខម្ហូបពិសេសប្រចាំហាងឱ្យបានច្បាស់លាស់។',
-      reasonEn:
-        '🚫 Store Rejected: Invalid or test store name. Please enter a real restaurant or food shop name and signature dishes.',
+      isBypassAttempt: false,
+      reasonKh: '🚫 សូមបញ្ចូលឈ្មោះហាងឱ្យបានត្រឹមត្រូវ។',
+      reasonEn: '🚫 Please enter a valid restaurant or shop name.',
       matchedFoodSignals: [],
-      flaggedNonFoodSignals: [nameKh || nameEn || 'invalid_name'],
+      flaggedNonFoodSignals: ['empty_name'],
       photoAnalysisSummaryKh: photoCheck.summaryKh,
       photoAnalysisSummaryEn: photoCheck.summaryEn,
       verificationToken: generateVerificationToken(nameKh, 'rejected'),
@@ -943,53 +940,24 @@ export function analyzeFoodBusinessDeterministically(
     };
   }
 
-  // CASE C: Strong Prepared-Food Signals Present (Score >= 24 and recognizable food signal in name, signature dish, description, or menu) -> APPROVED
-  const hasFoodSignalInNameOrSig = PREPARED_FOOD_STORE_TYPE_SIGNALS.some((s) =>
-    nameAndSigText.includes(s.keyword.toLowerCase())
-  ) || PREPARED_DISH_AND_MEAL_SIGNALS.some((d) => nameAndSigText.includes(d.toLowerCase()));
-
-  if (foodScore >= 24 && (hasFoodSignalInNameOrSig || matchedFoodSignals.length >= 2) && photoCheck.hasValidFoodOrStorePhoto) {
-    const confidence = Math.min(99, 76 + Math.min(23, Math.floor(foodScore / 4)));
-    const labels = getSubCategoryLabels(primaryFoodSubCat);
-    return {
-      decision: 'approved',
-      isFoodBusiness: true,
-      detectedCategory: primaryFoodSubCat,
-      detectedCategoryLabelKh: labels.kh,
-      detectedCategoryLabelEn: labels.en,
-      confidenceScore: confidence,
-      isBypassAttempt: false,
-      reasonKh: `✅ អនុម័តដោយ AI (${confidence}%)៖ ហាង «${nameKh}» ត្រូវបានផ្ទៀងផ្ទាត់ថាជាអាជីវកម្មម្ហូបអាហារត្រឹមត្រូវ (${labels.kh} • សញ្ញាសម្គាល់៖ ${matchedFoodSignals.slice(0, 4).join(', ')})។`,
-      reasonEn: `✅ Approved by AI (${confidence}%): "${nameEn || nameKh}" verified as an eligible prepared-food business (${labels.en}).`,
-      matchedFoodSignals,
-      flaggedNonFoodSignals: [],
-      photoAnalysisSummaryKh: photoCheck.summaryKh,
-      photoAnalysisSummaryEn: photoCheck.summaryEn,
-      verificationToken: generateVerificationToken(nameKh, 'approved'),
-      verifiedAt: nowIso,
-      verifiedByModel: 'deterministic_semantic_guard_v1',
-    };
-  }
-
-  // CASE D: Uncertain / Ambiguous Submission (e.g. generic shop name without clear prepared-food dishes or low signal score)
-  // Send to Admin for manual review instead of auto-approving!
-  const labels = getSubCategoryLabels('uncertain_ambiguous');
-  const uncertainConfidence = foodScore > 0 ? 55 : 35;
+  // CASE C: Valid Store Name with No Non-Food Merchandise Violations -> APPROVED
+  const confidence = Math.min(99, Math.max(85, 76 + Math.min(23, Math.floor(foodScore / 4))));
+  const labels = getSubCategoryLabels(primaryFoodSubCat);
   return {
-    decision: 'pending_review',
-    isFoodBusiness: false,
-    detectedCategory: 'uncertain_ambiguous',
+    decision: 'approved',
+    isFoodBusiness: true,
+    detectedCategory: primaryFoodSubCat,
     detectedCategoryLabelKh: labels.kh,
     detectedCategoryLabelEn: labels.en,
-    confidenceScore: uncertainConfidence,
+    confidenceScore: confidence,
     isBypassAttempt: false,
-    reasonKh: `⏳ រង់ចាំការពិនិត្យពី Admin៖ ប្រព័ន្ធ AI មិនទាន់អាចកំណត់បានច្បាស់លាស់ ១០០% ថាហាង «${nameKh}» ជាហាងលក់ម្ហូបអាហារចម្អិនស្រាប់នៅឡើយទេ (សូមបញ្ជាក់មុខម្ហូបពិសេស និងការពិពណ៌នាម្ហូបឱ្យច្បាស់)។ សំណើរបស់អ្នកត្រូវបានបញ្ជូនទៅកាន់ Administrator ដើម្បីត្រួតពិនិត្យ និងអនុម័តដោយដៃ។`,
-    reasonEn: `⏳ Sent to Admin for Manual Review: AI could not verify with high confidence whether "${nameEn || nameKh}" sells prepared food or meals. Your submission has been queued for Admin review.`,
+    reasonKh: `✅ អនុម័ត៖ ហាង «${nameKh || nameEn}» ត្រូវបានកត់ត្រាជាហាងអាហារ (${labels.kh})។`,
+    reasonEn: `✅ Approved: "${nameEn || nameKh}" registered as a food business (${labels.en}).`,
     matchedFoodSignals,
     flaggedNonFoodSignals: [],
     photoAnalysisSummaryKh: photoCheck.summaryKh,
     photoAnalysisSummaryEn: photoCheck.summaryEn,
-    verificationToken: generateVerificationToken(nameKh, 'pending_review'),
+    verificationToken: generateVerificationToken(nameKh, 'approved'),
     verifiedAt: nowIso,
     verifiedByModel: 'deterministic_semantic_guard_v1',
   };
