@@ -46,8 +46,7 @@ jobs:
 
       - name: 7. Copy Web Assets directly into Android
         run: |
-          mkdir -p android/app/src/main/assets/public
-          cp -rf dist/* android/app/src/main/assets/public/
+          rm -rf android/app/src/main/assets/public && mkdir -p android/app/src/main/assets/public && cp -rf dist/* android/app/src/main/assets/public/
 
       - name: 8. Build Signed Android Release APK & Play Store AAB
         run: |
@@ -72,13 +71,13 @@ jobs:
           mkdir -p android/app/build/outputs/apk/debug
           REL_APK=$(find android/app/build/outputs/apk/release -name "*.apk" 2>/dev/null | head -n 1)
           if [ -n "$REL_APK" ] && [ -f "$REL_APK" ]; then
-            cp "$REL_APK" android/app/build/outputs/apk/debug/KhmerFoodTourism-v2.2.0.apk
+            cp "$REL_APK" android/app/build/outputs/apk/debug/KhmerFoodTourism-v2.3.0.apk
           elif [ -f android/app/build/outputs/apk/debug/app-debug.apk ]; then
-            cp android/app/build/outputs/apk/debug/app-debug.apk android/app/build/outputs/apk/debug/KhmerFoodTourism-v2.2.0.apk
+            cp android/app/build/outputs/apk/debug/app-debug.apk android/app/build/outputs/apk/debug/KhmerFoodTourism-v2.3.0.apk
           fi
           REL_AAB=$(find android/app/build/outputs/bundle/release -name "*.aab" 2>/dev/null | head -n 1)
           if [ -n "$REL_AAB" ] && [ -f "$REL_AAB" ]; then
-            cp "$REL_AAB" android/app/build/outputs/apk/debug/KhmerFoodTourism-v2.2.0-PlayStore.aab
+            cp "$REL_AAB" android/app/build/outputs/apk/debug/KhmerFoodTourism-v2.3.0-PlayStore.aab
           fi
           ls -la android/app/build/outputs/apk/debug/
 
@@ -87,22 +86,22 @@ jobs:
         with:
           name: Khmer-Food-Tourism-Release-Packages
           path: |
-            android/app/build/outputs/apk/debug/KhmerFoodTourism-v2.2.0.apk
-            android/app/build/outputs/apk/debug/KhmerFoodTourism-v2.2.0-PlayStore.aab
+            android/app/build/outputs/apk/debug/KhmerFoodTourism-v2.3.0.apk
+            android/app/build/outputs/apk/debug/KhmerFoodTourism-v2.3.0-PlayStore.aab
 
       - name: 11. Publish GitHub Release with Signed APK & Play Store AAB
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: v2.2.0
-          name: "Khmer Food & Tourism v2.2.0"
+          tag_name: v2.3.0
+          name: "Khmer Food & Tourism v2.3.0"
           make_latest: true
           body: |
             ### 🇰🇭 កម្មវិធីទូរស័ព្ទដៃ អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism Mobile App)
             
-            **កំណែផ្លូវការ v2.2.0 (Official Signed Production Packages):**
-            - 📦 **KhmerFoodTourism-v2.2.0.apk:** Direct install APK for Android devices.
-            - 🚀 **KhmerFoodTourism-v2.2.0-PlayStore.aab:** Signed Android App Bundle for Google Play Store distribution.
+            **កំណែផ្លូវការ v2.3.0 (Official Signed Production Packages):**
+            - 📦 **KhmerFoodTourism-v2.3.0.apk:** Direct install APK for Android devices.
+            - 🚀 **KhmerFoodTourism-v2.3.0-PlayStore.aab:** Signed Android App Bundle for Google Play Store distribution.
             - 🔒 **6-Digit Admin PIN & Anti-Tamper Security:** Mandatory cryptographic PIN verification step & HMAC-SHA256 session integrity seal.
             - 👑 **Synchronized VIP Pricing:** 30 Days ($4.99), 60 Days ($6.99), and Additional Store Package ($5.00).
             - 🎲 **Session-Based Random Order:** Freshly shuffled shops and tourist attractions on every app open.
@@ -112,5 +111,5 @@ jobs:
           draft: false
           prerelease: false
           files: |
-            android/app/build/outputs/apk/debug/KhmerFoodTourism-v2.2.0.apk
-            android/app/build/outputs/apk/debug/KhmerFoodTourism-v2.2.0-PlayStore.aab
+            android/app/build/outputs/apk/debug/KhmerFoodTourism-v2.3.0.apk
+            android/app/build/outputs/apk/debug/KhmerFoodTourism-v2.3.0-PlayStore.aab
