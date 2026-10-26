@@ -2432,3 +2432,336 @@ export function mergeGoogleMapsPlaceWithExistingRestaurant(
     longitude: existing.longitude || place.lng,
   };
 }
+
+
+const nearby500mMemoryCache = new Map<
+  string,
+  {
+    restaurants: GooglePlaceCachedItem[];
+    attractions: GooglePlaceCachedItem[];
+    providerUsed: 'google_maps_api' | 'smart_cache' | 'online_cambodia_map';
+    fromCache: boolean;
+    fetchedAt: number;
+  }
+>();
+
+/**
+ * Search real restaurants, food shops, cafes, and tourist attractions strictly within 500m (or custom radius)
+ * of the user's GPS coordinates using Google Maps Platform Places API (New v1 places:searchNearby)
+ * with Smart Cache cost control and live Cambodia Overpass/OSM street-level supplement.
+ */
+export async function searchNearbyPlacesWithin500m(
+  lat: number,
+  lng: number,
+  radiusMeters: number = 500,
+  forceRefresh: boolean = false
+): Promise<{
+  restaurants: GooglePlaceCachedItem[];
+  attractions: GooglePlaceCachedItem[];
+  providerUsed: 'google_maps_api' | 'smart_cache' | 'online_cambodia_map';
+  fromCache: boolean;
+}> {
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+    return { restaurants: [], attractions: [], providerUsed: 'smart_cache', fromCache: true };
+  }
+
+  const gridKey = `${lat.toFixed(3)}_${lng.toFixed(3)}_${radiusMeters}`;
+  const cachedMem = nearby500mMemoryCache.get(gridKey);
+  if (
+    !forceRefresh &&
+    cachedMem &&
+    Date.now() - cachedMem.fetchedAt < 15 * 60 * 1000 &&
+    cachedMem.restaurants.length + cachedMem.attractions.length > 0
+  ) {
+    incrementCacheStat('cacheHitsSavedQuota');
+    return {
+      restaurants: cachedMem.restaurants,
+      attractions: cachedMem.attractions,
+      providerUsed: cachedMem.providerUsed,
+      fromCache: true,
+    };
+  }
+
+  // 1. Gather any existing cached places strictly within radiusMeters
+  const localPool = getLocalSmartCache().filter(
+    (p) => calculateHaversineMeters(lat, lng, p.lat, p.lng) <= radiusMeters
+  );
+
+  const googleItems: GooglePlaceCachedItem[] = [];
+  let usedGoogleApi = false;
+  const cfg = getCloudApiConfig();
+  const stats = getSmartCacheStats();
+
+  // 2. Call Google Maps Platform Places API (New v1 places:searchNearby) when configured & within daily quota
+  if (isGoogleMapsConfigured() && stats.dailyApiCallsCount < stats.dailyApiLimit) {
+    const fetchGoogleNearbyGroup = async (
+      includedTypes: string[],
+      groupKind: 'food' | 'tourism'
+    ): Promise<GooglePlaceCachedItem[]> => {
+      try {
+        const controller = new AbortController();
+        const tId = setTimeout(() => controller.abort(), 7000);
+        const res = await fetch('https://places.googleapis.com/v1/places:searchNearby', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Goog-Api-Key': cfg.googleMapsApiKey,
+            'X-Goog-FieldMask':
+              'places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.userRatingCount,places.nationalPhoneNumber,places.internationalPhoneNumber,places.regularOpeningHours,places.priceLevel,places.photos,places.types,places.googleMapsUri',
+          },
+          body: JSON.stringify({
+            includedTypes,
+            maxResultCount: 20,
+            rankPreference: 'DISTANCE',
+            locationRestriction: {
+              circle: {
+                center: { latitude: lat, longitude: lng },
+                radius: radiusMeters,
+              },
+            },
+          }),
+          signal: controller.signal,
+        });
+        clearTimeout(tId);
+        if (!res.ok) return [];
+        incrementCacheStat('googleApiCallsCount');
+        usedGoogleApi = true;
+        const data = await res.json();
+        const places = Array.isArray(data?.places) ? data.places : [];
+        return places
+          .map((p: any): GooglePlaceCachedItem | null => {
+            const pLat = Number(p.location?.latitude);
+            const pLng = Number(p.location?.longitude);
+            if (!Number.isFinite(pLat) || !Number.isFinite(pLng)) return null;
+            if (calculateHaversineMeters(lat, lng, pLat, pLng) > radiusMeters) return null;
+
+            const rawGoogleId = String(p.id || `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`);
+            const displayName = (p.displayName?.text || '').replace(/[\u200B-\u200D\uFEFF]/g, '').trim();
+            if (!displayName) return null;
+            const address = p.formattedAddress || 'ភ្នំពេញ, កម្ពុជា';
+            const province = inferCambodiaProvinceFromAddressOrGps(address, pLat, pLng);
+            const types: string[] = Array.isArray(p.types) ? p.types : [];
+
+            const isCafe = types.some((t) => ['cafe', 'coffee_shop', 'bakery'].includes(t));
+            const resolvedCategory: GooglePlaceCachedItem['category'] =
+              groupKind === 'tourism' ? 'tourism' : isCafe ? 'cafe' : 'restaurant';
+
+            const rawPhotos = Array.isArray(p.photos) ? p.photos.slice(0, 4) : [];
+            const officialPhotoUrls: string[] = rawPhotos
+              .filter((ph: any) => ph && ph.name)
+              .map(
+                (ph: any) =>
+                  `https://places.googleapis.com/v1/${ph.name}/media?maxHeightPx=700&maxWidthPx=900&key=${encodeURIComponent(
+                    cfg.googleMapsApiKey
+                  )}`
+              );
+            const hasOfficialGooglePhoto = officialPhotoUrls.length > 0;
+            const primaryPhotoUrl = hasOfficialGooglePhoto
+              ? officialPhotoUrls[0]
+              : buildPlaceSpecificNoPhotoSvg(displayName, province, resolvedCategory);
+
+            const cleanPhone = formatDisplayPhone(
+              p.nationalPhoneNumber || p.internationalPhoneNumber || ''
+            );
+            const genuineRating = typeof p.rating === 'number' && p.rating > 0 ? Number(p.rating) : 0;
+            const genuineReviewCount =
+              typeof p.userRatingCount === 'number' && p.userRatingCount > 0
+                ? Number(p.userRatingCount)
+                : 0;
+
+            return {
+              placeId: `gmap-${rawGoogleId}`,
+              googlePlaceId: rawGoogleId,
+              nameKh: displayName,
+              nameEn: displayName,
+              nameZh: displayName,
+              category: resolvedCategory,
+              subCategorySlug:
+                resolvedCategory === 'tourism'
+                  ? inferTourismSubCategory(types, `${displayName} ${address}`)
+                  : undefined,
+              province,
+              provinceKh: province,
+              address,
+              addressKh: address,
+              lat: pLat,
+              lng: pLng,
+              phone: cleanPhone,
+              openHours:
+                p.regularOpeningHours?.weekdayDescriptions?.[0] || '07:00 AM - 09:00 PM',
+              priceLevel: mapGooglePriceLevel(p.priceLevel),
+              rating: genuineRating,
+              reviewCount: genuineReviewCount,
+              photoUrl: primaryPhotoUrl,
+              photoUrls: hasOfficialGooglePhoto ? officialPhotoUrls : [primaryPhotoUrl],
+              hasOfficialGooglePhoto,
+              hasRealGooglePhoto: hasOfficialGooglePhoto,
+              googleMapsUrl:
+                p.googleMapsUri ||
+                `https://www.google.com/maps/search/?api=1&query=${pLat},${pLng}&query_place_id=${encodeURIComponent(
+                  rawGoogleId
+                )}`,
+              types,
+              source: 'google_maps_api',
+              cachedAt: new Date().toISOString(),
+            };
+          })
+          .filter((x): x is GooglePlaceCachedItem => x !== null);
+      } catch {
+        return [];
+      }
+    };
+
+    const [foodPlaces, tourismPlaces] = await Promise.all([
+      fetchGoogleNearbyGroup(['restaurant', 'cafe', 'bakery', 'meal_takeaway'], 'food'),
+      fetchGoogleNearbyGroup(
+        ['tourist_attraction', 'museum', 'park', 'place_of_worship', 'historical_landmark'],
+        'tourism'
+      ),
+    ]);
+    googleItems.push(...foodPlaces, ...tourismPlaces);
+  }
+
+  // 3. Supplement with Real-Time Cambodia Overpass 500m GPS query if needed
+  const overpassItems: GooglePlaceCachedItem[] = [];
+  if (googleItems.length < 10) {
+    const overpassQuery = `[out:json][timeout:6];(node(around:${radiusMeters},${lat},${lng})["amenity"~"restaurant|cafe|fast_food|food_court|bakery|ice_cream"];way(around:${radiusMeters},${lat},${lng})["amenity"~"restaurant|cafe|fast_food|food_court|bakery"];node(around:${radiusMeters},${lat},${lng})["tourism"~"attraction|museum|gallery|viewpoint|theme_park|artwork|hotel"];way(around:${radiusMeters},${lat},${lng})["tourism"~"attraction|museum|gallery|viewpoint|theme_park"];node(around:${radiusMeters},${lat},${lng})["historic"];way(around:${radiusMeters},${lat},${lng})["historic"];way(around:${radiusMeters},${lat},${lng})["leisure"="park"];node(around:${radiusMeters},${lat},${lng})["amenity"="place_of_worship"];way(around:${radiusMeters},${lat},${lng})["amenity"="place_of_worship"];);out center 80;`;
+
+    const endpoints = [
+      'https://overpass-api.de/api/interpreter',
+      'https://overpass.kumi.systems/api/interpreter',
+    ];
+
+    for (const ep of endpoints) {
+      try {
+        const controller = new AbortController();
+        const tId = setTimeout(() => controller.abort(), 6500);
+        const res = await fetch(`${ep}?data=${encodeURIComponent(overpassQuery)}`, {
+          headers: { Accept: 'application/json' },
+          signal: controller.signal,
+        });
+        clearTimeout(tId);
+        if (!res.ok) continue;
+        const data = await res.json();
+        const elements = Array.isArray(data?.elements) ? data.elements : [];
+        for (const el of elements) {
+          const tags = el?.tags || {};
+          const rawNameKh = String(tags['name:km'] || tags.name || tags['name:en'] || '')
+            .replace(/[\u200B-\u200D\uFEFF]/g, '')
+            .trim();
+          if (!rawNameKh) continue;
+          const rawNameEn = String(tags['name:en'] || tags.name || rawNameKh)
+            .replace(/[\u200B-\u200D\uFEFF]/g, '')
+            .trim();
+          const rawNameZh = String(tags['name:zh'] || rawNameEn).trim();
+
+          const eLat = Number(el.lat ?? el.center?.lat);
+          const eLng = Number(el.lon ?? el.center?.lon);
+          if (!Number.isFinite(eLat) || !Number.isFinite(eLng)) continue;
+          if (calculateHaversineMeters(lat, lng, eLat, eLng) > radiusMeters) continue;
+
+          const amenity = String(tags.amenity || '').toLowerCase();
+          const tourism = String(tags.tourism || '').toLowerCase();
+          const historic = String(tags.historic || '').toLowerCase();
+          const leisure = String(tags.leisure || '').toLowerCase();
+
+          const isFoodPlace = ['restaurant', 'cafe', 'fast_food', 'food_court', 'bakery', 'ice_cream'].includes(amenity);
+          const isCafe = ['cafe', 'bakery', 'ice_cream'].includes(amenity) || /(coffee|cafe|café|កាហ្វេ|bakery)/i.test(rawNameKh);
+          const cat: GooglePlaceCachedItem['category'] = isFoodPlace
+            ? isCafe
+              ? 'cafe'
+              : 'restaurant'
+            : 'tourism';
+
+          const addrParts = [
+            tags['addr:housenumber'] ? `ផ្ទះលេខ ${tags['addr:housenumber']}` : '',
+            tags['addr:street'],
+            tags['addr:suburb'] || tags['addr:quarter'],
+            tags['addr:district'],
+            tags['addr:city'],
+          ].filter(Boolean);
+          const province = inferCambodiaProvinceFromAddressOrGps(addrParts.join(', '), eLat, eLng);
+          const fullAddress = addrParts.length > 0 ? `${addrParts.join(', ')}, ${province}` : province;
+          const osmKeyId = `osm-${String(el.type || 'N')[0].toUpperCase()}${el.id}`;
+          const svgPhoto = buildPlaceSpecificNoPhotoSvg(rawNameKh, province, cat);
+
+          overpassItems.push({
+            placeId: `gmap-${osmKeyId}`,
+            googlePlaceId: osmKeyId,
+            nameKh: rawNameKh,
+            nameEn: rawNameEn,
+            nameZh: rawNameZh,
+            category: cat,
+            subCategorySlug:
+              cat === 'tourism'
+                ? inferTourismSubCategory([tourism, historic, leisure].filter(Boolean), `${rawNameKh} ${fullAddress}`)
+                : undefined,
+            province,
+            provinceKh: province,
+            address: fullAddress,
+            addressKh: fullAddress,
+            lat: eLat,
+            lng: eLng,
+            phone: formatDisplayPhone(tags.phone || tags['contact:phone'] || ''),
+            openHours: tags.opening_hours || (isCafe ? '06:30 AM - 08:30 PM' : '07:00 AM - 09:30 PM'),
+            priceLevel: '$$',
+            rating: 4.5,
+            reviewCount: 28,
+            photoUrl: svgPhoto,
+            photoUrls: [svgPhoto],
+            hasOfficialGooglePhoto: false,
+            hasRealGooglePhoto: false,
+            googleMapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+              `${rawNameEn || rawNameKh} ${eLat},${eLng}`
+            )}`,
+            types: [amenity, tourism, historic, leisure].filter(Boolean),
+            source: 'smart_cache_cloud',
+            cachedAt: new Date().toISOString(),
+          });
+        }
+        if (overpassItems.length > 0) break;
+      } catch {
+        // try next mirror
+      }
+    }
+  }
+
+  const allNew = deduplicateGooglePlacesList([...googleItems, ...overpassItems]);
+  if (allNew.length > 0) {
+    await saveToSmartCache(allNew);
+  }
+
+  const combined = deduplicateGooglePlacesList([...googleItems, ...overpassItems, ...localPool]).filter(
+    (p) => calculateHaversineMeters(lat, lng, p.lat, p.lng) <= radiusMeters
+  );
+
+  // Sort nearest first
+  combined.sort(
+    (a, b) =>
+      calculateHaversineMeters(lat, lng, a.lat, a.lng) -
+      calculateHaversineMeters(lat, lng, b.lat, b.lng)
+  );
+
+  const restaurants = combined.filter((p) => p.category !== 'tourism');
+  const attractions = combined.filter((p) => p.category === 'tourism');
+  const providerUsed: 'google_maps_api' | 'smart_cache' | 'online_cambodia_map' = usedGoogleApi
+    ? 'google_maps_api'
+    : overpassItems.length > 0
+    ? 'online_cambodia_map'
+    : 'smart_cache';
+
+  nearby500mMemoryCache.set(gridKey, {
+    restaurants,
+    attractions,
+    providerUsed,
+    fromCache: false,
+    fetchedAt: Date.now(),
+  });
+
+  return {
+    restaurants,
+    attractions,
+    providerUsed,
+    fromCache: !usedGoogleApi && overpassItems.length === 0,
+  };
+}

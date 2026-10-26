@@ -1,22 +1,25 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { Search, X, MoreVertical, Camera, Download, Heart, LayoutGrid, Lock, RefreshCw } from 'lucide-react';
+import { MoreVertical, Camera, Download, Heart, LayoutGrid, Lock, RefreshCw } from 'lucide-react';
 import { openSmartHub, hasSpecialAndHealthyFoodVipAccess } from '../utils/smartHub';
 import { Capacitor } from '@capacitor/core';
 import { APP_VERSION } from '../types';
 
 export const Header: React.FC = () => {
-  const { 
-    language, setLanguage, setActiveTab, 
-    searchQuery, setSearchQuery, selectedProvince, setSelectedProvince,
-    showToast, setIsQrScannerModalOpen, setIsInstallModalOpen, setIsSupportModalOpen,
-    currentUser, openUpgradeVipModal
+  const {
+    language,
+    setLanguage,
+    setActiveTab,
+    showToast,
+    setIsQrScannerModalOpen,
+    setIsInstallModalOpen,
+    setIsSupportModalOpen,
+    currentUser,
+    openUpgradeVipModal,
   } = useApp();
   const canUseVip = hasSpecialAndHealthyFoodVipAccess(currentUser);
 
-  const [isSearchVisible, setIsSearchVisible] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Hide "Install App" automatically when already running as the native app / installed PWA
   const isAppInstalled = (() => {
@@ -30,17 +33,6 @@ export const Header: React.FC = () => {
     return false;
   })();
 
-  const provinces = [
-    { id: '', nameKh: 'គ្រប់ខេត្តក្រុង', nameEn: 'All Provinces', nameZh: '全部省市' },
-    { id: 'រាជធានីភ្នំពេញ', nameKh: 'ភ្នំពេញ', nameEn: 'Phnom Penh', nameZh: '金边' },
-    { id: 'ខេត្តសៀមរាប', nameKh: 'សៀមរាប', nameEn: 'Siem Reap', nameZh: '暹粒' },
-    { id: 'ខេត្តបាត់ដំបង', nameKh: 'បាត់ដំបង', nameEn: 'Battambang', nameZh: '马德望' },
-    { id: 'ខេត្តកំពត', nameKh: 'កំពត', nameEn: 'Kampot', nameZh: '贡布' },
-    { id: 'ខេត្តកែប', nameKh: 'កែប', nameEn: 'Kep', nameZh: '白马' },
-    { id: 'ខេត្តព្រះសីហនុ', nameKh: 'ព្រះសីហនុ', nameEn: 'Sihanoukville', nameZh: '西哈努克港' },
-    { id: 'ខេត្តមណ្ឌលគិរី', nameKh: 'មណ្ឌលគិរី', nameEn: 'Mondulkiri', nameZh: '蒙多基里' },
-  ];
-
   const isKm = language === 'km';
   const isZh = language === 'zh';
 
@@ -49,7 +41,7 @@ export const Header: React.FC = () => {
       {/* Main Bar */}
       <div className="max-w-md mx-auto px-3 sm:px-4 py-2.5 flex items-center justify-between gap-2">
         {/* Brand */}
-        <div 
+        <div
           onClick={() => setActiveTab('home')}
           className="flex items-center gap-2.5 cursor-pointer group min-w-0 flex-1"
         >
@@ -77,7 +69,7 @@ export const Header: React.FC = () => {
           </div>
         </div>
 
-        {/* Action icons — Responsive & Properly Aligned on Mobile */}
+        {/* Action icons — Search is kept exclusively on Home Screen as requested */}
         <div className="flex items-center gap-1 shrink-0">
           {/* 3-Language Selector (ខ្មែរ / EN / 中文) */}
           <div className="flex items-center gap-0.5 bg-[#053F30]/95 p-0.5 rounded-full border border-emerald-400/40 shadow-xs shrink-0">
@@ -143,25 +135,6 @@ export const Header: React.FC = () => {
             )}
           </button>
 
-          {/* Search Toggle */}
-          <button
-            onClick={() => {
-              const nextState = !isSearchVisible;
-              setIsSearchVisible(nextState);
-              if (nextState) {
-                setTimeout(() => searchInputRef.current?.focus(), 100);
-              }
-            }}
-            className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors border shrink-0 ${
-              isSearchVisible || searchQuery
-                ? 'bg-white text-[#064E3B] border-white shadow-xs'
-                : 'bg-[#065F46]/80 hover:bg-[#065F46] text-emerald-100 border-emerald-500/40'
-            }`}
-            title={isKm ? 'ស្វែងរក' : isZh ? '搜索' : 'Search'}
-          >
-            <Search className="w-3.5 h-3.5 shrink-0" />
-          </button>
-
           {/* Single overflow "more" menu: Scan QR, Update/Install App, Support */}
           <div className="relative shrink-0">
             <button
@@ -184,7 +157,10 @@ export const Header: React.FC = () => {
                 <div className="absolute right-0 top-11 z-50 w-56 rounded-2xl bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden font-khmer">
                   <button
                     type="button"
-                    onClick={() => { setIsMenuOpen(false); setIsQrScannerModalOpen(true); }}
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      setIsQrScannerModalOpen(true);
+                    }}
                     className="w-full min-h-[44px] px-4 flex items-center gap-3 text-sm font-semibold hover:bg-emerald-50 dark:hover:bg-slate-700 text-left"
                   >
                     <Camera className="w-4 h-4 text-emerald-700" />
@@ -192,7 +168,10 @@ export const Header: React.FC = () => {
                   </button>
                   <button
                     type="button"
-                    onClick={() => { setIsMenuOpen(false); setIsInstallModalOpen(true); }}
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      setIsInstallModalOpen(true);
+                    }}
                     className="w-full min-h-[44px] px-4 flex items-center gap-3 text-sm font-semibold hover:bg-emerald-50 dark:hover:bg-slate-700 text-left border-t border-slate-100 dark:border-slate-700"
                   >
                     {isAppInstalled ? (
@@ -202,13 +181,24 @@ export const Header: React.FC = () => {
                     )}
                     <span>
                       {isAppInstalled
-                        ? (isKm ? 'ពិនិត្យអាប់ដេតកម្មវិធី' : isZh ? '检查应用更新' : 'Check for App Update')
-                        : (isKm ? 'ដំឡើងកម្មវិធី' : isZh ? '安装应用' : 'Install App')}
+                        ? isKm
+                          ? 'ពិនិត្យអាប់ដេតកម្មវិធី'
+                          : isZh
+                          ? '检查应用更新'
+                          : 'Check for App Update'
+                        : isKm
+                        ? 'ដំឡើងកម្មវិធី'
+                        : isZh
+                        ? '安装应用'
+                        : 'Install App'}
                     </span>
                   </button>
                   <button
                     type="button"
-                    onClick={() => { setIsMenuOpen(false); setIsSupportModalOpen(true); }}
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      setIsSupportModalOpen(true);
+                    }}
                     className="w-full min-h-[44px] px-4 flex items-center gap-3 text-sm font-semibold hover:bg-emerald-50 dark:hover:bg-slate-700 text-left border-t border-slate-100 dark:border-slate-700"
                   >
                     <Heart className="w-4 h-4 text-rose-500 fill-rose-500" />
@@ -220,52 +210,6 @@ export const Header: React.FC = () => {
           </div>
         </div>
       </div>
-
-      {/* Expandable Search & Province Filter Bar */}
-      {isSearchVisible && (
-        <div className="max-w-md mx-auto px-4 pb-3 pt-1 border-t border-[#047857] animate-in slide-in-from-top-2 duration-150 bg-[#064E3B]">
-          <div className="relative flex items-center">
-            <Search className="w-4 h-4 text-emerald-200 absolute left-3 pointer-events-none" />
-            <input
-              ref={searchInputRef}
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={isKm ? 'ស្វែងរកម្ហូប ហាងអាហារ ឬកន្លែងដើរលេង...' : isZh ? '搜索美食、餐厅或旅游景点...' : 'Search food, restaurant, or destination...'}
-              className="w-full pl-9 pr-8 py-2 rounded-xl bg-[#047857]/70 border border-emerald-400/60 text-white placeholder-emerald-200/70 text-xs sm:text-sm focus:outline-none focus:border-white focus:bg-[#047857] transition"
-              autoFocus
-            />
-            {searchQuery && (
-              <button 
-                onClick={() => setSearchQuery('')}
-                className="absolute right-2.5 p-1 text-emerald-200 hover:text-white"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            )}
-          </div>
-
-          {/* Quick province chips */}
-          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar mt-2 pt-1 pb-0.5">
-            {provinces.map((prov) => {
-              const active = selectedProvince === prov.nameKh || (!selectedProvince && prov.id === '');
-              return (
-                <button
-                  key={prov.id || 'all'}
-                  onClick={() => setSelectedProvince(prov.id === '' ? '' : prov.nameKh)}
-                  className={`px-2.5 py-1 rounded-full text-[11px] whitespace-nowrap transition-all ${
-                    active
-                      ? 'bg-white text-[#064E3B] font-bold shadow-xs'
-                      : 'bg-[#065F46] text-emerald-100 hover:bg-[#047857] hover:text-white'
-                  }`}
-                >
-                  {isKm ? prov.nameKh : isZh ? prov.nameZh : prov.nameEn}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
     </header>
   );
 };
