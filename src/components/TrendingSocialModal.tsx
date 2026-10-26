@@ -617,7 +617,7 @@ export const TrendingSocialModal: React.FC = () => {
             </label>
             <div className="flex gap-2">
               <input
-                type="url"
+                type="text"
                 required
                 value={customUrlInput}
                 onChange={(e) => setCustomUrlInput(e.target.value)}

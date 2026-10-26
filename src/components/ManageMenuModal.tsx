@@ -8,10 +8,11 @@ import {
 } from 'lucide-react';
 import { 
   RestaurantMenuItem, RestaurantPriceLevel, isRestaurantPremiumActive, isUserVipActive, 
-  VipPlanType, getVipAccountState,
+  VipPlanType, getVipAccountState, getVipRemainingDays,
   getRestaurantRatingSummary, isSeedRestaurantId, getRestaurantCreatedAtMs,
   getDynamicVipPlans, getDynamicVipBenefits
 } from '../types';
+import { tr } from '../utils/i18n';
 import {
   pickImageUsingNativeAndroidGallery,
   processAndCompressImageFile,
@@ -73,7 +74,10 @@ export const ManageMenuModal: React.FC = () => {
 
   const foodDishGalleryRef = useRef<HTMLInputElement>(null);
   const foodDishCameraRef = useRef<HTMLInputElement>(null);
+  const modalBodyRef = useRef<HTMLDivElement>(null);
+  const nameKhInputRef = useRef<HTMLInputElement>(null);
   const [isUploadingDishPhoto, setIsUploadingDishPhoto] = useState(false);
+  const [isSavingDish, setIsSavingDish] = useState(false);
 
   const handleDishFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -216,7 +220,7 @@ export const ManageMenuModal: React.FC = () => {
   useEffect(() => {
     if (isManageMenuModalOpen) {
       const requestedTab = (window as any).__kft_manage_initial_tab;
-      if (requestedTab === 'video' || (requestedTab === 'photos' && !isAdminUser)) {
+      if (requestedTab === 'video') {
         setMainTab('info');
         (window as any).__kft_manage_initial_tab = undefined;
       } else if (requestedTab && ['menu', 'info', 'photos', 'analytics', 'membership'].includes(requestedTab)) {
@@ -251,7 +255,13 @@ export const ManageMenuModal: React.FC = () => {
   );
   const isApprovedVip = isUserVipActive(currentUser);
   const vipState = getVipAccountState(currentUser);
-  const isAuthorized = isAdmin || (isOwner && isApprovedVip);
+  // Basic shop management is free for the shop owner; VIP is an optional upgrade
+  const isAuthorized = isAdmin || isOwner;
+
+  const handleCloseModal = () => {
+    setIsManageMenuModalOpen(false);
+    setManagingRestaurant(null);
+  };
 
   const ratingSummary = getRestaurantRatingSummary(managingRestaurant);
   const switchableShops = isAdmin
@@ -260,16 +270,30 @@ export const ManageMenuModal: React.FC = () => {
       )
     : getOwnedRestaurantsForUser(currentUser);
 
-  const menuItems = managingRestaurant.menuItems || [];
-  const isPremiumActive = isRestaurantPremiumActive(managingRestaurant) || isApprovedVip || isAdmin;
-  const isExpired = vipState === 'expired_vip' || (managingRestaurant.membershipTier === 'premium' && !isPremiumActive);
+  const menuItems = currentRest.menuItems || managingRestaurant.menuItems || [];
+  const isPremiumActive = isRestaurantPremiumActive(currentRest) || isApprovedVip || isAdmin;
+  const isExpired = vipState === 'expired_vip' || (currentRest.membershipTier === 'premium' && !isPremiumActive);
   const isFree = !isPremiumActive && !isExpired;
+  const maxMenuLimit = isPremiumActive ? 20 : 5;
+  const maxPhotoLimit = isPremiumActive ? 30 : 3;
+  const vipRemainingDays = getVipRemainingDays(currentUser);
+  const vipExpiryRaw = currentUser?.subscriptionExpiryDate || currentRest.membershipExpiresAt || currentRest.subscriptionExpiresAt;
+  const formattedVipExpiry = vipExpiryRaw
+    ? (() => {
+        try {
+          const d = new Date(vipExpiryRaw);
+          return Number.isNaN(d.getTime()) ? vipExpiryRaw : d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+        } catch {
+          return vipExpiryRaw;
+        }
+      })()
+    : null;
 
   // Analytics Metrics
-  const viewsCount = managingRestaurant.analytics?.views ?? 0;
-  const callsCount = managingRestaurant.analytics?.phoneClicks ?? 0;
-  const mapsCount = managingRestaurant.analytics?.mapClicks ?? 0;
-  const sharesCount = managingRestaurant.analytics?.shareClicks ?? 0;
+  const viewsCount = currentRest.analytics?.views ?? 0;
+  const callsCount = currentRest.analytics?.phoneClicks ?? 0;
+  const mapsCount = currentRest.analytics?.mapClicks ?? 0;
+  const sharesCount = currentRest.analytics?.shareClicks ?? 0;
 
   const origin = typeof window !== 'undefined' && window.location?.origin ? window.location.origin : 'https://khmerfoodtourism.com';
   const shareableUrl = `${origin}/?restaurant=${managingRestaurant.id}`;
@@ -282,6 +306,7 @@ export const ManageMenuModal: React.FC = () => {
     setDishPhotoUrl('https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80');
     setDescriptionKh('');
     setEditingItemId(null);
+    setOnlineDishCandidates([]);
     setMenuMode('list');
   };
 
@@ -293,40 +318,41 @@ export const ManageMenuModal: React.FC = () => {
   ];
 
   const handleStartAdd = () => {
-    if (!isPremiumActive) {
-      showToast(
-        isKm 
-          ? `ការចុះបញ្ជីឥតគិតថ្លៃមិនអាចបន្ថែមមុខម្ហូបបានទេ។ សូមដំឡើងទៅ ${dynamicPlansMap.quarterly.nameKh} ($${dynamicPlansMap.quarterly.priceUsd.toFixed(2)}) ឬ ${dynamicPlansMap.annual.nameKh} ($${dynamicPlansMap.annual.priceUsd.toFixed(2)})!` 
-          : `Free listing cannot add food items. Please upgrade to ${dynamicPlansMap.quarterly.nameEn} ($${dynamicPlansMap.quarterly.priceUsd.toFixed(2)}) or ${dynamicPlansMap.annual.nameEn} ($${dynamicPlansMap.annual.priceUsd.toFixed(2)})!`,
-        'warning'
-      );
-      setMainTab('membership');
-      return;
-    }
-    if (menuItems.length >= 20) {
-      showToast(
-        isKm 
-          ? 'សមាជិកភាព Premium VIP អនុញ្ញាតឱ្យបន្ថែមមុខម្ហូបអតិបរមាត្រឹម ២០ មុខប៉ុណ្ណោះ!' 
-          : 'Premium VIP membership allows a maximum of 20 food menu items!',
-        'warning'
-      );
+    if (menuItems.length >= maxMenuLimit) {
+      if (!isPremiumActive) {
+        showToast(
+          tr(
+            language,
+            `គម្រោងឥតគិតថ្លៃអាចបន្ថែមមុខម្ហូបបាន ${maxMenuLimit} មុខ។ សូមដំឡើងទៅគម្រោង VIP ដើម្បីបន្ថែមរហូតដល់ ២០ មុខ!`,
+            `Free Plan allows up to ${maxMenuLimit} dishes. Upgrade to VIP to add up to 20 dishes!`,
+            `免费计划最多可添加 ${maxMenuLimit} 道菜品。升级 VIP 可添加多达 20 道菜品！`
+          ),
+          'warning'
+        );
+        setMainTab('membership');
+      } else {
+        showToast(
+          tr(
+            language,
+            'សមាជិកភាព Premium VIP អនុញ្ញាតឱ្យបន្ថែមមុខម្ហូបអតិបរមាត្រឹម ២០ មុខប៉ុណ្ណោះ!',
+            'Premium VIP membership allows a maximum of 20 food menu items!',
+            'VIP 会员最多可添加 20 道菜品！'
+          ),
+          'warning'
+        );
+      }
       return;
     }
     resetMenuForm();
     setStatusBanner(null);
     setMenuMode('add');
+    setTimeout(() => {
+      modalBodyRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+      nameKhInputRef.current?.focus();
+    }, 60);
   };
 
   const handleStartEdit = (item: RestaurantMenuItem) => {
-    if (!isPremiumActive) {
-      showToast(
-        isKm 
-          ? `សមាជិកភាពបានផុតកំណត់ហើយ មិនអាចកែប្រែបានទេ។ សូមបន្តសមាជិកភាព VIP ($${dynamicPlansMap.quarterly.priceUsd.toFixed(2)} ឬ $${dynamicPlansMap.annual.priceUsd.toFixed(2)})!` 
-          : `Membership expired. Please renew VIP ($${dynamicPlansMap.quarterly.priceUsd.toFixed(2)} or $${dynamicPlansMap.annual.priceUsd.toFixed(2)}) to edit menu items!`,
-        'warning'
-      );
-      return;
-    }
     setEditingItemId(item.id);
     setNameKh(item.nameKh);
     setNameEn(item.nameEn || '');
@@ -336,86 +362,131 @@ export const ManageMenuModal: React.FC = () => {
     setDescriptionKh(item.descriptionKh || '');
     setStatusBanner(null);
     setMenuMode('edit');
+    setTimeout(() => {
+      modalBodyRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 60);
   };
 
   const handleMenuSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!nameKh.trim()) {
-      setStatusBanner({
-        type: 'error',
-        text: isKm ? '⚠️ សូមបញ្ចូលឈ្មោះមុខម្ហូបជាភាសាខ្មែរ!' : '⚠️ Please enter the dish name in Khmer!',
-      });
-      showToast(isKm ? 'សូមបញ្ចូលឈ្មោះមុខម្ហូប!' : 'Please enter food name!', 'warning');
+    if (isSavingDish) return;
+
+    const finalNameKh = nameKh.trim() || nameEn.trim();
+    if (!finalNameKh) {
+      const errMsg = tr(
+        language,
+        '⚠️ សូមបញ្ចូលឈ្មោះមុខម្ហូប (ជាភាសាខ្មែរ ឬ អង់គ្លេស) ជាមុនសិន!',
+        '⚠️ Please enter the dish name before saving!',
+        '⚠️ 保存前请输入菜品名称！'
+      );
+      setStatusBanner({ type: 'error', text: errMsg });
+      showToast(errMsg, 'error');
+      modalBodyRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+      setTimeout(() => nameKhInputRef.current?.focus(), 100);
       return;
     }
 
-    const usd = parseFloat(priceUsd) || 0;
-    const riel = parseInt(priceRiel) || Math.round(usd * 4100);
+    const usd = Math.max(0, parseFloat(priceUsd) || 0);
+    const riel = Math.max(0, parseInt(priceRiel, 10) || Math.round(usd * 4100));
+    const finalPhoto = dishPhotoUrl.trim() || sampleFoodPhotos[0];
 
-    if (menuMode === 'add') {
-      const savedName = nameKh.trim();
-      const ok = addRestaurantMenuItem(managingRestaurant.id, {
-        nameKh: savedName,
-        nameEn: nameEn.trim(),
-        priceUsd: usd,
-        priceRiel: riel,
-        photoUrl: dishPhotoUrl.trim() || sampleFoodPhotos[0],
-        descriptionKh: descriptionKh.trim(),
-      });
-      if (ok) {
-        resetMenuForm();
-        setStatusBanner({
-          type: 'success',
-          text: isKm
-            ? `✅ បានបន្ថែមមុខម្ហូប "${savedName}" ចូលក្នុងហាង "${managingRestaurant.nameKh}" ដោយជោគជ័យ!`
-            : `✅ Added "${savedName}" to "${managingRestaurant.nameEn || managingRestaurant.nameKh}"!`,
+    setIsSavingDish(true);
+    try {
+      if (menuMode === 'add') {
+        const ok = addRestaurantMenuItem(managingRestaurant.id, {
+          nameKh: finalNameKh,
+          nameEn: nameEn.trim() || finalNameKh,
+          priceUsd: usd,
+          priceRiel: riel,
+          photoUrl: finalPhoto,
+          descriptionKh: descriptionKh.trim(),
         });
-      }
-    } else if (menuMode === 'edit' && editingItemId) {
-      const existing = menuItems.find(m => m.id === editingItemId);
-      if (!existing) return;
-      const savedName = nameKh.trim();
-      const ok = updateRestaurantMenuItem(managingRestaurant.id, {
-        ...existing,
-        nameKh: savedName,
-        nameEn: nameEn.trim(),
-        priceUsd: usd,
-        priceRiel: riel,
-        photoUrl: dishPhotoUrl.trim() || sampleFoodPhotos[0],
-        descriptionKh: descriptionKh.trim(),
-      });
-      if (ok) {
-        resetMenuForm();
-        setStatusBanner({
-          type: 'success',
-          text: isKm
-            ? `✅ បានរក្សាទុកការកែប្រែមុខម្ហូប "${savedName}" ដោយជោគជ័យ!`
-            : `✅ Updated dish "${savedName}" successfully!`,
+        if (ok) {
+          resetMenuForm();
+          setStatusBanner({
+            type: 'success',
+            text: tr(
+              language,
+              `✅ បានរក្សាទុកមុខម្ហូប "${finalNameKh}" ចូលក្នុងហាង "${managingRestaurant.nameKh}" ដោយជោគជ័យ!`,
+              `✅ Saved "${finalNameKh}" to "${managingRestaurant.nameEn || managingRestaurant.nameKh}" successfully!`,
+              `✅ 已成功将 "${finalNameKh}" 保存至店铺菜单！`
+            ),
+          });
+          modalBodyRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+          setStatusBanner({
+            type: 'error',
+            text: tr(
+              language,
+              '⚠️ មិនអាចរក្សាទុកមុខម្ហូបបានទេ សូមពិនិត្យព័ត៌មានម្តងទៀត។',
+              '⚠️ Could not save dish. Please check the form details and try again.',
+              '⚠️ 无法保存菜品，请检查输入信息后重试。'
+            ),
+          });
+          modalBodyRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      } else if (menuMode === 'edit' && editingItemId) {
+        const existing = menuItems.find(m => m.id === editingItemId);
+        if (!existing) {
+          setIsSavingDish(false);
+          return;
+        }
+        const ok = updateRestaurantMenuItem(managingRestaurant.id, {
+          ...existing,
+          nameKh: finalNameKh,
+          nameEn: nameEn.trim() || finalNameKh,
+          priceUsd: usd,
+          priceRiel: riel,
+          photoUrl: finalPhoto,
+          descriptionKh: descriptionKh.trim(),
         });
+        if (ok) {
+          resetMenuForm();
+          setStatusBanner({
+            type: 'success',
+            text: tr(
+              language,
+              `✅ បានរក្សាទុកការកែប្រែមុខម្ហូប "${finalNameKh}" ដោយជោគជ័យ!`,
+              `✅ Updated dish "${finalNameKh}" successfully!`,
+              `✅ 已成功更新菜品 "${finalNameKh}"！`
+            ),
+          });
+          modalBodyRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+          setStatusBanner({
+            type: 'error',
+            text: tr(
+              language,
+              '⚠️ មិនអាចរក្សាទុកការកែប្រែបានទេ សូមពិនិត្យព័ត៌មានម្តងទៀត។',
+              '⚠️ Failed to save changes. Please verify your input.',
+              '⚠️ 无法保存修改，请检查输入信息。'
+            ),
+          });
+          modalBodyRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+        }
       }
+    } finally {
+      setIsSavingDish(false);
     }
   };
 
   const handleSaveStoreInfo = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!storeNameKh.trim()) {
+    if (!storeNameKh.trim() && !storeNameEn.trim()) {
       setStatusBanner({
         type: 'error',
-        text: isKm ? '⚠️ សូមបញ្ចូលឈ្មោះហាងជាភាសាខ្មែរ!' : '⚠️ Please enter restaurant name in Khmer!',
+        text: tr(language, '⚠️ សូមបញ្ចូលឈ្មោះហាងជាភាសាខ្មែរ!', '⚠️ Please enter restaurant name!', '⚠️ 请输入餐厅名称！'),
       });
-      showToast(isKm ? 'សូមបញ្ចូលឈ្មោះហាងជាភាសាខ្មែរ!' : 'Please enter restaurant name!', 'warning');
+      showToast(tr(language, 'សូមបញ្ចូលឈ្មោះហាង!', 'Please enter restaurant name!', '请输入餐厅名称！'), 'warning');
+      modalBodyRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
 
-    const finalCover = isAdmin
-      ? (storeCoverPhoto.trim() || managingRestaurant.photoUrl)
-      : managingRestaurant.photoUrl;
-    const finalGallery = isAdmin
-      ? Array.from(new Set([finalCover, ...storeGalleryPhotos])).filter(Boolean)
-      : (managingRestaurant.galleryPhotos || [managingRestaurant.photoUrl]);
+    const finalCover = storeCoverPhoto.trim() || managingRestaurant.photoUrl;
+    const finalGallery = Array.from(new Set([finalCover, ...storeGalleryPhotos])).filter(Boolean).slice(0, maxPhotoLimit);
     updateRestaurant({
       ...managingRestaurant,
-      nameKh: storeNameKh.trim(),
+      nameKh: storeNameKh.trim() || storeNameEn.trim(),
       nameEn: storeNameEn.trim() || storeNameKh.trim(),
       phone: storePhone.trim(),
       provinceKh: storeProvinceKh.trim() || managingRestaurant.provinceKh,
@@ -426,9 +497,9 @@ export const ManageMenuModal: React.FC = () => {
       mapUrl: storeMapUrl.trim(),
       photoUrl: finalCover,
       profileImage: finalCover,
-      foodImages: isAdmin ? storeGalleryPhotos : (managingRestaurant.foodImages || []),
+      foodImages: storeGalleryPhotos.slice(0, maxPhotoLimit),
       galleryPhotos: finalGallery,
-      promoVideoUrl: storePromoVideoUrl.trim() || undefined,
+      promoVideoUrl: isPremiumActive ? (storePromoVideoUrl.trim() || undefined) : managingRestaurant.promoVideoUrl,
       telegramUrl: storeTelegramUrl.trim() || undefined,
       facebookUrl: storeFacebookUrl.trim() || undefined,
       updatedAt: new Date().toISOString(),
@@ -436,39 +507,37 @@ export const ManageMenuModal: React.FC = () => {
 
     setStatusBanner({
       type: 'success',
-      text: isKm
-        ? `✅ បានរក្សាទុកព័ត៌មានហាង "${storeNameKh.trim()}" រូបភាព និងតម្លៃដោយជោគជ័យ!`
-        : `✅ Saved restaurant info & photos for "${storeNameEn.trim() || storeNameKh.trim()}"!`,
+      text: tr(
+        language,
+        `✅ បានរក្សាទុកព័ត៌មានហាង "${storeNameKh.trim() || storeNameEn.trim()}" ដោយជោគជ័យ!`,
+        `✅ Saved restaurant info for "${storeNameEn.trim() || storeNameKh.trim()}"!`,
+        `✅ 已成功保存店铺 "${storeNameEn.trim() || storeNameKh.trim()}" 的信息！`
+      ),
     });
-    showToast(isKm ? '✅ បានរក្សាទុកព័ត៌មានហាង និងរូបភាពដោយជោគជ័យ!' : '✅ Restaurant info & photos saved!', 'success');
+    modalBodyRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleSavePhotosOnly = () => {
-    if (!isAdmin) {
-      showToast(
-        isKm
-          ? '⚠️ មានតែអ្នកគ្រប់គ្រងប្រព័ន្ធ (Admin) ប៉ុណ្ណោះដែលអាចផ្លាស់ប្តូររូបភាពហាងបាន!'
-          : '⚠️ Only an Administrator can upload or replace shop photos!',
-        'warning'
-      );
-      return;
-    }
     const finalCover = storeCoverPhoto.trim() || storeGalleryPhotos[0] || managingRestaurant.photoUrl;
+    const cappedGallery = Array.from(new Set([finalCover, ...storeGalleryPhotos])).filter(Boolean).slice(0, maxPhotoLimit);
     updateRestaurant({
       ...managingRestaurant,
       photoUrl: finalCover,
       profileImage: finalCover,
-      foodImages: storeGalleryPhotos,
-      galleryPhotos: Array.from(new Set([finalCover, ...storeGalleryPhotos])).filter(Boolean),
+      foodImages: storeGalleryPhotos.slice(0, maxPhotoLimit),
+      galleryPhotos: cappedGallery,
       updatedAt: new Date().toISOString(),
     });
     setStatusBanner({
       type: 'success',
-      text: isKm
-        ? `✅ បានរក្សាទុករូបភាពហាងចំនួន ${Array.from(new Set([finalCover, ...storeGalleryPhotos])).filter(Boolean).length} សន្លឹកដោយជោគជ័យ!`
-        : '✅ Saved all restaurant photos successfully!',
+      text: tr(
+        language,
+        `✅ បានរក្សាទុករូបភាពហាងចំនួន ${cappedGallery.length} សន្លឹកដោយជោគជ័យ!`,
+        `✅ Saved ${cappedGallery.length} restaurant photos successfully!`,
+        `✅ 已成功保存 ${cappedGallery.length} 张店铺照片！`
+      ),
     });
-    showToast(isKm ? '✅ បានរក្សាទុករូបភាពហាងដោយជោគជ័យ!' : '✅ Restaurant photos saved!', 'success');
+    modalBodyRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleAddGalleryPhoto = (url: string) => {
@@ -567,7 +636,7 @@ export const ManageMenuModal: React.FC = () => {
               </div>
             </div>
             <button
-              onClick={() => setIsManageMenuModalOpen(false)}
+              onClick={handleCloseModal}
               className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-emerald-200 hover:text-white transition shrink-0 cursor-pointer"
               aria-label="Close"
             >
@@ -691,7 +760,7 @@ export const ManageMenuModal: React.FC = () => {
                 <div className="pt-2">
                   <button
                     type="button"
-                    onClick={() => setIsManageMenuModalOpen(false)}
+                    onClick={handleCloseModal}
                     className="px-6 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs transition cursor-pointer"
                   >
                     {isKm ? 'យល់ព្រម (បិទ)' : 'Close'}
@@ -727,7 +796,7 @@ export const ManageMenuModal: React.FC = () => {
                   </button>
                   <button
                     type="button"
-                    onClick={() => setIsManageMenuModalOpen(false)}
+                    onClick={handleCloseModal}
                     className="px-5 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs transition cursor-pointer"
                   >
                     {isKm ? 'បិទ' : 'Close'}
@@ -750,7 +819,7 @@ export const ManageMenuModal: React.FC = () => {
                 <div className="pt-2">
                   <button
                     type="button"
-                    onClick={() => setIsManageMenuModalOpen(false)}
+                    onClick={handleCloseModal}
                     className="px-6 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs transition cursor-pointer"
                   >
                     {isKm ? 'បិទ' : 'Close'}
@@ -783,7 +852,7 @@ export const ManageMenuModal: React.FC = () => {
                   </button>
                   <button
                     type="button"
-                    onClick={() => setIsManageMenuModalOpen(false)}
+                    onClick={handleCloseModal}
                     className="px-5 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs transition cursor-pointer"
                   >
                     {isKm ? 'បិទ' : 'Close'}
@@ -832,7 +901,7 @@ export const ManageMenuModal: React.FC = () => {
         )}
 
         {/* Clearly Separated Management Sections */}
-        <div className={`grid ${isAdmin ? 'grid-cols-5' : 'grid-cols-4'} bg-slate-100 dark:bg-slate-800/80 p-1 border-b border-slate-200 dark:border-slate-700 text-center font-khmer gap-0.5`}>
+        <div className="grid grid-cols-5 bg-slate-100 dark:bg-slate-800/80 p-1 border-b border-slate-200 dark:border-slate-700 text-center font-khmer gap-0.5">
           <button
             onClick={() => { setMainTab('menu'); setMenuMode('list'); setStatusBanner(null); }}
             className={`py-2 px-1 text-[10px] sm:text-[11px] font-bold rounded-xl transition flex flex-col items-center justify-center gap-0.5 cursor-pointer ${
@@ -857,19 +926,17 @@ export const ManageMenuModal: React.FC = () => {
             <span className="leading-tight">{isKm ? '២. ព័ត៌មានហាង' : '2. Info'}</span>
           </button>
 
-          {isAdmin && (
-            <button
-              onClick={() => { setMainTab('photos'); setStatusBanner(null); }}
-              className={`py-2 px-1 text-[10px] sm:text-[11px] font-bold rounded-xl transition flex flex-col items-center justify-center gap-0.5 cursor-pointer ${
-                mainTab === 'photos'
-                  ? 'bg-white dark:bg-slate-900 text-[#064E3B] dark:text-emerald-400 shadow-xs ring-1 ring-emerald-500/40'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
-              }`}
-            >
-              <Camera className="w-3.5 h-3.5" />
-              <span className="leading-tight">{isKm ? '៣. រូបភាពហាង' : '3. Photos'}</span>
-            </button>
-          )}
+          <button
+            onClick={() => { setMainTab('photos'); setStatusBanner(null); }}
+            className={`py-2 px-1 text-[10px] sm:text-[11px] font-bold rounded-xl transition flex flex-col items-center justify-center gap-0.5 cursor-pointer ${
+              mainTab === 'photos'
+                ? 'bg-white dark:bg-slate-900 text-[#064E3B] dark:text-emerald-400 shadow-xs ring-1 ring-emerald-500/40'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+            }`}
+          >
+            <Camera className="w-3.5 h-3.5" />
+            <span className="leading-tight">{tr(language, '៣. រូបភាពហាង', '3. Photos', '3. 照片')}</span>
+          </button>
 
           <button
             onClick={() => { setMainTab('analytics'); setStatusBanner(null); }}
@@ -932,10 +999,10 @@ export const ManageMenuModal: React.FC = () => {
 
           <div className="text-right">
             <span className="text-xs font-bold text-[#064E3B] dark:text-emerald-400 font-mono">
-              {menuItems.length} / 20
+              {menuItems.length} / {maxMenuLimit}
             </span>
             <span className="text-[10px] text-slate-500 ml-1">
-              {isKm ? 'មុខម្ហូប' : 'dishes'}
+              {tr(language, 'មុខម្ហូប', 'dishes', '道菜品')}
             </span>
           </div>
         </div>
@@ -961,7 +1028,7 @@ export const ManageMenuModal: React.FC = () => {
         )}
 
         {/* Body Content */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4 no-scrollbar text-xs">
+        <div ref={modalBodyRef} className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4 no-scrollbar text-xs">
 
           {/* TAB 1: MENU ITEMS & PRICES */}
           {mainTab === 'menu' && (
@@ -982,45 +1049,54 @@ export const ManageMenuModal: React.FC = () => {
                     </div>
                   </div>
 
-                  {isPremiumActive && menuItems.length < 20 && (
+                  {menuItems.length < maxMenuLimit ? (
                     <button
                       type="button"
                       onClick={handleStartAdd}
                       className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-[#064E3B] to-[#047857] hover:from-[#047857] hover:to-[#065F46] text-white font-bold text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-98 cursor-pointer"
                     >
                       <Plus className="w-4 h-4 text-amber-300" />
-                      <span>{isKm ? '+ បន្ថែមមុខម្ហូបថ្មី (Add New Dish)' : '+ Add New Dish'}</span>
+                      <span>{tr(language, '+ បន្ថែមមុខម្ហូបថ្មី (Add New Dish)', '+ Add New Dish', '+ 添加新菜品')}</span>
                     </button>
-                  )}
+                  ) : !isPremiumActive ? (
+                    <button
+                      type="button"
+                      onClick={() => setMainTab('membership')}
+                      className="w-full py-2.5 px-4 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 font-black text-xs shadow-md flex items-center justify-center gap-2 transition active:scale-98 cursor-pointer"
+                    >
+                      <Sparkles className="w-4 h-4" />
+                      <span>
+                        {tr(
+                          language,
+                          '👑 ពេញកំណត់គម្រោងឥតគិតថ្លៃ (៥ មុខ) — ដំឡើង VIP ដើម្បីបន្ថែមដល់ ២០ មុខ!',
+                          '👑 Free limit reached (5 dishes) — Upgrade to VIP for up to 20 dishes!',
+                          '👑 已达免费上限（5道）— 升级 VIP 可添加多达 20 道菜品！'
+                        )}
+                      </span>
+                    </button>
+                  ) : null}
 
                   {menuItems.length === 0 ? (
                     <div className="py-8 px-4 text-center bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 text-slate-500 space-y-2.5 font-khmer">
                       <UtensilsCrossed className="w-10 h-10 mx-auto text-emerald-600/60" />
                       <p className="text-xs font-bold text-slate-700 dark:text-slate-200">
-                        {isKm ? 'ហាងនេះមិនទាន់មានមុខម្ហូបនៅឡើយទេ' : 'No menu items added to this shop yet'}
+                        {tr(language, 'ហាងនេះមិនទាន់មានមុខម្ហូបនៅឡើយទេ', 'No menu items added to this shop yet', '此店铺尚未添加菜品')}
                       </p>
                       <p className="text-[11px] text-slate-500 max-w-xs mx-auto">
-                        {isKm
-                          ? 'បន្ថែមមុខម្ហូបឆ្ងាញ់ៗរបស់ហាងអ្នក ជាមួយរូបភាព និងតម្លៃ ដើម្បីទាក់ទាញអតិថិជន!'
-                          : 'Add your signature dishes with photos and prices so customers can see your menu!'}
+                        {tr(
+                          language,
+                          'បន្ថែមមុខម្ហូបឆ្ងាញ់ៗរបស់ហាងអ្នក ជាមួយរូបភាព និងតម្លៃ ដើម្បីទាក់ទាញអតិថិជន!',
+                          'Add your signature dishes with photos and prices so customers can see your menu!',
+                          '添加招牌菜品、照片与价格，吸引更多顾客！'
+                        )}
                       </p>
-                      {isPremiumActive ? (
-                        <button
-                          type="button"
-                          onClick={handleStartAdd}
-                          className="px-5 py-2.5 rounded-xl bg-[#064E3B] text-white font-bold text-xs hover:bg-[#047857] transition active:scale-95 cursor-pointer"
-                        >
-                          {isKm ? '+ បន្ថែមមុខម្ហូបដំបូងឥឡូវនេះ' : '+ Add First Dish Now'}
-                        </button>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() => setMainTab('membership')}
-                          className="px-4 py-2 rounded-xl bg-[#10B981] hover:bg-[#059669] text-white font-bold text-xs shadow-md transition active:scale-95 cursor-pointer"
-                        >
-                          {isKm ? '⭐ ដំឡើង VIP ដើម្បីបន្ថែមម្ហូប' : '⭐ Upgrade to VIP to add food items'}
-                        </button>
-                      )}
+                      <button
+                        type="button"
+                        onClick={handleStartAdd}
+                        className="px-5 py-2.5 rounded-xl bg-[#064E3B] text-white font-bold text-xs hover:bg-[#047857] transition active:scale-95 cursor-pointer"
+                      >
+                        {tr(language, '+ បន្ថែមមុខម្ហូបដំបូងឥឡូវនេះ', '+ Add First Dish Now', '+ 立即添加第一道菜品')}
+                      </button>
                     </div>
                   ) : (
                     <div className="space-y-2.5">
@@ -1093,7 +1169,6 @@ export const ManageMenuModal: React.FC = () => {
                               <button
                                 type="button"
                                 onClick={() => handleStartEdit(item)}
-                                disabled={!isPremiumActive}
                                 className="py-1.5 px-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 text-[#064E3B] dark:text-emerald-300 font-bold text-[11px] flex items-center justify-center gap-1.5 transition disabled:opacity-40 cursor-pointer"
                               >
                                 <Edit2 className="w-3.5 h-3.5" />
@@ -1118,7 +1193,7 @@ export const ManageMenuModal: React.FC = () => {
 
               {/* Menu Add / Edit Form */}
               {(menuMode === 'add' || menuMode === 'edit') && (
-                <form onSubmit={handleMenuSubmit} className="space-y-3 font-khmer">
+                <form onSubmit={handleMenuSubmit} noValidate className="space-y-3 font-khmer">
                   <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 flex items-center justify-between gap-2">
                     <h3 className="font-bold text-xs sm:text-sm text-[#064E3B] dark:text-emerald-300 flex items-center gap-1.5">
                       <UtensilsCrossed className="w-4 h-4" />
@@ -1142,8 +1217,8 @@ export const ManageMenuModal: React.FC = () => {
                       {isKm ? '១. ឈ្មោះមុខម្ហូប (ជាភាសាខ្មែរ) *' : '1. Dish Name (Khmer) *'}
                     </label>
                     <input
+                      ref={nameKhInputRef}
                       type="text"
-                      required
                       value={nameKh}
                       onChange={e => setNameKh(e.target.value)}
                       placeholder="ឧ. ត្រីដុតអំបិលម្ទេស ឬ សម្លកកូរ"
@@ -1220,11 +1295,14 @@ export const ManageMenuModal: React.FC = () => {
                     </button>
                     <button
                       type="submit"
-                      className="py-2.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-xs shadow-md transition active:scale-95 cursor-pointer"
+                      disabled={isSavingDish || isUploadingDishPhoto}
+                      className="py-2.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] disabled:opacity-60 text-white font-bold text-xs shadow-md transition active:scale-95 cursor-pointer"
                     >
-                      {menuMode === 'add'
-                        ? (isKm ? '💾 រក្សាទុកមុខម្ហូប' : '💾 Save Dish')
-                        : (isKm ? '💾 រក្សាទុកការកែប្រែ' : '💾 Save Changes')}
+                      {isSavingDish
+                        ? tr(language, '⏳ កំពុងរក្សាទុក...', '⏳ Saving...', '⏳ 正在保存...')
+                        : menuMode === 'add'
+                        ? tr(language, '💾 រក្សាទុកមុខម្ហូប', '💾 Save Dish', '💾 保存菜品')
+                        : tr(language, '💾 រក្សាទុកការកែប្រែ', '💾 Save Changes', '💾 保存修改')}
                     </button>
                   </div>
 
@@ -1367,7 +1445,7 @@ export const ManageMenuModal: React.FC = () => {
                         <span>{isKm ? 'រូបភាពគំរូ ឬតំណភ្ជាប់ URL' : 'Sample Photos or Direct URL'}</span>
                       </div>
                       <input
-                        type="url"
+                        type="text"
                         value={dishPhotoUrl}
                         onChange={e => setDishPhotoUrl(e.target.value)}
                         placeholder="https://..."
@@ -1400,9 +1478,14 @@ export const ManageMenuModal: React.FC = () => {
 
                     <button
                       type="submit"
-                      className="py-2.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold shadow-xs transition active:scale-95 cursor-pointer"
+                      disabled={isSavingDish || isUploadingDishPhoto}
+                      className="py-2.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] disabled:opacity-60 text-white font-bold shadow-xs transition active:scale-95 cursor-pointer"
                     >
-                      {menuMode === 'add' ? (isKm ? '💾 រក្សាទុកមុខម្ហូប' : '💾 Save Dish') : (isKm ? '💾 រក្សាទុកការកែប្រែ' : '💾 Update Dish')}
+                      {isSavingDish
+                        ? tr(language, '⏳ កំពុងរក្សាទុក...', '⏳ Saving...', '⏳ 正在保存...')
+                        : menuMode === 'add'
+                        ? tr(language, '💾 រក្សាទុកមុខម្ហូប', '💾 Save Dish', '💾 保存菜品')
+                        : tr(language, '💾 រក្សាទុកការកែប្រែ', '💾 Update Dish', '💾 保存修改')}
                     </button>
                   </div>
                 </form>
@@ -1412,7 +1495,7 @@ export const ManageMenuModal: React.FC = () => {
 
           {/* TAB 2: STORE INFORMATION & PRICES */}
           {mainTab === 'info' && (
-            <form onSubmit={handleSaveStoreInfo} className="space-y-3 font-khmer">
+            <form onSubmit={handleSaveStoreInfo} noValidate className="space-y-3 font-khmer">
               <div className="p-3 bg-emerald-50 dark:bg-emerald-950/30 rounded-2xl border border-emerald-200 dark:border-emerald-800 space-y-2">
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
@@ -1576,7 +1659,7 @@ export const ManageMenuModal: React.FC = () => {
                   {isKm ? '៩. តំណភ្ជាប់ផែនទី Google Maps URL' : '9. Google Maps URL'}
                 </label>
                 <input
-                  type="url"
+                  type="text"
                   value={storeMapUrl}
                   onChange={e => setStoreMapUrl(e.target.value)}
                   className="w-full px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs focus:ring-2 focus:ring-emerald-500/30 focus:border-[#059669] outline-none text-[#0F172A] dark:text-white font-mono text-[11px]"
@@ -1596,7 +1679,7 @@ export const ManageMenuModal: React.FC = () => {
                 </div>
                 <div className="flex gap-2">
                   <input
-                    type="url"
+                    type="text"
                     value={storePromoVideoUrl}
                     onChange={e => setStorePromoVideoUrl(e.target.value)}
                     placeholder="https://www.tiktok.com/@.../video/... ឬ Facebook/YouTube link"
@@ -1698,19 +1781,29 @@ export const ManageMenuModal: React.FC = () => {
             </form>
           )}
 
-          {/* TAB 3: DEDICATED STORE PHOTOS & GALLERY SECTION (ADMIN ONLY) */}
-          {mainTab === 'photos' && isAdmin && (
+          {/* TAB 3: DEDICATED STORE PHOTOS & GALLERY SECTION */}
+          {mainTab === 'photos' && (
             <div className="space-y-3.5 font-khmer">
               <div className="p-3 bg-emerald-50 dark:bg-emerald-950/30 rounded-2xl border border-emerald-200 dark:border-emerald-800 flex items-center justify-between gap-2">
                 <div className="space-y-0.5">
                   <h3 className="font-bold text-xs text-[#064E3B] dark:text-emerald-300 flex items-center gap-1.5">
                     <Camera className="w-4 h-4" />
-                    <span>{isKm ? '📸 រូបភាពមុខហាង និងរូបភាពម្ហូប (រហូតដល់ ៣០ សន្លឹក)' : '📸 Store Cover & Food Gallery (Up to 30 Photos)'}</span>
+                    <span>
+                      {tr(
+                        language,
+                        `📸 រូបភាពមុខហាង និងរូបភាពម្ហូប (រហូតដល់ ${maxPhotoLimit} សន្លឹក)`,
+                        `📸 Store Cover & Food Gallery (Up to ${maxPhotoLimit} Photos)`,
+                        `📸 店铺封面与美食相册（最多 ${maxPhotoLimit} 张）`
+                      )}
+                    </span>
                   </h3>
                   <p className="text-[11px] text-slate-600 dark:text-slate-300">
-                    {isKm
-                      ? 'រូបទី ១ គឺជារូបភាពមុខហាងគោល (Cover)។ បន្ទាប់ពីបន្ថែម ឬផ្លាស់ប្តូររូបភាព សូមចុចប៊ូតុង "💾 រក្សាទុករូបភាពហាង"។'
-                      : 'Photo #1 is your main storefront cover. Tap "Save Store Photos" after adding or reordering photos.'}
+                    {tr(
+                      language,
+                      'រូបទី ១ គឺជារូបភាពមុខហាងគោល (Cover)។ បន្ទាប់ពីបន្ថែម ឬផ្លាស់ប្តូររូបភាព សូមចុចប៊ូតុង "💾 រក្សាទុករូបភាពហាង"។',
+                      'Photo #1 is your main storefront cover. Tap "Save Store Photos" after adding or reordering photos.',
+                      '第 1 张照片为主封面。添加或调整照片后，请点击“💾 保存店铺照片”。'
+                    )}
                   </p>
                 </div>
               </div>
@@ -1729,7 +1822,7 @@ export const ManageMenuModal: React.FC = () => {
                 shopName={storeNameKh}
                 isKm={isKm}
                 onToast={showToast}
-                maxPhotos={30}
+                maxPhotos={maxPhotoLimit}
               />
 
               <button
@@ -1886,20 +1979,167 @@ export const ManageMenuModal: React.FC = () => {
             </div>
           )}
 
-          {/* TAB 5: VIP MEMBERSHIP PLAN & DIRECT SUPPORT (Dynamic Benefits & Rules) */}
+          {/* TAB 5: VIP MEMBERSHIP PLAN & DIRECT SUPPORT (Free vs VIP Comparison & Synced Pricing) */}
           {mainTab === 'membership' && (
             <div className="space-y-4 font-khmer">
-              {/* Plan Selector (Synchronized with Admin Settings) */}
-              <div className="p-4 bg-emerald-50 dark:bg-emerald-950/30 rounded-2xl border-2 border-emerald-500/80 text-center space-y-2">
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#064E3B] text-white text-[10px] font-bold rounded-full shadow-xs">
-                  <Sparkles className="w-3.5 h-3.5 text-emerald-200" />
-                  <span>
-                    {isKm
-                      ? `⭐ គម្រោង ${activePlan.nameKh}៖ $${activePlan.priceUsd.toFixed(2)} USD (${activePlan.durationDays} ថ្ងៃ)`
-                      : `⭐ ${activePlan.nameEn}: $${activePlan.priceUsd.toFixed(2)} USD (${activePlan.durationDays} Days)`}
+              {/* 1. Current Shop Plan, Payment Status & Expiration Summary Card */}
+              <div
+                className={`p-4 rounded-2xl border-2 space-y-2.5 ${
+                  isPremiumActive
+                    ? 'bg-gradient-to-br from-emerald-50 via-teal-50/70 to-amber-50/40 dark:from-emerald-950/40 dark:to-slate-900 border-emerald-500/80'
+                    : vipState === 'pending_vip'
+                    ? 'bg-amber-50 dark:bg-amber-950/30 border-amber-400'
+                    : 'bg-slate-50 dark:bg-slate-800/80 border-slate-300 dark:border-slate-700'
+                }`}
+              >
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`px-2.5 py-1 rounded-full text-[11px] font-black flex items-center gap-1 shadow-xs ${
+                        isAdmin
+                          ? 'bg-amber-400 text-slate-950'
+                          : isPremiumActive
+                          ? 'bg-[#064E3B] text-white'
+                          : vipState === 'pending_vip'
+                          ? 'bg-amber-500 text-slate-950'
+                          : 'bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-100'
+                      }`}
+                    >
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>
+                        {isAdmin
+                          ? tr(language, '🛡️ គណនី Admin (សិទ្ធិ VIP អចិន្ត្រៃយ៍)', '🛡️ System Admin (Permanent VIP)', '🛡️ 系统管理员（永久 VIP）')
+                          : isPremiumActive
+                          ? tr(language, '👑 គម្រោង VIP កំពុងដំណើរការ', '👑 Active VIP Plan', '👑 VIP 会员已激活')
+                          : vipState === 'pending_vip'
+                          ? tr(language, '⏳ កំពុងរង់ចាំ Admin អនុម័ត VIP', '⏳ Pending VIP Verification', '⏳ 等待管理员审核 VIP')
+                          : isExpired
+                          ? tr(language, '⚠️ គម្រោង VIP បានផុតកំណត់', '⚠️ VIP Plan Expired', '⚠️ VIP 会员已过期')
+                          : tr(language, '🏷️ គម្រោងមូលដ្ឋានឥតគិតថ្លៃ ($0)', '🏷️ Free Basic Plan ($0)', '🏷️ 免费基础计划 ($0)')}
+                      </span>
+                    </span>
+                  </div>
+
+                  <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300">
+                    {isAdmin
+                      ? tr(language, 'ស្ថានភាព៖ អនុម័តពេញលេញ ($0)', 'Status: Full Admin Access', '状态：管理员全权限')
+                      : isPremiumActive
+                      ? tr(language, 'ការបង់ប្រាក់៖ ✅ បានផ្ទៀងផ្ទាត់', 'Payment: ✅ Verified', '支付状态：✅ 已验证')
+                      : vipState === 'pending_vip'
+                      ? tr(language, 'ការបង់ប្រាក់៖ ⏳ រង់ចាំពិនិត្យ', 'Payment: ⏳ Pending Review', '支付状态：⏳ 待审核')
+                      : tr(language, 'ការបង់ប្រាក់៖ ឥតគិតថ្លៃ ($0)', 'Payment: Free Tier ($0)', '支付状态：免费 ($0)')}
                   </span>
                 </div>
-                <div className="grid grid-cols-2 gap-2 pt-1">
+
+                {/* Expiration Date & Remaining Days */}
+                <div className="pt-2 border-t border-slate-200/80 dark:border-slate-700/80 flex items-center justify-between text-[11px] flex-wrap gap-2">
+                  <div className="text-slate-600 dark:text-slate-300 flex items-center gap-1.5">
+                    <Calendar className="w-3.5 h-3.5 text-[#064E3B] dark:text-emerald-400" />
+                    <span>
+                      {isAdmin
+                        ? tr(language, 'សុពលភាព VIP៖ គ្មានថ្ងៃផុតកំណត់ (Permanent)', 'VIP Expiry: Never Expires (Admin)', '有效期：永久有效（管理员）')
+                        : formattedVipExpiry
+                        ? tr(
+                            language,
+                            `ថ្ងៃផុតកំណត់ VIP៖ ${formattedVipExpiry}${vipRemainingDays > 0 ? ` (នៅសល់ ${vipRemainingDays} ថ្ងៃ)` : ''}`,
+                            `VIP Expiration: ${formattedVipExpiry}${vipRemainingDays > 0 ? ` (${vipRemainingDays} days left)` : ''}`,
+                            `VIP 到期日：${formattedVipExpiry}${vipRemainingDays > 0 ? `（剩余 ${vipRemainingDays} 天）` : ''}`
+                          )
+                        : tr(
+                            language,
+                            'អ្នកកំពុងប្រើប្រាស់មុខងារគ្រប់គ្រងហាងមូលដ្ឋានដោយឥតគិតថ្លៃ ($0)។',
+                            'You are using basic shop management for free ($0).',
+                            '您当前正在免费使用基础店铺管理功能 ($0)。'
+                          )}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* 2. Clear Comparison: Free Basic Plan ($0) vs Optional Paid VIP Plan */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {/* Free Basic Plan Card */}
+                <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-2">
+                  <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-2">
+                    <span className="font-bold text-xs text-slate-800 dark:text-slate-100">
+                      {tr(language, '🏷️ គម្រោងមូលដ្ឋាន (Free)', '🏷️ Free Basic Plan', '🏷️ 免费基础计划')}
+                    </span>
+                    <span className="px-2 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200 font-mono font-black text-xs">
+                      $0.00
+                    </span>
+                  </div>
+                  <ul className="space-y-1.5 text-[11px] text-slate-600 dark:text-slate-300">
+                    <li className="flex items-start gap-1.5">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                      <span>{tr(language, 'កែប្រែព័ត៌មានហាង លេខទូរស័ព្ទ និងផែនទីដោយសេរី', 'Edit shop info, phone, hours & Google Maps link', '免费编辑店铺信息、电话、营业时间与地图链接')}</span>
+                    </li>
+                    <li className="flex items-start gap-1.5">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                      <span>{tr(language, 'បន្ថែម និងកែប្រែមុខម្ហូបបានរហូតដល់ ៥ មុខ', 'Add & edit up to 5 food menu items', '可添加和编辑最多 5 道菜品')}</span>
+                    </li>
+                    <li className="flex items-start gap-1.5">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                      <span>{tr(language, 'បង្ហោះរូបភាពហាងមូលដ្ឋានបាន ៣ សន្លឹក', 'Upload up to 3 storefront/food photos', '可上传最多 3 张店铺/菜品照片')}</span>
+                    </li>
+                    <li className="flex items-start gap-1.5">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                      <span>{tr(language, 'មើលស្ថិតិអ្នកចូលមើល និងផ្កាយវាយតម្លៃ', 'View store statistics & genuine customer ratings', '查看基础访问统计与顾客真实评分')}</span>
+                    </li>
+                  </ul>
+                </div>
+
+                {/* VIP Premium Plan Card */}
+                <div className="p-3.5 rounded-2xl bg-gradient-to-br from-amber-50/90 via-white to-emerald-50/60 dark:from-slate-800 dark:via-slate-800 dark:to-emerald-950/30 border-2 border-amber-400/80 space-y-2 shadow-xs">
+                  <div className="flex items-center justify-between border-b border-amber-200/70 dark:border-slate-700 pb-2">
+                    <span className="font-bold text-xs text-[#064E3B] dark:text-amber-300 flex items-center gap-1">
+                      <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                      <span>{tr(language, '👑 គម្រោង VIP Premium', '👑 VIP Premium Plan', '👑 VIP 尊享计划')}</span>
+                    </span>
+                    <span className="px-2 py-0.5 rounded-lg bg-[#064E3B] text-amber-300 font-mono font-black text-xs">
+                      ${dynamicPlansMap.quarterly.priceUsd.toFixed(2)} / ${dynamicPlansMap.annual.priceUsd.toFixed(2)}
+                    </span>
+                  </div>
+                  <ul className="space-y-1.5 text-[11px] text-slate-700 dark:text-slate-200">
+                    <li className="flex items-start gap-1.5">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
+                      <span>{tr(language, 'ស្លាកសញ្ញា 👑 VIP Gold Badge & អាទិភាពបង្ហាញលើគេ', '👑 VIP Gold Badge & Top Priority Home/Directory Ranking', '👑 VIP 金牌标识及首页/餐厅列表置顶优先展示')}</span>
+                    </li>
+                    <li className="flex items-start gap-1.5">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
+                      <span>{tr(language, 'បន្ថែមមុខម្ហូប និងតម្លៃបានរហូតដល់ ២០ មុខ', 'Add & edit up to 20 menu items with AI photo search', '可添加多达 20 道菜品及价格')}</span>
+                    </li>
+                    <li className="flex items-start gap-1.5">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
+                      <span>{tr(language, 'រូបភាព Gallery រហូតដល់ ៣០ សន្លឹក + វីដេអូផ្សព្វផ្សាយ (TikTok/FB)', 'Up to 30 gallery photos + Promo Video Reels (TikTok/FB)', '多达 30 张相册照片 + 推广视频链接 (TikTok/FB)')}</span>
+                    </li>
+                    <li className="flex items-start gap-1.5">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
+                      <span>{tr(language, 'រួមបញ្ចូលហាង VIP ទី ១ ឥតគិតថ្លៃ ($0) និងស្ថិតិពេញលេញ', 'Includes 1st VIP Store free ($0) + full analytics & VIP tools', '包含第 1 家 VIP 店铺免费 ($0) 及完整数据分析')}</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              {/* 3. Synchronized VIP Plan Selector & Optional Upgrade / Renewal Action */}
+              <div className="p-4 bg-emerald-50 dark:bg-emerald-950/30 rounded-2xl border-2 border-emerald-500/80 space-y-3">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <span className="font-bold text-xs text-[#064E3B] dark:text-emerald-300 flex items-center gap-1.5">
+                    <Sparkles className="w-4 h-4 text-amber-500" />
+                    <span>
+                      {tr(
+                        language,
+                        'ជ្រើសរើសកញ្ចប់សមាជិកភាព VIP (តម្លៃផ្លូវការពី Admin)',
+                        'Official VIP Plans (Synced with Admin Settings)',
+                        '官方 VIP 套餐（与管理员设置实时同步）'
+                      )}
+                    </span>
+                  </span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-white dark:bg-slate-800 text-[#064E3B] dark:text-emerald-300 font-bold border border-emerald-300">
+                    {tr(language, 'មិនបង្ខំ (Optional Upgrade)', 'Optional Paid Upgrade', '可选付费升级')}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
                   {(['quarterly', 'annual'] as VipPlanType[]).map((pk) => {
                     const p = dynamicPlansMap[pk];
                     const active = selectedVipPlan === pk;
@@ -1919,17 +2159,60 @@ export const ManageMenuModal: React.FC = () => {
                           <span className="font-mono font-black">${p.priceUsd.toFixed(2)}</span>
                         </div>
                         <div className="text-[10px] opacity-80">
-                          {isKm ? `សុពលភាព ${p.durationDays} ថ្ងៃ` : `${p.durationDays} days duration`}
+                          {tr(language, `សុពលភាព ${p.durationDays} ថ្ងៃ`, `${p.durationDays} days duration`, `有效期 ${p.durationDays} 天`)}
                         </div>
                       </button>
                     );
                   })}
                 </div>
+
                 <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-snug">
-                  {isKm
-                    ? `ការទូទាត់តែមួយលើក $${activePlan.priceUsd.toFixed(2)} សម្រាប់រយៈពេល ${activePlan.durationDays} ថ្ងៃពេញ • រួមបញ្ចូលហាងទី ១ ឥតគិតថ្លៃ ($0) • បន្ថែមហាងបន្ទាប់ +$${storeQuota.additionalStoreFeeUsd.toFixed(2)} USD / ហាង។`
-                    : `One-time payment of $${activePlan.priceUsd.toFixed(2)} for ${activePlan.durationDays} days • Includes 1st Store Free ($0) • Additional stores +$${storeQuota.additionalStoreFeeUsd.toFixed(2)} USD / store.`}
+                  {tr(
+                    language,
+                    `ការទូទាត់តែមួយលើក $${activePlan.priceUsd.toFixed(2)} សម្រាប់រយៈពេល ${activePlan.durationDays} ថ្ងៃពេញ • រួមបញ្ចូលហាងទី ១ ឥតគិតថ្លៃ ($0) • បន្ថែមហាងបន្ទាប់ +$${storeQuota.additionalStoreFeeUsd.toFixed(2)} USD / ហាង។ ទិន្នន័យហាង និងមុខម្ហូបរបស់អ្នកត្រូវបានរក្សាទុកជានិច្ច មិនបាត់បង់ឡើយ។`,
+                    `One-time payment of $${activePlan.priceUsd.toFixed(2)} for ${activePlan.durationDays} days • Includes 1st Store Free ($0) • Additional stores +$${storeQuota.additionalStoreFeeUsd.toFixed(2)} USD / store. Your existing shop data and menu items are always preserved.`,
+                    `一次性支付 $${activePlan.priceUsd.toFixed(2)} 即可享受 ${activePlan.durationDays} 天 VIP 权益 • 首店免费 ($0) • 新增分店 +$${storeQuota.additionalStoreFeeUsd.toFixed(2)} USD/店。您的所有店铺数据与菜品永久保留。`
+                  )}
                 </p>
+
+                {isAdmin ? (
+                  <div className="p-3 rounded-xl bg-white/90 dark:bg-slate-900 border border-emerald-400 text-[11px] text-[#064E3B] dark:text-emerald-300 font-bold flex items-center justify-between gap-2">
+                    <span>
+                      {tr(
+                        language,
+                        '✅ គណនី Admin មានសិទ្ធិ VIP អចិន្ត្រៃយ៍លើគ្រប់ហាងទាំងអស់ ដោយមិនចាំបាច់បង់ប្រាក់ឡើយ។',
+                        '✅ Your Admin account has permanent full VIP access for all shops with no payment required.',
+                        '✅ 您的管理员账号拥有所有店铺的永久 VIP 权限，无需付费。'
+                      )}
+                    </span>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleCloseModal();
+                      openUpgradeVipModal(isPremiumActive || isExpired);
+                    }}
+                    className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-slate-950 font-black text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-[0.98] cursor-pointer"
+                  >
+                    <Sparkles className="w-4 h-4" />
+                    <span>
+                      {isPremiumActive
+                        ? tr(
+                            language,
+                            `🔄 បន្តសុពលភាពគម្រោង VIP បន្ថែម ($${activePlan.priceUsd.toFixed(2)} / ${activePlan.durationDays} ថ្ងៃ)`,
+                            `🔄 Renew / Extend VIP Plan ($${activePlan.priceUsd.toFixed(2)} / ${activePlan.durationDays} Days)`,
+                            `🔄 续费 / 延长 VIP 套餐 ($${activePlan.priceUsd.toFixed(2)} / ${activePlan.durationDays} 天)`
+                          )
+                        : tr(
+                            language,
+                            `👑 ដំឡើងទៅគម្រោង ${activePlan.nameKh} ($${activePlan.priceUsd.toFixed(2)} / ${activePlan.durationDays} ថ្ងៃ)`,
+                            `👑 Upgrade to ${activePlan.nameEn} ($${activePlan.priceUsd.toFixed(2)} / ${activePlan.durationDays} Days)`,
+                            `👑 升级至 ${activePlan.nameEn} ($${activePlan.priceUsd.toFixed(2)} / ${activePlan.durationDays} 天)`
+                          )}
+                    </span>
+                  </button>
+                )}
               </div>
 
               {/* Dynamic VIP Benefits Breakdown */}
@@ -1937,9 +2220,12 @@ export const ManageMenuModal: React.FC = () => {
                 <h4 className="font-bold text-xs text-[#064E3B] dark:text-emerald-400 border-b border-slate-200 dark:border-slate-700 pb-1.5 flex items-center gap-1.5">
                   <Sparkles className="w-4 h-4 text-amber-500" />
                   <span>
-                    {isKm
-                      ? `អត្ថប្រយោជន៍ទាំង ${dynamicBenefits.length} យ៉ាងនៃសមាជិកភាព VIP Premium`
-                      : `${dynamicBenefits.length} Full Benefits of Premium VIP Membership`}
+                    {tr(
+                      language,
+                      `អត្ថប្រយោជន៍ទាំង ${dynamicBenefits.length} យ៉ាងនៃសមាជិកភាព VIP Premium`,
+                      `${dynamicBenefits.length} Full Benefits of Premium VIP Membership`,
+                      `VIP 尊享会员全部 ${dynamicBenefits.length} 项特权`
+                    )}
                   </span>
                 </h4>
 
@@ -1961,58 +2247,6 @@ export const ManageMenuModal: React.FC = () => {
                   ))}
                 </div>
               </div>
-
-              {/* Bank Transfer Details (NO QR CODE) */}
-              <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-2">
-                <div className="text-xs font-bold text-[#0F172A] dark:text-white border-b border-slate-200 dark:border-slate-700 pb-1">
-                  {isKm ? 'ព័ត៌មានគណនីផ្ទេរប្រាក់ (ABA Bank Transfer)' : 'Bank Transfer Details'}
-                </div>
-                <div className="flex justify-between text-[11px]">
-                  <span className="text-slate-500">{isKm ? 'ធនាគារ៖' : 'Bank:'}</span>
-                  <span className="font-bold text-[#0F172A] dark:text-white font-mono">ABA BANK</span>
-                </div>
-                <div className="flex justify-between text-[11px]">
-                  <span className="text-slate-500">{isKm ? 'ឈ្មោះគណនី៖' : 'Beneficiary:'}</span>
-                  <span className="font-bold text-[#0F172A] dark:text-white font-mono">CHEA KIMSENG</span>
-                </div>
-                <div className="flex justify-between text-[11px]">
-                  <span className="text-slate-500">{isKm ? 'លេខគណនី៖' : 'Account Number:'}</span>
-                  <span className="font-bold text-[#064E3B] dark:text-emerald-400 font-mono text-xs">000 123 456 (USD)</span>
-                </div>
-                <div className="flex justify-between text-[11px] pt-1 border-t border-slate-200 dark:border-slate-700">
-                  <span className="text-slate-500">{isKm ? 'ចំនួនទឹកប្រាក់៖' : 'Amount:'}</span>
-                  <span className="font-bold text-[#064E3B] dark:text-emerald-400 font-mono text-xs">${promoPrice} USD</span>
-                </div>
-              </div>
-
-              {/* Transaction ID Submission Form */}
-              <form onSubmit={handleUpgradeSubmit} className="space-y-3">
-                <div>
-                  <label className="block font-bold text-[#0F172A] dark:text-white mb-1 text-xs">
-                    {isKm ? 'លេខកូដប្រតិបត្តិការធនាគារ (Transaction Ref / Trx ID) *' : 'Bank Transaction Reference / Trx ID *'}
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={transactionRef}
-                    onChange={e => setTransactionRef(e.target.value)}
-                    placeholder="ឧ. TRX-123456789 ឬលេខ Ref លើវិក្កយបត្រ ABA"
-                    className="w-full px-3 py-2.5 rounded-xl border-2 border-emerald-500 bg-white dark:bg-slate-800 text-[#0F172A] dark:text-white font-mono font-bold text-xs focus:outline-none focus:border-[#064E3B]"
-                  />
-                  <p className="text-[10px] text-slate-500 mt-1">
-                    {isKm 
-                      ? `បញ្ចូលលេខកូដប្រតិបត្តិការពីបង្កាន់ដៃធនាគារ ABA របស់អ្នក ដើម្បីឱ្យរដ្ឋបាលផ្ទៀងផ្ទាត់ និងបើកដំណើរការ ${activePlan.durationDays} ថ្ងៃជូន។` 
-                      : `Enter the Transaction ID shown on your ABA bank receipt for administrative verification (${activePlan.durationDays} days).`}
-                  </p>
-                </div>
-
-                <button
-                  type="submit"
-                  className="w-full py-3 rounded-2xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-xs shadow-md shadow-emerald-950/20 transition active:scale-[0.98]"
-                >
-                  {isKm ? `ដាក់ស្នើផ្ទៀងផ្ទាត់ និងដំឡើង VIP ($${promoPrice.toFixed(2)})` : `Submit for Verification ($${promoPrice.toFixed(2)})`}
-                </button>
-              </form>
 
               {/* VIP Member Support Channel (Benefit 10) */}
               <div className="p-3.5 bg-emerald-50 dark:bg-emerald-950/30 rounded-2xl border border-emerald-200 dark:border-emerald-800 space-y-2">
@@ -2058,7 +2292,7 @@ export const ManageMenuModal: React.FC = () => {
               : `VIP Plans: ${dynamicPlansMap.quarterly.durationDays} Days ($${dynamicPlansMap.quarterly.priceUsd.toFixed(2)}) / ${dynamicPlansMap.annual.durationDays} Days ($${dynamicPlansMap.annual.priceUsd.toFixed(2)})`}
           </span>
           <button
-            onClick={() => setIsManageMenuModalOpen(false)}
+            onClick={handleCloseModal}
             className="px-4 py-1.5 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-xl transition font-medium"
           >
             {isKm ? 'បិទ' : 'Close'}

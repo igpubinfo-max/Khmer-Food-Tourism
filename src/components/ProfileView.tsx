@@ -2679,7 +2679,7 @@ export const ProfileView: React.FC = () => {
                   {tr(language, 'តំណភ្ជាប់ Profile Link (ស្រេចចិត្ត)៖', 'Profile URL (Optional):', '主页链接 Profile URL（选填）：')}
                 </label>
                 <input
-                  type="url"
+                  type="text"
                   value={socialUrlInput}
                   onChange={(e) => setSocialUrlInput(e.target.value)}
                   placeholder={socialModalType === 'tiktok' ? 'https://www.tiktok.com/@username' : 'https://www.facebook.com/username'}

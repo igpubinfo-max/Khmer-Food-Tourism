@@ -364,7 +364,7 @@ export const TouristDetailModal: React.FC = () => {
                     {isKm ? 'តំណភ្ជាប់ផែនទី (Google Maps Link)' : 'Google Maps URL'}
                   </label>
                   <input
-                    type="url"
+                    type="text"
                     value={editMapUrl}
                     onChange={(e) => setEditMapUrl(e.target.value)}
                     placeholder="https://maps.google.com/?q=..."

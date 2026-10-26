@@ -48,6 +48,7 @@ export const FoodDetailModal: React.FC = () => {
   const [editDescriptionEn, setEditDescriptionEn] = useState('');
   const [editPhotoUrl, setEditPhotoUrl] = useState('');
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+  const [isSavingAdminFood, setIsSavingAdminFood] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -166,7 +167,20 @@ export const FoodDetailModal: React.FC = () => {
 
   const handleSaveAdminFood = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedFood) return;
+    if (!selectedFood || isSavingAdminFood) return;
+    if (!editNameKh.trim() && !editNameEn.trim()) {
+      showToast(
+        tr(
+          language,
+          '⚠️ សូមបញ្ចូលឈ្មោះមុខម្ហូបជាមុនសិន!',
+          '⚠️ Please enter the dish name before saving!',
+          '⚠️ 保存前请输入菜品名称！'
+        ),
+        'error'
+      );
+      return;
+    }
+    setIsSavingAdminFood(true);
 
     const catSlug = editCategorySlug;
     const catKhMap: Record<FoodCategorySlug, string> = {
@@ -202,18 +216,22 @@ export const FoodDetailModal: React.FC = () => {
       imageAuditNote: 'កែប្រែដោយរដ្ឋបាល (Admin Edited)',
     };
 
-    updateFood(updated);
-    setSelectedFood(updated);
-    setIsEditingAdminFood(false);
-    showToast(
-      tr(
-        language,
-        `✅ បានកែប្រែព័ត៌មានមុខម្ហូប «${updated.nameKh}» រួចរាល់!`,
-        `✅ Updated food details for "${updated.nameEn}"!`,
-        `✅ 已成功更新菜品信息！`
-      ),
-      'success'
-    );
+    try {
+      updateFood(updated);
+      setIsEditingAdminFood(false);
+      setSelectedFood(null);
+      showToast(
+        tr(
+          language,
+          `✅ បានរក្សាទុកការកែប្រែមុខម្ហូប «${updated.nameKh}» រួចរាល់!`,
+          `✅ Saved food details for "${updated.nameEn}"!`,
+          `✅ 已成功保存菜品 «${updated.nameEn || updated.nameKh}» 的修改！`
+        ),
+        'success'
+      );
+    } finally {
+      setIsSavingAdminFood(false);
+    }
   };
 
   const bookmarked = isBookmarked(selectedFood.id);
@@ -640,10 +658,15 @@ export const FoodDetailModal: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-600 via-[#064E3B] to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-black text-xs flex items-center justify-center gap-1.5 shadow-md active:scale-95 cursor-pointer"
+                  disabled={isSavingAdminFood || isUploadingPhoto}
+                  className="py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-600 via-[#064E3B] to-teal-700 hover:from-emerald-700 hover:to-teal-800 disabled:opacity-60 text-white font-black text-xs flex items-center justify-center gap-1.5 shadow-md active:scale-95 cursor-pointer"
                 >
                   <Save className="w-4 h-4 text-emerald-300" />
-                  <span>{isKm ? 'រក្សាទុកការកែប្រែ' : 'Save Changes'}</span>
+                  <span>
+                    {isSavingAdminFood
+                      ? tr(language, 'កំពុងរក្សាទុក...', 'Saving...', '正在保存...')
+                      : tr(language, 'រក្សាទុកការកែប្រែ', 'Save Changes', '保存修改')}
+                  </span>
                 </button>
               </div>
             </form>

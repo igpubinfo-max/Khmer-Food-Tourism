@@ -993,8 +993,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
   });
 
-  const [isManageMenuModalOpen, setIsManageMenuModalOpen] = useState(false);
+  const [isManageMenuModalOpen, setIsManageMenuModalOpenState] = useState(false);
   const [managingRestaurant, setManagingRestaurantState] = useState<Restaurant | null>(null);
+  const setIsManageMenuModalOpen = (open: boolean) => {
+    setIsManageMenuModalOpenState(open);
+    if (!open) {
+      setManagingRestaurantState(null);
+    }
+  };
   const [activeManagedShopId, setActiveManagedShopIdState] = useState<string | null>(() => {
     try {
       return localStorage.getItem('kft_active_managed_shop_global') || null;
@@ -2910,7 +2916,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setSelectedDestination(null);
         return;
       }
-      if (state.isManageMenuModalOpen || state.managingRestaurant) {
+      if (state.isManageMenuModalOpen) {
         setIsManageMenuModalOpen(false);
         setManagingRestaurant(null);
         return;
@@ -5002,24 +5008,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       currentUser?.username === 'admin' || 
       currentUser?.username === 'cheasavuth';
 
-    const isOwner = Boolean(currentUser?.id && original?.ownerId === currentUser.id);
+    const isOwner = Boolean(
+      currentUser &&
+        (original?.ownerId === currentUser.id ||
+          (currentUser.email &&
+            original?.ownerEmail &&
+            original.ownerEmail.trim().toLowerCase() === currentUser.email.trim().toLowerCase()))
+    );
     const isApprovedVip = isUserVipActive(currentUser);
 
-    // Strict VIP Permission Enforcement: Only Admin or Approved VIP Owner can edit
-    if (!isAdmin && !(isOwner && isApprovedVip)) {
-      const state = getVipAccountState(currentUser);
-      let errorMsg = language === 'km' 
-        ? '🔒 គ្មានសិទ្ធិកែប្រែហាងនេះទេ! មានតែម្ចាស់ហាងដែលមានសមាជិកភាព VIP សកម្ម និងបានអនុម័ត ឬ Admin ប៉ុណ្ណោះដែលអាចកែប្រែបាន។' 
-        : '🔒 Unauthorized! Only approved VIP shop owners or Admin can edit this restaurant.';
-      if (isOwner && state === 'pending_vip') {
-        errorMsg = language === 'km'
-          ? '⏳ គណនី VIP របស់អ្នកកំពុងរង់ចាំការអនុម័តពី Admin។ មិនទាន់អាចកែប្រែព័ត៌មានហាងបាននៅឡើយទេ!'
-          : '⏳ Your VIP request is awaiting Admin approval. You cannot edit the restaurant yet.';
-      } else if (isOwner && state === 'expired_vip') {
-        errorMsg = language === 'km'
-          ? '⚠️ សមាជិកភាព VIP របស់អ្នកបានផុតកំណត់ហើយ! សូមបន្តកញ្ចប់ VIP ដើម្បីកែប្រែហាង។'
-          : '⚠️ Your VIP subscription has expired! Please renew to edit the restaurant.';
-      }
+    // Owner or Admin Permission Enforcement: Basic shop management is free for the shop owner
+    if (!isAdmin && !isOwner) {
+      const errorMsg =
+        language === 'km'
+          ? '🔒 គ្មានសិទ្ធិកែប្រែហាងនេះទេ! មានតែម្ចាស់ហាងផ្ទាល់ ឬ Admin ប៉ុណ្ណោះដែលអាចកែប្រែព័ត៌មានហាងនេះបាន។'
+          : language === 'zh'
+          ? '🔒 无权修改此店铺！仅限店主本人或管理员修改。'
+          : '🔒 Unauthorized! Only the shop owner or Admin can edit this restaurant.';
       showToast(errorMsg, 'warning');
       return;
     }
@@ -5158,34 +5163,42 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       currentUser?.username === 'admin' || 
       currentUser?.username === 'cheasavuth';
 
-    const isOwner = Boolean(currentUser?.id && targetRest.ownerId === currentUser.id);
-    const isApprovedVip = isUserVipActive(currentUser);
+    const isOwner = Boolean(
+      currentUser &&
+        (targetRest.ownerId === currentUser.id ||
+          (currentUser.email &&
+            targetRest.ownerEmail &&
+            targetRest.ownerEmail.trim().toLowerCase() === currentUser.email.trim().toLowerCase()))
+    );
+    const isApprovedVip = isUserVipActive(currentUser) || isRestaurantPremiumActive(targetRest);
 
-    // Strict VIP Permission Enforcement: Only Admin or Approved VIP Owner can add menu items
-    if (!isAdmin && !(isOwner && isApprovedVip)) {
-      const state = getVipAccountState(currentUser);
-      let errorMsg = language === 'km' 
-        ? '🔒 សិទ្ធិត្រូវបានបដិសេធ! មានតែម្ចាស់ហាង VIP ដែលបានអនុម័ត ឬ Admin ប៉ុណ្ណោះដែលអាចបន្ថែមមុខម្ហូបបាន។' 
-        : '🔒 Unauthorized! Only approved VIP shop owners or Admin can add food items.';
-      if (isOwner && state === 'pending_vip') {
-        errorMsg = language === 'km'
-          ? '⏳ គណនី VIP របស់អ្នកកំពុងរង់ចាំការអនុម័តពី Admin។ មិនទាន់អាចបន្ថែមមុខម្ហូបបាននៅឡើយទេ!'
-          : '⏳ Your VIP request is awaiting Admin approval.';
-      } else if (isOwner && state === 'expired_vip') {
-        errorMsg = language === 'km'
-          ? '⚠️ សមាជិកភាព VIP របស់អ្នកបានផុតកំណត់ហើយ! សូមបន្តកញ្ចប់ VIP ដើម្បីបន្ថែមមុខម្ហូប។'
-          : '⚠️ Your VIP subscription has expired! Please renew to add food items.';
-      }
-      showToast(errorMsg, 'warning');
+    if (!isAdmin && !isOwner) {
+      showToast(
+        language === 'km'
+          ? '🔒 សិទ្ធិត្រូវបានបដិសេធ! មានតែម្ចាស់ហាងផ្ទាល់ ឬ Admin ប៉ុណ្ណោះដែលអាចបន្ថែមមុខម្ហូបបាន។'
+          : language === 'zh'
+          ? '🔒 无权操作！仅限店主或管理员添加菜品。'
+          : '🔒 Unauthorized! Only the shop owner or Admin can add food items.',
+        'warning'
+      );
       return false;
     }
 
     const currentItems = targetRest.menuItems || [];
-    if (currentItems.length >= 20) {
+    const maxAllowedItems = isAdmin || isApprovedVip ? 20 : 5;
+    if (currentItems.length >= maxAllowedItems) {
       showToast(
-        language === 'km' 
-          ? 'សមាជិកភាព Premium VIP អនុញ្ញាតឱ្យបន្ថែមមុខម្ហូបអតិបរមាត្រឹម ២០ មុខប៉ុណ្ណោះ!' 
-          : 'Premium VIP membership allows a maximum of 20 food menu items!',
+        isAdmin || isApprovedVip
+          ? language === 'km'
+            ? 'សមាជិកភាព Premium VIP អនុញ្ញាតឱ្យបន្ថែមមុខម្ហូបអតិបរមាត្រឹម ២០ មុខប៉ុណ្ណោះ!'
+            : language === 'zh'
+            ? 'VIP 会员最多可添加 20 道菜品！'
+            : 'Premium VIP membership allows a maximum of 20 food menu items!'
+          : language === 'km'
+          ? 'គម្រោងឥតគិតថ្លៃ (Free Plan) អាចបន្ថែមមុខម្ហូបបាន ៥ មុខ។ សូមដំឡើងទៅគម្រោង VIP ដើម្បីបន្ថែមរហូតដល់ ២០ មុខ!'
+          : language === 'zh'
+          ? '免费计划最多可添加 5 道菜品。升级 VIP 可添加多达 20 道菜品！'
+          : 'Free Plan allows up to 5 menu items. Upgrade to VIP to add up to 20 menu items!',
         'warning'
       );
       return false;
@@ -5219,8 +5232,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const nowIso = new Date().toISOString();
     const updatedRest: Restaurant = {
       ...targetRest,
-      membershipTier: 'premium' as MembershipTier,
-      isPromoted: true,
+      membershipTier: (isAdmin || isApprovedVip ? 'premium' : (targetRest.membershipTier || 'free')) as MembershipTier,
+      isPromoted: isAdmin || isApprovedVip ? true : Boolean(targetRest.isPromoted),
       menuItems: updatedMenuItems,
       updatedAt: nowIso,
     };
@@ -5248,9 +5261,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     showToast(
-      language === 'km' 
-        ? `បានបន្ថែមមុខម្ហូប "${newItem.nameKh}" ជោគជ័យ (${updatedMenuItems.length}/20)!` 
-        : `Added menu item "${newItem.nameKh}" (${updatedMenuItems.length}/20)!`,
+      language === 'km'
+        ? `✅ បានរក្សាទុកមុខម្ហូប "${newItem.nameKh}" ដោយជោគជ័យ (${updatedMenuItems.length}/${maxAllowedItems})!`
+        : language === 'zh'
+        ? `✅ 已成功保存菜品 "${newItem.nameKh}" (${updatedMenuItems.length}/${maxAllowedItems})！`
+        : `✅ Saved menu item "${newItem.nameKh}" (${updatedMenuItems.length}/${maxAllowedItems})!`,
       'success'
     );
     return true;
@@ -5266,25 +5281,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       currentUser?.username === 'admin' || 
       currentUser?.username === 'cheasavuth';
 
-    const isOwner = Boolean(currentUser?.id && targetRest.ownerId === currentUser.id);
-    const isApprovedVip = isUserVipActive(currentUser);
+    const isOwner = Boolean(
+      currentUser &&
+        (targetRest.ownerId === currentUser.id ||
+          (currentUser.email &&
+            targetRest.ownerEmail &&
+            targetRest.ownerEmail.trim().toLowerCase() === currentUser.email.trim().toLowerCase()))
+    );
 
-    // Strict VIP Permission Enforcement: Only Admin or Approved VIP Owner can edit menu items
-    if (!isAdmin && !(isOwner && isApprovedVip)) {
-      const state = getVipAccountState(currentUser);
-      let errorMsg = language === 'km' 
-        ? '🔒 គ្មានសិទ្ធិកែប្រែមុខម្ហូបទេ! មានតែម្ចាស់ហាង VIP ដែលបានអនុម័ត ឬ Admin ប៉ុណ្ណោះដែលអាចកែប្រែបាន។' 
-        : '🔒 Unauthorized! Only approved VIP shop owners or Admin can edit food items.';
-      if (isOwner && state === 'pending_vip') {
-        errorMsg = language === 'km'
-          ? '⏳ គណនី VIP របស់អ្នកកំពុងរង់ចាំការអនុម័តពី Admin។'
-          : '⏳ Your VIP request is awaiting Admin approval.';
-      } else if (isOwner && state === 'expired_vip') {
-        errorMsg = language === 'km'
-          ? '⚠️ សមាជិកភាព VIP របស់អ្នកបានផុតកំណត់ហើយ! សូមបន្តកញ្ចប់ VIP ដើម្បីកែប្រែមុខម្ហូប។'
-          : '⚠️ Your VIP subscription has expired!';
-      }
-      showToast(errorMsg, 'warning');
+    if (!isAdmin && !isOwner) {
+      showToast(
+        language === 'km'
+          ? '🔒 គ្មានសិទ្ធិកែប្រែមុខម្ហូបទេ! មានតែម្ចាស់ហាងផ្ទាល់ ឬ Admin ប៉ុណ្ណោះដែលអាចកែប្រែបាន។'
+          : language === 'zh'
+          ? '🔒 无权修改菜品！仅限店主或管理员操作。'
+          : '🔒 Unauthorized! Only the shop owner or Admin can edit food items.',
+        'warning'
+      );
       return false;
     }
 
@@ -5332,12 +5345,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       currentUser?.username === 'admin' || 
       currentUser?.username === 'cheasavuth';
 
-    const isOwner = Boolean(currentUser?.id && targetRest.ownerId === currentUser.id);
-    const isApprovedVip = isUserVipActive(currentUser);
+    const isOwner = Boolean(
+      currentUser &&
+        (targetRest.ownerId === currentUser.id ||
+          (currentUser.email &&
+            targetRest.ownerEmail &&
+            targetRest.ownerEmail.trim().toLowerCase() === currentUser.email.trim().toLowerCase()))
+    );
 
-    // Strict VIP Permission Enforcement: Only Admin or Approved VIP Owner can delete menu items
-    if (!isAdmin && !(isOwner && isApprovedVip)) {
-      showToast(language === 'km' ? '🔒 គ្មានសិទ្ធិលុបមុខម្ហូបទេ! មានតែម្ចាស់ហាង VIP ដែលបានអនុម័ត ឬ Admin ប៉ុណ្ណោះ។' : '🔒 Unauthorized!', 'warning');
+    if (!isAdmin && !isOwner) {
+      showToast(
+        language === 'km'
+          ? '🔒 គ្មានសិទ្ធិលុបមុខម្ហូបទេ! មានតែម្ចាស់ហាងផ្ទាល់ ឬ Admin ប៉ុណ្ណោះ។'
+          : language === 'zh'
+          ? '🔒 无权删除菜品！仅限店主或管理员操作。'
+          : '🔒 Unauthorized!',
+        'warning'
+      );
       return false;
     }
 

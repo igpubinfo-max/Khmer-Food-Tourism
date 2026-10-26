@@ -129,10 +129,8 @@ const MainScreen: React.FC = () => {
     showWelcomeScreen ||
     !currentUser ||
     isAuthModalOpen ||
-    isAddPostModalOpen ||
     isAddRestaurantModalOpen ||
-    isManageMenuModalOpen ||
-    managingRestaurant ||
+    (isManageMenuModalOpen && Boolean(managingRestaurant)) ||
     isAdminOpen ||
     isAdminLoginModalOpen ||
     isInstallModalOpen ||
@@ -258,7 +256,7 @@ const MainScreen: React.FC = () => {
       {isQrScannerModalOpen && <QrScannerModal />}
       {isVipAddRestaurantModalOpen && <VipAddRestaurantModal />}
       {isGoogleMapsSearchModalOpen && <GoogleMapsPlaceSearchModal />}
-      {(isManageMenuModalOpen || managingRestaurant) && <ManageMenuModal />}
+      {isManageMenuModalOpen && managingRestaurant && <ManageMenuModal />}
       </Suspense>
 
       {/* Primary Detail Modals — Statically Mounted Outside Suspense for Zero-Latency Instant Open */}

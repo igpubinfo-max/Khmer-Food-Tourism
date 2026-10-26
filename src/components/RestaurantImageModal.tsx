@@ -380,7 +380,7 @@ export const RestaurantImageModal: React.FC<RestaurantImageModalProps> = ({
 
             <div className="flex gap-2">
               <input
-                type="url"
+                type="text"
                 value={urlInput}
                 onChange={(e) => setUrlInput(e.target.value)}
                 placeholder="https://example.com/restaurant-photo.jpg"

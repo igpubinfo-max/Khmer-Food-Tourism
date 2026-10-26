@@ -17,10 +17,30 @@ let savedHtmlOverflow = '';
  */
 export function useBodyScrollLock(locked = true): void {
   useEffect(() => {
-    if (!locked || typeof window === 'undefined' || typeof document === 'undefined') return;
+    if (typeof window === 'undefined' || typeof document === 'undefined') return;
 
     const body = document.body;
     const html = document.documentElement;
+
+    if (!locked) {
+      if (lockCount <= 0) {
+        lockCount = 0;
+        if (body.style.position === 'fixed') {
+          body.style.position = '';
+          body.style.top = '';
+          body.style.left = '';
+          body.style.right = '';
+          body.style.width = '';
+        }
+        if (body.style.overflow === 'hidden') {
+          body.style.overflow = '';
+        }
+        if (html.style.overflow === 'hidden') {
+          html.style.overflow = '';
+        }
+      }
+      return;
+    }
 
     if (lockCount === 0) {
       savedScrollY = window.scrollY || window.pageYOffset || 0;

@@ -151,7 +151,7 @@ export const CreatePostModal: React.FC = () => {
               {tr(language, 'រូបភាពដែលត្រូវបង្ហោះ (Photo URL)', 'Photo URL', '配图链接 (Photo URL)')}
             </label>
             <input
-              type="url"
+              type="text"
               required
               value={photoUrl}
               onChange={(e) => setPhotoUrl(e.target.value)}

@@ -210,6 +210,7 @@ export const AdminDashboard: React.FC = () => {
   const [cloudCfg, setCloudCfg] = useState(() => getCloudApiConfig());
   const [supabaseTestStatus, setSupabaseTestStatus] = useState<string>('');
   const [isSyncingCloud, setIsSyncingCloud] = useState(false);
+  const [isSavingNewFood, setIsSavingNewFood] = useState(false);
 
   if (!isAdminOpen) return null;
 
@@ -246,35 +247,52 @@ export const AdminDashboard: React.FC = () => {
     return t.status === txnFilter;
   });
 
+
   const handleCreateFood = (e: React.FormEvent) => {
     e.preventDefault();
-    addFood({
-      nameKh: newFoodNameKh,
-      nameEn: newFoodNameEn || newFoodNameKh,
-      categorySlug: newFoodCategory,
-      categoryKh: newFoodCategory === 'soup' ? 'សម្ល & អាម៉ុក' : newFoodCategory === 'grilled' ? 'ម្ហូបអាំង' : 'ម្ហូបខ្មែរ',
-      categoryEn: newFoodCategory,
-      descriptionKh: newFoodDescKh,
-      descriptionEn: newFoodDescKh,
-      photoUrl: newFoodPhotoUrl,
-      prepTime: '១៥ នាទី',
-      cookTime: newFoodCookTime,
-      servings: '២-៣ នាក់',
-      difficulty: 'medium',
-      priceRiel: 0,
-      priceUsd: 0,
-      ingredients: [
-        { nameKh: 'គ្រឿងផ្សំខ្មែរដើម', nameEn: 'Traditional Khmer ingredients', amount: '១ ចាន' },
-        { nameKh: 'គ្រឿងទេស និងអំបិល ស្ករ', nameEn: 'Seasonings', amount: 'តាមចំណូលចិត្ត' },
-      ],
-      steps: [
-        { stepNumber: 1, instructionKh: 'រៀបចំលាងសម្អាតគ្រឿងផ្សំឱ្យស្អាត។', instructionEn: 'Clean and prep ingredients.' },
-        { stepNumber: 2, instructionKh: 'ចម្អិនតាមលំដាប់រហូតដល់ឈ្ងុយឆ្ងាញ់។', instructionEn: 'Cook until delicious.' },
-      ],
-    });
-    setNewFoodNameKh('');
-    setNewFoodDescKh('');
-    setShowAddFoodForm(false);
+    if (isSavingNewFood) return;
+    const trimmedKh = newFoodNameKh.trim() || newFoodNameEn.trim();
+    if (!trimmedKh) {
+      showToast(
+        isKm ? '⚠️ សូមបញ្ចូលឈ្មោះមុខម្ហូបជាមុនសិន!' : '⚠️ Please enter the food name first!',
+        'error'
+      );
+      return;
+    }
+    setIsSavingNewFood(true);
+    try {
+      addFood({
+        nameKh: trimmedKh,
+        nameEn: newFoodNameEn.trim() || trimmedKh,
+        categorySlug: newFoodCategory,
+        categoryKh: newFoodCategory === 'soup' ? 'សម្ល & អាម៉ុក' : newFoodCategory === 'grilled' ? 'ម្ហូបអាំង' : 'ម្ហូបខ្មែរ',
+        categoryEn: newFoodCategory,
+        descriptionKh: newFoodDescKh.trim() || `${trimmedKh} ជាមុខម្ហូបខ្មែរដ៏ឈ្ងុយឆ្ងាញ់។`,
+        descriptionEn: newFoodDescKh.trim() || `${newFoodNameEn.trim() || trimmedKh} is a delicious traditional Khmer dish.`,
+        photoUrl: newFoodPhotoUrl.trim() || '/foods/food-1.jpg',
+        prepTime: '១៥ នាទី',
+        cookTime: newFoodCookTime.trim() || '៣០ នាទី',
+        servings: '២-៣ នាក់',
+        difficulty: 'medium',
+        priceRiel: 0,
+        priceUsd: 0,
+        ingredients: [
+          { nameKh: 'គ្រឿងផ្សំខ្មែរដើម', nameEn: 'Traditional Khmer ingredients', amount: '១ ចាន' },
+          { nameKh: 'គ្រឿងទេស និងអំបិល ស្ករ', nameEn: 'Seasonings', amount: 'តាមចំណូលចិត្ត' },
+        ],
+        steps: [
+          { stepNumber: 1, instructionKh: 'រៀបចំលាងសម្អាតគ្រឿងផ្សំឱ្យស្អាត។', instructionEn: 'Clean and prep ingredients.' },
+          { stepNumber: 2, instructionKh: 'ចម្អិនតាមលំដាប់រហូតដល់ឈ្ងុយឆ្ងាញ់។', instructionEn: 'Cook until delicious.' },
+        ],
+      });
+      setNewFoodNameKh('');
+      setNewFoodNameEn('');
+      setNewFoodDescKh('');
+      setNewFoodPhotoCandidates([]);
+      setShowAddFoodForm(false);
+    } finally {
+      setIsSavingNewFood(false);
+    }
   };
 
   const handleCreateDestination = (e: React.FormEvent) => {
@@ -2000,7 +2018,7 @@ export const AdminDashboard: React.FC = () => {
               </div>
 
               {showAddFoodForm && (
-                <form onSubmit={handleCreateFood} className="p-4 rounded-2xl bg-slate-50 dark:bg-stone-800 border border-slate-200 dark:border-slate-700 dark:border-stone-700 space-y-3 font-khmer">
+                <form onSubmit={handleCreateFood} noValidate className="p-4 rounded-2xl bg-slate-50 dark:bg-stone-800 border border-slate-200 dark:border-slate-700 dark:border-stone-700 space-y-3 font-khmer">
                   <div className="grid grid-cols-2 gap-2">
                     <div>
                       <label className="block font-medium mb-1">ឈ្មោះខ្មែរ *</label>
@@ -2098,7 +2116,7 @@ export const AdminDashboard: React.FC = () => {
                     </div>
 
                     <input
-                      type="url"
+                      type="text"
                       value={newFoodPhotoUrl}
                       onChange={(e) => setNewFoodPhotoUrl(e.target.value)}
                       className="w-full px-2.5 py-1.5 rounded-lg border bg-white dark:bg-stone-700"
@@ -3985,7 +4003,7 @@ export const AdminDashboard: React.FC = () => {
                       {isKm ? 'តំណភ្ជាប់ទាញយក Android APK (Direct APK Download URL)' : 'Direct APK Download URL'}
                     </label>
                     <input
-                      type="url"
+                      type="text"
                       value={apkUrl}
                       onChange={e => setApkUrl(e.target.value)}
                       required
@@ -3999,7 +4017,7 @@ export const AdminDashboard: React.FC = () => {
                         {isKm ? 'តំណភ្ជាប់ Google Play Store' : 'Google Play Store URL'}
                       </label>
                       <input
-                        type="url"
+                        type="text"
                         value={playStoreUrl}
                         onChange={e => setPlayStoreUrl(e.target.value)}
                         className="w-full px-3 py-2 rounded-xl border bg-stone-50 dark:bg-stone-700 text-stone-800 dark:text-stone-100 font-mono text-xs"
@@ -4010,7 +4028,7 @@ export const AdminDashboard: React.FC = () => {
                         {isKm ? 'តំណភ្ជាប់ Apple App Store' : 'Apple App Store URL'}
                       </label>
                       <input
-                        type="url"
+                        type="text"
                         value={appStoreUrl}
                         onChange={e => setAppStoreUrl(e.target.value)}
                         className="w-full px-3 py-2 rounded-xl border bg-stone-50 dark:bg-stone-700 text-stone-800 dark:text-stone-100 font-mono text-xs"
