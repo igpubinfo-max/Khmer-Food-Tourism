@@ -76,17 +76,15 @@ jobs:
           APPSTORE_PRIVATE_KEY: ${{ secrets.APPSTORE_PRIVATE_KEY }}
         run: |
           set -e
-          cd ios/App
-          mkdir -p build
-
-          # Resolve Swift Package Manager dependencies first
-          xcodebuild -resolvePackageDependencies -project App.xcodeproj -scheme App
+          mkdir -p ios/App/build
 
           if [ -n "$APPSTORE_PRIVATE_KEY" ] && [ -n "$APPSTORE_KEY_ID" ] && [ -n "$APPSTORE_ISSUER_ID" ]; then
-            echo "=== Building Signed App Store Archive with App Store Connect API Key ==="
-            mkdir -p ~/.appstoreconnect/private_keys
-            KEY_PATH="$HOME/.appstoreconnect/private_keys/AuthKey_${APPSTORE_KEY_ID}.p8"
-            echo "$APPSTORE_PRIVATE_KEY" > "$KEY_PATH"
+            echo "=== Setting up Apple Distribution Certificate & Provisioning Profile via API ==="
+            node scripts/setup-ios-signing.mjs
+            PROFILE_UUID=$(cat ios/App/build/signing/profile_uuid.txt)
+
+            cd ios/App
+            xcodebuild -resolvePackageDependencies -project App.xcodeproj -scheme App
 
             xcodebuild archive \
               -project App.xcodeproj \
@@ -95,50 +93,35 @@ jobs:
               -destination "generic/platform=iOS" \
               -archivePath build/App.xcarchive \
               DEVELOPMENT_TEAM=79L24WMX4R \
-              CODE_SIGN_STYLE=Automatic \
-              -allowProvisioningUpdates \
-              -authenticationKeyPath "$KEY_PATH" \
-              -authenticationKeyID "$APPSTORE_KEY_ID" \
-              -authenticationKeyIssuerID "$APPSTORE_ISSUER_ID"
-
-            cat > build/ExportOptions.plist <<EOF
-          <?xml version="1.0" encoding="UTF-8"?>
-          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-          <plist version="1.0">
-          <dict>
-            <key>method</key>
-            <string>app-store-connect</string>
-            <key>teamID</key>
-            <string>79L24WMX4R</string>
-            <key>uploadSymbols</key>
-            <true/>
-            <key>destination</key>
-            <string>export</string>
-          </dict>
-          </plist>
-          EOF
+              CODE_SIGN_STYLE=Manual \
+              CODE_SIGN_IDENTITY="Apple Distribution" \
+              PROVISIONING_PROFILE_SPECIFIER="$PROFILE_UUID"
 
             xcodebuild -exportArchive \
               -archivePath build/App.xcarchive \
               -exportOptionsPlist build/ExportOptions.plist \
-              -exportPath build/export \
-              -allowProvisioningUpdates \
-              -authenticationKeyPath "$KEY_PATH" \
-              -authenticationKeyID "$APPSTORE_KEY_ID" \
-              -authenticationKeyIssuerID "$APPSTORE_ISSUER_ID"
+              -exportPath build/export
 
             cp build/export/*.ipa build/KhmerFoodTourism-v2.3.1.ipa
+            echo "=== SIGNED APP STORE IPA EXPORTED SUCCESSFULLY ==="
+            ls -lh build/KhmerFoodTourism-v2.3.1.ipa
           else
             echo "=== Building Release Archive (Unsigned IPA Package) ==="
+            cd ios/App
+            xcodebuild -resolvePackageDependencies -project App.xcodeproj -scheme App
+
             xcodebuild archive \
               -project App.xcodeproj \
               -scheme App \
               -configuration Release \
               -destination "generic/platform=iOS" \
               -archivePath build/App.xcarchive \
+              DEVELOPMENT_TEAM="" \
+              CODE_SIGN_STYLE=Manual \
               CODE_SIGNING_REQUIRED=NO \
               CODE_SIGNING_ALLOWED=NO \
-              CODE_SIGN_IDENTITY=""
+              CODE_SIGN_IDENTITY="" \
+              PROVISIONING_PROFILE_SPECIFIER=""
 
             if [ -d "build/App.xcarchive/Products/Applications/App.app" ]; then
               mkdir -p build/Payload
@@ -147,18 +130,20 @@ jobs:
               zip -qry KhmerFoodTourism-v2.3.1.ipa Payload
               rm -rf Payload
               cd ..
-              echo "=== IPA PACKAGED SUCCESSFULLY ==="
+              echo "=== UNSIGNED IPA PACKAGED SUCCESSFULLY ==="
               ls -lh build/KhmerFoodTourism-v2.3.1.ipa
             fi
           fi
 
-      - name: 9. Optional Upload to Apple App Store Connect / TestFlight
+      - name: 9. Upload Signed IPA to Apple App Store Connect / TestFlight
         if: env.APPSTORE_PRIVATE_KEY != '' && env.APPSTORE_KEY_ID != '' && env.APPSTORE_ISSUER_ID != ''
         env:
           APPSTORE_ISSUER_ID: ${{ secrets.APPSTORE_ISSUER_ID }}
           APPSTORE_KEY_ID: ${{ secrets.APPSTORE_KEY_ID }}
           APPSTORE_PRIVATE_KEY: ${{ secrets.APPSTORE_PRIVATE_KEY }}
         run: |
+          mkdir -p ~/.appstoreconnect/private_keys
+          echo "$APPSTORE_PRIVATE_KEY" > "$HOME/.appstoreconnect/private_keys/AuthKey_${APPSTORE_KEY_ID}.p8"
           IPA_PATH="ios/App/build/KhmerFoodTourism-v2.3.1.ipa"
           if [ -f "$IPA_PATH" ]; then
             echo "Uploading $IPA_PATH to Apple App Store Connect / TestFlight..."
