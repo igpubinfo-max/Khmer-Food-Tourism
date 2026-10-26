@@ -38,6 +38,7 @@ export function calculateDistanceMeters(lat1: number, lon1: number, lat2: number
 }
 
 export const MAX_NEARBY_RADIUS_METERS = 500;
+const LAST_KNOWN_GPS_STORAGE_KEY = 'kft_last_known_user_gps_v1';
 
 interface PhnomPenhSpotPreset {
   id: string;
@@ -56,6 +57,46 @@ const PHNOM_PENH_SPOT_PRESETS: PhnomPenhSpotPreset[] = [
   { id: 'russian_market', labelKh: 'ផ្សារទួលទំពូង', labelEn: 'Russian Market', labelZh: '俄罗斯市场', lat: 11.5405, lng: 104.9144 },
 ];
 
+const RADIUS_OPTIONS: { value: number; labelKh: string; labelEn: string; labelZh: string }[] = [
+  { value: 500, labelKh: '៥០០ម (500m)', labelEn: '500m', labelZh: '500米' },
+  { value: 1000, labelKh: '១ គ.ម (1km)', labelEn: '1km', labelZh: '1公里' },
+  { value: 2000, labelKh: '២ គ.ម (2km)', labelEn: '2km', labelZh: '2公里' },
+  { value: 5000, labelKh: 'ជិតបំផុត (Nearest)', labelEn: 'Nearest All', labelZh: '最近全部' },
+];
+
+function readSavedUserGps(): { lat: number; lng: number } | null {
+  try {
+    const raw = localStorage.getItem(LAST_KNOWN_GPS_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (
+      parsed &&
+      Number.isFinite(Number(parsed.lat)) &&
+      Number.isFinite(Number(parsed.lng)) &&
+      Number(parsed.lat) >= 9.5 &&
+      Number(parsed.lat) <= 15.0 &&
+      Number(parsed.lng) >= 102.0 &&
+      Number(parsed.lng) <= 108.0
+    ) {
+      return { lat: Number(parsed.lat), lng: Number(parsed.lng) };
+    }
+  } catch {
+    // ignore storage errors
+  }
+  return null;
+}
+
+function saveUserGps(coords: { lat: number; lng: number }) {
+  try {
+    localStorage.setItem(
+      LAST_KNOWN_GPS_STORAGE_KEY,
+      JSON.stringify({ lat: coords.lat, lng: coords.lng, updatedAt: Date.now() })
+    );
+  } catch {
+    // ignore storage errors
+  }
+}
+
 export const NearMeModal: React.FC = () => {
   const { 
     isNearMeModalOpen, setIsNearMeModalOpen, 
@@ -64,10 +105,11 @@ export const NearMeModal: React.FC = () => {
   } = useApp();
 
   const [activeType, setActiveType] = useState<'restaurants' | 'destinations'>('restaurants');
-  const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(() => readSavedUserGps());
   const [geoStatus, setGeoStatus] = useState<'idle' | 'requesting' | 'granted' | 'fallback'>('idle');
   const [manualProvince, setManualProvince] = useState<string>('រាជធានីភ្នំពេញ');
   const [selectedPresetId, setSelectedPresetId] = useState<string>('gps');
+  const [selectedRadiusMeters, setSelectedRadiusMeters] = useState<number>(MAX_NEARBY_RADIUS_METERS);
   const [isLoadingNearby, setIsLoadingNearby] = useState<boolean>(false);
   const [liveNearbyRestaurants, setLiveNearbyRestaurants] = useState<GooglePlaceCachedItem[]>([]);
   const [liveNearbyAttractions, setLiveNearbyAttractions] = useState<GooglePlaceCachedItem[]>([]);
@@ -90,14 +132,18 @@ export const NearMeModal: React.FC = () => {
     return userCoords || provinceCenters[manualProvince] || provinceCenters['រាជធានីភ្នំពេញ'];
   }, [userCoords, manualProvince]);
 
-  const fetchLiveNearby500m = async (coords: { lat: number; lng: number }, forceRefresh = false) => {
+  const fetchLiveNearby500m = async (
+    coords: { lat: number; lng: number },
+    forceRefresh = false,
+    radiusOverride = selectedRadiusMeters
+  ) => {
     if (!coords || !Number.isFinite(coords.lat) || !Number.isFinite(coords.lng)) return;
     setIsLoadingNearby(true);
     try {
       const res = await searchNearbyPlacesWithin500m(
         coords.lat,
         coords.lng,
-        MAX_NEARBY_RADIUS_METERS,
+        radiusOverride,
         forceRefresh
       );
       setLiveNearbyRestaurants(res.restaurants);
@@ -110,45 +156,60 @@ export const NearMeModal: React.FC = () => {
     }
   };
 
-  // Request GPS with high accuracy
+  // Request GPS with instant initial load + high-accuracy & network fallback
   const requestLocation = (forceRefresh = false) => {
     setSelectedPresetId('gps');
     setGeoStatus('requesting');
+
+    // Immediately load places around last known GPS (or Phnom Penh center) so user never waits on an empty screen
+    const initialCoords = userCoords || readSavedUserGps() || provinceCenters[manualProvince] || provinceCenters['រាជធានីភ្នំពេញ'];
+    if (!userCoords) {
+      setUserCoords(initialCoords);
+    }
+    fetchLiveNearby500m(initialCoords, forceRefresh, selectedRadiusMeters);
+
     if ('geolocation' in navigator) {
+      const onSuccess = (position: GeolocationPosition) => {
+        const nextCoords = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        };
+        saveUserGps(nextCoords);
+        setUserCoords(nextCoords);
+        setGeoStatus('granted');
+        fetchLiveNearby500m(nextCoords, forceRefresh, selectedRadiusMeters);
+      };
+
+      const onFinalFallback = () => {
+        const fallback = readSavedUserGps() || provinceCenters[manualProvince] || provinceCenters['រាជធានីភ្នំពេញ'];
+        setUserCoords(fallback);
+        setGeoStatus('fallback');
+        fetchLiveNearby500m(fallback, forceRefresh, selectedRadiusMeters);
+      };
+
       navigator.geolocation.getCurrentPosition(
-        position => {
-          const nextCoords = {
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          };
-          setUserCoords(nextCoords);
-          setGeoStatus('granted');
-          fetchLiveNearby500m(nextCoords, forceRefresh);
+        onSuccess,
+        () => {
+          // Retry once with network/Wi-Fi geolocation (works indoors on Android WebView)
+          navigator.geolocation.getCurrentPosition(
+            onSuccess,
+            onFinalFallback,
+            { enableHighAccuracy: false, timeout: 4500, maximumAge: 300000 }
+          );
         },
-        error => {
-          console.warn('Geolocation denied or error:', error.message);
-          const fallback = provinceCenters[manualProvince] || provinceCenters['រាជធានីភ្នំពេញ'];
-          setUserCoords(fallback);
-          setGeoStatus('fallback');
-          fetchLiveNearby500m(fallback, forceRefresh);
-        },
-        { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 }
+        { enableHighAccuracy: true, timeout: 5500, maximumAge: 60000 }
       );
     } else {
-      const fallback = provinceCenters[manualProvince] || provinceCenters['រាជធានីភ្នំពេញ'];
+      const fallback = readSavedUserGps() || provinceCenters[manualProvince] || provinceCenters['រាជធានីភ្នំពេញ'];
       setUserCoords(fallback);
       setGeoStatus('fallback');
-      fetchLiveNearby500m(fallback, forceRefresh);
+      fetchLiveNearby500m(fallback, forceRefresh, selectedRadiusMeters);
     }
   };
 
   useEffect(() => {
     if (isNearMeModalOpen) {
-      if (!userCoords) {
-        requestLocation(false);
-      } else {
-        fetchLiveNearby500m(userCoords, false);
-      }
+      requestLocation(false);
     }
   }, [isNearMeModalOpen]);
 
@@ -158,7 +219,7 @@ export const NearMeModal: React.FC = () => {
     setSelectedPresetId('province');
     const coords = provinceCenters[prov] || provinceCenters['រាជធានីភ្នំពេញ'];
     setUserCoords(coords);
-    fetchLiveNearby500m(coords, false);
+    fetchLiveNearby500m(coords, false, selectedRadiusMeters);
   };
 
   // Handle Phnom Penh real location quick preset
@@ -168,25 +229,31 @@ export const NearMeModal: React.FC = () => {
     const coords = { lat: preset.lat, lng: preset.lng };
     setUserCoords(coords);
     setGeoStatus('fallback');
-    fetchLiveNearby500m(coords, false);
+    fetchLiveNearby500m(coords, false, selectedRadiusMeters);
   };
 
-  // Merge & deduplicate Supabase restaurants + Google Maps/Live 500m places, strictly within 500m, sorted nearest first
+  const handleSelectRadius = (newRadius: number) => {
+    setSelectedRadiusMeters(newRadius);
+    fetchLiveNearby500m(baseCoords, false, newRadius);
+  };
+
+  // Merge & deduplicate Supabase restaurants + Google Maps/Live nearby places, sorted strictly nearest first
   const nearbyRestaurants = useMemo(() => {
     const mergedMap = new Map<string, Restaurant>();
+    const candidateMaxDist = Math.max(selectedRadiusMeters, 5000);
 
-    // 1. Add existing Supabase/in-app restaurants within 500m
+    // 1. Add existing Supabase/in-app restaurants within candidate pool
     for (const r of restaurants) {
       const dist = calculateDistanceMeters(baseCoords.lat, baseCoords.lng, r.latitude, r.longitude);
-      if (dist <= MAX_NEARBY_RADIUS_METERS) {
+      if (dist <= candidateMaxDist) {
         mergedMap.set(r.id, r);
       }
     }
 
-    // 2. Merge live Google Places / 500m places without duplicating existing Supabase records
+    // 2. Merge live Google Places / Cambodia Street GPS places without duplicating existing Supabase records
     for (const gp of liveNearbyRestaurants) {
       const dist = calculateDistanceMeters(baseCoords.lat, baseCoords.lng, gp.lat, gp.lng);
-      if (dist > MAX_NEARBY_RADIUS_METERS) continue;
+      if (dist > candidateMaxDist) continue;
 
       const existingMatch = findDuplicateRestaurantForGooglePlace(gp, Array.from(mergedMap.values()));
       if (existingMatch) {
@@ -197,29 +264,39 @@ export const NearMeModal: React.FC = () => {
       }
     }
 
-    return Array.from(mergedMap.values())
+    const allSorted = Array.from(mergedMap.values())
       .map(r => {
         const dist = calculateDistanceMeters(baseCoords.lat, baseCoords.lng, r.latitude, r.longitude);
         return { ...r, distanceMeters: dist };
       })
-      .filter(r => r.distanceMeters <= MAX_NEARBY_RADIUS_METERS)
+      .filter(r => Number.isFinite(r.distanceMeters))
       .sort((a, b) => a.distanceMeters - b.distanceMeters);
-  }, [restaurants, liveNearbyRestaurants, baseCoords]);
 
-  // Merge & deduplicate Supabase destinations + Google Maps/Live 500m attractions, strictly within 500m, sorted nearest first
+    const withinSelectedRadius = allSorted.filter(r => r.distanceMeters <= selectedRadiusMeters);
+
+    // If user's GPS is in a residential neighborhood with >= 5 places in radius, return strict radius;
+    // otherwise include the top 15 nearest places sorted ascending by exact distance so it never shows 0!
+    if (withinSelectedRadius.length >= 5) {
+      return withinSelectedRadius;
+    }
+    return allSorted.slice(0, Math.max(15, withinSelectedRadius.length));
+  }, [restaurants, liveNearbyRestaurants, baseCoords, selectedRadiusMeters]);
+
+  // Merge & deduplicate Supabase destinations + Google Maps/Live nearby attractions, sorted strictly nearest first
   const nearbyDestinations = useMemo(() => {
     const mergedMap = new Map<string, TouristDestination>();
+    const candidateMaxDist = Math.max(selectedRadiusMeters, 6000);
 
     for (const d of destinations) {
       const dist = calculateDistanceMeters(baseCoords.lat, baseCoords.lng, d.latitude, d.longitude);
-      if (dist <= MAX_NEARBY_RADIUS_METERS) {
+      if (dist <= candidateMaxDist) {
         mergedMap.set(d.id, d);
       }
     }
 
     for (const gp of liveNearbyAttractions) {
       const dist = calculateDistanceMeters(baseCoords.lat, baseCoords.lng, gp.lat, gp.lng);
-      if (dist > MAX_NEARBY_RADIUS_METERS) continue;
+      if (dist > candidateMaxDist) continue;
 
       const existingMatch = findDuplicateDestinationForGooglePlace(gp, Array.from(mergedMap.values()));
       if (!existingMatch) {
@@ -228,19 +305,33 @@ export const NearMeModal: React.FC = () => {
       }
     }
 
-    return Array.from(mergedMap.values())
+    const allSorted = Array.from(mergedMap.values())
       .map(d => {
         const dist = calculateDistanceMeters(baseCoords.lat, baseCoords.lng, d.latitude, d.longitude);
         return { ...d, distanceMeters: dist };
       })
-      .filter(d => d.distanceMeters <= MAX_NEARBY_RADIUS_METERS)
+      .filter(d => Number.isFinite(d.distanceMeters))
       .sort((a, b) => a.distanceMeters - b.distanceMeters);
-  }, [destinations, liveNearbyAttractions, baseCoords]);
+
+    const withinSelectedRadius = allSorted.filter(d => d.distanceMeters <= selectedRadiusMeters);
+
+    if (withinSelectedRadius.length >= 4) {
+      return withinSelectedRadius;
+    }
+    return allSorted.slice(0, Math.max(12, withinSelectedRadius.length));
+  }, [destinations, liveNearbyAttractions, baseCoords, selectedRadiusMeters]);
 
   if (!isNearMeModalOpen) return null;
 
   const localizedManualProvince = translateProvince(manualProvince, language);
   const meterUnit = tr(language, 'ម៉ែត្រ', 'm', '米');
+  const formatDistanceLabel = (distMeters: number) => {
+    if (distMeters <= 1500) {
+      return `${distMeters} ${meterUnit}`;
+    }
+    const km = (distMeters / 1000).toFixed(1);
+    return `${km} ${tr(language, 'គ.ម', 'km', '公里')} (${distMeters}m)`;
+  };
 
   const buildDirectionsUrl = (targetLat: number, targetLng: number, fallbackName: string, existingMapUrl?: string) => {
     if (Number.isFinite(targetLat) && Number.isFinite(targetLng) && Number.isFinite(baseCoords.lat) && Number.isFinite(baseCoords.lng)) {
@@ -369,6 +460,28 @@ export const NearMeModal: React.FC = () => {
                 <span>{tr(language, spot.labelKh, spot.labelEn, spot.labelZh)}</span>
               </button>
             ))}
+          </div>
+
+          {/* Radius Selector Chips (500m, 1km, 2km, Nearest) */}
+          <div className="flex items-center justify-between gap-1.5 pt-0.5 font-khmer">
+            <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 whitespace-nowrap">
+              {tr(language, 'រង្វង់ស្វែងរក៖', 'Radius:', '搜索范围：')}
+            </span>
+            <div className="flex items-center gap-1 overflow-x-auto no-scrollbar">
+              {RADIUS_OPTIONS.map(opt => (
+                <button
+                  key={opt.value}
+                  onClick={() => handleSelectRadius(opt.value)}
+                  className={`px-2 py-0.5 rounded-lg text-[10px] font-bold whitespace-nowrap transition cursor-pointer ${
+                    selectedRadiusMeters === opt.value
+                      ? 'bg-[#064E3B] text-white shadow-2xs'
+                      : 'bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600 hover:border-emerald-400'
+                  }`}
+                >
+                  {tr(language, opt.labelKh, opt.labelEn, opt.labelZh)}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -500,7 +613,7 @@ export const NearMeModal: React.FC = () => {
                             {rLoc.name}
                           </h4>
                           <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-[#064E3B] dark:text-emerald-300 text-[11px] font-black shrink-0">
-                            📍 {r.distanceMeters} {meterUnit}
+                            📍 {formatDistanceLabel(r.distanceMeters)}
                           </span>
                         </div>
 
@@ -631,7 +744,7 @@ export const NearMeModal: React.FC = () => {
                             {dLoc.name}
                           </h4>
                           <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-[#064E3B] dark:text-emerald-300 text-[11px] font-black shrink-0">
-                            📍 {d.distanceMeters} {meterUnit}
+                            📍 {formatDistanceLabel(d.distanceMeters)}
                           </span>
                         </div>
 
