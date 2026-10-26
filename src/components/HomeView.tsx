@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { TrendingFoodCategorySlug, TrendingFoodItem, isUserVipActive, getVipAccountState, getVipRemainingDays, sortRestaurantsChronologically } from '../types';
 import { normalizeKhmerSearchText } from '../services/googlePlacesService';
+import { shuffleForCurrentSession } from '../utils/sessionShuffle';
 import { shareRichContent, copyTextNativeOrWeb } from '../utils/androidMediaHelper';
 import { tr } from '../utils/i18n';
 import { getLocalizedFood, getLocalizedRestaurant, getLocalizedDestination } from '../utils/zhDynamicTranslator';
@@ -153,6 +154,15 @@ export const HomeView: React.FC = () => {
     }
   };
 
+  const sessionShuffledRestaurants = useMemo(
+    () => shuffleForCurrentSession(restaurants),
+    [restaurants]
+  );
+  const sessionShuffledDestinations = useMemo(
+    () => shuffleForCurrentSession(destinations),
+    [destinations]
+  );
+
   // Global Search Filtering across Foods, Restaurants, and Destinations
   const searchResults = useMemo(() => {
     const q = normalizeKhmerSearchText(globalSearchQuery);
@@ -166,16 +176,16 @@ export const HomeView: React.FC = () => {
       (f.ingredients && f.ingredients.some(i => normalizeKhmerSearchText(i.nameKh).includes(q) || normalizeKhmerSearchText(i.nameEn).includes(q)))
     );
 
-    const matchedRestaurants = sortRestaurantsChronologically(restaurants.filter(r =>
+    const matchedRestaurants = sessionShuffledRestaurants.filter(r =>
       (r.status === 'approved' || currentUser?.role === 'admin' || currentUser?.id === r.ownerId) &&
       (normalizeKhmerSearchText(r.nameKh).includes(q) ||
       normalizeKhmerSearchText(r.nameEn).includes(q) ||
       (r.addressKh && normalizeKhmerSearchText(r.addressKh).includes(q)) ||
       (r.provinceKh && normalizeKhmerSearchText(r.provinceKh).includes(q)) ||
       (r.signatureDishesKh && r.signatureDishesKh.some(d => normalizeKhmerSearchText(d).includes(q))))
-    ));
+    );
 
-    const matchedDestinations = destinations.filter(d =>
+    const matchedDestinations = sessionShuffledDestinations.filter(d =>
       normalizeKhmerSearchText(d.nameKh).includes(q) ||
       normalizeKhmerSearchText(d.nameEn).includes(q) ||
       (d.descriptionKh && normalizeKhmerSearchText(d.descriptionKh).includes(q)) ||
@@ -191,7 +201,7 @@ export const HomeView: React.FC = () => {
       destinations: matchedDestinations,
       totalCount
     };
-  }, [globalSearchQuery, foods, restaurants, destinations]);
+  }, [globalSearchQuery, foods, sessionShuffledRestaurants, sessionShuffledDestinations]);
 
   const handleAiRandomize = () => {
     setRandomSeed(prev => prev + 1);

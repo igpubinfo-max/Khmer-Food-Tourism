@@ -148,10 +148,10 @@ export const SmartHubMenuModal: React.FC<Props> = ({ onClose }) => {
               <span className={`${iconBox} bg-rose-100 text-rose-600`}><Flame className="w-5 h-5" /></span>
               <span className="min-w-0 flex-1">
                 <span className="block text-sm font-bold text-slate-900 dark:text-white">
-                  {tr(language, 'ម្ហូបខ្មែរកំពុងពេញនិយម (Online)', 'Trending Khmer Food & Online Discovery', '热门高棉美食（在线发现）')}
+                  {tr(language, 'ម្ហូបខ្មែរកំពុងពេញនិយម (YouTube)', 'Trending Khmer Food (YouTube)', '热门高棉美食（YouTube）')}
                 </span>
                 <span className="block text-xs text-slate-500 dark:text-slate-400">
-                  {tr(language, 'YouTube • TikTok • Facebook • Wikipedia', 'YouTube · TikTok · Facebook · Wikipedia', 'YouTube · TikTok · Facebook · 维基百科')}
+                  {tr(language, 'វីដេអូពេញនិយម YouTube', 'Trending YouTube Videos', 'YouTube 热门视频')}
                 </span>
               </span>
             </button>

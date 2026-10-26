@@ -3,6 +3,7 @@ import { useApp } from '../context/AppContext';
 import { isUserVipActive } from '../types';
 import { TouristCard } from './TouristCard';
 import { Compass, Globe, Loader2, Plus } from 'lucide-react';
+import { shuffleForCurrentSession } from '../utils/sessionShuffle';
 import {
   searchCambodiaPlacesWithSmartCache,
   convertGooglePlaceToDestination,
@@ -71,9 +72,14 @@ export const TourismView: React.FC = () => {
     { id: 'mountain', nameKh: 'ភ្នំ & ឧទ្យានជាតិ', nameEn: 'Mountains', nameZh: '高山与国家公园' },
   ];
 
+  const sessionShuffledDestinations = useMemo(
+    () => shuffleForCurrentSession(destinations),
+    [destinations]
+  );
+
   const filteredDestinations = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
-    return destinations.filter((d) => {
+    return sessionShuffledDestinations.filter((d) => {
       if (selectedCategory === 'trending_social') {
         if (!d.isTrendingSocial) return false;
       } else if (selectedCategory !== 'all' && d.categorySlug !== selectedCategory) {
@@ -100,7 +106,7 @@ export const TourismView: React.FC = () => {
       }
       return true;
     });
-  }, [destinations, selectedCategory, selectedProvince, searchQuery]);
+  }, [sessionShuffledDestinations, selectedCategory, selectedProvince, searchQuery]);
 
   const displayedDestinations = useMemo(
     () => filteredDestinations.slice(0, visibleCount),

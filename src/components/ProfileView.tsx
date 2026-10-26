@@ -191,7 +191,13 @@ export const ProfileView: React.FC = () => {
                 <img 
                   src={currentUser.avatar} 
                   alt={currentUser.name} 
-                  className={`w-16 h-16 sm:w-22 sm:h-22 ${currentUser.role === 'admin' ? 'rounded-full ring-4 ring-emerald-400/40' : 'rounded-2xl ring-4 ring-emerald-500/20'} object-cover border-2 border-[#059669] shadow-md shrink-0`}
+                  className={`w-16 h-16 sm:w-22 sm:h-22 ${
+    currentUser.role === 'admin' 
+      ? 'rounded-full ring-4 ring-emerald-400/40 border-2 border-[#059669]' 
+      : isVip 
+      ? 'rounded-2xl ring-4 ring-amber-400/50 border-2 border-amber-300 shadow-[0_0_15px_rgba(245,158,11,0.4)] bg-white' 
+      : 'rounded-2xl ring-4 ring-emerald-500/20 border-2 border-[#059669]'
+  } object-cover shadow-md shrink-0`}
                 />
                 <div className="flex-1 min-w-0">
                   {/* Large Prominent Account Name & Quick Edit */}
@@ -253,7 +259,7 @@ export const ProfileView: React.FC = () => {
                     ) : isVip ? (
                       <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black bg-gradient-to-r from-amber-200 to-amber-300 text-amber-950 border border-amber-400 shadow-2xs font-khmer">
                         <Crown className="w-3.5 h-3.5 fill-amber-700 text-amber-700" />
-                        <span>{tr(language, 'សមាជិក VIP 🌟', 'Premium VIP 🌟', '尊享 VIP 🌟')}</span>
+                        <span className="animate-pulse">{tr(language, '👑 សមាជិក VIP', '👑 VIP MEMBER', '👑 VIP 尊享会员')}</span>
                       </span>
                     ) : (
                       <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-600 shadow-2xs font-khmer">

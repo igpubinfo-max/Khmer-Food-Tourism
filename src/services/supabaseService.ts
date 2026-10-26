@@ -268,6 +268,51 @@ export async function pullCloudDocument<T>(key: string, timeoutMs = 10000): Prom
   }
 }
 
+// ============================================================================
+// ADMIN 6-DIGIT PIN SECURITY HELPERS
+// ============================================================================
+export const DEFAULT_ADMIN_PIN_HASH = '03ae5db7cfcf3954b2d11fb5f60733b0372fc65c54446a1c9f703519893fadf8';
+export const ADMIN_PIN_SALT = 'kft_admin_pin_salt_v1:';
+export const ADMIN_PIN_KV_KEY = 'kft_admin_pin_security_v1';
+
+export async function hashAdminPin(pin: string): Promise<string> {
+  const salted = `${ADMIN_PIN_SALT}${pin}`;
+  const enc = new TextEncoder();
+  const data = enc.encode(salted);
+  const hashBuf = await crypto.subtle.digest('SHA-256', data);
+  const hashArr = Array.from(new Uint8Array(hashBuf));
+  return hashArr.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+export async function getAdminPinHash(): Promise<string> {
+  try {
+    const cloudRecord = await pullCloudDocument<{ pinHash: string }>(ADMIN_PIN_KV_KEY, 4000);
+    if (cloudRecord && typeof cloudRecord.pinHash === 'string' && cloudRecord.pinHash.length === 64) {
+      try {
+        localStorage.setItem(ADMIN_PIN_KV_KEY, cloudRecord.pinHash);
+      } catch {}
+      return cloudRecord.pinHash;
+    }
+  } catch {}
+  try {
+    const cached = localStorage.getItem(ADMIN_PIN_KV_KEY);
+    if (cached && cached.length === 64) return cached;
+  } catch {}
+  return DEFAULT_ADMIN_PIN_HASH;
+}
+
+export async function setAdminPinHash(newPin: string): Promise<boolean> {
+  const hash = await hashAdminPin(newPin);
+  try {
+    localStorage.setItem(ADMIN_PIN_KV_KEY, hash);
+  } catch {}
+  const pushed = await pushCloudDocument(ADMIN_PIN_KV_KEY, {
+    pinHash: hash,
+    updatedAt: new Date().toISOString()
+  });
+  return pushed;
+}
+
 /**
  * Normalize and sanitize AppSettings so VIP prices, durations, names, promotional banners,
  * and additional-store fees are always consistent across all screens and payment checks.
@@ -290,31 +335,34 @@ export function normalizeAuthoritativeAppSettings(
     ? { ...(raw || {}), ...(fallback || {}) }
     : { ...(fallback || {}), ...(raw || {}) }) as AppSettings;
 
-  // Automatically upgrade any legacy pre-v13 $2.99 / $4.99 cached settings to the authoritative $9.99 / $24.99 plans
-  const isObsoleteLegacyDefault =
-    Number(merged.settingsVersion || 0) < 13 &&
-    (Number(merged.vipShortPriceUsd) === 2.99 || Number(merged.vipLongPriceUsd) === 4.99);
+  // Migrate stale pre-v15 cached settings ($9.99 / $24.99 / $10.00) to authoritative defaults: 30d @ $4.99, 60d @ $6.99, extra shop @ $5.00
+  const isStalePreV15 = Number(merged.settingsVersion || 0) < 15;
 
-  const shortDays =
-    !isObsoleteLegacyDefault && typeof merged.vipShortDurationDays === 'number' && merged.vipShortDurationDays >= 1
-      ? Math.round(merged.vipShortDurationDays)
-      : 30;
-  const shortPrice =
-    !isObsoleteLegacyDefault && typeof merged.vipShortPriceUsd === 'number' && merged.vipShortPriceUsd > 0
-      ? Math.round(merged.vipShortPriceUsd * 100) / 100
-      : 9.99;
-  const longDays =
-    !isObsoleteLegacyDefault && typeof merged.vipLongDurationDays === 'number' && merged.vipLongDurationDays >= 1
-      ? Math.round(merged.vipLongDurationDays)
-      : 90;
-  const longPrice =
-    !isObsoleteLegacyDefault && typeof merged.vipLongPriceUsd === 'number' && merged.vipLongPriceUsd > 0
-      ? Math.round(merged.vipLongPriceUsd * 100) / 100
-      : 24.99;
-  const extraStoreFee =
-    typeof merged.additionalStoreFeeUsd === 'number' && merged.additionalStoreFeeUsd >= 0
-      ? Math.round(merged.additionalStoreFeeUsd * 100) / 100
-      : 10.0;
+  let shortDays = typeof merged.vipShortDurationDays === 'number' && merged.vipShortDurationDays >= 1
+    ? Math.round(merged.vipShortDurationDays)
+    : 30;
+  let shortPrice = typeof merged.vipShortPriceUsd === 'number' && merged.vipShortPriceUsd > 0
+    ? Math.round(merged.vipShortPriceUsd * 100) / 100
+    : 4.99;
+  let longDays = typeof merged.vipLongDurationDays === 'number' && merged.vipLongDurationDays >= 1
+    ? Math.round(merged.vipLongDurationDays)
+    : 60;
+  let longPrice = typeof merged.vipLongPriceUsd === 'number' && merged.vipLongPriceUsd > 0
+    ? Math.round(merged.vipLongPriceUsd * 100) / 100
+    : 6.99;
+  let extraStoreFee = typeof merged.additionalStoreFeeUsd === 'number' && merged.additionalStoreFeeUsd >= 0
+    ? Math.round(merged.additionalStoreFeeUsd * 100) / 100
+    : 5.0;
+
+  if (isStalePreV15) {
+    if (shortPrice === 9.99) shortPrice = 4.99;
+    if (longPrice === 24.99 || longDays === 90) {
+      longDays = 60;
+      longPrice = 6.99;
+    }
+    if (extraStoreFee === 10.0) extraStoreFee = 5.0;
+  }
+
   const includedFree =
     typeof merged.includedFreeStoresPerVip === 'number' && merged.includedFreeStoresPerVip >= 1
       ? Math.round(merged.includedFreeStoresPerVip)
@@ -327,7 +375,7 @@ export function normalizeAuthoritativeAppSettings(
 
   return {
     ...merged,
-    settingsVersion: Math.max(14, Number(merged.settingsVersion || 0)),
+    settingsVersion: Math.max(15, Number(merged.settingsVersion || 0)),
     supportAccountName: merged.supportAccountName || 'CHEA KIMSENG',
     vipShortDurationDays: shortDays,
     vipShortPriceUsd: shortPrice,

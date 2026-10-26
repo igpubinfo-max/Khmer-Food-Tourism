@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { RestaurantCard } from './RestaurantCard';
 import { isRestaurantPremiumActive, Restaurant, sortRestaurantsChronologically, getVipAccountState, isUserVipActive } from '../types';
+import { shuffleForCurrentSession } from '../utils/sessionShuffle';
 import { Store, Plus, MapPin, Sparkles, PhoneCall, CheckCircle2, AlertCircle, Camera, Globe, Loader2, Edit2 } from 'lucide-react';
 import {
   searchCambodiaPlacesWithSmartCache,
@@ -168,10 +169,15 @@ export const RestaurantView: React.FC = () => {
     { id: 'ពោធិ៍សាត់', nameKh: 'ពោធិ៍សាត់', nameEn: 'Pursat' },
   ];
 
+  const sessionShuffledRestaurants = useMemo(
+    () => shuffleForCurrentSession(restaurants),
+    [restaurants]
+  );
+
   const filteredRestaurants = useMemo(() => {
     const q = normalizeKhmerSearchText(searchQuery);
     const seenNames = new Set<string>();
-    return restaurants.filter((r) => {
+    return sessionShuffledRestaurants.filter((r) => {
       // Strictly exclude any non-restaurant records (food dishes or tourist attractions)
       if (!r || !r.id || String(r.id).startsWith('food-') || String(r.id).startsWith('dest-')) {
         return false;
@@ -212,13 +218,10 @@ export const RestaurantView: React.FC = () => {
       seenNames.add(dedupKey);
       return true;
     });
-  }, [restaurants, currentUser?.role, currentUser?.id, verifiedFilter, selectedProvince, priceFilter, categoryFilter, searchQuery]);
+  }, [sessionShuffledRestaurants, currentUser?.role, currentUser?.id, verifiedFilter, selectedProvince, priceFilter, categoryFilter, searchQuery]);
 
-  // Chronological order: restaurants added earlier appear first, newly added restaurants appear afterward
-  const sortedRestaurants = useMemo(
-    () => sortRestaurantsChronologically(filteredRestaurants),
-    [filteredRestaurants]
-  );
+  // Use session randomized ordering for restaurants
+  const sortedRestaurants = filteredRestaurants;
 
   const displayedRestaurants = useMemo(
     () => sortedRestaurants.slice(0, visibleCount),

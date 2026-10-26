@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import {
-  X, Flame, MapPin, Eye, ExternalLink, Navigation, Phone, Share2, Calendar,
+  X, Flame, ExternalLink, Navigation, Phone, Share2, Calendar,
   UtensilsCrossed, RefreshCw, Info, Plus, ChefHat, CheckCircle2, Globe, ChevronDown, Play,
   Search, AlertCircle, RotateCcw
 } from 'lucide-react';
@@ -10,11 +10,9 @@ import { shareRichContent } from '../utils/androidMediaHelper';
 import { tr, translateProvince } from '../utils/i18n';
 import { translateDynamicTextToZh } from '../utils/zhDynamicTranslator';
 import {
-  fetchOnlineFoodDiscoveryFeed,
   searchAndDiscoverSocialFood,
   extractEmbedPlayerInfo,
   addCustomDiscoveryUrl,
-  DiscoveryPlatformId,
   OnlineFoodDiscoveryItem,
   PlatformApiStatus,
 } from '../services/onlineFoodDiscoveryService';
@@ -34,7 +32,6 @@ export const TrendingSocialModal: React.FC = () => {
 
   const isKm = language === 'km';
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [platformFilter, setPlatformFilter] = useState<'all' | DiscoveryPlatformId>('all');
   const [categoryFilter, setCategoryFilter] = useState<TrendingFoodCategorySlug>('all');
   const [provinceFilter, setProvinceFilter] = useState<string>('all');
 
@@ -52,14 +49,20 @@ export const TrendingSocialModal: React.FC = () => {
   // Active inline video player tracking
   const [activePlayerItemId, setActivePlayerItemId] = useState<string | null>(null);
 
+  // Concurrency guard ref to prevent overlapping fetches
+  const isFetchingRef = useRef<boolean>(false);
+
   const loadFeed = useCallback(
     async (force = false) => {
+      if (isFetchingRef.current) return;
+      isFetchingRef.current = true;
       setIsRefreshing(true);
       setHasError(false);
       try {
         const res = await searchAndDiscoverSocialFood({
           query: searchQuery,
-          platform: platformFilter,
+          platform: 'youtube',
+          categorySlug: categoryFilter,
           foods,
           trendingFoods,
           forceRefresh: force,
@@ -74,9 +77,9 @@ export const TrendingSocialModal: React.FC = () => {
             showToast(
               tr(
                 language,
-                `⏳ សូមរង់ចាំ ${res.cooldownRemainingSec} វិនាទីទៀតមុននឹងផ្ទុកឡើងវិញ (ការពារកូតា API)`,
-                `⏳ Please wait ${res.cooldownRemainingSec}s before manual refresh (API quota guard)`,
-                `⏳ 请等待 ${res.cooldownRemainingSec} 秒后再手动刷新（API 配额保护）`
+                `⏳ សូមរង់ចាំ ${res.cooldownRemainingSec} វិនាទីទៀតមុននឹងផ្ទុកឡើងវិញ`,
+                `⏳ Please wait ${res.cooldownRemainingSec}s before refresh`,
+                `⏳ 请等待 ${res.cooldownRemainingSec} 秒后再刷新`
               ),
               'info'
             );
@@ -84,9 +87,9 @@ export const TrendingSocialModal: React.FC = () => {
             showToast(
               tr(
                 language,
-                `✅ បានពិនិត្យប្រភពអនឡាញ (${res.items.length} មុខម្ហូប និងវីដេអូ)`,
-                `✅ Checked online sources (${res.items.length} dishes & videos)`,
-                `✅ 已检查在线来源（共 ${res.items.length} 条美食与视频）`
+                `✅ បានពិនិត្យវីដេអូ YouTube ថ្មីៗ (${res.items.length} វីដេអូ)`,
+                `✅ Checked latest YouTube videos (${res.items.length} videos)`,
+                `✅ 已获取最新 YouTube 视频（共 ${res.items.length} 条）`
               ),
               'success'
             );
@@ -94,29 +97,36 @@ export const TrendingSocialModal: React.FC = () => {
         }
       } catch {
         setHasError(true);
-        showToast(
-          tr(
-            language,
-            '⚠️ មិនអាចទាញយកទិន្នន័យអនឡាញបានទេ សូមពិនិត្យការតភ្ជាប់អ៊ីនធឺណិត',
-            '⚠️ Could not reach online discovery feed. Please check connection.',
-            '⚠️ 无法连接在线发现源，请检查网络连接。'
-          ),
-          'warning'
-        );
+        if (force) {
+          showToast(
+            tr(
+              language,
+              '⚠️ មិនអាចទាញយកវីដេអូ YouTube បានទេ សូមពិនិត្យការតភ្ជាប់អ៊ីនធឺណិត',
+              '⚠️ Could not load YouTube trending feed. Please check connection.',
+              '⚠️ 无法加载 YouTube 热门视频，请检查网络连接。'
+            ),
+            'warning'
+          );
+        }
       } finally {
         setIsRefreshing(false);
+        isFetchingRef.current = false;
       }
     },
-    [foods, trendingFoods, language, showToast, searchQuery, platformFilter]
+    [searchQuery, categoryFilter, foods, trendingFoods, language, showToast]
   );
 
-  // Automatic load on open + scheduled refresh check every 30 minutes while open
+  // Initial load when modal opens + 60-second background auto-refresh when open & visible
   useEffect(() => {
     if (!isTrendingSocialModalOpen) return;
     loadFeed(false);
+
     const interval = setInterval(() => {
-      loadFeed(false);
-    }, 30 * 60 * 1000);
+      if (!document.hidden && !isFetchingRef.current) {
+        loadFeed(false);
+      }
+    }, 60_000);
+
     return () => clearInterval(interval);
   }, [isTrendingSocialModalOpen, loadFeed]);
 
@@ -147,8 +157,8 @@ export const TrendingSocialModal: React.FC = () => {
           tr(
             language,
             res.errorKh || 'តំណភ្ជាប់មិនត្រឹមត្រូវ',
-            res.errorEn || 'Invalid URL',
-            res.errorZh || '无效链接'
+            res.errorEn || 'Invalid YouTube video URL',
+            res.errorZh || '无效的 YouTube 视频链接'
           ),
           'warning'
         );
@@ -160,9 +170,9 @@ export const TrendingSocialModal: React.FC = () => {
       showToast(
         tr(
           language,
-          '✅ បានផ្ទៀងផ្ទាត់ និងរក្សាទុកតំណភ្ជាប់ម្ហូបថ្មី!',
-          '✅ Verified and saved food link via oEmbed!',
-          '✅ 已通过 oEmbed 验证并保存美食链接！'
+          '✅ បានផ្ទៀងផ្ទាត់ និងបន្ថែមវីដេអូ YouTube ថ្មី!',
+          '✅ Verified and saved YouTube video!',
+          '✅ 已通过验证并保存 YouTube 视频！'
         ),
         'success'
       );
@@ -173,7 +183,6 @@ export const TrendingSocialModal: React.FC = () => {
 
   const filteredItems = useMemo(() => {
     return discoveryItems.filter((item) => {
-      if (platformFilter !== 'all' && item.platform !== platformFilter) return false;
       if (categoryFilter !== 'all' && item.categorySlug !== categoryFilter) return false;
       if (
         provinceFilter !== 'all' &&
@@ -190,18 +199,17 @@ export const TrendingSocialModal: React.FC = () => {
       }
       return true;
     });
-  }, [discoveryItems, platformFilter, categoryFilter, provinceFilter, searchQuery]);
+  }, [discoveryItems, categoryFilter, provinceFilter, searchQuery]);
 
   if (!isTrendingSocialModalOpen) return null;
 
+  // 4 Main YouTube Categories + All Trending
   const categories: { id: TrendingFoodCategorySlug; labelKh: string; labelEn: string; labelZh: string; icon: string }[] = [
-    { id: 'all', labelKh: 'ទាំងអស់', labelEn: 'All', labelZh: '全部', icon: '🔥' },
-    { id: 'famous_dish', labelKh: 'មុខម្ហូបល្បីប្រចាំតំបន់', labelEn: 'Famous', labelZh: '招牌名菜', icon: '🍲' },
-    { id: 'street_food', labelKh: 'អាហារតាមផ្លូវ', labelEn: 'Street Food', labelZh: '街头小吃', icon: '🍢' },
-    { id: 'noodle_soup', labelKh: 'គុយទាវ & ស៊ុប', labelEn: 'Noodles', labelZh: '汤粉与面食', icon: '🍜' },
-    { id: 'cafe_drink', labelKh: 'កាហ្វេ & ភេសជ្ជៈ', labelEn: 'Café & Drinks', labelZh: '咖啡与饮品', icon: '☕' },
-    { id: 'dessert_snack', labelKh: 'បង្អែម & សម្រន់', labelEn: 'Desserts', labelZh: '甜品与小食', icon: '🍨' },
-    { id: 'unusual_local', labelKh: 'ម្ហូបប្លែកៗ & កម្រ', labelEn: 'Unusual & Rare', labelZh: '特色稀有美食', icon: '✨' },
+    { id: 'all', labelKh: 'ទាំងអស់', labelEn: 'All Trending', labelZh: '全部热门', icon: '🔥' },
+    { id: 'popular_food', labelKh: 'ម្ហូបខ្មែរល្បីៗ', labelEn: 'Popular Khmer Food', labelZh: '高棉招牌名菜', icon: '🍲' },
+    { id: 'famous_restaurant', labelKh: 'ភោជនីយដ្ឋានល្បីៗ', labelEn: 'Famous Restaurants', labelZh: '知名餐厅推荐', icon: '🏪' },
+    { id: 'tourist_attraction', labelKh: 'តំបន់ទេសចរណ៍', labelEn: 'Tourist Attractions', labelZh: '热门旅游景点', icon: '🏛️' },
+    { id: 'food_travel_vlog', labelKh: 'វីដេអូម្ហូប & ទេសចរណ៍', labelEn: 'Food & Travel Vlogs', labelZh: '美食与旅行 Vlog', icon: '🎬' },
   ];
 
   const provinces = [
@@ -211,17 +219,17 @@ export const TrendingSocialModal: React.FC = () => {
     { id: 'ខេត្តបាត់ដំបង', labelKh: 'បាត់ដំបង', labelEn: 'Battambang', labelZh: '马德望省' },
     { id: 'ខេត្តកំពត', labelKh: 'កំពត', labelEn: 'Kampot', labelZh: '贡布省' },
     { id: 'ខេត្តកែប', labelKh: 'កែប', labelEn: 'Kep', labelZh: '白马省' },
-    { id: 'ខេត្តកោះកុង', labelKh: 'កោះកុង', labelEn: 'Koh Kong', labelZh: '国公省' },
+    { id: 'ខេត្តព្រះសីហនុ', labelKh: 'ព្រះសីហនុ', labelEn: 'Sihanoukville', labelZh: '西哈努克省' },
     { id: 'ខេត្តកំពង់ចាម', labelKh: 'កំពង់ចាម', labelEn: 'Kampong Cham', labelZh: '磅湛省' },
     { id: 'ខេត្តកំពង់ស្ពឺ', labelKh: 'កំពង់ស្ពឺ', labelEn: 'Kampong Speu', labelZh: '磅士卑省' },
   ];
 
-  const openExternalVideoOrLinkSafely = (rawUrl?: string, fallbackQuery?: string) => {
+  const openExternalVideoSafely = (rawUrl?: string, fallbackQuery?: string) => {
     const targetUrl =
       rawUrl && /^https?:\/\//i.test(rawUrl.trim())
         ? rawUrl.trim()
         : `https://www.youtube.com/results?search_query=${encodeURIComponent(
-            (fallbackQuery || 'Cambodian food') + ' Khmer food'
+            (fallbackQuery || 'Cambodian food travel') + ' Khmer food'
           )}`;
     try {
       const opened = window.open(targetUrl, '_blank', 'noopener,noreferrer');
@@ -241,9 +249,9 @@ export const TrendingSocialModal: React.FC = () => {
         showToast(
           tr(
             language,
-            'មិនអាចបើកតំណវីដេអូបានទេ សូមព្យាយាមម្តងទៀត',
-            'Could not open video link, please try again',
-            '无法打开视频链接，请重试'
+            'មិនអាចបើកតំណវីដេអូ YouTube បានទេ សូមព្យាយាមម្តងទៀត',
+            'Could not open YouTube video, please try again',
+            '无法打开 YouTube 视频，请重试'
           ),
           'warning'
         );
@@ -260,7 +268,7 @@ export const TrendingSocialModal: React.FC = () => {
 
     const url = item.sourceUrl || item.trendingItem?.videoUrl || item.trendingItem?.sourceUrl;
     if (url) {
-      openExternalVideoOrLinkSafely(url, item.titleEn || item.titleKh);
+      openExternalVideoSafely(url, item.titleEn || item.titleKh);
       return;
     }
 
@@ -328,7 +336,6 @@ export const TrendingSocialModal: React.FC = () => {
 
   const handleResetFilters = () => {
     setSearchQuery('');
-    setPlatformFilter('all');
     setCategoryFilter('all');
     setProvinceFilter('all');
   };
@@ -341,20 +348,6 @@ export const TrendingSocialModal: React.FC = () => {
         minute: '2-digit',
       })
     : '—';
-
-  const platformBadgeStyle = (p: DiscoveryPlatformId) => {
-    if (p === 'youtube') return 'bg-red-600 text-white';
-    if (p === 'tiktok') return 'bg-rose-600 text-white';
-    if (p === 'facebook') return 'bg-blue-600 text-white';
-    return 'bg-emerald-700 text-white';
-  };
-
-  const platformLabel = (p: DiscoveryPlatformId) => {
-    if (p === 'youtube') return '▶ YouTube';
-    if (p === 'tiktok') return '🎵 TikTok';
-    if (p === 'facebook') return '👥 Facebook';
-    return '🌐 Wikipedia';
-  };
 
   return (
     <div
@@ -374,18 +367,18 @@ export const TrendingSocialModal: React.FC = () => {
             <div className="min-w-0">
               <div className="flex items-center gap-1.5 flex-wrap">
                 <h3 className="font-moul text-xs sm:text-sm text-white truncate">
-                  {tr(language, 'ម្ហូបខ្មែរកំពុងពេញនិយមលើអនឡាញ', 'Trending Khmer Food Discovery', '热门高棉美食在线发现')}
+                  {tr(language, 'វីដេអូពេញនិយម YouTube (ម្ហូប & ទេសចរណ៍)', 'Trending YouTube Videos (Food & Travel)', 'YouTube 热门视频（美食与旅行）')}
                 </h3>
-                <span className="px-2 py-0.5 rounded-full bg-rose-500 text-white text-[9px] font-bold shadow-xs">
-                  YouTube · Wikipedia
+                <span className="px-2 py-0.5 rounded-full bg-red-600 text-white text-[9px] font-bold shadow-xs">
+                  YouTube Only
                 </span>
               </div>
               <p className="text-[11px] text-pink-200 font-khmer truncate">
                 {tr(
                   language,
-                  `បានពិនិត្យចុងក្រោយ៖ ${formattedLastChecked} • ប្រភពផ្លូវការ & សាធារណៈ`,
-                  `Last checked: ${formattedLastChecked} · Official & public sources`,
-                  `最后检查：${formattedLastChecked} · 官方与公开来源`
+                  `កែប្រែស្វ័យប្រវត្តរៀងរាល់ ៦០វិនាទី • បានពិនិត្យ៖ ${formattedLastChecked}`,
+                  `Auto-refreshes every 60s · Last checked: ${formattedLastChecked}`,
+                  `每60秒自动刷新 · 最后检查：${formattedLastChecked}`
                 )}
               </p>
             </div>
@@ -396,7 +389,7 @@ export const TrendingSocialModal: React.FC = () => {
               onClick={() => loadFeed(true)}
               disabled={isRefreshing}
               className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition cursor-pointer disabled:opacity-50"
-              title={tr(language, 'ពិនិត្យប្រភពថ្មីៗ', 'Refresh Sources', '刷新来源')}
+              title={tr(language, 'ផ្ទុកឡើងវិញឥឡូវនេះ', 'Refresh Now', '立即刷新')}
             >
               <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
             </button>
@@ -420,9 +413,9 @@ export const TrendingSocialModal: React.FC = () => {
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={tr(
                 language,
-                'ស្វែងរកមុខម្ហូបខ្មែរ វីដេអូ ឬប្រភព (YouTube, TikTok, FB)...',
-                'Search Khmer dishes, videos or sources (YouTube, TikTok, FB)...',
-                '搜索高棉美食、视频或来源 (YouTube, TikTok, FB)...'
+                'ស្វែងរកវីដេអូ YouTube ម្ហូបខ្មែរ ឬតំបន់ទេសចរណ៍...',
+                'Search YouTube videos, Khmer dishes or attractions...',
+                '搜索 YouTube 高棉美食与景点视频...'
               )}
               className="w-full pl-9 pr-8 py-2 rounded-2xl bg-slate-800/90 border border-slate-700/80 text-xs text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-rose-500 font-khmer shadow-inner"
             />
@@ -439,7 +432,7 @@ export const TrendingSocialModal: React.FC = () => {
           </div>
         </div>
 
-        {/* Action & Transparency Bar: API Status + Add Video Link */}
+        {/* Action Bar: YouTube API Status + Add Video URL */}
         <div className="px-3 py-2 bg-slate-900 text-white border-b border-slate-800 flex items-center justify-between gap-2 shrink-0 font-khmer text-[11px]">
           <button
             type="button"
@@ -447,7 +440,7 @@ export const TrendingSocialModal: React.FC = () => {
             className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-300 font-bold border border-slate-700 cursor-pointer"
           >
             <Info className="w-3.5 h-3.5 shrink-0" />
-            <span>{tr(language, 'ស្ថានភាព API តាមវេទិកា (២)', 'Platform API Status (2)', '各平台 API 状态 (2)')}</span>
+            <span>{tr(language, 'ស្ថានភាព YouTube API', 'YouTube API Status', 'YouTube API 状态')}</span>
             <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showStatusPanel ? 'rotate-180' : ''}`} />
           </button>
 
@@ -457,11 +450,11 @@ export const TrendingSocialModal: React.FC = () => {
             className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold cursor-pointer"
           >
             <Plus className="w-3.5 h-3.5" />
-            <span>{tr(language, 'បន្ថែមតំណវីដេអូ', 'Add Video URL', '添加视频链接')}</span>
+            <span>{tr(language, 'បន្ថែមវីដេអូ YouTube', 'Add YouTube URL', '添加 YouTube 视频')}</span>
           </button>
         </div>
 
-        {/* Expandable Platform API Transparency Panel */}
+        {/* Expandable YouTube Transparency Panel */}
         {showStatusPanel && (
           <div className="p-3 bg-slate-950 text-slate-200 border-b border-slate-800 space-y-2 shrink-0 font-khmer text-[11px] max-h-56 overflow-y-auto">
             <div className="font-bold text-amber-300 flex items-center gap-1.5">
@@ -469,9 +462,9 @@ export const TrendingSocialModal: React.FC = () => {
               <span>
                 {tr(
                   language,
-                  'របាយការណ៍តម្លាភាពនៃការតភ្ជាប់ API ផ្លូវការ (គ្មានការ Scrape ខុសច្បាប់)៖',
-                  'Official API Access & Platform Transparency (Zero Prohibited Scraping):',
-                  '官方 API 访问与平台透明度说明（严禁违规抓取）：'
+                  'របាយការណ៍តម្លាភាពនៃការតភ្ជាប់ YouTube ផ្លូវការ៖',
+                  'Official YouTube API & Transparency Report:',
+                  '官方 YouTube API 与透明度说明：'
                 )}
               </span>
             </div>
@@ -484,9 +477,7 @@ export const TrendingSocialModal: React.FC = () => {
                       className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${
                         st.mode === 'live_api'
                           ? 'bg-emerald-900/70 text-emerald-300 border border-emerald-600/40'
-                          : st.mode === 'oembed_verified'
-                          ? 'bg-sky-900/70 text-sky-300 border border-sky-600/40'
-                          : 'bg-amber-900/70 text-amber-300 border border-amber-600/40'
+                          : 'bg-rose-900/70 text-rose-300 border border-rose-600/40'
                       }`}
                     >
                       {tr(language, st.statusLabelKh, st.statusLabelEn, st.statusLabelZh)}
@@ -501,15 +492,15 @@ export const TrendingSocialModal: React.FC = () => {
           </div>
         )}
 
-        {/* Expandable Add Custom URL Form (oEmbed verification) */}
+        {/* Expandable Add YouTube URL Form */}
         {showAddUrlPanel && (
           <form onSubmit={handleAddCustomUrl} className="p-3 bg-slate-900 border-b border-slate-800 space-y-2 shrink-0 font-khmer">
             <label className="block text-[11px] font-bold text-emerald-300">
               {tr(
                 language,
-                'បិទភ្ជាប់តំណវីដេអូម្ហូបខ្មែរពី YouTube, TikTok ឬ Facebook ដើម្បីទាញព័ត៌មានតាម oEmbed៖',
-                'Paste a YouTube, TikTok, or Facebook Cambodian food URL to verify via official oEmbed:',
-                '粘贴 YouTube、TikTok 或 Facebook 的高棉美食链接（通过官方 oEmbed 验证）：'
+                'បិទភ្ជាប់តំណវីដេអូ YouTube (https://www.youtube.com/... ឬ youtu.be/...)៖',
+                'Paste a YouTube video URL (https://www.youtube.com/... or youtu.be/...):',
+                '粘贴 YouTube 视频链接 (https://www.youtube.com/... 或 youtu.be/...)：'
               )}
             </label>
             <div className="flex gap-2">
@@ -534,41 +525,17 @@ export const TrendingSocialModal: React.FC = () => {
           </form>
         )}
 
-        {/* Filter Bar 1: Platform */}
+        {/* Category Tabs: 4 YouTube Categories + All Trending */}
         <div className="p-2.5 bg-slate-900/90 border-b border-slate-800 flex items-center gap-1.5 shrink-0 font-khmer text-xs overflow-x-auto no-scrollbar">
-          {[
-            { id: 'all', labelKh: `🔥 ទាំងអស់ (${discoveryItems.length})`, labelEn: `🔥 All (${discoveryItems.length})`, labelZh: `🔥 全部 (${discoveryItems.length})` },
-            { id: 'youtube', labelKh: '▶ YouTube', labelEn: '▶ YouTube', labelZh: '▶ YouTube 视频' },
-            { id: 'tiktok', labelKh: '🎵 TikTok', labelEn: '🎵 TikTok', labelZh: '🎵 TikTok' },
-            { id: 'facebook', labelKh: '👥 Facebook', labelEn: '👥 Facebook', labelZh: '👥 Facebook' },
-            { id: 'web_wiki', labelKh: '🌐 Wikipedia', labelEn: '🌐 Wikipedia', labelZh: '🌐 维基百科' },
-          ].map((f) => (
-            <button
-              key={f.id}
-              type="button"
-              onClick={() => setPlatformFilter(f.id as any)}
-              className={`px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition text-xs cursor-pointer ${
-                platformFilter === f.id
-                  ? 'bg-gradient-to-r from-rose-500 to-pink-600 text-white shadow-xs'
-                  : 'bg-slate-800 text-slate-300 hover:text-white border border-slate-700'
-              }`}
-            >
-              {tr(language, f.labelKh, f.labelEn, f.labelZh)}
-            </button>
-          ))}
-        </div>
-
-        {/* Filter Bar 2: Categories */}
-        <div className="px-3 py-2 bg-slate-900/60 border-b border-slate-800 flex items-center gap-1.5 overflow-x-auto no-scrollbar font-khmer text-xs shrink-0">
           {categories.map((c) => (
             <button
               key={c.id}
               type="button"
               onClick={() => setCategoryFilter(c.id)}
-              className={`px-2.5 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap transition flex items-center gap-1 cursor-pointer ${
+              className={`px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition text-xs flex items-center gap-1 cursor-pointer ${
                 categoryFilter === c.id
-                  ? 'bg-emerald-600 text-white shadow-xs'
-                  : 'bg-slate-800/80 text-slate-300 hover:text-white'
+                  ? 'bg-gradient-to-r from-red-600 to-rose-600 text-white shadow-xs'
+                  : 'bg-slate-800 text-slate-300 hover:text-white border border-slate-700'
               }`}
             >
               <span>{c.icon}</span>
@@ -577,7 +544,7 @@ export const TrendingSocialModal: React.FC = () => {
           ))}
         </div>
 
-        {/* Filter Bar 3: Province Selector */}
+        {/* Location Selector Bar */}
         <div className="px-3 py-1.5 bg-slate-900/40 border-b border-slate-800/80 flex items-center gap-1.5 overflow-x-auto no-scrollbar font-khmer text-xs shrink-0">
           <span className="text-[10px] text-slate-400 font-bold shrink-0">📍 {tr(language, 'ទីតាំង៖', 'City:', '城市：')}</span>
           {provinces.map((p) => (
@@ -587,7 +554,7 @@ export const TrendingSocialModal: React.FC = () => {
               onClick={() => setProvinceFilter(p.id)}
               className={`px-2 py-0.5 rounded-md text-[10px] font-medium whitespace-nowrap transition cursor-pointer ${
                 provinceFilter === p.id
-                  ? 'bg-rose-500 text-white font-bold'
+                  ? 'bg-red-600 text-white font-bold'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -596,7 +563,7 @@ export const TrendingSocialModal: React.FC = () => {
           ))}
         </div>
 
-        {/* List of Discovered & Trending Khmer Food Items */}
+        {/* Video List */}
         <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 space-y-4 no-scrollbar font-khmer text-xs [-webkit-overflow-scrolling:touch]">
           {/* Loading Skeleton */}
           {isRefreshing && discoveryItems.length === 0 ? (
@@ -616,9 +583,9 @@ export const TrendingSocialModal: React.FC = () => {
               <p className="text-sm font-bold text-white">
                 {tr(
                   language,
-                  'មិនអាចទាញទិន្នន័យបានទេ សូមពិនិត្យការតភ្ជាប់អ៊ីនធឺណិត',
-                  'Failed to load social feed. Please check your connection.',
-                  '无法加载内容，请检查网络连接。'
+                  'មិនអាចទាញយកវីដេអូ YouTube បានទេ សូមពិនិត្យការតភ្ជាប់អ៊ីនធឺណិត',
+                  'Failed to load YouTube feed. Please check your connection.',
+                  '无法加载 YouTube 视频，请检查网络连接。'
                 )}
               </p>
               <button
@@ -637,9 +604,9 @@ export const TrendingSocialModal: React.FC = () => {
               <p className="text-sm font-bold text-slate-300">
                 {tr(
                   language,
-                  'រកមិនឃើញមុខម្ហូបត្រូវនឹងការស្វែងរកនេះទេ',
-                  'No food discoveries matching this filter',
-                  '未找到符合筛选条件的美食内容'
+                  'រកមិនឃើញវីដេអូ YouTube ត្រូវនឹងការស្វែងរកនេះទេ',
+                  'No YouTube videos matching this filter',
+                  '未找到符合筛选条件的 YouTube 视频'
                 )}
               </p>
               <button
@@ -675,7 +642,7 @@ export const TrendingSocialModal: React.FC = () => {
                   key={item.id}
                   className="rounded-3xl overflow-hidden bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 shadow-sm space-y-3 transition hover:shadow-md"
                 >
-                  {/* Inline Embed Player OR Thumbnail Banner */}
+                  {/* Inline YouTube Embed Player OR High-Res Thumbnail */}
                   {isPlayingInline && playerInfo.canInlineEmbed && playerInfo.embedUrl ? (
                     <div className="relative aspect-16/9 w-full bg-black overflow-hidden shadow-inner">
                       <iframe
@@ -688,12 +655,12 @@ export const TrendingSocialModal: React.FC = () => {
                       <div className="absolute top-2 right-2 flex items-center gap-1.5 z-10">
                         <button
                           type="button"
-                          onClick={() => openExternalVideoOrLinkSafely(item.sourceUrl, displayTitle)}
+                          onClick={() => openExternalVideoSafely(item.sourceUrl, displayTitle)}
                           className="px-2 py-1 rounded-lg bg-black/80 hover:bg-black text-white text-[10px] font-bold flex items-center gap-1 border border-white/20 backdrop-blur-xs cursor-pointer"
-                          title={tr(language, 'បើកក្នុងកម្មវិធីដើម', 'Open in App', '在应用中打开')}
+                          title={tr(language, 'បើកក្នុង YouTube App', 'Open in YouTube App', '在 YouTube 应用中打开')}
                         >
-                          <ExternalLink className="w-3 h-3 text-rose-400" />
-                          <span>{tr(language, 'បើកក្នុង App', 'Open App', '在应用中打开')}</span>
+                          <ExternalLink className="w-3 h-3 text-red-400" />
+                          <span>{tr(language, 'YouTube App', 'YouTube App', '打开 YouTube')}</span>
                         </button>
                         <button
                           type="button"
@@ -718,10 +685,11 @@ export const TrendingSocialModal: React.FC = () => {
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
 
-                      {/* Platform & Verification Status Badge */}
+                      {/* YouTube & Verification Badge */}
                       <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 flex-wrap">
-                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-black shadow-xs ${platformBadgeStyle(item.platform)}`}>
-                          {platformLabel(item.platform)}
+                        <span className="px-2 py-0.5 rounded-full text-[9px] font-black shadow-xs bg-red-600 text-white flex items-center gap-1">
+                          <Play className="w-2.5 h-2.5 fill-current" />
+                          <span>YouTube</span>
                         </span>
                         <span className="px-2 py-0.5 rounded-full bg-black/70 text-emerald-200 text-[9px] font-bold backdrop-blur-xs flex items-center gap-1 border border-white/15">
                           <CheckCircle2 className="w-2.5 h-2.5 text-emerald-400" />
@@ -729,16 +697,14 @@ export const TrendingSocialModal: React.FC = () => {
                         </span>
                       </div>
 
-                      {/* Center Play Overlay for Video Platforms */}
-                      {item.platform === 'youtube' && (
-                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                          <div className="w-11 h-11 rounded-full bg-red-600/90 group-hover:bg-red-600 text-white flex items-center justify-center shadow-lg border-2 border-white/80 transition transform group-hover:scale-110">
-                            <Play className="w-5 h-5 fill-current ml-0.5" />
-                          </div>
+                      {/* Large Center YouTube Play Button */}
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <div className="w-12 h-12 rounded-full bg-red-600/90 group-hover:bg-red-600 text-white flex items-center justify-center shadow-xl border-2 border-white/90 transition transform group-hover:scale-110">
+                          <Play className="w-6 h-6 fill-current ml-0.5" />
                         </div>
-                      )}
+                      </div>
 
-                      {/* Title & Source Attribution Overlay */}
+                      {/* Title & Source Attribution */}
                       <div className="absolute bottom-2.5 left-3 right-3">
                         <h4 className="font-moul text-xs sm:text-sm text-white drop-shadow leading-snug line-clamp-2">
                           {displayTitle}
@@ -756,7 +722,7 @@ export const TrendingSocialModal: React.FC = () => {
                       {displayDesc}
                     </p>
 
-                    {/* Matched Cambodian Dish Chip (opens recipe modal in 1 tap) */}
+                    {/* Matched Recipe Link */}
                     {item.matchedFoodId && (
                       <div className="flex items-center justify-between gap-2 p-2 rounded-xl bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800">
                         <div className="flex items-center gap-1.5 min-w-0">
@@ -780,14 +746,12 @@ export const TrendingSocialModal: React.FC = () => {
                       </div>
                     )}
 
-                    {/* Publication / Revision Timestamp + Direct Source Link */}
+                    {/* Date + Direct YouTube Link */}
                     <div className="flex items-center justify-between text-[10px] text-slate-400 pt-1 border-t border-slate-100 dark:border-slate-700/60">
                       <span className="flex items-center gap-1">
                         <Calendar className="w-3 h-3" />
                         <span>
-                          {item.isLiveFetched
-                            ? tr(language, 'កាលបរិច្ឆេទប្រភព៖', 'Source date:', '来源日期：')
-                            : tr(language, 'កាលបរិច្ឆេទផ្ទៀងផ្ទាត់៖', 'Verified date:', '核实日期：')}{' '}
+                          {tr(language, 'កាលបរិច្ឆេទ៖', 'Published:', '发布日期：')}{' '}
                           {item.publishedOrUpdatedAt}
                         </span>
                       </span>
@@ -796,9 +760,9 @@ export const TrendingSocialModal: React.FC = () => {
                           href={item.sourceUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-rose-500 hover:text-rose-600 font-bold flex items-center gap-0.5"
+                          className="text-red-500 hover:text-red-600 font-bold flex items-center gap-0.5"
                         >
-                          <span>{tr(language, 'បើកប្រភពដើម', 'Open Original', '打开原链接')}</span>
+                          <span>YouTube</span>
                           <ExternalLink className="w-3 h-3" />
                         </a>
                       )}
@@ -810,29 +774,20 @@ export const TrendingSocialModal: React.FC = () => {
                         type="button"
                         onClick={() => handlePlayOrOpenItem(item)}
                         className={`py-1.5 px-2 rounded-xl font-bold text-[10px] flex items-center justify-center gap-1 transition cursor-pointer ${
-                          item.platform === 'youtube'
-                            ? isPlayingInline
-                              ? 'bg-slate-700 text-white'
-                              : 'bg-red-600 hover:bg-red-700 text-white shadow-xs'
-                            : 'bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/50 text-[#064E3B] dark:text-emerald-300'
+                          isPlayingInline
+                            ? 'bg-slate-700 text-white'
+                            : 'bg-red-600 hover:bg-red-700 text-white shadow-xs'
                         }`}
                       >
-                        {item.platform === 'youtube' ? (
-                          isPlayingInline ? (
-                            <>
-                              <X className="w-3 h-3" />
-                              <span>{tr(language, 'បិទ', 'Close', '关闭')}</span>
-                            </>
-                          ) : (
-                            <>
-                              <Play className="w-3 h-3 fill-current" />
-                              <span>{tr(language, 'ចាក់វីដេអូ', 'Play', '播放')}</span>
-                            </>
-                          )
+                        {isPlayingInline ? (
+                          <>
+                            <X className="w-3 h-3" />
+                            <span>{tr(language, 'បិទ', 'Close', '关闭')}</span>
+                          </>
                         ) : (
                           <>
-                            <Eye className="w-3 h-3" />
-                            <span>{tr(language, 'មើល', 'Open', '查看')}</span>
+                            <Play className="w-3 h-3 fill-current" />
+                            <span>{tr(language, 'ចាក់វីដេអូ', 'Play', '播放')}</span>
                           </>
                         )}
                       </button>

@@ -20,6 +20,9 @@ export interface FoodTripTemplate {
   subtitleKh: string;
   subtitleEn: string;
   subtitleZh: string;
+  provinceKh: string;
+  provinceEn: string;
+  provinceZh: string;
   /** Used to build a Google Maps search link for dishes that have no fixed location */
   mapHint: string;
   slots: TripSlot[];
@@ -42,6 +45,9 @@ export const FOOD_TRIP_TEMPLATES: FoodTripTemplate[] = [
     subtitleKh: 'គុយទាវ បាយសាច់ជ្រូក និងផ្សារ',
     subtitleEn: 'Kuyteav, grilled pork rice & markets',
     subtitleZh: '粿条、烤猪肉饭与市场',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    provinceEn: 'Phnom Penh',
+    provinceZh: '金边市',
     mapHint: 'Phnom Penh Cambodia',
     slots: [
       { slot: 'morning', stops: [{ type: 'food', id: 'food-36' }, { type: 'destination', id: 'dest-8' }] },
@@ -59,6 +65,9 @@ export const FOOD_TRIP_TEMPLATES: FoodTripTemplate[] = [
     subtitleKh: 'អាម៉ុក ប្រាសាទ និងផ្លូវមនុស្សដើរ',
     subtitleEn: 'Fish amok, temples & Pub Street',
     subtitleZh: '阿莫克鱼、古寺与酒吧街',
+    provinceKh: 'ខេត្តសៀមរាប',
+    provinceEn: 'Siem Reap',
+    provinceZh: '暹粒省',
     mapHint: 'Siem Reap Cambodia',
     slots: [
       { slot: 'morning', stops: [{ type: 'destination', id: 'dest-9' }] },
@@ -76,6 +85,9 @@ export const FOOD_TRIP_TEMPLATES: FoodTripTemplate[] = [
     subtitleKh: 'ម្រេចកំពត ក្តាមកែប និងសមុទ្រ',
     subtitleEn: 'Kampot pepper, Kep crab & the sea',
     subtitleZh: '贡布胡椒、白马螃蟹与海景',
+    provinceKh: 'ខេត្តកំពត',
+    provinceEn: 'Kampot',
+    provinceZh: '贡布省',
     mapHint: 'Kampot Kep Cambodia',
     slots: [
       { slot: 'morning', stops: [{ type: 'destination', id: 'dest-31' }] },
@@ -93,6 +105,9 @@ export const FOOD_TRIP_TEMPLATES: FoodTripTemplate[] = [
     subtitleKh: 'រថភ្លើងឫស្សី វត្ត និងម្ហូបតំបន់',
     subtitleEn: 'Bamboo train, temples & local dishes',
     subtitleZh: '竹火车、古寺与地方美食',
+    provinceKh: 'ខេត្តបាត់ដំបង',
+    provinceEn: 'Battambang',
+    provinceZh: '马德望省',
     mapHint: 'Battambang Cambodia',
     slots: [
       { slot: 'morning', stops: [{ type: 'destination', id: 'dest-43' }] },
@@ -104,16 +119,19 @@ export const FOOD_TRIP_TEMPLATES: FoodTripTemplate[] = [
   {
     id: 'trip-noodle-hunter',
     emoji: '🍜',
-    titleKh: 'ថ្ងៃប្រមាញ់មី និងគុយទាវ',
-    titleEn: 'Noodle Hunter Day',
-    titleZh: '面条猎人一日游',
-    subtitleKh: 'គុយទាវ នំបញ្ចុក មីកូឡា និងមីឆា',
-    subtitleEn: 'Kuyteav, num banh chok, mee kola & mee cha',
-    subtitleZh: '粿条、鱼汤米线、拌面与炒面',
+    titleKh: 'ថ្ងៃប្រមាញ់មី និងគុយទាវភ្នំពេញ',
+    titleEn: 'Phnom Penh Noodle Hunter Day',
+    titleZh: '金边面条猎人一日游',
+    subtitleKh: 'គុយទាវ នំបញ្ចុក មីឆា និងមីគោក',
+    subtitleEn: 'Kuyteav, num banh chok, mee cha & dried noodles',
+    subtitleZh: '粿条、鱼汤米线、炒面与干拌面',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    provinceEn: 'Phnom Penh',
+    provinceZh: '金边市',
     mapHint: 'Phnom Penh Cambodia',
     slots: [
       { slot: 'morning', stops: [{ type: 'food', id: 'food-36' }] },
-      { slot: 'lunch', stops: [{ type: 'food', id: 'food-37' }, { type: 'food', id: 'food-38' }] },
+      { slot: 'lunch', stops: [{ type: 'food', id: 'food-37' }, { type: 'food', id: 'food-2' }] },
       { slot: 'afternoon', stops: [{ type: 'food', id: 'food-39' }, { type: 'destination', id: 'dest-8' }] },
       { slot: 'dinner', stops: [{ type: 'food', id: 'food-40' }, { type: 'restaurant', id: 'rest-6' }] },
     ],
@@ -127,6 +145,9 @@ export const FOOD_TRIP_TEMPLATES: FoodTripTemplate[] = [
     subtitleKh: 'ឆ្នេរ មឹកអាំង និងម្ហូបសមុទ្រ',
     subtitleEn: 'Beaches, grilled squid & coastal dining',
     subtitleZh: '海滩、烤鱿鱼与海岸美食',
+    provinceKh: 'ខេត្តព្រះសីហនុ',
+    provinceEn: 'Preah Sihanouk',
+    provinceZh: '西哈努克省',
     mapHint: 'Sihanoukville Cambodia',
     slots: [
       { slot: 'morning', stops: [{ type: 'destination', id: 'dest-21' }] },

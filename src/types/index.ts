@@ -1,6 +1,6 @@
 export const APP_VERSION = 'v2.2.0';
 export const APP_VERSION_NAME = '2.2.0';
-export const APP_BUILD_CODE = 106;
+export const APP_BUILD_CODE = 107;
 export const APP_RELEASE_DATE = '2026-10-26';
 
 export interface GoogleMapsPlaceMetadata {
@@ -34,11 +34,11 @@ export interface DeletedUserRecord {
   snapshotUser?: User;
 }
 
-export const VIP_ANNUAL_PRICE_USD = 24.99;
-export const VIP_SUBSCRIPTION_DAYS = 90;
-export const VIP_QUARTERLY_PRICE_USD = 9.99;
+export const VIP_ANNUAL_PRICE_USD = 6.99;
+export const VIP_SUBSCRIPTION_DAYS = 60;
+export const VIP_QUARTERLY_PRICE_USD = 4.99;
 export const VIP_QUARTERLY_DAYS = 30;
-export const DEFAULT_ADDITIONAL_STORE_FEE_USD = 10.0;
+export const DEFAULT_ADDITIONAL_STORE_FEE_USD = 5.0;
 export const DEFAULT_INCLUDED_FREE_STORES = 1;
 
 export interface VipPlanConfig {
@@ -954,7 +954,11 @@ export type TrendingFoodCategorySlug =
   | 'cafe_drink' 
   | 'noodle_soup' 
   | 'famous_dish' 
-  | 'unusual_local';
+  | 'unusual_local'
+  | 'popular_food'
+  | 'famous_restaurant'
+  | 'tourist_attraction'
+  | 'food_travel_vlog';
 
 export interface TrendingFoodItem {
   id: string;
@@ -1328,29 +1332,36 @@ export const getDynamicVipPlans = (
   settings?: Partial<AppSettings> | null
 ): Record<'quarterly' | 'annual', VipPlanConfig> => {
   const s = settings || getStoredAppSettingsFallback();
-  const isObsoleteLegacyDefault =
-    Number(s.settingsVersion || 0) < 13 &&
-    (Number(s.vipShortPriceUsd) === 2.99 || Number(s.vipLongPriceUsd) === 4.99);
+  const isStalePreV15 = Number(s.settingsVersion || 0) < 15;
 
-  const shortDays =
-    !isObsoleteLegacyDefault && typeof s.vipShortDurationDays === 'number' && s.vipShortDurationDays >= 1
+  let shortDays =
+    typeof s.vipShortDurationDays === 'number' && s.vipShortDurationDays >= 1
       ? Math.round(s.vipShortDurationDays)
       : VIP_QUARTERLY_DAYS;
-  const shortPrice =
-    !isObsoleteLegacyDefault && typeof s.vipShortPriceUsd === 'number' && s.vipShortPriceUsd > 0
+  let shortPrice =
+    typeof s.vipShortPriceUsd === 'number' && s.vipShortPriceUsd > 0
       ? Math.round(s.vipShortPriceUsd * 100) / 100
       : VIP_QUARTERLY_PRICE_USD;
-  const shortNameKh = (s.vipShortNameKh || '').trim() || `VIP ${shortDays} ថ្ងៃ`;
-  const shortNameEn = (s.vipShortNameEn || '').trim() || `VIP ${shortDays} Days`;
 
-  const longDays =
-    !isObsoleteLegacyDefault && typeof s.vipLongDurationDays === 'number' && s.vipLongDurationDays >= 1
+  let longDays =
+    typeof s.vipLongDurationDays === 'number' && s.vipLongDurationDays >= 1
       ? Math.round(s.vipLongDurationDays)
       : VIP_SUBSCRIPTION_DAYS;
-  const longPrice =
-    !isObsoleteLegacyDefault && typeof s.vipLongPriceUsd === 'number' && s.vipLongPriceUsd > 0
+  let longPrice =
+    typeof s.vipLongPriceUsd === 'number' && s.vipLongPriceUsd > 0
       ? Math.round(s.vipLongPriceUsd * 100) / 100
       : VIP_ANNUAL_PRICE_USD;
+
+  if (isStalePreV15) {
+    if (shortPrice === 9.99) shortPrice = 4.99;
+    if (longPrice === 24.99 || longDays === 90) {
+      longDays = 60;
+      longPrice = 6.99;
+    }
+  }
+
+  const shortNameKh = (s.vipShortNameKh || '').trim() || `VIP ${shortDays} ថ្ងៃ`;
+  const shortNameEn = (s.vipShortNameEn || '').trim() || `VIP ${shortDays} Days`;
   const longNameKh = (s.vipLongNameKh || '').trim() || `VIP ${longDays} ថ្ងៃ`;
   const longNameEn = (s.vipLongNameEn || '').trim() || `VIP ${longDays} Days`;
 
@@ -1410,7 +1421,9 @@ export const getAdditionalStoreFeeUsd = (
 ): number => {
   const s = settings || getStoredAppSettingsFallback();
   if (typeof s.additionalStoreFeeUsd === 'number' && s.additionalStoreFeeUsd >= 0) {
-    return Math.round(s.additionalStoreFeeUsd * 100) / 100;
+    const val = Math.round(s.additionalStoreFeeUsd * 100) / 100;
+    if (Number(s.settingsVersion || 0) < 15 && val === 10.0) return DEFAULT_ADDITIONAL_STORE_FEE_USD;
+    return val;
   }
   return DEFAULT_ADDITIONAL_STORE_FEE_USD;
 };

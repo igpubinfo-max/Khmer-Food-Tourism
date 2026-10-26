@@ -1,6 +1,7 @@
 import React from 'react';
 import { Search, X, User as UserIcon, Crown, Shield, CheckCircle2, Sparkles, ChevronRight, LogIn } from 'lucide-react';
 import type { Language, User } from '../../types';
+import { getVipRemainingDays } from '../../types';
 import { tr } from '../../utils/i18n';
 
 interface Props {
@@ -45,6 +46,56 @@ export const HomeGreetingSearch: React.FC<Props> = ({
     <section className="space-y-3">
       {/* Compact User Profile & Account Status Card (Guest vs Registered) */}
       {currentUser ? (
+        isVip && !isAdmin ? (
+          <div className="p-3.5 sm:p-4 rounded-3xl bg-gradient-to-r from-[#022c22] via-[#064E3B] to-[#042f2e] text-white border-2 border-amber-400/80 shadow-[0_10px_28px_rgba(245,158,11,0.22)] relative overflow-hidden flex items-center justify-between gap-3">
+            <div className="absolute -right-8 -top-8 w-32 h-32 bg-amber-400/10 rounded-full blur-2xl pointer-events-none" />
+            <div
+              onClick={onExploreProfile}
+              className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer"
+            >
+              <div className="relative shrink-0">
+                <img
+                  src={currentUser.avatar}
+                  alt={currentUser.name}
+                  className="w-13 h-13 sm:w-16 sm:h-16 rounded-2xl object-cover border-2 border-amber-400 shadow-[0_0_12px_rgba(245,158,11,0.4)] ring-2 ring-amber-300/50 bg-white"
+                />
+                <div className="absolute -bottom-1 -right-1 p-1 bg-amber-400 text-slate-950 rounded-full shadow-xs">
+                  <Crown className="w-3 h-3 fill-slate-950" />
+                </div>
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="text-[11px] text-amber-200/90 font-medium">
+                    {greeting},
+                  </span>
+                  <span className="font-extrabold text-sm sm:text-base text-white truncate">
+                    {currentUser.name}
+                  </span>
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 text-slate-950 shadow-md ring-1 ring-amber-200 animate-pulse shrink-0">
+                    <Crown className="w-3 h-3 fill-slate-950" />
+                    <span>{tr(language, '👑 សមាជិក VIP', '👑 VIP MEMBER', '👑 VIP 尊享会员')}</span>
+                  </span>
+                </div>
+                <p className="text-[11px] text-emerald-100 font-khmer mt-0.5 truncate">
+                  ✨ {tr(language, `នៅសល់ ${getVipRemainingDays(currentUser)} ថ្ងៃ • អត្ថប្រយោជន៍ VIP ១០ យ៉ាង`, `${getVipRemainingDays(currentUser)} days left • 10 VIP Benefits`, `剩余 ${getVipRemainingDays(currentUser)} 天 • 尊享 10 项特权`)}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0">
+              {onExploreProfile && (
+                <button
+                  type="button"
+                  onClick={onExploreProfile}
+                  className="px-3 py-2 rounded-xl bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-400 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black text-xs shadow-md transition active:scale-95 cursor-pointer shrink-0 border border-amber-200 flex items-center gap-1"
+                >
+                  <span>{tr(language, 'គ្រប់គ្រង VIP', 'Manage VIP', '管理 VIP')}</span>
+                  <ChevronRight className="w-3.5 h-3.5 text-slate-950" />
+                </button>
+              )}
+            </div>
+          </div>
+        ) : (
         <div className="p-3 rounded-2xl bg-gradient-to-r from-[#064E3B] via-[#047857] to-[#065F46] text-white shadow-sm border border-emerald-400/40 flex items-center justify-between gap-2.5">
           <div
             onClick={onExploreProfile}
@@ -68,11 +119,6 @@ export const HomeGreetingSearch: React.FC<Props> = ({
                     <Shield className="w-2.5 h-2.5" />
                     <span>{tr(language, 'អ្នកគ្រប់គ្រង', 'Admin', '管理员')}</span>
                   </span>
-                ) : isVip ? (
-                  <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[9px] font-black bg-amber-400 text-slate-950 shadow-2xs shrink-0">
-                    <Crown className="w-2.5 h-2.5" />
-                    <span>{tr(language, 'សមាជិក VIP', 'VIP Member', 'VIP 会员')}</span>
-                  </span>
                 ) : (
                   <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-900/90 text-emerald-200 border border-emerald-400/40 shrink-0">
                     <CheckCircle2 className="w-2.5 h-2.5 text-emerald-300" />
@@ -81,7 +127,7 @@ export const HomeGreetingSearch: React.FC<Props> = ({
                 )}
               </div>
               <p className="text-[11px] text-emerald-100/95 truncate mt-0.5">
-                {isVip || isAdmin
+                {isAdmin
                   ? tr(
                       language,
                       '✨ គណនី VIP សកម្ម • ប្រើប្រាស់មុខងារពិសេសទាំងអស់ដោយសេរី',
@@ -99,7 +145,7 @@ export const HomeGreetingSearch: React.FC<Props> = ({
           </div>
 
           <div className="flex items-center gap-1.5 shrink-0">
-            {!isVip && !isAdmin && onUpgradeVip && (
+            {!isAdmin && onUpgradeVip && (
               <button
                 type="button"
                 onClick={onUpgradeVip}
@@ -121,6 +167,7 @@ export const HomeGreetingSearch: React.FC<Props> = ({
             )}
           </div>
         </div>
+        )
       ) : (
         <div className="p-3 rounded-2xl bg-gradient-to-r from-slate-900 via-[#064E3B] to-emerald-900 text-white shadow-sm border border-emerald-500/40 flex items-center justify-between gap-2.5">
           <div className="flex items-center gap-2.5 min-w-0 flex-1">

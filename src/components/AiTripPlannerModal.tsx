@@ -3,7 +3,7 @@ import { FoodTripTemplates } from './FoodTripTemplates';
 import { useApp } from '../context/AppContext';
 import { 
   X, Sparkles, Bot, Calendar, DollarSign, Users, MapPin, 
-  Share2, BookmarkCheck, RefreshCw, Compass, Utensils
+  Share2, BookmarkCheck, RefreshCw, Compass, Utensils, LocateFixed
 } from 'lucide-react';
 import { TripPlan } from '../types';
 import { tr, translateProvince } from '../utils/i18n';
@@ -79,6 +79,38 @@ export const AiTripPlannerModal: React.FC = () => {
     ).length;
     return { ...found, destCount, restCount };
   }, [selectedProvince, destinations, restaurants]);
+
+  const handleDetectGpsProvince = () => {
+    if (!('geolocation' in navigator)) {
+      showToast(tr(language, 'ទូរស័ព្ទមិនគាំទ្រ GPS ទេ', 'GPS not supported', '设备不支持 GPS'), 'warning');
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        if (lat > 13.0 && lng > 103.5) {
+          setSelectedProvince('ខេត្តសៀមរាប');
+        } else if (lat < 11.0 && lng < 104.5) {
+          setSelectedProvince('ខេត្តកំពត');
+        } else if (lat < 11.0 && lng < 103.8) {
+          setSelectedProvince('ខេត្តព្រះសីហនុ');
+        } else if (lat > 12.8 && lng < 103.5) {
+          setSelectedProvince('ខេត្តបាត់ដំបង');
+        } else {
+          setSelectedProvince('រាជធានីភ្នំពេញ');
+        }
+        showToast(
+          tr(language, '📍 បានកំណត់ខេត្តចាប់ផ្តើមតាម GPS!', '📍 Set starting province via GPS!', '📍 已通过 GPS 设置出发省份！'),
+          'success'
+        );
+      },
+      () => {
+        showToast(tr(language, 'មិនអាចចាប់ទីតាំង GPS បានទេ សូមជ្រើសរើសដោយដៃ', 'Could not access GPS, please select manually', '无法获取 GPS 定位，请手动选择'), 'info');
+      },
+      { timeout: 6000, enableHighAccuracy: true }
+    );
+  };
 
   if (!isAiTripPlannerModalOpen) return null;
 
