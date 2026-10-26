@@ -66,6 +66,7 @@ export interface RestaurantMediaOverride {
   galleryPhotos?: string[];
   foodImages?: string[];
   menuItems?: RestaurantMenuItem[];
+  menuItemsUpdatedAt?: string;
   reviews?: RestaurantReview[];
   rating?: number;
   reviewCount?: number;
@@ -413,6 +414,25 @@ export function mergeOverrideBundles(
   };
 
   const mergedRestaurants = mergeMaps(base.restaurants, incoming.restaurants || {});
+  for (const id of Object.keys(mergedRestaurants)) {
+    const a = base.restaurants?.[id];
+    const b = incoming.restaurants?.[id];
+    if (a && b) {
+      const aMenu = Array.isArray(a.menuItems) ? a.menuItems : [];
+      const bMenu = Array.isArray(b.menuItems) ? b.menuItems : [];
+      const aMenuTime = a.menuItemsUpdatedAt ? new Date(a.menuItemsUpdatedAt).getTime() : (a.updatedAt ? new Date(a.updatedAt).getTime() : 0);
+      const bMenuTime = b.menuItemsUpdatedAt ? new Date(b.menuItemsUpdatedAt).getTime() : (b.updatedAt ? new Date(b.updatedAt).getTime() : 0);
+      if (aMenu.length > 0 && bMenu.length === 0 && !b.menuItemsUpdatedAt) {
+        mergedRestaurants[id] = { ...mergedRestaurants[id], menuItems: aMenu, menuItemsUpdatedAt: a.menuItemsUpdatedAt };
+      } else if (bMenu.length > 0 && aMenu.length === 0 && !a.menuItemsUpdatedAt) {
+        mergedRestaurants[id] = { ...mergedRestaurants[id], menuItems: bMenu, menuItemsUpdatedAt: b.menuItemsUpdatedAt };
+      } else if (aMenuTime > bMenuTime) {
+        mergedRestaurants[id] = { ...mergedRestaurants[id], menuItems: aMenu, menuItemsUpdatedAt: a.menuItemsUpdatedAt };
+      } else if (bMenuTime > aMenuTime) {
+        mergedRestaurants[id] = { ...mergedRestaurants[id], menuItems: bMenu, menuItemsUpdatedAt: b.menuItemsUpdatedAt };
+      }
+    }
+  }
   for (const [id, restOv] of Object.entries(mergedRestaurants)) {
     if (isFakeSeedRestaurantOverride(restOv)) {
       delete mergedRestaurants[id];
@@ -503,6 +523,7 @@ export function recordPermanentRestaurantOverride(rest: Restaurant): void {
       ? rest.foodImages.filter((g) => g && g !== primaryPhoto)
       : undefined,
     menuItems: rest.menuItems,
+    menuItemsUpdatedAt: now,
     reviews: rest.reviews,
     rating: rest.rating,
     reviewCount: rest.reviewCount,
@@ -669,6 +690,22 @@ export function applyRestaurantOverrides(
     seenIds.add(r.id);
     const ov = overridesMap[r.id];
     if (!ov) return r;
+    const rTime = Math.max(
+      r.updatedAt ? new Date(r.updatedAt).getTime() || 0 : 0,
+      r.photoUpdatedAt ? new Date(r.photoUpdatedAt).getTime() || 0 : 0,
+      r.adminEditedAt ? new Date(r.adminEditedAt).getTime() || 0 : 0
+    );
+    const ovTime = ov.updatedAt ? new Date(ov.updatedAt).getTime() || 0 : 0;
+    const rMenu = Array.isArray(r.menuItems) ? r.menuItems : [];
+    const ovMenu = Array.isArray(ov.menuItems) ? ov.menuItems : [];
+    const resolvedMenuItems =
+      rTime > ovTime
+        ? rMenu
+        : ovMenu.length === 0 && rMenu.length > 0 && !ov.menuItemsUpdatedAt
+        ? rMenu
+        : Array.isArray(ov.menuItems)
+        ? ovMenu
+        : rMenu;
     const photoUrl = ov.photoUrl || ov.profileImage || r.photoUrl;
     return {
       ...r,
@@ -676,7 +713,7 @@ export function applyRestaurantOverrides(
       profileImage: ov.profileImage || photoUrl,
       galleryPhotos: Array.isArray(ov.galleryPhotos) ? ov.galleryPhotos : r.galleryPhotos,
       foodImages: Array.isArray(ov.foodImages) ? ov.foodImages : r.foodImages,
-      menuItems: Array.isArray(ov.menuItems) ? ov.menuItems : r.menuItems,
+      menuItems: resolvedMenuItems,
       reviews: Array.isArray(ov.reviews) ? ov.reviews : r.reviews,
       rating: typeof ov.rating === 'number' ? ov.rating : r.rating,
       reviewCount: typeof ov.reviewCount === 'number' ? ov.reviewCount : r.reviewCount,
@@ -704,7 +741,8 @@ export function applyRestaurantOverrides(
       isAdminEdited: ov.isAdminEdited ?? r.isAdminEdited,
       adminEditedAt: ov.adminEditedAt || r.adminEditedAt,
       isCustomPhoto: true,
-      photoUpdatedAt: ov.updatedAt || r.photoUpdatedAt,
+      photoUpdatedAt: ovTime >= rTime ? (ov.updatedAt || r.photoUpdatedAt) : (r.photoUpdatedAt || ov.updatedAt),
+      updatedAt: ovTime >= rTime ? (ov.updatedAt || r.updatedAt) : (r.updatedAt || ov.updatedAt),
     };
   });
 
@@ -1045,6 +1083,9 @@ export async function hydrateAndSyncMediaOverrides(): Promise<AllMediaOverridesB
     } catch {}
   }
 
+  if (inMemoryMasterBundle) {
+    current = mergeOverrideBundles(current, inMemoryMasterBundle);
+  }
   saveLocalMediaOverrides(current);
   return current;
 }

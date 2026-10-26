@@ -270,7 +270,9 @@ export const ManageMenuModal: React.FC = () => {
       )
     : getOwnedRestaurantsForUser(currentUser);
 
-  const menuItems = currentRest.menuItems || managingRestaurant.menuItems || [];
+  const currentRestMenu = Array.isArray(currentRest.menuItems) ? currentRest.menuItems : [];
+  const managingRestMenu = Array.isArray(managingRestaurant.menuItems) ? managingRestaurant.menuItems : [];
+  const menuItems = currentRestMenu.length >= managingRestMenu.length ? currentRestMenu : managingRestMenu;
   const isPremiumActive = isRestaurantPremiumActive(currentRest) || isApprovedVip || isAdmin;
   const isExpired = vipState === 'expired_vip' || (currentRest.membershipTier === 'premium' && !isPremiumActive);
   const isFree = !isPremiumActive && !isExpired;

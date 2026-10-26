@@ -799,7 +799,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       aiCategoryVerification: r.aiCategoryVerification,
       created_at: getRestaurantCreatedAtIso(r),
       createdAt: getRestaurantCreatedAtIso(r),
-      updatedAt: r.updatedAt,
+      updatedAt: r.updatedAt || r.photoUpdatedAt || r.adminEditedAt,
+      photoUpdatedAt: r.photoUpdatedAt || r.updatedAt || r.adminEditedAt,
     };
   };
 
@@ -2483,6 +2484,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const cloudSyncInFlightRef = useRef(false);
   const pendingForcedSyncRef = useRef(false);
   const lastCloudSyncAtRef = useRef(0);
+  const lastLocalRestaurantEditAtRef = useRef(0);
   const [isSyncingUsers, setIsSyncingUsers] = useState(false);
   const [lastUsersSyncedAt, setLastUsersSyncedAt] = useState<string | null>(null);
 
@@ -2629,6 +2631,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         latestSyncStateRef.current.transactions = result.mergedTransactions;
         if (result.mergedCustomRestaurants.length > 0) {
           const deletedIdSet = new Set((result.mergedDeletedUsers || []).map(d => d.id));
+          const getRestMs = (x?: Restaurant | null): number =>
+            Math.max(
+              x?.updatedAt ? new Date(x.updatedAt).getTime() || 0 : 0,
+              x?.photoUpdatedAt ? new Date(x.photoUpdatedAt).getTime() || 0 : 0,
+              x?.adminEditedAt ? new Date(x.adminEditedAt).getTime() || 0 : 0,
+              x?.createdAt ? new Date(x.createdAt).getTime() || 0 : 0
+            );
           setRestaurants(prev => {
             const map = new Map<string, Restaurant>();
             for (const r of prev) {
@@ -2638,10 +2647,34 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             }
             for (const r of result.mergedCustomRestaurants) {
               if (r && r.id && !isSeedRestaurantId(String(r.id)) && (!r.ownerId || !deletedIdSet.has(r.ownerId))) {
-                map.set(r.id, normalizeRestaurant(r));
+                const normCloud = normalizeRestaurant(r);
+                const localCur = map.get(r.id);
+                if (!localCur) {
+                  map.set(r.id, normCloud);
+                } else {
+                  const localMs = getRestMs(localCur);
+                  const cloudMs = getRestMs(normCloud);
+                  const editedDuringSync = lastLocalRestaurantEditAtRef.current >= now - 5000;
+                  if (editedDuringSync || localMs >= cloudMs) {
+                    map.set(r.id, {
+                      ...normCloud,
+                      ...localCur,
+                      menuItems:
+                        Array.isArray(localCur.menuItems) && localCur.menuItems.length > 0
+                          ? localCur.menuItems
+                          : Array.isArray(localCur.menuItems) && localMs > cloudMs
+                          ? localCur.menuItems
+                          : normCloud.menuItems || [],
+                    });
+                  } else {
+                    map.set(r.id, normCloud);
+                  }
+                }
               }
             }
-            return sortRestaurantsChronologically(Array.from(map.values()));
+            const sorted = sortRestaurantsChronologically(Array.from(map.values()));
+            latestSyncStateRef.current.restaurants = sorted;
+            return sorted;
           });
         }
         try {
@@ -2665,6 +2698,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             setRestaurants(prev => {
               const next = applyRestaurantOverrides(prev, syncedMediaBundle.restaurants);
               setSelectedRestaurant(sel => (sel ? next.find(r => r.id === sel.id) || sel : null));
+              setManagingRestaurantState(cur => (cur ? next.find(r => r.id === cur.id) || cur : null));
               return next;
             });
           }
@@ -5236,15 +5270,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       isPromoted: isAdmin || isApprovedVip ? true : Boolean(targetRest.isPromoted),
       menuItems: updatedMenuItems,
       updatedAt: nowIso,
+      photoUpdatedAt: nowIso,
+      adminEditedAt: nowIso,
     };
 
+    lastLocalRestaurantEditAtRef.current = Date.now();
     recordPermanentRestaurantOverride(updatedRest);
 
     setRestaurants(prev => {
       const next = prev.map(r => (r.id === restaurantId ? updatedRest : r));
+      latestSyncStateRef.current.restaurants = next;
       try {
-        localStorage.setItem('kft_restaurants_real_v11', JSON.stringify(next));
-      } catch {}
+        localStorage.setItem('kft_restaurants_real_v11', JSON.stringify(compactDataForBulkLocalStorage('kft_restaurants_real_v11', next)));
+      } catch {
+        scheduleStorageWrite('kft_restaurants_real_v11', next, 400);
+      }
       if (!isSeedRestaurantId(restaurantId) && isSupabaseConfigured()) {
         try {
           pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter(r => !isSeedRestaurantId(r.id)));
@@ -5301,22 +5341,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return false;
     }
 
+    const nowIso = new Date().toISOString();
     const updatedMenuItems = (targetRest.menuItems || []).map(item => 
-      item.id === updatedItem.id ? { ...updatedItem, updatedAt: new Date().toISOString().split('T')[0] } : item
+      item.id === updatedItem.id ? { ...updatedItem, updatedAt: nowIso.split('T')[0] } : item
     );
     const updatedRest: Restaurant = {
       ...targetRest,
       menuItems: updatedMenuItems,
-      updatedAt: new Date().toISOString(),
+      updatedAt: nowIso,
+      photoUpdatedAt: nowIso,
+      adminEditedAt: nowIso,
     };
 
+    lastLocalRestaurantEditAtRef.current = Date.now();
     recordPermanentRestaurantOverride(updatedRest);
 
     setRestaurants(prev => {
       const next = prev.map(r => (r.id === restaurantId ? updatedRest : r));
+      latestSyncStateRef.current.restaurants = next;
       try {
-        localStorage.setItem('kft_restaurants_real_v11', JSON.stringify(next));
-      } catch {}
+        localStorage.setItem('kft_restaurants_real_v11', JSON.stringify(compactDataForBulkLocalStorage('kft_restaurants_real_v11', next)));
+      } catch {
+        scheduleStorageWrite('kft_restaurants_real_v11', next, 400);
+      }
       if (!isSeedRestaurantId(restaurantId) && isSupabaseConfigured()) {
         try {
           pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter(r => !isSeedRestaurantId(r.id)));
@@ -5365,20 +5412,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return false;
     }
 
+    const nowIso = new Date().toISOString();
     const updatedMenuItems = (targetRest.menuItems || []).filter(item => item.id !== menuItemId);
     const updatedRest: Restaurant = {
       ...targetRest,
       menuItems: updatedMenuItems,
-      updatedAt: new Date().toISOString(),
+      updatedAt: nowIso,
+      photoUpdatedAt: nowIso,
+      adminEditedAt: nowIso,
     };
 
+    lastLocalRestaurantEditAtRef.current = Date.now();
     recordPermanentRestaurantOverride(updatedRest);
 
     setRestaurants(prev => {
       const next = prev.map(r => (r.id === restaurantId ? updatedRest : r));
+      latestSyncStateRef.current.restaurants = next;
       try {
-        localStorage.setItem('kft_restaurants_real_v11', JSON.stringify(next));
-      } catch {}
+        localStorage.setItem('kft_restaurants_real_v11', JSON.stringify(compactDataForBulkLocalStorage('kft_restaurants_real_v11', next)));
+      } catch {
+        scheduleStorageWrite('kft_restaurants_real_v11', next, 400);
+      }
       if (!isSeedRestaurantId(restaurantId) && isSupabaseConfigured()) {
         try {
           pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter(r => !isSeedRestaurantId(r.id)));

@@ -1487,15 +1487,33 @@ export async function syncAllAppDataWithSupabase(localState: {
         }
       }
     }
+    const getRestTimestampMs = (x: any): number =>
+      Math.max(
+        x?.updatedAt ? new Date(x.updatedAt).getTime() || 0 : 0,
+        x?.photoUpdatedAt ? new Date(x.photoUpdatedAt).getTime() || 0 : 0,
+        x?.adminEditedAt ? new Date(x.adminEditedAt).getTime() || 0 : 0,
+        x?.createdAt ? new Date(x.createdAt).getTime() || 0 : 0
+      );
+
     for (const r of localState.customRestaurants) {
       if (r && r.id && !isSeedRestaurantId(String(r.id)) && (!r.ownerId || !deletedIds.has(r.ownerId))) {
         const existing = restMap.get(r.id);
         if (!existing) {
           restMap.set(r.id, r);
         } else {
-          const existingMs = new Date(existing.photoUpdatedAt || existing.adminEditedAt || existing.createdAt || 0).getTime() || 0;
-          const localMs = new Date(r.photoUpdatedAt || r.adminEditedAt || r.createdAt || 0).getTime() || 0;
+          const existingMs = getRestTimestampMs(existing);
+          const localMs = getRestTimestampMs(r);
           const base = localMs >= existingMs ? { ...existing, ...r } : { ...r, ...existing };
+          const localMenu = Array.isArray(r.menuItems) ? r.menuItems : [];
+          const existingMenu = Array.isArray(existing.menuItems) ? existing.menuItems : [];
+          const bestMenuItems =
+            localMs >= existingMs
+              ? localMenu.length > 0 || existingMenu.length === 0
+                ? localMenu
+                : localMenu
+              : existingMenu.length > 0
+              ? existingMenu
+              : localMenu;
           const bestPhoto =
             r.photoUrl?.startsWith('data:') && localMs >= existingMs
               ? r.photoUrl
@@ -1504,8 +1522,11 @@ export async function syncAllAppDataWithSupabase(localState: {
               : base.photoUrl || existing.photoUrl || r.photoUrl;
           restMap.set(r.id, {
             ...base,
+            menuItems: bestMenuItems,
             photoUrl: bestPhoto,
             profileImage: base.profileImage?.startsWith('data:') ? base.profileImage : bestPhoto,
+            updatedAt: localMs >= existingMs ? (r.updatedAt || existing.updatedAt) : (existing.updatedAt || r.updatedAt),
+            photoUpdatedAt: localMs >= existingMs ? (r.photoUpdatedAt || existing.photoUpdatedAt) : (existing.photoUpdatedAt || r.photoUpdatedAt),
           });
         }
       }
