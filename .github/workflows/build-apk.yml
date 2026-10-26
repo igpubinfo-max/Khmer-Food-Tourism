@@ -59,6 +59,9 @@ jobs:
               -keypass 'KhmerFood2026PlayStore' \
               -dname "CN=Savuth Chea, OU=Khmer Food and Tourism, O=Khmer Food and Tourism, L=Phnom Penh, ST=Phnom Penh, C=KH"
           fi
+          AUTO_VC=$((100 + ${{ github.run_number }}))
+          sed -i "s/versionCode [0-9]\+/versionCode $AUTO_VC/g" android/app/build.gradle
+          echo "Set Android versionCode to $AUTO_VC"
           cd android
           chmod +x ./gradlew
           ./gradlew assembleRelease --no-daemon -x lint -x lintVitalRelease || ./gradlew assembleDebug --no-daemon
