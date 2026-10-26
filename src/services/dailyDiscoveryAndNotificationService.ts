@@ -122,6 +122,13 @@ export const CAMBODIA_PROVINCE_COORDS: Record<string, { lat: number; lng: number
   'ខេត្តក្រចេះ': { lat: 12.4881, lng: 106.0188, nameEn: 'Kratie' },
   'ខេត្តតាកែវ': { lat: 10.9908, lng: 104.7850, nameEn: 'Takeo' },
   'ខេត្តកំពង់ឆ្នាំង': { lat: 12.2500, lng: 104.6667, nameEn: 'Kampong Chhnang' },
+  'ខេត្តព្រៃវែង': { lat: 11.4868, lng: 105.3253, nameEn: 'Prey Veng' },
+  'ខេត្តស្វាយរៀង': { lat: 11.0879, lng: 105.7993, nameEn: 'Svay Rieng' },
+  'ខេត្តបន្ទាយមានជ័យ': { lat: 13.5859, lng: 102.9737, nameEn: 'Banteay Meanchey' },
+  'ខេត្តប៉ៃលិន': { lat: 12.8489, lng: 102.6093, nameEn: 'Pailin' },
+  'ខេត្តឧត្តរមានជ័យ': { lat: 14.1818, lng: 103.5176, nameEn: 'Oddar Meanchey' },
+  'ខេត្តស្ទឹងត្រែង': { lat: 13.5259, lng: 105.9683, nameEn: 'Stung Treng' },
+  'ខេត្តត្បូងឃ្មុំ': { lat: 11.8891, lng: 105.6540, nameEn: 'Tboung Khmum' },
 };
 
 export function calculateDistanceKm(

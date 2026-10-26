@@ -2309,6 +2309,7 @@ export function buildGoogleMapsMetaFromCachedItem(
  */
 export function convertGooglePlaceToRestaurant(place: GooglePlaceCachedItem): Restaurant {
   const googleMeta = buildGoogleMapsMetaFromCachedItem(place);
+  const resolvedProvEn = resolveProvinceGeoConfig(place.province)?.en || 'Phnom Penh';
   const attributionSuffix =
     place.photoAttributions && place.photoAttributions.length > 0
       ? ` (រូបភាពពី Google Maps៖ ${place.photoAttributions.slice(0, 2).join(', ')})`
@@ -2322,14 +2323,14 @@ export function convertGooglePlaceToRestaurant(place: GooglePlaceCachedItem): Re
     nameKh: place.nameKh,
     nameEn: place.nameEn || place.nameKh,
     descriptionKh: `${place.nameKh} មានទីតាំងស្ថិតនៅ ${place.address}។ ទាញយកទិន្នន័យផ្លូវការ និងទីតាំង GPS ពីផែនទី Google Maps${attributionSuffix}។`,
-    descriptionEn: `${place.nameEn || place.nameKh} located at ${place.address}. Imported via Google Maps Platform.`,
+    descriptionEn: `${place.nameEn || place.nameKh} located in ${resolvedProvEn}, Cambodia. Imported via Google Maps Platform.`,
     photoUrl: place.photoUrl,
     profileImage: place.photoUrl,
     galleryPhotos: place.photoUrls && place.photoUrls.length > 0 ? place.photoUrls : [place.photoUrl],
     addressKh: place.address,
     addressEn: place.address,
     provinceKh: place.province,
-    provinceEn: place.province,
+    provinceEn: resolvedProvEn,
     phone: formatDisplayPhone(place.phone),
     openingHoursKh: place.openHours,
     openingHoursEn: place.openHours,
@@ -2357,6 +2358,7 @@ export function convertGooglePlaceToDestination(
   place: GooglePlaceCachedItem
 ): TouristDestination {
   const googleMeta = buildGoogleMapsMetaFromCachedItem(place);
+  const resolvedProvEn = resolveProvinceGeoConfig(place.province)?.en || 'Phnom Penh';
   const subCat: DestinationCategorySlug = place.subCategorySlug || 'resort';
   const categoryLabels: Record<DestinationCategorySlug, { kh: string; en: string }> = {
     temple: { kh: 'ប្រាសាទបុរាណ & វត្តអារាម', en: 'Temples & Heritage' },
@@ -2378,11 +2380,11 @@ export function convertGooglePlaceToDestination(
     categoryKh: label.kh,
     categoryEn: label.en,
     descriptionKh: `${place.nameKh} មានទីតាំងស្ថិតនៅ ${place.address}។ ទាញយកទិន្នន័យ និងទីតាំង GPS ពិតប្រាកដពីផែនទី Google Maps។`,
-    descriptionEn: `${place.nameEn || place.nameKh} located at ${place.address}. Imported via Google Maps Platform.`,
+    descriptionEn: `${place.nameEn || place.nameKh} located in ${resolvedProvEn}, Cambodia. Imported via Google Maps Platform.`,
     photoUrl: place.photoUrl,
     galleryPhotos: place.photoUrls && place.photoUrls.length > 0 ? place.photoUrls : [place.photoUrl],
     provinceKh: place.province,
-    provinceEn: place.province,
+    provinceEn: resolvedProvEn,
     addressKh: place.address,
     addressEn: place.address,
     entranceFeeKh: 'មើលព័ត៌មាននៅទីតាំងផ្ទាល់',
@@ -2449,6 +2451,7 @@ function isRoadOrInvalidNearbyPlaceName(rawName: string): boolean {
   const clean = (rawName || '').replace(/[\u200B-\u200D\uFEFF]/g, '').trim();
   if (!clean || clean.length < 2) return true;
   if (clean.toLowerCase() === 'cambodia' || clean === 'កម្ពុជា') return true;
+  if (/(charges double|scam|tourist trap|do not go)/i.test(clean)) return true;
   return /^(ផ្លូវ\s|ផ្លូវលេខ|ផ្លូវបេតុង|មហាវិថី|ផ្លូវជាតិ|ស្ពាន|ផ្លូវដែក|street\s|st\.\s|road\s|rd\.\s|national\s+road|boulevard\s|blvd\s|bridge\s)/i.test(
     clean
   );
@@ -2558,15 +2561,14 @@ export async function searchNearbyPlacesWithin500m(
     return { restaurants: [], attractions: [], providerUsed: 'smart_cache', fromCache: true };
   }
 
-  const effectiveRadius = Math.max(radiusMeters, 500);
-  const extendedSearchRadius = Math.max(effectiveRadius * 5, 3500);
-  const gridKey = `v2_${lat.toFixed(3)}_${lng.toFixed(3)}_${effectiveRadius}`;
+  const effectiveRadius = Math.max(radiusMeters, 100);
+  const gridKey = `v3_${lat.toFixed(4)}_${lng.toFixed(4)}_${effectiveRadius}`;
   const cachedMem = nearby500mMemoryCache.get(gridKey);
   if (
     !forceRefresh &&
     cachedMem &&
     Date.now() - cachedMem.fetchedAt < 15 * 60 * 1000 &&
-    cachedMem.restaurants.length >= 5
+    cachedMem.restaurants.length + cachedMem.attractions.length > 0
   ) {
     incrementCacheStat('cacheHitsSavedQuota');
     return {
@@ -2577,13 +2579,13 @@ export async function searchNearbyPlacesWithin500m(
     };
   }
 
-  // 1. Gather existing cached & verified seed directory places within extended radius
+  // 1. Gather existing cached & verified seed directory places strictly within effectiveRadius
   const localPool = getLocalSmartCache().filter(
     (p) =>
       !isRoadOrInvalidNearbyPlaceName(p.nameKh) &&
-      calculateHaversineMeters(lat, lng, p.lat, p.lng) <= extendedSearchRadius
+      calculateHaversineMeters(lat, lng, p.lat, p.lng) <= effectiveRadius
   );
-  const seedPool = buildSeedDirectoryNearbyCandidates(lat, lng, extendedSearchRadius);
+  const seedPool = buildSeedDirectoryNearbyCandidates(lat, lng, effectiveRadius);
 
   const googleItems: GooglePlaceCachedItem[] = [];
   let usedGoogleApi = false;
@@ -2614,7 +2616,7 @@ export async function searchNearbyPlacesWithin500m(
             locationRestriction: {
               circle: {
                 center: { latitude: lat, longitude: lng },
-                radius: effectiveRadius,
+                radius: Math.min(effectiveRadius, 50000),
               },
             },
           }),
@@ -2631,7 +2633,7 @@ export async function searchNearbyPlacesWithin500m(
             const pLat = Number(p.location?.latitude);
             const pLng = Number(p.location?.longitude);
             if (!Number.isFinite(pLat) || !Number.isFinite(pLng)) return null;
-            if (calculateHaversineMeters(lat, lng, pLat, pLng) > extendedSearchRadius) return null;
+            if (calculateHaversineMeters(lat, lng, pLat, pLng) > effectiveRadius) return null;
 
             const rawGoogleId = String(p.id || `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`);
             const displayName = (p.displayName?.text || '').replace(/[\u200B-\u200D\uFEFF]/g, '').trim();
@@ -2722,28 +2724,32 @@ export async function searchNearbyPlacesWithin500m(
 
   // 3. Multi-Engine Live Cambodia Street GPS Discovery (Nominatim Bounded Viewbox + Photon Komoot BBox)
   const liveMapItems: GooglePlaceCachedItem[] = [];
-  if (googleItems.length < 12) {
-    // Tight 650m viewbox + neighborhood 2.2km viewbox so both dense 500m streets and residential areas return fast results
-    const tightDelta = 0.0065;
-    const wideDelta = 0.022;
+  if (googleItems.length < 15) {
+    // Scale bounding box dynamically to match effectiveRadius (500m -> ~0.0055 deg, 1km -> ~0.0105 deg, 2km -> ~0.021 deg)
+    const radiusDelta = Math.max(0.0055, (effectiveRadius / 111000) * 1.18);
+    const tightDelta = Math.min(0.006, radiusDelta);
+    const activeViewbox = `${(lng - radiusDelta).toFixed(5)},${(lat + radiusDelta).toFixed(5)},${(
+      lng + radiusDelta
+    ).toFixed(5)},${(lat - radiusDelta).toFixed(5)}`;
     const tightViewbox = `${(lng - tightDelta).toFixed(5)},${(lat + tightDelta).toFixed(5)},${(
       lng + tightDelta
     ).toFixed(5)},${(lat - tightDelta).toFixed(5)}`;
-    const wideViewbox = `${(lng - wideDelta).toFixed(5)},${(lat + wideDelta).toFixed(5)},${(
-      lng + wideDelta
-    ).toFixed(5)},${(lat - wideDelta).toFixed(5)}`;
-    const photonBbox = `${(lng - wideDelta).toFixed(5)},${(lat - wideDelta).toFixed(5)},${(
-      lng + wideDelta
-    ).toFixed(5)},${(lat + wideDelta).toFixed(5)}`;
+    const photonBbox = `${(lng - radiusDelta).toFixed(5)},${(lat - radiusDelta).toFixed(5)},${(
+      lng + radiusDelta
+    ).toFixed(5)},${(lat + radiusDelta).toFixed(5)}`;
 
     const nominatimSpecs: { q: string; vbox: string; forceCat?: GooglePlaceCachedItem['category'] }[] = [
       { q: '[restaurant]', vbox: tightViewbox, forceCat: 'restaurant' },
       { q: '[cafe]', vbox: tightViewbox, forceCat: 'cafe' },
       { q: '[fast_food]', vbox: tightViewbox, forceCat: 'restaurant' },
       { q: '[tourism]', vbox: tightViewbox, forceCat: 'tourism' },
-      { q: '[restaurant]', vbox: wideViewbox, forceCat: 'restaurant' },
-      { q: '[cafe]', vbox: wideViewbox, forceCat: 'cafe' },
-      { q: '[tourism]', vbox: wideViewbox, forceCat: 'tourism' },
+      ...(effectiveRadius > 500
+        ? [
+            { q: '[restaurant]', vbox: activeViewbox, forceCat: 'restaurant' as const },
+            { q: '[cafe]', vbox: activeViewbox, forceCat: 'cafe' as const },
+            { q: '[tourism]', vbox: activeViewbox, forceCat: 'tourism' as const },
+          ]
+        : []),
     ];
 
     const photonSpecs: { q: string; forceCat?: GooglePlaceCachedItem['category'] }[] = [
@@ -2785,7 +2791,7 @@ export async function searchNearbyPlacesWithin500m(
           const pLat = Number(item.lat);
           const pLng = Number(item.lon);
           if (!Number.isFinite(pLat) || !Number.isFinite(pLng)) continue;
-          if (calculateHaversineMeters(lat, lng, pLat, pLng) > extendedSearchRadius) continue;
+          if (calculateHaversineMeters(lat, lng, pLat, pLng) > effectiveRadius) continue;
 
           const rawNameKh = String(
             item.namedetails?.['name:km'] ||
@@ -2801,6 +2807,7 @@ export async function searchNearbyPlacesWithin500m(
           const rawNameEn = String(item.namedetails?.['name:en'] || item.name || rawNameKh)
             .replace(/[\u200B-\u200D\uFEFF]/g, '')
             .trim();
+          if (isRoadOrInvalidNearbyPlaceName(rawNameEn)) continue;
           const rawNameZh = String(item.namedetails?.['name:zh'] || rawNameEn).trim();
 
           const isTourism =
@@ -2828,7 +2835,9 @@ export async function searchNearbyPlacesWithin500m(
             addrObj.quarter || addrObj.suburb || addrObj.neighbourhood,
             addrObj.city_district || addrObj.county,
             addrObj.city || addrObj.state,
-          ].filter(Boolean);
+          ]
+            .map((part) => String(part || '').trim())
+            .filter(Boolean);
           const province = inferCambodiaProvinceFromAddressOrGps(
             addrParts.join(', ') || item.display_name || '',
             pLat,
@@ -2837,7 +2846,7 @@ export async function searchNearbyPlacesWithin500m(
           const fullAddress =
             addrParts.length > 0
               ? `${addrParts.join(', ')}, ${province}`
-              : item.display_name || province;
+              : province;
 
           const osmKeyId = item.osm_id
             ? `osm-${String(item.osm_type || 'N')[0].toUpperCase()}${item.osm_id}`
@@ -2895,7 +2904,7 @@ export async function searchNearbyPlacesWithin500m(
       try {
         const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(
           spec.q
-        )}&lat=${lat}&lon=${lng}&limit=35&bbox=${photonBbox}`;
+        )}&lat=${lat}&lon=${lng}&limit=40&bbox=${photonBbox}`;
         const controller = new AbortController();
         const tId = setTimeout(() => controller.abort(), 5500);
         const res = await fetch(url, {
@@ -2919,7 +2928,7 @@ export async function searchNearbyPlacesWithin500m(
           const pLng = Number(coords[0]);
           const pLat = Number(coords[1]);
           if (!Number.isFinite(pLat) || !Number.isFinite(pLng)) continue;
-          if (calculateHaversineMeters(lat, lng, pLat, pLng) > extendedSearchRadius) continue;
+          if (calculateHaversineMeters(lat, lng, pLat, pLng) > effectiveRadius) continue;
 
           const displayName = String(p.name || '').replace(/[\u200B-\u200D\uFEFF]/g, '').trim();
           if (isRoadOrInvalidNearbyPlaceName(displayName)) continue;
@@ -2945,7 +2954,9 @@ export async function searchNearbyPlacesWithin500m(
             p.street,
             p.locality || p.district,
             p.city || p.state,
-          ].filter(Boolean);
+          ]
+            .map((part) => String(part || '').trim())
+            .filter(Boolean);
           const province = inferCambodiaProvinceFromAddressOrGps(addrParts.join(', '), pLat, pLng);
           const fullAddress = addrParts.length > 0 ? `${addrParts.join(', ')}, ${province}` : province;
           const osmUniqueId = p.osm_id
@@ -3007,13 +3018,17 @@ export async function searchNearbyPlacesWithin500m(
     await saveToSmartCache(allNew);
   }
 
-  // Merge all sources (Google Places API + Live Nominatim/Photon + Local Smart Cache + Seed Directory)
+  // Merge all sources and strictly enforce effectiveRadius (500m, 1km, 2km)
   const combinedAll = deduplicateGooglePlacesList([
     ...googleItems,
     ...liveMapItems,
     ...localPool,
     ...seedPool,
-  ]).filter((p) => !isRoadOrInvalidNearbyPlaceName(p.nameKh));
+  ]).filter(
+    (p) =>
+      !isRoadOrInvalidNearbyPlaceName(p.nameKh) &&
+      calculateHaversineMeters(lat, lng, p.lat, p.lng) <= effectiveRadius
+  );
 
   // Sort strictly nearest first by exact Haversine distance
   combinedAll.sort(
@@ -3022,27 +3037,8 @@ export async function searchNearbyPlacesWithin500m(
       calculateHaversineMeters(lat, lng, b.lat, b.lng)
   );
 
-  const allRestaurantsSorted = combinedAll.filter((p) => p.category !== 'tourism');
-  const allAttractionsSorted = combinedAll.filter((p) => p.category === 'tourism');
-
-  // Prioritize places strictly within effectiveRadius (500m).
-  // If user is in a residential neighborhood with fewer than 8 restaurants or 5 attractions within 500m,
-  // include the nearest real places around them so Near Me never returns 0 empty results.
-  const strictRestaurants = allRestaurantsSorted.filter(
-    (p) => calculateHaversineMeters(lat, lng, p.lat, p.lng) <= effectiveRadius
-  );
-  const restaurants =
-    strictRestaurants.length >= 8
-      ? strictRestaurants
-      : allRestaurantsSorted.slice(0, Math.max(15, strictRestaurants.length));
-
-  const strictAttractions = allAttractionsSorted.filter(
-    (p) => calculateHaversineMeters(lat, lng, p.lat, p.lng) <= effectiveRadius
-  );
-  const attractions =
-    strictAttractions.length >= 5
-      ? strictAttractions
-      : allAttractionsSorted.slice(0, Math.max(12, strictAttractions.length));
+  const restaurants = combinedAll.filter((p) => p.category !== 'tourism');
+  const attractions = combinedAll.filter((p) => p.category === 'tourism');
 
   const providerUsed: 'google_maps_api' | 'smart_cache' | 'online_cambodia_map' = usedGoogleApi
     ? 'google_maps_api'

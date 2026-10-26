@@ -61,7 +61,6 @@ const RADIUS_OPTIONS: { value: number; labelKh: string; labelEn: string; labelZh
   { value: 500, labelKh: '៥០០ម (500m)', labelEn: '500m', labelZh: '500米' },
   { value: 1000, labelKh: '១ គ.ម (1km)', labelEn: '1km', labelZh: '1公里' },
   { value: 2000, labelKh: '២ គ.ម (2km)', labelEn: '2km', labelZh: '2公里' },
-  { value: 5000, labelKh: 'ជិតបំផុត (Nearest)', labelEn: 'Nearest All', labelZh: '最近全部' },
 ];
 
 function readSavedUserGps(): { lat: number; lng: number } | null {
@@ -113,19 +112,34 @@ export const NearMeModal: React.FC = () => {
   const [isLoadingNearby, setIsLoadingNearby] = useState<boolean>(false);
   const [liveNearbyRestaurants, setLiveNearbyRestaurants] = useState<GooglePlaceCachedItem[]>([]);
   const [liveNearbyAttractions, setLiveNearbyAttractions] = useState<GooglePlaceCachedItem[]>([]);
-  const [providerBadge, setProviderBadge] = useState<'google_maps_api' | 'smart_cache' | 'online_cambodia_map'>('google_maps_api');
 
-  // Center coordinate fallbacks for provinces if GPS unavailable
+  // All 25 Cambodian Provinces & Capital City center coordinates
   const provinceCenters: Record<string, { lat: number; lng: number }> = {
     'រាជធានីភ្នំពេញ': { lat: 11.5564, lng: 104.9282 },
-    'ខេត្តសៀមរាប': { lat: 13.3671, lng: 103.8448 },
-    'ខេត្តព្រះសីហនុ': { lat: 10.6275, lng: 103.5221 },
-    'ខេត្តកំពត': { lat: 10.6104, lng: 104.1815 },
-    'ខេត្តកែប': { lat: 10.4819, lng: 104.2975 },
+    'ខេត្តសៀមរាប': { lat: 13.3633, lng: 103.8564 },
     'ខេត្តបាត់ដំបង': { lat: 13.0957, lng: 103.2022 },
-    'ខេត្តមណ្ឌលគិរី': { lat: 12.4558, lng: 107.1889 },
-    'ខេត្តរតនគិរី': { lat: 13.7394, lng: 106.9872 },
-    'ខេត្តកោះកុង': { lat: 11.6154, lng: 102.9838 },
+    'ខេត្តកំពត': { lat: 10.6104, lng: 104.1815 },
+    'ខេត្តកែប': { lat: 10.4833, lng: 104.3167 },
+    'ខេត្តព្រះសីហនុ': { lat: 10.6275, lng: 103.5221 },
+    'ខេត្តកំពង់ចាម': { lat: 11.9934, lng: 105.4635 },
+    'ខេត្តមណ្ឌលគិរី': { lat: 12.4558, lng: 107.1881 },
+    'ខេត្តរតនគិរី': { lat: 13.7394, lng: 106.9873 },
+    'ខេត្តកោះកុង': { lat: 11.6153, lng: 102.9838 },
+    'ខេត្តកណ្តាល': { lat: 11.4833, lng: 104.9500 },
+    'ខេត្តកំពង់ឆ្នាំង': { lat: 12.2500, lng: 104.6667 },
+    'ខេត្តកំពង់ស្ពឺ': { lat: 11.4533, lng: 104.5208 },
+    'ខេត្តកំពង់ធំ': { lat: 12.7111, lng: 104.8887 },
+    'ខេត្តក្រចេះ': { lat: 12.4881, lng: 106.0188 },
+    'ខេត្តតាកែវ': { lat: 10.9908, lng: 104.7850 },
+    'ខេត្តព្រៃវែង': { lat: 11.4868, lng: 105.3253 },
+    'ខេត្តស្វាយរៀង': { lat: 11.0879, lng: 105.7993 },
+    'ខេត្តពោធិ៍សាត់': { lat: 12.5388, lng: 103.9192 },
+    'ខេត្តបន្ទាយមានជ័យ': { lat: 13.5859, lng: 102.9737 },
+    'ខេត្តប៉ៃលិន': { lat: 12.8489, lng: 102.6093 },
+    'ខេត្តឧត្តរមានជ័យ': { lat: 14.1818, lng: 103.5176 },
+    'ខេត្តព្រះវិហារ': { lat: 13.8073, lng: 104.9805 },
+    'ខេត្តស្ទឹងត្រែង': { lat: 13.5259, lng: 105.9683 },
+    'ខេត្តត្បូងឃ្មុំ': { lat: 11.8891, lng: 105.6540 },
   };
 
   const baseCoords = useMemo(() => {
@@ -148,9 +162,8 @@ export const NearMeModal: React.FC = () => {
       );
       setLiveNearbyRestaurants(res.restaurants);
       setLiveNearbyAttractions(res.attractions);
-      setProviderBadge(res.providerUsed);
     } catch (err) {
-      console.warn('NearMe 500m fetch warning:', err);
+      console.warn('NearMe fetch warning:', err);
     } finally {
       setIsLoadingNearby(false);
     }
@@ -219,7 +232,7 @@ export const NearMeModal: React.FC = () => {
     setSelectedPresetId('province');
     const coords = provinceCenters[prov] || provinceCenters['រាជធានីភ្នំពេញ'];
     setUserCoords(coords);
-    fetchLiveNearby500m(coords, false, selectedRadiusMeters);
+    fetchLiveNearby500m(coords, true, selectedRadiusMeters);
   };
 
   // Handle Phnom Penh real location quick preset
@@ -229,31 +242,30 @@ export const NearMeModal: React.FC = () => {
     const coords = { lat: preset.lat, lng: preset.lng };
     setUserCoords(coords);
     setGeoStatus('fallback');
-    fetchLiveNearby500m(coords, false, selectedRadiusMeters);
+    fetchLiveNearby500m(coords, true, selectedRadiusMeters);
   };
 
   const handleSelectRadius = (newRadius: number) => {
     setSelectedRadiusMeters(newRadius);
-    fetchLiveNearby500m(baseCoords, false, newRadius);
+    fetchLiveNearby500m(baseCoords, true, newRadius);
   };
 
-  // Merge & deduplicate Supabase restaurants + Google Maps/Live nearby places, sorted strictly nearest first
+  // Merge & deduplicate Supabase restaurants + Google Maps/Live nearby places, strictly within selectedRadiusMeters, sorted nearest first
   const nearbyRestaurants = useMemo(() => {
     const mergedMap = new Map<string, Restaurant>();
-    const candidateMaxDist = Math.max(selectedRadiusMeters, 5000);
 
-    // 1. Add existing Supabase/in-app restaurants within candidate pool
+    // 1. Add existing Supabase/in-app restaurants strictly within selectedRadiusMeters
     for (const r of restaurants) {
       const dist = calculateDistanceMeters(baseCoords.lat, baseCoords.lng, r.latitude, r.longitude);
-      if (dist <= candidateMaxDist) {
+      if (dist <= selectedRadiusMeters) {
         mergedMap.set(r.id, r);
       }
     }
 
-    // 2. Merge live Google Places / Cambodia Street GPS places without duplicating existing Supabase records
+    // 2. Merge live Google Places / Cambodia Street GPS places strictly within selectedRadiusMeters
     for (const gp of liveNearbyRestaurants) {
       const dist = calculateDistanceMeters(baseCoords.lat, baseCoords.lng, gp.lat, gp.lng);
-      if (dist > candidateMaxDist) continue;
+      if (dist > selectedRadiusMeters) continue;
 
       const existingMatch = findDuplicateRestaurantForGooglePlace(gp, Array.from(mergedMap.values()));
       if (existingMatch) {
@@ -264,39 +276,29 @@ export const NearMeModal: React.FC = () => {
       }
     }
 
-    const allSorted = Array.from(mergedMap.values())
+    return Array.from(mergedMap.values())
       .map(r => {
         const dist = calculateDistanceMeters(baseCoords.lat, baseCoords.lng, r.latitude, r.longitude);
         return { ...r, distanceMeters: dist };
       })
-      .filter(r => Number.isFinite(r.distanceMeters))
+      .filter(r => Number.isFinite(r.distanceMeters) && r.distanceMeters <= selectedRadiusMeters)
       .sort((a, b) => a.distanceMeters - b.distanceMeters);
-
-    const withinSelectedRadius = allSorted.filter(r => r.distanceMeters <= selectedRadiusMeters);
-
-    // If user's GPS is in a residential neighborhood with >= 5 places in radius, return strict radius;
-    // otherwise include the top 15 nearest places sorted ascending by exact distance so it never shows 0!
-    if (withinSelectedRadius.length >= 5) {
-      return withinSelectedRadius;
-    }
-    return allSorted.slice(0, Math.max(15, withinSelectedRadius.length));
   }, [restaurants, liveNearbyRestaurants, baseCoords, selectedRadiusMeters]);
 
-  // Merge & deduplicate Supabase destinations + Google Maps/Live nearby attractions, sorted strictly nearest first
+  // Merge & deduplicate Supabase destinations + Google Maps/Live nearby attractions, strictly within selectedRadiusMeters, sorted nearest first
   const nearbyDestinations = useMemo(() => {
     const mergedMap = new Map<string, TouristDestination>();
-    const candidateMaxDist = Math.max(selectedRadiusMeters, 6000);
 
     for (const d of destinations) {
       const dist = calculateDistanceMeters(baseCoords.lat, baseCoords.lng, d.latitude, d.longitude);
-      if (dist <= candidateMaxDist) {
+      if (dist <= selectedRadiusMeters) {
         mergedMap.set(d.id, d);
       }
     }
 
     for (const gp of liveNearbyAttractions) {
       const dist = calculateDistanceMeters(baseCoords.lat, baseCoords.lng, gp.lat, gp.lng);
-      if (dist > candidateMaxDist) continue;
+      if (dist > selectedRadiusMeters) continue;
 
       const existingMatch = findDuplicateDestinationForGooglePlace(gp, Array.from(mergedMap.values()));
       if (!existingMatch) {
@@ -305,32 +307,41 @@ export const NearMeModal: React.FC = () => {
       }
     }
 
-    const allSorted = Array.from(mergedMap.values())
+    return Array.from(mergedMap.values())
       .map(d => {
         const dist = calculateDistanceMeters(baseCoords.lat, baseCoords.lng, d.latitude, d.longitude);
         return { ...d, distanceMeters: dist };
       })
-      .filter(d => Number.isFinite(d.distanceMeters))
+      .filter(d => Number.isFinite(d.distanceMeters) && d.distanceMeters <= selectedRadiusMeters)
       .sort((a, b) => a.distanceMeters - b.distanceMeters);
-
-    const withinSelectedRadius = allSorted.filter(d => d.distanceMeters <= selectedRadiusMeters);
-
-    if (withinSelectedRadius.length >= 4) {
-      return withinSelectedRadius;
-    }
-    return allSorted.slice(0, Math.max(12, withinSelectedRadius.length));
   }, [destinations, liveNearbyAttractions, baseCoords, selectedRadiusMeters]);
 
   if (!isNearMeModalOpen) return null;
 
   const localizedManualProvince = translateProvince(manualProvince, language);
   const meterUnit = tr(language, 'ម៉ែត្រ', 'm', '米');
+  const activeRadiusText =
+    selectedRadiusMeters === 500
+      ? tr(language, '៥០០ ម៉ែត្រ', '500m', '500 米')
+      : selectedRadiusMeters === 1000
+      ? tr(language, '១ គ.ម (1km)', '1km', '1 公里')
+      : tr(language, '២ គ.ម (2km)', '2km', '2 公里');
   const formatDistanceLabel = (distMeters: number) => {
-    if (distMeters <= 1500) {
+    if (distMeters <= 2000) {
       return `${distMeters} ${meterUnit}`;
     }
     const km = (distMeters / 1000).toFixed(1);
     return `${km} ${tr(language, 'គ.ម', 'km', '公里')} (${distMeters}m)`;
+  };
+  const cleanCardAddress = (rawAddr: string | undefined, provLabel: string) => {
+    const cleaned = (rawAddr || '')
+      .replace(/(?:\s*,\s*){2,}/g, ', ')
+      .replace(/^[\s,.;:–—-]+|[\s,.;:–—-]+$/g, '')
+      .trim();
+    if (!cleaned || (language === 'en' && /[\u1780-\u17FF]/.test(cleaned))) {
+      return language === 'en' ? `${provLabel}, Cambodia` : provLabel;
+    }
+    return cleaned;
   };
 
   const buildDirectionsUrl = (targetLat: number, targetLng: number, fallbackName: string, existingMapUrl?: string) => {
@@ -357,20 +368,13 @@ export const NearMeModal: React.FC = () => {
                 <h3 className="font-moul text-sm text-white">
                   {tr(language, 'នៅជិតខ្ញុំ (Near Me)', 'Near Me', '附近探索 (Near Me)')}
                 </h3>
-                <span className="px-2 py-0.5 rounded-full bg-emerald-400/20 border border-emerald-300/30 text-[9px] font-bold text-emerald-200">
-                  {providerBadge === 'google_maps_api'
-                    ? 'Google Maps Live'
-                    : providerBadge === 'online_cambodia_map'
-                    ? '500m Street GPS'
-                    : 'Smart Cache 500m'}
-                </span>
               </div>
               <p className="text-[11px] text-emerald-100 font-khmer">
                 {tr(
                   language,
-                  'ក្នុងរង្វង់ ៥០០ ម៉ែត្រពីទីតាំង GPS របស់អ្នក',
-                  'Within 500m of your current GPS location',
-                  '距离您当前 GPS 位置 500 米以内'
+                  `ក្នុងរង្វង់ ${activeRadiusText} ពីទីតាំង GPS របស់អ្នក`,
+                  `Within ${activeRadiusText} of your current GPS location`,
+                  `距离您当前 GPS 位置 ${activeRadiusText} 以内`
                 )}
               </p>
             </div>
@@ -392,22 +396,22 @@ export const NearMeModal: React.FC = () => {
                 {geoStatus === 'granted' && selectedPresetId === 'gps'
                   ? tr(
                       language,
-                      `📍 GPS ផ្ទាល់ (${baseCoords.lat.toFixed(4)}, ${baseCoords.lng.toFixed(4)}) • ៥០០ម`,
-                      `📍 Live GPS (${baseCoords.lat.toFixed(4)}, ${baseCoords.lng.toFixed(4)}) • 500m`,
-                      `📍 实时 GPS (${baseCoords.lat.toFixed(4)}, ${baseCoords.lng.toFixed(4)}) • 500米`
+                      `📍 GPS ផ្ទាល់ (${baseCoords.lat.toFixed(4)}, ${baseCoords.lng.toFixed(4)}) • ${activeRadiusText}`,
+                      `📍 Live GPS (${baseCoords.lat.toFixed(4)}, ${baseCoords.lng.toFixed(4)}) • ${activeRadiusText}`,
+                      `📍 实时 GPS (${baseCoords.lat.toFixed(4)}, ${baseCoords.lng.toFixed(4)}) • ${activeRadiusText}`
                     )
                   : geoStatus === 'requesting'
                   ? tr(
                       language,
-                      '⏳ កំពុងចាប់ទីតាំង GPS (រង្វង់ ៥០០ម)...',
-                      '⏳ Acquiring GPS (500m radius)...',
-                      '⏳ 正在获取 GPS（500米范围）...'
+                      `⏳ កំពុងចាប់ទីតាំង GPS (រង្វង់ ${activeRadiusText})...`,
+                      `⏳ Acquiring GPS (${activeRadiusText} radius)...`,
+                      `⏳ 正在获取 GPS（${activeRadiusText}范围）...`
                     )
                   : tr(
                       language,
-                      `ទីតាំង៖ ${localizedManualProvince} (${baseCoords.lat.toFixed(4)}, ${baseCoords.lng.toFixed(4)})`,
-                      `Location: ${localizedManualProvince} (${baseCoords.lat.toFixed(4)}, ${baseCoords.lng.toFixed(4)})`,
-                      `当前位置：${localizedManualProvince} (${baseCoords.lat.toFixed(4)}, ${baseCoords.lng.toFixed(4)})`
+                      `ទីតាំង៖ ${localizedManualProvince} (${baseCoords.lat.toFixed(4)}, ${baseCoords.lng.toFixed(4)}) • ${activeRadiusText}`,
+                      `Location: ${localizedManualProvince} (${baseCoords.lat.toFixed(4)}, ${baseCoords.lng.toFixed(4)}) • ${activeRadiusText}`,
+                      `当前位置：${localizedManualProvince} (${baseCoords.lat.toFixed(4)}, ${baseCoords.lng.toFixed(4)}) • ${activeRadiusText}`
                     )}
               </span>
             </div>
@@ -520,15 +524,15 @@ export const NearMeModal: React.FC = () => {
 
         {/* Content list */}
         <div className="flex-1 overflow-y-auto p-4 space-y-3 no-scrollbar font-khmer">
-          {isLoadingNearby && nearbyRestaurants.length === 0 && nearbyDestinations.length === 0 ? (
+          {isLoadingNearby ? (
             <div className="py-14 px-4 text-center bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-slate-200/80 dark:border-slate-700 my-2">
               <Loader2 className="w-8 h-8 mx-auto mb-3 text-emerald-600 animate-spin" />
               <h4 className="font-bold text-slate-800 dark:text-slate-100 text-sm mb-1 font-khmer">
                 {tr(
                   language,
-                  'កំពុងស្វែងរកទីតាំងពិតក្នុងរង្វង់ ៥០០ ម៉ែត្រ...',
-                  'Searching real places within 500m...',
-                  '正在搜索 500 米范围内的真实地点...'
+                  `កំពុងស្វែងរកទីតាំងពិតក្នុងរង្វង់ ${activeRadiusText}...`,
+                  `Searching real places within ${activeRadiusText}...`,
+                  `正在搜索 ${activeRadiusText} 范围内的真实地点...`
                 )}
               </h4>
               <p className="text-xs text-slate-500 dark:text-slate-400">
@@ -549,26 +553,41 @@ export const NearMeModal: React.FC = () => {
                 <h4 className="font-bold text-slate-800 dark:text-slate-100 text-sm mb-1.5 font-khmer">
                   {tr(
                     language,
-                    'រកមិនឃើញហាងក្នុងរង្វង់ ៥០០ ម៉ែត្រទេ',
-                    'No shops found within 500m',
-                    '500 米范围内未找到商家'
+                    `រកមិនឃើញហាងក្នុងរង្វង់ ${activeRadiusText} ទេ`,
+                    `No shops found within ${activeRadiusText}`,
+                    `${activeRadiusText} 范围内未找到商家`
                   )}
                 </h4>
                 <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs mx-auto mb-4 leading-relaxed font-khmer">
                   {tr(
                     language,
-                    'មិនមានហាង ឬភោជនីយដ្ឋានក្នុងរង្វង់ ៥០០ ម៉ែត្រពីទីតាំង GPS របស់អ្នកឡើយ។ សូមសាកល្បងចាប់ទីតាំងឡើងវិញ ឬជ្រើសរើសតំបន់ខាងលើ។',
-                    'No shops or restaurants were found within 500 meters of your current GPS location. Try refreshing your GPS or selecting an area above.',
-                    '您当前 GPS 位置 500 米以内暂无餐厅或商铺。请尝试刷新定位或选择上方区域。'
+                    `មិនមានហាង ឬភោជនីយដ្ឋានក្នុងរង្វង់ ${activeRadiusText} ពីទីតាំង GPS របស់អ្នកឡើយ។ សូមសាកល្បងពង្រីករង្វង់ស្វែងរក ឬចាប់ទីតាំងឡើងវិញ។`,
+                    `No shops or restaurants were found within ${activeRadiusText} of your current GPS location. Try expanding the radius or refreshing your GPS.`,
+                    `您当前 GPS 位置 ${activeRadiusText} 以内暂无餐厅或商铺。请尝试扩大搜索范围或刷新定位。`
                   )}
                 </p>
-                <button
-                  onClick={() => requestLocation(true)}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#064E3B] to-[#047857] hover:from-[#047857] hover:to-[#064E3B] text-white text-xs font-bold font-khmer rounded-xl shadow-xs transition active:scale-95 cursor-pointer"
-                >
-                  <LocateFixed className="w-4 h-4" />
-                  <span>{tr(language, 'ចាប់ទីតាំងឡើងវិញ', 'Refresh GPS', '刷新定位')}</span>
-                </button>
+                <div className="flex items-center justify-center gap-2 flex-wrap">
+                  {selectedRadiusMeters < 2000 && (
+                    <button
+                      onClick={() => handleSelectRadius(selectedRadiusMeters === 500 ? 1000 : 2000)}
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-emerald-100 dark:bg-slate-700 text-[#064E3B] dark:text-emerald-300 text-xs font-bold font-khmer rounded-xl transition cursor-pointer"
+                    >
+                      <MapPin className="w-3.5 h-3.5" />
+                      <span>
+                        {selectedRadiusMeters === 500
+                          ? tr(language, 'ពង្រីកទៅ ១ គ.ម (1km)', 'Expand to 1km', '扩大至 1公里')
+                          : tr(language, 'ពង្រីកទៅ ២ គ.ម (2km)', 'Expand to 2km', '扩大至 2公里')}
+                      </span>
+                    </button>
+                  )}
+                  <button
+                    onClick={() => requestLocation(true)}
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#064E3B] to-[#047857] hover:from-[#047857] hover:to-[#064E3B] text-white text-xs font-bold font-khmer rounded-xl shadow-xs transition active:scale-95 cursor-pointer"
+                  >
+                    <LocateFixed className="w-4 h-4" />
+                    <span>{tr(language, 'ចាប់ទីតាំងឡើងវិញ', 'Refresh GPS', '刷新定位')}</span>
+                  </button>
+                </div>
               </div>
             ) : (
               nearbyRestaurants.map((r) => {
@@ -625,11 +644,11 @@ export const NearMeModal: React.FC = () => {
                             <span className="font-bold">{r.rating > 0 ? r.rating.toFixed(1) : '4.5'}</span>
                           </div>
                           <span>•</span>
-                          <span className="truncate">{rLoc.province}</span>
+                          <span className="truncate">{translateProvince(r.provinceKh || rLoc.province, language)}</span>
                         </div>
 
                         <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-1">
-                          {rLoc.address}
+                          {cleanCardAddress(rLoc.address, translateProvince(r.provinceKh || rLoc.province, language))}
                         </p>
                       </div>
                     </div>
@@ -680,26 +699,41 @@ export const NearMeModal: React.FC = () => {
                 <h4 className="font-bold text-slate-800 dark:text-slate-100 text-sm mb-1.5 font-khmer">
                   {tr(
                     language,
-                    'រកមិនឃើញកន្លែងដើរលេងក្នុងរង្វង់ ៥០០ ម៉ែត្រទេ',
-                    'No spots found within 500m',
-                    '500 米范围内未找到景点'
+                    `រកមិនឃើញកន្លែងដើរលេងក្នុងរង្វង់ ${activeRadiusText} ទេ`,
+                    `No spots found within ${activeRadiusText}`,
+                    `${activeRadiusText} 范围内未找到景点`
                   )}
                 </h4>
                 <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs mx-auto mb-4 leading-relaxed font-khmer">
                   {tr(
                     language,
-                    'មិនមានកន្លែងកម្សាន្តក្នុងរង្វង់ ៥០០ ម៉ែត្រពីទីតាំង GPS របស់អ្នកឡើយ។ សូមសាកល្បងចាប់ទីតាំងឡើងវិញ ឬជ្រើសរើសតំបន់ខាងលើ។',
-                    'No tourist spots were found within 500 meters of your current GPS location. Try refreshing your GPS or selecting an area above.',
-                    '您当前 GPS 位置 500 米以内暂无旅游景点。请尝试刷新定位或选择上方区域。'
+                    `មិនមានកន្លែងកម្សាន្តក្នុងរង្វង់ ${activeRadiusText} ពីទីតាំង GPS របស់អ្នកឡើយ។ សូមសាកល្បងពង្រីករង្វង់ស្វែងរក ឬចាប់ទីតាំងឡើងវិញ។`,
+                    `No tourist spots were found within ${activeRadiusText} of your current GPS location. Try expanding the radius or refreshing your GPS.`,
+                    `您当前 GPS 位置 ${activeRadiusText} 以内暂无旅游景点。请尝试扩大搜索范围或刷新定位。`
                   )}
                 </p>
-                <button
-                  onClick={() => requestLocation(true)}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#064E3B] to-[#047857] hover:from-[#047857] hover:to-[#064E3B] text-white text-xs font-bold font-khmer rounded-xl shadow-xs transition active:scale-95 cursor-pointer"
-                >
-                  <LocateFixed className="w-4 h-4" />
-                  <span>{tr(language, 'ចាប់ទីតាំងឡើងវិញ', 'Refresh GPS', '刷新定位')}</span>
-                </button>
+                <div className="flex items-center justify-center gap-2 flex-wrap">
+                  {selectedRadiusMeters < 2000 && (
+                    <button
+                      onClick={() => handleSelectRadius(selectedRadiusMeters === 500 ? 1000 : 2000)}
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-emerald-100 dark:bg-slate-700 text-[#064E3B] dark:text-emerald-300 text-xs font-bold font-khmer rounded-xl transition cursor-pointer"
+                    >
+                      <MapPin className="w-3.5 h-3.5" />
+                      <span>
+                        {selectedRadiusMeters === 500
+                          ? tr(language, 'ពង្រីកទៅ ១ គ.ម (1km)', 'Expand to 1km', '扩大至 1公里')
+                          : tr(language, 'ពង្រីកទៅ ២ គ.ម (2km)', 'Expand to 2km', '扩大至 2公里')}
+                      </span>
+                    </button>
+                  )}
+                  <button
+                    onClick={() => requestLocation(true)}
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#064E3B] to-[#047857] hover:from-[#047857] hover:to-[#064E3B] text-white text-xs font-bold font-khmer rounded-xl shadow-xs transition active:scale-95 cursor-pointer"
+                  >
+                    <LocateFixed className="w-4 h-4" />
+                    <span>{tr(language, 'ចាប់ទីតាំងឡើងវិញ', 'Refresh GPS', '刷新定位')}</span>
+                  </button>
+                </div>
               </div>
             ) : (
               nearbyDestinations.map((d) => {
@@ -758,7 +792,7 @@ export const NearMeModal: React.FC = () => {
                         </div>
 
                         <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-1">
-                          {dLoc.address || `${dLoc.province} - ${dLoc.entranceFee}`}
+                          {cleanCardAddress(dLoc.address, translateProvince(d.provinceKh || dLoc.province, language))}
                         </p>
                       </div>
                     </div>

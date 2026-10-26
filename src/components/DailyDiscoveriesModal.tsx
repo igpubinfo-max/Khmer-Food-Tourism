@@ -35,7 +35,7 @@ import {
   dismissDiscoveryItem,
   clearSeenDiscoveryHistory,
 } from '../services/dailyDiscoveryAndNotificationService';
-import { tr, translateTextToChinese } from '../utils/i18n';
+import { tr, translateTextToChinese, translateProvince } from '../utils/i18n';
 
 export const DailyDiscoveriesModal: React.FC = () => {
   const {
@@ -528,7 +528,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
                 <option value="all">{tr(language, '📍 គ្រប់ខេត្ត-ក្រុង', '📍 All Provinces', '📍 全部省市')}</option>
                 {provincesList.map((prov) => (
                   <option key={prov} value={prov}>
-                    {prov}
+                    {translateProvince(prov, language)}
                   </option>
                 ))}
               </select>

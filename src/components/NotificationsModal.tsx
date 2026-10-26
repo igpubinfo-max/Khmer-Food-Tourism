@@ -23,7 +23,7 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import { AppNotification } from '../types';
-import { tr, translateTextToChinese } from '../utils/i18n';
+import { tr, translateTextToChinese, translateProvince } from '../utils/i18n';
 import {
   loadNotificationPreferences,
   saveNotificationPreferences,
@@ -474,7 +474,7 @@ export const NotificationsModal: React.FC = () => {
                 <option value="all">{tr(language, 'គ្រប់ខេត្ត-ក្រុងទាំង ២៥', 'All 25 Provinces', '全部 25 个省市')}</option>
                 {Object.keys(CAMBODIA_PROVINCE_COORDS).map((prov) => (
                   <option key={prov} value={prov}>
-                    {prov}
+                    {translateProvince(prov, language)}
                   </option>
                 ))}
               </select>

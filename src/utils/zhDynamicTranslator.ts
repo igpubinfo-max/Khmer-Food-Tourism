@@ -1531,6 +1531,8 @@ export function sanitizeStrictLanguageText(input: string | undefined, lang: Lang
       .replace(/\s*[-–—•·]\s*[\u1780-\u17FF\s]+/g, '')
       .replace(/[\u1780-\u17FF]+/g, '')
       .replace(/\(\s*\)/g, '')
+      .replace(/(?:\s*,\s*){2,}/g, ', ')
+      .replace(/^[\s,.;:–—-]+|[\s,.;:–—-]+$/g, '')
       .replace(/\s+/g, ' ')
       .trim();
     return out || input.trim();
