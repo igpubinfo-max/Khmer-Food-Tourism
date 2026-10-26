@@ -25,6 +25,7 @@ export function useBodyScrollLock(locked = true): void {
     if (!locked) {
       if (lockCount <= 0) {
         lockCount = 0;
+        body.classList.remove('kft-modal-open');
         if (body.style.position === 'fixed') {
           body.style.position = '';
           body.style.top = '';
@@ -52,6 +53,7 @@ export function useBodyScrollLock(locked = true): void {
       savedBodyOverflow = body.style.overflow;
       savedHtmlOverflow = html.style.overflow;
 
+      body.classList.add('kft-modal-open');
       body.style.position = 'fixed';
       body.style.top = `-${savedScrollY}px`;
       body.style.left = '0';
@@ -66,6 +68,7 @@ export function useBodyScrollLock(locked = true): void {
       lockCount = Math.max(0, lockCount - 1);
       if (lockCount === 0) {
         const y = savedScrollY;
+        body.classList.remove('kft-modal-open');
         body.style.position = savedBodyPosition;
         body.style.top = savedBodyTop;
         body.style.left = savedBodyLeft;

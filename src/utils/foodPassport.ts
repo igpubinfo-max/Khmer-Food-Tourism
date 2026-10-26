@@ -14,7 +14,12 @@ export interface PassportStamp {
   stampedAt: string; // ISO date
 }
 
-function read(): PassportStamp[] {
+let cachedStamps: PassportStamp[] | null = null;
+let cachedStampIdSet: Set<string> | null = null;
+const passportSubscribers = new Set<() => void>();
+let storageListenerBound = false;
+
+function readFromStorage(): PassportStamp[] {
   try {
     const raw = localStorage.getItem(FOOD_PASSPORT_KEY);
     if (!raw) return [];
@@ -26,7 +31,39 @@ function read(): PassportStamp[] {
   }
 }
 
+function invalidateAndNotify() {
+  cachedStamps = readFromStorage();
+  cachedStampIdSet = new Set(cachedStamps.map((s) => s.foodId));
+  for (const sub of passportSubscribers) {
+    sub();
+  }
+}
+
+function ensureStorageListener() {
+  if (storageListenerBound || typeof window === 'undefined') return;
+  storageListenerBound = true;
+  window.addEventListener('storage', (e) => {
+    if (!e.key || e.key === FOOD_PASSPORT_KEY) {
+      invalidateAndNotify();
+    }
+  });
+  window.addEventListener(CHANGE_EVENT, () => {
+    invalidateAndNotify();
+  });
+}
+
+function read(): PassportStamp[] {
+  ensureStorageListener();
+  if (!cachedStamps) {
+    cachedStamps = readFromStorage();
+    cachedStampIdSet = new Set(cachedStamps.map((s) => s.foodId));
+  }
+  return cachedStamps;
+}
+
 function write(stamps: PassportStamp[]) {
+  cachedStamps = stamps;
+  cachedStampIdSet = new Set(stamps.map((s) => s.foodId));
   try {
     localStorage.setItem(FOOD_PASSPORT_KEY, JSON.stringify(stamps));
   } catch {
@@ -40,13 +77,14 @@ export function getPassportStamps(): PassportStamp[] {
 }
 
 export function isStamped(foodId: string): boolean {
-  return read().some((s) => s.foodId === foodId);
+  read();
+  return cachedStampIdSet ? cachedStampIdSet.has(foodId) : false;
 }
 
 /** Toggle a stamp. Returns true when the dish is now stamped. */
 export function togglePassportStamp(foodId: string): boolean {
   const stamps = read();
-  const exists = stamps.some((s) => s.foodId === foodId);
+  const exists = cachedStampIdSet ? cachedStampIdSet.has(foodId) : stamps.some((s) => s.foodId === foodId);
   if (exists) {
     write(stamps.filter((s) => s.foodId !== foodId));
     return false;
@@ -55,19 +93,24 @@ export function togglePassportStamp(foodId: string): boolean {
   return true;
 }
 
-/** React hook: live list of stamped dish ids. */
+/** React hook: live list of stamped dish ids (shared in-memory cache + O(1) Set lookup). */
 export function useFoodPassport() {
   const [stamps, setStamps] = useState<PassportStamp[]>(() => read());
   useEffect(() => {
+    ensureStorageListener();
     const refresh = () => setStamps(read());
-    window.addEventListener(CHANGE_EVENT, refresh);
-    window.addEventListener('storage', refresh);
+    passportSubscribers.add(refresh);
     return () => {
-      window.removeEventListener(CHANGE_EVENT, refresh);
-      window.removeEventListener('storage', refresh);
+      passportSubscribers.delete(refresh);
     };
   }, []);
-  const has = useCallback((id: string) => stamps.some((s) => s.foodId === id), [stamps]);
+  const has = useCallback(
+    (id: string) => {
+      read();
+      return cachedStampIdSet ? cachedStampIdSet.has(id) : stamps.some((s) => s.foodId === id);
+    },
+    [stamps]
+  );
   return { stamps, has, count: stamps.length };
 }
 

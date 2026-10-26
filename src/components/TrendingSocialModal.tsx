@@ -193,16 +193,19 @@ export const TrendingSocialModal: React.FC = () => {
     [searchQuery, categoryFilter, foods, trendingFoods, language, showToast]
   );
 
-  // Initial load when modal opens + 60-second background auto-refresh when open & visible
+  const activePlayerItemIdRef = useRef<string | null>(null);
+  activePlayerItemIdRef.current = activePlayerItemId;
+
+  // Initial load when modal opens + 3-minute background auto-refresh when open, visible & no video playing
   useEffect(() => {
     if (!isTrendingSocialModalOpen) return;
     loadFeed(false);
 
     const interval = setInterval(() => {
-      if (!document.hidden && !isFetchingRef.current) {
+      if (!document.hidden && !isFetchingRef.current && !activePlayerItemIdRef.current) {
         loadFeed(false);
       }
-    }, 60_000);
+    }, 180_000);
 
     return () => clearInterval(interval);
   }, [isTrendingSocialModalOpen, loadFeed]);

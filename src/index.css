@@ -121,6 +121,14 @@
 .kft-premium-card { animation: kft-gold-breathe 3.2s ease-in-out infinite; }
 .kft-shimmer-bar { animation: kft-gold-shimmer 4.5s ease-in-out infinite; }
 .kft-key-wiggle { animation: kft-key-wiggle 5s ease-in-out infinite; transform-origin: 50% 80%; }
+body.kft-modal-open .kft-premium-card,
+body.kft-modal-open .kft-shimmer-bar,
+body.kft-modal-open .kft-key-wiggle,
+body.kft-modal-open .vip-glow-btn,
+body.kft-modal-open .vip-sparkle-dot,
+body.kft-modal-open .kft-marquee-track {
+  animation-play-state: paused !important;
+}
 @media (prefers-reduced-motion: reduce) {
   .kft-premium-card, .kft-shimmer-bar, .kft-key-wiggle { animation: none; }
 }
@@ -131,6 +139,7 @@
   to { transform: translateX(-50%); }
 }
 .kft-marquee-track { animation: kft-marquee-rtl 40s linear infinite; will-change: transform; }
+.kft-marquee-track.kft-marquee-paused { animation-play-state: paused !important; will-change: auto; }
 .kft-marquee-viewport:hover .kft-marquee-track,
 .kft-marquee-viewport:active .kft-marquee-track { animation-play-state: paused; }
 @media (prefers-reduced-motion: reduce) {

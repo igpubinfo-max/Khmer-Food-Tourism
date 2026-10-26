@@ -817,6 +817,8 @@ export const HomeView: React.FC = () => {
 
       {/* 5. Everything else, collapsed under "More" */}
       <MoreSection language={language}>
+        {() => (
+          <>
       {/* Hero Banner (Turns GOLD when user upgrades to VIP) */}
       <div className={`relative rounded-3xl overflow-hidden p-5 transition-all duration-300 ${
         isVip 
@@ -1407,6 +1409,8 @@ export const HomeView: React.FC = () => {
           </p>
         </div>
       )}
+          </>
+        )}
       </MoreSection>
     </div>
   );

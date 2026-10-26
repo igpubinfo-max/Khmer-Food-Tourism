@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, useMemo } from 'react';
 import { 
   User, FoodItem, Restaurant, TouristDestination, CommunityPost, 
   Language, UserRole, AppSettings, RegistrationTransaction,
@@ -1770,11 +1770,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Compact bulk arrays before writing to localStorage so base64 photos already confirmed persisted in VAULT_KEYS
   // are never duplicated a second time in kft_destinations_real_v8 / kft_restaurants_real_v9 / kft_foods_200_v7.
   // Never strip a `data:` photo unless `isOverridePersistedInLocalStorage` confirms the override is safely on disk in localStorage.
+  const seedDestPhotoMapRef = useRef<Map<string, string> | null>(null);
+  const seedFoodPhotoMapRef = useRef<Map<string, string> | null>(null);
+  const seedRestPhotoMapRef = useRef<Map<string, string> | null>(null);
+
   const compactDataForBulkLocalStorage = (key: string, data: unknown): unknown => {
     if (!Array.isArray(data)) return data;
     try {
       if (key === 'kft_destinations_real_v8') {
-        const seedDestMap = new Map(initialDestinations.map(d => [d.id, d.photoUrl]));
+        if (!seedDestPhotoMapRef.current) {
+          seedDestPhotoMapRef.current = new Map(initialDestinations.map(d => [d.id, d.photoUrl]));
+        }
+        const seedDestMap = seedDestPhotoMapRef.current;
         return (data as TouristDestination[]).map(d => {
           if (
             d &&
@@ -1794,7 +1801,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         });
       }
       if (key === 'kft_foods_200_v7') {
-        const seedFoodMap = new Map(initialFoods.map(f => [f.id, f.photoUrl]));
+        if (!seedFoodPhotoMapRef.current) {
+          seedFoodPhotoMapRef.current = new Map(initialFoods.map(f => [f.id, f.photoUrl]));
+        }
+        const seedFoodMap = seedFoodPhotoMapRef.current;
         return (data as FoodItem[]).map(f => {
           if (
             f &&
@@ -1812,7 +1822,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         });
       }
       if (key === 'kft_restaurants_real_v11') {
-        const seedRestMap = new Map(initialRestaurants.map(r => [r.id, r.photoUrl]));
+        if (!seedRestPhotoMapRef.current) {
+          seedRestPhotoMapRef.current = new Map(initialRestaurants.map(r => [r.id, r.photoUrl]));
+        }
+        const seedRestMap = seedRestPhotoMapRef.current;
         return (data as Restaurant[]).map(r => {
           if (
             r &&
@@ -2128,7 +2141,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     enforceVipExpirationsAndReminders();
 
-    const intervalId = window.setInterval(enforceVipExpirationsAndReminders, 60000);
+    const intervalId = window.setInterval(enforceVipExpirationsAndReminders, 300000);
     const onVisibility = () => {
       if (typeof document !== 'undefined' && !document.hidden) {
         enforceVipExpirationsAndReminders();
@@ -2367,14 +2380,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return settingsFetchInFlightRef.current;
     }
 
-    setIsRefreshingSettings(true);
+    if (!silent) {
+      setIsRefreshingSettings(true);
+    }
     const task = (async () => {
       try {
         const res = await fetchAuthoritativeAppSettingsFromServer(appSettingsRef.current);
         if (isSavingSettingsRef.current || (silent && Date.now() - lastAdminSettingsSaveAtRef.current < 6000)) {
           return appSettingsRef.current;
         }
-        setSettingsSyncError(null);
+        setSettingsSyncError(prev => (prev === null ? prev : null));
         if (res.ok && res.settings) {
           setAppSettings(prev => {
             const next = normalizeAuthoritativeAppSettings(res.settings!, prev);
@@ -2388,10 +2403,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
         return appSettingsRef.current;
       } catch {
-        setSettingsSyncError(null);
+        setSettingsSyncError(prev => (prev === null ? prev : null));
         return appSettingsRef.current;
       } finally {
-        setIsRefreshingSettings(false);
+        if (!silent) {
+          setIsRefreshingSettings(false);
+        }
         settingsFetchInFlightRef.current = null;
       }
     })();
@@ -2467,7 +2484,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (typeof document === 'undefined' || !document.hidden) {
         refreshAppSettingsFromServer(true);
       }
-    }, 15000);
+    }, 120000);
 
     return () => {
       window.removeEventListener('focus', handleVisibilityOrFocus);
@@ -2516,12 +2533,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       return false;
     }
-    if (!force && now - lastCloudSyncAtRef.current < 15000) {
+    if (!force && now - lastCloudSyncAtRef.current < 60000) {
       return false;
     }
     cloudSyncInFlightRef.current = true;
     lastCloudSyncAtRef.current = now;
-    setIsSyncingUsers(true);
+    if (force) {
+      setIsSyncingUsers(true);
+    }
     try {
       let localVault: Record<string, any> = {};
       try {
@@ -2543,7 +2562,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       });
 
       if (result.synced) {
-        setLastUsersSyncedAt(new Date().toISOString());
+        if (force || isAdminOpen) {
+          setLastUsersSyncedAt(new Date().toISOString());
+        }
         if (result.mergedAppSettings && !isSavingSettingsRef.current && Date.now() - lastAdminSettingsSaveAtRef.current >= 6000) {
           setAppSettings(prev => {
             const nextSettings = normalizeAuthoritativeAppSettings(result.mergedAppSettings!, prev);
@@ -2561,11 +2582,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
 
         if (Array.isArray(result.mergedDeletedUsers)) {
-          setDeletedUsers(result.mergedDeletedUsers);
-          latestSyncStateRef.current.deletedUsers = result.mergedDeletedUsers;
-          try {
-            localStorage.setItem('kft_deleted_users_v1', JSON.stringify(result.mergedDeletedUsers));
-          } catch {}
+          setDeletedUsers(prev => {
+            if (prev.length === result.mergedDeletedUsers.length && JSON.stringify(prev) === JSON.stringify(result.mergedDeletedUsers)) {
+              return prev;
+            }
+            latestSyncStateRef.current.deletedUsers = result.mergedDeletedUsers;
+            try {
+              localStorage.setItem('kft_deleted_users_v1', JSON.stringify(result.mergedDeletedUsers));
+            } catch {}
+            return result.mergedDeletedUsers;
+          });
         }
 
         // Merge with latest live state in case a user logged in or registered while the sync request was in flight!
@@ -2583,6 +2609,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             [...result.mergedUsers, ...prev, nonAdminCur],
             result.mergedDeletedUsers
           );
+          if (prev.length === finalMerged.length && JSON.stringify(prev) === JSON.stringify(finalMerged)) {
+            return prev;
+          }
           latestSyncStateRef.current.users = finalMerged;
           try {
             localStorage.setItem('kft_users_v5', JSON.stringify(finalMerged));
@@ -2621,14 +2650,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 (curEmail && u.email && u.email.toLowerCase().trim() === curEmail) ||
                 (curPhone.length >= 7 && u.phone && u.phone.replace(/[\s-+]/g, '') === curPhone)
             );
-            if (matchedCurrent) {
+            if (matchedCurrent && JSON.stringify(matchedCurrent) !== JSON.stringify(liveCurrentUser)) {
               setCurrentUser(matchedCurrent);
               latestSyncStateRef.current.currentUser = matchedCurrent;
             }
           }
         }
-        setTransactions(result.mergedTransactions);
-        latestSyncStateRef.current.transactions = result.mergedTransactions;
+        setTransactions(prev => {
+          if (prev.length === result.mergedTransactions.length && JSON.stringify(prev) === JSON.stringify(result.mergedTransactions)) {
+            return prev;
+          }
+          latestSyncStateRef.current.transactions = result.mergedTransactions;
+          return result.mergedTransactions;
+        });
         if (result.mergedCustomRestaurants.length > 0) {
           const deletedIdSet = new Set((result.mergedDeletedUsers || []).map(d => d.id));
           const getRestMs = (x?: Restaurant | null): number =>
@@ -2640,9 +2674,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             );
           setRestaurants(prev => {
             const map = new Map<string, Restaurant>();
+            let anyCustomChanged = false;
             for (const r of prev) {
               if (isSeedRestaurantId(String(r.id)) || !r.ownerId || !deletedIdSet.has(r.ownerId)) {
                 map.set(r.id, r);
+              } else {
+                anyCustomChanged = true;
               }
             }
             for (const r of result.mergedCustomRestaurants) {
@@ -2651,26 +2688,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 const localCur = map.get(r.id);
                 if (!localCur) {
                   map.set(r.id, normCloud);
+                  anyCustomChanged = true;
                 } else {
                   const localMs = getRestMs(localCur);
                   const cloudMs = getRestMs(normCloud);
                   const editedDuringSync = lastLocalRestaurantEditAtRef.current >= now - 5000;
                   if (editedDuringSync || localMs >= cloudMs) {
-                    map.set(r.id, {
-                      ...normCloud,
-                      ...localCur,
-                      menuItems:
-                        Array.isArray(localCur.menuItems) && localCur.menuItems.length > 0
-                          ? localCur.menuItems
-                          : Array.isArray(localCur.menuItems) && localMs > cloudMs
-                          ? localCur.menuItems
-                          : normCloud.menuItems || [],
-                    });
+                    map.set(r.id, localCur);
                   } else {
                     map.set(r.id, normCloud);
+                    anyCustomChanged = true;
                   }
                 }
               }
+            }
+            if (!anyCustomChanged) {
+              return prev;
             }
             const sorted = sortRestaurantsChronologically(Array.from(map.values()));
             latestSyncStateRef.current.restaurants = sorted;
@@ -2678,10 +2711,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           });
         }
         try {
-          localStorage.setItem(
-            'kft_secure_payment_proofs_vault_v1',
-            JSON.stringify(result.mergedPaymentProofsVault)
-          );
+          if (JSON.stringify(localVault) !== JSON.stringify(result.mergedPaymentProofsVault)) {
+            localStorage.setItem(
+              'kft_secure_payment_proofs_vault_v1',
+              JSON.stringify(result.mergedPaymentProofsVault)
+            );
+          }
         } catch {}
 
         // Also synchronize permanent media overrides across Foods, Restaurants, Destinations & Trending Foods
@@ -2690,22 +2725,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           if (Object.keys(syncedMediaBundle.foods).length > 0) {
             setFoods(prev => {
               const next = applyFoodOverrides(prev, syncedMediaBundle.foods);
-              setSelectedFood(sel => (sel ? next.find(f => f.id === sel.id) || sel : null));
+              if (next !== prev) {
+                setSelectedFood(sel => (sel ? next.find(f => f.id === sel.id) || sel : null));
+              }
               return next;
             });
           }
           if (Object.keys(syncedMediaBundle.restaurants).length > 0) {
             setRestaurants(prev => {
               const next = applyRestaurantOverrides(prev, syncedMediaBundle.restaurants);
-              setSelectedRestaurant(sel => (sel ? next.find(r => r.id === sel.id) || sel : null));
-              setManagingRestaurantState(cur => (cur ? next.find(r => r.id === cur.id) || cur : null));
+              if (next !== prev) {
+                setSelectedRestaurant(sel => (sel ? next.find(r => r.id === sel.id) || sel : null));
+                setManagingRestaurantState(cur => (cur ? next.find(r => r.id === cur.id) || cur : null));
+              }
               return next;
             });
           }
           if (Object.keys(syncedMediaBundle.destinations).length > 0) {
             setDestinations(prev => {
               const next = applyDestinationOverrides(prev, syncedMediaBundle.destinations);
-              setSelectedDestination(sel => (sel ? next.find(d => d.id === sel.id) || sel : null));
+              if (next !== prev) {
+                setSelectedDestination(sel => (sel ? next.find(d => d.id === sel.id) || sel : null));
+              }
               return next;
             });
           }
@@ -2722,7 +2763,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return false;
     } finally {
       cloudSyncInFlightRef.current = false;
-      setIsSyncingUsers(false);
+      if (force) {
+        setIsSyncingUsers(false);
+      }
       if (pendingForcedSyncRef.current) {
         pendingForcedSyncRef.current = false;
         setTimeout(() => {
@@ -2790,7 +2833,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (typeof document === 'undefined' || !document.hidden) {
           triggerCloudSyncNow(false);
         }
-      }, 20000);
+      }, 90000);
       if (typeof document !== 'undefined') {
         document.addEventListener('visibilitychange', handleVisibilityCloudSync);
       }
@@ -3117,7 +3160,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
   };
 
-  const isBookmarked = (id: string) => bookmarks.includes(id);
+  const bookmarkSet = useMemo(() => new Set(bookmarks), [bookmarks]);
+  const isBookmarked = (id: string) => bookmarkSet.has(id);
 
   // Auth
   const login = (identifier: string, role?: UserRole): boolean => {

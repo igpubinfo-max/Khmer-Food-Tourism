@@ -1511,7 +1511,25 @@ function buildChineseCookingStepsForCategory(
  * - When `en`: strips Khmer characters `[\u1780-\u17FF]` and empty parentheticals
  * - When `zh`: strips Khmer characters `[\u1780-\u17FF]` and Latin transliteration parentheticals like `(Kari Sach Moan)` or `（Fish Amok）` while preserving numeric units like `（400克）` or `($10)`
  */
+const sanitizeTextCache = new Map<string, string>();
+const localizedFoodWeakCache = new WeakMap<FoodItem, Record<string, any>>();
+const localizedDestinationWeakCache = new WeakMap<TouristDestination, Record<string, any>>();
+const localizedRestaurantWeakCache = new WeakMap<Restaurant, Record<string, any>>();
+
 export function sanitizeStrictLanguageText(input: string | undefined, lang: Language): string {
+  if (!input) return '';
+  const trimmed = input.trim();
+  if (!trimmed) return '';
+  const cacheKey = lang + '|' + trimmed;
+  const cached = sanitizeTextCache.get(cacheKey);
+  if (cached !== undefined) return cached;
+  const result = computeSanitizeStrictLanguageText(trimmed, lang);
+  if (sanitizeTextCache.size > 5000) sanitizeTextCache.clear();
+  sanitizeTextCache.set(cacheKey, result);
+  return result;
+}
+
+function computeSanitizeStrictLanguageText(input: string, lang: Language): string {
   if (!input) return '';
   let out = input.trim();
   if (!out) return '';
@@ -1555,6 +1573,19 @@ export function sanitizeStrictLanguageText(input: string | undefined, lang: Lang
  * Get localized fields for a FoodItem in KM, EN, or ZH
  */
 export function getLocalizedFood(food: FoodItem, lang: Language) {
+  if (!food || typeof food !== 'object') return computeLocalizedFood(food, lang);
+  let byLang = localizedFoodWeakCache.get(food);
+  if (byLang && byLang[lang]) return byLang[lang];
+  const computed = computeLocalizedFood(food, lang);
+  if (!byLang) {
+    byLang = {};
+    localizedFoodWeakCache.set(food, byLang);
+  }
+  byLang[lang] = computed;
+  return computed;
+}
+
+function computeLocalizedFood(food: FoodItem, lang: Language) {
   if (lang === 'km') {
     const diffKm = formatDifficultyByLang(food.difficulty, 'km');
     const cleanKmName = sanitizeStrictLanguageText(food.nameKh, 'km');
@@ -1688,6 +1719,19 @@ const SOCIAL_HIGHLIGHT_ZH_MAP: Record<string, string> = {
  * Get localized fields for a TouristDestination in KM, EN, or ZH
  */
 export function getLocalizedDestination(dest: TouristDestination, lang: Language) {
+  if (!dest || typeof dest !== 'object') return computeLocalizedDestination(dest, lang);
+  let byLang = localizedDestinationWeakCache.get(dest);
+  if (byLang && byLang[lang]) return byLang[lang];
+  const computed = computeLocalizedDestination(dest, lang);
+  if (!byLang) {
+    byLang = {};
+    localizedDestinationWeakCache.set(dest, byLang);
+  }
+  byLang[lang] = computed;
+  return computed;
+}
+
+function computeLocalizedDestination(dest: TouristDestination, lang: Language) {
   const highlightsEnList = (dest as { highlightsEn?: string[] }).highlightsEn;
 
   if (lang === 'km') {
@@ -1772,6 +1816,19 @@ export function getLocalizedDestination(dest: TouristDestination, lang: Language
  * Get localized fields for a Restaurant in KM, EN, or ZH
  */
 export function getLocalizedRestaurant(rest: Restaurant, lang: Language) {
+  if (!rest || typeof rest !== 'object') return computeLocalizedRestaurant(rest, lang);
+  let byLang = localizedRestaurantWeakCache.get(rest);
+  if (byLang && byLang[lang]) return byLang[lang];
+  const computed = computeLocalizedRestaurant(rest, lang);
+  if (!byLang) {
+    byLang = {};
+    localizedRestaurantWeakCache.set(rest, byLang);
+  }
+  byLang[lang] = computed;
+  return computed;
+}
+
+function computeLocalizedRestaurant(rest: Restaurant, lang: Language) {
   if (lang === 'km') {
     return {
       name: sanitizeStrictLanguageText(rest.nameKh, 'km'),

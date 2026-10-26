@@ -216,6 +216,35 @@ export async function loadBundleFromIdb(): Promise<AllMediaOverridesBundle | nul
 // no Admin-replaced image is ever lost during subsequent edits in the session.
 let inMemoryMasterBundle: AllMediaOverridesBundle | null = null;
 
+// O(1) in-memory sets of IDs confirmed written to synchronous localStorage so `isOverridePersistedInLocalStorage`
+// never needs to call `JSON.parse(localStorage.getItem(...))` inside a 200-item loop!
+const persistedInLocalStorageSets: Record<'foods' | 'restaurants' | 'destinations', Set<string> | null> = {
+  foods: null,
+  restaurants: null,
+  destinations: null,
+};
+
+function getPersistedSetForCategory(category: 'foods' | 'restaurants' | 'destinations'): Set<string> {
+  if (persistedInLocalStorageSets[category]) {
+    return persistedInLocalStorageSets[category]!;
+  }
+  const key =
+    category === 'foods'
+      ? VAULT_KEYS.FOODS
+      : category === 'restaurants'
+      ? VAULT_KEYS.RESTAURANTS
+      : VAULT_KEYS.DESTINATIONS;
+  const diskMap = safeReadJsonMap<{ photoUrl?: string }>(key);
+  const set = new Set<string>();
+  for (const [id, rec] of Object.entries(diskMap)) {
+    if (rec && rec.photoUrl && rec.photoUrl.trim().length > 0) {
+      set.add(id);
+    }
+  }
+  persistedInLocalStorageSets[category] = set;
+  return set;
+}
+
 function isObsoleteSeedPhoto(url?: string): boolean {
   if (!url) return true;
   return url.includes('Huay_Kaew_waterfall_mu_yang.jpg') || url.includes('Global_Forest_Change_tree-cover_loss_year');
@@ -341,14 +370,7 @@ export function isOverridePersistedInLocalStorage(
   id: string
 ): boolean {
   try {
-    const key =
-      category === 'foods'
-        ? VAULT_KEYS.FOODS
-        : category === 'restaurants'
-        ? VAULT_KEYS.RESTAURANTS
-        : VAULT_KEYS.DESTINATIONS;
-    const diskMap = safeReadJsonMap<{ photoUrl?: string }>(key);
-    return Boolean(diskMap[id] && diskMap[id].photoUrl && diskMap[id].photoUrl!.trim().length > 0);
+    return getPersistedSetForCategory(category).has(id);
   } catch {
     return false;
   }
@@ -360,10 +382,28 @@ export function saveLocalMediaOverrides(bundle: AllMediaOverridesBundle): void {
   try {
     localStorage.removeItem(VAULT_KEYS.DESTINATIONS_LEGACY);
   } catch {}
-  safeWriteJsonMap(VAULT_KEYS.FOODS, bundle.foods);
-  safeWriteJsonMap(VAULT_KEYS.RESTAURANTS, bundle.restaurants);
+  if (safeWriteJsonMap(VAULT_KEYS.FOODS, bundle.foods)) {
+    persistedInLocalStorageSets.foods = new Set(
+      Object.entries(bundle.foods)
+        .filter(([, v]) => v && v.photoUrl && v.photoUrl.trim().length > 0)
+        .map(([k]) => k)
+    );
+  }
+  if (safeWriteJsonMap(VAULT_KEYS.RESTAURANTS, bundle.restaurants)) {
+    persistedInLocalStorageSets.restaurants = new Set(
+      Object.entries(bundle.restaurants)
+        .filter(([, v]) => v && (v.photoUrl || v.profileImage))
+        .map(([k]) => k)
+    );
+  }
   const destWritten = safeWriteJsonMap(VAULT_KEYS.DESTINATIONS, bundle.destinations);
-  if (!destWritten) {
+  if (destWritten) {
+    persistedInLocalStorageSets.destinations = new Set(
+      Object.entries(bundle.destinations)
+        .filter(([, v]) => v && v.photoUrl && v.photoUrl.trim().length > 0)
+        .map(([k]) => k)
+    );
+  } else {
     // If all base64 destination photos exceed localStorage's 5MB limit, prioritize storing the newest overrides
     // in localStorage while preserving 100% of overrides in IndexedDB and inMemoryMasterBundle.
     try {
@@ -381,7 +421,9 @@ export function saveLocalMediaOverrides(bundle: AllMediaOverridesBundle): void {
           approxBytes += entrySize;
         }
       }
-      safeWriteJsonMap(VAULT_KEYS.DESTINATIONS, trimmed);
+      if (safeWriteJsonMap(VAULT_KEYS.DESTINATIONS, trimmed)) {
+        persistedInLocalStorageSets.destinations = new Set(Object.keys(trimmed));
+      }
     } catch {}
   }
   safeWriteJsonMap(VAULT_KEYS.TRENDING_FOODS, bundle.trendingFoods);
@@ -648,37 +690,75 @@ export function recordPermanentTrendingFoodOverride(item: TrendingFoodItem): voi
 
 /**
  * Apply permanent food overrides on top of any food list (seed or cached).
+ * Preserves item and array references when no overrides actually change any field.
  */
 export function applyFoodOverrides(
   foods: FoodItem[],
   overridesMap: Record<string, FoodMediaOverride> = loadLocalMediaOverrides().foods
 ): FoodItem[] {
   if (!overridesMap || Object.keys(overridesMap).length === 0) return foods;
-  return foods.map((f) => {
+  let anyChanged = false;
+  const mapped = foods.map((f) => {
     const ov = overridesMap[f.id];
     if (!ov || !ov.photoUrl) return f;
+    const nextPhotoUrl = ov.photoUrl;
+    const nextNameKh = ov.nameKh || f.nameKh;
+    const nextNameEn = ov.nameEn || f.nameEn;
+    const nextCategorySlug = ov.categorySlug || f.categorySlug;
+    const nextCategoryKh = ov.categoryKh || f.categoryKh;
+    const nextCategoryEn = ov.categoryEn || f.categoryEn;
+    const nextDescriptionKh = ov.descriptionKh || f.descriptionKh;
+    const nextDescriptionEn = ov.descriptionEn || f.descriptionEn;
+    const nextPriceRiel = typeof ov.priceRiel === 'number' ? ov.priceRiel : f.priceRiel;
+    const nextPriceUsd = typeof ov.priceUsd === 'number' ? ov.priceUsd : f.priceUsd;
+    const nextAuditStatus = ov.imageAuditStatus || 'verified';
+    const nextAuditNote = ov.imageAuditNote || f.imageAuditNote;
+    const nextPhotoUpdatedAt = ov.updatedAt;
+
+    if (
+      f.photoUrl === nextPhotoUrl &&
+      f.nameKh === nextNameKh &&
+      f.nameEn === nextNameEn &&
+      f.categorySlug === nextCategorySlug &&
+      f.categoryKh === nextCategoryKh &&
+      f.categoryEn === nextCategoryEn &&
+      f.descriptionKh === nextDescriptionKh &&
+      f.descriptionEn === nextDescriptionEn &&
+      f.priceRiel === nextPriceRiel &&
+      f.priceUsd === nextPriceUsd &&
+      f.imageAuditStatus === nextAuditStatus &&
+      f.imageAuditNote === nextAuditNote &&
+      f.isCustomPhoto === true &&
+      f.photoUpdatedAt === nextPhotoUpdatedAt
+    ) {
+      return f;
+    }
+
+    anyChanged = true;
     return {
       ...f,
-      photoUrl: ov.photoUrl,
-      nameKh: ov.nameKh || f.nameKh,
-      nameEn: ov.nameEn || f.nameEn,
-      categorySlug: ov.categorySlug || f.categorySlug,
-      categoryKh: ov.categoryKh || f.categoryKh,
-      categoryEn: ov.categoryEn || f.categoryEn,
-      descriptionKh: ov.descriptionKh || f.descriptionKh,
-      descriptionEn: ov.descriptionEn || f.descriptionEn,
-      priceRiel: typeof ov.priceRiel === 'number' ? ov.priceRiel : f.priceRiel,
-      priceUsd: typeof ov.priceUsd === 'number' ? ov.priceUsd : f.priceUsd,
-      imageAuditStatus: ov.imageAuditStatus || 'verified',
-      imageAuditNote: ov.imageAuditNote || f.imageAuditNote,
+      photoUrl: nextPhotoUrl,
+      nameKh: nextNameKh,
+      nameEn: nextNameEn,
+      categorySlug: nextCategorySlug,
+      categoryKh: nextCategoryKh,
+      categoryEn: nextCategoryEn,
+      descriptionKh: nextDescriptionKh,
+      descriptionEn: nextDescriptionEn,
+      priceRiel: nextPriceRiel,
+      priceUsd: nextPriceUsd,
+      imageAuditStatus: nextAuditStatus,
+      imageAuditNote: nextAuditNote,
       isCustomPhoto: true,
-      photoUpdatedAt: ov.updatedAt,
+      photoUpdatedAt: nextPhotoUpdatedAt,
     };
   });
+  return anyChanged ? mapped : foods;
 }
 
 /**
  * Apply permanent restaurant overrides on top of any restaurant list (seed or cached).
+ * Preserves item and array references when no overrides actually change any field.
  */
 export function applyRestaurantOverrides(
   restaurants: Restaurant[],
@@ -686,6 +766,7 @@ export function applyRestaurantOverrides(
 ): Restaurant[] {
   if (!overridesMap || Object.keys(overridesMap).length === 0) return restaurants;
   const seenIds = new Set<string>();
+  let anyChanged = false;
   const mapped = restaurants.map((r) => {
     seenIds.add(r.id);
     const ov = overridesMap[r.id];
@@ -707,10 +788,33 @@ export function applyRestaurantOverrides(
         ? ovMenu
         : rMenu;
     const photoUrl = ov.photoUrl || ov.profileImage || r.photoUrl;
+    const nextPhotoUpdatedAt = ovTime >= rTime ? (ov.updatedAt || r.photoUpdatedAt) : (r.photoUpdatedAt || ov.updatedAt);
+    const nextUpdatedAt = ovTime >= rTime ? (ov.updatedAt || r.updatedAt) : (r.updatedAt || ov.updatedAt);
+    const nextProfileImage = ov.profileImage || photoUrl;
+
+    if (
+      r.photoUrl === photoUrl &&
+      r.profileImage === nextProfileImage &&
+      r.isCustomPhoto === true &&
+      r.photoUpdatedAt === nextPhotoUpdatedAt &&
+      r.updatedAt === nextUpdatedAt &&
+      r.nameKh === (ov.nameKh || r.nameKh) &&
+      r.nameEn === (ov.nameEn || r.nameEn) &&
+      r.descriptionKh === (ov.descriptionKh || r.descriptionKh) &&
+      r.addressKh === (ov.addressKh || r.addressKh) &&
+      r.provinceKh === (ov.provinceKh || r.provinceKh) &&
+      r.phone === (ov.phone !== undefined ? ov.phone : r.phone) &&
+      (r.menuItems || []).length === resolvedMenuItems.length &&
+      (r.reviews || []).length === (Array.isArray(ov.reviews) ? ov.reviews : r.reviews || []).length
+    ) {
+      return r;
+    }
+
+    anyChanged = true;
     return {
       ...r,
       photoUrl,
-      profileImage: ov.profileImage || photoUrl,
+      profileImage: nextProfileImage,
       galleryPhotos: Array.isArray(ov.galleryPhotos) ? ov.galleryPhotos : r.galleryPhotos,
       foodImages: Array.isArray(ov.foodImages) ? ov.foodImages : r.foodImages,
       menuItems: resolvedMenuItems,
@@ -741,14 +845,15 @@ export function applyRestaurantOverrides(
       isAdminEdited: ov.isAdminEdited ?? r.isAdminEdited,
       adminEditedAt: ov.adminEditedAt || r.adminEditedAt,
       isCustomPhoto: true,
-      photoUpdatedAt: ovTime >= rTime ? (ov.updatedAt || r.photoUpdatedAt) : (r.photoUpdatedAt || ov.updatedAt),
-      updatedAt: ovTime >= rTime ? (ov.updatedAt || r.updatedAt) : (r.updatedAt || ov.updatedAt),
+      photoUpdatedAt: nextPhotoUpdatedAt,
+      updatedAt: nextUpdatedAt,
     };
   });
 
   // Also append any custom VIP/Admin restaurants present in overridesMap that aren't in the list yet
   for (const [ovId, ov] of Object.entries(overridesMap)) {
     if (!seenIds.has(ovId) && ov && ov.nameKh && (ov.photoUrl || ov.profileImage)) {
+      anyChanged = true;
       seenIds.add(ovId);
       const photoUrl = ov.photoUrl || ov.profileImage || '/Shop/rest-1.jpg';
       mapped.push({
@@ -800,13 +905,14 @@ export function applyRestaurantOverrides(
     }
   }
 
-  return mapped;
+  return anyChanged ? mapped : restaurants;
 }
 
 /**
  * Apply permanent destination overrides on top of any destination list (seed or cached).
  * Compares override timestamps strictly against the immutable seed (`IMMUTABLE_SEED_DEST_MAP`)
  * so that `compactDataForBulkLocalStorage` can never cause a custom photo to revert to an older seed photo.
+ * Preserves item and array references when no overrides actually change any field.
  */
 export function applyDestinationOverrides(
   destinations: TouristDestination[],
@@ -814,6 +920,7 @@ export function applyDestinationOverrides(
 ): TouristDestination[] {
   if (!overridesMap || Object.keys(overridesMap).length === 0) return destinations;
   const seenIds = new Set<string>();
+  let anyChanged = false;
   const mapped = destinations.map((d) => {
     seenIds.add(d.id);
     const ov = overridesMap[d.id];
@@ -836,7 +943,22 @@ export function applyDestinationOverrides(
       seedTime === 0;
 
     const effectivePhotoUrl = useOverridePhoto ? ov.photoUrl : seedPhotoUrl;
+    const nextPhotoUpdatedAt = ovTime >= seedTime ? (ov.updatedAt || d.photoUpdatedAt) : (seedItem?.photoUpdatedAt || d.photoUpdatedAt);
 
+    if (
+      d.photoUrl === effectivePhotoUrl &&
+      d.isCustomPhoto === true &&
+      d.photoUpdatedAt === nextPhotoUpdatedAt &&
+      d.nameKh === (ov.nameKh || d.nameKh) &&
+      d.nameEn === (ov.nameEn || d.nameEn) &&
+      d.descriptionKh === (ov.descriptionKh || d.descriptionKh) &&
+      d.provinceKh === (ov.provinceKh || d.provinceKh) &&
+      d.addressKh === (ov.addressKh || d.addressKh)
+    ) {
+      return d;
+    }
+
+    anyChanged = true;
     return {
       ...d,
       photoUrl: effectivePhotoUrl,
@@ -862,13 +984,14 @@ export function applyDestinationOverrides(
       isAdminEdited: ov.isAdminEdited ?? d.isAdminEdited,
       adminEditedAt: ov.adminEditedAt || d.adminEditedAt,
       isCustomPhoto: true,
-      photoUpdatedAt: ovTime >= seedTime ? (ov.updatedAt || d.photoUpdatedAt) : (seedItem?.photoUpdatedAt || d.photoUpdatedAt),
+      photoUpdatedAt: nextPhotoUpdatedAt,
     };
   });
 
   // Also append any custom/imported destinations present in overridesMap that aren't in the array yet
   for (const [ovId, ov] of Object.entries(overridesMap)) {
     if (!seenIds.has(ovId) && ov && ov.photoUrl && !isObsoleteSeedPhoto(ov.photoUrl) && ov.nameKh) {
+      anyChanged = true;
       seenIds.add(ovId);
       mapped.push({
         id: ovId,
@@ -907,32 +1030,53 @@ export function applyDestinationOverrides(
     }
   }
 
-  return mapped;
+  return anyChanged ? mapped : destinations;
 }
 
 /**
  * Apply permanent trending food overrides on top of any trending food list.
+ * Preserves item and array references when no overrides actually change any field.
  */
 export function applyTrendingFoodOverrides(
   items: TrendingFoodItem[],
   overridesMap: Record<string, TrendingFoodMediaOverride> = loadLocalMediaOverrides().trendingFoods
 ): TrendingFoodItem[] {
   if (!Array.isArray(items)) return [];
-  const validItems = items.filter((item): item is TrendingFoodItem => Boolean(item && item.id));
+  const hasInvalid = items.some((item) => !item || !item.id);
+  const validItems = hasInvalid ? items.filter((item): item is TrendingFoodItem => Boolean(item && item.id)) : items;
   if (!overridesMap || Object.keys(overridesMap).length === 0) return validItems;
-  return validItems.map((item) => {
+  let anyChanged = hasInvalid;
+  const mapped = validItems.map((item) => {
     const ov = overridesMap[item.id];
     if (!ov || !ov.photoUrl) return item;
+    const nextPhotoUrl = ov.photoUrl || item.photoUrl;
+    const nextFoodNameKh = ov.foodNameKh || item.foodNameKh;
+    const nextFoodNameEn = ov.foodNameEn || item.foodNameEn;
+    const nextRestNameKh = ov.restaurantNameKh || item.restaurantNameKh;
+    const nextLocationKh = ov.locationKh || item.locationKh;
+    const nextPriceRange = ov.priceRange || item.priceRange;
+    if (
+      item.photoUrl === nextPhotoUrl &&
+      item.foodNameKh === nextFoodNameKh &&
+      item.foodNameEn === nextFoodNameEn &&
+      item.restaurantNameKh === nextRestNameKh &&
+      item.locationKh === nextLocationKh &&
+      item.priceRange === nextPriceRange
+    ) {
+      return item;
+    }
+    anyChanged = true;
     return {
       ...item,
-      photoUrl: ov.photoUrl || item.photoUrl,
-      foodNameKh: ov.foodNameKh || item.foodNameKh,
-      foodNameEn: ov.foodNameEn || item.foodNameEn,
-      restaurantNameKh: ov.restaurantNameKh || item.restaurantNameKh,
-      locationKh: ov.locationKh || item.locationKh,
-      priceRange: ov.priceRange || item.priceRange,
+      photoUrl: nextPhotoUrl,
+      foodNameKh: nextFoodNameKh,
+      foodNameEn: nextFoodNameEn,
+      restaurantNameKh: nextRestNameKh,
+      locationKh: nextLocationKh,
+      priceRange: nextPriceRange,
     };
   });
+  return anyChanged ? mapped : validItems;
 }
 
 /**
@@ -951,19 +1095,27 @@ export async function pushMediaOverridesToCloud(bundle?: AllMediaOverridesBundle
   }
 }
 
+let hasHydratedFromIdbOnce = false;
+
 /**
  * Fast local-only hydration from `localStorage` + `IndexedDB` (<15ms, zero network wait).
  * Called immediately on startup so custom photos stored in IndexedDB render before any network request.
  */
 export async function hydrateFromLocalIdbImmediate(): Promise<AllMediaOverridesBundle> {
+  if (inMemoryMasterBundle && hasHydratedFromIdbOnce) {
+    return inMemoryMasterBundle;
+  }
   let current = loadLocalMediaOverrides();
   try {
     const idbBundle = await loadBundleFromIdb();
+    hasHydratedFromIdbOnce = true;
     if (idbBundle) {
       current = mergeOverrideBundles(current, idbBundle);
       inMemoryMasterBundle = current;
     }
-  } catch {}
+  } catch {
+    hasHydratedFromIdbOnce = true;
+  }
   return current;
 }
 
@@ -978,6 +1130,7 @@ export async function hydrateFromLocalIdbImmediate(): Promise<AllMediaOverridesB
  */
 export async function hydrateAndSyncMediaOverrides(): Promise<AllMediaOverridesBundle> {
   let current = await hydrateFromLocalIdbImmediate();
+  let hasRemoteChanges = false;
 
   // Merge from Supabase Cloud using manifest-first delta sync + chunked batching
   if (isSupabaseConfigured()) {
@@ -1035,6 +1188,7 @@ export async function hydrateAndSyncMediaOverrides(): Promise<AllMediaOverridesB
           for (const row of rows) {
             const payload = row.payload;
             if (!payload || !payload.id) continue;
+            hasRemoteChanges = true;
             if (row.key.startsWith('kft_ov_food_')) {
               perRecordBundle.foods[payload.id] = payload;
             } else if (row.key.startsWith('kft_ov_rest_')) {
@@ -1046,13 +1200,16 @@ export async function hydrateAndSyncMediaOverrides(): Promise<AllMediaOverridesB
             }
           }
         }
-        current = mergeOverrideBundles(current, perRecordBundle);
+        if (hasRemoteChanges) {
+          current = mergeOverrideBundles(current, perRecordBundle);
+        }
       }
 
       // Also pull master bundle if manifest returned empty or had no per-record keys yet
       if (existingPerRecordKeys.size === 0) {
         const cloudBundle = await pullCloudDocument<AllMediaOverridesBundle>(VAULT_KEYS.CLOUD_DOC_KEY, 15000);
         if (cloudBundle) {
+          hasRemoteChanges = true;
           current = mergeOverrideBundles(current, cloudBundle);
         }
       }
@@ -1083,9 +1240,11 @@ export async function hydrateAndSyncMediaOverrides(): Promise<AllMediaOverridesB
     } catch {}
   }
 
-  if (inMemoryMasterBundle) {
+  if (inMemoryMasterBundle && hasRemoteChanges) {
     current = mergeOverrideBundles(current, inMemoryMasterBundle);
   }
-  saveLocalMediaOverrides(current);
+  if (hasRemoteChanges) {
+    saveLocalMediaOverrides(current);
+  }
   return current;
 }

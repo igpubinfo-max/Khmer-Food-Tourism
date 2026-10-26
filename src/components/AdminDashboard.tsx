@@ -63,13 +63,13 @@ export const AdminDashboard: React.FC = () => {
     if (activeTab === 'users') {
       const interval = setInterval(() => {
         if (typeof document === 'undefined' || !document.hidden) {
-          if (syncUsersNow) {
+          if (triggerCloudSyncNow) {
+            triggerCloudSyncNow(false);
+          } else if (syncUsersNow) {
             syncUsersNow();
-          } else if (triggerCloudSyncNow) {
-            triggerCloudSyncNow(true);
           }
         }
-      }, 8000);
+      }, 30000);
       return () => clearInterval(interval);
     }
   }, [isAdminOpen, activeTab]);

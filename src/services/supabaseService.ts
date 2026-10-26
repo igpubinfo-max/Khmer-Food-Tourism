@@ -1564,29 +1564,56 @@ export async function syncAllAppDataWithSupabase(localState: {
       mergedAppSettings = normalizeAuthoritativeAppSettings(localState.appSettings);
     }
 
-    // 6. Push merged state back to Supabase Cloud AND backfill atomic `kft_user_<id>` rows for every active user
-    const existingAtomicKeySet = new Set(atomicUserDocs.map(d => d.key));
-    const pushPromises: Promise<boolean>[] = [
-      pushCloudDocument('kft_cloud_users_v2', mergedUsers),
-      pushCloudDocument('kft_cloud_users_v1', mergedUsers),
-      pushCloudDocument('kft_cloud_deleted_users_v1', mergedDeletedUsers),
-      pushCloudDocument('kft_cloud_transactions_v1', mergedTransactions),
-      pushCloudDocument('kft_cloud_deleted_transactions_v1', Array.from(deletedTxnIdSet)),
-      pushCloudDocument('kft_cloud_custom_restaurants_v1', mergedCustomRestaurants),
-      pushCloudDocument('kft_cloud_payment_proofs_v1', mergedPaymentProofsVault),
-    ];
+    // 6. Push merged state back to Supabase Cloud ONLY when merged data differs from cloud state,
+    // and backfill any missing or changed atomic `kft_user_<id>` rows.
+    const existingAtomicMap = new Map(atomicUserDocs.map(d => [d.key, d.payload]));
+    const pushPromises: Promise<boolean>[] = [];
 
-    // Ensure every active user has an atomic `kft_user_<id>` record in Supabase
+    const safeJsonSig = (val: unknown): string => {
+      try {
+        return JSON.stringify(val ?? null);
+      } catch {
+        return '';
+      }
+    };
+
+    const mergedUsersSig = safeJsonSig(mergedUsers);
+    if (mergedUsersSig !== safeJsonSig(cloudUsersV2)) {
+      pushPromises.push(pushCloudDocument('kft_cloud_users_v2', mergedUsers));
+    }
+    if (mergedUsersSig !== safeJsonSig(cloudUsers)) {
+      pushPromises.push(pushCloudDocument('kft_cloud_users_v1', mergedUsers));
+    }
+    if (safeJsonSig(mergedDeletedUsers) !== safeJsonSig(cloudDeletedUsers || [])) {
+      pushPromises.push(pushCloudDocument('kft_cloud_deleted_users_v1', mergedDeletedUsers));
+    }
+    if (safeJsonSig(mergedTransactions) !== safeJsonSig(cloudTxns || [])) {
+      pushPromises.push(pushCloudDocument('kft_cloud_transactions_v1', mergedTransactions));
+    }
+    const mergedDeletedTxnArr = Array.from(deletedTxnIdSet);
+    if (safeJsonSig(mergedDeletedTxnArr) !== safeJsonSig(cloudDeletedTxnIds || [])) {
+      pushPromises.push(pushCloudDocument('kft_cloud_deleted_transactions_v1', mergedDeletedTxnArr));
+    }
+    if (safeJsonSig(mergedCustomRestaurants) !== safeJsonSig(cloudRests || [])) {
+      pushPromises.push(pushCloudDocument('kft_cloud_custom_restaurants_v1', mergedCustomRestaurants));
+    }
+    if (safeJsonSig(mergedPaymentProofsVault) !== safeJsonSig(cloudProofs || {})) {
+      pushPromises.push(pushCloudDocument('kft_cloud_payment_proofs_v1', mergedPaymentProofsVault));
+    }
+
+    // Ensure every active user has an up-to-date atomic `kft_user_<id>` record in Supabase
     for (const u of mergedUsers) {
       const atomicKey = `${USER_RECORD_PREFIX}${u.id}`;
-      const isCurrentUser = localState.currentUser && localState.currentUser.id === u.id;
-      if (!existingAtomicKeySet.has(atomicKey) || isCurrentUser) {
+      const existingAtomic = existingAtomicMap.get(atomicKey);
+      if (!existingAtomic || safeJsonSig(existingAtomic) !== safeJsonSig(u)) {
         pushPromises.push(pushCloudDocument(atomicKey, u));
       }
     }
 
     // Do not overwrite cloud VIP settings during general sync
-    await Promise.all(pushPromises);
+    if (pushPromises.length > 0) {
+      await Promise.all(pushPromises);
+    }
 
     return {
       synced: true,

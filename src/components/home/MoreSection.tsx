@@ -5,7 +5,7 @@ import { tr } from '../../utils/i18n';
 
 interface Props {
   language: Language;
-  children: React.ReactNode;
+  children: React.ReactNode | (() => React.ReactNode);
 }
 
 /** Collapsible "More" section: everything secondary lives here, collapsed by default. */
@@ -26,7 +26,11 @@ export const MoreSection: React.FC<Props> = ({ language, children }) => {
         </span>
         <ChevronDown className={`w-5 h-5 transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
-      {open && <div className="space-y-5 animate-in fade-in duration-150">{children}</div>}
+      {open && (
+        <div className="space-y-5 animate-in fade-in duration-150">
+          {typeof children === 'function' ? children() : children}
+        </div>
+      )}
     </section>
   );
 };
