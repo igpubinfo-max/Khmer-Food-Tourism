@@ -291,21 +291,6 @@ export const RestaurantView: React.FC = () => {
                 setIsAuthModalOpen(true);
                 return;
               }
-              const state = getVipAccountState(currentUser);
-              if (state === 'pending_vip') {
-                showToast(tr(language, '⏳ គណនី VIP របស់អ្នកកំពុងរង់ចាំការពិនិត្យ និងអនុម័តពី Administrator។', '⏳ VIP pending Admin approval.', '⏳ 您的 VIP 申请正在等待管理员审核。'), 'info');
-                return;
-              }
-              if (state === 'expired_vip') {
-                showToast(tr(language, '⚠️ សមាជិកភាព VIP របស់អ្នកបានផុតកំណត់ហើយ! សូមបន្តសមាជិកភាព VIP។', '⚠️ VIP expired. Please renew.', '⚠️ 您的 VIP 会员已到期，请续费。'), 'warning');
-                openUpgradeVipModal(true);
-                return;
-              }
-              if (state === 'regular_unpaid') {
-                showToast(tr(language, '🔒 សម្រាប់តែសមាជិក VIP ដែលបានអនុម័តប៉ុណ្ណោះ! សូមដំឡើងទៅកញ្ចប់ VIP។', '🔒 VIP required!', '🔒 仅限已认证 VIP 会员！请先升级 VIP。'), 'warning');
-                openUpgradeVipModal();
-                return;
-              }
               if (myExistingRest) {
                 openManageMyVipStore(myExistingRest.id);
               } else {
@@ -462,21 +447,6 @@ export const RestaurantView: React.FC = () => {
               onClick={() => {
                 if (!currentUser) {
                   setIsAuthModalOpen(true);
-                  return;
-                }
-                const state = getVipAccountState(currentUser);
-                if (state === 'pending_vip') {
-                  showToast(tr(language, '⏳ ការស្នើសុំសមាជិកភាព VIP របស់អ្នកកំពុងរង់ចាំការពិនិត្យ និងអនុម័តពី Administrator។', '⏳ VIP request pending Admin approval.', '⏳ 您的 VIP 申请正在等待管理员审核。'), 'info');
-                  return;
-                }
-                if (state === 'expired_vip') {
-                  showToast(tr(language, '⚠️ សមាជិកភាព VIP របស់អ្នកបានផុតកំណត់ហើយ! សូមបន្តសមាជិកភាព VIP ដើម្បីចុះបញ្ជីហាង។', '⚠️ VIP membership expired. Please renew.', '⚠️ 您的 VIP 会员已到期，请续费。'), 'warning');
-                  openUpgradeVipModal(true);
-                  return;
-                }
-                if (state === 'regular_unpaid') {
-                  showToast(tr(language, '🔒 ការចុះបញ្ជីហាងគឺសម្រាប់តែសមាជិក VIP ដែលបានអនុម័តប៉ុណ្ណោះ! សូមដំឡើងទៅកញ្ចប់ VIP។', '🔒 VIP required!', '🔒 仅限已认证 VIP 会员！请先升级 VIP。'), 'warning');
-                  openUpgradeVipModal();
                   return;
                 }
                 if (myExistingRest) {

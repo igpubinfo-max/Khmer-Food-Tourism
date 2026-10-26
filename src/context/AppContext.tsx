@@ -4838,7 +4838,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const isPendingManualReview = !isAdmin && aiVerification.decision === 'pending_review';
     const finalStatus: 'approved' | 'pending' | 'rejected' = isPendingManualReview ? 'pending' : 'approved';
     const finalIsVerified = !isPendingManualReview;
-    const finalIsPromoted = !isPendingManualReview;
+    const finalIsPromoted = !isPendingManualReview && (isAdmin || isApprovedVip);
 
     const nowIso = new Date().toISOString();
     const expiryIso =
@@ -4869,10 +4869,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       status: finalStatus,
       isVerified: finalIsVerified,
       isPromoted: finalIsPromoted,
-      membershipTier: 'premium',
-      membershipExpiresAt: expiryIso,
-      paymentStatus: 'verified',
-      menuItems: (restData.menuItems || []).slice(0, 20),
+      membershipTier: (isAdmin || isApprovedVip) ? 'premium' : 'free',
+      membershipExpiresAt: (isAdmin || isApprovedVip) ? expiryIso : undefined,
+      paymentStatus: (isAdmin || isApprovedVip) ? 'verified' : undefined,
+      menuItems: (restData.menuItems || []).slice(0, (isAdmin || isApprovedVip) ? 20 : 5),
       aiCategoryVerification: aiVerification,
       storeSlotNumber: slotNumber,
       replacedFromRestaurantId: targetToReplace ? targetToReplace.id : undefined,

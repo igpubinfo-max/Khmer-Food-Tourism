@@ -101,3 +101,26 @@
   animation: vip-sparkle-dot 1.8s ease-in-out infinite;
   will-change: opacity, transform;
 }
+
+
+/* ===== Premium Smart Menu teaser banner ===== */
+@keyframes kft-gold-shimmer {
+  0% { transform: translateX(-120%) skewX(-18deg); }
+  60%, 100% { transform: translateX(260%) skewX(-18deg); }
+}
+@keyframes kft-gold-breathe {
+  0%, 100% { box-shadow: 0 0 0 1px rgba(251,191,36,.55), 0 8px 24px -8px rgba(251,191,36,.35); }
+  50% { box-shadow: 0 0 0 1px rgba(253,224,71,.95), 0 10px 34px -6px rgba(251,191,36,.65); }
+}
+@keyframes kft-key-wiggle {
+  0%, 85%, 100% { transform: rotate(0deg); }
+  89% { transform: rotate(-12deg); }
+  93% { transform: rotate(10deg); }
+  97% { transform: rotate(-6deg); }
+}
+.kft-premium-card { animation: kft-gold-breathe 3.2s ease-in-out infinite; }
+.kft-shimmer-bar { animation: kft-gold-shimmer 4.5s ease-in-out infinite; }
+.kft-key-wiggle { animation: kft-key-wiggle 5s ease-in-out infinite; transform-origin: 50% 80%; }
+@media (prefers-reduced-motion: reduce) {
+  .kft-premium-card, .kft-shimmer-bar, .kft-key-wiggle { animation: none; }
+}
