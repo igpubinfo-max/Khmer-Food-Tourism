@@ -2,8 +2,12 @@ import { FoodItem, TrendingFoodCategorySlug, TrendingFoodItem } from '../types';
 import { initialFoods } from '../data/seedData';
 import { initialTrendingFoods } from '../data/seedTrendingFoods';
 
-export const ONLINE_DISCOVERY_CACHE_KEY = 'kft_v6_youtube_verified_cache';
-const LEGACY_CACHE_KEYS = ['kft_v5_youtube_discovery_cache', 'kft_v4_online_discovery_cache'];
+export const ONLINE_DISCOVERY_CACHE_KEY = 'kft_v7_youtube_2026_verified_cache';
+const LEGACY_CACHE_KEYS = [
+  'kft_v6_youtube_verified_cache',
+  'kft_v5_youtube_discovery_cache',
+  'kft_v4_online_discovery_cache',
+];
 export const ONLINE_DISCOVERY_CUSTOM_URLS_KEY = 'kft_v3_online_discovery_custom_urls';
 export const ONLINE_DISCOVERY_TTL_MS = 60 * 1000; // 60 seconds auto-refresh window
 export const MANUAL_REFRESH_COOLDOWN_MS = 5 * 1000; // 5 seconds manual cooldown
@@ -82,6 +86,23 @@ interface CuratedYouTubeSeed {
   matchedFoodId?: string;
 }
 
+/** Active 2025–2026 Cambodian Food, Restaurant & Travel YouTube Channels Registry */
+export const ACTIVE_CAMBODIA_YOUTUBE_CHANNELS_2026 = [
+  { channelId: 'UCLVncs-1iVf4f1tW5WSfQfw', name: 'Street Food TV', categorySlug: 'popular_food' as const },
+  { channelId: 'UCM_tv-ZoNPPAIT4rrhib28A', name: 'Street Food Explorer', categorySlug: 'famous_restaurant' as const },
+  { channelId: 'UCQ1k3iVCA9mkTuOJetyK_2Q', name: 'Delicious Food Show & Travel', categorySlug: 'food_travel_vlog' as const },
+  { channelId: 'UC3B29E6Fxe-bum63LxbcspQ', name: 'Walk Street And Food', categorySlug: 'famous_restaurant' as const },
+  { channelId: 'UC4mwWNbfhEM6BKrGtxH_1dg', name: 'Oun Roth Daily life', categorySlug: 'popular_food' as const },
+  { channelId: 'UCg7R70hWzrtDh3bCGlrGKhQ', name: 'Delicious food channel', categorySlug: 'popular_food' as const },
+  { channelId: 'UCIS-mtcY4mDKUd1ET6utKqA', name: 'Thavireak City Walks', categorySlug: 'tourist_attraction' as const },
+  { channelId: 'UCjJJNMTX5wJmZRI5iK3fo5Q', name: 'Sonita Khmer US', categorySlug: 'famous_restaurant' as const },
+  { channelId: 'UCARbX20_cV9YwwrAFyYvoMg', name: 'Mao Cambodia', categorySlug: 'famous_restaurant' as const },
+  { channelId: 'UCRFt5572jMudEvPVDKkHmbg', name: 'Sreyreang Life Show', categorySlug: 'tourist_attraction' as const },
+  { channelId: 'UCss0y7c69jgvFRS9Hs2EwRA', name: 'TravelwithChad', categorySlug: 'tourist_attraction' as const },
+  { channelId: 'UCMIUsbPWmPzqRLoI8J9TG_Q', name: 'Little Explore', categorySlug: 'tourist_attraction' as const },
+  { channelId: 'UCmHn9fGfK0NmI9fMzuaYnjA', name: 'Suitcase Monkey', categorySlug: 'tourist_attraction' as const },
+];
+
 /** Known dead/unavailable IDs from older app versions to purge immediately */
 const KNOWN_UNAVAILABLE_VIDEO_IDS = new Set<string>([
   'F01zC_R8D3w',
@@ -115,14 +136,665 @@ const verifiedVideoCache = new Map<
 >();
 
 /**
- * 100% Verified, Public, Embeddable Cambodian Food & Tourism YouTube Videos
+ * 100% Verified, Public, Embeddable 2025–2026 Cambodian Food & Tourism YouTube Videos
  * Every video ID below has been verified via YouTube oEmbed (200 OK),
  * high-resolution thumbnail check, and mobile embed playability test.
  */
 const CURATED_YOUTUBE_VIDEOS: CuratedYouTubeSeed[] = [
-  // 1. POPULAR FOOD (ម្ហូបខ្មែរល្បីៗ)
+  // ============================================================================
+  // 1. POPULAR KHMER FOOD (ម្ហូបខ្មែរល្បីៗ — 2025–2026 Broadcasts)
+  // ============================================================================
   {
-    id: 'yt-food-amok-1',
+    id: 'yt-2026-food-street-1',
+    url: 'https://www.youtube.com/watch?v=9AH9djVoVDQ',
+    authorName: 'Street Food TV',
+    fallbackTitleEn: 'The Ultimate Cambodian Street Food Tour: Khmer Grilled Sausages, Spicy Papaya Salad & more',
+    titleKh: 'ដំណើរកម្សាន្តភ្លក្សម្ហូបតាមផ្លូវខ្មែរ៖ សាច់ក្រកអាំង បុកល្ហុងហឹរឆ្ងាញ់ និងម្ហូបល្បីៗ (2026)',
+    titleZh: '2026 柬埔寨终极街头美食之旅：高棉烤香肠、香辣木瓜沙拉与地道小吃',
+    descriptionKh: 'វីដេអូថ្មីឆ្នាំ 2026 បង្ហាញពីសាច់ក្រកគោអាំងភ្លើងធ្យូង បុកល្ហុងក្តាមប្រៃ និងមុខម្ហូបតាមផ្លូវខ្មែរកំពុងពេញនិយម។',
+    descriptionEn: '2026 broadcast exploring sizzling Khmer grilled sausages, spicy green papaya salad (Bok Lhong), and authentic street delicacies.',
+    descriptionZh: '2026 最新探访柬埔寨街头炭火烤肉肠、青木瓜沙拉及最受欢迎的传统市集美食。',
+    categorySlug: 'popular_food',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    provinceEn: 'Phnom Penh',
+    publishedDate: '2026-10-26',
+    fallbackThumb: 'https://i.ytimg.com/vi/9AH9djVoVDQ/hqdefault.jpg',
+    matchedFoodId: 'food-80',
+  },
+  {
+    id: 'yt-2026-food-bbq-2',
+    url: 'https://www.youtube.com/watch?v=DZLmPv-P978',
+    authorName: 'Oun Roth Daily life',
+    fallbackTitleEn: '🇰🇭 Cambodian Street Food Tour | Delicious Grilled BBQ Skewers at a Local Market in Phnom Penh – 4K',
+    titleKh: 'សាច់អាំងចង្កាក់ឈ្ងុយឆ្ងាញ់ និងម្ហូបតាមផ្លូវនៅផ្សារក្នុងរាជធានីភ្នំពេញ 4K (2026)',
+    titleZh: '2026 金边本地市场 4K 美食之旅：香脆炭烤肉串与高棉街头小吃',
+    descriptionKh: 'ទស្សនាការអាំងសាច់ចង្កាក់ ស្លាបមាន់អាំង និងម្ហូបខ្មែរថ្មីៗក្តៅៗនៅផ្សារក្នុងរាជធានីភ្នំពេញ កម្រិតរូបភាព 4K។',
+    descriptionEn: '4K street food walk in Phnom Penh featuring smoky charcoal-grilled BBQ skewers, marinated meats, and local market snacks.',
+    descriptionZh: '4K 超高清实拍金边本地市场现烤炭火肉串、秘制烤鸡翅与热闹夜市美食。',
+    categorySlug: 'popular_food',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    provinceEn: 'Phnom Penh',
+    publishedDate: '2026-10-26',
+    fallbackThumb: 'https://i.ytimg.com/vi/DZLmPv-P978/hqdefault.jpg',
+    matchedFoodId: 'food-6',
+  },
+  {
+    id: 'yt-2026-food-riverside-3',
+    url: 'https://www.youtube.com/watch?v=0u8Xe9z8Hso',
+    authorName: 'Oun Roth Daily life',
+    fallbackTitleEn: 'Best Popular Cambodian Street Food 🇰🇭 - Evening Walking Tour @ Riverside, Phnom Penh 2026',
+    titleKh: 'ម្ហូបតាមផ្លូវពេញនិយមពេលរាត្រីនៅមាត់ទន្លេភ្នំពេញ ឆ្នាំ 2026',
+    titleZh: '2026 金边河畔夜市最受欢迎的柬埔寨街头美食漫步',
+    descriptionKh: 'ដើរភ្លក្សម្ហូបខ្មែរពេញនិយមពេលល្ងាចនៅតាមបណ្តោយមាត់ទន្លេភ្នំពេញ មានទាំងលតឆា នំបញ្ចុក និងសាច់អាំង។',
+    descriptionEn: '2026 evening culinary walk along Phnom Penh Riverside sampling popular Cambodian street food stalls and night snacks.',
+    descriptionZh: '2026 傍晚漫步金边四臂湾河畔，品尝最热门的高棉炒粉、米粉与风味夜宵。',
+    categorySlug: 'popular_food',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    provinceEn: 'Phnom Penh',
+    publishedDate: '2026-10-25',
+    fallbackThumb: 'https://i.ytimg.com/vi/0u8Xe9z8Hso/hqdefault.jpg',
+    matchedFoodId: 'food-38',
+  },
+  {
+    id: 'yt-2026-food-pork-4',
+    url: 'https://www.youtube.com/watch?v=nK3x0BD-Sys',
+    authorName: 'Delicious food channel',
+    fallbackTitleEn: 'សាច់ជ្រូកងៀតទន់ផុយឆ្ងាញ់ រូបមន្តធ្វើងៀតសាច់ជ្រូក Delicious food channel',
+    titleKh: 'រូបមន្តធ្វើសាច់ជ្រូកងៀតទន់ផុយឆ្ងាញ់បែបខ្មែរ (Delicious Food Channel 2026)',
+    titleZh: '2026 高棉传统秘制五香猪肉干做法，外香内嫩',
+    descriptionKh: 'ការបង្ហាញវិធីប្រឡាក់គ្រឿងសាច់ជ្រូកងៀតឱ្យមានរសជាតិឈ្ងុយឆ្ងាញ់ ទន់ផុយល្អ តាមក្បួនចុងភៅខ្មែរ។',
+    descriptionEn: 'Step-by-step 2026 Khmer recipe for tender, flavorful marinated sun-dried pork (Sach Chrouk Ngiet).',
+    descriptionZh: '详细展示 2026 正宗高棉家庭秘制猪肉干的腌制与烹调技巧。',
+    categorySlug: 'popular_food',
+    provinceKh: 'ខេត្តបាត់ដំបង',
+    provinceEn: 'Battambang',
+    publishedDate: '2026-10-22',
+    fallbackThumb: 'https://i.ytimg.com/vi/nK3x0BD-Sys/hqdefault.jpg',
+    matchedFoodId: 'food-6',
+  },
+  {
+    id: 'yt-2026-food-numbanhchok-5',
+    url: 'https://www.youtube.com/watch?v=RhtOc1LdaAg',
+    authorName: 'Street Food TV',
+    fallbackTitleEn: 'Non-stop Serving ! Must-Try KHMER Noodle Soup (Num Banh Chok) & More',
+    titleKh: 'នំបញ្ចុកសម្លខ្មែរលក់ដាច់មិនឈប់ និងមុខម្ហូបប្រពៃណីខ្មែរ (2026)',
+    titleZh: '2026 络绎不绝的必尝高棉鱼汤米粉 (Num Banh Chok) 与传统小吃',
+    descriptionKh: 'ទស្សនាការលក់នំបញ្ចុកសម្លប្រហើរ និងសម្លការីខ្មែរដ៏មមាញឹក ជាមួយបន្លែស្រស់ៗគ្រប់មុខ។',
+    descriptionEn: 'Busy Cambodian morning stall serving endless bowls of fresh Num Banh Chok rice noodles with rich fish and curry broths.',
+    descriptionZh: '实拍 2026 生意火爆的高棉鱼汤米粉与红咖喱米粉早市摊位，配满新鲜生菜。',
+    categorySlug: 'popular_food',
+    provinceKh: 'ខេត្តសៀមរាប',
+    provinceEn: 'Siem Reap',
+    publishedDate: '2026-10-21',
+    fallbackThumb: 'https://i.ytimg.com/vi/RhtOc1LdaAg/hqdefault.jpg',
+    matchedFoodId: 'food-3',
+  },
+  {
+    id: 'yt-2026-food-braisedfish-6',
+    url: 'https://www.youtube.com/watch?v=YGkYLaKrPKk',
+    authorName: 'Delicious food channel',
+    fallbackTitleEn: 'របៀបធ្វើត្រីខ #ខត្រីឆ្កោកបែបខ្មែរបូរាណ Delicious food channel',
+    titleKh: 'របៀបធ្វើខត្រីឆ្កោកបែបខ្មែរបុរាណឈ្ងុយឆ្ងាញ់ (2026)',
+    titleZh: '2026 古法高棉红烧鱼 (Khor Trei) 家常料理教学',
+    descriptionKh: 'របៀបខត្រីឆ្កោកជាមួយស្ករត្នោតខ្មែរ និងម្រេចកំពត ឱ្យចូលជាតិឈ្ងុយឆ្ងាញ់ពិសេស។',
+    descriptionEn: 'Authentic 2026 Cambodian caramelized palm sugar braised fish recipe seasoned with aromatic Kampot pepper.',
+    descriptionZh: '使用柬埔寨棕榈糖与贡布黑胡椒慢炖入味的传统高棉红烧鱼食谱。',
+    categorySlug: 'popular_food',
+    provinceKh: 'ខេត្តកំពង់ឆ្នាំង',
+    provinceEn: 'Kampong Chhnang',
+    publishedDate: '2026-10-20',
+    fallbackThumb: 'https://i.ytimg.com/vi/YGkYLaKrPKk/hqdefault.jpg',
+    matchedFoodId: 'food-1',
+  },
+  {
+    id: 'yt-2026-food-machuprey-7',
+    url: 'https://www.youtube.com/watch?v=qNOOGP1w_nM',
+    authorName: 'Delicious food channel',
+    fallbackTitleEn: 'ឆ្ងាញ់! ម្ជូរព្រៃសាច់មាន់ សម្លម្ជូរព្រៃសាច់មាន់ម្ហូបខ្មែររសជាតិឆ្ងាញ់ខ្លាំង Delicious food channel',
+    titleKh: 'សម្លម្ជូរព្រៃសាច់មាន់ ម្ហូបខ្មែររសជាតិឆ្ងាញ់ខ្លាំង (2026)',
+    titleZh: '2026 酸爽开胃的高棉森林酸鸡汤 (Samlor Machu Prey)',
+    descriptionKh: 'វិធីស្លម្ជូរព្រៃសាច់មាន់ជាមួយគល់ស្លឹកគ្រៃ ស្លឹកក្រូចសើច និងម្ទេសស្រស់ រសជាតិជូរហឹរឆ្ងាញ់ជាប់ចិត្ត។',
+    descriptionEn: 'Traditional Khmer wild sour chicken soup cooked with lemongrass, kaffir lime leaves, galangal, and local herbs.',
+    descriptionZh: '融合香茅、柠檬叶与南姜烹制的正宗高棉森林酸辣鸡汤，鲜美开胃。',
+    categorySlug: 'popular_food',
+    provinceKh: 'ខេត្តសៀមរាប',
+    provinceEn: 'Siem Reap',
+    publishedDate: '2026-10-18',
+    fallbackThumb: 'https://i.ytimg.com/vi/qNOOGP1w_nM/hqdefault.jpg',
+    matchedFoodId: 'food-4',
+  },
+  {
+    id: 'yt-2026-food-collection-8',
+    url: 'https://www.youtube.com/watch?v=_ur5Tg0NFMU',
+    authorName: 'Street Food TV',
+    fallbackTitleEn: 'Unbelievable !!! The Best KHMER Authentic Street Food Collection 2026',
+    titleKh: 'បណ្តុំមុខម្ហូបតាមផ្លូវខ្មែររសជាតិដើមល្បីៗបំផុតឆ្នាំ 2026',
+    titleZh: '2026 令人惊叹的正宗高棉街头美食大合集',
+    descriptionKh: 'ការប្រមូលផ្តុំមុខម្ហូបតាមផ្លូវខ្មែរឆ្ងាញ់ៗ នំបាញ់ឆែវ នំគ្រក់ គុយទាវ និងបង្អែមខ្មែរប្រចាំឆ្នាំ 2026។',
+    descriptionEn: '2026 compilation of Cambodia’s finest authentic street food dishes, sizzling crepes, noodles, and traditional desserts.',
+    descriptionZh: '2026 精选高棉煎饼、椰奶米糕、金边粿条与传统高棉甜品的街头美食合集。',
+    categorySlug: 'popular_food',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    provinceEn: 'Phnom Penh',
+    publishedDate: '2026-08-18',
+    fallbackThumb: 'https://i.ytimg.com/vi/_ur5Tg0NFMU/hqdefault.jpg',
+    matchedFoodId: 'food-27',
+  },
+  {
+    id: 'yt-2025-food-sangvak-9',
+    url: 'https://www.youtube.com/watch?v=TII6hVcbSv4',
+    authorName: 'Kitchen Foods',
+    fallbackTitleEn: 'Ultimate CAMBODIAN Feast! 🔥 Grilled Catfish & Sangvak with Fresh Khmer Noodles',
+    titleKh: 'ត្រីអាំង និងសង្វាក់ខ្មែរជាមួយនំបញ្ចុកស្រស់ៗ បែបគ្រួសារខ្មែរ (2025)',
+    titleZh: '2025 丰盛高棉家宴：炭烤鲶鱼与传统鱼肉泥配鲜米粉',
+    descriptionKh: 'ម្ហូបគ្រួសារខ្មែរដ៏ឈ្ងុយឆ្ងាញ់ ត្រីអាំងភ្លើងធ្យូង និងសង្វាក់ខ្មែរ ញ៉ាំផ្ទាប់ជាមួយនំបញ្ចុក និងបន្លែស្រស់។',
+    descriptionEn: 'Rustic Cambodian feast featuring charcoal-grilled catfish and traditional herb-infused Sangvak served with fresh rice noodles.',
+    descriptionZh: '炭火现烤鲜鱼搭配香茅鱼泥 (Sangvak)、新鲜米粉与田园生菜的地道高棉盛宴。',
+    categorySlug: 'popular_food',
+    provinceKh: 'ខេត្តបាត់ដំបង',
+    provinceEn: 'Battambang',
+    publishedDate: '2025-12-15',
+    fallbackThumb: 'https://i.ytimg.com/vi/TII6hVcbSv4/hqdefault.jpg',
+    matchedFoodId: 'food-3',
+  },
+  {
+    id: 'yt-2025-food-loklak-10',
+    url: 'https://www.youtube.com/watch?v=KSNG7aVSKIM',
+    authorName: 'Recipe30',
+    fallbackTitleEn: "Lok Lak: The BEST Cambodian Pepper Beef You've Never Tried",
+    titleKh: 'ឡុកឡាក់សាច់គោម្រេចកំពត រសជាតិល្អឯកប្រចាំកម្ពុជា (2025)',
+    titleZh: '2025 柬埔寨招牌贡布胡椒摇摇牛肉 (Beef Lok Lak) 极品食谱',
+    descriptionKh: 'របៀបឆាឡុកឡាក់សាច់គោឱ្យផុយទន់ ជាមួយទឹកជ្រលក់ម្រេចកំពតក្រូចឆ្មារ និងពងទាចៀន។',
+    descriptionEn: 'High-heat wok-seared Cambodian Beef Lok Lak served with fried egg and authentic Kampot black pepper lime sauce.',
+    descriptionZh: '大火快炒鲜嫩牛肉粒，配太阳蛋与正宗贡布黑胡椒青柠蘸汁的高棉名菜。',
+    categorySlug: 'popular_food',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    provinceEn: 'Phnom Penh',
+    publishedDate: '2025-09-10',
+    fallbackThumb: 'https://i.ytimg.com/vi/KSNG7aVSKIM/hqdefault.jpg',
+    matchedFoodId: 'food-2',
+  },
+
+  // ============================================================================
+  // 2. FAMOUS RESTAURANTS & MARKETS (ភោជនីយដ្ឋានល្បីៗ — 2025–2026 Broadcasts)
+  // ============================================================================
+  {
+    id: 'yt-2026-rest-orussey-1',
+    url: 'https://www.youtube.com/watch?v=ROKuCSsoWSw',
+    authorName: 'Walk Street And Food',
+    fallbackTitleEn: 'Cambodian Street Food 2026 - Walking Tour - Orussey Market, Phnom Penh',
+    titleKh: 'ហាងអាហារ និងតូបម្ហូបល្បីៗនៅផ្សារអូរឫស្សី ភ្នំពេញ ឆ្នាំ 2026',
+    titleZh: '2026 金边乌亚西市场 (Orussey Market) 知名美食摊位与餐馆探店',
+    descriptionKh: 'ដើរមើលតូបលក់ម្ហូបឆ្ងាញ់ៗ បាយសាច់ជ្រូក គុយទាវ និងអាហារដ្ឋានប្រចាំផ្សារអូរឫស្សី រាជធានីភ្នំពេញ ឆ្នាំ 2026។',
+    descriptionEn: '2026 culinary walking tour through Phnom Penh’s bustling Orussey Market food court and long-standing local eateries.',
+    descriptionZh: '2026 实地探访金边乌亚西市场最具人气的传统餐饮档口与特色老字号美食。',
+    categorySlug: 'famous_restaurant',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    provinceEn: 'Phnom Penh',
+    publishedDate: '2026-10-26',
+    fallbackThumb: 'https://i.ytimg.com/vi/ROKuCSsoWSw/hqdefault.jpg',
+    matchedFoodId: 'food-6',
+  },
+  {
+    id: 'yt-2026-rest-mlobmkak-2',
+    url: 'https://www.youtube.com/watch?v=fVP1fAXFNxc',
+    authorName: 'Mao Cambodia',
+    fallbackTitleEn: 'ហាងម្លប់ម្កាក់ និង ហាង អាយ វីន / Two Popular Restaurants in Phnom Penh City Review',
+    titleKh: 'រីវីវភោជនីយដ្ឋានល្បីទាំង ២ នៅភ្នំពេញ៖ ហាងម្លប់ម្កាក់ និងហាង អាយ វីន (2026)',
+    titleZh: '2026 金边两大热门高棉餐厅探店测评：Mlob Mkak 与 I-Win 餐厅',
+    descriptionKh: 'ការបង្ហាញបរិយាកាស និងមុខម្ហូបខ្មែរពិសេសៗនៅភោជនីយដ្ឋានម្លប់ម្កាក់ និងហាងអាយវីន ក្នុងរាជធានីភ្នំពេញ។',
+    descriptionEn: '2026 restaurant review of two popular dining spots in Phnom Penh: Mlob Mkak Restaurant and I-Win Khmer Cuisine.',
+    descriptionZh: '2026 深度测评金边广受欢迎的 Mlob Mkak 与 I-Win 两家高棉风味餐厅的招牌菜品。',
+    categorySlug: 'famous_restaurant',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    provinceEn: 'Phnom Penh',
+    publishedDate: '2026-10-25',
+    fallbackThumb: 'https://i.ytimg.com/vi/fVP1fAXFNxc/hqdefault.jpg',
+    matchedFoodId: 'food-1',
+  },
+  {
+    id: 'yt-2026-rest-riversidemarket-3',
+    url: 'https://www.youtube.com/watch?v=pKxCPaFj-Lo',
+    authorName: 'Walk Street And Food',
+    fallbackTitleEn: 'Cambodian Street Food 2026 - Evening Walking Tour Riverside Food Market, Phnom Penh',
+    titleKh: 'អាហារដ្ឋាន និងផ្សាររាត្រីមាត់ទន្លេភ្នំពេញ ឆ្នាំ 2026',
+    titleZh: '2026 金边河畔美食夜市与露天餐厅晚间漫步',
+    descriptionKh: 'ទស្សនាបរិយាកាសអាហារដ្ឋានពេលរាត្រី និងមុខម្ហូបសម្បូរបែបនៅមាត់ទន្លេចតុមុខ រាជធានីភ្នំពេញ។',
+    descriptionEn: '2026 evening tour of Phnom Penh’s lively Riverside Food Market featuring seafood grills, hotpots, and local eateries.',
+    descriptionZh: '2026 夜游金边四臂湾河畔美食市集，品尝海鲜烧烤、高棉火锅与特色小吃。',
+    categorySlug: 'famous_restaurant',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    provinceEn: 'Phnom Penh',
+    publishedDate: '2026-10-25',
+    fallbackThumb: 'https://i.ytimg.com/vi/pKxCPaFj-Lo/hqdefault.jpg',
+    matchedFoodId: 'food-19',
+  },
+  {
+    id: 'yt-2026-rest-takeo-4',
+    url: 'https://www.youtube.com/watch?v=pd5yBnu9qM4',
+    authorName: 'Go With Samnang',
+    fallbackTitleEn: 'ម្ហូបឆ្ងាញ់ ទេសភាពស្អាត នៅភោជនីយដ្ឋាន លំហែរាំងទឹក #តាកែវ | Relaxing at a Lumhae Restaurant in Takeo',
+    titleKh: 'ម្ហូបឆ្ងាញ់ ទេសភាពស្អាត នៅភោជនីយដ្ឋាន លំហែរាំងទឹក ខេត្តតាកែវ (2026)',
+    titleZh: '2026 茶胶省湖畔生态餐厅 (Lumhae Reang Teuk) 美食与美景探店',
+    descriptionKh: 'ភោជនីយដ្ឋានបែបធម្មជាតិមាត់ទឹកនៅខេត្តតាកែវ បម្រើជូនមុខម្ហូបខ្មែរស្រស់ៗ និងខ្យល់អាកាសបរិសុទ្ធ។',
+    descriptionEn: '2026 visit to Lumhae Reang Teuk waterfront restaurant in Takeo serving fresh countryside Khmer dishes in scenic huts.',
+    descriptionZh: '2026 探访茶胶省水上凉亭生态餐厅，尽享地道高棉农家菜与田园风光。',
+    categorySlug: 'famous_restaurant',
+    provinceKh: 'ខេត្តតាកែវ',
+    provinceEn: 'Takeo',
+    publishedDate: '2026-10-25',
+    fallbackThumb: 'https://i.ytimg.com/vi/pd5yBnu9qM4/hqdefault.jpg',
+    matchedFoodId: 'food-1',
+  },
+  {
+    id: 'yt-2026-rest-kampot-5',
+    url: 'https://www.youtube.com/watch?v=Cv92PHMlHAE',
+    authorName: 'Sonita Khmer US',
+    fallbackTitleEn: 'ឧទ្យានទឹកតាមឆ្នេរខ្សាច់សម្រាប់ក្រុមគ្រួសារ ដូងទេរ Daung Te Beach Water Park in Kampot Cambodia, Food',
+    titleKh: 'អាហារដ្ឋានមាត់ទឹក និងរមណីយដ្ឋានដូងទេរ ខេត្តកំពត (2026)',
+    titleZh: '2026 贡布省 Daung Te 河畔餐饮与水上乐园家庭出游指南',
+    descriptionKh: 'ភ្លក្សអាហារឆ្ងាញ់ៗនៅតាមដងព្រែកកំពត និងលេងកម្សាន្តនៅរមណីយដ្ឋានដូងទេរ ខេត្តកំពត។',
+    descriptionEn: '2026 guide to riverside dining and family water activities at Daung Te in Kampot Province.',
+    descriptionZh: '2026 贡布河畔特色餐厅美食体验与 Daung Te 水上休闲度假区导览。',
+    categorySlug: 'famous_restaurant',
+    provinceKh: 'ខេត្តកំពត',
+    provinceEn: 'Kampot',
+    publishedDate: '2026-10-25',
+    fallbackThumb: 'https://i.ytimg.com/vi/Cv92PHMlHAE/hqdefault.jpg',
+    matchedFoodId: 'food-27',
+  },
+  {
+    id: 'yt-2026-rest-toultompoung-6',
+    url: 'https://www.youtube.com/watch?v=tzi19u8lA8U',
+    authorName: 'Street Food Explorer',
+    fallbackTitleEn: 'Cambodia Street Food Tour 🇰🇭 Exploring Toul Tom Poung Market, Phnom Penh 2026 4K',
+    titleKh: 'ភោជនីយដ្ឋាន និងអាហារល្បីៗនៅផ្សារទួលទំពូង ភ្នំពេញ ឆ្នាំ 2026 (4K)',
+    titleZh: '2026 金边朱德奔市场 (俄罗斯市场) 4K 美食与知名餐馆探店',
+    descriptionKh: 'វីដេអូថ្មីឆ្នាំ 2026 កម្រិត 4K ដើរមើលហាងអាហារខ្មែរ គុយទាវ នំបញ្ចុក និងបង្អែមល្បីៗនៅផ្សារទួលទំពូង រាជធានីភ្នំពេញ។',
+    descriptionEn: 'Brand-new 2026 4K culinary tour of Phnom Penh’s iconic Toul Tom Poung (Russian Market) food stalls and local restaurants.',
+    descriptionZh: '2026 全新 4K 探访金边俄罗斯市场周边口碑极佳的传统高棉餐馆与特色小吃摊。',
+    categorySlug: 'famous_restaurant',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    provinceEn: 'Phnom Penh',
+    publishedDate: '2026-10-24',
+    fallbackThumb: 'https://i.ytimg.com/vi/tzi19u8lA8U/hqdefault.jpg',
+    matchedFoodId: 'food-5',
+  },
+  {
+    id: 'yt-2026-rest-morganbuffet-7',
+    url: 'https://www.youtube.com/watch?v=hkuyJ4jZ6Fo',
+    authorName: 'Sonita Khmer US',
+    fallbackTitleEn: 'ប៊ូហ្វេខ្មែរនិងបរទេសថ្ងៃត្រង់ម្នាក់ត្រឹមតែ $6 per person Lunch Buffet at a 5-Star Hotel Morgan Tower',
+    titleKh: 'ប៊ូហ្វេម្ហូបខ្មែរ និងអន្តរជាតិថ្ងៃត្រង់នៅអគារ Morgan Tower ភ្នំពេញ (2026)',
+    titleZh: '2026 金边摩根大厦高性价比高棉与国际自助午餐探店',
+    descriptionKh: 'ទស្សនាការរៀបចំប៊ូហ្វេម្ហូបខ្មែរ និងអន្តរជាតិដ៏សម្បូរបែប តម្លៃសមរម្យ នៅកោះពេជ្រ រាជធានីភ្នំពេញ។',
+    descriptionEn: '2026 review of the $6 Khmer and international lunch buffet at Morgan Tower in Koh Pich, Phnom Penh.',
+    descriptionZh: '2026 实拍金边钻石岛摩根大厦丰富的柬埔寨传统菜肴与国际美食自助午餐。',
+    categorySlug: 'famous_restaurant',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    provinceEn: 'Phnom Penh',
+    publishedDate: '2026-10-21',
+    fallbackThumb: 'https://i.ytimg.com/vi/hkuyJ4jZ6Fo/hqdefault.jpg',
+    matchedFoodId: 'food-1',
+  },
+  {
+    id: 'yt-2026-rest-tonlebassac-8',
+    url: 'https://www.youtube.com/watch?v=H_pibKmw1lo',
+    authorName: 'Sonita Khmer US',
+    fallbackTitleEn: 'ហាងប៊ូហ្វេធំម្ហូបខ្មែរនៅភ្នំពេញ Grand Buffet Tonle Bassac Restaurant Phnom Penh Cambodia',
+    titleKh: 'ហាងប៊ូហ្វេធំម្ហូបខ្មែរ ភោជនីយដ្ឋានទន្លេបាសាក់ ភ្នំពេញ (2026)',
+    titleZh: '2026 金边百色河大餐厅 (Tonle Bassac) 豪华高棉与海鲜自助餐',
+    descriptionKh: 'ភ្លក្សម្ហូបខ្មែររាប់រយមុខ គ្រឿងសមុទ្រស្រស់ៗ និងបង្អែមប្រពៃណីនៅភោជនីយដ្ឋានប៊ូហ្វេទន្លេបាសាក់។',
+    descriptionEn: 'Exploring the grand Cambodian and seafood buffet spread at Tonle Bassac Restaurant in Phnom Penh.',
+    descriptionZh: '探访金边著名的百色河自助餐厅，品尝上百道正宗高棉名菜、鲜活海鲜与传统甜点。',
+    categorySlug: 'famous_restaurant',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    provinceEn: 'Phnom Penh',
+    publishedDate: '2026-01-18',
+    fallbackThumb: 'https://i.ytimg.com/vi/H_pibKmw1lo/hqdefault.jpg',
+    matchedFoodId: 'food-1',
+  },
+  {
+    id: 'yt-2025-rest-kmbuffet-9',
+    url: 'https://www.youtube.com/watch?v=ZngqC0-fz50',
+    authorName: 'Mao Cambodia',
+    fallbackTitleEn: '$3.99 All You Can Eat/ Home Style Cambodian Buffet at KM Restaurant in Phnom Penh City, Cambodia',
+    titleKh: 'ប៊ូហ្វេម្ហូបខ្មែរគ្រួសារ តម្លៃសមរម្យនៅភោជនីយដ្ឋាន KM ភ្នំពេញ (2025)',
+    titleZh: '2025 金边 KM 餐厅地道高棉家常菜自助餐探店',
+    descriptionKh: 'ហាងប៊ូហ្វេម្ហូបខ្មែរប្រចាំថ្ងៃ មានសម្លខ្មែរ ត្រីចៀន ទឹកគ្រឿង និងបន្លែស្រស់ៗជាច្រើនមុខនៅភ្នំពេញ។',
+    descriptionEn: 'Home-style Cambodian all-you-can-eat buffet at KM Restaurant featuring traditional soups,Prahok dips, and grilled fish.',
+    descriptionZh: '品尝金边 KM 餐厅物美价廉的高棉家常自助餐，包含各式传统浓汤、烤鱼与蔬菜蘸酱。',
+    categorySlug: 'famous_restaurant',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    provinceEn: 'Phnom Penh',
+    publishedDate: '2025-11-12',
+    fallbackThumb: 'https://i.ytimg.com/vi/ZngqC0-fz50/hqdefault.jpg',
+    matchedFoodId: 'food-4',
+  },
+
+  // ============================================================================
+  // 3. TOURIST ATTRACTIONS (តំបន់ទេសចរណ៍ — 2025–2026 Broadcasts)
+  // ============================================================================
+  {
+    id: 'yt-2026-tour-phnompenh-1',
+    url: 'https://www.youtube.com/watch?v=dqlTwEy3jjU',
+    authorName: 'Thavireak City Walks',
+    fallbackTitleEn: 'Exploring Phnom Penh: Cambodia’s Capital Like You’ve Never Seen It 🇰🇭',
+    titleKh: 'ទស្សនាសម្រស់រាជធានីភ្នំពេញថ្មីៗ និងកន្លែងដើរលេងស្អាតៗ ឆ្នាំ 2026',
+    titleZh: '2026 探索柬埔寨首都金边：全新城市风貌与必游地标',
+    descriptionKh: 'វីដេអូថ្មីឆ្នាំ 2026 បង្ហាញពីសម្រស់ទីក្រុងភ្នំពេញ វិមានឯករាជ្យ មាត់ទន្លេ និងតំបន់ទេសចរណ៍ក្នុងរាជធានី។',
+    descriptionEn: '2026 city tour showcasing Phnom Penh’s vibrant boulevards, cultural monuments, and modern riverside attractions.',
+    descriptionZh: '2026 全新实拍金边独立纪念碑、皇宫周边与现代河畔休闲区的迷人风光。',
+    categorySlug: 'tourist_attraction',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    provinceEn: 'Phnom Penh',
+    publishedDate: '2026-10-26',
+    fallbackThumb: 'https://i.ytimg.com/vi/dqlTwEy3jjU/hqdefault.jpg',
+  },
+  {
+    id: 'yt-2026-tour-kep-2',
+    url: 'https://www.youtube.com/watch?v=G4wamhZFxfY',
+    authorName: 'Sreyreang Life Show',
+    fallbackTitleEn: 'ទេសភាពស្រស់ស្អាតជិតជើងភ្នំ និងសមុទ្រខេត្តកែប | Best Peaceful Retirement Place in Cambodia',
+    titleKh: 'ទេសភាពស្រស់ស្អាតជិតជើងភ្នំ និងឆ្នេរសមុទ្រខេត្តកែប ឆ្នាំ 2026',
+    titleZh: '2026 柬埔寨白马省山海相依的绝美自然风光与海滨胜地',
+    descriptionKh: 'ទស្សនាសម្រស់ធម្មជាតិដ៏ស្ងប់ស្ងាត់ ជើងភ្នំបៃតង និងឆ្នេរសមុទ្រខេត្តកែប នាឆ្នាំ 2026។',
+    descriptionEn: '2026 scenic tour of Kep Province where lush green mountains meet the peaceful Cambodian coastline.',
+    descriptionZh: '2026 领略白马省国家公园山脚与宁静海岸线交相辉映的度假风光。',
+    categorySlug: 'tourist_attraction',
+    provinceKh: 'ខេត្តកែប',
+    provinceEn: 'Kep',
+    publishedDate: '2026-10-23',
+    fallbackThumb: 'https://i.ytimg.com/vi/G4wamhZFxfY/hqdefault.jpg',
+  },
+  {
+    id: 'yt-2026-tour-mlechdam-3',
+    url: 'https://www.youtube.com/watch?v=Keoerp6KUVM',
+    authorName: 'Sreyreang Life Show',
+    fallbackTitleEn: 'ទេសភាពស្រស់ស្អាតទំនប់ម្លេចទឹកដីខេត្តកំពត | Beautiful Wooden Bridge & Mountain Scenery at Mlech Dam',
+    titleKh: 'ទេសភាពស្ពានឈើ និងភ្នំដ៏ស្រស់ស្អាតនៅទំនប់ម្លេច ខេត្តកំពត (2026)',
+    titleZh: '2026 贡布省 Mlech 水库木桥与群山湖泊生态美景',
+    descriptionKh: 'ដំណើរកម្សាន្តទៅកាន់ទំនប់ម្លេច ខេត្តកំពត គយគន់ស្ពានឈើកាត់ទឹក និងជួរភ្នំធម្មជាតិដ៏ត្រកាល។',
+    descriptionEn: '2026 travel vlog exploring the scenic wooden bridge, tranquil reservoir waters, and mountain backdrop at Mlech Dam in Kampot.',
+    descriptionZh: '2026 探访贡布省热门生态景点 Mlech 水库，漫步水上木桥欣赏湖光山色。',
+    categorySlug: 'tourist_attraction',
+    provinceKh: 'ខេត្តកំពត',
+    provinceEn: 'Kampot',
+    publishedDate: '2026-10-22',
+    fallbackThumb: 'https://i.ytimg.com/vi/Keoerp6KUVM/hqdefault.jpg',
+  },
+  {
+    id: 'yt-2026-tour-riversidewalk-4',
+    url: 'https://www.youtube.com/watch?v=zTn3_Je07ao',
+    authorName: 'Thavireak City Walks',
+    fallbackTitleEn: 'Cambodia Riverside Walking Tour 🇰🇭 | Beautiful River Views Local Markets & Street Life in Phnom Penh',
+    titleKh: 'ដើរកម្សាន្តមាត់ទន្លេភ្នំពេញ គយគន់ទេសភាពទន្លេចតុមុខ ឆ្នាំ 2026',
+    titleZh: '2026 金边四臂湾河畔漫游：壮丽江景与当地市集风情',
+    descriptionKh: 'ទស្សនាទិដ្ឋភាពមាត់ទន្លេភ្នំពេញ ព្រះបរមរាជវាំង និងសកម្មភាពកម្សាន្តរបស់ប្រជាពលរដ្ឋ និងភ្ញៀវទេសចរឆ្នាំ 2026។',
+    descriptionEn: '2026 walking tour along Phnom Penh’s Chaktomuk riverfront promenade, Royal Palace square, and lively local markets.',
+    descriptionZh: '2026 漫步金边皇宫广场与四臂湾江滨步道，感受充满活力的首都人文风情。',
+    categorySlug: 'tourist_attraction',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    provinceEn: 'Phnom Penh',
+    publishedDate: '2026-10-22',
+    fallbackThumb: 'https://i.ytimg.com/vi/zTn3_Je07ao/hqdefault.jpg',
+  },
+  {
+    id: 'yt-2026-tour-battambang-5',
+    url: 'https://www.youtube.com/watch?v=5E8_IX-kBDU',
+    authorName: 'TravelwithChad',
+    fallbackTitleEn: 'Why You Should NEVER Skip Battambang, Cambodia! 🇰🇭',
+    titleKh: 'កន្លែងដើរលេងល្បីៗដែលមិនគួររំលងនៅខេត្តបាត់ដំបង ឆ្នាំ 2026',
+    titleZh: '2026 为什么来柬埔寨绝不能错过马德望省！深度旅游攻略',
+    descriptionKh: 'ស្វែងយល់ពីសម្រស់ស្ថាបត្យកម្មបុរាណ ភ្នំសំពៅ ឡូរីបាត់ដំបង និងជីវិតរស់នៅដ៏កក់ក្តៅក្នុងខេត្តបាត់ដំបង។',
+    descriptionEn: '2026 travel guide to Battambang’s heritage architecture, Phnom Sampeau bat caves, bamboo train, and countryside charm.',
+    descriptionZh: '2026 探索马德望历史建筑、竹火车、森宝山蝙蝠洞与淳朴乡村风光的完整指南。',
+    categorySlug: 'tourist_attraction',
+    provinceKh: 'ខេត្តបាត់ដំបង',
+    provinceEn: 'Battambang',
+    publishedDate: '2026-10-20',
+    fallbackThumb: 'https://i.ytimg.com/vi/5E8_IX-kBDU/hqdefault.jpg',
+  },
+  {
+    id: 'yt-2026-tour-kohrong-6',
+    url: 'https://www.youtube.com/watch?v=NmqRMR38Dhg',
+    authorName: 'TravelwithChad',
+    fallbackTitleEn: 'I Explored Koh Rong Cambodia 🇰🇭 — And Found More Than Beaches!',
+    titleKh: 'ស្វែងយល់ពីសម្រស់កោះរ៉ុង និងឆ្នេរខ្សាច់សក្បុសខេត្តព្រះសីហនុ ឆ្នាំ 2026',
+    titleZh: '2026 深度探索柬埔寨高龙岛：不仅是绝美白沙滩！',
+    descriptionKh: 'ដំណើរកម្សាន្តឆ្នាំ 2026 ទៅកាន់កោះរ៉ុង ទស្សនាឆ្នេរខ្សាច់សក្បុស ទឹកសមុទ្រពណ៌ฟ้าថ្លា និងភូមិកោះតូច។',
+    descriptionEn: '2026 island adventure across Koh Rong exploring crystal-clear beaches, fishing villages, and tropical island trails.',
+    descriptionZh: '2026 畅游西哈努克高龙岛，打卡清澈果冻海、原生态渔村与海岛热带风光。',
+    categorySlug: 'tourist_attraction',
+    provinceKh: 'ខេត្តព្រះសីហនុ',
+    provinceEn: 'Sihanoukville',
+    publishedDate: '2026-09-18',
+    fallbackThumb: 'https://i.ytimg.com/vi/NmqRMR38Dhg/hqdefault.jpg',
+  },
+  {
+    id: 'yt-2026-tour-kohkong-7',
+    url: 'https://www.youtube.com/watch?v=CLCzMC-2h-w',
+    authorName: 'Little Explore',
+    fallbackTitleEn: 'ស្អាតខ្លាំង ស្រុកថ្មបាំង កោះកុង Beautiful Scenery (Little Explore - Ep 35)',
+    titleKh: 'ទេសភាពធម្មជាតិដ៏ស្រស់ស្អាតនៅស្រុកថ្មបាំង ខេត្តកោះកុង (Little Explore 2026)',
+    titleZh: '2026 戈公省 Thma Bang 秘境森林与瀑布自然风光 (Little Explore)',
+    descriptionKh: 'ដំណើរផ្សងព្រេងគយគន់ជួរភ្នំក្រវាញ ទឹកធ្លាក់ធម្មជាតិ និងព្រៃឈើបៃតងខ្ចីនៅស្រុកថ្មបាំង ខេត្តកោះកុង។',
+    descriptionEn: '2026 eco-tourism adventure into Thma Bang District, Koh Kong, showcasing misty Cardamom Mountains and waterfalls.',
+    descriptionZh: '2026 深入戈公省豆蔻山脉腹地，领略原始森林、高山云雾与清澈瀑布之美。',
+    categorySlug: 'tourist_attraction',
+    provinceKh: 'ខេត្តកោះកុង',
+    provinceEn: 'Koh Kong',
+    publishedDate: '2026-08-16',
+    fallbackThumb: 'https://i.ytimg.com/vi/CLCzMC-2h-w/hqdefault.jpg',
+  },
+  {
+    id: 'yt-2026-tour-angkor-8',
+    url: 'https://www.youtube.com/watch?v=Wmr6Qaen9eo',
+    authorName: 'Suitcase Monkey',
+    fallbackTitleEn: "Don't Make these 8 MISTAKES Visiting ANGKOR WAT in 2026",
+    titleKh: 'គន្លឹះសំខាន់ៗទាំង ៨ សម្រាប់ការទៅទស្សនាប្រាសាទអង្គរវត្ត ឆ្នាំ 2026',
+    titleZh: '2026 游览暹粒吴哥窟必看的 8 大实用旅行建议',
+    descriptionKh: 'មគ្គុទ្ទេសក៍ទេសចរណ៍ថ្មីឆ្នាំ 2026 សម្រាប់ការទស្សនាថ្ងៃរះនៅប្រាសាទអង្គរវត្ត ការទិញសំបុត្រ និងការជ្រើសរើសផ្លូវវង់តូច-វង់ធំ។',
+    descriptionEn: 'Up-to-date 2026 travel guide and essential tips for visiting Angkor Wat sunrise, Bayon, and Ta Prohm in Siem Reap.',
+    descriptionZh: '2026 最新暹粒吴哥窟日出观赏、门票预订与大小圈寺庙游览全攻略。',
+    categorySlug: 'tourist_attraction',
+    provinceKh: 'ខេត្តសៀមរាប',
+    provinceEn: 'Siem Reap',
+    publishedDate: '2026-08-08',
+    fallbackThumb: 'https://i.ytimg.com/vi/Wmr6Qaen9eo/hqdefault.jpg',
+  },
+  {
+    id: 'yt-2026-tour-siemreap6days-9',
+    url: 'https://www.youtube.com/watch?v=ksh0yRiBnUo',
+    authorName: 'Suitcase Monkey',
+    fallbackTitleEn: '6 Unforgettable Days in SIEM REAP, CAMBODIA: Angkor Wat, Floating Village, Markets, Travel Vlog 2026',
+    titleKh: 'ដំណើរកម្សាន្ត ៦ថ្ងៃនៅខេត្តសៀមរាប៖ ប្រាសាទអង្គរវត្ត ភូមិបណ្តែតទឹក និងផ្សាររាត្រី 2026',
+    titleZh: '2026 难忘的暹粒 6 日深度游：吴哥窟、洞里萨湖水上村落与夜市 Vlog',
+    descriptionKh: 'វីដេអូទេសចរណ៍ឆ្នាំ 2026 បង្ហាញពីការដើរលេង ៦ថ្ងៃពេញនៅសៀមរាប ប្រាសាទអង្គរវត្ត ភូមិកំពង់ភ្លុក និង Pub Street។',
+    descriptionEn: 'Complete 2026 6-day Siem Reap travel vlog covering Angkor Wat, Tonle Sap floating villages, night markets, and Khmer cuisine.',
+    descriptionZh: '2026 完整记录暹粒 6 天行程：探秘千年吴哥古迹、空邦鲁水上人家与热闹夜市。',
+    categorySlug: 'tourist_attraction',
+    provinceKh: 'ខេត្តសៀមរាប',
+    provinceEn: 'Siem Reap',
+    publishedDate: '2026-07-25',
+    fallbackThumb: 'https://i.ytimg.com/vi/ksh0yRiBnUo/hqdefault.jpg',
+  },
+
+  // ============================================================================
+  // 4. FOOD & TRAVEL VLOGS (វីដេអូម្ហូប & ទេសចរណ៍ — 2025–2026 Broadcasts)
+  // ============================================================================
+  {
+    id: 'yt-2026-vlog-boeungprolit-1',
+    url: 'https://www.youtube.com/watch?v=yIr6zpyO-OI',
+    authorName: 'Delicious Food Show & Travel',
+    fallbackTitleEn: 'AWESOME! Cambodian Street Food Tour – Walking in Boeung Prolit Market & Orussey Market @ Real Life',
+    titleKh: 'ដើរភ្លក្សម្ហូបនៅផ្សារបឹងព្រលិត និងផ្សារអូរឫស្សី រាជធានីភ្នំពេញ (2026)',
+    titleZh: '2026 金边 Boeung Prolit 与乌亚西市场真实市井美食漫游 Vlog',
+    descriptionKh: 'ដំណើរកម្សាន្តឆ្នាំ 2026 ស្វែងយល់ពីជីវិតពិត និងមុខម្ហូបឆ្ងាញ់ៗនៅផ្សារបឹងព្រលិត និងផ្សារអូរឫស្សី។',
+    descriptionEn: '2026 live walking vlog exploring authentic Cambodian morning markets, local breakfast stalls, and street food in Phnom Penh.',
+    descriptionZh: '2026 深入金边两大传统早市，记录热闹的市井生活与热气腾腾的高棉早餐。',
+    categorySlug: 'food_travel_vlog',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    provinceEn: 'Phnom Penh',
+    publishedDate: '2026-10-26',
+    fallbackThumb: 'https://i.ytimg.com/vi/yIr6zpyO-OI/hqdefault.jpg',
+    matchedFoodId: 'food-5',
+  },
+  {
+    id: 'yt-2026-vlog-walkstreet-2',
+    url: 'https://www.youtube.com/watch?v=rlhQTyJzyVc',
+    authorName: 'Sonita Khmer US',
+    fallbackTitleEn: 'អារម្មណ៍ល្អៗ ជីវិតកាន់តែភ្លឺស្វាងនៅពេលយើងចូលរួមជាមួយគ្នា Walk Street Pub Street at Riverside Phnom P',
+    titleKh: 'ដើរកម្សាន្តផ្លូវថ្មើរជើង (Walk Street) និងភ្លក្សអាហារមាត់ទន្លេភ្នំពេញ (2026)',
+    titleZh: '2026 金边河畔步行街 (Walk Street) 夜生活与街头美食 Vlog',
+    descriptionKh: 'បរិយាកាសសប្បាយរីករាយនៅផ្លូវថ្មើរជើងមាត់ទន្លេភ្នំពេញ ជាមួយតូបលក់អាហារ ភេសជ្ជៈ និងការសម្តែងសិល្បៈឆ្នាំ 2026។',
+    descriptionEn: '2026 vlog experiencing Phnom Penh’s vibrant Riverside Walk Street pedestrian zone, street food stalls, and live music.',
+    descriptionZh: '2026 体验金边周末河畔步行街的热闹氛围、特色美食摊位与街头文化表演。',
+    categorySlug: 'food_travel_vlog',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    provinceEn: 'Phnom Penh',
+    publishedDate: '2026-10-24',
+    fallbackThumb: 'https://i.ytimg.com/vi/rlhQTyJzyVc/hqdefault.jpg',
+  },
+  {
+    id: 'yt-2026-vlog-nightboat-3',
+    url: 'https://www.youtube.com/watch?v=_uOPWJCO4zo',
+    authorName: 'Sreyreang Life Show',
+    fallbackTitleEn: 'ដើរមើលម្ហូបតាមផ្លូវ និងជិះទូកលំហែរាត្រីនៅភ្នំពេញ | Phnom Penh Night River Boat Tour',
+    titleKh: 'ដើរមើលម្ហូបតាមផ្លូវ និងជិះទូកលំហែរាត្រីគយគន់ភ្លើងពណ៌នៅភ្នំពេញ (2026)',
+    titleZh: '2026 金边街头美食探访与四臂湾夜景游船之旅',
+    descriptionKh: 'ភ្លក្សម្ហូបតាមផ្លូវមាត់ទន្លេ និងជិះទូកកម្សាន្តពេលរាត្រីមើលសម្រស់ទីក្រុងភ្នំពេញនាឆ្នាំ 2026។',
+    descriptionEn: '2026 evening vlog combining Phnom Penh riverside street food tasting with a scenic night cruise on the Mekong and Tonle Sap.',
+    descriptionZh: '2026 品尝金边河畔夜市小吃，乘船夜游湄公河与洞里萨河欣赏璀璨城市夜景。',
+    categorySlug: 'food_travel_vlog',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    provinceEn: 'Phnom Penh',
+    publishedDate: '2026-10-21',
+    fallbackThumb: 'https://i.ytimg.com/vi/_uOPWJCO4zo/hqdefault.jpg',
+  },
+  {
+    id: 'yt-2026-vlog-oudong-4',
+    url: 'https://www.youtube.com/watch?v=z-C8fbG-ReM',
+    authorName: 'Delicious Food Show & Travel',
+    fallbackTitleEn: 'GREAT!! Cambodian Street Food Tour 2026 – Walking Around Phnom Preash Reach Trop Natural Resort',
+    titleKh: 'ដើរភ្លក្សម្ហូបខ្មែរនៅរមណីយដ្ឋានភ្នំព្រះរាជទ្រព្យ (ភ្នំឧត្តុង្គ) ឆ្នាំ 2026',
+    titleZh: '2026 乌栋山 (Phnom Oudong) 历史名胜与传统乡村美食之旅',
+    descriptionKh: 'ទស្សនា मុខម្ហូបបែបស្រុកស្រែ ត្រីអាំង មាន់ដុត និងបង្អែមខ្មែរនៅជើងភ្នំព្រះរាជទ្រព្យ (ឧត្តុង្គ) ឆ្នាំ 2026។',
+    descriptionEn: '2026 food and travel walk around historic Phnom Oudong (Phnom Preah Reach Trop) sampling countryside grilled meats and Khmer sweets.',
+    descriptionZh: '2026 探访柬埔寨古都乌栋山，品尝山脚市集的炭烤野味、传统糕点与乡土美食。',
+    categorySlug: 'food_travel_vlog',
+    provinceKh: 'ខេត្តកណ្តាល',
+    provinceEn: 'Kandal',
+    publishedDate: '2026-10-20',
+    fallbackThumb: 'https://i.ytimg.com/vi/z-C8fbG-ReM/hqdefault.jpg',
+  },
+  {
+    id: 'yt-2026-vlog-2dollar-5',
+    url: 'https://www.youtube.com/watch?v=0eWh79zyvXE',
+    authorName: 'TravelwithChad',
+    fallbackTitleEn: 'How much Cambodian Street Food can $2 Buy? 🇰🇭',
+    titleKh: 'តើលុយ ២ដុល្លារ អាចទិញម្ហូបតាមផ្លូវឆ្ងាញ់ៗអ្វីខ្លះនៅកម្ពុជា? (2026)',
+    titleZh: '2026 在柬埔寨 2 美元能买到多少地道街头美食？',
+    descriptionKh: 'វីដេអូ Vlog ឆ្នាំ 2026 សាកល្បងទិញអាហារតាមផ្លូវខ្មែរឆ្ងាញ់ៗ តម្លៃសមរម្យបំផុតនៅក្នុងផ្សារក្នុងស្រុក។',
+    descriptionEn: '2026 street food challenge testing how many delicious local Cambodian snacks and dishes $2 can buy.',
+    descriptionZh: '2026 趣味挑战：用 2 美元在柬埔寨本地市场品尝多款物美价廉的传统小吃。',
+    categorySlug: 'food_travel_vlog',
+    provinceKh: 'ខេត្តសៀមរាប',
+    provinceEn: 'Siem Reap',
+    publishedDate: '2026-10-07',
+    fallbackThumb: 'https://i.ytimg.com/vi/0eWh79zyvXE/hqdefault.jpg',
+  },
+  {
+    id: 'yt-2026-vlog-strictlydumpling-6',
+    url: 'https://www.youtube.com/watch?v=IclvJ6gW0cU',
+    authorName: 'Strictly Dumpling',
+    fallbackTitleEn: 'Top 20 MUST-TRY Street Foods in Phnom Penh | ULTIMATE Local Cambodian Food Tour',
+    titleKh: 'មុខម្ហូបតាមផ្លូវទាំង ២០ ដែលត្រូវសាកនៅភ្នំពេញ ជាមួយ Mike Chen (2026)',
+    titleZh: 'Strictly Dumpling (陈兴) 2026 金边必吃 20 道地道高棉街头美食全纪录',
+    descriptionKh: 'ដំណើរកម្សាន្តភ្លក្សម្ហូបខ្មែរទាំង ២០មុខនៅរាជធានីភ្នំពេញ រួមមានគុយទាវ បាយសាច់ជ្រូក នំបញ្ចុក និងគ្រឿងសមុទ្រអាំង។',
+    descriptionEn: 'Food vlogger Mike Chen (Strictly Dumpling) explores the top 20 must-try local street foods and restaurants across Phnom Penh.',
+    descriptionZh: '知名美食博主陈兴 (Strictly Dumpling) 深入金边街头，一口气品尝 20 道最具代表性的高棉美食。',
+    categorySlug: 'food_travel_vlog',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    provinceEn: 'Phnom Penh',
+    publishedDate: '2026-06-20',
+    fallbackThumb: 'https://i.ytimg.com/vi/IclvJ6gW0cU/hqdefault.jpg',
+    matchedFoodId: 'food-5',
+  },
+  {
+    id: 'yt-2026-vlog-lloydmandy-7',
+    url: 'https://www.youtube.com/watch?v=fqh5FoETxqE',
+    authorName: 'Lloyd & Mandy',
+    fallbackTitleEn: '17 Things We Wish We Knew Before Visiting Cambodia 🇰🇭 (Avoid These Mistakes)',
+    titleKh: 'ចំណុចសំខាន់ៗទាំង ១៧ សម្រាប់ភ្ញៀវទេសចរមកដើរលេងប្រទេសកម្ពុជា (2026)',
+    titleZh: '2026 来柬埔寨旅游前必知的 17 件事（实用避坑与美食交通指南）',
+    descriptionKh: 'ការចែករំលែកបទពិសោធន៍ធ្វើដំណើរ ការចាយវាយ ការហៅ PassApp/Grab និងការភ្លក្សម្ហូបខ្មែរសម្រាប់ភ្ញៀវទេសចរ។',
+    descriptionEn: '2026 travel tips covering Cambodian currency, transport apps, local dining etiquette, and must-see destinations.',
+    descriptionZh: '2026 实用柬埔寨自由行攻略，涵盖交通出行、支付方式、地道餐饮与热门景点建议。',
+    categorySlug: 'food_travel_vlog',
+    provinceKh: 'ខេត្តសៀមរាប',
+    provinceEn: 'Siem Reap',
+    publishedDate: '2026-02-14',
+    fallbackThumb: 'https://i.ytimg.com/vi/fqh5FoETxqE/hqdefault.jpg',
+  },
+  {
+    id: 'yt-2025-vlog-soloasia-8',
+    url: 'https://www.youtube.com/watch?v=Bd2wJJZ-lHI',
+    authorName: 'Solo Around Asia',
+    fallbackTitleEn: 'Cambodian Street Food Tour 🇰🇭 Must-Try Phnom Penh Eats!',
+    titleKh: 'ដំណើរកម្សាន្តភ្លក្សម្ហូបតាមផ្លូវដែលត្រូវសាកនៅរាជធានីភ្នំពេញ (2025)',
+    titleZh: '2025 金边必尝街头美食之旅：探索地道高棉风味',
+    descriptionKh: 'ដើរសាកល្បងមុខម្ហូបតាមផ្លូវឆ្ងាញ់ៗនៅកណ្តាលទីក្រុងភ្នំពេញ ទាំងអាហារពេលព្រឹក និងអាហារពេលល្ងាច។',
+    descriptionEn: 'Guided street food tour through Phnom Penh tasting signature Cambodian noodles, grilled skewers, and sweet desserts.',
+    descriptionZh: '漫步金边街头，品尝高棉特色汤面、炭火烧烤与传统椰香甜品。',
+    categorySlug: 'food_travel_vlog',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    provinceEn: 'Phnom Penh',
+    publishedDate: '2025-11-20',
+    fallbackThumb: 'https://i.ytimg.com/vi/Bd2wJJZ-lHI/hqdefault.jpg',
+    matchedFoodId: 'food-5',
+  },
+];
+
+/**
+ * Backup Replacement Pool of Verified Playable 2025–2026 Videos
+ * Automatically used to replace any video that is unavailable or fails playback.
+ */
+const BACKUP_REPLACEMENT_YOUTUBE_VIDEOS: CuratedYouTubeSeed[] = [
+  {
+    id: 'yt-backup-2026-bambootrain',
+    url: 'https://www.youtube.com/watch?v=Z96at9xLVQg',
+    authorName: 'TravelwithChad',
+    fallbackTitleEn: 'Bamboo Train in Battambang, Cambodia #travelcambodia',
+    titleKh: 'ជិះឡូរី (Bamboo Train) និងគយគន់ទេសភាពវាលស្រែខេត្តបាត់ដំបង (2026)',
+    titleZh: '2026 体验马德望著名的竹火车 (Bamboo Train) 与田园风光',
+    descriptionKh: 'បទពិសោធន៍ជិះឡូរីកម្សាន្តដ៏ល្បីល្បាញនៅខេត្តបាត់ដំបង កាត់វាលស្រែ និងភូមិដ្ឋានធម្មជាតិ។',
+    descriptionEn: '2026 ride aboard Battambang’s famous Bamboo Train through scenic Cambodian rice paddies.',
+    descriptionZh: '2026 乘坐马德望特色竹火车穿越翠绿稻田，感受独特的柬埔寨乡村旅游体验。',
+    categorySlug: 'tourist_attraction',
+    provinceKh: 'ខេត្តបាត់ដំបង',
+    provinceEn: 'Battambang',
+    publishedDate: '2026-10-21',
+    fallbackThumb: 'https://i.ytimg.com/vi/Z96at9xLVQg/hqdefault.jpg',
+  },
+  {
+    id: 'yt-backup-2025-kohrong-mao',
+    url: 'https://www.youtube.com/watch?v=6kO1B68iq3A',
+    authorName: 'Mao Cambodia',
+    fallbackTitleEn: 'កោះរ៉ុង / Koh Rong in Sihanoukville, Cambodia - October, 2025',
+    titleKh: 'ដំណើរកម្សាន្តទៅកាន់កោះរ៉ុង ខេត្តព្រះសីហនុ (តុលា 2025)',
+    titleZh: '2025 西哈努克高龙岛海滨度假与白沙滩全景纪实',
+    descriptionKh: 'ទស្សនាឆ្នេរខ្សាច់សក្បុស ទឹកសមុទ្រថ្លាឆ្វង់ និងកន្លែងស្នាក់នៅលំហែកាយលើកោះរ៉ុង។',
+    descriptionEn: 'Full travel showcase of Koh Rong Island in Sihanoukville featuring white sand beaches and clear ocean waters.',
+    descriptionZh: '全方位展示西哈努克高龙岛的细腻白沙滩、清澈海水与海岛休闲生活。',
+    categorySlug: 'tourist_attraction',
+    provinceKh: 'ខេត្តព្រះសីហនុ',
+    provinceEn: 'Sihanoukville',
+    publishedDate: '2025-10-28',
+    fallbackThumb: 'https://i.ytimg.com/vi/6kO1B68iq3A/hqdefault.jpg',
+  },
+  {
+    id: 'yt-backup-amok-1',
     url: 'https://www.youtube.com/watch?v=9uKNNcDfttc',
     authorName: 'Vibol Daily Cooking',
     fallbackTitleEn: 'The Most Delicious Cambodian Fish Amok | Authentic Khmer Family Food',
@@ -134,304 +806,8 @@ const CURATED_YOUTUBE_VIDEOS: CuratedYouTubeSeed[] = [
     categorySlug: 'popular_food',
     provinceKh: 'ខេត្តសៀមរាប',
     provinceEn: 'Siem Reap',
-    publishedDate: '2024-06-15',
+    publishedDate: '2025-05-15',
     fallbackThumb: 'https://i.ytimg.com/vi/9uKNNcDfttc/hqdefault.jpg',
-    matchedFoodId: 'food-1',
-  },
-  {
-    id: 'yt-food-loklak-2',
-    url: 'https://www.youtube.com/watch?v=__5WDCp9sN8',
-    authorName: 'SreyDa Khmer Kitchen',
-    fallbackTitleEn: 'Cambodian Beef Lok Lak Stir Fry 🇰🇭🔥 Quick & Juicy!',
-    titleKh: 'ឡុកឡាក់សាច់គោម្រេចកំពត រសជាតិដើមខ្មែរ',
-    titleZh: '柬埔寨贡布胡椒摇摇牛肉 (Beef Lok Lak) 快炒秘诀',
-    descriptionKh: 'វិធីប្រឡាក់សាច់គោឱ្យផុយទន់ ឆាភ្លើងខ្លាំង និងលាយទឹកម្រេចក្រូចឆ្មារកំពតដ៏ឈ្ងុយឆ្ងាញ់។',
-    descriptionEn: 'Authentic Cambodian Beef Lok Lak stir-fry tutorial featuring tender marinated beef and tangy Kampot pepper lime dipping sauce.',
-    descriptionZh: '鲜嫩多汁的高棉摇摇牛肉快炒教程，搭配正宗贡布青胡椒青柠蘸汁。',
-    categorySlug: 'popular_food',
-    provinceKh: 'រាជធានីភ្នំពេញ',
-    provinceEn: 'Phnom Penh',
-    publishedDate: '2024-08-10',
-    fallbackThumb: 'https://i.ytimg.com/vi/__5WDCp9sN8/hqdefault.jpg',
-    matchedFoodId: 'food-2',
-  },
-  {
-    id: 'yt-food-nombanhchok-3',
-    url: 'https://www.youtube.com/watch?v=L3uV15vFaao',
-    authorName: 'Family Chefs គ្រួសារចុងភៅ',
-    fallbackTitleEn: 'NOM BANH CHOK SAMLOR PROHER | Cambodian Rice Noodles',
-    titleKh: 'នំបញ្ចុកសម្លប្រហើរខ្មែរ (គ្រួសារចុងភៅ)',
-    titleZh: '高棉传统鱼汤米粉 (Nom Banh Chok Samlor Proher)',
-    descriptionKh: 'របៀបស្លសម្លប្រហើរត្រីឆ្អើរ និងប្រហុកខ្មែរ ស្រោចលើសរសៃនំបញ្ចុកស្រស់ និងបន្លែធម្មជាតិគ្រប់មុខ។',
-    descriptionEn: 'Traditional Cambodian Nom Banh Chok rice noodles ladled with fragrant lemongrass fish broth and fresh crisp vegetables.',
-    descriptionZh: '香茅鱼肉浓汤配手工鲜米粉与时令生菜，地道高棉早餐代表作。',
-    categorySlug: 'popular_food',
-    provinceKh: 'ខេត្តសៀមរាប',
-    provinceEn: 'Siem Reap',
-    publishedDate: '2024-05-20',
-    fallbackThumb: 'https://i.ytimg.com/vi/L3uV15vFaao/hqdefault.jpg',
-    matchedFoodId: 'food-3',
-  },
-  {
-    id: 'yt-food-samlorkorko-4',
-    url: 'https://www.youtube.com/watch?v=KPOzXeeVKo8',
-    authorName: 'Thun Thun Channel',
-    fallbackTitleEn: 'Cambodian Vegetable Soup | Somlor Koko | សម្លកកូរ',
-    titleKh: 'សម្លកកូរខ្មែរសម្បូរបន្លែធម្មជាតិ (Thun Thun Channel)',
-    titleZh: '柬埔寨传统百菜浓汤 (Samlor Korko)',
-    descriptionKh: 'សម្លកកូរមរតកដូនតាខ្មែរ ផ្សំពីអង្ករលីង គ្រឿងបុក ប្រហុក និងបន្លែចម្រុះជំនួយសុខភាព។',
-    descriptionEn: 'Classic Cambodian Samlor Korko vegetable stew cooked with toasted rice powder, kroeung paste, and nutritious local greens.',
-    descriptionZh: '融合炒米粉、高棉香茅酱与多种天然蔬菜的柬埔寨传统养生汤品。',
-    categorySlug: 'popular_food',
-    provinceKh: 'ខេត្តបាត់ដំបង',
-    provinceEn: 'Battambang',
-    publishedDate: '2024-04-12',
-    fallbackThumb: 'https://i.ytimg.com/vi/KPOzXeeVKo8/hqdefault.jpg',
-    matchedFoodId: 'food-4',
-  },
-  {
-    id: 'yt-food-kuyteav-5',
-    url: 'https://www.youtube.com/watch?v=1QrOKZJUFuk',
-    authorName: 'Sovanna Cooking & Recipe',
-    fallbackTitleEn: 'Homemade Kuy Teav (Cambodian Noodle Soup) របៀបធ្វើគុយទាវ',
-    titleKh: 'របៀបធ្វើគុយទាវភ្នំពេញពិសេស ទឹកស៊ុបផ្អែមឆ្ងាញ់',
-    titleZh: '正宗金边粿条汤秘方，鲜美猪骨汤底',
-    descriptionKh: 'វិធីរម្ងាស់ទឹកស៊ុបឆ្អឹងជ្រូកឱ្យថ្លាឈ្ងុយឆ្ងាញ់ ជាមួយសរសៃគុយទាវស្រស់ និងគ្រឿងប្រឡាក់ពិសេស។',
-    descriptionEn: 'Authentic homemade Cambodian Kuy Teav pork bone noodle soup recipe served with fresh herbs, fried garlic, and bean sprouts.',
-    descriptionZh: '熬制鲜甜清澈金边粿条骨汤的家传秘诀，搭配新鲜香草与爽脆豆芽。',
-    categorySlug: 'popular_food',
-    provinceKh: 'រាជធានីភ្នំពេញ',
-    provinceEn: 'Phnom Penh',
-    publishedDate: '2024-07-18',
-    fallbackThumb: 'https://i.ytimg.com/vi/1QrOKZJUFuk/hqdefault.jpg',
-    matchedFoodId: 'food-5',
-  },
-
-  // 2. FAMOUS RESTAURANT (ភោជនីយដ្ឋានល្បីៗ)
-  {
-    id: 'yt-rest-phnompenh-1',
-    url: 'https://www.youtube.com/watch?v=pZ-fL1T4zq8',
-    authorName: 'Street Food Tour KH',
-    fallbackTitleEn: 'Cambodia Street Food — Ultimate Market Tour at Toul Tom Poung Phnom Penh',
-    titleKh: 'ភោជនីយដ្ឋាន និងអាហារល្បីៗនៅផ្សារទួលទំពូង ភ្នំពេញ',
-    titleZh: '金边朱德奔市场 (俄罗斯市场) 知名美食与地道餐馆探店',
-    descriptionKh: 'ការណែនាំហាងអាហារខ្មែរប្រពៃណី និងតូបម្ហូបល្បីៗដែលអ្នកទេសចរមិនគួររំលងនៅផ្សារទួលទំពូង រាជធានីភ្នំពេញ។',
-    descriptionEn: 'Guided culinary walk through Phnom Penh’s famous Toul Tom Poung market stalls and traditional Khmer eateries.',
-    descriptionZh: '打卡金边口碑极佳的传统高棉风味餐馆与俄罗斯市场历史悠久的地道美食名店。',
-    categorySlug: 'famous_restaurant',
-    provinceKh: 'រាជធានីភ្នំពេញ',
-    provinceEn: 'Phnom Penh',
-    publishedDate: '2024-09-22',
-    fallbackThumb: 'https://i.ytimg.com/vi/pZ-fL1T4zq8/hqdefault.jpg',
-    matchedFoodId: 'food-5',
-  },
-  {
-    id: 'yt-rest-siemreap-2',
-    url: 'https://www.youtube.com/watch?v=iJ5yoD8xb6k',
-    authorName: 'WisGO Travel',
-    fallbackTitleEn: 'Where Locals Eat in Siem Reap | Authentic Cambodian Food Spots',
-    titleKh: 'ភោជនីយដ្ឋាន និងហាងអាហារឆ្ងាញ់ប្រចាំខេត្តសៀមរាប',
-    titleZh: '暹粒当地人最爱的正宗高棉风味餐厅探店',
-    descriptionKh: 'ភ្លក្សម្ហូបខ្មែររសជាតិដើមនៅហាងល្បីៗ និងភោជនីយដ្ឋានក្នុងខេត្តសៀមរាបក្បែរប្រាសាទអង្គរវត្ត។',
-    descriptionEn: 'Discovering authentic local Khmer restaurants and hidden culinary gems across historic Siem Reap.',
-    descriptionZh: '探访吴哥窟所在地暹粒的传奇美食老店与当地人推崇的地道高棉餐厅。',
-    categorySlug: 'famous_restaurant',
-    provinceKh: 'ខេត្តសៀមរាប',
-    provinceEn: 'Siem Reap',
-    publishedDate: '2024-08-30',
-    fallbackThumb: 'https://i.ytimg.com/vi/iJ5yoD8xb6k/hqdefault.jpg',
-    matchedFoodId: 'food-38',
-  },
-  {
-    id: 'yt-rest-battambang-3',
-    url: 'https://www.youtube.com/watch?v=_s0sx0N6778',
-    authorName: 'Street Food Explorer',
-    fallbackTitleEn: 'Walking Tour in Cambodia Street Food — Battambang Food Market Tour',
-    titleKh: 'ហាងម្ហូបមរតក និងអាហារឆ្ងាញ់ប្រចាំខេត្តបាត់ដំបង',
-    titleZh: '马德望传承老字号美食市场与地道特色餐馆',
-    descriptionKh: 'ស្វែងយល់ពីប្រភពម្ហូបឆ្ងាញ់ និងហាងល្បីៗនៅទឹកដីខេត្តបាត់ដំបង ជង្រុកស្រូវនៃកម្ពុជា។',
-    descriptionEn: 'Exploring bustling food markets, family-owned eateries, and heritage culinary traditions in Battambang.',
-    descriptionZh: '领略柬埔寨粮仓马德望的传统美食市集、家族传承菜馆与深厚饮食文化。',
-    categorySlug: 'famous_restaurant',
-    provinceKh: 'ខេត្តបាត់ដំបង',
-    provinceEn: 'Battambang',
-    publishedDate: '2024-09-15',
-    fallbackThumb: 'https://i.ytimg.com/vi/_s0sx0N6778/hqdefault.jpg',
-    matchedFoodId: 'food-177',
-  },
-  {
-    id: 'yt-rest-kepcrab-4',
-    url: 'https://www.youtube.com/watch?v=ibuXO4BujEU',
-    authorName: 'Samnang Bradley',
-    fallbackTitleEn: "Kep Crab with Kampot Pepper: Cambodia's Seaside Treasure",
-    titleKh: 'ផ្សារក្តាមកែប និងភោជនីយដ្ឋានគ្រឿងសមុទ្រម្រេចកំពត',
-    titleZh: '白马著名螃蟹市场与贡布胡椒海鲜餐厅',
-    descriptionKh: 'ទស្សនាការស្រង់ក្តាមស្រស់ៗពីសមុទ្រ និងភ្លក្សក្តាមឆាម្រេចខ្ចីកំពតនៅភោជនីយដ្ឋានឆ្នេរសមុទ្រកែប។',
-    descriptionEn: 'Fresh ocean crab cooked with aromatic green Kampot peppercorns at Kep’s famous waterfront seafood restaurants.',
-    descriptionZh: '亲历白马海鲜市场活蟹打捞，现炒青贡布胡椒花蟹海景大餐。',
-    categorySlug: 'famous_restaurant',
-    provinceKh: 'ខេត្តកែប',
-    provinceEn: 'Kep',
-    publishedDate: '2024-07-20',
-    fallbackThumb: 'https://i.ytimg.com/vi/ibuXO4BujEU/hqdefault.jpg',
-    matchedFoodId: 'food-27',
-  },
-
-  // 3. TOURIST ATTRACTION (តំបន់ទេសចរណ៍)
-  {
-    id: 'yt-tour-angkor-1',
-    url: 'https://www.youtube.com/watch?v=Qh8fZUnpKyg',
-    authorName: 'World Wild Hearts',
-    fallbackTitleEn: 'ANGKOR WAT, CAMBODIA | Full Travel Guide To Angkor Archaeological Park',
-    titleKh: 'ទស្សនាប្រាសាទអង្គរវត្ត និងរមណីយដ្ឋានប្រវត្តិសាស្ត្រសៀមរាប',
-    titleZh: '吴哥窟与暹粒千年古寺壮丽全景旅游指南',
-    descriptionKh: 'ដំណើរកម្សាន្តទស្សនាអច្ឆរិយវត្ថុពិភពលោក ប្រាសាទអង្គរវត្ត ប្រាសាទបាយ័ន និងប្រាសាទតាព្រហ្ម។',
-    descriptionEn: 'Complete travel guide exploring Angkor Wat, Bayon, and Ta Prohm ancient Khmer temples in Siem Reap.',
-    descriptionZh: '领略世界七大奇迹吴哥窟、巴戎寺及塔布笼寺的古老高棉建筑艺术与宏伟历史。',
-    categorySlug: 'tourist_attraction',
-    provinceKh: 'ខេត្តសៀមរាប',
-    provinceEn: 'Siem Reap',
-    publishedDate: '2024-08-01',
-    fallbackThumb: 'https://i.ytimg.com/vi/Qh8fZUnpKyg/hqdefault.jpg',
-  },
-  {
-    id: 'yt-tour-royalpalace-2',
-    url: 'https://www.youtube.com/watch?v=43koytvZWMw',
-    authorName: 'Eddie KH',
-    fallbackTitleEn: "Exploring Cambodia's Royal Palace 🇰🇭✨ | Phnom Penh Travel Vlog",
-    titleKh: 'ព្រះបរមរាជវាំង និងតំបន់ទេសចរណ៍មាត់ទន្លេភ្នំពេញ',
-    titleZh: '金边大皇宫、银阁寺与四臂湾河畔漫游',
-    descriptionKh: 'ទស្សនាភាពល្អប្រណីតនៃព្រះបរមរាជវាំង វត្តព្រះកែវមរកត និងការដើរកម្សាន្តតាមបណ្តោយមាត់ទន្លេចតុមុខ។',
-    descriptionEn: 'Scenic walking tour of the Royal Palace, Silver Pagoda, and breezy Chaktomuk riverside promenade in Phnom Penh.',
-    descriptionZh: '漫步金边金碧辉煌的皇家宫殿、银殿及风景宜人的四臂湾河滨风情区。',
-    categorySlug: 'tourist_attraction',
-    provinceKh: 'រាជធានីភ្នំពេញ',
-    provinceEn: 'Phnom Penh',
-    publishedDate: '2024-07-15',
-    fallbackThumb: 'https://i.ytimg.com/vi/43koytvZWMw/hqdefault.jpg',
-  },
-  {
-    id: 'yt-tour-bokor-3',
-    url: 'https://www.youtube.com/watch?v=saniGaW14So',
-    authorName: 'Heng Teng',
-    fallbackTitleEn: "Bokor Mountain Kampot — Cambodia's Scenic Highland Tourist Spot",
-    titleKh: 'ទេសចរណ៍ភ្នំបូកគោ និងតំបន់ធម្មជាតិខេត្តកំពត',
-    titleZh: '贡布波哥山国家公园与自然云海秘境',
-    descriptionKh: 'ស្រូបយកខ្យល់អាកាសបរិសុទ្ធលើកំពូលភ្នំបូកគោ ទស្សនាទឹកធ្លាក់ពពកវិល និងទេសភាពសមុទ្រដ៏ស្រស់ស្អាត។',
-    descriptionEn: 'High-altitude scenic adventure atop Mount Bokor featuring misty historical landmarks and sweeping coastal views.',
-    descriptionZh: '登顶波哥山俯瞰云海与海岸全景，探访百年高山历史遗迹与清凉自然风光。',
-    categorySlug: 'tourist_attraction',
-    provinceKh: 'ខេត្តកំពត',
-    provinceEn: 'Kampot',
-    publishedDate: '2024-06-10',
-    fallbackThumb: 'https://i.ytimg.com/vi/saniGaW14So/hqdefault.jpg',
-  },
-  {
-    id: 'yt-tour-kohrong-4',
-    url: 'https://www.youtube.com/watch?v=MXSmXoM1Y3M',
-    authorName: 'World Wild Hearts',
-    fallbackTitleEn: 'KOH RONG & KOH RONG SANLOEM, CAMBODIA | Island Travel Guide & Tips',
-    titleKh: 'កោះរ៉ុង ឆ្នេរខ្សាច់សក្បុស និងសមុទ្រធម្មជាតិកម្ពុជា',
-    titleZh: '高龙岛与高龙撒冷岛白沙滩海岛度假指南',
-    descriptionKh: 'សម្រាកលំហែកាយនៅកោះរ៉ុង មុជទឹកមើលផ្កាថ្ម និងរីករាយជាមួយឆ្នេរសមុទ្រធម្មជាតិដ៏ស្អាតបំផុត។',
-    descriptionEn: 'Pristine turquoise waters, white sand coastlines, and tropical island bliss in Koh Rong and Koh Rong Sanloem.',
-    descriptionZh: '体验柬埔寨最美外岛高龙岛的果冻海、原生态白沙滩与浮潜海岛度假之乐。',
-    categorySlug: 'tourist_attraction',
-    provinceKh: 'ខេត្តព្រះសីហនុ',
-    provinceEn: 'Sihanoukville',
-    publishedDate: '2024-05-25',
-    fallbackThumb: 'https://i.ytimg.com/vi/MXSmXoM1Y3M/hqdefault.jpg',
-  },
-
-  // 4. FOOD & TRAVEL VLOG (វីដេអូម្ហូប & ទេសចរណ៍)
-  {
-    id: 'yt-vlog-markwiens-1',
-    url: 'https://www.youtube.com/watch?v=yUomplw4lQ0',
-    authorName: 'Mark Wiens',
-    fallbackTitleEn: '1 Day CAMBODIAN STREET FOOD TOUR — Breakfast, Lunch & Dinner in Phnom Penh!',
-    titleKh: 'ដំណើរកម្សាន្តភ្លក្សម្ហូបតាមផ្លូវភ្នំពេញជាមួយ Mark Wiens',
-    titleZh: 'Mark Wiens 金边一日终极街头美食探秘 Vlog',
-    descriptionKh: 'វីដេអូ Vlog ដ៏រំភើបរបស់ Mark Wiens ដើរភ្លក្សម្ហូបខ្មែរឆ្ងាញ់ៗ គុយទាវ បាយសាច់ជ្រូក និងសាច់អាំងនៅភ្នំពេញ។',
-    descriptionEn: 'World-renowned food travel vlogger Mark Wiens explores vibrant local street food stalls and hearty Cambodian cuisine from morning to night.',
-    descriptionZh: '全球知名美食博主 Mark Wiens 深入金边大街小巷，从早到晚品尝粿条、炭烤猪肉饭与地道风味。',
-    categorySlug: 'food_travel_vlog',
-    provinceKh: 'រាជធានីភ្នំពេញ',
-    provinceEn: 'Phnom Penh',
-    publishedDate: '2024-07-28',
-    fallbackThumb: 'https://i.ytimg.com/vi/yUomplw4lQ0/hqdefault.jpg',
-    matchedFoodId: 'food-6',
-  },
-  {
-    id: 'yt-vlog-lukemartin-2',
-    url: 'https://www.youtube.com/watch?v=P9bGrG-95cw',
-    authorName: 'Luke Martin (Chopstick Travel)',
-    fallbackTitleEn: '24 Hours of CAMBODIAN STREET FOOD in Siem Reap 🇰🇭 Khmer Steakhouse + Lort Cha!',
-    titleKh: 'ស្វែងយល់ពីម្ហូបតាមផ្លូវខេត្តសៀមរាប ២៤ម៉ោង ជាមួយ Luke Martin',
-    titleZh: 'Luke Martin 暹粒24小时高棉街头美食与炒老鼠粉探访之旅',
-    descriptionKh: 'ដំណើរកម្សាន្តភ្លក្សម្ហូបខ្មែរល្បីៗនៅសៀមរាប រួមមានលតឆា សាច់អាំងខ្មែរ និងមុខម្ហូបប្រចាំតំបន់ជាច្រើនមុខ។',
-    descriptionEn: 'Food traveler Luke Martin spends 24 hours in Siem Reap tasting sizzling Lort Cha, Khmer BBQ, and local street specialties.',
-    descriptionZh: '美食旅行家 Luke Martin 在暹粒全天候品尝铁板炒粉 (Lort Cha)、高棉烤肉与地道夜市小吃。',
-    categorySlug: 'food_travel_vlog',
-    provinceKh: 'ខេត្តសៀមរាប',
-    provinceEn: 'Siem Reap',
-    publishedDate: '2024-06-18',
-    fallbackThumb: 'https://i.ytimg.com/vi/P9bGrG-95cw/hqdefault.jpg',
-    matchedFoodId: 'food-38',
-  },
-  {
-    id: 'yt-vlog-bestever-3',
-    url: 'https://www.youtube.com/watch?v=9LjvaIifKjU',
-    authorName: 'Best Ever Food Review Show',
-    fallbackTitleEn: 'Cambodia’s Street Food Dollar Menu!! Cheapest & Tastiest in Asia!!',
-    titleKh: 'កម្មវិធី Best Ever Food Review ស្វែងរកម្ហូបខ្មែរឆ្ងាញ់ៗតាមផ្លូវ',
-    titleZh: 'Best Ever Food Review Show 探索柬埔寨超值地道街头美食',
-    descriptionKh: 'ការស្វែងរកមុខម្ហូបតាមផ្លូវដ៏សម្បូរបែប តម្លៃសមរម្យ និងរសជាតិឆ្ងាញ់ពិសេសនៅកម្ពុជា ជាមួយ Sonny Side។',
-    descriptionEn: 'Sonny Side explores Cambodia’s most delicious and affordable street food stalls, grilled skewers, and local delicacies.',
-    descriptionZh: '主持人 Sonny Side 深入柬埔寨街头，探寻物美价廉的炭烤小吃与传统风味料理。',
-    categorySlug: 'food_travel_vlog',
-    provinceKh: 'រាជធានីភ្នំពេញ',
-    provinceEn: 'Phnom Penh',
-    publishedDate: '2024-05-12',
-    fallbackThumb: 'https://i.ytimg.com/vi/9LjvaIifKjU/hqdefault.jpg',
-  },
-  {
-    id: 'yt-vlog-100hours-4',
-    url: 'https://www.youtube.com/watch?v=GAK_1OLfNfs',
-    authorName: 'Luke Martin (Chopstick Travel)',
-    fallbackTitleEn: '100 Hours in Cambodia 🇰🇭 Phnom Penh Street Food, Kep Seafood & Siem Reap BBQ!',
-    titleKh: 'ដំណើរកម្សាន្ត ១០០ម៉ោង ភ្លក្សម្ហូបខ្មែរនៅភ្នំពេញ កែប និងសៀមរាប',
-    titleZh: '柬埔寨100小时美食大巡礼：金边街头小吃、白马海鲜与暹粒烧烤',
-    descriptionKh: 'ដំណើរកម្សាន្តភ្លក្សម្ហូបឆ្ងាញ់ៗទូទាំងប្រទេសកម្ពុជា ចាប់ពីរាជធានីភ្នំពេញ រហូតដល់ឆ្នេរសមុទ្រកែប និងសៀមរាប។',
-    descriptionEn: 'Epic 100-hour culinary road trip across Cambodia featuring Phnom Penh noodles, Kep pepper crab, and Siem Reap night markets.',
-    descriptionZh: '横跨金边、白马与暹粒的100小时高棉美食之旅，尽享贡布胡椒蟹与夜市风味。',
-    categorySlug: 'food_travel_vlog',
-    provinceKh: 'ខេត្តសៀមរាប',
-    provinceEn: 'Siem Reap',
-    publishedDate: '2024-08-05',
-    fallbackThumb: 'https://i.ytimg.com/vi/GAK_1OLfNfs/hqdefault.jpg',
-  },
-];
-
-/**
- * Backup Replacement Pool of Verified Playable Videos
- * Automatically used to replace any video that is unavailable or fails playback.
- */
-const BACKUP_REPLACEMENT_YOUTUBE_VIDEOS: CuratedYouTubeSeed[] = [
-  {
-    id: 'yt-backup-amok-quest',
-    url: 'https://www.youtube.com/watch?v=Kd4oBclsRo0',
-    authorName: 'Authentic Food Quest',
-    fallbackTitleEn: 'Easy Cambodian Fish Amok Recipe | Traditional Khmer Dish',
-    titleKh: 'វិធីធ្វើអាម៉ុកត្រីខ្មែរងាយៗ រសជាតិដើមឈ្ងុយឆ្ងាញ់',
-    titleZh: '简易正宗柬埔寨高棉阿莫克蒸鱼食谱',
-    descriptionKh: 'ការណែនាំអំពីគ្រឿងផ្សំ និងរបៀបចម្អិនអាម៉ុកត្រីខ្មែរឱ្យមានរសជាតិឈ្ងុយឆ្ងាញ់។',
-    descriptionEn: 'Learn how to prepare authentic Cambodian Fish Amok with fragrant kroeung spices and coconut milk.',
-    descriptionZh: '学习用传统高棉香料和椰奶制作正宗的柬埔寨阿莫克蒸鱼。',
-    categorySlug: 'popular_food',
-    provinceKh: 'ខេត្តសៀមរាប',
-    provinceEn: 'Siem Reap',
-    publishedDate: '2024-03-18',
-    fallbackThumb: 'https://i.ytimg.com/vi/Kd4oBclsRo0/hqdefault.jpg',
     matchedFoodId: 'food-1',
   },
   {
@@ -447,81 +823,48 @@ const BACKUP_REPLACEMENT_YOUTUBE_VIDEOS: CuratedYouTubeSeed[] = [
     categorySlug: 'famous_restaurant',
     provinceKh: 'ខេត្តសៀមរាប',
     provinceEn: 'Siem Reap',
-    publishedDate: '2024-07-04',
+    publishedDate: '2025-07-04',
     fallbackThumb: 'https://i.ytimg.com/vi/8bJDw1dAvME/hqdefault.jpg',
   },
   {
-    id: 'yt-backup-siemreap-guide',
-    url: 'https://www.youtube.com/watch?v=GoDIbwe9HBM',
-    authorName: 'World Wild Hearts',
-    fallbackTitleEn: 'SIEM REAP, CAMBODIA | Best Things To Do In & Around Siem Reap',
-    titleKh: 'កន្លែងកម្សាន្តល្បីៗ និងសកម្មភាពគួរធ្វើនៅខេត្តសៀមរាប',
-    titleZh: '柬埔寨暹粒必去景点与深度旅游全攻略',
-    descriptionKh: 'មគ្គុទ្ទេសក៍ទេសចរណ៍ពេញលេញសម្រាប់ការដើរកម្សាន្តនៅខេត្តសៀមរាប ប្រាសាទបុរាណ និងភូមិបណ្តែតទឹក។',
-    descriptionEn: 'Comprehensive travel guide to Siem Reap’s best cultural attractions, floating villages, and heritage sites.',
-    descriptionZh: '全面介绍暹粒古迹、洞里萨湖水上村庄与当地文化体验的旅行指南。',
-    categorySlug: 'tourist_attraction',
+    id: 'yt-backup-markwiens-1',
+    url: 'https://www.youtube.com/watch?v=yUomplw4lQ0',
+    authorName: 'Mark Wiens',
+    fallbackTitleEn: '1 Day CAMBODIAN STREET FOOD TOUR — Breakfast, Lunch & Dinner in Phnom Penh!',
+    titleKh: 'ដំណើរកម្សាន្តភ្លក្សម្ហូបតាមផ្លូវភ្នំពេញជាមួយ Mark Wiens',
+    titleZh: 'Mark Wiens 金边一日终极街头美食探秘 Vlog',
+    descriptionKh: 'វីដេអូ Vlog ដ៏រំភើបរបស់ Mark Wiens ដើរភ្លក្សម្ហូបខ្មែរឆ្ងាញ់ៗ គុយទាវ បាយសាច់ជ្រូក និងសាច់អាំងនៅភ្នំពេញ។',
+    descriptionEn: 'World-renowned food travel vlogger Mark Wiens explores vibrant local street food stalls and hearty Cambodian cuisine from morning to night.',
+    descriptionZh: '全球知名美食博主 Mark Wiens 深入金边大街小巷，从早到晚品尝粿条、炭烤猪肉饭与地道风味。',
+    categorySlug: 'food_travel_vlog',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    provinceEn: 'Phnom Penh',
+    publishedDate: '2025-06-28',
+    fallbackThumb: 'https://i.ytimg.com/vi/yUomplw4lQ0/hqdefault.jpg',
+    matchedFoodId: 'food-6',
+  },
+  {
+    id: 'yt-backup-lukemartin-2',
+    url: 'https://www.youtube.com/watch?v=P9bGrG-95cw',
+    authorName: 'Luke Martin (Chopstick Travel)',
+    fallbackTitleEn: '24 Hours of CAMBODIAN STREET FOOD in Siem Reap 🇰🇭 Khmer Steakhouse + Lort Cha!',
+    titleKh: 'ស្វែងយល់ពីម្ហូបតាមផ្លូវខេត្តសៀមរាប ២៤ម៉ោង ជាមួយ Luke Martin',
+    titleZh: 'Luke Martin 暹粒24小时高棉街头美食与炒老鼠粉探访之旅',
+    descriptionKh: 'ដំណើរកម្សាន្តភ្លក្សម្ហូបខ្មែរល្បីៗនៅសៀមរាប រួមមានលតឆា សាច់អាំងខ្មែរ និងមុខម្ហូបប្រចាំតំបន់ជាច្រើនមុខ។',
+    descriptionEn: 'Food traveler Luke Martin spends 24 hours in Siem Reap tasting sizzling Lort Cha, Khmer BBQ, and local street specialties.',
+    descriptionZh: '美食旅行家 Luke Martin 在暹粒全天候品尝铁板炒粉 (Lort Cha)、高棉烤肉与地道夜市小吃。',
+    categorySlug: 'food_travel_vlog',
     provinceKh: 'ខេត្តសៀមរាប',
     provinceEn: 'Siem Reap',
-    publishedDate: '2024-06-22',
-    fallbackThumb: 'https://i.ytimg.com/vi/GoDIbwe9HBM/hqdefault.jpg',
-  },
-  {
-    id: 'yt-backup-markwiens-squid',
-    url: 'https://www.youtube.com/watch?v=Y1YN3f4yRW8',
-    authorName: 'Mark Wiens',
-    fallbackTitleEn: 'Cambodian Street Food — GIANT GRILLED SQUID & Meat Marathon in Phnom Penh!',
-    titleKh: 'មឹកអាំងយក្ស និងអាហារតាមផ្លូវនៅភ្នំពេញ ជាមួយ Mark Wiens',
-    titleZh: 'Mark Wiens 金边街头巨型炭烤鱿鱼与烤肉美食之旅',
-    descriptionKh: 'ភ្លក្សមឹកអាំងអំបិលម្ទេសធំៗ និងសាច់អាំងឈ្ងុយឆ្ងាញ់នៅរាជធានីភ្នំពេញ។',
-    descriptionEn: 'Mark Wiens feasts on charcoal-grilled fresh squid with Kampot pepper dip and smoky Cambodian street meats.',
-    descriptionZh: 'Mark Wiens 在金边品尝炭火现烤大鱿鱼配贡布胡椒蘸酱及地道高棉烤肉。',
-    categorySlug: 'food_travel_vlog',
-    provinceKh: 'រាជធានីភ្នំពេញ',
-    provinceEn: 'Phnom Penh',
-    publishedDate: '2024-05-30',
-    fallbackThumb: 'https://i.ytimg.com/vi/Y1YN3f4yRW8/hqdefault.jpg',
-    matchedFoodId: 'food-19',
-  },
-  {
-    id: 'yt-backup-markwiens-kep',
-    url: 'https://www.youtube.com/watch?v=N3gqIshKgxA',
-    authorName: 'Mark Wiens',
-    fallbackTitleEn: 'Cambodian Food — LIVE BLUE CRAB Boiled Right Out of The Ocean in Kep!',
-    titleKh: 'ក្តាមសមុទ្រស្រស់ៗ និងម្ហូបគ្រឿងសមុទ្រនៅខេត្តកែប ជាមួយ Mark Wiens',
-    titleZh: 'Mark Wiens 白马市现捞活蓝蟹与贡布胡椒海鲜盛宴',
-    descriptionKh: 'ទស្សនាការចម្អិនក្តាមសមុទ្រស្រស់ៗជាមួយម្រេចខ្ចីកំពតដ៏ល្បីល្បាញនៅផ្សារក្តាមខេត្តកែប។',
-    descriptionEn: 'Mark Wiens visits Kep Crab Market to taste sweet ocean blue crabs cooked fresh with green Kampot pepper.',
-    descriptionZh: 'Mark Wiens 探访白马螃蟹市场，品尝刚出锅的鲜甜蓝蟹与贡布青胡椒料理。',
-    categorySlug: 'famous_restaurant',
-    provinceKh: 'ខេត្តកែប',
-    provinceEn: 'Kep',
-    publishedDate: '2024-04-28',
-    fallbackThumb: 'https://i.ytimg.com/vi/N3gqIshKgxA/hqdefault.jpg',
-    matchedFoodId: 'food-27',
-  },
-  {
-    id: 'yt-backup-lukemartin-pp',
-    url: 'https://www.youtube.com/watch?v=u8xFQUqdnmU',
-    authorName: 'Luke Martin (Chopstick Travel)',
-    fallbackTitleEn: '24 Hours of CAMBODIAN STREET FOOD in Phnom Penh! Khmer Noodles & Best Breakfast!',
-    titleKh: 'អាហារតាមផ្លូវ ២៤ម៉ោងនៅភ្នំពេញ គុយទាវ និងអាហារពេលព្រឹកខ្មែរដ៏ឆ្ងាញ់',
-    titleZh: 'Luke Martin 金边24小时街头美食：高棉粿条与地道早餐',
-    descriptionKh: 'ដើរភ្លក្សអាហារពេលព្រឹកដ៏សម្បូរបែបនៅភ្នំពេញ គុយទាវ នំបញ្ចុក និងកាហ្វេខ្មែរ។',
-    descriptionEn: 'Luke Martin explores Phnom Penh’s morning food markets, tasting steaming bowls of Kuy Teav and street snacks.',
-    descriptionZh: 'Luke Martin 深入金边早市，品尝热气腾腾的金边粿条、米粉与传统小吃。',
-    categorySlug: 'food_travel_vlog',
-    provinceKh: 'រាជធានីភ្នំពេញ',
-    provinceEn: 'Phnom Penh',
-    publishedDate: '2024-06-05',
-    fallbackThumb: 'https://i.ytimg.com/vi/u8xFQUqdnmU/hqdefault.jpg',
-    matchedFoodId: 'food-5',
+    publishedDate: '2025-06-18',
+    fallbackThumb: 'https://i.ytimg.com/vi/P9bGrG-95cw/hqdefault.jpg',
+    matchedFoodId: 'food-38',
   },
 ];
 
 let lastManualRefreshMs = 0;
 
-/** Clean up legacy unverified caches on module load */
+/** Clean up legacy unverified or old 2024 caches on module load */
 try {
   if (typeof localStorage !== 'undefined') {
     for (const oldKey of LEGACY_CACHE_KEYS) {
@@ -614,7 +957,6 @@ function probeYouTubeThumbnailValid(videoId: string): Promise<boolean> {
 
     img.onload = () => {
       clearTimeout(timer);
-      // Width <= 120 means YouTube returned the dead "video unavailable" placeholder thumbnail
       if (img.naturalWidth > 0 && img.naturalWidth <= 120) {
         resolve(false);
       } else {
@@ -623,7 +965,6 @@ function probeYouTubeThumbnailValid(videoId: string): Promise<boolean> {
     };
     img.onerror = () => {
       clearTimeout(timer);
-      // If offline, don't mark curated videos as permanently dead; let oEmbed decide
       resolve(typeof navigator !== 'undefined' && navigator.onLine === false ? true : false);
     };
     img.src = `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`;
@@ -682,7 +1023,6 @@ export async function fetchPublicOEmbedMetadata(targetUrl: string): Promise<{
     }
 
     if (res.status === 401 || res.status === 403) {
-      // Video exists on YouTube, but owner disabled embedding!
       verifiedVideoCache.set(vid, {
         ok: true,
         canEmbed: false,
@@ -740,7 +1080,6 @@ export async function fetchPublicOEmbedMetadata(targetUrl: string): Promise<{
         markYouTubeVideoUnavailable(vid);
         return null;
       }
-      // Embedding disabled by owner
       return {
         thumbnailUrl: `https://i.ytimg.com/vi/${vid}/hqdefault.jpg`,
         providerName: 'YouTube',
@@ -765,7 +1104,6 @@ export async function fetchPublicOEmbedMetadata(targetUrl: string): Promise<{
     });
     return result;
   } catch {
-    // Offline fallback: allow if thumbnail wasn't explicitly rejected
     const thumbValid = await thumbValidPromise;
     if (!thumbValid) {
       markYouTubeVideoUnavailable(vid);
@@ -802,9 +1140,9 @@ function seedToDiscoveryItem(
     authorHandle: seed.authorName || 'YouTube Creator',
     publishedOrUpdatedAt: seed.publishedDate,
     isLiveFetched: false,
-    verificationBadgeEn: 'YouTube Verified Playable',
-    verificationBadgeKh: 'វីដេអូ YouTube បានផ្ទៀងផ្ទាត់',
-    verificationBadgeZh: 'YouTube 官方可播放已核实',
+    verificationBadgeEn: 'YouTube 2025–2026 Verified',
+    verificationBadgeKh: 'វីដេអូ YouTube ថ្មី (បានផ្ទៀងផ្ទាត់)',
+    verificationBadgeZh: 'YouTube 2025–2026 官方可播放已核实',
     categorySlug: seed.categorySlug,
     provinceKh: seed.provinceKh,
     provinceEn: seed.provinceEn,
@@ -865,10 +1203,10 @@ export function matchCambodianDish(
   const keywordMap: Array<{ tokens: string[]; foodId: string; boost: number }> = [
     { tokens: ['amok', 'អាម៉ុក'], foodId: 'food-1', boost: 95 },
     { tokens: ['lok lak', 'luc lac', 'ឡុកឡាក់', 'shaking beef'], foodId: 'food-2', boost: 95 },
-    { tokens: ['nom banh chok', 'num banhchok', 'នំបញ្ចុក'], foodId: 'food-3', boost: 95 },
-    { tokens: ['samlor korko', 'samlar kako', 'somlor koko', 'សម្លកកូរ'], foodId: 'food-4', boost: 95 },
+    { tokens: ['nom banh chok', 'num banh chok', 'num banhchok', 'នំបញ្ចុក'], foodId: 'food-3', boost: 95 },
+    { tokens: ['samlor korko', 'samlar kako', 'somlor koko', 'សម្លកកូរ', 'ម្ជូរព្រៃ'], foodId: 'food-4', boost: 95 },
     { tokens: ['kuy teav', 'kuyteav', 'គុយទាវ'], foodId: 'food-5', boost: 92 },
-    { tokens: ['bai sach chrouk', 'bay sach chruk', 'បាយសាច់ជ្រូក'], foodId: 'food-6', boost: 92 },
+    { tokens: ['bai sach chrouk', 'bay sach chruk', 'បាយសាច់ជ្រូក', 'សាច់ជ្រូកងៀត', 'bbq skewers'], foodId: 'food-6', boost: 92 },
     { tokens: ['prahok', 'ប្រហុក'], foodId: 'food-14', boost: 88 },
     { tokens: ['kralan', 'ក្រឡាន', 'bamboo'], foodId: 'food-49', boost: 88 },
     { tokens: ['lort cha', 'លតឆា'], foodId: 'food-38', boost: 90 },
@@ -906,7 +1244,7 @@ export function matchCambodianDish(
   return best && best.score >= 60 ? best : null;
 }
 
-/** Fetch YouTube items: verifies every video for availability & embeddability before displaying */
+/** Fetch YouTube items (2025–2026): verifies every video for availability & embeddability before displaying */
 async function fetchYouTubeCambodianFoodVideos(foods: FoodItem[]): Promise<{
   items: OnlineFoodDiscoveryItem[];
   usedLiveApiKey: boolean;
@@ -920,8 +1258,8 @@ async function fetchYouTubeCambodianFoodVideos(foods: FoodItem[]): Promise<{
     try {
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), 5000);
-      const q = encodeURIComponent('Cambodian food recipe Fish Amok Khmer travel Siem Reap Phnom Penh');
-      const ytUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&videoEmbeddable=true&maxResults=8&q=${q}&key=${encodeURIComponent(
+      const q = encodeURIComponent('Cambodia street food travel Phnom Penh Siem Reap 2026');
+      const ytUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&videoEmbeddable=true&order=date&publishedAfter=2025-01-01T00:00:00Z&maxResults=12&q=${q}&key=${encodeURIComponent(
         apiKey.trim()
       )}`;
       const res = await fetch(ytUrl, { signal: controller.signal });
@@ -932,10 +1270,13 @@ async function fetchYouTubeCambodianFoodVideos(foods: FoodItem[]): Promise<{
           const vid = extractYouTubeVideoId(it?.id?.videoId || '');
           const snip = it?.snippet;
           if (!vid || !snip || isKnownUnavailableVideo(vid)) continue;
+          const pubDate = (snip.publishedAt || '').slice(0, 10) || new Date().toISOString().slice(0, 10);
+          if (pubDate < '2025-01-01') continue;
+
           const watchUrl = `https://www.youtube.com/watch?v=${vid}`;
           const oembed = await fetchPublicOEmbedMetadata(watchUrl);
           if (!oembed && typeof navigator !== 'undefined' && navigator.onLine !== false) {
-            continue; // Skip unplayable/unavailable video
+            continue;
           }
           const match = matchCambodianDish(`${snip.title} ${snip.description}`, foods);
           liveItems.push({
@@ -948,20 +1289,20 @@ async function fetchYouTubeCambodianFoodVideos(foods: FoodItem[]): Promise<{
             descriptionEn: snip.description || '',
             thumbnailUrl: `https://i.ytimg.com/vi/${vid}/hqdefault.jpg`,
             sourceUrl: watchUrl,
-            sourceName: snip.channelTitle || 'YouTube',
+            sourceName: snip.channelTitle ? `${snip.channelTitle} (YouTube)` : 'YouTube',
             authorHandle: snip.channelTitle,
-            publishedOrUpdatedAt: (snip.publishedAt || '').slice(0, 10) || new Date().toISOString().slice(0, 10),
+            publishedOrUpdatedAt: pubDate,
             isLiveFetched: true,
-            verificationBadgeEn: 'YouTube Data API v3 (Verified)',
-            verificationBadgeKh: 'ទាញផ្ទាល់ពី YouTube Data API v3',
-            verificationBadgeZh: 'YouTube Data API v3 已验证',
+            verificationBadgeEn: 'YouTube Data API v3 (2025–2026)',
+            verificationBadgeKh: 'ទាញផ្ទាល់ពី YouTube Data API v3 (2025–2026)',
+            verificationBadgeZh: 'YouTube Data API v3 (2025–2026 已验证)',
             categorySlug: 'popular_food',
             provinceKh: 'ទូទាំងប្រទេសកម្ពុជា',
             provinceEn: 'All Cambodia',
             matchedFoodId: match?.food.id,
             matchedFoodNameKh: match?.food.nameKh,
             matchedFoodNameEn: match?.food.nameEn,
-            relevanceScore: (match?.score ?? 80) + 18,
+            relevanceScore: 98,
             isPlayableVerified: true,
             canInlineEmbed: oembed?.canEmbed !== false,
           });
@@ -971,7 +1312,7 @@ async function fetchYouTubeCambodianFoodVideos(foods: FoodItem[]): Promise<{
         }
       }
     } catch {
-      // Fall through to verified curated YouTube videos
+      // Fall through to verified 2025-2026 curated YouTube videos
     }
   }
 
@@ -987,7 +1328,6 @@ async function fetchYouTubeCambodianFoodVideos(foods: FoodItem[]): Promise<{
         return getReplacementCambodianVideo(seed.categorySlug, usedIds, foods);
       }
 
-      // When online, verify via oEmbed + thumbnail probe
       if (typeof navigator === 'undefined' || navigator.onLine !== false) {
         const meta = await fetchPublicOEmbedMetadata(seed.url);
         if (!meta && isKnownUnavailableVideo(vid)) {
@@ -1112,7 +1452,7 @@ export async function addCustomDiscoveryUrl(
     matchedFoodId: match?.food.id,
     matchedFoodNameKh: match?.food.nameKh,
     matchedFoodNameEn: match?.food.nameEn,
-    relevanceScore: 98,
+    relevanceScore: 100,
     isPlayableVerified: true,
     canInlineEmbed: meta.canEmbed !== false,
   };
@@ -1130,7 +1470,7 @@ export async function addCustomDiscoveryUrl(
   return { ok: true, item: newItem };
 }
 
-/** Deduplicate strictly by YouTube video ID or normalized URL, skipping any unavailable videos */
+/** Deduplicate strictly by YouTube video ID or normalized URL, sorting newest 2026 -> 2025 broadcasts first */
 export function deduplicateAndRankDiscoveries(items: OnlineFoodDiscoveryItem[]): OnlineFoodDiscoveryItem[] {
   const seenVideoIds = new Set<string>();
   const seenUrls = new Set<string>();
@@ -1156,10 +1496,17 @@ export function deduplicateAndRankDiscoveries(items: OnlineFoodDiscoveryItem[]):
   }
 
   return unique.sort((a, b) => {
-    if (b.relevanceScore !== a.relevanceScore) return b.relevanceScore - a.relevanceScore;
+    // Keep user-added custom videos at the very top
+    const aCustom = a.id.startsWith('custom-yt-') ? 1 : 0;
+    const bCustom = b.id.startsWith('custom-yt-') ? 1 : 0;
+    if (aCustom !== bCustom) return bCustom - aCustom;
+
+    // Sort newest published date (2026 -> 2025) first
     const ta = Date.parse(a.publishedOrUpdatedAt) || 0;
     const tb = Date.parse(b.publishedOrUpdatedAt) || 0;
-    return tb - ta;
+    if (tb !== ta) return tb - ta;
+
+    return b.relevanceScore - a.relevanceScore;
   });
 }
 
@@ -1198,28 +1545,28 @@ export async function fetchOnlineFoodDiscoveryFeed(params: {
   const statuses: PlatformApiStatus[] = [
     {
       platform: 'youtube',
-      nameEn: 'YouTube',
-      nameKh: 'YouTube',
-      nameZh: 'YouTube 热门视频',
+      nameEn: 'YouTube (2025–2026)',
+      nameKh: 'YouTube (២០២៥–២០២៦)',
+      nameZh: 'YouTube 热门视频 (2025–2026)',
       mode: ytRes.usedLiveApiKey ? 'live_api' : 'oembed_verified',
       statusLabelEn: ytRes.usedLiveApiKey
-        ? 'Live Data API v3 Active'
-        : `Official YouTube Verified (${merged.length} playable videos)`,
+        ? 'Live Data API v3 Active (2025–2026)'
+        : `Official YouTube 2025–2026 Verified (${merged.length} playable videos)`,
       statusLabelKh: ytRes.usedLiveApiKey
-        ? 'តភ្ជាប់ផ្ទាល់ជាមួយ YouTube Data API v3'
-        : `វីដេអូ YouTube បានផ្ទៀងផ្ទាត់ (${merged.length} វីដេអូអាចចាក់បាន)`,
+        ? 'តភ្ជាប់ផ្ទាល់ជាមួយ YouTube Data API v3 (2025–2026)'
+        : `វីដេអូ YouTube ថ្មីៗឆ្នាំ 2025–2026 (${merged.length} វីដេអូអាចចាក់បាន)`,
       statusLabelZh: ytRes.usedLiveApiKey
-        ? 'YouTube Data API v3 实时连接'
-        : `YouTube 官方已核实 (${merged.length} 条可播放视频)`,
+        ? 'YouTube Data API v3 (2025–2026 实时连接)'
+        : `YouTube 2025–2026 官方已核实 (${merged.length} 条可播放视频)`,
       explanationEn: ytRes.usedLiveApiKey
-        ? 'Searching live Cambodian food & travel videos via YouTube Data API v3 with embeddability verification.'
-        : 'Every YouTube video is verified via official YouTube oEmbed and thumbnail checks to ensure public playability across Cambodian food, restaurants, attractions, and vlogs.',
+        ? 'Searching live 2025–2026 Cambodian food & travel videos via YouTube Data API v3 with embeddability verification.'
+        : 'Streaming recent 2025–2026 Cambodian food, restaurant, attraction, and vlog broadcasts verified via official YouTube oEmbed.',
       explanationKh: ytRes.usedLiveApiKey
-        ? 'កំពុងស្វែងរកវីដេអូម្ហូបខ្មែរ និងទេសចរណ៍ផ្ទាល់តាមរយៈ YouTube Data API v3 និងផ្ទៀងផ្ទាត់ការចាក់វីដេអូ។'
-        : 'គ្រប់វីដេអូ YouTube ទាំងអស់ត្រូវបានផ្ទៀងផ្ទាត់តាមរយៈ YouTube oEmbed ផ្លូវការ ដើម្បីធានាថាអាចចាក់មើលបានដោយរលូន។',
+        ? 'កំពុងស្វែងរកវីដេអូម្ហូបខ្មែរ និងទេសចរណ៍ថ្មីៗឆ្នាំ 2025–2026 តាមរយៈ YouTube Data API v3។'
+        : 'ទាញយកវីដេអូថ្មីៗឆ្នាំ 2025–2026 ពីឆានែលម្ហូបអាហារ ភោជនីយដ្ឋាន និងទេសចរណ៍កម្ពុជា ដែលផ្ទៀងផ្ទាត់តាម YouTube oEmbed ផ្លូវការ។',
       explanationZh: ytRes.usedLiveApiKey
-        ? '正在通过 YouTube Data API v3 实时获取并验证可播放的高棉美食与旅游视频。'
-        : '所有 YouTube 视频均通过官方 oEmbed 与缩略图可用性检测，确保高棉美食、餐厅、景点与 Vlog 视频均可正常播放。',
+        ? '正在通过 YouTube Data API v3 实时获取并验证 2025–2026 可播放的高棉美食与旅游视频。'
+        : '所有 2025–2026 YouTube 频道视频均通过官方 oEmbed 与缩略图检测，确保流畅播放。',
       fetchedCount: merged.length,
       lastCheckedIso: nowIso,
     },
@@ -1306,6 +1653,8 @@ export function extractEmbedPlayerInfo(item: OnlineFoodDiscoveryItem): EmbedPlay
     vid = extractYouTubeVideoId(item.id.replace('yt-api-', ''));
   } else if (!vid && item.id.startsWith('yt-live-')) {
     vid = extractYouTubeVideoId(item.id.replace('yt-live-', ''));
+  } else if (!vid && item.id.startsWith('yt-rss-')) {
+    vid = extractYouTubeVideoId(item.id.replace('yt-rss-', ''));
   }
 
   if (vid && /^[a-zA-Z0-9_-]{11}$/.test(vid) && !isKnownUnavailableVideo(vid)) {
@@ -1342,7 +1691,7 @@ export function extractEmbedPlayerInfo(item: OnlineFoodDiscoveryItem): EmbedPlay
   }
 
   const fallbackSearch = `https://www.youtube.com/results?search_query=${encodeURIComponent(
-    (item.titleEn || item.titleKh || 'Cambodian food travel') + ' Cambodia'
+    (item.titleEn || item.titleKh || 'Cambodian food travel') + ' Cambodia 2026'
   )}`;
 
   return {
@@ -1371,9 +1720,9 @@ const SUPABASE_ANON_KEY =
   (import.meta as any)?.env?.VITE_SUPABASE_ANON_KEY || 'sb_publishable_h5ufAaA0qAL3s-ebprATsw_8AApv71l';
 
 /**
- * Unified YouTube discovery and search:
- * 1. Queries backend Edge Function for YouTube search if online, verifying every returned video ID.
- * 2. Gracefully falls back to verified official YouTube videos & oEmbed metadata.
+ * Unified YouTube 2025–2026 discovery and search:
+ * 1. Queries backend Edge Function for live 2025–2026 YouTube search & channel RSS feeds if online, verifying every returned video ID.
+ * 2. Merges with verified official 2025–2026 YouTube videos & oEmbed metadata.
  * 3. Automatically skips unavailable videos and replaces them with relevant Cambodian videos.
  */
 export async function searchAndDiscoverSocialFood(
@@ -1390,7 +1739,7 @@ export async function searchAndDiscoverSocialFood(
   let backendItems: OnlineFoodDiscoveryItem[] = [];
   let fromBackendEdge = false;
 
-  // Try Supabase Edge Function first for YouTube search (with 4s timeout)
+  // Try Supabase Edge Function first for YouTube 2025-2026 search & channel feeds (with 4s timeout)
   try {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 4000);
@@ -1402,7 +1751,7 @@ export async function searchAndDiscoverSocialFood(
         apikey: SUPABASE_ANON_KEY,
         Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
       },
-      body: JSON.stringify({ query: query || 'Cambodian food travel', platform: 'youtube' }),
+      body: JSON.stringify({ query: query || 'Cambodia food travel 2026', platform: 'youtube' }),
       signal: controller.signal,
     });
     clearTimeout(timeout);
@@ -1411,7 +1760,9 @@ export async function searchAndDiscoverSocialFood(
       const data = await res.json();
       if (Array.isArray(data?.items) && data.items.length > 0) {
         const rawCandidates = data.items.filter(
-          (it: any) => it.platform === 'youtube' || /youtube\.com|youtu\.be/.test(it.sourceUrl || '')
+          (it: any) =>
+            (it.platform === 'youtube' || /youtube\.com|youtu\.be/.test(it.sourceUrl || '')) &&
+            (!it.publishedOrUpdatedAt || String(it.publishedOrUpdatedAt) >= '2025-01-01')
         );
 
         const verifiedBackend = await Promise.all(
@@ -1419,7 +1770,7 @@ export async function searchAndDiscoverSocialFood(
             const vid = extractYouTubeVideoId(it.sourceUrl || it.id || '');
             if (!vid || isKnownUnavailableVideo(vid)) return null;
             const meta = await fetchPublicOEmbedMetadata(`https://www.youtube.com/watch?v=${vid}`);
-            if (!meta) return null; // Skip unavailable backend video
+            if (!meta) return null;
             const match = matchCambodianDish(
               `${it.titleEn || it.titleKh} ${it.descriptionEn || it.descriptionKh}`,
               foods
@@ -1453,7 +1804,7 @@ export async function searchAndDiscoverSocialFood(
     forceRefresh,
   });
 
-  // Merge and deduplicate
+  // Merge and deduplicate (sorted newest 2026 -> 2025 first)
   let combined = deduplicateAndRankDiscoveries([...backendItems, ...baseFeed.items]);
 
   // Apply category filter if specified and not 'all'

@@ -1,5 +1,5 @@
 // Supabase Edge Function: social-food-discovery
-// Secure backend proxy for YouTube Data API v3 (Official Google API)
+// Secure backend proxy for YouTube Data API v3 (2025-2026 broadcasts) + Live Cambodian YouTube Channel RSS Feeds
 // Keeps YOUTUBE_API_KEY strictly server-side (Deno.env) with zero mobile-bundle exposure.
 
 declare const Deno: {
@@ -33,7 +33,7 @@ interface SocialDiscoveryItem {
   verificationBadgeEn: string;
   verificationBadgeKh: string;
   verificationBadgeZh: string;
-  categorySlug: 'famous_dish' | 'street_food' | 'noodle_soup' | 'cafe_drink' | 'dessert_snack' | 'unusual_local';
+  categorySlug: 'popular_food' | 'famous_restaurant' | 'tourist_attraction' | 'food_travel_vlog';
   provinceKh: string;
   provinceEn: string;
   relevanceScore: number;
@@ -49,6 +49,35 @@ interface PlatformCapabilityStatus {
   explanationKh: string;
   explanationZh: string;
   itemCount: number;
+}
+
+const ACTIVE_CAMBODIA_CHANNELS_2026: Array<{
+  channelId: string;
+  name: string;
+  categorySlug: SocialDiscoveryItem['categorySlug'];
+  provinceKh: string;
+  provinceEn: string;
+}> = [
+  { channelId: 'UCLVncs-1iVf4f1tW5WSfQfw', name: 'Street Food TV', categorySlug: 'popular_food', provinceKh: 'រាជធានីភ្នំពេញ', provinceEn: 'Phnom Penh' },
+  { channelId: 'UCM_tv-ZoNPPAIT4rrhib28A', name: 'Street Food Explorer', categorySlug: 'famous_restaurant', provinceKh: 'រាជធានីភ្នំពេញ', provinceEn: 'Phnom Penh' },
+  { channelId: 'UCQ1k3iVCA9mkTuOJetyK_2Q', name: 'Delicious Food Show & Travel', categorySlug: 'food_travel_vlog', provinceKh: 'រាជធានីភ្នំពេញ', provinceEn: 'Phnom Penh' },
+  { channelId: 'UC3B29E6Fxe-bum63LxbcspQ', name: 'Walk Street And Food', categorySlug: 'famous_restaurant', provinceKh: 'រាជធានីភ្នំពេញ', provinceEn: 'Phnom Penh' },
+  { channelId: 'UC4mwWNbfhEM6BKrGtxH_1dg', name: 'Oun Roth Daily life', categorySlug: 'popular_food', provinceKh: 'រាជធានីភ្នំពេញ', provinceEn: 'Phnom Penh' },
+  { channelId: 'UCg7R70hWzrtDh3bCGlrGKhQ', name: 'Delicious food channel', categorySlug: 'popular_food', provinceKh: 'ទូទាំងប្រទេសកម្ពុជា', provinceEn: 'All Cambodia' },
+  { channelId: 'UCIS-mtcY4mDKUd1ET6utKqA', name: 'Thavireak City Walks', categorySlug: 'tourist_attraction', provinceKh: 'រាជធានីភ្នំពេញ', provinceEn: 'Phnom Penh' },
+  { channelId: 'UCjJJNMTX5wJmZRI5iK3fo5Q', name: 'Sonita Khmer US', categorySlug: 'famous_restaurant', provinceKh: 'រាជធានីភ្នំពេញ', provinceEn: 'Phnom Penh' },
+  { channelId: 'UCARbX20_cV9YwwrAFyYvoMg', name: 'Mao Cambodia', categorySlug: 'famous_restaurant', provinceKh: 'រាជធានីភ្នំពេញ', provinceEn: 'Phnom Penh' },
+  { channelId: 'UCRFt5572jMudEvPVDKkHmbg', name: 'Sreyreang Life Show', categorySlug: 'tourist_attraction', provinceKh: 'ខេត្តកំពត', provinceEn: 'Kampot' },
+  { channelId: 'UCMIUsbPWmPzqRLoI8J9TG_Q', name: 'Little Explore', categorySlug: 'tourist_attraction', provinceKh: 'ខេត្តកោះកុង', provinceEn: 'Koh Kong' },
+];
+
+function decodeXmlEntities(str: string): string {
+  return str
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'");
 }
 
 Deno.serve(async (req: Request) => {
@@ -77,13 +106,15 @@ Deno.serve(async (req: Request) => {
     const items: SocialDiscoveryItem[] = [];
     const statuses: Record<string, PlatformCapabilityStatus> = {};
 
-    // YouTube Data API v3 (Official Google API) with videoEmbeddable=true
+    // 1. YouTube Data API v3 (Official Google API) with publishedAfter=2025-01-01T00:00:00Z & order=date
     const ytApiKey = Deno.env.get('YOUTUBE_API_KEY');
     if (platformFilter === 'all' || platformFilter === 'youtube') {
       if (ytApiKey && ytApiKey.trim().length > 10) {
         try {
-          const searchQuery = query ? `${query} Cambodian food` : 'Cambodian food recipe Fish Amok Khmer';
-          const ytUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&videoEmbeddable=true&maxResults=8&q=${encodeURIComponent(
+          const searchQuery = query
+            ? `${query} Cambodia 2026`
+            : 'Cambodia street food travel Phnom Penh Siem Reap 2026';
+          const ytUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&videoEmbeddable=true&order=date&publishedAfter=2025-01-01T00:00:00Z&maxResults=12&q=${encodeURIComponent(
             searchQuery
           )}&key=${encodeURIComponent(ytApiKey.trim())}`;
           const res = await fetch(ytUrl);
@@ -93,6 +124,9 @@ Deno.serve(async (req: Request) => {
               const vid = item?.id?.videoId;
               const snip = item?.snippet;
               if (!vid || !snip) continue;
+              const pubDate = (snip.publishedAt || '').slice(0, 10) || new Date().toISOString().slice(0, 10);
+              if (pubDate < '2025-01-01') continue;
+
               items.push({
                 id: `yt-live-${vid}`,
                 platform: 'youtube',
@@ -101,51 +135,108 @@ Deno.serve(async (req: Request) => {
                 titleZh: snip.title,
                 descriptionKh: snip.description || '',
                 descriptionEn: snip.description || '',
-                thumbnailUrl: snip?.thumbnails?.high?.url || snip?.thumbnails?.medium?.url || `https://i.ytimg.com/vi/${vid}/hqdefault.jpg`,
+                thumbnailUrl:
+                  snip?.thumbnails?.high?.url ||
+                  snip?.thumbnails?.medium?.url ||
+                  `https://i.ytimg.com/vi/${vid}/hqdefault.jpg`,
                 sourceUrl: `https://www.youtube.com/watch?v=${vid}`,
                 sourceName: snip.channelTitle ? `${snip.channelTitle} (YouTube)` : 'YouTube Khmer Food',
                 authorHandle: snip.channelTitle,
-                publishedOrUpdatedAt: (snip.publishedAt || '').slice(0, 10) || new Date().toISOString().slice(0, 10),
+                publishedOrUpdatedAt: pubDate,
                 isLiveFetched: true,
-                verificationBadgeEn: 'YouTube Data API v3 (Live Backend)',
-                verificationBadgeKh: 'ទាញផ្ទាល់ពី YouTube Data API v3',
-                verificationBadgeZh: 'YouTube Data API v3 实时后端连接',
-                categorySlug: 'famous_dish',
+                verificationBadgeEn: 'YouTube Data API v3 (2025–2026 Live)',
+                verificationBadgeKh: 'ទាញផ្ទាល់ពី YouTube Data API v3 (2025–2026)',
+                verificationBadgeZh: 'YouTube Data API v3 (2025–2026 实时)',
+                categorySlug: 'popular_food',
                 provinceKh: 'ទូទាំងប្រទេសកម្ពុជា',
                 provinceEn: 'All Cambodia',
                 relevanceScore: 98,
               });
             }
-            statuses.youtube = {
-              platform: 'youtube',
-              mode: 'live_api',
-              statusLabelEn: 'YouTube Data API v3 (Active)',
-              statusLabelKh: 'តភ្ជាប់ផ្ទាល់ជាមួយ YouTube Data API v3',
-              statusLabelZh: 'YouTube Data API v3 实时连接',
-              explanationEn: 'Server-side YouTube Data API v3 proxy returned authentic embeddable video listings.',
-              explanationKh: 'ប្រព័ន្ធបម្រើការបានទាញយកវីដេអូពិតប្រាកដពី YouTube Data API v3។',
-              explanationZh: '服务端代理通过官方 YouTube Data API v3 成功返回真实可嵌入视频内容。',
-              itemCount: items.filter((i) => i.platform === 'youtube').length,
-            };
           }
         } catch {
-          // fallback status handled below
+          // fall through to RSS channel feeds
         }
       }
 
-      if (!statuses.youtube) {
-        statuses.youtube = {
-          platform: 'youtube',
-          mode: 'oembed_verified',
-          statusLabelEn: 'YouTube oEmbed / Fallback Ready',
-          statusLabelKh: 'ផ្ទៀងផ្ទាត់តាម YouTube oEmbed',
-          statusLabelZh: 'YouTube oEmbed 验证模式',
-          explanationEn: 'No server-side YOUTUBE_API_KEY secret configured. Client uses official YouTube oEmbed.',
-          explanationKh: 'មិនទាន់កំណត់ YOUTUBE_API_KEY លើ Server ទេ។ ប្រើប្រាស់ YouTube oEmbed ផ្លូវការ។',
-          explanationZh: '服务器端尚未配置 YOUTUBE_API_KEY，客户端将使用官方 YouTube oEmbed 接口。',
-          itemCount: 0,
-        };
+      // 2. Live YouTube Channel RSS Feeds (fetches latest 2025-2026 uploads from active Cambodian channels)
+      try {
+        const rssResults = await Promise.all(
+          ACTIVE_CAMBODIA_CHANNELS_2026.map(async (ch) => {
+            try {
+              const rssRes = await fetch(
+                `https://www.youtube.com/feeds/videos.xml?channel_id=${encodeURIComponent(ch.channelId)}`
+              );
+              if (!rssRes.ok) return [];
+              const xml = await rssRes.text();
+              const entries = [...xml.matchAll(/<entry>([\s\S]*?)<\/entry>/g)].map((m) => m[1]);
+              const found: SocialDiscoveryItem[] = [];
+              for (const entry of entries.slice(0, 3)) {
+                const vid = (entry.match(/<yt:videoId>([^<]+)<\/yt:videoId>/) || [])[1]?.trim();
+                const rawTitle = (entry.match(/<title>([^<]+)<\/title>/) || [])[1]?.trim() || '';
+                const pubDate = ((entry.match(/<published>([^<]+)<\/published>/) || [])[1] || '').slice(0, 10);
+                const rawDesc = (entry.match(/<media:description>([\s\S]*?)<\/media:description>/) || [])[1]?.trim() || '';
+                if (!vid || !rawTitle || pubDate < '2025-01-01') continue;
+
+                const cleanTitle = decodeXmlEntities(rawTitle);
+                const cleanDesc = decodeXmlEntities(rawDesc).slice(0, 260);
+                found.push({
+                  id: `yt-rss-${vid}`,
+                  platform: 'youtube',
+                  titleKh: cleanTitle,
+                  titleEn: cleanTitle,
+                  titleZh: cleanTitle,
+                  descriptionKh: cleanDesc || `វីដេអូថ្មីពីឆានែល ${ch.name} (${pubDate})`,
+                  descriptionEn: cleanDesc || `Latest video from ${ch.name} (${pubDate})`,
+                  thumbnailUrl: `https://i.ytimg.com/vi/${vid}/hqdefault.jpg`,
+                  sourceUrl: `https://www.youtube.com/watch?v=${vid}`,
+                  sourceName: `${ch.name} (YouTube)`,
+                  authorHandle: ch.name,
+                  publishedOrUpdatedAt: pubDate,
+                  isLiveFetched: true,
+                  verificationBadgeEn: 'YouTube Channel Live Feed (2025–2026)',
+                  verificationBadgeKh: 'វីដេអូថ្មីពីឆានែល YouTube (2025–2026)',
+                  verificationBadgeZh: 'YouTube 频道最新视频 (2025–2026)',
+                  categorySlug: ch.categorySlug,
+                  provinceKh: ch.provinceKh,
+                  provinceEn: ch.provinceEn,
+                  relevanceScore: 97,
+                });
+              }
+              return found;
+            } catch {
+              return [];
+            }
+          })
+        );
+
+        for (const group of rssResults) {
+          items.push(...group);
+        }
+      } catch {
+        // ignore RSS errors
       }
+
+      statuses.youtube = {
+        platform: 'youtube',
+        mode: items.length > 0 ? 'live_api' : 'oembed_verified',
+        statusLabelEn:
+          items.length > 0
+            ? `YouTube 2025–2026 Live Channels (${items.length} recent videos)`
+            : 'YouTube 2025–2026 oEmbed Verified',
+        statusLabelKh:
+          items.length > 0
+            ? `ទាញផ្ទាល់ពីឆានែល YouTube ឆ្នាំ 2025–2026 (${items.length} វីដេអូថ្មីៗ)`
+            : 'ផ្ទៀងផ្ទាត់តាម YouTube oEmbed (2025–2026)',
+        statusLabelZh:
+          items.length > 0
+            ? `YouTube 2025–2026 实时频道更新 (${items.length} 条新视频)`
+            : 'YouTube 2025–2026 oEmbed 验证模式',
+        explanationEn: 'Streaming latest 2025–2026 Cambodian food, restaurant, and travel broadcasts from active YouTube channels.',
+        explanationKh: 'ទាញយកវីដេអូថ្មីៗឆ្នាំ 2025–2026 ពីឆានែល YouTube ម្ហូបអាហារ ភោជនីយដ្ឋាន និងទេសចរណ៍កម្ពុជា។',
+        explanationZh: '从活跃的高棉美食、餐厅与旅游 YouTube 频道获取 2025–2026 最新视频。',
+        itemCount: items.length,
+      };
     }
 
     return new Response(
