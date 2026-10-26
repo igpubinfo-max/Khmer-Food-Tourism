@@ -3,8 +3,16 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
 import { ErrorBoundary } from './components/ErrorBoundary.tsx'
+import { sanitizeStartupCurrentUser } from './utils/securityIntegrityGuard.ts'
 
-// 0. Version Migration: Safe non-destructive upgrade to v2.2.0 (Build 100)
+// 0. Anti-Tamper & Security Integrity Check: Strip unsealed/tampered admin roles or fake VIP status
+try {
+  sanitizeStartupCurrentUser();
+} catch (e) {
+  console.warn('Startup anti-tamper integrity check warning:', e);
+}
+
+// 1. Version Migration: Safe non-destructive upgrade to v2.2.0 (Build 108)
 try {
   const CURRENT_VER = '2.2.0';
   const installedVer = localStorage.getItem('kft_app_installed_ver');
@@ -23,7 +31,7 @@ try {
   console.warn('Version migration warning:', e);
 }
 
-// 1. Pre-boot cache sanitation: Purge invalid or corrupt values and clear legacy VIP settings caches
+// 2. Pre-boot cache sanitation: Purge invalid or corrupt values and clear legacy VIP settings caches
 try {
   localStorage.removeItem('kft_settings_v3');
   localStorage.removeItem('kft_settings_v4');
@@ -56,4 +64,3 @@ createRoot(document.getElementById('root')!).render(
     </ErrorBoundary>
   </StrictMode>,
 )
-

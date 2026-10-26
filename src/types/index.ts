@@ -1,6 +1,6 @@
 export const APP_VERSION = 'v2.2.0';
 export const APP_VERSION_NAME = '2.2.0';
-export const APP_BUILD_CODE = 107;
+export const APP_BUILD_CODE = 108;
 export const APP_RELEASE_DATE = '2026-10-26';
 
 export interface GoogleMapsPlaceMetadata {
@@ -121,6 +121,13 @@ export interface User {
 
   // Connected Social Accounts (TikTok & Facebook)
   socialAccounts?: UserSocialAccounts;
+
+  // Anti-Tamper & Security Integrity Seal
+  integritySeal?: string;
+  vipStatus?: 'active' | 'expired' | 'none';
+  vipPlanType?: string;
+  vipExpiresAt?: string;
+  approvedStoresCount?: number;
 }
 
 export interface ConnectedSocialAccount {
