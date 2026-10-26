@@ -414,7 +414,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   useChineseDomTranslation(language);
 
-  const [activeTab, setActiveTab] = useState<ActiveTab>('home');
+  const [activeTab, setActiveTab] = useState<ActiveTab>(() => {
+    try {
+      const p = new URLSearchParams(window.location.search).get('tab') as ActiveTab | null;
+      if (p && ['home', 'food', 'restaurants', 'tourism', 'community', 'profile'].includes(p)) {
+        return p;
+      }
+    } catch {}
+    return 'home';
+  });
   
   const [deletedUsers, setDeletedUsers] = useState<DeletedUserRecord[]>(() => {
     try {
