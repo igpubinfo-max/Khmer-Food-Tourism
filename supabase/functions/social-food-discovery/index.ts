@@ -77,13 +77,13 @@ Deno.serve(async (req: Request) => {
     const items: SocialDiscoveryItem[] = [];
     const statuses: Record<string, PlatformCapabilityStatus> = {};
 
-    // YouTube Data API v3 (Official Google API)
+    // YouTube Data API v3 (Official Google API) with videoEmbeddable=true
     const ytApiKey = Deno.env.get('YOUTUBE_API_KEY');
     if (platformFilter === 'all' || platformFilter === 'youtube') {
       if (ytApiKey && ytApiKey.trim().length > 10) {
         try {
           const searchQuery = query ? `${query} Cambodian food` : 'Cambodian food recipe Fish Amok Khmer';
-          const ytUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=8&q=${encodeURIComponent(
+          const ytUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&videoEmbeddable=true&maxResults=8&q=${encodeURIComponent(
             searchQuery
           )}&key=${encodeURIComponent(ytApiKey.trim())}`;
           const res = await fetch(ytUrl);
@@ -122,9 +122,9 @@ Deno.serve(async (req: Request) => {
               statusLabelEn: 'YouTube Data API v3 (Active)',
               statusLabelKh: 'តភ្ជាប់ផ្ទាល់ជាមួយ YouTube Data API v3',
               statusLabelZh: 'YouTube Data API v3 实时连接',
-              explanationEn: 'Server-side YouTube Data API v3 proxy returned authentic video listings.',
+              explanationEn: 'Server-side YouTube Data API v3 proxy returned authentic embeddable video listings.',
               explanationKh: 'ប្រព័ន្ធបម្រើការបានទាញយកវីដេអូពិតប្រាកដពី YouTube Data API v3។',
-              explanationZh: '服务端代理通过官方 YouTube Data API v3 成功返回真实视频内容。',
+              explanationZh: '服务端代理通过官方 YouTube Data API v3 成功返回真实可嵌入视频内容。',
               itemCount: items.filter((i) => i.platform === 'youtube').length,
             };
           }

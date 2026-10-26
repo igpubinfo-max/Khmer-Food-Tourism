@@ -12,7 +12,11 @@ import { translateDynamicTextToZh } from '../utils/zhDynamicTranslator';
 import {
   searchAndDiscoverSocialFood,
   extractEmbedPlayerInfo,
+  extractYouTubeVideoId,
   addCustomDiscoveryUrl,
+  markYouTubeVideoUnavailable,
+  getReplacementCambodianVideo,
+   fetchPublicOEmbedMetadata,
   OnlineFoodDiscoveryItem,
   PlatformApiStatus,
 } from '../services/onlineFoodDiscoveryService';
@@ -46,11 +50,84 @@ export const TrendingSocialModal: React.FC = () => {
   const [customUrlInput, setCustomUrlInput] = useState<string>('');
   const [isAddingUrl, setIsAddingUrl] = useState<boolean>(false);
 
-  // Active inline video player tracking
+  // Active inline video player tracking & embed fallback state
   const [activePlayerItemId, setActivePlayerItemId] = useState<string | null>(null);
+  const [embedFallbackItemIds, setEmbedFallbackItemIds] = useState<Record<string, boolean>>({});
+  const [verifyingPlayItemId, setVerifyingPlayItemId] = useState<string | null>(null);
+  const activeIframeRef = useRef<HTMLIFrameElement | null>(null);
 
   // Concurrency guard ref to prevent overlapping fetches
   const isFetchingRef = useRef<boolean>(false);
+
+  /** Automatically replace an unavailable video with a verified playable Cambodian video */
+  const handleReplaceUnavailableVideo = useCallback(
+    (unavailableItem: OnlineFoodDiscoveryItem, notifyUser = false) => {
+      markYouTubeVideoUnavailable(unavailableItem.sourceUrl);
+      setDiscoveryItems((prev) => {
+        const existingVideoIds = prev
+          .map((x) => extractYouTubeVideoId(x.sourceUrl) || '')
+          .filter(Boolean);
+        const replacement = getReplacementCambodianVideo(
+          unavailableItem.categorySlug,
+          existingVideoIds,
+          foods
+        );
+        if (!replacement) {
+          return prev.filter((x) => x.id !== unavailableItem.id);
+        }
+        return prev.map((x) => (x.id === unavailableItem.id ? replacement : x));
+      });
+
+      if (activePlayerItemId === unavailableItem.id) {
+        setActivePlayerItemId(null);
+      }
+
+      if (notifyUser) {
+        showToast(
+          tr(
+            language,
+            '🔄 បានប្តូរវីដេអូដែលមិនអាចចាក់បាន ជំនួសដោយវីដេអូម្ហូប និងទេសចរណ៍ខ្មែរដែលអាចចាក់បាន!',
+            '🔄 Replaced unavailable video with a verified playable Cambodian video!',
+            '🔄 已自动将不可用视频替换为可播放的柬埔寨美食与旅游视频！'
+          ),
+          'info'
+        );
+      }
+    },
+    [activePlayerItemId, foods, language, showToast]
+  );
+
+  // Listen to YouTube IFrame Player API postMessage events (detects Error 100 / 101 / 150)
+  useEffect(() => {
+    if (!activePlayerItemId) return;
+
+    const handleYouTubeMessage = (event: MessageEvent) => {
+      if (!event.origin || !event.origin.includes('youtube')) return;
+      if (typeof event.data !== 'string') return;
+      try {
+        const data = JSON.parse(event.data);
+        if (data?.event === 'onError') {
+          const errorCode = Number(data?.info);
+          const currentItem = discoveryItems.find((x) => x.id === activePlayerItemId);
+          if (!currentItem) return;
+
+          // Error 100 = Video not found / removed / private -> auto-replace immediately
+          if (errorCode === 100) {
+            handleReplaceUnavailableVideo(currentItem, true);
+            return;
+          }
+
+          // Error 101 / 150 / 2 / 5 = Embedding disabled by owner or WebView restriction -> show clean Watch on YouTube fallback
+          setEmbedFallbackItemIds((prev) => ({ ...prev, [activePlayerItemId]: true }));
+        }
+      } catch {
+        // ignore non-JSON messages
+      }
+    };
+
+    window.addEventListener('message', handleYouTubeMessage);
+    return () => window.removeEventListener('message', handleYouTubeMessage);
+  }, [activePlayerItemId, discoveryItems, handleReplaceUnavailableVideo]);
 
   const loadFeed = useCallback(
     async (force = false) => {
@@ -143,6 +220,7 @@ export const TrendingSocialModal: React.FC = () => {
   useEffect(() => {
     if (!isTrendingSocialModalOpen) {
       setActivePlayerItemId(null);
+      setVerifyingPlayItemId(null);
     }
   }, [isTrendingSocialModalOpen]);
 
@@ -225,26 +303,25 @@ export const TrendingSocialModal: React.FC = () => {
   ];
 
   const openExternalVideoSafely = (rawUrl?: string, fallbackQuery?: string) => {
-    const targetUrl =
-      rawUrl && /^https?:\/\//i.test(rawUrl.trim())
-        ? rawUrl.trim()
-        : `https://www.youtube.com/results?search_query=${encodeURIComponent(
-            (fallbackQuery || 'Cambodian food travel') + ' Khmer food'
-          )}`;
+    const vid = extractYouTubeVideoId(rawUrl || '');
+    const targetUrl = vid
+      ? `https://www.youtube.com/watch?v=${vid}`
+      : rawUrl && /^https?:\/\//i.test(rawUrl.trim())
+      ? rawUrl.trim()
+      : `https://www.youtube.com/results?search_query=${encodeURIComponent(
+          (fallbackQuery || 'Cambodian food travel') + ' Khmer food'
+        )}`;
     try {
-      const opened = window.open(targetUrl, '_blank', 'noopener,noreferrer');
-      if (!opened) {
-        const a = document.createElement('a');
-        a.href = targetUrl;
-        a.target = '_blank';
-        a.rel = 'noopener noreferrer';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-      }
+      const a = document.createElement('a');
+      a.href = targetUrl;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
     } catch {
       try {
-        window.location.assign(targetUrl);
+        window.open(targetUrl, '_blank', 'noopener,noreferrer');
       } catch {
         showToast(
           tr(
@@ -259,16 +336,51 @@ export const TrendingSocialModal: React.FC = () => {
     }
   };
 
-  const handlePlayOrOpenItem = (item: OnlineFoodDiscoveryItem) => {
-    const playerInfo = extractEmbedPlayerInfo(item);
-    if (playerInfo.canInlineEmbed && playerInfo.embedUrl) {
-      setActivePlayerItemId((prev) => (prev === item.id ? null : item.id));
+  /**
+   * Verify availability & embeddability before playing inline:
+   * - Toggle off if already open
+   * - Check oEmbed / thumbnail status if not yet verified
+   * - If unavailable, auto-replace with a verified playable Cambodian video
+   * - If embedding is disabled, show the clear "Watch on YouTube" fallback UI
+   */
+  const handlePlayOrOpenItem = async (item: OnlineFoodDiscoveryItem) => {
+    if (activePlayerItemId === item.id) {
+      setActivePlayerItemId(null);
       return;
     }
 
-    const url = item.sourceUrl || item.trendingItem?.videoUrl || item.trendingItem?.sourceUrl;
-    if (url) {
-      openExternalVideoSafely(url, item.titleEn || item.titleKh);
+    const playerInfo = extractEmbedPlayerInfo(item);
+    if (!playerInfo.videoId) {
+      openExternalVideoSafely(playerInfo.watchUrl, item.titleEn || item.titleKh);
+      return;
+    }
+
+    // Verify availability before opening player if online
+    if (typeof navigator === 'undefined' || navigator.onLine !== false) {
+      setVerifyingPlayItemId(item.id);
+      const meta = await fetchPublicOEmbedMetadata(playerInfo.watchUrl);
+      setVerifyingPlayItemId(null);
+
+      if (!meta) {
+        // Video is unavailable/deleted -> automatically replace with a playable video!
+        handleReplaceUnavailableVideo(item, true);
+        return;
+      }
+
+      if (meta.canEmbed === false) {
+        setEmbedFallbackItemIds((prev) => ({ ...prev, [item.id]: true }));
+        setActivePlayerItemId(item.id);
+        return;
+      }
+    }
+
+    if (playerInfo.canInlineEmbed && playerInfo.embedUrl) {
+      setActivePlayerItemId(item.id);
+      return;
+    }
+
+    if (playerInfo.watchUrl) {
+      openExternalVideoSafely(playerInfo.watchUrl, item.titleEn || item.titleKh);
       return;
     }
 
@@ -636,42 +748,107 @@ export const TrendingSocialModal: React.FC = () => {
 
               const playerInfo = extractEmbedPlayerInfo(item);
               const isPlayingInline = activePlayerItemId === item.id;
+              const isEmbedFallback = Boolean(embedFallbackItemIds[item.id] || !playerInfo.canInlineEmbed);
+              const isVerifyingThis = verifyingPlayItemId === item.id;
 
               return (
                 <div
                   key={item.id}
                   className="rounded-3xl overflow-hidden bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 shadow-sm space-y-3 transition hover:shadow-md"
                 >
-                  {/* Inline YouTube Embed Player OR High-Res Thumbnail */}
-                  {isPlayingInline && playerInfo.canInlineEmbed && playerInfo.embedUrl ? (
-                    <div className="relative aspect-16/9 w-full bg-black overflow-hidden shadow-inner">
-                      <iframe
-                        src={playerInfo.embedUrl}
-                        title={displayTitle}
-                        className="w-full h-full border-0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        allowFullScreen
-                      />
-                      <div className="absolute top-2 right-2 flex items-center gap-1.5 z-10">
-                        <button
-                          type="button"
-                          onClick={() => openExternalVideoSafely(item.sourceUrl, displayTitle)}
-                          className="px-2 py-1 rounded-lg bg-black/80 hover:bg-black text-white text-[10px] font-bold flex items-center gap-1 border border-white/20 backdrop-blur-xs cursor-pointer"
-                          title={tr(language, 'បើកក្នុង YouTube App', 'Open in YouTube App', '在 YouTube 应用中打开')}
-                        >
-                          <ExternalLink className="w-3 h-3 text-red-400" />
-                          <span>{tr(language, 'YouTube App', 'YouTube App', '打开 YouTube')}</span>
-                        </button>
+                  {/* Inline YouTube Embed Player OR Fallback OR High-Res Thumbnail */}
+                  {isPlayingInline ? (
+                    isEmbedFallback || !playerInfo.embedUrl ? (
+                      /* Clear Message + Working "Watch on YouTube" Button if Embedding is Disabled */
+                      <div className="relative aspect-16/9 w-full bg-slate-950 flex flex-col items-center justify-center p-4 text-center space-y-2.5">
+                        <img
+                          src={item.thumbnailUrl}
+                          alt=""
+                          className="absolute inset-0 w-full h-full object-cover opacity-25 blur-[2px] pointer-events-none"
+                        />
+                        <div className="relative z-10 flex flex-col items-center max-w-xs space-y-2">
+                          <AlertCircle className="w-8 h-8 text-amber-400" />
+                          <p className="text-xs font-bold text-white leading-snug">
+                            {tr(
+                              language,
+                              'ម្ចាស់វីដេអូនេះបានបិទការចាក់ផ្ទាល់ក្នុងកម្មវិធី ឬត្រូវការបើកក្នុងកម្មវិធី YouTube ផ្ទាល់។',
+                              'This video restricts embedded playback. Tap below to watch it directly on YouTube.',
+                              '该视频限制内嵌播放，请点击下方按钮直接在 YouTube 中观看。'
+                            )}
+                          </p>
+                          <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
+                            <button
+                              type="button"
+                              onClick={() => openExternalVideoSafely(playerInfo.watchUrl, displayTitle)}
+                              className="px-3.5 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-extrabold flex items-center gap-1.5 shadow-lg cursor-pointer"
+                            >
+                              <Play className="w-3.5 h-3.5 fill-current" />
+                              <span>{tr(language, 'មើលលើ YouTube', 'Watch on YouTube', '在 YouTube 上观看')}</span>
+                              <ExternalLink className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleReplaceUnavailableVideo(item, true)}
+                              className="px-3 py-2 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-emerald-300 text-[11px] font-bold border border-slate-600 cursor-pointer"
+                            >
+                              {tr(language, 'ប្តូរវីដេអូផ្សេង', 'Skip & Replace', '更换其他视频')}
+                            </button>
+                          </div>
+                        </div>
                         <button
                           type="button"
                           onClick={() => setActivePlayerItemId(null)}
-                          className="px-2 py-1 rounded-lg bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold flex items-center gap-1 shadow-md cursor-pointer"
+                          className="absolute top-2 right-2 z-10 px-2 py-1 rounded-lg bg-slate-800/90 hover:bg-slate-700 text-white text-[10px] font-bold flex items-center gap-1 cursor-pointer"
                         >
                           <X className="w-3 h-3" />
                           <span>{tr(language, 'បិទ', 'Close', '关闭')}</span>
                         </button>
                       </div>
-                    </div>
+                    ) : (
+                      <div className="relative aspect-16/9 w-full bg-black overflow-hidden shadow-inner">
+                        <iframe
+                          ref={activeIframeRef}
+                          src={playerInfo.embedUrl}
+                          title={displayTitle}
+                          className="w-full h-full border-0"
+                          referrerPolicy="strict-origin-when-cross-origin"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+                          allowFullScreen
+                          onLoad={(e) => {
+                            try {
+                              e.currentTarget.contentWindow?.postMessage(
+                                JSON.stringify({ event: 'listening', id: item.id }),
+                                '*'
+                              );
+                            } catch {
+                              // ignore cross-origin postMessage errors
+                            }
+                          }}
+                          onError={() => {
+                            setEmbedFallbackItemIds((prev) => ({ ...prev, [item.id]: true }));
+                          }}
+                        />
+                        <div className="absolute top-2 right-2 flex items-center gap-1.5 z-10">
+                          <button
+                            type="button"
+                            onClick={() => openExternalVideoSafely(playerInfo.watchUrl, displayTitle)}
+                            className="px-2.5 py-1 rounded-lg bg-black/85 hover:bg-red-600 text-white text-[10px] font-bold flex items-center gap-1 border border-white/25 backdrop-blur-xs cursor-pointer transition"
+                            title={tr(language, 'មើលលើ YouTube', 'Watch on YouTube', '在 YouTube 上观看')}
+                          >
+                            <ExternalLink className="w-3 h-3 text-red-400" />
+                            <span>{tr(language, 'មើលលើ YouTube', 'Watch on YouTube', '在 YouTube 观看')}</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setActivePlayerItemId(null)}
+                            className="px-2 py-1 rounded-lg bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold flex items-center gap-1 shadow-md cursor-pointer"
+                          >
+                            <X className="w-3 h-3" />
+                            <span>{tr(language, 'បិទ', 'Close', '关闭')}</span>
+                          </button>
+                        </div>
+                      </div>
+                    )
                   ) : (
                     <div
                       onClick={() => handlePlayOrOpenItem(item)}
@@ -682,6 +859,17 @@ export const TrendingSocialModal: React.FC = () => {
                         alt={displayTitle}
                         className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
                         loading="lazy"
+                        onLoad={(e) => {
+                          // YouTube dead video placeholder is exactly 120x90. Auto-skip and replace immediately!
+                          if (e.currentTarget.naturalWidth > 0 && e.currentTarget.naturalWidth <= 120) {
+                            handleReplaceUnavailableVideo(item, false);
+                          }
+                        }}
+                        onError={() => {
+                          if (typeof navigator === 'undefined' || navigator.onLine !== false) {
+                            handleReplaceUnavailableVideo(item, false);
+                          }
+                        }}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
 
@@ -697,10 +885,27 @@ export const TrendingSocialModal: React.FC = () => {
                         </span>
                       </div>
 
+                      {/* Quick Watch on YouTube pill at top-right */}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openExternalVideoSafely(playerInfo.watchUrl, displayTitle);
+                        }}
+                        className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full bg-black/75 hover:bg-red-600 text-white text-[9px] font-bold backdrop-blur-xs flex items-center gap-1 border border-white/20 transition cursor-pointer"
+                      >
+                        <span>{tr(language, 'បើក YouTube', 'Watch on YouTube', '打开 YouTube')}</span>
+                        <ExternalLink className="w-2.5 h-2.5" />
+                      </button>
+
                       {/* Large Center YouTube Play Button */}
                       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                         <div className="w-12 h-12 rounded-full bg-red-600/90 group-hover:bg-red-600 text-white flex items-center justify-center shadow-xl border-2 border-white/90 transition transform group-hover:scale-110">
-                          <Play className="w-6 h-6 fill-current ml-0.5" />
+                          {isVerifyingThis ? (
+                            <RefreshCw className="w-5 h-5 animate-spin" />
+                          ) : (
+                            <Play className="w-6 h-6 fill-current ml-0.5" />
+                          )}
                         </div>
                       </div>
 
@@ -746,7 +951,7 @@ export const TrendingSocialModal: React.FC = () => {
                       </div>
                     )}
 
-                    {/* Date + Direct YouTube Link */}
+                    {/* Date + Direct Watch on YouTube Link */}
                     <div className="flex items-center justify-between text-[10px] text-slate-400 pt-1 border-t border-slate-100 dark:border-slate-700/60">
                       <span className="flex items-center gap-1">
                         <Calendar className="w-3 h-3" />
@@ -755,17 +960,14 @@ export const TrendingSocialModal: React.FC = () => {
                           {item.publishedOrUpdatedAt}
                         </span>
                       </span>
-                      {item.sourceUrl && (
-                        <a
-                          href={item.sourceUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-red-500 hover:text-red-600 font-bold flex items-center gap-0.5"
-                        >
-                          <span>YouTube</span>
-                          <ExternalLink className="w-3 h-3" />
-                        </a>
-                      )}
+                      <button
+                        type="button"
+                        onClick={() => openExternalVideoSafely(playerInfo.watchUrl, displayTitle)}
+                        className="text-red-500 hover:text-red-600 font-bold flex items-center gap-0.5 cursor-pointer"
+                      >
+                        <span>{tr(language, 'មើលលើ YouTube', 'Watch on YouTube', '在 YouTube 观看')}</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </button>
                     </div>
 
                     {/* Action Buttons */}
