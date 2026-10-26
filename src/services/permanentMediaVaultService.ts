@@ -879,13 +879,15 @@ export function applyTrendingFoodOverrides(
   items: TrendingFoodItem[],
   overridesMap: Record<string, TrendingFoodMediaOverride> = loadLocalMediaOverrides().trendingFoods
 ): TrendingFoodItem[] {
-  if (!overridesMap || Object.keys(overridesMap).length === 0) return items;
-  return items.map((item) => {
+  if (!Array.isArray(items)) return [];
+  const validItems = items.filter((item): item is TrendingFoodItem => Boolean(item && item.id));
+  if (!overridesMap || Object.keys(overridesMap).length === 0) return validItems;
+  return validItems.map((item) => {
     const ov = overridesMap[item.id];
     if (!ov || !ov.photoUrl) return item;
     return {
       ...item,
-      photoUrl: ov.photoUrl,
+      photoUrl: ov.photoUrl || item.photoUrl,
       foodNameKh: ov.foodNameKh || item.foodNameKh,
       foodNameEn: ov.foodNameEn || item.foodNameEn,
       restaurantNameKh: ov.restaurantNameKh || item.restaurantNameKh,

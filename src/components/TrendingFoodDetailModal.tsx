@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
-  X, MapPin, Phone, Share2, ExternalLink, Flame, 
-  Calendar, Sparkles, Navigation, Bookmark, MessageSquareQuote, Play 
+  X, MapPin, Phone, Share2, ExternalLink,
+  Calendar, Sparkles, Navigation, Bookmark, MessageSquareQuote, Play, Utensils, ChefHat
 } from 'lucide-react';
 import { shareRichContent } from '../utils/androidMediaHelper';
 import { tr, translateProvince } from '../utils/i18n';
@@ -15,6 +15,9 @@ export const TrendingFoodDetailModal: React.FC = () => {
     setSelectedTrendingFood, 
     isTrendingFoodDetailModalOpen, 
     setIsTrendingFoodDetailModalOpen,
+    foods,
+    setSelectedFood,
+    setActiveTab,
     language,
     showToast,
     openAddToWishlist
@@ -22,59 +25,111 @@ export const TrendingFoodDetailModal: React.FC = () => {
 
   const isKm = language === 'km';
 
+  const matchedFood = useMemo(() => {
+    if (!selectedTrendingFood || !Array.isArray(foods) || foods.length === 0) return null;
+    const pUrl = selectedTrendingFood.photoUrl || '';
+    const idMatch = pUrl.match(/\/foods\/(food-\d+)\./i);
+    if (idMatch?.[1]) {
+      const byId = foods.find((f) => f && f.id === idMatch[1]);
+      if (byId) return byId;
+    }
+    if (pUrl) {
+      const byPhoto = foods.find((f) => f && f.photoUrl === pUrl);
+      if (byPhoto) return byPhoto;
+    }
+    const kh = (selectedTrendingFood.foodNameKh || '').trim();
+    const en = (selectedTrendingFood.foodNameEn || '').trim().toLowerCase();
+    return (
+      foods.find(
+        (f) =>
+          f &&
+          ((kh && f.nameKh && (f.nameKh.includes(kh) || kh.includes(f.nameKh))) ||
+            (en && f.nameEn && (f.nameEn.toLowerCase().includes(en) || en.includes(f.nameEn.toLowerCase()))))
+      ) || null
+    );
+  }, [selectedTrendingFood, foods]);
+
   if (!isTrendingFoodDetailModalOpen || !selectedTrendingFood) return null;
 
   const item = selectedTrendingFood;
+  const safeFoodKh = item.foodNameKh || item.foodNameEn || 'ម្ហូបខ្មែរ';
+  const safeFoodEn = item.foodNameEn || item.foodNameKh || 'Khmer Food';
+  const safeCatKh = item.categoryKh || 'មុខម្ហូបពេញនិយម';
+  const safeCatEn = item.categoryEn || 'Trending Food';
+  const safeDescKh = item.descriptionKh || item.descriptionEn || '';
+  const safeDescEn = item.descriptionEn || item.descriptionKh || '';
+  const safeRestKh = item.restaurantNameKh || item.restaurantNameEn || '';
+  const safeRestEn = item.restaurantNameEn || item.restaurantNameKh || '';
+  const safeAddrKh = item.addressKh || item.provinceKh || '';
+  const safeAddrEn = item.addressEn || item.provinceEn || '';
+
   const rawFoodName =
     language === 'km'
-      ? item.foodNameKh
+      ? safeFoodKh
       : language === 'zh'
-      ? translateDynamicTextToZh(item.foodNameEn) || item.foodNameEn
-      : item.foodNameEn;
-  const displayFoodName = sanitizeStrictLanguageText(rawFoodName, language);
+      ? translateDynamicTextToZh(safeFoodEn) || safeFoodEn
+      : safeFoodEn;
+  const displayFoodName = sanitizeStrictLanguageText(rawFoodName, language) || safeFoodKh;
+
   const rawCat =
     language === 'km'
-      ? item.categoryKh
+      ? safeCatKh
       : language === 'zh'
-      ? translateDynamicTextToZh(item.categoryEn) || item.categoryEn
-      : item.categoryEn;
-  const displayCat = sanitizeStrictLanguageText(rawCat, language);
-  const displayProv = translateProvince(item.provinceKh || item.provinceEn, language);
+      ? translateDynamicTextToZh(safeCatEn) || safeCatEn
+      : safeCatEn;
+  const displayCat = sanitizeStrictLanguageText(rawCat, language) || safeCatKh;
+
+  const displayProv = translateProvince(item.provinceKh || item.provinceEn || 'កម្ពុជា', language);
+
   const rawDesc =
     language === 'km'
-      ? item.descriptionKh
+      ? safeDescKh
       : language === 'zh'
-      ? translateDynamicTextToZh(item.descriptionEn) || item.descriptionEn
-      : item.descriptionEn;
-  const displayDesc = sanitizeStrictLanguageText(rawDesc, language);
+      ? translateDynamicTextToZh(safeDescEn) || safeDescEn
+      : safeDescEn;
+  const displayDesc = sanitizeStrictLanguageText(rawDesc, language) || safeDescKh;
+
   const displayRestName = sanitizeStrictLanguageText(
     language === 'km'
-      ? item.restaurantNameKh
+      ? safeRestKh
       : language === 'zh'
-      ? translateDynamicTextToZh(item.restaurantNameEn) || item.restaurantNameEn
-      : item.restaurantNameEn,
+      ? translateDynamicTextToZh(safeRestEn) || safeRestEn
+      : safeRestEn,
     language
-  );
+  ) || safeRestKh;
+
   const displayAddress = sanitizeStrictLanguageText(
     language === 'km'
-      ? item.addressKh
+      ? safeAddrKh
       : language === 'zh'
-      ? translateDynamicTextToZh(item.addressEn) || item.addressEn
-      : item.addressEn,
+      ? translateDynamicTextToZh(safeAddrEn) || safeAddrEn
+      : safeAddrEn,
     language
-  );
+  ) || safeAddrKh;
 
   const vid = extractYouTubeVideoId(item.videoUrl || item.sourceUrl || '');
   const youtubeWatchUrl =
     vid && !isKnownUnavailableVideo(vid)
       ? `https://www.youtube.com/watch?v=${vid}`
       : `https://www.youtube.com/results?search_query=${encodeURIComponent(
-          `${item.foodNameEn || item.foodNameKh} ${item.provinceEn || 'Cambodia'} Khmer food`
+          `${safeFoodEn} ${item.provinceEn || 'Cambodia'} Khmer food`
         )}`;
 
   const handleClose = () => {
     setIsTrendingFoodDetailModalOpen(false);
     setSelectedTrendingFood(null);
+  };
+
+  const handleOpenFullRecipe = () => {
+    if (!matchedFood) return;
+    setIsTrendingFoodDetailModalOpen(false);
+    setSelectedTrendingFood(null);
+    setSelectedFood(matchedFood);
+  };
+
+  const handleBrowseFoodCategory = () => {
+    handleClose();
+    setActiveTab('food');
   };
 
   const handleCall = () => {
@@ -87,11 +142,11 @@ export const TrendingFoodDetailModal: React.FC = () => {
 
   const handleOpenMap = () => {
     if (item.mapUrl) {
-      window.open(item.mapUrl, '_blank');
+      window.open(item.mapUrl, '_blank', 'noopener,noreferrer');
     } else if (item.latitude && item.longitude) {
-      window.open(`https://maps.google.com/?q=${item.latitude},${item.longitude}`, '_blank');
+      window.open(`https://maps.google.com/?q=${item.latitude},${item.longitude}`, '_blank', 'noopener,noreferrer');
     } else {
-      window.open(`https://maps.google.com/?q=${encodeURIComponent(item.restaurantNameKh + ' ' + item.provinceKh)}`, '_blank');
+      window.open(`https://maps.google.com/?q=${encodeURIComponent(safeRestKh + ' ' + (item.provinceKh || 'Cambodia'))}`, '_blank', 'noopener,noreferrer');
     }
   };
 
@@ -104,14 +159,14 @@ export const TrendingFoodDetailModal: React.FC = () => {
     shareRichContent(
       {
         title: isKm
-          ? `${item.foodNameKh} — ${item.restaurantNameKh}`
-          : `${item.foodNameEn} — ${item.restaurantNameEn}`,
-        nameKh: `${item.foodNameKh} (${item.restaurantNameKh})`,
-        nameEn: `${item.foodNameEn} (${item.restaurantNameEn})`,
-        description: isKm ? item.descriptionKh : item.descriptionEn,
+          ? `${safeFoodKh} — ${safeRestKh}`
+          : `${safeFoodEn} — ${safeRestEn}`,
+        nameKh: `${safeFoodKh} (${safeRestKh})`,
+        nameEn: `${safeFoodEn} (${safeRestEn})`,
+        description: isKm ? safeDescKh : safeDescEn,
         location: isKm
-          ? `${item.addressKh} (${item.provinceKh})`
-          : `${item.addressEn} (${item.provinceEn})`,
+          ? `${safeAddrKh} (${item.provinceKh || ''})`
+          : `${safeAddrEn} (${item.provinceEn || ''})`,
         phone: item.phone,
         priceDisplay: item.priceDisplay,
         photoUrl: item.photoUrl,
@@ -125,7 +180,12 @@ export const TrendingFoodDetailModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-xs p-0 sm:p-4 animate-in fade-in duration-200">
+    <div
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-xs p-0 sm:p-4 animate-in fade-in duration-200"
+      onClick={handleClose}
+      role="dialog"
+      aria-modal="true"
+    >
       <div 
         className="w-full max-w-lg bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-2xl max-h-[92vh] flex flex-col overflow-hidden"
         onClick={e => e.stopPropagation()}
@@ -133,16 +193,22 @@ export const TrendingFoodDetailModal: React.FC = () => {
         {/* Hero Photo Banner */}
         <div className="relative aspect-16/10 w-full overflow-hidden bg-slate-950 shrink-0">
           <img 
-            src={item.photoUrl} 
+            src={item.photoUrl || '/welcome/hero-bg.webp'} 
             alt={displayFoodName}
+            onError={(e) => {
+              e.currentTarget.onerror = null;
+              e.currentTarget.src = '/welcome/hero-bg.webp';
+            }}
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
 
           {/* Close button */}
           <button
+            type="button"
             onClick={handleClose}
-            className="absolute top-3 right-3 p-2 rounded-full bg-black/60 hover:bg-black/80 text-white transition backdrop-blur-xs cursor-pointer"
+            aria-label={tr(language, 'បិទ', 'Close', '关闭')}
+            className="absolute top-3 right-3 p-2.5 rounded-full bg-black/60 hover:bg-black/80 text-white transition backdrop-blur-xs cursor-pointer z-20"
           >
             <X className="w-5 h-5" />
           </button>
@@ -186,6 +252,48 @@ export const TrendingFoodDetailModal: React.FC = () => {
 
         {/* Modal Body */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4 font-khmer text-xs sm:text-sm">
+          {/* Quick Recipe & Category Navigation Actions */}
+          <div className="grid grid-cols-1 gap-2">
+            {matchedFood && (
+              <button
+                type="button"
+                onClick={handleOpenFullRecipe}
+                className="w-full py-2.5 px-3.5 rounded-xl bg-gradient-to-r from-[#064E3B] via-emerald-700 to-teal-700 hover:brightness-105 text-white font-bold flex items-center justify-between shadow-sm transition active:scale-[0.98] cursor-pointer"
+              >
+                <span className="flex items-center gap-2 text-left">
+                  <ChefHat className="w-4 h-4 text-amber-300 shrink-0" />
+                  <span>
+                    {tr(
+                      language,
+                      'មើលរូបមន្តចម្អិន និងគ្រឿងផ្សំលម្អិត',
+                      'View Full Cooking Recipe & Ingredients',
+                      '查看完整烹饪食谱与配料'
+                    )}
+                  </span>
+                </span>
+                <Utensils className="w-4 h-4 text-amber-300 shrink-0" />
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={handleBrowseFoodCategory}
+              className="w-full py-2 px-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-[#064E3B] dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/80 font-bold flex items-center justify-between transition active:scale-[0.98] cursor-pointer text-xs"
+            >
+              <span className="flex items-center gap-2">
+                <Utensils className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                <span>
+                  {tr(
+                    language,
+                    'មើលមុខម្ហូបខ្មែរទាំងអស់ក្នុងផ្ទាំងម្ហូប',
+                    'Browse All Khmer Dishes in Food Tab',
+                    '在美食页浏览全部高棉菜品'
+                  )}
+                </span>
+              </span>
+              <span className="text-[11px] font-extrabold">→</span>
+            </button>
+          </div>
+
           {/* Reviewer Highlight Quote */}
           {item.reviewerQuoteKh && (
             <div className="p-3 rounded-2xl bg-gradient-to-br from-rose-50 to-pink-50 dark:from-rose-950/40 dark:to-pink-950/30 border border-rose-200 dark:border-rose-900/60 flex items-start gap-2.5">
@@ -239,15 +347,17 @@ export const TrendingFoodDetailModal: React.FC = () => {
               </div>
             )}
 
-            <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 pt-1 border-t border-slate-200 dark:border-slate-700/60">
-              <span className="flex items-center gap-1">
-                <Calendar className="w-3.5 h-3.5" />
-                <span>{tr(language, 'កាលបរិច្ឆេទធ្វើបច្ចុប្បន្នភាព៖', 'Last Updated:', '更新时间：')}</span>
-              </span>
-              <span className="font-mono text-slate-600 dark:text-slate-300">
-                {item.lastUpdated}
-              </span>
-            </div>
+            {item.lastUpdated && (
+              <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 pt-1 border-t border-slate-200 dark:border-slate-700/60">
+                <span className="flex items-center gap-1">
+                  <Calendar className="w-3.5 h-3.5" />
+                  <span>{tr(language, 'កាលបរិច្ឆេទធ្វើបច្ចុប្បន្នភាព៖', 'Last Updated:', '更新时间：')}</span>
+                </span>
+                <span className="font-mono text-slate-600 dark:text-slate-300">
+                  {item.lastUpdated}
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Watch on YouTube Button */}
@@ -271,6 +381,7 @@ export const TrendingFoodDetailModal: React.FC = () => {
         <div className="p-3 bg-slate-50 dark:bg-slate-800/90 border-t border-slate-200 dark:border-slate-700 grid grid-cols-4 gap-2 font-khmer text-xs shrink-0">
           {/* 1. Map */}
           <button
+            type="button"
             onClick={handleOpenMap}
             className="py-2.5 px-1 bg-[#064E3B] hover:bg-[#047857] text-white rounded-xl shadow-xs font-bold flex flex-col items-center justify-center gap-1 transition cursor-pointer"
           >
@@ -280,6 +391,7 @@ export const TrendingFoodDetailModal: React.FC = () => {
 
           {/* 2. Call */}
           <button
+            type="button"
             onClick={handleCall}
             className={`py-2.5 px-1 rounded-xl shadow-xs font-bold flex flex-col items-center justify-center gap-1 transition ${
               item.phone 
@@ -293,6 +405,7 @@ export const TrendingFoodDetailModal: React.FC = () => {
 
           {/* 3. Share */}
           <button
+            type="button"
             onClick={handleShare}
             className="py-2.5 px-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-800 dark:text-white rounded-xl border border-slate-200 dark:border-slate-600 font-bold flex flex-col items-center justify-center gap-1 transition cursor-pointer"
           >
@@ -302,15 +415,16 @@ export const TrendingFoodDetailModal: React.FC = () => {
 
           {/* 4. Save / Wishlist */}
           <button
+            type="button"
             onClick={() => {
               openAddToWishlist({
                 id: item.id,
                 type: 'food',
-                nameKh: item.foodNameKh,
-                nameEn: item.foodNameEn,
-                photoUrl: item.photoUrl,
-                categoryKh: item.categoryKh,
-                provinceKh: item.provinceKh,
+                nameKh: safeFoodKh,
+                nameEn: safeFoodEn,
+                photoUrl: item.photoUrl || '/welcome/hero-bg.webp',
+                categoryKh: safeCatKh,
+                provinceKh: item.provinceKh || 'កម្ពុជា',
                 priceDisplay: item.priceDisplay,
               });
             }}

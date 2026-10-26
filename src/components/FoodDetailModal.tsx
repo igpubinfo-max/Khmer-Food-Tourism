@@ -77,6 +77,15 @@ export const FoodDetailModal: React.FC = () => {
     }
   }, [selectedFood?.id, isAdmin]);
 
+  // Ensure speechSynthesis always stops if modal unmounts or dish changes via back button
+  useEffect(() => {
+    return () => {
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, [selectedFood?.id]);
+
   if (!selectedFood) return null;
   const loc = getLocalizedFood(selectedFood, language);
 
@@ -216,15 +225,6 @@ export const FoodDetailModal: React.FC = () => {
     }));
   };
 
-  // Ensure speechSynthesis always stops if modal unmounts or dish changes via back button
-  useEffect(() => {
-    return () => {
-      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-      }
-    };
-  }, [selectedFood?.id]);
-
   // Text to Speech for Recipe in active language
   const handleSpeak = () => {
     if (!('speechSynthesis' in window)) {
@@ -313,7 +313,15 @@ export const FoodDetailModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+    <div
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
+      onClick={() => {
+        if (isSpeaking && typeof window !== 'undefined' && 'speechSynthesis' in window) {
+          window.speechSynthesis.cancel();
+        }
+        setSelectedFood(null);
+      }}
+    >
       <div 
         className="bg-white dark:bg-slate-900 w-full max-w-lg h-[90vh] sm:h-[85vh] rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden relative border border-slate-200/80 dark:border-slate-800"
         onClick={(e) => e.stopPropagation()}

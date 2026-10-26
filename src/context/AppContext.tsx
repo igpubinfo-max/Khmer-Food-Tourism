@@ -1461,13 +1461,32 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // AI Trending Food Discovery Section State
   const [trendingFoods, setTrendingFoods] = useState<TrendingFoodItem[]>(() => {
     const vault = loadLocalMediaOverrides();
+    const seedById = new Map<string, TrendingFoodItem>(
+      initialTrendingFoods.map((seed) => [seed.id, seed])
+    );
     try {
       localStorage.removeItem('kft_trending_foods_v2');
       const saved = localStorage.getItem('kft_trending_foods_v3');
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          return applyTrendingFoodOverrides(parsed, vault.trendingFoods);
+          const sanitized = parsed
+            .filter((item): item is TrendingFoodItem => Boolean(item && typeof item === 'object' && item.id))
+            .map((item) => {
+              const seed = seedById.get(item.id);
+              return seed ? { ...seed, ...item, photoUrl: item.photoUrl || seed.photoUrl } : item;
+            })
+            .filter((item) => Boolean(item.foodNameKh || item.foodNameEn));
+          if (sanitized.length > 0) {
+            // Ensure all core seed trending foods remain present
+            const existingIds = new Set(sanitized.map((i) => i.id));
+            for (const seed of initialTrendingFoods) {
+              if (!existingIds.has(seed.id)) {
+                sanitized.push(seed);
+              }
+            }
+            return applyTrendingFoodOverrides(sanitized, vault.trendingFoods);
+          }
         }
       }
     } catch (e) {
@@ -2875,6 +2894,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
 
       // 2. If any modal or detail screen is open, close the active modal first without exiting
+      if ((window as any).__kft_is_smart_hub_open) {
+        window.dispatchEvent(new CustomEvent('kft:close-smart-hub'));
+        return;
+      }
       if (state.selectedFood) {
         setSelectedFood(null);
         return;
@@ -2894,6 +2917,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       if (state.isTrendingFoodDetailModalOpen) {
         setIsTrendingFoodDetailModalOpen(false);
+        setSelectedTrendingFood(null);
         return;
       }
       if (state.isTrendingSocialModalOpen) {

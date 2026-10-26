@@ -30,15 +30,22 @@ export const TrendingFoodsRow: React.FC<Props> = ({ language, items, onOpen, onE
       )}
     </div>
     <div className="flex gap-3 overflow-x-auto no-scrollbar snap-x snap-mandatory -mx-4 px-4 pb-1">
-      {items.map((item) => {
+      {(items || []).map((item) => {
+        if (!item || !item.id) return null;
+        const safeKh = item.foodNameKh || item.foodNameEn || 'ម្ហូបខ្មែរ';
+        const safeEn = item.foodNameEn || item.foodNameKh || 'Khmer Dish';
         const rawName =
           language === 'km'
-            ? item.foodNameKh
+            ? safeKh
             : language === 'zh'
-            ? translateSignatureDish(item.foodNameKh, 'zh')
-            : item.foodNameEn;
-        const name = sanitizeStrictLanguageText(rawName, language);
-        const province = translateProvinceName(item.provinceKh, item.provinceEn, language);
+            ? translateSignatureDish(safeKh, 'zh')
+            : safeEn;
+        const name = sanitizeStrictLanguageText(rawName || safeKh, language) || safeKh;
+        const province = translateProvinceName(
+          item.provinceKh || 'កម្ពុជា',
+          item.provinceEn || 'Cambodia',
+          language
+        );
         return (
           <button
             key={item.id}
@@ -46,7 +53,16 @@ export const TrendingFoodsRow: React.FC<Props> = ({ language, items, onOpen, onE
             onClick={() => onOpen(item)}
             className="snap-start shrink-0 w-48 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs overflow-hidden text-left active:scale-[0.97] transition cursor-pointer"
           >
-            <img src={item.photoUrl} alt={name} loading="lazy" className="w-full h-28 object-cover bg-slate-100" />
+            <img
+              src={item.photoUrl || '/welcome/hero-bg.webp'}
+              alt={name}
+              loading="lazy"
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = '/welcome/hero-bg.webp';
+              }}
+              className="w-full h-28 object-cover bg-slate-100 dark:bg-slate-700"
+            />
             <span className="block p-3">
               <span className="block text-sm sm:text-base font-bold text-slate-900 dark:text-white leading-snug line-clamp-2 min-h-[2.6rem]">{name}</span>
               <span className="mt-1 flex items-center gap-1 text-xs font-medium text-slate-500 dark:text-slate-400">

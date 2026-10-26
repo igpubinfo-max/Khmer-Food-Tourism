@@ -10,7 +10,7 @@ import { RestaurantView } from './components/RestaurantView';
 import { TourismView } from './components/TourismView';
 import { CommunityFeed } from './components/CommunityFeed';
 const ProfileView = lazy(() => import('./components/ProfileView').then((m) => ({ default: m.ProfileView })));
-const SmartHubMenuModal = lazy(() => import('./components/SmartHubMenuModal').then((m) => ({ default: m.SmartHubMenuModal })));
+import { SmartHubMenuModal } from './components/SmartHubMenuModal';
 import { FoodDetailModal } from './components/FoodDetailModal';
 import { RestaurantDetailModal } from './components/RestaurantDetailModal';
 import { TouristDetailModal } from './components/TouristDetailModal';
@@ -29,8 +29,8 @@ const DailyDiscoveriesModal = lazy(() => import('./components/DailyDiscoveriesMo
 const WishlistsModal = lazy(() => import('./components/WishlistsModal').then((m) => ({ default: m.WishlistsModal })));
 const AiTripPlannerModal = lazy(() => import('./components/AiTripPlannerModal').then((m) => ({ default: m.AiTripPlannerModal })));
 const NotificationsModal = lazy(() => import('./components/NotificationsModal').then((m) => ({ default: m.NotificationsModal })));
-const TrendingSocialModal = lazy(() => import('./components/TrendingSocialModal').then((m) => ({ default: m.TrendingSocialModal })));
-const TrendingFoodDetailModal = lazy(() => import('./components/TrendingFoodDetailModal').then((m) => ({ default: m.TrendingFoodDetailModal })));
+import { TrendingSocialModal } from './components/TrendingSocialModal';
+import { TrendingFoodDetailModal } from './components/TrendingFoodDetailModal';
 const AiCheckInModal = lazy(() => import('./components/AiCheckInModal').then((m) => ({ default: m.AiCheckInModal })));
 const UpgradeVipModal = lazy(() => import('./components/UpgradeVipModal').then((m) => ({ default: m.UpgradeVipModal })));
 const PaymentSupportModal = lazy(() => import('./components/PaymentSupportModal').then((m) => ({ default: m.PaymentSupportModal })));
@@ -102,12 +102,24 @@ const MainScreen: React.FC = () => {
   const [isSmartHubOpen, setIsSmartHubOpen] = useState(false);
   const hasVipAccess = isUserVipActive(currentUser) || currentUser?.role === 'admin';
   useEffect(() => {
+    (window as any).__kft_is_smart_hub_open = Boolean(isSmartHubOpen && hasVipAccess);
+    return () => {
+      (window as any).__kft_is_smart_hub_open = false;
+    };
+  }, [isSmartHubOpen, hasVipAccess]);
+
+  useEffect(() => {
     const open = () => {
       if (!hasVipAccess) return;
       setIsSmartHubOpen(true);
     };
+    const close = () => setIsSmartHubOpen(false);
     window.addEventListener(SMART_HUB_EVENT, open);
-    return () => window.removeEventListener(SMART_HUB_EVENT, open);
+    window.addEventListener('kft:close-smart-hub', close);
+    return () => {
+      window.removeEventListener(SMART_HUB_EVENT, open);
+      window.removeEventListener('kft:close-smart-hub', close);
+    };
   }, [hasVipAccess]);
   const isAnyModalOpen = Boolean(
     (isSmartHubOpen && hasVipAccess) ||
@@ -220,9 +232,7 @@ const MainScreen: React.FC = () => {
       <OfflineBanner />
 
       {/* Smart Menu: dish tags + travel & food tools in one place (Strictly VIP Access Controlled) */}
-      <Suspense fallback={null}>
-        {isSmartHubOpen && hasVipAccess && <SmartHubMenuModal onClose={() => setIsSmartHubOpen(false)} />}
-      </Suspense>
+      {isSmartHubOpen && hasVipAccess && <SmartHubMenuModal onClose={() => setIsSmartHubOpen(false)} />}
 
       {/* Creation & Action Modals — Conditionally Mounted (lazy-loaded chunks) */}
       <Suspense fallback={null}>
@@ -241,8 +251,6 @@ const MainScreen: React.FC = () => {
       {isWishlistsModalOpen && (isUserVipActive(currentUser) || currentUser?.role === 'admin') && <WishlistsModal />}
       {isAiTripPlannerModalOpen && (isUserVipActive(currentUser) || currentUser?.role === 'admin') && <AiTripPlannerModal />}
       {isNotificationsModalOpen && (isUserVipActive(currentUser) || currentUser?.role === 'admin') && <NotificationsModal />}
-      {isTrendingSocialModalOpen && <TrendingSocialModal />}
-      {isTrendingFoodDetailModalOpen && <TrendingFoodDetailModal />}
       {isAiCheckInModalOpen && <AiCheckInModal />}
       {isRestaurantCheckInModalOpen && <RestaurantCheckInModal />}
       {isUpgradeVipModalOpen && <UpgradeVipModal />}
@@ -250,13 +258,15 @@ const MainScreen: React.FC = () => {
       {isQrScannerModalOpen && <QrScannerModal />}
       {isVipAddRestaurantModalOpen && <VipAddRestaurantModal />}
       {isGoogleMapsSearchModalOpen && <GoogleMapsPlaceSearchModal />}
+      {(isManageMenuModalOpen || managingRestaurant) && <ManageMenuModal />}
+      </Suspense>
 
-      {/* Detail & Edit Modals — Mounted Above Search Modals so Previews Open on Top */}
+      {/* Primary Detail Modals — Statically Mounted Outside Suspense for Zero-Latency Instant Open */}
+      {isTrendingSocialModalOpen && <TrendingSocialModal />}
+      {isTrendingFoodDetailModalOpen && <TrendingFoodDetailModal />}
       {selectedFood && <FoodDetailModal />}
       {selectedRestaurant && <RestaurantDetailModal />}
       {selectedDestination && <TouristDetailModal />}
-      {(isManageMenuModalOpen || managingRestaurant) && <ManageMenuModal />}
-      </Suspense>
 
       {/* Notifications */}
       {toast && <Toast />}
