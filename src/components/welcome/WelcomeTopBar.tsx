@@ -16,7 +16,11 @@ export const WelcomeTopBar: React.FC<Props> = ({ language, onLanguage }) => (
     style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 12px)' }}
   >
     <div className="flex items-center gap-1.5">
-      <div className="inline-flex items-center bg-black/50 backdrop-blur-md rounded-full p-0.5 border border-white/25 shadow-lg" role="group" aria-label="Language">
+      <div
+        className="inline-flex items-center gap-0.5 bg-black/50 backdrop-blur-md rounded-full p-1 border border-white/25 shadow-lg"
+        role="group"
+        aria-label="Language"
+      >
         {LANGUAGE_SWITCH.map((l) => {
           const active = language === l.code;
           return (
@@ -25,7 +29,7 @@ export const WelcomeTopBar: React.FC<Props> = ({ language, onLanguage }) => (
               type="button"
               onClick={() => onLanguage(l.code)}
               aria-pressed={active}
-              className={`min-w-[44px] min-h-[40px] px-2.5 rounded-full text-xs font-extrabold transition-colors motion-reduce:transition-none cursor-pointer ${
+              className={`min-w-[50px] min-h-[38px] px-3 rounded-full text-xs font-extrabold whitespace-nowrap leading-none flex items-center justify-center transition-colors motion-reduce:transition-none cursor-pointer ${
                 active ? 'bg-amber-400 text-slate-950 shadow-sm' : 'text-white/90 hover:text-white'
               }`}
             >

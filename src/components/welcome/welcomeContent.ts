@@ -58,7 +58,7 @@ export const WELCOME_LABELS = {
 } as const;
 
 export const LANGUAGE_SWITCH: Array<{ code: Language; label: string }> = [
-  { code: 'km', label: 'KM' },
+  { code: 'km', label: 'ខ្មែរ' },
   { code: 'en', label: 'EN' },
-  { code: 'zh', label: '中' },
+  { code: 'zh', label: '中文' },
 ];
