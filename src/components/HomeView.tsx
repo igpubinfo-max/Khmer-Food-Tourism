@@ -1,10 +1,19 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { TrendingFoodCategorySlug, TrendingFoodItem, isUserVipActive, getVipAccountState, getVipRemainingDays, sortRestaurantsChronologically } from '../types';
-import { normalizeKhmerSearchText } from '../services/googlePlacesService';
+import {
+  normalizeKhmerSearchText,
+  searchCambodiaPlacesWithSmartCache,
+  convertGooglePlaceToRestaurant,
+  convertGooglePlaceToDestination,
+  findDuplicateRestaurantForGooglePlace,
+  findDuplicateDestinationForGooglePlace,
+  expandMultilingualPlaceQuery,
+  GooglePlaceCachedItem,
+} from '../services/googlePlacesService';
 import { shuffleForCurrentSession } from '../utils/sessionShuffle';
 import { shareRichContent, copyTextNativeOrWeb } from '../utils/androidMediaHelper';
-import { tr } from '../utils/i18n';
+import { tr, translateProvince } from '../utils/i18n';
 import { getLocalizedFood, getLocalizedRestaurant, getLocalizedDestination } from '../utils/zhDynamicTranslator';
 import { HomeGreetingSearch } from './home/HomeGreetingSearch';
 import { QuickActions } from './home/QuickActions';
@@ -20,13 +29,13 @@ import {
   Apple, Smartphone, Bot, Calendar, Bookmark, Bell, 
   UtensilsCrossed, MessageSquareQuote, Camera, Phone,
   Navigation, Eye, ExternalLink, Play, Shuffle, Search, RefreshCw,
-  Crown, Plus, Edit2, CheckCircle2, X, Tag, ChefHat, Copy, Video, Check, Lock, Trash2, Globe, HeartPulse
+  Crown, Plus, Edit2, CheckCircle2, X, Tag, ChefHat, Copy, Video, Check, Lock, Trash2, Globe, HeartPulse, Loader2
 } from 'lucide-react';
 
 export const HomeView: React.FC = () => {
   const { 
     foods, restaurants, destinations, setActiveTab, 
-    language, setSelectedProvince, posts,
+    language, selectedProvince, setSelectedProvince, posts,
     currentUser, setIsAuthModalOpen,
     setIsInstallModalOpen, setIsSupportModalOpen,
     openInstallModal, setSelectedDestination,
@@ -163,45 +172,125 @@ export const HomeView: React.FC = () => {
     [destinations]
   );
 
-  // Global Search Filtering across Foods, Restaurants, and Destinations
+  const [homeSmartCachePlaces, setHomeSmartCachePlaces] = useState<GooglePlaceCachedItem[]>([]);
+  const [isHomeSearchingOnline, setIsHomeSearchingOnline] = useState(false);
+  const [homeCacheSourceLabel, setHomeCacheSourceLabel] = useState<string>('');
+
+  const homeProvinces = [
+    { id: '', nameKh: 'គ្រប់ខេត្តក្រុង', nameEn: 'All Provinces' },
+    { id: 'ភ្នំពេញ', nameKh: 'ភ្នំពេញ', nameEn: 'Phnom Penh' },
+    { id: 'សៀមរាប', nameKh: 'សៀមរាប', nameEn: 'Siem Reap' },
+    { id: 'បាត់ដំបង', nameKh: 'បាត់ដំបង', nameEn: 'Battambang' },
+    { id: 'កំពត', nameKh: 'កំពត', nameEn: 'Kampot' },
+    { id: 'កែប', nameKh: 'កែប', nameEn: 'Kep' },
+    { id: 'ព្រះសីហនុ', nameKh: 'ព្រះសីហនុ', nameEn: 'Sihanoukville' },
+  ];
+
+  // Live Google Maps & Smart Cache Search on Home Screen (works identically to Find in Shop!)
+  useEffect(() => {
+    const q = globalSearchQuery.trim();
+    if (!q || q.length < 2) {
+      setHomeSmartCachePlaces([]);
+      setIsHomeSearchingOnline(false);
+      return;
+    }
+
+    let cancelled = false;
+    setIsHomeSearchingOnline(true);
+    const timer = setTimeout(async () => {
+      const res = await searchCambodiaPlacesWithSmartCache(
+        q,
+        selectedProvince || 'ទាំងអស់',
+        'all'
+      );
+      if (!cancelled) {
+        setHomeSmartCachePlaces(res.results);
+        setHomeCacheSourceLabel(
+          res.fromSmartCache
+            ? tr(language, 'Smart Cache ($0 កូតា Google)', 'Smart Cache ($0 Google Quota)', '智能缓存（$0 谷歌配额）')
+            : res.providerUsed === 'google_maps_api'
+            ? tr(language, 'Google Maps API + Smart Cache', 'Google Maps API + Smart Cache', '谷歌地图 API + 智能缓存')
+            : tr(language, 'ផែនទីអនឡាញកម្ពុជា + Smart Cache', 'Cambodia Online Map + Smart Cache', '柬埔寨在线地图 + 智能缓存')
+        );
+        setIsHomeSearchingOnline(false);
+      }
+    }, 300);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [globalSearchQuery, selectedProvince, language]);
+
+  // Global Search Filtering across Foods, Restaurants, Destinations + Google Maps Smart Cache
   const searchResults = useMemo(() => {
     const q = normalizeKhmerSearchText(globalSearchQuery);
     if (!q) return null;
 
-    const matchedFoods = foods.filter(f => 
-      normalizeKhmerSearchText(f.nameKh).includes(q) ||
-      normalizeKhmerSearchText(f.nameEn).includes(q) ||
-      (f.descriptionKh && normalizeKhmerSearchText(f.descriptionKh).includes(q)) ||
-      (f.categoryKh && normalizeKhmerSearchText(f.categoryKh).includes(q)) ||
-      (f.ingredients && f.ingredients.some(i => normalizeKhmerSearchText(i.nameKh).includes(q) || normalizeKhmerSearchText(i.nameEn).includes(q)))
-    );
+    const tokens = expandMultilingualPlaceQuery(globalSearchQuery, 'all').matchTokens;
+    const cleanSelProv = (selectedProvince || '').replace(/^រាជធានី|^ខេត្ត/g, '').trim();
 
-    const matchedRestaurants = sessionShuffledRestaurants.filter(r =>
-      (r.status === 'approved' || currentUser?.role === 'admin' || currentUser?.id === r.ownerId) &&
-      (normalizeKhmerSearchText(r.nameKh).includes(q) ||
-      normalizeKhmerSearchText(r.nameEn).includes(q) ||
-      (r.addressKh && normalizeKhmerSearchText(r.addressKh).includes(q)) ||
-      (r.provinceKh && normalizeKhmerSearchText(r.provinceKh).includes(q)) ||
-      (r.signatureDishesKh && r.signatureDishesKh.some(d => normalizeKhmerSearchText(d).includes(q))))
-    );
+    const matchedFoods = foods.filter((f) => {
+      if (cleanSelProv) {
+        const provText = `${f.nameKh} ${f.nameEn} ${f.descriptionKh || ''}`;
+        if (!provText.includes(cleanSelProv)) return false;
+      }
+      const hay = normalizeKhmerSearchText(
+        `${f.nameKh} ${f.nameEn} ${f.descriptionKh || ''} ${f.categoryKh || ''} ${(f.ingredients || []).map((i) => `${i.nameKh} ${i.nameEn}`).join(' ')}`
+      );
+      return hay.includes(q) || tokens.some((tok) => tok.length >= 2 && hay.includes(tok.toLowerCase()));
+    });
 
-    const matchedDestinations = sessionShuffledDestinations.filter(d =>
-      normalizeKhmerSearchText(d.nameKh).includes(q) ||
-      normalizeKhmerSearchText(d.nameEn).includes(q) ||
-      (d.descriptionKh && normalizeKhmerSearchText(d.descriptionKh).includes(q)) ||
-      (d.provinceKh && normalizeKhmerSearchText(d.provinceKh).includes(q)) ||
-      (d.categoryKh && normalizeKhmerSearchText(d.categoryKh).includes(q))
-    );
+    const localRestaurants = sessionShuffledRestaurants.filter((r) => {
+      if (r.status !== 'approved' && currentUser?.role !== 'admin' && currentUser?.id !== r.ownerId) return false;
+      if (cleanSelProv && !r.provinceKh.replace(/^រាជធានី|^ខេត្ត/g, '').includes(cleanSelProv)) return false;
+      const hay = normalizeKhmerSearchText(
+        `${r.nameKh || ''} ${r.nameEn || ''} ${r.addressKh || ''} ${r.provinceKh || ''} ${(r.signatureDishesKh || []).join(' ')} ${(r.menuItems || []).map((m) => `${m.nameKh || ''} ${m.nameEn || ''}`).join(' ')}`
+      );
+      return hay.includes(q) || tokens.some((tok) => tok.length >= 2 && hay.includes(tok.toLowerCase()));
+    });
 
-    const totalCount = matchedFoods.length + matchedRestaurants.length + matchedDestinations.length;
+    const localDestinations = sessionShuffledDestinations.filter((d) => {
+      if (cleanSelProv && !d.provinceKh.replace(/^រាជធានី|^ខេត្ត/g, '').includes(cleanSelProv)) return false;
+      const hay = normalizeKhmerSearchText(
+        `${d.nameKh || ''} ${d.nameEn || ''} ${d.descriptionKh || ''} ${d.provinceKh || ''} ${d.categoryKh || ''}`
+      );
+      return hay.includes(q) || tokens.some((tok) => tok.length >= 2 && hay.includes(tok.toLowerCase()));
+    });
+
+    // Merge live Google Maps & Smart Cache places so Home search works identically to Find in Shop!
+    const seenRestIds = new Set(localRestaurants.map((r) => r.id));
+    const seenDestIds = new Set(localDestinations.map((d) => d.id));
+    const mergedRestaurants = [...localRestaurants];
+    const mergedDestinations = [...localDestinations];
+
+    for (const place of homeSmartCachePlaces) {
+      if (place.category === 'tourism') {
+        const dup = findDuplicateDestinationForGooglePlace(place, mergedDestinations);
+        const target = dup || convertGooglePlaceToDestination(place);
+        if (!seenDestIds.has(target.id)) {
+          seenDestIds.add(target.id);
+          mergedDestinations.push(target);
+        }
+      } else {
+        const dup = findDuplicateRestaurantForGooglePlace(place, mergedRestaurants);
+        const target = dup || convertGooglePlaceToRestaurant(place);
+        if (!seenRestIds.has(target.id)) {
+          seenRestIds.add(target.id);
+          mergedRestaurants.push(target);
+        }
+      }
+    }
+
+    const totalCount = matchedFoods.length + mergedRestaurants.length + mergedDestinations.length;
 
     return {
       foods: matchedFoods,
-      restaurants: matchedRestaurants,
-      destinations: matchedDestinations,
-      totalCount
+      restaurants: mergedRestaurants,
+      destinations: mergedDestinations,
+      totalCount,
     };
-  }, [globalSearchQuery, foods, sessionShuffledRestaurants, sessionShuffledDestinations]);
+  }, [globalSearchQuery, selectedProvince, foods, sessionShuffledRestaurants, sessionShuffledDestinations, homeSmartCachePlaces, currentUser?.role, currentUser?.id]);
 
   const handleAiRandomize = () => {
     setRandomSeed(prev => prev + 1);
@@ -421,6 +510,35 @@ export const HomeView: React.FC = () => {
             </button>
           </div>
 
+          {/* Quick Province Chips inside Home Search (works identically to Find in Shop) */}
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+            {homeProvinces.map((p) => {
+              const cleanSel = (selectedProvince || '').replace(/^រាជធានី|^ខេត្ត/g, '').trim();
+              const active = cleanSel === p.id || (!cleanSel && p.id === '');
+              return (
+                <button
+                  key={p.id || 'all'}
+                  type="button"
+                  onClick={() => setSelectedProvince(p.id)}
+                  className={`px-2.5 py-1 rounded-full text-[11px] font-bold whitespace-nowrap transition-all cursor-pointer ${
+                    active
+                      ? 'bg-[#064E3B] text-white shadow-xs'
+                      : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-emerald-50'
+                  }`}
+                >
+                  {language === 'km' ? p.nameKh : language === 'zh' ? translateProvince(p.nameEn, 'zh') : p.nameEn}
+                </button>
+              );
+            })}
+          </div>
+
+          {homeCacheSourceLabel && !isHomeSearchingOnline && homeSmartCachePlaces.length > 0 && (
+            <div className="flex items-center justify-between px-2.5 py-1 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-[10px] font-bold text-emerald-800 dark:text-emerald-300">
+              <span>{tr(language, 'រួមបញ្ចូលទិន្នន័យពី Google Maps & Smart Cache', 'Includes Google Maps & Smart Cache results', '包含 Google 地图与智能缓存结果')}</span>
+              <span>⚡ {homeCacheSourceLabel}</span>
+            </div>
+          )}
+
           {/* Result Filter Tabs */}
           <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar text-xs">
             <button
@@ -469,8 +587,13 @@ export const HomeView: React.FC = () => {
           </div>
 
           {/* Results List */}
-          <div className="space-y-2 max-h-[360px] overflow-y-auto no-scrollbar pt-1">
-            {searchResults.totalCount === 0 ? (
+          <div className="space-y-2 max-h-[420px] overflow-y-auto no-scrollbar pt-1">
+            {isHomeSearchingOnline && searchResults.totalCount === 0 ? (
+              <div className="py-8 flex items-center justify-center gap-2 text-xs text-slate-500">
+                <Loader2 className="w-4 h-4 animate-spin text-emerald-600" />
+                <span>{tr(language, 'កំពុងស្វែងរកហាង និងមុខម្ហូបពិតៗនៅភ្នំពេញ និងទូទាំងប្រទេស...', 'Searching verified places & dishes across Cambodia...', '正在搜索柬埔寨各地真实餐厅与美食...')}</span>
+              </div>
+            ) : searchResults.totalCount === 0 ? (
               <div className="py-8 text-center text-slate-500 space-y-2.5">
                 <Search className="w-8 h-8 mx-auto text-slate-400 stroke-1" />
                 <p className="text-xs sm:text-sm">

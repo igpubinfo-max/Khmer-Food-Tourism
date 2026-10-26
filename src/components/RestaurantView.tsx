@@ -3,12 +3,13 @@ import { useApp } from '../context/AppContext';
 import { RestaurantCard } from './RestaurantCard';
 import { isRestaurantPremiumActive, Restaurant, sortRestaurantsChronologically, getVipAccountState, isUserVipActive } from '../types';
 import { shuffleForCurrentSession } from '../utils/sessionShuffle';
-import { Store, Plus, MapPin, Sparkles, PhoneCall, CheckCircle2, AlertCircle, Camera, Globe, Loader2, Edit2 } from 'lucide-react';
+import { Store, Plus, MapPin, Sparkles, PhoneCall, CheckCircle2, AlertCircle, Camera, Globe, Loader2, Edit2, Search, X } from 'lucide-react';
 import {
   searchCambodiaPlacesWithSmartCache,
   convertGooglePlaceToRestaurant,
   findDuplicateRestaurantForGooglePlace,
   normalizeKhmerSearchText,
+  expandMultilingualPlaceQuery,
   GooglePlaceCachedItem,
 } from '../services/googlePlacesService';
 import { tr, translateProvince } from '../utils/i18n';
@@ -176,6 +177,8 @@ export const RestaurantView: React.FC = () => {
 
   const filteredRestaurants = useMemo(() => {
     const q = normalizeKhmerSearchText(searchQuery);
+    const tokens = q ? expandMultilingualPlaceQuery(searchQuery, 'restaurant').matchTokens : [];
+    const cleanSelProv = (selectedProvince || '').replace(/^រាជធានី|^ខេត្ត/g, '').trim();
     const seenNames = new Set<string>();
     return sessionShuffledRestaurants.filter((r) => {
       // Strictly exclude any non-restaurant records (food dishes or tourist attractions)
@@ -193,7 +196,7 @@ export const RestaurantView: React.FC = () => {
       }
       if (verifiedFilter === 'verified' && !r.isVerified) return false;
       if (verifiedFilter === 'unverified' && r.isVerified) return false;
-      if (selectedProvince && !r.provinceKh.includes(selectedProvince)) {
+      if (cleanSelProv && !r.provinceKh.replace(/^រាជធានី|^ខេត្ត/g, '').includes(cleanSelProv)) {
         return false;
       }
       if (priceFilter !== 'all' && r.priceLevel !== priceFilter) {
@@ -203,14 +206,11 @@ export const RestaurantView: React.FC = () => {
         return false;
       }
       if (q) {
-        const matchName =
-          normalizeKhmerSearchText(r.nameKh).includes(q) ||
-          normalizeKhmerSearchText(r.nameEn).includes(q);
-        const matchAddress =
-          normalizeKhmerSearchText(r.addressKh).includes(q) ||
-          normalizeKhmerSearchText(r.addressEn).includes(q);
-        const matchDish = r.signatureDishesKh.some((d) => normalizeKhmerSearchText(d).includes(q));
-        if (!matchName && !matchAddress && !matchDish) return false;
+        const hay = normalizeKhmerSearchText(
+          `${r.nameKh || ''} ${r.nameEn || ''} ${r.descriptionKh || ''} ${r.addressKh || ''} ${r.addressEn || ''} ${(r.signatureDishesKh || []).join(' ')} ${(r.menuItems || []).map((m) => `${m.nameKh || ''} ${m.nameEn || ''}`).join(' ')}`
+        );
+        const matched = hay.includes(q) || tokens.some((tok) => tok.length >= 2 && hay.includes(tok.toLowerCase()));
+        if (!matched) return false;
       }
       // Deduplicate by normalized Khmer+English name within the same province
       const dedupKey = `${normalizeKhmerSearchText(r.nameKh)}|${normalizeKhmerSearchText(r.provinceKh)}`;
@@ -314,6 +314,54 @@ export const RestaurantView: React.FC = () => {
         </div>
       </div>
 
+      {/* Direct Shop & Dish Search Bar + Quick Province Filter */}
+      <div className="p-2.5 rounded-2xl bg-white dark:bg-slate-800/90 border border-emerald-500/30 shadow-xs space-y-2 font-khmer">
+        <div className="relative flex items-center">
+          <Search className="w-4 h-4 text-emerald-600 dark:text-emerald-400 absolute left-3 pointer-events-none" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={tr(
+              language,
+              'ស្វែងរកឈ្មោះហាង ឬមុខម្ហូប (ឧ. Pizza, ម្លិះ, កាហ្វេ, សាច់អាំង)...',
+              'Search shop or dish (e.g. Pizza, Malis, Coffee, BBQ)...',
+              '搜索餐厅或美食（如：Pizza、茉莉餐厅、咖啡、烧烤）...'
+            )}
+            className="w-full pl-9 pr-8 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 text-xs sm:text-sm focus:outline-none focus:border-emerald-600 transition"
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => setSearchQuery('')}
+              className="absolute right-2.5 p-1 text-slate-400 hover:text-rose-500 cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+          {provinces.map((p) => {
+            const cleanSel = (selectedProvince || '').replace(/^រាជធានី|^ខេត្ត/g, '').trim();
+            const active = cleanSel === p.id || (!cleanSel && p.id === '');
+            return (
+              <button
+                key={p.id || 'all'}
+                type="button"
+                onClick={() => setSelectedProvince(p.id)}
+                className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-all cursor-pointer ${
+                  active
+                    ? 'bg-[#064E3B] text-white font-bold shadow-xs'
+                    : 'bg-slate-100 dark:bg-slate-700/70 text-slate-700 dark:text-slate-300 hover:bg-emerald-50'
+                }`}
+              >
+                {language === 'km' ? p.nameKh : language === 'zh' ? translateProvince(p.nameEn, 'zh') : p.nameEn}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       {/* Verification Filter Switcher */}
       <div className="flex items-center gap-1.5 p-1 bg-slate-100 dark:bg-slate-800 rounded-2xl text-xs font-khmer border border-slate-200/90 dark:border-slate-700">
         <button
@@ -350,7 +398,8 @@ export const RestaurantView: React.FC = () => {
         </button>
       </div>
 
-      {/* Banner for VIP Restaurant Owners */}
+      {/* Banner for VIP Restaurant Owners (hidden while actively searching so results appear immediately at the top) */}
+      {!searchQuery.trim() && (
       <div className="p-4 rounded-3xl bg-gradient-to-br from-amber-600 via-amber-700 to-[#064E3B] text-white shadow-lg border-2 border-amber-300/70 space-y-3 font-khmer">
         <div className="flex items-start justify-between gap-2.5">
           <div className="space-y-1 flex-1 min-w-0">
@@ -492,6 +541,8 @@ export const RestaurantView: React.FC = () => {
           </div>
         </div>
       </div>
+
+      )}
 
       {/* Restaurant Category Filter Pills */}
       <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 font-khmer">

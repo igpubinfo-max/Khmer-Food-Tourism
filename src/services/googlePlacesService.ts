@@ -919,10 +919,35 @@ export function expandMultilingualPlaceQuery(
     const strippedSub = clean
       .replace(/^(ភោជនីយដ្ឋាន|ហាងអាហារ|ហាងកាហ្វេ|អាហារដ្ឋាន|រមណីយដ្ឋាន|តំបន់ទេសចរណ៍|ជំនោរ|ផ្ទះបាយ|ហាង)\s*/i, '')
       .trim();
+    const bilingualSynonyms: Array<[RegExp, string[]]> = [
+      [/(pizza|ភីហ្សា|披萨)/i, ['pizza', 'ភីហ្សា', 'pizzeria']],
+      [/(burger|បឺហ្គឺ|ហាំបឺហ្គឺ|汉堡)/i, ['burger', 'បឺហ្គឺ', 'hamburger']],
+      [/(sushi|ស៊ូស៊ី|japanese|ជប៉ុន|寿司)/i, ['sushi', 'ស៊ូស៊ី', 'japanese']],
+      [/(steak|ស្តេក|គោអាំង|牛排)/i, ['steak', 'ស្តេក', 'steakhouse']],
+      [/(bbq|grill|សាច់អាំង|អាំង|烧烤)/i, ['bbq', 'grill', 'សាច់អាំង']],
+      [/(seafood|គ្រឿងសមុទ្រ|ក្តាម|បង្គា|海鲜)/i, ['seafood', 'គ្រឿងសមុទ្រ']],
+      [/(noodle|kuy teav|គុយទាវ|មី|នំបញ្ចុក|米粉|面)/i, ['noodle', 'គុយទាវ', 'មី', 'នំបញ្ចុក']],
+      [/(hotpot|soup|ស៊ុប|ឆ្នាំងភ្លើង|火锅)/i, ['hotpot', 'ស៊ុប', 'soup']],
+      [/(amok|អាម៉ុក|阿莫克)/i, ['amok', 'អាម៉ុក']],
+      [/(lok lak|ឡុកឡាក់|摇滚牛肉)/i, ['lok lak', 'ឡុកឡាក់']],
+      [/(curry|ការី|សម្លការី|咖喱)/i, ['curry', 'ការី', 'សម្លការី']],
+      [/(korko|កកូរ|សម្លកកូរ)/i, ['korko', 'កកូរ', 'សម្លកកូរ']],
+      [/(machu|ម្ជូរ|សម្លម្ជូរ)/i, ['machu', 'ម្ជូរ', 'សម្លម្ជូរ']],
+      [/(bakery|bread|cake|នំប៉័ង|នំខេក|បង្អែម|甜品|面包)/i, ['bakery', 'នំប៉័ង', 'បង្អែម', 'cake']],
+      [/(buffet|ប៊ូហ្វេ|自助餐)/i, ['buffet', 'ប៊ូហ្វេ']],
+      [/(halal|ហាឡាល់|ឥស្លាម)/i, ['halal', 'ហាឡាល់']],
+      [/(vegan|vegetarian|បួស|ម្ហូបបួស)/i, ['vegetarian', 'vegan', 'ម្ហូបបួស']],
+    ];
+
     const tokens = [clean];
     if (strippedSub.length >= 2 && strippedSub !== clean) tokens.push(strippedSub);
-    if (isRestaurantSearch) tokens.push('ភោជនីយដ្ឋាន', 'ហាងអាហារ', 'restaurant');
-    if (isTourismSearch) tokens.push('រមណីយដ្ឋាន', 'តំបន់ទេសចរណ៍', 'ប្រាសាទ');
+    const extraQueries: string[] = [];
+    for (const [rx, syns] of bilingualSynonyms) {
+      if (rx.test(clean) || rx.test(rawQuery)) {
+        tokens.push(...syns);
+        extraQueries.push(...syns.slice(0, 2));
+      }
+    }
 
     return {
       isCoffeeSearch: false,
@@ -930,8 +955,8 @@ export function expandMultilingualPlaceQuery(
       isTourismSearch,
       resolvedCategory: categoryFilter !== 'all' ? categoryFilter : isTourismSearch ? 'tourism' : 'restaurant',
       matchTokens: Array.from(new Set(tokens)),
-      photonQueries: Array.from(new Set([rawQuery.trim(), strippedSub].filter((x) => x.length >= 2))),
-      nominatimQueries: Array.from(new Set([rawQuery.trim(), strippedSub].filter((x) => x.length >= 2))),
+      photonQueries: Array.from(new Set([rawQuery.trim(), strippedSub, ...extraQueries].filter((x) => x.length >= 2))),
+      nominatimQueries: Array.from(new Set([rawQuery.trim(), strippedSub, ...extraQueries].filter((x) => x.length >= 2))),
     };
   }
 
@@ -1262,6 +1287,8 @@ async function searchLiveCambodiaMultiSource(
       } else {
         for (const nq of plan.nominatimQueries.slice(0, 3)) {
           nominatimTasks.push(nq);
+          nominatimTasks.push(`${nq} Phnom Penh`);
+          nominatimTasks.push(`${nq} Siem Reap`);
         }
       }
     } else {
@@ -1283,7 +1310,7 @@ async function searchLiveCambodiaMultiSource(
   const collected: GooglePlaceCachedItem[] = [];
 
   // 1. Run Photon Cambodia requests in parallel
-  const photonPromises = photonTasks.slice(0, 6).map(async (task) => {
+  const photonPromises = photonTasks.slice(0, 8).map(async (task) => {
     try {
       const locQuery =
         typeof task.lat === 'number' && typeof task.lng === 'number'
@@ -1392,7 +1419,7 @@ async function searchLiveCambodiaMultiSource(
   });
 
   // 2. Run Nominatim Cambodia requests in parallel (limit=50 instead of limit=8!)
-  const nominatimPromises = nominatimTasks.slice(0, 4).map(async (qText) => {
+  const nominatimPromises = nominatimTasks.slice(0, 6).map(async (qText) => {
     try {
       const searchUrl = `https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=kh&addressdetails=1&extratags=1&namedetails=1&limit=50&accept-language=km,en,zh&q=${encodeURIComponent(
         qText

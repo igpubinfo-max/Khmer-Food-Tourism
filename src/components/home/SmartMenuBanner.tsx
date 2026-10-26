@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronRight, Lock, Crown, UtensilsCrossed, Leaf, Route, MapPin, Heart, Flame } from 'lucide-react';
+import { ChevronRight, Lock, Crown, UtensilsCrossed, Leaf, Route, MapPin, Heart, Flame, Compass } from 'lucide-react';
 import type { Language } from '../../types';
 import { tr } from '../../utils/i18n';
 
@@ -12,7 +12,7 @@ interface Props {
 
 /**
  * Premium teaser entry to the Smart Menu (Special Menu & Healthy Food).
- * Curiosity-driven: short hook, 4 "what's inside" chips, gold shimmer, VIP key.
+ * Curiosity-driven: short hook, "what's inside" chips, gold shimmer, VIP key.
  */
 export const SmartMenuBanner: React.FC<Props> = ({ language, onOpen, showVipLock = false, onUpgradeVip }) => {
   const chips = [
@@ -20,6 +20,7 @@ export const SmartMenuBanner: React.FC<Props> = ({ language, onOpen, showVipLock
     { icon: Route, label: tr(language, 'ដំណើរ ១ ថ្ងៃ', '1-day trip', '一日行程') },
     { icon: MapPin, label: tr(language, 'នៅជិតខ្ញុំ', 'Near me', '附近') },
     { icon: Heart, label: tr(language, 'ចំណូលចិត្ត', 'Favorites', '收藏') },
+    { icon: Compass, label: tr(language, 'ផែនការដើរលេង AI', 'AI Trip Plan', 'AI 行程规划') },
     { icon: Flame, label: tr(language, 'កំពុងពេញនិយម', 'Trending', '热门') },
   ];
 

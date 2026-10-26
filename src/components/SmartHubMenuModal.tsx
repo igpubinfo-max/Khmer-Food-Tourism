@@ -167,12 +167,12 @@ export const SmartHubMenuModal: React.FC<Props> = ({ onClose }) => {
             </button>
             {canUseVip && openPanel === 'trips' && <FoodTripTemplates />}
 
-            {/* Smart Trip Planner (VIP) */}
+            {/* AI Trip Planner (VIP) */}
             <button type="button" className={rowCls} onClick={vipOnly(() => setIsAiTripPlannerModalOpen(true))}>
               <span className={`${iconBox} bg-sky-100 text-sky-700`}><Route className="w-5 h-5" /></span>
               <span className="min-w-0 flex-1">
                 <span className="block text-sm font-bold text-slate-900 dark:text-white">
-                  {tr(language, 'រៀបផែនការធ្វើដំណើរឆ្លាតវៃ', 'Smart Trip Planner', '智能行程规划')}
+                  {tr(language, 'ផែនការដើរលេង AI', 'AI Trip Planner', 'AI 行程规划')}
                 </span>
                 <span className="block text-xs text-slate-500 dark:text-slate-400">
                   {tr(language, 'រៀបចំផ្លូវដើរលេង និងម្ហូបតាមថវិកា', 'Custom route & dining built for your budget', '按预算量身定制出行与美食路线')}
