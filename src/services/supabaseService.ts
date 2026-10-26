@@ -326,7 +326,7 @@ export function normalizeAuthoritativeAppSettings(
   const rawTime = raw?.settingsUpdatedAt ? Date.parse(raw.settingsUpdatedAt) || 0 : 0;
   const fbTime = fallback?.settingsUpdatedAt ? Date.parse(fallback.settingsUpdatedAt) || 0 : 0;
 
-  // Never allow a stale local cache with an older settingsVersion/timestamp to overwrite a newer seed or server payload
+  // Prefer whichever payload has a newer settingsVersion, or if equal, a newer settingsUpdatedAt timestamp
   const preferFallback =
     Boolean(fallback) &&
     (fbVer > rawVer || (fbVer === rawVer && fbTime > rawTime));
@@ -335,32 +335,52 @@ export function normalizeAuthoritativeAppSettings(
     ? { ...(raw || {}), ...(fallback || {}) }
     : { ...(fallback || {}), ...(raw || {}) }) as AppSettings;
 
-  // Migrate stale pre-v15 cached settings ($9.99 / $24.99 / $10.00) to authoritative defaults: 30d @ $4.99, 60d @ $6.99, extra shop @ $5.00
-  const isStalePreV15 = Number(merged.settingsVersion || 0) < 15;
+  const ver = Number(merged.settingsVersion || 0);
+  const isLegacyCorrupted =
+    ver < 25 &&
+    (Number(merged.vipShortPriceUsd) === 9.99 ||
+      Number(merged.vipLongPriceUsd) === 24.99 ||
+      (Number(merged.vipShortDurationDays) === 3 && Number(merged.vipLongDurationDays) === 9));
 
-  let shortDays = typeof merged.vipShortDurationDays === 'number' && merged.vipShortDurationDays >= 1
-    ? Math.round(merged.vipShortDurationDays)
-    : 30;
-  let shortPrice = typeof merged.vipShortPriceUsd === 'number' && merged.vipShortPriceUsd > 0
-    ? Math.round(merged.vipShortPriceUsd * 100) / 100
-    : 4.99;
-  let longDays = typeof merged.vipLongDurationDays === 'number' && merged.vipLongDurationDays >= 1
-    ? Math.round(merged.vipLongDurationDays)
-    : 60;
-  let longPrice = typeof merged.vipLongPriceUsd === 'number' && merged.vipLongPriceUsd > 0
-    ? Math.round(merged.vipLongPriceUsd * 100) / 100
-    : 6.99;
-  let extraStoreFee = typeof merged.additionalStoreFeeUsd === 'number' && merged.additionalStoreFeeUsd >= 0
-    ? Math.round(merged.additionalStoreFeeUsd * 100) / 100
-    : 5.0;
+  const rawShortDays = Number(merged.vipShortDurationDays);
+  let shortDays =
+    Number.isFinite(rawShortDays) && rawShortDays >= 1
+      ? Math.round(rawShortDays)
+      : 30;
 
-  if (isStalePreV15) {
+  const rawShortPrice = Number(merged.vipShortPriceUsd);
+  let shortPrice =
+    Number.isFinite(rawShortPrice) && rawShortPrice > 0
+      ? Math.round(rawShortPrice * 100) / 100
+      : 4.99;
+
+  const rawLongDays = Number(merged.vipLongDurationDays);
+  let longDays =
+    Number.isFinite(rawLongDays) && rawLongDays >= 1
+      ? Math.round(rawLongDays)
+      : 60;
+
+  const rawLongPrice = Number(merged.vipLongPriceUsd);
+  let longPrice =
+    Number.isFinite(rawLongPrice) && rawLongPrice > 0
+      ? Math.round(rawLongPrice * 100) / 100
+      : 6.99;
+
+  const rawExtraFee = Number(merged.additionalStoreFeeUsd);
+  let extraStoreFee =
+    merged.additionalStoreFeeUsd !== undefined &&
+    merged.additionalStoreFeeUsd !== null &&
+    Number.isFinite(rawExtraFee) &&
+    rawExtraFee >= 0
+      ? Math.round(rawExtraFee * 100) / 100
+      : 5.0;
+
+  if (isLegacyCorrupted) {
     if (shortPrice === 9.99) shortPrice = 4.99;
-    if (longPrice === 24.99 || longDays === 90) {
-      longDays = 60;
-      longPrice = 6.99;
-    }
-    if (extraStoreFee === 10.0) extraStoreFee = 5.0;
+    if (shortDays === 3) shortDays = 30;
+    if (longPrice === 24.99) longPrice = 6.99;
+    if (longDays === 9 || longDays === 90) longDays = 60;
+    if (ver < 15 && extraStoreFee === 10.0) extraStoreFee = 5.0;
   }
 
   const includedFree =
@@ -368,14 +388,31 @@ export function normalizeAuthoritativeAppSettings(
       ? Math.round(merged.includedFreeStoresPerVip)
       : 1;
 
-  const shortNameKh = (merged.vipShortNameKh || '').trim() || `VIP ${shortDays} ថ្ងៃ`;
-  const shortNameEn = (merged.vipShortNameEn || '').trim() || `VIP ${shortDays} Days`;
-  const longNameKh = (merged.vipLongNameKh || '').trim() || `VIP ${longDays} ថ្ងៃ`;
-  const longNameEn = (merged.vipLongNameEn || '').trim() || `VIP ${longDays} Days`;
+  const shortNameKhRaw = (merged.vipShortNameKh || '').trim();
+  const shortNameEnRaw = (merged.vipShortNameEn || '').trim();
+  const longNameKhRaw = (merged.vipLongNameKh || '').trim();
+  const longNameEnRaw = (merged.vipLongNameEn || '').trim();
+
+  const shortNameKh =
+    !shortNameKhRaw || /^VIP\s+\d+\s*(ថ្ងៃ|\?+)$/i.test(shortNameKhRaw)
+      ? `VIP ${shortDays} ថ្ងៃ`
+      : shortNameKhRaw;
+  const shortNameEn =
+    !shortNameEnRaw || /^VIP\s+\d+\s*Days?$/i.test(shortNameEnRaw)
+      ? `VIP ${shortDays} Days`
+      : shortNameEnRaw;
+  const longNameKh =
+    !longNameKhRaw || /^VIP\s+\d+\s*(ថ្ងៃ|\?+)$/i.test(longNameKhRaw)
+      ? `VIP ${longDays} ថ្ងៃ`
+      : longNameKhRaw;
+  const longNameEn =
+    !longNameEnRaw || /^VIP\s+\d+\s*Days?$/i.test(longNameEnRaw)
+      ? `VIP ${longDays} Days`
+      : longNameEnRaw;
 
   return {
     ...merged,
-    settingsVersion: Math.max(15, Number(merged.settingsVersion || 0)),
+    settingsVersion: Math.max(25, ver),
     supportAccountName: merged.supportAccountName || 'CHEA KIMSENG',
     vipShortDurationDays: shortDays,
     vipShortPriceUsd: shortPrice,
@@ -388,14 +425,14 @@ export function normalizeAuthoritativeAppSettings(
     additionalStoreFeeUsd: extraStoreFee,
     includedFreeStoresPerVip: includedFree,
     promotionalFeeUsd: shortPrice,
-    promotionPeriodKh: `កញ្ចប់ VIP ផ្លូវការ៖ $${shortPrice.toFixed(2)} សម្រាប់ ${shortDays} ថ្ងៃ ឬ $${longPrice.toFixed(2)} សម្រាប់ ${longDays} ថ្ងៃ • បន្ថែមហាងថ្មី៖ $${extraStoreFee.toFixed(2)} / ១ ហាង`,
-    promotionPeriodEn: `Official VIP Plans: $${shortPrice.toFixed(2)} for ${shortDays} Days or $${longPrice.toFixed(2)} for ${longDays} Days • Additional Store: $${extraStoreFee.toFixed(2)} / store`,
+    promotionPeriodKh: `កញ្ចប់ VIP ផ្លូវការ៖ ${shortPrice.toFixed(2)} សម្រាប់ ${shortDays} ថ្ងៃ ឬ ${longPrice.toFixed(2)} សម្រាប់ ${longDays} ថ្ងៃ • បន្ថែមហាងថ្មី៖ ${extraStoreFee.toFixed(2)} / ១ ហាង`,
+    promotionPeriodEn: `Official VIP Plans: ${shortPrice.toFixed(2)} for ${shortDays} Days or ${longPrice.toFixed(2)} for ${longDays} Days • Additional Store: ${extraStoreFee.toFixed(2)} / store`,
   };
 }
 
 /**
- * Fetch the authoritative Admin-configured AppSettings directly from the server (`kft_cloud_app_settings_v1`).
- * Immediately invalidates outdated local caches (`kft_settings_v3`) and updates `kft_settings_v4`.
+ * Fetch the authoritative Admin-configured AppSettings directly from the server (`kft_cloud_admin_vip_pricing_v2` & `kft_cloud_app_settings_v1`).
+ * Pure read operation — never overwrites server settings with a local client fallback.
  */
 export async function fetchAuthoritativeAppSettingsFromServer(
   fallback?: Partial<AppSettings>,
@@ -425,20 +462,6 @@ export async function fetchAuthoritativeAppSettingsFromServer(
     }
     if (chosenPayload && typeof chosenPayload === 'object') {
       const normalized = normalizeAuthoritativeAppSettings(chosenPayload, fallback);
-      if (
-        !v2Payload ||
-        Number(v2Payload.vipShortPriceUsd) !== normalized.vipShortPriceUsd ||
-        Number(v2Payload.vipLongPriceUsd) !== normalized.vipLongPriceUsd
-      ) {
-        pushCloudDocument('kft_cloud_admin_vip_pricing_v2', normalized, 6000).catch(() => {});
-      }
-      if (
-        !v1Payload ||
-        Number(v1Payload.vipShortPriceUsd) !== normalized.vipShortPriceUsd ||
-        Number(v1Payload.vipLongPriceUsd) !== normalized.vipLongPriceUsd
-      ) {
-        pushCloudDocument('kft_cloud_app_settings_v1', normalized, 6000).catch(() => {});
-      }
       try {
         if (typeof localStorage !== 'undefined') {
           localStorage.removeItem('kft_settings_v3');
@@ -459,17 +482,18 @@ export async function fetchAuthoritativeAppSettingsFromServer(
       ok: true,
       settings: fallback ? normalizeAuthoritativeAppSettings(fallback) : null,
     };
-  } catch {
+  } catch (err: any) {
     return {
-      ok: true,
+      ok: false,
       settings: fallback ? normalizeAuthoritativeAppSettings(fallback) : null,
+      error: err?.message || 'Failed to fetch settings from server',
     };
   }
 }
 
 /**
  * Authoritative Admin-only save for centralized VIP settings (`kft_cloud_admin_vip_pricing_v2` & `kft_cloud_app_settings_v1`).
- * Increments `settingsVersion`, writes directly to the server, and invalidates stale local caches.
+ * Reads current server version first, increments `settingsVersion`, writes to both authoritative keys, and verifies persistence.
  */
 export async function saveAuthoritativeAppSettingsToServer(
   settings: AppSettings,
@@ -479,47 +503,106 @@ export async function saveAuthoritativeAppSettingsToServer(
   settings: AppSettings;
   error?: string;
 }> {
-  const nextVersion = (Number(settings.settingsVersion) || 0) + 1;
-  const nowIso = new Date().toISOString();
-  const normalized = normalizeAuthoritativeAppSettings({
-    ...settings,
-    settingsVersion: nextVersion,
-    settingsUpdatedAt: nowIso,
-  });
-
-  try {
-    if (typeof localStorage !== 'undefined') {
-      localStorage.removeItem('kft_settings_v3');
-      localStorage.removeItem('kft_settings_v4');
-      localStorage.setItem('kft_settings_v5', JSON.stringify(normalized));
-    }
-  } catch {
-    // ignore storage errors
-  }
-
   if (!isSupabaseConfigured()) {
     return {
       ok: false,
-      settings: normalized,
+      settings,
       error: 'Cloud server is not configured.',
     };
   }
+
+  let serverMaxVer = 25;
+  try {
+    const [existingV2, existingV1] = await Promise.all([
+      pullCloudDocument<Partial<AppSettings>>('kft_cloud_admin_vip_pricing_v2', 4000),
+      pullCloudDocument<Partial<AppSettings>>('kft_cloud_app_settings_v1', 4000),
+    ]);
+    serverMaxVer = Math.max(
+      25,
+      Number(existingV2?.settingsVersion) || 0,
+      Number(existingV1?.settingsVersion) || 0,
+      Number(settings.settingsVersion) || 0
+    );
+  } catch {
+    serverMaxVer = Math.max(25, Number(settings.settingsVersion) || 0);
+  }
+
+  const nextVersion = serverMaxVer + 1;
+  const nowIso = new Date().toISOString();
+
+  const shortDays = Math.max(1, Math.round(Number(settings.vipShortDurationDays) || 30));
+  const shortPrice = Math.max(0.01, Math.round((Number(settings.vipShortPriceUsd) || 4.99) * 100) / 100);
+  const longDays = Math.max(1, Math.round(Number(settings.vipLongDurationDays) || 60));
+  const longPrice = Math.max(0.01, Math.round((Number(settings.vipLongPriceUsd) || 6.99) * 100) / 100);
+  const extraStoreFee = Math.max(0, Math.round((Number(settings.additionalStoreFeeUsd ?? 5.0)) * 100) / 100);
+
+  const shortNameKh = (settings.vipShortNameKh || '').trim() || `VIP ${shortDays} ថ្ងៃ`;
+  const shortNameEn = (settings.vipShortNameEn || '').trim() || `VIP ${shortDays} Days`;
+  const longNameKh = (settings.vipLongNameKh || '').trim() || `VIP ${longDays} ថ្ងៃ`;
+  const longNameEn = (settings.vipLongNameEn || '').trim() || `VIP ${longDays} Days`;
+
+  const normalized: AppSettings = {
+    ...settings,
+    settingsVersion: nextVersion,
+    settingsUpdatedAt: nowIso,
+    vipShortDurationDays: shortDays,
+    vipShortPriceUsd: shortPrice,
+    vipShortNameKh: shortNameKh,
+    vipShortNameEn: shortNameEn,
+    vipLongDurationDays: longDays,
+    vipLongPriceUsd: longPrice,
+    vipLongNameKh: longNameKh,
+    vipLongNameEn: longNameEn,
+    additionalStoreFeeUsd: extraStoreFee,
+    promotionalFeeUsd: shortPrice,
+    promotionPeriodKh: `កញ្ចប់ VIP ផ្លូវការ៖ ${shortPrice.toFixed(2)} សម្រាប់ ${shortDays} ថ្ងៃ ឬ ${longPrice.toFixed(2)} សម្រាប់ ${longDays} ថ្ងៃ • បន្ថែមហាងថ្មី៖ ${extraStoreFee.toFixed(2)} / ១ ហាង`,
+    promotionPeriodEn: `Official VIP Plans: ${shortPrice.toFixed(2)} for ${shortDays} Days or ${longPrice.toFixed(2)} for ${longDays} Days • Additional Store: ${extraStoreFee.toFixed(2)} / store`,
+  };
 
   const [pushedV2, pushedV1] = await Promise.all([
     pushCloudDocument('kft_cloud_admin_vip_pricing_v2', normalized, timeoutMs),
     pushCloudDocument('kft_cloud_app_settings_v1', normalized, timeoutMs),
   ]);
-  if (!pushedV2 && !pushedV1) {
+
+  if (!pushedV2) {
     return {
       ok: false,
       settings: normalized,
-      error: 'Could not save VIP settings to cloud server. Please check your connection and try again.',
+      error: 'Could not save VIP settings to cloud database. Please check your internet connection and try again.',
     };
+  }
+
+  // Verify database persistence by reading back the authoritative record
+  const verifiedV2 = await pullCloudDocument<Partial<AppSettings>>('kft_cloud_admin_vip_pricing_v2', 5000);
+  if (
+    !verifiedV2 ||
+    Number(verifiedV2.vipShortDurationDays) !== shortDays ||
+    Math.abs(Number(verifiedV2.vipShortPriceUsd) - shortPrice) > 0.001 ||
+    Number(verifiedV2.vipLongDurationDays) !== longDays ||
+    Math.abs(Number(verifiedV2.vipLongPriceUsd) - longPrice) > 0.001
+  ) {
+    return {
+      ok: false,
+      settings: normalized,
+      error: 'Database verification failed: saved VIP values did not match on read-back.',
+    };
+  }
+
+  const confirmedSettings = normalizeAuthoritativeAppSettings(verifiedV2, normalized);
+
+  try {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.removeItem('kft_settings_v3');
+      localStorage.removeItem('kft_settings_v4');
+      localStorage.setItem('kft_settings_v5', JSON.stringify(confirmedSettings));
+    }
+  } catch {
+    // ignore storage errors
   }
 
   return {
     ok: true,
-    settings: normalized,
+    settings: confirmedSettings,
   };
 }
 
@@ -1455,14 +1538,7 @@ export async function syncAllAppDataWithSupabase(localState: {
       } catch {
         // ignore storage errors
       }
-      // Self-heal kft_cloud_app_settings_v1 if an older client overwrote it with stale prices
-      if (
-        !cloudSettingsV1 ||
-        Number(cloudSettingsV1.vipShortPriceUsd) !== mergedAppSettings.vipShortPriceUsd ||
-        Number(cloudSettingsV1.vipLongPriceUsd) !== mergedAppSettings.vipLongPriceUsd
-      ) {
-        pushCloudDocument('kft_cloud_app_settings_v1', mergedAppSettings).catch(() => {});
-      }
+      // Server VIP settings are read-only during general sync; only saveAuthoritativeAppSettingsToServer writes VIP settings.
     } else if (localState.appSettings) {
       mergedAppSettings = normalizeAuthoritativeAppSettings(localState.appSettings);
     }
@@ -1488,9 +1564,7 @@ export async function syncAllAppDataWithSupabase(localState: {
       }
     }
 
-    if (!cloudSettings && mergedAppSettings) {
-      pushPromises.push(pushCloudDocument('kft_cloud_app_settings_v1', mergedAppSettings));
-    }
+    // Do not overwrite cloud VIP settings during general sync
     await Promise.all(pushPromises);
 
     return {

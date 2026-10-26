@@ -1,6 +1,6 @@
-export const APP_VERSION = 'v2.3.0';
-export const APP_VERSION_NAME = '2.3.0';
-export const APP_BUILD_CODE = 111;
+export const APP_VERSION = 'v2.3.1';
+export const APP_VERSION_NAME = '2.3.1';
+export const APP_BUILD_CODE = 112;
 export const APP_RELEASE_DATE = '2026-10-26';
 
 export interface GoogleMapsPlaceMetadata {
@@ -57,21 +57,21 @@ export const VIP_PLANS: Record<'quarterly' | 'annual', VipPlanConfig> = {
     id: 'quarterly',
     nameEn: 'VIP 30 Days',
     nameKh: 'VIP 30 ថ្ងៃ',
-    priceUsd: 9.99,
-    durationDays: 30,
-    labelEn: 'VIP 30 Days ($9.99 / 30 days)',
-    labelKh: 'VIP 30 ថ្ងៃ ($9.99 / 30 ថ្ងៃ)',
-    priceKhrDisplay: '៤០,៩៥៩ រៀល'
+    priceUsd: VIP_QUARTERLY_PRICE_USD,
+    durationDays: VIP_QUARTERLY_DAYS,
+    labelEn: `VIP ${VIP_QUARTERLY_DAYS} Days (${VIP_QUARTERLY_PRICE_USD.toFixed(2)} / ${VIP_QUARTERLY_DAYS} days)`,
+    labelKh: `VIP ${VIP_QUARTERLY_DAYS} ថ្ងៃ (${VIP_QUARTERLY_PRICE_USD.toFixed(2)} / ${VIP_QUARTERLY_DAYS} ថ្ងៃ)`,
+    priceKhrDisplay: `${Math.round(VIP_QUARTERLY_PRICE_USD * 4100).toLocaleString()} រៀល`
   },
   annual: {
     id: 'annual',
-    nameEn: 'VIP 90 Days',
-    nameKh: 'VIP 90 ថ្ងៃ',
-    priceUsd: 24.99,
-    durationDays: 90,
-    labelEn: 'VIP 90 Days ($24.99 / 90 days)',
-    labelKh: 'VIP 90 ថ្ងៃ ($24.99 / 90 ថ្ងៃ)',
-    priceKhrDisplay: '១០២,៤៥៩ រៀល'
+    nameEn: 'VIP 60 Days',
+    nameKh: 'VIP 60 ថ្ងៃ',
+    priceUsd: VIP_ANNUAL_PRICE_USD,
+    durationDays: VIP_SUBSCRIPTION_DAYS,
+    labelEn: `VIP ${VIP_SUBSCRIPTION_DAYS} Days (${VIP_ANNUAL_PRICE_USD.toFixed(2)} / ${VIP_SUBSCRIPTION_DAYS} days)`,
+    labelKh: `VIP ${VIP_SUBSCRIPTION_DAYS} ថ្ងៃ (${VIP_ANNUAL_PRICE_USD.toFixed(2)} / ${VIP_SUBSCRIPTION_DAYS} ថ្ងៃ)`,
+    priceKhrDisplay: `${Math.round(VIP_ANNUAL_PRICE_USD * 4100).toLocaleString()} រៀល`
   }
 };
 
@@ -1339,38 +1339,65 @@ export const getDynamicVipPlans = (
   settings?: Partial<AppSettings> | null
 ): Record<'quarterly' | 'annual', VipPlanConfig> => {
   const s = settings || getStoredAppSettingsFallback();
-  const isStalePreV15 = Number(s.settingsVersion || 0) < 15;
+  const ver = Number(s.settingsVersion || 0);
+  const isLegacyCorrupted =
+    ver < 25 &&
+    (Number(s.vipShortPriceUsd) === 9.99 ||
+      Number(s.vipLongPriceUsd) === 24.99 ||
+      (Number(s.vipShortDurationDays) === 3 && Number(s.vipLongDurationDays) === 9));
 
+  const rawShortDays = Number(s.vipShortDurationDays);
   let shortDays =
-    typeof s.vipShortDurationDays === 'number' && s.vipShortDurationDays >= 1
-      ? Math.round(s.vipShortDurationDays)
+    Number.isFinite(rawShortDays) && rawShortDays >= 1
+      ? Math.round(rawShortDays)
       : VIP_QUARTERLY_DAYS;
+
+  const rawShortPrice = Number(s.vipShortPriceUsd);
   let shortPrice =
-    typeof s.vipShortPriceUsd === 'number' && s.vipShortPriceUsd > 0
-      ? Math.round(s.vipShortPriceUsd * 100) / 100
+    Number.isFinite(rawShortPrice) && rawShortPrice > 0
+      ? Math.round(rawShortPrice * 100) / 100
       : VIP_QUARTERLY_PRICE_USD;
 
+  const rawLongDays = Number(s.vipLongDurationDays);
   let longDays =
-    typeof s.vipLongDurationDays === 'number' && s.vipLongDurationDays >= 1
-      ? Math.round(s.vipLongDurationDays)
+    Number.isFinite(rawLongDays) && rawLongDays >= 1
+      ? Math.round(rawLongDays)
       : VIP_SUBSCRIPTION_DAYS;
+
+  const rawLongPrice = Number(s.vipLongPriceUsd);
   let longPrice =
-    typeof s.vipLongPriceUsd === 'number' && s.vipLongPriceUsd > 0
-      ? Math.round(s.vipLongPriceUsd * 100) / 100
+    Number.isFinite(rawLongPrice) && rawLongPrice > 0
+      ? Math.round(rawLongPrice * 100) / 100
       : VIP_ANNUAL_PRICE_USD;
 
-  if (isStalePreV15) {
-    if (shortPrice === 9.99) shortPrice = 4.99;
-    if (longPrice === 24.99 || longDays === 90) {
-      longDays = 60;
-      longPrice = 6.99;
-    }
+  if (isLegacyCorrupted) {
+    if (shortPrice === 9.99) shortPrice = VIP_QUARTERLY_PRICE_USD;
+    if (shortDays === 3) shortDays = VIP_QUARTERLY_DAYS;
+    if (longPrice === 24.99) longPrice = VIP_ANNUAL_PRICE_USD;
+    if (longDays === 9 || longDays === 90) longDays = VIP_SUBSCRIPTION_DAYS;
   }
 
-  const shortNameKh = (s.vipShortNameKh || '').trim() || `VIP ${shortDays} ថ្ងៃ`;
-  const shortNameEn = (s.vipShortNameEn || '').trim() || `VIP ${shortDays} Days`;
-  const longNameKh = (s.vipLongNameKh || '').trim() || `VIP ${longDays} ថ្ងៃ`;
-  const longNameEn = (s.vipLongNameEn || '').trim() || `VIP ${longDays} Days`;
+  const shortNameKhRaw = (s.vipShortNameKh || '').trim();
+  const shortNameEnRaw = (s.vipShortNameEn || '').trim();
+  const longNameKhRaw = (s.vipLongNameKh || '').trim();
+  const longNameEnRaw = (s.vipLongNameEn || '').trim();
+
+  const shortNameKh =
+    !shortNameKhRaw || /^VIP\s+\d+\s*(ថ្ងៃ|\?+)$/i.test(shortNameKhRaw)
+      ? `VIP ${shortDays} ថ្ងៃ`
+      : shortNameKhRaw;
+  const shortNameEn =
+    !shortNameEnRaw || /^VIP\s+\d+\s*Days?$/i.test(shortNameEnRaw)
+      ? `VIP ${shortDays} Days`
+      : shortNameEnRaw;
+  const longNameKh =
+    !longNameKhRaw || /^VIP\s+\d+\s*(ថ្ងៃ|\?+)$/i.test(longNameKhRaw)
+      ? `VIP ${longDays} ថ្ងៃ`
+      : longNameKhRaw;
+  const longNameEn =
+    !longNameEnRaw || /^VIP\s+\d+\s*Days?$/i.test(longNameEnRaw)
+      ? `VIP ${longDays} Days`
+      : longNameEnRaw;
 
   return {
     quarterly: {
@@ -1379,8 +1406,8 @@ export const getDynamicVipPlans = (
       nameKh: shortNameKh,
       priceUsd: shortPrice,
       durationDays: shortDays,
-      labelEn: `${shortNameEn} ($${shortPrice.toFixed(2)} / ${shortDays} days)`,
-      labelKh: `${shortNameKh} ($${shortPrice.toFixed(2)} / ${shortDays} ថ្ងៃ)`,
+      labelEn: `${shortNameEn} (${shortPrice.toFixed(2)} / ${shortDays} days)`,
+      labelKh: `${shortNameKh} (${shortPrice.toFixed(2)} / ${shortDays} ថ្ងៃ)`,
       priceKhrDisplay: `${Math.round(shortPrice * 4100).toLocaleString()} រៀល`,
     },
     annual: {
@@ -1389,8 +1416,8 @@ export const getDynamicVipPlans = (
       nameKh: longNameKh,
       priceUsd: longPrice,
       durationDays: longDays,
-      labelEn: `${longNameEn} ($${longPrice.toFixed(2)} / ${longDays} days)`,
-      labelKh: `${longNameKh} ($${longPrice.toFixed(2)} / ${longDays} ថ្ងៃ)`,
+      labelEn: `${longNameEn} (${longPrice.toFixed(2)} / ${longDays} days)`,
+      labelKh: `${longNameKh} (${longPrice.toFixed(2)} / ${longDays} ថ្ងៃ)`,
       priceKhrDisplay: `${Math.round(longPrice * 4100).toLocaleString()} រៀល`,
     },
   };
@@ -1427,8 +1454,14 @@ export const getAdditionalStoreFeeUsd = (
   settings?: Partial<AppSettings> | null
 ): number => {
   const s = settings || getStoredAppSettingsFallback();
-  if (typeof s.additionalStoreFeeUsd === 'number' && s.additionalStoreFeeUsd >= 0) {
-    const val = Math.round(s.additionalStoreFeeUsd * 100) / 100;
+  const rawVal = Number(s.additionalStoreFeeUsd);
+  if (
+    s.additionalStoreFeeUsd !== undefined &&
+    s.additionalStoreFeeUsd !== null &&
+    Number.isFinite(rawVal) &&
+    rawVal >= 0
+  ) {
+    const val = Math.round(rawVal * 100) / 100;
     if (Number(s.settingsVersion || 0) < 15 && val === 10.0) return DEFAULT_ADDITIONAL_STORE_FEE_USD;
     return val;
   }

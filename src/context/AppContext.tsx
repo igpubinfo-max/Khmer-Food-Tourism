@@ -124,7 +124,7 @@ interface AppContextType {
   
   // App Settings & QR Codes
   appSettings: AppSettings;
-  updateAppSettings: (newSettings: Partial<AppSettings>) => void;
+  updateAppSettings: (newSettings: Partial<AppSettings>) => Promise<{ ok: boolean; settings?: AppSettings; error?: string }>;
   isRefreshingSettings?: boolean;
   settingsSyncError?: string | null;
   refreshAppSettingsFromServer?: (silent?: boolean) => Promise<AppSettings | null>;
@@ -2297,9 +2297,36 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Authoritative Server-Side VIP Pricing & Settings Refresh (Single Source of Truth)
   const settingsFetchInFlightRef = useRef<Promise<AppSettings | null> | null>(null);
+  const isSavingSettingsRef = useRef<boolean>(false);
+  const lastAdminSettingsSaveAtRef = useRef<number>(0);
+
+  const areAppSettingsEqual = (a: AppSettings, b: AppSettings): boolean => {
+    return (
+      a.vipShortDurationDays === b.vipShortDurationDays &&
+      a.vipShortPriceUsd === b.vipShortPriceUsd &&
+      a.vipShortNameKh === b.vipShortNameKh &&
+      a.vipShortNameEn === b.vipShortNameEn &&
+      a.vipLongDurationDays === b.vipLongDurationDays &&
+      a.vipLongPriceUsd === b.vipLongPriceUsd &&
+      a.vipLongNameKh === b.vipLongNameKh &&
+      a.vipLongNameEn === b.vipLongNameEn &&
+      a.additionalStoreFeeUsd === b.additionalStoreFeeUsd &&
+      a.apkDownloadUrl === b.apkDownloadUrl &&
+      a.playStoreUrl === b.playStoreUrl &&
+      a.appStoreUrl === b.appStoreUrl &&
+      a.supportQrImageUrl === b.supportQrImageUrl &&
+      a.supportBankName === b.supportBankName &&
+      a.supportAccountName === b.supportAccountName &&
+      a.supportMessageKh === b.supportMessageKh &&
+      JSON.stringify(a.vipBenefitsList || []) === JSON.stringify(b.vipBenefitsList || [])
+    );
+  };
 
   const refreshAppSettingsFromServer = async (silent: boolean = true): Promise<AppSettings | null> => {
     if (!isSupabaseConfigured()) {
+      return appSettingsRef.current;
+    }
+    if (isSavingSettingsRef.current || (silent && Date.now() - lastAdminSettingsSaveAtRef.current < 6000)) {
       return appSettingsRef.current;
     }
     if (settingsFetchInFlightRef.current) {
@@ -2310,14 +2337,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const task = (async () => {
       try {
         const res = await fetchAuthoritativeAppSettingsFromServer(appSettingsRef.current);
+        if (isSavingSettingsRef.current || (silent && Date.now() - lastAdminSettingsSaveAtRef.current < 6000)) {
+          return appSettingsRef.current;
+        }
         setSettingsSyncError(null);
         if (res.ok && res.settings) {
           setAppSettings(prev => {
             const next = normalizeAuthoritativeAppSettings(res.settings!, prev);
+            if (areAppSettingsEqual(prev, next)) {
+              return prev;
+            }
             appSettingsRef.current = next;
             return next;
           });
-          return res.settings;
+          return appSettingsRef.current;
         }
         return appSettingsRef.current;
       } catch {
@@ -2476,9 +2509,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
       if (result.synced) {
         setLastUsersSyncedAt(new Date().toISOString());
-        if (result.mergedAppSettings) {
+        if (result.mergedAppSettings && !isSavingSettingsRef.current && Date.now() - lastAdminSettingsSaveAtRef.current >= 6000) {
           setAppSettings(prev => {
             const nextSettings = normalizeAuthoritativeAppSettings(result.mergedAppSettings!, prev);
+            if (areAppSettingsEqual(prev, nextSettings)) {
+              return prev;
+            }
             appSettingsRef.current = nextSettings;
             try {
               localStorage.removeItem('kft_settings_v3');
@@ -3764,7 +3800,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return true;
   };
 
-  const updateAppSettings = (newSettings: Partial<AppSettings>) => {
+  const updateAppSettings = async (
+    newSettings: Partial<AppSettings>
+  ): Promise<{ ok: boolean; settings?: AppSettings; error?: string }> => {
     const isAdminAuthorized =
       currentUser?.role === 'admin' ||
       currentUser?.id === 'admin-authorized-single' ||
@@ -3779,37 +3817,66 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         'AppSettings',
         `Unauthorized attempt to modify AppSettings by ${currentUser?.id || 'guest'}`
       );
-      showToast(
+      const unauthErr =
         language === 'km'
           ? '⛔ គ្មានសិទ្ធិអនុញ្ញាត៖ មានតែគណនី Administrator ប៉ុណ្ណោះដែលអាចកែប្រែការកំណត់ប្រព័ន្ធបាន!'
-          : '⛔ Unauthorized: Only an authorized Administrator can modify system settings!',
-        'warning'
-      );
-      return;
+          : '⛔ Unauthorized: Only an authorized Administrator can modify system settings!';
+      showToast(unauthErr, 'warning');
+      return { ok: false, error: unauthErr };
     }
 
     const sanitized: Partial<AppSettings> = { ...newSettings };
     if (sanitized.vipShortDurationDays !== undefined) {
-      sanitized.vipShortDurationDays = Math.max(1, Math.round(Number(sanitized.vipShortDurationDays) || 30));
+      const val = Number(sanitized.vipShortDurationDays);
+      if (!Number.isFinite(val) || val < 1 || val > 3650) {
+        const err = language === 'km' ? '⚠️ រយៈពេលកញ្ចប់ទី១ ត្រូវតែចាប់ពី ១ ថ្ងៃឡើងទៅ!' : '⚠️ Plan #1 duration must be at least 1 day!';
+        showToast(err, 'warning');
+        return { ok: false, error: err };
+      }
+      sanitized.vipShortDurationDays = Math.round(val);
     }
     if (sanitized.vipShortPriceUsd !== undefined) {
-      sanitized.vipShortPriceUsd = Math.max(0.5, Math.round((Number(sanitized.vipShortPriceUsd) || 9.99) * 100) / 100);
+      const val = Number(sanitized.vipShortPriceUsd);
+      if (!Number.isFinite(val) || val <= 0 || val > 10000) {
+        const err = language === 'km' ? '⚠️ តម្លៃកញ្ចប់ទី១ ត្រូវតែធំជាង $0.00!' : '⚠️ Plan #1 price must be greater than $0.00!';
+        showToast(err, 'warning');
+        return { ok: false, error: err };
+      }
+      sanitized.vipShortPriceUsd = Math.round(val * 100) / 100;
     }
     if (sanitized.vipLongDurationDays !== undefined) {
-      sanitized.vipLongDurationDays = Math.max(1, Math.round(Number(sanitized.vipLongDurationDays) || 90));
+      const val = Number(sanitized.vipLongDurationDays);
+      if (!Number.isFinite(val) || val < 1 || val > 3650) {
+        const err = language === 'km' ? '⚠️ រយៈពេលកញ្ចប់ទី២ ត្រូវតែចាប់ពី ១ ថ្ងៃឡើងទៅ!' : '⚠️ Plan #2 duration must be at least 1 day!';
+        showToast(err, 'warning');
+        return { ok: false, error: err };
+      }
+      sanitized.vipLongDurationDays = Math.round(val);
     }
     if (sanitized.vipLongPriceUsd !== undefined) {
-      sanitized.vipLongPriceUsd = Math.max(0.5, Math.round((Number(sanitized.vipLongPriceUsd) || 24.99) * 100) / 100);
+      const val = Number(sanitized.vipLongPriceUsd);
+      if (!Number.isFinite(val) || val <= 0 || val > 10000) {
+        const err = language === 'km' ? '⚠️ តម្លៃកញ្ចប់ទី២ ត្រូវតែធំជាង $0.00!' : '⚠️ Plan #2 price must be greater than $0.00!';
+        showToast(err, 'warning');
+        return { ok: false, error: err };
+      }
+      sanitized.vipLongPriceUsd = Math.round(val * 100) / 100;
     }
     if (sanitized.additionalStoreFeeUsd !== undefined) {
-      sanitized.additionalStoreFeeUsd = Math.max(0.5, Math.round((Number(sanitized.additionalStoreFeeUsd) || 10.0) * 100) / 100);
+      const val = Number(sanitized.additionalStoreFeeUsd);
+      if (!Number.isFinite(val) || val < 0 || val > 10000) {
+        const err = language === 'km' ? '⚠️ តម្លៃបន្ថែមហាងមិនត្រឹមត្រូវ!' : '⚠️ Invalid additional store fee!';
+        showToast(err, 'warning');
+        return { ok: false, error: err };
+      }
+      sanitized.additionalStoreFeeUsd = Math.round(val * 100) / 100;
     }
     if (sanitized.includedFreeStoresPerVip !== undefined) {
       sanitized.includedFreeStoresPerVip = Math.max(1, Math.round(Number(sanitized.includedFreeStoresPerVip) || 1));
     }
 
     const nowIso = new Date().toISOString();
-    const nextVersion = Math.max(14, Number(appSettingsRef.current.settingsVersion || 14) + 1);
+    const nextVersion = Math.max(25, Number(appSettingsRef.current.settingsVersion || 25)) + 1;
     const mergedCandidate: AppSettings = normalizeAuthoritativeAppSettings(
       {
         ...appSettingsRef.current,
@@ -3821,68 +3888,72 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       appSettingsRef.current
     );
 
-    const shortDays = mergedCandidate.vipShortDurationDays;
-    const shortPrice = mergedCandidate.vipShortPriceUsd;
-    const longDays = mergedCandidate.vipLongDurationDays;
-    const longPrice = mergedCandidate.vipLongPriceUsd;
-    const extraStoreFee = mergedCandidate.additionalStoreFeeUsd;
-    if (
-      sanitized.vipShortDurationDays !== undefined ||
-      sanitized.vipShortPriceUsd !== undefined ||
-      sanitized.vipLongDurationDays !== undefined ||
-      sanitized.vipLongPriceUsd !== undefined ||
-      sanitized.additionalStoreFeeUsd !== undefined
-    ) {
-      mergedCandidate.promotionalFeeUsd = shortPrice;
-      mergedCandidate.promotionPeriodKh = `កញ្ចប់ VIP ផ្លូវការ៖ $${shortPrice.toFixed(2)} សម្រាប់ ${shortDays} ថ្ងៃ ឬ $${longPrice.toFixed(2)} សម្រាប់ ${longDays} ថ្ងៃ • បន្ថែមហាងថ្មី៖ $${extraStoreFee.toFixed(2)} / ១ ហាង`;
-      mergedCandidate.promotionPeriodEn = `Official VIP Plans: $${shortPrice.toFixed(2)} for ${shortDays} Days or $${longPrice.toFixed(2)} for ${longDays} Days • Additional Store: $${extraStoreFee.toFixed(2)} / store`;
-    }
+    const shortDays = mergedCandidate.vipShortDurationDays!;
+    const shortPrice = mergedCandidate.vipShortPriceUsd!;
+    const longDays = mergedCandidate.vipLongDurationDays!;
+    const longPrice = mergedCandidate.vipLongPriceUsd!;
+    const extraStoreFee = mergedCandidate.additionalStoreFeeUsd ?? 5.0;
 
-    appSettingsRef.current = mergedCandidate;
-    setAppSettings(mergedCandidate);
+    mergedCandidate.promotionalFeeUsd = shortPrice;
+    mergedCandidate.promotionPeriodKh = `កញ្ចប់ VIP ផ្លូវការ៖ ${shortPrice.toFixed(2)} សម្រាប់ ${shortDays} ថ្ងៃ ឬ ${longPrice.toFixed(2)} សម្រាប់ ${longDays} ថ្ងៃ • បន្ថែមហាងថ្មី៖ ${extraStoreFee.toFixed(2)} / ១ ហាង`;
+    mergedCandidate.promotionPeriodEn = `Official VIP Plans: ${shortPrice.toFixed(2)} for ${shortDays} Days or ${longPrice.toFixed(2)} for ${longDays} Days • Additional Store: ${extraStoreFee.toFixed(2)} / store`;
+
+    isSavingSettingsRef.current = true;
     setSettingsSyncError(null);
 
     try {
-      localStorage.removeItem('kft_settings_v3');
-      localStorage.removeItem('kft_settings_v4');
-      localStorage.setItem('kft_settings_v5', JSON.stringify(mergedCandidate));
-    } catch (e) {
-      console.warn('Failed to persist updated AppSettings locally:', e);
-    }
+      let confirmedSettings = mergedCandidate;
 
-    try {
-      if (typeof BroadcastChannel !== 'undefined') {
-        const bc = new BroadcastChannel('kft_vip_settings_sync_channel');
-        bc.postMessage({ type: 'VIP_SETTINGS_UPDATED', settings: mergedCandidate });
-        bc.close();
-      }
-    } catch {}
-
-    if (isSupabaseConfigured()) {
-      saveAuthoritativeAppSettingsToServer(mergedCandidate).then(res => {
+      if (isSupabaseConfigured()) {
+        const res = await saveAuthoritativeAppSettingsToServer(mergedCandidate);
         if (!res.ok) {
           const errMsg =
             language === 'km'
-              ? '⚠️ បានរក្សាទុកក្នុងឧបករណ៍ ប៉ុន្តែមិនទាន់អាចធ្វើសមកាលកម្មទៅម៉ាស៊ីនមេ (Server) បានទេ។ សូមពិនិត្យអ៊ីនធឺណិត!'
-              : '⚠️ Saved locally, but failed to sync new prices to the server. Please check your connection!';
+              ? `❌ បរាជ័យក្នុងការរក្សាទុកទៅកាន់ Database៖ ${res.error || 'សូមពិនិត្យអ៊ីនធឺណិតរបស់អ្នក!'}`
+              : `❌ Failed to save VIP settings to database: ${res.error || 'Please check your connection!'}`;
           setSettingsSyncError(errMsg);
           showToast(errMsg, 'warning');
+          return { ok: false, error: errMsg };
         }
-      });
-    }
+        confirmedSettings = res.settings;
+      }
 
-    recordSecurityAudit(
-      'SETTINGS_UPDATE',
-      'SUCCESS',
-      'AppSettings',
-      `Admin updated centralized app settings (v${nextVersion}) at ${nowIso}: Short=$${shortPrice}/${shortDays}d, Long=$${longPrice}/${longDays}d, ExtraStore=$${extraStoreFee}`
-    );
-    showToast(
-      language === 'km'
-        ? '✅ បានរក្សាទុក និងធ្វើសមកាលកម្មតម្លៃកញ្ចប់ VIP ទូទាំងកម្មវិធីជោគជ័យ!'
-        : '✅ Saved and synchronized VIP package prices across the app!',
-      'success'
-    );
+      lastAdminSettingsSaveAtRef.current = Date.now();
+      appSettingsRef.current = confirmedSettings;
+      setAppSettings(confirmedSettings);
+
+      try {
+        localStorage.removeItem('kft_settings_v3');
+        localStorage.removeItem('kft_settings_v4');
+        localStorage.setItem('kft_settings_v5', JSON.stringify(confirmedSettings));
+      } catch (e) {
+        console.warn('Failed to persist updated AppSettings locally:', e);
+      }
+
+      try {
+        if (typeof BroadcastChannel !== 'undefined') {
+          const bc = new BroadcastChannel('kft_vip_settings_sync_channel');
+          bc.postMessage({ type: 'VIP_SETTINGS_UPDATED', settings: confirmedSettings });
+          bc.close();
+        }
+      } catch {}
+
+      recordSecurityAudit(
+        'SETTINGS_UPDATE',
+        'SUCCESS',
+        'AppSettings',
+        `Admin updated centralized app settings (v${confirmedSettings.settingsVersion}) at ${confirmedSettings.settingsUpdatedAt}: Short=${confirmedSettings.vipShortPriceUsd}/${confirmedSettings.vipShortDurationDays}d, Long=${confirmedSettings.vipLongPriceUsd}/${confirmedSettings.vipLongDurationDays}d, ExtraStore=${confirmedSettings.additionalStoreFeeUsd}`
+      );
+      showToast(
+        language === 'km'
+          ? `✅ បានរក្សាទុកទៅកាន់ Database ជោគជ័យ៖ ${confirmedSettings.vipShortDurationDays} ថ្ងៃ (${confirmedSettings.vipShortPriceUsd?.toFixed(2)}) & ${confirmedSettings.vipLongDurationDays} ថ្ងៃ (${confirmedSettings.vipLongPriceUsd?.toFixed(2)})!`
+          : `✅ Confirmed saved to Database: ${confirmedSettings.vipShortDurationDays}d (${confirmedSettings.vipShortPriceUsd?.toFixed(2)}) & ${confirmedSettings.vipLongDurationDays}d (${confirmedSettings.vipLongPriceUsd?.toFixed(2)})!`,
+        'success'
+      );
+      return { ok: true, settings: confirmedSettings };
+    } finally {
+      isSavingSettingsRef.current = false;
+    }
   };
 
   const register = (name: string, emailOrPhone: string, role: UserRole, phone?: string, restaurantName?: string): boolean => {

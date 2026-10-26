@@ -34,7 +34,7 @@ export const initialAppSettings: AppSettings = {
   additionalStoreFeeUsd: 5.0,
   includedFreeStoresPerVip: 1,
   vipBenefitsList: TEN_VIP_BENEFITS,
-  settingsVersion: 15,
+  settingsVersion: 25,
   settingsUpdatedAt: '2026-10-25T05:15:00.000Z',
   settingsUpdatedBy: 'រដ្ឋបាលប្រព័ន្ធ (Chea Savuth / Admin)',
 };

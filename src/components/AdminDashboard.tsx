@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
   X, Shield, Utensils, Store, Compass, MessageSquare, 
@@ -34,7 +34,7 @@ export const AdminDashboard: React.FC = () => {
     posts, deletePost,
     users, deletedUsers, updateUserRole, cancelUserVip, restoreUserAccess, disableUserAccount, deleteUserAccount, clearAllRegisteredUsers,
     transactions, verifyTransaction, rejectTransaction, requestMorePaymentInfo, deleteTransactions, getAuthorizedPaymentProof,
-    appSettings, updateAppSettings, setAdminPassword, currentUser, showToast,
+    appSettings, updateAppSettings, refreshAppSettingsFromServer, setAdminPassword, currentUser, showToast,
     aiCheckIns, approveAiCheckIn, rejectAiCheckIn, mergeAiCheckIn,
     setIsAiCheckInModalOpen, triggerCloudSyncNow, isSyncingUsers, lastUsersSyncedAt, syncUsersNow,
     supportTickets, replyToSupportTicket, updateSupportTicketStatus, approveVipFromSupportTicket, markSupportTicketRead,
@@ -130,40 +130,71 @@ export const AdminDashboard: React.FC = () => {
   const [promotionPeriodKh, setPromotionPeriodKh] = useState(appSettings.promotionPeriodKh || '');
   const [newAdminPass, setNewAdminPass] = useState('');
 
-  // Dynamic VIP Membership & Store Fee Admin Settings States
-  const [vipShortDurationDays, setVipShortDurationDays] = useState<number>(appSettings.vipShortDurationDays ?? 30);
-  const [vipShortPriceUsd, setVipShortPriceUsd] = useState<number>(appSettings.vipShortPriceUsd ?? 4.99);
+  // Dynamic VIP Membership & Store Fee Admin Settings States (Controlled String Drafts so clearing/typing never reverts)
+  const [vipShortDurationInput, setVipShortDurationInput] = useState<string>(() => String(appSettings.vipShortDurationDays ?? 30));
+  const [vipShortPriceInput, setVipShortPriceInput] = useState<string>(() => String(appSettings.vipShortPriceUsd ?? 4.99));
   const [vipShortNameKh, setVipShortNameKh] = useState<string>(appSettings.vipShortNameKh || `VIP ${appSettings.vipShortDurationDays ?? 30} ថ្ងៃ`);
   const [vipShortNameEn, setVipShortNameEn] = useState<string>(appSettings.vipShortNameEn || `VIP ${appSettings.vipShortDurationDays ?? 30} Days`);
-  const [vipLongDurationDays, setVipLongDurationDays] = useState<number>(appSettings.vipLongDurationDays ?? 60);
-  const [vipLongPriceUsd, setVipLongPriceUsd] = useState<number>(appSettings.vipLongPriceUsd ?? 6.99);
+  const [vipLongDurationInput, setVipLongDurationInput] = useState<string>(() => String(appSettings.vipLongDurationDays ?? 60));
+  const [vipLongPriceInput, setVipLongPriceInput] = useState<string>(() => String(appSettings.vipLongPriceUsd ?? 6.99));
   const [vipLongNameKh, setVipLongNameKh] = useState<string>(appSettings.vipLongNameKh || `VIP ${appSettings.vipLongDurationDays ?? 60} ថ្ងៃ`);
   const [vipLongNameEn, setVipLongNameEn] = useState<string>(appSettings.vipLongNameEn || `VIP ${appSettings.vipLongDurationDays ?? 60} Days`);
-  const [additionalStoreFeeUsd, setAdditionalStoreFeeUsd] = useState<number>(getAdditionalStoreFeeUsd(appSettings));
+  const [additionalStoreFeeInput, setAdditionalStoreFeeInput] = useState<string>(() => String(getAdditionalStoreFeeUsd(appSettings)));
   const [vipBenefitsDraft, setVipBenefitsDraft] = useState<VipBenefitItem[]>(() => getDynamicVipBenefits(appSettings));
 
-  // Keep Admin settings form synchronized when appSettings updates from Cloud Sync
+  const isVipFormDirtyRef = useRef<boolean>(false);
+  const [isSavingVipSettings, setIsSavingVipSettings] = useState<boolean>(false);
+  const [vipSaveFeedback, setVipSaveFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  const hydrateVipFormFromSettings = (s: typeof appSettings) => {
+    const sDays = s.vipShortDurationDays ?? 30;
+    const sPrice = s.vipShortPriceUsd ?? 4.99;
+    const lDays = s.vipLongDurationDays ?? 60;
+    const lPrice = s.vipLongPriceUsd ?? 6.99;
+    setApkUrl(s.apkDownloadUrl);
+    setPlayStoreUrl(s.playStoreUrl);
+    setAppStoreUrl(s.appStoreUrl);
+    setSupportQrUrl(s.supportQrImageUrl);
+    setBankName(s.supportBankName);
+    setAccountName(s.supportAccountName);
+    setSupportMessageKh(s.supportMessageKh);
+    setPromotionalFeeUsd(s.promotionalFeeUsd || sPrice);
+    setPromotionPeriodKh(s.promotionPeriodKh || '');
+    setVipShortDurationInput(String(sDays));
+    setVipShortPriceInput(String(sPrice));
+    setVipShortNameKh(s.vipShortNameKh || `VIP ${sDays} ថ្ងៃ`);
+    setVipShortNameEn(s.vipShortNameEn || `VIP ${sDays} Days`);
+    setVipLongDurationInput(String(lDays));
+    setVipLongPriceInput(String(lPrice));
+    setVipLongNameKh(s.vipLongNameKh || `VIP ${lDays} ថ្ងៃ`);
+    setVipLongNameEn(s.vipLongNameEn || `VIP ${lDays} Days`);
+    setAdditionalStoreFeeInput(String(getAdditionalStoreFeeUsd(s)));
+    setVipBenefitsDraft(getDynamicVipBenefits(s));
+  };
+
+  // Reset dirty flag and pull latest settings when Admin Dashboard opens
   useEffect(() => {
-    setApkUrl(appSettings.apkDownloadUrl);
-    setPlayStoreUrl(appSettings.playStoreUrl);
-    setAppStoreUrl(appSettings.appStoreUrl);
-    setSupportQrUrl(appSettings.supportQrImageUrl);
-    setBankName(appSettings.supportBankName);
-    setAccountName(appSettings.supportAccountName);
-    setSupportMessageKh(appSettings.supportMessageKh);
-    setPromotionalFeeUsd(appSettings.promotionalFeeUsd || 4.99);
-    setPromotionPeriodKh(appSettings.promotionPeriodKh || '');
-    setVipShortDurationDays(appSettings.vipShortDurationDays ?? 30);
-    setVipShortPriceUsd(appSettings.vipShortPriceUsd ?? 4.99);
-    setVipShortNameKh(appSettings.vipShortNameKh || `VIP ${appSettings.vipShortDurationDays ?? 30} ថ្ងៃ`);
-    setVipShortNameEn(appSettings.vipShortNameEn || `VIP ${appSettings.vipShortDurationDays ?? 30} Days`);
-    setVipLongDurationDays(appSettings.vipLongDurationDays ?? 60);
-    setVipLongPriceUsd(appSettings.vipLongPriceUsd ?? 6.99);
-    setVipLongNameKh(appSettings.vipLongNameKh || `VIP ${appSettings.vipLongDurationDays ?? 60} ថ្ងៃ`);
-    setVipLongNameEn(appSettings.vipLongNameEn || `VIP ${appSettings.vipLongDurationDays ?? 60} Days`);
-    setAdditionalStoreFeeUsd(getAdditionalStoreFeeUsd(appSettings));
-    setVipBenefitsDraft(getDynamicVipBenefits(appSettings));
-  }, [appSettings]);
+    if (isAdminOpen) {
+      isVipFormDirtyRef.current = false;
+      setVipSaveFeedback(null);
+      hydrateVipFormFromSettings(appSettings);
+      if (refreshAppSettingsFromServer) {
+        refreshAppSettingsFromServer(false).then(latest => {
+          if (latest && !isVipFormDirtyRef.current) {
+            hydrateVipFormFromSettings(latest);
+          }
+        });
+      }
+    }
+  }, [isAdminOpen]);
+
+  // Keep Admin settings form synchronized ONLY when the Admin is NOT actively editing the form
+  useEffect(() => {
+    if (isVipFormDirtyRef.current || isSavingVipSettings) {
+      return;
+    }
+    hydrateVipFormFromSettings(appSettings);
+  }, [appSettings, isSavingVipSettings]);
 
   // Transaction filter & Full-Resolution Payment Proof Inspection Modal
   // Default to 'pending' so approved/rejected payment requests automatically hide/archive out of the pending queue
@@ -275,39 +306,128 @@ export const AdminDashboard: React.FC = () => {
     setShowAddDestForm(false);
   };
 
-  const handleSaveSettings = (e: React.FormEvent) => {
+  const handleSaveSettings = async (e: React.FormEvent) => {
     e.preventDefault();
-    updateAppSettings({
-      apkDownloadUrl: apkUrl,
-      playStoreUrl,
-      appStoreUrl,
-      supportQrImageUrl: supportQrUrl,
-      supportBankName: bankName,
-      supportAccountName: accountName,
-      supportMessageKh,
-      promotionalFeeUsd: Number(promotionalFeeUsd),
-      promotionPeriodKh,
-      vipShortDurationDays: Math.max(1, Math.round(Number(vipShortDurationDays) || 30)),
-      vipShortPriceUsd: Math.max(0.01, Number(vipShortPriceUsd) || 4.99),
-      vipShortNameKh: vipShortNameKh.trim() || `VIP ${Math.max(1, Math.round(Number(vipShortDurationDays) || 30))} ថ្ងៃ`,
-      vipShortNameEn: vipShortNameEn.trim() || `VIP ${Math.max(1, Math.round(Number(vipShortDurationDays) || 30))} Days`,
-      vipLongDurationDays: Math.max(1, Math.round(Number(vipLongDurationDays) || 90)),
-      vipLongPriceUsd: Math.max(0.01, Number(vipLongPriceUsd) || 6.99),
-      vipLongNameKh: vipLongNameKh.trim() || `VIP ${Math.max(1, Math.round(Number(vipLongDurationDays) || 90))} ថ្ងៃ`,
-      vipLongNameEn: vipLongNameEn.trim() || `VIP ${Math.max(1, Math.round(Number(vipLongDurationDays) || 90))} Days`,
-      additionalStoreFeeUsd: Math.max(0, Number(additionalStoreFeeUsd)),
-      vipBenefitsList: vipBenefitsDraft.map((b, idx) => ({
-        id: idx + 1,
-        titleKh: b.titleKh.trim() || `អត្ថប្រយោជន៍ទី ${idx + 1}`,
-        titleEn: b.titleEn.trim() || `VIP Benefit #${idx + 1}`,
-        descriptionKh: (b.descriptionKh || b.descKh || '').trim(),
-        descriptionEn: (b.descriptionEn || b.descEn || '').trim(),
-        descKh: (b.descKh || b.descriptionKh || '').trim(),
-        descEn: (b.descEn || b.descriptionEn || '').trim(),
-        iconName: b.iconName || 'Sparkles',
-        category: b.category || 'promotion',
-      })),
-    });
+    if (isSavingVipSettings) return;
+
+    const parsedShortDays = parseInt(vipShortDurationInput.trim(), 10);
+    const parsedShortPrice = parseFloat(vipShortPriceInput.trim());
+    const parsedLongDays = parseInt(vipLongDurationInput.trim(), 10);
+    const parsedLongPrice = parseFloat(vipLongPriceInput.trim());
+    const parsedExtraFee = parseFloat(additionalStoreFeeInput.trim());
+
+    if (!Number.isFinite(parsedShortDays) || parsedShortDays < 1 || parsedShortDays > 3650) {
+      const msg = isKm ? '⚠️ សូមបញ្ចូលរយៈពេលកញ្ចប់ VIP ទី១ ឱ្យបានត្រឹមត្រូវ (១ ដល់ ៣៦៥០ ថ្ងៃ)!' : '⚠️ Please enter a valid duration for Plan #1 (1 to 3650 days)!';
+      setVipSaveFeedback({ type: 'error', message: msg });
+      showToast(msg, 'warning');
+      return;
+    }
+    if (!Number.isFinite(parsedShortPrice) || parsedShortPrice <= 0 || parsedShortPrice > 10000) {
+      const msg = isKm ? '⚠️ សូមបញ្ចូលតម្លៃកញ្ចប់ VIP ទី១ ឱ្យបានត្រឹមត្រូវ (ធំជាង $0.00)!' : '⚠️ Please enter a valid USD price for Plan #1 (greater than $0.00)!';
+      setVipSaveFeedback({ type: 'error', message: msg });
+      showToast(msg, 'warning');
+      return;
+    }
+    if (!Number.isFinite(parsedLongDays) || parsedLongDays < 1 || parsedLongDays > 3650) {
+      const msg = isKm ? '⚠️ សូមបញ្ចូលរយៈពេលកញ្ចប់ VIP ទី២ ឱ្យបានត្រឹមត្រូវ (១ ដល់ ៣៦៥០ ថ្ងៃ)!' : '⚠️ Please enter a valid duration for Plan #2 (1 to 3650 days)!';
+      setVipSaveFeedback({ type: 'error', message: msg });
+      showToast(msg, 'warning');
+      return;
+    }
+    if (!Number.isFinite(parsedLongPrice) || parsedLongPrice <= 0 || parsedLongPrice > 10000) {
+      const msg = isKm ? '⚠️ សូមបញ្ចូលតម្លៃកញ្ចប់ VIP ទី២ ឱ្យបានត្រឹមត្រូវ (ធំជាង $0.00)!' : '⚠️ Please enter a valid USD price for Plan #2 (greater than $0.00)!';
+      setVipSaveFeedback({ type: 'error', message: msg });
+      showToast(msg, 'warning');
+      return;
+    }
+    if (!Number.isFinite(parsedExtraFee) || parsedExtraFee < 0 || parsedExtraFee > 10000) {
+      const msg = isKm ? '⚠️ សូមបញ្ចូលតម្លៃបន្ថែមហាងឱ្យបានត្រឹមត្រូវ ($0 ឡើងទៅ)!' : '⚠️ Please enter a valid Additional Store Fee ($0 or more)!';
+      setVipSaveFeedback({ type: 'error', message: msg });
+      showToast(msg, 'warning');
+      return;
+    }
+
+    const cleanShortDays = Math.round(parsedShortDays);
+    const cleanShortPrice = Math.round(parsedShortPrice * 100) / 100;
+    const cleanLongDays = Math.round(parsedLongDays);
+    const cleanLongPrice = Math.round(parsedLongPrice * 100) / 100;
+    const cleanExtraFee = Math.round(parsedExtraFee * 100) / 100;
+
+    const cleanShortNameKh =
+      !vipShortNameKh.trim() || /^VIP\s+\d+\s*(ថ្ងៃ|\?+)$/i.test(vipShortNameKh.trim())
+        ? `VIP ${cleanShortDays} ថ្ងៃ`
+        : vipShortNameKh.trim();
+    const cleanShortNameEn =
+      !vipShortNameEn.trim() || /^VIP\s+\d+\s*Days?$/i.test(vipShortNameEn.trim())
+        ? `VIP ${cleanShortDays} Days`
+        : vipShortNameEn.trim();
+    const cleanLongNameKh =
+      !vipLongNameKh.trim() || /^VIP\s+\d+\s*(ថ្ងៃ|\?+)$/i.test(vipLongNameKh.trim())
+        ? `VIP ${cleanLongDays} ថ្ងៃ`
+        : vipLongNameKh.trim();
+    const cleanLongNameEn =
+      !vipLongNameEn.trim() || /^VIP\s+\d+\s*Days?$/i.test(vipLongNameEn.trim())
+        ? `VIP ${cleanLongDays} Days`
+        : vipLongNameEn.trim();
+
+    setIsSavingVipSettings(true);
+    setVipSaveFeedback(null);
+
+    try {
+      const res = await updateAppSettings({
+        apkDownloadUrl: apkUrl,
+        playStoreUrl,
+        appStoreUrl,
+        supportQrImageUrl: supportQrUrl,
+        supportBankName: bankName,
+        supportAccountName: accountName,
+        supportMessageKh,
+        promotionalFeeUsd: cleanShortPrice,
+        promotionPeriodKh,
+        vipShortDurationDays: cleanShortDays,
+        vipShortPriceUsd: cleanShortPrice,
+        vipShortNameKh: cleanShortNameKh,
+        vipShortNameEn: cleanShortNameEn,
+        vipLongDurationDays: cleanLongDays,
+        vipLongPriceUsd: cleanLongPrice,
+        vipLongNameKh: cleanLongNameKh,
+        vipLongNameEn: cleanLongNameEn,
+        additionalStoreFeeUsd: cleanExtraFee,
+        vipBenefitsList: vipBenefitsDraft.map((b, idx) => ({
+          id: idx + 1,
+          titleKh: b.titleKh.trim() || `អត្ថប្រយោជន៍ទី ${idx + 1}`,
+          titleEn: b.titleEn.trim() || `VIP Benefit #${idx + 1}`,
+          descriptionKh: (b.descriptionKh || b.descKh || '').trim(),
+          descriptionEn: (b.descriptionEn || b.descEn || '').trim(),
+          descKh: (b.descKh || b.descriptionKh || '').trim(),
+          descEn: (b.descEn || b.descriptionEn || '').trim(),
+          iconName: b.iconName || 'Sparkles',
+          category: b.category || 'promotion',
+        })),
+      });
+
+      if (res && res.ok && res.settings) {
+        isVipFormDirtyRef.current = false;
+        hydrateVipFormFromSettings(res.settings);
+        setVipSaveFeedback({
+          type: 'success',
+          message: isKm
+            ? `✅ បានរក្សាទុកក្នុង Database ជោគជ័យ (v${res.settings.settingsVersion})៖ Plan #1 = ${res.settings.vipShortDurationDays} ថ្ងៃ (${res.settings.vipShortPriceUsd?.toFixed(2)}) • Plan #2 = ${res.settings.vipLongDurationDays} ថ្ងៃ (${res.settings.vipLongPriceUsd?.toFixed(2)}) • ហាងបន្ថែម = ${res.settings.additionalStoreFeeUsd?.toFixed(2)}`
+            : `✅ Confirmed saved to Database (v${res.settings.settingsVersion}): Plan #1 = ${res.settings.vipShortDurationDays}d (${res.settings.vipShortPriceUsd?.toFixed(2)}) • Plan #2 = ${res.settings.vipLongDurationDays}d (${res.settings.vipLongPriceUsd?.toFixed(2)}) • Extra Store = ${res.settings.additionalStoreFeeUsd?.toFixed(2)}`,
+        });
+      } else {
+        setVipSaveFeedback({
+          type: 'error',
+          message:
+            res?.error ||
+            (isKm
+              ? '❌ ការរក្សាទុកទៅកាន់ Database បរាជ័យ។ សូមពិនិត្យអ៊ីនធឺណិតហើយព្យាយាមម្តងទៀត!'
+              : '❌ Failed to save to Database. Please check your internet connection and try again!'),
+        });
+      }
+    } finally {
+      setIsSavingVipSettings(false);
+    }
   };
 
   const handleChangeAdminPassword = async (e: React.FormEvent) => {
@@ -3490,16 +3610,20 @@ export const AdminDashboard: React.FC = () => {
                             {isKm ? 'រយៈពេល (ថ្ងៃ / Days) *' : 'Duration (Days) *'}
                           </label>
                           <input
-                            type="number"
-                            min={1}
-                            max={3650}
-                            required
-                            value={vipShortDurationDays}
+                            type="text"
+                            inputMode="numeric"
+                            placeholder="30"
+                            value={vipShortDurationInput}
                             onChange={e => {
-                              const days = Math.max(1, parseInt(e.target.value) || 10);
-                              setVipShortDurationDays(days);
-                              setVipShortNameKh(`VIP ${days} ថ្ងៃ`);
-                              setVipShortNameEn(`VIP ${days} Days`);
+                              const raw = e.target.value.replace(/[^0-9]/g, '');
+                              isVipFormDirtyRef.current = true;
+                              setVipSaveFeedback(null);
+                              setVipShortDurationInput(raw);
+                              const parsed = parseInt(raw, 10);
+                              if (Number.isFinite(parsed) && parsed >= 1) {
+                                setVipShortNameKh(prev => (!prev.trim() || /^VIP\s+\d+\s*(ថ្ងៃ|\?+)$/i.test(prev.trim()) ? `VIP ${parsed} ថ្ងៃ` : prev));
+                                setVipShortNameEn(prev => (!prev.trim() || /^VIP\s+\d+\s*Days?$/i.test(prev.trim()) ? `VIP ${parsed} Days` : prev));
+                              }
                             }}
                             className="w-full px-3 py-2 rounded-xl border border-amber-300 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-white font-mono font-bold text-xs"
                           />
@@ -3509,12 +3633,17 @@ export const AdminDashboard: React.FC = () => {
                             {isKm ? 'តម្លៃកញ្ចប់ ($ USD) *' : 'Package Price ($ USD) *'}
                           </label>
                           <input
-                            type="number"
-                            step="0.01"
-                            min={0.01}
-                            required
-                            value={vipShortPriceUsd}
-                            onChange={e => setVipShortPriceUsd(parseFloat(e.target.value) || 0)}
+                            type="text"
+                            inputMode="decimal"
+                            placeholder="4.99"
+                            value={vipShortPriceInput}
+                            onChange={e => {
+                              const raw = e.target.value.replace(/[^0-9.]/g, '');
+                              if ((raw.match(/\./g) || []).length > 1) return;
+                              isVipFormDirtyRef.current = true;
+                              setVipSaveFeedback(null);
+                              setVipShortPriceInput(raw);
+                            }}
                             className="w-full px-3 py-2 rounded-xl border border-amber-300 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-white font-mono font-bold text-xs"
                           />
                         </div>
@@ -3528,7 +3657,11 @@ export const AdminDashboard: React.FC = () => {
                           <input
                             type="text"
                             value={vipShortNameKh}
-                            onChange={e => setVipShortNameKh(e.target.value)}
+                            onChange={e => {
+                              isVipFormDirtyRef.current = true;
+                              setVipSaveFeedback(null);
+                              setVipShortNameKh(e.target.value);
+                            }}
                             className="w-full px-3 py-2 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-white text-xs"
                           />
                         </div>
@@ -3539,7 +3672,11 @@ export const AdminDashboard: React.FC = () => {
                           <input
                             type="text"
                             value={vipShortNameEn}
-                            onChange={e => setVipShortNameEn(e.target.value)}
+                            onChange={e => {
+                              isVipFormDirtyRef.current = true;
+                              setVipSaveFeedback(null);
+                              setVipShortNameEn(e.target.value);
+                            }}
                             className="w-full px-3 py-2 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-white text-xs"
                           />
                         </div>
@@ -3563,16 +3700,20 @@ export const AdminDashboard: React.FC = () => {
                             {isKm ? 'រយៈពេល (ថ្ងៃ / Days) *' : 'Duration (Days) *'}
                           </label>
                           <input
-                            type="number"
-                            min={1}
-                            max={3650}
-                            required
-                            value={vipLongDurationDays}
+                            type="text"
+                            inputMode="numeric"
+                            placeholder="60"
+                            value={vipLongDurationInput}
                             onChange={e => {
-                              const days = Math.max(1, parseInt(e.target.value) || 90);
-                              setVipLongDurationDays(days);
-                              setVipLongNameKh(`VIP ${days} ថ្ងៃ`);
-                              setVipLongNameEn(`VIP ${days} Days`);
+                              const raw = e.target.value.replace(/[^0-9]/g, '');
+                              isVipFormDirtyRef.current = true;
+                              setVipSaveFeedback(null);
+                              setVipLongDurationInput(raw);
+                              const parsed = parseInt(raw, 10);
+                              if (Number.isFinite(parsed) && parsed >= 1) {
+                                setVipLongNameKh(prev => (!prev.trim() || /^VIP\s+\d+\s*(ថ្ងៃ|\?+)$/i.test(prev.trim()) ? `VIP ${parsed} ថ្ងៃ` : prev));
+                                setVipLongNameEn(prev => (!prev.trim() || /^VIP\s+\d+\s*Days?$/i.test(prev.trim()) ? `VIP ${parsed} Days` : prev));
+                              }
                             }}
                             className="w-full px-3 py-2 rounded-xl border border-emerald-300 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-white font-mono font-bold text-xs"
                           />
@@ -3582,12 +3723,17 @@ export const AdminDashboard: React.FC = () => {
                             {isKm ? 'តម្លៃកញ្ចប់ ($ USD) *' : 'Package Price ($ USD) *'}
                           </label>
                           <input
-                            type="number"
-                            step="0.01"
-                            min={0.01}
-                            required
-                            value={vipLongPriceUsd}
-                            onChange={e => setVipLongPriceUsd(parseFloat(e.target.value) || 0)}
+                            type="text"
+                            inputMode="decimal"
+                            placeholder="6.99"
+                            value={vipLongPriceInput}
+                            onChange={e => {
+                              const raw = e.target.value.replace(/[^0-9.]/g, '');
+                              if ((raw.match(/\./g) || []).length > 1) return;
+                              isVipFormDirtyRef.current = true;
+                              setVipSaveFeedback(null);
+                              setVipLongPriceInput(raw);
+                            }}
                             className="w-full px-3 py-2 rounded-xl border border-emerald-300 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-white font-mono font-bold text-xs"
                           />
                         </div>
@@ -3601,7 +3747,11 @@ export const AdminDashboard: React.FC = () => {
                           <input
                             type="text"
                             value={vipLongNameKh}
-                            onChange={e => setVipLongNameKh(e.target.value)}
+                            onChange={e => {
+                              isVipFormDirtyRef.current = true;
+                              setVipSaveFeedback(null);
+                              setVipLongNameKh(e.target.value);
+                            }}
                             className="w-full px-3 py-2 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-white text-xs"
                           />
                         </div>
@@ -3612,7 +3762,11 @@ export const AdminDashboard: React.FC = () => {
                           <input
                             type="text"
                             value={vipLongNameEn}
-                            onChange={e => setVipLongNameEn(e.target.value)}
+                            onChange={e => {
+                              isVipFormDirtyRef.current = true;
+                              setVipSaveFeedback(null);
+                              setVipLongNameEn(e.target.value);
+                            }}
                             className="w-full px-3 py-2 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-white text-xs"
                           />
                         </div>
@@ -3641,12 +3795,17 @@ export const AdminDashboard: React.FC = () => {
                       <div className="flex items-center gap-2">
                         <span className="text-xs font-bold text-stone-700 dark:text-stone-300">$ USD:</span>
                         <input
-                          type="number"
-                          step="0.50"
-                          min={0}
-                          required
-                          value={additionalStoreFeeUsd}
-                          onChange={e => setAdditionalStoreFeeUsd(Math.max(0, parseFloat(e.target.value) || 0))}
+                          type="text"
+                          inputMode="decimal"
+                          placeholder="5.00"
+                          value={additionalStoreFeeInput}
+                          onChange={e => {
+                            const raw = e.target.value.replace(/[^0-9.]/g, '');
+                            if ((raw.match(/\./g) || []).length > 1) return;
+                            isVipFormDirtyRef.current = true;
+                            setVipSaveFeedback(null);
+                            setAdditionalStoreFeeInput(raw);
+                          }}
                           className="w-28 px-3 py-2 rounded-xl border-2 border-purple-400 dark:border-purple-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-white font-mono font-black text-sm text-center"
                         />
                       </div>
@@ -3750,6 +3909,18 @@ export const AdminDashboard: React.FC = () => {
                     </div>
                   </div>
 
+                  {vipSaveFeedback && (
+                    <div
+                      className={`p-3 rounded-2xl border text-xs font-bold flex items-center gap-2 ${
+                        vipSaveFeedback.type === 'success'
+                          ? 'bg-emerald-50 dark:bg-emerald-950/50 border-emerald-400 text-emerald-800 dark:text-emerald-200'
+                          : 'bg-rose-50 dark:bg-rose-950/50 border-rose-400 text-rose-800 dark:text-rose-200'
+                      }`}
+                    >
+                      <span>{vipSaveFeedback.message}</span>
+                    </div>
+                  )}
+
                   <div className="flex items-center justify-between gap-3 pt-1 flex-wrap">
                     <p className="text-[11px] text-stone-500">
                       {isKm
@@ -3758,11 +3929,20 @@ export const AdminDashboard: React.FC = () => {
                     </p>
                     <button
                       type="submit"
-                      className="px-6 py-3 bg-gradient-to-r from-[#064E3B] to-[#047857] hover:from-[#047857] hover:to-[#065F46] text-white font-extrabold rounded-2xl shadow-md transition-all text-xs flex items-center gap-2 active:scale-95 cursor-pointer"
+                      disabled={isSavingVipSettings}
+                      className="px-6 py-3 bg-gradient-to-r from-[#064E3B] to-[#047857] hover:from-[#047857] hover:to-[#065F46] disabled:opacity-60 text-white font-extrabold rounded-2xl shadow-md transition-all text-xs flex items-center gap-2 active:scale-95 cursor-pointer"
                     >
-                      <CheckCircle2 className="w-4 h-4 text-amber-300" />
+                      {isSavingVipSettings ? (
+                        <RefreshCw className="w-4 h-4 text-amber-300 animate-spin" />
+                      ) : (
+                        <CheckCircle2 className="w-4 h-4 text-amber-300" />
+                      )}
                       <span>
-                        {isKm
+                        {isSavingVipSettings
+                          ? isKm
+                            ? '⏳ កំពុងរក្សាទុកទៅកាន់ Database...'
+                            : '⏳ Saving to Database...'
+                          : isKm
                           ? '💾 រក្សាទុក & ធ្វើបច្ចុប្បន្នភាពការកំណត់ VIP ទូទាំងកម្មវិធី'
                           : '💾 Save & Synchronize VIP Settings Globally'}
                       </span>
