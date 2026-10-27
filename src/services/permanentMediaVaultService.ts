@@ -1225,6 +1225,13 @@ export async function hydrateAndSyncMediaOverrides(forceCloud = false): Promise<
             for (const row of rows) {
               const payload = row.payload;
               if (!payload || !payload.id) continue;
+              if (row.updated_at) {
+                const rowMs = new Date(row.updated_at).getTime() || 0;
+                const payloadMs = payload.updatedAt ? new Date(payload.updatedAt).getTime() || 0 : 0;
+                if (rowMs > payloadMs) {
+                  payload.updatedAt = row.updated_at;
+                }
+              }
               hasRemoteChanges = true;
               if (row.key.startsWith('kft_ov_food_')) {
                 perRecordBundle.foods[payload.id] = payload;

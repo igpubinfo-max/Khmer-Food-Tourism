@@ -68,6 +68,7 @@ const SEARCH_CATEGORIES: { id: GooglePlaceSearchCategory; labelKh: string; label
 const QUICK_SEARCH_PRESETS: { query: string; category: GooglePlaceSearchCategory; province: string; labelKh: string; labelEn: string; labelZh: string }[] = [
   { query: 'coffee', category: 'all', province: 'ទាំងអស់', labelKh: '☕ ហាងកាហ្វេទូទាំងប្រទេស (Coffee Cambodia)', labelEn: '☕ Coffee Shops Nationwide', labelZh: '☕ 柬埔寨全国咖啡店' },
   { query: 'ហាងកាហ្វេ', category: 'cafe', province: 'រាជធានីភ្នំពេញ', labelKh: '☕ ហាងកាហ្វេភ្នំពេញ (Phnom Penh Cafés)', labelEn: '☕ Phnom Penh Cafés', labelZh: '☕ 金边热门咖啡馆' },
+  { query: 'Manna Kitchen', category: 'restaurant', province: 'ទាំងអស់', labelKh: '🥗 Manna Kitchen (ភោជនីយដ្ឋានបួស)', labelEn: '🥗 Manna Kitchen (Vegetarian)', labelZh: '🥗 Manna Kitchen (素食餐厅)' },
   { query: 'ជំនោរក្បាលកោះ', category: 'restaurant', province: 'ទាំងអស់', labelKh: '🍽️ ជំនោរក្បាលកោះ (Chumnor Kbal Koh)', labelEn: '🍽️ Chumnor Kbal Koh', labelZh: '🍽️ 岛头微风餐厅 (Chumnor Kbal Koh)' },
   { query: 'ភោជនីយដ្ឋានម្ហូបខ្មែរល្បីៗ', category: 'restaurant', province: 'រាជធានីភ្នំពេញ', labelKh: '🍽️ ហាងម្ហូបខ្មែរភ្នំពេញ', labelEn: '🍽️ Phnom Penh Khmer Restaurants', labelZh: '🍽️ 金边知名高棉餐厅' },
   { query: 'ប្រាសាទបុរាណ និងរមណីយដ្ឋាន', category: 'temple', province: 'សៀមរាប', labelKh: '🛕 ប្រាសាទសៀមរាប', labelEn: '🛕 Siem Reap Temples', labelZh: '🛕 暹粒古迹寺庙' },
@@ -273,10 +274,10 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
       setFromCache(Boolean(response.fromCache ?? response.fromSmartCache));
       const errText =
         language === 'km'
-          ? response.errorMessageKh || response.errorMessage
+          ? response.errorMessageKh || response.errorMessage || response.apiWarningKh
           : language === 'zh'
-          ? response.errorMessageZh || response.errorMessageEn || response.errorMessage
-          : response.errorMessageEn || response.errorMessage;
+          ? response.errorMessageZh || response.errorMessageEn || response.errorMessage || response.apiWarningZh
+          : response.errorMessageEn || response.errorMessage || response.apiWarningEn;
       if (errText) {
         setErrorMsg(errText);
       }
@@ -1165,6 +1166,32 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                             <MapPin className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
                             <span>{displayAddress}</span>
                           </p>
+
+                          {(place.primaryTypeDisplayName || place.priceLevel || place.openHours) && (
+                            <div className="flex items-center gap-1.5 flex-wrap text-[11px]">
+                              {place.primaryTypeDisplayName && (
+                                <span className="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold">
+                                  🏷️ {place.primaryTypeDisplayName}
+                                </span>
+                              )}
+                              {place.priceLevel && (
+                                <span className="px-1.5 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-200 font-bold">
+                                  💰 {place.priceLevel}
+                                </span>
+                              )}
+                              {place.openHours && (
+                                <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 font-medium">
+                                  🕒 {place.openHours}
+                                </span>
+                              )}
+                            </div>
+                          )}
+
+                          {place.editorialSummary && (
+                            <p className="text-[11px] text-slate-600 bg-slate-50 border border-slate-200/80 rounded-lg px-2.5 py-1.5 italic line-clamp-2">
+                              “{place.editorialSummary}”
+                            </p>
+                          )}
 
                           <div className="flex items-center justify-between gap-2 text-[11px] text-slate-500 flex-wrap">
                             <span>

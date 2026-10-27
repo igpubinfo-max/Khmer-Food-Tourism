@@ -1044,7 +1044,7 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "isAdminEdited": true,
-    "photoUpdatedAt": "2026-10-25T04:13:53.691Z"
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-31",
@@ -1079,7 +1079,7 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-31.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-24T09:44:46.241Z",
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z",
     "isAdminEdited": true
   },
   {
@@ -1124,7 +1124,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Nature & Waterfalls",
     "descriptionKh": "អាងស្តុកទឹកធម្មជាតិដ៏ធំល្វឹងល្វើយព័ទ្ធជុំវិញដោយជួរភ្នំខៀវស្រងាត់។ ជាទីកន្លែងដ៏ពេញនិយមសម្រាប់បោះតង់ (Camping) ជិះទូកកាយ៉ាក់ និងគយគន់ថ្ងៃរះឆ្លុះលើផ្ទៃបឹង។",
     "descriptionEn": "Scenic freshwater reservoir nestled between rolling green hills. A rising hotspot for eco-camping, sunrise landscape photography, and kayaking.",
-    "photoUrl": "https://upload.wikimedia.org/wikipedia/commons/3/33/Bokor_palace_hotel_Cambodia.jpg",
+    "photoUrl": "/destinations/dest-33.jpg",
     "provinceKh": "ខេត្តកំពត",
     "provinceEn": "Kampot",
     "addressKh": "ស្រុកជុំគិរី ខេត្តកំពត",
@@ -1145,8 +1145,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/3/33/Bokor_palace_hotel_Cambodia.jpg"
-    ]
+      "/destinations/dest-33.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-34",
@@ -1290,7 +1292,7 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-37.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-24T09:40:23.788Z",
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z",
     "isAdminEdited": true
   },
   {
@@ -1459,7 +1461,7 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "isAdminEdited": true,
-    "photoUpdatedAt": "2026-10-25T04:17:03.924Z"
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-43",
@@ -1594,7 +1596,7 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "isAdminEdited": true,
-    "photoUpdatedAt": "2026-10-25T02:52:41.862Z"
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-47",
@@ -1630,7 +1632,7 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "isAdminEdited": true,
-    "photoUpdatedAt": "2026-10-25T04:09:48.568Z"
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-48",
@@ -1699,7 +1701,7 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "isAdminEdited": true,
-    "photoUpdatedAt": "2026-10-25T04:25:12.835Z"
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-50",
@@ -1735,7 +1737,7 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "isAdminEdited": true,
-    "photoUpdatedAt": "2026-10-25T04:11:28.159Z"
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-51",
@@ -1870,7 +1872,7 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "isAdminEdited": true,
-    "photoUpdatedAt": "2026-10-25T04:26:37.309Z"
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-55",
@@ -1881,7 +1883,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Beaches & Tropical Islands",
     "descriptionKh": "កោះធំបំផុតមួយនៅកម្ពុជា ដែលគ្មានមនុស្សរស់នៅអចិន្ត្រៃយ៍។ មានឆ្នេរខ្សាច់សក្បុសចំនួន ៧ ដាច់ដោយឡែកពីគ្នា ទឹកជ្រោះធ្លាក់ចូលសមុទ្រ និងព្រៃឈើធម្មជាតិដ៏ស្ងប់ស្ងាត់អស្ចារ្យ។",
     "descriptionEn": "Unspoiled outer island featuring seven pristine tropical beaches, freshwater streams cascading into the sea, and crystal-clear swimming conditions.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/95/2015_0319_174425_KohKongIsland_Strandidylle.jpg/960px-2015_0319_174425_KohKongIsland_Strandidylle.jpg",
+    "photoUrl": "/destinations/dest-55.jpg",
     "provinceKh": "ខេត្តកោះកុង",
     "provinceEn": "Koh Kong",
     "addressKh": "ឈូងសមុទ្រកោះកុង ចម្ងាយ ៣០ គ.ម ពីក្រុងខេមរភូមិន្ទ",
@@ -1902,8 +1904,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/95/2015_0319_174425_KohKongIsland_Strandidylle.jpg/960px-2015_0319_174425_KohKongIsland_Strandidylle.jpg"
-    ]
+      "/destinations/dest-55.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-56",
@@ -2014,7 +2018,7 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-58.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-24T09:52:08.183Z",
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z",
     "isAdminEdited": true
   },
   {
@@ -2050,7 +2054,7 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-59.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-24T09:50:29.874Z",
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z",
     "isAdminEdited": true
   },
   {
@@ -2086,7 +2090,7 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-60.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-24T10:46:00.875Z",
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z",
     "isAdminEdited": true
   },
   {
@@ -2131,7 +2135,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Nature & Waterfalls",
     "descriptionKh": "បឹងធម្មជាតិរាងមូលស្ទើរតែឥតខ្ចោះ កើតឡើងពីមាត់ភ្នំភ្លើងដែលបានផ្ទុះកាលពី ៤,០០០ ឆ្នាំមុន។ ទឹកបឹងមានជម្រៅដល់ ៤៨ ម៉ែត្រ ថ្លាឈ្វេងដូចត្បូងកណ្តៀង ព័ទ្ធជុំវិញដោយព្រៃស្រោង និងអប្សរាជនជាតិទំពូន។",
     "descriptionEn": "A breathtaking emerald-green crater lake formed by a volcanic eruption 4,000 years ago. 48 meters deep, perfectly circular, surrounded by lush primary rainforest.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cc/Yak_Loum.jpg/960px-Yak_Loum.jpg",
+    "photoUrl": "/destinations/dest-62.jpg",
     "provinceKh": "ខេត្តរតនគិរី",
     "provinceEn": "Ratanakiri",
     "addressKh": "ក្រុងបានលុង ចម្ងាយ ៥ គ.ម ពីកណ្តាលក្រុង",
@@ -2152,8 +2156,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": true,
     "galleryPhotos": [
-      "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cc/Yak_Loum.jpg/960px-Yak_Loum.jpg"
-    ]
+      "/destinations/dest-62.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-63",
@@ -2254,7 +2260,7 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-65.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-24T16:25:49.367Z",
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z",
     "isAdminEdited": true
   },
   {
@@ -2661,7 +2667,9 @@ export const initial100Destinations: TouristDestination[] = [
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-77.jpg"
-    ]
+    ],
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z",
+    "isCustomPhoto": true
   },
   {
     "id": "dest-78",
@@ -2730,7 +2738,7 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "isAdminEdited": true,
-    "photoUpdatedAt": "2026-10-25T04:19:44.186Z"
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-80",
@@ -2831,7 +2839,7 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-82.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-24T16:27:20.293Z",
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z",
     "isAdminEdited": true
   },
   {
@@ -2900,7 +2908,7 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-84.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-24T16:29:54.858Z",
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z",
     "isAdminEdited": true
   },
   {
@@ -2937,7 +2945,7 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "isAdminEdited": true,
-    "photoUpdatedAt": "2026-10-25T04:21:46.931Z"
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-86",
@@ -3006,7 +3014,7 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "isAdminEdited": true,
-    "photoUpdatedAt": "2026-10-25T04:42:29.498Z"
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-88",
@@ -3042,7 +3050,7 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "isAdminEdited": true,
-    "photoUpdatedAt": "2026-10-25T04:23:08.375Z"
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-89",
@@ -3111,7 +3119,7 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "isAdminEdited": true,
-    "photoUpdatedAt": "2026-10-25T04:59:30.695Z"
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-91",
@@ -3147,7 +3155,7 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "isAdminEdited": true,
-    "photoUpdatedAt": "2026-10-25T05:00:21.846Z"
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-92",
@@ -3192,7 +3200,7 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-92.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-24T16:31:06.441Z",
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z",
     "isAdminEdited": true
   },
   {
@@ -3294,7 +3302,7 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-95.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-24T10:29:01.979Z",
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z",
     "isAdminEdited": true
   },
   {
@@ -3330,7 +3338,7 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-96.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-24T16:33:17.329Z",
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z",
     "isAdminEdited": true
   },
   {
@@ -3366,7 +3374,7 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-97.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-24T16:48:38.087Z",
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z",
     "isAdminEdited": true
   },
   {
@@ -3601,7 +3609,7 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "isAdminEdited": true,
-    "photoUpdatedAt": "2026-10-25T05:05:34.078Z"
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-105",
@@ -3703,7 +3711,7 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "isAdminEdited": true,
-    "photoUpdatedAt": "2026-10-25T05:08:01.099Z"
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-108",
@@ -3747,7 +3755,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Nature & Waterfalls",
     "descriptionKh": "សហគមន៍អេកូទេសចរណ៍មាត់ទន្លេមេគង្គជាប់ព្រំប្រទល់ប្រទេសឡាវ។ ជាទីតាំងមើលសត្វផ្សោតទឹកសាប ទឹកធ្លាក់ល្បាក់ខោនដ៏អស្ចារ្យ និងការបោះតង់មាត់ទន្លេ។",
     "descriptionEn": "Community ecotourism village on the Mekong border rapids where the mighty river crashes over granite boulders, with freshwater dolphin sightings.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a8/Silk_Thread_on_Spools_-_Mekong_Blue_Silk_Cooperative_-_Outside_Stung_Treng_-_Cambodia_%2848429002452%29.jpg/960px-Silk_Thread_on_Spools_-_Mekong_Blue_Silk_Cooperative_-_Outside_Stung_Treng_-_Cambodia_%2848429002452%29.jpg",
+    "photoUrl": "/destinations/dest-109.jpg",
     "provinceKh": "ខេត្តស្ទឹងត្រែង",
     "provinceEn": "Stung Treng",
     "addressKh": "ឃុំព្រះរំកិល ស្រុកថាឡាបរិវ៉ាត់",
@@ -3768,8 +3776,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d5/Sopheat_Mit_%28Lbak_Khaon%29_Mekong_Cambodia_4172.jpg/960px-Sopheat_Mit_%28Lbak_Khaon%29_Mekong_Cambodia_4172.jpg"
-    ]
+      "/destinations/dest-109.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-110",
@@ -3903,7 +3913,7 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-113.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-24T16:35:53.725Z",
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z",
     "isAdminEdited": true
   },
   {
@@ -4038,7 +4048,7 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-117.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-24T16:38:42.253Z",
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z",
     "isAdminEdited": true
   },
   {
@@ -4050,7 +4060,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Resorts & Cultural Heritage",
     "descriptionKh": "ស្ពានខ្សែកាបឆ្លងកាត់ទន្លេមេគង្គដ៏វែងបំផុតនៅកម្ពុជា ប្រវែង ២,២១៥ ម៉ែត្រ ជំនួយឥតសំណងពីរដ្ឋាភិបាលជប៉ុន។ ជាស្នាដៃវិស្វកម្មដ៏អស្ចារ្យ ផ្តល់នូវទេសភាពទន្លេមេគង្គដ៏ធំល្វឹងល្វើយ។",
     "descriptionEn": "The longest cable-stayed bridge in Cambodia spanning 2,215 meters across the Mekong River, an engineering marvel offering sweeping vistas of the river.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/35/Neak_Loeung_Bridge_April_2015.jpg/960px-Neak_Loeung_Bridge_April_2015.jpg",
+    "photoUrl": "/destinations/dest-118.jpg",
     "provinceKh": "ខេត្តព្រៃវែង",
     "provinceEn": "Prey Veng",
     "addressKh": "ឆ្លងកាត់ទន្លេមេគង្គ ស្រុកពាមរក៍ ព្រំប្រទល់ខេត្តកណ្តាល",
@@ -4071,8 +4081,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/35/Neak_Loeung_Bridge_April_2015.jpg/960px-Neak_Loeung_Bridge_April_2015.jpg"
-    ]
+      "/destinations/dest-118.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-119",
@@ -4107,7 +4119,7 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-119.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-24T16:39:35.001Z",
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z",
     "isAdminEdited": true
   },
   {
@@ -4213,7 +4225,7 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-122.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-25T02:05:00.251Z",
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z",
     "isAdminEdited": true
   },
   {
@@ -4421,7 +4433,7 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-128.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-24T16:41:17.176Z",
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z",
     "isAdminEdited": true
   },
   {
@@ -4458,7 +4470,7 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-129.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-24T16:42:56.949Z",
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z",
     "isAdminEdited": true
   },
   {
@@ -4495,7 +4507,7 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-130.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-24T16:44:35.373Z",
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z",
     "isAdminEdited": true
   },
   {
@@ -4532,7 +4544,7 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-131.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-24T16:50:59.450Z",
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z",
     "isAdminEdited": true
   },
   {
@@ -4603,7 +4615,7 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-133.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-24T16:46:13.104Z",
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z",
     "isAdminEdited": true
   },
   {
@@ -4708,7 +4720,7 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-136.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-25T02:05:56.420Z",
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z",
     "isAdminEdited": true
   },
   {
@@ -4746,7 +4758,7 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "isAdminEdited": true,
-    "photoUpdatedAt": "2026-10-25T02:55:14.590Z"
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-138",
@@ -4757,7 +4769,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Resorts & Cultural Heritage",
     "descriptionKh": "កសិដ្ឋានសូត្រអង្គរជាមជ្ឈមណ្ឌលអភិរក្ស និងផលិតសូត្រខ្មែរប្រពៃណីដ៏ធំបំផុត បង្ហាញពីដំណាក់កាលចិញ្ចឹមដង្កូវនាង បណ្តុះដើមមន រវៃសូត្រ រហូតដល់តម្បាញក្បាច់ហូលផាមួងដ៏ប្រណិតលំដាប់ពិភពលោក។",
     "descriptionEn": "A premier living cultural center dedicated to preserving the Khmer silk-making tradition, offering free guided tours through the full process of sericulture, weaving, and wood/stone carving.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/24/Angkor_SiemReap_Cambodia_Ankor-Wat-Statue-01.jpg/960px-Angkor_SiemReap_Cambodia_Ankor-Wat-Statue-01.jpg",
+    "photoUrl": "/destinations/dest-138.jpg",
     "provinceKh": "ខេត្តសៀមរាប",
     "provinceEn": "Siem Reap",
     "addressKh": "ស្រុកពួក តាមបណ្តោយផ្លូវជាតិលេខ ៦",
@@ -4779,8 +4791,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": true,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Artisans_Angkor_Silk_Farm_Siem_Reap.jpg/960px-Artisans_Angkor_Silk_Farm_Siem_Reap.jpg"
-    ]
+      "/destinations/dest-138.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-139",
@@ -4825,7 +4839,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Resorts & Cultural Heritage",
     "descriptionKh": "វិថីមាត់ទន្លេស៊ីសុវត្ថិជាផ្លូវថ្មើរជើង និងសួនច្បារប្រវែង ៣ គីឡូម៉ែត្រ តាមបណ្តោយទន្លេចតុមុខ ពេញនិយមបំផុតសម្រាប់ការដើរហាត់ប្រាណ ស្រូបខ្យល់អាកាសបរិសុទ្ធ និងជិះទូកកម្សាន្តមើលថ្ងៃលិច។",
     "descriptionEn": "A vibrant 3-kilometer waterfront boulevard alongside the Chaktomuk River in Phnom Penh, flanked by palm trees, colonial architecture, cafes, and scenic sunset boat cruises.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a6/2016_Phnom_Penh%2C_Pa%C5%82ac_Kr%C3%B3lewski%2C_Srebrna_Pagoda_%2802%29.jpg/960px-2016_Phnom_Penh%2C_Pa%C5%82ac_Kr%C3%B3lewski%2C_Srebrna_Pagoda_%2802%29.jpg",
+    "photoUrl": "/destinations/dest-140.jpg",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
     "addressKh": "មហាវិថីព្រះស៊ីសុវត្ថិ មាត់ទន្លេ ខណ្ឌដូនពេញ",
@@ -4847,8 +4861,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": true,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/Sisowath_Quay_Phnom_Penh_Riverside.jpg/960px-Sisowath_Quay_Phnom_Penh_Riverside.jpg"
-    ]
+      "/destinations/dest-140.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-141",
@@ -4859,7 +4875,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Resorts & Cultural Heritage",
     "descriptionKh": "ស្តូបព្រះបរមរូបព្រះករុណាព្រះបាទសម្តេចព្រះ នរោត្តម សីហនុ «ព្រះបរមរតនកោដ្ឋ» ស្ថិតនៅខាងកើតវិមានឯករាជ្យ កម្ពស់ ៤.៥ ម៉ែត្រ ធ្វើពីសំរឹទ្ធ ក្រោមបុស្បុកក្បាច់ខ្មែរកម្ពស់ ២៧ ម៉ែត្រ គោរពដល់ព្រះបិតាឯករាជ្យជាតិ។",
     "descriptionEn": "A grand 4.5-meter bronze monument sheltered under an ornate 27-meter stupa east of the Independence Monument, honoring the revered King Father Norodom Sihanouk.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b5/2016_Phnom_Penh%2C_Pa%C5%82ac_Kr%C3%B3lewski%2C_Pawilon_Chanchhaya_%2802%29.jpg/960px-2016_Phnom_Penh%2C_Pa%C5%82ac_Kr%C3%B3lewski%2C_Pawilon_Chanchhaya_%2802%29.jpg",
+    "photoUrl": "/destinations/dest-141.jpg",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
     "addressKh": "សួនច្បារខាងកើតវិមានឯករាជ្យ ខណ្ឌចម្ការមន",
@@ -4881,8 +4897,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": true,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Statue_of_King_Father_Norodom_Sihanouk_Phnom_Penh.jpg/960px-Statue_of_King_Father_Norodom_Sihanouk_Phnom_Penh.jpg"
-    ]
+      "/destinations/dest-141.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-142",
@@ -4893,7 +4911,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Resorts & Cultural Heritage",
     "descriptionKh": "ផ្សារទួលទំពូង ជាផ្សារលក់វត្ថុអនុស្សាវរីយ៍ សម្លៀកបំពាក់ សូត្រខ្មែរ ចម្លាក់ឈើ គ្រឿងប្រាក់ និងម្ហូបអាហារតាមដងផ្លូវដ៏ល្បីល្បាញបំផុតមួយក្នុងរាជធានីភ្នំពេញ ដែលទាក់ទាញភ្ញៀវទេសចរអន្តរជាតិ។",
     "descriptionEn": "Phnom Penh famous bustling bazaar renowned for authentic Khmer handicrafts, antiques, silk, woodcarvings, local street food delicacies, and traditional market vibes.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ec/2016_Phnom_Penh%2C_Wat_Langka_%2854%29.jpg/960px-2016_Phnom_Penh%2C_Wat_Langka_%2854%29.jpg",
+    "photoUrl": "/destinations/dest-142.jpg",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
     "addressKh": "ផ្លូវលេខ ៤៤០ កែងផ្លូវ ១៦៣ សង្កាត់ទួលទំពូង១",
@@ -4915,8 +4933,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Russian_Market_Phsar_Toul_Tompoung_Phnom_Penh.jpg/960px-Russian_Market_Phsar_Toul_Tompoung_Phnom_Penh.jpg"
-    ]
+      "/destinations/dest-142.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-143",
@@ -4927,7 +4947,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Historical Temple / Heritage",
     "descriptionKh": "វត្តបុទុមវតី (វត្តផ្កាឈូក) ជាវត្តហ្លួងដ៏សំខាន់មួយ កសាងឡើងក្នុងឆ្នាំ ១៤៤២ ដោយព្រះបាទពញាយ៉ាត។ វត្តនេះមានចេតិយធំៗតម្កល់អដ្ឋិធាតុឥស្សរជន និងសួនច្បារវត្តបុទុមដ៏ល្បីល្បាញសម្រាប់លំហែកាយ។",
     "descriptionEn": "A major royal Buddhist sanctuary founded in 1442 by King Ponhea Yat, celebrated for its Lotus Blossom architecture, historical stupas, and scenic surrounding public park.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6e/20171124_Srebrna_Pagoda_w_Phnom_Penh_4139_DxO.jpg/960px-20171124_Srebrna_Pagoda_w_Phnom_Penh_4139_DxO.jpg",
+    "photoUrl": "/destinations/dest-143.jpg",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
     "addressKh": "ផ្លូវឧកញ៉ាស៊ូស្រ៊ុន ក្បែរព្រះបរមរាជវាំង ខណ្ឌដូនពេញ",
@@ -4949,8 +4969,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Wat_Botum_Vaddey_Phnom_Penh.jpg/960px-Wat_Botum_Vaddey_Phnom_Penh.jpg"
-    ]
+      "/destinations/dest-143.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-144",
@@ -4961,7 +4983,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Resorts & Cultural Heritage",
     "descriptionKh": "កោះពេជ្រជាទីក្រុងរណបទំនើបលើកោះមាត់ទន្លេបាសាក់ និងទន្លេមេគង្គ លេចធ្លោដោយសួនច្បារថ្មើរជើងមាត់ទឹក ស្ថាបត្យកម្មទំនើបបែបអឺរ៉ុប អគារពិព័រណ៍ និងកន្លែងជិះកង់កម្សាន្តពេលល្ងាច។",
     "descriptionEn": "A modern riverside district on the Bassac River featuring scenic boardwalks, European-inspired architecture, convention halls, riverside dining, and vibrant night attractions.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/db/2016_Phnom_Penh%2C_Wat_Phnom_%2807%29.jpg/960px-2016_Phnom_Penh%2C_Wat_Phnom_%2807%29.jpg",
+    "photoUrl": "/destinations/dest-144.jpg",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
     "addressKh": "កោះពេជ្រ សង្កាត់ទន្លេបាសាក់ ខណ្ឌចំការមន",
@@ -4983,8 +5005,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": true,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/d/de/Diamond_Island_Koh_Pich_Phnom_Penh.jpg/960px-Diamond_Island_Koh_Pich_Phnom_Penh.jpg"
-    ]
+      "/destinations/dest-144.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-145",
@@ -4995,7 +5019,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Resorts & Cultural Heritage",
     "descriptionKh": "ពហុកីឡដ្ឋានជាតិមរតកតេជោ ជាសំណង់ស្ថាបត្យកម្មកីឡាទំនើបធំបំផុតនៅកម្ពុជា រចនាឡើងជារាងសំពៅខ្មែរកម្ពស់ ៩៩ ម៉ែត្រ មានចំណុះ ៦០,០០០ អាសនៈ ជាទីតាំងប្រារព្ធស៊ីហ្គេមលើកទី៣២ ឆ្នាំ២០២៣។",
     "descriptionEn": "Cambodia premier 60,000-seat national sports stadium shaped like a majestic sailing ship with 99-meter prows, built to host the historic 32nd SEA Games in 2023.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c3/2016_Phnom_Penh%2C_Biuro_UNESCO_%2803%29.jpg/960px-2016_Phnom_Penh%2C_Biuro_UNESCO_%2803%29.jpg",
+    "photoUrl": "/destinations/dest-145.jpg",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
     "addressKh": "សង្កាត់ព្រែកតាសេក ខណ្ឌជ្រោយចង្វារ រាជធានីភ្នំពេញ",
@@ -5017,8 +5041,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": true,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Morodok_Techo_National_Stadium_Phnom_Penh.jpg/960px-Morodok_Techo_National_Stadium_Phnom_Penh.jpg"
-    ]
+      "/destinations/dest-145.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-146",
@@ -5029,7 +5055,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Resorts & Cultural Heritage",
     "descriptionKh": "សួនសត្វសាហ្វារី ភ្នំពេញជាសួនសត្វបែបធម្មជាតិធំជាងគេនៅក្បែររាជធានីភ្នំពេញ មានការសម្តែងសត្វឆ្លាតវៃ (សត្វស្វា ក្រពើ សត្វស្លាប និងខ្លា) ព្រមទាំងមានសត្វព្រៃកម្រជាច្រើនប្រភេទរស់នៅកណ្តាលព្រៃបៃតង។",
     "descriptionEn": "The largest wildlife and adventure safari park near Phnom Penh, featuring interactive animal shows, crocodile sanctuaries, bird parks, and tiger habitats.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4f/2016_Phnom_Penh%2C_Wat_Langka_%2827%29.jpg/960px-2016_Phnom_Penh%2C_Wat_Langka_%2827%29.jpg",
+    "photoUrl": "/destinations/dest-146.jpg",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
     "addressKh": "សង្កាត់ព្រែកតាសេក ខណ្ឌជ្រោយចង្វារ ក្បែរវិមានឈ្នះឈ្នះ",
@@ -5051,8 +5077,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Phnom_Tamao_Wildlife_Rescue_Center.jpg/960px-Phnom_Tamao_Wildlife_Rescue_Center.jpg"
-    ]
+      "/destinations/dest-146.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-147",
@@ -5063,7 +5091,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Beaches & Islands",
     "descriptionKh": "ឆ្នេរសុខាជាឆ្នេរខ្សាច់សក្បុសកោងរាងអឌ្ឍចន្ទប្រវែង ១.៥ គីឡូម៉ែត្រ ទឹកសមុទ្រថ្លាឈ្វេង និងស្ងប់ស្ងាត់ មានដើមដូងត្រឈឹងត្រឈៃ ជាឆ្នេរសម្រាកលំហែប្រណិតកម្រិតអន្តរជាតិ។",
     "descriptionEn": "A pristine 1.5-kilometer crescent-shaped white sand beach in Sihanoukville with calm turquoise waters, coconut palms, and luxury coastal relaxation.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e1/Cambodia%2C_Sihanoukville_Province.jpg/960px-Cambodia%2C_Sihanoukville_Province.jpg",
+    "photoUrl": "/destinations/dest-147.jpg",
     "provinceKh": "ខេត្តព្រះសីហនុ",
     "provinceEn": "Preah Sihanouk",
     "addressKh": "សង្កាត់លេខ ៤ ក្រុងព្រះសីហនុ",
@@ -5085,8 +5113,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": true,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Sokha_Beach_Sihanoukville.jpg/960px-Sokha_Beach_Sihanoukville.jpg"
-    ]
+      "/destinations/dest-147.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-148",
@@ -5131,7 +5161,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Beaches & Islands",
     "descriptionKh": "ឆ្នេរកោះតូចជាផែទូក និងមជ្ឈមណ្ឌលទេសចរណ៍ដ៏រស់រវើកបំផុតនៅលើកោះរ៉ុង មានខ្សាច់សក្បុស ទឹកសមុទ្រថ្លាខៀវស្រងាត់ ភោជនីយដ្ឋានមាត់សមុទ្រ និងទីតាំងជិះទូកមុជទឹកមើលផ្កាថ្ម។",
     "descriptionEn": "The main arrival port and vibrant beach hub of Koh Rong island, boasting powdery white sands, turquoise waters, watersports, and direct access to coral reef snorkeling trips.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5f/Krong_Preah_Sihanouk_06.jpg/960px-Krong_Preah_Sihanouk_06.jpg",
+    "photoUrl": "/destinations/dest-149.jpg",
     "provinceKh": "ខេត្តព្រះសីហនុ",
     "provinceEn": "Preah Sihanouk",
     "addressKh": "ភូមិកោះតូច កោះរ៉ុង ក្រុងកោះរ៉ុង",
@@ -5153,8 +5183,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": true,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Sok_San_Beach_Koh_Rong_Cambodia.jpg/960px-Sok_San_Beach_Koh_Rong_Cambodia.jpg"
-    ]
+      "/destinations/dest-149.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-150",
@@ -5165,7 +5197,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Beaches & Islands",
     "descriptionKh": "ឆ្នេរឡុងសិត (ឬឆ្នេរ ៤K) ជាឆ្នេរខ្សាច់សស្អាតប្រវែង ៤ គីឡូម៉ែត្រ នៅកោះរ៉ុង មានទឹកសមុទ្រថ្លាដូចកញ្ចក់ និងព្រៃដូងធម្មជាតិស្ងប់ស្ងាត់ ល្បីល្បាញដោយសារពន្លឺប្លង់តុងភ្លឺចិញ្ចែងចាចលើទឹកសមុទ្រពេលរាត្រី។",
     "descriptionEn": "A stunning 4-kilometer stretch of pristine powdery white sand on Koh Rong, renowned for crystal-clear turquoise waters, whispering sea breezes, and glowing bioluminescent plankton at night.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/20/Krong_Preah_Sihanouk_03.jpg/960px-Krong_Preah_Sihanouk_03.jpg",
+    "photoUrl": "/destinations/dest-150.jpg",
     "provinceKh": "ខេត្តព្រះសីហនុ",
     "provinceEn": "Preah Sihanouk",
     "addressKh": "ខាងកើតកោះតូច កោះរ៉ុង ក្រុងកោះរ៉ុង",
@@ -5187,8 +5219,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": true,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Long_Set_Beach_Koh_Rong.jpg/960px-Long_Set_Beach_Koh_Rong.jpg"
-    ]
+      "/destinations/dest-150.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-152",
@@ -5199,7 +5233,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Beaches & Islands",
     "descriptionKh": "ឆ្នេរឡេស៊ីប៊ីចជាឆ្នេរខ្សាច់ពណ៌មាសលាក់ខ្លួននៅភាគខាងលិចកោះរ៉ុងសន្លឹម ព័ទ្ធជុំវិញដោយព្រៃទឹកភ្លៀងត្រូពិច និងផ្ទាំងថ្មធម្មជាតិ ជាឋានសួគ៌ស្ងប់ស្ងាត់សម្រាប់សម្រាកលំហែកាយ និងមុជទឹក។",
     "descriptionEn": "A secluded golden sand cove tucked on the western side of Koh Rong Sanloem, framed by lush tropical rainforest, calm crystal waters, and world-class sunset tranquility.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/11/Krong_Preah_Sihanouk_07.jpg/960px-Krong_Preah_Sihanouk_07.jpg",
+    "photoUrl": "/destinations/dest-152.jpg",
     "provinceKh": "ខេត្តព្រះសីហនុ",
     "provinceEn": "Preah Sihanouk",
     "addressKh": "ភាគខាងលិចកោះរ៉ុងសន្លឹម ក្រុងកោះរ៉ុង",
@@ -5221,8 +5255,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/Lazy_Beach_Koh_Rong_Sanloem.jpg/960px-Lazy_Beach_Koh_Rong_Sanloem.jpg"
-    ]
+      "/destinations/dest-152.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-153",
@@ -5233,7 +5269,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Beaches & Islands",
     "descriptionKh": "ឆ្នេរសាន់សិតជាឆ្នេរសមុទ្រធម្មជាតិស្ងាត់ស្ងៀមនៅភាគពាយព្យកោះរ៉ុងសន្លឹម ទឹកសមុទ្រថ្លាខៀវដូចត្បូងកណ្តៀង និងផ្កាថ្មធម្មជាតិច្រើនប្រភេទ ស័ក្តិសមបំផុតសម្រាប់អ្នកចូលចិត្តមុជទឹកជ្រៅ Scuba Diving។",
     "descriptionEn": "An idyllic, laid-back beach on western Koh Rong Sanloem known for sapphire waters, colorful coral reefs, premier scuba diving spots, and dramatic twilight skies.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d6/Krong_Preah_Sihanouk_04.jpg/960px-Krong_Preah_Sihanouk_04.jpg",
+    "photoUrl": "/destinations/dest-153.jpg",
     "provinceKh": "ខេត្តព្រះសីហនុ",
     "provinceEn": "Preah Sihanouk",
     "addressKh": "ភាគពាយព្យកោះរ៉ុងសន្លឹម ក្រុងកោះរ៉ុង",
@@ -5255,8 +5291,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/Sunset_Beach_Koh_Rong_Sanloem.jpg/960px-Sunset_Beach_Koh_Rong_Sanloem.jpg"
-    ]
+      "/destinations/dest-153.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-154",
@@ -5267,7 +5305,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Beaches & Islands",
     "descriptionKh": "កោះតាគៀវជាកោះធម្មជាតិដ៏ស្ងប់ស្ងាត់ស្ថិតនៅក្បែរឆ្នេររាម ព័ទ្ធជុំវិញដោយព្រៃឈើបៃតង ឆ្នេរខ្សាច់ពណ៌មាស និងផ្ទាំងថ្មចម្លែកៗ គ្មានភ្លើងអគ្គិសនីរំខាន ជាទីឋានសម្រាកលំហែបែបធម្មជាតិសុទ្ធសាធ។",
     "descriptionEn": "A rustic, off-the-grid island oasis off the coast of Ream National Park, boasting yellow-gold sandy beaches, dense jungle trails, coastal hammocks, and starry skies.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/62/Cambodia_island_Kaoh_Tres_and_Kaoh_Chanloh.jpg/960px-Cambodia_island_Kaoh_Tres_and_Kaoh_Chanloh.jpg",
+    "photoUrl": "/destinations/dest-154.jpg",
     "provinceKh": "ខេត្តព្រះសីហនុ",
     "provinceEn": "Preah Sihanouk",
     "addressKh": "ទល់មុខឆ្នេរឧទ្យានជាតិរាម ក្រុងព្រះសីហនុ",
@@ -5289,8 +5327,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Koh_Ta_Kiev_Island_Cambodia.jpg/960px-Koh_Ta_Kiev_Island_Cambodia.jpg"
-    ]
+      "/destinations/dest-154.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-155",
@@ -5360,7 +5400,7 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-156.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-24T16:58:34.971Z",
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z",
     "isAdminEdited": true
   },
   {
@@ -5372,7 +5412,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Beaches & Islands",
     "descriptionKh": "ឆ្នេរអូរត្រេះ ២ ជាចុងខាងត្បូងនៃឆ្នេរអូរត្រេះ ល្បីល្បាញដោយសារភាពស្ងប់ស្ងាត់ ខ្សាច់សក្បុស ដើមស្រល់តម្រៀបជួរ និងទឹកសមុទ្ររាក់ថ្លាឈ្វេង ស័ក្តិសមបំផុតសម្រាប់អ្នកស្វែងរកភាពស្ងប់ស្ងាត់ពិតប្រាកដ។",
     "descriptionEn": "The tranquil southernmost stretch of Otres Beach, dotted with boutique eco-lodges, casuarina pine trees, calm crystal waters, and unspoiled sunset beach vibes.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/07/Sihanoukville_-_Prek_Treng_beach_01.jpg/960px-Sihanoukville_-_Prek_Treng_beach_01.jpg",
+    "photoUrl": "/destinations/dest-157.jpg",
     "provinceKh": "ខេត្តព្រះសីហនុ",
     "provinceEn": "Preah Sihanouk",
     "addressKh": "ចុងខាងត្បូងឆ្នេរអូរត្រេះ សង្កាត់លេខ ៤",
@@ -5394,8 +5434,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Otres_Beach_Sihanoukville_Cambodia.jpg/960px-Otres_Beach_Sihanoukville_Cambodia.jpg"
-    ]
+      "/destinations/dest-157.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-158",
@@ -5406,7 +5448,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Resorts & Cultural Heritage",
     "descriptionKh": "សណ្ឋាគារឡឺបូកគោផាឡេស កសាងឡើងក្នុងឆ្នាំ ១៩២៥ លើកំពូលភ្នំបូកគោកម្ពស់ ១,០៧៥ ម៉ែត្រ ជាសំណង់ប្រវត្តិសាស្ត្រសម័យអាណានិគមបារាំង ដែលត្រូវបានជួសជុលអភិរក្សយ៉ាងស្រស់ស្អាតលើផ្ទាំងពពក។",
     "descriptionEn": "An iconic historical hotel built in 1925 atop Mount Bokor at 1,075m elevation, fully restored to colonial grandeur overlooking rolling clouds and coastal plains.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3d/2016_Kampot%2C_Hotel_Auberge_du_Soleil_%2801%29.jpg/960px-2016_Kampot%2C_Hotel_Auberge_du_Soleil_%2801%29.jpg",
+    "photoUrl": "/destinations/dest-158.jpg",
     "provinceKh": "ខេត្តកំពត",
     "provinceEn": "Kampot",
     "addressKh": "ឧទ្យានជាតិព្រះមុនីវង្សបូកគោ ក្រុងបូកគោ",
@@ -5428,8 +5470,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": true,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Old_Bokor_Palace_Hotel_Kampot.jpg/960px-Old_Bokor_Palace_Hotel_Kampot.jpg"
-    ]
+      "/destinations/dest-158.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-159",
@@ -5440,7 +5484,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Nature & Waterfalls",
     "descriptionKh": "ទឹកជ្រោះពពកវិល (មានន័យថាពពករមៀលវិល) ជាទឹកជ្រោះ ២ ជាន់កម្ពស់ ១៥ ម៉ែត្រ លើកំពូលភ្នំបូកគោ មានទឹកហូរបោកបក់លើផ្ទាំងថ្មធំៗ និងហ៊ុមព័ទ្ធដោយអ័ព្ទពពកត្រជាក់ពេញមួយឆ្នាំ។",
     "descriptionEn": "A scenic two-tiered 15-meter waterfall situated on the Bokor mountain plateau, surrounded by dense jungle, swirling white mists, and cool alpine weather.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1e/2016_Kampot%2C_Muzeum_Prowincji_Kampot_%2806%29.jpg/960px-2016_Kampot%2C_Muzeum_Prowincji_Kampot_%2806%29.jpg",
+    "photoUrl": "/destinations/dest-159.jpg",
     "provinceKh": "ខេត្តកំពត",
     "provinceEn": "Kampot",
     "addressKh": "ឧទ្យានជាតិព្រះមុនីវង្សបូកគោ ខេត្តកំពត",
@@ -5462,8 +5506,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Popokvil_Waterfall_Bokor_Kampot.jpg/960px-Popokvil_Waterfall_Bokor_Kampot.jpg"
-    ]
+      "/destinations/dest-159.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-160",
@@ -5499,7 +5545,7 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-160.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-24T16:54:58.965Z",
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z",
     "isAdminEdited": true
   },
   {
@@ -5511,7 +5557,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Nature & Waterfalls",
     "descriptionKh": "បឹងសម្ងាត់ (បឹងតាកុក) ជាបឹងទឹកសាបដ៏ធំល្វឹងល្វើយកណ្តាលជ្រលងភ្នំ ហ៊ុមព័ទ្ធដោយជួរភ្នំ និងចម្ការម្រេចកំពត មានទឹកថ្លាឈ្វេង ស័ក្តិសមសម្រាប់ការជិះទូកកាយ៉ាក់ ហែលទឹក និងគយគន់ទេសភាពភ្នំ។",
     "descriptionEn": "A tranquil man-made irrigation lake nestled between mountains and Kampot pepper farms, popular for relaxing walks, countryside kayaking, and scenic mountain reflections.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c7/2016_Kampot%2C_Narodowy_Bank_Kambod%C5%BCy_-_oddzia%C5%82_w_Kampot_%2803%29.jpg/960px-2016_Kampot%2C_Narodowy_Bank_Kambod%C5%BCy_-_oddzia%C5%82_w_Kampot_%2803%29.jpg",
+    "photoUrl": "/destinations/dest-161.jpg",
     "provinceKh": "ខេត្តកំពត",
     "provinceEn": "Kampot",
     "addressKh": "ឃុំកូនសត្វ ស្រុកទឹកឈូ ខេត្តកំពត",
@@ -5533,8 +5579,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/d/de/Secret_Lake_Kampot_Cambodia.jpg/960px-Secret_Lake_Kampot_Cambodia.jpg"
-    ]
+      "/destinations/dest-161.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-162",
@@ -5545,7 +5593,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Nature & Waterfalls",
     "descriptionKh": "សហគមន៍អេកូទេសចរណ៍ត្រពាំងសង្កែ ជាតំបន់អភិរក្សព្រៃកោងកាងដ៏ធំមួយនៅខេត្តកំពត មានសកម្មភាពដាំកូនកោងកាង ជិះទូកកម្សាន្តតាមព្រែក និងទស្សនាអំពិលអំពែកភ្លឺចិញ្ចែងចាចនាពេលរាត្រី។",
     "descriptionEn": "A community-based ecotourism mangrove reserve along the Kampot estuary, renowned for mangrove planting activities, boat river tours, and magical evening firefly cruises.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d3/2016_Kampot%2C_Narodowy_Bank_Kambod%C5%BCy_-_oddzia%C5%82_w_Kampot_%2801%29.jpg/960px-2016_Kampot%2C_Narodowy_Bank_Kambod%C5%BCy_-_oddzia%C5%82_w_Kampot_%2801%29.jpg",
+    "photoUrl": "/destinations/dest-162.jpg",
     "provinceKh": "ខេត្តកំពត",
     "provinceEn": "Kampot",
     "addressKh": "ឃុំត្រពាំងសង្កែ ស្រុកទឹកឈូ ខេត្តកំពត",
@@ -5567,8 +5615,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": true,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Peam_Krasop_Mangrove_Sanctuary_Koh_Kong.jpg/960px-Peam_Krasop_Mangrove_Sanctuary_Koh_Kong.jpg"
-    ]
+      "/destinations/dest-162.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-163",
@@ -5579,7 +5629,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Nature & Waterfalls",
     "descriptionKh": "តំបន់ការពារទេសភាពអន្លង់ព្រីង ជាដែនដីសើមការពារជីវចម្រុះដែលជាជម្រកសត្វក្រៀលកម្ពស់ខ្ពស់ជាងគេលើលោក (Sarus Crane) ដែលធ្វើចំណាកស្រុកមករកចំណីក្នុងរដូវរំហើយ។",
     "descriptionEn": "A globally significant freshwater wetland sanctuary in southern Kampot, protecting the vulnerable Eastern Sarus Crane, the world's tallest flying bird.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e4/2016_Kampot%2C_Muzeum_Prowincji_Kampot_%2807%29.jpg/960px-2016_Kampot%2C_Muzeum_Prowincji_Kampot_%2807%29.jpg",
+    "photoUrl": "/destinations/dest-163.jpg",
     "provinceKh": "ខេត្តកំពត",
     "provinceEn": "Kampot",
     "addressKh": "ស្រុកកំពង់ត្រាច ជាប់ព្រំដែន ខេត្តកំពត",
@@ -5601,8 +5651,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/Trapaing_Thmor_Sarus_Crane_Sanctuary.jpg/960px-Trapaing_Thmor_Sarus_Crane_Sanctuary.jpg"
-    ]
+      "/destinations/dest-163.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-164",
@@ -5613,7 +5665,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Mountains & Caves",
     "descriptionKh": "រូបសំណាកលោកយាយម៉ៅកម្ពស់ ២៩ ម៉ែត្រ លើកំពូលភ្នំបូកគោ ជាបដិមាអ្នកតាម្ចាស់ស្រុកធំបំផុតនៅកម្ពុជា បែរមុខឆ្ពោះទៅកាន់សមុទ្រ ជាទីសក្ការៈបូជាដ៏ស័ក្តិសិទ្ធិរបស់ប្រជាជនខ្មែរគ្រប់រូប។",
     "descriptionEn": "A colossal 29-meter statue of Lok Yeay Mao, the revered guardian spirit of coastal Cambodia, seated cross-legged on Bokor mountain overlooking the sea.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9a/Monument_to_Cambodian-Vietnamese_Friendship_-_Kampot_-_Cambodia_%2848501907337%29.jpg/960px-Monument_to_Cambodian-Vietnamese_Friendship_-_Kampot_-_Cambodia_%2848501907337%29.jpg",
+    "photoUrl": "/destinations/dest-164.jpg",
     "provinceKh": "ខេត្តកំពត",
     "provinceEn": "Kampot",
     "addressKh": "ផ្លូវឡើងភ្នំបូកគោ ក្រុងបូកគោ ខេត្តកំពត",
@@ -5635,8 +5687,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Wat_Sampov_Pram_Bokor_Hill.jpg/960px-Wat_Sampov_Pram_Bokor_Hill.jpg"
-    ]
+      "/destinations/dest-164.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-165",
@@ -5647,7 +5701,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Nature & Waterfalls",
     "descriptionKh": "វាលស្រែ ៥០០ ជាវាលផ្ទាំងថ្មធម្មជាតិ និងរុក្ខជាតិព្រៃបូកគោកម្រិតខ្ពស់ មានរុក្ខជាតិចាប់សត្វល្អិត (Pithcer Plant - ផ្កាបំពង់ពរ) ដុះពាសពេញ លាយឡំដោយផ្ទាំងថ្មចម្លែកៗរាងដូចទូក និងរូបសត្វ។",
     "descriptionEn": "A mystical sandstone plateau on Mount Bokor filled with endemic carnivorous pitcher plants (Nepenthes bokorensis), unique bonsai pine trees, and wind-sculpted rock formations.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b3/2016_Kampot%2C_Muzeum_Prowincji_Kampot_%2811%29.jpg/960px-2016_Kampot%2C_Muzeum_Prowincji_Kampot_%2811%29.jpg",
+    "photoUrl": "/destinations/dest-165.jpg",
     "provinceKh": "ខេត្តកំពត",
     "provinceEn": "Kampot",
     "addressKh": "ឧទ្យានជាតិព្រះមុនីវង្សបូកគោ ខេត្តកំពត",
@@ -5669,8 +5723,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Popokvil_Waterfall_Bokor_Kampot.jpg/960px-Popokvil_Waterfall_Bokor_Kampot.jpg"
-    ]
+      "/destinations/dest-165.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-166",
@@ -5681,7 +5737,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Resorts & Cultural Heritage",
     "descriptionKh": "ស្ពានឥន្ធនូ (ស្ពានចាស់កំពត) សាងសង់ឡើងក្នុងសម័យអាណានិគមបារាំង ឆ្លងកាត់ស្ទឹងកំពត មានរចនាសម្ព័ន្ធដែកកោងចម្លែកៗជាច្រើនដំណាក់កាល ជាបេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងជានិមិត្តរូបក្រុងកំពត។",
     "descriptionEn": "An iconic French colonial steel truss bridge spanning the Kampot River, famed for its mismatched spans reflecting its wartime history and pedestrian sunset views.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b1/2016_Kampot%2C_Narodowy_Bank_Kambod%C5%BCy_-_oddzia%C5%82_w_Kampot_%2802%29.jpg/960px-2016_Kampot%2C_Narodowy_Bank_Kambod%C5%BCy_-_oddzia%C5%82_w_Kampot_%2802%29.jpg",
+    "photoUrl": "/destinations/dest-166.jpg",
     "provinceKh": "ខេត្តកំពត",
     "provinceEn": "Kampot",
     "addressKh": "ស្ពានឆ្លងកាត់ស្ទឹងកំពត ក្រុងកំពត",
@@ -5703,8 +5759,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/d/de/Secret_Lake_Kampot_Cambodia.jpg/960px-Secret_Lake_Kampot_Cambodia.jpg"
-    ]
+      "/destinations/dest-166.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-167",
@@ -5774,7 +5832,7 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-168.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-24T16:57:18.498Z",
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z",
     "isAdminEdited": true
   },
   {
@@ -5820,7 +5878,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Nature & Waterfalls",
     "descriptionKh": "ភ្នំវល្លិ៍ជាតំបន់កសិ-អេកូទេសចរណ៍ដ៏ល្បីល្បាញនៅខេត្តកែប សម្បូរទៅដោយចម្ការម្រេចសរីរាង្គ ចម្ការទុរេន ផ្លែឈើត្រូពិច និងប្រវត្តិសាស្ត្រតស៊ូ ដែលបច្ចុប្បន្នបានក្លាយជាឋានសួគ៌បៃតង។",
     "descriptionEn": "A flourishing agro-tourism mountain valley in Kep, known for organic Kampot pepper estates, sweet durian orchards, hiking trails, and historical transformation into a green sanctuary.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5b/Salt_fields_in_Kep_Province_%2850447129562%29.jpg/960px-Salt_fields_in_Kep_Province_%2850447129562%29.jpg",
+    "photoUrl": "/destinations/dest-170.jpg",
     "provinceKh": "ខេត្តកែប",
     "provinceEn": "Kep",
     "addressKh": "ឃុំពងទឹក ស្រុកដំណាក់ចង្អើរ ខេត្តកែប",
@@ -5842,8 +5900,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Poivre_kampot01.jpg/960px-Poivre_kampot01.jpg"
-    ]
+      "/destinations/dest-170.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-172",
@@ -5854,7 +5914,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Mountains & Caves",
     "descriptionKh": "ជ្រលងភ្នំអារ៉ែងជាឋានសួគ៌ធម្មជាតិព្រៃទឹកភ្លៀងកណ្តាលជួរភ្នំក្រវាញខាងត្បូង ជាជម្រកសត្វក្រពើភ្នំកម្រ និងត្រីនាគ មានសកម្មភាពជិះទូកកាយ៉ាក់តាមស្ទឹងអារ៉ែង ជិះកង់ភ្នំ និងដើរព្រៃបោះតង់។",
     "descriptionEn": "A breathtaking wild valley in the Southern Cardamom Mountains, home to the endangered Siamese crocodile and Asian arowana, offering world-class kayaking, jungle trekking, and indigenous homestays.",
-    "photoUrl": "https://upload.wikimedia.org/wikipedia/commons/d/df/National_Road_48_on_the_Thai-Cambodian_border_in_Pak_Khlang_Commune%2C_Koh_Kong_Province%2C_Southwest_Cambodia_%282004%29.jpg",
+    "photoUrl": "/destinations/dest-172.jpg",
     "provinceKh": "ខេត្តកោះកុង",
     "provinceEn": "Koh Kong",
     "addressKh": "ឃុំថ្មដូនពៅ ស្រុកថ្មបាំង ខេត្តកោះកុង",
@@ -5876,8 +5936,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": true,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Areng_Valley_Cardamom_Mountains_Koh_Kong.jpg/960px-Areng_Valley_Cardamom_Mountains_Koh_Kong.jpg"
-    ]
+      "/destinations/dest-172.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-173",
@@ -5888,7 +5950,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Nature & Waterfalls",
     "descriptionKh": "ឧទ្យានជាតិបុទុមសាគរជាឧបទ្វីបធម្មជាតិធំជាងគេនៅកម្ពុជា មានផ្ទៃដីជាង ១,៨០០ គីឡូម៉ែត្រការ៉េ សម្បូរទៅដោយព្រៃកោងកាង វាលស្មៅព្រៃរបោះ និងសត្វព្រៃកម្រដូចជាដំរីអាស៊ី ខ្លាឃ្មុំ និងទោចថ្ពាល់លឿង។",
     "descriptionEn": "Cambodia largest coastal national park spanning 1,800 square kilometers across the coastal peninsula, protecting evergreen mangroves, pristine beaches, and rare Asian elephants.",
-    "photoUrl": "https://upload.wikimedia.org/wikipedia/commons/7/71/Koh_Kong_logging.JPG",
+    "photoUrl": "/destinations/dest-173.jpg",
     "provinceKh": "ខេត្តកោះកុង",
     "provinceEn": "Koh Kong",
     "addressKh": "ស្រុកបុទុមសាគរ និងស្រុកគិរីសាគរ ខេត្តកោះកុង",
@@ -5910,8 +5972,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Chi_Phat_Cardamom_mountains_ecotourism.jpg/960px-Chi_Phat_Cardamom_mountains_ecotourism.jpg"
-    ]
+      "/destinations/dest-173.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-174",
@@ -5922,7 +5986,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Nature & Waterfalls",
     "descriptionKh": "ទឹកធ្លាក់ស្មាច់ដែងជាទឹកធ្លាក់ធម្មជាតិកណ្តាលព្រៃភ្នំកោះកុង មានទឹកហូរថ្លាឈ្វេងត្រជាក់ស្រឹបលើផ្ទាំងថ្មក្រាលធម្មជាតិ ជាទីកន្លែងងូតទឹកកម្សាន្តដ៏ពេញនិយមសម្រាប់អ្នកដំណើរឆ្លងកាត់ផ្លូវជាតិលេខ ៤៨។",
     "descriptionEn": "A hidden cascading mountain waterfall surrounded by lush greenery along National Road 48, featuring wide rock pools ideal for a refreshing swim.",
-    "photoUrl": "https://upload.wikimedia.org/wikipedia/commons/b/b7/Anthus_richardi_%28Richard%27s_Pipit%29%2C_Phum_Dong%2C_Koh_Kong%2C_Cambodia.jpg",
+    "photoUrl": "/destinations/dest-174.jpg",
     "provinceKh": "ខេត្តកោះកុង",
     "provinceEn": "Koh Kong",
     "addressKh": "ស្រុកស្រែអំបិល តាមបណ្តោយផ្លូវជាតិលេខ ៤៨",
@@ -5944,8 +6008,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/Tatai_River_Waterfall_Koh_Kong.jpg/960px-Tatai_River_Waterfall_Koh_Kong.jpg"
-    ]
+      "/destinations/dest-174.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-175",
@@ -5956,7 +6022,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Resorts & Cultural Heritage",
     "descriptionKh": "ច្រកទ្វារអន្តរជាតិចាំយាមជាច្រកព្រំដែនកម្ពុជា-ថៃ ជាប់មាត់សមុទ្រ មានសួនច្បារមាត់ទឹក ផ្សារទំនិញរួចពន្ធ និងទេសភាពភ្នំជាប់មាត់សមុទ្រដ៏ស្រស់បំព្រង។",
     "descriptionEn": "The southwestern coastal international border gateway between Cambodia and Thailand, offering duty-free shopping, scenic seaside cliffs, and sea-view promenades.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e1/Koh_Kong_Bridge.jpg/960px-Koh_Kong_Bridge.jpg",
+    "photoUrl": "/destinations/dest-175.jpg",
     "provinceKh": "ខេត្តកោះកុង",
     "provinceEn": "Koh Kong",
     "addressKh": "ឃុំប៉ាក់ខ្លង ស្រុកមណ្ឌលសីមា ខេត្តកោះកុង",
@@ -5978,8 +6044,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e1/Koh_Kong_Bridge.jpg/960px-Koh_Kong_Bridge.jpg"
-    ]
+      "/destinations/dest-175.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-176",
@@ -6015,7 +6083,7 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-176.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-25T02:08:11.481Z",
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z",
     "isAdminEdited": true
   },
   {
@@ -6154,7 +6222,7 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-180.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-24T17:00:26.262Z",
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z",
     "isAdminEdited": true
   },
   {
@@ -6293,7 +6361,7 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-184.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-24T17:01:28.909Z",
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z",
     "isAdminEdited": true
   },
   {
@@ -6398,7 +6466,7 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-187.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-24T17:02:26.762Z",
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z",
     "isAdminEdited": true
   },
   {
@@ -6877,7 +6945,7 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-201.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-24T17:04:45.384Z",
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z",
     "isAdminEdited": true
   },
   {
@@ -7390,7 +7458,7 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-216.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-25T02:10:04.093Z",
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z",
     "isAdminEdited": true
   },
   {
@@ -7470,7 +7538,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Resorts & Cultural Heritage",
     "descriptionKh": "រមណីយដ្ឋានជ្រោយចេកជាតំបន់រមណីយដ្ឋានកម្សាន្តមាត់ទឹកដ៏ល្បីល្បាញក្នុងស្រុកជើងព្រៃ មានក្យូសលំហែលើផ្ទៃបឹង ម្ហូបស្រុកស្រែដ៏ឆ្ងាញ់ពិសា និងសកម្មភាពជិះទូកទាទឹកកម្សាន្ត។",
     "descriptionEn": "A popular lakeside recreation park in Cheung Prey district featuring overwater thatched dining gazebos, authentic rural dishes, paddleboats, and cool waters.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/19/07-Mobile_Phone_Shops_%28Kampong_Cham%29-nX.jpg/960px-07-Mobile_Phone_Shops_%28Kampong_Cham%29-nX.jpg",
+    "photoUrl": "/destinations/dest-219.jpg",
     "provinceKh": "ខេត្តកំពង់ចាម",
     "provinceEn": "Kampong Cham",
     "addressKh": "ស្រុកជើងព្រៃ តាមបណ្តោយផ្លូវជាតិលេខ ៦",
@@ -7492,8 +7560,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Koh_Paen_Bamboo_Bridge_Kampong_Cham.jpg/960px-Koh_Paen_Bamboo_Bridge_Kampong_Cham.jpg"
-    ]
+      "/destinations/dest-219.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-221",
@@ -7665,7 +7735,7 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-225.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-25T02:11:38.730Z",
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z",
     "isAdminEdited": true
   },
   {
@@ -7736,7 +7806,7 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-227.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-24T17:10:15.243Z",
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z",
     "isAdminEdited": true
   },
   {
@@ -7813,7 +7883,7 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "isAdminEdited": true,
-    "photoUpdatedAt": "2026-10-25T05:34:26.119Z"
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-230",
@@ -7824,7 +7894,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Nature & Waterfalls",
     "descriptionKh": "តេទឹកពុះជាប្រភពទឹកក្តៅធម្មជាតិតែមួយគត់នៅកម្ពុជា ផុសចេញពីដីមានកម្តៅរហូតដល់ ៧០ អង្សាសេ សម្បូរដោយសារធាតុរ៉ែធម្មជាតិ ដែលប្រជាជនជឿជាក់ថាអាចជួយព្យាបាលជំងឺស្បែក និងសម្រួលសរសៃ។",
     "descriptionEn": "Cambodia unique geothermal hot spring bubbling at up to 70°C amidst scenic Cardamom foothills, famous for mineral-rich therapeutic soaking waters and egg-boiling spots.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8c/Cambodia_%2C_Kampong_Speu_-_panoramio_%283%29.jpg/960px-Cambodia_%2C_Kampong_Speu_-_panoramio_%283%29.jpg",
+    "photoUrl": "/destinations/dest-230.jpg",
     "provinceKh": "ខេត្តកំពង់ស្ពឺ",
     "provinceEn": "Kampong Speu",
     "addressKh": "ស្រុកឱរ៉ាល់ ខេត្តកំពង់ស្ពឺ",
@@ -7846,8 +7916,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": true,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8f/Chambok_ecotourism_waterfall_Kampong_Speu.jpg/960px-Chambok_ecotourism_waterfall_Kampong_Speu.jpg"
-    ]
+      "/destinations/dest-230.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-231",
@@ -7858,7 +7930,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Resorts & Cultural Heritage",
     "descriptionKh": "អំពែភ្នំជារមណីយដ្ឋានវប្បធម៌ និងធម្មជាតិដ៏ល្បីល្បាញក្បែរក្រុងច្បារមន មានស្ពានយោលឆ្លងកាត់ស្ទឹងព្រែកត្នោត វត្តអារាមបុរាណលើភ្នំ ហ្វូងសត្វស្វា និងក្យូសលំហែមាត់ទឹក។",
     "descriptionEn": "A celebrated riverside cultural resort featuring an iconic suspension bridge over the Prek Thnot river, hilltop Buddhist shrines, monkeys, and shaded water gazebos.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8c/Cambodia_%2C_Kampong_Speu_-_panoramio_%281%29.jpg/960px-Cambodia_%2C_Kampong_Speu_-_panoramio_%281%29.jpg",
+    "photoUrl": "/destinations/dest-231.jpg",
     "provinceKh": "ខេត្តកំពង់ស្ពឺ",
     "provinceEn": "Kampong Speu",
     "addressKh": "ឃុំតាំងក្រូច ស្រុកសំរោងទង ចម្ងាយ ៥ គ.ម ពីក្រុងច្បារមន",
@@ -7880,8 +7952,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": true,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8f/Chambok_ecotourism_waterfall_Kampong_Speu.jpg/960px-Chambok_ecotourism_waterfall_Kampong_Speu.jpg"
-    ]
+      "/destinations/dest-231.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-232",
@@ -8019,7 +8093,7 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-235.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-25T02:13:01.220Z",
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z",
     "isAdminEdited": true
   },
   {
@@ -8090,7 +8164,7 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-237.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-25T02:13:59.881Z",
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z",
     "isAdminEdited": true
   },
   {
@@ -8196,7 +8270,7 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "isAdminEdited": true,
-    "photoUpdatedAt": "2026-10-25T05:36:05.275Z"
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-241",
@@ -8266,7 +8340,7 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-242.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-24T17:15:32.467Z",
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z",
     "isAdminEdited": true
   },
   {
@@ -8303,7 +8377,7 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-243.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-24T17:13:12.628Z",
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z",
     "isAdminEdited": true
   },
   {
@@ -8315,7 +8389,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Resorts & Cultural Heritage",
     "descriptionKh": "រមណីយដ្ឋានបឹងទួលក្រសាំងជាតំបន់បឹងធម្មជាតិ និងកម្សាន្តកែច្នៃដ៏ពេញនិយមនៅក្រុងតាខ្មៅ មានក្យូសលំហែលើផ្ទៃបឹង ស្ពានឈើដើរមើលផ្កាឈូក និងម្ហូបស្រុកស្រែឆ្ងាញ់ៗ។",
     "descriptionEn": "A tranquil lakeside dining and recreation destination in Ta Khmau, offering floating wooden dining terraces, lotus viewpoints, and weekend relaxation.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/98/Bavet_Kandal%2C_Krong_Bavet%2C_Cambodia_-_panoramio_%282%29.jpg/960px-Bavet_Kandal%2C_Krong_Bavet%2C_Cambodia_-_panoramio_%282%29.jpg",
+    "photoUrl": "/destinations/dest-244.jpg",
     "provinceKh": "ខេត្តកណ្តាល",
     "provinceEn": "Kandal",
     "addressKh": "ក្រុងតាខ្មៅ ខេត្តកណ្តាល",
@@ -8337,8 +8411,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Koh_Dach_Silk_Island_Mekong.jpg/960px-Koh_Dach_Silk_Island_Mekong.jpg"
-    ]
+      "/destinations/dest-244.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-245",
@@ -8442,7 +8518,7 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-247.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-24T17:16:27.090Z",
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z",
     "isAdminEdited": true
   },
   {
@@ -8479,7 +8555,7 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-248.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-24T17:17:35.184Z",
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z",
     "isAdminEdited": true
   },
   {
@@ -8491,7 +8567,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Historical Temple / Heritage",
     "descriptionKh": "វត្តពោធិ៍ក្បាលជោរ ជាអារាមបុរាណល្បីល្បាញដោយសារព្រះវិហារឈើបុរាណ និងដើមពោធិ៍ធំៗចំណាស់រាប់រយឆ្នាំ ជាទីតាំងសក្ការៈបូជាប្រវត្តិសាស្ត្រក្នុងខេត្តតាកែវ។",
     "descriptionEn": "A revered traditional Buddhist monastery known for historic wooden architecture, ancient giant Bodhi trees, and peaceful monastic surroundings.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/45/Takeo_Provinz%2C_Reisfeld.jpg/960px-Takeo_Provinz%2C_Reisfeld.jpg",
+    "photoUrl": "/destinations/dest-249.jpg",
     "provinceKh": "ខេត្តតាកែវ",
     "provinceEn": "Takeo",
     "addressKh": "ស្រុកទ្រាំង ខេត្តតាកែវ",
@@ -8513,10 +8589,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/45/Takeo_Provinz%2C_Reisfeld.jpg/960px-Takeo_Provinz%2C_Reisfeld.jpg"
+      "/destinations/dest-249.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-25T02:17:47.748Z",
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z",
     "isAdminEdited": true
   },
   {
@@ -8528,7 +8604,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Nature & Waterfalls",
     "descriptionKh": "ព្រែកកាំពីជារមណីយដ្ឋានទឹកហូរកាត់ផ្ទាំងថ្មធម្មជាតិដ៏ល្បីល្បាញនៅខេត្តក្រចេះ មានក្យូសបណ្តែតទឹកឫស្សីលើស្ទឹង ទឹកថ្លាឈ្វេងត្រជាក់ស្រេង និងម្ហូបស្រុកស្រែឆ្ងាញ់ពិសា (ខ្យងអាំង ត្រីបឹង និងក្រូចថ្លុងកោះទ្រង់)។",
     "descriptionEn": "A lively river rapids and freshwater swimming resort in Kratie with thatched bamboo pavilions erected over rushing clear waters, famous for local dining and river fun.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a3/School_in_Kratie%2C_Cambodia.jpg/960px-School_in_Kratie%2C_Cambodia.jpg",
+    "photoUrl": "/destinations/dest-250.jpg",
     "provinceKh": "ខេត្តក្រចេះ",
     "provinceEn": "Kratie",
     "addressKh": "ឃុំសំបុក ស្រុកចិត្របុរី ចម្ងាយ ១៦ គ.ម ពីក្រុងក្រចេះ",
@@ -8550,8 +8626,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": true,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Irrawaddy_Dolphin_Mekong_Kampi_Kratie.jpg/960px-Irrawaddy_Dolphin_Mekong_Kampi_Kratie.jpg"
-    ]
+      "/destinations/dest-250.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-251",
@@ -8621,7 +8699,7 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-252.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-24T17:18:35.359Z",
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z",
     "isAdminEdited": true
   },
   {
@@ -8727,7 +8805,7 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "isAdminEdited": true,
-    "photoUpdatedAt": "2026-10-25T02:47:28.776Z"
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-256",
@@ -8763,7 +8841,7 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-256.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-24T17:19:37.678Z",
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z",
     "isAdminEdited": true
   },
   {
@@ -8877,7 +8955,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Historical Temple / Heritage",
     "descriptionKh": "ប្រាសាទព្រះគោ ស្ថិតនៅស្រុកថាឡាបរិវ៉ាត់ ត្រើយម្ខាងនៃទន្លេសេកុង ជាប្រាសាទឥដ្ឋបុរាណសាងសង់ក្នុងសតវត្សរ៍ទី៧ ក្នុងសម័យចេនឡា ជាកេរដំណែលប្រវត្តិសាស្ត្រដ៏ចំណាស់បំផុតមួយនៃកម្ពុជា។",
     "descriptionEn": "A 7th-century pre-Angkorian brick temple from the Chenla era located in Thala Barivat across the Sekong River, featuring early Khmer brick masonry and guardian bull statues.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/40/Facade_with_Dog_-_Stung_Treng_-_Cambodia_%2848444463186%29.jpg/960px-Facade_with_Dog_-_Stung_Treng_-_Cambodia_%2848444463186%29.jpg",
+    "photoUrl": "/destinations/dest-260.jpg",
     "provinceKh": "ខេត្តស្ទឹងត្រែង",
     "provinceEn": "Stung Treng",
     "addressKh": "ស្រុកថាឡាបរិវ៉ាត់ ខេត្តស្ទឹងត្រែង",
@@ -8899,8 +8977,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Prasat_Preah_Ko_Thala_Barivat.jpg/960px-Prasat_Preah_Ko_Thala_Barivat.jpg"
-    ]
+      "/destinations/dest-260.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-261",
@@ -8979,7 +9059,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Historical Temple / Heritage",
     "descriptionKh": "ប្រាសាទបន្ទាយទ័ព ជាប្រាសាទបុរាណសាងឡើងក្នុងចុងសតវត្សរ៍ទី១២ ក្នុងរជ្ជកាលព្រះបាទជ័យវរ្ម័នទី៧ ឧទ្ទិសដល់កងទ័ពខ្មែរដែលបានការពារទឹកដី មានតួប៉មខ្ពស់ត្រដែតកណ្តាលវាលស្រែដ៏ស្ងប់ស្ងាត់។",
     "descriptionEn": "Built in the late 12th century under King Jayavarman VII, Banteay Top stands majestically with tall stone towers commemorating the Khmer royal army surrounded by peaceful rural moats.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/00/Banteay_Meanchey%2C_Cambodia.jpg/960px-Banteay_Meanchey%2C_Cambodia.jpg",
+    "photoUrl": "/destinations/dest-264.jpg",
     "provinceKh": "ខេត្តបន្ទាយមានជ័យ",
     "provinceEn": "Banteay Meanchey",
     "addressKh": "ឃុំថ្មពួក ស្រុកថ្មពួក ខេត្តបន្ទាយមានជ័យ",
@@ -9001,8 +9081,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": true,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/Banteay_Top_Temple_Cambodia.jpg/960px-Banteay_Top_Temple_Cambodia.jpg"
-    ]
+      "/destinations/dest-264.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-265",
@@ -9013,7 +9095,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Mountain & Nature Resort",
     "descriptionKh": "ភ្នំបាក់ ស្ថិតនៅក្បែរក្រុងសិរីសោភ័ណ ជាភ្នំថ្មកំបោរធម្មជាតិមានល្អាងភ្នំ និងវត្តអារាមលើចង្កេះភ្នំ អាចគយគន់ទេសភាពវាលស្រែ និងក្រុងសិរីសោភ័ណទាំងមូលយ៉ាងស្រស់ស្អាត។",
     "descriptionEn": "A prominent limestone hill outside Serei Saophoan featuring scenic caves, a hillside Buddhist temple, and commanding viewpoints over the provincial capital and surrounding plains.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/eb/Banteay_Meanchey_Province%2C_Cambodia.jpg/960px-Banteay_Meanchey_Province%2C_Cambodia.jpg",
+    "photoUrl": "/destinations/dest-265.jpg",
     "provinceKh": "ខេត្តបន្ទាយមានជ័យ",
     "provinceEn": "Banteay Meanchey",
     "addressKh": "សង្កាត់ទឹកថ្លា ក្រុងសិរីសោភ័ណ ខេត្តបន្ទាយមានជ័យ",
@@ -9035,8 +9117,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Sisophon_Cambodia_hill.jpg/960px-Sisophon_Cambodia_hill.jpg"
-    ]
+      "/destinations/dest-265.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-266",
@@ -9149,7 +9233,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Historical Temple / Heritage",
     "descriptionKh": "បារាយណ៍មេបុណ្យបន្ទាយឆ្មារ ជាបារាយណ៍បុរាណទឹកថ្លាធំល្វឹងល្វើយកសាងក្នុងសម័យអង្គរ មានប្រាសាទមេបុណ្យតូចមួយនៅចំកណ្តាលបារាយណ៍ និងជាកន្លែងទស្សនាថ្ងៃលិចដ៏រ៉ូមែនទិក។",
     "descriptionEn": "An enormous ancient reservoir built during the Angkorian period beside Banteay Chhmar, featuring an island sanctuary in its center and spectacular golden sunset reflections.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/63/Banteay_Chhmar_Temple_Cambodia.jpg/960px-Banteay_Chhmar_Temple_Cambodia.jpg",
+    "photoUrl": "/destinations/dest-269.jpg",
     "provinceKh": "ខេត្តបន្ទាយមានជ័យ",
     "provinceEn": "Banteay Meanchey",
     "addressKh": "ឃុំបន្ទាយឆ្មារ ស្រុកថ្មពួក ខេត្តបន្ទាយមានជ័យ",
@@ -9171,8 +9255,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/63/Banteay_Chhmar_Temple_Cambodia.jpg/960px-Banteay_Chhmar_Temple_Cambodia.jpg"
-    ]
+      "/destinations/dest-269.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-270",
@@ -9353,7 +9439,7 @@ export const initial100Destinations: TouristDestination[] = [
     "categoryEn": "Historical Temple / Heritage",
     "descriptionKh": "ប្រាសាទត្រពាំងប្រាសាទ ជាប្រាសាទបុរាណខ្មែរដ៏ស្ងប់ស្ងាត់សាងសង់អំពីថ្មភក់ និងថ្មបាយក្រៀមក្នុងសតវត្សរ៍ទី១០ ឧទ្ទិសដល់ព្រហ្មញ្ញសាសនា មានគូទឹកបុរាណព័ទ្ធជុំវិញ។",
     "descriptionEn": "A 10th-century Angkorian sandstone and laterite Hindu temple sanctuary in Trapeang Prasat district, enveloped by an ancient sacred moat and towering forest trees.",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/83/Samraong.jpg/960px-Samraong.jpg",
+    "photoUrl": "/destinations/dest-275.jpg",
     "provinceKh": "ខេត្តឧត្តរមានជ័យ",
     "provinceEn": "Oddar Meanchey",
     "addressKh": "ស្រុកត្រពាំងប្រាសាទ ខេត្តឧត្តរមានជ័យ",
@@ -9375,8 +9461,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Prasat_Trapeang_Prasat_Cambodia.jpg/960px-Prasat_Trapeang_Prasat_Cambodia.jpg"
-    ]
+      "/destinations/dest-275.jpg"
+    ],
+    "isCustomPhoto": true,
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   },
   {
     "id": "dest-276",
@@ -9546,7 +9634,9 @@ export const initial100Destinations: TouristDestination[] = [
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-60.webp"
-    ]
+    ],
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z",
+    "isCustomPhoto": true
   },
   {
     "id": "dest-281",
@@ -9648,7 +9738,9 @@ export const initial100Destinations: TouristDestination[] = [
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-31.webp"
-    ]
+    ],
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z",
+    "isCustomPhoto": true
   },
   {
     "id": "dest-284",
@@ -10201,8 +10293,8 @@ export const initial100Destinations: TouristDestination[] = [
     "categorySlug": "nature",
     "categoryKh": "ធម្មជាតិ & ទឹកធ្លាក់",
     "categoryEn": "Nature & Waterfalls",
-    "descriptionKh": "រមណីយដ្ឋាន ក្បាលកោះ កៀនស្វាយ (Kbal Koh Riverside Resort) មានទីតាំងស្ថិតនៅសង្កាត់ក្បាលកោះ ខណ្ឌច្បារអំពៅ និងស្រុកកៀនស្វាយ តាមបណ្តោយដងទន្លេមេគង្គ មានកញ្ចុះមាត់ទឹកខ្យល់អាកាសត្រជាក់ សួនទឹកកម្សាន្ត និងម្ហូបត្រីទន្លេស្រស់ៗ។",
-    "descriptionEn": "A scenic Mekong riverside eco-resort located in Kbal Koh along the Chbar Ampov and Kien Svay border, featuring breezy waterside bamboo pavilions, a family water park, and fresh grilled river fish and roasted country chicken.",
+    "descriptionKh": "រមណីយដ្ឋាន ក្បាលកោះ កៀនស្វាយ (Kbal Koh Riverside Resort) មានទីតាំងស្ថិតនៅ សង្កាត់ក្បាលកោះ ខណ្ឌច្បារអំពៅ / ស្រុកកៀនស្វាយ តាមបណ្តោយទន្លេមេគង្គ។ ទាញយកទិន្នន័យ និងទីតាំង GPS ពិតប្រាកដពីផែនទី Google Maps។",
+    "descriptionEn": "Kbal Koh Riverside Resort (Chbar Ampov / Kien Svay) located at សង្កាត់ក្បាលកោះ ខណ្ឌច្បារអំពៅ / ស្រុកកៀនស្វាយ តាមបណ្តោយទន្លេមេគង្គ. Imported via Google Maps Platform.",
     "photoUrl": "/destinations/gmap-kandal-kbal-koh-ecotourism.jpg",
     "provinceKh": "កណ្តាល",
     "provinceEn": "Kandal",
@@ -10212,9 +10304,9 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "Free Entry ($0) / Optional riverside hut rental",
     "bestTimeToVisitKh": "ពេលព្រឹក ដល់ ពេលល្ងាច ម៉ោង ០៨:០០ - ១៨:៣០",
     "bestTimeToVisitEn": "Morning to Sunset 08:00 AM - 06:30 PM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.5318,105.0482",
-    "latitude": 11.5318,
-    "longitude": 105.0482,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.5125,105.0185",
+    "latitude": 11.5125,
+    "longitude": 105.0185,
     "rating": 4.8,
     "reviewCount": 420,
     "highlightsKh": [
@@ -10229,6 +10321,6 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "isAdminEdited": true,
-    "photoUpdatedAt": "2026-10-25T04:17:30.038Z"
+    "photoUpdatedAt": "2026-10-27T12:00:00.000Z"
   }
 ];

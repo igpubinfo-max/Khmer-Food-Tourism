@@ -298,47 +298,12 @@ public class NativeAbaLauncherPlugin extends Plugin {
             } catch (Exception ignored) {
             }
 
-            Bitmap bitmap;
-            try (InputStream is = resolver.openInputStream(uri)) {
-                if (is == null) {
-                    call.reject("Cannot open selected image stream");
-                    return;
-                }
-                bitmap = BitmapFactory.decodeStream(is);
-            }
-
-            if (bitmap == null) {
+            String dataUrl = processUriToDataUrl(getContext(), uri, 1080);
+            if (dataUrl == null) {
                 call.reject("Selected file is not a valid image");
                 return;
             }
-
-            // Keep crisp resolution up to 1400px for accurate QR decoding and sharp photo previews
-            int maxDim = 1400;
-            int w = bitmap.getWidth();
-            int h = bitmap.getHeight();
-            if (w > maxDim || h > maxDim) {
-                if (w > h) {
-                    h = Math.round((float) h * maxDim / w);
-                    w = maxDim;
-                } else {
-                    w = Math.round((float) w * maxDim / h);
-                    h = maxDim;
-                }
-                bitmap = Bitmap.createScaledBitmap(bitmap, w, h, true);
-            }
-
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            boolean isPng = mimeType.contains("png") || fileName.toLowerCase().endsWith(".png");
-            if (isPng) {
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
-                mimeType = "image/png";
-            } else {
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 90, baos);
-                mimeType = "image/jpeg";
-            }
-
-            String base64 = Base64.encodeToString(baos.toByteArray(), Base64.NO_WRAP);
-            String dataUrl = "data:" + mimeType + ";base64," + base64;
+            mimeType = "image/jpeg";
 
             JSObject ret = new JSObject();
             ret.put("success", true);

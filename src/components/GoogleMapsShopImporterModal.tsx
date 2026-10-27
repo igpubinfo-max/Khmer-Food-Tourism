@@ -21,6 +21,7 @@ import {
   GooglePlaceCachedItem,
   GooglePlaceSearchCategory,
   searchGoogleMapsPlacesAdvanced,
+  fetchGooglePlaceDetailsById,
   findDuplicateRestaurantForGooglePlace,
   buildGoogleMapsMetaFromCachedItem,
   formatDisplayPhone,
@@ -164,6 +165,10 @@ export const GoogleMapsShopImporterModal: React.FC<GoogleMapsShopImporterModalPr
 
   const [results, setResults] = useState<GooglePlaceCachedItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [nextPageToken, setNextPageToken] = useState<string | undefined>(undefined);
+  const [providerUsed, setProviderUsed] = useState<'google_maps_api' | 'smart_cache' | 'online_cambodia_map'>('smart_cache');
+  const [apiWarning, setApiWarning] = useState<string>('');
   const [hasSearched, setHasSearched] = useState(false);
   const [fromCache, setFromCache] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string>('');
@@ -206,11 +211,14 @@ export const GoogleMapsShopImporterModal: React.FC<GoogleMapsShopImporterModalPr
     cat?: GooglePlaceSearchCategory;
     prov?: string;
     loc?: { lat: number; lng: number } | null;
+    pageToken?: string;
+    append?: boolean;
   }) => {
     const activeQ = (overrideOpts?.q !== undefined ? overrideOpts.q : query).trim();
     const activeCat = overrideOpts?.cat !== undefined ? overrideOpts.cat : category;
     const activeProv = overrideOpts?.prov !== undefined ? overrideOpts.prov : provinceFilter;
     const activeLoc = overrideOpts?.loc !== undefined ? overrideOpts.loc : gpsLocation;
+    const isAppend = Boolean(overrideOpts?.append);
 
     if (activeQ.length < 2 && !activeLoc && activeCat === 'all' && activeProv === 'ទាំងអស់') {
       setErrorMsg(
@@ -225,16 +233,21 @@ export const GoogleMapsShopImporterModal: React.FC<GoogleMapsShopImporterModalPr
     }
 
     // Deduplicate identical consecutive requests to control API costs (Requirement 8)
-    const reqKey = `${activeQ.toLowerCase()}|${activeCat}|${activeProv}|${activeLoc ? `${activeLoc.lat.toFixed(3)},${activeLoc.lng.toFixed(3)}` : 'noloc'}`;
-    if (reqKey === lastExecutedKeyRef.current && results.length > 0) {
+    const reqKey = `${activeQ.toLowerCase()}|${activeCat}|${activeProv}|${activeLoc ? `${activeLoc.lat.toFixed(3)},${activeLoc.lng.toFixed(3)}` : 'noloc'}|${overrideOpts?.pageToken || ''}`;
+    if (!isAppend && reqKey === lastExecutedKeyRef.current && results.length > 0) {
       return;
     }
     lastExecutedKeyRef.current = reqKey;
 
     inputRef.current?.blur();
-    setIsLoading(true);
-    setErrorMsg('');
-    setHasSearched(true);
+    if (isAppend) {
+      setIsLoadingMore(true);
+    } else {
+      setIsLoading(true);
+      setErrorMsg('');
+      setApiWarning('');
+      setHasSearched(true);
+    }
 
     try {
       const response = await searchGoogleMapsPlacesAdvanced({
@@ -248,6 +261,7 @@ export const GoogleMapsShopImporterModal: React.FC<GoogleMapsShopImporterModalPr
         lat: activeLoc?.lat,
         lng: activeLoc?.lng,
         radiusMeters: activeLoc ? 10000 : 25000,
+        pageToken: overrideOpts?.pageToken,
         pageSize: 20,
         language,
       });
@@ -255,10 +269,31 @@ export const GoogleMapsShopImporterModal: React.FC<GoogleMapsShopImporterModalPr
       const foodAndShopResults = (response.places || response.results || []).filter(
         (p) => p.category !== 'tourism'
       );
-      setResults(foodAndShopResults);
+
+      if (isAppend) {
+        setResults((prev) => {
+          const seen = new Set(prev.map((x) => x.placeId));
+          return [...prev, ...foodAndShopResults.filter((x) => !seen.has(x.placeId))];
+        });
+      } else {
+        setResults(foodAndShopResults);
+      }
+
+      setNextPageToken(response.nextPageToken);
+      setProviderUsed(response.providerUsed);
       setFromCache(Boolean(response.fromCache ?? response.fromSmartCache));
 
-      if (foodAndShopResults.length === 0 && response.errorMessage) {
+      const warnText =
+        language === 'km'
+          ? response.apiWarningKh
+          : language === 'zh'
+          ? response.apiWarningZh || response.apiWarningEn
+          : response.apiWarningEn;
+      if (warnText) {
+        setApiWarning(warnText);
+      }
+
+      if (!isAppend && foodAndShopResults.length === 0 && response.errorMessage) {
         setErrorMsg(
           language === 'km'
             ? response.errorMessageKh || response.errorMessage
@@ -279,6 +314,7 @@ export const GoogleMapsShopImporterModal: React.FC<GoogleMapsShopImporterModalPr
       );
     } finally {
       setIsLoading(false);
+      setIsLoadingMore(false);
     }
   };
 
@@ -321,7 +357,18 @@ export const GoogleMapsShopImporterModal: React.FC<GoogleMapsShopImporterModalPr
     );
   };
 
-  const handleImportPlace = (place: GooglePlaceCachedItem) => {
+  const handleImportPlace = async (initialPlace: GooglePlaceCachedItem) => {
+    let place = initialPlace;
+    // Perform Place Details lookup if place came from Google Places API and is missing phone or hours (Requirement 5)
+    if (
+      place.source === 'google_maps_api' &&
+      (!place.phone || !place.openHours || place.openHours.includes('មើលម៉ោងបើកលើ'))
+    ) {
+      const detailed = await fetchGooglePlaceDetailsById(place.googlePlaceId || place.placeId, language);
+      if (detailed) {
+        place = { ...place, ...detailed };
+      }
+    }
     const googleMeta = buildGoogleMapsMetaFromCachedItem(place);
     const { provinceKh, provinceEn } = resolveProvincePair(place.provinceKh || place.province);
     const catInfo = getBusinessCategoryLabels(place);
@@ -588,6 +635,12 @@ export const GoogleMapsShopImporterModal: React.FC<GoogleMapsShopImporterModalPr
             </div>
           ) : results.length > 0 ? (
             <>
+              {apiWarning && (
+                <div className="p-2.5 rounded-xl bg-amber-50/90 dark:bg-amber-950/30 border border-amber-300/80 dark:border-amber-800/70 text-[10px] text-amber-900 dark:text-amber-200 leading-relaxed">
+                  {apiWarning}
+                </div>
+              )}
+
               <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 px-1">
                 <span>
                   {tr(
@@ -598,7 +651,11 @@ export const GoogleMapsShopImporterModal: React.FC<GoogleMapsShopImporterModalPr
                   )}
                 </span>
                 <span className="font-mono text-[10px] text-emerald-700 dark:text-emerald-400 font-semibold">
-                  {fromCache ? '⚡ Smart Cache' : '🌐 Google Maps Platform'}
+                  {providerUsed === 'google_maps_api'
+                    ? '🌐 Google Places API (Live)'
+                    : fromCache
+                    ? '⚡ Smart Cache'
+                    : '🗺️ Cambodia Map Directory'}
                 </span>
               </div>
 
@@ -633,6 +690,9 @@ export const GoogleMapsShopImporterModal: React.FC<GoogleMapsShopImporterModalPr
                             <span className="px-1.5 py-0.5 rounded-md bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-300 font-bold text-[10px] flex items-center gap-0.5 shrink-0">
                               <Star className="w-2.5 h-2.5 fill-amber-500 text-amber-500" />
                               <span>{item.rating.toFixed(1)}</span>
+                              {item.reviewCount > 0 && (
+                                <span className="text-[9px] opacity-80">({item.reviewCount})</span>
+                              )}
                             </span>
                           )}
                         </div>
@@ -645,12 +705,18 @@ export const GoogleMapsShopImporterModal: React.FC<GoogleMapsShopImporterModalPr
 
                         <div className="flex flex-wrap items-center gap-1.5 text-[10px]">
                           <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 font-bold">
-                            {language === 'km'
-                              ? catInfo.labelKh
-                              : language === 'zh'
-                              ? catInfo.labelZh
-                              : catInfo.labelEn}
+                            {item.primaryTypeDisplayName ||
+                              (language === 'km'
+                                ? catInfo.labelKh
+                                : language === 'zh'
+                                ? catInfo.labelZh
+                                : catInfo.labelEn)}
                           </span>
+                          {item.priceLevel && (
+                            <span className="px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold">
+                              {item.priceLevel}
+                            </span>
+                          )}
                           {hasRealPhoto && (
                             <span className="px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300 font-bold">
                               📸 {tr(language, 'មានរូបហាង', 'Has Photos', '含店铺照片')}
@@ -660,8 +726,19 @@ export const GoogleMapsShopImporterModal: React.FC<GoogleMapsShopImporterModalPr
 
                         <p className="text-[11px] text-slate-600 dark:text-slate-300 flex items-start gap-1 leading-snug">
                           <MapPin className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
-                          <span>{item.addressKh || item.address}</span>
+                          <span>
+                            {item.addressKh || item.address}{' '}
+                            <span className="text-[10px] font-mono text-slate-400">
+                              ({item.lat.toFixed(4)}, {item.lng.toFixed(4)})
+                            </span>
+                          </span>
                         </p>
+
+                        {item.editorialSummary && (
+                          <p className="text-[10px] text-slate-500 dark:text-slate-400 italic bg-slate-50 dark:bg-slate-900/60 px-2 py-1 rounded-lg border border-slate-200/60 dark:border-slate-700/60">
+                            💬 {item.editorialSummary}
+                          </p>
+                        )}
 
                         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-slate-500 dark:text-slate-400">
                           {cleanPhone && (
@@ -744,6 +821,31 @@ export const GoogleMapsShopImporterModal: React.FC<GoogleMapsShopImporterModalPr
                   </div>
                 );
               })}
+
+              {nextPageToken && (
+                <div className="pt-2 text-center">
+                  <button
+                    type="button"
+                    disabled={isLoadingMore}
+                    onClick={() => handleSearch({ pageToken: nextPageToken, append: true })}
+                    className="w-full py-2.5 px-4 rounded-xl bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/50 dark:hover:bg-emerald-900/60 border border-emerald-300 dark:border-emerald-700 text-emerald-800 dark:text-emerald-200 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer disabled:opacity-60"
+                  >
+                    {isLoadingMore ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Search className="w-4 h-4" />
+                    )}
+                    <span>
+                      {tr(
+                        language,
+                        'បង្ហាញលទ្ធផលបន្ថែម (Load More Places)',
+                        'Load More Places',
+                        '加载更多地点'
+                      )}
+                    </span>
+                  </button>
+                </div>
+              )}
             </>
           ) : hasSearched ? (
             /* Not Found Fallback -> Continue Manually (Requirement 6) */

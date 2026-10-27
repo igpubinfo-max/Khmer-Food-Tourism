@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { MoreVertical, Camera, Download, Heart, LayoutGrid, Lock, RefreshCw } from 'lucide-react';
+import { MoreVertical, Camera, Download, Heart, LayoutGrid, Lock, RefreshCw, Shield } from 'lucide-react';
 import { openSmartHub, hasSpecialAndHealthyFoodVipAccess } from '../utils/smartHub';
 import { Capacitor } from '@capacitor/core';
 import { APP_VERSION } from '../types';
@@ -14,6 +14,8 @@ export const Header: React.FC = () => {
     setIsQrScannerModalOpen,
     setIsInstallModalOpen,
     setIsSupportModalOpen,
+    setIsAdminLoginModalOpen,
+    setIsAdminOpen,
     currentUser,
     openUpgradeVipModal,
   } = useApp();
@@ -204,6 +206,35 @@ export const Header: React.FC = () => {
                     <Heart className="w-4 h-4 text-rose-500 fill-rose-500" />
                     <span>{isKm ? 'ជួយឧបត្ថម្ភកម្មវិធី' : isZh ? '支持我们' : 'Support the App'}</span>
                   </button>
+                  {(!canUseVip || currentUser?.role === 'admin') && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsMenuOpen(false);
+                        if (currentUser?.role === 'admin') {
+                          setIsAdminOpen(true);
+                        } else {
+                          setIsAdminLoginModalOpen(true);
+                        }
+                      }}
+                      className="w-full min-h-[44px] px-4 flex items-center gap-3 text-sm font-semibold hover:bg-emerald-50 dark:hover:bg-slate-700 text-left border-t border-slate-100 dark:border-slate-700"
+                    >
+                      <Shield className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
+                      <span>
+                        {currentUser?.role === 'admin'
+                          ? isKm
+                            ? 'ផ្ទាំងគ្រប់គ្រងរដ្ឋបាល'
+                            : isZh
+                            ? '管理后台'
+                            : 'Admin Dashboard'
+                          : isKm
+                          ? 'ច្រកចូលរដ្ឋបាល (Admin)'
+                          : isZh
+                          ? '管理员登录'
+                          : 'Admin Login'}
+                      </span>
+                    </button>
+                  )}
                 </div>
               </>
             )}

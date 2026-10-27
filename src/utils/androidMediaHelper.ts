@@ -151,6 +151,55 @@ export async function savePngDataUrlToGallery(
 }
 
 /**
+ * Ensures any native gallery Data URL larger than ~160 KB (e.g. uncompressed PNG screenshots)
+ * is downscaled and compressed to an optimized JPEG Data URL so it never bloats localStorage or Supabase.
+ */
+async function compressDataUrlIfLarge(
+  dataUrl: string,
+  maxDimension: number = 1000,
+  quality: number = 0.80
+): Promise<string> {
+  if (!dataUrl || !dataUrl.startsWith('data:image/') || dataUrl.length <= 220000) {
+    return dataUrl;
+  }
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      try {
+        let w = img.width || maxDimension;
+        let h = img.height || maxDimension;
+        if (w > maxDimension || h > maxDimension) {
+          if (w > h) {
+            h = Math.round((h * maxDimension) / w);
+            w = maxDimension;
+          } else {
+            w = Math.round((w * maxDimension) / h);
+            h = maxDimension;
+          }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          resolve(dataUrl);
+          return;
+        }
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, w, h);
+        ctx.drawImage(img, 0, 0, w, h);
+        const compressed = canvas.toDataURL('image/jpeg', quality);
+        resolve(compressed.length < dataUrl.length ? compressed : dataUrl);
+      } catch {
+        resolve(dataUrl);
+      }
+    };
+    img.onerror = () => resolve(dataUrl);
+    img.src = dataUrl;
+  });
+}
+
+/**
  * Opens the native Android Photo/Gallery picker when running on Android and returns a Data URL.
  * Returns { cancelled: true } safely if the user closes the picker without choosing an image.
  */
@@ -167,10 +216,11 @@ export async function pickImageUsingNativeAndroidGallery(): Promise<{
     if (!res || res.cancelled || !res.dataUrl) {
       return { success: false, cancelled: true };
     }
+    const optimizedUrl = await compressDataUrlIfLarge(res.dataUrl, 1000, 0.80);
     return {
       success: true,
       cancelled: false,
-      dataUrl: res.dataUrl
+      dataUrl: optimizedUrl
     };
   } catch (err) {
     console.warn('Native pickImageFromGallery error:', err);
@@ -201,10 +251,14 @@ export async function pickMultipleImagesUsingNativeAndroidGallery(
     if (!res || res.cancelled || !Array.isArray(res.dataUrls)) {
       return { success: false, cancelled: Boolean(res?.cancelled), dataUrls: [] };
     }
+    const optimizedUrls: string[] = [];
+    for (const rawUrl of res.dataUrls) {
+      optimizedUrls.push(await compressDataUrlIfLarge(rawUrl, 1000, 0.80));
+    }
     return {
-      success: res.dataUrls.length > 0,
+      success: optimizedUrls.length > 0,
       cancelled: false,
-      dataUrls: res.dataUrls,
+      dataUrls: optimizedUrls,
     };
   } catch (err) {
     console.warn('Native pickMultipleImagesFromGallery error:', err);

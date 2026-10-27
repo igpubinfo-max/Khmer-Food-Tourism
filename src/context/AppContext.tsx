@@ -1833,22 +1833,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
         const seedRestMap = seedRestPhotoMapRef.current;
         return (data as Restaurant[]).map(r => {
-          if (
-            r &&
-            typeof r.photoUrl === 'string' &&
-            r.photoUrl.startsWith('data:') &&
-            isOverridePersistedInLocalStorage('restaurants', r.id)
-          ) {
+          if (!r) return r;
+          const hasPersistedOverride = isOverridePersistedInLocalStorage('restaurants', r.id);
+          const hasInlineDataUrl =
+            (typeof r.photoUrl === 'string' && r.photoUrl.startsWith('data:')) ||
+            (typeof r.profileImage === 'string' && r.profileImage.startsWith('data:')) ||
+            (Array.isArray(r.galleryPhotos) && r.galleryPhotos.some(g => g.startsWith('data:'))) ||
+            (Array.isArray(r.foodImages) && r.foodImages.some(g => g.startsWith('data:'))) ||
+            (Array.isArray(r.menuItems) && r.menuItems.some(m => typeof m.photoUrl === 'string' && m.photoUrl.startsWith('data:')));
+          if (hasInlineDataUrl && hasPersistedOverride) {
             const fallbackUrl = seedRestMap.get(r.id) || '/Shop/rest-1.jpg';
             return {
               ...r,
-              photoUrl: fallbackUrl,
-              profileImage: fallbackUrl,
+              photoUrl: r.photoUrl?.startsWith('data:') ? fallbackUrl : r.photoUrl,
+              profileImage: r.profileImage?.startsWith('data:') ? fallbackUrl : r.profileImage,
               galleryPhotos: Array.isArray(r.galleryPhotos)
                 ? r.galleryPhotos.filter(g => !g.startsWith('data:'))
                 : [],
               foodImages: Array.isArray(r.foodImages)
                 ? r.foodImages.filter(g => !g.startsWith('data:'))
+                : [],
+              menuItems: Array.isArray(r.menuItems)
+                ? r.menuItems.map(m => (m.photoUrl?.startsWith('data:') ? { ...m, photoUrl: '' } : m))
                 : [],
             };
           }
@@ -3084,6 +3090,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setIsNotificationsModalOpen(false);
         return;
       }
+      if (state.isAdminLoginModalOpen) {
+        setIsAdminLoginModalOpen(false);
+        return;
+      }
       if (state.isAuthModalOpen) {
         if (!state.currentUser) {
           exitAppNow();
@@ -3390,6 +3400,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
 
     setCurrentUser(adminProfile);
+    latestSyncStateRef.current.currentUser = adminProfile;
+    try {
+      localStorage.setItem('kft_current_user_v5', JSON.stringify(adminProfile));
+    } catch {}
+    setIsAuthModalOpen(false);
     setIsAdminLoginModalOpen(false);
     setIsAdminOpen(true);
     showToast(language === 'km' ? 'ចូលកាន់ផ្ទាំងគ្រប់គ្រងរដ្ឋបាលជោគជ័យ!' : 'Admin portal unlocked securely!', 'success');
@@ -3444,6 +3459,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       };
 
       setCurrentUser(adminProfile);
+      latestSyncStateRef.current.currentUser = adminProfile;
+      try {
+        localStorage.setItem('kft_current_user_v5', JSON.stringify(adminProfile));
+      } catch {}
+      setIsAuthModalOpen(false);
       setIsAdminLoginModalOpen(false);
       setIsAdminOpen(true);
       showToast(

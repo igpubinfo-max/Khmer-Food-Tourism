@@ -309,12 +309,21 @@ export const ProfileView: React.FC = () => {
                 {tr(language, 'ដើម្បីរក្សាទុកម្ហូប ចែករំលែក និងចុះបញ្ជីហាង', 'To save recipes, share posts & manage shops', '登录以收藏食谱、分享动态并管理店铺')}
               </p>
             </div>
-            <div className="flex justify-center">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-2">
               <button
+                type="button"
                 onClick={() => setIsAuthModalOpen(true)}
-                className="w-full sm:w-auto px-8 py-2.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-xs sm:text-sm shadow-xs font-khmer transition"
+                className="w-full sm:w-auto px-8 py-2.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-xs sm:text-sm shadow-xs font-khmer transition cursor-pointer"
               >
                 {tr(language, 'ចូលគណនី / ចុះឈ្មោះ', 'Sign In / Register', '登录 / 注册')}
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsAdminLoginModalOpen(true)}
+                className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-emerald-50 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-600 font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 font-khmer transition cursor-pointer"
+              >
+                <Shield className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                <span>{tr(language, 'ច្រកចូលរដ្ឋបាល (Admin)', 'Admin Login', '管理员登录')}</span>
               </button>
             </div>
           </div>
@@ -2100,41 +2109,6 @@ export const ProfileView: React.FC = () => {
             </button>
           </div>
 
-          {/* App Version & Update Check Card */}
-          <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 shadow-2xs space-y-2.5 font-khmer my-2">
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-                  <Smartphone className="w-4 h-4" />
-                </div>
-                <div className="min-w-0">
-                  <div className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 flex-wrap">
-                    <span>{tr(language, 'កំណែកម្មវិធី', 'App Version', '应用版本')}</span>
-                    <span className="font-mono text-emerald-600 dark:text-emerald-400 font-extrabold text-[11px] bg-emerald-100 dark:bg-emerald-950/80 px-2 py-0.5 rounded-md border border-emerald-300 dark:border-emerald-700">
-                      {APP_VERSION} (Build {APP_BUILD_CODE})
-                    </span>
-                  </div>
-                  <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
-                    {tr(
-                      language,
-                      'គាំទ្រការអាប់ដេតលើទូរស័ព្ទចាស់ៗដោយរក្សាទុកទិន្នន័យ និងគណនីទាំងស្រុង',
-                      'Supports seamless in-place updates on existing devices while keeping all data',
-                      '支持在已安装设备上直接覆盖更新，完整保留账户与数据'
-                    )}
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsInstallModalOpen(true)}
-                className="px-3 py-1.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-[11px] flex items-center gap-1 shrink-0 shadow-2xs transition cursor-pointer"
-              >
-                <Download className="w-3.5 h-3.5 text-emerald-300" />
-                <span>{tr(language, 'អាប់ដេត APK', 'Update APK', '更新 APK')}</span>
-              </button>
-            </div>
-          </div>
-
           {/* Reset App Data */}
           <div className="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-700">
             <span className="font-medium text-[#0F172A] dark:text-slate-200 flex items-center gap-2">
@@ -2164,15 +2138,16 @@ export const ProfileView: React.FC = () => {
             </button>
           )}
 
-          {/* Discreet Admin Portal Access (Removed from VIP User Settings) */}
+          {/* Admin Portal Access (Shown only when NOT a VIP customer) */}
           {!isVip && (
             <div className="pt-2 border-t border-slate-100 dark:border-slate-700 text-center">
               <button
+                type="button"
                 onClick={() => setIsAdminLoginModalOpen(true)}
-                className="inline-flex items-center gap-1.5 text-slate-400 hover:text-[#064E3B] dark:hover:text-emerald-400 text-[11px] font-medium transition py-1.5 px-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700"
+                className="w-full py-2.5 px-4 rounded-2xl bg-slate-100 hover:bg-emerald-50 dark:bg-slate-700/80 dark:hover:bg-emerald-950/50 text-slate-700 hover:text-[#064E3B] dark:text-slate-200 dark:hover:text-emerald-300 border border-slate-200 dark:border-slate-600 text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer"
               >
-                <Shield className="w-3.5 h-3.5" />
-                <span>{isKm ? 'ច្រកចូលប្រព័ន្ធរដ្ឋបាល' : 'System Administration'}</span>
+                <Shield className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                <span>{tr(language, '🛡️ ច្រកចូលប្រព័ន្ធរដ្ឋបាល (Admin Login)', '🛡️ System Administration (Admin Login)', '🛡️ 系统管理中心（管理员登录）')}</span>
               </button>
             </div>
           )}

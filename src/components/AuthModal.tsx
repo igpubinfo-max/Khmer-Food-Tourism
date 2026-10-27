@@ -17,6 +17,7 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
     exitAppNow,
     language, 
     currentUser, 
+    isAdminLoginModalOpen,
     setIsAdminLoginModalOpen,
     showToast 
   } = useApp();
@@ -41,6 +42,7 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
 
   const isKm = language === 'km';
 
+  if (isAdminLoginModalOpen) return null;
   if (!isAuthModalOpen && !isMandatoryGate && currentUser) return null;
 
   // Handle Google Sign-In: 1-Tap Real Google OAuth (Android Native Account Selector + Web Popup + In-App Fallback)
@@ -593,17 +595,17 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
           </div>
 
           {/* Admin Login Portal Shortcut */}
-          <div className="pt-0.5 text-center font-khmer">
+          <div className="pt-1 text-center font-khmer">
             <button
               type="button"
               onClick={() => {
                 setIsAuthModalOpen(false);
                 setIsAdminLoginModalOpen(true);
               }}
-              className="text-[10px] text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 flex items-center justify-center gap-1 mx-auto transition"
+              className="w-full py-2 px-3 rounded-xl bg-slate-100 hover:bg-emerald-50 dark:bg-slate-800/80 dark:hover:bg-emerald-950/50 text-slate-600 hover:text-[#064E3B] dark:text-slate-300 dark:hover:text-emerald-300 border border-slate-200 dark:border-slate-700 text-[11px] font-bold flex items-center justify-center gap-1.5 mx-auto transition cursor-pointer"
             >
-              <Shield className="w-3 h-3" />
-              <span>{isKm ? 'ច្រកចូលរដ្ឋបាល (Admin Portal)' : 'Administrator Login'}</span>
+              <Shield className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+              <span>{isKm ? '🛡️ ច្រកចូលប្រព័ន្ធរដ្ឋបាល (Admin Login)' : '🛡️ Administrator Login'}</span>
             </button>
           </div>
         </div>
