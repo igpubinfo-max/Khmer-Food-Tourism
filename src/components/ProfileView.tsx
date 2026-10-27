@@ -2164,16 +2164,18 @@ export const ProfileView: React.FC = () => {
             </button>
           )}
 
-          {/* Discreet Admin Portal Access */}
-          <div className="pt-2 border-t border-slate-100 dark:border-slate-700 text-center">
-            <button
-              onClick={() => setIsAdminLoginModalOpen(true)}
-              className="inline-flex items-center gap-1.5 text-slate-400 hover:text-[#064E3B] dark:hover:text-emerald-400 text-[11px] font-medium transition py-1.5 px-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700"
-            >
-              <Shield className="w-3.5 h-3.5" />
-              <span>{isKm ? 'ច្រកចូលប្រព័ន្ធរដ្ឋបាល' : 'System Administration'}</span>
-            </button>
-          </div>
+          {/* Discreet Admin Portal Access (Removed from VIP User Settings) */}
+          {!isVip && (
+            <div className="pt-2 border-t border-slate-100 dark:border-slate-700 text-center">
+              <button
+                onClick={() => setIsAdminLoginModalOpen(true)}
+                className="inline-flex items-center gap-1.5 text-slate-400 hover:text-[#064E3B] dark:hover:text-emerald-400 text-[11px] font-medium transition py-1.5 px-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700"
+              >
+                <Shield className="w-3.5 h-3.5" />
+                <span>{isKm ? 'ច្រកចូលប្រព័ន្ធរដ្ឋបាល' : 'System Administration'}</span>
+              </button>
+            </div>
+          )}
         </div>
       )}
 

@@ -4,7 +4,7 @@ import {
   X, UtensilsCrossed, Plus, Trash2, Edit2, Sparkles, 
   AlertCircle, CheckCircle2, Image, DollarSign, Calendar, Clock,
   Store, BarChart3, ShieldCheck, Share2, Phone, MapPin, ExternalLink,
-  MessageCircle, Copy, Check, HelpCircle, ArrowRight, Camera, Upload, Lock, ShieldAlert, Star
+  MessageCircle, Copy, Check, HelpCircle, ArrowRight, Camera, Upload, Lock, ShieldAlert, Star, Mail
 } from 'lucide-react';
 import { 
   RestaurantMenuItem, RestaurantPriceLevel, isRestaurantPremiumActive, isUserVipActive, 
@@ -2283,22 +2283,22 @@ export const ManageMenuModal: React.FC = () => {
                     ? 'មានចម្ងល់ ឬត្រូវការជំនួយក្នុងការរៀបចំហាង និងមុខម្ហូប? ទាក់ទងផ្ទាល់មកកាន់ក្រុមការងាររដ្ឋបាល៖' 
                     : 'Need priority assistance with your restaurant setup? Contact our VIP team directly:'}
                 </p>
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <a
                     href="https://t.me/cheasavuth"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex-1 py-2 px-3 bg-[#059669] hover:bg-[#047857] text-white rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 shadow transition"
+                    className="flex-1 py-2.5 px-3 bg-[#059669] hover:bg-[#047857] text-white rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 shadow transition"
                   >
-                    <MessageCircle className="w-4 h-4" />
+                    <MessageCircle className="w-4 h-4 shrink-0" />
                     <span>Telegram VIP Support</span>
                   </a>
                   <a
-                    href="tel:012345678"
-                    className="py-2 px-3 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 text-slate-800 dark:text-slate-200 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition font-mono"
+                    href="mailto:kftcam@gmail.com"
+                    className="flex-1 py-2.5 px-3 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition font-mono break-all"
                   >
-                    <Phone className="w-3.5 h-3.5" />
-                    <span>012 345 678</span>
+                    <Mail className="w-3.5 h-3.5 shrink-0" />
+                    <span>kftcam@gmail.com</span>
                   </a>
                 </div>
               </div>
