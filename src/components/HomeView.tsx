@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { TrendingFoodCategorySlug, TrendingFoodItem, isUserVipActive, getVipAccountState, getVipRemainingDays, sortRestaurantsChronologically, sortRestaurantsWithVipRotation, isAdminAccount } from '../types';
+import { TrendingFoodCategorySlug, TrendingFoodItem, isUserVipActive, getVipAccountState, getVipRemainingDays, sortRestaurantsChronologically, sortRestaurantsWithVipRotation, isAdminAccount, getVipFeaturedRotationConfig } from '../types';
 import {
   normalizeKhmerSearchText,
   searchCambodiaPlacesWithSmartCache,
@@ -28,7 +28,8 @@ import {
   Apple, Smartphone, Bot, Calendar, Bookmark, Bell, 
   UtensilsCrossed, MessageSquareQuote, Camera, Phone,
   Navigation, Eye, ExternalLink, Play, Shuffle, Search, RefreshCw,
-  Crown, Plus, Edit2, CheckCircle2, X, Tag, ChefHat, Copy, Video, Check, Lock, Trash2, Globe, HeartPulse, Loader2
+  Crown, Plus, Edit2, CheckCircle2, X, Tag, ChefHat, Copy, Video, Check, Lock, Trash2, Globe, HeartPulse, Loader2,
+  Users, CreditCard, Settings, MessageSquare, Shield, Clock
 } from 'lucide-react';
 
 export const HomeView: React.FC = () => {
@@ -51,7 +52,7 @@ export const HomeView: React.FC = () => {
     setIsVipAddRestaurantModalOpen, setIsManageMenuModalOpen, setManagingRestaurant,
     getOwnedRestaurantsForUser, getCurrentUserStoreQuota, openManageMyVipStore, activeManagedShopId,
     openUpgradeVipModal, deleteRestaurant, openGoogleMapsSearchModal, setIsAdminOpen,
-    setIsQrScannerModalOpen
+    setIsQrScannerModalOpen, transactions, supportTickets, triggerCloudSyncNow
   } = useApp();
 
   const isKm = language === 'km';
@@ -478,6 +479,10 @@ export const HomeView: React.FC = () => {
         onSignIn={() => setIsAuthModalOpen(true)}
         onExploreProfile={() => setActiveTab('profile')}
         onUpgradeVip={() => openUpgradeVipModal()}
+        onOpenAdminPanel={() => {
+          (window as any).__kft_admin_tab = 'stats';
+          setIsAdminOpen(true);
+        }}
         query={globalSearchQuery}
         onChange={setGlobalSearchQuery}
       />
@@ -940,6 +945,318 @@ export const HomeView: React.FC = () => {
       )}
 
       {!searchResults && (
+        isAdmin ? (
+          (() => {
+            const activeVipUsersCount = users.filter(u => isUserVipActive(u)).length;
+            const pendingTxnsCount = transactions.filter(
+              t => t.status === 'pending_verification' || t.status === 'needs_more_info'
+            ).length;
+            const pendingShopsCount = restaurants.filter(r => r.status === 'pending').length;
+            const verifiedShopsCount = restaurants.filter(r => r.isVerified).length;
+            const pendingTicketsCount = supportTickets.filter(
+              t => String(t.status || '').toLowerCase() === 'pending' || t.unreadByAdmin
+            ).length;
+            const totalPendingApprovals = pendingTxnsCount + pendingShopsCount + pendingTicketsCount;
+            const rotCfg = getVipFeaturedRotationConfig(appSettings);
+
+            const openAdminTab = (tab: string, settingsSection?: string) => {
+              (window as any).__kft_admin_tab = tab;
+              if (settingsSection) {
+                (window as any).__kft_admin_settings_section = settingsSection;
+              }
+              setIsAdminOpen(true);
+            };
+
+            return (
+              <div className="space-y-4 animate-in fade-in">
+                {/* 1. Executive System Statistics Card */}
+                <div className="p-4 rounded-3xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 shadow-xs space-y-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-xl bg-[#064E3B] text-emerald-300 flex items-center justify-center shadow-2xs">
+                        <ShieldCheck className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <h3 className="font-moul text-xs sm:text-sm text-slate-900 dark:text-white">
+                          {tr(language, 'ស្ថិតិប្រព័ន្ធសរុប (System Overview)', 'Executive System Statistics', '系统运行统计总览')}
+                        </h3>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                          {tr(language, 'ទិន្នន័យបច្ចុប្បន្នភាពផ្ទាល់ក្នុងប្រព័ន្ធរដ្ឋបាល', 'Real-time platform metrics & pending approvals', '平台实时数据与待审批事项')}
+                        </p>
+                      </div>
+                    </div>
+                    {triggerCloudSyncNow && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          triggerCloudSyncNow(true);
+                          showToast(
+                            tr(language, '🔄 កំពុងធ្វើសមកាលកម្មទិន្នន័យ Cloud...', '🔄 Syncing Cloud Database...', '🔄 正在同步云端数据库...'),
+                            'info'
+                          );
+                        }}
+                        className="px-2.5 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 dark:bg-slate-700 dark:hover:bg-slate-600 text-[#064E3B] dark:text-emerald-300 text-[11px] font-bold border border-emerald-200/80 dark:border-slate-600 flex items-center gap-1 transition active:scale-95 cursor-pointer shrink-0"
+                      >
+                        <RefreshCw className="w-3.5 h-3.5" />
+                        <span>{tr(language, 'Sync ទិន្នន័យ', 'Sync Cloud', '云端同步')}</span>
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2.5">
+                    <button
+                      type="button"
+                      onClick={() => openAdminTab('users')}
+                      className="p-3 rounded-2xl bg-slate-50 hover:bg-emerald-50/70 dark:bg-slate-900/60 dark:hover:bg-slate-700/60 border border-slate-200/80 dark:border-slate-700 text-left transition cursor-pointer group"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-emerald-950/80 text-[#064E3B] dark:text-emerald-300 flex items-center justify-center">
+                          <Users className="w-4 h-4" />
+                        </span>
+                        <span className="px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 text-[10px] font-extrabold">
+                          {activeVipUsersCount} VIP
+                        </span>
+                      </div>
+                      <div className="text-lg font-black font-mono text-slate-900 dark:text-white mt-1.5">
+                        {users.length}
+                      </div>
+                      <div className="text-[11px] font-bold text-slate-600 dark:text-slate-300 group-hover:text-[#064E3B] dark:group-hover:text-emerald-300">
+                        {tr(language, 'អ្នកប្រើប្រាស់សរុប', 'Registered Users', '注册用户总数')}
+                      </div>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => openAdminTab('transactions')}
+                      className="p-3 rounded-2xl bg-slate-50 hover:bg-amber-50/70 dark:bg-slate-900/60 dark:hover:bg-slate-700/60 border border-slate-200/80 dark:border-slate-700 text-left transition cursor-pointer group"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="w-7 h-7 rounded-lg bg-amber-100 dark:bg-amber-950/80 text-amber-700 dark:text-amber-300 flex items-center justify-center">
+                          <Clock className="w-4 h-4" />
+                        </span>
+                        {totalPendingApprovals > 0 ? (
+                          <span className="px-2 py-0.5 rounded-full bg-rose-600 text-white text-[10px] font-black animate-pulse">
+                            {tr(language, `${totalPendingApprovals} រង់ចាំ`, `${totalPendingApprovals} Pending`, `${totalPendingApprovals} 待处理`)}
+                          </span>
+                        ) : (
+                          <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 text-[10px] font-bold">
+                            {tr(language, 'រួចរាល់', 'All Clear', '已处理')}
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-lg font-black font-mono text-slate-900 dark:text-white mt-1.5">
+                        {pendingTxnsCount}
+                      </div>
+                      <div className="text-[11px] font-bold text-slate-600 dark:text-slate-300 group-hover:text-amber-700 dark:group-hover:text-amber-300">
+                        {tr(language, 'វិក្កយបត្ររង់ចាំអនុម័ត', 'Pending Receipts', '待审付款凭证')}
+                      </div>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => openAdminTab('restaurants')}
+                      className="p-3 rounded-2xl bg-slate-50 hover:bg-emerald-50/70 dark:bg-slate-900/60 dark:hover:bg-slate-700/60 border border-slate-200/80 dark:border-slate-700 text-left transition cursor-pointer group"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="w-7 h-7 rounded-lg bg-teal-100 dark:bg-teal-950/80 text-teal-800 dark:text-teal-300 flex items-center justify-center">
+                          <Store className="w-4 h-4" />
+                        </span>
+                        <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 text-[10px] font-bold">
+                          {verifiedShopsCount} {tr(language, 'ផ្លូវការ', 'Verified', '已认证')}
+                        </span>
+                      </div>
+                      <div className="text-lg font-black font-mono text-slate-900 dark:text-white mt-1.5">
+                        {restaurants.length}
+                      </div>
+                      <div className="text-[11px] font-bold text-slate-600 dark:text-slate-300 group-hover:text-[#064E3B] dark:group-hover:text-emerald-300">
+                        {tr(language, 'ហាងអាហារសរុបក្នុងបញ្ជី', 'Total Directory Shops', '名录餐厅总数')}
+                      </div>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => openAdminTab('food')}
+                      className="p-3 rounded-2xl bg-slate-50 hover:bg-emerald-50/70 dark:bg-slate-900/60 dark:hover:bg-slate-700/60 border border-slate-200/80 dark:border-slate-700 text-left transition cursor-pointer group"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="w-7 h-7 rounded-lg bg-indigo-100 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 flex items-center justify-center">
+                          <Utensils className="w-4 h-4" />
+                        </span>
+                        <span className="px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-950/80 text-indigo-800 dark:text-indigo-300 text-[10px] font-bold">
+                          {destinations.length} {tr(language, 'ទេសចរណ៍', 'Sights', '景点')}
+                        </span>
+                      </div>
+                      <div className="text-lg font-black font-mono text-slate-900 dark:text-white mt-1.5">
+                        {foods.length}
+                      </div>
+                      <div className="text-[11px] font-bold text-slate-600 dark:text-slate-300 group-hover:text-indigo-700 dark:group-hover:text-indigo-300">
+                        {tr(language, 'មុខម្ហូប & រូបមន្តសរុប', 'Dishes & Recipes', '美食与食谱总数')}
+                      </div>
+                    </button>
+                  </div>
+                </div>
+
+                {/* 2. Admin Management Menus Grid */}
+                <div className="p-4 rounded-3xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 shadow-xs space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-moul text-xs sm:text-sm text-[#064E3B] dark:text-emerald-300 flex items-center gap-2">
+                      <Settings className="w-4 h-4" />
+                      <span>{tr(language, 'ម៉ឺនុយគ្រប់គ្រងរដ្ឋបាល (Admin Management)', 'Admin Management Menus', '系统管理菜单')}</span>
+                    </h3>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    {[
+                      {
+                        title: tr(language, 'គ្រប់គ្រងអ្នកប្រើប្រាស់ & VIP', 'User & VIP Management', '用户与 VIP 管理'),
+                        desc: tr(language, `${users.length} គណនី • ត្រួតពិនិត្យ កែប្រែ ឬលុបគណនី`, `${users.length} accounts • Inspect, edit roles or delete`, `共 ${users.length} 个账户 • 查看、修改或删除`),
+                        icon: Users,
+                        badge: `${users.length}`,
+                        badgeClass: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300',
+                        onClick: () => openAdminTab('users'),
+                      },
+                      {
+                        title: tr(language, 'អនុម័តការបង់ប្រាក់ & វិក្កយបត្រ', 'Payment & Receipt Approvals', '付款与凭证审批'),
+                        desc: tr(language, 'ពិនិត្យបង្កាន់ដៃ ABA KHQR និងអនុម័ត VIP', 'Verify ABA KHQR receipts & approve VIP', '核验 ABA 付款凭证并审批 VIP'),
+                        icon: CreditCard,
+                        badge: pendingTxnsCount > 0 ? `${pendingTxnsCount} រង់ចាំ` : 'រួចរាល់',
+                        badgeClass: pendingTxnsCount > 0 ? 'bg-rose-600 text-white' : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300',
+                        onClick: () => openAdminTab('transactions'),
+                      },
+                      {
+                        title: tr(language, 'គ្រប់គ្រងហាងអាហារទាំងអស់', 'Restaurant Directory Control', '餐厅名录管理'),
+                        desc: tr(language, `${restaurants.length} ហាង • អនុម័តហាងថ្មី កែប្រែ និងផ្ទៀងផ្ទាត់`, `${restaurants.length} shops • Approve, verify & edit listings`, `${restaurants.length} 家餐厅 • 审批、认证与编辑`),
+                        icon: Store,
+                        badge: pendingShopsCount > 0 ? `${pendingShopsCount} ថ្មី` : `${verifiedShopsCount} ផ្លូវការ`,
+                        badgeClass: pendingShopsCount > 0 ? 'bg-amber-500 text-slate-950' : 'bg-teal-100 text-teal-800 dark:bg-teal-950 dark:text-teal-300',
+                        onClick: () => openAdminTab('restaurants'),
+                      },
+                      {
+                        title: tr(language, 'វេនបង្ហាញហាង VIP មុខគេ', 'VIP Shop Featured Rotation', 'VIP 店铺置顶轮播设置'),
+                        desc: tr(
+                          language,
+                          rotCfg.enabled ? `កំពុងបើកដំណើរការ • បង្វិលរៀងរាល់ ${rotCfg.durationDays} ថ្ងៃ` : 'បានបិទការបង្វិលបង្ហាញមុខគេ',
+                          rotCfg.enabled ? `Active • Rotates every ${rotCfg.durationDays} day(s)` : 'Featured rotation disabled',
+                          rotCfg.enabled ? `已启用 • 每 ${rotCfg.durationDays} 天轮换` : '置顶轮播已关闭'
+                        ),
+                        icon: RefreshCw,
+                        badge: rotCfg.enabled ? `${rotCfg.durationDays}d` : 'OFF',
+                        badgeClass: rotCfg.enabled ? 'bg-amber-400 text-slate-950' : 'bg-slate-200 text-slate-700',
+                        onClick: () => openAdminTab('settings', 'featured_rotation'),
+                      },
+                      {
+                        title: tr(language, 'គ្រប់គ្រងមុខម្ហូប & រូបភាព', 'Food & Recipe Management', '菜品与食谱管理'),
+                        desc: tr(language, `${foods.length} មុខម្ហូប • បន្ថែមម្ហូបថ្មី ឬប្តូររូបភាព`, `${foods.length} dishes • Add recipes or update photos`, `${foods.length} 道菜品 • 添加食谱或更新图片`),
+                        icon: Utensils,
+                        badge: `${foods.length}`,
+                        badgeClass: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-300',
+                        onClick: () => openAdminTab('food'),
+                      },
+                      {
+                        title: tr(language, 'គ្រប់គ្រងតំបន់ទេសចរណ៍', 'Tourism Destinations Control', '旅游景点管理'),
+                        desc: tr(language, `${destinations.length} កន្លែង • គ្រប់គ្រងរមណីយដ្ឋាន ២៥ ខេត្ត-ក្រុង`, `${destinations.length} sights • Manage destinations across 25 provinces`, `${destinations.length} 个景点 • 管理 25 省市景点`),
+                        icon: Compass,
+                        badge: `${destinations.length}`,
+                        badgeClass: 'bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300',
+                        onClick: () => openAdminTab('destinations'),
+                      },
+                      {
+                        title: tr(language, 'សារជំនួយ & សំណើអតិថិជន', 'Support Tickets & Helpdesk', '客服工单与支持'),
+                        desc: tr(language, 'ឆ្លើយតបសារ និងដោះស្រាយបញ្ហាជូនអ្នកប្រើប្រាស់', 'Reply to user inquiries & payment tickets', '回复用户咨询与付款支持工单'),
+                        icon: MessageSquare,
+                        badge: pendingTicketsCount > 0 ? `${pendingTicketsCount} ថ្មី` : `${supportTickets.length}`,
+                        badgeClass: pendingTicketsCount > 0 ? 'bg-rose-600 text-white' : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300',
+                        onClick: () => openAdminTab('support_tickets'),
+                      },
+                      {
+                        title: tr(language, 'ការកំណត់ប្រព័ន្ធ & សុវត្ថិភាព', 'System Settings & Security', '系统设置与安全审计'),
+                        desc: tr(language, 'កំណត់តម្លៃ VIP, ធនាគារ KHQR, Cloud API និងសុវត្ថិភាព', 'Configure VIP pricing, KHQR, Cloud API & Security', '配置价格、收款码、云端 API 与安全'),
+                        icon: Shield,
+                        badge: 'Config',
+                        badgeClass: 'bg-emerald-900 text-emerald-200',
+                        onClick: () => openAdminTab('settings', 'all'),
+                      },
+                    ].map((item, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={item.onClick}
+                        className="p-3.5 rounded-2xl bg-slate-50 hover:bg-emerald-50/60 dark:bg-slate-900/60 dark:hover:bg-slate-700/60 border border-slate-200/90 dark:border-slate-700 flex items-start justify-between gap-2.5 text-left transition active:scale-[0.99] cursor-pointer group"
+                      >
+                        <div className="flex items-start gap-2.5 min-w-0">
+                          <div className="w-9 h-9 rounded-xl bg-[#064E3B] text-amber-300 flex items-center justify-center shrink-0 shadow-2xs mt-0.5">
+                            <item.icon className="w-4 h-4" />
+                          </div>
+                          <div className="min-w-0">
+                            <div className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white group-hover:text-[#064E3B] dark:group-hover:text-emerald-300 truncate">
+                              {item.title}
+                            </div>
+                            <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2 mt-0.5 leading-snug">
+                              {item.desc}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex flex-col items-end gap-1 shrink-0">
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-black whitespace-nowrap ${item.badgeClass}`}>
+                            {item.badge}
+                          </span>
+                          <ChevronRight className="w-4 h-4 text-slate-400 group-hover:translate-x-0.5 transition" />
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 3. Admin Field & Directory Quick Tools */}
+                <div className="p-4 rounded-3xl bg-gradient-to-br from-[#064E3B] via-[#065F46] to-slate-900 text-white border border-emerald-500/40 shadow-sm space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-moul text-xs sm:text-sm text-amber-300 flex items-center gap-2">
+                        <Store className="w-4 h-4" />
+                        <span>{tr(language, 'ឧបករណ៍បន្ថែម និងផ្ទៀងផ្ទាត់ទិន្នន័យផ្ទាល់', 'Directory & Field Verification Tools', '数据录入与实地核验工具')}</span>
+                      </h3>
+                      <p className="text-[11px] text-emerald-100/90 mt-0.5">
+                        {tr(language, 'បន្ថែមហាងផ្លូវការ ឆែកអ៊ីនទីតាំង GPS និងនាំចូលទិន្នន័យផែនទី', 'Add official shops, verify live GPS coordinates & import places', '添加官方店铺、核验 GPS 坐标及导入地图地点')}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        (window as any).__kft_vip_store_initial_mode = { mode: 'create' };
+                        setIsVipAddRestaurantModalOpen(true);
+                      }}
+                      className="p-3 rounded-2xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs shadow-sm flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer"
+                    >
+                      <Plus className="w-4 h-4 shrink-0" />
+                      <span>{tr(language, 'បន្ថែមហាងផ្លូវការថ្មី', 'Add Official Shop', '添加官方店铺')}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setIsRestaurantCheckInModalOpen(true)}
+                      className="p-3 rounded-2xl bg-white/15 hover:bg-white/25 text-white border border-white/25 font-bold text-xs flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer"
+                    >
+                      <MapPin className="w-4 h-4 text-emerald-300 shrink-0" />
+                      <span>{tr(language, 'ឆែកអ៊ីន & បញ្ជាក់ GPS', 'GPS Live Check-In', 'GPS 实地核验')}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => openGoogleMapsSearchModal('all')}
+                      className="p-3 rounded-2xl bg-white/15 hover:bg-white/25 text-white border border-white/25 font-bold text-xs flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer"
+                    >
+                      <Globe className="w-4 h-4 text-amber-300 shrink-0" />
+                      <span>{tr(language, 'នាំចូលពី Google Maps', 'Import Google Maps', '从 Google 地图导入')}</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })()
+        ) : (
         <>
           {isHomeLoading ? (
             <HomeSkeleton />
@@ -1013,9 +1330,11 @@ export const HomeView: React.FC = () => {
             </>
           )}
         </>
+        )
       )}
 
-      {/* 5. Everything else, collapsed under "More" */}
+      {/* 5. Everything else, collapsed under "More" (Consumer & VIP users only) */}
+      {!isAdmin && (
       <MoreSection language={language}>
         {() => (
           <>
@@ -1576,6 +1895,7 @@ export const HomeView: React.FC = () => {
           </>
         )}
       </MoreSection>
+      )}
     </div>
   );
 };

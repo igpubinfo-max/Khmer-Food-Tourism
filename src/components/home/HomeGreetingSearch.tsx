@@ -12,11 +12,12 @@ interface Props {
   onSignIn?: () => void;
   onExploreProfile?: () => void;
   onUpgradeVip?: () => void;
+  onOpenAdminPanel?: () => void;
   query: string;
   onChange: (value: string) => void;
 }
 
-/** Friendly greeting + compact Guest/Registered User Profile Card + one big, easy-to-tap search bar. */
+/** Friendly greeting + compact Guest/Registered User/Admin Profile Card + one big, easy-to-tap search bar. */
 export const HomeGreetingSearch: React.FC<Props> = ({
   language,
   userName,
@@ -25,6 +26,7 @@ export const HomeGreetingSearch: React.FC<Props> = ({
   onSignIn,
   onExploreProfile,
   onUpgradeVip,
+  onOpenAdminPanel,
   query,
   onChange,
 }) => {
@@ -44,9 +46,63 @@ export const HomeGreetingSearch: React.FC<Props> = ({
 
   return (
     <section className="space-y-3">
-      {/* Compact User Profile & Account Status Card (Guest vs Registered) */}
+      {/* Compact User Profile & Account Status Card (Admin vs VIP vs Registered vs Guest) */}
       {currentUser ? (
-        isVip && !isAdmin ? (
+        isAdmin ? (
+          <div className="p-3.5 sm:p-4 rounded-3xl bg-gradient-to-r from-[#022c22] via-[#064E3B] to-slate-900 text-white border border-emerald-400/50 shadow-md relative overflow-hidden flex items-center justify-between gap-3">
+            <div className="absolute -right-8 -top-8 w-28 h-28 bg-emerald-400/10 rounded-full blur-2xl pointer-events-none" />
+            <div
+              onClick={onOpenAdminPanel || onExploreProfile}
+              className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer"
+            >
+              <div className="relative shrink-0">
+                <img
+                  src={currentUser.avatar || '/images/admin_profile.png'}
+                  alt={currentUser.name}
+                  className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl object-cover border-2 border-emerald-400 shadow-sm bg-white"
+                />
+                <div className="absolute -bottom-1 -right-1 p-1 bg-emerald-500 text-white rounded-full shadow-xs border border-slate-900">
+                  <Shield className="w-3 h-3" />
+                </div>
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="text-[11px] text-emerald-200 font-medium">
+                    {greeting},
+                  </span>
+                  <span className="font-extrabold text-xs sm:text-sm text-white truncate">
+                    {currentUser.name}
+                  </span>
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black bg-emerald-500/25 text-emerald-200 border border-emerald-400/50 shrink-0">
+                    <Shield className="w-2.5 h-2.5 text-emerald-300" />
+                    <span>{tr(language, 'រដ្ឋបាលប្រព័ន្ធ', 'System Admin', '系统管理员')}</span>
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-200 font-khmer mt-0.5 truncate">
+                  {tr(
+                    language,
+                    '🛡️ មជ្ឈមណ្ឌលគ្រប់គ្រងរដ្ឋបាល • សិទ្ធិគ្រប់គ្រងពេញលេញ',
+                    '🛡️ Executive Admin Portal • Full System Control',
+                    '🛡️ 系统管理中心 • 拥有全部管理权限'
+                  )}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-1.5 shrink-0">
+              {onOpenAdminPanel && (
+                <button
+                  type="button"
+                  onClick={onOpenAdminPanel}
+                  className="px-3 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-[11px] shadow-sm transition active:scale-95 cursor-pointer shrink-0 flex items-center gap-1"
+                >
+                  <span>{tr(language, 'ផ្ទាំងរដ្ឋបាល', 'Admin Panel', '管理后台')}</span>
+                  <ChevronRight className="w-3.5 h-3.5 text-slate-950" />
+                </button>
+              )}
+            </div>
+          </div>
+        ) : isVip ? (
           <div className="p-3.5 sm:p-4 rounded-3xl bg-gradient-to-r from-[#022c22] via-[#064E3B] to-[#042f2e] text-white border-2 border-amber-400/80 shadow-[0_10px_28px_rgba(245,158,11,0.22)] relative overflow-hidden flex items-center justify-between gap-3">
             <div className="absolute -right-8 -top-8 w-32 h-32 bg-amber-400/10 rounded-full blur-2xl pointer-events-none" />
             <div
@@ -96,77 +152,63 @@ export const HomeGreetingSearch: React.FC<Props> = ({
             </div>
           </div>
         ) : (
-        <div className="p-3 rounded-2xl bg-gradient-to-r from-[#064E3B] via-[#047857] to-[#065F46] text-white shadow-sm border border-emerald-400/40 flex items-center justify-between gap-2.5">
-          <div
-            onClick={onExploreProfile}
-            className="flex items-center gap-2.5 min-w-0 flex-1 cursor-pointer"
-          >
-            <img
-              src={currentUser.avatar}
-              alt={currentUser.name}
-              className={`w-12 h-12 sm:w-14 sm:h-14 ${currentUser.role === 'admin' ? 'rounded-full ring-2 ring-emerald-300' : 'rounded-2xl'} object-cover border-2 border-amber-300/80 shadow-xs shrink-0 bg-white`}
-            />
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="text-[11px] text-emerald-200 font-medium">
-                  {greeting},
-                </span>
-                <span className="font-bold text-xs sm:text-sm text-white truncate">
-                  {currentUser.name}
-                </span>
-                {isAdmin ? (
-                  <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[9px] font-black bg-rose-500 text-white shadow-2xs shrink-0">
-                    <Shield className="w-2.5 h-2.5" />
-                    <span>{tr(language, 'អ្នកគ្រប់គ្រង', 'Admin', '管理员')}</span>
+          <div className="p-3 rounded-2xl bg-gradient-to-r from-[#064E3B] via-[#047857] to-[#065F46] text-white shadow-sm border border-emerald-400/40 flex items-center justify-between gap-2.5">
+            <div
+              onClick={onExploreProfile}
+              className="flex items-center gap-2.5 min-w-0 flex-1 cursor-pointer"
+            >
+              <img
+                src={currentUser.avatar}
+                alt={currentUser.name}
+                className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl object-cover border-2 border-amber-300/80 shadow-xs shrink-0 bg-white"
+              />
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="text-[11px] text-emerald-200 font-medium">
+                    {greeting},
                   </span>
-                ) : (
+                  <span className="font-bold text-xs sm:text-sm text-white truncate">
+                    {currentUser.name}
+                  </span>
                   <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-900/90 text-emerald-200 border border-emerald-400/40 shrink-0">
                     <CheckCircle2 className="w-2.5 h-2.5 text-emerald-300" />
                     <span>{tr(language, 'សមាជិកចុះឈ្មោះ', 'Registered', '已注册会员')}</span>
                   </span>
-                )}
+                </div>
+                <p className="text-[11px] text-emerald-100/95 truncate mt-0.5">
+                  {tr(
+                    language,
+                    'គណនីបានចុះឈ្មោះរួចរាល់ • ស្វែងរកមុខងារបន្ថែមក្នុងគណនីរបស់អ្នក',
+                    'Registered account active — explore more features in your profile',
+                    '账户已登录 • 前往个人中心探索更多功能'
+                  )}
+                </p>
               </div>
-              <p className="text-[11px] text-emerald-100/95 truncate mt-0.5">
-                {isAdmin
-                  ? tr(
-                      language,
-                      '✨ គណនី VIP សកម្ម • ប្រើប្រាស់មុខងារពិសេសទាំងអស់ដោយសេរី',
-                      '✨ Full VIP access unlocked — explore all special features',
-                      '✨ VIP 尊享权益已激活 • 畅享全部专属功能'
-                    )
-                  : tr(
-                      language,
-                      'គណនីបានចុះឈ្មោះរួចរាល់ • ស្វែងរកមុខងារបន្ថែមក្នុងគណនីរបស់អ្នក',
-                      'Registered account active — explore more features in your profile',
-                      '账户已登录 • 前往个人中心探索更多功能'
-                    )}
-              </p>
+            </div>
+
+            <div className="flex items-center gap-1.5 shrink-0">
+              {onUpgradeVip && (
+                <button
+                  type="button"
+                  onClick={onUpgradeVip}
+                  className="px-2.5 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-[10px] sm:text-[11px] shadow-xs flex items-center gap-1 transition active:scale-95 cursor-pointer"
+                >
+                  <Sparkles className="w-3 h-3" />
+                  <span>{tr(language, 'ដំឡើង VIP', 'Get VIP', '开通 VIP')}</span>
+                </button>
+              )}
+              {onExploreProfile && (
+                <button
+                  type="button"
+                  onClick={onExploreProfile}
+                  className="px-2.5 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 text-white font-bold text-[10px] sm:text-[11px] border border-white/25 flex items-center gap-0.5 transition active:scale-95 cursor-pointer"
+                >
+                  <span>{tr(language, 'គណនី', 'Profile', '我的')}</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+              )}
             </div>
           </div>
-
-          <div className="flex items-center gap-1.5 shrink-0">
-            {!isAdmin && onUpgradeVip && (
-              <button
-                type="button"
-                onClick={onUpgradeVip}
-                className="px-2.5 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-[10px] sm:text-[11px] shadow-xs flex items-center gap-1 transition active:scale-95 cursor-pointer"
-              >
-                <Sparkles className="w-3 h-3" />
-                <span>{tr(language, 'ដំឡើង VIP', 'Get VIP', '开通 VIP')}</span>
-              </button>
-            )}
-            {onExploreProfile && (
-              <button
-                type="button"
-                onClick={onExploreProfile}
-                className="px-2.5 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 text-white font-bold text-[10px] sm:text-[11px] border border-white/25 flex items-center gap-0.5 transition active:scale-95 cursor-pointer"
-              >
-                <span>{tr(language, 'គណនី', 'Profile', '我的')}</span>
-                <ChevronRight className="w-3.5 h-3.5" />
-              </button>
-            )}
-          </div>
-        </div>
         )
       ) : (
         <div className="p-3 rounded-2xl bg-gradient-to-r from-slate-900 via-[#064E3B] to-emerald-900 text-white shadow-sm border border-emerald-500/40 flex items-center justify-between gap-2.5">
@@ -209,7 +251,14 @@ export const HomeGreetingSearch: React.FC<Props> = ({
 
       <div>
         <h2 className="font-moul text-base sm:text-lg leading-snug text-[#064E3B] dark:text-emerald-300">
-          {tr(language, 'ថ្ងៃនេះចង់ញ៉ាំអ្វី?', 'What would you like to eat today?', '今天想吃点什么？')}
+          {isAdmin
+            ? tr(
+                language,
+                'ស្វែងរក និងគ្រប់គ្រងទិន្នន័យក្នុងប្រព័ន្ធ',
+                'Search & Manage System Directory',
+                '搜索并管理系统数据'
+              )
+            : tr(language, 'ថ្ងៃនេះចង់ញ៉ាំអ្វី?', 'What would you like to eat today?', '今天想吃点什么？')}
         </h2>
       </div>
 

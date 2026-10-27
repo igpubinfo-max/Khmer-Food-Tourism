@@ -51,6 +51,10 @@ export const AdminDashboard: React.FC = () => {
       setActiveTab((window as any).__kft_admin_tab);
       delete (window as any).__kft_admin_tab;
     }
+    if ((window as any).__kft_admin_settings_section) {
+      setActiveSettingsSection((window as any).__kft_admin_settings_section);
+      delete (window as any).__kft_admin_settings_section;
+    }
   }, [isAdminOpen]);
 
   // Real-time User Management synchronization whenever Admin Dashboard opens or switches to 'users' tab

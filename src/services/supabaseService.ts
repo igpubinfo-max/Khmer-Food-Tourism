@@ -1303,7 +1303,23 @@ export async function syncAllAppDataWithSupabase(localState: {
       }
     }
     const mergedDeletedUsers = Array.from(deletedMap.values());
-    const deletedIds = new Set(mergedDeletedUsers.map(d => d.id));
+    const deletedIds = new Set(mergedDeletedUsers.map(d => d.id).filter(Boolean));
+    const deletedEmails = new Set(
+      mergedDeletedUsers.map(d => (d.email || '').toLowerCase().trim()).filter(Boolean)
+    );
+    const deletedPhones = new Set(
+      mergedDeletedUsers
+        .map(d => (d.phone || '').replace(/[\s-+()]/g, ''))
+        .filter(p => p.length >= 7)
+    );
+    const isActivityUserDeleted = (uid?: string, email?: string, phone?: string): boolean => {
+      if (uid && deletedIds.has(uid)) return true;
+      const cleanE = (email || '').toLowerCase().trim();
+      if (cleanE && deletedEmails.has(cleanE)) return true;
+      const cleanP = (phone || '').replace(/[\s-+()]/g, '');
+      if (cleanP.length >= 7 && deletedPhones.has(cleanP)) return true;
+      return false;
+    };
 
     // 1c. Reconstruct any missing non-deleted users from Transactions, Support Tickets, Custom Restaurants, and VIP Backup
     const allTxnsCombined = [
@@ -1324,7 +1340,7 @@ export async function syncAllAppDataWithSupabase(localState: {
       // Skip nameless seed owner placeholders that have no email, phone, or userName
       if (!uEmail && uPhone.length < 7 && !t.userName) continue;
       if (!uid && !uEmail) continue;
-      if (uid && deletedIds.has(uid)) continue;
+      if (isActivityUserDeleted(uid, uEmail, uPhone) || isActivityUserDeleted(t.ownerId, uEmail, uPhone)) continue;
       const isGoogle = String(uid || '').startsWith('google-') || uEmail.endsWith('@gmail.com');
       const createdDate = t.createdAt ? t.createdAt.split('T')[0] : new Date().toISOString().split('T')[0];
       recoveredUsersFromActivity.push({
@@ -1352,8 +1368,8 @@ export async function syncAllAppDataWithSupabase(localState: {
 
     for (const tk of allTicketsCombined) {
       if (!tk || !tk.userId || tk.userId === 'guest') continue;
-      if (deletedIds.has(tk.userId)) continue;
       const uEmail = (tk.userEmail || '').trim().toLowerCase();
+      if (isActivityUserDeleted(tk.userId, uEmail, tk.userPhone)) continue;
       const isGoogle = String(tk.userId).startsWith('google-') || uEmail.endsWith('@gmail.com');
       recoveredUsersFromActivity.push({
         id: tk.userId,
@@ -1377,6 +1393,7 @@ export async function syncAllAppDataWithSupabase(localState: {
         const emailFromKey = key.startsWith('email:') ? key.slice(6) : (val.email || '');
         const idFromKey = key.startsWith('id:') ? key.slice(3) : (val.id || '');
         if (!idFromKey && !emailFromKey) continue;
+        if (isActivityUserDeleted(idFromKey, emailFromKey, val.phone)) continue;
         recoveredUsersFromActivity.push({
           id: idFromKey || `google-${emailFromKey.replace(/[^a-z0-9]/g, '_')}`,
           name: val.name || (emailFromKey ? emailFromKey.split('@')[0] : 'VIP Member'),
@@ -1515,14 +1532,14 @@ export async function syncAllAppDataWithSupabase(localState: {
           t &&
           t.id &&
           !deletedTxnIdSet.has(t.id) &&
-          (!t.ownerId || !deletedIds.has(t.ownerId))
+          !isActivityUserDeleted(t.userId || t.ownerId, t.userEmail, t.phone)
         ) {
           txnMap.set(t.id, t);
         }
       }
     }
     for (const t of localState.transactions) {
-      if (!t || !t.id || deletedTxnIdSet.has(t.id) || (t.ownerId && deletedIds.has(t.ownerId))) continue;
+      if (!t || !t.id || deletedTxnIdSet.has(t.id) || isActivityUserDeleted(t.userId || t.ownerId, t.userEmail, t.phone)) continue;
       const existing = txnMap.get(t.id);
       if (!existing) {
         txnMap.set(t.id, t);

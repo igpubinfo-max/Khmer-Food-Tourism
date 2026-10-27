@@ -3882,12 +3882,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   /**
    * Option 3 — Delete Forever:
    * Permanently deletes the entire account and all associated data after explicit confirmation.
+   * Updates UI state synchronously so the deleted user disappears immediately (0ms delay),
+   * and syncs tombstones + purged records to localStorage and Supabase Cloud in the background.
    */
   const deleteUserAccount = async (userId: string): Promise<{
     success: boolean;
     deletedStats?: { restaurants: number; posts: number; transactions: number; tickets: number };
   }> => {
-    const targetUser = users.find(u => u.id === userId);
+    const liveUsers = latestSyncStateRef.current.users || users;
+    const liveDeletedUsers = latestSyncStateRef.current.deletedUsers || deletedUsers;
+    const liveRestaurants = latestSyncStateRef.current.restaurants || restaurants;
+    const liveTransactions = latestSyncStateRef.current.transactions || transactions;
+    const liveTickets = latestSyncStateRef.current.supportTickets || supportTickets;
+
+    const targetUser = liveUsers.find(
+      u => u.id === userId || (Array.isArray(u.legacyIds) && u.legacyIds.includes(userId))
+    );
     if (!targetUser) {
       showToast(language === 'km' ? 'រកមិនឃើញគណនីអ្នកប្រើប្រាស់នេះទេ!' : 'User account not found!', 'warning');
       return { success: false };
@@ -3904,61 +3914,110 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return { success: false };
     }
 
-    // 1. Add user to permanent deleted/blacklisted users registry with permanentlyDeleted: true so they can never log in or be restored
-    const deletedRecord: DeletedUserRecord = {
-      id: targetUser.id,
-      email: (targetUser.email || '').toLowerCase().trim(),
-      phone: targetUser.phone ? targetUser.phone.replace(/[\s-+]/g, '') : undefined,
+    const nowIso = new Date().toISOString();
+    const canonicalId = getCanonicalUserId(targetUser);
+    const allTargetIds = Array.from(
+      new Set(
+        [
+          userId,
+          targetUser.id,
+          canonicalId,
+          ...(Array.isArray(targetUser.legacyIds) ? targetUser.legacyIds : []),
+        ].filter(Boolean)
+      )
+    );
+    const allTargetIdSet = new Set(allTargetIds);
+    const targetEmailLower = (targetUser.email || '').toLowerCase().trim();
+    const targetPhoneClean = targetUser.phone ? targetUser.phone.replace(/[\s-+()]/g, '') : '';
+
+    // 1. Add user (and any legacy/canonical IDs) to permanent deleted/blacklisted users registry with permanentlyDeleted: true
+    const newTombstones: DeletedUserRecord[] = allTargetIds.map(tid => ({
+      id: tid,
+      email: targetEmailLower,
+      phone: targetPhoneClean || undefined,
       username: targetUser.username ? targetUser.username.toLowerCase().trim() : undefined,
       name: targetUser.name,
-      deletedAt: new Date().toISOString(),
+      deletedAt: nowIso,
       deletedBy: currentUser?.name || 'Admin',
       permanentlyDeleted: true,
-    };
+    }));
+
     const nextDeletedUsers = [
-      ...deletedUsers.filter(d => d.id !== targetUser.id),
-      deletedRecord,
+      ...liveDeletedUsers.filter(d => !allTargetIdSet.has(d.id)),
+      ...newTombstones,
     ];
+    latestSyncStateRef.current.deletedUsers = nextDeletedUsers;
     setDeletedUsers(nextDeletedUsers);
     try {
       localStorage.setItem('kft_deleted_users_v1', JSON.stringify(nextDeletedUsers));
     } catch {}
 
-    // 2. Remove user from active users list
-    const nextUsers = users.filter(u => u.id !== userId);
+    // 2. Immediately remove user from active users list (matching ID, legacyIds, email, or phone via checkIsUserDeleted)
+    const nextUsers = liveUsers.filter(
+      u =>
+        !allTargetIdSet.has(u.id) &&
+        !(Array.isArray(u.legacyIds) && u.legacyIds.some(lid => allTargetIdSet.has(lid))) &&
+        !checkIsUserDeleted(u, nextDeletedUsers)
+    );
+    latestSyncStateRef.current.users = nextUsers;
     setUsers(nextUsers);
     try {
       localStorage.setItem('kft_users_v5', JSON.stringify(nextUsers));
     } catch {}
 
+    // 2b. Also purge the deleted user from `kft_vip_registry_backup_v1` and `kft_pre_update_db_backup_v1` so they never resurrect on reload!
+    try {
+      const rawVipBackup = localStorage.getItem('kft_vip_registry_backup_v1');
+      if (rawVipBackup) {
+        const parsedVip: User[] = JSON.parse(rawVipBackup);
+        if (Array.isArray(parsedVip)) {
+          const filteredVip = parsedVip.filter(
+            v => v && !allTargetIdSet.has(v.id) && !checkIsUserDeleted(v, nextDeletedUsers)
+          );
+          localStorage.setItem('kft_vip_registry_backup_v1', JSON.stringify(filteredVip));
+        }
+      }
+    } catch {}
+
     // 3. Remove user's custom restaurants (never touch built-in seed restaurants rest-1..250)
-    const ownedCustomRests = restaurants.filter(r => !isSeedRestaurantId(r.id) && r.ownerId === userId);
-    const nextRestaurants = restaurants.filter(r => isSeedRestaurantId(r.id) || r.ownerId !== userId);
+    const isTargetOwner = (ownerId?: string, ownerEmail?: string) =>
+      Boolean(
+        (ownerId && allTargetIdSet.has(ownerId)) ||
+          (targetEmailLower && ownerEmail && ownerEmail.toLowerCase().trim() === targetEmailLower)
+      );
+
+    const ownedCustomRests = liveRestaurants.filter(
+      r => !isSeedRestaurantId(r.id) && isTargetOwner(r.ownerId, r.ownerEmail)
+    );
+    const nextRestaurants = liveRestaurants.filter(
+      r => isSeedRestaurantId(r.id) || !isTargetOwner(r.ownerId, r.ownerEmail)
+    );
     if (ownedCustomRests.length > 0) {
+      latestSyncStateRef.current.restaurants = nextRestaurants;
       setRestaurants(nextRestaurants);
       try {
         localStorage.setItem('kft_restaurants_real_v11', JSON.stringify(nextRestaurants));
       } catch {}
-      if (selectedRestaurant && !isSeedRestaurantId(selectedRestaurant.id) && selectedRestaurant.ownerId === userId) {
+      if (selectedRestaurant && !isSeedRestaurantId(selectedRestaurant.id) && isTargetOwner(selectedRestaurant.ownerId, selectedRestaurant.ownerEmail)) {
         setSelectedRestaurant(null);
       }
-      if (managingRestaurant && managingRestaurant.ownerId === userId) {
+      if (managingRestaurant && isTargetOwner(managingRestaurant.ownerId, managingRestaurant.ownerEmail)) {
         setManagingRestaurant(null);
         setIsManageMenuModalOpen(false);
       }
     }
 
     // 4. Remove user's community posts, likes, and comments
-    const userPostsCount = posts.filter(p => p.authorId === userId).length;
+    const userPostsCount = posts.filter(p => allTargetIdSet.has(p.authorId)).length;
     const nextPosts = posts
-      .filter(p => p.authorId !== userId)
+      .filter(p => !allTargetIdSet.has(p.authorId))
       .map(p => {
-        const hadLiked = (p.likedByUserIds || []).includes(userId);
+        const hadLiked = (p.likedByUserIds || []).some(id => allTargetIdSet.has(id));
         return {
           ...p,
-          likedByUserIds: (p.likedByUserIds || []).filter(id => id !== userId),
+          likedByUserIds: (p.likedByUserIds || []).filter(id => !allTargetIdSet.has(id)),
           likesCount: hadLiked ? Math.max(0, p.likesCount - 1) : p.likesCount,
-          comments: (p.comments || []).filter(c => c.authorId !== userId && c.authorName !== targetUser.name),
+          comments: (p.comments || []).filter(c => !allTargetIdSet.has(c.authorId) && c.authorName !== targetUser.name),
         };
       });
     setPosts(nextPosts);
@@ -3967,11 +4026,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } catch {}
 
     // 5. Remove user's registration/VIP transactions & payment proof receipts
-    const userTxns = transactions.filter(t => t.ownerId === userId);
-    const nextTransactions = transactions.filter(t => t.ownerId !== userId);
+    const isTargetTransaction = (t: RegistrationTransaction) =>
+      Boolean(
+        (t.ownerId && allTargetIdSet.has(t.ownerId)) ||
+          (t.userId && allTargetIdSet.has(t.userId)) ||
+          (targetEmailLower && t.userEmail && t.userEmail.toLowerCase().trim() === targetEmailLower)
+      );
+
+    const userTxns = liveTransactions.filter(isTargetTransaction);
+    const nextTransactions = liveTransactions.filter(t => !isTargetTransaction(t));
+    latestSyncStateRef.current.transactions = nextTransactions;
     setTransactions(nextTransactions);
     try {
       localStorage.setItem('kft_transactions_v4', JSON.stringify(nextTransactions));
+      if (userTxns.length > 0) {
+        let localDelTxnIds: string[] = [];
+        try {
+          const rawDel = localStorage.getItem('kft_deleted_transactions_v1');
+          if (rawDel) localDelTxnIds = JSON.parse(rawDel) || [];
+        } catch {}
+        const mergedDelTxns = Array.from(new Set([...localDelTxnIds, ...userTxns.map(t => t.id)]));
+        localStorage.setItem('kft_deleted_transactions_v1', JSON.stringify(mergedDelTxns));
+      }
     } catch {}
 
     let localVault: Record<string, any> = {};
@@ -3987,20 +4063,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } catch {}
 
     // 6. Remove user's support tickets
-    const targetEmailLower = (targetUser.email || '').toLowerCase().trim();
-    const userTicketsCount = supportTickets.filter(
-      t => t.userId === userId || (targetEmailLower && t.userEmail?.toLowerCase().trim() === targetEmailLower)
-    ).length;
-    const nextTickets = supportTickets.filter(
-      t => t.userId !== userId && (!targetEmailLower || t.userEmail?.toLowerCase().trim() !== targetEmailLower)
-    );
+    const isTargetTicket = (t: SupportTicket) =>
+      Boolean(
+        allTargetIdSet.has(t.userId) ||
+          (targetEmailLower && t.userEmail?.toLowerCase().trim() === targetEmailLower)
+      );
+    const userTicketsCount = liveTickets.filter(isTargetTicket).length;
+    const nextTickets = liveTickets.filter(t => !isTargetTicket(t));
+    latestSyncStateRef.current.supportTickets = nextTickets;
     setSupportTickets(nextTickets);
     try {
       localStorage.setItem('kft_support_tickets_v1', JSON.stringify(nextTickets));
     } catch {}
 
     // 7. Remove user's AI check-in submissions
-    const nextAiCheckIns = aiCheckIns.filter(c => c.submittedByUserId !== userId);
+    const nextAiCheckIns = aiCheckIns.filter(c => !allTargetIdSet.has(c.submittedByUserId));
     if (nextAiCheckIns.length !== aiCheckIns.length) {
       setAiCheckIns(nextAiCheckIns);
       try {
@@ -4010,43 +4087,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     // 8. Remove user's local wishlists & trip plans
     try {
-      localStorage.removeItem(`kft_wishlists_v2_${userId}`);
-      localStorage.removeItem(`kft_wishlists_${userId}`);
-      localStorage.removeItem(`kft_trip_plans_v2_${userId}`);
-      localStorage.removeItem(`kft_trip_plans_${userId}`);
+      for (const tid of allTargetIds) {
+        localStorage.removeItem(`kft_wishlists_v3_${tid}`);
+        localStorage.removeItem(`kft_wishlists_v2_${tid}`);
+        localStorage.removeItem(`kft_wishlists_${tid}`);
+        localStorage.removeItem(`kft_trip_plans_v2_${tid}`);
+        localStorage.removeItem(`kft_trip_plans_${tid}`);
+      }
     } catch {}
 
     // 9. If the deleted user is currently logged in on this device, terminate their session
-    if (currentUser?.id === userId) {
+    if (currentUser && (allTargetIdSet.has(currentUser.id) || checkIsUserDeleted(currentUser, nextDeletedUsers))) {
       setCurrentUser(null);
+      latestSyncStateRef.current.currentUser = null;
       try {
         localStorage.removeItem('kft_current_user_v5');
       } catch {}
-    }
-
-    // 10. Push updated collections to Supabase Cloud AND delete atomic `kft_user_<id>` rows
-    try {
-      if (isSupabaseConfigured()) {
-        const customRests = nextRestaurants.filter(r => !isSeedRestaurantId(r.id));
-        const atomicDeletes = [
-          deleteCloudDocument(`${USER_RECORD_PREFIX}${targetUser.id}`),
-          ...(Array.isArray(targetUser.legacyIds)
-            ? targetUser.legacyIds.map(lid => deleteCloudDocument(`${USER_RECORD_PREFIX}${lid}`))
-            : []),
-        ];
-        await Promise.all([
-          ...atomicDeletes,
-          pushCloudDocument('kft_cloud_users_v2', nextUsers),
-          pushCloudDocument('kft_cloud_users_v1', nextUsers),
-          pushCloudDocument('kft_cloud_deleted_users_v1', nextDeletedUsers),
-          pushCloudDocument('kft_cloud_transactions_v1', nextTransactions),
-          pushCloudDocument('kft_cloud_custom_restaurants_v1', customRests),
-          pushCloudDocument('kft_cloud_support_tickets_v1', nextTickets),
-          pushCloudDocument('kft_cloud_payment_proofs_v1', localVault),
-        ]);
-      }
-    } catch (e) {
-      console.warn('Supabase cloud user deletion sync error:', e);
     }
 
     recordSecurityAudit(
@@ -4062,6 +4118,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         : `✅ Permanently deleted account "${targetUser.name}" and all associated data!`,
       'success'
     );
+
+    // 10. Push updated collections to Supabase Cloud AND delete atomic `kft_user_<id>` rows in the background
+    // so the UI updates & modal closes immediately without waiting for network roundtrips!
+    if (isSupabaseConfigured()) {
+      const customRests = nextRestaurants.filter(r => !isSeedRestaurantId(r.id));
+      const atomicDeletes = allTargetIds.map(tid =>
+        deleteCloudDocument(`${USER_RECORD_PREFIX}${tid}`)
+      );
+      Promise.all([
+        ...atomicDeletes,
+        pushCloudDocument('kft_cloud_deleted_users_v1', nextDeletedUsers),
+        pushCloudDocument('kft_cloud_users_v2', nextUsers),
+        pushCloudDocument('kft_cloud_users_v1', nextUsers),
+        pushCloudDocument('kft_cloud_transactions_v1', nextTransactions),
+        pushCloudDocument('kft_cloud_custom_restaurants_v1', customRests),
+        pushCloudDocument('kft_cloud_support_tickets_v1', nextTickets),
+        pushCloudDocument('kft_cloud_payment_proofs_v1', localVault),
+      ]).catch(e => {
+        console.warn('Supabase cloud user deletion sync error:', e);
+      });
+    }
 
     return {
       success: true,

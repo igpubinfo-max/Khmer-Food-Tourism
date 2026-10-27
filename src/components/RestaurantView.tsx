@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { RestaurantCard } from './RestaurantCard';
-import { Restaurant, sortRestaurantsWithVipRotation } from '../types';
+import { Restaurant, sortRestaurantsWithVipRotation, isAdminAccount, getVipFeaturedRotationConfig } from '../types';
 import { shuffleForCurrentSession } from '../utils/sessionShuffle';
-import { Store, Plus, CheckCircle2, AlertCircle, Edit2 } from 'lucide-react';
+import { Store, Plus, CheckCircle2, AlertCircle, Edit2, Shield, Settings, MapPin, Globe, RefreshCw } from 'lucide-react';
 import { normalizeKhmerSearchText } from '../services/googlePlacesService';
 import { tr, translateProvince } from '../utils/i18n';
 
@@ -25,8 +25,12 @@ export const RestaurantView: React.FC = () => {
     getOwnedRestaurantsForUser,
     getCurrentUserStoreQuota,
     openManageMyVipStore,
+    setIsAdminOpen,
+    setIsRestaurantCheckInModalOpen,
+    openGoogleMapsSearchModal,
   } = useApp();
 
+  const isAdmin = isAdminAccount(currentUser);
   const storeQuota = getCurrentUserStoreQuota(currentUser);
 
   const myOwnedRestaurants = useMemo(
@@ -197,24 +201,28 @@ export const RestaurantView: React.FC = () => {
     return () => observer.disconnect();
   }, [visibleCount, sortedRestaurants.length]);
 
-  const { verifiedCount, sampleCount } = useMemo(() => {
+  const { verifiedCount, sampleCount, pendingCount } = useMemo(() => {
     let v = 0;
+    let p = 0;
     for (const r of restaurants) {
       if (r.isVerified) v++;
+      if (r.status === 'pending') p++;
     }
-    return { verifiedCount: v, sampleCount: restaurants.length - v };
+    return { verifiedCount: v, sampleCount: restaurants.length - v, pendingCount: p };
   }, [restaurants]);
+
+  const rotCfg = getVipFeaturedRotationConfig(appSettings);
 
   return (
     <div className="max-w-md mx-auto px-4 py-3 space-y-4 pb-24">
-      {/* Title Bar (Search removed — kept on Home Screen only) */}
-      <div className="flex items-center justify-between gap-2">
-        <div>
-          <h2 className="font-moul text-sm sm:text-base text-[#0F172A] dark:text-white flex items-center gap-2">
-            <Store className="w-4 h-4 text-[#064E3B] dark:text-emerald-400" />
+      {/* Title Bar */}
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0 flex-1">
+          <h2 className="font-moul text-sm sm:text-base text-[#0F172A] dark:text-white flex items-center gap-2 leading-snug">
+            <Store className="w-4 h-4 text-[#064E3B] dark:text-emerald-400 shrink-0" />
             <span>{tr(language, 'បញ្ជីភោជនីយដ្ឋាន & ហាងអាហារ', 'Restaurant Directory', '餐厅与美食店铺名录')}</span>
           </h2>
-          <p className="text-[11px] text-slate-500 font-khmer">
+          <p className="text-[11px] text-slate-500 font-khmer mt-0.5">
             {tr(
               language,
               `បង្ហាញ ${filteredRestaurants.length} / ${restaurants.length} ហាង (${verifiedCount} ផ្ទៀងផ្ទាត់ផ្លូវការ)`,
@@ -225,32 +233,46 @@ export const RestaurantView: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-1.5 shrink-0">
-          <button
-            onClick={() => {
-              if (!currentUser) {
-                setIsAuthModalOpen(true);
-                return;
-              }
-              if (myExistingRest) {
-                openManageMyVipStore(myExistingRest.id);
-              } else {
-                setIsVipAddRestaurantModalOpen(true);
-              }
-            }}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-xs shadow-xs font-khmer transition cursor-pointer"
-          >
-            {myExistingRest ? (
-              <>
-                <Edit2 className="w-3.5 h-3.5 text-slate-950" />
-                <span>{tr(language, 'គ្រប់គ្រងហាងខ្ញុំ', 'My Store', '管理我的店铺')}</span>
-              </>
-            ) : (
-              <>
-                <Plus className="w-3.5 h-3.5 text-slate-950" />
-                <span>{tr(language, 'បន្ថែមហាងថ្មី', 'Add Store', '添加店铺')}</span>
-              </>
-            )}
-          </button>
+          {isAdmin ? (
+            <button
+              type="button"
+              onClick={() => {
+                (window as any).__kft_admin_tab = 'restaurants';
+                setIsAdminOpen(true);
+              }}
+              className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[#064E3B] hover:bg-emerald-800 text-amber-300 font-bold text-xs shadow-xs font-khmer transition cursor-pointer whitespace-nowrap"
+            >
+              <Settings className="w-3.5 h-3.5" />
+              <span>{tr(language, 'គ្រប់គ្រងហាង', 'Manage Shops', '管理店铺')}</span>
+            </button>
+          ) : (
+            <button
+              onClick={() => {
+                if (!currentUser) {
+                  setIsAuthModalOpen(true);
+                  return;
+                }
+                if (myExistingRest) {
+                  openManageMyVipStore(myExistingRest.id);
+                } else {
+                  setIsVipAddRestaurantModalOpen(true);
+                }
+              }}
+              className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-xs shadow-xs font-khmer transition cursor-pointer whitespace-nowrap"
+            >
+              {myExistingRest ? (
+                <>
+                  <Edit2 className="w-3.5 h-3.5 text-slate-950" />
+                  <span>{tr(language, 'គ្រប់គ្រងហាងខ្ញុំ', 'My Store', '管理我的店铺')}</span>
+                </>
+              ) : (
+                <>
+                  <Plus className="w-3.5 h-3.5 text-slate-950" />
+                  <span>{tr(language, 'បន្ថែមហាងថ្មី', 'Add Store', '添加店铺')}</span>
+                </>
+              )}
+            </button>
+          )}
         </div>
       </div>
 
@@ -290,7 +312,111 @@ export const RestaurantView: React.FC = () => {
         </button>
       </div>
 
-      {/* Banner for Restaurant Owners */}
+      {/* Role-Specific Section: Admin Directory Management Panel vs Consumer/VIP Store Registration Banner */}
+      {isAdmin ? (
+        <div className="p-4 rounded-3xl bg-gradient-to-br from-[#022c22] via-[#064E3B] to-slate-900 text-white shadow-md border border-emerald-500/40 space-y-3 font-khmer">
+          <div className="flex items-start justify-between gap-2.5">
+            <div className="space-y-1 flex-1 min-w-0">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <Shield className="w-4 h-4 text-emerald-300 shrink-0" />
+                <span className="font-black text-xs sm:text-sm text-white">
+                  {tr(language, 'មជ្ឈមណ្ឌលគ្រប់គ្រងបញ្ជីហាងអាហារ (Admin)', 'Admin Restaurant Directory Control', '餐厅名录管理中心（管理员）')}
+                </span>
+                <span className="px-2 py-0.5 rounded-full bg-emerald-500/25 text-emerald-200 border border-emerald-400/40 text-[9px] font-black">
+                  {tr(language, 'សិទ្ធិរដ្ឋបាល', 'Admin Access', '管理员权限')}
+                </span>
+              </div>
+              <p className="text-[11px] text-emerald-100/90 leading-relaxed">
+                {tr(
+                  language,
+                  'គ្រប់គ្រង បន្ថែមហាងផ្លូវការថ្មី អនុម័តហាងរបស់សមាជិក ផ្ទៀងផ្ទាត់ទីតាំង GPS និងកំណត់វេនបង្ហាញហាង VIP មុខគេ។',
+                  'Add official shops, approve member store submissions, verify GPS coordinates, and configure VIP featured rotation.',
+                  '添加官方店铺、审批会员提交的餐厅、核验 GPS 坐标及配置 VIP 店铺置顶轮播。'
+                )}
+              </p>
+            </div>
+          </div>
+
+          {/* Live Admin Shop Directory Metrics */}
+          <div className="grid grid-cols-3 gap-2">
+            <div className="p-2.5 rounded-2xl bg-white/10 border border-white/15 text-center">
+              <div className="text-sm font-black font-mono text-amber-300">{verifiedCount}</div>
+              <div className="text-[10px] font-bold text-emerald-100">
+                {tr(language, 'ផ្ទៀងផ្ទាត់ផ្លូវការ', 'Verified', '官方认证')}
+              </div>
+            </div>
+            <div className="p-2.5 rounded-2xl bg-white/10 border border-white/15 text-center">
+              <div className="text-sm font-black font-mono text-white">{pendingCount}</div>
+              <div className="text-[10px] font-bold text-emerald-100">
+                {tr(language, 'រង់ចាំអនុម័ត', 'Pending', '待审批')}
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                (window as any).__kft_admin_tab = 'settings';
+                (window as any).__kft_admin_settings_section = 'featured_rotation';
+                setIsAdminOpen(true);
+              }}
+              className="p-2.5 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/15 text-center transition cursor-pointer"
+            >
+              <div className="text-sm font-black font-mono text-emerald-300 flex items-center justify-center gap-1">
+                <RefreshCw className="w-3 h-3" />
+                <span>{rotCfg.enabled ? `${rotCfg.durationDays}d` : 'OFF'}</span>
+              </div>
+              <div className="text-[10px] font-bold text-emerald-100">
+                {tr(language, 'វេនហាងមុខគេ', 'VIP Rotation', '置顶轮播')}
+              </div>
+            </button>
+          </div>
+
+          {/* Admin Action Buttons */}
+          <div className="grid grid-cols-2 gap-2 pt-0.5">
+            <button
+              type="button"
+              onClick={() => {
+                (window as any).__kft_vip_store_initial_mode = { mode: 'create' };
+                setIsVipAddRestaurantModalOpen(true);
+              }}
+              className="py-2.5 px-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-black flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer shadow-sm"
+            >
+              <Plus className="w-4 h-4 shrink-0" />
+              <span className="truncate">{tr(language, 'បន្ថែមហាងផ្លូវការថ្មី', 'Add Official Shop', '添加官方店铺')}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                (window as any).__kft_admin_tab = 'restaurants';
+                setIsAdminOpen(true);
+              }}
+              className="py-2.5 px-3 rounded-xl bg-white/15 hover:bg-white/25 text-white border border-white/25 text-xs font-bold flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer"
+            >
+              <Settings className="w-4 h-4 text-amber-300 shrink-0" />
+              <span className="truncate">{tr(language, 'គ្រប់គ្រងហាងទាំងអស់', 'Manage All Shops', '管理全部店铺')}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setIsRestaurantCheckInModalOpen(true)}
+              className="py-2 px-3 rounded-xl bg-white/10 hover:bg-white/20 text-emerald-100 border border-white/15 text-[11px] font-bold flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer"
+            >
+              <MapPin className="w-3.5 h-3.5 text-emerald-300 shrink-0" />
+              <span className="truncate">{tr(language, 'ឆែកអ៊ីន & បញ្ជាក់ GPS', 'GPS Check-In', 'GPS 实地核验')}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => openGoogleMapsSearchModal('restaurant')}
+              className="py-2 px-3 rounded-xl bg-white/10 hover:bg-white/20 text-emerald-100 border border-white/15 text-[11px] font-bold flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer"
+            >
+              <Globe className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+              <span className="truncate">{tr(language, 'នាំចូលពី Google Maps', 'Import Maps', '导入地图餐厅')}</span>
+            </button>
+          </div>
+        </div>
+      ) : (
+      /* Banner for Restaurant Owners (Regular & VIP Users) */
       <div className="p-4 rounded-3xl bg-gradient-to-br from-amber-600 via-amber-700 to-[#064E3B] text-white shadow-lg border-2 border-amber-300/70 space-y-3 font-khmer">
         <div className="flex items-start justify-between gap-2.5">
           <div className="space-y-1 flex-1 min-w-0">
@@ -335,7 +461,7 @@ export const RestaurantView: React.FC = () => {
           </div>
         </div>
 
-        {/* Multi-Shop Selector Pill Bar (when user/Admin has multiple shops) */}
+        {/* Multi-Shop Selector Pill Bar (when user has multiple shops) */}
         {myOwnedRestaurants.length > 1 && (
           <div className="p-2.5 rounded-2xl bg-black/25 border border-white/20 space-y-1.5">
             <div className="text-[10px] font-bold text-amber-200 flex items-center justify-between">
@@ -429,6 +555,7 @@ export const RestaurantView: React.FC = () => {
           </div>
         </div>
       </div>
+      )}
 
       {/* Restaurant Category Filter Pills */}
       <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 font-khmer">
