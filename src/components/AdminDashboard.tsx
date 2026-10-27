@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
   X, Shield, Utensils, Store, Compass, MessageSquare, 
-  Users, Plus, Trash2, CheckCircle2, AlertTriangle, Settings, 
+  Users, Plus, Trash2, Edit2, CheckCircle2, AlertTriangle, Settings, 
   QrCode, Heart, KeyRound, Lock, ExternalLink, CreditCard,
   ShieldCheck, ShieldAlert, Clock, RefreshCw, FileText, Check, Ban,
   Sparkles, Image as ImageIcon, Search, Camera, Upload
@@ -38,7 +38,7 @@ export const AdminDashboard: React.FC = () => {
     aiCheckIns, approveAiCheckIn, rejectAiCheckIn, mergeAiCheckIn,
     setIsAiCheckInModalOpen, triggerCloudSyncNow, isSyncingUsers, lastUsersSyncedAt, syncUsersNow,
     supportTickets, replyToSupportTicket, updateSupportTicketStatus, approveVipFromSupportTicket, markSupportTicketRead,
-    openGoogleMapsSearchModal
+    openGoogleMapsSearchModal, openManageMyVipStore, setSelectedRestaurant
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<'stats' | 'support_tickets' | 'food' | 'restaurants' | 'destinations' | 'community' | 'users' | 'transactions' | 'settings' | 'security' | 'image_audit' | 'ai_checkins'>(() => {
@@ -117,6 +117,7 @@ export const AdminDashboard: React.FC = () => {
   const [selectedDestForImageEdit, setSelectedDestForImageEdit] = useState<TouristDestination | null>(null);
   const [destSearchQuery, setDestSearchQuery] = useState('');
   const [destProvinceFilter, setDestProvinceFilter] = useState('all');
+  const [adminRestSearchQuery, setAdminRestSearchQuery] = useState('');
 
   // Form states for Settings & Promotional pricing
   const [apkUrl, setApkUrl] = useState(appSettings.apkDownloadUrl);
@@ -2276,6 +2277,17 @@ export const AdminDashboard: React.FC = () => {
                         <div className="flex items-center gap-2 shrink-0 self-end sm:self-center font-khmer">
                           <button
                             type="button"
+                            onClick={() => {
+                              (window as any).__kft_manage_initial_tab = 'info';
+                              openManageMyVipStore(rest.id);
+                            }}
+                            className="px-3 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 text-[11px] font-black shadow-xs flex items-center gap-1 transition cursor-pointer"
+                          >
+                            <Edit2 className="w-3.5 h-3.5" />
+                            <span>{isKm ? 'កែប្រែ' : 'Edit'}</span>
+                          </button>
+                          <button
+                            type="button"
                             onClick={() => approveRestaurant(rest.id)}
                             className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold shadow-xs transition cursor-pointer"
                           >
@@ -2288,6 +2300,14 @@ export const AdminDashboard: React.FC = () => {
                           >
                             {isKm ? '🚫 បដិសេធ' : '🚫 Reject'}
                           </button>
+                          <button
+                            type="button"
+                            onClick={() => deleteRestaurant(rest.id)}
+                            className="px-2.5 py-1.5 rounded-xl bg-rose-100 dark:bg-rose-950/60 hover:bg-rose-600 hover:text-white text-rose-700 dark:text-rose-300 text-[11px] font-bold flex items-center gap-1 transition cursor-pointer"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            <span>{isKm ? 'លុប' : 'Delete'}</span>
+                          </button>
                         </div>
                       </div>
                     ))}
@@ -2295,14 +2315,59 @@ export const AdminDashboard: React.FC = () => {
                 </div>
               )}
 
+              {/* Admin Search Input for Shops */}
+              <div className="relative">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  type="text"
+                  value={adminRestSearchQuery}
+                  onChange={(e) => setAdminRestSearchQuery(e.target.value)}
+                  placeholder={
+                    isKm
+                      ? 'ស្វែងរកហាងតាមឈ្មោះ លេខទូរស័ព្ទ ខេត្ត ម្ចាស់ហាង ឬ ID...'
+                      : 'Search shops by name, phone, province, owner, or ID...'
+                  }
+                  className="w-full pl-10 pr-9 py-2.5 rounded-xl bg-white dark:bg-stone-800 border border-slate-200 dark:border-stone-700 text-xs font-khmer text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+                {adminRestSearchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setAdminRestSearchQuery('')}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-slate-100 dark:hover:bg-stone-700 text-slate-400 hover:text-slate-600 cursor-pointer"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+
               <div className="space-y-2 max-h-[50vh] overflow-y-auto no-scrollbar">
-                {restaurants.map((rest) => (
-                  <div key={rest.id} className="p-3 bg-white dark:bg-stone-800 rounded-2xl border border-slate-200 dark:border-slate-700 dark:border-stone-700 flex items-center justify-between">
-                    <div className="flex items-center gap-3 overflow-hidden">
+                {restaurants
+                  .filter((rest) => {
+                    const q = adminRestSearchQuery.trim().toLowerCase();
+                    if (!q) return true;
+                    return (
+                      (rest.nameKh || '').toLowerCase().includes(q) ||
+                      (rest.nameEn || '').toLowerCase().includes(q) ||
+                      (rest.phone || '').toLowerCase().includes(q) ||
+                      (rest.provinceKh || '').toLowerCase().includes(q) ||
+                      (rest.provinceEn || '').toLowerCase().includes(q) ||
+                      (rest.addressKh || '').toLowerCase().includes(q) ||
+                      (rest.ownerName || '').toLowerCase().includes(q) ||
+                      (rest.ownerPhone || '').toLowerCase().includes(q) ||
+                      (rest.ownerEmail || '').toLowerCase().includes(q) ||
+                      (rest.id || '').toLowerCase().includes(q)
+                    );
+                  })
+                  .map((rest) => (
+                  <div key={rest.id} className="p-3 bg-white dark:bg-stone-800 rounded-2xl border border-slate-200 dark:border-slate-700 dark:border-stone-700 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                    <div
+                      onClick={() => setSelectedRestaurant(rest)}
+                      className="flex items-center gap-3 overflow-hidden cursor-pointer group"
+                    >
                       <img src={rest.photoUrl} alt="rest" className="w-12 h-12 rounded-xl object-cover shrink-0 border border-slate-200 dark:border-slate-700" />
                       <div className="overflow-hidden">
                         <div className="flex items-center gap-1.5 flex-wrap">
-                          <h4 className="font-bold text-[#0F172A] dark:text-stone-100 font-khmer truncate">{rest.nameKh}</h4>
+                          <h4 className="font-bold text-[#0F172A] dark:text-stone-100 font-khmer truncate group-hover:text-emerald-600 transition">{rest.nameKh}</h4>
                           {rest.status === 'pending' && (
                             <span className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 text-[9px] font-bold font-khmer">
                               ⏳ រង់ចាំពិនិត្យ
@@ -2322,7 +2387,7 @@ export const AdminDashboard: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2 shrink-0">
+                    <div className="flex items-center gap-1.5 shrink-0 self-end sm:self-center flex-wrap">
                       {rest.status !== 'approved' && (
                         <button
                           onClick={() => approveRestaurant(rest.id)}
@@ -2333,17 +2398,32 @@ export const AdminDashboard: React.FC = () => {
                       )}
                       <button
                         onClick={() => toggleVerifyRestaurant(rest.id)}
-                        className={`px-2.5 py-1 rounded-lg text-[10px] font-bold font-khmer ${
+                        className={`px-2.5 py-1 rounded-lg text-[10px] font-bold font-khmer cursor-pointer ${
                           rest.isVerified ? 'bg-stone-200 text-stone-700' : 'bg-emerald-600 text-white'
                         }`}
                       >
                         {rest.isVerified ? 'Unverify' : 'Verify'}
                       </button>
                       <button
-                        onClick={() => deleteRestaurant(rest.id)}
-                        className="p-1.5 text-stone-400 hover:text-rose-600"
+                        type="button"
+                        onClick={() => {
+                          (window as any).__kft_manage_initial_tab = 'info';
+                          openManageMyVipStore(rest.id);
+                        }}
+                        className="px-2.5 py-1 rounded-lg text-[10px] font-black font-khmer bg-amber-400 hover:bg-amber-500 text-slate-950 flex items-center gap-1 shadow-xs transition cursor-pointer"
+                        title={isKm ? 'កែប្រែហាង' : 'Edit Shop'}
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Edit2 className="w-3.5 h-3.5" />
+                        <span>{isKm ? 'កែប្រែ' : 'Edit'}</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => deleteRestaurant(rest.id)}
+                        className="px-2.5 py-1 rounded-lg text-[10px] font-bold font-khmer bg-rose-600 hover:bg-rose-700 text-white flex items-center gap-1 shadow-xs transition cursor-pointer"
+                        title={isKm ? 'លុបហាង' : 'Delete Shop'}
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        <span>{isKm ? 'លុប' : 'Delete'}</span>
                       </button>
                     </div>
                   </div>

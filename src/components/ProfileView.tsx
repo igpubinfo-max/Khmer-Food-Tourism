@@ -1596,16 +1596,7 @@ export const ProfileView: React.FC = () => {
                       </button>
 
                       <button
-                        onClick={() => {
-                          const confirmed = window.confirm(
-                            isKm
-                              ? `តើអ្នកពិតជាចង់លុបហាង "${restaurant.nameKh}" មែនទេ?\n(កូតាហាងរបស់អ្នកនឹងត្រូវបានរក្សាទុក ដើម្បីឱ្យអ្នកអាចបង្កើតហាងថ្មីជំនួសវិញដោយឥតគិតថ្លៃ $0)`
-                              : `Are you sure you want to delete "${restaurant.nameEn || restaurant.nameKh}"?\n(Your store slot will be preserved so you can create a replacement store for $0)`
-                          );
-                          if (confirmed) {
-                            deleteRestaurant(restaurant.id);
-                          }
-                        }}
+                        onClick={() => deleteRestaurant(restaurant.id)}
                         className="py-2 px-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs shadow-xs flex items-center justify-center gap-1 transition active:scale-95 cursor-pointer"
                         title={isKm ? 'លុបហាងដើម្បីបង្កើតហាងថ្មី' : 'Delete store'}
                       >

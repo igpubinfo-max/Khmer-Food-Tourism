@@ -34,6 +34,7 @@ const IMMUTABLE_SEED_DEST_MAP = new Map<string, TouristDestination>(
 export const VAULT_KEYS = {
   FOODS: 'kft_permanent_food_overrides_v1',
   RESTAURANTS: 'kft_permanent_restaurant_overrides_v1',
+  DELETED_RESTAURANTS: 'kft_deleted_restaurants_v1',
   DESTINATIONS: 'kft_permanent_destination_overrides_v1',
   DESTINATIONS_LEGACY: 'kft_destination_photo_overrides_v1',
   TRENDING_FOODS: 'kft_permanent_trending_food_overrides_v1',
@@ -138,12 +139,34 @@ export interface TrendingFoodMediaOverride {
 export interface AllMediaOverridesBundle {
   foods: Record<string, FoodMediaOverride>;
   restaurants: Record<string, RestaurantMediaOverride>;
+  deletedRestaurants?: Record<string, string>;
   destinations: Record<string, DestinationMediaOverride>;
   trendingFoods: Record<string, TrendingFoodMediaOverride>;
   updatedAt: string;
 }
 
 const IDB_NAME = 'kft_permanent_media_vault_idb_v1';
+
+export function loadDeletedRestaurantIdsMap(): Record<string, string> {
+  return safeReadJsonMap<string>(VAULT_KEYS.DELETED_RESTAURANTS);
+}
+
+export function saveDeletedRestaurantIdsMap(map: Record<string, string>): void {
+  safeWriteJsonMap(VAULT_KEYS.DELETED_RESTAURANTS, map);
+}
+
+export function isRestaurantIdDeleted(
+  restaurantId: string,
+  itemTimestampIso?: string,
+  deletedMap: Record<string, string> = loadDeletedRestaurantIdsMap()
+): boolean {
+  const deletedAtIso = deletedMap?.[restaurantId];
+  if (!deletedAtIso) return false;
+  if (!itemTimestampIso) return true;
+  const delMs = new Date(deletedAtIso).getTime() || 0;
+  const itemMs = new Date(itemTimestampIso).getTime() || 0;
+  return delMs >= itemMs;
+}
 const IDB_STORE = 'media_overrides';
 const IDB_BUNDLE_KEY = 'master_bundle';
 
@@ -310,6 +333,7 @@ export function loadLocalMediaOverrides(forceDiskRead = false): AllMediaOverride
   }
   const foods = safeReadJsonMap<FoodMediaOverride>(VAULT_KEYS.FOODS);
   const restaurants = safeReadJsonMap<RestaurantMediaOverride>(VAULT_KEYS.RESTAURANTS);
+  const deletedRestaurants = safeReadJsonMap<string>(VAULT_KEYS.DELETED_RESTAURANTS);
   const destinations = safeReadJsonMap<DestinationMediaOverride>(VAULT_KEYS.DESTINATIONS);
   const legacyDest = safeReadJsonMap<{ photoUrl: string; updatedAt?: string }>(VAULT_KEYS.DESTINATIONS_LEGACY);
   const trendingFoods = safeReadJsonMap<TrendingFoodMediaOverride>(VAULT_KEYS.TRENDING_FOODS);
@@ -340,9 +364,9 @@ export function loadLocalMediaOverrides(forceDiskRead = false): AllMediaOverride
     }
   }
 
-  // Strip any accidental unedited seed restaurant entries from restaurants vault
+  // Strip any accidental unedited seed restaurant entries or deleted restaurants from restaurants vault
   for (const [id, restOv] of Object.entries(restaurants)) {
-    if (isFakeSeedRestaurantOverride(restOv)) {
+    if (isFakeSeedRestaurantOverride(restOv) || isRestaurantIdDeleted(id, restOv?.updatedAt, deletedRestaurants)) {
       delete restaurants[id];
     }
   }
@@ -350,6 +374,7 @@ export function loadLocalMediaOverrides(forceDiskRead = false): AllMediaOverride
   const fromDisk: AllMediaOverridesBundle = {
     foods,
     restaurants,
+    deletedRestaurants,
     destinations,
     trendingFoods,
     updatedAt: new Date().toISOString(),
@@ -400,6 +425,9 @@ export function saveLocalMediaOverrides(bundle: AllMediaOverridesBundle): void {
         .filter(([, v]) => v && (v.photoUrl || v.profileImage))
         .map(([k]) => k)
     );
+  }
+  if (bundle.deletedRestaurants && typeof bundle.deletedRestaurants === 'object') {
+    safeWriteJsonMap(VAULT_KEYS.DELETED_RESTAURANTS, bundle.deletedRestaurants);
   }
   const destWritten = safeWriteJsonMap(VAULT_KEYS.DESTINATIONS, bundle.destinations);
   if (destWritten) {
@@ -460,6 +488,19 @@ export function mergeOverrideBundles(
     return out;
   };
 
+  const mergedDeletedRestaurants: Record<string, string> = {
+    ...(base.deletedRestaurants || {}),
+  };
+  if (incoming.deletedRestaurants && typeof incoming.deletedRestaurants === 'object') {
+    for (const [delId, delIso] of Object.entries(incoming.deletedRestaurants)) {
+      if (!delId || !delIso) continue;
+      const curIso = mergedDeletedRestaurants[delId];
+      if (!curIso || (new Date(delIso).getTime() || 0) >= (new Date(curIso).getTime() || 0)) {
+        mergedDeletedRestaurants[delId] = delIso;
+      }
+    }
+  }
+
   const mergedRestaurants = mergeMaps(base.restaurants, incoming.restaurants || {});
   for (const id of Object.keys(mergedRestaurants)) {
     const a = base.restaurants?.[id];
@@ -481,14 +522,17 @@ export function mergeOverrideBundles(
     }
   }
   for (const [id, restOv] of Object.entries(mergedRestaurants)) {
-    if (isFakeSeedRestaurantOverride(restOv)) {
+    if (isFakeSeedRestaurantOverride(restOv) || isRestaurantIdDeleted(id, restOv?.updatedAt, mergedDeletedRestaurants)) {
       delete mergedRestaurants[id];
+    } else if (mergedDeletedRestaurants[id]) {
+      delete mergedDeletedRestaurants[id];
     }
   }
 
   return {
     foods: mergeMaps(base.foods, incoming.foods || {}),
     restaurants: mergedRestaurants,
+    deletedRestaurants: mergedDeletedRestaurants,
     destinations: mergeMaps(base.destinations, incoming.destinations || {}),
     trendingFoods: mergeMaps(base.trendingFoods, incoming.trendingFoods || {}),
     updatedAt: new Date().toISOString(),
@@ -604,23 +648,33 @@ export function recordPermanentRestaurantOverride(rest: Restaurant): void {
     updatedAt: now,
   };
   bundle.restaurants[rest.id] = overrideRecord;
+  if (bundle.deletedRestaurants && bundle.deletedRestaurants[rest.id]) {
+    delete bundle.deletedRestaurants[rest.id];
+    saveDeletedRestaurantIdsMap(bundle.deletedRestaurants);
+  }
   bundle.updatedAt = now;
   saveLocalMediaOverrides(bundle);
   syncSingleOverrideRecordToCloud('rest', rest.id, overrideRecord, bundle).catch(() => {});
 }
 
 /**
- * Remove a deleted restaurant from the permanent override vault.
+ * Remove a deleted restaurant from the permanent override vault and record a permanent deletion tombstone.
  */
 export function removePermanentRestaurantOverride(restaurantId: string): void {
   const bundle = loadLocalMediaOverrides();
+  const now = new Date().toISOString();
+  if (!bundle.deletedRestaurants) {
+    bundle.deletedRestaurants = loadDeletedRestaurantIdsMap();
+  }
+  bundle.deletedRestaurants[restaurantId] = now;
+  saveDeletedRestaurantIdsMap(bundle.deletedRestaurants);
   if (bundle.restaurants[restaurantId]) {
     delete bundle.restaurants[restaurantId];
-    bundle.updatedAt = new Date().toISOString();
-    saveLocalMediaOverrides(bundle);
-    deleteCloudDocument(`${VAULT_KEYS.CLOUD_RECORD_PREFIX}rest_${restaurantId}`).catch(() => {});
-    pushMediaOverridesToCloud(bundle).catch(() => {});
   }
+  bundle.updatedAt = now;
+  saveLocalMediaOverrides(bundle);
+  deleteCloudDocument(`${VAULT_KEYS.CLOUD_RECORD_PREFIX}rest_${restaurantId}`).catch(() => {});
+  pushMediaOverridesToCloud(bundle).catch(() => {});
 }
 
 /**
@@ -772,10 +826,17 @@ export function applyRestaurantOverrides(
   restaurants: Restaurant[],
   overridesMap: Record<string, RestaurantMediaOverride> = loadLocalMediaOverrides().restaurants
 ): Restaurant[] {
-  if (!overridesMap || Object.keys(overridesMap).length === 0) return restaurants;
+  const deletedMap = loadLocalMediaOverrides().deletedRestaurants || loadDeletedRestaurantIdsMap();
+  const hasDeleted = Object.keys(deletedMap).length > 0;
+  const filteredBase = hasDeleted
+    ? restaurants.filter(
+        (r) => !isRestaurantIdDeleted(r.id, r.updatedAt || r.photoUpdatedAt || r.adminEditedAt || r.createdAt, deletedMap)
+      )
+    : restaurants;
+  let anyChanged = filteredBase.length !== restaurants.length;
+  if (!overridesMap || Object.keys(overridesMap).length === 0) return anyChanged ? filteredBase : restaurants;
   const seenIds = new Set<string>();
-  let anyChanged = false;
-  const mapped = restaurants.map((r) => {
+  const mapped = filteredBase.map((r) => {
     seenIds.add(r.id);
     const ov = overridesMap[r.id];
     if (!ov) return r;
@@ -871,9 +932,9 @@ export function applyRestaurantOverrides(
     };
   });
 
-  // Also append any custom VIP/Admin restaurants present in overridesMap that aren't in the list yet
+  // Also append any custom VIP/Admin restaurants present in overridesMap that aren't in the list yet (excluding deleted restaurants)
   for (const [ovId, ov] of Object.entries(overridesMap)) {
-    if (!seenIds.has(ovId) && ov && ov.nameKh && (ov.photoUrl || ov.profileImage)) {
+    if (!seenIds.has(ovId) && ov && ov.nameKh && (ov.photoUrl || ov.profileImage) && !isRestaurantIdDeleted(ovId, ov.updatedAt, deletedMap)) {
       anyChanged = true;
       seenIds.add(ovId);
       const photoUrl = ov.photoUrl || ov.profileImage || '/Shop/rest-1.jpg';

@@ -49,6 +49,9 @@ export const AddRestaurantModal: React.FC = () => {
     restaurants,
     setManagingRestaurant,
     setIsManageMenuModalOpen,
+    setIsVipAddRestaurantModalOpen,
+    getOwnedRestaurantsForUser,
+    getCurrentUserStoreQuota,
     openUpgradeVipModal,
   } = useApp();
 
@@ -61,9 +64,11 @@ export const AddRestaurantModal: React.FC = () => {
   const vipState = getVipAccountState(currentUser);
   const isAuthorized = isAdmin || isApprovedVip;
 
+  const ownedRestaurants = getOwnedRestaurantsForUser(currentUser);
+  const storeQuota = getCurrentUserStoreQuota(currentUser);
   const existingOwnedRestaurant =
-    currentUser && currentUser.role !== 'admin'
-      ? restaurants.find((r) => r.ownerId === currentUser.id)
+    currentUser && currentUser.role !== 'admin' && !storeQuota.canAddWithoutNewPayment
+      ? ownedRestaurants[0]
       : undefined;
 
   const [step, setStep] = useState<1 | 2>(1);
@@ -471,19 +476,40 @@ export const AddRestaurantModal: React.FC = () => {
         ) : existingOwnedRestaurant ? (
           <div className="p-5 space-y-4 font-khmer text-xs">
             <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border-2 border-amber-400 space-y-2">
-              <div className="flex items-center gap-2 text-amber-800 dark:text-amber-300 font-bold text-sm">
-                <Store className="w-5 h-5 shrink-0" />
-                <span>
-                  {isKm
-                    ? 'គណនីនីមួយៗអាចបង្កើតបានត្រឹមតែ ១ ហាងប៉ុណ្ណោះ'
-                    : 'Each User Can Add Only 1 Restaurant'}
+              <div className="flex items-center justify-between gap-2 text-amber-800 dark:text-amber-300 font-bold text-sm">
+                <div className="flex items-center gap-2">
+                  <Store className="w-5 h-5 shrink-0" />
+                  <span>
+                    {isKm
+                      ? `ការបន្ថែមហាងទី ${storeQuota.nextStoreSlotNumber} តម្រូវឱ្យបង់ប្រាក់បន្ថែម`
+                      : `Adding Shop #${storeQuota.nextStoreSlotNumber} Requires Additional Payment`}
+                  </span>
+                </div>
+                <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 font-mono font-black text-xs shrink-0">
+                  +${storeQuota.additionalStoreFeeUsd.toFixed(2)} USD
                 </span>
               </div>
               <p className="text-[11px] text-slate-700 dark:text-slate-300 leading-relaxed">
                 {isKm
-                  ? `គណនីរបស់លោកអ្នកមានហាង "${existingOwnedRestaurant.nameKh}" រួចហើយ។ សូមកែប្រែហាងដែលមានស្រាប់ ឬលុបហាងចាស់ជាមុនសិន មុននឹងបន្ថែមហាងថ្មី។`
-                  : `You already own "${existingOwnedRestaurant.nameEn || existingOwnedRestaurant.nameKh}". Please edit your existing restaurant or delete it before adding another.`}
+                  ? `ហាងទី ១ "${existingOwnedRestaurant.nameKh}" ត្រូវបានរួមបញ្ចូលក្នុងកញ្ចប់ VIP រួចហើយ។ ការបន្ថែមហាងទី ${storeQuota.nextStoreSlotNumber} តម្រូវឱ្យបង់ប្រាក់បន្ថែម ${storeQuota.additionalStoreFeeUsd.toFixed(2)} USD ឬអ្នកអាចកែប្រែហាងដែលមានស្រាប់ដោយឥតគិតថ្លៃ ($0)។`
+                  : `Your 1st shop "${existingOwnedRestaurant.nameEn || existingOwnedRestaurant.nameKh}" is covered by your VIP subscription. Adding Shop #${storeQuota.nextStoreSlotNumber} requires a separate ${storeQuota.additionalStoreFeeUsd.toFixed(2)} USD fee, or you can edit your existing shop for free ($0).`}
               </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsAddRestaurantModalOpen(false);
+                  (window as any).__kft_vip_store_initial_mode = { mode: 'create' };
+                  setIsVipAddRestaurantModalOpen(true);
+                }}
+                className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 text-slate-950 font-black text-xs shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                <CreditCard className="w-4 h-4" />
+                <span>
+                  {isKm
+                    ? `💳 បន្តទៅបង់ប្រាក់បន្ថែមហាងទី ${storeQuota.nextStoreSlotNumber} (+${storeQuota.additionalStoreFeeUsd.toFixed(2)} USD)`
+                    : `💳 Proceed to Add Shop #${storeQuota.nextStoreSlotNumber} (+${storeQuota.additionalStoreFeeUsd.toFixed(2)} USD)`}
+                </span>
+              </button>
             </div>
 
             <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center gap-3">
@@ -523,17 +549,7 @@ export const AddRestaurantModal: React.FC = () => {
               {deleteRestaurant && (
                 <button
                   type="button"
-                  onClick={() => {
-                    if (
-                      window.confirm(
-                        isKm
-                          ? `តើអ្នកពិតជាចង់លុបហាង "${existingOwnedRestaurant.nameKh}" មែនទេ? ក្រោយពេលលុប អ្នកអាចបង្កើតហាងថ្មីជំនួសវិញបានភ្លាមៗ។`
-                          : `Delete "${existingOwnedRestaurant.nameEn || existingOwnedRestaurant.nameKh}" so you can add a new restaurant?`
-                      )
-                    ) {
-                      deleteRestaurant(existingOwnedRestaurant.id);
-                    }
-                  }}
+                  onClick={() => deleteRestaurant(existingOwnedRestaurant.id)}
                   className="w-full py-3 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-sm flex items-center justify-center gap-2 transition cursor-pointer"
                 >
                   <Trash2 className="w-4 h-4" />

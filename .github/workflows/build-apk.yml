@@ -35,8 +35,18 @@ jobs:
       - name: 4. Install Dependencies
         run: npm install
 
-      - name: 5. Build Web Bundle
+      - name: 5. Sync Version & Build Web Bundle
         run: |
+          CURRENT_VC=$(grep -oP 'versionCode\s+\K[0-9]+' android/app/build.gradle || echo 114)
+          AUTO_VC=$((100 + ${{ github.run_number }}))
+          if [ "$CURRENT_VC" -gt "$AUTO_VC" ]; then
+            FINAL_VC=$CURRENT_VC
+          else
+            FINAL_VC=$AUTO_VC
+          fi
+          sed -i "s/versionCode [0-9]\+/versionCode $FINAL_VC/g" android/app/build.gradle
+          sed -i "s/APP_BUILD_CODE: number = .*/APP_BUILD_CODE: number = $FINAL_VC;/g" src/types/index.ts
+          echo "Synchronized Android versionCode and APP_BUILD_CODE to $FINAL_VC"
           npm run build
           cp dist/index.html dist/404.html
 
@@ -63,9 +73,8 @@ jobs:
               -keypass 'KhmerFood2026PlayStore' \
               -dname "CN=Savuth Chea, OU=Khmer Food and Tourism, O=Khmer Food and Tourism, L=Phnom Penh, ST=Phnom Penh, C=KH"
           fi
-          AUTO_VC=$((100 + ${{ github.run_number }}))
-          sed -i "s/versionCode [0-9]\+/versionCode $AUTO_VC/g" android/app/build.gradle
-          echo "Set Android versionCode to $AUTO_VC"
+          FINAL_VC=$(grep -oP 'versionCode\s+\K[0-9]+' android/app/build.gradle || echo 114)
+          echo "Building Android APK with versionCode $FINAL_VC"
           cd android
           chmod +x ./gradlew
           ./gradlew assembleRelease --no-daemon -x lint -x lintVitalRelease || ./gradlew assembleDebug --no-daemon

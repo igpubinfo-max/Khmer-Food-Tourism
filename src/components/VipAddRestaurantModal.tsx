@@ -18,8 +18,11 @@ import {
   MapPin,
   Phone,
   Image as ImageIcon,
+  Crown,
+  CreditCard,
+  Clock,
 } from 'lucide-react';
-import { RestaurantPriceLevel, GoogleMapsPlaceMetadata } from '../types';
+import { RestaurantPriceLevel, GoogleMapsPlaceMetadata, isUserVipActive, getDynamicVipPlans } from '../types';
 import {
   pickImageUsingNativeAndroidGallery,
   pickMultipleImagesUsingNativeAndroidGallery,
@@ -85,6 +88,7 @@ export const VipAddRestaurantModal: React.FC = () => {
     setIsAuthModalOpen,
     appSettings,
     restaurants,
+    openUpgradeVipModal,
   } = useApp();
 
   const isKm = language === 'km';
@@ -94,8 +98,11 @@ export const VipAddRestaurantModal: React.FC = () => {
     currentUser?.username === 'admin' ||
     currentUser?.username === 'cheasavuth';
 
+  const isApprovedVip = isUserVipActive(currentUser);
+  const dynamicPlans = getDynamicVipPlans(appSettings);
   const quota = getCurrentUserStoreQuota(currentUser);
   const ownedRestaurants = getOwnedRestaurantsForUser(currentUser);
+  const requiresAdditionalPayment = !isAdmin && !replacingStoreId && quota.remainingAvailableSlots <= 0;
 
   // Simple 2-Tab Navigation: 'create_form' (Default!) or 'my_stores' or 'pay_additional_slot'
   const [activeTab, setActiveTab] = useState<'create_form' | 'my_stores' | 'pay_additional_slot'>('create_form');
@@ -525,6 +532,13 @@ export const VipAddRestaurantModal: React.FC = () => {
               <h3 className="font-moul text-sm text-white truncate">
                 {targetReplacingStore
                   ? tr(language, '🔄 ប្តូរដាក់ហាងថ្មី ($0)', '🔄 Replace with New Shop ($0)', '🔄 更换为新店铺 ($0)')
+                  : requiresAdditionalPayment
+                  ? tr(
+                      language,
+                      `🏪 បន្ថែមហាងទី ${quota.nextStoreSlotNumber} (+${quota.additionalStoreFeeUsd.toFixed(2)} USD)`,
+                      `🏪 Add Shop #${quota.nextStoreSlotNumber} (+${quota.additionalStoreFeeUsd.toFixed(2)} USD)`,
+                      `🏪 添加第 ${quota.nextStoreSlotNumber} 家店铺 (+${quota.additionalStoreFeeUsd.toFixed(2)} USD)`
+                    )
                   : tr(language, '🏪 បង្កើត និងបន្ថែមហាងថ្មី', '🏪 Create & Add New Shop', '🏪 创建与添加新店铺')}
               </h3>
               <p className="text-[11px] text-emerald-100 font-khmer truncate">
@@ -534,6 +548,13 @@ export const VipAddRestaurantModal: React.FC = () => {
                       `កំពុងប្តូរជំនួសហាង «${targetReplacingStore.nameKh}»`,
                       `Replacing "${targetReplacingStore.nameEn || targetReplacingStore.nameKh}"`,
                       `正在替换“${targetReplacingStore.nameEn || targetReplacingStore.nameKh}”`
+                    )
+                  : requiresAdditionalPayment
+                  ? tr(
+                      language,
+                      `ហាងទី ១ ឥតគិតថ្លៃ • ហាងបន្ថែមតម្រូវឱ្យបង់ប្រាក់ +${quota.additionalStoreFeeUsd.toFixed(2)} USD / ១ ហាង`,
+                      `1st shop included with VIP • Each extra shop requires +${quota.additionalStoreFeeUsd.toFixed(2)} USD`,
+                      `首店包含在 VIP 中 • 每增加一家店铺需支付 +${quota.additionalStoreFeeUsd.toFixed(2)} USD`
                     )
                   : tr(
                       language,
@@ -575,8 +596,15 @@ export const VipAddRestaurantModal: React.FC = () => {
               <PlusCircle className="w-4 h-4" />
               <span>
                 {targetReplacingStore
-                  ? tr(language, 'កែប្តូរហាងថ្មី', 'Replace Shop', '更换新店')
-                  : tr(language, 'បង្កើតហាងថ្មី', 'Create New Shop', '创建新店铺')}
+                  ? tr(language, 'កែប្តូរហាងថ្មី ($0)', 'Replace Shop ($0)', '更换新店 ($0)')
+                  : quota.canAddWithoutNewPayment
+                  ? tr(language, 'បង្កើតហាងថ្មី ($0)', 'Create New Shop ($0)', '创建新店铺 ($0)')
+                  : tr(
+                      language,
+                      `បន្ថែមហាងថ្មី (+${quota.additionalStoreFeeUsd.toFixed(2)})`,
+                      `Add New Shop (+${quota.additionalStoreFeeUsd.toFixed(2)})`,
+                      `添加新店 (+${quota.additionalStoreFeeUsd.toFixed(2)})`
+                    )}
               </span>
             </button>
 
@@ -628,6 +656,34 @@ export const VipAddRestaurantModal: React.FC = () => {
               className="px-6 py-2.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-xs shadow-md transition cursor-pointer"
             >
               {tr(language, 'ចូលគណនីឥឡូវនេះ', 'Sign In Now', '立即登录')}
+            </button>
+          </div>
+        ) : !isAdmin && !isApprovedVip ? (
+          <div className="p-6 text-center space-y-3.5 font-khmer">
+            <div className="w-14 h-14 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-600 flex items-center justify-center mx-auto shadow-xs">
+              <Crown className="w-7 h-7" />
+            </div>
+            <h4 className="font-moul text-sm text-slate-900 dark:text-white">
+              {tr(language, '🔒 សម្រាប់សមាជិក VIP សកម្មប៉ុណ្ណោះ', '🔒 Active VIP Membership Required', '🔒 仅限活跃 VIP 会员')}
+            </h4>
+            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+              {tr(
+                language,
+                `កញ្ចប់ VIP រួមបញ្ចូលសិទ្ធិបង្កើតហាងទី ១ ដោយឥតគិតថ្លៃ ($0)។ សូមដំឡើង ឬបន្តសមាជិកភាព VIP (${dynamicPlans.quarterly.priceUsd.toFixed(2)} / ${dynamicPlans.quarterly.durationDays} ថ្ងៃ ឬ ${dynamicPlans.annual.priceUsd.toFixed(2)} / ${dynamicPlans.annual.durationDays} ថ្ងៃ) ជាមុនសិន!`,
+                `Your 1st shop is included with an active VIP subscription ($0). Please upgrade or renew VIP (${dynamicPlans.quarterly.priceUsd.toFixed(2)} or ${dynamicPlans.annual.priceUsd.toFixed(2)}) first!`,
+                `VIP 会员免费包含第 1 家店铺 ($0)。请先开通或续费 VIP 套餐！`
+              )}
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                setIsVipAddRestaurantModalOpen(false);
+                openUpgradeVipModal();
+              }}
+              className="w-full py-3 rounded-2xl bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 text-slate-950 font-black text-xs shadow-md flex items-center justify-center gap-2 transition cursor-pointer"
+            >
+              <Crown className="w-4 h-4 fill-slate-950" />
+              <span>{tr(language, '👑 ដំឡើងទៅកញ្ចប់ VIP ឥឡូវនេះ', '👑 Upgrade to VIP Now', '👑 立即升级 VIP')}</span>
             </button>
           </div>
         ) : activeTab === 'my_stores' ? (
@@ -720,7 +776,7 @@ export const VipAddRestaurantModal: React.FC = () => {
 
                     <button
                       type="button"
-                      onClick={() => setConfirmDeleteStoreId(store.id)}
+                      onClick={() => deleteRestaurant(store.id)}
                       className="py-2 px-2 rounded-xl bg-rose-100 hover:bg-rose-600 hover:text-white dark:bg-rose-950/50 text-rose-700 dark:text-rose-300 font-bold text-[11px] flex items-center justify-center gap-1 transition cursor-pointer"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -740,7 +796,16 @@ export const VipAddRestaurantModal: React.FC = () => {
               className="w-full py-3 rounded-2xl bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 text-slate-950 font-black text-xs shadow-sm flex items-center justify-center gap-2 transition cursor-pointer"
             >
               <PlusCircle className="w-4 h-4" />
-              <span>{tr(language, '+ បង្កើតហាងថ្មីមួយទៀត', '+ Create Another Shop', '+ 再创建一家新店铺')}</span>
+              <span>
+                {quota.canAddWithoutNewPayment
+                  ? tr(language, '+ បង្កើតហាងថ្មីមួយទៀត ($0)', '+ Create Another Shop ($0)', '+ 再创建一家新店铺 ($0)')
+                  : tr(
+                      language,
+                      `+ បន្ថែមហាងទី ${quota.nextStoreSlotNumber} (+${quota.additionalStoreFeeUsd.toFixed(2)} USD)`,
+                      `+ Add Shop #${quota.nextStoreSlotNumber} (+${quota.additionalStoreFeeUsd.toFixed(2)} USD)`,
+                      `+ 添加第 ${quota.nextStoreSlotNumber} 家店铺 (+${quota.additionalStoreFeeUsd.toFixed(2)} USD)`
+                    )}
+              </span>
             </button>
           </div>
         ) : activeTab === 'pay_additional_slot' ? (
@@ -764,6 +829,54 @@ export const VipAddRestaurantModal: React.FC = () => {
                 +${quota.additionalStoreFeeUsd.toFixed(2)} USD / 1 {tr(language, 'ហាងបន្ថែម', 'Extra Shop', '额外店铺')}
               </span>
             </div>
+
+            <div className="p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-400/80 space-y-1.5">
+              <div className="font-bold text-amber-900 dark:text-amber-200 flex items-center justify-between">
+                <span>
+                  {tr(
+                    language,
+                    `🏪 តម្លៃបន្ថែមហាងទី ${quota.nextStoreSlotNumber}`,
+                    `🏪 Additional Shop #${quota.nextStoreSlotNumber} Fee`,
+                    `🏪 第 ${quota.nextStoreSlotNumber} 家额外店铺费用`
+                  )}
+                </span>
+                <span className="font-mono font-black text-emerald-700 dark:text-emerald-300 text-sm">
+                  +${quota.additionalStoreFeeUsd.toFixed(2)} USD
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-700 dark:text-slate-200 leading-relaxed">
+                {tr(
+                  language,
+                  `ហាងទី ១ ត្រូវបានរួមបញ្ចូលក្នុងកញ្ចប់ VIP រួចហើយ ($0)។ រាល់ការបន្ថែមហាងទី ២ ឬហាងបន្តបន្ទាប់ តម្រូវឱ្យបង់ប្រាក់បន្ថែម ${quota.additionalStoreFeeUsd.toFixed(2)} USD ក្នុង ១ ហាង ហើយហាងបន្ថែមនឹងត្រូវបើកដំណើរការក្រោយពេលការទូទាត់ត្រូវបានផ្ទៀងផ្ទាត់ និងអនុម័ត។`,
+                  `Your 1st shop is covered by your VIP subscription ($0). Each additional shop requires a separate ${quota.additionalStoreFeeUsd.toFixed(2)} USD payment and will be activated once payment is verified and approved.`,
+                  `您的第 1 家店铺已包含在 VIP 订阅中 ($0)。每增加一家额外店铺需单独支付 ${quota.additionalStoreFeeUsd.toFixed(2)} USD，付款经核实批准后即可激活。`
+                )}
+              </p>
+            </div>
+
+            {quota.pendingAdditionalStoreTransaction && (
+              <div className="p-3 rounded-2xl bg-blue-50 dark:bg-blue-950/50 border border-blue-400/70 space-y-1">
+                <div className="font-bold text-blue-900 dark:text-blue-200 flex items-center gap-1.5 text-xs">
+                  <Clock className="w-4 h-4 text-blue-600 shrink-0" />
+                  <span>
+                    {tr(
+                      language,
+                      '⏳ សំណើទូទាត់បន្ថែមហាងកំពុងរង់ចាំការផ្ទៀងផ្ទាត់',
+                      '⏳ Additional Shop Payment Pending Verification',
+                      '⏳ 额外店铺付款正在等待审核'
+                    )}
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-600 dark:text-slate-300">
+                  {tr(
+                    language,
+                    `លេខសម្គាល់៖ ${quota.pendingAdditionalStoreTransaction.id} • ហាងបន្ថែមនឹងអាចបង្កើត និងបើកដំណើរការភ្លាមៗក្រោយពេល Admin ផ្ទៀងផ្ទាត់ និងអនុម័តការទូទាត់។`,
+                    `Ref: ${quota.pendingAdditionalStoreTransaction.id} • Your extra shop slot will unlock as soon as payment is verified and approved.`,
+                    `单号：${quota.pendingAdditionalStoreTransaction.id} • 付款审核通过后将立即解锁额外店铺名额。`
+                  )}
+                </p>
+              </div>
+            )}
 
             {ownedRestaurants[0] && (
               <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-400 space-y-2">
@@ -869,6 +982,80 @@ export const VipAddRestaurantModal: React.FC = () => {
             noValidate
             className="p-4 space-y-3.5 overflow-y-auto flex-1 font-khmer text-xs"
           >
+            {/* Store Quota & Additional Shop Fee Notice (Displayed upfront before confirming!) */}
+            {requiresAdditionalPayment ? (
+              <div className="p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/50 border-2 border-amber-400 space-y-2 shadow-2xs">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="font-bold text-amber-900 dark:text-amber-200 text-xs flex items-center gap-1.5">
+                    <CreditCard className="w-4 h-4 text-amber-600 shrink-0" />
+                    <span>
+                      {tr(
+                        language,
+                        `បន្ថែមហាងទី ${quota.nextStoreSlotNumber} (ហាងបន្ថែម)`,
+                        `Adding Shop #${quota.nextStoreSlotNumber} (Additional Shop)`,
+                        `添加第 ${quota.nextStoreSlotNumber} 家店铺（额外店铺）`
+                      )}
+                    </span>
+                  </div>
+                  <span className="px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-950 font-mono font-black text-xs shrink-0">
+                    +${quota.additionalStoreFeeUsd.toFixed(2)} USD
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-700 dark:text-slate-200 leading-relaxed">
+                  {tr(
+                    language,
+                    `ហាងទី ១ ត្រូវបានរួមបញ្ចូលក្នុងកញ្ចប់ VIP រួចហើយ (${quota.usedStoresCount}/${quota.totalAllowedStores} ហាង)។ ការបន្ថែមហាងទី ${quota.nextStoreSlotNumber} តម្រូវឱ្យបង់ប្រាក់បន្ថែម ${quota.additionalStoreFeeUsd.toFixed(2)} USD ហើយហាងនឹងបើកដំណើរការក្រោយពេលការទូទាត់ត្រូវបានផ្ទៀងផ្ទាត់ និងអនុម័ត។`,
+                    `Your 1st shop is covered by your VIP subscription (${quota.usedStoresCount}/${quota.totalAllowedStores} used). Adding Shop #${quota.nextStoreSlotNumber} requires an additional ${quota.additionalStoreFeeUsd.toFixed(2)} USD fee and will be activated after payment verification.`,
+                    `第 1 家店铺已包含在 VIP 套餐中（已用 ${quota.usedStoresCount}/${quota.totalAllowedStores}）。添加第 ${quota.nextStoreSlotNumber} 家店铺需额外支付 ${quota.additionalStoreFeeUsd.toFixed(2)} USD，付款审核通过后激活。`
+                  )}
+                </p>
+                <div className="flex flex-wrap gap-2 pt-0.5">
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('pay_additional_slot')}
+                    className="flex-1 py-2 px-3 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 text-slate-950 font-black text-[11px] flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer"
+                  >
+                    <QrCode className="w-3.5 h-3.5" />
+                    <span>
+                      {tr(
+                        language,
+                        `បង់ប្រាក់បន្ថែមហាងឥឡូវនេះ (+${quota.additionalStoreFeeUsd.toFixed(2)} USD)`,
+                        `Pay Extra Shop Fee Now (+${quota.additionalStoreFeeUsd.toFixed(2)} USD)`,
+                        `立即支付额外店铺费 (+${quota.additionalStoreFeeUsd.toFixed(2)} USD)`
+                      )}
+                    </span>
+                  </button>
+                  {ownedRestaurants[0] && (
+                    <button
+                      type="button"
+                      onClick={() => beginReplaceStore(ownedRestaurants[0])}
+                      className="py-2 px-3 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-[11px] flex items-center justify-center gap-1 cursor-pointer"
+                    >
+                      <RefreshCw className="w-3 h-3" />
+                      <span>{tr(language, 'ប្តូរហាងចាស់ ($0)', 'Replace ($0)', '更换旧店 ($0)')}</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+            ) : !isAdmin ? (
+              <div className="px-3 py-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-400/50 flex items-center justify-between text-[11px]">
+                <span className="font-bold text-emerald-900 dark:text-emerald-200">
+                  {targetReplacingStore
+                    ? tr(language, '🔄 កែប្តូរជំនួសហាងដែលមានស្រាប់', '🔄 Replacing Existing Shop', '🔄 更换现有店铺')
+                    : quota.usedStoresCount === 0
+                    ? tr(language, '🎁 ហាងទី ១ រួមបញ្ចូលក្នុងកញ្ចប់ VIP', '🎁 1st Shop Included with VIP', '🎁 首店包含在 VIP 套餐中')
+                    : tr(
+                        language,
+                        `✅ កូតាហាងបន្ថែមដែលបានផ្ទៀងផ្ទាត់ (${quota.usedStoresCount + 1}/${quota.totalAllowedStores})`,
+                        `✅ Verified Store Slot (${quota.usedStoresCount + 1}/${quota.totalAllowedStores})`,
+                        `✅ 已核实额外店铺名额 (${quota.usedStoresCount + 1}/${quota.totalAllowedStores})`
+                      )}
+                </span>
+                <span className="px-2 py-0.5 rounded-full bg-emerald-600 text-white font-mono font-bold text-[10px]">
+                  $0.00
+                </span>
+              </div>
+            ) : null}
             {/* Option: Manual Entry vs. Import from Google Maps */}
             <div className="p-3 rounded-2xl bg-gradient-to-r from-emerald-50 via-teal-50 to-amber-50 dark:from-emerald-950/50 dark:via-slate-800 dark:to-slate-800 border border-emerald-400/50 dark:border-emerald-500/40 space-y-2">
               <div className="flex items-center justify-between gap-2">
@@ -1236,18 +1423,48 @@ export const VipAddRestaurantModal: React.FC = () => {
             </div>
 
             {/* Submit Button */}
-            <div className="pt-1">
+            <div className="pt-1 space-y-2">
+              {requiresAdditionalPayment && (
+                <div className="px-3 py-2 rounded-xl bg-amber-100/80 dark:bg-amber-950/60 border border-amber-400/70 flex items-center justify-between text-[11px] font-bold text-amber-950 dark:text-amber-200">
+                  <span>
+                    {tr(
+                      language,
+                      `តម្លៃបន្ថែមហាងទី ${quota.nextStoreSlotNumber}៖`,
+                      `Additional Shop #${quota.nextStoreSlotNumber} Fee:`,
+                      `第 ${quota.nextStoreSlotNumber} 家店铺费用：`
+                    )}
+                  </span>
+                  <span className="font-mono font-black text-emerald-700 dark:text-emerald-300">
+                    +${quota.additionalStoreFeeUsd.toFixed(2)} USD
+                  </span>
+                </div>
+              )}
               <button
                 type="submit"
                 disabled={isSaving || isUploadingPhoto}
-                className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-[#064E3B] via-emerald-700 to-[#047857] hover:from-emerald-800 hover:to-emerald-700 disabled:opacity-60 text-white font-extrabold text-sm shadow-lg flex items-center justify-center gap-2 transition active:scale-98 cursor-pointer"
+                className={`w-full py-3.5 px-4 rounded-2xl disabled:opacity-60 font-extrabold text-sm shadow-lg flex items-center justify-center gap-2 transition active:scale-98 cursor-pointer ${
+                  requiresAdditionalPayment
+                    ? 'bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-500 text-slate-950'
+                    : 'bg-gradient-to-r from-[#064E3B] via-emerald-700 to-[#047857] hover:from-emerald-800 hover:to-emerald-700 text-white'
+                }`}
               >
-                <CheckCircle2 className="w-5 h-5 text-amber-300 shrink-0" />
+                {requiresAdditionalPayment ? (
+                  <CreditCard className="w-5 h-5 text-slate-950 shrink-0" />
+                ) : (
+                  <CheckCircle2 className="w-5 h-5 text-amber-300 shrink-0" />
+                )}
                 <span>
                   {isSaving
                     ? tr(language, '⏳ កំពុងរក្សាទុកហាង...', '⏳ Saving Shop...', '⏳ 正在保存店铺...')
                     : targetReplacingStore
-                    ? tr(language, '🔄 រក្សាទុកការប្តូរហាងថ្មីឥឡូវនេះ', '🔄 Save & Replace Shop Now', '🔄 立即保存并更换店铺')
+                    ? tr(language, '🔄 រក្សាទុកការប្តូរហាងថ្មីឥឡូវនេះ ($0)', '🔄 Save & Replace Shop Now ($0)', '🔄 立即保存并更换店铺 ($0)')
+                    : requiresAdditionalPayment
+                    ? tr(
+                        language,
+                        `💳 បន្តទៅបង់ប្រាក់ +${quota.additionalStoreFeeUsd.toFixed(2)} USD ដើម្បីបន្ថែមហាងទី ${quota.nextStoreSlotNumber}`,
+                        `💳 Pay +${quota.additionalStoreFeeUsd.toFixed(2)} USD to Add Shop #${quota.nextStoreSlotNumber}`,
+                        `💳 支付 +${quota.additionalStoreFeeUsd.toFixed(2)} USD 添加第 ${quota.nextStoreSlotNumber} 家店铺`
+                      )
                     : tr(language, '✅ បង្កើតហាងឥឡូវនេះ (រួចបន្ថែមមុខម្ហូប)', '✅ Create Shop Now (& Add Dishes)', '✅ 立即创建店铺（并添加菜品）')}
                 </span>
               </button>

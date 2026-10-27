@@ -23,6 +23,7 @@ import { AdminLoginModal } from './components/AdminLoginModal';
 const InstallModal = lazy(() => import('./components/InstallModal').then((m) => ({ default: m.InstallModal })));
 const SupportModal = lazy(() => import('./components/SupportModal').then((m) => ({ default: m.SupportModal })));
 import { ExitConfirmModal } from './components/ExitConfirmModal';
+import { DeleteShopConfirmModal } from './components/DeleteShopConfirmModal';
 const WhatToEatModal = lazy(() => import('./components/WhatToEatModal').then((m) => ({ default: m.WhatToEatModal })));
 const NearMeModal = lazy(() => import('./components/NearMeModal').then((m) => ({ default: m.NearMeModal })));
 const DailyDiscoveriesModal = lazy(() => import('./components/DailyDiscoveriesModal').then((m) => ({ default: m.DailyDiscoveriesModal })));
@@ -265,6 +266,7 @@ const MainScreen: React.FC = () => {
       {selectedFood && <FoodDetailModal />}
       {selectedRestaurant && <RestaurantDetailModal />}
       {selectedDestination && <TouristDetailModal />}
+      <DeleteShopConfirmModal />
 
       {/* Notifications */}
       {toast && <Toast />}

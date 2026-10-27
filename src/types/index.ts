@@ -1,7 +1,8 @@
 export const APP_VERSION = 'v2.3.1';
 export const APP_VERSION_NAME = '2.3.1';
-export const APP_BUILD_CODE = 112;
-export const APP_RELEASE_DATE = '2026-10-26';
+declare const __KFT_BUILD_CODE__: number | undefined;
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 114;
+export const APP_RELEASE_DATE = '2026-10-27';
 
 export interface GoogleMapsPlaceMetadata {
   placeId: string;
@@ -1504,10 +1505,6 @@ export const getUserStoreQuotaSummary = (
 ): UserStoreQuotaSummary => {
   const s = settings || getStoredAppSettingsFallback();
   const additionalStoreFeeUsd = getAdditionalStoreFeeUsd(s);
-  const includedFreeBase =
-    typeof s.includedFreeStoresPerVip === 'number' && s.includedFreeStoresPerVip >= 1
-      ? Math.round(s.includedFreeStoresPerVip)
-      : DEFAULT_INCLUDED_FREE_STORES;
 
   if (!user) {
     return {
@@ -1540,14 +1537,25 @@ export const getUserStoreQuotaSummary = (
     user.username === 'cheasavuth';
   const isVipActive = isUserVipActive(user);
 
+  const userIdSet = new Set<string>([
+    user.id,
+    ...(Array.isArray(user.legacyIds) ? user.legacyIds : []),
+  ]);
   const userEmailLower = (user.email || '').toLowerCase().trim();
   const userPhoneClean = (user.phone || '').replace(/[\s-+]/g, '');
 
   const ownedStores = Array.isArray(restaurants)
     ? restaurants.filter((r) => {
         if (!r || isSeedRestaurantId(r.id)) return false;
-        if (r.ownerId && r.ownerId === user.id) return true;
+        if (r.ownerId && userIdSet.has(r.ownerId)) return true;
         if (userEmailLower && r.ownerEmail && r.ownerEmail.toLowerCase().trim() === userEmailLower) {
+          return true;
+        }
+        if (
+          userPhoneClean.length >= 7 &&
+          r.ownerPhone &&
+          r.ownerPhone.replace(/[\s-+]/g, '') === userPhoneClean
+        ) {
           return true;
         }
         return false;
@@ -1557,7 +1565,7 @@ export const getUserStoreQuotaSummary = (
   const userAdditionalTxns = Array.isArray(transactions)
     ? transactions.filter((t) => {
         if (!t || t.type !== 'additional_store_slot') return false;
-        if (t.userId === user.id || t.ownerId === user.id) return true;
+        if ((t.userId && userIdSet.has(t.userId)) || (t.ownerId && userIdSet.has(t.ownerId))) return true;
         if (userEmailLower && t.userEmail && t.userEmail.toLowerCase().trim() === userEmailLower) {
           return true;
         }
@@ -1580,19 +1588,29 @@ export const getUserStoreQuotaSummary = (
   );
   const pendingAdditionalStoreTransaction = pendingAdditionalStoreTxns[0] || null;
 
-  const paidAdditionalStoreSlots = Math.max(
-    typeof user.paidAdditionalStoreSlots === 'number' ? user.paidAdditionalStoreSlots : 0,
-    verifiedAdditionalStoreTransactions.length
-  );
+  // Strictly bind paid additional store slots to verified additional_store_slot transactions
+  const paidAdditionalStoreSlots = Array.isArray(transactions)
+    ? verifiedAdditionalStoreTransactions.length
+    : typeof user.paidAdditionalStoreSlots === 'number' && user.paidAdditionalStoreSlots > 0
+    ? user.paidAdditionalStoreSlots
+    : 0;
 
-  const includedFreeStores = isAdmin ? 9999 : Math.max(1, includedFreeBase);
+  // Only the 1st shop is included with an active VIP subscription; each additional shop requires a separate verified payment
+  const includedFreeStores = isAdmin
+    ? 9999
+    : isVipActive
+    ? DEFAULT_INCLUDED_FREE_STORES
+    : 0;
+
   const totalAllowedStores = isAdmin
     ? 9999
-    : includedFreeStores + paidAdditionalStoreSlots;
+    : isVipActive
+    ? includedFreeStores + paidAdditionalStoreSlots
+    : 0;
   const usedStoresCount = ownedStores.length;
   const remainingAvailableSlots = Math.max(0, totalAllowedStores - usedStoresCount);
-  const canCreateNewStoreWithoutPayment = isAdmin || remainingAvailableSlots > 0;
-  const canReplaceExistingStoreForFree = isAdmin || usedStoresCount > 0;
+  const canCreateNewStoreWithoutPayment = isAdmin || (isVipActive && remainingAvailableSlots > 0);
+  const canReplaceExistingStoreForFree = isAdmin || (isVipActive && usedStoresCount > 0);
   const canEditExistingFree = true;
 
   return {

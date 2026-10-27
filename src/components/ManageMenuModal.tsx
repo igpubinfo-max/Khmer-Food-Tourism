@@ -615,7 +615,7 @@ export const ManageMenuModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-sm animate-fade-in">
+    <div className="fixed inset-0 z-[70] flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-sm animate-fade-in">
       <div 
         className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] border border-slate-200 dark:border-slate-800"
         onClick={(e) => e.stopPropagation()}
@@ -1777,33 +1777,14 @@ export const ManageMenuModal: React.FC = () => {
                           : 'Deleting removes this store listing permanently. Please confirm before deleting.'}
                       </span>
                     </div>
-                    {!confirmDeleteStore ? (
-                      <button
-                        type="button"
-                        onClick={() => setConfirmDeleteStore(true)}
-                        className="px-3 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-[11px] shrink-0 flex items-center gap-1 transition cursor-pointer"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                        <span>{isKm ? 'លុបហាង' : 'Delete'}</span>
-                      </button>
-                    ) : (
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        <button
-                          type="button"
-                          onClick={() => deleteRestaurant(managingRestaurant.id)}
-                          className="px-3 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-[11px] transition cursor-pointer"
-                        >
-                          {isKm ? 'បញ្ជាក់លុប' : 'Confirm'}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setConfirmDeleteStore(false)}
-                          className="px-2.5 py-2 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-[11px] cursor-pointer"
-                        >
-                          {isKm ? 'បោះបង់' : 'Cancel'}
-                        </button>
-                      </div>
-                    )}
+                    <button
+                      type="button"
+                      onClick={() => deleteRestaurant(managingRestaurant.id)}
+                      className="px-3 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-[11px] shrink-0 flex items-center gap-1 transition cursor-pointer"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>{isKm ? 'លុបហាង' : 'Delete Shop'}</span>
+                    </button>
                   </div>
                 </div>
               </div>

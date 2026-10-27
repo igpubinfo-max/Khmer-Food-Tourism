@@ -1174,6 +1174,7 @@ export async function syncAllAppDataWithSupabase(localState: {
   deletedUsers?: DeletedUserRecord[];
   transactions: RegistrationTransaction[];
   customRestaurants: Restaurant[];
+  deletedRestaurantIds?: Record<string, string>;
   customDestinations?: TouristDestination[];
   supportTickets?: SupportTicket[];
   paymentProofsVault: Record<string, any>;
@@ -1184,6 +1185,7 @@ export async function syncAllAppDataWithSupabase(localState: {
   mergedDeletedUsers: DeletedUserRecord[];
   mergedTransactions: RegistrationTransaction[];
   mergedCustomRestaurants: Restaurant[];
+  mergedDeletedRestaurantIds?: Record<string, string>;
   mergedPaymentProofsVault: Record<string, any>;
   mergedAppSettings?: AppSettings;
 }> {
@@ -1227,6 +1229,7 @@ export async function syncAllAppDataWithSupabase(localState: {
       cloudTxns,
       cloudDeletedTxnIds,
       cloudRests,
+      cloudDeletedRests,
       cloudTickets,
       cloudProofs,
       cloudSettingsV2,
@@ -1244,6 +1247,7 @@ export async function syncAllAppDataWithSupabase(localState: {
       pullCloudDocument<RegistrationTransaction[]>('kft_cloud_transactions_v1'),
       pullCloudDocument<string[]>('kft_cloud_deleted_transactions_v1'),
       pullCloudDocument<Restaurant[]>('kft_cloud_custom_restaurants_v1'),
+      pullCloudDocument<Record<string, string>>('kft_cloud_deleted_restaurants_v1'),
       pullCloudDocument<SupportTicket[]>('kft_cloud_support_tickets_v1'),
       shouldSyncPaymentProofs
         ? pullCloudDocument<Record<string, any>>('kft_cloud_payment_proofs_v1')
@@ -1454,10 +1458,16 @@ export async function syncAllAppDataWithSupabase(localState: {
           (usrEmail && t.userEmail && t.userEmail.toLowerCase().trim() === usrEmail)
         );
       });
-      if (verifiedAdditionalStoreTxns.length > 0) {
+      {
         const uniqueVerifiedRefs = new Set(verifiedAdditionalStoreTxns.map(t => t.id));
-        const slotCount = Math.max(mergedUsers[i].paidAdditionalStoreSlots || 0, uniqueVerifiedRefs.size);
-        if (slotCount !== (mergedUsers[i].paidAdditionalStoreSlots || 0)) {
+        const slotCount = uniqueVerifiedRefs.size;
+        const currentIds = Array.isArray(mergedUsers[i].additionalStorePaymentIds)
+          ? mergedUsers[i].additionalStorePaymentIds
+          : [];
+        if (
+          slotCount !== (mergedUsers[i].paidAdditionalStoreSlots || 0) ||
+          currentIds.length !== uniqueVerifiedRefs.size
+        ) {
           mergedUsers[i] = {
             ...mergedUsers[i],
             paidAdditionalStoreSlots: slotCount,
@@ -1511,15 +1521,32 @@ export async function syncAllAppDataWithSupabase(localState: {
       (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
 
-    // 4. Merge Custom & Google Maps Smart-Cached Restaurants by ID (excluding built-in rest-1..250 seeds and deleted users' custom shops)
-    const restMap = new Map<string, Restaurant>();
-    if (Array.isArray(cloudRests)) {
-      for (const r of cloudRests) {
-        if (r && r.id && !isSeedRestaurantId(String(r.id)) && (!r.ownerId || !deletedIds.has(r.ownerId))) {
-          restMap.set(r.id, r);
+    // 4. Merge Custom & Google Maps Smart-Cached Restaurants by ID (excluding built-in rest-1..250 seeds, deleted users' shops, and permanently deleted shop IDs)
+    let localDeletedRestsMap: Record<string, string> = { ...(localState.deletedRestaurantIds || {}) };
+    try {
+      const rawDelRests = localStorage.getItem('kft_deleted_restaurants_v1');
+      if (rawDelRests) {
+        const parsedDel = JSON.parse(rawDelRests);
+        if (parsedDel && typeof parsedDel === 'object' && !Array.isArray(parsedDel)) {
+          localDeletedRestsMap = { ...parsedDel, ...localDeletedRestsMap };
         }
       }
+    } catch {}
+
+    const mergedDeletedRestaurantIds: Record<string, string> = {};
+    if (cloudDeletedRests && typeof cloudDeletedRests === 'object' && !Array.isArray(cloudDeletedRests)) {
+      for (const [id, iso] of Object.entries(cloudDeletedRests)) {
+        if (id && typeof iso === 'string') mergedDeletedRestaurantIds[id] = iso;
+      }
     }
+    for (const [id, iso] of Object.entries(localDeletedRestsMap)) {
+      if (!id || typeof iso !== 'string') continue;
+      const curIso = mergedDeletedRestaurantIds[id];
+      if (!curIso || (new Date(iso).getTime() || 0) >= (new Date(curIso).getTime() || 0)) {
+        mergedDeletedRestaurantIds[id] = iso;
+      }
+    }
+
     const getRestTimestampMs = (x: any): number =>
       Math.max(
         x?.updatedAt ? new Date(x.updatedAt).getTime() || 0 : 0,
@@ -1528,8 +1555,42 @@ export async function syncAllAppDataWithSupabase(localState: {
         x?.createdAt ? new Date(x.createdAt).getTime() || 0 : 0
       );
 
+    const isShopDeleted = (r: any): boolean => {
+      if (!r || !r.id) return true;
+      const delIso = mergedDeletedRestaurantIds[String(r.id)];
+      if (!delIso) return false;
+      const delMs = new Date(delIso).getTime() || 0;
+      const rMs = getRestTimestampMs(r);
+      return delMs >= rMs || rMs === 0;
+    };
+
+    try {
+      localStorage.setItem('kft_deleted_restaurants_v1', JSON.stringify(mergedDeletedRestaurantIds));
+    } catch {}
+
+    const restMap = new Map<string, Restaurant>();
+    if (Array.isArray(cloudRests)) {
+      for (const r of cloudRests) {
+        if (
+          r &&
+          r.id &&
+          !isSeedRestaurantId(String(r.id)) &&
+          (!r.ownerId || !deletedIds.has(r.ownerId)) &&
+          !isShopDeleted(r)
+        ) {
+          restMap.set(r.id, r);
+        }
+      }
+    }
+
     for (const r of localState.customRestaurants) {
-      if (r && r.id && !isSeedRestaurantId(String(r.id)) && (!r.ownerId || !deletedIds.has(r.ownerId))) {
+      if (
+        r &&
+        r.id &&
+        !isSeedRestaurantId(String(r.id)) &&
+        (!r.ownerId || !deletedIds.has(r.ownerId)) &&
+        !isShopDeleted(r)
+      ) {
         const existing = restMap.get(r.id);
         if (!existing) {
           restMap.set(r.id, r);
@@ -1624,8 +1685,17 @@ export async function syncAllAppDataWithSupabase(localState: {
     if (isAdminDevice && safeJsonSig(mergedDeletedTxnArr) !== safeJsonSig(cloudDeletedTxnIds || [])) {
       pushPromises.push(pushCloudDocument('kft_cloud_deleted_transactions_v1', mergedDeletedTxnArr));
     }
-    if ((isAdminDevice || localState.customRestaurants.length > 0) && safeJsonSig(mergedCustomRestaurants) !== safeJsonSig(cloudRests || [])) {
+    if (
+      (isAdminDevice || Boolean(localState.currentUser) || localState.customRestaurants.length > 0 || Object.keys(mergedDeletedRestaurantIds).length > 0) &&
+      safeJsonSig(mergedCustomRestaurants) !== safeJsonSig(cloudRests || [])
+    ) {
       pushPromises.push(pushCloudDocument('kft_cloud_custom_restaurants_v1', mergedCustomRestaurants));
+    }
+    if (
+      (isAdminDevice || Boolean(localState.currentUser) || Object.keys(mergedDeletedRestaurantIds).length > 0) &&
+      safeJsonSig(mergedDeletedRestaurantIds) !== safeJsonSig(cloudDeletedRests || {})
+    ) {
+      pushPromises.push(pushCloudDocument('kft_cloud_deleted_restaurants_v1', mergedDeletedRestaurantIds));
     }
     if (shouldSyncPaymentProofs && safeJsonSig(mergedPaymentProofsVault) !== safeJsonSig(cloudProofs || {})) {
       pushPromises.push(pushCloudDocument('kft_cloud_payment_proofs_v1', mergedPaymentProofsVault));
@@ -1655,6 +1725,7 @@ export async function syncAllAppDataWithSupabase(localState: {
       mergedDeletedUsers,
       mergedTransactions,
       mergedCustomRestaurants,
+      mergedDeletedRestaurantIds,
       mergedPaymentProofsVault,
       mergedAppSettings,
     };

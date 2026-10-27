@@ -1,10 +1,27 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
+import fs from 'node:fs'
+import path from 'node:path'
+
+function readAndroidVersionCode(): number {
+  try {
+    const gradlePath = path.resolve(process.cwd(), 'android/app/build.gradle');
+    const content = fs.readFileSync(gradlePath, 'utf-8');
+    const match = content.match(/versionCode\s+(\d+)/);
+    if (match && match[1]) {
+      return Number(match[1]);
+    }
+  } catch {}
+  return 114;
+}
 
 // https://vite.dev/config/
 export default defineConfig({
   base: './',
+  define: {
+    __KFT_BUILD_CODE__: JSON.stringify(readAndroidVersionCode()),
+  },
   plugins: [
     react(),
     tailwindcss(),

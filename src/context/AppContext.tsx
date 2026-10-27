@@ -66,6 +66,9 @@ import {
   recordPermanentFoodOverride,
   recordPermanentRestaurantOverride,
   removePermanentRestaurantOverride,
+  loadDeletedRestaurantIdsMap,
+  saveDeletedRestaurantIdsMap,
+  isRestaurantIdDeleted,
   recordPermanentDestinationOverride,
   recordPermanentTrendingFoodOverride,
   applyFoodOverrides,
@@ -177,6 +180,10 @@ interface AppContextType {
   getCurrentUserStoreQuota: (targetUser?: User | null) => UserStoreQuotaSummary;
   updateRestaurant: (rest: Restaurant) => void;
   deleteRestaurant: (id: string) => void;
+  requestDeleteRestaurant: (id: string) => void;
+  confirmDeleteRestaurant: () => void;
+  cancelDeleteRestaurant: () => void;
+  pendingDeleteRestaurant: Restaurant | null;
   approveRestaurant: (id: string) => void;
   rejectRestaurant: (id: string, reasonKh?: string) => void;
   toggleVerifyRestaurant: (id: string) => void;
@@ -810,6 +817,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [restaurants, setRestaurants] = useState<Restaurant[]>(() => {
     const seedMap = new Map<string, Restaurant>(initialRestaurants.map(r => [r.id, r]));
     const vault = loadLocalMediaOverrides();
+    const deletedRestsMap = vault.deletedRestaurants || loadDeletedRestaurantIdsMap();
     let vaultChanged = false;
     try {
       localStorage.removeItem('kft_restaurants_real_v5');
@@ -831,6 +839,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             if (!r || !r.id) continue;
             const rId = String(r.id);
             if (seenIds.has(rId)) continue;
+            if (isRestaurantIdDeleted(rId, r.updatedAt || r.photoUpdatedAt || r.adminEditedAt || r.createdAt, deletedRestsMap)) {
+              continue;
+            }
 
             const seed = seedMap.get(rId);
             // Skip removed legacy template clones & dish-named seed entries unless owned by a real user
@@ -912,9 +923,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               normalizedList.push(normalizeRestaurant(r));
             }
           }
-          // Ensure any newly added seed restaurants (e.g. Chumnor Kbal Koh - ជំនោរក្បាលកោះ) are also merged in
+          // Ensure any newly added seed restaurants (e.g. Chumnor Kbal Koh - ជំនោរក្បាលកោះ) are also merged in (unless explicitly deleted by Admin)
           for (const seedRest of initialRestaurants) {
-            if (!seenIds.has(seedRest.id)) {
+            if (!seenIds.has(seedRest.id) && !isRestaurantIdDeleted(seedRest.id, undefined, deletedRestsMap)) {
               seenIds.add(seedRest.id);
               normalizedList.push(normalizeRestaurant(seedRest));
             }
@@ -950,7 +961,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       localStorage.removeItem('kft_restaurants_v4');
     } catch {}
 
-    const baseRestaurants = initialRestaurants.map(r => {
+    const baseRestaurants = initialRestaurants
+      .filter(r => !isRestaurantIdDeleted(r.id, undefined, deletedRestsMap))
+      .map(r => {
       if (r.id === 'rest-19') {
         return normalizeRestaurant({
           ...r,
@@ -2587,12 +2600,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
       const snap = latestSyncStateRef.current;
       const customRests = snap.restaurants.filter(r => !isSeedRestaurantId(r.id));
+      const localDeletedRests = loadLocalMediaOverrides().deletedRestaurants || loadDeletedRestaurantIdsMap();
       const result = await syncAllAppDataWithSupabase({
         users: snap.users,
         currentUser: snap.currentUser,
         deletedUsers: snap.deletedUsers,
         transactions: snap.transactions,
         customRestaurants: customRests,
+        deletedRestaurantIds: localDeletedRests,
         supportTickets: snap.supportTickets,
         paymentProofsVault: localVault,
         appSettings: appSettingsRef.current,
@@ -2699,7 +2714,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           latestSyncStateRef.current.transactions = result.mergedTransactions;
           return result.mergedTransactions;
         });
-        if (result.mergedCustomRestaurants.length > 0) {
+        const syncedDeletedRests = result.mergedDeletedRestaurantIds || loadDeletedRestaurantIdsMap();
+        if (result.mergedDeletedRestaurantIds && Object.keys(result.mergedDeletedRestaurantIds).length > 0) {
+          const curBundle = loadLocalMediaOverrides();
+          curBundle.deletedRestaurants = {
+            ...(curBundle.deletedRestaurants || {}),
+            ...result.mergedDeletedRestaurantIds,
+          };
+          saveLocalMediaOverrides(curBundle);
+        }
+        if (result.mergedCustomRestaurants.length > 0 || Object.keys(syncedDeletedRests).length > 0) {
           const deletedIdSet = new Set((result.mergedDeletedUsers || []).map(d => d.id));
           const getRestMs = (x?: Restaurant | null): number =>
             Math.max(
@@ -2712,6 +2736,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             const map = new Map<string, Restaurant>();
             let anyCustomChanged = false;
             for (const r of prev) {
+              const rTimestamp = r.updatedAt || r.photoUpdatedAt || r.adminEditedAt || r.createdAt;
+              if (isRestaurantIdDeleted(String(r.id), rTimestamp, syncedDeletedRests)) {
+                anyCustomChanged = true;
+                continue;
+              }
               if (isSeedRestaurantId(String(r.id)) || !r.ownerId || !deletedIdSet.has(r.ownerId)) {
                 map.set(r.id, r);
               } else {
@@ -2719,7 +2748,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               }
             }
             for (const r of result.mergedCustomRestaurants) {
-              if (r && r.id && !isSeedRestaurantId(String(r.id)) && (!r.ownerId || !deletedIdSet.has(r.ownerId))) {
+              if (
+                r &&
+                r.id &&
+                !isSeedRestaurantId(String(r.id)) &&
+                (!r.ownerId || !deletedIdSet.has(r.ownerId)) &&
+                !isRestaurantIdDeleted(String(r.id), r.updatedAt || r.photoUpdatedAt || r.adminEditedAt || r.createdAt, syncedDeletedRests)
+              ) {
                 const normCloud = normalizeRestaurant(r);
                 const localCur = map.get(r.id);
                 if (!localCur) {
@@ -2743,6 +2778,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             }
             const sorted = sortRestaurantsChronologically(Array.from(map.values()));
             latestSyncStateRef.current.restaurants = sorted;
+            try {
+              const compacted = compactDataForBulkLocalStorage('kft_restaurants_real_v11', sorted);
+              localStorage.setItem('kft_restaurants_real_v11', JSON.stringify(compacted));
+            } catch {}
             return sorted;
           });
         }
@@ -2938,6 +2977,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     isSupportTicketModalOpen,
     isQrScannerModalOpen,
     isGoogleMapsSearchModalOpen,
+    pendingDeleteRestaurant,
     activeTab,
   });
 
@@ -2972,6 +3012,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       isSupportTicketModalOpen,
       isQrScannerModalOpen,
       isGoogleMapsSearchModalOpen,
+      pendingDeleteRestaurant,
       activeTab,
     };
   }, [
@@ -2983,6 +3024,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     isNotificationsModalOpen, isTrendingSocialModalOpen, isTrendingFoodDetailModalOpen,
     isAiCheckInModalOpen, isRestaurantCheckInModalOpen, isUpgradeVipModalOpen,
     isSupportTicketModalOpen, isQrScannerModalOpen, isGoogleMapsSearchModalOpen,
+    pendingDeleteRestaurant,
     activeTab,
   ]);
 
@@ -3008,8 +3050,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
 
       // 2. If any modal or detail screen is open, close the active modal first without exiting
+      if (state.pendingDeleteRestaurant) {
+        setPendingDeleteRestaurant(null);
+        return;
+      }
       if ((window as any).__kft_is_smart_hub_open) {
         window.dispatchEvent(new CustomEvent('kft:close-smart-hub'));
+        return;
+      }
+      if (state.isManageMenuModalOpen) {
+        setIsManageMenuModalOpen(false);
+        setManagingRestaurant(null);
         return;
       }
       if (state.selectedFood) {
@@ -3022,11 +3073,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       if (state.selectedDestination) {
         setSelectedDestination(null);
-        return;
-      }
-      if (state.isManageMenuModalOpen) {
-        setIsManageMenuModalOpen(false);
-        setManagingRestaurant(null);
         return;
       }
       if (state.isTrendingFoodDetailModalOpen) {
@@ -4814,7 +4860,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const isApprovedVip = isUserVipActive(currentUser);
     const dynamicPlans = getDynamicVipPlans(appSettings);
 
-    // Basic 1st store registration is open to signed-in users; VIP unlocks full 20 dishes & 30 photos
+    if (!isAdmin && !isApprovedVip) {
+      recordSecurityAudit(
+        'NON_VIP_STORE_CREATE_BLOCKED',
+        'BLOCKED',
+        'VipCreateStore',
+        `Blocked store creation by non-VIP user ${currentUser.name} (${currentUser.id})`
+      );
+      showToast(
+        language === 'km'
+          ? `🔒 មានតែគណនី VIP សកម្មប៉ុណ្ណោះដែលអាចបង្កើតហាងអាហារបាន។ សូមដំឡើងទៅកញ្ចប់ VIP (${dynamicPlans.quarterly.priceUsd.toFixed(2)} ឬ ${dynamicPlans.annual.priceUsd.toFixed(2)}) ជាមុនសិន!`
+          : `🔒 Only active VIP accounts can register a shop. Please upgrade to a VIP plan (${dynamicPlans.quarterly.priceUsd.toFixed(2)} or ${dynamicPlans.annual.priceUsd.toFixed(2)}) first!`,
+        'warning'
+      );
+      openUpgradeVipModal();
+      return null;
+    }
 
     const quota = getUserStoreQuotaSummary(currentUser, restaurants, transactions, appSettings);
     const replaceTargetId = options?.replaceRestaurantId?.trim();
@@ -4846,13 +4907,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       : undefined;
 
     if (replaceTargetId) {
+      const userIdSet = new Set<string>([
+        currentUser.id,
+        ...(Array.isArray(currentUser.legacyIds) ? currentUser.legacyIds : []),
+      ]);
+      const userPhoneClean = (currentUser.phone || '').replace(/[\s-+]/g, '');
       const isTargetOwner = Boolean(
         targetToReplace &&
           (isAdmin ||
-            targetToReplace.ownerId === currentUser.id ||
+            (targetToReplace.ownerId && userIdSet.has(targetToReplace.ownerId)) ||
             (currentUser.email &&
               targetToReplace.ownerEmail &&
-              targetToReplace.ownerEmail.toLowerCase() === currentUser.email.toLowerCase()))
+              targetToReplace.ownerEmail.toLowerCase() === currentUser.email.toLowerCase()) ||
+            (userPhoneClean.length >= 7 &&
+              targetToReplace.ownerPhone &&
+              targetToReplace.ownerPhone.replace(/[\s-+]/g, '') === userPhoneClean))
       );
       if (!targetToReplace || !isTargetOwner) {
         showToast(
@@ -4943,7 +5012,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return null;
     }
 
-    const isPendingManualReview = !isAdmin && aiVerification.decision === 'pending_review';
+    const isPendingPayment = !isAdmin && restData.paymentStatus === 'pending_verification';
+    const isPendingManualReview = !isAdmin && (aiVerification.decision === 'pending_review' || isPendingPayment || restData.status === 'pending');
     const finalStatus: 'approved' | 'pending' | 'rejected' = isPendingManualReview ? 'pending' : 'approved';
     const finalIsVerified = !isPendingManualReview;
     const finalIsPromoted = !isPendingManualReview && (isAdmin || isApprovedVip);
@@ -4979,7 +5049,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       isPromoted: finalIsPromoted,
       membershipTier: (isAdmin || isApprovedVip) ? 'premium' : 'free',
       membershipExpiresAt: (isAdmin || isApprovedVip) ? expiryIso : undefined,
-      paymentStatus: (isAdmin || isApprovedVip) ? 'verified' : undefined,
+      paymentStatus: isPendingPayment ? 'pending_verification' : (isAdmin || isApprovedVip) ? 'verified' : undefined,
       menuItems: (restData.menuItems || []).slice(0, (isAdmin || isApprovedVip) ? 20 : 5),
       aiCategoryVerification: aiVerification,
       storeSlotNumber: slotNumber,
@@ -5049,12 +5119,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Resolve all restaurants owned by a user, sorted newest/most-recently-updated first so the active shop is always prioritized
   const getOwnedRestaurantsForUser = (targetUser: User | null = currentUser): Restaurant[] => {
     if (!targetUser) return [];
+    const userIdSet = new Set<string>([
+      targetUser.id,
+      ...(Array.isArray(targetUser.legacyIds) ? targetUser.legacyIds : []),
+    ]);
     const userEmailLower = (targetUser.email || '').trim().toLowerCase();
+    const userPhoneClean = (targetUser.phone || '').replace(/[\s-+]/g, '');
     const matched = restaurants.filter(r => {
       // Never match seed demo shop rest-19 ('owner-1') unless the user's id is literally 'owner-1'
       if (isSeedRestaurantId(r.id) && r.ownerId !== targetUser.id) return false;
-      if (r.ownerId && r.ownerId === targetUser.id) return true;
+      if (r.ownerId && userIdSet.has(r.ownerId)) return true;
       if (userEmailLower && r.ownerEmail && r.ownerEmail.trim().toLowerCase() === userEmailLower) return true;
+      if (
+        userPhoneClean.length >= 7 &&
+        r.ownerPhone &&
+        r.ownerPhone.replace(/[\s-+]/g, '') === userPhoneClean
+      ) {
+        return true;
+      }
       return false;
     });
     return [...matched].sort((a, b) => {
@@ -5219,6 +5301,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       original?.membershipExpiresAt ||
       currentUser?.subscriptionExpiryDate ||
       (effectiveTier === 'premium' ? new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString() : undefined);
+    const editNowIso = new Date().toISOString();
 
     const safeUpdated: Restaurant = normalizeRestaurant(isAdmin ? {
       ...updated,
@@ -5226,8 +5309,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       profileImage: profileImg,
       galleryPhotos: galleryImgs,
       foodImages: foodImgs,
+      updatedAt: editNowIso,
+      photoUpdatedAt: editNowIso,
       isAdminEdited: true,
-      adminEditedAt: new Date().toISOString(),
+      adminEditedAt: editNowIso,
       created_at: preservedCreatedAt,
       createdAt: preservedCreatedAt,
     } : {
@@ -5236,6 +5321,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       profileImage: profileImg,
       galleryPhotos: galleryImgs,
       foodImages: foodImgs,
+      updatedAt: editNowIso,
+      photoUpdatedAt: editNowIso,
       membershipTier: effectiveTier,
       membershipExpiresAt: effectiveExpiry,
       isPromoted: effectiveTier === 'premium' ? nextIsPromotedAfterAiCheck : Boolean(original?.isPromoted),
@@ -5702,19 +5789,42 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     incrementRestaurantAnalyticsField(restaurantId, 'shareClicks');
   };
 
-  const deleteRestaurant = (id: string) => {
-    const target = restaurants.find(r => r.id === id);
-    if (!target) return;
-    const isAdmin = 
-      currentUser?.role === 'admin' || 
-      currentUser?.id === 'admin-authorized-single' || 
-      currentUser?.username === 'admin' || 
+  const [pendingDeleteRestaurant, setPendingDeleteRestaurant] = useState<Restaurant | null>(null);
+
+  const checkCanDeleteRestaurant = (target?: Restaurant | null): { allowed: boolean; isAdmin: boolean } => {
+    if (!target) return { allowed: false, isAdmin: false };
+    const isAdmin =
+      currentUser?.role === 'admin' ||
+      currentUser?.id === 'admin-authorized-single' ||
+      currentUser?.username === 'admin' ||
       currentUser?.username === 'cheasavuth';
 
-    const isOwner = Boolean(currentUser?.id && target.ownerId === currentUser.id);
+    const userIdSet = new Set<string>([
+      ...(currentUser?.id ? [currentUser.id] : []),
+      ...(Array.isArray(currentUser?.legacyIds) ? currentUser.legacyIds : []),
+    ]);
+    const userEmailClean = (currentUser?.email || '').trim().toLowerCase();
+    const userPhoneClean = (currentUser?.phone || '').replace(/[\s-+]/g, '');
+
+    const isOwner = Boolean(
+      currentUser &&
+        ((target.ownerId && userIdSet.has(target.ownerId)) ||
+          (userEmailClean && target.ownerEmail && target.ownerEmail.trim().toLowerCase() === userEmailClean) ||
+          (userPhoneClean.length >= 7 && target.ownerPhone && target.ownerPhone.replace(/[\s-+]/g, '') === userPhoneClean))
+    );
     const isApprovedVip = isUserVipActive(currentUser);
 
-    if (!isAdmin && !(isOwner && isApprovedVip)) {
+    return {
+      allowed: Boolean(isAdmin || (isOwner && isApprovedVip)),
+      isAdmin: Boolean(isAdmin),
+    };
+  };
+
+  const executeDeleteRestaurant = (id: string) => {
+    const target = restaurants.find(r => r.id === id);
+    if (!target) return;
+    const { allowed } = checkCanDeleteRestaurant(target);
+    if (!allowed) {
       showToast(
         language === 'km'
           ? '⛔ គ្មានសិទ្ធិលុបហាងនេះទេ! មានតែម្ចាស់ហាង VIP ដែលបានអនុម័ត ឬ Admin ប៉ុណ្ណោះដែលអាចលុបបាន។'
@@ -5723,20 +5833,40 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       );
       return;
     }
+
+    lastLocalRestaurantEditAtRef.current = Date.now();
+    // 1. Remove from permanent media vault & record permanent deletion tombstone
     removePermanentRestaurantOverride(id);
+    const updatedDeletedMap = loadLocalMediaOverrides().deletedRestaurants || loadDeletedRestaurantIdsMap();
+    updatedDeletedMap[id] = new Date().toISOString();
+    saveDeletedRestaurantIdsMap(updatedDeletedMap);
+
+    // 2. Immediately update state, synchronous localStorage, and Supabase Cloud
     setRestaurants(prev => {
       const next = prev.filter(r => r.id !== id);
-      scheduleStorageWrite('kft_restaurants_real_v11', next, 300);
+      latestSyncStateRef.current.restaurants = next;
+      try {
+        const compacted = compactDataForBulkLocalStorage('kft_restaurants_real_v11', next);
+        localStorage.setItem('kft_restaurants_real_v11', JSON.stringify(compacted));
+      } catch {
+        scheduleStorageWrite('kft_restaurants_real_v11', next, 100);
+      }
       if (isSupabaseConfigured()) {
         try {
-          pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter(r => !isSeedRestaurantId(r.id)));
+          const customRests = next.filter(r => !isSeedRestaurantId(r.id));
+          Promise.all([
+            pushCloudDocument('kft_cloud_custom_restaurants_v1', customRests),
+            pushCloudDocument('kft_cloud_deleted_restaurants_v1', updatedDeletedMap),
+            deleteCloudDocument(`kft_ov_rest_${id}`),
+          ]).catch(() => {});
         } catch {}
       }
       return next;
     });
+
     if (selectedRestaurant?.id === id) setSelectedRestaurant(null);
     if (managingRestaurant?.id === id) {
-      const remainingOwned = restaurants.filter(r => r.id !== id && !isSeedRestaurantId(r.id) && r.ownerId === currentUser?.id);
+      const remainingOwned = getOwnedRestaurantsForUser(currentUser).filter(r => r.id !== id);
       if (remainingOwned.length > 0) {
         setManagingRestaurant(remainingOwned[remainingOwned.length - 1]);
       } else {
@@ -5745,12 +5875,48 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setIsManageMenuModalOpen(false);
       }
     }
+    if (activeManagedShopId === id) {
+      const remainingOwned = getOwnedRestaurantsForUser(currentUser).filter(r => r.id !== id);
+      setActiveManagedShopId(remainingOwned.length > 0 ? remainingOwned[remainingOwned.length - 1].id : null);
+    }
+
     showToast(
       language === 'km'
-        ? '🗑️ បានលុបហាងអាហាររួចរាល់! ឥឡូវនេះអ្នកអាចបន្ថែមហាងថ្មីជំនួសបាន។'
-        : '🗑️ Restaurant deleted! You can now add a new restaurant.',
+        ? '🗑️ បានលុបហាងអាហាររួចរាល់ជាអចិន្ត្រៃយ៍!'
+        : '🗑️ Shop permanently deleted!',
       'info'
     );
+  };
+
+  const requestDeleteRestaurant = (id: string) => {
+    const target = restaurants.find(r => r.id === id);
+    if (!target) return;
+    const { allowed } = checkCanDeleteRestaurant(target);
+    if (!allowed) {
+      showToast(
+        language === 'km'
+          ? '⛔ គ្មានសិទ្ធិលុបហាងនេះទេ! មានតែម្ចាស់ហាង VIP ដែលបានអនុម័ត ឬ Admin ប៉ុណ្ណោះដែលអាចលុបបាន។'
+          : '⛔ Unauthorized! Only approved VIP shop owners or Admin can delete this restaurant.',
+        'warning'
+      );
+      return;
+    }
+    setPendingDeleteRestaurant(target);
+  };
+
+  const confirmDeleteRestaurant = () => {
+    if (!pendingDeleteRestaurant) return;
+    const targetId = pendingDeleteRestaurant.id;
+    setPendingDeleteRestaurant(null);
+    executeDeleteRestaurant(targetId);
+  };
+
+  const cancelDeleteRestaurant = () => {
+    setPendingDeleteRestaurant(null);
+  };
+
+  const deleteRestaurant = (id: string) => {
+    requestDeleteRestaurant(id);
   };
 
   const approveRestaurant = (id: string) => {
@@ -6329,13 +6495,40 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         localStorage.setItem('kft_admin_audit_logs_v1', JSON.stringify(logs.slice(0, 200)));
       } catch {}
 
+      if (targetRestId) {
+        setRestaurants(prev => {
+          const nextRests = prev.map(r => {
+            if (r.id !== targetRestId) return r;
+            return {
+              ...r,
+              status: 'approved' as const,
+              isVerified: true,
+              isPromoted: true,
+              paymentStatus: 'verified' as const,
+              paymentDate: now.toISOString().split('T')[0],
+            };
+          });
+          scheduleStorageWrite('kft_restaurants_real_v11', nextRests, 300);
+          return nextRests;
+        });
+      }
+
       if (targetUserId) {
+        const verifiedCountForUser =
+          transactions.filter(
+            t =>
+              t &&
+              t.type === 'additional_store_slot' &&
+              (t.status === 'verified' || t.id === txnId) &&
+              (t.userId === targetUserId || t.ownerId === targetUserId)
+          ).length || 1;
+
         setUsers(prev => {
           const nextUsers = prev.map(u => {
             if (u.id !== targetUserId) return u;
             const existingIds = Array.isArray(u.additionalStorePaymentIds) ? u.additionalStorePaymentIds : [];
             const nextIds = Array.from(new Set([...existingIds, txnId]));
-            const nextSlots = Math.max((u.paidAdditionalStoreSlots || 0) + 1, nextIds.length);
+            const nextSlots = Math.max(verifiedCountForUser, nextIds.length);
             return {
               ...u,
               paidAdditionalStoreSlots: nextSlots,
@@ -6344,8 +6537,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           });
           try {
             localStorage.setItem('kft_users_v5', JSON.stringify(nextUsers));
-            if (isSupabaseConfigured()) {
+            const updatedTarget = nextUsers.find(u => u.id === targetUserId);
+            if (updatedTarget && isSupabaseConfigured()) {
               pushCloudDocument('kft_cloud_users_v1', nextUsers);
+              pushCloudDocument('kft_cloud_users_v2', nextUsers);
+              pushCloudDocument(`kft_user_${updatedTarget.id}`, updatedTarget);
             }
           } catch {}
           return nextUsers;
@@ -6356,12 +6552,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             if (!prev) return null;
             const existingIds = Array.isArray(prev.additionalStorePaymentIds) ? prev.additionalStorePaymentIds : [];
             const nextIds = Array.from(new Set([...existingIds, txnId]));
-            const nextSlots = Math.max((prev.paidAdditionalStoreSlots || 0) + 1, nextIds.length);
-            return {
+            const nextSlots = Math.max(verifiedCountForUser, nextIds.length);
+            const updatedCurrent = {
               ...prev,
               paidAdditionalStoreSlots: nextSlots,
               additionalStorePaymentIds: nextIds,
             };
+            try {
+              localStorage.setItem('kft_current_user_v5', JSON.stringify(updatedCurrent));
+            } catch {}
+            return updatedCurrent;
           });
         }
 
@@ -7481,10 +7681,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     const quota = getUserStoreQuotaSummary(currentUser, restaurants, transactions, appSettings);
-    const requiredFee = quota.additionalStoreFeeUsd; // Default $10.00 (or Admin-configured fee)
+    const requiredFee = quota.additionalStoreFeeUsd; // Default $5.00 (or Admin-configured fee)
     const effectiveAmount =
       typeof submittedAmountUsd === 'number' ? submittedAmountUsd : requiredFee;
-    const nextSlotNumber = quota.totalAllowedStores + 1;
+    const nextSlotNumber = Math.max(quota.totalAllowedStores + 1, quota.usedStoresCount + 1);
 
     // Prevent duplicate pending charges for additional store slots
     if (quota.pendingAdditionalStoreTransaction) {
@@ -8918,6 +9118,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         getCurrentUserStoreQuota,
         updateRestaurant,
         deleteRestaurant,
+        requestDeleteRestaurant,
+        confirmDeleteRestaurant,
+        cancelDeleteRestaurant,
+        pendingDeleteRestaurant,
         approveRestaurant,
         rejectRestaurant,
         toggleVerifyRestaurant,

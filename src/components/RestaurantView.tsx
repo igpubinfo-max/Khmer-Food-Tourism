@@ -21,8 +21,11 @@ export const RestaurantView: React.FC = () => {
     activeManagedShopId,
     setActiveManagedShopId,
     getOwnedRestaurantsForUser,
+    getCurrentUserStoreQuota,
     openManageMyVipStore,
   } = useApp();
+
+  const storeQuota = getCurrentUserStoreQuota(currentUser);
 
   const myOwnedRestaurants = useMemo(
     () => getOwnedRestaurantsForUser(currentUser),
@@ -411,7 +414,11 @@ export const RestaurantView: React.FC = () => {
                 className="py-3 px-3.5 rounded-xl bg-emerald-900/90 hover:bg-emerald-800 text-amber-200 border border-amber-300/60 text-xs font-bold flex items-center justify-center gap-1 transition active:scale-95 cursor-pointer shrink-0"
               >
                 <Plus className="w-4 h-4" />
-                <span>{tr(language, 'បន្ថែមហាងថ្មី', 'Add Store', '添加新店铺')}</span>
+                <span>
+                  {storeQuota.canAddWithoutNewPayment
+                    ? tr(language, 'បន្ថែមហាងថ្មី ($0)', 'Add Store ($0)', '添加新店铺 ($0)')
+                    : tr(language, `បន្ថែមហាងថ្មី (+${storeQuota.additionalStoreFeeUsd.toFixed(2)})`, `Add Store (+${storeQuota.additionalStoreFeeUsd.toFixed(2)})`, `添加新店铺 (+${storeQuota.additionalStoreFeeUsd.toFixed(2)})`)}
+                </span>
               </button>
             )}
           </div>

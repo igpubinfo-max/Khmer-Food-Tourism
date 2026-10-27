@@ -3,7 +3,7 @@ import { useApp } from '../context/AppContext';
 import { 
   X, MapPin, Phone, Star, Clock, ExternalLink, 
   Send, Share2, UtensilsCrossed, Sparkles, CheckCircle2, AlertCircle, Copy, Camera, Bookmark,
-  BarChart3, Video, Crown, Edit2, MessageSquare
+  BarChart3, Video, Crown, Edit2, MessageSquare, Trash2
 } from 'lucide-react';
 import { isUserVipActive, getRestaurantRatingSummary } from '../types';
 import { RestaurantImageModal } from './RestaurantImageModal';
@@ -36,6 +36,7 @@ export const RestaurantDetailModal: React.FC = () => {
     trackRestaurantMap,
     trackRestaurantShare,
     updateRestaurant,
+    deleteRestaurant,
     openAddToWishlist,
     openUpgradeVipModal,
   } = useApp();
@@ -261,14 +262,27 @@ export const RestaurantDetailModal: React.FC = () => {
               <button
                 type="button"
                 onClick={() => {
+                  (window as any).__kft_manage_initial_tab = 'info';
                   setManagingRestaurant(selectedRestaurant);
                   setIsManageMenuModalOpen(true);
                 }}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-400 hover:bg-amber-500 text-slate-950 text-xs font-black shadow transition active:scale-95 font-khmer border border-white/50"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-400 hover:bg-amber-500 text-slate-950 text-xs font-black shadow transition active:scale-95 font-khmer border border-white/50 cursor-pointer"
                 title={tr(language, 'កែប្រែព័ត៌មាន & រូបភាពហាង (Admin)', 'Edit Store Details & Photos (Admin)', '编辑店铺信息与照片（管理员）')}
               >
                 <Edit2 className="w-3.5 h-3.5" />
-                <span>{tr(language, 'កែប្រែហាង (Admin)', 'Edit Store', '编辑店铺')}</span>
+                <span>{tr(language, 'កែប្រែហាង (Edit)', 'Edit Store', '编辑店铺')}</span>
+              </button>
+            )}
+
+            {isAdmin && (
+              <button
+                type="button"
+                onClick={() => deleteRestaurant(selectedRestaurant.id)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-rose-600 hover:bg-rose-700 text-white text-xs font-black shadow transition active:scale-95 font-khmer border border-white/40 cursor-pointer"
+                title={tr(language, 'លុបហាងនេះ (Admin)', 'Delete Shop (Admin)', '删除店铺（管理员）')}
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>{tr(language, 'លុបហាង', 'Delete', '删除')}</span>
               </button>
             )}
 
@@ -371,16 +385,28 @@ export const RestaurantDetailModal: React.FC = () => {
                     )}
                   </div>
                 </div>
-                <button
-                  onClick={() => {
-                    setManagingRestaurant(selectedRestaurant);
-                    setIsManageMenuModalOpen(true);
-                  }}
-                  className="px-3.5 py-2 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-xs shadow flex items-center gap-1.5 transition active:scale-95"
-                >
-                  <UtensilsCrossed className="w-3.5 h-3.5 text-emerald-200" />
-                  <span>{tr(language, 'គ្រប់គ្រងហាង & មុខម្ហូប', 'Manage Store & Menu', '管理店铺与菜单')}</span>
-                </button>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <button
+                    onClick={() => {
+                      (window as any).__kft_manage_initial_tab = 'info';
+                      setManagingRestaurant(selectedRestaurant);
+                      setIsManageMenuModalOpen(true);
+                    }}
+                    className="px-3 py-2 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-xs shadow flex items-center gap-1.5 transition active:scale-95 cursor-pointer"
+                  >
+                    <UtensilsCrossed className="w-3.5 h-3.5 text-emerald-200" />
+                    <span>{tr(language, 'កែប្រែហាង & មុខម្ហូប', 'Edit Store & Menu', '编辑店铺与菜单')}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => deleteRestaurant(selectedRestaurant.id)}
+                    className="px-2.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow flex items-center gap-1 transition active:scale-95 cursor-pointer"
+                    title={tr(language, 'លុបហាងនេះ', 'Delete this shop', '删除此店铺')}
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>{tr(language, 'លុប', 'Delete', '删除')}</span>
+                  </button>
+                </div>
               </div>
             ) : isOwner ? (
               <div className="p-3.5 bg-amber-50 dark:bg-amber-950/40 rounded-2xl border-2 border-amber-400/80 flex items-center justify-between gap-3 font-khmer">

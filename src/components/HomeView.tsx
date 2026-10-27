@@ -49,13 +49,19 @@ export const HomeView: React.FC = () => {
     searchQuery: globalSearchQuery, setSearchQuery: setGlobalSearchQuery,
     setSelectedFood, setSelectedRestaurant,
     setIsVipAddRestaurantModalOpen, setIsManageMenuModalOpen, setManagingRestaurant,
-    getOwnedRestaurantsForUser, openManageMyVipStore, activeManagedShopId,
+    getOwnedRestaurantsForUser, getCurrentUserStoreQuota, openManageMyVipStore, activeManagedShopId,
     openUpgradeVipModal, deleteRestaurant, openGoogleMapsSearchModal, setIsAdminOpen,
     setIsQrScannerModalOpen
   } = useApp();
 
   const isKm = language === 'km';
   const isVip = isUserVipActive(currentUser);
+  const isAdmin =
+    currentUser?.role === 'admin' ||
+    currentUser?.id === 'admin-authorized-single' ||
+    currentUser?.username === 'admin' ||
+    currentUser?.username === 'cheasavuth';
+  const storeQuota = getCurrentUserStoreQuota(currentUser);
   const myRestaurants = useMemo(() => {
     return getOwnedRestaurantsForUser(currentUser);
   }, [restaurants, currentUser, activeManagedShopId]);
@@ -752,6 +758,12 @@ export const HomeView: React.FC = () => {
                           userGpsLocation && typeof rest.latitude === 'number' && typeof rest.longitude === 'number'
                             ? (calculateDistanceMeters(userGpsLocation.lat, userGpsLocation.lng, rest.latitude, rest.longitude) / 1000).toFixed(1)
                             : null;
+                        const canManageRowShop =
+                          isAdmin ||
+                          (currentUser &&
+                            (rest.ownerId === currentUser.id ||
+                              (currentUser.legacyIds && rest.ownerId && currentUser.legacyIds.includes(rest.ownerId)) ||
+                              (currentUser.email && rest.ownerEmail && currentUser.email.toLowerCase() === rest.ownerEmail.toLowerCase())));
                         return (
                           <div
                             key={`rest-${rest.id}`}
@@ -774,7 +786,38 @@ export const HomeView: React.FC = () => {
                                 </p>
                               </div>
                             </div>
-                            <ChevronRight className="w-4 h-4 text-slate-400 shrink-0 group-hover:translate-x-0.5 transition" />
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              {canManageRowShop && (
+                                <>
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      (window as any).__kft_manage_initial_tab = 'info';
+                                      openManageMyVipStore(rest.id);
+                                    }}
+                                    className="px-2.5 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 text-[11px] font-black shadow-xs flex items-center gap-1 transition active:scale-95 font-khmer cursor-pointer"
+                                    title={tr(language, 'កែប្រែហាង', 'Edit Shop', '编辑店铺')}
+                                  >
+                                    <Edit2 className="w-3.5 h-3.5" />
+                                    <span>{tr(language, 'កែប្រែ', 'Edit', '编辑')}</span>
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      deleteRestaurant(rest.id);
+                                    }}
+                                    className="px-2.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-bold shadow-xs flex items-center gap-1 transition active:scale-95 font-khmer cursor-pointer"
+                                    title={tr(language, 'លុបហាង', 'Delete Shop', '删除店铺')}
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                    <span>{tr(language, 'លុប', 'Delete', '删除')}</span>
+                                  </button>
+                                </>
+                              )}
+                              <ChevronRight className="w-4 h-4 text-slate-400 shrink-0 group-hover:translate-x-0.5 transition" />
+                            </div>
                           </div>
                         );
                       }
@@ -1180,7 +1223,7 @@ export const HomeView: React.FC = () => {
                   </span>
                   {currentUser?.role !== 'admin' && (
                     <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-700 text-white">
-                      {Math.min(myRestaurants.length, 1)}/1 {isKm ? 'ហាង' : 'Store'}
+                      {storeQuota.usedStoresCount}/{storeQuota.totalAllowedStores} {isKm ? 'ហាង' : 'Store'}
                     </span>
                   )}
                 </div>
@@ -1286,11 +1329,7 @@ export const HomeView: React.FC = () => {
                     </button>
                     {deleteRestaurant && (
                       <button
-                        onClick={() => {
-                          if (window.confirm(isKm ? `តើអ្នកពិតជាចង់លុបហាង "${shop.nameKh}" មែនទេ? ក្រោយពេលលុប អ្នកអាចបង្កើតហាងថ្មីជំនួសវិញបាន។` : `Delete "${shop.nameEn || shop.nameKh}"? You can add a new restaurant after deleting.`)) {
-                            deleteRestaurant(shop.id);
-                          }
-                        }}
+                        onClick={() => deleteRestaurant(shop.id)}
                         className="p-1.5 bg-rose-100 hover:bg-rose-600 text-rose-700 hover:text-white dark:bg-rose-950/60 dark:text-rose-300 rounded-xl text-[10px] font-bold transition cursor-pointer"
                         title={isKm ? 'លុបហាងដើម្បីបង្កើតថ្មី' : 'Delete store'}
                       >

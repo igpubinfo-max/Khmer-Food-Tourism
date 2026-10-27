@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { Restaurant, getRestaurantRatingSummary } from '../types';
 import { useApp } from '../context/AppContext';
-import { MapPin, Phone, Star, Navigation, CheckCircle2, AlertCircle, Share2, Edit2, Heart } from 'lucide-react';
+import { MapPin, Phone, Star, Navigation, CheckCircle2, AlertCircle, Share2, Edit2, Trash2, Heart } from 'lucide-react';
 import { sanitizeDialablePhone, resolveRestaurantPhoneOnDemand } from '../services/googlePlacesService';
 import { shareRichContent } from '../utils/androidMediaHelper';
 import { tr } from '../utils/i18n';
@@ -21,6 +21,7 @@ interface RestaurantCardViewProps {
   setSelectedRestaurant: (r: Restaurant | null) => void;
   showToast: (msg: string, type?: 'success' | 'info' | 'warning') => void;
   openManageMyVipStore: (id?: string) => void;
+  deleteRestaurant: (id: string) => void;
   trackRestaurantView: (id: string) => void;
   trackRestaurantCall: (id: string) => void;
   trackRestaurantMap: (id: string) => void;
@@ -36,6 +37,7 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(({
   setSelectedRestaurant,
   showToast,
   openManageMyVipStore,
+  deleteRestaurant,
   trackRestaurantView,
   trackRestaurantCall,
   trackRestaurantMap,
@@ -103,18 +105,33 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(({
             {loc.province}
           </span>
           {isAdmin && (
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                openManageMyVipStore(restaurant.id);
-              }}
-              className="px-2.5 py-0.5 rounded-full bg-amber-400 hover:bg-amber-500 text-slate-950 text-xs font-black shadow-md flex items-center gap-1 transition active:scale-90 font-khmer"
-              title={tr(language, 'គ្រប់គ្រងហាងនេះ (Admin)', 'Manage Shop (Admin)', '管理店铺（管理员）')}
-            >
-              <Edit2 className="w-3 h-3" />
-              <span>{tr(language, 'កែប្រែ', 'Edit', '编辑')}</span>
-            </button>
+            <>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  (window as any).__kft_manage_initial_tab = 'info';
+                  openManageMyVipStore(restaurant.id);
+                }}
+                className="px-2.5 py-0.5 rounded-full bg-amber-400 hover:bg-amber-500 text-slate-950 text-xs font-black shadow-md flex items-center gap-1 transition active:scale-90 font-khmer cursor-pointer"
+                title={tr(language, 'គ្រប់គ្រងហាងនេះ (Admin)', 'Manage Shop (Admin)', '管理店铺（管理员）')}
+              >
+                <Edit2 className="w-3 h-3" />
+                <span>{tr(language, 'កែប្រែ', 'Edit', '编辑')}</span>
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  deleteRestaurant(restaurant.id);
+                }}
+                className="px-2 py-0.5 rounded-full bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-md flex items-center gap-1 transition active:scale-90 font-khmer cursor-pointer"
+                title={tr(language, 'លុបហាងនេះ (Admin)', 'Delete Shop (Admin)', '删除店铺（管理员）')}
+              >
+                <Trash2 className="w-3 h-3" />
+                <span>{tr(language, 'លុប', 'Delete', '删除')}</span>
+              </button>
+            </>
           )}
         </div>
 
@@ -281,7 +298,7 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(({
 const RestaurantCardInner: React.FC<RestaurantCardProps> = ({ restaurant }) => {
   const { 
     language, setSelectedRestaurant, showToast, currentUser,
-    openManageMyVipStore,
+    openManageMyVipStore, deleteRestaurant,
     trackRestaurantView, trackRestaurantCall, trackRestaurantMap, trackRestaurantShare,
     isBookmarked, toggleBookmark
   } = useApp();
@@ -300,6 +317,7 @@ const RestaurantCardInner: React.FC<RestaurantCardProps> = ({ restaurant }) => {
       setSelectedRestaurant={setSelectedRestaurant}
       showToast={showToast}
       openManageMyVipStore={openManageMyVipStore}
+      deleteRestaurant={deleteRestaurant}
       trackRestaurantView={trackRestaurantView}
       trackRestaurantCall={trackRestaurantCall}
       trackRestaurantMap={trackRestaurantMap}
