@@ -36,27 +36,37 @@ jobs:
           fi
           npx cap sync ios
 
-      - name: 6. Generate Compliant 1024x1024 RGB App Store Icon (Zero Transparency)
+      - name: 6. Generate Compliant Full-Bleed 1024x1024 RGB iPad & iPhone Icons (Zero Transparency)
         run: |
           pip3 install Pillow --break-system-packages || pip3 install Pillow || true
           python3 -c "
           import os
           try:
               from PIL import Image
-              src_path = 'public/welcome/welcome-hero-icon.png'
+              src_path = 'public/app-icon.png'
               if not os.path.exists(src_path):
-                  src_path = 'PlayStore_Assets/PlayStore_Icon_512x512.png'
+                  src_path = 'public/android-app-icon-1024.png'
               img = Image.open(src_path).convert('RGBA')
               canvas = Image.new('RGB', (1024, 1024), (6, 78, 59))
-              img.thumbnail((880, 880), Image.Resampling.LANCZOS)
-              x = (1024 - img.width) // 2
-              y = (1024 - img.height) // 2
-              canvas.paste(img, (x, y), mask=img.split()[3])
+              img = img.resize((1024, 1024), Image.Resampling.LANCZOS)
+              canvas.paste(img, (0, 0), mask=img.split()[3])
               out_dir = 'ios/App/App/Assets.xcassets/AppIcon.appiconset'
               os.makedirs(out_dir, exist_ok=True)
-              out_path = os.path.join(out_dir, 'AppIcon-512@2x.png')
-              canvas.save(out_path, 'PNG', optimize=True)
-              print('Successfully generated 1024x1024 non-transparent Apple App Store icon at', out_path)
+              sizes = {
+                  'AppIcon-512@2x.png': 1024,
+                  'AppIcon-83.5@2x.png': 167,
+                  'AppIcon-76@2x.png': 152,
+                  'AppIcon-76@1x.png': 76,
+                  'AppIcon-60@3x.png': 180,
+                  'AppIcon-60@2x.png': 120,
+                  'AppIcon-40@2x.png': 80,
+                  'AppIcon-29@2x.png': 58,
+                  'AppIcon-20@2x.png': 40,
+              }
+              for fname, px in sizes.items():
+                  resized = canvas.resize((px, px), Image.Resampling.LANCZOS)
+                  resized.save(os.path.join(out_dir, fname), 'PNG', optimize=True)
+              print('Successfully generated full-bleed iPad & iPhone App Store icons in', out_dir)
           except Exception as e:
               print(f'Icon generation warning: {e}')
           "
