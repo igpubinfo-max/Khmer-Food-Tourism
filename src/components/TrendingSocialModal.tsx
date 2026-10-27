@@ -18,6 +18,7 @@ import {
   getReplacementCambodianVideo,
   fetchPublicOEmbedMetadata,
   matchesExpandedYouTubeQuery,
+  buildDynamicQueryFallbackVideos,
   OnlineFoodDiscoveryItem,
   PlatformApiStatus,
 } from '../services/onlineFoodDiscoveryService';
@@ -275,14 +276,18 @@ export const TrendingSocialModal: React.FC = () => {
       ) {
         return false;
       }
-      if (searchQuery.trim()) {
-      if (searchQuery.trim()) {
-      }} if (searchQuery.trim()) {
-        if (!matchesExpandedYouTubeQuery(item, searchQuery)) return false;
-      }
+      if (searchQuery.trim() && !matchesExpandedYouTubeQuery(item, searchQuery)) return false;
       return true;
     });
   }, [discoveryItems, categoryFilter, provinceFilter, searchQuery]);
+
+  const effectiveFilteredItems = useMemo(() => {
+    if (filteredItems.length > 0) return filteredItems;
+    if (searchQuery.trim()) {
+      return buildDynamicQueryFallbackVideos(searchQuery, discoveryItems, foods);
+    }
+    return filteredItems;
+  }, [filteredItems, searchQuery, discoveryItems, foods]);
 
   if (!isTrendingSocialModalOpen) return null;
 
@@ -547,6 +552,33 @@ export const TrendingSocialModal: React.FC = () => {
               </button>
             )}
           </div>
+          {/* Quick Search Chips (Coffee, Amok, Noodle, Seafood, BBQ, Angkor) */}
+          <div className="mt-2 flex items-center gap-1.5 overflow-x-auto no-scrollbar font-khmer text-[10px]">
+            {[
+              { q: 'Coffee', labelKh: '☕ កាហ្វេ (Coffee)', labelEn: '☕ Coffee & Cafe', labelZh: '☕ 高棉咖啡' },
+              { q: 'Amok', labelKh: '🍲 អាម៉ុក', labelEn: '🍲 Fish Amok', labelZh: '🍲 阿莫克鱼' },
+              { q: 'Noodle', labelKh: '🍜 គុយទាវ/នំបញ្ចុក', labelEn: '🍜 Khmer Noodles', labelZh: '🍜 金边粿条' },
+              { q: 'Seafood', labelKh: '🦀 គ្រឿងសមុទ្រ', labelEn: '🦀 Kep Seafood', labelZh: '🦀 海鲜螃蟹' },
+              { q: 'BBQ', labelKh: '🍢 សាច់អាំងតាមផ្លូវ', labelEn: '🍢 Street BBQ', labelZh: '🍢 街头烧烤' },
+              { q: 'Angkor', labelKh: '🏛️ អង្គរវត្ត', labelEn: '🏛️ Angkor Wat', labelZh: '🏛️ 吴哥窟' },
+            ].map((chip) => {
+              const active = searchQuery.trim().toLowerCase() === chip.q.toLowerCase();
+              return (
+                <button
+                  key={chip.q}
+                  type="button"
+                  onClick={() => setSearchQuery(active ? '' : chip.q)}
+                  className={`px-2.5 py-1 rounded-full font-bold whitespace-nowrap transition cursor-pointer border ${
+                    active
+                      ? 'bg-rose-600 text-white border-rose-500 shadow-xs'
+                      : 'bg-slate-800/90 text-slate-300 hover:text-white border-slate-700'
+                  }`}
+                >
+                  {tr(language, chip.labelKh, chip.labelEn, chip.labelZh)}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* Action Bar: YouTube API Status + Add Video URL */}
@@ -714,7 +746,7 @@ export const TrendingSocialModal: React.FC = () => {
                 <span>{tr(language, 'សាកល្បងម្ដងទៀត', 'Retry', '重试')}</span>
               </button>
             </div>
-          ) : filteredItems.length === 0 ? (
+          ) : effectiveFilteredItems.length === 0 ? (
             /* Empty State with Reset Filters Button */
             <div className="py-12 text-center text-slate-400 space-y-3">
               <UtensilsCrossed className="w-12 h-12 mx-auto text-slate-500" />
@@ -736,7 +768,30 @@ export const TrendingSocialModal: React.FC = () => {
               </button>
             </div>
           ) : (
-            filteredItems.map((item) => {
+            <>
+              {searchQuery.trim() && (
+                <div className="flex items-center justify-between gap-2 p-2.5 rounded-2xl bg-slate-800/90 border border-slate-700 text-slate-200 text-[11px]">
+                  <span className="font-bold truncate">
+                    {tr(
+                      language,
+                      `🎬 លទ្ធផលវីដេអូសម្រាប់ "${searchQuery.trim()}" (${effectiveFilteredItems.length})`,
+                      `🎬 Video results for "${searchQuery.trim()}" (${effectiveFilteredItems.length})`,
+                      `🎬 "${searchQuery.trim()}" 视频结果 (${effectiveFilteredItems.length})`
+                    )}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => openExternalVideoSafely(undefined, searchQuery.trim())}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-[10px] shrink-0 cursor-pointer shadow-xs"
+                  >
+                    <ExternalLink className="w-3 h-3" />
+                    <span>
+                      {tr(language, 'មើលបន្ថែមលើ YouTube', 'More on YouTube', '在 YouTube 查看更多')}
+                    </span>
+                  </button>
+                </div>
+              )}
+              {effectiveFilteredItems.map((item) => {
               const displayTitle =
                 language === 'km'
                   ? item.titleKh
@@ -1033,7 +1088,8 @@ export const TrendingSocialModal: React.FC = () => {
                   </div>
                 </div>
               );
-            })
+              })}
+            </>
           )}
         </div>
       </div>

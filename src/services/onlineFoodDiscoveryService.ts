@@ -2,8 +2,9 @@ import { FoodItem, TrendingFoodCategorySlug, TrendingFoodItem } from '../types';
 import { initialFoods } from '../data/seedData';
 import { initialTrendingFoods } from '../data/seedTrendingFoods';
 
-export const ONLINE_DISCOVERY_CACHE_KEY = 'kft_v8_youtube_2026_verified_cache';
+export const ONLINE_DISCOVERY_CACHE_KEY = 'kft_v9_youtube_2026_verified_cache';
 const LEGACY_CACHE_KEYS = [
+  'kft_v8_youtube_2026_verified_cache',
   'kft_v7_youtube_2026_verified_cache',
   'kft_v6_youtube_verified_cache',
   'kft_v5_youtube_discovery_cache',
@@ -758,6 +759,102 @@ const CURATED_YOUTUBE_VIDEOS: CuratedYouTubeSeed[] = [
   // ============================================================================
   // CAMBODIAN COFFEE, CAFE CULTURE, BREAKFAST & STREET DRINKS (2025–2026)
   // ============================================================================
+  {
+    id: 'yt-2026-coffee-scene-pp-1',
+    url: 'https://www.youtube.com/watch?v=S91QLZKftmo',
+    authorName: 'Ly and Da',
+    fallbackTitleEn: "Phnom Penh's Coffee Scene 🇰🇭 | Best Local Café Experience & City Vibes (2026)",
+    titleKh: 'ពិភពកាហ្វេនៅភ្នំពេញ 🇰🇭 | ហាងកាហ្វេល្បីៗ និងបរិយាកាសដ៏ទាក់ទាញ (Phnom Penh Coffee & Cafe 2026)',
+    titleZh: '2026 金边咖啡馆文化 (Phnom Penh Coffee Scene)：最佳本地精品咖啡与下午茶体验',
+    descriptionKh: 'ស្វែងយល់ពីវប្បធម៌ញ៉ាំកាហ្វេនៅរាជធានីភ្នំពេញ ហាងកាហ្វេស្អាតៗ កាហ្វេទឹកដោះគោទឹកកក កាហ្វេដូង និងភេសជ្ជៈពេញនិយម (Coffee, Cafe, Latte, Espresso)។',
+    descriptionEn: 'Exploring Phnom Penh’s vibrant coffee scene, specialty local cafés, iced condensed milk coffee, latte art, and relaxing city vibes in Cambodia.',
+    descriptionZh: '探索金边最受欢迎的精品咖啡馆、高棉冰咖啡、拿铁与城市休闲生活。',
+    categorySlug: 'famous_restaurant',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    provinceEn: 'Phnom Penh',
+    publishedDate: '2026-10-27',
+    fallbackThumb: 'https://i.ytimg.com/vi/S91QLZKftmo/hqdefault.jpg',
+  },
+  {
+    id: 'yt-2026-coffee-tour-pp-2',
+    url: 'https://www.youtube.com/watch?v=Y90_MrsZld8',
+    authorName: 'Penny Win',
+    fallbackTitleEn: 'Best Coffee Shops in Phnom Penh | Cambodia Specialty Coffee & Cafe Tour (2026)',
+    titleKh: 'ដំណើរកម្សាន្តភ្លក្សហាងកាហ្វេឆ្ងាញ់ៗបំផុតនៅភ្នំពេញ (Best Coffee Shops in Phnom Penh 2026)',
+    titleZh: '2026 金边最佳咖啡店探店之旅 (Best Coffee Shops in Phnom Penh)',
+    descriptionKh: 'ដើរសាកល្បងរសជាតិកាហ្វេឈ្ងុយឆ្ងាញ់ នំខេក និងភេសជ្ជៈត្រជាក់ៗនៅតាមហាងកាហ្វេល្បីៗក្នុងរាជធានីភ្នំពេញ (Coffee, Cafe, Bakery, Drinks)។',
+    descriptionEn: 'Full coffee tour visiting the best coffee shops, roasteries, and cozy cafes in Phnom Penh, Cambodia.',
+    descriptionZh: '打卡金边口碑最佳的精品咖啡店、烘焙甜品与特色冰饮。',
+    categorySlug: 'famous_restaurant',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    provinceEn: 'Phnom Penh',
+    publishedDate: '2026-10-27',
+    fallbackThumb: 'https://i.ytimg.com/vi/Y90_MrsZld8/hqdefault.jpg',
+  },
+  {
+    id: 'yt-2026-coffee-street-milk-3',
+    url: 'https://www.youtube.com/watch?v=bherGArgorU',
+    authorName: 'Happy Yummy',
+    fallbackTitleEn: 'Cambodia Street Coffee! Over 600 Cups Of Iced Milk Coffee Sold Per Day (2026)',
+    titleKh: 'កាហ្វេទឹកដោះគោទឹកកកតាមផ្លូវខ្មែរ លក់ដាច់ជាង ៦០០កែវក្នុងមួយថ្ងៃ! (Cambodia Street Coffee 2026)',
+    titleZh: '2026 柬埔寨人气街头冰咖啡：每天热销 600 杯的秘制炼乳冰咖啡',
+    descriptionKh: 'ទស្សនាការឆុងកាហ្វេទឹកដោះគោទឹកកកខ្មែរដ៏ល្បីល្បាញ ក្លិនឈ្ងុយ រសជាតិเข้มข้น លក់ដាច់ជាង ៦០០កែវក្នុងមួយថ្ងៃ (Cambodian Iced Coffee / Street Drink)។',
+    descriptionEn: 'Famous Cambodian street coffee vendor brewing rich, creamy iced condensed milk coffee — selling over 600 cups every day.',
+    descriptionZh: '实拍柬埔寨街头最火爆的传统冰咖啡摊位，香浓顺滑日销600余杯。',
+    categorySlug: 'popular_food',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    provinceEn: 'Phnom Penh',
+    publishedDate: '2026-10-26',
+    fallbackThumb: 'https://i.ytimg.com/vi/bherGArgorU/hqdefault.jpg',
+  },
+  {
+    id: 'yt-2026-coffee-latte-street-4',
+    url: 'https://www.youtube.com/watch?v=XVi5dTRR_DM',
+    authorName: 'Street Food Thirty',
+    fallbackTitleEn: 'Only $1.25 for Iced Latte Street Coffee in Cambodia | Cambodia Street Food & Drinks (2026)',
+    titleKh: 'កាហ្វេឡាតេទឹកកកតាមផ្លូវខ្មែរ តម្លៃត្រឹមតែ $1.25 រសជាតិឆ្ងាញ់ពិសេស (Iced Latte Coffee 2026)',
+    titleZh: '2026 柬埔寨街头冰拿铁咖啡：仅需 $1.25 的超值现磨咖啡与街头饮品',
+    descriptionKh: 'សាកល្បងកាហ្វេឡាតេទឹកកក កាហ្វេខ្មៅ និងភេសជ្ជៈតាមផ្លូវដ៏ពេញនិយមនៅកម្ពុជា តម្លៃសមរម្យ និងរសជាតិឆ្ងាញ់។',
+    descriptionEn: 'Freshly brewed $1.25 iced latte street coffee, milk tea, and refreshing local drinks in Cambodia.',
+    descriptionZh: '体验柬埔寨街头现萃冰拿铁、冰美式与地道风味茶饮。',
+    categorySlug: 'popular_food',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    provinceEn: 'Phnom Penh',
+    publishedDate: '2026-10-26',
+    fallbackThumb: 'https://i.ytimg.com/vi/XVi5dTRR_DM/hqdefault.jpg',
+  },
+  {
+    id: 'yt-2026-coffee-siemreap-mao-5',
+    url: 'https://www.youtube.com/watch?v=2qybCDIQYkg',
+    authorName: 'Mao Cambodia',
+    fallbackTitleEn: 'Fancy Local Coffee Shops in Siem Reap Province, Cambodia Review (2026)',
+    titleKh: 'រីវីវហាងកាហ្វេស្អាតៗ និងល្បីៗនៅខេត្តសៀមរាប (Siem Reap Coffee Shops Review 2026)',
+    titleZh: '2026 暹粒省高颜值特色咖啡馆探店测评 (Siem Reap Coffee Shops)',
+    descriptionKh: 'ដើរមើលហាងកាហ្វេបែបធម្មជាតិ និងទំនើបនៅក្រុងសៀមរាប ភ្លក្សកាហ្វេឆ្ងាញ់ៗ តែបៃតង និងនំបុ័ងថ្មីៗ។',
+    descriptionEn: 'Reviewing the most beautiful local coffee shops, garden cafes, and breakfast spots in Siem Reap Province, Cambodia.',
+    descriptionZh: '深度探访暹粒最具格调的本地花园咖啡馆、特色冰咖啡与早午餐名店。',
+    categorySlug: 'famous_restaurant',
+    provinceKh: 'ខេត្តសៀមរាប',
+    provinceEn: 'Siem Reap',
+    publishedDate: '2026-10-25',
+    fallbackThumb: 'https://i.ytimg.com/vi/2qybCDIQYkg/hqdefault.jpg',
+  },
+  {
+    id: 'yt-2026-coffee-siemreap-5cafes-6',
+    url: 'https://www.youtube.com/watch?v=WSIGj7p7DKY',
+    authorName: 'WisGO',
+    fallbackTitleEn: "Don't Leave Siem Reap Without Visiting These 5 Cafes | Cambodia Coffee Vlog (2026)",
+    titleKh: 'ហាងកាហ្វេល្បីៗទាំង ៥ ដែលមិនគួររំលងពេលទៅលេងខេត្តសៀមរាប (Top 5 Siem Reap Cafes 2026)',
+    titleZh: '2026 游览暹粒必去的 5 家宝藏咖啡馆 (Top 5 Cafes in Siem Reap)',
+    descriptionKh: 'ណែនាំហាងកាហ្វេស្អាតៗទាំង ៥ កន្លែងនៅសៀមរាប សម្រាប់អ្នកចូលចិត្តញ៉ាំកាហ្វេ (Coffee Lover) ថតរូបស្អាតៗ និងសម្រាកលំហែ។',
+    descriptionEn: 'Travel & coffee vlog showcasing the top 5 must-visit cafes and specialty coffee bars in Siem Reap, Cambodia.',
+    descriptionZh: '暹粒旅行必打卡的 5 家精品咖啡店推荐，汇集手冲咖啡、椰奶冰咖与精致甜点。',
+    categorySlug: 'food_travel_vlog',
+    provinceKh: 'ខេត្តសៀមរាប',
+    provinceEn: 'Siem Reap',
+    publishedDate: '2026-10-24',
+    fallbackThumb: 'https://i.ytimg.com/vi/WSIGj7p7DKY/hqdefault.jpg',
+  },
   {
     id: 'yt-2026-coffee-phnompenh-1',
     url: 'https://www.youtube.com/watch?v=yUomplw4lQ0',
@@ -1768,19 +1865,19 @@ const SUPABASE_ANON_KEY =
  * matches relevant Cambodian food, drink, restaurant, and travel videos immediately.
  */
 const YOUTUBE_SEARCH_SYNONYM_GROUPS: string[][] = [
-  ['coffee', 'cafe', 'café', 'espresso', 'latte', 'iced coffee', 'kafe', 'កាហ្វេ', 'ហាងកាហ្វេ', 'កាហ្វេទឹកដោះគោ', 'ភេសជ្ជៈ', 'អាហារពេលព្រឹក', 'breakfast', 'morning', 'tea', 'តែ', '咖啡', '冰咖啡', '咖啡馆', '早餐'],
-  ['drink', 'drinks', 'beverage', 'juice', 'smoothie', 'sugarcane', 'coconut', 'ភេសជ្ជៈ', 'ទឹកអំពៅ', 'ទឹកដូង', 'កាហ្វេ', '饮品', '饮料'],
-  ['noodle', 'noodles', 'kuy teav', 'kuyteav', 'nom banh chok', 'num banh chok', 'lort cha', 'គុយទាវ', 'នំបញ្ចុក', 'លតឆា', 'មី', 'មីឆា', '米粉', '粿条', '面条'],
+  ['coffee', 'cafe', 'café', 'espresso', 'latte', 'cappuccino', 'mocha', 'americano', 'matcha', 'iced coffee', 'kafe', 'កាហ្វេ', 'ហាងកាហ្វេ', 'កាហ្វេទឹកដោះគោ', 'ភេសជ្ជៈ', 'អាហារពេលព្រឹក', 'breakfast', 'morning', 'tea', 'milk tea', 'boba', 'តែ', 'តែទឹកដោះគោ', '咖啡', '冰咖啡', '咖啡馆', '拿铁', '早餐'],
+  ['drink', 'drinks', 'beverage', 'juice', 'smoothie', 'sugarcane', 'coconut', 'beer', 'cocktail', 'ភេសជ្ជៈ', 'ទឹកអំពៅ', 'ទឹកដូង', 'កាហ្វេ', '饮品', '饮料'],
+  ['noodle', 'noodles', 'kuy teav', 'kuyteav', 'nom banh chok', 'num banh chok', 'lort cha', 'ramen', 'pasta', 'គុយទាវ', 'នំបញ្ចុក', 'លតឆា', 'មី', 'មីឆា', '米粉', '粿条', '面条'],
   ['amok', 'fish amok', 'អាម៉ុក', 'អាម៉ុកត្រី', 'ត្រី', 'fish', '阿莫克'],
-  ['beef', 'lok lak', 'luc lac', 'steak', 'សាច់គោ', 'ឡុកឡាក់', 'សាច់អាំង', '牛肉', '摇滚牛肉'],
-  ['pork', 'bai sach chrouk', 'bbq', 'skewer', 'សាច់ជ្រូក', 'បាយសាច់ជ្រូក', 'សាច់អាំង', '猪肉', '猪肉饭'],
-  ['chicken', 'សាច់មាន់', 'មាន់ដុត', 'មាន់', '鸡肉', '烤鸡'],
-  ['seafood', 'crab', 'shrimp', 'prawn', 'squid', 'គ្រឿងសមុទ្រ', 'ក្តាម', 'ក្តាមឆាម្រេច', 'បង្គា', 'មឹក', 'កែប', 'kep', '海鲜', '螃蟹'],
-  ['soup', 'curry', 'samlor', 'korko', 'machu', 'សម្ល', 'សម្លកកូរ', 'សម្លម្ជូរ', 'សម្លការី', 'ស្ងោរ', '汤', '咖喱'],
-  ['dessert', 'sweet', 'cake', 'snack', 'kralan', 'num krok', 'បង្អែម', 'នំ', 'ក្រឡាន', 'នំគ្រក់', 'ចេកអាំង', '甜品', '小吃'],
+  ['beef', 'lok lak', 'luc lac', 'steak', 'burger', 'សាច់គោ', 'ឡុកឡាក់', 'សាច់អាំង', '牛肉', '摇滚牛肉'],
+  ['pork', 'bai sach chrouk', 'bbq', 'skewer', 'sausage', 'សាច់ជ្រូក', 'បាយសាច់ជ្រូក', 'សាច់ក្រក', 'សាច់អាំង', '猪肉', '猪肉饭'],
+  ['chicken', 'duck', 'សាច់មាន់', 'មាន់ដុត', 'មាន់', 'ទា', '鸡肉', '烤鸡'],
+  ['seafood', 'crab', 'shrimp', 'prawn', 'squid', 'octopus', 'oyster', 'គ្រឿងសមុទ្រ', 'ក្តាម', 'ក្តាមឆាម្រេច', 'បង្គា', 'មឹក', 'កែប', 'kep', '海鲜', '螃蟹'],
+  ['soup', 'curry', 'samlor', 'korko', 'machu', 'hotpot', 'សម្ល', 'សម្លកកូរ', 'សម្លម្ជូរ', 'សម្លការី', 'ស្ងោរ', 'ស៊ុប', '汤', '咖喱', '火锅'],
+  ['dessert', 'sweet', 'cake', 'bakery', 'ice cream', 'fruit', 'durian', 'mango', 'snack', 'kralan', 'num krok', 'បង្អែម', 'នំ', 'ក្រឡាន', 'នំគ្រក់', 'ចេកអាំង', 'ការ៉េម', 'ទុរេន', '甜品', '小吃'],
   ['street food', 'night market', 'market', 'ម្ហូបតាមផ្លូវ', 'ផ្សារ', 'ផ្សាររាត្រី', 'អាហារតាមផ្លូវ', '街头美食', '夜市'],
-  ['restaurant', 'shop', 'dining', 'ភោជនីយដ្ឋាន', 'ហាង', 'ហាងអាហារ', '餐厅', '名店'],
-  ['travel', 'tourism', 'attraction', 'temple', 'angkor', 'island', 'beach', 'ទេសចរណ៍', 'ដើរលេង', 'ប្រាសាទ', 'អង្គរវត្ត', 'កោះ', 'ឆ្នេរ', '旅游', '景点', '吴哥窟'],
+  ['restaurant', 'buffet', 'shop', 'dining', 'pizza', 'ភោជនីយដ្ឋាន', 'ប៊ូហ្វេ', 'ហាង', 'ហាងអាហារ', '餐厅', '名店', '自助餐'],
+  ['travel', 'tourism', 'attraction', 'temple', 'angkor', 'island', 'beach', 'mountain', 'waterfall', 'ទេសចរណ៍', 'ដើរលេង', 'ប្រាសាទ', 'អង្គរវត្ត', 'កោះ', 'ឆ្នេរ', 'ភ្នំ', 'ទឹកធ្លាក់', '旅游', '景点', '吴哥窟'],
   ['phnom penh', 'ភ្នំពេញ', 'រាជធានីភ្នំពេញ', '金边'],
   ['siem reap', 'angkor', 'សៀមរាប', 'ខេត្តសៀមរាប', 'អង្គរ', '暹粒'],
   ['kampot', 'កំពត', 'ខេត្តកំពត', '贡布'],
@@ -1818,6 +1915,43 @@ export function matchesExpandedYouTubeQuery(
   if (hay.includes(q)) return true;
   const tokens = expandYouTubeSearchQueryTokens(q);
   return tokens.some((token) => hay.includes(token));
+}
+
+/**
+ * Smart Synchronous Fallback for any search query in TrendingSocialModal:
+ * Guarantees that typing ANY food, drink, coffee, restaurant, or travel keyword
+ * always returns playable Cambodian YouTube videos rather than an empty screen.
+ */
+export function buildDynamicQueryFallbackVideos(
+  rawQuery: string,
+  baseItems: OnlineFoodDiscoveryItem[],
+  foods: FoodItem[] = initialFoods
+): OnlineFoodDiscoveryItem[] {
+  const cleanQ = (rawQuery || '').trim();
+  const pool =
+    baseItems.length > 0
+      ? baseItems
+      : CURATED_YOUTUBE_VIDEOS.map((s) => seedToDiscoveryItem(s, foods, true));
+  if (!cleanQ) return pool;
+
+  // 1. Try matching across all items (ignoring restrictive category/province tab if needed)
+  const directMatches = pool.filter((item) => matchesExpandedYouTubeQuery(item, cleanQ));
+  if (directMatches.length > 0) {
+    return directMatches;
+  }
+
+  // 2. If user typed an uncommon keyword not in any title, return top relevant playable Cambodian videos
+  const qLower = cleanQ.toLowerCase();
+  const isCoffeeOrDrink =
+    /coffee|cafe|café|latte|espresso|cappuccino|mocha|matcha|tea|boba|drink|juice|smoothie|កាហ្វេ|តែ|ភេសជ្ជៈ|ទឹក|咖啡|茶/.test(
+      qLower
+    );
+
+  const selected = isCoffeeOrDrink
+    ? pool.filter((it) => it.id.includes('coffee') || matchesExpandedYouTubeQuery(it, 'coffee'))
+    : pool.slice(0, 6);
+
+  return (selected.length > 0 ? selected : pool.slice(0, 6)).slice(0, 6);
 }
 
 /**
