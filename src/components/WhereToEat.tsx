@@ -52,7 +52,7 @@ interface Props {
 
 /** "Where to eat this": restaurants whose listed signature dishes match, plus a Near-me shortcut. */
 export const WhereToEat: React.FC<Props> = ({ food }) => {
-  const { language, restaurants, setSelectedRestaurant, setIsNearMeModalOpen, currentUser, showToast, openUpgradeVipModal } = useApp();
+  const { language, restaurants, setSelectedFood, setSelectedRestaurant, setIsNearMeModalOpen, currentUser, showToast, openUpgradeVipModal } = useApp();
   const matches = useMemo(() => findRestaurantsServingDish(food, restaurants).slice(0, 4), [food, restaurants]);
 
   const openNearMe = () => {
@@ -64,6 +64,7 @@ export const WhereToEat: React.FC<Props> = ({ food }) => {
       openUpgradeVipModal();
       return;
     }
+    setSelectedFood(null);
     setIsNearMeModalOpen(true);
   };
 
@@ -91,7 +92,10 @@ export const WhereToEat: React.FC<Props> = ({ food }) => {
               <button
                 key={r.id}
                 type="button"
-                onClick={() => setSelectedRestaurant(r)}
+                onClick={() => {
+                  setSelectedFood(null);
+                  setSelectedRestaurant(r);
+                }}
                 className="w-full min-h-[64px] flex items-center gap-3 p-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-left active:scale-[0.98] transition cursor-pointer"
               >
                 <img src={r.photoUrl} alt={loc.name} loading="lazy" className="w-14 h-14 rounded-lg object-cover shrink-0 bg-slate-100" />
@@ -118,7 +122,7 @@ export const WhereToEat: React.FC<Props> = ({ food }) => {
         className="min-h-[44px] px-4 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white text-sm font-bold flex items-center gap-1.5 active:scale-95 transition cursor-pointer"
       >
         <Navigation className="w-4 h-4" />
-        {tr(language, 'នៅជិតខ្ញុំ', 'Near me', '附近')}
+        {tr(language, 'រកហាងនៅជិតខ្ញុំ', 'Find restaurants near me', '查找附近餐厅')}
       </button>
     </div>
   );

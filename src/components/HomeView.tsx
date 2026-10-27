@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { TrendingFoodCategorySlug, TrendingFoodItem, isUserVipActive, getVipAccountState, getVipRemainingDays, sortRestaurantsChronologically, getVipFeaturedRotationConfig, sortRestaurantsWithVipRotation, isAdminAccount } from '../types';
+import { TrendingFoodCategorySlug, TrendingFoodItem, isUserVipActive, getVipAccountState, getVipRemainingDays, sortRestaurantsChronologically, sortRestaurantsWithVipRotation, isAdminAccount } from '../types';
 import {
   normalizeKhmerSearchText,
   searchCambodiaPlacesWithSmartCache,
@@ -58,8 +58,6 @@ export const HomeView: React.FC = () => {
   const isVip = isUserVipActive(currentUser);
   const isAdmin = isAdminAccount(currentUser);
   const storeQuota = getCurrentUserStoreQuota(currentUser);
-  const rotationCfg = getVipFeaturedRotationConfig(appSettings);
-  const topListingLabel = `Top Listing: ${rotationCfg.durationDays} ${rotationCfg.durationDays === 1 ? 'Day' : 'Days'}`;
   const myRestaurants = useMemo(() => {
     return getOwnedRestaurantsForUser(currentUser);
   }, [restaurants, currentUser, activeManagedShopId]);
@@ -1259,7 +1257,7 @@ export const HomeView: React.FC = () => {
                 className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 text-slate-950 font-bold text-xs shadow-xs transition flex items-center gap-1 shrink-0 active:scale-95 cursor-pointer"
               >
                 <Plus className="w-3.5 h-3.5" />
-                <span>{isKm ? `បន្ថែមហាង VIP (${topListingLabel})` : `Add Store (${topListingLabel})`}</span>
+                <span>{isKm ? 'បន្ថែមហាង VIP' : 'Add Store'}</span>
               </button>
             )}
           </div>
@@ -1292,7 +1290,7 @@ export const HomeView: React.FC = () => {
                     className="relative w-full py-3.5 px-4 bg-gradient-to-r from-amber-300 via-amber-400 to-yellow-400 hover:from-amber-400 hover:to-yellow-500 text-slate-950 rounded-xl text-xs sm:text-sm font-black border-2 border-white/90 vip-glow-btn flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer shadow-lg"
                   >
                     <Crown className="w-4 h-4 fill-slate-950 shrink-0" />
-                    <span>{isKm ? `+ ចុះបញ្ជីហាង VIP របស់អ្នក (1 ហាង • ${topListingLabel})` : `+ Register Your VIP Restaurant (1 Store • ${topListingLabel})`}</span>
+                    <span>{isKm ? '+ ចុះបញ្ជីហាង VIP របស់អ្នក (1 ហាង)' : '+ Register Your VIP Restaurant (1 Store)'}</span>
                     <Sparkles className="w-3.5 h-3.5 text-amber-900 shrink-0" />
                   </button>
                 </div>

@@ -22,7 +22,7 @@ import {
   CreditCard,
   Clock,
 } from 'lucide-react';
-import { RestaurantPriceLevel, GoogleMapsPlaceMetadata, isUserVipActive, getDynamicVipPlans, getVipFeaturedRotationConfig, isAdminAccount } from '../types';
+import { RestaurantPriceLevel, GoogleMapsPlaceMetadata, isUserVipActive, getDynamicVipPlans, isAdminAccount } from '../types';
 import {
   pickImageUsingNativeAndroidGallery,
   pickMultipleImagesUsingNativeAndroidGallery,
@@ -94,19 +94,17 @@ export const VipAddRestaurantModal: React.FC = () => {
   const isKm = language === 'km';
   const isAdmin = isAdminAccount(currentUser);
 
-  const isApprovedVip = isUserVipActive(currentUser);
-  const dynamicPlans = getDynamicVipPlans(appSettings);
-  const quota = getCurrentUserStoreQuota(currentUser);
-  const ownedRestaurants = getOwnedRestaurantsForUser(currentUser);
-  const requiresAdditionalPayment = !isAdmin && !replacingStoreId && quota.remainingAvailableSlots <= 0;
-  const rotationCfg = getVipFeaturedRotationConfig(appSettings);
-  const topListingLabel = `Top Listing: ${rotationCfg.durationDays} ${rotationCfg.durationDays === 1 ? 'Day' : 'Days'}`;
-
   // Simple 2-Tab Navigation: 'create_form' (Default!) or 'my_stores' or 'pay_additional_slot'
   const [activeTab, setActiveTab] = useState<'create_form' | 'my_stores' | 'pay_additional_slot'>('create_form');
   const [replacingStoreId, setReplacingStoreId] = useState<string | null>(null);
   const [confirmDeleteStoreId, setConfirmDeleteStoreId] = useState<string | null>(null);
   const [showMoreOptions, setShowMoreOptions] = useState(false);
+
+  const isApprovedVip = isUserVipActive(currentUser);
+  const dynamicPlans = getDynamicVipPlans(appSettings);
+  const quota = getCurrentUserStoreQuota(currentUser);
+  const ownedRestaurants = getOwnedRestaurantsForUser(currentUser);
+  const requiresAdditionalPayment = !isAdmin && !replacingStoreId && quota.remainingAvailableSlots <= 0;
 
   // Essential Form Fields
   const [nameKh, setNameKh] = useState('');
@@ -149,30 +147,6 @@ export const VipAddRestaurantModal: React.FC = () => {
     () => (replacingStoreId ? ownedRestaurants.find((r) => r.id === replacingStoreId) || null : null),
     [replacingStoreId, ownedRestaurants]
   );
-
-  // When modal opens, always start cleanly on the Create Form (or Replace Mode if requested)
-  useEffect(() => {
-    if (!isVipAddRestaurantModalOpen) return;
-    setPhone((prev) => prev || currentUser?.phone || '');
-    const initialReq = (window as any).__kft_vip_store_initial_mode;
-    if (initialReq) {
-      delete (window as any).__kft_vip_store_initial_mode;
-      if (initialReq.mode === 'replace' && initialReq.storeId) {
-        const found = ownedRestaurants.find((s) => s.id === initialReq.storeId) || ownedRestaurants[0];
-        if (found) {
-          beginReplaceStore(found);
-          return;
-        }
-      } else if (initialReq.mode === 'my_stores') {
-        setActiveTab('my_stores');
-        return;
-      }
-    }
-    setReplacingStoreId(null);
-    setActiveTab('create_form');
-  }, [isVipAddRestaurantModalOpen]);
-
-  if (!isVipAddRestaurantModalOpen) return null;
 
   const resetFormFields = () => {
     setNameKh('');
@@ -217,6 +191,30 @@ export const VipAddRestaurantModal: React.FC = () => {
     setSignatureDishesKh(Array.isArray(store.signatureDishesKh) && store.signatureDishesKh.length > 0 ? store.signatureDishesKh : ['ម្ហូបពិសេសប្រចាំហាង']);
     setActiveTab('create_form');
   };
+
+  // When modal opens, always start cleanly on the Create Form (or Replace Mode if requested)
+  useEffect(() => {
+    if (!isVipAddRestaurantModalOpen) return;
+    setPhone((prev) => prev || currentUser?.phone || '');
+    const initialReq = (window as any).__kft_vip_store_initial_mode;
+    if (initialReq) {
+      delete (window as any).__kft_vip_store_initial_mode;
+      if (initialReq.mode === 'replace' && initialReq.storeId) {
+        const found = ownedRestaurants.find((s) => s.id === initialReq.storeId) || ownedRestaurants[0];
+        if (found) {
+          beginReplaceStore(found);
+          return;
+        }
+      } else if (initialReq.mode === 'my_stores') {
+        setActiveTab('my_stores');
+        return;
+      }
+    }
+    setReplacingStoreId(null);
+    setActiveTab('create_form');
+  }, [isVipAddRestaurantModalOpen]);
+
+  if (!isVipAddRestaurantModalOpen) return null;
 
   // Pick Shop Photo from Gallery
   const handlePickFromGallery = async () => {
@@ -1465,9 +1463,9 @@ export const VipAddRestaurantModal: React.FC = () => {
                       )
                     : tr(
                         language,
-                        `✅ ចុះបញ្ជីហាងឥឡូវនេះ (${topListingLabel})`,
-                        `✅ Register Shop Now (${topListingLabel})`,
-                        `✅ 立即注册店铺 (${topListingLabel})`
+                        '✅ ចុះបញ្ជីហាងឥឡូវនេះ',
+                        '✅ Register Shop Now',
+                        '✅ 立即注册店铺'
                       )}
                 </span>
               </button>

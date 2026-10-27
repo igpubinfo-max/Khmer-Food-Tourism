@@ -52,7 +52,6 @@ export const ProfileView: React.FC = () => {
   const dynamicBenefits = getDynamicVipBenefits(appSettings);
   const rotationCfg = getVipFeaturedRotationConfig(appSettings);
   const rotationState = getVipFeaturedRotationState(restaurants, users, appSettings);
-  const topListingLabel = `Top Listing: ${rotationCfg.durationDays} ${rotationCfg.durationDays === 1 ? 'Day' : 'Days'}`;
   const isOwner = Boolean(
     currentUser &&
       !isAdmin &&
@@ -885,7 +884,7 @@ export const ProfileView: React.FC = () => {
                         className="relative w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-300 via-amber-400 to-yellow-400 hover:from-amber-400 hover:to-yellow-500 text-slate-950 font-black text-xs sm:text-sm border-2 border-white/90 vip-glow-btn flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer shadow-lg"
                       >
                         <Crown className="w-4 h-4 fill-slate-950 shrink-0" />
-                        <span>{isKm ? `+ ចុះបញ្ជីហាង VIP របស់អ្នក (${topListingLabel})` : `+ Register Your VIP Restaurant (${topListingLabel})`}</span>
+                        <span>{isKm ? '+ ចុះបញ្ជីហាង VIP របស់អ្នក' : '+ Register Your VIP Restaurant'}</span>
                         <Sparkles className="w-3.5 h-3.5 text-amber-900 shrink-0" />
                       </button>
                     </div>
@@ -929,7 +928,7 @@ export const ProfileView: React.FC = () => {
                       onClick={() => setIsVipAddRestaurantModalOpen(true)}
                       className="flex-1 py-2 px-3 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 font-black text-[11px] transition cursor-pointer"
                     >
-                      {isKm ? `+ ចុះបញ្ជីហាង VIP របស់អ្នក (${topListingLabel})` : `+ Register Your VIP Store (${topListingLabel})`}
+                      {isKm ? '+ ចុះបញ្ជីហាង VIP របស់អ្នក' : '+ Register Your VIP Store'}
                     </button>
                   )}
                   <button
@@ -1623,7 +1622,7 @@ export const ProfileView: React.FC = () => {
               </div>
               <div className="space-y-1.5">
                 <h4 className="font-bold text-sm text-[#0F172A] dark:text-white">
-                  {isKm ? `ចុះបញ្ជីហាង VIP របស់អ្នក (${topListingLabel})` : `Register Your VIP Restaurant (${topListingLabel})`}
+                  {isKm ? 'ចុះបញ្ជីហាង VIP របស់អ្នក' : 'Register Your VIP Restaurant'}
                 </h4>
                 <p className="text-xs text-slate-700 dark:text-slate-200 leading-relaxed max-w-md mx-auto bg-amber-100/70 dark:bg-amber-950/40 border border-amber-300/60 dark:border-amber-500/40 rounded-2xl p-3 font-medium">
                   {isKm
@@ -1640,7 +1639,7 @@ export const ProfileView: React.FC = () => {
               >
                 <Crown className="w-4 h-4 fill-slate-950 shrink-0" />
                 <span>
-                  {isKm ? `+ ចុះបញ្ជីហាង VIP របស់អ្នក (${topListingLabel})` : `+ Register Your VIP Restaurant (${topListingLabel})`}
+                  {isKm ? '+ ចុះបញ្ជីហាង VIP របស់អ្នក' : '+ Register Your VIP Restaurant'}
                 </span>
               </button>
             </div>

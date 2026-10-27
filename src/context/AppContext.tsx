@@ -1299,9 +1299,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [appSettings]);
 
   // Modal & selection states
-  const [selectedFood, setSelectedFood] = useState<FoodItem | null>(null);
-  const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(null);
-  const [selectedDestination, setSelectedDestination] = useState<TouristDestination | null>(null);
+  const [selectedFood, setSelectedFoodRaw] = useState<FoodItem | null>(null);
+  const [selectedRestaurant, setSelectedRestaurantRaw] = useState<Restaurant | null>(null);
+  const [selectedDestination, setSelectedDestinationRaw] = useState<TouristDestination | null>(null);
   
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(() => !currentUser);
   const [isAddPostModalOpen, setIsAddPostModalOpen] = useState(false);
@@ -1535,6 +1535,49 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [selectedTrendingFood, setSelectedTrendingFood] = useState<TrendingFoodItem | null>(null);
   const [isTrendingFoodDetailModalOpen, setIsTrendingFoodDetailModalOpen] = useState<boolean>(false);
+
+  // Single-level detail navigation stack wrappers so opening a shop/food/destination never leaves another detail modal open underneath
+  const setSelectedRestaurant = (r: Restaurant | null) => {
+    if (r !== null) {
+      setSelectedFoodRaw(null);
+      setSelectedDestinationRaw(null);
+      setIsTrendingFoodDetailModalOpen(false);
+      setIsNearMeModalOpenRaw(false);
+      setIsWhatToEatModalOpenRaw(false);
+      setIsDailyDiscoveriesModalOpenRaw(false);
+      setIsWishlistsModalOpenRaw(false);
+      setIsGoogleMapsSearchModalOpenRaw(false);
+    }
+    setSelectedRestaurantRaw(r);
+  };
+
+  const setSelectedFood = (f: FoodItem | null) => {
+    if (f !== null) {
+      setSelectedRestaurantRaw(null);
+      setSelectedDestinationRaw(null);
+      setIsTrendingFoodDetailModalOpen(false);
+      setIsNearMeModalOpenRaw(false);
+      setIsWhatToEatModalOpenRaw(false);
+      setIsDailyDiscoveriesModalOpenRaw(false);
+      setIsWishlistsModalOpenRaw(false);
+      setIsGoogleMapsSearchModalOpenRaw(false);
+    }
+    setSelectedFoodRaw(f);
+  };
+
+  const setSelectedDestination = (d: TouristDestination | null) => {
+    if (d !== null) {
+      setSelectedFoodRaw(null);
+      setSelectedRestaurantRaw(null);
+      setIsTrendingFoodDetailModalOpen(false);
+      setIsNearMeModalOpenRaw(false);
+      setIsWhatToEatModalOpenRaw(false);
+      setIsDailyDiscoveriesModalOpenRaw(false);
+      setIsWishlistsModalOpenRaw(false);
+      setIsGoogleMapsSearchModalOpenRaw(false);
+    }
+    setSelectedDestinationRaw(d);
+  };
 
   // AI Smart Check-in State
   const [aiCheckIns, setAiCheckIns] = useState<AiCheckInSubmission[]>(() => {
@@ -3074,12 +3117,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setManagingRestaurant(null);
         return;
       }
-      if (state.selectedFood) {
-        setSelectedFood(null);
-        return;
-      }
       if (state.selectedRestaurant) {
         setSelectedRestaurant(null);
+        return;
+      }
+      if (state.selectedFood) {
+        setSelectedFood(null);
         return;
       }
       if (state.selectedDestination) {

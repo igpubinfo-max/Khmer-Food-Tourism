@@ -2784,13 +2784,36 @@ export const AdminDashboard: React.FC = () => {
 
           {/* USERS TAB */}
           {activeTab === 'users' && (() => {
-            const deletableUsers = users.filter(
-              u =>
-                u.role !== 'admin' &&
-                u.id !== 'admin-authorized-single' &&
-                u.username !== 'cheasavuth' &&
-                u.username !== 'admin'
+            const deletedIdsSet = new Set(
+              (deletedUsers || []).map(d => (d.id || '').trim().toLowerCase()).filter(Boolean)
             );
+            const deletedEmailsSet = new Set(
+              (deletedUsers || []).map(d => (d.email || '').trim().toLowerCase()).filter(Boolean)
+            );
+            const deletedPhonesSet = new Set(
+              (deletedUsers || []).map(d => (d.phone || '').replace(/[\s()-]/g, '').trim()).filter(Boolean)
+            );
+
+            const deletableUsers = users.filter(u => {
+              if (
+                u.role === 'admin' ||
+                u.id === 'admin-authorized-single' ||
+                u.username === 'cheasavuth' ||
+                u.username === 'admin'
+              ) {
+                return false;
+              }
+              if ((u as any).permanentlyDeleted === true || u.isDisabled === true) {
+                return false;
+              }
+              const uId = (u.id || '').trim().toLowerCase();
+              const uEmail = (u.email || '').trim().toLowerCase();
+              const uPhone = (u.phone || '').replace(/[\s()-]/g, '').trim();
+              if (uId && deletedIdsSet.has(uId)) return false;
+              if (uEmail && deletedEmailsSet.has(uEmail)) return false;
+              if (uPhone && deletedPhonesSet.has(uPhone)) return false;
+              return true;
+            });
             const validSelectedIds = selectedUserIdsForDeletion.filter(id =>
               deletableUsers.some(u => u.id === id)
             );
@@ -3226,57 +3249,6 @@ export const AdminDashboard: React.FC = () => {
                         </div>
                       );
                     })}
-                  </div>
-                )}
-
-                {/* Deleted / Disabled Users Registry with Option to Restore Non-Permanently Deleted Accounts */}
-                {deletedUsers && deletedUsers.length > 0 && (
-                  <div className="mt-4 p-4 rounded-2xl bg-rose-50/60 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/50 space-y-2.5">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2 text-rose-700 dark:text-rose-400 font-khmer font-bold text-xs">
-                        <Ban className="w-4 h-4 shrink-0" />
-                        <span>
-                          {isKm
-                            ? `បញ្ជីគណនីដែលត្រូវបានលុប ឬបិទសិទ្ធិចូលប្រើ (${deletedUsers.length})`
-                            : `Deleted & Disabled Accounts (${deletedUsers.length})`}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="space-y-1.5 max-h-44 overflow-y-auto no-scrollbar">
-                      {deletedUsers.map(d => {
-                        const isPermDeleted = d.permanentlyDeleted === true;
-                        return (
-                          <div
-                            key={d.id}
-                            className="px-3 py-2 rounded-xl bg-white/80 dark:bg-stone-900/60 border border-rose-200/70 dark:border-rose-900/40 flex items-center justify-between gap-2 text-[11px] font-khmer"
-                          >
-                            <div className="min-w-0">
-                              <span className="font-bold text-stone-800 dark:text-stone-200">{d.name}</span>{' '}
-                              <span className="text-stone-400 font-mono text-[10px]">({d.email || d.phone || d.id})</span>
-                            </div>
-                            <div className="flex items-center gap-1.5 shrink-0">
-                              {!isPermDeleted ? (
-                                <button
-                                  type="button"
-                                  onClick={async () => {
-                                    await restoreUserAccess(d.id || d.email);
-                                  }}
-                                  className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] flex items-center gap-1 cursor-pointer shadow-2xs transition"
-                                  title={isKm ? 'ស្តារសិទ្ធិចូលប្រើប្រាស់គណនីឡើងវិញ' : 'Restore User Access'}
-                                >
-                                  <RefreshCw className="w-3 h-3" />
-                                  <span>{isKm ? 'ស្តារគណនីឡើងវិញ (Restore)' : 'Restore Access'}</span>
-                                </button>
-                              ) : (
-                                <span className="px-2 py-0.5 rounded-full bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-300 font-bold text-[10px] shrink-0">
-                                  🚫 {isKm ? 'លុបជាអចិន្ត្រៃយ៍ (Delete Forever)' : 'Permanently Deleted'}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
                   </div>
                 )}
 
