@@ -9,7 +9,8 @@ import {
 } from 'lucide-react';
 import {
   FoodCategorySlug, DestinationCategorySlug, UserRole, User, RegistrationTransaction, FoodItem, TouristDestination, isSeedRestaurantId,
-  VipBenefitItem, TEN_VIP_BENEFITS, getDynamicVipBenefits, getAdditionalStoreFeeUsd
+  VipBenefitItem, TEN_VIP_BENEFITS, getDynamicVipBenefits, getAdditionalStoreFeeUsd,
+  getVipFeaturedRotationConfig, getVipFeaturedRotationState
 } from '../types';
 import { getSecurityAuditLogs, SecurityAuditEntry, revokeAdminSession, getOfficialOwnershipCertificate, verifyAppOwnershipAndDomainIntegrity } from '../utils/security';
 import { FoodImageModal } from './FoodImageModal';
@@ -142,6 +143,9 @@ export const AdminDashboard: React.FC = () => {
   const [vipLongNameEn, setVipLongNameEn] = useState<string>(appSettings.vipLongNameEn || `VIP ${appSettings.vipLongDurationDays ?? 60} Days`);
   const [additionalStoreFeeInput, setAdditionalStoreFeeInput] = useState<string>(() => String(getAdditionalStoreFeeUsd(appSettings)));
   const [vipBenefitsDraft, setVipBenefitsDraft] = useState<VipBenefitItem[]>(() => getDynamicVipBenefits(appSettings));
+  const [vipFeaturedRotationEnabledInput, setVipFeaturedRotationEnabledInput] = useState<boolean>(() => appSettings.vipFeaturedRotationEnabled !== false);
+  const [vipFeaturedDurationDaysInput, setVipFeaturedDurationDaysInput] = useState<string>(() => String(appSettings.vipFeaturedDurationDays ?? 1));
+  const [activeSettingsSection, setActiveSettingsSection] = useState<'all' | 'featured_rotation' | 'vip_pricing' | 'payment_khqr' | 'distribution' | 'cloud_system' | 'security'>('all');
 
   const isVipFormDirtyRef = useRef<boolean>(false);
   const [isSavingVipSettings, setIsSavingVipSettings] = useState<boolean>(false);
@@ -152,6 +156,7 @@ export const AdminDashboard: React.FC = () => {
     const sPrice = s.vipShortPriceUsd ?? 4.99;
     const lDays = s.vipLongDurationDays ?? 60;
     const lPrice = s.vipLongPriceUsd ?? 6.99;
+    const rotCfg = getVipFeaturedRotationConfig(s);
     setApkUrl(s.apkDownloadUrl);
     setPlayStoreUrl(s.playStoreUrl);
     setAppStoreUrl(s.appStoreUrl);
@@ -171,6 +176,8 @@ export const AdminDashboard: React.FC = () => {
     setVipLongNameEn(s.vipLongNameEn || `VIP ${lDays} Days`);
     setAdditionalStoreFeeInput(String(getAdditionalStoreFeeUsd(s)));
     setVipBenefitsDraft(getDynamicVipBenefits(s));
+    setVipFeaturedRotationEnabledInput(rotCfg.enabled);
+    setVipFeaturedDurationDaysInput(String(rotCfg.durationDays));
   };
 
   // Reset dirty flag and pull latest settings when Admin Dashboard opens
@@ -334,6 +341,14 @@ export const AdminDashboard: React.FC = () => {
     const parsedLongDays = parseInt(vipLongDurationInput.trim(), 10);
     const parsedLongPrice = parseFloat(vipLongPriceInput.trim());
     const parsedExtraFee = parseFloat(additionalStoreFeeInput.trim());
+    const parsedFeaturedDays = parseInt(vipFeaturedDurationDaysInput.trim(), 10);
+
+    if (!Number.isFinite(parsedFeaturedDays) || parsedFeaturedDays < 1 || parsedFeaturedDays > 365) {
+      const msg = isKm ? '⚠️ សូមបញ្ចូលរយៈពេលបង្វិលបង្ហាញហាង VIP ឱ្យបានត្រឹមត្រូវ (១ ដល់ ៣៦៥ ថ្ងៃ)!' : '⚠️ Please enter a valid VIP Featured Duration (1 to 365 days)!';
+      setVipSaveFeedback({ type: 'error', message: msg });
+      showToast(msg, 'warning');
+      return;
+    }
 
     if (!Number.isFinite(parsedShortDays) || parsedShortDays < 1 || parsedShortDays > 3650) {
       const msg = isKm ? '⚠️ សូមបញ្ចូលរយៈពេលកញ្ចប់ VIP ទី១ ឱ្យបានត្រឹមត្រូវ (១ ដល់ ៣៦៥០ ថ្ងៃ)!' : '⚠️ Please enter a valid duration for Plan #1 (1 to 3650 days)!';
@@ -371,6 +386,7 @@ export const AdminDashboard: React.FC = () => {
     const cleanLongDays = Math.round(parsedLongDays);
     const cleanLongPrice = Math.round(parsedLongPrice * 100) / 100;
     const cleanExtraFee = Math.round(parsedExtraFee * 100) / 100;
+    const cleanFeaturedDays = Math.max(1, Math.min(365, Math.round(parsedFeaturedDays)));
 
     const cleanShortNameKh =
       !vipShortNameKh.trim() || /^VIP\s+\d+\s*(ថ្ងៃ|\?+)$/i.test(vipShortNameKh.trim())
@@ -412,6 +428,8 @@ export const AdminDashboard: React.FC = () => {
         vipLongNameKh: cleanLongNameKh,
         vipLongNameEn: cleanLongNameEn,
         additionalStoreFeeUsd: cleanExtraFee,
+        vipFeaturedRotationEnabled: vipFeaturedRotationEnabledInput,
+        vipFeaturedDurationDays: cleanFeaturedDays,
         vipBenefitsList: vipBenefitsDraft.map((b, idx) => ({
           id: idx + 1,
           titleKh: b.titleKh.trim() || `អត្ថប្រយោជន៍ទី ${idx + 1}`,
@@ -3672,11 +3690,266 @@ export const AdminDashboard: React.FC = () => {
             </div>
           )}
 
-          {/* SETTINGS TAB */}
-          {activeTab === 'settings' && (
-            <div className="space-y-6">
-              {/* Requirement 3 & 4: Admin VIP Membership Durations (10 Days & 90 Days), Prices, Benefits & Additional Store Fee ($10) */}
-              <div className="bg-white dark:bg-stone-800 p-5 rounded-3xl border-2 border-amber-500/40 shadow-sm space-y-5 font-khmer">
+          {/* SETTINGS TAB - ENTERPRISE ADMIN SETTINGS & SYSTEM CONFIGURATION */}
+          {activeTab === 'settings' && (() => {
+            const rotationState = getVipFeaturedRotationState(
+              restaurants,
+              users,
+              {
+                ...appSettings,
+                vipFeaturedRotationEnabled: vipFeaturedRotationEnabledInput,
+                vipFeaturedDurationDays: parseInt(vipFeaturedDurationDaysInput, 10) || appSettings.vipFeaturedDurationDays || 1,
+              }
+            );
+            const showSection = (sec: typeof activeSettingsSection) =>
+              activeSettingsSection === 'all' || activeSettingsSection === sec;
+
+            return (
+              <div className="space-y-5 font-khmer">
+                {/* Enterprise Header Banner */}
+                <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-[#0F172A] via-[#064E3B] to-[#0F172A] text-white border border-emerald-500/30 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex items-start gap-3">
+                    <div className="p-2.5 rounded-xl bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 shrink-0">
+                      <Settings className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h3 className="font-moul text-sm sm:text-base text-white">
+                          {isKm ? 'ការកំណត់ប្រព័ន្ធរដ្ឋបាលកម្រិតខ្ពស់ (Enterprise Admin Settings)' : 'Enterprise Admin Settings & Configuration'}
+                        </h3>
+                        <span className="px-2 py-0.5 rounded-md bg-emerald-500/20 border border-emerald-400/40 text-emerald-200 text-[10px] font-mono font-bold">
+                          RBAC VERIFIED
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-300 mt-0.5">
+                        {isKm
+                          ? 'គ្រប់គ្រងប្រព័ន្ធបង្វិលហាង VIP កញ្ចប់សមាជិកភាព ការទូទាត់ KHQR តំណភ្ជាប់កម្មវិធី Cloud Database និងសុវត្ថិភាពរដ្ឋបាល'
+                          : 'Centralized configuration for VIP Shop Rotation, Membership Pricing, KHQR Payments, App Distribution, Cloud DB, and Security'}
+                      </p>
+                    </div>
+                  </div>
+                  {appSettings.settingsUpdatedAt && (
+                    <div className="px-3 py-1.5 rounded-xl bg-white/10 border border-white/15 text-[10px] font-mono text-emerald-200 shrink-0 self-start sm:self-center">
+                      Synced: {appSettings.settingsUpdatedAt.replace('T', ' ').slice(0, 16)} (v{appSettings.settingsVersion || 1})
+                    </div>
+                  )}
+                </div>
+
+                {/* Organized Settings Category Filter Pills */}
+                <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
+                  {([
+                    { id: 'all', labelKh: '📋 ទាំងអស់', labelEn: '📋 All Categories' },
+                    { id: 'featured_rotation', labelKh: '🔄 បង្វិលហាង VIP មុខគេ', labelEn: '🔄 VIP Featured Rotation' },
+                    { id: 'vip_pricing', labelKh: '👑 កញ្ចប់ VIP & តម្លៃហាង', labelEn: '👑 VIP & Store Pricing' },
+                    { id: 'payment_khqr', labelKh: '💳 ការទូទាត់ KHQR', labelEn: '💳 Payment & KHQR' },
+                    { id: 'distribution', labelKh: '📲 តំណភ្ជាប់កម្មវិធី', labelEn: '📲 App Links' },
+                    { id: 'cloud_system', labelKh: '☁️ ប្រព័ន្ធ Cloud & API', labelEn: '☁️ Cloud & APIs' },
+                    { id: 'security', labelKh: '🔐 សុវត្ថិភាពរដ្ឋបាល', labelEn: '🔐 Admin Security' },
+                  ] as const).map(cat => (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      onClick={() => setActiveSettingsSection(cat.id)}
+                      className={`px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap border transition cursor-pointer ${
+                        activeSettingsSection === cat.id
+                          ? 'bg-[#064E3B] text-white border-[#064E3B] shadow-2xs'
+                          : 'bg-white dark:bg-stone-800 text-slate-700 dark:text-stone-300 border-slate-200 dark:border-stone-700 hover:bg-slate-50 dark:hover:bg-stone-700/70'
+                      }`}
+                    >
+                      {isKm ? cat.labelKh : cat.labelEn}
+                    </button>
+                  ))}
+                </div>
+
+                {/* CATEGORY 1: VIP SHOP FEATURED ROTATION SETTINGS */}
+                {showSection('featured_rotation') && (
+                  <div className="bg-white dark:bg-stone-800 p-5 rounded-2xl border border-slate-200/90 dark:border-stone-700 shadow-xs space-y-4">
+                    <div className="flex items-start justify-between gap-3 pb-3 border-b border-slate-100 dark:border-stone-700 flex-wrap">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-[#064E3B] dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/60">
+                          <RefreshCw className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <h4 className="font-bold text-slate-900 dark:text-white text-sm">
+                              {isKm
+                                ? 'ប្រព័ន្ធបង្វិលហាង VIP បង្ហាញលើគេ (VIP Shop Featured Rotation Settings)'
+                                : 'VIP Shop Featured Rotation Settings'}
+                            </h4>
+                            <span
+                              className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                                vipFeaturedRotationEnabledInput
+                                  ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300'
+                                  : 'bg-slate-200 text-slate-700 dark:bg-stone-700 dark:text-stone-300'
+                              }`}
+                            >
+                              {vipFeaturedRotationEnabledInput
+                                ? isKm ? '● កំពុងបើកដំណើរការ (Active)' : '● Rotation Enabled'
+                                : isKm ? '○ បានបិទ (Disabled)' : '○ Rotation Disabled'}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-slate-500 dark:text-stone-400 mt-0.5">
+                            {isKm
+                              ? 'ហាង VIP ថ្មីដែលបានអនុម័តនឹងបង្ហាញនៅលើគេបង្អស់ (Top Listing: 1 ថ្ងៃ ជាលំនាំដើម) ហើយបន្ទាប់មកប្រព័ន្ធនឹងបង្វិលហាង VIP បន្ទាប់តាមលំដាប់ចុះឈ្មោះដោយស្វ័យប្រវត្តិ។'
+                              : 'Newly approved VIP shops appear at the top for 1 day by default, then automatically rotate through all eligible VIP shops in registration order.'}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* Left Column: Controls */}
+                      <div className="p-4 rounded-xl bg-slate-50 dark:bg-stone-900/70 border border-slate-200/80 dark:border-stone-700 space-y-4">
+                        {/* Enable / Disable Toggle */}
+                        <div className="flex items-center justify-between gap-3">
+                          <div>
+                            <div className="text-xs font-bold text-slate-900 dark:text-white">
+                              {isKm ? 'បើក/បិទ ការបង្វិលហាង VIP ស្វ័យប្រវត្តិ' : 'Enable Automatic Featured Rotation'}
+                            </div>
+                            <div className="text-[10px] text-slate-500 dark:text-stone-400 mt-0.5">
+                              {isKm
+                                ? 'បើកដើម្បីផ្តល់អាទិភាពដល់ហាង VIP ថ្មី និងបង្វិលវេនគ្នាដោយស្មើភាព'
+                                : 'Fairly rotate top directory placement across all eligible VIP shops'}
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              isVipFormDirtyRef.current = true;
+                              setVipSaveFeedback(null);
+                              setVipFeaturedRotationEnabledInput(prev => !prev);
+                            }}
+                            className={`w-12 h-6 flex items-center rounded-full p-1 transition-colors duration-200 cursor-pointer shrink-0 ${
+                              vipFeaturedRotationEnabledInput ? 'bg-[#064E3B]' : 'bg-slate-300 dark:bg-stone-600'
+                            }`}
+                          >
+                            <div
+                              className={`bg-white w-4 h-4 rounded-full shadow-xs transform transition-transform duration-200 ${
+                                vipFeaturedRotationEnabledInput ? 'translate-x-6' : 'translate-x-0'
+                              }`}
+                            />
+                          </button>
+                        </div>
+
+                        {/* Featured Duration Input + Presets */}
+                        <div className="pt-3 border-t border-slate-200/70 dark:border-stone-700 space-y-2">
+                          <div className="flex items-center justify-between gap-2">
+                            <label className="text-xs font-bold text-slate-800 dark:text-stone-200">
+                              {isKm ? 'រយៈពេលបង្ហាញលើគេក្នុង ១ ហាង (ថ្ងៃ / Days)៖' : 'Featured Duration (Days per Shop):'}
+                            </label>
+                            <div className="flex items-center gap-1.5">
+                              <input
+                                type="text"
+                                inputMode="numeric"
+                                value={vipFeaturedDurationDaysInput}
+                                onChange={e => {
+                                  const raw = e.target.value.replace(/[^0-9]/g, '');
+                                  isVipFormDirtyRef.current = true;
+                                  setVipSaveFeedback(null);
+                                  setVipFeaturedDurationDaysInput(raw);
+                                }}
+                                className="w-20 px-2.5 py-1.5 rounded-xl border border-slate-300 dark:border-stone-600 bg-white dark:bg-stone-800 text-slate-900 dark:text-white font-mono font-bold text-xs text-center"
+                              />
+                              <span className="text-xs font-bold text-slate-600 dark:text-stone-300">
+                                {isKm ? 'ថ្ងៃ' : 'Days'}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-1.5 flex-wrap pt-1">
+                            <span className="text-[10px] text-slate-500 mr-1">
+                              {isKm ? 'ជ្រើសរើសរហ័ស៖' : 'Presets:'}
+                            </span>
+                            {[1, 2, 3, 5, 7, 14].map(d => (
+                              <button
+                                key={d}
+                                type="button"
+                                onClick={() => {
+                                  isVipFormDirtyRef.current = true;
+                                  setVipSaveFeedback(null);
+                                  setVipFeaturedDurationDaysInput(String(d));
+                                }}
+                                className={`px-2.5 py-1 rounded-lg font-mono text-[11px] font-bold border transition cursor-pointer ${
+                                  Number(vipFeaturedDurationDaysInput) === d
+                                    ? 'bg-[#064E3B] text-white border-[#064E3B]'
+                                    : 'bg-white dark:bg-stone-800 text-slate-700 dark:text-stone-300 border-slate-200 dark:border-stone-700 hover:bg-emerald-50'
+                                }`}
+                              >
+                                {d} {isKm ? 'ថ្ងៃ' : d === 1 ? 'Day' : 'Days'}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Right Column: Live Rotation Queue Status */}
+                      <div className="p-4 rounded-xl bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-200/80 dark:border-emerald-800/50 space-y-2.5 flex flex-col justify-between">
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-bold text-emerald-950 dark:text-emerald-300">
+                              {isKm ? 'ស្ថានភាពហាង VIP កំពុងបង្ហាញលើគេផ្ទាល់' : 'Live Featured VIP Queue Status'}
+                            </span>
+                            <span className="px-2 py-0.5 rounded-md bg-white dark:bg-stone-800 border border-emerald-200 dark:border-emerald-800 text-[10px] font-mono font-bold text-emerald-700 dark:text-emerald-300">
+                              {rotationState.eligibleQueue.length} {isKm ? 'ហាងក្នុងជួរ' : 'Eligible Shops'}
+                            </span>
+                          </div>
+
+                          {rotationState.primaryFeaturedShop ? (
+                            <div className="p-3 rounded-xl bg-white dark:bg-stone-800 border border-emerald-200/90 dark:border-stone-700 space-y-1">
+                              <div className="flex items-center justify-between gap-2">
+                                <span className="text-xs font-extrabold text-slate-900 dark:text-white truncate">
+                                  🌟 {rotationState.primaryFeaturedShop.restaurant.nameKh || rotationState.primaryFeaturedShop.restaurant.nameEn}
+                                </span>
+                                <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-950/80 dark:text-amber-300 text-[9px] font-bold shrink-0">
+                                  {rotationState.primaryFeaturedShop.reason === 'new_shop_boost'
+                                    ? isKm ? 'ហាងថ្មី (Top Slot)' : 'New Shop Boost'
+                                    : isKm ? 'វេនបង្វិលស្វ័យប្រវត្តិ' : 'Scheduled Rotation'}
+                                </span>
+                              </div>
+                              <div className="text-[10px] text-slate-500 dark:text-stone-400">
+                                {isKm
+                                  ? `សល់ប្រហែល ${rotationState.primaryFeaturedShop.remainingHours} ម៉ោងទៀត • ហាងបន្ទាប់៖ ${rotationState.nextRotatingShop?.nameKh || rotationState.nextRotatingShop?.nameEn || '—'}`
+                                  : `~${rotationState.primaryFeaturedShop.remainingHours}h remaining • Next in line: ${rotationState.nextRotatingShop?.nameEn || rotationState.nextRotatingShop?.nameKh || '—'}`}
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="p-3 rounded-xl bg-white/80 dark:bg-stone-800/80 border border-slate-200 dark:border-stone-700 text-[11px] text-slate-500 dark:text-stone-400">
+                              {vipFeaturedRotationEnabledInput
+                                ? isKm
+                                  ? 'មិនទាន់មានហាង VIP ក្នុងជួរបង្វិលនៅឡើយទេ។ នៅពេលសមាជិក VIP បន្ថែមហាងថ្មី វានឹងបង្ហាញលើគេដោយស្វ័យប្រវត្តិ។'
+                                  : 'No custom VIP shops in the rotation queue yet. Newly approved VIP shops will automatically take the top slot.'
+                                : isKm
+                                ? 'ប្រព័ន្ធបង្វិលហាង VIP កំពុងត្រូវបានបិទ។'
+                                : 'VIP Featured Rotation is currently disabled.'}
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="flex items-center justify-between gap-2 pt-2 border-t border-emerald-200/60 dark:border-emerald-800/40">
+                          <span className="text-[10px] text-slate-600 dark:text-stone-400">
+                            {isKm
+                              ? `ប៊ូតុងចុះឈ្មោះហាងបង្ហាញ៖ "Top Listing: ${vipFeaturedDurationDaysInput || 1} Day(s)"`
+                              : `Register button label: "Top Listing: ${vipFeaturedDurationDaysInput || 1} Day(s)"`}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={handleSaveSettings}
+                            disabled={isSavingVipSettings}
+                            className="px-4 py-2 rounded-xl bg-[#064E3B] hover:bg-[#047857] disabled:opacity-60 text-white font-bold text-xs shadow-2xs transition cursor-pointer shrink-0"
+                          >
+                            {isSavingVipSettings
+                              ? isKm ? 'កំពុងរក្សាទុក...' : 'Saving...'
+                              : isKm ? '💾 រក្សាទុកការបង្វិលហាង' : '💾 Save Rotation'}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* CATEGORY 2: VIP MEMBERSHIP PACKAGES & STORE PRICING */}
+                {showSection('vip_pricing') && (
+              <div className="bg-white dark:bg-stone-800 p-5 rounded-2xl border border-slate-200/90 dark:border-stone-700 shadow-xs space-y-5 font-khmer">
                 <div className="flex items-start justify-between gap-3 pb-3 border-b border-stone-200 dark:border-stone-700 flex-wrap">
                   <div className="flex items-center gap-2.5">
                     <div className="p-2.5 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 text-slate-950 shadow-sm">
@@ -4062,9 +4335,11 @@ export const AdminDashboard: React.FC = () => {
                   </div>
                 </form>
               </div>
+              )}
 
-              {/* Installation & Store URLs */}
-              <div className="bg-white dark:bg-stone-800 p-5 rounded-3xl border border-stone-200 dark:border-stone-700 shadow-sm space-y-4">
+              {/* CATEGORY 4: App Distribution & Installation URLs */}
+              {showSection('distribution') && (
+              <div className="bg-white dark:bg-stone-800 p-5 rounded-2xl border border-slate-200/90 dark:border-stone-700 shadow-xs space-y-4">
                 <div className="flex items-center gap-2.5 pb-2 border-b border-stone-200 dark:border-stone-700">
                   <QrCode className="w-5 h-5 text-red-600" />
                   <div>
@@ -4124,9 +4399,11 @@ export const AdminDashboard: React.FC = () => {
                   </button>
                 </form>
               </div>
+              )}
 
-              {/* Support / Donation KHQR Configuration */}
-              <div className="bg-white dark:bg-stone-800 p-5 rounded-3xl border border-stone-200 dark:border-stone-700 shadow-sm space-y-4">
+              {/* CATEGORY 3: Support / Payment KHQR Configuration */}
+              {showSection('payment_khqr') && (
+              <div className="bg-white dark:bg-stone-800 p-5 rounded-2xl border border-slate-200/90 dark:border-stone-700 shadow-xs space-y-4">
                 <div className="flex items-center gap-2.5 pb-2 border-b border-stone-200 dark:border-stone-700">
                   <Heart className="w-5 h-5 text-rose-600 fill-rose-600" />
                   <div>
@@ -4198,9 +4475,11 @@ export const AdminDashboard: React.FC = () => {
                   </div>
                 </div>
               </div>
+              )}
 
-              {/* Password Management */}
-              <div className="bg-white dark:bg-stone-800 p-5 rounded-3xl border border-stone-200 dark:border-stone-700 shadow-sm space-y-4 font-khmer">
+              {/* CATEGORY 6: Administrator Password & Credentials Management */}
+              {showSection('security') && (
+              <div className="bg-white dark:bg-stone-800 p-5 rounded-2xl border border-slate-200/90 dark:border-stone-700 shadow-xs space-y-4 font-khmer">
                 <div className="flex items-center gap-2.5 pb-2 border-b border-stone-200 dark:border-stone-700">
                   <KeyRound className="w-5 h-5 text-[#059669]" />
                   <div>
@@ -4236,9 +4515,11 @@ export const AdminDashboard: React.FC = () => {
                   </button>
                 </form>
               </div>
+              )}
 
-              {/* Supabase Free Tier Cloud & Google Maps Places API + Smart Cache */}
-              <div className="bg-white dark:bg-stone-800 p-5 rounded-3xl border-2 border-emerald-500/40 dark:border-emerald-600/40 shadow-sm space-y-4 font-khmer text-xs">
+              {/* CATEGORY 5: Supabase Free Tier Cloud & Google Maps Places API + Smart Cache */}
+              {showSection('cloud_system') && (
+              <div className="bg-white dark:bg-stone-800 p-5 rounded-2xl border border-slate-200/90 dark:border-stone-700 shadow-xs space-y-4 font-khmer text-xs">
                 <div className="flex items-center justify-between pb-2 border-b border-stone-200 dark:border-stone-700">
                   <div>
                     <h4 className="font-bold text-stone-900 dark:text-stone-100 text-sm flex items-center gap-2">
@@ -4401,8 +4682,10 @@ export const AdminDashboard: React.FC = () => {
                   </button>
                 </div>
               </div>
+              )}
             </div>
-          )}
+            );
+          })()}
 
           {/* AI IMAGE AUDIT & REPLACEMENT TAB */}
           {activeTab === 'image_audit' && (

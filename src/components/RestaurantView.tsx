@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { RestaurantCard } from './RestaurantCard';
-import { Restaurant } from '../types';
+import { Restaurant, getVipFeaturedRotationConfig, sortRestaurantsWithVipRotation } from '../types';
 import { shuffleForCurrentSession } from '../utils/sessionShuffle';
 import { Store, Plus, CheckCircle2, AlertCircle, Edit2 } from 'lucide-react';
 import { normalizeKhmerSearchText } from '../services/googlePlacesService';
@@ -12,6 +12,8 @@ const RESTAURANT_BATCH_SIZE = 20;
 export const RestaurantView: React.FC = () => {
   const {
     restaurants,
+    users,
+    appSettings,
     language,
     selectedProvince,
     setSelectedProvince,
@@ -26,6 +28,8 @@ export const RestaurantView: React.FC = () => {
   } = useApp();
 
   const storeQuota = getCurrentUserStoreQuota(currentUser);
+  const rotationCfg = getVipFeaturedRotationConfig(appSettings);
+  const topListingLabel = `Top Listing: ${rotationCfg.durationDays} ${rotationCfg.durationDays === 1 ? 'Day' : 'Days'}`;
 
   const myOwnedRestaurants = useMemo(
     () => getOwnedRestaurantsForUser(currentUser),
@@ -168,7 +172,10 @@ export const RestaurantView: React.FC = () => {
     });
   }, [sessionShuffledRestaurants, currentUser?.role, currentUser?.id, verifiedFilter, selectedProvince, priceFilter, categoryFilter]);
 
-  const sortedRestaurants = filteredRestaurants;
+  const sortedRestaurants = useMemo(
+    () => sortRestaurantsWithVipRotation(filteredRestaurants, users, appSettings),
+    [filteredRestaurants, users, appSettings]
+  );
 
   const displayedRestaurants = useMemo(
     () => sortedRestaurants.slice(0, visibleCount),
@@ -242,7 +249,7 @@ export const RestaurantView: React.FC = () => {
             ) : (
               <>
                 <Plus className="w-3.5 h-3.5 text-slate-950" />
-                <span>{tr(language, 'បន្ថែមហាងថ្មី', 'Add Store', '添加店铺')}</span>
+                <span>{tr(language, `បន្ថែមហាងថ្មី (${topListingLabel})`, `Add Store (${topListingLabel})`, `添加店铺 (${topListingLabel})`)}</span>
               </>
             )}
           </button>
@@ -397,9 +404,9 @@ export const RestaurantView: React.FC = () => {
                     )
                   : tr(
                       language,
-                      '+ ចុះបញ្ជីហាងរបស់អ្នក (1 ហាង)',
-                      '+ Register Your Restaurant (1 Store)',
-                      '+ 注册您的专属餐厅 (1 家店铺)'
+                      `+ ចុះបញ្ជីហាងរបស់អ្នក (1 ហាង • ${topListingLabel})`,
+                      `+ Register Your Restaurant (1 Store • ${topListingLabel})`,
+                      `+ 注册您的专属餐厅 (1 家店铺 • ${topListingLabel})`
                     )}
               </span>
             </button>

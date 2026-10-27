@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
-import { Restaurant, getRestaurantRatingSummary } from '../types';
+import { Restaurant, getRestaurantRatingSummary, getVipFeaturedRotationState, isAdminAccount } from '../types';
 import { useApp } from '../context/AppContext';
-import { MapPin, Phone, Star, Navigation, CheckCircle2, AlertCircle, Share2, Edit2, Trash2, Heart } from 'lucide-react';
+import { MapPin, Phone, Star, Navigation, CheckCircle2, AlertCircle, Share2, Edit2, Trash2, Heart, Crown } from 'lucide-react';
 import { sanitizeDialablePhone, resolveRestaurantPhoneOnDemand } from '../services/googlePlacesService';
 import { shareRichContent } from '../utils/androidMediaHelper';
 import { tr } from '../utils/i18n';
@@ -18,6 +18,7 @@ interface RestaurantCardViewProps {
   language: Language;
   bookmarked: boolean;
   isAdmin: boolean;
+  isTopFeaturedVip: boolean;
   setSelectedRestaurant: (r: Restaurant | null) => void;
   showToast: (msg: string, type?: 'success' | 'info' | 'warning') => void;
   openManageMyVipStore: (id?: string) => void;
@@ -34,6 +35,7 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(({
   language,
   bookmarked,
   isAdmin,
+  isTopFeaturedVip,
   setSelectedRestaurant,
   showToast,
   openManageMyVipStore,
@@ -100,7 +102,13 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(({
         />
 
         {/* Province pill & Admin shortcut */}
-        <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 z-10">
+        <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 flex-wrap z-10">
+          {isTopFeaturedVip && (
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black bg-gradient-to-r from-amber-400 to-yellow-400 text-slate-950 border border-white/80 shadow-md flex items-center gap-1 font-khmer">
+              <Crown className="w-3 h-3 fill-slate-950 text-slate-950 shrink-0" />
+              <span>{tr(language, 'ហាង VIP មុខគេ', 'Top Featured VIP', '置顶推荐 VIP')}</span>
+            </span>
+          )}
           <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-[#064E3B]/95 text-emerald-100 border border-emerald-400/30 shadow-xs font-khmer">
             {loc.province}
           </span>
@@ -292,28 +300,30 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(({
   prev.restaurant === next.restaurant &&
   prev.language === next.language &&
   prev.bookmarked === next.bookmarked &&
-  prev.isAdmin === next.isAdmin
+  prev.isAdmin === next.isAdmin &&
+  prev.isTopFeaturedVip === next.isTopFeaturedVip
 );
 
 const RestaurantCardInner: React.FC<RestaurantCardProps> = ({ restaurant }) => {
   const { 
-    language, setSelectedRestaurant, showToast, currentUser,
+    language, setSelectedRestaurant, showToast, currentUser, restaurants, users, appSettings,
     openManageMyVipStore, deleteRestaurant,
     trackRestaurantView, trackRestaurantCall, trackRestaurantMap, trackRestaurantShare,
     isBookmarked, toggleBookmark
   } = useApp();
   const bookmarked = isBookmarked(restaurant.id);
-  const isAdmin =
-    currentUser?.role === 'admin' ||
-    currentUser?.id === 'admin-authorized-single' ||
-    currentUser?.username === 'admin' ||
-    currentUser?.username === 'cheasavuth';
+  const isAdmin = isAdminAccount(currentUser);
+  const isTopFeaturedVip = useMemo(() => {
+    const rotation = getVipFeaturedRotationState(restaurants, users, appSettings);
+    return rotation.currentlyFeaturedIds.has(restaurant.id);
+  }, [restaurants, users, appSettings, restaurant.id]);
   return (
     <RestaurantCardView
       restaurant={restaurant}
       language={language}
       bookmarked={bookmarked}
       isAdmin={isAdmin}
+      isTopFeaturedVip={isTopFeaturedVip}
       setSelectedRestaurant={setSelectedRestaurant}
       showToast={showToast}
       openManageMyVipStore={openManageMyVipStore}

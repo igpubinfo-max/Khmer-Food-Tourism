@@ -388,6 +388,13 @@ export function normalizeAuthoritativeAppSettings(
       ? Math.round(merged.includedFreeStoresPerVip)
       : 1;
 
+  const vipFeaturedRotationEnabled = merged.vipFeaturedRotationEnabled !== false;
+  const rawFeaturedDays = Number(merged.vipFeaturedDurationDays);
+  const vipFeaturedDurationDays =
+    Number.isFinite(rawFeaturedDays) && rawFeaturedDays >= 1
+      ? Math.min(365, Math.round(rawFeaturedDays))
+      : 1;
+
   const shortNameKhRaw = (merged.vipShortNameKh || '').trim();
   const shortNameEnRaw = (merged.vipShortNameEn || '').trim();
   const longNameKhRaw = (merged.vipLongNameKh || '').trim();
@@ -424,6 +431,8 @@ export function normalizeAuthoritativeAppSettings(
     vipLongNameEn: longNameEn,
     additionalStoreFeeUsd: extraStoreFee,
     includedFreeStoresPerVip: includedFree,
+    vipFeaturedRotationEnabled,
+    vipFeaturedDurationDays,
     promotionalFeeUsd: shortPrice,
     promotionPeriodKh: `កញ្ចប់ VIP ផ្លូវការ៖ ${shortPrice.toFixed(2)} សម្រាប់ ${shortDays} ថ្ងៃ ឬ ${longPrice.toFixed(2)} សម្រាប់ ${longDays} ថ្ងៃ • បន្ថែមហាងថ្មី៖ ${extraStoreFee.toFixed(2)} / ១ ហាង`,
     promotionPeriodEn: `Official VIP Plans: ${shortPrice.toFixed(2)} for ${shortDays} Days or ${longPrice.toFixed(2)} for ${longDays} Days • Additional Store: ${extraStoreFee.toFixed(2)} / store`,
@@ -535,6 +544,12 @@ export async function saveAuthoritativeAppSettingsToServer(
   const longDays = Math.max(1, Math.round(Number(settings.vipLongDurationDays) || 60));
   const longPrice = Math.max(0.01, Math.round((Number(settings.vipLongPriceUsd) || 6.99) * 100) / 100);
   const extraStoreFee = Math.max(0, Math.round((Number(settings.additionalStoreFeeUsd ?? 5.0)) * 100) / 100);
+  const vipFeaturedRotationEnabled = settings.vipFeaturedRotationEnabled !== false;
+  const rawFeaturedDays = Number(settings.vipFeaturedDurationDays);
+  const vipFeaturedDurationDays =
+    Number.isFinite(rawFeaturedDays) && rawFeaturedDays >= 1
+      ? Math.min(365, Math.round(rawFeaturedDays))
+      : 1;
 
   const shortNameKh = (settings.vipShortNameKh || '').trim() || `VIP ${shortDays} ថ្ងៃ`;
   const shortNameEn = (settings.vipShortNameEn || '').trim() || `VIP ${shortDays} Days`;
@@ -554,6 +569,8 @@ export async function saveAuthoritativeAppSettingsToServer(
     vipLongNameKh: longNameKh,
     vipLongNameEn: longNameEn,
     additionalStoreFeeUsd: extraStoreFee,
+    vipFeaturedRotationEnabled,
+    vipFeaturedDurationDays,
     promotionalFeeUsd: shortPrice,
     promotionPeriodKh: `កញ្ចប់ VIP ផ្លូវការ៖ ${shortPrice.toFixed(2)} សម្រាប់ ${shortDays} ថ្ងៃ ឬ ${longPrice.toFixed(2)} សម្រាប់ ${longDays} ថ្ងៃ • បន្ថែមហាងថ្មី៖ ${extraStoreFee.toFixed(2)} / ១ ហាង`,
     promotionPeriodEn: `Official VIP Plans: ${shortPrice.toFixed(2)} for ${shortDays} Days or ${longPrice.toFixed(2)} for ${longDays} Days • Additional Store: ${extraStoreFee.toFixed(2)} / store`,

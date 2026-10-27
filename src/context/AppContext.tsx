@@ -10,7 +10,8 @@ import {
   SupportTicket, SupportTicketMessage, SupportTicketStatus, VIP_PLANS,
   DeletedUserRecord, AbaReceiptVerificationReport,
   getDynamicVipPlans, getDynamicVipBenefits, getAdditionalStoreFeeUsd,
-  getUserStoreQuotaSummary, UserStoreQuotaSummary
+  getUserStoreQuotaSummary, UserStoreQuotaSummary,
+  isAdminAccount, getVipFeaturedRotationConfig
 } from '../types';
 import {
   verifyAbaPaymentAndReceipt,
@@ -584,11 +585,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
         if (parsed && typeof parsed === 'object') {
-          // Keep Admin session active if logged in as Admin and ensure official avatar is loaded
+          // Keep Admin session active if logged in as Admin and ensure official avatar & strict admin role without consumer VIP tier
           if (parsed.role === 'admin' || parsed.id === 'admin-authorized-single' || parsed.username === 'cheasavuth' || parsed.username === 'admin') {
             return {
               ...parsed,
+              role: 'admin',
               avatar: '/images/admin_profile.png',
+              membershipTier: undefined,
+              subscriptionStatus: undefined,
+              paymentStatus: undefined,
+              subscriptionExpiryDate: undefined,
             };
           }
           if (checkIsUserDeleted(parsed, localDeleted)) {
@@ -1317,13 +1323,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isGoogleMapsSearchModalOpen, setIsGoogleMapsSearchModalOpenRaw] = useState(false);
   const [googleMapsSearchInitialTab, setGoogleMapsSearchInitialTab] = useState<'restaurant' | 'tourism' | 'all'>('all');
   const setIsGoogleMapsSearchModalOpen = (open: boolean) => {
-    if (open && !verifyBackendVipFeatureAccess('ស្វែងរកទីតាំងលើ Google Maps', 'Google Maps Places Search')) {
+    if (open && !isAdminAccount(currentUser) && !verifyBackendVipFeatureAccess('ស្វែងរកទីតាំងលើ Google Maps', 'Google Maps Places Search')) {
       return;
     }
     setIsGoogleMapsSearchModalOpenRaw(open);
   };
   const openGoogleMapsSearchModal = (initialTab: 'restaurant' | 'tourism' | 'all' = 'all') => {
-    if (!verifyBackendVipFeatureAccess('ស្វែងរកទីតាំងលើ Google Maps', 'Google Maps Places Search')) {
+    if (!isAdminAccount(currentUser) && !verifyBackendVipFeatureAccess('ស្វែងរកទីតាំងលើ Google Maps', 'Google Maps Places Search')) {
       return;
     }
     setGoogleMapsSearchInitialTab(initialTab);
@@ -1354,11 +1360,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isUpgradeVipModalOpen, setIsUpgradeVipModalOpen] = useState(false);
   const [isVipRenewMode, setIsVipRenewMode] = useState(false);
   const openUpgradeVipModal = (renewMode: boolean = false) => {
-    if (currentUser?.role === 'admin' || currentUser?.id === 'admin-authorized-single') {
+    if (isAdminAccount(currentUser)) {
       showToast(
         language === 'km' 
-          ? '🛡️ គណនី Admin មានសិទ្ធិពេញលេញគ្រប់មុខងារទាំងអស់រួចជាស្រេច (Lifetime Master Access)!' 
-          : 'Admin account has full lifetime access to all features!', 
+          ? '🛡️ គណនី Admin គឺជាគណនីរដ្ឋបាលប្រព័ន្ធ (មិនមែនជាគណនីសមាជិក VIP ទូទៅទេ)!' 
+          : 'Admin account is a System Administrator account (separated from VIP user accounts)!', 
         'info'
       );
       return;
@@ -1377,7 +1383,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setIsGoogleMapsSearchModalOpenRaw(false);
   };
 
-  // Authoritative Backend/Context VIP Verification for Personalized Features
+  // Authoritative Backend/Context VIP Verification for Personalized Features (Strictly VIP users only)
   const verifyBackendVipFeatureAccess = (featureNameKh: string, featureNameEn: string): boolean => {
     if (!currentUser) {
       closeAllPersonalizedFeatureModals();
@@ -1391,12 +1397,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return false;
     }
 
-    const isAdmin =
-      currentUser.role === 'admin' ||
-      currentUser.id === 'admin-authorized-single' ||
-      currentUser.username === 'admin' ||
-      currentUser.username === 'cheasavuth';
-    if (isAdmin) return true;
+    if (isAdminAccount(currentUser)) {
+      closeAllPersonalizedFeatureModals();
+      showToast(
+        language === 'km'
+          ? `🔒 មុខងារ «${featureNameKh}» គឺសម្រាប់តែគណនីសមាជិក VIP ប៉ុណ្ណោះ (មិនបង្ហាញក្នុងគណនី Admin ទេ)!`
+          : `🔒 "${featureNameEn}" is a VIP-exclusive user feature and is not available in the Admin account.`,
+        'info'
+      );
+      return false;
+    }
 
     // Cross-verify against authoritative backend/state users array
     const backendUserRecord = users.find(u => u.id === currentUser.id) || currentUser;
@@ -3430,7 +3440,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     await createAdminSession();
     recordSecurityAudit('ADMIN_LOGIN_SUCCESS', 'SUCCESS', 'AdminPortal', 'Authorized admin session established');
 
-    // Isolated single authorized administrator profile with official profile photo
+    // Isolated single authorized administrator profile with official profile photo (strictly separated from consumer VIP)
     const adminProfile: User = {
       id: 'admin-authorized-single',
       name: 'រដ្ឋបាលប្រព័ន្ធ (Chea Savuth / Admin)',
@@ -3440,9 +3450,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       avatar: '/images/admin_profile.png',
       bio: 'ប្រព័ន្ធគ្រប់គ្រងរដ្ឋបាលផ្លូវការ (System Administrator)',
       createdAt: '2026-01-01',
-      membershipTier: 'premium_vip',
-      subscriptionStatus: 'active',
-      paymentStatus: 'verified',
     };
 
     setCurrentUser(adminProfile);
@@ -3499,9 +3506,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         avatar: '/images/admin_profile.png',
         bio: 'ប្រព័ន្ធគ្រប់គ្រងរដ្ឋបាលផ្លូវការ (System Administrator)',
         createdAt: '2026-01-01',
-        membershipTier: 'premium_vip',
-        subscriptionStatus: 'active',
-        paymentStatus: 'verified',
       };
 
       setCurrentUser(adminProfile);
@@ -4187,6 +4191,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
     if (sanitized.includedFreeStoresPerVip !== undefined) {
       sanitized.includedFreeStoresPerVip = Math.max(1, Math.round(Number(sanitized.includedFreeStoresPerVip) || 1));
+    }
+    if (sanitized.vipFeaturedRotationEnabled !== undefined) {
+      sanitized.vipFeaturedRotationEnabled = Boolean(sanitized.vipFeaturedRotationEnabled);
+    }
+    if (sanitized.vipFeaturedDurationDays !== undefined) {
+      const val = Number(sanitized.vipFeaturedDurationDays);
+      if (!Number.isFinite(val) || val < 1 || val > 365) {
+        const err =
+          language === 'km'
+            ? '⚠️ រយៈពេលបង្ហាញហាង VIP មុខគេ (Featured Duration) ត្រូវតែចាប់ពី ១ ដល់ ៣៦៥ ថ្ងៃ!'
+            : '⚠️ VIP Featured Duration must be between 1 and 365 days!';
+        showToast(err, 'warning');
+        return { ok: false, error: err };
+      }
+      sanitized.vipFeaturedDurationDays = Math.round(val);
     }
 
     const nowIso = new Date().toISOString();
@@ -5022,6 +5041,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const expiryIso =
       currentUser.subscriptionExpiryDate ||
       new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString();
+    const rotationCfg = getVipFeaturedRotationConfig(appSettings);
+    const featuredUntilIso = new Date(Date.now() + rotationCfg.durationMs).toISOString();
     const uniqueShopId = targetToReplace
       ? targetToReplace.id
       : (restData as any).id || `rest-vip-${currentUser.id}-${Date.now()}`;
@@ -5055,6 +5076,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       storeSlotNumber: slotNumber,
       replacedFromRestaurantId: targetToReplace ? targetToReplace.id : undefined,
       replacedAt: targetToReplace ? nowIso : undefined,
+      approvedAt: finalStatus === 'approved' ? (targetToReplace?.approvedAt || nowIso) : undefined,
+      featuredFromAt: finalStatus === 'approved' ? nowIso : undefined,
+      featuredUntilAt: finalStatus === 'approved' ? featuredUntilIso : undefined,
       created_at: targetToReplace?.created_at || targetToReplace?.createdAt || restData.created_at || restData.createdAt || nowIso,
       createdAt: targetToReplace?.created_at || targetToReplace?.createdAt || restData.created_at || restData.createdAt || nowIso,
       updatedAt: nowIso,
@@ -5921,6 +5945,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const approveRestaurant = (id: string) => {
     const nowIso = new Date().toISOString();
+    const rotationCfg = getVipFeaturedRotationConfig(appSettings);
+    const featuredUntilIso = new Date(Date.now() + rotationCfg.durationMs).toISOString();
     setRestaurants(prev => {
       const next = prev.map(r => {
         if (r.id !== id) return r;
@@ -5929,6 +5955,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           status: 'approved',
           isVerified: true,
           isPromoted: r.membershipTier === 'premium' ? true : Boolean(r.isPromoted),
+          approvedAt: r.approvedAt || nowIso,
+          featuredFromAt: nowIso,
+          featuredUntilAt: featuredUntilIso,
           updatedAt: nowIso,
           aiCategoryVerification: r.aiCategoryVerification
             ? {
@@ -6146,7 +6175,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       photoUrl?: string;
     }
   ): { imported: boolean; duplicate: boolean; type: 'restaurant' | 'tourism'; id: string; item?: Restaurant | TouristDestination } => {
-    if (!verifyBackendVipFeatureAccess('ស្វែងរកទីតាំងលើ Google Maps', 'Google Maps Places Search')) {
+    if (!isAdminAccount(currentUser) && !verifyBackendVipFeatureAccess('ស្វែងរកទីតាំងលើ Google Maps', 'Google Maps Places Search')) {
       return { imported: false, duplicate: false, type: 'restaurant', id: '' };
     }
     const targetCategory: 'restaurant' | 'tourism' = customEdits?.category || place.category || 'restaurant';

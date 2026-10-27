@@ -22,7 +22,7 @@ import {
   CreditCard,
   Clock,
 } from 'lucide-react';
-import { RestaurantPriceLevel, GoogleMapsPlaceMetadata, isUserVipActive, getDynamicVipPlans } from '../types';
+import { RestaurantPriceLevel, GoogleMapsPlaceMetadata, isUserVipActive, getDynamicVipPlans, getVipFeaturedRotationConfig, isAdminAccount } from '../types';
 import {
   pickImageUsingNativeAndroidGallery,
   pickMultipleImagesUsingNativeAndroidGallery,
@@ -92,17 +92,15 @@ export const VipAddRestaurantModal: React.FC = () => {
   } = useApp();
 
   const isKm = language === 'km';
-  const isAdmin =
-    currentUser?.role === 'admin' ||
-    currentUser?.id === 'admin-authorized-single' ||
-    currentUser?.username === 'admin' ||
-    currentUser?.username === 'cheasavuth';
+  const isAdmin = isAdminAccount(currentUser);
 
   const isApprovedVip = isUserVipActive(currentUser);
   const dynamicPlans = getDynamicVipPlans(appSettings);
   const quota = getCurrentUserStoreQuota(currentUser);
   const ownedRestaurants = getOwnedRestaurantsForUser(currentUser);
   const requiresAdditionalPayment = !isAdmin && !replacingStoreId && quota.remainingAvailableSlots <= 0;
+  const rotationCfg = getVipFeaturedRotationConfig(appSettings);
+  const topListingLabel = `Top Listing: ${rotationCfg.durationDays} ${rotationCfg.durationDays === 1 ? 'Day' : 'Days'}`;
 
   // Simple 2-Tab Navigation: 'create_form' (Default!) or 'my_stores' or 'pay_additional_slot'
   const [activeTab, setActiveTab] = useState<'create_form' | 'my_stores' | 'pay_additional_slot'>('create_form');
@@ -1465,7 +1463,12 @@ export const VipAddRestaurantModal: React.FC = () => {
                         `💳 Pay +${quota.additionalStoreFeeUsd.toFixed(2)} USD to Add Shop #${quota.nextStoreSlotNumber}`,
                         `💳 支付 +${quota.additionalStoreFeeUsd.toFixed(2)} USD 添加第 ${quota.nextStoreSlotNumber} 家店铺`
                       )
-                    : tr(language, '✅ បង្កើតហាងឥឡូវនេះ (រួចបន្ថែមមុខម្ហូប)', '✅ Create Shop Now (& Add Dishes)', '✅ 立即创建店铺（并添加菜品）')}
+                    : tr(
+                        language,
+                        `✅ ចុះបញ្ជីហាងឥឡូវនេះ (${topListingLabel})`,
+                        `✅ Register Shop Now (${topListingLabel})`,
+                        `✅ 立即注册店铺 (${topListingLabel})`
+                      )}
                 </span>
               </button>
             </div>

@@ -33,6 +33,8 @@ export const initialAppSettings: AppSettings = {
   vipLongNameEn: 'VIP 60 Days',
   additionalStoreFeeUsd: 5.0,
   includedFreeStoresPerVip: 1,
+  vipFeaturedRotationEnabled: true,
+  vipFeaturedDurationDays: 1,
   vipBenefitsList: TEN_VIP_BENEFITS,
   settingsVersion: 25,
   settingsUpdatedAt: '2026-10-25T05:15:00.000Z',

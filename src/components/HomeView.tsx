@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { TrendingFoodCategorySlug, TrendingFoodItem, isUserVipActive, getVipAccountState, getVipRemainingDays, sortRestaurantsChronologically } from '../types';
+import { TrendingFoodCategorySlug, TrendingFoodItem, isUserVipActive, getVipAccountState, getVipRemainingDays, sortRestaurantsChronologically, getVipFeaturedRotationConfig, sortRestaurantsWithVipRotation, isAdminAccount } from '../types';
 import {
   normalizeKhmerSearchText,
   searchCambodiaPlacesWithSmartCache,
@@ -35,7 +35,7 @@ export const HomeView: React.FC = () => {
   const { 
     foods, restaurants, destinations, setActiveTab, 
     language, selectedProvince, setSelectedProvince, posts,
-    currentUser, setIsAuthModalOpen,
+    currentUser, users, appSettings, setIsAuthModalOpen,
     setIsInstallModalOpen, setIsSupportModalOpen,
     openInstallModal, setSelectedDestination,
     setIsWhatToEatModalOpen,
@@ -56,12 +56,10 @@ export const HomeView: React.FC = () => {
 
   const isKm = language === 'km';
   const isVip = isUserVipActive(currentUser);
-  const isAdmin =
-    currentUser?.role === 'admin' ||
-    currentUser?.id === 'admin-authorized-single' ||
-    currentUser?.username === 'admin' ||
-    currentUser?.username === 'cheasavuth';
+  const isAdmin = isAdminAccount(currentUser);
   const storeQuota = getCurrentUserStoreQuota(currentUser);
+  const rotationCfg = getVipFeaturedRotationConfig(appSettings);
+  const topListingLabel = `Top Listing: ${rotationCfg.durationDays} ${rotationCfg.durationDays === 1 ? 'Day' : 'Days'}`;
   const myRestaurants = useMemo(() => {
     return getOwnedRestaurantsForUser(currentUser);
   }, [restaurants, currentUser, activeManagedShopId]);
@@ -173,8 +171,8 @@ export const HomeView: React.FC = () => {
   };
 
   const sessionShuffledRestaurants = useMemo(
-    () => shuffleForCurrentSession(restaurants),
-    [restaurants]
+    () => sortRestaurantsWithVipRotation(shuffleForCurrentSession(restaurants), users, appSettings),
+    [restaurants, users, appSettings]
   );
   const sessionShuffledDestinations = useMemo(
     () => shuffleForCurrentSession(destinations),
@@ -352,9 +350,13 @@ export const HomeView: React.FC = () => {
     [foods.length, discoverySeed]
   );
   const discoveryRestaurants = useMemo(
-    () => pickRandom(restaurants.filter((r) => r && r.id && r.status === 'approved' && r.photoUrl), 6),
+    () => {
+      const approvedList = restaurants.filter((r) => r && r.id && r.status === 'approved' && r.photoUrl);
+      const rotated = sortRestaurantsWithVipRotation(pickRandom(approvedList, Math.min(20, approvedList.length)), users, appSettings);
+      return rotated.slice(0, 6);
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [restaurants.length, discoverySeed]
+    [restaurants.length, discoverySeed, users, appSettings]
   );
   const randomTrending = useMemo(
     () => pickRandom(trendingFoods.filter((t) => t && t.id), 8),
@@ -362,7 +364,7 @@ export const HomeView: React.FC = () => {
     [trendingFoods.length, discoverySeed]
   );
   const isHomeLoading = foods.length === 0 && restaurants.length === 0 && trendingFoods.length === 0;
-  const canUseVipActions = isVip || currentUser?.role === 'admin';
+  const canUseVipActions = isVip;
   const txt = (km: string, en: string, zh: string) => (language === 'km' ? km : language === 'zh' ? zh : en);
   const requireVip = (open: () => void) => () => {
     if (!canUseVipActions) {
@@ -1204,7 +1206,7 @@ export const HomeView: React.FC = () => {
       </div>
 
       {/* 3. Manage Shop Panel: Enabled when VIP, Locked when not VIP (Non-Admin users only) */}
-      {currentUser?.role !== 'admin' && (
+      {!isAdmin && (
         isVip ? (
         /* ENABLED VIP RESTAURANT MANAGEMENT CARD */
         <div className="p-4 sm:p-5 rounded-3xl bg-gradient-to-br from-amber-500/20 via-yellow-500/10 to-amber-600/20 border-2 border-amber-400/80 shadow-md space-y-3 font-khmer animate-in fade-in">
@@ -1257,7 +1259,7 @@ export const HomeView: React.FC = () => {
                 className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 text-slate-950 font-bold text-xs shadow-xs transition flex items-center gap-1 shrink-0 active:scale-95 cursor-pointer"
               >
                 <Plus className="w-3.5 h-3.5" />
-                <span>{isKm ? 'បន្ថែមហាង VIP' : 'Add Store'}</span>
+                <span>{isKm ? `បន្ថែមហាង VIP (${topListingLabel})` : `Add Store (${topListingLabel})`}</span>
               </button>
             )}
           </div>
@@ -1290,7 +1292,7 @@ export const HomeView: React.FC = () => {
                     className="relative w-full py-3.5 px-4 bg-gradient-to-r from-amber-300 via-amber-400 to-yellow-400 hover:from-amber-400 hover:to-yellow-500 text-slate-950 rounded-xl text-xs sm:text-sm font-black border-2 border-white/90 vip-glow-btn flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer shadow-lg"
                   >
                     <Crown className="w-4 h-4 fill-slate-950 shrink-0" />
-                    <span>{isKm ? '+ ចុះបញ្ជីហាង VIP របស់អ្នក (1 ហាង)' : '+ Register Your VIP Restaurant (1 Store)'}</span>
+                    <span>{isKm ? `+ ចុះបញ្ជីហាង VIP របស់អ្នក (1 ហាង • ${topListingLabel})` : `+ Register Your VIP Restaurant (1 Store • ${topListingLabel})`}</span>
                     <Sparkles className="w-3.5 h-3.5 text-amber-900 shrink-0" />
                   </button>
                 </div>
@@ -1384,22 +1386,22 @@ export const HomeView: React.FC = () => {
 
       {/* Quick category icon row removed: identical to the bottom tab bar */}
 
-      {/* 6 Personalized Account Features Suite (មជ្ឈមណ្ឌលផ្ទាល់ខ្លួនសម្រាប់គណនី) */}
-      {/* Personalized Features Suite for VIP Members and Admins */}
+      {/* 6 Personalized Account Features Suite (មជ្ឈមណ្ឌលផ្ទាល់ខ្លួនសម្រាប់គណនី) — Strictly for VIP and Regular Users, NOT Admin */}
+      {!isAdmin && (
       <div className={`p-4 rounded-3xl text-white transition-all duration-300 space-y-3 font-khmer ${
-        isVip || currentUser?.role === 'admin'
+        isVip
           ? 'bg-gradient-to-br from-emerald-950 via-[#064E3B] to-slate-900 border-2 border-emerald-400/60 shadow-lg ring-2 ring-emerald-400/20'
           : 'bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border border-slate-700/80 shadow-sm'
       }`}>
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <div className="flex items-center gap-2">
-            <span className={`w-2.5 h-2.5 rounded-full ${isVip || currentUser?.role === 'admin' ? 'bg-amber-400' : 'bg-slate-500'}`} />
+            <span className={`w-2.5 h-2.5 rounded-full ${isVip ? 'bg-amber-400' : 'bg-slate-500'}`} />
             <div>
               <div className="flex items-center gap-1.5 flex-wrap">
                 <h3 className="font-moul text-xs sm:text-sm text-white flex items-center gap-1.5">
                   <span>{isKm ? 'សេវាកម្មផ្ទាល់ខ្លួន (Personal Feature)' : 'Personalized Member Hub'}</span>
                 </h3>
-                {isVip || currentUser?.role === 'admin' ? (
+                {isVip ? (
                   <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-400 text-slate-950 flex items-center gap-1 shadow-xs font-mono">
                     <Sparkles className="w-2.5 h-2.5 fill-current" />
                     <span>VIP ACTIVE</span>
@@ -1412,7 +1414,7 @@ export const HomeView: React.FC = () => {
                 )}
               </div>
               <p className="text-[10px] text-slate-300">
-                {isVip || currentUser?.role === 'admin'
+                {isVip
                   ? (currentUser ? (isKm ? `គណនី VIP សកម្ម៖ ${currentUser.name}` : `VIP Active: ${currentUser.name}`) : (isKm ? 'មុខងារពិសេសសកម្មពេញលេញ' : 'All VIP features enabled'))
                   : (isKm ? 'ដំឡើងទៅជាគណនី VIP ដើម្បីបើកដំណើរការមុខងារពិសេសទាំង ៦ នេះ' : 'Unlock VIP account to enable all 6 personalized features')}
               </p>
@@ -1420,11 +1422,9 @@ export const HomeView: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-2">
-            {/* AI Check-in lives only in the Quick Actions "Check in" card (single entry point) */}
-
-            {!isVip && currentUser?.role !== 'admin' && (
+            {!isVip && (
               <button
-                onClick={openUpgradeVipModal}
+                onClick={() => openUpgradeVipModal()}
                 className="px-3 py-1 bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-500 text-slate-950 rounded-xl text-[10px] font-extrabold shadow-sm transition flex items-center gap-1 cursor-pointer active:scale-95"
               >
                 <Crown className="w-3 h-3 fill-slate-950" />
@@ -1434,7 +1434,7 @@ export const HomeView: React.FC = () => {
           </div>
         </div>
 
-        {/* Prominent AI Discovery & Google Maps Places Search (Admin & VIP) Entry Cards */}
+        {/* Prominent AI Discovery & Google Maps Places Search (VIP) Entry Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
           {/* 1. Browse Khmer dishes (opens the Food tab: single entry point) */}
           <button
@@ -1467,7 +1467,7 @@ export const HomeView: React.FC = () => {
             </span>
           </button>
 
-          {/* 1a. Google Maps Places Search Menu (Admin & Active VIP) */}
+          {/* 1a. Google Maps Places Search Menu (Active VIP) */}
           <button
             onClick={() => openGoogleMapsSearchModal('all')}
             className="p-3.5 rounded-2xl bg-gradient-to-r from-emerald-800 via-teal-800 to-[#064E3B] text-white text-left shadow-md flex items-center justify-between transition hover:scale-[1.01] active:scale-98 cursor-pointer ring-2 ring-amber-400/50"
@@ -1486,42 +1486,13 @@ export const HomeView: React.FC = () => {
               </div>
             </div>
             <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[9px] font-black uppercase tracking-wider font-sans shrink-0">
-              {isVip || currentUser?.role === 'admin' ? 'VIP / Maps' : '🔒 VIP'}
+              {isVip ? 'VIP / Maps' : '🔒 VIP'}
             </span>
           </button>
-
-          {/* Admin photo auto-search shortcut removed: it already lives inside the Food tab (admin panel) */}
-
-          {/* 2. Restaurant Check-in & GPS Location (Admin Only) */}
-          {currentUser?.role === 'admin' && (
-            <button
-              onClick={() => setIsRestaurantCheckInModalOpen(true)}
-              className="p-3.5 rounded-2xl bg-gradient-to-r from-[#004B87] via-[#005a9e] to-sky-800 text-white text-left shadow-md flex items-center justify-between transition hover:scale-[1.01] active:scale-98 cursor-pointer ring-2 ring-sky-400/30"
-            >
-              <div className="flex items-center gap-2.5">
-                <div className="w-10 h-10 rounded-xl bg-sky-400 text-slate-950 flex items-center justify-center shadow-sm shrink-0">
-                  <MapPin className="w-5 h-5 fill-slate-950" />
-                </div>
-                <div>
-                  <span className="font-moul text-xs block text-white">
-                    {isKm ? 'ឆែកអ៊ីន & បញ្ជាក់ទីតាំង (Admin)' : 'Restaurant Check-in (Admin)'}
-                  </span>
-                  <span className="text-[10px] text-sky-200 block">
-                    {isKm ? 'បញ្ជាក់ទីតាំង GPS • រកហាងពិត' : 'GPS Location Verification'}
-                  </span>
-                </div>
-              </div>
-              <span className="px-2 py-0.5 rounded-full bg-sky-300 text-slate-950 text-[9px] font-black uppercase tracking-wider font-sans shrink-0">
-                GPS Live
-              </span>
-            </button>
-          )}
         </div>
 
         {/* 6 Feature Buttons Grid - Enabled for VIP, Prompts Upgrade for Free Users */}
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-
-
           {/* C. កន្លែងថ្មីប្រចាំថ្ងៃ */}
           <button
             onClick={requireVip(() => {
@@ -1540,8 +1511,6 @@ export const HomeView: React.FC = () => {
               {isKm ? 'ហាង ទេសចរណ៍ & ព្រឹត្តិការណ៍ថ្មី' : 'New spots, events & news'}
             </div>
           </button>
-
-
 
           {/* F. ការជូនដំណឹងដែលមានប្រយោជន៍ */}
           <button
@@ -1569,6 +1538,7 @@ export const HomeView: React.FC = () => {
           </button>
         </div>
       </div>
+      )}
 
       {/* Preserved in hidden container for test suite integrity */}
       <div className="hidden" aria-hidden="true">

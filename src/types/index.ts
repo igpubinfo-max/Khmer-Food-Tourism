@@ -722,6 +722,9 @@ export interface Restaurant {
   storeSlotNumber?: number;
   replacedFromRestaurantId?: string;
   replacedAt?: string;
+  approvedAt?: string;
+  featuredFromAt?: string;
+  featuredUntilAt?: string;
 }
 
 // Helper to resolve original created_at ISO timestamp for chronological sorting
@@ -871,17 +874,23 @@ export const isRestaurantPremiumActive = (restaurant?: Restaurant | null): boole
 
 export type VipAccountState = 'admin' | 'approved_vip' | 'pending_vip' | 'expired_vip' | 'regular_unpaid';
 
-// Helper to determine if a user has an active, admin-approved Premium VIP subscription (Admin always has lifetime active VIP)
+// Helper to strictly identify an Administrator account (separate from VIP customer accounts)
+export const isAdminAccount = (user?: User | null): boolean => {
+  if (!user) return false;
+  return (
+    user.role === 'admin' ||
+    user.id === 'admin-authorized-single' ||
+    user.username === 'admin' ||
+    user.username === 'cheasavuth'
+  );
+};
+
+// Helper to determine if a user has an active, admin-approved Premium VIP subscription (strictly for VIP customers, NOT Admin)
 export const isUserVipActive = (user?: User | null): boolean => {
   if (!user) return false;
-  // System Admin always has lifetime active VIP access
-  if (
-    user.role === 'admin' || 
-    user.id === 'admin-authorized-single' || 
-    user.username === 'admin' || 
-    user.username === 'cheasavuth'
-  ) {
-    return true;
+  // Administrators use administrative privileges and are strictly separated from consumer VIP accounts
+  if (isAdminAccount(user)) {
+    return false;
   }
   if (user.isDisabled) {
     return false;
@@ -908,12 +917,7 @@ export const isUserVipActive = (user?: User | null): boolean => {
 // Helper to classify user's exact VIP state (Admin, Approved VIP, Pending Admin Approval, Expired VIP, or Regular Unpaid)
 export const getVipAccountState = (user?: User | null): VipAccountState => {
   if (!user) return 'regular_unpaid';
-  if (
-    user.role === 'admin' || 
-    user.id === 'admin-authorized-single' || 
-    user.username === 'admin' || 
-    user.username === 'cheasavuth'
-  ) {
+  if (isAdminAccount(user)) {
     return 'admin';
   }
   if (isUserVipActive(user)) {
@@ -941,17 +945,9 @@ export const getVipAccountState = (user?: User | null): VipAccountState => {
   return 'regular_unpaid';
 };
 
-// Helper to calculate remaining days in VIP subscription
+// Helper to calculate remaining days in VIP subscription (strictly for VIP users, 0 for Admin)
 export const getVipRemainingDays = (user?: User | null): number => {
-  if (!user) return 0;
-  if (
-    user.role === 'admin' || 
-    user.id === 'admin-authorized-single' || 
-    user.username === 'admin' || 
-    user.username === 'cheasavuth'
-  ) {
-    return 9999;
-  }
+  if (!user || isAdminAccount(user)) return 0;
   if (!isUserVipActive(user) || !user?.subscriptionExpiryDate) return 0;
   const diffMs = new Date(user.subscriptionExpiryDate).getTime() - Date.now();
   return Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
@@ -1274,6 +1270,8 @@ export interface AppSettings {
   vipLongNameEn?: string; // Default: "VIP 90 Days"
   additionalStoreFeeUsd?: number; // Default: $10.00 per additional store beyond the 1st
   includedFreeStoresPerVip?: number; // Default: 1 store included with VIP
+  vipFeaturedRotationEnabled?: boolean; // Default: true (enable VIP shop featured top rotation)
+  vipFeaturedDurationDays?: number; // Default: 1 day per featured slot
   vipBenefitsList?: VipBenefitItem[]; // Configurable VIP benefits list
   settingsVersion?: number; // Monotonically increasing server configuration version
   settingsUpdatedAt?: string;
@@ -1634,4 +1632,275 @@ export const getUserStoreQuotaSummary = (
     canReplaceExistingFree: canReplaceExistingStoreForFree,
     canEditExistingFree,
   };
+};
+
+// ============================================================================
+// VIP SHOP FEATURED ROTATION SYSTEM
+// ============================================================================
+export const DEFAULT_VIP_FEATURED_DURATION_DAYS = 1;
+const VIP_ROTATION_EPOCH_MS = Date.UTC(2026, 0, 1, 0, 0, 0);
+
+export interface VipFeaturedRotationConfig {
+  enabled: boolean;
+  durationDays: number;
+  durationMs: number;
+}
+
+export const getVipFeaturedRotationConfig = (
+  settings?: Partial<AppSettings> | null
+): VipFeaturedRotationConfig => {
+  const s = settings || getStoredAppSettingsFallback();
+  const enabled = s.vipFeaturedRotationEnabled !== false;
+  const rawDays = Number(s.vipFeaturedDurationDays);
+  const durationDays =
+    Number.isFinite(rawDays) && rawDays >= 1
+      ? Math.min(365, Math.round(rawDays))
+      : DEFAULT_VIP_FEATURED_DURATION_DAYS;
+  return {
+    enabled,
+    durationDays,
+    durationMs: durationDays * 24 * 60 * 60 * 1000,
+  };
+};
+
+export const getRestaurantApprovedAtMs = (r?: Partial<Restaurant> | null): number => {
+  if (!r) return 0;
+  const raw = r.approvedAt || r.featuredFromAt || r.created_at || r.createdAt;
+  if (raw && typeof raw === 'string') {
+    const parsed = Date.parse(raw);
+    if (!Number.isNaN(parsed)) {
+      return parsed;
+    }
+  }
+  return getRestaurantCreatedAtMs(r);
+};
+
+export const isRestaurantEligibleForVipRotation = (
+  restaurant?: Restaurant | null,
+  users?: User[] | null
+): boolean => {
+  if (!restaurant || !restaurant.id) return false;
+  if (isSeedRestaurantId(restaurant.id)) return false;
+  if (String(restaurant.id).startsWith('food-') || String(restaurant.id).startsWith('dest-')) {
+    return false;
+  }
+  if (restaurant.status && restaurant.status !== 'approved') {
+    return false;
+  }
+  if (
+    restaurant.aiCategoryVerification?.detectedType &&
+    restaurant.aiCategoryVerification.detectedType !== 'restaurant'
+  ) {
+    return false;
+  }
+
+  // Check if owner is an active VIP member or if the shop itself has an active premium tier
+  if (Array.isArray(users) && users.length > 0 && restaurant.ownerId) {
+    const owner = users.find(
+      (u) =>
+        u.id === restaurant.ownerId ||
+        (Array.isArray(u.legacyIds) && u.legacyIds.includes(restaurant.ownerId!))
+    );
+    if (owner) {
+      if (owner.isDisabled) return false;
+      if (isUserVipActive(owner) || isAdminAccount(owner)) return true;
+      // If owner's VIP subscription has explicitly expired, shop is not eligible for VIP rotation
+      if (owner.subscriptionExpiryDate) {
+        const exp = Date.parse(owner.subscriptionExpiryDate);
+        if (!Number.isNaN(exp) && exp <= Date.now()) {
+          return false;
+        }
+      }
+    }
+  }
+
+  if (isRestaurantPremiumActive(restaurant)) return true;
+  if (restaurant.membershipTier === 'premium' || restaurant.dataSource === 'vip_owner' || restaurant.isFeatured) {
+    if (restaurant.membershipExpiresAt) {
+      const exp = Date.parse(restaurant.membershipExpiresAt);
+      if (!Number.isNaN(exp) && exp <= Date.now()) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  return false;
+};
+
+export interface VipFeaturedShopSlotInfo {
+  restaurant: Restaurant;
+  reason: 'new_shop_boost' | 'rotation_slot';
+  slotStartIso: string;
+  slotEndIso: string;
+  remainingMs: number;
+  remainingHours: number;
+  queueIndex: number;
+}
+
+export interface VipFeaturedRotationState {
+  config: VipFeaturedRotationConfig;
+  eligibleQueue: Restaurant[];
+  currentlyFeatured: VipFeaturedShopSlotInfo[];
+  currentlyFeaturedIds: Set<string>;
+  primaryFeaturedShop: VipFeaturedShopSlotInfo | null;
+  nextRotatingShop: Restaurant | null;
+  currentSlotIndex: number;
+  slotStartIso: string;
+  slotEndIso: string;
+}
+
+/**
+ * Deterministically compute the active VIP Featured Shop Rotation state across all devices using server/ISO timestamps.
+ * - Newly approved VIP shops are featured at the top for `durationDays` (1 day by default) from their `approvedAt` timestamp.
+ * - After the initial window (and continuously), eligible VIP shops rotate fairly in registration/approval order for `durationDays` per slot.
+ */
+export const getVipFeaturedRotationState = (
+  restaurants?: Restaurant[] | null,
+  users?: User[] | null,
+  settings?: Partial<AppSettings> | null,
+  nowMs: number = Date.now()
+): VipFeaturedRotationState => {
+  const config = getVipFeaturedRotationConfig(settings);
+  const list = Array.isArray(restaurants) ? restaurants : [];
+
+  // Sort eligible VIP shops strictly in registration/approval order
+  const eligibleQueue = list
+    .filter((r) => isRestaurantEligibleForVipRotation(r, users))
+    .sort((a, b) => {
+      const diff = getRestaurantApprovedAtMs(a) - getRestaurantApprovedAtMs(b);
+      if (diff !== 0) return diff;
+      return String(a.id).localeCompare(String(b.id));
+    });
+
+  const elapsedSinceEpoch = Math.max(0, nowMs - VIP_ROTATION_EPOCH_MS);
+  const currentSlotIndex = Math.floor(elapsedSinceEpoch / config.durationMs);
+  const slotStartMs = VIP_ROTATION_EPOCH_MS + currentSlotIndex * config.durationMs;
+  const slotEndMs = slotStartMs + config.durationMs;
+  const slotStartIso = new Date(slotStartMs).toISOString();
+  const slotEndIso = new Date(slotEndMs).toISOString();
+
+  if (!config.enabled || eligibleQueue.length === 0) {
+    return {
+      config,
+      eligibleQueue,
+      currentlyFeatured: [],
+      currentlyFeaturedIds: new Set<string>(),
+      primaryFeaturedShop: null,
+      nextRotatingShop: null,
+      currentSlotIndex,
+      slotStartIso,
+      slotEndIso,
+    };
+  }
+
+  const currentlyFeatured: VipFeaturedShopSlotInfo[] = [];
+  const currentlyFeaturedIds = new Set<string>();
+
+  // 1. Check for newly added approved VIP shops within their initial `durationDays` top-listing window
+  for (let i = 0; i < eligibleQueue.length; i++) {
+    const shop = eligibleQueue[i];
+    const approvedMs = getRestaurantApprovedAtMs(shop);
+    const explicitUntilMs = shop.featuredUntilAt ? Date.parse(shop.featuredUntilAt) : Number.NaN;
+    // Always compute dynamic window from approvedMs + config.durationMs so Admin duration changes take effect immediately
+    const boostEndMs =
+      approvedMs > 0
+        ? approvedMs + config.durationMs
+        : !Number.isNaN(explicitUntilMs)
+        ? explicitUntilMs
+        : 0;
+
+    if (approvedMs > 0 && nowMs >= approvedMs && nowMs < boostEndMs) {
+      const remMs = Math.max(0, boostEndMs - nowMs);
+      currentlyFeatured.push({
+        restaurant: shop,
+        reason: 'new_shop_boost',
+        slotStartIso: new Date(approvedMs).toISOString(),
+        slotEndIso: new Date(boostEndMs).toISOString(),
+        remainingMs: remMs,
+        remainingHours: Math.max(1, Math.ceil(remMs / (1000 * 60 * 60))),
+        queueIndex: i,
+      });
+      currentlyFeaturedIds.add(shop.id);
+    }
+  }
+
+  // Sort newly added shops so the most recently registered approved shop is first
+  currentlyFeatured.sort(
+    (a, b) => getRestaurantApprovedAtMs(b.restaurant) - getRestaurantApprovedAtMs(a.restaurant)
+  );
+
+  // 2. Fair Round-Robin Rotation in Registration/Approval Order
+  const rotatingQueueIndex = currentSlotIndex % eligibleQueue.length;
+  const rotatingShop = eligibleQueue[rotatingQueueIndex];
+  if (rotatingShop && !currentlyFeaturedIds.has(rotatingShop.id)) {
+    const remMs = Math.max(0, slotEndMs - nowMs);
+    currentlyFeatured.push({
+      restaurant: rotatingShop,
+      reason: 'rotation_slot',
+      slotStartIso,
+      slotEndIso,
+      remainingMs: remMs,
+      remainingHours: Math.max(1, Math.ceil(remMs / (1000 * 60 * 60))),
+      queueIndex: rotatingQueueIndex,
+    });
+    currentlyFeaturedIds.add(rotatingShop.id);
+  }
+
+  const nextRotatingShop =
+    eligibleQueue.length > 1
+      ? eligibleQueue[(rotatingQueueIndex + 1) % eligibleQueue.length]
+      : eligibleQueue[0] || null;
+
+  return {
+    config,
+    eligibleQueue,
+    currentlyFeatured,
+    currentlyFeaturedIds,
+    primaryFeaturedShop: currentlyFeatured[0] || null,
+    nextRotatingShop,
+    currentSlotIndex,
+    slotStartIso,
+    slotEndIso,
+  };
+};
+
+/**
+ * Sort a list of restaurants so that currently featured VIP shops (from initial 1-day new-shop boost or fair round-robin rotation)
+ * appear at the very top of the relevant listing, while preserving the order of all other restaurants.
+ */
+export const sortRestaurantsWithVipRotation = (
+  restaurants: Restaurant[],
+  users?: User[] | null,
+  settings?: Partial<AppSettings> | null,
+  nowMs: number = Date.now()
+): Restaurant[] => {
+  if (!Array.isArray(restaurants) || restaurants.length <= 1) {
+    return Array.isArray(restaurants) ? [...restaurants] : [];
+  }
+  const rotation = getVipFeaturedRotationState(restaurants, users, settings, nowMs);
+  if (!rotation.config.enabled || rotation.currentlyFeatured.length === 0) {
+    return [...restaurants];
+  }
+
+  const featuredOrderMap = new Map<string, number>();
+  rotation.currentlyFeatured.forEach((item, idx) => {
+    featuredOrderMap.set(item.restaurant.id, idx);
+  });
+
+  const topFeatured: Restaurant[] = [];
+  const restList: Restaurant[] = [];
+  for (const r of restaurants) {
+    if (featuredOrderMap.has(r.id)) {
+      topFeatured.push(r);
+    } else {
+      restList.push(r);
+    }
+  }
+
+  topFeatured.sort(
+    (a, b) => (featuredOrderMap.get(a.id) ?? 999) - (featuredOrderMap.get(b.id) ?? 999)
+  );
+
+  return [...topFeatured, ...restList];
 };
