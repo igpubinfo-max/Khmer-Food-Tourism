@@ -2,6 +2,9 @@ name: Build iOS App & Apple App Store Package
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
 
 permissions:
   contents: write
@@ -135,13 +138,14 @@ jobs:
             fi
           fi
 
-      - name: 9. Upload Signed IPA to Apple App Store Connect / TestFlight
+      - name: 9. Upload Signed IPA & Update Review Notes in Apple App Store Connect
         if: env.APPSTORE_PRIVATE_KEY != '' && env.APPSTORE_KEY_ID != '' && env.APPSTORE_ISSUER_ID != ''
         env:
           APPSTORE_ISSUER_ID: ${{ secrets.APPSTORE_ISSUER_ID }}
           APPSTORE_KEY_ID: ${{ secrets.APPSTORE_KEY_ID }}
           APPSTORE_PRIVATE_KEY: ${{ secrets.APPSTORE_PRIVATE_KEY }}
         run: |
+          node scripts/update-asc-review-notes.mjs || true
           mkdir -p ~/.appstoreconnect/private_keys
           echo "$APPSTORE_PRIVATE_KEY" > "$HOME/.appstoreconnect/private_keys/AuthKey_${APPSTORE_KEY_ID}.p8"
           IPA_PATH="ios/App/build/KhmerFoodTourism-v2.3.1.ipa"
