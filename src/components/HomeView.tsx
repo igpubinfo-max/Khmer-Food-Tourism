@@ -4,11 +4,7 @@ import { TrendingFoodCategorySlug, TrendingFoodItem, isUserVipActive, getVipAcco
 import {
   normalizeKhmerSearchText,
   searchCambodiaPlacesWithSmartCache,
-  convertGooglePlaceToRestaurant,
-  convertGooglePlaceToDestination,
-  findDuplicateRestaurantForGooglePlace,
-  findDuplicateDestinationForGooglePlace,
-  expandMultilingualPlaceQuery,
+  performUnifiedCambodiaSearch,
   GooglePlaceCachedItem,
 } from '../services/googlePlacesService';
 import { shuffleForCurrentSession } from '../utils/sessionShuffle';
@@ -226,71 +222,16 @@ export const HomeView: React.FC = () => {
   const searchResults = useMemo(() => {
     const q = normalizeKhmerSearchText(globalSearchQuery);
     if (!q) return null;
-
-    const tokens = expandMultilingualPlaceQuery(globalSearchQuery, 'all').matchTokens;
-    const cleanSelProv = (selectedProvince || '').replace(/^រាជធានី|^ខេត្ត/g, '').trim();
-
-    const matchedFoods = foods.filter((f) => {
-      if (cleanSelProv) {
-        const provText = `${f.nameKh} ${f.nameEn} ${f.descriptionKh || ''}`;
-        if (!provText.includes(cleanSelProv)) return false;
-      }
-      const hay = normalizeKhmerSearchText(
-        `${f.nameKh} ${f.nameEn} ${f.descriptionKh || ''} ${f.categoryKh || ''} ${(f.ingredients || []).map((i) => `${i.nameKh} ${i.nameEn}`).join(' ')}`
-      );
-      return hay.includes(q) || tokens.some((tok) => tok.length >= 2 && hay.includes(tok.toLowerCase()));
+    return performUnifiedCambodiaSearch({
+      query: globalSearchQuery,
+      provinceFilter: selectedProvince,
+      foods,
+      restaurants: sessionShuffledRestaurants,
+      destinations: sessionShuffledDestinations,
+      smartCachePlaces: homeSmartCachePlaces,
+      currentUser,
     });
-
-    const localRestaurants = sessionShuffledRestaurants.filter((r) => {
-      if (r.status !== 'approved' && currentUser?.role !== 'admin' && currentUser?.id !== r.ownerId) return false;
-      if (cleanSelProv && !r.provinceKh.replace(/^រាជធានី|^ខេត្ត/g, '').includes(cleanSelProv)) return false;
-      const hay = normalizeKhmerSearchText(
-        `${r.nameKh || ''} ${r.nameEn || ''} ${r.addressKh || ''} ${r.provinceKh || ''} ${(r.signatureDishesKh || []).join(' ')} ${(r.menuItems || []).map((m) => `${m.nameKh || ''} ${m.nameEn || ''}`).join(' ')}`
-      );
-      return hay.includes(q) || tokens.some((tok) => tok.length >= 2 && hay.includes(tok.toLowerCase()));
-    });
-
-    const localDestinations = sessionShuffledDestinations.filter((d) => {
-      if (cleanSelProv && !d.provinceKh.replace(/^រាជធានី|^ខេត្ត/g, '').includes(cleanSelProv)) return false;
-      const hay = normalizeKhmerSearchText(
-        `${d.nameKh || ''} ${d.nameEn || ''} ${d.descriptionKh || ''} ${d.provinceKh || ''} ${d.categoryKh || ''}`
-      );
-      return hay.includes(q) || tokens.some((tok) => tok.length >= 2 && hay.includes(tok.toLowerCase()));
-    });
-
-    // Merge live Google Maps & Smart Cache places so Home search works identically to Find in Shop!
-    const seenRestIds = new Set(localRestaurants.map((r) => r.id));
-    const seenDestIds = new Set(localDestinations.map((d) => d.id));
-    const mergedRestaurants = [...localRestaurants];
-    const mergedDestinations = [...localDestinations];
-
-    for (const place of homeSmartCachePlaces) {
-      if (place.category === 'tourism') {
-        const dup = findDuplicateDestinationForGooglePlace(place, mergedDestinations);
-        const target = dup || convertGooglePlaceToDestination(place);
-        if (!seenDestIds.has(target.id)) {
-          seenDestIds.add(target.id);
-          mergedDestinations.push(target);
-        }
-      } else {
-        const dup = findDuplicateRestaurantForGooglePlace(place, mergedRestaurants);
-        const target = dup || convertGooglePlaceToRestaurant(place);
-        if (!seenRestIds.has(target.id)) {
-          seenRestIds.add(target.id);
-          mergedRestaurants.push(target);
-        }
-      }
-    }
-
-    const totalCount = matchedFoods.length + mergedRestaurants.length + mergedDestinations.length;
-
-    return {
-      foods: matchedFoods,
-      restaurants: mergedRestaurants,
-      destinations: mergedDestinations,
-      totalCount,
-    };
-  }, [globalSearchQuery, selectedProvince, foods, sessionShuffledRestaurants, sessionShuffledDestinations, homeSmartCachePlaces, currentUser?.role, currentUser?.id]);
+  }, [globalSearchQuery, selectedProvince, foods, sessionShuffledRestaurants, sessionShuffledDestinations, homeSmartCachePlaces, currentUser]);
 
   const handleAiRandomize = () => {
     setRandomSeed(prev => prev + 1);
