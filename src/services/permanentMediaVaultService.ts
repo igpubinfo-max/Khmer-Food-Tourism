@@ -82,6 +82,8 @@ export interface RestaurantMediaOverride {
   promoVideoUrl?: string;
   telegramUrl?: string;
   facebookUrl?: string;
+  websiteUrl?: string;
+  businessCategory?: string;
   ownerId?: string;
   ownerName?: string;
   ownerEmail?: string;
@@ -559,13 +561,14 @@ export function recordPermanentRestaurantOverride(rest: Restaurant): void {
   const dedupedGallery = Array.isArray(rest.galleryPhotos)
     ? rest.galleryPhotos.filter((g) => g && g !== primaryPhoto)
     : undefined;
+  const gallerySet = new Set([primaryPhoto, ...(dedupedGallery || [])].filter(Boolean));
   const overrideRecord: RestaurantMediaOverride = {
     id: rest.id,
     photoUrl: primaryPhoto,
     profileImage: primaryPhoto,
     galleryPhotos: dedupedGallery && dedupedGallery.length > 0 ? dedupedGallery : undefined,
     foodImages: Array.isArray(rest.foodImages)
-      ? rest.foodImages.filter((g) => g && g !== primaryPhoto)
+      ? rest.foodImages.filter((g) => g && !gallerySet.has(g))
       : undefined,
     menuItems: rest.menuItems,
     menuItemsUpdatedAt: now,
@@ -584,6 +587,8 @@ export function recordPermanentRestaurantOverride(rest: Restaurant): void {
     promoVideoUrl: rest.promoVideoUrl,
     telegramUrl: rest.telegramUrl,
     facebookUrl: rest.facebookUrl,
+    websiteUrl: rest.websiteUrl,
+    businessCategory: rest.businessCategory,
     ownerId: rest.ownerId,
     ownerName: rest.ownerName,
     ownerEmail: rest.ownerEmail,
@@ -818,8 +823,19 @@ export function applyRestaurantOverrides(
       ...r,
       photoUrl,
       profileImage: nextProfileImage,
-      galleryPhotos: Array.isArray(ov.galleryPhotos) ? ov.galleryPhotos : r.galleryPhotos,
-      foodImages: Array.isArray(ov.foodImages) ? ov.foodImages : r.foodImages,
+      galleryPhotos: Array.isArray(ov.galleryPhotos) && ov.galleryPhotos.length > 0
+        ? Array.from(new Set([photoUrl, ...ov.galleryPhotos])).filter(Boolean)
+        : (Array.isArray(r.galleryPhotos) && r.galleryPhotos.length > 0
+            ? Array.from(new Set([photoUrl, ...r.galleryPhotos])).filter(Boolean)
+            : [photoUrl].filter(Boolean)),
+      foodImages: (() => {
+        const gList = Array.isArray(ov.galleryPhotos) && ov.galleryPhotos.length > 0
+          ? [photoUrl, ...ov.galleryPhotos]
+          : [photoUrl, ...(r.galleryPhotos || [])];
+        const gSet = new Set(gList.filter(Boolean));
+        const rawFood = Array.isArray(ov.foodImages) ? ov.foodImages : (r.foodImages || []);
+        return rawFood.filter((u: string) => u && !gSet.has(u));
+      })(),
       menuItems: resolvedMenuItems,
       reviews: Array.isArray(ov.reviews) ? ov.reviews : r.reviews,
       rating: typeof ov.rating === 'number' ? ov.rating : r.rating,
@@ -836,6 +852,8 @@ export function applyRestaurantOverrides(
       promoVideoUrl: ov.promoVideoUrl !== undefined ? ov.promoVideoUrl : r.promoVideoUrl,
       telegramUrl: ov.telegramUrl !== undefined ? ov.telegramUrl : r.telegramUrl,
       facebookUrl: ov.facebookUrl !== undefined ? ov.facebookUrl : r.facebookUrl,
+      websiteUrl: ov.websiteUrl !== undefined ? ov.websiteUrl : r.websiteUrl,
+      businessCategory: ov.businessCategory !== undefined ? ov.businessCategory : r.businessCategory,
       ownerId: ov.ownerId || r.ownerId,
       ownerName: ov.ownerName || r.ownerName,
       ownerEmail: ov.ownerEmail || r.ownerEmail,
@@ -888,6 +906,8 @@ export function applyRestaurantOverrides(
         promoVideoUrl: ov.promoVideoUrl,
         telegramUrl: ov.telegramUrl,
         facebookUrl: ov.facebookUrl,
+        websiteUrl: ov.websiteUrl,
+        businessCategory: ov.businessCategory,
         ownerId: ov.ownerId,
         ownerName: ov.ownerName,
         ownerEmail: ov.ownerEmail,

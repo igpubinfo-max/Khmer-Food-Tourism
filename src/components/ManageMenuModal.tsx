@@ -507,7 +507,9 @@ export const ManageMenuModal: React.FC = () => {
       longitude: storeLongitude,
       photoUrl: finalCover,
       profileImage: finalCover,
-      foodImages: storeGalleryPhotos.slice(0, maxPhotoLimit),
+      foodImages: Array.isArray(managingRestaurant.foodImages)
+        ? managingRestaurant.foodImages.filter((u) => u && !finalGallery.includes(u))
+        : [],
       galleryPhotos: finalGallery,
       promoVideoUrl: isPremiumActive ? (storePromoVideoUrl.trim() || undefined) : managingRestaurant.promoVideoUrl,
       telegramUrl: storeTelegramUrl.trim() || undefined,
@@ -534,7 +536,9 @@ export const ManageMenuModal: React.FC = () => {
       ...managingRestaurant,
       photoUrl: finalCover,
       profileImage: finalCover,
-      foodImages: storeGalleryPhotos.slice(0, maxPhotoLimit),
+      foodImages: Array.isArray(managingRestaurant.foodImages)
+        ? managingRestaurant.foodImages.filter((u) => u && !cappedGallery.includes(u))
+        : [],
       galleryPhotos: cappedGallery,
       updatedAt: new Date().toISOString(),
     });

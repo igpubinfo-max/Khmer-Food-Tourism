@@ -452,16 +452,16 @@ export const ShopMultiPhotoUploader: React.FC<ShopMultiPhotoUploaderProps> = ({
                       className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                     />
 
-                    {/* Badge: Cover Photo or Index Number */}
+                    {/* Badge: Shop Photo Label */}
                     <div className="absolute top-1.5 left-1.5 flex items-center gap-1">
                       {isCover ? (
                         <span className="px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-black text-[9px] shadow-md flex items-center gap-1 font-khmer">
                           <Star className="w-2.5 h-2.5 fill-slate-950 text-slate-950" />
-                          <span>{isKm ? 'រូបតំណាងហាង (Cover)' : 'Cover Photo'}</span>
+                          <span>{isKm ? 'រូបហាង' : 'Shop Photo'}</span>
                         </span>
                       ) : (
-                        <span className="px-1.5 py-0.5 rounded-md bg-black/75 backdrop-blur-xs text-white font-mono font-bold text-[10px] shadow">
-                          #{idx + 1}
+                        <span className="px-2 py-0.5 rounded-md bg-black/75 backdrop-blur-xs text-white font-khmer font-bold text-[10px] shadow">
+                          {isKm ? 'រូបហាង' : 'Shop Photo'}
                         </span>
                       )}
                     </div>

@@ -701,12 +701,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const membershipTier = (r.membershipTier || (isPromoted ? 'premium' : 'free')) as MembershipTier;
     const membershipExpiresAt = r.membershipExpiresAt || (membershipTier === 'premium' ? new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString() : undefined);
     
-    const foodImages = Array.isArray(r.foodImages)
-      ? r.foodImages
-      : (Array.isArray(r.galleryPhotos) ? r.galleryPhotos : []);
-    const galleryPhotos = Array.isArray(r.galleryPhotos) && r.galleryPhotos.length > 0
-      ? r.galleryPhotos
-      : foodImages;
+    const galleryPhotos: string[] = Array.isArray(r.galleryPhotos) && r.galleryPhotos.length > 0
+      ? r.galleryPhotos.filter(Boolean)
+      : [r.photoUrl || r.profileImage].filter(Boolean);
+    const gallerySet = new Set(galleryPhotos);
+    const foodImages: string[] = Array.isArray(r.foodImages)
+      ? r.foodImages.filter((u: string) => u && !gallerySet.has(u))
+      : [];
 
     // Preserve exact matched photoUrl for each restaurant without cross-assigning another shop's storefront sign
     // Never allow a food dish photo (/foods/...) or broken path (/restaurants/...) as the restaurant's primary photoUrl
@@ -791,6 +792,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       promoVideoUrl: r.promoVideoUrl,
       telegramUrl: r.telegramUrl,
       facebookUrl: r.facebookUrl,
+      websiteUrl: r.websiteUrl,
+      businessCategory: r.businessCategory,
       googlePlaceId: r.googlePlaceId,
       dataSource: r.dataSource,
       googleMapsMeta: r.googleMapsMeta,
@@ -861,7 +864,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                   photoUrl: hasCustomPhoto ? primaryImg : seed.photoUrl,
                   profileImage: hasCustomPhoto ? primaryImg : seed.photoUrl,
                   galleryPhotos: hasCustomGallery ? r.galleryPhotos : seed.galleryPhotos,
-                  foodImages: r.foodImages || r.galleryPhotos || seed.galleryPhotos,
+                  foodImages: Array.isArray(r.foodImages)
+                    ? r.foodImages.filter((u: string) => u && !(hasCustomGallery ? r.galleryPhotos : (seed.galleryPhotos || [])).includes(u))
+                    : [],
                   menuItems: r.menuItems,
                   isCustomPhoto: true,
                   updatedAt: new Date().toISOString(),
@@ -890,7 +895,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 photoUrl: finalPhoto,
                 profileImage: finalPhoto,
                 galleryPhotos: finalGallery,
-                foodImages: ov?.foodImages || finalGallery,
+                foodImages: Array.isArray(ov?.foodImages)
+                  ? ov.foodImages.filter((u: string) => u && !(finalGallery || []).includes(u))
+                  : [],
                 menuItems: ov?.menuItems || r.menuItems || [],
                 reviews: ov?.reviews || r.reviews || [],
                 addressKh: ov?.addressKh || seed.addressKh,
@@ -4791,6 +4798,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     const quota = getUserStoreQuotaSummary(currentUser, restaurants, transactions, appSettings);
     const replaceTargetId = options?.replaceRestaurantId?.trim();
+
+    // Prevent duplicate shop entries by checking existing records using Google Place ID
+    const candidatePlaceId = (restData.googlePlaceId || restData.googleMapsMeta?.placeId || '').trim();
+    if (candidatePlaceId) {
+      const existingByPlaceId = restaurants.find(
+        r =>
+          r.id !== replaceTargetId &&
+          (r.googlePlaceId === candidatePlaceId ||
+            r.googleMapsMeta?.placeId === candidatePlaceId ||
+            r.id === `gplace-${candidatePlaceId}`)
+      );
+      if (existingByPlaceId) {
+        showToast(
+          language === 'km'
+            ? `⚠️ ហាង «${existingByPlaceId.nameKh || existingByPlaceId.nameEn}» មានក្នុងប្រព័ន្ធរួចហើយ (Google Place ID ដូចគ្នា)!`
+            : language === 'zh'
+            ? `⚠️ 店铺“${existingByPlaceId.nameEn || existingByPlaceId.nameKh}”已存在（相同的 Google Place ID）！`
+            : `⚠️ "${existingByPlaceId.nameEn || existingByPlaceId.nameKh}" is already registered with this Google Place ID!`,
+          'warning'
+        );
+        return null;
+      }
+    }
     const targetToReplace = replaceTargetId
       ? restaurants.find(r => r.id === replaceTargetId && !isSeedRestaurantId(r.id))
       : undefined;
@@ -4831,9 +4861,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     const profileImg = restData.profileImage || restData.photoUrl || '/foods/food-1.jpg';
-    const foodImgs = Array.isArray(restData.foodImages) && restData.foodImages.length > 0
-      ? restData.foodImages
-      : (Array.isArray(restData.galleryPhotos) ? restData.galleryPhotos : []);
+    const galleryImgs = Array.isArray(restData.galleryPhotos) && restData.galleryPhotos.length > 0
+      ? Array.from(new Set([profileImg, ...restData.galleryPhotos])).filter(Boolean)
+      : [profileImg].filter(Boolean);
+    const galleryImgSet = new Set(galleryImgs);
+    const foodImgs = Array.isArray(restData.foodImages)
+      ? restData.foodImages.filter((u: string) => u && !galleryImgSet.has(u))
+      : [];
 
     // Final Server/Context AI Business Category Verification before saving or publishing any store
     const aiVerification =
@@ -4909,7 +4943,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       ...restData,
       photoUrl: profileImg,
       profileImage: profileImg,
-      galleryPhotos: foodImgs,
+      galleryPhotos: galleryImgs,
       foodImages: foodImgs,
       id: uniqueShopId,
       // Do NOT auto-assign a 5-star rating when registering a VIP shop; ratings come strictly from genuine customer reviews
@@ -5099,9 +5133,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     const profileImg = updated.profileImage || updated.photoUrl || original?.profileImage || original?.photoUrl || '/foods/food-1.jpg';
+    const galleryImgs = Array.isArray(updated.galleryPhotos) && updated.galleryPhotos.length > 0
+      ? Array.from(new Set([profileImg, ...updated.galleryPhotos])).filter(Boolean)
+      : (Array.isArray(original?.galleryPhotos) && original.galleryPhotos.length > 0
+          ? Array.from(new Set([profileImg, ...original.galleryPhotos])).filter(Boolean)
+          : [profileImg].filter(Boolean));
+    const galleryImgSet = new Set(galleryImgs);
     const foodImgs = Array.isArray(updated.foodImages)
-      ? updated.foodImages
-      : (Array.isArray(updated.galleryPhotos) ? updated.galleryPhotos : (original?.foodImages || original?.galleryPhotos || []));
+      ? updated.foodImages.filter((u: string) => u && !galleryImgSet.has(u))
+      : (Array.isArray(original?.foodImages)
+          ? original.foodImages.filter((u: string) => u && !galleryImgSet.has(u))
+          : []);
 
     // Prevent VIP users from bypassing verification by editing an approved store into a non-food business
     let updatedAiVerification = updated.aiCategoryVerification || original?.aiCategoryVerification;
@@ -5162,7 +5204,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       ...updated,
       photoUrl: profileImg,
       profileImage: profileImg,
-      galleryPhotos: foodImgs,
+      galleryPhotos: galleryImgs,
       foodImages: foodImgs,
       isAdminEdited: true,
       adminEditedAt: new Date().toISOString(),
@@ -5172,7 +5214,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       ...updated,
       photoUrl: profileImg,
       profileImage: profileImg,
-      galleryPhotos: foodImgs,
+      galleryPhotos: galleryImgs,
       foodImages: foodImgs,
       membershipTier: effectiveTier,
       membershipExpiresAt: effectiveExpiry,
@@ -5186,6 +5228,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       promoVideoUrl: updated.promoVideoUrl !== undefined ? updated.promoVideoUrl : original?.promoVideoUrl,
       telegramUrl: updated.telegramUrl !== undefined ? updated.telegramUrl : original?.telegramUrl,
       facebookUrl: updated.facebookUrl !== undefined ? updated.facebookUrl : original?.facebookUrl,
+      websiteUrl: updated.websiteUrl !== undefined ? updated.websiteUrl : original?.websiteUrl,
+      businessCategory: updated.businessCategory !== undefined ? updated.businessCategory : original?.businessCategory,
       created_at: preservedCreatedAt,
       createdAt: preservedCreatedAt,
     });

@@ -133,17 +133,36 @@ export const RestaurantDetailModal: React.FC = () => {
   };
 
   const shopProfilePic = selectedRestaurant.profileImage || selectedRestaurant.photoUrl;
-  const shopFoodPhotos = Array.from(
+  const shopPhotosList = Array.from(
     new Set([
-      ...(selectedRestaurant.foodImages || []),
+      shopProfilePic,
       ...(selectedRestaurant.galleryPhotos || []),
     ])
-  ).filter((u) => u && u !== shopProfilePic);
+  ).filter((u): u is string => Boolean(u));
+  const shopPhotoSet = new Set(shopPhotosList);
 
-  const allPhotos = [
-    shopProfilePic,
-    ...shopFoodPhotos,
-  ].filter((url, index, self) => url && self.indexOf(url) === index);
+  const foodPhotosList = Array.from(
+    new Set(
+      (selectedRestaurant.foodImages || []).filter(
+        (u): u is string => Boolean(u && !shopPhotoSet.has(u))
+      )
+    )
+  );
+
+  const categorizedPhotos = [
+    ...shopPhotosList.map((url) => ({
+      url,
+      category: 'shop' as const,
+      foodIndex: 0,
+    })),
+    ...foodPhotosList.map((url, idx) => ({
+      url,
+      category: 'food' as const,
+      foodIndex: idx + 1,
+    })),
+  ];
+
+  const allPhotos = categorizedPhotos.map((item) => item.url);
 
   const sharePayload = {
     title: isKm ? selectedRestaurant.nameKh : selectedRestaurant.nameEn,
@@ -532,23 +551,23 @@ export const RestaurantDetailModal: React.FC = () => {
                   </button>
                 )}
               </div>
-              {allPhotos.length > 0 && (
+              {categorizedPhotos.length > 0 && (
                 <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
-                  {allPhotos.map((photo, idx) => (
+                  {categorizedPhotos.map((item, idx) => (
                     <button
                       key={idx}
-                      onClick={() => setActivePhoto(photo)}
+                      onClick={() => setActivePhoto(item.url)}
                       className={`relative w-24 h-18 rounded-xl overflow-hidden shrink-0 border-2 transition ${
-                        (activePhoto || shopProfilePic) === photo
+                        (activePhoto || shopProfilePic) === item.url
                           ? 'border-[#064E3B] ring-2 ring-[#059669]'
                           : 'border-slate-200 dark:border-slate-700 opacity-80 hover:opacity-100'
                       }`}
                     >
-                      <img src={photo} alt="gallery" className="w-full h-full object-cover" />
+                      <img src={item.url} alt="gallery" className="w-full h-full object-cover" />
                       <span className="absolute bottom-0 inset-x-0 bg-black/65 text-white text-[8px] font-khmer py-0.5 text-center">
-                        {idx === 0
+                        {item.category === 'shop'
                           ? tr(language, 'រូបហាង', 'Shop', '店铺封面')
-                          : tr(language, `ម្ហូប ${idx}`, `Food ${idx}`, `菜品 ${idx}`)}
+                          : tr(language, `ម្ហូបទី ${item.foodIndex}`, `Food ${item.foodIndex}`, `菜品 ${item.foodIndex}`)}
                       </span>
                     </button>
                   ))}
@@ -604,6 +623,25 @@ export const RestaurantDetailModal: React.FC = () => {
                   </p>
                 </div>
               </div>
+
+              {(selectedRestaurant.websiteUrl || selectedRestaurant.googleMapsMeta?.websiteUri) && (
+                <div className="flex items-start gap-2.5 pt-2 border-t border-slate-100 dark:border-slate-700">
+                  <ExternalLink className="w-4 h-4 text-[#059669] shrink-0 mt-0.5" />
+                  <div className="min-w-0 flex-1">
+                    <p className="font-semibold text-[#0F172A] dark:text-white">
+                      {tr(language, 'គេហទំព័រផ្លូវការ (Website)', 'Official Website', '官方网站')}
+                    </p>
+                    <a
+                      href={selectedRestaurant.websiteUrl || selectedRestaurant.googleMapsMeta?.websiteUri}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-emerald-700 dark:text-emerald-400 hover:underline font-mono text-[11px] break-all block"
+                    >
+                      {selectedRestaurant.websiteUrl || selectedRestaurant.googleMapsMeta?.websiteUri}
+                    </a>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Restaurant Food Menu Items */}

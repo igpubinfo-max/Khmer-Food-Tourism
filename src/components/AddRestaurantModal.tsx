@@ -23,7 +23,9 @@ import {
   AlertCircle,
   Crown,
 } from 'lucide-react';
-import { RestaurantPriceLevel, getDynamicVipPlans, VipPlanType, isUserVipActive, getVipAccountState } from '../types';
+import { RestaurantPriceLevel, getDynamicVipPlans, VipPlanType, isUserVipActive, getVipAccountState, GoogleMapsPlaceMetadata } from '../types';
+import { tr } from '../utils/i18n';
+import { GoogleMapsShopImporterModal, ImportedGoogleShopData } from './GoogleMapsShopImporterModal';
 import { ShopMultiPhotoUploader } from './ShopMultiPhotoUploader';
 import { ShopLocationCheckInPickerModal, ShopCheckInLocationResult } from './ShopLocationCheckInPickerModal';
 import { resolveProvinceGeoConfig } from '../services/googlePlacesService';
@@ -86,6 +88,12 @@ export const AddRestaurantModal: React.FC = () => {
   ]);
   const [descriptionKh, setDescriptionKh] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGoogleImportModalOpen, setIsGoogleImportModalOpen] = useState(false);
+  const [importedGooglePlaceId, setImportedGooglePlaceId] = useState<string | undefined>(undefined);
+  const [importedGoogleMeta, setImportedGoogleMeta] = useState<GoogleMapsPlaceMetadata | undefined>(undefined);
+  const [businessCategory, setBusinessCategory] = useState<string>('');
+  const [websiteUrl, setWebsiteUrl] = useState<string>('');
+  const [signatureDishesKh, setSignatureDishesKh] = useState<string[]>(['ម្ហូបខ្មែរប្រពៃណី']);
 
   // Payment Step Fields ($2.99 for 30 Days or $4.99 for 90 Days)
   const [transactionRef, setTransactionRef] = useState('');
@@ -137,9 +145,16 @@ export const AddRestaurantModal: React.FC = () => {
       priceLevel,
       photoUrl: finalProfile,
       profileImage: finalProfile,
-      foodImages: shopPhotos,
+      foodImages: [],
       galleryPhotos: combinedGallery,
-      signatureDishesKh: ['ម្ហូបខ្មែរប្រពៃណី'],
+      signatureDishesKh: signatureDishesKh.length > 0 ? signatureDishesKh : ['ម្ហូបខ្មែរប្រពៃណី'],
+      googlePlaceId: importedGooglePlaceId,
+      dataSource: importedGooglePlaceId ? ('google_maps' as const) : ('vip_owner' as const),
+      googleMapsMeta: importedGoogleMeta
+        ? { ...importedGoogleMeta, websiteUri: websiteUrl.trim() || importedGoogleMeta.websiteUri }
+        : undefined,
+      websiteUrl: websiteUrl.trim() || undefined,
+      businessCategory: businessCategory.trim() || undefined,
       descriptionKh: descriptionKh.trim() || 'ហាងអាហារខ្មែររសជាតិដើម បរិយាកាសស្អាត និងផាសុកភាព។',
       descriptionEn: descriptionKh.trim() || 'Authentic traditional Khmer restaurant.',
       mapUrl:
@@ -227,9 +242,16 @@ export const AddRestaurantModal: React.FC = () => {
       priceLevel,
       photoUrl: finalProfile,
       profileImage: finalProfile,
-      foodImages: shopPhotos,
+      foodImages: [],
       galleryPhotos: combinedGallery,
-      signatureDishesKh: ['ម្ហូបខ្មែរប្រពៃណី'],
+      signatureDishesKh: signatureDishesKh.length > 0 ? signatureDishesKh : ['ម្ហូបខ្មែរប្រពៃណី'],
+      googlePlaceId: importedGooglePlaceId,
+      dataSource: importedGooglePlaceId ? ('google_maps' as const) : ('vip_owner' as const),
+      googleMapsMeta: importedGoogleMeta
+        ? { ...importedGoogleMeta, websiteUri: websiteUrl.trim() || importedGoogleMeta.websiteUri }
+        : undefined,
+      websiteUrl: websiteUrl.trim() || undefined,
+      businessCategory: businessCategory.trim() || undefined,
       descriptionKh: descriptionKh.trim() || 'ហាងអាហារខ្មែររសជាតិដើម បរិយាកាសស្អាត និងផាសុកភាព។',
       descriptionEn: descriptionKh.trim() || 'Authentic traditional Khmer restaurant with delicious dishes.',
       mapUrl:
@@ -644,6 +666,60 @@ export const AddRestaurantModal: React.FC = () => {
               )}
             </div>
 
+            {/* Option: Import from Google Maps vs Manual Entry */}
+            <div className="p-3 rounded-2xl bg-gradient-to-r from-emerald-50 via-teal-50 to-amber-50 dark:from-emerald-950/50 dark:via-slate-800 dark:to-slate-800 border border-emerald-400/50 space-y-2">
+              <div className="font-bold text-slate-900 dark:text-white text-xs flex items-center gap-1.5">
+                <span>🗺️</span>
+                <span>
+                  {tr(
+                    language,
+                    'ទាញយកទិន្នន័យហាងពី Google Maps (Import from Google Maps)',
+                    'Import Shop from Google Maps',
+                    '从 Google 地图导入店铺信息'
+                  )}
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsGoogleImportModalOpen(true)}
+                  className="py-2 px-3 rounded-xl bg-gradient-to-r from-[#064E3B] to-emerald-700 hover:from-emerald-700 hover:to-emerald-600 text-white font-bold text-[11px] flex items-center justify-center gap-1.5 shadow-sm transition cursor-pointer"
+                >
+                  <span>🔍</span>
+                  <span>{tr(language, 'Import ពី Google Maps', 'Import from Google Maps', '从 Google 地图导入')}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (importedGooglePlaceId) {
+                      setImportedGooglePlaceId(undefined);
+                      setImportedGoogleMeta(undefined);
+                    }
+                  }}
+                  className={`py-2 px-3 rounded-xl font-bold text-[11px] flex items-center justify-center gap-1.5 border transition cursor-pointer ${
+                    !importedGooglePlaceId
+                      ? 'bg-amber-400/90 text-slate-950 border-amber-500'
+                      : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 border-slate-300 dark:border-slate-700'
+                  }`}
+                >
+                  <span>✏️</span>
+                  <span>{tr(language, 'បំពេញដោយដៃ (Manual)', 'Manual Entry', '手动填写')}</span>
+                </button>
+              </div>
+              {importedGooglePlaceId && (
+                <div className="p-2 rounded-xl bg-emerald-600/15 border border-emerald-500/40 text-[10px] text-emerald-900 dark:text-emerald-200 font-bold flex items-center justify-between">
+                  <span className="truncate">✓ Place ID: {importedGooglePlaceId}</span>
+                  <button
+                    type="button"
+                    onClick={() => setIsGoogleImportModalOpen(true)}
+                    className="px-2 py-0.5 rounded bg-[#064E3B] text-white text-[10px] cursor-pointer"
+                  >
+                    {tr(language, 'ប្តូរហាង', 'Change', '更换')}
+                  </button>
+                </div>
+              )}
+            </div>
+
             {/* Shop Names */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
@@ -979,6 +1055,46 @@ export const AddRestaurantModal: React.FC = () => {
               isKm
                 ? '📍 បានកំណត់ទីតាំងហាង (Check In) ដោយជោគជ័យ!'
                 : '📍 Shop location pinned successfully!',
+              'success'
+            );
+          }}
+        />
+        <GoogleMapsShopImporterModal
+          isOpen={isGoogleImportModalOpen}
+          onClose={() => setIsGoogleImportModalOpen(false)}
+          language={language}
+          existingRestaurants={restaurants}
+          defaultProvinceKh={provinceKh}
+          onSelectShop={(shop: ImportedGoogleShopData) => {
+            setNameKh(shop.nameKh || shop.nameEn);
+            setNameEn(shop.nameEn || shop.nameKh);
+            setProvinceKh(shop.provinceKh);
+            setProvinceEn(shop.provinceEn);
+            setAddressKh(shop.addressKh || shop.addressEn);
+            setShopLat(shop.latitude);
+            setShopLng(shop.longitude);
+            setShopMapUrl(shop.mapUrl);
+            if (shop.phone) setPhone(shop.phone);
+            if (shop.openingHoursKh) setOpeningHoursKh(shop.openingHoursKh);
+            if (shop.priceLevel) setPriceLevel(shop.priceLevel);
+            if (Array.isArray(shop.photoUrls) && shop.photoUrls.length > 0) {
+              setShopPhotos(shop.photoUrls.slice(0, 20));
+            }
+            if (shop.descriptionKh) setDescriptionKh(shop.descriptionKh);
+            setBusinessCategory(shop.businessCategory || '');
+            setWebsiteUrl(shop.websiteUrl || '');
+            if (Array.isArray(shop.signatureDishesKh) && shop.signatureDishesKh.length > 0) {
+              setSignatureDishesKh(shop.signatureDishesKh);
+            }
+            setImportedGooglePlaceId(shop.googlePlaceId);
+            setImportedGoogleMeta(shop.googleMapsMeta);
+            showToast(
+              tr(
+                language,
+                `✅ បានទាញយកទិន្នន័យហាង «${shop.nameKh || shop.nameEn}» ពី Google Maps រួចរាល់!`,
+                `✅ Imported "${shop.nameEn || shop.nameKh}" from Google Maps!`,
+                `✅ 已从 Google 地图导入“${shop.nameEn || shop.nameKh}”！`
+              ),
               'success'
             );
           }}

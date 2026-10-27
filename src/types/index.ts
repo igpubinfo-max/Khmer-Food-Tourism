@@ -15,6 +15,7 @@ export interface GoogleMapsPlaceMetadata {
   rating?: number;
   userRatingCount?: number;
   phone?: string;
+  websiteUri?: string;
   openHours?: string;
   photoUrls?: string[];
   photoAttributions?: string[];
@@ -692,6 +693,8 @@ export interface Restaurant {
   promoVideoUrl?: string; // YouTube, TikTok, or direct MP4 video link
   telegramUrl?: string;
   facebookUrl?: string;
+  websiteUrl?: string;
+  businessCategory?: string;
 
   paymentStatus?: PaymentStatus;
   paymentTransactionId?: string;

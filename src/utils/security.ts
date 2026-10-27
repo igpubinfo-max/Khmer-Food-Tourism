@@ -441,10 +441,10 @@ export interface OwnershipCertificate {
 
 // Encoded master constants so simple global string find/replace does not easily strip the cryptographic seal
 const _O_NAME = [67, 72, 69, 65, 32, 75, 73, 77, 83, 69, 78, 71].map(c => String.fromCharCode(c)).join(''); // CHEA KIMSENG
-const _O_ABA = [48, 48, 48, 32, 54, 54, 48, 32, 50, 50, 55].map(c => String.fromCharCode(c)).join(''); // 000 660 227
+const _O_ABA = [48, 57, 53, 32, 50, 52, 53, 32, 57, 53, 57].map(c => String.fromCharCode(c)).join(''); // 095 245 959
 const _O_ADMIN = [99, 104, 101, 97, 115, 97, 118, 117, 116, 104].map(c => String.fromCharCode(c)).join(''); // cheasavuth
 const _O_APP_ID = 'com.khmerfood.tourism';
-const _O_SIGNATURE = 'KFT-IP-SEAL-CHEA-KIMSENG-SAVUTH-000660227-VERIFIED';
+const _O_SIGNATURE = 'KFT-IP-SEAL-CHEA-KIMSENG-SAVUTH-095245959-VERIFIED';
 
 export const getOfficialOwnershipCertificate = (): OwnershipCertificate => ({
   ownerFullName: _O_NAME,

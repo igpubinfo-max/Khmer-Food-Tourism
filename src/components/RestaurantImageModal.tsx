@@ -9,6 +9,7 @@ import {
   Camera,
   Trash2,
   Utensils,
+  Store,
 } from 'lucide-react';
 import {
   pickImageUsingNativeAndroidGallery,
@@ -32,6 +33,8 @@ export const RestaurantImageModal: React.FC<RestaurantImageModalProps> = ({
 }) => {
   const profileFileInputRef = useRef<HTMLInputElement>(null);
   const profileCameraInputRef = useRef<HTMLInputElement>(null);
+  const shopGalleryFileInputRef = useRef<HTMLInputElement>(null);
+  const shopGalleryCameraInputRef = useRef<HTMLInputElement>(null);
   const foodFileInputRef = useRef<HTMLInputElement>(null);
   const foodCameraInputRef = useRef<HTMLInputElement>(null);
 
@@ -39,6 +42,7 @@ export const RestaurantImageModal: React.FC<RestaurantImageModalProps> = ({
   const [urlInput, setUrlInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [shopPhotos, setShopPhotos] = useState<string[]>([]);
   const [foodPhotos, setFoodPhotos] = useState<string[]>([]);
 
   useEffect(() => {
@@ -46,12 +50,18 @@ export const RestaurantImageModal: React.FC<RestaurantImageModalProps> = ({
       const initialProfile = restaurant.profileImage || restaurant.photoUrl || '';
       setPhotoUrl(initialProfile);
       setUrlInput(initialProfile);
-      const initialFood = Array.from(
+      const initialShopGallery = Array.from(
         new Set([
-          ...(restaurant.foodImages || []),
+          initialProfile,
           ...(restaurant.galleryPhotos || []),
         ])
-      ).filter((u) => u && u !== initialProfile);
+      ).filter(Boolean);
+      setShopPhotos(initialShopGallery);
+
+      const shopGallerySet = new Set(initialShopGallery);
+      const initialFood = Array.from(
+        new Set((restaurant.foodImages || []).filter((u) => u && !shopGallerySet.has(u)))
+      );
       setFoodPhotos(initialFood);
       setErrorMsg('');
     }
@@ -69,7 +79,9 @@ export const RestaurantImageModal: React.FC<RestaurantImageModalProps> = ({
         return;
       }
       if (nativePick.success && nativePick.dataUrl) {
-        setPhotoUrl(nativePick.dataUrl);
+        const nextUrl = nativePick.dataUrl;
+        setPhotoUrl(nextUrl);
+        setShopPhotos((prev) => Array.from(new Set([nextUrl, ...prev])).filter(Boolean));
         setUrlInput('');
         setIsProcessing(false);
         return;
@@ -91,12 +103,68 @@ export const RestaurantImageModal: React.FC<RestaurantImageModalProps> = ({
     try {
       const dataUrl = await processAndCompressImageFile(file);
       setPhotoUrl(dataUrl);
+      setShopPhotos((prev) => Array.from(new Set([dataUrl, ...prev])).filter(Boolean));
       setUrlInput('');
     } catch (err: any) {
       setErrorMsg(err?.message || (isKm ? 'រូបភាពមិនត្រឹមត្រូវ' : 'Invalid image'));
     } finally {
       setIsProcessing(false);
     }
+  };
+
+  const handleShopGalleryFilesChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    e.target.value = '';
+    if (files.length === 0) return;
+
+    setIsProcessing(true);
+    setErrorMsg('');
+    const added: string[] = [];
+    for (const file of files.slice(0, 8)) {
+      try {
+        const dataUrl = await processAndCompressImageFile(file);
+        if (dataUrl) added.push(dataUrl);
+      } catch (err: any) {
+        setErrorMsg(err?.message || (isKm ? 'រូបភាពមិនត្រឹមត្រូវ' : 'Invalid image'));
+      }
+    }
+    setIsProcessing(false);
+
+    if (added.length > 0) {
+      setShopPhotos((prev) => {
+        const next = Array.from(new Set([...(photoUrl ? [photoUrl] : []), ...prev, ...added])).slice(0, 20);
+        if (!photoUrl && next.length > 0) {
+          setPhotoUrl(next[0]);
+        }
+        return next;
+      });
+    }
+  };
+
+  const handleReplaceShopPhoto = async (idx: number) => {
+    try {
+      const nativePick = await pickImageUsingNativeAndroidGallery();
+      if (nativePick.success && nativePick.dataUrl) {
+        const nextUrl = nativePick.dataUrl;
+        setShopPhotos((prev) => {
+          const updated = prev.map((item, i) => (i === idx ? nextUrl : item));
+          if (idx === 0) setPhotoUrl(nextUrl);
+          return updated;
+        });
+      }
+    } catch {
+      // ignore
+    }
+  };
+
+  const handleRemoveShopPhoto = (idx: number) => {
+    setShopPhotos((prev) => {
+      const next = prev.filter((_, i) => i !== idx);
+      if (idx === 0 && next.length > 0) {
+        setPhotoUrl(next[0]);
+      }
+      return next;
+    });
   };
 
   const handleFoodFilesChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -146,6 +214,7 @@ export const RestaurantImageModal: React.FC<RestaurantImageModalProps> = ({
       return;
     }
     setPhotoUrl(trimmed);
+    setShopPhotos((prev) => Array.from(new Set([trimmed, ...prev])).filter(Boolean));
     setErrorMsg('');
   };
 
@@ -154,18 +223,21 @@ export const RestaurantImageModal: React.FC<RestaurantImageModalProps> = ({
   };
 
   const handleSave = () => {
-    if (!photoUrl) {
+    const finalCover = photoUrl || shopPhotos[0] || '';
+    if (!finalCover) {
       setErrorMsg(isKm ? 'សូមបញ្ចូលរូបភាពតំណាងហាងមុនពេលរក្សាទុក' : 'Please provide a shop profile photo before saving');
       return;
     }
 
-    const updatedGallery = Array.from(new Set([photoUrl, ...foodPhotos])).filter(Boolean);
+    const updatedGallery = Array.from(new Set([finalCover, ...shopPhotos])).filter(Boolean);
+    const gallerySet = new Set(updatedGallery);
+    const cleanFoodPhotos = foodPhotos.filter((u) => u && !gallerySet.has(u));
 
     const updatedRestaurant: Restaurant = {
       ...restaurant,
-      photoUrl,
-      profileImage: photoUrl,
-      foodImages: foodPhotos,
+      photoUrl: finalCover,
+      profileImage: finalCover,
+      foodImages: cleanFoodPhotos,
       galleryPhotos: updatedGallery,
     };
 
@@ -204,11 +276,20 @@ export const RestaurantImageModal: React.FC<RestaurantImageModalProps> = ({
 
         {/* Scrollable Content */}
         <div className="overflow-y-auto flex-1 p-5 space-y-4 no-scrollbar">
-          {/* 1. Shop Profile Picture Section */}
-          <div className="space-y-2">
+          {/* 1. Shop Photos Section (រូបហាង) */}
+          <div className="space-y-2.5 p-3.5 rounded-2xl bg-emerald-50/50 dark:bg-slate-800/70 border border-emerald-200 dark:border-emerald-800/60">
             <div className="flex items-center justify-between text-xs font-bold text-slate-800 dark:text-slate-100">
-              <span>{isKm ? '១. រូបភាពតំណាងហាង (Shop Profile Picture)' : '1. Shop Profile Picture'}</span>
-              <span className="text-[10px] text-slate-400">JPG, JPEG, PNG</span>
+              <span className="flex items-center gap-1.5">
+                <Store className="w-4 h-4 text-emerald-600" />
+                <span>
+                  {isKm
+                    ? `១. រូបហាង (Shop Photos - ${shopPhotos.length} សន្លឹក)`
+                    : `1. Shop Photos (${shopPhotos.length})`}
+                </span>
+              </span>
+              <span className="text-[10px] text-emerald-700 dark:text-emerald-300 font-bold">
+                {isKm ? 'រូបហាង' : 'Shop Category'}
+              </span>
             </div>
 
             <div className="relative aspect-16/9 w-full rounded-2xl overflow-hidden bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-inner">
@@ -226,7 +307,7 @@ export const RestaurantImageModal: React.FC<RestaurantImageModalProps> = ({
               )}
 
               <div className="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-md bg-black/70 text-[10px] text-white font-bold">
-                {isKm ? 'រូបតំណាងហាង (Profile)' : 'Shop Profile'}
+                {isKm ? 'រូបហាង' : 'Shop Photo'}
               </div>
 
               {isProcessing && (
@@ -236,6 +317,47 @@ export const RestaurantImageModal: React.FC<RestaurantImageModalProps> = ({
                 </div>
               )}
             </div>
+
+            {shopPhotos.length > 0 && (
+              <div className="grid grid-cols-3 gap-2 pt-1">
+                {shopPhotos.map((imgUrl, i) => (
+                  <div
+                    key={i}
+                    className={`relative group aspect-square rounded-xl overflow-hidden border-2 bg-slate-900 ${
+                      photoUrl === imgUrl ? 'border-emerald-600 ring-2 ring-emerald-500/40' : 'border-emerald-300 dark:border-emerald-700'
+                    }`}
+                  >
+                    <img
+                      src={imgUrl}
+                      alt={`Shop ${i + 1}`}
+                      onClick={() => setPhotoUrl(imgUrl)}
+                      className="w-full h-full object-cover cursor-pointer"
+                    />
+                    <span className="absolute top-1 left-1 px-1.5 py-0.5 rounded bg-black/75 text-white text-[9px] font-bold">
+                      {isKm ? 'រូបហាង' : 'Shop'}
+                    </span>
+                    <div className="absolute inset-x-0 bottom-0 p-1 bg-black/75 flex items-center justify-between gap-1">
+                      <button
+                        type="button"
+                        onClick={() => handleReplaceShopPhoto(i)}
+                        className="px-1.5 py-0.5 rounded bg-white/90 text-slate-900 font-bold text-[9px] cursor-pointer"
+                      >
+                        {isKm ? 'ប្តូរ' : 'Replace'}
+                      </button>
+                      {shopPhotos.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveShopPhoto(i)}
+                          className="px-1.5 py-0.5 rounded bg-rose-600 text-white font-bold text-[9px] cursor-pointer"
+                        >
+                          <Trash2 className="w-2.5 h-2.5 inline" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
 
             <input
               type="file"
@@ -252,23 +374,39 @@ export const RestaurantImageModal: React.FC<RestaurantImageModalProps> = ({
               capture="environment"
               className="hidden"
             />
+            <input
+              type="file"
+              ref={shopGalleryFileInputRef}
+              onChange={handleShopGalleryFilesChange}
+              accept="image/jpeg,image/jpg,image/png,image/webp"
+              multiple
+              className="hidden"
+            />
+            <input
+              type="file"
+              ref={shopGalleryCameraInputRef}
+              onChange={handleShopGalleryFilesChange}
+              accept="image/jpeg,image/jpg,image/png"
+              capture="environment"
+              className="hidden"
+            />
 
             <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
-                onClick={handlePickProfileNativeOrFallback}
+                onClick={() => shopGalleryFileInputRef.current?.click()}
                 className="py-2.5 px-3 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white flex items-center justify-center gap-1.5 font-bold text-xs transition cursor-pointer"
               >
                 <Upload className="w-4 h-4" />
-                <span>{isKm ? 'ជ្រើសរូបហាងពី Gallery' : 'Profile from Gallery'}</span>
+                <span>{isKm ? 'បន្ថែមរូបហាងពី Gallery' : 'Add Shop Photos'}</span>
               </button>
               <button
                 type="button"
-                onClick={() => profileCameraInputRef.current?.click()}
+                onClick={() => shopGalleryCameraInputRef.current?.click()}
                 className="py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center gap-1.5 font-bold text-xs transition cursor-pointer"
               >
                 <Camera className="w-4 h-4" />
-                <span>{isKm ? 'ថតរូបហាងថ្មី (Camera)' : 'Camera Profile'}</span>
+                <span>{isKm ? 'ថតរូបហាងថ្មី (Camera)' : 'Camera Shop Photo'}</span>
               </button>
             </div>
           </div>
@@ -325,6 +463,9 @@ export const RestaurantImageModal: React.FC<RestaurantImageModalProps> = ({
                       onClick={() => setPhotoUrl(imgUrl)}
                       className="w-full h-full object-cover cursor-pointer"
                     />
+                    <span className="absolute top-1 left-1 px-1.5 py-0.5 rounded bg-black/75 text-white text-[9px] font-bold">
+                      {isKm ? `ម្ហូបទី ${i + 1}` : `Food ${i + 1}`}
+                    </span>
                     <div className="absolute inset-x-0 bottom-0 p-1 bg-black/75 flex items-center justify-between gap-1">
                       <button
                         type="button"
@@ -410,7 +551,7 @@ export const RestaurantImageModal: React.FC<RestaurantImageModalProps> = ({
           <button
             type="button"
             onClick={handleSave}
-            disabled={isProcessing || !photoUrl}
+            disabled={isProcessing || (!photoUrl && shopPhotos.length === 0)}
             className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#064E3B] to-[#059669] hover:brightness-110 text-white font-bold text-xs shadow-md shadow-emerald-950/20 flex items-center gap-1.5 transition active:scale-95 disabled:opacity-50 cursor-pointer"
           >
             <Check className="w-4 h-4" />

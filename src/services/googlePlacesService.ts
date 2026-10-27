@@ -72,6 +72,7 @@ export interface GooglePlaceCachedItem {
   latitude?: number;
   longitude?: number;
   phone: string;
+  websiteUri?: string;
   openHours: string;
   priceLevel?: RestaurantPriceLevel;
   rating: number;
@@ -2266,7 +2267,7 @@ export async function searchGoogleMapsPlacesAdvanced(
         'Content-Type': 'application/json',
         'X-Goog-Api-Key': cfg.googleMapsApiKey,
         'X-Goog-FieldMask':
-          'places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.userRatingCount,places.nationalPhoneNumber,places.internationalPhoneNumber,places.regularOpeningHours,places.priceLevel,places.photos,places.types,places.googleMapsUri,nextPageToken',
+          'places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.userRatingCount,places.nationalPhoneNumber,places.internationalPhoneNumber,places.websiteUri,places.regularOpeningHours,places.priceLevel,places.photos,places.types,places.googleMapsUri,nextPageToken',
       },
       body: JSON.stringify(requestBody),
       signal: controller.signal,
@@ -2435,6 +2436,7 @@ export async function searchGoogleMapsPlacesAdvanced(
         lat,
         lng,
         phone: cleanPhone,
+        websiteUri: typeof p.websiteUri === 'string' && p.websiteUri.trim() ? p.websiteUri.trim() : undefined,
         openHours:
           p.regularOpeningHours?.weekdayDescriptions?.[0] || 'មើលម៉ោងបើកលើ Google Maps',
         priceLevel: mapGooglePriceLevel(p.priceLevel),
@@ -2621,6 +2623,7 @@ export function buildGoogleMapsMetaFromCachedItem(
     rating: place.rating,
     userRatingCount: place.reviewCount,
     phone: place.phone,
+    websiteUri: place.websiteUri,
     openHours: place.openHours,
     photoUrls: place.photoUrls || [place.photoUrl],
     photoAttributions: place.photoAttributions || [],
@@ -2658,6 +2661,8 @@ export function convertGooglePlaceToRestaurant(place: GooglePlaceCachedItem): Re
     provinceKh: place.province,
     provinceEn: resolvedProvEn,
     phone: formatDisplayPhone(place.phone),
+    websiteUrl: place.websiteUri,
+    businessCategory: place.category,
     openingHoursKh: place.openHours,
     openingHoursEn: place.openHours,
     priceLevel: place.priceLevel || '$$',
@@ -2933,7 +2938,7 @@ export async function searchNearbyPlacesWithin500m(
             'Content-Type': 'application/json',
             'X-Goog-Api-Key': cfg.googleMapsApiKey,
             'X-Goog-FieldMask':
-              'places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.userRatingCount,places.nationalPhoneNumber,places.internationalPhoneNumber,places.regularOpeningHours,places.priceLevel,places.photos,places.types,places.googleMapsUri',
+              'places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.userRatingCount,places.nationalPhoneNumber,places.internationalPhoneNumber,places.websiteUri,places.regularOpeningHours,places.priceLevel,places.photos,places.types,places.googleMapsUri',
           },
           body: JSON.stringify({
             includedTypes,
@@ -3018,6 +3023,7 @@ export async function searchNearbyPlacesWithin500m(
               lat: pLat,
               lng: pLng,
               phone: cleanPhone,
+              websiteUri: typeof p.websiteUri === 'string' && p.websiteUri.trim() ? p.websiteUri.trim() : undefined,
               openHours:
                 p.regularOpeningHours?.weekdayDescriptions?.[0] || '07:00 AM - 09:00 PM',
               priceLevel: mapGooglePriceLevel(p.priceLevel),
