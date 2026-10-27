@@ -1,6 +1,12 @@
 @echo off
+setlocal EnableDelayedExpansion
 title Push Khmer Food & Tourism to GitHub
 cd /d "%~dp0"
+
+set "GIT_EXE=C:\Users\igpub\AppData\Local\MinGit\cmd\git.exe"
+if not exist "%GIT_EXE%" (
+    set "GIT_EXE=git"
+)
 
 echo ===================================================================
 echo     PUSHING KHMER FOOD & TOURISM PROJECT TO GITHUB
@@ -8,18 +14,27 @@ echo ===================================================================
 echo.
 echo Target Repository: https://github.com/igpubinfo-max/Khmer-Food-Tourism.git
 echo.
-echo Step 1: Pushing code to branch 'main'...
-echo (If prompted, please sign in with your GitHub browser window or Personal Access Token)
-echo.
+echo Step 1: Staging and committing any changes...
+"%GIT_EXE%" add -A
+"%GIT_EXE%" diff --cached --quiet
+if %ERRORLEVEL% neq 0 (
+    "%GIT_EXE%" commit -m "Update release build"
+)
 
-"C:\Users\igpub\AppData\Local\MinGit\cmd\git.exe" push -u origin main
+echo.
+echo Step 2: Syncing and pushing code to branch 'main' and 'test-ui-apk'...
+"%GIT_EXE%" branch -f main HEAD 2>nul
+"%GIT_EXE%" push -u origin test-ui-apk --force-with-lease
+"%GIT_EXE%" push -u origin HEAD:main --force-with-lease
 
 echo.
 if %ERRORLEVEL% equ 0 (
     echo ===================================================================
     echo SUCCESS! Code has been successfully pushed to GitHub!
     echo.
-    echo GitHub Actions is now automatically building your Android APK!
+    echo Direct APK Download Link (ready ~2 minutes after push):
+    echo https://github.com/igpubinfo-max/Khmer-Food-Tourism/releases/download/v2.3.1/KhmerFoodTourism-v2.3.1.apk
+    echo.
     echo Visit your Actions page to watch the build and download APK:
     echo https://github.com/igpubinfo-max/Khmer-Food-Tourism/actions
     echo ===================================================================
