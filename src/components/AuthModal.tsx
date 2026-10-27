@@ -595,17 +595,24 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
           </div>
 
           {/* Admin Login Portal Shortcut */}
-          <div className="pt-1 text-center font-khmer">
+          <div className="pt-0.5 text-center font-khmer">
             <button
               type="button"
               onClick={() => {
                 setIsAuthModalOpen(false);
                 setIsAdminLoginModalOpen(true);
               }}
-              className="w-full py-2 px-3 rounded-xl bg-slate-100 hover:bg-emerald-50 dark:bg-slate-800/80 dark:hover:bg-emerald-950/50 text-slate-600 hover:text-[#064E3B] dark:text-slate-300 dark:hover:text-emerald-300 border border-slate-200 dark:border-slate-700 text-[11px] font-bold flex items-center justify-center gap-1.5 mx-auto transition cursor-pointer"
+              style={{
+                WebkitTapHighlightColor: 'transparent',
+                backgroundColor: 'transparent',
+                boxShadow: 'none',
+                outline: 'none',
+                border: 'none',
+              }}
+              className="text-[10px] text-slate-400 active:text-slate-400 focus:text-slate-400 bg-transparent active:bg-transparent focus:bg-transparent hover:bg-transparent shadow-none active:shadow-none focus:shadow-none outline-none focus:outline-none focus:ring-0 border-0 flex items-center justify-center gap-1 mx-auto select-none cursor-pointer"
             >
-              <Shield className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-              <span>{isKm ? '🛡️ ច្រកចូលប្រព័ន្ធរដ្ឋបាល (Admin Login)' : '🛡️ Administrator Login'}</span>
+              <Shield className="w-3 h-3 shrink-0" />
+              <span>{isKm ? 'ច្រកចូលរដ្ឋបាល (Admin Portal)' : 'Administrator Login'}</span>
             </button>
           </div>
         </div>
