@@ -1,7 +1,13 @@
 name: Build iOS App & Apple App Store Package
 
 on:
+  push:
+    branches: [ main, master, test-ui-apk ]
   workflow_dispatch:
+
+concurrency:
+  group: build-ios-app
+  cancel-in-progress: true
 
 permissions:
   contents: write
@@ -170,4 +176,16 @@ jobs:
         with:
           name: Khmer-Food-Tourism-iOS-v2.3.1-Package
           path: |
+            ios/App/build/KhmerFoodTourism-v2.3.1.ipa
+
+      - name: 11. Attach iOS IPA to GitHub Release v2.3.1
+        uses: softprops/action-gh-release@v2
+        if: github.ref == 'refs/heads/main'
+        with:
+          tag_name: v2.3.1
+          name: "Khmer Food & Tourism v2.3.1"
+          make_latest: true
+          draft: false
+          prerelease: false
+          files: |
             ios/App/build/KhmerFoodTourism-v2.3.1.ipa
