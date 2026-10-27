@@ -1319,6 +1319,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isExitModalOpen, setIsExitModalOpen] = useState(false);
   const [isQrScannerModalOpen, setIsQrScannerModalOpen] = useState(false);
   const [isVipAddRestaurantModalOpen, setIsVipAddRestaurantModalOpen] = useState(false);
+  const [pendingDeleteRestaurant, setPendingDeleteRestaurant] = useState<Restaurant | null>(null);
   const [isAiFoodDiscoveryModalOpen, setIsAiFoodDiscoveryModalOpen] = useState(false);
   const [isGoogleMapsSearchModalOpen, setIsGoogleMapsSearchModalOpenRaw] = useState(false);
   const [googleMapsSearchInitialTab, setGoogleMapsSearchInitialTab] = useState<'restaurant' | 'tourism' | 'all'>('all');
@@ -5812,8 +5813,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const trackRestaurantShare = (restaurantId: string) => {
     incrementRestaurantAnalyticsField(restaurantId, 'shareClicks');
   };
-
-  const [pendingDeleteRestaurant, setPendingDeleteRestaurant] = useState<Restaurant | null>(null);
 
   const checkCanDeleteRestaurant = (target?: Restaurant | null): { allowed: boolean; isAdmin: boolean } => {
     if (!target) return { allowed: false, isAdmin: false };
