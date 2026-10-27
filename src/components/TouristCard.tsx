@@ -5,14 +5,29 @@ import { MapPin, Star, Heart, Ticket, Edit2 } from 'lucide-react';
 import { tr } from '../utils/i18n';
 import { getLocalizedDestination } from '../utils/zhDynamicTranslator';
 
+import type { Language } from '../types';
+
 interface TouristCardProps {
   destination: TouristDestination;
 }
 
-const TouristCardInner: React.FC<TouristCardProps> = ({ destination }) => {
-  const { language, setSelectedDestination, isBookmarked, toggleBookmark, currentUser } = useApp();
-  const bookmarked = isBookmarked(destination.id);
-  const isAdmin = currentUser?.role === 'admin';
+interface TouristCardViewProps {
+  destination: TouristDestination;
+  language: Language;
+  bookmarked: boolean;
+  isAdmin: boolean;
+  setSelectedDestination: (d: TouristDestination | null) => void;
+  toggleBookmark: (id: string) => void;
+}
+
+const TouristCardView: React.FC<TouristCardViewProps> = React.memo(({
+  destination,
+  language,
+  bookmarked,
+  isAdmin,
+  setSelectedDestination,
+  toggleBookmark,
+}) => {
   const loc = useMemo(() => getLocalizedDestination(destination, language), [destination, language]);
 
   return (
@@ -135,6 +150,27 @@ const TouristCardInner: React.FC<TouristCardProps> = ({ destination }) => {
         </div>
       </div>
     </div>
+  );
+}, (prev, next) =>
+  prev.destination === next.destination &&
+  prev.language === next.language &&
+  prev.bookmarked === next.bookmarked &&
+  prev.isAdmin === next.isAdmin
+);
+
+const TouristCardInner: React.FC<TouristCardProps> = ({ destination }) => {
+  const { language, setSelectedDestination, isBookmarked, toggleBookmark, currentUser } = useApp();
+  const bookmarked = isBookmarked(destination.id);
+  const isAdmin = currentUser?.role === 'admin';
+  return (
+    <TouristCardView
+      destination={destination}
+      language={language}
+      bookmarked={bookmarked}
+      isAdmin={isAdmin}
+      setSelectedDestination={setSelectedDestination}
+      toggleBookmark={toggleBookmark}
+    />
   );
 };
 

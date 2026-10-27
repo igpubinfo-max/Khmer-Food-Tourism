@@ -210,18 +210,10 @@ export const TrendingSocialModal: React.FC = () => {
   const activePlayerItemIdRef = useRef<string | null>(null);
   activePlayerItemIdRef.current = activePlayerItemId;
 
-  // Initial load when modal opens + 3-minute background auto-refresh when open, visible & no video playing
+  // Initial load when modal opens (manual refresh available anytime; no background polling timer)
   useEffect(() => {
     if (!isTrendingSocialModalOpen) return;
     loadFeed(false);
-
-    const interval = setInterval(() => {
-      if (!document.hidden && !isFetchingRef.current && !activePlayerItemIdRef.current) {
-        loadFeed(false);
-      }
-    }, 180_000);
-
-    return () => clearInterval(interval);
   }, [isTrendingSocialModalOpen, loadFeed]);
 
   // Cooldown countdown ticker
@@ -929,6 +921,7 @@ export const TrendingSocialModal: React.FC = () => {
                 return (
                   <div
                     key={item.id}
+                    style={{ contentVisibility: 'auto', containIntrinsicSize: '360px' }}
                     className="rounded-3xl overflow-hidden bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 shadow-sm space-y-3 transition hover:shadow-md"
                   >
                     {/* Inline YouTube Embed Player OR Fallback OR High-Res Thumbnail */}

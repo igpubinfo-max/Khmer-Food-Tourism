@@ -14,7 +14,7 @@ import { TAG_FILTERS, TAG_ESTIMATE_NOTE, GENERAL_FOOD_INFO_NOTE, matchesTagFilte
 import { TAG_FILTER_EVENT, consumePendingTagFilter, hasSpecialAndHealthyFoodVipAccess } from '../utils/smartHub';
 import { tr } from '../utils/i18n';
 
-const PAGE_BATCH_SIZE = 48;
+const PAGE_BATCH_SIZE = 20;
 
 export const FoodView: React.FC = () => {
   const { foods, language, currentUser, openUpgradeVipModal, showToast } = useApp();

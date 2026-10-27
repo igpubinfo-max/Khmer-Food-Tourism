@@ -8,15 +8,32 @@ import { getLocalizedFood } from '../utils/zhDynamicTranslator';
 import { getDisplayTags, tagLabel } from '../utils/dishTags';
 import { PassportStampButton } from './PassportStampButton';
 
+import type { Language } from '../types';
+
 interface FoodCardProps {
   food: FoodItem;
 }
 
-const FoodCardInner: React.FC<FoodCardProps> = ({ food }) => {
-  const { language, setSelectedFood, isBookmarked, toggleBookmark, showToast, currentUser } = useApp();
-  const bookmarked = isBookmarked(food.id);
+interface FoodCardViewProps {
+  food: FoodItem;
+  language: Language;
+  bookmarked: boolean;
+  isAdmin: boolean;
+  setSelectedFood: (f: FoodItem | null) => void;
+  toggleBookmark: (id: string) => void;
+  showToast: (msg: string, type?: 'success' | 'info' | 'warning') => void;
+}
+
+const FoodCardView: React.FC<FoodCardViewProps> = React.memo(({
+  food,
+  language,
+  bookmarked,
+  isAdmin,
+  setSelectedFood,
+  toggleBookmark,
+  showToast,
+}) => {
   const isKm = language === 'km';
-  const isAdmin = currentUser?.role === 'admin';
   const loc = useMemo(() => getLocalizedFood(food, language), [food, language]);
   const tags = useMemo(() => getDisplayTags(food, 3), [food]);
 
@@ -174,6 +191,28 @@ const FoodCardInner: React.FC<FoodCardProps> = ({ food }) => {
         </div>
       </div>
     </div>
+  );
+}, (prev, next) =>
+  prev.food === next.food &&
+  prev.language === next.language &&
+  prev.bookmarked === next.bookmarked &&
+  prev.isAdmin === next.isAdmin
+);
+
+const FoodCardInner: React.FC<FoodCardProps> = ({ food }) => {
+  const { language, setSelectedFood, isBookmarked, toggleBookmark, showToast, currentUser } = useApp();
+  const bookmarked = isBookmarked(food.id);
+  const isAdmin = currentUser?.role === 'admin';
+  return (
+    <FoodCardView
+      food={food}
+      language={language}
+      bookmarked={bookmarked}
+      isAdmin={isAdmin}
+      setSelectedFood={setSelectedFood}
+      toggleBookmark={toggleBookmark}
+      showToast={showToast}
+    />
   );
 };
 

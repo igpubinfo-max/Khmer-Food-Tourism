@@ -1192,32 +1192,44 @@ export async function syncAllAppDataWithSupabase(localState: {
   }
 
   try {
-    // 1. Pull existing cloud records including v2 users, v1 users, atomic per-user rows (`kft_user_*`), and VIP backups
+    const isAdminDevice = Boolean(
+      localState.currentUser &&
+        (localState.currentUser.role === 'admin' ||
+          localState.currentUser.id === 'admin-authorized-single' ||
+          localState.currentUser.username === 'admin' ||
+          localState.currentUser.username === 'cheasavuth')
+    );
+    const shouldSyncPaymentProofs =
+      isAdminDevice || Object.keys(localState.paymentProofsVault || {}).length > 0;
+
+    // 1. Pull existing cloud records in a single batch (skipping heavy base64 payment proofs on regular user devices)
     const [
       cloudUsersV2,
-      cloudUsers,
       atomicUserDocs,
       cloudVipBackup,
       cloudDeletedUsers,
       cloudTxns,
+      cloudDeletedTxnIds,
       cloudRests,
       cloudTickets,
       cloudProofs,
       cloudSettingsV2,
-      cloudSettingsV1,
     ] = await Promise.all([
       pullCloudDocument<User[]>('kft_cloud_users_v2'),
-      pullCloudDocument<User[]>('kft_cloud_users_v1'),
       pullCloudDocumentsByPrefix<User>(USER_RECORD_PREFIX),
       pullCloudDocument<Record<string, Partial<User>>>('kft_cloud_vip_backup_v1'),
       pullCloudDocument<DeletedUserRecord[]>('kft_cloud_deleted_users_v1'),
       pullCloudDocument<RegistrationTransaction[]>('kft_cloud_transactions_v1'),
+      pullCloudDocument<string[]>('kft_cloud_deleted_transactions_v1'),
       pullCloudDocument<Restaurant[]>('kft_cloud_custom_restaurants_v1'),
       pullCloudDocument<SupportTicket[]>('kft_cloud_support_tickets_v1'),
-      pullCloudDocument<Record<string, any>>('kft_cloud_payment_proofs_v1'),
+      shouldSyncPaymentProofs
+        ? pullCloudDocument<Record<string, any>>('kft_cloud_payment_proofs_v1')
+        : Promise.resolve(null),
       pullCloudDocument<AppSettings>('kft_cloud_admin_vip_pricing_v2'),
-      pullCloudDocument<AppSettings>('kft_cloud_app_settings_v1'),
     ]);
+    const cloudUsers = cloudUsersV2 ? null : await pullCloudDocument<User[]>('kft_cloud_users_v1');
+    const cloudSettingsV1 = cloudSettingsV2 ? null : await pullCloudDocument<AppSettings>('kft_cloud_app_settings_v1');
     const cloudSettings = cloudSettingsV2 || cloudSettingsV1;
 
     // 1b. Merge Deleted Users Registry (Permanent Blacklist)
@@ -1439,7 +1451,6 @@ export async function syncAllAppDataWithSupabase(localState: {
       const rawDelTxns = localStorage.getItem('kft_deleted_transactions_v1');
       if (rawDelTxns) localDeletedTxnIds = JSON.parse(rawDelTxns);
     } catch {}
-    const cloudDeletedTxnIds = await pullCloudDocument<string[]>('kft_cloud_deleted_transactions_v1');
     const deletedTxnIdSet = new Set<string>([
       ...(Array.isArray(localDeletedTxnIds) ? localDeletedTxnIds : []),
       ...(Array.isArray(cloudDeletedTxnIds) ? cloudDeletedTxnIds : []),
@@ -1578,31 +1589,32 @@ export async function syncAllAppDataWithSupabase(localState: {
     };
 
     const mergedUsersSig = safeJsonSig(mergedUsers);
-    if (mergedUsersSig !== safeJsonSig(cloudUsersV2)) {
+    if ((isAdminDevice || Boolean(localState.currentUser)) && mergedUsersSig !== safeJsonSig(cloudUsersV2)) {
       pushPromises.push(pushCloudDocument('kft_cloud_users_v2', mergedUsers));
     }
-    if (mergedUsersSig !== safeJsonSig(cloudUsers)) {
-      pushPromises.push(pushCloudDocument('kft_cloud_users_v1', mergedUsers));
-    }
-    if (safeJsonSig(mergedDeletedUsers) !== safeJsonSig(cloudDeletedUsers || [])) {
+    if (isAdminDevice && safeJsonSig(mergedDeletedUsers) !== safeJsonSig(cloudDeletedUsers || [])) {
       pushPromises.push(pushCloudDocument('kft_cloud_deleted_users_v1', mergedDeletedUsers));
     }
-    if (safeJsonSig(mergedTransactions) !== safeJsonSig(cloudTxns || [])) {
+    if ((isAdminDevice || Boolean(localState.currentUser)) && safeJsonSig(mergedTransactions) !== safeJsonSig(cloudTxns || [])) {
       pushPromises.push(pushCloudDocument('kft_cloud_transactions_v1', mergedTransactions));
     }
     const mergedDeletedTxnArr = Array.from(deletedTxnIdSet);
-    if (safeJsonSig(mergedDeletedTxnArr) !== safeJsonSig(cloudDeletedTxnIds || [])) {
+    if (isAdminDevice && safeJsonSig(mergedDeletedTxnArr) !== safeJsonSig(cloudDeletedTxnIds || [])) {
       pushPromises.push(pushCloudDocument('kft_cloud_deleted_transactions_v1', mergedDeletedTxnArr));
     }
-    if (safeJsonSig(mergedCustomRestaurants) !== safeJsonSig(cloudRests || [])) {
+    if ((isAdminDevice || localState.customRestaurants.length > 0) && safeJsonSig(mergedCustomRestaurants) !== safeJsonSig(cloudRests || [])) {
       pushPromises.push(pushCloudDocument('kft_cloud_custom_restaurants_v1', mergedCustomRestaurants));
     }
-    if (safeJsonSig(mergedPaymentProofsVault) !== safeJsonSig(cloudProofs || {})) {
+    if (shouldSyncPaymentProofs && safeJsonSig(mergedPaymentProofsVault) !== safeJsonSig(cloudProofs || {})) {
       pushPromises.push(pushCloudDocument('kft_cloud_payment_proofs_v1', mergedPaymentProofsVault));
     }
 
-    // Ensure every active user has an up-to-date atomic `kft_user_<id>` record in Supabase
+    // Ensure active user(s) have an up-to-date atomic `kft_user_<id>` record in Supabase without write-back storms
+    const currentCanonicalId = localState.currentUser ? getCanonicalUserId(localState.currentUser) : null;
     for (const u of mergedUsers) {
+      if (!isAdminDevice && u.id !== localState.currentUser?.id && u.id !== currentCanonicalId) {
+        continue;
+      }
       const atomicKey = `${USER_RECORD_PREFIX}${u.id}`;
       const existingAtomic = existingAtomicMap.get(atomicKey);
       if (!existingAtomic || safeJsonSig(existingAtomic) !== safeJsonSig(u)) {

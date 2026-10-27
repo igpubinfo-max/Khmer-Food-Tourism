@@ -7,24 +7,42 @@ import { shareRichContent } from '../utils/androidMediaHelper';
 import { tr } from '../utils/i18n';
 import { getLocalizedRestaurant } from '../utils/zhDynamicTranslator';
 
+import type { Language } from '../types';
+
 interface RestaurantCardProps {
   restaurant: Restaurant;
 }
 
-const RestaurantCardInner: React.FC<RestaurantCardProps> = ({ restaurant }) => {
-  const { 
-    language, setSelectedRestaurant, showToast, currentUser,
-    openManageMyVipStore,
-    trackRestaurantView, trackRestaurantCall, trackRestaurantMap, trackRestaurantShare,
-    isBookmarked, toggleBookmark
-  } = useApp();
-  const bookmarked = isBookmarked(restaurant.id);
+interface RestaurantCardViewProps {
+  restaurant: Restaurant;
+  language: Language;
+  bookmarked: boolean;
+  isAdmin: boolean;
+  setSelectedRestaurant: (r: Restaurant | null) => void;
+  showToast: (msg: string, type?: 'success' | 'info' | 'warning') => void;
+  openManageMyVipStore: (id?: string) => void;
+  trackRestaurantView: (id: string) => void;
+  trackRestaurantCall: (id: string) => void;
+  trackRestaurantMap: (id: string) => void;
+  trackRestaurantShare: (id: string) => void;
+  toggleBookmark: (id: string) => void;
+}
+
+const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(({
+  restaurant,
+  language,
+  bookmarked,
+  isAdmin,
+  setSelectedRestaurant,
+  showToast,
+  openManageMyVipStore,
+  trackRestaurantView,
+  trackRestaurantCall,
+  trackRestaurantMap,
+  trackRestaurantShare,
+  toggleBookmark,
+}) => {
   const isKm = language === 'km';
-  const isAdmin =
-    currentUser?.role === 'admin' ||
-    currentUser?.id === 'admin-authorized-single' ||
-    currentUser?.username === 'admin' ||
-    currentUser?.username === 'cheasavuth';
   const ratingSummary = getRestaurantRatingSummary(restaurant);
   const loc = useMemo(() => getLocalizedRestaurant(restaurant, language), [restaurant, language]);
 
@@ -252,6 +270,42 @@ const RestaurantCardInner: React.FC<RestaurantCardProps> = ({ restaurant }) => {
         </div>
       </div>
     </div>
+  );
+}, (prev, next) =>
+  prev.restaurant === next.restaurant &&
+  prev.language === next.language &&
+  prev.bookmarked === next.bookmarked &&
+  prev.isAdmin === next.isAdmin
+);
+
+const RestaurantCardInner: React.FC<RestaurantCardProps> = ({ restaurant }) => {
+  const { 
+    language, setSelectedRestaurant, showToast, currentUser,
+    openManageMyVipStore,
+    trackRestaurantView, trackRestaurantCall, trackRestaurantMap, trackRestaurantShare,
+    isBookmarked, toggleBookmark
+  } = useApp();
+  const bookmarked = isBookmarked(restaurant.id);
+  const isAdmin =
+    currentUser?.role === 'admin' ||
+    currentUser?.id === 'admin-authorized-single' ||
+    currentUser?.username === 'admin' ||
+    currentUser?.username === 'cheasavuth';
+  return (
+    <RestaurantCardView
+      restaurant={restaurant}
+      language={language}
+      bookmarked={bookmarked}
+      isAdmin={isAdmin}
+      setSelectedRestaurant={setSelectedRestaurant}
+      showToast={showToast}
+      openManageMyVipStore={openManageMyVipStore}
+      trackRestaurantView={trackRestaurantView}
+      trackRestaurantCall={trackRestaurantCall}
+      trackRestaurantMap={trackRestaurantMap}
+      trackRestaurantShare={trackRestaurantShare}
+      toggleBookmark={toggleBookmark}
+    />
   );
 };
 

@@ -104,14 +104,10 @@ export const DailyDiscoveriesModal: React.FC = () => {
     [foods, restaurants, destinations, language, showToast]
   );
 
-  // Sync automatically when opened and every 5 minutes while open
+  // Sync automatically when opened (manual refresh available anytime; no background polling timer)
   useEffect(() => {
     if (!isDailyDiscoveriesModalOpen) return;
     syncFeed(false);
-    const timer = setInterval(() => {
-      syncFeed(false);
-    }, 5 * 60 * 1000);
-    return () => clearInterval(timer);
   }, [isDailyDiscoveriesModalOpen, syncFeed]);
 
   const handleToggleNearMe = () => {

@@ -1102,7 +1102,7 @@ let hasHydratedFromIdbOnce = false;
 let mediaSyncInFlightPromise: Promise<AllMediaOverridesBundle> | null = null;
 let lastMediaCloudSyncAtMs = 0;
 let hasBackfilledPerRecordKeysOnce = false;
-const MEDIA_CLOUD_SYNC_COOLDOWN_MS = 5 * 60 * 1000; // 5 minutes cooldown
+const MEDIA_CLOUD_SYNC_COOLDOWN_MS = 10 * 60 * 1000; // 10 minutes cooldown
 
 /**
  * Fast local-only hydration from `localStorage` + `IndexedDB` (<15ms, zero network wait).
@@ -1231,30 +1231,7 @@ export async function hydrateAndSyncMediaOverrides(forceCloud = false): Promise<
           }
         }
 
-        // Backfill missing atomic per-record keys at most once per session
-        if (existingPerRecordKeys.size > 0 && !hasBackfilledPerRecordKeysOnce) {
-          hasBackfilledPerRecordKeysOnce = true;
-          const backfillPromises: Promise<any>[] = [];
-          for (const [id, ov] of Object.entries(current.foods)) {
-            const k = `kft_ov_food_${id}`;
-            if (!existingPerRecordKeys.has(k)) backfillPromises.push(pushCloudDocument(k, ov, 10000));
-          }
-          for (const [id, ov] of Object.entries(current.restaurants)) {
-            const k = `kft_ov_rest_${id}`;
-            if (!existingPerRecordKeys.has(k)) backfillPromises.push(pushCloudDocument(k, ov, 10000));
-          }
-          for (const [id, ov] of Object.entries(current.destinations)) {
-            const k = `kft_ov_dest_${id}`;
-            if (!existingPerRecordKeys.has(k)) backfillPromises.push(pushCloudDocument(k, ov, 10000));
-          }
-          for (const [id, ov] of Object.entries(current.trendingFoods)) {
-            const k = `kft_ov_trend_${id}`;
-            if (!existingPerRecordKeys.has(k)) backfillPromises.push(pushCloudDocument(k, ov, 10000));
-          }
-          if (backfillPromises.length > 0) {
-            Promise.allSettled(backfillPromises).catch(() => {});
-          }
-        }
+        // Per-record keys are written on Admin/owner save via syncSingleOverrideRecordToCloud
       } catch {}
     }
 

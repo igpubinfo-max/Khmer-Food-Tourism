@@ -50,8 +50,31 @@
 }
 
 /* Zero-CPU / Zero-GPU-Repaint Static Styles (Prevents Mobile Overheating) */
-.animate-pulse-subtle {
+.animate-pulse-subtle,
+.animate-pulse,
+.animate-bounce,
+.animate-ping {
+  animation: none !important;
   opacity: 1;
+}
+
+/* Disable expensive mobile GPU multi-pass Gaussian blur shaders on scroll & overlays */
+.backdrop-blur-xs,
+.backdrop-blur-sm,
+.backdrop-blur,
+.backdrop-blur-md,
+.backdrop-blur-lg,
+.backdrop-blur-xl,
+.backdrop-blur-2xl,
+.backdrop-blur-3xl {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+.blur-xl,
+.blur-2xl,
+.blur-3xl {
+  filter: none !important;
 }
 
 /* Glassmorphism helpers (optimized without expensive backdrop-filter repaints) */

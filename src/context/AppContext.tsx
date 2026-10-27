@@ -1651,13 +1651,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return d.toISOString().split('T')[0];
   };
 
-  const defaultNotificationsList: AppNotification[] = buildDynamicNotificationsList(
-    foods,
-    restaurants,
-    destinations
-  );
-
   const [notifications, setNotifications] = useState<AppNotification[]>(() => {
+    const defaultNotificationsList: AppNotification[] = buildDynamicNotificationsList(
+      foods,
+      restaurants,
+      destinations
+    );
     try {
       const saved = localStorage.getItem('kft_notifications_v1');
       if (saved && saved !== 'undefined' && saved !== 'null') {
@@ -2141,22 +2140,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     enforceVipExpirationsAndReminders();
 
-    const intervalId = window.setInterval(enforceVipExpirationsAndReminders, 300000);
-    const onVisibility = () => {
-      if (typeof document !== 'undefined' && !document.hidden) {
-        enforceVipExpirationsAndReminders();
-      }
-    };
-    if (typeof document !== 'undefined') {
-      document.addEventListener('visibilitychange', onVisibility);
-    }
+    const intervalId = window.setInterval(enforceVipExpirationsAndReminders, 600000);
     return () => {
       window.clearInterval(intervalId);
-      if (typeof document !== 'undefined') {
-        document.removeEventListener('visibilitychange', onVisibility);
-      }
     };
-  }, [currentUser, users]);
+  }, [currentUser?.id, currentUser?.membershipTier, currentUser?.subscriptionExpiryDate, users.length]);
 
   // Automatically disable access and close any open Personalized Feature modals if currentUser is not an active VIP
   useEffect(() => {
@@ -2346,6 +2334,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const settingsFetchInFlightRef = useRef<Promise<AppSettings | null> | null>(null);
   const isSavingSettingsRef = useRef<boolean>(false);
   const lastAdminSettingsSaveAtRef = useRef<number>(0);
+  const lastSettingsFetchedAtRef = useRef<number>(0);
 
   const areAppSettingsEqual = (a: AppSettings, b: AppSettings): boolean => {
     return (
@@ -2373,7 +2362,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (!isSupabaseConfigured()) {
       return appSettingsRef.current;
     }
-    if (isSavingSettingsRef.current || (silent && Date.now() - lastAdminSettingsSaveAtRef.current < 6000)) {
+    if (
+      isSavingSettingsRef.current ||
+      (silent && Date.now() - lastAdminSettingsSaveAtRef.current < 6000) ||
+      (silent && lastSettingsFetchedAtRef.current > 0 && Date.now() - lastSettingsFetchedAtRef.current < 120000)
+    ) {
       return appSettingsRef.current;
     }
     if (settingsFetchInFlightRef.current) {
@@ -2391,6 +2384,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
         setSettingsSyncError(prev => (prev === null ? prev : null));
         if (res.ok && res.settings) {
+          lastSettingsFetchedAtRef.current = Date.now();
           setAppSettings(prev => {
             const next = normalizeAuthoritativeAppSettings(res.settings!, prev);
             if (areAppSettingsEqual(prev, next)) {
@@ -2484,7 +2478,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (typeof document === 'undefined' || !document.hidden) {
         refreshAppSettingsFromServer(true);
       }
-    }, 120000);
+    }, 600000);
 
     return () => {
       window.removeEventListener('focus', handleVisibilityOrFocus);
@@ -2533,12 +2527,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       return false;
     }
-    if (!force && now - lastCloudSyncAtRef.current < 60000) {
+    if (!force && now - lastCloudSyncAtRef.current < 180000) {
       return false;
     }
     cloudSyncInFlightRef.current = true;
     lastCloudSyncAtRef.current = now;
-    if (force) {
+    if (force && isAdminOpen) {
       setIsSyncingUsers(true);
     }
     try {
@@ -2562,7 +2556,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       });
 
       if (result.synced) {
-        if (force || isAdminOpen) {
+        if (isAdminOpen) {
           setLastUsersSyncedAt(new Date().toISOString());
         }
         if (result.mergedAppSettings && !isSavingSettingsRef.current && Date.now() - lastAdminSettingsSaveAtRef.current >= 6000) {
@@ -2763,7 +2757,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return false;
     } finally {
       cloudSyncInFlightRef.current = false;
-      if (force) {
+      if (force && isAdminOpen) {
         setIsSyncingUsers(false);
       }
       if (pendingForcedSyncRef.current) {
@@ -2812,11 +2806,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       .then(applyHydratedBundle)
       .catch(() => {});
 
-    // 2. Hydrate & delta-sync from Supabase Cloud in background so Admin-replaced photos sync across all devices
-    hydrateAndSyncMediaOverrides()
-      .then(applyHydratedBundle)
-      .catch(() => {});
-
     let syncTimer: any;
     let periodicSyncInterval: any;
     const handleVisibilityCloudSync = () => {
@@ -2825,15 +2814,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
     };
     if (isSupabaseConfigured()) {
-      // Defer cloud sync so initial startup UI paints instantly (< 50ms) without waiting for network
+      // Defer cloud sync (which also delta-syncs media overrides) so initial UI paints & scrolls with 0% network contention
       syncTimer = setTimeout(() => {
         triggerCloudSyncNow(true);
-      }, 900);
+      }, 1800);
       periodicSyncInterval = setInterval(() => {
         if (typeof document === 'undefined' || !document.hidden) {
           triggerCloudSyncNow(false);
         }
-      }, 300000);
+      }, 600000);
       if (typeof document !== 'undefined') {
         document.addEventListener('visibilitychange', handleVisibilityCloudSync);
       }
@@ -8784,6 +8773,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const restoreDefaultNotifications = () => {
+    const defaultNotificationsList = buildDynamicNotificationsList(foods, restaurants, destinations);
     setNotifications(prev => {
       const existingIds = new Set(prev.map(n => n.id));
       const missingDefaults = defaultNotificationsList.filter(d => !existingIds.has(d.id));
