@@ -21,7 +21,7 @@ import { tr } from '../utils/i18n';
 export const ProfileView: React.FC = () => {
   const { 
     currentUser, users, login, logout, language, setLanguage, 
-    bookmarks, foods, destinations, posts, restaurants,
+    bookmarks, foods, destinations, restaurants,
     wishlists, tripPlans, deleteTripPlan, notifications, notificationsEnabled, setNotificationsEnabled,
     unreadNotificationsCount, setIsWhatToEatModalOpen, setIsNearMeModalOpen,
     setIsDailyDiscoveriesModalOpen, setIsWishlistsModalOpen, setIsAiTripPlannerModalOpen,
@@ -62,7 +62,7 @@ export const ProfileView: React.FC = () => {
   const remainingDays = getVipRemainingDays(currentUser);
   const [selectedVipPowerPanel, setSelectedVipPowerPanel] = useState<'analytics' | 'reels' | 'photos' | 'rank' | null>('analytics');
 
-  const [activeSubTab, setActiveSubTab] = useState<'bookmarks' | 'wishlists' | 'tripplans' | 'myposts' | 'settings' | 'myrestaurant' | 'membership'>(
+  const [activeSubTab, setActiveSubTab] = useState<'bookmarks' | 'wishlists' | 'tripplans' | 'settings' | 'myrestaurant' | 'membership'>(
     isAdmin ? 'settings' : (isOwner ? 'myrestaurant' : (isVip ? 'wishlists' : 'bookmarks'))
   );
 
@@ -107,9 +107,6 @@ export const ProfileView: React.FC = () => {
   const savedFoods = foods.filter(f => bookmarks.includes(f.id));
   const savedDestinations = destinations.filter(d => bookmarks.includes(d.id));
   const savedRestaurants = restaurants.filter(r => bookmarks.includes(r.id));
-
-  // User posts
-  const myPosts = posts.filter(p => currentUser && p.authorId === currentUser.id);
 
   // Owner restaurants (sorted newest/active first via getOwnedRestaurantsForUser)
   const myRestaurants = getOwnedRestaurantsForUser(currentUser);
@@ -310,7 +307,7 @@ export const ProfileView: React.FC = () => {
                 {tr(language, 'សូមចូលគណនីរបស់អ្នក', 'Please Sign In', '请登录您的账户')}
               </h3>
               <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-                {tr(language, 'ដើម្បីរក្សាទុកម្ហូប ចែករំលែក និងចុះបញ្ជីហាង', 'To save recipes, share posts & manage shops', '登录以收藏食谱、分享动态并管理店铺')}
+                {tr(language, 'ដើម្បីរក្សាទុកម្ហូប និងចុះបញ្ជីហាង', 'To save recipes & manage shops', '登录以收藏食谱并管理店铺')}
               </p>
             </div>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-2">
@@ -1473,7 +1470,7 @@ export const ProfileView: React.FC = () => {
       </div>
       )}
 
-      {/* Tabs: My Restaurant (for owners) / Wishlists / Saved / Trip Plans / My Posts / Membership / Settings */}
+      {/* Tabs: My Restaurant (for owners) / Wishlists / Saved / Trip Plans / Membership / Settings */}
       {!isAdmin && (
       <div className="relative group/tabs">
         {/* Left Scroll Button */}
@@ -1569,17 +1566,6 @@ export const ProfileView: React.FC = () => {
             }`}
           >
             {isKm ? `❤️ ចំណូលចិត្ត (${savedFoods.length + savedDestinations.length + savedRestaurants.length})` : `Saved (${savedFoods.length + savedDestinations.length + savedRestaurants.length})`}
-          </button>
-
-          <button
-            onClick={() => setActiveSubTab('myposts')}
-            className={`py-2.5 font-bold text-center border-b-2 transition whitespace-nowrap px-3 ${
-              activeSubTab === 'myposts'
-                ? 'border-[#064E3B] text-[#064E3B] dark:border-emerald-400 dark:text-emerald-400'
-                : 'border-transparent text-slate-400 hover:text-slate-600'
-            }`}
-          >
-            {isKm ? `ការបង្ហោះ (${myPosts.length})` : `Posts (${myPosts.length})`}
           </button>
 
           {currentUser?.role !== 'admin' && (
@@ -2095,29 +2081,6 @@ export const ProfileView: React.FC = () => {
                 </div>
               )}
             </>
-          )}
-        </div>
-      )}
-
-      {/* Tab: My Posts (Consumer Users Only) */}
-      {!isAdmin && activeSubTab === 'myposts' && (
-        <div className="space-y-3">
-          {myPosts.length === 0 ? (
-            <div className="text-center py-8 text-slate-400 text-xs font-khmer">
-              <p>{isKm ? 'លោកអ្នកមិនទាន់បានបង្ហោះអ្វីនៅឡើយទេ' : 'You haven’t posted anything yet'}</p>
-            </div>
-          ) : (
-            myPosts.map((p) => (
-              <div key={p.id} className="p-3 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/90 dark:border-slate-700 flex items-center justify-between shadow-xs">
-                <div className="flex items-center gap-2.5">
-                  <img src={p.photoUrl} alt="thumb" className="w-12 h-12 rounded-xl object-cover" />
-                  <div>
-                    <h5 className="font-bold text-xs text-[#0F172A] dark:text-white font-khmer">{p.titleKh}</h5>
-                    <p className="text-[10px] text-slate-400">{p.likesCount} ❤️ • {p.comments.length} 💬</p>
-                  </div>
-                </div>
-              </div>
-            ))
           )}
         </div>
       )}

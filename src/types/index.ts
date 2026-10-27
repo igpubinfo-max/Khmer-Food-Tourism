@@ -1206,41 +1206,6 @@ export interface DailyDiscoveryItem {
   tagsEn?: string[];
 }
 
-export interface CommentItem {
-  id: string;
-  authorId: string;
-  authorName: string;
-  authorAvatar: string;
-  text: string;
-  createdAt: string;
-}
-
-export interface CommunityPost {
-  id: string;
-  authorId: string;
-  authorName: string;
-  authorAvatar: string;
-  authorRole: UserRole;
-  titleKh: string;
-  descriptionKh: string;
-  photoUrl: string;
-  categoryTag: string;
-  locationName: string;
-  likesCount: number;
-  likedByUserIds: string[];
-  comments: CommentItem[];
-  createdAt: string;
-  status: 'approved' | 'pending' | 'flagged';
-}
-
-export interface ReportedItem {
-  id: string;
-  postId: string;
-  reason: string;
-  reporterName: string;
-  createdAt: string;
-}
-
 export interface AppSettings {
   apkDownloadUrl: string;
   playStoreUrl: string;

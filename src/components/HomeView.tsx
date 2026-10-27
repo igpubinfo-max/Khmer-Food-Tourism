@@ -35,7 +35,7 @@ import {
 export const HomeView: React.FC = () => {
   const { 
     foods, restaurants, destinations, setActiveTab, 
-    language, selectedProvince, setSelectedProvince, posts,
+    language, selectedProvince, setSelectedProvince,
     currentUser, users, appSettings, setIsAuthModalOpen,
     setIsInstallModalOpen, setIsSupportModalOpen,
     openInstallModal, setSelectedDestination,
@@ -1870,28 +1870,6 @@ export const HomeView: React.FC = () => {
         ))}
       </div>
 
-
-
-      {/* Section 4: Community Highlights */}
-      {posts.length > 0 && (
-        <div className="p-4 rounded-3xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 space-y-2 shadow-xs">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-[#064E3B] dark:text-emerald-400 flex items-center gap-1.5 font-khmer">
-              <Heart className="w-4 h-4 text-rose-500 fill-current" />
-              {isKm ? 'ការចែករំលែកថ្មីៗពីសហគមន៍' : 'Recent Community Stories'}
-            </span>
-            <button
-              onClick={() => setActiveTab('community')}
-              className="text-xs font-semibold text-[#064E3B] dark:text-emerald-400 hover:underline font-khmer"
-            >
-              {isKm ? 'ចូលរួម' : 'Join Feed'}
-            </button>
-          </div>
-          <p className="text-xs text-[#0F172A] dark:text-slate-300 font-khmer">
-            {posts[0].titleKh}
-          </p>
-        </div>
-      )}
           </>
         )}
       </MoreSection>

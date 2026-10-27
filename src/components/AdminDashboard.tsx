@@ -32,7 +32,6 @@ export const AdminDashboard: React.FC = () => {
     foods, addFood, updateFood, deleteFood,
     restaurants, deleteRestaurant, approveRestaurant, rejectRestaurant, toggleVerifyRestaurant,
     destinations, addDestination, updateDestination, deleteDestination,
-    posts, deletePost,
     users, deletedUsers, updateUserRole, cancelUserVip, restoreUserAccess, disableUserAccount, deleteUserAccount, clearAllRegisteredUsers,
     transactions, verifyTransaction, rejectTransaction, requestMorePaymentInfo, deleteTransactions, getAuthorizedPaymentProof,
     appSettings, updateAppSettings, refreshAppSettingsFromServer, setAdminPassword, currentUser, showToast,
@@ -42,7 +41,7 @@ export const AdminDashboard: React.FC = () => {
     openGoogleMapsSearchModal, openManageMyVipStore, setSelectedRestaurant
   } = useApp();
 
-  const [activeTab, setActiveTab] = useState<'stats' | 'support_tickets' | 'food' | 'restaurants' | 'destinations' | 'community' | 'users' | 'transactions' | 'settings' | 'security' | 'image_audit' | 'ai_checkins'>(() => {
+  const [activeTab, setActiveTab] = useState<'stats' | 'support_tickets' | 'food' | 'restaurants' | 'destinations' | 'users' | 'transactions' | 'settings' | 'security' | 'image_audit' | 'ai_checkins'>(() => {
     return (window as any).__kft_admin_tab || 'stats';
   });
 
@@ -704,19 +703,6 @@ export const AdminDashboard: React.FC = () => {
           >
             <Compass className="w-3.5 h-3.5 shrink-0" />
             <span className="truncate">{isKm ? `ទេសចរណ៍ (${destinations.length})` : `Tourism (${destinations.length})`}</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab('community')}
-            className={`flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl font-bold border transition cursor-pointer ${
-              activeTab === 'community'
-                ? 'bg-[#064E3B] text-white border-[#064E3B] shadow-xs'
-                : 'bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-300 border-stone-200 dark:border-stone-800 hover:border-emerald-500/50'
-            }`}
-          >
-            <MessageSquare className="w-3.5 h-3.5 shrink-0" />
-            <span className="truncate">{isKm ? `សហគមន៍ (${posts.length})` : `Feed (${posts.length})`}</span>
           </button>
 
           <button
@@ -2758,34 +2744,6 @@ export const AdminDashboard: React.FC = () => {
             </div>
           )}
 
-          {/* COMMUNITY POSTS TAB */}
-          {activeTab === 'community' && (
-            <div className="space-y-4">
-              <h3 className="font-bold text-stone-900 dark:text-stone-100 font-khmer text-sm">
-                {isKm ? `ការចែករំលែកសហគមន៍ (${posts.length} បទបង្ហាញ)` : `Community Feed (${posts.length} posts)`}
-              </h3>
-              <div className="space-y-2 max-h-[50vh] overflow-y-auto no-scrollbar">
-                {posts.map((p) => (
-                  <div key={p.id} className="p-3 bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <img src={p.photoUrl} alt="post" className="w-12 h-12 rounded-xl object-cover shrink-0" />
-                      <div>
-                        <h4 className="font-bold text-stone-900 dark:text-stone-100 font-khmer truncate max-w-xs">{p.titleKh}</h4>
-                        <p className="text-[10px] text-stone-400">{p.authorName} • {p.locationName}</p>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => deletePost(p.id)}
-                      className="p-1.5 text-stone-400 hover:text-rose-600"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
           {/* USERS TAB */}
           {activeTab === 'users' && (() => {
             const deletedIdsSet = new Set(
@@ -3096,9 +3054,6 @@ export const AdminDashboard: React.FC = () => {
                           ((r.ownerId && userIdSet.has(r.ownerId)) ||
                             (uEmailLower && r.ownerEmail && r.ownerEmail.toLowerCase().trim() === uEmailLower))
                       ).length;
-                      const userPostsCount = posts.filter(
-                        p => p.authorId && userIdSet.has(p.authorId)
-                      ).length;
                       const userTxnsCount = transactions.filter(
                         t =>
                           (t.userId && userIdSet.has(t.userId)) ||
@@ -3204,8 +3159,6 @@ export const AdminDashboard: React.FC = () => {
                                 <span>•</span>
                                 <span>🏪 ហាងផ្ទាល់ខ្លួន៖ <strong>{userCustomRestsCount}</strong></span>
                                 <span>•</span>
-                                <span>📝 បង្ហោះ៖ <strong>{userPostsCount}</strong></span>
-                                <span>•</span>
                                 <span>💳 ប្រតិបត្តិការ៖ <strong>{userTxnsCount}</strong></span>
                                 {userTicketsCount > 0 && (
                                   <>
@@ -3265,7 +3218,6 @@ export const AdminDashboard: React.FC = () => {
                   const targetRestsCount = restaurants.filter(
                     r => !isSeedRestaurantId(r.id) && r.ownerId && targetIds.has(r.ownerId)
                   ).length;
-                  const targetPostsCount = posts.filter(p => targetIds.has(p.authorId)).length;
                   const targetTxnsCount = transactions.filter(
                     t => (t.ownerId && targetIds.has(t.ownerId)) || (t.userId && targetIds.has(t.userId))
                   ).length;
@@ -3444,8 +3396,8 @@ export const AdminDashboard: React.FC = () => {
                               </h4>
                               <p className="text-[11px] text-rose-700/90 dark:text-rose-300/90 mt-0.5 leading-relaxed">
                                 {isKm
-                                  ? `លុបគណនីទាំងស្រុង និងទិន្នន័យពាក់ព័ន្ធទាំងអស់ជាអចិន្ត្រៃយ៍ (ហាង ${targetRestsCount}, បង្ហោះ ${targetPostsCount}, ប្រតិបត្តិការ ${targetTxnsCount}, សំណើជំនួយ ${targetTicketsCount}) ហើយមិនអាចស្តារឡើងវិញបានឡើយ។`
-                                  : `Permanently delete the entire account and associated data (${targetRestsCount} shops, ${targetPostsCount} posts, ${targetTxnsCount} transactions, ${targetTicketsCount} tickets). Cannot be restored.`}
+                                  ? `លុបគណនីទាំងស្រុង និងទិន្នន័យពាក់ព័ន្ធទាំងអស់ជាអចិន្ត្រៃយ៍ (ហាង ${targetRestsCount}, ប្រតិបត្តិការ ${targetTxnsCount}, សំណើជំនួយ ${targetTicketsCount}) ហើយមិនអាចស្តារឡើងវិញបានឡើយ។`
+                                  : `Permanently delete the entire account and associated data (${targetRestsCount} shops, ${targetTxnsCount} transactions, ${targetTicketsCount} tickets). Cannot be restored.`}
                               </p>
                             </div>
 

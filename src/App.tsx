@@ -8,7 +8,7 @@ import { HomeView } from './components/HomeView';
 import { FoodView } from './components/FoodView';
 import { RestaurantView } from './components/RestaurantView';
 import { TourismView } from './components/TourismView';
-import { CommunityFeed } from './components/CommunityFeed';
+const GuideView = lazy(() => import('./components/GuideView').then((m) => ({ default: m.GuideView })));
 const ProfileView = lazy(() => import('./components/ProfileView').then((m) => ({ default: m.ProfileView })));
 import { SmartHubMenuModal } from './components/SmartHubMenuModal';
 import { FoodDetailModal } from './components/FoodDetailModal';
@@ -57,7 +57,6 @@ const MainScreen: React.FC = () => {
     selectedRestaurant,
     selectedDestination,
     isAuthModalOpen,
-    isAddPostModalOpen,
     isAddRestaurantModalOpen,
     isManageMenuModalOpen,
     managingRestaurant,
@@ -223,7 +222,7 @@ const MainScreen: React.FC = () => {
           {activeTab === 'food' && <FoodView />}
           {activeTab === 'restaurants' && <RestaurantView />}
           {activeTab === 'tourism' && <TourismView />}
-          {activeTab === 'community' && <CommunityFeed />}
+          {activeTab === 'guide' && <GuideView />}
           {activeTab === 'profile' && <ProfileView />}
         </Suspense>
       </main>

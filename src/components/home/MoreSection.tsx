@@ -22,7 +22,7 @@ export const MoreSection: React.FC<Props> = ({ language, children }) => {
         <span>
           {open
             ? tr(language, 'លាក់ព័ត៌មានបន្ថែម', 'Show less', '收起')
-            : tr(language, 'មើលបន្ថែម (VIP, ហាងរបស់ខ្ញុំ, សហគមន៍...)', 'More (VIP, my shop, community...)', '更多（VIP、我的店铺、社区…）')}
+            : tr(language, 'មើលបន្ថែម (VIP, ហាងរបស់ខ្ញុំ...)', 'More (VIP, my shop...)', '更多（VIP、我的店铺…）')}
         </span>
         <ChevronDown className={`w-5 h-5 transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>

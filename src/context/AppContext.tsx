@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useRef, useMemo } from 'react';
 import { 
-  User, FoodItem, Restaurant, TouristDestination, CommunityPost, 
+  User, FoodItem, Restaurant, TouristDestination, 
   Language, UserRole, AppSettings, RegistrationTransaction,
   RestaurantMenuItem, RestaurantReview, MembershipTier, isRestaurantPremiumActive, isUserVipActive, getVipRemainingDays,
   getVipAccountState, VipAccountState,
@@ -34,7 +34,7 @@ import { findDuplicateRestaurant, mergeRestaurantRecords } from '../utils/duplic
 import { recordSubmissionTimestamp, checkSubmissionRateLimit } from '../services/aiCheckInService';
 import { 
   initialUsers, initialFoods, initialRestaurants, 
-  initialDestinations, initialCommunityPosts, initialAppSettings, initialTransactions 
+  initialDestinations, initialAppSettings, initialTransactions 
 } from '../data/seedData';
 import { hashPassword, verifyPassword } from '../utils/crypto';
 import { recordMeaningfulAction } from '../utils/engagement';
@@ -88,7 +88,7 @@ import {
   mergeGoogleMapsPlaceWithExistingRestaurant,
 } from '../services/googlePlacesService';
 
-export type ActiveTab = 'home' | 'food' | 'restaurants' | 'tourism' | 'community' | 'profile';
+export type ActiveTab = 'home' | 'food' | 'restaurants' | 'tourism' | 'guide' | 'profile';
 
 interface AppContextType {
   language: Language;
@@ -111,7 +111,7 @@ interface AppContextType {
   disableUserAccount: (userId: string) => Promise<{ success: boolean }>;
   deleteUserAccount: (userId: string) => Promise<{
     success: boolean;
-    deletedStats?: { restaurants: number; posts: number; transactions: number; tickets: number };
+    deletedStats?: { restaurants: number; transactions: number; tickets: number };
   }>;
   clearAllRegisteredUsers: () => Promise<{ success: boolean; count: number }>;
 
@@ -137,7 +137,6 @@ interface AppContextType {
   foods: FoodItem[];
   restaurants: Restaurant[];
   destinations: TouristDestination[];
-  posts: CommunityPost[];
 
   // Transactions & $4.99 Registration Payments
   transactions: RegistrationTransaction[];
@@ -218,12 +217,6 @@ interface AppContextType {
   deleteDestination: (id: string) => void;
   checkDuplicateDestination: (candidate: { nameKh: string; nameEn?: string; provinceKh?: string; latitude?: number; longitude?: number }, excludeId?: string) => { isDuplicate: boolean; duplicate?: TouristDestination; reason?: string };
   
-  // Community Actions
-  addPost: (titleKh: string, descriptionKh: string, photoUrl: string, categoryTag: string, locationName: string) => void;
-  toggleLikePost: (postId: string) => void;
-  addComment: (postId: string, text: string) => void;
-  deletePost: (postId: string) => void;
-  
   // Modals & Selection
   selectedFood: FoodItem | null;
   setSelectedFood: (food: FoodItem | null) => void;
@@ -234,8 +227,6 @@ interface AppContextType {
   
   isAuthModalOpen: boolean;
   setIsAuthModalOpen: (open: boolean) => void;
-  isAddPostModalOpen: boolean;
-  setIsAddPostModalOpen: (open: boolean) => void;
   isAddRestaurantModalOpen: boolean;
   setIsAddRestaurantModalOpen: (open: boolean) => void;
   isAdminOpen: boolean;
@@ -425,7 +416,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [activeTab, setActiveTab] = useState<ActiveTab>(() => {
     try {
       const p = new URLSearchParams(window.location.search).get('tab') as ActiveTab | null;
-      if (p && ['home', 'food', 'restaurants', 'tourism', 'community', 'profile'].includes(p)) {
+      if (p && ['home', 'food', 'restaurants', 'tourism', 'guide', 'profile'].includes(p)) {
         return p;
       }
     } catch {}
@@ -1231,37 +1222,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return applyDestinationOverrides(initialDestinations, vault.destinations);
   });
 
-  const [posts, setPosts] = useState<CommunityPost[]>(() => {
-    try {
-      const saved = localStorage.getItem('kft_posts_v6');
-      if (saved && saved !== 'undefined' && saved !== 'null') {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) {
-          return parsed.map((p: any) => ({
-            id: p.id || `post-${Date.now()}`,
-            authorId: p.authorId || 'user-1',
-            authorName: p.authorName || 'អ្នកស្រឡាញ់ម្ហូបខ្មែរ',
-            authorAvatar: p.authorAvatar || 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
-            authorRole: p.authorRole || 'user',
-            titleKh: p.titleKh || '',
-            descriptionKh: p.descriptionKh || '',
-            photoUrl: p.photoUrl || '',
-            categoryTag: p.categoryTag || 'ទូទៅ',
-            locationName: p.locationName || 'កម្ពុជា',
-            likesCount: typeof p.likesCount === 'number' ? p.likesCount : 0,
-            likedByUserIds: Array.isArray(p.likedByUserIds) ? p.likedByUserIds : [],
-            comments: Array.isArray(p.comments) ? p.comments : [],
-            createdAt: p.createdAt || 'ថ្មីៗនេះ',
-            status: p.status || 'approved',
-          }));
-        }
-      }
-    } catch (e) {
-      console.warn('Failed to parse kft_posts', e);
-    }
-    return initialCommunityPosts;
-  });
-
   const [bookmarks, setBookmarks] = useState<string[]>(() => {
     try {
       const saved = localStorage.getItem('kft_bookmarks_v4') || localStorage.getItem('kft_bookmarks_v3');
@@ -1304,7 +1264,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [selectedDestination, setSelectedDestinationRaw] = useState<TouristDestination | null>(null);
   
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(() => !currentUser);
-  const [isAddPostModalOpen, setIsAddPostModalOpen] = useState(false);
   const [isAddRestaurantModalOpen, setIsAddRestaurantModalOpen] = useState(false);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [isAdminLoginModalOpen, setIsAdminLoginModalOpen] = useState(false);
@@ -1835,7 +1794,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     foods: true,
     restaurants: true,
     destinations: true,
-    posts: true,
     transactions: true,
     supportTickets: true,
   });
@@ -2375,15 +2333,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, [destinations]);
 
+  // One-time cleanup: the retired Community Feed stored its posts here; the feature no longer exists.
   useEffect(() => {
-    if (isInitialMountRef.current.posts) {
-      isInitialMountRef.current.posts = false;
-      return;
-    }
-    if (posts) {
-      scheduleStorageWrite('kft_posts_v6', posts, 1000);
-    }
-  }, [posts]);
+    try {
+      localStorage.removeItem('kft_posts_v6');
+    } catch {}
+  }, []);
 
   useEffect(() => {
     try {
@@ -3008,7 +2963,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     selectedRestaurant,
     selectedDestination,
     isAuthModalOpen,
-    isAddPostModalOpen,
     isAddRestaurantModalOpen,
     isVipAddRestaurantModalOpen,
     isManageMenuModalOpen,
@@ -3043,7 +2997,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       selectedRestaurant,
       selectedDestination,
       isAuthModalOpen,
-      isAddPostModalOpen,
       isAddRestaurantModalOpen,
       isVipAddRestaurantModalOpen,
       isManageMenuModalOpen,
@@ -3071,7 +3024,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
   }, [
     currentUser, isExitModalOpen, selectedFood, selectedRestaurant, selectedDestination,
-    isAuthModalOpen, isAddPostModalOpen, isAddRestaurantModalOpen, isVipAddRestaurantModalOpen,
+    isAuthModalOpen, isAddRestaurantModalOpen, isVipAddRestaurantModalOpen,
     isManageMenuModalOpen, managingRestaurant, isAdminOpen, isAdminLoginModalOpen,
     isInstallModalOpen, isSupportModalOpen, isWhatToEatModalOpen, isNearMeModalOpen,
     isDailyDiscoveriesModalOpen, isWishlistsModalOpen, isAiTripPlannerModalOpen,
@@ -3110,6 +3063,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       if ((window as any).__kft_is_smart_hub_open) {
         window.dispatchEvent(new CustomEvent('kft:close-smart-hub'));
+        return;
+      }
+      if ((window as any).__kft_guide_overlay_open) {
+        window.dispatchEvent(new CustomEvent('kft:close-guide-overlay'));
         return;
       }
       if (state.isManageMenuModalOpen) {
@@ -3204,10 +3161,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       if (state.isAddRestaurantModalOpen) {
         setIsAddRestaurantModalOpen(false);
-        return;
-      }
-      if (state.isAddPostModalOpen) {
-        setIsAddPostModalOpen(false);
         return;
       }
       if (state.isAdminLoginModalOpen) {
@@ -3887,7 +3840,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
    */
   const deleteUserAccount = async (userId: string): Promise<{
     success: boolean;
-    deletedStats?: { restaurants: number; posts: number; transactions: number; tickets: number };
+    deletedStats?: { restaurants: number; transactions: number; tickets: number };
   }> => {
     const liveUsers = latestSyncStateRef.current.users || users;
     const liveDeletedUsers = latestSyncStateRef.current.deletedUsers || deletedUsers;
@@ -4006,24 +3959,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setIsManageMenuModalOpen(false);
       }
     }
-
-    // 4. Remove user's community posts, likes, and comments
-    const userPostsCount = posts.filter(p => allTargetIdSet.has(p.authorId)).length;
-    const nextPosts = posts
-      .filter(p => !allTargetIdSet.has(p.authorId))
-      .map(p => {
-        const hadLiked = (p.likedByUserIds || []).some(id => allTargetIdSet.has(id));
-        return {
-          ...p,
-          likedByUserIds: (p.likedByUserIds || []).filter(id => !allTargetIdSet.has(id)),
-          likesCount: hadLiked ? Math.max(0, p.likesCount - 1) : p.likesCount,
-          comments: (p.comments || []).filter(c => !allTargetIdSet.has(c.authorId) && c.authorName !== targetUser.name),
-        };
-      });
-    setPosts(nextPosts);
-    try {
-      localStorage.setItem('kft_posts_v6', JSON.stringify(nextPosts));
-    } catch {}
 
     // 5. Remove user's registration/VIP transactions & payment proof receipts
     const isTargetTransaction = (t: RegistrationTransaction) =>
@@ -4144,7 +4079,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       success: true,
       deletedStats: {
         restaurants: ownedCustomRests.length,
-        posts: userPostsCount,
         transactions: userTxns.length,
         tickets: userTicketsCount,
       },
@@ -6447,121 +6381,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setDestinations(prev => prev.filter(d => d.id !== id));
     if (selectedDestination?.id === id) setSelectedDestination(null);
     showToast(language === 'km' ? 'បានលុបតំបន់ទេសចរណ៍' : 'Destination deleted', 'info');
-  };
-
-  // Community Posts
-  const addPost = (
-    titleKh: string, 
-    descriptionKh: string, 
-    photoUrl: string, 
-    categoryTag: string, 
-    locationName: string
-  ) => {
-    const newPost: CommunityPost = {
-      id: `post-${Date.now()}`,
-      authorId: currentUser?.id || 'anon',
-      authorName: currentUser?.name || 'អ្នកដំណើរខ្មែរ (Khmer Traveler)',
-      authorAvatar: currentUser?.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
-      authorRole: currentUser?.role || 'user',
-      titleKh,
-      descriptionKh,
-      photoUrl,
-      categoryTag,
-      locationName,
-      likesCount: 0,
-      likedByUserIds: [],
-      comments: [],
-      createdAt: 'អម្បាញ់មិញ',
-      status: 'approved',
-    };
-    setPosts(prev => [newPost, ...prev]);
-    showToast(
-      language === 'km'
-        ? 'បានចែករំលែកការបង្ហោះបានជោគជ័យ 🎉'
-        : language === 'zh'
-        ? '动态已成功发布到社区 🎉'
-        : 'Post shared successfully! 🎉',
-      'success'
-    );
-  };
-
-  const toggleLikePost = (postId: string) => {
-    if (!currentUser) {
-      showToast(
-        language === 'km' 
-          ? 'សូមចុះឈ្មោះ ឬចូលគណនី ដើម្បីចុច Like' 
-          : language === 'zh'
-          ? '请先登录或注册账号后再点赞'
-          : 'Please sign in or register to like posts',
-        'info'
-      );
-      setIsAuthModalOpen(true);
-      return;
-    }
-    const uid = currentUser?.id || 'guest';
-    setPosts(prev => prev.map(p => {
-      if (p.id !== postId) return p;
-      const alreadyLiked = p.likedByUserIds.includes(uid);
-      const newLiked = alreadyLiked 
-        ? p.likedByUserIds.filter(id => id !== uid)
-        : [...p.likedByUserIds, uid];
-      return {
-        ...p,
-        likesCount: newLiked.length,
-        likedByUserIds: newLiked,
-      };
-    }));
-  };
-
-  const addComment = (postId: string, text: string) => {
-    if (!currentUser) {
-      showToast(
-        language === 'km' 
-          ? 'សូមចុះឈ្មោះ ឬចូលគណនី ដើម្បីបញ្ចេញមតិយោបល់' 
-          : language === 'zh'
-          ? '请先登录或注册账号后再发表评论'
-          : 'Please sign in or register to comment',
-        'info'
-      );
-      setIsAuthModalOpen(true);
-      return;
-    }
-    if (!text.trim()) return;
-    const newComment = {
-      id: `c-${Date.now()}`,
-      authorId: currentUser?.id || 'guest',
-      authorName: currentUser?.name || 'អ្នកដំណើរខ្មែរ',
-      authorAvatar: currentUser?.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
-      text,
-      createdAt: 'អម្បាញ់មិញ',
-    };
-    setPosts(prev => prev.map(p => {
-      if (p.id !== postId) return p;
-      return {
-        ...p,
-        comments: [...p.comments, newComment],
-      };
-    }));
-    showToast(
-      language === 'km'
-        ? 'បានបញ្ចេញមតិយោបល់'
-        : language === 'zh'
-        ? '评论已发表'
-        : 'Comment added',
-      'info'
-    );
-  };
-
-  const deletePost = (postId: string) => {
-    setPosts(prev => prev.filter(p => p.id !== postId));
-    showToast(
-      language === 'km'
-        ? 'បានលុបការបង្ហោះ'
-        : language === 'zh'
-        ? '动态已删除'
-        : 'Post deleted',
-      'info'
-    );
   };
 
   // Transactions & $4.99 Registration Payment
@@ -9186,7 +9005,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setFoods(initialFoods);
     setRestaurants(initialRestaurants);
     setDestinations(initialDestinations);
-    setPosts(initialCommunityPosts);
     setBookmarks(['food-1', 'dest-1']);
     setAppSettings(initialAppSettings);
     setTransactions(initialTransactions);
@@ -9226,7 +9044,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         foods,
         restaurants,
         destinations,
-        posts,
         transactions,
         addRegistrationTransaction,
         verifyTransaction,
@@ -9294,10 +9111,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         updateDestination,
         deleteDestination,
         checkDuplicateDestination,
-        addPost,
-        toggleLikePost,
-        addComment,
-        deletePost,
         selectedFood,
         setSelectedFood,
         selectedRestaurant,
@@ -9306,8 +9119,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setSelectedDestination,
         isAuthModalOpen,
         setIsAuthModalOpen,
-        isAddPostModalOpen,
-        setIsAddPostModalOpen,
         isAddRestaurantModalOpen,
         setIsAddRestaurantModalOpen,
         isAdminOpen,

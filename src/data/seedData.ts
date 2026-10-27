@@ -1,4 +1,4 @@
-import { FoodItem, Restaurant, TouristDestination, CommunityPost, User, AppSettings, RegistrationTransaction, TEN_VIP_BENEFITS } from '../types';
+import { FoodItem, Restaurant, TouristDestination, User, AppSettings, RegistrationTransaction, TEN_VIP_BENEFITS } from '../types';
 import { initial100Foods } from './seedFoods';
 import { initial100Restaurants } from './seedRestaurants';
 import { initial100Destinations } from './seedDestinations';
@@ -80,69 +80,6 @@ export const initialRestaurants: Restaurant[] = [
 
 // 100+ Authentic Tourist Destinations across 25 Cambodian Provinces
 export const initialDestinations: TouristDestination[] = initial100Destinations;
-
-export const initialCommunityPosts: CommunityPost[] = [
-  {
-    id: 'post-1',
-    authorId: 'user-traveler',
-    authorName: 'អ្នកដំណើរខ្មែរ (Khmer Traveler)',
-    authorAvatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
-    authorRole: 'user',
-    titleKh: 'បទពិសោធន៍ញ៉ាំក្តាមសេះឆាម្រេចខ្ចី នៅមាត់សមុទ្រកែប!',
-    descriptionKh: 'ថ្ងៃនេះបានមកដល់ខេត្តកែប ឆ្ងាញ់មែនទែនបងប្អូនអើយ! ក្តាមសេះទើបស្រង់ពីកន្ត្រកសមុទ្រស្រស់ៗ សាច់ផ្អែមឆ្ងាញ់ លាយជាមួយម្រេចខ្ចីកំពតក្រអូបហឹរតិចៗ ញ៉ាំបណ្តើរមើលថ្ងៃលិចបណ្តើរ ពិតជាមានក្តីសុខខ្លាំងណាស់!',
-    photoUrl: '/foods/food-27.jpg',
-    categoryTag: 'គ្រឿងសមុទ្រ',
-    locationName: 'ផ្សារក្តាមខេត្តកែប',
-    likesCount: 38,
-    likedByUserIds: ['admin-1', 'owner-1'],
-    comments: [
-      {
-        id: 'c-1',
-        authorId: 'owner-1',
-        authorName: 'សុខ គីមលី',
-        authorAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
-        text: 'អរគុណបងដែលបានមកគាំទ្រ! លើកក្រោយមកទៀត ហាងយើងខ្ញុំមានបញ្ចុះតម្លៃជូនពិសេសបាទ។',
-        createdAt: '១ ម៉ោងមុន',
-      },
-      {
-        id: 'c-2',
-        authorId: 'system-admin',
-        authorName: 'ក្រុមការងាររដ្ឋបាល (Admin)',
-        authorAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-        text: 'រូបភាពស្រស់ស្អាតណាស់! ក្តាមកំពត-កែបល្បីល្បាញលេខ១តែម្តង។',
-        createdAt: '៣០ នាទីមុន',
-      },
-    ],
-    createdAt: '២ ម៉ោងមុន',
-    status: 'approved',
-  },
-  {
-    id: 'post-2',
-    authorId: 'owner-1',
-    authorName: 'សុខ គីមលី (ម្ចាស់ហាង)',
-    authorAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
-    authorRole: 'owner',
-    titleKh: 'ចែករំលែករូបមន្តអាម៉ុកត្រីស្លឹកញរ រសជាតិដើមបែបបុរាណ',
-    descriptionKh: 'ជំរាបសួរបងប្អូនទាំងអស់គ្នា! ថ្ងៃនេះខ្ញុំសូមចែករំលែកពីរបៀបចំហុយអាម៉ុកត្រីឱ្យសាច់ណែនទន់ល្អ គឺកុំចំហុយភ្លើងខ្លាំងពេក ហើយប្រើខ្ទិះដូងស្រស់ដើមខាប់ៗ ទើបទទួលបានក្លិនឈ្ងុយពិសា។ សាកល្បងទាំងអស់គ្នាណា!',
-    photoUrl: '/foods/food-1.jpg',
-    categoryTag: 'រូបមន្តម្ហូប',
-    locationName: 'ខេត្តកំពត',
-    likesCount: 65,
-    likedByUserIds: ['owner-1'],
-    comments: [
-      {
-        id: 'c-3',
-        authorId: 'user-traveler',
-        authorName: 'អ្នកដំណើរខ្មែរ',
-        authorAvatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
-        text: 'រូបមន្តល្អណាស់លោកពូ ចាំថ្ងៃចុងសប្តាហ៍នេះខ្ញុំសាកល្បងធ្វើតាម!',
-        createdAt: '៤៥ នាទីមុន',
-      },
-    ],
-    createdAt: '៥ ម៉ោងមុន',
-    status: 'approved',
-  },
-];
 
 export const initialTransactions: RegistrationTransaction[] = [
   {

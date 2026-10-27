@@ -1,6 +1,6 @@
 import React from 'react';
 import { useApp, ActiveTab } from '../context/AppContext';
-import { Home, Utensils, Store, Compass, MessageSquare, User } from 'lucide-react';
+import { Home, Utensils, Store, Compass, BookOpen, User } from 'lucide-react';
 
 export const BottomNav: React.FC = () => {
   const { activeTab, setActiveTab, language } = useApp();
@@ -10,7 +10,7 @@ export const BottomNav: React.FC = () => {
     { id: 'food', labelKh: 'មុខម្ហូប', labelEn: 'Food', labelZh: '美食', icon: <Utensils className="w-5 h-5" /> },
     { id: 'restaurants', labelKh: 'ភោជនីយដ្ឋាន', labelEn: 'Shops', labelZh: '餐厅', icon: <Store className="w-5 h-5" /> },
     { id: 'tourism', labelKh: 'ទេសចរណ៍', labelEn: 'Travel', labelZh: '旅游', icon: <Compass className="w-5 h-5" /> },
-    { id: 'community', labelKh: 'សហគមន៍', labelEn: 'Feed', labelZh: '社区', icon: <MessageSquare className="w-5 h-5" /> },
+    { id: 'guide', labelKh: 'ណែនាំ', labelEn: 'Guide', labelZh: '指南', icon: <BookOpen className="w-5 h-5" /> },
     { id: 'profile', labelKh: 'គណនី', labelEn: 'Profile', labelZh: '我的', icon: <User className="w-5 h-5" /> },
   ];
 
