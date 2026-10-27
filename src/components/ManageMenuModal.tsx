@@ -19,6 +19,7 @@ import {
 } from '../utils/androidMediaHelper';
 import { searchOnlineFoodImages, OnlineFoodImageCandidate } from '../services/onlineFoodImageService';
 import { ShopMultiPhotoUploader } from './ShopMultiPhotoUploader';
+import { ShopLocationCheckInPickerModal, ShopCheckInLocationResult } from './ShopLocationCheckInPickerModal';
 
 export const ManageMenuModal: React.FC = () => {
   const { 
@@ -164,6 +165,9 @@ export const ManageMenuModal: React.FC = () => {
   const [storePriceLevel, setStorePriceLevel] = useState<RestaurantPriceLevel>(managingRestaurant?.priceLevel || '$$');
   const [storeDescriptionKh, setStoreDescriptionKh] = useState(managingRestaurant?.descriptionKh || '');
   const [storeMapUrl, setStoreMapUrl] = useState(managingRestaurant?.mapUrl || '');
+  const [storeLatitude, setStoreLatitude] = useState<number>(managingRestaurant?.latitude || 11.5564);
+  const [storeLongitude, setStoreLongitude] = useState<number>(managingRestaurant?.longitude || 104.9282);
+  const [isStoreCheckInOpen, setIsStoreCheckInOpen] = useState(false);
   const [storeCoverPhoto, setStoreCoverPhoto] = useState(managingRestaurant?.photoUrl || '');
   const [storeGalleryPhotos, setStoreGalleryPhotos] = useState<string[]>(managingRestaurant?.galleryPhotos || []);
   const [storePromoVideoUrl, setStorePromoVideoUrl] = useState(managingRestaurant?.promoVideoUrl || '');
@@ -203,6 +207,8 @@ export const ManageMenuModal: React.FC = () => {
       setStorePriceLevel(fresh.priceLevel || '$$');
       setStoreDescriptionKh(fresh.descriptionKh || '');
       setStoreMapUrl(fresh.mapUrl || '');
+      setStoreLatitude(typeof fresh.latitude === 'number' ? fresh.latitude : 11.5564);
+      setStoreLongitude(typeof fresh.longitude === 'number' ? fresh.longitude : 104.9282);
       setStoreCoverPhoto(fresh.photoUrl || '');
       setStoreGalleryPhotos(fresh.galleryPhotos || []);
       setStorePromoVideoUrl(fresh.promoVideoUrl || '');
@@ -497,6 +503,8 @@ export const ManageMenuModal: React.FC = () => {
       priceLevel: storePriceLevel,
       descriptionKh: storeDescriptionKh.trim(),
       mapUrl: storeMapUrl.trim(),
+      latitude: storeLatitude,
+      longitude: storeLongitude,
       photoUrl: finalCover,
       profileImage: finalCover,
       foodImages: storeGalleryPhotos.slice(0, maxPhotoLimit),
@@ -1633,7 +1641,7 @@ export const ManageMenuModal: React.FC = () => {
                 </div>
               </div>
 
-              <div>
+              <div className="space-y-2">
                 <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
                   {isKm ? '៧. អាសយដ្ឋានហាងលម្អិត *' : '7. Detailed Address *'}
                 </label>
@@ -1644,6 +1652,18 @@ export const ManageMenuModal: React.FC = () => {
                   onChange={e => setStoreAddressKh(e.target.value)}
                   className="w-full px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs focus:ring-2 focus:ring-emerald-500/30 focus:border-[#059669] outline-none text-[#0F172A] dark:text-white"
                 />
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsStoreCheckInOpen(true)}
+                    className="py-2 px-3.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 text-white font-bold text-xs flex items-center gap-1.5 shadow-xs transition cursor-pointer"
+                  >
+                    <span>📍 កំណត់ទីតាំងហាង (Check In)</span>
+                  </button>
+                  <span className="text-[11px] font-mono text-emerald-700 dark:text-emerald-300">
+                    📍 GPS: {storeLatitude.toFixed(5)}, {storeLongitude.toFixed(5)}
+                  </span>
+                </div>
               </div>
 
               <div>
@@ -2303,6 +2323,29 @@ export const ManageMenuModal: React.FC = () => {
             {isKm ? 'បិទ' : 'Close'}
           </button>
         </div>
+        <ShopLocationCheckInPickerModal
+          isOpen={isStoreCheckInOpen}
+          onClose={() => setIsStoreCheckInOpen(false)}
+          initialLat={storeLatitude}
+          initialLng={storeLongitude}
+          initialAddress={storeAddressKh}
+          initialProvinceKh={storeProvinceKh}
+          shopName={storeNameKh || storeNameEn}
+          language={language}
+          onConfirmLocation={(loc: ShopCheckInLocationResult) => {
+            setStoreLatitude(loc.latitude);
+            setStoreLongitude(loc.longitude);
+            setStoreMapUrl(loc.mapUrl);
+            if (loc.formattedAddressKh) setStoreAddressKh(loc.formattedAddressKh);
+            if (loc.provinceKh) setStoreProvinceKh(loc.provinceKh);
+            showToast(
+              isKm
+                ? '📍 បានកំណត់ទីតាំងហាង (Check In) ដោយជោគជ័យ! សូមចុច «រក្សាទុក» ដើម្បីរក្សាទុកការកែប្រែ។'
+                : '📍 Shop location pinned! Tap Save to persist changes.',
+              'success'
+            );
+          }}
+        />
       </div>
     </div>
   );

@@ -77,10 +77,17 @@ async function main() {
   const distCerts = (existingCerts.data || []).filter(
     c => c.attributes.certificateType === 'DISTRIBUTION' || c.attributes.certificateType === 'IOS_DISTRIBUTION'
   );
-  // Revoke any previous CI distribution certificates so we never hit Apple's limit
-  for (const c of distCerts) {
-    console.log('   Revoking previous CI distribution certificate:', c.id);
-    await ascRequest('/certificates/' + c.id, 'DELETE').catch(() => {});
+  // Only revoke the oldest certificate if at Apple's 2-certificate limit,
+  // preserving the active certificate for any build currently in App Store Review
+  if (distCerts.length >= 2) {
+    const sorted = [...distCerts].sort((a, b) =>
+      String(a.attributes.expirationDate || '').localeCompare(String(b.attributes.expirationDate || ''))
+    );
+    const toRevoke = sorted.slice(0, distCerts.length - 1);
+    for (const c of toRevoke) {
+      console.log('   Revoking oldest CI distribution certificate:', c.id);
+      await ascRequest('/certificates/' + c.id, 'DELETE').catch(() => {});
+    }
   }
 
   console.log('4. Creating Apple Distribution Certificate via API...');

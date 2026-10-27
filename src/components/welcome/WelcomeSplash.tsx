@@ -37,13 +37,13 @@ export const WelcomeSplash: React.FC<Props> = ({ language, onDone, durationMs = 
       />
       <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/45 to-black/85" />
       <div className="relative z-10 h-full w-full flex flex-col items-center justify-center gap-4 px-6 text-center animate-in fade-in duration-500 motion-reduce:animate-none">
-        <div className="w-28 h-28 rounded-3xl bg-white/95 p-2 shadow-2xl ring-4 ring-white/30">
+        <div className="w-36 h-36 sm:w-40 sm:h-40 flex items-center justify-center">
           <img
             src={WELCOME_IMAGES.logo}
             alt="Khmer Food & Tourism"
             width={256}
             height={256}
-            className="w-full h-full object-contain"
+            className="w-full h-full object-contain drop-shadow-[0_14px_28px_rgba(0,0,0,0.75)] select-none"
             onError={(e) => {
               (e.currentTarget as HTMLImageElement).src = WELCOME_IMAGES.logoFallback;
             }}

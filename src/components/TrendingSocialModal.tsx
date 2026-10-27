@@ -19,6 +19,7 @@ import {
   searchCambodiaPlacesWithSmartCache,
   performUnifiedCambodiaSearch,
   GooglePlaceCachedItem,
+  openExternalPlaceInGoogleMaps,
 } from '../services/googlePlacesService';
 import {
   searchAndDiscoverSocialFood,
@@ -293,8 +294,9 @@ export const TrendingSocialModal: React.FC = () => {
       filteredRestaurants = [];
     }
 
+    const filteredExternal = raw.externalPlaces || [];
     const scopedTotal =
-      filteredFoods.length + filteredRestaurants.length + filteredDestinations.length;
+      filteredFoods.length + filteredRestaurants.length + filteredDestinations.length + filteredExternal.length;
 
     // If a specific category tab had 0 matches for the user's keyword (e.g., user typed "Pizza" while on "🍲 ម្ហូបខ្មែរល្បីៗ"),
     // show all matching categories from the unified Home search so relevant results are never hidden.
@@ -306,6 +308,7 @@ export const TrendingSocialModal: React.FC = () => {
       foods: filteredFoods,
       restaurants: filteredRestaurants,
       destinations: filteredDestinations,
+      externalPlaces: filteredExternal,
       totalCount: scopedTotal,
     };
   }, [
@@ -785,6 +788,8 @@ export const TrendingSocialModal: React.FC = () => {
                           <img
                             src={food.photoUrl}
                             alt={locF.name}
+                            loading="lazy"
+                            decoding="async"
                             className="w-12 h-12 rounded-xl object-cover shrink-0 border border-slate-700"
                           />
                           <div className="min-w-0">
@@ -819,6 +824,8 @@ export const TrendingSocialModal: React.FC = () => {
                           <img
                             src={rest.photoUrl}
                             alt={locR.name}
+                            loading="lazy"
+                            decoding="async"
                             className="w-12 h-12 rounded-xl object-cover shrink-0 border border-slate-700"
                           />
                           <div className="min-w-0">
@@ -853,6 +860,8 @@ export const TrendingSocialModal: React.FC = () => {
                           <img
                             src={dest.photoUrl}
                             alt={locD.name}
+                            loading="lazy"
+                            decoding="async"
                             className="w-12 h-12 rounded-xl object-cover shrink-0 border border-slate-700"
                           />
                           <div className="min-w-0">
@@ -870,6 +879,53 @@ export const TrendingSocialModal: React.FC = () => {
                           </div>
                         </div>
                         <ChevronRight className="w-4 h-4 text-slate-400 shrink-0 group-hover:translate-x-0.5 transition" />
+                      </div>
+                    );
+                  })}
+
+                  {/* External Google Maps Places -> Tap opens directly in Google Maps */}
+                  {(homeSearchResults.externalPlaces || []).map((place) => {
+                    const extName =
+                      language === 'km'
+                        ? place.nameKh || place.name
+                        : place.nameEn || place.name;
+                    const extAddress =
+                      language === 'km'
+                        ? place.addressKh || place.address || place.provinceKh
+                        : place.address || place.addressKh || place.provinceEn;
+                    return (
+                      <div
+                        key={`modal-ext-${place.placeId}`}
+                        onClick={() => openExternalPlaceInGoogleMaps(place)}
+                        className="p-2.5 rounded-2xl bg-slate-900/90 hover:bg-blue-950/60 border border-blue-700/60 flex items-center justify-between gap-3 cursor-pointer transition group"
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          {place.hasRealGooglePhoto && place.photoUrl ? (
+                            <img
+                              src={place.photoUrl}
+                              alt={extName}
+                              className="w-12 h-12 rounded-xl object-cover shrink-0 border border-blue-700"
+                            />
+                          ) : (
+                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-600 to-teal-600 text-white flex flex-col items-center justify-center shrink-0">
+                              <Navigation className="w-5 h-5" />
+                            </div>
+                          )}
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-1.5">
+                              <span className="px-1.5 py-0.5 rounded-md bg-blue-950 text-blue-300 border border-blue-700/70 text-[10px] font-bold shrink-0">
+                                🗺️ {tr(language, 'Google Maps', 'Google Maps', '谷歌地图')}
+                              </span>
+                              <h4 className="font-bold text-xs sm:text-sm text-white truncate group-hover:text-blue-400">
+                                {extName}
+                              </h4>
+                            </div>
+                            <p className="text-[11px] text-slate-400 truncate mt-0.5">
+                              📍 {extAddress}
+                            </p>
+                          </div>
+                        </div>
+                        <ExternalLink className="w-4 h-4 text-blue-400 shrink-0 group-hover:translate-x-0.5 transition" />
                       </div>
                     );
                   })}

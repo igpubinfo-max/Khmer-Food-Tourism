@@ -57,9 +57,9 @@ export const WelcomeSlides: React.FC<Props> = ({ language, onLanguage, onFinish 
               <img
                 src={WELCOME_IMAGES.logo}
                 alt="Khmer Food & Tourism"
-                width={140}
-                height={140}
-                className="w-28 h-28 sm:w-32 sm:h-32 object-contain drop-shadow-[0_12px_24px_rgba(0,0,0,0.7)] select-none animate-in fade-in zoom-in-95 duration-500"
+                width={156}
+                height={156}
+                className="w-32 h-32 sm:w-36 sm:h-36 object-contain drop-shadow-[0_14px_28px_rgba(0,0,0,0.75)] select-none animate-in fade-in zoom-in-95 duration-500"
                 onError={(e) => {
                   (e.currentTarget as HTMLImageElement).src = WELCOME_IMAGES.logoFallback;
                 }}

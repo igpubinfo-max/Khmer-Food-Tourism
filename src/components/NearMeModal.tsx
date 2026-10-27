@@ -624,6 +624,10 @@ export const NearMeModal: React.FC = () => {
                         <div className="flex items-start justify-between gap-1">
                           <h4 
                             onClick={() => {
+                              if (String(r.id).startsWith('gplace_rest_')) {
+                                window.open(buildDirectionsUrl(r.latitude, r.longitude, `${r.nameKh} ${r.addressKh}`, r.mapUrl), '_blank', 'noopener,noreferrer');
+                                return;
+                              }
                               setSelectedRestaurant(r);
                               setIsNearMeModalOpen(false);
                             }}
@@ -677,6 +681,10 @@ export const NearMeModal: React.FC = () => {
 
                       <button
                         onClick={() => {
+                          if (String(r.id).startsWith('gplace_rest_')) {
+                            window.open(buildDirectionsUrl(r.latitude, r.longitude, `${r.nameKh} ${r.addressKh}`, r.mapUrl), '_blank', 'noopener,noreferrer');
+                            return;
+                          }
                           setSelectedRestaurant(r);
                           setIsNearMeModalOpen(false);
                         }}
@@ -770,6 +778,10 @@ export const NearMeModal: React.FC = () => {
                         <div className="flex items-start justify-between gap-1">
                           <h4 
                             onClick={() => {
+                              if (String(d.id).startsWith('gplace_dest_')) {
+                                window.open(buildDirectionsUrl(d.latitude, d.longitude, `${d.nameKh} ${d.provinceKh}`, d.mapUrl), '_blank', 'noopener,noreferrer');
+                                return;
+                              }
                               setSelectedDestination(d);
                               setIsNearMeModalOpen(false);
                             }}
@@ -811,6 +823,10 @@ export const NearMeModal: React.FC = () => {
 
                       <button
                         onClick={() => {
+                          if (String(d.id).startsWith('gplace_dest_')) {
+                            window.open(buildDirectionsUrl(d.latitude, d.longitude, `${d.nameKh} ${d.provinceKh}`, d.mapUrl), '_blank', 'noopener,noreferrer');
+                            return;
+                          }
                           setSelectedDestination(d);
                           setIsNearMeModalOpen(false);
                         }}

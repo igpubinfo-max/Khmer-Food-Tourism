@@ -87,8 +87,7 @@ export const SmartHubMenuModal: React.FC<Props> = ({ onClose }) => {
 
   const openFavorites = () => {
     onClose();
-    if (canUseVip) setIsWishlistsModalOpen(true);
-    else setActiveTab('profile');
+    setIsWishlistsModalOpen(true);
   };
 
   const rowCls =

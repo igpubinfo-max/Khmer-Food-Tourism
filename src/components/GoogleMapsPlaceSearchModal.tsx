@@ -18,6 +18,7 @@ import {
   findDuplicateDestinationForGooglePlace,
   convertGooglePlaceToRestaurant,
   convertGooglePlaceToDestination,
+  openExternalPlaceInGoogleMaps,
 } from '../services/googlePlacesService';
 
 const CAMBODIA_PROVINCES = [
@@ -434,6 +435,9 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
     setEditingPlaceId(null);
   };
 
+  // Smart result routing:
+  // - If the place already exists in our app database, open its existing in-app detail page.
+  // - If the place is external (not in our app database), open that exact place directly in Google Maps!
   const handleOpenPlacePreview = (place: GooglePlaceCachedItem) => {
     const dupInfo = duplicateMap.get(place.placeId);
     if (dupInfo?.isDuplicate && dupInfo.existingId) {
@@ -452,11 +456,8 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
       }
     }
 
-    if (place.category === 'tourism') {
-      setSelectedDestination(convertGooglePlaceToDestination(place));
-    } else {
-      setSelectedRestaurant(convertGooglePlaceToRestaurant(place));
-    }
+    // External Google Maps result -> Open directly in Google Maps / Navigation without creating duplicate app records
+    openExternalPlaceInGoogleMaps(place);
   };
 
   const handleSaveDailyLimit = () => {
@@ -1302,23 +1303,36 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                         {/* Action Buttons */}
                         <div className="flex items-center justify-between gap-2 pt-1 flex-wrap">
                           <div className="flex items-center gap-1.5">
-                            <button
-                              type="button"
-                              onClick={() => handleOpenPlacePreview(place)}
-                              className="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors cursor-pointer"
-                            >
-                              {tr(language, 'មើលព័ត៌មានលម្អិត', 'View Details', '查看详情')}
-                            </button>
+                            {isDup ? (
+                              <button
+                                type="button"
+                                onClick={() => handleOpenPlacePreview(place)}
+                                className="px-2.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors cursor-pointer shadow-xs"
+                              >
+                                {tr(language, '✅ មើលក្នុងកម្មវិធី', '✅ Open in App', '✅ 在应用中查看')}
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => handleOpenPlacePreview(place)}
+                                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-colors cursor-pointer shadow-xs"
+                              >
+                                <ExternalLink className="w-3.5 h-3.5" />
+                                <span>{tr(language, '🗺️ បើកទីតាំងលើ Google Maps', '🗺️ Open in Google Maps', '🗺️ 在谷歌地图中打开')}</span>
+                              </button>
+                            )}
 
-                            <a
-                              href={placeMapsHref}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold transition-colors"
-                            >
-                              <ExternalLink className="w-3.5 h-3.5" />
-                              <span>{tr(language, 'បើក Google Maps', 'Google Maps', '打开谷歌地图')}</span>
-                            </a>
+                            {isDup && (
+                              <a
+                                href={placeMapsHref}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold transition-colors"
+                              >
+                                <ExternalLink className="w-3.5 h-3.5" />
+                                <span>{tr(language, 'Google Maps', 'Google Maps', '谷歌地图')}</span>
+                              </a>
+                            )}
                           </div>
 
                           {canManagePlaces && (

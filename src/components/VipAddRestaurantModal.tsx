@@ -28,6 +28,8 @@ import {
 } from '../utils/androidMediaHelper';
 import { analyzeFoodBusinessDeterministically } from '../services/aiFoodBusinessVerifierService';
 import { tr } from '../utils/i18n';
+import { ShopLocationCheckInPickerModal, ShopCheckInLocationResult } from './ShopLocationCheckInPickerModal';
+import { resolveProvinceGeoConfig } from '../services/googlePlacesService';
 
 const SAMPLE_SHOP_PHOTOS = [
   '/foods/food-1.jpg',
@@ -105,6 +107,10 @@ export const VipAddRestaurantModal: React.FC = () => {
   const [provinceKh, setProvinceKh] = useState('រាជធានីភ្នំពេញ');
   const [provinceEn, setProvinceEn] = useState('Phnom Penh');
   const [addressKh, setAddressKh] = useState('');
+  const [shopLat, setShopLat] = useState<number | null>(null);
+  const [shopLng, setShopLng] = useState<number | null>(null);
+  const [shopMapUrl, setShopMapUrl] = useState<string>('');
+  const [isCheckInPickerOpen, setIsCheckInPickerOpen] = useState(false);
   const [phone, setPhone] = useState(currentUser?.phone || '');
   const [openingHoursKh, setOpeningHoursKh] = useState('០៧:០០ ព្រឹក - ០៩:០០ យប់');
   const [priceLevel] = useState<RestaurantPriceLevel>('$$');
@@ -159,6 +165,9 @@ export const VipAddRestaurantModal: React.FC = () => {
     setNameKh('');
     setNameEn('');
     setAddressKh('');
+    setShopLat(null);
+    setShopLng(null);
+    setShopMapUrl('');
     setDescriptionKh('');
     setShopPhotos(['/foods/food-1.jpg']);
     setReplacingStoreId(null);
@@ -172,6 +181,9 @@ export const VipAddRestaurantModal: React.FC = () => {
     setProvinceKh(store.provinceKh || 'រាជធានីភ្នំពេញ');
     setProvinceEn(store.provinceEn || 'Phnom Penh');
     setAddressKh(store.addressKh || '');
+    setShopLat(typeof store.latitude === 'number' ? store.latitude : null);
+    setShopLng(typeof store.longitude === 'number' ? store.longitude : null);
+    setShopMapUrl(store.mapUrl || '');
     setPhone(store.phone || currentUser?.phone || '');
     setOpeningHoursKh(store.openingHoursKh || '០៧:០០ ព្រឹក - ០៩:០០ យប់');
     setShopPhotos(
@@ -314,9 +326,13 @@ export const VipAddRestaurantModal: React.FC = () => {
         openingHoursKh: openingHoursKh.trim() || '០៧:០០ ព្រឹក - ០៩:០០ យប់',
         openingHoursEn: '07:00 AM - 09:00 PM',
         priceLevel,
-        mapUrl: `https://maps.google.com/?q=${encodeURIComponent(finalNameKh)}`,
-        latitude: 11.5564,
-        longitude: 104.9282,
+        mapUrl:
+          shopMapUrl.trim() ||
+          (shopLat !== null && shopLng !== null
+            ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${finalNameKh} ${shopLat},${shopLng}`)}`
+            : `https://maps.google.com/?q=${encodeURIComponent(finalNameKh)}`),
+        latitude: shopLat !== null ? shopLat : (resolveProvinceGeoConfig(provinceKh)?.lat ?? 11.5564),
+        longitude: shopLng !== null ? shopLng : (resolveProvinceGeoConfig(provinceKh)?.lng ?? 104.9282),
         signatureDishesKh: ['ម្ហូបពិសេសប្រចាំហាង'],
         isFeatured: true,
         isVerified: true,
@@ -942,8 +958,8 @@ export const VipAddRestaurantModal: React.FC = () => {
               </div>
             </div>
 
-            {/* 4. Short Address / Location */}
-            <div>
+            {/* 4. Short Address / Location + Check In Button */}
+            <div className="space-y-2">
               <label className="block font-bold text-slate-800 dark:text-slate-200 mb-1">
                 {tr(language, '៥. ទីតាំង ឬអាសយដ្ឋានខ្លីៗ (មិនបាច់ដាក់ក៏បាន)', '5. Short Address / Location (Optional)', '5. 简短地址或位置（选填）')}
               </label>
@@ -954,6 +970,37 @@ export const VipAddRestaurantModal: React.FC = () => {
                 placeholder={tr(language, 'ឧ. ជិតផ្សារថ្មី ឬ ផ្លូវលេខ ៦៣...', 'e.g. Near Central Market, St. 63...', '例如：中央市场附近...')}
                 className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs focus:border-emerald-600 outline-none"
               />
+
+              {/* Check In / Set Shop Location Button */}
+              <button
+                type="button"
+                onClick={() => setIsCheckInPickerOpen(true)}
+                className="w-full py-2.5 px-3.5 rounded-xl bg-gradient-to-r from-emerald-600/90 to-teal-700 hover:from-emerald-500 hover:to-teal-600 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm border border-emerald-400/30 transition cursor-pointer"
+              >
+                <span>📍 កំណត់ទីតាំងហាង (Check In)</span>
+              </button>
+
+              {/* Selected GPS Coordinates & Map Preview Badge */}
+              {shopLat !== null && shopLng !== null && (
+                <div className="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-500/40 flex items-center justify-between gap-2 text-[11px]">
+                  <div className="min-w-0 flex-1">
+                    <div className="font-bold text-emerald-800 dark:text-emerald-300 flex items-center gap-1">
+                      <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                      <span>{tr(language, 'បានកំណត់ទីតាំង GPS រួចរាល់', 'GPS Location Pinned', '已标记 GPS 位置')}</span>
+                    </div>
+                    <div className="font-mono text-[10px] text-slate-600 dark:text-slate-400 truncate mt-0.5">
+                      GPS: {shopLat.toFixed(6)}, {shopLng.toFixed(6)}
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsCheckInPickerOpen(true)}
+                    className="px-2.5 py-1 rounded-lg bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-[10px] shrink-0 cursor-pointer"
+                  >
+                    {tr(language, 'កែទីតាំង', 'Adjust Pin', '调整位置')}
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Optional Collapsible Extra Info (Opening Hours & Description) */}
@@ -1023,6 +1070,42 @@ export const VipAddRestaurantModal: React.FC = () => {
             </div>
           </form>
         )}
+        <ShopLocationCheckInPickerModal
+          isOpen={isCheckInPickerOpen}
+          onClose={() => setIsCheckInPickerOpen(false)}
+          initialLat={shopLat ?? undefined}
+          initialLng={shopLng ?? undefined}
+          initialAddress={addressKh}
+          initialProvinceKh={provinceKh}
+          shopName={nameKh || nameEn}
+          language={language}
+          onConfirmLocation={(loc: ShopCheckInLocationResult) => {
+            setShopLat(loc.latitude);
+            setShopLng(loc.longitude);
+            setShopMapUrl(loc.mapUrl);
+            if (loc.formattedAddressKh) {
+              setAddressKh(loc.formattedAddressKh);
+            }
+            const matchedProv = PROVINCES.find(
+              (p) =>
+                p.nameKh === loc.provinceKh ||
+                p.nameKh.replace(/^ខេត្ត|^រាជធានី/g, '') === loc.provinceKh.replace(/^ខេត្ត|^រាជធានី/g, '')
+            );
+            if (matchedProv) {
+              setProvinceKh(matchedProv.nameKh);
+              setProvinceEn(matchedProv.nameEn);
+            }
+            showToast(
+              tr(
+                language,
+                '📍 បានកំណត់ទីតាំងហាង (Check In) ដោយជោគជ័យ!',
+                '📍 Shop location pinned successfully!',
+                '📍 店铺位置已成功标记！'
+              ),
+              'success'
+            );
+          }}
+        />
       </div>
     </div>
   );

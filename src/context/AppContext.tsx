@@ -1886,8 +1886,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, [users]);
 
-  // Automatic Pre-Update Database & VIP Snapshot Backup whenever App Version changes
+  // Automatic Pre-Update Database & VIP Snapshot Backup whenever App Version changes (runs at most once per session)
+  const hasAttemptedVersionBackupRef = useRef(false);
   useEffect(() => {
+    if (hasAttemptedVersionBackupRef.current) return;
+    hasAttemptedVersionBackupRef.current = true;
     try {
       const APP_VERSION = '2.3.1';
       const lastBackedUpVersion = localStorage.getItem('kft_last_backed_up_version');
@@ -1904,42 +1907,70 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           allUsersCount: users.length,
           verifiedTransactions: transactions.filter(t => t.status === 'verified'),
         };
-        localStorage.setItem('kft_pre_update_db_backup_v1', JSON.stringify(backupSnapshot));
-        localStorage.setItem('kft_last_backed_up_version', APP_VERSION);
+        try {
+          localStorage.setItem('kft_pre_update_db_backup_v1', JSON.stringify(backupSnapshot));
+        } catch {
+          // Ignore quota error for backup snapshot so it never loops
+        }
+        try {
+          localStorage.setItem('kft_last_backed_up_version', APP_VERSION);
+        } catch {}
       }
     } catch (e) {
       console.warn('Pre-update database backup warning:', e);
     }
   }, [users, transactions]);
 
+  const lastCurrentUserSyncSigRef = useRef<string>('');
+
   useEffect(() => {
     try {
       if (currentUser) {
-        localStorage.setItem('kft_current_user_v5', JSON.stringify(currentUser));
+        scheduleStorageWrite('kft_current_user_v5', currentUser, 300);
         const userLang = localStorage.getItem(`kft_lang_user_${currentUser.id}`);
         if (userLang === 'km' || userLang === 'en' || userLang === 'zh') {
           setLanguageState(userLang);
           localStorage.setItem('kft_user_language_pref_v1', userLang);
         }
         // Guarantee that any logged-in non-admin user is ALWAYS in `users` and synced to their atomic cloud row
+        // Deduplicated by signature so initial mount + background cloud sync do not trigger a redundant network loop
         const isAdmin =
           currentUser.role === 'admin' ||
           currentUser.id === 'admin-authorized-single' ||
           currentUser.username === 'admin' ||
           currentUser.username === 'cheasavuth';
         if (!isAdmin && !checkIsUserDeleted(currentUser)) {
-          setUsers(prev => {
-            const merged = deduplicateAndNormalizeUsers([...prev, currentUser], deletedUsers);
-            if (merged.length !== prev.length || !prev.some(u => u.id === getCanonicalUserId(currentUser))) {
+          const sig = `${currentUser.id}|${currentUser.email}|${currentUser.phone || ''}|${currentUser.name}|${currentUser.membershipTier || ''}|${currentUser.subscriptionStatus || ''}|${currentUser.subscriptionExpiryDate || ''}|${currentUser.paymentStatus || ''}|${currentUser.paidAdditionalStoreSlots || 0}|${Boolean(currentUser.isDisabled)}`;
+          if (lastCurrentUserSyncSigRef.current !== sig) {
+            const isFirstMountSync = lastCurrentUserSyncSigRef.current === '';
+            lastCurrentUserSyncSigRef.current = sig;
+            setUsers(prev => {
+              const canonicalId = getCanonicalUserId(currentUser);
+              const existing = prev.find(u => u.id === canonicalId || u.id === currentUser.id);
+              if (
+                existing &&
+                existing.membershipTier === currentUser.membershipTier &&
+                existing.subscriptionStatus === currentUser.subscriptionStatus &&
+                existing.subscriptionExpiryDate === currentUser.subscriptionExpiryDate &&
+                existing.paymentStatus === currentUser.paymentStatus &&
+                existing.name === currentUser.name
+              ) {
+                return prev;
+              }
+              const merged = deduplicateAndNormalizeUsers([...prev, currentUser], deletedUsers);
+              if (merged.length !== prev.length || ! existing) {
+                return merged;
+              }
               return merged;
+            });
+            // Skip immediate cloud upsert on initial mount because `triggerCloudSyncNow` runs 1.8s after mount anyway
+            if (!isFirstMountSync && isSupabaseConfigured()) {
+              upsertSingleUserToCloud(currentUser, deletedUsers, false).catch(() => {});
             }
-            return prev;
-          });
-          if (isSupabaseConfigured()) {
-            upsertSingleUserToCloud(currentUser, deletedUsers).catch(() => {});
           }
         }
       } else {
+        lastCurrentUserSyncSigRef.current = '';
         localStorage.removeItem('kft_current_user_v5');
       }
     } catch (e) {
@@ -2378,13 +2409,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
     const task = (async () => {
       try {
+        lastSettingsFetchedAtRef.current = Date.now();
         const res = await fetchAuthoritativeAppSettingsFromServer(appSettingsRef.current);
         if (isSavingSettingsRef.current || (silent && Date.now() - lastAdminSettingsSaveAtRef.current < 6000)) {
           return appSettingsRef.current;
         }
         setSettingsSyncError(prev => (prev === null ? prev : null));
         if (res.ok && res.settings) {
-          lastSettingsFetchedAtRef.current = Date.now();
           setAppSettings(prev => {
             const next = normalizeAuthoritativeAppSettings(res.settings!, prev);
             if (areAppSettingsEqual(prev, next)) {
@@ -2411,7 +2442,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return task;
   };
 
-  // Immediately refresh authoritative VIP settings whenever any VIP, Checkout, Support, Store, or Profile view opens or when account switches
+  // Immediately refresh authoritative VIP settings whenever any VIP, Checkout, Support, Store, or Profile view opens
   useEffect(() => {
     if (
       isUpgradeVipModalOpen ||
@@ -2420,8 +2451,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       isAddRestaurantModalOpen ||
       isManageMenuModalOpen ||
       isAdminOpen ||
-      activeTab === 'profile' ||
-      Boolean(currentUser?.id)
+      activeTab === 'profile'
     ) {
       refreshAppSettingsFromServer(true);
     }
@@ -2607,9 +2637,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             return prev;
           }
           latestSyncStateRef.current.users = finalMerged;
-          try {
-            localStorage.setItem('kft_users_v5', JSON.stringify(finalMerged));
-          } catch {}
+          scheduleStorageWrite('kft_users_v5', finalMerged, 600);
           return finalMerged;
         });
 
@@ -2645,6 +2673,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 (curPhone.length >= 7 && u.phone && u.phone.replace(/[\s-+]/g, '') === curPhone)
             );
             if (matchedCurrent && JSON.stringify(matchedCurrent) !== JSON.stringify(liveCurrentUser)) {
+              lastCurrentUserSyncSigRef.current = `${matchedCurrent.id}|${matchedCurrent.email}|${matchedCurrent.phone || ''}|${matchedCurrent.name}|${matchedCurrent.membershipTier || ''}|${matchedCurrent.subscriptionStatus || ''}|${matchedCurrent.subscriptionExpiryDate || ''}|${matchedCurrent.paymentStatus || ''}|${matchedCurrent.paidAdditionalStoreSlots || 0}|${Boolean(matchedCurrent.isDisabled)}`;
               setCurrentUser(matchedCurrent);
               latestSyncStateRef.current.currentUser = matchedCurrent;
             }
@@ -4701,11 +4730,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     recordPermanentFoodOverride(newFood);
     setFoods(prev => {
       const next = [newFood, ...prev];
-      try {
-        localStorage.setItem('kft_foods_200_v7', JSON.stringify(compactDataForBulkLocalStorage('kft_foods_200_v7', next)));
-      } catch {
-        scheduleStorageWrite('kft_foods_200_v7', next, 500);
-      }
+      scheduleStorageWrite('kft_foods_200_v7', next, 400);
       return next;
     });
     showToast(language === 'km' ? 'បានបញ្ចូលមុខម្ហូបថ្មីដោយជោគជ័យ' : 'Food item added successfully!', 'success');
@@ -4720,11 +4745,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     recordPermanentFoodOverride(customUpdated);
     setFoods(prev => {
       const next = prev.map(f => f.id === customUpdated.id ? customUpdated : f);
-      try {
-        localStorage.setItem('kft_foods_200_v7', JSON.stringify(compactDataForBulkLocalStorage('kft_foods_200_v7', next)));
-      } catch {
-        scheduleStorageWrite('kft_foods_200_v7', next, 500);
-      }
+      scheduleStorageWrite('kft_foods_200_v7', next, 400);
       return next;
     });
     if (selectedFood?.id === customUpdated.id) setSelectedFood(customUpdated);
@@ -4923,11 +4944,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setRestaurants(prev => {
       const nextList = sortRestaurantsChronologically([...prev.filter(r => r.id !== newRest.id), newRest]);
       latestSyncStateRef.current.restaurants = nextList;
-      try {
-        localStorage.setItem('kft_restaurants_real_v11', JSON.stringify(compactDataForBulkLocalStorage('kft_restaurants_real_v9', nextList)));
-      } catch (e) {
-        console.warn('Immediate save failed for new restaurant:', e);
-      }
+      scheduleStorageWrite('kft_restaurants_real_v11', nextList, 300);
       // Background push to Supabase Cloud if configured
       try {
         if (isSupabaseConfigured()) {
@@ -5180,11 +5197,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setRestaurants(prev => {
       const next = prev.map(r => r.id === updated.id ? safeUpdated : r);
       latestSyncStateRef.current.restaurants = next;
-      try {
-        localStorage.setItem('kft_restaurants_real_v11', JSON.stringify(compactDataForBulkLocalStorage('kft_restaurants_real_v9', next)));
-      } catch {
-        scheduleStorageWrite('kft_restaurants_real_v9', next, 500);
-      }
+      scheduleStorageWrite('kft_restaurants_real_v11', next, 300);
       if (!isSeedRestaurantId(safeUpdated.id) && isSupabaseConfigured()) {
         try {
           const customRests = next.filter(r => !isSeedRestaurantId(r.id));
@@ -5300,11 +5313,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setRestaurants(prev => {
       const next = prev.map(r => (r.id === restaurantId ? updatedRest : r));
       latestSyncStateRef.current.restaurants = next;
-      try {
-        localStorage.setItem('kft_restaurants_real_v11', JSON.stringify(compactDataForBulkLocalStorage('kft_restaurants_real_v11', next)));
-      } catch {
-        scheduleStorageWrite('kft_restaurants_real_v11', next, 400);
-      }
+      scheduleStorageWrite('kft_restaurants_real_v11', next, 300);
       if (!isSeedRestaurantId(restaurantId) && isSupabaseConfigured()) {
         try {
           pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter(r => !isSeedRestaurantId(r.id)));
@@ -5379,11 +5388,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setRestaurants(prev => {
       const next = prev.map(r => (r.id === restaurantId ? updatedRest : r));
       latestSyncStateRef.current.restaurants = next;
-      try {
-        localStorage.setItem('kft_restaurants_real_v11', JSON.stringify(compactDataForBulkLocalStorage('kft_restaurants_real_v11', next)));
-      } catch {
-        scheduleStorageWrite('kft_restaurants_real_v11', next, 400);
-      }
+      scheduleStorageWrite('kft_restaurants_real_v11', next, 300);
       if (!isSeedRestaurantId(restaurantId) && isSupabaseConfigured()) {
         try {
           pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter(r => !isSeedRestaurantId(r.id)));
@@ -5448,11 +5453,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setRestaurants(prev => {
       const next = prev.map(r => (r.id === restaurantId ? updatedRest : r));
       latestSyncStateRef.current.restaurants = next;
-      try {
-        localStorage.setItem('kft_restaurants_real_v11', JSON.stringify(compactDataForBulkLocalStorage('kft_restaurants_real_v11', next)));
-      } catch {
-        scheduleStorageWrite('kft_restaurants_real_v11', next, 400);
-      }
+      scheduleStorageWrite('kft_restaurants_real_v11', next, 300);
       if (!isSeedRestaurantId(restaurantId) && isSupabaseConfigured()) {
         try {
           pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter(r => !isSeedRestaurantId(r.id)));
@@ -5526,9 +5527,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     setRestaurants(prev => {
       const next = prev.map(r => (r.id === restaurantId ? updatedRest : r));
-      try {
-        localStorage.setItem('kft_restaurants_real_v11', JSON.stringify(next));
-      } catch {}
+      scheduleStorageWrite('kft_restaurants_real_v11', next, 400);
       if (!isSeedRestaurantId(restaurantId) && isSupabaseConfigured()) {
         try {
           pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter(r => !isSeedRestaurantId(r.id)));
@@ -5595,8 +5594,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
   };
 
-  // Restaurant Analytics (Views, Calls, Maps, Shares) — Throttled to prevent duplicate re-renders
+  // Restaurant Analytics (Views, Calls, Maps, Shares) — Lightweight in-place counter update + debounced idle write
+  // Avoids mutating the 250-restaurant array reference while opening RestaurantDetailModal, preventing full-list re-renders!
   const recentTrackedViewsRef = useRef<Record<string, number>>({});
+
+  const incrementRestaurantAnalyticsField = (
+    restaurantId: string,
+    field: 'views' | 'phoneClicks' | 'mapClicks' | 'shareClicks'
+  ) => {
+    const list = latestSyncStateRef.current.restaurants;
+    const target = list.find(r => r.id === restaurantId);
+    if (target) {
+      const cur = target.analytics || { views: 0, phoneClicks: 0, mapClicks: 0, shareClicks: 0 };
+      target.analytics = {
+        ...cur,
+        [field]: (cur[field] || 0) + 1,
+      };
+      scheduleStorageWrite('kft_restaurants_real_v11', list, 4000);
+    }
+    if (isManageMenuModalOpen || isAdminOpen) {
+      setRestaurants(prev => [...prev]);
+    }
+  };
 
   const trackRestaurantView = (restaurantId: string) => {
     const now = Date.now();
@@ -5604,59 +5623,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return;
     }
     recentTrackedViewsRef.current[restaurantId] = now;
-    setRestaurants(prev => prev.map(r => {
-      if (r.id !== restaurantId) return r;
-      const cur = r.analytics || { views: 0, phoneClicks: 0, mapClicks: 0, shareClicks: 0 };
-      return {
-        ...r,
-        analytics: {
-          ...cur,
-          views: (cur.views || 0) + 1,
-        }
-      };
-    }));
+    incrementRestaurantAnalyticsField(restaurantId, 'views');
   };
 
   const trackRestaurantCall = (restaurantId: string) => {
-    setRestaurants(prev => prev.map(r => {
-      if (r.id !== restaurantId) return r;
-      const cur = r.analytics || { views: 0, phoneClicks: 0, mapClicks: 0, shareClicks: 0 };
-      return {
-        ...r,
-        analytics: {
-          ...cur,
-          phoneClicks: (cur.phoneClicks || 0) + 1,
-        }
-      };
-    }));
+    incrementRestaurantAnalyticsField(restaurantId, 'phoneClicks');
   };
 
   const trackRestaurantMap = (restaurantId: string) => {
-    setRestaurants(prev => prev.map(r => {
-      if (r.id !== restaurantId) return r;
-      const cur = r.analytics || { views: 0, phoneClicks: 0, mapClicks: 0, shareClicks: 0 };
-      return {
-        ...r,
-        analytics: {
-          ...cur,
-          mapClicks: (cur.mapClicks || 0) + 1,
-        }
-      };
-    }));
+    incrementRestaurantAnalyticsField(restaurantId, 'mapClicks');
   };
 
   const trackRestaurantShare = (restaurantId: string) => {
-    setRestaurants(prev => prev.map(r => {
-      if (r.id !== restaurantId) return r;
-      const cur = r.analytics || { views: 0, phoneClicks: 0, mapClicks: 0, shareClicks: 0 };
-      return {
-        ...r,
-        analytics: {
-          ...cur,
-          shareClicks: (cur.shareClicks || 0) + 1,
-        }
-      };
-    }));
+    incrementRestaurantAnalyticsField(restaurantId, 'shareClicks');
   };
 
   const deleteRestaurant = (id: string) => {
@@ -5683,9 +5662,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     removePermanentRestaurantOverride(id);
     setRestaurants(prev => {
       const next = prev.filter(r => r.id !== id);
-      try {
-        localStorage.setItem('kft_restaurants_real_v11', JSON.stringify(next));
-      } catch {}
+      scheduleStorageWrite('kft_restaurants_real_v11', next, 300);
       if (isSupabaseConfigured()) {
         try {
           pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter(r => !isSeedRestaurantId(r.id)));
@@ -5740,9 +5717,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (selectedRestaurant?.id === id) setSelectedRestaurant(approvedRest);
         return approvedRest;
       });
-      try {
-        localStorage.setItem('kft_restaurants_real_v11', JSON.stringify(compactDataForBulkLocalStorage('kft_restaurants_real_v9', next)));
-      } catch {}
+      scheduleStorageWrite('kft_restaurants_real_v11', next, 400);
       if (isSupabaseConfigured()) {
         try {
           pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter(r => !isSeedRestaurantId(r.id)));
@@ -5798,9 +5773,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (selectedRestaurant?.id === id) setSelectedRestaurant(rejectedRest);
         return rejectedRest;
       });
-      try {
-        localStorage.setItem('kft_restaurants_real_v11', JSON.stringify(compactDataForBulkLocalStorage('kft_restaurants_real_v9', next)));
-      } catch {}
+      scheduleStorageWrite('kft_restaurants_real_v11', next, 400);
       if (isSupabaseConfigured()) {
         try {
           pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter(r => !isSeedRestaurantId(r.id)));
@@ -5897,11 +5870,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     recordPermanentDestinationOverride(newDest);
     setDestinations(prev => {
       const next = [newDest, ...prev];
-      try {
-        localStorage.setItem('kft_destinations_real_v8', JSON.stringify(compactDataForBulkLocalStorage('kft_destinations_real_v8', next)));
-      } catch (e) {
-        scheduleStorageWrite('kft_destinations_real_v8', next, 500);
-      }
+      scheduleStorageWrite('kft_destinations_real_v8', next, 400);
       return next;
     });
     showToast(language === 'km' ? 'បានបញ្ចូលតំបន់ទេសចរណ៍ថ្មីដោយជោគជ័យ' : 'Destination added!', 'success');
@@ -5926,11 +5895,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     setDestinations(prev => {
       const next = prev.map(d => d.id === customUpdated.id ? customUpdated : d);
-      try {
-        localStorage.setItem('kft_destinations_real_v8', JSON.stringify(compactDataForBulkLocalStorage('kft_destinations_real_v8', next)));
-      } catch (e) {
-        scheduleStorageWrite('kft_destinations_real_v8', next, 500);
-      }
+      scheduleStorageWrite('kft_destinations_real_v8', next, 400);
       return next;
     });
     if (selectedDestination?.id === customUpdated.id) {
@@ -5980,9 +5945,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         recordPermanentDestinationOverride(refreshedDest);
         setDestinations(prev => {
           const next = prev.map(d => d.id === existingDest.id ? refreshedDest : d);
-          try {
-            localStorage.setItem('kft_destinations_real_v8', JSON.stringify(next));
-          } catch {}
+          scheduleStorageWrite('kft_destinations_real_v8', next, 400);
           return next;
         });
         showToast(
@@ -6010,11 +5973,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       recordPermanentDestinationOverride(finalDest);
       setDestinations(prev => {
         const next = [finalDest, ...prev];
-        try {
-          localStorage.setItem('kft_destinations_real_v8', JSON.stringify(next));
-        } catch {
-          scheduleStorageWrite('kft_destinations_real_v8', next, 500);
-        }
+        scheduleStorageWrite('kft_destinations_real_v8', next, 400);
         return next;
       });
       showToast(
@@ -6046,9 +6005,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       recordPermanentRestaurantOverride(finalMerged);
       setRestaurants(prev => {
         const next = prev.map(r => r.id === existingRest.id ? finalMerged : r);
-        try {
-          localStorage.setItem('kft_restaurants_real_v11', JSON.stringify(next));
-        } catch {}
+        scheduleStorageWrite('kft_restaurants_real_v11', next, 400);
         if (!isSeedRestaurantId(finalMerged.id) && isSupabaseConfigured()) {
           try {
             pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter(r => !isSeedRestaurantId(r.id)));
@@ -6091,11 +6048,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     recordPermanentRestaurantOverride(finalRest);
     setRestaurants(prev => {
       const next = sortRestaurantsChronologically([finalRest, ...prev]);
-      try {
-        localStorage.setItem('kft_restaurants_real_v11', JSON.stringify(next));
-      } catch {
-        scheduleStorageWrite('kft_restaurants_real_v9', next, 500);
-      }
+      scheduleStorageWrite('kft_restaurants_real_v11', next, 400);
       if (isSupabaseConfigured()) {
         try {
           pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter(r => !isSeedRestaurantId(r.id)));

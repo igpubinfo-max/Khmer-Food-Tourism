@@ -6,6 +6,9 @@ import {
   searchCambodiaPlacesWithSmartCache,
   performUnifiedCambodiaSearch,
   GooglePlaceCachedItem,
+  openExternalPlaceInGoogleMaps,
+  getCurrentDeviceLocation,
+  calculateDistanceMeters,
 } from '../services/googlePlacesService';
 import { shuffleForCurrentSession } from '../utils/sessionShuffle';
 import { shareRichContent, copyTextNativeOrWeb } from '../utils/androidMediaHelper';
@@ -62,8 +65,12 @@ export const HomeView: React.FC = () => {
   const [trendingSearchQuery, setTrendingSearchQuery] = useState<string>('');
   const [randomSeed, setRandomSeed] = useState<number>(0);
 
-  // Search results tab filter when global search is active
-  const [searchTab, setSearchTab] = useState<'all' | 'food' | 'restaurants' | 'tourism'>('all');
+  // Search results tab filter, radius filter, and pagination when global search is active
+  const [searchTab, setSearchTab] = useState<'all' | 'food' | 'restaurants' | 'tourism' | 'external'>('all');
+  const [searchRadiusMeters, setSearchRadiusMeters] = useState<number>(0); // 0 = All Cambodia
+  const [userGpsLocation, setUserGpsLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [isGettingSearchGps, setIsGettingSearchGps] = useState<boolean>(false);
+  const [searchVisibleCount, setSearchVisibleCount] = useState<number>(12);
 
   // AI Viral Content Generator State
   const [aiViralIndex, setAiViralIndex] = useState<number>(0);
@@ -218,6 +225,40 @@ export const HomeView: React.FC = () => {
     };
   }, [globalSearchQuery, selectedProvince, language]);
 
+  // Reset pagination when search query or filters change
+  useEffect(() => {
+    setSearchVisibleCount(12);
+  }, [globalSearchQuery, selectedProvince, searchTab, searchRadiusMeters]);
+
+  const handleSelectSearchRadius = async (meters: number) => {
+    if (meters === 0) {
+      setSearchRadiusMeters(0);
+      return;
+    }
+    if (userGpsLocation) {
+      setSearchRadiusMeters(meters);
+      return;
+    }
+    setIsGettingSearchGps(true);
+    const loc = await getCurrentDeviceLocation();
+    setIsGettingSearchGps(false);
+    if (loc) {
+      setUserGpsLocation({ lat: loc.lat, lng: loc.lng });
+      setSearchRadiusMeters(meters);
+    } else {
+      showToast(
+        tr(
+          language,
+          '⚠️ មិនអាចចាប់ទីតាំង GPS បានទេ។ កំពុងបង្ហាញលទ្ធផលទូទាំងប្រទេសជំនួស។',
+          '⚠️ GPS unavailable. Showing nationwide results instead.',
+          '⚠️ 无法获取 GPS 位置，已为您显示全国搜索结果。'
+        ),
+        'warning'
+      );
+      setSearchRadiusMeters(0);
+    }
+  };
+
   // Global Search Filtering across Foods, Restaurants, Destinations + Google Maps Smart Cache
   const searchResults = useMemo(() => {
     const q = normalizeKhmerSearchText(globalSearchQuery);
@@ -230,8 +271,11 @@ export const HomeView: React.FC = () => {
       destinations: sessionShuffledDestinations,
       smartCachePlaces: homeSmartCachePlaces,
       currentUser,
+      userLat: userGpsLocation?.lat,
+      userLng: userGpsLocation?.lng,
+      radiusMeters: searchRadiusMeters > 0 ? searchRadiusMeters : undefined,
     });
-  }, [globalSearchQuery, selectedProvince, foods, sessionShuffledRestaurants, sessionShuffledDestinations, homeSmartCachePlaces, currentUser]);
+  }, [globalSearchQuery, selectedProvince, foods, sessionShuffledRestaurants, sessionShuffledDestinations, homeSmartCachePlaces, currentUser, userGpsLocation, searchRadiusMeters]);
 
   const handleAiRandomize = () => {
     setRandomSeed(prev => prev + 1);
@@ -307,7 +351,7 @@ export const HomeView: React.FC = () => {
     [restaurants.length, discoverySeed]
   );
   const randomTrending = useMemo(
-    () => pickRandom(trendingFoods.filter((t) => t && t.id), 12),
+    () => pickRandom(trendingFoods.filter((t) => t && t.id), 8),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [trendingFoods.length, discoverySeed]
   );
@@ -473,9 +517,49 @@ export const HomeView: React.FC = () => {
             })}
           </div>
 
+          {/* Search Radius Controls (Near Me / GPS Distance Filter) */}
+          <div className="flex items-center justify-between gap-2 flex-wrap pt-0.5">
+            <div className="flex items-center gap-1 overflow-x-auto no-scrollbar text-[11px]">
+              <span className="text-slate-500 dark:text-slate-400 font-bold shrink-0 mr-0.5">
+                {tr(language, 'ចម្ងាយ៖', 'Radius:', '距离：')}
+              </span>
+              {[
+                { meters: 0, labelKh: 'ទូទាំងប្រទេស', labelEn: 'All', labelZh: '全国' },
+                { meters: 2000, labelKh: '📍 2km', labelEn: '📍 2km', labelZh: '📍 2公里' },
+                { meters: 5000, labelKh: '📍 5km', labelEn: '📍 5km', labelZh: '📍 5公里' },
+                { meters: 15000, labelKh: '📍 15km', labelEn: '📍 15km', labelZh: '📍 15公里' },
+                { meters: 30000, labelKh: '📍 30km', labelEn: '📍 30km', labelZh: '📍 30公里' },
+              ].map((r) => (
+                <button
+                  key={r.meters}
+                  type="button"
+                  disabled={isGettingSearchGps}
+                  onClick={() => handleSelectSearchRadius(r.meters)}
+                  className={`px-2 py-0.5 rounded-lg font-bold transition whitespace-nowrap cursor-pointer ${
+                    searchRadiusMeters === r.meters
+                      ? 'bg-teal-600 text-white shadow-xs'
+                      : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-teal-50'
+                  }`}
+                >
+                  {language === 'km' ? r.labelKh : language === 'zh' ? r.labelZh : r.labelEn}
+                </button>
+              ))}
+              {isGettingSearchGps && (
+                <Loader2 className="w-3.5 h-3.5 animate-spin text-teal-600 shrink-0 ml-1" />
+              )}
+            </div>
+
+            {isHomeSearchingOnline && (
+              <div className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+                <Loader2 className="w-3 h-3 animate-spin" />
+                <span>{tr(language, 'កំពុងស្វែងរកលើ Google Maps...', 'Searching Google Maps...', '正在搜索 Google 地图...')}</span>
+              </div>
+            )}
+          </div>
+
           {homeCacheSourceLabel && !isHomeSearchingOnline && homeSmartCachePlaces.length > 0 && (
             <div className="flex items-center justify-between px-2.5 py-1 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-[10px] font-bold text-emerald-800 dark:text-emerald-300">
-              <span>{tr(language, 'រួមបញ្ចូលទិន្នន័យពី Google Maps & Smart Cache', 'Includes Google Maps & Smart Cache results', '包含 Google 地图与智能缓存结果')}</span>
+              <span>{tr(language, 'រួមបញ្ចូលទិន្នន័យក្នុងកម្មវិធី + Google Maps ផ្ទាល់', 'Combined In-App DB + Live Google Maps Discovery', '整合应用内数据库与 Google 地图实时结果')}</span>
               <span>⚡ {homeCacheSourceLabel}</span>
             </div>
           )}
@@ -484,7 +568,7 @@ export const HomeView: React.FC = () => {
           <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar text-xs">
             <button
               onClick={() => setSearchTab('all')}
-              className={`px-3 py-1 rounded-xl font-bold transition text-xs ${
+              className={`px-3 py-1 rounded-xl font-bold transition text-xs whitespace-nowrap cursor-pointer ${
                 searchTab === 'all'
                   ? 'bg-emerald-600 text-white shadow-xs'
                   : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
@@ -494,7 +578,7 @@ export const HomeView: React.FC = () => {
             </button>
             <button
               onClick={() => setSearchTab('food')}
-              className={`px-3 py-1 rounded-xl font-bold transition text-xs flex items-center gap-1 ${
+              className={`px-3 py-1 rounded-xl font-bold transition text-xs flex items-center gap-1 whitespace-nowrap cursor-pointer ${
                 searchTab === 'food'
                   ? 'bg-emerald-600 text-white shadow-xs'
                   : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
@@ -505,18 +589,18 @@ export const HomeView: React.FC = () => {
             </button>
             <button
               onClick={() => setSearchTab('restaurants')}
-              className={`px-3 py-1 rounded-xl font-bold transition text-xs flex items-center gap-1 ${
+              className={`px-3 py-1 rounded-xl font-bold transition text-xs flex items-center gap-1 whitespace-nowrap cursor-pointer ${
                 searchTab === 'restaurants'
                   ? 'bg-emerald-600 text-white shadow-xs'
                   : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
               }`}
             >
               <span>🏪</span>
-              <span>{tr(language, `ហាងអាហារ (${searchResults.restaurants.length})`, `Restaurants (${searchResults.restaurants.length})`, `餐厅 (${searchResults.restaurants.length})`)}</span>
+              <span>{tr(language, `ហាងក្នុង App (${searchResults.restaurants.length})`, `In-App Shops (${searchResults.restaurants.length})`, `应用内餐厅 (${searchResults.restaurants.length})`)}</span>
             </button>
             <button
               onClick={() => setSearchTab('tourism')}
-              className={`px-3 py-1 rounded-xl font-bold transition text-xs flex items-center gap-1 ${
+              className={`px-3 py-1 rounded-xl font-bold transition text-xs flex items-center gap-1 whitespace-nowrap cursor-pointer ${
                 searchTab === 'tourism'
                   ? 'bg-emerald-600 text-white shadow-xs'
                   : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
@@ -525,14 +609,25 @@ export const HomeView: React.FC = () => {
               <span>🏛️</span>
               <span>{tr(language, `ទេសចរណ៍ (${searchResults.destinations.length})`, `Places (${searchResults.destinations.length})`, `景点 (${searchResults.destinations.length})`)}</span>
             </button>
+            <button
+              onClick={() => setSearchTab('external')}
+              className={`px-3 py-1 rounded-xl font-bold transition text-xs flex items-center gap-1 whitespace-nowrap cursor-pointer ${
+                searchTab === 'external'
+                  ? 'bg-blue-600 text-white shadow-xs'
+                  : 'bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800'
+              }`}
+            >
+              <span>🗺️</span>
+              <span>{tr(language, `Google Maps (${searchResults.externalPlaces.length})`, `Google Maps (${searchResults.externalPlaces.length})`, `谷歌地图 (${searchResults.externalPlaces.length})`)}</span>
+            </button>
           </div>
 
           {/* Results List */}
-          <div className="space-y-2 max-h-[420px] overflow-y-auto no-scrollbar pt-1">
+          <div className="space-y-2 max-h-[440px] overflow-y-auto no-scrollbar pt-1">
             {isHomeSearchingOnline && searchResults.totalCount === 0 ? (
               <div className="py-8 flex items-center justify-center gap-2 text-xs text-slate-500">
                 <Loader2 className="w-4 h-4 animate-spin text-emerald-600" />
-                <span>{tr(language, 'កំពុងស្វែងរកហាង និងមុខម្ហូបពិតៗនៅភ្នំពេញ និងទូទាំងប្រទេស...', 'Searching verified places & dishes across Cambodia...', '正在搜索柬埔寨各地真实餐厅与美食...')}</span>
+                <span>{tr(language, 'កំពុងស្វែងរកហាង មុខម្ហូប និងទីតាំងលើ Google Maps ទូទាំងប្រទេស...', 'Searching in-app database & Google Maps across Cambodia...', '正在搜索应用内数据与柬埔寨 Google 地图...')}</span>
               </div>
             ) : searchResults.totalCount === 0 ? (
               <div className="py-8 text-center text-slate-500 space-y-2.5">
@@ -545,6 +640,15 @@ export const HomeView: React.FC = () => {
                     `未找到与“${globalSearchQuery}”相关的结果`
                   )}
                 </p>
+                {searchRadiusMeters > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchRadiusMeters(0)}
+                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-amber-100 text-amber-800 text-xs font-bold cursor-pointer"
+                  >
+                    <span>{tr(language, '🔄 បង្ហាញលទ្ធផលទូទាំងប្រទេសវិញ', '🔄 Reset radius to All Cambodia', '🔄 恢复显示全国范围结果')}</span>
+                  </button>
+                )}
                 <div className="pt-1 flex justify-center">
                   <a
                     href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
@@ -584,97 +688,209 @@ export const HomeView: React.FC = () => {
                 </div>
               </div>
             ) : (
-              <>
-                {/* Foods */}
-                {(searchTab === 'all' || searchTab === 'food') && searchResults.foods.map((food) => {
-                  const locF = getLocalizedFood(food, language);
-                  return (
-                    <div
-                      key={`food-${food.id}`}
-                      onClick={() => setSelectedFood(food)}
-                      className="p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-700/50 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 border border-slate-200/80 dark:border-slate-600 flex items-center justify-between gap-3 cursor-pointer transition group"
-                    >
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <img src={food.photoUrl} alt={locF.name} className="w-12 h-12 rounded-xl object-cover shrink-0 border border-slate-200" />
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-1.5">
-                            <span className="px-1.5 py-0.5 rounded-md bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 text-[10px] font-bold">
-                              🍲 {tr(language, 'មុខម្ហូប', 'Dish', '菜品')}
-                            </span>
-                            <h4 className="font-bold text-sm text-slate-900 dark:text-white truncate group-hover:text-emerald-600">
-                              {locF.name}
-                            </h4>
-                          </div>
-                          <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">
-                            {locF.description}
-                          </p>
-                        </div>
-                      </div>
-                      <ChevronRight className="w-4 h-4 text-slate-400 shrink-0 group-hover:translate-x-0.5 transition" />
-                    </div>
-                  );
-                })}
+              (() => {
+                type UnifiedRow =
+                  | { kind: 'food'; item: typeof searchResults.foods[0] }
+                  | { kind: 'restaurant'; item: typeof searchResults.restaurants[0] }
+                  | { kind: 'destination'; item: typeof searchResults.destinations[0] }
+                  | { kind: 'external'; item: GooglePlaceCachedItem };
 
-                {/* Restaurants */}
-                {(searchTab === 'all' || searchTab === 'restaurants') && searchResults.restaurants.map((rest) => {
-                  const locR = getLocalizedRestaurant(rest, language);
-                  return (
-                    <div
-                      key={`rest-${rest.id}`}
-                      onClick={() => setSelectedRestaurant(rest)}
-                      className="p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-700/50 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 border border-slate-200/80 dark:border-slate-600 flex items-center justify-between gap-3 cursor-pointer transition group"
-                    >
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <img src={rest.photoUrl} alt={locR.name} className="w-12 h-12 rounded-xl object-cover shrink-0 border border-slate-200" />
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-1.5">
-                            <span className="px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 text-[10px] font-bold">
-                              🏪 {tr(language, 'ហាងអាហារ', 'Restaurant', '餐厅')}
-                            </span>
-                            <h4 className="font-bold text-sm text-slate-900 dark:text-white truncate group-hover:text-emerald-600">
-                              {locR.name}
-                            </h4>
-                          </div>
-                          <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">
-                            📍 {locR.address} • 📞 {rest.phone}
-                          </p>
-                        </div>
-                      </div>
-                      <ChevronRight className="w-4 h-4 text-slate-400 shrink-0 group-hover:translate-x-0.5 transition" />
-                    </div>
-                  );
-                })}
+                const combinedRows: UnifiedRow[] = [];
+                if (searchTab === 'all' || searchTab === 'food') {
+                  searchResults.foods.forEach((f) => combinedRows.push({ kind: 'food', item: f }));
+                }
+                if (searchTab === 'all' || searchTab === 'restaurants') {
+                  searchResults.restaurants.forEach((r) => combinedRows.push({ kind: 'restaurant', item: r }));
+                }
+                if (searchTab === 'all' || searchTab === 'tourism') {
+                  searchResults.destinations.forEach((d) => combinedRows.push({ kind: 'destination', item: d }));
+                }
+                if (searchTab === 'all' || searchTab === 'external') {
+                  searchResults.externalPlaces.forEach((p) => combinedRows.push({ kind: 'external', item: p }));
+                }
 
-                {/* Destinations */}
-                {(searchTab === 'all' || searchTab === 'tourism') && searchResults.destinations.map((dest) => {
-                  const locD = getLocalizedDestination(dest, language);
-                  return (
-                    <div
-                      key={`dest-${dest.id}`}
-                      onClick={() => setSelectedDestination(dest)}
-                      className="p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-700/50 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 border border-slate-200/80 dark:border-slate-600 flex items-center justify-between gap-3 cursor-pointer transition group"
-                    >
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <img src={dest.photoUrl} alt={locD.name} className="w-12 h-12 rounded-xl object-cover shrink-0 border border-slate-200" />
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-1.5">
-                            <span className="px-1.5 py-0.5 rounded-md bg-teal-100 text-teal-800 dark:bg-teal-950 dark:text-teal-300 text-[10px] font-bold">
-                              🏛️ {tr(language, 'ទេសចរណ៍', 'Place', '景点')}
-                            </span>
-                            <h4 className="font-bold text-sm text-slate-900 dark:text-white truncate group-hover:text-emerald-600">
-                              {locD.name}
-                            </h4>
+                const visibleRows = combinedRows.slice(0, searchVisibleCount);
+                const remainingCount = combinedRows.length - visibleRows.length;
+
+                return (
+                  <>
+                    {visibleRows.map((row) => {
+                      if (row.kind === 'food') {
+                        const food = row.item;
+                        const locF = getLocalizedFood(food, language);
+                        return (
+                          <div
+                            key={`food-${food.id}`}
+                            onClick={() => setSelectedFood(food)}
+                            className="p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-700/50 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 border border-slate-200/80 dark:border-slate-600 flex items-center justify-between gap-3 cursor-pointer transition group"
+                          >
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <img src={food.photoUrl} alt={locF.name} loading="lazy" decoding="async" className="w-12 h-12 rounded-xl object-cover shrink-0 border border-slate-200" />
+                              <div className="min-w-0">
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                  <span className="px-1.5 py-0.5 rounded-md bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 text-[10px] font-bold">
+                                    🍲 {tr(language, 'មុខម្ហូបក្នុង App', 'In-App Dish', '应用内菜品')}
+                                  </span>
+                                  <h4 className="font-bold text-sm text-slate-900 dark:text-white truncate group-hover:text-emerald-600">
+                                    {locF.name}
+                                  </h4>
+                                </div>
+                                <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                                  {locF.description}
+                                </p>
+                              </div>
+                            </div>
+                            <ChevronRight className="w-4 h-4 text-slate-400 shrink-0 group-hover:translate-x-0.5 transition" />
                           </div>
-                          <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">
-                            📍 {locD.province} ({locD.category})
-                          </p>
+                        );
+                      }
+
+                      if (row.kind === 'restaurant') {
+                        const rest = row.item;
+                        const locR = getLocalizedRestaurant(rest, language);
+                        const distKm =
+                          userGpsLocation && typeof rest.latitude === 'number' && typeof rest.longitude === 'number'
+                            ? (calculateDistanceMeters(userGpsLocation.lat, userGpsLocation.lng, rest.latitude, rest.longitude) / 1000).toFixed(1)
+                            : null;
+                        return (
+                          <div
+                            key={`rest-${rest.id}`}
+                            onClick={() => setSelectedRestaurant(rest)}
+                            className="p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-700/50 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 border border-slate-200/80 dark:border-slate-600 flex items-center justify-between gap-3 cursor-pointer transition group"
+                          >
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <img src={rest.photoUrl} alt={locR.name} loading="lazy" decoding="async" className="w-12 h-12 rounded-xl object-cover shrink-0 border border-slate-200" />
+                              <div className="min-w-0">
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                  <span className="px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 text-[10px] font-bold">
+                                    ✅ {tr(language, 'ហាងក្នុងកម្មវិធី', 'In-App Shop', '应用内店铺')}
+                                  </span>
+                                  <h4 className="font-bold text-sm text-slate-900 dark:text-white truncate group-hover:text-emerald-600">
+                                    {locR.name}
+                                  </h4>
+                                </div>
+                                <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                                  📍 {locR.address} {rest.phone ? `• 📞 ${rest.phone}` : ''} {distKm ? `• 🧭 ${distKm} km` : ''}
+                                </p>
+                              </div>
+                            </div>
+                            <ChevronRight className="w-4 h-4 text-slate-400 shrink-0 group-hover:translate-x-0.5 transition" />
+                          </div>
+                        );
+                      }
+
+                      if (row.kind === 'destination') {
+                        const dest = row.item;
+                        const locD = getLocalizedDestination(dest, language);
+                        const distKm =
+                          userGpsLocation && typeof dest.latitude === 'number' && typeof dest.longitude === 'number'
+                            ? (calculateDistanceMeters(userGpsLocation.lat, userGpsLocation.lng, dest.latitude, dest.longitude) / 1000).toFixed(1)
+                            : null;
+                        return (
+                          <div
+                            key={`dest-${dest.id}`}
+                            onClick={() => setSelectedDestination(dest)}
+                            className="p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-700/50 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 border border-slate-200/80 dark:border-slate-600 flex items-center justify-between gap-3 cursor-pointer transition group"
+                          >
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <img src={dest.photoUrl} alt={locD.name} loading="lazy" decoding="async" className="w-12 h-12 rounded-xl object-cover shrink-0 border border-slate-200" />
+                              <div className="min-w-0">
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                  <span className="px-1.5 py-0.5 rounded-md bg-teal-100 text-teal-800 dark:bg-teal-950 dark:text-teal-300 text-[10px] font-bold">
+                                    🏛️ {tr(language, 'ទេសចរណ៍ក្នុងកម្មវិធី', 'In-App Place', '应用内景点')}
+                                  </span>
+                                  <h4 className="font-bold text-sm text-slate-900 dark:text-white truncate group-hover:text-emerald-600">
+                                    {locD.name}
+                                  </h4>
+                                </div>
+                                <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                                  📍 {locD.province} ({locD.category}) {distKm ? `• 🧭 ${distKm} km` : ''}
+                                </p>
+                              </div>
+                            </div>
+                            <ChevronRight className="w-4 h-4 text-slate-400 shrink-0 group-hover:translate-x-0.5 transition" />
+                          </div>
+                        );
+                      }
+
+                      // External Google Maps Place -> Tapping opens exact place directly in Google Maps!
+                      const place = row.item;
+                      const extName =
+                        language === 'km'
+                          ? place.nameKh || place.name
+                          : language === 'zh'
+                          ? place.nameEn || place.name
+                          : place.nameEn || place.name;
+                      const extAddress =
+                        language === 'km'
+                          ? place.addressKh || place.address || place.provinceKh
+                          : place.address || place.addressKh || place.provinceEn;
+                      const distKm =
+                        userGpsLocation && typeof place.lat === 'number' && typeof place.lng === 'number'
+                          ? (calculateDistanceMeters(userGpsLocation.lat, userGpsLocation.lng, place.lat, place.lng) / 1000).toFixed(1)
+                          : null;
+
+                      return (
+                        <div
+                          key={`ext-${place.placeId}`}
+                          onClick={() => openExternalPlaceInGoogleMaps(place)}
+                          className="p-2.5 rounded-2xl bg-blue-50/70 dark:bg-slate-700/60 hover:bg-blue-100/80 dark:hover:bg-blue-950/40 border border-blue-200/80 dark:border-blue-800/60 flex items-center justify-between gap-3 cursor-pointer transition group"
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            {place.hasRealGooglePhoto && place.photoUrl ? (
+                              <img
+                                src={place.photoUrl}
+                                alt={extName}
+                                className="w-12 h-12 rounded-xl object-cover shrink-0 border border-blue-200"
+                              />
+                            ) : (
+                              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-600 to-teal-600 text-white flex flex-col items-center justify-center shrink-0 shadow-xs">
+                                <MapPin className="w-5 h-5" />
+                                <span className="text-[8px] font-extrabold uppercase tracking-tighter">Maps</span>
+                              </div>
+                            )}
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <span className="px-1.5 py-0.5 rounded-md bg-blue-600 text-white text-[10px] font-bold shrink-0">
+                                  🗺️ {tr(language, 'Google Maps ផ្ទាល់', 'Google Maps Place', 'Google 地图地点')}
+                                </span>
+                                <h4 className="font-bold text-sm text-slate-900 dark:text-white truncate group-hover:text-blue-600">
+                                  {extName}
+                                </h4>
+                              </div>
+                              <p className="text-xs text-slate-600 dark:text-slate-300 truncate mt-0.5">
+                                📍 {extAddress} {distKm ? `• 🧭 ${distKm} km` : ''}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="shrink-0 flex items-center gap-1 text-[11px] font-bold text-blue-600 dark:text-blue-400">
+                            <span className="hidden sm:inline">{tr(language, 'បើកផែនទី', 'Open Maps', '打开地图')}</span>
+                            <ExternalLink className="w-4 h-4 group-hover:translate-x-0.5 transition" />
+                          </div>
                         </div>
+                      );
+                    })}
+
+                    {/* Pagination / Load More Button */}
+                    {remainingCount > 0 && (
+                      <div className="pt-1 flex justify-center">
+                        <button
+                          type="button"
+                          onClick={() => setSearchVisibleCount((prev) => prev + 12)}
+                          className="w-full py-2 rounded-xl bg-slate-100 hover:bg-emerald-50 dark:bg-slate-700 dark:hover:bg-slate-600 text-emerald-700 dark:text-emerald-300 text-xs font-extrabold border border-emerald-200 dark:border-slate-600 transition cursor-pointer"
+                        >
+                          {tr(
+                            language,
+                            `⬇️ បង្ហាញលទ្ធផលបន្ថែមទៀត (${remainingCount} ទៀត)`,
+                            `⬇️ Load More Results (${remainingCount} more)`,
+                            `⬇️ 加载更多结果（还有 ${remainingCount} 项）`
+                          )}
+                        </button>
                       </div>
-                      <ChevronRight className="w-4 h-4 text-slate-400 shrink-0 group-hover:translate-x-0.5 transition" />
-                    </div>
-                  );
-                })}
-              </>
+                    )}
+                  </>
+                );
+              })()
             )}
           </div>
         </div>

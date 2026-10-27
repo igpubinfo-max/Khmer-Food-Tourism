@@ -1101,9 +1101,19 @@ export function deduplicateAndNormalizeUsers(
  * Immediately writes `kft_user_<canonicalId>` to Supabase AND pulls, merges, and updates `kft_cloud_users_v1`
  * so no device can ever overwrite or lose a newly registered or logged-in user.
  */
+// Session-level deduplication cache for atomic user cloud writes to prevent redundant radio/network wakeups
+const lastPushedAtomicUserSigMap = new Map<string, string>();
+
+/**
+ * Atomic per-user cloud persistence:
+ * Immediately writes `kft_user_<canonicalId>` to Supabase.
+ * Only pulls and updates the aggregate `kft_cloud_users_v2` table when `updateAggregate` is true,
+ * avoiding 7-request network bursts on every profile/session touch.
+ */
 export async function upsertSingleUserToCloud(
   user: User,
-  deletedUsers: DeletedUserRecord[] = []
+  deletedUsers: DeletedUserRecord[] = [],
+  updateAggregate = false
 ): Promise<User[]> {
   if (!user || user.role === 'admin' || user.id === 'admin-authorized-single') {
     return [];
@@ -1115,15 +1125,21 @@ export async function upsertSingleUserToCloud(
   if (!isSupabaseConfigured()) return [canonicalUser];
 
   try {
-    // 1. Write atomic per-user row immediately (cannot be overwritten by any other user's device)
+    // 1. Write atomic per-user row immediately (deduplicated within session so unchanged user state never fires redundant network requests)
     const atomicKey = `${USER_RECORD_PREFIX}${canonicalUser.id}`;
-    await pushCloudDocument(atomicKey, canonicalUser);
+    const userSig = JSON.stringify(canonicalUser);
+    if (lastPushedAtomicUserSigMap.get(atomicKey) !== userSig) {
+      lastPushedAtomicUserSigMap.set(atomicKey, userSig);
+      await pushCloudDocument(atomicKey, canonicalUser);
+    }
 
-    // 2. Pull latest cloud users (v2 + v1) + per-user atomic records, merge with canonicalUser, and push back
-    const [cloudUsersV2, cloudUsersV1, atomicUserRows, cloudDeleted] = await Promise.all([
+    if (!updateAggregate) {
+      return [canonicalUser];
+    }
+
+    // 2. When explicitly updating the aggregate table, pull `kft_cloud_users_v2` + `kft_cloud_deleted_users_v1` only
+    const [cloudUsersV2, cloudDeleted] = await Promise.all([
       pullCloudDocument<User[]>('kft_cloud_users_v2'),
-      pullCloudDocument<User[]>('kft_cloud_users_v1'),
-      pullCloudDocumentsByPrefix<User>(USER_RECORD_PREFIX),
       pullCloudDocument<DeletedUserRecord[]>('kft_cloud_deleted_users_v1'),
     ]);
 
@@ -1135,17 +1151,12 @@ export async function upsertSingleUserToCloud(
     const merged = deduplicateAndNormalizeUsers(
       [
         ...(Array.isArray(cloudUsersV2) ? cloudUsersV2 : []),
-        ...(Array.isArray(cloudUsersV1) ? cloudUsersV1 : []),
-        ...atomicUserRows.map(r => r.payload),
         canonicalUser,
       ],
       allDeleted
     );
 
-    await Promise.all([
-      pushCloudDocument('kft_cloud_users_v2', merged),
-      pushCloudDocument('kft_cloud_users_v1', merged),
-    ]);
+    await pushCloudDocument('kft_cloud_users_v2', merged);
     return merged;
   } catch (err) {
     console.warn('upsertSingleUserToCloud warning:', err);
@@ -1202,7 +1213,12 @@ export async function syncAllAppDataWithSupabase(localState: {
     const shouldSyncPaymentProofs =
       isAdminDevice || Object.keys(localState.paymentProofsVault || {}).length > 0;
 
-    // 1. Pull existing cloud records in a single batch (skipping heavy base64 payment proofs on regular user devices)
+    // Only Admin devices need to download all 1,000 `kft_user_*` prefix documents;
+    // regular user devices only fetch their own atomic `kft_user_<canonicalId>` row alongside `kft_cloud_users_v2`.
+    const currentCanonicalIdForFetch =
+      !isAdminDevice && localState.currentUser ? getCanonicalUserId(localState.currentUser) : null;
+
+    // 1. Pull existing cloud records in a single batch (skipping heavy base64 payment proofs and 1,000-row prefix scan on regular user devices)
     const [
       cloudUsersV2,
       atomicUserDocs,
@@ -1216,7 +1232,13 @@ export async function syncAllAppDataWithSupabase(localState: {
       cloudSettingsV2,
     ] = await Promise.all([
       pullCloudDocument<User[]>('kft_cloud_users_v2'),
-      pullCloudDocumentsByPrefix<User>(USER_RECORD_PREFIX),
+      isAdminDevice
+        ? pullCloudDocumentsByPrefix<User>(USER_RECORD_PREFIX)
+        : currentCanonicalIdForFetch
+        ? pullCloudDocument<User>(`${USER_RECORD_PREFIX}${currentCanonicalIdForFetch}`).then(doc =>
+            doc ? [{ key: `${USER_RECORD_PREFIX}${currentCanonicalIdForFetch}`, payload: doc, updated_at: '' }] : []
+          )
+        : Promise.resolve([] as Array<{ key: string; payload: User; updated_at: string }>),
       pullCloudDocument<Record<string, Partial<User>>>('kft_cloud_vip_backup_v1'),
       pullCloudDocument<DeletedUserRecord[]>('kft_cloud_deleted_users_v1'),
       pullCloudDocument<RegistrationTransaction[]>('kft_cloud_transactions_v1'),

@@ -25,6 +25,8 @@ import {
 } from 'lucide-react';
 import { RestaurantPriceLevel, getDynamicVipPlans, VipPlanType, isUserVipActive, getVipAccountState } from '../types';
 import { ShopMultiPhotoUploader } from './ShopMultiPhotoUploader';
+import { ShopLocationCheckInPickerModal, ShopCheckInLocationResult } from './ShopLocationCheckInPickerModal';
+import { resolveProvinceGeoConfig } from '../services/googlePlacesService';
 import {
   pickImageUsingNativeAndroidGallery,
   processAndCompressImageFile,
@@ -72,6 +74,10 @@ export const AddRestaurantModal: React.FC = () => {
   const [provinceKh, setProvinceKh] = useState('រាជធានីភ្នំពេញ');
   const [provinceEn, setProvinceEn] = useState('Phnom Penh');
   const [addressKh, setAddressKh] = useState('');
+  const [shopLat, setShopLat] = useState<number | null>(null);
+  const [shopLng, setShopLng] = useState<number | null>(null);
+  const [shopMapUrl, setShopMapUrl] = useState<string>('');
+  const [isCheckInPickerOpen, setIsCheckInPickerOpen] = useState(false);
   const [phone, setPhone] = useState('');
   const [openingHoursKh, setOpeningHoursKh] = useState('០៧:០០ ព្រឹក - ០៩:០០ យប់');
   const [priceLevel, setPriceLevel] = useState<RestaurantPriceLevel>('$$');
@@ -136,9 +142,13 @@ export const AddRestaurantModal: React.FC = () => {
       signatureDishesKh: ['ម្ហូបខ្មែរប្រពៃណី'],
       descriptionKh: descriptionKh.trim() || 'ហាងអាហារខ្មែររសជាតិដើម បរិយាកាសស្អាត និងផាសុកភាព។',
       descriptionEn: descriptionKh.trim() || 'Authentic traditional Khmer restaurant.',
-      mapUrl: `https://maps.google.com/?q=${encodeURIComponent(nameKh || 'Cambodia Restaurant')}`,
-      latitude: 11.5564,
-      longitude: 104.9282,
+      mapUrl:
+        shopMapUrl.trim() ||
+        (shopLat !== null && shopLng !== null
+          ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${nameKh || 'Cambodia Restaurant'} ${shopLat},${shopLng}`)}`
+          : `https://maps.google.com/?q=${encodeURIComponent(nameKh || 'Cambodia Restaurant')}`),
+      latitude: shopLat !== null ? shopLat : (resolveProvinceGeoConfig(provinceKh)?.lat ?? 11.5564),
+      longitude: shopLng !== null ? shopLng : (resolveProvinceGeoConfig(provinceKh)?.lng ?? 104.9282),
       membershipTier: 'free',
       menuItems: [],
       status: 'approved',
@@ -222,9 +232,13 @@ export const AddRestaurantModal: React.FC = () => {
       signatureDishesKh: ['ម្ហូបខ្មែរប្រពៃណី'],
       descriptionKh: descriptionKh.trim() || 'ហាងអាហារខ្មែររសជាតិដើម បរិយាកាសស្អាត និងផាសុកភាព។',
       descriptionEn: descriptionKh.trim() || 'Authentic traditional Khmer restaurant with delicious dishes.',
-      mapUrl: `https://maps.google.com/?q=${encodeURIComponent(nameKh || 'Cambodia Restaurant')}`,
-      latitude: 11.5564,
-      longitude: 104.9282,
+      mapUrl:
+        shopMapUrl.trim() ||
+        (shopLat !== null && shopLng !== null
+          ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${nameKh || 'Cambodia Restaurant'} ${shopLat},${shopLng}`)}`
+          : `https://maps.google.com/?q=${encodeURIComponent(nameKh || 'Cambodia Restaurant')}`),
+      latitude: shopLat !== null ? shopLat : (resolveProvinceGeoConfig(provinceKh)?.lat ?? 11.5564),
+      longitude: shopLng !== null ? shopLng : (resolveProvinceGeoConfig(provinceKh)?.lng ?? 104.9282),
       membershipTier: 'premium',
       membershipExpiresAt: expiresAt,
       menuItems: [],
@@ -721,7 +735,7 @@ export const AddRestaurantModal: React.FC = () => {
 
             {/* Address & Contact Phone */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
+              <div className="space-y-1.5">
                 <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
                   <MapPin className="w-3.5 h-3.5 inline mr-1 text-[#059669]" />
                   {isKm ? 'អាសយដ្ឋានជាក់ស្ដែង *' : 'Physical Address *'}
@@ -734,6 +748,18 @@ export const AddRestaurantModal: React.FC = () => {
                   placeholder="ផ្ទះលេខ, ផ្លូវ, សង្កាត់, ក្រុង/ខណ្ឌ..."
                   className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs focus:ring-2 focus:ring-[#059669]/20 focus:border-[#059669] outline-none"
                 />
+                <button
+                  type="button"
+                  onClick={() => setIsCheckInPickerOpen(true)}
+                  className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 text-white font-bold text-[11px] flex items-center justify-center gap-1.5 shadow-xs transition cursor-pointer"
+                >
+                  <span>📍 កំណត់ទីតាំងហាង (Check In)</span>
+                </button>
+                {shopLat !== null && shopLng !== null && (
+                  <div className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400">
+                    ✓ GPS: {shopLat.toFixed(5)}, {shopLng.toFixed(5)}
+                  </div>
+                )}
               </div>
 
               <div>
@@ -931,6 +957,32 @@ export const AddRestaurantModal: React.FC = () => {
             </div>
           </form>
         )}
+        <ShopLocationCheckInPickerModal
+          isOpen={isCheckInPickerOpen}
+          onClose={() => setIsCheckInPickerOpen(false)}
+          initialLat={shopLat ?? undefined}
+          initialLng={shopLng ?? undefined}
+          initialAddress={addressKh}
+          initialProvinceKh={provinceKh}
+          shopName={nameKh || nameEn}
+          language={language}
+          onConfirmLocation={(loc: ShopCheckInLocationResult) => {
+            setShopLat(loc.latitude);
+            setShopLng(loc.longitude);
+            setShopMapUrl(loc.mapUrl);
+            if (loc.formattedAddressKh) setAddressKh(loc.formattedAddressKh);
+            if (loc.provinceKh) {
+              setProvinceKh(loc.provinceKh);
+              setProvinceEn(loc.provinceEn || loc.provinceKh);
+            }
+            showToast(
+              isKm
+                ? '📍 បានកំណត់ទីតាំងហាង (Check In) ដោយជោគជ័យ!'
+                : '📍 Shop location pinned successfully!',
+              'success'
+            );
+          }}
+        />
       </div>
     </div>
   );
