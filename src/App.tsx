@@ -282,8 +282,8 @@ export default function App() {
   return (
     <AppProvider>
       {/* Full-screen Native Mobile App Layout (No fake bezels, no notches, edge-to-edge full screen) */}
-      <div className="w-full min-h-screen bg-[#F8FAFC] dark:bg-[#0F172A] text-[#0F172A] dark:text-[#F8FAFC] flex justify-center">
-        <div className="w-full max-w-md min-h-screen flex flex-col bg-[#F8FAFC] dark:bg-[#0F172A] relative shadow-none md:shadow-xl md:border-x md:border-slate-200 dark:md:border-slate-800">
+      <div className="dark w-full min-h-screen bg-[#0F172A] text-[#F8FAFC] flex justify-center">
+        <div className="w-full max-w-md min-h-screen flex flex-col bg-[#0F172A] text-[#F8FAFC] relative shadow-none md:shadow-xl md:border-x md:border-slate-800">
           <MainScreen />
         </div>
       </div>

@@ -259,7 +259,7 @@ export const ProfileView: React.FC = () => {
                     ) : isVip ? (
                       <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black bg-gradient-to-r from-amber-200 to-amber-300 text-amber-950 border border-amber-400 shadow-2xs font-khmer">
                         <Crown className="w-3.5 h-3.5 fill-amber-700 text-amber-700" />
-                        <span className="animate-pulse">{tr(language, '👑 សមាជិក VIP', '👑 VIP MEMBER', '👑 VIP 尊享会员')}</span>
+                        <span>{tr(language, '👑 សមាជិក VIP', '👑 VIP MEMBER', '👑 VIP 尊享会员')}</span>
                       </span>
                     ) : (
                       <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-600 shadow-2xs font-khmer">

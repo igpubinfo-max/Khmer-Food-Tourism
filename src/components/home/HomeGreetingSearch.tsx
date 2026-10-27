@@ -71,7 +71,7 @@ export const HomeGreetingSearch: React.FC<Props> = ({
                   <span className="font-extrabold text-sm sm:text-base text-white truncate">
                     {currentUser.name}
                   </span>
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 text-slate-950 shadow-md ring-1 ring-amber-200 animate-pulse shrink-0">
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 text-slate-950 shadow-md ring-1 ring-amber-200 shrink-0">
                     <Crown className="w-3 h-3 fill-slate-950" />
                     <span>{tr(language, '👑 សមាជិក VIP', '👑 VIP MEMBER', '👑 VIP 尊享会员')}</span>
                   </span>

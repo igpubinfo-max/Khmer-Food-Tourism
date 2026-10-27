@@ -16,7 +16,8 @@ import {
   addCustomDiscoveryUrl,
   markYouTubeVideoUnavailable,
   getReplacementCambodianVideo,
-   fetchPublicOEmbedMetadata,
+  fetchPublicOEmbedMetadata,
+  matchesExpandedYouTubeQuery,
   OnlineFoodDiscoveryItem,
   PlatformApiStatus,
 } from '../services/onlineFoodDiscoveryService';
@@ -137,9 +138,9 @@ export const TrendingSocialModal: React.FC = () => {
       setHasError(false);
       try {
         const res = await searchAndDiscoverSocialFood({
-          query: searchQuery,
+          query: '',
           platform: 'youtube',
-          categorySlug: categoryFilter,
+          categorySlug: 'all',
           foods,
           trendingFoods,
           forceRefresh: force,
@@ -190,7 +191,8 @@ export const TrendingSocialModal: React.FC = () => {
         isFetchingRef.current = false;
       }
     },
-    [searchQuery, categoryFilter, foods, trendingFoods, language, showToast]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [foods, trendingFoods, language]
   );
 
   const activePlayerItemIdRef = useRef<string | null>(null);
@@ -274,9 +276,9 @@ export const TrendingSocialModal: React.FC = () => {
         return false;
       }
       if (searchQuery.trim()) {
-        const q = searchQuery.trim().toLowerCase();
-        const hay = `${item.titleKh} ${item.titleEn} ${item.titleZh || ''} ${item.descriptionKh} ${item.descriptionEn} ${item.sourceName} ${item.matchedFoodNameKh || ''} ${item.matchedFoodNameEn || ''}`.toLowerCase();
-        if (!hay.includes(q)) return false;
+      if (searchQuery.trim()) {
+      }} if (searchQuery.trim()) {
+        if (!matchesExpandedYouTubeQuery(item, searchQuery)) return false;
       }
       return true;
     });
@@ -730,7 +732,7 @@ export const TrendingSocialModal: React.FC = () => {
                 className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-rose-400 font-bold text-xs cursor-pointer border border-slate-700 shadow-sm"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
-                <span>{tr(language, 'សម្អាតតម្រងទាំងអស់', 'Reset Filters', '重置所有筛选')}</span>
+                <span>{tr(language, 'សម្អាតតម្រងទាំងអស់', 'Reset Filters', '重置所有筛选')}</span></button><button type="button" onClick={() => openExternalVideoSafely(undefined, searchQuery.trim() || 'Cambodian food travel')} className="ml-2 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs cursor-pointer shadow-sm"><ExternalLink className="w-3.5 h-3.5" /><span>{tr(language, searchQuery.trim() ? `ស្វែងរក "${searchQuery.trim()}" លើ YouTube` : 'ស្វែងរកលើ YouTube', searchQuery.trim() ? `Search "${searchQuery.trim()}" on YouTube` : 'Search on YouTube', searchQuery.trim() ? `在 YouTube 搜索 "${searchQuery.trim()}"` : '在 YouTube 搜索')}</span>
               </button>
             </div>
           ) : (

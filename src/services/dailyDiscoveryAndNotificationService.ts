@@ -790,11 +790,13 @@ export async function fetchDynamicDailyDiscoveries(params: {
  * Generates a rich, diverse, non-duplicate list of 12+ actionable Notifications
  * with images, timestamps, source links, and accurate target deep-links.
  */
+let cachedNotifFoods: FoodItem[] | null = null; let cachedNotifRests: Restaurant[] | null = null; let cachedNotifDests: TouristDestination[] | null = null; let cachedNotifList: AppNotification[] | null = null;
 export function buildDynamicNotificationsList(
   foods: FoodItem[],
   restaurants: Restaurant[],
   destinations: TouristDestination[]
 ): AppNotification[] {
+  if (cachedNotifList && cachedNotifFoods === foods && cachedNotifRests === restaurants && cachedNotifDests === destinations) return cachedNotifList;
   const getRelDate = (daysAgo: number) =>
     new Date(Date.now() - daysAgo * 86400000).toISOString().split('T')[0];
   const getRelIso = (hoursAgo: number) =>
@@ -1078,5 +1080,6 @@ export function buildDynamicNotificationsList(
     },
   ];
 
+  cachedNotifFoods = foods; cachedNotifRests = restaurants; cachedNotifDests = destinations; cachedNotifList = list;
   return list;
 }

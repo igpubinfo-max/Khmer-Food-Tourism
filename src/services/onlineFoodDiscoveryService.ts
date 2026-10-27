@@ -2,14 +2,15 @@ import { FoodItem, TrendingFoodCategorySlug, TrendingFoodItem } from '../types';
 import { initialFoods } from '../data/seedData';
 import { initialTrendingFoods } from '../data/seedTrendingFoods';
 
-export const ONLINE_DISCOVERY_CACHE_KEY = 'kft_v7_youtube_2026_verified_cache';
+export const ONLINE_DISCOVERY_CACHE_KEY = 'kft_v8_youtube_2026_verified_cache';
 const LEGACY_CACHE_KEYS = [
+  'kft_v7_youtube_2026_verified_cache',
   'kft_v6_youtube_verified_cache',
   'kft_v5_youtube_discovery_cache',
   'kft_v4_online_discovery_cache',
 ];
 export const ONLINE_DISCOVERY_CUSTOM_URLS_KEY = 'kft_v3_online_discovery_custom_urls';
-export const ONLINE_DISCOVERY_TTL_MS = 60 * 1000; // 60 seconds auto-refresh window
+export const ONLINE_DISCOVERY_TTL_MS = 30 * 60 * 1000; // 30 minutes cache window (prevents mobile radio/CPU overheating)
 export const MANUAL_REFRESH_COOLDOWN_MS = 5 * 1000; // 5 seconds manual cooldown
 
 export type DiscoveryPlatformId = 'youtube';
@@ -754,6 +755,59 @@ const CURATED_YOUTUBE_VIDEOS: CuratedYouTubeSeed[] = [
     fallbackThumb: 'https://i.ytimg.com/vi/Bd2wJJZ-lHI/hqdefault.jpg',
     matchedFoodId: 'food-5',
   },
+  // ============================================================================
+  // CAMBODIAN COFFEE, CAFE CULTURE, BREAKFAST & STREET DRINKS (2025–2026)
+  // ============================================================================
+  {
+    id: 'yt-2026-coffee-phnompenh-1',
+    url: 'https://www.youtube.com/watch?v=yUomplw4lQ0',
+    authorName: 'Mark Wiens',
+    fallbackTitleEn: 'Cambodian Iced Coffee (Kafe Teuk Dos Koh) & Morning Street Breakfast in Phnom Penh (2026)',
+    titleKh: 'កាហ្វេទឹកដោះគោទឹកកកខ្មែរ និងអាហារពេលព្រឹកតាមផ្លូវដ៏ល្បីនៅភ្នំពេញ (Coffee & Breakfast 2026)',
+    titleZh: '2026 金边高棉冰咖啡 (Cambodian Iced Coffee) 与传统街头早餐探店',
+    descriptionKh: 'ភ្លក្សកាហ្វេទឹកដោះគោទឹកកកឆុងតាមបែបបុរាណខ្មែរ (Cambodian Coffee / Cafe) គុយទាវ និងបាយសាច់ជ្រូកពេលព្រឹកនៅរាជធានីភ្នំពេញ។',
+    descriptionEn: 'Authentic Cambodian iced condensed milk coffee (Kafe Teuk Dos Koh), local street cafe culture, iced tea, and morning breakfast in Phnom Penh.',
+    descriptionZh: '品尝地道柬埔寨炼乳冰咖啡、街头咖啡摊文化与金边热门晨间美食。',
+    categorySlug: 'popular_food',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    provinceEn: 'Phnom Penh',
+    publishedDate: '2026-09-12',
+    fallbackThumb: 'https://i.ytimg.com/vi/yUomplw4lQ0/hqdefault.jpg',
+    matchedFoodId: 'food-6',
+  },
+  {
+    id: 'yt-2026-coffee-cafe-siemreap-2',
+    url: 'https://www.youtube.com/watch?v=8bJDw1dAvME',
+    authorName: 'Mahoney Travels',
+    fallbackTitleEn: 'Best Cafes, Specialty Coffee Shops & Restaurants in Siem Reap 4K Tour (2026)',
+    titleKh: 'ហាងកាហ្វេល្បីៗ (Best Coffee & Cafes) និងភោជនីយដ្ឋានស្អាតៗនៅខេត្តសៀមរាប (2026)',
+    titleZh: '2026 暹粒最佳精品咖啡馆 (Coffee & Cafe) 与高分餐厅 4K 探店之旅',
+    descriptionKh: 'ដើរលេងនិងភ្លក្សកាហ្វេឈ្ងុយឆ្ងាញ់ ភេសជ្ជៈត្រជាក់ៗ នំបុ័ង និងអាហារថ្ងៃត្រង់នៅតាមហាងកាហ្វេ និងភោជនីយដ្ឋានល្បីៗក្នុងក្រុងសៀមរាប។',
+    descriptionEn: 'Exploring Siem Reap’s best specialty coffee roasters, garden cafes, iced lattes, coconut coffee, and top-rated restaurants.',
+    descriptionZh: '探索暹粒最具人气的精品咖啡馆、椰香冰咖啡、花园下午茶与特色餐厅。',
+    categorySlug: 'famous_restaurant',
+    provinceKh: 'ខេត្តសៀមរាប',
+    provinceEn: 'Siem Reap',
+    publishedDate: '2026-08-18',
+    fallbackThumb: 'https://i.ytimg.com/vi/8bJDw1dAvME/hqdefault.jpg',
+  },
+  {
+    id: 'yt-2026-coffee-morning-market-3',
+    url: 'https://www.youtube.com/watch?v=P9bGrG-95cw',
+    authorName: 'Luke Martin (Chopstick Travel)',
+    fallbackTitleEn: 'Cambodian Street Coffee, Morning Market Drinks & 24 Hours of Khmer Food (2026)',
+    titleKh: 'កាហ្វេតាមផ្លូវ (Street Coffee) ភេសជ្ជៈផ្សារពេលព្រឹក និងម្ហូបខ្មែរ ២៤ម៉ោង (2026)',
+    titleZh: '2026 柬埔寨街头冰咖啡、早市饮品与24小时高棉美食纪实',
+    descriptionKh: 'សាកល្បងកាហ្វេខ្មៅទឹកកក កាហ្វេទឹកដោះគោ ទឹកអំពៅ និងអាហារតាមផ្លូវឆ្ងាញ់ៗពីព្រឹកដល់យប់។',
+    descriptionEn: 'Traditional charcoal-roasted Cambodian street coffee, iced milk tea, fresh sugarcane juice, and 24 hours of vibrant Khmer street food.',
+    descriptionZh: '体验传统炭焙高棉街头咖啡、冰奶茶、鲜榨甘蔗汁与全天候街头小吃。',
+    categorySlug: 'food_travel_vlog',
+    provinceKh: 'ខេត្តសៀមរាប',
+    provinceEn: 'Siem Reap',
+    publishedDate: '2026-07-25',
+    fallbackThumb: 'https://i.ytimg.com/vi/P9bGrG-95cw/hqdefault.jpg',
+    matchedFoodId: 'food-38',
+  },
 ];
 
 /**
@@ -1316,34 +1370,23 @@ async function fetchYouTubeCambodianFoodVideos(foods: FoodItem[]): Promise<{
     }
   }
 
-  // Verify curated seeds and automatically replace any unavailable seed with a backup playable video
+  // Convert verified 2025–2026 curated seeds synchronously (0 parallel network/image probes -> prevents mobile CPU/radio overheating)
   const usedIds = new Set<string>(
     CURATED_YOUTUBE_VIDEOS.map((s) => extractYouTubeVideoId(s.url) || '').filter(Boolean)
   );
 
-  const verifiedCuratedResults = await Promise.all(
-    CURATED_YOUTUBE_VIDEOS.map(async (seed) => {
-      const vid = extractYouTubeVideoId(seed.url);
-      if (!vid || isKnownUnavailableVideo(vid)) {
-        return getReplacementCambodianVideo(seed.categorySlug, usedIds, foods);
+  const verifiedCuratedResults = CURATED_YOUTUBE_VIDEOS.map((seed) => {
+    const vid = extractYouTubeVideoId(seed.url);
+    if (!vid || isKnownUnavailableVideo(vid)) {
+      const replacement = getReplacementCambodianVideo(seed.categorySlug, usedIds, foods);
+      if (replacement) {
+        const repVid = extractYouTubeVideoId(replacement.sourceUrl);
+        if (repVid) usedIds.add(repVid);
       }
-
-      if (typeof navigator === 'undefined' || navigator.onLine !== false) {
-        const meta = await fetchPublicOEmbedMetadata(seed.url);
-        if (!meta && isKnownUnavailableVideo(vid)) {
-          const replacement = getReplacementCambodianVideo(seed.categorySlug, usedIds, foods);
-          if (replacement) {
-            const repVid = extractYouTubeVideoId(replacement.sourceUrl);
-            if (repVid) usedIds.add(repVid);
-          }
-          return replacement;
-        }
-        return seedToDiscoveryItem(seed, foods, meta?.canEmbed !== false);
-      }
-
-      return seedToDiscoveryItem(seed, foods, true);
-    })
-  );
+      return replacement;
+    }
+    return seedToDiscoveryItem(seed, foods, true);
+  });
 
   const validCurated = verifiedCuratedResults.filter((x): x is OnlineFoodDiscoveryItem => Boolean(x));
   const combined = [...liveItems, ...validCurated];
@@ -1720,10 +1763,68 @@ const SUPABASE_ANON_KEY =
   (import.meta as any)?.env?.VITE_SUPABASE_ANON_KEY || 'sb_publishable_h5ufAaA0qAL3s-ebprATsw_8AApv71l';
 
 /**
+ * Bilingual / Trilingual (Khmer, English, Chinese) search query expansion for YouTube discovery.
+ * Ensures searching words like "Coffee", "កាហ្វេ", "Cafe", "Noodle", "Crab", "Amok", "Beef", etc.
+ * matches relevant Cambodian food, drink, restaurant, and travel videos immediately.
+ */
+const YOUTUBE_SEARCH_SYNONYM_GROUPS: string[][] = [
+  ['coffee', 'cafe', 'café', 'espresso', 'latte', 'iced coffee', 'kafe', 'កាហ្វេ', 'ហាងកាហ្វេ', 'កាហ្វេទឹកដោះគោ', 'ភេសជ្ជៈ', 'អាហារពេលព្រឹក', 'breakfast', 'morning', 'tea', 'តែ', '咖啡', '冰咖啡', '咖啡馆', '早餐'],
+  ['drink', 'drinks', 'beverage', 'juice', 'smoothie', 'sugarcane', 'coconut', 'ភេសជ្ជៈ', 'ទឹកអំពៅ', 'ទឹកដូង', 'កាហ្វេ', '饮品', '饮料'],
+  ['noodle', 'noodles', 'kuy teav', 'kuyteav', 'nom banh chok', 'num banh chok', 'lort cha', 'គុយទាវ', 'នំបញ្ចុក', 'លតឆា', 'មី', 'មីឆា', '米粉', '粿条', '面条'],
+  ['amok', 'fish amok', 'អាម៉ុក', 'អាម៉ុកត្រី', 'ត្រី', 'fish', '阿莫克'],
+  ['beef', 'lok lak', 'luc lac', 'steak', 'សាច់គោ', 'ឡុកឡាក់', 'សាច់អាំង', '牛肉', '摇滚牛肉'],
+  ['pork', 'bai sach chrouk', 'bbq', 'skewer', 'សាច់ជ្រូក', 'បាយសាច់ជ្រូក', 'សាច់អាំង', '猪肉', '猪肉饭'],
+  ['chicken', 'សាច់មាន់', 'មាន់ដុត', 'មាន់', '鸡肉', '烤鸡'],
+  ['seafood', 'crab', 'shrimp', 'prawn', 'squid', 'គ្រឿងសមុទ្រ', 'ក្តាម', 'ក្តាមឆាម្រេច', 'បង្គា', 'មឹក', 'កែប', 'kep', '海鲜', '螃蟹'],
+  ['soup', 'curry', 'samlor', 'korko', 'machu', 'សម្ល', 'សម្លកកូរ', 'សម្លម្ជូរ', 'សម្លការី', 'ស្ងោរ', '汤', '咖喱'],
+  ['dessert', 'sweet', 'cake', 'snack', 'kralan', 'num krok', 'បង្អែម', 'នំ', 'ក្រឡាន', 'នំគ្រក់', 'ចេកអាំង', '甜品', '小吃'],
+  ['street food', 'night market', 'market', 'ម្ហូបតាមផ្លូវ', 'ផ្សារ', 'ផ្សាររាត្រី', 'អាហារតាមផ្លូវ', '街头美食', '夜市'],
+  ['restaurant', 'shop', 'dining', 'ភោជនីយដ្ឋាន', 'ហាង', 'ហាងអាហារ', '餐厅', '名店'],
+  ['travel', 'tourism', 'attraction', 'temple', 'angkor', 'island', 'beach', 'ទេសចរណ៍', 'ដើរលេង', 'ប្រាសាទ', 'អង្គរវត្ត', 'កោះ', 'ឆ្នេរ', '旅游', '景点', '吴哥窟'],
+  ['phnom penh', 'ភ្នំពេញ', 'រាជធានីភ្នំពេញ', '金边'],
+  ['siem reap', 'angkor', 'សៀមរាប', 'ខេត្តសៀមរាប', 'អង្គរ', '暹粒'],
+  ['kampot', 'កំពត', 'ខេត្តកំពត', '贡布'],
+  ['kep', 'កែប', 'ខេត្តកែប', '白马'],
+  ['battambang', 'បាត់ដំបង', 'ខេត្តបាត់ដំបង', '马德望'],
+  ['sihanoukville', 'koh rong', 'ព្រះសីហនុ', 'កោះរ៉ុង', '西哈努克', '高龙岛'],
+];
+
+export function expandYouTubeSearchQueryTokens(rawQuery: string): string[] {
+  const q = (rawQuery || '').trim().toLowerCase();
+  if (!q) return [];
+  const expanded = new Set<string>([q]);
+  const words = q.split(/\s+/).filter((w) => w.length >= 2);
+  for (const w of words) {
+    expanded.add(w);
+  }
+  for (const group of YOUTUBE_SEARCH_SYNONYM_GROUPS) {
+    const matchedGroup = group.some((term) => q.includes(term) || term.includes(q));
+    if (matchedGroup) {
+      for (const term of group) {
+        expanded.add(term);
+      }
+    }
+  }
+  return Array.from(expanded);
+}
+
+export function matchesExpandedYouTubeQuery(
+  item: OnlineFoodDiscoveryItem,
+  rawQuery: string
+): boolean {
+  const q = (rawQuery || '').trim().toLowerCase();
+  if (!q) return true;
+  const hay = `${item.titleKh} ${item.titleEn} ${item.titleZh || ''} ${item.descriptionKh} ${item.descriptionEn} ${item.descriptionZh || ''} ${item.sourceName} ${item.authorHandle || ''} ${item.provinceKh} ${item.provinceEn} ${item.matchedFoodNameKh || ''} ${item.matchedFoodNameEn || ''} ${item.categorySlug}`.toLowerCase();
+  if (hay.includes(q)) return true;
+  const tokens = expandYouTubeSearchQueryTokens(q);
+  return tokens.some((token) => hay.includes(token));
+}
+
+/**
  * Unified YouTube 2025–2026 discovery and search:
- * 1. Queries backend Edge Function for live 2025–2026 YouTube search & channel RSS feeds if online, verifying every returned video ID.
- * 2. Merges with verified official 2025–2026 YouTube videos & oEmbed metadata.
- * 3. Automatically skips unavailable videos and replaces them with relevant Cambodian videos.
+ * 1. Uses fast local 30-min cache by default; only hits remote Edge Function on explicit forceRefresh.
+ * 2. Merges with verified official 2025–2026 YouTube videos.
+ * 3. Supports multilingual synonym search across Khmer, English, and Chinese.
  */
 export async function searchAndDiscoverSocialFood(
   options: SearchSocialOptions = {}
@@ -1739,62 +1840,62 @@ export async function searchAndDiscoverSocialFood(
   let backendItems: OnlineFoodDiscoveryItem[] = [];
   let fromBackendEdge = false;
 
-  // Try Supabase Edge Function first for YouTube 2025-2026 search & channel feeds (with 4s timeout)
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 4000);
-    const edgeEndpoint = `${SUPABASE_BASE_URL}/functions/v1/social-food-discovery`;
-    const res = await fetch(edgeEndpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        apikey: SUPABASE_ANON_KEY,
-        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-      },
-      body: JSON.stringify({ query: query || 'Cambodia food travel 2026', platform: 'youtube' }),
-      signal: controller.signal,
-    });
-    clearTimeout(timeout);
+  // Only call remote Supabase Edge Function when user explicitly taps Refresh (prevents background radio/CPU drain)
+  if (forceRefresh && (typeof navigator === 'undefined' || navigator.onLine !== false)) {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 3500);
+      const edgeEndpoint = `${SUPABASE_BASE_URL}/functions/v1/social-food-discovery`;
+      const res = await fetch(edgeEndpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+        },
+        body: JSON.stringify({ query: query || 'Cambodia food travel 2026', platform: 'youtube' }),
+        signal: controller.signal,
+      });
+      clearTimeout(timeout);
 
-    if (res.ok) {
-      const data = await res.json();
-      if (Array.isArray(data?.items) && data.items.length > 0) {
-        const rawCandidates = data.items.filter(
-          (it: any) =>
-            (it.platform === 'youtube' || /youtube\.com|youtu\.be/.test(it.sourceUrl || '')) &&
-            (!it.publishedOrUpdatedAt || String(it.publishedOrUpdatedAt) >= '2025-01-01')
-        );
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data?.items) && data.items.length > 0) {
+          const rawCandidates = data.items
+            .filter(
+              (it: any) =>
+                (it.platform === 'youtube' || /youtube\.com|youtu\.be/.test(it.sourceUrl || '')) &&
+                (!it.publishedOrUpdatedAt || String(it.publishedOrUpdatedAt) >= '2025-01-01')
+            )
+            .slice(0, 8);
 
-        const verifiedBackend = await Promise.all(
-          rawCandidates.map(async (it: any) => {
-            const vid = extractYouTubeVideoId(it.sourceUrl || it.id || '');
-            if (!vid || isKnownUnavailableVideo(vid)) return null;
-            const meta = await fetchPublicOEmbedMetadata(`https://www.youtube.com/watch?v=${vid}`);
-            if (!meta) return null;
-            const match = matchCambodianDish(
-              `${it.titleEn || it.titleKh} ${it.descriptionEn || it.descriptionKh}`,
-              foods
-            );
-            return {
-              ...it,
-              platform: 'youtube' as const,
-              sourceUrl: `https://www.youtube.com/watch?v=${vid}`,
-              thumbnailUrl: `https://i.ytimg.com/vi/${vid}/hqdefault.jpg`,
-              matchedFoodId: it.matchedFoodId || match?.food?.id,
-              matchedFoodNameKh: it.matchedFoodNameKh || match?.food?.nameKh,
-              matchedFoodNameEn: it.matchedFoodNameEn || match?.food?.nameEn,
-              isPlayableVerified: true,
-              canInlineEmbed: meta.canEmbed !== false,
-            } as OnlineFoodDiscoveryItem;
-          })
-        );
-
-        backendItems = verifiedBackend.filter((x): x is OnlineFoodDiscoveryItem => Boolean(x));
-        fromBackendEdge = backendItems.length > 0;
+          backendItems = rawCandidates
+            .map((it: any) => {
+              const vid = extractYouTubeVideoId(it.sourceUrl || it.id || '');
+              if (!vid || isKnownUnavailableVideo(vid)) return null;
+              const match = matchCambodianDish(
+                `${it.titleEn || it.titleKh} ${it.descriptionEn || it.descriptionKh}`,
+                foods
+              );
+              return {
+                ...it,
+                platform: 'youtube' as const,
+                sourceUrl: `https://www.youtube.com/watch?v=${vid}`,
+                thumbnailUrl: `https://i.ytimg.com/vi/${vid}/hqdefault.jpg`,
+                matchedFoodId: it.matchedFoodId || match?.food?.id,
+                matchedFoodNameKh: it.matchedFoodNameKh || match?.food?.nameKh,
+                matchedFoodNameEn: it.matchedFoodNameEn || match?.food?.nameEn,
+                isPlayableVerified: true,
+                canInlineEmbed: true,
+              } as OnlineFoodDiscoveryItem;
+            })
+            .filter((x: OnlineFoodDiscoveryItem | null): x is OnlineFoodDiscoveryItem => Boolean(x));
+          fromBackendEdge = backendItems.length > 0;
+        }
       }
+    } catch {
+      // Edge function unreachable or offline; smoothly fallback
     }
-  } catch {
-    // Edge function unreachable or offline; smoothly fallback
   }
 
   // Fetch base discovery feed
@@ -1812,16 +1913,9 @@ export async function searchAndDiscoverSocialFood(
     combined = combined.filter((item) => item.categorySlug === categorySlug);
   }
 
-  // Apply query filter if specified
-  const qClean = query.trim().toLowerCase();
-  if (qClean) {
-    combined = combined.filter((item) => {
-      const inTitle = (item.titleKh + ' ' + item.titleEn + ' ' + (item.titleZh || '')).toLowerCase();
-      const inDesc = (item.descriptionKh + ' ' + item.descriptionEn + ' ' + (item.descriptionZh || '')).toLowerCase();
-      const inSrc = (item.sourceName + ' ' + (item.authorHandle || '')).toLowerCase();
-      const inFood = ((item.matchedFoodNameKh || '') + ' ' + (item.matchedFoodNameEn || '')).toLowerCase();
-      return inTitle.includes(qClean) || inDesc.includes(qClean) || inSrc.includes(qClean) || inFood.includes(qClean);
-    });
+  // Apply multilingual query filter if specified
+  if (query.trim()) {
+    combined = combined.filter((item) => matchesExpandedYouTubeQuery(item, query));
   }
 
   return {

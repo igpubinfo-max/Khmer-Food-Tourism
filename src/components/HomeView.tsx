@@ -921,7 +921,7 @@ export const HomeView: React.FC = () => {
 
                   {/* Last 3 Days Daily Expiration Reminder Banner */}
                   {getVipRemainingDays(currentUser) <= 3 && (
-                    <div className="p-3 rounded-2xl bg-rose-600 text-white border-2 border-white shadow-md flex items-center justify-between gap-2 animate-pulse">
+                    <div className="p-3 rounded-2xl bg-rose-600 text-white border-2 border-white shadow-md flex items-center justify-between gap-2">
                       <div className="min-w-0">
                         <p className="text-xs font-black leading-snug">
                           {isKm

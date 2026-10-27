@@ -1,24 +1,26 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
   --color-emerald-deep: #064E3B;
   --color-emerald-primary: #059669;
   --color-emerald-accent: #10B981;
   --color-emerald-soft: #ECFDF5;
-  --color-page-bg: #F8FAFC;
-  --color-text-main: #0F172A;
-  --color-text-muted: #64748B;
+  --color-page-bg: #0F172A;
+  --color-text-main: #F8FAFC;
+  --color-text-muted: #94A3B8;
   --color-gold-warm: #F59E0B;
 }
 
 :root {
+  color-scheme: dark;
   --deep-emerald: #064E3B;
   --primary-emerald: #059669;
   --light-emerald: #10B981;
   --soft-emerald: #ECFDF5;
-  --page-background: #F8FAFC;
-  --main-text: #0F172A;
-  --muted-text: #64748B;
+  --page-background: #0F172A;
+  --main-text: #F8FAFC;
+  --muted-text: #94A3B8;
   --warm-gold: #F59E0B;
 }
 
@@ -28,9 +30,10 @@
     -webkit-font-smoothing: antialiased;
   }
   
+  html,
   body {
-    background-color: #F8FAFC;
-    color: #0F172A;
+    background-color: #0F172A;
+    color: #F8FAFC;
   }
   
   /* Smooth scrolling and hide default scrollbars for mobile feel */
@@ -46,103 +49,47 @@
   }
 }
 
-/* Custom animations */
-@keyframes pulse-subtle {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.85; transform: scale(1.03); }
-}
-
+/* Zero-CPU / Zero-GPU-Repaint Static Styles (Prevents Mobile Overheating) */
 .animate-pulse-subtle {
-  animation: pulse-subtle 3s infinite ease-in-out;
+  opacity: 1;
 }
 
-/* Glassmorphism helpers */
+/* Glassmorphism helpers (optimized without expensive backdrop-filter repaints) */
 .glass-header {
-  background: rgba(6, 78, 59, 0.96);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(6, 78, 59, 0.98);
 }
 
 .glass-card {
-  background: rgba(255, 255, 255, 0.98);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: rgba(30, 41, 59, 0.98);
 }
 
-/* VIP Registration Button Soft Blinking Glowing Lights (GPU-accelerated, 0% CPU overhead) */
-@keyframes vip-soft-glow {
-  0%, 100% {
-    box-shadow: 0 0 8px rgba(245, 158, 11, 0.45), 0 0 16px rgba(234, 179, 8, 0.3), inset 0 0 6px rgba(254, 240, 138, 0.4);
-    border-color: rgba(251, 191, 36, 0.85);
-  }
-  50% {
-    box-shadow: 0 0 22px rgba(245, 158, 11, 0.95), 0 0 38px rgba(234, 179, 8, 0.7), 0 0 2px #fff, inset 0 0 12px rgba(254, 240, 138, 0.75);
-    border-color: rgba(254, 240, 138, 1);
-  }
-}
-
-@keyframes vip-sparkle-dot {
-  0%, 100% {
-    opacity: 0.35;
-    transform: scale(0.85);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1.2);
-  }
-}
-
+/* VIP Registration Button Static Gold Highlight (0% continuous GPU/CPU usage) */
 .vip-glow-btn {
-  animation: vip-soft-glow 2.2s ease-in-out infinite;
-  will-change: box-shadow, border-color;
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.55), inset 0 0 6px rgba(254, 240, 138, 0.35);
+  border-color: rgba(251, 191, 36, 0.9);
 }
 
 .vip-sparkle-dot {
-  animation: vip-sparkle-dot 1.8s ease-in-out infinite;
-  will-change: opacity, transform;
+  opacity: 0.9;
 }
 
-
-/* ===== Premium Smart Menu teaser banner ===== */
-@keyframes kft-gold-shimmer {
-  0% { transform: translateX(-120%) skewX(-18deg); }
-  60%, 100% { transform: translateX(260%) skewX(-18deg); }
+/* ===== Premium Smart Menu teaser banner (Static Gold Border - 0% GPU Repaint) ===== */
+.kft-premium-card {
+  box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.65), 0 8px 20px -8px rgba(251, 191, 36, 0.35);
 }
-@keyframes kft-gold-breathe {
-  0%, 100% { box-shadow: 0 0 0 1px rgba(251,191,36,.55), 0 8px 24px -8px rgba(251,191,36,.35); }
-  50% { box-shadow: 0 0 0 1px rgba(253,224,71,.95), 0 10px 34px -6px rgba(251,191,36,.65); }
+.kft-shimmer-bar {
+  display: none;
 }
-@keyframes kft-key-wiggle {
-  0%, 85%, 100% { transform: rotate(0deg); }
-  89% { transform: rotate(-12deg); }
-  93% { transform: rotate(10deg); }
-  97% { transform: rotate(-6deg); }
-}
-.kft-premium-card { animation: kft-gold-breathe 3.2s ease-in-out infinite; }
-.kft-shimmer-bar { animation: kft-gold-shimmer 4.5s ease-in-out infinite; }
-.kft-key-wiggle { animation: kft-key-wiggle 5s ease-in-out infinite; transform-origin: 50% 80%; }
-body.kft-modal-open .kft-premium-card,
-body.kft-modal-open .kft-shimmer-bar,
-body.kft-modal-open .kft-key-wiggle,
-body.kft-modal-open .vip-glow-btn,
-body.kft-modal-open .vip-sparkle-dot,
-body.kft-modal-open .kft-marquee-track {
-  animation-play-state: paused !important;
-}
-@media (prefers-reduced-motion: reduce) {
-  .kft-premium-card, .kft-shimmer-bar, .kft-key-wiggle { animation: none; }
+.kft-key-wiggle {
+  transform: none;
 }
 
-/* ===== Home auto-scrolling rows (right -> left, slow) ===== */
-@keyframes kft-marquee-rtl {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
+/* ===== Home horizontal rows (native touch scroll, 0% idle GPU usage) ===== */
+.kft-marquee-viewport {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
-.kft-marquee-track { animation: kft-marquee-rtl 40s linear infinite; will-change: transform; }
-.kft-marquee-track.kft-marquee-paused { animation-play-state: paused !important; will-change: auto; }
-.kft-marquee-viewport:hover .kft-marquee-track,
-.kft-marquee-viewport:active .kft-marquee-track { animation-play-state: paused; }
-@media (prefers-reduced-motion: reduce) {
-  .kft-marquee-viewport { overflow-x: auto; }
-  .kft-marquee-track { animation: none; }
+.kft-marquee-track {
+  animation: none !important;
+  will-change: auto;
 }

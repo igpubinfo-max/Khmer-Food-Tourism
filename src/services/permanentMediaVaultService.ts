@@ -302,7 +302,10 @@ function safeWriteJsonMap<T>(key: string, map: Record<string, T>): boolean {
   }
 }
 
-export function loadLocalMediaOverrides(): AllMediaOverridesBundle {
+export function loadLocalMediaOverrides(forceDiskRead = false): AllMediaOverridesBundle {
+  if (inMemoryMasterBundle && !forceDiskRead) {
+    return inMemoryMasterBundle;
+  }
   const foods = safeReadJsonMap<FoodMediaOverride>(VAULT_KEYS.FOODS);
   const restaurants = safeReadJsonMap<RestaurantMediaOverride>(VAULT_KEYS.RESTAURANTS);
   const destinations = safeReadJsonMap<DestinationMediaOverride>(VAULT_KEYS.DESTINATIONS);
@@ -1096,6 +1099,10 @@ export async function pushMediaOverridesToCloud(bundle?: AllMediaOverridesBundle
 }
 
 let hasHydratedFromIdbOnce = false;
+let mediaSyncInFlightPromise: Promise<AllMediaOverridesBundle> | null = null;
+let lastMediaCloudSyncAtMs = 0;
+let hasBackfilledPerRecordKeysOnce = false;
+const MEDIA_CLOUD_SYNC_COOLDOWN_MS = 5 * 60 * 1000; // 5 minutes cooldown
 
 /**
  * Fast local-only hydration from `localStorage` + `IndexedDB` (<15ms, zero network wait).
@@ -1128,123 +1135,141 @@ export async function hydrateFromLocalIdbImmediate(): Promise<AllMediaOverridesB
  *      via lightweight manifest check + chunked batch downloads so large base64 images never time out
  *   5. Supabase Cloud Master Bundle (`kft_cloud_media_overrides_v1`)
  */
-export async function hydrateAndSyncMediaOverrides(): Promise<AllMediaOverridesBundle> {
-  let current = await hydrateFromLocalIdbImmediate();
-  let hasRemoteChanges = false;
+export async function hydrateAndSyncMediaOverrides(forceCloud = false): Promise<AllMediaOverridesBundle> {
+  if (mediaSyncInFlightPromise) {
+    return mediaSyncInFlightPromise;
+  }
+  const now = Date.now();
+  if (!forceCloud && lastMediaCloudSyncAtMs > 0 && now - lastMediaCloudSyncAtMs < MEDIA_CLOUD_SYNC_COOLDOWN_MS && inMemoryMasterBundle) {
+    return inMemoryMasterBundle;
+  }
 
-  // Merge from Supabase Cloud using manifest-first delta sync + chunked batching
-  if (isSupabaseConfigured()) {
-    try {
-      const manifest = await pullCloudKeysManifestByPrefix(VAULT_KEYS.CLOUD_RECORD_PREFIX, 8000);
-      const existingPerRecordKeys = new Set<string>();
-      const keysToFetch: string[] = [];
+  mediaSyncInFlightPromise = (async () => {
+    let current = await hydrateFromLocalIdbImmediate();
+    let hasRemoteChanges = false;
 
-      if (Array.isArray(manifest) && manifest.length > 0) {
-        for (const item of manifest) {
-          existingPerRecordKeys.add(item.key);
-          const remoteMs = item.updated_at ? new Date(item.updated_at).getTime() : 0;
-          let localUpdatedAt: string | undefined;
-          let seedUpdatedAtMs = 0;
-          if (item.key.startsWith('kft_ov_food_')) {
-            const id = item.key.slice('kft_ov_food_'.length);
-            localUpdatedAt = current.foods[id]?.updatedAt;
-          } else if (item.key.startsWith('kft_ov_rest_')) {
-            const id = item.key.slice('kft_ov_rest_'.length);
-            localUpdatedAt = current.restaurants[id]?.updatedAt;
-          } else if (item.key.startsWith('kft_ov_dest_')) {
-            const id = item.key.slice('kft_ov_dest_'.length);
-            localUpdatedAt = current.destinations[id]?.updatedAt;
-            const seedDest = IMMUTABLE_SEED_DEST_MAP.get(id);
-            if (seedDest?.photoUrl?.startsWith('/destinations/') && seedDest.photoUpdatedAt) {
-              seedUpdatedAtMs = new Date(seedDest.photoUpdatedAt).getTime() || 0;
+    // Merge from Supabase Cloud using manifest-first delta sync + chunked batching
+    if (isSupabaseConfigured()) {
+      try {
+        lastMediaCloudSyncAtMs = Date.now();
+        const manifest = await pullCloudKeysManifestByPrefix(VAULT_KEYS.CLOUD_RECORD_PREFIX, 8000);
+        const existingPerRecordKeys = new Set<string>();
+        const keysToFetch: string[] = [];
+
+        if (Array.isArray(manifest) && manifest.length > 0) {
+          for (const item of manifest) {
+            existingPerRecordKeys.add(item.key);
+            const remoteMs = item.updated_at ? new Date(item.updated_at).getTime() : 0;
+            let localUpdatedAt: string | undefined;
+            let seedUpdatedAtMs = 0;
+            if (item.key.startsWith('kft_ov_food_')) {
+              const id = item.key.slice('kft_ov_food_'.length);
+              localUpdatedAt = current.foods[id]?.updatedAt;
+            } else if (item.key.startsWith('kft_ov_rest_')) {
+              const id = item.key.slice('kft_ov_rest_'.length);
+              localUpdatedAt = current.restaurants[id]?.updatedAt;
+            } else if (item.key.startsWith('kft_ov_dest_')) {
+              const id = item.key.slice('kft_ov_dest_'.length);
+              localUpdatedAt = current.destinations[id]?.updatedAt;
+              const seedDest = IMMUTABLE_SEED_DEST_MAP.get(id);
+              if (seedDest?.photoUrl?.startsWith('/destinations/') && seedDest.photoUpdatedAt) {
+                seedUpdatedAtMs = new Date(seedDest.photoUpdatedAt).getTime() || 0;
+              }
+            } else if (item.key.startsWith('kft_ov_trend_')) {
+              const id = item.key.slice('kft_ov_trend_'.length);
+              localUpdatedAt = current.trendingFoods[id]?.updatedAt;
             }
-          } else if (item.key.startsWith('kft_ov_trend_')) {
-            const id = item.key.slice('kft_ov_trend_'.length);
-            localUpdatedAt = current.trendingFoods[id]?.updatedAt;
-          }
-          const localMs = Math.max(
-            localUpdatedAt ? new Date(localUpdatedAt).getTime() || 0 : 0,
-            seedUpdatedAtMs
-          );
-          if (localMs === 0 || remoteMs > localMs + 1000) {
-            keysToFetch.push(item.key);
+            const localMs = Math.max(
+              localUpdatedAt ? new Date(localUpdatedAt).getTime() || 0 : 0,
+              seedUpdatedAtMs
+            );
+            if (localMs === 0 || remoteMs > localMs + 1000) {
+              keysToFetch.push(item.key);
+            }
           }
         }
-      }
 
-      // Fetch any missing or newer per-record overrides in small batches of 6 keys so requests never time out
-      if (keysToFetch.length > 0) {
-        const BATCH_SIZE = 6;
-        const perRecordBundle: AllMediaOverridesBundle = {
-          foods: {},
-          restaurants: {},
-          destinations: {},
-          trendingFoods: {},
-          updatedAt: new Date().toISOString(),
-        };
-        for (let i = 0; i < keysToFetch.length; i += BATCH_SIZE) {
-          const batchKeys = keysToFetch.slice(i, i + BATCH_SIZE);
-          const rows = await pullCloudDocumentsByKeys<any>(batchKeys, 15000);
-          for (const row of rows) {
-            const payload = row.payload;
-            if (!payload || !payload.id) continue;
+        // Fetch any missing or newer per-record overrides in small batches of 6 keys so requests never time out
+        if (keysToFetch.length > 0) {
+          const BATCH_SIZE = 6;
+          const perRecordBundle: AllMediaOverridesBundle = {
+            foods: {},
+            restaurants: {},
+            destinations: {},
+            trendingFoods: {},
+            updatedAt: new Date().toISOString(),
+          };
+          for (let i = 0; i < keysToFetch.length; i += BATCH_SIZE) {
+            const batchKeys = keysToFetch.slice(i, i + BATCH_SIZE);
+            const rows = await pullCloudDocumentsByKeys<any>(batchKeys, 15000);
+            for (const row of rows) {
+              const payload = row.payload;
+              if (!payload || !payload.id) continue;
+              hasRemoteChanges = true;
+              if (row.key.startsWith('kft_ov_food_')) {
+                perRecordBundle.foods[payload.id] = payload;
+              } else if (row.key.startsWith('kft_ov_rest_')) {
+                perRecordBundle.restaurants[payload.id] = payload;
+              } else if (row.key.startsWith('kft_ov_dest_')) {
+                perRecordBundle.destinations[payload.id] = payload;
+              } else if (row.key.startsWith('kft_ov_trend_')) {
+                perRecordBundle.trendingFoods[payload.id] = payload;
+              }
+            }
+          }
+          if (hasRemoteChanges) {
+            current = mergeOverrideBundles(current, perRecordBundle);
+          }
+        }
+
+        // Also pull master bundle if manifest returned empty or had no per-record keys yet
+        if (existingPerRecordKeys.size === 0) {
+          const cloudBundle = await pullCloudDocument<AllMediaOverridesBundle>(VAULT_KEYS.CLOUD_DOC_KEY, 15000);
+          if (cloudBundle) {
             hasRemoteChanges = true;
-            if (row.key.startsWith('kft_ov_food_')) {
-              perRecordBundle.foods[payload.id] = payload;
-            } else if (row.key.startsWith('kft_ov_rest_')) {
-              perRecordBundle.restaurants[payload.id] = payload;
-            } else if (row.key.startsWith('kft_ov_dest_')) {
-              perRecordBundle.destinations[payload.id] = payload;
-            } else if (row.key.startsWith('kft_ov_trend_')) {
-              perRecordBundle.trendingFoods[payload.id] = payload;
-            }
+            current = mergeOverrideBundles(current, cloudBundle);
           }
         }
-        if (hasRemoteChanges) {
-          current = mergeOverrideBundles(current, perRecordBundle);
-        }
-      }
 
-      // Also pull master bundle if manifest returned empty or had no per-record keys yet
-      if (existingPerRecordKeys.size === 0) {
-        const cloudBundle = await pullCloudDocument<AllMediaOverridesBundle>(VAULT_KEYS.CLOUD_DOC_KEY, 15000);
-        if (cloudBundle) {
-          hasRemoteChanges = true;
-          current = mergeOverrideBundles(current, cloudBundle);
+        // Backfill missing atomic per-record keys at most once per session
+        if (existingPerRecordKeys.size > 0 && !hasBackfilledPerRecordKeysOnce) {
+          hasBackfilledPerRecordKeysOnce = true;
+          const backfillPromises: Promise<any>[] = [];
+          for (const [id, ov] of Object.entries(current.foods)) {
+            const k = `kft_ov_food_${id}`;
+            if (!existingPerRecordKeys.has(k)) backfillPromises.push(pushCloudDocument(k, ov, 10000));
+          }
+          for (const [id, ov] of Object.entries(current.restaurants)) {
+            const k = `kft_ov_rest_${id}`;
+            if (!existingPerRecordKeys.has(k)) backfillPromises.push(pushCloudDocument(k, ov, 10000));
+          }
+          for (const [id, ov] of Object.entries(current.destinations)) {
+            const k = `kft_ov_dest_${id}`;
+            if (!existingPerRecordKeys.has(k)) backfillPromises.push(pushCloudDocument(k, ov, 10000));
+          }
+          for (const [id, ov] of Object.entries(current.trendingFoods)) {
+            const k = `kft_ov_trend_${id}`;
+            if (!existingPerRecordKeys.has(k)) backfillPromises.push(pushCloudDocument(k, ov, 10000));
+          }
+          if (backfillPromises.length > 0) {
+            Promise.allSettled(backfillPromises).catch(() => {});
+          }
         }
-      }
+      } catch {}
+    }
 
-      // Backfill any missing atomic per-record keys in Supabase ONLY if manifest succeeded (`existingPerRecordKeys.size > 0`)
-      if (existingPerRecordKeys.size > 0) {
-        const backfillPromises: Promise<any>[] = [];
-        for (const [id, ov] of Object.entries(current.foods)) {
-          const k = `kft_ov_food_${id}`;
-          if (!existingPerRecordKeys.has(k)) backfillPromises.push(pushCloudDocument(k, ov, 10000));
-        }
-        for (const [id, ov] of Object.entries(current.restaurants)) {
-          const k = `kft_ov_rest_${id}`;
-          if (!existingPerRecordKeys.has(k)) backfillPromises.push(pushCloudDocument(k, ov, 10000));
-        }
-        for (const [id, ov] of Object.entries(current.destinations)) {
-          const k = `kft_ov_dest_${id}`;
-          if (!existingPerRecordKeys.has(k)) backfillPromises.push(pushCloudDocument(k, ov, 10000));
-        }
-        for (const [id, ov] of Object.entries(current.trendingFoods)) {
-          const k = `kft_ov_trend_${id}`;
-          if (!existingPerRecordKeys.has(k)) backfillPromises.push(pushCloudDocument(k, ov, 10000));
-        }
-        if (backfillPromises.length > 0) {
-          Promise.allSettled(backfillPromises).catch(() => {});
-        }
-      }
-    } catch {}
-  }
+    if (inMemoryMasterBundle && hasRemoteChanges) {
+      current = mergeOverrideBundles(current, inMemoryMasterBundle);
+    }
+    if (hasRemoteChanges) {
+      saveLocalMediaOverrides(current);
+    }
+    return current;
+  })();
 
-  if (inMemoryMasterBundle && hasRemoteChanges) {
-    current = mergeOverrideBundles(current, inMemoryMasterBundle);
+  try {
+    return await mediaSyncInFlightPromise;
+  } finally {
+    mediaSyncInFlightPromise = null;
   }
-  if (hasRemoteChanges) {
-    saveLocalMediaOverrides(current);
-  }
-  return current;
 }

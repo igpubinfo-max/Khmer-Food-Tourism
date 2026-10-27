@@ -2833,7 +2833,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (typeof document === 'undefined' || !document.hidden) {
           triggerCloudSyncNow(false);
         }
-      }, 90000);
+      }, 300000);
       if (typeof document !== 'undefined') {
         document.addEventListener('visibilitychange', handleVisibilityCloudSync);
       }
