@@ -29,6 +29,9 @@ import {
   getReplacementCambodianVideo,
   fetchPublicOEmbedMetadata,
   matchesExpandedYouTubeQuery,
+  advanceVideoRotationCycle,
+  getCurrentVideoRotationCycle,
+  rotateLatestVideosForScope,
   OnlineFoodDiscoveryItem,
 } from '../services/onlineFoodDiscoveryService';
 
@@ -60,6 +63,8 @@ export const TrendingSocialModal: React.FC = () => {
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const [hasError, setHasError] = useState<boolean>(false);
   const [cooldownSec, setCooldownSec] = useState<number>(0);
+  const [rotationCycle, setRotationCycle] = useState<number>(() => getCurrentVideoRotationCycle());
+  const [nextAutoRefreshSec, setNextAutoRefreshSec] = useState<number>(60);
 
   // Live Google Maps & Smart Cache search state (reusing Home Screen search engine)
   const [smartCachePlaces, setSmartCachePlaces] = useState<GooglePlaceCachedItem[]>([]);
@@ -73,6 +78,8 @@ export const TrendingSocialModal: React.FC = () => {
 
   // Concurrency guard ref to prevent overlapping fetches
   const isFetchingRef = useRef<boolean>(false);
+  // IDs already shown, used to detect newly uploaded videos on automatic refreshes
+  const knownVideoIdsRef = useRef<Set<string>>(new Set());
 
   /** Automatically replace an unavailable video with a verified playable Cambodian video */
   const handleReplaceUnavailableVideo = useCallback(
@@ -145,12 +152,18 @@ export const TrendingSocialModal: React.FC = () => {
   }, [activePlayerItemId, discoveryItems, handleReplaceUnavailableVideo]);
 
   const loadFeed = useCallback(
-    async (force = false) => {
+    async (force = false, isAutoCycle = false) => {
       if (isFetchingRef.current) return;
       isFetchingRef.current = true;
-      setIsRefreshing(true);
+      if (force || discoveryItems.length === 0) {
+        setIsRefreshing(true);
+      }
       setHasError(false);
       try {
+        const nextCycle = force || isAutoCycle ? advanceVideoRotationCycle() : getCurrentVideoRotationCycle();
+        setRotationCycle(nextCycle);
+        setNextAutoRefreshSec(60);
+
         const res = await searchAndDiscoverSocialFood({
           query: '',
           platform: 'youtube',
@@ -158,9 +171,24 @@ export const TrendingSocialModal: React.FC = () => {
           foods,
           trendingFoods,
           forceRefresh: force,
+          skipRotation: true,
         });
+        const prevIds = knownVideoIdsRef.current;
+        const newItems = res.items.filter((it) => !prevIds.has(it.id));
+        knownVideoIdsRef.current = new Set(res.items.map((it) => it.id));
         setDiscoveryItems(res.items);
-        setLastCheckedAt(res.lastCheckedAt);
+        setLastCheckedAt(new Date().toISOString());
+        if (!force && prevIds.size > 0 && newItems.length > 0) {
+          showToast(
+            tr(
+              language,
+              `🆕 មានវីដេអូ YouTube ថ្មី ${newItems.length} ត្រូវបានបន្ថែមនៅខាងលើ`,
+              `🆕 ${newItems.length} new YouTube video(s) added to the top`,
+              `🆕 已在顶部添加 ${newItems.length} 条 YouTube 新视频`
+            ),
+            'info'
+          );
+        }
         setCooldownSec(res.cooldownRemainingSec);
 
         if (force) {
@@ -178,9 +206,9 @@ export const TrendingSocialModal: React.FC = () => {
             showToast(
               tr(
                 language,
-                `✅ បានពិនិត្យវីដេអូ YouTube ថ្មីៗ (${res.items.length} វីដេអូ)`,
-                `✅ Checked latest YouTube videos (${res.items.length} videos)`,
-                `✅ 已获取最新 YouTube 视频（共 ${res.items.length} 条）`
+                `✅ បានពិនិត្យ និងបង្វិលវីដេអូ YouTube ថ្មីៗ (${res.items.length} វីដេអូ)`,
+                `✅ Refreshed & rotated latest YouTube videos (${res.items.length} videos)`,
+                `✅ 已刷新并轮换最新 YouTube 视频（共 ${res.items.length} 条）`
               ),
               'success'
             );
@@ -205,17 +233,41 @@ export const TrendingSocialModal: React.FC = () => {
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [foods, trendingFoods, language]
+    [foods, trendingFoods, language, discoveryItems.length]
   );
 
   const activePlayerItemIdRef = useRef<string | null>(null);
   activePlayerItemIdRef.current = activePlayerItemId;
 
-  // Initial load when modal opens (manual refresh available anytime; no background polling timer)
+  // Initial load & rotation when modal opens, then automatic refresh & video rotation every 60 seconds
+  const loadFeedRef = useRef(loadFeed);
+  loadFeedRef.current = loadFeed;
+  const countdownRef = useRef<number>(60);
   useEffect(() => {
     if (!isTrendingSocialModalOpen) return;
-    loadFeed(false);
-  }, [isTrendingSocialModalOpen, loadFeed]);
+    countdownRef.current = 60;
+    setNextAutoRefreshSec(60);
+    loadFeedRef.current(false, true);
+
+    const ticker = setInterval(() => {
+      if (typeof document !== 'undefined' && document.hidden) return;
+      if (countdownRef.current <= 1) {
+        countdownRef.current = 60;
+        setNextAutoRefreshSec(60);
+        // Rotate & refresh automatically every 60 seconds without manual refresh
+        if (!activePlayerItemIdRef.current) {
+          loadFeedRef.current(false, true);
+        } else {
+          setLastCheckedAt(new Date().toISOString());
+        }
+      } else {
+        countdownRef.current -= 1;
+        setNextAutoRefreshSec(countdownRef.current);
+      }
+    }, 1000);
+
+    return () => clearInterval(ticker);
+  }, [isTrendingSocialModalOpen]);
 
   // Cooldown countdown ticker
   useEffect(() => {
@@ -353,8 +405,16 @@ export const TrendingSocialModal: React.FC = () => {
       );
     }
 
+    if (!searchQuery.trim() && strictMatches.length > 1) {
+      return rotateLatestVideosForScope(
+        strictMatches,
+        `${categoryFilter}|${provinceFilter}`,
+        rotationCycle
+      );
+    }
+
     return strictMatches;
-  }, [discoveryItems, categoryFilter, provinceFilter, searchQuery]);
+  }, [discoveryItems, categoryFilter, provinceFilter, searchQuery, rotationCycle]);
 
   if (!isTrendingSocialModalOpen) return null;
 
@@ -567,9 +627,9 @@ export const TrendingSocialModal: React.FC = () => {
               <p className="text-[11px] text-pink-200 font-khmer truncate">
                 {tr(
                   language,
-                  `កែប្រែស្វ័យប្រវត្តរៀងរាល់ ៦០វិនាទី • បានពិនិត្យ៖ ${formattedLastChecked}`,
-                  `Auto-refreshes every 60s · Last checked: ${formattedLastChecked}`,
-                  `每60秒自动刷新 · 最后检查：${formattedLastChecked}`
+                  `ប្តូរវីដេអូថ្មីស្វ័យប្រវត្តិរៀងរាល់ ៦០វិនាទី (${nextAutoRefreshSec}s) • បានពិនិត្យ៖ ${formattedLastChecked}`,
+                  `Auto-rotates every 60s (${nextAutoRefreshSec}s) · Checked: ${formattedLastChecked}`,
+                  `每60秒自动轮换 (${nextAutoRefreshSec}s) · 检查：${formattedLastChecked}`
                 )}
               </p>
             </div>

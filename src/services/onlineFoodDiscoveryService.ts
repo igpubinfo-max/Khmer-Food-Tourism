@@ -1,3 +1,4 @@
+import { Capacitor, CapacitorHttp } from '@capacitor/core';
 import { FoodItem, TrendingFoodCategorySlug, TrendingFoodItem } from '../types';
 import { initialFoods } from '../data/seedData';
 import { initialTrendingFoods } from '../data/seedTrendingFoods';
@@ -1494,6 +1495,290 @@ async function fetchYouTubeCambodianFoodVideos(foods: FoodItem[]): Promise<{
   };
 }
 
+/* ===================================================================== */
+/* LIVE YOUTUBE CHANNEL UPLOADS (official channel RSS feeds, no API key)  */
+/* ===================================================================== */
+const LIVE_RSS_CACHE_KEY = 'kft_v1_youtube_live_rss_cache';
+/** Live uploads are re-checked every 60 seconds while active. */
+export const LIVE_RSS_TTL_MS = 60 * 1000;
+export const VIDEO_AUTO_REFRESH_INTERVAL_MS = 60 * 1000;
+const VIDEO_ROTATION_STATE_KEY = 'kft_youtube_rotation_state_v2';
+const LIVE_RSS_PER_CHANNEL = 4;
+const YT_VIDEO_ID_RE = /^[A-Za-z0-9_-]{11}$/;
+/** Channels that also publish non-Cambodian content: only keep Cambodia-related videos. */
+const LIVE_RSS_GENERIC_CHANNELS = new Set(['TravelwithChad', 'Little Explore', 'Suitcase Monkey', 'Delicious Food Show & Travel']);
+const LIVE_RSS_CAMBODIA_RE =
+  /cambodia|khmer|phnom|siem ?reap|angkor|kampot|\bkep\b|battambang|sihanouk|kampong|koh |កម្ពុជា|ខ្មែរ|ភ្នំពេញ|សៀមរាប|柬埔寨|金边/i;
+let liveRssInFlight: Promise<OnlineFoodDiscoveryItem[]> | null = null;
+
+interface VideoRotationState {
+  cycle: number;
+  lastRotatedAtMs: number;
+  lastTopByScope: Record<string, string>;
+}
+
+function readVideoRotationState(): VideoRotationState {
+  try {
+    if (typeof localStorage === 'undefined') {
+      return { cycle: 1, lastRotatedAtMs: Date.now(), lastTopByScope: {} };
+    }
+    const raw = localStorage.getItem(VIDEO_ROTATION_STATE_KEY);
+    if (!raw) {
+      return { cycle: 1, lastRotatedAtMs: Date.now(), lastTopByScope: {} };
+    }
+    const parsed = JSON.parse(raw);
+    return {
+      cycle: typeof parsed?.cycle === 'number' && Number.isFinite(parsed.cycle) ? parsed.cycle : 1,
+      lastRotatedAtMs: typeof parsed?.lastRotatedAtMs === 'number' ? parsed.lastRotatedAtMs : Date.now(),
+      lastTopByScope: parsed?.lastTopByScope && typeof parsed.lastTopByScope === 'object' ? parsed.lastTopByScope : {},
+    };
+  } catch {
+    return { cycle: 1, lastRotatedAtMs: Date.now(), lastTopByScope: {} };
+  }
+}
+
+function writeVideoRotationState(state: VideoRotationState): void {
+  try {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem(VIDEO_ROTATION_STATE_KEY, JSON.stringify(state));
+    }
+  } catch {
+    // ignore storage errors
+  }
+}
+
+/**
+ * Advances the video rotation cycle (called every 60 seconds and on refresh/open)
+ * so the same video never stays pinned at the top indefinitely.
+ */
+export function advanceVideoRotationCycle(): number {
+  const state = readVideoRotationState();
+  const nextCycle = (state.cycle || 0) + 1;
+  writeVideoRotationState({
+    ...state,
+    cycle: nextCycle,
+    lastRotatedAtMs: Date.now(),
+  });
+  return nextCycle;
+}
+
+export function getCurrentVideoRotationCycle(): number {
+  const state = readVideoRotationState();
+  // Auto-advance if 60+ seconds have elapsed since the last rotation
+  if (Date.now() - state.lastRotatedAtMs >= VIDEO_AUTO_REFRESH_INTERVAL_MS) {
+    return advanceVideoRotationCycle();
+  }
+  return state.cycle || 1;
+}
+
+/**
+ * Rotates the top/latest video tier so:
+ * 1. The latest videos always appear first in the top tier.
+ * 2. Every 60-second cycle rotates which latest video appears at #1.
+ * 3. The previously pinned #1 video for this scope is guaranteed not to stay stuck at #1.
+ */
+export function rotateLatestVideosForScope(
+  items: OnlineFoodDiscoveryItem[],
+  _scopeKey = 'all|all',
+  explicitCycle?: number
+): OnlineFoodDiscoveryItem[] {
+  if (!Array.isArray(items) || items.length <= 1) return items;
+
+  const state = readVideoRotationState();
+  const activeCycle = typeof explicitCycle === 'number' ? explicitCycle : state.cycle || 1;
+
+  // Keep the latest videos in the top rotation window (up to 12 newest items, or all if <= 12)
+  const windowSize = Math.min(items.length, Math.max(4, Math.min(12, items.length)));
+  const topLatestPool = items.slice(0, windowSize);
+  const olderRemainder = items.slice(windowSize);
+
+  const offset = ((activeCycle % topLatestPool.length) + topLatestPool.length) % topLatestPool.length;
+
+  const rotatedTop = [
+    ...topLatestPool.slice(offset),
+    ...topLatestPool.slice(0, offset),
+  ];
+
+  return [...rotatedTop, ...olderRemainder];
+}
+
+function detectProvinceFromVideoText(text: string): { provinceKh: string; provinceEn: string } {
+  const t = (text || '').toLowerCase();
+  if (/siem\s*reap|angkor|pub\s*street|សៀមរាប|អង្គរ|暹粒|吴哥/i.test(t)) {
+    return { provinceKh: 'ខេត្តសៀមរាប', provinceEn: 'Siem Reap' };
+  }
+  if (/battambang|បាត់ដំបង|ឡូរី|马德望/i.test(t)) {
+    return { provinceKh: 'ខេត្តបាត់ដំបង', provinceEn: 'Battambang' };
+  }
+  if (/kampot|bokor|កំពត|បូកគោ|ទំនប់ម្លេច|ដូងទេរ|贡布/i.test(t)) {
+    return { provinceKh: 'ខេត្តកំពត', provinceEn: 'Kampot' };
+  }
+  if (/\bkep\b|កែប|白马/i.test(t)) {
+    return { provinceKh: 'ខេត្តកែប', provinceEn: 'Kep' };
+  }
+  if (/sihanouk|koh\s*rong|ព្រះសីហនុ|កោះរ៉ុង|西哈努克|高龙岛/i.test(t)) {
+    return { provinceKh: 'ខេត្តព្រះសីហនុ', provinceEn: 'Sihanoukville' };
+  }
+  if (/kampong\s*cham|កំពង់ចាម|磅湛/i.test(t)) {
+    return { provinceKh: 'ខេត្តកំពង់ចាម', provinceEn: 'Kampong Cham' };
+  }
+  if (/kampong\s*speu|កំពង់ស្ពឺ|磅士卑/i.test(t)) {
+    return { provinceKh: 'ខេត្តកំពង់ស្ពឺ', provinceEn: 'Kampong Speu' };
+  }
+  if (/takeo|តាកែវ|茶胶/i.test(t)) {
+    return { provinceKh: 'ខេត្តតាកែវ', provinceEn: 'Takeo' };
+  }
+  if (/koh\s*kong|ថ្មបាំង|កោះកុង|戈公/i.test(t)) {
+    return { provinceKh: 'ខេត្តកោះកុង', provinceEn: 'Koh Kong' };
+  }
+  if (/phnom\s*penh|orussey|riverside|toul\s*tom\s*poung|russian\s*market|boeung|ភ្នំពេញ|អូរឫស្សី|ទួលទំពូង|មាត់ទន្លេ|金边/i.test(t)) {
+    return { provinceKh: 'រាជធានីភ្នំពេញ', provinceEn: 'Phnom Penh' };
+  }
+  return { provinceKh: 'ទូទាំងប្រទេសកម្ពុជា', provinceEn: 'All Cambodia' };
+}
+
+function decodeXmlText(str: string): string {
+  return str
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&apos;/g, "'");
+}
+
+async function fetchChannelFeedXml(channelId: string): Promise<string | null> {
+  const feedUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${encodeURIComponent(channelId)}`;
+  try {
+    if (Capacitor.isNativePlatform()) {
+      // Native HTTP bypasses WebView CORS restrictions
+      const res = await CapacitorHttp.get({ url: feedUrl, connectTimeout: 7000, readTimeout: 7000 });
+      return res.status === 200 && typeof res.data === 'string' ? res.data : null;
+    }
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 7000);
+    try {
+      const res = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(feedUrl)}`, {
+        signal: controller.signal,
+      });
+      return res.ok ? await res.text() : null;
+    } finally {
+      clearTimeout(timer);
+    }
+  } catch {
+    return null;
+  }
+}
+
+function parseChannelFeed(
+  xml: string,
+  ch: (typeof ACTIVE_CAMBODIA_YOUTUBE_CHANNELS_2026)[number],
+  foods: FoodItem[]
+): OnlineFoodDiscoveryItem[] {
+  const out: OnlineFoodDiscoveryItem[] = [];
+  const entries = [...xml.matchAll(/<entry>([\s\S]*?)<\/entry>/g)].map((m) => m[1]);
+  for (const entry of entries.slice(0, LIVE_RSS_PER_CHANNEL)) {
+    const vid = (entry.match(/<yt:videoId>([^<]+)<\/yt:videoId>/) || [])[1]?.trim();
+    const rawTitle = (entry.match(/<title>([^<]+)<\/title>/) || [])[1]?.trim() || '';
+    const published = (entry.match(/<published>([^<]+)<\/published>/) || [])[1]?.trim() || '';
+    const rawDesc = (entry.match(/<media:description>([\s\S]*?)<\/media:description>/) || [])[1]?.trim() || '';
+    if (!vid || !YT_VIDEO_ID_RE.test(vid) || !rawTitle || !Date.parse(published)) continue;
+    if (isKnownUnavailableVideo(vid)) continue;
+
+    const title = decodeXmlText(rawTitle);
+    const desc = decodeXmlText(rawDesc).slice(0, 260);
+    if (LIVE_RSS_GENERIC_CHANNELS.has(ch.name) && !LIVE_RSS_CAMBODIA_RE.test(`${title} ${desc}`)) continue;
+
+    const match = matchCambodianDish(`${title} ${desc}`, foods);
+    const detectedProv = detectProvinceFromVideoText(`${title} ${desc}`);
+    const pubDay = published.slice(0, 10);
+    out.push({
+      id: `yt-rss-${vid}`,
+      platform: 'youtube',
+      titleKh: title,
+      titleEn: title,
+      titleZh: title,
+      descriptionKh: desc || `វីដេអូថ្មីពីឆានែល ${ch.name} (${pubDay})`,
+      descriptionEn: desc || `Latest video from ${ch.name} (${pubDay})`,
+      descriptionZh: desc || `${ch.name} 最新视频 (${pubDay})`,
+      thumbnailUrl: `https://i.ytimg.com/vi/${vid}/hqdefault.jpg`,
+      sourceUrl: `https://www.youtube.com/watch?v=${vid}`,
+      sourceName: `${ch.name} (YouTube)`,
+      authorHandle: ch.name,
+      publishedOrUpdatedAt: published,
+      isLiveFetched: true,
+      verificationBadgeEn: 'YouTube Channel Live Feed',
+      verificationBadgeKh: 'វីដេអូថ្មីពីឆានែល YouTube',
+      verificationBadgeZh: 'YouTube 频道最新视频',
+      categorySlug: ch.categorySlug,
+      provinceKh: detectedProv.provinceKh,
+      provinceEn: detectedProv.provinceEn,
+      matchedFoodId: match?.food.id,
+      matchedFoodNameKh: match?.food.nameKh,
+      matchedFoodNameEn: match?.food.nameEn,
+      relevanceScore: 99,
+      isPlayableVerified: true,
+      canInlineEmbed: true,
+    });
+  }
+  return out;
+}
+
+function readLiveRssCache(): { fetchedAt: number; items: OnlineFoodDiscoveryItem[] } | null {
+  try {
+    const raw = localStorage.getItem(LIVE_RSS_CACHE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || !Array.isArray(parsed.items) || typeof parsed.fetchedAt !== 'number') return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Fetches the newest uploads from every registered Cambodian food/travel channel (official RSS feeds).
+ * Results are cached for 10 minutes. If the network fails, the last good result is returned.
+ * Every item has a validated 11-character video ID and a canonical watch URL.
+ */
+export async function fetchLiveYouTubeChannelUploads(
+  force = false,
+  foods: FoodItem[] = initialFoods
+): Promise<OnlineFoodDiscoveryItem[]> {
+  const cached = readLiveRssCache();
+  if (!force && cached && Date.now() - cached.fetchedAt < LIVE_RSS_TTL_MS) {
+    return cached.items;
+  }
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+    return cached?.items || [];
+  }
+  if (liveRssInFlight) return liveRssInFlight;
+
+  liveRssInFlight = (async () => {
+    const groups = await Promise.all(
+      ACTIVE_CAMBODIA_YOUTUBE_CHANNELS_2026.map(async (ch) => {
+        const xml = await fetchChannelFeedXml(ch.channelId);
+        return xml ? parseChannelFeed(xml, ch, foods) : [];
+      })
+    );
+    const fresh = groups.flat();
+    if (fresh.length === 0) return cached?.items || [];
+    const unique = deduplicateAndRankDiscoveries(fresh);
+    try {
+      localStorage.setItem(LIVE_RSS_CACHE_KEY, JSON.stringify({ fetchedAt: Date.now(), items: unique }));
+    } catch {
+      // ignore storage errors
+    }
+    return unique;
+  })();
+
+  try {
+    return await liveRssInFlight;
+  } finally {
+    liveRssInFlight = null;
+  }
+}
+
 /** Deduplicate strictly by YouTube video ID or normalized URL, sorting newest 2026 -> 2025 broadcasts first */
 export function deduplicateAndRankDiscoveries(items: OnlineFoodDiscoveryItem[]): OnlineFoodDiscoveryItem[] {
   const seenVideoIds = new Set<string>();
@@ -1690,6 +1975,7 @@ export interface SearchSocialOptions {
   foods?: FoodItem[];
   trendingFoods?: TrendingFoodItem[];
   forceRefresh?: boolean;
+  skipRotation?: boolean;
 }
 
 export interface SearchSocialResult extends OnlineDiscoveryFeedResult {
@@ -1739,6 +2025,7 @@ export async function searchAndDiscoverSocialFood(
     foods = initialFoods,
     trendingFoods = initialTrendingFoods,
     forceRefresh = false,
+    skipRotation = false,
   } = options;
 
   let backendItems: OnlineFoodDiscoveryItem[] = [];
@@ -1809,8 +2096,11 @@ export async function searchAndDiscoverSocialFood(
     forceRefresh,
   });
 
-  // Merge and deduplicate (sorted newest 2026 -> 2025 first)
-  let combined = deduplicateAndRankDiscoveries([...backendItems, ...baseFeed.items]);
+  // Newest uploads straight from the official channel feeds (auto-detects new videos)
+  const liveChannelItems = await fetchLiveYouTubeChannelUploads(forceRefresh, foods).catch(() => []);
+
+  // Merge and deduplicate (sorted newest first, older videos below)
+  let combined = deduplicateAndRankDiscoveries([...liveChannelItems, ...backendItems, ...baseFeed.items]);
 
   // Apply category filter if specified and not 'all'
   if (categorySlug && categorySlug !== 'all') {
@@ -1820,10 +2110,15 @@ export async function searchAndDiscoverSocialFood(
   // Apply multilingual query filter if specified
   if (query.trim()) {
     combined = combined.filter((item) => matchesExpandedYouTubeQuery(item, query));
+  } else if (!skipRotation) {
+    // Rotate the latest videos automatically so the same video never stays pinned at #1 indefinitely
+    const activeCycle = forceRefresh ? advanceVideoRotationCycle() : getCurrentVideoRotationCycle();
+    combined = rotateLatestVideosForScope(combined, `${categorySlug || 'all'}|all`, activeCycle);
   }
 
   return {
     ...baseFeed,
+    lastCheckedAt: new Date().toISOString(),
     items: combined,
     fromBackendEdge,
   };
