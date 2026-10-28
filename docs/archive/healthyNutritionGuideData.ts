@@ -162,7 +162,7 @@ export const HEALTHY_NUTRITION_CONDITIONS_DATA: DiseaseNutritionConditionGuide[]
     ],
     foodsToLimitOrAvoid: [
       {
-        nameKh: 'ភេសជ្ជៈផ្អែម ទឹកอัดลม តែគុជ និងកាហ្វេទឹកដោះគោខាប់',
+        nameKh: 'ភេសជ្ជៈផ្អែម ទឹកក្រូចកំប៉ុង តែគុជ និងកាហ្វេទឹកដោះគោខាប់',
         nameEn: 'Sugary Soft Drinks, Bubble Tea & Condensed Milk Coffee',
         nameZh: '含糖碳酸饮料、珍珠奶茶与炼乳冰咖啡',
         benefitOrReasonKh: 'មានជាតិស្កររាវខ្ពស់ដែលជ្រាបចូលក្នុងឈាមភ្លាមៗ ធ្វើឱ្យកម្រិតជាតិស្ករឡើងខ្ពស់យ៉ាងឆាប់រហ័ស។',
@@ -551,7 +551,7 @@ export const HEALTHY_NUTRITION_CONDITIONS_DATA: DiseaseNutritionConditionGuide[]
         keyNutrientsZh: '高饱和脂肪与高胆固醇',
       },
       {
-        nameKh: 'អាហារបំពងខ្លាញ់ច្រើន និងប្រេងឆាប្រើซ้ำច្រើនដង',
+        nameKh: 'អាហារបំពងខ្លាញ់ច្រើន និងប្រេងឆាប្រើឡើងវិញច្រើនដង',
         nameEn: 'Deep-Fried Foods & Repeatedly Reused Cooking Oil',
         nameZh: '高温油炸食品与反复使用的煎炸油',
         benefitOrReasonKh: 'មានផ្ទុកខ្លាញ់ Trans Fat និងកាឡូរីខ្ពស់ ដែលប៉ះពាល់ដល់សុខភាពសរសៃឈាមបេះដូង។',

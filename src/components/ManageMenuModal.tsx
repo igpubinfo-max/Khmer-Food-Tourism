@@ -1138,10 +1138,10 @@ export const ManageMenuModal: React.FC = () => {
                               )}
                               <div className="flex items-center gap-2 mt-1">
                                 <span className="px-2 py-0.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-[#064E3B] dark:text-emerald-400 font-black font-mono text-xs border border-emerald-200 dark:border-emerald-800">
-                                  ${item.priceUsd.toFixed(2)}
+                                  {isKm ? `ប្រហាក់ប្រហែល $${item.priceUsd.toFixed(2)}` : `Approx. $${item.priceUsd.toFixed(2)}`}
                                 </span>
                                 <span className="text-[11px] text-slate-500 font-mono">
-                                  ({item.priceRiel.toLocaleString()} ៛)
+                                  ({isKm ? `ប្រហាក់ប្រហែល ${item.priceRiel.toLocaleString()} ៛` : `Approx. ${item.priceRiel.toLocaleString()} ៛`})
                                 </span>
                               </div>
                               {item.descriptionKh && (
@@ -1607,7 +1607,7 @@ export const ManageMenuModal: React.FC = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
-                    {isKm ? '៥. កម្រិតតម្លៃជាមធ្យមក្នុងហាង' : '5. Store Price Range'}
+                    {isKm ? '៥. កម្រិតតម្លៃប្រហាក់ប្រហែលក្នុងហាង' : '5. Approx. Store Price Range'}
                   </label>
                   <div className="grid grid-cols-3 gap-1.5">
                     {([

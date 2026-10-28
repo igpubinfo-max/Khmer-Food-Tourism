@@ -352,6 +352,7 @@ export const RestaurantDetailModal: React.FC = () => {
                 )}
 
                 <span className="px-2 py-0.5 rounded-md bg-[#064E3B]/90 text-emerald-100 text-[10px] font-bold border border-emerald-400/30">
+                  {tr(language, 'ប្រហាក់ប្រហែល ', 'Approx. ', '约 ')}
                   {selectedRestaurant.priceLevel}
                 </span>
               </div>
@@ -728,9 +729,13 @@ export const RestaurantDetailModal: React.FC = () => {
                             <h4 className="font-bold text-[#0F172A] dark:text-white text-sm truncate">
                               {itemDisplayName}
                             </h4>
-                            <span className="text-[#064E3B] dark:text-emerald-400 font-bold font-mono text-xs ml-2">${(item.priceUsd ?? 0).toFixed(2)}</span>
+                            <span className="text-[#064E3B] dark:text-emerald-400 font-bold font-mono text-xs ml-2 shrink-0">
+                              {tr(language, `ប្រហាក់ប្រហែល $${(item.priceUsd ?? 0).toFixed(2)}`, `Approx. $${(item.priceUsd ?? 0).toFixed(2)}`, `约 $${(item.priceUsd ?? 0).toFixed(2)}`)}
+                            </span>
                           </div>
-                          <p className="text-[11px] text-slate-500 font-mono">({item.priceRiel.toLocaleString()} ៛)</p>
+                          <p className="text-[11px] text-slate-500 font-mono">
+                            ({tr(language, `ប្រហាក់ប្រហែល ${item.priceRiel.toLocaleString()} ៛`, `Approx. ${item.priceRiel.toLocaleString()} ៛`, `约 ${item.priceRiel.toLocaleString()} ៛`)})
+                          </p>
                           {itemDesc && (
                             <p className="text-xs text-slate-600 dark:text-slate-300 line-clamp-1 mt-0.5">
                               {itemDesc}

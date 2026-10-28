@@ -622,7 +622,7 @@ const KHMER_CULINARY_MAP: Array<[string, string, string]> = [
   ['ភ្លាសាច់គោត្រយូងចេក', 'Cambodian Lime-Cured Beef Salad', '香蕉花酸柑生拌牛肉沙拉'],
   ['បង្អែមសង់ខ្យាល្ពៅ', 'Steamed Pumpkin Coconut Custard', '高棉椰香蒸南瓜布丁'],
   ['ក្រឡានថ្មគោលបាត់ដំបង', 'Battambang Bamboo Sticky Rice', '马德望竹筒香糯米饭'],
-  ['កាហ្វេឆงដៃពិសេសបាត់ដំបង', 'Battambang Specialty Hand-Brewed Coffee', '马德望手冲精品咖啡'],
+  ['កាហ្វេឆុងដៃពិសេសបាត់ដំបង', 'Battambang Specialty Hand-Brewed Coffee', '马德望手冲精品咖啡'],
   ['គុយទាវបាត់ដំបង', 'Battambang Rice Noodle Soup', '马德望特色粿条汤'],
   ['នំខេកការ៉ុត និងទឹកក្រឡុកផ្លែឈើ', 'Carrot Cake & Fresh Fruit Smoothies', '手工胡萝卜蛋糕与鲜果冰沙'],
   ['ឡុកឡាក់សាច់គោម្រេចខ្ចីកំពត', 'Kampot Green Pepper Beef Lok Lak', '贡布青胡椒柬式摇滚牛肉粒 (Lok Lak)'],
@@ -1531,7 +1531,8 @@ export function sanitizeStrictLanguageText(input: string | undefined, lang: Lang
 
 function computeSanitizeStrictLanguageText(input: string, lang: Language): string {
   if (!input) return '';
-  let out = input.trim();
+  // Always strip any Thai (\u0E00-\u0E7F), Lao (\u0E80-\u0EFF), Myanmar (\u1000-\u109F), or Devanagari (\u0900-\u097F) script
+  let out = input.replace(/[\u0E00-\u0E7F\u0E80-\u0EFF\u1000-\u109F\u0900-\u097F]+/g, '').trim();
   if (!out) return '';
 
   if (lang === 'km') {
@@ -1540,7 +1541,7 @@ function computeSanitizeStrictLanguageText(input: string, lang: Language): strin
       .replace(/\s*-\s*[A-Za-z0-9\s&'.,/+-]+$/g, '')
       .replace(/\s+/g, ' ')
       .trim();
-    return out || input.trim();
+    return out || input.replace(/[\u0E00-\u0E7F\u0E80-\u0EFF\u1000-\u109F\u0900-\u097F]+/g, '').trim();
   }
 
   if (lang === 'en') {
@@ -1553,7 +1554,7 @@ function computeSanitizeStrictLanguageText(input: string, lang: Language): strin
       .replace(/^[\s,.;:–—-]+|[\s,.;:–—-]+$/g, '')
       .replace(/\s+/g, ' ')
       .trim();
-    return out || input.trim();
+    return out || input.replace(/[\u0E00-\u0E7F\u0E80-\u0EFF\u1000-\u109F\u0900-\u097F]+/g, '').trim();
   }
 
   // Simplified Chinese ('zh')
@@ -1566,7 +1567,51 @@ function computeSanitizeStrictLanguageText(input: string, lang: Language): strin
     .replace(/（\s*）/g, '')
     .replace(/\s+/g, ' ')
     .trim();
-  return out || input.trim();
+  return out || input.replace(/[\u0E00-\u0E7F\u0E80-\u0EFF\u1000-\u109F\u0900-\u097F]+/g, '').trim();
+}
+
+/**
+ * Format estimated price or entrance fee with "ប្រហាក់ប្រហែល" (km), "Approx." (en), or "约" (zh)
+ * when a non-zero price ($X or X រៀល / Riel / KHR) is present.
+ * Leaves "$0" / "ឥតគិតថ្លៃ" / "Free" without any paid price unchanged.
+ */
+export function formatApproxPriceText(rawText: string | undefined, lang: Language): string {
+  if (!rawText) return '';
+  const cleaned = rawText.replace(/[\u0E00-\u0E7F\u0E80-\u0EFF\u1000-\u109F\u0900-\u097F]+/g, '').trim();
+  if (!cleaned) return '';
+
+  // Check if there is any non-zero price amount ($1+, 500+ Riel/KHR/រៀល)
+  const hasNonZeroUsd = /\$(?!0(?:\.0+)?\b)\d+(?:\.\d+)?/.test(cleaned);
+  const hasRielAmount = /(?:\d|[០-៩])[\d,០-៩]*\s*(?:រៀល|៛|Riel|KHR)/i.test(cleaned);
+  if (!hasNonZeroUsd && !hasRielAmount) {
+    return cleaned;
+  }
+
+  if (lang === 'km') {
+    if (cleaned.includes('ប្រហាក់ប្រហែល')) return cleaned;
+    if (/\([^)]*(?:\$(?!0\b)\d|(?:\d|[០-៩])[\d,០-៩]*\s*(?:រៀល|៛))/.test(cleaned)) {
+      return cleaned.replace(/\(([^)]*(?:\$(?!0\b)\d|(?:\d|[០-៩])[\d,០-៩]*\s*(?:រៀល|៛))[^)]*)\)/, '(ប្រហាក់ប្រហែល $1)');
+    }
+    return `ប្រហាក់ប្រហែល ${cleaned}`;
+  }
+
+  if (lang === 'en') {
+    if (/approx\.?|approximately|~/i.test(cleaned)) return cleaned;
+    if (/\([^)]*(?:\$(?!0\b)\d|\d[\d,]*\s*(?:Riel|KHR))/i.test(cleaned)) {
+      return cleaned.replace(/\(([^)]*(?:\$(?!0\b)\d|\d[\d,]*\s*(?:Riel|KHR))[^)]*)\)/i, '(Approx. $1)');
+    }
+    return `Approx. ${cleaned}`;
+  }
+
+  // Simplified Chinese ('zh')
+  if (cleaned.includes('约') || cleaned.includes('~')) return cleaned;
+  if (/（[^）]*(?:\$(?!0\b)\d|\d[\d,]*\s*瑞尔)/.test(cleaned)) {
+    return cleaned.replace(/（([^）]*(?:\$(?!0\b)\d|\d[\d,]*\s*瑞尔)[^）]*)）/, '（约 $1）');
+  }
+  if (/\([^)]*(?:\$(?!0\b)\d|\d[\d,]*\s*瑞尔)/.test(cleaned)) {
+    return cleaned.replace(/\(([^)]*(?:\$(?!0\b)\d|\d[\d,]*\s*瑞尔)[^)]*)\)/, '（约 $1）');
+  }
+  return `约 ${cleaned}`;
 }
 
 /**
@@ -1740,13 +1785,13 @@ function computeLocalizedDestination(dest: TouristDestination, lang: Language) {
       secondaryName: '',
       subtitle: '',
       category: sanitizeStrictLanguageText(dest.categoryKh, 'km'),
-      province: dest.provinceKh,
-      address: dest.addressKh,
-      description: dest.descriptionKh,
-      entranceFee: dest.entranceFeeKh || dest.entryFeeKh || 'ឥតគិតថ្លៃ',
-      bestTime: dest.bestTimeToVisitKh || 'ពេញមួយឆ្នាំ',
+      province: sanitizeStrictLanguageText(dest.provinceKh, 'km'),
+      address: sanitizeStrictLanguageText(dest.addressKh, 'km'),
+      description: sanitizeStrictLanguageText(dest.descriptionKh, 'km'),
+      entranceFee: formatApproxPriceText(dest.entranceFeeKh || dest.entryFeeKh || 'ឥតគិតថ្លៃ', 'km'),
+      bestTime: sanitizeStrictLanguageText(dest.bestTimeToVisitKh || 'ពេញមួយឆ្នាំ', 'km'),
       highlights: (dest.highlightsKh || []).map((h: string) => sanitizeStrictLanguageText(h, 'km')),
-      socialHighlight: dest.socialHighlightKh || '',
+      socialHighlight: sanitizeStrictLanguageText(dest.socialHighlightKh || '', 'km'),
     };
   }
 
@@ -1759,7 +1804,7 @@ function computeLocalizedDestination(dest: TouristDestination, lang: Language) {
       province: sanitizeStrictLanguageText(dest.provinceEn, 'en'),
       address: sanitizeStrictLanguageText(dest.addressEn, 'en'),
       description: sanitizeStrictLanguageText(dest.descriptionEn, 'en'),
-      entranceFee: sanitizeStrictLanguageText(dest.entranceFeeEn || dest.entryFeeEn || 'Free Entry', 'en'),
+      entranceFee: formatApproxPriceText(sanitizeStrictLanguageText(dest.entranceFeeEn || dest.entryFeeEn || 'Free Entry', 'en'), 'en'),
       bestTime: sanitizeStrictLanguageText(dest.bestTimeToVisitEn || 'All year round', 'en'),
       highlights:
         highlightsEnList && highlightsEnList.length > 0
@@ -1781,7 +1826,7 @@ function computeLocalizedDestination(dest: TouristDestination, lang: Language) {
   const rawZhDesc = DEST_DESC_ZH_BY_ID[dest.id] || translateDynamicTextToZh(dest.descriptionEn);
   const zhDesc = sanitizeStrictLanguageText(rawZhDesc, 'zh');
   const rawFee = dest.entranceFeeEn || dest.entryFeeEn || 'Free';
-  const zhFee = sanitizeStrictLanguageText(translateEntranceFeeToZh(rawFee), 'zh');
+  const zhFee = formatApproxPriceText(sanitizeStrictLanguageText(translateEntranceFeeToZh(rawFee), 'zh'), 'zh');
   const rawTime = dest.bestTimeToVisitEn || 'All year round';
   const zhTime = sanitizeStrictLanguageText(translateBestTimeToZh(rawTime), 'zh');
   const zhAddress = sanitizeStrictLanguageText(translateAddressToZh(dest.addressEn || '', zhProv), 'zh');
@@ -1834,9 +1879,9 @@ function computeLocalizedRestaurant(rest: Restaurant, lang: Language) {
       name: sanitizeStrictLanguageText(rest.nameKh, 'km'),
       secondaryName: '',
       subtitle: '',
-      province: rest.provinceKh || 'កម្ពុជា',
-      address: rest.addressKh,
-      description: rest.descriptionKh,
+      province: sanitizeStrictLanguageText(rest.provinceKh || 'កម្ពុជា', 'km'),
+      address: sanitizeStrictLanguageText(rest.addressKh, 'km'),
+      description: sanitizeStrictLanguageText(rest.descriptionKh, 'km'),
       openingHours: translateOpeningHours(rest.openingHoursKh || rest.openingHoursEn, 'km'),
       signatureDishes: (rest.signatureDishesKh || []).map((d) => sanitizeStrictLanguageText(d, 'km')),
     };

@@ -230,9 +230,9 @@ export const WhatToEatModal: React.FC = () => {
             </span>
             {[
               { id: 'all', labelKh: 'ទាំងអស់', labelEn: 'All', labelZh: '全部' },
-              { id: 'budget', labelKh: '< $3 សន្សំសំចៃ', labelEn: '< $3 Budget', labelZh: '< $3 实惠' },
-              { id: 'medium', labelKh: '$3-$7 មធ្យម', labelEn: '$3-$7 Medium', labelZh: '$3-$7 适中' },
-              { id: 'premium', labelKh: '> $7 ពិសេស', labelEn: '> $7 Special', labelZh: '> $7 精品' },
+              { id: 'budget', labelKh: 'ប្រហាក់ប្រហែល < $3 សន្សំសំចៃ', labelEn: 'Approx. < $3 Budget', labelZh: '约 < $3 实惠' },
+              { id: 'medium', labelKh: 'ប្រហាក់ប្រហែល $3-$7 មធ្យម', labelEn: 'Approx. $3-$7 Medium', labelZh: '约 $3-$7 适中' },
+              { id: 'premium', labelKh: 'ប្រហាក់ប្រហែល > $7 ពិសេស', labelEn: 'Approx. > $7 Special', labelZh: '约 > $7 精品' },
             ].map(b => (
               <button
                 key={b.id}

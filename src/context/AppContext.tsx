@@ -34,7 +34,7 @@ import {
 } from '../data/seedData';
 import { hashPassword, verifyPassword } from '../utils/crypto';
 import { recordMeaningfulAction } from '../utils/engagement';
-import { translateTextToChinese, useChineseDomTranslation } from '../utils/i18n';
+import { translateTextToChinese, useChineseDomTranslation, stripForeignScripts } from '../utils/i18n';
 import { 
   hashPasswordPBKDF2, verifyPasswordPBKDF2, 
   checkAdminLoginAllowed, recordAdminLoginFailed, resetAdminLoginAttempts,
@@ -738,18 +738,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     return {
       id: restId,
-      nameKh: r.nameKh || 'ភោជនីយដ្ឋានខ្មែរ',
-      nameEn: r.nameEn || r.nameKh || 'Khmer Restaurant',
-      descriptionKh: r.descriptionKh || 'ភោជនីយដ្ឋានម្ហូបខ្មែររសជាតិដើម ផាសុកភាព និងអនាម័យខ្ពស់។',
-      descriptionEn: r.descriptionEn || 'Authentic traditional Khmer restaurant.',
+      nameKh: stripForeignScripts(r.nameKh || 'ភោជនីយដ្ឋានខ្មែរ'),
+      nameEn: stripForeignScripts(r.nameEn || r.nameKh || 'Khmer Restaurant'),
+      descriptionKh: stripForeignScripts(r.descriptionKh || 'ភោជនីយដ្ឋានម្ហូបខ្មែររសជាតិដើម ផាសុកភាព និងអនាម័យខ្ពស់។'),
+      descriptionEn: stripForeignScripts(r.descriptionEn || 'Authentic traditional Khmer restaurant.'),
       photoUrl,
       profileImage: cleanProfileImage,
       galleryPhotos,
       foodImages,
-      addressKh: r.addressKh || 'រាជធានីភ្នំពេញ កម្ពុជា',
-      addressEn: r.addressEn || 'Phnom Penh, Cambodia',
-      provinceKh: r.provinceKh || 'រាជធានីភ្នំពេញ',
-      provinceEn: r.provinceEn || 'Phnom Penh',
+      addressKh: stripForeignScripts(r.addressKh || 'រាជធានីភ្នំពេញ កម្ពុជា'),
+      addressEn: stripForeignScripts(r.addressEn || 'Phnom Penh, Cambodia'),
+      provinceKh: stripForeignScripts(r.provinceKh || 'រាជធានីភ្នំពេញ'),
+      provinceEn: stripForeignScripts(r.provinceEn || 'Phnom Penh'),
       phone:
         r.phone &&
         !String(r.phone).includes('Google Maps') &&
@@ -757,8 +757,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         !String(r.phone).includes('មាននៅលើ')
           ? r.phone
           : '',
-      openingHoursKh: r.openingHoursKh || '០៧:០០ ព្រឹក - ០៩:០០ យប់',
-      openingHoursEn: r.openingHoursEn || '07:00 AM - 09:00 PM',
+      openingHoursKh: stripForeignScripts(r.openingHoursKh || '០៧:០០ ព្រឹក - ០៩:០០ យប់'),
+      openingHoursEn: stripForeignScripts(r.openingHoursEn || '07:00 AM - 09:00 PM'),
       priceLevel: r.priceLevel || '$$',
       mapUrl: r.mapUrl || `https://maps.google.com/?q=${encodeURIComponent(r.nameKh || 'Cambodia')}`,
       latitude: typeof r.latitude === 'number' ? r.latitude : 11.5564,
@@ -767,7 +767,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       reviewCount: ratingSummary.reviewCount,
       reviews: genuineReviews,
       signatureDishesKh: Array.isArray(r.signatureDishesKh) && r.signatureDishesKh.length > 0
-        ? r.signatureDishesKh 
+        ? r.signatureDishesKh.map((d: string) => stripForeignScripts(d))
         : ['ម្ហូបខ្មែរប្រពៃណី', 'ម្ហូបពិសេសប្រចាំហាង'],
       status: r.status || 'approved',
       isVerified: typeof r.isVerified === 'boolean' ? r.isVerified : true,

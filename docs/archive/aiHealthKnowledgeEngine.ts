@@ -1122,7 +1122,7 @@ export const CLINICAL_TOPICS_CATALOG: ClinicalTopicDefinition[] = [
       '🧂 កាត់បន្ថយអំបិល ទឹកត្រី ប្រហុក និងអាហារកែច្នៃ ដើម្បីកាត់បន្ថយសម្ពាធលើតម្រងនោម។',
       '💧 សម្រាប់អ្នកការពារគ្រួសក្នុងតម្រងនោម ឬរលាកផ្លូវទឹកនោម៖ ផឹកទឹកស្អាត ២.៥ លីត្រ/ថ្ងៃ និងកុំទប់ទឹកនោម (បន្ថែមក្រូចឆ្មាតិចៗក្នុងទឹកជួយការពារគ្រួសកាល់ស្យូម)។',
       '⚠️ សម្រាប់អ្នកជំងឺខ្សោយតម្រងនោមរ៉ាំរ៉ៃ (CKD កម្រិត 3-5)៖ ត្រូវញ៉ាំប្រូតេអ៊ីនក្នុងបរិមាណល្មម ស្រុសបន្លែចោលទឹកមុនយកទៅស្លដើម្បីបន្ថយប៉ូតាស្យូម និងជៀសវាងផ្លែស្ពឺ (Starfruit) ដាច់ខាត!',
-      '🚫 ហាមប្រើថ្នាំបំបាត់ការឈឺចាប់ NSAIDs (Ibuprofen/Diclofenac) ឬថ្នាំชุด/ថ្នាំបុរាណគ្មានវេជ្ជបញ្ជា។',
+      '🚫 ហាមប្រើថ្នាំបំបាត់ការឈឺចាប់ NSAIDs (Ibuprofen/Diclofenac) ឬថ្នាំឈុត/ថ្នាំបុរាណគ្មានវេជ្ជបញ្ជា។',
     ],
     bulletPointsEn: [
       '🧂 Reduce salt, fish sauce, prahok, and processed foods to lower glomerular pressure.',
@@ -1154,10 +1154,10 @@ export const CLINICAL_TOPICS_CATALOG: ClinicalTopicDefinition[] = [
     eveningMealKh: 'អាហារពេលល្ងាច៖ ស្ងោរត្រឡាចត្រីរ៉ស់ និងឆាស្ពៃក្តោបប្រៃតិច ជាមួយបាយស។',
     eveningMealEn: 'Dinner: Low-sodium winter melon fish soup and light cabbage stir-fry with rice.',
     eveningMealZh: '晚餐：低盐冬瓜鱼汤配清炒卷心菜及米饭。',
-    medicationCareKh: 'ហាមប្រើថ្នាំបំបាត់ការឈឺចាប់ក្រុម NSAIDs (Ibuprofen, Naproxen, Diclofenac, Meloxicam) ថ្នាំชุด និងថ្នាំបុរាណដាំផឹកគ្មានវេជ្ជបញ្ជា ព្រោះវាជាមូលហេតុចម្បងនៃជំងឺខ្សោយតម្រងនោមស្រួចស្រាវនៅកម្ពុជា!',
+    medicationCareKh: 'ហាមប្រើថ្នាំបំបាត់ការឈឺចាប់ក្រុម NSAIDs (Ibuprofen, Naproxen, Diclofenac, Meloxicam) ថ្នាំឈុត និងថ្នាំបុរាណដាំផឹកគ្មានវេជ្ជបញ្ជា ព្រោះវាជាមូលហេតុចម្បងនៃជំងឺខ្សោយតម្រងនោមស្រួចស្រាវនៅកម្ពុជា!',
     medicationCareEn: 'Strictly avoid NSAID painkillers, mixed pill packets ("Thnam Chut"), and unverified herbal decoctions, which are leading causes of acute kidney injury.',
     medicationCareZh: '严禁滥用非甾体抗炎止痛药、散装混合药包及不明草药煎剂，这些是导致急性肾损伤的主要原因！',
-    redFlagsKh: 'ត្រូវទៅមន្ទីរពេទ្យភ្លាមប្រសិនបើ៖ នោមតិចខ្លាំង ឬនោមไม่ออก នោមមានឈាម ហើមមុខ/ហើមជើងខ្លាំង ឈឺចង្កេះខ្លាំងរាលដាលចុះក្រោម ក្ដៅខ្លួនរងាញាក់ ឬដង្ហក់។',
+    redFlagsKh: 'ត្រូវទៅមន្ទីរពេទ្យភ្លាមប្រសិនបើ៖ នោមតិចខ្លាំង ឬនោមមិនចេញ នោមមានឈាម ហើមមុខ/ហើមជើងខ្លាំង ឈឺចង្កេះខ្លាំងរាលដាលចុះក្រោម ក្ដៅខ្លួនរងាញាក់ ឬដង្ហក់។',
     redFlagsEn: 'URGENT RED FLAGS: Markedly decreased urine output, blood in urine, facial/leg swelling, severe flank pain with fever/chills, or shortness of breath.',
     redFlagsZh: '急诊警示信号：尿量明显减少或无尿、血尿、眼睑或下肢严重水肿、剧烈腰背部绞痛伴寒战高热或气促。',
     recoveryTimelineKh: 'ការរលាកផ្លូវទឹកនោមធូរស្រាលក្នុង ៣-៧ ថ្ងៃតាមវេជ្ជបញ្ជា ចំណែកការថែរក្សាតម្រងនោមគឺជាការការពារប្រចាំថ្ងៃ។',
@@ -1241,7 +1241,7 @@ export const CLINICAL_TOPICS_CATALOG: ClinicalTopicDefinition[] = [
     eveningMealKh: 'អាហារពេលល្ងាច៖ ស្ងោរត្រឡាច ឬសម្លប្រហើរបន្លែចម្រុះដាក់តៅហ៊ូ/ស៊ុត ជាមួយបាយសម្រូប។',
     eveningMealEn: 'Dinner: Winter melon soup or vegetable soup with tofu/egg and brown rice.',
     eveningMealZh: '晚餐：冬瓜清汤或豆腐蔬菜汤配糙米饭。',
-    medicationCareKh: 'ហាមទិញ «ថ្នាំชุด» ឬថ្នាំបំបាត់ការឈឺសន្លាក់លាយស្តេរ៉ូអ៊ីត (Steroids/Dexamethasone) និង NSAIDs លេបប្រចាំដោយគ្មានវេជ្ជបញ្ជា ព្រោះវាធ្វើឱ្យធ្លុះក្រពះ និងខូចតម្រងនោម! សូមពិគ្រោះជាមួយគ្រូពេទ្យអំពីថ្នាំបញ្ចុះអាស៊ីតអ៊ុយរិក (ដូចជា Allopurinol)។',
+    medicationCareKh: 'ហាមទិញ «ថ្នាំឈុត» ឬថ្នាំបំបាត់ការឈឺសន្លាក់លាយស្តេរ៉ូអ៊ីត (Steroids/Dexamethasone) និង NSAIDs លេបប្រចាំដោយគ្មានវេជ្ជបញ្ជា ព្រោះវាធ្វើឱ្យធ្លុះក្រពះ និងខូចតម្រងនោម! សូមពិគ្រោះជាមួយគ្រូពេទ្យអំពីថ្នាំបញ្ចុះអាស៊ីតអ៊ុយរិក (ដូចជា Allopurinol)។',
     medicationCareEn: 'Never take unlabelled multi-pill joint pain packets ("Thnam Chut") containing hidden steroids and NSAIDs, which cause stomach ulcers and kidney failure! Consult a doctor for safe uric-acid-lowering therapy.',
     medicationCareZh: '切勿购买不明成分的“关节止痛药包”（常隐含激素与强效止痛药，极易导致胃穿孔与肾衰竭）！请在医生指导下规范使用降尿酸药物（如别嘌醇）。',
     redFlagsKh: 'ត្រូវទៅមន្ទីរពេទ្យប្រសិនបើ៖ សន្លាក់ហើមក្រហមក្ដៅខ្លាំងរួមជាមួយក្ដៅខ្លួនរងាញាក់ (សង្ស័យឆ្លងមេរោគក្នុងសន្លាក់ Septic arthritis) ឬឈឺសន្លាក់រាលដាលមិនអាចដើរបាន។',
@@ -1254,7 +1254,7 @@ export const CLINICAL_TOPICS_CATALOG: ClinicalTopicDefinition[] = [
       'តើអ្នកលើសអាស៊ីតអ៊ុយរិក អាចញ៉ាំសាច់មាន់ ឬត្រីបានទេ?',
       'ហេតុអ្វីស្រាបៀរធ្វើឱ្យឈឺសន្លាក់ Gout ភ្លាមៗ?',
       'តើអាហារអ្វីខ្លះសម្បូរកាល់ស្យូមជួយបំប៉នឆ្អឹង និងជង្គង់?',
-      'ហេតុអ្វីការលេបថ្នាំឈឺសន្លាក់ (ថ្នាំชุด) គ្រោះថ្នាក់ដល់ក្រពះ និងតម្រងនោម?',
+      'ហេតុអ្វីការលេបថ្នាំឈឺសន្លាក់ (ថ្នាំឈុត) គ្រោះថ្នាក់ដល់ក្រពះ និងតម្រងនោម?',
     ],
     followUpSuggestionsEn: [
       'Can I eat chicken or freshwater fish if I have high uric acid?',
@@ -1466,7 +1466,7 @@ export const CLINICAL_TOPICS_CATALOG: ClinicalTopicDefinition[] = [
     summaryZh:
       '⚠️ 重要警示：若突发高烧（39–40°C）伴眼眶痛、全身肌肉酸痛或皮疹，请立即就医查血排查登革热或伤寒！疑似登革热时严禁服用阿司匹林或布洛芬（会引发严重内出血）！护理核心是频繁补充口服补液盐（ORS）、椰子水和软烂米粥。',
     bulletPointsKh: [
-      '🚫 ហាមដាច់ខាត៖ មិនត្រូវលេបថ្នាំ Aspirin, Ibuprofen, Diclofenac ឬថ្នាំชุด ពេលក្ដៅខ្លួនសង្ស័យគ្រុនឈាមឡើយ (ប្រើបានតែ Paracetamol តាមកម្រិតវេជ្ជបញ្ជាប៉ុណ្ណោះ)។',
+      '🚫 ហាមដាច់ខាត៖ មិនត្រូវលេបថ្នាំ Aspirin, Ibuprofen, Diclofenac ឬថ្នាំឈុត ពេលក្ដៅខ្លួនសង្ស័យគ្រុនឈាមឡើយ (ប្រើបានតែ Paracetamol តាមកម្រិតវេជ្ជបញ្ជាប៉ុណ្ណោះ)។',
       '💧 បំពេញជាតិទឹកឱ្យបានច្រើន៖ ផឹកទឹកអូរ៉ាលីត (ORS) ទឹកដូងស្រស់ ទឹកផ្លែឈើស្រស់ និងទឹកស៊ុប ដើម្បីការពារការខាប់ឈាម (Hemoconcentration)។',
       '🥣 ញ៉ាំអាហារទន់ងាយរំលាយ៖ បបរត្រី បបរមាន់ ស្ងោរត្រឡាច និងជៀសវាងអាហារពណ៌ខ្មៅ/ក្រហមដិត (ដើម្បីកុំឱ្យច្រឡំជាមួយឈាមពេលក្អួត ឬបន្ទោរបង់)។',
     ],
@@ -1637,7 +1637,7 @@ export const CLINICAL_TOPICS_CATALOG: ClinicalTopicDefinition[] = [
       '💧 លេបថ្នាំជាមួយទឹកស្អាតប៉ុណ្ណោះ៖ តែ និងកាហ្វេបន្ថយប្រសិទ្ធភាពថ្នាំជាតិដែក ចំណែកទឹកដោះគោអាចរារាំងការស្រូបយកថ្នាំផ្សះមួយចំនួន (Tetracyclines/Fluoroquinolones)។',
       '🍽️ ថ្នាំលេបក្រោយបាយភ្លាម៖ ថ្នាំបំបាត់ការឈឺចាប់/រលាក (NSAIDs) និងថ្នាំទឹកនោមផ្អែម Metformin ត្រូវលេបក្រោយអាហារភ្លាមដើម្បីការពារក្រពះ។',
       '🚫 ហាមផឹកគ្រឿងស្រវឹងដាច់ខាតពេលលេបថ្នាំ៖ អាល់កុលលាយជាមួយ Paracetamol ធ្វើឱ្យពុលថ្លើម ហើយលាយជាមួយថ្នាំផ្សះ Metronidazole ធ្វើឱ្យក្អួត និងបេះដូងលោតញាប់ខ្លាំង។',
-      '⚠️ ហាមទិញ «ថ្នាំชุด» (ថ្នាំច្រើនគ្រាប់ច្រកថង់គ្មានស្លាកឈ្មោះ) លេបដោយខ្លួនឯង ព្រោះអាចធ្វើឱ្យធ្លុះក្រពះ និងខូចតម្រងនោម។',
+      '⚠️ ហាមទិញ «ថ្នាំឈុត» (ថ្នាំច្រើនគ្រាប់ច្រកថង់គ្មានស្លាកឈ្មោះ) លេបដោយខ្លួនឯង ព្រោះអាចធ្វើឱ្យធ្លុះក្រពះ និងខូចតម្រងនោម។',
     ],
     bulletPointsEn: [
       '💧 Plain Water Only: Tea/coffee blocks iron absorption; dairy calcium binds certain antibiotics (tetracyclines/quinolones).',
@@ -2015,7 +2015,7 @@ export const CLINICAL_TOPICS_CATALOG: ClinicalTopicDefinition[] = [
     redFlagsKh: 'ទៅមន្ទីរពេទ្យភ្លាមប្រសិនបើកុមារ ឬមនុស្សចាស់៖ ក្ដៅខ្លួនខ្លាំង ប្រកាច់ ដង្ហក់ មិនព្រមញ៉ាំទឹក/អាហារ សន្លឹម ឬរាកក្អួតខ្សោះជាតិទឹក។',
     redFlagsEn: 'Seek urgent care if a child or older adult has high fever, seizures, fast breathing, refusal to drink, lethargy, or dehydration.',
     redFlagsZh: '若幼儿或老人出现高烧、抽搐、呼吸急促、拒食拒水、精神萎靡或腹泻脱水，请立即送医。',
-    recoveryTimelineKh: 'អាហារូបត្ថម្ភត្រឹមត្រូវជារៀងរាល់ថ្ងៃ ជួយឱ្យកុមារលូតលាស់ពេញศัก្តានុពល និងមនុស្សចាស់មានសុខភាពរឹងមាំ។',
+    recoveryTimelineKh: 'អាហារូបត្ថម្ភត្រឹមត្រូវជារៀងរាល់ថ្ងៃ ជួយឱ្យកុមារលូតលាស់ពេញសក្តានុពល និងមនុស្សចាស់មានសុខភាពរឹងមាំ។',
     recoveryTimelineEn: 'Daily balanced nutrition supports optimal child growth and healthy aging.',
     recoveryTimelineZh: '每日均衡营养有助于儿童健康成长并延缓老年人机能衰退。',
     followUpSuggestionsKh: [
@@ -2724,7 +2724,7 @@ export function generateMultiTurnHealthAnswer(
     badgeKh = `🚫 អាហារ និងភេសជ្ជៈដែលត្រូវតមសម្រាប់៖ ${topic.topicNameKh}`;
     badgeEn = `🚫 Foods & Drinks to Strictly Avoid: ${topic.topicNameEn}`;
     badgeZh = `🚫 严格忌口与饮食禁忌：${topic.topicNameZh}`;
-    summaryKh = `ដើម្បីការពារកុំឱ្យ «${topic.topicNameKh}» កាន់តែធ្ងន់ធ្ងរ ឬលាប់ឡើងវិញ សូមជៀសវាងអាហារ និងភេសជ្ជៈខាងក្រោមនេះឱ្យបានម៉ឺងម៉ាត់៖ ${topic.foodsToLimitKh.join(' ၊ ')}។`;
+    summaryKh = `ដើម្បីការពារកុំឱ្យ «${topic.topicNameKh}» កាន់តែធ្ងន់ធ្ងរ ឬលាប់ឡើងវិញ សូមជៀសវាងអាហារ និងភេសជ្ជៈខាងក្រោមនេះឱ្យបានម៉ឺងម៉ាត់៖ ${topic.foodsToLimitKh.join(' ។ ')}។`;
     summaryEn = `To prevent worsening or flare-ups of "${topic.topicNameEn}", strictly avoid or limit: ${topic.foodsToLimitEn.join(', ')}.`;
     summaryZh = `为防止“${topic.topicNameZh}”加重或复发，请严格忌口或限制以下食物：${topic.foodsToLimitZh.join('、')}。`;
     bulletsKh = [

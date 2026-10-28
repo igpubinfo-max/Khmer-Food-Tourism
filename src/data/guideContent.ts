@@ -321,7 +321,7 @@ export const FESTIVALS: Festival[] = [
       zh: '佛教徒傍晚前往寺庙参加烛光巡礼，纪念佛陀弘法。',
     },
     foods: { km: 'ម្ហូបបួស ចង្ហាន់ថ្វាយព្រះសង្ឃ និងបង្អែមខ្មែរ', en: 'Vegetarian meals, temple offerings and Khmer desserts', zh: '素食、供僧餐食与高棉甜品' },
-    tip: { km: 'ស្លៀកពាក់សមរម្យ (អាវស ឬសម្លៀកបំពាក់สุភាព) ពេលទៅវត្តនាពេលល្ងាច', en: 'Wear modest clothing (often white shirts) when visiting pagodas in the evening.', zh: '傍晚前往寺庙请着装得体（当地人常穿白衣）。' },
+    tip: { km: 'ស្លៀកពាក់សមរម្យ (អាវស ឬសម្លៀកបំពាក់សុភាពរាបសារ) ពេលទៅវត្តនាពេលល្ងាច', en: 'Wear modest clothing (often white shirts) when visiting pagodas in the evening.', zh: '傍晚前往寺庙请着装得体（当地人常穿白衣）。' },
   },
   {
     id: 'womens-day',
@@ -356,7 +356,7 @@ export const FESTIVALS: Festival[] = [
     durationLabel: { km: 'ឈប់សម្រាក ៣ ថ្ងៃ', en: '3-Day Public Holiday', zh: '法定休假 3 天' },
     pricingLabel: { km: 'ឥតគិតថ្លៃ ($0 • បុណ្យជាតិធំបំផុត)', en: 'Free ($0 • National Festival)', zh: '免费 ($0 • 全国盛大庆典)' },
     about: {
-      km: 'បុណ្យប្រពៃណីជាតិធំបំផុតរយៈពេល ៣ ថ្ងៃ (មហាសង្ក្រាន្ត វនបត និងឡើងស័ក) — ប្រជាជនទៅវត្តពូនភ្នំខ្សាច់ សรงទឹកព្រះ លេងល្បែងប្រជាប្រិយ និងសង្ក្រាន្តតាមខេត្ត។',
+      km: 'បុណ្យប្រពៃណីជាតិធំបំផុតរយៈពេល ៣ ថ្ងៃ (មហាសង្ក្រាន្ត វនបត និងឡើងស័ក) — ប្រជាជនទៅវត្តពូនភ្នំខ្សាច់ ស្រង់ទឹកព្រះ លេងល្បែងប្រជាប្រិយ និងសង្ក្រាន្តតាមខេត្ត។',
       en: 'Cambodia’s biggest 3-day national celebration featuring Angkor Sankranta, temple visits, traditional games and family reunions.',
       zh: '柬埔寨最盛大的三天传统节日，包含吴哥宋干节、寺庙祈福、传统民俗游戏与阖家团圆。',
     },
@@ -910,8 +910,8 @@ export const GUIDE_TIPS: GuideTip[] = [
     category: 'money',
     title: { km: 'ដុល្លារអាមេរិក & ប្រាក់រៀលខ្មែរ', en: 'US dollars & Cambodian Riel', zh: '美元与瑞尔双币通用' },
     body: {
-      km: 'ប្រើទាំងដុល្លារអាមេរិក និងប្រាក់រៀល។ អត្រាទូទៅគឺ ៤,០០០៛–៤,១០០៛ ស្មើ ១ ដុល្លារ ហើយលុយអាប់ក្រោម ១ ដុល្លារនឹងអាប់ជារៀល។',
-      en: 'Both US dollars and Cambodian Riel circulate together. Roughly 4,000–4,100៛ ≈ US$1, with change under $1 given in Riel.',
+      km: 'ប្រើទាំងដុល្លារអាមេរិក និងប្រាក់រៀល។ អត្រាទូទៅគឺប្រហាក់ប្រហែល ៤,០០០៛–៤,១០០៛ ស្មើ ១ ដុល្លារ ហើយលុយអាប់ក្រោម ១ ដុល្លារនឹងអាប់ជារៀល។',
+      en: 'Both US dollars and Cambodian Riel circulate together. Approx. 4,000–4,100៛ ≈ US$1, with change under $1 given in Riel.',
       zh: '美元与瑞尔同时流通，约 4,000–4,100៛ ≈ 1 美元，1美元以下找零通常给瑞尔。',
     },
   },
@@ -943,9 +943,9 @@ export const GUIDE_TIPS: GuideTip[] = [
     category: 'money',
     title: { km: 'ការតថ្លៃដោយស្នាមញញឹមនៅតាមផ្សារ', en: 'Polite bargaining at local markets', zh: '在本地市场礼貌议价' },
     body: {
-      km: 'នៅផ្សារធំថ្មី ផ្សារទួលទំពូង ឬផ្សារចាស់ អាចតថ្លៃវត្ថុអនុស្សាវរីយ៍ប្រហែល ១០–២៥% ដោយស្នាមញញឹម។ ចំណែកហាងអាហារមានតម្លៃកំណត់ច្បាស់លាស់។',
-      en: 'At souvenir markets (Central Market, Russian Market, Old Market), polite bargaining of 10–25% with a smile is normal. Restaurants have fixed prices.',
-      zh: '在中央市场、俄罗斯市场或老市场购买纪念品可微笑议价 10–25%；正规餐厅则为明码标价。',
+      km: 'នៅផ្សារធំថ្មី ផ្សារទួលទំពូង ឬផ្សារចាស់ អាចតថ្លៃវត្ថុអនុស្សាវរីយ៍ប្រហាក់ប្រហែល ១០–២៥% ដោយស្នាមញញឹម។ ចំណែកហាងអាហារមានតម្លៃកំណត់ច្បាស់លាស់។',
+      en: 'At souvenir markets (Central Market, Russian Market, Old Market), polite bargaining of approx. 10–25% with a smile is normal. Restaurants have fixed prices.',
+      zh: '在中央市场、俄罗斯市场或老市场购买纪念品可微笑议价约 10–25%；正规餐厅则为明码标价。',
     },
   },
   {
@@ -954,8 +954,8 @@ export const GUIDE_TIPS: GuideTip[] = [
     category: 'money',
     title: { km: 'ប្រាក់ទឹកតែ (Tip)', en: 'Tipping etiquette', zh: '小费礼仪' },
     body: {
-      km: 'មិនបង្ខំទេ ប៉ុន្តែគេទទួលស្វាគមន៍៖ ប្រហែល ៥–១០% នៅភោជនីយដ្ឋានធំៗ និងលុយអាប់តិចតួចនៅហាងក្នុងស្រុក។',
-      en: 'Not mandatory but warmly appreciated: around 5–10% at sit-down restaurants or rounding up small Riel change.',
+      km: 'មិនបង្ខំទេ ប៉ុន្តែគេទទួលស្វាគមន៍៖ ប្រហាក់ប្រហែល ៥–១០% នៅភោជនីយដ្ឋានធំៗ និងលុយអាប់តិចតួចនៅហាងក្នុងស្រុក។',
+      en: 'Not mandatory but warmly appreciated: approx. 5–10% at sit-down restaurants or rounding up small Riel change.',
       zh: '非强制但很受欢迎：餐厅约 5–10%，本地小店留些瑞尔零钱即可。',
     },
   },
@@ -1009,9 +1009,9 @@ export const GUIDE_TIPS: GuideTip[] = [
     category: 'culture',
     title: { km: 'ទិញសំបុត្រចូលទស្សនាអង្គរផ្លូវការ (Angkor Pass)', en: 'Buy official Angkor Pass tickets only', zh: '通过官方渠道购买吴哥门票' },
     body: {
-      km: 'ភ្ញៀវអន្តរជាតិអាចទិញសំបុត្រផ្លូវការនៅគ្រឹះស្ថានអង្គរ ឬតាមកម្មវិធី Angkor Enterprise (១ ថ្ងៃ $37, ៣ ថ្ងៃ $62, ៧ ថ្ងៃ $72)។ ពលរដ្ឋខ្មែរចូលទស្សនាដោយឥតគិតថ្លៃ ($0)។',
-      en: 'Foreign visitors should buy tickets only at the official Angkor Enterprise ticket center or website (1-day $37, 3-day $62, 7-day $72). Free ($0) for Cambodian citizens.',
-      zh: '外国游客请仅在吴哥机构官方售票处或官网购票（1日票$37、3日票$62、7日票$72）；柬埔寨公民免费。',
+      km: 'ភ្ញៀវអន្តរជាតិអាចទិញសំបុត្រផ្លូវការនៅគ្រឹះស្ថានអង្គរ ឬតាមកម្មវិធី Angkor Enterprise (ប្រហាក់ប្រហែល ១ ថ្ងៃ $37, ៣ ថ្ងៃ $62, ៧ ថ្ងៃ $72)។ ពលរដ្ឋខ្មែរចូលទស្សនាដោយឥតគិតថ្លៃ ($0)។',
+      en: 'Foreign visitors should buy tickets only at the official Angkor Enterprise ticket center or website (Approx. 1-day $37, 3-day $62, 7-day $72). Free ($0) for Cambodian citizens.',
+      zh: '外国游客请仅在吴哥机构官方售票处或官网购票（约 1日票$37、3日票$62、7日票$72）；柬埔寨公民免费。',
     },
   },
   {
@@ -1064,7 +1064,7 @@ export const GUIDE_TIPS: GuideTip[] = [
     category: 'safety',
     title: { km: 'ឱសថស្ថានផ្លូវការ និងការការពារមូសខ្លា', en: 'Licensed pharmacies & mosquito protection', zh: '正规药房与防蚊贴士' },
     body: {
-      km: 'ប្រើស្เปรយ៍ការពារមូសនៅពេលព្រលប់ និងទិញថ្នាំពេទ្យនៅឱសថស្ថានស្របច្បាប់ (ដូចជា UCare Pharmacy ឬ Pharmacie de la Gare)។ ករណីបន្ទាន់ហៅ 119។',
+      km: 'ប្រើស្ព្រៃយ៍បាញ់ការពារមូសនៅពេលព្រលប់ និងទិញថ្នាំពេទ្យនៅឱសថស្ថានស្របច្បាប់ (ដូចជា UCare Pharmacy ឬ Pharmacie de la Gare)។ ករណីបន្ទាន់ហៅ 119។',
       en: 'Use mosquito repellent at dusk and buy medicine from licensed pharmacies (such as UCare or Pharmacie de la Gare). Call 119 for medical emergencies.',
       zh: '傍晚外出建议使用驱蚊液；购药请前往正规连锁药房（如 UCare），紧急医疗情况请拨打 119。',
     },

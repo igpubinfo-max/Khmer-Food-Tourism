@@ -1589,7 +1589,7 @@ export const initial100Restaurants: Restaurant[] = [
     "rating": 4.6,
     "reviewCount": 761,
     "signatureDishesKh": [
-      "កាហ្វេឆงដៃពិសេសបាត់ដំបង",
+      "កាហ្វេឆុងដៃពិសេសបាត់ដំបង",
       "ណែមឆៅបាត់ដំបង",
       "គុយទាវបាត់ដំបង",
       "នំខេកការ៉ុត និងទឹកក្រឡុកផ្លែឈើ"

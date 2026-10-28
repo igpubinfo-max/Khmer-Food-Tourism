@@ -372,7 +372,11 @@ export const GuideView: React.FC = () => {
         title={loc.name}
         subtitle={loc.category}
         rating={f.rating}
-        meta={f.priceUsd > 0 ? `$${f.priceUsd.toFixed(2)}` : undefined}
+        meta={
+          f.priceUsd > 0
+            ? tr(language, `ប្រហាក់ប្រហែល $${f.priceUsd.toFixed(2)}`, `Approx. $${f.priceUsd.toFixed(2)}`, `约 $${f.priceUsd.toFixed(2)}`)
+            : undefined
+        }
         saved={bookmarkSet.has(f.id)}
         onToggleSave={() => toggleBookmark(f.id)}
         onOpen={() => setSelectedFood(f)}
@@ -410,7 +414,11 @@ export const GuideView: React.FC = () => {
         subtitle={loc.province}
         tag={r.isVerified ? tr(language, 'ផ្ទៀងផ្ទាត់រួច', 'Verified', '已认证') : undefined}
         rating={summary.hasReviews ? summary.averageRating : undefined}
-        meta={r.priceLevel}
+        meta={
+          r.priceLevel
+            ? tr(language, `ប្រហាក់ប្រហែល ${r.priceLevel}`, `Approx. ${r.priceLevel}`, `约 ${r.priceLevel}`)
+            : undefined
+        }
         saved={bookmarkSet.has(r.id)}
         onToggleSave={() => toggleBookmark(r.id)}
         onOpen={() => openRestaurant(r)}

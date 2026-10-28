@@ -349,9 +349,9 @@ export const AiTripPlannerModal: React.FC = () => {
                 </label>
                 <div className="grid grid-cols-3 gap-2">
                   {[
-                    { id: 'budget', labelKh: 'សន្សំសំចៃ', labelEn: 'Budget', labelZh: '经济实惠', subKh: '< $40/ថ្ងៃ', subEn: '< $40/day', subZh: '< $40/天' },
-                    { id: 'medium', labelKh: 'មធ្យម', labelEn: 'Medium', labelZh: '舒适适中', subKh: '$40-$100/ថ្ងៃ', subEn: '$40-$100/day', subZh: '$40-$100/天' },
-                    { id: 'luxury', labelKh: 'ទំនើប VIP', labelEn: 'Luxury VIP', labelZh: '尊享豪华', subKh: '> $100/ថ្ងៃ', subEn: '> $100/day', subZh: '> $100/天' },
+                    { id: 'budget', labelKh: 'សន្សំសំចៃ', labelEn: 'Budget', labelZh: '经济实惠', subKh: 'ប្រហាក់ប្រហែល < $40/ថ្ងៃ', subEn: 'Approx. < $40/day', subZh: '约 < $40/天' },
+                    { id: 'medium', labelKh: 'មធ្យម', labelEn: 'Medium', labelZh: '舒适适中', subKh: 'ប្រហាក់ប្រហែល $40-$100/ថ្ងៃ', subEn: 'Approx. $40-$100/day', subZh: '约 $40-$100/天' },
+                    { id: 'luxury', labelKh: 'ទំនើប VIP', labelEn: 'Luxury VIP', labelZh: '尊享豪华', subKh: 'ប្រហាក់ប្រហែល > $100/ថ្ងៃ', subEn: 'Approx. > $100/day', subZh: '约 > $100/天' },
                   ].map(b => (
                     <button
                       key={b.id}
@@ -421,9 +421,9 @@ export const AiTripPlannerModal: React.FC = () => {
                   <span className="text-xs font-black text-[#059669] dark:text-emerald-400">
                     {tr(
                       language,
-                      `ថវិកាប៉ាន់ស្មាន៖ ~$${generatedPlan.totalEstimatedCostUsd} USD`,
-                      `Est: ~$${generatedPlan.totalEstimatedCostUsd}`,
-                      `预计总预算：~$${generatedPlan.totalEstimatedCostUsd} USD`
+                      `ថវិកាប្រហាក់ប្រហែល $${generatedPlan.totalEstimatedCostUsd} USD`,
+                      `Approx. $${generatedPlan.totalEstimatedCostUsd} USD`,
+                      `预计总预算：约 $${generatedPlan.totalEstimatedCostUsd} USD`
                     )}
                   </span>
                 </div>
@@ -512,7 +512,7 @@ export const AiTripPlannerModal: React.FC = () => {
                                 : tr(language, '🌙 ពេលល្ងាច', '🌙 Evening', '🌙 傍晚/晚餐')}
                             </span>
                             <span className="text-[11px] font-mono text-emerald-600 font-bold">
-                              ~${act.estimatedCostUsd}
+                              {tr(language, `ប្រហាក់ប្រហែល $${act.estimatedCostUsd}`, `Approx. $${act.estimatedCostUsd}`, `约 $${act.estimatedCostUsd}`)}
                             </span>
                           </div>
 

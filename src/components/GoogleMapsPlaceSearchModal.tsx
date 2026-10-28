@@ -1176,7 +1176,8 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                               )}
                               {place.priceLevel && (
                                 <span className="px-1.5 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-200 font-bold">
-                                  💰 {place.priceLevel}
+                                  💰 {tr(language, 'ប្រហាក់ប្រហែល ', 'Approx. ', '约 ')}
+                                  {place.priceLevel}
                                 </span>
                               )}
                               {place.openHours && (

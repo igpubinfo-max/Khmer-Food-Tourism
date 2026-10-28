@@ -667,7 +667,9 @@ export const DailyDiscoveriesModal: React.FC = () => {
                         )}
                         {item.priceDisplay && (
                           <span className="px-1.5 py-0.2 rounded bg-amber-400/25 text-amber-200">
-                            {item.priceDisplay}
+                            {item.priceDisplay.includes('$0') || item.priceDisplay.includes('ឥតគិតថ្លៃ') || item.priceDisplay.includes('សេរី') || item.priceDisplay.includes('ប្រហាក់ប្រហែល')
+                              ? item.priceDisplay
+                              : tr(language, `ប្រហាក់ប្រហែល ${item.priceDisplay}`, `Approx. ${item.priceDisplay}`, `约 ${item.priceDisplay}`)}
                           </span>
                         )}
                       </div>

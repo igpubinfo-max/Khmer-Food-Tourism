@@ -342,7 +342,9 @@ export const TrendingFoodDetailModal: React.FC = () => {
                   {tr(language, 'តម្លៃប្រហាក់ប្រហែល៖', 'Estimated Price:', '参考价格：')}
                 </span>
                 <span className="font-bold text-[#064E3B] dark:text-emerald-400 font-mono">
-                  {item.priceDisplay}
+                  {item.priceDisplay.includes('ប្រហាក់ប្រហែល')
+                    ? item.priceDisplay
+                    : tr(language, `ប្រហាក់ប្រហែល ${item.priceDisplay}`, `Approx. ${item.priceDisplay}`, `约 ${item.priceDisplay}`)}
                 </span>
               </div>
             )}

@@ -817,10 +817,10 @@ export const AddRestaurantModal: React.FC = () => {
                   onChange={(e) => setPriceLevel(e.target.value as RestaurantPriceLevel)}
                   className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs focus:ring-2 focus:ring-[#059669]/20 focus:border-[#059669] outline-none"
                 >
-                  <option value="$">$ (ទូទៅ / $1 - $3)</option>
-                  <option value="$$">$$ (មធ្យម / $3 - $8)</option>
-                  <option value="$$$">$$$ (លំដាប់ខ្ពស់ / $8 - $20)</option>
-                  <option value="$$$$">$$$$ (ប្រណិត / $20+)</option>
+                  <option value="$">$ (ទូទៅ / ប្រហាក់ប្រហែល $1 - $3)</option>
+                  <option value="$$">$$ (មធ្យម / ប្រហាក់ប្រហែល $3 - $8)</option>
+                  <option value="$$$">$$$ (លំដាប់ខ្ពស់ / ប្រហាក់ប្រហែល $8 - $20)</option>
+                  <option value="$$$$">$$$$ (ប្រណិត / ប្រហាក់ប្រហែល $20+)</option>
                 </select>
               </div>
             </div>

@@ -11,10 +11,27 @@ import { ZH_UI_EXTRA } from '../data/zhUiExtra';
 /**
  * Helper for 3-language inline selection: Khmer ('km'), English ('en'), Simplified Chinese ('zh')
  */
+export function stripForeignScripts(text: string): string {
+  if (!text || typeof text !== 'string') return text;
+  if (!/[\u0E00-\u0E7F\u0E80-\u0EFF\u1000-\u109F\u0900-\u097F]/.test(text)) return text;
+  return text
+    .replace(/កាហ្វេឆ\u0E07ដៃ/g, 'កាហ្វេឆុងដៃ')
+    .replace(/សម្លៀកបំពាក់\u0E2A\u0E38ភាព/g, 'សម្លៀកបំពាក់សុភាពរាបសារ')
+    .replace(/ស\u0E23\u0E07ទឹកព្រះ/g, 'ស្រង់ទឹកព្រះ')
+    .replace(/ស្\u0E40\u0E1B\u0E23យ៍/g, 'ស្ព្រៃយ៍')
+    .replace(/ថ្ម\u0E22\u0E49\u0E2D\u0E22/g, 'ថ្មសំយុង')
+    .replace(/ពណ៌\u0E1F\u0E49\u0E32ថ្លា/g, 'ពណ៌ខៀវថ្លា')
+    .replace(/រសជាតិ\u0E40\u0E02\u0E49\u0E21\u0E02\u0E49\u0E19/g, 'រសជាតិដិតឈ្ងុយឆ្ងាញ់')
+    .replace(/\u092Eុខម្ហូប/g, 'ម្ហូប')
+    .replace(/[\u0E00-\u0E7F\u0E80-\u0EFF\u1000-\u109F\u0900-\u097F]+/g, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
+
 export function tr(lang: Language, km: string, en: string, zh: string): string {
-  if (lang === 'km') return km;
-  if (lang === 'zh') return zh;
-  return en;
+  if (lang === 'km') return stripForeignScripts(km);
+  if (lang === 'zh') return stripForeignScripts(zh);
+  return stripForeignScripts(en);
 }
 
 /**
@@ -426,42 +443,43 @@ const PHRASE_REPLACEMENTS_EN_TO_ZH: Array<[RegExp, string]> = [
 
 export function translateTextToChinese(text: string): string {
   if (!text) return text;
-  const trimmed = text.trim();
-  if (!trimmed) return text;
+  const cleanedText = stripForeignScripts(text);
+  const trimmed = cleanedText.trim();
+  if (!trimmed) return cleanedText;
 
   if (EXACT_EN_TO_ZH_MAP[trimmed]) {
-    return text.replace(trimmed, EXACT_EN_TO_ZH_MAP[trimmed]);
+    return cleanedText.replace(trimmed, EXACT_EN_TO_ZH_MAP[trimmed]);
   }
   if (ZH_UI_EXTRA[trimmed]) {
-    return text.replace(trimmed, () => ZH_UI_EXTRA[trimmed]);
+    return cleanedText.replace(trimmed, () => ZH_UI_EXTRA[trimmed]);
   }
   if (CAMBODIA_PROVINCE_ZH_MAP[trimmed]) {
-    return text.replace(trimmed, CAMBODIA_PROVINCE_ZH_MAP[trimmed]);
+    return cleanedText.replace(trimmed, CAMBODIA_PROVINCE_ZH_MAP[trimmed]);
   }
   if (EXACT_FOOD_NAME_ZH_MAP[trimmed]) {
-    return text.replace(trimmed, EXACT_FOOD_NAME_ZH_MAP[trimmed]);
+    return cleanedText.replace(trimmed, EXACT_FOOD_NAME_ZH_MAP[trimmed]);
   }
   if (FOOD_CATEGORY_ZH_MAP[trimmed]) {
-    return text.replace(trimmed, FOOD_CATEGORY_ZH_MAP[trimmed]);
+    return cleanedText.replace(trimmed, FOOD_CATEGORY_ZH_MAP[trimmed]);
   }
   if (EXACT_DESTINATION_NAME_ZH_MAP[trimmed]) {
-    return text.replace(trimmed, EXACT_DESTINATION_NAME_ZH_MAP[trimmed]);
+    return cleanedText.replace(trimmed, EXACT_DESTINATION_NAME_ZH_MAP[trimmed]);
   }
 
-  let result = text;
+  let result = cleanedText;
   for (const [regex, replacement] of PHRASE_REPLACEMENTS_EN_TO_ZH) {
     if (regex.test(result)) {
       result = result.replace(regex, replacement);
     }
   }
 
-  if (result !== text) return result;
+  if (result !== cleanedText) return result;
 
   // If it's a multi-word English sentence/label in the UI, translate dynamically
   if (/^[A-Za-z0-9\s,.'":;!?()&/•+-]{4,}$/.test(trimmed) && !/^https?:\/\//i.test(trimmed)) {
     const dyn = translateDynamicTextToZh(trimmed);
     if (dyn && dyn !== trimmed && /[\u4E00-\u9FFF]/.test(dyn)) {
-      return text.replace(trimmed, dyn);
+      return cleanedText.replace(trimmed, dyn);
     }
   }
 

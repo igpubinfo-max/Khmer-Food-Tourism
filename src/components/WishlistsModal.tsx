@@ -386,7 +386,9 @@ export const WishlistsModal: React.FC = () => {
                     </h4>
                     {item.priceDisplay && (
                       <span className="text-[11px] font-mono text-[#059669] font-bold">
-                        {item.priceDisplay}
+                        {item.priceDisplay.includes('$0') || item.priceDisplay.includes('ឥតគិតថ្លៃ') || item.priceDisplay.includes('ប្រហាក់ប្រហែល') || item.priceDisplay.includes('គីឡូកាឡូរី') || item.priceDisplay.includes('kcal')
+                          ? item.priceDisplay
+                          : tr(language, `ប្រហាក់ប្រហែល ${item.priceDisplay}`, `Approx. ${item.priceDisplay}`, `约 ${item.priceDisplay}`)}
                       </span>
                     )}
                   </div>

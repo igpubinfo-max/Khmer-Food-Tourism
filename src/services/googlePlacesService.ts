@@ -31,6 +31,7 @@ import {
 import { initial100Restaurants as SEED_RESTAURANTS } from '../data/seedRestaurants';
 import { initial100Destinations as SEED_DESTINATIONS } from '../data/seedDestinations';
 import { isRestaurantIdDeleted, loadDeletedRestaurantIdsMap } from './permanentMediaVaultService';
+import { stripForeignScripts } from '../utils/i18n';
 
 export type GooglePlaceSearchCategory =
   | 'all'
@@ -2985,9 +2986,16 @@ export async function searchGoogleMapsPlacesAdvanced(
       const safeLng = Number.isFinite(Number(it.lng)) ? Number(it.lng) : Number.isFinite(Number(it.longitude)) ? Number(it.longitude) : 104.9282;
       const safeRating = Number.isFinite(Number(it.rating)) ? Number(it.rating) : 0;
       const safeCount = Number.isFinite(Number(it.reviewCount)) ? Number(it.reviewCount) : Number.isFinite(Number(it.userRatingCount)) ? Number(it.userRatingCount) : 0;
-      const resolvedProv = it.provinceKh || it.province || inferCambodiaProvinceFromAddressOrGps(it.address, safeLat, safeLng);
+      const resolvedProv = stripForeignScripts(it.provinceKh || it.province || inferCambodiaProvinceFromAddressOrGps(it.address, safeLat, safeLng));
       return {
         ...it,
+        nameKh: stripForeignScripts(it.nameKh || it.nameEn || ''),
+        nameEn: stripForeignScripts(it.nameEn || it.nameKh || ''),
+        nameZh: it.nameZh ? stripForeignScripts(it.nameZh) : undefined,
+        address: stripForeignScripts(it.address || 'កម្ពុជា'),
+        addressKh: stripForeignScripts(it.addressKh || it.address || 'កម្ពុជា'),
+        editorialSummary: it.editorialSummary ? stripForeignScripts(it.editorialSummary) : undefined,
+        primaryTypeDisplayName: it.primaryTypeDisplayName ? stripForeignScripts(it.primaryTypeDisplayName) : undefined,
         lat: safeLat,
         lng: safeLng,
         latitude: safeLat,
@@ -2997,7 +3005,6 @@ export async function searchGoogleMapsPlacesAdvanced(
         userRatingCount: safeCount,
         province: resolvedProv,
         provinceKh: resolvedProv,
-        addressKh: it.addressKh || it.address || 'កម្ពុជា',
         hasRealGooglePhoto: it.hasRealGooglePhoto ?? it.hasOfficialGooglePhoto ?? false,
       };
     });

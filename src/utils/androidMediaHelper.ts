@@ -536,8 +536,11 @@ export function formatRichShareText(options: RichShareOptions): {
   }
 
   if (options.priceDisplay && options.priceDisplay.trim()) {
-    const label = isKm ? '💰 តម្លៃ៖' : '💰 Price:';
-    lines.push(`${label} ${options.priceDisplay.trim()}`);
+    const rawPrice = options.priceDisplay.trim();
+    const label = isKm
+      ? rawPrice.includes('ប្រហាក់ប្រហែល') ? '💰 តម្លៃ៖' : '💰 តម្លៃប្រហាក់ប្រហែល៖'
+      : /approx/i.test(rawPrice) ? '💰 Price:' : '💰 Approx. Price:';
+    lines.push(`${label} ${rawPrice}`);
   }
 
   if (options.location && options.location.trim()) {
