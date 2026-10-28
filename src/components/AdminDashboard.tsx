@@ -2242,10 +2242,10 @@ export const AdminDashboard: React.FC = () => {
                 <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border-2 border-amber-400 space-y-3">
                   <div className="flex items-center justify-between gap-2">
                     <h4 className="font-bold text-amber-900 dark:text-amber-200 font-khmer text-xs sm:text-sm flex items-center gap-1.5">
-                      <span>⏳ {isKm ? `ហាង VIP រង់ចាំការពិនិត្យប្រភេទអាជីវកម្មម្ហូបអាហារ (${pendingRestaurants.length})` : `Pending AI Food-Category Review (${pendingRestaurants.length})`}</span>
+                      <span>⏳ {isKm ? `ហាងរង់ចាំការត្រួតពិនិត្យ និងអនុម័តពី Admin (${pendingRestaurants.length})` : `Pending Shop Submissions for Admin Approval (${pendingRestaurants.length})`}</span>
                     </h4>
                     <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 font-black text-[10px]">
-                      MANUAL REVIEW REQUIRED
+                      ADMIN APPROVAL REQUIRED
                     </span>
                   </div>
                   <div className="space-y-2">
@@ -2265,20 +2265,13 @@ export const AdminDashboard: React.FC = () => {
                               <h5 className="font-bold text-xs text-slate-900 dark:text-white truncate">
                                 {rest.nameKh} ({rest.nameEn})
                               </h5>
-                              {rest.aiCategoryVerification && (
-                                <span className="px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-200 text-[9px] font-mono font-bold">
-                                  AI {rest.aiCategoryVerification.confidenceScore}%
-                                </span>
-                              )}
+                              <span className="px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-200 text-[9px] font-bold">
+                                {isKm ? 'រង់ចាំអនុម័ត' : 'Pending Approval'}
+                              </span>
                             </div>
                             <p className="text-[10px] text-slate-500 dark:text-slate-400">
-                              📍 {rest.provinceKh} • 📞 {rest.phone} • 🍽️ {(rest.signatureDishesKh || []).join(', ')}
+                              📍 {rest.provinceKh} • 📞 {rest.phone} • 👤 {rest.ownerName || 'Shop Owner'}
                             </p>
-                            {rest.aiCategoryVerification && (
-                              <p className="text-[10px] text-amber-800 dark:text-amber-300 leading-relaxed">
-                                {isKm ? rest.aiCategoryVerification.reasonKh : rest.aiCategoryVerification.reasonEn}
-                              </p>
-                            )}
                           </div>
                         </div>
 
@@ -2299,14 +2292,14 @@ export const AdminDashboard: React.FC = () => {
                             onClick={() => approveRestaurant(rest.id)}
                             className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold shadow-xs transition cursor-pointer"
                           >
-                            {isKm ? '✅ អនុម័តហាងអាហារ' : '✅ Approve Store'}
+                            {isKm ? '✅ អនុម័ត (Approve)' : '✅ Approve'}
                           </button>
                           <button
                             type="button"
                             onClick={() => rejectRestaurant(rest.id)}
                             className="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-bold shadow-xs transition cursor-pointer"
                           >
-                            {isKm ? '🚫 បដិសេធ' : '🚫 Reject'}
+                            {isKm ? '🚫 បដិសេធ (Reject)' : '🚫 Reject'}
                           </button>
                           <button
                             type="button"

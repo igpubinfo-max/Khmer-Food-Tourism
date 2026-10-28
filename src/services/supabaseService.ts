@@ -1591,11 +1591,13 @@ export async function syncAllAppDataWithSupabase(localState: {
 
     const isShopDeleted = (r: any): boolean => {
       if (!r || !r.id) return true;
-      const delIso = mergedDeletedRestaurantIds[String(r.id)];
-      if (!delIso) return false;
-      const delMs = new Date(delIso).getTime() || 0;
-      const rMs = getRestTimestampMs(r);
-      return delMs >= rMs || rMs === 0;
+      const rId = String(r.id);
+      if (mergedDeletedRestaurantIds[rId]) return true;
+      const gPlaceId = r.googlePlaceId ? String(r.googlePlaceId) : '';
+      if (gPlaceId && (mergedDeletedRestaurantIds[`gplace:${gPlaceId}`] || mergedDeletedRestaurantIds[gPlaceId])) {
+        return true;
+      }
+      return false;
     };
 
     try {

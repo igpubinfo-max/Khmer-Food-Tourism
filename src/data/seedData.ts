@@ -44,39 +44,8 @@ export const initialAppSettings: AppSettings = {
 // 100+ Authentic Khmer Dishes
 export const initialFoods: FoodItem[] = initial100Foods;
 
-// 100+ Cambodian Restaurants & Food Shops (including Chumnor Kbal Koh Restaurant - ជំនោរក្បាលកោះ)
-export const initialRestaurants: Restaurant[] = [
-  ...initial100Restaurants,
-  {
-    id: 'rest-chumnor-kbal-koh',
-    googlePlaceId: '0x31095729de2b8f21:0x7c6cd6284a4f844c',
-    dataSource: 'google_maps',
-    nameKh: 'ភោជនីយដ្ឋាន ជំនោរក្បាលកោះ (Chumnor Kbal Koh Restaurant)',
-    nameEn: 'Chumnor Kbal Koh Restaurant (Jomnor Kbal Koh) - ជំនោរក្បាលកោះ',
-    descriptionKh: 'ភោជនីយដ្ឋាន ជំនោរក្បាលកោះ ជាកន្លែងទទួលទានអាហារខ្មែរ និងលំហែកាយតាមមាត់ទន្លេដ៏ពេញនិយម ស្ថិតនៅភូមិកោះនរា សង្កាត់និរោធ ខណ្ឌច្បារអំពៅ រាជធានីភ្នំពេញ។',
-    descriptionEn: 'Chumnor Kbal Koh Restaurant (Jomnor Kbal Koh) is a popular riverside dining and relaxation spot in Koh Nora, Sangkat Niroth, Khan Chbar Ampov, Phnom Penh.',
-    photoUrl: '/Shop/rest-51.jpg',
-    profileImage: '/Shop/rest-51.jpg',
-    galleryPhotos: ['/Shop/rest-51.jpg'],
-    addressKh: 'GWRW+QF4, ផ្លូវលំ ភូមិកោះនរា សង្កាត់និរោធ ខណ្ឌច្បារអំពៅ រាជធានីភ្នំពេញ',
-    addressEn: 'GWRW+QF4, Koh Nora Village, Sangkat Niroth, Khan Chbar Ampov, Phnom Penh',
-    provinceKh: 'រាជធានីភ្នំពេញ',
-    provinceEn: 'Phnom Penh',
-    phone: '012 649 051',
-    openingHoursKh: '08:00 AM - 07:30 PM',
-    openingHoursEn: '08:00 AM - 07:30 PM',
-    priceLevel: '$$',
-    mapUrl: 'https://www.google.com/maps?q=GWRW+QF4+%E1%9E%87%E1%9F%86%E1%9E%93%E1%9F%84%E1%9E%9A%E2%80%8B%E1%9E%80%E1%9F%92%E1%9E%94%E1%9E%B6%E1%9E%9B%E1%9E%80%E1%9F%84%E1%9F%87,+Koh+Rong+Samrong+Sangkat+Nerothor,+12357&ftid=0x31095729de2b8f21:0x7c6cd6284a4f844c',
-    latitude: 11.541938,
-    longitude: 104.946187,
-    rating: 4.6,
-    reviewCount: 185,
-    signatureDishesKh: ['ម្ហូបខ្មែរមាត់ទន្លេ', 'ត្រីទន្លេដុតអំបិលម្ទេស', 'ស៊ុប និងគ្រឿងក្លែមពិសេស'],
-    status: 'approved',
-    isVerified: true,
-    createdAt: '2026-10-24T00:00:00.000Z',
-  },
-];
+// 100+ Cambodian Restaurants & Food Shops
+export const initialRestaurants: Restaurant[] = initial100Restaurants;
 
 // 100+ Authentic Tourist Destinations across 25 Cambodian Provinces
 export const initialDestinations: TouristDestination[] = initial100Destinations;

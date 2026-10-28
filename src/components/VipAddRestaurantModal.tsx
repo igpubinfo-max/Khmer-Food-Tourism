@@ -29,7 +29,6 @@ import {
   processAndCompressImageFile,
   batchProcessAndCompressImageFiles,
 } from '../utils/androidMediaHelper';
-import { analyzeFoodBusinessDeterministically } from '../services/aiFoodBusinessVerifierService';
 import { tr } from '../utils/i18n';
 import { ShopLocationCheckInPickerModal, ShopCheckInLocationResult } from './ShopLocationCheckInPickerModal';
 import { GoogleMapsShopImporterModal, ImportedGoogleShopData } from './GoogleMapsShopImporterModal';
@@ -129,6 +128,7 @@ export const VipAddRestaurantModal: React.FC = () => {
   const [signatureDishesKh, setSignatureDishesKh] = useState<string[]>(['ម្ហូបពិសេសប្រចាំហាង']);
   const [isSaving, setIsSaving] = useState(false);
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+  const [submittedPendingShop, setSubmittedPendingShop] = useState<any | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const cameraInputRef = useRef<HTMLInputElement | null>(null);
@@ -211,6 +211,7 @@ export const VipAddRestaurantModal: React.FC = () => {
       }
     }
     setReplacingStoreId(null);
+    setSubmittedPendingShop(null);
     setActiveTab('create_form');
   }, [isVipAddRestaurantModalOpen]);
 
@@ -334,22 +335,6 @@ export const VipAddRestaurantModal: React.FC = () => {
     const finalProfile = (shopPhotos[0] || '').trim() || '/foods/food-1.jpg';
     const combinedGallery = Array.from(new Set([finalProfile, ...shopPhotos])).filter(Boolean);
 
-    // Fast synchronous check only to block obvious non-food spam (clothing, electronics, etc.)
-    const quickCheck = analyzeFoodBusinessDeterministically({
-      nameKh: finalNameKh,
-      nameEn: finalNameEn,
-      descriptionKh: descriptionKh.trim(),
-      addressKh: addressKh.trim() || provinceKh,
-      provinceKh,
-      photoUrl: finalProfile,
-      foodImages: combinedGallery,
-    });
-
-    if (quickCheck.decision === 'rejected') {
-      showToast(isKm ? quickCheck.reasonKh : quickCheck.reasonEn, 'warning');
-      return;
-    }
-
     setIsSaving(true);
     try {
       const newRestData = {
@@ -388,11 +373,10 @@ export const VipAddRestaurantModal: React.FC = () => {
           : undefined,
         websiteUrl: websiteUrl.trim() || undefined,
         businessCategory: businessCategory.trim() || undefined,
-        isFeatured: true,
-        isVerified: true,
+        isFeatured: isAdmin,
+        isVerified: isAdmin,
         membershipTier: 'premium' as const,
-        status: 'approved' as const,
-        aiCategoryVerification: quickCheck,
+        status: isAdmin ? ('approved' as const) : ('pending' as const),
         ownerId: currentUser?.id,
         ownerName: currentUser?.name,
         ownerPhone: phone.trim() || currentUser?.phone || '',
@@ -408,11 +392,14 @@ export const VipAddRestaurantModal: React.FC = () => {
       }
 
       resetFormFields();
-      setIsVipAddRestaurantModalOpen(false);
-      // Immediately open the shop management modal so the user can add dishes right away
-      (window as any).__kft_manage_initial_tab = 'menu';
-      setManagingRestaurant(created);
-      setIsManageMenuModalOpen(true);
+      if (!isAdmin) {
+        setSubmittedPendingShop(created);
+      } else {
+        setIsVipAddRestaurantModalOpen(false);
+        (window as any).__kft_manage_initial_tab = 'menu';
+        setManagingRestaurant(created);
+        setIsManageMenuModalOpen(true);
+      }
     } finally {
       setIsSaving(false);
     }
@@ -626,8 +613,61 @@ export const VipAddRestaurantModal: React.FC = () => {
           </div>
         )}
 
-        {/* Not Signed In Guard */}
-        {!currentUser ? (
+        {/* Submission Confirmation Alert Dialog (Pending Admin Approval) */}
+        {submittedPendingShop ? (
+          <div className="p-6 text-center space-y-4 font-khmer animate-fade-in">
+            <div className="w-16 h-16 rounded-full bg-amber-100 dark:bg-amber-950/60 border-2 border-amber-400 text-amber-600 dark:text-amber-300 flex items-center justify-center mx-auto shadow-md">
+              <Clock className="w-8 h-8" />
+            </div>
+            <div className="space-y-2">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-200 font-bold text-xs border border-amber-300 dark:border-amber-700">
+                ⏳ {tr(language, 'រង់ចាំការត្រួតពិនិត្យ និងអនុម័តពី Admin', 'Pending Admin Review & Approval', '等待管理员审核与批准')}
+              </span>
+              <h4 className="font-moul text-base text-slate-900 dark:text-white pt-1">
+                {tr(
+                  language,
+                  '✅ បានទទួលសំណើបង្កើតហាងរបស់អ្នកជោគជ័យ!',
+                  '✅ Shop Submission Received!',
+                  '✅ 您的店铺申请已成功提交！'
+                )}
+              </h4>
+              <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                {tr(
+                  language,
+                  `ហាង «${submittedPendingShop.nameKh || submittedPendingShop.nameEn}» ត្រូវបានបញ្ជូនទៅកាន់រដ្ឋបាល (Admin) ដើម្បីត្រួតពិនិត្យ និងអនុម័ត (Approve) ឬបដិសេធ (Reject)។ បន្ទាប់ពី Admin អនុម័ត ហាងរបស់អ្នកនឹងបង្ហាញជាសាធារណៈភ្លាមៗ!`,
+                  `Your shop "${submittedPendingShop.nameEn || submittedPendingShop.nameKh}" has been submitted. The Administrator will review and approve or reject your listing shortly.`,
+                  `您的店铺“${submittedPendingShop.nameEn || submittedPendingShop.nameKh}”已提交，管理员审核批准后将立即公开展示！`
+                )}
+              </p>
+            </div>
+            <div className="pt-2 space-y-2">
+              <button
+                type="button"
+                onClick={() => {
+                  const shop = submittedPendingShop;
+                  setSubmittedPendingShop(null);
+                  setIsVipAddRestaurantModalOpen(false);
+                  (window as any).__kft_manage_initial_tab = 'menu';
+                  setManagingRestaurant(shop);
+                  setIsManageMenuModalOpen(true);
+                }}
+                className="w-full py-3 px-4 rounded-2xl bg-[#064E3B] hover:bg-emerald-800 text-white font-bold text-xs shadow-md transition cursor-pointer"
+              >
+                {tr(language, '🍽️ រៀបចំបញ្ជីមុខម្ហូបក្នុងហាងឥឡូវនេះ', '🍽️ Manage Shop Menu Now', '🍽️ 立即管理店铺菜单')}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setSubmittedPendingShop(null);
+                  setIsVipAddRestaurantModalOpen(false);
+                }}
+                className="w-full py-2.5 px-4 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs transition cursor-pointer"
+              >
+                {tr(language, 'យល់ព្រម (បិទផ្ទាំងនេះ)', 'OK, Got It', '好的，知道了')}
+              </button>
+            </div>
+          </div>
+        ) : !currentUser ? (
           <div className="p-6 text-center space-y-3 font-khmer">
             <div className="w-14 h-14 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-[#064E3B] dark:text-emerald-400 flex items-center justify-center mx-auto">
               <Lock className="w-7 h-7" />

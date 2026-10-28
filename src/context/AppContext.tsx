@@ -18,10 +18,6 @@ import {
   computeReceiptImageFingerprint,
   recordVerifiedReceiptFingerprint,
 } from '../services/aiPaymentVerificationService';
-import {
-  analyzeFoodBusinessDeterministically,
-  verifyFoodBusinessOnServer,
-} from '../services/aiFoodBusinessVerifierService';
 import { 
   verifyPaymentOnBackend, calculateVipDates, checkEligibleRestoration,
   VIP_ANNUAL_PRICE_USD, VIP_SUBSCRIPTION_DAYS, VIP_QUARTERLY_PRICE_USD, VIP_QUARTERLY_DAYS,
@@ -836,7 +832,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             if (!r || !r.id) continue;
             const rId = String(r.id);
             if (seenIds.has(rId)) continue;
-            if (isRestaurantIdDeleted(rId, r.updatedAt || r.photoUpdatedAt || r.adminEditedAt || r.createdAt, deletedRestsMap)) {
+            if (isRestaurantIdDeleted(rId, r.updatedAt || r.photoUpdatedAt || r.adminEditedAt || r.createdAt, deletedRestsMap, r.googlePlaceId)) {
+              continue;
+            }
+            // Remove legacy hardcoded rest-chumnor-kbal-koh if it was only a seed clone and not edited by Admin
+            if (rId === 'rest-chumnor-kbal-koh' && !r.isAdminEdited && !r.ownerId) {
               continue;
             }
 
@@ -920,9 +920,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               normalizedList.push(normalizeRestaurant(r));
             }
           }
-          // Ensure any newly added seed restaurants (e.g. Chumnor Kbal Koh - ជំនោរក្បាលកោះ) are also merged in (unless explicitly deleted by Admin)
+          // Ensure any newly added seed restaurants are also merged in (unless explicitly deleted by Admin)
           for (const seedRest of initialRestaurants) {
-            if (!seenIds.has(seedRest.id) && !isRestaurantIdDeleted(seedRest.id, undefined, deletedRestsMap)) {
+            if (!seenIds.has(seedRest.id) && !isRestaurantIdDeleted(seedRest.id, undefined, deletedRestsMap, seedRest.googlePlaceId)) {
               seenIds.add(seedRest.id);
               normalizedList.push(normalizeRestaurant(seedRest));
             }
@@ -2746,7 +2746,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             let anyCustomChanged = false;
             for (const r of prev) {
               const rTimestamp = r.updatedAt || r.photoUpdatedAt || r.adminEditedAt || r.createdAt;
-              if (isRestaurantIdDeleted(String(r.id), rTimestamp, syncedDeletedRests)) {
+              if (isRestaurantIdDeleted(String(r.id), rTimestamp, syncedDeletedRests, r.googlePlaceId)) {
                 anyCustomChanged = true;
                 continue;
               }
@@ -2762,7 +2762,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 r.id &&
                 !isSeedRestaurantId(String(r.id)) &&
                 (!r.ownerId || !deletedIdSet.has(r.ownerId)) &&
-                !isRestaurantIdDeleted(String(r.id), r.updatedAt || r.photoUpdatedAt || r.adminEditedAt || r.createdAt, syncedDeletedRests)
+                !isRestaurantIdDeleted(String(r.id), r.updatedAt || r.photoUpdatedAt || r.adminEditedAt || r.createdAt, syncedDeletedRests, r.googlePlaceId)
               ) {
                 const normCloud = normalizeRestaurant(r);
                 const localCur = map.get(r.id);
@@ -2872,10 +2872,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           return next;
         });
       }
-      if (Object.keys(bundle.restaurants).length > 0) {
+      if (Object.keys(bundle.restaurants).length > 0 || (bundle.deletedRestaurants && Object.keys(bundle.deletedRestaurants).length > 0)) {
         setRestaurants(prev => {
-          const next = applyRestaurantOverrides(prev, bundle.restaurants);
-          setSelectedRestaurant(cur => (cur ? next.find(r => r.id === cur.id) || cur : null));
+          const next = applyRestaurantOverrides(prev, bundle.restaurants, bundle.deletedRestaurants || loadDeletedRestaurantIdsMap());
+          setSelectedRestaurant(cur => (cur ? next.find(r => r.id === cur.id) || null : null));
           return next;
         });
       }
@@ -5032,62 +5032,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       ? restData.foodImages.filter((u: string) => u && !galleryImgSet.has(u))
       : [];
 
-    // Final Server/Context AI Business Category Verification before saving or publishing any store
-    const aiVerification =
-      restData.aiCategoryVerification ||
-      analyzeFoodBusinessDeterministically({
-        nameKh: restData.nameKh,
-        nameEn: restData.nameEn,
-        descriptionKh: restData.descriptionKh,
-        descriptionEn: restData.descriptionEn,
-        signatureDishesKh: restData.signatureDishesKh,
-        addressKh: restData.addressKh,
-        provinceKh: restData.provinceKh,
-        phone: restData.phone,
-        photoUrl: profileImg,
-        profileImage: profileImg,
-        foodImages: foodImgs,
-        galleryPhotos: restData.galleryPhotos,
-        menuItems: restData.menuItems,
-        ownerId: currentUser.id,
-        ownerName: currentUser.name,
-      });
-
-    // Trigger asynchronous server audit log & multimodal verification
-    verifyFoodBusinessOnServer({
-      nameKh: restData.nameKh,
-      nameEn: restData.nameEn,
-      descriptionKh: restData.descriptionKh,
-      descriptionEn: restData.descriptionEn,
-      signatureDishesKh: restData.signatureDishesKh,
-      addressKh: restData.addressKh,
-      provinceKh: restData.provinceKh,
-      phone: restData.phone,
-      photoUrl: profileImg,
-      profileImage: profileImg,
-      foodImages: foodImgs,
-      galleryPhotos: restData.galleryPhotos,
-      menuItems: restData.menuItems,
-      ownerId: currentUser.id,
-      ownerName: currentUser.name,
-    }).catch(() => {});
-
-    if (aiVerification.decision === 'rejected') {
-      recordSecurityAudit(
-        'VIP_STORE_REJECTED_NON_FOOD',
-        'BLOCKED',
-        'VipCreateStore',
-        `Rejected non-food store "${restData.nameKh}" (${aiVerification.detectedCategory})`
-      );
-      showToast(
-        language === 'km' ? aiVerification.reasonKh : aiVerification.reasonEn,
-        'warning'
-      );
-      return null;
-    }
-
     const isPendingPayment = !isAdmin && restData.paymentStatus === 'pending_verification';
-    const isPendingManualReview = !isAdmin && (aiVerification.decision === 'pending_review' || isPendingPayment || restData.status === 'pending');
+    const isPendingManualReview = !isAdmin;
     const finalStatus: 'approved' | 'pending' | 'rejected' = isPendingManualReview ? 'pending' : 'approved';
     const finalIsVerified = !isPendingManualReview;
     const finalIsPromoted = !isPendingManualReview && (isAdmin || isApprovedVip);
@@ -5127,7 +5073,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       membershipExpiresAt: (isAdmin || isApprovedVip) ? expiryIso : undefined,
       paymentStatus: isPendingPayment ? 'pending_verification' : (isAdmin || isApprovedVip) ? 'verified' : undefined,
       menuItems: (restData.menuItems || []).slice(0, (isAdmin || isApprovedVip) ? 20 : 5),
-      aiCategoryVerification: aiVerification,
       storeSlotNumber: slotNumber,
       replacedFromRestaurantId: targetToReplace ? targetToReplace.id : undefined,
       replacedAt: targetToReplace ? nowIso : undefined,
@@ -5165,9 +5110,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (isPendingManualReview) {
       showToast(
         language === 'km'
-          ? '⏳ សំណើបង្កើត/ប្តូរហាងរបស់អ្នកត្រូវបានបញ្ជូនទៅកាន់ Admin ដើម្បីត្រួតពិនិត្យប្រភេទអាជីវកម្មម្ហូបអាហារជាមុនសិន!'
-          : '⏳ Your store submission has been sent to Admin for manual food-category verification!',
-        'info'
+          ? '✅ សំណើបង្កើតហាងរបស់អ្នកត្រូវបានបញ្ជូនជោគជ័យ! សូមរង់ចាំការត្រួតពិនិត្យ និងអនុម័ត (Approve) ពីរដ្ឋបាល (Admin)។'
+          : '✅ Your shop submission has been received! Please wait for Admin approval.',
+        'success'
       );
     } else if (targetToReplace) {
       showToast(
@@ -5327,52 +5272,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           : []);
 
     // Prevent VIP users from bypassing verification by editing an approved store into a non-food business
-    let updatedAiVerification = updated.aiCategoryVerification || original?.aiCategoryVerification;
-    let nextStatusAfterAiCheck: 'approved' | 'pending' | 'rejected' = original?.status || 'approved';
-    let nextIsVerifiedAfterAiCheck: boolean = original?.isVerified ?? true;
-    let nextIsPromotedAfterAiCheck: boolean = true;
-
-    if (!isAdmin && !isSeedRestaurantId(updated.id)) {
-      const aiCheck = analyzeFoodBusinessDeterministically({
-        nameKh: updated.nameKh,
-        nameEn: updated.nameEn,
-        descriptionKh: updated.descriptionKh,
-        descriptionEn: updated.descriptionEn,
-        signatureDishesKh: updated.signatureDishesKh,
-        addressKh: updated.addressKh,
-        provinceKh: updated.provinceKh,
-        phone: updated.phone,
-        photoUrl: profileImg,
-        profileImage: profileImg,
-        foodImages: foodImgs,
-        galleryPhotos: updated.galleryPhotos,
-        menuItems: updated.menuItems,
-        ownerId: currentUser?.id,
-        ownerName: currentUser?.name,
-      });
-
-      if (aiCheck.decision === 'rejected') {
-        recordSecurityAudit(
-          'VIP_STORE_EDIT_REJECTED_NON_FOOD',
-          'BLOCKED',
-          'VipEditStore',
-          `Blocked non-food edit on "${updated.nameKh}" (${aiCheck.detectedCategory})`
-        );
-        showToast(language === 'km' ? aiCheck.reasonKh : aiCheck.reasonEn, 'warning');
-        return;
-      }
-
-      updatedAiVerification = aiCheck;
-      if (aiCheck.decision === 'pending_review') {
-        nextStatusAfterAiCheck = 'pending';
-        nextIsVerifiedAfterAiCheck = false;
-        nextIsPromotedAfterAiCheck = false;
-      } else {
-        nextStatusAfterAiCheck = 'approved';
-        nextIsVerifiedAfterAiCheck = true;
-        nextIsPromotedAfterAiCheck = true;
-      }
-    }
+    const updatedAiVerification = updated.aiCategoryVerification || original?.aiCategoryVerification;
+    const nextStatusAfterAiCheck: 'approved' | 'pending' | 'rejected' = isAdmin
+      ? (updated.status || original?.status || 'approved')
+      : (original?.status || 'pending');
+    const nextIsVerifiedAfterAiCheck: boolean = isAdmin
+      ? (updated.isVerified ?? original?.isVerified ?? true)
+      : (original?.isVerified ?? false);
+    const nextIsPromotedAfterAiCheck: boolean = nextStatusAfterAiCheck === 'approved';
 
     const preservedCreatedAt = original?.created_at || original?.createdAt || updated.created_at || updated.createdAt || getRestaurantCreatedAtIso(original || updated);
     const effectiveTier: MembershipTier = (isAdmin || isApprovedVip) ? 'premium' : 'free';
@@ -5499,23 +5406,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         'warning'
       );
       return false;
-    }
-
-    // AI Anti-Bypass Check on Menu Item (block non-food merchandise in restaurant menu)
-    if (!isAdmin) {
-      const menuAiCheck = analyzeFoodBusinessDeterministically({
-        nameKh: targetRest.nameKh,
-        nameEn: targetRest.nameEn,
-        menuItems: [itemData],
-        photoUrl: itemData.photoUrl,
-      });
-      if (menuAiCheck.decision === 'rejected') {
-        showToast(
-          language === 'km' ? menuAiCheck.reasonKh : menuAiCheck.reasonEn,
-          'warning'
-        );
-        return false;
-      }
     }
 
     const newItem: RestaurantMenuItem = {
@@ -5912,15 +5802,59 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     lastLocalRestaurantEditAtRef.current = Date.now();
-    // 1. Remove from permanent media vault & record permanent deletion tombstone
-    removePermanentRestaurantOverride(id);
+    const nowIso = new Date().toISOString();
+
+    // Find all matching/duplicate entries in `restaurants` (same ID, same googlePlaceId, or same normalized name + coordinates)
+    const normTargetNameKh = (target.nameKh || '').trim().toLowerCase();
+    const normTargetNameEn = (target.nameEn || '').trim().toLowerCase();
+    const matchingRestaurants = restaurants.filter(r => {
+      if (r.id === id) return true;
+      if (target.googlePlaceId && r.googlePlaceId && r.googlePlaceId === target.googlePlaceId) return true;
+      const rNameKh = (r.nameKh || '').trim().toLowerCase();
+      const rNameEn = (r.nameEn || '').trim().toLowerCase();
+      const sameName =
+        (normTargetNameKh.length >= 4 && rNameKh === normTargetNameKh) ||
+        (normTargetNameEn.length >= 4 && rNameEn === normTargetNameEn);
+      if (sameName) {
+        const dLat = Math.abs((r.latitude || 0) - (target.latitude || 0));
+        const dLng = Math.abs((r.longitude || 0) - (target.longitude || 0));
+        if (dLat < 0.005 && dLng < 0.005) return true;
+      }
+      return false;
+    });
+
+    const deletedIdSet = new Set<string>([id, ...matchingRestaurants.map(r => r.id)]);
+    const extraDeleteKeys: string[] = [];
+    for (const r of matchingRestaurants) {
+      if (r.id !== id) extraDeleteKeys.push(r.id);
+      if (r.googlePlaceId) {
+        extraDeleteKeys.push(`gplace:${r.googlePlaceId}`);
+        extraDeleteKeys.push(r.googlePlaceId);
+        extraDeleteKeys.push(`gmap-${r.googlePlaceId}`);
+      }
+    }
+    if (target.googlePlaceId) {
+      extraDeleteKeys.push(`gplace:${target.googlePlaceId}`);
+      extraDeleteKeys.push(target.googlePlaceId);
+      extraDeleteKeys.push(`gmap-${target.googlePlaceId}`);
+    }
+
+    // 1. Remove from permanent media vault & record permanent deletion tombstones for all matching IDs & Google Place IDs
+    removePermanentRestaurantOverride(id, extraDeleteKeys);
     const updatedDeletedMap = loadLocalMediaOverrides().deletedRestaurants || loadDeletedRestaurantIdsMap();
-    updatedDeletedMap[id] = new Date().toISOString();
+    for (const delId of deletedIdSet) {
+      updatedDeletedMap[delId] = nowIso;
+    }
+    for (const extraKey of extraDeleteKeys) {
+      if (extraKey) updatedDeletedMap[extraKey] = nowIso;
+    }
     saveDeletedRestaurantIdsMap(updatedDeletedMap);
 
     // 2. Immediately update state, synchronous localStorage, and Supabase Cloud
     setRestaurants(prev => {
-      const next = prev.filter(r => r.id !== id);
+      const next = prev.filter(
+        r => !deletedIdSet.has(r.id) && !(r.googlePlaceId && updatedDeletedMap[`gplace:${r.googlePlaceId}`])
+      );
       latestSyncStateRef.current.restaurants = next;
       try {
         const compacted = compactDataForBulkLocalStorage('kft_restaurants_real_v11', next);
@@ -5931,19 +5865,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (isSupabaseConfigured()) {
         try {
           const customRests = next.filter(r => !isSeedRestaurantId(r.id));
-          Promise.all([
+          const deleteCloudPromises: Promise<any>[] = [
             pushCloudDocument('kft_cloud_custom_restaurants_v1', customRests),
             pushCloudDocument('kft_cloud_deleted_restaurants_v1', updatedDeletedMap),
-            deleteCloudDocument(`kft_ov_rest_${id}`),
-          ]).catch(() => {});
+          ];
+          for (const delId of deletedIdSet) {
+            deleteCloudPromises.push(deleteCloudDocument(`kft_ov_rest_${delId}`));
+          }
+          Promise.allSettled(deleteCloudPromises).catch(() => {});
         } catch {}
       }
       return next;
     });
 
-    if (selectedRestaurant?.id === id) setSelectedRestaurant(null);
-    if (managingRestaurant?.id === id) {
-      const remainingOwned = getOwnedRestaurantsForUser(currentUser).filter(r => r.id !== id);
+    // Also remove from bookmarks & wishlists so deleted shops never linger in user saved lists
+    setBookmarkedRestaurantIds(prev => prev.filter(rId => !deletedIdSet.has(rId)));
+    setWishlists(prev =>
+      prev.map(w => ({
+        ...w,
+        items: w.items.filter(item => !(item.type === 'restaurant' && deletedIdSet.has(item.itemId))),
+      }))
+    );
+
+    if (selectedRestaurant && deletedIdSet.has(selectedRestaurant.id)) setSelectedRestaurant(null);
+    if (managingRestaurant && deletedIdSet.has(managingRestaurant.id)) {
+      const remainingOwned = getOwnedRestaurantsForUser(currentUser).filter(r => !deletedIdSet.has(r.id));
       if (remainingOwned.length > 0) {
         setManagingRestaurant(remainingOwned[remainingOwned.length - 1]);
       } else {
@@ -5952,8 +5898,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setIsManageMenuModalOpen(false);
       }
     }
-    if (activeManagedShopId === id) {
-      const remainingOwned = getOwnedRestaurantsForUser(currentUser).filter(r => r.id !== id);
+    if (activeManagedShopId && deletedIdSet.has(activeManagedShopId)) {
+      const remainingOwned = getOwnedRestaurantsForUser(currentUser).filter(r => !deletedIdSet.has(r.id));
       setActiveManagedShopId(remainingOwned.length > 0 ? remainingOwned[remainingOwned.length - 1].id : null);
     }
 
@@ -6095,8 +6041,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
     showToast(
       language === 'km'
-        ? '🚫 បានបដិសេធសំណើបង្កើតហាងដែលមិនមែនជាអាហាររួចរាល់!'
-        : '🚫 Rejected non-food store submission!',
+        ? '🚫 បានបដិសេធសំណើបង្កើតហាងរួចរាល់!'
+        : '🚫 Rejected store submission!',
       'info'
     );
   };

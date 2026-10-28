@@ -157,15 +157,14 @@ export function saveDeletedRestaurantIdsMap(map: Record<string, string>): void {
 
 export function isRestaurantIdDeleted(
   restaurantId: string,
-  itemTimestampIso?: string,
-  deletedMap: Record<string, string> = loadDeletedRestaurantIdsMap()
+  _itemTimestampIso?: string,
+  deletedMap: Record<string, string> = loadDeletedRestaurantIdsMap(),
+  googlePlaceId?: string
 ): boolean {
-  const deletedAtIso = deletedMap?.[restaurantId];
-  if (!deletedAtIso) return false;
-  if (!itemTimestampIso) return true;
-  const delMs = new Date(deletedAtIso).getTime() || 0;
-  const itemMs = new Date(itemTimestampIso).getTime() || 0;
-  return delMs >= itemMs;
+  if (!deletedMap) return false;
+  if (restaurantId && deletedMap[restaurantId]) return true;
+  if (googlePlaceId && (deletedMap[`gplace:${googlePlaceId}`] || deletedMap[googlePlaceId])) return true;
+  return false;
 }
 const IDB_STORE = 'media_overrides';
 const IDB_BUNDLE_KEY = 'master_bundle';
@@ -522,10 +521,11 @@ export function mergeOverrideBundles(
     }
   }
   for (const [id, restOv] of Object.entries(mergedRestaurants)) {
-    if (isFakeSeedRestaurantOverride(restOv) || isRestaurantIdDeleted(id, restOv?.updatedAt, mergedDeletedRestaurants)) {
+    if (
+      isFakeSeedRestaurantOverride(restOv) ||
+      isRestaurantIdDeleted(id, restOv?.updatedAt, mergedDeletedRestaurants, restOv?.googlePlaceId)
+    ) {
       delete mergedRestaurants[id];
-    } else if (mergedDeletedRestaurants[id]) {
-      delete mergedDeletedRestaurants[id];
     }
   }
 
@@ -648,9 +648,25 @@ export function recordPermanentRestaurantOverride(rest: Restaurant): void {
     updatedAt: now,
   };
   bundle.restaurants[rest.id] = overrideRecord;
-  if (bundle.deletedRestaurants && bundle.deletedRestaurants[rest.id]) {
-    delete bundle.deletedRestaurants[rest.id];
-    saveDeletedRestaurantIdsMap(bundle.deletedRestaurants);
+  if (bundle.deletedRestaurants) {
+    let tombChanged = false;
+    if (bundle.deletedRestaurants[rest.id]) {
+      delete bundle.deletedRestaurants[rest.id];
+      tombChanged = true;
+    }
+    if (rest.googlePlaceId) {
+      if (bundle.deletedRestaurants[`gplace:${rest.googlePlaceId}`]) {
+        delete bundle.deletedRestaurants[`gplace:${rest.googlePlaceId}`];
+        tombChanged = true;
+      }
+      if (bundle.deletedRestaurants[rest.googlePlaceId]) {
+        delete bundle.deletedRestaurants[rest.googlePlaceId];
+        tombChanged = true;
+      }
+    }
+    if (tombChanged) {
+      saveDeletedRestaurantIdsMap(bundle.deletedRestaurants);
+    }
   }
   bundle.updatedAt = now;
   saveLocalMediaOverrides(bundle);
@@ -660,21 +676,43 @@ export function recordPermanentRestaurantOverride(rest: Restaurant): void {
 /**
  * Remove a deleted restaurant from the permanent override vault and record a permanent deletion tombstone.
  */
-export function removePermanentRestaurantOverride(restaurantId: string): void {
+export function removePermanentRestaurantOverride(restaurantId: string, extraKeys: string[] = []): void {
   const bundle = loadLocalMediaOverrides();
   const now = new Date().toISOString();
   if (!bundle.deletedRestaurants) {
     bundle.deletedRestaurants = loadDeletedRestaurantIdsMap();
   }
   bundle.deletedRestaurants[restaurantId] = now;
+  const existingOv = bundle.restaurants[restaurantId];
+  if (existingOv?.googlePlaceId) {
+    bundle.deletedRestaurants[`gplace:${existingOv.googlePlaceId}`] = now;
+    bundle.deletedRestaurants[existingOv.googlePlaceId] = now;
+  }
+  for (const extraKey of extraKeys) {
+    if (extraKey) {
+      bundle.deletedRestaurants[extraKey] = now;
+      if (bundle.restaurants[extraKey]) {
+        delete bundle.restaurants[extraKey];
+      }
+    }
+  }
   saveDeletedRestaurantIdsMap(bundle.deletedRestaurants);
   if (bundle.restaurants[restaurantId]) {
     delete bundle.restaurants[restaurantId];
   }
   bundle.updatedAt = now;
   saveLocalMediaOverrides(bundle);
-  deleteCloudDocument(`${VAULT_KEYS.CLOUD_RECORD_PREFIX}rest_${restaurantId}`).catch(() => {});
-  pushMediaOverridesToCloud(bundle).catch(() => {});
+  const deletePromises: Promise<any>[] = [
+    deleteCloudDocument(`${VAULT_KEYS.CLOUD_RECORD_PREFIX}rest_${restaurantId}`),
+  ];
+  for (const extraKey of extraKeys) {
+    if (extraKey && !extraKey.startsWith('gplace:')) {
+      deletePromises.push(deleteCloudDocument(`${VAULT_KEYS.CLOUD_RECORD_PREFIX}rest_${extraKey}`));
+    }
+  }
+  Promise.allSettled(deletePromises).finally(() => {
+    pushMediaOverridesToCloud(bundle).catch(() => {});
+  });
 }
 
 /**
@@ -830,7 +868,7 @@ export function applyRestaurantOverrides(
   const hasDeleted = Object.keys(deletedMap).length > 0;
   const filteredBase = hasDeleted
     ? restaurants.filter(
-        (r) => !isRestaurantIdDeleted(r.id, r.updatedAt || r.photoUpdatedAt || r.adminEditedAt || r.createdAt, deletedMap)
+        (r) => !isRestaurantIdDeleted(r.id, r.updatedAt || r.photoUpdatedAt || r.adminEditedAt || r.createdAt, deletedMap, r.googlePlaceId)
       )
     : restaurants;
   let anyChanged = filteredBase.length !== restaurants.length;
@@ -934,7 +972,7 @@ export function applyRestaurantOverrides(
 
   // Also append any custom VIP/Admin restaurants present in overridesMap that aren't in the list yet (excluding deleted restaurants)
   for (const [ovId, ov] of Object.entries(overridesMap)) {
-    if (!seenIds.has(ovId) && ov && ov.nameKh && (ov.photoUrl || ov.profileImage) && !isRestaurantIdDeleted(ovId, ov.updatedAt, deletedMap)) {
+    if (!seenIds.has(ovId) && ov && ov.nameKh && (ov.photoUrl || ov.profileImage) && !isRestaurantIdDeleted(ovId, ov.updatedAt, deletedMap, ov.googlePlaceId)) {
       anyChanged = true;
       seenIds.add(ovId);
       const photoUrl = ov.photoUrl || ov.profileImage || '/Shop/rest-1.jpg';
@@ -1248,6 +1286,10 @@ export async function hydrateAndSyncMediaOverrides(forceCloud = false): Promise<
               localUpdatedAt = current.foods[id]?.updatedAt;
             } else if (item.key.startsWith('kft_ov_rest_')) {
               const id = item.key.slice('kft_ov_rest_'.length);
+              if (current.deletedRestaurants?.[id] || isRestaurantIdDeleted(id, undefined, current.deletedRestaurants)) {
+                deleteCloudDocument(item.key).catch(() => {});
+                continue;
+              }
               localUpdatedAt = current.restaurants[id]?.updatedAt;
             } else if (item.key.startsWith('kft_ov_dest_')) {
               const id = item.key.slice('kft_ov_dest_'.length);

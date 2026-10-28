@@ -12,11 +12,11 @@ import { getLocalizedDestination, getLocalizedFood, getLocalizedRestaurant } fro
 import { copyTextNativeOrWeb } from '../utils/androidMediaHelper';
 import {
   BookOpen, Sparkles, MapPinned, CalendarDays, Lightbulb, Heart, Star, Store, Compass, Utensils,
-  ChevronRight, Copy, Lock, CheckCircle2, Route, Navigation, Maximize2, X,
+  ChevronRight, Copy, Lock, CheckCircle2, Route, Navigation, Maximize2, X, PhoneCall, ShieldAlert, Clock, Tag,
 } from 'lucide-react';
 import {
-  FESTIVALS, GUIDE_TIPS, MEAL_SLOTS, PHRASES, SEASONAL_ITEMS, TIP_CATEGORIES,
-  getMealSlotForHour, getSeasonForMonth, pickTri,
+  EMERGENCY_CONTACTS, GUIDE_TIPS, MEAL_SLOTS, PHRASES, SEASONAL_ITEMS, TIP_CATEGORIES,
+  getCambodiaHolidaysForYear, getMealSlotForHour, getSeasonForMonth, pickTri,
 } from '../data/guideContent';
 import type { MealSlotId, TipCategory } from '../data/guideContent';
 
@@ -358,15 +358,9 @@ export const GuideView: React.FC = () => {
     [activeGroup, users, appSettings]
   );
 
-  // Calendar data
+  // Calendar data (automatically calculates exact solar dates and countdown days for current & next year)
   const seasonalNow = useMemo(() => SEASONAL_ITEMS.filter((s) => s.months.includes(month)), [month]);
-  const festivals = useMemo(
-    () =>
-      [...FESTIVALS]
-        .map((f) => ({ f, dist: (f.month - month + 12) % 12 }))
-        .sort((a, b) => a.dist - b.dist),
-    [month]
-  );
+  const festivals = useMemo(() => getCambodiaHolidaysForYear(new Date()), [month]);
 
   const visibleTips = useMemo(
     () => GUIDE_TIPS.filter((t) => tipFilter === 'all' || t.category === tipFilter),
@@ -870,49 +864,72 @@ export const GuideView: React.FC = () => {
           <section className="space-y-2.5">
             <SectionTitle
               icon={<CalendarDays className="w-4 h-4" />}
-              title={tr(language, 'បុណ្យទាន & ពិធីសំខាន់ៗ', 'Festivals & celebrations', '节日与庆典')}
+              title={tr(language, 'បុណ្យជាតិ & ពិធីបុណ្យផ្លូវការនៅកម្ពុជា (១៦ ពិធី)', 'Cambodian Public Holidays & Festivals (Auto-Updated Yearly)', '柬埔寨官方公共假日与传统庆典（每年自动更新）')}
               subtitle={tr(
                 language,
-                'កាលបរិច្ឆេទប្តូរតាមប្រតិទិនចន្ទគតិ សូមពិនិត្យថ្ងៃផ្លូវការ',
-                'Dates follow the lunar calendar — always confirm the official dates',
-                '日期依农历而定，出行前请核对官方日期'
+                'បង្ហាញកាលបរិច្ឆេទពិតប្រាកដ ចំនួនថ្ងៃនៅសល់ រយៈពេលឈប់សម្រាក និងតម្លៃចូលរួម ($0 ឥតគិតថ្លៃ)',
+                'Live countdown in days, official holiday duration, and free public admission ($0)',
+                '显示准确日期、倒计时天数、放假时长及免费公众参与（$0）'
               )}
             />
-            <ol className="space-y-2.5">
-              {festivals.map(({ f, dist }, idx) => (
+            <ol className="space-y-3">
+              {festivals.map((f, idx) => (
                 <li
                   key={f.id}
-                  className={`p-3.5 rounded-2xl border space-y-2 ${
-                    idx === 0
-                      ? 'bg-amber-50 dark:bg-amber-950/25 border-amber-300/70 dark:border-amber-700/50'
+                  className={`p-3.5 rounded-2xl border space-y-2.5 ${
+                    f.isOngoingToday
+                      ? 'bg-rose-50 dark:bg-rose-950/30 border-rose-400 dark:border-rose-600 shadow-sm'
+                      : idx === 0
+                      ? 'bg-amber-50 dark:bg-amber-950/25 border-amber-300/80 dark:border-amber-700/60 shadow-xs'
                       : 'bg-white dark:bg-slate-800 border-slate-200/90 dark:border-slate-700'
                   }`}
                 >
                   <div className="flex items-start gap-3">
-                    <div className="w-12 shrink-0 text-center">
+                    <div className="w-12 shrink-0 text-center p-1.5 rounded-2xl bg-emerald-50 dark:bg-slate-700/70 border border-emerald-200/60 dark:border-slate-600">
                       <div className="text-2xl leading-none">{f.emoji}</div>
                       <div className="mt-1 text-[10px] font-black text-[#064E3B] dark:text-emerald-300">{monthLabel(f.month, lang)}</div>
+                      <div className="text-[9px] font-bold text-slate-500 dark:text-slate-400">{f.activeYear}</div>
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        <h4 className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white">{pickTri(f.name, lang)}</h4>
+                        <h4 className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white leading-snug">
+                          {pickTri(f.name, lang)}
+                        </h4>
                         <span
-                          className={`px-2 py-0.5 rounded-full text-[9px] font-black ${
-                            dist === 0 ? 'bg-rose-500 text-white' : idx === 0 ? 'bg-amber-400 text-slate-950' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
+                          className={`px-2.5 py-0.5 rounded-full text-[10px] font-black shrink-0 ${
+                            f.isOngoingToday
+                              ? 'bg-rose-600 text-white'
+                              : idx === 0
+                              ? 'bg-amber-400 text-slate-950 shadow-2xs'
+                              : 'bg-emerald-100 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300'
                           }`}
                         >
-                          {dist === 0
-                            ? tr(language, 'ខែនេះ', 'This month', '本月')
-                            : tr(language, `ក្នុង ${dist} ខែ`, `In ${dist} mo`, `${dist} 个月后`)}
+                          {pickTri(f.countdownBadge, lang)}
                         </span>
                       </div>
-                      <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">{pickTri(f.when, lang)}</p>
-                      <p className="text-[11px] sm:text-xs text-slate-700 dark:text-slate-200 mt-1.5 leading-relaxed">{pickTri(f.about, lang)}</p>
+
+                      <p className="text-[11px] font-bold text-[#064E3B] dark:text-emerald-300 mt-1">
+                        📅 {pickTri(f.formattedDateRange, lang)} • <span className="font-normal text-slate-500 dark:text-slate-400">{pickTri(f.when, lang)}</span>
+                      </p>
+
+                      {/* Explicit Duration & Pricing Pills to eliminate any "1 Month" confusion */}
+                      <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-700/80 text-slate-800 dark:text-slate-200 text-[10px] font-bold border border-slate-200 dark:border-slate-600">
+                          <Clock className="w-3 h-3 text-amber-600 dark:text-amber-400 shrink-0" />
+                          <span>{tr(language, 'រយៈពេល៖', 'Duration:', '时长：')} {pickTri(f.durationLabel, lang)}</span>
+                        </span>
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300 text-[10px] font-bold border border-emerald-200 dark:border-emerald-800">
+                          <Tag className="w-3 h-3 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                          <span>{tr(language, 'តម្លៃ៖', 'Cost:', '费用：')} {pickTri(f.pricingLabel, lang)}</span>
+                        </span>
+                      </div>
+
+                      <p className="text-[11px] sm:text-xs text-slate-700 dark:text-slate-200 mt-2 leading-relaxed">{pickTri(f.about, lang)}</p>
                     </div>
                   </div>
                   <div className="grid gap-1.5 text-[11px] leading-snug">
                     <p className="px-2.5 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-200">
-                      🍽️ <span className="font-bold">{tr(language, 'ម្ហូប៖', 'Foods:', '美食：')}</span> {pickTri(f.foods, lang)}
+                      🍽️ <span className="font-bold">{tr(language, 'ម្ហូបប្រចាំពិធី៖', 'Festival Foods:', '节日美食：')}</span> {pickTri(f.foods, lang)}
                     </p>
                     <p className="px-2.5 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-900/50 text-slate-700 dark:text-slate-300">
                       💡 {pickTri(f.tip, lang)}
@@ -930,10 +947,61 @@ export const GuideView: React.FC = () => {
       {/* ------------------------------------------------------------------ */}
       {tab === 'tips' && (
         <div className="space-y-5">
+          {/* Dedicated Police & Emergency Contacts Section */}
+          {(tipFilter === 'all' || tipFilter === 'safety') && (
+            <section className="p-4 rounded-3xl bg-gradient-to-br from-rose-50 via-amber-50/70 to-white dark:from-rose-950/40 dark:via-slate-900 dark:to-slate-800 border-2 border-rose-300 dark:border-rose-800/80 space-y-3 shadow-xs">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="w-9 h-9 rounded-xl bg-rose-600 text-white flex items-center justify-center shadow-xs shrink-0">
+                    <ShieldAlert className="w-5 h-5" />
+                  </span>
+                  <div className="min-w-0">
+                    <h3 className="font-moul text-xs sm:text-sm text-rose-900 dark:text-rose-200 truncate">
+                      {tr(language, '🚨 លេខទូរស័ព្ទប៉ូលីស & សង្គ្រោះបន្ទាន់ (24 ម៉ោង)', '🚨 Police & Emergency Hotlines (24/7)', '🚨 柬埔寨警察与紧急救援电话（24小时）')}
+                    </h3>
+                    <p className="text-[10px] text-rose-700 dark:text-rose-300">
+                      {tr(language, 'ចុចលើលេខទូរស័ព្ទខាងក្រោមដើម្បីហៅចេញភ្លាមៗក្នុងករណីមានអាសន្ន', 'Tap any emergency number below to dial immediately', '遇到紧急情况请点击下方号码直接拨打')}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {EMERGENCY_CONTACTS.map((ec) => (
+                  <div
+                    key={ec.id}
+                    className="p-2.5 rounded-2xl bg-white dark:bg-slate-800/90 border border-rose-200/80 dark:border-slate-700 flex items-center justify-between gap-2.5"
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <span className="w-9 h-9 rounded-xl bg-rose-50 dark:bg-rose-950/60 flex items-center justify-center text-lg shrink-0">
+                        {ec.emoji}
+                      </span>
+                      <div className="min-w-0">
+                        <h4 className="text-xs font-extrabold text-slate-900 dark:text-white truncate">
+                          {pickTri(ec.name, lang)}
+                        </h4>
+                        <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
+                          {pickTri(ec.note, lang)}
+                        </p>
+                      </div>
+                    </div>
+                    <a
+                      href={`tel:${ec.number}`}
+                      className="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-mono font-black text-xs flex items-center gap-1.5 shrink-0 shadow-xs active:scale-95 transition"
+                    >
+                      <PhoneCall className="w-3.5 h-3.5" />
+                      <span>{ec.number}</span>
+                    </a>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
           <section className="space-y-2.5">
             <SectionTitle
               icon={<Lightbulb className="w-4 h-4" />}
-              title={tr(language, 'គន្លឹះដំណើរកម្សាន្ត & ញ៉ាំអាហារ', 'Travel & dining tips', '旅行与用餐贴士')}
+              title={tr(language, `គន្លឹះដំណើរកម្សាន្ត & ញ៉ាំអាហារ (${GUIDE_TIPS.length} គន្លឹះ)`, `Travel & dining tips (${GUIDE_TIPS.length} tips)`, `旅行与用餐实用贴士（共 ${GUIDE_TIPS.length} 条）`)}
             />
             <div className="flex gap-1.5 overflow-x-auto no-scrollbar -mx-4 px-4">
               {TIP_CATEGORIES.map((c) => {

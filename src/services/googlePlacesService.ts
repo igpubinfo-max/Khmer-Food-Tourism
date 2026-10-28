@@ -30,6 +30,7 @@ import {
 } from './supabaseService';
 import { initial100Restaurants as SEED_RESTAURANTS } from '../data/seedRestaurants';
 import { initial100Destinations as SEED_DESTINATIONS } from '../data/seedDestinations';
+import { isRestaurantIdDeleted, loadDeletedRestaurantIdsMap } from './permanentMediaVaultService';
 
 export type GooglePlaceSearchCategory =
   | 'all'
@@ -3835,8 +3836,10 @@ function buildSeedDirectoryNearbyCandidates(
   maxDistanceMeters: number
 ): GooglePlaceCachedItem[] {
   const out: GooglePlaceCachedItem[] = [];
+  const deletedMap = loadDeletedRestaurantIdsMap();
 
   for (const r of SEED_RESTAURANTS) {
+    if (isRestaurantIdDeleted(r.id, undefined, deletedMap, r.googlePlaceId)) continue;
     const dist = calculateHaversineMeters(lat, lng, r.latitude, r.longitude);
     if (dist > maxDistanceMeters) continue;
     const prov = inferCambodiaProvinceFromAddressOrGps(`${r.provinceKh} ${r.addressKh}`, r.latitude, r.longitude);
@@ -4389,7 +4392,8 @@ export async function searchNearbyPlacesWithin500m(
     await saveToSmartCache(allNew);
   }
 
-  // Merge all sources and strictly enforce effectiveRadius (500m, 1km, 2km)
+  // Merge all sources and strictly enforce effectiveRadius (500m, 1km, 2km) and exclude Admin-deleted shops
+  const deletedNearbyMap = loadDeletedRestaurantIdsMap();
   const combinedAll = deduplicateGooglePlacesList([
     ...googleItems,
     ...liveMapItems,
@@ -4398,7 +4402,12 @@ export async function searchNearbyPlacesWithin500m(
   ]).filter(
     (p) =>
       !isRoadOrInvalidNearbyPlaceName(p.nameKh) &&
-      calculateHaversineMeters(lat, lng, p.lat, p.lng) <= effectiveRadius
+      calculateHaversineMeters(lat, lng, p.lat, p.lng) <= effectiveRadius &&
+      !(
+        p.category !== 'tourism' &&
+        (deletedNearbyMap[p.placeId] ||
+          (p.googlePlaceId && (deletedNearbyMap[`gplace:${p.googlePlaceId}`] || deletedNearbyMap[p.googlePlaceId])))
+      )
   );
 
   // Sort strictly nearest first by exact Haversine distance
@@ -4560,9 +4569,20 @@ export function performUnifiedCambodiaSearch(
   const externalPlaces: GooglePlaceCachedItem[] = [];
   const seenExternalIds = new Set<string>();
 
+  const deletedRestsMap = loadDeletedRestaurantIdsMap();
+  const isExternalPlaceDeleted = (item: GooglePlaceCachedItem): boolean => {
+    if (!deletedRestsMap || Object.keys(deletedRestsMap).length === 0) return false;
+    if (item.placeId && deletedRestsMap[item.placeId]) return true;
+    if (item.googlePlaceId && (deletedRestsMap[`gplace:${item.googlePlaceId}`] || deletedRestsMap[item.googlePlaceId])) {
+      return true;
+    }
+    return false;
+  };
+
   // Check local Smart Cache synchronously so instant results include EXTENDED_PHNOM_PENH_CAMBODIA_PLACES
   const filterInstantCache = (enforceProvince: boolean) =>
     getLocalSmartCache().filter((item) => {
+      if (item.category !== 'tourism' && isExternalPlaceDeleted(item)) return false;
       if (enforceProvince && cleanSelProv && !matchesProvinceText(`${item.province || ''} ${item.provinceKh || ''} ${item.address || ''}`)) {
         return false;
       }
@@ -4611,6 +4631,9 @@ export function performUnifiedCambodiaSearch(
         });
       }
     } else {
+      if (isExternalPlaceDeleted(place)) {
+        continue;
+      }
       // Check against ALL approved app restaurants (so searching an English/Chinese alias of an in-app shop opens its in-app detail page!)
       const matchedAppRest = findDuplicateRestaurantForGooglePlace(place, approvedAppRestaurants);
       if (matchedAppRest) {

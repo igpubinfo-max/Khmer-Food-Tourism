@@ -57,22 +57,22 @@ export interface VipPlanConfig {
 export const VIP_PLANS: Record<'quarterly' | 'annual', VipPlanConfig> = {
   quarterly: {
     id: 'quarterly',
-    nameEn: 'VIP 30 Days',
-    nameKh: 'VIP 30 ថ្ងៃ',
+    nameEn: 'VIP 1 Month (30 Days)',
+    nameKh: 'VIP ១ ខែ (30 ថ្ងៃ)',
     priceUsd: VIP_QUARTERLY_PRICE_USD,
     durationDays: VIP_QUARTERLY_DAYS,
-    labelEn: `VIP ${VIP_QUARTERLY_DAYS} Days (${VIP_QUARTERLY_PRICE_USD.toFixed(2)} / ${VIP_QUARTERLY_DAYS} days)`,
-    labelKh: `VIP ${VIP_QUARTERLY_DAYS} ថ្ងៃ (${VIP_QUARTERLY_PRICE_USD.toFixed(2)} / ${VIP_QUARTERLY_DAYS} ថ្ងៃ)`,
+    labelEn: `VIP 1 Month / ${VIP_QUARTERLY_DAYS} Days ($${VIP_QUARTERLY_PRICE_USD.toFixed(2)} USD)`,
+    labelKh: `VIP ១ ខែ / ${VIP_QUARTERLY_DAYS} ថ្ងៃ ($${VIP_QUARTERLY_PRICE_USD.toFixed(2)} USD)`,
     priceKhrDisplay: `${Math.round(VIP_QUARTERLY_PRICE_USD * 4100).toLocaleString()} រៀល`
   },
   annual: {
     id: 'annual',
-    nameEn: 'VIP 60 Days',
-    nameKh: 'VIP 60 ថ្ងៃ',
+    nameEn: 'VIP 2 Months (60 Days)',
+    nameKh: 'VIP ២ ខែ (60 ថ្ងៃ)',
     priceUsd: VIP_ANNUAL_PRICE_USD,
     durationDays: VIP_SUBSCRIPTION_DAYS,
-    labelEn: `VIP ${VIP_SUBSCRIPTION_DAYS} Days (${VIP_ANNUAL_PRICE_USD.toFixed(2)} / ${VIP_SUBSCRIPTION_DAYS} days)`,
-    labelKh: `VIP ${VIP_SUBSCRIPTION_DAYS} ថ្ងៃ (${VIP_ANNUAL_PRICE_USD.toFixed(2)} / ${VIP_SUBSCRIPTION_DAYS} ថ្ងៃ)`,
+    labelEn: `VIP 2 Months / ${VIP_SUBSCRIPTION_DAYS} Days ($${VIP_ANNUAL_PRICE_USD.toFixed(2)} USD)`,
+    labelKh: `VIP ២ ខែ / ${VIP_SUBSCRIPTION_DAYS} ថ្ងៃ ($${VIP_ANNUAL_PRICE_USD.toFixed(2)} USD)`,
     priceKhrDisplay: `${Math.round(VIP_ANNUAL_PRICE_USD * 4100).toLocaleString()} រៀល`
   }
 };
@@ -1351,19 +1351,27 @@ export const getDynamicVipPlans = (
 
   const shortNameKh =
     !shortNameKhRaw || /^VIP\s+\d+\s*(ថ្ងៃ|\?+)$/i.test(shortNameKhRaw)
-      ? `VIP ${shortDays} ថ្ងៃ`
+      ? shortDays === 30
+        ? 'VIP ១ ខែ (30 ថ្ងៃ)'
+        : `VIP ${shortDays} ថ្ងៃ`
       : shortNameKhRaw;
   const shortNameEn =
     !shortNameEnRaw || /^VIP\s+\d+\s*Days?$/i.test(shortNameEnRaw)
-      ? `VIP ${shortDays} Days`
+      ? shortDays === 30
+        ? 'VIP 1 Month (30 Days)'
+        : `VIP ${shortDays} Days`
       : shortNameEnRaw;
   const longNameKh =
     !longNameKhRaw || /^VIP\s+\d+\s*(ថ្ងៃ|\?+)$/i.test(longNameKhRaw)
-      ? `VIP ${longDays} ថ្ងៃ`
+      ? longDays === 60
+        ? 'VIP ២ ខែ (60 ថ្ងៃ)'
+        : `VIP ${longDays} ថ្ងៃ`
       : longNameKhRaw;
   const longNameEn =
     !longNameEnRaw || /^VIP\s+\d+\s*Days?$/i.test(longNameEnRaw)
-      ? `VIP ${longDays} Days`
+      ? longDays === 60
+        ? 'VIP 2 Months (60 Days)'
+        : `VIP ${longDays} Days`
       : longNameEnRaw;
 
   return {
@@ -1373,8 +1381,8 @@ export const getDynamicVipPlans = (
       nameKh: shortNameKh,
       priceUsd: shortPrice,
       durationDays: shortDays,
-      labelEn: `${shortNameEn} (${shortPrice.toFixed(2)} / ${shortDays} days)`,
-      labelKh: `${shortNameKh} (${shortPrice.toFixed(2)} / ${shortDays} ថ្ងៃ)`,
+      labelEn: `${shortNameEn} ($${shortPrice.toFixed(2)} USD / ${shortDays} days)`,
+      labelKh: `${shortNameKh} ($${shortPrice.toFixed(2)} USD / ${shortDays} ថ្ងៃ)`,
       priceKhrDisplay: `${Math.round(shortPrice * 4100).toLocaleString()} រៀល`,
     },
     annual: {
@@ -1383,8 +1391,8 @@ export const getDynamicVipPlans = (
       nameKh: longNameKh,
       priceUsd: longPrice,
       durationDays: longDays,
-      labelEn: `${longNameEn} (${longPrice.toFixed(2)} / ${longDays} days)`,
-      labelKh: `${longNameKh} (${longPrice.toFixed(2)} / ${longDays} ថ្ងៃ)`,
+      labelEn: `${longNameEn} ($${longPrice.toFixed(2)} USD / ${longDays} days)`,
+      labelKh: `${longNameKh} ($${longPrice.toFixed(2)} USD / ${longDays} ថ្ងៃ)`,
       priceKhrDisplay: `${Math.round(longPrice * 4100).toLocaleString()} រៀល`,
     },
   };
