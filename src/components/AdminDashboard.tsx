@@ -10,7 +10,8 @@ import {
 import {
   FoodCategorySlug, DestinationCategorySlug, UserRole, User, RegistrationTransaction, FoodItem, TouristDestination, isSeedRestaurantId,
   VipBenefitItem, TEN_VIP_BENEFITS, getDynamicVipBenefits, getAdditionalStoreFeeUsd,
-  getVipFeaturedRotationConfig, getVipFeaturedRotationState
+  getVipFeaturedRotationConfig, getVipFeaturedRotationState,
+  sanitizeManualFeaturedSchedule, getManualFeaturedSlotEndMs, ManualFeaturedSlot, MAX_MANUAL_FEATURED_SLOTS
 } from '../types';
 import { getSecurityAuditLogs, SecurityAuditEntry, revokeAdminSession, getOfficialOwnershipCertificate, verifyAppOwnershipAndDomainIntegrity } from '../utils/security';
 import { FoodImageModal } from './FoodImageModal';
@@ -148,6 +149,16 @@ export const AdminDashboard: React.FC = () => {
   const [vipBenefitsDraft, setVipBenefitsDraft] = useState<VipBenefitItem[]>(() => getDynamicVipBenefits(appSettings));
   const [vipFeaturedRotationEnabledInput, setVipFeaturedRotationEnabledInput] = useState<boolean>(() => appSettings.vipFeaturedRotationEnabled !== false);
   const [vipFeaturedDurationDaysInput, setVipFeaturedDurationDaysInput] = useState<string>(() => String(appSettings.vipFeaturedDurationDays ?? 1));
+  // Manual Top Listing schedule form (Admin picks shop + start date/time + duration)
+  const toLocalDateTimeInput = (d: Date) => {
+    const p = (n: number) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+  };
+  const [manualShopId, setManualShopId] = useState<string>('');
+  const [manualShopQuery, setManualShopQuery] = useState<string>('');
+  const [manualStartLocal, setManualStartLocal] = useState<string>(() => toLocalDateTimeInput(new Date()));
+  const [manualDaysInput, setManualDaysInput] = useState<string>('1');
+  const [isSavingManualSlot, setIsSavingManualSlot] = useState<boolean>(false);
   const [activeSettingsSection, setActiveSettingsSection] = useState<'all' | 'featured_rotation' | 'vip_pricing' | 'payment_khqr' | 'distribution' | 'cloud_system' | 'security'>('all');
 
   const isVipFormDirtyRef = useRef<boolean>(false);
@@ -3625,6 +3636,105 @@ export const AdminDashboard: React.FC = () => {
             const showSection = (sec: typeof activeSettingsSection) =>
               activeSettingsSection === 'all' || activeSettingsSection === sec;
 
+            // ---- Manual Top Listing schedule ----
+            const manualSchedule: ManualFeaturedSlot[] = sanitizeManualFeaturedSchedule(
+              appSettings.vipFeaturedManualSchedule
+            ).sort((a, b) => Date.parse(a.startAt) - Date.parse(b.startAt));
+            const fmtDateTime = (iso: string | number) => {
+              const d = new Date(iso);
+              const p = (n: number) => String(n).padStart(2, '0');
+              return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+            };
+            const shopLabel = (id: string) => {
+              const r = restaurants.find((x) => x.id === id);
+              return r ? (isKm ? r.nameKh || r.nameEn : r.nameEn || r.nameKh) : (isKm ? '(ហាងត្រូវបានលុប)' : '(deleted shop)');
+            };
+            const manualQuery = manualShopQuery.trim().toLowerCase();
+            const manualShopOptions = restaurants
+              .filter((r) => r && r.id && (!r.status || r.status === 'approved'))
+              .filter((r) =>
+                !manualQuery ||
+                (r.nameKh || '').toLowerCase().includes(manualQuery) ||
+                (r.nameEn || '').toLowerCase().includes(manualQuery)
+              )
+              .slice(0, 60);
+            const manualDaysNum = parseInt(manualDaysInput, 10);
+            const manualStartMsPreview = manualStartLocal ? new Date(manualStartLocal).getTime() : Number.NaN;
+            const manualEndPreview =
+              Number.isFinite(manualDaysNum) && manualDaysNum >= 1 && !Number.isNaN(manualStartMsPreview)
+                ? manualStartMsPreview + manualDaysNum * 86400000
+                : null;
+
+            const persistManualSchedule = async (next: ManualFeaturedSlot[]) => {
+              setIsSavingManualSlot(true);
+              try {
+                return await updateAppSettings({ vipFeaturedManualSchedule: next });
+              } finally {
+                setIsSavingManualSlot(false);
+              }
+            };
+
+            const handleAddManualSlot = async () => {
+              const shop = restaurants.find((r) => r.id === manualShopId);
+              if (!shop) {
+                showToast(isKm ? '⚠️ សូមជ្រើសរើសហាងមុនសិន!' : '⚠️ Please select a shop first!', 'warning');
+                return;
+              }
+              const startMs = manualStartLocal ? new Date(manualStartLocal).getTime() : Date.now();
+              if (Number.isNaN(startMs)) {
+                showToast(isKm ? '⚠️ កាលបរិច្ឆេទចាប់ផ្តើមមិនត្រឹមត្រូវ!' : '⚠️ Invalid start date!', 'warning');
+                return;
+              }
+              if (!Number.isFinite(manualDaysNum) || manualDaysNum < 1 || manualDaysNum > 365) {
+                showToast(isKm ? '⚠️ រយៈពេលត្រូវតែចាប់ពី ១ ដល់ ៣៦៥ ថ្ងៃ!' : '⚠️ Duration must be 1–365 days!', 'warning');
+                return;
+              }
+              const endMs = startMs + manualDaysNum * 86400000;
+              const overlap = manualSchedule.find(
+                (s) => s.restaurantId === shop.id && Date.parse(s.startAt) < endMs && getManualFeaturedSlotEndMs(s) > startMs
+              );
+              if (overlap) {
+                showToast(
+                  isKm
+                    ? '⚠️ ហាងនេះមានកាលវិភាគស្ទួនគ្នាក្នុងចន្លោះពេលនេះរួចហើយ!'
+                    : '⚠️ This shop already has a schedule overlapping this period!',
+                  'warning'
+                );
+                return;
+              }
+              if (manualSchedule.length >= MAX_MANUAL_FEATURED_SLOTS) {
+                showToast(isKm ? '⚠️ កាលវិភាគពេញហើយ សូមលុបកាលវិភាគចាស់ៗ!' : '⚠️ Schedule is full. Remove old entries first!', 'warning');
+                return;
+              }
+              const nowIso = new Date().toISOString();
+              const slot: ManualFeaturedSlot = {
+                id: `mfs-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+                restaurantId: shop.id,
+                startAt: new Date(startMs).toISOString(),
+                durationDays: manualDaysNum,
+                createdAt: nowIso,
+              };
+              const res = await persistManualSchedule([...manualSchedule, slot]);
+              if (res && res.ok) {
+                setManualShopId('');
+                showToast(
+                  isKm
+                    ? `📌 បានកំណត់កាលវិភាគ Top Listing សម្រាប់ «${shop.nameKh || shop.nameEn}» (${manualDaysNum} ថ្ងៃ)`
+                    : `📌 Top Listing scheduled for "${shop.nameEn || shop.nameKh}" (${manualDaysNum} day(s))`,
+                  'success'
+                );
+              }
+            };
+
+            const handleRemoveManualSlot = async (id: string) => {
+              await persistManualSchedule(manualSchedule.filter((s) => s.id !== id));
+            };
+
+            const handleClearEndedSlots = async () => {
+              const nowMs = Date.now();
+              await persistManualSchedule(manualSchedule.filter((s) => getManualFeaturedSlotEndMs(s) > nowMs));
+            };
+
             return (
               <div className="space-y-5 font-khmer">
                 {/* Enterprise Header Banner */}
@@ -3822,7 +3932,9 @@ export const AdminDashboard: React.FC = () => {
                                   🌟 {rotationState.primaryFeaturedShop.restaurant.nameKh || rotationState.primaryFeaturedShop.restaurant.nameEn}
                                 </span>
                                 <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-950/80 dark:text-amber-300 text-[9px] font-bold shrink-0">
-                                  {rotationState.primaryFeaturedShop.reason === 'new_shop_boost'
+                                  {rotationState.primaryFeaturedShop.reason === 'manual_schedule'
+                                    ? isKm ? '📌 កំណត់ដោយ Admin' : '📌 Admin Scheduled'
+                                    : rotationState.primaryFeaturedShop.reason === 'new_shop_boost'
                                     ? isKm ? 'ហាងថ្មី (Top Slot)' : 'New Shop Boost'
                                     : isKm ? 'វេនបង្វិលស្វ័យប្រវត្តិ' : 'Scheduled Rotation'}
                                 </span>
@@ -3863,6 +3975,193 @@ export const AdminDashboard: React.FC = () => {
                               : isKm ? '💾 រក្សាទុកការបង្វិលហាង' : '💾 Save Rotation'}
                           </button>
                         </div>
+                      </div>
+                    </div>
+
+                    {/* MANUAL TOP LISTING SCHEDULE */}
+                    <div className="p-4 rounded-xl bg-amber-50/60 dark:bg-amber-950/10 border border-amber-300/70 dark:border-amber-800/40 space-y-3">
+                      <div>
+                        <div className="text-xs font-extrabold text-amber-950 dark:text-amber-300">
+                          {isKm ? '📌 កំណត់ហាងបង្ហាញលើគេដោយដៃ (Manual Top Listing Schedule)' : '📌 Manual Top Listing Schedule'}
+                        </div>
+                        <p className="text-[10px] text-slate-600 dark:text-stone-400 mt-0.5 leading-snug">
+                          {isKm
+                            ? 'ជ្រើសរើសហាង កាលបរិច្ឆេទចាប់ផ្តើម និងរយៈពេល។ ហាងដែលបានកំណត់នឹងបង្ហាញនៅលើគេបង្អស់តាមពេលវេលានោះ មុនការបង្វិលស្វ័យប្រវត្តិ។'
+                            : 'Pick a shop, its start date/time and duration. Scheduled shops take the very top spot during that window, ahead of automatic rotation.'}
+                        </p>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div className="space-y-1.5">
+                          <label className="text-[11px] font-bold text-slate-800 dark:text-stone-200">
+                            {isKm ? '១. ជ្រើសរើសហាង' : '1. Select Shop'}
+                          </label>
+                          <input
+                            type="text"
+                            value={manualShopQuery}
+                            onChange={(e) => setManualShopQuery(e.target.value)}
+                            placeholder={isKm ? 'ស្វែងរកឈ្មោះហាង...' : 'Search shop name...'}
+                            className="w-full px-2.5 py-1.5 rounded-xl border border-slate-300 dark:border-stone-600 bg-white dark:bg-stone-800 text-xs text-slate-900 dark:text-white"
+                          />
+                          <select
+                            value={manualShopId}
+                            onChange={(e) => setManualShopId(e.target.value)}
+                            className="w-full px-2.5 py-1.5 rounded-xl border border-slate-300 dark:border-stone-600 bg-white dark:bg-stone-800 text-xs text-slate-900 dark:text-white"
+                          >
+                            <option value="">{isKm ? '— ជ្រើសរើសហាង —' : '— Choose a shop —'}</option>
+                            {manualShopOptions.map((r) => (
+                              <option key={r.id} value={r.id}>
+                                {(isKm ? r.nameKh || r.nameEn : r.nameEn || r.nameKh)}
+                              </option>
+                            ))}
+                          </select>
+                          {manualShopOptions.length >= 60 && (
+                            <div className="text-[10px] text-slate-500">
+                              {isKm ? 'បង្ហាញ ៦០ ហាងដំបូង — សូមវាយឈ្មោះដើម្បីរកឱ្យចំ' : 'Showing first 60 — type to narrow down'}
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="text-[11px] font-bold text-slate-800 dark:text-stone-200">
+                            {isKm ? '២. កាលបរិច្ឆេទ & ម៉ោងចាប់ផ្តើម' : '2. Start Date & Time'}
+                          </label>
+                          <div className="flex items-center gap-1.5">
+                            <input
+                              type="datetime-local"
+                              value={manualStartLocal}
+                              onChange={(e) => setManualStartLocal(e.target.value)}
+                              className="flex-1 min-w-0 px-2.5 py-1.5 rounded-xl border border-slate-300 dark:border-stone-600 bg-white dark:bg-stone-800 text-xs text-slate-900 dark:text-white"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setManualStartLocal(toLocalDateTimeInput(new Date()))}
+                              className="px-2.5 py-1.5 rounded-xl bg-white dark:bg-stone-800 border border-slate-300 dark:border-stone-600 text-[11px] font-bold text-slate-700 dark:text-stone-200 hover:bg-amber-50 cursor-pointer shrink-0"
+                            >
+                              {isKm ? 'ឥឡូវនេះ' : 'Now'}
+                            </button>
+                          </div>
+
+                          <label className="text-[11px] font-bold text-slate-800 dark:text-stone-200 block pt-1">
+                            {isKm ? '៣. រយៈពេលបង្ហាញ (ថ្ងៃ)' : '3. Display Duration (Days)'}
+                          </label>
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <input
+                              type="text"
+                              inputMode="numeric"
+                              value={manualDaysInput}
+                              onChange={(e) => setManualDaysInput(e.target.value.replace(/[^0-9]/g, ''))}
+                              className="w-16 px-2 py-1.5 rounded-xl border border-slate-300 dark:border-stone-600 bg-white dark:bg-stone-800 text-center font-mono font-bold text-xs text-slate-900 dark:text-white"
+                            />
+                            {[1, 3, 7, 14, 30].map((d) => (
+                              <button
+                                key={d}
+                                type="button"
+                                onClick={() => setManualDaysInput(String(d))}
+                                className={`px-2 py-1 rounded-lg font-mono text-[11px] font-bold border cursor-pointer ${
+                                  Number(manualDaysInput) === d
+                                    ? 'bg-amber-500 text-slate-950 border-amber-500'
+                                    : 'bg-white dark:bg-stone-800 text-slate-700 dark:text-stone-300 border-slate-200 dark:border-stone-700 hover:bg-amber-50'
+                                }`}
+                              >
+                                {d}{isKm ? ' ថ្ងៃ' : 'd'}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between gap-2 flex-wrap pt-1">
+                        <span className="text-[10px] text-slate-600 dark:text-stone-400">
+                          {manualEndPreview
+                            ? isKm
+                              ? `ចាប់ពី ${fmtDateTime(manualStartMsPreview)} → បញ្ចប់ ${fmtDateTime(manualEndPreview)}`
+                              : `From ${fmtDateTime(manualStartMsPreview)} → ends ${fmtDateTime(manualEndPreview)}`
+                            : isKm ? 'សូមបញ្ចូលកាលបរិច្ឆេទ និងរយៈពេលឱ្យត្រឹមត្រូវ' : 'Enter a valid start date and duration'}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={handleAddManualSlot}
+                          disabled={isSavingManualSlot || !manualShopId}
+                          className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-slate-950 font-black text-xs shadow-2xs transition cursor-pointer"
+                        >
+                          {isSavingManualSlot
+                            ? isKm ? 'កំពុងរក្សាទុក...' : 'Saving...'
+                            : isKm ? '➕ កំណត់ពេលបង្ហាញ' : '➕ Schedule Top Listing'}
+                        </button>
+                      </div>
+
+                      {/* Scheduled list */}
+                      <div className="pt-2 border-t border-amber-200/70 dark:border-amber-800/40 space-y-1.5">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-[11px] font-bold text-slate-800 dark:text-stone-200">
+                            {isKm ? `កាលវិភាគដែលបានកំណត់ (${manualSchedule.length})` : `Scheduled Slots (${manualSchedule.length})`}
+                          </span>
+                          {manualSchedule.some((s) => getManualFeaturedSlotEndMs(s) <= Date.now()) && (
+                            <button
+                              type="button"
+                              onClick={handleClearEndedSlots}
+                              disabled={isSavingManualSlot}
+                              className="px-2 py-1 rounded-lg text-[10px] font-bold bg-white dark:bg-stone-800 border border-slate-300 dark:border-stone-600 text-slate-700 dark:text-stone-200 hover:bg-slate-50 cursor-pointer"
+                            >
+                              {isKm ? 'សម្អាតដែលផុតកំណត់' : 'Clear ended'}
+                            </button>
+                          )}
+                        </div>
+
+                        {manualSchedule.length === 0 ? (
+                          <div className="text-[11px] text-slate-500 dark:text-stone-400 p-2.5 rounded-lg bg-white/70 dark:bg-stone-800/60 border border-slate-200 dark:border-stone-700">
+                            {isKm ? 'មិនទាន់មានកាលវិភាគដោយដៃទេ — ប្រព័ន្ធប្រើការបង្វិលស្វ័យប្រវត្តិ។' : 'No manual schedule yet — automatic rotation is in effect.'}
+                          </div>
+                        ) : (
+                          manualSchedule.map((slot) => {
+                            const nowMs = Date.now();
+                            const startMs = Date.parse(slot.startAt);
+                            const endMs = getManualFeaturedSlotEndMs(slot);
+                            const status = nowMs >= endMs ? 'ended' : nowMs >= startMs ? 'active' : 'upcoming';
+                            return (
+                              <div
+                                key={slot.id}
+                                className="flex items-center justify-between gap-2 p-2.5 rounded-lg bg-white dark:bg-stone-800 border border-slate-200 dark:border-stone-700"
+                              >
+                                <div className="min-w-0">
+                                  <div className="flex items-center gap-1.5 flex-wrap">
+                                    <span className="text-xs font-extrabold text-slate-900 dark:text-white truncate">
+                                      {shopLabel(slot.restaurantId)}
+                                    </span>
+                                    <span
+                                      className={`px-1.5 py-0.5 rounded-full text-[9px] font-black ${
+                                        status === 'active'
+                                          ? 'bg-emerald-100 text-emerald-800'
+                                          : status === 'upcoming'
+                                          ? 'bg-sky-100 text-sky-800'
+                                          : 'bg-slate-200 text-slate-600'
+                                      }`}
+                                    >
+                                      {status === 'active'
+                                        ? isKm ? '● កំពុងបង្ហាញ' : '● Active'
+                                        : status === 'upcoming'
+                                        ? isKm ? '⏳ នឹងមកដល់' : '⏳ Upcoming'
+                                        : isKm ? 'ផុតកំណត់' : 'Ended'}
+                                    </span>
+                                  </div>
+                                  <div className="text-[10px] text-slate-500 dark:text-stone-400 font-mono">
+                                    {fmtDateTime(startMs)} → {fmtDateTime(endMs)} ({slot.durationDays}{isKm ? ' ថ្ងៃ' : 'd'})
+                                  </div>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveManualSlot(slot.id)}
+                                  disabled={isSavingManualSlot}
+                                  className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white dark:bg-rose-950/50 transition cursor-pointer shrink-0"
+                                  title={isKm ? 'លុបកាលវិភាគនេះ' : 'Remove this schedule'}
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            );
+                          })
+                        )}
                       </div>
                     </div>
                   </div>

@@ -11,7 +11,7 @@ import {
   DeletedUserRecord, AbaReceiptVerificationReport,
   getDynamicVipPlans, getDynamicVipBenefits, getAdditionalStoreFeeUsd,
   getUserStoreQuotaSummary, UserStoreQuotaSummary,
-  isAdminAccount, getVipFeaturedRotationConfig
+  isAdminAccount, getVipFeaturedRotationConfig, sanitizeManualFeaturedSchedule
 } from '../types';
 import {
   verifyAbaPaymentAndReceipt,
@@ -4261,6 +4261,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return { ok: false, error: err };
       }
       sanitized.vipFeaturedDurationDays = Math.round(val);
+    }
+    if (sanitized.vipFeaturedManualSchedule !== undefined) {
+      sanitized.vipFeaturedManualSchedule = sanitizeManualFeaturedSchedule(sanitized.vipFeaturedManualSchedule);
     }
 
     const nowIso = new Date().toISOString();

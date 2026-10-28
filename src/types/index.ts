@@ -1237,6 +1237,7 @@ export interface AppSettings {
   includedFreeStoresPerVip?: number; // Default: 1 store included with VIP
   vipFeaturedRotationEnabled?: boolean; // Default: true (enable VIP shop featured top rotation)
   vipFeaturedDurationDays?: number; // Default: 1 day per featured slot
+  vipFeaturedManualSchedule?: ManualFeaturedSlot[]; // Admin-scheduled Top Listing slots (shop + start date + duration)
   vipBenefitsList?: VipBenefitItem[]; // Configurable VIP benefits list
   settingsVersion?: number; // Monotonically increasing server configuration version
   settingsUpdatedAt?: string;
@@ -1613,6 +1614,46 @@ export const getUserStoreQuotaSummary = (
 export const DEFAULT_VIP_FEATURED_DURATION_DAYS = 1;
 const VIP_ROTATION_EPOCH_MS = Date.UTC(2026, 0, 1, 0, 0, 0);
 
+/**
+ * Admin-scheduled Top Listing slot: pins one specific shop to the top of the directory
+ * from `startAt` for `durationDays` days. Takes priority over automatic rotation.
+ */
+export interface ManualFeaturedSlot {
+  id: string;
+  restaurantId: string;
+  startAt: string; // ISO timestamp
+  durationDays: number; // 1..365
+  createdAt?: string;
+}
+
+export const MAX_MANUAL_FEATURED_SLOTS = 200;
+
+export const getManualFeaturedSlotEndMs = (slot: ManualFeaturedSlot): number =>
+  Date.parse(slot.startAt) + Math.max(1, Number(slot.durationDays) || 1) * 24 * 60 * 60 * 1000;
+
+/** Drop malformed slots and clamp values so corrupted settings can never break the listing. */
+export const sanitizeManualFeaturedSchedule = (raw: unknown): ManualFeaturedSlot[] => {
+  if (!Array.isArray(raw)) return [];
+  const out: ManualFeaturedSlot[] = [];
+  for (const item of raw) {
+    if (!item || typeof item !== 'object') continue;
+    const s = item as Partial<ManualFeaturedSlot>;
+    const restaurantId = typeof s.restaurantId === 'string' ? s.restaurantId.trim() : '';
+    const startMs = typeof s.startAt === 'string' ? Date.parse(s.startAt) : Number.NaN;
+    const days = Math.round(Number(s.durationDays));
+    if (!restaurantId || Number.isNaN(startMs) || !Number.isFinite(days) || days < 1) continue;
+    out.push({
+      id: typeof s.id === 'string' && s.id ? s.id : `mfs-${startMs}-${restaurantId}`,
+      restaurantId,
+      startAt: new Date(startMs).toISOString(),
+      durationDays: Math.min(365, days),
+      createdAt: typeof s.createdAt === 'string' ? s.createdAt : undefined,
+    });
+    if (out.length >= MAX_MANUAL_FEATURED_SLOTS) break;
+  }
+  return out;
+};
+
 export interface VipFeaturedRotationConfig {
   enabled: boolean;
   durationDays: number;
@@ -1703,7 +1744,7 @@ export const isRestaurantEligibleForVipRotation = (
 
 export interface VipFeaturedShopSlotInfo {
   restaurant: Restaurant;
-  reason: 'new_shop_boost' | 'rotation_slot';
+  reason: 'manual_schedule' | 'new_shop_boost' | 'rotation_slot';
   slotStartIso: string;
   slotEndIso: string;
   remainingMs: number;
@@ -1753,13 +1794,42 @@ export const getVipFeaturedRotationState = (
   const slotStartIso = new Date(slotStartMs).toISOString();
   const slotEndIso = new Date(slotEndMs).toISOString();
 
+  // 0. Admin manual schedule (highest priority, works even when automatic rotation is disabled)
+  const manualFeatured: VipFeaturedShopSlotInfo[] = [];
+  const manualSeen = new Set<string>();
+  const manualSchedule = sanitizeManualFeaturedSchedule(
+    (settings || getStoredAppSettingsFallback()).vipFeaturedManualSchedule
+  )
+    .filter((slot) => {
+      const startMs = Date.parse(slot.startAt);
+      return nowMs >= startMs && nowMs < getManualFeaturedSlotEndMs(slot);
+    })
+    .sort((a, b) => Date.parse(a.startAt) - Date.parse(b.startAt));
+  for (const slot of manualSchedule) {
+    if (manualSeen.has(slot.restaurantId)) continue;
+    const shop = list.find((r) => r && r.id === slot.restaurantId);
+    if (!shop) continue;
+    manualSeen.add(slot.restaurantId);
+    const endMs = getManualFeaturedSlotEndMs(slot);
+    const remMs = Math.max(0, endMs - nowMs);
+    manualFeatured.push({
+      restaurant: shop,
+      reason: 'manual_schedule',
+      slotStartIso: slot.startAt,
+      slotEndIso: new Date(endMs).toISOString(),
+      remainingMs: remMs,
+      remainingHours: Math.max(1, Math.ceil(remMs / (1000 * 60 * 60))),
+      queueIndex: eligibleQueue.findIndex((r) => r.id === shop.id),
+    });
+  }
+
   if (!config.enabled || eligibleQueue.length === 0) {
     return {
       config,
       eligibleQueue,
-      currentlyFeatured: [],
-      currentlyFeaturedIds: new Set<string>(),
-      primaryFeaturedShop: null,
+      currentlyFeatured: manualFeatured,
+      currentlyFeaturedIds: new Set<string>(manualFeatured.map((m) => m.restaurant.id)),
+      primaryFeaturedShop: manualFeatured[0] || null,
       nextRotatingShop: null,
       currentSlotIndex,
       slotStartIso,
@@ -1768,11 +1838,12 @@ export const getVipFeaturedRotationState = (
   }
 
   const currentlyFeatured: VipFeaturedShopSlotInfo[] = [];
-  const currentlyFeaturedIds = new Set<string>();
+  const currentlyFeaturedIds = new Set<string>(manualFeatured.map((m) => m.restaurant.id));
 
   // 1. Check for newly added approved VIP shops within their initial `durationDays` top-listing window
   for (let i = 0; i < eligibleQueue.length; i++) {
     const shop = eligibleQueue[i];
+    if (currentlyFeaturedIds.has(shop.id)) continue;
     const approvedMs = getRestaurantApprovedAtMs(shop);
     const explicitUntilMs = shop.featuredUntilAt ? Date.parse(shop.featuredUntilAt) : Number.NaN;
     // Always compute dynamic window from approvedMs + config.durationMs so Admin duration changes take effect immediately
@@ -1828,9 +1899,9 @@ export const getVipFeaturedRotationState = (
   return {
     config,
     eligibleQueue,
-    currentlyFeatured,
+    currentlyFeatured: [...manualFeatured, ...currentlyFeatured],
     currentlyFeaturedIds,
-    primaryFeaturedShop: currentlyFeatured[0] || null,
+    primaryFeaturedShop: manualFeatured[0] || currentlyFeatured[0] || null,
     nextRotatingShop,
     currentSlotIndex,
     slotStartIso,
@@ -1852,7 +1923,7 @@ export const sortRestaurantsWithVipRotation = (
     return Array.isArray(restaurants) ? [...restaurants] : [];
   }
   const rotation = getVipFeaturedRotationState(restaurants, users, settings, nowMs);
-  if (!rotation.config.enabled || rotation.currentlyFeatured.length === 0) {
+  if (rotation.currentlyFeatured.length === 0) {
     return [...restaurants];
   }
 
