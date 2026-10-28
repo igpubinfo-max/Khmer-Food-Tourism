@@ -12,7 +12,7 @@ import { getLocalizedDestination, getLocalizedFood, getLocalizedRestaurant } fro
 import { copyTextNativeOrWeb } from '../utils/androidMediaHelper';
 import {
   BookOpen, Sparkles, MapPinned, CalendarDays, Lightbulb, Heart, Star, Store, Compass, Utensils,
-  ChevronRight, Copy, Lock, CheckCircle2, Route, Navigation, Maximize2, X, PhoneCall, ShieldAlert, Clock, Tag,
+  ChevronRight, Copy, Lock, CheckCircle2, Route, Navigation, Maximize2, X, PhoneCall, ShieldAlert, Clock,
 } from 'lucide-react';
 import {
   EMERGENCY_CONTACTS, GUIDE_TIPS, MEAL_SLOTS, PHRASES, SEASONAL_ITEMS, TIP_CATEGORIES,
@@ -870,9 +870,9 @@ export const GuideView: React.FC = () => {
               title={tr(language, 'បុណ្យជាតិ & ពិធីបុណ្យផ្លូវការនៅកម្ពុជា (១៦ ពិធី)', 'Cambodian Public Holidays & Festivals (Auto-Updated Yearly)', '柬埔寨官方公共假日与传统庆典（每年自动更新）')}
               subtitle={tr(
                 language,
-                'បង្ហាញកាលបរិច្ឆេទពិតប្រាកដ ចំនួនថ្ងៃនៅសល់ រយៈពេលឈប់សម្រាក និងតម្លៃចូលរួម ($0 ឥតគិតថ្លៃ)',
-                'Live countdown in days, official holiday duration, and free public admission ($0)',
-                '显示准确日期、倒计时天数、放假时长及免费公众参与（$0）'
+                'បង្ហាញកាលបរិច្ឆេទពិតប្រាកដ ចំនួនថ្ងៃនៅសល់ និងរយៈពេលឈប់សម្រាកផ្លូវការ',
+                'Live countdown in days and official public holiday duration',
+                '显示准确日期、倒计时天数及官方放假时长'
               )}
             />
             <ol className="space-y-3">
@@ -915,15 +915,11 @@ export const GuideView: React.FC = () => {
                         📅 {pickTri(f.formattedDateRange, lang)} • <span className="font-normal text-slate-500 dark:text-slate-400">{pickTri(f.when, lang)}</span>
                       </p>
 
-                      {/* Explicit Duration & Pricing Pills to eliminate any "1 Month" confusion */}
+                      {/* Explicit Duration Pill */}
                       <div className="flex flex-wrap items-center gap-1.5 mt-2">
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-700/80 text-slate-800 dark:text-slate-200 text-[10px] font-bold border border-slate-200 dark:border-slate-600">
                           <Clock className="w-3 h-3 text-amber-600 dark:text-amber-400 shrink-0" />
                           <span>{tr(language, 'រយៈពេល៖', 'Duration:', '时长：')} {pickTri(f.durationLabel, lang)}</span>
-                        </span>
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300 text-[10px] font-bold border border-emerald-200 dark:border-emerald-800">
-                          <Tag className="w-3 h-3 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                          <span>{tr(language, 'តម្លៃ៖', 'Cost:', '费用：')} {pickTri(f.pricingLabel, lang)}</span>
                         </span>
                       </div>
 

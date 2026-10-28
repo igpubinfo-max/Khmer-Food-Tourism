@@ -28,15 +28,12 @@ export const BottomNav: React.FC = () => {
                 isGuide
                   ? isActive
                     ? 'bg-gradient-to-b from-amber-300 via-amber-400 to-yellow-500 text-slate-950 font-black scale-105 shadow-md shadow-amber-500/35 ring-2 ring-amber-400/90'
-                    : 'bg-amber-400/20 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-400/80 dark:border-amber-400/60 font-extrabold shadow-xs hover:bg-amber-400/35'
+                    : 'text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 font-bold'
                   : isActive
                   ? 'text-[#064E3B] dark:text-emerald-400 font-bold scale-105 bg-emerald-50 dark:bg-emerald-950/50'
                   : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white font-medium'
               }`}
             >
-              {isGuide && (
-                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-amber-400 border-2 border-white dark:border-slate-900 animate-pulse" />
-              )}
               <div className="relative">
                 {item.icon}
                 {isActive && (
