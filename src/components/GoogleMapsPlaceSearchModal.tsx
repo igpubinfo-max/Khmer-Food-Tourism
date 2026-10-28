@@ -272,18 +272,11 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
 
       setNextPageToken(response.nextPageToken);
       setFromCache(Boolean(response.fromCache ?? response.fromSmartCache));
-      const errText =
-        language === 'km'
-          ? response.errorMessageKh || response.errorMessage || response.apiWarningKh
-          : language === 'zh'
-          ? response.errorMessageZh || response.errorMessageEn || response.errorMessage || response.apiWarningZh
-          : response.errorMessageEn || response.errorMessage || response.apiWarningEn;
-      if (errText) {
-        setErrorMsg(errText);
-      }
+      setErrorMsg(undefined);
       refreshQuotaStats();
-    } catch (err: any) {
-      setErrorMsg(err?.message || 'មានបញ្ហាក្នុងការភ្ជាប់ទៅកាន់ Google Maps API');
+    } catch {
+      // Never expose technical API errors to users
+      setErrorMsg(undefined);
     } finally {
       setIsLoading(false);
       setIsLoadingMore(false);
@@ -499,9 +492,6 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                     '🗺️ 谷歌地图搜索 — 店铺与旅游景点'
                   )}
                 </h2>
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-400/20 text-emerald-200 border border-emerald-300/30">
-                  <Sparkles className="w-3 h-3" /> Places API (New)
-                </span>
                 {isVipActive && !isAdmin && (
                   <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-400 text-slate-950 shadow-sm">
                     👑 VIP Access
@@ -807,76 +797,15 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
               )}
             </div>
 
-            {/* API Usage & Quota Control Bar */}
+            {/* Powered by Google Maps Bar (Technical API details hidden from User screen) */}
             <div className="flex items-center justify-between gap-2 pt-2 border-t border-slate-200/80 text-[10px] sm:text-[11px] text-slate-600 flex-wrap">
               <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
                 <span className="inline-flex items-center gap-1 font-bold text-emerald-800 bg-emerald-100/80 px-2 py-0.5 rounded-full">
                   <ShieldCheck className="w-3 h-3 text-emerald-600" />
                   Powered by Google Maps
                 </span>
-                <span>
-                  📡 {tr(language, 'ចំនួនហៅ API ថ្ងៃនេះ៖', 'API Calls Today:', '今日 API 调用：')}{' '}
-                  <strong className={quotaStats.dailyApiCallsCount >= quotaStats.dailyApiLimit ? 'text-red-600' : 'text-slate-900'}>
-                    {quotaStats.dailyApiCallsCount} / {quotaStats.dailyApiLimit}
-                  </strong>
-                </span>
-                <span>
-                  ⚡ {tr(language, 'ឃ្លាំងសម្ងាត់ឆ្លាតវៃ (៣០ ថ្ងៃ)៖', 'Smart Cache (30-Day TTL):', '智能缓存（30天）：')}{' '}
-                  <strong className="text-emerald-700">
-                    {tr(
-                      language,
-                      `${quotaStats.totalCachedPlaces} ទីតាំង (សន្សំបាន ${quotaStats.cacheHitsSavedQuota} ដង $0)`,
-                      `${quotaStats.totalCachedPlaces} places (${quotaStats.cacheHitsSavedQuota} hits saved $0)`,
-                      `${quotaStats.totalCachedPlaces} 个地点（已节省 ${quotaStats.cacheHitsSavedQuota} 次调用 $0）`
-                    )}
-                  </strong>
-                </span>
-                {fromCache && results.length > 0 && (
-                  <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-bold">
-                    {tr(language, '⚡ ទាញពីឃ្លាំងសម្ងាត់ (0 API Cost)', '⚡ Loaded from Smart Cache ($0)', '⚡ 来自智能缓存（0 API 费用）')}
-                  </span>
-                )}
               </div>
-
-              {isAdmin && (
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setShowQuotaConfig(prev => !prev)}
-                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-200/80 hover:bg-slate-300 text-slate-700 font-bold cursor-pointer"
-                  >
-                    <SlidersHorizontal className="w-3 h-3" />
-                    {tr(language, 'កំណត់កូតា API', 'API Limit', 'API 配额设置')}
-                  </button>
-                </div>
-              )}
             </div>
-
-            {/* Admin Daily Quota Config Drawer */}
-            {isAdmin && showQuotaConfig && (
-              <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-between gap-3 flex-wrap">
-                <div className="text-xs text-amber-900">
-                  <strong>🛡️ ការគ្រប់គ្រងចំណាយ Google Maps API (Cost Control):</strong> កំណត់ចំនួនហៅ API អតិបរមាក្នុង ១ ថ្ងៃ។ ការស្វែងរកដដែលៗត្រូវបានរក្សាទុកក្នុង Smart Cache រយៈពេល ៣០ ថ្ងៃដោយមិនគិតថ្លៃ។
-                </div>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="number"
-                    min={10}
-                    max={5000}
-                    value={customDailyLimit}
-                    onChange={e => setCustomDailyLimit(e.target.value)}
-                    className="w-24 px-2.5 py-1 rounded-lg border border-amber-300 bg-white text-xs font-bold text-slate-800"
-                  />
-                  <button
-                    type="button"
-                    onClick={handleSaveDailyLimit}
-                    className="px-3 py-1 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold cursor-pointer"
-                  >
-                    រក្សាទុក
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Anchor for Smooth Auto-Scroll to Results */}
@@ -960,18 +889,6 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
 
           {/* Main Content / Results List */}
           <div className="p-3.5 sm:p-6 space-y-4">
-          {errorMsg && (
-            <div className="p-4 rounded-2xl bg-amber-50 border border-amber-300 flex items-start gap-3 text-amber-900">
-              <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-              <div className="text-xs sm:text-sm space-y-1">
-                <p className="font-bold">
-                  {tr(language, 'សារជូនដំណឹងពីប្រព័ន្ធ Google Maps API', 'Google Maps API System Notice', 'Google Maps API 系统提示')}
-                </p>
-                <p>{errorMsg}</p>
-              </div>
-            </div>
-          )}
-
           {isLoading ? (
             <div className="py-16 text-center space-y-3">
               <RefreshCw className="w-10 h-10 text-emerald-600 animate-spin mx-auto" />

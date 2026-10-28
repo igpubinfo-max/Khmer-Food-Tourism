@@ -212,11 +212,7 @@ export const HomeView: React.FC = () => {
       if (!cancelled) {
         setHomeSmartCachePlaces(res.results);
         setHomeCacheSourceLabel(
-          res.fromSmartCache
-            ? tr(language, 'Smart Cache ($0 កូតា Google)', 'Smart Cache ($0 Google Quota)', '智能缓存（$0 谷歌配额）')
-            : res.providerUsed === 'google_maps_api'
-            ? tr(language, 'Google Maps API + Smart Cache', 'Google Maps API + Smart Cache', '谷歌地图 API + 智能缓存')
-            : tr(language, 'ផែនទីអនឡាញកម្ពុជា + Smart Cache', 'Cambodia Online Map + Smart Cache', '柬埔寨在线地图 + 智能缓存')
+          tr(language, 'ផែនទី Google Maps កម្ពុជា', 'Google Maps Cambodia', '柬埔寨 Google 地图')
         );
         setIsHomeSearchingOnline(false);
       }

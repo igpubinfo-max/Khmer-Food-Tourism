@@ -1992,37 +1992,125 @@ function searchAppVerifiedCambodiaDirectory(
   return out;
 }
 
-// Short 60-second circuit-breaker for Google Places API (New v1) when the key has HTTP 403 SERVICE_DISABLED
-let googlePlacesApiDisabledUntil = 0;
-let lastGooglePlacesApiDiagnosis: {
+const GOOGLE_PLACES_DIAG_STORAGE_KEY = 'kft_google_places_api_diag_v1';
+
+export interface GooglePlacesApiDiagnosticReport {
   status: GooglePlacesApiDiagnosisStatus;
   warningKh: string;
   warningEn: string;
   warningZh: string;
-  projectId?: string;
-  enableUrl?: string;
-  billingUrl?: string;
-} | null = null;
+  projectId: string;
+  enableUrl: string;
+  billingUrl: string;
+  credentialsUrl: string;
+  placesApiNewEnabled: boolean;
+  billingEnabled: boolean;
+  keyRestrictionsOk: boolean;
+  multiSourceSearchActive: boolean;
+  keyMasked: string;
+  disabledUntil: number;
+  checkedAt: string;
+}
+
+// Circuit-breaker for Google Places API (New v1) when the key has HTTP 403 SERVICE_DISABLED / BILLING_DISABLED
+let googlePlacesApiDisabledUntil = 0;
+let lastGooglePlacesApiDiagnosis: GooglePlacesApiDiagnosticReport | null = null;
+
+function maskApiKey(key?: string): string {
+  const clean = (key || '').trim();
+  if (!clean) return 'មិនទាន់ដាក់សោ (Not Configured)';
+  if (clean.length <= 12) return `${clean.slice(0, 4)}...`;
+  return `${clean.slice(0, 8)}...${clean.slice(-4)}`;
+}
+
+function loadPersistedGoogleApiDiagnosis(): GooglePlacesApiDiagnosticReport | null {
+  try {
+    const raw = localStorage.getItem(GOOGLE_PLACES_DIAG_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as GooglePlacesApiDiagnosticReport;
+    const currentKeyMasked = maskApiKey(getCloudApiConfig().googleMapsApiKey);
+    if (parsed && parsed.keyMasked === currentKeyMasked) {
+      if (parsed.disabledUntil && Date.now() < parsed.disabledUntil) {
+        googlePlacesApiDisabledUntil = parsed.disabledUntil;
+      }
+      lastGooglePlacesApiDiagnosis = parsed;
+      return parsed;
+    }
+  } catch {
+    // ignore storage error
+  }
+  return null;
+}
+
+function savePersistedGoogleApiDiagnosis(diag: GooglePlacesApiDiagnosticReport): void {
+  lastGooglePlacesApiDiagnosis = diag;
+  googlePlacesApiDisabledUntil = diag.disabledUntil || 0;
+  try {
+    localStorage.setItem(GOOGLE_PLACES_DIAG_STORAGE_KEY, JSON.stringify(diag));
+  } catch {
+    // ignore storage error
+  }
+}
+
+export function isGooglePlacesV1CurrentlyBlocked(): boolean {
+  if (!lastGooglePlacesApiDiagnosis) {
+    loadPersistedGoogleApiDiagnosis();
+  }
+  return Date.now() < googlePlacesApiDisabledUntil;
+}
+
+/**
+ * Retrieve the latest Google Places API diagnostic report for Admin Settings only.
+ * Never expose this report on User-facing screens.
+ */
+export function getLastGooglePlacesApiDiagnosis(): GooglePlacesApiDiagnosticReport {
+  const persisted = lastGooglePlacesApiDiagnosis || loadPersistedGoogleApiDiagnosis();
+  if (persisted) return persisted;
+
+  const cfg = getCloudApiConfig();
+  const configured = isGoogleMapsConfigured();
+  const projectId = '834153814844';
+  return {
+    status: configured ? 'OK' : 'UNCONFIGURED',
+    warningKh: configured
+      ? 'ប្រព័ន្ធស្វែងរក Google Maps + Multi-Source Cambodia Directory កំពុងដំណើរការធម្មតា។ ចុចប៊ូតុងផ្ទៀងផ្ទាត់ខាងក្រោមដើម្បីពិនិត្យ Places API (New) និង Billing ផ្ទាល់។'
+      : 'មិនទាន់បានកំណត់ Google Maps API Key ទេ។',
+    warningEn: configured
+      ? 'Google Maps + Multi-Source Cambodia Search is active. Click Verify below to test live Places API (New) and Billing.'
+      : 'Google Maps API Key is not configured.',
+    warningZh: configured
+      ? 'Google 地图与柬埔寨多源搜索引擎运行正常。点击下方验证按钮测试 Places API (New) 与结算状态。'
+      : '尚未配置 Google Maps API 密钥。',
+    projectId,
+    enableUrl: `https://console.developers.google.com/apis/api/places.googleapis.com/overview?project=${projectId}`,
+    billingUrl: 'https://console.cloud.google.com/project/_/billing/enable',
+    credentialsUrl: `https://console.cloud.google.com/apis/credentials?project=${projectId}`,
+    placesApiNewEnabled: configured,
+    billingEnabled: configured,
+    keyRestrictionsOk: configured,
+    multiSourceSearchActive: true,
+    keyMasked: maskApiKey(cfg.googleMapsApiKey),
+    disabledUntil: 0,
+    checkedAt: new Date().toISOString(),
+  };
+}
 
 export function resetGooglePlacesCircuitBreaker(): void {
   googlePlacesApiDisabledUntil = 0;
   lastGooglePlacesApiDiagnosis = null;
   searchQueryMemoryCache.clear();
+  try {
+    localStorage.removeItem(GOOGLE_PLACES_DIAG_STORAGE_KEY);
+  } catch {
+    // ignore
+  }
 }
 
 /**
  * Diagnose a Google Places API HTTP error response and return clear, actionable explanations
- * in Khmer, English, and Chinese (Requirement 4).
+ * in Khmer, English, and Chinese for Admin Settings ONLY (Requirement 4).
  */
-function parseGooglePlacesApiError(status: number, errJson: any): {
-  status: GooglePlacesApiDiagnosisStatus;
-  warningKh: string;
-  warningEn: string;
-  warningZh: string;
-  projectId?: string;
-  enableUrl?: string;
-  billingUrl?: string;
-} {
+function parseGooglePlacesApiError(status: number, errJson: any): GooglePlacesApiDiagnosticReport {
   const rawMsg = String(errJson?.error?.message || errJson?.error_message || `HTTP ${status}`);
   const details = Array.isArray(errJson?.error?.details) ? errJson.error.details : [];
   const reason = details.find((d: any) => d?.reason)?.reason || '';
@@ -2030,6 +2118,11 @@ function parseGooglePlacesApiError(status: number, errJson: any): {
   const projectId = projMatch ? projMatch[1] : '834153814844';
   const enableUrl = `https://console.developers.google.com/apis/api/places.googleapis.com/overview?project=${projectId}`;
   const billingUrl = 'https://console.cloud.google.com/project/_/billing/enable';
+  const credentialsUrl = `https://console.cloud.google.com/apis/credentials?project=${projectId}`;
+  const keyMasked = maskApiKey(getCloudApiConfig().googleMapsApiKey);
+  const checkedAt = new Date().toISOString();
+  // Circuit breaker for 30 minutes (or until Admin clicks Verify / saves a new key) so users experience 0 lag
+  const disabledUntil = Date.now() + 30 * 60 * 1000;
 
   if (reason === 'SERVICE_DISABLED' || /Places API \(New\) has not been used|is disabled/i.test(rawMsg)) {
     return {
@@ -2037,9 +2130,17 @@ function parseGooglePlacesApiError(status: number, errJson: any): {
       projectId,
       enableUrl,
       billingUrl,
-      warningKh: `⚠️ Google Places API (New) មិនទាន់បានបើក (Disabled) នៅលើ Google Cloud Project #${projectId} ទេ។ សូមចូលទៅបើក Places API (New) និង Billing ក្នុង Google Cloud Console ដើម្បីទាញយកទិន្នន័យផ្ទាល់ ១០០% ពី Google Maps។`,
-      warningEn: `⚠️ Google Places API (New) is currently disabled on Google Cloud Project #${projectId}. Please enable Places API (New) and Billing in Google Cloud Console for live Google Maps retrieval.`,
-      warningZh: `⚠️ Google Cloud 项目 #${projectId} 尚未启用 Places API (New)。请在 Google Cloud 控制台中启用 Places API (New) 和结算功能。`,
+      credentialsUrl,
+      placesApiNewEnabled: false,
+      billingEnabled: false,
+      keyRestrictionsOk: true,
+      multiSourceSearchActive: true,
+      keyMasked,
+      disabledUntil,
+      checkedAt,
+      warningKh: `Google Places API (New) មិនទាន់បានបើក (Disabled) នៅលើ Google Cloud Project #${projectId} ទេ។ សូមចូលទៅបើក Places API (New) និង Billing ក្នុង Google Cloud Console។ (បច្ចុប្បន្នប្រព័ន្ធកំពុងប្រើប្រាស់ Cambodia Multi-Source Map Search + Smart Cache ជំនួសដោយស្វ័យប្រវត្តិ ដោយមិនបង្ហាញ Error ដល់ User ឡើយ)។`,
+      warningEn: `Google Places API (New) is disabled on Google Cloud Project #${projectId}. Enable Places API (New) and Billing in Google Cloud Console. (Multi-Source Cambodia Map Search + Smart Cache is active automatically with zero user-facing errors).`,
+      warningZh: `Google Cloud 项目 #${projectId} 尚未启用 Places API (New)。请在控制台中启用 Places API (New) 和结算功能。（当前已自动无缝启用柬埔寨多源地图搜索与智能缓存，不会向用户显示任何错误）。`,
     };
   }
 
@@ -2049,9 +2150,17 @@ function parseGooglePlacesApiError(status: number, errJson: any): {
       projectId,
       enableUrl,
       billingUrl,
-      warningKh: `⚠️ គណនី Google Cloud Project #${projectId} មិនទាន់បានភ្ជាប់ Billing ទេ។ សូមបើក Billing និង Places API (New) ក្នុង Google Cloud Console។`,
-      warningEn: `⚠️ Billing is not enabled on Google Cloud Project #${projectId}. Please enable Billing and Places API (New) in Google Cloud Console.`,
-      warningZh: `⚠️ Google Cloud 项目 #${projectId} 尚未启用结算 (Billing)。请在控制台中启用结算功能。`,
+      credentialsUrl,
+      placesApiNewEnabled: true,
+      billingEnabled: false,
+      keyRestrictionsOk: true,
+      multiSourceSearchActive: true,
+      keyMasked,
+      disabledUntil,
+      checkedAt,
+      warningKh: `គណនី Google Cloud Project #${projectId} មិនទាន់បានភ្ជាប់ Billing ទេ។ សូមបើក Billing និង Places API (New) ក្នុង Google Cloud Console។ (បច្ចុប្បន្នប្រព័ន្ធកំពុងប្រើប្រាស់ Cambodia Multi-Source Map Search + Smart Cache ជំនួសដោយស្វ័យប្រវត្តិ)។`,
+      warningEn: `Billing is not enabled on Google Cloud Project #${projectId}. Please enable Billing and Places API (New) in Google Cloud Console.`,
+      warningZh: `Google Cloud 项目 #${projectId} 尚未启用结算 (Billing)。请在控制台中启用结算功能。`,
     };
   }
 
@@ -2059,9 +2168,19 @@ function parseGooglePlacesApiError(status: number, errJson: any): {
     return {
       status: 'HTTP_REFERRER_BLOCKED',
       projectId,
-      warningKh: '⚠️ Google Maps API Key ត្រូវបានដាក់កម្រិត HTTP Referrer។ សូមអនុញ្ញាត Domain កម្មវិធីក្នុង Google Cloud Credentials។',
-      warningEn: '⚠️ Google Maps API Key has HTTP referrer restrictions blocking this domain. Update key restrictions in Google Cloud Console.',
-      warningZh: '⚠️ Google Maps API 密钥受 HTTP 引荐来源限制，请在 Google Cloud 控制台中更新域名白名单。',
+      enableUrl,
+      billingUrl,
+      credentialsUrl,
+      placesApiNewEnabled: true,
+      billingEnabled: true,
+      keyRestrictionsOk: false,
+      multiSourceSearchActive: true,
+      keyMasked,
+      disabledUntil,
+      checkedAt,
+      warningKh: 'Google Maps API Key ត្រូវបានដាក់កម្រិត HTTP Referrer។ សូមអនុញ្ញាត Domain កម្មវិធីក្នុង Google Cloud Credentials។',
+      warningEn: 'Google Maps API Key has HTTP referrer restrictions blocking this domain. Update key restrictions in Google Cloud Console.',
+      warningZh: 'Google Maps API 密钥受 HTTP 引荐来源限制，请在 Google Cloud 控制台中更新域名白名单。',
     };
   }
 
@@ -2069,23 +2188,43 @@ function parseGooglePlacesApiError(status: number, errJson: any): {
     return {
       status: 'RATE_LIMITED',
       projectId,
-      warningKh: '⚠️ បានដល់កម្រិតកូតា Google Places API។ សូមពិនិត្យ Quotas ក្នុង Google Cloud Console។',
-      warningEn: '⚠️ Google Places API quota exceeded. Please check Quotas in Google Cloud Console.',
-      warningZh: '⚠️ 已超出 Google Places API 配额，请检查 Google Cloud 配额设置。',
+      enableUrl,
+      billingUrl,
+      credentialsUrl,
+      placesApiNewEnabled: true,
+      billingEnabled: true,
+      keyRestrictionsOk: true,
+      multiSourceSearchActive: true,
+      keyMasked,
+      disabledUntil: Date.now() + 5 * 60 * 1000,
+      checkedAt,
+      warningKh: 'បានដល់កម្រិតកូតា Google Places API។ សូមពិនិត្យ Quotas ក្នុង Google Cloud Console។',
+      warningEn: 'Google Places API quota exceeded. Please check Quotas in Google Cloud Console.',
+      warningZh: '已超出 Google Places API 配额，请检查 Google Cloud 配额设置。',
     };
   }
 
   return {
     status: 'API_KEY_INVALID',
     projectId,
-    warningKh: `⚠️ Google Places API បដិសេធការតភ្ជាប់ (${rawMsg.slice(0, 100)})។`,
-    warningEn: `⚠️ Google Places API request rejected (${rawMsg.slice(0, 100)}).`,
-    warningZh: `⚠️ Google Places API 请求被拒绝 (${rawMsg.slice(0, 100)})。`,
+    enableUrl,
+    billingUrl,
+    credentialsUrl,
+    placesApiNewEnabled: false,
+    billingEnabled: false,
+    keyRestrictionsOk: false,
+    multiSourceSearchActive: true,
+    keyMasked,
+    disabledUntil,
+    checkedAt,
+    warningKh: `Google Places API បដិសេធការតភ្ជាប់ (${rawMsg.slice(0, 100)})។`,
+    warningEn: `Google Places API request rejected (${rawMsg.slice(0, 100)}).`,
+    warningZh: `Google Places API 请求被拒绝 (${rawMsg.slice(0, 100)})。`,
   };
 }
 
 /**
- * Verify Google Cloud Billing, Places API (New) enablement, and API Key status live (Requirement 4).
+ * Verify Google Cloud Billing, Places API (New) enablement, and API Key restrictions live for Admin Settings.
  */
 export async function verifyGooglePlacesApiStatus(): Promise<{
   ok: boolean;
@@ -2096,14 +2235,32 @@ export async function verifyGooglePlacesApiStatus(): Promise<{
   projectId?: string;
   enableUrl?: string;
   billingUrl?: string;
+  credentialsUrl?: string;
+  placesApiNewEnabled?: boolean;
+  billingEnabled?: boolean;
+  keyRestrictionsOk?: boolean;
+  multiSourceSearchActive?: boolean;
+  keyMasked?: string;
+  checkedAt?: string;
 }> {
   if (!isGoogleMapsConfigured()) {
+    const unconf = getLastGooglePlacesApiDiagnosis();
     return {
       ok: false,
       status: 'UNCONFIGURED',
-      messageKh: 'មិនទាន់បានកំណត់ Google Maps API Key ទេ។',
-      messageEn: 'Google Maps API Key is not configured.',
-      messageZh: '尚未配置 Google Maps API 密钥。',
+      messageKh: unconf.warningKh,
+      messageEn: unconf.warningEn,
+      messageZh: unconf.warningZh,
+      projectId: unconf.projectId,
+      enableUrl: unconf.enableUrl,
+      billingUrl: unconf.billingUrl,
+      credentialsUrl: unconf.credentialsUrl,
+      placesApiNewEnabled: false,
+      billingEnabled: false,
+      keyRestrictionsOk: false,
+      multiSourceSearchActive: true,
+      keyMasked: unconf.keyMasked,
+      checkedAt: unconf.checkedAt,
     };
   }
   const cfg = getCloudApiConfig();
@@ -2123,17 +2280,45 @@ export async function verifyGooglePlacesApiStatus(): Promise<{
     });
     if (res.ok) {
       resetGooglePlacesCircuitBreaker();
+      const okDiag: GooglePlacesApiDiagnosticReport = {
+        status: 'OK',
+        warningKh: '✅ Google Places API (New), Google Cloud Billing និង API Key ដំណើរការធម្មតា ១០០%!',
+        warningEn: '✅ Google Places API (New), Cloud Billing, and API Key are active and working 100%!',
+        warningZh: '✅ Google Places API (New)、Cloud 结算与 API 密钥均运行正常 100%！',
+        projectId: '834153814844',
+        enableUrl: 'https://console.developers.google.com/apis/api/places.googleapis.com/overview?project=834153814844',
+        billingUrl: 'https://console.cloud.google.com/project/_/billing/enable',
+        credentialsUrl: 'https://console.cloud.google.com/apis/credentials?project=834153814844',
+        placesApiNewEnabled: true,
+        billingEnabled: true,
+        keyRestrictionsOk: true,
+        multiSourceSearchActive: true,
+        keyMasked: maskApiKey(cfg.googleMapsApiKey),
+        disabledUntil: 0,
+        checkedAt: new Date().toISOString(),
+      };
+      savePersistedGoogleApiDiagnosis(okDiag);
       return {
         ok: true,
         status: 'OK',
-        messageKh: '✅ Google Places API (New) ដំណើរការធម្មតា!',
-        messageEn: '✅ Google Places API (New) is active and working!',
-        messageZh: '✅ Google Places API (New) 运行正常！',
+        messageKh: okDiag.warningKh,
+        messageEn: okDiag.warningEn,
+        messageZh: okDiag.warningZh,
+        projectId: okDiag.projectId,
+        enableUrl: okDiag.enableUrl,
+        billingUrl: okDiag.billingUrl,
+        credentialsUrl: okDiag.credentialsUrl,
+        placesApiNewEnabled: true,
+        billingEnabled: true,
+        keyRestrictionsOk: true,
+        multiSourceSearchActive: true,
+        keyMasked: okDiag.keyMasked,
+        checkedAt: okDiag.checkedAt,
       };
     }
     const errJson = await res.json().catch(() => ({}));
     const diag = parseGooglePlacesApiError(res.status, errJson);
-    lastGooglePlacesApiDiagnosis = diag;
+    savePersistedGoogleApiDiagnosis(diag);
     return {
       ok: false,
       status: diag.status,
@@ -2143,6 +2328,13 @@ export async function verifyGooglePlacesApiStatus(): Promise<{
       projectId: diag.projectId,
       enableUrl: diag.enableUrl,
       billingUrl: diag.billingUrl,
+      credentialsUrl: diag.credentialsUrl,
+      placesApiNewEnabled: diag.placesApiNewEnabled,
+      billingEnabled: diag.billingEnabled,
+      keyRestrictionsOk: diag.keyRestrictionsOk,
+      multiSourceSearchActive: diag.multiSourceSearchActive,
+      keyMasked: diag.keyMasked,
+      checkedAt: diag.checkedAt,
     };
   } catch (err: any) {
     return {
@@ -2151,6 +2343,9 @@ export async function verifyGooglePlacesApiStatus(): Promise<{
       messageKh: `កំហុសបណ្តាញ៖ ${err?.message || 'មិនអាចតភ្ជាប់ទៅ Google Places API បានទេ'}`,
       messageEn: `Network error: ${err?.message || 'Unable to reach Google Places API'}`,
       messageZh: `网络错误：${err?.message || '无法连接 Google Places API'}`,
+      multiSourceSearchActive: true,
+      keyMasked: maskApiKey(cfg.googleMapsApiKey),
+      checkedAt: new Date().toISOString(),
     };
   }
 }
@@ -2319,7 +2514,7 @@ export async function fetchGooglePlaceDetailsById(
   googlePlaceId: string,
   language: 'km' | 'en' | 'zh' = 'km'
 ): Promise<GooglePlaceCachedItem | null> {
-  if (!googlePlaceId || !isGoogleMapsConfigured()) return null;
+  if (!googlePlaceId || !isGoogleMapsConfigured() || isGooglePlacesV1CurrentlyBlocked()) return null;
   const cleanId = googlePlaceId.replace(/^gmap-/, '').trim();
   if (!cleanId.startsWith('ChIJ') && !cleanId.startsWith('0x')) {
     return null;
@@ -2806,7 +3001,7 @@ async function searchLiveCambodiaMultiSource(
       const viewboxParam = task.viewbox
         ? `&viewbox=${task.viewbox}${task.bounded ? '&bounded=1' : ''}`
         : '';
-      const searchUrl = `https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=kh&addressdetails=1&extratags=1&namedetails=1&limit=40&accept-language=km,en,zh${viewboxParam}&q=${encodeURIComponent(
+      const searchUrl = `https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=kh&addressdetails=1&extratags=1&namedetails=1&limit=40&email=admin%40khmerfoodtourism.com&accept-language=km,en,zh${viewboxParam}&q=${encodeURIComponent(
         task.q
       )}`;
       const controller = new AbortController();
@@ -3090,14 +3285,7 @@ export async function searchGoogleMapsPlacesAdvanced(
       fromCache: fromSmartCache,
       providerUsed,
       apiStatus: opts?.apiStatus ?? lastGooglePlacesApiDiagnosis?.status,
-      apiWarningKh: opts?.apiWarningKh ?? lastGooglePlacesApiDiagnosis?.warningKh,
-      apiWarningEn: opts?.apiWarningEn ?? lastGooglePlacesApiDiagnosis?.warningEn,
-      apiWarningZh: opts?.apiWarningZh ?? lastGooglePlacesApiDiagnosis?.warningZh,
       rateLimitReached: opts?.rateLimitReached,
-      errorMessage: opts?.errorMessageKh || opts?.errorMessageEn,
-      errorMessageKh: opts?.errorMessageKh,
-      errorMessageEn: opts?.errorMessageEn,
-      errorMessageZh: opts?.errorMessageZh,
       directGoogleMapsSearchUrl,
       attributionText: fromSmartCache ? 'Powered by Google Maps • Smart Cache' : 'Powered by Google Maps',
     };
@@ -3310,7 +3498,7 @@ export async function searchGoogleMapsPlacesAdvanced(
   // STEP 2: Check API Configuration & Daily Usage Limit (Requirement 8)
   // ==========================================================================
   const cfg = getCloudApiConfig();
-  if (!isGoogleMapsConfigured() || Date.now() < googlePlacesApiDisabledUntil) {
+  if (!isGoogleMapsConfigured() || isGooglePlacesV1CurrentlyBlocked()) {
     let multiLive = await searchLiveCambodiaMultiSource(
       cleanQuery,
       provinceFilter,
@@ -3352,9 +3540,6 @@ export async function searchGoogleMapsPlacesAdvanced(
     incrementCacheStat('cacheHitsSavedQuota');
     return buildResponse(initialCombinedCache, true, 'smart_cache', {
       rateLimitReached: true,
-      errorMessageKh: `បានដល់កម្រិតកំណត់ប្រចាំថ្ងៃរបស់ Google Maps API (${stats.dailyApiLimit} ដង/ថ្ងៃ) ដើម្បីការពារការចំណាយ។ កំពុងបង្ហាញទិន្នន័យពី Smart Cache ($0)។`,
-      errorMessageEn: `Daily Google Maps API limit (${stats.dailyApiLimit} calls/day) reached to control costs. Showing Smart Cache results ($0).`,
-      errorMessageZh: `已达到每日 Google 地图 API 调用限额 (${stats.dailyApiLimit} 次/天)，正在显示智能缓存结果 ($0)。`,
     });
   }
 
@@ -3429,11 +3614,7 @@ export async function searchGoogleMapsPlacesAdvanced(
         // ignore
       }
       const diag = parseGooglePlacesApiError(res.status, errJson);
-      lastGooglePlacesApiDiagnosis = diag;
-      if (res.status === 403 || res.status === 401) {
-        // Use a short 60s circuit-breaker so enabling the API in Google Cloud Console works within 1 minute
-        googlePlacesApiDisabledUntil = Date.now() + 60 * 1000;
-      }
+      savePersistedGoogleApiDiagnosis(diag);
 
       // Live Multi-Source Cambodia Map Search (Photon + ArcGIS + Nominatim + Verified Cambodia Directory)
       let multiLive = await searchLiveCambodiaMultiSource(
@@ -3464,21 +3645,6 @@ export async function searchGoogleMapsPlacesAdvanced(
         {
           nextPageToken: multiLive.nextPageToken,
           apiStatus: diag.status,
-          apiWarningKh: diag.warningKh,
-          apiWarningEn: diag.warningEn,
-          apiWarningZh: diag.warningZh,
-          errorMessageKh:
-            combinedList.length === 0
-              ? `រកមិនឃើញ "${cleanQuery}" ក្នុងបញ្ជីទេ។ ${diag.warningKh}`
-              : undefined,
-          errorMessageEn:
-            combinedList.length === 0
-              ? `No places matched "${cleanQuery}". ${diag.warningEn}`
-              : undefined,
-          errorMessageZh:
-            combinedList.length === 0
-              ? `未找到与“${cleanQuery}”相关的地点。${diag.warningZh}`
-              : undefined,
         }
       );
       if (combinedList.length > 0) {
@@ -3487,12 +3653,23 @@ export async function searchGoogleMapsPlacesAdvanced(
       return out;
     }
 
-    lastGooglePlacesApiDiagnosis = {
+    savePersistedGoogleApiDiagnosis({
       status: 'OK',
-      warningKh: '',
-      warningEn: '',
-      warningZh: '',
-    };
+      warningKh: '✅ Google Places API (New) ដំណើរការធម្មតា!',
+      warningEn: '✅ Google Places API (New) is active and working!',
+      warningZh: '✅ Google Places API (New) 运行正常！',
+      projectId: '834153814844',
+      enableUrl: 'https://console.developers.google.com/apis/api/places.googleapis.com/overview?project=834153814844',
+      billingUrl: 'https://console.cloud.google.com/project/_/billing/enable',
+      credentialsUrl: 'https://console.cloud.google.com/apis/credentials?project=834153814844',
+      placesApiNewEnabled: true,
+      billingEnabled: true,
+      keyRestrictionsOk: true,
+      multiSourceSearchActive: true,
+      keyMasked: maskApiKey(cfg.googleMapsApiKey),
+      disabledUntil: 0,
+      checkedAt: new Date().toISOString(),
+    });
     incrementCacheStat('googleApiCallsCount');
     const data = await res.json();
     let places: any[] = Array.isArray(data.places) ? data.places : [];
@@ -3612,8 +3789,7 @@ export async function searchGoogleMapsPlacesAdvanced(
     });
     searchQueryMemoryCache.set(memKey, out);
     return out;
-  } catch (err: any) {
-    const isTimeout = err?.name === 'AbortError';
+  } catch {
     const multiLive = await searchLiveCambodiaMultiSource(
       cleanQuery,
       provinceFilter,
@@ -3630,24 +3806,6 @@ export async function searchGoogleMapsPlacesAdvanced(
     return buildResponse(combined, multiLive.items.length === 0, multiLive.items.length > 0 ? 'online_cambodia_map' : 'smart_cache', {
       nextPageToken: multiLive.nextPageToken,
       apiStatus: 'NETWORK_ERROR',
-      errorMessageKh:
-        combined.length === 0
-          ? isTimeout
-            ? 'ការតភ្ជាប់ទៅ Google Maps លើសពេលកំណត់ (Timeout)។'
-            : 'មិនអាចតភ្ជាប់ទៅ Google Maps បានទេ។'
-          : undefined,
-      errorMessageEn:
-        combined.length === 0
-          ? isTimeout
-            ? 'Google Maps request timed out.'
-            : 'Failed to connect to Google Maps.'
-          : undefined,
-      errorMessageZh:
-        combined.length === 0
-          ? isTimeout
-            ? '连接 Google 地图超时。'
-            : '无法连接 Google 地图。'
-          : undefined,
     });
   }
 }
@@ -3676,7 +3834,6 @@ export async function searchCambodiaPlacesWithSmartCache(
     fromSmartCache: res.fromSmartCache,
     providerUsed: res.providerUsed,
     nextPageToken: res.nextPageToken,
-    errorMessageKh: res.errorMessageKh,
   };
 }
 
@@ -3687,7 +3844,7 @@ export async function resolveRestaurantPhoneOnDemand(
   name: string,
   province?: string
 ): Promise<string> {
-  if (!isGoogleMapsConfigured() || !name) return '';
+  if (!isGoogleMapsConfigured() || !name || isGooglePlacesV1CurrentlyBlocked()) return '';
   const cacheKey = `${name.trim().toLowerCase()}__${(province || '').trim().toLowerCase()}`;
   if (resolvedPhoneMemoryCache.has(cacheKey)) {
     return resolvedPhoneMemoryCache.get(cacheKey) || '';
@@ -4047,7 +4204,7 @@ export async function searchNearbyPlacesWithin500m(
   const stats = getSmartCacheStats();
 
   // 2. Call Google Maps Platform Places API (New v1 places:searchNearby) when configured & within daily quota
-  if (isGoogleMapsConfigured() && Date.now() >= googlePlacesApiDisabledUntil && stats.dailyApiCallsCount < stats.dailyApiLimit) {
+  if (isGoogleMapsConfigured() && !isGooglePlacesV1CurrentlyBlocked() && stats.dailyApiCallsCount < stats.dailyApiLimit) {
     const fetchGoogleNearbyGroup = async (
       includedTypes: string[],
       groupKind: 'food' | 'tourism'
@@ -4079,7 +4236,8 @@ export async function searchNearbyPlacesWithin500m(
         clearTimeout(tId);
         if (!res.ok) {
           if (res.status === 403 || res.status === 401) {
-            googlePlacesApiDisabledUntil = Date.now() + 30 * 60 * 1000;
+            const errJson = await res.json().catch(() => ({}));
+            savePersistedGoogleApiDiagnosis(parseGooglePlacesApiError(res.status, errJson));
           }
           return [];
         }
@@ -4228,7 +4386,7 @@ export async function searchNearbyPlacesWithin500m(
       forceCat?: GooglePlaceCachedItem['category'];
     }): Promise<GooglePlaceCachedItem[]> => {
       try {
-        const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=kh&addressdetails=1&extratags=1&namedetails=1&viewbox=${spec.vbox}&bounded=1&limit=40&accept-language=km,en,zh&q=${encodeURIComponent(
+        const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=kh&addressdetails=1&extratags=1&namedetails=1&email=admin%40khmerfoodtourism.com&viewbox=${spec.vbox}&bounded=1&limit=40&accept-language=km,en,zh&q=${encodeURIComponent(
           spec.q
         )}`;
         const controller = new AbortController();

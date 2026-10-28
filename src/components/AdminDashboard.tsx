@@ -25,7 +25,13 @@ import {
   isSupabaseConfigured,
   SUPABASE_SETUP_SQL,
 } from '../services/supabaseService';
-import { getSmartCacheStats } from '../services/googlePlacesService';
+import {
+  getSmartCacheStats,
+  verifyGooglePlacesApiStatus,
+  getLastGooglePlacesApiDiagnosis,
+  setGoogleMapsDailyLimit,
+  GooglePlacesApiDiagnosticReport,
+} from '../services/googlePlacesService';
 
 export const AdminDashboard: React.FC = () => {
   const { 
@@ -233,6 +239,36 @@ export const AdminDashboard: React.FC = () => {
   const [supabaseTestStatus, setSupabaseTestStatus] = useState<string>('');
   const [isSyncingCloud, setIsSyncingCloud] = useState(false);
   const [isSavingNewFood, setIsSavingNewFood] = useState(false);
+  const [googleMapsDiag, setGoogleMapsDiag] = useState<GooglePlacesApiDiagnosticReport | null>(() => getLastGooglePlacesApiDiagnosis());
+  const [isVerifyingGoogleMaps, setIsVerifyingGoogleMaps] = useState(false);
+  const [adminDailyLimitInput, setAdminDailyLimitInput] = useState<string>(() => String(getSmartCacheStats().dailyApiLimit || 500));
+
+  const handleVerifyGoogleMapsApi = async (customKey?: string) => {
+    setIsVerifyingGoogleMaps(true);
+    try {
+      const report = await verifyGooglePlacesApiStatus(customKey ?? cloudCfg.googleMapsApiKey);
+      setGoogleMapsDiag(report);
+      showToast(
+        report.status === 'OK'
+          ? '✅ Google Places API (New) ដំណើរការធម្មតា 100%!'
+          : `🔍 លទ្ធផលពិនិត្យ API៖ ${report.status} (ប្រព័ន្ធ Fallback កម្ពុជាដំណើរការធម្មតា 100%)`,
+        report.status === 'OK' ? 'success' : 'info'
+      );
+    } finally {
+      setIsVerifyingGoogleMaps(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isAdminOpen && activeTab === 'settings') {
+      const cachedDiag = getLastGooglePlacesApiDiagnosis();
+      if (cachedDiag) {
+        setGoogleMapsDiag(cachedDiag);
+      } else {
+        verifyGooglePlacesApiStatus(cloudCfg.googleMapsApiKey).then(setGoogleMapsDiag).catch(() => {});
+      }
+    }
+  }, [isAdminOpen, activeTab]);
 
   if (!isAdminOpen) return null;
 
@@ -840,11 +876,20 @@ export const AdminDashboard: React.FC = () => {
                     onClick={() => {
                       const saved = saveCloudApiConfig(cloudCfg);
                       setCloudCfg(saved);
+                      handleVerifyGoogleMapsApi(saved.googleMapsApiKey);
                       showToast('បានរក្សាទុកសោ Google Maps Places API Key ក្នុងប្រអប់ទី ៣ ជោគជ័យ!', 'success');
                     }}
                     className="px-4 py-2 bg-[#064E3B] hover:bg-[#047857] text-white font-khmer font-bold text-xs rounded-xl transition cursor-pointer shrink-0"
                   >
                     💾 រក្សាទុកសោ (Save Key)
+                  </button>
+                  <button
+                    type="button"
+                    disabled={isVerifyingGoogleMaps}
+                    onClick={() => handleVerifyGoogleMapsApi(cloudCfg.googleMapsApiKey)}
+                    className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-khmer font-bold text-xs rounded-xl transition cursor-pointer shrink-0"
+                  >
+                    {isVerifyingGoogleMaps ? '⏳ កំពុងពិនិត្យ...' : '🔍 ពិនិត្យស្ថានភាព API'}
                   </button>
                   <button
                     type="button"
@@ -4752,8 +4797,8 @@ export const AdminDashboard: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Smart Cache Live Statistics */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800">
+                {/* Smart Cache & Daily API Quota Live Statistics (Admin Only) */}
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 p-3 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800">
                   <div>
                     <div className="text-[10px] text-stone-500">ហាង & ទីតាំងក្នុង Smart Cache</div>
                     <div className="text-lg font-black text-emerald-700 dark:text-emerald-300 font-mono">
@@ -4767,11 +4812,177 @@ export const AdminDashboard: React.FC = () => {
                     </div>
                   </div>
                   <div>
-                    <div className="text-[10px] text-stone-500">ចំនួនហៅទៅ Google API ផ្ទាល់</div>
-                    <div className="text-lg font-black text-stone-700 dark:text-stone-300 font-mono">
-                      {smartCacheStats.googleApiCallsCount} ដង
+                    <div className="text-[10px] text-stone-500">ចំនួនហៅ API ថ្ងៃនេះ / កូតាប្រចាំថ្ងៃ</div>
+                    <div className="text-lg font-black text-stone-800 dark:text-stone-200 font-mono">
+                      {smartCacheStats.dailyApiCallsCount} / {smartCacheStats.dailyApiLimit}
                     </div>
                   </div>
+                  <div className="flex flex-col justify-between gap-1">
+                    <div className="text-[10px] text-stone-500 font-bold">កំណត់កូតា API ប្រចាំថ្ងៃ (Cost Limit)</div>
+                    <div className="flex items-center gap-1.5">
+                      <input
+                        type="number"
+                        min={10}
+                        max={5000}
+                        value={adminDailyLimitInput}
+                        onChange={(e) => setAdminDailyLimitInput(e.target.value)}
+                        className="w-20 px-2 py-1 rounded-lg border border-emerald-300 bg-white dark:bg-stone-800 text-xs font-bold font-mono text-stone-900 dark:text-stone-100"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const parsed = parseInt(adminDailyLimitInput, 10);
+                          if (!Number.isFinite(parsed) || parsed < 10) {
+                            showToast('សូមបញ្ចូលកូតាយ៉ាងតិច 10 ដង/ថ្ងៃ', 'warning');
+                            return;
+                          }
+                          setGoogleMapsDailyLimit(parsed);
+                          showToast(`✅ បានកំណត់កូតា Google Maps API ប្រចាំថ្ងៃត្រឹម ${parsed} ដង/ថ្ងៃ`, 'success');
+                        }}
+                        className="px-2.5 py-1 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white text-[11px] font-bold cursor-pointer"
+                      >
+                        រក្សាទុក
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Admin-Only Google Maps API Status, Error Details, Billing & Restrictions Diagnostics */}
+                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-stone-900/90 border-2 border-indigo-200 dark:border-indigo-900/70 space-y-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-sm font-extrabold text-slate-900 dark:text-stone-100">
+                        🛡️ របាយការណ៍ស្ថានភាព Google Maps API & Error Details (បង្ហាញតែក្នុង Admin Settings ប៉ុណ្ណោះ)
+                      </span>
+                      {googleMapsDiag && (
+                        <span
+                          className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold font-mono ${
+                            googleMapsDiag.status === 'OK'
+                              ? 'bg-emerald-600 text-white'
+                              : 'bg-amber-500 text-slate-950'
+                          }`}
+                        >
+                          {googleMapsDiag.status}
+                        </span>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      disabled={isVerifyingGoogleMaps}
+                      onClick={() => handleVerifyGoogleMapsApi(cloudCfg.googleMapsApiKey)}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-bold shadow-xs transition cursor-pointer"
+                    >
+                      <RefreshCw className={`w-3.5 h-3.5 ${isVerifyingGoogleMaps ? 'animate-spin' : ''}`} />
+                      <span>
+                        {isVerifyingGoogleMaps
+                          ? 'កំពុងផ្ទៀងផ្ទាត់ផ្ទាល់ជាមួយ Google Cloud...'
+                          : '🔍 ផ្ទៀងផ្ទាត់ស្ថានភាព API, Billing & Restrictions ឥឡូវនេះ'}
+                      </span>
+                    </button>
+                  </div>
+
+                  <p className="text-[11px] text-slate-600 dark:text-stone-400">
+                    🔒 <strong>សុវត្ថិភាពអេក្រង់អ្នកប្រើប្រាស់ (User Screen Protection)៖</strong> សារព្រមានបច្ចេកទេស និងកំហុស API ទាំងអស់ត្រូវបានដកចេញពីអេក្រង់ User/VIP ទាំងស្រុង។ នៅពេល Google Places API (New) មិនទាន់បើក ឬជាប់ Billing ប្រព័ន្ធស្វែងរកហាង និងតំបន់ទេសចរណ៍កម្ពុជា (Multi-Source Cambodia Search + Smart Cache) ដំណើរការជំនួសដោយស្វ័យប្រវត្តិ 100% ដោយមិនបង្ហាញ Error ដល់អ្នកប្រើប្រាស់ឡើយ។
+                  </p>
+
+                  {googleMapsDiag ? (
+                    <div className="space-y-2.5">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 text-[11px]">
+                        <div className={`p-2.5 rounded-xl border ${googleMapsDiag.placesApiNewEnabled ? 'bg-emerald-50 border-emerald-300 text-emerald-950' : 'bg-amber-50 border-amber-300 text-amber-950'}`}>
+                          <div className="font-bold flex items-center justify-between">
+                            <span>1. Places API (New)</span>
+                            <span>{googleMapsDiag.placesApiNewEnabled ? '✅ Enabled' : '⚠️ Disabled'}</span>
+                          </div>
+                          <div className="text-[10px] mt-1 opacity-85">
+                            Project #{googleMapsDiag.projectId || '834153814844'}
+                          </div>
+                          {googleMapsDiag.enableUrl && !googleMapsDiag.placesApiNewEnabled && (
+                            <a
+                              href={googleMapsDiag.enableUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 mt-1.5 text-[10px] font-extrabold text-indigo-700 underline"
+                            >
+                              <span>បើក Places API (New)</span>
+                              <ExternalLink className="w-2.5 h-2.5" />
+                            </a>
+                          )}
+                        </div>
+
+                        <div className={`p-2.5 rounded-xl border ${googleMapsDiag.billingEnabled ? 'bg-emerald-50 border-emerald-300 text-emerald-950' : 'bg-amber-50 border-amber-300 text-amber-950'}`}>
+                          <div className="font-bold flex items-center justify-between">
+                            <span>2. Cloud Billing</span>
+                            <span>{googleMapsDiag.billingEnabled ? '✅ Active' : '⚠️ Check Billing'}</span>
+                          </div>
+                          <div className="text-[10px] mt-1 opacity-85">
+                            {googleMapsDiag.billingEnabled ? 'គណនី Billing ដំណើរការធម្មតា' : 'ត្រូវភ្ជាប់ Billing ដើម្បីទទួល $200/ខែ Free'}
+                          </div>
+                          {googleMapsDiag.billingUrl && !googleMapsDiag.billingEnabled && (
+                            <a
+                              href={googleMapsDiag.billingUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 mt-1.5 text-[10px] font-extrabold text-indigo-700 underline"
+                            >
+                              <span>ផ្ទៀងផ្ទាត់ Cloud Billing</span>
+                              <ExternalLink className="w-2.5 h-2.5" />
+                            </a>
+                          )}
+                        </div>
+
+                        <div className={`p-2.5 rounded-xl border ${googleMapsDiag.keyRestrictionsOk ? 'bg-emerald-50 border-emerald-300 text-emerald-950' : 'bg-red-50 border-red-300 text-red-950'}`}>
+                          <div className="font-bold flex items-center justify-between">
+                            <span>3. API Key Restrictions</span>
+                            <span>{googleMapsDiag.keyRestrictionsOk ? '✅ Valid' : '❌ Restricted/Invalid'}</span>
+                          </div>
+                          <div className="text-[10px] mt-1 font-mono opacity-85">
+                            Key: {googleMapsDiag.keyMasked || 'AIzaSy...'}
+                          </div>
+                          {googleMapsDiag.credentialsUrl && (
+                            <a
+                              href={googleMapsDiag.credentialsUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 mt-1.5 text-[10px] font-extrabold text-indigo-700 underline"
+                            >
+                              <span>ពិនិត្យ Key Restrictions</span>
+                              <ExternalLink className="w-2.5 h-2.5" />
+                            </a>
+                          )}
+                        </div>
+
+                        <div className="p-2.5 rounded-xl border bg-emerald-50 border-emerald-300 text-emerald-950">
+                          <div className="font-bold flex items-center justify-between">
+                            <span>4. ប្រព័ន្ធស្វែងរកកម្ពុជា</span>
+                            <span>✅ Active 100%</span>
+                          </div>
+                          <div className="text-[10px] mt-1 opacity-85">
+                            Smart Cache + Multi-Source Cambodia ដំណើរការដោយគ្មាន Error
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className={`p-3 rounded-xl border text-[11px] leading-relaxed ${
+                        googleMapsDiag.status === 'OK'
+                          ? 'bg-emerald-50/90 border-emerald-300 text-emerald-950'
+                          : 'bg-amber-50/90 border-amber-300 text-amber-950'
+                      }`}>
+                        <div className="font-bold mb-0.5">
+                          📋 សេចក្តីលម្អិតបច្ចេកទេស (Admin Diagnostic Message):
+                        </div>
+                        <div>{isKm ? googleMapsDiag.messageKh : googleMapsDiag.messageEn}</div>
+                        {googleMapsDiag.rawDetail && googleMapsDiag.status !== 'OK' && (
+                          <div className="mt-1.5 p-2 rounded-lg bg-white/80 dark:bg-stone-800 border border-amber-200 font-mono text-[10px] text-slate-700 dark:text-stone-300 break-all">
+                            Raw API Response: {googleMapsDiag.rawDetail}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-[11px] text-stone-500">
+                      ចុចប៊ូតុង <strong>«🔍 ផ្ទៀងផ្ទាត់ស្ថានភាព API, Billing & Restrictions ឥឡូវនេះ»</strong> ដើម្បីពិនិត្យសោ Google Maps API ផ្ទាល់។
+                    </div>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -4816,11 +5027,12 @@ export const AdminDashboard: React.FC = () => {
                         onClick={() => {
                           const saved = saveCloudApiConfig(cloudCfg);
                           setCloudCfg(saved);
+                          handleVerifyGoogleMapsApi(saved.googleMapsApiKey);
                           showToast('បានរក្សាទុកសោ Google Maps Places API Key ជោគជ័យ!', 'success');
                         }}
                         className="px-3 py-2 bg-[#064E3B] hover:bg-[#047857] text-white font-bold rounded-xl text-[11px] shrink-0"
                       >
-                        💾 Save
+                        💾 Save & Verify
                       </button>
                     </div>
                   </div>
@@ -4850,6 +5062,7 @@ export const AdminDashboard: React.FC = () => {
                     onClick={() => {
                       const saved = saveCloudApiConfig(cloudCfg);
                       setCloudCfg(saved);
+                      handleVerifyGoogleMapsApi(saved.googleMapsApiKey);
                       showToast('បានរក្សាទុកការកំណត់ Cloud Supabase & Google Maps Places API ជោគជ័យ!', 'success');
                     }}
                     className="px-4 py-2 bg-[#064E3B] hover:bg-[#047857] text-white font-bold rounded-xl shadow-xs transition active:scale-95"

@@ -282,36 +282,8 @@ export const GoogleMapsShopImporterModal: React.FC<GoogleMapsShopImporterModalPr
       setNextPageToken(response.nextPageToken);
       setProviderUsed(response.providerUsed);
       setFromCache(Boolean(response.fromCache ?? response.fromSmartCache));
-
-      const warnText =
-        language === 'km'
-          ? response.apiWarningKh
-          : language === 'zh'
-          ? response.apiWarningZh || response.apiWarningEn
-          : response.apiWarningEn;
-      if (warnText) {
-        setApiWarning(warnText);
-      }
-
-      if (!isAppend && foodAndShopResults.length === 0 && response.errorMessage) {
-        setErrorMsg(
-          language === 'km'
-            ? response.errorMessageKh || response.errorMessage
-            : language === 'zh'
-            ? response.errorMessageZh || response.errorMessageEn || response.errorMessage
-            : response.errorMessageEn || response.errorMessage
-        );
-      }
-    } catch (err: any) {
-      setErrorMsg(
-        err?.message ||
-          tr(
-            language,
-            'មិនអាចតភ្ជាប់ទៅកាន់ Google Maps បានទេ។ សូមសាកល្បងម្តងទៀត ឬបញ្ចូលដោយដៃ។',
-            'Unable to connect to Google Maps. Please try again or enter details manually.',
-            '无法连接 Google 地图，请重试或手动填写。'
-          )
-      );
+    } catch {
+      // Never expose technical API errors to users
     } finally {
       setIsLoading(false);
       setIsLoadingMore(false);
@@ -635,12 +607,6 @@ export const GoogleMapsShopImporterModal: React.FC<GoogleMapsShopImporterModalPr
             </div>
           ) : results.length > 0 ? (
             <>
-              {apiWarning && (
-                <div className="p-2.5 rounded-xl bg-amber-50/90 dark:bg-amber-950/30 border border-amber-300/80 dark:border-amber-800/70 text-[10px] text-amber-900 dark:text-amber-200 leading-relaxed">
-                  {apiWarning}
-                </div>
-              )}
-
               <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 px-1">
                 <span>
                   {tr(
@@ -651,11 +617,7 @@ export const GoogleMapsShopImporterModal: React.FC<GoogleMapsShopImporterModalPr
                   )}
                 </span>
                 <span className="font-mono text-[10px] text-emerald-700 dark:text-emerald-400 font-semibold">
-                  {providerUsed === 'google_maps_api'
-                    ? '🌐 Google Places API (Live)'
-                    : fromCache
-                    ? '⚡ Smart Cache'
-                    : '🗺️ Cambodia Map Directory'}
+                  📍 Google Maps
                 </span>
               </div>
 

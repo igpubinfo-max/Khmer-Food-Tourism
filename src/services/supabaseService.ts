@@ -86,6 +86,9 @@ export function saveCloudApiConfig(partial: Partial<CloudApiConfig>): CloudApiCo
 
   try {
     localStorage.setItem(CLOUD_API_CONFIG_STORAGE_KEY, JSON.stringify(updated));
+    if (partial.googleMapsApiKey !== undefined) {
+      localStorage.removeItem('kft_google_places_api_diag_v1');
+    }
     // Also keep AI Vision config in sync so aiFoodService.ts picks up Gemini key automatically
     if (updated.geminiApiKey || updated.aiVisionBackendUrl) {
       const aiVisionCfg = {
