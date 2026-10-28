@@ -16,18 +16,13 @@ import {
 } from 'lucide-react';
 import {
   EMERGENCY_CONTACTS, GUIDE_TIPS, MEAL_SLOTS, PHRASES, SEASONAL_ITEMS, TIP_CATEGORIES,
-  getCambodiaHolidaysForYear, getMealSlotForHour, getSeasonForMonth, pickTri,
+  getCambodiaHolidaysForYear, getMealSlotForHour, getSeasonForMonth, monthLabel, pickTri,
 } from '../data/guideContent';
 import type { MealSlotId, TipCategory } from '../data/guideContent';
 
 type GuideTab = 'foryou' | 'provinces' | 'calendar' | 'tips';
 
 const FALLBACK_IMG = '/welcome/hero-bg.webp';
-const MONTHS_KM = ['មករា', 'កុម្ភៈ', 'មីនា', 'មេសា', 'ឧសភា', 'មិថុនា', 'កក្កដា', 'សីហា', 'កញ្ញា', 'តុលា', 'វិច្ឆិកា', 'ធ្នូ'];
-const MONTHS_EN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-const monthLabel = (m: number, lang: Language) =>
-  lang === 'km' ? MONTHS_KM[m - 1] : lang === 'zh' ? `${m}月` : MONTHS_EN[m - 1];
 
 const stripProvincePrefix = (s?: string) => (s || '').replace(/^រាជធានី|^ខេត្ត/g, '').trim();
 
@@ -360,7 +355,7 @@ export const GuideView: React.FC = () => {
 
   // Calendar data (automatically calculates exact solar dates and countdown days for current & next year)
   const seasonalNow = useMemo(() => SEASONAL_ITEMS.filter((s) => s.months.includes(month)), [month]);
-  const festivals = useMemo(() => getCambodiaHolidaysForYear(new Date()), [month]);
+  const festivals = useMemo(() => getCambodiaHolidaysForYear(now), [now]);
 
   const visibleTips = useMemo(
     () => GUIDE_TIPS.filter((t) => tipFilter === 'all' || t.category === tipFilter),

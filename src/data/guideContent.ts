@@ -606,7 +606,29 @@ function toKhmerNum(n: number | string): string {
   return String(n).replace(/\d/g, (d) => KHMER_DIGITS[Number(d)] || d);
 }
 
+const MONTH_NAMES_KM = [
+  '',
+  'មករា',
+  'កុម្ភៈ',
+  'មីនា',
+  'មេសា',
+  'ឧសភា',
+  'មិថុនា',
+  'កក្កដា',
+  'សីហា',
+  'កញ្ញា',
+  'តុលា',
+  'វិច្ឆិកា',
+  'ធ្នូ',
+];
 const MONTH_NAMES_SHORT_EN = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+export function monthLabel(m: number, lang: 'km' | 'en' | 'zh'): string {
+  const idx = Math.max(1, Math.min(12, Math.round(m || 1)));
+  if (lang === 'km') return MONTH_NAMES_KM[idx];
+  if (lang === 'zh') return `${idx}月`;
+  return MONTH_NAMES_SHORT_EN[idx];
+}
 
 /**
  * Automatically compute the exact solar dates and countdown in days for all Cambodian holidays
