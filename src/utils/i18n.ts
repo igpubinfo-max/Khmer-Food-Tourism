@@ -8,12 +8,16 @@ import {
 } from './zhDynamicTranslator';
 import { ZH_UI_EXTRA } from '../data/zhUiExtra';
 
+// Pre-compiled (non-global, so `.test()` is stateless) detector for unintended Thai / Lao / Myanmar / Devanagari scripts.
+const FOREIGN_SCRIPT_TEST_RX = /[\u0E00-\u0E7F\u0E80-\u0EFF\u1000-\u109F\u0900-\u097F]/;
+
 /**
- * Helper for 3-language inline selection: Khmer ('km'), English ('en'), Simplified Chinese ('zh')
+ * Strip any unintended foreign scripts (Thai, Lao, Myanmar, Devanagari) and repair known legacy cached typos.
+ * Fast path: returns the very same string instance after a single cheap regex test when nothing needs cleaning.
  */
 export function stripForeignScripts(text: string): string {
   if (!text || typeof text !== 'string') return text;
-  if (!/[\u0E00-\u0E7F\u0E80-\u0EFF\u1000-\u109F\u0900-\u097F]/.test(text)) return text;
+  if (!FOREIGN_SCRIPT_TEST_RX.test(text)) return text;
   return text
     .replace(/កាហ្វេឆ\u0E07ដៃ/g, 'កាហ្វេឆុងដៃ')
     .replace(/សម្លៀកបំពាក់\u0E2A\u0E38ភាព/g, 'សម្លៀកបំពាក់សុភាពរាបសារ')
@@ -28,6 +32,9 @@ export function stripForeignScripts(text: string): string {
     .trim();
 }
 
+/**
+ * Helper for 3-language inline selection: Khmer ('km'), English ('en'), Simplified Chinese ('zh')
+ */
 export function tr(lang: Language, km: string, en: string, zh: string): string {
   if (lang === 'km') return stripForeignScripts(km);
   if (lang === 'zh') return stripForeignScripts(zh);
@@ -441,8 +448,25 @@ const PHRASE_REPLACEMENTS_EN_TO_ZH: Array<[RegExp, string]> = [
   [/Welcome to the app, ([^!]+)!/i, '欢迎使用本应用，$1！'],
 ];
 
+// Bounded memo of translateTextToChinese results. The translation is a pure function of the input text, so
+// repeated DOM text nodes (card labels, buttons, badges) are resolved with one Map lookup instead of
+// re-running the whole phrase-regex table on every mutation. Cleared wholesale when full to cap memory.
+const ZH_TRANSLATION_MEMO_LIMIT = 3000;
+const zhTranslationMemo = new Map<string, string>();
+
 export function translateTextToChinese(text: string): string {
   if (!text) return text;
+  const memoized = zhTranslationMemo.get(text);
+  if (memoized !== undefined) return memoized;
+  const out = translateTextToChineseUncached(text);
+  if (text.length <= 400) {
+    if (zhTranslationMemo.size >= ZH_TRANSLATION_MEMO_LIMIT) zhTranslationMemo.clear();
+    zhTranslationMemo.set(text, out);
+  }
+  return out;
+}
+
+function translateTextToChineseUncached(text: string): string {
   const cleanedText = stripForeignScripts(text);
   const trimmed = cleanedText.trim();
   if (!trimmed) return cleanedText;

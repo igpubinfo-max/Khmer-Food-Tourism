@@ -256,7 +256,7 @@ export const TrendingSocialModal: React.FC = () => {
         setSmartCachePlaces(res.results);
         setIsSearchingOnline(false);
       }
-    }, 300);
+    }, 600);
 
     return () => {
       cancelled = true;

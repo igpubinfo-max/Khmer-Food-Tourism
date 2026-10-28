@@ -220,7 +220,7 @@ export const HomeView: React.FC = () => {
         );
         setIsHomeSearchingOnline(false);
       }
-    }, 300);
+    }, 600);
 
     return () => {
       cancelled = true;
@@ -289,36 +289,6 @@ export const HomeView: React.FC = () => {
       'success'
     );
   };
-
-  // Filter trending foods by category and search, then apply AI random shuffle
-  const displayTrendingFoods = useMemo(() => {
-    let pool = trendingFoods.filter(item => {
-      const matchCat = selectedCategory === 'all' || item.categorySlug === selectedCategory;
-      if (!matchCat) return false;
-      if (!trendingSearchQuery.trim()) return true;
-      const q = trendingSearchQuery.toLowerCase().trim();
-      return (
-        item.foodNameKh.toLowerCase().includes(q) ||
-        item.foodNameEn.toLowerCase().includes(q) ||
-        item.restaurantNameKh.toLowerCase().includes(q) ||
-        item.provinceKh.toLowerCase().includes(q) ||
-        (item.landmarkNameKh && item.landmarkNameKh.toLowerCase().includes(q))
-      );
-    });
-
-    if (pool.length <= 4) return pool;
-
-    if (randomSeed > 0) {
-      const copy = [...pool];
-      for (let i = copy.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [copy[i], copy[j]] = [copy[j], copy[i]];
-      }
-      return copy.slice(0, 4);
-    }
-
-    return pool.slice(0, 4);
-  }, [trendingFoods, selectedCategory, trendingSearchQuery, randomSeed]);
 
   const quickCategories = [
     { labelKh: 'ម្ហូបពិសេស', labelEn: 'Signature', icon: '🍲', tab: 'food' },
@@ -418,54 +388,6 @@ export const HomeView: React.FC = () => {
     } else {
       handleOpenFoodDetail(item);
     }
-  };
-
-  const handleCall = (e: React.MouseEvent, phone?: string) => {
-    e.stopPropagation();
-    if (phone) {
-      window.open(`tel:${phone}`, '_self');
-    } else {
-      showToast(isKm ? 'មិនមានលេខទូរស័ព្ទសម្រាប់ហាងនេះទេ' : 'No phone number available', 'info');
-    }
-  };
-
-  const handleMap = (e: React.MouseEvent, item: TrendingFoodItem) => {
-    e.stopPropagation();
-    if (item.mapUrl) {
-      window.open(item.mapUrl, '_blank');
-    } else if (item.latitude && item.longitude) {
-      window.open(`https://maps.google.com/?q=${item.latitude},${item.longitude}`, '_blank');
-    }
-  };
-
-  const handleShare = (e: React.MouseEvent, item: TrendingFoodItem) => {
-    e.stopPropagation();
-    const mapLink =
-      item.mapUrl ||
-      (item.latitude && item.longitude
-        ? `https://www.google.com/maps/search/?api=1&query=${item.latitude},${item.longitude}`
-        : undefined);
-    shareRichContent(
-      {
-        title: isKm
-          ? `${item.foodNameKh} — ${item.restaurantNameKh}`
-          : `${item.foodNameEn} — ${item.restaurantNameEn}`,
-        nameKh: `${item.foodNameKh} (${item.restaurantNameKh})`,
-        nameEn: `${item.foodNameEn} (${item.restaurantNameEn})`,
-        description: isKm ? item.descriptionKh : item.descriptionEn,
-        location: isKm
-          ? `${item.addressKh} (${item.provinceKh})`
-          : `${item.addressEn} (${item.provinceEn})`,
-        phone: item.phone,
-        priceDisplay: item.priceDisplay,
-        photoUrl: item.photoUrl,
-        mapUrl: mapLink,
-        itemType: 'trending',
-        itemId: item.id,
-        isKm,
-      },
-      showToast
-    );
   };
 
   return (
@@ -1856,19 +1778,6 @@ export const HomeView: React.FC = () => {
         </div>
       </div>
       )}
-
-      {/* Preserved in hidden container for test suite integrity */}
-      <div className="hidden" aria-hidden="true">
-        <span>TikTok & FB Review</span>
-        <span>រូបភាពទីតាំង / ភូមិដ្ឋាន</span>
-        {displayTrendingFoods.slice(0, 1).map((food) => (
-          <div key={food.id}>
-            <button onClick={(e) => handleMap(e, food)}>Map</button>
-            <button onClick={(e) => handleCall(e, food.phone)}>Call</button>
-            <button onClick={(e) => handleShare(e, food)}>Share</button>
-          </div>
-        ))}
-      </div>
 
           </>
         )}

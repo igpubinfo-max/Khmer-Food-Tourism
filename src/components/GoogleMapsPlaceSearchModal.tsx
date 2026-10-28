@@ -324,7 +324,7 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
           'warning'
         );
       },
-      { enableHighAccuracy: true, timeout: 10000 }
+      { enableHighAccuracy: false, timeout: 10000, maximumAge: 120000 }
     );
   };
 

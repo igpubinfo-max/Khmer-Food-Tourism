@@ -185,7 +185,7 @@ export const FoodTripTemplates: React.FC = () => {
         setIsLocatingGps(false);
         showToast(tr(language, 'មិនអាចចាប់ទីតាំង GPS បានទេ សូមជ្រើសរើសដោយដៃ', 'Could not access GPS, please pick area manually', '无法获取 GPS 定位，请手动选择区域'), 'info');
       },
-      { timeout: 6000, enableHighAccuracy: true }
+      { timeout: 6000, enableHighAccuracy: false, maximumAge: 120000 }
     );
   };
 

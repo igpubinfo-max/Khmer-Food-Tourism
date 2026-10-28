@@ -809,17 +809,49 @@ function getTodayDateKey(): string {
 /**
  * Load Smart Cache items from localStorage (always merged with EXTENDED_PHNOM_PENH_CAMBODIA_PLACES)
  */
+// Performance: the merged cache is rebuilt only when the persisted string actually changed (or after 60s so the
+// 30-day TTL filter still applies). Legacy cache keys are purged exactly once per session instead of on every call.
+const SMART_CACHE_MEMO_MAX_AGE_MS = 60 * 1000;
+const SMART_CACHE_MAX_PERSISTED_ITEMS = 600;
+let smartCacheMemoRaw: string | null | undefined;
+let smartCacheMemoAt = 0;
+let smartCacheMemoResult: GooglePlaceCachedItem[] | null = null;
+let legacySmartCacheKeysPurged = false;
+
 export function getLocalSmartCache(): GooglePlaceCachedItem[] {
+  let raw: string | null = null;
+  try {
+    if (!legacySmartCacheKeysPurged) {
+      legacySmartCacheKeysPurged = true;
+      localStorage.removeItem('kft_google_places_smart_cache_v8');
+      localStorage.removeItem('kft_google_places_smart_cache_v3');
+      localStorage.removeItem('kft_google_places_smart_cache_v2');
+      localStorage.removeItem('kft_google_places_smart_cache_v1');
+    }
+    raw = localStorage.getItem(SMART_CACHE_STORAGE_KEY);
+  } catch {
+    raw = null;
+  }
+  if (
+    smartCacheMemoResult &&
+    raw === smartCacheMemoRaw &&
+    Date.now() - smartCacheMemoAt < SMART_CACHE_MEMO_MAX_AGE_MS
+  ) {
+    return smartCacheMemoResult.slice();
+  }
+  const built = buildLocalSmartCache(raw);
+  smartCacheMemoRaw = raw;
+  smartCacheMemoAt = Date.now();
+  smartCacheMemoResult = built;
+  return built.slice();
+}
+
+function buildLocalSmartCache(raw: string | null): GooglePlaceCachedItem[] {
   const mergedMap = new Map<string, GooglePlaceCachedItem>();
   for (const seed of EXTENDED_PHNOM_PENH_CAMBODIA_PLACES) {
     mergedMap.set(seed.placeId, seed);
   }
   try {
-    localStorage.removeItem('kft_google_places_smart_cache_v8');
-    localStorage.removeItem('kft_google_places_smart_cache_v3');
-    localStorage.removeItem('kft_google_places_smart_cache_v2');
-    localStorage.removeItem('kft_google_places_smart_cache_v1');
-    const raw = localStorage.getItem(SMART_CACHE_STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed)) {
@@ -857,7 +889,14 @@ export async function saveToSmartCache(newItems: GooglePlaceCachedItem[]): Promi
     }
   }
 
-  const merged = Array.from(map.values());
+  // Never re-persist the bundled seed places (they are always merged in at read time) and keep only the newest N
+  // fetched places, so the persisted cache stays small and every read/parse stays fast.
+  const seedById = new Map<string, GooglePlaceCachedItem>();
+  for (const seed of EXTENDED_PHNOM_PENH_CAMBODIA_PLACES) seedById.set(seed.placeId, seed);
+  const merged = Array.from(map.values())
+    .filter((it) => seedById.get(it.placeId) !== it)
+    .sort((a, b) => new Date(b.cachedAt || 0).getTime() - new Date(a.cachedAt || 0).getTime())
+    .slice(0, SMART_CACHE_MAX_PERSISTED_ITEMS);
   try {
     localStorage.setItem(SMART_CACHE_STORAGE_KEY, JSON.stringify(merged));
   } catch (err) {
@@ -1268,7 +1307,40 @@ const CATEGORY_SEARCH_KEYWORD_MAP: Record<GooglePlaceSearchCategory, string> = {
 };
 
 let lastCloudCachePullAt = 0;
-const searchQueryMemoryCache = new Map<string, GooglePlacesSearchResponse>();
+/**
+ * In-memory search response cache: bounded (LRU-ish) and time-limited, so repeating a search (typing, back/forward,
+ * switching tabs) never re-triggers the multi-source network fan-out for 5 minutes.
+ */
+class SearchResponseMemoryCache {
+  private store = new Map<string, { at: number; value: GooglePlacesSearchResponse }>();
+  constructor(private readonly ttlMs: number, private readonly maxEntries: number) {}
+  get(key: string): GooglePlacesSearchResponse | undefined {
+    const hit = this.store.get(key);
+    if (!hit) return undefined;
+    if (Date.now() - hit.at > this.ttlMs) {
+      this.store.delete(key);
+      return undefined;
+    }
+    return hit.value;
+  }
+  has(key: string): boolean {
+    return this.get(key) !== undefined;
+  }
+  set(key: string, value: GooglePlacesSearchResponse): this {
+    this.store.delete(key);
+    this.store.set(key, { at: Date.now(), value });
+    while (this.store.size > this.maxEntries) {
+      const oldest = this.store.keys().next().value;
+      if (oldest === undefined) break;
+      this.store.delete(oldest);
+    }
+    return this;
+  }
+  clear(): void {
+    this.store.clear();
+  }
+}
+const searchQueryMemoryCache = new SearchResponseMemoryCache(5 * 60 * 1000, 40);
 const resolvedPhoneMemoryCache = new Map<string, string>();
 
 function mapGooglePriceLevel(rawPriceLevel?: string): RestaurantPriceLevel {
@@ -3061,7 +3133,7 @@ export async function searchGoogleMapsPlacesAdvanced(
 
   if (!req.forceLiveApi && !req.pageToken && searchQueryMemoryCache.has(memKey)) {
     const cachedResp = searchQueryMemoryCache.get(memKey)!;
-    if (cachedResp.results.length >= 15) {
+    if (cachedResp.results.length > 0) {
       return cachedResp;
     }
   }
@@ -4707,9 +4779,9 @@ export async function getCurrentDeviceLocation(): Promise<{ lat: number; lng: nu
         resolve(null);
       },
       {
-        enableHighAccuracy: true,
-        timeout: 7000,
-        maximumAge: 60000,
+        enableHighAccuracy: false,
+        timeout: 8000,
+        maximumAge: 120000,
       }
     );
   });

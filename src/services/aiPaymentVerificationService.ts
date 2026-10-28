@@ -1,4 +1,3 @@
-import { createWorker } from 'tesseract.js';
 import {
   AbaReceiptVerificationReport,
   AbaVerificationCheckItem,
@@ -267,6 +266,7 @@ export function parseAbaReceiptOcrText(rawText: string): Partial<ExtractedReceip
  */
 async function extractReceiptViaOcr(receiptDataUrl: string): Promise<Partial<ExtractedReceiptData>> {
   try {
+    const { createWorker } = await import('tesseract.js');
     const worker = await createWorker('eng');
     const ret = await worker.recognize(receiptDataUrl);
     await worker.terminate();
