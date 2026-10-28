@@ -6174,7 +6174,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       photoUrl?: string;
     }
   ): { imported: boolean; duplicate: boolean; type: 'restaurant' | 'tourism'; id: string; item?: Restaurant | TouristDestination } => {
-    if (!isAdminAccount(currentUser) && !verifyBackendVipFeatureAccess('ស្វែងរកទីតាំងលើ Google Maps', 'Google Maps Places Search')) {
+    if (!isAdminAccount(currentUser)) {
+      showToast(
+        language === 'km'
+          ? '⚠️ សិទ្ធិបន្ថែម ឬនាំចូលហាងចូលកម្មវិធី អនុញ្ញាតសម្រាប់តែគណនីរដ្ឋបាល (Admin) ប៉ុណ្ណោះ!'
+          : '⚠️ Only Admin is permitted to add or import shops into the app!',
+        'warning'
+      );
       return { imported: false, duplicate: false, type: 'restaurant', id: '' };
     }
     const targetCategory: 'restaurant' | 'tourism' = customEdits?.category || place.category || 'restaurant';

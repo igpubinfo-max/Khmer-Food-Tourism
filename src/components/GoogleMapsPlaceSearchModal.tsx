@@ -104,7 +104,7 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
       currentUser.username === 'cheasavuth')
   );
   const isVipActive = Boolean(currentUser && isUserVipActive(currentUser));
-  const canManagePlaces = isAdmin || isVipActive;
+  const canManagePlaces = isAdmin;
 
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState<GooglePlaceSearchCategory>('all');
@@ -369,6 +369,7 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
   }, [results, currentPage]);
 
   const toggleSelectPlace = (placeId: string) => {
+    if (!isAdmin) return;
     setSelectedPlaceIds(prev => {
       const next = new Set(prev);
       if (next.has(placeId)) next.delete(placeId);
@@ -378,6 +379,7 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
   };
 
   const handleSelectAllOnPage = () => {
+    if (!isAdmin) return;
     const pageIds = paginatedResults.map(p => p.placeId);
     const allSelected = pageIds.every(id => selectedPlaceIds.has(id));
     setSelectedPlaceIds(prev => {
@@ -392,6 +394,7 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
   };
 
   const handleBatchImportSelected = () => {
+    if (!isAdmin) return;
     if (selectedPlaceIds.size === 0) return;
     let importedCount = 0;
     let duplicateCount = 0;
@@ -411,6 +414,7 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
   };
 
   const startEditingBeforeImport = (place: GooglePlaceCachedItem) => {
+    if (!isAdmin) return;
     setEditingPlaceId(place.placeId);
     setEditDraft({
       nameKh: place.nameKh,
@@ -424,6 +428,7 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
   };
 
   const handleSaveEditedImport = (place: GooglePlaceCachedItem) => {
+    if (!isAdmin) return;
     importGooglePlaceToApp(place, {
       nameKh: editDraft.nameKh,
       nameEn: editDraft.nameEn,
@@ -1237,7 +1242,7 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                         {canManagePlaces && isEditingThis && (
                           <div className="p-3 rounded-xl bg-slate-50 border border-indigo-200 space-y-2 text-xs">
                             <div className="font-bold text-indigo-950 flex items-center justify-between">
-                              <span>✏️ ពិនិត្យ និងកែសម្រួលមុននាំចូល ({isAdmin ? 'Admin Override' : 'VIP Review'})</span>
+                              <span>✏️ ពិនិត្យ និងកែសម្រួលមុននាំចូល (Admin Only)</span>
                               <button
                                 type="button"
                                 onClick={() => setEditingPlaceId(null)}
