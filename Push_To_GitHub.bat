@@ -35,13 +35,18 @@ if %ERRORLEVEL% equ 0 (
     echo ===================================================================
     echo SUCCESS! Code has been pushed to GitHub!
     echo.
-    echo 1. Android APK is building automatically (~2 mins):
-    echo    https://github.com/igpubinfo-max/Khmer-Food-Tourism/releases/download/v2.3.1/KhmerFoodTourism-v2.3.1.apk
+    echo 1. Android APK ^& Play Store AAB are building (~2-3 mins):
+    echo    - Direct APK: https://github.com/igpubinfo-max/Khmer-Food-Tourism/releases/download/v2.3.1/KhmerFoodTourism-v2.3.1.apk
+    echo    - Play Store AAB: https://github.com/igpubinfo-max/Khmer-Food-Tourism/releases/download/v2.3.1/KhmerFoodTourism-v2.3.1-PlayStore.aab
     echo.
-    echo 2. iOS IPA is building on macOS & auto-uploading to Apple App Store Connect / TestFlight!
-    echo    https://github.com/igpubinfo-max/Khmer-Food-Tourism/actions/workflows/build-ios.yml
+    echo 2. iOS IPA is building on macOS ^& auto-uploading to Apple App Store Connect / TestFlight!
+    echo    - Workflow: https://github.com/igpubinfo-max/Khmer-Food-Tourism/actions/workflows/build-ios.yml
+    echo    - Direct IPA: https://github.com/igpubinfo-max/Khmer-Food-Tourism/releases/download/v2.3.1/KhmerFoodTourism-v2.3.1.ipa
     echo.
-    echo 3. Live Website (GitHub Pages) is updating automatically!
+    echo 3. All Release Files Page (APK + AAB + IPA):
+    echo    https://github.com/igpubinfo-max/Khmer-Food-Tourism/releases/tag/v2.3.1
+    echo.
+    echo 4. Live Website (GitHub Pages) is updating automatically!
     echo ===================================================================
 ) else (
     echo.

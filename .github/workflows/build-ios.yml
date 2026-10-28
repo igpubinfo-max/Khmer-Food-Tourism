@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: build-ios-app
+  group: build-ios-app-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
