@@ -16,6 +16,7 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import {
+  isNativeAndroidOrIosPlatform,
   pickImageUsingNativeAndroidGallery,
   pickMultipleImagesUsingNativeAndroidGallery,
   processAndCompressImageFile,
@@ -72,6 +73,11 @@ export const ShopMultiPhotoUploader: React.FC<ShopMultiPhotoUploaderProps> = ({
         isKm ? `⚠️ អាចផ្ទុករូបភាពបានអតិបរមា ${maxPhotos} សន្លឹកប៉ុណ្ណោះ!` : `⚠️ Maximum ${maxPhotos} photos allowed!`,
         'warning'
       );
+      return;
+    }
+
+    if (!isNativeAndroidOrIosPlatform()) {
+      fileInputRef.current?.click();
       return;
     }
 
@@ -219,8 +225,14 @@ export const ShopMultiPhotoUploader: React.FC<ShopMultiPhotoUploaderProps> = ({
   // 8. Replace a specific photo
   const handleReplacePhoto = async (index: number, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
+    if (!isNativeAndroidOrIosPlatform()) {
+      replaceTargetIndexRef.current = index;
+      replaceInputRef.current?.click();
+      return;
+    }
     try {
       const nativePick = await pickImageUsingNativeAndroidGallery();
+      if (nativePick.cancelled) return;
       if (nativePick.success && nativePick.dataUrl) {
         const updated = photos.map((item, i) => (i === index ? nativePick.dataUrl! : item));
         onChangePhotos(updated);

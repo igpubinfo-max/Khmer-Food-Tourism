@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { RestaurantPriceLevel, GoogleMapsPlaceMetadata, isUserVipActive, getDynamicVipPlans, isAdminAccount } from '../types';
 import {
+  isNativeAndroidOrIosPlatform,
   pickImageUsingNativeAndroidGallery,
   pickMultipleImagesUsingNativeAndroidGallery,
   processAndCompressImageFile,
@@ -219,6 +220,10 @@ export const VipAddRestaurantModal: React.FC = () => {
 
   // Pick Shop Photo from Gallery
   const handlePickFromGallery = async () => {
+    if (!isNativeAndroidOrIosPlatform()) {
+      fileInputRef.current?.click();
+      return;
+    }
     setIsUploadingPhoto(true);
     try {
       const nativePick = await pickMultipleImagesUsingNativeAndroidGallery(5, 1200);
@@ -406,7 +411,12 @@ export const VipAddRestaurantModal: React.FC = () => {
   };
 
   const handlePickSlotReceiptFromGallery = async () => {
+    if (!isNativeAndroidOrIosPlatform()) {
+      slotFileInputRef.current?.click();
+      return;
+    }
     const picked = await pickImageUsingNativeAndroidGallery(1200, 0.84);
+    if (picked && picked.cancelled) return;
     if (picked && picked.dataUrl) {
       setSlotProofData({
         dataUrl: picked.dataUrl,

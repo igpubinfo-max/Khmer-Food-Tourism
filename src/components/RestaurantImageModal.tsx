@@ -12,6 +12,7 @@ import {
   Store,
 } from 'lucide-react';
 import {
+  isNativeAndroidOrIosPlatform,
   pickImageUsingNativeAndroidGallery,
   processAndCompressImageFile,
 } from '../utils/androidMediaHelper';
@@ -37,6 +38,8 @@ export const RestaurantImageModal: React.FC<RestaurantImageModalProps> = ({
   const shopGalleryCameraInputRef = useRef<HTMLInputElement>(null);
   const foodFileInputRef = useRef<HTMLInputElement>(null);
   const foodCameraInputRef = useRef<HTMLInputElement>(null);
+  const replaceSingleFileInputRef = useRef<HTMLInputElement>(null);
+  const replaceTargetRef = useRef<{ type: 'shop' | 'food'; index: number } | null>(null);
 
   const [photoUrl, setPhotoUrl] = useState('');
   const [urlInput, setUrlInput] = useState('');
@@ -70,6 +73,10 @@ export const RestaurantImageModal: React.FC<RestaurantImageModalProps> = ({
   if (!isOpen || !restaurant) return null;
 
   const handlePickProfileNativeOrFallback = async () => {
+    if (!isNativeAndroidOrIosPlatform()) {
+      profileFileInputRef.current?.click();
+      return;
+    }
     setIsProcessing(true);
     setErrorMsg('');
     try {
@@ -91,6 +98,33 @@ export const RestaurantImageModal: React.FC<RestaurantImageModalProps> = ({
     }
     setIsProcessing(false);
     profileFileInputRef.current?.click();
+  };
+
+  const handleReplaceSingleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    const target = replaceTargetRef.current;
+    replaceTargetRef.current = null;
+    if (!file || !target) return;
+
+    setIsProcessing(true);
+    setErrorMsg('');
+    try {
+      const dataUrl = await processAndCompressImageFile(file);
+      if (target.type === 'shop') {
+        setShopPhotos((prev) => {
+          const updated = prev.map((item, i) => (i === target.index ? dataUrl : item));
+          if (target.index === 0) setPhotoUrl(dataUrl);
+          return updated;
+        });
+      } else {
+        setFoodPhotos((prev) => prev.map((item, i) => (i === target.index ? dataUrl : item)));
+      }
+    } catch (err: any) {
+      setErrorMsg(err?.message || (isKm ? 'រូបភាពមិនត្រឹមត្រូវ' : 'Invalid image'));
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const handleProfileFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -142,8 +176,14 @@ export const RestaurantImageModal: React.FC<RestaurantImageModalProps> = ({
   };
 
   const handleReplaceShopPhoto = async (idx: number) => {
+    if (!isNativeAndroidOrIosPlatform()) {
+      replaceTargetRef.current = { type: 'shop', index: idx };
+      replaceSingleFileInputRef.current?.click();
+      return;
+    }
     try {
       const nativePick = await pickImageUsingNativeAndroidGallery();
+      if (nativePick.cancelled) return;
       if (nativePick.success && nativePick.dataUrl) {
         const nextUrl = nativePick.dataUrl;
         setShopPhotos((prev) => {
@@ -151,10 +191,13 @@ export const RestaurantImageModal: React.FC<RestaurantImageModalProps> = ({
           if (idx === 0) setPhotoUrl(nextUrl);
           return updated;
         });
+        return;
       }
     } catch {
-      // ignore
+      // fallback to file input
     }
+    replaceTargetRef.current = { type: 'shop', index: idx };
+    replaceSingleFileInputRef.current?.click();
   };
 
   const handleRemoveShopPhoto = (idx: number) => {
@@ -191,14 +234,23 @@ export const RestaurantImageModal: React.FC<RestaurantImageModalProps> = ({
   };
 
   const handleReplaceFoodPhoto = async (idx: number) => {
+    if (!isNativeAndroidOrIosPlatform()) {
+      replaceTargetRef.current = { type: 'food', index: idx };
+      replaceSingleFileInputRef.current?.click();
+      return;
+    }
     try {
       const nativePick = await pickImageUsingNativeAndroidGallery();
+      if (nativePick.cancelled) return;
       if (nativePick.success && nativePick.dataUrl) {
         setFoodPhotos((prev) => prev.map((item, i) => (i === idx ? nativePick.dataUrl! : item)));
+        return;
       }
     } catch {
-      // ignore
+      // fallback to file input
     }
+    replaceTargetRef.current = { type: 'food', index: idx };
+    replaceSingleFileInputRef.current?.click();
   };
 
   const handleApplyUrl = () => {
@@ -359,6 +411,13 @@ export const RestaurantImageModal: React.FC<RestaurantImageModalProps> = ({
               </div>
             )}
 
+            <input
+              type="file"
+              ref={replaceSingleFileInputRef}
+              onChange={handleReplaceSingleFileChange}
+              accept="image/jpeg,image/jpg,image/png,image/webp"
+              className="hidden"
+            />
             <input
               type="file"
               ref={profileFileInputRef}

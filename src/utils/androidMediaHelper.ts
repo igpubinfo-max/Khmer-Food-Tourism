@@ -199,16 +199,29 @@ async function compressDataUrlIfLarge(
   });
 }
 
+export function isNativeAndroidOrIosPlatform(): boolean {
+  try {
+    return Capacitor.isNativePlatform();
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Opens the native Android Photo/Gallery picker when running on Android and returns a Data URL.
  * Returns { cancelled: true } safely if the user closes the picker without choosing an image.
  */
-export async function pickImageUsingNativeAndroidGallery(): Promise<{
+export async function pickImageUsingNativeAndroidGallery(
+  _maxDimension?: number,
+  _quality?: number
+): Promise<{
   success?: boolean;
   cancelled: boolean;
   dataUrl?: string;
+  fileName?: string;
+  mimeType?: string;
 }> {
-  if (!Capacitor.isNativePlatform()) {
+  if (!isNativeAndroidOrIosPlatform()) {
     return { success: false, cancelled: false };
   }
   try {
@@ -292,16 +305,25 @@ export async function batchProcessAndCompressImageFiles(
   return results;
 }
 
-export const MAX_IMAGE_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB
+export const MAX_IMAGE_FILE_SIZE_BYTES = 20 * 1024 * 1024; // 20 MB
 
 /**
- * Validates and compresses a File (JPG, JPEG, PNG, WebP) up to 10MB into a clean JPEG/PNG Data URL.
+ * Validates and compresses a File (JPG, JPEG, PNG, WebP) up to 20MB into a clean JPEG/WebP Data URL.
+ * Supports both (file, maxDimension, quality) and legacy 4-arg (file, maxWidth, maxHeight, quality).
  */
 export function processAndCompressImageFile(
   file: File,
   maxDimension: number = 1000,
-  quality: number = 0.82
+  quality: number = 0.82,
+  maybeQuality?: number
 ): Promise<string> {
+  const effectiveQuality =
+    typeof maybeQuality === 'number' && maybeQuality > 0 && maybeQuality <= 1
+      ? maybeQuality
+      : quality > 0 && quality <= 1
+        ? quality
+        : 0.85;
+
   return new Promise((resolve, reject) => {
     if (!file) {
       reject(new Error('មិនមានឯកសាររូបភាពត្រូវបានជ្រើសរើសទេ។'));
@@ -311,13 +333,13 @@ export function processAndCompressImageFile(
     const validMime = /^image\/(jpeg|jpg|png|webp|heic|heif)$/i.test(file.type) ||
       /\.(jpe?g|png|webp|heic)$/i.test(file.name || '');
     if (!validMime && file.type && !file.type.startsWith('image/')) {
-      reject(new Error('សូមជ្រើសរើសប្រភេទរូបភាពដែលត្រឹមត្រូវ (JPG, JPEG, ឬ PNG)។'));
+      reject(new Error('សូមជ្រើសរើសប្រភេទរូបភាពដែលត្រឹមត្រូវ (JPG, JPEG, WebP ឬ PNG)។'));
       return;
     }
 
-    const maxBytes = 12 * 1024 * 1024; // 12 MB
+    const maxBytes = 20 * 1024 * 1024; // 20 MB
     if (file.size > maxBytes) {
-      reject(new Error('ទំហំរូបភាពធំពេក (លើសពី 12MB)។ សូមជ្រើសរើសរូបភាពតូចជាងនេះ។'));
+      reject(new Error('ទំហំរូបភាពធំពេក (លើសពី 20MB)។ សូមជ្រើសរើសរូបភាពតូចជាងនេះ។'));
       return;
     }
 
@@ -360,7 +382,7 @@ export function processAndCompressImageFile(
           ctx.fillStyle = '#FFFFFF';
           ctx.fillRect(0, 0, canvas.width, canvas.height);
           ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-          const compressed = canvas.toDataURL('image/jpeg', quality);
+          const compressed = canvas.toDataURL('image/jpeg', effectiveQuality);
           resolve(compressed);
         } catch {
           resolve(rawDataUrl);

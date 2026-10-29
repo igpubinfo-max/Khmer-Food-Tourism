@@ -9,6 +9,7 @@ import {
   shareRichContent,
   formatRichShareText,
   copyTextNativeOrWeb,
+  isNativeAndroidOrIosPlatform,
   pickImageUsingNativeAndroidGallery,
   processAndCompressImageFile,
 } from '../utils/androidMediaHelper';
@@ -136,13 +137,30 @@ export const FoodDetailModal: React.FC = () => {
   };
 
   const handlePickDevicePhoto = async () => {
+    // On PC / Web browser, open the file dialog synchronously within the user click gesture
+    if (!isNativeAndroidOrIosPlatform()) {
+      fileInputRef.current?.click();
+      return;
+    }
+
     setIsUploadingPhoto(true);
     try {
       const pick = await pickImageUsingNativeAndroidGallery();
-      if (!pick.cancelled && pick.dataUrl) {
-        setEditPhotoUrl(pick.dataUrl);
-        showToast(language === 'km' ? 'បានជ្រើសរើសរូបភាពពីទូរស័ព្ទ' : 'Photo selected from device', 'info');
+      if (pick.cancelled) {
+        return;
       }
+      if (pick.dataUrl) {
+        setEditPhotoUrl(pick.dataUrl);
+        showToast(
+          language === 'km'
+            ? '✅ បានជ្រើសរើសរូបភាពពីទូរស័ព្ទរួចរាល់ — សូមចុច «រក្សាទុកការកែប្រែ»!'
+            : '✅ Photo selected from device — click "Save Changes" to apply!',
+          'success'
+        );
+        return;
+      }
+      // Fallback to HTML file input if native gallery returned no dataUrl
+      fileInputRef.current?.click();
     } catch {
       fileInputRef.current?.click();
     } finally {
@@ -152,14 +170,23 @@ export const FoodDetailModal: React.FC = () => {
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    e.target.value = '';
     if (!file) return;
     setIsUploadingPhoto(true);
     try {
-      const dataUrl = await processAndCompressImageFile(file, 1080, 810, 0.85);
+      const dataUrl = await processAndCompressImageFile(file, 1080, 0.85);
       setEditPhotoUrl(dataUrl);
-      showToast(language === 'km' ? 'បានបង្រួម និងបញ្ចូលរូបភាពរួចរាល់' : 'Photo compressed and ready', 'info');
-    } catch {
-      showToast(language === 'km' ? 'មិនអាចដំណើរការរូបភាពនេះបានទេ' : 'Failed to process image', 'warning');
+      showToast(
+        language === 'km'
+          ? '✅ បានផ្ទុករូបភាពរួចរាល់ — សូមចុច «រក្សាទុកការកែប្រែ» ខាងក្រោមដើម្បីរក្សាទុក!'
+          : '✅ Photo uploaded & ready — click "Save Changes" below to save!',
+        'success'
+      );
+    } catch (err: any) {
+      showToast(
+        err?.message || (language === 'km' ? 'មិនអាចដំណើរការរូបភាពនេះបានទេ' : 'Failed to process image'),
+        'warning'
+      );
     } finally {
       setIsUploadingPhoto(false);
     }
@@ -451,8 +478,18 @@ export const FoodDetailModal: React.FC = () => {
                 <label className="block font-bold text-xs text-slate-800 dark:text-slate-200">
                   {isKm ? 'រូបភាពមុខម្ហូប (Photo URL / Upload)' : 'Dish Photo'}
                 </label>
-                <div className="relative aspect-16/10 rounded-xl overflow-hidden bg-slate-900 border border-amber-400/50">
+                <div
+                  onClick={handlePickDevicePhoto}
+                  title={isKm ? 'ចុចដើម្បីជ្រើសរើសរូបភាពពីកុំព្យូទ័រ ឬទូរស័ព្ទ' : 'Click to choose photo from PC or phone'}
+                  className="relative aspect-16/10 rounded-xl overflow-hidden bg-slate-900 border border-amber-400/50 cursor-pointer group"
+                >
                   <img src={editPhotoUrl || selectedFood.photoUrl} alt="Preview" className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                    <span className="px-3 py-1.5 rounded-full bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-lg">
+                      <Upload className="w-3.5 h-3.5" />
+                      {isKm ? 'ចុចជ្រើសរើសរូបភាពពី PC / ទូរស័ព្ទ' : 'Click to upload photo'}
+                    </span>
+                  </div>
                 </div>
                 <input
                   type="text"
@@ -478,7 +515,7 @@ export const FoodDetailModal: React.FC = () => {
                     className="py-2 px-3 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer"
                   >
                     <Camera className="w-3.5 h-3.5" />
-                    <span>{isKm ? 'ជ្រើសរូបពីទូរស័ព្ទ' : 'Choose from Device'}</span>
+                    <span>{isKm ? 'ជ្រើសរូបពីទូរស័ព្ទ / PC' : 'Choose from PC / Device'}</span>
                   </button>
                 </div>
                 {onlineCandidates.length > 0 && (

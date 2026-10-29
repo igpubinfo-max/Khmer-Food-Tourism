@@ -14,6 +14,7 @@ import {
 } from '../types';
 import { tr } from '../utils/i18n';
 import {
+  isNativeAndroidOrIosPlatform,
   pickImageUsingNativeAndroidGallery,
   processAndCompressImageFile,
 } from '../utils/androidMediaHelper';
@@ -102,9 +103,17 @@ export const ManageMenuModal: React.FC = () => {
   };
 
   const handlePickDishNativeGallery = async () => {
+    if (!isNativeAndroidOrIosPlatform()) {
+      foodDishGalleryRef.current?.click();
+      return;
+    }
     setIsUploadingDishPhoto(true);
     try {
       const nativeRes = await pickImageUsingNativeAndroidGallery();
+      if (nativeRes && nativeRes.cancelled) {
+        setIsUploadingDishPhoto(false);
+        return;
+      }
       if (nativeRes && !nativeRes.cancelled && nativeRes.dataUrl) {
         setDishPhotoUrl(nativeRes.dataUrl);
         showToast(
