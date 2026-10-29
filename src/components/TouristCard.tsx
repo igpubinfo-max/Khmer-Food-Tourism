@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { TouristDestination } from '../types';
 import { useApp } from '../context/AppContext';
-import { MapPin, Star, Heart, Ticket, Edit2 } from 'lucide-react';
+import { MapPin, Star, Heart, Edit2 } from 'lucide-react';
 import { tr } from '../utils/i18n';
 import { getLocalizedDestination } from '../utils/zhDynamicTranslator';
 
@@ -141,11 +141,6 @@ const TouristCardView: React.FC<TouristCardViewProps> = React.memo(({
             <Star className="w-4 h-4 fill-current text-amber-500" />
             <span>{destination.rating ?? 4.8}</span>
             <span className="text-slate-400 text-xs">({destination.reviewCount ?? 0})</span>
-          </div>
-
-          <div className="flex items-center gap-1 text-[#064E3B] dark:text-emerald-400 font-bold text-xs">
-            <Ticket className="w-3.5 h-3.5" />
-            <span>{loc.entranceFee}</span>
           </div>
         </div>
       </div>

@@ -1900,7 +1900,7 @@ function computeLocalizedDestination(dest: TouristDestination, lang: Language) {
       province: sanitizeStrictLanguageText(dest.provinceKh, 'km'),
       address: sanitizeStrictLanguageText(dest.addressKh, 'km'),
       description: sanitizeStrictLanguageText(dest.descriptionKh, 'km'),
-      entranceFee: formatApproxPriceText(dest.entranceFeeKh || dest.entryFeeKh || 'ឥតគិតថ្លៃ', 'km'),
+      entranceFee: '',
       bestTime: sanitizeStrictLanguageText(dest.bestTimeToVisitKh || 'ពេញមួយឆ្នាំ', 'km'),
       highlights: (dest.highlightsKh || []).map((h: string) => sanitizeStrictLanguageText(h, 'km')),
       socialHighlight: sanitizeStrictLanguageText(dest.socialHighlightKh || '', 'km'),
@@ -1916,7 +1916,7 @@ function computeLocalizedDestination(dest: TouristDestination, lang: Language) {
       province: sanitizeStrictLanguageText(dest.provinceEn, 'en'),
       address: sanitizeStrictLanguageText(dest.addressEn, 'en'),
       description: sanitizeStrictLanguageText(dest.descriptionEn, 'en'),
-      entranceFee: formatApproxPriceText(sanitizeStrictLanguageText(dest.entranceFeeEn || dest.entryFeeEn || 'Free Entry', 'en'), 'en'),
+      entranceFee: '',
       bestTime: sanitizeStrictLanguageText(dest.bestTimeToVisitEn || 'All year round', 'en'),
       highlights:
         highlightsEnList && highlightsEnList.length > 0
@@ -1937,8 +1937,7 @@ function computeLocalizedDestination(dest: TouristDestination, lang: Language) {
   const zhCat = sanitizeStrictLanguageText(rawZhCat, 'zh');
   const rawZhDesc = DEST_DESC_ZH_BY_ID[dest.id] || translateDynamicTextToZh(dest.descriptionEn);
   const zhDesc = sanitizeStrictLanguageText(rawZhDesc, 'zh');
-  const rawFee = dest.entranceFeeEn || dest.entryFeeEn || 'Free';
-  const zhFee = formatApproxPriceText(sanitizeStrictLanguageText(translateEntranceFeeToZh(rawFee), 'zh'), 'zh');
+  const zhFee = '';
   const rawTime = dest.bestTimeToVisitEn || 'All year round';
   const zhTime = sanitizeStrictLanguageText(translateBestTimeToZh(rawTime), 'zh');
   const zhAddress = sanitizeStrictLanguageText(translateAddressToZh(dest.addressEn || '', zhProv), 'zh');

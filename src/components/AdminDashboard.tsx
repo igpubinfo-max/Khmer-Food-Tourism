@@ -121,7 +121,7 @@ export const AdminDashboard: React.FC = () => {
   const [newDestCategory, setNewDestCategory] = useState<DestinationCategorySlug>('temple');
   const [newDestProvince, setNewDestProvince] = useState('ខេត្តសៀមរាប');
   const [newDestAddress, setNewDestAddress] = useState('');
-  const [newDestFee, setNewDestFee] = useState('ឥតគិតថ្លៃ (ជាតិ)');
+  const [newDestFee, setNewDestFee] = useState('');
   const [newDestBestTime, setNewDestBestTime] = useState('ពេញមួយឆ្នាំ');
   const [newDestPhotoUrl, setNewDestPhotoUrl] = useState('https://images.unsplash.com/photo-1569154941061-e231b4725ef1?w=800&auto=format&fit=crop&q=80');
   const [newDestDescKh, setNewDestDescKh] = useState('');

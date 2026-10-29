@@ -665,7 +665,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
                             📍 {distKm} km
                           </span>
                         )}
-                        {item.priceDisplay && (
+                        {item.priceDisplay && item.targetType !== 'destination' && (
                           <span className="px-1.5 py-0.2 rounded bg-amber-400/25 text-amber-200">
                             {item.priceDisplay.includes('$0') || item.priceDisplay.includes('ឥតគិតថ្លៃ') || item.priceDisplay.includes('សេរី') || item.priceDisplay.includes('ប្រហាក់ប្រហែល')
                               ? item.priceDisplay

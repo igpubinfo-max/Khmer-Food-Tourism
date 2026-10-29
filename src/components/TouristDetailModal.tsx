@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
-  X, Heart, MapPin, Calendar, Ticket, ExternalLink, 
+  X, Heart, MapPin, Calendar, ExternalLink, 
   Send, Share2, Sparkles, Compass, Camera, Bookmark, Edit2, Save
 } from 'lucide-react';
 import { TouristImageModal } from './TouristImageModal';
@@ -32,8 +32,6 @@ export const TouristDetailModal: React.FC = () => {
   const [editProvinceEn, setEditProvinceEn] = useState('');
   const [editAddressKh, setEditAddressKh] = useState('');
   const [editAddressEn, setEditAddressEn] = useState('');
-  const [editEntranceFeeKh, setEditEntranceFeeKh] = useState('');
-  const [editEntranceFeeEn, setEditEntranceFeeEn] = useState('');
   const [editBestTimeKh, setEditBestTimeKh] = useState('');
   const [editBestTimeEn, setEditBestTimeEn] = useState('');
   const [editMapUrl, setEditMapUrl] = useState('');
@@ -54,8 +52,6 @@ export const TouristDetailModal: React.FC = () => {
       setEditProvinceEn(selectedDestination.provinceEn || '');
       setEditAddressKh(selectedDestination.addressKh || '');
       setEditAddressEn(selectedDestination.addressEn || '');
-      setEditEntranceFeeKh(selectedDestination.entranceFeeKh || 'ឥតគិតថ្លៃ');
-      setEditEntranceFeeEn(selectedDestination.entranceFeeEn || 'Free Entry');
       setEditBestTimeKh(selectedDestination.bestTimeToVisitKh || 'ពេញមួយឆ្នាំ');
       setEditBestTimeEn(selectedDestination.bestTimeToVisitEn || 'All year round');
       setEditMapUrl(selectedDestination.mapUrl || '');
@@ -99,8 +95,8 @@ export const TouristDetailModal: React.FC = () => {
       provinceEn: editProvinceEn.trim() || selectedDestination.provinceEn,
       addressKh: editAddressKh.trim() || selectedDestination.addressKh,
       addressEn: editAddressEn.trim() || selectedDestination.addressEn,
-      entranceFeeKh: editEntranceFeeKh.trim() || selectedDestination.entranceFeeKh,
-      entranceFeeEn: editEntranceFeeEn.trim() || selectedDestination.entranceFeeEn,
+      entranceFeeKh: '',
+      entranceFeeEn: '',
       bestTimeToVisitKh: editBestTimeKh.trim() || selectedDestination.bestTimeToVisitKh,
       bestTimeToVisitEn: editBestTimeEn.trim() || selectedDestination.bestTimeToVisitEn,
       mapUrl: editMapUrl.trim() || selectedDestination.mapUrl,
@@ -133,7 +129,6 @@ export const TouristDetailModal: React.FC = () => {
     location: isKm
       ? `${selectedDestination.addressKh} (${selectedDestination.provinceKh})`
       : `${selectedDestination.addressEn} (${selectedDestination.provinceEn})`,
-    priceDisplay: isKm ? selectedDestination.entranceFeeKh : selectedDestination.entranceFeeEn,
     signatureDishes: selectedDestination.highlightsKh,
     photoUrl: selectedDestination.photoUrl,
     mapUrl: selectedDestination.mapUrl,
@@ -373,32 +368,18 @@ export const TouristDetailModal: React.FC = () => {
                 </div>
               </div>
 
-              {/* Entrance fee & Best time */}
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="block font-bold text-xs text-slate-800 dark:text-slate-200 mb-1">
-                    {isKm ? 'តម្លៃសំបុត្រ (Entrance Fee)' : 'Entrance Fee'}
-                  </label>
-                  <input
-                    type="text"
-                    value={editEntranceFeeKh}
-                    onChange={(e) => setEditEntranceFeeKh(e.target.value)}
-                    placeholder="ឥតគិតថ្លៃ ឬ $2"
-                    className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block font-bold text-xs text-slate-800 dark:text-slate-200 mb-1">
-                    {isKm ? 'ពេលវេលាល្អសម្រាប់ដើរលេង' : 'Best Time to Visit'}
-                  </label>
-                  <input
-                    type="text"
-                    value={editBestTimeKh}
-                    onChange={(e) => setEditBestTimeKh(e.target.value)}
-                    placeholder="ពេលព្រឹក / ពេញមួយឆ្នាំ"
-                    className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-white"
-                  />
-                </div>
+              {/* Best time to visit */}
+              <div>
+                <label className="block font-bold text-xs text-slate-800 dark:text-slate-200 mb-1">
+                  {isKm ? 'ពេលវេលាល្អសម្រាប់ដើរលេង' : 'Best Time to Visit'}
+                </label>
+                <input
+                  type="text"
+                  value={editBestTimeKh}
+                  onChange={(e) => setEditBestTimeKh(e.target.value)}
+                  placeholder="ពេលព្រឹក / ពេញមួយឆ្នាំ"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-white"
+                />
               </div>
 
               {/* Highlights */}
@@ -513,21 +494,8 @@ export const TouristDetailModal: React.FC = () => {
               </div>
             )}
 
-            {/* Quick Info Cards: Fees & Best Time */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {/* Fee Card */}
-              <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 space-y-1">
-                <div className="flex items-center gap-2 text-[#064E3B] dark:text-emerald-400 font-bold text-xs">
-                  <Ticket className="w-4 h-4 text-[#059669]" />
-                  <span>{tr(language, 'សំបុត្រចូលទស្សនា', 'Entrance Fee', '门票费用')}</span>
-                </div>
-                <p className="text-xs text-slate-700 dark:text-slate-200 font-medium leading-relaxed">
-                  {loc.entranceFee}
-                </p>
-              </div>
-
-              {/* Best Time Card */}
-              <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 space-y-1">
+            {/* Quick Info Card: Best Time */}
+            <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 space-y-1">
                 <div className="flex items-center gap-2 text-[#064E3B] dark:text-emerald-400 font-bold text-xs">
                   <Calendar className="w-4 h-4 text-[#059669]" />
                   <span>{tr(language, 'ពេលវេលាល្អបំផុតដើម្បីមកលេង', 'Best Time to Visit', '最佳游览时间')}</span>
@@ -536,7 +504,6 @@ export const TouristDetailModal: React.FC = () => {
                   {loc.bestTime}
                 </p>
               </div>
-            </div>
 
             {/* Address */}
             <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 flex items-start gap-2.5 text-xs">

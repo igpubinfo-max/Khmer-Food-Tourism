@@ -255,7 +255,7 @@ export function buildCuratedCambodiaDiscoveryItems(
         `ស្វែងយល់ពីសម្រស់ធម្មជាតិ និងវប្បធម៌នៅ ${d.nameKh} (${d.provinceKh}) ជាមួយរូបភាពថ្មីច្បាស់កម្រិត HD និងផែនទីធ្វើដំណើរ។`,
       summaryEn:
         d.descriptionEn ||
-        `Discover ${d.nameEn} in ${d.provinceEn} with newly updated HD photos, entrance info, and GPS directions.`,
+        `Discover ${d.nameEn} in ${d.provinceEn} with newly updated HD photos and GPS directions.`,
       photoUrl: d.photoUrl || `/destinations/${d.id}.jpg`,
       provinceKh: d.provinceKh || 'ខេត្តសៀមរាប',
       provinceEn: d.provinceEn || 'Siem Reap',
@@ -268,7 +268,6 @@ export function buildCuratedCambodiaDiscoveryItems(
       sourcePlatform: idx % 2 === 0 ? 'supabase_live' : 'google_maps',
       targetType: 'destination',
       targetId: d.id,
-      priceDisplay: d.entranceFeeKh,
       rating: d.rating || 4.8,
       isNewToday: idx < 5,
       tagsKh: [d.categoryKh || 'ទេសចរណ៍', d.provinceKh || 'កម្ពុជា'],
@@ -752,7 +751,6 @@ export async function fetchDynamicDailyDiscoveries(params: {
                 sourcePlatform: 'supabase_live',
                 targetType: 'destination',
                 targetId: dest.id,
-                priceDisplay: dest.entranceFeeKh,
                 rating: dest.rating || 4.9,
                 isNewToday: true,
                 tagsKh: ['ទើបកែប្រែថ្មី (Live)', dest.provinceKh || 'កម្ពុជា'],

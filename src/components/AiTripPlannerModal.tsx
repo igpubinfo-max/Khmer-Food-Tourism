@@ -149,10 +149,10 @@ export const AiTripPlannerModal: React.FC = () => {
     const provLabel = translateProvince(generatedPlan.provinceKh, language);
     const text =
       language === 'km'
-        ? `🗺️ ផែនការដើរលេង AI នៅ${generatedPlan.provinceKh} (${generatedPlan.durationDays} ថ្ងៃ)\n💰 ថវិកាប៉ាន់ស្មានសរុប៖ ~$${generatedPlan.totalEstimatedCostUsd} USD\n👥 ដំណើរកម្សាន្ត៖ ${generatedPlan.companion}\nទាញយកកម្មវិធី Khmer Food & Tourism ដើម្បីមើលកាលវិភាគលម្អិត!`
+        ? `🗺️ ផែនការដើរលេង AI នៅ${generatedPlan.provinceKh} (${generatedPlan.durationDays} ថ្ងៃ)\n👥 ដំណើរកម្សាន្ត៖ ${generatedPlan.companion}\nទាញយកកម្មវិធី Khmer Food & Tourism ដើម្បីមើលកាលវិភាគលម្អិត!`
         : language === 'zh'
-        ? `🗺️ AI 智能行程规划：${provLabel}（${generatedPlan.durationDays}天）\n💰 预计总预算：~$${generatedPlan.totalEstimatedCostUsd} USD\n👥 出行方式：${generatedPlan.companion}\n下载 Khmer Food & Tourism 查看完整行程！`
-        : `🗺️ AI Trip Plan in ${provLabel} (${generatedPlan.durationDays} Days)\n💰 Est. Budget: ~$${generatedPlan.totalEstimatedCostUsd} USD\n👥 Companion: ${generatedPlan.companion}\nDownload Khmer Food & Tourism for the full itinerary!`;
+        ? `🗺️ AI 智能行程规划：${provLabel}（${generatedPlan.durationDays}天）\n👥 出行方式：${generatedPlan.companion}\n下载 Khmer Food & Tourism 查看完整行程！`
+        : `🗺️ AI Trip Plan in ${provLabel} (${generatedPlan.durationDays} Days)\n👥 Companion: ${generatedPlan.companion}\nDownload Khmer Food & Tourism for the full itinerary!`;
     
     if (navigator.share) {
       navigator.share({ title: 'AI Trip Plan', text }).catch(() => {});
@@ -363,9 +363,6 @@ export const AiTripPlannerModal: React.FC = () => {
                       }`}
                     >
                       <div className="text-xs font-bold">{tr(language, b.labelKh, b.labelEn, b.labelZh)}</div>
-                      <div className={`text-[10px] ${budgetLevel === b.id ? 'text-emerald-200' : 'text-slate-400'}`}>
-                        {tr(language, b.subKh, b.subEn, b.subZh)}
-                      </div>
                     </button>
                   ))}
                 </div>
@@ -417,14 +414,6 @@ export const AiTripPlannerModal: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <span className="px-2.5 py-1 rounded-full bg-[#064E3B] text-white text-[11px] font-bold">
                     📍 {translateProvince(generatedPlan.provinceKh, language)}
-                  </span>
-                  <span className="text-xs font-black text-[#059669] dark:text-emerald-400">
-                    {tr(
-                      language,
-                      `ថវិកាប្រហាក់ប្រហែល $${generatedPlan.totalEstimatedCostUsd} USD`,
-                      `Approx. $${generatedPlan.totalEstimatedCostUsd} USD`,
-                      `预计总预算：约 $${generatedPlan.totalEstimatedCostUsd} USD`
-                    )}
                   </span>
                 </div>
 
@@ -510,9 +499,6 @@ export const AiTripPlannerModal: React.FC = () => {
                                 : act.timePeriod === 'afternoon'
                                 ? tr(language, '🌄 ពេលរសៀល', '🌄 Afternoon', '🌄 下午')
                                 : tr(language, '🌙 ពេលល្ងាច', '🌙 Evening', '🌙 傍晚/晚餐')}
-                            </span>
-                            <span className="text-[11px] font-mono text-emerald-600 font-bold">
-                              {tr(language, `ប្រហាក់ប្រហែល $${act.estimatedCostUsd}`, `Approx. $${act.estimatedCostUsd}`, `约 $${act.estimatedCostUsd}`)}
                             </span>
                           </div>
 

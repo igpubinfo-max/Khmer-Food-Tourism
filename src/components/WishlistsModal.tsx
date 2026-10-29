@@ -85,7 +85,7 @@ export const WishlistsModal: React.FC = () => {
             nameEn: destination.nameEn,
             photoUrl: destination.photoUrl,
             provinceKh: destination.provinceKh,
-            priceDisplay: destination.entryFee,
+            priceDisplay: undefined,
             addedAt: '',
           };
         }
@@ -103,7 +103,7 @@ export const WishlistsModal: React.FC = () => {
             nameEn: cachedPlace.nameEn || cachedPlace.nameKh,
             photoUrl: cachedPlace.photoUrl,
             provinceKh: cachedPlace.provinceKh || cachedPlace.province,
-            priceDisplay: cachedPlace.priceLevel || '$$',
+            priceDisplay: cachedPlace.category === 'tourism' ? undefined : (cachedPlace.priceLevel || '$$'),
             addedAt: '',
           };
         }
@@ -385,6 +385,7 @@ export const WishlistsModal: React.FC = () => {
                       <ExternalLink className="w-3 h-3 text-emerald-600 shrink-0 opacity-70" />
                     </h4>
                     {item.priceDisplay &&
+                      item.type !== 'destination' &&
                       !(item.type === 'food' && (item.priceDisplay.includes('$') || item.priceDisplay.includes('៛'))) && (
                       <span className="text-[11px] font-mono text-[#059669] font-bold">
                         {item.priceDisplay.includes('$0') || item.priceDisplay.includes('ឥតគិតថ្លៃ') || item.priceDisplay.includes('ប្រហាក់ប្រហែល') || item.priceDisplay.includes('គីឡូកាឡូរី') || item.priceDisplay.includes('kcal')

@@ -1096,7 +1096,7 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                                   🏷️ {place.primaryTypeDisplayName}
                                 </span>
                               )}
-                              {place.priceLevel && (
+                              {place.priceLevel && place.category !== 'tourism' && (
                                 <span className="px-1.5 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-200 font-bold">
                                   💰 {tr(language, 'ប្រហាក់ប្រហែល ', 'Approx. ', '约 ')}
                                   {place.priceLevel}
