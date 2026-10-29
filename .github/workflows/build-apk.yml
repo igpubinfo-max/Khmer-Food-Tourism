@@ -37,8 +37,8 @@ jobs:
 
       - name: 5. Sync Version & Build Web Bundle
         run: |
-          CURRENT_VC=$(grep -oP 'versionCode\s+\K[0-9]+' android/app/build.gradle || echo 500)
-          AUTO_VC=$((200 + ${{ github.run_number }}))
+          CURRENT_VC=$(grep -oP 'versionCode\s+\K[0-9]+' android/app/build.gradle || echo 850)
+          AUTO_VC=$((800 + ${{ github.run_number }}))
           if [ "$CURRENT_VC" -gt "$AUTO_VC" ]; then
             FINAL_VC=$CURRENT_VC
           else
@@ -77,7 +77,7 @@ jobs:
           echo "Building Android APK & Play Store AAB with versionCode $FINAL_VC"
           cd android
           chmod +x ./gradlew
-          ./gradlew assembleRelease --no-daemon -x lint -x lintVitalRelease || ./gradlew assembleDebug --no-daemon
+          ./gradlew assembleRelease --no-daemon -x lint -x lintVitalRelease
           ./gradlew bundleRelease --no-daemon -x lint -x lintVitalRelease
 
       - name: 9. Locate and Rename Signed APK and AAB Files

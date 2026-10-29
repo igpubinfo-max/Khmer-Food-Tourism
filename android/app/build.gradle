@@ -7,7 +7,7 @@ android {
         applicationId "com.khmerfood.tourism"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 500
+        versionCode 850
         versionName "2.3.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
@@ -26,8 +26,6 @@ android {
                 keyPassword System.getenv("KEY_PASSWORD") ?: "KhmerFood2026PlayStore"
                 v1SigningEnabled true
                 v2SigningEnabled true
-                enableV3Signing true
-                enableV4Signing true
             }
         }
     }
