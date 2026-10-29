@@ -95,17 +95,21 @@ jobs:
           if [ -n "$REL_AAB" ] && [ -f "$REL_AAB" ]; then
             cp "$REL_AAB" android/app/build/outputs/apk/debug/KhmerFoodTourism-v2.3.1-PlayStore.aab
           fi
+          if [ -f android/app/build/outputs/apk/debug/KhmerFoodTourism-v2.3.1.apk ]; then
+            (cd android/app/build/outputs/apk/debug && zip -9 KhmerFoodTourism-v2.3.1-Android.zip KhmerFoodTourism-v2.3.1.apk)
+          fi
           ls -la android/app/build/outputs/apk/debug/
 
-      - name: 10. Upload Android Packages Artifact (APK + Play Store AAB)
+      - name: 10. Upload Android Packages Artifact (APK + ZIP + Play Store AAB)
         uses: actions/upload-artifact@v4
         with:
           name: Khmer-Food-Tourism-Release-Packages
           path: |
             android/app/build/outputs/apk/debug/KhmerFoodTourism-v2.3.1.apk
+            android/app/build/outputs/apk/debug/KhmerFoodTourism-v2.3.1-Android.zip
             android/app/build/outputs/apk/debug/KhmerFoodTourism-v2.3.1-PlayStore.aab
 
-      - name: 11. Publish GitHub Release with Signed APK & Play Store AAB
+      - name: 11. Publish GitHub Release with Signed APK, ZIP & Play Store AAB
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
@@ -116,7 +120,8 @@ jobs:
             ### 🇰🇭 កម្មវិធីទូរស័ព្ទដៃ អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism Mobile App)
             
             **កំណែផ្លូវការ v2.3.1 (Official Signed Production Packages):**
-            - 📦 **KhmerFoodTourism-v2.3.1.apk:** Direct install APK for Android devices.
+            - 📦 **KhmerFoodTourism-v2.3.1.apk:** Direct install APK for Android devices (V1+V2+V3+V4 signed).
+            - 🗜️ **KhmerFoodTourism-v2.3.1-Android.zip:** Chrome-friendly ZIP package (bypasses Chrome APK download block on PC/Android).
             - 🚀 **KhmerFoodTourism-v2.3.1-PlayStore.aab:** Signed Android App Bundle for Google Play Store distribution.
             - 🍎 **KhmerFoodTourism-v2.3.1.ipa:** Signed iOS Package for Apple App Store / TestFlight.
             - ❄️ **Zero-Overheat Cloud & Media Engine:** Baked static photos, bounded search cache & low-power GPS.
@@ -125,4 +130,5 @@ jobs:
           prerelease: false
           files: |
             android/app/build/outputs/apk/debug/KhmerFoodTourism-v2.3.1.apk
+            android/app/build/outputs/apk/debug/KhmerFoodTourism-v2.3.1-Android.zip
             android/app/build/outputs/apk/debug/KhmerFoodTourism-v2.3.1-PlayStore.aab

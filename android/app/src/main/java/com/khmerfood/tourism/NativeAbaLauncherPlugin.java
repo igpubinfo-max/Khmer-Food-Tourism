@@ -476,6 +476,34 @@ public class NativeAbaLauncherPlugin extends Plugin {
     }
 
     /**
+     * Opens any HTTPS URL (such as an APK or ZIP download link) directly in the system's external browser
+     * so Capacitor WebView does not swallow or block file downloads.
+     */
+    @PluginMethod
+    public void openExternalUrl(PluginCall call) {
+        Context context = getContext();
+        if (context == null) {
+            call.reject("Context is null");
+            return;
+        }
+        String url = call.getString("url", "");
+        if (url == null || url.trim().isEmpty()) {
+            call.reject("Missing url");
+            return;
+        }
+        try {
+            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url.trim()));
+            browserIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(browserIntent);
+            JSObject ret = new JSObject();
+            ret.put("opened", true);
+            call.resolve(ret);
+        } catch (Exception e) {
+            call.reject("Could not open external URL: " + e.getMessage());
+        }
+    }
+
+    /**
      * Resolves a photoUrl (bundled APK asset, Base64 data URL, or remote HTTP/HTTPS URL)
      * into a temporary file in cache/shared_images so it can be shared via FileProvider.
      */

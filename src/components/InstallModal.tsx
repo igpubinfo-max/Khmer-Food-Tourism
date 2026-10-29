@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { 
   X, Download, Share2, Smartphone, CheckCircle, ExternalLink, 
-  QrCode, Apple, Compass, PlusSquare, ArrowRight, ShieldCheck 
+  QrCode, Apple, Compass, PlusSquare, ArrowRight, ShieldCheck, Archive, AlertTriangle
 } from 'lucide-react';
+import { Capacitor } from '@capacitor/core';
 import QRCode from 'qrcode';
 import { useApp } from '../context/AppContext';
 import { APP_VERSION, APP_BUILD_CODE } from '../types';
@@ -24,15 +25,33 @@ export const InstallModal: React.FC = () => {
   const [copied, setCopied] = useState<boolean>(false);
 
   const isKm = language === 'km';
-  const LATEST_SIGNED_APK_URL = 'https://github.com/igpubinfo-max/Khmer-Food-Tourism/releases/download/v2.3.0/KhmerFoodTourism-v2.3.0.apk';
+  const LATEST_SIGNED_APK_URL = 'https://github.com/igpubinfo-max/Khmer-Food-Tourism/releases/download/v2.3.1/KhmerFoodTourism-v2.3.1.apk';
+  const LATEST_ZIP_PACKAGE_URL = 'https://github.com/igpubinfo-max/Khmer-Food-Tourism/releases/download/v2.3.1/KhmerFoodTourism-v2.3.1-Android.zip';
+  const LATEST_RELEASE_PAGE_URL = 'https://github.com/igpubinfo-max/Khmer-Food-Tourism/releases/tag/v2.3.1';
   const apkDownloadTarget =
     appSettings.apkDownloadUrl &&
     !appSettings.apkDownloadUrl.includes('app-debug.apk') &&
-    appSettings.apkDownloadUrl.includes('v2.3.0')
+    appSettings.apkDownloadUrl.includes('v2.3.1')
       ? appSettings.apkDownloadUrl
       : LATEST_SIGNED_APK_URL;
   const playStoreTarget = appSettings.playStoreUrl || 'https://play.google.com/store/apps/details?id=com.khmerfood.tourism';
   const iosWebTarget = 'https://igpubinfo-max.github.io/Khmer-Food-Tourism/';
+
+  const handleExternalDownload = async (url: string, e?: React.MouseEvent) => {
+    if (Capacitor.isNativePlatform()) {
+      if (e) e.preventDefault();
+      try {
+        const NativeAbaLauncher = (window as any)?.Capacitor?.Plugins?.NativeAbaLauncher;
+        if (NativeAbaLauncher && typeof NativeAbaLauncher.openExternalUrl === 'function') {
+          await NativeAbaLauncher.openExternalUrl({ url });
+          return;
+        }
+      } catch {
+        // Fallback to window.open
+      }
+      window.open(url, '_system');
+    }
+  };
 
   useEffect(() => {
     if (isInstallModalOpen) {
@@ -161,6 +180,7 @@ export const InstallModal: React.FC = () => {
               <div className="space-y-2">
                 <a
                   href={apkDownloadTarget}
+                  onClick={e => handleExternalDownload(apkDownloadTarget, e)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-[#064E3B] hover:bg-[#047857] text-white font-bold rounded-2xl shadow-md shadow-emerald-950/20 active:scale-[0.98] transition-all font-khmer text-xs"
@@ -176,17 +196,85 @@ export const InstallModal: React.FC = () => {
                   </span>
                 </a>
 
-                <button
-                  onClick={() => handleCopyLink(apkDownloadTarget)}
-                  className="w-full flex items-center justify-center gap-1.5 py-2.5 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-medium rounded-2xl transition font-khmer text-xs border border-slate-200 dark:border-slate-700"
+                <a
+                  href={LATEST_ZIP_PACKAGE_URL}
+                  onClick={e => handleExternalDownload(LATEST_ZIP_PACKAGE_URL, e)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-2xl shadow-xs active:scale-[0.98] transition-all font-khmer text-xs"
                 >
-                  {copied ? <CheckCircle className="w-4 h-4 text-[#059669]" /> : <Share2 className="w-4 h-4 text-slate-500" />}
+                  <Archive className="w-4 h-4 text-amber-200" />
                   <span>
-                    {copied
-                      ? tr(language, 'បានចម្លងរួចរាល់!', 'Copied!', '已复制！')
-                      : tr(language, 'ចម្លងតំណភ្ជាប់ APK', 'Copy APK Download Link', '复制 APK 下载链接')}
+                    {tr(
+                      language,
+                      `ទាញយកជាឯកសារ .ZIP (ប្រសិនបើ Chrome បិទមិនឱ្យទាញយក .APK)`,
+                      `Download as .ZIP Package (Bypasses Chrome .APK Block)`,
+                      `下载 .ZIP 压缩包（绕过 Chrome 拦截 .APK）`
+                    )}
                   </span>
-                </button>
+                </a>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => handleCopyLink(apkDownloadTarget)}
+                    className="w-full flex items-center justify-center gap-1.5 py-2.5 px-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-medium rounded-2xl transition font-khmer text-xs border border-slate-200 dark:border-slate-700"
+                  >
+                    {copied ? <CheckCircle className="w-4 h-4 text-[#059669]" /> : <Share2 className="w-4 h-4 text-slate-500" />}
+                    <span>
+                      {copied
+                        ? tr(language, 'បានចម្លងរួចរាល់!', 'Copied!', '已复制！')
+                        : tr(language, 'ចម្លងតំណភ្ជាប់ APK', 'Copy APK Link', '复制 APK 链接')}
+                    </span>
+                  </button>
+
+                  <a
+                    href={LATEST_RELEASE_PAGE_URL}
+                    onClick={e => handleExternalDownload(LATEST_RELEASE_PAGE_URL, e)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full flex items-center justify-center gap-1.5 py-2.5 px-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-medium rounded-2xl transition font-khmer text-xs border border-slate-200 dark:border-slate-700"
+                  >
+                    <ExternalLink className="w-4 h-4 text-emerald-600" />
+                    <span>
+                      {tr(language, 'ទំព័រទាញយកផ្ទាល់', 'Release Page', '官方发布页')}
+                    </span>
+                  </a>
+                </div>
+              </div>
+
+              {/* Chrome Download Block Bypass Guide */}
+              <div className="bg-blue-50/90 dark:bg-blue-950/30 rounded-2xl p-3.5 border border-blue-300 dark:border-blue-800/70 space-y-2 font-khmer">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
+                  <h4 className="text-xs font-extrabold text-slate-900 dark:text-blue-200">
+                    {tr(
+                      language,
+                      '💡 ប្រសិនបើ Chrome បង្ហាញសារ "File might be harmful" ឬមិនឱ្យទាញយក៖',
+                      '💡 If Chrome says "File might be harmful" or blocks the download:',
+                      '💡 如果 Chrome 提示“文件可能有害”或拦截下载：'
+                    )}
+                  </h4>
+                </div>
+                <div className="space-y-1.5 text-[11px] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900/80 p-2.5 rounded-xl border border-blue-200 dark:border-slate-700">
+                  <p>
+                    <strong>• {tr(language, 'លើទូរស័ព្ទ Android (Chrome):', 'On Android Phone (Chrome):', '在 Android 手机 (Chrome)：')}</strong>{' '}
+                    {tr(
+                      language,
+                      'ចុចពាក្យ «Download anyway (ទាញយកទោះជាយ៉ាងណាក៏ដោយ)» រួចចុច «Open» -> បើក «Allow from this source» -> ចុច «Install»។',
+                      'Tap "Download anyway", then tap "Open" -> toggle ON "Allow from this source" -> tap "Install".',
+                      '点击“仍然下载 (Download anyway)”，完成后点击打开并允许“来自此来源的应用”。'
+                    )}
+                  </p>
+                  <p>
+                    <strong>• {tr(language, 'លើកុំព្យូទ័រ PC (Chrome):', 'On Computer / PC (Chrome):', '在电脑 PC (Chrome)：')}</strong>{' '}
+                    {tr(
+                      language,
+                      'ចុច Ctrl + J (ឬបើក chrome://downloads) -> ចុច «Keep» -> «Keep anyway» ឬចុចប៊ូតុងពណ៌លឿងខាងលើដើម្បីទាញយកជាឯកសារ .ZIP ជំនួសវិញ!',
+                      'Press Ctrl + J (open chrome://downloads) -> click "Keep" -> "Keep anyway", OR click the yellow button above to download the .ZIP package instead!',
+                      '按 Ctrl + J 打开下载记录 -> 点击“保留 (Keep)” -> “仍然保留”，或直接点击上方黄色按钮下载 .ZIP 压缩包！'
+                    )}
+                  </p>
+                </div>
               </div>
 
               {/* Official Google Play Store Option */}

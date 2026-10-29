@@ -26,6 +26,8 @@ android {
                 keyPassword System.getenv("KEY_PASSWORD") ?: "KhmerFood2026PlayStore"
                 v1SigningEnabled true
                 v2SigningEnabled true
+                enableV3Signing true
+                enableV4Signing true
             }
         }
     }
