@@ -67,8 +67,6 @@ export const ManageMenuModal: React.FC = () => {
   // Menu item fields
   const [nameKh, setNameKh] = useState('');
   const [nameEn, setNameEn] = useState('');
-  const [priceUsd, setPriceUsd] = useState('5.00');
-  const [priceRiel, setPriceRiel] = useState('20000');
   const [dishPhotoUrl, setDishPhotoUrl] = useState('https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80');
   const [descriptionKh, setDescriptionKh] = useState('');
   const [isSearchingOnlineDish, setIsSearchingOnlineDish] = useState(false);
@@ -318,8 +316,6 @@ export const ManageMenuModal: React.FC = () => {
   const resetMenuForm = () => {
     setNameKh('');
     setNameEn('');
-    setPriceUsd('5.00');
-    setPriceRiel('20000');
     setDishPhotoUrl('https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80');
     setDescriptionKh('');
     setEditingItemId(null);
@@ -373,8 +369,6 @@ export const ManageMenuModal: React.FC = () => {
     setEditingItemId(item.id);
     setNameKh(item.nameKh);
     setNameEn(item.nameEn || '');
-    setPriceUsd(item.priceUsd.toString());
-    setPriceRiel(item.priceRiel.toString());
     setDishPhotoUrl(item.photoUrl);
     setDescriptionKh(item.descriptionKh || '');
     setStatusBanner(null);
@@ -403,8 +397,6 @@ export const ManageMenuModal: React.FC = () => {
       return;
     }
 
-    const usd = Math.max(0, parseFloat(priceUsd) || 0);
-    const riel = Math.max(0, parseInt(priceRiel, 10) || Math.round(usd * 4100));
     const finalPhoto = dishPhotoUrl.trim() || sampleFoodPhotos[0];
 
     setIsSavingDish(true);
@@ -413,8 +405,8 @@ export const ManageMenuModal: React.FC = () => {
         const ok = addRestaurantMenuItem(managingRestaurant.id, {
           nameKh: finalNameKh,
           nameEn: nameEn.trim() || finalNameKh,
-          priceUsd: usd,
-          priceRiel: riel,
+          priceUsd: 0,
+          priceRiel: 0,
           photoUrl: finalPhoto,
           descriptionKh: descriptionKh.trim(),
         });
@@ -452,8 +444,8 @@ export const ManageMenuModal: React.FC = () => {
           ...existing,
           nameKh: finalNameKh,
           nameEn: nameEn.trim() || finalNameKh,
-          priceUsd: usd,
-          priceRiel: riel,
+          priceUsd: 0,
+          priceRiel: 0,
           photoUrl: finalPhoto,
           descriptionKh: descriptionKh.trim(),
         });
@@ -1055,7 +1047,7 @@ export const ManageMenuModal: React.FC = () => {
         {/* Body Content */}
         <div ref={modalBodyRef} className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4 no-scrollbar text-xs">
 
-          {/* TAB 1: MENU ITEMS & PRICES */}
+          {/* TAB 1: MENU ITEMS */}
           {mainTab === 'menu' && (
             <div>
               {menuMode === 'list' && (
@@ -1064,12 +1056,12 @@ export const ManageMenuModal: React.FC = () => {
                   <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 flex items-center justify-between gap-3">
                     <div className="space-y-0.5">
                       <h3 className="font-bold text-[#064E3B] dark:text-emerald-300 text-xs">
-                        {isKm ? '📋 គ្រប់គ្រងមុខម្ហូប និងតម្លៃក្នុងហាងរបស់អ្នក' : '📋 Manage Your Store Menu & Prices'}
+                        {isKm ? '📋 គ្រប់គ្រងមុខម្ហូបក្នុងហាងរបស់អ្នក' : '📋 Manage Your Store Menu'}
                       </h3>
                       <p className="text-[11px] text-slate-600 dark:text-slate-300">
                         {isKm
-                          ? 'ចុច "+ បន្ថែមមុខម្ហូបថ្មី" ដើម្បីដាក់រូបម្ហូប និងតម្លៃ ឬចុច "កែប្រែ / លុប" លើមុខម្ហូបនីមួយៗ។'
-                          : 'Tap "+ Add New Dish" to add dishes with photos and prices, or Edit / Delete existing items.'}
+                          ? 'ចុច "+ បន្ថែមមុខម្ហូបថ្មី" ដើម្បីដាក់រូបម្ហូប ឬចុច "កែប្រែ / លុប" លើមុខម្ហូបនីមួយៗ។'
+                          : 'Tap "+ Add New Dish" to add dishes with photos, or Edit / Delete existing items.'}
                       </p>
                     </div>
                   </div>
@@ -1110,9 +1102,9 @@ export const ManageMenuModal: React.FC = () => {
                       <p className="text-[11px] text-slate-500 max-w-xs mx-auto">
                         {tr(
                           language,
-                          'បន្ថែមមុខម្ហូបឆ្ងាញ់ៗរបស់ហាងអ្នក ជាមួយរូបភាព និងតម្លៃ ដើម្បីទាក់ទាញអតិថិជន!',
-                          'Add your signature dishes with photos and prices so customers can see your menu!',
-                          '添加招牌菜品、照片与价格，吸引更多顾客！'
+                          'បន្ថែមមុខម្ហូបឆ្ងាញ់ៗរបស់ហាងអ្នក ជាមួយរូបភាព ដើម្បីទាក់ទាញអតិថិជន!',
+                          'Add your signature dishes with photos so customers can see your menu!',
+                          '添加招牌菜品与照片，吸引更多顾客！'
                         )}
                       </p>
                       <button
@@ -1145,16 +1137,8 @@ export const ManageMenuModal: React.FC = () => {
                               {item.nameEn && (
                                 <p className="text-[10px] text-slate-500 truncate">{item.nameEn}</p>
                               )}
-                              <div className="flex items-center gap-2 mt-1">
-                                <span className="px-2 py-0.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-[#064E3B] dark:text-emerald-400 font-black font-mono text-xs border border-emerald-200 dark:border-emerald-800">
-                                  {isKm ? `ប្រហាក់ប្រហែល $${item.priceUsd.toFixed(2)}` : `Approx. $${item.priceUsd.toFixed(2)}`}
-                                </span>
-                                <span className="text-[11px] text-slate-500 font-mono">
-                                  ({isKm ? `ប្រហាក់ប្រហែល ${item.priceRiel.toLocaleString()} ៛` : `Approx. ${item.priceRiel.toLocaleString()} ៛`})
-                                </span>
-                              </div>
                               {item.descriptionKh && (
-                                <p className="text-[10px] text-slate-500 font-khmer line-clamp-1 mt-0.5">{item.descriptionKh}</p>
+                                <p className="text-[10px] text-slate-500 font-khmer line-clamp-2 mt-0.5">{item.descriptionKh}</p>
                               )}
                             </div>
                           </div>
@@ -1197,7 +1181,7 @@ export const ManageMenuModal: React.FC = () => {
                                 className="py-1.5 px-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 text-[#064E3B] dark:text-emerald-300 font-bold text-[11px] flex items-center justify-center gap-1.5 transition disabled:opacity-40 cursor-pointer"
                               >
                                 <Edit2 className="w-3.5 h-3.5" />
-                                <span>{isKm ? '✏️ កែប្រែម្ហូប និងតម្លៃ' : '✏️ Edit Dish & Price'}</span>
+                                <span>{isKm ? '✏️ កែប្រែមុខម្ហូប' : '✏️ Edit Dish'}</span>
                               </button>
                               <button
                                 type="button"
@@ -1224,8 +1208,8 @@ export const ManageMenuModal: React.FC = () => {
                       <UtensilsCrossed className="w-4 h-4" />
                       <span>
                         {menuMode === 'add'
-                          ? (isKm ? '➕ បន្ថែមមុខម្ហូបថ្មី និងតម្លៃ' : '➕ Add New Dish & Price')
-                          : (isKm ? '✏️ កែប្រែមុខម្ហូប និងតម្លៃ' : '✏️ Edit Dish & Price')}
+                          ? (isKm ? '➕ បន្ថែមមុខម្ហូបថ្មី' : '➕ Add New Dish')
+                          : (isKm ? '✏️ កែប្រែមុខម្ហូប' : '✏️ Edit Dish')}
                       </span>
                     </h3>
                     <button
@@ -1264,41 +1248,9 @@ export const ManageMenuModal: React.FC = () => {
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
-                        {isKm ? '៣. តម្លៃដុល្លារ ($ USD) *' : '3. Price ($ USD) *'}
-                      </label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        required
-                        value={priceUsd}
-                        onChange={e => {
-                          setPriceUsd(e.target.value);
-                          const val = parseFloat(e.target.value) || 0;
-                          setPriceRiel((Math.round(val * 4100)).toString());
-                        }}
-                        className="w-full px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs focus:ring-2 focus:ring-emerald-500/30 focus:border-[#059669] outline-none text-[#0F172A] dark:text-white font-mono font-bold"
-                      />
-                    </div>
-                    <div>
-                      <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
-                        {isKm ? '៤. តម្លៃរៀល (៛ KHR)' : '4. Price (KHR)'}
-                      </label>
-                      <input
-                        type="number"
-                        step="500"
-                        value={priceRiel}
-                        onChange={e => setPriceRiel(e.target.value)}
-                        className="w-full px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs focus:ring-2 focus:ring-emerald-500/30 focus:border-[#059669] outline-none text-[#0F172A] dark:text-white font-mono font-bold"
-                      />
-                    </div>
-                  </div>
-
                   <div>
                     <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
-                      {isKm ? '៥. ការពិពណ៌នាអំពីមុខម្ហូប (មិនបង្ខំ)' : '5. Short Dish Description (Optional)'}
+                      {isKm ? '៣. ការពិពណ៌នាអំពីមុខម្ហូប (មិនបង្ខំ)' : '3. Short Dish Description (Optional)'}
                     </label>
                     <textarea
                       rows={2}
@@ -1333,7 +1285,7 @@ export const ManageMenuModal: React.FC = () => {
 
                   <div className="pt-1 border-t border-slate-200 dark:border-slate-700">
                     <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
-                      {isKm ? '៦. រូបភាពមុខម្ហូប (ជ្រើសពីទូរស័ព្ទ ឬ ស្វែងរក Online) *' : '6. Dish Photo (Phone Upload or Online Search) *'}
+                      {isKm ? '៤. រូបភាពមុខម្ហូប (ជ្រើសពីទូរស័ព្ទ ឬ ស្វែងរក Online) *' : '4. Dish Photo (Phone Upload or Online Search) *'}
                     </label>
 
                     {/* Hidden Native / Web File Inputs */}

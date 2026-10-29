@@ -725,19 +725,11 @@ export const RestaurantDetailModal: React.FC = () => {
                           </span>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between">
-                            <h4 className="font-bold text-[#0F172A] dark:text-white text-sm truncate">
-                              {itemDisplayName}
-                            </h4>
-                            <span className="text-[#064E3B] dark:text-emerald-400 font-bold font-mono text-xs ml-2 shrink-0">
-                              {tr(language, `ប្រហាក់ប្រហែល $${(item.priceUsd ?? 0).toFixed(2)}`, `Approx. $${(item.priceUsd ?? 0).toFixed(2)}`, `约 $${(item.priceUsd ?? 0).toFixed(2)}`)}
-                            </span>
-                          </div>
-                          <p className="text-[11px] text-slate-500 font-mono">
-                            ({tr(language, `ប្រហាក់ប្រហែល ${item.priceRiel.toLocaleString()} ៛`, `Approx. ${item.priceRiel.toLocaleString()} ៛`, `约 ${item.priceRiel.toLocaleString()} ៛`)})
-                          </p>
+                          <h4 className="font-bold text-[#0F172A] dark:text-white text-sm truncate">
+                            {itemDisplayName}
+                          </h4>
                           {itemDesc && (
-                            <p className="text-xs text-slate-600 dark:text-slate-300 line-clamp-1 mt-0.5">
+                            <p className="text-xs text-slate-600 dark:text-slate-300 line-clamp-2 mt-0.5">
                               {itemDesc}
                             </p>
                           )}
