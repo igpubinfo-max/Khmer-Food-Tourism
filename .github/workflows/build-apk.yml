@@ -37,8 +37,8 @@ jobs:
 
       - name: 5. Sync Version & Build Web Bundle
         run: |
-          CURRENT_VC=$(grep -oP 'versionCode\s+\K[0-9]+' android/app/build.gradle || echo 114)
-          AUTO_VC=$((100 + ${{ github.run_number }}))
+          CURRENT_VC=$(grep -oP 'versionCode\s+\K[0-9]+' android/app/build.gradle || echo 500)
+          AUTO_VC=$((200 + ${{ github.run_number }}))
           if [ "$CURRENT_VC" -gt "$AUTO_VC" ]; then
             FINAL_VC=$CURRENT_VC
           else
@@ -107,7 +107,7 @@ jobs:
 
       - name: 11. Publish GitHub Release with Signed APK & Play Store AAB
         uses: softprops/action-gh-release@v2
-        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/test-ui-apk'
+        if: github.ref == 'refs/heads/main'
         with:
           tag_name: v2.3.1
           name: "Khmer Food & Tourism v2.3.1"
