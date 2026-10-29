@@ -866,8 +866,8 @@ export function mergeTwoUserRecordsCanonical(first: User, second: User): User {
   };
   const firstCreatedMs = parseValidMs(first.registeredAtIso || first.createdAt);
   const secondCreatedMs = parseValidMs(second.registeredAtIso || second.createdAt);
-  let earliestCreatedIso = first.createdAt || second.createdAt || new Date().toISOString().split('T')[0];
-  let earliestRegisteredIso = first.registeredAtIso || second.registeredAtIso || first.createdAt || second.createdAt;
+  let earliestCreatedIso = first.createdAt || second.createdAt || '2026-01-01';
+  let earliestRegisteredIso = first.registeredAtIso || second.registeredAtIso || first.createdAt || second.createdAt || '2026-01-01T00:00:00.000Z';
   if (firstCreatedMs > 0 && secondCreatedMs > 0) {
     if (secondCreatedMs < firstCreatedMs) {
       earliestCreatedIso = second.createdAt || earliestCreatedIso;
@@ -1096,8 +1096,8 @@ export function deduplicateAndNormalizeUsers(
         ...item,
         id: targetCanonicalId,
         email: cleanEmail || item.email || '',
-        createdAt: item.createdAt || new Date().toISOString().split('T')[0],
-        registeredAtIso: item.registeredAtIso || item.createdAt || new Date().toISOString(),
+        createdAt: item.createdAt || '2026-01-01',
+        registeredAtIso: item.registeredAtIso || item.createdAt || '2026-01-01T00:00:00.000Z',
         legacyIds: legacyIds && legacyIds.length > 0 ? Array.from(new Set(legacyIds)) : undefined,
       });
       canonicalMap.set(normalized.id, normalized);
@@ -1199,6 +1199,7 @@ export async function syncAllAppDataWithSupabase(localState: {
   supportTickets?: SupportTicket[];
   paymentProofsVault: Record<string, any>;
   appSettings?: AppSettings;
+  includeHeavyAdminVaults?: boolean;
 }): Promise<{
   synced: boolean;
   mergedUsers: User[];
@@ -1232,15 +1233,15 @@ export async function syncAllAppDataWithSupabase(localState: {
           localState.currentUser.username === 'admin' ||
           localState.currentUser.username === 'cheasavuth')
     );
-    const shouldSyncPaymentProofs =
-      isAdminDevice || Object.keys(localState.paymentProofsVault || {}).length > 0;
+    const shouldFetchHeavyAdminVaults = Boolean(isAdminDevice && localState.includeHeavyAdminVaults);
+    const shouldSyncPaymentProofs = shouldFetchHeavyAdminVaults;
 
-    // Only Admin devices need to download all 1,000 `kft_user_*` prefix documents;
-    // regular user devices only fetch their own atomic `kft_user_<canonicalId>` row alongside `kft_cloud_users_v2`.
+    // Only fetch all 1,000 `kft_user_*` prefix documents when Admin Dashboard is open (`includeHeavyAdminVaults`);
+    // routine background syncs rely on `kft_cloud_users_v2` plus the active user's atomic row to prevent CPU/radio overheating.
     const currentCanonicalIdForFetch =
       !isAdminDevice && localState.currentUser ? getCanonicalUserId(localState.currentUser) : null;
 
-    // 1. Pull existing cloud records in a single batch (skipping heavy base64 payment proofs and 1,000-row prefix scan on regular user devices)
+    // 1. Pull existing cloud records in a single batch (skipping heavy base64 payment proofs and 1,000-row prefix scan on background syncs)
     const [
       cloudUsersV2,
       atomicUserDocs,
@@ -1255,7 +1256,7 @@ export async function syncAllAppDataWithSupabase(localState: {
       cloudSettingsV2,
     ] = await Promise.all([
       pullCloudDocument<User[]>('kft_cloud_users_v2'),
-      isAdminDevice
+      shouldFetchHeavyAdminVaults
         ? pullCloudDocumentsByPrefix<User>(USER_RECORD_PREFIX)
         : currentCanonicalIdForFetch
         ? pullCloudDocument<User>(`${USER_RECORD_PREFIX}${currentCanonicalIdForFetch}`).then(doc =>
@@ -1345,7 +1346,7 @@ export async function syncAllAppDataWithSupabase(localState: {
       if (!uid && !uEmail) continue;
       if (isActivityUserDeleted(uid, uEmail, uPhone) || isActivityUserDeleted(t.ownerId, uEmail, uPhone)) continue;
       const isGoogle = String(uid || '').startsWith('google-') || uEmail.endsWith('@gmail.com');
-      const createdDate = t.createdAt ? t.createdAt.split('T')[0] : new Date().toISOString().split('T')[0];
+      const createdDate = t.createdAt ? t.createdAt.split('T')[0] : '2026-01-01';
       recoveredUsersFromActivity.push({
         id: uid || `user-${uEmail.replace(/[^a-z0-9]/g, '_')}`,
         name: t.userName || (uEmail ? uEmail.split('@')[0] : 'Member'),
@@ -1357,7 +1358,7 @@ export async function syncAllAppDataWithSupabase(localState: {
         linkedProviders: [isGoogle ? 'google' : 'email'],
         isVerified: true,
         createdAt: createdDate,
-        registeredAtIso: t.createdAt || new Date().toISOString(),
+        registeredAtIso: t.createdAt || '2026-01-01T00:00:00.000Z',
         lastActiveAt: t.verifiedAt || t.createdAt,
         membershipTier: t.status === 'verified' && t.expiresAt && new Date(t.expiresAt).getTime() > Date.now() ? 'premium_vip' : 'free',
         subscriptionStatus: t.status === 'verified' && t.expiresAt && new Date(t.expiresAt).getTime() > Date.now() ? 'active' : 'none',
@@ -1384,8 +1385,8 @@ export async function syncAllAppDataWithSupabase(localState: {
         authProvider: isGoogle ? 'google' : 'email',
         linkedProviders: [isGoogle ? 'google' : 'email'],
         isVerified: true,
-        createdAt: tk.createdAt ? tk.createdAt.split('T')[0] : new Date().toISOString().split('T')[0],
-        registeredAtIso: tk.createdAt,
+        createdAt: tk.createdAt ? tk.createdAt.split('T')[0] : '2026-01-01',
+        registeredAtIso: tk.createdAt || '2026-01-01T00:00:00.000Z',
         lastActiveAt: tk.updatedAt || tk.createdAt,
       });
     }
@@ -1404,6 +1405,8 @@ export async function syncAllAppDataWithSupabase(localState: {
           phone: val.phone,
           role: val.role || 'user',
           avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
+          createdAt: val.subscriptionStartDate ? val.subscriptionStartDate.split('T')[0] : '2026-01-01',
+          registeredAtIso: val.subscriptionStartDate || '2026-01-01T00:00:00.000Z',
           membershipTier: val.membershipTier,
           subscriptionStatus: val.subscriptionStatus,
           subscriptionStartDate: val.subscriptionStartDate,
@@ -1420,12 +1423,12 @@ export async function syncAllAppDataWithSupabase(localState: {
     // 2. Deduplicate & Normalize Users across all sources (Cloud v2 + Cloud v1 + Atomic per-user rows + Local users + CurrentUser + Recovered activity)
     const mergedUsers = deduplicateAndNormalizeUsers(
       [
-        ...recoveredUsersFromActivity,
         ...(Array.isArray(cloudUsersV2) ? cloudUsersV2 : []),
         ...(Array.isArray(cloudUsers) ? cloudUsers : []),
         ...atomicUserDocs.map(doc => doc.payload),
         ...(Array.isArray(localState.users) ? localState.users : []),
         localState.currentUser && localState.currentUser.role !== 'admin' ? localState.currentUser : undefined,
+        ...recoveredUsersFromActivity,
       ],
       mergedDeletedUsers
     );
@@ -1743,7 +1746,7 @@ export async function syncAllAppDataWithSupabase(localState: {
     // Ensure active user(s) have an up-to-date atomic `kft_user_<id>` record in Supabase without write-back storms
     const currentCanonicalId = localState.currentUser ? getCanonicalUserId(localState.currentUser) : null;
     for (const u of mergedUsers) {
-      if (!isAdminDevice && u.id !== localState.currentUser?.id && u.id !== currentCanonicalId) {
+      if (!shouldFetchHeavyAdminVaults && u.id !== localState.currentUser?.id && u.id !== currentCanonicalId) {
         continue;
       }
       const atomicKey = `${USER_RECORD_PREFIX}${u.id}`;

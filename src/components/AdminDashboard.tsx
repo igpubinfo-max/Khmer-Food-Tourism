@@ -63,7 +63,7 @@ export const AdminDashboard: React.FC = () => {
     }
   }, [isAdminOpen]);
 
-  // Real-time User Management synchronization whenever Admin Dashboard opens or switches to 'users' tab
+  // Synchronize Cloud data once when Admin Dashboard opens
   useEffect(() => {
     if (!isAdminOpen) return;
     if (syncUsersNow) {
@@ -71,18 +71,19 @@ export const AdminDashboard: React.FC = () => {
     } else if (triggerCloudSyncNow) {
       triggerCloudSyncNow(true);
     }
-    if (activeTab === 'users') {
-      const interval = setInterval(() => {
-        if (typeof document === 'undefined' || !document.hidden) {
-          if (triggerCloudSyncNow) {
-            triggerCloudSyncNow(false);
-          } else if (syncUsersNow) {
-            syncUsersNow();
-          }
+  }, [isAdminOpen]);
+
+  // Lightweight background refresh while viewing the Users tab (every 2 minutes)
+  useEffect(() => {
+    if (!isAdminOpen || activeTab !== 'users') return;
+    const interval = setInterval(() => {
+      if (typeof document === 'undefined' || !document.hidden) {
+        if (triggerCloudSyncNow) {
+          triggerCloudSyncNow(false);
         }
-      }, 30000);
-      return () => clearInterval(interval);
-    }
+      }
+    }, 120000);
+    return () => clearInterval(interval);
   }, [isAdminOpen, activeTab]);
 
   const [userSearchQuery, setUserSearchQuery] = useState('');

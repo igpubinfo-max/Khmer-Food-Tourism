@@ -1499,11 +1499,13 @@ async function fetchYouTubeCambodianFoodVideos(foods: FoodItem[]): Promise<{
 /* LIVE YOUTUBE CHANNEL UPLOADS (official channel RSS feeds, no API key)  */
 /* ===================================================================== */
 const LIVE_RSS_CACHE_KEY = 'kft_v1_youtube_live_rss_cache';
-/** Live uploads are re-checked every 60 seconds while active. */
-export const LIVE_RSS_TTL_MS = 60 * 1000;
+/** Live RSS channel feeds are cached for 15 minutes to prevent mobile CPU/radio overheating while 60s rotation runs in memory. */
+export const LIVE_RSS_TTL_MS = 15 * 60 * 1000;
 export const VIDEO_AUTO_REFRESH_INTERVAL_MS = 60 * 1000;
 const VIDEO_ROTATION_STATE_KEY = 'kft_youtube_rotation_state_v2';
 const LIVE_RSS_PER_CHANNEL = 4;
+const LIVE_RSS_BATCH_CHANNELS_COUNT = 3;
+let rssChannelBatchCursor = 0;
 const YT_VIDEO_ID_RE = /^[A-Za-z0-9_-]{11}$/;
 /** Channels that also publish non-Cambodian content: only keep Cambodia-related videos. */
 const LIVE_RSS_GENERIC_CHANNELS = new Set(['TravelwithChad', 'Little Explore', 'Suitcase Monkey', 'Delicious Food Show & Travel']);
@@ -1755,15 +1757,25 @@ export async function fetchLiveYouTubeChannelUploads(
   if (liveRssInFlight) return liveRssInFlight;
 
   liveRssInFlight = (async () => {
+    const totalChannels = ACTIVE_CAMBODIA_YOUTUBE_CHANNELS_2026.length;
+    const batchChannels: ActiveCambodiaYouTubeChannel[] = [];
+    for (let i = 0; i < Math.min(LIVE_RSS_BATCH_CHANNELS_COUNT, totalChannels); i++) {
+      batchChannels.push(
+        ACTIVE_CAMBODIA_YOUTUBE_CHANNELS_2026[(rssChannelBatchCursor + i) % totalChannels]
+      );
+    }
+    rssChannelBatchCursor = (rssChannelBatchCursor + batchChannels.length) % Math.max(1, totalChannels);
+
     const groups = await Promise.all(
-      ACTIVE_CAMBODIA_YOUTUBE_CHANNELS_2026.map(async (ch) => {
+      batchChannels.map(async (ch) => {
         const xml = await fetchChannelFeedXml(ch.channelId);
         return xml ? parseChannelFeed(xml, ch, foods) : [];
       })
     );
     const fresh = groups.flat();
-    if (fresh.length === 0) return cached?.items || [];
-    const unique = deduplicateAndRankDiscoveries(fresh);
+    const prevItems = cached?.items || [];
+    if (fresh.length === 0) return prevItems;
+    const unique = deduplicateAndRankDiscoveries([...fresh, ...prevItems]);
     try {
       localStorage.setItem(LIVE_RSS_CACHE_KEY, JSON.stringify({ fetchedAt: Date.now(), items: unique }));
     } catch {

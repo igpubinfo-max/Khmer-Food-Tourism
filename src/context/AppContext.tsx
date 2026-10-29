@@ -2413,6 +2413,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       a.vipLongNameKh === b.vipLongNameKh &&
       a.vipLongNameEn === b.vipLongNameEn &&
       a.additionalStoreFeeUsd === b.additionalStoreFeeUsd &&
+      a.vipFeaturedRotationEnabled === b.vipFeaturedRotationEnabled &&
+      a.vipFeaturedDurationDays === b.vipFeaturedDurationDays &&
       a.apkDownloadUrl === b.apkDownloadUrl &&
       a.playStoreUrl === b.playStoreUrl &&
       a.appStoreUrl === b.appStoreUrl &&
@@ -2420,7 +2422,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       a.supportBankName === b.supportBankName &&
       a.supportAccountName === b.supportAccountName &&
       a.supportMessageKh === b.supportMessageKh &&
-      JSON.stringify(a.vipBenefitsList || []) === JSON.stringify(b.vipBenefitsList || [])
+      JSON.stringify(a.vipBenefitsList || []) === JSON.stringify(b.vipBenefitsList || []) &&
+      JSON.stringify(a.manualFeaturedSchedule || []) === JSON.stringify(b.manualFeaturedSchedule || [])
     );
   };
 
@@ -2592,20 +2595,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       return false;
     }
-    if (!force && now - lastCloudSyncAtRef.current < 180000) {
+    if (!force && now - lastCloudSyncAtRef.current < 300000) {
       return false;
     }
     cloudSyncInFlightRef.current = true;
     lastCloudSyncAtRef.current = now;
-    if (force && isAdminOpen) {
+    const includeHeavyAdminVaults = Boolean(force && isAdminOpen);
+    if (includeHeavyAdminVaults) {
       setIsSyncingUsers(true);
     }
     try {
       let localVault: Record<string, any> = {};
-      try {
-        const rawVault = localStorage.getItem('kft_secure_payment_proofs_vault_v1');
-        if (rawVault) localVault = JSON.parse(rawVault);
-      } catch {}
+      if (includeHeavyAdminVaults) {
+        try {
+          const rawVault = localStorage.getItem('kft_secure_payment_proofs_vault_v1');
+          if (rawVault) localVault = JSON.parse(rawVault);
+        } catch {}
+      }
 
       const snap = latestSyncStateRef.current;
       const customRests = snap.restaurants.filter(r => !isSeedRestaurantId(r.id));
@@ -2620,6 +2626,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         supportTickets: snap.supportTickets,
         paymentProofsVault: localVault,
         appSettings: appSettingsRef.current,
+        includeHeavyAdminVaults,
       });
 
       if (result.synced) {
@@ -2726,11 +2733,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         const syncedDeletedRests = result.mergedDeletedRestaurantIds || loadDeletedRestaurantIdsMap();
         if (result.mergedDeletedRestaurantIds && Object.keys(result.mergedDeletedRestaurantIds).length > 0) {
           const curBundle = loadLocalMediaOverrides();
-          curBundle.deletedRestaurants = {
-            ...(curBundle.deletedRestaurants || {}),
-            ...result.mergedDeletedRestaurantIds,
-          };
-          saveLocalMediaOverrides(curBundle);
+          const prevDel = curBundle.deletedRestaurants || {};
+          let delChanged = false;
+          for (const [k, v] of Object.entries(result.mergedDeletedRestaurantIds)) {
+            if (prevDel[k] !== v) {
+              delChanged = true;
+              break;
+            }
+          }
+          if (delChanged) {
+            curBundle.deletedRestaurants = {
+              ...prevDel,
+              ...result.mergedDeletedRestaurantIds,
+            };
+            saveLocalMediaOverrides(curBundle);
+          }
         }
         if (result.mergedCustomRestaurants.length > 0 || Object.keys(syncedDeletedRests).length > 0) {
           const deletedIdSet = new Set((result.mergedDeletedUsers || []).map(d => d.id));
@@ -2794,14 +2811,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             return sorted;
           });
         }
-        try {
-          if (JSON.stringify(localVault) !== JSON.stringify(result.mergedPaymentProofsVault)) {
-            localStorage.setItem(
-              'kft_secure_payment_proofs_vault_v1',
-              JSON.stringify(result.mergedPaymentProofsVault)
-            );
-          }
-        } catch {}
+        if (includeHeavyAdminVaults) {
+          try {
+            if (JSON.stringify(localVault) !== JSON.stringify(result.mergedPaymentProofsVault)) {
+              localStorage.setItem(
+                'kft_secure_payment_proofs_vault_v1',
+                JSON.stringify(result.mergedPaymentProofsVault)
+              );
+            }
+          } catch {}
+        }
 
         // Also synchronize permanent media overrides across Foods, Restaurants, Destinations & Trending Foods
         try {

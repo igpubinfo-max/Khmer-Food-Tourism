@@ -35,6 +35,8 @@ import {
   OnlineFoodDiscoveryItem,
 } from '../services/onlineFoodDiscoveryService';
 
+const VIDEO_BATCH_SIZE = 12;
+
 export const TrendingSocialModal: React.FC = () => {
   const {
     isTrendingSocialModalOpen,
@@ -57,6 +59,8 @@ export const TrendingSocialModal: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [categoryFilter, setCategoryFilter] = useState<TrendingFoodCategorySlug>('all');
   const [provinceFilter, setProvinceFilter] = useState<string>('all');
+  const [visibleVideoCount, setVisibleVideoCount] = useState<number>(VIDEO_BATCH_SIZE);
+  const loadMoreVideosRef = useRef<HTMLDivElement | null>(null);
 
   const [discoveryItems, setDiscoveryItems] = useState<OnlineFoodDiscoveryItem[]>([]);
   const [lastCheckedAt, setLastCheckedAt] = useState<string>('');
@@ -64,7 +68,6 @@ export const TrendingSocialModal: React.FC = () => {
   const [hasError, setHasError] = useState<boolean>(false);
   const [cooldownSec, setCooldownSec] = useState<number>(0);
   const [rotationCycle, setRotationCycle] = useState<number>(() => getCurrentVideoRotationCycle());
-  const [nextAutoRefreshSec, setNextAutoRefreshSec] = useState<number>(60);
 
   // Live Google Maps & Smart Cache search state (reusing Home Screen search engine)
   const [smartCachePlaces, setSmartCachePlaces] = useState<GooglePlaceCachedItem[]>([]);
@@ -162,7 +165,6 @@ export const TrendingSocialModal: React.FC = () => {
       try {
         const nextCycle = force || isAutoCycle ? advanceVideoRotationCycle() : getCurrentVideoRotationCycle();
         setRotationCycle(nextCycle);
-        setNextAutoRefreshSec(60);
 
         const res = await searchAndDiscoverSocialFood({
           query: '',
@@ -239,34 +241,24 @@ export const TrendingSocialModal: React.FC = () => {
   const activePlayerItemIdRef = useRef<string | null>(null);
   activePlayerItemIdRef.current = activePlayerItemId;
 
-  // Initial load & rotation when modal opens, then automatic refresh & video rotation every 60 seconds
+  // Initial load & rotation when modal opens, then automatic refresh & video rotation every 60 seconds (zero per-second re-renders)
   const loadFeedRef = useRef(loadFeed);
   loadFeedRef.current = loadFeed;
-  const countdownRef = useRef<number>(60);
   useEffect(() => {
     if (!isTrendingSocialModalOpen) return;
-    countdownRef.current = 60;
-    setNextAutoRefreshSec(60);
     loadFeedRef.current(false, true);
 
-    const ticker = setInterval(() => {
+    const autoRefreshInterval = setInterval(() => {
       if (typeof document !== 'undefined' && document.hidden) return;
-      if (countdownRef.current <= 1) {
-        countdownRef.current = 60;
-        setNextAutoRefreshSec(60);
-        // Rotate & refresh automatically every 60 seconds without manual refresh
-        if (!activePlayerItemIdRef.current) {
-          loadFeedRef.current(false, true);
-        } else {
-          setLastCheckedAt(new Date().toISOString());
-        }
+      // Rotate & refresh automatically every 60 seconds without manual refresh
+      if (!activePlayerItemIdRef.current) {
+        loadFeedRef.current(false, true);
       } else {
-        countdownRef.current -= 1;
-        setNextAutoRefreshSec(countdownRef.current);
+        setLastCheckedAt(new Date().toISOString());
       }
-    }, 1000);
+    }, 60 * 1000);
 
-    return () => clearInterval(ticker);
+    return () => clearInterval(autoRefreshInterval);
   }, [isTrendingSocialModalOpen]);
 
   // Cooldown countdown ticker
@@ -415,6 +407,32 @@ export const TrendingSocialModal: React.FC = () => {
 
     return strictMatches;
   }, [discoveryItems, categoryFilter, provinceFilter, searchQuery, rotationCycle]);
+
+  useEffect(() => {
+    setVisibleVideoCount(VIDEO_BATCH_SIZE);
+  }, [categoryFilter, provinceFilter, searchQuery]);
+
+  const displayedVideos = useMemo(
+    () => filteredItems.slice(0, visibleVideoCount),
+    [filteredItems, visibleVideoCount]
+  );
+
+  useEffect(() => {
+    const node = loadMoreVideosRef.current;
+    if (!node || visibleVideoCount >= filteredItems.length) return;
+    if (typeof IntersectionObserver === 'undefined') return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          setVisibleVideoCount((prev) => Math.min(filteredItems.length, prev + VIDEO_BATCH_SIZE));
+        }
+      },
+      { rootMargin: '320px' }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [visibleVideoCount, filteredItems.length]);
 
   if (!isTrendingSocialModalOpen) return null;
 
@@ -627,9 +645,9 @@ export const TrendingSocialModal: React.FC = () => {
               <p className="text-[11px] text-pink-200 font-khmer truncate">
                 {tr(
                   language,
-                  `ប្តូរវីដេអូថ្មីស្វ័យប្រវត្តិរៀងរាល់ ៦០វិនាទី (${nextAutoRefreshSec}s) • បានពិនិត្យ៖ ${formattedLastChecked}`,
-                  `Auto-rotates every 60s (${nextAutoRefreshSec}s) · Checked: ${formattedLastChecked}`,
-                  `每60秒自动轮换 (${nextAutoRefreshSec}s) · 检查：${formattedLastChecked}`
+                  `ប្តូរវីដេអូថ្មីស្វ័យប្រវត្តិរៀងរាល់ ៦០វិនាទី • បានពិនិត្យ៖ ${formattedLastChecked}`,
+                  `Auto-rotates every 60s · Checked: ${formattedLastChecked}`,
+                  `每60秒自动轮换 · 检查：${formattedLastChecked}`
                 )}
               </p>
             </div>
@@ -1014,7 +1032,7 @@ export const TrendingSocialModal: React.FC = () => {
                 </div>
               )}
 
-              {filteredItems.map((item) => {
+              {displayedVideos.map((item) => {
                 const displayTitle =
                   language === 'km'
                     ? item.titleKh
@@ -1142,6 +1160,7 @@ export const TrendingSocialModal: React.FC = () => {
                           alt={displayTitle}
                           className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
                           loading="lazy"
+                          decoding="async"
                           onLoad={(e) => {
                             if (e.currentTarget.naturalWidth > 0 && e.currentTarget.naturalWidth <= 120) {
                               handleReplaceUnavailableVideo(item, false);
@@ -1311,6 +1330,22 @@ export const TrendingSocialModal: React.FC = () => {
                   </div>
                 );
               })}
+              {visibleVideoCount < filteredItems.length && (
+                <div ref={loadMoreVideosRef} className="pt-2 flex justify-center">
+                  <button
+                    type="button"
+                    onClick={() => setVisibleVideoCount((prev) => Math.min(filteredItems.length, prev + VIDEO_BATCH_SIZE))}
+                    className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-rose-300 shadow-2xs font-khmer cursor-pointer"
+                  >
+                    {tr(
+                      language,
+                      `បង្ហាញវីដេអូបន្ថែម (${displayedVideos.length} / ${filteredItems.length})`,
+                      `Show More Videos (${displayedVideos.length} / ${filteredItems.length})`,
+                      `加载更多视频 (${displayedVideos.length} / ${filteredItems.length})`
+                    )}
+                  </button>
+                </div>
+              )}
             </>
           )}
         </div>
