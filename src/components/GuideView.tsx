@@ -372,11 +372,6 @@ export const GuideView: React.FC = () => {
         title={loc.name}
         subtitle={loc.category}
         rating={f.rating}
-        meta={
-          f.priceUsd > 0
-            ? tr(language, `ប្រហាក់ប្រហែល $${f.priceUsd.toFixed(2)}`, `Approx. $${f.priceUsd.toFixed(2)}`, `约 $${f.priceUsd.toFixed(2)}`)
-            : undefined
-        }
         saved={bookmarkSet.has(f.id)}
         onToggleSave={() => toggleBookmark(f.id)}
         onOpen={() => setSelectedFood(f)}

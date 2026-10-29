@@ -59,7 +59,7 @@ export const WishlistsModal: React.FC = () => {
             nameEn: food.nameEn,
             photoUrl: food.photoUrl,
             provinceKh: food.provinceKh,
-            priceDisplay: food.priceRange,
+            priceDisplay: food.calories ? `${food.calories} kcal` : undefined,
             addedAt: '',
           };
         }
@@ -384,7 +384,8 @@ export const WishlistsModal: React.FC = () => {
                       <span className="truncate">{getWishlistItemDisplayName(item)}</span>
                       <ExternalLink className="w-3 h-3 text-emerald-600 shrink-0 opacity-70" />
                     </h4>
-                    {item.priceDisplay && (
+                    {item.priceDisplay &&
+                      !(item.type === 'food' && (item.priceDisplay.includes('$') || item.priceDisplay.includes('៛'))) && (
                       <span className="text-[11px] font-mono text-[#059669] font-bold">
                         {item.priceDisplay.includes('$0') || item.priceDisplay.includes('ឥតគិតថ្លៃ') || item.priceDisplay.includes('ប្រហាក់ប្រហែល') || item.priceDisplay.includes('គីឡូកាឡូរី') || item.priceDisplay.includes('kcal')
                           ? item.priceDisplay

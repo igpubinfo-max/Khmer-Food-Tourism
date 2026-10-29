@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
-  X, Sparkles, Shuffle, Utensils, DollarSign, MapPin, 
+  X, Sparkles, Shuffle, Utensils, MapPin, 
   Star, Clock, ChefHat, Heart, Sun, Sunset, Moon, Coffee
 } from 'lucide-react';
 import { FoodItem } from '../types';
@@ -16,8 +16,7 @@ export const WhatToEatModal: React.FC = () => {
     openAddToWishlist 
   } = useApp();
 
-  // Filters: Budget, Category, Meal Time
-  const [budgetFilter, setBudgetFilter] = useState<'all' | 'budget' | 'medium' | 'premium'>('all');
+  // Filters: Category, Meal Time
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [isSpinning, setIsSpinning] = useState(false);
   
@@ -80,13 +79,10 @@ export const WhatToEatModal: React.FC = () => {
   // Filter candidate dishes
   const matchingFoods = useMemo(() => {
     return foods.filter(food => {
-      if (budgetFilter === 'budget' && food.priceUsd > 3.0) return false;
-      if (budgetFilter === 'medium' && (food.priceUsd < 3.0 || food.priceUsd > 7.0)) return false;
-      if (budgetFilter === 'premium' && food.priceUsd <= 7.0) return false;
       if (categoryFilter !== 'all' && food.categorySlug !== categoryFilter) return false;
       return true;
     });
-  }, [foods, budgetFilter, categoryFilter]);
+  }, [foods, categoryFilter]);
 
   // Active candidate list
   const activeDishList = matchingFoods.length > 0 ? matchingFoods : foods;
@@ -118,7 +114,7 @@ export const WhatToEatModal: React.FC = () => {
       const initialPick = pickRandomDish();
       setCurrentDishId(initialPick.id);
     }
-  }, [isWhatToEatModalOpen, budgetFilter, categoryFilter]);
+  }, [isWhatToEatModalOpen, categoryFilter]);
 
   // Current active dish
   const currentDish: FoodItem = useMemo(() => {
@@ -187,9 +183,9 @@ export const WhatToEatModal: React.FC = () => {
               <p className="text-[11px] text-emerald-100 font-khmer">
                 {tr(
                   language,
-                  'AI ជួយស្នើម្ហូបប្លែកៗឆ្លាតវៃតាមថវិកា និងចំណង់ចំណូលចិត្ត',
+                  'AI ជួយស្នើម្ហូបប្លែកៗឆ្លាតវៃតាមចំណង់ចំណូលចិត្ត',
                   `Smart AI recommendations from ${foods.length} authentic dishes`,
-                  `AI 根据您的预算与口味从 ${foods.length} 道正宗高棉菜中智能推荐`
+                  `AI 根据您的口味从 ${foods.length} 道正宗高棉菜中智能推荐`
                 )}
               </p>
             </div>
@@ -222,32 +218,6 @@ export const WhatToEatModal: React.FC = () => {
 
         {/* Filters Bar */}
         <div className="p-3 bg-emerald-50/60 dark:bg-slate-800/60 border-b border-emerald-100 dark:border-slate-800 space-y-2 shrink-0">
-          {/* Budget row */}
-          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar text-xs font-khmer">
-            <span className="text-[11px] font-bold text-slate-500 shrink-0 flex items-center gap-1 mr-1">
-              <DollarSign className="w-3.5 h-3.5 text-emerald-600" />
-              {tr(language, 'ថវិកា៖', 'Budget:', '预算：')}
-            </span>
-            {[
-              { id: 'all', labelKh: 'ទាំងអស់', labelEn: 'All', labelZh: '全部' },
-              { id: 'budget', labelKh: 'ប្រហាក់ប្រហែល < $3 សន្សំសំចៃ', labelEn: 'Approx. < $3 Budget', labelZh: '约 < $3 实惠' },
-              { id: 'medium', labelKh: 'ប្រហាក់ប្រហែល $3-$7 មធ្យម', labelEn: 'Approx. $3-$7 Medium', labelZh: '约 $3-$7 适中' },
-              { id: 'premium', labelKh: 'ប្រហាក់ប្រហែល > $7 ពិសេស', labelEn: 'Approx. > $7 Special', labelZh: '约 > $7 精品' },
-            ].map(b => (
-              <button
-                key={b.id}
-                onClick={() => setBudgetFilter(b.id as any)}
-                className={`px-2.5 py-1 rounded-xl font-bold whitespace-nowrap transition text-[11px] ${
-                  budgetFilter === b.id
-                    ? 'bg-[#064E3B] text-white shadow-xs'
-                    : 'bg-white dark:bg-slate-700/80 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-600'
-                }`}
-              >
-                {tr(language, b.labelKh, b.labelEn, b.labelZh)}
-              </button>
-            ))}
-          </div>
-
           {/* Category row */}
           <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar text-xs font-khmer">
             <span className="text-[11px] font-bold text-slate-500 shrink-0 mr-1">

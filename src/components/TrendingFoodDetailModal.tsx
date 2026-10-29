@@ -168,7 +168,6 @@ export const TrendingFoodDetailModal: React.FC = () => {
           ? `${safeAddrKh} (${item.provinceKh || ''})`
           : `${safeAddrEn} (${item.provinceEn || ''})`,
         phone: item.phone,
-        priceDisplay: item.priceDisplay,
         photoUrl: item.photoUrl,
         mapUrl: mapLink,
         itemType: 'trending',
@@ -336,19 +335,6 @@ export const TrendingFoodDetailModal: React.FC = () => {
               </div>
             </div>
 
-            {item.priceDisplay && (
-              <div className="flex items-center justify-between pt-1 border-t border-slate-200 dark:border-slate-700/60">
-                <span className="text-slate-500 dark:text-slate-400">
-                  {tr(language, 'តម្លៃប្រហាក់ប្រហែល៖', 'Estimated Price:', '参考价格：')}
-                </span>
-                <span className="font-bold text-[#064E3B] dark:text-emerald-400 font-mono">
-                  {item.priceDisplay.includes('ប្រហាក់ប្រហែល')
-                    ? item.priceDisplay
-                    : tr(language, `ប្រហាក់ប្រហែល ${item.priceDisplay}`, `Approx. ${item.priceDisplay}`, `约 ${item.priceDisplay}`)}
-                </span>
-              </div>
-            )}
-
             {item.lastUpdated && (
               <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 pt-1 border-t border-slate-200 dark:border-slate-700/60">
                 <span className="flex items-center gap-1">
@@ -427,7 +413,6 @@ export const TrendingFoodDetailModal: React.FC = () => {
                 photoUrl: item.photoUrl || '/welcome/hero-bg.webp',
                 categoryKh: safeCatKh,
                 provinceKh: item.provinceKh || 'កម្ពុជា',
-                priceDisplay: item.priceDisplay,
               });
             }}
             className="py-2.5 px-1 bg-amber-500 hover:bg-amber-600 text-white rounded-xl shadow-xs font-bold flex flex-col items-center justify-center gap-1 transition cursor-pointer"

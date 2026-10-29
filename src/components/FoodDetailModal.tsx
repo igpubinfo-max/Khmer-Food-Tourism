@@ -39,8 +39,6 @@ export const FoodDetailModal: React.FC = () => {
   const [editNameEn, setEditNameEn] = useState('');
   const [editCategorySlug, setEditCategorySlug] = useState<FoodCategorySlug>('soup');
   const [editCategoryKh, setEditCategoryKh] = useState('');
-  const [editPriceUsd, setEditPriceUsd] = useState('');
-  const [editPriceRiel, setEditPriceRiel] = useState('');
   const [editCookTime, setEditCookTime] = useState('');
   const [editServings, setEditServings] = useState('');
   const [editCalories, setEditCalories] = useState('');
@@ -58,8 +56,6 @@ export const FoodDetailModal: React.FC = () => {
       setEditNameEn(selectedFood.nameEn || '');
       setEditCategorySlug((selectedFood.categorySlug as FoodCategorySlug) || 'soup');
       setEditCategoryKh(selectedFood.categoryKh || '');
-      setEditPriceUsd((selectedFood.priceUsd || 0).toString());
-      setEditPriceRiel((selectedFood.priceRiel || 0).toString());
       setEditCookTime(selectedFood.cookTime || '២៥ នាទី');
       setEditServings(selectedFood.servings || '៣-៤ នាក់');
       setEditCalories((selectedFood.calories || 320).toString());
@@ -230,8 +226,8 @@ export const FoodDetailModal: React.FC = () => {
       nameEn: editNameEn.trim() || selectedFood.nameEn,
       categorySlug: catSlug,
       categoryKh: editCategoryKh.trim() || catKhMap[catSlug] || selectedFood.categoryKh,
-      priceUsd: parseFloat(editPriceUsd) || selectedFood.priceUsd,
-      priceRiel: parseInt(editPriceRiel) || selectedFood.priceRiel,
+      priceUsd: 0,
+      priceRiel: 0,
       cookTime: editCookTime.trim() || selectedFood.cookTime,
       servings: editServings.trim() || selectedFood.servings,
       calories: parseInt(editCalories) || selectedFood.calories,
@@ -563,8 +559,8 @@ export const FoodDetailModal: React.FC = () => {
                 </div>
               </div>
 
-              {/* 3. Category & Price */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {/* 3. Category & Difficulty */}
+              <div className="grid grid-cols-2 gap-2">
                 <div>
                   <label className="block font-bold text-xs text-slate-800 dark:text-slate-200 mb-1">
                     {isKm ? 'ប្រភេទម្ហូប' : 'Category'}
@@ -586,34 +582,6 @@ export const FoodDetailModal: React.FC = () => {
                     <option value="drink">ភេសជ្ជៈ</option>
                     <option value="specialty">ពិសេស</option>
                   </select>
-                </div>
-                <div>
-                  <label className="block font-bold text-xs text-slate-800 dark:text-slate-200 mb-1">
-                    {isKm ? 'តម្លៃ ($ USD)' : 'Price USD'}
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={editPriceUsd}
-                    onChange={(e) => {
-                      setEditPriceUsd(e.target.value);
-                      const val = parseFloat(e.target.value) || 0;
-                      setEditPriceRiel((Math.round(val * 4100)).toString());
-                    }}
-                    className="w-full px-2.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-white font-mono"
-                  />
-                </div>
-                <div>
-                  <label className="block font-bold text-xs text-slate-800 dark:text-slate-200 mb-1">
-                    {isKm ? 'តម្លៃ (៛ រៀល)' : 'Price Riel'}
-                  </label>
-                  <input
-                    type="number"
-                    step="500"
-                    value={editPriceRiel}
-                    onChange={(e) => setEditPriceRiel(e.target.value)}
-                    className="w-full px-2.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-white font-mono"
-                  />
                 </div>
                 <div>
                   <label className="block font-bold text-xs text-slate-800 dark:text-slate-200 mb-1">
