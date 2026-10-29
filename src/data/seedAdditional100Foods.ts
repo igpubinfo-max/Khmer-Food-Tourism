@@ -1528,7 +1528,7 @@ export const additional100Foods: FoodItem[] = RAW_100_NEW_DISHES.map((item, idx)
     categorySlug: item.cat,
     categoryKh: item.catKh,
     categoryEn: item.catEn,
-    descriptionKh: `${item.nameKh} គឺជាមុខម្ហូបខ្មែរដ៏ឈ្ងុយឆ្ងាញ់ ផ្សំពី ${item.mainIngKh} លាយជាមួយ ${item.subIngKh} និងបន្ថែមក្លិនក្រអូបដោយ ${item.herbKh} តាមរូបមន្តប្រពៃណីខ្មែរពិតៗ។`,
+    descriptionKh: `${item.nameKh} គឺជាមុខម្ហូបខ្មែរដ៏ឈ្ងុយឆ្ងាញ់ ផ្សំពី ${item.mainIngKh} លាយជាមួយ ${item.subIngKh} និងបន្ថែមក្លិនក្រអូបដោយ ${item.herbKh}។`,
     descriptionEn: `${item.nameEn} is an authentic Cambodian culinary dish prepared with ${item.mainIngEn}, ${item.subIngEn}, and aromatic ${item.herbEn}.`,
     photoUrl: onlinePhotoUrl,
     originalPhotoUrl: onlinePhotoUrl,

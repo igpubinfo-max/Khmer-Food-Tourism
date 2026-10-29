@@ -60,7 +60,7 @@ export const FoodDetailModal: React.FC = () => {
       setEditServings(selectedFood.servings || '៣-៤ នាក់');
       setEditCalories((selectedFood.calories || 320).toString());
       setEditDifficulty(selectedFood.difficulty || 'medium');
-      setEditDescriptionKh(selectedFood.descriptionKh || '');
+      setEditDescriptionKh((selectedFood.descriptionKh || '').replace(/\s*តាមរូបមន្តប្រពៃណីខ្មែរពិតៗ/g, '').trim());
       setEditDescriptionEn(selectedFood.descriptionEn || '');
       setEditPhotoUrl(selectedFood.photoUrl || '');
     }

@@ -792,22 +792,34 @@ export function recordPermanentTrendingFoodOverride(item: TrendingFoodItem): voi
  * Apply permanent food overrides on top of any food list (seed or cached).
  * Preserves item and array references when no overrides actually change any field.
  */
+export function stripLegacyFoodPhraseKh(text?: string): string {
+  if (!text) return '';
+  return text.replace(/\s*តាមរូបមន្តប្រពៃណីខ្មែរពិតៗ/g, '').trim();
+}
+
 export function applyFoodOverrides(
   foods: FoodItem[],
   overridesMap: Record<string, FoodMediaOverride> = loadLocalMediaOverrides().foods
 ): FoodItem[] {
-  if (!overridesMap || Object.keys(overridesMap).length === 0) return foods;
+  const safeOverrides = overridesMap || {};
   let anyChanged = false;
   const mapped = foods.map((f) => {
-    const ov = overridesMap[f.id];
-    if (!ov || !ov.photoUrl) return f;
+    const cleanedBaseDescKh = stripLegacyFoodPhraseKh(f.descriptionKh);
+    const ov = safeOverrides[f.id];
+    if (!ov || !ov.photoUrl) {
+      if (cleanedBaseDescKh !== (f.descriptionKh || '')) {
+        anyChanged = true;
+        return { ...f, descriptionKh: cleanedBaseDescKh };
+      }
+      return f;
+    }
     const nextPhotoUrl = ov.photoUrl;
     const nextNameKh = ov.nameKh || f.nameKh;
     const nextNameEn = ov.nameEn || f.nameEn;
     const nextCategorySlug = ov.categorySlug || f.categorySlug;
     const nextCategoryKh = ov.categoryKh || f.categoryKh;
     const nextCategoryEn = ov.categoryEn || f.categoryEn;
-    const nextDescriptionKh = ov.descriptionKh || f.descriptionKh;
+    const nextDescriptionKh = stripLegacyFoodPhraseKh(ov.descriptionKh || cleanedBaseDescKh);
     const nextDescriptionEn = ov.descriptionEn || f.descriptionEn;
     const nextPriceRiel = typeof ov.priceRiel === 'number' ? ov.priceRiel : f.priceRiel;
     const nextPriceUsd = typeof ov.priceUsd === 'number' ? ov.priceUsd : f.priceUsd;

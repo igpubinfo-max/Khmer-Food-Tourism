@@ -1634,12 +1634,13 @@ function computeLocalizedFood(food: FoodItem, lang: Language) {
   if (lang === 'km') {
     const diffKm = formatDifficultyByLang(food.difficulty, 'km');
     const cleanKmName = sanitizeStrictLanguageText(food.nameKh, 'km');
+    const rawDescKm = (food.descriptionKh || '').replace(/\s*តាមរូបមន្តប្រពៃណីខ្មែរពិតៗ/g, '').trim();
     return {
       name: cleanKmName,
       secondaryName: '',
       subtitle: '',
       category: sanitizeStrictLanguageText(food.categoryKh, 'km'),
-      description: sanitizeStrictLanguageText(food.descriptionKh, 'km'),
+      description: sanitizeStrictLanguageText(rawDescKm, 'km'),
       prepTime: food.prepTime,
       cookTime: food.cookTime,
       servings: food.servings,

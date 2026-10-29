@@ -675,6 +675,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               ...f,
               nameKh: seed.nameKh,
               nameEn: seed.nameEn,
+              descriptionKh: (f.descriptionKh || seed.descriptionKh || '').replace(/\s*តាមរូបមន្តប្រពៃណីខ្មែរពិតៗ/g, '').trim(),
               photoUrl: seed.photoUrl,
               originalPhotoUrl: seed.originalPhotoUrl,
               imageAuditStatus: seed.imageAuditStatus,
