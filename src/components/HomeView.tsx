@@ -309,25 +309,72 @@ export const HomeView: React.FC = () => {
     }
     return a.slice(0, n);
   };
-  const discoveryFoods = useMemo(
-    () => pickRandom(foods.filter((f) => f && f.id && f.photoUrl), 6),
+  const discoveryFoodIds = useMemo(() => {
+    const valid = foods.filter((f) => f && f.id && f.photoUrl);
+    const customUpdated = valid.filter(
+      (f) => f.isCustomPhoto || f.photoUrl.startsWith('data:') || f.photoUrl.startsWith('http')
+    );
+    const pool = customUpdated.length >= 6 ? customUpdated : valid;
+    return pickRandom(pool, 6).map((f) => f.id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [foods.length, discoverySeed]
-  );
-  const discoveryRestaurants = useMemo(
-    () => {
-      const approvedList = restaurants.filter((r) => r && r.id && r.status === 'approved' && r.photoUrl);
-      const rotated = sortRestaurantsWithVipRotation(pickRandom(approvedList, Math.min(20, approvedList.length)), users, appSettings);
-      return rotated.slice(0, 6);
-    },
+  }, [foods.length, discoverySeed]);
+
+  const discoveryFoods = useMemo(() => {
+    const byId = new Map(foods.map((f) => [f.id, f]));
+    const picked = discoveryFoodIds
+      .map((id) => byId.get(id))
+      .filter((f): f is NonNullable<typeof f> => Boolean(f && f.photoUrl));
+    if (picked.length > 0) return picked;
+    return foods.filter((f) => f && f.id && f.photoUrl).slice(0, 6);
+  }, [foods, discoveryFoodIds]);
+
+  const discoveryRestaurantIds = useMemo(() => {
+    const approvedList = restaurants.filter((r) => r && r.id && r.status === 'approved' && r.photoUrl);
+    const rotated = sortRestaurantsWithVipRotation(pickRandom(approvedList, Math.min(20, approvedList.length)), users, appSettings);
+    return rotated.slice(0, 6).map((r) => r.id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [restaurants.length, discoverySeed, users, appSettings]
-  );
-  const randomTrending = useMemo(
-    () => pickRandom(trendingFoods.filter((t) => t && t.id), 8),
+  }, [restaurants.length, discoverySeed, users.length]);
+
+  const discoveryRestaurants = useMemo(() => {
+    const byId = new Map(restaurants.map((r) => [r.id, r]));
+    return discoveryRestaurantIds
+      .map((id) => byId.get(id))
+      .filter((r): r is NonNullable<typeof r> => Boolean(r && r.photoUrl));
+  }, [restaurants, discoveryRestaurantIds]);
+
+  const randomTrendingIds = useMemo(
+    () => pickRandom(trendingFoods.filter((t) => t && t.id), 8).map((t) => t.id),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [trendingFoods.length, discoverySeed]
   );
+
+  const randomTrending = useMemo(() => {
+    const foodById = new Map(foods.map((f) => [f.id, f]));
+    const byId = new Map(trendingFoods.map((t) => [t.id, t]));
+    return randomTrendingIds
+      .map((id) => byId.get(id))
+      .filter((t): t is TrendingFoodItem => Boolean(t && t.id))
+      .map((t) => {
+        if (t.photoUrl && (t.photoUrl.startsWith('data:') || t.photoUrl.startsWith('http'))) {
+          return t;
+        }
+        const candidateIds = [
+          ...(t.matchedFoodId ? [t.matchedFoodId] : []),
+          ...(Array.isArray(t.fallbackFoodIds) ? t.fallbackFoodIds : []),
+        ];
+        for (const fid of candidateIds) {
+          const matched = foodById.get(fid);
+          if (
+            matched &&
+            matched.photoUrl &&
+            (matched.isCustomPhoto || matched.photoUrl.startsWith('data:') || matched.photoUrl.startsWith('http'))
+          ) {
+            return { ...t, photoUrl: matched.photoUrl, isCustomPhoto: true };
+          }
+        }
+        return t;
+      });
+  }, [trendingFoods, foods, randomTrendingIds]);
   const isHomeLoading = foods.length === 0 && restaurants.length === 0 && trendingFoods.length === 0;
   const canUseVipActions = isVip;
   const txt = (km: string, en: string, zh: string) => (language === 'km' ? km : language === 'zh' ? zh : en);

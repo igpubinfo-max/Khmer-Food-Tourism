@@ -418,12 +418,35 @@ export function saveLocalMediaOverrides(bundle: AllMediaOverridesBundle): void {
   try {
     localStorage.removeItem(VAULT_KEYS.DESTINATIONS_LEGACY);
   } catch {}
-  if (safeWriteJsonMap(VAULT_KEYS.FOODS, bundle.foods)) {
+  const foodsWritten = safeWriteJsonMap(VAULT_KEYS.FOODS, bundle.foods);
+  if (foodsWritten) {
     persistedInLocalStorageSets.foods = new Set(
       Object.entries(bundle.foods)
         .filter(([, v]) => v && v.photoUrl && v.photoUrl.trim().length > 0)
         .map(([k]) => k)
     );
+  } else {
+    // If all base64 food photos exceed localStorage's 5MB limit, prioritize storing the newest overrides
+    // in localStorage while preserving 100% of overrides in IndexedDB and inMemoryMasterBundle.
+    try {
+      const entries = Object.entries(bundle.foods).sort((a, b) => {
+        const tA = a[1]?.updatedAt ? new Date(a[1].updatedAt).getTime() : 0;
+        const tB = b[1]?.updatedAt ? new Date(b[1].updatedAt).getTime() : 0;
+        return tB - tA;
+      });
+      const trimmed: Record<string, FoodMediaOverride> = {};
+      let approxBytes = 0;
+      for (const [k, v] of entries) {
+        const entrySize = JSON.stringify(v).length;
+        if (approxBytes + entrySize < 1_800_000) {
+          trimmed[k] = v;
+          approxBytes += entrySize;
+        }
+      }
+      if (safeWriteJsonMap(VAULT_KEYS.FOODS, trimmed)) {
+        persistedInLocalStorageSets.foods = new Set(Object.keys(trimmed));
+      }
+    } catch {}
   }
   if (safeWriteJsonMap(VAULT_KEYS.RESTAURANTS, bundle.restaurants)) {
     persistedInLocalStorageSets.restaurants = new Set(
@@ -547,30 +570,33 @@ export function mergeOverrideBundles(
 }
 
 /**
- * Push a single record override to its own dedicated Supabase key (`kft_ov_<type>_<id>`)
- * AND safely merge-push the master bundle so no record can ever overwrite another.
+ * Push a single record override to its own dedicated Supabase key (`kft_ov_<type>_<id>`).
+ * Uses atomic per-record upsert with automatic retries so saves are fast, reliable,
+ * and never blocked by a 45MB master bundle upload.
  */
 async function syncSingleOverrideRecordToCloud(
   category: 'food' | 'rest' | 'dest' | 'trend',
   recordId: string,
   overridePayload: any,
   localBundle: AllMediaOverridesBundle
-): Promise<void> {
-  if (!isSupabaseConfigured()) return;
+): Promise<boolean> {
+  if (!isSupabaseConfigured()) return false;
   const perRecordKey = `${VAULT_KEYS.CLOUD_RECORD_PREFIX}${category}_${recordId}`;
-  try {
-    // 1. Atomic per-record upsert (fast, small payload, zero risk of overwriting other records)
-    await pushCloudDocument(perRecordKey, overridePayload, 12000);
-
-    // 2. Pull existing master bundle first, merge with localBundle, then push merged master bundle
-    const remoteMaster = await pullCloudDocument<AllMediaOverridesBundle>(VAULT_KEYS.CLOUD_DOC_KEY, 10000);
-    const mergedMaster = remoteMaster ? mergeOverrideBundles(remoteMaster, localBundle) : localBundle;
-    inMemoryMasterBundle = mergedMaster;
-    saveLocalMediaOverrides(mergedMaster);
-    await pushCloudDocument(VAULT_KEYS.CLOUD_DOC_KEY, mergedMaster, 15000);
-  } catch (err) {
-    console.warn(`syncSingleOverrideRecordToCloud(${perRecordKey}) warning:`, err);
+  inMemoryMasterBundle = localBundle;
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      const ok = await pushCloudDocument(perRecordKey, overridePayload, 20000);
+      if (ok) {
+        return true;
+      }
+    } catch (err) {
+      console.warn(`syncSingleOverrideRecordToCloud(${perRecordKey}) attempt ${attempt} warning:`, err);
+    }
+    if (attempt < 3) {
+      await new Promise((r) => setTimeout(r, 1200 * attempt));
+    }
   }
+  return false;
 }
 
 /**
@@ -1199,34 +1225,112 @@ export function applyDestinationOverrides(
 }
 
 /**
- * Apply permanent trending food overrides on top of any trending food list.
- * Preserves item and array references when no overrides actually change any field.
+ * Apply permanent trending food overrides AND food photo overrides on top of any trending food list.
+ * Ensures that replacing a food image in the Food tab (`vault.foods` / `foodsList`) immediately updates
+ * the corresponding item in `TrendingFoodsRow` (`ម្ហូបកំពុងពេញនិយម`) and never shows stale static images.
  */
 export function applyTrendingFoodOverrides(
   items: TrendingFoodItem[],
-  overridesMap: Record<string, TrendingFoodMediaOverride> = loadLocalMediaOverrides().trendingFoods
+  overridesMap: Record<string, TrendingFoodMediaOverride> = loadLocalMediaOverrides().trendingFoods,
+  foodOverridesMap: Record<string, FoodMediaOverride> = loadLocalMediaOverrides().foods,
+  foodsList?: FoodItem[]
 ): TrendingFoodItem[] {
   if (!Array.isArray(items)) return [];
   const hasInvalid = items.some((item) => !item || !item.id);
   const validItems = hasInvalid ? items.filter((item): item is TrendingFoodItem => Boolean(item && item.id)) : items;
-  if (!overridesMap || Object.keys(overridesMap).length === 0) return validItems;
+  const safeTrendOverrides = overridesMap || {};
+  const safeFoodOverrides = foodOverridesMap || {};
+  const foodByIdMap = new Map<string, FoodItem>();
+  if (Array.isArray(foodsList)) {
+    for (const f of foodsList) {
+      if (f && f.id) foodByIdMap.set(f.id, f);
+    }
+  }
+
   let anyChanged = hasInvalid;
   const mapped = validItems.map((item) => {
-    const ov = overridesMap[item.id];
-    if (!ov || !ov.photoUrl) return item;
-    const nextPhotoUrl = ov.photoUrl || item.photoUrl;
-    const nextFoodNameKh = ov.foodNameKh || item.foodNameKh;
-    const nextFoodNameEn = ov.foodNameEn || item.foodNameEn;
-    const nextRestNameKh = ov.restaurantNameKh || item.restaurantNameKh;
-    const nextLocationKh = ov.locationKh || item.locationKh;
-    const nextPriceRange = ov.priceRange || item.priceRange;
+    const ov = safeTrendOverrides[item.id];
+
+    // Determine candidate food IDs linked to this trending dish
+    const candidateIds: string[] = [];
+    if (item.matchedFoodId) candidateIds.push(item.matchedFoodId);
+    const pathMatch = String(item.photoUrl || '').match(/\/foods\/(food-\d+)\./);
+    if (pathMatch && !candidateIds.includes(pathMatch[1])) {
+      candidateIds.push(pathMatch[1]);
+    }
+    if (Array.isArray(item.fallbackFoodIds)) {
+      for (const fid of item.fallbackFoodIds) {
+        if (fid && !candidateIds.includes(fid)) candidateIds.push(fid);
+      }
+    }
+
+    // Find the best updated food photo from vault.foods or foodsList
+    let resolvedFoodPhoto = '';
+    let resolvedFoodUpdatedAt = '';
+    let resolvedMatchedFoodId = item.matchedFoodId;
+
+    for (const fid of candidateIds) {
+      const foodOv = safeFoodOverrides[fid];
+      if (foodOv && foodOv.photoUrl && !isObsoleteSeedPhoto(foodOv.photoUrl)) {
+        resolvedFoodPhoto = foodOv.photoUrl;
+        resolvedFoodUpdatedAt = foodOv.updatedAt || '';
+        resolvedMatchedFoodId = fid;
+        break;
+      }
+      const foodObj = foodByIdMap.get(fid);
+      if (
+        foodObj &&
+        foodObj.photoUrl &&
+        (foodObj.isCustomPhoto ||
+          foodObj.photoUrl.startsWith('data:') ||
+          foodObj.photoUrl.startsWith('http'))
+      ) {
+        resolvedFoodPhoto = foodObj.photoUrl;
+        resolvedFoodUpdatedAt = foodObj.photoUpdatedAt || '';
+        resolvedMatchedFoodId = fid;
+        break;
+      }
+    }
+
+    // Priority:
+    // 1. Explicit TrendingFood override with custom photo (data: or http)
+    // 2. Updated Food override from vault.foods / foodsList (from Admin editing in Food tab)
+    // 3. TrendingFood override photoUrl or item's current photoUrl
+    let nextPhotoUrl = item.photoUrl;
+    let nextPhotoUpdatedAt = item.photoUpdatedAt;
+    let nextIsCustomPhoto = item.isCustomPhoto;
+
+    if (
+      ov?.photoUrl &&
+      !isObsoleteSeedPhoto(ov.photoUrl) &&
+      (ov.photoUrl.startsWith('data:') || ov.photoUrl.startsWith('http'))
+    ) {
+      nextPhotoUrl = ov.photoUrl;
+      nextPhotoUpdatedAt = ov.updatedAt || nextPhotoUpdatedAt;
+      nextIsCustomPhoto = true;
+    } else if (resolvedFoodPhoto) {
+      nextPhotoUrl = resolvedFoodPhoto;
+      nextPhotoUpdatedAt = resolvedFoodUpdatedAt || nextPhotoUpdatedAt;
+      nextIsCustomPhoto = true;
+    } else if (ov?.photoUrl && !isObsoleteSeedPhoto(ov.photoUrl)) {
+      nextPhotoUrl = ov.photoUrl;
+      nextPhotoUpdatedAt = ov.updatedAt || nextPhotoUpdatedAt;
+    }
+
+    const nextFoodNameKh = ov?.foodNameKh || item.foodNameKh;
+    const nextFoodNameEn = ov?.foodNameEn || item.foodNameEn;
+    const nextRestNameKh = ov?.restaurantNameKh || item.restaurantNameKh;
+    const nextLocationKh = ov?.locationKh || (item as any).locationKh;
+
     if (
       item.photoUrl === nextPhotoUrl &&
       item.foodNameKh === nextFoodNameKh &&
       item.foodNameEn === nextFoodNameEn &&
       item.restaurantNameKh === nextRestNameKh &&
-      item.locationKh === nextLocationKh &&
-      item.priceRange === nextPriceRange
+      (item as any).locationKh === nextLocationKh &&
+      item.matchedFoodId === resolvedMatchedFoodId &&
+      item.isCustomPhoto === nextIsCustomPhoto &&
+      item.photoUpdatedAt === nextPhotoUpdatedAt
     ) {
       return item;
     }
@@ -1237,8 +1341,10 @@ export function applyTrendingFoodOverrides(
       foodNameKh: nextFoodNameKh,
       foodNameEn: nextFoodNameEn,
       restaurantNameKh: nextRestNameKh,
-      locationKh: nextLocationKh,
-      priceRange: nextPriceRange,
+      ...(nextLocationKh ? { locationKh: nextLocationKh } : {}),
+      matchedFoodId: resolvedMatchedFoodId,
+      isCustomPhoto: nextIsCustomPhoto,
+      photoUpdatedAt: nextPhotoUpdatedAt,
     };
   });
   return anyChanged ? mapped : validItems;
@@ -1288,21 +1394,42 @@ export async function hydrateFromLocalIdbImmediate(): Promise<AllMediaOverridesB
   return current;
 }
 
+const mediaSyncProgressListeners = new Set<(bundle: AllMediaOverridesBundle) => void>();
+
 /**
  * Hydrate and synchronize permanent media overrides from:
  *   1. In-memory master cache (`inMemoryMasterBundle`)
  *   2. LocalStorage (`VAULT_KEYS`)
  *   3. IndexedDB (`kft_permanent_media_vault_idb_v1`)
  *   4. Supabase Cloud Atomic Per-Record Keys (`kft_ov_food_*`, `kft_ov_rest_*`, `kft_ov_dest_*`, `kft_ov_trend_*`)
- *      via lightweight manifest check + chunked batch downloads so large base64 images never time out
- *   5. Supabase Cloud Master Bundle (`kft_cloud_media_overrides_v1`)
+ *      via lightweight manifest check + progressive batch downloads + IndexedDB checkpointing
+ *   5. Automatic background backfill of any local IndexedDB overrides missing from Supabase
  */
-export async function hydrateAndSyncMediaOverrides(forceCloud = false): Promise<AllMediaOverridesBundle> {
+export async function hydrateAndSyncMediaOverrides(
+  forceCloud = false,
+  onProgress?: (bundle: AllMediaOverridesBundle) => void
+): Promise<AllMediaOverridesBundle> {
+  if (onProgress) {
+    mediaSyncProgressListeners.add(onProgress);
+  }
+  const notifyListeners = (bundle: AllMediaOverridesBundle) => {
+    for (const fn of Array.from(mediaSyncProgressListeners)) {
+      try {
+        fn(bundle);
+      } catch {}
+    }
+  };
+
   if (mediaSyncInFlightPromise) {
-    return mediaSyncInFlightPromise;
+    try {
+      return await mediaSyncInFlightPromise;
+    } finally {
+      if (onProgress) mediaSyncProgressListeners.delete(onProgress);
+    }
   }
   const now = Date.now();
   if (!forceCloud && lastMediaCloudSyncAtMs > 0 && now - lastMediaCloudSyncAtMs < MEDIA_CLOUD_SYNC_COOLDOWN_MS && inMemoryMasterBundle) {
+    if (onProgress) mediaSyncProgressListeners.delete(onProgress);
     return inMemoryMasterBundle;
   }
 
@@ -1310,23 +1437,27 @@ export async function hydrateAndSyncMediaOverrides(forceCloud = false): Promise<
     let current = await hydrateFromLocalIdbImmediate();
     let hasRemoteChanges = false;
 
-    // Merge from Supabase Cloud using manifest-first delta sync + chunked batching
+    // Merge from Supabase Cloud using manifest-first delta sync + progressive chunked batching
     if (isSupabaseConfigured()) {
       try {
         lastMediaCloudSyncAtMs = Date.now();
-        const manifest = await pullCloudKeysManifestByPrefix(VAULT_KEYS.CLOUD_RECORD_PREFIX, 8000);
+        const manifest = await pullCloudKeysManifestByPrefix(VAULT_KEYS.CLOUD_RECORD_PREFIX, 10000);
         const existingPerRecordKeys = new Set<string>();
+        const remoteUpdatedAtMap = new Map<string, number>();
         const keysToFetch: string[] = [];
 
         if (Array.isArray(manifest) && manifest.length > 0) {
           for (const item of manifest) {
             existingPerRecordKeys.add(item.key);
             const remoteMs = item.updated_at ? new Date(item.updated_at).getTime() : 0;
+            remoteUpdatedAtMap.set(item.key, remoteMs);
             let localUpdatedAt: string | undefined;
+            let hasLocalPhoto = false;
             let seedUpdatedAtMs = 0;
             if (item.key.startsWith('kft_ov_food_')) {
               const id = item.key.slice('kft_ov_food_'.length);
               localUpdatedAt = current.foods[id]?.updatedAt;
+              hasLocalPhoto = Boolean(current.foods[id]?.photoUrl && !isObsoleteSeedPhoto(current.foods[id]?.photoUrl));
             } else if (item.key.startsWith('kft_ov_rest_')) {
               const id = item.key.slice('kft_ov_rest_'.length);
               if (current.deletedRestaurants?.[id] || isRestaurantIdDeleted(id, undefined, current.deletedRestaurants)) {
@@ -1334,9 +1465,11 @@ export async function hydrateAndSyncMediaOverrides(forceCloud = false): Promise<
                 continue;
               }
               localUpdatedAt = current.restaurants[id]?.updatedAt;
+              hasLocalPhoto = Boolean(current.restaurants[id]?.photoUrl || current.restaurants[id]?.profileImage);
             } else if (item.key.startsWith('kft_ov_dest_')) {
               const id = item.key.slice('kft_ov_dest_'.length);
               localUpdatedAt = current.destinations[id]?.updatedAt;
+              hasLocalPhoto = Boolean(current.destinations[id]?.photoUrl && !isObsoleteSeedPhoto(current.destinations[id]?.photoUrl));
               const seedDest = IMMUTABLE_SEED_DEST_MAP.get(id);
               if (seedDest?.photoUrl?.startsWith('/destinations/') && seedDest.photoUpdatedAt) {
                 seedUpdatedAtMs = new Date(seedDest.photoUpdatedAt).getTime() || 0;
@@ -1344,9 +1477,10 @@ export async function hydrateAndSyncMediaOverrides(forceCloud = false): Promise<
             } else if (item.key.startsWith('kft_ov_trend_')) {
               const id = item.key.slice('kft_ov_trend_'.length);
               localUpdatedAt = current.trendingFoods[id]?.updatedAt;
+              hasLocalPhoto = Boolean(current.trendingFoods[id]?.photoUrl && !isObsoleteSeedPhoto(current.trendingFoods[id]?.photoUrl));
             }
             const localMs = Math.max(
-              localUpdatedAt ? new Date(localUpdatedAt).getTime() || 0 : 0,
+              hasLocalPhoto && localUpdatedAt ? new Date(localUpdatedAt).getTime() || 0 : 0,
               seedUpdatedAtMs
             );
             if (localMs === 0 || remoteMs > localMs + 1000) {
@@ -1355,19 +1489,24 @@ export async function hydrateAndSyncMediaOverrides(forceCloud = false): Promise<
           }
         }
 
-        // Fetch any missing or newer per-record overrides in small batches of 6 keys so requests never time out
+        // Fetch any missing or newer per-record overrides in progressive batches of 10 keys
+        // Checkpoint to IndexedDB and update UI after each batch so refresh never loses progress!
         if (keysToFetch.length > 0) {
-          const BATCH_SIZE = 6;
-          const perRecordBundle: AllMediaOverridesBundle = {
-            foods: {},
-            restaurants: {},
-            destinations: {},
-            trendingFoods: {},
-            updatedAt: new Date().toISOString(),
-          };
+          const BATCH_SIZE = 10;
           for (let i = 0; i < keysToFetch.length; i += BATCH_SIZE) {
             const batchKeys = keysToFetch.slice(i, i + BATCH_SIZE);
-            const rows = await pullCloudDocumentsByKeys<any>(batchKeys, 15000);
+            const rows = await pullCloudDocumentsByKeys<any>(batchKeys, 18000);
+            if (!Array.isArray(rows) || rows.length === 0) continue;
+
+            const batchBundle: AllMediaOverridesBundle = {
+              foods: {},
+              restaurants: {},
+              destinations: {},
+              trendingFoods: {},
+              updatedAt: new Date().toISOString(),
+            };
+            let batchChanged = false;
+
             for (const row of rows) {
               const payload = row.payload;
               if (!payload || !payload.id) continue;
@@ -1378,20 +1517,25 @@ export async function hydrateAndSyncMediaOverrides(forceCloud = false): Promise<
                   payload.updatedAt = row.updated_at;
                 }
               }
+              batchChanged = true;
               hasRemoteChanges = true;
               if (row.key.startsWith('kft_ov_food_')) {
-                perRecordBundle.foods[payload.id] = payload;
+                batchBundle.foods[payload.id] = payload;
               } else if (row.key.startsWith('kft_ov_rest_')) {
-                perRecordBundle.restaurants[payload.id] = payload;
+                batchBundle.restaurants[payload.id] = payload;
               } else if (row.key.startsWith('kft_ov_dest_')) {
-                perRecordBundle.destinations[payload.id] = payload;
+                batchBundle.destinations[payload.id] = payload;
               } else if (row.key.startsWith('kft_ov_trend_')) {
-                perRecordBundle.trendingFoods[payload.id] = payload;
+                batchBundle.trendingFoods[payload.id] = payload;
               }
             }
-          }
-          if (hasRemoteChanges) {
-            current = mergeOverrideBundles(current, perRecordBundle);
+
+            if (batchChanged) {
+              current = mergeOverrideBundles(current, batchBundle);
+              inMemoryMasterBundle = current;
+              saveLocalMediaOverrides(current);
+              notifyListeners(current);
+            }
           }
         }
 
@@ -1401,10 +1545,39 @@ export async function hydrateAndSyncMediaOverrides(forceCloud = false): Promise<
           if (cloudBundle) {
             hasRemoteChanges = true;
             current = mergeOverrideBundles(current, cloudBundle);
+            inMemoryMasterBundle = current;
+            saveLocalMediaOverrides(current);
+            notifyListeners(current);
           }
         }
 
-        // Per-record keys are written on Admin/owner save via syncSingleOverrideRecordToCloud
+        // Automatically backfill any local overrides (in IndexedDB / localStorage) that are missing from Supabase
+        // or newer than Supabase so edits made offline or interrupted mid-upload are guaranteed to reach the cloud!
+        if (!hasBackfilledPerRecordKeysOnce && existingPerRecordKeys.size > 0) {
+          hasBackfilledPerRecordKeysOnce = true;
+          (async () => {
+            try {
+              for (const [fid, fOv] of Object.entries(current.foods || {})) {
+                if (!fOv || !fOv.photoUrl || isObsoleteSeedPhoto(fOv.photoUrl)) continue;
+                const key = `kft_ov_food_${fid}`;
+                const localMs = fOv.updatedAt ? new Date(fOv.updatedAt).getTime() || 0 : 0;
+                const remoteMs = remoteUpdatedAtMap.get(key) || 0;
+                if (!existingPerRecordKeys.has(key) || (localMs > 0 && localMs > remoteMs + 2000)) {
+                  await pushCloudDocument(key, fOv, 20000);
+                }
+              }
+              for (const [tid, tOv] of Object.entries(current.trendingFoods || {})) {
+                if (!tOv || !tOv.photoUrl || isObsoleteSeedPhoto(tOv.photoUrl)) continue;
+                const key = `kft_ov_trend_${tid}`;
+                const localMs = tOv.updatedAt ? new Date(tOv.updatedAt).getTime() || 0 : 0;
+                const remoteMs = remoteUpdatedAtMap.get(key) || 0;
+                if (!existingPerRecordKeys.has(key) || (localMs > 0 && localMs > remoteMs + 2000)) {
+                  await pushCloudDocument(key, tOv, 20000);
+                }
+              }
+            } catch {}
+          })();
+        }
       } catch {}
     }
 
@@ -1413,6 +1586,7 @@ export async function hydrateAndSyncMediaOverrides(forceCloud = false): Promise<
     }
     if (hasRemoteChanges) {
       saveLocalMediaOverrides(current);
+      notifyListeners(current);
     }
     return current;
   })();
@@ -1421,5 +1595,6 @@ export async function hydrateAndSyncMediaOverrides(forceCloud = false): Promise<
     return await mediaSyncInFlightPromise;
   } finally {
     mediaSyncInFlightPromise = null;
+    if (onProgress) mediaSyncProgressListeners.delete(onProgress);
   }
 }

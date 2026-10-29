@@ -27,6 +27,11 @@ export const TodayDiscovery: React.FC<Props> = ({ language, foods, restaurants, 
     const food = foods[i];
     if (food) {
       const loc = getLocalizedFood(food, language);
+      const resolvedFoodPhoto = food.photoUrl
+        ? food.photoUrl.startsWith('/foods/') && !food.photoUrl.includes('?')
+          ? `${food.photoUrl}?v=20261029v3`
+          : food.photoUrl
+        : FALLBACK_IMG;
       cards.push(
         <button
           key={`f-${food.id}`}
@@ -35,7 +40,7 @@ export const TodayDiscovery: React.FC<Props> = ({ language, foods, restaurants, 
           className="relative shrink-0 w-44 h-56 rounded-3xl overflow-hidden text-left shadow-lg active:scale-[0.97] transition cursor-pointer"
         >
           <img
-            src={food.photoUrl || FALLBACK_IMG}
+            src={resolvedFoodPhoto}
             alt={loc.name}
             loading="lazy"
             onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = FALLBACK_IMG; }}

@@ -27,6 +27,16 @@ export const TrendingFoodDetailModal: React.FC = () => {
 
   const matchedFood = useMemo(() => {
     if (!selectedTrendingFood || !Array.isArray(foods) || foods.length === 0) return null;
+    if (selectedTrendingFood.matchedFoodId) {
+      const byExplicitId = foods.find((f) => f && f.id === selectedTrendingFood.matchedFoodId);
+      if (byExplicitId) return byExplicitId;
+    }
+    if (Array.isArray(selectedTrendingFood.fallbackFoodIds)) {
+      for (const fid of selectedTrendingFood.fallbackFoodIds) {
+        const found = foods.find((f) => f && f.id === fid);
+        if (found) return found;
+      }
+    }
     const pUrl = selectedTrendingFood.photoUrl || '';
     const idMatch = pUrl.match(/\/foods\/(food-\d+)\./i);
     if (idMatch?.[1]) {
@@ -192,7 +202,20 @@ export const TrendingFoodDetailModal: React.FC = () => {
         {/* Hero Photo Banner */}
         <div className="relative aspect-16/10 w-full overflow-hidden bg-slate-950 shrink-0">
           <img 
-            src={item.photoUrl || '/welcome/hero-bg.webp'} 
+            src={
+              (() => {
+                const rawUrl =
+                  matchedFood?.photoUrl &&
+                  (matchedFood.isCustomPhoto ||
+                    matchedFood.photoUrl.startsWith('data:') ||
+                    matchedFood.photoUrl.startsWith('http'))
+                    ? matchedFood.photoUrl
+                    : item.photoUrl || matchedFood?.photoUrl || '/welcome/hero-bg.webp';
+                return rawUrl.startsWith('/foods/') && !rawUrl.includes('?')
+                  ? `${rawUrl}?v=20261029v3`
+                  : rawUrl;
+              })()
+            } 
             alt={displayFoodName}
             onError={(e) => {
               e.currentTarget.onerror = null;

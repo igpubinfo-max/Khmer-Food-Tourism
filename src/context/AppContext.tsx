@@ -607,15 +607,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } catch {}
     const vault = loadLocalMediaOverrides();
     try {
-      const savedV8 = localStorage.getItem('kft_foods_200_v8');
+      const savedV9 = localStorage.getItem('kft_foods_200_v9');
       const savedLegacy =
+        localStorage.getItem('kft_foods_200_v8') ||
         localStorage.getItem('kft_foods_200_v7') ||
         localStorage.getItem('kft_foods_200_v6') ||
         localStorage.getItem('kft_foods_200_v5');
-      const saved = savedV8 || savedLegacy;
+      const saved = savedV9 || savedLegacy;
       localStorage.removeItem('kft_foods_200_v5');
       localStorage.removeItem('kft_foods_200_v6');
       localStorage.removeItem('kft_foods_200_v7');
+      localStorage.removeItem('kft_foods_200_v8');
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length >= 50) {
@@ -671,7 +673,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
       }
     } catch (e) {
-      console.warn('Failed to parse kft_foods_200_v8', e);
+      console.warn('Failed to parse kft_foods_200_v9', e);
     }
     return applyFoodOverrides(initialFoods, vault.foods);
   });
@@ -1443,7 +1445,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
     try {
       localStorage.removeItem('kft_trending_foods_v2');
-      const saved = localStorage.getItem('kft_trending_foods_v3');
+      localStorage.removeItem('kft_trending_foods_v3');
+      const saved = localStorage.getItem('kft_trending_foods_v4');
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
@@ -1451,7 +1454,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             .filter((item): item is TrendingFoodItem => Boolean(item && typeof item === 'object' && item.id))
             .map((item) => {
               const seed = seedById.get(item.id);
-              return seed ? { ...seed, ...item, photoUrl: item.photoUrl || seed.photoUrl } : item;
+              if (!seed) return item;
+              const isItemCustomPhoto =
+                typeof item.photoUrl === 'string' &&
+                (item.photoUrl.startsWith('data:') || item.photoUrl.startsWith('http'));
+              return {
+                ...seed,
+                ...item,
+                matchedFoodId: seed.matchedFoodId || item.matchedFoodId,
+                fallbackFoodIds: seed.fallbackFoodIds || item.fallbackFoodIds,
+                photoUrl: isItemCustomPhoto ? item.photoUrl : seed.photoUrl,
+              };
             })
             .filter((item) => Boolean(item.foodNameKh || item.foodNameEn));
           if (sanitized.length > 0) {
@@ -1462,14 +1475,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 sanitized.push(seed);
               }
             }
-            return applyTrendingFoodOverrides(sanitized, vault.trendingFoods);
+            return applyTrendingFoodOverrides(sanitized, vault.trendingFoods, vault.foods, foods);
           }
         }
       }
     } catch (e) {
-      console.warn('Failed to parse kft_trending_foods_v3', e);
+      console.warn('Failed to parse kft_trending_foods_v4', e);
     }
-    return applyTrendingFoodOverrides(initialTrendingFoods, vault.trendingFoods);
+    return applyTrendingFoodOverrides(initialTrendingFoods, vault.trendingFoods, vault.foods, foods);
   });
 
   const [selectedTrendingFood, setSelectedTrendingFood] = useState<TrendingFoodItem | null>(null);
@@ -1547,7 +1560,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   useEffect(() => {
     try {
-      localStorage.setItem('kft_trending_foods_v3', JSON.stringify(trendingFoods));
+      const compactedTrending = trendingFoods.map(item =>
+        item.photoUrl && item.photoUrl.startsWith('data:') && item.matchedFoodId
+          ? { ...item, photoUrl: `/foods/${item.matchedFoodId}.jpg` }
+          : item
+      );
+      localStorage.setItem('kft_trending_foods_v4', JSON.stringify(compactedTrending));
     } catch {}
   }, [trendingFoods]);
 
@@ -1811,7 +1829,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           return d;
         });
       }
-      if (key === 'kft_foods_200_v8') {
+      if (key === 'kft_foods_200_v9') {
         if (!seedFoodPhotoMapRef.current) {
           seedFoodPhotoMapRef.current = new Map(initialFoods.map(f => [f.id, f.photoUrl]));
         }
@@ -1820,12 +1838,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           if (
             f &&
             typeof f.photoUrl === 'string' &&
-            f.photoUrl.startsWith('data:') &&
-            isOverridePersistedInLocalStorage('foods', f.id)
+            f.photoUrl.startsWith('data:')
           ) {
             return {
               ...f,
-              photoUrl: seedFoodMap.get(f.id) || '',
+              photoUrl: seedFoodMap.get(f.id) || `/foods/${f.id}.jpg`,
               isCustomPhoto: true,
             };
           }
@@ -2244,7 +2261,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return;
     }
     if (foods && foods.length > 0) {
-      scheduleStorageWrite('kft_foods_200_v8', foods, 1500);
+      scheduleStorageWrite('kft_foods_200_v9', foods, 1500);
     }
   }, [foods]);
 
@@ -2804,38 +2821,57 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
         // Also synchronize permanent media overrides across Foods, Restaurants, Destinations & Trending Foods
         try {
-          const syncedMediaBundle = await hydrateAndSyncMediaOverrides();
-          if (Object.keys(syncedMediaBundle.foods).length > 0) {
-            setFoods(prev => {
-              const next = applyFoodOverrides(prev, syncedMediaBundle.foods);
-              if (next !== prev) {
-                setSelectedFood(sel => (sel ? next.find(f => f.id === sel.id) || sel : null));
-              }
-              return next;
-            });
-          }
-          if (Object.keys(syncedMediaBundle.restaurants).length > 0) {
-            setRestaurants(prev => {
-              const next = applyRestaurantOverrides(prev, syncedMediaBundle.restaurants);
-              if (next !== prev) {
-                setSelectedRestaurant(sel => (sel ? next.find(r => r.id === sel.id) || sel : null));
-                setManagingRestaurantState(cur => (cur ? next.find(r => r.id === cur.id) || cur : null));
-              }
-              return next;
-            });
-          }
-          if (Object.keys(syncedMediaBundle.destinations).length > 0) {
-            setDestinations(prev => {
-              const next = applyDestinationOverrides(prev, syncedMediaBundle.destinations);
-              if (next !== prev) {
-                setSelectedDestination(sel => (sel ? next.find(d => d.id === sel.id) || sel : null));
-              }
-              return next;
-            });
-          }
-          if (Object.keys(syncedMediaBundle.trendingFoods).length > 0) {
-            setTrendingFoods(prev => applyTrendingFoodOverrides(prev, syncedMediaBundle.trendingFoods));
-          }
+          const applySyncedBundle = (syncedMediaBundle: ReturnType<typeof loadLocalMediaOverrides>) => {
+            let latestFoodsList = foods;
+            if (Object.keys(syncedMediaBundle.foods).length > 0) {
+              setFoods(prev => {
+                const next = applyFoodOverrides(prev, syncedMediaBundle.foods);
+                latestFoodsList = next;
+                if (next !== prev) {
+                  setSelectedFood(sel => (sel ? next.find(f => f.id === sel.id) || sel : null));
+                }
+                return next;
+              });
+            }
+            if (Object.keys(syncedMediaBundle.restaurants).length > 0) {
+              setRestaurants(prev => {
+                const next = applyRestaurantOverrides(prev, syncedMediaBundle.restaurants);
+                if (next !== prev) {
+                  setSelectedRestaurant(sel => (sel ? next.find(r => r.id === sel.id) || sel : null));
+                  setManagingRestaurantState(cur => (cur ? next.find(r => r.id === cur.id) || cur : null));
+                }
+                return next;
+              });
+            }
+            if (Object.keys(syncedMediaBundle.destinations).length > 0) {
+              setDestinations(prev => {
+                const next = applyDestinationOverrides(prev, syncedMediaBundle.destinations);
+                if (next !== prev) {
+                  setSelectedDestination(sel => (sel ? next.find(d => d.id === sel.id) || sel : null));
+                }
+                return next;
+              });
+            }
+            if (
+              Object.keys(syncedMediaBundle.trendingFoods).length > 0 ||
+              Object.keys(syncedMediaBundle.foods).length > 0
+            ) {
+              setTrendingFoods(prev => {
+                const next = applyTrendingFoodOverrides(
+                  prev,
+                  syncedMediaBundle.trendingFoods,
+                  syncedMediaBundle.foods,
+                  latestFoodsList
+                );
+                if (next !== prev) {
+                  setSelectedTrendingFood(sel => (sel ? next.find(t => t.id === sel.id) || sel : null));
+                }
+                return next;
+              });
+            }
+          };
+          const syncedMediaBundle = await hydrateAndSyncMediaOverrides(false, applySyncedBundle);
+          applySyncedBundle(syncedMediaBundle);
         } catch (err) {
           console.warn('Media overrides cloud sync warning:', err);
         }
@@ -2864,9 +2900,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   useEffect(() => {
     const applyHydratedBundle = (bundle: ReturnType<typeof loadLocalMediaOverrides>) => {
+      let latestFoods = foods;
       if (Object.keys(bundle.foods).length > 0) {
         setFoods(prev => {
           const next = applyFoodOverrides(prev, bundle.foods);
+          latestFoods = next;
           setSelectedFood(cur => (cur ? next.find(f => f.id === cur.id) || cur : null));
           return next;
         });
@@ -2885,14 +2923,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           return next;
         });
       }
-      if (Object.keys(bundle.trendingFoods).length > 0) {
-        setTrendingFoods(prev => applyTrendingFoodOverrides(prev, bundle.trendingFoods));
+      if (Object.keys(bundle.trendingFoods).length > 0 || Object.keys(bundle.foods).length > 0) {
+        setTrendingFoods(prev => {
+          const next = applyTrendingFoodOverrides(prev, bundle.trendingFoods, bundle.foods, latestFoods);
+          setSelectedTrendingFood(cur => (cur ? next.find(t => t.id === cur.id) || cur : null));
+          return next;
+        });
       }
     };
 
-    // 1. Immediately hydrate from local IndexedDB (<15ms, zero network wait)
+    // 1. Immediately hydrate from local IndexedDB (<15ms, zero network wait), then immediately start progressive cloud media sync
     hydrateFromLocalIdbImmediate()
-      .then(applyHydratedBundle)
+      .then((idbBundle) => {
+        applyHydratedBundle(idbBundle);
+        if (isSupabaseConfigured()) {
+          hydrateAndSyncMediaOverrides(true, applyHydratedBundle)
+            .then(applyHydratedBundle)
+            .catch(() => {});
+        }
+      })
       .catch(() => {});
 
     let syncTimer: any;
@@ -4879,7 +4928,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     recordPermanentFoodOverride(newFood);
     setFoods(prev => {
       const next = [newFood, ...prev];
-      scheduleStorageWrite('kft_foods_200_v8', next, 400);
+      scheduleStorageWrite('kft_foods_200_v9', next, 400);
       return next;
     });
     showToast(language === 'km' ? 'បានបញ្ចូលមុខម្ហូបថ្មីដោយជោគជ័យ' : 'Food item added successfully!', 'success');
@@ -4892,9 +4941,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       photoUpdatedAt: new Date().toISOString(),
     };
     recordPermanentFoodOverride(customUpdated);
+    const vault = loadLocalMediaOverrides();
     setFoods(prev => {
       const next = prev.map(f => f.id === customUpdated.id ? customUpdated : f);
-      scheduleStorageWrite('kft_foods_200_v8', next, 400);
+      scheduleStorageWrite('kft_foods_200_v9', next, 400);
+      setTrendingFoods(prevTrending =>
+        applyTrendingFoodOverrides(prevTrending, vault.trendingFoods, vault.foods, next)
+      );
       return next;
     });
     if (selectedFood?.id === customUpdated.id) setSelectedFood(customUpdated);
@@ -8396,16 +8449,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // AI Trending Food Update
   const updateTrendingFood = (updated: TrendingFoodItem) => {
-    recordPermanentTrendingFoodOverride(updated);
+    const customUpdated: TrendingFoodItem = {
+      ...updated,
+      isCustomPhoto: true,
+      photoUpdatedAt: new Date().toISOString(),
+    };
+    recordPermanentTrendingFoodOverride(customUpdated);
     setTrendingFoods(prev => {
-      const next = prev.map(item => item.id === updated.id ? updated : item);
+      const next = prev.map(item => item.id === customUpdated.id ? customUpdated : item);
       try {
-        localStorage.setItem('kft_trending_foods_v3', JSON.stringify(next));
+        const compacted = next.map(item =>
+          item.photoUrl && item.photoUrl.startsWith('data:') && item.matchedFoodId
+            ? { ...item, photoUrl: `/foods/${item.matchedFoodId}.jpg` }
+            : item
+        );
+        localStorage.setItem('kft_trending_foods_v4', JSON.stringify(compacted));
       } catch {
-        scheduleStorageWrite('kft_trending_foods_v3', next, 500);
+        scheduleStorageWrite('kft_trending_foods_v4', next, 500);
       }
       return next;
     });
+    if (selectedTrendingFood?.id === customUpdated.id) {
+      setSelectedTrendingFood(customUpdated);
+    }
   };
 
   // AI Smart Check-in & Auto Add Restaurant Engine

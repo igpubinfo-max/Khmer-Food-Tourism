@@ -891,7 +891,11 @@ export const FoodDetailModal: React.FC = () => {
           {/* Hero Image */}
           <div className="relative h-64 sm:h-72 w-full bg-slate-800">
             <img 
-              src={selectedFood.photoUrl} 
+              src={
+                selectedFood.photoUrl && selectedFood.photoUrl.startsWith('/foods/') && !selectedFood.photoUrl.includes('?')
+                  ? `${selectedFood.photoUrl}?v=20261029v3`
+                  : selectedFood.photoUrl
+              } 
               alt={loc.name}
               className="w-full h-full object-cover"
             />

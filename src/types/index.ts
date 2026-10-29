@@ -1004,6 +1004,10 @@ export interface TrendingFoodItem {
   landmarkNameKh?: string;
   landmarkNameEn?: string;
   videoUrl?: string;
+  matchedFoodId?: string;
+  fallbackFoodIds?: string[];
+  isCustomPhoto?: boolean;
+  photoUpdatedAt?: string;
 }
 
 // AI Smart Check-in & Auto Add Restaurant Types

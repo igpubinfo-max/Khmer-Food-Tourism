@@ -37,6 +37,11 @@ const FoodCardView: React.FC<FoodCardViewProps> = React.memo(({
   const loc = useMemo(() => getLocalizedFood(food, language), [food, language]);
   const tags = useMemo(() => getDisplayTags(food, 3), [food]);
 
+  const resolvedPhotoUrl = useMemo(() => {
+    const raw = food.photoUrl || '/welcome/hero-bg.webp';
+    return raw.startsWith('/foods/') && !raw.includes('?') ? `${raw}?v=20261029v3` : raw;
+  }, [food.photoUrl]);
+
   const handleShareFood = (e: React.MouseEvent) => {
     e.stopPropagation();
     shareRichContent(
@@ -65,7 +70,7 @@ const FoodCardView: React.FC<FoodCardViewProps> = React.memo(({
       {/* Image container */}
       <div className="relative aspect-16/10 w-full overflow-hidden bg-slate-100 dark:bg-slate-700">
         <img 
-          src={food.photoUrl} 
+          src={resolvedPhotoUrl} 
           alt={loc.name}
           className="w-full h-full object-cover"
           loading="lazy"

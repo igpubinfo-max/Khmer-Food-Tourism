@@ -48,6 +48,11 @@ export const TrendingFoodsRow: React.FC<Props> = ({ language, items, onOpen, onE
           item.provinceEn || 'Cambodia',
           language
         );
+        const resolvedPhoto = item.photoUrl
+          ? item.photoUrl.startsWith('/foods/') && !item.photoUrl.includes('?')
+            ? `${item.photoUrl}?v=20261029v3`
+            : item.photoUrl
+          : '/welcome/hero-bg.webp';
         return (
           <button
             key={item.id}
@@ -56,7 +61,7 @@ export const TrendingFoodsRow: React.FC<Props> = ({ language, items, onOpen, onE
             className="shrink-0 w-48 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs overflow-hidden text-left active:scale-[0.97] transition cursor-pointer"
           >
             <img
-              src={item.photoUrl || '/welcome/hero-bg.webp'}
+              src={resolvedPhoto}
               alt={name}
               loading="lazy"
               onError={(e) => {
