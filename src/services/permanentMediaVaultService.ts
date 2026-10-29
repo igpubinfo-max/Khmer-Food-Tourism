@@ -52,6 +52,12 @@ export interface FoodMediaOverride {
   categoryEn?: string;
   descriptionKh?: string;
   descriptionEn?: string;
+  cookTime?: string;
+  servings?: string;
+  calories?: number;
+  difficulty?: FoodItem['difficulty'];
+  ingredients?: FoodItem['ingredients'];
+  steps?: FoodItem['steps'];
   priceRiel?: number;
   priceUsd?: number;
   imageAuditStatus?: FoodItem['imageAuditStatus'];
@@ -317,6 +323,7 @@ function safeWriteJsonMap<T>(key: string, map: Record<string, T>): boolean {
       localStorage.removeItem('kft_destinations_real_v7');
       localStorage.removeItem('kft_restaurants_real_v8');
       localStorage.removeItem('kft_foods_200_v6');
+      localStorage.removeItem('kft_foods_200_v7');
       localStorage.setItem(key, JSON.stringify(map));
       return true;
     } catch {
@@ -582,6 +589,12 @@ export function recordPermanentFoodOverride(food: FoodItem): void {
     categoryEn: food.categoryEn,
     descriptionKh: food.descriptionKh,
     descriptionEn: food.descriptionEn,
+    cookTime: food.cookTime,
+    servings: food.servings,
+    calories: food.calories,
+    difficulty: food.difficulty,
+    ingredients: Array.isArray(food.ingredients) && food.ingredients.length > 0 ? food.ingredients : undefined,
+    steps: Array.isArray(food.steps) && food.steps.length > 0 ? food.steps : undefined,
     priceRiel: food.priceRiel,
     priceUsd: food.priceUsd,
     imageAuditStatus: food.imageAuditStatus,
@@ -821,6 +834,12 @@ export function applyFoodOverrides(
     const nextCategoryEn = ov.categoryEn || f.categoryEn;
     const nextDescriptionKh = stripLegacyFoodPhraseKh(ov.descriptionKh || cleanedBaseDescKh);
     const nextDescriptionEn = ov.descriptionEn || f.descriptionEn;
+    const nextCookTime = ov.cookTime || f.cookTime;
+    const nextServings = ov.servings || f.servings;
+    const nextCalories = typeof ov.calories === 'number' && ov.calories > 0 ? ov.calories : f.calories;
+    const nextDifficulty = ov.difficulty || f.difficulty;
+    const nextIngredients = Array.isArray(ov.ingredients) && ov.ingredients.length > 0 ? ov.ingredients : f.ingredients;
+    const nextSteps = Array.isArray(ov.steps) && ov.steps.length > 0 ? ov.steps : f.steps;
     const nextPriceRiel = typeof ov.priceRiel === 'number' ? ov.priceRiel : f.priceRiel;
     const nextPriceUsd = typeof ov.priceUsd === 'number' ? ov.priceUsd : f.priceUsd;
     const nextAuditStatus = ov.imageAuditStatus || 'verified';
@@ -836,6 +855,12 @@ export function applyFoodOverrides(
       f.categoryEn === nextCategoryEn &&
       f.descriptionKh === nextDescriptionKh &&
       f.descriptionEn === nextDescriptionEn &&
+      f.cookTime === nextCookTime &&
+      f.servings === nextServings &&
+      f.calories === nextCalories &&
+      f.difficulty === nextDifficulty &&
+      f.ingredients === nextIngredients &&
+      f.steps === nextSteps &&
       f.priceRiel === nextPriceRiel &&
       f.priceUsd === nextPriceUsd &&
       f.imageAuditStatus === nextAuditStatus &&
@@ -857,6 +882,12 @@ export function applyFoodOverrides(
       categoryEn: nextCategoryEn,
       descriptionKh: nextDescriptionKh,
       descriptionEn: nextDescriptionEn,
+      cookTime: nextCookTime,
+      servings: nextServings,
+      calories: nextCalories,
+      difficulty: nextDifficulty,
+      ingredients: nextIngredients,
+      steps: nextSteps,
       priceRiel: nextPriceRiel,
       priceUsd: nextPriceUsd,
       imageAuditStatus: nextAuditStatus,

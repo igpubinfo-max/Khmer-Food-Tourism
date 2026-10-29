@@ -3,7 +3,7 @@ import { useApp } from '../context/AppContext';
 import { 
   X, Heart, Clock, Users, Flame, ChefHat, 
   Share2, CheckCircle2, Circle, Volume2, Sparkles, Send, Bookmark, Globe, Check,
-  Edit2, Save, Upload, Camera, ArrowLeft
+  Edit2, Save, Upload, Camera, ArrowLeft, Plus, Trash2
 } from 'lucide-react';
 import {
   shareRichContent,
@@ -14,7 +14,7 @@ import {
   processAndCompressImageFile,
 } from '../utils/androidMediaHelper';
 import { searchOnlineFoodImages, OnlineFoodImageCandidate } from '../services/onlineFoodImageService';
-import { FoodCategorySlug, FoodItem } from '../types';
+import { FoodCategorySlug, FoodItem, Ingredient, CookingStep } from '../types';
 import { tr } from '../utils/i18n';
 import { getLocalizedFood } from '../utils/zhDynamicTranslator';
 import { DishTagChips } from './DishTagChips';
@@ -45,6 +45,8 @@ export const FoodDetailModal: React.FC = () => {
   const [editDifficulty, setEditDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
   const [editDescriptionKh, setEditDescriptionKh] = useState('');
   const [editDescriptionEn, setEditDescriptionEn] = useState('');
+  const [editIngredients, setEditIngredients] = useState<Ingredient[]>([]);
+  const [editSteps, setEditSteps] = useState<CookingStep[]>([]);
   const [editPhotoUrl, setEditPhotoUrl] = useState('');
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const [isSavingAdminFood, setIsSavingAdminFood] = useState(false);
@@ -62,6 +64,25 @@ export const FoodDetailModal: React.FC = () => {
       setEditDifficulty(selectedFood.difficulty || 'medium');
       setEditDescriptionKh((selectedFood.descriptionKh || '').replace(/\s*តាមរូបមន្តប្រពៃណីខ្មែរពិតៗ/g, '').trim());
       setEditDescriptionEn(selectedFood.descriptionEn || '');
+      setEditIngredients(
+        Array.isArray(selectedFood.ingredients) && selectedFood.ingredients.length > 0
+          ? selectedFood.ingredients.map((ing) => ({
+              nameKh: ing.nameKh || '',
+              nameEn: ing.nameEn || '',
+              amount: ing.amount || '',
+            }))
+          : []
+      );
+      setEditSteps(
+        Array.isArray(selectedFood.steps) && selectedFood.steps.length > 0
+          ? selectedFood.steps.map((st, idx) => ({
+              stepNumber: idx + 1,
+              instructionKh: st.instructionKh || '',
+              instructionEn: st.instructionEn || '',
+              tipKh: st.tipKh,
+            }))
+          : []
+      );
       setEditPhotoUrl(selectedFood.photoUrl || '');
     }
     setOnlineCandidates([]);
@@ -220,6 +241,28 @@ export const FoodDetailModal: React.FC = () => {
       specialty: 'មុខម្ហូបពិសេស',
     };
 
+    const cleanedIngredients: Ingredient[] = editIngredients
+      .map((ing) => ({
+        nameKh: (ing.nameKh || '').trim(),
+        nameEn: (ing.nameEn || ing.nameKh || '').trim(),
+        amount: (ing.amount || '').trim() || 'តាមចំណូលចិត្ត',
+      }))
+      .filter((ing) => ing.nameKh.length > 0 || ing.nameEn.length > 0);
+
+    const cleanedSteps: CookingStep[] = editSteps
+      .map((st) => ({
+        instructionKh: (st.instructionKh || '').trim(),
+        instructionEn: (st.instructionEn || st.instructionKh || '').trim(),
+        tipKh: st.tipKh,
+      }))
+      .filter((st) => st.instructionKh.length > 0 || st.instructionEn.length > 0)
+      .map((st, idx) => ({
+        stepNumber: idx + 1,
+        instructionKh: st.instructionKh,
+        instructionEn: st.instructionEn,
+        ...(st.tipKh ? { tipKh: st.tipKh } : {}),
+      }));
+
     const updated: FoodItem = {
       ...selectedFood,
       nameKh: editNameKh.trim() || selectedFood.nameKh,
@@ -234,6 +277,8 @@ export const FoodDetailModal: React.FC = () => {
       difficulty: editDifficulty,
       descriptionKh: editDescriptionKh.trim() || selectedFood.descriptionKh,
       descriptionEn: editDescriptionEn.trim() || selectedFood.descriptionEn,
+      ingredients: cleanedIngredients.length > 0 ? cleanedIngredients : selectedFood.ingredients,
+      steps: cleanedSteps.length > 0 ? cleanedSteps : selectedFood.steps,
       photoUrl: editPhotoUrl.trim() || selectedFood.photoUrl,
       imageAuditStatus: 'verified',
       imageAuditNote: 'កែប្រែដោយរដ្ឋបាល (Admin Edited)',
@@ -640,16 +685,182 @@ export const FoodDetailModal: React.FC = () => {
               </div>
 
               {/* 5. Description */}
-              <div>
-                <label className="block font-bold text-xs text-slate-800 dark:text-slate-200 mb-1">
-                  {isKm ? 'ការពិពណ៌នា (ភាសាខ្មែរ)' : 'Description (Khmer)'}
-                </label>
-                <textarea
-                  rows={3}
-                  value={editDescriptionKh}
-                  onChange={(e) => setEditDescriptionKh(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-white leading-relaxed"
-                />
+              <div className="space-y-2">
+                <div>
+                  <label className="block font-bold text-xs text-slate-800 dark:text-slate-200 mb-1">
+                    {isKm ? 'ការពិពណ៌នា (ភាសាខ្មែរ)' : 'Description (Khmer)'}
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={editDescriptionKh}
+                    onChange={(e) => setEditDescriptionKh(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-white leading-relaxed"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-xs text-slate-800 dark:text-slate-200 mb-1">
+                    {isKm ? 'ការពិពណ៌នា (English)' : 'Description (English)'}
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={editDescriptionEn}
+                    onChange={(e) => setEditDescriptionEn(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-white leading-relaxed"
+                  />
+                </div>
+              </div>
+
+              {/* 6. Ingredients Editor (គ្រឿងផ្សំ) */}
+              <div className="space-y-2 p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+                <div className="flex items-center justify-between">
+                  <label className="font-bold text-xs text-slate-800 dark:text-slate-200">
+                    {isKm ? 'គ្រឿងផ្សំ (Ingredients)' : 'Ingredients'} ({editIngredients.length})
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setEditIngredients((prev) => [
+                        ...prev,
+                        { nameKh: '', nameEn: '', amount: 'តាមចំណូលចិត្ត' },
+                      ])
+                    }
+                    className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold flex items-center gap-1 cursor-pointer"
+                  >
+                    <Plus className="w-3 h-3" />
+                    <span>{isKm ? 'បន្ថែមគ្រឿងផ្សំ' : 'Add'}</span>
+                  </button>
+                </div>
+                <div className="space-y-2">
+                  {editIngredients.map((ing, idx) => (
+                    <div
+                      key={`edit-ing-${idx}`}
+                      className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 space-y-1.5"
+                    >
+                      <div className="flex items-center gap-1.5">
+                        <input
+                          type="text"
+                          value={ing.nameKh}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setEditIngredients((prev) =>
+                              prev.map((item, i) => (i === idx ? { ...item, nameKh: val } : item))
+                            );
+                          }}
+                          placeholder={isKm ? 'ឈ្មោះគ្រឿងផ្សំ (ខ្មែរ)' : 'Ingredient (Khmer)'}
+                          className="flex-1 px-2.5 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs text-slate-900 dark:text-white"
+                        />
+                        <input
+                          type="text"
+                          value={ing.amount}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setEditIngredients((prev) =>
+                              prev.map((item, i) => (i === idx ? { ...item, amount: val } : item))
+                            );
+                          }}
+                          placeholder={isKm ? 'បរិមាណ' : 'Amount'}
+                          className="w-28 px-2 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs text-slate-900 dark:text-white"
+                        />
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setEditIngredients((prev) => prev.filter((_, i) => i !== idx))
+                          }
+                          className="p-1.5 rounded-lg text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 cursor-pointer"
+                          title={isKm ? 'លុប' : 'Remove'}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                      <input
+                        type="text"
+                        value={ing.nameEn}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setEditIngredients((prev) =>
+                            prev.map((item, i) => (i === idx ? { ...item, nameEn: val } : item))
+                          );
+                        }}
+                        placeholder="Ingredient (English)"
+                        className="w-full px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/70 text-[11px] text-slate-700 dark:text-slate-300"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* 7. Cooking Steps Editor (វិធីធ្វើម្ហូប) */}
+              <div className="space-y-2 p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+                <div className="flex items-center justify-between">
+                  <label className="font-bold text-xs text-slate-800 dark:text-slate-200">
+                    {isKm ? 'វិធីធ្វើម្ហូប (Cooking Steps)' : 'Cooking Steps'} ({editSteps.length})
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setEditSteps((prev) => [
+                        ...prev,
+                        { stepNumber: prev.length + 1, instructionKh: '', instructionEn: '' },
+                      ])
+                    }
+                    className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold flex items-center gap-1 cursor-pointer"
+                  >
+                    <Plus className="w-3 h-3" />
+                    <span>{isKm ? 'បន្ថែមជំហាន' : 'Add Step'}</span>
+                  </button>
+                </div>
+                <div className="space-y-2">
+                  {editSteps.map((st, idx) => (
+                    <div
+                      key={`edit-step-${idx}`}
+                      className="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 space-y-1.5"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-400">
+                          {isKm ? `ជំហានទី ${idx + 1}` : `Step ${idx + 1}`}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setEditSteps((prev) =>
+                              prev
+                                .filter((_, i) => i !== idx)
+                                .map((item, n) => ({ ...item, stepNumber: n + 1 }))
+                            )
+                          }
+                          className="p-1 rounded-lg text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 cursor-pointer"
+                          title={isKm ? 'លុបជំហាននេះ' : 'Remove step'}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                      <textarea
+                        rows={2}
+                        value={st.instructionKh}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setEditSteps((prev) =>
+                            prev.map((item, i) => (i === idx ? { ...item, instructionKh: val } : item))
+                          );
+                        }}
+                        placeholder={isKm ? 'វិធីធ្វើជាភាសាខ្មែរ...' : 'Instruction in Khmer...'}
+                        className="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs text-slate-900 dark:text-white leading-relaxed"
+                      />
+                      <textarea
+                        rows={2}
+                        value={st.instructionEn}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setEditSteps((prev) =>
+                            prev.map((item, i) => (i === idx ? { ...item, instructionEn: val } : item))
+                          );
+                        }}
+                        placeholder="Instruction in English..."
+                        className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/70 text-[11px] text-slate-700 dark:text-slate-300 leading-relaxed"
+                      />
+                    </div>
+                  ))}
+                </div>
               </div>
 
               {/* Save & Cancel */}

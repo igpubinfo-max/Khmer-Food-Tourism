@@ -607,22 +607,30 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } catch {}
     const vault = loadLocalMediaOverrides();
     try {
-      const saved =
+      const savedV8 = localStorage.getItem('kft_foods_200_v8');
+      const savedLegacy =
         localStorage.getItem('kft_foods_200_v7') ||
         localStorage.getItem('kft_foods_200_v6') ||
         localStorage.getItem('kft_foods_200_v5');
+      const saved = savedV8 || savedLegacy;
       localStorage.removeItem('kft_foods_200_v5');
       localStorage.removeItem('kft_foods_200_v6');
+      localStorage.removeItem('kft_foods_200_v7');
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length >= 50) {
           const initialMap = new Map(initialFoods.map(f => [f.id, f]));
           let vaultChanged = false;
-          const upgraded = parsed.map((f: FoodItem) => {
+          const customAddedFoods: FoodItem[] = [];
+          for (const f of parsed as FoodItem[]) {
+            if (!f || !f.id) continue;
             const seed = initialMap.get(f.id);
-            if (!seed) return f;
+            if (!seed) {
+              customAddedFoods.push(f);
+              continue;
+            }
 
-            // Check if Admin previously customized this food item's photo or details
+            // Harvest any custom photo from cached localStorage into the permanent vault if not already recorded
             const existingOverride = vault.foods[f.id];
             const isPhotoModifiedFromSeed =
               typeof f.photoUrl === 'string' &&
@@ -654,45 +662,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               };
               vaultChanged = true;
             }
-
-            const finalOverride = vault.foods[f.id];
-            if (finalOverride && finalOverride.photoUrl) {
-              return {
-                ...seed,
-                ...f,
-                nameKh: finalOverride.nameKh || seed.nameKh,
-                nameEn: finalOverride.nameEn || seed.nameEn,
-                photoUrl: finalOverride.photoUrl,
-                originalPhotoUrl: seed.originalPhotoUrl,
-                imageAuditStatus: finalOverride.imageAuditStatus || 'verified',
-                imageAuditNote: finalOverride.imageAuditNote || f.imageAuditNote,
-                isCustomPhoto: true,
-                photoUpdatedAt: finalOverride.updatedAt,
-              };
-            }
-
-            return {
-              ...f,
-              nameKh: seed.nameKh,
-              nameEn: seed.nameEn,
-              descriptionKh: (f.descriptionKh || seed.descriptionKh || '').replace(/\s*តាមរូបមន្តប្រពៃណីខ្មែរពិតៗ/g, '').trim(),
-              photoUrl: seed.photoUrl,
-              originalPhotoUrl: seed.originalPhotoUrl,
-              imageAuditStatus: seed.imageAuditStatus,
-              imageAuditNote: seed.imageAuditNote,
-            };
-          });
+          }
           if (vaultChanged) {
             saveLocalMediaOverrides(vault);
           }
-          const existingIds = new Set(upgraded.map((f: FoodItem) => f.id));
-          const missingFromInitial = initialFoods.filter(f => !existingIds.has(f.id));
-          const combined = missingFromInitial.length > 0 ? [...upgraded, ...missingFromInitial] : upgraded;
+          const combined = customAddedFoods.length > 0 ? [...customAddedFoods, ...initialFoods] : initialFoods;
           return applyFoodOverrides(combined, vault.foods);
         }
       }
     } catch (e) {
-      console.warn('Failed to parse kft_foods_200_v7', e);
+      console.warn('Failed to parse kft_foods_200_v8', e);
     }
     return applyFoodOverrides(initialFoods, vault.foods);
   });
@@ -1800,7 +1779,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
 
   // Compact bulk arrays before writing to localStorage so base64 photos already confirmed persisted in VAULT_KEYS
-  // are never duplicated a second time in kft_destinations_real_v8 / kft_restaurants_real_v9 / kft_foods_200_v7.
+  // are never duplicated a second time in kft_destinations_real_v8 / kft_restaurants_real_v9 / kft_foods_200_v8.
   // Never strip a `data:` photo unless `isOverridePersistedInLocalStorage` confirms the override is safely on disk in localStorage.
   const seedDestPhotoMapRef = useRef<Map<string, string> | null>(null);
   const seedFoodPhotoMapRef = useRef<Map<string, string> | null>(null);
@@ -1832,7 +1811,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           return d;
         });
       }
-      if (key === 'kft_foods_200_v7') {
+      if (key === 'kft_foods_200_v8') {
         if (!seedFoodPhotoMapRef.current) {
           seedFoodPhotoMapRef.current = new Map(initialFoods.map(f => [f.id, f.photoUrl]));
         }
@@ -2265,7 +2244,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return;
     }
     if (foods && foods.length > 0) {
-      scheduleStorageWrite('kft_foods_200_v7', foods, 1500);
+      scheduleStorageWrite('kft_foods_200_v8', foods, 1500);
     }
   }, [foods]);
 
@@ -4900,7 +4879,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     recordPermanentFoodOverride(newFood);
     setFoods(prev => {
       const next = [newFood, ...prev];
-      scheduleStorageWrite('kft_foods_200_v7', next, 400);
+      scheduleStorageWrite('kft_foods_200_v8', next, 400);
       return next;
     });
     showToast(language === 'km' ? 'បានបញ្ចូលមុខម្ហូបថ្មីដោយជោគជ័យ' : 'Food item added successfully!', 'success');
@@ -4915,7 +4894,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     recordPermanentFoodOverride(customUpdated);
     setFoods(prev => {
       const next = prev.map(f => f.id === customUpdated.id ? customUpdated : f);
-      scheduleStorageWrite('kft_foods_200_v7', next, 400);
+      scheduleStorageWrite('kft_foods_200_v8', next, 400);
       return next;
     });
     if (selectedFood?.id === customUpdated.id) setSelectedFood(customUpdated);

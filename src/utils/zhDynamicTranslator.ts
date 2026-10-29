@@ -242,9 +242,26 @@ export const FOOD_CATEGORY_ZH_MAP: Record<string, string> = {
   'Stir-Fry / Kampot Pepper Squid': '贡布青胡椒炒鱿鱼',
   'Stir-Fry / Holy Basil Frog': '九层塔香辣炒田鸡',
   'Stir-Fry / Eggplant & Pork': '肉末豆瓣烧紫茄',
-  'Stir-Fry / Mixed Vegetables': '脆皮五花肉炒什锦蔬菜',
+  'Stir-Fry / Mixed Vegetables': '高棉什锦炒时蔬',
   'Braised / Pork Trotters Khor': '棕榈糖红烧猪蹄卤蛋',
   'Stir-Fry / Fermented Tofu Beef': '腐乳杏鲍菇炒牛肉',
+  'Stir-Fry / Fermented Tofu Mushroom': '红腐乳爆炒杏鲍菇',
+  'Soup / Kroeung Sour': '高棉香茅酸汤',
+  'Soup / Lime Herb Fish': '青柠香草清汤黑鱼',
+  'Stir-fry / Morning Glory & Giblets': '空心菜爆炒鸡杂',
+  'Crispy Fried / Green Mango Dip': '酥炸鲜鱼配青芒果鱼露',
+  'Stir-Fried / Seafood': '香茅九层塔辣炒海鲜',
+  'Soup / Fish Coconut Curry': '高棉椰香红咖喱鱼',
+  'Soup / Forest Pickled Bamboo': '山野酸笋鲶鱼汤',
+  'Soup / Mushroom & Fish Praher': '草菇鲜鱼草本汤',
+  'Grilled / Roasted Duck': '秘制脆皮烤鸭',
+  'Stir-Fry / Ginger Fish': '嫩子姜爆炒鲜鱼片',
+  'Stir-Fry / Beef & Broccoli': '牛肉炒西兰花与花椰菜',
+  'Braised / Prahok Mekong Fish': '波罗福鱼酱焖湄公河鱼',
+  'Noodles / Beef Lort Cha': '金边牛肉煎蛋炒银针粉',
+  'Breakfast Stew / Beef Khor Ko & Baguette': '高棉五香红烧牛腩配脆法棍',
+  'Rice / Yangzhou Fried Rice': '扬州风味什锦炒饭',
+  'Steamed Dish / Pork, Fish Roe & Salted Egg': '鱼籽咸鸭蛋蒸肉饼',
   'Stir-Fry / Sweet & Sour Fish': '糖醋脆皮黑鱼',
   'Stir-Fry / Spicy Eel Kroeung': '香茅九层塔辣炒鳝鱼',
   'Stir-Fry / Garlic Prawns & Okra': '蒜香河虾炒秋葵',
@@ -464,6 +481,36 @@ export const EXACT_FOOD_NAME_ZH_MAP: Record<string, string> = {
   'Wild Forest Honey & Fresh Lime Iced Tea (Tae Krouch Chhmar)': '森林野蜂蜜鲜青柠冰红茶',
   'Freshly Stone-Ground Warm Soy Milk with Pandan (Teuk Sandaek)': '斑兰叶清香石磨热豆浆',
   'Red Dragon Fruit & Fresh Milk Tropical Smoothie': '热带红心火龙果鲜奶冰沙',
+  'Sanday Fish Sour Soup': '湄公河鲜鲶鱼罗望子酸汤',
+  'Braised Bamboo Shoot & Pork Trotter Soup': '鲜笋清炖猪蹄汤',
+  'Cambodian Beef Kroeung Sour Soup': '高棉香茅酸牛肉汤',
+  'Winter Melon Sour Fish Soup': '冬瓜鲜河鱼罗望子酸汤',
+  'Snakehead Fish Sour Herb Soup (Sngor Chhruk Trei Ros)': '高棉青柠香草清汤黑鱼',
+  'Grilled Squid with Salt and Chili': '蒜蓉椒盐炭烤鲜鱿鱼',
+  'Stir-Fried Morning Glory with Chicken Giblets': '蒜香空心菜爆炒鸡杂',
+  'Dieb Fish & Young Tamarind Leaf Sour Soup': '嫩罗望子叶鲜河鱼酸汤',
+  'Pumpkin Vine Shoot & Fish Sour Soup': '鲜嫩南瓜藤尖河鱼酸汤',
+  'Field Fish & Paddy Crab Sour Soup': '高棉田鱼稻田蟹酸汤',
+  'Crispy Fried Fish with Green Mango Fish Sauce': '金黄脆皮炸鱼配青芒果鱼露汁',
+  'Charcoal Grilled Marinated Pork': '高棉棕榈糖蒜香炭烤猪肉',
+  'Grilled Catfish with Green Mango Fish Sauce': '炭烤淡水鲶鱼配青芒果鱼露酱',
+  'Stir-Fried Spicy Squid with Holy Basil': '香茅九层塔猛火辣炒鲜鱿鱼',
+  'Water Lily Stems Stir-Fried': '蒜蓉猛火快炒睡莲嫩茎',
+  'Khmer Red Fish Coconut Curry': '高棉椰香红咖喱鲜鱼',
+  'Spicy Forest Catfish & Pickled Bamboo Shoot Soup': '山野酸笋香辣鲶鱼汤',
+  'Straw Mushroom & Fresh Fish Herbal Soup': '草菇鲜河鱼高棉草本汤',
+  'Charcoal Grilled Beef with Savory Prahok Dip': '炭烤嫩牛肉配咸香波罗福蘸酱',
+  'Roasted Duck': '蜜汁五香脆皮烤鸭',
+  'Fragrant Young Ginger Stir-Fried Fish (Cha Knhyey)': '嫩子姜豆豉爆炒鲜鱼片',
+  'Broccoli & Cauliflower Stir-Fry with Beef': '鲜嫩牛肉炒西兰花与花椰菜',
+  'Cambodian Mixed Vegetable Stir-Fry': '高棉蚝油炒什锦时蔬',
+  'Fermented Red Tofu & King Oyster Mushroom Stir-Fry': '红腐乳蒜香炒杏鲍菇',
+  'Braised Mekong Fish with Savory Prahok': '波罗福鱼酱砂锅焖湄公鱼',
+  'Phnom Penh Stir-Fried Short Pin Noodles with Beef & Fried Egg (Lort Cha)': '金边鲜嫩牛肉煎蛋炒银针粉',
+  'Cambodian Spiced Beef Stew with Crispy Baguette (Khor Ko)': '高棉五香红烧牛腩配脆皮法棍',
+  'Yangzhou Fried Rice': '招牌扬州什锦炒饭',
+  'Steamed Minced Pork with Fish Roe & Salted Egg': '鲜鱼籽咸鸭蛋清蒸肉饼',
+  'Steamed Minced Pork with Fish Roe & Salted Duck Egg': '鲜鱼籽咸鸭蛋清蒸肉饼',
   ...FOOD_51_100_NAME_ZH,
 };
 
@@ -1384,124 +1431,182 @@ function buildChineseCookingStepsForCategory(
   zhName: string,
   mainZh: string,
   subZh: string,
-  herbZh: string
+  herbZh: string,
+  nameKh = ''
 ): Array<{ stepNumber: number; instruction: string; tip: string }> {
   if (cat === 'soup') {
+    if (nameKh.includes('ការី') || nameKh.includes('សម្លខ្ទិះ')) {
+      return [
+        { stepNumber: 1, instruction: `将${mainZh}洗净切好，备齐${subZh}与高棉红咖喱香料泥。`, tip: '' },
+        { stepNumber: 2, instruction: '锅中倒入头道浓椰浆与咖喱酱慢火煸炒，直至红油析出、椰香四溢。', tip: '' },
+        { stepNumber: 3, instruction: `放入${mainZh}与${subZh}注入椰奶慢火炖煮至软嫩入味，调入鱼露、棕榈糖与海盐。`, tip: '' },
+        { stepNumber: 4, instruction: `出锅前加入${herbZh}增香，即可将浓醇鲜美的「${zhName}」盛出享用。`, tip: '' },
+      ];
+    }
+    if (nameKh.includes('ម្រះញាត់') || nameKh.includes('ស្ងោរ')) {
+      return [
+        { stepNumber: 1, instruction: `将${mainZh}与${subZh}清洗处理干净并切配整齐备用。`, tip: '' },
+        { stepNumber: 2, instruction: `锅中烧沸清汤并放入草本香料，下入${mainZh}中小火慢炖，撇净浮沫保持汤色清亮。`, tip: '' },
+        { stepNumber: 3, instruction: `加入${subZh}煮至熟透软嫩，调入特级鱼露、海盐与少许糖提鲜。`, tip: '' },
+        { stepNumber: 4, instruction: `起锅前撒入${herbZh}（酸汤则挤入鲜青柠汁），即可趁热品尝清爽鲜美的「${zhName}」。`, tip: '' },
+      ];
+    }
+    if (nameKh.includes('ប្រហើរ')) {
+      return [
+        { stepNumber: 1, instruction: `将${mainZh}处理干净，把${subZh}切块，并捣好香茅与凹唇姜。`, tip: '' },
+        { stepNumber: 2, instruction: '锅中清水烧开，放入拍扁香茅与少许波罗福鱼酱熬出清雅草本汤底。', tip: '' },
+        { stepNumber: 3, instruction: `依成熟先后放入${mainZh}与${subZh}煮熟，调入鱼露与少许海盐。`, tip: '' },
+        { stepNumber: 4, instruction: `关火前拌入${herbZh}保持翠绿清香，即可趁热盛盘。`, tip: '' },
+      ];
+    }
     return [
-      {
-        stepNumber: 1,
-        instruction: `将${mainZh}洗净处理好，并将${subZh}切配整齐备用。`,
-        tip: '',
-      },
-      {
-        stepNumber: 2,
-        instruction: '起锅热油，下入高棉香茅酱与波罗福鱼酱煸炒出浓郁香气，再放入主料翻炒锁住鲜味。',
-        tip: '',
-      },
-      {
-        stepNumber: 3,
-        instruction: `注入适量高汤大火烧开，下入${subZh}同煮，并调入鱼露、棕榈糖与海盐。`,
-        tip: '',
-      },
-      {
-        stepNumber: 4,
-        instruction: `出锅前撒入${herbZh}增香，即可将热气腾腾的「${zhName}」盛出配茉莉香米饭享用。`,
-        tip: '',
-      },
+      { stepNumber: 1, instruction: `将${mainZh}洗净处理好，并将${subZh}切配整齐备用。`, tip: '' },
+      { stepNumber: 2, instruction: `起锅将香茅香料与少许波罗福鱼酱激发香气，放入${mainZh}煮至鲜味析出。`, tip: '' },
+      { stepNumber: 3, instruction: `加入${subZh}同煮，并调入鱼露、棕榈糖与海盐使酸咸鲜甜平衡。`, tip: '' },
+      { stepNumber: 4, instruction: `出锅前撒入${herbZh}增香，即可将热气腾腾的「${zhName}」盛出配茉莉香米饭享用。`, tip: '' },
     ];
   }
   if (cat === 'grilled') {
+    if (nameKh.includes('ដុតអំបិល')) {
+      return [
+        { stepNumber: 1, instruction: `将${mainZh}洗净（保留鱼鳞锁住水分），鱼腹塞入拍扁香茅与青柠叶。`, tip: '' },
+        { stepNumber: 2, instruction: `用${subZh}均匀包裹整条鱼身，锁住天然鲜汁。`, tip: '' },
+        { stepNumber: 3, instruction: '置于稳火木炭上慢烤并适时翻面，烤至盐壳焦脆定型、内里鱼肉鲜嫩多汁。', tip: '' },
+        { stepNumber: 4, instruction: `敲开外层盐壳装盘，搭配${herbZh}趁热享用。`, tip: '' },
+      ];
+    }
+    if (nameKh.includes('ទឹកប្រហុក') || nameKh.includes('ទឹកត្រី') || nameKh.includes('ទឹកអម្ពិល')) {
+      return [
+        { stepNumber: 1, instruction: `将${mainZh}洗净沥干，薄抹少许海盐或蒜油静置10分钟。`, tip: '' },
+        { stepNumber: 2, instruction: '点燃木炭至火候均匀，将食材放上炭火架炙烤并适时翻面，烤至外焦里嫩、炭香扑鼻。', tip: '' },
+        { stepNumber: 3, instruction: `调制招牌蘸酱（${subZh}），达到酸、辣、咸、甜层次分明的风味。`, tip: '' },
+        { stepNumber: 4, instruction: `改刀装盘，搭配${herbZh}与秘制蘸酱趁热享用。`, tip: '' },
+      ];
+    }
     return [
-      {
-        stepNumber: 1,
-        instruction: `将${mainZh}洗净，加入${subZh}充分抓匀，静置腌制20至30分钟使其入味。`,
-        tip: '',
-      },
-      {
-        stepNumber: 2,
-        instruction: '点燃木炭至火候均匀，将食材放上炭火架慢烤并适时翻面，烤至表面金黄焦香、内里熟透。',
-        tip: '',
-      },
-      {
-        stepNumber: 3,
-        instruction: `装盘上桌，搭配${herbZh}与正宗高棉秘制蘸酱趁热享用。`,
-        tip: '',
-      },
+      { stepNumber: 1, instruction: `将${mainZh}洗净拭干，加入${subZh}充分抓匀，静置腌制30分钟使其深层入味。`, tip: '' },
+      { stepNumber: 2, instruction: '点燃木炭至火候均匀，将食材放上烤架慢烤并刷上腌汁，频频翻面使其受热均匀。', tip: '' },
+      { stepNumber: 3, instruction: '继续烘烤至表面呈诱人焦糖金红色、外皮酥香且内里柔嫩多汁。', tip: '' },
+      { stepNumber: 4, instruction: `斩件或切片装盘，搭配${herbZh}趁热享用。`, tip: '' },
     ];
   }
   if (cat === 'stirfry') {
+    if (nameKh.startsWith('ខ')) {
+      return [
+        { stepNumber: 1, instruction: `将${mainZh}洗净处理干净，并准备好${subZh}。`, tip: '' },
+        { stepNumber: 2, instruction: '锅中以棕榈糖或香料蒜蓉炒出浓郁琥珀酱香，放入主料翻拌均匀上色。', tip: '' },
+        { stepNumber: 3, instruction: `注入${subZh}转小火慢焖收汁，直至食材酥软入味、汤汁浓稠红亮。`, tip: '' },
+        { stepNumber: 4, instruction: `撒上${herbZh}点缀增香，配热茉莉香米饭趁热享用。`, tip: '' },
+      ];
+    }
     return [
-      {
-        stepNumber: 1,
-        instruction: `将${mainZh}与${subZh}分别改刀切好备用。`,
-        tip: '',
-      },
-      {
-        stepNumber: 2,
-        instruction: '热锅猛火下油，爆香蒜末与高棉香料，随即下入主料快速滑炒至变色。',
-        tip: '',
-      },
-      {
-        stepNumber: 3,
-        instruction: `加入${subZh}一同翻炒，调入蚝油、鱼露与棕榈糖，出锅前撒入${herbZh}兜匀即可装盘。`,
-        tip: '',
-      },
+      { stepNumber: 1, instruction: `将${mainZh}与${subZh}分别洗净改刀切好，沥干备用。`, tip: '' },
+      { stepNumber: 2, instruction: `热锅猛火下油爆香蒜蓉或香料，随即下入${mainZh}快速翻炒锁住鲜嫩口感。`, tip: '' },
+      { stepNumber: 3, instruction: `加入${subZh}大火快炒，调入蚝油、鱼露与少许棕榈糖激发浓郁锅气。`, tip: '' },
+      { stepNumber: 4, instruction: `出锅前拌入${herbZh}兜匀，立即装盘趁热享用。`, tip: '' },
     ];
   }
   if (cat === 'salad') {
+    if (nameKh.includes('ប្រហុកខ្ទិះ')) {
+      return [
+        { stepNumber: 1, instruction: `将${mainZh}细剁拌匀，备好${subZh}。`, tip: '' },
+        { stepNumber: 2, instruction: '锅中用浓椰浆将黄香茅酱慢火炒出红油，下入肉末与波罗福鱼酱翻炒熟透。', tip: '' },
+        { stepNumber: 3, instruction: '加入水茄与棕榈糖小火慢熬至酱汁浓稠醇香。', tip: '' },
+        { stepNumber: 4, instruction: `撒上细切青柠叶丝，搭配${herbZh}蘸食享用。`, tip: '' },
+      ];
+    }
     return [
-      {
-        stepNumber: 1,
-        instruction: `将${mainZh}处理好，并将${subZh}洗净后放入冰水中浸泡至爽脆，沥干备用。`,
-        tip: '',
-      },
-      {
-        stepNumber: 2,
-        instruction: '取碗调入鲜青柠汁、鱼露、棕榈糖、蒜末与鲜辣椒，搅拌均匀制成酸甜适口的高棉凉拌汁。',
-        tip: '',
-      },
-      {
-        stepNumber: 3,
-        instruction: `将所有主配料淋上凉拌汁轻轻抓拌入味，最后撒上${herbZh}点缀即可装盘享用。`,
-        tip: '',
-      },
+      { stepNumber: 1, instruction: `将${mainZh}处理好，并将${subZh}洗净冰镇至爽脆沥干备用。`, tip: '' },
+      { stepNumber: 2, instruction: '取碗调入鲜榨青柠汁、鱼露、棕榈糖、蒜末与鲜辣椒，搅匀成酸甜开胃的凉拌汁。', tip: '' },
+      { stepNumber: 3, instruction: `将${mainZh}与配菜淋入酱汁，轻轻抓拌或舂拌使其均匀入味。`, tip: '' },
+      { stepNumber: 4, instruction: `装盘后撒上${herbZh}增香点缀，即可清爽享用。`, tip: '' },
     ];
   }
-  if (cat === 'dessert' || cat === 'drink') {
+  if (cat === 'noodles') {
+    if (nameKh.startsWith('ខគោ')) {
+      return [
+        { stepNumber: 1, instruction: '将带筋牛肉切块，加入高棉五香红烧酱、蒜蓉、棕榈糖与鱼露腌制20分钟。', tip: '' },
+        { stepNumber: 2, instruction: '锅中爆香香茅与八角，下牛肉块煸炒锁汁后注入高汤小火慢炖。', tip: '' },
+        { stepNumber: 3, instruction: '加入胡萝卜与洋葱继续焖至牛腩酥烂浓香，同时将法棍烘烤至外皮酥脆。', tip: '' },
+        { stepNumber: 4, instruction: `盛入深碗撒上${herbZh}，搭配酥脆法棍蘸食浓郁肉汤享用。`, tip: '' },
+      ];
+    }
+    if (nameKh.includes('ឆា')) {
+      return [
+        { stepNumber: 1, instruction: `备好粉面与主料（${mainZh}），并将${subZh}洗净切好。`, tip: '' },
+        { stepNumber: 2, instruction: '热锅猛火爆香蒜末，先将肉类或海鲜滑炒至断生鲜嫩。', tip: '' },
+        { stepNumber: 3, instruction: '下入粉面与配菜，调入酱油、蚝油与调味汁大火快炒出锅气。', tip: '' },
+        { stepNumber: 4, instruction: `盛盘后搭配${herbZh}（如有煎蛋则盖于顶部）趁热享用。`, tip: '' },
+      ];
+    }
     return [
-      {
-        stepNumber: 1,
-        instruction: `甄选新鲜天然食材：准备好${mainZh}与${subZh}。`,
-        tip: '',
-      },
-      {
-        stepNumber: 2,
-        instruction: `按照高棉传统甜品与饮品工艺慢火熬煮或调配，并融入${herbZh}增添自然清香。`,
-        tip: '',
-      },
-      {
-        stepNumber: 3,
-        instruction: `盛入碗中或杯中，温热或冰镇后即可品尝香甜可口的「${zhName}」。`,
-        tip: '',
-      },
+      { stepNumber: 1, instruction: `慢火熬制醇香汤底（${subZh}），并备齐${mainZh}。`, tip: '' },
+      { stepNumber: 2, instruction: '将粉面或米线与时蔬烫熟沥干，盛入汤碗中。', tip: '' },
+      { stepNumber: 3, instruction: '把鲜肉或海鲜烫熟码放在粉面上，浇入滚烫浓郁的鲜汤或咖喱卤汁。', tip: '' },
+      { stepNumber: 4, instruction: `撒上${herbZh}增香，挤入青柠汁即可趁热享用。`, tip: '' },
+    ];
+  }
+  if (cat === 'rice') {
+    if (nameKh.includes('បបរ')) {
+      return [
+        { stepNumber: 1, instruction: '将茉莉香米淘净，加入高汤或斑兰清水慢火熬至米粒开花、粥底绵密丝滑。', tip: '' },
+        { stepNumber: 2, instruction: `分别烹制好鲜美主料与佐粥配菜（${mainZh}、${subZh}）。`, tip: '' },
+        { stepNumber: 3, instruction: '将主料融入滚粥中或装碟佐食，以鱼露、海盐调出清鲜回甘的滋味。', tip: '' },
+        { stepNumber: 4, instruction: `盛入热碗，撒上${herbZh}即可暖胃享用。`, tip: '' },
+      ];
+    }
+    if (nameKh.includes('បាយឆា')) {
+      return [
+        { stepNumber: 1, instruction: `备好粒粒分明的冷茉莉香米饭，并将${mainZh}与${subZh}切丁备妥。`, tip: '' },
+        { stepNumber: 2, instruction: '热锅大火下油爆香蒜末，先将肉类、海鲜与蛋液炒香。', tip: '' },
+        { stepNumber: 3, instruction: `倒入米饭与${subZh}猛火翻炒，调入鱼露、酱油与蚝油炒至干香粒粒分明。`, tip: '' },
+        { stepNumber: 4, instruction: `出锅前撒入${herbZh}翻匀即可装盘趁热享用。`, tip: '' },
+      ];
+    }
+    return [
+      { stepNumber: 1, instruction: `蒸熟喷香米饭或糯米饭，并处理好主料（${mainZh}）。`, tip: '' },
+      { stepNumber: 2, instruction: '将肉类或海鲜依风味炭烤、白灼或砂锅焗制至鲜香熟透。', tip: '' },
+      { stepNumber: 3, instruction: `备好清爽泡菜、秘制蘸酱或例汤（${subZh}）。`, tip: '' },
+      { stepNumber: 4, instruction: `盛饭码上主料，点缀${herbZh}并配佐料趁热享用。`, tip: '' },
+    ];
+  }
+  if (cat === 'streetfood') {
+    if (nameKh.includes('ចំហុយ')) {
+      return [
+        { stepNumber: 1, instruction: '将粉丝与黑木耳泡发切碎，新鲜鱼籽轻轻漂洗干净沥干。', tip: '' },
+        { stepNumber: 2, instruction: `将${mainZh}与粉丝、木耳、咸蛋白、蒜末、鱼露及贡布胡椒充分搅拌上劲。`, tip: '' },
+        { stepNumber: 3, instruction: '盛入蒸碗，表面点缀金黄咸蛋黄，入沸水蒸锅大火蒸25至30分钟至熟透凝固。', tip: '' },
+        { stepNumber: 4, instruction: `出锅撒上炸蒜酥与${herbZh}，配热白米饭趁热享用。`, tip: '' },
+      ];
+    }
+    return [
+      { stepNumber: 1, instruction: `调配好${mainZh}及新鲜馅料或腌料。`, tip: '' },
+      { stepNumber: 2, instruction: '掌握适中火候煎烙、酥炸、炭烤或卷制至色泽诱人、口感香脆弹牙。', tip: '' },
+      { stepNumber: 3, instruction: `调制地道风味蘸酱或配菜（${subZh}）。`, tip: '' },
+      { stepNumber: 4, instruction: `装盘搭配${herbZh}与蘸酱立即品尝「${zhName}」。`, tip: '' },
+    ];
+  }
+  if (cat === 'drink') {
+    return [
+      { stepNumber: 1, instruction: `甄选新鲜天然原料：准备好${mainZh}。`, tip: '' },
+      { stepNumber: 2, instruction: `鲜榨、手冲萃取或冰沙搅打，并融入${subZh}使口感醇厚清爽。`, tip: '' },
+      { stepNumber: 3, instruction: '细致过滤或搅拌均匀，平衡天然果香、茶香或咖啡醇香。', tip: '' },
+      { stepNumber: 4, instruction: `倒入杯中，点缀${herbZh}即可享用清爽怡人的「${zhName}」。`, tip: '' },
+    ];
+  }
+  if (cat === 'dessert') {
+    return [
+      { stepNumber: 1, instruction: `精选新鲜食材：备妥${mainZh}与${subZh}。`, tip: '' },
+      { stepNumber: 2, instruction: `以斑兰清香（${herbZh}）慢火熬煮椰浆糖水或精心包裹蕉叶糕体。`, tip: '' },
+      { stepNumber: 3, instruction: '耐心蒸制或慢炖至软糯绵密、椰香与棕榈糖甜香充分交融。', tip: '' },
+      { stepNumber: 4, instruction: `盛入甜品碗或切块装盘，温热或冰镇后品尝香甜可口的「${zhName}」。`, tip: '' },
     ];
   }
   return [
-    {
-      stepNumber: 1,
-      instruction: `将${mainZh}与${subZh}清洗干净并切配整齐备用。`,
-      tip: '',
-    },
-    {
-      stepNumber: 2,
-      instruction: '掌控适宜火候依序烹制，并按正宗高棉风味调入传统酱料使其充分入味。',
-      tip: '',
-    },
-    {
-      stepNumber: 3,
-      instruction: `盛入盘碗中，撒上${herbZh}增香点缀，即可趁热享用。`,
-      tip: '',
-    },
+    { stepNumber: 1, instruction: `将${mainZh}与${subZh}清洗干净并切配整齐备用。`, tip: '' },
+    { stepNumber: 2, instruction: '热锅掌控适宜火候依序烹制主料与配菜。', tip: '' },
+    { stepNumber: 3, instruction: '调入高棉鱼露、棕榈糖与香料使其充分入味。', tip: '' },
+    { stepNumber: 4, instruction: `盛入盘碗中，撒上${herbZh}增香点缀，即可趁热享用。`, tip: '' },
   ];
 }
 
@@ -1708,7 +1813,13 @@ function computeLocalizedFood(food: FoodItem, lang: Language) {
   const rawZhDesc =
     CORE_100_DESC_ZH[food.id] ||
     (zhIngredients.length >= 3
-      ? `${zhName}是一道正宗传统高棉佳肴，甄选${mainZh}为主料，搭配${subZh}精心烹制，最后辅以${herbZh}提香，层次丰富、风味地道。`
+      ? food.id === 'food-173'
+        ? `${zhName}是一道广受欢迎的经典什锦炒饭，甄选${mainZh}为主料，搭配${subZh}猛火快炒，最后撒入${herbZh}提香，粒粒分明、鲜香可口。`
+        : food.categorySlug === 'drink'
+        ? `${zhName}是一款清爽怡人的柬埔寨特色饮品，精选${mainZh}调制，融合${subZh}，并带有${herbZh}的自然芬芳。`
+        : food.categorySlug === 'dessert'
+        ? `${zhName}是一款备受喜爱的高棉传统甜品美点，精选${mainZh}与${subZh}匠心制作，融入${herbZh}清香，香甜绵密。`
+        : `${zhName}是一道风味地道的高棉佳肴，甄选${mainZh}为主料，搭配${subZh}精心烹制，最后辅以${herbZh}提香，层次丰富、鲜美可口。`
       : translateDynamicTextToZh(food.descriptionEn));
   const zhDesc = sanitizeStrictLanguageText(rawZhDesc, 'zh');
 
@@ -1722,7 +1833,7 @@ function computeLocalizedFood(food: FoodItem, lang: Language) {
         instruction: sanitizeStrictLanguageText(CORE_100_STEPS_ZH[(st.instructionEn || '').trim()], 'zh'),
         tip: st.tipKh ? sanitizeStrictLanguageText(translateSignatureDish(st.tipKh, 'zh'), 'zh') : '',
       }))
-    : buildChineseCookingStepsForCategory(food.categorySlug, zhName, mainZh, subZh, herbZh);
+    : buildChineseCookingStepsForCategory(food.categorySlug, zhName, mainZh, subZh, herbZh, food.nameKh || '');
 
   return {
     name: zhName,
