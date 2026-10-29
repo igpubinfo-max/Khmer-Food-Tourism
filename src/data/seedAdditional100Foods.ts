@@ -251,15 +251,15 @@ const RAW_100_NEW_DISHES: Array<{
 
   // ================= GRILLED & ROASTED (14 dishes: food-117 .. food-130) =================
   {
-    nameKh: 'ត្រីរ៉ស់ដុតអំបិលម្ទេសស្លឹកគ្រៃ',
-    nameEn: 'Salt-Crusted Grilled Snakehead Fish with Lemongrass',
+    nameKh: 'ត្រីរ៉ស់ដុតអំបិល',
+    nameEn: 'Salt-Crusted Grilled Snakehead Fish',
     cat: 'grilled',
     catKh: 'ម្ហូបអាំង / ត្រីដុតអំបិល',
     catEn: 'Grilled / Salt-Crusted Fish',
     mainIngKh: 'ត្រីរ៉ស់ធំស្រស់ ១ ក្បាល (៨០០ ក្រាម)',
     mainIngEn: 'Whole fresh snakehead fish (800g)',
-    subIngKh: 'អំបិលគ្រួសលាយម្ទេសបុក និងម្សៅមីបិទជុំវិញត្រី',
-    subIngEn: 'Coarse sea salt & chili crust with stuffed lemongrass',
+    subIngKh: 'អំបិលគ្រួសលាយម្សៅមីបិទជុំវិញត្រី និងគល់ស្លឹកគ្រៃញាត់ពោះត្រី',
+    subIngEn: 'Coarse sea salt crust with stuffed lemongrass',
     herbKh: 'ស្លឹកគ្រៃ ស្លឹកក្រូចសើច និងទឹកត្រីកោះកុង',
     herbEn: 'Lemongrass bundle, kaffir lime, and spicy dipping sauce',
   },
@@ -381,7 +381,7 @@ const RAW_100_NEW_DISHES: Array<{
     herbEn: 'Kaffir lime leaves and cucumber pickle',
   },
   {
-    nameKh: 'ត្រីងៀតអាំងជ្រលក់ទឹកអម្ពិលទុំ',
+    nameKh: 'ត្រីងៀតអាំង',
     nameEn: 'Charcoal Grilled Sun-Dried Fish with Tamarind Dip',
     cat: 'grilled',
     catKh: 'ម្ហូបអាំង / ត្រីងៀតអាំង',
@@ -684,17 +684,17 @@ const RAW_100_NEW_DISHES: Array<{
     herbEn: 'Cilantro, Chinese celery, and roasted peanuts',
   },
   {
-    nameKh: 'ញាំក្រូចថ្លុងបង្គាស្រស់ដូងលីង',
-    nameEn: 'Pomelo & Prawn Salad with Toasted Coconut',
+    nameKh: 'ញាំមីសួសាច់ជ្រូកបីជាន់',
+    nameEn: 'Cambodian Glass Noodle & Pork Belly Herb Salad',
     cat: 'salad',
-    catKh: 'ម្ហូបញាំ & ភ្លា / ញាំក្រូចថ្លុង',
-    catEn: 'Salad / Pomelo & Prawn',
-    mainIngKh: 'សាច់ក្រូចថ្លុងផ្អែម និងបង្គាស្រុស (៤០០ ក្រាម)',
-    mainIngEn: 'Juicy pomelo segments and poached prawns (400g)',
-    subIngKh: 'ដូងកោសលីងឈ្ងុយ និងទឹកត្រីស្ករត្នោតក្រូចឆ្មារ',
-    subIngEn: 'Golden toasted shredded coconut and palm sugar lime dressing',
-    herbKh: 'ជីរអង្កាម ខ្ទឹមក្រហមបំពង និងម្ទេសហាន់',
-    herbEn: 'Mint leaves, crispy shallots, and sliced red chili',
+    catKh: 'ម្ហូបញាំ & ភ្លា / ញាំមីសួរ',
+    catEn: 'Salad / Pork Belly Glass Noodle',
+    mainIngKh: 'មីសួរស្រុសទន់ សាច់ជ្រូកបីជាន់ស្ងោរហាន់ស្តើង និងសាច់ជ្រូកចិញ្ច្រាំ (៤០០ ក្រាម)',
+    mainIngEn: 'Softened glass noodles, sliced boiled pork belly, and minced pork (400g)',
+    subIngKh: 'ផ្សិតត្រចៀកកណ្តុរ បង្គាក្រៀម ការ៉ុត និងទឹកត្រីក្រូចឆ្មារស្ករត្នោត',
+    subIngEn: 'Wood-ear mushrooms, dried shrimp, julienned carrots, and palm sugar lime dressing',
+    herbKh: 'ជីរអង្កាម ជីរវ៉ាន់ស៊ុយ សណ្តែកដីលីង ខ្ទឹមក្រហមបំពង និងម្ទេសហាន់',
+    herbEn: 'Fresh mint, cilantro, roasted peanuts, crispy shallots, and sliced red chili',
   },
   {
     nameKh: 'ភ្លាបង្គាស្រស់ម្រះខ្ចី',
@@ -855,17 +855,17 @@ const RAW_100_NEW_DISHES: Array<{
     herbEn: 'Scallions, cilantro, and crispy garlic oil',
   },
   {
-    nameKh: 'នំបញ្ចុកទឹកប្រហុកត្រីឆ្អើរ',
-    nameEn: 'Rice Vermicelli with Smoked Fish & Fermented Herb Broth',
+    nameKh: 'នំបញ្ចុកទឹកត្រីផ្អែម',
+    nameEn: 'Khmer Rice Vermicelli with Sweet Garlic Fish Sauce & Grilled Catfish',
     cat: 'noodles',
-    catKh: 'គុយទាវ & នំបញ្ចុក / នំបញ្ចុកទឹកប្រហុក',
-    catEn: 'Noodles / Smoked Fish Num Banh Chok',
-    mainIngKh: 'នំបញ្ចុកស្រស់ និងសាច់ត្រីឆ្អើរបុក (៤៥០ ក្រាម)',
-    mainIngEn: 'Fresh rice vermicelli and pounded smoked fish (450g)',
-    subIngKh: 'ទឹកប្រហុកដាំជាមួយគល់ស្លឹកគ្រៃ និងខ្ទិះដូងតិចៗ',
-    subIngEn: 'Savory prahok broth infused with lemongrass and coconut',
-    herbKh: 'ព្រលិត កញ្ឆែត ត្រួយស្វាយ និងផ្កាស្នោ',
-    herbEn: 'Water lily stems, water mimosa, and sesbania flowers',
+    catKh: 'គុយទាវ & នំបញ្ចុក / នំបញ្ចុកទឹកត្រីផ្អែម',
+    catEn: 'Noodles / Sweet Fish Sauce Vermicelli',
+    mainIngKh: 'នំបញ្ចុកស្រស់ និងសាច់ត្រីអណ្តែងអាំង ឬសាច់ជ្រូកខ្វៃ (៤៥០ ក្រាម)',
+    mainIngEn: 'Fresh rice vermicelli and flaked charcoal-grilled catfish or roasted pork (450g)',
+    subIngKh: 'ទឹកត្រីផ្អែមខ្ទឹមសម្ទេសក្រូចឆ្មារ និងសណ្តែកដីបុក',
+    subIngEn: 'Sweet-tangy garlic chili fish sauce and crushed roasted peanuts',
+    herbKh: 'សាឡាត់ ត្រសក់ សណ្តែកបណ្តុះ ជីរអង្កាម និងជីរនាងវង',
+    herbEn: 'Crisp lettuce, cucumber, bean sprouts, mint, and sweet basil',
   },
   {
     nameKh: 'មីសួរឆាក្តាមសេះកំពត',
@@ -1080,7 +1080,7 @@ const RAW_100_NEW_DISHES: Array<{
     herbEn: 'Fresh lime wedges and herbs',
   },
   {
-    nameKh: 'ប្រហិតសាច់គោអាំងទឹកជ្រលក់អម្ពិលទុំ',
+    nameKh: 'ប្រហិតសាច់គោអាំងទឹកជ្រលក់',
     nameEn: 'Grilled Khmer Beef Meatball Skewers with Spicy Tamarind Sauce',
     cat: 'streetfood',
     catKh: 'អាហារសម្រន់ / ប្រហិតសាច់គោអាំង',
@@ -1173,15 +1173,15 @@ const RAW_100_NEW_DISHES: Array<{
     herbEn: 'Pandan leaf and toasted white sesame seeds',
   },
   {
-    nameKh: 'នំអន្សមជ្រូកសណ្តែកលឿងខ្មែរ',
-    nameEn: 'Traditional Banana-Leaf Sticky Rice Cake with Pork & Mung Bean (Num Ansom Chrouk)',
+    nameKh: 'នំអន្សមជ្រូកចៀន',
+    nameEn: 'Crispy Pan-Fried Sliced Sticky Rice Cake with Pork & Mung Bean (Num Ansom Chien)',
     cat: 'dessert',
-    catKh: 'នំប្រពៃណីខ្មែរ / នំអន្សមជ្រូក',
-    catEn: 'Traditional Cake / Num Ansom Chrouk',
-    mainIngKh: 'អង្ករដំណើប សណ្តែកបាយលឿង និងសាច់ជ្រូកបីជាន់ប្រឡាក់ម្រេច (៦០០ ក្រាម)',
-    mainIngEn: 'Glutinous rice, peeled split mung beans, and peppered pork belly (600g)',
-    subIngKh: 'ខ្ទិះដូង អំបិល និងស្លឹកចេកស្រស់សម្រាប់វេច',
-    subIngEn: 'Coconut milk, salt, and banana leaves with twine',
+    catKh: 'នំប្រពៃណីខ្មែរ / នំអន្សមជ្រូកចៀន',
+    catEn: 'Traditional Cake / Crispy Pan-Fried Num Ansom',
+    mainIngKh: 'នំអន្សមជ្រូកស្នូលសណ្តែកលឿង និងសាច់ជ្រូកបីជាន់កាត់ជាកង់ចៀនស្រួយ (៦០០ ក្រាម)',
+    mainIngEn: 'Sliced sticky rice cake stuffed with mung beans & peppered pork belly, pan-fried golden crisp (600g)',
+    subIngKh: 'ប្រេងឆាសម្រាប់ចៀន ខ្ទិះដូង អំបិល និងជ្រក់ត្រសក់ ឬទឹកត្រីផ្អែម',
+    subIngEn: 'Cooking oil for pan-frying, coconut milk, sea salt, and cucumber pickle or sweet fish sauce',
     herbKh: 'ម្រេចកំពត និងខ្ទឹមសក្នុងស្នូលសាច់ជ្រូក',
     herbEn: 'Kampot black pepper and garlic seasoning',
   },
@@ -2122,7 +2122,33 @@ function buildStepsForDish(
       ];
     }
 
-    // Num Banh Chok / Banh Kanh gravy noodles (food-157, 163, 166)
+    // Num Banh Chok Teuk Trey Phaem (food-163)
+    if (nameKh.includes('ទឹកត្រីផ្អែម')) {
+      return [
+        {
+          stepNumber: 1,
+          instructionKh: `រៀបចំសរសៃនំបញ្ចុកស្រស់ និងបេះសាច់ត្រីអណ្តែងអាំង ឬហាន់សាច់ជ្រូកខ្វៃ (${mainIngKh}) ព្រមទាំងលាងបន្លែស្រស់ (${herbKh})។`,
+          instructionEn: `Prepare fresh rice vermicelli and flaked grilled catfish or roasted pork (${mainIngEn}), and wash crisp greens (${herbEn}).`,
+        },
+        {
+          stepNumber: 2,
+          instructionKh: 'លាយទឹកត្រីផ្អែមដោយប្រើទឹកត្រី ស្ករត្នោត ទឹកក្រូចឆ្មារ ទឹកឆ្អិន ខ្ទឹមសម្ទេសបុក និងសណ្តែកដីលីងបុកឱ្យជូរផ្អែមឈ្ងុយ។',
+          instructionEn: 'Whisk fish sauce, palm sugar, fresh lime juice, warm water, pounded garlic-chili, and crushed roasted peanuts into a sweet-tangy dressing.',
+        },
+        {
+          stepNumber: 3,
+          instructionKh: 'ចាប់នំបញ្ចុកដាក់ចាន រៀបបន្លែស្រស់ សណ្តែកបណ្តុះ ជីរ និងដាក់សាច់ត្រីអាំង ឬសាច់ជ្រូកខ្វៃពីលើ។',
+          instructionEn: 'Place rice vermicelli in a bowl, layer with fresh vegetables and herbs, and top generously with grilled fish or roasted pork.',
+        },
+        {
+          stepNumber: 4,
+          instructionKh: 'ស្រោចទឹកត្រីផ្អែមសណ្តែកដីបុកពីលើ រួចច្របល់ទទួលទានភ្លាមៗ។',
+          instructionEn: 'Drizzle generously with the sweet garlic-peanut fish sauce, toss lightly, and enjoy fresh.',
+        },
+      ];
+    }
+
+    // Num Banh Chok / Banh Kanh gravy noodles (food-157, 166)
     if (nameKh.includes('នំបញ្ចុក') || nameKh.includes('បាញ់កាញ់')) {
       return [
         {
@@ -2545,8 +2571,32 @@ function buildStepsForDish(
       ];
     }
 
-    // Num Ansom Chrouk / Num Kom wrapped banana-leaf cakes (food-187, 188)
+    // Num Ansom Chien / Num Ansom Chrouk / Num Kom wrapped banana-leaf cakes (food-187, 188)
     if (nameKh.includes('នំអន្សម') || nameKh.includes('នំគម')) {
+      if (nameKh.includes('ចៀន')) {
+        return [
+          {
+            stepNumber: 1,
+            instructionKh: 'បកស្លឹកចេកចេញពីនំអន្សមជ្រូកដែលស្ងោរឆ្អិនល្អ រួចកាត់ជាកង់មូលៗកម្រាស់ល្មម (ប្រហែល ១.៥ សង់ទីម៉ែត្រ)។',
+            instructionEn: 'Unwrap the banana leaves from the cooked pork-and-mung-bean sticky rice cake (Num Ansom) and slice into even rounds.',
+          },
+          {
+            stepNumber: 2,
+            instructionKh: 'ដាក់ខ្ទះមិនជាប់លើភ្លើងមធ្យម លាបប្រេងឆាបន្តិច រួចតម្រៀបកង់នំអន្សមជ្រូកដាក់ចៀន។',
+            instructionEn: 'Heat a lightly oiled skillet over medium heat and arrange the Num Ansom slices in a single layer.',
+          },
+          {
+            stepNumber: 3,
+            instructionKh: 'ចៀនប្រែសងខាងរហូតដល់សំបកអង្ករដំណើបខាងក្រៅឡើងក្រហមមាសស្រួយឈ្ងុយ ឯស្នូលសណ្តែកលឿង និងសាច់ជ្រូកខាងក្នុងទន់ក្តៅឈ្ងុយម្រេចកំពត។',
+            instructionEn: 'Pan-fry both sides until the outer sticky rice crust turns golden and crispy while the mung bean and peppered pork center stays warm and soft.',
+          },
+          {
+            stepNumber: 4,
+            instructionKh: 'ស្រង់ដាក់ចានទទួលទានក្តៅៗផ្ទាប់ជាមួយជ្រក់ត្រសក់ ជ្រក់ល្ហុង ឬទឹកត្រីផ្អែមតាមចំណូលចិត្ត។',
+            instructionEn: 'Serve hot and crispy alongside tangy cucumber/papaya pickles or sweet fish sauce.',
+          },
+        ];
+      }
       return [
         {
           stepNumber: 1,

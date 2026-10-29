@@ -1360,18 +1360,13 @@ export const ProfileView: React.FC = () => {
 
           {/* C. កន្លែងថ្មីប្រចាំថ្ងៃ */}
           <button
+            type="button"
             onClick={() => setIsDailyDiscoveriesModalOpen(true)}
             className="p-2.5 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/15 text-left transition cursor-pointer"
           >
             <div className="flex items-center justify-between">
               <span className="text-lg">✨</span>
-              {!isVip && currentUser?.role !== 'admin' ? (
-                <span className="px-1.5 py-0.5 rounded-full bg-amber-400/25 border border-amber-300/50 text-amber-200 text-[9px] font-extrabold flex items-center gap-0.5">
-                  <Lock className="w-2.5 h-2.5" /> VIP
-                </span>
-              ) : (
-                <span className="text-[8px] text-amber-300 font-bold">Daily</span>
-              )}
+              <span className="text-[8px] text-amber-300 font-bold">Daily Live</span>
             </div>
             <div className="text-xs font-bold text-white mt-1">
               {isKm ? 'កន្លែងថ្មីប្រចាំថ្ងៃ' : 'Daily Picks'}
@@ -1420,20 +1415,19 @@ export const ProfileView: React.FC = () => {
 
           {/* F. ការជូនដំណឹង */}
           <button
+            type="button"
             onClick={() => setIsNotificationsModalOpen(true)}
             className="p-2.5 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/15 text-left transition relative cursor-pointer"
           >
             <div className="flex items-center justify-between">
               <span className="text-lg">🔔</span>
-              {!isVip && currentUser?.role !== 'admin' ? (
-                <span className="px-1.5 py-0.5 rounded-full bg-amber-400/25 border border-amber-300/50 text-amber-200 text-[9px] font-extrabold flex items-center gap-0.5">
-                  <Lock className="w-2.5 h-2.5" /> VIP
-                </span>
-              ) : unreadNotificationsCount > 0 ? (
+              {unreadNotificationsCount > 0 ? (
                 <span className="px-1.5 py-0.2 rounded-full bg-rose-500 text-white text-[8px] font-black">
                   {unreadNotificationsCount}
                 </span>
-              ) : null}
+              ) : (
+                <span className="text-[8px] text-emerald-300 font-bold">Alerts</span>
+              )}
             </div>
             <div className="text-xs font-bold text-white mt-1">
               {isKm ? 'ការជូនដំណឹង' : 'Notifications'}

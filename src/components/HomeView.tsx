@@ -1653,7 +1653,7 @@ export const HomeView: React.FC = () => {
             </div>
 
             <button
-              onClick={openUpgradeVipModal}
+              onClick={() => openUpgradeVipModal()}
               className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 text-slate-950 font-bold text-xs shadow-xs transition flex items-center gap-1 shrink-0 active:scale-95 cursor-pointer"
             >
               <Crown className="w-3.5 h-3.5" />
@@ -1773,13 +1773,14 @@ export const HomeView: React.FC = () => {
           </button>
         </div>
 
-        {/* 6 Feature Buttons Grid - Enabled for VIP, Prompts Upgrade for Free Users */}
+        {/* Feature Buttons Grid - Daily Live & Notifications Open Directly */}
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
           {/* C. កន្លែងថ្មីប្រចាំថ្ងៃ */}
           <button
-            onClick={requireVip(() => {
+            type="button"
+            onClick={() => {
               setIsDailyDiscoveriesModalOpen(true);
-            })}
+            }}
             className="p-3 rounded-2xl border text-left transition group active:scale-95 relative bg-white/10 hover:bg-white/15 border-white/15 cursor-pointer"
           >
             <div className="flex items-center justify-between mb-1.5">
@@ -1796,9 +1797,10 @@ export const HomeView: React.FC = () => {
 
           {/* F. ការជូនដំណឹងដែលមានប្រយោជន៍ */}
           <button
-            onClick={requireVip(() => {
+            type="button"
+            onClick={() => {
               setIsNotificationsModalOpen(true);
-            })}
+            }}
             className="p-3 rounded-2xl border text-left transition group active:scale-95 relative bg-white/10 hover:bg-white/15 border-white/15 cursor-pointer"
           >
             <div className="flex items-center justify-between mb-1.5">

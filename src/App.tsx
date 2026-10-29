@@ -138,10 +138,10 @@ const MainScreen: React.FC = () => {
     isExitModalOpen ||
     (isWhatToEatModalOpen && hasVipAccess) ||
     (isNearMeModalOpen && hasVipAccess) ||
-    (isDailyDiscoveriesModalOpen && hasVipAccess) ||
+    isDailyDiscoveriesModalOpen ||
     (isWishlistsModalOpen && hasVipAccess) ||
     (isAiTripPlannerModalOpen && hasVipAccess) ||
-    (isNotificationsModalOpen && hasVipAccess) ||
+    isNotificationsModalOpen ||
     isTrendingSocialModalOpen ||
     isTrendingFoodDetailModalOpen ||
     isAiCheckInModalOpen ||
@@ -242,13 +242,13 @@ const MainScreen: React.FC = () => {
       {isSupportModalOpen && <SupportModal />}
       {isExitModalOpen && <ExitConfirmModal />}
 
-      {/* 6 Personalized Account Features — Strictly VIP Access Controlled & Conditionally Mounted */}
+      {/* Personalized Account Features & Daily/Notification Modals */}
       {isWhatToEatModalOpen && (isUserVipActive(currentUser) || currentUser?.role === 'admin') && <WhatToEatModal />}
       {isNearMeModalOpen && (isUserVipActive(currentUser) || currentUser?.role === 'admin') && <NearMeModal />}
-      {isDailyDiscoveriesModalOpen && (isUserVipActive(currentUser) || currentUser?.role === 'admin') && <DailyDiscoveriesModal />}
+      {isDailyDiscoveriesModalOpen && <DailyDiscoveriesModal />}
       {isWishlistsModalOpen && (isUserVipActive(currentUser) || currentUser?.role === 'admin') && <WishlistsModal />}
       {isAiTripPlannerModalOpen && (isUserVipActive(currentUser) || currentUser?.role === 'admin') && <AiTripPlannerModal />}
-      {isNotificationsModalOpen && (isUserVipActive(currentUser) || currentUser?.role === 'admin') && <NotificationsModal />}
+      {isNotificationsModalOpen && <NotificationsModal />}
       {isAiCheckInModalOpen && <AiCheckInModal />}
       {isRestaurantCheckInModalOpen && <RestaurantCheckInModal />}
       {isUpgradeVipModalOpen && <UpgradeVipModal />}

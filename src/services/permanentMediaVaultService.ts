@@ -17,6 +17,7 @@
 
 import { FoodItem, Restaurant, TouristDestination, TrendingFoodItem, RestaurantMenuItem, RestaurantReview, RestaurantPriceLevel, GoogleMapsPlaceMetadata } from '../types';
 import { initial100Destinations } from '../data/seedDestinations';
+import { initial200Foods } from '../data/seedFoods';
 import {
   isSupabaseConfigured,
   pullCloudDocument,
@@ -30,6 +31,12 @@ import {
 const IMMUTABLE_SEED_DEST_MAP = new Map<string, TouristDestination>(
   initial100Destinations.map((d) => [d.id, d])
 );
+
+const IMMUTABLE_SEED_FOOD_MAP = new Map<string, FoodItem>(
+  initial200Foods.map((f) => [f.id, f])
+);
+// Timestamp of the static `/foods/food-*.jpg` asset bake (all cloud food overrides up to 2026-10-29T15:05:00Z are already baked into /foods/food-<id>.jpg)
+const BAKED_STATIC_FOOD_ASSETS_MS = new Date('2026-10-29T15:05:00.000Z').getTime();
 
 export const VAULT_KEYS = {
   FOODS: 'kft_permanent_food_overrides_v1',
@@ -852,7 +859,18 @@ export function applyFoodOverrides(
       }
       return f;
     }
-    const nextPhotoUrl = ov.photoUrl;
+    const seedFood = IMMUTABLE_SEED_FOOD_MAP.get(f.id);
+    const seedPhotoUrl = seedFood?.photoUrl || '';
+    const isSeedBundledStaticFoodPhoto =
+      typeof seedPhotoUrl === 'string' && seedPhotoUrl.startsWith('/foods/');
+    const ovTime = ov.updatedAt ? new Date(ov.updatedAt).getTime() : 0;
+    const useOverrideFoodPhoto =
+      !isSeedBundledStaticFoodPhoto ||
+      ov.photoUrl.startsWith('/foods/') ||
+      ovTime > BAKED_STATIC_FOOD_ASSETS_MS + 1000 ||
+      ovTime === 0;
+
+    const nextPhotoUrl = useOverrideFoodPhoto ? ov.photoUrl : seedPhotoUrl;
     const nextNameKh = ov.nameKh || f.nameKh;
     const nextNameEn = ov.nameEn || f.nameEn;
     const nextCategorySlug = ov.categorySlug || f.categorySlug;
@@ -1272,7 +1290,15 @@ export function applyTrendingFoodOverrides(
     for (const fid of candidateIds) {
       const foodOv = safeFoodOverrides[fid];
       if (foodOv && foodOv.photoUrl && !isObsoleteSeedPhoto(foodOv.photoUrl)) {
-        resolvedFoodPhoto = foodOv.photoUrl;
+        const seedFood = IMMUTABLE_SEED_FOOD_MAP.get(fid);
+        const seedPhotoUrl = seedFood?.photoUrl || '';
+        const ovTime = foodOv.updatedAt ? new Date(foodOv.updatedAt).getTime() : 0;
+        const useOvPhoto =
+          !seedPhotoUrl.startsWith('/foods/') ||
+          foodOv.photoUrl.startsWith('/foods/') ||
+          ovTime > BAKED_STATIC_FOOD_ASSETS_MS + 1000 ||
+          ovTime === 0;
+        resolvedFoodPhoto = useOvPhoto ? foodOv.photoUrl : seedPhotoUrl;
         resolvedFoodUpdatedAt = foodOv.updatedAt || '';
         resolvedMatchedFoodId = fid;
         break;
@@ -1283,7 +1309,8 @@ export function applyTrendingFoodOverrides(
         foodObj.photoUrl &&
         (foodObj.isCustomPhoto ||
           foodObj.photoUrl.startsWith('data:') ||
-          foodObj.photoUrl.startsWith('http'))
+          foodObj.photoUrl.startsWith('http') ||
+          foodObj.photoUrl.startsWith('/foods/'))
       ) {
         resolvedFoodPhoto = foodObj.photoUrl;
         resolvedFoodUpdatedAt = foodObj.photoUpdatedAt || '';
@@ -1458,6 +1485,11 @@ export async function hydrateAndSyncMediaOverrides(
               const id = item.key.slice('kft_ov_food_'.length);
               localUpdatedAt = current.foods[id]?.updatedAt;
               hasLocalPhoto = Boolean(current.foods[id]?.photoUrl && !isObsoleteSeedPhoto(current.foods[id]?.photoUrl));
+              const seedFood = IMMUTABLE_SEED_FOOD_MAP.get(id);
+              if (seedFood?.photoUrl?.startsWith('/foods/')) {
+                const seedPhotoMs = seedFood.photoUpdatedAt ? new Date(seedFood.photoUpdatedAt).getTime() || 0 : 0;
+                seedUpdatedAtMs = Math.max(seedPhotoMs, BAKED_STATIC_FOOD_ASSETS_MS);
+              }
             } else if (item.key.startsWith('kft_ov_rest_')) {
               const id = item.key.slice('kft_ov_rest_'.length);
               if (current.deletedRestaurants?.[id] || isRestaurantIdDeleted(id, undefined, current.deletedRestaurants)) {
@@ -1533,9 +1565,11 @@ export async function hydrateAndSyncMediaOverrides(
             if (batchChanged) {
               current = mergeOverrideBundles(current, batchBundle);
               inMemoryMasterBundle = current;
-              saveLocalMediaOverrides(current);
-              notifyListeners(current);
             }
+          }
+          if (hasRemoteChanges) {
+            saveLocalMediaOverrides(current);
+            notifyListeners(current);
           }
         }
 
