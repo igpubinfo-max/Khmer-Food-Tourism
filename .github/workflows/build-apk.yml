@@ -37,8 +37,8 @@ jobs:
 
       - name: 5. Sync Version & Build Web Bundle
         run: |
-          CURRENT_VC=$(grep -oP 'versionCode\s+\K[0-9]+' android/app/build.gradle || echo 850)
-          AUTO_VC=$((800 + ${{ github.run_number }}))
+          CURRENT_VC=$(grep -oP 'versionCode\s+\K[0-9]+' android/app/build.gradle || echo 1200)
+          AUTO_VC=$((900 + ${{ github.run_number }}))
           if [ "$CURRENT_VC" -gt "$AUTO_VC" ]; then
             FINAL_VC=$CURRENT_VC
           else
@@ -62,7 +62,7 @@ jobs:
         run: |
           rm -rf android/app/src/main/assets/public && mkdir -p android/app/src/main/assets/public && cp -rf dist/* android/app/src/main/assets/public/
 
-      - name: 8. Build Signed Android Release APK & Play Store AAB
+      - name: 8. Build & V1+V2+V3 Sign Official APK, Direct-Install APK & Play Store AAB
         run: |
           if [ ! -f android/app/khmerfood-upload-key.jks ]; then
             keytool -genkeypair -v -noprompt \
@@ -73,62 +73,89 @@ jobs:
               -keypass 'KhmerFood2026PlayStore' \
               -dname "CN=Savuth Chea, OU=Khmer Food and Tourism, O=Khmer Food and Tourism, L=Phnom Penh, ST=Phnom Penh, C=KH"
           fi
-          FINAL_VC=$(grep -oP 'versionCode\s+\K[0-9]+' android/app/build.gradle || echo 114)
+          FINAL_VC=$(grep -oP 'versionCode\s+\K[0-9]+' android/app/build.gradle || echo 1200)
           echo "Building Android APK & Play Store AAB with versionCode $FINAL_VC"
+          BUILD_TOOLS_DIR=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -n 1)
+          ZIPALIGN="$BUILD_TOOLS_DIR/zipalign"
+          APKSIGNER="$BUILD_TOOLS_DIR/apksigner"
+          echo "Using build-tools: $BUILD_TOOLS_DIR"
+
+          mkdir -p release_out
+
           cd android
           chmod +x ./gradlew
-          ./gradlew assembleRelease --no-daemon -x lint -x lintVitalRelease
-          ./gradlew bundleRelease --no-daemon -x lint -x lintVitalRelease
+          # 1) Official package (com.khmerfood.tourism) APK + Play Store AAB
+          ./gradlew assembleRelease bundleRelease --no-daemon -x lint -x lintVitalRelease
+          REL_APK=$(find app/build/outputs/apk/release -name "*.apk" | head -n 1)
+          "$ZIPALIGN" -p -f 4 "$REL_APK" ../release_out/aligned-official.apk
+          "$APKSIGNER" sign \
+            --ks app/khmerfood-upload-key.jks \
+            --ks-key-alias khmerfood-upload \
+            --ks-pass pass:KhmerFood2026PlayStore \
+            --key-pass pass:KhmerFood2026PlayStore \
+            --v1-signing-enabled true \
+            --v2-signing-enabled true \
+            --v3-signing-enabled true \
+            --v4-signing-enabled false \
+            --out ../release_out/KhmerFoodTourism-v2.3.2.apk \
+            ../release_out/aligned-official.apk
+          rm -f ../release_out/aligned-official.apk
+          "$APKSIGNER" verify --verbose ../release_out/KhmerFoodTourism-v2.3.2.apk
 
-      - name: 9. Locate and Rename Signed APK and AAB Files
-        run: |
-          echo "=== SEARCHING FOR GENERATED APK & AAB FILES ==="
-          find . -name "*.apk" -o -name "*.aab" -ls
-          mkdir -p android/app/build/outputs/apk/debug
-          REL_APK=$(find android/app/build/outputs/apk/release -name "*.apk" 2>/dev/null | head -n 1)
-          if [ -n "$REL_APK" ] && [ -f "$REL_APK" ]; then
-            cp "$REL_APK" android/app/build/outputs/apk/debug/KhmerFoodTourism-v2.3.1.apk
-          elif [ -f android/app/build/outputs/apk/debug/app-debug.apk ]; then
-            cp android/app/build/outputs/apk/debug/app-debug.apk android/app/build/outputs/apk/debug/KhmerFoodTourism-v2.3.1.apk
-          fi
-          REL_AAB=$(find android/app/build/outputs/bundle/release -name "*.aab" 2>/dev/null | head -n 1)
-          if [ -n "$REL_AAB" ] && [ -f "$REL_AAB" ]; then
-            cp "$REL_AAB" android/app/build/outputs/apk/debug/KhmerFoodTourism-v2.3.1-PlayStore.aab
-          fi
-          if [ -f android/app/build/outputs/apk/debug/KhmerFoodTourism-v2.3.1.apk ]; then
-            (cd android/app/build/outputs/apk/debug && zip -9 KhmerFoodTourism-v2.3.1-Android.zip KhmerFoodTourism-v2.3.1.apk)
-          fi
-          ls -la android/app/build/outputs/apk/debug/
+          REL_AAB=$(find app/build/outputs/bundle/release -name "*.aab" | head -n 1)
+          cp "$REL_AAB" ../release_out/KhmerFoodTourism-v2.3.2-PlayStore.aab
 
-      - name: 10. Upload Android Packages Artifact (APK + ZIP + Play Store AAB)
+          # 2) Direct-Install Conflict-Free APK (com.khmerfood.tourism.direct) that bypasses Play Store signature lock
+          ./gradlew assembleRelease -PcustomAppId=com.khmerfood.tourism.direct --no-daemon -x lint -x lintVitalRelease
+          DIRECT_APK=$(find app/build/outputs/apk/release -name "*.apk" | head -n 1)
+          "$ZIPALIGN" -p -f 4 "$DIRECT_APK" ../release_out/aligned-direct.apk
+          "$APKSIGNER" sign \
+            --ks app/khmerfood-upload-key.jks \
+            --ks-key-alias khmerfood-upload \
+            --ks-pass pass:KhmerFood2026PlayStore \
+            --key-pass pass:KhmerFood2026PlayStore \
+            --v1-signing-enabled true \
+            --v2-signing-enabled true \
+            --v3-signing-enabled true \
+            --v4-signing-enabled false \
+            --out ../release_out/KhmerFoodTourism-v2.3.2-DirectInstall.apk \
+            ../release_out/aligned-direct.apk
+          rm -f ../release_out/aligned-direct.apk
+          "$APKSIGNER" verify --verbose ../release_out/KhmerFoodTourism-v2.3.2-DirectInstall.apk
+          cd ..
+
+          (cd release_out && zip -9 KhmerFoodTourism-v2.3.2-Android.zip KhmerFoodTourism-v2.3.2.apk KhmerFoodTourism-v2.3.2-DirectInstall.apk)
+          ls -la release_out/
+
+      - name: 9. Upload Android Packages Artifact (APKs + ZIP + Play Store AAB)
         uses: actions/upload-artifact@v4
         with:
           name: Khmer-Food-Tourism-Release-Packages
           path: |
-            android/app/build/outputs/apk/debug/KhmerFoodTourism-v2.3.1.apk
-            android/app/build/outputs/apk/debug/KhmerFoodTourism-v2.3.1-Android.zip
-            android/app/build/outputs/apk/debug/KhmerFoodTourism-v2.3.1-PlayStore.aab
+            release_out/KhmerFoodTourism-v2.3.2.apk
+            release_out/KhmerFoodTourism-v2.3.2-DirectInstall.apk
+            release_out/KhmerFoodTourism-v2.3.2-Android.zip
+            release_out/KhmerFoodTourism-v2.3.2-PlayStore.aab
 
-      - name: 11. Publish GitHub Release with Signed APK, ZIP & Play Store AAB
+      - name: 10. Publish GitHub Release with Signed APKs, ZIP & Play Store AAB
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: v2.3.1
-          name: "Khmer Food & Tourism v2.3.1"
+          tag_name: v2.3.2
+          name: "Khmer Food & Tourism v2.3.2"
           make_latest: true
           body: |
             ### 🇰🇭 កម្មវិធីទូរស័ព្ទដៃ អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism Mobile App)
             
-            **កំណែផ្លូវការ v2.3.1 (Official Signed Production Packages):**
-            - 📦 **KhmerFoodTourism-v2.3.1.apk:** Direct install APK for Android devices (V1+V2+V3+V4 signed).
-            - 🗜️ **KhmerFoodTourism-v2.3.1-Android.zip:** Chrome-friendly ZIP package (bypasses Chrome APK download block on PC/Android).
-            - 🚀 **KhmerFoodTourism-v2.3.1-PlayStore.aab:** Signed Android App Bundle for Google Play Store distribution.
-            - 🍎 **KhmerFoodTourism-v2.3.1.ipa:** Signed iOS Package for Apple App Store / TestFlight.
-            - ❄️ **Zero-Overheat Cloud & Media Engine:** Baked static photos, bounded search cache & low-power GPS.
-            - 🗺️ **Enhanced Google Maps / Places Integration:** Multi-query Khmer/English/Chinese discovery & Place ID resolution.
+            **កំណែផ្លូវការ v2.3.2 (Official V1+V2+V3 Signed Production Packages):**
+            - 📦 **KhmerFoodTourism-v2.3.2.apk:** Official Android APK (`com.khmerfood.tourism`, V1+V2+V3 signed).
+            - ⚡ **KhmerFoodTourism-v2.3.2-DirectInstall.apk:** Instant Direct-Install APK (`com.khmerfood.tourism.direct`) — installs immediately even if the Google Play Store version is already on your phone!
+            - 🗜️ **KhmerFoodTourism-v2.3.2-Android.zip:** Chrome-friendly ZIP package containing both APKs.
+            - 🚀 **KhmerFoodTourism-v2.3.2-PlayStore.aab:** Signed Android App Bundle for Google Play Console.
           draft: false
           prerelease: false
           files: |
-            android/app/build/outputs/apk/debug/KhmerFoodTourism-v2.3.1.apk
-            android/app/build/outputs/apk/debug/KhmerFoodTourism-v2.3.1-Android.zip
-            android/app/build/outputs/apk/debug/KhmerFoodTourism-v2.3.1-PlayStore.aab
+            release_out/KhmerFoodTourism-v2.3.2.apk
+            release_out/KhmerFoodTourism-v2.3.2-DirectInstall.apk
+            release_out/KhmerFoodTourism-v2.3.2-Android.zip
+            release_out/KhmerFoodTourism-v2.3.2-PlayStore.aab

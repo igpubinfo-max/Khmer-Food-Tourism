@@ -7,7 +7,7 @@ import { initial100Destinations } from './seedDestinations';
 export const initialUsers: User[] = [];
 
 export const initialAppSettings: AppSettings = {
-  apkDownloadUrl: 'https://github.com/igpubinfo-max/Khmer-Food-Tourism/releases/download/v2.3.1/KhmerFoodTourism-v2.3.1.apk',
+  apkDownloadUrl: 'https://github.com/igpubinfo-max/Khmer-Food-Tourism/releases/download/v2.3.2/KhmerFoodTourism-v2.3.2.apk',
   playStoreUrl: 'https://play.google.com/store/apps/details?id=com.khmerfood.tourism',
   appStoreUrl: 'https://apps.apple.com/app/khmer-food-tourism/id6826976670',
   iosAppStoreUrl: 'https://apps.apple.com/app/khmer-food-tourism/id6826976670',
