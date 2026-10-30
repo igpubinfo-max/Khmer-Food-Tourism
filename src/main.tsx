@@ -51,6 +51,23 @@ try {
   console.warn('Cache sanitation warning:', e);
 }
 
+// 2b. Protect original food photography: block long-press / right-click "save image" and dragging on dish & shop photos
+try {
+  const isProtectedImage = (t: EventTarget | null): boolean => {
+    if (!(t instanceof HTMLImageElement)) return false;
+    const src = t.currentSrc || t.src || '';
+    return src.includes('/foods/') || src.includes('/Shop/') || src.startsWith('data:image');
+  };
+  document.addEventListener('contextmenu', (e) => {
+    if (isProtectedImage(e.target)) e.preventDefault();
+  });
+  document.addEventListener('dragstart', (e) => {
+    if (isProtectedImage(e.target)) e.preventDefault();
+  });
+} catch (e) {
+  console.warn('Image protection warning:', e);
+}
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ErrorBoundary>

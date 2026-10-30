@@ -1,8 +1,7 @@
 import React, { useMemo } from 'react';
 import { FoodItem } from '../types';
 import { useApp } from '../context/AppContext';
-import { Star, Heart, Flame, Share2, Edit2 } from 'lucide-react';
-import { shareRichContent } from '../utils/androidMediaHelper';
+import { Star, Heart, Flame, Edit2 } from 'lucide-react';
 import { tr } from '../utils/i18n';
 import { getLocalizedFood } from '../utils/zhDynamicTranslator';
 import { getDisplayTags, tagLabel } from '../utils/dishTags';
@@ -33,7 +32,6 @@ const FoodCardView: React.FC<FoodCardViewProps> = React.memo(({
   toggleBookmark,
   showToast,
 }) => {
-  const isKm = language === 'km';
   const loc = useMemo(() => getLocalizedFood(food, language), [food, language]);
   const tags = useMemo(() => getDisplayTags(food, 3), [food]);
 
@@ -41,25 +39,6 @@ const FoodCardView: React.FC<FoodCardViewProps> = React.memo(({
     const raw = food.photoUrl || '/welcome/hero-bg.webp';
     return raw.startsWith('/foods/') && !raw.includes('?') ? `${raw}?v=20261029v3` : raw;
   }, [food.photoUrl]);
-
-  const handleShareFood = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    shareRichContent(
-      {
-        title: loc.name,
-        nameKh: loc.name,
-        nameEn: loc.name,
-        description: loc.description,
-        location: tr(language, `${loc.category} • កម្ពុជា`, `${loc.category} • Cambodia`, `${loc.category} • 柬埔寨`),
-        signatureDishes: loc.ingredients.slice(0, 4).map(i => i.name),
-        photoUrl: food.photoUrl,
-        itemType: 'food',
-        itemId: food.id,
-        isKm,
-      },
-      showToast
-    );
-  };
 
   return (
     <div 
@@ -183,15 +162,6 @@ const FoodCardView: React.FC<FoodCardViewProps> = React.memo(({
 
           <div className="flex items-center gap-1.5">
             <PassportStampButton foodId={food.id} language={language} showToast={showToast} />
-            <button
-              type="button"
-              onClick={handleShareFood}
-              className="min-w-[44px] min-h-[38px] px-3 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-200 transition flex items-center justify-center gap-1 text-xs sm:text-sm font-bold"
-              title={tr(language, 'ចែករំលែកមុខម្ហូប', 'Share dish', '分享菜品')}
-            >
-              <Share2 className="w-3.5 h-3.5" />
-              <span>{tr(language, 'ចែក', 'Share', '分享')}</span>
-            </button>
           </div>
         </div>
       </div>

@@ -2,13 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
   X, Heart, Clock, Users, Flame, ChefHat, 
-  Share2, CheckCircle2, Circle, Volume2, Sparkles, Send, Bookmark, Globe, Check,
+  CheckCircle2, Circle, Volume2, Sparkles, Bookmark, Globe, Check,
   Edit2, Save, Upload, Camera, ArrowLeft, Plus, Trash2
 } from 'lucide-react';
 import {
-  shareRichContent,
-  formatRichShareText,
-  copyTextNativeOrWeb,
   isNativeAndroidOrIosPlatform,
   pickImageUsingNativeAndroidGallery,
   processAndCompressImageFile,
@@ -350,53 +347,6 @@ export const FoodDetailModal: React.FC = () => {
   };
 
   const isKm = language === 'km';
-  const sharePayload = {
-    title: loc.name,
-    nameKh: loc.name,
-    nameEn: loc.name,
-    description: loc.description,
-    location: tr(language, `${loc.category} • កម្ពុជា`, `${loc.category} • Cambodia`, `${loc.category} • 柬埔寨`),
-    signatureDishes: loc.ingredients.slice(0, 4).map(i => i.name),
-    photoUrl: selectedFood.photoUrl,
-    itemType: 'food' as const,
-    itemId: selectedFood.id,
-    isKm,
-  };
-
-  // Social Sharing
-  const handleShareNative = () => {
-    shareRichContent(sharePayload, showToast);
-  };
-
-  const handleShareTelegram = () => {
-    const { fullText, directLink } = formatRichShareText(sharePayload);
-    const text = encodeURIComponent(fullText);
-    const url = encodeURIComponent(directLink);
-    window.open(`https://t.me/share/url?url=${url}&text=${text}`, '_blank');
-  };
-
-  const handleShareFacebook = () => {
-    const { fullText, directLink } = formatRichShareText(sharePayload);
-    const url = encodeURIComponent(directLink);
-    const quote = encodeURIComponent(fullText);
-    window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${quote}`, '_blank');
-  };
-
-  const handleCopyLink = async () => {
-    const { fullText, title } = formatRichShareText(sharePayload);
-    const ok = await copyTextNativeOrWeb(fullText, title);
-    if (ok) {
-      showToast(
-        tr(
-          language,
-          'បានចម្លងព័ត៌មានមុខម្ហូប និងតំណភ្ជាប់រួចរាល់!',
-          'Food details & link copied to clipboard!',
-          '菜品详情与链接已复制到剪贴板！'
-        ),
-        'success'
-      );
-    }
-  };
 
   return (
     <div
@@ -466,15 +416,6 @@ export const FoodDetailModal: React.FC = () => {
               title={tr(language, 'ដាក់ក្នុងបញ្ជីចង់ញ៉ាំ', 'Save to wishlist', '加入收藏清单')}
             >
               <Bookmark className="w-4 h-4 fill-current" />
-            </button>
-
-            {/* Share Button */}
-            <button
-              onClick={handleShareNative}
-              className="p-2.5 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur-md shadow transition active:scale-90 text-white"
-              title={tr(language, 'ចែករំលែកមុខម្ហូប', 'Share dish', '分享菜品')}
-            >
-              <Share2 className="w-4 h-4" />
             </button>
 
             {/* Favorite */}
@@ -1125,44 +1066,6 @@ export const FoodDetailModal: React.FC = () => {
                     )}
                   </div>
                 ))}
-              </div>
-            </div>
-
-            {/* Social Share Bar */}
-            <div className="pt-2 border-t border-slate-200 dark:border-slate-800">
-              <p className="text-xs sm:text-sm font-semibold text-slate-500 mb-2.5 text-center">
-                {tr(language, 'ចែករំលែកមុខម្ហូបនេះទៅកាន់មិត្តភក្តិ', 'Share this recipe with friends', '将此食谱分享给好友')}
-              </p>
-              
-              <div className="flex items-center justify-center gap-2 flex-wrap">
-                {/* Telegram */}
-                <button
-                  type="button"
-                  onClick={handleShareTelegram}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#229ED9] text-white text-xs font-bold shadow hover:brightness-105 transition active:scale-95"
-                >
-                  <Send className="w-3.5 h-3.5" />
-                  Telegram
-                </button>
-
-                {/* Facebook */}
-                <button
-                  type="button"
-                  onClick={handleShareFacebook}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#1877F2] text-white text-xs font-bold shadow hover:brightness-105 transition active:scale-95"
-                >
-                  <Share2 className="w-3.5 h-3.5" />
-                  Facebook
-                </button>
-
-                {/* Copy link */}
-                <button
-                  type="button"
-                  onClick={handleCopyLink}
-                  className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-medium border border-slate-300 dark:border-slate-700 hover:bg-slate-200 transition active:scale-95"
-                >
-                  {tr(language, 'ចម្លងតំណ', 'Copy link', '复制链接')}
-                </button>
               </div>
             </div>
           </div>

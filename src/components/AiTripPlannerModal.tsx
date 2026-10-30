@@ -38,6 +38,7 @@ import {
   QUICK_CRAVING_CHIPS,
   getAiFoodAdvisorRecommendations,
 } from '../services/aiFoodAdvisorService';
+import { AiBrainInsightCard } from './AiBrainInsightCard';
 
 export interface CambodiaProvinceTripOption {
   id: string;
@@ -145,8 +146,9 @@ export const AiTripPlannerModal: React.FC = () => {
         goal: advisorGoal,
         seed: advisorSeed,
         language,
+        canUseVip,
       }),
-    [foods, restaurants, advisorPrompt, advisorGoal, advisorSeed, language]
+    [foods, restaurants, advisorPrompt, advisorGoal, advisorSeed, language, canUseVip]
   );
 
   const handleAdvisorSearchSubmit = (e?: React.FormEvent) => {
@@ -500,9 +502,9 @@ export const AiTripPlannerModal: React.FC = () => {
                       }}
                       placeholder={tr(
                         language,
-                        'ឧ. បាយ, គុយទាវ, សម្លក្តៅៗ, គ្រឿងសមុទ្រ...',
-                        'e.g. rice, noodles, warm soup, seafood, spicy...',
-                        '例如：米饭、粿条、热汤、少油清淡、海鲜...'
+                        'ឧ. បាយ, Pizza, ក្រោយស្រវឹង, ម្ហូបអមស្រាបៀរ...',
+                        'e.g. rice, pizza, hangover, beer food...',
+                        '例如：米饭、披萨、解酒、下酒菜...'
                       )}
                       className="w-full pl-3.5 pr-8 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     />
@@ -582,9 +584,11 @@ export const AiTripPlannerModal: React.FC = () => {
                         )}
                       </span>
                     </h4>
-                    <p className="text-[11px] font-semibold text-slate-600 dark:text-slate-300 mt-0.5 leading-snug">
-                      {aiAdvisorResults.aiSummaryText}
-                    </p>
+                    {!aiAdvisorResults.brain && (
+                      <p className="text-[11px] font-semibold text-slate-600 dark:text-slate-300 mt-0.5 leading-snug">
+                        {aiAdvisorResults.aiSummaryText}
+                      </p>
+                    )}
                   </div>
                   <button
                     type="button"
@@ -596,6 +600,23 @@ export const AiTripPlannerModal: React.FC = () => {
                   </button>
                 </div>
 
+                {aiAdvisorResults.brain && (
+                  <AiBrainInsightCard
+                    insight={aiAdvisorResults.brain}
+                    language={language}
+                    onPickFood={(food) => {
+                      setSelectedFood(food);
+                      setIsAiTripPlannerModalOpen(false);
+                    }}
+                    onChip={(q) => {
+                      setAdvisorPrompt(q);
+                      setAdvisorSeed(1);
+                    }}
+                    onUpgrade={() => openUpgradeVipModal()}
+                  />
+                )}
+
+                {!(aiAdvisorResults.brain && aiAdvisorResults.brain.dishes.length > 0) && (
                 <div className="space-y-2">
                   {aiAdvisorResults.dishes.map((dish) => {
                     const loc = getLocalizedFood(dish, language);
@@ -640,6 +661,7 @@ export const AiTripPlannerModal: React.FC = () => {
                     );
                   })}
                 </div>
+                )}
 
                 {/* Matching Restaurants with 1-Tap Navigation */}
                 {aiAdvisorResults.shops.length > 0 && (

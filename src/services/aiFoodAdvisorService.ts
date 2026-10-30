@@ -2,8 +2,10 @@ import { FoodItem, Language, Restaurant } from '../types';
 import { getDishTagIds, DishTagId } from '../utils/dishTags';
 import { getLocalizedFood } from '../utils/zhDynamicTranslator';
 import { tr } from '../utils/i18n';
+import { buildAiBrainInsight, type AiBrainInsight } from './aiFoodBrain';
 
 export type AdvisorGoalId =
+  | 'any'
   | 'quick_daily'
   | 'khmer_comfort'
   | 'vip_light_cal'
@@ -92,6 +94,15 @@ export const QUICK_CRAVING_CHIPS: QuickCravingChip[] = [
     labelKh: '🍨 បង្អែមខ្មែរ',
     labelEn: '🍨 Sweet Dessert',
     labelZh: '🍨 传统甜品',
+  },
+  {
+    id: 'drink_pairing',
+    queryKh: 'ម្ហូបអមស្រាបៀរ',
+    queryEn: 'beer food',
+    queryZh: '下酒菜',
+    labelKh: '🍻 ម្ហូបអមភេសជ្ជៈ 👑',
+    labelEn: '🍻 Drink Pairing 👑',
+    labelZh: '🍻 下酒菜 👑',
   },
 ];
 
@@ -256,6 +267,8 @@ export interface AiFoodAdvisorOutput {
   shops: Restaurant[];
   hasActiveQuery: boolean;
   aiSummaryText: string;
+  /** Smart "AI brain" insight (bridges unknown cravings, moods, VIP drink-pairing, safety…). */
+  brain: AiBrainInsight | null;
 }
 
 /**
@@ -269,10 +282,12 @@ export function getAiFoodAdvisorRecommendations(params: {
   goal: AdvisorGoalId;
   seed: number;
   language: Language;
+  canUseVip?: boolean;
 }): AiFoodAdvisorOutput {
-  const { foods, restaurants, query, goal, seed, language } = params;
+  const { foods, restaurants, query, goal, seed, language, canUseVip = false } = params;
   const cleanQuery = normalizeSearchText(query);
   const hasActiveQuery = cleanQuery.length > 0;
+  let hasTitleMatch = false;
 
   // Tokenize query into words (supporting Khmer, English, and Chinese substrings)
   const tokens = cleanQuery
@@ -309,8 +324,10 @@ export function getAiFoodAdvisorRecommendations(params: {
       // 1. Direct query match in title (highest priority)
       if (titleText === cleanQuery || titleText.startsWith(cleanQuery)) {
         score += 260;
+        hasTitleMatch = true;
       } else if (titleText.includes(cleanQuery)) {
         score += 200;
+        hasTitleMatch = true;
       }
 
       // 2. Semantic craving rule match (e.g., បាយ / rice / 米饭 / សម្លក្តៅៗ / 海鲜)
@@ -374,9 +391,24 @@ export function getAiFoodAdvisorRecommendations(params: {
 
   const totalMatchedCount = scoredFoods.length;
 
+  // Smart AI brain: understands foreign dishes, moods, health notes, VIP drink-pairing and unknown cravings.
+  const brain = hasActiveQuery
+    ? buildAiBrainInsight({
+        foods,
+        query,
+        language,
+        canUseVip,
+        seed,
+        directMatchCount: totalMatchedCount,
+        hasTitleMatch,
+      })
+    : null;
+
   // If the user typed a query that matched dishes, return up to 6 top matches (rotated by seed when Refresh is clicked)
   let topDishes: FoodItem[];
-  if (scoredFoods.length > 0) {
+  if (brain && brain.dishes.length > 0) {
+    topDishes = brain.dishes.map((d) => d.food);
+  } else if (scoredFoods.length > 0) {
     const limit = hasActiveQuery ? 5 : 4;
     if (scoredFoods.length <= limit || seed === 1) {
       topDishes = scoredFoods.slice(0, limit).map((item) => item.food);
@@ -413,13 +445,15 @@ export function getAiFoodAdvisorRecommendations(params: {
     })
     .slice(0, 3);
 
-  const aiSummaryText = buildAiSummaryText({
-    hasActiveQuery,
-    query: query.trim(),
-    totalMatchedCount,
-    goal,
-    language,
-  });
+  const aiSummaryText = brain
+    ? brain.headline
+    : buildAiSummaryText({
+        hasActiveQuery,
+        query: query.trim(),
+        totalMatchedCount,
+        goal,
+        language,
+      });
 
   return {
     dishes: topDishes,
@@ -427,6 +461,7 @@ export function getAiFoodAdvisorRecommendations(params: {
     shops: matchedShops.length > 0 ? matchedShops : restaurants.slice(0, 2),
     hasActiveQuery,
     aiSummaryText,
+    brain,
   };
 }
 
@@ -494,7 +529,7 @@ function buildAiSummaryText(params: {
     );
   }
 
-  const goalDescriptions: Record<AdvisorGoalId, [string, string, string]> = {
+  const goalDescriptions: Record<Exclude<AdvisorGoalId, 'any'>, [string, string, string]> = {
     quick_daily: [
       '🤖 ណែនាំអាហាររហ័ស ឆ្ងាញ់ និងងាយស្រួលញ៉ាំប្រចាំថ្ងៃ៖',
       '🤖 Recommended quick & tasty everyday meals:',
@@ -522,6 +557,6 @@ function buildAiSummaryText(params: {
     ],
   };
 
-  const [kh, en, zh] = goalDescriptions[goal];
+  const [kh, en, zh] = goalDescriptions[goal === 'any' ? 'quick_daily' : goal];
   return tr(language, kh, en, zh);
 }

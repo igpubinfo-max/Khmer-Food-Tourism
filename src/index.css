@@ -179,6 +179,26 @@
   padding-bottom: 0.06em;
 }
 
+/* Slightly larger base size: every rem-based size (text, spacing, icons) scales ~6% for easier reading in Khmer, English and Chinese */
+@layer base {
+  html {
+    font-size: 17px;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+}
+
+/* Protect original food photography: no long-press "save image", dragging or selection on dish / shop photos */
+img[src*="/foods/"],
+img[src*="/Shop/"],
+img[src^="data:image"],
+.kft-protected-img {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
 /* Proportionally bump micro text utilities so Khmer, English, and Chinese badges, labels, and descriptions are comfortable to read without clipping */
 .text-\[8px\] {
   font-size: 9.5px !important;

@@ -1,10 +1,9 @@
 import React, { useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
-  X, MapPin, Phone, Share2, ExternalLink,
+  X, MapPin, Phone, ExternalLink,
   Calendar, Sparkles, Navigation, Bookmark, MessageSquareQuote, Play, Utensils, ChefHat
 } from 'lucide-react';
-import { shareRichContent } from '../utils/androidMediaHelper';
 import { tr, translateProvince } from '../utils/i18n';
 import { translateDynamicTextToZh, sanitizeStrictLanguageText, toConciseSummary } from '../utils/zhDynamicTranslator';
 import { extractYouTubeVideoId, isKnownUnavailableVideo } from '../services/onlineFoodDiscoveryService';
@@ -158,34 +157,6 @@ export const TrendingFoodDetailModal: React.FC = () => {
     } else {
       window.open(`https://maps.google.com/?q=${encodeURIComponent(safeRestKh + ' ' + (item.provinceKh || 'Cambodia'))}`, '_blank', 'noopener,noreferrer');
     }
-  };
-
-  const handleShare = () => {
-    const mapLink =
-      item.mapUrl ||
-      (item.latitude && item.longitude
-        ? `https://www.google.com/maps/search/?api=1&query=${item.latitude},${item.longitude}`
-        : undefined);
-    shareRichContent(
-      {
-        title: isKm
-          ? `${safeFoodKh} — ${safeRestKh}`
-          : `${safeFoodEn} — ${safeRestEn}`,
-        nameKh: `${safeFoodKh} (${safeRestKh})`,
-        nameEn: `${safeFoodEn} (${safeRestEn})`,
-        description: isKm ? safeDescKh : safeDescEn,
-        location: isKm
-          ? `${safeAddrKh} (${item.provinceKh || ''})`
-          : `${safeAddrEn} (${item.provinceEn || ''})`,
-        phone: item.phone,
-        photoUrl: item.photoUrl,
-        mapUrl: mapLink,
-        itemType: 'trending',
-        itemId: item.id,
-        isKm,
-      },
-      showToast
-    );
   };
 
   return (
@@ -390,7 +361,7 @@ export const TrendingFoodDetailModal: React.FC = () => {
         </div>
 
         {/* Action Footer: 4 Action Buttons */}
-        <div className="p-3 bg-slate-50 dark:bg-slate-800/90 border-t border-slate-200 dark:border-slate-700 grid grid-cols-4 gap-2 font-khmer text-xs shrink-0">
+        <div className="p-3 bg-slate-50 dark:bg-slate-800/90 border-t border-slate-200 dark:border-slate-700 grid grid-cols-3 gap-2 font-khmer text-xs shrink-0">
           {/* 1. Map */}
           <button
             type="button"
@@ -415,17 +386,7 @@ export const TrendingFoodDetailModal: React.FC = () => {
             <span className="text-[10px]">{tr(language, 'ទូរស័ព្ទ', 'Call', '拨打电话')}</span>
           </button>
 
-          {/* 3. Share */}
-          <button
-            type="button"
-            onClick={handleShare}
-            className="py-2.5 px-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-800 dark:text-white rounded-xl border border-slate-200 dark:border-slate-600 font-bold flex flex-col items-center justify-center gap-1 transition cursor-pointer"
-          >
-            <Share2 className="w-4 h-4 text-slate-600 dark:text-slate-300" />
-            <span className="text-[10px]">{tr(language, 'ចែករំលែក', 'Share', '分享')}</span>
-          </button>
-
-          {/* 4. Save / Wishlist */}
+          {/* 3. Save / Wishlist */}
           <button
             type="button"
             onClick={() => {
