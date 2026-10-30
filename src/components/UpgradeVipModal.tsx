@@ -1164,7 +1164,7 @@ export const UpgradeVipModal: React.FC = () => {
         {/* Modal Footer / Prominent App Version Bar */}
         <div className="px-5 py-2.5 bg-slate-100 dark:bg-slate-950/80 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-500 font-mono shrink-0">
           <span className="font-semibold text-slate-600 dark:text-slate-400">
-            Discover Cambodia {APP_VERSION} (Build {APP_BUILD_CODE})
+            Cambodia Flavors & Tourism {APP_VERSION} (Build {APP_BUILD_CODE})
           </span>
           <a
             href="/privacy-policy.html"

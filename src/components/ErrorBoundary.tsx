@@ -50,7 +50,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
             <div>
               <h2 className="font-moul text-base text-[#064E3B]">
-                {isEn ? 'Discover Cambodia Food & Tourism' : isZh ? '探索柬埔寨美食与旅游' : 'ស្វែងយល់អាហារ និងទេសចរណ៍កម្ពុជា'}
+                {isEn ? 'Cambodia Flavors & Tourism' : isZh ? '柬埔寨风味与旅游' : 'រសជាតិ និងទេសចរណ៍កម្ពុជា'}
               </h2>
               <p className="text-xs text-slate-500 mt-1">
                 {isEn

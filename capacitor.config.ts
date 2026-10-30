@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.khmerfood.tourism',
-  appName: 'Discover Cambodia Food & Tourism',
+  appName: 'Cambodia Flavors & Tourism',
   webDir: 'dist',
   ios: {
     contentInset: 'automatic',

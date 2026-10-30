@@ -47,7 +47,7 @@ export const WelcomeSlides: React.FC<Props> = ({ language, onLanguage, onFinish 
             <div className="mb-3 sm:mb-4 flex items-center justify-center">
               <img
                 src={WELCOME_IMAGES.logo}
-                alt="Discover Cambodia Food & Tourism"
+                alt="Cambodia Flavors & Tourism"
                 width={144}
                 height={144}
                 decoding="async"

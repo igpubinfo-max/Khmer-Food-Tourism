@@ -46,7 +46,7 @@ export const SupportModal: React.FC = () => {
             </div>
             <div>
               <h2 className="text-xl font-bold font-khmer text-white">
-                {tr(language, 'គាំទ្រការអភិវឌ្ឍន៍កម្មវិធី', 'Support Discover Cambodia', '支持应用开发')}
+                {tr(language, 'គាំទ្រការអភិវឌ្ឍន៍កម្មវិធី', 'Support Cambodia Flavors & Tourism', '支持应用开发')}
               </h2>
               <p className="text-xs text-emerald-200 font-khmer">
                 {tr(language, 'ការចូលរួមគាំទ្រដោយស្ម័គ្រចិត្តតាមរយៈ Bakong KHQR', 'Voluntary contribution via Bakong KHQR', '通过 Bakong KHQR 自愿支持')}
@@ -66,9 +66,9 @@ export const SupportModal: React.FC = () => {
               <p className="text-[#0F172A]/80 mt-0.5 leading-relaxed">
                 {tr(
                   language,
-                  'នេះជា QR Code សម្រាប់ការចូលរួមគាំទ្រដោយស្ម័គ្រចិត្តដល់កម្មវិធី «ស្វែងយល់អាហារ និងទេសចរណ៍កម្ពុជា» ប៉ុណ្ណោះ ដោយដាច់ដោយឡែកពី QR Code ទាញយកកម្មវិធី។',
-                  'This QR code is strictly for voluntary contributions to support Discover Cambodia Food & Tourism, separate from the app download QR code.',
-                  '此二维码仅用于自愿支持“探索柬埔寨美食与旅游”的持续开发与维护，与应用下载二维码完全独立。'
+                  'នេះជា QR Code សម្រាប់ការចូលរួមគាំទ្រដោយស្ម័គ្រចិត្តដល់កម្មវិធី «រសជាតិ និងទេសចរណ៍កម្ពុជា» ប៉ុណ្ណោះ ដោយដាច់ដោយឡែកពី QR Code ទាញយកកម្មវិធី។',
+                  'This QR code is strictly for voluntary contributions to support Cambodia Flavors & Tourism, separate from the app download QR code.',
+                  '此二维码仅用于自愿支持“柬埔寨风味与旅游”的持续开发与维护，与应用下载二维码完全独立。'
                 )}
               </p>
             </div>
@@ -126,7 +126,7 @@ export const SupportModal: React.FC = () => {
               {language === 'km'
                 ? appSettings.supportMessageKh
                 : language === 'zh'
-                ? '感谢您支持“探索柬埔寨美食与旅游”。您的每一份心意都将助力我们持续完善应用并推广柬埔寨美食与文化。'
+                ? '感谢您支持“柬埔寨风味与旅游”。您的每一份心意都将助力我们持续完善应用并推广柬埔寨美食与文化。'
                 : appSettings.supportMessageEn}
             </p>
             <div className="flex items-center justify-center gap-1 text-[11px] text-[#059669] font-khmer">

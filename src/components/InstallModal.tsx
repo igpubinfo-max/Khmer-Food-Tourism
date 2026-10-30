@@ -378,7 +378,7 @@ export const InstallModal: React.FC = () => {
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="w-4 h-4 rounded-full bg-[#064E3B] text-white flex items-center justify-center text-[10px] shrink-0 mt-0.5">4</span>
-                    <span>{tr(language, 'ចុច "ដំឡើង" ហើយចាប់ផ្តើមប្រើប្រាស់កម្មវិធី!', 'Tap "Install" and start exploring Cambodia!', '点击“安装”，即刻探索柬埔寨美食与旅游！')}</span>
+                    <span>{tr(language, 'ចុច "ដំឡើង" ហើយចាប់ផ្តើមប្រើប្រាស់កម្មវិធី!', 'Tap "Install" and start exploring Cambodia!', '点击“安装”，即刻柬埔寨风味与旅游！')}</span>
                   </li>
                 </ul>
               </div>

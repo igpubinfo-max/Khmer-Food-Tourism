@@ -333,7 +333,7 @@ export function buildCuratedCambodiaDiscoveryItems(
       titleKh: '🏷️ បញ្ចុះតម្លៃ 15% នៅភោជនីយដ្ឋាន គីមលី គ្រឿងសមុទ្រកែប',
       titleEn: '🏷️ 15% OFF at Kimly Seafood Restaurant (Kep Crab Market)',
       titleZh: '🏷️ 白马金莉海鲜餐厅 (Kimly Seafood) 专属 85 折优惠',
-      summaryKh: 'ផ្តល់ជូនការបញ្ចុះតម្លៃ 15% លើឈុតក្តាមឆាម្រេចខ្ចីកំពត និងបង្គាអាំង សម្រាប់សមាជិកកម្មវិធី Discover Cambodia Food & Tourism រៀងរាល់ថ្ងៃចុងសប្តាហ៍!',
+      summaryKh: 'ផ្តល់ជូនការបញ្ចុះតម្លៃ 15% លើឈុតក្តាមឆាម្រេចខ្ចីកំពត និងបង្គាអាំង សម្រាប់សមាជិកកម្មវិធី Cambodia Flavors & Tourism រៀងរាល់ថ្ងៃចុងសប្តាហ៍!',
       summaryEn: 'Enjoy 15% off fresh Kampot green pepper crab and grilled prawns at Kep Crab Market when showing the app!',
       provinceKh: 'ខេត្តកែប',
       provinceEn: 'Kep',
@@ -1008,7 +1008,7 @@ export function buildDynamicNotificationsList(
       photoUrl: food143?.photoUrl || '/foods/food-143.jpg',
       provinceKh: 'ទូទាំងប្រទេសកម្ពុជា',
       provinceEn: 'All Cambodia',
-      sourceName: 'Discover Cambodia Kitchen',
+      sourceName: 'Cambodia Flavors Kitchen',
       sourceUrl: 'https://en.wikipedia.org/wiki/Cambodian_cuisine',
       latitude: 11.5564,
       longitude: 104.9282,
@@ -1074,7 +1074,7 @@ export function buildDynamicNotificationsList(
       photoUrl: food149?.photoUrl || '/foods/food-149.jpg',
       provinceKh: 'ទូទាំងប្រទេសកម្ពុជា',
       provinceEn: 'All Cambodia',
-      sourceName: 'Discover Cambodia Updates',
+      sourceName: 'Cambodia Flavors Updates',
     },
   ];
 

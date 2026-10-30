@@ -37,7 +37,7 @@ jobs:
 
       - name: 5. Sync Version & Build Web Bundle
         run: |
-          CURRENT_VC=$(grep -oP 'versionCode\s+\K[0-9]+' android/app/build.gradle || echo 1252)
+          CURRENT_VC=$(grep -oP 'versionCode\s+\K[0-9]+' android/app/build.gradle || echo 1253)
           AUTO_VC=$((900 + ${{ github.run_number }}))
           if [ "$CURRENT_VC" -gt "$AUTO_VC" ]; then
             FINAL_VC=$CURRENT_VC
@@ -73,7 +73,7 @@ jobs:
               -keypass 'KhmerFood2026PlayStore' \
               -dname "CN=Savuth Chea, OU=Khmer Food and Tourism, O=Khmer Food and Tourism, L=Phnom Penh, ST=Phnom Penh, C=KH"
           fi
-          FINAL_VC=$(grep -oP 'versionCode\s+\K[0-9]+' android/app/build.gradle || echo 1252)
+          FINAL_VC=$(grep -oP 'versionCode\s+\K[0-9]+' android/app/build.gradle || echo 1253)
           echo "Building Android APK & Play Store AAB with versionCode $FINAL_VC"
           BUILD_TOOLS_DIR=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -n 1)
           ZIPALIGN="$BUILD_TOOLS_DIR/zipalign"
@@ -124,11 +124,11 @@ jobs:
         if: github.ref == 'refs/heads/main'
         with:
           tag_name: v2.5.0
-          name: "Discover Cambodia Food & Tourism v2.5.0"
+          name: "Cambodia Flavors & Tourism v2.5.0"
           make_latest: true
           body: |
-            ### 🇰🇭 Discover Cambodia Food & Tourism — Taste Cambodia. Explore Cambodia.
-            **ស្វែងយល់អាហារ និងទេសចរណ៍កម្ពុជា • 探索柬埔寨美食与旅游**
+            ### 🇰🇭 Cambodia Flavors & Tourism — Discover Food • Places • Experiences
+            **រសជាតិ និងទេសចរណ៍កម្ពុជា • 柬埔寨风味与旅游**
             
             **Official Release v2.5.0:**
             - 📲 **DiscoverCambodia-v2.5.0.apk:** Official Android APK (1-Tap Direct Install, V1+V2+V3 signed).

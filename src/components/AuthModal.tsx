@@ -196,10 +196,10 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
             <Sparkles className="w-6 h-6 text-emerald-300" />
           </div>
           <h2 className="text-lg font-bold font-moul tracking-wide drop-shadow-sm">
-            {language === 'km' ? 'ស្វែងយល់អាហារ និងទេសចរណ៍កម្ពុជា' : language === 'zh' ? '探索柬埔寨美食与旅游' : 'Discover Cambodia Food & Tourism'}
+            {language === 'km' ? 'រសជាតិ និងទេសចរណ៍កម្ពុជា' : language === 'zh' ? '柬埔寨风味与旅游' : 'Cambodia Flavors & Tourism'}
           </h2>
           <p className="text-[11px] text-emerald-100/90 font-khmer mt-0.5">
-            {language === 'km' ? 'ភ្លក្សរសជាតិកម្ពុជា • ស្វែងយល់ទឹកដីកម្ពុជា' : language === 'zh' ? '品味柬埔寨 · 探索柬埔寨' : 'Taste Cambodia. Explore Cambodia.'}
+            {language === 'km' ? 'ស្វែងយល់អាហារ • ទីតាំង • បទពិសោធន៍' : language === 'zh' ? '探索美食 • 景点 • 体验' : 'Discover Food • Places • Experiences'}
           </p>
 
           {!isMandatoryGate && (

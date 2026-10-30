@@ -16,9 +16,9 @@ export interface WelcomeSlide {
 export const WELCOME_IMAGES = {
   hero: { src: '/welcome/hero-bg.webp', width: 1264, height: 848 },
   places: { src: '/welcome/places.webp', width: 1280, height: 714 },
-  logo: '/welcome/welcome-hero-icon.png?v=2.4.1',
+  logo: '/welcome/welcome-hero-icon.png?v=2.5.2',
   /** Existing app icon used if the welcome logo fails to load */
-  logoFallback: '/icon-192.png?v=2.4.1',
+  logoFallback: '/icon-192.png?v=2.5.2',
 } as const;
 
 export const WELCOME_SLIDES: WelcomeSlide[] = [
@@ -29,14 +29,14 @@ export const WELCOME_SLIDES: WelcomeSlide[] = [
     imageHeight: WELCOME_IMAGES.hero.height,
     objectPosition: '88% 50%',
     headline: {
-      km: 'ស្វែងយល់អាហារ និងទេសចរណ៍កម្ពុជា',
-      en: 'Discover Cambodia Food & Tourism',
-      zh: '探索柬埔寨美食与旅游',
+      km: 'រសជាតិ និងទេសចរណ៍កម្ពុជា',
+      en: 'Cambodia Flavors & Tourism',
+      zh: '柬埔寨风味与旅游',
     },
     tagline: {
-      km: 'ភ្លក្សរសជាតិកម្ពុជា • ស្វែងយល់ទឹកដីកម្ពុជា',
-      en: 'Taste Cambodia. Explore Cambodia.',
-      zh: '品味柬埔寨 · 探索柬埔寨',
+      km: 'ស្វែងយល់អាហារ • ទីតាំង • បទពិសោធន៍',
+      en: 'Discover Food • Places • Experiences',
+      zh: '探索美食 • 景点 • 体验',
     },
     sub: {
       km: 'មគ្គុទ្ទេសក៍ម្ហូបប្រពៃណី ភោជនីយដ្ឋាន និងតំបន់ទេសចរណ៍ទូទាំង ២៥ ខេត្ត-ក្រុង',
@@ -51,9 +51,9 @@ export const WELCOME_LABELS = {
   next: { km: 'បន្ទាប់', en: 'Next', zh: '下一步' },
   start: { km: 'ចាប់ផ្តើមស្វែងរក', en: 'Start Exploring', zh: '开始探索' },
   appName: {
-    km: 'ស្វែងយល់អាហារ និងទេសចរណ៍កម្ពុជា',
-    en: 'Discover Cambodia Food & Tourism',
-    zh: '探索柬埔寨美食与旅游',
+    km: 'រសជាតិ និងទេសចរណ៍កម្ពុជា',
+    en: 'Cambodia Flavors & Tourism',
+    zh: '柬埔寨风味与旅游',
   },
   offlineBadge: {
     km: 'ប្រើបានទោះគ្មានអ៊ីនធឺណិត',

@@ -2290,7 +2290,7 @@ export const ProfileView: React.FC = () => {
               {isKm ? `គណនីកំពុងប្រើប្រាស់៖ ${currentUser.name}` : `Signed in as: ${currentUser.name}`}
             </span>
             <span className="font-mono text-[10px] text-slate-400">
-              Discover Cambodia {APP_VERSION} (Build {APP_BUILD_CODE})
+              Cambodia Flavors & Tourism {APP_VERSION} (Build {APP_BUILD_CODE})
             </span>
           </div>
 
