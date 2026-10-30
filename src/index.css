@@ -85,6 +85,23 @@
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain;
   overflow-anchor: none;
+  scroll-behavior: smooth;
+  /* The bottom nav is a flex sibling (never overlays content); this breathing room
+     guarantees the last card/image can always be scrolled fully clear of it. */
+  padding-bottom: 20px;
+  scroll-padding-bottom: 28px;
+}
+@media (prefers-reduced-motion: reduce) {
+  #kft-main-scroll { scroll-behavior: auto; }
+}
+
+/* Bottom navigation: fixed to the bottom of the app shell, never overlapping content */
+#kft-bottom-nav {
+  position: relative;
+  flex: 0 0 auto;
+  padding-bottom: max(var(--kft-safe-bottom, 0px), 8px);
+  padding-left: var(--kft-safe-left, 0px);
+  padding-right: var(--kft-safe-right, 0px);
 }
 
 /* Zero-CPU / Zero-GPU-Repaint Static Styles (Prevents 120Hz Mobile Overheating) */

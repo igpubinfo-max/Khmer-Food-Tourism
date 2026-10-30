@@ -30,8 +30,8 @@ export const BottomNav: React.FC = () => {
 
   return (
     <nav
+      id="kft-bottom-nav"
       className="shrink-0 w-full z-30 bg-[#064E3B] text-white border-t border-emerald-400/20 shadow-[0_-4px_16px_rgba(0,0,0,0.28)]"
-      style={{ paddingBottom: 'max(var(--kft-safe-bottom, 0px), 6px)' }}
     >
       <div className="max-w-md mx-auto grid grid-cols-6 px-1 pt-1.5 pb-0.5">
         {navItems.map((item) => {
