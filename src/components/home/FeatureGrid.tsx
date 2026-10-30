@@ -1,11 +1,11 @@
 import React from 'react';
-import { UtensilsCrossed, MapPin, Leaf, CalendarDays, Bell, Globe, Lock } from 'lucide-react';
+import { UtensilsCrossed, MapPin, Leaf, CalendarDays, Bell, Globe } from 'lucide-react';
 import type { Language } from '../../types';
 import { tr } from '../../utils/i18n';
 
 interface Props {
   language: Language;
-  isVip: boolean;
+  isVip?: boolean;
   unreadCount: number;
   onWhatToEat: () => void;
   onNearMe: () => void;
@@ -16,12 +16,10 @@ interface Props {
 }
 
 /**
- * Six clear, equal-weight feature shortcuts. Premium features carry only a tiny lock dot,
- * so the grid reads as "useful tools" rather than a sales banner.
+ * Six clear, equal-weight feature shortcuts that open their respective tools directly.
  */
 export const FeatureGrid: React.FC<Props> = ({
   language,
-  isVip,
   unreadCount,
   onWhatToEat,
   onNearMe,
@@ -36,7 +34,6 @@ export const FeatureGrid: React.FC<Props> = ({
       Icon: UtensilsCrossed,
       gradient: 'from-amber-400 to-orange-500',
       label: tr(language, 'ញ៉ាំអ្វីល្អ?', 'What to Eat', '吃什么'),
-      premium: true,
       onClick: onWhatToEat,
     },
     {
@@ -44,7 +41,6 @@ export const FeatureGrid: React.FC<Props> = ({
       Icon: MapPin,
       gradient: 'from-emerald-400 to-teal-600',
       label: tr(language, 'នៅជិតខ្ញុំ', 'Near Me', '附近'),
-      premium: true,
       onClick: onNearMe,
     },
     {
@@ -52,7 +48,6 @@ export const FeatureGrid: React.FC<Props> = ({
       Icon: Leaf,
       gradient: 'from-lime-400 to-emerald-600',
       label: tr(language, 'ម៉ឺនុយឆ្លាតវៃ', 'Smart Menu', '智能菜单'),
-      premium: true,
       onClick: onSmartMenu,
     },
     {
@@ -60,7 +55,6 @@ export const FeatureGrid: React.FC<Props> = ({
       Icon: CalendarDays,
       gradient: 'from-sky-400 to-indigo-500',
       label: tr(language, 'ថ្មីប្រចាំថ្ងៃ', 'Daily New', '每日新发现'),
-      premium: false,
       onClick: onDaily,
     },
     {
@@ -68,7 +62,6 @@ export const FeatureGrid: React.FC<Props> = ({
       Icon: Bell,
       gradient: 'from-rose-400 to-pink-600',
       label: tr(language, 'ការជូនដំណឹង', 'Alerts', '通知'),
-      premium: false,
       onClick: onAlerts,
       badge: unreadCount > 0 ? unreadCount : 0,
     },
@@ -77,7 +70,6 @@ export const FeatureGrid: React.FC<Props> = ({
       Icon: Globe,
       gradient: 'from-violet-400 to-purple-600',
       label: tr(language, 'ស្វែងរកលើផែនទី', 'Maps Search', '地图搜索'),
-      premium: true,
       onClick: onMapsSearch,
     },
   ];
@@ -104,14 +96,6 @@ export const FeatureGrid: React.FC<Props> = ({
             {t.label}
           </span>
 
-          {t.premium && !isVip && (
-            <span
-              className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-amber-400/15 text-amber-600 dark:text-amber-300 flex items-center justify-center"
-              aria-hidden="true"
-            >
-              <Lock className="w-2.5 h-2.5" />
-            </span>
-          )}
           {'badge' in t && t.badge ? (
             <span className="absolute top-1.5 right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-rose-500 text-white text-[10px] font-black flex items-center justify-center shadow">
               {t.badge > 99 ? '99+' : t.badge}

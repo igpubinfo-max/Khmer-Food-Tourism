@@ -42,7 +42,7 @@ export const SmartHubMenuModal: React.FC<Props> = ({ onClose }) => {
 
   const organizedFoods = useMemo(() => organizeAndDeduplicateFoods(foods), [foods]);
 
-  const canUseVip = isUserVipActive(currentUser) || currentUser?.role === 'admin';
+  const canUseVip = true;
   const { level } = getPassportLevel(stampCount);
 
   const triggerVipUpgrade = () => {

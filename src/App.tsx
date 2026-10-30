@@ -100,7 +100,7 @@ const MainScreen: React.FC = () => {
 
   // Smart Menu (opened from the Header button or the Home banner via a window event — strictly VIP-controlled)
   const [isSmartHubOpen, setIsSmartHubOpen] = useState(false);
-  const hasVipAccess = isUserVipActive(currentUser) || currentUser?.role === 'admin';
+  const hasVipAccess = true;
   useEffect(() => {
     (window as any).__kft_is_smart_hub_open = Boolean(isSmartHubOpen && hasVipAccess);
     return () => {
@@ -243,11 +243,11 @@ const MainScreen: React.FC = () => {
       {isExitModalOpen && <ExitConfirmModal />}
 
       {/* Personalized Account Features & Daily/Notification Modals */}
-      {isWhatToEatModalOpen && (isUserVipActive(currentUser) || currentUser?.role === 'admin') && <WhatToEatModal />}
-      {isNearMeModalOpen && (isUserVipActive(currentUser) || currentUser?.role === 'admin') && <NearMeModal />}
+      {isWhatToEatModalOpen && <WhatToEatModal />}
+      {isNearMeModalOpen && <NearMeModal />}
       {isDailyDiscoveriesModalOpen && <DailyDiscoveriesModal />}
-      {isWishlistsModalOpen && (isUserVipActive(currentUser) || currentUser?.role === 'admin') && <WishlistsModal />}
-      {isAiTripPlannerModalOpen && (isUserVipActive(currentUser) || currentUser?.role === 'admin') && <AiTripPlannerModal />}
+      {isWishlistsModalOpen && <WishlistsModal />}
+      {isAiTripPlannerModalOpen && <AiTripPlannerModal />}
       {isNotificationsModalOpen && <NotificationsModal />}
       {isAiCheckInModalOpen && <AiCheckInModal />}
       {isRestaurantCheckInModalOpen && <RestaurantCheckInModal />}

@@ -1270,9 +1270,9 @@ export const HomeView: React.FC = () => {
                 language={language}
                 isVip={canUseVipActions}
                 unreadCount={unreadNotificationsCount}
-                onWhatToEat={requireVip(() => setIsWhatToEatModalOpen(true))}
-                onNearMe={requireVip(() => setIsNearMeModalOpen(true))}
-                onSmartMenu={requireVip(openSmartHub)}
+                onWhatToEat={() => setIsWhatToEatModalOpen(true)}
+                onNearMe={() => setIsNearMeModalOpen(true)}
+                onSmartMenu={openSmartHub}
                 onDaily={() => setIsDailyDiscoveriesModalOpen(true)}
                 onAlerts={() => setIsNotificationsModalOpen(true)}
                 onMapsSearch={() => openGoogleMapsSearchModal('all')}

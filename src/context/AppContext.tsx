@@ -1325,58 +1325,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setIsGoogleMapsSearchModalOpenRaw(false);
   };
 
-  // Authoritative Backend/Context VIP Verification for Personalized Features (Strictly VIP users only)
+    // Feature access check: ensure user is signed in without redirecting to VIP payment request screen
   const verifyBackendVipFeatureAccess = (featureNameKh: string, featureNameEn: string): boolean => {
     if (!currentUser) {
       closeAllPersonalizedFeatureModals();
       showToast(
         language === 'km'
-          ? `🔒 សូមចូលគណនី និងបើកកញ្ចប់ VIP ដើម្បីប្រើប្រាស់មុខងារ «${featureNameKh}»!`
-          : `🔒 Please sign in and activate VIP to access "${featureNameEn}"!`,
+          ? `🔒 សូមចូលគណនីដើម្បីប្រើប្រាស់មុខងារ «${featureNameKh}»!`
+          : `🔒 Please sign in to access "${featureNameEn}"!`,
         'warning'
       );
       setIsAuthModalOpen(true);
       return false;
     }
-
-    if (isAdminAccount(currentUser)) {
-      closeAllPersonalizedFeatureModals();
-      showToast(
-        language === 'km'
-          ? `🔒 មុខងារ «${featureNameKh}» គឺសម្រាប់តែគណនីសមាជិក VIP ប៉ុណ្ណោះ (មិនបង្ហាញក្នុងគណនី Admin ទេ)!`
-          : `🔒 "${featureNameEn}" is a VIP-exclusive user feature and is not available in the Admin account.`,
-        'info'
-      );
-      return false;
-    }
-
-    // Cross-verify against authoritative backend/state users array
-    const backendUserRecord = users.find(u => u.id === currentUser.id) || currentUser;
-    const isBackendActiveVip =
-      !backendUserRecord.isDisabled &&
-      isUserVipActive(backendUserRecord) &&
-      isUserVipActive(currentUser);
-
-    if (!isBackendActiveVip) {
-      closeAllPersonalizedFeatureModals();
-      const vipState = getVipAccountState(backendUserRecord);
-      const isExpiredOrCancelled =
-        vipState === 'expired_vip' || backendUserRecord.subscriptionStatus === 'cancelled';
-
-      showToast(
-        language === 'km'
-          ? isExpiredOrCancelled
-            ? `🔒 សមាជិកភាព VIP របស់អ្នកបានផុតកំណត់ ឬត្រូវបានបោះបង់។ សូមបន្តកញ្ចប់ VIP ដើម្បីប្រើប្រាស់មុខងារ «${featureNameKh}»!`
-            : `🔒 មុខងារពិសេស «${featureNameKh}» អនុញ្ញាតសម្រាប់តែសមាជិក VIP ប៉ុណ្ណោះ។ សូមដំឡើងទៅ VIP ឥឡូវនេះ!`
-          : isExpiredOrCancelled
-          ? `🔒 Your VIP subscription has expired or was cancelled. Please renew VIP to access "${featureNameEn}"!`
-          : `🔒 Personalized Feature "${featureNameEn}" is locked for Free Users. Upgrade to VIP to unlock!`,
-        'warning'
-      );
-      openUpgradeVipModal(isExpiredOrCancelled);
-      return false;
-    }
-
     return true;
   };
 
@@ -2212,48 +2173,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
   }, [currentUser?.id, currentUser?.membershipTier, currentUser?.subscriptionExpiryDate, users.length]);
 
-  // Automatically disable access and close any open Personalized Feature modals if currentUser is not an active VIP
-  useEffect(() => {
-    const isAdmin =
-      currentUser &&
-      (currentUser.role === 'admin' ||
-        currentUser.id === 'admin-authorized-single' ||
-        currentUser.username === 'admin' ||
-        currentUser.username === 'cheasavuth');
-    const backendUser = currentUser ? users.find(u => u.id === currentUser.id) || currentUser : null;
-    const hasActiveVip = Boolean(
-      isAdmin || (backendUser && !backendUser.isDisabled && isUserVipActive(backendUser) && isUserVipActive(currentUser))
-    );
-
-    if (!hasActiveVip) {
-      const anyPersonalizedModalOpen =
-        isWhatToEatModalOpen ||
-        isNearMeModalOpen ||
-        isDailyDiscoveriesModalOpen ||
-        isWishlistsModalOpen ||
-        isAiTripPlannerModalOpen ||
-        isNotificationsModalOpen;
-
-      if (anyPersonalizedModalOpen) {
-        closeAllPersonalizedFeatureModals();
-        if (currentUser) {
-          const isExpiredOrCancelled =
-            getVipAccountState(backendUser) === 'expired_vip' ||
-            backendUser?.subscriptionStatus === 'cancelled';
-          openUpgradeVipModal(isExpiredOrCancelled);
-        }
-      }
-    }
-  }, [
-    currentUser,
-    users,
-    isWhatToEatModalOpen,
-    isNearMeModalOpen,
-    isDailyDiscoveriesModalOpen,
-    isWishlistsModalOpen,
-    isAiTripPlannerModalOpen,
-    isNotificationsModalOpen,
-  ]);
+  // Personalized discovery modals are open to all signed-in users without redirecting to VIP upgrade
 
   useEffect(() => {
     if (isInitialMountRef.current.foods) {
