@@ -674,11 +674,7 @@ export const GoogleMapsShopImporterModal: React.FC<GoogleMapsShopImporterModalPr
                                 ? catInfo.labelZh
                                 : catInfo.labelEn)}
                           </span>
-                          {item.priceLevel && (
-                            <span className="px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold">
-                              {item.priceLevel}
-                            </span>
-                          )}
+
                           {hasRealPhoto && (
                             <span className="px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300 font-bold">
                               📸 {tr(language, 'មានរូបហាង', 'Has Photos', '含店铺照片')}

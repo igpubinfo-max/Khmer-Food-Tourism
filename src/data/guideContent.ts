@@ -276,7 +276,7 @@ export const FESTIVALS: Festival[] = [
     name: { km: 'ទិវាចូលឆ្នាំសកល', en: 'International New Year’s Day', zh: '国际元旦' },
     when: { km: 'ថ្ងៃទី ១ ខែមករា (រៀងរាល់ឆ្នាំ)', en: '1 January (Every Year)', zh: '每年1月1日' },
     durationLabel: { km: 'ឈប់សម្រាក ១ ថ្ងៃ', en: '1-Day Public Holiday', zh: '法定休假 1 天' },
-    pricingLabel: { km: 'ឥតគិតថ្លៃ ($0 • បុណ្យជាតិផ្លូវការ)', en: 'Free ($0 • Official Public Holiday)', zh: '免费 ($0 • 官方公共假日)' },
+    pricingLabel: { km: 'ឥតគិតថ្លៃ (បុណ្យជាតិផ្លូវការ)', en: 'Free (Official Public Holiday)', zh: '免费 (官方公共假日)' },
     about: {
       km: 'ថ្ងៃឈប់សម្រាកផ្លូវការទូទាំងប្រទេស អបអរសាទរការចូលឆ្នាំសកលថ្មី ជាមួយការបាញ់កាំជ្រួច និងការជួបជុំគ្រួសារ។',
       en: 'Official nationwide public holiday celebrating the start of the Gregorian calendar year with fireworks and family dining.',
@@ -296,7 +296,7 @@ export const FESTIVALS: Festival[] = [
     name: { km: 'ទិវាជ័យជម្នះលើរបបប្រល័យពូជសាសន៍', en: 'Victory over Genocide Day', zh: '胜利日（推翻种族灭绝政权纪念日）' },
     when: { km: 'ថ្ងៃទី ៧ ខែមករា (រៀងរាល់ឆ្នាំ)', en: '7 January (Every Year)', zh: '每年1月7日' },
     durationLabel: { km: 'ឈប់សម្រាក ១ ថ្ងៃ', en: '1-Day Public Holiday', zh: '法定休假 1 天' },
-    pricingLabel: { km: 'ឥតគិតថ្លៃ ($0 • បុណ្យជាតិផ្លូវការ)', en: 'Free ($0 • Official Public Holiday)', zh: '免费 ($0 • 官方公共假日)' },
+    pricingLabel: { km: 'ឥតគិតថ្លៃ (បុណ្យជាតិផ្លូវការ)', en: 'Free (Official Public Holiday)', zh: '免费 (官方公共假日)' },
     about: {
       km: 'ថ្ងៃឈប់សម្រាកជាតិរំលឹកដល់ការបញ្ចប់របបខ្មែរក្រហមនៅថ្ងៃទី ៧ មករា ១៩៧៩។',
       en: 'National public holiday commemorating the end of the Khmer Rouge regime on 7 January 1979.',
@@ -314,7 +314,7 @@ export const FESTIVALS: Festival[] = [
     name: { km: 'ពិធីបុណ្យមាឃបូជា', en: 'Meak Bochea Day', zh: '万佛节（麦加宝蕉节）' },
     when: { km: 'ថ្ងៃ ១៥ កើត ខែមាឃ (ពេញបូណ៌មី)', en: 'Full Moon of Meak (Feb / early Mar)', zh: '高棉历三月十五满月日（2月或3月初）' },
     durationLabel: { km: 'ពិធីបុណ្យព្រះពុទ្ធសាសនា (១ ថ្ងៃ)', en: '1-Day Buddhist Observance', zh: '佛教传统节日（1天）' },
-    pricingLabel: { km: 'ឥតគិតថ្លៃ ($0 • ចូលវត្តដោយសេរី)', en: 'Free ($0 • Open Temple Entry)', zh: '免费 ($0 • 寺庙免费开放)' },
+    pricingLabel: { km: 'ឥតគិតថ្លៃ (ចូលវត្តដោយសេរី)', en: 'Free (Open Temple Entry)', zh: '免费 (寺庙免费开放)' },
     about: {
       km: 'ថ្ងៃរំលឹកដល់មហាសន្និបាតព្រះសង្ឃ ១,២៥០ អង្គ និងការសម្តែងឱវាទបាតិមោក្ខរបស់ព្រះពុទ្ធ។ ប្រជាជនទៅវត្តហែទៀនធូបជុំវិញព្រះវិហារ។',
       en: 'Buddhists gather at pagodas for evening candle-lit processions (Wien Tien) honouring the Buddha’s teachings.',
@@ -334,14 +334,14 @@ export const FESTIVALS: Festival[] = [
     name: { km: 'ទិវានារីអន្តរជាតិ', en: 'International Women’s Day', zh: '国际妇女节' },
     when: { km: 'ថ្ងៃទី ៨ ខែមីនា (រៀងរាល់ឆ្នាំ)', en: '8 March (Every Year)', zh: '每年3月8日' },
     durationLabel: { km: 'ឈប់សម្រាក ១ ថ្ងៃ', en: '1-Day Public Holiday', zh: '法定休假 1 天' },
-    pricingLabel: { km: 'ឥតគិតថ្លៃ ($0 • បុណ្យជាតិផ្លូវការ)', en: 'Free ($0 • Official Public Holiday)', zh: '免费 ($0 • 官方公共假日)' },
+    pricingLabel: { km: 'ឥតគិតថ្លៃ (បុណ្យជាតិផ្លូវការ)', en: 'Free (Official Public Holiday)', zh: '免费 (官方公共假日)' },
     about: {
       km: 'ថ្ងៃឈប់សម្រាកផ្លូវការនៅកម្ពុជា ដើម្បីអបអរសាទរសិទ្ធិ និងសមិទ្ធផលរបស់ស្ត្រី។',
       en: 'Official public holiday in Cambodia celebrating women’s rights, leadership and family appreciation.',
       zh: '柬埔寨官方公共假日，表彰女性的贡献与权益。',
     },
     foods: { km: 'អាហារថ្ងៃត្រង់ជួបជុំគ្រួសារ នំខេក និងភេសជ្ជៈពិសេស', en: 'Special family lunches, cakes and café treats', zh: '家庭聚餐、蛋糕与特色饮品' },
-    tip: { km: 'ហាងអាហារ និងហាងកាហ្វេជាច្រើនមានកម្មវិធីបញ្ចុះតម្លៃពិសេសសម្រាប់ស្ត្រី', en: 'Many restaurants and cafés offer special promotions on 8 March.', zh: '许多餐厅和咖啡馆在当天推出女性专属优惠。' },
+    tip: { km: 'ភោជនីយដ្ឋាន និងហាងកាហ្វេជាច្រើនមានមនុស្សជួបជុំគ្រួសារ និងមិត្តភក្តិយ៉ាងច្រើនកុះករ', en: 'Many restaurants and cafés host family and group gatherings on 8 March.', zh: '许多餐厅和咖啡馆在当天迎来家庭与朋友聚餐。' },
   },
   {
     id: 'khmer-new-year',
@@ -354,7 +354,7 @@ export const FESTIVALS: Festival[] = [
     name: { km: 'ពិធីបុណ្យចូលឆ្នាំថ្មីប្រពៃណីជាតិខ្មែរ', en: 'Khmer New Year (Choul Chnam Thmey)', zh: '高棉传统新年（宋干节）' },
     when: { km: 'ថ្ងៃទី ១៤–១៦ ខែមេសា (ឈប់សម្រាក ៣ ថ្ងៃ)', en: '14–16 April (3-Day Official Holiday)', zh: '每年4月14–16日（法定休假3天）' },
     durationLabel: { km: 'ឈប់សម្រាក ៣ ថ្ងៃ', en: '3-Day Public Holiday', zh: '法定休假 3 天' },
-    pricingLabel: { km: 'ឥតគិតថ្លៃ ($0 • បុណ្យជាតិធំបំផុត)', en: 'Free ($0 • National Festival)', zh: '免费 ($0 • 全国盛大庆典)' },
+    pricingLabel: { km: 'ឥតគិតថ្លៃ (បុណ្យជាតិធំបំផុត)', en: 'Free (National Festival)', zh: '免费 (全国盛大庆典)' },
     about: {
       km: 'បុណ្យប្រពៃណីជាតិធំបំផុតរយៈពេល ៣ ថ្ងៃ (មហាសង្ក្រាន្ត វនបត និងឡើងស័ក) — ប្រជាជនទៅវត្តពូនភ្នំខ្សាច់ ស្រង់ទឹកព្រះ លេងល្បែងប្រជាប្រិយ និងសង្ក្រាន្តតាមខេត្ត។',
       en: 'Cambodia’s biggest 3-day national celebration featuring Angkor Sankranta, temple visits, traditional games and family reunions.',
@@ -378,7 +378,7 @@ export const FESTIVALS: Festival[] = [
     name: { km: 'ទិវាពលកម្មអន្តរជាតិ', en: 'International Labor Day', zh: '国际劳动节' },
     when: { km: 'ថ្ងៃទី ១ ខែឧសភា (រៀងរាល់ឆ្នាំ)', en: '1 May (Every Year)', zh: '每年5月1日' },
     durationLabel: { km: 'ឈប់សម្រាក ១ ថ្ងៃ', en: '1-Day Public Holiday', zh: '法定休假 1 天' },
-    pricingLabel: { km: 'ឥតគិតថ្លៃ ($0 • បុណ្យជាតិផ្លូវការ)', en: 'Free ($0 • Official Public Holiday)', zh: '免费 ($0 • 官方公共假日)' },
+    pricingLabel: { km: 'ឥតគិតថ្លៃ (បុណ្យជាតិផ្លូវការ)', en: 'Free (Official Public Holiday)', zh: '免费 (官方公共假日)' },
     about: {
       km: 'ថ្ងៃឈប់សម្រាកផ្លូវការទូទាំងប្រទេសដើម្បីលើកកម្ពស់សិទ្ធិ និងសុខុមាលភាពកម្មករនិយោជិត។',
       en: 'National public holiday honouring workers and employees across Cambodia.',
@@ -396,7 +396,7 @@ export const FESTIVALS: Festival[] = [
     name: { km: 'ពិធីបុណ្យវិសាខបូជា', en: 'Visak Bochea Day', zh: '卫塞节（佛诞日）' },
     when: { km: 'ថ្ងៃ ១៥ កើត ខែពិសាខ (ពេញបូណ៌មី ខែឧសភា)', en: 'Full Moon of Visak (May)', zh: '高棉历六月十五满月日（5月）' },
     durationLabel: { km: 'ឈប់សម្រាក ១ ថ្ងៃ', en: '1-Day Public Holiday', zh: '法定休假 1 天' },
-    pricingLabel: { km: 'ឥតគិតថ្លៃ ($0 • បុណ្យជាតិផ្លូវការ)', en: 'Free ($0 • Official Public Holiday)', zh: '免费 ($0 • 官方公共假日)' },
+    pricingLabel: { km: 'ឥតគិតថ្លៃ (បុណ្យជាតិផ្លូវការ)', en: 'Free (Official Public Holiday)', zh: '免费 (官方公共假日)' },
     about: {
       km: 'ថ្ងៃឈប់សម្រាកជាតិដ៏សំខាន់បំផុតក្នុងព្រះពុទ្ធសាសនា រំលឹកដល់ថ្ងៃប្រសូត ត្រាស់ដឹង និងបរិនិព្វានរបស់ព្រះសម្មាសម្ពុទ្ធ។',
       en: 'Sacred Buddhist public holiday commemorating the birth, enlightenment and passing (Parinirvana) of the Buddha.',
@@ -414,7 +414,7 @@ export const FESTIVALS: Festival[] = [
     name: { km: 'ព្រះរាជពិធីច្រត់ព្រះនង្គ័ល', en: 'Royal Ploughing Ceremony', zh: '皇家春耕节' },
     when: { km: 'ថ្ងៃ ៤ រោច ខែពិសាខ (ខែឧសភា)', en: '4th Waning Moon of Visak (May)', zh: '高棉历六月下弦初四（5月）' },
     durationLabel: { km: 'ឈប់សម្រាក ១ ថ្ងៃ', en: '1-Day Public Holiday', zh: '法定休假 1 天' },
-    pricingLabel: { km: 'ឥតគិតថ្លៃ ($0 • បុណ្យជាតិផ្លូវការ)', en: 'Free ($0 • Official Public Holiday)', zh: '免费 ($0 • 官方公共假日)' },
+    pricingLabel: { km: 'ឥតគិតថ្លៃ (បុណ្យជាតិផ្លូវការ)', en: 'Free (Official Public Holiday)', zh: '免费 (官方公共假日)' },
     about: {
       km: 'ព្រះរាជពិធីបុរាណបើករដូវធ្វើស្រែចម្ការ ដោយគោឧសភរាជជ្រើសរើសចំណីអាហារ ៧ មុខ ដើម្បីទស្សន៍ទាយទឹកភ្លៀង និងទិន្នផលកសិកម្ម។',
       en: 'Ancient royal ceremony marking the start of the rice-growing season, where sacred royal oxen predict the year’s harvest.',
@@ -434,7 +434,7 @@ export const FESTIVALS: Festival[] = [
     name: { km: 'ព្រះរាជពិធីបុណ្យចម្រើនព្រះជន្ម ព្រះករុណាព្រះបាទសម្តេចព្រះបរមនាថ នរោត្តម សីហមុនី', en: 'King Norodom Sihamoni’s Birthday', zh: '诺罗敦·西哈莫尼国王华诞' },
     when: { km: 'ថ្ងៃទី ១៤ ខែឧសភា (រៀងរាល់ឆ្នាំ)', en: '14 May (Every Year)', zh: '每年5月14日' },
     durationLabel: { km: 'ឈប់សម្រាក ១ ថ្ងៃ', en: '1-Day Public Holiday', zh: '法定休假 1 天' },
-    pricingLabel: { km: 'ឥតគិតថ្លៃ ($0 • បុណ្យជាតិផ្លូវការ)', en: 'Free ($0 • Official Public Holiday)', zh: '免费 ($0 • 官方公共假日)' },
+    pricingLabel: { km: 'ឥតគិតថ្លៃ (បុណ្យជាតិផ្លូវការ)', en: 'Free (Official Public Holiday)', zh: '免费 (官方公共假日)' },
     about: {
       km: 'ថ្ងៃឈប់សម្រាកជាតិអបអរសាទរព្រះរាជពិធីបុណ្យចម្រើនព្រះជន្មព្រះមហាក្សត្រនៃព្រះរាជាណាចក្រកម្ពុជា ជាមួយការតុបតែងភ្លើងពណ៌ និងកាំជ្រួចនៅមុខព្រះបរមរាជវាំង។',
       en: 'Official national holiday celebrating the birthday of His Majesty King Norodom Sihamoni with royal illuminations and fireworks.',
@@ -454,7 +454,7 @@ export const FESTIVALS: Festival[] = [
     name: { km: 'ព្រះរាជពិធីបុណ្យចម្រើនព្រះជន្ម សម្តេចព្រះមហាក្សត្រី នរោត្តម មុនីនាថ សីហនុ', en: 'Queen Mother Norodom Monineath Sihanouk’s Birthday', zh: '莫尼列太后华诞' },
     when: { km: 'ថ្ងៃទី ១៨ ខែមិថុនា (រៀងរាល់ឆ្នាំ)', en: '18 June (Every Year)', zh: '每年6月18日' },
     durationLabel: { km: 'ឈប់សម្រាក ១ ថ្ងៃ', en: '1-Day Public Holiday', zh: '法定休假 1 天' },
-    pricingLabel: { km: 'ឥតគិតថ្លៃ ($0 • បុណ្យជាតិផ្លូវការ)', en: 'Free ($0 • Official Public Holiday)', zh: '免费 ($0 • 官方公共假日)' },
+    pricingLabel: { km: 'ឥតគិតថ្លៃ (បុណ្យជាតិផ្លូវការ)', en: 'Free (Official Public Holiday)', zh: '免费 (官方公共假日)' },
     about: {
       km: 'ថ្ងៃឈប់សម្រាកជាតិអបអរសាទរព្រះរាជពិធីបុណ្យចម្រើនព្រះជន្ម សម្តេចព្រះមហាក្សត្រី ព្រះវររាជមាតាជាតិខ្មែរ។',
       en: 'Official public holiday honouring the birthday of Her Majesty Queen Mother Norodom Monineath Sihanouk.',
@@ -474,7 +474,7 @@ export const FESTIVALS: Festival[] = [
     name: { km: 'ទិវាប្រកាសរដ្ឋធម្មនុញ្ញ', en: 'Constitutional Day', zh: '立宪节（宪法日）' },
     when: { km: 'ថ្ងៃទី ២៤ ខែកញ្ញា (រៀងរាល់ឆ្នាំ)', en: '24 September (Every Year)', zh: '每年9月24日' },
     durationLabel: { km: 'ឈប់សម្រាក ១ ថ្ងៃ', en: '1-Day Public Holiday', zh: '法定休假 1 天' },
-    pricingLabel: { km: 'ឥតគិតថ្លៃ ($0 • បុណ្យជាតិផ្លូវការ)', en: 'Free ($0 • Official Public Holiday)', zh: '免费 ($0 • 官方公共假日)' },
+    pricingLabel: { km: 'ឥតគិតថ្លៃ (បុណ្យជាតិផ្លូវការ)', en: 'Free (Official Public Holiday)', zh: '免费 (官方公共假日)' },
     about: {
       km: 'ថ្ងៃឈប់សម្រាកជាតិរំលឹកដល់ការប្រកាសឱ្យប្រើរដ្ឋធម្មនុញ្ញនៃព្រះរាជាណាចក្រកម្ពុជានៅថ្ងៃទី ២៤ កញ្ញា ១៩៩៣។',
       en: 'National public holiday marking the promulgation of the 1993 Constitution of the Kingdom of Cambodia.',
@@ -492,7 +492,7 @@ export const FESTIVALS: Festival[] = [
     name: { km: 'ពិធីបុណ្យភ្ជុំបិណ្ឌ (កាន់បិណ្ឌ ១៥ ថ្ងៃ)', en: 'Pchum Ben Festival (Ancestors’ Day)', zh: '亡人节 / 祭祖节（Pchum Ben）' },
     when: { km: '១ រោច ដល់ ១៥ រោច ខែភទ្របទ (ឈប់សម្រាកផ្លូវការ ៣ ថ្ងៃចុងក្រោយ)', en: '15-Day Dak Ben + 3-Day Official Public Holiday (Sep / Oct)', zh: '共15天守夏供僧，最后3天为全国法定假日（9月或10月）' },
     durationLabel: { km: 'ឈប់សម្រាកផ្លូវការ ៣ ថ្ងៃ (ពិធីសាសនា ១៥ ថ្ងៃ)', en: '3-Day Public Holiday (15-Day Festival)', zh: '法定休假 3 天（宗教仪式 15 天）' },
-    pricingLabel: { km: 'ឥតគិតថ្លៃ ($0 • បុណ្យប្រពៃណីជាតិធំ)', en: 'Free ($0 • National Religious Holiday)', zh: '免费 ($0 • 全国重大传统节日)' },
+    pricingLabel: { km: 'ឥតគិតថ្លៃ (បុណ្យប្រពៃណីជាតិធំ)', en: 'Free (National Religious Holiday)', zh: '免费 (全国重大传统节日)' },
     about: {
       km: 'ពិធីបុណ្យប្រពៃណីព្រះពុទ្ធសាសនាដ៏ធំបំផុតមួយរបស់ខ្មែរ រយៈពេល ១៥ ថ្ងៃ (បិណ្ឌ ១ ដល់ បិណ្ឌ ១៤ និងថ្ងៃភ្ជុំធំ) ដើម្បីឧទ្ទិសកុសលជូនបុព្វការីជន និងជួបជុំគ្រួសារ។',
       en: 'One of Cambodia’s most sacred traditions: 14 days of Dak Ben temple offerings culminating in a 3-day national holiday honouring ancestors.',
@@ -512,7 +512,7 @@ export const FESTIVALS: Festival[] = [
     name: { km: 'ទិវាប្រារព្ធពិធីគោរពព្រះវិញ្ញាណក្ខន្ធ ព្រះករុណា ព្រះបរមរតនកោដ្ឋ', en: 'Commemoration Day of the King’s Father (Norodom Sihanouk)', zh: '西哈努克太皇逝世纪念日' },
     when: { km: 'ថ្ងៃទី ១៥ ខែតុលា (រៀងរាល់ឆ្នាំ)', en: '15 October (Every Year)', zh: '每年10月15日' },
     durationLabel: { km: 'ឈប់សម្រាក ១ ថ្ងៃ', en: '1-Day Public Holiday', zh: '法定休假 1 天' },
-    pricingLabel: { km: 'ឥតគិតថ្លៃ ($0 • បុណ្យជាតិផ្លូវការ)', en: 'Free ($0 • Official Public Holiday)', zh: '免费 ($0 • 官方公共假日)' },
+    pricingLabel: { km: 'ឥតគិតថ្លៃ (បុណ្យជាតិផ្លូវការ)', en: 'Free (Official Public Holiday)', zh: '免费 (官方公共假日)' },
     about: {
       km: 'ថ្ងៃឈប់សម្រាកជាតិដើម្បីគោរពព្រះវិញ្ញាណក្ខន្ធ និងរំលឹកព្រះមហាករុណាទិគុណ ព្រះករុណាព្រះបាទសម្តេចព្រះ នរោត្តម សីហនុ ព្រះបរមរតនកោដ្ឋ។',
       en: 'National day of remembrance honouring the late King-Father Norodom Sihanouk, architect of Cambodia’s independence.',
@@ -532,7 +532,7 @@ export const FESTIVALS: Festival[] = [
     name: { km: 'ព្រះរាជពិធីបុណ្យខួបនៃការឡើងគ្រងរាជសម្បត្តិ ព្រះករុណាព្រះបាទសម្តេចព្រះបរមនាថ នរោត្តម សីហមុនី', en: 'King Norodom Sihamoni’s Coronation Day', zh: '西哈莫尼国王登基纪念日' },
     when: { km: 'ថ្ងៃទី ២៩ ខែតុលា (រៀងរាល់ឆ្នាំ)', en: '29 October (Every Year)', zh: '每年10月29日' },
     durationLabel: { km: 'ឈប់សម្រាក ១ ថ្ងៃ', en: '1-Day Public Holiday', zh: '法定休假 1 天' },
-    pricingLabel: { km: 'ឥតគិតថ្លៃ ($0 • បុណ្យជាតិផ្លូវការ)', en: 'Free ($0 • Official Public Holiday)', zh: '免费 ($0 • 官方公共假日)' },
+    pricingLabel: { km: 'ឥតគិតថ្លៃ (បុណ្យជាតិផ្លូវការ)', en: 'Free (Official Public Holiday)', zh: '免费 (官方公共假日)' },
     about: {
       km: 'ថ្ងៃឈប់សម្រាកជាតិអបអរសាទរខួបនៃការឡើងគ្រងរាជសម្បត្តិរបស់ព្រះករុណាព្រះបាទសម្តេចព្រះបរមនាថ នរោត្តម សីហមុនី (២៩ តុលា ២០០៤)។',
       en: 'Official public holiday celebrating the coronation of His Majesty King Norodom Sihamoni on 29 October 2004.',
@@ -552,7 +552,7 @@ export const FESTIVALS: Festival[] = [
     name: { km: 'ទិវាបុណ្យឯករាជ្យជាតិ (៩ វិច្ឆិកា)', en: 'Cambodia Independence Day', zh: '柬埔寨独立节（11月9日）' },
     when: { km: 'ថ្ងៃទី ៩ ខែវិច្ឆិកា (រៀងរាល់ឆ្នាំ)', en: '9 November (Every Year)', zh: '每年11月9日' },
     durationLabel: { km: 'ឈប់សម្រាក ១ ថ្ងៃ', en: '1-Day Public Holiday', zh: '法定休假 1 天' },
-    pricingLabel: { km: 'ឥតគិតថ្លៃ ($0 • បុណ្យជាតិផ្លូវការ)', en: 'Free ($0 • Official Public Holiday)', zh: '免费 ($0 • 官方公共假日)' },
+    pricingLabel: { km: 'ឥតគិតថ្លៃ (បុណ្យជាតិផ្លូវការ)', en: 'Free (Official Public Holiday)', zh: '免费 (官方公共假日)' },
     about: {
       km: 'ថ្ងៃឈប់សម្រាកជាតិដ៏មហោឡារិក រំលឹកដល់ការទទួលបានឯករាជ្យពេញលេញរបស់កម្ពុជាពីបារាំងនៅថ្ងៃទី ៩ វិច្ឆិកា ១៩៥៣។',
       en: 'Major national holiday celebrating Cambodia’s independence from France on 9 November 1953, centered at the Independence Monument.',
@@ -570,7 +570,7 @@ export const FESTIVALS: Festival[] = [
     name: { km: 'ព្រះរាជពិធីបុណ្យអុំទូក បណ្ដែតប្រទីប និងសំពះព្រះខែ អកអំបុក', en: 'Bon Om Touk (Cambodian Water Festival)', zh: '送水节（赛龙舟、放水灯、拜月吃扁米）' },
     when: { km: 'ថ្ងៃ ១៤–១៥ កើត និង ១ រោច ខែកក្ដិក (ឈប់សម្រាក ៣ ថ្ងៃ ក្នុងខែវិច្ឆិកា)', en: 'Full Moon of Kadeuk — November (3-Day Official Holiday)', zh: '高棉历十二月满月前后（11月，法定休假3天）' },
     durationLabel: { km: 'ឈប់សម្រាក ៣ ថ្ងៃ', en: '3-Day Public Holiday', zh: '法定休假 3 天' },
-    pricingLabel: { km: 'ឥតគិតថ្លៃ ($0 • ទស្សនាដោយសេរី)', en: 'Free Admission ($0 • Public Festival)', zh: '免费观赏 ($0 • 公众盛大庆典)' },
+    pricingLabel: { km: 'ឥតគិតថ្លៃ (ទស្សនាដោយសេរី)', en: 'Free Admission ($0 • Public Festival)', zh: '免费观赏 ($0 • 公众盛大庆典)' },
     about: {
       km: 'ព្រះរាជពិធីបុណ្យប្រពៃណីជាតិរយៈពេល ៣ ថ្ងៃ អបអរសាទរទឹកទន្លេសាបហូរត្រឡប់ចូលទន្លេមេគង្គវិញ ជាមួយការប្រណាំងទូកង បណ្ដែតប្រទីប បាញ់កាំជ្រួច និងពិធីអកអំបុកសំពះព្រះខែ។',
       en: 'Three-day national celebration of the reversal of the Tonle Sap River flow, featuring royal boat races, illuminated floats, fireworks and Ambok.',
@@ -590,7 +590,7 @@ export const FESTIVALS: Festival[] = [
     name: { km: 'ទិវាសន្តិភាពនៅកម្ពុជា (២៩ ធ្នូ)', en: 'Peace Day in Cambodia', zh: '柬埔寨和平日（12月29日）' },
     when: { km: 'ថ្ងៃទី ២៩ ខែធ្នូ (រៀងរាល់ឆ្នាំ)', en: '29 December (Every Year)', zh: '每年12月29日' },
     durationLabel: { km: 'ឈប់សម្រាក ១ ថ្ងៃ', en: '1-Day Public Holiday', zh: '法定休假 1 天' },
-    pricingLabel: { km: 'ឥតគិតថ្លៃ ($0 • បុណ្យជាតិផ្លូវការ)', en: 'Free ($0 • Official Public Holiday)', zh: '免费 ($0 • 官方公共假日)' },
+    pricingLabel: { km: 'ឥតគិតថ្លៃ (បុណ្យជាតិផ្លូវការ)', en: 'Free (Official Public Holiday)', zh: '免费 (官方公共假日)' },
     about: {
       km: 'ថ្ងៃឈប់សម្រាកផ្លូវការទូទាំងប្រទេស អបអរសាទរការសម្រេចបានសន្តិភាពពេញលេញ និងការបង្រួបបង្រួមជាតិនៅកម្ពុជា (២៩ ធ្នូ ១៩៩៨)។',
       en: 'Official national public holiday celebrating complete peace and national reconciliation in Cambodia (29 December 1998).',

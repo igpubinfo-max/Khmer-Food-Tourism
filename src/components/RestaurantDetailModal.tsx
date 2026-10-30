@@ -180,7 +180,6 @@ export const RestaurantDetailModal: React.FC = () => {
       ? `${selectedRestaurant.addressKh} (${selectedRestaurant.provinceKh})`
       : `${selectedRestaurant.addressEn} (${selectedRestaurant.provinceEn})`,
     phone: displayPhone || selectedRestaurant.phone,
-    priceDisplay: selectedRestaurant.priceLevel,
     signatureDishes: selectedRestaurant.signatureDishesKh,
     photoUrl: activePhoto || selectedRestaurant.photoUrl,
     mapUrl: selectedRestaurant.mapUrl,
@@ -256,7 +255,6 @@ export const RestaurantDetailModal: React.FC = () => {
                 photoUrl: selectedRestaurant.photoUrl,
                 categoryKh: selectedRestaurant.provinceKh,
                 provinceKh: selectedRestaurant.provinceKh,
-                priceDisplay: selectedRestaurant.priceLevel,
                 rating: selectedRestaurant.rating,
               })}
               className="p-2.5 rounded-full bg-black/60 hover:bg-black/80 backdrop-blur-md text-white shadow transition active:scale-95 border border-white/20"
@@ -358,10 +356,7 @@ export const RestaurantDetailModal: React.FC = () => {
                   </span>
                 )}
 
-                <span className="px-2 py-0.5 rounded-md bg-[#064E3B]/90 text-emerald-100 text-[10px] font-bold border border-emerald-400/30">
-                  {tr(language, 'ប្រហាក់ប្រហែល ', 'Approx. ', '约 ')}
-                  {selectedRestaurant.priceLevel}
-                </span>
+
               </div>
 
               <h2 className="text-lg sm:text-xl font-extrabold font-moul leading-snug drop-shadow text-white">
@@ -518,7 +513,7 @@ export const RestaurantDetailModal: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-[#0F172A] dark:text-white flex items-center gap-1.5">
                     <Video className="w-4 h-4 text-amber-500" />
-                    <span>{tr(language, 'វីដេអូផ្សព្វផ្សាយម្ហូប (Food Video Reels)', 'Food Video Reels', '美食宣传短视频 (Video Reels)')}</span>
+                    <span>{tr(language, 'វីដេអូបង្ហាញមុខម្ហូបក្នុងហាង (Food Video Reels)', 'Food Video Reels', '本店特色菜品短视频 (Video Reels)')}</span>
                   </span>
                   {canEditShop && (
                     <button

@@ -1568,33 +1568,7 @@ export const ManageMenuModal: React.FC = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
-                    {isKm ? '៥. កម្រិតតម្លៃប្រហាក់ប្រហែលក្នុងហាង' : '5. Approx. Store Price Range'}
-                  </label>
-                  <div className="grid grid-cols-3 gap-1.5">
-                    {([
-                      { level: '$' as RestaurantPriceLevel, labelKh: '$ សមរម្យ', labelEn: '$ Budget' },
-                      { level: '$$' as RestaurantPriceLevel, labelKh: '$$ មធ្យម', labelEn: '$$ Mid' },
-                      { level: '$$$' as RestaurantPriceLevel, labelKh: '$$$ ប្រណីត', labelEn: '$$$ Fine' },
-                    ]).map((opt) => (
-                      <button
-                        key={opt.level}
-                        type="button"
-                        onClick={() => setStorePriceLevel(opt.level)}
-                        className={`py-2 px-2 rounded-xl border font-bold text-[11px] transition cursor-pointer ${
-                          storePriceLevel === opt.level
-                            ? 'bg-[#064E3B] text-white border-[#064E3B] shadow-xs'
-                            : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700'
-                        }`}
-                      >
-                        {isKm ? opt.labelKh : opt.labelEn}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
-                    {isKm ? '៦. ខេត្ត / រាជធានី' : '6. Province / City'}
+                    {isKm ? '៥. ខេត្ត / រាជធានី' : '5. Province / City'}
                   </label>
                   <input
                     type="text"
@@ -2077,11 +2051,11 @@ export const ManageMenuModal: React.FC = () => {
                     </li>
                     <li className="flex items-start gap-1.5">
                       <CheckCircle2 className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
-                      <span>{tr(language, 'បន្ថែមមុខម្ហូប និងតម្លៃបានរហូតដល់ ២០ មុខ', 'Add & edit up to 20 menu items with AI photo search', '可添加多达 20 道菜品及价格')}</span>
+                      <span>{tr(language, 'បន្ថែមមុខម្ហូប និងរូបភាពបានរហូតដល់ ២០ មុខ', 'Add & edit up to 20 menu items with AI photo search', '可添加多达 20 道菜品及高清图片')}</span>
                     </li>
                     <li className="flex items-start gap-1.5">
                       <CheckCircle2 className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
-                      <span>{tr(language, 'រូបភាព Gallery រហូតដល់ ៣០ សន្លឹក + វីដេអូផ្សព្វផ្សាយ (TikTok/FB)', 'Up to 30 gallery photos + Promo Video Reels (TikTok/FB)', '多达 30 张相册照片 + 推广视频链接 (TikTok/FB)')}</span>
+                      <span>{tr(language, 'រូបភាព Gallery រហូតដល់ ៣០ សន្លឹក + វីដេអូបង្ហាញមុខម្ហូប (TikTok/FB)', 'Up to 30 gallery photos + Food Video Reels (TikTok/FB)', '多达 30 张相册照片 + 菜品短视频链接 (TikTok/FB)')}</span>
                     </li>
                     <li className="flex items-start gap-1.5">
                       <CheckCircle2 className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />

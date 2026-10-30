@@ -447,9 +447,9 @@ export const RestaurantView: React.FC = () => {
               {myExistingRest
                 ? tr(
                     language,
-                    `${myExistingRest.addressKh} • ចុចប៊ូតុងខាងក្រោមដើម្បីបន្ថែមមុខម្ហូប កែតម្លៃ រូបភាព និងព័ត៌មានហាង "${myExistingRest.nameKh}"។`,
-                    `${myExistingRest.addressEn || myExistingRest.addressKh} • Tap below to manage menus, prices, photos & info.`,
-                    `${myExistingRest.addressEn || myExistingRest.addressKh} • 点击下方按钮管理菜单、价格、图片与店铺信息。`
+                    `${myExistingRest.addressKh} • ចុចប៊ូតុងខាងក្រោមដើម្បីបន្ថែមមុខម្ហូប រូបភាព និងព័ត៌មានហាង "${myExistingRest.nameKh}"។`,
+                    `${myExistingRest.addressEn || myExistingRest.addressKh} • Tap below to manage menus, photos & store info.`,
+                    `${myExistingRest.addressEn || myExistingRest.addressKh} • 点击下方按钮管理菜单、图片与店铺信息。`
                   )
                 : tr(
                     language,

@@ -127,9 +127,7 @@ const PopularShopsInner: React.FC<Props> = ({ language, restaurants, onOpen, onS
                       <MapPin className="w-3.5 h-3.5 shrink-0" />
                       <span className="truncate">{loc.province}</span>
                     </span>
-                    {rest.priceLevel && (
-                      <span className="font-bold text-emerald-700 dark:text-emerald-300 shrink-0">{rest.priceLevel}</span>
-                    )}
+
                   </span>
                 </span>
               </button>

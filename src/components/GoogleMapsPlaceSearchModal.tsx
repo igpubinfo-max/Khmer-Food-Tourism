@@ -1119,17 +1119,11 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                             <span>{displayAddress}</span>
                           </p>
 
-                          {(place.primaryTypeDisplayName || place.priceLevel || place.openHours) && (
+                          {(place.primaryTypeDisplayName || place.openHours) && (
                             <div className="flex items-center gap-1.5 flex-wrap text-[11px]">
                               {place.primaryTypeDisplayName && (
                                 <span className="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold">
                                   🏷️ {place.primaryTypeDisplayName}
-                                </span>
-                              )}
-                              {place.priceLevel && place.category !== 'tourism' && (
-                                <span className="px-1.5 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-200 font-bold">
-                                  💰 {tr(language, 'ប្រហាក់ប្រហែល ', 'Approx. ', '约 ')}
-                                  {place.priceLevel}
                                 </span>
                               )}
                               {place.openHours && (

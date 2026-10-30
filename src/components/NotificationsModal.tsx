@@ -70,14 +70,14 @@ export const NotificationsModal: React.FC = () => {
     saveNotificationPreferences(next);
   };
 
-  // Deduplicate notifications by id and sort newest/unread first
+  // Deduplicate notifications by id and sort newest/unread first (exclude any legacy promo/discount items)
   const activeNotifications = useMemo(() => {
     const seen = new Set<string>();
     const list: AppNotification[] = [];
     for (const n of notifications) {
       if (!n || !n.id || seen.has(n.id)) continue;
+      if (n.type === 'promo' || n.type === 'discount' || Boolean(n.discountPercent)) continue;
       // Apply user category preferences
-      if ((n.type === 'promo' || n.type === 'discount') && !prefs.promo) continue;
       if (n.type === 'new_spot' && !prefs.new_spot) continue;
       if (n.type === 'event' && !prefs.event) continue;
       if (n.type === 'local_news' && !prefs.local_news) continue;
@@ -260,11 +260,7 @@ export const NotificationsModal: React.FC = () => {
       label: tr(language, 'ទាំងអស់', 'All', '全部'),
       count: activeNotifications.length,
     },
-    {
-      id: 'promo',
-      label: tr(language, 'ប្រូម៉ូសិន', 'Promos', '优惠促销'),
-      count: activeNotifications.filter((n) => n.type === 'promo' || n.type === 'discount').length,
-    },
+
     {
       id: 'new_spot',
       label: tr(language, 'កន្លែងថ្មី', 'New Spots', '热门景点'),
@@ -321,9 +317,9 @@ export const NotificationsModal: React.FC = () => {
               <p className="text-[11px] text-emerald-100 font-khmer leading-normal truncate">
                 {tr(
                   language,
-                  'ប្រូម៉ូសិនហាង កន្លែងថ្មី ព្រឹត្តិការណ៍ និងព័ត៌មានទេសចរណ៍',
-                  'Promos, new spots, festivals, news & daily dishes',
-                  '餐厅优惠、新景点、节庆活动与本地文旅资讯'
+                  'មុខម្ហូបតាមខេត្ត កន្លែងថ្មី ព្រឹត្តិការណ៍ និងព័ត៌មានទេសចរណ៍',
+                  'Provincial dishes, new spots, festivals & travel news',
+                  '各省传统美食、新景点、节庆活动与本地文旅资讯'
                 )}
               </p>
             </div>
@@ -436,7 +432,7 @@ export const NotificationsModal: React.FC = () => {
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 text-[11px]">
               {[
-                { key: 'promo', label: tr(language, '🏷️ ប្រូម៉ូសិនហាង', '🏷️ Shop Promos', '🏷️ 促销优惠') },
+
                 { key: 'new_spot', label: tr(language, '🏞️ កន្លែងថ្មីៗ', '🏞️ New Places', '🏞️ 新景点') },
                 { key: 'event', label: tr(language, '🎉 ព្រឹត្តិការណ៍', '🎉 Events', '🎉 节庆活动') },
                 { key: 'local_news', label: tr(language, '📰 ព័ត៌មានថ្មី', '📰 Local News', '📰 本地资讯') },
@@ -493,9 +489,9 @@ export const NotificationsModal: React.FC = () => {
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={tr(
                 language,
-                'ស្វែងរកការជូនដំណឹង, ហាង, ទីតាំង, ព្រឹត្តិការណ៍...',
-                'Search notifications, places, promos, events...',
-                '搜索通知、餐厅、景点或节庆活动...'
+                'ស្វែងរកការជូនដំណឹង, ម្ហូបខេត្ត, ទីតាំង, ព្រឹត្តិការណ៍...',
+                'Search notifications, places, provincial dishes, events...',
+                '搜索通知、各省美食、景点或节庆活动...'
               )}
               className="w-full pl-8 pr-7 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500"
             />
@@ -606,9 +602,9 @@ export const NotificationsModal: React.FC = () => {
                 <p className="text-xs text-slate-500 max-w-xs mx-auto mt-1 leading-relaxed">
                   {tr(
                     language,
-                    'សូមបើកកុងតាក់ខាងលើឡើងវិញ ដើម្បីទទួលបានព័ត៌មានប្រូម៉ូសិន កន្លែងថ្មី និងព្រឹត្តិការណ៍ទេសចរណ៍។',
-                    'Turn the switch back on above to receive promotions, new places, and event alerts.',
-                    '请开启上方开关，以便接收餐厅优惠、新景点与节庆活动提醒。'
+                    'សូមបើកកុងតាក់ខាងលើឡើងវិញ ដើម្បីទទួលបានព័ត៌មានម្ហូបតាមខេត្ត កន្លែងថ្មី និងព្រឹត្តិការណ៍ទេសចរណ៍។',
+                    'Turn the switch back on above to receive provincial dish highlights, new places, and event alerts.',
+                    '请开启上方开关，以便接收各省美食推荐、新景点与节庆活动提醒。'
                   )}
                 </p>
               </div>
@@ -643,11 +639,7 @@ export const NotificationsModal: React.FC = () => {
                         <span>{catMeta.label}</span>
                       </span>
 
-                      {n.discountPercent && (
-                        <span className="px-2 py-0.5 rounded-lg bg-rose-600 text-white text-[10px] font-black font-mono">
-                          -{n.discountPercent}% OFF
-                        </span>
-                      )}
+
 
                       {n.provinceKh && (
                         <span className="px-2 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-[10px] font-bold flex items-center gap-0.5">

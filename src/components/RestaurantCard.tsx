@@ -86,7 +86,6 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(({
         description: loc.description,
         location: `${loc.address} (${loc.province})`,
         phone: restaurant.phone,
-        priceDisplay: restaurant.priceLevel,
         signatureDishes: loc.signatureDishes,
         photoUrl: restaurant.photoUrl,
         mapUrl: restaurant.mapUrl,
@@ -159,10 +158,7 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(({
               )}
             </span>
 
-            <span className="px-2 py-0.5 rounded-md bg-[#064E3B]/95 text-emerald-100 text-xs font-bold border border-emerald-400/30 whitespace-nowrap shrink-0">
-              {tr(language, 'ប្រហាក់ប្រហែល ', 'Approx. ', '约 ')}
-              {restaurant.priceLevel || '$$'}
-            </span>
+
           </div>
         </div>
 

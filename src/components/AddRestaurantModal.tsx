@@ -628,7 +628,7 @@ export const AddRestaurantModal: React.FC = () => {
                     </div>
                     <ul className="text-[10px] text-slate-600 dark:text-slate-300 space-y-1">
                       <li className="text-[#064E3B] dark:text-emerald-400 font-bold">
-                        ✓ {isKm ? 'មុខម្ហូប ៥ មុខ ជាមួយរូបភាព និងតម្លៃ' : 'Up to 5 food items with photos & prices'}
+                        ✓ {isKm ? 'មុខម្ហូប ៥ មុខ ជាមួយរូបភាព និងការពិពណ៌នា' : 'Up to 5 food items with photos & descriptions'}
                       </li>
                       <li>✓ {isKm ? 'រូបតំណាងហាង & រូបភាពម្ហូបច្រើនសន្លឹក' : 'Shop profile & multiple food photos'}</li>
                       <li>✓ {isKm ? 'កែប្រែព័ត៌មានហាងដោយខ្លួនឯង' : 'Self-service editing'}</li>
@@ -808,21 +808,7 @@ export const AddRestaurantModal: React.FC = () => {
                 </select>
               </div>
 
-              <div>
-                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  {isKm ? 'កម្រិតតម្លៃ' : 'Price Tier'}
-                </label>
-                <select
-                  value={priceLevel}
-                  onChange={(e) => setPriceLevel(e.target.value as RestaurantPriceLevel)}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs focus:ring-2 focus:ring-[#059669]/20 focus:border-[#059669] outline-none"
-                >
-                  <option value="$">$ (ទូទៅ / ប្រហាក់ប្រហែល $1 - $3)</option>
-                  <option value="$$">$$ (មធ្យម / ប្រហាក់ប្រហែល $3 - $8)</option>
-                  <option value="$$$">$$$ (លំដាប់ខ្ពស់ / ប្រហាក់ប្រហែល $8 - $20)</option>
-                  <option value="$$$$">$$$$ (ប្រណិត / ប្រហាក់ប្រហែល $20+)</option>
-                </select>
-              </div>
+
             </div>
 
             {/* Address & Contact Phone */}

@@ -815,8 +815,6 @@ export const NearMeModal: React.FC = () => {
                         </div>
 
                         <div className="flex items-center gap-2 mt-1 text-[11px] text-slate-500">
-                          <span className="font-bold text-[#059669] font-mono">{r.priceLevel || '$$'}</span>
-                          <span>•</span>
                           <div className="flex items-center gap-0.5">
                             <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
                             <span className="font-bold">{r.rating > 0 ? r.rating.toFixed(1) : '4.5'}</span>

@@ -1554,7 +1554,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           photoUrl: '/Shop/rest-1.jpg',
           categoryKh: 'ម្ហូបខ្មែរបុរាណប្រណិត',
           provinceKh: 'រាជធានីភ្នំពេញ',
-          priceDisplay: '$$$',
           rating: 4.9,
           addedAt: '2026-10-21',
         },
@@ -8955,7 +8954,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
   };
 
-  const unreadNotificationsCount = notificationsEnabled ? notifications.filter(n => !n.isRead).length : 0;
+  const unreadNotificationsCount = notificationsEnabled ? notifications.filter(n => !n.isRead && n.type !== 'promo' && n.type !== 'discount' && !n.discountPercent).length : 0;
 
   const resetAllData = () => {
     setUsers(initialUsers);

@@ -306,10 +306,10 @@ export const AiTripPlannerModal: React.FC = () => {
   }> = [
     {
       id: 'quick_daily',
-      kh: '⚡ អាហាររហ័ស & សន្សំសំចៃ',
-      en: '⚡ Quick & Affordable Meal',
-      zh: '⚡ 快捷实惠日常简餐',
-      descKh: 'ម្ហូបញ៉ាំប្រចាំថ្ងៃ រហ័ស ឆ្ងាញ់ និងតម្លៃសមរម្យ',
+      kh: '⚡ អាហាររហ័ស & ងាយស្រួលប្រចាំថ្ងៃ',
+      en: '⚡ Quick & Convenient Daily Meal',
+      zh: '⚡ 快捷便利日常简餐',
+      descKh: 'ម្ហូបញ៉ាំប្រចាំថ្ងៃ រហ័ស ឆ្ងាញ់ និងសម្បូរបែប',
       descEn: 'Fast, tasty everyday dishes for breakfast, lunch, or dinner',
       descZh: '适合日常早午晚餐的快捷美味菜品',
       vipOnly: false,
@@ -701,7 +701,7 @@ export const AiTripPlannerModal: React.FC = () => {
                               {sLoc.name}
                             </div>
                             <div className="text-[10px] text-slate-500 truncate">
-                              📍 {sLoc.province} • {shop.priceLevel || '$$'} • ⭐ {shop.rating}
+                              📍 {sLoc.province} • ⭐ {shop.rating}
                             </div>
                           </div>
                           <a
