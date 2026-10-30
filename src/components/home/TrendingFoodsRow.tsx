@@ -1,9 +1,10 @@
 import React from 'react';
-import { MapPin, Flame } from 'lucide-react';
+import { MapPin } from 'lucide-react';
 import type { TrendingFoodItem, Language } from '../../types';
 import { tr, translateProvinceName } from '../../utils/i18n';
 import { translateSignatureDish, sanitizeStrictLanguageText } from '../../utils/zhDynamicTranslator';
 import { SectionHeader } from './SectionHeader';
+import { IconFlamePopular } from '../icons/HandcraftedIcons';
 import { FALLBACK_IMG, resolveHomePhoto } from './homeUtils';
 
 interface Props {
@@ -16,7 +17,7 @@ interface Props {
 const TrendingFoodsRowInner: React.FC<Props> = ({ language, items, onOpen, onExploreAll }) => (
   <section className="space-y-3">
     <SectionHeader
-      icon={Flame}
+      icon={IconFlamePopular}
       title={tr(language, 'ម្ហូបពេញនិយមនៅកម្ពុជា', 'Popular Cambodian Dishes', '柬埔寨人气美食')}
       subtitle={tr(language, 'មុខម្ហូបប្រចាំតំបន់ និងអាហារតាមផ្លូវល្បីៗ', 'Regional specialties & local street food', '地方特色名菜与人气街头小吃')}
       actionLabel={onExploreAll ? tr(language, 'មើលវីដេអូម្ហូប', 'Food videos', '美食视频') : undefined}

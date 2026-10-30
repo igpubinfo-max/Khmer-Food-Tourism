@@ -1,245 +1,210 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { MoreVertical, Camera, Download, Heart, LayoutGrid, RefreshCw, Shield, Bell } from 'lucide-react';
-import { openSmartHub } from '../utils/smartHub';
-import { Capacitor } from '@capacitor/core';
-import { APP_VERSION } from '../types';
+import {
+  Download,
+  Heart,
+  Bell,
+  QrCode,
+  MoreVertical,
+} from 'lucide-react';
+import { IconSmartAssistant } from './icons/HandcraftedIcons';
+import { tr } from '../utils/i18n';
 
-export const Header: React.FC = () => {
+interface HeaderProps {
+  onOpenSmartHub?: () => void;
+}
+
+export const Header: React.FC<HeaderProps> = ({ onOpenSmartHub }) => {
   const {
     language,
     setLanguage,
     setActiveTab,
-    showToast,
-    setIsQrScannerModalOpen,
-    setIsInstallModalOpen,
+    openInstallModal,
     setIsSupportModalOpen,
+    setIsQrScannerModalOpen,
+    setIsAiTripPlannerModalOpen,
     setIsNotificationsModalOpen,
     unreadNotificationsCount,
-    setIsAdminLoginModalOpen,
-    setIsAdminOpen,
-    currentUser,
   } = useApp();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
-  // Hide "Install App" automatically when already running as the native app / installed PWA
-  const isAppInstalled = (() => {
-    try {
-      if (Capacitor.isNativePlatform()) return true;
-      if (typeof window !== 'undefined' && window.matchMedia?.('(display-mode: standalone)').matches) return true;
-      if ((navigator as unknown as { standalone?: boolean }).standalone) return true;
-    } catch {
-      // ignore
-    }
-    return false;
-  })();
-
-  const isKm = language === 'km';
-  const isZh = language === 'zh';
+  useEffect(() => {
+    if (!isMenuOpen) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isMenuOpen]);
 
   return (
-    <header className="sticky top-0 z-40 bg-[#064E3B] text-white shadow-md pt-[env(safe-area-inset-top,0px)] border-b border-[#047857]">
-      {/* Main Bar */}
-      <div className="max-w-md mx-auto px-3 sm:px-4 py-2.5 flex items-center justify-between gap-2">
-        {/* Brand */}
+    <header className="sticky top-0 z-40 glass-header text-white shadow-lg border-b border-emerald-400/20">
+      <div className="max-w-md mx-auto px-3 py-2 flex items-center justify-between gap-2">
+        {/* Brand Logo & Title */}
         <div
           onClick={() => setActiveTab('home')}
           className="flex items-center gap-2.5 cursor-pointer group min-w-0 flex-1"
         >
-          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-white p-0.5 shadow-md flex items-center justify-center border border-emerald-300/60 shrink-0 overflow-hidden">
-            <img src="/icon-192.png?v=2.5.4" alt="Cambodia Flavors & Tourism" className="w-full h-full rounded-[13px] object-contain" />
+          <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-amber-300 via-yellow-500 to-amber-700 p-[1.5px] flex items-center justify-center shadow-md group-hover:scale-105 transition shrink-0">
+            <img
+              src="/icons/icon-192.png?v=20261030v3"
+              alt="រសជាតិ និងទេសចរណ៍កម្ពុជា"
+              className="w-full h-full rounded-[10px] object-cover bg-[#064E3B]"
+              onError={(e) => {
+                (e.currentTarget as HTMLImageElement).src = '/welcome/welcome-icon.jpg?v=20261030v3';
+              }}
+            />
           </div>
           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-1.5 min-w-0">
-              <h1 className="font-moul text-[10.5px] sm:text-xs tracking-wide text-white leading-snug drop-shadow-sm truncate">
-                {isKm
-                  ? 'រសជាតិ និងទេសចរណ៍កម្ពុជា'
-                  : isZh
-                  ? '柬埔寨风味与旅游'
-                  : 'Cambodia Flavors & Tourism'}
-              </h1>
-            </div>
-            <div className="flex items-center gap-1.5 mt-0.5">
-              <span className="px-1.5 py-0.2 rounded-md bg-emerald-950/70 text-emerald-200 font-mono text-[8px] sm:text-[9px] font-bold border border-emerald-400/30 shrink-0">
-                {APP_VERSION}
-              </span>
-              <p className="text-[10px] sm:text-[11px] text-emerald-200/95 font-medium truncate">
-                {isKm
-                  ? 'ស្វែងយល់អាហារ • ទីតាំង • បទពិសោធន៍'
-                  : isZh
-                  ? '探索美食 • 景点 • 体验'
-                  : 'Discover Food • Places • Experiences'}
-              </p>
-            </div>
+            <h1 className="font-moul text-[12px] sm:text-[13px] tracking-wide text-white leading-snug truncate">
+              {tr(language, 'រសជាតិ និងទេសចរណ៍កម្ពុជា', 'Cambodia Flavors & Tourism', '柬埔寨风味与旅游')}
+            </h1>
+            <p className="text-[10px] text-amber-300 font-semibold leading-tight truncate mt-0.5">
+              {tr(
+                language,
+                'Cambodia Flavors & Tourism',
+                'Discover Food • Places • Experiences',
+                '探索美食 • 景点 • 文化体验'
+              )}
+            </p>
           </div>
         </div>
 
-        {/* Action icons */}
-        <div className="flex items-center gap-1 shrink-0">
-          {/* 3-Language Selector (ខ្មែរ / EN / 中文) */}
-          <div className="flex items-center gap-0.5 bg-[#053F30]/95 p-0.5 rounded-full border border-emerald-400/40 shadow-xs shrink-0">
-            {(['km', 'en', 'zh'] as const).map((langOption) => {
-              const isSelected = language === langOption;
-              const label = langOption === 'km' ? 'ខ្មែរ' : langOption === 'en' ? 'EN' : '中文';
-              return (
-                <button
-                  key={langOption}
-                  type="button"
-                  onClick={() => {
-                    setLanguage(langOption);
-                    showToast(
-                      langOption === 'km'
-                        ? '🇰🇭 បានប្តូរទៅជា ភាសាខ្មែរ'
-                        : langOption === 'zh'
-                        ? '🇨🇳 已切换为 简体中文'
-                        : '🇬🇧 Switched to English',
-                      'info'
-                    );
-                  }}
-                  className={`px-1.5 sm:px-2 h-6 sm:h-7 rounded-full text-[9px] sm:text-[11px] font-black transition-all active:scale-95 shrink-0 cursor-pointer flex items-center justify-center ${
-                    isSelected
-                      ? 'bg-amber-400 text-slate-950 shadow-xs'
-                      : 'text-emerald-100 hover:text-white hover:bg-emerald-800/70'
-                  }`}
-                  title={isKm ? 'ប្តូរភាសា' : isZh ? '切换语言' : 'Switch Language'}
-                >
-                  {label}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Smart Menu: dish tags + travel & food tools */}
-          <button
-            type="button"
-            onClick={() => openSmartHub()}
-            className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 flex items-center justify-center shadow-md ring-2 ring-white/30 transition-all active:scale-95 shrink-0 cursor-pointer"
-            title={isKm ? 'ម៉ឺនុយឆ្លាតវៃ' : isZh ? '精选菜单' : 'Smart Menu'}
-            aria-label={isKm ? 'ម៉ឺនុយឆ្លាតវៃ' : isZh ? '精选菜单' : 'Smart Menu'}
-          >
-            <LayoutGrid className="w-4 h-4 shrink-0" />
-          </button>
-
-          {/* Overflow "more" menu: Notifications, Scan QR, Update/Install App, Support, Admin */}
-          <div className="relative shrink-0">
+        {/* Right Controls: Only Essential Actions + Clean More Menu */}
+        <div className="flex items-center gap-1.5 shrink-0">
+          {/* Smart Menu Button */}
+          {onOpenSmartHub && (
             <button
               type="button"
-              onClick={() => setIsMenuOpen((v) => !v)}
-              className={`relative w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center transition-colors border shrink-0 cursor-pointer ${
-                isMenuOpen
-                  ? 'bg-white text-[#064E3B] border-white shadow-xs'
-                  : 'bg-[#065F46]/80 hover:bg-[#065F46] text-emerald-100 border-emerald-500/40'
-              }`}
-              title={isKm ? 'ម៉ឺនុយបន្ថែម' : isZh ? '更多' : 'More'}
-              aria-label={isKm ? 'ម៉ឺនុយបន្ថែម' : isZh ? '更多' : 'More'}
-              aria-expanded={isMenuOpen}
+              onClick={onOpenSmartHub}
+              className="px-2.5 h-9 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-300 hover:from-amber-300 hover:to-yellow-200 text-slate-950 flex items-center justify-center gap-1 shadow-sm transition active:scale-95 cursor-pointer font-khmer text-[11px] font-black shrink-0"
+              title={tr(language, 'ម៉ឺនុយឆ្លាតវៃ', 'Smart Menu', '智能菜单')}
+              aria-label={tr(language, 'ម៉ឺនុយឆ្លាតវៃ', 'Smart Menu', '智能菜单')}
             >
-              <MoreVertical className="w-4 h-4 shrink-0" />
-              {unreadNotificationsCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-rose-500 ring-2 ring-[#064E3B]" />
-              )}
+              <IconSmartAssistant className="w-4 h-4 shrink-0 text-slate-950" />
+              <span className="hidden xs:inline">{tr(language, 'ម៉ឺនុយឆ្លាតវៃ', 'Smart', '智能')}</span>
             </button>
+          )}
+
+          {/* Notifications Bell Button */}
+          <button
+            type="button"
+            onClick={() => setIsNotificationsModalOpen(true)}
+            className="relative w-9 h-9 rounded-xl bg-white/15 hover:bg-white/25 text-white flex items-center justify-center border border-white/20 transition active:scale-95 cursor-pointer shrink-0"
+            title={tr(language, 'ដំណឹងថ្មីៗ', 'Notifications', '最新通知')}
+            aria-label={tr(language, 'ដំណឹងថ្មីៗ', 'Notifications', '最新通知')}
+          >
+            <Bell className="w-4 h-4 text-amber-300" />
+            {unreadNotificationsCount > 0 && (
+              <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-1 rounded-full bg-rose-500 text-white text-[9px] font-black flex items-center justify-center border border-[#064E3B]">
+                {unreadNotificationsCount > 9 ? '9+' : unreadNotificationsCount}
+              </span>
+            )}
+          </button>
+
+          {/* Language Toggle Pill: ខ្មែរ / EN / 中文 */}
+          <button
+            type="button"
+            onClick={() =>
+              setLanguage(language === 'km' ? 'en' : language === 'en' ? 'zh' : 'km')
+            }
+            className="px-2.5 h-9 rounded-xl bg-white/15 hover:bg-white/25 text-[11px] font-extrabold tracking-wide flex items-center gap-1 border border-white/25 transition active:scale-95 cursor-pointer shrink-0"
+            title="ប្តូរភាសា / Switch Language / 切换语言 (ខ្មែរ • EN • 中文)"
+          >
+            <span className={language === 'km' ? 'text-amber-300' : 'text-white/70'}>ខ្មែរ</span>
+            <span className="text-white/30">/</span>
+            <span className={language === 'en' ? 'text-amber-300' : 'text-white/70'}>EN</span>
+            <span className="text-white/30">/</span>
+            <span className={language === 'zh' ? 'text-amber-300' : 'text-white/70'}>中文</span>
+          </button>
+
+          {/* Overflow Menu Button (QR, AI Planner, Install, Support) */}
+          <div className="relative" ref={menuRef}>
+            <button
+              type="button"
+              onClick={() => setIsMenuOpen((prev) => !prev)}
+              className="w-9 h-9 rounded-xl bg-white/15 hover:bg-white/25 text-white flex items-center justify-center border border-white/20 transition active:scale-95 cursor-pointer"
+              title={tr(language, 'មុខងារបន្ថែម', 'More Options', '更多选项')}
+              aria-label={tr(language, 'មុខងារបន្ថែម', 'More Options', '更多选项')}
+            >
+              <MoreVertical className="w-4 h-4" />
+            </button>
+
             {isMenuOpen && (
-              <>
-                <div className="fixed inset-0 z-40" onClick={() => setIsMenuOpen(false)} />
-                <div className="absolute right-0 top-11 z-50 w-56 rounded-2xl bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden font-khmer">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsMenuOpen(false);
-                      setIsNotificationsModalOpen(true);
-                    }}
-                    className="w-full min-h-[44px] px-4 flex items-center justify-between gap-3 text-sm font-semibold hover:bg-emerald-50 dark:hover:bg-slate-700 text-left"
-                  >
-                    <span className="flex items-center gap-3">
-                      <Bell className="w-4 h-4 text-rose-500" />
-                      <span>{isKm ? 'ការជូនដំណឹង' : isZh ? '消息通知' : 'Notifications'}</span>
+              <div className="absolute right-0 mt-2 w-56 rounded-2xl bg-slate-900 text-white shadow-2xl border border-white/15 py-1.5 z-50 font-khmer text-xs">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    setIsAiTripPlannerModalOpen(true);
+                  }}
+                  className="w-full px-3.5 py-2.5 flex items-center justify-between hover:bg-white/10 transition cursor-pointer text-left"
+                >
+                  <span className="flex items-center gap-2.5 font-bold text-amber-300">
+                    <IconSmartAssistant className="w-4 h-4 text-amber-400" />
+                    <span>{tr(language, 'ជំនួយការ AI ឆ្លាតវៃ', 'Smart AI Assistant', 'AI 智能助手')}</span>
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    setIsNotificationsModalOpen(true);
+                  }}
+                  className="w-full px-3.5 py-2.5 flex items-center justify-between hover:bg-white/10 transition cursor-pointer text-left"
+                >
+                  <span className="flex items-center gap-2.5 font-semibold">
+                    <Bell className="w-4 h-4 text-emerald-400" />
+                    <span>{tr(language, 'ដំណឹង និងការណែនាំ', 'Notifications', '通知与推荐')}</span>
+                  </span>
+                  {unreadNotificationsCount > 0 && (
+                    <span className="px-1.5 py-0.5 rounded-full bg-rose-500 text-white text-[10px] font-extrabold">
+                      {unreadNotificationsCount}
                     </span>
-                    {unreadNotificationsCount > 0 && (
-                      <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-rose-500 text-white text-[11px] font-bold flex items-center justify-center">
-                        {unreadNotificationsCount > 99 ? '99+' : unreadNotificationsCount}
-                      </span>
-                    )}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsMenuOpen(false);
-                      setIsQrScannerModalOpen(true);
-                    }}
-                    className="w-full min-h-[44px] px-4 flex items-center gap-3 text-sm font-semibold hover:bg-emerald-50 dark:hover:bg-slate-700 text-left border-t border-slate-100 dark:border-slate-700"
-                  >
-                    <Camera className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
-                    <span>{isKm ? 'ស្កេន QR កូដ' : isZh ? '扫描二维码' : 'Scan QR Code'}</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsMenuOpen(false);
-                      setIsInstallModalOpen(true);
-                    }}
-                    className="w-full min-h-[44px] px-4 flex items-center gap-3 text-sm font-semibold hover:bg-emerald-50 dark:hover:bg-slate-700 text-left border-t border-slate-100 dark:border-slate-700"
-                  >
-                    {isAppInstalled ? (
-                      <RefreshCw className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
-                    ) : (
-                      <Download className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
-                    )}
-                    <span>
-                      {isAppInstalled
-                        ? isKm
-                          ? 'ពិនិត្យអាប់ដេតកម្មវិធី'
-                          : isZh
-                          ? '检查应用更新'
-                          : 'Check for Updates'
-                        : isKm
-                        ? 'ដំឡើងកម្មវិធី'
-                        : isZh
-                        ? '安装应用'
-                        : 'Install App'}
-                    </span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsMenuOpen(false);
-                      setIsSupportModalOpen(true);
-                    }}
-                    className="w-full min-h-[44px] px-4 flex items-center gap-3 text-sm font-semibold hover:bg-emerald-50 dark:hover:bg-slate-700 text-left border-t border-slate-100 dark:border-slate-700"
-                  >
-                    <Heart className="w-4 h-4 text-rose-500 fill-rose-500" />
-                    <span>{isKm ? 'ជួយឧបត្ថម្ភកម្មវិធី' : isZh ? '支持我们' : 'Support Us'}</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsMenuOpen(false);
-                      if (currentUser?.role === 'admin') {
-                        setIsAdminOpen(true);
-                      } else {
-                        setIsAdminLoginModalOpen(true);
-                      }
-                    }}
-                    className="w-full min-h-[44px] px-4 flex items-center gap-3 text-sm font-semibold hover:bg-emerald-50 dark:hover:bg-slate-700 text-left border-t border-slate-100 dark:border-slate-700"
-                  >
-                    <Shield className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
-                    <span>
-                      {currentUser?.role === 'admin'
-                        ? isKm
-                          ? 'ផ្ទាំងគ្រប់គ្រងរដ្ឋបាល'
-                          : isZh
-                          ? '管理后台'
-                          : 'Admin Dashboard'
-                        : isKm
-                        ? 'ច្រកចូលរដ្ឋបាល'
-                        : isZh
-                        ? '管理员登录'
-                        : 'Admin Login'}
-                    </span>
-                  </button>
-                </div>
-              </>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    setIsQrScannerModalOpen(true);
+                  }}
+                  className="w-full px-3.5 py-2.5 flex items-center gap-2.5 hover:bg-white/10 transition cursor-pointer text-left font-semibold"
+                >
+                  <QrCode className="w-4 h-4 text-emerald-400" />
+                  <span>{tr(language, 'ស្កេន QR Code ហាង', 'Scan QR Code', '扫描店铺二维码')}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    openInstallModal('android');
+                  }}
+                  className="w-full px-3.5 py-2.5 flex items-center gap-2.5 hover:bg-white/10 transition cursor-pointer text-left font-semibold"
+                >
+                  <Download className="w-4 h-4 text-sky-400" />
+                  <span>{tr(language, 'ទាញយកកម្មវិធី (APK / App)', 'Download App', '下载应用 (APK)')}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    setIsSupportModalOpen(true);
+                  }}
+                  className="w-full px-3.5 py-2.5 flex items-center gap-2.5 hover:bg-white/10 transition cursor-pointer text-left font-semibold"
+                >
+                  <Heart className="w-4 h-4 text-rose-400 fill-rose-400" />
+                  <span>{tr(language, 'គាំទ្រការអភិវឌ្ឍ App', 'Support App', '支持应用开发')}</span>
+                </button>
+              </div>
             )}
           </div>
         </div>

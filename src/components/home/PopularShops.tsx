@@ -1,10 +1,11 @@
 import React, { useMemo, useState } from 'react';
-import { Store, Star, MapPin, BadgeCheck } from 'lucide-react';
+import { Star, MapPin, BadgeCheck } from 'lucide-react';
 import type { Language, Restaurant } from '../../types';
 import { isRestaurantPremiumActive } from '../../types';
 import { tr } from '../../utils/i18n';
 import { getLocalizedRestaurant } from '../../utils/zhDynamicTranslator';
 import { SectionHeader } from './SectionHeader';
+import { IconNavShop } from '../icons/HandcraftedIcons';
 import { FALLBACK_IMG } from './homeUtils';
 
 interface Props {
@@ -43,7 +44,7 @@ const PopularShopsInner: React.FC<Props> = ({ language, restaurants, onOpen, onS
   return (
     <section className="space-y-3">
       <SectionHeader
-        icon={Store}
+        icon={IconNavShop}
         title={tr(language, 'ហាងអាហារពេញនិយម', 'Popular Places to Eat', '热门餐厅推荐')}
         subtitle={tr(language, 'ហាងដែលមានការវាយតម្លៃខ្ពស់តាមបណ្តាខេត្ត-ក្រុង', 'Highly rated dining spots across Cambodia', '深受食客喜爱的高分好店')}
         actionLabel={tr(language, 'មើលទាំងអស់', 'See all', '查看全部')}
@@ -127,7 +128,6 @@ const PopularShopsInner: React.FC<Props> = ({ language, restaurants, onOpen, onS
                       <MapPin className="w-3.5 h-3.5 shrink-0" />
                       <span className="truncate">{loc.province}</span>
                     </span>
-
                   </span>
                 </span>
               </button>
@@ -139,4 +139,5 @@ const PopularShopsInner: React.FC<Props> = ({ language, restaurants, onOpen, onS
   );
 };
 
+export const PopularDestinationsPlaceholder = null;
 export const PopularShops = React.memo(PopularShopsInner);

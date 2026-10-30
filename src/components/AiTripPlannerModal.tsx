@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { TripPlan, isUserVipActive, isAdminAccount } from '../types';
 import { tr, translateProvince } from '../utils/i18n';
+import { IconSmartAssistant } from './icons/HandcraftedIcons';
 import {
   translateDynamicTextToZh,
   getLocalizedFood,
@@ -369,7 +370,7 @@ export const AiTripPlannerModal: React.FC = () => {
         <div className="p-4 bg-gradient-to-r from-[#064E3B] via-emerald-800 to-[#047857] text-white flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-300 via-yellow-400 to-amber-500 text-slate-950 flex items-center justify-center shadow-sm shrink-0">
-              <Bot className="w-5 h-5" />
+              <IconSmartAssistant className="w-5 h-5" />
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-1.5 flex-wrap">

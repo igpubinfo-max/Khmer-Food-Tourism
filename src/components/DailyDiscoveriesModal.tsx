@@ -34,6 +34,7 @@ import {
 } from '../utils/foodFilters';
 import { calculateDistanceKm } from '../services/dailyDiscoveryAndNotificationService';
 import { tr } from '../utils/i18n';
+import { IconProvinceFood } from './icons/HandcraftedIcons';
 import { getLocalizedFood, getLocalizedRestaurant } from '../utils/zhDynamicTranslator';
 
 type RegionFilterId = 'all' | 'central' | 'tonle_sap' | 'coastal' | 'mekong' | 'highlands';
@@ -369,7 +370,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
         <div className="px-4 py-3.5 bg-gradient-to-r from-[#064E3B] via-[#047857] to-teal-800 text-white flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="w-10 h-10 rounded-2xl bg-amber-400/20 border border-amber-300/40 flex items-center justify-center text-amber-300 shadow-xs shrink-0">
-              <Compass className="w-5 h-5" />
+              <IconProvinceFood className="w-5 h-5" />
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-1.5 flex-wrap">

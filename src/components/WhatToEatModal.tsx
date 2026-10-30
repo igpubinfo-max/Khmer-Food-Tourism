@@ -20,6 +20,7 @@ import {
   Navigation,
 } from 'lucide-react';
 import { FoodItem } from '../types';
+import { IconFoodPicks } from './icons/HandcraftedIcons';
 import { tr } from '../utils/i18n';
 import { getLocalizedFood, getLocalizedRestaurant } from '../utils/zhDynamicTranslator';
 import { useBodyScrollLock } from '../utils/useBodyScrollLock';
@@ -248,7 +249,7 @@ export const WhatToEatModal: React.FC = () => {
         <div className="p-4 bg-gradient-to-r from-[#064E3B] to-[#047857] text-white flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="w-10 h-10 rounded-2xl bg-amber-400/20 border border-amber-300/40 flex items-center justify-center text-amber-300 shadow-xs shrink-0">
-              <Utensils className="w-5 h-5" />
+              <IconFoodPicks className="w-5 h-5" />
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">

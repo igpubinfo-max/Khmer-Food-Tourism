@@ -1,9 +1,10 @@
 import React, { useMemo } from 'react';
-import { Compass, Star, MapPin } from 'lucide-react';
+import { Star, MapPin } from 'lucide-react';
 import type { Language, TouristDestination } from '../../types';
 import { tr } from '../../utils/i18n';
 import { getLocalizedDestination } from '../../utils/zhDynamicTranslator';
 import { SectionHeader } from './SectionHeader';
+import { IconNavTourism } from '../icons/HandcraftedIcons';
 import { FALLBACK_IMG, headingFont } from './homeUtils';
 
 interface Props {
@@ -25,7 +26,7 @@ const PopularDestinationsInner: React.FC<Props> = ({ language, destinations, onO
   return (
     <section className="space-y-3">
       <SectionHeader
-        icon={Compass}
+        icon={IconNavTourism}
         title={tr(language, 'ស្វែងយល់ទឹកដីកម្ពុជា', 'Explore Cambodia', '探索柬埔寨')}
         subtitle={tr(language, 'តំបន់ទេសចរណ៍ល្បីៗទូទាំង ២៥ រាជធានី-ខេត្ត', 'Top sights across all 25 provinces', '遍布柬埔寨 25 省市的精选景点')}
         actionLabel={tr(language, 'មើលទាំងអស់', 'See all', '查看全部')}

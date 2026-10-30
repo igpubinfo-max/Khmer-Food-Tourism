@@ -1,9 +1,10 @@
 import React from 'react';
-import { Sparkles, Clock, ChevronRight, Sunrise, Sun, Coffee, Moon } from 'lucide-react';
+import { Clock, Sunrise, Sun, Coffee, Moon } from 'lucide-react';
 import type { FoodItem, Language } from '../../types';
 import { tr } from '../../utils/i18n';
 import { getLocalizedFood } from '../../utils/zhDynamicTranslator';
 import { SectionHeader } from './SectionHeader';
+import { IconFoodPicks } from '../icons/HandcraftedIcons';
 import { FALLBACK_IMG, resolveHomePhoto, type MealSlot, headingFont } from './homeUtils';
 
 interface Props {
@@ -32,7 +33,7 @@ const ForYouSectionInner: React.FC<Props> = ({ language, slot, foods, onOpenFood
   return (
     <section className="space-y-3">
       <SectionHeader
-        icon={Sparkles}
+        icon={IconFoodPicks}
         title={tr(language, 'មុខម្ហូបប្រចាំពេល', 'Recommended Dishes', '时段精选美食')}
         subtitle={tr(language, 'ជ្រើសរើសតាមពេលវេលាបច្ចុប្បន្ន', 'Curated for this time of day', '根据当前时段为您精选')}
         actionLabel={tr(language, 'មើលទាំងអស់', 'See all', '查看全部')}
@@ -104,7 +105,6 @@ const ForYouSectionInner: React.FC<Props> = ({ language, slot, foods, onOpenFood
                     {loc.category}
                   </span>
                 </span>
-                <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
               </button>
             );
           })}

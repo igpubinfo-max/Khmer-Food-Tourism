@@ -17,6 +17,7 @@ import { HomeGreetingSearch } from './home/HomeGreetingSearch';
 import { TrendingFoodsRow } from './home/TrendingFoodsRow';
 import { HomeSkeleton, HomeEmptyState } from './home/HomeStates';
 import { FeatureGrid } from './home/FeatureGrid';
+import { IconNavFood, IconNavShop, IconNavTourism, IconMapRoute } from './icons/HandcraftedIcons';
 import { ForYouSection } from './home/ForYouSection';
 import { PopularShops } from './home/PopularShops';
 import { PopularDestinations } from './home/PopularDestinations';
@@ -405,7 +406,7 @@ export const HomeView: React.FC = () => {
                   : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
               }`}
             >
-              <span>🍲</span>
+              <IconNavFood className="w-3.5 h-3.5 shrink-0" />
               <span>{tr(language, `មុខម្ហូប (${searchResults.foods.length})`, `Dishes (${searchResults.foods.length})`, `美食 (${searchResults.foods.length})`)}</span>
             </button>
             <button
@@ -416,7 +417,7 @@ export const HomeView: React.FC = () => {
                   : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
               }`}
             >
-              <span>🏪</span>
+              <IconNavShop className="w-3.5 h-3.5 shrink-0" />
               <span>{tr(language, `ហាងអាហារ (${searchResults.restaurants.length})`, `Restaurants (${searchResults.restaurants.length})`, `餐厅 (${searchResults.restaurants.length})`)}</span>
             </button>
             <button
@@ -427,7 +428,7 @@ export const HomeView: React.FC = () => {
                   : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
               }`}
             >
-              <span>🏛️</span>
+              <IconNavTourism className="w-3.5 h-3.5 shrink-0" />
               <span>{tr(language, `ទេសចរណ៍ (${searchResults.destinations.length})`, `Destinations (${searchResults.destinations.length})`, `景点 (${searchResults.destinations.length})`)}</span>
             </button>
             <button
@@ -438,7 +439,7 @@ export const HomeView: React.FC = () => {
                   : 'bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800'
               }`}
             >
-              <span>🗺️</span>
+              <IconMapRoute className="w-3.5 h-3.5 shrink-0" />
               <span>{tr(language, `Google Maps (${searchResults.externalPlaces.length})`, `Google Maps (${searchResults.externalPlaces.length})`, `谷歌地图 (${searchResults.externalPlaces.length})`)}</span>
             </button>
           </div>

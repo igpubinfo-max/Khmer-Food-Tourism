@@ -1519,21 +1519,33 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setIsAiCheckInModalOpenRaw(open);
   };
 
+  const isInitialAuxMountRef = useRef({
+    trending: true,
+    aiCheckIns: true,
+    wishlists: true,
+    tripPlans: true,
+    notifications: true,
+  });
+
   useEffect(() => {
-    try {
-      const compactedTrending = trendingFoods.map(item =>
-        item.photoUrl && item.photoUrl.startsWith('data:') && item.matchedFoodId
-          ? { ...item, photoUrl: `/foods/${item.matchedFoodId}.jpg` }
-          : item
-      );
-      localStorage.setItem('kft_trending_foods_v4', JSON.stringify(compactedTrending));
-    } catch {}
+    if (isInitialAuxMountRef.current.trending) {
+      isInitialAuxMountRef.current.trending = false;
+      return;
+    }
+    const compactedTrending = trendingFoods.map(item =>
+      item.photoUrl && item.photoUrl.startsWith('data:') && item.matchedFoodId
+        ? { ...item, photoUrl: `/foods/${item.matchedFoodId}.jpg` }
+        : item
+    );
+    scheduleStorageWrite('kft_trending_foods_v4', compactedTrending, 1500);
   }, [trendingFoods]);
 
   useEffect(() => {
-    try {
-      localStorage.setItem('kft_ai_checkins_v1', JSON.stringify(aiCheckIns));
-    } catch {}
+    if (isInitialAuxMountRef.current.aiCheckIns) {
+      isInitialAuxMountRef.current.aiCheckIns = false;
+      return;
+    }
+    scheduleStorageWrite('kft_ai_checkins_v1', aiCheckIns, 1000);
   }, [aiCheckIns]);
 
   // Personalized Wishlists
@@ -1700,25 +1712,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return true;
   });
 
-  // Sync wishlists, trip plans & notifications to localStorage
+  // Sync wishlists, trip plans & notifications to localStorage (debounced off critical path)
   useEffect(() => {
-    try {
-      const storageKey = `kft_wishlists_v3_${currentUser?.id || 'guest'}`;
-      localStorage.setItem(storageKey, JSON.stringify(wishlists));
-    } catch {}
+    if (isInitialAuxMountRef.current.wishlists) {
+      isInitialAuxMountRef.current.wishlists = false;
+      return;
+    }
+    const storageKey = `kft_wishlists_v3_${currentUser?.id || 'guest'}`;
+    scheduleStorageWrite(storageKey, wishlists, 800);
   }, [wishlists, currentUser]);
 
   useEffect(() => {
-    try {
-      const storageKey = `kft_trip_plans_v2_${currentUser?.id || 'guest'}`;
-      localStorage.setItem(storageKey, JSON.stringify(tripPlans));
-    } catch {}
+    if (isInitialAuxMountRef.current.tripPlans) {
+      isInitialAuxMountRef.current.tripPlans = false;
+      return;
+    }
+    const storageKey = `kft_trip_plans_v2_${currentUser?.id || 'guest'}`;
+    scheduleStorageWrite(storageKey, tripPlans, 800);
   }, [tripPlans, currentUser]);
 
   useEffect(() => {
-    try {
-      localStorage.setItem('kft_notifications_v1', JSON.stringify(notifications));
-    } catch {}
+    if (isInitialAuxMountRef.current.notifications) {
+      isInitialAuxMountRef.current.notifications = false;
+      return;
+    }
+    scheduleStorageWrite('kft_notifications_v1', notifications, 1000);
   }, [notifications]);
 
   useEffect(() => {
@@ -1909,11 +1927,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           allUsersCount: users.length,
           verifiedTransactions: transactions.filter(t => t.status === 'verified'),
         };
-        try {
-          localStorage.setItem('kft_pre_update_db_backup_v1', JSON.stringify(backupSnapshot));
-        } catch {
-          // Ignore quota error for backup snapshot so it never loops
-        }
+        scheduleStorageWrite('kft_pre_update_db_backup_v1', backupSnapshot, 2500);
         try {
           localStorage.setItem('kft_last_backed_up_version', APP_VERSION);
         } catch {}
@@ -2936,6 +2950,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (periodicSyncInterval) clearInterval(periodicSyncInterval);
       if (typeof document !== 'undefined') {
         document.removeEventListener('visibilitychange', handleVisibilityCloudSync);
+      }
+      for (const timerId of Object.values(storageWriteTimersRef.current)) {
+        window.clearTimeout(timerId);
       }
     };
   }, []);
