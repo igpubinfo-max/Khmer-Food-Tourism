@@ -460,7 +460,7 @@ public class NativeAbaLauncherPlugin extends Plugin {
             return;
         }
         String text = call.getString("text", "");
-        String label = call.getString("label", "Khmer Food & Tourism");
+        String label = call.getString("label", "Discover Cambodia Food & Tourism");
         try {
             ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
             if (clipboard != null) {
@@ -623,7 +623,7 @@ public class NativeAbaLauncherPlugin extends Plugin {
             return;
         }
 
-        final String title = call.getString("title", "Khmer Food & Tourism");
+        final String title = call.getString("title", "Discover Cambodia Food & Tourism");
         final String text = call.getString("text", "");
         final String url = call.getString("url", "");
         final String photoUrl = call.getString("photoUrl", "");

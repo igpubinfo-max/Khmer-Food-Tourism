@@ -40,7 +40,7 @@ export const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({ isOpen, 
                 {isKm ? 'គោលការណ៍ឯកជនភាព & សុវត្ថិភាព' : 'Privacy Policy & Data Safety'}
               </h3>
               <p className="text-[10px] text-emerald-200 font-khmer">
-                {isKm ? 'កម្មវិធី Khmer Food & Tourism • អនុលោមតាម Google Play Store' : 'Khmer Food & Tourism • Google Play Compliant'}
+                {language === 'km' ? 'ស្វែងយល់អាហារ និងទេសចរណ៍កម្ពុជា • Google Play Compliant' : language === 'zh' ? '探索柬埔寨美食与旅游 • 符合 Google Play 规范' : 'Discover Cambodia Food & Tourism • Google Play Compliant'}
               </p>
             </div>
           </div>

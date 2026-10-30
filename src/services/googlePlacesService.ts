@@ -903,8 +903,10 @@ export async function saveToSmartCache(newItems: GooglePlaceCachedItem[]): Promi
     console.warn('Smart cache localStorage save error:', err);
   }
 
-  if (isSupabaseConfigured()) {
-    await pushCloudDocument('kft_cloud_google_places_cache_v1', merged);
+  const nowMs = Date.now();
+  if (isSupabaseConfigured() && nowMs - ((globalThis as any).__kftLastPlacesCloudPushAt || 0) > 300000) {
+    (globalThis as any).__kftLastPlacesCloudPushAt = nowMs;
+    pushCloudDocument('kft_cloud_google_places_cache_v1', merged).catch(() => {});
   }
 }
 
@@ -3754,9 +3756,9 @@ export async function searchGoogleMapsPlacesAdvanced(
       )
       .filter((x): x is GooglePlaceCachedItem => x !== null);
 
-    // If Google Places returned fewer than 20 items on initial search, supplement with multi-source Cambodia map
+    // Only supplement with multi-source Cambodia map when Google Places returned fewer than 5 items
     let supplementedItems: GooglePlaceCachedItem[] = [];
-    if (!req.pageToken && newCachedItems.length < 20) {
+    if (!req.pageToken && newCachedItems.length < 5) {
       const multiLive = await searchLiveCambodiaMultiSource(
         cleanQuery,
         provinceFilter,

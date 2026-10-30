@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Khmer Food &amp; Tourism</string>
-    <string name="title_activity_main">Khmer Food &amp; Tourism</string>
+    <string name="app_name">Discover Cambodia Food &amp; Tourism</string>
+    <string name="title_activity_main">Discover Cambodia</string>
     <string name="package_name">com.khmerfood.tourism</string>
     <string name="custom_url_scheme">com.khmerfood.tourism</string>
 </resources>

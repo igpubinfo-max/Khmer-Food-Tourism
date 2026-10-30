@@ -68,7 +68,7 @@ const TouristCardView: React.FC<TouristCardViewProps> = React.memo(({
                     : language === 'zh'
                     ? destination.socialViews.replace(/views/gi, '次浏览').replace(/M\+/gi, '百万+')
                     : destination.socialViews
-                  : 'TikTok & FB'}
+                  : tr(language, 'ពេញនិយម', 'Popular', '热门')}
               </span>
             </span>
           )}

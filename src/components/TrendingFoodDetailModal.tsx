@@ -217,6 +217,7 @@ export const TrendingFoodDetailModal: React.FC = () => {
               })()
             } 
             alt={displayFoodName}
+            decoding="async"
             onError={(e) => {
               e.currentTarget.onerror = null;
               e.currentTarget.src = '/welcome/hero-bg.webp';
@@ -239,7 +240,7 @@ export const TrendingFoodDetailModal: React.FC = () => {
           <div className="absolute top-3 left-3 flex items-center gap-1.5 flex-wrap">
             <span className="px-2.5 py-1 rounded-xl bg-red-600 text-white text-[11px] font-bold shadow-md flex items-center gap-1">
               <Play className="w-3 h-3 fill-current" />
-              <span>YouTube Trending</span>
+              <span>{tr(language, 'វីដេអូពេញនិយម', 'Featured Video', '热门视频')}</span>
             </span>
             {item.socialViews && (
               <span className="px-2 py-0.5 rounded-lg bg-black/60 text-pink-200 text-[10px] font-bold backdrop-blur-xs">
@@ -337,7 +338,7 @@ export const TrendingFoodDetailModal: React.FC = () => {
           <div className="space-y-1">
             <h4 className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5 text-sm">
               <Sparkles className="w-4 h-4 text-emerald-500" />
-              <span>{tr(language, 'ការពិពណ៌នាអំពីមុខម្ហូប', 'Food Description', '美食详细介绍')}</span>
+              <span>{tr(language, 'អំពីមុខម្ហូបនេះ', 'About This Dish', '菜品介绍')}</span>
             </h4>
             <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-xs sm:text-sm">
               {displayDesc}

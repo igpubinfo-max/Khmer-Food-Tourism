@@ -37,7 +37,7 @@ jobs:
 
       - name: 5. Sync Version & Build Web Bundle
         run: |
-          CURRENT_VC=$(grep -oP 'versionCode\s+\K[0-9]+' android/app/build.gradle || echo 1200)
+          CURRENT_VC=$(grep -oP 'versionCode\s+\K[0-9]+' android/app/build.gradle || echo 1250)
           AUTO_VC=$((900 + ${{ github.run_number }}))
           if [ "$CURRENT_VC" -gt "$AUTO_VC" ]; then
             FINAL_VC=$CURRENT_VC
@@ -73,7 +73,7 @@ jobs:
               -keypass 'KhmerFood2026PlayStore' \
               -dname "CN=Savuth Chea, OU=Khmer Food and Tourism, O=Khmer Food and Tourism, L=Phnom Penh, ST=Phnom Penh, C=KH"
           fi
-          FINAL_VC=$(grep -oP 'versionCode\s+\K[0-9]+' android/app/build.gradle || echo 1200)
+          FINAL_VC=$(grep -oP 'versionCode\s+\K[0-9]+' android/app/build.gradle || echo 1250)
           echo "Building Android APK & Play Store AAB with versionCode $FINAL_VC"
           BUILD_TOOLS_DIR=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -n 1)
           ZIPALIGN="$BUILD_TOOLS_DIR/zipalign"
@@ -87,7 +87,7 @@ jobs:
           # 1. Build Play Store AAB with official Play Store package ID (com.khmerfood.tourism)
           ./gradlew bundleRelease --no-daemon -x lint -x lintVitalRelease
           REL_AAB=$(find app/build/outputs/bundle/release -name "*.aab" | head -n 1)
-          cp "$REL_AAB" ../release_out/KhmerFoodTourism-v2.4.0-PlayStore.aab
+          cp "$REL_AAB" ../release_out/DiscoverCambodia-v2.5.0-PlayStore.aab
 
           # 2. Build SINGLE APK with conflict-free package ID (com.khmerfood.tourism.direct)
           # Guarantees 1-tap installation on Samsung Android 15 without Play Store signature conflicts
@@ -103,10 +103,10 @@ jobs:
             --v2-signing-enabled true \
             --v3-signing-enabled true \
             --v4-signing-enabled false \
-            --out ../release_out/KhmerFoodTourism-v2.4.0.apk \
+            --out ../release_out/DiscoverCambodia-v2.5.0.apk \
             ../release_out/aligned-official.apk
           rm -f ../release_out/aligned-official.apk
-          "$APKSIGNER" verify --verbose ../release_out/KhmerFoodTourism-v2.4.0.apk
+          "$APKSIGNER" verify --verbose ../release_out/DiscoverCambodia-v2.5.0.apk
           cd ..
 
           ls -la release_out/
@@ -114,26 +114,27 @@ jobs:
       - name: 9. Upload Android Packages Artifact (Single APK + Play Store AAB)
         uses: actions/upload-artifact@v4
         with:
-          name: Khmer-Food-Tourism-Release-Packages
+          name: Discover-Cambodia-Release-Packages
           path: |
-            release_out/KhmerFoodTourism-v2.4.0.apk
-            release_out/KhmerFoodTourism-v2.4.0-PlayStore.aab
+            release_out/DiscoverCambodia-v2.5.0.apk
+            release_out/DiscoverCambodia-v2.5.0-PlayStore.aab
 
       - name: 10. Publish GitHub Release with Signed APK & Play Store AAB
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: v2.4.0
-          name: "Khmer Food & Tourism v2.4.0"
+          tag_name: v2.5.0
+          name: "Discover Cambodia Food & Tourism v2.5.0"
           make_latest: true
           body: |
-            ### 🇰🇭 កម្មវិធីទូរស័ព្ទដៃ អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism Mobile App)
+            ### 🇰🇭 Discover Cambodia Food & Tourism — Taste Cambodia. Explore Cambodia.
+            **ស្វែងយល់អាហារ និងទេសចរណ៍កម្ពុជា • 探索柬埔寨美食与旅游**
             
-            **កំណែផ្លូវការ v2.4.0 (Official V1+V2+V3 Signed Production Packages):**
-            - 📲 **KhmerFoodTourism-v2.4.0.apk:** Official Android APK (1-Tap Direct Install, V1+V2+V3 signed).
-            - 📦 **KhmerFoodTourism-v2.4.0-PlayStore.aab:** Signed Android App Bundle for Google Play Console.
+            **Official Release v2.5.0:**
+            - 📲 **DiscoverCambodia-v2.5.0.apk:** Official Android APK (1-Tap Direct Install, V1+V2+V3 signed).
+            - 📦 **DiscoverCambodia-v2.5.0-PlayStore.aab:** Signed Android App Bundle for Google Play Console.
           draft: false
           prerelease: false
           files: |
-            release_out/KhmerFoodTourism-v2.4.0.apk
-            release_out/KhmerFoodTourism-v2.4.0-PlayStore.aab
+            release_out/DiscoverCambodia-v2.5.0.apk
+            release_out/DiscoverCambodia-v2.5.0-PlayStore.aab

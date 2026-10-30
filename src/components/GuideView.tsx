@@ -862,7 +862,7 @@ export const GuideView: React.FC = () => {
           <section className="space-y-2.5">
             <SectionTitle
               icon={<CalendarDays className="w-4 h-4" />}
-              title={tr(language, 'បុណ្យជាតិ & ពិធីបុណ្យផ្លូវការនៅកម្ពុជា (១៦ ពិធី)', 'Cambodian Public Holidays & Festivals (Auto-Updated Yearly)', '柬埔寨官方公共假日与传统庆典（每年自动更新）')}
+              title={tr(language, 'បុណ្យជាតិ & ពិធីបុណ្យផ្លូវការនៅកម្ពុជា', 'Cambodian Public Holidays & Festivals', '柬埔寨公共假日与传统节庆')}
               subtitle={tr(
                 language,
                 'បង្ហាញកាលបរិច្ឆេទពិតប្រាកដ ចំនួនថ្ងៃនៅសល់ និងរយៈពេលឈប់សម្រាកផ្លូវការ',
@@ -1056,7 +1056,7 @@ export const GuideView: React.FC = () => {
                     <p className="text-[10px] italic text-slate-500 dark:text-slate-400">{p.roman}</p>
                     <p className="text-[11px] text-slate-700 dark:text-slate-200 mt-0.5">
                       {lang === 'zh' ? p.zh : p.en}
-                      {lang === 'km' && <span className="text-slate-400"> • {p.zh}</span>}
+                      {lang === 'km' && <span className="text-slate-400"> • {p.en}</span>}
                     </p>
                   </div>
                   <button

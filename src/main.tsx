@@ -12,9 +12,9 @@ try {
   console.warn('Startup anti-tamper integrity check warning:', e);
 }
 
-// 1. Version Migration: Safe non-destructive upgrade to v2.3.1 (Build 114)
+// 1. Version Migration: Safe non-destructive upgrade to v2.5.0 (Build 1250)
 try {
-  const CURRENT_VER = '2.3.1';
+  const CURRENT_VER = '2.5.0';
   const installedVer = localStorage.getItem('kft_app_installed_ver');
   if (installedVer !== CURRENT_VER) {
     // Keep all existing user accounts, credentials, and v5 data intact
@@ -45,12 +45,6 @@ try {
     const raw = localStorage.getItem(key);
     if (raw === 'undefined' || raw === 'null') {
       localStorage.removeItem(key);
-    } else if (raw) {
-      try {
-        JSON.parse(raw);
-      } catch {
-        localStorage.removeItem(key);
-      }
     }
   });
 } catch (e) {

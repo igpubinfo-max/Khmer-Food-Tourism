@@ -23,7 +23,7 @@ export const TourismView: React.FC = () => {
 
   const categories = [
     { id: 'all', nameKh: 'ទាំងអស់', nameEn: 'All', nameZh: '全部景点' },
-    { id: 'trending_social', nameKh: 'ល្បីលើ TikTok & FB', nameEn: 'TikTok & FB Viral', nameZh: '抖音 & FB 网红景点' },
+    { id: 'trending_social', nameKh: 'កំពុងពេញនិយម', nameEn: 'Popular Now', nameZh: '热门打卡' },
     { id: 'temple', nameKh: 'ប្រាសាទបុរាណ', nameEn: 'Temples', nameZh: '古迹与寺庙' },
     { id: 'nature', nameKh: 'ធម្មជាតិ & ទឹកធ្លាក់', nameEn: 'Nature & Falls', nameZh: '自然生态与瀑布' },
     { id: 'beach', nameKh: 'កោះ & ឆ្នេរសមុទ្រ', nameEn: 'Islands & Beaches', nameZh: '海岛与海滩' },

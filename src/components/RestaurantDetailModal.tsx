@@ -58,7 +58,13 @@ export const RestaurantDetailModal: React.FC = () => {
           if (foundPhone) {
             const updated = { ...selectedRestaurant, phone: foundPhone };
             setSelectedRestaurant(updated);
-            updateRestaurant(updated);
+            const canPersist =
+              currentUser?.role === 'admin' ||
+              currentUser?.id === 'admin-authorized-single' ||
+              Boolean(currentUser?.id && selectedRestaurant.ownerId === currentUser.id);
+            if (canPersist) {
+              updateRestaurant(updated);
+            }
           }
         });
       }
@@ -315,7 +321,8 @@ export const RestaurantDetailModal: React.FC = () => {
             <img 
               src={activePhoto || selectedRestaurant.photoUrl} 
               alt={loc.name}
-              className="w-full h-full object-cover transition-all duration-300"
+              decoding="async"
+              className="w-full h-full object-cover"
               onError={(e) => {
                 const target = e.currentTarget;
                 if (!target.dataset.fallback) {
@@ -590,7 +597,7 @@ export const RestaurantDetailModal: React.FC = () => {
                           : 'border-slate-200 dark:border-slate-700 opacity-80 hover:opacity-100'
                       }`}
                     >
-                      <img src={item.url} alt="gallery" className="w-full h-full object-cover" />
+                      <img src={item.url} alt="gallery" loading="lazy" decoding="async" className="w-full h-full object-cover" />
                       <span className="absolute bottom-0 inset-x-0 bg-black/65 text-white text-[8px] font-khmer py-0.5 text-center">
                         {item.category === 'shop'
                           ? tr(language, 'រូបហាង', 'Shop', '店铺封面')

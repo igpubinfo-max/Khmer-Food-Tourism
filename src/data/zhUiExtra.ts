@@ -351,7 +351,7 @@ export const ZH_UI_EXTRA: Record<string, string> = {
   "🛡️ Safe Installation with Google Play Protect (Keep Play Protect ON!)": "🛡️ 通过Google Play Protect安全安装（请保持Play Protect开启！）",
   "When \"App scan recommended\" appears, tap the blue \"Scan app\" button so Google Play Protect verifies the APK.": "出现“建议扫描应用”提示时，请点击蓝色的“扫描应用”按钮，让Google Play Protect验证该APK。",
   "4 Easy Installation Steps for Android": "安卓安装4步走",
-  "Open the downloaded KhmerFoodTourism-v1.9.6.apk file.": "打开已下载的 KhmerFoodTourism-v1.9.6.apk 文件。",
+  "Open the downloaded DiscoverCambodia-v2.5.0.apk file.": "打开已下载的 DiscoverCambodia-v2.5.0.apk 文件。",
   "When Google Play Protect prompts, tap \"Scan app\" while keeping Play Protect enabled.": "出现Google Play Protect提示时，请保持Play Protect开启并点击“扫描应用”。",
   "Using Apple iPhone? Switch to iOS guide": "使用苹果iPhone？切换到iOS指南",
   "Open Web App in Safari": "在Safari中打开网页应用",

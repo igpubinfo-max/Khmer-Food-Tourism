@@ -9,6 +9,31 @@ import { getLocalizedRestaurant } from '../utils/zhDynamicTranslator';
 
 import type { Language } from '../types';
 
+let _cachedRotRestaurants: Restaurant[] | null = null;
+let _cachedRotUsers: any = null;
+let _cachedRotSettings: any = null;
+let _cachedRotState: ReturnType<typeof getVipFeaturedRotationState> | null = null;
+
+function getCachedVipRotation(
+  restaurants: Restaurant[],
+  users: any[],
+  appSettings: any
+): ReturnType<typeof getVipFeaturedRotationState> {
+  if (
+    _cachedRotState &&
+    _cachedRotRestaurants === restaurants &&
+    _cachedRotUsers === users &&
+    _cachedRotSettings === appSettings
+  ) {
+    return _cachedRotState;
+  }
+  _cachedRotRestaurants = restaurants;
+  _cachedRotUsers = users;
+  _cachedRotSettings = appSettings;
+  _cachedRotState = getVipFeaturedRotationState(restaurants, users, appSettings);
+  return _cachedRotState;
+}
+
 interface RestaurantCardProps {
   restaurant: Restaurant;
 }
@@ -76,7 +101,6 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(({
   return (
     <div 
       onClick={() => {
-        trackRestaurantView(restaurant.id);
         setSelectedRestaurant(restaurant);
       }}
       style={{ contentVisibility: 'auto', containIntrinsicSize: '280px' }}
@@ -130,7 +154,7 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(({
               ) : (
                 <>
                   <AlertCircle className="w-3 h-3 text-slate-300 shrink-0" />
-                  <span>{tr(language, 'គំរូ / មិនទាន់ផ្ទៀងផ្ទាត់', 'Sample', '未认证')}</span>
+                  <span>{tr(language, 'មិនទាន់ផ្ទៀងផ្ទាត់', 'Unverified', '未认证')}</span>
                 </>
               )}
             </span>
@@ -319,7 +343,7 @@ const RestaurantCardInner: React.FC<RestaurantCardProps> = ({ restaurant }) => {
   const bookmarked = isBookmarked(restaurant.id);
   const isAdmin = isAdminAccount(currentUser);
   const isTopFeaturedVip = useMemo(() => {
-    const rotation = getVipFeaturedRotationState(restaurants, users, appSettings);
+    const rotation = getCachedVipRotation(restaurants, users, appSettings);
     return rotation.currentlyFeaturedIds.has(restaurant.id);
   }, [restaurants, users, appSettings, restaurant.id]);
   return (

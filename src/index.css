@@ -50,13 +50,19 @@
   }
 }
 
-/* Zero-CPU / Zero-GPU-Repaint Static Styles (Prevents Mobile Overheating) */
+/* Zero-CPU / Zero-GPU-Repaint Static Styles (Prevents 120Hz Mobile Overheating) */
 .animate-pulse-subtle,
 .animate-pulse,
 .animate-bounce,
 .animate-ping {
   animation: none !important;
   opacity: 1;
+}
+
+/* Step-throttle active spinners to 10fps instead of forcing 120Hz continuous GPU compositing */
+.animate-spin {
+  animation-duration: 1.2s !important;
+  animation-timing-function: steps(12, end) !important;
 }
 
 /* Disable expensive mobile GPU multi-pass Gaussian blur shaders on scroll & overlays */
@@ -72,10 +78,21 @@
   backdrop-filter: none !important;
 }
 
+.blur-xs,
+.blur-sm,
+.blur,
+.blur-md,
+.blur-lg,
 .blur-xl,
 .blur-2xl,
 .blur-3xl {
   filter: none !important;
+}
+
+/* Offscreen layout & paint containment for long scrollable card lists */
+.kft-cv-card {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 320px;
 }
 
 /* Glassmorphism helpers (optimized without expensive backdrop-filter repaints) */

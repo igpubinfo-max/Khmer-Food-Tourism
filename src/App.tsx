@@ -5,15 +5,15 @@ import { verifyAppOwnershipAndDomainIntegrity } from './utils/security';
 import { Header } from './components/Header';
 import { BottomNav } from './components/BottomNav';
 import { HomeView } from './components/HomeView';
-import { FoodView } from './components/FoodView';
-import { RestaurantView } from './components/RestaurantView';
-import { TourismView } from './components/TourismView';
+const FoodView = lazy(() => import('./components/FoodView').then((m) => ({ default: m.FoodView })));
+const RestaurantView = lazy(() => import('./components/RestaurantView').then((m) => ({ default: m.RestaurantView })));
+const TourismView = lazy(() => import('./components/TourismView').then((m) => ({ default: m.TourismView })));
 const GuideView = lazy(() => import('./components/GuideView').then((m) => ({ default: m.GuideView })));
 const ProfileView = lazy(() => import('./components/ProfileView').then((m) => ({ default: m.ProfileView })));
-import { SmartHubMenuModal } from './components/SmartHubMenuModal';
-import { FoodDetailModal } from './components/FoodDetailModal';
-import { RestaurantDetailModal } from './components/RestaurantDetailModal';
-import { TouristDetailModal } from './components/TouristDetailModal';
+const SmartHubMenuModal = lazy(() => import('./components/SmartHubMenuModal').then((m) => ({ default: m.SmartHubMenuModal })));
+const FoodDetailModal = lazy(() => import('./components/FoodDetailModal').then((m) => ({ default: m.FoodDetailModal })));
+const RestaurantDetailModal = lazy(() => import('./components/RestaurantDetailModal').then((m) => ({ default: m.RestaurantDetailModal })));
+const TouristDetailModal = lazy(() => import('./components/TouristDetailModal').then((m) => ({ default: m.TouristDetailModal })));
 import { AuthModal } from './components/AuthModal';
 import { WelcomeScreenModal, WELCOME_SESSION_KEY } from './components/WelcomeScreenModal';
 const AddRestaurantModal = lazy(() => import('./components/AddRestaurantModal').then((m) => ({ default: m.AddRestaurantModal })));
@@ -30,8 +30,8 @@ const DailyDiscoveriesModal = lazy(() => import('./components/DailyDiscoveriesMo
 const WishlistsModal = lazy(() => import('./components/WishlistsModal').then((m) => ({ default: m.WishlistsModal })));
 const AiTripPlannerModal = lazy(() => import('./components/AiTripPlannerModal').then((m) => ({ default: m.AiTripPlannerModal })));
 const NotificationsModal = lazy(() => import('./components/NotificationsModal').then((m) => ({ default: m.NotificationsModal })));
-import { TrendingSocialModal } from './components/TrendingSocialModal';
-import { TrendingFoodDetailModal } from './components/TrendingFoodDetailModal';
+const TrendingSocialModal = lazy(() => import('./components/TrendingSocialModal').then((m) => ({ default: m.TrendingSocialModal })));
+const TrendingFoodDetailModal = lazy(() => import('./components/TrendingFoodDetailModal').then((m) => ({ default: m.TrendingFoodDetailModal })));
 const AiCheckInModal = lazy(() => import('./components/AiCheckInModal').then((m) => ({ default: m.AiCheckInModal })));
 const UpgradeVipModal = lazy(() => import('./components/UpgradeVipModal').then((m) => ({ default: m.UpgradeVipModal })));
 const PaymentSupportModal = lazy(() => import('./components/PaymentSupportModal').then((m) => ({ default: m.PaymentSupportModal })));
@@ -197,7 +197,7 @@ const MainScreen: React.FC = () => {
     return (
       <div className="flex-1 flex flex-col w-full min-h-screen relative overflow-y-auto no-scrollbar bg-slate-950 items-center justify-center p-3 sm:p-4">
         <AuthModal isMandatoryGate={true} />
-        {selectedFood && <FoodDetailModal />}
+        <Suspense fallback={null}>{selectedFood && <FoodDetailModal />}</Suspense>
         {isExitModalOpen && <ExitConfirmModal />}
         {isAdminLoginModalOpen && <AdminLoginModal />}
         {toast && <Toast />}
@@ -210,7 +210,7 @@ const MainScreen: React.FC = () => {
       <Header />
       <UpdateAvailableBanner />
       
-      <main key={`lang-${language}`} className="flex-1 w-full">
+      <main className="flex-1 w-full">
         <Suspense
           fallback={
             <div className="max-w-md mx-auto px-4 py-10 text-center text-sm text-slate-400 animate-pulse" aria-busy="true">
@@ -229,11 +229,9 @@ const MainScreen: React.FC = () => {
 
       <OfflineBanner />
 
-      {/* Smart Menu: dish tags + travel & food tools in one place (Strictly VIP Access Controlled) */}
-      {isSmartHubOpen && hasVipAccess && <SmartHubMenuModal onClose={() => setIsSmartHubOpen(false)} />}
-
       {/* Creation & Action Modals — Conditionally Mounted (lazy-loaded chunks) */}
       <Suspense fallback={null}>
+      {isSmartHubOpen && hasVipAccess && <SmartHubMenuModal onClose={() => setIsSmartHubOpen(false)} />}
       {isAuthModalOpen && <AuthModal />}
       {isAddRestaurantModalOpen && <AddRestaurantModal />}
       {isAdminOpen && <AdminDashboard />}
@@ -257,14 +255,12 @@ const MainScreen: React.FC = () => {
       {isVipAddRestaurantModalOpen && <VipAddRestaurantModal />}
       {isGoogleMapsSearchModalOpen && <GoogleMapsPlaceSearchModal />}
       {isManageMenuModalOpen && managingRestaurant && <ManageMenuModal />}
-      </Suspense>
-
-      {/* Primary Detail Modals — Statically Mounted Outside Suspense for Zero-Latency Instant Open */}
       {isTrendingSocialModalOpen && <TrendingSocialModal />}
       {isTrendingFoodDetailModalOpen && <TrendingFoodDetailModal />}
       {selectedFood && <FoodDetailModal />}
       {selectedRestaurant && <RestaurantDetailModal />}
       {selectedDestination && <TouristDetailModal />}
+      </Suspense>
       <DeleteShopConfirmModal />
 
       {/* Notifications */}

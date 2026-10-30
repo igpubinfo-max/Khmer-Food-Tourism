@@ -119,9 +119,9 @@ export const AiTripPlannerModal: React.FC = () => {
     setGenerationStepText(
       tr(
         language,
-        'AI កំពុងវិភាគតំបន់ទេសចរណ៍ និងហាងឆ្ងាញ់ៗ...',
-        'AI analyzing top spots & restaurants...',
-        'AI 正在智能分析热门景点与地道餐厅...'
+        'កំពុងជ្រើសរើសតំបន់ទេសចរណ៍ និងហាងអាហារល្បីៗ...',
+        'Selecting top attractions & local restaurants...',
+        '正在筛选热门景点与地道餐厅...'
       )
     );
 
@@ -129,9 +129,9 @@ export const AiTripPlannerModal: React.FC = () => {
       setGenerationStepText(
         tr(
           language,
-          'AI កំពុងរៀបចំកាលវិភាគធ្វើដំណើរ និងគណនាថវិកា...',
-          'AI calculating routes & optimal budget...',
-          'AI 正在规划最优游览路线与预算分配...'
+          'កំពុងរៀបចំកាលវិភាគធ្វើដំណើរ និងថវិកាប្រចាំថ្ងៃ...',
+          'Building your daily route & budget...',
+          '正在安排每日游览路线与预算...'
         )
       );
     }, 700);
@@ -149,10 +149,10 @@ export const AiTripPlannerModal: React.FC = () => {
     const provLabel = translateProvince(generatedPlan.provinceKh, language);
     const text =
       language === 'km'
-        ? `🗺️ ផែនការដើរលេង AI នៅ${generatedPlan.provinceKh} (${generatedPlan.durationDays} ថ្ងៃ)\n👥 ដំណើរកម្សាន្ត៖ ${generatedPlan.companion}\nទាញយកកម្មវិធី Khmer Food & Tourism ដើម្បីមើលកាលវិភាគលម្អិត!`
+        ? `🗺️ ផែនការដើរលេង AI នៅ${generatedPlan.provinceKh} (${generatedPlan.durationDays} ថ្ងៃ)\n👥 ដំណើរកម្សាន្ត៖ ${generatedPlan.companion}\nស្វែងយល់អាហារ និងទេសចរណ៍កម្ពុជា — Discover Cambodia Food & Tourism`
         : language === 'zh'
-        ? `🗺️ AI 智能行程规划：${provLabel}（${generatedPlan.durationDays}天）\n👥 出行方式：${generatedPlan.companion}\n下载 Khmer Food & Tourism 查看完整行程！`
-        : `🗺️ AI Trip Plan in ${provLabel} (${generatedPlan.durationDays} Days)\n👥 Companion: ${generatedPlan.companion}\nDownload Khmer Food & Tourism for the full itinerary!`;
+        ? `🗺️ AI 智能行程规划：${provLabel}（${generatedPlan.durationDays}天）\n👥 出行方式：${generatedPlan.companion}\n探索柬埔寨美食与旅游 — Discover Cambodia Food & Tourism`
+        : `🗺️ AI Trip Plan in ${provLabel} (${generatedPlan.durationDays} Days)\n👥 Companion: ${generatedPlan.companion}\nPlanned with Discover Cambodia Food & Tourism`;
     
     if (navigator.share) {
       navigator.share({ title: 'AI Trip Plan', text }).catch(() => {});
@@ -181,7 +181,7 @@ export const AiTripPlannerModal: React.FC = () => {
   const budgetLabels: Record<string, string> = {
     budget: tr(language, 'សន្សំសំចៃ', 'Budget', '经济实惠'),
     medium: tr(language, 'មធ្យម', 'Medium', '舒适适中'),
-    luxury: tr(language, 'ទំនើប VIP', 'Luxury', '尊享豪华'),
+    luxury: tr(language, 'ផាសុកភាពខ្ពស់', 'Luxury', '尊享豪华'),
   };
 
   return (
@@ -201,12 +201,9 @@ export const AiTripPlannerModal: React.FC = () => {
                 <h3 className="font-moul text-sm text-white">
                   {tr(language, 'ផែនការដើរលេង AI', 'AI Trip Planner', 'AI 智能行程规划')}
                 </h3>
-                <span className="px-2 py-0.5 rounded-full bg-amber-400 text-stone-900 text-[10px] font-black shadow-xs">
-                  {tr(language, 'ឆ្លាតវៃស្វ័យប្រវត្តិ 🤖', 'Automated AI 🤖', '全自动智能 🤖')}
-                </span>
               </div>
               <p className="text-[11px] text-emerald-100 font-khmer">
-                {tr(language, 'រៀបចំផ្លូវដើរលេង កន្លែងញ៉ាំ និងកម្សាន្តតាមថវិកា', 'Auto-generate meals & sightseeing itinerary', '根据预算一键生成景点游览与美食打卡行程')}
+                {tr(language, 'រៀបចំកម្មវិធីដើរលេង និងហាងអាហារតាមខេត្ត និងថវិកា', 'Plan daily sightseeing & local dining by province and budget', '按省份与预算规划每日景点与地道美食')}
               </p>
             </div>
           </div>
@@ -351,7 +348,7 @@ export const AiTripPlannerModal: React.FC = () => {
                   {[
                     { id: 'budget', labelKh: 'សន្សំសំចៃ', labelEn: 'Budget', labelZh: '经济实惠', subKh: 'ប្រហាក់ប្រហែល < $40/ថ្ងៃ', subEn: 'Approx. < $40/day', subZh: '约 < $40/天' },
                     { id: 'medium', labelKh: 'មធ្យម', labelEn: 'Medium', labelZh: '舒适适中', subKh: 'ប្រហាក់ប្រហែល $40-$100/ថ្ងៃ', subEn: 'Approx. $40-$100/day', subZh: '约 $40-$100/天' },
-                    { id: 'luxury', labelKh: 'ទំនើប VIP', labelEn: 'Luxury VIP', labelZh: '尊享豪华', subKh: 'ប្រហាក់ប្រហែល > $100/ថ្ងៃ', subEn: 'Approx. > $100/day', subZh: '约 > $100/天' },
+                    { id: 'luxury', labelKh: 'ផាសុកភាពខ្ពស់', labelEn: 'Comfort / Luxury', labelZh: '尊享豪华', subKh: 'ប្រហាក់ប្រហែល > $100/ថ្ងៃ', subEn: 'Approx. > $100/day', subZh: '约 > $100/天' },
                   ].map(b => (
                     <button
                       key={b.id}
@@ -403,7 +400,7 @@ export const AiTripPlannerModal: React.FC = () => {
                 className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-500 hover:from-amber-600 hover:to-amber-500 text-stone-900 font-black text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-[0.98] cursor-pointer"
               >
                 <Sparkles className="w-5 h-5 fill-current" />
-                <span>{tr(language, '« បង្កើតផែនការដើរលេងដោយ AI »', 'Generate AI Trip Plan', '« 一键生成 AI 智能行程 »')}</span>
+                <span>{tr(language, 'បង្កើតផែនការដើរលេង', 'Create Trip Plan', '生成行程方案')}</span>
               </button>
             </div>
           ) : (

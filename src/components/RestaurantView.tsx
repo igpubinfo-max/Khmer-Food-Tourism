@@ -308,7 +308,7 @@ export const RestaurantView: React.FC = () => {
           }`}
         >
           <AlertCircle className="w-3.5 h-3.5" />
-          <span>{tr(language, `គំរូ (${sampleCount})`, `Sample (${sampleCount})`, `示例 (${sampleCount})`)}</span>
+          <span>{tr(language, `ទូទៅ (${sampleCount})`, `Listed (${sampleCount})`, `收录 (${sampleCount})`)}</span>
         </button>
       </div>
 
@@ -430,7 +430,7 @@ export const RestaurantView: React.FC = () => {
                       `My Store: ${myExistingRest.nameEn || myExistingRest.nameKh}`,
                       `我的店铺：${myExistingRest.nameEn || myExistingRest.nameKh}`
                     )
-                  : tr(language, 'ចុះបញ្ជីហាងរបស់អ្នក (1 ហាង)', 'Register Your Restaurant (1 Store)', '注册您的餐厅（1 家店铺）')}
+                  : tr(language, 'ចុះបញ្ជីហាងរបស់អ្នក', 'Register Your Restaurant', '注册您的餐厅')}
               </span>
               <span className="px-2 py-0.5 rounded-full bg-amber-300 text-slate-950 text-[9px] font-black">
                 {myExistingRest
@@ -453,9 +453,9 @@ export const RestaurantView: React.FC = () => {
                   )
                 : tr(
                     language,
-                    'ចុះបញ្ជីហាងមុន ហាងរបស់លោកអ្នកនឹងបង្ហាញមុនគេតាមលំដាប់លេខរៀង ដើម្បីងាយស្រួលឱ្យអតិថិជនស្វែងរក និងតាមដានស្ថិតិហាង។',
-                    'Register your restaurant early so it appears first in chronological order, making it easy for customers to find and track store analytics.',
-                    '越早注册您的餐厅，越能优先展示在推荐列表中，方便国内外顾客搜索并查看实时店铺访问统计。'
+                    'ដាក់បង្ហាញមុខម្ហូប ទីតាំងផែនទី និងលេខទំនាក់ទំនងហាងរបស់អ្នក ដើម្បីឱ្យភ្ញៀវងាយស្រួលស្វែងរក។',
+                    'Share your menu, map location, and contact details so diners can easily find your restaurant.',
+                    '展示您的菜单、地图位置与联系方式，方便食客轻松找到您的餐厅。'
                   )}
             </p>
           </div>
@@ -500,8 +500,7 @@ export const RestaurantView: React.FC = () => {
           </div>
         )}
 
-        <div className="relative p-1 rounded-2xl group">
-          <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 opacity-70 blur-xs vip-glow-btn pointer-events-none" />
+        <div className="relative rounded-2xl">
           <div className="relative flex flex-col sm:flex-row gap-2">
             <button
               onClick={() => {
@@ -528,9 +527,9 @@ export const RestaurantView: React.FC = () => {
                     )
                   : tr(
                       language,
-                      '+ ចុះបញ្ជីហាងរបស់អ្នក (1 ហាង)',
-                      '+ Register Your Restaurant (1 Store)',
-                      '+ 注册您的专属餐厅 (1 家店铺)'
+                      '+ ចុះបញ្ជីហាងរបស់អ្នក',
+                      '+ Register Your Restaurant',
+                      '+ 注册您的餐厅'
                     )}
               </span>
             </button>
@@ -547,7 +546,7 @@ export const RestaurantView: React.FC = () => {
                 <Plus className="w-4 h-4" />
                 <span>
                   {storeQuota.canAddWithoutNewPayment
-                    ? tr(language, 'បន្ថែមហាងថ្មី ($0)', 'Add Store ($0)', '添加新店铺 ($0)')
+                    ? tr(language, 'បន្ថែមហាងថ្មី', 'Add Restaurant', '添加新餐厅')
                     : tr(language, `បន្ថែមហាងថ្មី (+${storeQuota.additionalStoreFeeUsd.toFixed(2)})`, `Add Store (+${storeQuota.additionalStoreFeeUsd.toFixed(2)})`, `添加新店铺 (+${storeQuota.additionalStoreFeeUsd.toFixed(2)})`)}
                 </span>
               </button>

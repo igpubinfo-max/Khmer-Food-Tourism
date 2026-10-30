@@ -76,18 +76,18 @@ export const FoodView: React.FC = () => {
 
   // Ordered exactly as requested: សម្ល, ឆា, ស្ងោរ, បង្អែម
   const categories = [
-    { id: 'all', nameKh: 'ទាំងអស់', nameEn: 'All Menus', nameZh: '全部菜品', emoji: '🍽️' },
-    { id: 'samlor', nameKh: '១. សម្ល', nameEn: '1. Soups & Curries', nameZh: '1. 浓汤/咖喱', emoji: '🍲' },
-    { id: 'cha', nameKh: '២. ឆា', nameEn: '2. Stir-Fry & Grill', nameZh: '2. 热炒/烧烤', emoji: '🥘' },
-    { id: 'sngor', nameKh: '៣. ស្ងោរ', nameEn: '3. Boiled Soups', nameZh: '3. 清汤/汤粉', emoji: '🥣' },
-    { id: 'bong_aem', nameKh: '៤. បង្អែម', nameEn: '4. Desserts', nameZh: '4. 高棉甜品', emoji: '🍨' },
+    { id: 'all', nameKh: 'ទាំងអស់', nameEn: 'All Dishes', nameZh: '全部菜品', emoji: '🍽️' },
+    { id: 'samlor', nameKh: 'សម្ល', nameEn: 'Soups & Curries', nameZh: '浓汤/咖喱', emoji: '🍲' },
+    { id: 'cha', nameKh: 'ឆា & អាំង', nameEn: 'Stir-Fry & Grill', nameZh: '热炒/烧烤', emoji: '🥘' },
+    { id: 'sngor', nameKh: 'ស្ងោរ & គុយទាវ', nameEn: 'Broths & Noodles', nameZh: '清汤/汤粉', emoji: '🥣' },
+    { id: 'bong_aem', nameKh: 'បង្អែម', nameEn: 'Desserts', nameZh: '高棉甜品', emoji: '🍨' },
   ];
 
   const sectionZhMeta: Record<KhmerFoodPrimaryGroup, { titleZh: string; subtitleZh: string }> = {
-    samlor: { titleZh: '1. 高棉传统浓汤与咖喱', subtitleZh: '正宗高棉浓汤、阿莫克与红绿咖喱' },
-    cha: { titleZh: '2. 高棉风味小炒与烤物', subtitleZh: '香茅热炒、摇滚牛肉粒、炙烤与凉拌菜' },
-    sngor: { titleZh: '3. 清炖鲜汤、米粉与主食', subtitleZh: '酸汤、清汤、高棉米粉与特色饭面' },
-    bong_aem: { titleZh: '4. 传统高棉甜品与糕点', subtitleZh: '椰奶甜汤、传统糕点与特色饮品' },
+    samlor: { titleZh: '高棉传统浓汤与咖喱', subtitleZh: '传统高棉浓汤、阿莫克与红绿咖喱' },
+    cha: { titleZh: '高棉风味小炒与烤物', subtitleZh: '香茅热炒、摇滚牛肉粒、炙烤与凉拌菜' },
+    sngor: { titleZh: '清炖鲜汤、米粉与主食', subtitleZh: '酸汤、清汤、高棉米粉与特色饭面' },
+    bong_aem: { titleZh: '传统高棉甜品与糕点', subtitleZh: '椰奶甜汤、传统糕点与特色饮品' },
   };
 
   const filteredFoods = useMemo(() => {
@@ -172,15 +172,15 @@ export const FoodView: React.FC = () => {
           <h2 className="font-moul text-base sm:text-lg text-[#0F172A] dark:text-white flex items-center gap-2">
             <Utensils className="w-5 h-5 text-[#059669]" />
             <span>
-              {tr(language, 'ប្រមូលផ្តុំម្ហូបខ្មែរ (២០០ មុខ)', 'Khmer Food Collection (200 Dishes)', '高棉美食大全（200 道正宗菜品）')}
+              {tr(language, 'មុខម្ហូបខ្មែរ និងរូបមន្តចម្អិន', 'Cambodian Dishes & Recipes', '柬埔寨传统美食与食谱')}
             </span>
           </h2>
           <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-khmer mt-0.5">
             {tr(
               language,
-              `បង្ហាញ ${filteredFoods.length} លើ ${foods.length} មុខម្ហូបខ្មែរពិតៗ`,
-              `Showing ${filteredFoods.length} of ${foods.length} authentic dishes`,
-              `当前显示 ${filteredFoods.length} / ${foods.length} 道正宗高棉菜品`
+              `បង្ហាញ ${filteredFoods.length} នៃ ${foods.length} មុខម្ហូប`,
+              `Showing ${filteredFoods.length} of ${foods.length} dishes`,
+              `显示 ${filteredFoods.length} / ${foods.length} 道菜品`
             )}
           </p>
         </div>
@@ -192,9 +192,9 @@ export const FoodView: React.FC = () => {
           <span className="text-xs sm:text-sm font-bold text-[#064E3B] dark:text-emerald-300">
             {tr(
               language,
-              '📂 បញ្ជីមុខម្ហូបតាមផ្នែក (សម្ល • ឆា • ស្ងោរ • បង្អែម)៖',
-              '📂 Browse by Category (Soups • Stir-Fry • Broths • Desserts):',
-              '📂 按分类浏览菜品（浓汤 • 热炒 • 清炖 • 甜品）：'
+              'ជ្រើសរើសប្រភេទម្ហូប',
+              'Browse by Category',
+              '按分类浏览'
             )}
           </span>
           <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
@@ -356,11 +356,8 @@ export const FoodView: React.FC = () => {
                     </div>
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className="px-2 py-0.5 rounded bg-amber-400 text-slate-950 text-[11px] font-black">
-                          {tr(language, `ផ្នែកទី ${section.meta.order}`, `Category #${section.meta.order}`, `第 ${section.meta.order} 类`)}
-                        </span>
                         <h3 className="font-moul text-sm sm:text-base text-white truncate">
-                          {tr(language, section.meta.nameKh, section.meta.nameEn, zhMeta?.titleZh || section.meta.nameEn)}
+                          {tr(language, section.meta.nameKh.replace(/^[០-៩0-9]+.s*/, ''), section.meta.nameEn.replace(/^[0-9]+.s*/, ''), zhMeta?.titleZh || section.meta.nameEn)}
                         </h3>
                       </div>
                       <p className="text-xs text-emerald-100 truncate mt-0.5">

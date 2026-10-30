@@ -15,14 +15,13 @@ interface Props {
 }
 
 const SLOT_META: Record<MealSlot, { icon: React.ElementType; km: string; en: string; zh: string }> = {
-  breakfast: { icon: Sunrise, km: 'ល្អសម្រាប់ពេលព្រឹក', en: 'Good for breakfast', zh: '适合早餐' },
-  lunch: { icon: Sun, km: 'ល្អសម្រាប់ពេលថ្ងៃត្រង់', en: 'Good for lunch', zh: '适合午餐' },
-  snack: { icon: Coffee, km: 'ល្អសម្រាប់ពេលរសៀល', en: 'Good for afternoon', zh: '适合下午茶' },
-  dinner: { icon: Moon, km: 'ល្អសម្រាប់ពេលល្ងាច', en: 'Good for dinner', zh: '适合晚餐' },
+  breakfast: { icon: Sunrise, km: 'ស័ក្តិសមសម្រាប់ពេលព្រឹក', en: 'Recommended for breakfast', zh: '早餐精选' },
+  lunch: { icon: Sun, km: 'ស័ក្តិសមសម្រាប់ពេលថ្ងៃត្រង់', en: 'Recommended for lunch', zh: '午餐精选' },
+  snack: { icon: Coffee, km: 'ស័ក្តិសមសម្រាប់ពេលរសៀល', en: 'Recommended for afternoon', zh: '下午茶精选' },
+  dinner: { icon: Moon, km: 'ស័ក្តិសមសម្រាប់ពេលល្ងាច', en: 'Recommended for dinner', zh: '晚餐精选' },
 };
 
-/** "Picked for you right now": one spotlight dish + two compact picks, chosen by time of day. */
-export const ForYouSection: React.FC<Props> = ({ language, slot, foods, onOpenFood, onSeeAll }) => {
+const ForYouSectionInner: React.FC<Props> = ({ language, slot, foods, onOpenFood, onSeeAll }) => {
   if (!foods.length) return null;
   const [hero, ...rest] = foods;
   const heroLoc = getLocalizedFood(hero, language);
@@ -34,8 +33,8 @@ export const ForYouSection: React.FC<Props> = ({ language, slot, foods, onOpenFo
     <section className="space-y-3">
       <SectionHeader
         icon={Sparkles}
-        title={tr(language, 'ជ្រើសរើសសម្រាប់អ្នក', 'Picked for You', '为您推荐')}
-        subtitle={tr(language, 'ជ្រើសរើសតាមពេលវេលាបច្ចុប្បន្ន', 'Chosen for this time of day', '根据当前时段精选')}
+        title={tr(language, 'មុខម្ហូបប្រចាំពេល', 'Recommended Dishes', '时段精选美食')}
+        subtitle={tr(language, 'ជ្រើសរើសតាមពេលវេលាបច្ចុប្បន្ន', 'Curated for this time of day', '根据当前时段为您精选')}
         actionLabel={tr(language, 'មើលទាំងអស់', 'See all', '查看全部')}
         onAction={onSeeAll}
       />
@@ -49,19 +48,20 @@ export const ForYouSection: React.FC<Props> = ({ language, slot, foods, onOpenFo
           src={resolveHomePhoto(hero.photoUrl)}
           alt={heroLoc.name}
           loading="lazy"
+          decoding="async"
           onError={(e) => {
             e.currentTarget.onerror = null;
             e.currentTarget.src = FALLBACK_IMG;
           }}
-          className="absolute inset-0 w-full h-full object-cover bg-slate-200"
+          className="absolute inset-0 w-full h-full object-cover bg-slate-800"
         />
         <span className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" />
-        <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-black/45 backdrop-blur-sm text-amber-200 text-[11px] font-bold inline-flex items-center gap-1.5">
+        <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-black/65 text-amber-200 text-[11px] font-bold inline-flex items-center gap-1.5">
           <SlotIcon className="w-3.5 h-3.5" />
           {slotLabel}
         </span>
         <span className="absolute bottom-0 inset-x-0 p-4">
-          <span className={`${headingFont(language)} text-lg leading-snug text-white drop-shadow line-clamp-2`}>{heroLoc.name}</span>
+          <span className={`${headingFont(language)} text-lg leading-snug text-white line-clamp-2`}>{heroLoc.name}</span>
           <span className="mt-1 flex items-center gap-3 text-xs text-emerald-100">
             <span className="truncate">{heroLoc.category}</span>
             {(heroLoc.cookTime || heroLoc.prepTime) && (
@@ -89,6 +89,7 @@ export const ForYouSection: React.FC<Props> = ({ language, slot, foods, onOpenFo
                   src={resolveHomePhoto(food.photoUrl)}
                   alt={loc.name}
                   loading="lazy"
+                  decoding="async"
                   onError={(e) => {
                     e.currentTarget.onerror = null;
                     e.currentTarget.src = FALLBACK_IMG;
@@ -112,3 +113,5 @@ export const ForYouSection: React.FC<Props> = ({ language, slot, foods, onOpenFo
     </section>
   );
 };
+
+export const ForYouSection = React.memo(ForYouSectionInner);

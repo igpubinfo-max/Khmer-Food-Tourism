@@ -1,6 +1,6 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useApp } from '../context/AppContext';
-import { TrendingFoodCategorySlug, TrendingFoodItem, isUserVipActive, getVipAccountState, getVipRemainingDays, sortRestaurantsChronologically, sortRestaurantsWithVipRotation, isAdminAccount, getVipFeaturedRotationConfig } from '../types';
+import { TrendingFoodItem, isUserVipActive, getVipAccountState, getVipRemainingDays, sortRestaurantsWithVipRotation, isAdminAccount, getVipFeaturedRotationConfig } from '../types';
 import {
   normalizeKhmerSearchText,
   searchCambodiaPlacesWithSmartCache,
@@ -11,17 +11,12 @@ import {
   calculateDistanceMeters,
 } from '../services/googlePlacesService';
 import { shuffleForCurrentSession } from '../utils/sessionShuffle';
-import { shareRichContent, copyTextNativeOrWeb } from '../utils/androidMediaHelper';
 import { tr, translateProvince } from '../utils/i18n';
 import { getLocalizedFood, getLocalizedRestaurant, getLocalizedDestination } from '../utils/zhDynamicTranslator';
 import { HomeGreetingSearch } from './home/HomeGreetingSearch';
-import { QuickActions } from './home/QuickActions';
-import { SmartMenuBanner } from './home/SmartMenuBanner';
 import { openSmartHub } from '../utils/smartHub';
-import { TodayDiscovery } from './home/TodayDiscovery';
 import { TrendingFoodsRow } from './home/TrendingFoodsRow';
 import { HomeSkeleton, HomeEmptyState } from './home/HomeStates';
-import { MoreSection } from './home/MoreSection';
 import { FeatureGrid } from './home/FeatureGrid';
 import { ForYouSection } from './home/ForYouSection';
 import { PopularShops } from './home/PopularShops';
@@ -30,51 +25,43 @@ import { VipPerksCard } from './home/VipPerksCard';
 import { VipStatusNotice } from './home/VipStatusNotice';
 import { MyShopPanel } from './home/MyShopPanel';
 import { getMealSlot, getMealHint, MEAL_CATEGORIES, seededShuffle } from './home/homeUtils';
-import { 
-  Sparkles, ChevronRight, Utensils, Store, Compass, 
-  MapPin, Heart, Flame, QrCode, Download, ShieldCheck,
-  Apple, Smartphone, Bot, Calendar, Bookmark, Bell, 
-  UtensilsCrossed, MessageSquareQuote, Camera, Phone,
-  Navigation, Eye, ExternalLink, Play, Shuffle, Search, RefreshCw,
-  Crown, Plus, Edit2, CheckCircle2, X, Tag, ChefHat, Copy, Video, Check, Lock, Trash2, Globe, HeartPulse, Loader2,
+import {
+  ChevronRight, Utensils, Store, Compass,
+  MapPin, ShieldCheck,
+  ExternalLink, Search, RefreshCw,
+  Plus, Edit2, X, Trash2, Globe, Loader2,
   Users, CreditCard, Settings, MessageSquare, Shield, Clock
 } from 'lucide-react';
 
 export const HomeView: React.FC = () => {
-  const { 
-    foods, restaurants, destinations, setActiveTab, 
+  const {
+    foods, restaurants, destinations, setActiveTab,
     language, selectedProvince, setSelectedProvince,
     currentUser, users, appSettings, setIsAuthModalOpen,
-    setIsInstallModalOpen, setIsSupportModalOpen,
-    openInstallModal, setSelectedDestination,
+    setSelectedDestination,
     setIsWhatToEatModalOpen,
     setIsNearMeModalOpen,
     setIsDailyDiscoveriesModalOpen,
-    setIsNotificationsModalOpen,
-    setIsTrendingSocialModalOpen, unreadNotificationsCount,
+    setIsAiTripPlannerModalOpen,
+    setIsTrendingSocialModalOpen,
     trendingFoods, setSelectedTrendingFood, setIsTrendingFoodDetailModalOpen,
-    setIsAiCheckInModalOpen, showToast,
-    setIsAiFoodDiscoveryModalOpen, setIsRestaurantCheckInModalOpen,
+    showToast,
+    setIsRestaurantCheckInModalOpen,
     searchQuery: globalSearchQuery, setSearchQuery: setGlobalSearchQuery,
     setSelectedFood, setSelectedRestaurant,
-    setIsVipAddRestaurantModalOpen, setIsManageMenuModalOpen, setManagingRestaurant,
+    setIsVipAddRestaurantModalOpen,
     getOwnedRestaurantsForUser, getCurrentUserStoreQuota, openManageMyVipStore, activeManagedShopId,
     openUpgradeVipModal, deleteRestaurant, openGoogleMapsSearchModal, setIsAdminOpen,
-    setIsQrScannerModalOpen, transactions, supportTickets, triggerCloudSyncNow
+    transactions, supportTickets, triggerCloudSyncNow
   } = useApp();
 
-  const isKm = language === 'km';
   const isVip = isUserVipActive(currentUser);
   const isAdmin = isAdminAccount(currentUser);
   const storeQuota = getCurrentUserStoreQuota(currentUser);
   const myRestaurants = useMemo(() => {
+    if (!isVip && !isAdmin) return [];
     return getOwnedRestaurantsForUser(currentUser);
-  }, [restaurants, currentUser, activeManagedShopId]);
-
-  // Active category filter, local search query, and AI random seed for AI Trending Food on Home
-  const [selectedCategory, setSelectedCategory] = useState<TrendingFoodCategorySlug>('all');
-  const [trendingSearchQuery, setTrendingSearchQuery] = useState<string>('');
-  const [randomSeed, setRandomSeed] = useState<number>(0);
+  }, [restaurants, currentUser, activeManagedShopId, isVip, isAdmin, getOwnedRestaurantsForUser]);
 
   // Search results tab filter, radius filter, and pagination when global search is active
   const [searchTab, setSearchTab] = useState<'all' | 'food' | 'restaurants' | 'tourism' | 'external'>('all');
@@ -83,114 +70,11 @@ export const HomeView: React.FC = () => {
   const [isGettingSearchGps, setIsGettingSearchGps] = useState<boolean>(false);
   const [searchVisibleCount, setSearchVisibleCount] = useState<number>(12);
 
-  // AI Viral Content Generator State
-  const [aiViralIndex, setAiViralIndex] = useState<number>(0);
-  const [hasCopiedCaption, setHasCopiedCaption] = useState<boolean>(false);
-
-  // Authentic Cambodian viral food concepts pool for AI generator
-  const viralAiIdeas = useMemo(() => [
-    {
-      foodNameKh: 'នំក្រក់ពិសេស និងសាច់អាំងបាត់ដំបង',
-      foodNameEn: 'Battambang Crispy Num Krok & Beef Skewers',
-      provinceKh: 'ខេត្តបាត់ដំបង',
-      provinceEn: 'Battambang',
-      accountHandle: currentUser?.socialAccounts?.tiktok?.handle ? `@${currentUser.socialAccounts.tiktok.handle}` : '@cheakimseng',
-      verifiedCreator: currentUser?.name || 'Chea Kimseng Foodie',
-      hookKh: '🔥 តើអ្នកធ្លាប់ភ្លក្សនំក្រក់ពិសេសនៅបាត់ដំបងក្បែរលោកតាដំបងក្រញូងហើយឬនៅ? ក្លិនឈ្ងុយខ្ទិះដូង ស្រួយស្រឹបមិនអាចបំភ្លេចបាន!',
-      hookEn: '🔥 Have you ever tasted authentic Battambang Num Krok near the Ta Dumbong shrine? Crispy coconut perfection!',
-      captionKh: 'រសជាតិមរតកដើមនំក្រក់ក្តៅៗស្រួយក្រៅទន់ក្នុង ជ្រលក់ទឹកត្រីផ្អែមពិសេស និងសាច់អាំងប្រឡាក់គ្រឿងល្មៀតឈ្ងុយឆ្ងាញ់! មើលហើយចង់ហោះទៅបាត់ដំបងភ្លាមៗ 😋📍',
-      captionEn: 'Golden crispy Num Krok hot off the cast iron pan, served with authentic sweet fish sauce & lemongrass beef skewers! 😋📍',
-      hashtags: '#KhmerFood #BattambangEats #NumKrok #CambodianStreetFood #TikTokFoodCambodia #អាហារខ្មែរ #ទេសចរណ៍បាត់ដំបង',
-      videoConceptKh: 'ប្លង់ ១: ចាក់ម្សៅខ្ទិះលើខ្ទះដែកក្តៅៗមានផ្សែងហុយ -> ប្លង់ ២: លើកនំក្រក់ស្រួយជ្រលក់ទឹកត្រីផ្អែម -> ប្លង់ ៣: បង្ហាញរូបលោកតាដំបងក្រញូងតំណាងខេត្តបាត់ដំបង',
-      videoConceptEn: 'Shot 1: Sizzling coconut batter poured into cast-iron pan -> Shot 2: Dipping hot crispy cake into sweet chili sauce -> Shot 3: Ta Dumbong landmark cutaway',
-    },
-    {
-      foodNameKh: 'ក្តាមថ្មឆាម្រេចខ្ចីកំពត និងមឹកបំពងម្សៅកែប',
-      foodNameEn: 'Kampot Fresh Green Pepper Crab & Kep Squid',
-      provinceKh: 'ខេត្តកំពត & កែប',
-      provinceEn: 'Kampot & Kep',
-      accountHandle: currentUser?.socialAccounts?.tiktok?.handle ? `@${currentUser.socialAccounts.tiktok.handle}` : '@cheakimseng',
-      verifiedCreator: currentUser?.name || 'Chea Kimseng Foodie',
-      hookKh: '🦀 កំពតមិនមែនមានតែទុរេនទេ! មកភ្លក្សក្តាមសមុទ្រស្រស់ឆាជាមួយម្រេចខ្ចីកំពត GI ហឹរឈ្ងុយជាប់មាត់!',
-      hookEn: '🦀 Fresh mud crab wok-fried with world-famous GI Kampot green peppercorns!',
-      captionKh: 'សាច់ក្តាមផ្អែមស្រស់ៗពីផ្សារក្តាមកែប ឆាជាមួយម្រេចខ្ចីកំពតពិតៗ ហឹរប្រហើរឈ្ងុយឆ្ងាញ់ខ្លាំង! ធានាថាញ៉ាំបាយអស់ ៣ ចានមិនដឹងខ្លួន! 🤤🌊',
-      captionEn: 'Sweet fresh sea crab tossed with fragrant Kampot green peppercorns right by the sea! Absolute Cambodian pride 🤤🌊',
-      hashtags: '#KampotPepperCrab #KepCrabMarket #CambodiaSeafood #KhmerFoodie #TikTokCambodia #ម្រេចកំពត #ក្តាមឆាម្រេចខ្ចី',
-      videoConceptKh: 'ប្លង់ ១: ស្រង់ក្តាមស្រស់ៗពីកន្ត្រកទឹកសមុទ្រ -> ប្លង់ ២: ភ្លើងឆាបឆាជាមួយម្រេចខ្ចី -> ប្លង់ ៣: បង្ហាញទេសភាពឆ្នេរសមុទ្រកែប និងផ្សារក្តាម',
-      videoConceptEn: 'Shot 1: Pulling fresh crab baskets from the sea -> Shot 2: Wok fire flaring with peppercorns -> Shot 3: Kep Crab Market seaside sunset',
-    },
-    {
-      foodNameKh: 'នំបញ្ចុកសម្លការីសៀមរាប និងប្រហុកអាំងស្លឹកចេក',
-      foodNameEn: 'Siem Reap Curry Nom Banh Chok & Grilled Prahok',
-      provinceKh: 'ខេត្តសៀមរាប',
-      provinceEn: 'Siem Reap',
-      accountHandle: currentUser?.socialAccounts?.tiktok?.handle ? `@${currentUser.socialAccounts.tiktok.handle}` : '@cheakimseng',
-      verifiedCreator: currentUser?.name || 'Chea Kimseng Foodie',
-      hookKh: '🍜 មកដល់សៀមរាបអង្គរ បើមិនបានញ៉ាំនំបញ្ចុកទឹកសម្លការីព្រះវិហារ និងប្រហុកខ្ចប់ស្លឹកចេក ដូចមិនទាន់មកដល់!',
-      hookEn: '🍜 Visiting Angkor without fresh Siem Reap Nom Banh Chok is incomplete!',
-      captionKh: 'សរសៃនំបញ្ចុកបុកដៃស្រស់ៗស្រុះទឹកក្តៅ ស្រោចទឹកសម្លការីក្រហមដូងខ្ទិះរោយជីរគ្រប់មុខ និងប្រហុកអាំងឈ្ងុយសាយភាយ! រសជាតិប្រពៃណីពិតៗ ❤️',
-      captionEn: 'Handmade rice noodles ladled with fragrant coconut curry, fresh herbs, and roasted prahok in banana leaves! ❤️',
-      hashtags: '#SiemReapEats #NomBanhChok #AngkorFood #KhmerTraditionalDish #FoodReviewCambodia #នំបញ្ចុកសៀមរាប',
-      videoConceptKh: 'ប្លង់ ១: ចាប់សរសៃនំបញ្ចុកសស្គុសដាក់ចាន -> ប្លង់ ២: ស្រោចទឹកសម្លការីក្តៅហុយផ្សែង -> ប្លង់ ៣: ប្លង់ស្វាគមន៍មុខប្រាសាទអង្គរវត្ត',
-      videoConceptEn: 'Shot 1: Plating silky fresh rice noodles -> Shot 2: Ladling rich golden coconut curry -> Shot 3: Iconic Angkor Wat panorama',
-    },
-    {
-      foodNameKh: 'គុយទាវភ្នំពេញពិសេស និងកាហ្វេទឹកដោះគោទឹកកកបុរាណ',
-      foodNameEn: 'Phnom Penh Kuy Teav & Traditional Iced Milk Coffee',
-      provinceKh: 'រាជធានីភ្នំពេញ',
-      provinceEn: 'Phnom Penh',
-      accountHandle: currentUser?.socialAccounts?.tiktok?.handle ? `@${currentUser.socialAccounts.tiktok.handle}` : '@cheakimseng',
-      verifiedCreator: currentUser?.name || 'Chea Kimseng Foodie',
-      hookKh: '🥣 អាហារពេលព្រឹកលេខ ១ របស់ប្រជាជនខ្មែរ! គុយទាវភ្នំពេញទឹកស៊ុបឆ្អឹងជ្រូកផ្អែមថ្លាឈ្វេង!',
-      hookEn: '🥣 Number 1 Cambodian morning staple! Clear sweet pork bone broth Kuy Teav Phnom Penh!',
-      captionKh: 'ចាប់ផ្តើមព្រឹកព្រលឹមជាមួយគុយទាវភ្នំពេញគ្រឿងក្នុងពិសេស ខ្ទឹមលីងឈ្ងុយ និងកាហ្វេទឹកដោះគោកូរហុយផ្សែង! រសជាតិកម្រិតរាជធានី 💯☕',
-      captionEn: 'Start your morning in Phnom Penh with iconic Kuy Teav and artisan condensed milk iced coffee! 💯☕',
-      hashtags: '#PhnomPenhFood #KuyTeavPhnomPenh #KhmerBreakfast #CambodianCoffee #ភ្នំពេញ #គុយទាវខ្មែរ',
-      videoConceptKh: 'ប្លង់ ១: ស្រង់សរសៃគុយទាវឡើង -> ប្លង់ ២: ចាក់ទឹកស៊ុបពុះក្តៅស្រោចលើសាច់ -> ប្លង់ ៣: ចាក់ទឹកដោះគោចូលកាហ្វេខ្មៅទឹកកក',
-      videoConceptEn: 'Shot 1: Lifting bouncy rice noodles -> Shot 2: Pouring crystal clear boiling broth -> Shot 3: Swirling iced milk coffee',
-    }
-  ], [currentUser]);
-
-  const currentViralIdea = viralAiIdeas[aiViralIndex % viralAiIdeas.length];
-
-  const handleNextAiIdea = () => {
-    setAiViralIndex(prev => prev + 1);
-    setHasCopiedCaption(false);
-    showToast(
-      tr(
-        language,
-        '✨ គំនិតវីដេអូថ្មីសម្រាប់មុខម្ហូបខ្មែរ!',
-        '✨ Fresh viral Khmer food concept generated!',
-        '✨ 已生成新的高人气高棉美食视频创意！'
-      ),
-      'success'
-    );
-  };
-
-  const handleCopyCaption = async () => {
-    const fullText = `${currentViralIdea.hookKh}\n\n${currentViralIdea.captionKh}\n\n${currentViralIdea.hashtags}`;
-    const ok = await copyTextNativeOrWeb(fullText, currentViralIdea.foodNameKh);
-    if (ok) {
-      setHasCopiedCaption(true);
-      showToast(isKm ? 'បានចម្លង Caption & Hashtags រួចរាល់!' : 'Caption & Hashtags copied!', 'success');
-      setTimeout(() => setHasCopiedCaption(false), 2500);
-    }
-  };
-
-  const sessionShuffledRestaurants = useMemo(
-    () => sortRestaurantsWithVipRotation(shuffleForCurrentSession(restaurants), users, appSettings),
-    [restaurants, users, appSettings]
-  );
-  const sessionShuffledDestinations = useMemo(
-    () => shuffleForCurrentSession(destinations),
-    [destinations]
-  );
-
   const [homeSmartCachePlaces, setHomeSmartCachePlaces] = useState<GooglePlaceCachedItem[]>([]);
   const [isHomeSearchingOnline, setIsHomeSearchingOnline] = useState(false);
   const [homeCacheSourceLabel, setHomeCacheSourceLabel] = useState<string>('');
 
-  const homeProvinces = [
+  const homeProvinces = useMemo(() => [
     { id: '', nameKh: 'គ្រប់ខេត្តក្រុង', nameEn: 'All Provinces' },
     { id: 'ភ្នំពេញ', nameKh: 'ភ្នំពេញ', nameEn: 'Phnom Penh' },
     { id: 'សៀមរាប', nameKh: 'សៀមរាប', nameEn: 'Siem Reap' },
@@ -198,9 +82,20 @@ export const HomeView: React.FC = () => {
     { id: 'កំពត', nameKh: 'កំពត', nameEn: 'Kampot' },
     { id: 'កែប', nameKh: 'កែប', nameEn: 'Kep' },
     { id: 'ព្រះសីហនុ', nameKh: 'ព្រះសីហនុ', nameEn: 'Sihanoukville' },
-  ];
+  ], []);
 
-  // Live Google Maps & Smart Cache Search on Home Screen (works identically to Find in Shop!)
+  const hasActiveSearch = globalSearchQuery.trim().length > 0;
+
+  const sessionShuffledRestaurants = useMemo(
+    () => (hasActiveSearch ? sortRestaurantsWithVipRotation(shuffleForCurrentSession(restaurants), users, appSettings) : []),
+    [hasActiveSearch, restaurants, users, appSettings]
+  );
+  const sessionShuffledDestinations = useMemo(
+    () => (hasActiveSearch ? shuffleForCurrentSession(destinations) : []),
+    [hasActiveSearch, destinations]
+  );
+
+  // Live Google Maps & Smart Cache Search on Home Screen
   useEffect(() => {
     const q = globalSearchQuery.trim();
     if (!q || q.length < 2) {
@@ -224,7 +119,7 @@ export const HomeView: React.FC = () => {
         );
         setIsHomeSearchingOnline(false);
       }
-    }, 600);
+    }, 500);
 
     return () => {
       cancelled = true;
@@ -256,9 +151,9 @@ export const HomeView: React.FC = () => {
       showToast(
         tr(
           language,
-          '⚠️ មិនអាចចាប់ទីតាំង GPS បានទេ។ កំពុងបង្ហាញលទ្ធផលទូទាំងប្រទេសជំនួស។',
-          '⚠️ GPS unavailable. Showing nationwide results instead.',
-          '⚠️ 无法获取 GPS 位置，已为您显示全国搜索结果。'
+          'មិនអាចចាប់ទីតាំង GPS បានទេ។ កំពុងបង្ហាញលទ្ធផលទូទាំងប្រទេសជំនួស។',
+          'GPS unavailable. Showing nationwide results instead.',
+          '无法获取 GPS 位置，已为您显示全国搜索结果。'
         ),
         'warning'
       );
@@ -284,76 +179,15 @@ export const HomeView: React.FC = () => {
     });
   }, [globalSearchQuery, selectedProvince, foods, sessionShuffledRestaurants, sessionShuffledDestinations, homeSmartCachePlaces, currentUser, userGpsLocation, searchRadiusMeters]);
 
-  const handleAiRandomize = () => {
-    setRandomSeed(prev => prev + 1);
-    showToast(
-      isKm 
-        ? '✨ AI បាន Random វីដេអូ និងមុខម្ហូបល្បីៗថ្មីៗជូនលោកអ្នក!' 
-        : '✨ AI randomly rotated fresh trending videos for you!',
-      'success'
-    );
-  };
-
-  const quickCategories = [
-    { labelKh: 'ម្ហូបពិសេស', labelEn: 'Signature', icon: '🍲', tab: 'food' },
-    { labelKh: 'ភោជនីយដ្ឋាន', labelEn: 'Restaurants', icon: '🏪', tab: 'restaurants' },
-    { labelKh: 'ប្រាសាទបុរាណ', labelEn: 'Temples', icon: '🏛️', tab: 'tourism' },
-    { labelKh: 'ឆ្នេរសមុទ្រ', labelEn: 'Beaches', icon: '🏝️', tab: 'tourism' },
-    { labelKh: 'ទឹកធ្លាក់ & ភ្នំ', labelEn: 'Nature', icon: '🏞️', tab: 'tourism' },
-  ];
-
-  // ---- Phase 2: daily discovery picks (deterministic per day, uses already-merged data so admin photo overrides win) ----
   const todaySeed = useMemo(() => {
     const d = new Date();
     return d.getFullYear() * 372 + d.getMonth() * 31 + d.getDate();
   }, []);
-  // Random picks on every Home visit (and on "Shuffle"); photos come from merged app data so admin overrides win
-  const [discoverySeed, setDiscoverySeed] = useState(0);
-  const pickRandom = <T,>(list: T[], n: number): T[] => {
-    const a = [...list];
-    for (let i = a.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [a[i], a[j]] = [a[j], a[i]];
-    }
-    return a.slice(0, n);
-  };
-  const discoveryFoodIds = useMemo(() => {
-    const valid = foods.filter((f) => f && f.id && f.photoUrl);
-    const customUpdated = valid.filter(
-      (f) => f.isCustomPhoto || f.photoUrl.startsWith('data:') || f.photoUrl.startsWith('http')
-    );
-    const pool = customUpdated.length >= 6 ? customUpdated : valid;
-    return pickRandom(pool, 6).map((f) => f.id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [foods.length, discoverySeed]);
-
-  const discoveryFoods = useMemo(() => {
-    const byId = new Map(foods.map((f) => [f.id, f]));
-    const picked = discoveryFoodIds
-      .map((id) => byId.get(id))
-      .filter((f): f is NonNullable<typeof f> => Boolean(f && f.photoUrl));
-    if (picked.length > 0) return picked;
-    return foods.filter((f) => f && f.id && f.photoUrl).slice(0, 6);
-  }, [foods, discoveryFoodIds]);
-
-  const discoveryRestaurantIds = useMemo(() => {
-    const approvedList = restaurants.filter((r) => r && r.id && r.status === 'approved' && r.photoUrl);
-    const rotated = sortRestaurantsWithVipRotation(pickRandom(approvedList, Math.min(20, approvedList.length)), users, appSettings);
-    return rotated.slice(0, 6).map((r) => r.id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [restaurants.length, discoverySeed, users.length]);
-
-  const discoveryRestaurants = useMemo(() => {
-    const byId = new Map(restaurants.map((r) => [r.id, r]));
-    return discoveryRestaurantIds
-      .map((id) => byId.get(id))
-      .filter((r): r is NonNullable<typeof r> => Boolean(r && r.photoUrl));
-  }, [restaurants, discoveryRestaurantIds]);
 
   const randomTrendingIds = useMemo(
-    () => pickRandom(trendingFoods.filter((t) => t && t.id), 8).map((t) => t.id),
+    () => seededShuffle(trendingFoods.filter((t) => t && t.id), todaySeed + 17).slice(0, 8).map((t) => t.id),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [trendingFoods.length, discoverySeed]
+    [trendingFoods.length, todaySeed]
   );
 
   const randomTrending = useMemo(() => {
@@ -383,65 +217,16 @@ export const HomeView: React.FC = () => {
         return t;
       });
   }, [trendingFoods, foods, randomTrendingIds]);
+
   const isHomeLoading = foods.length === 0 && restaurants.length === 0 && trendingFoods.length === 0;
   const canUseVipActions = isVip;
   const txt = (km: string, en: string, zh: string) => (language === 'km' ? km : language === 'zh' ? zh : en);
-  const requireVip = (open: () => void) => () => {
-    if (!canUseVipActions) {
-      showToast(
-        txt(
-          'មុខងារនេះសម្រាប់គណនី VIP • សូមដំឡើង VIP ដើម្បីប្រើប្រាស់!',
-          'This feature is for VIP accounts — please unlock VIP!',
-          '此功能仅限 VIP 账户，请先开通 VIP！'
-        ),
-        'info'
-      );
-      openUpgradeVipModal();
-      return;
-    }
-    open();
-  };
-  const handleQuickCheckIn = () => {
-    if (currentUser?.role === 'admin') {
-      setIsAiCheckInModalOpen(true);
-      return;
-    }
-    showToast(
-      txt(
-        'ជ្រើសរើសហាងមួយ ដើម្បីមើលព័ត៌មាន និងទីតាំង',
-        'Pick a shop to see its details and location',
-        '请选择一家店铺查看详情与位置'
-      ),
-      'info'
-    );
-    setActiveTab('restaurants');
-  };
 
-  const foodCategoryChips: { id: TrendingFoodCategorySlug; labelKh: string; labelEn: string; icon: string }[] = [
-    { id: 'all', labelKh: 'ទាំងអស់', labelEn: 'All', icon: '🔥' },
-    { id: 'street_food', labelKh: 'អាហារតាមផ្លូវ', labelEn: 'Street Food', icon: '🍢' },
-    { id: 'famous_dish', labelKh: 'មុខម្ហូបល្បីៗ', labelEn: 'Famous', icon: '🍲' },
-    { id: 'cafe_drink', labelKh: 'កាហ្វេ & ភេសជ្ជៈ', labelEn: 'Café', icon: '☕' },
-    { id: 'dessert_snack', labelKh: 'បង្អែម', labelEn: 'Desserts', icon: '🍨' },
-    { id: 'unusual_local', labelKh: 'ម្ហូបប្លែកៗ', labelEn: 'Unusual', icon: '✨' },
-  ];
-
-  const handleOpenFoodDetail = (item: TrendingFoodItem) => {
+  const handleOpenFoodDetail = useCallback((item: TrendingFoodItem) => {
     setSelectedTrendingFood(item);
     setIsTrendingFoodDetailModalOpen(true);
-  };
+  }, [setSelectedTrendingFood, setIsTrendingFoodDetailModalOpen]);
 
-  const handleOpenVideo = (e: React.MouseEvent, item: TrendingFoodItem) => {
-    e.stopPropagation();
-    const url = item.videoUrl || item.sourceUrl;
-    if (url) {
-      window.open(url, '_blank');
-    } else {
-      handleOpenFoodDetail(item);
-    }
-  };
-
-  // ---- Redesigned Home: time-of-day personalization & VIP status line ----
   const mealSlot = useMemo(() => getMealSlot(), []);
   const forYouFoods = useMemo(() => {
     const withPhoto = foods.filter((f) => f && f.id && f.photoUrl);
@@ -450,6 +235,7 @@ export const HomeView: React.FC = () => {
     const pool = matching.length >= 3 ? matching : withPhoto;
     return seededShuffle(pool, todaySeed * 4 + ['breakfast', 'lunch', 'snack', 'dinner'].indexOf(mealSlot)).slice(0, 3);
   }, [foods, mealSlot, todaySeed]);
+
   const vipDaysLeft = isVip && currentUser ? getVipRemainingDays(currentUser) : 0;
   const vipNoticeKind: 'expiring' | 'expired' | null =
     currentUser && !isAdmin
@@ -460,21 +246,36 @@ export const HomeView: React.FC = () => {
         : null
       : null;
 
+  const handleSignIn = useCallback(() => setIsAuthModalOpen(true), [setIsAuthModalOpen]);
+  const handleExploreProfile = useCallback(() => setActiveTab('profile'), [setActiveTab]);
+  const handleUpgradeVip = useCallback(() => openUpgradeVipModal(), [openUpgradeVipModal]);
+  const handleOpenAdminPanel = useCallback(() => {
+    (window as any).__kft_admin_tab = 'stats';
+    setIsAdminOpen(true);
+  }, [setIsAdminOpen]);
+
+  const handleWhatToEat = useCallback(() => setIsWhatToEatModalOpen(true), [setIsWhatToEatModalOpen]);
+  const handleNearMe = useCallback(() => setIsNearMeModalOpen(true), [setIsNearMeModalOpen]);
+  const handleDaily = useCallback(() => setIsDailyDiscoveriesModalOpen(true), [setIsDailyDiscoveriesModalOpen]);
+  const handleTripPlanner = useCallback(() => setIsAiTripPlannerModalOpen(true), [setIsAiTripPlannerModalOpen]);
+  const handleMapsSearch = useCallback(() => openGoogleMapsSearchModal('all'), [openGoogleMapsSearchModal]);
+  const handleSeeAllFoods = useCallback(() => setActiveTab('food'), [setActiveTab]);
+  const handleSeeAllRestaurants = useCallback(() => setActiveTab('restaurants'), [setActiveTab]);
+  const handleSeeAllTourism = useCallback(() => setActiveTab('tourism'), [setActiveTab]);
+  const handleExploreAllTrending = useCallback(() => setIsTrendingSocialModalOpen(true), [setIsTrendingSocialModalOpen]);
+
   return (
     <div className="max-w-md mx-auto px-4 py-4 space-y-7 pb-28 font-khmer">
-      {/* 1. Greeting + User Profile Card + one big search bar */}
+      {/* 1. Greeting + User Profile Card + debounced search bar */}
       <HomeGreetingSearch
         language={language}
         userName={currentUser?.name}
         currentUser={currentUser}
         isVip={isVip}
-        onSignIn={() => setIsAuthModalOpen(true)}
-        onExploreProfile={() => setActiveTab('profile')}
-        onUpgradeVip={() => openUpgradeVipModal()}
-        onOpenAdminPanel={() => {
-          (window as any).__kft_admin_tab = 'stats';
-          setIsAdminOpen(true);
-        }}
+        onSignIn={handleSignIn}
+        onExploreProfile={handleExploreProfile}
+        onUpgradeVip={handleUpgradeVip}
+        onOpenAdminPanel={handleOpenAdminPanel}
         hint={getMealHint(mealSlot, language)}
         query={globalSearchQuery}
         onChange={setGlobalSearchQuery}
@@ -499,7 +300,7 @@ export const HomeView: React.FC = () => {
             </button>
           </div>
 
-          {/* Quick Province Chips inside Home Search (works identically to Find in Shop) */}
+          {/* Quick Province Chips inside Home Search */}
           <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
             {homeProvinces.map((p) => {
               const cleanSel = (selectedProvince || '').replace(/^រាជធានី|^ខេត្ត/g, '').trim();
@@ -529,10 +330,10 @@ export const HomeView: React.FC = () => {
               </span>
               {[
                 { meters: 0, labelKh: 'ទូទាំងប្រទេស', labelEn: 'All', labelZh: '全国' },
-                { meters: 2000, labelKh: '📍 2km', labelEn: '📍 2km', labelZh: '📍 2公里' },
-                { meters: 5000, labelKh: '📍 5km', labelEn: '📍 5km', labelZh: '📍 5公里' },
-                { meters: 15000, labelKh: '📍 15km', labelEn: '📍 15km', labelZh: '📍 15公里' },
-                { meters: 30000, labelKh: '📍 30km', labelEn: '📍 30km', labelZh: '📍 30公里' },
+                { meters: 2000, labelKh: '2km', labelEn: '2km', labelZh: '2公里' },
+                { meters: 5000, labelKh: '5km', labelEn: '5km', labelZh: '5公里' },
+                { meters: 15000, labelKh: '15km', labelEn: '15km', labelZh: '15公里' },
+                { meters: 30000, labelKh: '30km', labelEn: '30km', labelZh: '30公里' },
               ].map((r) => (
                 <button
                   key={r.meters}
@@ -556,15 +357,15 @@ export const HomeView: React.FC = () => {
             {isHomeSearchingOnline && (
               <div className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
                 <Loader2 className="w-3 h-3 animate-spin" />
-                <span>{tr(language, 'កំពុងស្វែងរកលើ Google Maps...', 'Searching Google Maps...', '正在搜索 Google 地图...')}</span>
+                <span>{tr(language, 'កំពុងស្វែងរកលើផែនទី...', 'Searching Google Maps...', '正在搜索 Google 地图...')}</span>
               </div>
             )}
           </div>
 
           {homeCacheSourceLabel && !isHomeSearchingOnline && homeSmartCachePlaces.length > 0 && (
             <div className="flex items-center justify-between px-2.5 py-1 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-[10px] font-bold text-emerald-800 dark:text-emerald-300">
-              <span>{tr(language, 'រួមបញ្ចូលទិន្នន័យក្នុងកម្មវិធី + Google Maps ផ្ទាល់', 'Combined In-App DB + Live Google Maps Discovery', '整合应用内数据库与 Google 地图实时结果')}</span>
-              <span>⚡ {homeCacheSourceLabel}</span>
+              <span>{tr(language, 'រួមបញ្ចូលបញ្ជីក្នុងកម្មវិធី និងផែនទី Google Maps', 'In-App Directory + Google Maps', '应用内名录与 Google 地图结果')}</span>
+              <span>{homeCacheSourceLabel}</span>
             </div>
           )}
 
@@ -600,7 +401,7 @@ export const HomeView: React.FC = () => {
               }`}
             >
               <span>🏪</span>
-              <span>{tr(language, `ហាងក្នុង App (${searchResults.restaurants.length})`, `In-App Shops (${searchResults.restaurants.length})`, `应用内餐厅 (${searchResults.restaurants.length})`)}</span>
+              <span>{tr(language, `ហាងអាហារ (${searchResults.restaurants.length})`, `Restaurants (${searchResults.restaurants.length})`, `餐厅 (${searchResults.restaurants.length})`)}</span>
             </button>
             <button
               onClick={() => setSearchTab('tourism')}
@@ -611,7 +412,7 @@ export const HomeView: React.FC = () => {
               }`}
             >
               <span>🏛️</span>
-              <span>{tr(language, `ទេសចរណ៍ (${searchResults.destinations.length})`, `Places (${searchResults.destinations.length})`, `景点 (${searchResults.destinations.length})`)}</span>
+              <span>{tr(language, `ទេសចរណ៍ (${searchResults.destinations.length})`, `Destinations (${searchResults.destinations.length})`, `景点 (${searchResults.destinations.length})`)}</span>
             </button>
             <button
               onClick={() => setSearchTab('external')}
@@ -631,7 +432,7 @@ export const HomeView: React.FC = () => {
             {isHomeSearchingOnline && searchResults.totalCount === 0 ? (
               <div className="py-8 flex items-center justify-center gap-2 text-xs text-slate-500">
                 <Loader2 className="w-4 h-4 animate-spin text-emerald-600" />
-                <span>{tr(language, 'កំពុងស្វែងរកហាង មុខម្ហូប និងទីតាំងលើ Google Maps ទូទាំងប្រទេស...', 'Searching in-app database & Google Maps across Cambodia...', '正在搜索应用内数据与柬埔寨 Google 地图...')}</span>
+                <span>{tr(language, 'កំពុងស្វែងរកម្ហូប ហាងអាហារ និងទីតាំងទេសចរណ៍...', 'Searching dishes, restaurants, and destinations...', '正在搜索美食、餐厅与景点...')}</span>
               </div>
             ) : searchResults.totalCount === 0 ? (
               <div className="py-8 text-center text-slate-500 space-y-2.5">
@@ -650,7 +451,7 @@ export const HomeView: React.FC = () => {
                     onClick={() => setSearchRadiusMeters(0)}
                     className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-amber-100 text-amber-800 text-xs font-bold cursor-pointer"
                   >
-                    <span>{tr(language, '🔄 បង្ហាញលទ្ធផលទូទាំងប្រទេសវិញ', '🔄 Reset radius to All Cambodia', '🔄 恢复显示全国范围结果')}</span>
+                    <span>{tr(language, 'បង្ហាញលទ្ធផលទូទាំងប្រទេសវិញ', 'Show results across Cambodia', '恢复显示全国范围结果')}</span>
                   </button>
                 )}
                 <div className="pt-1 flex justify-center">
@@ -666,9 +467,9 @@ export const HomeView: React.FC = () => {
                     <span>
                       {tr(
                         language,
-                        `🗺️ បើកស្វែងរក "${globalSearchQuery.trim()}" ផ្ទាល់នៅលើ Google Maps`,
-                        `🗺️ Open "${globalSearchQuery.trim()}" in Google Maps`,
-                        `🗺️ 在 Google 地图中搜索 “${globalSearchQuery.trim()}”`
+                        `បើកស្វែងរក "${globalSearchQuery.trim()}" នៅលើ Google Maps`,
+                        `Open "${globalSearchQuery.trim()}" in Google Maps`,
+                        `在 Google 地图中搜索 “${globalSearchQuery.trim()}”`
                       )}
                     </span>
                   </a>
@@ -676,7 +477,7 @@ export const HomeView: React.FC = () => {
                 <div className="flex items-center justify-center gap-1.5 flex-wrap pt-1 text-xs">
                   <span className="text-slate-400">{tr(language, 'សាកល្បង៖', 'Try:', '试试搜索：')}</span>
                   {(language === 'km'
-                    ? ['ជំនោរក្បាលកោះ', 'សម្លការី', 'នំបញ្ចុក', 'អាម៉ុក', 'បាត់ដំបង', 'សៀមរាប']
+                    ? ['អាម៉ុក', 'នំបញ្ចុក', 'សម្លកកូរ', 'ភ្នំពេញ', 'សៀមរាប', 'កំពត']
                     : language === 'zh'
                     ? ['阿莫克', '金边', '暹粒', '贡布', '白马']
                     : ['Amok', 'Samlor Korko', 'Lok Lak', 'Phnom Penh', 'Siem Reap']
@@ -733,7 +534,7 @@ export const HomeView: React.FC = () => {
                               <div className="min-w-0">
                                 <div className="flex items-center gap-1.5 flex-wrap">
                                   <span className="px-1.5 py-0.5 rounded-md bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 text-[10px] font-bold">
-                                    🍲 {tr(language, 'មុខម្ហូបក្នុង App', 'In-App Dish', '应用内菜品')}
+                                    {tr(language, 'មុខម្ហូប', 'Dish', '菜品')}
                                   </span>
                                   <h4 className="font-bold text-sm text-slate-900 dark:text-white truncate group-hover:text-emerald-600">
                                     {locF.name}
@@ -773,14 +574,14 @@ export const HomeView: React.FC = () => {
                               <div className="min-w-0">
                                 <div className="flex items-center gap-1.5 flex-wrap">
                                   <span className="px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 text-[10px] font-bold">
-                                    ✅ {tr(language, 'ហាងក្នុងកម្មវិធី', 'In-App Shop', '应用内店铺')}
+                                    {tr(language, 'ហាងអាហារ', 'Restaurant', '餐厅')}
                                   </span>
                                   <h4 className="font-bold text-sm text-slate-900 dark:text-white truncate group-hover:text-emerald-600">
                                     {locR.name}
                                   </h4>
                                 </div>
                                 <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">
-                                  📍 {locR.address} {rest.phone ? `• 📞 ${rest.phone}` : ''} {distKm ? `• 🧭 ${distKm} km` : ''}
+                                  {locR.address} {rest.phone ? `• ${rest.phone}` : ''} {distKm ? `• ${distKm} km` : ''}
                                 </p>
                               </div>
                             </div>
@@ -838,14 +639,14 @@ export const HomeView: React.FC = () => {
                               <div className="min-w-0">
                                 <div className="flex items-center gap-1.5 flex-wrap">
                                   <span className="px-1.5 py-0.5 rounded-md bg-teal-100 text-teal-800 dark:bg-teal-950 dark:text-teal-300 text-[10px] font-bold">
-                                    🏛️ {tr(language, 'ទេសចរណ៍ក្នុងកម្មវិធី', 'In-App Place', '应用内景点')}
+                                    {tr(language, 'ទេសចរណ៍', 'Destination', '景点')}
                                   </span>
                                   <h4 className="font-bold text-sm text-slate-900 dark:text-white truncate group-hover:text-emerald-600">
                                     {locD.name}
                                   </h4>
                                 </div>
                                 <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">
-                                  📍 {locD.province} ({locD.category}) {distKm ? `• 🧭 ${distKm} km` : ''}
+                                  {locD.province} ({locD.category}) {distKm ? `• ${distKm} km` : ''}
                                 </p>
                               </div>
                             </div>
@@ -854,13 +655,10 @@ export const HomeView: React.FC = () => {
                         );
                       }
 
-                      // External Google Maps Place -> Tapping opens exact place directly in Google Maps!
                       const place = row.item;
                       const extName =
                         language === 'km'
                           ? place.nameKh || place.name
-                          : language === 'zh'
-                          ? place.nameEn || place.name
                           : place.nameEn || place.name;
                       const extAddress =
                         language === 'km'
@@ -882,6 +680,8 @@ export const HomeView: React.FC = () => {
                               <img
                                 src={place.photoUrl}
                                 alt={extName}
+                                loading="lazy"
+                                decoding="async"
                                 className="w-12 h-12 rounded-xl object-cover shrink-0 border border-blue-200"
                               />
                             ) : (
@@ -893,26 +693,25 @@ export const HomeView: React.FC = () => {
                             <div className="min-w-0">
                               <div className="flex items-center gap-1.5 flex-wrap">
                                 <span className="px-1.5 py-0.5 rounded-md bg-blue-600 text-white text-[10px] font-bold shrink-0">
-                                  🗺️ {tr(language, 'Google Maps ផ្ទាល់', 'Google Maps Place', 'Google 地图地点')}
+                                  Google Maps
                                 </span>
                                 <h4 className="font-bold text-sm text-slate-900 dark:text-white truncate group-hover:text-blue-600">
                                   {extName}
                                 </h4>
                               </div>
                               <p className="text-xs text-slate-600 dark:text-slate-300 truncate mt-0.5">
-                                📍 {extAddress} {distKm ? `• 🧭 ${distKm} km` : ''}
+                                {extAddress} {distKm ? `• ${distKm} km` : ''}
                               </p>
                             </div>
                           </div>
                           <div className="shrink-0 flex items-center gap-1 text-[11px] font-bold text-blue-600 dark:text-blue-400">
-                            <span className="hidden sm:inline">{tr(language, 'បើកផែនទី', 'Open Maps', '打开地图')}</span>
+                            <span className="hidden sm:inline">{tr(language, 'ផែនទី', 'Maps', '地图')}</span>
                             <ExternalLink className="w-4 h-4 group-hover:translate-x-0.5 transition" />
                           </div>
                         </div>
                       );
                     })}
 
-                    {/* Pagination / Load More Button */}
                     {remainingCount > 0 && (
                       <div className="pt-1 flex justify-center">
                         <button
@@ -922,9 +721,9 @@ export const HomeView: React.FC = () => {
                         >
                           {tr(
                             language,
-                            `⬇️ បង្ហាញលទ្ធផលបន្ថែមទៀត (${remainingCount} ទៀត)`,
-                            `⬇️ Load More Results (${remainingCount} more)`,
-                            `⬇️ 加载更多结果（还有 ${remainingCount} 项）`
+                            `បង្ហាញលទ្ធផលបន្ថែម (${remainingCount} ទៀត)`,
+                            `Show More Results (${remainingCount} more)`,
+                            `加载更多结果（还有 ${remainingCount} 项）`
                           )}
                         </button>
                       </div>
@@ -962,7 +761,7 @@ export const HomeView: React.FC = () => {
 
             return (
               <div className="space-y-4 animate-in fade-in">
-                {/* 1. Executive System Statistics Card */}
+                {/* 1. System Statistics Card */}
                 <div className="p-4 rounded-3xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 shadow-xs space-y-3">
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
@@ -971,10 +770,10 @@ export const HomeView: React.FC = () => {
                       </div>
                       <div>
                         <h3 className="font-moul text-xs sm:text-sm text-slate-900 dark:text-white">
-                          {tr(language, 'ស្ថិតិប្រព័ន្ធសរុប (System Overview)', 'Executive System Statistics', '系统运行统计总览')}
+                          {tr(language, 'ទិដ្ឋភាពទូទៅនៃប្រព័ន្ធ', 'System Overview', '系统运行概览')}
                         </h3>
                         <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                          {tr(language, 'ទិន្នន័យបច្ចុប្បន្នភាពផ្ទាល់ក្នុងប្រព័ន្ធរដ្ឋបាល', 'Real-time platform metrics & pending approvals', '平台实时数据与待审批事项')}
+                          {tr(language, 'ស្ថិតិទិន្នន័យ និងសំណើរង់ចាំអនុម័ត', 'Directory statistics & pending approvals', '名录统计与待审批事项')}
                         </p>
                       </div>
                     </div>
@@ -984,7 +783,7 @@ export const HomeView: React.FC = () => {
                         onClick={() => {
                           triggerCloudSyncNow(true);
                           showToast(
-                            tr(language, '🔄 កំពុងធ្វើសមកាលកម្មទិន្នន័យ Cloud...', '🔄 Syncing Cloud Database...', '🔄 正在同步云端数据库...'),
+                            tr(language, 'កំពុងធ្វើសមកាលកម្មទិន្នន័យ Cloud...', 'Syncing cloud database...', '正在同步云端数据库...'),
                             'info'
                           );
                         }}
@@ -1028,7 +827,7 @@ export const HomeView: React.FC = () => {
                           <Clock className="w-4 h-4" />
                         </span>
                         {totalPendingApprovals > 0 ? (
-                          <span className="px-2 py-0.5 rounded-full bg-rose-600 text-white text-[10px] font-black animate-pulse">
+                          <span className="px-2 py-0.5 rounded-full bg-rose-600 text-white text-[10px] font-black">
                             {tr(language, `${totalPendingApprovals} រង់ចាំ`, `${totalPendingApprovals} Pending`, `${totalPendingApprovals} 待处理`)}
                           </span>
                         ) : (
@@ -1094,7 +893,7 @@ export const HomeView: React.FC = () => {
                   <div className="flex items-center justify-between">
                     <h3 className="font-moul text-xs sm:text-sm text-[#064E3B] dark:text-emerald-300 flex items-center gap-2">
                       <Settings className="w-4 h-4" />
-                      <span>{tr(language, 'ម៉ឺនុយគ្រប់គ្រងរដ្ឋបាល (Admin Management)', 'Admin Management Menus', '系统管理菜单')}</span>
+                      <span>{tr(language, 'ម៉ឺនុយគ្រប់គ្រងរដ្ឋបាល', 'Admin Management', '系统管理菜单')}</span>
                     </h3>
                   </div>
 
@@ -1255,7 +1054,6 @@ export const HomeView: React.FC = () => {
             <HomeSkeleton />
           ) : (
             <>
-              {/* Slim, informative VIP status line (only when expiring soon or just ended) */}
               {vipNoticeKind && (
                 <VipStatusNotice
                   language={language}
@@ -1265,17 +1063,16 @@ export const HomeView: React.FC = () => {
                 />
               )}
 
-              {/* 1. Six clear feature shortcuts */}
+              {/* 1. Six clear feature shortcuts (AI Trip Planner replaces Alerts) */}
               <FeatureGrid
                 language={language}
                 isVip={canUseVipActions}
-                unreadCount={unreadNotificationsCount}
-                onWhatToEat={() => setIsWhatToEatModalOpen(true)}
-                onNearMe={() => setIsNearMeModalOpen(true)}
+                onWhatToEat={handleWhatToEat}
+                onNearMe={handleNearMe}
                 onSmartMenu={openSmartHub}
-                onDaily={() => setIsDailyDiscoveriesModalOpen(true)}
-                onAlerts={() => setIsNotificationsModalOpen(true)}
-                onMapsSearch={() => openGoogleMapsSearchModal('all')}
+                onDaily={handleDaily}
+                onTripPlanner={handleTripPlanner}
+                onMapsSearch={handleMapsSearch}
               />
 
               {/* 2. Personalized picks for the current time of day */}
@@ -1284,7 +1081,7 @@ export const HomeView: React.FC = () => {
                 slot={mealSlot}
                 foods={forYouFoods}
                 onOpenFood={setSelectedFood}
-                onSeeAll={() => setActiveTab('food')}
+                onSeeAll={handleSeeAllFoods}
               />
 
               {/* 3. Trending foods */}
@@ -1293,16 +1090,16 @@ export const HomeView: React.FC = () => {
                   language={language}
                   items={randomTrending}
                   onOpen={handleOpenFoodDetail}
-                  onExploreAll={() => setIsTrendingSocialModalOpen(true)}
+                  onExploreAll={handleExploreAllTrending}
                 />
               ) : (
                 <HomeEmptyState
                   language={language}
-                  emoji="🔥"
-                  title={txt('មិនទាន់មានម្ហូបពេញនិយម', 'No trending foods yet', '暂无热门美食')}
+                  emoji="🍲"
+                  title={txt('មិនទាន់មានម្ហូបពេញនិយម', 'No featured dishes yet', '暂无精选美食')}
                   message={txt('សូមមើលមុខម្ហូបទាំងអស់ក្នុងផ្ទាំងម្ហូប', 'Browse all dishes in the Food tab.', '请到“美食”页浏览全部菜品。')}
-                  actionLabel={txt('មើលមុខម្ហូប', 'Browse foods', '浏览美食')}
-                  onAction={() => setActiveTab('food')}
+                  actionLabel={txt('មើលមុខម្ហូប', 'Browse dishes', '浏览美食')}
+                  onAction={handleSeeAllFoods}
                 />
               )}
 
@@ -1311,7 +1108,7 @@ export const HomeView: React.FC = () => {
                 language={language}
                 restaurants={restaurants}
                 onOpen={setSelectedRestaurant}
-                onSeeAll={() => setActiveTab('restaurants')}
+                onSeeAll={handleSeeAllRestaurants}
               />
 
               {/* 5. Explore Cambodia */}
@@ -1319,15 +1116,15 @@ export const HomeView: React.FC = () => {
                 language={language}
                 destinations={destinations}
                 onOpen={setSelectedDestination}
-                onSeeAll={() => setActiveTab('tourism')}
+                onSeeAll={handleSeeAllTourism}
               />
 
               {/* 6. Cambodia at a glance */}
               <div className="grid grid-cols-3 divide-x divide-slate-200 dark:divide-white/10 rounded-2xl bg-white dark:bg-slate-800/60 border border-slate-200/80 dark:border-white/10 shadow-sm overflow-hidden">
                 {[
                   { n: foods.length, label: txt('មុខម្ហូប', 'Dishes', '美食'), tab: 'food' },
-                  { n: restaurants.length, label: txt('ហាងអាហារ', 'Places', '餐厅'), tab: 'restaurants' },
-                  { n: destinations.length, label: txt('កន្លែងទេសចរណ៍', 'Sights', '景点'), tab: 'tourism' },
+                  { n: restaurants.length, label: txt('ហាងអាហារ', 'Restaurants', '餐厅'), tab: 'restaurants' },
+                  { n: destinations.length, label: txt('តំបន់ទេសចរណ៍', 'Destinations', '景点'), tab: 'tourism' },
                 ].map((s) => (
                   <button
                     key={s.tab}
@@ -1359,7 +1156,7 @@ export const HomeView: React.FC = () => {
                   onDelete={deleteRestaurant ? (shopId) => { deleteRestaurant(shopId); } : undefined}
                 />
               ) : (
-                <VipPerksCard language={language} onLearnMore={() => openUpgradeVipModal()} />
+                <VipPerksCard language={language} onLearnMore={handleUpgradeVip} />
               )}
             </>
           )}

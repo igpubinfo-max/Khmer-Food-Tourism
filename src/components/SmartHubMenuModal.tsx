@@ -109,7 +109,7 @@ export const SmartHubMenuModal: React.FC<Props> = ({ onClose }) => {
         <div className="px-4 py-3.5 bg-gradient-to-r from-[#064E3B] via-emerald-800 to-[#047857] text-white flex items-center justify-between gap-3 shrink-0">
           <div className="min-w-0">
             <h2 className="font-moul text-base text-amber-300">
-              {tr(language, 'ម៉ឺនុយពិសេស', 'Smart Menu', '智能菜单')}
+              {tr(language, 'ម៉ឺនុយពិសេស', 'Explore Hub', '精选菜单')}
             </h2>
             <p className="text-xs text-emerald-100">
               {tr(language, 'ស្លាកម្ហូប និងឧបករណ៍ទេសចរណ៍នៅទីតែមួយ', 'Dish tags & travel tools in one place', '菜品标签与出行工具，一站直达')}
@@ -133,7 +133,7 @@ export const SmartHubMenuModal: React.FC<Props> = ({ onClose }) => {
           <section className="space-y-2.5">
             <h3 className="font-moul text-sm text-[#064E3B] dark:text-emerald-300 flex items-center gap-1.5">
               <Compass className="w-4 h-4 text-amber-500 shrink-0" />
-              <span>{tr(language, 'ឧបករណ៍ទេសចរណ៍ និងម្ហូបឆ្លាតវៃ', 'Smart Travel & Food Tools', '智能出行与美食工具')}</span>
+              <span>{tr(language, 'ឧបករណ៍ម្ហូប និងទេសចរណ៍', 'Food & Travel Tools', '美食与出行工具')}</span>
             </h3>
 
             {/* 1-Day food trips (VIP) */}
@@ -246,7 +246,7 @@ export const SmartHubMenuModal: React.FC<Props> = ({ onClose }) => {
               <span className={`${iconBox} bg-emerald-100 text-emerald-700`}><BadgeCheck className="w-5 h-5" /></span>
               <span className="min-w-0 flex-1">
                 <span className="block text-sm font-bold text-slate-900 dark:text-white">
-                  {tr(language, 'កត់ត្រាម្ហូប', 'Discover & Dish Record', '探索与美食记录')}
+                  {tr(language, 'កំណត់ត្រាម្ហូបដែលបានភ្លក្ស', 'Food Passport', '美食打卡护照')}
                 </span>
                 <span className="block text-xs text-slate-500 dark:text-slate-400">
                   {level.emoji} {levelTitle(level, language)} · {stampCount} / {organizedFoods.length}

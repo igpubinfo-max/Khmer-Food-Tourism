@@ -97,8 +97,15 @@ export const signInWithGoogleReal = (): Promise<GoogleUserProfile> => {
       return;
     }
 
+    const popupStartedAt = Date.now();
     const timer = setInterval(async () => {
       try {
+        if (Date.now() - popupStartedAt > 180000) {
+          clearInterval(timer);
+          try { popup.close(); } catch {}
+          reject(new Error('Google Sign-In timed out'));
+          return;
+        }
         if (popup.closed) {
           clearInterval(timer);
           reject(new Error('Google popup closed by user'));

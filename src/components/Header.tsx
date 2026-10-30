@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { MoreVertical, Camera, Download, Heart, LayoutGrid, Lock, RefreshCw, Shield } from 'lucide-react';
-import { openSmartHub, hasSpecialAndHealthyFoodVipAccess } from '../utils/smartHub';
+import { MoreVertical, Camera, Download, Heart, LayoutGrid, RefreshCw, Shield, Bell } from 'lucide-react';
+import { openSmartHub } from '../utils/smartHub';
 import { Capacitor } from '@capacitor/core';
 import { APP_VERSION } from '../types';
 
@@ -14,12 +14,12 @@ export const Header: React.FC = () => {
     setIsQrScannerModalOpen,
     setIsInstallModalOpen,
     setIsSupportModalOpen,
+    setIsNotificationsModalOpen,
+    unreadNotificationsCount,
     setIsAdminLoginModalOpen,
     setIsAdminOpen,
     currentUser,
-    openUpgradeVipModal,
   } = useApp();
-  const canUseVip = hasSpecialAndHealthyFoodVipAccess(currentUser);
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -48,12 +48,16 @@ export const Header: React.FC = () => {
           className="flex items-center gap-2.5 cursor-pointer group min-w-0 flex-1"
         >
           <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-white p-0.5 shadow-md flex items-center justify-center border border-emerald-300/60 shrink-0 overflow-hidden">
-            <img src="/icon-192.png?v=2.3.1" alt="Khmer Food" className="w-full h-full rounded-[13px] object-contain" />
+            <img src="/icon-192.png?v=2.4.1" alt="Discover Cambodia" className="w-full h-full rounded-[13px] object-contain" />
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5 min-w-0">
-              <h1 className="font-moul text-[11px] sm:text-sm tracking-wide text-white leading-snug drop-shadow-sm truncate">
-                {isKm ? 'អាហារ និងទេសចរណ៍ខ្មែរ' : isZh ? '高棉美食与旅游' : 'Khmer Food & Tourism'}
+              <h1 className="font-moul text-[10.5px] sm:text-xs tracking-wide text-white leading-snug drop-shadow-sm truncate">
+                {isKm
+                  ? 'ស្វែងយល់អាហារ និងទេសចរណ៍កម្ពុជា'
+                  : isZh
+                  ? '探索柬埔寨美食与旅游'
+                  : 'Discover Cambodia Food & Tourism'}
               </h1>
             </div>
             <div className="flex items-center gap-1.5 mt-0.5">
@@ -62,16 +66,16 @@ export const Header: React.FC = () => {
               </span>
               <p className="text-[10px] sm:text-[11px] text-emerald-200/95 font-medium truncate">
                 {isKm
-                  ? 'មគ្គុទ្ទេសក៍ម្ហូប និងទេសចរណ៍'
+                  ? 'ភ្លក្សរសជាតិកម្ពុជា • ស្វែងយល់ទឹកដីកម្ពុជា'
                   : isZh
-                  ? '柬埔寨正宗美食与旅游指南'
-                  : 'Cambodia Food & Travel'}
+                  ? '品味柬埔寨 · 探索柬埔寨'
+                  : 'Taste Cambodia. Explore Cambodia.'}
               </p>
             </div>
           </div>
         </div>
 
-        {/* Action icons — Search is kept exclusively on Home Screen as requested */}
+        {/* Action icons */}
         <div className="flex items-center gap-1 shrink-0">
           {/* 3-Language Selector (ខ្មែរ / EN / 中文) */}
           <div className="flex items-center gap-0.5 bg-[#053F30]/95 p-0.5 rounded-full border border-emerald-400/40 shadow-xs shrink-0">
@@ -106,43 +110,23 @@ export const Header: React.FC = () => {
             })}
           </div>
 
-          {/* Smart Menu: dish tags + travel & food tools in one place (VIP-gated) */}
+          {/* Smart Menu: dish tags + travel & food tools */}
           <button
             type="button"
-            onClick={() => {
-              if (!canUseVip) {
-                showToast(
-                  isKm
-                    ? 'មុខងារម៉ឺនុយពិសេស & ម្ហូបសុខភាព សម្រាប់គណនី VIP • សូមដំឡើង VIP!'
-                    : isZh
-                    ? '特色菜单与健康饮食功能仅限 VIP 账户，请先升级 VIP！'
-                    : 'Special Food & Healthy Food is for VIP accounts — please upgrade to VIP!',
-                  'info'
-                );
-                openUpgradeVipModal();
-                return;
-              }
-              openSmartHub();
-            }}
+            onClick={() => openSmartHub()}
             className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 flex items-center justify-center shadow-md ring-2 ring-white/30 transition-all active:scale-95 shrink-0 cursor-pointer"
-            title={isKm ? 'ម៉ឺនុយពិសេស & ជម្រើសម្ហូបសុខភាព (VIP)' : isZh ? '智能菜单与健康饮食筛选 (VIP)' : 'Smart Menu & Healthy Filter (VIP)'}
-            aria-label={isKm ? 'ម៉ឺនុយពិសេស & ជម្រើសម្ហូបសុខភាព (VIP)' : isZh ? '智能菜单与健康饮食筛选 (VIP)' : 'Smart Menu & Healthy Filter (VIP)'}
+            title={isKm ? 'ម៉ឺនុយឆ្លាតវៃ' : isZh ? '精选菜单' : 'Smart Menu'}
+            aria-label={isKm ? 'ម៉ឺនុយឆ្លាតវៃ' : isZh ? '精选菜单' : 'Smart Menu'}
           >
             <LayoutGrid className="w-4 h-4 shrink-0" />
-            {!canUseVip && (
-              <span className="absolute -top-1 -right-1 px-1 py-0.2 rounded-full bg-slate-900 text-amber-300 text-[7px] font-black border border-amber-400 flex items-center gap-0.5 leading-none shadow-xs">
-                <Lock className="w-2 h-2" />
-                VIP
-              </span>
-            )}
           </button>
 
-          {/* Single overflow "more" menu: Scan QR, Update/Install App, Support */}
+          {/* Overflow "more" menu: Notifications, Scan QR, Update/Install App, Support, Admin */}
           <div className="relative shrink-0">
             <button
               type="button"
               onClick={() => setIsMenuOpen((v) => !v)}
-              className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center transition-colors border shrink-0 ${
+              className={`relative w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center transition-colors border shrink-0 cursor-pointer ${
                 isMenuOpen
                   ? 'bg-white text-[#064E3B] border-white shadow-xs'
                   : 'bg-[#065F46]/80 hover:bg-[#065F46] text-emerald-100 border-emerald-500/40'
@@ -152,6 +136,9 @@ export const Header: React.FC = () => {
               aria-expanded={isMenuOpen}
             >
               <MoreVertical className="w-4 h-4 shrink-0" />
+              {unreadNotificationsCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-rose-500 ring-2 ring-[#064E3B]" />
+              )}
             </button>
             {isMenuOpen && (
               <>
@@ -161,11 +148,29 @@ export const Header: React.FC = () => {
                     type="button"
                     onClick={() => {
                       setIsMenuOpen(false);
+                      setIsNotificationsModalOpen(true);
+                    }}
+                    className="w-full min-h-[44px] px-4 flex items-center justify-between gap-3 text-sm font-semibold hover:bg-emerald-50 dark:hover:bg-slate-700 text-left"
+                  >
+                    <span className="flex items-center gap-3">
+                      <Bell className="w-4 h-4 text-rose-500" />
+                      <span>{isKm ? 'ការជូនដំណឹង' : isZh ? '消息通知' : 'Notifications'}</span>
+                    </span>
+                    {unreadNotificationsCount > 0 && (
+                      <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-rose-500 text-white text-[11px] font-bold flex items-center justify-center">
+                        {unreadNotificationsCount > 99 ? '99+' : unreadNotificationsCount}
+                      </span>
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsMenuOpen(false);
                       setIsQrScannerModalOpen(true);
                     }}
-                    className="w-full min-h-[44px] px-4 flex items-center gap-3 text-sm font-semibold hover:bg-emerald-50 dark:hover:bg-slate-700 text-left"
+                    className="w-full min-h-[44px] px-4 flex items-center gap-3 text-sm font-semibold hover:bg-emerald-50 dark:hover:bg-slate-700 text-left border-t border-slate-100 dark:border-slate-700"
                   >
-                    <Camera className="w-4 h-4 text-emerald-700" />
+                    <Camera className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
                     <span>{isKm ? 'ស្កេន QR កូដ' : isZh ? '扫描二维码' : 'Scan QR Code'}</span>
                   </button>
                   <button
@@ -177,9 +182,9 @@ export const Header: React.FC = () => {
                     className="w-full min-h-[44px] px-4 flex items-center gap-3 text-sm font-semibold hover:bg-emerald-50 dark:hover:bg-slate-700 text-left border-t border-slate-100 dark:border-slate-700"
                   >
                     {isAppInstalled ? (
-                      <RefreshCw className="w-4 h-4 text-emerald-700" />
+                      <RefreshCw className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
                     ) : (
-                      <Download className="w-4 h-4 text-emerald-700" />
+                      <Download className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
                     )}
                     <span>
                       {isAppInstalled
@@ -187,7 +192,7 @@ export const Header: React.FC = () => {
                           ? 'ពិនិត្យអាប់ដេតកម្មវិធី'
                           : isZh
                           ? '检查应用更新'
-                          : 'Check for App Update'
+                          : 'Check for Updates'
                         : isKm
                         ? 'ដំឡើងកម្មវិធី'
                         : isZh
@@ -204,37 +209,35 @@ export const Header: React.FC = () => {
                     className="w-full min-h-[44px] px-4 flex items-center gap-3 text-sm font-semibold hover:bg-emerald-50 dark:hover:bg-slate-700 text-left border-t border-slate-100 dark:border-slate-700"
                   >
                     <Heart className="w-4 h-4 text-rose-500 fill-rose-500" />
-                    <span>{isKm ? 'ជួយឧបត្ថម្ភកម្មវិធី' : isZh ? '支持我们' : 'Support the App'}</span>
+                    <span>{isKm ? 'ជួយឧបត្ថម្ភកម្មវិធី' : isZh ? '支持我们' : 'Support Us'}</span>
                   </button>
-                  {(!canUseVip || currentUser?.role === 'admin') && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsMenuOpen(false);
-                        if (currentUser?.role === 'admin') {
-                          setIsAdminOpen(true);
-                        } else {
-                          setIsAdminLoginModalOpen(true);
-                        }
-                      }}
-                      className="w-full min-h-[44px] px-4 flex items-center gap-3 text-sm font-semibold hover:bg-emerald-50 dark:hover:bg-slate-700 text-left border-t border-slate-100 dark:border-slate-700"
-                    >
-                      <Shield className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
-                      <span>
-                        {currentUser?.role === 'admin'
-                          ? isKm
-                            ? 'ផ្ទាំងគ្រប់គ្រងរដ្ឋបាល'
-                            : isZh
-                            ? '管理后台'
-                            : 'Admin Dashboard'
-                          : isKm
-                          ? 'ច្រកចូលរដ្ឋបាល (Admin)'
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      if (currentUser?.role === 'admin') {
+                        setIsAdminOpen(true);
+                      } else {
+                        setIsAdminLoginModalOpen(true);
+                      }
+                    }}
+                    className="w-full min-h-[44px] px-4 flex items-center gap-3 text-sm font-semibold hover:bg-emerald-50 dark:hover:bg-slate-700 text-left border-t border-slate-100 dark:border-slate-700"
+                  >
+                    <Shield className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
+                    <span>
+                      {currentUser?.role === 'admin'
+                        ? isKm
+                          ? 'ផ្ទាំងគ្រប់គ្រងរដ្ឋបាល'
                           : isZh
-                          ? '管理员登录'
-                          : 'Admin Login'}
-                      </span>
-                    </button>
-                  )}
+                          ? '管理后台'
+                          : 'Admin Dashboard'
+                        : isKm
+                        ? 'ច្រកចូលរដ្ឋបាល'
+                        : isZh
+                        ? '管理员登录'
+                        : 'Admin Login'}
+                    </span>
+                  </button>
                 </div>
               </>
             )}

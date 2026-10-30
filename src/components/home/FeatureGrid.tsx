@@ -1,17 +1,16 @@
 import React from 'react';
-import { UtensilsCrossed, MapPin, Leaf, CalendarDays, Bell, Globe } from 'lucide-react';
+import { UtensilsCrossed, MapPin, Leaf, CalendarDays, Route, Globe } from 'lucide-react';
 import type { Language } from '../../types';
 import { tr } from '../../utils/i18n';
 
 interface Props {
   language: Language;
   isVip?: boolean;
-  unreadCount: number;
   onWhatToEat: () => void;
   onNearMe: () => void;
   onSmartMenu: () => void;
   onDaily: () => void;
-  onAlerts: () => void;
+  onTripPlanner: () => void;
   onMapsSearch: () => void;
 }
 
@@ -20,12 +19,11 @@ interface Props {
  */
 export const FeatureGrid: React.FC<Props> = ({
   language,
-  unreadCount,
   onWhatToEat,
   onNearMe,
   onSmartMenu,
   onDaily,
-  onAlerts,
+  onTripPlanner,
   onMapsSearch,
 }) => {
   const tiles = [
@@ -33,37 +31,36 @@ export const FeatureGrid: React.FC<Props> = ({
       id: 'eat',
       Icon: UtensilsCrossed,
       gradient: 'from-amber-400 to-orange-500',
-      label: tr(language, 'ញ៉ាំអ្វីល្អ?', 'What to Eat', '吃什么'),
+      label: tr(language, 'ញ៉ាំអ្វីល្អ?', 'What to Eat', '今天吃什么'),
       onClick: onWhatToEat,
     },
     {
       id: 'near',
       Icon: MapPin,
       gradient: 'from-emerald-400 to-teal-600',
-      label: tr(language, 'នៅជិតខ្ញុំ', 'Near Me', '附近'),
+      label: tr(language, 'នៅជិតខ្ញុំ', 'Near Me', '附近推荐'),
       onClick: onNearMe,
     },
     {
       id: 'menu',
       Icon: Leaf,
       gradient: 'from-lime-400 to-emerald-600',
-      label: tr(language, 'ម៉ឺនុយឆ្លាតវៃ', 'Smart Menu', '智能菜单'),
+      label: tr(language, 'ម៉ឺនុយឆ្លាតវៃ', 'Smart Menu', '精选菜单'),
       onClick: onSmartMenu,
     },
     {
       id: 'daily',
       Icon: CalendarDays,
       gradient: 'from-sky-400 to-indigo-500',
-      label: tr(language, 'ថ្មីប្រចាំថ្ងៃ', 'Daily New', '每日新发现'),
+      label: tr(language, 'ថ្មីប្រចាំថ្ងៃ', 'Daily Picks', '每日精选'),
       onClick: onDaily,
     },
     {
-      id: 'alerts',
-      Icon: Bell,
+      id: 'trip',
+      Icon: Route,
       gradient: 'from-rose-400 to-pink-600',
-      label: tr(language, 'ការជូនដំណឹង', 'Alerts', '通知'),
-      onClick: onAlerts,
-      badge: unreadCount > 0 ? unreadCount : 0,
+      label: tr(language, 'ផែនការដើរលេង AI', 'AI Trip Planner', 'AI 行程规划'),
+      onClick: onTripPlanner,
     },
     {
       id: 'maps',
@@ -95,12 +92,6 @@ export const FeatureGrid: React.FC<Props> = ({
           <span className="text-[12px] font-bold leading-snug text-slate-800 dark:text-slate-100 line-clamp-2">
             {t.label}
           </span>
-
-          {'badge' in t && t.badge ? (
-            <span className="absolute top-1.5 right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-rose-500 text-white text-[10px] font-black flex items-center justify-center shadow">
-              {t.badge > 99 ? '99+' : t.badge}
-            </span>
-          ) : null}
         </button>
       ))}
     </section>

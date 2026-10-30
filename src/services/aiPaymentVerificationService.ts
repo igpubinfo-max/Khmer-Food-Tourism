@@ -268,9 +268,13 @@ async function extractReceiptViaOcr(receiptDataUrl: string): Promise<Partial<Ext
   try {
     const { createWorker } = await import('tesseract.js');
     const worker = await createWorker('eng');
-    const ret = await worker.recognize(receiptDataUrl);
-    await worker.terminate();
-    const rawText = ret?.data?.text || '';
+    let rawText = '';
+    try {
+      const ret = await worker.recognize(receiptDataUrl);
+      rawText = ret?.data?.text || '';
+    } finally {
+      await worker.terminate().catch(() => {});
+    }
     if (!rawText.trim()) {
       return { rawOcrText: '' };
     }
@@ -453,10 +457,15 @@ export async function verifyAbaPaymentAndReceipt(params: {
   };
 
   if (receiptDataUrl && receiptDataUrl.startsWith('data:image/')) {
-    const [geminiRes, ocrRes] = await Promise.all([
-      extractReceiptViaGeminiVision(receiptDataUrl),
-      extractReceiptViaOcr(receiptDataUrl),
-    ]);
+    const geminiRes = await extractReceiptViaGeminiVision(receiptDataUrl);
+    const needsFallbackOcr =
+      !geminiRes ||
+      !geminiRes.trxId ||
+      geminiRes.amountUsd === undefined ||
+      (!geminiRes.recipientName && !geminiRes.recipientAccount);
+    const ocrRes: Partial<ExtractedReceiptData> = needsFallbackOcr
+      ? await extractReceiptViaOcr(receiptDataUrl)
+      : {};
 
     extracted = {
       isAbaReceipt: Boolean(geminiRes?.isAbaReceipt || ocrRes?.isAbaReceipt),

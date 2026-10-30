@@ -74,7 +74,7 @@ export const SmartHubHealthySection: React.FC<Props> = ({ foods, onViewAll, onOp
         <div className="flex items-center justify-between gap-2">
           <div>
             <h3 className="font-moul text-sm text-[#064E3B] dark:text-emerald-300 flex items-center gap-1.5">
-              <span>🥗 {tr(language, 'ស្លាកម្ហូបសុខភាព & ម៉ឺនុយពិសេស', 'Special Food & Healthy Food', '特色菜单与健康饮食')}</span>
+              <span>🥗 {tr(language, 'មុខម្ហូបសុខភាព និងជម្រើសពិសេស', 'Healthy & Light Dishes', '健康轻食与特色菜品')}</span>
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400">
               {tr(language, 'មុខងារពិសេសសម្រាប់សមាជិក VIP ប៉ុណ្ណោះ', 'Exclusive feature for VIP members only', 'VIP 会员专属功能')}
@@ -100,7 +100,7 @@ export const SmartHubHealthySection: React.FC<Props> = ({ foods, onViewAll, onOp
                 {tr(
                   language,
                   'ដោះសោម៉ឺនុយពិសេស & ជម្រើសម្ហូបសុខភាព',
-                  'Unlock Special Food & Healthy Food Menu',
+                  'Unlock Healthy Dish Filters & Meal Ideas',
                   '解锁特色菜单与健康饮食指南'
                 )}
               </h4>

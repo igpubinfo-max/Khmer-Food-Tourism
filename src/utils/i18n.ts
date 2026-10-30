@@ -403,6 +403,20 @@ export const EXACT_EN_TO_ZH_MAP: Record<string, string> = {
   'English': '英语 (English)',
   'Simplified Chinese': '简体中文 (中文)',
 
+  'Discover Cambodia Food & Tourism': '探索柬埔寨美食与旅游',
+  'Discover Cambodia': '探索柬埔寨',
+  'Taste Cambodia. Explore Cambodia.': '品味柬埔寨 · 探索柬埔寨',
+  'AI Trip Planner': 'AI 行程规划',
+  'Cambodian Dishes & Recipes': '柬埔寨传统美食与食谱',
+  'Browse by Category': '按分类浏览',
+  'Popular Now': '热门打卡',
+  'Active VIP Member': 'VIP 会员（有效）',
+  'VIP Member Benefits': 'VIP 会员专属权益',
+  'All Active': '全部已开启',
+  '✓ Priority Placement': '✓ 优先展示已开启',
+  'Unverified': '未认证',
+  'Add Restaurant': '添加新餐厅',
+  'Reset App Data': '重置应用数据',
   'Owner': '店主',
   'Admin': '管理员',
   'Khmer Food': '高棉美食',
@@ -423,6 +437,9 @@ const PHRASE_REPLACEMENTS_EN_TO_ZH: Array<[RegExp, string]> = [
   [/All \((\d+)\)/i, '全部 ($1)'],
   [/Verified \((\d+)\)/i, '已认证 ($1)'],
   [/Sample \((\d+)\)/i, '示例 ($1)'],
+  [/Listed \((\d+)\)/i, '收录 ($1)'],
+  [/Showing (\d+) of (\d+) dishes/i, '显示 $1 / $2 道菜品'],
+  [/Discover Cambodia v([0-9.]+) \(Build (\d+)\)/i, '探索柬埔寨 v$1 (构建号 $2)'],
   [/(\d+) dishes/i, '$1 道菜品'],
   [/(\d+) items/i, '$1 道菜'],
   [/Category #(\d+)/i, '第 $1 类'],
@@ -519,15 +536,15 @@ export function useChineseDomTranslation(language: Language): void {
   useEffect(() => {
     if (typeof document === 'undefined') return;
 
-    const mutatedTextNodes = new Map<Text, string>();
-    const mutatedPlaceholders = new Map<Element, string>();
-    const mutatedTitles = new Map<Element, string>();
+    const mutatedTextNodes = new Map<Text, { orig: string; translated: string }>();
+    const mutatedPlaceholders = new Map<Element, { orig: string; translated: string }>();
+    const mutatedTitles = new Map<Element, { orig: string; translated: string }>();
 
     const restoreAllNodes = () => {
-      mutatedTextNodes.forEach((origText, textNode) => {
+      mutatedTextNodes.forEach((entry, textNode) => {
         try {
-          if (textNode.isConnected) {
-            textNode.nodeValue = origText;
+          if (textNode.isConnected && textNode.nodeValue === entry.translated) {
+            textNode.nodeValue = entry.orig;
           }
         } catch {
           // ignore detached node
@@ -535,10 +552,10 @@ export function useChineseDomTranslation(language: Language): void {
       });
       mutatedTextNodes.clear();
 
-      mutatedPlaceholders.forEach((origPh, el) => {
+      mutatedPlaceholders.forEach((entry, el) => {
         try {
-          if (el.isConnected) {
-            el.setAttribute('placeholder', origPh);
+          if (el.isConnected && el.getAttribute('placeholder') === entry.translated) {
+            el.setAttribute('placeholder', entry.orig);
           }
         } catch {
           // ignore
@@ -546,10 +563,10 @@ export function useChineseDomTranslation(language: Language): void {
       });
       mutatedPlaceholders.clear();
 
-      mutatedTitles.forEach((origTitle, el) => {
+      mutatedTitles.forEach((entry, el) => {
         try {
-          if (el.isConnected) {
-            el.setAttribute('title', origTitle);
+          if (el.isConnected && el.getAttribute('title') === entry.translated) {
+            el.setAttribute('title', entry.orig);
           }
         } catch {
           // ignore
@@ -577,9 +594,8 @@ export function useChineseDomTranslation(language: Language): void {
           const raw = textNode.nodeValue || '';
           const translated = translateTextToChinese(raw);
           if (translated !== raw) {
-            if (!mutatedTextNodes.has(textNode)) {
-              mutatedTextNodes.set(textNode, raw);
-            }
+            const prev = mutatedTextNodes.get(textNode);
+            mutatedTextNodes.set(textNode, { orig: prev ? prev.orig : raw, translated });
             textNode.nodeValue = translated;
           }
           return;
@@ -593,9 +609,8 @@ export function useChineseDomTranslation(language: Language): void {
             const raw = node.nodeValue || '';
             const translated = translateTextToChinese(raw);
             if (translated !== raw) {
-              if (!mutatedTextNodes.has(node)) {
-                mutatedTextNodes.set(node, raw);
-              }
+              const prev = mutatedTextNodes.get(node);
+              mutatedTextNodes.set(node, { orig: prev ? prev.orig : raw, translated });
               node.nodeValue = translated;
             }
           }
@@ -609,9 +624,8 @@ export function useChineseDomTranslation(language: Language): void {
             if (ph) {
               const nextPh = translateTextToChinese(ph);
               if (nextPh !== ph) {
-                if (!mutatedPlaceholders.has(el)) {
-                  mutatedPlaceholders.set(el, ph);
-                }
+                const prev = mutatedPlaceholders.get(el);
+                mutatedPlaceholders.set(el, { orig: prev ? prev.orig : ph, translated: nextPh });
                 el.setAttribute('placeholder', nextPh);
               }
             }
@@ -619,9 +633,8 @@ export function useChineseDomTranslation(language: Language): void {
             if (title) {
               const nextTitle = translateTextToChinese(title);
               if (nextTitle !== title) {
-                if (!mutatedTitles.has(el)) {
-                  mutatedTitles.set(el, title);
-                }
+                const prev = mutatedTitles.get(el);
+                mutatedTitles.set(el, { orig: prev ? prev.orig : title, translated: nextTitle });
                 el.setAttribute('title', nextTitle);
               }
             }

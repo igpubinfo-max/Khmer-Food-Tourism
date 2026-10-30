@@ -25,13 +25,13 @@ export const InstallModal: React.FC = () => {
   const [copied, setCopied] = useState<boolean>(false);
 
   const isKm = language === 'km';
-  const LATEST_SIGNED_APK_URL = 'https://github.com/igpubinfo-max/Khmer-Food-Tourism/releases/download/v2.4.0/KhmerFoodTourism-v2.4.0.apk';
-  const LATEST_ZIP_PACKAGE_URL = 'https://github.com/igpubinfo-max/Khmer-Food-Tourism/releases/download/v2.4.0/KhmerFoodTourism-v2.4.0.apk';
-  const LATEST_RELEASE_PAGE_URL = 'https://github.com/igpubinfo-max/Khmer-Food-Tourism/releases/tag/v2.4.0';
+  const LATEST_SIGNED_APK_URL = 'https://github.com/igpubinfo-max/Khmer-Food-Tourism/releases/download/v2.5.0/DiscoverCambodia-v2.5.0.apk';
+  const LATEST_ZIP_PACKAGE_URL = 'https://github.com/igpubinfo-max/Khmer-Food-Tourism/releases/download/v2.5.0/DiscoverCambodia-v2.5.0.apk';
+  const LATEST_RELEASE_PAGE_URL = 'https://github.com/igpubinfo-max/Khmer-Food-Tourism/releases/tag/v2.5.0';
   const apkDownloadTarget =
     appSettings.apkDownloadUrl &&
     !appSettings.apkDownloadUrl.includes('app-debug.apk') &&
-    appSettings.apkDownloadUrl.includes('v2.4.0')
+    appSettings.apkDownloadUrl.includes('v2.5.0')
       ? appSettings.apkDownloadUrl
       : LATEST_SIGNED_APK_URL;
   const playStoreTarget = appSettings.playStoreUrl || 'https://play.google.com/store/apps/details?id=com.khmerfood.tourism';
@@ -287,13 +287,13 @@ export const InstallModal: React.FC = () => {
                     <div className="font-bold text-slate-900 dark:text-white font-khmer text-xs flex items-center gap-1.5">
                       <span>Google Play Store</span>
                       <span className="px-1.5 py-0.2 rounded bg-emerald-600 text-white text-[9px] font-bold">
-                        VerifiedV2/V3
+                        Official
                       </span>
                     </div>
                     <div className="text-[10px] text-slate-600 dark:text-slate-300 font-khmer leading-snug mt-0.5">
                       {isKm
-                        ? 'ចុះហត្ថលេខាឌីជីថលផ្លូវការ (V1/V2/V3 Signed Release) • គាំទ្រប្រព័ន្ធ Google Play Protect ១០០%'
-                        : 'Signed with official V1/V2/V3 release certificate • 100% Google Play Protect compatible'}
+                        ? 'ដំឡើងដោយសុវត្ថិភាពតាមរយៈ Google Play Store ផ្លូវការ'
+                        : 'Install safely from the official Google Play Store'}
                     </div>
                   </div>
                 </div>
@@ -366,9 +366,9 @@ export const InstallModal: React.FC = () => {
                     <span>
                       {tr(
                         language,
-                        `បើកឯកសារ KhmerFoodTourism-${APP_VERSION}.apk ដែលបានទាញយករួច (ដំឡើងជាន់លើកំណែចាស់ដោយមិនបាច់លុបកម្មវិធីចាស់ទេ)`,
-                        `Open the downloaded KhmerFoodTourism-${APP_VERSION}.apk file (installs directly over your existing app without uninstalling).`,
-                        `打开下载好的 KhmerFoodTourism-${APP_VERSION}.apk 文件（直接覆盖安装，无需卸载旧版）。`
+                        `បើកឯកសារ DiscoverCambodia-${APP_VERSION}.apk ដែលបានទាញយករួច (ដំឡើងជាន់លើកំណែចាស់ដោយមិនបាច់លុបកម្មវិធីចាស់ទេ)`,
+                        `Open the downloaded DiscoverCambodia-${APP_VERSION}.apk file (installs directly over your existing app without uninstalling).`,
+                        `打开下载好的 DiscoverCambodia-${APP_VERSION}.apk 文件（直接覆盖安装，无需卸载旧版）。`
                       )}
                     </span>
                   </li>
@@ -378,7 +378,7 @@ export const InstallModal: React.FC = () => {
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="w-4 h-4 rounded-full bg-[#064E3B] text-white flex items-center justify-center text-[10px] shrink-0 mt-0.5">4</span>
-                    <span>{isKm ? 'ចុច "ដំឡើង (Install)" ហើយបើកដំណើរការកម្មវិធីជាការស្រេច!' : 'Tap "Install" and enjoy Khmer Food & Tourism!'}</span>
+                    <span>{tr(language, 'ចុច "ដំឡើង" ហើយចាប់ផ្តើមប្រើប្រាស់កម្មវិធី!', 'Tap "Install" and start exploring Cambodia!', '点击“安装”，即刻探索柬埔寨美食与旅游！')}</span>
                   </li>
                 </ul>
               </div>

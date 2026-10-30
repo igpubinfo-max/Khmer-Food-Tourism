@@ -1406,7 +1406,7 @@ export const AdminDashboard: React.FC = () => {
                           onClick={() => {
                             const auditPayload = {
                               exportedAt: new Date().toISOString(),
-                              appName: 'Khmer Food & Tourism',
+                              appName: 'Discover Cambodia Food & Tourism',
                               totalRecords: transactions.length,
                               transactions: transactions.map(t => ({
                                 id: t.id,
@@ -2987,7 +2987,7 @@ export const AdminDashboard: React.FC = () => {
                       onClick={() => {
                         const backupObj = {
                           timestamp: new Date().toISOString(),
-                          appName: 'Khmer Food & Tourism',
+                          appName: 'Discover Cambodia Food & Tourism',
                           version: 'v2.1.0',
                           users: deletableUsers,
                           count: deletableUsers.length,

@@ -24,7 +24,6 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   private handleRecover = () => {
-    // Recover safely without clearing localStorage or user data
     this.setState({ hasError: false, error: undefined });
     try {
       window.location.reload();
@@ -51,28 +50,28 @@ export class ErrorBoundary extends Component<Props, State> {
 
             <div>
               <h2 className="font-moul text-base text-[#064E3B]">
-                {isEn ? 'Khmer Food & Tourism' : isZh ? '高棉美食与旅游' : 'អាហារ និងទេសចរណ៍ខ្មែរ'}
+                {isEn ? 'Discover Cambodia Food & Tourism' : isZh ? '探索柬埔寨美食与旅游' : 'ស្វែងយល់អាហារ និងទេសចរណ៍កម្ពុជា'}
               </h2>
               <p className="text-xs text-slate-500 mt-1">
                 {isEn
                   ? 'A temporary display issue occurred'
                   : isZh
-                  ? '界面加载出现临时问题'
-                  : 'ប្រព័ន្ធបានជួបប្រទះបញ្ហាបណ្តោះអាសន្នក្នុងការបង្ហាញផ្ទាំងនេះ'}
+                  ? '页面加载出现临时问题'
+                  : 'ប្រព័ន្ធបានជួបបញ្ហាបណ្តោះអាសន្នក្នុងការបង្ហាញទំព័រនេះ'}
               </p>
             </div>
 
             <p className="text-[11px] text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-200">
               {isEn
-                ? 'Tap the button below to reload safely. Your account and saved data remain completely intact.'
+                ? 'Tap the button below to reload safely. Your account and saved data remain intact.'
                 : isZh
-                ? '请点击下方按钮安全重新加载，您的账户和收藏数据完好无损。'
-                : 'សូមចុចប៊ូតុងខាងក្រោមដើម្បីបើកដំណើរការកម្មវិធីឡើងវិញដោយសុវត្ថិភាព (ទិន្នន័យ និងគណនីរបស់អ្នកត្រូវបានរក្សាទុកទាំងស្រុង)។'}
+                ? '请点击下方按钮重新加载，您的账户与收藏数据完好无损。'
+                : 'សូមចុចប៊ូតុងខាងក្រោមដើម្បីដំណើរការឡើងវិញ។ គណនី និងទិន្នន័យរបស់អ្នកត្រូវបានរក្សាទុកទាំងស្រុង។'}
             </p>
 
             {this.state.error && (
               <div className="text-[10px] text-rose-600 font-mono text-left break-all bg-rose-50/80 p-2.5 rounded-xl border border-rose-200/80">
-                ⚠️ Error: {this.state.error.message || String(this.state.error)}
+                Error: {this.state.error.message || String(this.state.error)}
               </div>
             )}
 
@@ -82,12 +81,12 @@ export class ErrorBoundary extends Component<Props, State> {
             >
               <RefreshCw className="w-4 h-4 text-emerald-300" />
               <span>
-                {isEn ? 'Reload App Safely' : isZh ? '安全重新加载' : 'បើកដំណើរការឡើងវិញដោយសុវត្ថិភាព'}
+                {isEn ? 'Reload App' : isZh ? '重新加载应用' : 'ដំណើរការកម្មវិធីឡើងវិញ'}
               </span>
             </button>
 
             <div className="pt-2 text-center text-[10px] text-slate-500 font-khmer">
-              <span>{isEn ? 'Support: ' : isZh ? '技术支持：' : 'មតិកែលម្អ / ជំនួយបច្ចេកទេស៖ '}</span>
+              <span>{isEn ? 'Support: ' : isZh ? '技术支持：' : 'ជំនួយបច្ចេកទេស៖ '}</span>
               <a href="mailto:kftcam@gmail.com" className="font-mono text-[#064E3B] underline font-bold">
                 kftcam@gmail.com
               </a>

@@ -13,21 +13,20 @@ interface Props {
   onExploreAll?: () => void;
 }
 
-/** Horizontal, swipeable list of trending foods with rank badges. */
-export const TrendingFoodsRow: React.FC<Props> = ({ language, items, onOpen, onExploreAll }) => (
+const TrendingFoodsRowInner: React.FC<Props> = ({ language, items, onOpen, onExploreAll }) => (
   <section className="space-y-3">
     <SectionHeader
       icon={Flame}
-      title={tr(language, 'ម្ហូបកំពុងពេញនិយម', 'Trending Khmer Food', '热门高棉美食')}
-      subtitle={tr(language, 'មុខម្ហូបដែលមនុស្សគ្រប់គ្នាកំពុងនិយាយអំពី', 'What everyone is talking about right now', '大家都在热议的美食')}
-      actionLabel={onExploreAll ? tr(language, 'រកមើលបន្ថែម', 'Discover more', '发现更多') : undefined}
+      title={tr(language, 'ម្ហូបពេញនិយមនៅកម្ពុជា', 'Popular Cambodian Dishes', '柬埔寨人气美食')}
+      subtitle={tr(language, 'មុខម្ហូបប្រចាំតំបន់ និងអាហារតាមផ្លូវល្បីៗ', 'Regional specialties & local street food', '地方特色名菜与人气街头小吃')}
+      actionLabel={onExploreAll ? tr(language, 'មើលវីដេអូម្ហូប', 'Food videos', '美食视频') : undefined}
       onAction={onExploreAll}
     />
     <div className="-mx-4 px-4 flex gap-3 overflow-x-auto no-scrollbar snap-x snap-mandatory scroll-pl-4 pb-1">
       {(items || []).map((item, index) => {
         if (!item || !item.id) return null;
         const safeKh = item.foodNameKh || item.foodNameEn || 'ម្ហូបខ្មែរ';
-        const safeEn = item.foodNameEn || item.foodNameKh || 'Khmer Dish';
+        const safeEn = item.foodNameEn || item.foodNameKh || 'Cambodian Dish';
         const rawName =
           language === 'km'
             ? safeKh
@@ -52,6 +51,7 @@ export const TrendingFoodsRow: React.FC<Props> = ({ language, items, onOpen, onE
                 src={resolveHomePhoto(item.photoUrl)}
                 alt={name}
                 loading="lazy"
+                decoding="async"
                 onError={(e) => {
                   e.currentTarget.onerror = null;
                   e.currentTarget.src = FALLBACK_IMG;
@@ -76,3 +76,5 @@ export const TrendingFoodsRow: React.FC<Props> = ({ language, items, onOpen, onE
     </div>
   </section>
 );
+
+export const TrendingFoodsRow = React.memo(TrendingFoodsRowInner);

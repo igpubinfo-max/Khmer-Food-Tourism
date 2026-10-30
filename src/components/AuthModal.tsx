@@ -196,10 +196,10 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
             <Sparkles className="w-6 h-6 text-emerald-300" />
           </div>
           <h2 className="text-lg font-bold font-moul tracking-wide drop-shadow-sm">
-            {isKm ? 'ចូលប្រើប្រាស់កម្មវិធី' : 'Khmer Food & Tourism'}
+            {language === 'km' ? 'ស្វែងយល់អាហារ និងទេសចរណ៍កម្ពុជា' : language === 'zh' ? '探索柬埔寨美食与旅游' : 'Discover Cambodia Food & Tourism'}
           </h2>
           <p className="text-[11px] text-emerald-100/90 font-khmer mt-0.5">
-            {isKm ? 'តម្រូវឱ្យមានគណនីដើម្បីចូលទស្សនា និងប្រើប្រាស់មុខងារទាំងអស់' : 'Please sign in to access Cambodian cuisine & tourism'}
+            {language === 'km' ? 'ភ្លក្សរសជាតិកម្ពុជា • ស្វែងយល់ទឹកដីកម្ពុជា' : language === 'zh' ? '品味柬埔寨 · 探索柬埔寨' : 'Taste Cambodia. Explore Cambodia.'}
           </p>
 
           {!isMandatoryGate && (
@@ -229,7 +229,7 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
                 </div>
                 <ul className="text-[10.5px] text-slate-600 dark:text-slate-300 space-y-0.5 pl-4 list-disc">
                   <li>{isKm ? 'រក្សាទុកមុខម្ហូប និងហាងដែលពេញចិត្ត' : 'Save favorite dishes & restaurants'}</li>
-                  <li>{isKm ? 'ស្វែងរកហាងឆ្ងាញ់ៗនៅក្បែរអ្នក និងផែនការដើរលេង AI' : 'Find nearby delicious shops & AI trip plans'}</li>
+                  <li>{language === 'km' ? 'ស្វែងរកហាងអាហារនៅក្បែរអ្នក និងរៀបចំផែនការដើរលេង' : language === 'zh' ? '发现附近地道餐厅并规划出行路线' : 'Find nearby local restaurants & plan your trips'}</li>
                   <li>{isKm ? 'ចុះឈ្មោះហាងអាហារ និងផ្សព្វផ្សាយមុខម្ហូបខ្មែរ' : 'Register food stalls & promote Khmer cuisine'}</li>
                 </ul>
               </div>
@@ -289,7 +289,7 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
                       {isKm ? 'បន្តជាមួយ Google' : 'Continue with Google'}
                     </span>
                     <span className="block text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">
-                      {isKm ? 'ចុចតែ ១ ឃ្លីក ចូលភ្លាមៗ • ឥតគិតថ្លៃ ១០០%' : 'Fast 1-Tap Sign-In • 100% Free'}
+                      {language === 'km' ? 'ចូលរហ័សដោយគណនី Google របស់អ្នក' : language === 'zh' ? '使用 Google 账号快速登录' : 'Quick sign-in with your Google account'}
                     </span>
                   </div>
                 </div>
@@ -297,7 +297,7 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
                   <Loader2 className="w-5 h-5 animate-spin text-emerald-600" />
                 ) : (
                   <span className="px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950 text-[#064E3B] dark:text-emerald-300 text-[10px] font-bold shadow-2xs">
-                    {isKm ? 'ណែនាំ' : 'Fastest'}
+                    {language === 'km' ? 'ណែនាំ' : language === 'zh' ? '推荐' : 'Recommended'}
                   </span>
                 )}
               </button>
@@ -318,7 +318,7 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
                 className="w-full py-2.5 px-3 rounded-2xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 text-xs font-bold transition flex items-center justify-center gap-2"
               >
                 <Mail className="w-4 h-4 text-slate-500" />
-                <span>{isKm ? 'ប្រើប្រាស់អាសយដ្ឋានអ៊ីមែល (Email)' : 'Continue with Email'}</span>
+                <span>{language === 'km' ? 'បន្តដោយប្រើអាសយដ្ឋានអ៊ីមែល' : language === 'zh' ? '使用电子邮箱登录' : 'Continue with Email'}</span>
               </button>
             </div>
           ) : authMode === 'google_quick' ? (
@@ -585,12 +585,12 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
               className="w-full py-2.5 px-3 rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/30 dark:hover:bg-rose-950/50 text-rose-600 dark:text-rose-400 text-xs font-bold transition flex items-center justify-center gap-2 border border-rose-200 dark:border-rose-900/50 shadow-2xs"
             >
               <LogOut className="w-3.5 h-3.5" />
-              <span>{isKm ? 'ចាកចេញពីកម្មវិធី (Exit App)' : 'Exit Application'}</span>
+              <span>{language === 'km' ? 'ចាកចេញពីកម្មវិធី' : language === 'zh' ? '退出应用' : 'Exit Application'}</span>
             </button>
             <p className="text-[10px] text-slate-400">
               {isKm 
-                ? 'តម្រូវឱ្យមានគណនីដើម្បីចូលប្រើប្រាស់។ ប្រសិនបើមិនបង្កើតគណនីទេ កម្មវិធីនឹងបិទស្វ័យប្រវត្តិ។' 
-                : 'Account required. If you do not create an account, the app will exit automatically.'}
+                ? 'សូមចូលគណនីដើម្បីរក្សាទុកចំណូលចិត្ត និងបន្តប្រើប្រាស់កម្មវិធី។' 
+                : 'Please sign in to save your preferences and continue exploring.'}
             </p>
           </div>
 
@@ -612,7 +612,7 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
               className="text-[10px] text-slate-400 active:text-slate-400 focus:text-slate-400 bg-transparent active:bg-transparent focus:bg-transparent hover:bg-transparent shadow-none active:shadow-none focus:shadow-none outline-none focus:outline-none focus:ring-0 border-0 flex items-center justify-center gap-1 mx-auto select-none cursor-pointer"
             >
               <Shield className="w-3 h-3 shrink-0" />
-              <span>{isKm ? 'ច្រកចូលរដ្ឋបាល (Admin Portal)' : 'Administrator Login'}</span>
+              <span>{language === 'km' ? 'ចូលគណនីអ្នកគ្រប់គ្រង' : language === 'zh' ? '管理员入口' : 'Administrator Login'}</span>
             </button>
           </div>
         </div>

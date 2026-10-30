@@ -1,16 +1,16 @@
 {
-  "short_name": "Khmer Food",
-  "name": "Khmer Food & Tourism - អាហារ និងទេសចរណ៍ខ្មែរ",
-  "description": "Cambodian Cuisine, Authentic Restaurants, and Scenic Tourist Destinations",
+  "short_name": "Discover Cambodia",
+  "name": "Discover Cambodia Food & Tourism",
+  "description": "Taste Cambodia. Explore Cambodia. Authentic Cambodian dishes, local restaurants, and scenic destinations across all 25 provinces.",
   "icons": [
     {
-      "src": "./icon-192.png?v=2.3.2",
+      "src": "./icon-192.png?v=2.4.1",
       "type": "image/png",
       "sizes": "192x192",
       "purpose": "any maskable"
     },
     {
-      "src": "./icon-512.png?v=2.3.2",
+      "src": "./icon-512.png?v=2.4.1",
       "type": "image/png",
       "sizes": "512x512",
       "purpose": "any maskable"
@@ -18,7 +18,7 @@
   ],
   "start_url": "./",
   "scope": "./",
-  "background_color": "#064E3B",
+  "background_color": "#0F172A",
   "theme_color": "#064E3B",
   "display": "standalone",
   "orientation": "portrait"

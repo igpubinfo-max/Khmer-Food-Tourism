@@ -7,7 +7,7 @@ import { initial100Destinations } from './seedDestinations';
 export const initialUsers: User[] = [];
 
 export const initialAppSettings: AppSettings = {
-  apkDownloadUrl: 'https://github.com/igpubinfo-max/Khmer-Food-Tourism/releases/download/v2.3.2/KhmerFoodTourism-v2.3.2.apk',
+  apkDownloadUrl: 'https://github.com/igpubinfo-max/Khmer-Food-Tourism/releases/download/v2.5.0/DiscoverCambodia-v2.5.0.apk',
   playStoreUrl: 'https://play.google.com/store/apps/details?id=com.khmerfood.tourism',
   appStoreUrl: 'https://apps.apple.com/app/khmer-food-tourism/id6826976670',
   iosAppStoreUrl: 'https://apps.apple.com/app/khmer-food-tourism/id6826976670',
@@ -15,8 +15,8 @@ export const initialAppSettings: AppSettings = {
   supportQrImageUrl: '/donation-qr.png',
   supportBankName: 'ABA BANK / BAKONG KHQR',
   supportAccountName: 'CHEA KIMSENG',
-  supportMessageKh: 'សូមជួយគាំទ្រការអភិវឌ្ឍន៍កម្មវិធី "អាហារ និងទេសចរណ៍ខ្មែរ" ដើម្បីផ្សព្វផ្សាយវប្បធម៌ និងម្ហូបខ្មែរទៅកាន់ពិភពលោក។ រាល់ការបរិច្ចាគស្ម័គ្រចិត្តរបស់លោកអ្នក គឺជាកម្លាំងចិត្តដ៏ធំធេងសម្រាប់ក្រុមការងារ!',
-  supportMessageEn: 'Thank you for supporting Khmer Food & Tourism. Your kind voluntary contribution empowers us to continue promoting authentic Cambodian heritage and cuisine worldwide!',
+  supportMessageKh: 'សូមជួយគាំទ្រការអភិវឌ្ឍន៍កម្មវិធី «ស្វែងយល់អាហារ និងទេសចរណ៍កម្ពុជា» ដើម្បីផ្សព្វផ្សាយម្ហូបអាហារ និងតំបន់ទេសចរណ៍កម្ពុជាទៅកាន់ពិភពលោក។ រាល់ការចូលរួមគាំទ្ររបស់លោកអ្នក គឺជាកម្លាំងចិត្តដ៏មានតម្លៃសម្រាប់ក្រុមការងារ!',
+  supportMessageEn: 'Thank you for supporting Discover Cambodia Food & Tourism. Your contribution helps us maintain the platform and share Cambodian cuisine and destinations worldwide.',
   adminPasswordHash: 'pbkdf2$100000$70fcb2b4c0d7d330e0c35f90e46c1dc4d23d0a6ba9e8bf24d49f9236b54dbcd5$9f4c042b557cce87cacb3a142fef4082cded0ac5bf594f6a0fd167439f53b369',
   isAdminInitialized: true,
   promotionalFeeUsd: 4.99,

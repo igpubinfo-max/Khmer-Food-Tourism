@@ -9,15 +9,16 @@ export interface WelcomeSlide {
   /** CSS object-position so each slide shows a different part of the photo */
   objectPosition: string;
   headline: Record<Language, string>;
+  tagline: Record<Language, string>;
   sub: Record<Language, string>;
 }
 
 export const WELCOME_IMAGES = {
   hero: { src: '/welcome/hero-bg.webp', width: 1264, height: 848 },
   places: { src: '/welcome/places.webp', width: 1280, height: 714 },
-  logo: '/welcome/welcome-hero-icon.png',
+  logo: '/welcome/welcome-hero-icon.png?v=2.4.1',
   /** Existing app icon used if the welcome logo fails to load */
-  logoFallback: '/icon-192.png',
+  logoFallback: '/icon-192.png?v=2.4.1',
 } as const;
 
 export const WELCOME_SLIDES: WelcomeSlide[] = [
@@ -28,14 +29,19 @@ export const WELCOME_SLIDES: WelcomeSlide[] = [
     imageHeight: WELCOME_IMAGES.hero.height,
     objectPosition: '88% 50%',
     headline: {
-      km: 'ស្វែងយល់ពីម្ហូប និងទេសចរណ៍កម្ពុជា',
-      en: 'Discover Cambodian Food & Travel',
+      km: 'ស្វែងយល់អាហារ និងទេសចរណ៍កម្ពុជា',
+      en: 'Discover Cambodia Food & Tourism',
       zh: '探索柬埔寨美食与旅游',
     },
+    tagline: {
+      km: 'ភ្លក្សរសជាតិកម្ពុជា • ស្វែងយល់ទឹកដីកម្ពុជា',
+      en: 'Taste Cambodia. Explore Cambodia.',
+      zh: '品味柬埔寨 · 探索柬埔寨',
+    },
     sub: {
-      km: 'ម្ហូបបុរាណ រូបមន្ត ភោជនីយដ្ឋាន និងទីកន្លែងទេសចរណ៍ទូទាំងកម្ពុជា',
-      en: 'Authentic dishes, recipes, restaurants and destinations across Cambodia.',
-      zh: '地道菜肴、食谱、餐厅与柬埔寨各地景点。',
+      km: 'មគ្គុទ្ទេសក៍ម្ហូបប្រពៃណី ភោជនីយដ្ឋាន និងតំបន់ទេសចរណ៍ទូទាំង ២៥ ខេត្ត-ក្រុង',
+      en: 'Authentic dishes, local restaurants, and scenic destinations across all 25 provinces.',
+      zh: '汇集全国 25 省市地道菜肴、精选餐厅与风景名胜。',
     },
   },
 ];
@@ -43,17 +49,21 @@ export const WELCOME_SLIDES: WelcomeSlide[] = [
 export const WELCOME_LABELS = {
   skip: { km: 'រំលង', en: 'Skip', zh: '跳过' },
   next: { km: 'បន្ទាប់', en: 'Next', zh: '下一步' },
-  start: { km: 'ចាប់ផ្តើម', en: 'Get Started', zh: '开始使用' },
-  appName: { km: 'អាហារ & ទេសចរណ៍ខ្មែរ', en: 'Khmer Food & Tourism', zh: '高棉美食与旅游' },
+  start: { km: 'ចាប់ផ្តើមស្វែងរក', en: 'Start Exploring', zh: '开始探索' },
+  appName: {
+    km: 'ស្វែងយល់អាហារ និងទេសចរណ៍កម្ពុជា',
+    en: 'Discover Cambodia Food & Tourism',
+    zh: '探索柬埔寨美食与旅游',
+  },
   offlineBadge: {
-    km: 'ប្រើបានទោះគ្មានអ៊ីនធឺណិត — មិនត្រូវការអ៊ីនធឺណិត',
-    en: 'Works Offline — No Internet Required',
-    zh: '支持离线使用 — 无需网络连接',
+    km: 'ប្រើបានទោះគ្មានអ៊ីនធឺណិត',
+    en: 'Works Offline Anytime',
+    zh: '支持离线随时浏览',
   },
   offlineSub: {
-    km: 'មើលព័ត៌មានម្ហូប រូបមន្ត និងមុខម្ហូបដែលបានរក្សាទុក ដោយមិនបាច់មាន Wi-Fi ឬទិន្នន័យចល័ត',
-    en: 'Browse food guides, recipes, and saved favorites anytime without Wi-Fi or mobile data.',
-    zh: '无需 Wi-Fi 或移动数据，随时浏览美食指南、食谱与已收藏内容。',
+    km: 'មើលមុខម្ហូប រូបមន្ត និងកន្លែងដែលបានរក្សាទុក ដោយមិនបាច់ភ្ជាប់ Wi-Fi ឬទិន្នន័យចល័ត',
+    en: 'Read dish guides, recipes, and saved places even without Wi-Fi or mobile data.',
+    zh: '无需 Wi-Fi 或移动数据，随时查看菜品指南、食谱与收藏地点。',
   },
 } as const;
 

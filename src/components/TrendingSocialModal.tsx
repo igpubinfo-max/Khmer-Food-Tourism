@@ -57,6 +57,15 @@ export const TrendingSocialModal: React.FC = () => {
 
   const isKm = language === 'km';
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState<string>('');
+  useEffect(() => {
+    if (!debouncedSearchQuery.trim()) {
+      setDebouncedSearchQuery('');
+      return;
+    }
+    const timer = setTimeout(() => setDebouncedSearchQuery(searchQuery), 220);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
   const [categoryFilter, setCategoryFilter] = useState<TrendingFoodCategorySlug>('all');
   const [provinceFilter, setProvinceFilter] = useState<string>('all');
   const [visibleVideoCount, setVisibleVideoCount] = useState<number>(VIDEO_BATCH_SIZE);
@@ -246,29 +255,8 @@ export const TrendingSocialModal: React.FC = () => {
   loadFeedRef.current = loadFeed;
   useEffect(() => {
     if (!isTrendingSocialModalOpen) return;
-    loadFeedRef.current(false, true);
-
-    const autoRefreshInterval = setInterval(() => {
-      if (typeof document !== 'undefined' && document.hidden) return;
-      // Rotate & refresh automatically every 60 seconds without manual refresh
-      if (!activePlayerItemIdRef.current) {
-        loadFeedRef.current(false, true);
-      } else {
-        setLastCheckedAt(new Date().toISOString());
-      }
-    }, 60 * 1000);
-
-    return () => clearInterval(autoRefreshInterval);
+    loadFeedRef.current(false, false);
   }, [isTrendingSocialModalOpen]);
-
-  // Cooldown countdown ticker
-  useEffect(() => {
-    if (cooldownSec <= 0) return;
-    const t = setInterval(() => {
-      setCooldownSec((prev) => Math.max(0, prev - 1));
-    }, 1000);
-    return () => clearInterval(t);
-  }, [cooldownSec]);
 
   // Stop inline video when modal closes
   useEffect(() => {
@@ -281,7 +269,7 @@ export const TrendingSocialModal: React.FC = () => {
   // Live Google Maps & Smart Cache Search (identical to HomeView search!)
   useEffect(() => {
     if (!isTrendingSocialModalOpen) return;
-    const q = searchQuery.trim();
+    const q = debouncedSearchQuery.trim();
     if (!q || q.length < 2) {
       setSmartCachePlaces([]);
       setIsSearchingOnline(false);
@@ -385,19 +373,19 @@ export const TrendingSocialModal: React.FC = () => {
     const strictMatches = discoveryItems.filter((item) => {
       if (categoryFilter !== 'all' && item.categorySlug !== categoryFilter) return false;
       if (!matchesProvince(item)) return false;
-      if (searchQuery.trim() && !matchesExpandedYouTubeQuery(item, searchQuery)) return false;
+      if (debouncedSearchQuery.trim() && !matchesExpandedYouTubeQuery(item, debouncedSearchQuery)) return false;
       return true;
     });
 
     // If user typed a keyword while on a specific category tab and the matching video is in another category tab,
     // return the matching videos across categories (still strictly matching the searchQuery and provinceFilter!)
-    if (strictMatches.length === 0 && searchQuery.trim() && categoryFilter !== 'all') {
+    if (strictMatches.length === 0 && debouncedSearchQuery.trim() && categoryFilter !== 'all') {
       return discoveryItems.filter(
-        (item) => matchesProvince(item) && matchesExpandedYouTubeQuery(item, searchQuery)
+        (item) => matchesProvince(item) && matchesExpandedYouTubeQuery(item, debouncedSearchQuery)
       );
     }
 
-    if (!searchQuery.trim() && strictMatches.length > 1) {
+    if (!debouncedSearchQuery.trim() && strictMatches.length > 1) {
       return rotateLatestVideosForScope(
         strictMatches,
         `${categoryFilter}|${provinceFilter}`,
@@ -406,11 +394,11 @@ export const TrendingSocialModal: React.FC = () => {
     }
 
     return strictMatches;
-  }, [discoveryItems, categoryFilter, provinceFilter, searchQuery, rotationCycle]);
+  }, [discoveryItems, categoryFilter, provinceFilter, debouncedSearchQuery, rotationCycle]);
 
   useEffect(() => {
     setVisibleVideoCount(VIDEO_BATCH_SIZE);
-  }, [categoryFilter, provinceFilter, searchQuery]);
+  }, [categoryFilter, provinceFilter, debouncedSearchQuery]);
 
   const displayedVideos = useMemo(
     () => filteredItems.slice(0, visibleVideoCount),
@@ -508,24 +496,6 @@ export const TrendingSocialModal: React.FC = () => {
     if (!playerInfo.videoId) {
       openExternalVideoSafely(playerInfo.watchUrl, item.titleEn || item.titleKh);
       return;
-    }
-
-    // Verify availability before opening player if online
-    if (typeof navigator === 'undefined' || navigator.onLine !== false) {
-      setVerifyingPlayItemId(item.id);
-      const meta = await fetchPublicOEmbedMetadata(playerInfo.watchUrl);
-      setVerifyingPlayItemId(null);
-
-      if (!meta) {
-        handleReplaceUnavailableVideo(item, true);
-        return;
-      }
-
-      if (meta.canEmbed === false) {
-        setEmbedFallbackItemIds((prev) => ({ ...prev, [item.id]: true }));
-        setActivePlayerItemId(item.id);
-        return;
-      }
     }
 
     if (playerInfo.canInlineEmbed && playerInfo.embedUrl) {
@@ -636,18 +606,15 @@ export const TrendingSocialModal: React.FC = () => {
             <div className="min-w-0">
               <div className="flex items-center gap-1.5 flex-wrap">
                 <h3 className="font-moul text-xs sm:text-sm text-white truncate">
-                  {tr(language, 'វីដេអូពេញនិយម YouTube (ម្ហូប & ទេសចរណ៍)', 'Trending YouTube Videos (Food & Travel)', 'YouTube 热门视频（美食与旅行）')}
+                  {tr(language, 'វីដេអូម្ហូប និងទេសចរណ៍កម្ពុជា', 'Cambodia Food & Travel Videos', '柬埔寨美食与旅行视频')}
                 </h3>
-                <span className="px-2 py-0.5 rounded-full bg-red-600 text-white text-[9px] font-bold shadow-xs">
-                  YouTube Only
-                </span>
               </div>
               <p className="text-[11px] text-pink-200 font-khmer truncate">
                 {tr(
                   language,
-                  `ប្តូរវីដេអូថ្មីស្វ័យប្រវត្តិរៀងរាល់ ៦០វិនាទី • បានពិនិត្យ៖ ${formattedLastChecked}`,
-                  `Auto-rotates every 60s · Checked: ${formattedLastChecked}`,
-                  `每60秒自动轮换 · 检查：${formattedLastChecked}`
+                  `បានធ្វើបច្ចុប្បន្នភាព៖ ${formattedLastChecked}`,
+                  `Updated: ${formattedLastChecked}`,
+                  `更新于：${formattedLastChecked}`
                 )}
               </p>
             </div>
@@ -792,14 +759,14 @@ export const TrendingSocialModal: React.FC = () => {
               <p className="text-sm font-bold text-slate-300">
                 {tr(
                   language,
-                  searchQuery.trim()
-                    ? `រកមិនឃើញលទ្ធផលត្រូវនឹង "${searchQuery.trim()}" ទេ`
+                  debouncedSearchQuery.trim()
+                    ? `រកមិនឃើញលទ្ធផលត្រូវនឹង "${debouncedSearchQuery.trim()}" ទេ`
                     : 'រកមិនឃើញវីដេអូ YouTube ត្រូវនឹងការស្វែងរកនេះទេ',
-                  searchQuery.trim()
-                    ? `No results found for "${searchQuery.trim()}"`
+                  debouncedSearchQuery.trim()
+                    ? `No results found for "${debouncedSearchQuery.trim()}"`
                     : 'No YouTube videos matching this filter',
-                  searchQuery.trim()
-                    ? `未找到与“${searchQuery.trim()}”相关的结果`
+                  debouncedSearchQuery.trim()
+                    ? `未找到与“${debouncedSearchQuery.trim()}”相关的结果`
                     : '未找到符合筛选条件的 YouTube 视频'
                 )}
               </p>
@@ -814,16 +781,16 @@ export const TrendingSocialModal: React.FC = () => {
                 </button>
                 <button
                   type="button"
-                  onClick={() => openExternalVideoSafely(undefined, searchQuery.trim() || 'Cambodian food travel')}
+                  onClick={() => openExternalVideoSafely(undefined, debouncedSearchQuery.trim() || 'Cambodian food travel')}
                   className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs cursor-pointer shadow-sm"
                 >
                   <ExternalLink className="w-3.5 h-3.5" />
                   <span>
                     {tr(
                       language,
-                      searchQuery.trim() ? `ស្វែងរក "${searchQuery.trim()}" លើ YouTube` : 'ស្វែងរកលើ YouTube',
-                      searchQuery.trim() ? `Search "${searchQuery.trim()}" on YouTube` : 'Search on YouTube',
-                      searchQuery.trim() ? `在 YouTube 搜索 "${searchQuery.trim()}"` : '在 YouTube 搜索'
+                      debouncedSearchQuery.trim() ? `ស្វែងរក "${debouncedSearchQuery.trim()}" លើ YouTube` : 'ស្វែងរកលើ YouTube',
+                      debouncedSearchQuery.trim() ? `Search "${debouncedSearchQuery.trim()}" on YouTube` : 'Search on YouTube',
+                      debouncedSearchQuery.trim() ? `在 YouTube 搜索 "${debouncedSearchQuery.trim()}"` : '在 YouTube 搜索'
                     )}
                   </span>
                 </button>
@@ -832,7 +799,7 @@ export const TrendingSocialModal: React.FC = () => {
           ) : (
             <>
               {/* Home Screen Search Results (Foods, Drinks, Restaurants, Tourist Attractions) */}
-              {searchQuery.trim() && homeSearchResults && homeSearchResults.totalCount > 0 && (
+              {debouncedSearchQuery.trim() && homeSearchResults && homeSearchResults.totalCount > 0 && (
                 <div className="space-y-2 rounded-2xl bg-slate-800/60 border border-slate-700/80 p-3">
                   <div className="flex items-center justify-between gap-2 pb-1">
                     <span className="font-bold text-emerald-300 text-[11px]">
@@ -845,7 +812,7 @@ export const TrendingSocialModal: React.FC = () => {
                     </span>
                     <button
                       type="button"
-                      onClick={() => openExternalVideoSafely(undefined, searchQuery.trim())}
+                      onClick={() => openExternalVideoSafely(undefined, debouncedSearchQuery.trim())}
                       className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-[10px] shrink-0 cursor-pointer shadow-xs"
                     >
                       <ExternalLink className="w-3 h-3" />
@@ -1011,19 +978,19 @@ export const TrendingSocialModal: React.FC = () => {
               )}
 
               {/* Matching YouTube Videos */}
-              {searchQuery.trim() && filteredItems.length > 0 && (
+              {debouncedSearchQuery.trim() && filteredItems.length > 0 && (
                 <div className="flex items-center justify-between gap-2 p-2.5 rounded-2xl bg-slate-800/90 border border-slate-700 text-slate-200 text-[11px]">
                   <span className="font-bold truncate">
                     {tr(
                       language,
-                      `🎬 វីដេអូ YouTube ត្រូវនឹង "${searchQuery.trim()}" (${filteredItems.length})`,
-                      `🎬 YouTube videos matching "${searchQuery.trim()}" (${filteredItems.length})`,
-                      `🎬 匹配 "${searchQuery.trim()}" 的 YouTube 视频 (${filteredItems.length})`
+                      `🎬 វីដេអូ YouTube ត្រូវនឹង "${debouncedSearchQuery.trim()}" (${filteredItems.length})`,
+                      `🎬 YouTube videos matching "${debouncedSearchQuery.trim()}" (${filteredItems.length})`,
+                      `🎬 匹配 "${debouncedSearchQuery.trim()}" 的 YouTube 视频 (${filteredItems.length})`
                     )}
                   </span>
                   <button
                     type="button"
-                    onClick={() => openExternalVideoSafely(undefined, searchQuery.trim())}
+                    onClick={() => openExternalVideoSafely(undefined, debouncedSearchQuery.trim())}
                     className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-[10px] shrink-0 cursor-pointer shadow-xs"
                   >
                     <ExternalLink className="w-3 h-3" />
@@ -1065,7 +1032,7 @@ export const TrendingSocialModal: React.FC = () => {
                           <img
                             src={item.thumbnailUrl}
                             alt=""
-                            className="absolute inset-0 w-full h-full object-cover opacity-25 blur-[2px] pointer-events-none"
+                            className="absolute inset-0 w-full h-full object-cover opacity-25 pointer-events-none"
                           />
                           <div className="relative z-10 flex flex-col items-center max-w-xs space-y-2">
                             <AlertCircle className="w-8 h-8 text-amber-400" />

@@ -176,16 +176,13 @@ export const WhatToEatModal: React.FC = () => {
                 <h3 className="font-moul text-sm text-white">
                   {tr(language, 'ថ្ងៃនេះញ៉ាំអ្វី?', 'What to Eat Today?', '今天吃什么？')}
                 </h3>
-                <span className="px-2 py-0.5 rounded-full bg-amber-400 text-stone-900 text-[10px] font-bold shadow-xs">
-                  {tr(language, 'អាទិភាពខ្ពស់ ⭐', 'High Priority ⭐', '智能推荐 ⭐')}
-                </span>
               </div>
               <p className="text-[11px] text-emerald-100 font-khmer">
                 {tr(
                   language,
-                  'AI ជួយស្នើម្ហូបប្លែកៗឆ្លាតវៃតាមចំណង់ចំណូលចិត្ត',
-                  `Smart AI recommendations from ${foods.length} authentic dishes`,
-                  `AI 根据您的口味从 ${foods.length} 道正宗高棉菜中智能推荐`
+                  `ណែនាំមុខម្ហូបខ្មែរឆ្ងាញ់ៗពីក្នុងចំណោម ${foods.length} មុខ`,
+                  `Handpicked ideas from ${foods.length} Cambodian dishes`,
+                  `从 ${foods.length} 道柬埔寨传统美食中为您精选`
                 )}
               </p>
             </div>
@@ -205,9 +202,9 @@ export const WhatToEatModal: React.FC = () => {
             <span>
               {tr(
                 language,
-                `AI ណែនាំសម្រាប់ ${currentMealInfo.labelKh} ពេលនេះ`,
-                `AI Pick for ${currentMealInfo.labelEn}`,
-                `AI 当前时段推荐：${currentMealInfo.labelZh}`
+                `ណែនាំសម្រាប់${currentMealInfo.labelKh}`,
+                `Suggested for ${currentMealInfo.labelEn}`,
+                `当前时段推荐：${currentMealInfo.labelZh}`
               )}
             </span>
           </div>
@@ -250,7 +247,7 @@ export const WhatToEatModal: React.FC = () => {
         {/* Content body */}
         <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 space-y-4 no-scrollbar [-webkit-overflow-scrolling:touch]">
           {currentDish && currentLoc && (
-            <div className={`transition-all duration-300 ${isSpinning ? 'opacity-30 scale-95 blur-[1px]' : 'opacity-100 scale-100'}`}>
+            <div className={`transition-all duration-300 ${isSpinning ? 'opacity-30 scale-95 ' : 'opacity-100 scale-100'}`}>
               {/* Highlight Recommended Dish Card */}
               <div className="relative rounded-3xl overflow-hidden bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 shadow-md">
                 <div className="relative aspect-16/10 w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
@@ -258,7 +255,7 @@ export const WhatToEatModal: React.FC = () => {
                     src={currentDish.photoUrl} 
                     alt={currentLoc.name} 
                     className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-                    loading="lazy"
+                    loading="lazy" decoding="async"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
                   
@@ -266,7 +263,7 @@ export const WhatToEatModal: React.FC = () => {
                   <div className="absolute top-3 left-3 flex items-center gap-1.5">
                     <span className="px-2.5 py-1 rounded-full bg-amber-400 text-stone-900 text-xs font-black shadow-xs flex items-center gap-1 font-khmer">
                       <Sparkles className="w-3.5 h-3.5 fill-current text-amber-900" />
-                      {tr(language, 'AI ស្នើឡើងសម្រាប់អ្នក!', 'AI Top Pick!', 'AI 为您精选！')}
+                      {tr(language, 'ម្ហូបណែនាំថ្ងៃនេះ', "Today's Pick", '今日推荐')}
                     </span>
                     <span className="px-2 py-1 rounded-full bg-black/60 backdrop-blur-xs text-white text-[11px] font-bold">
                       {currentLoc.category}
@@ -376,7 +373,7 @@ export const WhatToEatModal: React.FC = () => {
             <div className="space-y-2 font-khmer">
               <h4 className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1">
                 <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                <span>{tr(language, 'ជម្រើសគួរពិចារណាផ្សេងទៀត៖', 'Other AI alternative picks:', '其他 AI 精选备选菜品：')}</span>
+                <span>{tr(language, 'មុខម្ហូបគួរសាកល្បងផ្សេងទៀត៖', 'More dishes you might enjoy:', '其他推荐菜品：')}</span>
               </h4>
               <div className="grid grid-cols-2 gap-2">
                 {alternativeDishes.map(d => {
@@ -390,7 +387,7 @@ export const WhatToEatModal: React.FC = () => {
                       }}
                       className="p-2 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/90 dark:border-slate-700 flex items-center gap-2 cursor-pointer hover:border-emerald-500 transition shadow-2xs group"
                     >
-                      <img src={d.photoUrl} alt={dLoc.name} className="w-10 h-10 rounded-xl object-cover shrink-0 group-hover:scale-105 transition-transform" />
+                      <img src={d.photoUrl} alt={dLoc.name} loading="lazy" decoding="async" className="w-10 h-10 rounded-xl object-cover shrink-0 group-hover:scale-105 transition-transform" />
                       <div className="min-w-0">
                         <div className="text-xs font-bold text-[#0F172A] dark:text-white truncate">
                           {dLoc.name}
@@ -415,7 +412,7 @@ export const WhatToEatModal: React.FC = () => {
             className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-500 hover:from-amber-600 hover:to-amber-500 text-stone-900 font-black text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-[0.98] font-khmer cursor-pointer"
           >
             <Shuffle className={`w-5 h-5 ${isSpinning ? 'animate-spin' : ''}`} />
-            <span>{tr(language, '« បង្ហាញម្ហូបផ្សេងទៀត »', '« Show Another Dish »', '« 换一道菜 »')}</span>
+            <span>{tr(language, 'បង្ហាញម្ហូបផ្សេងទៀត', 'Try Another Dish', '换一道菜')}</span>
           </button>
         </div>
       </div>

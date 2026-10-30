@@ -169,17 +169,20 @@ export const NearMeModal: React.FC = () => {
     }
   };
 
-  // Request GPS with instant initial load + high-accuracy & network fallback
+  // Request GPS without back-to-back duplicate network bursts
   const requestLocation = (forceRefresh = false) => {
     setSelectedPresetId('gps');
     setGeoStatus('requesting');
 
-    // Immediately load places around last known GPS (or Phnom Penh center) so user never waits on an empty screen
-    const initialCoords = userCoords || readSavedUserGps() || provinceCenters[manualProvince] || provinceCenters['រាជធានីភ្នំពេញ'];
-    if (!userCoords) {
-      setUserCoords(initialCoords);
+    const savedGps = userCoords || readSavedUserGps();
+    const defaultCenter = provinceCenters[manualProvince] || provinceCenters['រាជធានីភ្នំពេញ'];
+    let fetchedCoords: { lat: number; lng: number } | null = null;
+
+    if (savedGps) {
+      if (!userCoords) setUserCoords(savedGps);
+      fetchedCoords = savedGps;
+      fetchLiveNearby500m(savedGps, forceRefresh, selectedRadiusMeters);
     }
-    fetchLiveNearby500m(initialCoords, forceRefresh, selectedRadiusMeters);
 
     if ('geolocation' in navigator) {
       const onSuccess = (position: GeolocationPosition) => {
@@ -190,33 +193,44 @@ export const NearMeModal: React.FC = () => {
         saveUserGps(nextCoords);
         setUserCoords(nextCoords);
         setGeoStatus('granted');
-        fetchLiveNearby500m(nextCoords, forceRefresh, selectedRadiusMeters);
+        if (
+          !fetchedCoords ||
+          forceRefresh ||
+          calculateDistanceMeters(fetchedCoords.lat, fetchedCoords.lng, nextCoords.lat, nextCoords.lng) > 120
+        ) {
+          fetchedCoords = nextCoords;
+          fetchLiveNearby500m(nextCoords, forceRefresh, selectedRadiusMeters);
+        }
       };
 
       const onFinalFallback = () => {
-        const fallback = readSavedUserGps() || provinceCenters[manualProvince] || provinceCenters['រាជធានីភ្នំពេញ'];
+        const fallback = savedGps || defaultCenter;
         setUserCoords(fallback);
         setGeoStatus('fallback');
-        fetchLiveNearby500m(fallback, forceRefresh, selectedRadiusMeters);
+        if (!fetchedCoords) {
+          fetchedCoords = fallback;
+          fetchLiveNearby500m(fallback, forceRefresh, selectedRadiusMeters);
+        }
       };
 
       navigator.geolocation.getCurrentPosition(
         onSuccess,
         () => {
-          // Retry once with network/Wi-Fi geolocation (works indoors on Android WebView)
           navigator.geolocation.getCurrentPosition(
             onSuccess,
             onFinalFallback,
-            { enableHighAccuracy: false, timeout: 4500, maximumAge: 300000 }
+            { enableHighAccuracy: false, timeout: 3500, maximumAge: 300000 }
           );
         },
-        { enableHighAccuracy: true, timeout: 5500, maximumAge: 60000 }
+        { enableHighAccuracy: true, timeout: 3500, maximumAge: 120000 }
       );
     } else {
-      const fallback = readSavedUserGps() || provinceCenters[manualProvince] || provinceCenters['រាជធានីភ្នំពេញ'];
+      const fallback = savedGps || defaultCenter;
       setUserCoords(fallback);
       setGeoStatus('fallback');
-      fetchLiveNearby500m(fallback, forceRefresh, selectedRadiusMeters);
+      if (!fetchedCoords) {
+        fetchLiveNearby500m(fallback, forceRefresh, selectedRadiusMeters);
+      }
     }
   };
 
@@ -366,7 +380,7 @@ export const NearMeModal: React.FC = () => {
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="font-moul text-sm text-white">
-                  {tr(language, 'នៅជិតខ្ញុំ (Near Me)', 'Near Me', '附近探索 (Near Me)')}
+                  {tr(language, 'នៅជិតខ្ញុំ', 'Near Me', '附近探索')}
                 </h3>
               </div>
               <p className="text-[11px] text-emerald-100 font-khmer">
@@ -538,9 +552,9 @@ export const NearMeModal: React.FC = () => {
               <p className="text-xs text-slate-500 dark:text-slate-400">
                 {tr(
                   language,
-                  'កំពុងភ្ជាប់ទៅ Google Maps Platform & ផែនទីកម្ពុជា',
-                  'Connecting to Google Maps Platform & Cambodia GPS directory',
-                  '正在连接 Google Maps Platform 与柬埔寨地图数据'
+                  'កំពុងស្វែងរកហាងអាហារ និងកន្លែងដើរលេងនៅក្បែរអ្នក...',
+                  'Finding nearby restaurants and attractions...',
+                  '正在查找附近的餐厅与景点...'
                 )}
               </p>
             </div>
@@ -666,7 +680,7 @@ export const NearMeModal: React.FC = () => {
                         className="flex-1 py-2 px-3 bg-gradient-to-r from-[#064E3B] to-[#047857] hover:from-[#047857] hover:to-[#064E3B] text-white rounded-xl text-xs font-bold shadow-xs transition flex items-center justify-center gap-1.5"
                       >
                         <Navigation className="w-3.5 h-3.5 text-emerald-300" />
-                        <span>{tr(language, 'នាំផ្លូវ (Google Maps)', 'Directions Route', '路线导航 (Google 地图)')}</span>
+                        <span>{tr(language, 'បង្ហាញផ្លូវ', 'Directions', '路线导航')}</span>
                       </a>
 
                       {sanitizeDialablePhone(r.phone) && (
@@ -818,7 +832,7 @@ export const NearMeModal: React.FC = () => {
                         className="flex-1 py-2 px-3 bg-gradient-to-r from-[#064E3B] to-[#047857] hover:from-[#047857] hover:to-[#064E3B] text-white rounded-xl text-xs font-bold shadow-xs transition flex items-center justify-center gap-1.5"
                       >
                         <Navigation className="w-3.5 h-3.5 text-emerald-300" />
-                        <span>{tr(language, 'នាំផ្លូវ (Google Maps)', 'Directions Route', '路线导航 (Google 地图)')}</span>
+                        <span>{tr(language, 'បង្ហាញផ្លូវ', 'Directions', '路线导航')}</span>
                       </a>
 
                       <button

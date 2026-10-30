@@ -23,8 +23,7 @@ const PROVINCES = [
   { id: 'ព្រះសីហនុ', km: 'ព្រះសីហនុ', en: 'Sihanoukville', zh: '西哈努克' },
 ];
 
-/** Popular places, ranked by rating & reviews, with quick province chips (no GPS needed). */
-export const PopularShops: React.FC<Props> = ({ language, restaurants, onOpen, onSeeAll }) => {
+const PopularShopsInner: React.FC<Props> = ({ language, restaurants, onOpen, onSeeAll }) => {
   const [province, setProvince] = useState('');
 
   const ranked = useMemo(() => {
@@ -45,8 +44,8 @@ export const PopularShops: React.FC<Props> = ({ language, restaurants, onOpen, o
     <section className="space-y-3">
       <SectionHeader
         icon={Store}
-        title={tr(language, 'ហាងពេញនិយម', 'Popular Places to Eat', '热门餐厅')}
-        subtitle={tr(language, 'ហាងដែលមានការវាយតម្លៃខ្ពស់', 'Highly rated spots loved by visitors', '深受食客喜爱的高分好店')}
+        title={tr(language, 'ហាងអាហារពេញនិយម', 'Popular Places to Eat', '热门餐厅推荐')}
+        subtitle={tr(language, 'ហាងដែលមានការវាយតម្លៃខ្ពស់តាមបណ្តាខេត្ត-ក្រុង', 'Highly rated dining spots across Cambodia', '深受食客喜爱的高分好店')}
         actionLabel={tr(language, 'មើលទាំងអស់', 'See all', '查看全部')}
         onAction={onSeeAll}
       />
@@ -98,6 +97,7 @@ export const PopularShops: React.FC<Props> = ({ language, restaurants, onOpen, o
                     src={rest.photoUrl || FALLBACK_IMG}
                     alt={loc.name}
                     loading="lazy"
+                    decoding="async"
                     onError={(e) => {
                       e.currentTarget.onerror = null;
                       e.currentTarget.src = FALLBACK_IMG;
@@ -106,7 +106,7 @@ export const PopularShops: React.FC<Props> = ({ language, restaurants, onOpen, o
                   />
                   <span className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                   {typeof rest.rating === 'number' && rest.rating > 0 && (
-                    <span className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full bg-black/55 backdrop-blur-sm text-white text-[11px] font-bold inline-flex items-center gap-1">
+                    <span className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full bg-black/65 text-white text-[11px] font-bold inline-flex items-center gap-1">
                       <Star className="w-3 h-3 fill-amber-300 text-amber-300" />
                       {rest.rating.toFixed(1)}
                     </span>
@@ -140,3 +140,5 @@ export const PopularShops: React.FC<Props> = ({ language, restaurants, onOpen, o
     </section>
   );
 };
+
+export const PopularShops = React.memo(PopularShopsInner);

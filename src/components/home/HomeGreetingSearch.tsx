@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Search, X, User as UserIcon, Crown, Shield, ChevronRight, LogIn } from 'lucide-react';
 import type { Language, User } from '../../types';
 import { getVipRemainingDays } from '../../types';
@@ -22,9 +22,9 @@ interface Props {
 
 /**
  * Clean welcome header: a friendly greeting row (avatar, name, small status chip),
- * a clear headline, and one large search bar. No promotional banners live here.
+ * a clear headline, and one large debounced search bar.
  */
-export const HomeGreetingSearch: React.FC<Props> = ({
+const HomeGreetingSearchInner: React.FC<Props> = ({
   language,
   userName,
   currentUser,
@@ -36,6 +36,39 @@ export const HomeGreetingSearch: React.FC<Props> = ({
   query,
   onChange,
 }) => {
+  const [localQuery, setLocalQuery] = useState(query);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
+
+  useEffect(() => {
+    setLocalQuery(query);
+  }, [query]);
+
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, []);
+
+  const handleInputChange = (val: string) => {
+    setLocalQuery(val);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (!val.trim()) {
+      onChangeRef.current('');
+      return;
+    }
+    debounceRef.current = setTimeout(() => {
+      onChangeRef.current(val);
+    }, 220);
+  };
+
+  const handleClear = () => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    setLocalQuery('');
+    onChangeRef.current('');
+  };
+
   const hour = new Date().getHours();
   const greeting =
     hour < 11
@@ -57,7 +90,6 @@ export const HomeGreetingSearch: React.FC<Props> = ({
       {currentUser ? (
         isAdmin ? (
           <div className="p-3.5 sm:p-4 rounded-3xl bg-gradient-to-r from-[#022c22] via-[#064E3B] to-slate-900 text-white border border-emerald-400/50 shadow-md relative overflow-hidden flex items-center justify-between gap-3">
-            <div className="absolute -right-8 -top-8 w-28 h-28 bg-emerald-400/10 rounded-full blur-2xl pointer-events-none" />
             <div
               onClick={onOpenAdminPanel || onExploreProfile}
               className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer"
@@ -66,6 +98,7 @@ export const HomeGreetingSearch: React.FC<Props> = ({
                 <img
                   src={currentUser.avatar || '/images/admin_profile.png'}
                   alt={currentUser.name}
+                  decoding="async"
                   className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl object-cover border-2 border-emerald-400 shadow-sm bg-white"
                 />
                 <div className="absolute -bottom-1 -right-1 p-1 bg-emerald-500 text-white rounded-full shadow-xs border border-slate-900">
@@ -88,9 +121,9 @@ export const HomeGreetingSearch: React.FC<Props> = ({
                 <p className="text-[11px] text-slate-200 font-khmer mt-0.5 truncate">
                   {tr(
                     language,
-                    '🛡️ មជ្ឈមណ្ឌលគ្រប់គ្រងរដ្ឋបាល • សិទ្ធិគ្រប់គ្រងពេញលេញ',
-                    '🛡️ Executive Admin Portal • Full System Control',
-                    '🛡️ 系统管理中心 • 拥有全部管理权限'
+                    'មជ្ឈមណ្ឌលគ្រប់គ្រងទិន្នន័យ និងសមាជិកភាព',
+                    'Directory & Membership Management',
+                    '名录与会员管理中心'
                   )}
                 </p>
               </div>
@@ -120,6 +153,7 @@ export const HomeGreetingSearch: React.FC<Props> = ({
               <img
                 src={currentUser.avatar}
                 alt={currentUser.name}
+                decoding="async"
                 className={`w-12 h-12 rounded-2xl object-cover bg-white shadow-md ${
                   isVip ? 'border-2 border-amber-400' : 'border-2 border-emerald-500/40'
                 }`}
@@ -131,7 +165,7 @@ export const HomeGreetingSearch: React.FC<Props> = ({
               )}
             </button>
             <div className="min-w-0 flex-1">
-              <p className="text-xs text-slate-500 dark:text-emerald-200/80 truncate">{greeting} 👋</p>
+              <p className="text-xs text-slate-500 dark:text-emerald-200/80 truncate">{greeting}</p>
               <p className={`${headingFont(language)} text-[15px] leading-snug text-[#064E3B] dark:text-white truncate`}>{displayName}</p>
             </div>
             {isVip && (
@@ -159,9 +193,9 @@ export const HomeGreetingSearch: React.FC<Props> = ({
             <UserIcon className="w-6 h-6" />
           </span>
           <div className="min-w-0 flex-1">
-            <p className="text-xs text-slate-500 dark:text-emerald-200/80 truncate">{greeting} 👋</p>
+            <p className="text-xs text-slate-500 dark:text-emerald-200/80 truncate">{greeting}</p>
             <p className={`${headingFont(language)} text-[15px] leading-snug text-[#064E3B] dark:text-white truncate`}>
-              {tr(language, 'សូមស្វាគមន៍', 'Welcome', '欢迎')}
+              {tr(language, 'សូមស្វាគមន៍មកកាន់កម្ពុជា', 'Discover Cambodia', '探索柬埔寨')}
             </p>
           </div>
           {onSignIn && (
@@ -180,8 +214,8 @@ export const HomeGreetingSearch: React.FC<Props> = ({
       <div>
         <h2 className={`${headingFont(language)} text-xl leading-snug text-[#064E3B] dark:text-emerald-200`}>
           {isAdmin
-            ? tr(language, 'ស្វែងរក និងគ្រប់គ្រងទិន្នន័យក្នុងប្រព័ន្ធ', 'Search & Manage System Directory', '搜索并管理系统数据')
-            : tr(language, 'ថ្ងៃនេះចង់ញ៉ាំអ្វី?', 'What would you like to eat today?', '今天想吃点什么？')}
+            ? tr(language, 'ស្វែងរក និងគ្រប់គ្រងទិន្នន័យក្នុងប្រព័ន្ធ', 'Search & Manage Directory', '搜索并管理系统数据')
+            : tr(language, 'ភ្លក្សរសជាតិកម្ពុជា • ស្វែងយល់ទឹកដីកម្ពុជា', 'Taste Cambodia. Explore Cambodia.', '品味柬埔寨 · 探索柬埔寨')}
         </h2>
         {!isAdmin && hint && (
           <p className="text-[13px] leading-relaxed text-slate-500 dark:text-slate-400 mt-1">{hint}</p>
@@ -192,21 +226,21 @@ export const HomeGreetingSearch: React.FC<Props> = ({
         <Search className="w-5 h-5 text-emerald-600 dark:text-emerald-400 absolute left-4 pointer-events-none" />
         <input
           type="text"
-          value={query}
-          onChange={(e) => onChange(e.target.value)}
+          value={localQuery}
+          onChange={(e) => handleInputChange(e.target.value)}
           placeholder={tr(
             language,
-            'ស្វែងរកម្ហូប ហាង ឬកន្លែងដើរលេង...',
-            'Search dishes, restaurants or places...',
-            '搜索菜肴、餐厅或景点...'
+            'ស្វែងរកម្ហូប ហាងអាហារ ឬតំបន់ទេសចរណ៍...',
+            'Search dishes, restaurants, or destinations...',
+            '搜索美食、餐厅或旅游景点...'
           )}
           aria-label={tr(language, 'ស្វែងរក', 'Search', '搜索')}
           className="w-full min-h-[54px] pl-12 pr-12 rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder-slate-400 text-base shadow-md focus:outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/20 font-khmer transition"
         />
-        {query && (
+        {localQuery && (
           <button
             type="button"
-            onClick={() => onChange('')}
+            onClick={handleClear}
             className="absolute right-1.5 w-11 h-11 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-white transition"
             title={tr(language, 'សម្អាតការស្វែងរក', 'Clear search', '清除搜索')}
             aria-label={tr(language, 'សម្អាតការស្វែងរក', 'Clear search', '清除搜索')}
@@ -218,3 +252,5 @@ export const HomeGreetingSearch: React.FC<Props> = ({
     </section>
   );
 };
+
+export const HomeGreetingSearch = React.memo(HomeGreetingSearchInner);

@@ -1,7 +1,7 @@
-export const APP_VERSION = 'v2.4.0';
-export const APP_VERSION_NAME = '2.4.0';
+export const APP_VERSION = 'v2.5.0';
+export const APP_VERSION_NAME = '2.5.0';
 declare const __KFT_BUILD_CODE__: number | undefined;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1240;
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1250;
 export const APP_RELEASE_DATE = '2026-10-30';
 
 export interface GoogleMapsPlaceMetadata {
@@ -163,7 +163,7 @@ export interface VipBenefitItem {
 export const TEN_VIP_BENEFITS: VipBenefitItem[] = [
   {
     id: 1,
-    titleKh: 'ទម្រង់ហាងកម្រិតខ្ពស់ (Enhanced Restaurant Profile)',
+    titleKh: 'ទម្រង់ហាងកម្រិតខ្ពស់',
     titleEn: 'Enhanced Restaurant Profile',
     descriptionKh: 'កែប្រែទម្រង់ហាងជាមួយ Theme មាស និងផ្លាកសញ្ញាបញ្ជាក់ផ្លូវការ Iconic VIP',
     descriptionEn: 'Customized golden theme, verified iconic badge, and custom branding for your restaurant.',
@@ -172,7 +172,7 @@ export const TEN_VIP_BENEFITS: VipBenefitItem[] = [
   },
   {
     id: 2,
-    titleKh: 'រូបថតច្រើនសន្លឹក & មុខម្ហូបរហូតដល់ ២០ មុខ (More Photos & Menu Items)',
+    titleKh: 'រូបថតច្រើនសន្លឹក និងមុខម្ហូបរហូតដល់ ២០ មុខ',
     titleEn: 'More Food Photos & Menu Items',
     descriptionKh: 'បង្ហោះមុខម្ហូបក្នុងបញ្ជីបានរហូតដល់ ២០ មុខ ព្រមទាំងរូបថត Gallery ច្រើនសន្លឹក',
     descriptionEn: 'Add up to 20 menu items (free accounts limited to 5) with high-res photo gallery.',
@@ -181,7 +181,7 @@ export const TEN_VIP_BENEFITS: VipBenefitItem[] = [
   },
   {
     id: 3,
-    titleKh: 'បង្ហោះវីដេអូផ្សព្វផ្សាយម្ហូប (Food Promotional Video Uploads)',
+    titleKh: 'បង្ហោះវីដេអូផ្សព្វផ្សាយម្ហូប',
     titleEn: 'Food Promotional Video Uploads',
     descriptionKh: 'ភ្ជាប់វីដេអូផ្សព្វផ្សាយម្ហូប YouTube, TikTok ឬ MP4 លើទំព័រហាងផ្ទាល់',
     descriptionEn: 'Embed promotional video clips (YouTube, TikTok, MP4) directly on restaurant cards.',
@@ -190,7 +190,7 @@ export const TEN_VIP_BENEFITS: VipBenefitItem[] = [
   },
   {
     id: 4,
-    titleKh: 'ផ្លាកសញ្ញា VIP Badge មាស (Premium VIP Badge)',
+    titleKh: 'ផ្លាកសញ្ញា VIP ពណ៌មាស',
     titleEn: 'Premium VIP Badge',
     descriptionKh: 'បង្ហាញផ្លាកសញ្ញា VIP ពណ៌មាសលើកម្រង Profile, Comments និងកាតហាង',
     descriptionEn: 'Distinguished golden VIP badge on your profile, comments, reviews, and restaurant listings.',
@@ -199,7 +199,7 @@ export const TEN_VIP_BENEFITS: VipBenefitItem[] = [
   },
   {
     id: 5,
-    titleKh: 'ទីតាំងផ្សព្វផ្សាយពិសេស (Additional Promotional Placement)',
+    titleKh: 'ទីតាំងផ្សព្វផ្សាយលើទំព័រដើម',
     titleEn: 'Additional Promotional Placement',
     descriptionKh: 'ទទួលបានការផ្សព្វផ្សាយលើគេក្នុងទំព័រដើម Home Screen និងបញ្ជី Top Recommended',
     descriptionEn: 'Prime featured spot on the home page carousel and top recommendations section.',
@@ -208,7 +208,7 @@ export const TEN_VIP_BENEFITS: VipBenefitItem[] = [
   },
   {
     id: 6,
-    titleKh: 'ទីតាំងច្បាស់លាស់លើផែនទី (Restaurant Location on Map)',
+    titleKh: 'ទីតាំងលេចធ្លោលើផែនទី',
     titleEn: 'Restaurant Location on the Map',
     descriptionKh: 'សម្គាល់ទីតាំងហាងដោយ Pin ពណ៌មាសលើផែនទី GPS និងប៊ូតុងនាំផ្លូវ 1-Tap Directions',
     descriptionEn: 'Highlighted golden map pin with instant turn-by-turn navigation for visitors.',
@@ -217,7 +217,7 @@ export const TEN_VIP_BENEFITS: VipBenefitItem[] = [
   },
   {
     id: 7,
-    titleKh: 'ប៊ូតុងទាក់ទងរហ័ស (Quick Contact Buttons)',
+    titleKh: 'ប៊ូតុងទំនាក់ទំនងរហ័ស',
     titleEn: 'Quick Contact Buttons',
     descriptionKh: 'ប៊ូតុងទាក់ទងរហ័ស ហៅទូរស័ព្ទ (Call), Telegram និង Facebook ដោយផ្ទាល់លើកាតហាង',
     descriptionEn: 'One-tap direct contact buttons for Phone Call, Telegram chat, and Facebook page.',
@@ -226,7 +226,7 @@ export const TEN_VIP_BENEFITS: VipBenefitItem[] = [
   },
   {
     id: 8,
-    titleKh: 'ស្ថិតិអ្នកចូលទស្សនា & ចុចមើល (Profile View & Click Statistics)',
+    titleKh: 'ស្ថិតិអ្នកចូលមើលហាង',
     titleEn: 'Profile View & Contact Click Statistics',
     descriptionKh: 'ផ្ទាំងគ្រប់គ្រងមើលចំនួនអ្នកទស្សនាហាង ចំនួនអ្នកចុច Call និងចំនួនអ្នកចុច Map',
     descriptionEn: 'Detailed real-time analytics dashboard on visitor views, calls, and direction clicks.',
@@ -235,7 +235,7 @@ export const TEN_VIP_BENEFITS: VipBenefitItem[] = [
   },
   {
     id: 9,
-    titleKh: 'តំណភ្ជាប់ចែករំលែកផ្ទាល់ (Shareable Restaurant Profile Link)',
+    titleKh: 'តំណភ្ជាប់ចែករំលែកទំព័រហាង',
     titleEn: 'Shareable Restaurant Profile Link',
     descriptionKh: 'តំណភ្ជាប់ Deep Link ផ្ទាល់ខ្លួន ចម្លង និងចែករំលែកទៅបណ្តាញសង្គម Telegram និង Facebook',
     descriptionEn: 'Direct custom deep-link to share your profile across Telegram, Facebook, and WhatsApp.',
@@ -244,7 +244,7 @@ export const TEN_VIP_BENEFITS: VipBenefitItem[] = [
   },
   {
     id: 10,
-    titleKh: 'ចំណាត់ថ្នាក់ខ្ពស់ក្នុងការស្វែងរក (Improved Search Visibility)',
+    titleKh: 'អាទិភាពខ្ពស់ក្នុងការស្វែងរក',
     titleEn: 'Improved Search Visibility & Priority Ranking',
     descriptionKh: 'ទទួលបានអាទិភាពបង្ហាញលើគេពេលអតិថិជនស្វែងរកមុខម្ហូប និងឈ្មោះហាងក្នុងកម្មវិធី',
     descriptionEn: 'Algorithm boost ensuring your listings appear at the top of search and filter queries.',

@@ -557,7 +557,7 @@ export const UpgradeVipModal: React.FC = () => {
               </div>
               <div>
                 <h3 className="font-moul text-sm sm:text-base text-white flex items-center gap-1.5 flex-wrap">
-                  <span>{tr(language, 'ដំឡើងទៅជា Premium VIP', 'Upgrade to Premium VIP', '升级为尊享 VIP')}</span>
+                  <span>{tr(language, 'ដំឡើងសមាជិកភាព VIP', 'Upgrade to VIP', '升级 VIP 会员')}</span>
                   <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-900 text-[10px] font-black font-sans">
                     VIP
                   </span>
@@ -566,7 +566,7 @@ export const UpgradeVipModal: React.FC = () => {
                   </span>
                 </h3>
                 <p className="text-[11px] text-amber-200 font-khmer">
-                  {tr(language, 'កញ្ចប់សមាជិកភាព VIP • អនុម័តដោយរដ្ឋបាលផ្លូវការ', 'Premium VIP Subscription • Official Admin Verification', 'VIP 会员套餐 · 官方管理员审核')}
+                  {tr(language, 'ដោះសោមុខងារពិសេស និងឧបករណ៍គ្រប់គ្រងហាងអាហារ', 'Unlock dining perks & restaurant owner tools', '解锁专属美食权益与商家管理工具')}
                 </p>
               </div>
             </div>
@@ -1164,7 +1164,7 @@ export const UpgradeVipModal: React.FC = () => {
         {/* Modal Footer / Prominent App Version Bar */}
         <div className="px-5 py-2.5 bg-slate-100 dark:bg-slate-950/80 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-500 font-mono shrink-0">
           <span className="font-semibold text-slate-600 dark:text-slate-400">
-            KhmerFoodTourism {APP_VERSION} (Build {APP_BUILD_CODE})
+            Discover Cambodia {APP_VERSION} (Build {APP_BUILD_CODE})
           </span>
           <a
             href="/privacy-policy.html"
@@ -1172,7 +1172,7 @@ export const UpgradeVipModal: React.FC = () => {
             rel="noopener noreferrer"
             className="text-emerald-600 dark:text-emerald-400 font-medium hover:underline"
           >
-            Admin-Verified KHQR
+            {tr(language, 'គោលការណ៍ឯកជនភាព', 'Privacy Policy', '隐私政策')}
           </a>
         </div>
       </div>

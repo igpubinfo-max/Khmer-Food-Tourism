@@ -581,7 +581,7 @@ export function formatRichShareText(options: RichShareOptions): {
 
   // Short bilingual recommendation line + Play Store link (placeholder id until the app is published)
   lines.push('');
-  lines.push('🇰🇭 រកឃើញក្នុងកម្មវិធី «អាហារ & ទេសចរណ៍ខ្មែរ» — Found on “Khmer Food & Tourism”');
+  lines.push('🇰🇭 ស្វែងយល់អាហារ និងទេសចរណ៍កម្ពុជា — Discover Cambodia Food & Tourism');
   lines.push(`📲 Google Play: ${PLAY_STORE_URL}`);
 
   return {
@@ -594,7 +594,7 @@ export function formatRichShareText(options: RichShareOptions): {
 /**
  * Copies text reliably on both Android native (via ClipboardManager) and Web browsers.
  */
-export async function copyTextNativeOrWeb(text: string, label: string = 'Khmer Food & Tourism'): Promise<boolean> {
+export async function copyTextNativeOrWeb(text: string, label: string = 'Discover Cambodia Food & Tourism'): Promise<boolean> {
   if (Capacitor.isNativePlatform()) {
     try {
       const res = await NativeMediaLauncher.copyToClipboard({ text, label });
@@ -665,7 +665,7 @@ async function shareRichContentInner(
           const resp = await fetch(options.photoUrl);
           if (resp.ok) {
             const blob = await resp.blob();
-            const file = new File([blob], 'khmer-food-tourism.jpg', { type: blob.type || 'image/jpeg' });
+            const file = new File([blob], 'discover-cambodia.jpg', { type: blob.type || 'image/jpeg' });
             if (navigator.canShare({ files: [file], title, text: fullText })) {
               await navigator.share({
                 files: [file],

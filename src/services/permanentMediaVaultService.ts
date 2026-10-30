@@ -1567,10 +1567,6 @@ export async function hydrateAndSyncMediaOverrides(
               inMemoryMasterBundle = current;
             }
           }
-          if (hasRemoteChanges) {
-            saveLocalMediaOverrides(current);
-            notifyListeners(current);
-          }
         }
 
         // Also pull master bundle if manifest returned empty or had no per-record keys yet
@@ -1580,14 +1576,13 @@ export async function hydrateAndSyncMediaOverrides(
             hasRemoteChanges = true;
             current = mergeOverrideBundles(current, cloudBundle);
             inMemoryMasterBundle = current;
-            saveLocalMediaOverrides(current);
-            notifyListeners(current);
           }
         }
 
-        // Automatically backfill any local overrides (in IndexedDB / localStorage) that are missing from Supabase
-        // or newer than Supabase so edits made offline or interrupted mid-upload are guaranteed to reach the cloud!
-        if (!hasBackfilledPerRecordKeysOnce && existingPerRecordKeys.size > 0) {
+        // Automatically backfill any local admin overrides missing from Supabase (only when an admin session is active)
+        const hasActiveAdminSession =
+          typeof localStorage !== 'undefined' && Boolean(localStorage.getItem('kft_admin_session_token'));
+        if (hasActiveAdminSession && !hasBackfilledPerRecordKeysOnce && existingPerRecordKeys.size > 0) {
           hasBackfilledPerRecordKeysOnce = true;
           (async () => {
             try {

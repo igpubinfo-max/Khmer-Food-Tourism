@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useRef, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { 
   User, FoodItem, Restaurant, TouristDestination, 
   Language, UserRole, AppSettings, RegistrationTransaction,
@@ -913,7 +913,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             saveLocalMediaOverrides(vault);
           }
           return sortRestaurantsChronologically(
-            applyRestaurantOverrides(normalizedList, vault.restaurants).map(normalizeRestaurant)
+            applyRestaurantOverrides(normalizedList, vault.restaurants)
           );
         }
       }
@@ -989,7 +989,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return normalizeRestaurant(r);
     });
     return sortRestaurantsChronologically(
-      applyRestaurantOverrides([...baseRestaurants, ...customLegacyRestaurants], vault.restaurants).map(normalizeRestaurant)
+      applyRestaurantOverrides([...baseRestaurants, ...customLegacyRestaurants], vault.restaurants)
     );
   });
 
@@ -1736,7 +1736,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'info' | 'warning' } | null>(null);
   const toastTimerRef = useRef<number | null>(null);
 
-  const showToast = (message: string, type: 'success' | 'info' | 'warning' = 'success') => {
+  const showToast = useCallback((message: string, type: 'success' | 'info' | 'warning' = 'success') => {
     if (toastTimerRef.current) {
       window.clearTimeout(toastTimerRef.current);
     }
@@ -1745,11 +1745,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setToast(null);
       toastTimerRef.current = null;
     }, 3200);
-  };
+  }, []);
 
   // Non-blocking debounced localStorage writer to prevent CPU spikes & phone heating on large arrays
   const storageWriteTimersRef = useRef<Record<string, number>>({});
+  const skipNextTransactionsCloudPushRef = useRef(false);
+  const lastMediaVaultCloudSyncAtRef = useRef(0);
   const isInitialMountRef = useRef({
+    users: true,
     foods: true,
     restaurants: true,
     destinations: true,
@@ -1873,6 +1876,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Sync to localStorage safely (guarded against QuotaExceeded or JSON corruption) + Maintain VIP Registry Backup
   // IMPORTANT: Never blindly overwrite `kft_cloud_users_v1` here without pulling & merging from Supabase first!
   useEffect(() => {
+    if (isInitialMountRef.current.users) {
+      isInitialMountRef.current.users = false;
+      return;
+    }
     scheduleStorageWrite('kft_users_v5', users, 600);
     const activeVips = users.filter(
       u => u.membershipTier === 'premium_vip' && u.subscriptionStatus === 'active' && u.subscriptionExpiryDate
@@ -1888,7 +1895,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (hasAttemptedVersionBackupRef.current) return;
     hasAttemptedVersionBackupRef.current = true;
     try {
-      const APP_VERSION = '2.3.1';
+      const APP_VERSION = '2.5.0';
       const lastBackedUpVersion = localStorage.getItem('kft_last_backed_up_version');
       if (lastBackedUpVersion !== APP_VERSION) {
         const activeVips = users.filter(
@@ -2167,7 +2174,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     enforceVipExpirationsAndReminders();
 
-    const intervalId = window.setInterval(enforceVipExpirationsAndReminders, 600000);
+    const intervalId = window.setInterval(() => {
+      if (typeof document === 'undefined' || !document.hidden) {
+        enforceVipExpirationsAndReminders();
+      }
+    }, 600000);
     return () => {
       window.clearInterval(intervalId);
     };
@@ -2287,7 +2298,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     try {
       if (transactions) {
         localStorage.setItem('kft_transactions_v4', JSON.stringify(transactions));
-        if (isSupabaseConfigured()) {
+        if (skipNextTransactionsCloudPushRef.current) {
+          skipNextTransactionsCloudPushRef.current = false;
+        } else if (isSupabaseConfigured()) {
           pushCloudDocument('kft_cloud_transactions_v1', transactions);
         }
       }
@@ -2644,6 +2657,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           if (prev.length === result.mergedTransactions.length && JSON.stringify(prev) === JSON.stringify(result.mergedTransactions)) {
             return prev;
           }
+          skipNextTransactionsCloudPushRef.current = true;
           latestSyncStateRef.current.transactions = result.mergedTransactions;
           return result.mergedTransactions;
         });
@@ -2790,8 +2804,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               });
             }
           };
-          const syncedMediaBundle = await hydrateAndSyncMediaOverrides(false, applySyncedBundle);
-          applySyncedBundle(syncedMediaBundle);
+          if ((force && isAdminOpen) || Date.now() - lastMediaVaultCloudSyncAtRef.current > 120000) {
+            lastMediaVaultCloudSyncAtRef.current = Date.now();
+            const syncedMediaBundle = await hydrateAndSyncMediaOverrides(false, applySyncedBundle);
+            applySyncedBundle(syncedMediaBundle);
+          }
         } catch (err) {
           console.warn('Media overrides cloud sync warning:', err);
         }
@@ -2857,6 +2874,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       .then((idbBundle) => {
         applyHydratedBundle(idbBundle);
         if (isSupabaseConfigured()) {
+          lastMediaVaultCloudSyncAtRef.current = Date.now();
           hydrateAndSyncMediaOverrides(true, applyHydratedBundle)
             .then(applyHydratedBundle)
             .catch(() => {});
@@ -2875,7 +2893,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       // Defer cloud sync (which also delta-syncs media overrides) so initial UI paints & scrolls with 0% network contention
       syncTimer = setTimeout(() => {
         triggerCloudSyncNow(true);
-      }, 1800);
+      }, 3000);
       periodicSyncInterval = setInterval(() => {
         if (typeof document === 'undefined' || !document.hidden) {
           triggerCloudSyncNow(false);
@@ -3191,8 +3209,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, []);
 
   // Bookmarking
-  const toggleBookmark = (id: string) => {
-    if (!currentUser) {
+  const bookmarkSet = useMemo(() => new Set(bookmarks), [bookmarks]);
+  const isBookmarked = useCallback((id: string) => bookmarkSet.has(id), [bookmarkSet]);
+
+  const toggleBookmark = useCallback((id: string) => {
+    if (!latestSyncStateRef.current.currentUser) {
       showToast(
         language === 'km' 
           ? 'សូមចុះឈ្មោះ ឬចូលគណនី ដើម្បីរក្សាទុកមុខម្ហូប និងកន្លែងដែលចូលចិត្ត' 
@@ -3202,9 +3223,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setIsAuthModalOpen(true);
       return;
     }
-    if (!bookmarks.includes(id)) recordMeaningfulAction('favorite');
     setBookmarks(prev => {
       const exists = prev.includes(id);
+      if (!exists) recordMeaningfulAction('favorite');
       const updated = exists ? prev.filter(item => item !== id) : [...prev, id];
       showToast(
         exists 
@@ -3214,10 +3235,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       );
       return updated;
     });
-  };
-
-  const bookmarkSet = useMemo(() => new Set(bookmarks), [bookmarks]);
-  const isBookmarked = (id: string) => bookmarkSet.has(id);
+  }, [language, showToast]);
 
   // Auth
   const login = (identifier: string, role?: UserRole): boolean => {
@@ -5705,33 +5723,33 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         ...cur,
         [field]: (cur[field] || 0) + 1,
       };
-      scheduleStorageWrite('kft_restaurants_real_v11', list, 4000);
+      scheduleStorageWrite('kft_restaurants_real_v11', list, 25000);
     }
     if (isManageMenuModalOpen || isAdminOpen) {
       setRestaurants(prev => [...prev]);
     }
   };
 
-  const trackRestaurantView = (restaurantId: string) => {
+  const trackRestaurantView = useCallback((restaurantId: string) => {
     const now = Date.now();
     if (recentTrackedViewsRef.current[restaurantId] && now - recentTrackedViewsRef.current[restaurantId] < 30000) {
       return;
     }
     recentTrackedViewsRef.current[restaurantId] = now;
     incrementRestaurantAnalyticsField(restaurantId, 'views');
-  };
+  }, [isManageMenuModalOpen, isAdminOpen]);
 
-  const trackRestaurantCall = (restaurantId: string) => {
+  const trackRestaurantCall = useCallback((restaurantId: string) => {
     incrementRestaurantAnalyticsField(restaurantId, 'phoneClicks');
-  };
+  }, [isManageMenuModalOpen, isAdminOpen]);
 
-  const trackRestaurantMap = (restaurantId: string) => {
+  const trackRestaurantMap = useCallback((restaurantId: string) => {
     incrementRestaurantAnalyticsField(restaurantId, 'mapClicks');
-  };
+  }, [isManageMenuModalOpen, isAdminOpen]);
 
-  const trackRestaurantShare = (restaurantId: string) => {
+  const trackRestaurantShare = useCallback((restaurantId: string) => {
     incrementRestaurantAnalyticsField(restaurantId, 'shareClicks');
-  };
+  }, [isManageMenuModalOpen, isAdminOpen]);
 
   const checkCanDeleteRestaurant = (target?: Restaurant | null): { allowed: boolean; isAdmin: boolean } => {
     if (!target) return { allowed: false, isAdmin: false };

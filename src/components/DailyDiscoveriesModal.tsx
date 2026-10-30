@@ -420,11 +420,8 @@ export const DailyDiscoveriesModal: React.FC = () => {
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <h3 className="font-moul text-sm text-white">
-                  {tr(language, 'កន្លែងថ្មីប្រចាំថ្ងៃ & ព្រឹត្តិការណ៍', 'Daily New Places & Live Feed', '每日新地点与实时动态')}
+                  {tr(language, 'កន្លែងថ្មីៗ និងព្រឹត្តិការណ៍', 'New Places & Events', '新地点与活动资讯')}
                 </h3>
-                <span className="px-2 py-0.5 rounded-full bg-amber-400 text-stone-900 text-[10px] font-black shadow-xs">
-                  {tr(language, 'បច្ចុប្បន្នភាពផ្ទាល់', 'LIVE FEED', '实时更新')}
-                </span>
               </div>
               <p className="text-[11px] text-emerald-100 font-khmer truncate">
                 {tr(
@@ -567,9 +564,9 @@ export const DailyDiscoveriesModal: React.FC = () => {
             <span className="text-slate-500 dark:text-slate-400 font-medium">
               {tr(
                 language,
-                `បង្ហាញ ${filteredItems.length} មាតិកាថ្មីៗ (គ្មានស្ទួន)`,
-                `Showing ${filteredItems.length} verified updates (deduplicated)`,
-                `当前显示 ${filteredItems.length} 条精选动态（已去重）`
+                `បង្ហាញ ${filteredItems.length} មាតិកា`,
+                `${filteredItems.length} updates`,
+                `共 ${filteredItems.length} 条动态`
               )}
             </span>
 
@@ -755,7 +752,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
                 <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs mx-auto leading-relaxed">
                   {tr(
                     language,
-                    'អ្នកបានមើលមាតិកាក្នុងផ្នែកនេះរួចរាល់ ឬមិនមានលទ្ធផលត្រូវនឹងពាក្យស្វែងរក។ សូមសម្អាតតម្រង ឬទាញយកទិន្នន័យថ្មីពី Server។',
+                    'អ្នកបានមើលមាតិកាក្នុងផ្នែកនេះរួចរាល់ ឬមិនមានលទ្ធផលត្រូវនឹងពាក្យស្វែងរក។ សូមសម្អាតតម្រង ឬទាញយកទិន្នន័យថ្មី។',
                     'You have viewed all items in this filter or no results match your search. Reset filters or sync the latest updates.',
                     '您已看完该分类下的全部内容或未找到匹配结果。请重置筛选或从服务器同步最新动态。'
                   )}

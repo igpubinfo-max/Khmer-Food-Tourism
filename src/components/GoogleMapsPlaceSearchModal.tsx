@@ -501,9 +501,9 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
               <p className="text-[11px] sm:text-xs text-emerald-100/90 truncate mt-0.5">
                 {tr(
                   language,
-                  'ស្វែងរកទូទាំងប្រទេសកម្ពុជា តាមខេត្ត/ក្រុង ឬ GPS ជិតអ្នក • ការពារទិន្នន័យស្ទួនដោយស្វ័យប្រវត្តិ',
-                  'Search nationwide across Cambodia, by province, or GPS nearby • Automatic duplicate protection',
-                  '支持全柬埔寨、按省份或 GPS 附近位置搜索 • 自动防重保护'
+                  'ស្វែងរកហាងអាហារ និងរមណីយដ្ឋានតាមខេត្ត/ក្រុង ឬទីតាំង GPS ជិតអ្នក',
+                  'Search restaurants & attractions across Cambodia by province or nearby GPS',
+                  '按省份、城市或 GPS 附近位置搜索全柬埔寨餐厅与景点'
                 )}
               </p>
             </div>
@@ -820,9 +820,9 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                   <span>
                     {tr(
                       language,
-                      `រកឃើញសរុប ${results.length} ទីតាំងពិតប្រាកដ`,
-                      `Total Retrieved: ${results.length} Verified Places`,
-                      `共检索到 ${results.length} 个真实地点`
+                      `រកឃើញ ${results.length} ទីតាំង`,
+                      `Found ${results.length} places`,
+                      `找到 ${results.length} 个地点`
                     )}
                   </span>
                 </span>
@@ -903,9 +903,9 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
               <p className="text-xs text-slate-500">
                 {tr(
                   language,
-                  'ផ្ទៀងផ្ទាត់ឈ្មោះ អាសយដ្ឋាន កូអរដោនេ រូបភាពផ្លូវការ និងការពារទិន្នន័យស្ទួន',
-                  'Verifying names, coordinates, official photos, and checking for duplicates',
-                  '正在核验地点名称、地址、GPS 坐标、官方照片并检查重复项'
+                  'កំពុងទាញយកឈ្មោះ អាសយដ្ឋាន រូបភាព និងទីតាំងផែនទី...',
+                  'Loading place names, addresses, photos, and map locations...',
+                  '正在加载地点名称、地址、照片与地图位置...'
                 )}
               </p>
             </div>
@@ -1149,9 +1149,11 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                                     '🖼️ 已验证 Google 地图地点'
                                   )}
                             </span>
-                            <span className="font-mono text-[9px] text-slate-400 shrink-0" title={place.placeId}>
-                              ID: {String(place.placeId || '').slice(0, 10)}…
-                            </span>
+                            {isAdmin && (
+                              <span className="font-mono text-[9px] text-slate-400 shrink-0" title={place.placeId}>
+                                ID: {String(place.placeId || '').slice(0, 10)}…
+                              </span>
+                            )}
                           </div>
                         </div>
 
@@ -1402,9 +1404,9 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                       <span>
                         {tr(
                           language,
-                          'ទាញយកលទ្ធផលបន្ថែមពី Google Maps (Load More)',
-                          'Load More Results from Google Maps',
-                          '从 Google 地图加载更多结果 (Load More)'
+                          'បង្ហាញលទ្ធផលបន្ថែម',
+                          'Load More Results',
+                          '加载更多结果'
                         )}
                       </span>
                     </button>
@@ -1418,13 +1420,12 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
           {/* Footer Policy & Attribution Compliance (Inside Scroll Container with Android Safe Area Padding) */}
           <div className="px-4 sm:px-6 pt-3 pb-16 sm:pb-5 bg-white border-t border-slate-200 flex items-center justify-between gap-2 text-[11px] text-slate-500 flex-wrap">
             <div className="flex items-center gap-2">
-              <span className="font-bold text-slate-700">Google Maps Platform & OpenStreetMap Attribution:</span>
               <span>
                 {tr(
                   language,
-                  'រូបភាព និងទិន្នន័យផែនទីផ្តល់ដោយ Google Maps Platform & OpenStreetMap Contributors • រក្សាទុកព័ត៌មានកម្មវិធីដាច់ដោយឡែកពី Google Metadata',
-                  'Map data & photos powered by Google Maps Platform & OpenStreetMap Contributors • App records stored separately from Google Metadata',
-                  '地图与照片数据由 Google 地图平台及 OpenStreetMap 提供 • 应用数据与 Google 元数据独立存储'
+                  'ទិន្នន័យផែនទី និងរូបភាព © Google Maps & OpenStreetMap contributors',
+                  'Map data & photos © Google Maps & OpenStreetMap contributors',
+                  '地图与照片数据 © Google Maps & OpenStreetMap 贡献者'
                 )}
               </span>
             </div>
