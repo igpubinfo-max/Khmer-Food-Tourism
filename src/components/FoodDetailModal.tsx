@@ -903,9 +903,15 @@ export const FoodDetailModal: React.FC = () => {
             
             {/* Bottom info inside hero */}
             <div className="absolute bottom-3.5 left-4 right-24 text-white">
-              <span className="px-3 py-1 rounded-full text-xs font-bold bg-[#064E3B] text-emerald-100 border border-emerald-400/40 shadow-xs mb-2 inline-block">
-                {loc.category}
-              </span>
+              <div className="flex items-center gap-2 flex-wrap mb-2">
+                <span className="px-3 py-1 rounded-full text-xs font-bold bg-[#064E3B] text-emerald-100 border border-emerald-400/40 shadow-xs">
+                  {loc.category}
+                </span>
+                <span className="px-2.5 py-0.5 rounded-full bg-black/65 text-white text-xs font-bold flex items-center gap-1 border border-white/20">
+                  <span className="text-amber-400">★</span> {selectedFood.rating}
+                  <span className="font-normal text-white/75 text-[11px]">({selectedFood.reviewCount})</span>
+                </span>
+              </div>
               <h2 className="text-xl sm:text-2xl font-bold font-moul leading-snug drop-shadow text-white">
                 {loc.name}
               </h2>
@@ -917,25 +923,7 @@ export const FoodDetailModal: React.FC = () => {
             </div>
           </div>
 
-          <div className="p-4 sm:p-6 space-y-6">
-            {/* Meta Rating & Category Bar */}
-            <div className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-200/90 dark:border-slate-700">
-              <div className="flex items-center gap-2">
-                <span className="px-3 py-1 rounded-xl bg-[#064E3B] text-white font-bold text-xs sm:text-sm font-khmer">
-                  {loc.category}
-                </span>
-                <span className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-khmer">
-                  {tr(language, 'មុខម្ហូបខ្មែរប្រពៃណី', 'Traditional Khmer Recipe', '传统高棉食谱')}
-                </span>
-              </div>
-
-              <div className="flex items-center gap-1.5 text-sm">
-                <span className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-700 shadow-xs font-bold text-slate-800 dark:text-white flex items-center gap-1 border border-slate-200">
-                  <span className="text-amber-500">★</span> {selectedFood.rating} <span className="font-normal text-slate-400 text-xs">({selectedFood.reviewCount})</span>
-                </span>
-              </div>
-            </div>
-
+          <div className="p-4 sm:p-6 space-y-5">
             {/* Auto Online Food Photo Search Button ($0 Free) - ADMIN ONLY per Requirement #1 */}
             {isAdmin && (
               <div className="p-3.5 rounded-2xl bg-gradient-to-br from-emerald-50 via-teal-50/70 to-amber-50/40 dark:from-slate-800 dark:via-slate-800/90 dark:to-slate-900 border-2 border-emerald-500/40 shadow-sm space-y-2.5">

@@ -522,7 +522,7 @@ export const TouristDetailModal: React.FC = () => {
             <div>
               <h3 className="font-bold text-[#0F172A] dark:text-white text-base mb-1.5 flex items-center gap-1.5">
                 <Sparkles className="w-4 h-4 text-[#059669]" />
-                {tr(language, 'ប្រវត្តិ និងទិដ្ឋភាពទូទៅ', 'Overview & History', '历史与景点介绍')}
+                {tr(language, 'អំពីកន្លែងនេះ', 'About this Place', '景点简介')}
               </h3>
               <p className="text-sm sm:text-base text-slate-700 dark:text-slate-300 leading-relaxed bg-slate-50 dark:bg-slate-800/50 p-3.5 rounded-xl border border-slate-200/90 dark:border-slate-700">
                 {loc.description}

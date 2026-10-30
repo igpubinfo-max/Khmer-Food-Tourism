@@ -8,7 +8,7 @@ import {
   sortRestaurantsWithVipRotation,
 } from '../types';
 import { tr, translateProvince } from '../utils/i18n';
-import { getLocalizedDestination, getLocalizedFood, getLocalizedRestaurant } from '../utils/zhDynamicTranslator';
+import { getLocalizedDestination, getLocalizedFood, getLocalizedRestaurant, toConciseSummary } from '../utils/zhDynamicTranslator';
 import { copyTextNativeOrWeb } from '../utils/androidMediaHelper';
 import {
   BookOpen, Sparkles, MapPinned, CalendarDays, Lightbulb, Heart, Star, Store, Compass, Utensils,
@@ -903,26 +903,23 @@ export const GuideView: React.FC = () => {
                       </div>
 
                       <p className="text-[11px] font-bold text-[#064E3B] dark:text-emerald-300 mt-1">
-                        📅 {pickTri(f.formattedDateRange, lang)} • <span className="font-normal text-slate-500 dark:text-slate-400">{pickTri(f.when, lang)}</span>
+                        📅 {pickTri(f.formattedDateRange, lang)}
                       </p>
 
                       {/* Explicit Duration Pill */}
-                      <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                      <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-700/80 text-slate-800 dark:text-slate-200 text-[10px] font-bold border border-slate-200 dark:border-slate-600">
                           <Clock className="w-3 h-3 text-amber-600 dark:text-amber-400 shrink-0" />
                           <span>{tr(language, 'រយៈពេល៖', 'Duration:', '时长：')} {pickTri(f.durationLabel, lang)}</span>
                         </span>
                       </div>
 
-                      <p className="text-[11px] sm:text-xs text-slate-700 dark:text-slate-200 mt-2 leading-relaxed">{pickTri(f.about, lang)}</p>
+                      <p className="text-[11px] sm:text-xs text-slate-700 dark:text-slate-200 mt-2 leading-relaxed">{toConciseSummary(pickTri(f.about, lang), lang)}</p>
                     </div>
                   </div>
-                  <div className="grid gap-1.5 text-[11px] leading-snug">
-                    <p className="px-2.5 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-200">
+                  <div className="text-[11px] leading-snug">
+                    <p className="px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-200">
                       🍽️ <span className="font-bold">{tr(language, 'ម្ហូបប្រចាំពិធី៖', 'Festival Foods:', '节日美食：')}</span> {pickTri(f.foods, lang)}
-                    </p>
-                    <p className="px-2.5 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-900/50 text-slate-700 dark:text-slate-300">
-                      💡 {pickTri(f.tip, lang)}
                     </p>
                   </div>
                 </li>
@@ -1023,7 +1020,7 @@ export const GuideView: React.FC = () => {
                   </span>
                   <div className="min-w-0">
                     <h4 className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white">{pickTri(t.title, lang)}</h4>
-                    <p className="text-[11px] sm:text-xs text-slate-600 dark:text-slate-300 leading-relaxed mt-0.5">{pickTri(t.body, lang)}</p>
+                    <p className="text-[11px] sm:text-xs text-slate-600 dark:text-slate-300 leading-relaxed mt-0.5">{toConciseSummary(pickTri(t.body, lang), lang)}</p>
                   </div>
                 </li>
               ))}
@@ -1052,7 +1049,6 @@ export const GuideView: React.FC = () => {
                     <p className="text-[10px] italic text-slate-500 dark:text-slate-400">{p.roman}</p>
                     <p className="text-[11px] text-slate-700 dark:text-slate-200 mt-0.5">
                       {lang === 'zh' ? p.zh : p.en}
-                      {lang === 'km' && <span className="text-slate-400"> • {p.en}</span>}
                     </p>
                   </div>
                   <button

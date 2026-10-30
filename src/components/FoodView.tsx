@@ -10,7 +10,7 @@ import {
 } from '../types';
 import { Utensils, Lock, Crown } from 'lucide-react';
 import { DISH_PROVINCES, detectDishProvince } from '../utils/foodFilters';
-import { TAG_FILTERS, TAG_ESTIMATE_NOTE, GENERAL_FOOD_INFO_NOTE, matchesTagFilter, TagFilterId } from '../utils/dishTags';
+import { TAG_FILTERS, matchesTagFilter, TagFilterId } from '../utils/dishTags';
 import { TAG_FILTER_EVENT, consumePendingTagFilter, hasSpecialAndHealthyFoodVipAccess } from '../utils/smartHub';
 import { tr } from '../utils/i18n';
 
@@ -297,9 +297,6 @@ export const FoodView: React.FC = () => {
             );
           })}
         </div>
-        <p className="text-xs text-slate-500 dark:text-slate-400">
-          ℹ️ {tr(language, TAG_ESTIMATE_NOTE.km, TAG_ESTIMATE_NOTE.en, TAG_ESTIMATE_NOTE.zh)}
-        </p>
       </div>
 
       {/* Province filter with ONE reset button */}
@@ -354,16 +351,9 @@ export const FoodView: React.FC = () => {
                     <div className="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center text-xl shrink-0 border border-white/20">
                       {section.meta.emoji}
                     </div>
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-moul text-sm sm:text-base text-white truncate">
-                          {tr(language, section.meta.nameKh.replace(/^[០-៩0-9]+.s*/, ''), section.meta.nameEn.replace(/^[0-9]+.s*/, ''), zhMeta?.titleZh || section.meta.nameEn)}
-                        </h3>
-                      </div>
-                      <p className="text-xs text-emerald-100 truncate mt-0.5">
-                        {tr(language, section.meta.subtitleKh, section.meta.subtitleEn, zhMeta?.subtitleZh || section.meta.subtitleEn)}
-                      </p>
-                    </div>
+                    <h3 className="font-moul text-sm sm:text-base text-white truncate">
+                      {tr(language, section.meta.nameKh.replace(/^[០-៩0-9]+.s*/, ''), section.meta.nameEn.replace(/^[0-9]+.s*/, ''), zhMeta?.titleZh || section.meta.nameEn)}
+                    </h3>
                   </div>
                   <span className="px-2.5 py-1 rounded-full bg-white/20 text-white text-xs font-bold shrink-0 border border-white/25">
                     {section.totalInCategory} {tr(language, 'មុខ', 'items', '道菜')}
@@ -398,10 +388,6 @@ export const FoodView: React.FC = () => {
           )}
         </div>
       )}
-
-      <p className="text-center text-xs text-slate-400 font-khmer pt-2">
-        {tr(language, GENERAL_FOOD_INFO_NOTE.km, GENERAL_FOOD_INFO_NOTE.en, GENERAL_FOOD_INFO_NOTE.zh)}
-      </p>
     </div>
   );
 };

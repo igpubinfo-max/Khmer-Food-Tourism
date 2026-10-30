@@ -60,22 +60,13 @@ export const WhereToEat: React.FC<Props> = ({ food }) => {
   };
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2.5">
       <h3 className="font-bold text-[#0F172A] dark:text-white text-sm flex items-center gap-1.5">
         <Store className="w-4 h-4 text-[#059669]" />
         {tr(language, 'កន្លែងញ៉ាំម្ហូបនេះ', 'Where to eat this', '哪里可以吃到')}
       </h3>
 
-      {matches.length === 0 ? (
-        <p className="text-xs text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-200/80 dark:border-slate-700">
-          {tr(
-            language,
-            'មិនទាន់មានហាងក្នុងបញ្ជីដែលដាក់ម្ហូបនេះជាម្ហូបពិសេសទេ។ សាកល្បង «នៅជិតខ្ញុំ»។',
-            'No listed restaurant has this as a signature dish yet. Try “Near me”.',
-            '暂无餐厅将此菜列为招牌菜，试试“附近”。'
-          )}
-        </p>
-      ) : (
+      {matches.length > 0 && (
         <div className="space-y-2">
           {matches.map((r) => {
             const loc = getLocalizedRestaurant(r, language);
@@ -87,9 +78,9 @@ export const WhereToEat: React.FC<Props> = ({ food }) => {
                   setSelectedFood(null);
                   setSelectedRestaurant(r);
                 }}
-                className="w-full min-h-[64px] flex items-center gap-3 p-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-left active:scale-[0.98] transition cursor-pointer"
+                className="w-full min-h-[60px] flex items-center gap-3 p-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-left active:scale-[0.98] transition cursor-pointer"
               >
-                <img src={r.photoUrl} alt={loc.name} loading="lazy" className="w-14 h-14 rounded-lg object-cover shrink-0 bg-slate-100" />
+                <img src={r.photoUrl} alt={loc.name} loading="lazy" className="w-12 h-12 rounded-lg object-cover shrink-0 bg-slate-100" />
                 <span className="min-w-0 flex-1">
                   <span className="block text-sm font-bold text-slate-900 dark:text-white line-clamp-1">{loc.name}</span>
                   <span className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
@@ -103,14 +94,10 @@ export const WhereToEat: React.FC<Props> = ({ food }) => {
         </div>
       )}
 
-      <p className="text-[11px] text-slate-400">
-        ℹ️ {tr(language, 'ផ្គូផ្គងតាមម្ហូបពិសេសដែលហាងបានចុះបញ្ជី', "Matched by each restaurant's listed signature dishes", '根据餐厅登记的招牌菜匹配')}
-      </p>
-
       <button
         type="button"
         onClick={openNearMe}
-        className="min-h-[44px] px-4 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white text-sm font-bold flex items-center gap-1.5 active:scale-95 transition cursor-pointer"
+        className="min-h-[42px] px-4 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white text-xs sm:text-sm font-bold flex items-center gap-1.5 active:scale-95 transition cursor-pointer"
       >
         <Navigation className="w-4 h-4" />
         {tr(language, 'រកហាងនៅជិតខ្ញុំ', 'Find restaurants near me', '查找附近餐厅')}

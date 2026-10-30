@@ -2873,21 +2873,21 @@ export const additional100Foods: FoodItem[] = RAW_100_NEW_DISHES.map((item, idx)
 
   const descriptionKh =
     id === 'food-173'
-      ? `${item.nameKh} គឺជាមុខម្ហូបបាយឆាដ៏ឈ្ងុយឆ្ងាញ់ពេញនិយម ផ្សំពី ${cleanMainKh} លាយជាមួយ ${item.subIngKh} និងបន្ថែមក្លិនក្រអូបដោយ ${item.herbKh}។`
+      ? `${item.nameKh} គឺជាបាយឆាខ្មែរដ៏ឈ្ងុយឆ្ងាញ់ ចម្អិនពី ${cleanMainKh}។`
       : item.cat === 'drink'
-      ? `${item.nameKh} គឺជាភេសជ្ជៈខ្មែរដ៏ស្រស់ស្រាយ ផ្សំពី ${cleanMainKh} លាយជាមួយ ${item.subIngKh} និងបន្ថែមក្លិនក្រអូបដោយ ${item.herbKh}។`
+      ? `${item.nameKh} គឺជាភេសជ្ជៈខ្មែរដ៏ស្រស់ស្រាយ ផ្សំពី ${cleanMainKh}។`
       : item.cat === 'dessert'
-      ? `${item.nameKh} គឺជាបង្អែម និងនំខ្មែរដ៏ឈ្ងុយឆ្ងាញ់ ផ្សំពី ${cleanMainKh} លាយជាមួយ ${item.subIngKh} និងបន្ថែមក្លិនក្រអូបដោយ ${item.herbKh}។`
-      : `${item.nameKh} គឺជាមុខម្ហូបខ្មែរដ៏ឈ្ងុយឆ្ងាញ់ ផ្សំពី ${cleanMainKh} លាយជាមួយ ${item.subIngKh} និងបន្ថែមក្លិនក្រអូបដោយ ${item.herbKh}។`;
+      ? `${item.nameKh} គឺជាបង្អែមខ្មែរដ៏ឈ្ងុយឆ្ងាញ់ ផ្សំពី ${cleanMainKh}។`
+      : `${item.nameKh} គឺជាមុខម្ហូបខ្មែរដ៏ឈ្ងុយឆ្ងាញ់ ចម្អិនពី ${cleanMainKh}។`;
 
   const descriptionEn =
     id === 'food-173'
-      ? `${item.nameEn} is a beloved wok-fried rice dish prepared with ${cleanMainEn}, ${item.subIngEn}, and aromatic ${item.herbEn}.`
+      ? `${item.nameEn} is a popular wok-fried rice dish prepared with ${cleanMainEn}.`
       : item.cat === 'drink'
-      ? `${item.nameEn} is a refreshing Cambodian beverage crafted with ${cleanMainEn}, ${item.subIngEn}, and ${item.herbEn}.`
+      ? `${item.nameEn} is a refreshing Cambodian beverage crafted with ${cleanMainEn}.`
       : item.cat === 'dessert'
-      ? `${item.nameEn} is a beloved Cambodian sweet delicacy made with ${cleanMainEn}, ${item.subIngEn}, and fragrant ${item.herbEn}.`
-      : `${item.nameEn} is an authentic Cambodian culinary dish prepared with ${cleanMainEn}, ${item.subIngEn}, and aromatic ${item.herbEn}.`;
+      ? `${item.nameEn} is a traditional Cambodian dessert made with ${cleanMainEn}.`
+      : `${item.nameEn} is an authentic Cambodian dish prepared with ${cleanMainEn}.`;
 
   return {
     id,

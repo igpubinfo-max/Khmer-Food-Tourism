@@ -792,20 +792,10 @@ export const RestaurantDetailModal: React.FC = () => {
             {/* Genuine Customer Reviews & Rating Section (Strictly Separate from VIP Status) */}
             <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200/90 dark:border-slate-700 space-y-3.5 font-khmer">
               <div className="flex items-center justify-between gap-2 flex-wrap">
-                <div>
-                  <h3 className="font-bold text-[#0F172A] dark:text-white text-sm flex items-center gap-1.5">
-                    <Star className="w-4 h-4 fill-current text-amber-500" />
-                    <span>{tr(language, 'ការវាយតម្លៃពិតប្រាកដពីអតិថិជន', 'Genuine Customer Reviews', '真实顾客评价与评分')}</span>
-                  </h3>
-                  <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
-                    {tr(
-                      language,
-                      'ផ្អែកលើការវាយតម្លៃរបស់អតិថិជនពិតប្រាកដប៉ុណ្ណោះ (សមាជិកភាព VIP មិនប៉ះពាល់ដល់ផ្កាយវាយតម្លៃឡើយ)',
-                      'Based strictly on genuine customer reviews (VIP status never affects ratings)',
-                      '完全基于真实顾客评价计算（VIP 会员身份绝不影响星级评分）'
-                    )}
-                  </p>
-                </div>
+                <h3 className="font-bold text-[#0F172A] dark:text-white text-sm flex items-center gap-1.5">
+                  <Star className="w-4 h-4 fill-current text-amber-500" />
+                  <span>{tr(language, 'ការវាយតម្លៃពីអតិថិជន', 'Customer Reviews', '顾客评价')}</span>
+                </h3>
 
                 {ratingSummary.hasReviews ? (
                   <div className="px-3 py-1.5 rounded-xl bg-amber-500/15 border border-amber-400/50 text-right">

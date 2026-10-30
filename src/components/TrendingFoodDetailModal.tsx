@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { shareRichContent } from '../utils/androidMediaHelper';
 import { tr, translateProvince } from '../utils/i18n';
-import { translateDynamicTextToZh, sanitizeStrictLanguageText } from '../utils/zhDynamicTranslator';
+import { translateDynamicTextToZh, sanitizeStrictLanguageText, toConciseSummary } from '../utils/zhDynamicTranslator';
 import { extractYouTubeVideoId, isKnownUnavailableVideo } from '../services/onlineFoodDiscoveryService';
 
 export const TrendingFoodDetailModal: React.FC = () => {
@@ -97,7 +97,7 @@ export const TrendingFoodDetailModal: React.FC = () => {
       : language === 'zh'
       ? translateDynamicTextToZh(safeDescEn) || safeDescEn
       : safeDescEn;
-  const displayDesc = sanitizeStrictLanguageText(rawDesc, language) || safeDescKh;
+  const displayDesc = toConciseSummary(sanitizeStrictLanguageText(rawDesc, language) || safeDescKh, language);
 
   const displayRestName = sanitizeStrictLanguageText(
     language === 'km'

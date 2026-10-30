@@ -12,7 +12,6 @@ import {
   Navigation,
   CheckCircle2,
   RotateCcw,
-  BookOpen,
   Utensils,
   Crown,
   Lock,
@@ -29,7 +28,6 @@ import {
   ProvinceFilterOption,
   detectDishProvince,
   getProvinceOptionById,
-  getDishCulturalHistory,
   getMatchingRestaurantsForProvinceDish,
 } from '../utils/foodFilters';
 import { calculateDistanceKm } from '../services/dailyDiscoveryAndNotificationService';
@@ -230,12 +228,6 @@ export const DailyDiscoveriesModal: React.FC = () => {
     return p.culinaryTitleEn;
   };
 
-  const getProvinceHistory = (p: ProvinceFilterOption) => {
-    if (isKm) return p.historyKh;
-    if (isZh) return p.historyZh;
-    return p.historyEn;
-  };
-
   const getProvinceWhereToFind = (p: ProvinceFilterOption) => {
     if (isKm) return p.whereToFindKh;
     if (isZh) return p.whereToFindZh;
@@ -390,9 +382,9 @@ export const DailyDiscoveriesModal: React.FC = () => {
               <p className="text-[11px] text-emerald-100 font-khmer truncate mt-0.5">
                 {tr(
                   language,
-                  'មុខម្ហូបប្រពៃណី ប្រវត្តិ គ្រឿងផ្សំ និងផែនទីហាងតាមខេត្ត-ក្រុងទាំង ២៥',
-                  'Authentic dishes, history, ingredients & map navigation across all 25 provinces',
-                  '涵盖全柬 25 省市正宗代表菜、文化历史、配料与地图导航'
+                  'មុខម្ហូបប្រចាំខេត្ត និងផែនទីហាងទាំង ២៥ ខេត្ត-ក្រុង',
+                  'Signature dishes & map across all 25 provinces',
+                  '全柬 25 省市代表菜与地图导航'
                 )}
               </p>
             </div>
@@ -447,51 +439,34 @@ export const DailyDiscoveriesModal: React.FC = () => {
             </button>
           </div>
 
-          {/* Row 2: Region Filter Tabs + 25-Province Dropdown */}
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5 flex-1">
-              {regionTabs.map((reg) => {
-                const active = selectedRegion === reg.id;
-                return (
-                  <button
-                    key={reg.id}
-                    type="button"
-                    onClick={() => {
-                      setSelectedRegion(reg.id);
-                      if (
-                        reg.id !== 'all' &&
-                        selectedProvinceId !== 'all' &&
-                        getProvinceOptionById(selectedProvinceId).region !== reg.id
-                      ) {
-                        setSelectedProvinceId('all');
-                      }
-                    }}
-                    className={`px-2.5 py-1 rounded-lg text-[10px] font-bold whitespace-nowrap transition cursor-pointer shrink-0 ${
-                      active
-                        ? 'bg-emerald-700 text-white shadow-2xs'
-                        : 'bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600'
-                    }`}
-                  >
-                    {reg.label}
-                  </button>
-                );
-              })}
-            </div>
-
-            <select
-              value={selectedProvinceId}
-              onChange={(e) => setSelectedProvinceId(e.target.value)}
-              className="px-2.5 py-1 rounded-xl bg-white dark:bg-slate-800 border border-emerald-500/50 text-[11px] font-bold text-[#064E3B] dark:text-emerald-300 focus:outline-none max-w-[155px] truncate shrink-0"
-            >
-              <option value="all">
-                {tr(language, '📍 គ្រប់ ២៥ ខេត្ត-ក្រុង', '📍 All 25 Provinces', '📍 全部 25 省市')} ({verifiedDishes.length})
-              </option>
-              {DISH_PROVINCES.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {getProvinceShortName(p)} ({provinceDishCounts[p.id] || 0})
-                </option>
-              ))}
-            </select>
+          {/* Row 2: Region Filter Tabs */}
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+            {regionTabs.map((reg) => {
+              const active = selectedRegion === reg.id;
+              return (
+                <button
+                  key={reg.id}
+                  type="button"
+                  onClick={() => {
+                    setSelectedRegion(reg.id);
+                    if (
+                      reg.id !== 'all' &&
+                      selectedProvinceId !== 'all' &&
+                      getProvinceOptionById(selectedProvinceId).region !== reg.id
+                    ) {
+                      setSelectedProvinceId('all');
+                    }
+                  }}
+                  className={`px-2.5 py-1 rounded-lg text-[10px] font-bold whitespace-nowrap transition cursor-pointer shrink-0 ${
+                    active
+                      ? 'bg-emerald-700 text-white shadow-2xs'
+                      : 'bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600'
+                  }`}
+                >
+                  {reg.label}
+                </button>
+              );
+            })}
           </div>
 
           {/* Row 3: Interactive 25-Province Horizontal Chips */}
@@ -584,10 +559,10 @@ export const DailyDiscoveriesModal: React.FC = () => {
         </div>
 
         {/* Main Scrollable Content */}
-        <div className="flex-1 overflow-y-auto p-3.5 space-y-3.5 no-scrollbar font-khmer">
-          {/* Selected Province Culinary Heritage & Interactive Map Banner */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar font-khmer">
+          {/* Selected Province Culinary Specialty & Interactive Map Banner */}
           {activeProvinceMeta ? (
-            <div className="p-3.5 rounded-3xl bg-gradient-to-br from-[#064E3B] via-[#047857] to-slate-900 text-white shadow-md border border-emerald-400/30 space-y-2.5">
+            <div className="p-4 rounded-3xl bg-gradient-to-br from-[#064E3B] via-[#047857] to-slate-900 text-white shadow-md border border-emerald-400/30 space-y-3">
               <div className="flex items-start justify-between gap-2">
                 <div>
                   <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[10px] font-black">
@@ -602,15 +577,11 @@ export const DailyDiscoveriesModal: React.FC = () => {
                 </span>
               </div>
 
-              <p className="text-xs text-emerald-50/95 leading-relaxed">
-                {getProvinceHistory(activeProvinceMeta)}
-              </p>
-
               <div className="p-2.5 rounded-2xl bg-black/25 border border-white/15 text-[11px] text-emerald-100 flex items-start gap-2">
                 <MapPin className="w-4 h-4 text-amber-300 shrink-0 mt-0.5" />
                 <div>
                   <span className="font-bold text-white">
-                    {tr(language, 'កន្លែងលក់ម្ហូបល្បីៗក្នុងខេត្ត៖ ', 'Where to Find in Province: ', '省内推荐品尝地点：')}
+                    {tr(language, 'កន្លែងលក់ល្បីៗ៖ ', 'Where to Find: ', '推荐地点：')}
                   </span>
                   <span>{getProvinceWhereToFind(activeProvinceMeta)}</span>
                 </div>
@@ -624,7 +595,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
                 >
                   <Navigation className="w-3.5 h-3.5 shrink-0" />
                   <span className="truncate">
-                    {tr(language, 'ផែនទីម្ហូបក្នុងខេត្ត', 'Province Food Map', '省内美食地图导航')}
+                    {tr(language, 'ផែនទីម្ហូបក្នុងខេត្ត', 'Province Food Map', '省内美食地图')}
                   </span>
                 </button>
                 <button
@@ -634,7 +605,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
                 >
                   <Store className="w-3.5 h-3.5 text-amber-300 shrink-0" />
                   <span className="truncate">
-                    {tr(language, 'មើលហាងក្នុងខេត្តនេះ', 'Verified Province Shops', '查看本省认证餐厅')}
+                    {tr(language, 'មើលហាងក្នុងខេត្តនេះ', 'Province Shops', '查看本省餐厅')}
                   </span>
                 </button>
               </div>
@@ -642,7 +613,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
           ) : (
             /* All 25 Provinces Overview Banner */
             <div className="p-3 rounded-2xl bg-emerald-50/90 dark:bg-slate-800/90 border border-emerald-200 dark:border-slate-700 flex items-center justify-between gap-2 text-xs">
-              <div className="flex items-center gap-2 min-w-0">
+              <div className="flex items-center gap-2.5 min-w-0">
                 <span className="w-8 h-8 rounded-xl bg-[#064E3B] text-amber-300 flex items-center justify-center shrink-0 font-black">
                   25
                 </span>
@@ -650,17 +621,17 @@ export const DailyDiscoveriesModal: React.FC = () => {
                   <div className="font-bold text-slate-900 dark:text-white truncate">
                     {tr(
                       language,
-                      `ម្ហូបប្រពៃណីខ្មែរតាមខេត្ត-ក្រុងទាំង ២៥ (${filteredDishes.length} មុខ)`,
-                      `Authentic Dishes Across All 25 Provinces (${filteredDishes.length})`,
-                      `全柬 25 省市传统美食名录（共 ${filteredDishes.length} 道）`
+                      `ម្ហូបប្រពៃណីខ្មែរទាំង ២៥ ខេត្ត-ក្រុង (${filteredDishes.length} មុខ)`,
+                      `Authentic Dishes Across 25 Provinces (${filteredDishes.length})`,
+                      `全柬 25 省市代表美食（共 ${filteredDishes.length} 道）`
                     )}
                   </div>
                   <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
                     {tr(
                       language,
-                      'ចុចលើឈ្មោះខេត្តខាងលើ ដើម្បីមើលប្រវត្តិម្ហូប និងផែនទីតាមខេត្តនីមួយៗ',
-                      'Tap any province chip above to explore its culinary history & map',
-                      '点击上方任意省份标签，即可查看该省饮食历史与美食地图'
+                      'ចុចលើឈ្មោះខេត្តខាងលើ ដើម្បីមើលមុខម្ហូប និងផែនទី',
+                      'Tap a province chip above to explore dishes & map',
+                      '点击上方省份标签查看代表菜与地图'
                     )}
                   </div>
                 </div>
@@ -674,7 +645,6 @@ export const DailyDiscoveriesModal: React.FC = () => {
               const pid = detectDishProvince(food);
               const provMeta = getProvinceOptionById(pid);
               const locFood = getLocalizedFood(food, language);
-              const historyText = getDishCulturalHistory(food, provMeta, language);
               const matchedRests = getMatchingRestaurantsForProvinceDish(food, provMeta, restaurants);
               const resolvedPhoto =
                 food.photoUrl && food.photoUrl.startsWith('/foods/') && !food.photoUrl.includes('?')
@@ -741,32 +711,14 @@ export const DailyDiscoveriesModal: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Card Body: Description, History, Ingredients & Where to Find */}
-                  <div className="p-3.5 space-y-3">
-                    {/* 1. Description */}
-                    <p className="text-xs text-slate-700 dark:text-slate-200 leading-relaxed">
+                  {/* Card Body: Concise Summary, Key Ingredients & Where to Find */}
+                  <div className="p-4 space-y-3.5">
+                    {/* 1. Concise Description */}
+                    <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-200 leading-relaxed">
                       {locFood.description}
                     </p>
 
-                    {/* 2. Cultural History & Regional Origin */}
-                    <div className="p-2.5 rounded-2xl bg-amber-50/70 dark:bg-slate-900/70 border border-amber-200/70 dark:border-slate-700 space-y-1">
-                      <div className="text-[11px] font-extrabold text-amber-900 dark:text-amber-300 flex items-center gap-1.5">
-                        <BookOpen className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-                        <span>
-                          {tr(
-                            language,
-                            'ប្រវត្តិ និងប្រភពដើមតាមតំបន់',
-                            'Cultural History & Regional Origin',
-                            '历史渊源与地域特色'
-                          )}
-                        </span>
-                      </div>
-                      <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed line-clamp-3">
-                        {historyText}
-                      </p>
-                    </div>
-
-                    {/* 3. Key Authentic Ingredients */}
+                    {/* 2. Key Authentic Ingredients */}
                     {locFood.ingredients && locFood.ingredients.length > 0 && (
                       <div className="space-y-1.5">
                         <div className="text-[11px] font-extrabold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
@@ -776,33 +728,39 @@ export const DailyDiscoveriesModal: React.FC = () => {
                               language,
                               `គ្រឿងផ្សំសំខាន់ៗ (${locFood.ingredients.length} មុខ)`,
                               `Key Ingredients (${locFood.ingredients.length})`,
-                              `主要传统配料（${locFood.ingredients.length} 种）`
+                              `主要配料（${locFood.ingredients.length} 种）`
                             )}
                           </span>
                         </div>
                         <div className="flex items-center gap-1.5 flex-wrap">
-                          {locFood.ingredients.slice(0, 5).map((ing, i) => (
-                            <span
-                              key={i}
-                              className="px-2 py-0.5 rounded-lg bg-emerald-50 dark:bg-slate-700/80 text-emerald-900 dark:text-emerald-200 border border-emerald-200/70 dark:border-slate-600 text-[10px] font-semibold"
-                            >
-                              🌿 {ing.name}
-                            </span>
-                          ))}
+                          {locFood.ingredients.slice(0, 4).map((ing, i) => {
+                            const shortIng = (ing.name || '')
+                              .split(/,|និង|\band\b|、/i)[0]
+                              .replace(/\s*\([^)]*\)/g, '')
+                              .trim();
+                            return (
+                              <span
+                                key={i}
+                                className="px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-slate-700/80 text-emerald-900 dark:text-emerald-200 border border-emerald-200/70 dark:border-slate-600 text-[11px] font-semibold"
+                              >
+                                🌿 {shortIng || ing.name}
+                              </span>
+                            );
+                          })}
                         </div>
                       </div>
                     )}
 
-                    {/* 4. Where to Find & Verified Province Restaurants */}
-                    <div className="p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-700/80 space-y-2">
+                    {/* 3. Where to Find & Verified Province Restaurants */}
+                    <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-700/80 space-y-2">
                       <div className="text-[11px] font-extrabold text-[#064E3B] dark:text-emerald-300 flex items-center gap-1.5">
                         <MapPin className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                         <span>
                           {tr(
                             language,
-                            `កន្លែងលក់ និងទីតាំងក្នុង${provMeta.fullKh}`,
+                            `កន្លែងលក់ក្នុង${provMeta.fullKh}`,
                             `Where to Find in ${provMeta.en}`,
-                            `${provMeta.zh}推荐寻味地点`
+                            `${provMeta.zh}寻味地点`
                           )}
                         </span>
                       </div>
@@ -835,8 +793,8 @@ export const DailyDiscoveriesModal: React.FC = () => {
                       )}
                     </div>
 
-                    {/* 5. Action Buttons: Full Recipe & Interactive Map Navigation */}
-                    <div className="grid grid-cols-2 gap-2 pt-1">
+                    {/* 4. Action Buttons: Full Recipe & Interactive Map Navigation */}
+                    <div className="grid grid-cols-2 gap-2 pt-0.5">
                       <button
                         type="button"
                         onClick={() => {

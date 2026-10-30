@@ -1769,17 +1769,71 @@ export function getLocalizedFood(food: FoodItem, lang: Language) {
   return computed;
 }
 
+/**
+ * Condense verbose or multi-sentence descriptions into a clean, easy-to-read 1-sentence summary
+ * while preserving essential dish/place information across Khmer, English, and Chinese.
+ */
+export function toConciseSummary(raw: string | undefined, lang: Language): string {
+  const text = (raw || '').trim();
+  if (!text) return '';
+
+  if (lang === 'km') {
+    let cleaned = text
+      .replace(/\s*តាមរូបមន្តប្រពៃណីខ្មែរពិតៗ/g, '')
+      .replace(/,?\s*លាយជាមួយ\s+[^។]+និងបន្ថែមក្លិនក្រអូបដោយ\s+[^។]+/g, '')
+      .replace(/\s*ដែលពេញនិយមបំផុតនៅតាមផ្សារ[^។]*/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+    const firstStop = cleaned.indexOf('។');
+    if (firstStop !== -1) {
+      cleaned = cleaned.slice(0, firstStop + 1).trim();
+    } else if (cleaned && !cleaned.endsWith('។')) {
+      cleaned = `${cleaned}។`;
+    }
+    return cleaned;
+  }
+
+  if (lang === 'en') {
+    let cleaned = text
+      .replace(
+        /\b(prepared|crafted|made) with ([^,.]+),\s*[^.]+?\s+and (?:aromatic |fragrant )?[^.]+\./i,
+        '$1 with $2.'
+      )
+      .replace(/\s+/g, ' ')
+      .trim();
+    const firstSentenceMatch = cleaned.match(/^(.+?[.!?])(?:\s+|$)/);
+    if (firstSentenceMatch?.[1]) {
+      cleaned = firstSentenceMatch[1].trim();
+    }
+    return cleaned;
+  }
+
+  // Simplified Chinese ('zh')
+  let cleanedZh = text
+    .replace(/，搭配[^，。]+(?:精心烹制|猛火快炒)，最后(?:辅以|撒入)[^，。]+提香/g, '')
+    .replace(/，融合[^，。]+，并带有[^，。]+的自然芬芳/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  const firstZhStop = cleanedZh.indexOf('。');
+  if (firstZhStop !== -1) {
+    cleanedZh = cleanedZh.slice(0, firstZhStop + 1).trim();
+  } else if (cleanedZh && !cleanedZh.endsWith('。')) {
+    cleanedZh = `${cleanedZh}。`;
+  }
+  return cleanedZh;
+}
+
 function computeLocalizedFood(food: FoodItem, lang: Language) {
   if (lang === 'km') {
     const diffKm = formatDifficultyByLang(food.difficulty, 'km');
     const cleanKmName = sanitizeStrictLanguageText(food.nameKh, 'km');
-    const rawDescKm = (food.descriptionKh || '').replace(/\s*តាមរូបមន្តប្រពៃណីខ្មែរពិតៗ/g, '').trim();
+    const conciseKm = toConciseSummary(food.descriptionKh, 'km');
     return {
       name: cleanKmName,
       secondaryName: '',
       subtitle: '',
       category: sanitizeStrictLanguageText(food.categoryKh, 'km'),
-      description: sanitizeStrictLanguageText(rawDescKm, 'km'),
+      description: sanitizeStrictLanguageText(conciseKm, 'km'),
       prepTime: food.prepTime,
       cookTime: food.cookTime,
       servings: food.servings,
@@ -1800,12 +1854,13 @@ function computeLocalizedFood(food: FoodItem, lang: Language) {
   if (lang === 'en') {
     const diffEn = formatDifficultyByLang(food.difficulty, 'en');
     const cleanEnName = sanitizeStrictLanguageText(food.nameEn, 'en');
+    const conciseEn = toConciseSummary(food.descriptionEn, 'en');
     return {
       name: cleanEnName,
       secondaryName: '',
       subtitle: '',
       category: sanitizeStrictLanguageText(food.categoryEn, 'en'),
-      description: sanitizeStrictLanguageText(food.descriptionEn, 'en'),
+      description: sanitizeStrictLanguageText(conciseEn, 'en'),
       prepTime: formatDurationByLang(food.prepTime, 'en'),
       cookTime: formatDurationByLang(food.cookTime, 'en'),
       servings: formatServingsByLang(food.servings, 'en'),
@@ -1846,16 +1901,16 @@ function computeLocalizedFood(food: FoodItem, lang: Language) {
 
   const rawZhDesc =
     CORE_100_DESC_ZH[food.id] ||
-    (zhIngredients.length >= 3
+    (zhIngredients.length >= 1
       ? food.id === 'food-173'
-        ? `${zhName}是一道广受欢迎的经典什锦炒饭，甄选${mainZh}为主料，搭配${subZh}猛火快炒，最后撒入${herbZh}提香，粒粒分明、鲜香可口。`
+        ? `${zhName}是一道广受欢迎的经典什锦炒饭，甄选${mainZh}猛火快炒，粒粒分明、鲜香可口。`
         : food.categorySlug === 'drink'
-        ? `${zhName}是一款清爽怡人的柬埔寨特色饮品，精选${mainZh}调制，融合${subZh}，并带有${herbZh}的自然芬芳。`
+        ? `${zhName}是一款清爽怡人的柬埔寨特色饮品，精选${mainZh}调制而成。`
         : food.categorySlug === 'dessert'
-        ? `${zhName}是一款备受喜爱的高棉传统甜品美点，精选${mainZh}与${subZh}匠心制作，融入${herbZh}清香，香甜绵密。`
-        : `${zhName}是一道风味地道的高棉佳肴，甄选${mainZh}为主料，搭配${subZh}精心烹制，最后辅以${herbZh}提香，层次丰富、鲜美可口。`
+        ? `${zhName}是一款备受喜爱的高棉传统甜品，精选${mainZh}匠心制作，香甜绵密。`
+        : `${zhName}是一道风味地道的高棉佳肴，甄选${mainZh}精心烹制，鲜美可口。`
       : translateDynamicTextToZh(food.descriptionEn));
-  const zhDesc = sanitizeStrictLanguageText(rawZhDesc, 'zh');
+  const zhDesc = sanitizeStrictLanguageText(toConciseSummary(rawZhDesc, 'zh'), 'zh');
 
   const rawSteps = food.steps || [];
   const allStepsInCoreMap =
@@ -1933,7 +1988,7 @@ function computeLocalizedDestination(dest: TouristDestination, lang: Language) {
       category: sanitizeStrictLanguageText(dest.categoryKh, 'km'),
       province: sanitizeStrictLanguageText(dest.provinceKh, 'km'),
       address: sanitizeStrictLanguageText(dest.addressKh, 'km'),
-      description: sanitizeStrictLanguageText(dest.descriptionKh, 'km'),
+      description: sanitizeStrictLanguageText(toConciseSummary(dest.descriptionKh, 'km'), 'km'),
       entranceFee: '',
       bestTime: sanitizeStrictLanguageText(dest.bestTimeToVisitKh || 'ពេញមួយឆ្នាំ', 'km'),
       highlights: (dest.highlightsKh || []).map((h: string) => sanitizeStrictLanguageText(h, 'km')),
@@ -1949,7 +2004,7 @@ function computeLocalizedDestination(dest: TouristDestination, lang: Language) {
       category: sanitizeStrictLanguageText(dest.categoryEn, 'en'),
       province: sanitizeStrictLanguageText(dest.provinceEn, 'en'),
       address: sanitizeStrictLanguageText(dest.addressEn, 'en'),
-      description: sanitizeStrictLanguageText(dest.descriptionEn, 'en'),
+      description: sanitizeStrictLanguageText(toConciseSummary(dest.descriptionEn, 'en'), 'en'),
       entranceFee: '',
       bestTime: sanitizeStrictLanguageText(dest.bestTimeToVisitEn || 'All year round', 'en'),
       highlights:
@@ -1970,7 +2025,7 @@ function computeLocalizedDestination(dest: TouristDestination, lang: Language) {
   const rawZhCat = DEST_CATEGORY_ZH_MAP[dest.categoryEn] || translateDynamicTextToZh(dest.categoryEn);
   const zhCat = sanitizeStrictLanguageText(rawZhCat, 'zh');
   const rawZhDesc = DEST_DESC_ZH_BY_ID[dest.id] || translateDynamicTextToZh(dest.descriptionEn);
-  const zhDesc = sanitizeStrictLanguageText(rawZhDesc, 'zh');
+  const zhDesc = sanitizeStrictLanguageText(toConciseSummary(rawZhDesc, 'zh'), 'zh');
   const zhFee = '';
   const rawTime = dest.bestTimeToVisitEn || 'All year round';
   const zhTime = sanitizeStrictLanguageText(translateBestTimeToZh(rawTime), 'zh');
@@ -2026,7 +2081,7 @@ function computeLocalizedRestaurant(rest: Restaurant, lang: Language) {
       subtitle: '',
       province: sanitizeStrictLanguageText(rest.provinceKh || 'កម្ពុជា', 'km'),
       address: sanitizeStrictLanguageText(rest.addressKh, 'km'),
-      description: sanitizeStrictLanguageText(rest.descriptionKh, 'km'),
+      description: sanitizeStrictLanguageText(toConciseSummary(rest.descriptionKh, 'km'), 'km'),
       openingHours: translateOpeningHours(rest.openingHoursKh || rest.openingHoursEn, 'km'),
       signatureDishes: (rest.signatureDishesKh || []).map((d) => sanitizeStrictLanguageText(d, 'km')),
     };
@@ -2039,7 +2094,7 @@ function computeLocalizedRestaurant(rest: Restaurant, lang: Language) {
       subtitle: '',
       province: sanitizeStrictLanguageText(rest.provinceEn || 'Cambodia', 'en'),
       address: sanitizeStrictLanguageText(rest.addressEn || rest.addressKh, 'en'),
-      description: sanitizeStrictLanguageText(rest.descriptionEn || rest.descriptionKh, 'en'),
+      description: sanitizeStrictLanguageText(toConciseSummary(rest.descriptionEn || rest.descriptionKh, 'en'), 'en'),
       openingHours: translateOpeningHours(rest.openingHoursEn || rest.openingHoursKh, 'en'),
       signatureDishes: (rest.signatureDishesKh || []).map((d) => sanitizeStrictLanguageText(translateSignatureDish(d, 'en'), 'en')),
     };
@@ -2053,7 +2108,7 @@ function computeLocalizedRestaurant(rest: Restaurant, lang: Language) {
   const rawZhName = translateRestaurantNameToZh(rest.nameEn || '', rest.nameKh || '', zhProv);
   const zhName = sanitizeStrictLanguageText(rawZhName, 'zh');
   const zhAddress = sanitizeStrictLanguageText(translateAddressToZh(rest.addressEn || '', zhProv), 'zh');
-  const zhDesc = sanitizeStrictLanguageText(translateRestaurantDescToZh(rest.descriptionEn || '', zhProv), 'zh');
+  const zhDesc = sanitizeStrictLanguageText(toConciseSummary(translateRestaurantDescToZh(rest.descriptionEn || '', zhProv), 'zh'), 'zh');
   const zhHours = translateOpeningHours(rest.openingHoursKh || rest.openingHoursEn, 'zh');
 
   return {
