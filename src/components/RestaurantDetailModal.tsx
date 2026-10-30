@@ -437,44 +437,26 @@ export const RestaurantDetailModal: React.FC = () => {
               </div>
             ) : null}
 
-            {/* Quick action bar: Maps, Call, Telegram, Facebook, and Share (Benefits 6, 7, 9) */}
-            <div className="grid grid-cols-4 gap-1.5 sm:gap-2">
+            {/* Quick action bar: Maps and Call */}
+            <div className="grid grid-cols-2 gap-2">
               <a
                 href={selectedRestaurant.mapUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => trackRestaurantMap(selectedRestaurant.id)}
-                className="flex items-center justify-center gap-1 py-2 px-1 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-bold shadow transition active:scale-95 font-khmer"
+                className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow transition active:scale-95 font-khmer"
               >
-                <MapPin className="w-3.5 h-3.5 shrink-0" />
+                <MapPin className="w-4 h-4 shrink-0" />
                 <span className="truncate">{tr(language, 'ផែនទី', 'Maps', '地图导航')}</span>
               </a>
 
               <button
                 type="button"
                 onClick={handleCallRestaurant}
-                className="flex items-center justify-center gap-1 py-2 px-1 rounded-xl bg-[#059669] hover:bg-[#047857] text-white text-[11px] font-bold shadow transition active:scale-95 font-mono"
+                className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold shadow transition active:scale-95 font-mono"
               >
-                <Phone className="w-3.5 h-3.5 shrink-0" />
+                <Phone className="w-4 h-4 shrink-0" />
                 <span className="truncate">{tr(language, 'ហៅ', 'Call', '致电')}</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={handleShareTelegram}
-                className="flex items-center justify-center gap-1 py-2 px-1 rounded-xl bg-sky-500 hover:bg-sky-400 text-white text-[11px] font-bold shadow transition active:scale-95 font-khmer"
-              >
-                <span>✈️</span>
-                <span className="truncate">Telegram</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={handleShare}
-                className="flex items-center justify-center gap-1 py-2 px-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-[11px] font-bold shadow transition active:scale-95 font-khmer"
-              >
-                <Share2 className="w-3.5 h-3.5 shrink-0" />
-                <span className="truncate">{tr(language, 'ចែករំលែក', 'Share', '分享')}</span>
               </button>
             </div>
 
@@ -907,41 +889,6 @@ export const RestaurantDetailModal: React.FC = () => {
                   ))}
                 </div>
               )}
-            </div>
-
-            {/* Social Share Bar */}
-            <div className="pt-2 border-t border-slate-200 dark:border-slate-800 font-khmer">
-              <p className="text-xs font-semibold text-slate-500 mb-2.5 text-center">
-                {tr(language, 'ចែករំលែកទីតាំងហាងនេះ', 'Share this restaurant', '将此餐厅分享给好友')}
-              </p>
-              
-              <div className="flex items-center justify-center gap-2 flex-wrap">
-                <button
-                  type="button"
-                  onClick={handleShareTelegram}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#229ED9] text-white text-xs font-bold shadow hover:brightness-105 transition active:scale-95"
-                >
-                  <Send className="w-3.5 h-3.5" />
-                  Telegram
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleShareFacebook}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#1877F2] text-white text-xs font-bold shadow hover:brightness-105 transition active:scale-95"
-                >
-                  <Share2 className="w-3.5 h-3.5" />
-                  Facebook
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleCopyLink}
-                  className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-medium border border-slate-300 dark:border-slate-700 transition active:scale-95"
-                >
-                  {tr(language, 'ចម្លង', 'Copy', '复制链接')}
-                </button>
-              </div>
             </div>
           </div>
         </div>

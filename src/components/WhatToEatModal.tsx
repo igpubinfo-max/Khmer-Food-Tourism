@@ -19,9 +19,19 @@ import {
   Lock,
   Navigation,
   Search,
+  ShieldAlert,
 } from 'lucide-react';
 import { FoodItem } from '../types';
-import { IconFoodPicks } from './icons/HandcraftedIcons';
+import {
+  IconFoodPicks,
+  IconBeveragePairing,
+  IconDishCategory,
+  IconCravingSpark,
+  IconVipCrown,
+  IconGrillFlame,
+  IconZestyCitrus,
+  DishTagIcon,
+} from './icons/HandcraftedIcons';
 import { tr } from '../utils/i18n';
 import { getLocalizedFood, getLocalizedRestaurant } from '../utils/zhDynamicTranslator';
 import { useBodyScrollLock } from '../utils/useBodyScrollLock';
@@ -44,12 +54,12 @@ type VipDietFilter = 'none' | DishTagId;
 
 type MenuGroupId = 'time' | 'type' | 'craving' | 'health';
 
-const MEAL_SLOTS: Array<{ id: MealSlotFilter; kh: string; en: string; zh: string }> = [
-  { id: 'auto', kh: '⏰ ពេលនេះ', en: '⏰ Right Now', zh: '⏰ 当前时段' },
-  { id: 'breakfast', kh: '🌅 ពេលព្រឹក', en: '🌅 Breakfast', zh: '🌅 早餐' },
-  { id: 'lunch', kh: '☀️ ថ្ងៃត្រង់', en: '☀️ Lunch', zh: '☀️ 午餐' },
-  { id: 'afternoon', kh: '🧋 រសៀល', en: '🧋 Snack', zh: '🧋 下午茶' },
-  { id: 'dinner', kh: '🌙 ពេលល្ងាច', en: '🌙 Dinner', zh: '🌙 晚餐' },
+const MEAL_SLOTS: Array<{ id: MealSlotFilter; kh: string; en: string; zh: string; icon: React.ComponentType<{ className?: string }> }> = [
+  { id: 'auto', kh: 'ពេលនេះ', en: 'Right Now', zh: '当前时段', icon: Clock },
+  { id: 'breakfast', kh: 'ពេលព្រឹក', en: 'Breakfast', zh: '早餐', icon: Coffee },
+  { id: 'lunch', kh: 'ថ្ងៃត្រង់', en: 'Lunch', zh: '午餐', icon: Sun },
+  { id: 'afternoon', kh: 'រសៀល', en: 'Snack', zh: '下午茶', icon: Sparkles },
+  { id: 'dinner', kh: 'ពេលល្ងាច', en: 'Dinner', zh: '晚餐', icon: Moon },
 ];
 
 const CATEGORY_OPTIONS = [
@@ -64,10 +74,10 @@ const CATEGORY_OPTIONS = [
 
 const HEALTH_OPTIONS: Array<{ id: VipDietFilter; kh: string; en: string; zh: string; vipOnly: boolean }> = [
   { id: 'none', kh: 'ធម្មតា', en: 'Any', zh: '不限', vipOnly: false },
-  { id: 'light', kh: '🥗 ស្រាលក្រពះ (<450 kcal)', en: '🥗 Light (<450 kcal)', zh: '🥗 轻食低卡', vipOnly: true },
-  { id: 'protein_rich', kh: '💪 ប្រូតេអ៊ីនខ្ពស់', en: '💪 High Protein', zh: '💪 高蛋白', vipOnly: true },
-  { id: 'steamed_boiled', kh: '🍲 ស្ងោរ/ចំហុយ', en: '🍲 Steamed/Boiled', zh: '🍲 清蒸/水煮', vipOnly: true },
-  { id: 'vegetable_rich', kh: '🥦 បន្លែច្រើន', en: '🥦 Veggie Rich', zh: '🥦 多蔬菜', vipOnly: true },
+  { id: 'light', kh: 'ស្រាលក្រពះ (<450 kcal)', en: 'Light (<450 kcal)', zh: '轻食低卡', vipOnly: true },
+  { id: 'protein_rich', kh: 'ប្រូតេអ៊ីនខ្ពស់', en: 'High Protein', zh: '高蛋白', vipOnly: true },
+  { id: 'steamed_boiled', kh: 'ស្ងោរ/ចំហុយ', en: 'Steamed/Boiled', zh: '清蒸/水煮', vipOnly: true },
+  { id: 'vegetable_rich', kh: 'បន្លែច្រើន', en: 'Veggie Rich', zh: '多蔬菜', vipOnly: true },
 ];
 
 const stripLeadingSymbols = (s: string) => s.replace(/^[^\p{L}\p{N}]+/u, '').trim();
@@ -347,9 +357,9 @@ export const WhatToEatModal: React.FC = () => {
       showToast(
         tr(
           language,
-          '👑 ម៉ឺនុយ «ម្ហូបអមភេសជ្ជៈ» សម្រាប់សមាជិក VIP ប៉ុណ្ណោះ!',
-          '👑 The “Food & Drink Pairing” menu is for VIP members only!',
-          '👑 “下酒菜”特别菜单为 VIP 会员专属！'
+          'ម៉ឺនុយ «ម្ហូបអមភេសជ្ជៈ» សម្រាប់សមាជិក VIP ប៉ុណ្ណោះ!',
+          'The “Beverage Pairings” menu is for VIP members only!',
+          '“佐餐与饮品搭配”特别菜单为 VIP 会员专属！'
         ),
         'info'
       );
@@ -380,7 +390,7 @@ export const WhatToEatModal: React.FC = () => {
     },
     {
       id: 'type',
-      icon: '🍽️',
+      icon: <IconDishCategory className="w-4 h-4" />,
       label: tr(language, 'ប្រភេទ', 'Type', '分类'),
       value:
         categoryFilter === 'all' || !activeCategory
@@ -390,14 +400,14 @@ export const WhatToEatModal: React.FC = () => {
     },
     {
       id: 'craving',
-      icon: '💡',
+      icon: <IconCravingSpark className="w-4 h-4" />,
       label: tr(language, 'ចំណង់', 'Craving', '想吃'),
       value: cravingQuery.trim().slice(0, 10),
       active: cravingQuery.trim().length > 0,
     },
     {
       id: 'health',
-      icon: canUseVip ? '👑' : '🔒',
+      icon: canUseVip ? <IconVipCrown className="w-4 h-4 text-amber-500" /> : <Lock className="w-4 h-4 text-amber-500" />,
       label: tr(language, 'សុខភាព', 'Health', '健康'),
       value:
         vipDietFilter === 'none' || !activeHealth
@@ -491,39 +501,39 @@ export const WhatToEatModal: React.FC = () => {
             </button>
           </form>
 
-          {/* ★ Special menu (VIP): ម្ហូបអមភេសជ្ជៈ — AI auto-picks true drinking food */}
+          {/* ★ Special menu (VIP): ម្ហូបអមភេសជ្ជៈ — AI auto-curated Beverage Pairings */}
           <button
             type="button"
             onClick={handleOpenDrinkPairing}
             className={`w-full rounded-2xl px-3.5 py-2.5 flex items-center gap-3 text-left shadow-md border transition active:scale-[0.99] cursor-pointer ${
               drinkMode
-                ? 'bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 border-amber-200 text-white'
-                : 'bg-gradient-to-r from-[#1c1208] via-[#3b2410] to-[#5b2a12] border-amber-400/60 text-amber-100'
+                ? 'bg-gradient-to-r from-[#064E3B] via-[#047857] to-[#059669] border-amber-300/80 text-white'
+                : 'bg-gradient-to-r from-[#0f2922] via-[#133b2f] to-[#1a4d3c] border-amber-400/60 text-amber-100'
             }`}
           >
-            <span className="w-10 h-10 rounded-xl bg-amber-400/20 border border-amber-300/40 flex items-center justify-center text-xl shrink-0">
-              🍻
+            <span className="w-10 h-10 rounded-xl bg-amber-400/20 border border-amber-300/40 flex items-center justify-center text-amber-300 shrink-0">
+              <IconBeveragePairing className="w-5 h-5" />
             </span>
             <span className="flex-1 min-w-0">
               <span className="block font-moul text-sm leading-relaxed">
-                {tr(language, 'ម្ហូបអមភេសជ្ជៈ', 'Food & Drink Pairing', '下酒菜 · 佐酒美食')}
+                {tr(language, 'ម្ហូបអមភេសជ្ជៈ', 'Beverage Pairings', '佐餐与饮品搭配')}
               </span>
               <span className="block text-xs opacity-90 leading-snug">
                 {tr(
                   language,
-                  'AI រើសម្ហូបក្លែមស្រាបៀរ ឬស្រា',
-                  'AI picks true drinking food',
-                  'AI 精选地道下酒菜'
+                  'AI ជ្រើសម្ហូបអាំង ចៀនស្រួយ និងញាំជូរហឹរ សម្រាប់ញ៉ាំជុំគ្នា',
+                  'AI-curated savory dishes for dining & refreshments',
+                  'AI 精选烧烤、香脆与酸辣佐餐美食'
                 )}
               </span>
             </span>
-            <span className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-black/40 border border-amber-300/50 text-amber-200 text-xs font-black">
+            <span className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-black/35 border border-amber-300/50 text-amber-200 text-xs font-black">
               {canUseVip ? (
                 drinkMode ? (
                   <span>✓ {tr(language, 'កំពុងបើក', 'ON', '已开启')}</span>
                 ) : (
                   <>
-                    <Crown className="w-3 h-3" />
+                    <IconVipCrown className="w-3.5 h-3.5 text-amber-300" />
                     <span>VIP</span>
                   </>
                 )
@@ -551,7 +561,7 @@ export const WhatToEatModal: React.FC = () => {
                       : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700'
                 }`}
               >
-                <span className="text-base leading-none">{g.icon}</span>
+                <span className="flex items-center justify-center h-4">{g.icon}</span>
                 <span className="text-xs font-extrabold leading-tight">{g.label}</span>
                 <span className="text-[10px] leading-tight opacity-80 truncate max-w-full">{g.value || '\u00A0'}</span>
               </button>
@@ -561,24 +571,28 @@ export const WhatToEatModal: React.FC = () => {
           {openGroup && (
             <div className="p-2.5 rounded-2xl bg-emerald-50/70 dark:bg-slate-800/70 border border-emerald-100 dark:border-slate-700 flex flex-wrap gap-1.5">
               {openGroup === 'time' &&
-                MEAL_SLOTS.map((slot) => (
-                  <button
-                    key={slot.id}
-                    type="button"
-                    onClick={() => {
-                      setMealSlotFilter(slot.id);
-                      setDrinkMode(false);
-                      setOpenGroup(null);
-                    }}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition cursor-pointer ${
-                      mealSlotFilter === slot.id
-                        ? 'bg-[#064E3B] text-white shadow-2xs'
-                        : 'bg-white dark:bg-slate-700/80 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-600'
-                    }`}
-                  >
-                    {tr(language, slot.kh, slot.en, slot.zh)}
-                  </button>
-                ))}
+                MEAL_SLOTS.map((slot) => {
+                  const SlotIcon = slot.icon;
+                  return (
+                    <button
+                      key={slot.id}
+                      type="button"
+                      onClick={() => {
+                        setMealSlotFilter(slot.id);
+                        setDrinkMode(false);
+                        setOpenGroup(null);
+                      }}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap inline-flex items-center gap-1.5 transition cursor-pointer ${
+                        mealSlotFilter === slot.id
+                          ? 'bg-[#064E3B] text-white shadow-2xs'
+                          : 'bg-white dark:bg-slate-700/80 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-600'
+                      }`}
+                    >
+                      <SlotIcon className="w-3.5 h-3.5 shrink-0" />
+                      <span>{tr(language, slot.kh, slot.en, slot.zh)}</span>
+                    </button>
+                  );
+                })}
 
               {openGroup === 'type' &&
                 CATEGORY_OPTIONS.map((c) => (
@@ -620,7 +634,7 @@ export const WhatToEatModal: React.FC = () => {
                           : 'bg-white dark:bg-slate-700/80 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-600'
                       }`}
                     >
-                      {tr(language, chip.labelKh, chip.labelEn, chip.labelZh)}
+                      {stripLeadingSymbols(tr(language, chip.labelKh, chip.labelEn, chip.labelZh))}
                     </button>
                   );
                 })}
@@ -638,9 +652,9 @@ export const WhatToEatModal: React.FC = () => {
                           showToast(
                             tr(
                               language,
-                              '👑 តម្រងម្ហូបសុខភាព និងកាឡូរី គឺសម្រាប់សមាជិក VIP!',
-                              '👑 Smart Nutrition & Calorie filters are reserved for VIP members!',
-                              '👑 智能营养与热量筛选为 VIP 会员专属功能！'
+                              'តម្រងម្ហូបសុខភាព និងកាឡូរី គឺសម្រាប់សមាជិក VIP!',
+                              'Smart Nutrition & Calorie filters are reserved for VIP members!',
+                              '智能营养与热量筛选为 VIP 会员专属功能！'
                             ),
                             'info'
                           );
@@ -651,12 +665,13 @@ export const WhatToEatModal: React.FC = () => {
                         setDrinkMode(false);
                         setOpenGroup(null);
                       }}
-                      className={`px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition text-xs inline-flex items-center gap-1 cursor-pointer ${
+                      className={`px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition text-xs inline-flex items-center gap-1.5 cursor-pointer ${
                         isActive
                           ? 'bg-amber-400 text-slate-950 shadow-xs'
                           : 'bg-white dark:bg-slate-700/80 text-slate-700 dark:text-slate-200 border border-amber-300/70 dark:border-slate-600'
                       }`}
                     >
+                      {d.id !== 'none' && <DishTagIcon id={d.id} className="w-3.5 h-3.5 shrink-0" />}
                       <span>{tr(language, d.kh, d.en, d.zh)}</span>
                       {isLocked && <Lock className="w-3 h-3 text-amber-500 shrink-0" />}
                     </button>
@@ -669,49 +684,73 @@ export const WhatToEatModal: React.FC = () => {
         {/* Content body */}
         <div ref={dishCardRef} className="p-4 space-y-3">
           {drinkMode && canUseVip && (
-            <div className="p-3 rounded-2xl bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 dark:from-amber-950/40 dark:via-slate-800 dark:to-rose-950/30 border border-amber-300/70 dark:border-amber-700/50 space-y-2 font-khmer">
+            <div className="p-3.5 rounded-2xl bg-gradient-to-br from-emerald-50 via-teal-50/70 to-amber-50/70 dark:from-emerald-950/40 dark:via-slate-800 dark:to-amber-950/30 border border-emerald-300/70 dark:border-emerald-700/50 space-y-2.5 font-khmer">
               <div className="flex items-start gap-2.5">
-                <span className="text-2xl leading-none">🍻</span>
+                <span className="w-9 h-9 rounded-xl bg-emerald-600/15 dark:bg-amber-400/20 border border-emerald-500/30 dark:border-amber-300/40 flex items-center justify-center text-[#064E3B] dark:text-amber-300 shrink-0 mt-0.5">
+                  <IconBeveragePairing className="w-5 h-5" />
+                </span>
                 <div className="min-w-0">
                   <h4 className="text-sm font-extrabold text-slate-900 dark:text-white leading-relaxed">
                     {tr(
                       language,
-                      `ម្ហូបអមភេសជ្ជៈ — AI បានរើស ${pairingRanked.length} មុខ`,
-                      `Food & Drink Pairing — AI picked ${pairingRanked.length} dishes`,
-                      `下酒菜 — AI 精选 ${pairingRanked.length} 道`
+                      `ម្ហូបអមភេសជ្ជៈ — AI បានជ្រើសរើស ${pairingRanked.length} មុខ`,
+                      `Beverage Pairings — AI selected ${pairingRanked.length} dishes`,
+                      `佐餐与饮品搭配 — AI 精选 ${pairingRanked.length} 道`
                     )}
                   </h4>
                   <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
                     {tr(
                       language,
-                      'សុទ្ធតែម្ហូបក្លែមពិតៗ៖ អាំង ចៀនស្រួយ ញាំជូរហឹរ គ្រឿងសមុទ្រ និងសាច់ក្រៀម។',
-                      'Only true drinking food: grilled, crispy, zesty salads, seafood and cured meats.',
-                      '只收录真正的下酒菜：烧烤、酥炸、酸辣凉拌、海鲜和腌制肉类。'
+                      'ជម្រើសម្ហូបរសជាតិឈ្ងុយឆ្ងាញ់៖ អាំង ចៀនស្រួយ ញាំជូរហឹរ គ្រឿងសមុទ្រ និងសាច់ប្រឡាក់ ស័ក្តិសមសម្រាប់ញ៉ាំជុំតុ និងភេសជ្ជៈគ្រប់ប្រភេទ។',
+                      'Savory sharing dishes: charcoal-grilled, crispy bites, zesty salads, fresh seafood and seasoned meats for dining & refreshments.',
+                      '精选聚餐风味佳肴：烧烤、酥脆小食、酸辣凉拌、海鲜与风味肉食，适合围桌分享与饮品搭配。'
                     )}
                   </p>
                 </div>
               </div>
               <div className="flex flex-wrap gap-1.5">
                 {([
-                  { id: 'all' as const, kh: '🍻 ទាំងអស់', en: '🍻 All', zh: '🍻 全部' },
-                  { id: 'beer' as const, kh: '🍺 ស្រាបៀរ', en: '🍺 Beer', zh: '🍺 啤酒' },
-                  { id: 'spirits' as const, kh: '🥃 ស្រា', en: '🥃 Liquor & wine', zh: '🥃 烈酒/葡萄酒' },
+                  {
+                    id: 'all' as const,
+                    icon: <IconBeveragePairing className="w-3.5 h-3.5 shrink-0" />,
+                    kh: 'ទាំងអស់',
+                    en: 'All Pairings',
+                    zh: '全部搭配',
+                  },
+                  {
+                    id: 'beer' as const,
+                    icon: <IconGrillFlame className="w-3.5 h-3.5 shrink-0" />,
+                    kh: 'អាំង & ចៀនស្រួយ',
+                    en: 'Grilled & Crispy',
+                    zh: '烧烤与香脆',
+                  },
+                  {
+                    id: 'spirits' as const,
+                    icon: <IconZestyCitrus className="w-3.5 h-3.5 shrink-0" />,
+                    kh: 'ញាំជូរហឹរ & ម្ហូបពិសេស',
+                    en: 'Zesty & Savory',
+                    zh: '酸辣与风味小食',
+                  },
                 ]).map((k) => (
                   <button
                     key={k.id}
                     type="button"
                     onClick={() => setDrinkKind(k.id)}
-                    className={`px-3 py-1.5 rounded-full text-xs font-bold transition cursor-pointer ${
+                    className={`px-3 py-1.5 rounded-full text-xs font-bold inline-flex items-center gap-1.5 transition cursor-pointer ${
                       drinkKind === k.id
-                        ? 'bg-amber-500 text-slate-950 shadow-xs'
-                        : 'bg-white dark:bg-slate-700/80 text-slate-700 dark:text-slate-200 border border-amber-300/70 dark:border-slate-600'
+                        ? 'bg-[#064E3B] text-amber-300 border border-amber-400/60 shadow-xs'
+                        : 'bg-white dark:bg-slate-700/80 text-slate-700 dark:text-slate-200 border border-emerald-200 dark:border-slate-600'
                     }`}
                   >
-                    {tr(language, k.kh, k.en, k.zh)}
+                    {k.icon}
+                    <span>{tr(language, k.kh, k.en, k.zh)}</span>
                   </button>
                 ))}
               </div>
-              <p className="text-[11px] font-bold text-rose-700 dark:text-rose-300 leading-relaxed">🔞 {drinkDisclaimer(language)}</p>
+              <p className="text-[11px] font-bold text-[#064E3B] dark:text-emerald-300 leading-relaxed flex items-start gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
+                <span>{drinkDisclaimer(language)}</span>
+              </p>
             </div>
           )}
           {!drinkMode && aiCravingRecommendations && cravingQuery.trim() && (
@@ -816,10 +855,14 @@ export const WhatToEatModal: React.FC = () => {
                     const allergens = brainInfo?.allergens || [];
                     return (
                       <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 text-xs text-amber-900 dark:text-amber-200 leading-relaxed space-y-1">
-                        <div>💡 {reason}</div>
+                        <div className="flex items-start gap-1.5">
+                          <IconCravingSpark className="w-3.5 h-3.5 shrink-0 mt-0.5 text-amber-600 dark:text-amber-400" />
+                          <span>{reason}</span>
+                        </div>
                         {allergens.length > 0 && (
-                          <div className="text-[11px] font-bold">
-                            ⚠️ {allergens.map((a) => allergenLabel(a as AllergenId, language)).join(' · ')}
+                          <div className="text-[11px] font-bold flex items-center gap-1">
+                            <ShieldAlert className="w-3.5 h-3.5 shrink-0 text-amber-600 dark:text-amber-400" />
+                            <span>{allergens.map((a) => allergenLabel(a as AllergenId, language)).join(' · ')}</span>
                           </div>
                         )}
                       </div>

@@ -548,41 +548,6 @@ export const TouristDetailModal: React.FC = () => {
                 </div>
               </div>
             )}
-
-            {/* Social Share Bar */}
-            <div className="pt-2 border-t border-slate-200 dark:border-slate-800">
-              <p className="text-xs font-semibold text-slate-500 mb-2.5 text-center">
-                {tr(language, 'ចែករំលែកតំបន់ទេសចរណ៍នេះ', 'Share this destination', '分享此旅游景点')}
-              </p>
-              
-              <div className="flex items-center justify-center gap-2 flex-wrap">
-                <button
-                  type="button"
-                  onClick={handleShareTelegram}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#229ED9] text-white text-xs font-bold shadow hover:brightness-105 transition active:scale-95"
-                >
-                  <Send className="w-3.5 h-3.5" />
-                  Telegram
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleShareFacebook}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#1877F2] text-white text-xs font-bold shadow hover:brightness-105 transition active:scale-95"
-                >
-                  <Share2 className="w-3.5 h-3.5" />
-                  Facebook
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleCopyLink}
-                  className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-medium border border-slate-300 dark:border-slate-700 transition active:scale-95"
-                >
-                  {tr(language, 'ចម្លង', 'Copy', '复制链接')}
-                </button>
-              </div>
-            </div>
           </div>
           </>
           )}

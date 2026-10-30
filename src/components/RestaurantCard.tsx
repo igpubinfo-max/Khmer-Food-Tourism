@@ -1,9 +1,8 @@
 import React, { useMemo } from 'react';
 import { Restaurant, getRestaurantRatingSummary, getVipFeaturedRotationState, isAdminAccount } from '../types';
 import { useApp } from '../context/AppContext';
-import { MapPin, Phone, Star, Navigation, CheckCircle2, AlertCircle, Share2, Edit2, Trash2, Heart, Crown } from 'lucide-react';
+import { MapPin, Phone, Star, Navigation, CheckCircle2, AlertCircle, Edit2, Trash2, Heart, Crown, Utensils } from 'lucide-react';
 import { sanitizeDialablePhone, resolveRestaurantPhoneOnDemand } from '../services/googlePlacesService';
-import { shareRichContent } from '../utils/androidMediaHelper';
 import { tr } from '../utils/i18n';
 import { getLocalizedRestaurant } from '../utils/zhDynamicTranslator';
 
@@ -71,31 +70,17 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(({
   trackRestaurantShare,
   toggleBookmark,
 }) => {
-  const isKm = language === 'km';
   const ratingSummary = getRestaurantRatingSummary(restaurant);
   const loc = useMemo(() => getLocalizedRestaurant(restaurant, language), [restaurant, language]);
-
-  const handleShare = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    trackRestaurantShare(restaurant.id);
-    shareRichContent(
-      {
-        title: loc.name,
-        nameKh: loc.name,
-        nameEn: loc.name,
-        description: loc.description,
-        location: `${loc.address} (${loc.province})`,
-        phone: restaurant.phone,
-        signatureDishes: loc.signatureDishes,
-        photoUrl: restaurant.photoUrl,
-        mapUrl: restaurant.mapUrl,
-        itemType: 'restaurant',
-        itemId: restaurant.id,
-        isKm,
-      },
-      showToast
-    );
-  };
+  const resolvedShopPhotoUrl = useMemo(() => {
+    const raw =
+      restaurant.photoUrl && !restaurant.photoUrl.startsWith('/foods/') && !restaurant.photoUrl.startsWith('/restaurants/')
+        ? restaurant.photoUrl
+        : restaurant.profileImage && !restaurant.profileImage.startsWith('/foods/') && !restaurant.profileImage.startsWith('/restaurants/')
+        ? restaurant.profileImage
+        : '/Shop/rest-1.jpg';
+    return raw.startsWith('/Shop/') && !raw.includes('?') ? `${raw}?v=20261030v1` : raw;
+  }, [restaurant.photoUrl, restaurant.profileImage]);
 
   return (
     <div 
@@ -107,19 +92,13 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(({
       {/* Cover image */}
       <div className="relative aspect-16/9 w-full overflow-hidden bg-slate-100 dark:bg-slate-700">
         <img 
-          src={
-            restaurant.photoUrl && !restaurant.photoUrl.startsWith('/foods/') && !restaurant.photoUrl.startsWith('/restaurants/')
-              ? restaurant.photoUrl
-              : restaurant.profileImage && !restaurant.profileImage.startsWith('/foods/') && !restaurant.profileImage.startsWith('/restaurants/')
-              ? restaurant.profileImage
-              : '/Shop/rest-1.jpg'
-          } 
+          src={resolvedShopPhotoUrl} 
           alt={loc.name}
           className="w-full h-full object-cover"
           loading="lazy"
           decoding="async"
           onError={(e) => {
-            (e.currentTarget as HTMLImageElement).src = '/Shop/rest-1.jpg';
+            (e.currentTarget as HTMLImageElement).src = '/Shop/rest-1.jpg?v=20261030v1';
           }}
         />
 
@@ -215,8 +194,9 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(({
           {/* Signature dishes tags */}
           <div className="flex flex-wrap gap-1.5 mb-2.5">
             {loc.signatureDishes.slice(0, 2).map((dish, i) => (
-              <span key={i} className="px-2.5 py-0.5 rounded-md bg-slate-50 dark:bg-slate-700/60 text-slate-700 dark:text-slate-200 text-xs font-semibold border border-slate-200/80 dark:border-slate-600/60 font-khmer">
-                🍽️ {dish}
+              <span key={i} className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-slate-50 dark:bg-slate-700/60 text-slate-700 dark:text-slate-200 text-xs font-semibold border border-slate-200/80 dark:border-slate-600/60 font-khmer">
+                <Utensils className="w-3 h-3 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                <span>{dish}</span>
               </span>
             ))}
           </div>
@@ -305,15 +285,6 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(({
               title={tr(language, 'រក្សាទុកជាចំណូលចិត្ត', 'Save to favorites', '加入收藏')}
             >
               <Heart className={`w-3.5 h-3.5 ${bookmarked ? 'fill-current' : ''}`} />
-            </button>
-
-            <button
-              type="button"
-              onClick={handleShare}
-              className="p-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-200 transition"
-              title={tr(language, 'ចែករំលែកតំណភ្ជាប់ហាង', 'Share restaurant', '分享餐厅链接')}
-            >
-              <Share2 className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>

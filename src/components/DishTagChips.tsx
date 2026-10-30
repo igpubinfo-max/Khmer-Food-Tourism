@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import type { FoodItem, Language } from '../types';
 import { getDishTags, tagLabel } from '../utils/dishTags';
+import { DishTagIcon } from './icons/HandcraftedIcons';
 
 interface Props {
   food: FoodItem;
@@ -21,8 +22,9 @@ export const DishTagChips: React.FC<Props> = ({ food, language }) => {
   return (
     <div className="flex flex-wrap gap-1.5">
       {tags.map((tg) => (
-        <span key={tg.id} className={`px-2.5 py-1 rounded-full text-xs font-bold border ${toneClass(tg.tone)}`}>
-          {tg.emoji} {tagLabel(tg, language)}
+        <span key={tg.id} className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border ${toneClass(tg.tone)}`}>
+          <DishTagIcon id={tg.id} className="w-3.5 h-3.5 shrink-0" />
+          <span>{tagLabel(tg, language)}</span>
         </span>
       ))}
     </div>

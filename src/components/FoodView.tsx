@@ -8,11 +8,12 @@ import {
   classifyKhmerFoodPrimaryGroup,
   organizeAndDeduplicateFoods,
 } from '../types';
-import { Utensils, Lock, Crown } from 'lucide-react';
+import { Utensils, Lock, Crown, MapPin, Soup, Sparkles } from 'lucide-react';
 import { DISH_PROVINCES, detectDishProvince } from '../utils/foodFilters';
-import { TAG_FILTERS, matchesTagFilter, TagFilterId } from '../utils/dishTags';
+import { TAG_FILTERS, matchesTagFilter, TagFilterId, DishTagId } from '../utils/dishTags';
 import { TAG_FILTER_EVENT, consumePendingTagFilter, hasSpecialAndHealthyFoodVipAccess } from '../utils/smartHub';
 import { tr } from '../utils/i18n';
+import { DishTagIcon, IconDishCategory, IconGrillFlame, IconHealthyLeaf, IconKhmerFoodBowl } from './icons/HandcraftedIcons';
 
 const PAGE_BATCH_SIZE = 20;
 
@@ -75,12 +76,12 @@ export const FoodView: React.FC = () => {
   }, [organizedFoods]);
 
   // Ordered exactly as requested: សម្ល, ឆា, ស្ងោរ, បង្អែម
-  const categories = [
-    { id: 'all', nameKh: 'ទាំងអស់', nameEn: 'All Dishes', nameZh: '全部菜品', emoji: '🍽️' },
-    { id: 'samlor', nameKh: 'សម្ល', nameEn: 'Soups & Curries', nameZh: '浓汤/咖喱', emoji: '🍲' },
-    { id: 'cha', nameKh: 'ឆា & អាំង', nameEn: 'Stir-Fry & Grill', nameZh: '热炒/烧烤', emoji: '🥘' },
-    { id: 'sngor', nameKh: 'ស្ងោរ & គុយទាវ', nameEn: 'Broths & Noodles', nameZh: '清汤/汤粉', emoji: '🥣' },
-    { id: 'bong_aem', nameKh: 'បង្អែម', nameEn: 'Desserts', nameZh: '高棉甜品', emoji: '🍨' },
+  const categories: Array<{ id: string; nameKh: string; nameEn: string; nameZh: string; icon: React.ReactNode }> = [
+    { id: 'all', nameKh: 'ទាំងអស់', nameEn: 'All Dishes', nameZh: '全部菜品', icon: <IconDishCategory className="w-4 h-4" /> },
+    { id: 'samlor', nameKh: 'សម្ល', nameEn: 'Soups & Curries', nameZh: '浓汤/咖喱', icon: <IconKhmerFoodBowl className="w-4 h-4" /> },
+    { id: 'cha', nameKh: 'ឆា & អាំង', nameEn: 'Stir-Fry & Grill', nameZh: '热炒/烧烤', icon: <IconGrillFlame className="w-4 h-4" /> },
+    { id: 'sngor', nameKh: 'ស្ងោរ & គុយទាវ', nameEn: 'Broths & Noodles', nameZh: '清汤/汤粉', icon: <Soup className="w-4 h-4 text-emerald-500" /> },
+    { id: 'bong_aem', nameKh: 'បង្អែម', nameEn: 'Desserts', nameZh: '高棉甜品', icon: <Sparkles className="w-4 h-4 text-amber-500" /> },
   ];
 
   const sectionZhMeta: Record<KhmerFoodPrimaryGroup, { titleZh: string; subtitleZh: string }> = {
@@ -215,7 +216,7 @@ export const FoodView: React.FC = () => {
                     : 'bg-slate-50 dark:bg-slate-900/60 text-slate-700 dark:text-slate-200 border-slate-200/80 dark:border-slate-700 hover:bg-emerald-50/60'
                 }`}
               >
-                <span className="text-base leading-none mb-1">{cat.emoji}</span>
+                <span className="mb-1 flex items-center justify-center">{cat.icon}</span>
                 <span className="text-[11px] sm:text-xs font-bold leading-tight truncate w-full">
                   {tr(language, cat.nameKh, cat.nameEn, cat.nameZh)}
                 </span>
@@ -236,7 +237,8 @@ export const FoodView: React.FC = () => {
       <div className="space-y-2 font-khmer">
         <div className="flex items-center justify-between gap-2">
           <span className="text-xs sm:text-sm font-bold text-[#064E3B] dark:text-emerald-300 flex items-center gap-1.5">
-            <span>🥗 {tr(language, 'ស្លាកម្ហូបសុខភាព (VIP)៖', 'Healthy Dish Tags (VIP):', '健康菜品标签 (VIP)：')}</span>
+            <IconHealthyLeaf className="w-4 h-4 shrink-0" />
+            <span>{tr(language, 'ស្លាកម្ហូបសុខភាព (VIP)៖', 'Healthy Dish Tags (VIP):', '健康菜品标签 (VIP)：')}</span>
             {!canUseVip && (
               <span className="px-2 py-0.5 rounded-full bg-slate-900 text-amber-300 text-[10px] font-extrabold inline-flex items-center gap-0.5">
                 <Lock className="w-2.5 h-2.5" />
@@ -286,7 +288,12 @@ export const FoodView: React.FC = () => {
                     : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-300 dark:border-slate-600'
                 }`}
               >
-                <span>{t.emoji} {tr(language, t.labelKh, t.labelEn, t.labelZh)}</span>
+                {t.id === 'all' ? (
+                  <IconDishCategory className="w-3.5 h-3.5 shrink-0" />
+                ) : (
+                  <DishTagIcon id={t.id as DishTagId} className="w-3.5 h-3.5 shrink-0" />
+                )}
+                <span>{tr(language, t.labelKh, t.labelEn, t.labelZh)}</span>
                 {isLockedTag && (
                   <span className="px-1.5 py-0.5 rounded-full bg-slate-900 text-amber-300 text-[10px] font-extrabold inline-flex items-center gap-0.5">
                     <Lock className="w-2.5 h-2.5" />
@@ -302,8 +309,9 @@ export const FoodView: React.FC = () => {
       {/* Province filter with ONE reset button */}
       <div className="grid grid-cols-1 gap-2 font-khmer">
         <label className="block">
-          <span className="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">
-            📍 {tr(language, 'ខេត្ត', 'Province', '省份')}
+          <span className="flex items-center gap-1 text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">
+            <MapPin className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+            <span>{tr(language, 'ខេត្ត', 'Province', '省份')}</span>
           </span>
           <select
             value={provinceFilter}
@@ -348,8 +356,16 @@ export const FoodView: React.FC = () => {
                 {/* Category Section Banner Header */}
                 <div className="flex items-center justify-between px-4 py-3 rounded-2xl bg-gradient-to-r from-[#064E3B] via-[#047857] to-emerald-700 text-white shadow-sm border border-emerald-400/30 font-khmer">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center text-xl shrink-0 border border-white/20">
-                      {section.meta.emoji}
+                    <div className="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center shrink-0 border border-white/20">
+                      {section.meta.id === 'samlor' ? (
+                        <IconKhmerFoodBowl className="w-5 h-5" />
+                      ) : section.meta.id === 'cha' ? (
+                        <IconGrillFlame className="w-5 h-5" />
+                      ) : section.meta.id === 'sngor' ? (
+                        <Soup className="w-5 h-5 text-emerald-200" />
+                      ) : (
+                        <Sparkles className="w-5 h-5 text-amber-300" />
+                      )}
                     </div>
                     <h3 className="font-moul text-sm sm:text-base text-white truncate">
                       {tr(language, section.meta.nameKh.replace(/^[០-៩0-9]+.s*/, ''), section.meta.nameEn.replace(/^[0-9]+.s*/, ''), zhMeta?.titleZh || section.meta.nameEn)}

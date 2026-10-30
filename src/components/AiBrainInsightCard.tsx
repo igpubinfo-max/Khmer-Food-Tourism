@@ -1,9 +1,10 @@
 import React from 'react';
-import { ChefHat, Crown, Lock, ShieldAlert } from 'lucide-react';
+import { ChefHat, Crown, Lock, ShieldAlert, Sparkles } from 'lucide-react';
 import type { FoodItem, Language } from '../types';
 import { tr } from '../utils/i18n';
 import { getLocalizedFood } from '../utils/zhDynamicTranslator';
 import { allergenLabel, allergyFootnote, type AiBrainInsight, type AllergenId } from '../services/aiFoodBrain';
+import { IconBeveragePairing, IconCravingSpark, IconSmartAssistant } from './icons/HandcraftedIcons';
 
 interface Props {
   insight: AiBrainInsight;
@@ -53,8 +54,14 @@ export const AiBrainInsightCard: React.FC<Props> = ({
     >
       {/* Headline */}
       <div className="flex items-start gap-3">
-        <div className="w-11 h-11 rounded-2xl bg-white/80 dark:bg-slate-700/70 border border-black/5 dark:border-white/10 flex items-center justify-center text-2xl shrink-0 shadow-xs">
-          {insight.emoji}
+        <div className="w-11 h-11 rounded-2xl bg-white/90 dark:bg-slate-700/80 border border-black/5 dark:border-white/10 flex items-center justify-center shrink-0 shadow-xs">
+          {insight.mode === 'drink' ? (
+            <IconBeveragePairing className="w-6 h-6" />
+          ) : insight.mode === 'blocked' ? (
+            <ShieldAlert className="w-6 h-6 text-rose-500" />
+          ) : (
+            <IconSmartAssistant className="w-6 h-6" />
+          )}
         </div>
         <div className="min-w-0">
           <h4 className="text-sm font-extrabold text-slate-900 dark:text-white leading-relaxed">{insight.headline}</h4>
@@ -72,7 +79,7 @@ export const AiBrainInsightCard: React.FC<Props> = ({
         </div>
       )}
 
-      {/* VIP lock (drink-pairing menu) */}
+      {/* VIP lock (beverage-pairing menu) */}
       {insight.vipLock && (
         <div className="p-3 rounded-xl bg-slate-900 text-amber-100 border border-amber-400/50 space-y-2">
           <div className="flex items-center gap-2 text-sm font-extrabold">
@@ -82,9 +89,9 @@ export const AiBrainInsightCard: React.FC<Props> = ({
           <p className="text-xs leading-relaxed text-amber-100/90">
             {tr(
               language,
-              `AI បានរកឃើញម្ហូបក្លែមពិតៗ ${insight.pairingCount ?? 0} មុខ ដែលផ្គួបស្រាបៀរ ឬស្រា។ ដំឡើង VIP ដើម្បីមើលបញ្ជីពេញ។`,
-              `AI found ${insight.pairingCount ?? 0} genuine drinking dishes that pair with beer or liquor. Upgrade to VIP to unlock the full list.`,
-              `AI 找到了 ${insight.pairingCount ?? 0} 道适合佐啤酒/烈酒的地道下酒菜。升级 VIP 即可查看完整名单。`
+              `AI បានរកឃើញម្ហូបអមភេសជ្ជៈ និងម្ហូបញ៉ាំជុំតុ ${insight.pairingCount ?? 0} មុខ។ ដំឡើង VIP ដើម្បីមើលបញ្ជីពេញ។`,
+              `AI curated ${insight.pairingCount ?? 0} savory beverage-pairing dishes. Upgrade to VIP to unlock the full menu.`,
+              `AI 精选了 ${insight.pairingCount ?? 0} 道佐餐与聚会美食。升级 VIP 即可查看完整菜单。`
             )}
           </p>
           <button
@@ -120,15 +127,19 @@ export const AiBrainInsightCard: React.FC<Props> = ({
                 />
                 <div className="min-w-0 flex-1">
                   <div className="text-sm font-extrabold text-slate-900 dark:text-white leading-snug">{loc.name}</div>
-                  <p className="text-xs text-emerald-800 dark:text-emerald-300 leading-relaxed mt-0.5">💡 {reason}</p>
+                  <p className="text-xs text-emerald-800 dark:text-emerald-300 leading-relaxed mt-0.5 flex items-start gap-1">
+                    <IconCravingSpark className="w-3.5 h-3.5 shrink-0 mt-0.5 text-amber-500" />
+                    <span>{reason}</span>
+                  </p>
                   {allergens.length > 0 && (
                     <div className="flex flex-wrap gap-1 mt-1">
                       {allergens.map((a) => (
                         <span
                           key={a}
-                          className="px-1.5 py-0.5 rounded-md bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800/50 text-[11px] font-bold"
+                          className="px-1.5 py-0.5 rounded-md bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800/50 text-[11px] font-bold inline-flex items-center gap-1"
                         >
-                          {ALLERGEN_ICON[a]} {allergenLabel(a, language)}
+                          <ShieldAlert className="w-3 h-3 shrink-0" />
+                          <span>{allergenLabel(a, language)}</span>
                         </span>
                       ))}
                     </div>
@@ -142,7 +153,10 @@ export const AiBrainInsightCard: React.FC<Props> = ({
             );
           })}
           {hasAllergens && (
-            <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">🥜 {allergyFootnote(language)}</p>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed flex items-center gap-1">
+              <ShieldAlert className="w-3.5 h-3.5 shrink-0 text-amber-500" />
+              <span>{allergyFootnote(language)}</span>
+            </p>
           )}
         </div>
       )}
@@ -150,7 +164,10 @@ export const AiBrainInsightCard: React.FC<Props> = ({
       {/* Surprise */}
       {insight.surprise && (
         <div className="p-3 rounded-xl bg-gradient-to-r from-amber-100 via-yellow-50 to-amber-100 dark:from-amber-950/40 dark:via-slate-800 dark:to-amber-950/30 border border-amber-300/70 dark:border-amber-700/50">
-          <div className="text-xs font-extrabold text-amber-800 dark:text-amber-300 mb-0.5">✨ {insight.surprise.title}</div>
+          <div className="text-xs font-extrabold text-amber-800 dark:text-amber-300 mb-0.5 flex items-center gap-1">
+            <Sparkles className="w-3.5 h-3.5 shrink-0 text-amber-600" />
+            <span>{insight.surprise.title}</span>
+          </div>
           <p className="text-xs text-slate-700 dark:text-slate-200 leading-relaxed">{insight.surprise.text}</p>
         </div>
       )}
@@ -159,8 +176,8 @@ export const AiBrainInsightCard: React.FC<Props> = ({
       {insight.tips.length > 0 && (
         <ul className="space-y-1">
           {insight.tips.map((tip, i) => (
-            <li key={i} className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed flex gap-1.5">
-              <span className="shrink-0">💡</span>
+            <li key={i} className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed flex items-start gap-1.5">
+              <IconCravingSpark className="w-3.5 h-3.5 shrink-0 mt-0.5 text-amber-500" />
               <span>{tip}</span>
             </li>
           ))}
@@ -168,7 +185,10 @@ export const AiBrainInsightCard: React.FC<Props> = ({
       )}
 
       {insight.drinkDisclaimer && (
-        <p className="text-[11px] font-bold text-rose-700 dark:text-rose-300 leading-relaxed">🔞 {insight.drinkDisclaimer}</p>
+        <p className="text-[11px] font-bold text-amber-800 dark:text-amber-300 leading-relaxed flex items-start gap-1.5">
+          <IconBeveragePairing className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+          <span>{insight.drinkDisclaimer}</span>
+        </p>
       )}
 
       {/* Follow-ups */}

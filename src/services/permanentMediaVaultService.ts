@@ -998,10 +998,21 @@ export function applyRestaurantOverrides(
         : Array.isArray(ov.menuItems)
         ? ovMenu
         : rMenu;
-    const photoUrl = ov.photoUrl || ov.profileImage || r.photoUrl;
+    const CLEAN_STATIC_MEDIA_CUTOFF_MS = new Date('2026-10-30T16:00:00.000Z').getTime();
+    const hasCleanBundledShopPhoto =
+      typeof r.photoUrl === 'string' && r.photoUrl.startsWith('/Shop/');
+    const useOverrideShopPhoto =
+      !hasCleanBundledShopPhoto ||
+      ovTime > CLEAN_STATIC_MEDIA_CUTOFF_MS;
+    const rawOvPhoto = ov.photoUrl || ov.profileImage || '';
+    const photoUrl =
+      useOverrideShopPhoto && rawOvPhoto
+        ? rawOvPhoto
+        : r.photoUrl || rawOvPhoto;
     const nextPhotoUpdatedAt = ovTime >= rTime ? (ov.updatedAt || r.photoUpdatedAt) : (r.photoUpdatedAt || ov.updatedAt);
     const nextUpdatedAt = ovTime >= rTime ? (ov.updatedAt || r.updatedAt) : (r.updatedAt || ov.updatedAt);
-    const nextProfileImage = ov.profileImage || photoUrl;
+    const nextProfileImage =
+      useOverrideShopPhoto && ov.profileImage ? ov.profileImage : photoUrl;
 
     if (
       r.photoUrl === photoUrl &&
@@ -1026,17 +1037,17 @@ export function applyRestaurantOverrides(
       ...r,
       photoUrl,
       profileImage: nextProfileImage,
-      galleryPhotos: Array.isArray(ov.galleryPhotos) && ov.galleryPhotos.length > 0
+      galleryPhotos: useOverrideShopPhoto && Array.isArray(ov.galleryPhotos) && ov.galleryPhotos.length > 0
         ? Array.from(new Set([photoUrl, ...ov.galleryPhotos])).filter(Boolean)
         : (Array.isArray(r.galleryPhotos) && r.galleryPhotos.length > 0
             ? Array.from(new Set([photoUrl, ...r.galleryPhotos])).filter(Boolean)
             : [photoUrl].filter(Boolean)),
       foodImages: (() => {
-        const gList = Array.isArray(ov.galleryPhotos) && ov.galleryPhotos.length > 0
+        const gList = useOverrideShopPhoto && Array.isArray(ov.galleryPhotos) && ov.galleryPhotos.length > 0
           ? [photoUrl, ...ov.galleryPhotos]
           : [photoUrl, ...(r.galleryPhotos || [])];
         const gSet = new Set(gList.filter(Boolean));
-        const rawFood = Array.isArray(ov.foodImages) ? ov.foodImages : (r.foodImages || []);
+        const rawFood = useOverrideShopPhoto && Array.isArray(ov.foodImages) ? ov.foodImages : (r.foodImages || []);
         return rawFood.filter((u: string) => u && !gSet.has(u));
       })(),
       menuItems: resolvedMenuItems,
@@ -1159,14 +1170,10 @@ export function applyDestinationOverrides(
     const seedTime = seedItem?.photoUpdatedAt ? new Date(seedItem.photoUpdatedAt).getTime() : 0;
     const ovTime = ov.updatedAt ? new Date(ov.updatedAt).getTime() : 0;
 
-    // If the seed already has this exact override baked into `/destinations/<id>.jpg` (`seedTime >= ovTime - 1000`),
-    // use the fast static `/destinations/<id>.jpg` asset.
-    // Otherwise (if `ov` is newer than the seed OR the seed is not a baked `/destinations/` file), always use `ov.photoUrl`!
+    const CLEAN_STATIC_MEDIA_CUTOFF_MS = new Date('2026-10-30T16:00:00.000Z').getTime();
     const useOverridePhoto =
       !isSeedBundledStaticPhoto ||
-      ov.photoUrl.startsWith('/destinations/') ||
-      ovTime > seedTime + 1000 ||
-      seedTime === 0;
+      (ovTime > Math.max(seedTime, CLEAN_STATIC_MEDIA_CUTOFF_MS) + 1000);
 
     const effectivePhotoUrl = useOverridePhoto ? ov.photoUrl : seedPhotoUrl;
     const nextPhotoUpdatedAt = ovTime >= seedTime ? (ov.updatedAt || d.photoUpdatedAt) : (seedItem?.photoUpdatedAt || d.photoUpdatedAt);
@@ -1189,7 +1196,7 @@ export function applyDestinationOverrides(
       ...d,
       photoUrl: effectivePhotoUrl,
       galleryPhotos:
-        Array.isArray(ov.galleryPhotos) && ov.galleryPhotos.length > 0
+        useOverridePhoto && Array.isArray(ov.galleryPhotos) && ov.galleryPhotos.length > 0
           ? [effectivePhotoUrl, ...ov.galleryPhotos.filter((g) => g && g !== effectivePhotoUrl && g !== ov.photoUrl)]
           : [effectivePhotoUrl],
       nameKh: ov.nameKh || d.nameKh,

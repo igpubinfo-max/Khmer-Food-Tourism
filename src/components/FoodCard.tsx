@@ -6,6 +6,7 @@ import { tr } from '../utils/i18n';
 import { getLocalizedFood } from '../utils/zhDynamicTranslator';
 import { getDisplayTags, tagLabel } from '../utils/dishTags';
 import { PassportStampButton } from './PassportStampButton';
+import { DishTagIcon } from './icons/HandcraftedIcons';
 
 import type { Language } from '../types';
 
@@ -129,7 +130,7 @@ const FoodCardView: React.FC<FoodCardViewProps> = React.memo(({
               {tags.map((tg) => (
                 <span
                   key={tg.id}
-                  className={`px-2.5 py-1 rounded-full text-xs font-bold border ${
+                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border ${
                     tg.tone === 'green'
                       ? 'bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800'
                       : tg.tone === 'blue'
@@ -137,7 +138,8 @@ const FoodCardView: React.FC<FoodCardViewProps> = React.memo(({
                       : 'bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800'
                   }`}
                 >
-                  {tg.emoji} {tagLabel(tg, language)}
+                  <DishTagIcon id={tg.id} className="w-3.5 h-3.5 shrink-0" />
+                  <span>{tagLabel(tg, language)}</span>
                 </span>
               ))}
             </div>

@@ -160,17 +160,17 @@ export function describeDish(food: FoodItem, language: Language): string {
 // ---------------------------------------------------------------------------------------------
 
 const CHIPS: Record<string, { label: T3; query: T3 }> = {
-  spicy: { label: ['🌶️ ហឹរជាងនេះ', '🌶️ Spicier', '🌶️ 再辣一点'], query: ['ជូរហឹរ', 'spicy sour', '酸辣'] },
-  mild: { label: ['😌 ស្រាលក្រពះ', '😌 Light & mild', '😌 清淡'], query: ['អាហារមិនសូវខ្លាញ់', 'light low oil', '少油清淡'] },
-  soup: { label: ['🍲 សម្លក្តៅៗ', '🍲 Warm soup', '🍲 热汤'], query: ['សម្លក្តៅៗ', 'warm soup', '热汤'] },
-  grilled: { label: ['🥩 សាច់អាំង', '🥩 Grilled', '🥩 烧烤'], query: ['សាច់អាំង', 'grilled', '烧烤'] },
-  seafood: { label: ['🦀 គ្រឿងសមុទ្រ', '🦀 Seafood', '🦀 海鲜'], query: ['គ្រឿងសមុទ្រ', 'seafood', '海鲜'] },
-  sweet: { label: ['🍨 បង្អែម', '🍨 Something sweet', '🍨 来点甜的'], query: ['បង្អែម', 'dessert', '甜品'] },
-  noodles: { label: ['🍜 គុយទាវ & មី', '🍜 Noodles', '🍜 粉面'], query: ['គុយទាវ', 'noodles', '粿条面食'] },
-  rice: { label: ['🍚 បាយ', '🍚 Rice', '🍚 米饭'], query: ['បាយ', 'rice', '米饭'] },
-  drink: { label: ['🍻 ម្ហូបអមភេសជ្ជៈ (VIP)', '🍻 Drink-pairing food (VIP)', '🍻 下酒菜 (VIP)'], query: ['ម្ហូបអមស្រាបៀរ', 'beer food', '下酒菜'] },
-  surprise: { label: ['🎁 ភ្ញាក់ផ្អើលខ្ញុំ', '🎁 Surprise me', '🎁 给我惊喜'], query: ['ភ្ញាក់ផ្អើល', 'surprise me', '惊喜'] },
-  cheap: { label: ['💸 ថោក ឆ្ងាញ់', '💸 Cheap & tasty', '💸 实惠美味'], query: ['ថោក', 'cheap', '实惠'] },
+  spicy: { label: ['ហឹរជាងនេះ', 'Spicier', '再辣一点'], query: ['ជូរហឹរ', 'spicy sour', '酸辣'] },
+  mild: { label: ['ស្រាលក្រពះ', 'Light & mild', '清淡'], query: ['អាហារមិនសូវខ្លាញ់', 'light low oil', '少油清淡'] },
+  soup: { label: ['សម្លក្តៅៗ', 'Warm soup', '热汤'], query: ['សម្លក្តៅៗ', 'warm soup', '热汤'] },
+  grilled: { label: ['សាច់អាំង', 'Grilled', '烧烤'], query: ['សាច់អាំង', 'grilled', '烧烤'] },
+  seafood: { label: ['គ្រឿងសមុទ្រ', 'Seafood', '海鲜'], query: ['គ្រឿងសមុទ្រ', 'seafood', '海鲜'] },
+  sweet: { label: ['បង្អែម', 'Something sweet', '来点甜的'], query: ['បង្អែម', 'dessert', '甜品'] },
+  noodles: { label: ['គុយទាវ & មី', 'Noodles', '粉面'], query: ['គុយទាវ', 'noodles', '粿条面食'] },
+  rice: { label: ['បាយ', 'Rice', '米饭'], query: ['បាយ', 'rice', '米饭'] },
+  drink: { label: ['ម្ហូបអមភេសជ្ជៈ (VIP)', 'Beverage Pairings (VIP)', '佐餐与饮品搭配 (VIP)'], query: ['ម្ហូបអមភេសជ្ជៈ', 'beverage pairing food', '佐餐美食'] },
+  surprise: { label: ['ភ្ញាក់ផ្អើលខ្ញុំ', 'Surprise me', '给我惊喜'], query: ['ភ្ញាក់ផ្អើល', 'surprise me', '惊喜'] },
+  cheap: { label: ['ថោក ឆ្ងាញ់', 'Cheap & tasty', '实惠美味'], query: ['ថោក', 'cheap', '实惠'] },
 };
 
 function chipsFor(ids: string[], language: Language): BrainChip[] {
@@ -245,38 +245,33 @@ const BRAIN_ENTRIES: BrainEntry[] = [
     ],
     follow: ['mild', 'soup', 'surprise'],
   },
-  // ---- VIP Drink-pairing menu ------------------------------------------------------------
+  // ---- VIP Beverage-pairing menu ---------------------------------------------------------
   {
     id: 'drink_pairing',
-    emoji: '🍻',
+    emoji: '🍹',
     mode: 'drink',
-    test: /beer|alcohol|liquor|wine\b|whisk|vodka|cocktail|\bsake\b|bar food|pub food|drinking food|ស្រាបៀរ|ស្រា(?![លប])|ក្លែម|ជុំតុ|ផឹកស្រា|啤酒|白酒|红酒|葡萄酒|下酒|喝酒/i,
-    headline: ['ម្ហូបអមភេសជ្ជៈ 🍻 ជម្រើសរបស់ AI', 'Drink-pairing food 🍻 picked by AI', '下酒菜 🍻 AI 精选'],
+    test: /beverage pairing|drink pairing|bar food|pub food|drinking food|beer|alcohol|liquor|wine\b|whisk|vodka|cocktail|\bsake\b|ម្ហូបអមភេសជ្ជៈ|ស្រាបៀរ|ស្រា(?![លប])|ក្លែម|ជុំតុ|ផឹកស្រា|佐餐|啤酒|白酒|红酒|葡萄酒|下酒|喝酒/i,
+    headline: ['ម្ហូបអមភេសជ្ជៈ — ជម្រើសរបស់ AI', 'Beverage Pairings — Curated by AI', '佐餐与饮品搭配 — AI 精选'],
     explain: [
-      'AI ចាប់យកតែម្ហូបក្លែមពិតៗ — អាំង ចៀនស្រួយ ញាំជូរហឹរ គ្រឿងសមុទ្រ និងសាច់ក្រៀម — ដែលអ្នកស្រុកញ៉ាំជាមួយស្រាបៀរ ឬស្រា។',
-      'AI keeps only true drinking food — grilled, crispy, zesty salads, seafood and cured meats — the kind Cambodians enjoy with beer or liquor.',
-      'AI 只保留真正的下酒菜——烧烤、酥炸、酸辣凉拌、海鲜和腌制肉类——也就是柬埔寨人佐啤酒或烈酒的经典搭配。',
+      'AI ជ្រើសរើសមុខម្ហូបសម្រាប់ញ៉ាំជុំតុ និងអមភេសជ្ជៈ — អាំង ចៀនស្រួយ ញាំជូរហឹរ គ្រឿងសមុទ្រ និងសាច់ប្រឡាក់ឈ្ងុយឆ្ងាញ់។',
+      'AI curates savory sharing dishes — grilled meats, crispy bites, zesty salads, fresh seafood and seasoned specialties — ideal for dining and refreshments.',
+      'AI 精选适合围桌分享与饮品搭配的风味佳肴——炭火烧烤、酥脆小食、酸辣凉拌、鲜美海鲜与风味肉食。',
     ],
-    like: ['ផ្គួបស្រាបានល្អព្រោះ៖', 'Pairs well because:', '适合佐酒：'],
+    like: ['ស័ក្តិសមអមភេសជ្ជៈព្រោះ៖', 'Pairs well with refreshments because:', '适合佐餐搭配：'],
     surprise: {
-      title: ['ល្បិចអ្នកស្រុក', 'Local secret', '本地小窍门'],
+      title: ['គន្លឹះរសជាតិ', 'Culinary tip', '风味小贴士'],
       text: [
-        'ញាំជូរហឹរ ឬក្រូចឆ្មារ ជួយកាត់ជាតិខ្លាញ់ និងធ្វើឱ្យមាត់ស្រស់ — ហេតុនេះអ្នកស្រុកតែងបញ្ជាញាំមុនសាច់អាំង។',
-        'A tangy, spicy salad cuts through richness and refreshes the palate — locals often order one before the grill arrives.',
-        '酸辣凉拌能解腻、清爽口腔——当地人常常在烧烤上桌前先点一份。',
+        'ញាំជូរហឹរ ឬក្រូចឆ្មារស្រស់ ជួយកាត់ជាតិខ្លាញ់ និងធ្វើឱ្យរសជាតិស្រស់ស្រាយ — ហេតុនេះគេនិយមបញ្ជាញាំមុនម្ហូបអាំង។',
+        'A tangy, zesty salad cuts through richness and refreshes the palate — a favorite starter before grilled dishes arrive.',
+        '酸辣凉拌能解腻、清爽味蕾——非常适合在烧烤上桌前作为开胃菜。',
       ],
     },
     tips: [
       [
-        'បញ្ជាទឹកក្រូចឆ្មារ និងទឹកដាក់ទឹកកកជាមួយ ដើម្បីកុំឱ្យខ្សោះជាតិទឹក។',
-        'Order water and lime on the side to stay hydrated.',
-        '记得配上清水和青柠，避免脱水。',
+        'ផ្គួបជាមួយទឹកក្រូចឆ្មារស្រស់ តែត្រជាក់ ឬភេសជ្ជៈស្រស់ស្រាយ ដើម្បីបង្កើនរសជាតិឱ្យកាន់តែឆ្ងាញ់។',
+        'Pair with fresh lime soda, iced tea or chilled refreshments to elevate the savory flavors.',
+        '搭配鲜榨青柠水、冰茶或冰爽饮品，更能衬托菜品的鲜美风味。',
       ],
-    ],
-    safety: [
-      '🔞 សម្រាប់អាយុ ១៨ ឆ្នាំឡើង • ផឹកស្រាត្រូវមានកម្រិត • កុំបើកបរពេលផឹកស្រា។',
-      '🔞 18+ only • Drink responsibly • Never drink and drive.',
-      '🔞 仅限18岁以上 • 理性饮酒 • 酒后严禁驾驶。',
     ],
     follow: ['grilled', 'seafood', 'spicy'],
   },

@@ -1,5 +1,5 @@
 import React, { useMemo, useRef, useState } from 'react';
-import { RefreshCw, ChevronRight, Lock, Crown, CheckCircle2 } from 'lucide-react';
+import { RefreshCw, ChevronRight, Lock, Crown, CheckCircle2, Flame, Sun, Sunset, Moon, Info } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import type { FoodItem } from '../types';
 import { tr } from '../utils/i18n';
@@ -10,6 +10,7 @@ import type { DishTagId } from '../utils/dishTags';
 import { buildMealPlan } from '../utils/mealPlan';
 import { hasSpecialAndHealthyFoodVipAccess } from '../utils/smartHub';
 import { getLocalizedFood } from '../utils/zhDynamicTranslator';
+import { DishTagIcon, IconDishCategory, IconHealthyLeaf } from './icons/HandcraftedIcons';
 
 // The six tag cards (recipe-based estimates only: no health/medical claims)
 const HUB_TAGS: DishTagId[] = ['light', 'steamed_boiled', 'grilled', 'vegetable_rich', 'protein_rich', 'vegetarian_friendly'];
@@ -74,7 +75,8 @@ export const SmartHubHealthySection: React.FC<Props> = ({ foods, onViewAll, onOp
         <div className="flex items-center justify-between gap-2">
           <div>
             <h3 className="font-moul text-sm text-[#064E3B] dark:text-emerald-300 flex items-center gap-1.5">
-              <span>🥗 {tr(language, 'មុខម្ហូបសុខភាព និងជម្រើសពិសេស', 'Healthy & Light Dishes', '健康轻食与特色菜品')}</span>
+              <IconHealthyLeaf className="w-4 h-4 shrink-0" />
+              <span>{tr(language, 'មុខម្ហូបសុខភាព និងជម្រើសពិសេស', 'Healthy & Light Dishes', '健康轻食与特色菜品')}</span>
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400">
               {tr(language, 'មុខងារពិសេសសម្រាប់សមាជិក VIP ប៉ុណ្ណោះ', 'Exclusive feature for VIP members only', 'VIP 会员专属功能')}
@@ -123,8 +125,9 @@ export const SmartHubHealthySection: React.FC<Props> = ({ foods, onViewAll, onOp
                   key={id}
                   className="px-2.5 py-1.5 rounded-xl bg-white/10 border border-white/15 flex items-center justify-between gap-1.5"
                 >
-                  <span className="truncate font-bold">
-                    {def.emoji} {tr(language, def.labelKh, def.labelEn, def.labelZh)}
+                  <span className="truncate font-bold inline-flex items-center gap-1.5">
+                    <DishTagIcon id={id} className="w-3.5 h-3.5 shrink-0" />
+                    <span className="truncate">{tr(language, def.labelKh, def.labelEn, def.labelZh)}</span>
                   </span>
                   <Lock className="w-3 h-3 text-amber-300 shrink-0" />
                 </div>
@@ -163,17 +166,18 @@ export const SmartHubHealthySection: React.FC<Props> = ({ foods, onViewAll, onOp
   const top = selList.slice(0, 6);
   const name = (f: FoodItem) => getLocalizedFood(f, language).name;
 
-  const meals: Array<{ key: 'breakfast' | 'lunch' | 'dinner'; emoji: string; label: string; food: FoodItem | null }> = [
-    { key: 'breakfast', emoji: '🌅', label: tr(language, 'អាហារពេលព្រឹក', 'Breakfast', '早餐'), food: plan.breakfast },
-    { key: 'lunch', emoji: '☀️', label: tr(language, 'អាហារថ្ងៃត្រង់', 'Lunch', '午餐'), food: plan.lunch },
-    { key: 'dinner', emoji: '🌙', label: tr(language, 'អាហារពេលល្ងាច', 'Dinner', '晚餐'), food: plan.dinner },
+  const meals: Array<{ key: 'breakfast' | 'lunch' | 'dinner'; icon: React.ReactNode; label: string; food: FoodItem | null }> = [
+    { key: 'breakfast', icon: <Sunset className="w-3.5 h-3.5 text-amber-500" />, label: tr(language, 'អាហារពេលព្រឹក', 'Breakfast', '早餐'), food: plan.breakfast },
+    { key: 'lunch', icon: <Sun className="w-3.5 h-3.5 text-amber-500" />, label: tr(language, 'អាហារថ្ងៃត្រង់', 'Lunch', '午餐'), food: plan.lunch },
+    { key: 'dinner', icon: <Moon className="w-3.5 h-3.5 text-indigo-500" />, label: tr(language, 'អាហារពេលល្ងាច', 'Dinner', '晚餐'), food: plan.dinner },
   ];
 
   return (
     <section className="space-y-2.5">
       <div>
-        <h3 className="font-moul text-sm text-[#064E3B] dark:text-emerald-300">
-          🥗 {tr(language, 'ស្លាកម្ហូបសុខភាព', 'Healthy Dish Tags', '健康菜品标签')}
+        <h3 className="font-moul text-sm text-[#064E3B] dark:text-emerald-300 flex items-center gap-1.5">
+          <IconHealthyLeaf className="w-4 h-4 shrink-0" />
+          <span>{tr(language, 'ស្លាកម្ហូបសុខភាព', 'Healthy Dish Tags', '健康菜品标签')}</span>
         </h3>
         <p className="text-xs text-slate-500 dark:text-slate-400">
           {tr(language, 'ជ្រើសរើសម្ហូបតាមស្លាក — ប៉ាន់ស្មានពីរូបមន្តប៉ុណ្ណោះ', 'Pick dishes by tag — estimated from the recipe only', '按标签挑选菜肴——仅根据食谱估算')}
@@ -196,7 +200,7 @@ export const SmartHubHealthySection: React.FC<Props> = ({ foods, onViewAll, onOp
             >
               <span className="flex items-center justify-between gap-1.5">
                 <span className="flex items-center gap-1.5 min-w-0">
-                  <span className="text-lg leading-none shrink-0" aria-hidden="true">{def.emoji}</span>
+                  <DishTagIcon id={id} className="w-4 h-4 shrink-0" />
                   <span className="text-xs font-extrabold leading-tight truncate">{tr(language, def.labelKh, def.labelEn, def.labelZh)}</span>
                 </span>
                 <span className="px-1.5 py-0.5 rounded-full bg-white/80 dark:bg-slate-900/70 text-[10px] font-extrabold shrink-0">
@@ -211,8 +215,9 @@ export const SmartHubHealthySection: React.FC<Props> = ({ foods, onViewAll, onOp
 
       {/* Inline recommended dishes */}
       <div ref={recommendedRef} className="p-3 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-2.5">
-        <h4 className="text-sm font-extrabold text-slate-900 dark:text-white">
-          {selDef.emoji} {tr(language, 'ម្ហូបណែនាំក្នុងប្រភេទនេះ', 'Recommended Dishes in This Category', '本分类推荐菜品')}
+        <h4 className="text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-1.5 flex-wrap">
+          <DishTagIcon id={selected} className="w-4 h-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+          <span>{tr(language, 'ម្ហូបណែនាំក្នុងប្រភេទនេះ', 'Recommended Dishes in This Category', '本分类推荐菜品')}</span>
           <span className="font-semibold text-slate-500 dark:text-slate-400"> · {tr(language, selDef.labelKh, selDef.labelEn, selDef.labelZh)}</span>
         </h4>
         {top.length === 0 && (
@@ -229,8 +234,9 @@ export const SmartHubHealthySection: React.FC<Props> = ({ foods, onViewAll, onOp
               <img src={f.photoUrl} alt={name(f)} loading="lazy" decoding="async" className="w-16 h-16 rounded-xl object-cover shrink-0 bg-slate-200" />
               <span className="min-w-0 flex-1">
                 <span className="block text-sm font-bold text-slate-900 dark:text-white leading-snug line-clamp-2">{name(f)}</span>
-                <span className="inline-block mt-0.5 px-2 py-0.5 rounded-full bg-orange-100 text-orange-700 text-xs font-extrabold">
-                  🔥 {f.calories ?? '—'} {tr(language, 'គីឡូកាឡូរី', 'kcal', '千卡')}
+                <span className="inline-flex items-center gap-1 mt-0.5 px-2 py-0.5 rounded-full bg-orange-100 text-orange-700 text-xs font-extrabold">
+                  <Flame className="w-3 h-3 shrink-0" />
+                  <span>{f.calories ?? '—'} {tr(language, 'គីឡូកាឡូរី', 'kcal', '千卡')}</span>
                 </span>
                 <span className="block mt-0.5 text-xs leading-snug text-slate-500 dark:text-slate-400 line-clamp-2">{tagCookingTip(selDef, language)}</span>
               </span>
@@ -257,8 +263,9 @@ export const SmartHubHealthySection: React.FC<Props> = ({ foods, onViewAll, onOp
 
       {/* Daily balanced 3-meal idea */}
       <div className="p-3 rounded-2xl bg-gradient-to-br from-amber-50 to-emerald-50 dark:from-slate-800 dark:to-slate-800 border border-amber-200 dark:border-slate-700 space-y-2.5">
-        <h4 className="text-sm font-extrabold text-slate-900 dark:text-white">
-          🍽️ {tr(language, 'ឈុតម្ហូបសុខភាពប្រចាំថ្ងៃ ៣ ពេល', 'Daily Balanced 3-Meal Idea', '每日均衡三餐搭配')}
+        <h4 className="text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-1.5">
+          <IconDishCategory className="w-4 h-4 shrink-0" />
+          <span>{tr(language, 'ឈុតម្ហូបសុខភាពប្រចាំថ្ងៃ ៣ ពេល', 'Daily Balanced 3-Meal Idea', '每日均衡三餐搭配')}</span>
         </h4>
         <div className="grid grid-cols-3 gap-2">
           {meals.map((m) => (
@@ -269,12 +276,18 @@ export const SmartHubHealthySection: React.FC<Props> = ({ foods, onViewAll, onOp
               onClick={() => m.food && onOpenFood(m.food)}
               className="rounded-xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 p-1.5 text-center cursor-pointer active:scale-[0.97] disabled:opacity-50"
             >
-              <span className="block text-xs font-extrabold text-slate-600 dark:text-slate-300">{m.emoji} {m.label}</span>
+              <span className="inline-flex items-center justify-center gap-1 text-xs font-extrabold text-slate-600 dark:text-slate-300">
+                {m.icon}
+                <span>{m.label}</span>
+              </span>
               {m.food ? (
                 <>
                   <img src={m.food.photoUrl} alt={name(m.food)} loading="lazy" decoding="async" className="mt-1 w-full aspect-square rounded-lg object-cover bg-slate-200" />
                   <span className="block mt-1 text-xs font-bold text-slate-900 dark:text-white leading-tight line-clamp-2 min-h-[30px]">{name(m.food)}</span>
-                  <span className="block text-[11px] font-extrabold text-orange-600">🔥 {m.food.calories} {tr(language, 'គីឡូកាឡូរី', 'kcal', '千卡')}</span>
+                  <span className="inline-flex items-center justify-center gap-0.5 text-[11px] font-extrabold text-orange-600">
+                    <Flame className="w-3 h-3 shrink-0" />
+                    <span>{m.food.calories} {tr(language, 'គីឡូកាឡូរី', 'kcal', '千卡')}</span>
+                  </span>
                 </>
               ) : (
                 <span className="block mt-3 text-[11px] text-slate-400">—</span>
@@ -297,9 +310,12 @@ export const SmartHubHealthySection: React.FC<Props> = ({ foods, onViewAll, onOp
         </div>
       </div>
 
-      <p className="text-[11px] text-slate-400">
-        ℹ️ {tr(language, TAG_ESTIMATE_NOTE.km, TAG_ESTIMATE_NOTE.en, TAG_ESTIMATE_NOTE.zh)} ·{' '}
-        {tr(language, GENERAL_FOOD_INFO_NOTE.km, GENERAL_FOOD_INFO_NOTE.en, GENERAL_FOOD_INFO_NOTE.zh)}
+      <p className="text-[11px] text-slate-400 flex items-start gap-1">
+        <Info className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+        <span>
+          {tr(language, TAG_ESTIMATE_NOTE.km, TAG_ESTIMATE_NOTE.en, TAG_ESTIMATE_NOTE.zh)} ·{' '}
+          {tr(language, GENERAL_FOOD_INFO_NOTE.km, GENERAL_FOOD_INFO_NOTE.en, GENERAL_FOOD_INFO_NOTE.zh)}
+        </span>
       </p>
     </section>
   );

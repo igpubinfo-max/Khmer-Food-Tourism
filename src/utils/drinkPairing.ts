@@ -2,12 +2,12 @@ import type { FoodItem, Language } from '../types';
 import { tr } from './i18n';
 
 /**
- * ម្ហូបអមភេសជ្ជៈ (Drink-Pairing Menu) — VIP special menu.
+ * ម្ហូបអមភេសជ្ជៈ (Beverage Pairings Menu) — VIP special menu.
  *
- * Automatically detects which dishes are real Khmer "kleam" (drinking food) that people order
- * with beer or liquor: charcoal grills, crispy fried bites, spicy-sour salads (ញាំ / ភ្លា),
- * seafood, cured/dried meats and bold stir-fries. Rice plates, noodles, soups, porridge,
- * desserts, cakes and drinks are always excluded so the list stays 100% drinking food.
+ * Automatically identifies savory Cambodian sharing dishes ideal for dining and refreshments:
+ * charcoal grills, crispy bites, zesty salads (ញាំ / ភ្លា), fresh seafood, seasoned cured meats
+ * and bold stir-fries. Rice plates, noodles, soups, porridge, desserts and cakes are excluded
+ * so the collection stays focused on authentic table-sharing & beverage-pairing dishes.
  * Works on any dish (including ones the Admin adds later) — no manual tagging required.
  */
 
@@ -72,7 +72,7 @@ const BASE_BY_CATEGORY: Record<string, number> = {
   specialty: 8,
 };
 
-/** Categories that are never drinking food. */
+/** Categories that are excluded from beverage-pairing snack platters. */
 const EXCLUDED_CATEGORIES = new Set(['dessert', 'cake', 'drink', 'rice', 'noodles', 'soup']);
 
 /**
@@ -85,20 +85,20 @@ const EXCLUDED_NAME_RE =
 /** Dips / sauces served as a side for rice meals (only matters for the salad & dip category). */
 const DIP_NAME_RE = /\bdip\b|fish herb dip|ទឹកជ្រលក់បន្លែ/i;
 
-/** Plain vegetable dishes are rice side dishes, not drinking food — unless they also contain meat/seafood. */
+/** Plain vegetable dishes are rice side dishes — unless they also contain meat/seafood. */
 const VEGETABLE_NAME_RE =
   /okra|eggplant|vegetable|morning glory|broccoli|cauliflower|cabbage|water lily|mushroom|tofu|ត្រកួន|ត្រប់|ព្រលិត|ផ្សិត|បន្លែ|ខាត់ណា|ស្ពៃ|ពោតបារាំង/i;
 const PROTEIN_NAME_RE =
   /beef|pork|chicken|prawn|shrimp|fish|squid|frog|crab|snail|clam|giblet|sausage|សាច់|ត្រី|បង្គា|ក្តាម|ក្ដាម|មឹក|មាន់|កង្កែប|ខ្យង|លៀស|គ្រឿងក្នុង/i;
 
-/** Iconic Khmer drinking snacks that always qualify (balut, sausage, dried fish, snails, frog, jerky). */
+/** Iconic Khmer savory sharing snacks that always qualify (sausage, dried fish, snails, frog, jerky). */
 const CLASSIC_KLEAM_RE =
   /ពងទាកូន|balut|ត្រីងៀត|dried fish|សាច់ក្រក|sausage|jerky|សាច់គោងៀត|គោងៀត|(?<!ប្រេង)ខ្យង|snail|កង្កែប|frog|ជើងមាន់|chicken feet|លៀស|clam/i;
 
-/** Prahok served as a plain rice side (not a drinking snack). */
+/** Prahok served as a plain rice side. */
 const PRAHOK_SIDE_RE = /ប្រហុក(?:កប់|អាំង)|prahok.*(?:wrapped|banana leaf|pit)/i;
 
-/** Minimum score per category: stir-fries and snacks need a stronger signal to count as drinking food. */
+/** Minimum score per category: stir-fries and snacks need a stronger signal to qualify. */
 const MIN_SCORE_BY_CATEGORY: Record<string, number> = { stirfry: 78, streetfood: 70 };
 
 const cache = new Map<string, DrinkPairingInfo | null>();
@@ -111,7 +111,7 @@ function descOf(food: FoodItem): string {
   return `${food.descriptionKh || ''} ${food.descriptionEn || ''} ${food.categoryKh || ''} ${food.categoryEn || ''}`;
 }
 
-/** Returns pairing info when the dish is genuine drinking food, otherwise null. */
+/** Returns pairing info when the dish qualifies for Beverage Pairings, otherwise null. */
 export function getDrinkPairing(food: FoodItem): DrinkPairingInfo | null {
   if (!food) return null;
   const key = `${food.id}|${food.nameKh}|${food.categorySlug}|${food.descriptionEn?.length ?? 0}`;
@@ -159,10 +159,10 @@ function computePairing(food: FoodItem): DrinkPairingInfo | null {
   if (score < (MIN_SCORE_BY_CATEGORY[slug] ?? 55)) return null;
 
   const kinds: DrinkKind[] = [];
-  if (features.some((f) => f === 'grilled' || f === 'crispy' || f === 'seafood' || f === 'salad' || f === 'spicy') || categoryIsKleam) {
+  if (features.some((f) => f === 'grilled' || f === 'crispy' || f === 'seafood') || slug === 'grilled' || slug === 'streetfood') {
     kinds.push('beer');
   }
-  if (features.some((f) => f === 'cured' || f === 'meaty' || f === 'spicy' || f === 'grilled') ) {
+  if (features.some((f) => f === 'salad' || f === 'cured' || f === 'spicy' || f === 'sour' || f === 'meaty') || slug === 'salad') {
     kinds.push('spirits');
   }
   if (kinds.length === 0) kinds.push('beer');
@@ -188,7 +188,7 @@ export interface RankedPairingDish {
   info: DrinkPairingInfo;
 }
 
-/** Ranks every drinking-food dish, best first (pairing strength + rating). */
+/** Ranks every beverage-pairing dish, best first (pairing strength + rating). */
 export function rankDrinkPairingDishes(
   foods: FoodItem[],
   kind: DrinkKindFilter = 'all'
@@ -209,33 +209,33 @@ export function rankDrinkPairingDishes(
 
 const FEATURE_PHRASE: Record<PairingFeatureId, [string, string, string]> = {
   grilled: [
-    'អាំងលើធ្យូង ក្លិនឈ្ងុយឆេះបន្តិច',
+    'អាំងលើធ្យូង ក្លិនឈ្ងុយឈ្ងប់',
     'smoky charcoal-grilled aroma',
-    '炭火烧烤的烟熏香气',
+    '炭火烧烤的浓郁香气',
   ],
   crispy: [
-    'ចៀន/បំពងស្រួយៗ ញ៉ាំលេងបានមិនធុញ',
-    'crunchy fried bites you can keep snacking on',
-    '酥脆小食，边喝边吃不腻',
+    'ចៀន/បំពងស្រួយៗ ញ៉ាំជុំគ្នាឆ្ងាញ់មិនធុញ',
+    'crunchy golden bites ideal for table sharing',
+    '金黄酥脆，围桌分享不腻口',
   ],
   salad: [
-    'ញាំជូរហឹរស្រស់ ជួយឱ្យមាត់ស្រស់ស្រាយ',
+    'ញាំជូរហឹរស្រស់ ជួយឱ្យរសជាតិស្រស់ស្រាយ',
     'zesty, tangy salad that refreshes the palate',
     '酸辣爽口的凉拌，解腻开胃',
   ],
   spicy: [
-    'ហឹរមុត ផ្គួបស្រាបៀរត្រជាក់បានល្អ',
-    'a spicy kick that loves ice-cold beer',
-    '香辣过瘾，配冰啤酒绝佳',
+    'រសជាតិហឹរឈ្ងុយ ផ្គួបភេសជ្ជៈត្រជាក់ៗបានយ៉ាងល្អ',
+    'bold spice that pairs wonderfully with chilled refreshments',
+    '香辣过瘾，搭配冰爽饮品绝佳',
   ],
   sour: ['ជូរស្រស់ កាត់ជាតិខ្លាញ់បានល្អ', 'bright sourness cuts through richness', '酸爽解腻'],
-  seafood: ['គ្រឿងសមុទ្រ/ត្រីស្រស់ផ្អែម', 'sweet, fresh seafood', '鲜甜海味'],
+  seafood: ['គ្រឿងសមុទ្រ និងត្រីស្រស់ផ្អែម', 'sweet, fresh coastal & river seafood', '鲜甜海味与河鲜'],
   cured: [
-    'ប្រៃ ទំពារយូរ ជាម្ហូបក្លែមបុរាណ',
-    'salty, chewy and savoury — a classic drinking snack',
-    '咸香有嚼劲，经典下酒菜',
+    'ប្រៃឈ្ងុយ ទំពារជក់មាត់ សម្រាប់ញ៉ាំជុំតុ',
+    'savory, flavorful & classic for table gatherings',
+    '咸香有嚼劲，聚餐佐饮佳品',
   ],
-  meaty: ['សាច់ឈ្ងុយ សម្បូររសជាតិ', 'rich, hearty meat flavour', '肉香浓郁'],
+  meaty: ['សាច់ឈ្ងុយ សម្បូររសជាតិ', 'rich, hearty savory meat flavor', '肉香浓郁'],
 };
 
 /** Human-readable "why it pairs" sentence (top 2 features, the dish's own style first). */
@@ -257,16 +257,20 @@ export function pairingReason(info: DrinkPairingInfo, language: Language): strin
 
 export function pairingKindsLabel(kinds: DrinkKind[], language: Language): string {
   const parts: string[] = [];
-  if (kinds.includes('beer')) parts.push(tr(language, '🍺 ស្រាបៀរ', '🍺 Beer', '🍺 啤酒'));
-  if (kinds.includes('spirits')) parts.push(tr(language, '🥃 ស្រា', '🥃 Liquor & wine', '🥃 烈酒/葡萄酒'));
+  if (kinds.includes('beer')) {
+    parts.push(tr(language, 'អាំង & ចៀនស្រួយ', 'Grilled & Crispy', '烧烤与香脆'));
+  }
+  if (kinds.includes('spirits')) {
+    parts.push(tr(language, 'ញាំជូរហឹរ & ម្ហូបពិសេស', 'Zesty & Savory', '酸辣与风味小食'));
+  }
   return parts.join(' · ');
 }
 
 export function drinkDisclaimer(language: Language): string {
   return tr(
     language,
-    'សម្រាប់អាយុ ១៨ ឆ្នាំឡើង • ផឹកស្រាត្រូវមានកម្រិត • កុំបើកបរពេលផឹកស្រា',
-    '18+ only • Drink responsibly • Never drink and drive',
-    '仅限18岁以上 • 理性饮酒 • 酒后严禁驾驶'
+    'គន្លឹះ៖ ផ្គួបជាមួយទឹកក្រូចឆ្មារស្រស់ តែត្រជាក់ ឬភេសជ្ជៈស្រស់ស្រាយ ដើម្បីបង្កើនរសជាតិម្ហូបឱ្យកាន់តែឆ្ងាញ់',
+    'Dining tip: Pair with fresh lime soda, iced tea, or chilled refreshments for a balanced flavor experience',
+    '用餐贴士：搭配鲜榨青柠水、冰茶或清爽饮品，风味更加平衡美味'
   );
 }

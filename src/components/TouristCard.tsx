@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { TouristDestination } from '../types';
 import { useApp } from '../context/AppContext';
-import { MapPin, Star, Heart, Edit2 } from 'lucide-react';
+import { MapPin, Star, Heart, Edit2, Flame } from 'lucide-react';
 import { tr } from '../utils/i18n';
 import { getLocalizedDestination } from '../utils/zhDynamicTranslator';
 
@@ -29,6 +29,10 @@ const TouristCardView: React.FC<TouristCardViewProps> = React.memo(({
   toggleBookmark,
 }) => {
   const loc = useMemo(() => getLocalizedDestination(destination, language), [destination, language]);
+  const resolvedDestPhotoUrl = useMemo(() => {
+    const raw = destination.photoUrl || '/welcome/places.webp';
+    return raw.startsWith('/destinations/') && !raw.includes('?') ? `${raw}?v=20261030v1` : raw;
+  }, [destination.photoUrl]);
 
   return (
     <div 
@@ -39,7 +43,7 @@ const TouristCardView: React.FC<TouristCardViewProps> = React.memo(({
       {/* Cover image */}
       <div className="relative aspect-16/10 w-full overflow-hidden bg-slate-100 dark:bg-slate-700">
         <img 
-          src={destination.photoUrl} 
+          src={resolvedDestPhotoUrl} 
           alt={loc.name}
           className="w-full h-full object-cover"
           loading="lazy"
@@ -60,8 +64,8 @@ const TouristCardView: React.FC<TouristCardViewProps> = React.memo(({
           </span>
           {destination.isTrendingSocial && (
             <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-gradient-to-r from-rose-600 via-pink-600 to-indigo-600 text-white border border-white/30 shadow-xs flex items-center gap-1 font-khmer">
+              <Flame className="w-3 h-3 shrink-0" />
               <span>
-                🔥{' '}
                 {destination.socialViews
                   ? language === 'km'
                     ? destination.socialViews.replace(/views/gi, 'ដង').replace(/M\+/gi, 'លាន+')
