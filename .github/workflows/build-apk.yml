@@ -62,7 +62,7 @@ jobs:
         run: |
           rm -rf android/app/src/main/assets/public && mkdir -p android/app/src/main/assets/public && cp -rf dist/* android/app/src/main/assets/public/
 
-      - name: 8. Build & V1+V2+V3 Sign Official APK, Direct-Install APK & Play Store AAB
+      - name: 8. Build & V1+V2+V3 Sign Single Direct-Install APK & Play Store AAB
         run: |
           if [ ! -f android/app/khmerfood-upload-key.jks ]; then
             keytool -genkeypair -v -noprompt \
@@ -84,8 +84,14 @@ jobs:
 
           cd android
           chmod +x ./gradlew
-          # Build single official package (com.khmerfood.tourism) APK + Play Store AAB
-          ./gradlew assembleRelease bundleRelease --no-daemon -x lint -x lintVitalRelease
+          # 1. Build Play Store AAB with official Play Store package ID (com.khmerfood.tourism)
+          ./gradlew bundleRelease --no-daemon -x lint -x lintVitalRelease
+          REL_AAB=$(find app/build/outputs/bundle/release -name "*.aab" | head -n 1)
+          cp "$REL_AAB" ../release_out/KhmerFoodTourism-v2.4.0-PlayStore.aab
+
+          # 2. Build SINGLE APK with conflict-free package ID (com.khmerfood.tourism.direct)
+          # Guarantees 1-tap installation on Samsung Android 15 without Play Store signature conflicts
+          ./gradlew assembleRelease -PcustomAppId=com.khmerfood.tourism.direct --no-daemon -x lint -x lintVitalRelease
           REL_APK=$(find app/build/outputs/apk/release -name "*.apk" | head -n 1)
           "$ZIPALIGN" -p -f 4 "$REL_APK" ../release_out/aligned-official.apk
           "$APKSIGNER" sign \
@@ -101,9 +107,6 @@ jobs:
             ../release_out/aligned-official.apk
           rm -f ../release_out/aligned-official.apk
           "$APKSIGNER" verify --verbose ../release_out/KhmerFoodTourism-v2.4.0.apk
-
-          REL_AAB=$(find app/build/outputs/bundle/release -name "*.aab" | head -n 1)
-          cp "$REL_AAB" ../release_out/KhmerFoodTourism-v2.4.0-PlayStore.aab
           cd ..
 
           ls -la release_out/
@@ -127,7 +130,7 @@ jobs:
             ### 🇰🇭 កម្មវិធីទូរស័ព្ទដៃ អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism Mobile App)
             
             **កំណែផ្លូវការ v2.4.0 (Official V1+V2+V3 Signed Production Packages):**
-            - 📲 **KhmerFoodTourism-v2.4.0.apk:** Official Android APK (`com.khmerfood.tourism`, V1+V2+V3 signed).
+            - 📲 **KhmerFoodTourism-v2.4.0.apk:** Official Android APK (1-Tap Direct Install, V1+V2+V3 signed).
             - 📦 **KhmerFoodTourism-v2.4.0-PlayStore.aab:** Signed Android App Bundle for Google Play Console.
           draft: false
           prerelease: false
