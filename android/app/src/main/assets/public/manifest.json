@@ -4,13 +4,13 @@
   "description": "Discover Food • Places • Experiences Authentic Cambodian dishes, local restaurants, and scenic destinations across all 25 provinces.",
   "icons": [
     {
-      "src": "./icon-192.png?v=2.5.2",
+      "src": "./icon-192.png?v=2.5.4",
       "type": "image/png",
       "sizes": "192x192",
       "purpose": "any maskable"
     },
     {
-      "src": "./icon-512.png?v=2.5.2",
+      "src": "./icon-512.png?v=2.5.4",
       "type": "image/png",
       "sizes": "512x512",
       "purpose": "any maskable"

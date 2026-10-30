@@ -16,9 +16,9 @@ export interface WelcomeSlide {
 export const WELCOME_IMAGES = {
   hero: { src: '/welcome/hero-bg.webp', width: 1264, height: 848 },
   places: { src: '/welcome/places.webp', width: 1280, height: 714 },
-  logo: '/welcome/welcome-hero-icon.png?v=2.5.2',
+  logo: '/welcome/welcome-hero-icon.png?v=2.5.4',
   /** Existing app icon used if the welcome logo fails to load */
-  logoFallback: '/icon-192.png?v=2.5.2',
+  logoFallback: '/icon-192.png?v=2.5.4',
 } as const;
 
 export const WELCOME_SLIDES: WelcomeSlide[] = [

@@ -86,7 +86,7 @@ const HomeGreetingSearchInner: React.FC<Props> = ({
   const displayName = currentUser?.name || userName;
 
   return (
-    <section className="space-y-4">
+    <section className="space-y-2.5">
       {currentUser ? (
         isAdmin ? (
           <div className="p-3.5 sm:p-4 rounded-3xl bg-gradient-to-r from-[#022c22] via-[#064E3B] to-slate-900 text-white border border-emerald-400/50 shadow-md relative overflow-hidden flex items-center justify-between gap-3">
@@ -195,7 +195,7 @@ const HomeGreetingSearchInner: React.FC<Props> = ({
           <div className="min-w-0 flex-1">
             <p className="text-xs text-slate-500 dark:text-emerald-200/80 truncate">{greeting}</p>
             <p className={`${headingFont(language)} text-[15px] leading-snug text-[#064E3B] dark:text-white truncate`}>
-              {tr(language, 'សូមស្វាគមន៍មកកាន់កម្ពុជា', 'Discover Cambodia', '探索柬埔寨')}
+              {tr(language, 'រសជាតិ និងទេសចរណ៍កម្ពុជា', 'Cambodia Flavors & Tourism', '柬埔寨风味与旅游')}
             </p>
           </div>
           {onSignIn && (
@@ -212,13 +212,13 @@ const HomeGreetingSearchInner: React.FC<Props> = ({
       )}
 
       <div>
-        <h2 className={`${headingFont(language)} text-xl leading-snug text-[#064E3B] dark:text-emerald-200`}>
+        <h2 className={`${headingFont(language)} text-base sm:text-lg leading-snug text-[#064E3B] dark:text-emerald-200 truncate`}>
           {isAdmin
             ? tr(language, 'ស្វែងរក និងគ្រប់គ្រងទិន្នន័យក្នុងប្រព័ន្ធ', 'Search & Manage Directory', '搜索并管理系统数据')
-            : tr(language, 'ភ្លក្សរសជាតិកម្ពុជា • ស្វែងយល់ទឹកដីកម្ពុជា', 'Taste Cambodia. Explore Cambodia.', '品味柬埔寨 · 探索柬埔寨')}
+            : tr(language, 'ស្វែងយល់អាហារ • ទីតាំង • បទពិសោធន៍', 'Discover Food • Places • Experiences', '探索美食 • 景点 • 体验')}
         </h2>
         {!isAdmin && hint && (
-          <p className="text-[13px] leading-relaxed text-slate-500 dark:text-slate-400 mt-1">{hint}</p>
+          <p className="text-xs leading-snug text-slate-500 dark:text-slate-400 mt-0.5 truncate">{hint}</p>
         )}
       </div>
 
@@ -235,7 +235,7 @@ const HomeGreetingSearchInner: React.FC<Props> = ({
             '搜索美食、餐厅或旅游景点...'
           )}
           aria-label={tr(language, 'ស្វែងរក', 'Search', '搜索')}
-          className="w-full min-h-[54px] pl-12 pr-12 rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder-slate-400 text-base shadow-md focus:outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/20 font-khmer transition"
+          className="w-full min-h-[48px] pl-12 pr-12 rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder-slate-400 text-base shadow-md focus:outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/20 font-khmer transition"
         />
         {localQuery && (
           <button

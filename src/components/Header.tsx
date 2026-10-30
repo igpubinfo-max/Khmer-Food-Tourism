@@ -48,7 +48,7 @@ export const Header: React.FC = () => {
           className="flex items-center gap-2.5 cursor-pointer group min-w-0 flex-1"
         >
           <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-white p-0.5 shadow-md flex items-center justify-center border border-emerald-300/60 shrink-0 overflow-hidden">
-            <img src="/icon-192.png?v=2.5.2" alt="Cambodia Flavors & Tourism" className="w-full h-full rounded-[13px] object-contain" />
+            <img src="/icon-192.png?v=2.5.4" alt="Cambodia Flavors & Tourism" className="w-full h-full rounded-[13px] object-contain" />
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5 min-w-0">
