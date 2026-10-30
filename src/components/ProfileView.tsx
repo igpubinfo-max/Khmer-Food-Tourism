@@ -112,7 +112,7 @@ export const ProfileView: React.FC = () => {
   const myRestaurants = getOwnedRestaurantsForUser(currentUser);
 
   return (
-    <div className="max-w-md mx-auto px-4 py-3 space-y-4 pb-24">
+    <div className="max-w-md mx-auto px-4 py-3 space-y-4 pb-6">
       {/* User Header Profile Card */}
       <div className="p-4 rounded-3xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700/80 shadow-xs">
         {currentUser ? (

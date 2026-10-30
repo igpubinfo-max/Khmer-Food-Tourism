@@ -13,7 +13,7 @@ interface Props {
 export const WelcomeTopBar: React.FC<Props> = ({ language, onLanguage }) => (
   <div
     className="absolute top-0 inset-x-0 z-20 flex items-center justify-end px-4 sm:px-6"
-    style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 12px)' }}
+    style={{ paddingTop: 'calc(var(--kft-safe-top, 0px) + 12px)' }}
   >
     <div className="flex items-center gap-1.5">
       <div

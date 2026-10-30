@@ -20,8 +20,11 @@ export const Toast: React.FC = () => {
   };
 
   return (
-    <div className="fixed top-5 left-1/2 -translate-x-1/2 z-50 max-w-sm w-11/12 animate-in fade-in slide-in-from-top-4 duration-200">
-      <div className={`flex items-center gap-3 px-4 py-3 rounded-2xl border backdrop-blur-md ${bgStyles[toast.type]}`}>
+    <div
+      className="fixed left-1/2 -translate-x-1/2 z-50 max-w-sm w-11/12 animate-in fade-in slide-in-from-top-4 duration-200"
+      style={{ top: 'calc(var(--kft-safe-top, 0px) + 16px)' }}
+    >
+      <div className={`flex items-center gap-3 px-4 py-3 rounded-2xl border ${bgStyles[toast.type]}`}>
         {icons[toast.type]}
         <p className="text-sm font-medium leading-snug">{toast.message}</p>
       </div>

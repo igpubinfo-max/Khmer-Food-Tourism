@@ -313,7 +313,7 @@ export const RestaurantDetailModal: React.FC = () => {
         </div>
 
         {/* Scrollable Body */}
-        <div className="overflow-y-auto flex-1 no-scrollbar pb-[calc(env(safe-area-inset-bottom,0px)+24px)]">
+        <div className="overflow-y-auto flex-1 no-scrollbar pb-[calc(var(--kft-safe-bottom,0px)+24px)]">
           {/* Hero Image */}
           <div className="relative h-60 sm:h-64 w-full bg-slate-800">
             <img 

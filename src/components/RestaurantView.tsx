@@ -195,7 +195,7 @@ export const RestaurantView: React.FC = () => {
           setVisibleCount((prev) => Math.min(sortedRestaurants.length, prev + RESTAURANT_BATCH_SIZE));
         }
       },
-      { rootMargin: '320px' }
+      { root: document.getElementById('kft-main-scroll'), rootMargin: '320px' }
     );
     observer.observe(node);
     return () => observer.disconnect();
@@ -214,7 +214,7 @@ export const RestaurantView: React.FC = () => {
   const rotCfg = getVipFeaturedRotationConfig(appSettings);
 
   return (
-    <div className="max-w-md mx-auto px-4 py-3 space-y-4 pb-24">
+    <div className="max-w-md mx-auto px-4 py-3 space-y-4 pb-6">
       {/* Title Bar */}
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">

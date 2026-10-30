@@ -40,7 +40,7 @@ export const WelcomeSlides: React.FC<Props> = ({ language, onLanguage, onFinish 
         {/* Main Content pinned cleanly at the bottom */}
         <div
           className="absolute inset-x-0 bottom-0 z-10 flex flex-col items-center justify-end px-5 sm:px-6 pointer-events-auto"
-          style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 20px)' }}
+          style={{ paddingBottom: 'calc(var(--kft-safe-bottom, 0px) + 20px)' }}
         >
           <div className="w-full max-w-sm flex flex-col items-center">
             {/* Centered App Icon positioned directly above the offline panel */}

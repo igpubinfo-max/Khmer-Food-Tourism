@@ -33,7 +33,7 @@ const TouristCardView: React.FC<TouristCardViewProps> = React.memo(({
   return (
     <div 
       onClick={() => setSelectedDestination(destination)}
-      style={{ contentVisibility: 'auto', containIntrinsicSize: '260px' }}
+
       className="group bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-xs hover:shadow-md border border-slate-200/90 dark:border-slate-700/80 transition-colors duration-150 cursor-pointer flex flex-col"
     >
       {/* Cover image */}

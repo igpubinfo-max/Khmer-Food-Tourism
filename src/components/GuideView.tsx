@@ -450,7 +450,7 @@ export const GuideView: React.FC = () => {
   }, [bigPhraseId]);
 
   return (
-    <div className="max-w-md mx-auto px-4 py-3 space-y-4 pb-24 font-khmer">
+    <div className="max-w-md mx-auto px-4 py-3 space-y-4 pb-6 font-khmer">
       {/* Hero */}
       <section className="relative overflow-hidden p-4 rounded-3xl bg-gradient-to-br from-[#064E3B] via-[#065F46] to-[#047857] text-white border border-emerald-600/30 shadow-md">
         <div className="absolute -right-8 -top-10 w-32 h-32 rounded-full bg-amber-300/10 blur-2xl pointer-events-none" />

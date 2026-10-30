@@ -13,13 +13,13 @@ import {
 
 interface Props {
   language: Language;
-  isVipActive: boolean;
-  onNearbyFood: () => void;
+  isVip: boolean;
+  onNearbyFoodSearch: () => void;
   onNearbyPlaces: () => void;
-  onFoodRecommend: () => void;
-  onDailyFood: () => void;
-  onMapNav: () => void;
-  onSmartAi: () => void;
+  onFoodRecommendations: () => void;
+  onDailyFoodDiscovery: () => void;
+  onMapNavigation: () => void;
+  onSmartAiAssistant: () => void;
 }
 
 interface FeatureItem {
@@ -32,15 +32,15 @@ interface FeatureItem {
   onClick: () => void;
 }
 
-export const FeatureGrid: React.FC<Props> = ({
+const FeatureGridImpl: React.FC<Props> = ({
   language,
-  isVipActive,
-  onNearbyFood,
+  isVip,
+  onNearbyFoodSearch,
   onNearbyPlaces,
-  onFoodRecommend,
-  onDailyFood,
-  onMapNav,
-  onSmartAi,
+  onFoodRecommendations,
+  onDailyFoodDiscovery,
+  onMapNavigation,
+  onSmartAiAssistant,
 }) => {
   const items: FeatureItem[] = [
     {
@@ -51,7 +51,7 @@ export const FeatureGrid: React.FC<Props> = ({
       badgeLabel: tr(language, 'ឥតគិតថ្លៃ', 'FREE', '免费'),
       iconContainerClass:
         'bg-emerald-500/15 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-300 ring-1 ring-emerald-500/30',
-      onClick: onNearbyFood,
+      onClick: onNearbyFoodSearch,
     },
     {
       id: 'nearby-places',
@@ -71,7 +71,7 @@ export const FeatureGrid: React.FC<Props> = ({
       badgeLabel: tr(language, 'ឥតគិតថ្លៃ', 'FREE', '免费'),
       iconContainerClass:
         'bg-amber-500/15 text-amber-600 dark:bg-amber-500/20 dark:text-amber-300 ring-1 ring-amber-500/30',
-      onClick: onFoodRecommend,
+      onClick: onFoodRecommendations,
     },
     {
       id: 'daily-food',
@@ -81,7 +81,7 @@ export const FeatureGrid: React.FC<Props> = ({
       badgeLabel: tr(language, '២៥ ខេត្ត', '25 Prov', '25省市'),
       iconContainerClass:
         'bg-orange-500/15 text-orange-600 dark:bg-orange-500/20 dark:text-orange-300 ring-1 ring-orange-500/30',
-      onClick: onDailyFood,
+      onClick: onDailyFoodDiscovery,
     },
     {
       id: 'map-nav',
@@ -91,19 +91,19 @@ export const FeatureGrid: React.FC<Props> = ({
       badgeLabel: tr(language, 'ឥតគិតថ្លៃ', 'FREE', '免费'),
       iconContainerClass:
         'bg-sky-500/15 text-sky-600 dark:bg-sky-500/20 dark:text-sky-300 ring-1 ring-sky-500/30',
-      onClick: onMapNav,
+      onClick: onMapNavigation,
     },
     {
       id: 'smart-ai',
       label: tr(language, 'ជំនួយការ AI', 'Smart AI', 'AI 助手'),
       icon: IconSmartAssistant,
       badgeType: 'vip',
-      badgeLabel: isVipActive
+      badgeLabel: isVip
         ? tr(language, 'VIP បើករួច', 'VIP Active', 'VIP已激活')
         : tr(language, 'FREE + VIP', 'FREE + VIP', '免费+VIP'),
       iconContainerClass:
         'bg-amber-400/20 text-amber-600 dark:bg-amber-400/25 dark:text-amber-300 ring-1 ring-amber-400/45',
-      onClick: onSmartAi,
+      onClick: onSmartAiAssistant,
     },
   ];
 
@@ -154,3 +154,5 @@ export const FeatureGrid: React.FC<Props> = ({
     </section>
   );
 };
+
+export const FeatureGrid = React.memo(FeatureGridImpl);

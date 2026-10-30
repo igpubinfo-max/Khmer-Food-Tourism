@@ -1,6 +1,5 @@
-import React, { useState, useMemo, useEffect, lazy, Suspense } from 'react';
+import React, { useState, useMemo, useEffect, useRef, lazy, Suspense } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
-import { isUserVipActive } from './types';
 import { verifyAppOwnershipAndDomainIntegrity } from './utils/security';
 import { Header } from './components/Header';
 import { BottomNav } from './components/BottomNav';
@@ -50,7 +49,6 @@ const MainScreen: React.FC = () => {
   const {
     activeTab,
     setActiveTab,
-    language,
     currentUser,
     setIsAuthModalOpen,
     selectedFood,
@@ -84,6 +82,15 @@ const MainScreen: React.FC = () => {
     toast,
   } = useApp();
 
+  const mainScrollRef = useRef<HTMLElement | null>(null);
+
+  // Reset main scroll position cleanly to the top whenever switching bottom navigation tabs
+  useEffect(() => {
+    if (mainScrollRef.current) {
+      mainScrollRef.current.scrollTop = 0;
+    }
+  }, [activeTab]);
+
   // Intellectual Property & Anti-Clone Domain/Merchant Signature Verification
   const ownershipCheck = useMemo(
     () => verifyAppOwnershipAndDomainIntegrity(appSettings),
@@ -98,7 +105,7 @@ const MainScreen: React.FC = () => {
     }
   });
 
-  // Smart Menu (opened from the Header button or the Home banner via a window event — strictly VIP-controlled)
+  // Smart Menu (opened from the Header button or the Home banner via a window event)
   const [isSmartHubOpen, setIsSmartHubOpen] = useState(false);
   const hasVipAccess = true;
   useEffect(() => {
@@ -121,6 +128,7 @@ const MainScreen: React.FC = () => {
       window.removeEventListener('kft:close-smart-hub', close);
     };
   }, [hasVipAccess]);
+
   const isAnyModalOpen = Boolean(
     (isSmartHubOpen && hasVipAccess) ||
     selectedFood ||
@@ -156,7 +164,13 @@ const MainScreen: React.FC = () => {
 
   if (!ownershipCheck.isAuthentic) {
     return (
-      <div className="flex-1 flex flex-col w-full min-h-screen bg-rose-950 text-white items-center justify-center p-6 text-center space-y-4">
+      <div
+        className="flex-1 min-h-0 flex flex-col w-full h-full overflow-y-auto bg-rose-950 text-white items-center justify-center p-6 text-center space-y-4"
+        style={{
+          paddingTop: 'calc(var(--kft-safe-top, 0px) + 24px)',
+          paddingBottom: 'calc(var(--kft-safe-bottom, 0px) + 24px)',
+        }}
+      >
         <div className="w-16 h-16 rounded-2xl bg-rose-600 flex items-center justify-center text-3xl shadow-xl border-2 border-rose-300">
           🛡️
         </div>
@@ -195,7 +209,13 @@ const MainScreen: React.FC = () => {
   // Strict Condition: If user does not create or sign into an account, app cannot be used!
   if (!currentUser) {
     return (
-      <div className="flex-1 flex flex-col w-full min-h-screen relative overflow-y-auto no-scrollbar bg-slate-950 items-center justify-center p-3 sm:p-4">
+      <div
+        className="flex-1 min-h-0 flex flex-col w-full h-full relative overflow-y-auto overscroll-y-contain no-scrollbar bg-slate-950 items-center justify-center px-3 sm:px-4"
+        style={{
+          paddingTop: 'calc(var(--kft-safe-top, 0px) + 12px)',
+          paddingBottom: 'calc(var(--kft-safe-bottom, 0px) + 12px)',
+        }}
+      >
         <AuthModal isMandatoryGate={true} />
         <Suspense fallback={null}>{selectedFood && <FoodDetailModal />}</Suspense>
         {isExitModalOpen && <ExitConfirmModal />}
@@ -206,14 +226,20 @@ const MainScreen: React.FC = () => {
   }
 
   return (
-    <div className="flex-1 flex flex-col w-full min-h-screen relative overflow-y-auto no-scrollbar pb-[calc(env(safe-area-inset-bottom,0px)+68px)]">
+    <div className="flex-1 min-h-0 flex flex-col w-full h-full overflow-hidden relative bg-[#0F172A]">
+      {/* Fixed Top Header — Never scrolls or recalculates sticky offsets */}
       <Header />
       <UpdateAvailableBanner />
-      
-      <main className="flex-1 w-full">
+
+      {/* Single Bounded Scroll Container — Strictly sandwiched between Header and BottomNav */}
+      <main
+        id="kft-main-scroll"
+        ref={mainScrollRef}
+        className="flex-1 min-h-0 w-full overflow-y-auto overflow-x-hidden overscroll-y-contain no-scrollbar relative"
+      >
         <Suspense
           fallback={
-            <div className="max-w-md mx-auto px-4 py-10 text-center text-sm text-slate-400 animate-pulse" aria-busy="true">
+            <div className="max-w-md mx-auto px-4 py-10 text-center text-sm text-slate-400" aria-busy="true">
               …
             </div>
           }
@@ -227,39 +253,42 @@ const MainScreen: React.FC = () => {
         </Suspense>
       </main>
 
+      {/* Fixed Bottom Navigation — Content never scrolls underneath or overlaps */}
+      <BottomNav />
+
       <OfflineBanner />
 
       {/* Creation & Action Modals — Conditionally Mounted (lazy-loaded chunks) */}
       <Suspense fallback={null}>
-      {isSmartHubOpen && hasVipAccess && <SmartHubMenuModal onClose={() => setIsSmartHubOpen(false)} />}
-      {isAuthModalOpen && <AuthModal />}
-      {isAddRestaurantModalOpen && <AddRestaurantModal />}
-      {isAdminOpen && <AdminDashboard />}
-      {isAdminLoginModalOpen && <AdminLoginModal />}
-      {isInstallModalOpen && <InstallModal />}
-      {isSupportModalOpen && <SupportModal />}
-      {isExitModalOpen && <ExitConfirmModal />}
+        {isSmartHubOpen && hasVipAccess && <SmartHubMenuModal onClose={() => setIsSmartHubOpen(false)} />}
+        {isAuthModalOpen && <AuthModal />}
+        {isAddRestaurantModalOpen && <AddRestaurantModal />}
+        {isAdminOpen && <AdminDashboard />}
+        {isAdminLoginModalOpen && <AdminLoginModal />}
+        {isInstallModalOpen && <InstallModal />}
+        {isSupportModalOpen && <SupportModal />}
+        {isExitModalOpen && <ExitConfirmModal />}
 
-      {/* Personalized Account Features & Daily/Notification Modals */}
-      {isWhatToEatModalOpen && <WhatToEatModal />}
-      {isNearMeModalOpen && <NearMeModal />}
-      {isDailyDiscoveriesModalOpen && <DailyDiscoveriesModal />}
-      {isWishlistsModalOpen && <WishlistsModal />}
-      {isAiTripPlannerModalOpen && <AiTripPlannerModal />}
-      {isNotificationsModalOpen && <NotificationsModal />}
-      {isAiCheckInModalOpen && <AiCheckInModal />}
-      {isRestaurantCheckInModalOpen && <RestaurantCheckInModal />}
-      {isUpgradeVipModalOpen && <UpgradeVipModal />}
-      {isSupportTicketModalOpen && <PaymentSupportModal />}
-      {isQrScannerModalOpen && <QrScannerModal />}
-      {isVipAddRestaurantModalOpen && <VipAddRestaurantModal />}
-      {isGoogleMapsSearchModalOpen && <GoogleMapsPlaceSearchModal />}
-      {isManageMenuModalOpen && managingRestaurant && <ManageMenuModal />}
-      {isTrendingSocialModalOpen && <TrendingSocialModal />}
-      {isTrendingFoodDetailModalOpen && <TrendingFoodDetailModal />}
-      {selectedFood && <FoodDetailModal />}
-      {selectedRestaurant && <RestaurantDetailModal />}
-      {selectedDestination && <TouristDetailModal />}
+        {/* Personalized Account Features & Daily/Notification Modals */}
+        {isWhatToEatModalOpen && <WhatToEatModal />}
+        {isNearMeModalOpen && <NearMeModal />}
+        {isDailyDiscoveriesModalOpen && <DailyDiscoveriesModal />}
+        {isWishlistsModalOpen && <WishlistsModal />}
+        {isAiTripPlannerModalOpen && <AiTripPlannerModal />}
+        {isNotificationsModalOpen && <NotificationsModal />}
+        {isAiCheckInModalOpen && <AiCheckInModal />}
+        {isRestaurantCheckInModalOpen && <RestaurantCheckInModal />}
+        {isUpgradeVipModalOpen && <UpgradeVipModal />}
+        {isSupportTicketModalOpen && <PaymentSupportModal />}
+        {isQrScannerModalOpen && <QrScannerModal />}
+        {isVipAddRestaurantModalOpen && <VipAddRestaurantModal />}
+        {isGoogleMapsSearchModalOpen && <GoogleMapsPlaceSearchModal />}
+        {isManageMenuModalOpen && managingRestaurant && <ManageMenuModal />}
+        {isTrendingSocialModalOpen && <TrendingSocialModal />}
+        {isTrendingFoodDetailModalOpen && <TrendingFoodDetailModal />}
+        {selectedFood && <FoodDetailModal />}
+        {selectedRestaurant && <RestaurantDetailModal />}
+        {selectedDestination && <TouristDetailModal />}
       </Suspense>
       <DeleteShopConfirmModal />
 
@@ -268,9 +297,6 @@ const MainScreen: React.FC = () => {
 
       {/* One-time gentle rating prompt (after 5th meaningful action) */}
       <RatePrompt />
-
-      {/* Mobile Bottom Navigation */}
-      <BottomNav />
     </div>
   );
 };
@@ -278,9 +304,9 @@ const MainScreen: React.FC = () => {
 export default function App() {
   return (
     <AppProvider>
-      {/* Full-screen Native Mobile App Layout (No fake bezels, no notches, edge-to-edge full screen) */}
-      <div className="dark w-full min-h-screen bg-[#0F172A] text-[#F8FAFC] flex justify-center">
-        <div className="w-full max-w-md min-h-screen flex flex-col bg-[#0F172A] text-[#F8FAFC] relative shadow-none md:shadow-xl md:border-x md:border-slate-800">
+      {/* Locked Full-Screen Native Mobile App Shell (Zero dual scrollbars, Edge-to-Edge Safe Area aware) */}
+      <div className="dark w-full h-full max-h-[100dvh] overflow-hidden bg-[#0F172A] text-[#F8FAFC] flex justify-center">
+        <div className="w-full max-w-md h-full max-h-[100dvh] flex flex-col overflow-hidden bg-[#0F172A] text-[#F8FAFC] relative shadow-none md:shadow-xl md:border-x md:border-slate-800">
           <MainScreen />
         </div>
       </div>

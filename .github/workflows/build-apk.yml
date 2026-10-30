@@ -37,7 +37,7 @@ jobs:
 
       - name: 5. Sync Version & Build Web Bundle
         run: |
-          CURRENT_VC=$(grep -oP 'versionCode\s+\K[0-9]+' android/app/build.gradle || echo 1256)
+          CURRENT_VC=$(grep -oP 'versionCode\s+\K[0-9]+' android/app/build.gradle || echo 1257)
           AUTO_VC=$((900 + ${{ github.run_number }}))
           if [ "$CURRENT_VC" -gt "$AUTO_VC" ]; then
             FINAL_VC=$CURRENT_VC
@@ -73,7 +73,7 @@ jobs:
               -keypass 'KhmerFood2026PlayStore' \
               -dname "CN=Savuth Chea, OU=Khmer Food and Tourism, O=Khmer Food and Tourism, L=Phnom Penh, ST=Phnom Penh, C=KH"
           fi
-          FINAL_VC=$(grep -oP 'versionCode\s+\K[0-9]+' android/app/build.gradle || echo 1256)
+          FINAL_VC=$(grep -oP 'versionCode\s+\K[0-9]+' android/app/build.gradle || echo 1257)
           echo "Building Android APK & Play Store AAB with versionCode $FINAL_VC"
           BUILD_TOOLS_DIR=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -n 1)
           ZIPALIGN="$BUILD_TOOLS_DIR/zipalign"

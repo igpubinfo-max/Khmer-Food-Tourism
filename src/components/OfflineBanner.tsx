@@ -31,9 +31,10 @@ export const OfflineBanner: React.FC = () => {
     <div
       role="status"
       aria-live="polite"
-      className="fixed left-0 right-0 bottom-16 z-40 px-4 pointer-events-none"
+      className="fixed left-0 right-0 z-40 px-4 pointer-events-none"
+      style={{ bottom: 'calc(var(--kft-safe-bottom, 0px) + 68px)' }}
     >
-      <div className="max-w-md mx-auto px-3.5 py-2.5 rounded-2xl bg-slate-900/95 border border-amber-400/30 text-white text-xs flex items-start gap-2.5 shadow-xl font-khmer">
+      <div className="max-w-md mx-auto px-3.5 py-2.5 rounded-2xl bg-slate-900 border border-amber-400/30 text-white text-xs flex items-start gap-2.5 shadow-xl font-khmer">
         <WifiOff className="w-4 h-4 text-amber-300 shrink-0 mt-0.5" />
         <div className="min-w-0 leading-snug">
           <div className="font-extrabold text-amber-300">

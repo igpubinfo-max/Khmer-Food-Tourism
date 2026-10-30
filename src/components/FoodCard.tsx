@@ -64,7 +64,7 @@ const FoodCardView: React.FC<FoodCardViewProps> = React.memo(({
   return (
     <div 
       onClick={() => setSelectedFood(food)}
-      style={{ contentVisibility: 'auto', containIntrinsicSize: '360px' }}
+
       className="group bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-xs hover:shadow-md border border-slate-200/90 dark:border-slate-700/80 transition-colors duration-150 cursor-pointer flex flex-col"
     >
       {/* Image container */}

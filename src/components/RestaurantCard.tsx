@@ -102,7 +102,6 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(({
       onClick={() => {
         setSelectedRestaurant(restaurant);
       }}
-      style={{ contentVisibility: 'auto', containIntrinsicSize: '280px' }}
       className="group bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-xs hover:shadow-md transition-colors duration-150 cursor-pointer flex flex-col border border-slate-200/90 dark:border-slate-700/80"
     >
       {/* Cover image */}

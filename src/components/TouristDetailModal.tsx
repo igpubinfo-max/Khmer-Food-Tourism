@@ -233,7 +233,7 @@ export const TouristDetailModal: React.FC = () => {
         </div>
 
         {/* Scrollable Body */}
-        <div className="overflow-y-auto flex-1 no-scrollbar pb-[calc(env(safe-area-inset-bottom,0px)+24px)]">
+        <div className="overflow-y-auto flex-1 no-scrollbar pb-[calc(var(--kft-safe-bottom,0px)+24px)]">
           {isEditingAdminDest ? (
             /* ADMIN EDIT DESTINATION FORM */
             <form onSubmit={handleSaveAdminDestination} className="p-4 sm:p-6 space-y-4 font-khmer pt-16">

@@ -18,7 +18,10 @@ export const RatePrompt: React.FC = () => {
   if (!visible) return null;
 
   return (
-    <div className="fixed left-0 right-0 bottom-20 z-50 px-4 pointer-events-none">
+    <div
+      className="fixed left-0 right-0 z-50 px-4 pointer-events-none"
+      style={{ bottom: 'calc(var(--kft-safe-bottom, 0px) + 74px)' }}
+    >
       <div
         role="dialog"
         aria-live="polite"

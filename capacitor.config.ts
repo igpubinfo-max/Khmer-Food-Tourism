@@ -11,6 +11,14 @@ const config: CapacitorConfig = {
   },
   android: {
     allowMixedContent: true,
+    backgroundColor: '#0F172A',
+  },
+  plugins: {
+    SystemBars: {
+      insetsHandling: 'css',
+      style: 'DARK',
+      initialViewportFitValueHint: 'cover',
+    },
   },
 };
 

@@ -66,14 +66,14 @@ export const TourismView: React.FC = () => {
           setVisibleCount((prev) => Math.min(filteredDestinations.length, prev + TOURISM_BATCH_SIZE));
         }
       },
-      { rootMargin: '320px' }
+      { root: document.getElementById('kft-main-scroll'), rootMargin: '320px' }
     );
     observer.observe(node);
     return () => observer.disconnect();
   }, [visibleCount, filteredDestinations.length]);
 
   return (
-    <div className="max-w-md mx-auto px-4 py-3 space-y-4 pb-24">
+    <div className="max-w-md mx-auto px-4 py-3 space-y-4 pb-6">
       {/* Title Bar (Search removed — kept on Home Screen only) */}
       <div className="flex items-center justify-between gap-2">
         <div>

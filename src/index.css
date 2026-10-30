@@ -22,6 +22,11 @@
   --main-text: #F8FAFC;
   --muted-text: #94A3B8;
   --warm-gold: #F59E0B;
+  /* Unified Safe Area insets supporting both Capacitor 8 SystemBars (--safe-area-inset-*) and browser env() */
+  --kft-safe-top: max(var(--safe-area-inset-top, 0px), env(safe-area-inset-top, 0px));
+  --kft-safe-bottom: max(var(--safe-area-inset-bottom, 0px), env(safe-area-inset-bottom, 0px));
+  --kft-safe-left: max(var(--safe-area-inset-left, 0px), env(safe-area-inset-left, 0px));
+  --kft-safe-right: max(var(--safe-area-inset-right, 0px), env(safe-area-inset-right, 0px));
 }
 
 @layer base {
@@ -30,24 +35,44 @@
     -webkit-font-smoothing: antialiased;
     -webkit-tap-highlight-color: transparent;
   }
-  
+
   html,
-  body {
+  body,
+  #root {
+    width: 100%;
+    height: 100%;
+    height: 100dvh;
+    max-height: 100dvh;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    overscroll-behavior: none;
     background-color: #0F172A;
     color: #F8FAFC;
   }
-  
+
   /* Smooth scrolling and hide default scrollbars for mobile feel */
+  .no-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
-  /* Safe area helpers for notch and home indicator */
+  /* Safe area helpers for notch, camera cutout, and Android gesture bar */
   .pb-safe {
-    padding-bottom: max(env(safe-area-inset-bottom, 0px), 8px);
+    padding-bottom: max(var(--kft-safe-bottom, 0px), 8px);
   }
   .pt-safe {
-    padding-top: env(safe-area-inset-top, 0px);
+    padding-top: var(--kft-safe-top, 0px);
   }
+}
+
+/* Dedicated single scroll container for the native App Shell */
+#kft-main-scroll {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  overflow-anchor: none;
 }
 
 /* Zero-CPU / Zero-GPU-Repaint Static Styles (Prevents 120Hz Mobile Overheating) */
@@ -89,19 +114,18 @@
   filter: none !important;
 }
 
-/* Offscreen layout & paint containment for long scrollable card lists */
+/* Card helper (no content-visibility:auto to prevent Android WebView raster tile ghosting) */
 .kft-cv-card {
-  content-visibility: auto;
-  contain-intrinsic-size: auto 320px;
+  contain: layout style;
 }
 
-/* Glassmorphism helpers (optimized without expensive backdrop-filter repaints) */
+/* Solid opaque surfaces (prevents blend-compositing flicker & ghosting behind fixed bars) */
 .glass-header {
-  background: rgba(6, 78, 59, 0.98);
+  background-color: #064E3B;
 }
 
 .glass-card {
-  background: rgba(30, 41, 59, 0.98);
+  background-color: #1E293B;
 }
 
 /* VIP Registration Button Static Gold Highlight (0% continuous GPU/CPU usage) */

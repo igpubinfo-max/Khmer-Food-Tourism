@@ -95,7 +95,7 @@ export const UpdateAvailableBanner: React.FC = () => {
   if (!hasUpdate || dismissed) return null;
 
   return (
-    <div className="w-full bg-gradient-to-r from-amber-500 via-amber-600 to-emerald-600 text-slate-950 shadow-md border-b border-amber-400/40 font-khmer">
+    <div className="shrink-0 z-20 w-full bg-gradient-to-r from-amber-500 via-amber-600 to-emerald-600 text-slate-950 shadow-md border-b border-amber-400/40 font-khmer">
       <div className="max-w-md mx-auto px-3 py-2 flex items-center justify-between gap-2">
         <button
           type="button"
