@@ -422,6 +422,8 @@ export function normalizeAuthoritativeAppSettings(
 
   return {
     ...merged,
+    apkDownloadUrl: '',
+    playStoreUrl: merged.playStoreUrl || 'https://play.google.com/store/apps/details?id=com.khmerfood.tourism',
     settingsVersion: Math.max(25, ver),
     supportAccountName: merged.supportAccountName || 'CHEA KIMSENG',
     vipShortDurationDays: shortDays,
@@ -561,6 +563,8 @@ export async function saveAuthoritativeAppSettingsToServer(
 
   const normalized: AppSettings = {
     ...settings,
+    apkDownloadUrl: '',
+    playStoreUrl: settings.playStoreUrl || 'https://play.google.com/store/apps/details?id=com.khmerfood.tourism',
     settingsVersion: nextVersion,
     settingsUpdatedAt: nowIso,
     vipShortDurationDays: shortDays,

@@ -132,7 +132,6 @@ export const AdminDashboard: React.FC = () => {
   const [adminRestSearchQuery, setAdminRestSearchQuery] = useState('');
 
   // Form states for Settings & Promotional pricing
-  const [apkUrl, setApkUrl] = useState(appSettings.apkDownloadUrl);
   const [playStoreUrl, setPlayStoreUrl] = useState(appSettings.playStoreUrl);
   const [appStoreUrl, setAppStoreUrl] = useState(appSettings.appStoreUrl);
   const [supportQrUrl, setSupportQrUrl] = useState(appSettings.supportQrImageUrl);
@@ -178,7 +177,6 @@ export const AdminDashboard: React.FC = () => {
     const lDays = s.vipLongDurationDays ?? 60;
     const lPrice = s.vipLongPriceUsd ?? 6.99;
     const rotCfg = getVipFeaturedRotationConfig(s);
-    setApkUrl(s.apkDownloadUrl);
     setPlayStoreUrl(s.playStoreUrl);
     setAppStoreUrl(s.appStoreUrl);
     setSupportQrUrl(s.supportQrImageUrl);
@@ -461,7 +459,7 @@ export const AdminDashboard: React.FC = () => {
 
     try {
       const res = await updateAppSettings({
-        apkDownloadUrl: apkUrl,
+        apkDownloadUrl: '',
         playStoreUrl,
         appStoreUrl,
         supportQrImageUrl: supportQrUrl,
@@ -4607,17 +4605,17 @@ export const AdminDashboard: React.FC = () => {
               </div>
               )}
 
-              {/* CATEGORY 4: App Distribution & Installation URLs */}
+              {/* CATEGORY 4: Official Store Distribution Links (Google Play Store) */}
               {showSection('distribution') && (
               <div className="bg-white dark:bg-stone-800 p-5 rounded-2xl border border-slate-200/90 dark:border-stone-700 shadow-xs space-y-4">
                 <div className="flex items-center gap-2.5 pb-2 border-b border-stone-200 dark:border-stone-700">
-                  <QrCode className="w-5 h-5 text-red-600" />
+                  <QrCode className="w-5 h-5 text-emerald-600" />
                   <div>
                     <h4 className="font-bold text-stone-900 dark:text-stone-100 font-khmer text-sm">
-                      {isKm ? 'តំណភ្ជាប់ដំឡើងកម្មវិធី និង QR Code' : 'App Installation & Download Links'}
+                      {isKm ? 'តំណភ្ជាប់ផ្លូវការ Google Play Store' : 'Official Google Play Store Link'}
                     </h4>
                     <p className="text-[11px] text-stone-500 font-khmer">
-                      {isKm ? 'កែប្រែតំណភ្ជាប់ទាញយក APK, Play Store និង App Store ដោយមិនបាច់ Rebuild កម្មវិធីឡើយ' : 'Update download links dynamically without rebuilding the app'}
+                      {isKm ? 'កម្មវិធីត្រូវបានដំឡើងជាផ្លូវការតាមរយៈ Google Play Store ប៉ុណ្ណោះ' : 'Official installation is exclusively via Google Play Store'}
                     </p>
                   </div>
                 </div>
@@ -4625,47 +4623,21 @@ export const AdminDashboard: React.FC = () => {
                 <form onSubmit={handleSaveSettings} className="space-y-3 font-khmer">
                   <div>
                     <label className="block font-semibold mb-1 text-stone-700 dark:text-stone-300">
-                      {isKm ? 'តំណភ្ជាប់ទាញយក Android APK (Direct APK Download URL)' : 'Direct APK Download URL'}
+                      {isKm ? 'តំណភ្ជាប់ផ្លូវការ Google Play Store' : 'Official Google Play Store URL'}
                     </label>
                     <input
                       type="text"
-                      value={apkUrl}
-                      onChange={e => setApkUrl(e.target.value)}
-                      required
+                      value={playStoreUrl}
+                      onChange={e => setPlayStoreUrl(e.target.value)}
                       className="w-full px-3 py-2 rounded-xl border bg-stone-50 dark:bg-stone-700 text-stone-800 dark:text-stone-100 font-mono text-xs"
                     />
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                      <label className="block font-semibold mb-1 text-stone-700 dark:text-stone-300">
-                        {isKm ? 'តំណភ្ជាប់ Google Play Store' : 'Google Play Store URL'}
-                      </label>
-                      <input
-                        type="text"
-                        value={playStoreUrl}
-                        onChange={e => setPlayStoreUrl(e.target.value)}
-                        className="w-full px-3 py-2 rounded-xl border bg-stone-50 dark:bg-stone-700 text-stone-800 dark:text-stone-100 font-mono text-xs"
-                      />
-                    </div>
-                    <div>
-                      <label className="block font-semibold mb-1 text-stone-700 dark:text-stone-300">
-                        {isKm ? 'តំណភ្ជាប់ Apple App Store' : 'Apple App Store URL'}
-                      </label>
-                      <input
-                        type="text"
-                        value={appStoreUrl}
-                        onChange={e => setAppStoreUrl(e.target.value)}
-                        className="w-full px-3 py-2 rounded-xl border bg-stone-50 dark:bg-stone-700 text-stone-800 dark:text-stone-100 font-mono text-xs"
-                      />
-                    </div>
                   </div>
 
                   <button
                     type="submit"
                     className="px-5 py-2.5 bg-gradient-to-r bg-[#064E3B] hover:bg-[#047857] text-white font-bold rounded-xl shadow-md transition-all font-khmer text-xs active:scale-95"
                   >
-                    {isKm ? 'រក្សាទុកតំណភ្ជាប់ដំឡើង' : 'Save Download Configuration'}
+                    {isKm ? 'រក្សាទុកតំណភ្ជាប់ Google Play Store' : 'Save Google Play Store Link'}
                   </button>
                 </form>
               </div>

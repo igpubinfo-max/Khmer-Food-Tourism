@@ -158,3 +158,11 @@
   animation: none !important;
   will-change: auto;
 }
+
+/* Prevent tall Khmer top vowel diacritics (ែ, ី, ិ, ឺ, ំ, ៍) in Moul headings from being clipped by overflow:hidden / truncate */
+.font-moul,
+.font-moul .truncate {
+  line-height: 1.7 !important;
+  padding-top: 0.18em;
+  padding-bottom: 0.06em;
+}

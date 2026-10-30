@@ -164,9 +164,9 @@ const HomeGreetingSearchInner: React.FC<Props> = ({
                 </span>
               )}
             </button>
-            <div className="min-w-0 flex-1">
+            <div className="min-w-0 flex-1 pt-0.5">
               <p className="text-xs text-slate-500 dark:text-emerald-200/80 truncate">{greeting}</p>
-              <p className={`${headingFont(language)} text-[15px] leading-snug text-[#064E3B] dark:text-white truncate`}>{displayName}</p>
+              <p className={`${headingFont(language)} text-[15px] leading-relaxed pt-0.5 pb-0.5 text-[#064E3B] dark:text-white truncate`}>{displayName}</p>
             </div>
             {isVip && (
               <button
@@ -192,9 +192,9 @@ const HomeGreetingSearchInner: React.FC<Props> = ({
           <span className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center shrink-0 text-emerald-600 dark:text-emerald-300">
             <UserIcon className="w-6 h-6" />
           </span>
-          <div className="min-w-0 flex-1">
+          <div className="min-w-0 flex-1 pt-0.5">
             <p className="text-xs text-slate-500 dark:text-emerald-200/80 truncate">{greeting}</p>
-            <p className={`${headingFont(language)} text-[15px] leading-snug text-[#064E3B] dark:text-white truncate`}>
+            <p className={`${headingFont(language)} text-[15px] leading-relaxed pt-0.5 pb-0.5 text-[#064E3B] dark:text-white truncate`}>
               {tr(language, 'រសជាតិ និងទេសចរណ៍កម្ពុជា', 'Cambodia Flavors & Tourism', '柬埔寨风味与旅游')}
             </p>
           </div>
@@ -211,14 +211,14 @@ const HomeGreetingSearchInner: React.FC<Props> = ({
         </div>
       )}
 
-      <div>
-        <h2 className={`${headingFont(language)} text-base sm:text-lg leading-snug text-[#064E3B] dark:text-emerald-200 truncate`}>
+      <div className="mt-1 pt-2">
+        <h2 className={`${headingFont(language)} text-[15px] sm:text-lg leading-relaxed pt-1.5 pb-1 text-[#064E3B] dark:text-emerald-200 break-words`}>
           {isAdmin
             ? tr(language, 'ស្វែងរក និងគ្រប់គ្រងទិន្នន័យក្នុងប្រព័ន្ធ', 'Search & Manage Directory', '搜索并管理系统数据')
             : tr(language, 'ស្វែងយល់អាហារ • ទីតាំង • បទពិសោធន៍', 'Discover Food • Places • Experiences', '探索美食 • 景点 • 体验')}
         </h2>
         {!isAdmin && hint && (
-          <p className="text-xs leading-snug text-slate-500 dark:text-slate-400 mt-0.5 truncate">{hint}</p>
+          <p className="text-xs leading-relaxed pt-0.5 pb-0.5 text-slate-500 dark:text-slate-400 mt-0.5 truncate">{hint}</p>
         )}
       </div>
 

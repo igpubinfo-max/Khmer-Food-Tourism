@@ -19,7 +19,6 @@ const AddRestaurantModal = lazy(() => import('./components/AddRestaurantModal').
 const ManageMenuModal = lazy(() => import('./components/ManageMenuModal').then((m) => ({ default: m.ManageMenuModal })));
 const AdminDashboard = lazy(() => import('./components/AdminDashboard').then((m) => ({ default: m.AdminDashboard })));
 import { AdminLoginModal } from './components/AdminLoginModal';
-const InstallModal = lazy(() => import('./components/InstallModal').then((m) => ({ default: m.InstallModal })));
 const SupportModal = lazy(() => import('./components/SupportModal').then((m) => ({ default: m.SupportModal })));
 import { ExitConfirmModal } from './components/ExitConfirmModal';
 import { DeleteShopConfirmModal } from './components/DeleteShopConfirmModal';
@@ -41,7 +40,6 @@ const GoogleMapsPlaceSearchModal = lazy(() => import('./components/GoogleMapsPla
 import { Toast } from './components/Toast';
 import { RatePrompt } from './components/RatePrompt';
 import { OfflineBanner } from './components/OfflineBanner';
-import { UpdateAvailableBanner } from './components/UpdateAvailableBanner';
 import { SMART_HUB_EVENT } from './utils/smartHub';
 import { useBodyScrollLock } from './utils/useBodyScrollLock';
 
@@ -60,7 +58,6 @@ const MainScreen: React.FC = () => {
     managingRestaurant,
     isAdminOpen,
     isAdminLoginModalOpen,
-    isInstallModalOpen,
     isSupportModalOpen,
     isExitModalOpen,
     isWhatToEatModalOpen,
@@ -141,7 +138,6 @@ const MainScreen: React.FC = () => {
     (isManageMenuModalOpen && Boolean(managingRestaurant)) ||
     isAdminOpen ||
     isAdminLoginModalOpen ||
-    isInstallModalOpen ||
     isSupportModalOpen ||
     isExitModalOpen ||
     (isWhatToEatModalOpen && hasVipAccess) ||
@@ -229,7 +225,6 @@ const MainScreen: React.FC = () => {
     <div className="flex-1 min-h-0 flex flex-col w-full h-full overflow-hidden relative bg-[#0F172A]">
       {/* Fixed Top Header — Never scrolls or recalculates sticky offsets */}
       <Header />
-      <UpdateAvailableBanner />
 
       {/* Single Bounded Scroll Container — Strictly sandwiched between Header and BottomNav */}
       <main
@@ -265,7 +260,6 @@ const MainScreen: React.FC = () => {
         {isAddRestaurantModalOpen && <AddRestaurantModal />}
         {isAdminOpen && <AdminDashboard />}
         {isAdminLoginModalOpen && <AdminLoginModal />}
-        {isInstallModalOpen && <InstallModal />}
         {isSupportModalOpen && <SupportModal />}
         {isExitModalOpen && <ExitConfirmModal />}
 

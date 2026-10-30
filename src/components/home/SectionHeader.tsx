@@ -17,13 +17,13 @@ interface Props {
 export const SectionHeader: React.FC<Props> = ({ icon: Icon, title, subtitle, actionLabel, onAction, right }) => {
   const { language } = useApp();
   return (
-  <div className="flex items-end justify-between gap-3">
+  <div className="flex items-end justify-between gap-3 pt-1">
     <div className="min-w-0 flex items-start gap-2.5">
-      <span className="mt-1 w-1 h-9 rounded-full bg-gradient-to-b from-amber-300 to-amber-500 shrink-0" aria-hidden="true" />
-      <div className="min-w-0">
-        <h3 className={`${headingFont(language)} text-[15px] leading-snug text-[#064E3B] dark:text-emerald-100 flex items-center gap-1.5`}>
+      <span className="mt-1.5 w-1 h-9 rounded-full bg-gradient-to-b from-amber-300 to-amber-500 shrink-0" aria-hidden="true" />
+      <div className="min-w-0 pt-0.5">
+        <h3 className={`${headingFont(language)} text-[15px] leading-relaxed pt-0.5 pb-0.5 text-[#064E3B] dark:text-emerald-100 flex items-center gap-1.5`}>
           {Icon && <Icon className="w-4 h-4 text-amber-500 shrink-0" aria-hidden="true" />}
-          <span className="truncate">{title}</span>
+          <span className="truncate pt-0.5 pb-0.5 leading-relaxed">{title}</span>
         </h3>
         {subtitle && (
           <p className="text-xs leading-relaxed text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-2">{subtitle}</p>

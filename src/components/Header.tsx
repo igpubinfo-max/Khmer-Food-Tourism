@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import {
-  Download,
   Heart,
   Bell,
   QrCode,
@@ -20,7 +19,6 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSmartHub }) => {
     language,
     setLanguage,
     setActiveTab,
-    openInstallModal,
     setIsSupportModalOpen,
     setIsQrScannerModalOpen,
     setIsAiTripPlannerModalOpen,
@@ -83,11 +81,11 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSmartHub }) => {
               }}
             />
           </div>
-          <div className="min-w-0 flex-1">
-            <h1 className="font-moul text-[12px] sm:text-[13px] tracking-wide text-white leading-snug truncate">
+          <div className="min-w-0 flex-1 pt-0.5">
+            <h1 className="font-moul text-[12px] sm:text-[13px] tracking-wide text-white leading-relaxed pt-0.5 pb-0.5 truncate">
               {tr(language, 'រសជាតិ និងទេសចរណ៍កម្ពុជា', 'Cambodia Flavors & Tourism', '柬埔寨风味与旅游')}
             </h1>
-            <p className="text-[10px] text-amber-300 font-semibold leading-tight truncate mt-0.5">
+            <p className="text-[10px] text-amber-300 font-semibold leading-relaxed pt-0.5 pb-0.5 truncate">
               {tr(
                 language,
                 'ស្វែងយល់អាហារ • ទីតាំង • បទពិសោធន៍',
@@ -173,18 +171,6 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSmartHub }) => {
                   >
                     <QrCode className="w-4 h-4 text-emerald-400" />
                     <span>{tr(language, 'ស្កេនកូដ QR ហាង', 'Scan QR Code', '扫描店铺二维码')}</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsMenuOpen(false);
-                      openInstallModal('android');
-                    }}
-                    className="w-full px-3.5 py-2.5 flex items-center gap-2.5 hover:bg-white/10 transition cursor-pointer text-left font-semibold"
-                  >
-                    <Download className="w-4 h-4 text-sky-400" />
-                    <span>{tr(language, 'ទាញយកកម្មវិធី', 'Download App', '下载应用程序')}</span>
                   </button>
 
                   <button
