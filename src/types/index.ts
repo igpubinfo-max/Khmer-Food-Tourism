@@ -1,8 +1,8 @@
-export const APP_VERSION = 'v2.3.2';
-export const APP_VERSION_NAME = '2.3.2';
+export const APP_VERSION = 'v2.4.0';
+export const APP_VERSION_NAME = '2.4.0';
 declare const __KFT_BUILD_CODE__: number | undefined;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1200;
-export const APP_RELEASE_DATE = '2026-10-29';
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1240;
+export const APP_RELEASE_DATE = '2026-10-30';
 
 export interface GoogleMapsPlaceMetadata {
   placeId: string;

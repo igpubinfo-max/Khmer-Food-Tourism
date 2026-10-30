@@ -97,13 +97,13 @@ jobs:
             --v2-signing-enabled true \
             --v3-signing-enabled true \
             --v4-signing-enabled false \
-            --out ../release_out/KhmerFoodTourism-v2.3.2.apk \
+            --out ../release_out/KhmerFoodTourism-v2.4.0.apk \
             ../release_out/aligned-official.apk
           rm -f ../release_out/aligned-official.apk
-          "$APKSIGNER" verify --verbose ../release_out/KhmerFoodTourism-v2.3.2.apk
+          "$APKSIGNER" verify --verbose ../release_out/KhmerFoodTourism-v2.4.0.apk
 
           REL_AAB=$(find app/build/outputs/bundle/release -name "*.aab" | head -n 1)
-          cp "$REL_AAB" ../release_out/KhmerFoodTourism-v2.3.2-PlayStore.aab
+          cp "$REL_AAB" ../release_out/KhmerFoodTourism-v2.4.0-PlayStore.aab
           cd ..
 
           ls -la release_out/
@@ -113,24 +113,24 @@ jobs:
         with:
           name: Khmer-Food-Tourism-Release-Packages
           path: |
-            release_out/KhmerFoodTourism-v2.3.2.apk
-            release_out/KhmerFoodTourism-v2.3.2-PlayStore.aab
+            release_out/KhmerFoodTourism-v2.4.0.apk
+            release_out/KhmerFoodTourism-v2.4.0-PlayStore.aab
 
       - name: 10. Publish GitHub Release with Signed APK & Play Store AAB
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: v2.3.2
-          name: "Khmer Food & Tourism v2.3.2"
+          tag_name: v2.4.0
+          name: "Khmer Food & Tourism v2.4.0"
           make_latest: true
           body: |
             ### 🇰🇭 កម្មវិធីទូរស័ព្ទដៃ អាហារ និងទេសចរណ៍ខ្មែរ (Khmer Food & Tourism Mobile App)
             
-            **កំណែផ្លូវការ v2.3.2 (Official V1+V2+V3 Signed Production Packages):**
-            - 📲 **KhmerFoodTourism-v2.3.2.apk:** Official Android APK (`com.khmerfood.tourism`, V1+V2+V3 signed).
-            - 📦 **KhmerFoodTourism-v2.3.2-PlayStore.aab:** Signed Android App Bundle for Google Play Console.
+            **កំណែផ្លូវការ v2.4.0 (Official V1+V2+V3 Signed Production Packages):**
+            - 📲 **KhmerFoodTourism-v2.4.0.apk:** Official Android APK (`com.khmerfood.tourism`, V1+V2+V3 signed).
+            - 📦 **KhmerFoodTourism-v2.4.0-PlayStore.aab:** Signed Android App Bundle for Google Play Console.
           draft: false
           prerelease: false
           files: |
-            release_out/KhmerFoodTourism-v2.3.2.apk
-            release_out/KhmerFoodTourism-v2.3.2-PlayStore.aab
+            release_out/KhmerFoodTourism-v2.4.0.apk
+            release_out/KhmerFoodTourism-v2.4.0-PlayStore.aab

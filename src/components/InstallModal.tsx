@@ -25,13 +25,13 @@ export const InstallModal: React.FC = () => {
   const [copied, setCopied] = useState<boolean>(false);
 
   const isKm = language === 'km';
-  const LATEST_SIGNED_APK_URL = 'https://github.com/igpubinfo-max/Khmer-Food-Tourism/releases/download/v2.3.2/KhmerFoodTourism-v2.3.2.apk';
-  const LATEST_ZIP_PACKAGE_URL = 'https://github.com/igpubinfo-max/Khmer-Food-Tourism/releases/download/v2.3.2/KhmerFoodTourism-v2.3.2-Android.zip';
-  const LATEST_RELEASE_PAGE_URL = 'https://github.com/igpubinfo-max/Khmer-Food-Tourism/releases/tag/v2.3.2';
+  const LATEST_SIGNED_APK_URL = 'https://github.com/igpubinfo-max/Khmer-Food-Tourism/releases/download/v2.4.0/KhmerFoodTourism-v2.4.0.apk';
+  const LATEST_ZIP_PACKAGE_URL = 'https://github.com/igpubinfo-max/Khmer-Food-Tourism/releases/download/v2.4.0/KhmerFoodTourism-v2.4.0.apk';
+  const LATEST_RELEASE_PAGE_URL = 'https://github.com/igpubinfo-max/Khmer-Food-Tourism/releases/tag/v2.4.0';
   const apkDownloadTarget =
     appSettings.apkDownloadUrl &&
     !appSettings.apkDownloadUrl.includes('app-debug.apk') &&
-    appSettings.apkDownloadUrl.includes('v2.3.2')
+    appSettings.apkDownloadUrl.includes('v2.4.0')
       ? appSettings.apkDownloadUrl
       : LATEST_SIGNED_APK_URL;
   const playStoreTarget = appSettings.playStoreUrl || 'https://play.google.com/store/apps/details?id=com.khmerfood.tourism';
