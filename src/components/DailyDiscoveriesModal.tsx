@@ -185,22 +185,28 @@ export const DailyDiscoveriesModal: React.FC = () => {
         count: activePool.length,
       },
       {
-        id: 'restaurant',
-        label: tr(language, 'ហាងថ្មី', 'Restaurants', '新餐厅'),
-        icon: <Store className="w-3.5 h-3.5" />,
-        count: activePool.filter((i) => i.category === 'restaurant').length,
+        id: 'food',
+        label: tr(language, 'មុខម្ហូបថ្ងៃនេះ', 'Daily Dishes', '今日美食'),
+        icon: <ChefHat className="w-3.5 h-3.5" />,
+        count: activePool.filter((i) => i.category === 'food').length,
       },
       {
-        id: 'attraction',
-        label: tr(language, 'ទេសចរណ៍', 'Attractions', '旅游景点'),
-        icon: <Mountain className="w-3.5 h-3.5" />,
-        count: activePool.filter((i) => i.category === 'attraction').length,
+        id: 'restaurant',
+        label: tr(language, 'ហាងថ្មី', 'New Shops', '新餐厅'),
+        icon: <Store className="w-3.5 h-3.5" />,
+        count: activePool.filter((i) => i.category === 'restaurant').length,
       },
       {
         id: 'promotion',
         label: tr(language, 'ប្រូម៉ូសិន', 'Promos', '优惠促销'),
         icon: <Tag className="w-3.5 h-3.5" />,
         count: activePool.filter((i) => i.category === 'promotion').length,
+      },
+      {
+        id: 'attraction',
+        label: tr(language, 'ទេសចរណ៍', 'Attractions', '旅游景点'),
+        icon: <Mountain className="w-3.5 h-3.5" />,
+        count: activePool.filter((i) => i.category === 'attraction').length,
       },
       {
         id: 'event',
@@ -213,12 +219,6 @@ export const DailyDiscoveriesModal: React.FC = () => {
         label: tr(language, 'ព័ត៌មាន', 'Local News', '本地资讯'),
         icon: <Newspaper className="w-3.5 h-3.5" />,
         count: activePool.filter((i) => i.category === 'local_news').length,
-      },
-      {
-        id: 'food',
-        label: tr(language, 'មុខម្ហូប', 'Dishes', '精选美食'),
-        icon: <ChefHat className="w-3.5 h-3.5" />,
-        count: activePool.filter((i) => i.category === 'food').length,
       },
     ];
   }, [items, dismissedIds, language]);
@@ -265,6 +265,11 @@ export const DailyDiscoveriesModal: React.FC = () => {
       const aSeen = seenIds.has(a.id) ? 1 : 0;
       const bSeen = seenIds.has(b.id) ? 1 : 0;
       if (aSeen !== bSeen) return aSeen - bSeen; // Unseen first!
+
+      // Prioritize food & restaurant discoveries first for Daily Food Discovery
+      const aFoodPriority = a.category === 'food' || a.category === 'restaurant' || a.category === 'promotion' ? 0 : 1;
+      const bFoodPriority = b.category === 'food' || b.category === 'restaurant' || b.category === 'promotion' ? 0 : 1;
+      if (aFoodPriority !== bFoodPriority) return aFoodPriority - bFoodPriority;
 
       if (rotationOffset > 0) {
         const ha = ((a.id.charCodeAt(a.id.length - 1) + rotationOffset * 7) % 13);
@@ -420,15 +425,19 @@ export const DailyDiscoveriesModal: React.FC = () => {
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <h3 className="font-moul text-sm text-white">
-                  {tr(language, 'កន្លែងថ្មីៗ និងព្រឹត្តិការណ៍', 'New Places & Events', '新地点与活动资讯')}
+                  {tr(language, 'ស្វែងយល់ម្ហូបប្រចាំថ្ងៃ', 'Daily Food Discovery', '每日美食探索')}
                 </h3>
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-400/20 border border-emerald-300/40 text-emerald-100 text-[10px] font-extrabold shrink-0">
+                  <CheckCircle2 className="w-3 h-3 text-emerald-300" />
+                  <span>{tr(language, 'ឥតគិតថ្លៃ • FREE', 'FREE Access', '免费使用')}</span>
+                </span>
               </div>
               <p className="text-[11px] text-emerald-100 font-khmer truncate">
                 {tr(
                   language,
-                  'ហាងថ្មី រមណីយដ្ឋាន ប្រូម៉ូសិន ពិធីបុណ្យ និងព័ត៌មានទេសចរណ៍ថ្មីៗ',
-                  'New restaurants, attractions, promos, events & local travel news',
-                  '最新餐厅、旅游景点、促销折扣、节庆活动与本地资讯'
+                  'មុខម្ហូបប្លែកៗប្រចាំថ្ងៃ ហាងថ្មី ប្រូម៉ូសិន និងកន្លែងគួរសាកល្បង',
+                  'Daily featured dishes, new restaurants, special promos & spots',
+                  '每日特色菜品、新开业餐厅、优惠促销与打卡地'
                 )}
               </p>
             </div>

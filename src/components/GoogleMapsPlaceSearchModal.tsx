@@ -487,23 +487,26 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                 <h2 className="text-sm sm:text-lg font-extrabold tracking-tight truncate">
                   {tr(
                     language,
-                    '🗺️ ស្វែងរកហាង & តំបន់ទេសចរណ៍លើ Google Maps',
-                    '🗺️ Google Maps Search — Shops & Tourist Attractions',
-                    '🗺️ 谷歌地图搜索 — 店铺与旅游景点'
+                    '🧭 នាំផ្លូវ និងស្វែងរកទីតាំងលើផែនទី',
+                    '🧭 Map Navigation & Place Search',
+                    '🧭 地图搜索与路线导航'
                   )}
                 </h2>
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-400/20 border border-emerald-300/40 text-emerald-100 shadow-2xs">
+                  ✓ {tr(language, 'ឥតគិតថ្លៃ • FREE', 'FREE Navigation', '免费搜索导航')}
+                </span>
                 {isVipActive && !isAdmin && (
                   <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-400 text-slate-950 shadow-sm">
-                    👑 VIP Access
+                    👑 VIP ✓
                   </span>
                 )}
               </div>
               <p className="text-[11px] sm:text-xs text-emerald-100/90 truncate mt-0.5">
                 {tr(
                   language,
-                  'ស្វែងរកហាងអាហារ និងរមណីយដ្ឋានតាមខេត្ត/ក្រុង ឬទីតាំង GPS ជិតអ្នក',
-                  'Search restaurants & attractions across Cambodia by province or nearby GPS',
-                  '按省份、城市或 GPS 附近位置搜索全柬埔寨餐厅与景点'
+                  'ស្វែងរកហាងម្ហូប កន្លែងដើរលេង និងបើកការនាំផ្លូវផ្ទាល់លើ Google Maps ដោយឥតគិតថ្លៃ',
+                  'Search food & places across Cambodia and get free turn-by-turn directions',
+                  '免费搜索全柬埔寨餐厅与景点，一键开启 Google 地图路线导航'
                 )}
               </p>
             </div>
@@ -632,6 +635,33 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                   ))}
                 </div>
               )}
+            </div>
+
+            {/* 1-Tap Daily Quick Navigation Presets (FREE) */}
+            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
+              <span className="text-[11px] font-extrabold text-slate-500 shrink-0">
+                {tr(language, 'ស្វែងរករហ័ស៖', 'Quick Find:', '快捷导航：')}
+              </span>
+              {[
+                { q: 'អាហារខ្មែរ Khmer Restaurant', kh: '🍲 អាហារខ្មែរ', en: '🍲 Khmer Food', zh: '🍲 柬式餐厅', cat: 'restaurant' as const },
+                { q: 'គុយទាវ Noodles Breakfast', kh: '🍜 គុយទាវ/អាហារព្រឹក', en: '🍜 Noodles', zh: '🍜 粿条/早餐', cat: 'restaurant' as const },
+                { q: 'Coffee Cafe ហាងកាហ្វេ', kh: '☕ ហាងកាហ្វេ', en: '☕ Coffee & Café', zh: '☕ 咖啡馆', cat: 'restaurant' as const },
+                { q: 'Seafood BBQ គ្រឿងសមុទ្រ សាច់អាំង', kh: '🦐 គ្រឿងសមុទ្រ/សាច់អាំង', en: '🦐 Seafood & BBQ', zh: '🦐 海鲜与烧烤', cat: 'restaurant' as const },
+                { q: 'Tourist Attraction រមណីយដ្ឋាន', kh: '🏞️ រមណីយដ្ឋាន', en: '🏞️ Attractions', zh: '🏞️ 热门景点', cat: 'tourism' as const },
+              ].map((preset) => (
+                <button
+                  key={preset.q}
+                  type="button"
+                  onClick={() => {
+                    setQuery(preset.q);
+                    setCategory(preset.cat);
+                    executeSearch({ q: preset.q, cat: preset.cat });
+                  }}
+                  className="px-2.5 py-1 rounded-full bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-800 border border-slate-200 hover:border-emerald-400 text-[11px] font-bold whitespace-nowrap transition cursor-pointer shadow-2xs"
+                >
+                  {tr(language, preset.kh, preset.en, preset.zh)}
+                </button>
+              ))}
             </div>
 
             <form

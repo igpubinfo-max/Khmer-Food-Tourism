@@ -12,18 +12,23 @@ interface Props {
 const VipPerksCardInner: React.FC<Props> = ({ language, onLearnMore }) => {
   const perks = [
     {
+      Icon: Wand2,
+      title: tr(language, 'ជំនួយការឆ្លាតវៃ AI & ម៉ឺនុយសុខភាព', 'Advanced AI Assistant & Healthy Menu', '高级 AI 助手与健康营养菜单'),
+      desc: tr(
+        language,
+        'វិភាគកាឡូរី ស្លាកម្ហូបសុខភាព ៦ ប្រភេទ ឈុតអាហារ ៣ ពេល និងផែនការដើរលេង AI ច្រើនថ្ងៃ',
+        'AI calorie & nutrition filters, 3-meal daily plans, and multi-day custom AI itineraries',
+        'AI 热量与营养标签、每日均衡三餐搭配及多日定制行程规划'
+      ),
+    },
+    {
       Icon: Store,
-      title: tr(language, 'ផ្សព្វផ្សាយហាងរបស់អ្នក', 'Promote your own restaurant', '推广您的餐厅'),
+      title: tr(language, 'ផ្សព្វផ្សាយហាងរបស់អ្នកលើផែនទី', 'Promote your own restaurant', '在地图与名录推广您的餐厅'),
       desc: tr(language, 'ស្លាក VIP មាស និងបង្ហាញទីតាំងលេចធ្លោលើផែនទី', 'Verified gold badge and highlighted map listing', '金色认证徽章与醒目地图标记'),
     },
     {
-      Icon: Wand2,
-      title: tr(language, 'ឧបករណ៍ម្ហូប និងផែនការដើរលេង', 'Food & travel tools', '美食与出行工具'),
-      desc: tr(language, 'ណែនាំមុខម្ហូបប្រចាំថ្ងៃ ម៉ឺនុយសុខភាព និងរៀបចំផែនការដើរលេង', 'Daily dish ideas, healthy menu filters, and custom trip plans', '每日荐菜、健康轻食筛选与定制行程'),
-    },
-    {
       Icon: BarChart3,
-      title: tr(language, 'ស្ថិតិអ្នកចូលមើលហាង', 'Track visitor engagement', '查看访客数据'),
+      title: tr(language, 'ស្ថិតិអ្នកចូលមើលហាងផ្ទាល់', 'Track visitor engagement', '查看店铺访客数据'),
       desc: tr(language, 'មើលចំនួនអ្នកចូលទស្សនា ហៅទូរស័ព្ទ និងចុចបង្ហាញផ្លូវ', 'Views, phone calls, and map direction taps', '浏览、来电与路线导航统计'),
     },
   ];
@@ -39,7 +44,12 @@ const VipPerksCardInner: React.FC<Props> = ({ language, onLearnMore }) => {
             {tr(language, 'អត្ថប្រយោជន៍សមាជិក VIP', 'VIP Membership Perks', 'VIP 会员专属权益')}
           </h3>
           <p className="text-xs text-emerald-100/85 mt-0.5">
-            {tr(language, 'សម្រាប់ម្ចាស់ហាងអាហារ និងអ្នកចូលចិត្តធ្វើដំណើរ', 'For restaurant owners and frequent travelers', '适合餐厅店主与深度旅行爱好者')}
+            {tr(
+              language,
+              'មុខងារមូលដ្ឋានឥតគិតថ្លៃ • ដំឡើង VIP សម្រាប់ AI កម្រិតខ្ពស់ និងម្ចាស់ហាង',
+              'Basic search & map navigation are Free • Upgrade for advanced AI & shop tools',
+              '基础搜索与导航永久免费 • 升级解锁高级 AI 与商家推广'
+            )}
           </p>
         </div>
       </div>

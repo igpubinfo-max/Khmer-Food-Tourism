@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
   X, Navigation, Compass, Store, Mountain, 
-  Phone, Star, ArrowUpRight, LocateFixed, Loader2, MapPin, RefreshCw
+  Phone, Star, ArrowUpRight, LocateFixed, Loader2, MapPin, RefreshCw, Search, UtensilsCrossed, CheckCircle2
 } from 'lucide-react';
 import {
   sanitizeDialablePhone,
@@ -61,6 +61,7 @@ const RADIUS_OPTIONS: { value: number; labelKh: string; labelEn: string; labelZh
   { value: 500, labelKh: '៥០០ម (500m)', labelEn: '500m', labelZh: '500米' },
   { value: 1000, labelKh: '១ គ.ម (1km)', labelEn: '1km', labelZh: '1公里' },
   { value: 2000, labelKh: '២ គ.ម (2km)', labelEn: '2km', labelZh: '2公里' },
+  { value: 5000, labelKh: '៥ គ.ម (5km)', labelEn: '5km', labelZh: '5公里' },
 ];
 
 function readSavedUserGps(): { lat: number; lng: number } | null {
@@ -103,8 +104,43 @@ export const NearMeModal: React.FC = () => {
     setSelectedRestaurant, setSelectedDestination 
   } = useApp();
 
-  const [activeType, setActiveType] = useState<'restaurants' | 'destinations'>('restaurants');
+  const [activeType, setActiveType] = useState<'restaurants' | 'destinations'>(() => {
+    const init = typeof window !== 'undefined' ? (window as any).__kft_near_me_initial_tab : null;
+    return init === 'destinations' ? 'destinations' : 'restaurants';
+  });
+  const [nearbyQuery, setNearbyQuery] = useState<string>('');
+  const [quickFilterId, setQuickFilterId] = useState<string>('all');
   const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(() => readSavedUserGps());
+
+  useEffect(() => {
+    const onTabEvent = (e: Event) => {
+      const tab = (e as CustomEvent<'restaurants' | 'destinations'>).detail;
+      if (tab === 'restaurants' || tab === 'destinations') {
+        setActiveType(tab);
+        setQuickFilterId('all');
+      }
+    };
+    window.addEventListener('kft:near-me-tab', onTabEvent);
+    return () => window.removeEventListener('kft:near-me-tab', onTabEvent);
+  }, []);
+
+  useEffect(() => {
+    if (isNearMeModalOpen && typeof window !== 'undefined') {
+      const initTab = (window as any).__kft_near_me_initial_tab;
+      if (initTab === 'restaurants' || initTab === 'destinations') {
+        setActiveType(initTab);
+        (window as any).__kft_near_me_initial_tab = undefined;
+      }
+      const initQuery = (window as any).__kft_near_me_initial_query;
+      if (typeof initQuery === 'string') {
+        setNearbyQuery(initQuery);
+        (window as any).__kft_near_me_initial_query = undefined;
+      } else {
+        setNearbyQuery('');
+      }
+      setQuickFilterId('all');
+    }
+  }, [isNearMeModalOpen]);
   const [geoStatus, setGeoStatus] = useState<'idle' | 'requesting' | 'granted' | 'fallback'>('idle');
   const [manualProvince, setManualProvince] = useState<string>('រាជធានីភ្នំពេញ');
   const [selectedPresetId, setSelectedPresetId] = useState<string>('gps');
@@ -330,6 +366,48 @@ export const NearMeModal: React.FC = () => {
       .sort((a, b) => a.distanceMeters - b.distanceMeters);
   }, [destinations, liveNearbyAttractions, baseCoords, selectedRadiusMeters]);
 
+  const filteredNearbyRestaurants = useMemo(() => {
+    const q = nearbyQuery.trim().toLowerCase();
+    return nearbyRestaurants.filter((r) => {
+      const haystack = [
+        r.nameKh,
+        r.nameEn,
+        r.addressKh,
+        r.addressEn,
+        r.categoryKh,
+        r.categoryEn,
+        ...(r.signatureDishesKh || []),
+        ...(r.signatureDishesEn || []),
+        ...((r.menuItems || []).map((m) => `${m.nameKh} ${m.nameEn || ''}`)),
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+
+      if (quickFilterId === 'noodles' && !/គុយទាវ|មី|នំបញ្ចុក|noodle|soup|ស៊ុប/.test(haystack)) return false;
+      if (quickFilterId === 'rice_khmer' && !/បាយ|ម្ហូបខ្មែរ|សម្ល|អាម៉ុក|khmer|rice|restaurant|ភោជនីយដ្ឋាន|អាហារដ្ឋាន/.test(haystack)) return false;
+      if (quickFilterId === 'coffee' && !/កាហ្វេ|តែ|ភេសជ្ជៈ|coffee|cafe|café|tea|bakery/.test(haystack)) return false;
+      if (quickFilterId === 'bbq_seafood' && !/សាច់អាំង|គ្រឿងសមុទ្រ|ស៊ុប|bbq|seafood|grill|hotpot|buffet/.test(haystack)) return false;
+      if (q && !haystack.includes(q)) return false;
+      return true;
+    });
+  }, [nearbyRestaurants, nearbyQuery, quickFilterId]);
+
+  const filteredNearbyDestinations = useMemo(() => {
+    const q = nearbyQuery.trim().toLowerCase();
+    return nearbyDestinations.filter((d) => {
+      const haystack = [d.nameKh, d.nameEn, d.categoryKh, d.categoryEn, d.descriptionKh, d.descriptionEn, d.addressKh, d.addressEn]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+      if (quickFilterId === 'culture' && !/វត្ត|ប្រាសាទ|សារមន្ទីរ|វប្បធម៌|ប្រវត្តិ|temple|pagoda|museum|palace|heritage|វាំង/.test(haystack)) return false;
+      if (quickFilterId === 'nature' && !/ធម្មជាតិ|សួន|ទន្លេ|ភ្នំ|បឹង|ឆ្នេរ|park|river|nature|garden|beach|mountain/.test(haystack)) return false;
+      if (quickFilterId === 'leisure' && !/ផ្សារ|កម្សាន្ត|ដើរលេង|រមណីយដ្ឋាន|market|mall|walk|night|plaza/.test(haystack)) return false;
+      if (q && !haystack.includes(q)) return false;
+      return true;
+    });
+  }, [nearbyDestinations, nearbyQuery, quickFilterId]);
+
   if (!isNearMeModalOpen) return null;
 
   const localizedManualProvince = translateProvince(manualProvince, language);
@@ -339,7 +417,9 @@ export const NearMeModal: React.FC = () => {
       ? tr(language, '៥០០ ម៉ែត្រ', '500m', '500 米')
       : selectedRadiusMeters === 1000
       ? tr(language, '១ គ.ម (1km)', '1km', '1 公里')
-      : tr(language, '២ គ.ម (2km)', '2km', '2 公里');
+      : selectedRadiusMeters === 2000
+      ? tr(language, '២ គ.ម (2km)', '2km', '2 公里')
+      : tr(language, '៥ គ.ម (5km)', '5km', '5 公里');
   const formatDistanceLabel = (distMeters: number) => {
     if (distMeters <= 2000) {
       return `${distMeters} ${meterUnit}`;
@@ -373,22 +453,28 @@ export const NearMeModal: React.FC = () => {
       >
         {/* Header */}
         <div className="p-4 bg-gradient-to-r from-[#064E3B] to-[#047857] text-white flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center text-emerald-300 shadow-xs">
-              <Compass className="w-5 h-5" />
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-10 h-10 rounded-2xl bg-white/15 border border-white/25 flex items-center justify-center text-emerald-300 shadow-xs shrink-0">
+              {activeType === 'restaurants' ? <UtensilsCrossed className="w-5 h-5" /> : <Compass className="w-5 h-5" />}
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="font-moul text-sm text-white">
-                  {tr(language, 'នៅជិតខ្ញុំ', 'Near Me', '附近探索')}
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="font-moul text-sm text-white truncate">
+                  {activeType === 'restaurants'
+                    ? tr(language, 'ស្វែងរកម្ហូបជិតខ្ញុំ', 'Nearby Food Search', '附近美食搜索')
+                    : tr(language, 'កន្លែងជិតខ្ញុំ', 'Nearby Places', '附近景点与好去处')}
                 </h3>
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-400/20 border border-emerald-300/40 text-emerald-100 text-[10px] font-extrabold shrink-0">
+                  <CheckCircle2 className="w-3 h-3 text-emerald-300" />
+                  <span>{tr(language, 'ឥតគិតថ្លៃ • FREE', 'FREE Access', '免费使用')}</span>
+                </span>
               </div>
-              <p className="text-[11px] text-emerald-100 font-khmer">
+              <p className="text-[11px] text-emerald-100 font-khmer truncate">
                 {tr(
                   language,
-                  `ក្នុងរង្វង់ ${activeRadiusText} ពីទីតាំង GPS របស់អ្នក`,
-                  `Within ${activeRadiusText} of your current GPS location`,
-                  `距离您当前 GPS 位置 ${activeRadiusText} 以内`
+                  `ក្នុងរង្វង់ ${activeRadiusText} ពីទីតាំង GPS របស់អ្នក • នាំផ្លូវផ្ទាល់`,
+                  `Within ${activeRadiusText} of your GPS • Direct map directions`,
+                  `距离您当前 GPS ${activeRadiusText} 以内 • 支持一键路线导航`
                 )}
               </p>
             </div>
@@ -503,10 +589,13 @@ export const NearMeModal: React.FC = () => {
           </div>
         </div>
 
-        {/* Tab switchers: Restaurants vs Destinations */}
+        {/* Tab switchers: Nearby Food Search vs Nearby Places */}
         <div className="grid grid-cols-2 p-1.5 bg-slate-100 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 shrink-0 font-khmer">
           <button
-            onClick={() => setActiveType('restaurants')}
+            onClick={() => {
+              setActiveType('restaurants');
+              setQuickFilterId('all');
+            }}
             className={`py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
               activeType === 'restaurants'
                 ? 'bg-white dark:bg-slate-700 text-[#064E3B] dark:text-emerald-300 shadow-xs'
@@ -514,14 +603,17 @@ export const NearMeModal: React.FC = () => {
             }`}
           >
             <Store className="w-4 h-4" />
-            <span>{tr(language, 'ភោជនីយដ្ឋានជិតខ្ញុំ', 'Restaurants Near Me', '附近餐厅')}</span>
+            <span>{tr(language, 'ស្វែងរកម្ហូបជិតខ្ញុំ', 'Nearby Food & Shops', '附近美食与餐厅')}</span>
             <span className="px-1.5 py-0.2 rounded-full bg-emerald-100 dark:bg-emerald-900/60 text-[10px]">
-              {nearbyRestaurants.length}
+              {filteredNearbyRestaurants.length}
             </span>
           </button>
 
           <button
-            onClick={() => setActiveType('destinations')}
+            onClick={() => {
+              setActiveType('destinations');
+              setQuickFilterId('all');
+            }}
             className={`py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
               activeType === 'destinations'
                 ? 'bg-white dark:bg-slate-700 text-[#064E3B] dark:text-emerald-300 shadow-xs'
@@ -529,11 +621,79 @@ export const NearMeModal: React.FC = () => {
             }`}
           >
             <Mountain className="w-4 h-4" />
-            <span>{tr(language, 'កន្លែងដើរលេងជិតខ្ញុំ', 'Spots Near Me', '附近景点')}</span>
+            <span>{tr(language, 'កន្លែងជិតខ្ញុំ', 'Nearby Places', '附近景点好去处')}</span>
             <span className="px-1.5 py-0.2 rounded-full bg-emerald-100 dark:bg-emerald-900/60 text-[10px]">
-              {nearbyDestinations.length}
+              {filteredNearbyDestinations.length}
             </span>
           </button>
+        </div>
+
+        {/* Instant Dish / Place Filter Bar */}
+        <div className="px-3 py-2 bg-white dark:bg-slate-900 border-b border-slate-200/80 dark:border-slate-800 space-y-1.5 shrink-0 font-khmer">
+          <div className="relative">
+            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <input
+              type="text"
+              value={nearbyQuery}
+              onChange={(e) => setNearbyQuery(e.target.value)}
+              placeholder={
+                activeType === 'restaurants'
+                  ? tr(
+                      language,
+                      'វាយឈ្មោះមុខម្ហូប ឬហាងជិតអ្នក (ឧ. គុយទាវ, កាហ្វេ, បាយ)...',
+                      'Filter nearby dishes or shops (e.g. noodles, coffee, rice)...',
+                      '搜索附近的菜品或餐厅（如 粿条、咖啡、米饭）...'
+                    )
+                  : tr(
+                      language,
+                      'វាយឈ្មោះកន្លែងជិតអ្នក (ឧ. វត្ត, សួន, ផ្សារ, មាត់ទន្លេ)...',
+                      'Filter nearby places (e.g. pagoda, park, market, riverside)...',
+                      '搜索附近的景点或去处（如 寺庙、公园、市场、河畔）...'
+                    )
+              }
+              className="w-full pl-8 pr-7 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            />
+            {nearbyQuery && (
+              <button
+                type="button"
+                onClick={() => setNearbyQuery('')}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+
+          <div className="flex items-center gap-1 overflow-x-auto no-scrollbar">
+            {(activeType === 'restaurants'
+              ? [
+                  { id: 'all', kh: 'ទាំងអស់', en: 'All Food', zh: '全部美食' },
+                  { id: 'rice_khmer', kh: '🍚 បាយ & ម្ហូបខ្មែរ', en: '🍚 Rice & Khmer', zh: '🍚 柬式简餐/米饭' },
+                  { id: 'noodles', kh: '🍜 គុយទាវ & មី', en: '🍜 Noodles & Soup', zh: '🍜 粉面与汤品' },
+                  { id: 'coffee', kh: '☕ កាហ្វេ & ភេសជ្ជៈ', en: '☕ Coffee & Café', zh: '☕ 咖啡与饮品' },
+                  { id: 'bbq_seafood', kh: '🦐 សាច់អាំង & ស៊ុប', en: '🦐 BBQ & Seafood', zh: '🦐 烧烤与海鲜' },
+                ]
+              : [
+                  { id: 'all', kh: 'ទាំងអស់', en: 'All Places', zh: '全部地点' },
+                  { id: 'culture', kh: '🏛️ វប្បធម៌ & វត្តអារាម', en: '🏛️ Culture & Temples', zh: '🏛️ 文化与古迹' },
+                  { id: 'nature', kh: '🌿 ធម្មជាតិ & សួន', en: '🌿 Parks & Nature', zh: '🌿 公园与自然' },
+                  { id: 'leisure', kh: '🎡 ផ្សារ & កន្លែងដើរលេង', en: '🎡 Markets & Leisure', zh: '🎡 市场与休闲' },
+                ]
+            ).map((chip) => (
+              <button
+                key={chip.id}
+                type="button"
+                onClick={() => setQuickFilterId(chip.id)}
+                className={`px-2.5 py-1 rounded-full text-[10px] font-bold whitespace-nowrap transition cursor-pointer ${
+                  quickFilterId === chip.id
+                    ? 'bg-[#064E3B] text-white shadow-2xs'
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700'
+                }`}
+              >
+                {tr(language, chip.kh, chip.en, chip.zh)}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Content list */}
@@ -559,7 +719,7 @@ export const NearMeModal: React.FC = () => {
               </p>
             </div>
           ) : activeType === 'restaurants' ? (
-            nearbyRestaurants.length === 0 ? (
+            filteredNearbyRestaurants.length === 0 ? (
               <div className="py-12 px-4 text-center bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700 my-2">
                 <div className="w-14 h-14 mx-auto mb-3 rounded-2xl bg-emerald-100 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center text-[#064E3B] dark:text-emerald-400 shadow-xs">
                   <Compass className="w-7 h-7" />
@@ -581,9 +741,9 @@ export const NearMeModal: React.FC = () => {
                   )}
                 </p>
                 <div className="flex items-center justify-center gap-2 flex-wrap">
-                  {selectedRadiusMeters < 2000 && (
+                  {selectedRadiusMeters < 5000 && (
                     <button
-                      onClick={() => handleSelectRadius(selectedRadiusMeters === 500 ? 1000 : 2000)}
+                      onClick={() => handleSelectRadius(selectedRadiusMeters === 500 ? 1000 : selectedRadiusMeters === 1000 ? 2000 : 5000)}
                       className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-emerald-100 dark:bg-slate-700 text-[#064E3B] dark:text-emerald-300 text-xs font-bold font-khmer rounded-xl transition cursor-pointer"
                     >
                       <MapPin className="w-3.5 h-3.5" />
@@ -604,7 +764,7 @@ export const NearMeModal: React.FC = () => {
                 </div>
               </div>
             ) : (
-              nearbyRestaurants.map((r) => {
+              filteredNearbyRestaurants.map((r) => {
                 const rLoc = getLocalizedRestaurant(r, language);
                 const hasOfficialPhoto =
                   !r.photoUrl?.startsWith('data:image/svg+xml') &&
@@ -713,7 +873,7 @@ export const NearMeModal: React.FC = () => {
               })
             )
           ) : (
-            nearbyDestinations.length === 0 ? (
+            filteredNearbyDestinations.length === 0 ? (
               <div className="py-12 px-4 text-center bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700 my-2">
                 <div className="w-14 h-14 mx-auto mb-3 rounded-2xl bg-emerald-100 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center text-[#064E3B] dark:text-emerald-400 shadow-xs">
                   <Mountain className="w-7 h-7" />
@@ -735,9 +895,9 @@ export const NearMeModal: React.FC = () => {
                   )}
                 </p>
                 <div className="flex items-center justify-center gap-2 flex-wrap">
-                  {selectedRadiusMeters < 2000 && (
+                  {selectedRadiusMeters < 5000 && (
                     <button
-                      onClick={() => handleSelectRadius(selectedRadiusMeters === 500 ? 1000 : 2000)}
+                      onClick={() => handleSelectRadius(selectedRadiusMeters === 500 ? 1000 : selectedRadiusMeters === 1000 ? 2000 : 5000)}
                       className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-emerald-100 dark:bg-slate-700 text-[#064E3B] dark:text-emerald-300 text-xs font-bold font-khmer rounded-xl transition cursor-pointer"
                     >
                       <MapPin className="w-3.5 h-3.5" />
@@ -758,7 +918,7 @@ export const NearMeModal: React.FC = () => {
                 </div>
               </div>
             ) : (
-              nearbyDestinations.map((d) => {
+              filteredNearbyDestinations.map((d) => {
                 const dLoc = getLocalizedDestination(d, language);
                 const hasOfficialPhoto =
                   !d.photoUrl?.startsWith('data:image/svg+xml') &&

@@ -1,12 +1,14 @@
-import type { User } from '../types';
+import { isAdminAccount, isUserVipActive, type User } from '../types';
 import type { TagFilterId } from './dishTags';
 
 /**
- * Smart Menu & Healthy Food access helper — open to all signed-in users so
- * discovery features never unexpectedly redirect to the VIP payment submission modal.
+ * Smart Menu & Healthy Dish Nutrition Filter access helper —
+ * reserved for active VIP members and System Administrators.
+ * Basic features (Nearby Food Search, Nearby Places, Food Recommendations,
+ * Daily Food Discovery, and Map Navigation) remain 100% Free for all users.
  */
-export function hasSpecialAndHealthyFoodVipAccess(_user?: User | null): boolean {
-  return true;
+export function hasSpecialAndHealthyFoodVipAccess(user?: User | null): boolean {
+  return Boolean(user && (isUserVipActive(user) || isAdminAccount(user)));
 }
 
 /**
@@ -15,16 +17,20 @@ export function hasSpecialAndHealthyFoodVipAccess(_user?: User | null): boolean 
 export const TAG_FILTER_EVENT = 'kft:set-tag-filter';
 let pending: TagFilterId | null = null;
 
-export function requestTagFilter(id: TagFilterId, _user?: User | null): boolean {
+export function requestTagFilter(id: TagFilterId, user?: User | null): boolean {
+  if (!hasSpecialAndHealthyFoodVipAccess(user)) {
+    return false;
+  }
   pending = id;
   if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent(TAG_FILTER_EVENT, { detail: id }));
   return true;
 }
 
 /** Returns (and clears) a tag filter requested before FoodView mounted. */
-export function consumePendingTagFilter(_user?: User | null): TagFilterId | null {
+export function consumePendingTagFilter(user?: User | null): TagFilterId | null {
   const p = pending;
   pending = null;
+  if (!hasSpecialAndHealthyFoodVipAccess(user)) return null;
   return p;
 }
 

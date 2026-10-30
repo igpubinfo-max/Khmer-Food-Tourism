@@ -1,9 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
-  X, Compass, Navigation, Heart, BadgeCheck, Wifi, WifiOff, Route, ChevronDown, Lock, Flame,
+  X, Compass, Navigation, Heart, BadgeCheck, Wifi, WifiOff, Route, ChevronDown, Lock, Flame, CheckCircle2,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
-import { isUserVipActive, organizeAndDeduplicateFoods } from '../types';
+import { isAdminAccount, isUserVipActive, organizeAndDeduplicateFoods } from '../types';
 import type { FoodItem } from '../types';
 import { tr } from '../utils/i18n';
 import type { TagFilterId, DishTagId } from '../utils/dishTags';
@@ -42,7 +42,7 @@ export const SmartHubMenuModal: React.FC<Props> = ({ onClose }) => {
 
   const organizedFoods = useMemo(() => organizeAndDeduplicateFoods(foods), [foods]);
 
-  const canUseVip = true;
+  const canUseVip = Boolean(currentUser && (isUserVipActive(currentUser) || isAdminAccount(currentUser)));
   const { level } = getPassportLevel(stampCount);
 
   const triggerVipUpgrade = () => {
@@ -76,15 +76,6 @@ export const SmartHubMenuModal: React.FC<Props> = ({ onClose }) => {
     setSelectedFood(food);
   };
 
-  const vipOnly = (open: () => void) => () => {
-    if (!canUseVip) {
-      triggerVipUpgrade();
-      return;
-    }
-    onClose();
-    open();
-  };
-
   const openFavorites = () => {
     onClose();
     setIsWishlistsModalOpen(true);
@@ -112,7 +103,7 @@ export const SmartHubMenuModal: React.FC<Props> = ({ onClose }) => {
               {tr(language, 'ម៉ឺនុយពិសេស', 'Explore Hub', '精选菜单')}
             </h2>
             <p className="text-xs text-emerald-100">
-              {tr(language, 'ស្លាកម្ហូប និងឧបករណ៍ទេសចរណ៍នៅទីតែមួយ', 'Dish tags & travel tools in one place', '菜品标签与出行工具，一站直达')}
+              {tr(language, 'ស្លាកម្ហូបសុខភាព (VIP) និងឧបករណ៍ប្រចាំថ្ងៃ (FREE)', 'VIP Healthy Tags & Free Daily Tools', 'VIP 健康标签与免费日常工具')}
             </p>
           </div>
           <button
@@ -126,7 +117,7 @@ export const SmartHubMenuModal: React.FC<Props> = ({ onClose }) => {
         </div>
 
         <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-3.5 space-y-5 [-webkit-overflow-scrolling:touch]">
-          {/* SECTION 1: Healthy Dish Tags (cards, inline dishes, 3-meal idea) */}
+          {/* SECTION 1: Healthy Dish Tags (cards, inline dishes, 3-meal idea — VIP) */}
           <SmartHubHealthySection foods={organizedFoods} onViewAll={pickTag} onOpenFood={openFood} onUpgradeVip={triggerVipUpgrade} />
 
           {/* SECTION 2: Smart Travel & Food Tools */}
@@ -135,6 +126,53 @@ export const SmartHubMenuModal: React.FC<Props> = ({ onClose }) => {
               <Compass className="w-4 h-4 text-amber-500 shrink-0" />
               <span>{tr(language, 'ឧបករណ៍ម្ហូប និងទេសចរណ៍', 'Food & Travel Tools', '美食与出行工具')}</span>
             </h3>
+
+            {/* Near me (FREE) */}
+            <button
+              type="button"
+              className={rowCls}
+              onClick={() => {
+                onClose();
+                setIsNearMeModalOpen(true);
+              }}
+            >
+              <span className={`${iconBox} bg-emerald-100 text-emerald-700`}><Navigation className="w-5 h-5" /></span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-sm font-bold text-slate-900 dark:text-white">
+                  {tr(language, 'ស្វែងរកម្ហូប & កន្លែងជិតខ្ញុំ', 'Nearby Food & Places', '附近美食与景点')}
+                </span>
+                <span className="block text-xs text-slate-500 dark:text-slate-400">
+                  {tr(language, 'ហាងអាហារ និងកន្លែងកម្សាន្តក្បែរ GPS អ្នក', 'Restaurants & attractions near your GPS', '搜索身边的餐厅与景点')}
+                </span>
+              </span>
+              <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 text-[10px] font-extrabold flex items-center gap-1">
+                <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                {tr(language, 'ឥតគិតថ្លៃ', 'FREE', '免费')}
+              </span>
+            </button>
+
+            {/* Smart AI Assistant (Free Preview + VIP) */}
+            <button
+              type="button"
+              className={rowCls}
+              onClick={() => {
+                onClose();
+                setIsAiTripPlannerModalOpen(true);
+              }}
+            >
+              <span className={`${iconBox} bg-amber-100 text-amber-700`}><Route className="w-5 h-5" /></span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-sm font-bold text-slate-900 dark:text-white">
+                  {tr(language, 'ជំនួយការឆ្លាតវៃ AI', 'Smart AI Assistant', 'AI 智能助手')}
+                </span>
+                <span className="block text-xs text-slate-500 dark:text-slate-400">
+                  {tr(language, 'ជំនួយការរើសម្ហូប សុខភាព និងរៀបផែនការ AI', 'AI food advisor, nutrition & route planner', 'AI 选餐顾问、营养与路线助手')}
+                </span>
+              </span>
+              <span className="px-2 py-0.5 rounded-full bg-slate-900 text-amber-300 text-[10px] font-bold flex items-center gap-0.5">
+                👑 VIP
+              </span>
+            </button>
 
             {/* 1-Day food trips (VIP) */}
             <button
@@ -166,35 +204,7 @@ export const SmartHubMenuModal: React.FC<Props> = ({ onClose }) => {
             </button>
             {canUseVip && openPanel === 'trips' && <FoodTripTemplates />}
 
-            {/* AI Trip Planner (VIP) */}
-            <button type="button" className={rowCls} onClick={vipOnly(() => setIsAiTripPlannerModalOpen(true))}>
-              <span className={`${iconBox} bg-sky-100 text-sky-700`}><Route className="w-5 h-5" /></span>
-              <span className="min-w-0 flex-1">
-                <span className="block text-sm font-bold text-slate-900 dark:text-white">
-                  {tr(language, 'ផែនការដើរលេង AI', 'AI Trip Planner', 'AI 行程规划')}
-                </span>
-                <span className="block text-xs text-slate-500 dark:text-slate-400">
-                  {tr(language, 'រៀបចំផ្លូវដើរលេង និងម្ហូបតាមថវិកា', 'Custom route & dining built for your budget', '按预算量身定制出行与美食路线')}
-                </span>
-              </span>
-              {!canUseVip && <span className="px-1.5 py-0.5 rounded-full bg-slate-900 text-amber-300 text-[10px] font-bold flex items-center gap-0.5"><Lock className="w-3 h-3" />VIP</span>}
-            </button>
-
-            {/* Near me (VIP) */}
-            <button type="button" className={rowCls} onClick={vipOnly(() => setIsNearMeModalOpen(true))}>
-              <span className={`${iconBox} bg-emerald-100 text-emerald-700`}><Navigation className="w-5 h-5" /></span>
-              <span className="min-w-0 flex-1">
-                <span className="block text-sm font-bold text-slate-900 dark:text-white">
-                  {tr(language, 'នៅជិតខ្ញុំ', 'Near Me', '附近')}
-                </span>
-                <span className="block text-xs text-slate-500 dark:text-slate-400">
-                  {tr(language, 'ហាង និងកន្លែងក្បែរខ្លួន', 'Places & distances around you', '身边的餐厅与景点')}
-                </span>
-              </span>
-              {!canUseVip && <span className="px-1.5 py-0.5 rounded-full bg-slate-900 text-amber-300 text-[10px] font-bold flex items-center gap-0.5"><Lock className="w-3 h-3" />VIP</span>}
-            </button>
-
-            {/* Favorites with live count */}
+            {/* Favorites with live count (FREE) */}
             <button type="button" className={rowCls} onClick={openFavorites}>
               <span className={`${iconBox} bg-rose-100 text-rose-600`}><Heart className="w-5 h-5" /></span>
               <span className="min-w-0 flex-1">
@@ -202,7 +212,7 @@ export const SmartHubMenuModal: React.FC<Props> = ({ onClose }) => {
                   {tr(language, 'ចំណូលចិត្តរបស់ខ្ញុំ', 'My Favorites', '我的收藏')}
                 </span>
                 <span className="block text-xs text-slate-500 dark:text-slate-400">
-                  {tr(language, 'បញ្ជីដែលបានរក្សាទុក', 'Your saved list', '已保存列表')}
+                  {tr(language, 'បញ្ជីដែលបានរក្សាទុក (ឥតគិតថ្លៃ)', 'Your saved list (Free)', '已保存列表（免费）')}
                 </span>
               </span>
               <span className="min-w-[32px] h-8 px-2 rounded-full bg-rose-500 text-white text-sm font-extrabold flex items-center justify-center" aria-label={`${bookmarks.length}`}>
@@ -210,7 +220,7 @@ export const SmartHubMenuModal: React.FC<Props> = ({ onClose }) => {
               </span>
             </button>
 
-            {/* Trending Khmer Food & Online Discovery */}
+            {/* Trending Khmer Food & Online Discovery (FREE) */}
             <button
               type="button"
               className={rowCls}
@@ -227,6 +237,9 @@ export const SmartHubMenuModal: React.FC<Props> = ({ onClose }) => {
                 <span className="block text-xs text-slate-500 dark:text-slate-400">
                   {tr(language, 'វីដេអូពេញនិយម YouTube', 'Trending YouTube Videos', 'YouTube 热门视频')}
                 </span>
+              </span>
+              <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 text-[10px] font-extrabold">
+                {tr(language, 'ឥតគិតថ្លៃ', 'FREE', '免费')}
               </span>
             </button>
 

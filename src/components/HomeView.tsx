@@ -14,7 +14,6 @@ import { shuffleForCurrentSession } from '../utils/sessionShuffle';
 import { tr, translateProvince } from '../utils/i18n';
 import { getLocalizedFood, getLocalizedRestaurant, getLocalizedDestination } from '../utils/zhDynamicTranslator';
 import { HomeGreetingSearch } from './home/HomeGreetingSearch';
-import { openSmartHub } from '../utils/smartHub';
 import { TrendingFoodsRow } from './home/TrendingFoodsRow';
 import { HomeSkeleton, HomeEmptyState } from './home/HomeStates';
 import { FeatureGrid } from './home/FeatureGrid';
@@ -254,11 +253,28 @@ export const HomeView: React.FC = () => {
     setIsAdminOpen(true);
   }, [setIsAdminOpen]);
 
-  const handleWhatToEat = useCallback(() => setIsWhatToEatModalOpen(true), [setIsWhatToEatModalOpen]);
-  const handleNearMe = useCallback(() => setIsNearMeModalOpen(true), [setIsNearMeModalOpen]);
-  const handleDaily = useCallback(() => setIsDailyDiscoveriesModalOpen(true), [setIsDailyDiscoveriesModalOpen]);
-  const handleTripPlanner = useCallback(() => setIsAiTripPlannerModalOpen(true), [setIsAiTripPlannerModalOpen]);
-  const handleMapsSearch = useCallback(() => openGoogleMapsSearchModal('all'), [openGoogleMapsSearchModal]);
+  const handleNearbyFoodSearch = useCallback(() => {
+    (window as any).__kft_near_me_initial_tab = 'restaurants';
+    window.dispatchEvent(new CustomEvent('kft:near-me-tab', { detail: 'restaurants' }));
+    setIsNearMeModalOpen(true);
+  }, [setIsNearMeModalOpen]);
+
+  const handleNearbyPlaces = useCallback(() => {
+    (window as any).__kft_near_me_initial_tab = 'destinations';
+    window.dispatchEvent(new CustomEvent('kft:near-me-tab', { detail: 'destinations' }));
+    setIsNearMeModalOpen(true);
+  }, [setIsNearMeModalOpen]);
+
+  const handleFoodRecommendations = useCallback(() => setIsWhatToEatModalOpen(true), [setIsWhatToEatModalOpen]);
+
+  const handleDailyFoodDiscovery = useCallback(() => {
+    (window as any).__kft_daily_initial_category = 'food';
+    setIsDailyDiscoveriesModalOpen(true);
+  }, [setIsDailyDiscoveriesModalOpen]);
+
+  const handleMapNavigation = useCallback(() => openGoogleMapsSearchModal('all'), [openGoogleMapsSearchModal]);
+
+  const handleSmartAiAssistant = useCallback(() => setIsAiTripPlannerModalOpen(true), [setIsAiTripPlannerModalOpen]);
   const handleSeeAllFoods = useCallback(() => setActiveTab('food'), [setActiveTab]);
   const handleSeeAllRestaurants = useCallback(() => setActiveTab('restaurants'), [setActiveTab]);
   const handleSeeAllTourism = useCallback(() => setActiveTab('tourism'), [setActiveTab]);
@@ -1063,16 +1079,16 @@ export const HomeView: React.FC = () => {
                 />
               )}
 
-              {/* 1. Six clear feature shortcuts (AI Trip Planner replaces Alerts) */}
+              {/* 1. Six Smart Daily Services (5 Free + 1 VIP Smart AI Assistant) */}
               <FeatureGrid
                 language={language}
                 isVip={canUseVipActions}
-                onWhatToEat={handleWhatToEat}
-                onNearMe={handleNearMe}
-                onSmartMenu={openSmartHub}
-                onDaily={handleDaily}
-                onTripPlanner={handleTripPlanner}
-                onMapsSearch={handleMapsSearch}
+                onNearbyFoodSearch={handleNearbyFoodSearch}
+                onNearbyPlaces={handleNearbyPlaces}
+                onFoodRecommendations={handleFoodRecommendations}
+                onDailyFoodDiscovery={handleDailyFoodDiscovery}
+                onMapNavigation={handleMapNavigation}
+                onSmartAiAssistant={handleSmartAiAssistant}
               />
 
               {/* 2. Personalized picks for the current time of day */}
