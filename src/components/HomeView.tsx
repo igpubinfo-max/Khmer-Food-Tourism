@@ -22,6 +22,14 @@ import { TodayDiscovery } from './home/TodayDiscovery';
 import { TrendingFoodsRow } from './home/TrendingFoodsRow';
 import { HomeSkeleton, HomeEmptyState } from './home/HomeStates';
 import { MoreSection } from './home/MoreSection';
+import { FeatureGrid } from './home/FeatureGrid';
+import { ForYouSection } from './home/ForYouSection';
+import { PopularShops } from './home/PopularShops';
+import { PopularDestinations } from './home/PopularDestinations';
+import { VipPerksCard } from './home/VipPerksCard';
+import { VipStatusNotice } from './home/VipStatusNotice';
+import { MyShopPanel } from './home/MyShopPanel';
+import { getMealSlot, getMealHint, MEAL_CATEGORIES, seededShuffle } from './home/homeUtils';
 import { 
   Sparkles, ChevronRight, Utensils, Store, Compass, 
   MapPin, Heart, Flame, QrCode, Download, ShieldCheck,
@@ -433,8 +441,27 @@ export const HomeView: React.FC = () => {
     }
   };
 
+  // ---- Redesigned Home: time-of-day personalization & VIP status line ----
+  const mealSlot = useMemo(() => getMealSlot(), []);
+  const forYouFoods = useMemo(() => {
+    const withPhoto = foods.filter((f) => f && f.id && f.photoUrl);
+    const preferred = MEAL_CATEGORIES[mealSlot];
+    const matching = withPhoto.filter((f) => preferred.includes(f.categorySlug));
+    const pool = matching.length >= 3 ? matching : withPhoto;
+    return seededShuffle(pool, todaySeed * 4 + ['breakfast', 'lunch', 'snack', 'dinner'].indexOf(mealSlot)).slice(0, 3);
+  }, [foods, mealSlot, todaySeed]);
+  const vipDaysLeft = isVip && currentUser ? getVipRemainingDays(currentUser) : 0;
+  const vipNoticeKind: 'expiring' | 'expired' | null =
+    currentUser && !isAdmin
+      ? isVip && vipDaysLeft <= 3
+        ? 'expiring'
+        : !isVip && getVipAccountState(currentUser) === 'expired_vip'
+        ? 'expired'
+        : null
+      : null;
+
   return (
-    <div className="max-w-md mx-auto px-4 py-3 space-y-5 pb-24 font-khmer">
+    <div className="max-w-md mx-auto px-4 py-4 space-y-7 pb-28 font-khmer">
       {/* 1. Greeting + User Profile Card + one big search bar */}
       <HomeGreetingSearch
         language={language}
@@ -448,6 +475,7 @@ export const HomeView: React.FC = () => {
           (window as any).__kft_admin_tab = 'stats';
           setIsAdminOpen(true);
         }}
+        hint={getMealHint(mealSlot, language)}
         query={globalSearchQuery}
         onChange={setGlobalSearchQuery}
       />
@@ -1227,54 +1255,39 @@ export const HomeView: React.FC = () => {
             <HomeSkeleton />
           ) : (
             <>
-              {/* 2. Smart Menu (one entry for tags, trips, near me, favorites, stamps, share, offline) + 2 quick actions */}
-              <SmartMenuBanner
+              {/* Slim, informative VIP status line (only when expiring soon or just ended) */}
+              {vipNoticeKind && (
+                <VipStatusNotice
+                  language={language}
+                  kind={vipNoticeKind}
+                  daysLeft={vipDaysLeft}
+                  onRenew={() => openUpgradeVipModal(true)}
+                />
+              )}
+
+              {/* 1. Six clear feature shortcuts */}
+              <FeatureGrid
                 language={language}
-                onOpen={requireVip(openSmartHub)}
-                showVipLock={!canUseVipActions}
-                onUpgradeVip={openUpgradeVipModal}
-              />
-              <QuickActions
-                language={language}
-                showVipLock={!canUseVipActions}
+                isVip={canUseVipActions}
+                unreadCount={unreadNotificationsCount}
                 onWhatToEat={requireVip(() => setIsWhatToEatModalOpen(true))}
                 onNearMe={requireVip(() => setIsNearMeModalOpen(true))}
-                onCheckIn={requireVip(() => setIsNearMeModalOpen(true))}
+                onSmartMenu={requireVip(openSmartHub)}
+                onDaily={() => setIsDailyDiscoveriesModalOpen(true)}
+                onAlerts={() => setIsNotificationsModalOpen(true)}
+                onMapsSearch={() => openGoogleMapsSearchModal('all')}
               />
 
-              {/* Highlights strip: live counts, tap to jump */}
-              <div className="grid grid-cols-3 gap-2">
-                {[
-                  { Icon: Utensils, n: foods.length, label: txt('មុខម្ហូប', 'Dishes', '美食'), tab: 'food' },
-                  { Icon: Store, n: restaurants.length, label: txt('ហាងអាហារ', 'Places', '餐厅'), tab: 'restaurants' },
-                  { Icon: Compass, n: destinations.length, label: txt('កន្លែងទេសចរណ៍', 'Sights', '景点'), tab: 'tourism' },
-                ].map((s) => (
-                  <button
-                    key={s.tab}
-                    type="button"
-                    onClick={() => setActiveTab(s.tab as any)}
-                    className="rounded-2xl bg-white dark:bg-slate-800/90 border border-emerald-900/15 dark:border-emerald-700/40 p-2.5 text-center shadow-xs hover:border-amber-400 active:scale-95 transition cursor-pointer flex flex-col items-center"
-                  >
-                    <span className="w-8 h-8 rounded-xl bg-emerald-950/90 dark:bg-emerald-900/60 text-amber-300 flex items-center justify-center shadow-xs">
-                      <s.Icon className="w-4 h-4" />
-                    </span>
-                    <span className="block text-base font-black font-mono text-[#064E3B] dark:text-amber-300 leading-tight mt-1.5">{s.n}+</span>
-                    <span className="block text-[11px] font-bold text-slate-700 dark:text-slate-300">{s.label}</span>
-                  </button>
-                ))}
-              </div>
-
-              {/* 3. Today's discovery */}
-              <TodayDiscovery
+              {/* 2. Personalized picks for the current time of day */}
+              <ForYouSection
                 language={language}
-                foods={discoveryFoods}
-                restaurants={discoveryRestaurants}
-                onShuffle={() => setDiscoverySeed((s) => s + 1)}
+                slot={mealSlot}
+                foods={forYouFoods}
                 onOpenFood={setSelectedFood}
-                onOpenRestaurant={setSelectedRestaurant}
+                onSeeAll={() => setActiveTab('food')}
               />
 
-              {/* 4. Trending foods (horizontal) */}
+              {/* 3. Trending foods */}
               {randomTrending.length > 0 ? (
                 <TrendingFoodsRow
                   language={language}
@@ -1292,541 +1305,66 @@ export const HomeView: React.FC = () => {
                   onAction={() => setActiveTab('food')}
                 />
               )}
+
+              {/* 4. Popular places (with quick province chips) */}
+              <PopularShops
+                language={language}
+                restaurants={restaurants}
+                onOpen={setSelectedRestaurant}
+                onSeeAll={() => setActiveTab('restaurants')}
+              />
+
+              {/* 5. Explore Cambodia */}
+              <PopularDestinations
+                language={language}
+                destinations={destinations}
+                onOpen={setSelectedDestination}
+                onSeeAll={() => setActiveTab('tourism')}
+              />
+
+              {/* 6. Cambodia at a glance */}
+              <div className="grid grid-cols-3 divide-x divide-slate-200 dark:divide-white/10 rounded-2xl bg-white dark:bg-slate-800/60 border border-slate-200/80 dark:border-white/10 shadow-sm overflow-hidden">
+                {[
+                  { n: foods.length, label: txt('មុខម្ហូប', 'Dishes', '美食'), tab: 'food' },
+                  { n: restaurants.length, label: txt('ហាងអាហារ', 'Places', '餐厅'), tab: 'restaurants' },
+                  { n: destinations.length, label: txt('កន្លែងទេសចរណ៍', 'Sights', '景点'), tab: 'tourism' },
+                ].map((s) => (
+                  <button
+                    key={s.tab}
+                    type="button"
+                    onClick={() => setActiveTab(s.tab as any)}
+                    className="py-3.5 text-center hover:bg-slate-50 dark:hover:bg-white/5 active:scale-95 transition cursor-pointer"
+                  >
+                    <span className="block text-lg font-black font-mono text-[#064E3B] dark:text-amber-300 leading-tight">{s.n}+</span>
+                    <span className="block text-[11px] font-semibold text-slate-600 dark:text-slate-300 mt-0.5">{s.label}</span>
+                  </button>
+                ))}
+              </div>
+
+              {/* 7. VIP members manage their shop; everyone else sees one calm benefits card */}
+              {isVip ? (
+                <MyShopPanel
+                  language={language}
+                  shops={myRestaurants}
+                  usedStores={storeQuota.usedStoresCount}
+                  totalStores={storeQuota.totalAllowedStores}
+                  onManage={(shopId) => openManageMyVipStore(shopId)}
+                  onAdd={() => {
+                    if (!currentUser) {
+                      setIsAuthModalOpen(true);
+                      return;
+                    }
+                    setIsVipAddRestaurantModalOpen(true);
+                  }}
+                  onDelete={deleteRestaurant ? (shopId) => { deleteRestaurant(shopId); } : undefined}
+                />
+              ) : (
+                <VipPerksCard language={language} onLearnMore={() => openUpgradeVipModal()} />
+              )}
             </>
           )}
         </>
         )
-      )}
-
-      {/* 5. Everything else, collapsed under "More" (Consumer & VIP users only) */}
-      {!isAdmin && (
-      <MoreSection language={language}>
-        {() => (
-          <>
-      {/* Hero Banner (Turns GOLD when user upgrades to VIP) */}
-      <div className={`relative rounded-3xl overflow-hidden p-5 transition-all duration-300 ${
-        isVip 
-          ? 'bg-gradient-to-br from-amber-400 via-yellow-400 to-amber-500 text-slate-950 border-2 border-amber-300 ring-4 ring-amber-400/25 shadow-xl' 
-          : 'bg-gradient-to-br from-[#064E3B] via-[#065F46] to-[#047857] text-white border border-emerald-600/30 shadow-md'
-      }`}>
-        <div className="relative z-10 space-y-2">
-          <div className="flex items-center gap-2 flex-wrap">
-            <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold ${
-              isVip 
-                ? 'bg-slate-950/15 border border-slate-950/20 text-slate-950' 
-                : 'bg-white/15 border border-white/20 text-emerald-100'
-            }`}>
-              <Sparkles className={`w-3.5 h-3.5 ${isVip ? 'text-amber-800' : 'text-emerald-200'}`} />
-              <span>{isKm ? 'មរតកវប្បធម៌ខ្មែរ' : 'Cambodian Heritage'}</span>
-            </div>
-            <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold shadow-xs ${
-              isVip 
-                ? 'bg-slate-950 text-amber-300 font-mono' 
-                : 'bg-[#10B981] text-white'
-            }`}>
-              {isVip ? '🌟 VIP GOLD MEMBER' : '100+ Dishes & Shops'}
-            </span>
-          </div>
-
-          {currentUser && (
-            <div className="space-y-1.5 pt-1 pb-1 animate-in fade-in">
-              <div className="flex items-center justify-between gap-2 flex-wrap">
-                <span className={`text-sm sm:text-base font-bold font-khmer flex items-center gap-1.5 drop-shadow-sm flex-wrap ${
-                  isVip ? 'text-slate-950 font-extrabold' : 'text-emerald-200'
-                }`}>
-                  <span>{isKm ? 'សួស្តី,' : 'Hello,'}</span>
-                  <span className={`text-base sm:text-xl font-bold font-moul underline decoration-2 ${
-                    isVip ? 'text-slate-950 decoration-amber-800' : 'text-white decoration-emerald-400'
-                  }`}>
-                    {currentUser.name}
-                  </span>
-                  <span>👋</span>
-                </span>
-
-                {currentUser.role === 'admin' ? (
-                  <span className="px-2.5 py-0.5 rounded-full bg-emerald-950 text-emerald-300 font-extrabold text-[10px] shadow-sm flex items-center gap-1 border border-emerald-400/80 font-mono">
-                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                    <span>SYSTEM ADMIN</span>
-                  </span>
-                ) : isVip ? (
-                  <span className="px-2.5 py-0.5 rounded-full bg-slate-950 text-amber-300 font-extrabold text-[10px] shadow-sm flex items-center gap-1 border border-amber-300 font-mono">
-                    <Crown className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                    <span>PREMIUM VIP</span>
-                  </span>
-                ) : (
-                  <button
-                    onClick={openUpgradeVipModal}
-                    className="px-2.5 py-1 rounded-full bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-500 hover:to-yellow-500 text-slate-950 font-extrabold text-[10px] shadow-sm flex items-center gap-1 transition active:scale-95 cursor-pointer font-khmer"
-                  >
-                    <Crown className="w-3.5 h-3.5 fill-slate-950 text-slate-950" />
-                    <span>{isKm ? 'ដំឡើងជា VIP' : 'Unlock VIP'}</span>
-                  </button>
-                )}
-              </div>
-
-              {/* VIP promotion message */}
-              {currentUser.role === 'admin' ? (
-                <div className="p-2.5 rounded-2xl bg-emerald-900/40 border border-emerald-400/40 flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <ShieldCheck className="w-4 h-4 text-emerald-300 shrink-0" />
-                    <p className="text-xs font-bold text-emerald-100 leading-snug">
-                      {isKm 
-                        ? '🛡️ គណនីរដ្ឋបាលប្រព័ន្ធ៖ សិទ្ធិគ្រប់គ្រង និងកែប្រែទិន្នន័យពេញលេញ (Full Access)!' 
-                        : '🛡️ System Administrator: Full master access to all tools & listings!'}
-                    </p>
-                  </div>
-                </div>
-              ) : isVip ? (
-                <div className="space-y-2">
-                  <div className="p-2.5 rounded-2xl bg-white/60 border border-amber-700/40 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-2xs">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <Sparkles className="w-4 h-4 text-amber-900 shrink-0" />
-                      <div className="min-w-0">
-                        <p className="text-xs font-extrabold text-slate-950 leading-snug">
-                          {isKm 
-                            ? '🌟 គណនី VIP សកម្ម៖ ហាង និងមុខម្ហូបរបស់អ្នកត្រូវបានផ្សព្វផ្សាយជាអាទិភាពកំពូល!' 
-                            : '🌟 VIP Account Active: Your Shop & Dishes are featured at Top Priority!'}
-                        </p>
-                        {currentUser.subscriptionExpiryDate && (
-                          <p className="text-[11px] font-bold text-slate-900 mt-0.5">
-                            📅 {isKm ? 'ថ្ងៃផុតកំណត់ VIP៖' : 'VIP Expires:'}{' '}
-                            <span className="font-mono underline">{currentUser.subscriptionExpiryDate.split('T')[0]}</span>
-                            {' • '}
-                            <span className="px-1.5 py-0.2 rounded bg-slate-950 text-amber-300 font-black">
-                              {isKm
-                                ? `នៅសល់ ${getVipRemainingDays(currentUser)} ថ្ងៃទៀត`
-                                : `${getVipRemainingDays(currentUser)} Days Left`}
-                            </span>
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Last 3 Days Daily Expiration Reminder Banner */}
-                  {getVipRemainingDays(currentUser) <= 3 && (
-                    <div className="p-3 rounded-2xl bg-rose-600 text-white border-2 border-white shadow-md flex items-center justify-between gap-2">
-                      <div className="min-w-0">
-                        <p className="text-xs font-black leading-snug">
-                          {isKm
-                            ? `⏰ រំលឹកប្រចាំថ្ងៃ៖ គណនី VIP របស់អ្នកនៅសល់តែ ${getVipRemainingDays(currentUser)} ថ្ងៃទៀតប៉ុណ្ណោះ!`
-                            : `⏰ Daily Reminder: Only ${getVipRemainingDays(currentUser)} day(s) left on your VIP account!`}
-                        </p>
-                        <p className="text-[10px] text-rose-100 mt-0.5">
-                          {isKm
-                            ? `ផុតកំណត់នៅថ្ងៃទី ${currentUser.subscriptionExpiryDate?.split('T')[0]} — សូមបន្តកញ្ចប់ VIP មុនផុតកំណត់!`
-                            : `Expires on ${currentUser.subscriptionExpiryDate?.split('T')[0]} — Renew now to keep VIP benefits!`}
-                        </p>
-                      </div>
-                      <button
-                        onClick={() => openUpgradeVipModal(true)}
-                        className="px-3 py-1.5 rounded-xl bg-amber-300 hover:bg-amber-200 text-slate-950 font-black text-[11px] shrink-0 shadow cursor-pointer"
-                      >
-                        {isKm ? 'បន្ត VIP' : 'Renew VIP'}
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ) : getVipAccountState(currentUser) === 'expired_vip' ? (
-                <div className="p-2.5 rounded-2xl bg-rose-950/80 border border-rose-400/60 flex items-center justify-between gap-2 text-white">
-                  <div className="min-w-0">
-                    <p className="text-xs font-bold text-rose-200 leading-snug">
-                      {isKm
-                        ? `⚠️ គណនី VIP របស់អ្នកបានផុតកំណត់ (${currentUser.subscriptionExpiryDate?.split('T')[0] || 'Expired'}) ហើយត្រូវបានប្តូរមកជាគណនីធម្មតា`
-                        : `⚠️ Your VIP expired (${currentUser.subscriptionExpiryDate?.split('T')[0] || 'Expired'}) & was downgraded to a normal account`}
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => openUpgradeVipModal(true)}
-                    className="px-3 py-1 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-[11px] shrink-0 shadow cursor-pointer"
-                  >
-                    {isKm ? 'បន្ត VIP ឡើងវិញ' : 'Renew VIP'}
-                  </button>
-                </div>
-              ) : (
-                <div className="p-2.5 rounded-2xl bg-amber-400/20 border border-amber-300/40 flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <Crown className="w-4 h-4 text-amber-300 shrink-0" />
-                    <p className="text-xs font-bold text-amber-200 leading-snug truncate">
-                      {isKm ? 'ដំឡើងទៅជាគណនី VIP ដើម្បីផ្សព្វផ្សាយហាងរបស់អ្នក' : 'Unlock to be VIP account for advertising your Shop'}
-                    </p>
-                  </div>
-                  <button
-                    onClick={openUpgradeVipModal}
-                    className="px-3 py-1 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-[11px] shadow-sm shrink-0 transition active:scale-95 whitespace-nowrap cursor-pointer"
-                  >
-                    {isKm ? 'ដំឡើង VIP' : 'Unlock VIP'}
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
-
-          <h2 className={`font-moul text-lg sm:text-xl leading-snug drop-shadow-sm ${
-            isVip ? 'text-slate-950' : 'text-white'
-          }`}>
-            {isKm 
-              ? 'ភ្លក្សរសជាតិម្ហូបខ្មែរ និងទស្សនាសម្រស់កម្ពុជា' 
-              : 'Taste Khmer Flavors & Discover Cambodia'}
-          </h2>
-
-          <p className={`text-xs leading-relaxed font-normal ${
-            isVip ? 'text-slate-900 font-medium' : 'text-emerald-100'
-          }`}>
-            {isKm
-              ? 'ស្វែងរកមុខម្ហូបប្រពៃណី ២០០+ មុខ រូបមន្តចម្អិន ភោជនីយដ្ឋានល្បីៗ និងតំបន់ទេសចរណ៍ ៣០០ កន្លែងទូទាំង ២៥ រាជធានី-ខេត្ត'
-              : 'Discover 200+ authentic Khmer dishes, recipes, top restaurants, and 300 tourist destinations across all 25 provinces.'}
-          </p>
-
-          {/* Hero shortcuts removed: Food lives in the bottom tab bar; Install/Support live in the single Install card below */}
-        </div>
-
-        {/* Decorative background shape */}
-        <div className={`absolute -bottom-8 -right-8 w-36 h-36 rounded-full blur-2xl pointer-events-none ${
-          isVip ? 'bg-amber-300/40' : 'bg-white/10'
-        }`} />
-      </div>
-
-      {/* 3. Manage Shop Panel: Enabled when VIP, Locked when not VIP (Non-Admin users only) */}
-      {!isAdmin && (
-        isVip ? (
-        /* ENABLED VIP RESTAURANT MANAGEMENT CARD */
-        <div className="p-4 sm:p-5 rounded-3xl bg-gradient-to-br from-amber-500/20 via-yellow-500/10 to-amber-600/20 border-2 border-amber-400/80 shadow-md space-y-3 font-khmer animate-in fade-in">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-2xl bg-gradient-to-br from-amber-400 to-yellow-500 text-slate-950 shadow-md">
-                <Crown className="w-6 h-6 fill-slate-950" />
-              </div>
-              <div>
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  <h3 className="font-moul text-xs sm:text-sm text-slate-900 dark:text-white">
-                    {isKm ? 'ផ្ទាំងគ្រប់គ្រងហាង VIP' : 'VIP Restaurant Management'}
-                  </h3>
-                  <span className="px-2 py-0.5 rounded-full text-[9px] font-black bg-amber-400 text-slate-950 shadow-2xs">
-                    🌟 VIP Active
-                  </span>
-                  {currentUser?.role !== 'admin' && (
-                    <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-700 text-white">
-                      {storeQuota.usedStoresCount}/{storeQuota.totalAllowedStores} {isKm ? 'ហាង' : 'Store'}
-                    </span>
-                  )}
-                </div>
-                <p className="text-[10px] text-amber-800 dark:text-amber-300 font-bold mt-0.5">
-                  {isKm 
-                    ? 'គណនី VIP សក្តានុពលខ្ពស់ • សិទ្ធិបន្ថែម ១ ហាង & គ្រប់គ្រងពេញលេញ' 
-                    : 'Super Potential VIP Account • Add 1 Store & Full Menu Management'}
-                </p>
-              </div>
-            </div>
-
-            {currentUser?.role !== 'admin' && myRestaurants.length >= 1 ? (
-              <button
-                onClick={() => {
-                  openManageMyVipStore(myRestaurants[0]?.id);
-                }}
-                className="px-3.5 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-xs shadow-xs transition flex items-center gap-1 shrink-0 active:scale-95 cursor-pointer"
-              >
-                <Edit2 className="w-3.5 h-3.5" />
-                <span>{isKm ? 'គ្រប់គ្រងហាងខ្ញុំ' : 'Manage My Store'}</span>
-              </button>
-            ) : (
-              <button
-                onClick={() => {
-                  if (!currentUser) {
-                    setIsAuthModalOpen(true);
-                    return;
-                  }
-                  setIsVipAddRestaurantModalOpen(true);
-                }}
-                className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 text-slate-950 font-bold text-xs shadow-xs transition flex items-center gap-1 shrink-0 active:scale-95 cursor-pointer"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span>{isKm ? 'បន្ថែមហាង VIP' : 'Add Store'}</span>
-              </button>
-            )}
-          </div>
-
-          {/* User's Owned Restaurants on Home */}
-          <div className="space-y-2 pt-1">
-            {myRestaurants.length === 0 ? (
-              <div className="p-3.5 bg-gradient-to-br from-amber-50 via-white to-emerald-50 dark:from-slate-800 dark:via-slate-800 dark:to-emerald-950/50 rounded-2xl border-2 border-amber-400/70 space-y-2.5 shadow-sm">
-                <div className="text-[11px] text-slate-800 dark:text-slate-100 leading-relaxed font-medium">
-                  {isKm
-                    ? '✨ ចុះបញ្ជីហាងមុន ហាងរបស់លោកអ្នកនឹងបង្ហាញមុនគេតាមលំដាប់លេខរៀង ដើម្បីងាយស្រួលឱ្យអតិថិជនស្វែងរក និងតាមដានស្ថិតិហាង។'
-                    : '✨ Register your restaurant early so it appears first in chronological order, making it easy for customers to find and track store analytics.'}
-                </div>
-                <div className="relative p-1 rounded-2xl group">
-                  {/* Softly blinking glowing lights around border */}
-                  <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 opacity-70 blur-xs vip-glow-btn pointer-events-none" />
-                  <div className="absolute top-1 left-2 w-2 h-2 rounded-full bg-yellow-200 shadow-sm shadow-amber-300 vip-sparkle-dot pointer-events-none" />
-                  <div className="absolute top-1 right-2 w-2 h-2 rounded-full bg-yellow-200 shadow-sm shadow-amber-300 vip-sparkle-dot pointer-events-none" style={{ animationDelay: '0.9s' }} />
-                  <div className="absolute bottom-1 left-4 w-1.5 h-1.5 rounded-full bg-amber-200 shadow-sm shadow-amber-300 vip-sparkle-dot pointer-events-none" style={{ animationDelay: '0.4s' }} />
-                  <div className="absolute bottom-1 right-4 w-1.5 h-1.5 rounded-full bg-amber-200 shadow-sm shadow-amber-300 vip-sparkle-dot pointer-events-none" style={{ animationDelay: '1.3s' }} />
-
-                  <button
-                    onClick={() => {
-                      if (!currentUser) {
-                        setIsAuthModalOpen(true);
-                        return;
-                      }
-                      setIsVipAddRestaurantModalOpen(true);
-                    }}
-                    className="relative w-full py-3.5 px-4 bg-gradient-to-r from-amber-300 via-amber-400 to-yellow-400 hover:from-amber-400 hover:to-yellow-500 text-slate-950 rounded-xl text-xs sm:text-sm font-black border-2 border-white/90 vip-glow-btn flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer shadow-lg"
-                  >
-                    <Crown className="w-4 h-4 fill-slate-950 shrink-0" />
-                    <span>{isKm ? '+ ចុះបញ្ជីហាង VIP របស់អ្នក (1 ហាង)' : '+ Register Your VIP Restaurant (1 Store)'}</span>
-                    <Sparkles className="w-3.5 h-3.5 text-amber-900 shrink-0" />
-                  </button>
-                </div>
-              </div>
-            ) : (
-              myRestaurants.map((shop) => (
-                <div 
-                  key={shop.id}
-                  className="p-3 bg-white/85 dark:bg-slate-800/85 rounded-2xl border border-amber-300/60 shadow-xs flex items-center justify-between gap-3"
-                >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <img src={shop.photoUrl} alt={shop.nameKh} className="w-12 h-12 rounded-xl object-cover shrink-0 border border-slate-200" />
-                    <div className="min-w-0">
-                      <h4 className="font-bold text-xs text-slate-900 dark:text-white truncate">
-                        {isKm ? shop.nameKh : shop.nameEn}
-                      </h4>
-                      <p className="text-[10px] text-slate-500 truncate mt-0.5">
-                        📍 {isKm ? shop.addressKh : (shop.addressEn || shop.addressKh)} • 📞 {shop.phone}
-                      </p>
-                      <span className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400">
-                        {shop.menuItems?.length || 0} / 20 {isKm ? 'មុខម្ហូបក្នុងហាង (VIP)' : 'Store Menu Items (VIP)'}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-1.5 shrink-0">
-                    <button
-                      onClick={() => {
-                        openManageMyVipStore(shop.id);
-                      }}
-                      className="px-2.5 py-1.5 bg-emerald-700 hover:bg-emerald-600 text-white rounded-xl text-[10px] font-bold shadow-xs transition flex items-center gap-1 cursor-pointer"
-                      title={isKm ? 'គ្រប់គ្រងមុខម្ហូប & ព័ត៌មាន' : 'Manage Menu & Details'}
-                    >
-                      <Edit2 className="w-3 h-3" />
-                      <span>{isKm ? 'គ្រប់គ្រង' : 'Manage'}</span>
-                    </button>
-                    {deleteRestaurant && (
-                      <button
-                        onClick={() => deleteRestaurant(shop.id)}
-                        className="p-1.5 bg-rose-100 hover:bg-rose-600 text-rose-700 hover:text-white dark:bg-rose-950/60 dark:text-rose-300 rounded-xl text-[10px] font-bold transition cursor-pointer"
-                        title={isKm ? 'លុបហាងដើម្បីបង្កើតថ្មី' : 'Delete store'}
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-      ) : (
-        /* LOCKED MANAGE SHOP CARD FOR NON-VIP */
-        <div className="p-4 sm:p-5 rounded-3xl bg-slate-50 dark:bg-slate-800/80 border-2 border-dashed border-slate-300 dark:border-slate-700 shadow-xs space-y-3 font-khmer">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-2xl bg-slate-200 dark:bg-slate-700 text-slate-500 shadow-sm">
-                <Lock className="w-6 h-6" />
-              </div>
-              <div>
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  <h3 className="font-moul text-xs sm:text-sm text-slate-800 dark:text-slate-200">
-                    {isKm ? 'ផ្ទាំងគ្រប់គ្រងហាង (Manage Shop)' : 'Manage Shop Panel'}
-                  </h3>
-                  <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center gap-1">
-                    <Lock className="w-2.5 h-2.5" />
-                    <span>VIP Only</span>
-                  </span>
-                </div>
-                <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
-                  {isKm 
-                    ? 'មុខងារគ្រប់គ្រងហាងត្រូវបានចាក់សោ • សូមដំឡើងគណនី VIP ដើម្បីផ្សព្វផ្សាយ និងគ្រប់គ្រងហាងរបស់អ្នក' 
-                    : 'Manage Shop is locked • Unlock VIP account to advertise and manage your shop'}
-                </p>
-              </div>
-            </div>
-
-            <button
-              onClick={() => openUpgradeVipModal()}
-              className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 text-slate-950 font-bold text-xs shadow-xs transition flex items-center gap-1 shrink-0 active:scale-95 cursor-pointer"
-            >
-              <Crown className="w-3.5 h-3.5" />
-              <span>{isKm ? 'ដំឡើង VIP' : 'Unlock VIP'}</span>
-            </button>
-          </div>
-        </div>
-      ))}
-      {/* Share / invite now lives in the Smart Menu */}
-
-      {/* Install / Scan QR / Support now live only in the Header "more" menu (single entry point) */}
-
-      {/* Quick category icon row removed: identical to the bottom tab bar */}
-
-      {/* 6 Personalized Account Features Suite (មជ្ឈមណ្ឌលផ្ទាល់ខ្លួនសម្រាប់គណនី) — Strictly for VIP and Regular Users, NOT Admin */}
-      {!isAdmin && (
-      <div className={`p-4 rounded-3xl text-white transition-all duration-300 space-y-3 font-khmer ${
-        isVip
-          ? 'bg-gradient-to-br from-emerald-950 via-[#064E3B] to-slate-900 border-2 border-emerald-400/60 shadow-lg ring-2 ring-emerald-400/20'
-          : 'bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border border-slate-700/80 shadow-sm'
-      }`}>
-        <div className="flex items-center justify-between gap-2 flex-wrap">
-          <div className="flex items-center gap-2">
-            <span className={`w-2.5 h-2.5 rounded-full ${isVip ? 'bg-amber-400' : 'bg-slate-500'}`} />
-            <div>
-              <div className="flex items-center gap-1.5 flex-wrap">
-                <h3 className="font-moul text-xs sm:text-sm text-white flex items-center gap-1.5">
-                  <span>{isKm ? 'សេវាកម្មផ្ទាល់ខ្លួន (Personal Feature)' : 'Personalized Member Hub'}</span>
-                </h3>
-                {isVip ? (
-                  <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-400 text-slate-950 flex items-center gap-1 shadow-xs font-mono">
-                    <Sparkles className="w-2.5 h-2.5 fill-current" />
-                    <span>VIP ACTIVE</span>
-                  </span>
-                ) : (
-                  <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-500/20 text-amber-300 border border-amber-400/40 flex items-center gap-1">
-                    <Lock className="w-2.5 h-2.5" />
-                    <span>VIP Feature</span>
-                  </span>
-                )}
-              </div>
-              <p className="text-[10px] text-slate-300">
-                {isVip
-                  ? (currentUser ? (isKm ? `គណនី VIP សកម្ម៖ ${currentUser.name}` : `VIP Active: ${currentUser.name}`) : (isKm ? 'មុខងារពិសេសសកម្មពេញលេញ' : 'All VIP features enabled'))
-                  : (isKm ? 'ដំឡើងទៅជាគណនី VIP ដើម្បីបើកដំណើរការមុខងារពិសេសទាំង ៦ នេះ' : 'Unlock VIP account to enable all 6 personalized features')}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            {!isVip && (
-              <button
-                onClick={() => openUpgradeVipModal()}
-                className="px-3 py-1 bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-500 text-slate-950 rounded-xl text-[10px] font-extrabold shadow-sm transition flex items-center gap-1 cursor-pointer active:scale-95"
-              >
-                <Crown className="w-3 h-3 fill-slate-950" />
-                <span>{isKm ? 'ដំឡើង VIP' : 'Unlock VIP'}</span>
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Prominent AI Discovery & Google Maps Places Search (VIP) Entry Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-          {/* 1. Browse Khmer dishes (opens the Food tab: single entry point) */}
-          <button
-            onClick={() => setActiveTab('food')}
-            className="p-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 via-[#064E3B] to-teal-800 text-white text-left shadow-md flex items-center justify-between transition hover:scale-[1.01] active:scale-98 cursor-pointer ring-2 ring-emerald-400/30"
-          >
-            <div className="flex items-center gap-2.5">
-              <div className="w-10 h-10 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center shadow-sm shrink-0">
-                <Utensils className="w-5 h-5 stroke-[2.4]" />
-              </div>
-              <div>
-                <span className="font-moul text-xs block text-white">
-                  {language === 'km'
-                    ? 'ស្វែងរកម្ហូបខ្មែរ'
-                    : language === 'zh'
-                    ? '探索高棉美食'
-                    : 'Discover Cambodian Food'}
-                </span>
-                <span className="text-[10px] text-emerald-200 block">
-                  {language === 'km'
-                    ? 'ស្លាកម្ហូប • តម្រង • រូបមន្តចម្អិន'
-                    : language === 'zh'
-                    ? '菜品标签 • 筛选 • 详细食谱'
-                    : 'Dish tags • Filters • Full recipes'}
-                </span>
-              </div>
-            </div>
-            <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[9px] font-black uppercase tracking-wider font-sans shrink-0">
-              {language === 'km' ? 'ម្ហូប' : language === 'zh' ? '美食' : 'Food'}
-            </span>
-          </button>
-
-          {/* 1a. Google Maps Places Search Menu (Active VIP) */}
-          <button
-            onClick={() => openGoogleMapsSearchModal('all')}
-            className="p-3.5 rounded-2xl bg-gradient-to-r from-emerald-800 via-teal-800 to-[#064E3B] text-white text-left shadow-md flex items-center justify-between transition hover:scale-[1.01] active:scale-98 cursor-pointer ring-2 ring-amber-400/50"
-          >
-            <div className="flex items-center gap-2.5">
-              <div className="w-10 h-10 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center shadow-sm shrink-0">
-                <Globe className="w-5 h-5" />
-              </div>
-              <div>
-                <span className="font-moul text-xs block text-amber-300">
-                  {isKm ? 'ស្វែងរកទីតាំងលើ Google Maps' : 'Google Maps Places Search'}
-                </span>
-                <span className="text-[10px] text-emerald-100 block">
-                  {isKm ? 'ហាងកាហ្វេ ភោជនីយដ្ឋាន & តំបន់ទេសចរណ៍ ២៥ ខេត្ត/ក្រុង' : 'Search Cafés, Shops & Places across Cambodia'}
-                </span>
-              </div>
-            </div>
-            <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[9px] font-black uppercase tracking-wider font-sans shrink-0">
-              {isVip ? 'VIP / Maps' : '🔒 VIP'}
-            </span>
-          </button>
-        </div>
-
-        {/* Feature Buttons Grid - Daily Live & Notifications Open Directly */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-          {/* C. កន្លែងថ្មីប្រចាំថ្ងៃ */}
-          <button
-            type="button"
-            onClick={() => {
-              setIsDailyDiscoveriesModalOpen(true);
-            }}
-            className="p-3 rounded-2xl border text-left transition group active:scale-95 relative bg-white/10 hover:bg-white/15 border-white/15 cursor-pointer"
-          >
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="text-xl">✨</span>
-              <span className="text-[9px] text-amber-300 font-bold">Daily Live</span>
-            </div>
-            <div className="text-xs font-bold text-white group-hover:text-emerald-300">
-              {isKm ? 'កន្លែងថ្មីប្រចាំថ្ងៃ' : 'Daily New Places'}
-            </div>
-            <div className="text-[10px] text-slate-300 line-clamp-1 mt-0.5">
-              {isKm ? 'ហាង ទេសចរណ៍ & ព្រឹត្តិការណ៍ថ្មី' : 'New spots, events & news'}
-            </div>
-          </button>
-
-          {/* F. ការជូនដំណឹងដែលមានប្រយោជន៍ */}
-          <button
-            type="button"
-            onClick={() => {
-              setIsNotificationsModalOpen(true);
-            }}
-            className="p-3 rounded-2xl border text-left transition group active:scale-95 relative bg-white/10 hover:bg-white/15 border-white/15 cursor-pointer"
-          >
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="text-xl">🔔</span>
-              {unreadNotificationsCount > 0 ? (
-                <span className="px-1.5 py-0.2 rounded-full bg-rose-500 text-white text-[9px] font-black">
-                  {unreadNotificationsCount} {isKm ? 'ថ្មី' : 'New'}
-                </span>
-              ) : (
-                <span className="text-[9px] text-emerald-300 font-bold">Alerts</span>
-              )}
-            </div>
-            <div className="text-xs font-bold text-white group-hover:text-emerald-300">
-              {isKm ? 'ការជូនដំណឹង' : 'Notifications'}
-            </div>
-            <div className="text-[10px] text-slate-300 line-clamp-1 mt-0.5">
-              {isKm ? 'ប្រូម៉ូសិនហាង & ព្រឹត្តិការណ៍' : 'Promos, events & news'}
-            </div>
-          </button>
-        </div>
-      </div>
-      )}
-
-          </>
-        )}
-      </MoreSection>
       )}
     </div>
   );

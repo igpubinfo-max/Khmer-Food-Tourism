@@ -1,8 +1,9 @@
 import React from 'react';
-import { Search, X, User as UserIcon, Crown, Shield, CheckCircle2, Sparkles, ChevronRight, LogIn } from 'lucide-react';
+import { Search, X, User as UserIcon, Crown, Shield, ChevronRight, LogIn } from 'lucide-react';
 import type { Language, User } from '../../types';
 import { getVipRemainingDays } from '../../types';
 import { tr } from '../../utils/i18n';
+import { headingFont } from './homeUtils';
 
 interface Props {
   language: Language;
@@ -13,11 +14,16 @@ interface Props {
   onExploreProfile?: () => void;
   onUpgradeVip?: () => void;
   onOpenAdminPanel?: () => void;
+  /** Short personalized line under the headline (e.g. a time-of-day food suggestion). */
+  hint?: string;
   query: string;
   onChange: (value: string) => void;
 }
 
-/** Friendly greeting + compact Guest/Registered User/Admin Profile Card + one big, easy-to-tap search bar. */
+/**
+ * Clean welcome header: a friendly greeting row (avatar, name, small status chip),
+ * a clear headline, and one large search bar. No promotional banners live here.
+ */
 export const HomeGreetingSearch: React.FC<Props> = ({
   language,
   userName,
@@ -25,8 +31,8 @@ export const HomeGreetingSearch: React.FC<Props> = ({
   isVip,
   onSignIn,
   onExploreProfile,
-  onUpgradeVip,
   onOpenAdminPanel,
+  hint,
   query,
   onChange,
 }) => {
@@ -44,9 +50,10 @@ export const HomeGreetingSearch: React.FC<Props> = ({
     currentUser?.username === 'admin' ||
     currentUser?.username === 'cheasavuth';
 
+  const displayName = currentUser?.name || userName;
+
   return (
-    <section className="space-y-3">
-      {/* Compact User Profile & Account Status Card (Admin vs VIP vs Registered vs Guest) */}
+    <section className="space-y-4">
       {currentUser ? (
         isAdmin ? (
           <div className="p-3.5 sm:p-4 rounded-3xl bg-gradient-to-r from-[#022c22] via-[#064E3B] to-slate-900 text-white border border-emerald-400/50 shadow-md relative overflow-hidden flex items-center justify-between gap-3">
@@ -102,164 +109,83 @@ export const HomeGreetingSearch: React.FC<Props> = ({
               )}
             </div>
           </div>
-        ) : isVip ? (
-          <div className="p-3.5 sm:p-4 rounded-3xl bg-gradient-to-r from-[#022c22] via-[#064E3B] to-[#042f2e] text-white border-2 border-amber-400/80 shadow-[0_10px_28px_rgba(245,158,11,0.22)] relative overflow-hidden flex items-center justify-between gap-3">
-            <div className="absolute -right-8 -top-8 w-32 h-32 bg-amber-400/10 rounded-full blur-2xl pointer-events-none" />
-            <div
-              onClick={onExploreProfile}
-              className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer"
-            >
-              <div className="relative shrink-0">
-                <img
-                  src={currentUser.avatar}
-                  alt={currentUser.name}
-                  className="w-13 h-13 sm:w-16 sm:h-16 rounded-2xl object-cover border-2 border-amber-400 shadow-[0_0_12px_rgba(245,158,11,0.4)] ring-2 ring-amber-300/50 bg-white"
-                />
-                <div className="absolute -bottom-1 -right-1 p-1 bg-amber-400 text-slate-950 rounded-full shadow-xs">
-                  <Crown className="w-3 h-3 fill-slate-950" />
-                </div>
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  <span className="text-[11px] text-amber-200/90 font-medium">
-                    {greeting},
-                  </span>
-                  <span className="font-extrabold text-sm sm:text-base text-white truncate">
-                    {currentUser.name}
-                  </span>
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 text-slate-950 shadow-md ring-1 ring-amber-200 shrink-0">
-                    <Crown className="w-3 h-3 fill-slate-950" />
-                    <span>{tr(language, '👑 សមាជិក VIP', '👑 VIP MEMBER', '👑 VIP 尊享会员')}</span>
-                  </span>
-                </div>
-                <p className="text-[11px] text-emerald-100 font-khmer mt-0.5 truncate">
-                  ✨ {tr(language, `នៅសល់ ${getVipRemainingDays(currentUser)} ថ្ងៃ • អត្ថប្រយោជន៍ VIP ១០ យ៉ាង`, `${getVipRemainingDays(currentUser)} days left • 10 VIP Benefits`, `剩余 ${getVipRemainingDays(currentUser)} 天 • 尊享 10 项特权`)}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 shrink-0">
-              {onExploreProfile && (
-                <button
-                  type="button"
-                  onClick={onExploreProfile}
-                  className="px-3 py-2 rounded-xl bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-400 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black text-xs shadow-md transition active:scale-95 cursor-pointer shrink-0 border border-amber-200 flex items-center gap-1"
-                >
-                  <span>{tr(language, 'គ្រប់គ្រង VIP', 'Manage VIP', '管理 VIP')}</span>
-                  <ChevronRight className="w-3.5 h-3.5 text-slate-950" />
-                </button>
-              )}
-            </div>
-          </div>
         ) : (
-          <div className="p-3 rounded-2xl bg-gradient-to-r from-[#064E3B] via-[#047857] to-[#065F46] text-white shadow-sm border border-emerald-400/40 flex items-center justify-between gap-2.5">
-            <div
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
               onClick={onExploreProfile}
-              className="flex items-center gap-2.5 min-w-0 flex-1 cursor-pointer"
+              aria-label={tr(language, 'គណនីរបស់ខ្ញុំ', 'My profile', '我的账户')}
+              className="relative shrink-0 cursor-pointer active:scale-95 transition"
             >
               <img
                 src={currentUser.avatar}
                 alt={currentUser.name}
-                className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl object-cover border-2 border-amber-300/80 shadow-xs shrink-0 bg-white"
+                className={`w-12 h-12 rounded-2xl object-cover bg-white shadow-md ${
+                  isVip ? 'border-2 border-amber-400' : 'border-2 border-emerald-500/40'
+                }`}
               />
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  <span className="text-[11px] text-emerald-200 font-medium">
-                    {greeting},
-                  </span>
-                  <span className="font-bold text-xs sm:text-sm text-white truncate">
-                    {currentUser.name}
-                  </span>
-                  <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-900/90 text-emerald-200 border border-emerald-400/40 shrink-0">
-                    <CheckCircle2 className="w-2.5 h-2.5 text-emerald-300" />
-                    <span>{tr(language, 'សមាជិកចុះឈ្មោះ', 'Registered', '已注册会员')}</span>
-                  </span>
-                </div>
-                <p className="text-[11px] text-emerald-100/95 truncate mt-0.5">
+              {isVip && (
+                <span className="absolute -bottom-1 -right-1 p-1 bg-amber-400 text-slate-950 rounded-full shadow-sm">
+                  <Crown className="w-2.5 h-2.5 fill-slate-950" />
+                </span>
+              )}
+            </button>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs text-slate-500 dark:text-emerald-200/80 truncate">{greeting} 👋</p>
+              <p className={`${headingFont(language)} text-[15px] leading-snug text-[#064E3B] dark:text-white truncate`}>{displayName}</p>
+            </div>
+            {isVip && (
+              <button
+                type="button"
+                onClick={onExploreProfile}
+                className="shrink-0 min-h-[36px] px-3 rounded-full bg-gradient-to-r from-amber-300 to-amber-500 text-slate-950 text-[11px] font-extrabold inline-flex items-center gap-1 shadow-sm active:scale-95 transition cursor-pointer"
+              >
+                <Crown className="w-3.5 h-3.5 fill-slate-950" />
+                <span>
                   {tr(
                     language,
-                    'គណនីបានចុះឈ្មោះរួចរាល់ • ស្វែងរកមុខងារបន្ថែមក្នុងគណនីរបស់អ្នក',
-                    'Registered account active — explore more features in your profile',
-                    '账户已登录 • 前往个人中心探索更多功能'
+                    `VIP · ${getVipRemainingDays(currentUser)} ថ្ងៃ`,
+                    `VIP · ${getVipRemainingDays(currentUser)} days`,
+                    `VIP · ${getVipRemainingDays(currentUser)} 天`
                   )}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-1.5 shrink-0">
-              {onUpgradeVip && (
-                <button
-                  type="button"
-                  onClick={onUpgradeVip}
-                  className="px-2.5 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-[10px] sm:text-[11px] shadow-xs flex items-center gap-1 transition active:scale-95 cursor-pointer"
-                >
-                  <Sparkles className="w-3 h-3" />
-                  <span>{tr(language, 'ដំឡើង VIP', 'Get VIP', '开通 VIP')}</span>
-                </button>
-              )}
-              {onExploreProfile && (
-                <button
-                  type="button"
-                  onClick={onExploreProfile}
-                  className="px-2.5 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 text-white font-bold text-[10px] sm:text-[11px] border border-white/25 flex items-center gap-0.5 transition active:scale-95 cursor-pointer"
-                >
-                  <span>{tr(language, 'គណនី', 'Profile', '我的')}</span>
-                  <ChevronRight className="w-3.5 h-3.5" />
-                </button>
-              )}
-            </div>
+                </span>
+              </button>
+            )}
           </div>
         )
       ) : (
-        <div className="p-3 rounded-2xl bg-gradient-to-r from-slate-900 via-[#064E3B] to-emerald-900 text-white shadow-sm border border-emerald-500/40 flex items-center justify-between gap-2.5">
-          <div className="flex items-center gap-2.5 min-w-0 flex-1">
-            <div className="w-10 h-10 rounded-xl bg-white/15 border border-white/25 flex items-center justify-center shrink-0 text-amber-300">
-              <UserIcon className="w-5 h-5" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="font-bold text-xs sm:text-sm text-white truncate">
-                  {greeting} 👋
-                </span>
-                <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-white/15 text-amber-200 border border-amber-300/30 shrink-0">
-                  {tr(language, 'គណនីភ្ញៀវ', 'Guest Mode', '访客模式')}
-                </span>
-              </div>
-              <p className="text-[11px] text-emerald-100/95 truncate mt-0.5">
-                {tr(
-                  language,
-                  'ចុះឈ្មោះគណនីឥតគិតថ្លៃ ដើម្បីរក្សាទុកម្ហូប និងមុខងារពិសេសៗ',
-                  'Register a free account to save dishes & unlock more features',
-                  '免费注册登录，收藏喜爱的美食并解锁更多功能'
-                )}
-              </p>
-            </div>
+        <div className="flex items-center gap-3">
+          <span className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center shrink-0 text-emerald-600 dark:text-emerald-300">
+            <UserIcon className="w-6 h-6" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="text-xs text-slate-500 dark:text-emerald-200/80 truncate">{greeting} 👋</p>
+            <p className={`${headingFont(language)} text-[15px] leading-snug text-[#064E3B] dark:text-white truncate`}>
+              {tr(language, 'សូមស្វាគមន៍', 'Welcome', '欢迎')}
+            </p>
           </div>
-
           {onSignIn && (
             <button
               type="button"
               onClick={onSignIn}
-              className="px-3 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-[11px] shadow-sm flex items-center gap-1.5 shrink-0 transition active:scale-95 cursor-pointer"
+              className="shrink-0 min-h-[40px] px-4 rounded-full bg-[#064E3B] dark:bg-amber-400 text-white dark:text-slate-950 text-xs font-extrabold inline-flex items-center gap-1.5 shadow-sm active:scale-95 transition cursor-pointer"
             >
               <LogIn className="w-3.5 h-3.5" />
-              <span>{tr(language, 'ចុះឈ្មោះ / ចូល', 'Sign In', '注册 / 登录')}</span>
+              <span>{tr(language, 'ចូល / ចុះឈ្មោះ', 'Sign in', '登录 / 注册')}</span>
             </button>
           )}
         </div>
       )}
 
       <div>
-        <h2 className="font-moul text-base sm:text-lg leading-snug text-[#064E3B] dark:text-emerald-300">
+        <h2 className={`${headingFont(language)} text-xl leading-snug text-[#064E3B] dark:text-emerald-200`}>
           {isAdmin
-            ? tr(
-                language,
-                'ស្វែងរក និងគ្រប់គ្រងទិន្នន័យក្នុងប្រព័ន្ធ',
-                'Search & Manage System Directory',
-                '搜索并管理系统数据'
-              )
+            ? tr(language, 'ស្វែងរក និងគ្រប់គ្រងទិន្នន័យក្នុងប្រព័ន្ធ', 'Search & Manage System Directory', '搜索并管理系统数据')
             : tr(language, 'ថ្ងៃនេះចង់ញ៉ាំអ្វី?', 'What would you like to eat today?', '今天想吃点什么？')}
         </h2>
+        {!isAdmin && hint && (
+          <p className="text-[13px] leading-relaxed text-slate-500 dark:text-slate-400 mt-1">{hint}</p>
+        )}
       </div>
 
       <div className="relative flex items-center">
@@ -275,7 +201,7 @@ export const HomeGreetingSearch: React.FC<Props> = ({
             '搜索菜肴、餐厅或景点...'
           )}
           aria-label={tr(language, 'ស្វែងរក', 'Search', '搜索')}
-          className="w-full min-h-[52px] pl-12 pr-12 rounded-2xl bg-white dark:bg-slate-800 border-2 border-emerald-500/40 text-slate-900 dark:text-white placeholder-slate-400 text-base shadow-sm focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 font-khmer transition"
+          className="w-full min-h-[54px] pl-12 pr-12 rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder-slate-400 text-base shadow-md focus:outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/20 font-khmer transition"
         />
         {query && (
           <button

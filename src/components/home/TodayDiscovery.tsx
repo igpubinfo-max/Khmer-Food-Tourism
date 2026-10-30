@@ -4,6 +4,7 @@ import type { FoodItem, Restaurant, Language } from '../../types';
 import { tr } from '../../utils/i18n';
 import { getLocalizedFood, getLocalizedRestaurant } from '../../utils/zhDynamicTranslator';
 import { AutoMarquee } from './AutoMarquee';
+import { SectionHeader } from './SectionHeader';
 
 interface Props {
   language: Language;
@@ -95,23 +96,24 @@ export const TodayDiscovery: React.FC<Props> = ({ language, foods, restaurants, 
   }
 
   return (
-    <section className="space-y-2.5">
-      <div className="flex items-center justify-between gap-2">
-        <h3 className="font-moul text-base text-[#064E3B] dark:text-emerald-300 flex items-center gap-2">
-          <Compass className="w-4 h-4 text-amber-500 shrink-0" />
-          <span>{tr(language, 'រកឃើញថ្មីថ្ងៃនេះ', "Today's discovery", '今日发现')}</span>
-        </h3>
-        {onShuffle && (
-          <button
-            type="button"
-            onClick={onShuffle}
-            className="px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs font-extrabold flex items-center gap-1 active:scale-95 transition cursor-pointer"
-          >
-            <Shuffle className="w-3.5 h-3.5" />
-            <span>{tr(language, 'ប្តូរថ្មី', 'Shuffle', '换一批')}</span>
-          </button>
-        )}
-      </div>
+    <section className="space-y-3">
+      <SectionHeader
+        icon={Compass}
+        title={tr(language, 'រកឃើញថ្មីថ្ងៃនេះ', "Today's discovery", '今日发现')}
+        subtitle={tr(language, 'ម្ហូប និងហាងថ្មីៗ សម្រាប់ថ្ងៃនេះ', 'Fresh dishes and places to try today', '今天值得一试的美食与好店')}
+        right={
+          onShuffle ? (
+            <button
+              type="button"
+              onClick={onShuffle}
+              className="min-h-[36px] px-3 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs font-extrabold flex items-center gap-1 active:scale-95 transition cursor-pointer"
+            >
+              <Shuffle className="w-3.5 h-3.5" />
+              <span>{tr(language, 'ប្តូរថ្មី', 'Shuffle', '换一批')}</span>
+            </button>
+          ) : undefined
+        }
+      />
       <AutoMarquee durationSec={Math.max(30, cards.length * 7)}>{cards}</AutoMarquee>
     </section>
   );
