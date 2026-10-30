@@ -100,17 +100,6 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSmartHub }) => {
 
         {/* Right Controls: Essential Actions + Clean More Menu */}
         <div className="flex items-center gap-1.5 shrink-0">
-          {/* Smart Menu Button */}
-          <button
-            type="button"
-            onClick={handleOpenSmartMenu}
-            className="w-9 h-9 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-300 hover:from-amber-300 hover:to-yellow-200 text-slate-950 flex items-center justify-center shadow-sm transition active:scale-95 cursor-pointer shrink-0"
-            title={tr(language, 'ម៉ឺនុយឆ្លាតវៃ', 'Smart Menu', '智能菜单')}
-            aria-label={tr(language, 'ម៉ឺនុយឆ្លាតវៃ', 'Smart Menu', '智能菜单')}
-          >
-            <IconSmartAssistant className="w-4 h-4 shrink-0 text-slate-950" />
-          </button>
-
           {/* Notifications Bell Button */}
           <button
             type="button"
@@ -143,7 +132,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSmartHub }) => {
             <span className={language === 'zh' ? 'text-amber-300' : 'text-white/70'}>中文</span>
           </button>
 
-          {/* Overflow Menu Button (AI Assistant, Notifications, QR, Install, Support — No Admin Login) */}
+          {/* Overflow Menu Button (Smart Menu, QR, Install, Support — No Admin Login or Duplicate Bell) */}
           <div className="relative" ref={menuRef}>
             <button
               type="button"
@@ -164,33 +153,14 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSmartHub }) => {
                     type="button"
                     onClick={() => {
                       setIsMenuOpen(false);
-                      setIsAiTripPlannerModalOpen(true);
+                      handleOpenSmartMenu();
                     }}
                     className="w-full px-3.5 py-2.5 flex items-center justify-between hover:bg-white/10 transition cursor-pointer text-left"
                   >
                     <span className="flex items-center gap-2.5 font-bold text-amber-300">
                       <IconSmartAssistant className="w-4 h-4 text-amber-400" />
-                      <span>{tr(language, 'ជំនួយការឆ្លាតវៃ', 'Smart AI Assistant', '智能助手')}</span>
+                      <span>{tr(language, 'ម៉ឺនុយឆ្លាតវៃ', 'Smart Menu', '智能菜单')}</span>
                     </span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsMenuOpen(false);
-                      setIsNotificationsModalOpen(true);
-                    }}
-                    className="w-full px-3.5 py-2.5 flex items-center justify-between hover:bg-white/10 transition cursor-pointer text-left"
-                  >
-                    <span className="flex items-center gap-2.5 font-semibold">
-                      <Bell className="w-4 h-4 text-emerald-400" />
-                      <span>{tr(language, 'ដំណឹង និងការណែនាំ', 'Notifications', '通知与推荐')}</span>
-                    </span>
-                    {unreadNotificationsCount > 0 && (
-                      <span className="px-1.5 py-0.5 rounded-full bg-rose-500 text-white text-[10px] font-extrabold">
-                        {unreadNotificationsCount}
-                      </span>
-                    )}
                   </button>
 
                   <button

@@ -240,14 +240,14 @@ export const AdminDashboard: React.FC = () => {
   const [supabaseTestStatus, setSupabaseTestStatus] = useState<string>('');
   const [isSyncingCloud, setIsSyncingCloud] = useState(false);
   const [isSavingNewFood, setIsSavingNewFood] = useState(false);
-  const [googleMapsDiag, setGoogleMapsDiag] = useState<GooglePlacesApiDiagnosticReport | null>(() => getLastGooglePlacesApiDiagnosis());
+  const [googleMapsDiag, setGoogleMapsDiag] = useState<any>(() => getLastGooglePlacesApiDiagnosis());
   const [isVerifyingGoogleMaps, setIsVerifyingGoogleMaps] = useState(false);
   const [adminDailyLimitInput, setAdminDailyLimitInput] = useState<string>(() => String(getSmartCacheStats().dailyApiLimit || 500));
 
-  const handleVerifyGoogleMapsApi = async (customKey?: string) => {
+  const handleVerifyGoogleMapsApi = async (_customKey?: string) => {
     setIsVerifyingGoogleMaps(true);
     try {
-      const report = await verifyGooglePlacesApiStatus(customKey ?? cloudCfg.googleMapsApiKey);
+      const report = await verifyGooglePlacesApiStatus();
       setGoogleMapsDiag(report);
       showToast(
         report.status === 'OK'
@@ -266,7 +266,7 @@ export const AdminDashboard: React.FC = () => {
       if (cachedDiag) {
         setGoogleMapsDiag(cachedDiag);
       } else {
-        verifyGooglePlacesApiStatus(cloudCfg.googleMapsApiKey).then(setGoogleMapsDiag).catch(() => {});
+        verifyGooglePlacesApiStatus().then(setGoogleMapsDiag).catch(() => {});
       }
     }
   }, [isAdminOpen, activeTab]);
@@ -1008,18 +1008,20 @@ export const AdminDashboard: React.FC = () => {
                 <div className="space-y-4">
                   {filteredSupportTickets.map((ticket) => {
                     const draftText = adminReplyDrafts[ticket.id] || '';
+                    const normStatus = String(ticket.status || 'pending').toLowerCase();
+                    const isVipTicketApproved = Boolean(ticket.vipApproved || (ticket as any).vipActivated);
                     return (
                       <div
                         key={ticket.id}
                         onClick={() => {
                           if (ticket.unreadByAdmin) {
-                            markSupportTicketRead(ticket.id, 'admin');
+                            markSupportTicketRead(ticket.id);
                           }
                         }}
                         className={`p-4 rounded-2xl border transition-all space-y-3 ${
-                          ticket.status === 'Pending'
+                          normStatus === 'pending'
                             ? 'bg-amber-50/50 dark:bg-amber-950/20 border-amber-400 dark:border-amber-700'
-                            : ticket.status === 'Replied'
+                            : normStatus === 'replied'
                             ? 'bg-emerald-50/40 dark:bg-emerald-950/20 border-emerald-400 dark:border-emerald-800'
                             : 'bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-700'
                         }`}
@@ -1033,33 +1035,33 @@ export const AdminDashboard: React.FC = () => {
                               </span>
                               <span
                                 className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold font-khmer ${
-                                  ticket.status === 'Resolved'
+                                  normStatus === 'resolved'
                                     ? 'bg-emerald-600 text-white'
-                                    : ticket.status === 'Replied'
+                                    : normStatus === 'replied'
                                     ? 'bg-sky-600 text-white'
                                     : 'bg-amber-500 text-slate-950'
                                 }`}
                               >
-                                {ticket.status === 'Pending'
+                                {normStatus === 'pending'
                                   ? isKm
-                                    ? '⏳ រង់ចាំពិនិត្យ (Pending)'
+                                    ? '⏳ រង់ចាំពិនិត្យ'
                                     : '⏳ Pending'
-                                  : ticket.status === 'Replied'
+                                  : normStatus === 'replied'
                                   ? isKm
-                                    ? '💬 បានឆ្លើយតប (Replied)'
+                                    ? '💬 បានឆ្លើយតប'
                                     : '💬 Replied'
                                   : isKm
-                                  ? '✅ ដោះស្រាយរួច (Resolved)'
+                                  ? '✅ ដោះស្រាយរួច'
                                   : '✅ Resolved'}
                               </span>
                               {ticket.unreadByAdmin && (
                                 <span className="px-2 py-0.5 rounded-full bg-rose-600 text-white text-[9px] font-bold">
-                                  NEW MESSAGE
+                                  {isKm ? 'សារថ្មី' : 'NEW MESSAGE'}
                                 </span>
                               )}
-                              {ticket.vipActivated && (
+                              {isVipTicketApproved && (
                                 <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/40 text-[10px] font-bold font-khmer">
-                                  👑 បានបើក VIP រួចរាល់
+                                  👑 {isKm ? 'បានបើក VIP រួចរាល់' : 'VIP Activated'}
                                 </span>
                               )}
                             </div>
@@ -1071,11 +1073,11 @@ export const AdminDashboard: React.FC = () => {
                               </div>
                               <div>
                                 <span className="text-stone-400">💎 គម្រោង៖ </span>
-                                <strong className="text-emerald-700 dark:text-emerald-300">{ticket.paymentPlan}</strong>
+                                <strong className="text-emerald-700 dark:text-emerald-300">{ticket.paymentPlanLabel || ticket.paymentPlanId || (ticket as any).paymentPlan}</strong>
                               </div>
                               <div>
                                 <span className="text-stone-400">💵 ទឹកប្រាក់៖ </span>
-                                <strong className="font-mono">${ticket.amountUsd.toFixed(2)} USD ({ticket.durationDays} Days)</strong>
+                                <strong className="font-mono">${Number(ticket.amountUsd || 0).toFixed(2)} USD ({ticket.durationDays} Days)</strong>
                               </div>
                               <div>
                                 <span className="text-stone-400">📅 ថ្ងៃបង់ប្រាក់៖ </span>
@@ -1097,22 +1099,22 @@ export const AdminDashboard: React.FC = () => {
                             <div className="flex items-center gap-1">
                               <span className="text-[10px] text-stone-400 font-khmer">ស្ថានភាព៖</span>
                               <select
-                                value={ticket.status}
+                                value={normStatus}
                                 onChange={(e) =>
                                   updateSupportTicketStatus(
                                     ticket.id,
-                                    e.target.value as 'Pending' | 'Replied' | 'Resolved'
+                                    e.target.value as 'pending' | 'replied' | 'resolved'
                                   )
                                 }
                                 className="px-2 py-1 rounded-lg border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-900 text-xs font-bold text-stone-800 dark:text-stone-100"
                               >
-                                <option value="Pending">Pending</option>
-                                <option value="Replied">Replied</option>
-                                <option value="Resolved">Resolved</option>
+                                <option value="pending">{isKm ? 'រង់ចាំពិនិត្យ' : 'Pending'}</option>
+                                <option value="replied">{isKm ? 'បានឆ្លើយតប' : 'Replied'}</option>
+                                <option value="resolved">{isKm ? 'ដោះស្រាយរួច' : 'Resolved'}</option>
                               </select>
                             </div>
 
-                            {!ticket.vipActivated && (
+                            {!isVipTicketApproved && (
                               <button
                                 type="button"
                                 onClick={() => approveVipFromSupportTicket(ticket.id)}
@@ -1121,8 +1123,8 @@ export const AdminDashboard: React.FC = () => {
                                 <CheckCircle2 className="w-4 h-4" />
                                 <span>
                                   {isKm
-                                    ? `✅ អនុម័ត & បើក VIP (${ticket.durationDays} ថ្ងៃ / $${ticket.amountUsd.toFixed(2)})`
-                                    : `✅ Approve & Activate VIP (${ticket.durationDays}d / $${ticket.amountUsd.toFixed(2)})`}
+                                    ? `✅ អនុម័ត & បើក VIP (${ticket.durationDays} ថ្ងៃ / $${Number(ticket.amountUsd || 0).toFixed(2)})`
+                                    : `✅ Approve & Activate VIP (${ticket.durationDays}d / $${Number(ticket.amountUsd || 0).toFixed(2)})`}
                                 </span>
                               </button>
                             )}
@@ -4488,6 +4490,8 @@ export const AdminDashboard: React.FC = () => {
                                 id: prev.length + 1,
                                 titleKh: `អត្ថប្រយោជន៍ពិសេសទី ${prev.length + 1}`,
                                 titleEn: `Exclusive VIP Benefit #${prev.length + 1}`,
+                                descriptionKh: 'អត្ថប្រយោជន៍បន្ថែមសម្រាប់សមាជិក VIP',
+                                descriptionEn: 'Additional benefit for VIP members',
                                 descKh: 'អត្ថប្រយោជន៍បន្ថែមសម្រាប់សមាជិក VIP',
                                 descEn: 'Additional benefit for VIP members',
                               },

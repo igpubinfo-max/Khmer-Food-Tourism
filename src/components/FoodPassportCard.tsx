@@ -30,7 +30,7 @@ export const FoodPassportCard: React.FC = () => {
         </div>
         <div className="min-w-0 flex-1">
           <h4 className="font-moul text-sm text-[#064E3B] dark:text-emerald-300">
-            🧭 {tr(language, 'រសជាតិ និងទេសចរណ៍កម្ពុជា', 'Discover Cambodian Food & Travel', '柬埔寨风味与旅游')}
+            🧭 {tr(language, 'រសជាតិ និងទេសចរណ៍កម្ពុជា', 'Cambodia Flavors & Tourism', '柬埔寨风味与旅游')}
           </h4>
           <p className="text-sm font-bold text-slate-800 dark:text-white">{levelTitle(level, language)}</p>
           <p className="text-xs text-slate-500 dark:text-slate-400">

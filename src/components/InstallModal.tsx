@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { 
   X, Download, Share2, Smartphone, CheckCircle, ExternalLink, 
-  QrCode, Apple, Compass, PlusSquare, ArrowRight, ShieldCheck, Archive, AlertTriangle
+  Apple, Compass, ArrowRight, ShieldCheck
 } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 import QRCode from 'qrcode';
@@ -24,9 +24,7 @@ export const InstallModal: React.FC = () => {
   const [iosQrUrl, setIosQrUrl] = useState<string>('');
   const [copied, setCopied] = useState<boolean>(false);
 
-  const isKm = language === 'km';
   const LATEST_SIGNED_APK_URL = 'https://github.com/igpubinfo-max/Khmer-Food-Tourism/releases/download/v2.5.0/DiscoverCambodia-v2.5.0.apk';
-  const LATEST_ZIP_PACKAGE_URL = 'https://github.com/igpubinfo-max/Khmer-Food-Tourism/releases/download/v2.5.0/DiscoverCambodia-v2.5.0.apk';
   const LATEST_RELEASE_PAGE_URL = 'https://github.com/igpubinfo-max/Khmer-Food-Tourism/releases/tag/v2.5.0';
   const apkDownloadTarget =
     appSettings.apkDownloadUrl &&
@@ -76,7 +74,7 @@ export const InstallModal: React.FC = () => {
   const handleCopyLink = (target: string) => {
     navigator.clipboard.writeText(target);
     setCopied(true);
-    showToast(isKm ? 'បានចម្លងតំណភ្ជាប់ជោគជ័យ!' : 'Link copied to clipboard!', 'success');
+    showToast(tr(language, 'បានចម្លងតំណភ្ជាប់ជោគជ័យ!', 'Link copied to clipboard!', '链接已成功复制！'), 'success');
     setTimeout(() => setCopied(false), 2500);
   };
 
@@ -91,7 +89,7 @@ export const InstallModal: React.FC = () => {
           <button
             onClick={() => setIsInstallModalOpen(false)}
             className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-emerald-200 hover:text-white transition-colors"
-            aria-label="Close"
+            aria-label={tr(language, 'បិទ', 'Close', '关闭')}
           >
             <X className="w-5 h-5" />
           </button>
@@ -107,9 +105,9 @@ export const InstallModal: React.FC = () => {
               <p className="text-[11px] text-emerald-200 font-khmer">
                 {tr(
                   language,
-                  `កំណែចុងក្រោយ ${APP_VERSION} (Build ${APP_BUILD_CODE}) • អាប់ដេតដោយមិនបាត់ទិន្នន័យ`,
-                  `Latest ${APP_VERSION} (Build ${APP_BUILD_CODE}) • Seamless in-place update`,
-                  `最新版本 ${APP_VERSION} (Build ${APP_BUILD_CODE}) • 覆盖更新不丢失数据`
+                  `រសជាតិ និងទេសចរណ៍កម្ពុជា (${APP_VERSION} • Build ${APP_BUILD_CODE})`,
+                  `Cambodia Flavors & Tourism (${APP_VERSION} • Build ${APP_BUILD_CODE})`,
+                  `柬埔寨风味与旅游 (${APP_VERSION} • Build ${APP_BUILD_CODE})`
                 )}
               </p>
             </div>
@@ -126,7 +124,7 @@ export const InstallModal: React.FC = () => {
               }`}
             >
               <Smartphone className="w-4 h-4" />
-              <span>{isKm ? 'ប្រព័ន្ធ Android (APK)' : 'Android (APK)'}</span>
+              <span>{tr(language, 'ប្រព័ន្ធ Android', 'Android (APK)', 'Android 手机')}</span>
             </button>
 
             <button
@@ -138,13 +136,13 @@ export const InstallModal: React.FC = () => {
               }`}
             >
               <Apple className="w-4 h-4" />
-              <span>{isKm ? 'ប្រព័ន្ធ iPhone (iOS)' : 'Apple iOS (iPhone)'}</span>
+              <span>{tr(language, 'ប្រព័ន្ធ iPhone', 'Apple iOS (iPhone)', '苹果 iPhone')}</span>
             </button>
           </div>
         </div>
 
         {/* Body Content */}
-        <div className="p-5 overflow-y-auto space-y-5 flex-1 text-xs">
+        <div className="p-5 overflow-y-auto space-y-4 flex-1 text-xs">
           {/* ANDROID TAB */}
           {installPlatformTab === 'android' && (
             <div className="space-y-4">
@@ -154,12 +152,14 @@ export const InstallModal: React.FC = () => {
                   {androidQrUrl ? (
                     <img 
                       src={androidQrUrl} 
-                      alt="Android APK Install QR" 
-                      className="w-44 h-44 object-contain rounded-lg"
+                      alt={tr(language, 'កូដ QR ទាញយកកម្មវិធី', 'Android APK Install QR', 'Android APK 下载二维码')} 
+                      className="w-40 h-40 object-contain rounded-lg"
                     />
                   ) : (
-                    <div className="w-44 h-44 flex items-center justify-center text-slate-400">
-                      <span className="font-khmer text-xs">{isKm ? 'កំពុងបង្កើត QR Code...' : 'Generating QR...'}</span>
+                    <div className="w-40 h-40 flex items-center justify-center text-slate-400">
+                      <span className="font-khmer text-xs">
+                        {tr(language, 'កំពុងបង្កើតកូដ QR...', 'Generating QR...', '正在生成二维码...')}
+                      </span>
                     </div>
                   )}
                   <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -170,9 +170,12 @@ export const InstallModal: React.FC = () => {
                 </div>
 
                 <p className="text-[11px] text-[#0F172A] dark:text-slate-300 font-khmer max-w-xs">
-                  {isKm 
-                    ? 'ស្កេន QR Code នេះដោយកាមេរ៉ាទូរស័ព្ទ Android ដើម្បីទាញយក APK ដំឡើងភ្លាមៗ' 
-                    : 'Scan this QR code with your Android phone camera to download APK directly.'}
+                  {tr(
+                    language,
+                    'ស្កេនកូដ QR នេះដោយកាមេរ៉ាទូរស័ព្ទដើម្បីទាញយកកម្មវិធីដំឡើងភ្លាមៗ',
+                    'Scan this QR code with your Android phone camera to download the APK directly.',
+                    '使用 Android 手机相机扫描此二维码即可直接下载安装。'
+                  )}
                 </p>
               </div>
 
@@ -189,27 +192,9 @@ export const InstallModal: React.FC = () => {
                   <span>
                     {tr(
                       language,
-                      `ទាញយក / អាប់ដេត Android APK ផ្លូវការ (${APP_VERSION} Build ${APP_BUILD_CODE})`,
-                      `Download / Update Official Android APK (${APP_VERSION} Build ${APP_BUILD_CODE})`,
-                      `下载 / 更新官方 Android APK (${APP_VERSION} Build ${APP_BUILD_CODE})`
-                    )}
-                  </span>
-                </a>
-
-                <a
-                  href={LATEST_ZIP_PACKAGE_URL}
-                  onClick={e => handleExternalDownload(LATEST_ZIP_PACKAGE_URL, e)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-2xl shadow-xs active:scale-[0.98] transition-all font-khmer text-xs"
-                >
-                  <Archive className="w-4 h-4 text-amber-200" />
-                  <span>
-                    {tr(
-                      language,
-                      `ទាញយកជាឯកសារ .ZIP (ប្រសិនបើ Chrome បិទមិនឱ្យទាញយក .APK)`,
-                      `Download as .ZIP Package (Bypasses Chrome .APK Block)`,
-                      `下载 .ZIP 压缩包（绕过 Chrome 拦截 .APK）`
+                      `ទាញយកកម្មវិធីផ្លូវការ (${APP_VERSION} • Build ${APP_BUILD_CODE})`,
+                      `Download Official Android APK (${APP_VERSION} • Build ${APP_BUILD_CODE})`,
+                      `下载官方 Android 安装包 (${APP_VERSION} • Build ${APP_BUILD_CODE})`
                     )}
                   </span>
                 </a>
@@ -223,7 +208,7 @@ export const InstallModal: React.FC = () => {
                     <span>
                       {copied
                         ? tr(language, 'បានចម្លងរួចរាល់!', 'Copied!', '已复制！')
-                        : tr(language, 'ចម្លងតំណភ្ជាប់ APK', 'Copy APK Link', '复制 APK 链接')}
+                        : tr(language, 'ចម្លងតំណភ្ជាប់', 'Copy APK Link', '复制下载链接')}
                     </span>
                   </button>
 
@@ -242,41 +227,6 @@ export const InstallModal: React.FC = () => {
                 </div>
               </div>
 
-              {/* Chrome Download Block Bypass Guide */}
-              <div className="bg-blue-50/90 dark:bg-blue-950/30 rounded-2xl p-3.5 border border-blue-300 dark:border-blue-800/70 space-y-2 font-khmer">
-                <div className="flex items-center gap-2">
-                  <AlertTriangle className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
-                  <h4 className="text-xs font-extrabold text-slate-900 dark:text-blue-200">
-                    {tr(
-                      language,
-                      '💡 ប្រសិនបើ Chrome បង្ហាញសារ "File might be harmful" ឬមិនឱ្យទាញយក៖',
-                      '💡 If Chrome says "File might be harmful" or blocks the download:',
-                      '💡 如果 Chrome 提示“文件可能有害”或拦截下载：'
-                    )}
-                  </h4>
-                </div>
-                <div className="space-y-1.5 text-[11px] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900/80 p-2.5 rounded-xl border border-blue-200 dark:border-slate-700">
-                  <p>
-                    <strong>• {tr(language, 'លើទូរស័ព្ទ Android (Chrome):', 'On Android Phone (Chrome):', '在 Android 手机 (Chrome)：')}</strong>{' '}
-                    {tr(
-                      language,
-                      'ចុចពាក្យ «Download anyway (ទាញយកទោះជាយ៉ាងណាក៏ដោយ)» រួចចុច «Open» -> បើក «Allow from this source» -> ចុច «Install»។',
-                      'Tap "Download anyway", then tap "Open" -> toggle ON "Allow from this source" -> tap "Install".',
-                      '点击“仍然下载 (Download anyway)”，完成后点击打开并允许“来自此来源的应用”。'
-                    )}
-                  </p>
-                  <p>
-                    <strong>• {tr(language, 'លើកុំព្យូទ័រ PC (Chrome):', 'On Computer / PC (Chrome):', '在电脑 PC (Chrome)：')}</strong>{' '}
-                    {tr(
-                      language,
-                      'ចុច Ctrl + J (ឬបើក chrome://downloads) -> ចុច «Keep» -> «Keep anyway» ឬចុចប៊ូតុងពណ៌លឿងខាងលើដើម្បីទាញយកជាឯកសារ .ZIP ជំនួសវិញ!',
-                      'Press Ctrl + J (open chrome://downloads) -> click "Keep" -> "Keep anyway", OR click the yellow button above to download the .ZIP package instead!',
-                      '按 Ctrl + J 打开下载记录 -> 点击“保留 (Keep)” -> “仍然保留”，或直接点击上方黄色按钮下载 .ZIP 压缩包！'
-                    )}
-                  </p>
-                </div>
-              </div>
-
               {/* Official Google Play Store Option */}
               <div className="p-3.5 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-slate-800 dark:to-slate-800/90 rounded-2xl border border-emerald-200 dark:border-emerald-800/60 flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3 min-w-0">
@@ -287,13 +237,16 @@ export const InstallModal: React.FC = () => {
                     <div className="font-bold text-slate-900 dark:text-white font-khmer text-xs flex items-center gap-1.5">
                       <span>Google Play Store</span>
                       <span className="px-1.5 py-0.2 rounded bg-emerald-600 text-white text-[9px] font-bold">
-                        Official
+                        {tr(language, 'ផ្លូវការ', 'Official', '官方')}
                       </span>
                     </div>
                     <div className="text-[10px] text-slate-600 dark:text-slate-300 font-khmer leading-snug mt-0.5">
-                      {isKm
-                        ? 'ដំឡើងដោយសុវត្ថិភាពតាមរយៈ Google Play Store ផ្លូវការ'
-                        : 'Install safely from the official Google Play Store'}
+                      {tr(
+                        language,
+                        'ដំឡើងដោយសុវត្ថិភាពតាមរយៈហាងកម្មវិធីផ្លូវការ',
+                        'Install safely from the official Google Play Store',
+                        '通过官方 Google Play 商店安全安装'
+                      )}
                     </div>
                   </div>
                 </div>
@@ -303,82 +256,56 @@ export const InstallModal: React.FC = () => {
                   rel="noopener noreferrer"
                   className="px-3 py-1.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white text-[10px] font-bold font-khmer shrink-0 shadow-2xs"
                 >
-                  {isKm ? 'Play Store' : 'Play Store'}
+                  {tr(language, 'បើកហាងកម្មវិធី', 'Play Store', '打开商店')}
                 </a>
               </div>
 
-              {/* Google Play Protect Safe Installation Guide in Khmer (Never Disable Play Protect!) */}
-              <div className="bg-amber-50/90 dark:bg-amber-950/30 rounded-2xl p-4 border-2 border-amber-300 dark:border-amber-700/70 space-y-2.5 font-khmer">
+              {/* Safe Installation Guide */}
+              <div className="bg-amber-50/90 dark:bg-amber-950/30 rounded-2xl p-4 border border-amber-300 dark:border-amber-700/70 space-y-2 font-khmer">
                 <div className="flex items-center gap-2">
                   <ShieldCheck className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
                   <h4 className="text-xs font-extrabold text-slate-900 dark:text-amber-200">
-                    {isKm
-                      ? '🛡️ វិធីដំឡើងដោយសុវត្ថិភាពជាមួយ Google Play Protect (មិនបាច់បិទ Play Protect ទេ!)'
-                      : '🛡️ Safe Installation with Google Play Protect (Keep Play Protect ON!)'}
+                    {tr(
+                      language,
+                      '🛡️ វិធីដំឡើងដោយសុវត្ថិភាពលើទូរស័ព្ទ Android',
+                      '🛡️ Safe Android Installation Steps',
+                      '🛡️ Android 安全安装指南'
+                    )}
                   </h4>
                 </div>
-                <p className="text-[11px] text-slate-700 dark:text-slate-300 leading-relaxed">
-                  {isKm
-                    ? 'កម្មវិធីនេះត្រូវបានចុះហត្ថលេខាឌីជីថលផ្លូវការ (Official Release Signature)។ សូមកុំបិទ (Do NOT disable) Google Play Protect ឡើយ! ប្រសិនបើទូរស័ព្ទលោតផ្ទាំងសួរពេលដំឡើង សូមអនុវត្តតាមជំហានងាយៗខាងក្រោម៖'
-                    : 'This app is digitally signed with our official release key. Do NOT disable Google Play Protect! If Android shows a security prompt during installation, follow these safe steps:'}
-                </p>
-                <div className="space-y-2 text-[11px] text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-900/80 p-3 rounded-xl border border-amber-200 dark:border-slate-700">
-                  <div className="flex items-start gap-2">
-                    <span className="px-1.5 py-0.5 rounded bg-emerald-600 text-white font-bold text-[10px] shrink-0">ជំហាន ១</span>
-                    <span>
-                      {isKm
-                        ? 'នៅពេលលោតផ្ទាំង "App scan recommended" (ណែនាំឱ្យស្កេនកម្មវិធី) សូមចុចប៊ូតុងពណ៌ខៀវ «Scan app (ស្កេនកម្មវិធី)» ដើម្បីឱ្យ Google Play Protect ត្រួតពិនិត្យសុវត្ថិភាពដោយស្វ័យប្រវត្តិ។'
-                        : 'When "App scan recommended" appears, tap the blue "Scan app" button so Google Play Protect verifies the APK.'}
-                    </span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <span className="px-1.5 py-0.5 rounded bg-emerald-600 text-white font-bold text-[10px] shrink-0">ជំហាន ២</span>
-                    <span>
-                      {isKm
-                        ? 'បន្ទាប់ពីស្កេនចប់ (ប្រហែល ២-៣ វិនាទី) ឬប្រសិនបើលោតផ្ទាំងបញ្ជាក់បន្ថែម សូមចុច «More details (ព័ត៌មានលម្អិតបន្ថែម)» រួចចុច «Install anyway / Install (ដំឡើង)»។'
-                        : 'Once the scan completes (or if prompted under "More details"), tap "Install" to finish installation.'}
-                    </span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <span className="px-1.5 py-0.5 rounded bg-emerald-600 text-white font-bold text-[10px] shrink-0">ជំហាន ៣</span>
-                    <span>
-                      {isKm
-                        ? 'ប្រសិនបើទូរស័ព្ទសួរសិទ្ធិដំឡើងពី Browser (Chrome/Telegram) សូមបើកកុងតាក់ «Allow from this source (អនុញ្ញាតពីប្រភពនេះ)» រួចចុច Install ជាការស្រេច!'
-                        : 'If your browser (Chrome/Telegram) asks permission, toggle ON "Allow from this source" and tap Install!'}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* 4-Step Android Installation Guide */}
-              <div className="bg-slate-50 dark:bg-slate-800/80 rounded-2xl p-4 border border-slate-200 dark:border-slate-700 space-y-2">
-                <h4 className="text-xs font-bold text-[#064E3B] dark:text-emerald-400 font-khmer flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-[#059669]"></span>
-                  {isKm ? 'សង្ខេបជំហានដំឡើងលើទូរស័ព្ទ Android (៤ ជំហានងាយៗ)' : '4 Easy Installation Steps for Android'}
-                </h4>
-                <ul className="text-[11px] text-slate-600 dark:text-slate-300 space-y-1.5 font-khmer pl-1">
+                <ul className="text-[11px] text-slate-700 dark:text-slate-200 space-y-1.5 pl-1">
                   <li className="flex items-start gap-2">
                     <span className="w-4 h-4 rounded-full bg-[#064E3B] text-white flex items-center justify-center text-[10px] shrink-0 mt-0.5">1</span>
-                    <span>{isKm ? 'ចុចប៊ូតុង "ទាញយកកម្មវិធី Android APK ផ្លូវការ" ឬស្កេន QR Code ខាងលើ' : 'Click "Download Official Signed Android APK" or scan QR Code.'}</span>
+                    <span>
+                      {tr(
+                        language,
+                        'ចុចប៊ូតុងទាញយកកម្មវិធីផ្លូវការ ឬស្កេនកូដ QR ខាងលើ។',
+                        'Tap "Download Official Android APK" or scan the QR code above.',
+                        '点击“下载官方 Android 安装包”或扫描上方二维码。'
+                      )}
+                    </span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="w-4 h-4 rounded-full bg-[#064E3B] text-white flex items-center justify-center text-[10px] shrink-0 mt-0.5">2</span>
                     <span>
                       {tr(
                         language,
-                        `បើកឯកសារ DiscoverCambodia-${APP_VERSION}.apk ដែលបានទាញយករួច (ដំឡើងជាន់លើកំណែចាស់ដោយមិនបាច់លុបកម្មវិធីចាស់ទេ)`,
-                        `Open the downloaded DiscoverCambodia-${APP_VERSION}.apk file (installs directly over your existing app without uninstalling).`,
-                        `打开下载好的 DiscoverCambodia-${APP_VERSION}.apk 文件（直接覆盖安装，无需卸载旧版）。`
+                        'បើកឯកសារដែលបានទាញយករួច ដើម្បីដំឡើងជាន់លើកំណែចាស់ដោយមិនបាត់ទិន្នន័យ។',
+                        'Open the downloaded APK file to install directly without losing existing data.',
+                        '打开已下载的安装包，直接覆盖安装且不会丢失已有数据。'
                       )}
                     </span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="w-4 h-4 rounded-full bg-[#064E3B] text-white flex items-center justify-center text-[10px] shrink-0 mt-0.5">3</span>
-                    <span>{isKm ? 'ពេលលោតផ្ទាំង Google Play Protect សូមចុច "Scan app (ស្កេនកម្មវិធី)" ដោយរក្សា Play Protect ឱ្យនៅបើកដដែល' : 'When Google Play Protect prompts, tap "Scan app" while keeping Play Protect enabled.'}</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="w-4 h-4 rounded-full bg-[#064E3B] text-white flex items-center justify-center text-[10px] shrink-0 mt-0.5">4</span>
-                    <span>{tr(language, 'ចុច "ដំឡើង" ហើយចាប់ផ្តើមប្រើប្រាស់កម្មវិធី!', 'Tap "Install" and start exploring Cambodia!', '点击“安装”，即刻柬埔寨风味与旅游！')}</span>
+                    <span>
+                      {tr(
+                        language,
+                        'ប្រសិនបើទូរស័ព្ទសួរសិទ្ធិដំឡើង សូមចុចអនុញ្ញាត និងចុចដំឡើងជាការស្រេច!',
+                        'If prompted by your browser or Play Protect, tap Scan / Install to finish!',
+                        '如浏览器提示安装权限，请允许安装并点击完成！'
+                      )}
+                    </span>
                   </li>
                 </ul>
               </div>
@@ -389,7 +316,14 @@ export const InstallModal: React.FC = () => {
                 className="w-full flex items-center justify-center gap-2 py-2.5 px-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-2xl border border-slate-200 dark:border-slate-700 transition font-khmer text-xs font-semibold"
               >
                 <Apple className="w-4 h-4 text-slate-700 dark:text-slate-300" />
-                <span>{isKm ? 'ប្រើប្រាស់ Apple iPhone? ចុចទីនេះសម្រាប់ iOS' : 'Using Apple iPhone? Switch to iOS guide'}</span>
+                <span>
+                  {tr(
+                    language,
+                    'ប្រើប្រាស់ទូរស័ព្ទ iPhone? ចុចទីនេះសម្រាប់ការណែនាំ',
+                    'Using Apple iPhone? Switch to iOS guide',
+                    '使用苹果 iPhone？点击查看 iOS 安装指南'
+                  )}
+                </span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
@@ -404,12 +338,14 @@ export const InstallModal: React.FC = () => {
                   {iosQrUrl ? (
                     <img 
                       src={iosQrUrl} 
-                      alt="iPhone Web App QR" 
-                      className="w-44 h-44 object-contain rounded-lg"
+                      alt={tr(language, 'កូដ QR សម្រាប់ iPhone', 'iPhone Web App QR', 'iPhone 网页应用二维码')} 
+                      className="w-40 h-40 object-contain rounded-lg"
                     />
                   ) : (
-                    <div className="w-44 h-44 flex items-center justify-center text-slate-400">
-                      <span className="font-khmer text-xs">{isKm ? 'កំពុងបង្កើត QR Code...' : 'Generating QR...'}</span>
+                    <div className="w-40 h-40 flex items-center justify-center text-slate-400">
+                      <span className="font-khmer text-xs">
+                        {tr(language, 'កំពុងបង្កើតកូដ QR...', 'Generating QR...', '正在生成二维码...')}
+                      </span>
                     </div>
                   )}
                   <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -420,9 +356,12 @@ export const InstallModal: React.FC = () => {
                 </div>
 
                 <p className="text-[11px] text-slate-600 dark:text-slate-300 font-khmer max-w-xs">
-                  {isKm 
-                    ? 'ស្កេន QR Code នេះដោយកាមេរ៉ា iPhone ដើម្បីបើកកម្មវិធីលើ Safari និងបន្ថែមទៅអេក្រង់ដើម (Home Screen)' 
-                    : 'Scan with your iPhone camera to open in Safari and add to Home Screen.'}
+                  {tr(
+                    language,
+                    'ស្កេនកូដ QR នេះដោយកាមេរ៉ា iPhone ដើម្បីបើកកម្មវិធី និងបន្ថែមទៅអេក្រង់ដើម',
+                    'Scan with your iPhone camera to open in Safari and add to Home Screen.',
+                    '使用 iPhone 相机扫描二维码，在 Safari 中打开并添加到主屏幕。'
+                  )}
                 </p>
 
                 <div className="w-full space-y-2 pt-2">
@@ -433,7 +372,9 @@ export const InstallModal: React.FC = () => {
                     className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-slate-900 hover:bg-black text-white font-bold rounded-2xl shadow-md active:scale-[0.98] transition-all font-khmer text-xs"
                   >
                     <ExternalLink className="w-4 h-4 text-emerald-400" />
-                    <span>{isKm ? 'បើកកម្មវិធីលើ Safari ផ្ទាល់ (Open in Safari)' : 'Open Web App in Safari'}</span>
+                    <span>
+                      {tr(language, 'បើកកម្មវិធីលើកម្មវិធីរុករក Safari', 'Open Web App in Safari', '在 Safari 中打开应用')}
+                    </span>
                   </a>
 
                   <button
@@ -441,30 +382,12 @@ export const InstallModal: React.FC = () => {
                     className="w-full flex items-center justify-center gap-1.5 py-2.5 px-4 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-medium rounded-2xl transition font-khmer text-xs border border-slate-200 dark:border-slate-700"
                   >
                     {copied ? <CheckCircle className="w-4 h-4 text-[#059669]" /> : <Share2 className="w-4 h-4 text-slate-500" />}
-                    <span>{copied ? (isKm ? 'បានចម្លងរួចរាល់!' : 'Copied!') : (isKm ? 'ចម្លងតំណភ្ជាប់ Web App សម្រាប់ iPhone' : 'Copy iPhone Web App Link')}</span>
+                    <span>
+                      {copied
+                        ? tr(language, 'បានចម្លងរួចរាល់!', 'Copied!', '已复制！')
+                        : tr(language, 'ចម្លងតំណភ្ជាប់សម្រាប់ iPhone', 'Copy iPhone Web App Link', '复制 iPhone 网页版链接')}
+                    </span>
                   </button>
-                </div>
-              </div>
-
-              {/* Official Apple Store & TestFlight Status */}
-              <div className="grid grid-cols-2 gap-2">
-                <a
-                  href={appSettings.iosTestFlightUrl || 'https://testflight.apple.com'}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-3 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 flex flex-col items-center text-center transition"
-                >
-                  <Apple className="w-5 h-5 text-slate-800 dark:text-slate-200 mb-1" />
-                  <span className="font-bold font-khmer text-xs">Apple TestFlight</span>
-                  <span className="text-[9px] text-slate-500 font-khmer">{isKm ? 'កំណែសាកល្បង Beta' : 'Beta Testing'}</span>
-                </a>
-
-                <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 flex flex-col items-center text-center opacity-85">
-                  <div className="w-5 h-5 rounded-full bg-slate-900 text-white flex items-center justify-center text-[10px] font-bold mb-1">
-                    A
-                  </div>
-                  <span className="font-bold font-khmer text-xs">App Store</span>
-                  <span className="text-[9px] text-slate-500 font-khmer">{isKm ? 'កំពុងត្រួតពិនិត្យ (Coming Soon)' : 'In Review (Coming)'}</span>
                 </div>
               </div>
 
@@ -472,32 +395,46 @@ export const InstallModal: React.FC = () => {
               <div className="bg-slate-50 dark:bg-slate-800 rounded-2xl p-4 border border-slate-200 dark:border-slate-700 space-y-2">
                 <h4 className="text-xs font-bold text-[#064E3B] dark:text-emerald-400 font-khmer flex items-center gap-1.5">
                   <Compass className="w-4 h-4 text-[#059669]" />
-                  {isKm ? 'វិធីដំឡើងលើ iPhone តាម Safari (ដំណើរការដូច App ពេញលេញ)' : 'Install on iPhone via Safari (Full App Mode)'}
+                  {tr(
+                    language,
+                    'វិធីបន្ថែមកម្មវិធីទៅអេក្រង់ដើមលើទូរស័ព្ទ iPhone',
+                    'Install on iPhone via Safari (Full App Mode)',
+                    '在 iPhone 上通过 Safari 添加到主屏幕'
+                  )}
                 </h4>
                 <ul className="text-[11px] text-slate-700 dark:text-slate-300 space-y-2 font-khmer pl-1">
                   <li className="flex items-start gap-2">
                     <span className="w-4 h-4 rounded-full bg-[#064E3B] text-white flex items-center justify-center text-[10px] shrink-0 mt-0.5">1</span>
-                    <span>{isKm ? 'បើកតំណភ្ជាប់កម្មវិធីនៅក្នុង Safari នៅលើទូរស័ព្ទ iPhone' : 'Open the app link in Safari on your iPhone.'}</span>
+                    <span>
+                      {tr(
+                        language,
+                        'បើកតំណភ្ជាប់កម្មវិធីនៅក្នុង Safari នៅលើទូរស័ព្ទ iPhone របស់អ្នក។',
+                        'Open the app link in Safari on your iPhone.',
+                        '在 iPhone 的 Safari 浏览器中打开应用链接。'
+                      )}
+                    </span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="w-4 h-4 rounded-full bg-[#064E3B] text-white flex items-center justify-center text-[10px] shrink-0 mt-0.5">2</span>
                     <span>
-                      {isKm ? 'ចុចលើប៊ូតុង "Share" ' : 'Tap the "Share" button '}
-                      <Share2 className="w-3.5 h-3.5 inline text-[#059669] mx-0.5" />
-                      {isKm ? '(សញ្ញាការ៉េព្រួញឡើងលើ) នៅរបារខាងក្រោម' : 'at the bottom toolbar.'}
+                      {tr(
+                        language,
+                        'ចុចលើប៊ូតុងចែករំលែក (សញ្ញាការ៉េព្រួញឡើងលើ) នៅរបារខាងក្រោម។',
+                        'Tap the Share button at the bottom toolbar.',
+                        '点击底部工具栏的“分享”按钮。'
+                      )}
                     </span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="w-4 h-4 rounded-full bg-[#064E3B] text-white flex items-center justify-center text-[10px] shrink-0 mt-0.5">3</span>
                     <span>
-                      {isKm ? 'អូសចុះក្រោម រួចជ្រើសរើស ' : 'Scroll down and tap '}
-                      <strong className="text-slate-900 dark:text-white">"Add to Home Screen"</strong>
-                      {isKm ? ' (បន្ថែមទៅអេក្រង់ដើម)' : '.'}
+                      {tr(
+                        language,
+                        'អូសចុះក្រោម រួចជ្រើសរើស «បន្ថែមទៅអេក្រង់ដើម» និងចុចបន្ថែមជាការស្រេច!',
+                        'Scroll down, tap "Add to Home Screen", and tap "Add"!',
+                        '向下滚动并点击“添加到主屏幕”，然后点击“添加”即可！'
+                      )}
                     </span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="w-4 h-4 rounded-full bg-[#064E3B] text-white flex items-center justify-center text-[10px] shrink-0 mt-0.5">4</span>
-                    <span>{isKm ? 'ចុច "Add (បន្ថែម)" — រូបសញ្ញាកម្មវិធីនឹងបង្ហាញលើអេក្រង់ដើមទូរស័ព្ទ iPhone របស់អ្នកភ្លាមៗ!' : 'Tap "Add" — The app icon appears on your home screen and opens full-screen!'}</span>
                   </li>
                 </ul>
               </div>
@@ -508,7 +445,14 @@ export const InstallModal: React.FC = () => {
                 className="w-full flex items-center justify-center gap-2 py-2.5 px-3 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:hover:bg-emerald-900/50 text-[#064E3B] dark:text-emerald-300 rounded-2xl border border-emerald-200/80 dark:border-emerald-800/80 transition font-khmer text-xs font-semibold"
               >
                 <Smartphone className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                <span>{isKm ? 'ប្រើប្រាស់ Android? ចុចទីនេះដើម្បីទាញយក APK' : 'Using Android? Switch to APK Download'}</span>
+                <span>
+                  {tr(
+                    language,
+                    'ប្រើប្រាស់ទូរស័ព្ទ Android? ចុចទីនេះដើម្បីទាញយកកម្មវិធី',
+                    'Using Android? Switch to APK Download',
+                    '使用 Android 手机？点击切换至 APK 下载'
+                  )}
+                </span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>

@@ -1,7 +1,7 @@
 export const APP_VERSION = 'v2.5.0';
 export const APP_VERSION_NAME = '2.5.0';
 declare const __KFT_BUILD_CODE__: number | undefined;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1258;
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1259;
 export const APP_RELEASE_DATE = '2026-10-30';
 
 export interface GoogleMapsPlaceMetadata {
@@ -43,8 +43,10 @@ export const VIP_QUARTERLY_DAYS = 30;
 export const DEFAULT_ADDITIONAL_STORE_FEE_USD = 5.0;
 export const DEFAULT_INCLUDED_FREE_STORES = 1;
 
+export type VipPlanType = 'quarterly' | 'annual';
+
 export interface VipPlanConfig {
-  id: 'quarterly' | 'annual';
+  id: VipPlanType;
   nameEn: string;
   nameKh: string;
   priceUsd: number;
@@ -262,7 +264,9 @@ export type FoodCategorySlug =
   | 'cake'
   | 'noodles' 
   | 'rice' 
-  | 'specialty';
+  | 'specialty'
+  | 'streetfood'
+  | 'drink';
 
 export interface Ingredient {
   nameKh: string;
@@ -298,6 +302,8 @@ export interface FoodItem {
   steps: CookingStep[];
   rating: number;
   reviewCount: number;
+  provinceKh?: string;
+  provinceEn?: string;
   isFeatured?: boolean;
   imageAuditStatus?: 'verified' | 'replaced' | 'flagged_review';
   imageAuditNote?: string;
@@ -629,6 +635,7 @@ export interface AiStoreCategoryVerificationReport {
   decision: AiStoreCategoryDecision;
   isFoodBusiness: boolean;
   detectedCategory: DetectedBusinessSubCategory;
+  detectedType?: string;
   detectedCategoryLabelKh: string;
   detectedCategoryLabelEn: string;
   confidenceScore: number; // 0 to 100
@@ -648,6 +655,9 @@ export interface Restaurant {
   id: string;
   nameKh: string;
   nameEn: string;
+  subtitle?: string;
+  categoryKh?: string;
+  categoryEn?: string;
   descriptionKh: string;
   descriptionEn: string;
   photoUrl: string;
@@ -669,6 +679,7 @@ export interface Restaurant {
   reviewCount: number;
   reviews?: RestaurantReview[];
   signatureDishesKh: string[];
+  signatureDishesEn?: string[];
   ownerId?: string;
   ownerName?: string;
   ownerEmail?: string;
@@ -680,6 +691,7 @@ export interface Restaurant {
   // Membership & Menu Items ($0 Free Listing vs VIP $2.99/30d or $4.99/90d)
   membershipTier?: MembershipTier; // 'free' ($0) or 'premium' ($2.99 / $4.99)
   membershipExpiresAt?: string; // ISO 8601 date timestamp (30 or 90 days from activation)
+  subscriptionExpiresAt?: string;
   menuItems?: RestaurantMenuItem[]; // Up to 20 items for active Premium restaurants
   
   // 10 VIP Benefits tracking & Analytics
@@ -707,6 +719,8 @@ export interface Restaurant {
   created_at?: string;
   createdAt?: string;
   updatedAt?: string;
+  isCustomPhoto?: boolean;
+  photoUpdatedAt?: string;
 
   // Google Maps Platform Source Separation & Admin Override Protection
   googlePlaceId?: string;

@@ -1215,7 +1215,7 @@ export const ProfileView: React.FC = () => {
                   >
                     <div>
                       <span className="font-bold text-slate-800 dark:text-slate-200">
-                        {txn.type === 'additional_store_fee'
+                        {(txn.type as string) === 'additional_store_fee' || txn.type === 'additional_store'
                           ? tr(
                               language,
                               `បន្ថែមហាងថ្មី ($${Number(txn.amountUsd || 0).toFixed(2)})`,
@@ -1252,209 +1252,6 @@ export const ProfileView: React.FC = () => {
       {/* Cambodian Food Passport - Consumer Users Only */}
       {!isAdmin && <FoodPassportCard />}
 
-      {/* App Installation & Support Buttons Showcase - Users Only */}
-      {!isAdmin && (
-        <div className="grid grid-cols-1 gap-2.5">
-          <button
-            onClick={() => setIsSupportModalOpen(true)}
-            className="p-3 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/90 dark:border-slate-700 shadow-xs flex items-center gap-2.5 hover:bg-slate-50 dark:hover:bg-slate-700/60 transition text-left"
-          >
-            <div className="p-2 rounded-xl bg-[#10B981] text-white shrink-0">
-              <Heart className="w-4 h-4 fill-white" />
-            </div>
-            <div>
-              <div className="text-xs font-bold text-[#0F172A] dark:text-white font-khmer">
-                {tr(language, 'ជួយឧបត្ថម្ភកម្មវិធី', 'Support App', '支持应用开发')}
-              </div>
-              <div className="text-[10px] text-slate-500 font-khmer">
-                {tr(language, 'បាគង KHQR', 'Bakong KHQR', 'Bakong KHQR')}
-              </div>
-            </div>
-          </button>
-        </div>
-      )}
-
-      {/* 6 Personalized Account Features Hub (Consumer Access - Hidden for Admin) */}
-      {!isAdmin && (
-      <div className="p-4 rounded-3xl bg-gradient-to-br from-emerald-950 via-[#064E3B] to-slate-900 text-white border border-emerald-500/40 shadow-xs space-y-3 font-khmer relative overflow-hidden">
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-amber-400" />
-            <h3 className="font-moul text-xs sm:text-sm text-white">
-              {tr(language, 'សេវាកម្មឆ្លាតវៃប្រចាំថ្ងៃ', 'Smart Daily Services', '智能日常服务')}
-            </h3>
-          </div>
-          {isVip || currentUser?.role === 'admin' ? (
-            <span className="px-2.5 py-0.5 rounded-full bg-emerald-400/20 border border-emerald-400/50 text-emerald-200 text-[10px] font-extrabold flex items-center gap-1">
-              <Crown className="w-3 h-3 text-amber-300" />
-              {tr(language, 'បើកដំណើរការ VIP', 'VIP Unlocked', 'VIP 已开启')}
-            </span>
-          ) : (
-            <button
-              onClick={() => openUpgradeVipModal(vipAccountState === 'expired_vip' || currentUser?.subscriptionStatus === 'cancelled')}
-              className="px-2.5 py-1 rounded-full bg-gradient-to-r from-amber-400 to-yellow-500 text-stone-950 text-[10px] font-extrabold flex items-center gap-1 shadow-xs hover:brightness-105 cursor-pointer"
-            >
-              <Crown className="w-3 h-3" />
-              {tr(language, '👑 ដំឡើង VIP', '👑 Upgrade VIP', '👑 升级 VIP')}
-            </button>
-          )}
-        </div>
-
-        {!isVip && currentUser?.role !== 'admin' && (
-          <div className="p-2.5 rounded-2xl bg-amber-500/15 border border-amber-400/40 flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2 text-[11px] text-amber-100 leading-snug">
-              <Crown className="w-3.5 h-3.5 text-amber-300 shrink-0" />
-              <span>
-                {tr(
-                  language,
-                  'មុខងារស្វែងរកមូលដ្ឋាន និងផែនទីបង្ហាញផ្លូវគឺឥតគិតថ្លៃ • ដំឡើង VIP សម្រាប់ AI កម្រិតខ្ពស់ និងផ្សព្វផ្សាយហាង!',
-                  'Basic search & map navigation are Free • Upgrade to VIP for advanced AI & store promotion!',
-                  '基础搜索与地图导航免费开放 • 升级 VIP 解锁高级 AI 与店铺推广！'
-                )}
-              </span>
-            </div>
-            <button
-              onClick={() => openUpgradeVipModal(vipAccountState === 'expired_vip' || currentUser?.subscriptionStatus === 'cancelled')}
-              className="shrink-0 px-2.5 py-1 rounded-xl bg-amber-400 hover:bg-amber-300 text-stone-950 font-extrabold text-[10px] cursor-pointer"
-            >
-              {tr(language, 'ដំឡើង VIP', 'Upgrade', '升级 VIP')}
-            </button>
-          </div>
-        )}
-
-        <div className="grid grid-cols-2 gap-2">
-          {/* A. ថ្ងៃនេះញ៉ាំអ្វី? */}
-          <button
-            onClick={() => setIsWhatToEatModalOpen(true)}
-            className="p-2.5 rounded-2xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/40 text-left transition cursor-pointer"
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-lg">🍲</span>
-              <span className="px-1.5 py-0.5 rounded-full bg-emerald-500/25 border border-emerald-300/40 text-emerald-200 text-[9px] font-extrabold">
-                {tr(language, 'ឥតគិតថ្លៃ', 'FREE', '免费')}
-              </span>
-            </div>
-            <div className="text-xs font-bold text-white mt-1">
-              {tr(language, 'ណែនាំមុខម្ហូប', 'Food Picks', '美食推荐')}
-            </div>
-          </button>
-
-          {/* B. នៅជិតខ្ញុំ */}
-          <button
-            onClick={() => setIsNearMeModalOpen(true)}
-            className="p-2.5 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/15 text-left transition cursor-pointer"
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-lg">📍</span>
-              <span className="px-1.5 py-0.5 rounded-full bg-emerald-500/25 border border-emerald-300/40 text-emerald-200 text-[9px] font-extrabold">
-                {tr(language, 'ឥតគិតថ្លៃ', 'FREE', '免费')}
-              </span>
-            </div>
-            <div className="text-xs font-bold text-white mt-1">
-              {tr(language, 'អាហារនៅជិតខ្ញុំ', 'Nearby Food', '附近美食')}
-            </div>
-          </button>
-
-          {/* C. ម្ហូបតាមខេត្ត */}
-          <button
-            type="button"
-            onClick={() => setIsDailyDiscoveriesModalOpen(true)}
-            className="p-2.5 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/15 text-left transition cursor-pointer"
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-lg">✨</span>
-              <span className="px-1.5 py-0.5 rounded-full bg-emerald-500/25 border border-emerald-300/40 text-emerald-200 text-[9px] font-extrabold">
-                {tr(language, 'ឥតគិតថ្លៃ', 'FREE', '免费')}
-              </span>
-            </div>
-            <div className="text-xs font-bold text-white mt-1">
-              {tr(language, 'ម្ហូបតាមខេត្ត', 'Food by Province', '各省美食')}
-            </div>
-          </button>
-
-          {/* D. បញ្ជីកន្លែងដែលចង់ទៅ */}
-          <button
-            onClick={() => setIsWishlistsModalOpen(true)}
-            className="p-2.5 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/15 text-left transition cursor-pointer"
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-lg">📑</span>
-              {!isVip && currentUser?.role !== 'admin' ? (
-                <span className="px-1.5 py-0.5 rounded-full bg-amber-400/25 border border-amber-300/50 text-amber-200 text-[9px] font-extrabold flex items-center gap-0.5">
-                  <Crown className="w-2.5 h-2.5" /> VIP
-                </span>
-              ) : (
-                <span className="text-[9px] text-emerald-300 font-bold">{wishlists.length}</span>
-              )}
-            </div>
-            <div className="text-xs font-bold text-white mt-1">
-              {tr(language, 'បញ្ជីកន្លែងចង់ទៅ', 'My Wishlists', '我的收藏夹')}
-            </div>
-          </button>
-
-          {/* E. ជំនួយការឆ្លាតវៃ */}
-          <button
-            onClick={() => setIsAiTripPlannerModalOpen(true)}
-            className="p-2.5 rounded-2xl bg-teal-500/20 hover:bg-teal-500/30 border border-teal-400/30 text-left transition cursor-pointer"
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-lg">🤖</span>
-              <span className="px-1.5 py-0.5 rounded-full bg-amber-400/25 border border-amber-300/50 text-amber-200 text-[9px] font-extrabold">
-                {tr(language, 'ឥតគិតថ្លៃ + VIP', 'FREE + VIP', '免费 + VIP')}
-              </span>
-            </div>
-            <div className="text-xs font-bold text-white mt-1">
-              {tr(language, 'ជំនួយការឆ្លាតវៃ', 'Smart AI Assistant', '智能 AI 助手')}
-            </div>
-          </button>
-
-          {/* F. ការជូនដំណឹង */}
-          <button
-            type="button"
-            onClick={() => setIsNotificationsModalOpen(true)}
-            className="p-2.5 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/15 text-left transition relative cursor-pointer"
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-lg">🔔</span>
-              {unreadNotificationsCount > 0 ? (
-                <span className="px-1.5 py-0.2 rounded-full bg-rose-500 text-white text-[8px] font-black">
-                  {unreadNotificationsCount}
-                </span>
-              ) : (
-                <span className="text-[8px] text-emerald-300 font-bold">
-                  {tr(language, 'ថ្មីៗ', 'Alerts', '通知')}
-                </span>
-              )}
-            </div>
-            <div className="text-xs font-bold text-white mt-1">
-              {tr(language, 'ការជូនដំណឹង', 'Notifications', '消息通知')}
-            </div>
-          </button>
-
-          {/* G. ផែនទីបង្ហាញផ្លូវ */}
-          <button
-            onClick={() => openGoogleMapsSearchModal('all')}
-            className="col-span-2 p-2.5 rounded-2xl bg-gradient-to-r from-emerald-700/60 to-teal-700/60 hover:from-emerald-700/80 hover:to-teal-700/80 border border-amber-400/50 text-left transition relative cursor-pointer flex items-center justify-between gap-2"
-          >
-            <div className="flex items-center gap-2">
-              <span className="text-lg">🗺️</span>
-              <div>
-                <div className="text-xs font-bold text-amber-300">
-                  {tr(language, 'ស្វែងរកហាង & ផែនទីបង្ហាញផ្លូវ', 'Map Navigation & Places Search', '地图导航与地点搜索')}
-                </div>
-                <div className="text-[10px] text-emerald-100">
-                  {tr(language, 'ហាងកាហ្វេ ភោជនីយដ្ឋាន និងតំបន់ទេសចរណ៍ទូទាំងកម្ពុជា', 'Search cafés, restaurants & attractions across Cambodia', '搜索全柬埔寨咖啡馆、餐厅与旅游景点')}
-                </div>
-              </div>
-            </div>
-            <span className="px-2 py-0.5 rounded-full bg-emerald-500/30 border border-emerald-300/50 text-emerald-100 text-[9px] font-black shrink-0">
-              {tr(language, 'ឥតគិតថ្លៃ', 'FREE', '免费')}
-            </span>
-          </button>
-        </div>
-      </div>
-      )}
-
       {/* Tabs: My Restaurant (for owners) / Wishlists / Saved / Trip Plans / Membership / Settings */}
       {!isAdmin && (
       <div className="relative group/tabs">
@@ -1463,7 +1260,7 @@ export const ProfileView: React.FC = () => {
           <button
             onClick={() => scrollTabs(-150)}
             className="absolute -left-2 top-1/2 -translate-y-1/2 z-10 p-1.5 rounded-full bg-white dark:bg-slate-800 shadow-md border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition active:scale-95 cursor-pointer"
-            title={isKm ? 'រំកិលទៅឆ្វេង' : 'Scroll left'}
+            title={tr(language, 'រំកិលទៅឆ្វេង', 'Scroll left', '向左滚动')}
           >
             <ChevronLeft className="w-3.5 h-3.5" />
           </button>
