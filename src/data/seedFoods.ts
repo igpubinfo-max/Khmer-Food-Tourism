@@ -12,8 +12,8 @@ export const seedFoods: FoodItem[] = [
     categorySlug: 'soup',
     categoryKh: 'ម្ហូបពិសេស / អាម៉ុក',
     categoryEn: 'Signature / Amok',
-    descriptionKh: 'អាម៉ុកត្រី គឺជាម្ហូបតំណាងអត្តសញ្ញាណជាតិខ្មែរដ៏ល្បីល្បាញលើពិភពលោក។ ចម្អិនពីសាច់ត្រីរ៉ស់ស្រស់ៗ លាយជាមួយគ្រឿងបុកខ្មែរ ខ្ទិះដូងខាប់ ស៊ុត និងស្លឹកញ វេចក្នុងកន្ទោងស្លឹកចេក រួចចំហុយឱ្យឈ្ងុយឈ្ងប់។',
-    descriptionEn: 'The undisputed national dish of Cambodia. Fresh river fish gently cooked in fragrant lemongrass-turmeric kroeung with rich coconut cream and steamed inside banana leaf cups.',
+    descriptionKh: 'អាម៉ុកត្រី ចម្អិនពីសាច់ត្រីរ៉ស់ស្រស់ៗ លាយជាមួយគ្រឿងបុកខ្មែរ ខ្ទិះដូងខាប់ ស៊ុត និងស្លឹកញ វេចក្នុងកន្ទោងស្លឹកចេក រួចចំហុយឱ្យឈ្ងុយឈ្ងប់។',
+    descriptionEn: 'Fresh river fish gently cooked in fragrant lemongrass-turmeric kroeung with rich coconut cream and steamed inside banana leaf cups.',
     photoUrl: '/foods/food-1.jpg',
     imageAuditStatus: 'verified',
     imageAuditNote: 'រូបភាពដើមពិតប្រាកដពី Magnific',
@@ -51,7 +51,7 @@ export const seedFoods: FoodItem[] = [
     categoryKh: 'ម្ហូបសម្ល / ប្រពៃណី',
     categoryEn: 'Soup / Traditional',
     descriptionKh: 'សម្លកកូរ ជាកំពូលសម្លបុរាណខ្មែរដែលសម្បូរដោយបន្លែធម្មជាតិច្រើនមុខ និងអង្ករលីងបុកឈ្ងុយ។ ចម្អិនជាមួយត្រីឆ្អើរ ឬសាច់ជ្រូកបីជាន់ មានរសជាតិផ្អែមបែបធម្មជាតិ។',
-    descriptionEn: 'The traditional royal everyday stew of Cambodia packed with farm vegetables, toasted rice powder, and savory smoked fish or pork belly.',
+    descriptionEn: 'Traditional Cambodian everyday vegetable stew packed with farm greens, toasted rice powder, and savory smoked fish or pork belly.',
     photoUrl: '/foods/food-2.jpg',
     imageAuditStatus: 'verified',
     imageAuditNote: 'រូបភាពដើមពិតប្រាកដពី Magnific',
@@ -539,12 +539,12 @@ export const seedFoods: FoodItem[] = [
   {
     id: 'food-16',
     nameKh: 'សម្លការីសារ៉ាម៉ាន់សាច់គោ',
-    nameEn: 'Royal Saraman Beef Curry',
+    nameEn: 'Saraman Beef Curry',
     categorySlug: 'soup',
-    categoryKh: 'ម្ហូបរាជវាំង / ការីពិសេស',
-    categoryEn: 'Curry / Royal Saraman',
-    descriptionKh: 'ការីសារ៉ាម៉ាន់ ជាកំពូលការីរាជវាំងខ្មែរដែលមានក្លិនឈ្ងុយគ្រឿងទេសបុកពិសេស អង្ករលីង សណ្តែកដីលីង និងខ្ទិះដូងខាប់ រម្ងាស់ជាមួយសាច់គោជាប់សរសៃផុយទន់។',
-    descriptionEn: 'The rich royal Cambodian ceremonial beef curry infused with roasted spices, toasted peanuts, coconut cream, and melt-in-mouth beef shank.',
+    categoryKh: 'ម្ហូបសម្ល / ការីពិសេស',
+    categoryEn: 'Curry / Special Saraman',
+    descriptionKh: 'ការីសារ៉ាម៉ាន់ មានក្លិនឈ្ងុយគ្រឿងទេសបុកពិសេស អង្ករលីង សណ្តែកដីលីង និងខ្ទិះដូងខាប់ រម្ងាស់ជាមួយសាច់គោជាប់សរសៃផុយទន់។',
+    descriptionEn: 'Rich Cambodian beef curry infused with roasted spices, toasted peanuts, coconut cream, and melt-in-mouth beef shank.',
     photoUrl: '/foods/food-16.jpg',
     imageAuditStatus: 'verified',
     imageAuditNote: 'រូបភាពដើមពិតប្រាកដពី Magnific',
@@ -1216,7 +1216,7 @@ export const seedFoods: FoodItem[] = [
     categoryKh: 'ម្ហូបញាំ / ស្រស់ស្រាយ',
     categoryEn: 'Salad / Pomelo',
     descriptionKh: 'ញាំក្រូចថ្លុងកោះទ្រង់ (ក្រចេះ) ជាម្ហូបញាំលំដាប់ខ្ពស់។ ក្រូចថ្លុងផ្អែមស្រួយ លាយជាមួយបង្គាស្ងោរ សាច់មាន់ហែក ដូងលីង សណ្តែកដី និងទឹកញាំក្រូចឆ្មា។',
-    descriptionEn: 'Prestigious Cambodian royal salad featuring sweet Koh Trong pomelo sacs, tender poached prawns, shredded chicken, toasted coconut shreds, and mint.',
+    descriptionEn: 'Refreshing Cambodian salad featuring sweet Koh Trong pomelo sacs, tender poached prawns, shredded chicken, toasted coconut shreds, and mint.',
     photoUrl: '/foods/food-35.jpg',
     imageAuditStatus: 'verified',
     imageAuditNote: 'រូបភាពដើមពិតប្រាកដពី Magnific',
@@ -1639,10 +1639,10 @@ export const seedFoods: FoodItem[] = [
     nameKh: 'សង់ខ្យាល្ពៅ',
     nameEn: 'Sangkhya Lapov (Steamed Pumpkin Custard)',
     categorySlug: 'dessert',
-    categoryKh: 'បង្អែមខ្មែរ / រាជវាំង',
+    categoryKh: 'បង្អែមខ្មែរ / ប្រពៃណី',
     categoryEn: 'Desserts / Pumpkin Custard',
-    descriptionKh: 'សង់ខ្យាល្ពៅ ជាកំពូលបង្អែមរាជវាំងដ៏ប្រណិត។ យកល្ពៅមូលតូចឆ្កៀលគ្រាប់ចេញ រួចចាក់ទឹកខាប់ពីស៊ុតទា ខ្ទិះដូងខាប់ និងស្ករត្នោតចូល ហើយចំហុយរហូតសាច់ល្ពៅនិងសង់ខ្យាឆ្អិនទន់រលោង។',
-    descriptionEn: 'Spectacular royal Cambodian dessert: whole baby kabocha pumpkin hollowed out, filled with luscious duck egg, coconut milk, and palm sugar custard, then steamed until velvety.',
+    descriptionKh: 'សង់ខ្យាល្ពៅ យកល្ពៅមូលតូចឆ្កៀលគ្រាប់ចេញ រួចចាក់ទឹកខាប់ពីស៊ុតទា ខ្ទិះដូងខាប់ និងស្ករត្នោតចូល ហើយចំហុយរហូតសាច់ល្ពៅនិងសង់ខ្យាឆ្អិនទន់រលោង។',
+    descriptionEn: 'Whole baby kabocha pumpkin hollowed out, filled with luscious duck egg, coconut milk, and palm sugar custard, then steamed until velvety.',
     photoUrl: '/foods/food-47.jpg',
     imageAuditStatus: 'verified',
     imageAuditNote: 'រូបភាពដើមពិតប្រាកដពី Magnific',
@@ -3394,65 +3394,65 @@ export const AUTHENTIC_FOOD_RECIPES = {
     ]
   },
   "food-76": {
-    "nameKh": "ញាំត្រយូងចេកសាច់មាន់ស្រែ",
-    "nameEn": "Banana Blossom Salad with Free-Range Chicken",
+    "nameKh": "ញាំត្រចៀកជ្រូក",
+    "nameEn": "Cambodian Crispy Pig Ear Salad",
     "cat": "salad",
     "catKh": "ញាំ & ភ្លា",
     "catEn": "Salads & Dips",
-    "descKh": "ញាំត្រយូងចេកសាច់មាន់ស្រែ ប្រើត្រយូងចេកហាន់ស្ដើងស្រួយ ច្របល់ជាមួយសាច់មាន់ស្រែស្ងោរបេះសរសៃ ស្លឹកជីរគ្រប់មុខ សណ្តែកដីបុក និងទឹកត្រីកោះកុងជូរអែមឆ្ងាញ់ពិសា។",
-    "descEn": "Refreshing royal Cambodian salad of crisp shaved banana blossoms, shredded poached free-range chicken, fresh mint, crushed peanuts, and sweet-sour dressing.",
-    "prepTime": "២៥ នាទី",
-    "cookTime": "១៥ នាទី",
+    "descKh": "ញាំត្រចៀកជ្រូក ជាមួយស្លឹកជីរគ្រប់មុខ សណ្តែកដីបុក និងទឹកត្រីកោះកុងជូរអែមឆ្ងាញ់ពិសា។",
+    "descEn": "Crunchy sliced boiled pig ear salad tossed with fresh aromatic herbs, sliced onions, ripe tomatoes, crushed roasted peanuts, and zesty Koh Kong chili-lime dressing.",
+    "prepTime": "២០ នាទី",
+    "cookTime": "២៥ នាទី",
     "servings": "៣-៤ នាក់",
     "calories": 220,
-    "difficulty": "medium",
+    "difficulty": "easy",
     "ingredients": [
       {
-        "nameKh": "ត្រយូងចេកហាន់ស្ដើងត្រាំទឹកក្រូចឆ្មា",
-        "nameEn": "Thinly shaved banana blossom",
-        "amount": "១ ផ្កាធំ"
+        "nameKh": "ត្រចៀកជ្រូកស្ងោរឆ្អិនហាន់ស្តើងៗ",
+        "nameEn": "Thinly sliced boiled crispy pig ear",
+        "amount": "៣៥០ ក្រាម"
       },
       {
-        "nameKh": "សាច់មាន់ស្រែស្ងោរបេះជាសរសៃ",
-        "nameEn": "Shredded poached free-range chicken",
-        "amount": "២០០ ក្រាម"
+        "nameKh": "ប៉េងប៉ោះទុំ និងខ្ទឹមបារាំងហាន់ស្តើងៗ",
+        "nameEn": "Sliced ripe tomatoes and white onion",
+        "amount": "១៥០ ក្រាម"
       },
       {
-        "nameKh": "ស្លឹកជីរគ្រប់មុខ (ជីរអង្កាម ជីររណារ)",
-        "nameEn": "Assorted fresh herbs (mint, sawtooth)",
-        "amount": "១ ក្តាប់"
+        "nameKh": "ជីរវ៉ាន់ស៊ុយ ស្លឹកខ្ទឹម និងជីរគ្រប់មុខ",
+        "nameEn": "Fresh cilantro, spring onions, and mixed Khmer herbs",
+        "amount": "១០០ ក្រាម"
       },
       {
-        "nameKh": "សណ្តែកដីលីងបុកម៉ត់",
-        "nameEn": "Crushed roasted peanuts",
+        "nameKh": "សណ្តែកដីលីងបុក និងម្ទេសស្រស់ហាន់",
+        "nameEn": "Crushed roasted peanuts and sliced bird's eye chili",
         "amount": "៣ ស្លាបព្រាបាយ"
       },
       {
-        "nameKh": "ទឹកត្រី ក្រូចឆ្មា ស្ករត្នោត ខ្ទឹមស ម្ទេស",
-        "nameEn": "Lime fish sauce dressing (garlic, chili, sugar)",
-        "amount": "៣ ស្លាបព្រាបាយ"
+        "nameKh": "ទឹកត្រីកោះកុង (ទឹកក្រូចឆ្មារ ទឹកត្រី ស្ករត្នោត ខ្ទឹមស ម្ទេសបុក)",
+        "nameEn": "Koh Kong dressing (fresh lime juice, fish sauce, palm sugar, pounded garlic & chili)",
+        "amount": "៤ ស្លាបព្រាបាយ"
       }
     ],
     "steps": [
       {
         "stepNumber": 1,
-        "instructionKh": "ហាន់ត្រយូងចេកស្ដើងៗត្រាំក្នុងទឹកលាយទឹកក្រូចឆ្មាដើម្បីកុំឱ្យខ្មៅ រួចស្រង់ពូតទឹកឱ្យស្ងួត។",
-        "instructionEn": "Shave banana blossom thinly into lime water to prevent browning, then drain thoroughly."
+        "instructionKh": "លាងត្រចៀកជ្រូកជាមួយអំបិលនិងក្រូចឆ្មារឱ្យស្អាត រួចស្ងោរជាមួយគល់ស្លឹកគ្រៃ រំដេង និងអំបិលបន្តិចរហូតឆ្អិនផុយស្រួយ ទើបស្រង់ត្រាំទឹកត្រជាក់ហើយហាន់ជាចំណិតស្តើងៗ។",
+        "instructionEn": "Clean the pig ear thoroughly with salt and lime, boil with lemongrass and galangal until tender-crisp, chill in ice water to keep its crunch, and slice thinly."
       },
       {
         "stepNumber": 2,
-        "instructionKh": "ធ្វើទឹកញាំ៖ លាយទឹកត្រី ទឹកក្រូចឆ្មា ស្ករត្នោត ខ្ទឹមស និងម្ទេសបុកឱ្យមានរសជាតិជូរអែម។",
-        "instructionEn": "Whisk fish sauce, lime juice, palm sugar, garlic, and chilies into a balanced dressing."
+        "instructionKh": "បុកខ្ទឹមស និងម្ទេសស្រស់ឱ្យម៉ដ្ឋ រួចលាយជាមួយទឹកត្រី ស្ករត្នោត និងទឹកក្រូចឆ្មារស្រស់ កូរឱ្យរលាយចូលគ្នាមានរសជាតិជូរ ប្រៃ ផ្អែម និងហឹរល្មម។",
+        "instructionEn": "Pound fresh garlic and bird's eye chilies in a mortar, then whisk with fish sauce, palm sugar, and freshly squeezed lime juice until balanced."
       },
       {
         "stepNumber": 3,
-        "instructionKh": "ច្របល់ត្រយូងចេក សាច់មាន់បេះ ជីរគ្រប់មុខ និងទឹកញាំចូលគ្នាឱ្យសព្វ។",
-        "instructionEn": "Toss shredded chicken, banana blossom, herbs, and dressing together."
+        "instructionKh": "ដាក់ត្រចៀកជ្រូកហាន់ ខ្ទឹមបារាំង និងប៉េងប៉ោះចូលក្នុងចានធំ ចាក់ទឹកត្រីកោះកុងចូល រួចច្របល់ថ្នមៗឱ្យចូលជាតិសព្វល្អ។",
+        "instructionEn": "Place the sliced pig ear, onions, and tomato wedges in a mixing bowl, pour over the Koh Kong chili-lime dressing, and toss gently to coat."
       },
       {
         "stepNumber": 4,
-        "instructionKh": "រៀបដាក់ចាន រោយសណ្តែកដីលីងបុកឈ្ងុយៗពីលើ ដួសទទួលទានភ្លាមៗ។",
-        "instructionEn": "Mound on a platter, garnish generously with roasted peanuts, and serve."
+        "instructionKh": "ដាក់ស្លឹកខ្ទឹម ជីរវ៉ាន់ស៊ុយ និងជីរគ្រប់មុខចូលច្របល់មួយត្រឡប់ ទើបដួសដាក់ចាន រោយសណ្តែកដីលីងបុកពីលើ ជាការស្រេច។",
+        "instructionEn": "Fold in the fresh herbs and spring onions, transfer to a serving plate, and top generously with crushed roasted peanuts."
       }
     ]
   },
@@ -4292,7 +4292,7 @@ export const AUTHENTIC_FOOD_RECIPES = {
     "catKh": "បង្អែមខ្មែរ",
     "catEn": "Desserts & Sweets",
     "descKh": "បាយដំណើបសង់ខ្យាខ្មែរ ជាបង្អែមប្រពៃណីខ្មែរដ៏ល្បីល្បាញ អង្ករដំណើបចំហុយជាមួយខ្ទិះដូងខាប់ទន់ឈ្ងុយស្លឹកតើយ ដាក់សង់ខ្យាស៊ុតទាស្ករត្នោតពីលើ រសជាតិផ្អែមមុតស្រាលឈ្ងុយដូង។",
-    "descEn": "Classic Cambodian royal sweet: fragrant coconut-steamed sticky rice infused with pandan, crowned with rich steamed duck egg and palm sugar custard.",
+    "descEn": "Classic Cambodian sweet: fragrant coconut-steamed sticky rice infused with pandan, crowned with rich steamed duck egg and palm sugar custard.",
     "prepTime": "២៥ នាទី",
     "cookTime": "៣០ នាទី",
     "servings": "៤-៦ នាក់",
@@ -5233,7 +5233,7 @@ export const generateFull100Foods = (): FoodItem[] => {
   },
   {
     "nameKh": "សម្លការីសារ៉ាម៉ាន់សាច់គោ",
-    "nameEn": "Royal Saraman Beef Curry",
+    "nameEn": "Saraman Beef Curry",
     "cat": "soup",
     "priceR": 25000,
     "priceU": 6.25
@@ -5624,8 +5624,8 @@ export const generateFull100Foods = (): FoodItem[] => {
     "priceU": 4.5
   },
   {
-    "nameKh": "ញាំត្រយូងចេកសាច់មាន់ស្រែ",
-    "nameEn": "Banana Blossom Salad with Free-Range Chicken",
+    "nameKh": "ញាំត្រចៀកជ្រូក",
+    "nameEn": "Cambodian Crispy Pig Ear Salad",
     "cat": "salad",
     "priceR": 18000,
     "priceU": 4.5

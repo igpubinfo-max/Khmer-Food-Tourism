@@ -29,7 +29,7 @@ export const initial100Restaurants: Restaurant[] = [
     "signatureDishesKh": [
       "អាម៉ុកត្រីរ៉ស់ពិសេស",
       "ក្តាមថ្មចំហុយម្រេចកំពត",
-      "គុយទាវរាជវាំង"
+      "គុយទាវពិសេស"
     ],
     "status": "approved",
     "isVerified": true,
@@ -122,7 +122,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameKh": "ភោជនីយដ្ឋាន ក្រវាញ",
     "nameEn": "Kravanh Authentic Khmer Restaurant",
     "descriptionKh": "ហាងអាហារខ្មែររសជាតិដើមបែបគ្រួសារខ្មែរអភិជន តុបតែងរចនាបថបែបបុរាណ ម្ហូបឆ្ងាញ់ប្រកបដោយអនាម័យខ្ពស់។",
-    "descriptionEn": "Authentic royal and traditional home recipes prepared with exquisite presentation and antique atmosphere.",
+    "descriptionEn": "Authentic traditional Khmer home recipes prepared with exquisite presentation and classic atmosphere.",
     "photoUrl": "/Shop/rest-4.jpg",
     "galleryPhotos": [
       "/Shop/rest-4.jpg"
@@ -236,7 +236,7 @@ export const initial100Restaurants: Restaurant[] = [
     "nameKh": "ភោជនីយដ្ឋាន វ័ន ម៉រ",
     "nameEn": "One More Restaurant Toul Kork",
     "descriptionKh": "ភោជនីយដ្ឋានប្រណីតនៅខណ្ឌទួលគោក ដែលមានកេរ្តិ៍ឈ្មោះល្បីល្បាញខាងស៊ុប និងមុខម្ហូបខ្មែរបុរាណប្រកបដោយសោភ័ណភាពខ្ពស់។",
-    "descriptionEn": "Sophisticated Khmer dining destination in Toul Kork featuring royal soups and traditional dishes.",
+    "descriptionEn": "Sophisticated Khmer dining destination in Toul Kork featuring signature soups and traditional dishes.",
     "photoUrl": "/Shop/rest-7.jpg",
     "galleryPhotos": [
       "/Shop/rest-7.jpg"
@@ -255,7 +255,7 @@ export const initial100Restaurants: Restaurant[] = [
     "rating": 4.8,
     "reviewCount": 210,
     "signatureDishesKh": [
-      "សម្លកកូររាជវាំង",
+      "សម្លកកូរខ្មែរ",
       "បង្កងអាំងទឹកត្រីកោះកុង",
       "ឆាក្តៅសាច់មាន់"
     ],

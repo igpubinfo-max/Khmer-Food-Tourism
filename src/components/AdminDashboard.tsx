@@ -15,6 +15,7 @@ import {
 } from '../types';
 import { getSecurityAuditLogs, SecurityAuditEntry, revokeAdminSession, getOfficialOwnershipCertificate, verifyAppOwnershipAndDomainIntegrity } from '../utils/security';
 import { FoodImageModal } from './FoodImageModal';
+import { resolveUserAvatarUrl, handleAvatarImageError } from '../utils/avatarHelper';
 import { TouristImageModal } from './TouristImageModal';
 import { searchOnlineFoodImages, OnlineFoodImageCandidate } from '../services/onlineFoodImageService';
 import {
@@ -589,9 +590,11 @@ export const AdminDashboard: React.FC = () => {
           <div className="flex items-center gap-3.5">
             <div className="relative shrink-0">
               <img 
-                src={currentUser?.avatar || '/images/admin_profile.png'} 
-                alt="Chea Savuth Admin" 
-                className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover border-2 border-emerald-300 shadow-md ring-2 ring-emerald-400/40" 
+                src={resolveUserAvatarUrl(currentUser)} 
+                alt={currentUser?.name || "Admin"} 
+                referrerPolicy="no-referrer"
+                onError={(e) => handleAvatarImageError(e, currentUser)}
+                className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover border-2 border-emerald-300 shadow-md ring-2 ring-emerald-400/40 bg-emerald-950" 
               />
               <div className="absolute -bottom-1 -right-1 p-1 bg-emerald-600 rounded-full border border-white text-white shadow-xs">
                 <Shield className="w-3.5 h-3.5 text-white" />
@@ -3150,7 +3153,7 @@ export const AdminDashboard: React.FC = () => {
                                 <Shield className="w-3.5 h-3.5 text-emerald-600" />
                               </div>
                             )}
-                            <img src={u.avatar} alt="avatar" className="w-11 h-11 rounded-full object-cover border border-stone-200 dark:border-stone-600 shrink-0" />
+                            <img src={resolveUserAvatarUrl(u)} alt={u.name} referrerPolicy="no-referrer" onError={(e) => handleAvatarImageError(e, u)} className="w-11 h-11 rounded-full object-cover border border-stone-200 dark:border-stone-600 shrink-0 bg-emerald-950" />
                             <div className="min-w-0">
                               <h4 className="font-bold text-stone-900 dark:text-stone-100 font-khmer flex items-center gap-2 flex-wrap">
                                 <span>{u.name}</span>
@@ -3331,9 +3334,11 @@ export const AdminDashboard: React.FC = () => {
                                 className="p-2.5 rounded-2xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 flex items-center gap-3"
                               >
                                 <img
-                                  src={target.avatar}
+                                  src={resolveUserAvatarUrl(target)}
                                   alt={target.name}
-                                  className="w-10 h-10 rounded-full object-cover border-2 border-emerald-500 shrink-0"
+                                  referrerPolicy="no-referrer"
+                                  onError={(e) => handleAvatarImageError(e, target)}
+                                  className="w-10 h-10 rounded-full object-cover border-2 border-emerald-500 shrink-0 bg-emerald-950"
                                 />
                                 <div className="min-w-0 flex-1">
                                   <div className="flex items-center gap-1.5 flex-wrap">

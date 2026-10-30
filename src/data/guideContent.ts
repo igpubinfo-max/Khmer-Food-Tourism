@@ -460,7 +460,7 @@ export const FESTIVALS: Festival[] = [
       en: 'Official public holiday honouring the birthday of Her Majesty Queen Mother Norodom Monineath Sihanouk.',
       zh: '庆祝柬埔寨太后诺罗敦·莫尼列·西哈努克华诞的全国公共假日。',
     },
-    foods: { km: 'ម្ហូបខ្មែរប្រពៃណី និងបង្អែមខ្មែរ', en: 'Traditional Khmer cuisine and royal-style desserts', zh: '传统高棉美食与宫廷风味甜点' },
+    foods: { km: 'ម្ហូបខ្មែរប្រពៃណី និងបង្អែមខ្មែរ', en: 'Traditional Khmer cuisine and classic Cambodian desserts', zh: '传统高棉美食与特色甜点' },
     tip: { km: 'ស្ថាប័នរដ្ឋ និងធនាគារឈប់សម្រាក ១ ថ្ងៃ', en: 'Government offices and banks close for 1 day.', zh: '政府部门及银行放假1天。' },
   },
   {

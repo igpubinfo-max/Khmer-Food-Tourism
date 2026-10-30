@@ -37,7 +37,7 @@ export interface DishTag {
 }
 
 export const DISH_TAG_DEFS: Record<DishTagId, DishTag> = {
-  light: { id: 'light', labelKh: 'ស្រាល', labelEn: 'Light', labelZh: '清淡', emoji: '🪶', tone: 'green', benefitKh: "≤ 350 kcal • ល្អសម្រាប់អាហារពេលល្ងាច & រក្សាទម្ងន់", benefitEn: "≤ 350 kcal • great for light dinners & balanced eating", benefitZh: "≤ 350 千卡 • 适合清淡晚餐与均衡饮食", cookingTipKh: "គន្លឹះសុខភាព៖ បន្ថយប្រេងឆា ទឹកត្រី ឬស្ករ ហើយបន្ថែមបន្លែស្រស់ឱ្យបានច្រើន", cookingTipEn: "Tip: use less oil, fish sauce or sugar, and add plenty of fresh vegetables.", cookingTipZh: "小贴士：少放油、鱼露或糖，多加新鲜蔬菜。" },
+  light: { id: 'light', labelKh: 'ស្រាល', labelEn: 'Light', labelZh: '清淡', emoji: '🌿', tone: 'green', benefitKh: "≤ 350 kcal • ល្អសម្រាប់អាហារពេលល្ងាច & រក្សាទម្ងន់", benefitEn: "≤ 350 kcal • great for light dinners & balanced eating", benefitZh: "≤ 350 千卡 • 适合清淡晚餐与均衡饮食", cookingTipKh: "គន្លឹះសុខភាព៖ បន្ថយប្រេងឆា ទឹកត្រី ឬស្ករ ហើយបន្ថែមបន្លែស្រស់ឱ្យបានច្រើន", cookingTipEn: "Tip: use less oil, fish sauce or sugar, and add plenty of fresh vegetables.", cookingTipZh: "小贴士：少放油、鱼露或糖，多加新鲜蔬菜。" },
   steamed_boiled: { id: 'steamed_boiled', labelKh: 'ចំហុយ/ស្ងោរ', labelEn: 'Steamed/Boiled', labelZh: '蒸/煮', emoji: '♨️', tone: 'blue', benefitKh: "ចម្អិនដោយចំហុយ/ស្ងោរ • កាត់បន្ថយប្រេងឆា & ស្រួលរំលាយ", benefitEn: "Steamed or boiled • less frying oil & gentle to digest", benefitZh: "蒸或煮 • 少油，易于消化", cookingTipKh: "គន្លឹះ៖ ចំហុយ ឬស្ងោរជំនួសការចៀន ហើយបន្ថយអំបិល និងទឹកត្រីក្នុងទឹកស៊ុប", cookingTipEn: "Tip: steam or boil instead of frying, and go easy on salt and fish sauce in the broth.", cookingTipZh: "小贴士：以蒸、煮代替油炸，汤底少放盐和鱼露。" },
   grilled: { id: 'grilled', labelKh: 'អាំង/ដុត', labelEn: 'Grilled', labelZh: '烧烤', emoji: '🔥', tone: 'blue', benefitKh: "អាំង/ដុត ស្រក់ខ្លាញ់ចេញ • ឈ្ងុយឆ្ងាញ់មិនបាច់បំពង", benefitEn: "Grilled • fat drips away, tasty without deep-frying", benefitZh: "烧烤 • 油脂滴落，无需油炸也美味", cookingTipKh: "គន្លឹះ៖ អាំងលើភ្លើងស្រាល កុំឱ្យឆេះខ្មៅ ហើយកាត់ខ្លាញ់ចេញមុនអាំង", cookingTipEn: "Tip: grill over gentle heat, avoid charring, and trim visible fat first.", cookingTipZh: "小贴士：用温和火力烤制，避免烤焦，烤前去除肥肉。" },
   fried: { id: 'fried', labelKh: 'បំពង/ចៀន', labelEn: 'Fried', labelZh: '油炸', emoji: '🍳', tone: 'amber', infoOnly: true },
@@ -123,8 +123,10 @@ export function getDishTagIds(food: FoodItem): DishTagId[] {
     .join(' ')
     .toLowerCase();
   const nameText = `${food.nameEn || ''} ${food.nameKh || ''}`.toLowerCase();
-  // Stir-fry is a quick pan method: do not count it as "deep fried"
-  const methodText = `${nameText} ${stepsText}`.replace(/stir-?\s?fr(y|ied)/g, '');
+  // Stir-fry is a quick pan method: do not count it as "deep fried"; also ignore roasted peanuts/rice/sesame in salads
+  const methodText = `${nameText} ${stepsText}`
+    .replace(/stir-?\s?fr(y|ied)/g, '')
+    .replace(/អង្ករលីង|សណ្តែកដីលីង|សណ្ដែកដីលីង|ល្ងលីង|ដូងលីង|គ្រាប់ស្វាយចន្ទីលីង|ម្ទេសឆ្អើរ|ត្រីឆ្អើរ|roasted\s+peanut\w*|toasted\s+peanut\w*|roasted\s+rice|toasted\s+rice|roasted\s+sesame|toasted\s+sesame|toasted\s+coconut|roasted\s+cashew\w*|toasted\s+cashew\w*|roasted\s+chili\w*|dried\s+chili\w*/gi, ' ');
 
   const tags = new Set<DishTagId>();
 

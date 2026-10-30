@@ -10,6 +10,18 @@
   --color-text-main: #F8FAFC;
   --color-text-muted: #94A3B8;
   --color-gold-warm: #F59E0B;
+
+  /* Slightly increased, readable typography scale across Khmer, English, and Chinese */
+  --text-xs: 0.8125rem;     /* 13px (up from 12px) */
+  --text-xs--line-height: 1.45;
+  --text-sm: 0.9375rem;     /* 15px (up from 14px) */
+  --text-sm--line-height: 1.55;
+  --text-base: 1.0625rem;   /* 17px (up from 16px) */
+  --text-base--line-height: 1.6;
+  --text-lg: 1.1875rem;     /* 19px (up from 18px) */
+  --text-lg--line-height: 1.55;
+  --text-xl: 1.3125rem;     /* 21px (up from 20px) */
+  --text-xl--line-height: 1.45;
 }
 
 :root {
@@ -165,4 +177,38 @@
   line-height: 1.7 !important;
   padding-top: 0.18em;
   padding-bottom: 0.06em;
+}
+
+/* Proportionally bump micro text utilities so Khmer, English, and Chinese badges, labels, and descriptions are comfortable to read without clipping */
+.text-\[8px\] {
+  font-size: 9.5px !important;
+  line-height: 1.42 !important;
+}
+.text-\[9px\] {
+  font-size: 10.5px !important;
+  line-height: 1.45 !important;
+}
+.text-\[10px\] {
+  font-size: 11.5px !important;
+  line-height: 1.48 !important;
+}
+.text-\[11px\] {
+  font-size: 12.5px !important;
+  line-height: 1.5 !important;
+}
+.text-\[12px\] {
+  font-size: 13.5px !important;
+  line-height: 1.52 !important;
+}
+.text-\[13px\] {
+  font-size: 14.5px !important;
+  line-height: 1.55 !important;
+}
+.text-\[14px\] {
+  font-size: 15.5px !important;
+  line-height: 1.56 !important;
+}
+.text-\[15px\] {
+  font-size: 16.25px !important;
+  line-height: 1.58 !important;
 }

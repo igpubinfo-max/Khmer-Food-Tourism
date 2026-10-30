@@ -1780,6 +1780,17 @@ export function toConciseSummary(raw: string | undefined, lang: Language): strin
   if (lang === 'km') {
     let cleaned = text
       .replace(/\s*តាមរូបមន្តប្រពៃណីខ្មែរពិតៗ/g, '')
+      .replace(/គឺជាម្ហូបតំណាងអត្តសញ្ញាណជាតិខ្មែរដ៏ល្បីល្បាញលើពិភពលោក[។\s]*/g, '')
+      .replace(/ជាម្ហូបតំណាងអត្តសញ្ញាណជាតិខ្មែរ[^។]*[។\s]*/g, '')
+      .replace(/ជាម្ហូបតំណាងជាតិខ្មែរ\s*(ដែល)?/g, '')
+      .replace(/ជាម្[ហភ]ូបតំណាងខ្មែរ\s*(ដែល)?/g, '')
+      .replace(/ម្[ហភ]ូបតំណាងខ្មែរ\s*/g, '')
+      .replace(/ជាកំពូលការីរាជវាំងខ្មែរដែល/g, '')
+      .replace(/ជាកំពូលបង្អែមរាជវាំងដ៏ប្រណិត[។\s]*/g, '')
+      .replace(/ម្[ហភ]ូបព្រះបរមរាជវាំង\s*/g, '')
+      .replace(/ម្[ហភ]ូបរាជវាំង\s*/g, '')
+      .replace(/ការីរាជវាំង/g, 'ការីពិសេស')
+      .replace(/បង្អែមរាជវាំង/g, 'បង្អែមប្រពៃណី')
       .replace(/,?\s*លាយជាមួយ\s+[^។]+និងបន្ថែមក្លិនក្រអូបដោយ\s+[^។]+/g, '')
       .replace(/\s*ដែលពេញនិយមបំផុតនៅតាមផ្សារ[^។]*/g, '')
       .replace(/\s+/g, ' ')
@@ -1795,6 +1806,10 @@ export function toConciseSummary(raw: string | undefined, lang: Language): strin
 
   if (lang === 'en') {
     let cleaned = text
+      .replace(/^The undisputed national dish of Cambodia\.\s*/i, '')
+      .replace(/\broyal Cambodian\b/gi, 'Cambodian')
+      .replace(/\bCambodian royal\b/gi, 'Cambodian')
+      .replace(/\broyal Khmer\b/gi, 'Khmer')
       .replace(
         /\b(prepared|crafted|made) with ([^,.]+),\s*[^.]+?\s+and (?:aromatic |fragrant )?[^.]+\./i,
         '$1 with $2.'
@@ -1810,6 +1825,8 @@ export function toConciseSummary(raw: string | undefined, lang: Language): strin
 
   // Simplified Chinese ('zh')
   let cleanedZh = text
+    .replace(/^举世闻名的柬埔寨国菜[。，]/g, '')
+    .replace(/皇室|宫廷|皇家/g, '')
     .replace(/，搭配[^，。]+(?:精心烹制|猛火快炒)，最后(?:辅以|撒入)[^，。]+提香/g, '')
     .replace(/，融合[^，。]+，并带有[^，。]+的自然芬芳/g, '')
     .replace(/\s+/g, ' ')

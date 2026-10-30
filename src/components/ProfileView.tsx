@@ -17,6 +17,7 @@ import {
   isAdminAccount, getVipFeaturedRotationConfig, getVipFeaturedRotationState
 } from '../types';
 import { tr } from '../utils/i18n';
+import { resolveUserAvatarUrl, handleAvatarImageError } from '../utils/avatarHelper';
 
 export const ProfileView: React.FC = () => {
   const { 
@@ -120,9 +121,11 @@ export const ProfileView: React.FC = () => {
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
                 <img 
-                  src={currentUser.avatar} 
+                  src={resolveUserAvatarUrl(currentUser)} 
                   alt={currentUser.name} 
-                  className={`w-16 h-16 sm:w-22 sm:h-22 ${
+                  referrerPolicy="no-referrer"
+                  onError={(e) => handleAvatarImageError(e, currentUser)}
+                  className={`w-16 h-16 sm:w-22 sm:h-22 bg-emerald-950 ${
     isAdmin 
       ? 'rounded-full ring-4 ring-emerald-400/40 border-2 border-[#059669]' 
       : isVip 

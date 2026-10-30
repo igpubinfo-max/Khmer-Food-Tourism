@@ -658,13 +658,13 @@ const RAW_100_NEW_DISHES: Array<{
     herbEn: 'Thinly sliced lemongrass, mint, culantro, and roasted peanuts',
   },
   {
-    nameKh: 'ញាំត្រយូងចេកសាច់មាន់ហែក',
-    nameEn: 'Shredded Chicken & Banana Blossom Herb Salad',
+    nameKh: 'ញាំត្រយូងចេកសាច់មាន់ហែកលាយស្បែកជ្រូក',
+    nameEn: 'Shredded Chicken, Crispy Pork Skin & Banana Blossom Salad',
     cat: 'salad',
     catKh: 'ម្ហូបញាំ & ភ្លា / ញាំត្រយូងចេក',
-    catEn: 'Salad / Banana Blossom Chicken',
-    mainIngKh: 'សាច់មាន់ស្រែស្ងោរហែកជាសរសៃ (៣០០ ក្រាម)',
-    mainIngEn: 'Poached shredded free-range chicken (300g)',
+    catEn: 'Salad / Chicken, Pork Skin & Banana Blossom Salad',
+    mainIngKh: 'សាច់មាន់ស្រែស្ងោរហែក និងស្បែកជ្រូកស្ងោរហាន់ស្តើង (៣៥០ ក្រាម)',
+    mainIngEn: 'Poached shredded free-range chicken and thinly sliced boiled pork skin (350g)',
     subIngKh: 'ត្រយូងចេក ការ៉ុត និងទឹកត្រីជូរផ្អែម',
     subIngEn: 'Shredded banana flower, carrots, and sweet-sour lime dressing',
     herbKh: 'ជីរគ្រប់មុខ ខ្ទឹមក្រហមបំពង និងសណ្តែកដីបុក',
@@ -737,7 +737,7 @@ const RAW_100_NEW_DISHES: Array<{
   },
   {
     nameKh: 'ទឹកគ្រឿងខ្មែរពិសេសបន្លែស្រស់',
-    nameEn: 'Royal Khmer Fish Herb Dip with Fresh Garden Vegetables (Teuk Kroeung)',
+    nameEn: 'Traditional Khmer Fish Herb Dip with Fresh Garden Vegetables (Teuk Kroeung)',
     cat: 'salad',
     catKh: 'ទឹកជ្រលក់ & បន្លែ / ទឹកគ្រឿង',
     catEn: 'Dip & Salad / Teuk Kroeung',
@@ -922,13 +922,13 @@ const RAW_100_NEW_DISHES: Array<{
     herbEn: 'Scallions, cilantro, and sliced cucumber',
   },
   {
-    nameKh: 'បាយសាច់ជ្រូកអាំងពងទាខជ្រក់ត្រសក់',
-    nameEn: 'Phnom Penh Grilled Pork Rice with Braised Egg & Pickles (Bay Sach Chrouk)',
+    nameKh: 'បាយសាច់ជ្រូកចៀនពងទាចៀនជ្រក់ត្រសក់',
+    nameEn: 'Cambodian Fried Pork Rice with Crispy Fried Duck Egg & Pickles',
     cat: 'rice',
-    catKh: 'បាយ & បបរ / បាយសាច់ជ្រូកពងទាខ',
-    catEn: 'Rice / Pork & Braised Egg Rice',
-    mainIngKh: 'បាយក្តៅៗ សាច់ជ្រូកអាំងស្ករត្នោត និងពងទាខ (៤៥០ ក្រាម)',
-    mainIngEn: 'Steamed jasmine rice, palm-sugar grilled pork, and braised duck egg (450g)',
+    catKh: 'បាយ & បបរ / បាយសាច់ជ្រូកចៀនពងទាចៀន',
+    catEn: 'Rice / Fried Pork & Fried Egg Rice',
+    mainIngKh: 'បាយក្តៅៗ សាច់ជ្រូកចៀនប្រឡាក់គ្រឿង និងពងទាចៀន (៤៥០ ក្រាម)',
+    mainIngEn: 'Steamed jasmine rice, marinated pan-fried pork, and crispy fried duck egg (450g)',
     subIngKh: 'ជ្រក់ត្រសក់ ការ៉ុត ឆៃថាវ និងទឹកស៊ុបក្តៅៗ',
     subIngEn: 'Pickled cucumber, radish, carrots, and clear soup on the side',
     herbKh: 'ស្លឹកខ្ទឹមខ្លាញ់ និងខ្ទឹមសបំពង',
@@ -1080,13 +1080,13 @@ const RAW_100_NEW_DISHES: Array<{
     herbEn: 'Fresh lime wedges and herbs',
   },
   {
-    nameKh: 'ប្រហិតសាច់គោអាំងទឹកជ្រលក់',
-    nameEn: 'Grilled Khmer Beef Meatball Skewers with Spicy Tamarind Sauce',
+    nameKh: 'ប្រហិតសាច់គោចៀនទឹកជ្រលក់',
+    nameEn: 'Crispy Fried Khmer Beef Meatballs with Spicy Tamarind Sauce',
     cat: 'streetfood',
-    catKh: 'អាហារសម្រន់ / ប្រហិតសាច់គោអាំង',
-    catEn: 'Street Food / Grilled Beef Meatballs',
-    mainIngKh: 'ប្រហិតសាច់គោសុទ្ធដោតចង្កាក់អាំង (៣៥០ ក្រាម)',
-    mainIngEn: 'Skewered pure beef meatballs grilled over charcoal (350g)',
+    catKh: 'អាហារសម្រន់ / ប្រហិតសាច់គោចៀន',
+    catEn: 'Street Food / Fried Beef Meatballs',
+    mainIngKh: 'ប្រហិតសាច់គោសុទ្ធចៀនស្រួយ (៣៥០ ក្រាម)',
+    mainIngEn: 'Pure beef meatballs pan-fried until golden and bouncy (350g)',
     subIngKh: 'ទឹកជ្រលក់អម្ពិលទុំស្ករត្នោតម្ទេស និងជ្រក់ល្ហុងការ៉ុត',
     subIngEn: 'Spicy palm sugar tamarind sauce and crispy papaya pickle',
     herbKh: 'ជីររណារ និងសណ្តែកដីបុក',
@@ -2466,28 +2466,28 @@ function buildStepsForDish(
       ];
     }
 
-    // Grilled beef meatballs (food-180)
-    if (nameKh.includes('ប្រហិតសាច់គោអាំង')) {
+    // Fried beef meatballs (food-180)
+    if (nameKh.includes('ប្រហិតសាច់គោ')) {
       return [
         {
           stepNumber: 1,
-          instructionKh: 'ដោតប្រហិតសាច់គោសុទ្ធនឹងចង្កាក់ឫស្សី ឆូតលើសាច់ប្រហិតតិចៗ និងលាបប្រេងខ្ទឹមសបន្តិច។',
-          instructionEn: 'Thread pure beef meatballs onto bamboo skewers, score lightly, and brush with a touch of garlic oil.',
+          instructionKh: 'លាងសម្អាតប្រហិតសាច់គោសុទ្ធ ទុកឱ្យស្រស់ទឹក រួចយកកាំបិតឆូតលើគ្រាប់ប្រហិតជារាងខ្វែងតិចៗ ដើម្បីឱ្យពេលចៀនឆ្អិនសព្វ រីកស្អាត និងស្រួយឆ្ងាញ់។',
+          instructionEn: 'Rinse and pat dry the pure beef meatballs, then lightly score a crosshatch on each meatball so they puff up and crisp evenly when fried.',
         },
         {
           stepNumber: 2,
-          instructionKh: 'អាំងលើភ្លើងធ្យូងក្តៅល្មម ប្រែសងខាងរហូតដល់ប្រហិតឡើងប៉ោងក្រហមឈ្ងុយស្វិតឆ្ងាញ់។',
-          instructionEn: 'Grill over glowing charcoal, turning until puffed, lightly charred, and bouncy.',
+          instructionKh: 'រំងាស់ទឹកជ្រលក់អម្ពិលទុំជាមួយស្ករត្នោត ទឹកត្រី ខ្ទឹមសបំពង និងម្ទេសឱ្យខាប់ជូរផ្អែមហឹរល្មម។',
+          instructionEn: 'Simmer ripe tamarind pulp, palm sugar, fish sauce, crispy garlic, and chili into a thick sweet-spicy dipping sauce.',
         },
         {
           stepNumber: 3,
-          instructionKh: 'រំងាស់ទឹកជ្រលក់អម្ពិលទុំជាមួយស្ករត្នោត ទឹកត្រី និងម្ទេសឱ្យខាប់ជូរផ្អែមហឹរល្មម។',
-          instructionEn: 'Simmer ripe tamarind pulp, palm sugar, fish sauce, and chili into a thick sweet-spicy glaze.',
+          instructionKh: 'ដាក់ប្រេងឆាក្នុងខ្ទះឱ្យក្តៅល្មម ដាក់ប្រហិតសាច់គោចូលចៀនដោយប្រើភ្លើងមធ្យម ឧស្សាហ៍ត្រឡប់រហូតប្រហិតរីកធំ ឡើងពណ៌មាសស្រួយក្រៅទន់ស្វិតខាងក្នុង។',
+          instructionEn: 'Heat oil in a wok over medium heat and fry the beef meatballs, turning frequently until puffed, golden-crisp outside, and juicy and bouncy inside.',
         },
         {
           stepNumber: 4,
-          instructionKh: `រៀបប្រហិតអាំងដាក់ចាន ស្រោចទឹកជ្រលក់ រោយ ${herbKh} និងញ៉ាំផ្ទាប់ជាមួយជ្រក់ល្ហុងការ៉ុតស្រួយៗ។`,
-          instructionEn: `Drizzle with spicy tamarind sauce, top with ${herbEn}, and serve with crunchy papaya-carrot pickle.`,
+          instructionKh: `ស្រង់ប្រហិតសាច់គោចៀនដាក់ចាន ស្រោចទឹកជ្រលក់អម្ពិលទុំ រោយ ${herbKh} និងញ៉ាំផ្ទាប់ជាមួយជ្រក់ល្ហុងការ៉ុតស្រួយៗ។`,
+          instructionEn: `Plate the piping-hot fried beef meatballs, drizzle with spicy tamarind sauce, top with ${herbEn}, and serve with crunchy papaya-carrot pickle.`,
         },
       ];
     }

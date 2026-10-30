@@ -4,6 +4,7 @@ import type { Language, User } from '../../types';
 import { getVipRemainingDays } from '../../types';
 import { tr } from '../../utils/i18n';
 import { headingFont } from './homeUtils';
+import { resolveUserAvatarUrl, handleAvatarImageError } from '../../utils/avatarHelper';
 
 interface Props {
   language: Language;
@@ -96,10 +97,12 @@ const HomeGreetingSearchInner: React.FC<Props> = ({
             >
               <div className="relative shrink-0">
                 <img
-                  src={currentUser.avatar || '/images/admin_profile.png'}
+                  src={resolveUserAvatarUrl(currentUser)}
                   alt={currentUser.name}
                   decoding="async"
-                  className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl object-cover border-2 border-emerald-400 shadow-sm bg-white"
+                  referrerPolicy="no-referrer"
+                  onError={(e) => handleAvatarImageError(e, currentUser)}
+                  className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl object-cover border-2 border-emerald-400 shadow-sm bg-emerald-950"
                 />
                 <div className="absolute -bottom-1 -right-1 p-1 bg-emerald-500 text-white rounded-full shadow-xs border border-slate-900">
                   <Shield className="w-3 h-3" />
@@ -151,10 +154,12 @@ const HomeGreetingSearchInner: React.FC<Props> = ({
               className="relative shrink-0 cursor-pointer active:scale-95 transition"
             >
               <img
-                src={currentUser.avatar}
+                src={resolveUserAvatarUrl(currentUser)}
                 alt={currentUser.name}
                 decoding="async"
-                className={`w-12 h-12 rounded-2xl object-cover bg-white shadow-md ${
+                referrerPolicy="no-referrer"
+                onError={(e) => handleAvatarImageError(e, currentUser)}
+                className={`w-12 h-12 rounded-2xl object-cover bg-emerald-950 shadow-md ${
                   isVip ? 'border-2 border-amber-400' : 'border-2 border-emerald-500/40'
                 }`}
               />

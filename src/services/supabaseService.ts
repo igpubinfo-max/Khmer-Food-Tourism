@@ -917,9 +917,19 @@ export function mergeTwoUserRecordsCanonical(first: User, second: User): User {
     phone: second.phone || first.phone || undefined,
     role: mergedRole,
     avatar:
-      second.avatar && !second.avatar.includes('photo-1535713875002')
+      second.avatar &&
+      !second.avatar.includes('photo-1535713875002') &&
+      !second.avatar.includes('photo-1534528741775') &&
+      !second.avatar.includes('photo-1507003211169') &&
+      !second.avatar.includes('photo-1517841905240')
         ? second.avatar
-        : first.avatar || second.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
+        : first.avatar &&
+            !first.avatar.includes('photo-1535713875002') &&
+            !first.avatar.includes('photo-1534528741775') &&
+            !first.avatar.includes('photo-1507003211169') &&
+            !first.avatar.includes('photo-1517841905240')
+          ? first.avatar
+          : second.avatar || first.avatar || '',
     restaurantId: second.restaurantId || first.restaurantId,
     authProvider:
       first.authProvider === 'google' || second.authProvider === 'google'

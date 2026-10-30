@@ -361,7 +361,7 @@ export const initialTrendingFoods: TrendingFoodItem[] = [
   {
     id: 'trend-food-10',
     foodNameKh: 'សម្លការីសារ៉ាម៉ាន់សាច់គោ ភ្នំពេញ',
-    foodNameEn: 'Royal Cambodian Saraman Beef Curry',
+    foodNameEn: 'Cambodian Saraman Beef Curry',
     restaurantNameKh: 'ផ្ទះសម្លខ្មែរ ៩៩៩ ទួលទំពូង',
     restaurantNameEn: '999 Khmer Curry House Toul Tompoung',
     photoUrl: '/foods/food-16.jpg',
@@ -371,7 +371,7 @@ export const initialTrendingFoods: TrendingFoodItem[] = [
     categoryKh: 'មុខម្ហូបល្បីប្រចាំតំបន់',
     categoryEn: 'Famous Regional Dish',
     descriptionKh: 'សម្លការីសារ៉ាម៉ាន់សាច់គោរម្ងាស់ជាមួយខ្ទិះដូង គ្រឿងទេសបុរាណ និងសណ្ដែកដីលីង សាច់គោផុយរលាយក្នុងមាត់ ញ៉ាំជាមួយនំប៉័ងក្ដៅៗ ឬបាយស។',
-    descriptionEn: 'Rich aromatic Royal Saraman beef curry slow-simmered in coconut milk, roasted peanuts, and warm spices.',
+    descriptionEn: 'Rich aromatic Saraman beef curry slow-simmered in coconut milk, roasted peanuts, and warm spices.',
     provinceKh: 'រាជធានីភ្នំពេញ',
     provinceEn: 'Phnom Penh',
     addressKh: 'ផ្លូវលេខ ៤៣២ សង្កាត់ទួលទំពូង១ ខណ្ឌចំការមន',

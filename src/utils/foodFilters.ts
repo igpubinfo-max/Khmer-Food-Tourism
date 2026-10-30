@@ -40,11 +40,11 @@ export const DISH_PROVINCES: ProvinceFilterOption[] = [
     culinaryTitleEn: 'Phnom Penh Kuy Teav, Grilled Pork Rice & Capital Street Classics',
     culinaryTitleZh: '金边粿条、烤猪肉饭、炒银针粉与首都传统风味',
     historyKh:
-      'ម្ហូបអាហារនៅរាជធានីភ្នំពេញ គឺជាចំណុចប្រសព្វនៃវប្បធម៌ធ្វើម្ហូបខ្មែរពីគ្រប់ខេត្ត-ក្រុង និងម្ហូបព្រះបរមរាជវាំង ដោយល្បីល្បាញបំផុតលើទឹកស៊ុបគុយទាវភ្នំពេញរម្ងាស់ពីឆ្អឹងជ្រូកនិងមឹកក្រៀម បាយសាច់ជ្រូកអាំងពេលព្រឹក និងលតឆាពេលល្ងាច។',
+      'ម្ហូបអាហារនៅរាជធានីភ្នំពេញ គឺជាចំណុចប្រសព្វនៃវប្បធម៌ធ្វើម្ហូបខ្មែរពីគ្រប់ខេត្ត-ក្រុង ដោយល្បីល្បាញបំផុតលើទឹកស៊ុបគុយទាវភ្នំពេញរម្ងាស់ពីឆ្អឹងជ្រូកនិងមឹកក្រៀម បាយសាច់ជ្រូកអាំងពេលព្រឹក និងលតឆាពេលល្ងាច។',
     historyEn:
-      'Phnom Penh’s culinary heritage blends Royal Palace recipes with bustling riverside and market street food, famed for slow-simmered Phnom Penh pork-and-dried-squid Kuy Teav broth, charcoal-grilled morning pork rice, and wok-fired Lort Cha.',
+      'Phnom Penh’s culinary heritage blends regional Khmer recipes with bustling riverside and market street food, famed for slow-simmered Phnom Penh pork-and-dried-squid Kuy Teav broth, charcoal-grilled morning pork rice, and wok-fired Lort Cha.',
     historyZh:
-      '金边饮食文化融合了高棉皇室宫廷菜肴与热闹的河畔集市街头美食，以慢火熬制的金边猪骨墨鱼干粿条、清晨炭烤猪肉碎米饭及夜市炒银针粉闻名。',
+      '金边饮食文化融合了高棉传统名菜与热闹的河畔集市街头美食，以慢火熬制的金边猪骨墨鱼干粿条、清晨炭烤猪肉碎米饭及夜市炒银针粉闻名。',
     whereToFindKh: 'ផ្សារធំថ្មី ផ្សារទួលទំពូង ផ្សារអូរឫស្សី និងតាមបណ្តោយមាត់ទន្លេចតុមុខ រាជធានីភ្នំពេញ',
     whereToFindEn: 'Central Market (Phsar Thmei), Russian Market, Orussey Market & Sisowath Riverside, Phnom Penh',
     whereToFindZh: '金边中央市场、俄罗斯市场、乌亚西市场及四臂湾河畔美食街',

@@ -840,7 +840,24 @@ export function recordPermanentTrendingFoodOverride(item: TrendingFoodItem): voi
  */
 export function stripLegacyFoodPhraseKh(text?: string): string {
   if (!text) return '';
-  return text.replace(/\s*តាមរូបមន្តប្រពៃណីខ្មែរពិតៗ/g, '').trim();
+  return text
+    .replace(/\s*តាមរូបមន្តប្រពៃណីខ្មែរពិតៗ/g, '')
+    .replace(/គឺជាម្ហូបតំណាងអត្តសញ្ញាណជាតិខ្មែរដ៏ល្បីល្បាញលើពិភពលោក[។\s]*/g, '')
+    .replace(/ជាម្ហូបតំណាងអត្តសញ្ញាណជាតិខ្មែរ[^។]*[។\s]*/g, '')
+    .replace(/ជាម្ហូបតំណាងជាតិខ្មែរ\s*(ដែល)?/g, '')
+    .replace(/ជាម្[ហភ]ូបតំណាងខ្មែរ\s*(ដែល)?/g, '')
+    .replace(/ម្[ហភ]ូបតំណាងខ្មែរ\s*/g, '')
+    .replace(/ម្[ហភ]ូបតំណាងជាតិខ្មែរ\s*/g, '')
+    .replace(/ជាកំពូលការីរាជវាំងខ្មែរដែល/g, '')
+    .replace(/ជាសម្លការីបែបរាជវាំងខ្មែរ\s*(ដែល)?/g, '')
+    .replace(/ជាកំពូលបង្អែមរាជវាំងដ៏ប្រណិត[។\s]*/g, '')
+    .replace(/ជាម្[ហភ]ូបរាជវាំងខ្មែរ\s*(ដែល)?/g, '')
+    .replace(/ម្[ហភ]ូបព្រះបរមរាជវាំង\s*/g, '')
+    .replace(/ម្[ហភ]ូបរាជវាំង\s*/g, '')
+    .replace(/ការីរាជវាំង/g, 'ការីពិសេស')
+    .replace(/បង្អែមរាជវាំង/g, 'បង្អែមប្រពៃណី')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
 }
 
 export function applyFoodOverrides(
