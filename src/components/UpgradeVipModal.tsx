@@ -545,7 +545,7 @@ export const UpgradeVipModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm animate-fade-in overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/80 backdrop-blur-sm animate-fade-in overflow-y-auto">
       {/* Hidden File Inputs for Payment Proof Upload (Gallery & Camera) */}
       <input
         ref={proofGalleryInputRef}
@@ -568,31 +568,25 @@ export const UpgradeVipModal: React.FC = () => {
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
-        <div className="relative px-5 py-4 bg-gradient-to-r from-[#064E3B] via-[#047857] to-amber-700 text-white shrink-0">
+        <div className="relative px-4 py-2.5 bg-gradient-to-r from-[#064E3B] via-[#047857] to-amber-700 text-white shrink-0">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <div className="p-2 rounded-2xl bg-amber-400 text-slate-900 shadow-md">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="p-2 rounded-2xl bg-amber-400 text-slate-900 shadow-md shrink-0">
                 <Crown className="w-5 h-5 fill-slate-900" />
               </div>
-              <div>
-                <h3 className="font-moul text-sm sm:text-base text-white flex items-center gap-1.5 flex-wrap">
-                  <span>{tr(language, 'ដំឡើងសមាជិកភាព VIP', 'Upgrade to VIP', '升级 VIP 会员')}</span>
-                  <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-900 text-[10px] font-black font-sans">
-                    VIP
-                  </span>
-                  <span className="px-1.5 py-0.5 rounded-md bg-white/20 text-white font-mono text-[9px] font-bold border border-white/25">
-                    {APP_VERSION}
-                  </span>
+              <div className="min-w-0">
+                <h3 className="font-moul text-sm text-white truncate">
+                  {tr(language, 'ដំឡើងសមាជិកភាព VIP', 'Upgrade to VIP', '升级 VIP 会员')}
                 </h3>
-                <p className="text-[11px] text-amber-200 font-khmer">
-                  {tr(language, 'ដោះសោមុខងារពិសេស និងឧបករណ៍គ្រប់គ្រងហាងអាហារ', 'Unlock dining perks & restaurant owner tools', '解锁专属美食权益与商家管理工具')}
+                <p className="text-[11px] text-amber-200 font-khmer truncate">
+                  {tr(language, 'ដោះសោមុខងារពិសេស និងឧបករណ៍គ្រប់គ្រងហាង', 'Unlock dining perks & restaurant owner tools', '解锁专属美食权益与商家管理工具')}
                 </p>
               </div>
             </div>
 
             <button
               onClick={handleClose}
-              className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white transition cursor-pointer"
+              className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white transition cursor-pointer shrink-0"
               title={tr(language, 'បិទ', 'Close', '关闭')}
             >
               <X className="w-5 h-5" />
@@ -601,7 +595,7 @@ export const UpgradeVipModal: React.FC = () => {
         </div>
 
         {/* Modal Body */}
-        <div className="flex-1 overflow-y-auto max-h-[80vh] p-5 space-y-4 font-khmer">
+        <div className="flex-1 overflow-y-auto max-h-[calc(100dvh-6.5rem)] p-3 space-y-3 font-khmer">
           {/* STATE 3: APPROVED (Displayed ONLY after Administrator approves in Admin Dashboard) */}
           {paymentState === 'APPROVED' && isVip && (
             <div className="py-6 text-center space-y-4 animate-scale-up">
@@ -934,7 +928,7 @@ export const UpgradeVipModal: React.FC = () => {
 
           {/* STATE 1: AWAITING_PAYMENT — Clean, Short 4-Step VIP Payment Screen */}
           {paymentState === 'AWAITING_PAYMENT' && isVipConfigValid && (
-            <div className="space-y-4">
+            <div className="space-y-2.5">
               {/* If user has a pending verification request, show a friendly status bar without blocking the upgrade flow */}
               {(userLatestVipTxn?.status === 'pending_verification' ||
                 userLatestVipTxn?.status === 'needs_more_info') && (
@@ -960,124 +954,115 @@ export const UpgradeVipModal: React.FC = () => {
                 </div>
               )}
 
-              {/* VIP Plan Selector */}
-              <div className="grid grid-cols-2 gap-2.5">
+              {/* VIP Plan Selector (compact) */}
+              <div className="grid grid-cols-2 gap-2">
                 {dynamicPlansList.map((plan) => {
                   const isSelected = selectedPlan.id === plan.id;
                   return (
                     <div
                       key={plan.id}
                       onClick={() => handleSelectPlan(plan)}
-                      className={`relative p-3 rounded-2xl border-2 cursor-pointer transition text-left flex flex-col justify-between ${
+                      className={`relative px-3 py-2 rounded-2xl border-2 cursor-pointer transition text-left flex items-center justify-between gap-2 ${
                         isSelected
                           ? 'bg-gradient-to-br from-amber-500/15 via-orange-500/10 to-amber-600/20 border-amber-500 shadow-sm ring-2 ring-amber-400/30'
                           : 'bg-white dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 hover:border-amber-300'
                       }`}
                     >
                       {plan.isPopular && (
-                        <span className="absolute -top-2.5 right-2.5 px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[9px] font-black uppercase tracking-wider font-sans shadow-xs">
+                        <span className="absolute -top-2 right-2 px-2 py-px rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[9px] font-black uppercase tracking-wider font-sans shadow-xs">
                           {tr(language, 'ពេញនិយម', 'Popular', '热门')}
                         </span>
                       )}
-                      <div className="flex items-center justify-between gap-1">
-                        <span className="text-xs font-bold text-slate-900 dark:text-white truncate">
+                      <div className="min-w-0">
+                        <div className="text-xs font-bold text-slate-600 dark:text-slate-300 truncate">
                           {tr(language, `${plan.days} ថ្ងៃ`, `${plan.days} Days`, `${plan.days} 天`)}
-                        </span>
-                        <div
-                          className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${
-                            isSelected ? 'border-amber-500 bg-amber-500 text-white' : 'border-slate-300'
-                          }`}
-                        >
-                          {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                        </div>
+                        <div className="flex items-baseline gap-1">
+                          <span className="font-moul text-lg text-slate-900 dark:text-white font-mono leading-tight">
+                            ${plan.priceUsd.toFixed(2)}
+                          </span>
+                          <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold">
+                            {tr(language, 'ដុល្លារ', 'USD', '美元')}
+                          </span>
                         </div>
                       </div>
-                      <div className="mt-1.5 flex items-baseline gap-1">
-                        <span className="font-moul text-lg sm:text-xl text-slate-900 dark:text-white font-mono">
-                          ${plan.priceUsd.toFixed(2)}
-                        </span>
-                        <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold">
-                          {tr(language, 'ដុល្លារ', 'USD', '美元')}
-                        </span>
+                      <div
+                        className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${
+                          isSelected ? 'border-amber-500 bg-amber-500 text-white' : 'border-slate-300'
+                        }`}
+                      >
+                        {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
                       </div>
                     </div>
                   );
                 })}
               </div>
 
-              {/* STEP 1 & 2: Scan or save ABA KHQR + Pay via ABA Mobile */}
-              <div className="p-4 rounded-3xl bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 shadow-sm flex flex-col items-center space-y-3">
-                <div className="w-full flex items-center justify-between">
-                  <span className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-1.5">
+              {/* STEP 1 & 2: Scan / save ABA KHQR + pay via ABA Mobile */}
+              <div className="p-3 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-sm space-y-2.5">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-1.5 min-w-0">
                     <QrCode className="w-4 h-4 text-emerald-600 shrink-0" />
-                    <span>
-                      {tr(
-                        language,
-                        '១. ស្កេន ឬរក្សាទុកកូដ QR',
-                        '1. Scan or save ABA KHQR',
-                        '1. 扫描或保存二维码'
-                      )}
+                    <span className="truncate">
+                      {tr(language, '១. ស្កេន ឬរក្សាទុកកូដ QR', '1. Scan or save ABA KHQR', '1. 扫描或保存二维码')}
                     </span>
                   </span>
-                  <span className="px-2 py-0.5 rounded-full bg-emerald-600 text-white text-[9px] font-bold font-mono">
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-600 text-white text-[9px] font-bold font-mono shrink-0">
                     {tr(language, 'បាគង KHQR', 'Bakong KHQR', '巴孔二维码')}
                   </span>
                 </div>
 
-                {/* Clickable Clean Square ABA QR Code */}
-                <div
-                  onClick={handleLaunchAbaApp}
-                  className="relative p-2 bg-white rounded-2xl shadow-sm border-2 border-emerald-500/40 max-w-[220px] cursor-pointer hover:shadow-lg transition active:scale-98 group"
-                >
-                  <img
-                    src={qrCodeDataUrl}
-                    alt="ABA KHQR"
-                    className="w-full h-auto object-contain rounded-xl block bg-white"
-                  />
-                </div>
-
-                {/* Account Name & Phone Number */}
-                <div className="w-full p-2.5 rounded-xl bg-sky-50 dark:bg-slate-800/80 border border-sky-200 dark:border-slate-700 flex items-center justify-between text-xs">
-                  <span className="font-bold text-slate-900 dark:text-white">
-                    {tr(language, 'ឈ្មោះគណនី៖ ជា គីមសេង', 'Account Name: CHEA KIMSENG', '账户名称：CHEA KIMSENG')}
-                  </span>
-                  <span className="font-mono font-bold text-[#004B87] dark:text-sky-400">
-                    095 245 959
-                  </span>
-                </div>
-
-                {/* Save QR & Copy Phone Buttons */}
-                <div className="grid grid-cols-2 gap-2 w-full">
-                  <button
-                    type="button"
-                    onClick={handleSaveQrImage}
-                    className="py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer border border-slate-200 dark:border-slate-700"
+                <div className="flex gap-3 items-stretch">
+                  <div
+                    onClick={handleLaunchAbaApp}
+                    className="relative p-1.5 bg-white rounded-2xl shadow-sm border-2 border-emerald-500/40 w-[34%] max-w-[140px] shrink-0 cursor-pointer active:scale-98 transition self-start"
                   >
-                    <Download className="w-3.5 h-3.5 text-emerald-600" />
-                    <span>{tr(language, 'រក្សាទុកកូដ QR', 'Save QR', '保存二维码')}</span>
-                  </button>
+                    <img
+                      src={qrCodeDataUrl}
+                      alt="ABA KHQR"
+                      className="w-full h-auto object-contain rounded-xl block bg-white"
+                    />
+                  </div>
 
-                  <button
-                    type="button"
-                    onClick={handleCopyAccount}
-                    className="py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer border border-slate-200 dark:border-slate-700"
-                  >
-                    {hasCopiedAccount ? (
-                      <Check className="w-3.5 h-3.5 text-emerald-600" />
-                    ) : (
-                      <Copy className="w-3.5 h-3.5 text-amber-500" />
-                    )}
-                    <span>
-                      {hasCopiedAccount
-                        ? tr(language, 'បានចម្លង!', 'Copied!', '已复制！')
-                        : tr(language, 'ចម្លង 095 245 959', 'Copy 095 245 959', '复制 095 245 959')}
-                    </span>
-                  </button>
+                  <div className="flex-1 min-w-0 flex flex-col justify-between gap-1.5">
+                    <div className="px-2.5 py-1.5 rounded-xl bg-sky-50 dark:bg-slate-800/80 border border-sky-200 dark:border-slate-700">
+                      <div className="text-[11px] font-bold text-slate-700 dark:text-slate-200 leading-snug">
+                        {tr(language, 'ឈ្មោះគណនី៖ ជា គីមសេង', 'Account: CHEA KIMSENG', '账户：CHEA KIMSENG')}
+                      </div>
+                      <div className="font-mono font-extrabold text-sm text-[#004B87] dark:text-sky-400 leading-tight">
+                        095 245 959
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleSaveQrImage}
+                      className="py-2 px-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer border border-slate-200 dark:border-slate-700"
+                    >
+                      <Download className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                      <span className="truncate">{tr(language, 'រក្សាទុក QR', 'Save QR', '保存二维码')}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleCopyAccount}
+                      className="py-2 px-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer border border-slate-200 dark:border-slate-700"
+                    >
+                      {hasCopiedAccount ? (
+                        <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                      ) : (
+                        <Copy className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                      )}
+                      <span className="truncate">
+                        {hasCopiedAccount
+                          ? tr(language, 'បានចម្លង!', 'Copied!', '已复制！')
+                          : tr(language, 'ចម្លងលេខ', 'Copy number', '复制号码')}
+                      </span>
+                    </button>
+                  </div>
                 </div>
 
-                {/* STEP 2 Button: Pay via ABA Mobile */}
                 <button
                   onClick={handleLaunchAbaApp}
-                  className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-[#004B87] via-[#005a9e] to-[#004B87] hover:from-[#003966] hover:to-[#003966] text-white font-extrabold text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-98 cursor-pointer ring-4 ring-sky-500/20"
+                  className="w-full py-2.5 px-4 rounded-2xl bg-gradient-to-r from-[#004B87] via-[#005a9e] to-[#004B87] hover:from-[#003966] hover:to-[#003966] text-white font-extrabold text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-98 cursor-pointer"
                 >
                   <ExternalLink className="w-4 h-4 text-sky-200 shrink-0" />
                   <span>
@@ -1091,61 +1076,51 @@ export const UpgradeVipModal: React.FC = () => {
                 </button>
               </div>
 
-              {/* STEP 3: Upload the payment receipt */}
-              <div className="p-4 rounded-3xl bg-white dark:bg-slate-800/90 border-2 border-emerald-500/40 shadow-sm space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-1.5">
+              {/* STEP 3 & 4: Upload receipt + submit for admin approval */}
+              <div className="p-3 rounded-3xl bg-amber-50/60 dark:bg-slate-800/80 border border-amber-500/40 space-y-2">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-1.5 min-w-0">
                     <ImageIcon className="w-4 h-4 text-emerald-600 shrink-0" />
-                    <span>
-                      {tr(
-                        language,
-                        '៣. អាប់ឡូតវិក្កយបត្របង់ប្រាក់',
-                        '3. Upload the payment receipt',
-                        '3. 上传付款凭证截图'
-                      )}
+                    <span className="truncate">
+                      {tr(language, '៣. អាប់ឡូតវិក្កយបត្របង់ប្រាក់', '3. Upload the payment receipt', '3. 上传付款凭证截图')}
                     </span>
-                  </span>
-                  <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 text-[10px] font-bold">
-                    {tr(language, 'រូបភាពវិក្កយបត្រ', 'Receipt Image', '凭证图片')}
                   </span>
                 </div>
 
                 {paymentProofDraft && (
-                  <div className="p-2.5 rounded-2xl bg-emerald-50/70 dark:bg-slate-900/90 border border-emerald-300 dark:border-emerald-700/60 space-y-2 animate-fade-in">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="font-bold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5 truncate">
-                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                        <span className="truncate">{paymentProofDraft.fileName}</span>
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => setPaymentProofDraft(null)}
-                        className="p-1 rounded-lg bg-rose-100 dark:bg-rose-950/60 text-rose-600 hover:bg-rose-200 transition cursor-pointer shrink-0"
-                        title={tr(language, 'លុបរូបភាព', 'Remove image', '删除图片')}
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
+                  <div className="flex items-center gap-2 p-1.5 rounded-xl bg-emerald-50/80 dark:bg-slate-900/90 border border-emerald-300 dark:border-emerald-700/60 animate-fade-in">
                     <img
                       src={paymentProofDraft.dataUrl}
                       alt="Selected Payment Proof Preview"
-                      className="w-full max-h-48 object-contain rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 p-1"
+                      className="w-10 h-10 object-cover rounded-lg bg-white border border-slate-200 dark:border-slate-800 shrink-0"
                     />
+                    <span className="flex-1 min-w-0 text-xs font-bold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <span className="truncate">{paymentProofDraft.fileName}</span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setPaymentProofDraft(null)}
+                      className="p-1.5 rounded-lg bg-rose-100 dark:bg-rose-950/60 text-rose-600 hover:bg-rose-200 transition cursor-pointer shrink-0"
+                      title={tr(language, 'លុបរូបភាព', 'Remove image', '删除图片')}
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
                   </div>
                 )}
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
                     onClick={handlePickReceiptFromGallery}
                     disabled={isProcessingProofImage}
-                    className="py-3 px-4 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-950 font-extrabold text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-98 cursor-pointer"
+                    className="py-2.5 px-3 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-950 font-extrabold text-xs shadow-md flex items-center justify-center gap-1.5 transition active:scale-98 cursor-pointer disabled:opacity-60"
                   >
                     <Upload className="w-4 h-4 shrink-0" />
-                    <span>
+                    <span className="truncate">
                       {paymentProofDraft
-                        ? tr(language, 'ប្តូរវិក្កយបត្រថ្មី', 'Replace Receipt', '更换付款凭证')
-                        : tr(language, 'អាប់ឡូតវិក្កយបត្រ', 'Upload Receipt', '上传付款凭证')}
+                        ? tr(language, 'ប្តូរវិក្កយបត្រ', 'Replace', '更换凭证')
+                        : tr(language, 'អាប់ឡូតវិក្កយបត្រ', 'Upload Receipt', '上传凭证')}
                     </span>
                   </button>
 
@@ -1153,34 +1128,17 @@ export const UpgradeVipModal: React.FC = () => {
                     type="button"
                     onClick={() => proofCameraInputRef.current?.click()}
                     disabled={isProcessingProofImage}
-                    className="py-3 px-4 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-800 dark:text-white font-bold text-xs flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-600 transition active:scale-98 cursor-pointer"
+                    className="py-2.5 px-3 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-800 dark:text-white font-bold text-xs flex items-center justify-center gap-1.5 border border-slate-200 dark:border-slate-600 transition active:scale-98 cursor-pointer disabled:opacity-60"
                   >
                     <Camera className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                    <span>{tr(language, 'ថតរូបវិក្កយបត្រ', 'Take Photo', '拍摄凭证')}</span>
+                    <span className="truncate">{tr(language, 'ថតរូបវិក្កយបត្រ', 'Take Photo', '拍摄凭证')}</span>
                   </button>
-                </div>
-              </div>
-
-              {/* STEP 4: Submit for Admin approval */}
-              <div className="p-4 rounded-3xl bg-amber-50/60 dark:bg-slate-800/80 border-2 border-amber-500/40 space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-1.5">
-                    <BadgeCheck className="w-4 h-4 text-amber-600 shrink-0" />
-                    <span>
-                      {tr(
-                        language,
-                        '៤. បញ្ជូនសំណើទៅរដ្ឋបាលអនុម័ត',
-                        '4. Submit for Admin approval',
-                        '4. 提交管理员审核'
-                      )}
-                    </span>
-                  </span>
                 </div>
 
                 <button
                   onClick={handleSubmitPaymentForAdminApproval}
                   disabled={isSubmittingRequest || isProcessingProofImage}
-                  className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 via-emerald-700 to-[#064E3B] hover:from-emerald-700 hover:to-[#047857] text-white font-extrabold text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-98 cursor-pointer ring-4 ring-emerald-500/20 disabled:opacity-50"
+                  className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 via-emerald-700 to-[#064E3B] hover:from-emerald-700 hover:to-[#047857] text-white font-extrabold text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-98 cursor-pointer disabled:opacity-50"
                 >
                   {isSubmittingRequest ? (
                     <>
@@ -1189,13 +1147,13 @@ export const UpgradeVipModal: React.FC = () => {
                     </>
                   ) : (
                     <>
-                      <CheckCircle2 className="w-4 h-4 text-emerald-200 shrink-0" />
+                      <BadgeCheck className="w-4 h-4 text-emerald-200 shrink-0" />
                       <span>
                         {tr(
                           language,
-                          `បញ្ជូនសំណើទៅរដ្ឋបាលអនុម័ត ($${selectedPlan.priceUsd.toFixed(2)})`,
-                          `Submit for Admin approval ($${selectedPlan.priceUsd.toFixed(2)})`,
-                          `提交管理员审核 ($${selectedPlan.priceUsd.toFixed(2)})`
+                          `៤. បញ្ជូនសំណើអនុម័ត ($${selectedPlan.priceUsd.toFixed(2)})`,
+                          `4. Submit for approval ($${selectedPlan.priceUsd.toFixed(2)})`,
+                          `4. 提交审核 ($${selectedPlan.priceUsd.toFixed(2)})`
                         )}
                       </span>
                     </>
@@ -1208,7 +1166,7 @@ export const UpgradeVipModal: React.FC = () => {
         </div>
 
         {/* Modal Footer / Prominent App Version Bar */}
-        <div className="px-5 py-2.5 bg-slate-100 dark:bg-slate-950/80 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-500 font-mono shrink-0">
+        <div className="px-4 py-1.5 bg-slate-100 dark:bg-slate-950/80 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-500 font-mono shrink-0">
           <span className="font-semibold text-slate-600 dark:text-slate-400">
             {tr(language, 'រសជាតិ និងទេសចរណ៍កម្ពុជា', 'Cambodia Flavors & Tourism', '柬埔寨美食与旅游')} {APP_VERSION} ({APP_BUILD_CODE})
           </span>

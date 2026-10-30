@@ -82,6 +82,30 @@ const HEALTH_OPTIONS: Array<{ id: VipDietFilter; kh: string; en: string; zh: str
 
 const stripLeadingSymbols = (s: string) => s.replace(/^[^\p{L}\p{N}]+/u, '').trim();
 
+const PAIRING_SET_SIZE = 4;
+const PAIRING_SETS_PER_PAGE = 2;
+
+/**
+ * Clear FREE / VIP access label shown on every Food Pick option.
+ * The label is rendered through a CSS pseudo-element so the global auto-translation
+ * never rewrites it: it always reads exactly "FREE" or "VIP" in Khmer, English and Chinese.
+ */
+const AccessBadge: React.FC<{ vip: boolean; className?: string }> = ({ vip, className = '' }) => (
+  <span
+    role="img"
+    aria-label={vip ? 'VIP' : 'FREE'}
+    data-label={vip ? 'VIP' : 'FREE'}
+    className={`inline-flex items-center gap-0.5 px-1.5 py-px rounded-full text-[9px] leading-tight font-black tracking-wide shrink-0 whitespace-nowrap font-sans ${
+      vip
+        ? 'bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 shadow-xs'
+        : 'bg-emerald-500 text-white'
+    } ${className}`}
+  >
+    {vip ? <Crown className="w-2.5 h-2.5" /> : <CheckCircle2 className="w-2.5 h-2.5" />}
+    <span aria-hidden="true" className="after:content-[attr(data-label)]" data-label={vip ? 'VIP' : 'FREE'} />
+  </span>
+);
+
 export const WhatToEatModal: React.FC = () => {
   const {
     isWhatToEatModalOpen,
@@ -112,6 +136,7 @@ export const WhatToEatModal: React.FC = () => {
   const [openGroup, setOpenGroup] = useState<MenuGroupId | null>(null);
   const [drinkMode, setDrinkMode] = useState(false);
   const [drinkKind, setDrinkKind] = useState<DrinkKindFilter>('all');
+  const [setPage, setSetPage] = useState(0);
 
   // Current dish index and history of seen dish IDs to prevent repetition
   const [currentDishId, setCurrentDishId] = useState<string>('');
@@ -193,6 +218,23 @@ export const WhatToEatModal: React.FC = () => {
     () => (drinkMode && canUseVip ? rankDrinkPairingDishes(foods, drinkKind) : []),
     [drinkMode, canUseVip, foods, drinkKind]
   );
+
+  // Beverage Pairings are presented as curated sets of exactly 4 dishes (incomplete remainders are dropped)
+  const pairingSets = useMemo(() => {
+    const list = pairingRanked.map((r) => r.food);
+    const sets: FoodItem[][] = [];
+    for (let i = 0; i + PAIRING_SET_SIZE <= list.length; i += PAIRING_SET_SIZE) {
+      sets.push(list.slice(i, i + PAIRING_SET_SIZE));
+    }
+    return sets;
+  }, [pairingRanked]);
+  const showSets = drinkMode && canUseVip && pairingSets.length > 0;
+  const setPageCount = Math.max(1, Math.ceil(pairingSets.length / PAIRING_SETS_PER_PAGE));
+  const visibleSets = pairingSets.slice(setPage * PAIRING_SETS_PER_PAGE, (setPage + 1) * PAIRING_SETS_PER_PAGE);
+
+  useEffect(() => {
+    setSetPage(0);
+  }, [drinkMode, drinkKind]);
 
   // Filter candidate dishes by Craving Query, Category, Mealtime, and VIP Nutrition Tag
   const matchingFoods = useMemo(() => {
@@ -327,6 +369,14 @@ export const WhatToEatModal: React.FC = () => {
   };
 
   const handleShowAnother = () => {
+    if (showSets) {
+      setIsSpinning(true);
+      setTimeout(() => {
+        setSetPage((p) => (p + 1) % setPageCount);
+        setIsSpinning(false);
+      }, 200);
+      return;
+    }
     setIsSpinning(true);
     setTimeout(() => {
       const nextDish = pickRandomDish(currentDish?.id);
@@ -377,9 +427,10 @@ export const WhatToEatModal: React.FC = () => {
   const activeSlot = MEAL_SLOTS.find((s) => s.id === mealSlotFilter);
   const activeCategory = CATEGORY_OPTIONS.find((c) => c.id === categoryFilter);
   const activeHealth = HEALTH_OPTIONS.find((h) => h.id === vipDietFilter);
-  const menuGroups: Array<{ id: MenuGroupId; icon: React.ReactNode; label: string; value: string; active: boolean }> = [
+  const menuGroups: Array<{ id: MenuGroupId; icon: React.ReactNode; label: string; value: string; active: boolean; vip: boolean }> = [
     {
       id: 'time',
+      vip: false,
       icon: <MealIcon className="w-4 h-4" />,
       label: tr(language, 'ពេលវេលា', 'Time', '时段'),
       value:
@@ -390,6 +441,7 @@ export const WhatToEatModal: React.FC = () => {
     },
     {
       id: 'type',
+      vip: false,
       icon: <IconDishCategory className="w-4 h-4" />,
       label: tr(language, 'ប្រភេទ', 'Type', '分类'),
       value:
@@ -400,6 +452,7 @@ export const WhatToEatModal: React.FC = () => {
     },
     {
       id: 'craving',
+      vip: false,
       icon: <IconCravingSpark className="w-4 h-4" />,
       label: tr(language, 'ចំណង់', 'Craving', '想吃'),
       value: cravingQuery.trim().slice(0, 10),
@@ -407,6 +460,7 @@ export const WhatToEatModal: React.FC = () => {
     },
     {
       id: 'health',
+      vip: true,
       icon: canUseVip ? <IconVipCrown className="w-4 h-4 text-amber-500" /> : <Lock className="w-4 h-4 text-amber-500" />,
       label: tr(language, 'សុខភាព', 'Health', '健康'),
       value:
@@ -527,33 +581,23 @@ export const WhatToEatModal: React.FC = () => {
                 )}
               </span>
             </span>
-            <span className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-black/35 border border-amber-300/50 text-amber-200 text-xs font-black">
-              {canUseVip ? (
-                drinkMode ? (
-                  <span>✓ {tr(language, 'កំពុងបើក', 'ON', '已开启')}</span>
-                ) : (
-                  <>
-                    <IconVipCrown className="w-3.5 h-3.5 text-amber-300" />
-                    <span>VIP</span>
-                  </>
-                )
-              ) : (
-                <>
-                  <Lock className="w-3 h-3" />
-                  <span>VIP</span>
-                </>
+            <span className="shrink-0 flex flex-col items-end gap-1">
+              <AccessBadge vip />
+              {canUseVip && drinkMode && (
+                <span className="text-[10px] font-black text-amber-200">✓ {tr(language, 'បើក', 'ON', '开启')}</span>
               )}
+              {!canUseVip && <Lock className="w-3 h-3 text-amber-200" />}
             </span>
           </button>
 
           {/* Compact sub-menus: one tap opens a group, keeping the screen clean */}
-          <div className="grid grid-cols-4 gap-1.5">
+          <div className="grid grid-cols-4 gap-1.5 pt-1.5">
             {menuGroups.map((g) => (
               <button
                 key={g.id}
                 type="button"
                 onClick={() => setOpenGroup((cur) => (cur === g.id ? null : g.id))}
-                className={`py-2 px-1 rounded-xl border flex flex-col items-center justify-center gap-0.5 transition cursor-pointer min-w-0 ${
+                className={`relative pt-3 pb-2 px-1 rounded-xl border flex flex-col items-center justify-center gap-0.5 transition cursor-pointer min-w-0 ${
                   openGroup === g.id
                     ? 'bg-[#064E3B] text-white border-[#064E3B] shadow-xs'
                     : g.active
@@ -561,6 +605,7 @@ export const WhatToEatModal: React.FC = () => {
                       : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700'
                 }`}
               >
+                <AccessBadge vip={g.vip} className="absolute -top-2 left-1/2 -translate-x-1/2" />
                 <span className="flex items-center justify-center h-4">{g.icon}</span>
                 <span className="text-xs font-extrabold leading-tight">{g.label}</span>
                 <span className="text-[10px] leading-tight opacity-80 truncate max-w-full">{g.value || '\u00A0'}</span>
@@ -673,7 +718,7 @@ export const WhatToEatModal: React.FC = () => {
                     >
                       {d.id !== 'none' && <DishTagIcon id={d.id} className="w-3.5 h-3.5 shrink-0" />}
                       <span>{tr(language, d.kh, d.en, d.zh)}</span>
-                      {isLocked && <Lock className="w-3 h-3 text-amber-500 shrink-0" />}
+                      <AccessBadge vip={d.vipOnly} />
                     </button>
                   );
                 })}
@@ -689,24 +734,20 @@ export const WhatToEatModal: React.FC = () => {
                 <span className="w-9 h-9 rounded-xl bg-emerald-600/15 dark:bg-amber-400/20 border border-emerald-500/30 dark:border-amber-300/40 flex items-center justify-center text-[#064E3B] dark:text-amber-300 shrink-0 mt-0.5">
                   <IconBeveragePairing className="w-5 h-5" />
                 </span>
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <h4 className="text-sm font-extrabold text-slate-900 dark:text-white leading-relaxed">
-                    {tr(
-                      language,
-                      `ម្ហូបអមភេសជ្ជៈ — AI បានជ្រើសរើស ${pairingRanked.length} មុខ`,
-                      `Beverage Pairings — AI selected ${pairingRanked.length} dishes`,
-                      `佐餐与饮品搭配 — AI 精选 ${pairingRanked.length} 道`
-                    )}
+                    {tr(language, 'ម្ហូបអមភេសជ្ជៈ', 'Beverage Pairings', '佐餐与饮品搭配')}
                   </h4>
                   <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
                     {tr(
                       language,
-                      'ជម្រើសម្ហូបរសជាតិឈ្ងុយឆ្ងាញ់៖ អាំង ចៀនស្រួយ ញាំជូរហឹរ គ្រឿងសមុទ្រ និងសាច់ប្រឡាក់ ស័ក្តិសមសម្រាប់ញ៉ាំជុំតុ និងភេសជ្ជៈគ្រប់ប្រភេទ។',
-                      'Savory sharing dishes: charcoal-grilled, crispy bites, zesty salads, fresh seafood and seasoned meats for dining & refreshments.',
-                      '精选聚餐风味佳肴：烧烤、酥脆小食、酸辣凉拌、海鲜与风味肉食，适合围桌分享与饮品搭配。'
+                      `ឈុតម្ហូបជ្រើសរើសដោយ AI • ${showSets ? pairingSets.length : 0} ឈុត × ${PAIRING_SET_SIZE} មុខ`,
+                      `AI-curated sets • ${showSets ? pairingSets.length : 0} sets × ${PAIRING_SET_SIZE} dishes`,
+                      `AI 精选套餐 • ${showSets ? pairingSets.length : 0} 套 × ${PAIRING_SET_SIZE} 道`
                     )}
                   </p>
                 </div>
+                <AccessBadge vip className="mt-1" />
               </div>
               <div className="flex flex-wrap gap-1.5">
                 {([
@@ -747,9 +788,65 @@ export const WhatToEatModal: React.FC = () => {
                   </button>
                 ))}
               </div>
-              <p className="text-[11px] font-bold text-[#064E3B] dark:text-emerald-300 leading-relaxed flex items-start gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
-                <span>{drinkDisclaimer(language)}</span>
+            </div>
+          )}
+          {showSets && (
+            <div className={`space-y-3 transition-opacity duration-200 ${isSpinning ? 'opacity-30' : 'opacity-100'}`}>
+              {visibleSets.map((set, idx) => {
+                const setNo = setPage * PAIRING_SETS_PER_PAGE + idx + 1;
+                return (
+                  <div
+                    key={`${setPage}-${idx}`}
+                    className="rounded-3xl p-3 bg-gradient-to-br from-[#0f2922] via-[#133b2f] to-[#1a4d3c] border border-amber-400/50 shadow-lg space-y-2.5"
+                  >
+                    <div className="flex items-center justify-between gap-2 px-0.5">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="w-7 h-7 rounded-lg bg-amber-400 text-slate-950 text-xs font-black flex items-center justify-center shrink-0">
+                          {setNo}
+                        </span>
+                        <span className="font-moul text-xs text-amber-100 truncate">
+                          {tr(language, `ឈុតម្ហូបទី ${setNo}`, `Pairing Set ${setNo}`, `搭配套餐 ${setNo}`)}
+                        </span>
+                      </div>
+                      <IconBeveragePairing className="w-5 h-5 text-amber-300 shrink-0" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      {set.map((food) => {
+                        const fLoc = getLocalizedFood(food, language);
+                        return (
+                          <button
+                            key={food.id}
+                            type="button"
+                            onClick={() => {
+                              setSelectedFood(food);
+                              setIsWhatToEatModalOpen(false);
+                            }}
+                            className="group rounded-2xl overflow-hidden bg-white/95 dark:bg-slate-800 border border-white/10 text-left active:scale-[0.97] transition cursor-pointer"
+                          >
+                            <span className="block aspect-4/3 w-full overflow-hidden bg-slate-200">
+                              <img
+                                src={food.photoUrl}
+                                alt={fLoc.name}
+                                loading="lazy"
+                                decoding="async"
+                                draggable={false}
+                                onContextMenu={(e) => e.preventDefault()}
+                                className="w-full h-full object-cover select-none group-hover:scale-105 transition-transform duration-500"
+                              />
+                            </span>
+                            <span className="block px-2 py-1.5 text-xs font-extrabold leading-snug text-slate-900 dark:text-white line-clamp-2 min-h-[2.4rem] font-khmer">
+                              {fLoc.name}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+              <p className="text-center text-[11px] font-bold text-slate-500 dark:text-slate-400">
+                {tr(language, 'ទំព័រ', 'Page', '第')} {setPage + 1} / {setPageCount}
+                {language === 'zh' ? ' 页' : ''}
               </p>
             </div>
           )}
@@ -771,7 +868,7 @@ export const WhatToEatModal: React.FC = () => {
               </div>
             )
           )}
-          {currentDish && currentLoc && (
+          {!showSets && currentDish && currentLoc && (
             <div
               className={`transition-all duration-300 ${
                 isSpinning ? 'opacity-30 scale-95' : 'opacity-100 scale-100'
@@ -956,7 +1053,7 @@ export const WhatToEatModal: React.FC = () => {
           )}
 
           {/* Alternative quick choices */}
-          {alternativeDishes.length > 0 && (
+          {!showSets && alternativeDishes.length > 0 && (
             <div className="space-y-2 font-khmer">
               <h4 className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1">
                 <Sparkles className="w-3.5 h-3.5 text-amber-500" />
@@ -1008,7 +1105,11 @@ export const WhatToEatModal: React.FC = () => {
             className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-500 hover:from-amber-600 hover:to-amber-500 text-stone-900 font-black text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-[0.98] font-khmer cursor-pointer"
           >
             <Shuffle className={`w-5 h-5 ${isSpinning ? 'animate-spin' : ''}`} />
-            <span>{tr(language, 'បង្ហាញម្ហូបផ្សេងទៀត', 'Recommend Another Dish', '换一道推荐菜品')}</span>
+            <span>
+              {showSets
+                ? tr(language, 'បង្ហាញឈុតម្ហូបផ្សេងទៀត', 'Show More Sets', '查看更多套餐')
+                : tr(language, 'បង្ហាញម្ហូបផ្សេងទៀត', 'Recommend Another Dish', '换一道推荐菜品')}
+            </span>
           </button>
         </div>
       </div>
