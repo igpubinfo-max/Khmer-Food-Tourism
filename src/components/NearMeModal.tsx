@@ -50,18 +50,18 @@ interface PhnomPenhSpotPreset {
 }
 
 const PHNOM_PENH_SPOT_PRESETS: PhnomPenhSpotPreset[] = [
-  { id: 'bkk1', labelKh: 'បឹងកេងកង ១', labelEn: 'BKK1', labelZh: '万景岗1区 (BKK1)', lat: 11.5515, lng: 104.9282 },
-  { id: 'riverside', labelKh: 'មាត់ទន្លេ & ព្រះបរមរាជវាំង', labelEn: 'Riverside & Palace', labelZh: '河畔与皇宫', lat: 11.5656, lng: 104.9314 },
+  { id: 'bkk1', labelKh: 'បឹងកេងកង ១', labelEn: 'BKK1', labelZh: '万景岗1区', lat: 11.5515, lng: 104.9282 },
+  { id: 'riverside', labelKh: 'មាត់ទន្លេ និងព្រះបរមរាជវាំង', labelEn: 'Riverside & Palace', labelZh: '河畔与皇宫', lat: 11.5656, lng: 104.9314 },
   { id: 'central_market', labelKh: 'ផ្សារថ្មី', labelEn: 'Central Market', labelZh: '中央市场', lat: 11.5696, lng: 104.9210 },
   { id: 'independence', labelKh: 'វិមានឯករាជ្យ', labelEn: 'Independence Monument', labelZh: '独立纪念碑', lat: 11.5564, lng: 104.9282 },
   { id: 'russian_market', labelKh: 'ផ្សារទួលទំពូង', labelEn: 'Russian Market', labelZh: '俄罗斯市场', lat: 11.5405, lng: 104.9144 },
 ];
 
 const RADIUS_OPTIONS: { value: number; labelKh: string; labelEn: string; labelZh: string }[] = [
-  { value: 500, labelKh: '៥០០ម (500m)', labelEn: '500m', labelZh: '500米' },
-  { value: 1000, labelKh: '១ គ.ម (1km)', labelEn: '1km', labelZh: '1公里' },
-  { value: 2000, labelKh: '២ គ.ម (2km)', labelEn: '2km', labelZh: '2公里' },
-  { value: 5000, labelKh: '៥ គ.ម (5km)', labelEn: '5km', labelZh: '5公里' },
+  { value: 500, labelKh: '៥០០ ម៉ែត្រ', labelEn: '500m', labelZh: '500米' },
+  { value: 1000, labelKh: '១ គ.ម', labelEn: '1km', labelZh: '1公里' },
+  { value: 2000, labelKh: '២ គ.ម', labelEn: '2km', labelZh: '2公里' },
+  { value: 5000, labelKh: '៥ គ.ម', labelEn: '5km', labelZh: '5公里' },
 ];
 
 function readSavedUserGps(): { lat: number; lng: number } | null {
@@ -416,16 +416,16 @@ export const NearMeModal: React.FC = () => {
     selectedRadiusMeters === 500
       ? tr(language, '៥០០ ម៉ែត្រ', '500m', '500 米')
       : selectedRadiusMeters === 1000
-      ? tr(language, '១ គ.ម (1km)', '1km', '1 公里')
+      ? tr(language, '១ គ.ម', '1km', '1 公里')
       : selectedRadiusMeters === 2000
-      ? tr(language, '២ គ.ម (2km)', '2km', '2 公里')
-      : tr(language, '៥ គ.ម (5km)', '5km', '5 公里');
+      ? tr(language, '២ គ.ម', '2km', '2 公里')
+      : tr(language, '៥ គ.ម', '5km', '5 公里');
   const formatDistanceLabel = (distMeters: number) => {
     if (distMeters <= 2000) {
       return `${distMeters} ${meterUnit}`;
     }
     const km = (distMeters / 1000).toFixed(1);
-    return `${km} ${tr(language, 'គ.ម', 'km', '公里')} (${distMeters}m)`;
+    return `${km} ${tr(language, 'គ.ម', 'km', '公里')}`;
   };
   const cleanCardAddress = (rawAddr: string | undefined, provLabel: string) => {
     const cleaned = (rawAddr || '')
@@ -466,15 +466,15 @@ export const NearMeModal: React.FC = () => {
                 </h3>
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-400/20 border border-emerald-300/40 text-emerald-100 text-[10px] font-extrabold shrink-0">
                   <CheckCircle2 className="w-3 h-3 text-emerald-300" />
-                  <span>{tr(language, 'ឥតគិតថ្លៃ • FREE', 'FREE Access', '免费使用')}</span>
+                  <span>{tr(language, 'ឥតគិតថ្លៃ', 'FREE Access', '免费使用')}</span>
                 </span>
               </div>
               <p className="text-[11px] text-emerald-100 font-khmer truncate">
                 {tr(
                   language,
-                  `ក្នុងរង្វង់ ${activeRadiusText} ពីទីតាំង GPS របស់អ្នក • នាំផ្លូវផ្ទាល់`,
+                  `ក្នុងរង្វង់ ${activeRadiusText} ពីទីតាំងរបស់អ្នក • នាំផ្លូវផ្ទាល់`,
                   `Within ${activeRadiusText} of your GPS • Direct map directions`,
-                  `距离您当前 GPS ${activeRadiusText} 以内 • 支持一键路线导航`
+                  `距离您当前位置 ${activeRadiusText} 以内 • 支持一键路线导航`
                 )}
               </p>
             </div>

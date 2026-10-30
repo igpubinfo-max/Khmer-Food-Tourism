@@ -90,7 +90,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSmartHub }) => {
             <p className="text-[10px] text-amber-300 font-semibold leading-tight truncate mt-0.5">
               {tr(
                 language,
-                'Cambodia Flavors & Tourism',
+                'ស្វែងយល់អាហារ • ទីតាំង • បទពិសោធន៍',
                 'Discover Food • Places • Experiences',
                 '探索美食 • 景点 • 文化体验'
               )}
@@ -170,7 +170,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSmartHub }) => {
                   >
                     <span className="flex items-center gap-2.5 font-bold text-amber-300">
                       <IconSmartAssistant className="w-4 h-4 text-amber-400" />
-                      <span>{tr(language, 'ជំនួយការ AI ឆ្លាតវៃ', 'Smart AI Assistant', 'AI 智能助手')}</span>
+                      <span>{tr(language, 'ជំនួយការឆ្លាតវៃ', 'Smart AI Assistant', '智能助手')}</span>
                     </span>
                   </button>
 
@@ -202,7 +202,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSmartHub }) => {
                     className="w-full px-3.5 py-2.5 flex items-center gap-2.5 hover:bg-white/10 transition cursor-pointer text-left font-semibold"
                   >
                     <QrCode className="w-4 h-4 text-emerald-400" />
-                    <span>{tr(language, 'ស្កេន QR Code ហាង', 'Scan QR Code', '扫描店铺二维码')}</span>
+                    <span>{tr(language, 'ស្កេនកូដ QR ហាង', 'Scan QR Code', '扫描店铺二维码')}</span>
                   </button>
 
                   <button
@@ -214,7 +214,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSmartHub }) => {
                     className="w-full px-3.5 py-2.5 flex items-center gap-2.5 hover:bg-white/10 transition cursor-pointer text-left font-semibold"
                   >
                     <Download className="w-4 h-4 text-sky-400" />
-                    <span>{tr(language, 'ទាញយកកម្មវិធី (APK / App)', 'Download App', '下载应用 (APK)')}</span>
+                    <span>{tr(language, 'ទាញយកកម្មវិធី', 'Download App', '下载应用程序')}</span>
                   </button>
 
                   <button
@@ -226,7 +226,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSmartHub }) => {
                     className="w-full px-3.5 py-2.5 flex items-center gap-2.5 hover:bg-white/10 transition cursor-pointer text-left font-semibold"
                   >
                     <Heart className="w-4 h-4 text-rose-400 fill-rose-400" />
-                    <span>{tr(language, 'គាំទ្រការអភិវឌ្ឍ App', 'Support App', '支持应用开发')}</span>
+                    <span>{tr(language, 'គាំទ្រការអភិវឌ្ឍកម្មវិធី', 'Support App', '支持应用开发')}</span>
                   </button>
                 </div>
               </>

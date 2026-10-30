@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { getDynamicVipPlans, SupportTicket, AbaReceiptVerificationReport } from '../types';
+import { tr } from '../utils/i18n';
 import {
   pickImageUsingNativeAndroidGallery,
   processAndCompressImageFile,
@@ -167,9 +168,12 @@ export const PaymentSupportModal: React.FC = () => {
             setReceiptDataUrl(res.dataUrl);
           }
           showToast(
-            language === 'km'
-              ? '✅ បានជ្រើសរើសរូបភាពវិក្កយបត្រពី Gallery រួចរាល់!'
-              : '✅ Selected receipt image from Gallery!',
+            tr(
+              language,
+              '✅ បានជ្រើសរើសរូបភាពវិក្កយបត្រពីបណ្ណាល័យរូបភាពរួចរាល់!',
+              '✅ Selected receipt image from Gallery!',
+              '✅ 已从相册选择付款凭证截图！'
+            ),
             'success'
           );
           setIsUploading(false);
@@ -209,17 +213,23 @@ export const PaymentSupportModal: React.FC = () => {
         setReceiptDataUrl(compressed);
       }
       showToast(
-        language === 'km'
-          ? '✅ បានភ្ជាប់រូបភាពវិក្កយបត្ររួចរាល់!'
-          : '✅ Payment receipt attached!',
+        tr(
+          language,
+          '✅ បានភ្ជាប់រូបភាពវិក្កយបត្ររួចរាល់!',
+          '✅ Payment receipt attached!',
+          '✅ 付款凭证已附上！'
+        ),
         'success'
       );
     } catch (err: any) {
       showToast(
         err?.message ||
-          (language === 'km'
-            ? 'មិនអាចអានរូបភាពបានទេ។'
-            : 'Could not process selected image.'),
+          tr(
+            language,
+            'មិនអាចអានរូបភាពបានទេ។',
+            'Could not process selected image.',
+            '无法处理所选图片。'
+          ),
         'warning'
       );
     } finally {
@@ -231,9 +241,12 @@ export const PaymentSupportModal: React.FC = () => {
     e.preventDefault();
     if (!messageText.trim()) {
       showToast(
-        language === 'km'
-          ? 'សូមសរសេរសារពន្យល់ពីបញ្ហាការបង់ប្រាក់របស់អ្នក។'
-          : 'Please describe your payment issue.',
+        tr(
+          language,
+          'សូមសរសេរសារពន្យល់ពីបញ្ហាការបង់ប្រាក់របស់អ្នក។',
+          'Please describe your payment issue.',
+          '请描述您的付款问题。'
+        ),
         'warning'
       );
       return;
@@ -290,9 +303,12 @@ export const PaymentSupportModal: React.FC = () => {
   const handleSendReply = (ticket: SupportTicket) => {
     if (!replyText.trim() && !replyAttachmentUrl) {
       showToast(
-        language === 'km'
-          ? 'សូមសរសេរសារ ឬភ្ជាប់រូបភាពមុនពេលផ្ញើ។'
-          : 'Please enter a message or attach a receipt.',
+        tr(
+          language,
+          'សូមសរសេរសារ ឬភ្ជាប់រូបភាពមុនពេលផ្ញើ។',
+          'Please enter a message or attach a receipt.',
+          '请输入留言或附上付款凭证后再发送。'
+        ),
         'warning'
       );
       return;
@@ -317,7 +333,7 @@ export const PaymentSupportModal: React.FC = () => {
       return (
         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-700 border border-emerald-300">
           <CheckCircle2 className="w-3 h-3" />
-          {language === 'km' ? 'បានដោះស្រាយ (Resolved)' : 'Resolved'}
+          {tr(language, 'បានដោះស្រាយ', 'Resolved', '已解决')}
         </span>
       );
     }
@@ -325,14 +341,14 @@ export const PaymentSupportModal: React.FC = () => {
       return (
         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-100 text-blue-700 border border-blue-300">
           <MessageSquare className="w-3 h-3" />
-          {language === 'km' ? 'Admin បានឆ្លើយតប (Replied)' : 'Replied'}
+          {tr(language, 'រដ្ឋបាលបានឆ្លើយតប', 'Replied', '管理员已回复')}
         </span>
       );
     }
     return (
       <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-300">
         <Clock className="w-3 h-3" />
-        {language === 'km' ? 'កំពុងរង់ចាំ (Pending)' : 'Pending'}
+        {tr(language, 'កំពុងរង់ចាំ', 'Pending', '待处理')}
       </span>
     );
   };
@@ -348,14 +364,20 @@ export const PaymentSupportModal: React.FC = () => {
             </div>
             <div>
               <h2 className="text-base sm:text-lg font-extrabold leading-tight">
-                {language === 'km'
-                  ? 'ទាក់ទង Admin / ជំនួយការបង់ប្រាក់ VIP'
-                  : 'Contact Admin / VIP Payment Support'}
+                {tr(
+                  language,
+                  'ទាក់ទងរដ្ឋបាល / ជំនួយការបង់ប្រាក់ VIP',
+                  'Contact Admin / VIP Payment Support',
+                  '联系管理员 / VIP 付款支持'
+                )}
               </h2>
               <p className="text-xs text-amber-100">
-                {language === 'km'
-                  ? 'ផ្ញើសារ និងវិក្កយបត្រ ABA ទៅកាន់ Admin ផ្ទាល់ក្នុងកម្មវិធី'
-                  : 'Direct two-way support & payment verification with Admin'}
+                {tr(
+                  language,
+                  'ផ្ញើសារ និងវិក្កយបត្របង់ប្រាក់ទៅកាន់រដ្ឋបាលផ្ទាល់ក្នុងកម្មវិធី',
+                  'Direct two-way support & payment verification with Admin',
+                  '在应用内直接向管理员发送留言与付款凭证'
+                )}
               </p>
             </div>
           </div>
@@ -379,9 +401,7 @@ export const PaymentSupportModal: React.FC = () => {
             }`}
           >
             <Send className="w-4 h-4" />
-            {language === 'km'
-              ? 'ផ្ញើសារជំនួយថ្មី'
-              : 'New Support Message'}
+            {tr(language, 'ផ្ញើសារជំនួយថ្មី', 'New Support Message', '发送新支持留言')}
           </button>
           <button
             type="button"
@@ -396,9 +416,12 @@ export const PaymentSupportModal: React.FC = () => {
             }`}
           >
             <MessageSquare className="w-4 h-4" />
-            {language === 'km'
-              ? `ប្រវត្តិសារ & ការឆ្លើយតប (${myTickets.length})`
-              : `Support Messages (${myTickets.length})`}
+            {tr(
+              language,
+              `ប្រវត្តិសារ និងការឆ្លើយតប (${myTickets.length})`,
+              `Support Messages (${myTickets.length})`,
+              `留言记录 (${myTickets.length})`
+            )}
             {unreadRepliesCount > 0 && (
               <span className="ml-1 px-1.5 py-0.2 bg-red-600 text-white text-[10px] font-extrabold rounded-full animate-pulse">
                 {unreadRepliesCount}
@@ -432,18 +455,21 @@ export const PaymentSupportModal: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-extrabold text-amber-900 flex items-center gap-1.5">
                     <UserIcon className="w-3.5 h-3.5 text-amber-600" />
-                    {language === 'km'
-                      ? 'ព័ត៌មានគណនីរបស់អ្នក (ភ្ជាប់ដោយស្វ័យប្រវត្តិ)'
-                      : 'Your Account Details (Auto-Attached)'}
+                    {tr(
+                      language,
+                      'ព័ត៌មានគណនីរបស់អ្នក (ភ្ជាប់ដោយស្វ័យប្រវត្តិ)',
+                      'Your Account Details (Auto-Attached)',
+                      '您的账户信息（自动附上）'
+                    )}
                   </span>
                   <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-amber-200/70 text-amber-900">
-                    ID: {currentUser.id}
+                    {tr(language, 'លេខសម្គាល់៖', 'ID:', '编号：')} {currentUser.id}
                   </span>
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-xs text-gray-700 pt-1">
                   <div className="bg-white/80 rounded-xl p-2 border border-amber-100">
                     <span className="text-[10px] text-gray-500 block">
-                      {language === 'km' ? 'ឈ្មោះគណនី (Username)' : 'Username'}
+                      {tr(language, 'ឈ្មោះគណនី', 'Username', '账户名称')}
                     </span>
                     <span className="font-bold text-gray-900">
                       {currentUser.name} ({currentUser.username || currentUser.email})
@@ -451,7 +477,7 @@ export const PaymentSupportModal: React.FC = () => {
                   </div>
                   <div className="bg-white/80 rounded-xl p-2 border border-amber-100">
                     <span className="text-[10px] text-gray-500 block">
-                      {language === 'km' ? 'កាលបរិច្ឆេទបង់ប្រាក់' : 'Payment Date'}
+                      {tr(language, 'កាលបរិច្ឆេទបង់ប្រាក់', 'Payment Date', '付款日期')}
                     </span>
                     <input
                       type="date"
@@ -468,9 +494,12 @@ export const PaymentSupportModal: React.FC = () => {
               <div>
                 <div className="flex items-center justify-between mb-1.5">
                   <label className="block text-xs font-extrabold text-gray-800">
-                    {language === 'km'
-                      ? 'ជ្រើសរើសកញ្ចប់ VIP ដែលអ្នកបានបង់ប្រាក់៖'
-                      : 'Select the VIP Plan You Paid For:'}
+                    {tr(
+                      language,
+                      'ជ្រើសរើសកញ្ចប់ VIP ដែលអ្នកបានបង់ប្រាក់៖',
+                      'Select the VIP Plan You Paid For:',
+                      '选择您所支付的 VIP 套餐：'
+                    )}
                   </label>
                 </div>
 
@@ -486,14 +515,14 @@ export const PaymentSupportModal: React.FC = () => {
                   >
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-extrabold text-gray-900">
-                        {language === 'km' ? dynamicPlans.quarterly.nameKh : dynamicPlans.quarterly.nameEn}
+                        {tr(language, dynamicPlans.quarterly.nameKh, dynamicPlans.quarterly.nameEn, `${dynamicPlans.quarterly.durationDays}天 VIP 套餐`)}
                       </span>
                       <Crown className="w-4 h-4 text-amber-500" />
                     </div>
                     <div className="text-lg font-black text-amber-600 mt-1">
                       ${dynamicPlans.quarterly.priceUsd.toFixed(2)}{' '}
                       <span className="text-xs font-semibold text-gray-600">
-                        / {dynamicPlans.quarterly.durationDays} {language === 'km' ? 'ថ្ងៃ' : 'days'}
+                        / {dynamicPlans.quarterly.durationDays} {tr(language, 'ថ្ងៃ', 'days', '天')}
                       </span>
                     </div>
                   </button>
@@ -509,14 +538,14 @@ export const PaymentSupportModal: React.FC = () => {
                   >
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-extrabold text-gray-900">
-                        {language === 'km' ? dynamicPlans.annual.nameKh : dynamicPlans.annual.nameEn}
+                        {tr(language, dynamicPlans.annual.nameKh, dynamicPlans.annual.nameEn, `${dynamicPlans.annual.durationDays}天 VIP 套餐`)}
                       </span>
                       <Sparkles className="w-4 h-4 text-orange-500" />
                     </div>
                     <div className="text-lg font-black text-orange-600 mt-1">
                       ${dynamicPlans.annual.priceUsd.toFixed(2)}{' '}
                       <span className="text-xs font-semibold text-gray-600">
-                        / {dynamicPlans.annual.durationDays} {language === 'km' ? 'ថ្ងៃ' : 'days'}
+                        / {dynamicPlans.annual.durationDays} {tr(language, 'ថ្ងៃ', 'days', '天')}
                       </span>
                     </div>
                   </button>
@@ -526,15 +555,23 @@ export const PaymentSupportModal: React.FC = () => {
               {/* Payment Reference Input */}
               <div>
                 <label className="block text-xs font-extrabold text-gray-800 mb-1">
-                  {language === 'km'
-                    ? 'លេខយោងប្រតិបត្តិការ ABA (Payment Reference / Trx ID)៖'
-                    : 'ABA Payment Reference / Transaction ID:'}
+                  {tr(
+                    language,
+                    'លេខយោងប្រតិបត្តិការធនាគារ៖',
+                    'ABA Payment Reference / Transaction ID:',
+                    'ABA 交易参考号 / 交易编号：'
+                  )}
                 </label>
                 <input
                   type="text"
                   value={paymentRef}
                   onChange={(e) => setPaymentRef(e.target.value)}
-                  placeholder="ឧ. 176121426630955 (Auto-detected from receipt)"
+                  placeholder={tr(
+                    language,
+                    'ឧ. 176121426630955',
+                    'e.g. 176121426630955',
+                    '例如：176121426630955'
+                  )}
                   style={{ color: '#000000', backgroundColor: '#ffffff' }}
                   className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 text-sm font-semibold focus:ring-2 focus:ring-amber-500 focus:outline-none"
                 />
@@ -543,9 +580,12 @@ export const PaymentSupportModal: React.FC = () => {
               {/* Upload Payment Receipt / Screenshot */}
               <div>
                 <label className="block text-xs font-extrabold text-gray-800 mb-1.5">
-                  {language === 'km'
-                    ? 'ភ្ជាប់រូបភាពវិក្កយបត្របង់ប្រាក់ ABA (Receipt / Screenshot)៖'
-                    : 'Attach ABA Payment Receipt or Screenshot:'}
+                  {tr(
+                    language,
+                    'ភ្ជាប់រូបភាពវិក្កយបត្របង់ប្រាក់៖',
+                    'Attach ABA Payment Receipt or Screenshot:',
+                    '附上 ABA 付款凭证截图：'
+                  )}
                 </label>
                 {receiptDataUrl ? (
                   <div className="space-y-2.5">
@@ -558,13 +598,16 @@ export const PaymentSupportModal: React.FC = () => {
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-extrabold text-emerald-800 flex items-center gap-1">
                           <CheckCircle2 className="w-4 h-4 shrink-0" />
-                          {language === 'km'
-                            ? 'បានភ្ជាប់រូបភាពវិក្កយបត្ររួចរាល់'
-                            : 'Payment receipt attached'}
+                          {tr(
+                            language,
+                            'បានភ្ជាប់រូបភាពវិក្កយបត្ររួចរាល់',
+                            'Payment receipt attached',
+                            '付款凭证已附上'
+                          )}
                         </p>
                         <p className="text-[11px] text-gray-600 mt-0.5">
-                          {currentPlanConfig.nameEn} (${currentPlanConfig.priceUsd.toFixed(2)} /{' '}
-                          {currentPlanConfig.durationDays} days)
+                          {tr(language, currentPlanConfig.nameKh, currentPlanConfig.nameEn, `${currentPlanConfig.durationDays}天 VIP 套餐`)} (${currentPlanConfig.priceUsd.toFixed(2)} /{' '}
+                          {currentPlanConfig.durationDays} {tr(language, 'ថ្ងៃ', 'days', '天')})
                         </p>
                         <div className="flex items-center gap-2 mt-2">
                           <button
@@ -572,7 +615,7 @@ export const PaymentSupportModal: React.FC = () => {
                             onClick={() => handleChooseReceipt(false)}
                             className="px-2.5 py-1 rounded-lg bg-white border border-gray-300 text-xs font-bold text-gray-700 hover:bg-gray-100"
                           >
-                            {language === 'km' ? 'ប្តូររូបភាព' : 'Replace'}
+                            {tr(language, 'ប្តូររូបភាព', 'Replace', '更换图片')}
                           </button>
                           <button
                             type="button"
@@ -583,134 +626,54 @@ export const PaymentSupportModal: React.FC = () => {
                             className="px-2.5 py-1 rounded-lg bg-red-50 border border-red-200 text-xs font-bold text-red-600 hover:bg-red-100 flex items-center gap-1"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
-                            {language === 'km' ? 'លុប' : 'Remove'}
+                            {tr(language, 'លុប', 'Remove', '删除')}
                           </button>
                         </div>
                       </div>
                     </div>
 
-                    {/* AI & Transaction Payment Verification Result Card */}
+                    {/* Clean, non-alarming receipt status banner */}
                     {isVerifyingAi ? (
                       <div className="rounded-2xl border border-blue-200 bg-blue-50/80 p-3 flex items-center gap-2.5 text-xs font-bold text-blue-900">
                         <Loader2 className="w-4 h-4 text-blue-600 animate-spin shrink-0" />
                         <span>
-                          {language === 'km'
-                            ? '🤖 កំពុងផ្ទៀងផ្ទាត់វិក្កយបត្រ ABA (លេខ Trx. ID, ចំនួនទឹកប្រាក់, កាលបរិច្ឆេទ និងឈ្មោះគណនី Kim Seng)...'
-                            : '🤖 Verifying ABA receipt (Trx. ID, Amount, Date, and Recipient "Kim Seng")...'}
+                          {tr(
+                            language,
+                            'កំពុងពិនិត្យរូបភាពវិក្កយបត្របង់ប្រាក់...',
+                            'Checking payment receipt image...',
+                            '正在检查付款凭证图片...'
+                          )}
                         </span>
                       </div>
                     ) : (
                       aiReport && (
                         <div
-                          className={`rounded-2xl border-2 p-3 space-y-2 ${
-                            aiReport.canAutoApprove
-                              ? 'border-emerald-400 bg-emerald-50/70'
-                              : aiReport.status === 'rejected_mismatch'
-                              ? 'border-red-300 bg-red-50/70'
-                              : 'border-amber-300 bg-amber-50/70'
+                          className={`rounded-2xl border p-3 text-xs font-semibold flex items-center gap-2 ${
+                            !aiReport.checks.antiReplay.passed
+                              ? 'border-amber-300 bg-amber-50 text-amber-900'
+                              : 'border-emerald-300 bg-emerald-50/80 text-emerald-900'
                           }`}
                         >
-                          <div className="flex items-center justify-between gap-2">
-                            <span
-                              className={`text-xs font-extrabold flex items-center gap-1.5 ${
-                                aiReport.canAutoApprove
-                                  ? 'text-emerald-800'
-                                  : aiReport.status === 'rejected_mismatch'
-                                  ? 'text-red-800'
-                                  : 'text-amber-900'
-                              }`}
-                            >
-                              {aiReport.canAutoApprove ? (
-                                <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-                              ) : aiReport.status === 'rejected_mismatch' ? (
-                                <XCircle className="w-4 h-4 text-red-600 shrink-0" />
-                              ) : (
-                                <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
-                              )}
-                              {aiReport.canAutoApprove
-                                ? language === 'km'
-                                  ? '✅ ផ្ទៀងផ្ទាត់វិក្កយបត្រជោគជ័យ (Verified)'
-                                  : '✅ Receipt & Transaction Verified'
-                                : language === 'km'
-                                ? '🚩 ត្រូវការ Admin ត្រួតពិនិត្យផ្ទាល់ (Flagged for Manual Review)'
-                                : '🚩 Flagged for Manual Admin Review'}
-                            </span>
-                            <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-white/80 border border-black/10 text-gray-800">
-                              Score: {aiReport.confidenceScore}%
-                            </span>
-                          </div>
-
-                          <div className="grid grid-cols-2 gap-1.5 text-[11px]">
-                            <div
-                              className={`p-2 rounded-xl border ${
-                                aiReport.checks.recipient.passed
-                                  ? 'bg-white border-emerald-200 text-emerald-900'
-                                  : 'bg-white border-red-200 text-red-900'
-                              }`}
-                            >
-                              <div className="font-bold text-[10px] text-gray-500">
-                                {language === 'km' ? 'អ្នកទទួល (Kim Seng)' : 'Recipient (Kim Seng)'}
-                              </div>
-                              <div className="font-extrabold truncate">
-                                {aiReport.checks.recipient.passed ? '✅ ' : '❌ '}
-                                {aiReport.checks.recipient.detected}
-                              </div>
-                            </div>
-
-                            <div
-                              className={`p-2 rounded-xl border ${
-                                aiReport.checks.amount.passed
-                                  ? 'bg-white border-emerald-200 text-emerald-900'
-                                  : 'bg-white border-red-200 text-red-900'
-                              }`}
-                            >
-                              <div className="font-bold text-[10px] text-gray-500">
-                                {language === 'km'
-                                  ? `ចំនួនទឹកប្រាក់ ($${currentPlanConfig.priceUsd.toFixed(2)})`
-                                  : `Amount ($${currentPlanConfig.priceUsd.toFixed(2)})`}
-                              </div>
-                              <div className="font-extrabold truncate">
-                                {aiReport.checks.amount.passed ? '✅ ' : '❌ '}
-                                {aiReport.checks.amount.detected}
-                              </div>
-                            </div>
-
-                            <div
-                              className={`p-2 rounded-xl border ${
-                                aiReport.checks.trxId.passed
-                                  ? 'bg-white border-emerald-200 text-emerald-900'
-                                  : 'bg-white border-amber-200 text-amber-900'
-                              }`}
-                            >
-                              <div className="font-bold text-[10px] text-gray-500">
-                                {language === 'km' ? 'លេខ Trx. ID' : 'ABA Trx. ID'}
-                              </div>
-                              <div className="font-extrabold truncate">
-                                {aiReport.checks.trxId.passed ? '✅ ' : '⚠️ '}
-                                {aiReport.checks.trxId.detected}
-                              </div>
-                            </div>
-
-                            <div
-                              className={`p-2 rounded-xl border ${
-                                aiReport.checks.date.passed
-                                  ? 'bg-white border-emerald-200 text-emerald-900'
-                                  : 'bg-white border-red-200 text-red-900'
-                              }`}
-                            >
-                              <div className="font-bold text-[10px] text-gray-500">
-                                {language === 'km' ? 'កាលបរិច្ឆេទវិក្កយបត្រ' : 'Receipt Date'}
-                              </div>
-                              <div className="font-extrabold truncate">
-                                {aiReport.checks.date.passed ? '✅ ' : '❌ '}
-                                {aiReport.checks.date.detected}
-                              </div>
-                            </div>
-                          </div>
-
-                          <p className="text-[11px] font-semibold text-gray-800 leading-snug">
-                            {language === 'km' ? aiReport.summaryKh : aiReport.summaryEn}
-                          </p>
+                          {!aiReport.checks.antiReplay.passed ? (
+                            <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+                          ) : (
+                            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                          )}
+                          <span>
+                            {!aiReport.checks.antiReplay.passed
+                              ? tr(
+                                  language,
+                                  'វិក្កយបត្រនេះធ្លាប់ត្រូវបានប្រើរួចហើយ។ រដ្ឋបាលនឹងពិនិត្យផ្ទាល់ពេលអ្នកផ្ញើសារ។',
+                                  'This receipt was used previously. Admin will review manually upon submission.',
+                                  '此凭证曾被使用过，提交后管理员将进行人工审核。'
+                                )
+                              : tr(
+                                  language,
+                                  'រូបភាពវិក្កយបត្ររួចរាល់សម្រាប់បញ្ជូនទៅរដ្ឋបាលពិនិត្យ និងអនុម័ត។',
+                                  'Receipt image is ready to submit for administrator review and approval.',
+                                  '付款凭证已准备就绪，可提交给管理员审核与批准。'
+                                )}
+                          </span>
                         </div>
                       )
                     )}
@@ -725,17 +688,21 @@ export const PaymentSupportModal: React.FC = () => {
                     <Upload className="w-6 h-6 text-amber-600" />
                     <span className="text-xs sm:text-sm font-extrabold">
                       {isUploading
-                        ? language === 'km'
-                          ? 'កំពុងអានរូបភាព...'
-                          : 'Loading image...'
-                        : language === 'km'
-                        ? '📸 ចុចជ្រើសរើសរូបភាពវិក្កយបត្រ ABA ពី Gallery / Photos'
-                        : '📸 Select ABA Payment Receipt from Gallery / Photos'}
+                        ? tr(language, 'កំពុងអានរូបភាព...', 'Loading image...', '正在读取图片...')
+                        : tr(
+                            language,
+                            '📸 ចុចជ្រើសរើសរូបភាពវិក្កយបត្របង់ប្រាក់ពីបណ្ណាល័យរូបភាព',
+                            '📸 Select ABA Payment Receipt from Gallery / Photos',
+                            '📸 从相册选择 ABA 付款凭证截图'
+                          )}
                     </span>
                     <span className="text-[11px] text-gray-500">
-                      {language === 'km'
-                        ? 'គាំទ្ររូបភាព JPG, JPEG, PNG'
-                        : 'Supports JPG, JPEG, PNG'}
+                      {tr(
+                        language,
+                        'គាំទ្រឯកសាររូបភាពគ្រប់ប្រភេទ',
+                        'Supports JPG, JPEG, PNG',
+                        '支持 JPG、JPEG、PNG 格式'
+                      )}
                     </span>
                   </button>
                 )}
@@ -744,19 +711,23 @@ export const PaymentSupportModal: React.FC = () => {
               {/* Message Explaining Payment Problem */}
               <div>
                 <label className="block text-xs font-extrabold text-gray-800 mb-1">
-                  {language === 'km'
-                    ? 'សារពន្យល់ទៅកាន់ Admin (Message to Admin) *៖'
-                    : 'Your Message to Admin *:'}
+                  {tr(
+                    language,
+                    'សារពន្យល់ទៅកាន់រដ្ឋបាល *៖',
+                    'Your Message to Admin *:',
+                    '给管理员的留言说明 *：'
+                  )}
                 </label>
                 <textarea
                   rows={3}
                   value={messageText}
                   onChange={(e) => setMessageText(e.target.value)}
-                  placeholder={
-                    language === 'km'
-                      ? `ឧ. ខ្ញុំបានបង់ប្រាក់តាម ABA រួចហើយសម្រាប់កញ្ចប់ ${currentPlanConfig.nameKh} ($${currentPlanConfig.priceUsd.toFixed(2)}) ប៉ុន្តែគណនី VIP មិនទាន់បើកដំណើរការទេ សូម Admin ជួយពិនិត្យវិក្កយបត្រ...`
-                      : `e.g., I already paid via ABA for ${currentPlanConfig.nameEn} ($${currentPlanConfig.priceUsd.toFixed(2)}) but my VIP access is not active yet. Please verify my attached receipt...`
-                  }
+                  placeholder={tr(
+                    language,
+                    `ឧ. ខ្ញុំបានបង់ប្រាក់រួចហើយសម្រាប់កញ្ចប់ ${currentPlanConfig.nameKh} ($${currentPlanConfig.priceUsd.toFixed(2)}) សូមរដ្ឋបាលជួយពិនិត្យវិក្កយបត្រ...`,
+                    `e.g., I already paid via ABA for ${currentPlanConfig.nameEn} ($${currentPlanConfig.priceUsd.toFixed(2)}). Please verify my attached receipt...`,
+                    `例如：我已通过 ABA 支付 $${currentPlanConfig.priceUsd.toFixed(2)} 购买 VIP 套餐，请管理员核实所附凭证...`
+                  )}
                   style={{ color: '#000000', backgroundColor: '#ffffff' }}
                   className="w-full px-3.5 py-2.5 rounded-2xl border border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 text-sm font-medium focus:ring-2 focus:ring-amber-500 focus:outline-none"
                   required
@@ -768,9 +739,12 @@ export const PaymentSupportModal: React.FC = () => {
                 className="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 hover:from-amber-600 hover:to-red-600 text-white font-extrabold text-sm shadow-lg flex items-center justify-center gap-2 transition"
               >
                 <Send className="w-4 h-4" />
-                {language === 'km'
-                  ? 'ផ្ញើសារ និងវិក្កយបត្រទៅកាន់ Admin'
-                  : 'Submit Support Message & Receipt to Admin'}
+                {tr(
+                  language,
+                  'ផ្ញើសារ និងវិក្កយបត្រទៅកាន់រដ្ឋបាល',
+                  'Submit Support Message & Receipt to Admin',
+                  '提交支持留言与付款凭证给管理员'
+                )}
               </button>
             </form>
           ) : (
@@ -780,23 +754,32 @@ export const PaymentSupportModal: React.FC = () => {
                 <div className="text-center py-10 bg-gray-50 rounded-2xl border border-gray-200 p-6">
                   <MessageSquare className="w-10 h-10 text-gray-400 mx-auto mb-2" />
                   <p className="text-sm font-bold text-gray-700">
-                    {language === 'km'
-                      ? 'មិនទាន់មានសារជំនួយនៅឡើយទេ'
-                      : 'No support messages yet'}
+                    {tr(
+                      language,
+                      'មិនទាន់មានសារជំនួយនៅឡើយទេ',
+                      'No support messages yet',
+                      '暂无支持留言记录'
+                    )}
                   </p>
                   <p className="text-xs text-gray-500 mt-1 mb-4">
-                    {language === 'km'
-                      ? 'ប្រសិនបើអ្នកបានបង់ប្រាក់តាម ABA រួចហើយតែមិនទាន់ទទួលបាន VIP សូមផ្ញើសារ និងវិក្កយបត្រមកកាន់ Admin។'
-                      : 'If you paid via ABA and need VIP activation, send a message with your receipt.'}
+                    {tr(
+                      language,
+                      'ប្រសិនបើអ្នកបានបង់ប្រាក់រួចហើយតែមិនទាន់ទទួលបាន VIP សូមផ្ញើសារ និងវិក្កយបត្រមកកាន់រដ្ឋបាល។',
+                      'If you paid via ABA and need VIP activation, send a message with your receipt.',
+                      '如果您已通过 ABA 付款但尚未开通 VIP，请发送留言并附上付款凭证。'
+                    )}
                   </p>
                   <button
                     type="button"
                     onClick={() => setActiveTab('new')}
                     className="px-4 py-2 rounded-xl bg-amber-600 text-white text-xs font-bold hover:bg-amber-700"
                   >
-                    {language === 'km'
-                      ? '➕ ផ្ញើសារជំនួយថ្មី'
-                      : '➕ Create Support Message'}
+                    {tr(
+                      language,
+                      '➕ ផ្ញើសារជំនួយថ្មី',
+                      '➕ Create Support Message',
+                      '➕ 发送新支持留言'
+                    )}
                   </button>
                 </div>
               ) : (
@@ -819,7 +802,7 @@ export const PaymentSupportModal: React.FC = () => {
                           }`}
                         >
                           <span>#{t.id.slice(-6)}</span>
-                          <span>({t.paymentPlanLabel.split(' ')[1]}d)</span>
+                          <span>({t.durationDays}{tr(language, 'ថ្ងៃ', 'd', '天')})</span>
                           {t.unreadByUser && (
                             <span className="w-2 h-2 rounded-full bg-red-500" />
                           )}
@@ -840,16 +823,18 @@ export const PaymentSupportModal: React.FC = () => {
                             {renderStatusBadge(activeTicket.status)}
                           </div>
                           <p className="text-xs font-bold text-amber-700 mt-1">
-                            {activeTicket.paymentPlanLabel} • Ref:{' '}
-                            {activeTicket.paymentRef} • {activeTicket.paymentDate}
+                            ${activeTicket.amountUsd.toFixed(2)} ({activeTicket.durationDays} {tr(language, 'ថ្ងៃ', 'days', '天')}) • {activeTicket.paymentRef} • {activeTicket.paymentDate}
                           </p>
                         </div>
                         {activeTicket.vipApproved && (
                           <span className="px-2.5 py-1 rounded-xl bg-emerald-600 text-white text-xs font-extrabold flex items-center gap-1">
                             <Crown className="w-3.5 h-3.5" />
-                            {language === 'km'
-                              ? 'VIP ត្រូវបានបើកដំណើរការ'
-                              : 'VIP Activated'}
+                            {tr(
+                              language,
+                              'VIP ត្រូវបានបើកដំណើរការ',
+                              'VIP Activated',
+                              'VIP 已激活'
+                            )}
                           </span>
                         )}
                       </div>
@@ -921,9 +906,12 @@ export const PaymentSupportModal: React.FC = () => {
                               className="w-12 h-12 object-cover rounded-lg"
                             />
                             <span className="text-xs font-bold text-amber-900 flex-1">
-                              {language === 'km'
-                                ? 'រូបភាពវិក្កយបត្រភ្ជាប់បន្ថែម'
-                                : 'Receipt image attached'}
+                              {tr(
+                                language,
+                                'រូបភាពវិក្កយបត្រភ្ជាប់បន្ថែម',
+                                'Receipt image attached',
+                                '已附上补充凭证图片'
+                              )}
                             </span>
                             <button
                               type="button"
@@ -938,11 +926,12 @@ export const PaymentSupportModal: React.FC = () => {
                           <button
                             type="button"
                             onClick={() => handleChooseReceipt(true)}
-                            title={
-                              language === 'km'
-                                ? 'ភ្ជាប់រូបភាពវិក្កយបត្រ'
-                                : 'Attach receipt image'
-                            }
+                            title={tr(
+                              language,
+                              'ភ្ជាប់រូបភាពវិក្កយបត្រ',
+                              'Attach receipt image',
+                              '附上付款凭证图片'
+                            )}
                             className="p-2.5 rounded-xl border border-gray-300 text-gray-600 hover:bg-gray-100 shrink-0"
                           >
                             <ImageIcon className="w-4 h-4" />
@@ -951,11 +940,12 @@ export const PaymentSupportModal: React.FC = () => {
                             type="text"
                             value={replyText}
                             onChange={(e) => setReplyText(e.target.value)}
-                            placeholder={
-                              language === 'km'
-                                ? 'សរសេរសារឆ្លើយតបទៅកាន់ Admin...'
-                                : 'Write a reply to Admin...'
-                            }
+                            placeholder={tr(
+                              language,
+                              'សរសេរសារឆ្លើយតបទៅកាន់រដ្ឋបាល...',
+                              'Write a reply to Admin...',
+                              '输入回复管理员的消息...'
+                            )}
                             style={{ color: '#000000', backgroundColor: '#ffffff' }}
                             className="flex-1 px-3.5 py-2 rounded-xl border border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 text-xs sm:text-sm font-medium focus:ring-2 focus:ring-amber-500 focus:outline-none"
                           />
@@ -965,7 +955,7 @@ export const PaymentSupportModal: React.FC = () => {
                             className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs sm:text-sm font-extrabold flex items-center gap-1 shrink-0"
                           >
                             <Send className="w-3.5 h-3.5" />
-                            {language === 'km' ? 'ផ្ញើ' : 'Send'}
+                            {tr(language, 'ផ្ញើ', 'Send', '发送')}
                           </button>
                         </div>
                       </div>

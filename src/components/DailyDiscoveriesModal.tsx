@@ -384,7 +384,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
                 </h3>
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-400/20 border border-emerald-300/40 text-emerald-100 text-[10px] font-extrabold shrink-0">
                   <CheckCircle2 className="w-3 h-3 text-emerald-300" />
-                  <span>{tr(language, 'ឥតគិតថ្លៃ • FREE', 'FREE', '免费浏览')}</span>
+                  <span>{tr(language, 'ឥតគិតថ្លៃ', 'FREE', '免费浏览')}</span>
                 </span>
               </div>
               <p className="text-[11px] text-emerald-100 font-khmer truncate mt-0.5">
@@ -550,7 +550,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
                 <span>
                   {tr(
                     language,
-                    'ជំនួយការ AI ណែនាំម្ហូបប្រចាំខេត្តតាមចំណូលចិត្ត',
+                    'ជំនួយការឆ្លាតវៃណែនាំម្ហូបប្រចាំខេត្តតាមចំណូលចិត្ត',
                     'AI Provincial Dish Recommendations',
                     'AI 省级特色美食智能推荐'
                   )}
@@ -738,11 +738,6 @@ export const DailyDiscoveriesModal: React.FC = () => {
                       <h4 className="font-extrabold text-sm sm:text-base leading-snug drop-shadow line-clamp-1">
                         {locFood.name}
                       </h4>
-                      {food.nameEn && language === 'km' && (
-                        <p className="text-[11px] text-emerald-200 font-medium truncate">
-                          {food.nameEn}
-                        </p>
-                      )}
                     </div>
                   </div>
 

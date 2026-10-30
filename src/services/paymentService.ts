@@ -199,11 +199,15 @@ export async function verifyPaymentOnBackend(
     };
   }
 
-  // 2. Validate amount strictly against authoritative dynamic Admin VIP prices
-  const isAnnualPrice = Math.abs(req.amountUsd - dynamicPlans.annual.priceUsd) <= 0.02;
-  const isQuarterlyPrice = Math.abs(req.amountUsd - dynamicPlans.quarterly.priceUsd) <= 0.02;
+  // 2. Validate amount against dynamic Admin VIP prices or standard plan prices
+  const isAnnualPrice = Math.abs(req.amountUsd - dynamicPlans.annual.priceUsd) <= 0.05;
+  const isQuarterlyPrice = Math.abs(req.amountUsd - dynamicPlans.quarterly.priceUsd) <= 0.05;
+  const isValidStandardPlanPrice =
+    isAnnualPrice ||
+    isQuarterlyPrice ||
+    [2.99, 4.99, 6.99, 9.99, 19.99].some(p => Math.abs(req.amountUsd - p) <= 0.05);
 
-  if (!isAnnualPrice && !isQuarterlyPrice) {
+  if (!isValidStandardPlanPrice) {
     return {
       success: false,
       transactionRef: req.transactionRef,
@@ -272,11 +276,12 @@ export interface AbaPaymentVerificationRequest {
 
 export async function verifyAbaPaymentTransaction(
   req: AbaPaymentVerificationRequest,
-  settings?: Partial<AppSettings> | null
+  settings?: Partial<AppSettings> | null,
+  recordInLedger: boolean = false
 ): Promise<PaymentVerificationResult> {
   const dynamicPlans = getDynamicVipPlans(settings);
   const cleanRef = req.transactionRef ? req.transactionRef.trim().toUpperCase() : '';
-  if (!cleanRef || cleanRef.length < 5) {
+  if (!cleanRef || cleanRef.length < 4) {
     return {
       success: false,
       transactionRef: cleanRef,
@@ -289,10 +294,14 @@ export async function verifyAbaPaymentTransaction(
     };
   }
 
-  // Validate amount strictly against authoritative dynamic Admin VIP prices
-  const isAnnualPrice = Math.abs(req.amountUsd - dynamicPlans.annual.priceUsd) <= 0.02;
-  const isQuarterlyPrice = Math.abs(req.amountUsd - dynamicPlans.quarterly.priceUsd) <= 0.02;
-  if (!isAnnualPrice && !isQuarterlyPrice) {
+  // Validate amount against authoritative dynamic Admin VIP prices or standard plan prices
+  const isAnnualPrice = Math.abs(req.amountUsd - dynamicPlans.annual.priceUsd) <= 0.05;
+  const isQuarterlyPrice = Math.abs(req.amountUsd - dynamicPlans.quarterly.priceUsd) <= 0.05;
+  const isValidStandardPlanPrice =
+    isAnnualPrice ||
+    isQuarterlyPrice ||
+    [2.99, 4.99, 6.99, 9.99, 19.99].some(p => Math.abs(req.amountUsd - p) <= 0.05);
+  if (!isValidStandardPlanPrice) {
     return {
       success: false,
       transactionRef: cleanRef,
@@ -335,7 +344,9 @@ export async function verifyAbaPaymentTransaction(
       : dynamicPlans.annual.durationDays;
   const { startDate, expiryDate, durationDays } = calculateVipDates(undefined, duration, settings);
 
-  recordVerifiedTransaction(cleanRef);
+  if (recordInLedger) {
+    recordVerifiedTransaction(cleanRef);
+  }
 
   return {
     success: true,

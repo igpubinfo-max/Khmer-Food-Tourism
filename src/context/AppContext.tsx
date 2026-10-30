@@ -34,7 +34,7 @@ import {
 } from '../data/seedData';
 import { hashPassword, verifyPassword } from '../utils/crypto';
 import { recordMeaningfulAction } from '../utils/engagement';
-import { translateTextToChinese, useChineseDomTranslation, stripForeignScripts } from '../utils/i18n';
+import { translateTextToChinese, useChineseDomTranslation, stripForeignScripts, tr } from '../utils/i18n';
 import { 
   hashPasswordPBKDF2, verifyPasswordPBKDF2, 
   checkAdminLoginAllowed, recordAdminLoginFailed, resetAdminLoginAttempts,
@@ -1265,15 +1265,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isGoogleMapsSearchModalOpen, setIsGoogleMapsSearchModalOpenRaw] = useState(false);
   const [googleMapsSearchInitialTab, setGoogleMapsSearchInitialTab] = useState<'restaurant' | 'tourism' | 'all'>('all');
   const setIsGoogleMapsSearchModalOpen = (open: boolean) => {
-    if (open && !isAdminAccount(currentUser) && !verifyBackendVipFeatureAccess('ស្វែងរកទីតាំងលើ Google Maps', 'Google Maps Places Search')) {
-      return;
-    }
     setIsGoogleMapsSearchModalOpenRaw(open);
   };
   const openGoogleMapsSearchModal = (initialTab: 'restaurant' | 'tourism' | 'all' = 'all') => {
-    if (!isAdminAccount(currentUser) && !verifyBackendVipFeatureAccess('ស្វែងរកទីតាំងលើ Google Maps', 'Google Maps Places Search')) {
-      return;
-    }
     setGoogleMapsSearchInitialTab(initialTab);
     setIsGoogleMapsSearchModalOpenRaw(true);
   };
@@ -1304,9 +1298,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const openUpgradeVipModal = (renewMode: boolean = false) => {
     if (isAdminAccount(currentUser)) {
       showToast(
-        language === 'km' 
-          ? '🛡️ គណនី Admin គឺជាគណនីរដ្ឋបាលប្រព័ន្ធ (មិនមែនជាគណនីសមាជិក VIP ទូទៅទេ)!' 
-          : 'Admin account is a System Administrator account (separated from VIP user accounts)!', 
+        tr(
+          language,
+          '🛡️ គណនីរដ្ឋបាលប្រព័ន្ធមានសិទ្ធិពេញលេញរួចហើយ!',
+          '🛡️ System Administrator account already has full access!',
+          '🛡️ 系统管理员账户已拥有全部权限！'
+        ),
         'info'
       );
       return;
@@ -1325,14 +1322,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setIsGoogleMapsSearchModalOpenRaw(false);
   };
 
-    // Feature access check: ensure user is signed in without redirecting to VIP payment request screen
-  const verifyBackendVipFeatureAccess = (featureNameKh: string, featureNameEn: string): boolean => {
+  // Feature access check: ensure user is signed in for personal account lists without redirecting to VIP payment request screen
+  const verifyBackendVipFeatureAccess = (featureNameKh: string, featureNameEn: string, featureNameZh?: string): boolean => {
     if (!currentUser) {
       closeAllPersonalizedFeatureModals();
       showToast(
-        language === 'km'
-          ? `🔒 សូមចូលគណនីដើម្បីប្រើប្រាស់មុខងារ «${featureNameKh}»!`
-          : `🔒 Please sign in to access "${featureNameEn}"!`,
+        tr(
+          language,
+          `🔒 សូមចូលគណនីដើម្បីប្រើប្រាស់មុខងារ «${featureNameKh}»!`,
+          `🔒 Please sign in to access "${featureNameEn}"!`,
+          `🔒 请先登录以使用“${featureNameZh || featureNameEn}”功能！`
+        ),
         'warning'
       );
       setIsAuthModalOpen(true);
@@ -1342,12 +1342,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const setIsWhatToEatModalOpen = (open: boolean) => {
-    if (open && !verifyBackendVipFeatureAccess('ថ្ងៃនេះញ៉ាំអី?', 'What to Eat Today?')) return;
     setIsWhatToEatModalOpenRaw(open);
   };
 
   const setIsNearMeModalOpen = (open: boolean) => {
-    if (open && !verifyBackendVipFeatureAccess('នៅជិតខ្ញុំ (GPS)', 'Near Me (GPS)')) return;
     setIsNearMeModalOpenRaw(open);
   };
 
@@ -1356,12 +1354,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const setIsWishlistsModalOpen = (open: boolean) => {
-    if (open && !verifyBackendVipFeatureAccess('បញ្ជីចង់ទៅ', 'My Wishlists')) return;
+    if (open && !verifyBackendVipFeatureAccess('បញ្ជីចង់ទៅ', 'My Wishlists', '我的心愿单')) return;
     setIsWishlistsModalOpenRaw(open);
   };
 
   const setIsAiTripPlannerModalOpen = (open: boolean) => {
-    if (open && !verifyBackendVipFeatureAccess('ផែនការដើរលេង AI', 'AI Trip Planner')) return;
     setIsAiTripPlannerModalOpenRaw(open);
   };
 
@@ -7073,9 +7070,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } catch {}
 
     showToast(
-      language === 'km'
-        ? '📸 បានអាប់ឡូតភស្តុតាងបង់ប្រាក់រួចរាល់! កំពុងរង់ចាំ Admin ពិនិត្យ និងអនុម័ត។'
-        : '📸 Payment proof uploaded! Awaiting Admin verification and approval.',
+      tr(
+        language,
+        '📸 បានអាប់ឡូតភស្តុតាងបង់ប្រាក់រួចរាល់! កំពុងរង់ចាំរដ្ឋបាលពិនិត្យ និងអនុម័ត។',
+        '📸 Payment proof uploaded! Awaiting administrator verification and approval.',
+        '📸 付款凭据已上传！正在等待管理员审核与批准。'
+      ),
       'success'
     );
 
@@ -7138,9 +7138,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setTransactions(prev => [failedTxn, ...prev]);
 
         showToast(
-          language === 'km' 
-            ? `ការផ្ទៀងផ្ទាត់មិនជោគជ័យ៖ ${result.error || 'សូមព្យាយាមម្តងទៀត'}` 
-            : `Verification failed: ${result.error || 'Please try again'}`,
+          tr(
+            language,
+            `ការផ្ទៀងផ្ទាត់មិនជោគជ័យ៖ ${result.error || 'សូមព្យាយាមម្តងទៀត'}`,
+            `Verification failed: ${result.error || 'Please try again'}`,
+            `验证失败：${result.error || '请重试'}`
+          ),
           'warning'
         );
         return { success: false, error: result.error };
@@ -7201,9 +7204,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }));
 
       showToast(
-        language === 'km' 
-          ? `អបអរសាទរ! គណនីរបស់អ្នកត្រូវបានដំឡើងទៅជា Premium VIP (${result.durationDays} ថ្ងៃ) ដោយជោគជ័យ! 🎉` 
-          : `Congratulations! Your account has been upgraded to Premium VIP (${result.durationDays} days)! 🎉`,
+        tr(
+          language,
+          `អបអរសាទរ! គណនីរបស់អ្នកត្រូវបានដំឡើងទៅជាសមាជិក VIP (${result.durationDays} ថ្ងៃ) ដោយជោគជ័យ! 🎉`,
+          `Congratulations! Your account has been upgraded to VIP (${result.durationDays} days)! 🎉`,
+          `恭喜！您的账户已成功升级为 VIP 会员（${result.durationDays} 天）！🎉`
+        ),
         'success'
       );
 
@@ -7244,9 +7250,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     const eligible = checkEligibleRestoration(currentUser.id, currentUser.email, transactions);
     if (!eligible || !eligible.expiresAt) {
-      const msg = language === 'km' 
-        ? 'មិនមានការទូទាត់ VIP ដែលត្រូវស្តារឡើងវិញសម្រាប់គណនីនេះទេ' 
-        : 'No active VIP purchases found to restore for this account.';
+      const msg = tr(
+        language,
+        'មិនមានការទូទាត់ VIP ដែលត្រូវស្តារឡើងវិញសម្រាប់គណនីនេះទេ',
+        'No active VIP purchases found to restore for this account.',
+        '未找到该账户可恢复的 VIP 订阅记录。'
+      );
       showToast(msg, 'info');
       return { success: true, restored: false, message: msg };
     }
@@ -7265,14 +7274,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setCurrentUser(restoredUser);
     setUsers(prev => prev.map(u => u.id === currentUser.id ? restoredUser : u));
 
-    const successMsg = language === 'km' 
-      ? `ការជាវ VIP របស់អ្នកត្រូវបានស្តារឡើងវិញដោយជោគជ័យ (ផុតកំណត់៖ ${eligible.expiresAt.split('T')[0]})! 🎉` 
-      : `Your VIP subscription has been restored successfully (Expires: ${eligible.expiresAt.split('T')[0]})! 🎉`;
+    const successMsg = tr(
+      language,
+      `ការជាវ VIP របស់អ្នកត្រូវបានស្តារឡើងវិញដោយជោគជ័យ (ផុតកំណត់៖ ${eligible.expiresAt.split('T')[0]})! 🎉`,
+      `Your VIP subscription has been restored successfully (Expires: ${eligible.expiresAt.split('T')[0]})! 🎉`,
+      `您的 VIP 订阅已成功恢复（到期日：${eligible.expiresAt.split('T')[0]}）！🎉`
+    );
     showToast(successMsg, 'success');
     return { success: true, restored: true, message: successMsg };
   };
 
-  // Submit VIP Upgrade Request for Administrator Review & Approval (Never activates VIP directly)
+  // Submit VIP Upgrade Request for Administrator Review & Approval
   const submitVipUpgradeRequest = async (
     durationDays?: number,
     amountUsd?: number,
@@ -7300,7 +7312,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
 
     if (existingPending && !isVipRenewMode) {
-      // If user attached a new payment proof image, update the existing request!
+      const updatedRef =
+        (transactionRef || '').trim().toUpperCase() || existingPending.transactionRef;
+      setTransactions(prev =>
+        prev.map(t =>
+          t.id === existingPending.id
+            ? {
+                ...t,
+                planType,
+                amountUsd: validPrice,
+                durationDays: validDays,
+                transactionRef: updatedRef,
+                paymentProofUrl: paymentProofData?.dataUrl || t.paymentProofUrl,
+                paymentProofFileName: paymentProofData?.fileName || t.paymentProofFileName,
+                paymentProofMimeType: paymentProofData?.mimeType || t.paymentProofMimeType,
+                paymentProofUploadedAt: paymentProofData?.dataUrl
+                  ? new Date().toISOString().replace('T', ' ').slice(0, 16)
+                  : t.paymentProofUploadedAt,
+              }
+            : t
+        )
+      );
       if (paymentProofData?.dataUrl) {
         uploadPaymentProofToTransaction(
           existingPending.id,
@@ -7312,9 +7344,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
 
       showToast(
-        language === 'km' 
-          ? '⏳ សំណើរបស់អ្នកកំពុងរង់ចាំ Admin ពិនិត្យការទូទាត់រួចហើយ!' 
-          : '⏳ Your payment request is already pending Admin approval!',
+        tr(
+          language,
+          '✅ សំណើដំឡើង VIP របស់អ្នកត្រូវបានបញ្ជូន និងកំពុងរង់ចាំរដ្ឋបាលពិនិត្យអនុម័ត!',
+          '✅ Your VIP upgrade request is submitted and awaiting administrator approval!',
+          '✅ 您的 VIP 升级申请已提交，正在等待管理员审核批准！'
+        ),
         'info'
       );
       return { success: true, transactionId: existingPending.id };
@@ -7335,15 +7370,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         paymentMethod: 'KHQR',
         timestamp: Date.now()
       },
-      appSettings
+      latestSettings,
+      false
     );
 
     if (!verification.success) {
       const errMsg = verification.error || 'Payment request validation failed';
       showToast(
-        language === 'km' 
-          ? `សំណើទូទាត់មិនត្រឹមត្រូវ៖ ${errMsg}` 
-          : `Payment request invalid: ${errMsg}`,
+        tr(
+          language,
+          `សំណើទូទាត់មិនត្រឹមត្រូវ៖ ${errMsg}`,
+          `Payment request invalid: ${errMsg}`,
+          `付款请求无效：${errMsg}`
+        ),
         'warning'
       );
       return { success: false, transactionId: '', error: errMsg };
@@ -7418,6 +7457,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
 
     if (isAutoVerified && paymentProofData?.dataUrl) {
+      recordVerifiedTransaction(effectiveTrxRef);
       recordVerifiedReceiptFingerprint(
         computeReceiptImageFingerprint(paymentProofData.dataUrl),
         currentUser.id,
@@ -7505,15 +7545,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setNotifications(prev => [userSuccessNotif, ...prev]);
 
       showToast(
-        language === 'km'
-          ? `🎉 ផ្ទៀងផ្ទាត់វិក្កយបត្រ ABA ជោគជ័យ! គណនី VIP (${validDays} ថ្ងៃ) ត្រូវបានបើកដំណើរការ!`
-          : `🎉 ABA Receipt Verified! VIP (${validDays} Days) is now active!`,
+        tr(
+          language,
+          `🎉 ផ្ទៀងផ្ទាត់វិក្កយបត្រ ABA ជោគជ័យ! គណនី VIP (${validDays} ថ្ងៃ) ត្រូវបានបើកដំណើរការ!`,
+          `🎉 ABA Receipt Verified! VIP (${validDays} Days) is now active!`,
+          `🎉 ABA 凭据验证成功！VIP（${validDays} 天）已正式激活！`
+        ),
         'success'
       );
       return { success: true, transactionId: txnId };
     }
 
-    // Keep user on previous membership level ('free' unless already active VIP) while flagged for Manual Admin Review
+    // Keep user on previous membership level ('free' unless already active VIP) while awaiting Admin Review
     const pendingUser: User = {
       ...currentUser,
       membershipTier: isUserVipActive(currentUser) ? 'premium_vip' : 'free',
@@ -7531,15 +7574,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       id: `notif-admin-vip-${Date.now()}`,
       titleKh:
         aiReport?.status === 'rejected_mismatch'
-          ? '🚩 សំណើបង់ប្រាក់ VIP មានព័ត៌មានមិនត្រូវគ្នា (Flagged for Admin Review)'
-          : '👑 សំណើពិនិត្យការទូទាត់ VIP ថ្មី (Manual Admin Review)',
+          ? '🚩 សំណើបង់ប្រាក់ VIP ត្រូវការរដ្ឋបាលពិនិត្យផ្ទាល់'
+          : '👑 សំណើពិនិត្យការទូទាត់ VIP ថ្មី',
       titleEn:
         aiReport?.status === 'rejected_mismatch'
-          ? '🚩 VIP Payment Mismatch Flagged for Admin Review'
-          : '👑 New VIP Payment Verification Request (Manual Review)',
+          ? '🚩 VIP Payment Flagged for Admin Review'
+          : '👑 New VIP Payment Verification Request',
       messageKh: aiReport
         ? `${currentUser.name}: ${aiReport.summaryKh}`
-        : `អតិថិជន ${currentUser.name} (${currentUser.email}) បានបញ្ជូនសំណើពិនិត្យការទូទាត់ VIP ${validDays} ថ្ងៃ ($${validPrice.toFixed(2)} USD) តាម ABA KHQR (Ref: ${effectiveTrxRef})។ សូមពិនិត្យភស្តុតាងមុនពេលអនុម័ត។`,
+        : `អតិថិជន ${currentUser.name} (${currentUser.email}) បានបញ្ជូនសំណើពិនិត្យការទូទាត់ VIP ${validDays} ថ្ងៃ ($${validPrice.toFixed(2)} USD) តាម ABA KHQR (លេខយោង៖ ${effectiveTrxRef})។ សូមពិនិត្យភស្តុតាងមុនពេលអនុម័ត។`,
       messageEn: aiReport
         ? `${currentUser.name}: ${aiReport.summaryEn}`
         : `Customer ${currentUser.name} (${currentUser.email}) submitted a VIP ${validDays} Days ($${validPrice.toFixed(2)} USD) payment verification request via ABA KHQR (Ref: ${effectiveTrxRef}). Please verify before approving.`,
@@ -7551,14 +7594,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // Send User Notification
     const userNotif: AppNotification = {
       id: `notif-user-vip-req-${Date.now() + 1}`,
-      titleKh: '⏳ បានដាក់សញ្ញាសម្រាប់ Admin ត្រួតពិនិត្យផ្ទាល់',
-      titleEn: '⏳ Flagged for Manual Admin Payment Review',
-      messageKh: aiReport
-        ? aiReport.summaryKh
-        : `សំណើពិនិត្យការទូទាត់ប្រាក់ ($${validPrice.toFixed(2)} USD / ${validDays} ថ្ងៃ) របស់អ្នកត្រូវបានបញ្ជូនទៅរដ្ឋបាល។ គណនី VIP នឹងត្រូវបានបើកដំណើរការបន្ទាប់ពីរដ្ឋបាលពិនិត្យ និងអនុម័ត។`,
-      messageEn: aiReport
-        ? aiReport.summaryEn
-        : `Your payment confirmation request ($${validPrice.toFixed(2)} USD / ${validDays} days) has been submitted. VIP will be activated after administrator verification and approval.`,
+      titleKh: '⏳ សំណើដំឡើង VIP កំពុងរង់ចាំរដ្ឋបាលពិនិត្យ និងអនុម័ត',
+      titleEn: '⏳ VIP Upgrade Request Awaiting Admin Approval',
+      messageKh:
+        `សំណើពិនិត្យការទូទាត់ប្រាក់ ($${validPrice.toFixed(2)} USD / ${validDays} ថ្ងៃ) របស់អ្នកត្រូវបានបញ្ជូនទៅរដ្ឋបាល។ គណនី VIP នឹងត្រូវបានបើកដំណើរការបន្ទាប់ពីរដ្ឋបាលពិនិត្យ និងអនុម័ត។`,
+      messageEn:
+        `Your payment confirmation request ($${validPrice.toFixed(2)} USD / ${validDays} days) has been submitted. VIP will be activated after administrator verification and approval.`,
       type: 'system',
       date: now.toISOString().split('T')[0],
       isRead: false,
@@ -7566,15 +7607,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     setNotifications(prev => [adminNotif, userNotif, ...prev]);
 
+    const isExplicitDuplicate = aiReport && !aiReport.checks.antiReplay.passed;
     showToast(
-      language === 'km'
-        ? aiReport?.status === 'rejected_mismatch'
-          ? '🚩 រកឃើញព័ត៌មានលើវិក្កយបត្រមិនត្រូវគ្នា! សំណើត្រូវបានបញ្ជូនឱ្យ Admin ត្រួតពិនិត្យផ្ទាល់។'
-          : '⏳ បានបញ្ជូនសំណើរួចរាល់! កំពុងរង់ចាំ Admin ពិនិត្យការទូទាត់។'
-        : aiReport?.status === 'rejected_mismatch'
-        ? '🚩 Receipt mismatch detected! Flagged for manual Admin review.'
-        : '⏳ Request submitted! Awaiting Admin payment verification.',
-      aiReport?.status === 'rejected_mismatch' ? 'warning' : 'info'
+      isExplicitDuplicate
+        ? tr(
+            language,
+            '⚠️ វិក្កយបត្រ ឬលេខប្រតិបត្តិការនេះធ្លាប់ត្រូវបានប្រើរួចហើយ។ សំណើត្រូវបានបញ្ជូនឱ្យរដ្ឋបាលពិនិត្យផ្ទាល់។',
+            '⚠️ Duplicate receipt or transaction ID detected. Submitted for manual administrator review.',
+            '⚠️ 检测到重复的凭据或交易号，已提交管理员人工审核。'
+          )
+        : tr(
+            language,
+            '✅ បានបញ្ជូនសំណើដំឡើង VIP រួចរាល់! កំពុងរង់ចាំរដ្ឋបាលពិនិត្យ និងអនុម័ត។',
+            '✅ VIP upgrade request submitted! Awaiting administrator verification and approval.',
+            '✅ VIP 升级申请已提交！正在等待管理员审核与批准。'
+          ),
+      isExplicitDuplicate ? 'warning' : 'success'
     );
 
     return { success: true, transactionId: txnId };
@@ -7827,9 +7875,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const cleanMessage = (input.message || '').trim();
     if (!cleanMessage) {
       showToast(
-        language === 'km'
-          ? 'សូមសរសេរសារពន្យល់ពីបញ្ហាការបង់ប្រាក់របស់អ្នក។'
-          : 'Please enter a message explaining your payment issue.',
+        tr(
+          language,
+          'សូមសរសេរសារពន្យល់ពីបញ្ហាការបង់ប្រាក់របស់អ្នក។',
+          'Please enter a message explaining your payment issue.',
+          '请输入说明您付款问题的留言。'
+        ),
         'warning'
       );
       return null;
@@ -7881,16 +7932,37 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         id: `msg-ai-${Date.now() + 1}`,
         senderRole: 'admin',
         senderId: 'ai-payment-verifier',
-        senderName: '🤖 AI & Transaction Verifier',
-        message: `${aiReport.summaryKh}\n\n• អ្នកទទួល (Recipient): ${
-          aiReport.checks.recipient.passed ? '✅' : '❌'
-        } ${aiReport.checks.recipient.detected}\n• ចំនួនទឹកប្រាក់ (Amount): ${
-          aiReport.checks.amount.passed ? '✅' : '❌'
-        } ${aiReport.checks.amount.detected}\n• លេខប្រតិបត្តិការ (Trx. ID): ${
-          aiReport.checks.trxId.passed ? '✅' : '⚠️'
-        } ${aiReport.checks.trxId.detected}\n• កាលបរិច្ឆេទ (Date): ${
-          aiReport.checks.date.passed ? '✅' : '❌'
-        } ${aiReport.checks.date.detected}`,
+        senderName: tr(language, '🤖 ប្រព័ន្ធពិនិត្យការទូទាត់', '🤖 Payment Verification System', '🤖 付款审核系统'),
+        message: tr(
+          language,
+          `${aiReport.summaryKh}\n\n• អ្នកទទួល៖ ${
+            aiReport.checks.recipient.passed ? '✅' : '⏳'
+          } ${aiReport.checks.recipient.detected}\n• ចំនួនទឹកប្រាក់៖ ${
+            aiReport.checks.amount.passed ? '✅' : '⏳'
+          } ${aiReport.checks.amount.detected}\n• លេខប្រតិបត្តិការ៖ ${
+            aiReport.checks.trxId.passed ? '✅' : '⏳'
+          } ${aiReport.checks.trxId.detected}\n• កាលបរិច្ឆេទ៖ ${
+            aiReport.checks.date.passed ? '✅' : '⏳'
+          } ${aiReport.checks.date.detected}`,
+          `${aiReport.summaryEn}\n\n• Recipient: ${
+            aiReport.checks.recipient.passed ? '✅' : '⏳'
+          } ${aiReport.checks.recipient.detected}\n• Amount: ${
+            aiReport.checks.amount.passed ? '✅' : '⏳'
+          } ${aiReport.checks.amount.detected}\n• Transaction ID: ${
+            aiReport.checks.trxId.passed ? '✅' : '⏳'
+          } ${aiReport.checks.trxId.detected}\n• Date: ${
+            aiReport.checks.date.passed ? '✅' : '⏳'
+          } ${aiReport.checks.date.detected}`,
+          `已收到您的付款凭据，正在等待管理员审核。\n\n• 收款人：${
+            aiReport.checks.recipient.passed ? '✅' : '⏳'
+          } ${aiReport.checks.recipient.detected}\n• 金额：${
+            aiReport.checks.amount.passed ? '✅' : '⏳'
+          } ${aiReport.checks.amount.detected}\n• 交易号：${
+            aiReport.checks.trxId.passed ? '✅' : '⏳'
+          } ${aiReport.checks.trxId.detected}\n• 日期：${
+            aiReport.checks.date.passed ? '✅' : '⏳'
+          } ${aiReport.checks.date.detected}`
+        ),
         createdAt: readableNow,
       };
       messagesList.push(aiSystemMsg);
@@ -8034,21 +8106,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const adminNotif: AppNotification = {
       id: `notif-sup-admin-${Date.now()}`,
       titleKh: isAutoApprovedByAi
-        ? '✅ AI បានផ្ទៀងផ្ទាត់វិក្កយបត្រ និងបើក VIP ជោគជ័យ'
-        : aiReport?.status === 'rejected_mismatch'
-        ? '🚩 សារជំនួយបង់ប្រាក់ VIP មានព័ត៌មានមិនត្រូវគ្នា (Flagged for Manual Review)'
-        : '💬 សារជំនួយបញ្ហាការបង់ប្រាក់ VIP ថ្មី (Manual Admin Review)',
+        ? '✅ បានផ្ទៀងផ្ទាត់វិក្កយបត្រ និងបើក VIP ជោគជ័យ'
+        : '💬 សារជំនួយបញ្ហាការបង់ប្រាក់ VIP ថ្មី',
       titleEn: isAutoApprovedByAi
-        ? '✅ AI Verified ABA Receipt & Activated VIP'
-        : aiReport?.status === 'rejected_mismatch'
-        ? '🚩 VIP Support Receipt Mismatch (Flagged for Manual Review)'
-        : '💬 New VIP Payment Support Message (Manual Admin Review)',
+        ? '✅ Verified ABA Receipt & Activated VIP'
+        : '💬 New VIP Payment Support Message',
       messageKh: aiReport
         ? `អ្នកប្រើប្រាស់ ${currentUser.name}: ${aiReport.summaryKh}`
-        : `អ្នកប្រើប្រាស់ ${currentUser.name} (ID: ${currentUser.id}) បានផ្ញើសារជំនួយសម្រាប់កញ្ចប់ ${plan.nameEn} ($${plan.priceUsd.toFixed(2)})៖ "${cleanMessage.slice(0, 80)}"`,
+        : `អ្នកប្រើប្រាស់ ${currentUser.name} (${currentUser.id}) បានផ្ញើសារជំនួយសម្រាប់កញ្ចប់ ${plan.nameKh} ($${plan.priceUsd.toFixed(2)})៖ "${cleanMessage.slice(0, 80)}"`,
       messageEn: aiReport
         ? `User ${currentUser.name}: ${aiReport.summaryEn}`
-        : `User ${currentUser.name} (ID: ${currentUser.id}) submitted a payment support ticket for ${plan.nameEn} ($${plan.priceUsd.toFixed(2)}): "${cleanMessage.slice(0, 80)}"`,
+        : `User ${currentUser.name} (${currentUser.id}) submitted a payment support ticket for ${plan.nameEn} ($${plan.priceUsd.toFixed(2)}): "${cleanMessage.slice(0, 80)}"`,
       type: 'system',
       date: nowIso.split('T')[0],
       isRead: false,
@@ -8057,17 +8125,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     showToast(
       isAutoApprovedByAi
-        ? language === 'km'
-          ? `🎉 វិក្កយបត្រ ABA ត្រូវបានផ្ទៀងផ្ទាត់ជោគជ័យ! គណនី VIP (${plan.durationDays} ថ្ងៃ) ត្រូវបានបើកដំណើរការ!`
-          : `🎉 ABA Receipt verified! VIP (${plan.durationDays} Days) is now activated!`
-        : aiReport?.status === 'rejected_mismatch'
-        ? language === 'km'
-          ? '🚩 រកឃើញព័ត៌មានមិនត្រូវគ្នាលើវិក្កយបត្រ! បានដាក់សញ្ញាសម្រាប់ Admin ត្រួតពិនិត្យផ្ទាល់។'
-          : '🚩 Receipt mismatch detected! Flagged for manual Admin review.'
-        : language === 'km'
-        ? '✅ បានផ្ញើសារជំនួយ និងវិក្កយបត្រទៅកាន់ Admin ដើម្បីត្រួតពិនិត្យផ្ទាល់!'
-        : '✅ Support message & receipt flagged for manual Admin review!',
-      isAutoApprovedByAi ? 'success' : aiReport?.status === 'rejected_mismatch' ? 'warning' : 'info'
+        ? tr(
+            language,
+            `🎉 វិក្កយបត្រ ABA ត្រូវបានផ្ទៀងផ្ទាត់ជោគជ័យ! គណនី VIP (${plan.durationDays} ថ្ងៃ) ត្រូវបានបើកដំណើរការ!`,
+            `🎉 ABA Receipt verified! VIP (${plan.durationDays} Days) is now activated!`,
+            `🎉 ABA 凭据已验证！VIP（${plan.durationDays} 天）现已激活！`
+          )
+        : tr(
+            language,
+            '✅ បានផ្ញើសារជំនួយ និងវិក្កយបត្រទៅកាន់រដ្ឋបាលដើម្បីពិនិត្យ និងអនុម័ត!',
+            '✅ Support message and receipt submitted to administrator for review!',
+            '✅ 支持留言与付款凭据已提交管理员审核！'
+          ),
+      'success'
     );
     return newTicket;
   };

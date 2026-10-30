@@ -1,7 +1,6 @@
 import React, { useMemo } from 'react';
 import { MapPin, Navigation, Store } from 'lucide-react';
 import { useApp } from '../context/AppContext';
-import { isUserVipActive } from '../types';
 import type { FoodItem, Restaurant } from '../types';
 import { tr } from '../utils/i18n';
 import { getLocalizedRestaurant } from '../utils/zhDynamicTranslator';
@@ -52,18 +51,10 @@ interface Props {
 
 /** "Where to eat this": restaurants whose listed signature dishes match, plus a Near-me shortcut. */
 export const WhereToEat: React.FC<Props> = ({ food }) => {
-  const { language, restaurants, setSelectedFood, setSelectedRestaurant, setIsNearMeModalOpen, currentUser, showToast, openUpgradeVipModal } = useApp();
+  const { language, restaurants, setSelectedFood, setSelectedRestaurant, setIsNearMeModalOpen } = useApp();
   const matches = useMemo(() => findRestaurantsServingDish(food, restaurants).slice(0, 4), [food, restaurants]);
 
   const openNearMe = () => {
-    if (!isUserVipActive(currentUser) && currentUser?.role !== 'admin') {
-      showToast(
-        tr(language, 'មុខងារ «នៅជិតខ្ញុំ» សម្រាប់គណនី VIP', '“Near me” is for VIP accounts — please unlock VIP!', '“附近”功能仅限 VIP 账户'),
-        'info'
-      );
-      openUpgradeVipModal();
-      return;
-    }
     setSelectedFood(null);
     setIsNearMeModalOpen(true);
   };

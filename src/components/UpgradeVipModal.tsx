@@ -139,50 +139,34 @@ export const UpgradeVipModal: React.FC = () => {
     );
   }, [transactions, currentUser]);
 
-  // Synchronize UI with real backend/persisted status whenever modal opens or user/transactions change
+  // Synchronize UI when modal opens: ALWAYS open cleanly into AWAITING_PAYMENT (or APPROVED if already active VIP and not renewing)
+  // Never show stale REJECTED or PAYMENT_FAILED error screens when the user clicks "Upgrade to VIP"!
   useEffect(() => {
     if (!isUpgradeVipModalOpen) return;
     refreshAppSettingsFromServer(true);
-    if (!currentUser) return;
+    setErrorMessage('');
+    if (!currentUser) {
+      setPaymentState('AWAITING_PAYMENT');
+      return;
+    }
 
-    // Requirement 6 Fix: When user clicks "បន្ត VIP" (Renew VIP), always open AWAITING_PAYMENT so it never auto-approves!
     if (isVipRenewMode) {
       setPaymentState('AWAITING_PAYMENT');
       return;
     }
 
-    if (
-      currentUser.paymentStatus === 'needs_more_info' ||
-      userLatestVipTxn?.status === 'needs_more_info'
-    ) {
-      setPaymentState('NEEDS_MORE_INFO');
-      if (userLatestVipTxn) {
-        setSubmittedTxnId(userLatestVipTxn.id);
-        setCustomTxnRef(userLatestVipTxn.transactionRef);
-        setSubmissionTimestamp(userLatestVipTxn.createdAt);
-      }
-    } else if (
-      currentUser.subscriptionStatus === 'pending' || 
-      currentUser.paymentStatus === 'paid_pending_approval' ||
-      userLatestVipTxn?.status === 'pending_verification'
-    ) {
-      setPaymentState('PENDING_ADMIN_APPROVAL');
-      if (userLatestVipTxn) {
-        setSubmittedTxnId(userLatestVipTxn.id);
-        setCustomTxnRef(userLatestVipTxn.transactionRef);
-        setSubmissionTimestamp(userLatestVipTxn.createdAt);
-      }
-    } else if (
-      currentUser.paymentStatus === 'failed' || 
-      userLatestVipTxn?.status === 'rejected'
-    ) {
-      setPaymentState('REJECTED');
-    } else if (isUserVipActive(currentUser) && currentUser.paymentStatus === 'verified') {
+    if (userLatestVipTxn) {
+      setSubmittedTxnId(userLatestVipTxn.id);
+      setCustomTxnRef(userLatestVipTxn.transactionRef);
+      setSubmissionTimestamp(userLatestVipTxn.createdAt);
+    }
+
+    if (isUserVipActive(currentUser) && currentUser.paymentStatus === 'verified') {
       setPaymentState('APPROVED');
     } else {
       setPaymentState('AWAITING_PAYMENT');
     }
-  }, [isUpgradeVipModalOpen, isVipRenewMode, currentUser, userLatestVipTxn]);
+  }, [isUpgradeVipModalOpen, isVipRenewMode]);
 
   if (!isUpgradeVipModalOpen) return null;
 
@@ -215,7 +199,7 @@ export const UpgradeVipModal: React.FC = () => {
           showToast(
             tr(
               language,
-              '✅ បានជ្រើសរើសរូបភាពវិក្កយបត្រពី Gallery រួចរាល់!',
+              '✅ បានជ្រើសរើសរូបភាពវិក្កយបត្រពីបណ្ណាល័យរូបភាពរួចរាល់!',
               '✅ Selected payment receipt from Gallery!',
               '✅ 已从相册选择付款凭证截图！'
             ),
@@ -257,12 +241,12 @@ export const UpgradeVipModal: React.FC = () => {
       const result = await savePngDataUrlToGallery(qrCodeDataUrl, fileName);
       showToast(
         result.duplicate
-          ? tr(language, '✅ រូបភាព QR នេះត្រូវបានរក្សាទុករួចហើយនៅក្នុង Gallery!', '✅ QR image is already saved in your Gallery!', '✅ 二维码图片已保存在相册中！')
-          : tr(language, '✅ បានរក្សាទុករូបភាព QR ទៅក្នុង Gallery រួចរាល់!', '✅ QR saved to Gallery!', '✅ 二维码已保存到相册！'),
+          ? tr(language, '✅ រូបភាពកូដ QR នេះត្រូវបានរក្សាទុករួចហើយនៅក្នុងបណ្ណាល័យរូបភាព!', '✅ QR image is already saved in your Gallery!', '✅ 二维码图片已保存在相册中！')
+          : tr(language, '✅ បានរក្សាទុករូបភាពកូដ QR ទៅក្នុងបណ្ណាល័យរូបភាពរួចរាល់!', '✅ QR saved to Gallery!', '✅ 二维码已保存到相册！'),
         'success'
       );
     } catch (err: any) {
-      showToast(err?.message || tr(language, 'សូម Screenshot រូបភាព QR ដើម្បីស្កេន', 'Please screenshot QR to scan', '请截图保存二维码进行扫描'), 'warning');
+      showToast(err?.message || tr(language, 'សូមថតអេក្រង់រូបភាពកូដ QR ដើម្បីស្កេន', 'Please screenshot QR to scan', '请截图保存二维码进行扫描'), 'warning');
     }
   };
 
@@ -300,9 +284,12 @@ export const UpgradeVipModal: React.FC = () => {
             launchedNatively = true;
           } else if (res?.reason && res.reason.includes('market')) {
             showToast(
-              isKm 
-                ? '⚠️ មិនទាន់មាន ABA Mobile ក្នុងទូរស័ព្ទឡើយ កំពុងបើក Play Store ដើម្បីដំឡើង...' 
-                : '⚠️ ABA Mobile not installed, opening Google Play Store...',
+              tr(
+                language,
+                '⚠️ មិនទាន់មានកម្មវិធីធនាគារ ABA ក្នុងទូរស័ព្ទឡើយ កំពុងបើក Play Store ដើម្បីដំឡើង...',
+                '⚠️ ABA Mobile not installed, opening Google Play Store...',
+                '⚠️ 尚未安装 ABA Mobile，正在打开应用商店...'
+              ),
               'info'
             );
             return;
@@ -350,9 +337,12 @@ export const UpgradeVipModal: React.FC = () => {
 
     if (!isValidType) {
       showToast(
-        isKm
-          ? '⚠️ សូមជ្រើសរើសរូបភាពប្រភេទ JPG, JPEG ឬ PNG ប៉ុណ្ណោះ!'
-          : '⚠️ Please select a valid JPG, JPEG, or PNG image!',
+        tr(
+          language,
+          '⚠️ សូមជ្រើសរើសឯកសាររូបភាពដែលត្រឹមត្រូវ!',
+          '⚠️ Please select a valid JPG, JPEG, or PNG image!',
+          '⚠️ 请选择有效的 JPG、JPEG 或 PNG 图片！'
+        ),
         'warning'
       );
       e.target.value = '';
@@ -362,9 +352,12 @@ export const UpgradeVipModal: React.FC = () => {
     const maxBytes = 10 * 1024 * 1024; // 10 MB max
     if (file.size > maxBytes) {
       showToast(
-        isKm
-          ? '⚠️ ទំហំរូបភាពធំពេក (អតិបរមា 10MB)។ សូមជ្រើសរើសរូបភាពផ្សេង។'
-          : '⚠️ Image file size exceeds 10MB limit. Please choose a smaller image.',
+        tr(
+          language,
+          '⚠️ ទំហំរូបភាពធំពេក។ សូមជ្រើសរើសរូបភាពផ្សេងដែលតូចជាងនេះ។',
+          '⚠️ Image file size exceeds 10MB limit. Please choose a smaller image.',
+          '⚠️ 图片大小超过 10MB 限制，请选择较小的图片。'
+        ),
         'warning'
       );
       e.target.value = '';
@@ -469,17 +462,29 @@ export const UpgradeVipModal: React.FC = () => {
     }
   };
 
-  // Requirement 2 & 3: Submit Payment Confirmation Request to Admin Queue (NEVER activates VIP directly!)
+  // Requirement 2 & 3: Submit Payment Confirmation Request to Admin Queue
   const handleSubmitPaymentForAdminApproval = async () => {
     if (!currentUser) {
       setIsAuthModalOpen(true);
       return;
     }
 
-    // Check session timeout (15 mins)
-    if (Date.now() > sessionExpiryTime) {
-      setPaymentState('EXPIRED');
+    // Require payment receipt attachment before submitting so we never submit empty requests or show false bank verification errors
+    if (!paymentProofDraft?.dataUrl && !userLatestVipTxn?.paymentProofUrl) {
+      showToast(
+        tr(
+          language,
+          '📸 សូមភ្ជាប់រូបភាពវិក្កយបត្របង់ប្រាក់ជាមុនសិន (ជំហានទី ៣)',
+          '📸 Please attach your payment receipt screenshot first (Step 3)',
+          '📸 请先上传您的付款凭证截图（第 3 步）'
+        ),
+        'info'
+      );
       return;
+    }
+
+    if (Date.now() > sessionExpiryTime) {
+      setSessionExpiryTime(Date.now() + 15 * 60 * 1000);
     }
 
     setIsSubmittingRequest(true);
@@ -506,13 +511,27 @@ export const UpgradeVipModal: React.FC = () => {
         setPaymentState('PENDING_ADMIN_APPROVAL');
       } else {
         setErrorMessage(
-          reqResult.error || (isKm ? 'មិនអាចបញ្ជូនសំណើបានទេ សូមព្យាយាមម្តងទៀត។' : 'Could not submit payment request. Please try again.')
+          reqResult.error ||
+            tr(
+              language,
+              'មិនអាចបញ្ជូនសំណើបានទេ សូមព្យាយាមម្តងទៀត។',
+              'Could not submit payment request. Please try again.',
+              '无法提交付款申请，请重试。'
+            )
         );
         setPaymentState('PAYMENT_FAILED');
       }
     } catch (err: any) {
       setIsSubmittingRequest(false);
-      setErrorMessage(err?.message || (isKm ? 'មានបញ្ហាបច្ចេកទេសក្នុងការបញ្ជូនសំណើ។' : 'Technical error occurred while submitting request.'));
+      setErrorMessage(
+        err?.message ||
+          tr(
+            language,
+            'មានបញ្ហាបច្ចេកទេសក្នុងការបញ្ជូនសំណើ។',
+            'Technical error occurred while submitting request.',
+            '提交申请时发生技术错误，请重试。'
+          )
+      );
       setPaymentState('PAYMENT_FAILED');
     }
   };
@@ -602,8 +621,8 @@ export const UpgradeVipModal: React.FC = () => {
                 <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 max-w-sm mx-auto leading-relaxed">
                   {tr(
                     language,
-                    `រដ្ឋបាលបានផ្ទៀងផ្ទាត់ការទូទាត់ និងអនុម័តគណនី Premium VIP របស់អ្នករួចរាល់ (នៅសល់ ${remainingDays} ថ្ងៃ)!`,
-                    `Administrator verified your payment and activated your Premium VIP account (${remainingDays} days remaining)!`,
+                    `រដ្ឋបាលបានផ្ទៀងផ្ទាត់ការទូទាត់ និងអនុម័តគណនី VIP របស់អ្នករួចរាល់ (នៅសល់ ${remainingDays} ថ្ងៃ)!`,
+                    `Administrator verified your payment and activated your VIP account (${remainingDays} days remaining)!`,
                     `管理员已核实您的付款并开通尊享 VIP 会员（剩余 ${remainingDays} 天）！`
                   )}
                 </p>
@@ -716,7 +735,7 @@ export const UpgradeVipModal: React.FC = () => {
                     className="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-md transition cursor-pointer"
                   >
                     <CheckCircle2 className="w-4 h-4" />
-                    <span>{tr(language, '📤 បញ្ជូនវិក្កយបត្រថ្មីទៅ Admin', '📤 Submit Updated Receipt to Admin', '📤 提交新凭证给管理员')}</span>
+                    <span>{tr(language, '📤 បញ្ជូនវិក្កយបត្រថ្មីទៅរដ្ឋបាល', '📤 Submit Updated Receipt to Admin', '📤 提交新凭证给管理员')}</span>
                   </button>
                 )}
               </div>
@@ -739,12 +758,12 @@ export const UpgradeVipModal: React.FC = () => {
 
               <div>
                 <h4 className="font-moul text-base text-slate-900 dark:text-white mt-2">
-                  {tr(language, '⏳ កំពុងរង់ចាំ Admin អនុម័ត', '⏳ Pending Admin Approval', '⏳ 等待管理员审核')}
+                  {tr(language, '⏳ កំពុងរង់ចាំរដ្ឋបាលអនុម័ត', '⏳ Pending Admin Approval', '⏳ 等待管理员审核')}
                 </h4>
                 <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 max-w-sm mx-auto leading-relaxed">
                   {tr(
                     language,
-                    'សំណើរបស់អ្នកត្រូវបានបញ្ជូនរួចរាល់។ Admin នឹងពិនិត្យវិក្កយបត្រ ABA និងបើកដំណើរការ VIP ជូនអ្នក។',
+                    'សំណើរបស់អ្នកត្រូវបានបញ្ជូនរួចរាល់។ រដ្ឋបាលនឹងពិនិត្យវិក្កយបត្រ និងបើកដំណើរការ VIP ជូនអ្នក។',
                     'Your request has been submitted. Admin will verify your ABA receipt and activate VIP.',
                     '您的申请已提交，管理员核实 ABA 付款凭证后将为您开通 VIP。'
                   )}
@@ -755,7 +774,7 @@ export const UpgradeVipModal: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <span className="text-slate-500">{tr(language, 'កញ្ចប់ដែលបានស្នើសុំ៖', 'Requested Plan:', '申请套餐：')}</span>
                   <span className="font-bold text-slate-900 dark:text-white">
-                    ${(userLatestVipTxn?.amountUsd || selectedPlan.priceUsd).toFixed(2)} USD ({userLatestVipTxn?.durationDays || selectedPlan.days} {tr(language, 'ថ្ងៃ', 'Days', '天')})
+                    ${(userLatestVipTxn?.amountUsd || selectedPlan.priceUsd).toFixed(2)} ({userLatestVipTxn?.durationDays || selectedPlan.days} {tr(language, 'ថ្ងៃ', 'Days', '天')})
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
@@ -822,7 +841,7 @@ export const UpgradeVipModal: React.FC = () => {
 
               <div>
                 <h4 className="font-moul text-sm text-slate-900 dark:text-white mt-2">
-                  {tr(language, '❌ សំណើទូទាត់ត្រូវបានបដិសេធដោយ Admin', '❌ Payment Request Rejected', '❌ 付款申请未通过审核')}
+                  {tr(language, '❌ សំណើទូទាត់ត្រូវបានបដិសេធដោយរដ្ឋបាល', '❌ Payment Request Rejected', '❌ 付款申请未通过审核')}
                 </h4>
                 <p className="text-xs text-rose-600 dark:text-rose-400 mt-1 max-w-sm mx-auto leading-relaxed">
                   {userLatestVipTxn?.notes ||
@@ -916,6 +935,31 @@ export const UpgradeVipModal: React.FC = () => {
           {/* STATE 1: AWAITING_PAYMENT — Clean, Short 4-Step VIP Payment Screen */}
           {paymentState === 'AWAITING_PAYMENT' && isVipConfigValid && (
             <div className="space-y-4">
+              {/* If user has a pending verification request, show a friendly status bar without blocking the upgrade flow */}
+              {(userLatestVipTxn?.status === 'pending_verification' ||
+                userLatestVipTxn?.status === 'needs_more_info') && (
+                <div className="p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700/60 flex items-center justify-between gap-2 text-xs">
+                  <div className="flex items-center gap-2 text-amber-800 dark:text-amber-200 font-semibold">
+                    <Clock className="w-4 h-4 text-amber-600 shrink-0" />
+                    <span>
+                      {tr(
+                        language,
+                        'អ្នកមានសំណើដំឡើង VIP កំពុងរង់ចាំរដ្ឋបាលអនុម័ត',
+                        'You have a VIP upgrade request awaiting approval',
+                        '您有一项 VIP 升级申请正在等待审核'
+                      )}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setPaymentState('PENDING_ADMIN_APPROVAL')}
+                    className="px-2.5 py-1 rounded-xl bg-amber-500 text-slate-950 font-bold text-[11px] shrink-0 cursor-pointer hover:bg-amber-600 transition"
+                  >
+                    {tr(language, 'មើលស្ថានភាព', 'View Status', '查看状态')}
+                  </button>
+                </div>
+              )}
+
               {/* VIP Plan Selector */}
               <div className="grid grid-cols-2 gap-2.5">
                 {dynamicPlansList.map((plan) => {
@@ -951,14 +995,16 @@ export const UpgradeVipModal: React.FC = () => {
                         <span className="font-moul text-lg sm:text-xl text-slate-900 dark:text-white font-mono">
                           ${plan.priceUsd.toFixed(2)}
                         </span>
-                        <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold">USD</span>
+                        <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold">
+                          {tr(language, 'ដុល្លារ', 'USD', '美元')}
+                        </span>
                       </div>
                     </div>
                   );
                 })}
               </div>
 
-              {/* STEP 1 & 2: Scan or save ABA KHQR + Pay $9.99 via ABA Mobile */}
+              {/* STEP 1 & 2: Scan or save ABA KHQR + Pay via ABA Mobile */}
               <div className="p-4 rounded-3xl bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 shadow-sm flex flex-col items-center space-y-3">
                 <div className="w-full flex items-center justify-between">
                   <span className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-1.5">
@@ -966,14 +1012,14 @@ export const UpgradeVipModal: React.FC = () => {
                     <span>
                       {tr(
                         language,
-                        '១. ស្កេន ឬរក្សាទុក ABA KHQR',
+                        '១. ស្កេន ឬរក្សាទុកកូដ QR',
                         '1. Scan or save ABA KHQR',
-                        '1. 扫描或保存 ABA KHQR'
+                        '1. 扫描或保存二维码'
                       )}
                     </span>
                   </span>
                   <span className="px-2 py-0.5 rounded-full bg-emerald-600 text-white text-[9px] font-bold font-mono">
-                    Bakong KHQR
+                    {tr(language, 'បាគង KHQR', 'Bakong KHQR', '巴孔二维码')}
                   </span>
                 </div>
 
@@ -992,7 +1038,7 @@ export const UpgradeVipModal: React.FC = () => {
                 {/* Account Name & Phone Number */}
                 <div className="w-full p-2.5 rounded-xl bg-sky-50 dark:bg-slate-800/80 border border-sky-200 dark:border-slate-700 flex items-center justify-between text-xs">
                   <span className="font-bold text-slate-900 dark:text-white">
-                    {tr(language, 'ឈ្មោះគណនី៖', 'Account Name:', '账户名称：')} CHEA KIMSENG
+                    {tr(language, 'ឈ្មោះគណនី៖ ជា គីមសេង', 'Account Name: CHEA KIMSENG', '账户名称：CHEA KIMSENG')}
                   </span>
                   <span className="font-mono font-bold text-[#004B87] dark:text-sky-400">
                     095 245 959
@@ -1007,7 +1053,7 @@ export const UpgradeVipModal: React.FC = () => {
                     className="py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer border border-slate-200 dark:border-slate-700"
                   >
                     <Download className="w-3.5 h-3.5 text-emerald-600" />
-                    <span>{tr(language, 'រក្សាទុក QR', 'Save QR', '保存二维码')}</span>
+                    <span>{tr(language, 'រក្សាទុកកូដ QR', 'Save QR', '保存二维码')}</span>
                   </button>
 
                   <button
@@ -1028,7 +1074,7 @@ export const UpgradeVipModal: React.FC = () => {
                   </button>
                 </div>
 
-                {/* STEP 2 Button: Pay $9.99 via ABA Mobile */}
+                {/* STEP 2 Button: Pay via ABA Mobile */}
                 <button
                   onClick={handleLaunchAbaApp}
                   className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-[#004B87] via-[#005a9e] to-[#004B87] hover:from-[#003966] hover:to-[#003966] text-white font-extrabold text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-98 cursor-pointer ring-4 ring-sky-500/20"
@@ -1037,9 +1083,9 @@ export const UpgradeVipModal: React.FC = () => {
                   <span>
                     {tr(
                       language,
-                      `២. បង់ប្រាក់ $${selectedPlan.priceUsd.toFixed(2)} តាម ABA Mobile`,
+                      `២. បង់ប្រាក់ $${selectedPlan.priceUsd.toFixed(2)} តាមកម្មវិធី ABA`,
                       `2. Pay $${selectedPlan.priceUsd.toFixed(2)} via ABA Mobile`,
-                      `2. 通过 ABA Mobile 支付 $${selectedPlan.priceUsd.toFixed(2)}`
+                      `2. 通过 ABA 手机银行支付 $${selectedPlan.priceUsd.toFixed(2)}`
                     )}
                   </span>
                 </button>
@@ -1059,8 +1105,8 @@ export const UpgradeVipModal: React.FC = () => {
                       )}
                     </span>
                   </span>
-                  <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 text-[10px] font-bold font-mono">
-                    JPG / PNG
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 text-[10px] font-bold">
+                    {tr(language, 'រូបភាពវិក្កយបត្រ', 'Receipt Image', '凭证图片')}
                   </span>
                 </div>
 
@@ -1123,7 +1169,7 @@ export const UpgradeVipModal: React.FC = () => {
                     <span>
                       {tr(
                         language,
-                        '៤. បញ្ជូនសំណើទៅ Admin អនុម័ត',
+                        '៤. បញ្ជូនសំណើទៅរដ្ឋបាលអនុម័ត',
                         '4. Submit for Admin approval',
                         '4. 提交管理员审核'
                       )}
@@ -1139,7 +1185,7 @@ export const UpgradeVipModal: React.FC = () => {
                   {isSubmittingRequest ? (
                     <>
                       <RefreshCw className="w-4 h-4 animate-spin text-white shrink-0" />
-                      <span>{tr(language, 'កំពុងបញ្ជូនទៅ Admin...', 'Submitting to Admin...', '正在提交审核...')}</span>
+                      <span>{tr(language, 'កំពុងបញ្ជូនទៅរដ្ឋបាល...', 'Submitting to Admin...', '正在提交审核...')}</span>
                     </>
                   ) : (
                     <>
@@ -1147,7 +1193,7 @@ export const UpgradeVipModal: React.FC = () => {
                       <span>
                         {tr(
                           language,
-                          `បញ្ជូនសំណើទៅ Admin អនុម័ត ($${selectedPlan.priceUsd.toFixed(2)})`,
+                          `បញ្ជូនសំណើទៅរដ្ឋបាលអនុម័ត ($${selectedPlan.priceUsd.toFixed(2)})`,
                           `Submit for Admin approval ($${selectedPlan.priceUsd.toFixed(2)})`,
                           `提交管理员审核 ($${selectedPlan.priceUsd.toFixed(2)})`
                         )}
@@ -1164,7 +1210,7 @@ export const UpgradeVipModal: React.FC = () => {
         {/* Modal Footer / Prominent App Version Bar */}
         <div className="px-5 py-2.5 bg-slate-100 dark:bg-slate-950/80 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-500 font-mono shrink-0">
           <span className="font-semibold text-slate-600 dark:text-slate-400">
-            Cambodia Flavors & Tourism {APP_VERSION} (Build {APP_BUILD_CODE})
+            {tr(language, 'រសជាតិ និងទេសចរណ៍កម្ពុជា', 'Cambodia Flavors & Tourism', '柬埔寨美食与旅游')} {APP_VERSION} ({APP_BUILD_CODE})
           </span>
           <a
             href="/privacy-policy.html"

@@ -997,26 +997,29 @@ export const ProfileView: React.FC = () => {
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5 flex-wrap">
                   <span className="text-xs font-bold text-slate-900 dark:text-white font-khmer">
-                    {isKm ? 'ស្ថានភាពសមាជិកភាព៖' : 'Membership:'}
+                    {tr(language, 'ស្ថានភាពសមាជិកភាព៖', 'Membership:', '会员状态：')}
                   </span>
                   <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300">
-                    {isKm ? '⏳ រង់ចាំការអនុម័តពីរដ្ឋបាល (Pending)' : '⏳ Pending Admin Approval'}
+                    {tr(language, '⏳ រង់ចាំការអនុម័តពីរដ្ឋបាល', '⏳ Pending Admin Approval', '⏳ 等待管理员审核')}
                   </span>
                 </div>
                 
                 <p className="text-[11px] text-amber-700 dark:text-amber-400 mt-0.5 font-khmer truncate">
-                  {isKm 
-                    ? 'សំណើដំឡើង VIP ត្រូវបានបញ្ជូន។ រដ្ឋបាលកំពុងត្រួតពិនិត្យ និងអនុម័ត...' 
-                    : 'VIP upgrade request submitted. Administrator is reviewing your payment...'}
+                  {tr(
+                    language,
+                    'សំណើដំឡើង VIP ត្រូវបានបញ្ជូន។ រដ្ឋបាលកំពុងត្រួតពិនិត្យ និងអនុម័ត...',
+                    'VIP upgrade request submitted. Administrator is reviewing your payment...',
+                    'VIP 升级申请已提交，管理员正在审核您的付款...'
+                  )}
                 </p>
               </div>
             </div>
 
             <button
-              onClick={openUpgradeVipModal}
+              onClick={() => openUpgradeVipModal(false)}
               className="px-3.5 py-2 rounded-xl text-xs font-bold font-khmer shadow-xs transition shrink-0 active:scale-95 bg-amber-500 hover:bg-amber-600 text-white"
             >
-              {isKm ? 'មើលស្ថានភាព' : 'View Status'}
+              {tr(language, 'មើលស្ថានភាព', 'View Status', '查看状态')}
             </button>
           </div>
         </div>
@@ -1031,15 +1034,20 @@ export const ProfileView: React.FC = () => {
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5 flex-wrap">
                   <span className="text-xs font-bold text-slate-900 dark:text-white font-khmer">
-                    {isKm ? 'ស្ថានភាពសមាជិកភាព៖' : 'Membership:'}
+                    {tr(language, 'ស្ថានភាពសមាជិកភាព៖', 'Membership:', '会员状态：')}
                   </span>
                   <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300">
-                    {isKm ? '❌ ផុតកំណត់ (Expired)' : 'Expired'}
+                    {tr(language, '❌ ផុតកំណត់', 'Expired', '已到期')}
                   </span>
                 </div>
                 
                 <p className="text-[11px] text-rose-600 dark:text-rose-400 mt-0.5 font-khmer truncate">
-                  {isKm ? 'សមាជិកភាព VIP របស់អ្នកបានផុតកំណត់ហើយ។ សូមបន្តឡើងវិញដើម្បីទទួលអត្ថប្រយោជន៍។' : 'Your VIP membership has expired. Renew to regain all 10 benefits.'}
+                  {tr(
+                    language,
+                    'សមាជិកភាព VIP របស់អ្នកបានផុតកំណត់ហើយ។ សូមបន្តឡើងវិញដើម្បីទទួលអត្ថប្រយោជន៍។',
+                    'Your VIP membership has expired. Renew to regain all VIP benefits.',
+                    '您的 VIP 会员已到期，续费即可恢复全部专属权益。'
+                  )}
                 </p>
               </div>
             </div>
@@ -1048,7 +1056,7 @@ export const ProfileView: React.FC = () => {
               onClick={() => openUpgradeVipModal(true)}
               className="px-3.5 py-2 rounded-xl text-xs font-bold font-khmer shadow-xs transition shrink-0 active:scale-95 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white cursor-pointer"
             >
-              {isKm ? '🔄 បន្ត VIP' : 'Renew VIP'}
+              {tr(language, '🔄 បន្ត VIP', 'Renew VIP', '🔄 续费 VIP')}
             </button>
           </div>
         </div>
@@ -1063,17 +1071,20 @@ export const ProfileView: React.FC = () => {
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5 flex-wrap">
                   <span className="text-xs font-bold text-slate-900 dark:text-white font-khmer">
-                    {isKm ? 'ស្ថានភាពសមាជិកភាព៖' : 'Membership:'}
+                    {tr(language, 'ស្ថានភាពសមាជិកភាព៖', 'Membership:', '会员状态：')}
                   </span>
                   <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
-                    {isKm ? 'គណនីឥតគិតថ្លៃ (Free User)' : 'Free User'}
+                    {tr(language, 'គណនីឥតគិតថ្លៃ', 'Free User', '免费账户')}
                   </span>
                 </div>
                 
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-khmer truncate">
-                  {isKm 
-                    ? `ដំឡើងទៅជា Premium VIP ($${shortPlan.priceUsd.toFixed(2)}/${shortPlan.durationDays}ថ្ងៃ ឬ $${longPlan.priceUsd.toFixed(2)}/${longPlan.durationDays}ថ្ងៃ) ដើម្បីដោះសោសក្តានុពលទាំង ${dynamicBenefits.length}!` 
-                    : `Upgrade to Premium VIP ($${shortPlan.priceUsd.toFixed(2)}/${shortPlan.durationDays}d or $${longPlan.priceUsd.toFixed(2)}/${longPlan.durationDays}d) to unlock all ${dynamicBenefits.length} powers!`}
+                  {tr(
+                    language,
+                    `ដំឡើងទៅជា VIP ($${shortPlan.priceUsd.toFixed(2)}/${shortPlan.durationDays}ថ្ងៃ ឬ $${longPlan.priceUsd.toFixed(2)}/${longPlan.durationDays}ថ្ងៃ) ដើម្បីទទួលអត្ថប្រយោជន៍ពិសេសទាំង ${dynamicBenefits.length}!`,
+                    `Upgrade to VIP ($${shortPlan.priceUsd.toFixed(2)}/${shortPlan.durationDays}d or $${longPlan.priceUsd.toFixed(2)}/${longPlan.durationDays}d) to unlock all ${dynamicBenefits.length} benefits!`,
+                    `升级至 VIP ($${shortPlan.priceUsd.toFixed(2)}/${shortPlan.durationDays}天 或 $${longPlan.priceUsd.toFixed(2)}/${longPlan.durationDays}天) 解锁全部 ${dynamicBenefits.length} 项特权！`
+                  )}
                 </p>
               </div>
             </div>
@@ -1082,7 +1093,7 @@ export const ProfileView: React.FC = () => {
               onClick={() => openUpgradeVipModal(false)}
               className="px-3.5 py-2 rounded-xl text-xs font-bold font-khmer shadow-xs transition shrink-0 active:scale-95 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-amber-500/20 cursor-pointer"
             >
-              {isKm ? '👑 ដំឡើង VIP' : 'Upgrade VIP'}
+              {tr(language, '👑 ដំឡើង VIP', 'Upgrade VIP', '👑 升级 VIP')}
             </button>
           </div>
         </div>
@@ -1105,20 +1116,31 @@ export const ProfileView: React.FC = () => {
                 <div>
                   <h4 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white flex items-center gap-1.5">
                     <span>
-                      {isKm
-                        ? 'សារជំនួយ & ប្រវត្តិការបង់ប្រាក់ (Support Messages / Payment History)'
-                        : 'Support Messages / Payment History'}
+                      {tr(
+                        language,
+                        'សារជំនួយ & ប្រវត្តិការបង់ប្រាក់',
+                        'Support Messages / Payment History',
+                        '客服消息与付款记录'
+                      )}
                     </span>
                     {unreadAdminReplies > 0 && (
                       <span className="px-2 py-0.5 rounded-full bg-red-600 text-white text-[10px] font-black">
-                        {isKm ? `${unreadAdminReplies} សារឆ្លើយតបថ្មីពី Admin` : `${unreadAdminReplies} New Reply`}
+                        {tr(
+                          language,
+                          `${unreadAdminReplies} សារឆ្លើយតបថ្មីពីរដ្ឋបាល`,
+                          `${unreadAdminReplies} New Reply`,
+                          `${unreadAdminReplies} 条新回复`
+                        )}
                       </span>
                     )}
                   </h4>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                    {isKm
-                      ? 'បានបង់ប្រាក់តាម ABA រួចហើយតែមិនទាន់បើក VIP? ផ្ញើសារ និងវិក្កយបត្រមកកាន់ Admin ផ្ទាល់'
-                      : 'Paid via ABA but VIP not activated? Message Admin & attach your receipt directly'}
+                    {tr(
+                      language,
+                      'បានបង់ប្រាក់តាម ABA រួចហើយតែមិនទាន់បើក VIP? ផ្ញើសារ និងវិក្កយបត្រមកកាន់រដ្ឋបាលផ្ទាល់',
+                      'Paid via ABA but VIP not activated? Message Admin & attach your receipt directly',
+                      '已通过 ABA 付款但尚未开通 VIP？直接向管理员发送消息并附上付款收据'
+                    )}
                   </p>
                 </div>
               </div>
@@ -1130,7 +1152,7 @@ export const ProfileView: React.FC = () => {
               >
                 <MessageSquare className="w-3.5 h-3.5" />
                 <span>
-                  {isKm ? '💬 ទាក់ទង Admin / ជំនួយការបង់ប្រាក់' : '💬 Contact Admin / Payment Support'}
+                  {tr(language, '💬 ទាក់ទងរដ្ឋបាល / ជំនួយការបង់ប្រាក់', '💬 Contact Admin / Payment Support', '💬 联系管理员 / 付款客服')}
                 </span>
               </button>
             </div>
@@ -1159,22 +1181,18 @@ export const ProfileView: React.FC = () => {
                           }`}
                         >
                           {ticket.status === 'resolved'
-                            ? isKm
-                              ? '✓ បានដោះស្រាយ (Resolved)'
-                              : '✓ Resolved'
+                            ? tr(language, '✓ បានដោះស្រាយ', '✓ Resolved', '✓ 已解决')
                             : ticket.status === 'replied'
-                            ? isKm
-                              ? '💬 Admin បានឆ្លើយតប (Replied)'
-                              : '💬 Replied'
-                            : isKm
-                            ? '⏳ រង់ចាំ (Pending)'
-                            : '⏳ Pending'}
+                            ? tr(language, '💬 រដ្ឋបាលបានឆ្លើយតប', '💬 Replied', '💬 已回复')
+                            : tr(language, '⏳ រង់ចាំពិនិត្យ', '⏳ Pending', '⏳ 待处理')}
                         </span>
                       </div>
                       {latestMsg && (
                         <p className="text-[11px] text-slate-700 dark:text-slate-300 truncate">
                           <strong className={latestMsg.senderRole === 'admin' ? 'text-blue-600 dark:text-blue-400' : 'text-amber-700 dark:text-amber-400'}>
-                            {latestMsg.senderRole === 'admin' ? 'Admin: ' : `${isKm ? 'អ្នក' : 'You'}: `}
+                            {latestMsg.senderRole === 'admin'
+                              ? `${tr(language, 'រដ្ឋបាល', 'Admin', '管理员')}: `
+                              : `${tr(language, 'អ្នក', 'You', '您')}: `}
                           </strong>
                           {latestMsg.message}
                         </p>
@@ -1188,7 +1206,7 @@ export const ProfileView: React.FC = () => {
             {myPaymentHistory.length > 0 && (
               <div className="pt-1 border-t border-slate-100 dark:border-slate-700 space-y-1.5">
                 <div className="text-[11px] font-bold text-slate-600 dark:text-slate-400">
-                  {isKm ? 'ប្រវត្តិការបង់ប្រាក់ VIP ថ្មីៗ៖' : 'Recent VIP Payment History:'}
+                  {tr(language, 'ប្រវត្តិការបង់ប្រាក់ VIP ថ្មីៗ៖', 'Recent VIP Payment History:', '近期 VIP 付款记录：')}
                 </div>
                 {myPaymentHistory.slice(0, 2).map(txn => (
                   <div
@@ -1198,10 +1216,13 @@ export const ProfileView: React.FC = () => {
                     <div>
                       <span className="font-bold text-slate-800 dark:text-slate-200">
                         {txn.type === 'additional_store_fee'
-                          ? isKm
-                            ? `បន្ថែមហាងថ្មី ($${Number(txn.amountUsd || 0).toFixed(2)})`
-                            : `Extra Store ($${Number(txn.amountUsd || 0).toFixed(2)})`
-                          : `VIP ${txn.durationDays || shortPlan.durationDays} ${isKm ? 'ថ្ងៃ' : 'Days'} ($${Number(txn.amountUsd ?? shortPlan.priceUsd).toFixed(2)})`}
+                          ? tr(
+                              language,
+                              `បន្ថែមហាងថ្មី ($${Number(txn.amountUsd || 0).toFixed(2)})`,
+                              `Extra Store ($${Number(txn.amountUsd || 0).toFixed(2)})`,
+                              `新增店铺 ($${Number(txn.amountUsd || 0).toFixed(2)})`
+                            )
+                          : `VIP ${txn.durationDays || shortPlan.durationDays} ${tr(language, 'ថ្ងៃ', 'Days', '天')} ($${Number(txn.amountUsd ?? shortPlan.priceUsd).toFixed(2)})`}
                       </span>
                       <span className="text-slate-400 ml-2 font-mono">{txn.transactionRef}</span>
                     </div>
@@ -1215,16 +1236,10 @@ export const ProfileView: React.FC = () => {
                       }`}
                     >
                       {txn.status === 'verified'
-                        ? isKm
-                          ? '✓ អនុម័តរួច'
-                          : '✓ Verified'
+                        ? tr(language, '✓ អនុម័តរួច', '✓ Verified', '✓ 已批准')
                         : txn.status === 'rejected'
-                        ? isKm
-                          ? '✕ បដិសេធ'
-                          : '✕ Rejected'
-                        : isKm
-                        ? '⏳ រង់ចាំពិនិត្យ'
-                        : '⏳ Pending'}
+                        ? tr(language, '✕ បដិសេធ', '✕ Rejected', '✕ 已拒绝')
+                        : tr(language, '⏳ រង់ចាំពិនិត្យ', '⏳ Pending', '⏳ 待审核')}
                     </span>
                   </div>
                 ))}
@@ -1249,38 +1264,38 @@ export const ProfileView: React.FC = () => {
             </div>
             <div>
               <div className="text-xs font-bold text-[#0F172A] dark:text-white font-khmer">
-                {isKm ? 'ជួយឧបត្ថម្ភ' : 'Support App'}
+                {tr(language, 'ជួយឧបត្ថម្ភកម្មវិធី', 'Support App', '支持应用开发')}
               </div>
               <div className="text-[10px] text-slate-500 font-khmer">
-                {isKm ? 'Bakong KHQR' : 'Bakong KHQR'}
+                {tr(language, 'បាគង KHQR', 'Bakong KHQR', 'Bakong KHQR')}
               </div>
             </div>
           </button>
         </div>
       )}
 
-      {/* 6 Personalized Account Features Hub (Strictly Consumer VIP Access Controlled - Hidden for Admin) */}
+      {/* 6 Personalized Account Features Hub (Consumer Access - Hidden for Admin) */}
       {!isAdmin && (
       <div className="p-4 rounded-3xl bg-gradient-to-br from-emerald-950 via-[#064E3B] to-slate-900 text-white border border-emerald-500/40 shadow-xs space-y-3 font-khmer relative overflow-hidden">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-amber-400" />
             <h3 className="font-moul text-xs sm:text-sm text-white">
-              {isKm ? 'សេវាកម្មផ្ទាល់ខ្លួន (Personal Features)' : 'Personalized Features'}
+              {tr(language, 'សេវាកម្មឆ្លាតវៃប្រចាំថ្ងៃ', 'Smart Daily Services', '智能日常服务')}
             </h3>
           </div>
           {isVip || currentUser?.role === 'admin' ? (
             <span className="px-2.5 py-0.5 rounded-full bg-emerald-400/20 border border-emerald-400/50 text-emerald-200 text-[10px] font-extrabold flex items-center gap-1">
               <Crown className="w-3 h-3 text-amber-300" />
-              {isKm ? 'បើកដំណើរការ VIP' : 'VIP Unlocked'}
+              {tr(language, 'បើកដំណើរការ VIP', 'VIP Unlocked', 'VIP 已开启')}
             </span>
           ) : (
             <button
               onClick={() => openUpgradeVipModal(vipAccountState === 'expired_vip' || currentUser?.subscriptionStatus === 'cancelled')}
               className="px-2.5 py-1 rounded-full bg-gradient-to-r from-amber-400 to-yellow-500 text-stone-950 text-[10px] font-extrabold flex items-center gap-1 shadow-xs hover:brightness-105 cursor-pointer"
             >
-              <Lock className="w-3 h-3" />
-              {isKm ? '🔒 សម្រាប់តែ VIP • ដំឡើងឥឡូវ' : '🔒 VIP Only • Upgrade'}
+              <Crown className="w-3 h-3" />
+              {tr(language, '👑 ដំឡើង VIP', '👑 Upgrade VIP', '👑 升级 VIP')}
             </button>
           )}
         </div>
@@ -1288,22 +1303,21 @@ export const ProfileView: React.FC = () => {
         {!isVip && currentUser?.role !== 'admin' && (
           <div className="p-2.5 rounded-2xl bg-amber-500/15 border border-amber-400/40 flex items-center justify-between gap-2">
             <div className="flex items-center gap-2 text-[11px] text-amber-100 leading-snug">
-              <Lock className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+              <Crown className="w-3.5 h-3.5 text-amber-300 shrink-0" />
               <span>
-                {isKm
-                  ? vipAccountState === 'expired_vip' || currentUser?.subscriptionStatus === 'cancelled'
-                    ? 'សមាជិកភាព VIP របស់អ្នកបានផុតកំណត់ ឬត្រូវបានបោះបង់។ សូមបន្តកញ្ចប់ VIP ដើម្បីបើកសោមុខងារពិសេសទាំង ៦!'
-                    : 'មុខងារពិសេសផ្ទាល់ខ្លួនទាំង ៦ ត្រូវបានចាក់សោសម្រាប់គណនីធម្មតា (Free User)។ សូមដំឡើងទៅ VIP ដើម្បីប្រើប្រាស់!'
-                  : vipAccountState === 'expired_vip' || currentUser?.subscriptionStatus === 'cancelled'
-                  ? 'Your VIP has expired or was cancelled. Renew VIP to unlock all 6 Personalized Features!'
-                  : 'All 6 Personalized Features are locked for Free Users. Upgrade to VIP to unlock immediate access!'}
+                {tr(
+                  language,
+                  'មុខងារស្វែងរកមូលដ្ឋាន និងផែនទីបង្ហាញផ្លូវគឺឥតគិតថ្លៃ • ដំឡើង VIP សម្រាប់ AI កម្រិតខ្ពស់ និងផ្សព្វផ្សាយហាង!',
+                  'Basic search & map navigation are Free • Upgrade to VIP for advanced AI & store promotion!',
+                  '基础搜索与地图导航免费开放 • 升级 VIP 解锁高级 AI 与店铺推广！'
+                )}
               </span>
             </div>
             <button
               onClick={() => openUpgradeVipModal(vipAccountState === 'expired_vip' || currentUser?.subscriptionStatus === 'cancelled')}
               className="shrink-0 px-2.5 py-1 rounded-xl bg-amber-400 hover:bg-amber-300 text-stone-950 font-extrabold text-[10px] cursor-pointer"
             >
-              {isKm ? 'ដំឡើង VIP' : 'Upgrade'}
+              {tr(language, 'ដំឡើង VIP', 'Upgrade', '升级 VIP')}
             </button>
           </div>
         )}
@@ -1316,18 +1330,12 @@ export const ProfileView: React.FC = () => {
           >
             <div className="flex items-center justify-between">
               <span className="text-lg">🍲</span>
-              {!isVip && currentUser?.role !== 'admin' ? (
-                <span className="px-1.5 py-0.5 rounded-full bg-amber-400/25 border border-amber-300/50 text-amber-200 text-[9px] font-extrabold flex items-center gap-0.5">
-                  <Lock className="w-2.5 h-2.5" /> VIP
-                </span>
-              ) : (
-                <span className="px-1.5 py-0.2 rounded-full bg-amber-400 text-stone-900 text-[8px] font-black">
-                  {isKm ? 'អាទិភាពខ្ពស់ ⭐' : 'High Priority'}
-                </span>
-              )}
+              <span className="px-1.5 py-0.5 rounded-full bg-emerald-500/25 border border-emerald-300/40 text-emerald-200 text-[9px] font-extrabold">
+                {tr(language, 'ឥតគិតថ្លៃ', 'FREE', '免费')}
+              </span>
             </div>
             <div className="text-xs font-bold text-white mt-1">
-              {isKm ? 'ថ្ងៃនេះញ៉ាំអ្វី?' : 'What to Eat Today?'}
+              {tr(language, 'ណែនាំមុខម្ហូប', 'Food Picks', '美食推荐')}
             </div>
           </button>
 
@@ -1338,20 +1346,16 @@ export const ProfileView: React.FC = () => {
           >
             <div className="flex items-center justify-between">
               <span className="text-lg">📍</span>
-              {!isVip && currentUser?.role !== 'admin' ? (
-                <span className="px-1.5 py-0.5 rounded-full bg-amber-400/25 border border-amber-300/50 text-amber-200 text-[9px] font-extrabold flex items-center gap-0.5">
-                  <Lock className="w-2.5 h-2.5" /> VIP
-                </span>
-              ) : (
-                <span className="text-[9px] font-mono text-emerald-300 font-bold">GPS</span>
-              )}
+              <span className="px-1.5 py-0.5 rounded-full bg-emerald-500/25 border border-emerald-300/40 text-emerald-200 text-[9px] font-extrabold">
+                {tr(language, 'ឥតគិតថ្លៃ', 'FREE', '免费')}
+              </span>
             </div>
             <div className="text-xs font-bold text-white mt-1">
-              {isKm ? 'នៅជិតខ្ញុំ' : 'Near Me'}
+              {tr(language, 'អាហារនៅជិតខ្ញុំ', 'Nearby Food', '附近美食')}
             </div>
           </button>
 
-          {/* C. កន្លែងថ្មីប្រចាំថ្ងៃ */}
+          {/* C. ម្ហូបតាមខេត្ត */}
           <button
             type="button"
             onClick={() => setIsDailyDiscoveriesModalOpen(true)}
@@ -1359,10 +1363,12 @@ export const ProfileView: React.FC = () => {
           >
             <div className="flex items-center justify-between">
               <span className="text-lg">✨</span>
-              <span className="text-[8px] text-amber-300 font-bold">Daily Live</span>
+              <span className="px-1.5 py-0.5 rounded-full bg-emerald-500/25 border border-emerald-300/40 text-emerald-200 text-[9px] font-extrabold">
+                {tr(language, 'ឥតគិតថ្លៃ', 'FREE', '免费')}
+              </span>
             </div>
             <div className="text-xs font-bold text-white mt-1">
-              {isKm ? 'កន្លែងថ្មីប្រចាំថ្ងៃ' : 'Daily Picks'}
+              {tr(language, 'ម្ហូបតាមខេត្ត', 'Food by Province', '各省美食')}
             </div>
           </button>
 
@@ -1375,34 +1381,30 @@ export const ProfileView: React.FC = () => {
               <span className="text-lg">📑</span>
               {!isVip && currentUser?.role !== 'admin' ? (
                 <span className="px-1.5 py-0.5 rounded-full bg-amber-400/25 border border-amber-300/50 text-amber-200 text-[9px] font-extrabold flex items-center gap-0.5">
-                  <Lock className="w-2.5 h-2.5" /> VIP
+                  <Crown className="w-2.5 h-2.5" /> VIP
                 </span>
               ) : (
                 <span className="text-[9px] text-emerald-300 font-bold">{wishlists.length}</span>
               )}
             </div>
             <div className="text-xs font-bold text-white mt-1">
-              {isKm ? 'បញ្ជីកន្លែងចង់ទៅ' : 'My Wishlists'}
+              {tr(language, 'បញ្ជីកន្លែងចង់ទៅ', 'My Wishlists', '我的收藏夹')}
             </div>
           </button>
 
-          {/* E. ផែនការដើរលេង AI */}
+          {/* E. ជំនួយការឆ្លាតវៃ */}
           <button
             onClick={() => setIsAiTripPlannerModalOpen(true)}
             className="p-2.5 rounded-2xl bg-teal-500/20 hover:bg-teal-500/30 border border-teal-400/30 text-left transition cursor-pointer"
           >
             <div className="flex items-center justify-between">
               <span className="text-lg">🤖</span>
-              {!isVip && currentUser?.role !== 'admin' ? (
-                <span className="px-1.5 py-0.5 rounded-full bg-amber-400/25 border border-amber-300/50 text-amber-200 text-[9px] font-extrabold flex items-center gap-0.5">
-                  <Lock className="w-2.5 h-2.5" /> VIP
-                </span>
-              ) : (
-                <span className="text-[8px] text-teal-300 font-bold">Smart AI</span>
-              )}
+              <span className="px-1.5 py-0.5 rounded-full bg-amber-400/25 border border-amber-300/50 text-amber-200 text-[9px] font-extrabold">
+                {tr(language, 'ឥតគិតថ្លៃ + VIP', 'FREE + VIP', '免费 + VIP')}
+              </span>
             </div>
             <div className="text-xs font-bold text-white mt-1">
-              {isKm ? 'ផែនការដើរលេង AI' : 'AI Trip Planner'}
+              {tr(language, 'ជំនួយការឆ្លាតវៃ', 'Smart AI Assistant', '智能 AI 助手')}
             </div>
           </button>
 
@@ -1419,15 +1421,17 @@ export const ProfileView: React.FC = () => {
                   {unreadNotificationsCount}
                 </span>
               ) : (
-                <span className="text-[8px] text-emerald-300 font-bold">Alerts</span>
+                <span className="text-[8px] text-emerald-300 font-bold">
+                  {tr(language, 'ថ្មីៗ', 'Alerts', '通知')}
+                </span>
               )}
             </div>
             <div className="text-xs font-bold text-white mt-1">
-              {isKm ? 'ការជូនដំណឹង' : 'Notifications'}
+              {tr(language, 'ការជូនដំណឹង', 'Notifications', '消息通知')}
             </div>
           </button>
 
-          {/* G. ស្វែងរកទីតាំងលើ Google Maps (VIP & Admin) */}
+          {/* G. ផែនទីបង្ហាញផ្លូវ */}
           <button
             onClick={() => openGoogleMapsSearchModal('all')}
             className="col-span-2 p-2.5 rounded-2xl bg-gradient-to-r from-emerald-700/60 to-teal-700/60 hover:from-emerald-700/80 hover:to-teal-700/80 border border-amber-400/50 text-left transition relative cursor-pointer flex items-center justify-between gap-2"
@@ -1436,22 +1440,16 @@ export const ProfileView: React.FC = () => {
               <span className="text-lg">🗺️</span>
               <div>
                 <div className="text-xs font-bold text-amber-300">
-                  {isKm ? 'ស្វែងរកហាង & ទីតាំងលើ Google Maps' : 'Google Maps Places Search'}
+                  {tr(language, 'ស្វែងរកហាង & ផែនទីបង្ហាញផ្លូវ', 'Map Navigation & Places Search', '地图导航与地点搜索')}
                 </div>
                 <div className="text-[10px] text-emerald-100">
-                  {isKm ? 'ហាងកាហ្វេ ភោជនីយដ្ឋាន និងតំបន់ទេសចរណ៍ទូទាំងកម្ពុជា' : 'Search cafés, restaurants & attractions across Cambodia'}
+                  {tr(language, 'ហាងកាហ្វេ ភោជនីយដ្ឋាន និងតំបន់ទេសចរណ៍ទូទាំងកម្ពុជា', 'Search cafés, restaurants & attractions across Cambodia', '搜索全柬埔寨咖啡馆、餐厅与旅游景点')}
                 </div>
               </div>
             </div>
-            {!isVip ? (
-              <span className="px-2 py-0.5 rounded-full bg-amber-400/25 border border-amber-300/50 text-amber-200 text-[9px] font-extrabold flex items-center gap-0.5 shrink-0">
-                <Lock className="w-2.5 h-2.5" /> VIP
-              </span>
-            ) : (
-              <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[9px] font-black shrink-0">
-                VIP Maps
-              </span>
-            )}
+            <span className="px-2 py-0.5 rounded-full bg-emerald-500/30 border border-emerald-300/50 text-emerald-100 text-[9px] font-black shrink-0">
+              {tr(language, 'ឥតគិតថ្លៃ', 'FREE', '免费')}
+            </span>
           </button>
         </div>
       </div>
@@ -1764,12 +1762,15 @@ export const ProfileView: React.FC = () => {
                 </div>
                 <div>
                   <h4 className="font-moul text-sm text-slate-900 dark:text-white">
-                    {isKm ? 'ទំព័រសមាជិកភាព (VIP Membership Page)' : 'VIP Membership Page'}
+                    {tr(language, 'ទំព័រសមាជិកភាព VIP', 'VIP Membership Page', 'VIP 会员专属中心')}
                   </h4>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                    {isKm
-                      ? `កញ្ចប់ $${shortPlan.priceUsd.toFixed(2)} USD (${shortPlan.durationDays} ថ្ងៃ) ឬ $${longPlan.priceUsd.toFixed(2)} USD (${longPlan.durationDays} ថ្ងៃ)`
-                      : `$${shortPlan.priceUsd.toFixed(2)} USD (${shortPlan.durationDays} Days) or $${longPlan.priceUsd.toFixed(2)} USD (${longPlan.durationDays} Days)`}
+                    {tr(
+                      language,
+                      `កញ្ចប់ $${shortPlan.priceUsd.toFixed(2)} (${shortPlan.durationDays} ថ្ងៃ) ឬ $${longPlan.priceUsd.toFixed(2)} (${longPlan.durationDays} ថ្ងៃ)`,
+                      `$${shortPlan.priceUsd.toFixed(2)} USD (${shortPlan.durationDays} Days) or $${longPlan.priceUsd.toFixed(2)} USD (${longPlan.durationDays} Days)`,
+                      `$${shortPlan.priceUsd.toFixed(2)} 美元 (${shortPlan.durationDays} 天) 或 $${longPlan.priceUsd.toFixed(2)} 美元 (${longPlan.durationDays} 天)`
+                    )}
                   </p>
                 </div>
               </div>
@@ -1784,46 +1785,46 @@ export const ProfileView: React.FC = () => {
                   : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
               }`}>
                 {isVip 
-                  ? (isKm ? '🌟 Premium VIP' : '🌟 Premium VIP') 
+                  ? tr(language, '🌟 សមាជិក VIP', '🌟 Premium VIP', '🌟 尊享 VIP') 
                   : currentUser?.subscriptionStatus === 'pending'
-                  ? (isKm ? '⏳ រង់ចាំអនុម័ត (Pending)' : '⏳ Pending Review')
+                  ? tr(language, '⏳ រង់ចាំអនុម័ត', '⏳ Pending Review', '⏳ 等待审核')
                   : currentUser?.subscriptionStatus === 'expired'
-                  ? (isKm ? '❌ ផុតកំណត់' : 'Expired')
-                  : (isKm ? 'Free User' : 'Free User')}
+                  ? tr(language, '❌ ផុតកំណត់', 'Expired', '已到期')
+                  : tr(language, 'គណនីឥតគិតថ្លៃ', 'Free User', '免费账户')}
               </span>
             </div>
 
             {/* Details */}
             <div className="p-3 bg-white/70 dark:bg-slate-800/70 rounded-2xl border border-slate-200 dark:border-slate-700 text-xs space-y-1.5">
               <div className="flex justify-between">
-                <span className="text-slate-500">{isKm ? 'ស្ថានភាពបច្ចុប្បន្ន៖' : 'Current Status:'}</span>
+                <span className="text-slate-500">{tr(language, 'ស្ថានភាពបច្ចុប្បន្ន៖', 'Current Status:', '当前状态：')}</span>
                 <span className="font-bold text-slate-900 dark:text-white">
                   {isVip 
-                    ? (isKm ? 'កំពុងដំណើរការ (Active)' : 'Active') 
+                    ? tr(language, 'កំពុងដំណើរការ', 'Active', '有效') 
                     : currentUser?.subscriptionStatus === 'pending'
-                    ? (isKm ? '⏳ រង់ចាំរដ្ឋបាលអនុម័ត (Pending Review)' : '⏳ Pending Admin Approval')
+                    ? tr(language, '⏳ រង់ចាំរដ្ឋបាលអនុម័ត', '⏳ Pending Admin Approval', '⏳ 等待管理员审核')
                     : currentUser?.subscriptionStatus === 'expired'
-                    ? (isKm ? '❌ ផុតកំណត់ (Expired)' : 'Expired')
-                    : (isKm ? 'គណនីឥតគិតថ្លៃ (Free Account)' : 'Free Account')}
+                    ? tr(language, '❌ ផុតកំណត់', 'Expired', '已到期')
+                    : tr(language, 'គណនីឥតគិតថ្លៃ', 'Free Account', '免费账户')}
                 </span>
               </div>
               {isVip && (
                 <>
                   <div className="flex justify-between">
-                    <span className="text-slate-500">{isKm ? 'កាលបរិច្ឆេទផុតកំណត់៖' : 'Expiry Date:'}</span>
+                    <span className="text-slate-500">{tr(language, 'កាលបរិច្ឆេទផុតកំណត់៖', 'Expiry Date:', '到期日期：')}</span>
                     <span className="font-mono font-bold text-emerald-600">
-                      {currentUser?.subscriptionExpiryDate ? currentUser.subscriptionExpiryDate.split('T')[0] : 'N/A'}
+                      {currentUser?.subscriptionExpiryDate ? currentUser.subscriptionExpiryDate.split('T')[0] : '—'}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-500">{isKm ? 'រយៈពេលដែលនៅសល់៖' : 'Remaining Period:'}</span>
+                    <span className="text-slate-500">{tr(language, 'រយៈពេលដែលនៅសល់៖', 'Remaining Period:', '剩余天数：')}</span>
                     <span className="font-bold text-amber-600 dark:text-amber-400">
-                      {remainingDays} {isKm ? 'ថ្ងៃ' : 'Days'}
+                      {remainingDays} {tr(language, 'ថ្ងៃ', 'Days', '天')}
                     </span>
                   </div>
                   {currentUser?.transactionRef && (
                     <div className="flex justify-between text-[11px]">
-                      <span className="text-slate-500">Trx Ref:</span>
+                      <span className="text-slate-500">{tr(language, 'លេខកូដប្រតិបត្តិការ៖', 'Trx Ref:', '交易单号：')}</span>
                       <span className="font-mono text-slate-600 dark:text-slate-400 truncate max-w-[180px]">
                         {currentUser.transactionRef}
                       </span>
@@ -1841,12 +1842,27 @@ export const ProfileView: React.FC = () => {
               <Crown className="w-4 h-4 fill-white" />
               <span>
                 {isVip 
-                  ? (isKm ? `🔄 បន្តសមាជិកភាព VIP ($${shortPlan.priceUsd.toFixed(2)}/${shortPlan.durationDays}ថ្ងៃ • $${longPlan.priceUsd.toFixed(2)}/${longPlan.durationDays}ថ្ងៃ)` : `Renew VIP ($${shortPlan.priceUsd.toFixed(2)}/${shortPlan.durationDays}d • $${longPlan.priceUsd.toFixed(2)}/${longPlan.durationDays}d)`)
+                  ? tr(
+                      language,
+                      `🔄 បន្តសមាជិកភាព VIP ($${shortPlan.priceUsd.toFixed(2)}/${shortPlan.durationDays}ថ្ងៃ • $${longPlan.priceUsd.toFixed(2)}/${longPlan.durationDays}ថ្ងៃ)`,
+                      `Renew VIP ($${shortPlan.priceUsd.toFixed(2)}/${shortPlan.durationDays}d • $${longPlan.priceUsd.toFixed(2)}/${longPlan.durationDays}d)`,
+                      `🔄 续费 VIP ($${shortPlan.priceUsd.toFixed(2)}/${shortPlan.durationDays}天 • $${longPlan.priceUsd.toFixed(2)}/${longPlan.durationDays}天)`
+                    )
                   : currentUser?.subscriptionStatus === 'pending'
-                  ? (isKm ? '⏳ មើលស្ថានភាពសំណើដំឡើង VIP' : 'View Pending Request Status')
+                  ? tr(language, '⏳ មើលស្ថានភាពសំណើដំឡើង VIP', 'View Pending Request Status', '⏳ 查看 VIP 升级申请状态')
                   : currentUser?.subscriptionStatus === 'expired'
-                  ? (isKm ? `🔄 បន្តសមាជិកភាព VIP ឡើងវិញ ($${shortPlan.priceUsd.toFixed(2)}/${shortPlan.durationDays}ថ្ងៃ • $${longPlan.priceUsd.toFixed(2)}/${longPlan.durationDays}ថ្ងៃ)` : `Renew VIP ($${shortPlan.priceUsd.toFixed(2)}/${shortPlan.durationDays}d • $${longPlan.priceUsd.toFixed(2)}/${longPlan.durationDays}d)`)
-                  : (isKm ? `👑 ដំឡើងទៅជា Premium VIP ($${shortPlan.priceUsd.toFixed(2)}/${shortPlan.durationDays}ថ្ងៃ • $${longPlan.priceUsd.toFixed(2)}/${longPlan.durationDays}ថ្ងៃ)` : `Upgrade to Premium VIP ($${shortPlan.priceUsd.toFixed(2)}/${shortPlan.durationDays}d • $${longPlan.priceUsd.toFixed(2)}/${longPlan.durationDays}d)`)}
+                  ? tr(
+                      language,
+                      `🔄 បន្តសមាជិកភាព VIP ឡើងវិញ ($${shortPlan.priceUsd.toFixed(2)}/${shortPlan.durationDays}ថ្ងៃ • $${longPlan.priceUsd.toFixed(2)}/${longPlan.durationDays}ថ្ងៃ)`,
+                      `Renew VIP ($${shortPlan.priceUsd.toFixed(2)}/${shortPlan.durationDays}d • $${longPlan.priceUsd.toFixed(2)}/${longPlan.durationDays}d)`,
+                      `🔄 续费 VIP ($${shortPlan.priceUsd.toFixed(2)}/${shortPlan.durationDays}天 • $${longPlan.priceUsd.toFixed(2)}/${longPlan.durationDays}天)`
+                    )
+                  : tr(
+                      language,
+                      `👑 ដំឡើងទៅជា VIP ($${shortPlan.priceUsd.toFixed(2)}/${shortPlan.durationDays}ថ្ងៃ • $${longPlan.priceUsd.toFixed(2)}/${longPlan.durationDays}ថ្ងៃ)`,
+                      `Upgrade to VIP ($${shortPlan.priceUsd.toFixed(2)}/${shortPlan.durationDays}d • $${longPlan.priceUsd.toFixed(2)}/${longPlan.durationDays}d)`,
+                      `👑 升级至 VIP ($${shortPlan.priceUsd.toFixed(2)}/${shortPlan.durationDays}天 • $${longPlan.priceUsd.toFixed(2)}/${longPlan.durationDays}天)`
+                    )}
               </span>
             </button>
 
@@ -1857,9 +1873,12 @@ export const ProfileView: React.FC = () => {
             >
               <MessageSquare className="w-4 h-4 text-amber-600" />
               <span>
-                {isKm
-                  ? '💬 ទាក់ទង Admin / បញ្ហាការបង់ប្រាក់ VIP (ផ្ញើសារ & វិក្កយបត្រ)'
-                  : '💬 Contact Admin / Payment Support'}
+                {tr(
+                  language,
+                  '💬 ទាក់ទងរដ្ឋបាល / បញ្ហាការបង់ប្រាក់ VIP (ផ្ញើសារ & វិក្កយបត្រ)',
+                  '💬 Contact Admin / Payment Support',
+                  '💬 联系管理员 / VIP 付款支持（发送消息与收据）'
+                )}
               </span>
             </button>
           </div>
@@ -1869,9 +1888,12 @@ export const ProfileView: React.FC = () => {
             <h5 className="font-bold text-xs text-slate-900 dark:text-white flex items-center gap-1.5">
               <Sparkles className="w-4 h-4 text-amber-500" />
               <span>
-                {isKm
-                  ? `អត្ថប្រយោជន៍ទាំង ${dynamicBenefits.length} យ៉ាងនៃ Premium VIP:`
-                  : `All ${dynamicBenefits.length} Premium VIP Benefits:`}
+                {tr(
+                  language,
+                  `អត្ថប្រយោជន៍ទាំង ${dynamicBenefits.length} យ៉ាងនៃសមាជិក VIP៖`,
+                  `All ${dynamicBenefits.length} VIP Member Benefits:`,
+                  `VIP 会员全部 ${dynamicBenefits.length} 项专属特权：`
+                )}
               </span>
             </h5>
 
@@ -1896,7 +1918,9 @@ export const ProfileView: React.FC = () => {
                       <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded-md ${
                         isVip ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-400'
                       }`}>
-                        {isVip ? '✓ Active' : 'Locked'}
+                        {isVip
+                          ? tr(language, '✓ សកម្ម', '✓ Active', '✓ 已开启')
+                          : tr(language, 'សម្រាប់ VIP', 'VIP Only', 'VIP 专享')}
                       </span>
                     </div>
                     <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">

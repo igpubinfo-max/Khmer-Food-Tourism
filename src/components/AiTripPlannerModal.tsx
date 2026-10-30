@@ -413,10 +413,10 @@ export const AiTripPlannerModal: React.FC = () => {
           >
             <span className="flex items-center gap-1">
               <Utensils className="w-3.5 h-3.5 text-emerald-600" />
-              <span className="truncate">{tr(language, 'រើសម្ហូប AI', 'AI Food', 'AI 选餐')}</span>
+              <span className="truncate">{tr(language, 'រើសម្ហូបឆ្លាតវៃ', 'AI Food', '智能选餐')}</span>
             </span>
             <span className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400">
-              {tr(language, 'សាកល្បង FREE + VIP', 'Free + VIP', '免费 + VIP')}
+              {tr(language, 'ឥតគិតថ្លៃ + VIP', 'Free + VIP', '免费 + VIP')}
             </span>
           </button>
 
@@ -450,7 +450,7 @@ export const AiTripPlannerModal: React.FC = () => {
               <span className="truncate">{tr(language, 'ផែនការដើរលេង', 'Trip Planner', '行程规划')}</span>
             </span>
             <span className="text-[9px] font-black text-amber-600 dark:text-amber-400">
-              {tr(language, '1ថ្ងៃ FREE • VIP', '1d Free • VIP', '1日免费 • VIP')}
+              {tr(language, '១ថ្ងៃឥតគិតថ្លៃ • VIP', '1d Free • VIP', '1日免费 • VIP')}
             </span>
           </button>
         </div>
@@ -470,16 +470,16 @@ export const AiTripPlannerModal: React.FC = () => {
                     <span>
                       {tr(
                         language,
-                        'ជំនួយការ AI ណែនាំមុខម្ហូប និងហាងប្រចាំថ្ងៃ',
+                        'ជំនួយការឆ្លាតវៃណែនាំមុខម្ហូប និងហាងប្រចាំថ្ងៃ',
                         'Smart AI Daily Meal & Restaurant Advisor',
-                        'AI 每日用餐与餐厅智能顾问'
+                        '智能每日用餐与餐厅顾问'
                       )}
                     </span>
                   </div>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
                     {tr(
                       language,
-                      'មុខងារមូលដ្ឋានឥតគិតថ្លៃ (FREE) • ការវិភាគកាឡូរី និងសុខភាពសម្រាប់ VIP',
+                      'មុខងារមូលដ្ឋានឥតគិតថ្លៃ • ការវិភាគកាឡូរី និងសុខភាពសម្រាប់ VIP',
                       'Basic daily picks are FREE • Advanced nutrition & group AI for VIP',
                       '基础日常推荐免费使用 • 营养热量分析与聚餐定制专属 VIP'
                     )}
@@ -645,7 +645,7 @@ export const AiTripPlannerModal: React.FC = () => {
                               {loc.name}
                             </div>
                             <div className="flex items-center gap-1.5 mt-0.5 text-[10px] font-bold text-emerald-700 dark:text-emerald-300">
-                              <span>🔥 {dish.calories} kcal</span>
+                              <span>🔥 {dish.calories} {tr(language, 'គីឡូកាឡូរី', 'kcal', '千卡')}</span>
                               <span>•</span>
                               <span>⭐ {dish.rating}</span>
                               <span>•</span>
@@ -795,10 +795,10 @@ export const AiTripPlannerModal: React.FC = () => {
                         <option key={prov.id} value={prov.id}>
                           {idx + 1}.{' '}
                           {language === 'km'
-                            ? `${prov.nameKh} (${prov.nameEn})`
+                            ? prov.nameKh
                             : language === 'zh'
-                            ? `${prov.nameZh} (${prov.nameEn})`
-                            : `${prov.nameEn} (${prov.nameKh})`}
+                            ? prov.nameZh
+                            : prov.nameEn}
                         </option>
                       ))}
                     </select>
@@ -839,7 +839,7 @@ export const AiTripPlannerModal: React.FC = () => {
                     </label>
                     <div className="grid grid-cols-3 gap-2">
                       {[
-                        { days: 1, labelKh: '១ ថ្ងៃ (FREE)', labelEn: '1 Day (FREE)', labelZh: '1日游 (免费)', vipOnly: false },
+                        { days: 1, labelKh: '១ ថ្ងៃ (ឥតគិតថ្លៃ)', labelEn: '1 Day (FREE)', labelZh: '1日游 (免费)', vipOnly: false },
                         { days: 2, labelKh: '២ ថ្ងៃ ១ យប់', labelEn: '2 Days 1 Night', labelZh: '2天1晚', vipOnly: true },
                         { days: 3, labelKh: '៣ ថ្ងៃ ២ យប់', labelEn: '3 Days 2 Nights', labelZh: '3天2晚', vipOnly: true },
                       ].map((d) => {

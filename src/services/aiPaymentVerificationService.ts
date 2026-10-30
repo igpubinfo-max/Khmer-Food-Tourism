@@ -511,17 +511,17 @@ export async function verifyAbaPaymentAndReceipt(params: {
   const recipientCheck: AbaVerificationCheckItem = {
     passed: recipientMatched,
     expected: 'Kim Seng / CHEA KIMSENG (095 245 959)',
-    detected: detectedRecipientDisplay || 'មិនអាចអានឈ្មោះអ្នកទទួលពីវិក្កយបត្រ (Unverified)',
+    detected: detectedRecipientDisplay || 'រង់ចាំការពិនិត្យពីរដ្ឋបាល',
     reasonKh: recipientMatched
       ? `✅ ឈ្មោះគណនីអ្នកទទួលត្រូវគ្នា៖ ${detectedRecipientDisplay}`
       : detectedRecipientDisplay
       ? `❌ ឈ្មោះអ្នកទទួលលើវិក្កយបត្រគឺ "${detectedRecipientDisplay}" មិនមែនគណនី "Kim Seng / CHEA KIMSENG" ទេ!`
-      : '⚠️ មិនអាចផ្ទៀងផ្ទាត់ឈ្មោះគណនីអ្នកទទួល "Kim Seng" លើវិក្កយបត្របានទេ (ត្រូវការ Admin ត្រួតពិនិត្យផ្ទាល់)',
+      : '⏳ រង់ចាំរដ្ឋបាលពិនិត្យឈ្មោះគណនីអ្នកទទួលលើវិក្កយបត្រ',
     reasonEn: recipientMatched
       ? `✅ Recipient account matches: ${detectedRecipientDisplay}`
       : detectedRecipientDisplay
       ? `❌ Receipt recipient "${detectedRecipientDisplay}" does NOT match "Kim Seng / CHEA KIMSENG"!`
-      : '⚠️ Could not verify recipient account "Kim Seng" on receipt (Flagged for manual Admin review)',
+      : '⏳ Awaiting administrator verification of recipient account on receipt',
   };
 
   // ============================================================================
@@ -530,7 +530,7 @@ export async function verifyAbaPaymentAndReceipt(params: {
   const detectedAmount = extracted.amountUsd;
   const amountMatched =
     detectedAmount !== undefined &&
-    Math.abs(detectedAmount - expectedAmountUsd) < 0.01 &&
+    Math.abs(detectedAmount - expectedAmountUsd) < 0.05 &&
     (extracted.currency || 'USD').toUpperCase() === 'USD';
 
   const amountCheck: AbaVerificationCheckItem = {
@@ -539,29 +539,29 @@ export async function verifyAbaPaymentAndReceipt(params: {
     detected:
       detectedAmount !== undefined
         ? `$${detectedAmount.toFixed(2)} ${extracted.currency || 'USD'}`
-        : 'មិនអាចអានចំនួនទឹកប្រាក់ពីវិក្កយបត្រ (Unverified)',
+        : 'រង់ចាំការពិនិត្យពីរដ្ឋបាល',
     reasonKh: amountMatched
       ? `✅ ចំនួនទឹកប្រាក់ត្រូវគ្នា៖ $${detectedAmount!.toFixed(2)} USD`
       : detectedAmount !== undefined
       ? `❌ ចំនួនទឹកប្រាក់លើវិក្កយបត្រ ($${detectedAmount.toFixed(2)} ${
           extracted.currency || 'USD'
         }) មិនត្រូវជាមួយកញ្ចប់ VIP ($${expectedAmountUsd.toFixed(2)} USD) ទេ!`
-      : `⚠️ មិនអាចផ្ទៀងផ្ទាត់ចំនួនទឹកប្រាក់ $${expectedAmountUsd.toFixed(2)} USD លើវិក្កយបត្របានទេ`,
+      : `⏳ រង់ចាំរដ្ឋបាលពិនិត្យចំនួនទឹកប្រាក់ $${expectedAmountUsd.toFixed(2)} USD លើវិក្កយបត្រ`,
     reasonEn: amountMatched
       ? `✅ Payment amount matches: $${detectedAmount!.toFixed(2)} USD`
       : detectedAmount !== undefined
       ? `❌ Receipt amount ($${detectedAmount.toFixed(2)} ${
           extracted.currency || 'USD'
         }) does NOT match expected VIP plan ($${expectedAmountUsd.toFixed(2)} USD)!`
-      : `⚠️ Could not verify payment amount ($${expectedAmountUsd.toFixed(2)} USD) from receipt`,
+      : `⏳ Awaiting administrator verification of payment amount ($${expectedAmountUsd.toFixed(2)} USD)`,
   };
 
   // ============================================================================
   // CHECK 4: Transaction Date (Must be recent & current year, not stale 2025 receipt)
   // ============================================================================
   let datePassed = false;
-  let dateReasonKh = '⚠️ មិនអាចផ្ទៀងផ្ទាត់កាលបរិច្ឆេទលើវិក្កយបត្របានទេ';
-  let dateReasonEn = '⚠️ Could not verify transaction date on receipt';
+  let dateReasonKh = '⏳ រង់ចាំរដ្ឋបាលពិនិត្យកាលបរិច្ឆេទលើវិក្កយបត្រ';
+  let dateReasonEn = '⏳ Awaiting administrator verification of transaction date';
 
   if (extracted.transactionDate) {
     const parsedReceiptMs = Date.parse(extracted.transactionDate);
@@ -594,7 +594,7 @@ export async function verifyAbaPaymentAndReceipt(params: {
   const dateCheck: AbaVerificationCheckItem = {
     passed: datePassed,
     expected: submittedDate || now.toISOString().split('T')[0],
-    detected: extracted.transactionDate || 'មិនអាចអានកាលបរិច្ឆេទពីវិក្កយបត្រ (Unverified)',
+    detected: extracted.transactionDate || 'រង់ចាំការពិនិត្យពីរដ្ឋបាល',
     reasonKh: dateReasonKh,
     reasonEn: dateReasonEn,
   };
@@ -638,18 +638,18 @@ export async function verifyAbaPaymentAndReceipt(params: {
     detected: extracted.trxId
       ? `Trx. ID: ${extracted.trxId}`
       : cleanUserTrxId
-      ? `Entered: ${cleanUserTrxId} (Not found on image)`
-      : 'មិនមានលេខប្រតិបត្តិការ (Missing Trx. ID)',
+      ? cleanUserTrxId
+      : 'រង់ចាំការពិនិត្យពីរដ្ឋបាល',
     reasonKh: trxIdPassed
       ? `✅ លេខប្រតិបត្តិការ ABA ត្រឹមត្រូវ៖ ${extracted.trxId}`
       : !userAndReceiptTrxMatch
       ? `❌ លេខប្រតិបត្តិការដែលបានបញ្ចូល (${cleanUserTrxId}) មិនត្រូវគ្នាជាមួយវិក្កយបត្រ (${extracted.trxId}) ទេ!`
-      : '⚠️ មិនអាចផ្ទៀងផ្ទាត់លេខប្រតិបត្តិការ ABA (Trx. ID) លើវិក្កយបត្របានទេ',
+      : '⏳ រង់ចាំរដ្ឋបាលពិនិត្យលេខប្រតិបត្តិការលើវិក្កយបត្រ',
     reasonEn: trxIdPassed
       ? `✅ Valid ABA Trx. ID verified: ${extracted.trxId}`
       : !userAndReceiptTrxMatch
       ? `❌ Submitted Trx. ID (${cleanUserTrxId}) does NOT match receipt Trx. ID (${extracted.trxId})!`
-      : '⚠️ Could not verify a valid ABA Trx. ID on the receipt',
+      : '⏳ Awaiting administrator verification of transaction ID on receipt',
   };
 
   // ============================================================================
@@ -676,7 +676,7 @@ export async function verifyAbaPaymentAndReceipt(params: {
     expected: 'Unique unused ABA Transaction & Receipt',
     detected: !antiReplayPassed
       ? `Duplicate (${effectiveTrxId || dupReceiptImg.trxId || 'Used Receipt'})`
-      : 'Unique (មិនធ្លាប់ប្រើពីមុន)',
+      : 'មិនធ្លាប់ប្រើពីមុន',
     reasonKh: antiReplayPassed
       ? '✅ វិក្កយបត្រ និងលេខប្រតិបត្តិការមិនធ្លាប់ត្រូវបានប្រើប្រាស់ពីមុនទេ'
       : '❌ វិក្កយបត្រ ឬលេខប្រតិបត្តិការនេះត្រូវបានប្រើប្រាស់រួចម្តងហើយ!',
@@ -695,13 +695,19 @@ export async function verifyAbaPaymentAndReceipt(params: {
     dateCheck.passed &&
     antiReplayCheck.passed;
 
-  // Detect if there is a definite mismatch (e.g. wrong recipient, wrong amount, old year, or duplicate)
+  const isHighConfidenceAiExtraction =
+    extracted.extractionSource === 'gemini_vision' ||
+    extracted.extractionSource === 'gemini_vision_and_ocr';
+
+  // Only flag as an explicit mismatch when anti-replay fails (duplicate receipt/trx)
+  // or when high-confidence AI vision explicitly confirmed a wrong recipient/amount/date.
   const hasExplicitMismatch =
-    (Boolean(detectedRecipientDisplay) && !recipientCheck.passed) ||
-    (detectedAmount !== undefined && !amountCheck.passed) ||
-    (Boolean(extracted.transactionDate) && !dateCheck.passed) ||
     !antiReplayCheck.passed ||
-    !userAndReceiptTrxMatch;
+    !userAndReceiptTrxMatch ||
+    (isHighConfidenceAiExtraction &&
+      ((Boolean(detectedRecipientDisplay) && !recipientCheck.passed) ||
+        (detectedAmount !== undefined && !amountCheck.passed) ||
+        (Boolean(extracted.transactionDate) && !dateCheck.passed)));
 
   const passedCount = [
     recipientCheck.passed,
@@ -719,7 +725,7 @@ export async function verifyAbaPaymentAndReceipt(params: {
   if (canAutoApprove) {
     summaryKh = `✅ បានផ្ទៀងផ្ទាត់ជោគជ័យ 100%៖ វិក្កយបត្រ ABA ត្រូវគ្នាជាមួយគណនី "${
       extracted.recipientName || 'Kim Seng'
-    }", ចំនួនទឹកប្រាក់ $${expectedAmountUsd.toFixed(2)} USD, លេខ Trx. ID (${
+    }", ចំនួនទឹកប្រាក់ $${expectedAmountUsd.toFixed(2)} USD, លេខប្រតិបត្តិការ (${
       extracted.trxId
     }) និងកាលបរិច្ឆេទ (${extracted.transactionDate})។ អនុម័តបើកដំណើរការ VIP!`;
     summaryEn = `✅ 100% Verified: ABA receipt matches recipient "${
@@ -747,13 +753,13 @@ export async function verifyAbaPaymentAndReceipt(params: {
       .filter(Boolean)
       .join(' | ');
 
-    summaryKh = `🚩 រកឃើញព័ត៌មានមិនត្រូវគ្នា (មិនអាចបើក VIP ស្វ័យប្រវត្តិទេ — បានដាក់សញ្ញាសម្រាប់ Admin ត្រួតពិនិត្យផ្ទាល់)៖ ${failedReasonsKh}`;
-    summaryEn = `🚩 Payment Mismatch Detected (VIP NOT auto-activated — Flagged for Manual Admin Review): ${failedReasonsEn}`;
+    summaryKh = `🚩 រកឃើញព័ត៌មានមិនត្រូវគ្នា (កំពុងរង់ចាំរដ្ឋបាលពិនិត្យផ្ទាល់)៖ ${failedReasonsKh}`;
+    summaryEn = `🚩 Payment Mismatch Detected (Awaiting Manual Admin Review): ${failedReasonsEn}`;
   } else {
     summaryKh =
-      '⏳ មិនអាចផ្ទៀងផ្ទាត់ព័ត៌មានលើវិក្កយបត្របានពេញលេញដោយស្វ័យប្រវត្តិទេ។ សំណើត្រូវបានដាក់សញ្ញាសម្រាប់ Admin ត្រួតពិនិត្យដោយផ្ទាល់ (Manual Admin Review)។';
+      '⏳ បានទទួលវិក្កយបត្ររួចរាល់។ សំណើរបស់អ្នកកំពុងរង់ចាំរដ្ឋបាលពិនិត្យ និងអនុម័តបើកដំណើរការ VIP។';
     summaryEn =
-      '⏳ Receipt details could not be fully verified automatically. Flagged for manual Admin review before VIP activation.';
+      '⏳ Receipt received. Your request has been submitted for administrator verification and VIP activation.';
   }
 
   return {

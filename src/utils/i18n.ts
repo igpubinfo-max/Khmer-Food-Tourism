@@ -398,15 +398,20 @@ export const EXACT_EN_TO_ZH_MAP: Record<string, string> = {
   'Logged out': '已安全退出登录',
   'Restore VIP Purchases': '恢复 VIP 会员权益',
   'Manage My VIP Store': '管理我的 VIP 店铺',
-  'Language': '语言设置 (Language)',
-  'Khmer': '高棉语 (ខ្មែរ)',
-  'English': '英语 (English)',
-  'Simplified Chinese': '简体中文 (中文)',
+  'Language': '语言设置',
+  'Khmer': '高棉语',
+  'English': '英语',
+  'Simplified Chinese': '简体中文',
 
   'Cambodia Flavors & Tourism': '柬埔寨风味与旅游',
-  'Cambodia Flavors & Tourism': '柬埔寨风味与旅游',
   'Discover Food • Places • Experiences': '探索美食 • 景点 • 体验',
-  'AI Trip Planner': 'AI 行程规划',
+  'Smart AI Assistant': '智能 AI 助手',
+  'Food Picks': '美食推荐',
+  'Nearby Food': '附近美食',
+  'Nearby Places': '附近地点',
+  'Food by Province': '各省美食',
+  'Map Navigation': '地图导航',
+  'Smart Daily Services': '智能日常服务',
   'Cambodian Dishes & Recipes': '柬埔寨传统美食与食谱',
   'Browse by Category': '按分类浏览',
   'Popular Now': '热门打卡',
@@ -424,7 +429,129 @@ export const EXACT_EN_TO_ZH_MAP: Record<string, string> = {
   'Food Review': '探店点评',
   'Travel / Tour': '旅游打卡',
   'Dessert & Drink': '甜品与饮品',
+  'Free User': '免费账户',
+  'Free Account': '免费账户',
+  'FREE': '免费',
+  'FREE + VIP': '免费 + VIP',
+  'VIP Only': 'VIP 专享',
+  '✓ Active': '✓ 已开启',
+  'Locked': 'VIP 专享',
+  'Expired': '已到期',
+  'Pending': '待审核',
+  '✓ Verified': '✓ 已批准',
+  '✕ Rejected': '✕ 已拒绝',
+  '✓ Resolved': '✓ 已解决',
+  '💬 Replied': '💬 已回复',
+  '⏳ Pending': '⏳ 待处理',
+  '⏳ Pending Review': '⏳ 等待审核',
+  '⏳ Pending Admin Approval': '⏳ 等待管理员审核',
 };
+
+/**
+ * Exact English -> Khmer UI fallback dictionary for strict Khmer-only mode
+ */
+const EXACT_EN_TO_KM_MAP: Record<string, string> = {
+  'Cambodia Flavors & Tourism': 'រសជាតិ និងទេសចរណ៍កម្ពុជា',
+  'Discover Food • Places • Experiences': 'ស្វែងយល់អាហារ • ទីតាំង • បទពិសោធន៍',
+  'Free User': 'គណនីឥតគិតថ្លៃ',
+  'Free Account': 'គណនីឥតគិតថ្លៃ',
+  'FREE': 'ឥតគិតថ្លៃ',
+  'Free': 'ឥតគិតថ្លៃ',
+  'FREE + VIP': 'ឥតគិតថ្លៃ + VIP',
+  'Free + VIP': 'ឥតគិតថ្លៃ + VIP',
+  'VIP Only': 'សម្រាប់ VIP',
+  'Daily Live': 'ប្រចាំថ្ងៃ',
+  'Smart AI': 'ជំនួយការឆ្លាតវៃ',
+  'Alerts': 'ថ្មីៗ',
+  'VIP Maps': 'ផែនទី VIP',
+  'High Priority': 'អាទិភាពខ្ពស់',
+  'Active': 'សកម្ម',
+  '✓ Active': '✓ សកម្ម',
+  'ACTIVE': 'សកម្ម',
+  '● LIVE': '● ផ្ទាល់',
+  'Locked': 'សម្រាប់ VIP',
+  'Expired': 'ផុតកំណត់',
+  'Pending': 'កំពុងរង់ចាំ',
+  '✓ Resolved': '✓ បានដោះស្រាយ',
+  '✓ Verified': '✓ អនុម័តរួច',
+  '✕ Rejected': '✕ បដិសេធ',
+  'Bakong KHQR': 'បាគង KHQR',
+  'SYSTEM PREFS': 'ការកំណត់ប្រព័ន្ធ',
+};
+
+const LANGUAGE_BADGE_TOKENS = new Set(['ខ្មែរ', 'EN', '中文']);
+
+export function normalizeTextForKhmer(text: string): string {
+  if (!text) return text;
+  const cleaned = stripForeignScripts(text);
+  const trimmed = cleaned.trim();
+  if (!trimmed || LANGUAGE_BADGE_TOKENS.has(trimmed)) return cleaned;
+  if (/^(https?:\/\/|mailto:|tel:)/i.test(trimmed) || trimmed.includes('@')) return cleaned;
+
+  if (EXACT_EN_TO_KM_MAP[trimmed]) {
+    return cleaned.replace(trimmed, EXACT_EN_TO_KM_MAP[trimmed]);
+  }
+
+  let result = cleaned;
+  // Remove any accidental Chinese script in Khmer mode
+  if (/[\u4E00-\u9FFF]/.test(result)) {
+    result = result.replace(/[\u4E00-\u9FFF]+/g, '').replace(/\s{2,}/g, ' ').trim();
+  }
+
+  // If the text contains Khmer script, strip redundant English parentheticals and mixed English words
+  if (/[\u1780-\u17FF]/.test(result)) {
+    result = result
+      .replace(/•\s*FREE\b/gi, '')
+      .replace(/\s*\((?!(?:VIP|QR|KHQR|ABA|GPS|AI|USD|HD)\))[A-Za-z][A-Za-z0-9\s/&.,•+-]*\)/g, '')
+      .replace(/ថ្ងៃ\s*\/\s*Days/gi, 'ថ្ងៃ')
+      .replace(/\bFree User\b/gi, 'គណនីឥតគិតថ្លៃ')
+      .replace(/\bFree Account\b/gi, 'គណនីឥតគិតថ្លៃ')
+      .replace(/\bPending Review\b/gi, 'រង់ចាំពិនិត្យ')
+      .replace(/\bPending\b/gi, 'កំពុងរង់ចាំ')
+      .replace(/\bExpired\b/gi, 'ផុតកំណត់')
+      .replace(/\bResolved\b/gi, 'បានដោះស្រាយ')
+      .replace(/\bReplied\b/gi, 'បានឆ្លើយតប')
+      .replace(/\bAdmin\b/g, 'រដ្ឋបាល')
+      .replace(/\s{2,}/g, ' ');
+  }
+
+  return result;
+}
+
+export function normalizeTextForEnglish(text: string): string {
+  if (!text) return text;
+  const cleaned = stripForeignScripts(text);
+  const trimmed = cleaned.trim();
+  if (!trimmed || LANGUAGE_BADGE_TOKENS.has(trimmed)) return cleaned;
+
+  let result = cleaned;
+  if (/[\u4E00-\u9FFF]/.test(result)) {
+    result = result.replace(/[\u4E00-\u9FFF]+/g, '').replace(/\s{2,}/g, ' ').trim();
+  }
+
+  if (/[\u1780-\u17FF]/.test(result)) {
+    if (CAMBODIA_PROVINCE_EN_MAP[trimmed]) {
+      return cleaned.replace(trimmed, CAMBODIA_PROVINCE_EN_MAP[trimmed]);
+    }
+    for (const [kmProv, enProv] of Object.entries(CAMBODIA_PROVINCE_EN_MAP)) {
+      if (result.includes(kmProv)) {
+        result = result.split(kmProv).join(enProv);
+      }
+    }
+    result = result
+      .replace(/ឥតគិតថ្លៃ\s*•\s*FREE/gi, 'FREE')
+      .replace(/ឥតគិតថ្លៃ/g, 'Free')
+      .replace(/ថ្ងៃ/g, 'Days')
+      .replace(/មុខម្ហូប/g, 'dishes')
+      .replace(/ហាង/g, 'shops')
+      .replace(/[\u1780-\u17FF]+/g, '')
+      .replace(/\(\s*\)/g, '')
+      .replace(/\s{2,}/g, ' ')
+      .trim();
+  }
+
+  return result || cleaned;
+}
 
 /**
  * Partial phrase replacements for dynamic strings when `language === 'zh'`
@@ -483,28 +610,56 @@ export function translateTextToChinese(text: string): string {
   return out;
 }
 
+function finalizeChineseOnlyText(text: string): string {
+  let out = text;
+  // Replace any remaining Khmer province names or common Khmer words in zh mode
+  if (/[\u1780-\u17FF]/.test(out)) {
+    for (const [kmProv, zhProv] of Object.entries(CAMBODIA_PROVINCE_ZH_MAP)) {
+      if (out.includes(kmProv)) {
+        out = out.split(kmProv).join(zhProv);
+      }
+    }
+    out = out
+      .replace(/ឥតគិតថ្លៃ/g, '免费')
+      .replace(/ថ្ងៃ/g, '天')
+      .replace(/មុខម្ហូប/g, '道菜品')
+      .replace(/ហាង/g, '家店铺')
+      .replace(/[\u1780-\u17FF]+/g, '')
+      .replace(/\(\s*\)/g, '')
+      .replace(/\s{2,}/g, ' ')
+      .trim();
+  }
+  // If Chinese characters are present, strip trailing redundant English parentheticals like (Soup/Curry) or (Language)
+  if (/[\u4E00-\u9FFF]/.test(out)) {
+    out = out
+      .replace(/\s*\((?!(?:VIP|QR|KHQR|ABA|GPS|AI|USD|HD)\))[A-Za-z][A-Za-z0-9\s/&.,-]*\)/g, '')
+      .replace(/\s{2,}/g, ' ');
+  }
+  return out || text;
+}
+
 function translateTextToChineseUncached(text: string): string {
   const cleanedText = stripForeignScripts(text);
   const trimmed = cleanedText.trim();
-  if (!trimmed) return cleanedText;
+  if (!trimmed || LANGUAGE_BADGE_TOKENS.has(trimmed)) return cleanedText;
 
   if (EXACT_EN_TO_ZH_MAP[trimmed]) {
-    return cleanedText.replace(trimmed, EXACT_EN_TO_ZH_MAP[trimmed]);
+    return finalizeChineseOnlyText(cleanedText.replace(trimmed, EXACT_EN_TO_ZH_MAP[trimmed]));
   }
   if (ZH_UI_EXTRA[trimmed]) {
-    return cleanedText.replace(trimmed, () => ZH_UI_EXTRA[trimmed]);
+    return finalizeChineseOnlyText(cleanedText.replace(trimmed, () => ZH_UI_EXTRA[trimmed]));
   }
   if (CAMBODIA_PROVINCE_ZH_MAP[trimmed]) {
-    return cleanedText.replace(trimmed, CAMBODIA_PROVINCE_ZH_MAP[trimmed]);
+    return finalizeChineseOnlyText(cleanedText.replace(trimmed, CAMBODIA_PROVINCE_ZH_MAP[trimmed]));
   }
   if (EXACT_FOOD_NAME_ZH_MAP[trimmed]) {
-    return cleanedText.replace(trimmed, EXACT_FOOD_NAME_ZH_MAP[trimmed]);
+    return finalizeChineseOnlyText(cleanedText.replace(trimmed, EXACT_FOOD_NAME_ZH_MAP[trimmed]));
   }
   if (FOOD_CATEGORY_ZH_MAP[trimmed]) {
-    return cleanedText.replace(trimmed, FOOD_CATEGORY_ZH_MAP[trimmed]);
+    return finalizeChineseOnlyText(cleanedText.replace(trimmed, FOOD_CATEGORY_ZH_MAP[trimmed]));
   }
   if (EXACT_DESTINATION_NAME_ZH_MAP[trimmed]) {
-    return cleanedText.replace(trimmed, EXACT_DESTINATION_NAME_ZH_MAP[trimmed]);
+    return finalizeChineseOnlyText(cleanedText.replace(trimmed, EXACT_DESTINATION_NAME_ZH_MAP[trimmed]));
   }
 
   let result = cleanedText;
@@ -514,23 +669,30 @@ function translateTextToChineseUncached(text: string): string {
     }
   }
 
-  if (result !== cleanedText) return result;
+  if (result !== cleanedText) return finalizeChineseOnlyText(result);
 
   // If it's a multi-word English sentence/label in the UI, translate dynamically
   if (/^[A-Za-z0-9\s,.'":;!?()&/•+-]{4,}$/.test(trimmed) && !/^https?:\/\//i.test(trimmed)) {
     const dyn = translateDynamicTextToZh(trimmed);
     if (dyn && dyn !== trimmed && /[\u4E00-\u9FFF]/.test(dyn)) {
-      return cleanedText.replace(trimmed, dyn);
+      return finalizeChineseOnlyText(cleanedText.replace(trimmed, dyn));
     }
   }
 
-  return result;
+  return finalizeChineseOnlyText(result);
+}
+
+function transformTextForLanguage(text: string, language: Language): string {
+  if (!text) return text;
+  if (language === 'zh') return translateTextToChinese(text);
+  if (language === 'km') return normalizeTextForKhmer(text);
+  return normalizeTextForEnglish(text);
 }
 
 /**
- * Reversible, React-safe DOM translation hook when `language === 'zh'`.
- * Saves original text node values and attributes BEFORE translating to Chinese,
- * and restores 100% of mutated DOM nodes immediately when switching back to Khmer or English.
+ * Reversible, React-safe DOM translation & strict single-language enforcement hook across 'km', 'en', and 'zh'.
+ * Saves original text node values and attributes BEFORE transforming, and restores 100% of mutated DOM nodes
+ * cleanly when switching languages.
  */
 export function useChineseDomTranslation(language: Language): void {
   useEffect(() => {
@@ -575,11 +737,6 @@ export function useChineseDomTranslation(language: Language): void {
       mutatedTitles.clear();
     };
 
-    if (language !== 'zh') {
-      restoreAllNodes();
-      return;
-    }
-
     let isApplying = false;
     let rafId: number | null = null;
     const pendingNodes = new Set<Node>();
@@ -592,7 +749,7 @@ export function useChineseDomTranslation(language: Language): void {
         if (root.nodeType === Node.TEXT_NODE) {
           const textNode = root as Text;
           const raw = textNode.nodeValue || '';
-          const translated = translateTextToChinese(raw);
+          const translated = transformTextForLanguage(raw, language);
           if (translated !== raw) {
             const prev = mutatedTextNodes.get(textNode);
             mutatedTextNodes.set(textNode, { orig: prev ? prev.orig : raw, translated });
@@ -607,7 +764,7 @@ export function useChineseDomTranslation(language: Language): void {
           const parentTag = node.parentElement?.tagName;
           if (parentTag !== 'SCRIPT' && parentTag !== 'STYLE' && parentTag !== 'CODE') {
             const raw = node.nodeValue || '';
-            const translated = translateTextToChinese(raw);
+            const translated = transformTextForLanguage(raw, language);
             if (translated !== raw) {
               const prev = mutatedTextNodes.get(node);
               mutatedTextNodes.set(node, { orig: prev ? prev.orig : raw, translated });
@@ -622,7 +779,7 @@ export function useChineseDomTranslation(language: Language): void {
           inputs?.forEach((el) => {
             const ph = el.getAttribute('placeholder');
             if (ph) {
-              const nextPh = translateTextToChinese(ph);
+              const nextPh = transformTextForLanguage(ph, language);
               if (nextPh !== ph) {
                 const prev = mutatedPlaceholders.get(el);
                 mutatedPlaceholders.set(el, { orig: prev ? prev.orig : ph, translated: nextPh });
@@ -631,7 +788,7 @@ export function useChineseDomTranslation(language: Language): void {
             }
             const title = el.getAttribute('title');
             if (title) {
-              const nextTitle = translateTextToChinese(title);
+              const nextTitle = transformTextForLanguage(title, language);
               if (nextTitle !== title) {
                 const prev = mutatedTitles.get(el);
                 mutatedTitles.set(el, { orig: prev ? prev.orig : title, translated: nextTitle });

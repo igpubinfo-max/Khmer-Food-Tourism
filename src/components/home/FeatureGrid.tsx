@@ -95,12 +95,12 @@ const FeatureGridImpl: React.FC<Props> = ({
     },
     {
       id: 'smart-ai',
-      label: tr(language, 'ជំនួយការ AI', 'Smart AI', 'AI 助手'),
+      label: tr(language, 'ជំនួយការឆ្លាតវៃ', 'Smart AI', '智能助手'),
       icon: IconSmartAssistant,
       badgeType: 'vip',
       badgeLabel: isVip
         ? tr(language, 'VIP បើករួច', 'VIP Active', 'VIP已激活')
-        : tr(language, 'FREE + VIP', 'FREE + VIP', '免费+VIP'),
+        : tr(language, 'ឥតគិតថ្លៃ + VIP', 'FREE + VIP', '免费+VIP'),
       iconContainerClass:
         'bg-amber-400/20 text-amber-600 dark:bg-amber-400/25 dark:text-amber-300 ring-1 ring-amber-400/45',
       onClick: onSmartAiAssistant,
