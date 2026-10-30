@@ -18,6 +18,7 @@ import {
   Crown,
   Lock,
   Navigation,
+  Search,
 } from 'lucide-react';
 import { FoodItem } from '../types';
 import { IconFoodPicks } from './icons/HandcraftedIcons';
@@ -26,6 +27,7 @@ import { getLocalizedFood, getLocalizedRestaurant } from '../utils/zhDynamicTran
 import { useBodyScrollLock } from '../utils/useBodyScrollLock';
 import { getDishTagIds, DishTagId } from '../utils/dishTags';
 import { hasSpecialAndHealthyFoodVipAccess } from '../utils/smartHub';
+import { getAiFoodAdvisorRecommendations, QUICK_CRAVING_CHIPS } from '../services/aiFoodAdvisorService';
 
 type MealSlotFilter = 'auto' | 'breakfast' | 'lunch' | 'afternoon' | 'dinner';
 type VipDietFilter = 'none' | DishTagId;
@@ -48,11 +50,14 @@ export const WhatToEatModal: React.FC = () => {
 
   const canUseVip = hasSpecialAndHealthyFoodVipAccess(currentUser);
 
-  // Filters: Category, Meal Time, and VIP Smart Nutrition Tag
+  // Filters: Craving Search, Category, Meal Time, and VIP Smart Nutrition Tag
+  const [cravingQuery, setCravingQuery] = useState<string>('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [mealSlotFilter, setMealSlotFilter] = useState<MealSlotFilter>('auto');
   const [vipDietFilter, setVipDietFilter] = useState<VipDietFilter>('none');
   const [isSpinning, setIsSpinning] = useState(false);
+  const cravingInputRef = useRef<HTMLInputElement | null>(null);
+  const dishCardRef = useRef<HTMLDivElement | null>(null);
 
   // Current dish index and history of seen dish IDs to prevent repetition
   const [currentDishId, setCurrentDishId] = useState<string>('');
@@ -107,8 +112,24 @@ export const WhatToEatModal: React.FC = () => {
 
   const effectiveMealSlot = mealSlotFilter === 'auto' ? currentMealInfo.slug : mealSlotFilter;
 
-  // Filter candidate dishes by Category, Mealtime, and VIP Nutrition Tag
+  const aiCravingRecommendations = useMemo(() => {
+    if (!cravingQuery.trim()) return null;
+    return getAiFoodAdvisorRecommendations({
+      foods,
+      restaurants,
+      query: cravingQuery,
+      goal: 'any',
+      seed: 0,
+      language,
+    });
+  }, [foods, restaurants, cravingQuery, language]);
+
+  // Filter candidate dishes by Craving Query, Category, Mealtime, and VIP Nutrition Tag
   const matchingFoods = useMemo(() => {
+    if (aiCravingRecommendations && aiCravingRecommendations.dishes.length > 0) {
+      return aiCravingRecommendations.dishes;
+    }
+
     const filtered = foods.filter((food) => {
       if (categoryFilter !== 'all' && food.categorySlug !== categoryFilter) return false;
 
@@ -137,7 +158,7 @@ export const WhatToEatModal: React.FC = () => {
     });
 
     return filtered;
-  }, [foods, categoryFilter, vipDietFilter, canUseVip, mealSlotFilter, effectiveMealSlot]);
+  }, [foods, aiCravingRecommendations, categoryFilter, vipDietFilter, canUseVip, mealSlotFilter, effectiveMealSlot]);
 
   // Active candidate list (falls back gracefully if combination is too narrow)
   const activeDishList = matchingFoods.length > 0 ? matchingFoods : foods;
@@ -146,6 +167,11 @@ export const WhatToEatModal: React.FC = () => {
   const pickRandomDish = (excludeId?: string): FoodItem => {
     if (activeDishList.length === 0) return foods[0];
     if (activeDishList.length === 1) return activeDishList[0];
+
+    // When user typed a specific craving query, prioritize the #1 best-ranked dish first
+    if (cravingQuery.trim() && !excludeId) {
+      return activeDishList[0];
+    }
 
     let unseenCandidates = activeDishList.filter(
       (f) => f.id !== excludeId && !seenDishIdsRef.current.has(f.id)
@@ -157,19 +183,22 @@ export const WhatToEatModal: React.FC = () => {
     }
 
     const pool = unseenCandidates.length > 0 ? unseenCandidates : activeDishList;
-    const randomPick = pool[Math.floor(Math.random() * pool.length)];
+    const randomPick = cravingQuery.trim()
+      ? pool[0]
+      : pool[Math.floor(Math.random() * pool.length)];
 
     seenDishIdsRef.current.add(randomPick.id);
     return randomPick;
   };
 
-  // Re-roll dish whenever modal opens or filters change
+  // Re-roll dish whenever modal opens or filters/craving change
   useEffect(() => {
     if (isWhatToEatModalOpen && foods.length > 0) {
+      seenDishIdsRef.current.clear();
       const initialPick = pickRandomDish();
       setCurrentDishId(initialPick.id);
     }
-  }, [isWhatToEatModalOpen, categoryFilter, mealSlotFilter, vipDietFilter]);
+  }, [isWhatToEatModalOpen, cravingQuery, categoryFilter, mealSlotFilter, vipDietFilter]);
 
   useEffect(() => {
     if (!canUseVip && vipDietFilter !== 'none') {
@@ -187,14 +216,17 @@ export const WhatToEatModal: React.FC = () => {
     [currentDish, language]
   );
 
-  // 2 Distinct Alternative Dishes randomly picked from candidates
+  // 2 Distinct Alternative Dishes (ordered by AI relevance when craving query is active)
   const alternativeDishes = useMemo(() => {
     if (activeDishList.length <= 1) return [];
     const pool = activeDishList.filter((f) => f.id !== currentDish?.id);
     if (pool.length === 0) return [];
+    if (cravingQuery.trim()) {
+      return pool.slice(0, 4);
+    }
     const shuffled = [...pool].sort(() => 0.5 - Math.random());
     return shuffled.slice(0, 2);
-  }, [activeDishList, currentDish?.id]);
+  }, [activeDishList, currentDish?.id, cravingQuery]);
 
   // Find restaurants serving this dish
   const servingRestaurants = useMemo(() => {
@@ -209,6 +241,17 @@ export const WhatToEatModal: React.FC = () => {
   }, [restaurants, currentDish]);
 
   if (!isWhatToEatModalOpen) return null;
+
+  const handleCravingSubmit = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    cravingInputRef.current?.blur();
+    if (activeDishList.length > 0) {
+      setCurrentDishId(activeDishList[0].id);
+    }
+    setTimeout(() => {
+      dishCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 60);
+  };
 
   const handleShowAnother = () => {
     setIsSpinning(true);
@@ -277,6 +320,79 @@ export const WhatToEatModal: React.FC = () => {
           >
             <X className="w-5 h-5" />
           </button>
+        </div>
+
+        {/* AI Craving Search Bar (What Do You Want to Eat?) */}
+        <div className="px-3.5 py-2.5 bg-white dark:bg-slate-900 border-b border-emerald-100/70 dark:border-slate-800 space-y-2 font-khmer shrink-0">
+          <form onSubmit={handleCravingSubmit} className="relative flex items-center gap-1.5">
+            <div className="relative flex-1 min-w-0">
+              <Search className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <input
+                ref={cravingInputRef}
+                type="search"
+                enterKeyHint="search"
+                value={cravingQuery}
+                onChange={(e) => setCravingQuery(e.target.value)}
+                placeholder={tr(
+                  language,
+                  'ចង់ញ៉ាំអ្វីថ្ងៃនេះ? (ឧ. បាយ, គុយទាវ, សម្ល, គ្រឿងសមុទ្រ...)',
+                  'What do you want to eat? (e.g. rice, noodles, seafood...)',
+                  '您今天想吃什么？（如：米饭、粿条、海鲜、热汤...）'
+                )}
+                className="w-full pl-8 pr-7 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              />
+              {cravingQuery && (
+                <button
+                  type="button"
+                  onClick={() => setCravingQuery('')}
+                  aria-label="Clear search"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+            <button
+              type="submit"
+              className="px-3 py-2 rounded-xl bg-gradient-to-r from-[#064E3B] to-[#047857] hover:from-[#047857] hover:to-[#059669] text-white text-xs font-extrabold shadow-xs flex items-center gap-1 shrink-0 transition active:scale-[0.98] cursor-pointer"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+              <span>{tr(language, 'ស្វែងរក', 'Ask AI', 'AI 推荐')}</span>
+            </button>
+          </form>
+
+          {/* Quick Craving Suggestion Chips */}
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+            {QUICK_CRAVING_CHIPS.map((chip) => {
+              const chipQuery =
+                language === 'km'
+                  ? chip.queryKh
+                  : language === 'zh'
+                  ? chip.queryZh
+                  : chip.queryEn;
+              const isChipActive =
+                cravingQuery.trim().toLowerCase() === chipQuery.trim().toLowerCase();
+              return (
+                <button
+                  key={chip.id}
+                  type="button"
+                  onClick={() => {
+                    const nextQuery = isChipActive ? '' : chipQuery;
+                    setCravingQuery(nextQuery);
+                    cravingInputRef.current?.blur();
+                  }}
+                  className={`px-2.5 py-1 rounded-full text-[10px] font-bold whitespace-nowrap transition flex items-center gap-1 cursor-pointer ${
+                    isChipActive
+                      ? 'bg-[#064E3B] text-amber-300 border border-amber-400/60 shadow-2xs'
+                      : 'bg-slate-100 hover:bg-emerald-50 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700'
+                  }`}
+                >
+                  <span>{chip.emoji}</span>
+                  <span>{tr(language, chip.labelKh, chip.labelEn, chip.labelZh)}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* Mealtime Context & Selector Banner (FREE) */}
@@ -404,7 +520,15 @@ export const WhatToEatModal: React.FC = () => {
         </div>
 
         {/* Content body */}
-        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 space-y-4 no-scrollbar [-webkit-overflow-scrolling:touch]">
+        <div
+          ref={dishCardRef}
+          className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 space-y-3 no-scrollbar [-webkit-overflow-scrolling:touch]"
+        >
+          {aiCravingRecommendations && cravingQuery.trim() && (
+            <div className="px-3 py-2 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800/50 text-[11px] font-bold text-[#064E3B] dark:text-emerald-200 leading-relaxed font-khmer">
+              {aiCravingRecommendations.aiSummaryText}
+            </div>
+          )}
           {currentDish && currentLoc && (
             <div
               className={`transition-all duration-300 ${

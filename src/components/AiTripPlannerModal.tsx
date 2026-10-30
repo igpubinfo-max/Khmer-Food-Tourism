@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { FoodTripTemplates } from './FoodTripTemplates';
 import { SmartHubHealthySection } from './SmartHubHealthySection';
 import { useApp } from '../context/AppContext';
@@ -31,8 +31,13 @@ import {
   getLocalizedFood,
   getLocalizedRestaurant,
 } from '../utils/zhDynamicTranslator';
-import { getDishTagIds, DishTagId } from '../utils/dishTags';
+import { DishTagId } from '../utils/dishTags';
 import { requestTagFilter } from '../utils/smartHub';
+import {
+  AdvisorGoalId,
+  QUICK_CRAVING_CHIPS,
+  getAiFoodAdvisorRecommendations,
+} from '../services/aiFoodAdvisorService';
 
 export interface CambodiaProvinceTripOption {
   id: string;
@@ -74,7 +79,6 @@ export const ALL_25_CAMBODIA_PROVINCES: CambodiaProvinceTripOption[] = [
 ];
 
 type AssistantTab = 'food_advisor' | 'healthy_vip' | 'route_planner';
-type AdvisorGoalId = 'quick_daily' | 'khmer_comfort' | 'vip_light_cal' | 'vip_high_protein' | 'vip_group_feast';
 
 export const AiTripPlannerModal: React.FC = () => {
   const {
@@ -103,6 +107,8 @@ export const AiTripPlannerModal: React.FC = () => {
   const [advisorGoal, setAdvisorGoal] = useState<AdvisorGoalId>('quick_daily');
   const [advisorPrompt, setAdvisorPrompt] = useState<string>('');
   const [advisorSeed, setAdvisorSeed] = useState<number>(1);
+  const advisorInputRef = useRef<HTMLInputElement | null>(null);
+  const advisorResultsRef = useRef<HTMLDivElement | null>(null);
 
   // Mode 3: AI Route & Trip Planner State
   const [selectedProvince, setSelectedProvince] = useState<string>('ខេត្តសៀមរាប');
@@ -129,57 +135,27 @@ export const AiTripPlannerModal: React.FC = () => {
     return { ...found, destCount, restCount };
   }, [selectedProvince, destinations, restaurants]);
 
-  // AI Food & Craving Advisor matched dishes & shops
-  const aiAdvisorResults = useMemo(() => {
-    const q = advisorPrompt.trim().toLowerCase();
-    const pool = foods.filter((f) => {
-      const tags = getDishTagIds(f);
-      const text = `${f.nameKh} ${f.nameEn} ${f.descriptionKh || ''} ${f.descriptionEn || ''} ${f.categoryKh || ''}`.toLowerCase();
+  // AI Food & Craving Advisor matched dishes & shops (multilingual semantic search across Khmer, English, Chinese)
+  const aiAdvisorResults = useMemo(
+    () =>
+      getAiFoodAdvisorRecommendations({
+        foods,
+        restaurants,
+        query: advisorPrompt,
+        goal: advisorGoal,
+        seed: advisorSeed,
+        language,
+      }),
+    [foods, restaurants, advisorPrompt, advisorGoal, advisorSeed, language]
+  );
 
-      if (q && !text.includes(q)) return false;
-
-      if (advisorGoal === 'quick_daily') {
-        return /គុយទាវ|បាយ|មី|នំបញ្ចុក|ឆា|បបរ|noodle|rice|stirfry|soup/.test(text);
-      }
-      if (advisorGoal === 'khmer_comfort') {
-        return /សម្ល|អាម៉ុក|កកូរ|ម្ជូរ|ប្រហុក|ទឹកគ្រឿង|amok|samlor|soup/.test(text);
-      }
-      if (advisorGoal === 'vip_light_cal') {
-        return tags.includes('light') || tags.includes('steamed_boiled') || (f.calories > 0 && f.calories <= 450);
-      }
-      if (advisorGoal === 'vip_high_protein') {
-        return tags.includes('protein_rich') || tags.includes('grilled');
-      }
-      if (advisorGoal === 'vip_group_feast') {
-        return /ស៊ុប|អាំង|ត្រី|គ្រឿងសមុទ្រ|ឈុត|សម្ល|grilled|seafood|soup/.test(text);
-      }
-      return true;
-    });
-
-    const effectiveFoods = pool.length >= 2 ? pool : foods;
-    const rotated = [...effectiveFoods].sort((a, b) => {
-      const ha = (a.id.charCodeAt(a.id.length - 1) + advisorSeed * 5) % 11;
-      const hb = (b.id.charCodeAt(b.id.length - 1) + advisorSeed * 5) % 11;
-      return ha - hb || (b.rating || 0) - (a.rating || 0);
-    });
-
-    const topDishes = rotated.slice(0, 3);
-
-    const matchedShops = restaurants
-      .filter((r) => {
-        const hay = `${r.nameKh} ${r.nameEn} ${(r.signatureDishesKh || []).join(' ')} ${r.provinceKh}`.toLowerCase();
-        if (q && hay.includes(q)) return true;
-        return topDishes.some((d) =>
-          (r.signatureDishesKh || []).some((sig) => sig.includes(d.nameKh) || d.nameKh.includes(sig))
-        );
-      })
-      .slice(0, 2);
-
-    return {
-      dishes: topDishes,
-      shops: matchedShops.length > 0 ? matchedShops : restaurants.slice(0, 2),
-    };
-  }, [foods, restaurants, advisorGoal, advisorPrompt, advisorSeed]);
+  const handleAdvisorSearchSubmit = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    advisorInputRef.current?.blur();
+    if (!advisorPrompt.trim()) {
+      setAdvisorSeed((s) => s + 1);
+    }
+  };
 
   if (!isAiTripPlannerModalOpen) return null;
 
@@ -498,7 +474,7 @@ export const AiTripPlannerModal: React.FC = () => {
               </div>
 
               {/* Ask AI Search / Craving Box */}
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
                   <Search className="w-3.5 h-3.5 text-emerald-600" />
                   <span>
@@ -510,110 +486,110 @@ export const AiTripPlannerModal: React.FC = () => {
                     )}
                   </span>
                 </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={advisorPrompt}
-                    onChange={(e) => setAdvisorPrompt(e.target.value)}
-                    placeholder={tr(
-                      language,
-                      'ឧ. សម្លក្តៅៗ, គុយទាវ, អាហារមិនសូវខ្លាញ់, គ្រឿងសមុទ្រ...',
-                      'e.g. warm soup, noodles, low oil, seafood, spicy...',
-                      '例如：热汤、粿条、少油清淡、海鲜...'
-                    )}
-                    className="w-full pl-3.5 pr-8 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  />
-                  {advisorPrompt && (
-                    <button
-                      type="button"
-                      onClick={() => setAdvisorPrompt('')}
-                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
-                    >
-                      <X className="w-3.5 h-3.5" />
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* Select Daily Goal (2 Free + 3 VIP) */}
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                  {tr(language, 'ជ្រើសរើសគោលបំណងអាហារថ្ងៃនេះ៖', 'Select your dining goal today:', '选择今日用餐目标：')}
-                </label>
-                <div className="space-y-1.5">
-                  {advisorGoals.map((g) => {
-                    const isLocked = g.vipOnly && !canUseVip;
-                    const isSelected = advisorGoal === g.id;
-                    return (
+                <form onSubmit={handleAdvisorSearchSubmit} className="flex items-center gap-2">
+                  <div className="relative flex-1">
+                    <input
+                      id="kft-ai-food-advisor-input"
+                      ref={advisorInputRef}
+                      type="text"
+                      enterKeyHint="search"
+                      value={advisorPrompt}
+                      onChange={(e) => {
+                        setAdvisorPrompt(e.target.value);
+                        setAdvisorSeed(1);
+                      }}
+                      placeholder={tr(
+                        language,
+                        'ឧ. បាយ, គុយទាវ, សម្លក្តៅៗ, គ្រឿងសមុទ្រ...',
+                        'e.g. rice, noodles, warm soup, seafood, spicy...',
+                        '例如：米饭、粿条、热汤、少油清淡、海鲜...'
+                      )}
+                      className="w-full pl-3.5 pr-8 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    />
+                    {advisorPrompt && (
                       <button
-                        key={g.id}
+                        id="kft-ai-food-advisor-clear"
                         type="button"
                         onClick={() => {
-                          if (isLocked) {
-                            showToast(
-                              tr(
-                                language,
-                                '👑 មុខងារវិភាគអាហារូបត្ថម្ភ AI កម្រិតខ្ពស់ គឺសម្រាប់សមាជិក VIP!',
-                                '👑 Advanced AI Nutrition & Group Dining modes are for VIP members!',
-                                '👑 高级 AI 营养分析与聚餐推荐仅限 VIP 会员！'
-                              ),
-                              'info'
-                            );
-                            openUpgradeVipModal();
-                            return;
-                          }
-                          setAdvisorGoal(g.id);
+                          setAdvisorPrompt('');
+                          setAdvisorSeed(1);
                         }}
-                        className={`w-full p-2.5 rounded-2xl border text-left transition flex items-center justify-between gap-2 cursor-pointer ${
-                          isSelected
-                            ? 'bg-emerald-50/90 dark:bg-emerald-950/50 border-emerald-600 ring-1 ring-emerald-500/40'
-                            : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-emerald-400'
+                        aria-label={tr(language, 'សម្អាត', 'Clear', '清除')}
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
+                  <button
+                    id="kft-ai-food-advisor-submit"
+                    type="submit"
+                    className="px-3.5 py-2.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white text-xs font-extrabold inline-flex items-center gap-1.5 shrink-0 shadow-xs active:scale-95 transition cursor-pointer"
+                  >
+                    <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                    <span>{tr(language, 'ស្វែងរក', 'Ask AI', 'AI 推荐')}</span>
+                  </button>
+                </form>
+
+                {/* 1-Tap Quick Craving Chips */}
+                <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-0.5">
+                  {QUICK_CRAVING_CHIPS.map((chip) => {
+                    const chipQuery = tr(language, chip.queryKh, chip.queryEn, chip.queryZh);
+                    const isActive =
+                      advisorPrompt.trim().toLowerCase() === chip.queryKh.toLowerCase() ||
+                      advisorPrompt.trim().toLowerCase() === chip.queryEn.toLowerCase() ||
+                      advisorPrompt.trim().toLowerCase() === chip.queryZh.toLowerCase();
+                    return (
+                      <button
+                        key={chip.id}
+                        type="button"
+                        onClick={() => {
+                          if (isActive) {
+                            setAdvisorPrompt('');
+                          } else {
+                            setAdvisorPrompt(chipQuery);
+                          }
+                          setAdvisorSeed(1);
+                        }}
+                        className={`px-2.5 py-1 rounded-full text-[11px] font-bold whitespace-nowrap border transition cursor-pointer ${
+                          isActive
+                            ? 'bg-emerald-600 text-white border-emerald-500 shadow-2xs'
+                            : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:border-emerald-400'
                         }`}
                       >
-                        <div className="min-w-0">
-                          <div className="text-xs font-extrabold text-slate-900 dark:text-white truncate">
-                            {tr(language, g.kh, g.en, g.zh)}
-                          </div>
-                          <div className="text-[10.5px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
-                            {tr(language, g.descKh, g.descEn, g.descZh)}
-                          </div>
-                        </div>
-
-                        {g.vipOnly ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-900 text-amber-300 text-[10px] font-black shrink-0 border border-amber-400/40">
-                            {isLocked ? <Lock className="w-2.5 h-2.5" /> : <Crown className="w-2.5 h-2.5" />}
-                            <span>VIP</span>
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 text-[10px] font-extrabold shrink-0">
-                            <CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" />
-                            <span>{tr(language, 'ឥតគិតថ្លៃ', 'FREE', '免费')}</span>
-                          </span>
-                        )}
+                        {tr(language, chip.labelKh, chip.labelEn, chip.labelZh)}
                       </button>
                     );
                   })}
                 </div>
               </div>
 
-              {/* AI Curated Dish Matches */}
-              <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 space-y-2.5">
-                <div className="flex items-center justify-between gap-2">
-                  <h4 className="text-xs font-extrabold text-[#064E3B] dark:text-emerald-300 flex items-center gap-1.5">
-                    <Bot className="w-4 h-4 text-emerald-600" />
-                    <span>
-                      {tr(
-                        language,
-                        'មុខម្ហូបដែល AI ណែនាំសម្រាប់អ្នក៖',
-                        'AI-Matched Dishes for You:',
-                        'AI 为您智能匹配的菜品：'
-                      )}
-                    </span>
-                  </h4>
+              {/* AI Curated Dish Matches (Placed directly below search input so results appear immediately!) */}
+              <div
+                ref={advisorResultsRef}
+                className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-emerald-500/30 dark:border-emerald-500/30 space-y-2.5"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <h4 className="text-xs font-extrabold text-[#064E3B] dark:text-emerald-300 flex items-center gap-1.5">
+                      <Bot className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <span>
+                        {tr(
+                          language,
+                          'មុខម្ហូបដែល AI ណែនាំសម្រាប់អ្នក៖',
+                          'AI-Matched Dishes for You:',
+                          'AI 为您智能匹配的菜品：'
+                        )}
+                      </span>
+                    </h4>
+                    <p className="text-[11px] font-semibold text-slate-600 dark:text-slate-300 mt-0.5 leading-snug">
+                      {aiAdvisorResults.aiSummaryText}
+                    </p>
+                  </div>
                   <button
                     type="button"
                     onClick={() => setAdvisorSeed((s) => s + 1)}
-                    className="px-2.5 py-1 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-[10px] font-black inline-flex items-center gap-1 cursor-pointer"
+                    className="px-2.5 py-1 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-[10px] font-black inline-flex items-center gap-1 shrink-0 cursor-pointer"
                   >
                     <RefreshCw className="w-3 h-3" />
                     <span>{tr(language, 'ប្តូរជម្រើសថ្មី', 'Refresh AI', '换一批')}</span>
@@ -719,6 +695,73 @@ export const AiTripPlannerModal: React.FC = () => {
                     })}
                   </div>
                 )}
+              </div>
+
+              {/* Select Daily Goal (2 Free + 3 VIP) */}
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                  {tr(language, 'ជ្រើសរើសគោលបំណងអាហារថ្ងៃនេះ៖', 'Select your dining goal today:', '选择今日用餐目标：')}
+                </label>
+                <div className="space-y-1.5">
+                  {advisorGoals.map((g) => {
+                    const isLocked = g.vipOnly && !canUseVip;
+                    const isSelected = advisorGoal === g.id;
+                    return (
+                      <button
+                        key={g.id}
+                        type="button"
+                        onClick={() => {
+                          if (isLocked) {
+                            showToast(
+                              tr(
+                                language,
+                                '👑 មុខងារវិភាគអាហារូបត្ថម្ភ AI កម្រិតខ្ពស់ គឺសម្រាប់សមាជិក VIP!',
+                                '👑 Advanced AI Nutrition & Group Dining modes are for VIP members!',
+                                '👑 高级 AI 营养分析与聚餐推荐仅限 VIP 会员！'
+                              ),
+                              'info'
+                            );
+                            openUpgradeVipModal();
+                            return;
+                          }
+                          setAdvisorGoal(g.id);
+                          setAdvisorSeed(1);
+                          if (typeof window !== 'undefined') {
+                            window.requestAnimationFrame(() => {
+                              advisorResultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                            });
+                          }
+                        }}
+                        className={`w-full p-2.5 rounded-2xl border text-left transition flex items-center justify-between gap-2 cursor-pointer ${
+                          isSelected
+                            ? 'bg-emerald-50/90 dark:bg-emerald-950/50 border-emerald-600 ring-1 ring-emerald-500/40'
+                            : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-emerald-400'
+                        }`}
+                      >
+                        <div className="min-w-0">
+                          <div className="text-xs font-extrabold text-slate-900 dark:text-white truncate">
+                            {tr(language, g.kh, g.en, g.zh)}
+                          </div>
+                          <div className="text-[10.5px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                            {tr(language, g.descKh, g.descEn, g.descZh)}
+                          </div>
+                        </div>
+
+                        {g.vipOnly ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-900 text-amber-300 text-[10px] font-black shrink-0 border border-amber-400/40">
+                            {isLocked ? <Lock className="w-2.5 h-2.5" /> : <Crown className="w-2.5 h-2.5" />}
+                            <span>VIP</span>
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 text-[10px] font-extrabold shrink-0">
+                            <CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" />
+                            <span>{tr(language, 'ឥតគិតថ្លៃ', 'FREE', '免费')}</span>
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           )}
