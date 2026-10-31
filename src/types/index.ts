@@ -1,8 +1,16 @@
 export const APP_VERSION = 'v2.5.0';
 export const APP_VERSION_NAME = '2.5.0';
 declare const __KFT_BUILD_CODE__: number | undefined;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1275;
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1291;
 export const APP_RELEASE_DATE = '2026-10-31';
+
+/**
+ * Authoritative baseline timestamp for the verified bundled 200-dish food photo library (`public/foods/*.jpg`).
+ * Any stale cached/cloud food photo override older than this baseline (or using legacy auto-scraped external placeholders)
+ * is strictly rejected and purged so old food pictures never reappear.
+ */
+export const SEED_FOOD_PHOTO_BASELINE_ISO = '2026-10-31T10:30:00.000Z';
+export const SEED_FOOD_PHOTO_BASELINE_MS = Date.parse(SEED_FOOD_PHOTO_BASELINE_ISO);
 
 export interface AuthModalInitialView {
   mode: 'main' | 'email';
@@ -78,10 +86,18 @@ export const resolveFoodPhotoUrl = (photoUrl?: string, photoUpdatedAt?: string):
 
 /**
  * Verify that the signed-in user possesses a genuine, authenticated email account
- * (excluding guest sessions, empty emails, and phone-only synthetic placeholder emails).
+ * (strictly excluding guest sessions, empty emails, placeholder domains, and phone-only synthetic accounts).
  */
 export const hasAuthenticatedEmailAccount = (user?: Partial<User> | null): boolean => {
-  if (!user || typeof user.email !== 'string') return false;
+  if (!user || typeof user !== 'object') return false;
+  const rawUser = user as Record<string, unknown>;
+  if (rawUser.isGuest === true || rawUser.role === 'guest' || rawUser.authProvider === 'guest') {
+    return false;
+  }
+  if (typeof user.id === 'string' && (user.id === 'guest' || user.id.startsWith('guest-'))) {
+    return false;
+  }
+  if (typeof user.email !== 'string') return false;
   const trimmed = user.email.trim().toLowerCase();
   if (!trimmed || trimmed.length < 5) return false;
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(trimmed)) return false;
@@ -89,8 +105,32 @@ export const hasAuthenticatedEmailAccount = (user?: Partial<User> | null): boole
     trimmed.endsWith('@phone.kh') ||
     trimmed.endsWith('@user.kh') ||
     trimmed.endsWith('@guest.local') ||
+    trimmed.endsWith('@guest.kh') ||
     trimmed.endsWith('@local') ||
-    trimmed.endsWith('@placeholder.local')
+    trimmed.endsWith('@placeholder.local') ||
+    trimmed.endsWith('@placeholder.com') ||
+    trimmed.endsWith('@temp.local') ||
+    trimmed.endsWith('@test.local') ||
+    trimmed.endsWith('@invalid.local') ||
+    trimmed.endsWith('@noreply.local') ||
+    trimmed.endsWith('@anonymous.local') ||
+    trimmed.endsWith('@example.com') ||
+    trimmed.endsWith('@example.org') ||
+    trimmed.endsWith('@example.net')
+  ) {
+    return false;
+  }
+  const [localPart, domainPart] = trimmed.split('@');
+  if (
+    /^\+?\d{6,}$/.test(localPart || '') &&
+    (domainPart?.endsWith('.kh') || domainPart?.endsWith('.local'))
+  ) {
+    return false;
+  }
+  if (
+    user.authProvider === 'phone' &&
+    (!Array.isArray(user.linkedProviders) ||
+      (!user.linkedProviders.includes('email') && !user.linkedProviders.includes('google')))
   ) {
     return false;
   }
@@ -155,22 +195,22 @@ export const VIP_PLANS: Record<'quarterly' | 'annual', VipPlanConfig> = {
   quarterly: {
     id: 'quarterly',
     nameEn: 'VIP 1 Month (30 Days)',
-    nameKh: 'VIP ១ ខែ (30 ថ្ងៃ)',
+    nameKh: 'VIP áŸ¡ ážáŸ‚ (30 ážáŸ’áž„áŸƒ)',
     priceUsd: VIP_QUARTERLY_PRICE_USD,
     durationDays: VIP_QUARTERLY_DAYS,
     labelEn: `VIP 1 Month / ${VIP_QUARTERLY_DAYS} Days ($${VIP_QUARTERLY_PRICE_USD.toFixed(2)} USD)`,
-    labelKh: `VIP ១ ខែ / ${VIP_QUARTERLY_DAYS} ថ្ងៃ ($${VIP_QUARTERLY_PRICE_USD.toFixed(2)} USD)`,
-    priceKhrDisplay: `${Math.round(VIP_QUARTERLY_PRICE_USD * 4100).toLocaleString()} រៀល`
+    labelKh: `VIP áŸ¡ ážáŸ‚ / ${VIP_QUARTERLY_DAYS} ážáŸ’áž„áŸƒ ($${VIP_QUARTERLY_PRICE_USD.toFixed(2)} USD)`,
+    priceKhrDisplay: `${Math.round(VIP_QUARTERLY_PRICE_USD * 4100).toLocaleString()} ážšáŸ€áž›`
   },
   annual: {
     id: 'annual',
     nameEn: 'VIP 2 Months (60 Days)',
-    nameKh: 'VIP ២ ខែ (60 ថ្ងៃ)',
+    nameKh: 'VIP áŸ¢ ážáŸ‚ (60 ážáŸ’áž„áŸƒ)',
     priceUsd: VIP_ANNUAL_PRICE_USD,
     durationDays: VIP_SUBSCRIPTION_DAYS,
     labelEn: `VIP 2 Months / ${VIP_SUBSCRIPTION_DAYS} Days ($${VIP_ANNUAL_PRICE_USD.toFixed(2)} USD)`,
-    labelKh: `VIP ២ ខែ / ${VIP_SUBSCRIPTION_DAYS} ថ្ងៃ ($${VIP_ANNUAL_PRICE_USD.toFixed(2)} USD)`,
-    priceKhrDisplay: `${Math.round(VIP_ANNUAL_PRICE_USD * 4100).toLocaleString()} រៀល`
+    labelKh: `VIP áŸ¢ ážáŸ‚ / ${VIP_SUBSCRIPTION_DAYS} ážáŸ’áž„áŸƒ ($${VIP_ANNUAL_PRICE_USD.toFixed(2)} USD)`,
+    priceKhrDisplay: `${Math.round(VIP_ANNUAL_PRICE_USD * 4100).toLocaleString()} ážšáŸ€áž›`
   }
 };
 
@@ -260,90 +300,90 @@ export interface VipBenefitItem {
 export const TEN_VIP_BENEFITS: VipBenefitItem[] = [
   {
     id: 1,
-    titleKh: 'ទម្រង់ហាងកម្រិតខ្ពស់',
+    titleKh: 'áž‘áž˜áŸ’ážšáž„áŸ‹áž áž¶áž„áž€áž˜áŸ’ážšáž·ážážáŸ’áž–ážŸáŸ‹',
     titleEn: 'Enhanced Restaurant Profile',
-    descriptionKh: 'កែប្រែទម្រង់ហាងជាមួយ Theme មាស និងផ្លាកសញ្ញាបញ្ជាក់ផ្លូវការ Iconic VIP',
+    descriptionKh: 'áž€áŸ‚áž”áŸ’ážšáŸ‚áž‘áž˜áŸ’ážšáž„áŸ‹áž áž¶áž„áž‡áž¶áž˜áž½áž™ Theme áž˜áž¶ážŸ áž“áž·áž„áž•áŸ’áž›áž¶áž€ážŸáž‰áŸ’áž‰áž¶áž”áž‰áŸ’áž‡áž¶áž€áŸ‹áž•áŸ’áž›áž¼ážœáž€áž¶ážš Iconic VIP',
     descriptionEn: 'Customized golden theme, verified iconic badge, and custom branding for your restaurant.',
     iconName: 'Sparkles',
     category: 'profile'
   },
   {
     id: 2,
-    titleKh: 'រូបថតច្រើនសន្លឹក និងមុខម្ហូបរហូតដល់ ២០ មុខ',
+    titleKh: 'ážšáž¼áž”ážážáž…áŸ’ážšáž¾áž“ážŸáž“áŸ’áž›áž¹áž€ áž“áž·áž„áž˜áž»ážáž˜áŸ’áž áž¼áž”ážšáž áž¼ážážŠáž›áŸ‹ áŸ¢áŸ  áž˜áž»áž',
     titleEn: 'More Food Photos & Menu Items',
-    descriptionKh: 'បង្ហោះមុខម្ហូបក្នុងបញ្ជីបានរហូតដល់ ២០ មុខ ព្រមទាំងរូបថត Gallery ច្រើនសន្លឹក',
+    descriptionKh: 'áž”áž„áŸ’áž áŸ„áŸ‡áž˜áž»ážáž˜áŸ’áž áž¼áž”áž€áŸ’áž“áž»áž„áž”áž‰áŸ’áž‡áž¸áž”áž¶áž“ážšáž áž¼ážážŠáž›áŸ‹ áŸ¢áŸ  áž˜áž»áž áž–áŸ’ážšáž˜áž‘áž¶áŸ†áž„ážšáž¼áž”ážáž Gallery áž…áŸ’ážšáž¾áž“ážŸáž“áŸ’áž›áž¹áž€',
     descriptionEn: 'Add up to 20 menu items (free accounts limited to 5) with high-res photo gallery.',
     iconName: 'UtensilsCrossed',
     category: 'profile'
   },
   {
     id: 3,
-    titleKh: 'បង្ហោះវីដេអូផ្សព្វផ្សាយម្ហូប',
+    titleKh: 'áž”áž„áŸ’áž áŸ„áŸ‡ážœáž¸ážŠáŸáž¢áž¼áž•áŸ’ážŸáž–áŸ’ážœáž•áŸ’ážŸáž¶áž™áž˜áŸ’áž áž¼áž”',
     titleEn: 'Food Promotional Video Uploads',
-    descriptionKh: 'ភ្ជាប់វីដេអូផ្សព្វផ្សាយម្ហូប YouTube, TikTok ឬ MP4 លើទំព័រហាងផ្ទាល់',
+    descriptionKh: 'áž—áŸ’áž‡áž¶áž”áŸ‹ážœáž¸ážŠáŸáž¢áž¼áž•áŸ’ážŸáž–áŸ’ážœáž•áŸ’ážŸáž¶áž™áž˜áŸ’áž áž¼áž” YouTube, TikTok áž¬ MP4 áž›áž¾áž‘áŸ†áž–áŸážšáž áž¶áž„áž•áŸ’áž‘áž¶áž›áŸ‹',
     descriptionEn: 'Embed promotional video clips (YouTube, TikTok, MP4) directly on restaurant cards.',
     iconName: 'Video',
     category: 'promotion'
   },
   {
     id: 4,
-    titleKh: 'ផ្លាកសញ្ញា VIP ពណ៌មាស',
+    titleKh: 'áž•áŸ’áž›áž¶áž€ážŸáž‰áŸ’áž‰áž¶ VIP áž–ážŽáŸŒáž˜áž¶ážŸ',
     titleEn: 'Premium VIP Badge',
-    descriptionKh: 'បង្ហាញផ្លាកសញ្ញា VIP ពណ៌មាសលើកម្រង Profile, Comments និងកាតហាង',
+    descriptionKh: 'áž”áž„áŸ’áž áž¶áž‰áž•áŸ’áž›áž¶áž€ážŸáž‰áŸ’áž‰áž¶ VIP áž–ážŽáŸŒáž˜áž¶ážŸáž›áž¾áž€áž˜áŸ’ážšáž„ Profile, Comments áž“áž·áž„áž€áž¶ážáž áž¶áž„',
     descriptionEn: 'Distinguished golden VIP badge on your profile, comments, reviews, and restaurant listings.',
     iconName: 'Crown',
     category: 'profile'
   },
   {
     id: 5,
-    titleKh: 'ទីតាំងផ្សព្វផ្សាយលើទំព័រដើម',
+    titleKh: 'áž‘áž¸ážáž¶áŸ†áž„áž•áŸ’ážŸáž–áŸ’ážœáž•áŸ’ážŸáž¶áž™áž›áž¾áž‘áŸ†áž–áŸážšážŠáž¾áž˜',
     titleEn: 'Additional Promotional Placement',
-    descriptionKh: 'ទទួលបានការផ្សព្វផ្សាយលើគេក្នុងទំព័រដើម Home Screen និងបញ្ជី Top Recommended',
+    descriptionKh: 'áž‘áž‘áž½áž›áž”áž¶áž“áž€áž¶ážšáž•áŸ’ážŸáž–áŸ’ážœáž•áŸ’ážŸáž¶áž™áž›áž¾áž‚áŸáž€áŸ’áž“áž»áž„áž‘áŸ†áž–áŸážšážŠáž¾áž˜ Home Screen áž“áž·áž„áž”áž‰áŸ’áž‡áž¸ Top Recommended',
     descriptionEn: 'Prime featured spot on the home page carousel and top recommendations section.',
     iconName: 'Flame',
     category: 'promotion'
   },
   {
     id: 6,
-    titleKh: 'ទីតាំងលេចធ្លោលើផែនទី',
+    titleKh: 'áž‘áž¸ážáž¶áŸ†áž„áž›áŸáž…áž’áŸ’áž›áŸ„áž›áž¾áž•áŸ‚áž“áž‘áž¸',
     titleEn: 'Restaurant Location on the Map',
-    descriptionKh: 'សម្គាល់ទីតាំងហាងដោយ Pin ពណ៌មាសលើផែនទី GPS និងប៊ូតុងនាំផ្លូវ 1-Tap Directions',
+    descriptionKh: 'ážŸáž˜áŸ’áž‚áž¶áž›áŸ‹áž‘áž¸ážáž¶áŸ†áž„áž áž¶áž„ážŠáŸ„áž™ Pin áž–ážŽáŸŒáž˜áž¶ážŸáž›áž¾áž•áŸ‚áž“áž‘áž¸ GPS áž“áž·áž„áž”áŸŠáž¼ážáž»áž„áž“áž¶áŸ†áž•áŸ’áž›áž¼ážœ 1-Tap Directions',
     descriptionEn: 'Highlighted golden map pin with instant turn-by-turn navigation for visitors.',
     iconName: 'MapPin',
     category: 'reach'
   },
   {
     id: 7,
-    titleKh: 'ប៊ូតុងទំនាក់ទំនងរហ័ស',
+    titleKh: 'áž”áŸŠáž¼ážáž»áž„áž‘áŸ†áž“áž¶áž€áŸ‹áž‘áŸ†áž“áž„ážšáž áŸážŸ',
     titleEn: 'Quick Contact Buttons',
-    descriptionKh: 'ប៊ូតុងទាក់ទងរហ័ស ហៅទូរស័ព្ទ (Call), Telegram និង Facebook ដោយផ្ទាល់លើកាតហាង',
+    descriptionKh: 'áž”áŸŠáž¼ážáž»áž„áž‘áž¶áž€áŸ‹áž‘áž„ážšáž áŸážŸ áž áŸ…áž‘áž¼ážšážŸáŸáž–áŸ’áž‘ (Call), Telegram áž“áž·áž„ Facebook ážŠáŸ„áž™áž•áŸ’áž‘áž¶áž›áŸ‹áž›áž¾áž€áž¶ážáž áž¶áž„',
     descriptionEn: 'One-tap direct contact buttons for Phone Call, Telegram chat, and Facebook page.',
     iconName: 'Zap',
     category: 'reach'
   },
   {
     id: 8,
-    titleKh: 'ស្ថិតិអ្នកចូលមើលហាង',
+    titleKh: 'ážŸáŸ’ážáž·ážáž·áž¢áŸ’áž“áž€áž…áž¼áž›áž˜áž¾áž›áž áž¶áž„',
     titleEn: 'Profile View & Contact Click Statistics',
-    descriptionKh: 'ផ្ទាំងគ្រប់គ្រងមើលចំនួនអ្នកទស្សនាហាង ចំនួនអ្នកចុច Call និងចំនួនអ្នកចុច Map',
+    descriptionKh: 'áž•áŸ’áž‘áž¶áŸ†áž„áž‚áŸ’ážšáž”áŸ‹áž‚áŸ’ážšáž„áž˜áž¾áž›áž…áŸ†áž“áž½áž“áž¢áŸ’áž“áž€áž‘ážŸáŸ’ážŸáž“áž¶áž áž¶áž„ áž…áŸ†áž“áž½áž“áž¢áŸ’áž“áž€áž…áž»áž… Call áž“áž·áž„áž…áŸ†áž“áž½áž“áž¢áŸ’áž“áž€áž…áž»áž… Map',
     descriptionEn: 'Detailed real-time analytics dashboard on visitor views, calls, and direction clicks.',
     iconName: 'BarChart3',
     category: 'analytics'
   },
   {
     id: 9,
-    titleKh: 'តំណភ្ជាប់ចែករំលែកទំព័រហាង',
+    titleKh: 'ážáŸ†ážŽáž—áŸ’áž‡áž¶áž”áŸ‹áž…áŸ‚áž€ážšáŸ†áž›áŸ‚áž€áž‘áŸ†áž–áŸážšáž áž¶áž„',
     titleEn: 'Shareable Restaurant Profile Link',
-    descriptionKh: 'តំណភ្ជាប់ Deep Link ផ្ទាល់ខ្លួន ចម្លង និងចែករំលែកទៅបណ្តាញសង្គម Telegram និង Facebook',
+    descriptionKh: 'ážáŸ†ážŽáž—áŸ’áž‡áž¶áž”áŸ‹ Deep Link áž•áŸ’áž‘áž¶áž›áŸ‹ážáŸ’áž›áž½áž“ áž…áž˜áŸ’áž›áž„ áž“áž·áž„áž…áŸ‚áž€ážšáŸ†áž›áŸ‚áž€áž‘áŸ…áž”ážŽáŸ’ážáž¶áž‰ážŸáž„áŸ’áž‚áž˜ Telegram áž“áž·áž„ Facebook',
     descriptionEn: 'Direct custom deep-link to share your profile across Telegram, Facebook, and WhatsApp.',
     iconName: 'Share2',
     category: 'reach'
   },
   {
     id: 10,
-    titleKh: 'អាទិភាពខ្ពស់ក្នុងការស្វែងរក',
+    titleKh: 'áž¢áž¶áž‘áž·áž—áž¶áž–ážáŸ’áž–ážŸáŸ‹áž€áŸ’áž“áž»áž„áž€áž¶ážšážŸáŸ’ážœáŸ‚áž„ážšáž€',
     titleEn: 'Improved Search Visibility & Priority Ranking',
-    descriptionKh: 'ទទួលបានអាទិភាពបង្ហាញលើគេពេលអតិថិជនស្វែងរកមុខម្ហូប និងឈ្មោះហាងក្នុងកម្មវិធី',
+    descriptionKh: 'áž‘áž‘áž½áž›áž”áž¶áž“áž¢áž¶áž‘áž·áž—áž¶áž–áž”áž„áŸ’áž áž¶áž‰áž›áž¾áž‚áŸáž–áŸáž›áž¢ážáž·ážáž·áž‡áž“ážŸáŸ’ážœáŸ‚áž„ážšáž€áž˜áž»ážáž˜áŸ’áž áž¼áž” áž“áž·áž„ážˆáŸ’áž˜áŸ„áŸ‡áž áž¶áž„áž€áŸ’áž“áž»áž„áž€áž˜áŸ’áž˜ážœáž·áž’áž¸',
     descriptionEn: 'Algorithm boost ensuring your listings appear at the top of search and filter queries.',
     iconName: 'Search',
     category: 'promotion'
@@ -433,42 +473,42 @@ export const KHMER_FOOD_PRIMARY_CATEGORIES: KhmerFoodPrimaryCategoryMeta[] = [
   {
     id: 'samlor',
     order: 1,
-    nameKh: 'សម្ល និងការី',
-    shortNameKh: 'សម្ល',
+    nameKh: 'ážŸáž˜áŸ’áž› áž“áž·áž„áž€áž¶ážšáž¸',
+    shortNameKh: 'ážŸáž˜áŸ’áž›',
     nameEn: 'Samlor & Curries',
-    subtitleKh: 'សម្លខ្មែរ សម្លកកូរ សម្លការី សម្លម្ជូរ អាម៉ុក ប្រហុកខ្ទិះ និងខ',
+    subtitleKh: 'ážŸáž˜áŸ’áž›ážáŸ’áž˜áŸ‚ážš ážŸáž˜áŸ’áž›áž€áž€áž¼ážš ážŸáž˜áŸ’áž›áž€áž¶ážšáž¸ ážŸáž˜áŸ’áž›áž˜áŸ’áž‡áž¼ážš áž¢áž¶áž˜áŸ‰áž»áž€ áž”áŸ’ážšáž áž»áž€ážáŸ’áž‘áž·áŸ‡ áž“áž·áž„áž',
     subtitleEn: 'Traditional Khmer Samlor, Curries, Amok, Stews & Braised Dishes',
-    emoji: '🍲'
+    emoji: 'ðŸ²'
   },
   {
     id: 'cha',
     order: 2,
-    nameKh: 'ឆា អាំង និងញាំ',
-    shortNameKh: 'ឆា',
+    nameKh: 'áž†áž¶ áž¢áž¶áŸ†áž„ áž“áž·áž„áž‰áž¶áŸ†',
+    shortNameKh: 'áž†áž¶',
     nameEn: 'Stir-Fry & Savory',
-    subtitleKh: 'ម្ហូបឆា ឡុកឡាក់ ឆាគ្រឿង ឆាក្តៅ មីឆា បាយឆា និងម្ហូបអាំង/ញាំ',
+    subtitleKh: 'áž˜áŸ’áž áž¼áž”áž†áž¶ áž¡áž»áž€áž¡áž¶áž€áŸ‹ áž†áž¶áž‚áŸ’ážšáž¿áž„ áž†áž¶áž€áŸ’ážáŸ… áž˜áž¸áž†áž¶ áž”áž¶áž™áž†áž¶ áž“áž·áž„áž˜áŸ’áž áž¼áž”áž¢áž¶áŸ†áž„/áž‰áž¶áŸ†',
     subtitleEn: 'Wok Stir-Fries, Lok Lak, Fried Noodles/Rice, Grilled & Salads',
-    emoji: '🥘'
+    emoji: 'ðŸ¥˜'
   },
   {
     id: 'sngor',
     order: 3,
-    nameKh: 'ស្ងោរ ស៊ុប និងបបរ',
-    shortNameKh: 'ស្ងោរ',
+    nameKh: 'ážŸáŸ’áž„áŸ„ážš ážŸáŸŠáž»áž” áž“áž·áž„áž”áž”ážš',
+    shortNameKh: 'ážŸáŸ’áž„áŸ„ážš',
     nameEn: 'Boiled Soups & Broths',
-    subtitleKh: 'ស្ងោរជ្រក់ ស្ងោរម្រះ ស្ងោរង៉ាំង៉ូវ ស៊ុប បបរ និងគុយទាវទឹក',
+    subtitleKh: 'ážŸáŸ’áž„áŸ„ážšáž‡áŸ’ážšáž€áŸ‹ ážŸáŸ’áž„áŸ„ážšáž˜áŸ’ážšáŸ‡ ážŸáŸ’áž„áŸ„ážšáž„áŸ‰áž¶áŸ†áž„áŸ‰áž¼ážœ ážŸáŸŠáž»áž” áž”áž”ážš áž“áž·áž„áž‚áž»áž™áž‘áž¶ážœáž‘áž¹áž€',
     subtitleEn: 'Clear Boiled Soups, Herbal Broths, Hotpots, Porridges & Noodle Soups',
-    emoji: '🥣'
+    emoji: 'ðŸ¥£'
   },
   {
     id: 'bong_aem',
     order: 4,
-    nameKh: 'បង្អែម និងនំខ្មែរ',
-    shortNameKh: 'បង្អែម',
+    nameKh: 'áž”áž„áŸ’áž¢áŸ‚áž˜ áž“áž·áž„áž“áŸ†ážáŸ’áž˜áŸ‚ážš',
+    shortNameKh: 'áž”áž„áŸ’áž¢áŸ‚áž˜',
     nameEn: 'Khmer Desserts & Cakes',
-    subtitleKh: 'បង្អែមខ្មែរ សង់ខ្យា ចេកខ្ទិះ នំប្រពៃណីខ្មែរ និងភេសជ្ជៈផ្អែម',
+    subtitleKh: 'áž”áž„áŸ’áž¢áŸ‚áž˜ážáŸ’áž˜áŸ‚ážš ážŸáž„áŸ‹ážáŸ’áž™áž¶ áž…áŸáž€ážáŸ’áž‘áž·áŸ‡ áž“áŸ†áž”áŸ’ážšáž–áŸƒážŽáž¸ážáŸ’áž˜áŸ‚ážš áž“áž·áž„áž—áŸážŸáž‡áŸ’áž‡áŸˆáž•áŸ’áž¢áŸ‚áž˜',
     subtitleEn: 'Traditional Khmer Sweet Desserts, Custard, Pudding & Sweet Cakes',
-    emoji: '🍨'
+    emoji: 'ðŸ¨'
   }
 ];
 
@@ -478,19 +518,19 @@ export function classifyKhmerFoodPrimaryGroup(food: Pick<FoodItem, 'nameKh' | 'n
   const slug = food.categorySlug;
 
   // 1. Check explicit prefix in Khmer name first for 100% accuracy on named dishes
-  if (kh.startsWith('បង្អែម') || kh.includes('សង់ខ្យា') || kh.includes('ចេកខ្ទិះ') || kh.includes('ទឹកកកឈូស') || kh.includes('ចាហួយ') || kh.includes('បាញ់ឌុក') || kh.includes('បាញ់ចានឿក') || kh.includes('តៅហ៊ូទឹកស្ករ')) {
+  if (kh.startsWith('áž”áž„áŸ’áž¢áŸ‚áž˜') || kh.includes('ážŸáž„áŸ‹ážáŸ’áž™áž¶') || kh.includes('áž…áŸáž€ážáŸ’áž‘áž·áŸ‡') || kh.includes('áž‘áž¹áž€áž€áž€ážˆáž¼ážŸ') || kh.includes('áž…áž¶áž áž½áž™') || kh.includes('áž”áž¶áž‰áŸ‹ážŒáž»áž€') || kh.includes('áž”áž¶áž‰áŸ‹áž…áž¶áž“áž¿áž€') || kh.includes('ážáŸ…áž áŸŠáž¼áž‘áž¹áž€ážŸáŸ’áž€ážš')) {
     return 'bong_aem';
   }
-  if (kh.startsWith('ស្ងោរ') || kh.startsWith('ស៊ុប') || kh.startsWith('បបរ') || kh.includes('ស្ងោរ') || kh.includes('ង៉ាំង៉ូវ') || kh.includes('ឆ្នាំងភ្លើង') || kh.includes('យ៉ាវហន')) {
-    // Exclude sweet dessert porridges like បង្អែមបបរ
-    if (!kh.includes('បង្អែម') && slug !== 'dessert') {
+  if (kh.startsWith('ážŸáŸ’áž„áŸ„ážš') || kh.startsWith('ážŸáŸŠáž»áž”') || kh.startsWith('áž”áž”ážš') || kh.includes('ážŸáŸ’áž„áŸ„ážš') || kh.includes('áž„áŸ‰áž¶áŸ†áž„áŸ‰áž¼ážœ') || kh.includes('áž†áŸ’áž“áž¶áŸ†áž„áž—áŸ’áž›áž¾áž„') || kh.includes('áž™áŸ‰áž¶ážœáž áž“')) {
+    // Exclude sweet dessert porridges like áž”áž„áŸ’áž¢áŸ‚áž˜áž”áž”ážš
+    if (!kh.includes('áž”áž„áŸ’áž¢áŸ‚áž˜') && slug !== 'dessert') {
       return 'sngor';
     }
   }
-  if (kh.startsWith('សម្ល') || kh.includes('សម្ល') || kh.includes('ការី') || kh.includes('អាម៉ុក') || kh.includes('កកូរ') || kh.includes('ម្ជូរគ្រឿង') || kh.includes('ម្ជូរយួន') || kh.includes('ប្រហើរ') || kh.includes('ប្រហុកខ្ទិះ') || kh.includes('ប្រហុកគ្រឿង') || kh.includes('ប្រហុកចិញ្ច្រាំ') || kh.includes('ទឹកគ្រឿង') || kh.includes('កាពិផាវ') || kh.includes('ណាំយ៉ា') || kh.startsWith('ខ') || kh.includes('ខសាច់') || kh.includes('ខត្រី') || kh.includes('ខជើងជ្រូក') || kh.includes('ផាក់ឡូវ')) {
+  if (kh.startsWith('ážŸáž˜áŸ’áž›') || kh.includes('ážŸáž˜áŸ’áž›') || kh.includes('áž€áž¶ážšáž¸') || kh.includes('áž¢áž¶áž˜áŸ‰áž»áž€') || kh.includes('áž€áž€áž¼ážš') || kh.includes('áž˜áŸ’áž‡áž¼ážšáž‚áŸ’ážšáž¿áž„') || kh.includes('áž˜áŸ’áž‡áž¼ážšáž™áž½áž“') || kh.includes('áž”áŸ’ážšáž áž¾ážš') || kh.includes('áž”áŸ’ážšáž áž»áž€ážáŸ’áž‘áž·áŸ‡') || kh.includes('áž”áŸ’ážšáž áž»áž€áž‚áŸ’ážšáž¿áž„') || kh.includes('áž”áŸ’ážšáž áž»áž€áž…áž·áž‰áŸ’áž…áŸ’ážšáž¶áŸ†') || kh.includes('áž‘áž¹áž€áž‚áŸ’ážšáž¿áž„') || kh.includes('áž€áž¶áž–áž·áž•áž¶ážœ') || kh.includes('ážŽáž¶áŸ†áž™áŸ‰áž¶') || kh.startsWith('áž') || kh.includes('ážážŸáž¶áž…áŸ‹') || kh.includes('ážážáŸ’ážšáž¸') || kh.includes('ážáž‡áž¾áž„áž‡áŸ’ážšáž¼áž€') || kh.includes('áž•áž¶áž€áŸ‹áž¡áž¼ážœ')) {
     return 'samlor';
   }
-  if (kh.startsWith('ឆា') || kh.includes('ឆា') || kh.includes('ឡុកឡាក់')) {
+  if (kh.startsWith('áž†áž¶') || kh.includes('áž†áž¶') || kh.includes('áž¡áž»áž€áž¡áž¶áž€áŸ‹')) {
     return 'cha';
   }
 
@@ -499,8 +539,8 @@ export function classifyKhmerFoodPrimaryGroup(food: Pick<FoodItem, 'nameKh' | 'n
     return 'bong_aem';
   }
   if (slug === 'cake') {
-    // Savory street cakes like បាញ់ឆែវ, នំប៉័ងប៉ាតេ, គួង, ណែម go to 'cha' (savory/pan-fried), while sweet cakes go to 'bong_aem'
-    if (kh.includes('បាញ់ឆែវ') || kh.includes('បាញ់ហយ') || kh.includes('នំប៉័ង') || kh.includes('គួង') || kh.includes('ណែម') || kh.includes('គូឆាយ')) {
+    // Savory street cakes like áž”áž¶áž‰áŸ‹áž†áŸ‚ážœ, áž“áŸ†áž”áŸ‰áŸáž„áž”áŸ‰áž¶ážáŸ, áž‚áž½áž„, ážŽáŸ‚áž˜ go to 'cha' (savory/pan-fried), while sweet cakes go to 'bong_aem'
+    if (kh.includes('áž”áž¶áž‰áŸ‹áž†áŸ‚ážœ') || kh.includes('áž”áž¶áž‰áŸ‹áž áž™') || kh.includes('áž“áŸ†áž”áŸ‰áŸáž„') || kh.includes('áž‚áž½áž„') || kh.includes('ážŽáŸ‚áž˜') || kh.includes('áž‚áž¼áž†áž¶áž™')) {
       return 'cha';
     }
     return 'bong_aem';
@@ -508,10 +548,10 @@ export function classifyKhmerFoodPrimaryGroup(food: Pick<FoodItem, 'nameKh' | 'n
 
   // 3. Check Noodle dishes: noodle soups with broth go to 'sngor' or 'samlor', stir-fried noodles go to 'cha'
   if (slug === 'noodles') {
-    if (kh.includes('នំបញ្ចុក')) {
+    if (kh.includes('áž“áŸ†áž”áž‰áŸ’áž…áž»áž€')) {
       return 'samlor';
     }
-    if (kh.includes('ឆា') || en.includes('fried') || en.includes('stir')) {
+    if (kh.includes('áž†áž¶') || en.includes('fried') || en.includes('stir')) {
       return 'cha';
     }
     return 'sngor';
@@ -519,7 +559,7 @@ export function classifyKhmerFoodPrimaryGroup(food: Pick<FoodItem, 'nameKh' | 'n
 
   // 4. Check Soup categorySlug: separate Samlor/Curry from Sngor/Clear Boiled Soup
   if (slug === 'soup') {
-    if (en.includes('curry') || en.includes('samlor') || en.includes('korko') || en.includes('machu') || en.includes('amok') || kh.includes('ម្ជូរ')) {
+    if (en.includes('curry') || en.includes('samlor') || en.includes('korko') || en.includes('machu') || en.includes('amok') || kh.includes('áž˜áŸ’áž‡áž¼ážš')) {
       return 'samlor';
     }
     return 'sngor';
@@ -532,30 +572,30 @@ export function classifyKhmerFoodPrimaryGroup(food: Pick<FoodItem, 'nameKh' | 'n
 export function getFoodSubGroupSortKey(food: FoodItem, group: KhmerFoodPrimaryGroup): string {
   const kh = (food.nameKh || '').trim();
   if (group === 'samlor') {
-    if (kh.startsWith('សម្ល')) return `1_${kh}`;
-    if (kh.includes('ការី') || kh.includes('អាម៉ុក')) return `2_${kh}`;
-    if (kh.includes('ប្រហុក') || kh.includes('ទឹកគ្រឿង') || kh.includes('កាពិ')) return `3_${kh}`;
-    if (kh.startsWith('ខ') || kh.includes('ផាក់ឡូវ')) return `4_${kh}`;
+    if (kh.startsWith('ážŸáž˜áŸ’áž›')) return `1_${kh}`;
+    if (kh.includes('áž€áž¶ážšáž¸') || kh.includes('áž¢áž¶áž˜áŸ‰áž»áž€')) return `2_${kh}`;
+    if (kh.includes('áž”áŸ’ážšáž áž»áž€') || kh.includes('áž‘áž¹áž€áž‚áŸ’ážšáž¿áž„') || kh.includes('áž€áž¶áž–áž·')) return `3_${kh}`;
+    if (kh.startsWith('áž') || kh.includes('áž•áž¶áž€áŸ‹áž¡áž¼ážœ')) return `4_${kh}`;
     return `5_${kh}`;
   }
   if (group === 'cha') {
-    if (kh.startsWith('ឆា')) return `1_${kh}`;
-    if (kh.includes('ឆា') || kh.includes('ឡុកឡាក់')) return `2_${kh}`;
-    if (kh.includes('អាំង') || kh.includes('ដុត') || kh.includes('បំពង') || kh.includes('ចៀន')) return `3_${kh}`;
-    if (kh.includes('ញាំ') || kh.includes('ភ្លា') || kh.includes('បុក')) return `4_${kh}`;
+    if (kh.startsWith('áž†áž¶')) return `1_${kh}`;
+    if (kh.includes('áž†áž¶') || kh.includes('áž¡áž»áž€áž¡áž¶áž€áŸ‹')) return `2_${kh}`;
+    if (kh.includes('áž¢áž¶áŸ†áž„') || kh.includes('ážŠáž»áž') || kh.includes('áž”áŸ†áž–áž„') || kh.includes('áž…áŸ€áž“')) return `3_${kh}`;
+    if (kh.includes('áž‰áž¶áŸ†') || kh.includes('áž—áŸ’áž›áž¶') || kh.includes('áž”áž»áž€')) return `4_${kh}`;
     return `5_${kh}`;
   }
   if (group === 'sngor') {
-    if (kh.startsWith('ស្ងោរ')) return `1_${kh}`;
-    if (kh.includes('ស្ងោរ')) return `2_${kh}`;
-    if (kh.startsWith('ស៊ុប') || kh.includes('ឆ្នាំងភ្លើង')) return `3_${kh}`;
-    if (kh.startsWith('បបរ')) return `4_${kh}`;
+    if (kh.startsWith('ážŸáŸ’áž„áŸ„ážš')) return `1_${kh}`;
+    if (kh.includes('ážŸáŸ’áž„áŸ„ážš')) return `2_${kh}`;
+    if (kh.startsWith('ážŸáŸŠáž»áž”') || kh.includes('áž†áŸ’áž“áž¶áŸ†áž„áž—áŸ’áž›áž¾áž„')) return `3_${kh}`;
+    if (kh.startsWith('áž”áž”ážš')) return `4_${kh}`;
     return `5_${kh}`;
   }
   // bong_aem
-  if (kh.startsWith('បង្អែម')) return `1_${kh}`;
-  if (kh.includes('សង់ខ្យា') || kh.includes('ចេកខ្ទិះ') || kh.includes('បាញ់ឌុក')) return `2_${kh}`;
-  if (kh.startsWith('នំ')) return `3_${kh}`;
+  if (kh.startsWith('áž”áž„áŸ’áž¢áŸ‚áž˜')) return `1_${kh}`;
+  if (kh.includes('ážŸáž„áŸ‹ážáŸ’áž™áž¶') || kh.includes('áž…áŸáž€ážáŸ’áž‘áž·áŸ‡') || kh.includes('áž”áž¶áž‰áŸ‹ážŒáž»áž€')) return `2_${kh}`;
+  if (kh.startsWith('áž“áŸ†')) return `3_${kh}`;
   return `4_${kh}`;
 }
 
@@ -986,9 +1026,10 @@ export const isValidCambodiaCoordinates = (
     typeof lng === 'number' &&
     Number.isFinite(lat) &&
     Number.isFinite(lng) &&
+    !(lat === 0 && lng === 0) &&
     lat >= 9.8 &&
     lat <= 14.8 &&
-    lng >= 102.2 &&
+    lng >= 102.3 &&
     lng <= 107.7
   );
 };
@@ -1031,6 +1072,51 @@ export const isPlaceLocationVerified = (
   const lat = typeof place.latitude === 'number' ? place.latitude : place.lat;
   const lng = typeof place.longitude === 'number' ? place.longitude : place.lng;
   return isValidCambodiaCoordinates(lat, lng);
+};
+
+/**
+ * Strict runtime guardrail for Cambodia restaurants & food shops:
+ * Rejects unverified, incomplete, fake, (0, 0), locationNeedsReview: true,
+ * out-of-Cambodia coordinates, fake Place IDs, or missing/broken mapUrl entries so they
+ * can NEVER be displayed in RestaurantView, HomeView, NearMeModal, or search results.
+ */
+export const isStrictVerifiedCambodiaRestaurant = (
+  restaurant?: Partial<Restaurant> | null
+): boolean => {
+  if (!restaurant || typeof restaurant !== 'object') return false;
+  if (!restaurant.id || typeof restaurant.id !== 'string') return false;
+  if (restaurant.id.startsWith('food-') || restaurant.id.startsWith('dest-')) return false;
+  if (
+    restaurant.locationNeedsReview === true ||
+    restaurant.locationVerificationStatus === 'needs_admin_review'
+  ) {
+    return false;
+  }
+  if (!isValidCambodiaCoordinates(restaurant.latitude, restaurant.longitude)) {
+    return false;
+  }
+  const nameKh = (restaurant.nameKh || '').trim();
+  const nameEn = (restaurant.nameEn || '').trim();
+  if (!nameKh && !nameEn) return false;
+  const address = (restaurant.addressKh || restaurant.addressEn || '').trim();
+  const province = (restaurant.provinceKh || restaurant.provinceEn || '').trim();
+  if (!address || !province) return false;
+  const mapUrl = (restaurant.mapUrl || '').trim();
+  if (
+    !mapUrl ||
+    !(
+      mapUrl.startsWith('https://www.google.com/maps') ||
+      mapUrl.startsWith('https://maps.google.com') ||
+      mapUrl.startsWith('https://maps.app.goo.gl/') ||
+      mapUrl.startsWith('https://goo.gl/maps/')
+    )
+  ) {
+    return false;
+  }
+  if (restaurant.googlePlaceId && !isValidOfficialGooglePlaceId(restaurant.googlePlaceId)) {
+    return false;
+  }
+  return true;
 };
 
 export const buildCanonicalGoogleMapsPinUrl = (
@@ -1376,7 +1462,7 @@ export const getVipRemainingDays = (user?: User | null): number => {
   return Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
 };
 
-// AI Trending Food Section Types (Strictly Food Places only: Street Food, Cafés, Desserts, Famous & Unusual Dishes)
+// AI Trending Food Section Types (Strictly Food Places only: Street Food, CafÃ©s, Desserts, Famous & Unusual Dishes)
 export type TrendingFoodCategorySlug = 
   | 'all'
   | 'street_food' 
@@ -1503,7 +1589,7 @@ export interface TouristDestination {
   socialLikes?: string; // e.g. "185K Likes"
   socialHighlightKh?: string;
   socialHighlightEn?: string;
-  reviewerQuoteKh?: string; // e.g. "ទេសភាពស្អាតដូចឋានសួគ៌ ពេលព្រឹកពពកហោះកាត់ជើង!"
+  reviewerQuoteKh?: string; // e.g. "áž‘áŸážŸáž—áž¶áž–ážŸáŸ’áž¢áž¶ážážŠáž¼áž…áž‹áž¶áž“ážŸáž½áž‚áŸŒ áž–áŸáž›áž–áŸ’ážšáž¹áž€áž–áž–áž€áž áŸ„áŸ‡áž€áž¶ážáŸ‹áž‡áž¾áž„!"
   reviewerQuoteEn?: string;
   reviewerName?: string;
   isCustomPhoto?: boolean;
@@ -1519,7 +1605,7 @@ export interface TouristDestination {
   locationVerifiedAt?: string;
 }
 
-// User Wishlist Item & Custom Lists (បញ្ជីកន្លែងដែលចង់ទៅ)
+// User Wishlist Item & Custom Lists (áž”áž‰áŸ’áž‡áž¸áž€áž“áŸ’áž›áŸ‚áž„ážŠáŸ‚áž›áž…áž„áŸ‹áž‘áŸ…)
 export interface WishlistItem {
   id: string; // matches FoodItem.id, Restaurant.id, or TouristDestination.id
   type: 'food' | 'restaurant' | 'destination';
@@ -1544,7 +1630,7 @@ export interface Wishlist {
   createdAt: string;
 }
 
-// AI Trip Planner (ផែនការដើរលេង AI ដោយស្វ័យប្រវត្តិ)
+// AI Trip Planner (áž•áŸ‚áž“áž€áž¶ážšážŠáž¾ážšáž›áŸáž„ AI ážŠáŸ„áž™ážŸáŸ’ážœáŸáž™áž”áŸ’ážšážœážáŸ’ážáž·)
 export interface TripPlanActivity {
   timePeriod: 'morning' | 'lunch' | 'afternoon' | 'dinner';
   titleKh: string;
@@ -1578,7 +1664,7 @@ export interface TripPlan {
   createdAt: string;
 }
 
-// Helpful Notifications (ការជូនដំណឹងដែលមានប្រយោជន៍)
+// Helpful Notifications (áž€áž¶ážšáž‡áž¼áž“ážŠáŸ†ážŽáž¹áž„ážŠáŸ‚áž›áž˜áž¶áž“áž”áŸ’ážšáž™áŸ„áž‡áž“áŸ)
 export interface AppNotification {
   id: string;
   titleKh: string;
@@ -1662,11 +1748,11 @@ export interface AppSettings {
   // Dynamic Admin-Configurable VIP Packages & Store Management Fees
   vipShortDurationDays?: number; // Default: 10 days
   vipShortPriceUsd?: number; // Default: $2.99
-  vipShortNameKh?: string; // Default: "កញ្ចប់ VIP 10 ថ្ងៃ"
+  vipShortNameKh?: string; // Default: "áž€áž‰áŸ’áž…áž”áŸ‹ VIP 10 ážáŸ’áž„áŸƒ"
   vipShortNameEn?: string; // Default: "VIP 10 Days"
   vipLongDurationDays?: number; // Default: 90 days
   vipLongPriceUsd?: number; // Default: $4.99
-  vipLongNameKh?: string; // Default: "កញ្ចប់ VIP 90 ថ្ងៃ"
+  vipLongNameKh?: string; // Default: "áž€áž‰áŸ’áž…áž”áŸ‹ VIP 90 ážáŸ’áž„áŸƒ"
   vipLongNameEn?: string; // Default: "VIP 90 Days"
   additionalStoreFeeUsd?: number; // Default: $10.00 per additional store beyond the 1st
   includedFreeStoresPerVip?: number; // Default: 1 store included with VIP
@@ -1679,7 +1765,7 @@ export interface AppSettings {
   settingsUpdatedBy?: string;
 }
 
-// User–Admin Two-Way Support & Payment Verification System
+// Userâ€“Admin Two-Way Support & Payment Verification System
 export type SupportTicketStatus = 'pending' | 'replied' | 'resolved';
 
 export interface SupportTicketMessage {
@@ -1786,10 +1872,10 @@ export const getDynamicVipPlans = (
   const longNameEnRaw = (s.vipLongNameEn || '').trim();
 
   const shortNameKh =
-    !shortNameKhRaw || /^VIP\s+\d+\s*(ថ្ងៃ|\?+)$/i.test(shortNameKhRaw)
+    !shortNameKhRaw || /^VIP\s+\d+\s*(ážáŸ’áž„áŸƒ|\?+)$/i.test(shortNameKhRaw)
       ? shortDays === 30
-        ? 'VIP ១ ខែ (30 ថ្ងៃ)'
-        : `VIP ${shortDays} ថ្ងៃ`
+        ? 'VIP áŸ¡ ážáŸ‚ (30 ážáŸ’áž„áŸƒ)'
+        : `VIP ${shortDays} ážáŸ’áž„áŸƒ`
       : shortNameKhRaw;
   const shortNameEn =
     !shortNameEnRaw || /^VIP\s+\d+\s*Days?$/i.test(shortNameEnRaw)
@@ -1798,10 +1884,10 @@ export const getDynamicVipPlans = (
         : `VIP ${shortDays} Days`
       : shortNameEnRaw;
   const longNameKh =
-    !longNameKhRaw || /^VIP\s+\d+\s*(ថ្ងៃ|\?+)$/i.test(longNameKhRaw)
+    !longNameKhRaw || /^VIP\s+\d+\s*(ážáŸ’áž„áŸƒ|\?+)$/i.test(longNameKhRaw)
       ? longDays === 60
-        ? 'VIP ២ ខែ (60 ថ្ងៃ)'
-        : `VIP ${longDays} ថ្ងៃ`
+        ? 'VIP áŸ¢ ážáŸ‚ (60 ážáŸ’áž„áŸƒ)'
+        : `VIP ${longDays} ážáŸ’áž„áŸƒ`
       : longNameKhRaw;
   const longNameEn =
     !longNameEnRaw || /^VIP\s+\d+\s*Days?$/i.test(longNameEnRaw)
@@ -1818,8 +1904,8 @@ export const getDynamicVipPlans = (
       priceUsd: shortPrice,
       durationDays: shortDays,
       labelEn: `${shortNameEn} ($${shortPrice.toFixed(2)} USD / ${shortDays} days)`,
-      labelKh: `${shortNameKh} ($${shortPrice.toFixed(2)} USD / ${shortDays} ថ្ងៃ)`,
-      priceKhrDisplay: `${Math.round(shortPrice * 4100).toLocaleString()} រៀល`,
+      labelKh: `${shortNameKh} ($${shortPrice.toFixed(2)} USD / ${shortDays} ážáŸ’áž„áŸƒ)`,
+      priceKhrDisplay: `${Math.round(shortPrice * 4100).toLocaleString()} ážšáŸ€áž›`,
     },
     annual: {
       id: 'annual',
@@ -1828,8 +1914,8 @@ export const getDynamicVipPlans = (
       priceUsd: longPrice,
       durationDays: longDays,
       labelEn: `${longNameEn} ($${longPrice.toFixed(2)} USD / ${longDays} days)`,
-      labelKh: `${longNameKh} ($${longPrice.toFixed(2)} USD / ${longDays} ថ្ងៃ)`,
-      priceKhrDisplay: `${Math.round(longPrice * 4100).toLocaleString()} រៀល`,
+      labelKh: `${longNameKh} ($${longPrice.toFixed(2)} USD / ${longDays} ážáŸ’áž„áŸƒ)`,
+      priceKhrDisplay: `${Math.round(longPrice * 4100).toLocaleString()} ážšáŸ€áž›`,
     },
   };
 };

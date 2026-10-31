@@ -26,14 +26,18 @@ import {
   GoogleMapsPlaceMetadata,
   ShopPhotoReplacementRequest,
   LocationVerificationStatus,
+  SEED_FOOD_PHOTO_BASELINE_ISO,
+  SEED_FOOD_PHOTO_BASELINE_MS,
   isSeedRestaurantId,
   isValidCambodiaCoordinates,
   isValidOfficialGooglePlaceId,
+  isStrictVerifiedCambodiaRestaurant,
   buildCanonicalGoogleMapsPinUrl,
   computeFastPhotoSignature,
 } from '../types';
 import { initial100Destinations } from '../data/seedDestinations';
 import { initial200Foods } from '../data/seedFoods';
+import { initial100Restaurants } from '../data/seedRestaurants';
 import {
   generateAuthenticRecipeByDishName,
   hasPlaceholderOrIncompleteRecipe,
@@ -60,8 +64,76 @@ const IMMUTABLE_SEED_DEST_MAP = new Map<string, TouristDestination>(
 const IMMUTABLE_SEED_FOOD_MAP = new Map<string, FoodItem>(
   initial200Foods.map((f) => [f.id, f])
 );
-// Timestamp of the initial static `/foods/food-*.jpg` ledger bake (any override after 2026-10-29T15:05:00Z or with a custom photo is always preserved)
-const BAKED_STATIC_FOOD_ASSETS_MS = new Date('2026-10-29T15:05:00.000Z').getTime();
+
+const IMMUTABLE_SEED_REST_MAP = new Map<string, Restaurant>(
+  initial100Restaurants.map((r) => [r.id, r])
+);
+// Authoritative baseline timestamp for bundled `/foods/food-*.jpg` assets
+export { SEED_FOOD_PHOTO_BASELINE_ISO, SEED_FOOD_PHOTO_BASELINE_MS };
+const BAKED_STATIC_FOOD_ASSETS_MS = SEED_FOOD_PHOTO_BASELINE_MS;
+
+export function isLegacyAutoScrapedFoodPlaceholderUrl(url?: string): boolean {
+  if (!url || typeof url !== 'string') return false;
+  const lower = url.trim().toLowerCase();
+  return (
+    lower.includes('themealdb.com') ||
+    lower.includes('loremflickr.com') ||
+    lower.includes('picsum.photos') ||
+    lower.includes('source.unsplash.com') ||
+    lower.includes('placehold.co') ||
+    lower.includes('via.placeholder.com')
+  );
+}
+
+export function getSeedFoodPhotoBaselineMs(foodId: string): number {
+  const seedFood = IMMUTABLE_SEED_FOOD_MAP.get(foodId);
+  if (!seedFood || !seedFood.photoUrl?.startsWith('/foods/')) {
+    return 0;
+  }
+  const seedPhotoMs = seedFood.photoUpdatedAt ? Date.parse(seedFood.photoUpdatedAt) || 0 : 0;
+  return Math.max(SEED_FOOD_PHOTO_BASELINE_MS, seedPhotoMs);
+}
+
+export function isRejectedLegacyFoodOverridePhoto(
+  foodId: string,
+  ov?: {
+    photoUrl?: string;
+    updatedAt?: string;
+    adminApprovedAt?: string;
+    revision?: number;
+    isCustomPhoto?: boolean;
+  } | null
+): boolean {
+  if (!ov || typeof ov.photoUrl !== 'string' || !ov.photoUrl.trim()) {
+    return true;
+  }
+  if (isLegacyAutoScrapedFoodPlaceholderUrl(ov.photoUrl)) {
+    return true;
+  }
+  if (
+    ov.photoUrl.includes('images.unsplash.com') ||
+    ov.photoUrl.includes('plus.unsplash.com') ||
+    ov.photoUrl.startsWith('/restaurants/')
+  ) {
+    return true;
+  }
+  const seedFood = IMMUTABLE_SEED_FOOD_MAP.get(foodId);
+  if (seedFood && seedFood.photoUrl?.startsWith('/foods/')) {
+    const baselineMs = getSeedFoodPhotoBaselineMs(foodId);
+    const adminMs = ov.adminApprovedAt ? Date.parse(ov.adminApprovedAt) || 0 : 0;
+    const updMs = ov.updatedAt ? Date.parse(ov.updatedAt) || 0 : 0;
+    const effectiveMs = Math.max(adminMs, updMs);
+    if (effectiveMs <= baselineMs) {
+      return true;
+    }
+    const cleanOvBase = ov.photoUrl.split('?')[0].trim();
+    const cleanSeedBase = seedFood.photoUrl.split('?')[0].trim();
+    if (cleanOvBase === cleanSeedBase && !ov.isCustomPhoto) {
+      return true;
+    }
+  }
+  return false;
+}
 
 export const VAULT_KEYS = {
   FOODS: 'kft_permanent_food_overrides_v1',
@@ -289,7 +361,51 @@ export async function saveSingleRecordToIdb(recordKey: string, payload: any): Pr
     try {
       const tx = db.transaction(IDB_STORE, 'readwrite');
       const store = tx.objectStore(IDB_STORE);
-      store.put(payload, recordKey);
+      const getReq = store.get(recordKey);
+      getReq.onsuccess = () => {
+        const existing = getReq.result;
+        if (existing && typeof existing === 'object' && payload && typeof payload === 'object') {
+          const exRev = Number(existing.revision || 0);
+          const inRev = Number(payload.revision || 0);
+          if (exRev > 0 && inRev > 0 && inRev < exRev) {
+            return; // Never overwrite a newer revision with an out-of-order older write
+          }
+          if (exRev === inRev) {
+            const exTime = existing.updatedAt ? Date.parse(existing.updatedAt) || 0 : 0;
+            const inTime = payload.updatedAt ? Date.parse(payload.updatedAt) || 0 : 0;
+            if (inTime > 0 && exTime > inTime) {
+              return;
+            }
+          }
+        }
+        store.put(payload, recordKey);
+      };
+      getReq.onerror = () => {
+        store.put(payload, recordKey);
+      };
+      tx.oncomplete = () => {
+        db.close();
+        resolve(true);
+      };
+      tx.onerror = () => {
+        db.close();
+        resolve(false);
+      };
+    } catch {
+      db.close();
+      resolve(false);
+    }
+  });
+}
+
+export async function deleteSingleRecordFromIdb(recordKey: string): Promise<boolean> {
+  const db = await openVaultIdb();
+  if (!db) return false;
+  return new Promise((resolve) => {
+    try {
+      const tx = db.transaction(IDB_STORE, 'readwrite');
+      const store = tx.objectStore(IDB_STORE);
+      store.delete(recordKey);
       tx.oncomplete = () => {
         db.close();
         resolve(true);
@@ -328,7 +444,20 @@ function readRawAllEntriesFromIdb(db: IDBDatabase): Promise<Record<string, any>>
 }
 
 function assembleBundleFromIdbEntries(entries: Record<string, any>): AllMediaOverridesBundle | null {
-  const master = (entries[IDB_BUNDLE_KEY] as AllMediaOverridesBundle | undefined) || null;
+  const rawMaster = (entries[IDB_BUNDLE_KEY] as AllMediaOverridesBundle | undefined) || null;
+  let master: AllMediaOverridesBundle | null = null;
+  if (rawMaster && typeof rawMaster === 'object') {
+    const cleanMasterFoods: Record<string, FoodMediaOverride> = {};
+    for (const [fid, fOv] of Object.entries(rawMaster.foods || {})) {
+      if (fOv && !isRejectedLegacyFoodOverridePhoto(fid, fOv)) {
+        cleanMasterFoods[fid] = fOv;
+      }
+    }
+    master = {
+      ...rawMaster,
+      foods: cleanMasterFoods,
+    };
+  }
   const atomicOverlay: AllMediaOverridesBundle = {
     foods: {},
     restaurants: {},
@@ -340,6 +469,10 @@ function assembleBundleFromIdbEntries(entries: Record<string, any>): AllMediaOve
   for (const [k, val] of Object.entries(entries)) {
     if (!val || typeof val !== 'object') continue;
     if (k.startsWith('food:') && val.id) {
+      if (isRejectedLegacyFoodOverridePhoto(val.id, val as FoodMediaOverride)) {
+        deleteSingleRecordFromIdb(k).catch(() => {});
+        continue;
+      }
       atomicOverlay.foods[val.id] = val as FoodMediaOverride;
       hasAtomic = true;
     } else if (k.startsWith('rest:') && val.id) {
@@ -349,6 +482,10 @@ function assembleBundleFromIdbEntries(entries: Record<string, any>): AllMediaOve
       atomicOverlay.destinations[val.id] = val as DestinationMediaOverride;
       hasAtomic = true;
     } else if (k.startsWith('trend:') && val.id) {
+      if (isLegacyAutoScrapedFoodPlaceholderUrl((val as TrendingFoodMediaOverride).photoUrl)) {
+        deleteSingleRecordFromIdb(k).catch(() => {});
+        continue;
+      }
       atomicOverlay.trendingFoods[val.id] = val as TrendingFoodMediaOverride;
       hasAtomic = true;
     }
@@ -578,9 +715,27 @@ export function loadLocalMediaOverrides(forceDiskRead = false): AllMediaOverride
   // might hold an older base64 image than the ledger's latest revision/photoHash. Evict any stale photo immediately
   // so an outdated localStorage photo can NEVER reappear while IndexedDB hydrates the latest revision!
   let evictedStaleFoodFromDisk = false;
+  let evictedStaleLedgerEntry = false;
+  for (const [lid, lEntry] of Object.entries(ledger)) {
+    const baselineMs = getSeedFoodPhotoBaselineMs(lid);
+    const lTime = lEntry?.updatedAt ? Date.parse(lEntry.updatedAt) || 0 : 0;
+    if (
+      !lEntry ||
+      (baselineMs > 0 && lTime <= baselineMs) ||
+      isLegacyAutoScrapedFoodPlaceholderUrl(lEntry.cloudUrl)
+    ) {
+      delete ledger[lid];
+      evictedStaleLedgerEntry = true;
+    }
+  }
+  if (evictedStaleLedgerEntry) {
+    saveFoodRevisionLedger(ledger);
+  }
+
   for (const [id, foodOv] of Object.entries(foods)) {
-    if (!foodOv) {
+    if (!foodOv || isRejectedLegacyFoodOverridePhoto(id, foodOv)) {
       delete foods[id];
+      evictedStaleFoodFromDisk = true;
       continue;
     }
     const ledgerEntry = ledger[id];
@@ -588,7 +743,7 @@ export function loadLocalMediaOverrides(forceDiskRead = false): AllMediaOverride
       const diskHash = foodOv.photoHash || computeFastPhotoSignature(foodOv.photoUrl);
       const diskRev = Number(foodOv.revision || 0);
       if (diskRev < ledgerEntry.revision && diskHash !== ledgerEntry.photoHash) {
-        if (ledgerEntry.cloudUrl) {
+        if (ledgerEntry.cloudUrl && !isLegacyAutoScrapedFoodPlaceholderUrl(ledgerEntry.cloudUrl)) {
           foods[id] = {
             ...foodOv,
             photoUrl: ledgerEntry.cloudUrl,
@@ -605,6 +760,17 @@ export function loadLocalMediaOverrides(forceDiskRead = false): AllMediaOverride
   }
   if (evictedStaleFoodFromDisk) {
     safeWriteJsonMap(VAULT_KEYS.FOODS, foods);
+  }
+
+  let evictedStaleTrending = false;
+  for (const [tid, tOv] of Object.entries(trendingFoods)) {
+    if (!tOv || isLegacyAutoScrapedFoodPlaceholderUrl(tOv.photoUrl)) {
+      delete trendingFoods[tid];
+      evictedStaleTrending = true;
+    }
+  }
+  if (evictedStaleTrending) {
+    safeWriteJsonMap(VAULT_KEYS.TRENDING_FOODS, trendingFoods);
   }
 
   // Merge legacy destination photo overrides into the unified destinations vault & remove duplicate legacy key
@@ -675,7 +841,12 @@ export function isOverridePersistedInLocalStorage(
   }
 }
 
-export function saveLocalMediaOverrides(bundle: AllMediaOverridesBundle): void {
+export function saveLocalMediaOverrides(incomingBundle: AllMediaOverridesBundle): void {
+  // Guard against stale async bundle snapshots overwriting newer in-memory revisions
+  const bundle =
+    inMemoryMasterBundle && inMemoryMasterBundle !== incomingBundle
+      ? mergeOverrideBundles(inMemoryMasterBundle, incomingBundle)
+      : incomingBundle;
   inMemoryMasterBundle = bundle;
   // Remove duplicate legacy key first to maximize available localStorage space
   try {
@@ -830,11 +1001,6 @@ export function mergeOverrideBundles(
 ): AllMediaOverridesBundle {
   if (!incoming) return base;
 
-  const isCustomMediaUrl = (url?: string): boolean => {
-    if (!url || typeof url !== 'string') return false;
-    return url.startsWith('data:') || url.startsWith('http://') || url.startsWith('https://');
-  };
-
   const getRecordEffectiveMs = (rec: { adminApprovedAt?: string; updatedAt?: string }): number => {
     const tAdmin = rec.adminApprovedAt ? Date.parse(rec.adminApprovedAt) || 0 : 0;
     const tUpd = rec.updatedAt ? Date.parse(rec.updatedAt) || 0 : 0;
@@ -854,11 +1020,19 @@ export function mergeOverrideBundles(
     a: Record<string, T> = {},
     b: Record<string, T> = {}
   ): Record<string, T> => {
-    const out: Record<string, T> = { ...a };
+    const out: Record<string, T> = {};
+    for (const [id, itemA] of Object.entries(a)) {
+      if (!itemA || isObsoleteSeedPhoto(itemA.photoUrl) || isLegacyAutoScrapedFoodPlaceholderUrl(itemA.photoUrl)) {
+        continue;
+      }
+      out[id] = itemA;
+    }
     for (const [id, itemB] of Object.entries(b)) {
-      if (!itemB || isObsoleteSeedPhoto(itemB.photoUrl)) continue;
+      if (!itemB || isObsoleteSeedPhoto(itemB.photoUrl) || isLegacyAutoScrapedFoodPlaceholderUrl(itemB.photoUrl)) {
+        continue;
+      }
       const itemA = out[id];
-      if (!itemA || isObsoleteSeedPhoto(itemA.photoUrl)) {
+      if (!itemA) {
         out[id] = itemB;
       } else {
         const revA = Number(itemA.revision || 0);
@@ -866,29 +1040,20 @@ export function mergeOverrideBundles(
         const timeA = getRecordEffectiveMs(itemA);
         const timeB = getRecordEffectiveMs(itemB);
 
-        // Determine winner strictly by monotonic revision + authoritative approval/update timestamp.
-        // Never allow an older revision or older timestamp backup to overwrite a newer Admin replacement!
+        // Strictly newer revision / updatedAt timestamp ALWAYS wins as the single source of truth.
+        // Never allow an older record, older backup, or older http:/data: URL to overwrite a newer approved image.
         let bWins: boolean;
         if (revA > 0 && revB > 0 && revA !== revB) {
           bWins = revB > revA;
-        } else if (revB > 0 && revA === 0 && timeB >= timeA - 5000) {
-          bWins = true;
-        } else if (revA > 0 && revB === 0 && timeA >= timeB - 5000) {
-          bWins = false;
+        } else if (timeA > 0 && timeB > 0 && timeA !== timeB) {
+          bWins = timeB > timeA;
+        } else if (revA !== revB) {
+          bWins = revB > revA;
         } else {
           bWins = timeB >= timeA;
         }
 
-        const merged = bWins ? { ...itemA, ...itemB } : { ...itemB, ...itemA };
-        // Protect custom data:/http: photos against unedited compacted static seed fallbacks (/foods/*, /Shop/*, /destinations/*)
-        if (isCustomMediaUrl(itemA.photoUrl) && !isCustomMediaUrl(itemB.photoUrl) && !(bWins && itemB.isCustomPhoto && revB > revA)) {
-          merged.photoUrl = itemA.photoUrl;
-          if (itemA.profileImage) merged.profileImage = itemA.profileImage;
-        } else if (isCustomMediaUrl(itemB.photoUrl) && !isCustomMediaUrl(itemA.photoUrl) && !(!bWins && itemA.isCustomPhoto && revA > revB)) {
-          merged.photoUrl = itemB.photoUrl;
-          if (itemB.profileImage) merged.profileImage = itemB.profileImage;
-        }
-        out[id] = merged;
+        out[id] = bWins ? { ...itemA, ...itemB } : { ...itemB, ...itemA };
       }
     }
     return out;
@@ -936,8 +1101,15 @@ export function mergeOverrideBundles(
     }
   }
 
+  const mergedFoods = mergeMaps(base.foods, incoming.foods || {});
+  for (const [fid, fOv] of Object.entries(mergedFoods)) {
+    if (isRejectedLegacyFoodOverridePhoto(fid, fOv)) {
+      delete mergedFoods[fid];
+    }
+  }
+
   return {
-    foods: mergeMaps(base.foods, incoming.foods || {}),
+    foods: mergedFoods,
     restaurants: mergedRestaurants,
     deletedRestaurants: mergedDeletedRestaurants,
     destinations: mergeMaps(base.destinations, incoming.destinations || {}),
@@ -981,12 +1153,11 @@ async function syncSingleOverrideRecordToCloud(
   category: 'food' | 'rest' | 'dest' | 'trend',
   recordId: string,
   overridePayload: any,
-  localBundle: AllMediaOverridesBundle
+  _localBundle?: AllMediaOverridesBundle
 ): Promise<boolean> {
   const rev = Number(overridePayload?.revision || 1);
   if (!isSupabaseConfigured()) return false;
   const perRecordKey = `${VAULT_KEYS.CLOUD_RECORD_PREFIX}${category}_${recordId}`;
-  inMemoryMasterBundle = localBundle;
 
   let payloadToPush = { ...overridePayload };
 
@@ -1027,25 +1198,39 @@ async function syncSingleOverrideRecordToCloud(
         if (category === 'food') {
           const ledger = loadFoodRevisionLedger();
           const curLedger = ledger[recordId];
+          const pushedHash = payloadToPush.photoHash || computeFastPhotoSignature(payloadToPush.photoUrl);
           if (!curLedger || curLedger.revision <= rev) {
             ledger[recordId] = {
               revision: rev,
               updatedAt: payloadToPush.updatedAt || new Date().toISOString(),
-              photoHash: payloadToPush.photoHash || computeFastPhotoSignature(payloadToPush.photoUrl),
+              photoHash: pushedHash,
               cloudSynced: true,
-              cloudUrl: payloadToPush.photoUrl?.startsWith('https://') ? payloadToPush.photoUrl : curLedger?.cloudUrl,
+              cloudUrl: payloadToPush.photoUrl?.startsWith('https://')
+                ? payloadToPush.photoUrl
+                : curLedger?.photoHash === pushedHash
+                ? curLedger?.cloudUrl
+                : undefined,
             };
             saveFoodRevisionLedger(ledger);
           }
           // Only replace local base64 with cloud Storage URL AFTER confirming both Storage + KV save succeeded
+          // AND only if no newer revision was created by Admin while the upload was in flight!
+          const latestBundle = loadLocalMediaOverrides();
           if (
             payloadToPush.photoUrl !== overridePayload.photoUrl &&
             payloadToPush.photoUrl?.startsWith('https://') &&
-            (localBundle.foods[recordId]?.revision || 0) <= rev
+            Number(latestBundle.foods[recordId]?.revision || 0) === rev
           ) {
-            localBundle.foods[recordId] = payloadToPush;
-            saveSingleRecordToIdb(`food:${recordId}`, payloadToPush).catch(() => {});
-            saveLocalMediaOverrides(localBundle);
+            const upgradedBundle: AllMediaOverridesBundle = {
+              ...latestBundle,
+              foods: {
+                ...latestBundle.foods,
+                [recordId]: payloadToPush,
+              },
+            };
+            inMemoryMasterBundle = upgradedBundle;
+            await saveSingleRecordToIdb(`food:${recordId}`, payloadToPush);
+            saveLocalMediaOverrides(upgradedBundle);
           }
           cleanupOutdatedLegacyMasterCloudEntry('foods', recordId).catch(() => {});
         } else if (category === 'trend') {
@@ -1113,7 +1298,7 @@ export async function flushPendingMediaCloudQueue(): Promise<number> {
  *   3. Quota-Safe LocalStorage (`VAULT_KEYS.FOODS`)
  *   4. Persistent Cloud Sync Queue + Supabase Storage & KV (`kft_ov_food_<id>`)
  */
-export function recordPermanentFoodOverride(food: FoodItem): void {
+export function recordPermanentFoodOverride(food: FoodItem): Promise<FoodMediaOverride> {
   const bundle = loadLocalMediaOverrides();
   const ledger = loadFoodRevisionLedger();
   const prevOv = bundle.foods[food.id];
@@ -1123,8 +1308,8 @@ export function recordPermanentFoodOverride(food: FoodItem): void {
     prevOv?.updatedAt ? Date.parse(prevOv.updatedAt) || 0 : 0,
     prevLedger?.updatedAt ? Date.parse(prevLedger.updatedAt) || 0 : 0
   );
-  // Guarantee strictly monotonic timestamp even if Admin replaces twice within the same millisecond
-  const nowMs = Math.max(Date.now(), prevMs + 1);
+  // Guarantee strictly monotonic timestamp above seed baseline even if Admin replaces twice within the same millisecond
+  const nowMs = Math.max(Date.now(), prevMs + 1, SEED_FOOD_PHOTO_BASELINE_MS + 1);
   const now = new Date(nowMs).toISOString();
   const photoHash = computeFastPhotoSignature(food.photoUrl);
 
@@ -1165,19 +1350,28 @@ export function recordPermanentFoodOverride(food: FoodItem): void {
   };
   saveFoodRevisionLedger(ledger);
 
-  // 2. Write atomic per-record IndexedDB entry immediately (<2ms)
-  saveSingleRecordToIdb(`food:${food.id}`, overrideRecord).catch(() => {});
-
-  // 3. Enqueue persistent cloud upload retry item BEFORE network call
+  // 2. Enqueue persistent cloud upload retry item BEFORE network call
   enqueuePendingMediaCloudSync('food', food.id, nextRevision, now);
 
-  // 4. Update in-memory master bundle, quota-safe localStorage, and master IndexedDB bundle
-  bundle.foods[food.id] = overrideRecord;
-  bundle.updatedAt = now;
-  saveLocalMediaOverrides(bundle);
+  // 3. Update authoritative in-memory master bundle & synchronous localStorage immediately for zero-flicker UI
+  const nextBundle: AllMediaOverridesBundle = {
+    ...bundle,
+    foods: {
+      ...bundle.foods,
+      [food.id]: overrideRecord,
+    },
+    updatedAt: now,
+  };
+  inMemoryMasterBundle = nextBundle;
+  saveLocalMediaOverrides(nextBundle);
 
-  // 5. Push to Supabase Storage + KV immediately in background
-  syncSingleOverrideRecordToCloud('food', food.id, overrideRecord, bundle).catch(() => {});
+  // 4. Persist atomic per-record key to IndexedDB & push to Supabase Storage + KV in background
+  const idbPromise = saveSingleRecordToIdb(`food:${food.id}`, overrideRecord)
+    .then(() => overrideRecord)
+    .catch(() => overrideRecord);
+
+  syncSingleOverrideRecordToCloud('food', food.id, overrideRecord, nextBundle).catch(() => {});
+  return idbPromise;
 }
 
 /**
@@ -1429,7 +1623,7 @@ export function applyFoodOverrides(
   const mapped = foods.map((f) => {
     const cleanedBaseDescKh = stripLegacyFoodPhraseKh(f.descriptionKh);
     const ov = safeOverrides[f.id];
-    if (!ov || !ov.photoUrl) {
+    if (!ov || !ov.photoUrl || isRejectedLegacyFoodOverridePhoto(f.id, ov)) {
       if (hasPlaceholderOrIncompleteRecipe(f.ingredients, f.steps)) {
         const gen = generateAuthenticRecipeByDishName(
           f.nameKh,
@@ -1453,21 +1647,10 @@ export function applyFoodOverrides(
       return f;
     }
     const seedFood = IMMUTABLE_SEED_FOOD_MAP.get(f.id);
-    const seedPhotoUrl = seedFood?.photoUrl || '';
-    const isSeedBundledStaticFoodPhoto =
-      typeof seedPhotoUrl === 'string' && seedPhotoUrl.startsWith('/foods/');
     const ovTime = ov.updatedAt ? new Date(ov.updatedAt).getTime() : 0;
-    const isPreBakeOverride = ovTime > 0 && ovTime <= BAKED_STATIC_FOOD_ASSETS_MS + 1000 && !ov.isCustomPhoto;
-    const useOverrideFoodPhoto =
-      !isSeedBundledStaticFoodPhoto ||
-      ov.isCustomPhoto ||
-      ov.photoUrl.startsWith('data:image/') ||
-      ov.photoUrl.startsWith('http') ||
-      ov.photoUrl.startsWith('/foods/') ||
-      ovTime > BAKED_STATIC_FOOD_ASSETS_MS + 1000 ||
-      ovTime === 0;
+    const isPreBakeOverride = ovTime > 0 && ovTime <= BAKED_STATIC_FOOD_ASSETS_MS && !ov.isCustomPhoto;
 
-    const nextPhotoUrl = useOverrideFoodPhoto ? ov.photoUrl : seedPhotoUrl;
+    const nextPhotoUrl = ov.photoUrl;
     const nextNameKh = ov.nameKh || f.nameKh;
     const nextNameEn = ov.nameEn || f.nameEn;
     const nextCategorySlug = ov.categorySlug || f.categorySlug;
@@ -1604,15 +1787,27 @@ export function applyFoodOverrides(
  */
 export function applyRestaurantOverrides(
   restaurants: Restaurant[],
-  overridesMap: Record<string, RestaurantMediaOverride> = loadLocalMediaOverrides().restaurants
+  overridesMap: Record<string, RestaurantMediaOverride> = loadLocalMediaOverrides().restaurants,
+  explicitDeletedMap?: Record<string, string>
 ): Restaurant[] {
-  const deletedMap = loadLocalMediaOverrides().deletedRestaurants || loadDeletedRestaurantIdsMap();
+  const deletedMap =
+    explicitDeletedMap || loadLocalMediaOverrides().deletedRestaurants || loadDeletedRestaurantIdsMap();
   const hasDeleted = Object.keys(deletedMap).length > 0;
-  const filteredBase = hasDeleted
-    ? restaurants.filter(
-        (r) => !isRestaurantIdDeleted(r.id, r.updatedAt || r.photoUpdatedAt || r.adminEditedAt || r.createdAt, deletedMap, r.googlePlaceId)
+  const filteredBase = restaurants.filter((r) => {
+    if (!isStrictVerifiedCambodiaRestaurant(r)) return false;
+    if (
+      hasDeleted &&
+      isRestaurantIdDeleted(
+        r.id,
+        r.updatedAt || r.photoUpdatedAt || r.adminEditedAt || r.createdAt,
+        deletedMap,
+        r.googlePlaceId
       )
-    : restaurants;
+    ) {
+      return false;
+    }
+    return true;
+  });
   let anyChanged = filteredBase.length !== restaurants.length;
   if (!overridesMap || Object.keys(overridesMap).length === 0) return anyChanged ? filteredBase : restaurants;
   const seenIds = new Set<string>();
@@ -1645,15 +1840,27 @@ export function applyRestaurantOverrides(
       ov.isAdminEdited ||
       Boolean(ov.photoUrl && ov.photoUrl.startsWith('data:image/')) ||
       ovTime > CLEAN_STATIC_MEDIA_CUTOFF_MS;
-    const rawOvPhoto = ov.photoUrl || ov.profileImage || '';
+    const candidateOvPhoto = ov.photoUrl || ov.profileImage || '';
+    const rawOvPhoto =
+      typeof candidateOvPhoto === 'string' &&
+      !candidateOvPhoto.startsWith('/foods/') &&
+      !candidateOvPhoto.startsWith('/restaurants/')
+        ? candidateOvPhoto
+        : '';
     const photoUrl =
       useOverrideShopPhoto && rawOvPhoto
         ? rawOvPhoto
         : r.photoUrl || rawOvPhoto;
     const nextPhotoUpdatedAt = ovTime >= rTime ? (ov.updatedAt || r.photoUpdatedAt) : (r.photoUpdatedAt || ov.updatedAt);
     const nextUpdatedAt = ovTime >= rTime ? (ov.updatedAt || r.updatedAt) : (r.updatedAt || ov.updatedAt);
+    const candidateOvProfile =
+      typeof ov.profileImage === 'string' &&
+      !ov.profileImage.startsWith('/foods/') &&
+      !ov.profileImage.startsWith('/restaurants/')
+        ? ov.profileImage
+        : '';
     const nextProfileImage =
-      useOverrideShopPhoto && ov.profileImage ? ov.profileImage : photoUrl;
+      useOverrideShopPhoto && candidateOvProfile ? candidateOvProfile : photoUrl;
 
     if (
       r.photoUrl === photoUrl &&
@@ -1673,6 +1880,14 @@ export function applyRestaurantOverrides(
     ) {
       return r;
     }
+
+    const ovHasVerifiedCambodiaLoc =
+      isValidCambodiaCoordinates(ov.latitude, ov.longitude) &&
+      ov.locationNeedsReview !== true &&
+      ov.locationVerificationStatus !== 'needs_admin_review';
+    const nextCleanGpid = isValidOfficialGooglePlaceId(ov.googlePlaceId)
+      ? ov.googlePlaceId
+      : (isValidOfficialGooglePlaceId(r.googlePlaceId) ? r.googlePlaceId : undefined);
 
     anyChanged = true;
     return {
@@ -1713,91 +1928,119 @@ export function applyRestaurantOverrides(
       ownerId: ov.ownerId || r.ownerId,
       ownerName: ov.ownerName || r.ownerName,
       ownerEmail: ov.ownerEmail || r.ownerEmail,
-      ...(Boolean(ov.locationVerifiedAt) || !isSeedRestaurantId(r.id)
+      ...((Boolean(ov.locationVerifiedAt) || !isSeedRestaurantId(r.id)) && ovHasVerifiedCambodiaLoc
         ? {
-            mapUrl: ov.mapUrl !== undefined ? ov.mapUrl : r.mapUrl,
-            latitude: typeof ov.latitude === 'number' ? ov.latitude : r.latitude,
-            longitude: typeof ov.longitude === 'number' ? ov.longitude : r.longitude,
-            locationVerificationStatus: ov.locationVerificationStatus ?? r.locationVerificationStatus,
-            locationNeedsReview: ov.locationNeedsReview ?? r.locationNeedsReview,
+            mapUrl: buildCanonicalGoogleMapsPinUrl(ov.latitude!, ov.longitude!, nextCleanGpid),
+            latitude: ov.latitude!,
+            longitude: ov.longitude!,
+            locationVerificationStatus: 'verified' as const,
+            locationNeedsReview: false,
             locationReviewNote: ov.locationReviewNote ?? r.locationReviewNote,
             locationVerifiedAt: ov.locationVerifiedAt ?? r.locationVerifiedAt,
           }
         : {}),
-      googlePlaceId: isValidOfficialGooglePlaceId(ov.googlePlaceId)
-        ? ov.googlePlaceId
-        : (isValidOfficialGooglePlaceId(r.googlePlaceId) ? r.googlePlaceId : undefined),
+      googlePlaceId: nextCleanGpid,
       dataSource: ov.dataSource || r.dataSource,
       googleMapsMeta: ov.googleMapsMeta || r.googleMapsMeta,
       isAdminEdited: ov.isAdminEdited ?? r.isAdminEdited,
       adminEditedAt: ov.adminEditedAt || r.adminEditedAt,
       pendingPhotoReplacement: ov.pendingPhotoReplacement !== undefined ? ov.pendingPhotoReplacement : r.pendingPhotoReplacement,
-      isCustomPhoto: true,
+      isCustomPhoto: Boolean(photoUrl),
       photoUpdatedAt: nextPhotoUpdatedAt,
       updatedAt: nextUpdatedAt,
     };
   });
 
-  // Also append any custom VIP/Admin restaurants present in overridesMap that aren't in the list yet (excluding deleted restaurants)
+  // Also append any custom VIP/Admin restaurants present in overridesMap that aren't in the list yet
+  // ONLY if they are strictly location-verified in Cambodia and NOT purged seed placeholders!
   for (const [ovId, ov] of Object.entries(overridesMap)) {
-    if (!seenIds.has(ovId) && ov && ov.nameKh && (ov.photoUrl || ov.profileImage) && !isRestaurantIdDeleted(ovId, ov.updatedAt, deletedMap, ov.googlePlaceId)) {
+    if (seenIds.has(ovId) || !ov || !ov.nameKh) continue;
+    if (isRestaurantIdDeleted(ovId, ov.updatedAt, deletedMap, ov.googlePlaceId)) continue;
+    // Never resurrect purged unverified seed restaurant IDs unless owned by a real VIP user
+    if (
+      isSeedRestaurantId(ovId) &&
+      !IMMUTABLE_SEED_REST_MAP.has(ovId) &&
+      (!ov.ownerId || ov.ownerId === 'owner-1')
+    ) {
+      continue;
+    }
+    const hasValidOvCoords =
+      isValidCambodiaCoordinates(ov.latitude, ov.longitude) &&
+      ov.locationNeedsReview !== true &&
+      ov.locationVerificationStatus !== 'needs_admin_review';
+    if (!hasValidOvCoords) {
+      continue;
+    }
+
+    const rawPhoto = ov.photoUrl || ov.profileImage || '';
+    const photoUrl =
+      typeof rawPhoto === 'string' &&
+      !rawPhoto.startsWith('/foods/') &&
+      !rawPhoto.startsWith('/restaurants/')
+        ? rawPhoto
+        : '';
+    const cleanGpid = isValidOfficialGooglePlaceId(ov.googlePlaceId) ? ov.googlePlaceId : undefined;
+    const candidateRest: Restaurant = {
+      id: ovId,
+      nameKh: ov.nameKh,
+      nameEn: ov.nameEn || ov.nameKh,
+      descriptionKh: ov.descriptionKh || 'ភោជនីយដ្ឋានម្ហូបខ្មែររសជាតិដើម ផាសុកភាព និងអនាម័យខ្ពស់។',
+      descriptionEn: ov.descriptionEn || 'Authentic Cambodian restaurant.',
+      photoUrl,
+      profileImage: photoUrl,
+      galleryPhotos:
+        Array.isArray(ov.galleryPhotos) && ov.galleryPhotos.length > 0
+          ? ov.galleryPhotos
+          : photoUrl
+          ? [photoUrl]
+          : [],
+      foodImages: Array.isArray(ov.foodImages) ? ov.foodImages : [],
+      menuItems: Array.isArray(ov.menuItems) ? ov.menuItems : [],
+      reviews: Array.isArray(ov.reviews) ? ov.reviews : [],
+      addressKh: ov.addressKh || 'រាជធានីភ្នំពេញ',
+      addressEn: ov.addressKh || 'Phnom Penh',
+      provinceKh: ov.provinceKh || 'រាជធានីភ្នំពេញ',
+      provinceEn: 'Phnom Penh',
+      phone: ov.phone || '',
+      openingHoursKh: ov.openingHoursKh || '០៧:០០ ព្រឹក - ០៩:០០ យប់',
+      openingHoursEn: '07:00 AM - 09:00 PM',
+      priceLevel: ov.priceLevel || '$$',
+      mapUrl: buildCanonicalGoogleMapsPinUrl(ov.latitude!, ov.longitude!, cleanGpid),
+      latitude: ov.latitude!,
+      longitude: ov.longitude!,
+      locationVerificationStatus: 'verified',
+      locationNeedsReview: false,
+      locationReviewNote: ov.locationReviewNote,
+      locationVerifiedAt: ov.locationVerifiedAt,
+      rating: typeof ov.rating === 'number' && ov.rating > 0 ? ov.rating : 0,
+      reviewCount: typeof ov.reviewCount === 'number' ? ov.reviewCount : 0,
+      signatureDishesKh: ['ម្ហូបប្រចាំហាង'],
+      promoVideoUrl: ov.promoVideoUrl,
+      telegramUrl: ov.telegramUrl,
+      facebookUrl: ov.facebookUrl,
+      websiteUrl: ov.websiteUrl,
+      businessCategory: ov.businessCategory,
+      ownerId: ov.ownerId,
+      ownerName: ov.ownerName,
+      ownerEmail: ov.ownerEmail,
+      googlePlaceId: cleanGpid,
+      dataSource: ov.dataSource,
+      googleMapsMeta: ov.googleMapsMeta,
+      status: 'approved',
+      isVerified: false,
+      isPromoted: Boolean(ov.ownerId),
+      membershipTier: ov.ownerId ? 'premium' : 'free',
+      paymentStatus: ov.ownerId ? 'paid' : 'unpaid',
+      isAdminEdited: ov.isAdminEdited ?? true,
+      adminEditedAt: ov.adminEditedAt || ov.updatedAt,
+      isCustomPhoto: Boolean(photoUrl),
+      photoUpdatedAt: ov.updatedAt,
+      createdAt: ov.adminEditedAt || ov.updatedAt || new Date().toISOString(),
+    };
+    if (isStrictVerifiedCambodiaRestaurant(candidateRest)) {
       anyChanged = true;
       seenIds.add(ovId);
-      const photoUrl = ov.photoUrl || ov.profileImage || '/Shop/rest-1.jpg';
-      const hasValidOvCoords = isValidCambodiaCoordinates(ov.latitude, ov.longitude) && !ov.locationNeedsReview;
-      const cleanGpid = isValidOfficialGooglePlaceId(ov.googlePlaceId) ? ov.googlePlaceId : undefined;
-      mapped.push({
-        id: ovId,
-        nameKh: ov.nameKh,
-        nameEn: ov.nameEn || ov.nameKh,
-        descriptionKh: ov.descriptionKh || 'ភោជនីយដ្ឋានម្ហូបខ្មែររសជាតិដើម ផាសុកភាព និងអនាម័យខ្ពស់។',
-        descriptionEn: ov.descriptionEn || 'Authentic Cambodian restaurant.',
-        photoUrl,
-        profileImage: ov.profileImage || photoUrl,
-        galleryPhotos: Array.isArray(ov.galleryPhotos) && ov.galleryPhotos.length > 0 ? ov.galleryPhotos : [photoUrl],
-        foodImages: Array.isArray(ov.foodImages) ? ov.foodImages : [],
-        menuItems: Array.isArray(ov.menuItems) ? ov.menuItems : [],
-        reviews: Array.isArray(ov.reviews) ? ov.reviews : [],
-        addressKh: ov.addressKh || 'ភ្នំពេញ',
-        addressEn: ov.addressKh || 'Phnom Penh',
-        provinceKh: ov.provinceKh || 'រាជធានីភ្នំពេញ',
-        provinceEn: 'Phnom Penh',
-        phone: ov.phone || '',
-        openingHoursKh: ov.openingHoursKh || '០៧:០០ ព្រឹក - ០៩:០០ យប់',
-        openingHoursEn: '07:00 AM - 09:00 PM',
-        priceLevel: ov.priceLevel || '$$',
-        mapUrl: hasValidOvCoords ? buildCanonicalGoogleMapsPinUrl(ov.latitude!, ov.longitude!, cleanGpid) : '',
-        latitude: hasValidOvCoords ? ov.latitude! : 0,
-        longitude: hasValidOvCoords ? ov.longitude! : 0,
-        locationVerificationStatus: hasValidOvCoords ? 'verified' : 'needs_admin_review',
-        locationNeedsReview: !hasValidOvCoords,
-        locationReviewNote: hasValidOvCoords ? ov.locationReviewNote : (ov.locationReviewNote || 'Unverified custom shop GPS — flagged for Admin review'),
-        locationVerifiedAt: ov.locationVerifiedAt,
-        rating: typeof ov.rating === 'number' && ov.rating > 0 ? ov.rating : 4.9,
-        reviewCount: typeof ov.reviewCount === 'number' ? ov.reviewCount : 1,
-        signatureDishesKh: ['ម្ហូបប្រចាំហាង'],
-        promoVideoUrl: ov.promoVideoUrl,
-        telegramUrl: ov.telegramUrl,
-        facebookUrl: ov.facebookUrl,
-        websiteUrl: ov.websiteUrl,
-        businessCategory: ov.businessCategory,
-        ownerId: ov.ownerId,
-        ownerName: ov.ownerName,
-        ownerEmail: ov.ownerEmail,
-        googlePlaceId: ov.googlePlaceId,
-        dataSource: ov.dataSource,
-        googleMapsMeta: ov.googleMapsMeta,
-        status: 'approved',
-        isVerified: true,
-        isPromoted: Boolean(ov.ownerId),
-        membershipTier: ov.ownerId ? 'premium' : 'free',
-        paymentStatus: ov.ownerId ? 'paid' : 'unpaid',
-        isAdminEdited: ov.isAdminEdited ?? true,
-        adminEditedAt: ov.adminEditedAt || ov.updatedAt,
-        isCustomPhoto: true,
-        photoUpdatedAt: ov.updatedAt,
-        createdAt: ov.adminEditedAt || ov.updatedAt || new Date().toISOString(),
-      });
+      mapped.push(candidateRest);
     }
   }
 
@@ -1991,20 +2234,9 @@ export function applyTrendingFoodOverrides(
 
     for (const fid of candidateIds) {
       const foodOv = safeFoodOverrides[fid];
-      if (foodOv && foodOv.photoUrl && !isObsoleteSeedPhoto(foodOv.photoUrl)) {
-        const seedFood = IMMUTABLE_SEED_FOOD_MAP.get(fid);
-        const seedPhotoUrl = seedFood?.photoUrl || '';
-        const ovTime = foodOv.updatedAt ? new Date(foodOv.updatedAt).getTime() : 0;
-        const useOvPhoto =
-          !seedPhotoUrl.startsWith('/foods/') ||
-          foodOv.isCustomPhoto ||
-          foodOv.photoUrl.startsWith('data:image/') ||
-          foodOv.photoUrl.startsWith('http') ||
-          foodOv.photoUrl.startsWith('/foods/') ||
-          ovTime > BAKED_STATIC_FOOD_ASSETS_MS + 1000 ||
-          ovTime === 0;
-        resolvedFoodPhoto = useOvPhoto ? foodOv.photoUrl : seedPhotoUrl;
-        resolvedFoodUpdatedAt = foodOv.updatedAt || '';
+      if (foodOv && foodOv.photoUrl && !isRejectedLegacyFoodOverridePhoto(fid, foodOv)) {
+        resolvedFoodPhoto = foodOv.photoUrl;
+        resolvedFoodUpdatedAt = foodOv.adminApprovedAt || foodOv.updatedAt || '';
         resolvedMatchedFoodId = fid;
         break;
       }
@@ -2012,6 +2244,7 @@ export function applyTrendingFoodOverrides(
       if (
         foodObj &&
         foodObj.photoUrl &&
+        !isLegacyAutoScrapedFoodPlaceholderUrl(foodObj.photoUrl) &&
         (foodObj.isCustomPhoto ||
           foodObj.photoUrl.startsWith('data:') ||
           foodObj.photoUrl.startsWith('http') ||
@@ -2034,6 +2267,7 @@ export function applyTrendingFoodOverrides(
     const hasCustomTrendOvPhoto = Boolean(
       ov?.photoUrl &&
         !isObsoleteSeedPhoto(ov.photoUrl) &&
+        !isLegacyAutoScrapedFoodPlaceholderUrl(ov.photoUrl) &&
         (ov.photoUrl.startsWith('data:') || ov.photoUrl.startsWith('http'))
     );
     const trendOvMs = ov?.updatedAt ? Date.parse(ov.updatedAt) || 0 : 0;
@@ -2282,6 +2516,11 @@ export async function hydrateAndSyncMediaOverrides(
               continue;
             }
 
+            // Skip downloading cloud rows whose table timestamp is already older than the bundled seed baseline
+            if (seedUpdatedAtMs > 0 && remoteMs > 0 && remoteMs <= seedUpdatedAtMs) {
+              continue;
+            }
+
             const localMs = Math.max(
               hasLocalPhoto && localUpdatedAt ? new Date(localUpdatedAt).getTime() || 0 : 0,
               seedUpdatedAtMs
@@ -2296,6 +2535,8 @@ export async function hydrateAndSyncMediaOverrides(
         if (keysToFetch.length > 0) {
           const BATCH_SIZE = 10;
           let seenChanged = false;
+          const canCleanupStaleCloud =
+            typeof localStorage !== 'undefined' && Boolean(localStorage.getItem('kft_admin_session_token'));
           for (let i = 0; i < keysToFetch.length; i += BATCH_SIZE) {
             const batchKeys = keysToFetch.slice(i, i + BATCH_SIZE);
             const rows = await pullCloudDocumentsByKeys<any>(batchKeys, 18000);
@@ -2314,31 +2555,72 @@ export async function hydrateAndSyncMediaOverrides(
               const payload = row.payload;
               if (!payload || !payload.id) continue;
               // Record seen row timestamp WITHOUT inflating payload.updatedAt!
-              // Inflating payload.updatedAt with row.updated_at previously allowed old backfilled images to beat newer edits.
               if (row.updated_at) {
                 seenRows[row.key] = row.updated_at;
                 seenChanged = true;
               }
-              batchChanged = true;
-              hasRemoteChanges = true;
               if (row.key.startsWith('kft_ov_food_')) {
+                if (isRejectedLegacyFoodOverridePhoto(payload.id, payload)) {
+                  if (!current.foods[payload.id]) {
+                    deleteSingleRecordFromIdb(`food:${payload.id}`).catch(() => {});
+                  }
+                  if (canCleanupStaleCloud && !current.foods[payload.id] && !pendingQueue[`food:${payload.id}`]) {
+                    deleteCloudDocument(row.key).catch(() => {});
+                  }
+                  continue;
+                }
                 batchBundle.foods[payload.id] = payload;
-                saveSingleRecordToIdb(`food:${payload.id}`, payload).catch(() => {});
+                batchChanged = true;
+                hasRemoteChanges = true;
               } else if (row.key.startsWith('kft_ov_rest_')) {
                 batchBundle.restaurants[payload.id] = payload;
-                saveSingleRecordToIdb(`rest:${payload.id}`, payload).catch(() => {});
+                batchChanged = true;
+                hasRemoteChanges = true;
               } else if (row.key.startsWith('kft_ov_dest_')) {
                 batchBundle.destinations[payload.id] = payload;
-                saveSingleRecordToIdb(`dest:${payload.id}`, payload).catch(() => {});
+                batchChanged = true;
+                hasRemoteChanges = true;
               } else if (row.key.startsWith('kft_ov_trend_')) {
+                if (isLegacyAutoScrapedFoodPlaceholderUrl(payload.photoUrl)) {
+                  if (!current.trendingFoods[payload.id]) {
+                    deleteSingleRecordFromIdb(`trend:${payload.id}`).catch(() => {});
+                  }
+                  continue;
+                }
                 batchBundle.trendingFoods[payload.id] = payload;
-                saveSingleRecordToIdb(`trend:${payload.id}`, payload).catch(() => {});
+                batchChanged = true;
+                hasRemoteChanges = true;
               }
             }
 
             if (batchChanged) {
               current = mergeOverrideBundles(current, batchBundle);
               inMemoryMasterBundle = current;
+              // Persist ONLY the winning merged records into IndexedDB so an older cloud payload never clobbers a newer local replacement
+              for (const fid of Object.keys(batchBundle.foods)) {
+                const winner = current.foods[fid];
+                if (winner) {
+                  saveSingleRecordToIdb(`food:${fid}`, winner).catch(() => {});
+                }
+              }
+              for (const rid of Object.keys(batchBundle.restaurants)) {
+                const winner = current.restaurants[rid];
+                if (winner) {
+                  saveSingleRecordToIdb(`rest:${rid}`, winner).catch(() => {});
+                }
+              }
+              for (const did of Object.keys(batchBundle.destinations)) {
+                const winner = current.destinations[did];
+                if (winner) {
+                  saveSingleRecordToIdb(`dest:${did}`, winner).catch(() => {});
+                }
+              }
+              for (const tid of Object.keys(batchBundle.trendingFoods)) {
+                const winner = current.trendingFoods[tid];
+                if (winner) {
+                  saveSingleRecordToIdb(`trend:${tid}`, winner).catch(() => {});
+                }
+              }
             }
           }
           if (seenChanged) {

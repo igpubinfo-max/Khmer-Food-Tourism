@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useApp } from '../context/AppContext';
-import { TrendingFoodItem, isUserVipActive, getVipAccountState, getVipRemainingDays, sortRestaurantsWithVipRotation, isAdminAccount, getVipFeaturedRotationConfig, isGpipRegisteredRestaurant, openRestaurantGoogleExternal, resolveFoodPhotoUrl } from '../types';
+import { TrendingFoodItem, isUserVipActive, getVipAccountState, getVipRemainingDays, sortRestaurantsWithVipRotation, isAdminAccount, getVipFeaturedRotationConfig, isGpipRegisteredRestaurant, openRestaurantGoogleExternal, resolveFoodPhotoUrl, isStrictVerifiedCambodiaRestaurant } from '../types';
 import {
   normalizeKhmerSearchText,
   searchCambodiaPlacesWithSmartCache,
@@ -87,9 +87,14 @@ export const HomeView: React.FC = () => {
 
   const hasActiveSearch = globalSearchQuery.trim().length > 0;
 
+  const verifiedHomeRestaurants = useMemo(
+    () => restaurants.filter(isStrictVerifiedCambodiaRestaurant),
+    [restaurants]
+  );
+
   const sessionShuffledRestaurants = useMemo(
-    () => (hasActiveSearch ? sortRestaurantsWithVipRotation(shuffleForCurrentSession(restaurants), users, appSettings) : []),
-    [hasActiveSearch, restaurants, users, appSettings]
+    () => (hasActiveSearch ? sortRestaurantsWithVipRotation(shuffleForCurrentSession(verifiedHomeRestaurants), users, appSettings) : []),
+    [hasActiveSearch, verifiedHomeRestaurants, users, appSettings]
   );
   const sessionShuffledDestinations = useMemo(
     () => (hasActiveSearch ? shuffleForCurrentSession(destinations) : []),

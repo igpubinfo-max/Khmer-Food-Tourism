@@ -14,6 +14,7 @@ import {
   isAdminAccount, getVipFeaturedRotationConfig, sanitizeManualFeaturedSchedule,
   parseSafeDateMs, isGpipRegisteredRestaurant, openRestaurantGoogleExternal,
   isValidCambodiaCoordinates, isValidOfficialGooglePlaceId, buildCanonicalGoogleMapsPinUrl,
+  isStrictVerifiedCambodiaRestaurant, SEED_FOOD_PHOTO_BASELINE_MS,
   AuthModalInitialView, hasAuthenticatedEmailAccount, computeFastPhotoSignature
 } from '../types';
 import {
@@ -83,6 +84,8 @@ import {
   applyTrendingFoodOverrides,
   hydrateFromLocalIdbImmediate,
   hydrateAndSyncMediaOverrides,
+  isLegacyAutoScrapedFoodPlaceholderUrl,
+  isRejectedLegacyFoodOverridePhoto,
 } from '../services/permanentMediaVaultService';
 import {
   GooglePlaceCachedItem,
@@ -741,11 +744,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               continue;
             }
 
-            // Harvest any custom photo, name, or recipe edit from cached localStorage ONLY when it is not stale
-            // relative to `kft_food_revision_ledger_v1`, and NEVER fabricate a fresh `new Date().toISOString()` timestamp
-            // that could overwrite newer IndexedDB or Supabase Cloud overrides!
+            // Harvest any custom photo, name, or recipe edit from cached localStorage ONLY when:
+            // 1) It was NOT compacted down to a fallback seed URL (__compactedFromVault),
+            // 2) It is NOT a legacy auto-scraped external placeholder (e.g. themealdb.com),
+            // 3) Its authoritative timestamp is strictly newer than SEED_FOOD_PHOTO_BASELINE_MS,
+            // 4) It is NOT stale relative to `kft_food_revision_ledger_v1`.
+            if ((f as any).__compactedFromVault === true || isLegacyAutoScrapedFoodPlaceholderUrl(f.photoUrl)) {
+              continue;
+            }
             const existingOverride = vault.foods[f.id];
             const ledgerEntry = foodLedger[f.id];
+            const candidateEffectiveMs = Math.max(
+              f.photoUpdatedAt ? Date.parse(f.photoUpdatedAt) || 0 : 0,
+              f.adminEditedAt ? Date.parse(f.adminEditedAt) || 0 : 0,
+              ledgerEntry?.updatedAt ? Date.parse(ledgerEntry.updatedAt) || 0 : 0
+            );
+            if (candidateEffectiveMs <= SEED_FOOD_PHOTO_BASELINE_MS) {
+              continue;
+            }
             const candidateHash = f.photoUrl ? computeFastPhotoSignature(f.photoUrl) : '';
             const isStaleVsLedger = Boolean(
               ledgerEntry &&
@@ -756,27 +772,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               continue;
             }
 
+            const cleanCachedPhotoBase = (f.photoUrl || '').split('?')[0].trim();
+            const cleanSeedPhotoBase = (seed.photoUrl || '').split('?')[0].trim();
             const isPhotoModifiedFromSeed =
               typeof f.photoUrl === 'string' &&
-              f.photoUrl.trim().length > 0 &&
-              f.photoUrl !== seed.photoUrl &&
+              cleanCachedPhotoBase.length > 0 &&
+              cleanCachedPhotoBase !== cleanSeedPhotoBase &&
               (f.isCustomPhoto ||
                 f.photoUrl.startsWith('data:') ||
                 f.photoUrl.startsWith('http://') ||
-                f.photoUrl.startsWith('https://') ||
-                (f.imageAuditNote && (f.imageAuditNote.includes('រដ្ឋបាល') || f.imageAuditNote.includes('Online'))));
+                f.photoUrl.startsWith('https://'));
             const isContentModifiedFromSeed =
-              (f.nameKh && f.nameKh !== seed.nameKh) ||
-              (f.nameEn && f.nameEn !== seed.nameEn) ||
-              (f.descriptionKh && f.descriptionKh !== seed.descriptionKh) ||
-              (f.imageAuditNote && f.imageAuditNote.includes('រដ្ឋបាល'));
+              Boolean(f.isAdminEdited) &&
+              ((f.nameKh && f.nameKh !== seed.nameKh) ||
+                (f.nameEn && f.nameEn !== seed.nameEn) ||
+                (f.descriptionKh && f.descriptionKh !== seed.descriptionKh));
 
             if ((isPhotoModifiedFromSeed || isContentModifiedFromSeed) && !existingOverride) {
-              vault.foods[f.id] = {
+              const candidateOv = {
                 id: f.id,
                 photoUrl: isPhotoModifiedFromSeed ? f.photoUrl : (ledgerEntry?.cloudUrl || seed.photoUrl),
                 photoHash: isPhotoModifiedFromSeed ? candidateHash : undefined,
-                revision: ledgerEntry?.revision,
+                revision: ledgerEntry?.revision || 1,
                 nameKh: f.nameKh,
                 nameEn: f.nameEn,
                 categorySlug: f.categorySlug,
@@ -794,9 +811,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 priceUsd: f.priceUsd,
                 imageAuditStatus: f.imageAuditStatus || 'verified',
                 imageAuditNote: f.imageAuditNote,
-                isCustomPhoto: Boolean(isPhotoModifiedFromSeed || f.isCustomPhoto),
-                updatedAt: f.photoUpdatedAt || ledgerEntry?.updatedAt || '1970-01-01T00:00:00.000Z',
+                isCustomPhoto: Boolean(isPhotoModifiedFromSeed),
+                updatedAt: new Date(candidateEffectiveMs).toISOString(),
               };
+              if (!isRejectedLegacyFoodOverridePhoto(f.id, candidateOv)) {
+                vault.foods[f.id] = candidateOv;
+              }
             }
           }
           // Note: Do NOT call saveLocalMediaOverrides(vault) synchronously before hydrateFromLocalIdbImmediate() completes,
@@ -825,15 +845,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       : [];
 
     // Preserve exact matched photoUrl for each restaurant without cross-assigning another shop's storefront sign
-    // Never allow a broken path (/restaurants/...) as the restaurant's primary photoUrl
-    const rawPhoto = r.photoUrl || r.profileImage || galleryPhotos[0] || '/Shop/rest-1.jpg';
+    // Never allow a broken path (/restaurants/...) or dish photo (/foods/...) as the restaurant's primary photoUrl
+    const rawPhoto = r.photoUrl || r.profileImage || galleryPhotos[0] || '';
     const photoUrl =
-      typeof rawPhoto === 'string' && !rawPhoto.startsWith('/restaurants/')
+      typeof rawPhoto === 'string' &&
+      !rawPhoto.startsWith('/restaurants/') &&
+      !rawPhoto.startsWith('/foods/')
         ? rawPhoto
-        : '/Shop/rest-1.jpg';
+        : '';
     const rawProfile = r.profileImage || photoUrl;
     const cleanProfileImage =
-      typeof rawProfile === 'string' && !rawProfile.startsWith('/restaurants/')
+      typeof rawProfile === 'string' &&
+      !rawProfile.startsWith('/restaurants/') &&
+      !rawProfile.startsWith('/foods/')
         ? rawProfile
         : photoUrl;
     const restId = r.id || `rest-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
@@ -961,11 +985,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       localStorage.removeItem('kft_restaurants_real_v7');
       localStorage.removeItem('kft_restaurants_real_v8');
       const saved =
+        localStorage.getItem('kft_restaurants_real_v12') ||
         localStorage.getItem('kft_restaurants_real_v11') ||
         localStorage.getItem('kft_restaurants_real_v10') ||
         localStorage.getItem('kft_restaurants_real_v9');
       localStorage.removeItem('kft_restaurants_real_v9');
       localStorage.removeItem('kft_restaurants_real_v10');
+      localStorage.removeItem('kft_restaurants_real_v11');
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length >= 40) {
@@ -1066,15 +1092,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 addressEn: seed.addressEn,
                 provinceKh: ov?.provinceKh || seed.provinceKh,
                 provinceEn: seed.provinceEn,
-                ...(Boolean(ov?.locationVerifiedAt || r.locationVerifiedAt)
+                ...(Boolean(ov?.locationVerifiedAt) &&
+                isValidCambodiaCoordinates(ov?.latitude, ov?.longitude) &&
+                ov?.locationNeedsReview !== true
                   ? {
-                      mapUrl: ov?.mapUrl ?? r.mapUrl,
-                      latitude: typeof ov?.latitude === 'number' ? ov.latitude : r.latitude,
-                      longitude: typeof ov?.longitude === 'number' ? ov.longitude : r.longitude,
-                      locationVerificationStatus: ov?.locationVerificationStatus ?? r.locationVerificationStatus,
-                      locationNeedsReview: ov?.locationNeedsReview ?? r.locationNeedsReview,
-                      locationReviewNote: ov?.locationReviewNote ?? r.locationReviewNote,
-                      locationVerifiedAt: ov?.locationVerifiedAt ?? r.locationVerifiedAt,
+                      mapUrl: buildCanonicalGoogleMapsPinUrl(
+                        ov!.latitude!,
+                        ov!.longitude!,
+                        isValidOfficialGooglePlaceId(ov?.googlePlaceId)
+                          ? ov?.googlePlaceId
+                          : seed.googlePlaceId
+                      ),
+                      latitude: ov!.latitude!,
+                      longitude: ov!.longitude!,
+                      googlePlaceId: isValidOfficialGooglePlaceId(ov?.googlePlaceId)
+                        ? ov?.googlePlaceId
+                        : seed.googlePlaceId,
+                      locationVerificationStatus: 'verified' as const,
+                      locationNeedsReview: false,
+                      locationReviewNote: ov?.locationReviewNote ?? seed.locationReviewNote,
+                      locationVerifiedAt: ov?.locationVerifiedAt ?? seed.locationVerifiedAt,
                     }
                   : {
                       mapUrl: seed.mapUrl,
@@ -1091,7 +1128,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 createdAt: seed.created_at || getRestaurantCreatedAtIso(seed),
               }));
             } else {
-              normalizedList.push(normalizeRestaurant(r));
+              const normCustom = normalizeRestaurant(r);
+              if (isStrictVerifiedCambodiaRestaurant(normCustom)) {
+                normalizedList.push(normCustom);
+              }
             }
           }
           // Ensure any newly added seed restaurants are also merged in (unless explicitly deleted by Admin)
@@ -1105,12 +1145,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             saveLocalMediaOverrides(vault);
           }
           return sortRestaurantsChronologically(
-            applyRestaurantOverrides(normalizedList, vault.restaurants)
+            applyRestaurantOverrides(normalizedList, vault.restaurants).filter(
+              isStrictVerifiedCambodiaRestaurant
+            )
           );
         }
       }
     } catch (e) {
-      console.warn('Failed to parse kft_restaurants_real_v9', e);
+      console.warn('Failed to parse kft_restaurants_real_v12', e);
     }
 
     // Preserve any user-created custom restaurants from previous storage key
@@ -1122,7 +1164,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (Array.isArray(parsedOld)) {
           customLegacyRestaurants = parsedOld
             .filter((r: any) => r && r.id && !isSeedRestaurantId(String(r.id)))
-            .map(normalizeRestaurant);
+            .map(normalizeRestaurant)
+            .filter(isStrictVerifiedCambodiaRestaurant);
         }
       }
       localStorage.removeItem('kft_restaurants_google_v3');
@@ -1141,7 +1184,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         ownerId: undefined,
       }));
     return sortRestaurantsChronologically(
-      applyRestaurantOverrides([...baseRestaurants, ...customLegacyRestaurants], vault.restaurants)
+      applyRestaurantOverrides([...baseRestaurants, ...customLegacyRestaurants], vault.restaurants).filter(
+        isStrictVerifiedCambodiaRestaurant
+      )
     );
   });
 
@@ -2112,13 +2157,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             return {
               ...f,
               photoUrl: seedFoodMap.get(f.id) || `/foods/${f.id}.jpg`,
-              isCustomPhoto: true,
+              isCustomPhoto: false,
+              __compactedFromVault: true,
             };
           }
           return f;
         });
       }
-      if (key === 'kft_restaurants_real_v11') {
+      if (key === 'kft_restaurants_real_v12' || key === 'kft_restaurants_real_v12') {
         if (!seedRestPhotoMapRef.current) {
           seedRestPhotoMapRef.current = new Map(initialRestaurants.map(r => [r.id, r.photoUrl]));
         }
@@ -2133,7 +2179,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             (Array.isArray(r.foodImages) && r.foodImages.some(g => g.startsWith('data:'))) ||
             (Array.isArray(r.menuItems) && r.menuItems.some(m => typeof m.photoUrl === 'string' && m.photoUrl.startsWith('data:')));
           if (hasInlineDataUrl && hasPersistedOverride) {
-            const fallbackUrl = seedRestMap.get(r.id) || '/Shop/rest-1.jpg';
+            const fallbackUrl = seedRestMap.get(r.id) || '';
             return {
               ...r,
               photoUrl: r.photoUrl?.startsWith('data:') ? fallbackUrl : r.photoUrl,
@@ -2590,7 +2636,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           });
           if (restChanged) {
             try {
-              localStorage.setItem('kft_restaurants_real_v11', JSON.stringify(nextRests));
+              localStorage.setItem('kft_restaurants_real_v12', JSON.stringify(nextRests));
             } catch {}
           }
           return restChanged ? nextRests : prev;
@@ -2642,7 +2688,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return;
     }
     if (restaurants && restaurants.length > 0) {
-      scheduleStorageWrite('kft_restaurants_real_v11', restaurants, 1200);
+      scheduleStorageWrite('kft_restaurants_real_v12', restaurants, 1200);
     }
   }, [restaurants]);
 
@@ -3151,7 +3197,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 anyCustomChanged = true;
                 continue;
               }
-              if (isSeedRestaurantId(String(r.id)) || !r.ownerId || !deletedIdSet.has(r.ownerId)) {
+              if (
+                (isSeedRestaurantId(String(r.id)) || !r.ownerId || !deletedIdSet.has(r.ownerId)) &&
+                isStrictVerifiedCambodiaRestaurant(r)
+              ) {
                 map.set(r.id, r);
               } else {
                 anyCustomChanged = true;
@@ -3166,6 +3215,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 !isRestaurantIdDeleted(String(r.id), r.updatedAt || r.photoUpdatedAt || r.adminEditedAt || r.createdAt, syncedDeletedRests, r.googlePlaceId)
               ) {
                 const normCloud = normalizeRestaurant(r);
+                if (!isStrictVerifiedCambodiaRestaurant(normCloud)) {
+                  continue;
+                }
                 const localCur = map.get(r.id);
                 if (!localCur) {
                   map.set(r.id, normCloud);
@@ -3189,8 +3241,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             const sorted = sortRestaurantsChronologically(Array.from(map.values()));
             latestSyncStateRef.current.restaurants = sorted;
             try {
-              const compacted = compactDataForBulkLocalStorage('kft_restaurants_real_v11', sorted);
-              localStorage.setItem('kft_restaurants_real_v11', JSON.stringify(compacted));
+              const compacted = compactDataForBulkLocalStorage('kft_restaurants_real_v12', sorted);
+              localStorage.setItem('kft_restaurants_real_v12', JSON.stringify(compacted));
             } catch {}
             return sorted;
           });
@@ -4145,7 +4197,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       });
       if (restChanged) {
         latestSyncStateRef.current.restaurants = nextRests;
-        scheduleStorageWrite('kft_restaurants_real_v11', nextRests, 300);
+        scheduleStorageWrite('kft_restaurants_real_v12', nextRests, 300);
       }
       return restChanged ? nextRests : prev;
     });
@@ -4326,7 +4378,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       });
       setRestaurants(nextRestaurants);
       try {
-        localStorage.setItem('kft_restaurants_real_v11', JSON.stringify(nextRestaurants));
+        localStorage.setItem('kft_restaurants_real_v12', JSON.stringify(nextRestaurants));
       } catch {}
     }
 
@@ -4678,7 +4730,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       latestSyncStateRef.current.restaurants = nextRestaurants;
       setRestaurants(nextRestaurants);
       try {
-        localStorage.setItem('kft_restaurants_real_v11', JSON.stringify(nextRestaurants));
+        localStorage.setItem('kft_restaurants_real_v12', JSON.stringify(nextRestaurants));
       } catch {}
       if (selectedRestaurant && !isSeedRestaurantId(selectedRestaurant.id) && isTargetOwner(selectedRestaurant.ownerId, selectedRestaurant.ownerEmail)) {
         setSelectedRestaurant(null);
@@ -5593,13 +5645,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const updateFood = (updated: FoodItem) => {
-    const customUpdated: FoodItem = {
+    const draftUpdated: FoodItem = {
       ...updated,
       isCustomPhoto: true,
+      isAdminEdited: true,
       photoUpdatedAt: new Date().toISOString(),
     };
-    recordPermanentFoodOverride(customUpdated);
+    recordPermanentFoodOverride(draftUpdated);
     const vault = loadLocalMediaOverrides();
+    const authoritativeIso = vault.foods[updated.id]?.updatedAt || draftUpdated.photoUpdatedAt!;
+    const customUpdated: FoodItem = {
+      ...draftUpdated,
+      photoUpdatedAt: authoritativeIso,
+      adminEditedAt: authoritativeIso,
+    };
     setFoods(prev => {
       const next = prev.map(f => f.id === customUpdated.id ? customUpdated : f);
       scheduleStorageWrite('kft_foods_200_v9', next, 400);
@@ -5820,7 +5879,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setRestaurants(prev => {
       const nextList = sortRestaurantsChronologically([...prev.filter(r => r.id !== newRest.id), newRest]);
       latestSyncStateRef.current.restaurants = nextList;
-      scheduleStorageWrite('kft_restaurants_real_v11', nextList, 300);
+      scheduleStorageWrite('kft_restaurants_real_v12', nextList, 300);
       // Background push to Supabase Cloud if configured
       try {
         if (isSupabaseConfigured()) {
@@ -6091,7 +6150,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setRestaurants(prev => {
       const next = prev.map(r => r.id === updated.id ? safeUpdated : r);
       latestSyncStateRef.current.restaurants = next;
-      scheduleStorageWrite('kft_restaurants_real_v11', next, 300);
+      scheduleStorageWrite('kft_restaurants_real_v12', next, 300);
       if (!isSeedRestaurantId(safeUpdated.id) && isSupabaseConfigured()) {
         try {
           const customRests = next.filter(r => !isSeedRestaurantId(r.id));
@@ -6218,7 +6277,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setRestaurants(prev => {
       const next = prev.map(r => (r.id === restaurantId ? updatedRest : r));
       latestSyncStateRef.current.restaurants = next;
-      scheduleStorageWrite('kft_restaurants_real_v11', next, 300);
+      scheduleStorageWrite('kft_restaurants_real_v12', next, 300);
       if (!isSeedRestaurantId(restaurantId) && isSupabaseConfigured()) {
         try {
           pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter(r => !isSeedRestaurantId(r.id)));
@@ -6293,7 +6352,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setRestaurants(prev => {
       const next = prev.map(r => (r.id === restaurantId ? updatedRest : r));
       latestSyncStateRef.current.restaurants = next;
-      scheduleStorageWrite('kft_restaurants_real_v11', next, 300);
+      scheduleStorageWrite('kft_restaurants_real_v12', next, 300);
       if (!isSeedRestaurantId(restaurantId) && isSupabaseConfigured()) {
         try {
           pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter(r => !isSeedRestaurantId(r.id)));
@@ -6358,7 +6417,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setRestaurants(prev => {
       const next = prev.map(r => (r.id === restaurantId ? updatedRest : r));
       latestSyncStateRef.current.restaurants = next;
-      scheduleStorageWrite('kft_restaurants_real_v11', next, 300);
+      scheduleStorageWrite('kft_restaurants_real_v12', next, 300);
       if (!isSeedRestaurantId(restaurantId) && isSupabaseConfigured()) {
         try {
           pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter(r => !isSeedRestaurantId(r.id)));
@@ -6432,7 +6491,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     setRestaurants(prev => {
       const next = prev.map(r => (r.id === restaurantId ? updatedRest : r));
-      scheduleStorageWrite('kft_restaurants_real_v11', next, 400);
+      scheduleStorageWrite('kft_restaurants_real_v12', next, 400);
       if (!isSeedRestaurantId(restaurantId) && isSupabaseConfigured()) {
         try {
           pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter(r => !isSeedRestaurantId(r.id)));
@@ -6515,7 +6574,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         ...cur,
         [field]: (cur[field] || 0) + 1,
       };
-      scheduleStorageWrite('kft_restaurants_real_v11', list, 25000);
+      scheduleStorageWrite('kft_restaurants_real_v12', list, 25000);
     }
     if (isManageMenuModalOpen || isAdminOpen) {
       setRestaurants(prev => [...prev]);
@@ -6642,10 +6701,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       );
       latestSyncStateRef.current.restaurants = next;
       try {
-        const compacted = compactDataForBulkLocalStorage('kft_restaurants_real_v11', next);
-        localStorage.setItem('kft_restaurants_real_v11', JSON.stringify(compacted));
+        const compacted = compactDataForBulkLocalStorage('kft_restaurants_real_v12', next);
+        localStorage.setItem('kft_restaurants_real_v12', JSON.stringify(compacted));
       } catch {
-        scheduleStorageWrite('kft_restaurants_real_v11', next, 100);
+        scheduleStorageWrite('kft_restaurants_real_v12', next, 100);
       }
       if (isSupabaseConfigured()) {
         try {
@@ -6775,7 +6834,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (selectedRestaurant?.id === id) setSelectedRestaurant(approvedRest);
         return approvedRest;
       });
-      scheduleStorageWrite('kft_restaurants_real_v11', next, 400);
+      scheduleStorageWrite('kft_restaurants_real_v12', next, 400);
       if (isSupabaseConfigured()) {
         try {
           pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter(r => !isSeedRestaurantId(r.id)));
@@ -6831,7 +6890,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (selectedRestaurant?.id === id) setSelectedRestaurant(rejectedRest);
         return rejectedRest;
       });
-      scheduleStorageWrite('kft_restaurants_real_v11', next, 400);
+      scheduleStorageWrite('kft_restaurants_real_v12', next, 400);
       if (isSupabaseConfigured()) {
         try {
           pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter(r => !isSeedRestaurantId(r.id)));
@@ -6923,7 +6982,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setRestaurants(prev => {
         const next = prev.map(r => (r.id === restaurantId ? adminUpdated : r));
         latestSyncStateRef.current.restaurants = next;
-        scheduleStorageWrite('kft_restaurants_real_v11', next, 300);
+        scheduleStorageWrite('kft_restaurants_real_v12', next, 300);
         if (!isSeedRestaurantId(adminUpdated.id) && isSupabaseConfigured()) {
           try {
             pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter(r => !isSeedRestaurantId(r.id)));
@@ -6960,7 +7019,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setRestaurants(prev => {
       const next = prev.map(r => (r.id === restaurantId ? pendingUpdated : r));
       latestSyncStateRef.current.restaurants = next;
-      scheduleStorageWrite('kft_restaurants_real_v11', next, 300);
+      scheduleStorageWrite('kft_restaurants_real_v12', next, 300);
       if (!isSeedRestaurantId(pendingUpdated.id) && isSupabaseConfigured()) {
         try {
           pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter(r => !isSeedRestaurantId(r.id)));
@@ -7031,7 +7090,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setRestaurants(prev => {
       const next = prev.map(r => (r.id === restaurantId ? approvedRest : r));
       latestSyncStateRef.current.restaurants = next;
-      scheduleStorageWrite('kft_restaurants_real_v11', next, 300);
+      scheduleStorageWrite('kft_restaurants_real_v12', next, 300);
       if (!isSeedRestaurantId(approvedRest.id) && isSupabaseConfigured()) {
         try {
           pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter(r => !isSeedRestaurantId(r.id)));
@@ -7098,7 +7157,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setRestaurants(prev => {
       const next = prev.map(r => (r.id === restaurantId ? rejectedRest : r));
       latestSyncStateRef.current.restaurants = next;
-      scheduleStorageWrite('kft_restaurants_real_v11', next, 300);
+      scheduleStorageWrite('kft_restaurants_real_v12', next, 300);
       if (!isSeedRestaurantId(rejectedRest.id) && isSupabaseConfigured()) {
         try {
           pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter(r => !isSeedRestaurantId(r.id)));
@@ -7361,7 +7420,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       recordPermanentRestaurantOverride(finalMerged);
       setRestaurants(prev => {
         const next = prev.map(r => r.id === existingRest.id ? finalMerged : r);
-        scheduleStorageWrite('kft_restaurants_real_v11', next, 400);
+        scheduleStorageWrite('kft_restaurants_real_v12', next, 400);
         if (!isSeedRestaurantId(finalMerged.id) && isSupabaseConfigured()) {
           try {
             pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter(r => !isSeedRestaurantId(r.id)));
@@ -7404,7 +7463,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     recordPermanentRestaurantOverride(finalRest);
     setRestaurants(prev => {
       const next = sortRestaurantsChronologically([finalRest, ...prev]);
-      scheduleStorageWrite('kft_restaurants_real_v11', next, 400);
+      scheduleStorageWrite('kft_restaurants_real_v12', next, 400);
       if (isSupabaseConfigured()) {
         try {
           pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter(r => !isSeedRestaurantId(r.id)));
@@ -7519,7 +7578,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               paymentDate: now.toISOString().split('T')[0],
             };
           });
-          scheduleStorageWrite('kft_restaurants_real_v11', nextRests, 300);
+          scheduleStorageWrite('kft_restaurants_real_v12', nextRests, 300);
           return nextRests;
         });
       }

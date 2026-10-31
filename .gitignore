@@ -29,6 +29,7 @@ backup_*
 PlayStore-Assets/Khmer-Food-Tourism-APK-and-AAB/
 PlayStore-Assets/*.aab
 PlayStore-Assets/*.apk
+Release_APK_AAB/
 Food/
 /Shop/
 !public/Shop/

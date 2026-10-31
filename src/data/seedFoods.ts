@@ -1,4 +1,4 @@
-import { FoodItem } from '../types';
+import { FoodItem, SEED_FOOD_PHOTO_BASELINE_ISO, SEED_FOOD_PHOTO_BASELINE_MS } from '../types';
 import { additional100Foods } from './seedAdditional100Foods';
 
 export const seedFoods: FoodItem[] = [
@@ -6452,7 +6452,8 @@ export const generateFull100Foods = (): FoodItem[] => {
         imageAuditStatus: auditStatus,
         imageAuditNote: auditNote,
         originalPhotoUrl: photo,
-        ...(id === 'food-84' ? { isCustomPhoto: true, photoUpdatedAt: '2026-10-24T11:33:28.601Z' } : {}),
+        isCustomPhoto: false,
+        photoUpdatedAt: SEED_FOOD_PHOTO_BASELINE_ISO,
         prepTime: customRecipe.prepTime,
         cookTime: customRecipe.cookTime,
         servings: customRecipe.servings,
@@ -6481,7 +6482,8 @@ export const generateFull100Foods = (): FoodItem[] => {
         imageAuditStatus: auditStatus,
         imageAuditNote: auditNote,
         originalPhotoUrl: photo,
-        ...(id === 'food-84' ? { isCustomPhoto: true, photoUpdatedAt: '2026-10-24T11:33:28.601Z' } : {}),
+        isCustomPhoto: false,
+        photoUpdatedAt: SEED_FOOD_PHOTO_BASELINE_ISO,
         prepTime: '១៥ នាទី',
         cookTime: '២០ នាទី',
         servings: '២-៣ នាក់',
@@ -6497,7 +6499,16 @@ export const generateFull100Foods = (): FoodItem[] => {
     }
   });
 
-  return [...fullList.map((f) => ({ ...f, priceRiel: 0, priceUsd: 0 })), ...additional100Foods];
+  return [...fullList, ...additional100Foods].map((f) => ({
+    ...f,
+    priceRiel: 0,
+    priceUsd: 0,
+    isCustomPhoto: false,
+    photoUpdatedAt:
+      f.photoUpdatedAt && Date.parse(f.photoUpdatedAt) >= SEED_FOOD_PHOTO_BASELINE_MS
+        ? f.photoUpdatedAt
+        : SEED_FOOD_PHOTO_BASELINE_ISO,
+  }));
 };
 
 export const initial100Foods: FoodItem[] = generateFull100Foods();

@@ -5,6 +5,7 @@ import {
   isAdminAccount,
   isGpipRegisteredRestaurant,
   openRestaurantGoogleExternal,
+  resolveFoodPhotoUrl,
 } from '../types';
 import { useApp } from '../context/AppContext';
 import {
@@ -78,20 +79,18 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(
     const isGpipRegistered = useMemo(() => isGpipRegisteredRestaurant(restaurant), [restaurant]);
 
     const resolvedShopPhotoUrl = useMemo(() => {
-      const raw =
-        restaurant.photoUrl && !restaurant.photoUrl.startsWith('/restaurants/')
+      const candidate =
+        restaurant.photoUrl &&
+        !restaurant.photoUrl.startsWith('/restaurants/') &&
+        !restaurant.photoUrl.startsWith('/foods/')
           ? restaurant.photoUrl
-          : restaurant.profileImage && !restaurant.profileImage.startsWith('/restaurants/')
+          : restaurant.profileImage &&
+            !restaurant.profileImage.startsWith('/restaurants/') &&
+            !restaurant.profileImage.startsWith('/foods/')
           ? restaurant.profileImage
-          : '/Shop/rest-1.jpg';
-      if (raw.startsWith('/Shop/') && !raw.includes('?')) {
-        return `${raw}?v=20261031v1`;
-      }
-      if (raw.startsWith('/foods/') && !raw.includes('?')) {
-        return `${raw}?v=20261031v1`;
-      }
-      return raw;
-    }, [restaurant.photoUrl, restaurant.profileImage]);
+          : '';
+      return resolveFoodPhotoUrl(candidate, restaurant.photoUpdatedAt);
+    }, [restaurant.photoUrl, restaurant.profileImage, restaurant.photoUpdatedAt]);
 
     const handleCardClick = () => {
       trackRestaurantView(restaurant.id);

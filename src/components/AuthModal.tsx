@@ -120,7 +120,7 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
   const handleGoogleQuickSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const cleanEmail = googleQuickEmail.trim().toLowerCase();
-    if (!cleanEmail || !cleanEmail.includes('@')) {
+    if (!cleanEmail || !hasAuthenticatedEmailAccount({ email: cleanEmail })) {
       showToast(isKm ? 'សូមបញ្ចូលអាសយដ្ឋាន Gmail របស់អ្នកឱ្យបានត្រឹមត្រូវ' : 'Please enter a valid Gmail address', 'warning');
       return;
     }

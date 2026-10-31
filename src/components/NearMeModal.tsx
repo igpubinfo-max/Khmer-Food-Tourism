@@ -20,6 +20,7 @@ import {
   TouristDestination,
   isGpipRegisteredRestaurant,
   isPlaceLocationVerified,
+  isStrictVerifiedCambodiaRestaurant,
   openRestaurantGoogleExternal,
   openDestinationGoogleExternal,
 } from '../types';
@@ -314,7 +315,7 @@ export const NearMeModal: React.FC = () => {
 
     // 1. Add existing verified-location in-app restaurants strictly within selectedRadiusMeters
     for (const r of restaurants) {
-      if (!isPlaceLocationVerified(r)) continue;
+      if (!isStrictVerifiedCambodiaRestaurant(r)) continue;
       const dist = calculateDistanceMeters(baseCoords.lat, baseCoords.lng, r.latitude, r.longitude);
       if (dist <= selectedRadiusMeters) {
         mergedMap.set(r.id, r);
@@ -331,7 +332,9 @@ export const NearMeModal: React.FC = () => {
         mergedMap.set(existingMatch.id, mergeGoogleMapsPlaceWithExistingRestaurant(existingMatch, gp));
       } else {
         const converted = convertGooglePlaceToRestaurant(gp);
-        mergedMap.set(converted.id, converted);
+        if (isStrictVerifiedCambodiaRestaurant(converted)) {
+          mergedMap.set(converted.id, converted);
+        }
       }
     }
 

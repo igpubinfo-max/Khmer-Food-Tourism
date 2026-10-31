@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { RestaurantCard } from './RestaurantCard';
-import { Restaurant, sortRestaurantsWithVipRotation, isAdminAccount, getVipFeaturedRotationConfig } from '../types';
+import { Restaurant, sortRestaurantsWithVipRotation, isAdminAccount, getVipFeaturedRotationConfig, isStrictVerifiedCambodiaRestaurant } from '../types';
 import { shuffleForCurrentSession } from '../utils/sessionShuffle';
 import { Store, Plus, Edit2, Shield, Settings, MapPin, Globe, RefreshCw, Search, X } from 'lucide-react';
 import { normalizeKhmerSearchText } from '../services/googlePlacesService';
@@ -142,7 +142,7 @@ export const RestaurantView: React.FC = () => {
   const validDirectoryRestaurants = useMemo(() => {
     const seenIds = new Set<string>();
     return sessionShuffledRestaurants.filter((r) => {
-      if (!r || !r.id || String(r.id).startsWith('food-') || String(r.id).startsWith('dest-')) {
+      if (!isStrictVerifiedCambodiaRestaurant(r)) {
         return false;
       }
       if (

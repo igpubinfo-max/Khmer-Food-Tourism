@@ -23,6 +23,7 @@ import {
   isValidCambodiaCoordinates,
   isValidOfficialGooglePlaceId,
   isPlaceLocationVerified,
+  isStrictVerifiedCambodiaRestaurant,
   buildCanonicalGoogleMapsPinUrl,
   buildCanonicalGoogleMapsDirectionsUrl,
   openExternalUrlNativeSafe,
@@ -344,6 +345,9 @@ function isNonBusinessInstitutionName(name: string, category?: string): boolean 
 export function isValidSmartCachePlace(item: any): item is GooglePlaceCachedItem {
   if (!item || typeof item !== 'object' || !item.placeId) return false;
   if (String(item.placeId).startsWith('osm-kh-')) return false;
+  const lat = Number(item.lat ?? item.latitude);
+  const lng = Number(item.lng ?? item.longitude);
+  if (!isValidCambodiaCoordinates(lat, lng)) return false;
   if (isNonBusinessInstitutionName(item.nameKh || item.nameEn || '', item.category)) return false;
   if (isUnrelatedFallbackPhotoUrl(item.photoUrl, item.placeId) && !item.photoUrl?.startsWith('data:image/svg+xml')) {
     return false;
@@ -4802,7 +4806,9 @@ export function performUnifiedCambodiaSearch(
   });
 
   const approvedAppRestaurants = restaurants.filter(
-    (r) => r.status === 'approved' || currentUser?.role === 'admin' || currentUser?.id === r.ownerId
+    (r) =>
+      isStrictVerifiedCambodiaRestaurant(r) &&
+      (r.status === 'approved' || currentUser?.role === 'admin' || currentUser?.id === r.ownerId)
   );
 
   const localRestaurants = approvedAppRestaurants.filter((r) => {

@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Star, MapPin } from 'lucide-react';
 import type { Language, Restaurant } from '../../types';
-import { isRestaurantPremiumActive, isGpipRegisteredRestaurant, openRestaurantGoogleExternal } from '../../types';
+import { isRestaurantPremiumActive, isGpipRegisteredRestaurant, openRestaurantGoogleExternal, isStrictVerifiedCambodiaRestaurant } from '../../types';
 import { tr } from '../../utils/i18n';
 import { getLocalizedRestaurant } from '../../utils/zhDynamicTranslator';
 import { SectionHeader } from './SectionHeader';
@@ -28,7 +28,9 @@ const PopularShopsInner: React.FC<Props> = ({ language, restaurants, onOpen, onS
   const [province, setProvince] = useState('');
 
   const ranked = useMemo(() => {
-    const approved = restaurants.filter((r) => r && r.id && (r.status === 'approved' || !r.status));
+    const approved = restaurants.filter(
+      (r) => isStrictVerifiedCambodiaRestaurant(r) && (r.status === 'approved' || !r.status)
+    );
     const score = (r: Restaurant) =>
       (r.isVerified ? 2000 : 0) +
       (isGpipRegisteredRestaurant(r) ? 1000 : 0) +

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { resolveFoodPhotoUrl } from '../../types';
 import type { Restaurant } from '../../types';
 
 export interface DefaultShopIconProps {
@@ -80,7 +81,11 @@ export const ShopAvatar: React.FC<ShopAvatarProps> = ({
 }) => {
   const [imgError, setImgError] = useState(false);
   const isVerified = Boolean(restaurant?.isVerified);
-  const photoUrl = restaurant?.photoUrl?.trim() || '';
+  const rawPhoto = restaurant?.photoUrl?.trim() || '';
+  const photoUrl =
+    rawPhoto && !rawPhoto.startsWith('/foods/') && !rawPhoto.startsWith('/restaurants/')
+      ? resolveFoodPhotoUrl(rawPhoto)
+      : '';
 
   if (!isVerified || !photoUrl || imgError) {
     return <DefaultShopIcon className={className} />;
