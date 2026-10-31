@@ -23,6 +23,7 @@ import {
   isUserVipActive,
   organizeAndDeduplicateFoods,
   isGpipRegisteredRestaurant,
+  resolveFoodPhotoUrl,
   openRestaurantGoogleExternal,
 } from '../types';
 import {
@@ -649,10 +650,10 @@ export const DailyDiscoveriesModal: React.FC = () => {
               const provMeta = getProvinceOptionById(pid);
               const locFood = getLocalizedFood(food, language);
               const matchedRests = getMatchingRestaurantsForProvinceDish(food, provMeta, restaurants);
-              const resolvedPhoto =
-                food.photoUrl && food.photoUrl.startsWith('/foods/') && !food.photoUrl.includes('?')
-                  ? `${food.photoUrl}?v=20261029v3`
-                  : food.photoUrl || '/foods/food-1.jpg';
+              const resolvedPhoto = resolveFoodPhotoUrl(
+                food.photoUrl || '/foods/food-1.jpg',
+                food.photoUpdatedAt
+              );
 
               return (
                 <div

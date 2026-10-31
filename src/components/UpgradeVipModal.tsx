@@ -10,7 +10,8 @@ import {
 import { 
   isUserVipActive, getVipRemainingDays,
   APP_VERSION, APP_BUILD_CODE,
-  getDynamicVipPlans, getDynamicVipBenefits, getAdditionalStoreFeeUsd
+  getDynamicVipPlans, getDynamicVipBenefits, getAdditionalStoreFeeUsd,
+  hasAuthenticatedEmailAccount, isAdminAccount
 } from '../types';
 import {
   savePngDataUrlToGallery,
@@ -44,6 +45,7 @@ export const UpgradeVipModal: React.FC = () => {
   const { 
     isUpgradeVipModalOpen, 
     setIsUpgradeVipModalOpen,
+    openUpgradeVipModal,
     isVipRenewMode,
     setIsVipRenewMode,
     openSupportTicketModal,
@@ -188,7 +190,17 @@ export const UpgradeVipModal: React.FC = () => {
     userLatestVipTxn?.status,
   ]);
 
+  // Hard authentication guard: never allow VIP payment page or ABA QR code to render without email login
+  useEffect(() => {
+    if (isUpgradeVipModalOpen && !isAdminAccount(currentUser) && !hasAuthenticatedEmailAccount(currentUser)) {
+      openUpgradeVipModal(isVipRenewMode);
+    }
+  }, [isUpgradeVipModalOpen, currentUser, isVipRenewMode]);
+
   if (!isUpgradeVipModalOpen) return null;
+  if (!isAdminAccount(currentUser) && !hasAuthenticatedEmailAccount(currentUser)) {
+    return null;
+  }
 
   const handleClose = () => {
     setIsVipRenewMode(false);
@@ -573,7 +585,7 @@ export const UpgradeVipModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/80 backdrop-blur-sm animate-fade-in overflow-y-auto">
+    <div className="fixed inset-0 z-[95] flex items-center justify-center p-2 sm:p-4 bg-black/80 backdrop-blur-sm animate-fade-in overflow-y-auto">
       {/* Hidden File Inputs for Payment Proof Upload (Gallery & Camera) */}
       <input
         ref={proofGalleryInputRef}

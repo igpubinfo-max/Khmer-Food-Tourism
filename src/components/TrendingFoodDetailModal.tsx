@@ -5,7 +5,7 @@ import {
   Calendar, Sparkles, Navigation, Bookmark, MessageSquareQuote, Play, Utensils, ChefHat
 } from 'lucide-react';
 import { tr, translateProvince } from '../utils/i18n';
-import { openTrendingFoodGoogleExternal } from '../types';
+import { openTrendingFoodGoogleExternal, resolveFoodPhotoUrl } from '../types';
 import { translateDynamicTextToZh, sanitizeStrictLanguageText, toConciseSummary } from '../utils/zhDynamicTranslator';
 import { extractYouTubeVideoId, isKnownUnavailableVideo } from '../services/onlineFoodDiscoveryService';
 
@@ -177,9 +177,7 @@ export const TrendingFoodDetailModal: React.FC = () => {
                     matchedFood.photoUrl.startsWith('http'))
                     ? matchedFood.photoUrl
                     : item.photoUrl || matchedFood?.photoUrl || '/welcome/hero-bg.webp';
-                return rawUrl.startsWith('/foods/') && !rawUrl.includes('?')
-                  ? `${rawUrl}?v=20261029v3`
-                  : rawUrl;
+                return resolveFoodPhotoUrl(rawUrl, matchedFood?.photoUpdatedAt || item.photoUpdatedAt);
               })()
             } 
             alt={displayFoodName}

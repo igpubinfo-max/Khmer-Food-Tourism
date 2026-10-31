@@ -23,7 +23,7 @@ import {
   Search,
   HeartPulse,
 } from 'lucide-react';
-import { TripPlan, isUserVipActive, isAdminAccount, openRestaurantGoogleExternal } from '../types';
+import { TripPlan, isUserVipActive, isAdminAccount, openRestaurantGoogleExternal, resolveFoodPhotoUrl } from '../types';
 import { tr, translateProvince } from '../utils/i18n';
 import { IconSmartAssistant } from './icons/HandcraftedIcons';
 import {
@@ -631,7 +631,7 @@ export const AiTripPlannerModal: React.FC = () => {
                       >
                         <div className="flex items-center gap-2.5 min-w-0">
                           <img
-                            src={dish.photoUrl}
+                            src={resolveFoodPhotoUrl(dish.photoUrl, dish.photoUpdatedAt)}
                             alt={loc.name}
                             loading="lazy"
                             decoding="async"

@@ -226,6 +226,13 @@ export async function testSupabaseConnection(): Promise<{
 
 // Circuit-breaker timestamp when Supabase returns HTTP 402 (exceed_egress_quota) so background syncs don't hammer the endpoint
 let supabaseEgressCooldownUntilMs = 0;
+export function isSupabaseEgressCooldownActive(): boolean {
+  return Date.now() < supabaseEgressCooldownUntilMs;
+}
+
+export function resetSupabaseEgressCooldown(): void {
+  supabaseEgressCooldownUntilMs = 0;
+}
 
 export const PROOF_RECORD_PREFIX = 'kft_proof_';
 const pushedProofKeysInSession = new Set<string>();
@@ -415,7 +422,14 @@ export async function pushCloudDocument(key: string, payload: any, timeoutMs = 1
   if (!isSupabaseConfigured()) return false;
   const cfg = getCloudApiConfig();
   if (!cfg.enableAutoCloudSync) return false;
-  if (Date.now() < supabaseEgressCooldownUntilMs && !key.startsWith('kft_user_') && key !== 'kft_cloud_users_v2' && key !== 'kft_cloud_transactions_v1' && key !== 'kft_cloud_vip_backup_v1') {
+  if (
+    Date.now() < supabaseEgressCooldownUntilMs &&
+    !key.startsWith('kft_user_') &&
+    !key.startsWith('kft_ov_food_') &&
+    key !== 'kft_cloud_users_v2' &&
+    key !== 'kft_cloud_transactions_v1' &&
+    key !== 'kft_cloud_vip_backup_v1'
+  ) {
     return false;
   }
 
@@ -885,8 +899,9 @@ export async function pullCloudDocumentsByPrefix<T = any>(
 export async function pullCloudKeysManifestByPrefix(
   prefix: string,
   timeoutMs = 8000
-): Promise<Array<{ key: string; updated_at: string }>> {
-  if (!isSupabaseConfigured()) return [];
+): Promise<Array<{ key: string; updated_at: string }> | null> {
+  if (!isSupabaseConfigured()) return null;
+  if (Date.now() < supabaseEgressCooldownUntilMs) return null;
   const cfg = getCloudApiConfig();
 
   try {
@@ -899,7 +914,14 @@ export async function pullCloudKeysManifestByPrefix(
       },
       timeoutMs
     );
-    if (!res.ok) return [];
+    if (res.status === 402) {
+      supabaseEgressCooldownUntilMs = Date.now() + 180_000;
+      return null;
+    }
+    if (!res.ok) return null;
+    if (supabaseEgressCooldownUntilMs > 0) {
+      supabaseEgressCooldownUntilMs = 0;
+    }
     const rows = await res.json();
     if (Array.isArray(rows)) {
       return rows.filter(r => r && typeof r.key === 'string');
@@ -907,50 +929,148 @@ export async function pullCloudKeysManifestByPrefix(
     return [];
   } catch (err) {
     console.warn(`Supabase pullCloudKeysManifestByPrefix(${prefix}) error:`, err);
-    return [];
+    return null;
   }
 }
 
 /**
- * Fetch specific keys in a small batch so large base64 images never time out on mobile networks.
+ * Fetch specific keys in a single compact PostgREST batch (`key=in.(...)`) so large base64 images never time out
+ * and HTTP overhead/egress is minimized.
  */
 export async function pullCloudDocumentsByKeys<T = any>(
   keys: string[],
   timeoutMs = 15000
 ): Promise<Array<{ key: string; payload: T; updated_at?: string }>> {
   if (!isSupabaseConfigured() || !Array.isArray(keys) || keys.length === 0) return [];
+  if (Date.now() < supabaseEgressCooldownUntilMs) return [];
   const cfg = getCloudApiConfig();
 
+  const cleanKeys = Array.from(new Set(keys.filter(Boolean)));
+  if (cleanKeys.length === 0) return [];
+
   try {
-    const results = await Promise.allSettled(
-      keys.map(async k => {
-        const res = await fetchWithTimeout(
-          `${cfg.supabaseUrl}/rest/v1/kft_app_kv_store?key=eq.${encodeURIComponent(k)}&select=key,payload,updated_at&limit=1`,
-          {
-            method: 'GET',
-            headers: getSupabaseHeaders(false),
-            cache: 'no-store',
-          },
-          timeoutMs
-        );
-        if (!res.ok) return null;
-        const rows = await res.json();
-        if (Array.isArray(rows) && rows.length > 0 && rows[0]?.payload !== undefined) {
-          return rows[0] as { key: string; payload: T; updated_at?: string };
-        }
-        return null;
-      })
+    const inList = cleanKeys.map(k => `"${k.replace(/"/g, '')}"`).join(',');
+    const res = await fetchWithTimeout(
+      `${cfg.supabaseUrl}/rest/v1/kft_app_kv_store?key=in.(${encodeURIComponent(inList)})&select=key,payload,updated_at`,
+      {
+        method: 'GET',
+        headers: getSupabaseHeaders(false),
+        cache: 'no-store',
+      },
+      timeoutMs
     );
-    const out: Array<{ key: string; payload: T; updated_at?: string }> = [];
-    for (const r of results) {
-      if (r.status === 'fulfilled' && r.value) {
-        out.push(r.value);
+    if (res.status === 402) {
+      supabaseEgressCooldownUntilMs = Date.now() + 180_000;
+      return [];
+    }
+    if (res.ok) {
+      if (supabaseEgressCooldownUntilMs > 0) {
+        supabaseEgressCooldownUntilMs = 0;
+      }
+      const rows = await res.json();
+      if (Array.isArray(rows)) {
+        return rows.filter(
+          (r): r is { key: string; payload: T; updated_at?: string } =>
+            Boolean(r && typeof r.key === 'string' && r.payload !== undefined)
+        );
       }
     }
-    return out;
+    return [];
   } catch (err) {
     console.warn('Supabase pullCloudDocumentsByKeys error:', err);
     return [];
+  }
+}
+
+let storageBucketAvailabilityState: 'unknown' | 'available' | 'unavailable' = 'unknown';
+let lastStorageBucketCheckProjectUrl = '';
+
+/**
+ * Attempt to upload a base64 `data:image/...` directly to Supabase Cloud Storage (`food-media` public bucket)
+ * and return its permanent CDN public URL (`https://<project>.supabase.co/storage/v1/object/public/food-media/...`).
+ * Returns `null` cleanly if Supabase Storage bucket is not provisioned or offline so KV fallback handles it seamlessly.
+ */
+export async function uploadBase64ImageToSupabaseStorage(
+  folder: 'foods' | 'restaurants' | 'destinations' | 'trending',
+  recordId: string,
+  dataUrl: string,
+  timeoutMs = 12000
+): Promise<string | null> {
+  if (!isSupabaseConfigured() || !dataUrl || !dataUrl.startsWith('data:image/')) {
+    return null;
+  }
+  if (Date.now() < supabaseEgressCooldownUntilMs) {
+    return null;
+  }
+  const cfg = getCloudApiConfig();
+  if (!cfg.enableAutoCloudSync) return null;
+
+  if (lastStorageBucketCheckProjectUrl !== cfg.supabaseUrl) {
+    lastStorageBucketCheckProjectUrl = cfg.supabaseUrl;
+    storageBucketAvailabilityState = 'unknown';
+  }
+  if (storageBucketAvailabilityState === 'unavailable') {
+    return null;
+  }
+
+  try {
+    const commaIdx = dataUrl.indexOf(',');
+    if (commaIdx < 0) return null;
+    const header = dataUrl.slice(0, commaIdx);
+    const b64 = dataUrl.slice(commaIdx + 1);
+    const mimeMatch = header.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64$/i);
+    const mimeType = mimeMatch ? mimeMatch[1].toLowerCase() : 'image/jpeg';
+    const ext = mimeType.includes('webp') ? 'webp' : mimeType.includes('png') ? 'png' : 'jpg';
+
+    let bytes: Uint8Array;
+    if (typeof atob === 'function') {
+      const bin = atob(b64);
+      bytes = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) {
+        bytes[i] = bin.charCodeAt(i);
+      }
+    } else if (typeof Buffer !== 'undefined') {
+      bytes = new Uint8Array(Buffer.from(b64, 'base64'));
+    } else {
+      return null;
+    }
+
+    const safeId = recordId.replace(/[^a-zA-Z0-9_-]/g, '_');
+    const objectPath = `${folder}/${safeId}_${Date.now()}.${ext}`;
+    const bucketName = 'food-media';
+    const uploadUrl = `${cfg.supabaseUrl}/storage/v1/object/${bucketName}/${objectPath}`;
+
+    const res = await fetchWithTimeout(
+      uploadUrl,
+      {
+        method: 'POST',
+        headers: {
+          apikey: cfg.supabaseAnonKey,
+          Authorization: `Bearer ${cfg.supabaseAnonKey}`,
+          'Content-Type': mimeType,
+          'x-upsert': 'true',
+          'Cache-Control': '31536000',
+        },
+        body: bytes as unknown as BodyInit,
+      },
+      timeoutMs
+    );
+
+    if (res.status === 402) {
+      supabaseEgressCooldownUntilMs = Date.now() + 180_000;
+      return null;
+    }
+    if (res.status === 400 || res.status === 404) {
+      storageBucketAvailabilityState = 'unavailable';
+      return null;
+    }
+    if (res.ok) {
+      storageBucketAvailabilityState = 'available';
+      return `${cfg.supabaseUrl}/storage/v1/object/public/${bucketName}/${objectPath}`;
+    }
+    return null;
+  } catch {
+    return null;
   }
 }
 
@@ -2166,4 +2286,16 @@ CREATE POLICY "Allow public read and write for app sync"
 
 -- Optional: Index on updated_at for fast queries
 CREATE INDEX IF NOT EXISTS idx_kft_app_kv_updated_at ON public.kft_app_kv_store(updated_at DESC);
+
+-- Optional: Public Cloud Storage Bucket for Food, Shop & Tourism Media
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('food-media', 'food-media', true)
+ON CONFLICT (id) DO UPDATE SET public = true;
+
+DROP POLICY IF EXISTS "Allow public read and upload on food-media" ON storage.objects;
+CREATE POLICY "Allow public read and upload on food-media"
+  ON storage.objects
+  FOR ALL
+  USING (bucket_id = 'food-media')
+  WITH CHECK (bucket_id = 'food-media');
 `;

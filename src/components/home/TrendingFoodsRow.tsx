@@ -49,7 +49,7 @@ const TrendingFoodsRowInner: React.FC<Props> = ({ language, items, onOpen, onExp
           >
             <span className="relative block h-32">
               <img
-                src={resolveHomePhoto(item.photoUrl)}
+                src={resolveHomePhoto(item.photoUrl, item.photoUpdatedAt)}
                 alt={name}
                 loading="lazy"
                 decoding="async"

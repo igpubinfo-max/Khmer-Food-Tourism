@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { 
   X, Bookmark, Plus, Trash2, Check, ListPlus, Heart, ExternalLink 
 } from 'lucide-react';
-import { WishlistItem, isGpipRegisteredRestaurant, openRestaurantGoogleExternal } from '../types';
+import { WishlistItem, isGpipRegisteredRestaurant, openRestaurantGoogleExternal, resolveFoodPhotoUrl } from '../types';
 import { useApp } from '../context/AppContext';
 import { tr, translateProvince } from '../utils/i18n';
 import { translateDynamicTextToZh, sanitizeStrictLanguageText } from '../utils/zhDynamicTranslator';
@@ -118,9 +118,40 @@ export const WishlistsModal: React.FC = () => {
     ? null
     : wishlists.find(w => w.id === activeListId) || wishlists[0];
 
-  const displayedItems: WishlistItem[] = isSavedBookmarksTab
-    ? bookmarkedItems
-    : activeWishlist?.items || [];
+  const displayedItems: WishlistItem[] = useMemo(() => {
+    const rawItems = isSavedBookmarksTab ? bookmarkedItems : activeWishlist?.items || [];
+    return rawItems.map((item) => {
+      if (item.type === 'food') {
+        const liveFood = foods.find((f) => f.id === item.id);
+        if (liveFood) {
+          return {
+            ...item,
+            nameKh: liveFood.nameKh || item.nameKh,
+            nameEn: liveFood.nameEn || item.nameEn,
+            photoUrl: resolveFoodPhotoUrl(liveFood.photoUrl, liveFood.photoUpdatedAt),
+            provinceKh: liveFood.provinceKh || item.provinceKh,
+          };
+        }
+        return {
+          ...item,
+          photoUrl: item.photoUrl ? resolveFoodPhotoUrl(item.photoUrl) : item.photoUrl,
+        };
+      }
+      if (item.type === 'destination') {
+        const liveDest = destinations.find((d) => d.id === item.id);
+        if (liveDest) {
+          return {
+            ...item,
+            nameKh: liveDest.nameKh || item.nameKh,
+            nameEn: liveDest.nameEn || item.nameEn,
+            photoUrl: liveDest.photoUrl || item.photoUrl,
+            provinceKh: liveDest.provinceKh || item.provinceKh,
+          };
+        }
+      }
+      return item;
+    });
+  }, [isSavedBookmarksTab, bookmarkedItems, activeWishlist, foods, destinations]);
 
   if (!isWishlistsModalOpen) return null;
 

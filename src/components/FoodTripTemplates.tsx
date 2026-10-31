@@ -12,6 +12,7 @@ import {
   openDestinationGoogleExternal,
   openExternalUrlNativeSafe,
   openRestaurantGoogleExternal,
+  resolveFoodPhotoUrl,
 } from '../types';
 
 interface ResolvedStop {
@@ -83,7 +84,7 @@ export const FoodTripTemplates: React.FC = () => {
           key: stop.id,
           type: 'food',
           name,
-          photoUrl: f.photoUrl,
+          photoUrl: resolveFoodPhotoUrl(f.photoUrl, f.photoUpdatedAt),
           mapLink: foodMapUrl,
           onOpen: () => setSelectedFood(f),
           onOpenMap: () => openExternalUrlNativeSafe(foodMapUrl),

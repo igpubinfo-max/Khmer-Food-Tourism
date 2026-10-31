@@ -13,7 +13,8 @@ import {
   getUserStoreQuotaSummary, UserStoreQuotaSummary,
   isAdminAccount, getVipFeaturedRotationConfig, sanitizeManualFeaturedSchedule,
   parseSafeDateMs, isGpipRegisteredRestaurant, openRestaurantGoogleExternal,
-  isValidCambodiaCoordinates, isValidOfficialGooglePlaceId, buildCanonicalGoogleMapsPinUrl
+  isValidCambodiaCoordinates, isValidOfficialGooglePlaceId, buildCanonicalGoogleMapsPinUrl,
+  AuthModalInitialView, hasAuthenticatedEmailAccount, computeFastPhotoSignature
 } from '../types';
 import {
   verifyAbaPaymentAndReceipt,
@@ -65,6 +66,8 @@ import { authenticateAdminWithBiometric, setSavedAdminUsername } from '../servic
 import {
   loadLocalMediaOverrides,
   saveLocalMediaOverrides,
+  loadFoodRevisionLedger,
+  flushPendingMediaCloudQueue,
   isOverridePersistedInLocalStorage,
   recordPermanentFoodOverride,
   recordPermanentRestaurantOverride,
@@ -233,6 +236,8 @@ interface AppContextType {
   
   isAuthModalOpen: boolean;
   setIsAuthModalOpen: (open: boolean) => void;
+  authModalInitialView: AuthModalInitialView;
+  setAuthModalInitialView: (view: AuthModalInitialView) => void;
   isAddRestaurantModalOpen: boolean;
   setIsAddRestaurantModalOpen: (open: boolean) => void;
   isAdminOpen: boolean;
@@ -710,6 +715,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       localStorage.removeItem('kft_foods_100_v3');
     } catch {}
     const vault = loadLocalMediaOverrides();
+    const foodLedger = loadFoodRevisionLedger();
     try {
       const savedV9 = localStorage.getItem('kft_foods_200_v9');
       const savedLegacy =
@@ -726,7 +732,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length >= 50) {
           const initialMap = new Map(initialFoods.map(f => [f.id, f]));
-          let vaultChanged = false;
           const customAddedFoods: FoodItem[] = [];
           for (const f of parsed as FoodItem[]) {
             if (!f || !f.id) continue;
@@ -736,8 +741,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               continue;
             }
 
-            // Harvest any custom photo, name, or recipe edit from cached localStorage into the permanent vault if not already recorded
+            // Harvest any custom photo, name, or recipe edit from cached localStorage ONLY when it is not stale
+            // relative to `kft_food_revision_ledger_v1`, and NEVER fabricate a fresh `new Date().toISOString()` timestamp
+            // that could overwrite newer IndexedDB or Supabase Cloud overrides!
             const existingOverride = vault.foods[f.id];
+            const ledgerEntry = foodLedger[f.id];
+            const candidateHash = f.photoUrl ? computeFastPhotoSignature(f.photoUrl) : '';
+            const isStaleVsLedger = Boolean(
+              ledgerEntry &&
+                ledgerEntry.photoHash &&
+                candidateHash !== ledgerEntry.photoHash
+            );
+            if (isStaleVsLedger) {
+              continue;
+            }
+
             const isPhotoModifiedFromSeed =
               typeof f.photoUrl === 'string' &&
               f.photoUrl.trim().length > 0 &&
@@ -756,7 +774,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             if ((isPhotoModifiedFromSeed || isContentModifiedFromSeed) && !existingOverride) {
               vault.foods[f.id] = {
                 id: f.id,
-                photoUrl: isPhotoModifiedFromSeed ? f.photoUrl : undefined,
+                photoUrl: isPhotoModifiedFromSeed ? f.photoUrl : (ledgerEntry?.cloudUrl || seed.photoUrl),
+                photoHash: isPhotoModifiedFromSeed ? candidateHash : undefined,
+                revision: ledgerEntry?.revision,
                 nameKh: f.nameKh,
                 nameEn: f.nameEn,
                 categorySlug: f.categorySlug,
@@ -775,9 +795,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 imageAuditStatus: f.imageAuditStatus || 'verified',
                 imageAuditNote: f.imageAuditNote,
                 isCustomPhoto: Boolean(isPhotoModifiedFromSeed || f.isCustomPhoto),
-                updatedAt: f.photoUpdatedAt || new Date().toISOString(),
+                updatedAt: f.photoUpdatedAt || ledgerEntry?.updatedAt || '1970-01-01T00:00:00.000Z',
               };
-              vaultChanged = true;
             }
           }
           // Note: Do NOT call saveLocalMediaOverrides(vault) synchronously before hydrateFromLocalIdbImmediate() completes,
@@ -1396,7 +1415,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [selectedRestaurant, setSelectedRestaurantRaw] = useState<Restaurant | null>(null);
   const [selectedDestination, setSelectedDestinationRaw] = useState<TouristDestination | null>(null);
   
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpenRaw] = useState(false);
+  const [authModalInitialView, setAuthModalInitialView] = useState<AuthModalInitialView>({
+    mode: 'main',
+    emailTab: 'register',
+    requireEmailForVip: false,
+  });
+  const pendingVipUpgradeAfterAuthRef = useRef<{ active: boolean; renewMode: boolean }>({
+    active: false,
+    renewMode: false,
+  });
+  const setIsAuthModalOpen = (open: boolean) => {
+    if (!open) {
+      pendingVipUpgradeAfterAuthRef.current = { active: false, renewMode: false };
+      setAuthModalInitialView({ mode: 'main', emailTab: 'register', requireEmailForVip: false });
+    }
+    setIsAuthModalOpenRaw(open);
+  };
   const [isAddRestaurantModalOpen, setIsAddRestaurantModalOpen] = useState(false);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [isAdminLoginModalOpen, setIsAdminLoginModalOpen] = useState(false);
@@ -1444,8 +1479,71 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isAiTripPlannerModalOpen, setIsAiTripPlannerModalOpenRaw] = useState(false);
   const [isNotificationsModalOpen, setIsNotificationsModalOpenRaw] = useState(false);
   const [isTrendingSocialModalOpen, setIsTrendingSocialModalOpen] = useState(false);
-  const [isUpgradeVipModalOpen, setIsUpgradeVipModalOpen] = useState(false);
+  const [isUpgradeVipModalOpen, setIsUpgradeVipModalOpenRaw] = useState(false);
   const [isVipRenewMode, setIsVipRenewMode] = useState(false);
+
+  const redirectToEmailLoginForVipUpgrade = (renewMode: boolean = false) => {
+    setIsUpgradeVipModalOpenRaw(false);
+    pendingVipUpgradeAfterAuthRef.current = { active: true, renewMode: Boolean(renewMode) };
+    setAuthModalInitialView({
+      mode: 'email',
+      emailTab: 'login',
+      requireEmailForVip: true,
+    });
+    setIsAuthModalOpenRaw(true);
+    showToast(
+      tr(
+        language,
+        '🔒 សូមចូលគណនីដោយប្រើអ៊ីមែល (Login with Email) ជាមុនសិន មុននឹងបន្តទៅទំព័រដំឡើង VIP និងបង្ហាញ ABA QR!',
+        '🔒 Please log in with your email account first before proceeding to the VIP payment page or viewing the ABA QR code!',
+        '🔒 请先使用电子邮箱账号登录，然后再进入 VIP 升级付款页面及查看 ABA 二维码！'
+      ),
+      'warning'
+    );
+  };
+
+  const completePendingVipRedirectAfterEmailAuth = (authenticatedUser: User): boolean => {
+    if (!pendingVipUpgradeAfterAuthRef.current.active) {
+      return false;
+    }
+    if (!hasAuthenticatedEmailAccount(authenticatedUser)) {
+      return false;
+    }
+    const { renewMode } = pendingVipUpgradeAfterAuthRef.current;
+    pendingVipUpgradeAfterAuthRef.current = { active: false, renewMode: false };
+    setAuthModalInitialView({ mode: 'main', emailTab: 'register', requireEmailForVip: false });
+    setIsAuthModalOpenRaw(false);
+    if (!isAdminAccount(authenticatedUser)) {
+      setIsVipRenewMode(Boolean(renewMode));
+      setIsUpgradeVipModalOpenRaw(true);
+    }
+    return true;
+  };
+
+  const setIsUpgradeVipModalOpen = (open: boolean) => {
+    if (!open) {
+      setIsUpgradeVipModalOpenRaw(false);
+      return;
+    }
+    if (isAdminAccount(currentUser)) {
+      showToast(
+        tr(
+          language,
+          '🛡️ គណនីរដ្ឋបាលប្រព័ន្ធមានសិទ្ធិពេញលេញរួចហើយ!',
+          '🛡️ System Administrator account already has full access!',
+          '🛡️ 系统管理员账户已拥有全部权限！'
+        ),
+        'info'
+      );
+      return;
+    }
+    if (!hasAuthenticatedEmailAccount(currentUser)) {
+      redirectToEmailLoginForVipUpgrade(isVipRenewMode);
+      return;
+    }
+    setIsUpgradeVipModalOpenRaw(true);
+  };
+
   const openUpgradeVipModal = (renewMode: boolean = false) => {
     if (isAdminAccount(currentUser)) {
       showToast(
@@ -1459,8 +1557,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       );
       return;
     }
+    if (!hasAuthenticatedEmailAccount(currentUser)) {
+      redirectToEmailLoginForVipUpgrade(Boolean(renewMode));
+      return;
+    }
     setIsVipRenewMode(Boolean(renewMode));
-    setIsUpgradeVipModalOpen(true);
+    setIsUpgradeVipModalOpenRaw(true);
   };
 
   const closeAllPersonalizedFeatureModals = () => {
@@ -3155,9 +3257,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               });
             }
           };
-          if ((force && isAdminOpen) || Date.now() - lastMediaVaultCloudSyncAtRef.current > 120000) {
+          if ((force && isAdminOpen) || Date.now() - lastMediaVaultCloudSyncAtRef.current > 25000) {
             lastMediaVaultCloudSyncAtRef.current = Date.now();
-            const syncedMediaBundle = await hydrateAndSyncMediaOverrides(false, applySyncedBundle);
+            await flushPendingMediaCloudQueue().catch(() => {});
+            const syncedMediaBundle = await hydrateAndSyncMediaOverrides(Boolean(force && isAdminOpen), applySyncedBundle);
             applySyncedBundle(syncedMediaBundle);
           }
         } catch (err) {
@@ -3635,6 +3738,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const clean = identifier.trim().toLowerCase();
     const cleanDigits = identifier.replace(/[\s-+]/g, '');
     const isPhone = /^[0-9+ ]{7,15}$/.test(clean);
+    if (pendingVipUpgradeAfterAuthRef.current.active && (isPhone || !hasAuthenticatedEmailAccount({ email: clean }))) {
+      showToast(
+        tr(
+          language,
+          '⚠️ សូមបញ្ចូលអាសយដ្ឋានអ៊ីមែលពិតប្រាកដ (ឧ. name@gmail.com) ដើម្បីចូលគណនី និងបន្តទៅទំព័រដំឡើង VIP!',
+          '⚠️ Please enter a valid email address (e.g. name@gmail.com) to log in before proceeding to VIP upgrade!',
+          '⚠️ 请输入有效的电子邮箱地址（如 name@gmail.com）登录后再继续升级 VIP！'
+        ),
+        'warning'
+      );
+      return false;
+    }
     const emailVal = isPhone ? `user_${cleanDigits}@phone.kh` : (clean.includes('@') ? clean : `${clean}@user.kh`);
     const nowIso = new Date().toISOString();
 
@@ -3691,7 +3806,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setCurrentUser(updatedExisting);
       latestSyncStateRef.current.currentUser = updatedExisting;
       showToast(language === 'km' ? `សូមស្វាគមន៍មកវិញ ${updatedExisting.name}!` : `Welcome back, ${updatedExisting.name}!`, 'success');
-      setIsAuthModalOpen(false);
+      if (!completePendingVipRedirectAfterEmailAuth(updatedExisting)) {
+        setIsAuthModalOpen(false);
+      }
       syncLoggedInUserFromCloud(updatedExisting);
       return true;
     }
@@ -3728,7 +3845,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setCurrentUser(candidateUser);
     latestSyncStateRef.current.currentUser = candidateUser;
     showToast(language === 'km' ? `ចូលគណនីបានជោគជ័យ!` : `Logged in successfully!`, 'success');
-    setIsAuthModalOpen(false);
+    if (!completePendingVipRedirectAfterEmailAuth(candidateUser)) {
+      setIsAuthModalOpen(false);
+    }
     syncLoggedInUserFromCloud(candidateUser);
     return true;
   };
@@ -4962,6 +5081,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const safeRole: UserRole = role === 'admin' ? 'user' : role;
     const cleanId = emailOrPhone.trim();
     const isPhone = /^[0-9+ ]{7,15}$/.test(cleanId);
+    if (pendingVipUpgradeAfterAuthRef.current.active && (isPhone || !hasAuthenticatedEmailAccount({ email: cleanId }))) {
+      showToast(
+        tr(
+          language,
+          '⚠️ សូមបញ្ចូលអាសយដ្ឋានអ៊ីមែលពិតប្រាកដ (ឧ. name@gmail.com) ដើម្បីបង្កើតគណនី និងបន្តទៅទំព័រដំឡើង VIP!',
+          '⚠️ Please enter a valid email address (e.g. name@gmail.com) to register before proceeding to VIP upgrade!',
+          '⚠️ 请输入有效的电子邮箱地址（如 name@gmail.com）注册后再继续升级 VIP！'
+        ),
+        'warning'
+      );
+      return false;
+    }
     const cleanPhoneDigits = (phone || (isPhone ? cleanId : '')).replace(/[\s-+]/g, '');
     const emailVal = (isPhone ? `user_${cleanPhoneDigits}@phone.kh` : (cleanId.includes('@') ? cleanId : `${cleanId}@user.kh`)).toLowerCase();
     const phoneVal = phone ? phone.trim() : (isPhone ? cleanId : undefined);
@@ -5018,7 +5149,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setCurrentUser(updatedExisting);
       latestSyncStateRef.current.currentUser = updatedExisting;
       showToast(language === 'km' ? `សូមស្វាគមន៍មកវិញ ${updatedExisting.name}!` : `Welcome back, ${updatedExisting.name}!`, 'success');
-      setIsAuthModalOpen(false);
+      if (!completePendingVipRedirectAfterEmailAuth(updatedExisting)) {
+        setIsAuthModalOpen(false);
+      }
       syncLoggedInUserFromCloud(updatedExisting);
       return true;
     }
@@ -5056,7 +5189,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setCurrentUser(newUser);
     latestSyncStateRef.current.currentUser = newUser;
     showToast(language === 'km' ? `សូមស្វាគមន៍មកកាន់កម្មវិធី ${displayName}!` : `Welcome to the app, ${displayName}!`, 'success');
-    setIsAuthModalOpen(false);
+    if (!completePendingVipRedirectAfterEmailAuth(newUser)) {
+      setIsAuthModalOpen(false);
+    }
     syncLoggedInUserFromCloud(newUser);
     return true;
   };
@@ -5147,7 +5282,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setCurrentUser(updated);
       latestSyncStateRef.current.currentUser = updated;
       showToast(language === 'km' ? `សូមស្វាគមន៍មកវិញ ${updated.name}!` : `Welcome back, ${updated.name}!`, 'success');
-      setIsAuthModalOpen(false);
+      if (!completePendingVipRedirectAfterEmailAuth(updated)) {
+        setIsAuthModalOpen(false);
+      }
       syncLoggedInUserFromCloud(updated);
       return true;
     }
@@ -5183,7 +5320,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setCurrentUser(newUser);
     latestSyncStateRef.current.currentUser = newUser;
     showToast(language === 'km' ? `សូមស្វាគមន៍មកកាន់កម្មវិធី ${newUser.name}!` : `Welcome to the app, ${newUser.name}!`, 'success');
-    setIsAuthModalOpen(false);
+    if (!completePendingVipRedirectAfterEmailAuth(newUser)) {
+      setIsAuthModalOpen(false);
+    }
     syncLoggedInUserFromCloud(newUser);
     return true;
   };
@@ -8043,9 +8182,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     amountUsd?: number,
     durationDays?: number
   ): Promise<{ success: boolean; error?: string }> => {
-    if (!currentUser) {
-      setIsAuthModalOpen(true);
-      return { success: false, error: 'Please sign in first.' };
+    if (!currentUser || (!isAdminAccount(currentUser) && !hasAuthenticatedEmailAccount(currentUser))) {
+      redirectToEmailLoginForVipUpgrade(false);
+      return { success: false, error: 'Please log in with your email account first.' };
     }
 
     const latestSettings = await refreshAppSettingsFromServer(true);
@@ -8163,7 +8302,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     durationDays?: number,
     amountUsd?: number
   ): Promise<{ success: boolean; error?: string }> => {
-    if (!currentUser) return { success: false, error: 'Please sign in first.' };
+    if (!currentUser || (!isAdminAccount(currentUser) && !hasAuthenticatedEmailAccount(currentUser))) {
+      redirectToEmailLoginForVipUpgrade(true);
+      return { success: false, error: 'Please log in with your email account first.' };
+    }
 
     const latestSettings = await refreshAppSettingsFromServer(true);
     const validatedPlan = resolveAndValidateVipPlan({ durationDays, amountUsd }, latestSettings);
@@ -8256,9 +8398,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     notes?: string,
     paymentProofData?: { dataUrl: string; fileName?: string; mimeType?: string }
   ): Promise<{ success: boolean; transactionId: string; error?: string }> => {
-    if (!currentUser) {
-      setIsAuthModalOpen(true);
-      return { success: false, transactionId: '', error: 'User authentication required' };
+    if (!currentUser || (!isAdminAccount(currentUser) && !hasAuthenticatedEmailAccount(currentUser))) {
+      redirectToEmailLoginForVipUpgrade(false);
+      return { success: false, transactionId: '', error: 'Email account authentication required before VIP payment' };
     }
 
     const latestSettings = await refreshAppSettingsFromServer(true);
@@ -9359,12 +9501,35 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // AI Trending Food Update
   const updateTrendingFood = (updated: TrendingFoodItem) => {
+    const nowIso = new Date().toISOString();
     const customUpdated: TrendingFoodItem = {
       ...updated,
       isCustomPhoto: true,
-      photoUpdatedAt: new Date().toISOString(),
+      photoUpdatedAt: nowIso,
     };
     recordPermanentTrendingFoodOverride(customUpdated);
+    // Keep linked FoodItem permanently synchronized when Admin replaces a photo from Trending Food modal
+    if (customUpdated.matchedFoodId && customUpdated.photoUrl) {
+      const matched = foods.find(f => f.id === customUpdated.matchedFoodId);
+      if (matched && matched.photoUrl !== customUpdated.photoUrl) {
+        const syncedFood: FoodItem = {
+          ...matched,
+          photoUrl: customUpdated.photoUrl,
+          isCustomPhoto: true,
+          photoUpdatedAt: nowIso,
+          imageAuditStatus: 'verified',
+        };
+        recordPermanentFoodOverride(syncedFood);
+        setFoods(prevFoods => {
+          const nextFoods = prevFoods.map(f => (f.id === syncedFood.id ? syncedFood : f));
+          scheduleStorageWrite('kft_foods_200_v9', nextFoods, 400);
+          return nextFoods;
+        });
+        if (selectedFood?.id === syncedFood.id) {
+          setSelectedFood(syncedFood);
+        }
+      }
+    }
     setTrendingFoods(prev => {
       const next = prev.map(item => item.id === customUpdated.id ? customUpdated : item);
       try {
@@ -9929,16 +10094,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const unreadNotificationsCount = notificationsEnabled ? notifications.filter(n => !n.isRead && n.type !== 'promo' && n.type !== 'discount' && !n.discountPercent).length : 0;
 
   const resetAllData = () => {
-    setUsers(initialUsers);
-    setCurrentUser(initialUsers[2]);
-    setFoods(initialFoods);
-    setRestaurants(initialRestaurants);
-    setDestinations(initialDestinations);
+    // Strictly preserve permanent Admin-approved media overrides, revision ledger, pending cloud queue,
+    // user accounts, shops, and transactions — NEVER wipe the database or restore old food pictures!
+    const vault = loadLocalMediaOverrides();
     setBookmarks(['food-1', 'dest-1']);
-    setAppSettings(initialAppSettings);
-    setTransactions(initialTransactions);
-    localStorage.clear();
-    showToast(language === 'km' ? 'បានកំណត់ទិន្នន័យឡើងវិញ' : 'Reset to default data', 'info');
+    setSearchQuery('');
+    setSelectedProvince('ទាំងអស់');
+    try {
+      localStorage.removeItem('kft_bookmarks_v4');
+      localStorage.removeItem('kft_trip_plans_v1');
+    } catch {}
+    setFoods(prev => applyFoodOverrides(prev.length > 0 ? prev : initialFoods, vault.foods));
+    setRestaurants(prev => applyRestaurantOverrides(prev, vault.restaurants, vault.deletedRestaurants || loadDeletedRestaurantIdsMap()));
+    setDestinations(prev => applyDestinationOverrides(prev.length > 0 ? prev : initialDestinations, vault.destinations));
+    showToast(
+      language === 'km'
+        ? 'បានកំណត់ចំណូលចិត្តស្វែងរកឡើងវិញ (រក្សាទុកទិន្នន័យ និងរូបភាពចុងក្រោយទាំងអស់)'
+        : 'Preferences reset (all latest database records & photos preserved)',
+      'info'
+    );
   };
 
   return (
@@ -10052,6 +10226,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setSelectedDestination,
         isAuthModalOpen,
         setIsAuthModalOpen,
+        authModalInitialView,
+        setAuthModalInitialView,
         isAddRestaurantModalOpen,
         setIsAddRestaurantModalOpen,
         isAdminOpen,

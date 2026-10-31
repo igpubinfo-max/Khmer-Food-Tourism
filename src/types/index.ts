@@ -1,8 +1,101 @@
 export const APP_VERSION = 'v2.5.0';
 export const APP_VERSION_NAME = '2.5.0';
 declare const __KFT_BUILD_CODE__: number | undefined;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1273;
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1275;
 export const APP_RELEASE_DATE = '2026-10-31';
+
+export interface AuthModalInitialView {
+  mode: 'main' | 'email';
+  emailTab: 'register' | 'login';
+  requireEmailForVip?: boolean;
+}
+
+/**
+ * Deterministic lightweight FNV-1a 32-bit hex signature for photo revision ledger & cache-busting.
+ */
+export const computeFastPhotoSignature = (input?: string): string => {
+  if (!input || typeof input !== 'string') return '0';
+  let h = 0x811c9dc5;
+  const len = input.length;
+  // Sample prefix + middle + suffix + full length for huge base64 strings in O(1), or full scan for <=4096 chars
+  if (len <= 4096) {
+    for (let i = 0; i < len; i++) {
+      h ^= input.charCodeAt(i);
+      h = Math.imul(h, 0x01000193);
+    }
+  } else {
+    const midStart = Math.max(0, (len >> 1) - 512);
+    const tailStart = Math.max(0, len - 1024);
+    for (let i = 0; i < 1024; i++) {
+      h ^= input.charCodeAt(i);
+      h = Math.imul(h, 0x01000193);
+    }
+    for (let i = midStart; i < midStart + 1024; i++) {
+      h ^= input.charCodeAt(i);
+      h = Math.imul(h, 0x01000193);
+    }
+    for (let i = tailStart; i < len; i++) {
+      h ^= input.charCodeAt(i);
+      h = Math.imul(h, 0x01000193);
+    }
+    h ^= len;
+    h = Math.imul(h, 0x01000193);
+  }
+  return (h >>> 0).toString(36);
+};
+
+/**
+ * Resolve any Food, Shop, or Destination photo URL with an always-fresh build + update cache-buster
+ * so Android WebView and browser HTTP caches never display outdated static or cloud-hosted pictures.
+ */
+export const resolveFoodPhotoUrl = (photoUrl?: string, photoUpdatedAt?: string): string => {
+  if (!photoUrl || typeof photoUrl !== 'string') return '';
+  const trimmed = photoUrl.trim();
+  if (!trimmed) return '';
+  if (trimmed.startsWith('data:') || trimmed.startsWith('blob:')) {
+    return trimmed;
+  }
+  const revSuffix = photoUpdatedAt ? `_${computeFastPhotoSignature(photoUpdatedAt)}` : '';
+  if (
+    trimmed.startsWith('/foods/') ||
+    trimmed.startsWith('/Shop/') ||
+    trimmed.startsWith('/destinations/')
+  ) {
+    const basePath = trimmed.split('?')[0];
+    return `${basePath}?v=${APP_BUILD_CODE}${revSuffix}`;
+  }
+  if (
+    (trimmed.startsWith('https://') || trimmed.startsWith('http://')) &&
+    trimmed.includes('/storage/v1/object/public/') &&
+    photoUpdatedAt &&
+    !trimmed.includes('v=')
+  ) {
+    const sep = trimmed.includes('?') ? '&' : '?';
+    return `${trimmed}${sep}v=${APP_BUILD_CODE}${revSuffix}`;
+  }
+  return trimmed;
+};
+
+/**
+ * Verify that the signed-in user possesses a genuine, authenticated email account
+ * (excluding guest sessions, empty emails, and phone-only synthetic placeholder emails).
+ */
+export const hasAuthenticatedEmailAccount = (user?: Partial<User> | null): boolean => {
+  if (!user || typeof user.email !== 'string') return false;
+  const trimmed = user.email.trim().toLowerCase();
+  if (!trimmed || trimmed.length < 5) return false;
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(trimmed)) return false;
+  if (
+    trimmed.endsWith('@phone.kh') ||
+    trimmed.endsWith('@user.kh') ||
+    trimmed.endsWith('@guest.local') ||
+    trimmed.endsWith('@local') ||
+    trimmed.endsWith('@placeholder.local')
+  ) {
+    return false;
+  }
+  return true;
+};
 
 export type LocationVerificationStatus = 'verified' | 'needs_admin_review';
 

@@ -46,7 +46,7 @@ const ForYouSectionInner: React.FC<Props> = ({ language, slot, foods, onOpenFood
         className="relative w-full h-52 rounded-3xl overflow-hidden text-left shadow-lg active:scale-[0.98] transition cursor-pointer"
       >
         <img
-          src={resolveHomePhoto(hero.photoUrl)}
+          src={resolveHomePhoto(hero.photoUrl, hero.photoUpdatedAt)}
           alt={heroLoc.name}
           loading="lazy"
           decoding="async"
@@ -87,7 +87,7 @@ const ForYouSectionInner: React.FC<Props> = ({ language, slot, foods, onOpenFood
                 className="flex items-center gap-2.5 p-2 rounded-2xl bg-white dark:bg-slate-800/70 border border-slate-200/80 dark:border-white/10 shadow-sm text-left active:scale-[0.97] transition cursor-pointer min-w-0"
               >
                 <img
-                  src={resolveHomePhoto(food.photoUrl)}
+                  src={resolveHomePhoto(food.photoUrl, food.photoUpdatedAt)}
                   alt={loc.name}
                   loading="lazy"
                   decoding="async"

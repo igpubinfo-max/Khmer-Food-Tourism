@@ -4750,13 +4750,23 @@ export const AUTHENTIC_FOOD_RECIPES = {
         "amount": "៣០០ ក្រាម"
       },
       {
-        "nameKh": "ជ្រក់ត្រសក់ ឬជ្រក់ល្ហុង",
-        "nameEn": "Pickled cucumbers or green papaya",
+        "nameKh": "គ្រាប់ល្ងសលីងឈ្ងុយ និងម្រេចកំពតបុក",
+        "nameEn": "Toasted white sesame seeds and crushed Kampot pepper",
+        "amount": "១ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "ស្ករត្នោត និងខ្ទឹមសចិញ្ច្រាំ (ប្រឡាក់បន្ថែមមុនអាំង)",
+        "nameEn": "Palm sugar glaze and minced garlic",
+        "amount": "១ ស្លាបព្រាកាហ្វេ"
+      },
+      {
+        "nameKh": "ជ្រក់ត្រសក់ ជ្រក់ល្ហុង និងជីរស្រស់",
+        "nameEn": "Pickled cucumbers, green papaya slaw, and fresh herbs",
         "amount": "១ ចាន"
       },
       {
-        "nameKh": "ទឹកត្រីកោះកុង ឬទឹកម្ទេស",
-        "nameEn": "Koh Kong spicy dip or chili sauce",
+        "nameKh": "ទឹកត្រីកោះកុង ឬទឹកអម្ពិលទុំហឹរ",
+        "nameEn": "Koh Kong spicy dip or tangy tamarind chili sauce",
         "amount": "សម្រាប់ជ្រលក់"
       }
     ],

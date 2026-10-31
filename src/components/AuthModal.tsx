@@ -1,16 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
-  X, Mail, User, Store, Shield, Sparkles, 
+  X, Mail, User, Store, Shield, Sparkles, Crown,
   ArrowRight, ShieldCheck, Loader2, LogOut, CheckCircle2
 } from 'lucide-react';
-import { UserRole } from '../types';
+import { UserRole, hasAuthenticatedEmailAccount } from '../types';
 import { signInWithGoogleReal, buildCanonicalGoogleUserId } from '../services/googleAuth';
 
 export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatoryGate = false }) => {
   const { 
     isAuthModalOpen, 
     setIsAuthModalOpen, 
+    authModalInitialView,
     login, 
     register, 
     loginWithGoogle,
@@ -22,8 +23,15 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
     showToast 
   } = useApp();
 
-  const [authMode, setAuthMode] = useState<'main' | 'email' | 'google_quick'>('main');
-  const [emailTab, setEmailTab] = useState<'register' | 'login'>('register');
+  const [authMode, setAuthMode] = useState<'main' | 'email' | 'google_quick'>(authModalInitialView.mode || 'main');
+  const [emailTab, setEmailTab] = useState<'register' | 'login'>(authModalInitialView.emailTab || 'register');
+
+  useEffect(() => {
+    if (isAuthModalOpen) {
+      setAuthMode(authModalInitialView.mode || 'main');
+      setEmailTab(authModalInitialView.emailTab || 'register');
+    }
+  }, [isAuthModalOpen, authModalInitialView.mode, authModalInitialView.emailTab, authModalInitialView.requireEmailForVip]);
 
   // Email form fields
   const [name, setName] = useState('');
@@ -43,7 +51,7 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
   const isKm = language === 'km';
 
   if (isAdminLoginModalOpen) return null;
-  if (!isAuthModalOpen && !isMandatoryGate && currentUser) return null;
+  if (!isAuthModalOpen && !isMandatoryGate) return null;
 
   // Handle Google Sign-In: 1-Tap Real Google OAuth (Android Native Account Selector + Web Popup + In-App Fallback)
   const handleGoogleSignIn = async () => {
@@ -141,6 +149,17 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
       showToast(isKm ? 'សូមបំពេញឈ្មោះ និងអ៊ីមែលឱ្យបានត្រឹមត្រូវ' : 'Please enter your name and email', 'warning');
       return;
     }
+    if (!hasAuthenticatedEmailAccount({ email })) {
+      showToast(
+        isKm
+          ? 'សូមវាយបញ្ចូលអាសយដ្ឋានអ៊ីមែលឱ្យបានត្រឹមត្រូវ (ឧ. name@gmail.com)'
+          : language === 'zh'
+          ? '请输入有效的电子邮箱地址（如 name@gmail.com）'
+          : 'Please enter a valid email address (e.g. name@gmail.com)',
+        'warning'
+      );
+      return;
+    }
     if (role === 'owner' && !restaurantName.trim()) {
       showToast(isKm ? 'សូមបំពេញឈ្មោះហាងអាហាររបស់អ្នក' : 'Please enter restaurant name', 'warning');
       return;
@@ -157,7 +176,6 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
       );
       if (ok) {
         showToast(isKm ? 'បានបង្កើតគណនីជោគជ័យ!' : 'Account created successfully!', 'success');
-        setIsAuthModalOpen(false);
       }
     } catch (err: any) {
       showToast(err?.message || (isKm ? 'មានបញ្ហាក្នុងការចុះឈ្មោះ' : 'Registration error'), 'warning');
@@ -169,8 +187,15 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
   // Handle Email Login
   const handleEmailLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!loginEmail.trim()) {
-      showToast(isKm ? 'សូមវាយបញ្ចូលអាសយដ្ឋានអ៊ីមែលរបស់អ្នក' : 'Please enter your email', 'warning');
+    if (!loginEmail.trim() || !hasAuthenticatedEmailAccount({ email: loginEmail })) {
+      showToast(
+        isKm
+          ? 'សូមវាយបញ្ចូលអាសយដ្ឋានអ៊ីមែលរបស់អ្នកឱ្យបានត្រឹមត្រូវ (ឧ. name@gmail.com)'
+          : language === 'zh'
+          ? '请输入有效的电子邮箱地址（如 name@gmail.com）'
+          : 'Please enter a valid email address (e.g. name@gmail.com)',
+        'warning'
+      );
       return;
     }
 
@@ -179,7 +204,6 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
       const success = login(loginEmail.trim().toLowerCase());
       if (success) {
         showToast(isKm ? 'ចូលគណនីបានជោគជ័យ!' : 'Signed in successfully!', 'success');
-        setIsAuthModalOpen(false);
       }
     } finally {
       setIsSubmitting(false);
@@ -187,7 +211,7 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md overflow-y-auto font-sans">
+    <div className="fixed inset-0 z-[115] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md overflow-y-auto font-sans">
       <div className="relative w-full max-w-sm rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden my-auto animate-in fade-in zoom-in-95 duration-200">
         
         {/* Top Header Banner */}
@@ -234,8 +258,8 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
                 </ul>
               </div>
 
-              {/* Quick Continue if User Already Has an Active Session on This Device */}
-              {currentUser && (
+              {/* Quick Continue if User Already Has an Active Email Session on This Device */}
+              {currentUser && hasAuthenticatedEmailAccount(currentUser) && (
                 <button
                   type="button"
                   onClick={() => {
@@ -388,6 +412,28 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
                SECONDARY SCREEN: EMAIL REGISTRATION / LOGIN
                ========================================================== */
             <div className="space-y-3 font-khmer animate-in fade-in duration-150">
+              {authModalInitialView.requireEmailForVip && (
+                <div className="p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/35 border border-amber-300 dark:border-amber-700/70 text-[11px] text-amber-900 dark:text-amber-200 flex items-start gap-2.5 shadow-2xs">
+                  <Crown className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                  <div className="space-y-0.5 leading-relaxed">
+                    <div className="font-bold">
+                      {language === 'km'
+                        ? 'ចូលគណនីដោយអ៊ីមែល មុនដំឡើង VIP'
+                        : language === 'zh'
+                        ? '升级 VIP 前需先登录电子邮箱'
+                        : 'Email Login Required for VIP Upgrade'}
+                    </div>
+                    <div className="text-[10.5px] opacity-90">
+                      {language === 'km'
+                        ? 'សូមចូលគណនី (ឬចុះឈ្មោះ) ដោយប្រើអ៊ីមែលរបស់អ្នកជាមុនសិន មុននឹងបន្តទៅទំព័រទូទាត់ប្រាក់ VIP និងបង្ហាញ ABA QR Code។'
+                        : language === 'zh'
+                        ? '请先使用您的电子邮箱登录（或注册），验证成功后将自动跳转至 VIP 付款与 ABA 二维码页面。'
+                        : 'Please sign in (or register) with your email first before proceeding to the VIP payment page and ABA QR code.'}
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Back to Google */}
               <button
                 type="button"

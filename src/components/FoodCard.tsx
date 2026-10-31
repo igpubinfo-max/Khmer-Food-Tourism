@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { FoodItem } from '../types';
+import { FoodItem, resolveFoodPhotoUrl } from '../types';
 import { useApp } from '../context/AppContext';
 import { Star, Heart, Flame, Edit2 } from 'lucide-react';
 import { tr } from '../utils/i18n';
@@ -38,8 +38,8 @@ const FoodCardView: React.FC<FoodCardViewProps> = React.memo(({
 
   const resolvedPhotoUrl = useMemo(() => {
     const raw = food.photoUrl || '/welcome/hero-bg.webp';
-    return raw.startsWith('/foods/') && !raw.includes('?') ? `${raw}?v=20261029v3` : raw;
-  }, [food.photoUrl]);
+    return resolveFoodPhotoUrl(raw, food.photoUpdatedAt);
+  }, [food.photoUrl, food.photoUpdatedAt]);
 
   return (
     <div 

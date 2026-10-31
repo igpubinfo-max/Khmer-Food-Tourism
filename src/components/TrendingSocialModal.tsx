@@ -10,6 +10,7 @@ import {
   openTrendingFoodGoogleExternal,
   getTrendingFoodGoogleExternalUrl,
   openExternalUrlNativeSafe,
+  resolveFoodPhotoUrl,
 } from '../types';
 import { shareRichContent } from '../utils/androidMediaHelper';
 import { tr, translateProvince } from '../utils/i18n';
@@ -842,7 +843,7 @@ export const TrendingSocialModal: React.FC = () => {
                       >
                         <div className="flex items-center gap-2.5 min-w-0">
                           <img
-                            src={food.photoUrl}
+                            src={resolveFoodPhotoUrl(food.photoUrl, food.photoUpdatedAt)}
                             alt={locF.name}
                             loading="lazy"
                             decoding="async"

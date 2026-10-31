@@ -1,7 +1,7 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { RefreshCw, ChevronRight, Lock, Crown, CheckCircle2, Flame, Sun, Sunset, Moon, Info } from 'lucide-react';
 import { useApp } from '../context/AppContext';
-import type { FoodItem } from '../types';
+import { resolveFoodPhotoUrl, type FoodItem } from '../types';
 import { tr } from '../utils/i18n';
 import {
   DISH_TAG_DEFS, getDishTagIds, tagBenefit, tagCookingTip, TAG_ESTIMATE_NOTE, GENERAL_FOOD_INFO_NOTE,
@@ -231,7 +231,7 @@ export const SmartHubHealthySection: React.FC<Props> = ({ foods, onViewAll, onOp
               onClick={() => onOpenFood(f)}
               className="w-full flex items-center gap-3 p-2 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 text-left active:scale-[0.98] transition motion-reduce:transition-none cursor-pointer"
             >
-              <img src={f.photoUrl} alt={name(f)} loading="lazy" decoding="async" className="w-16 h-16 rounded-xl object-cover shrink-0 bg-slate-200" />
+              <img src={resolveFoodPhotoUrl(f.photoUrl, f.photoUpdatedAt)} alt={name(f)} loading="lazy" decoding="async" className="w-16 h-16 rounded-xl object-cover shrink-0 bg-slate-200" />
               <span className="min-w-0 flex-1">
                 <span className="block text-sm font-bold text-slate-900 dark:text-white leading-snug line-clamp-2">{name(f)}</span>
                 <span className="inline-flex items-center gap-1 mt-0.5 px-2 py-0.5 rounded-full bg-orange-100 text-orange-700 text-xs font-extrabold">
@@ -282,7 +282,7 @@ export const SmartHubHealthySection: React.FC<Props> = ({ foods, onViewAll, onOp
               </span>
               {m.food ? (
                 <>
-                  <img src={m.food.photoUrl} alt={name(m.food)} loading="lazy" decoding="async" className="mt-1 w-full aspect-square rounded-lg object-cover bg-slate-200" />
+                  <img src={resolveFoodPhotoUrl(m.food.photoUrl, m.food.photoUpdatedAt)} alt={name(m.food)} loading="lazy" decoding="async" className="mt-1 w-full aspect-square rounded-lg object-cover bg-slate-200" />
                   <span className="block mt-1 text-xs font-bold text-slate-900 dark:text-white leading-tight line-clamp-2 min-h-[30px]">{name(m.food)}</span>
                   <span className="inline-flex items-center justify-center gap-0.5 text-[11px] font-extrabold text-orange-600">
                     <Flame className="w-3 h-3 shrink-0" />

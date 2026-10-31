@@ -1,6 +1,6 @@
 import React from 'react';
 import { ChefHat, Crown, Lock, ShieldAlert, Sparkles } from 'lucide-react';
-import type { FoodItem, Language } from '../types';
+import { resolveFoodPhotoUrl, type FoodItem, type Language } from '../types';
 import { tr } from '../utils/i18n';
 import { getLocalizedFood } from '../utils/zhDynamicTranslator';
 import { allergenLabel, allergyFootnote, type AiBrainInsight, type AllergenId } from '../services/aiFoodBrain';
@@ -118,7 +118,7 @@ export const AiBrainInsightCard: React.FC<Props> = ({
                 className="p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 hover:border-emerald-500 flex items-start gap-2.5 cursor-pointer transition shadow-2xs"
               >
                 <img
-                  src={food.photoUrl}
+                  src={resolveFoodPhotoUrl(food.photoUrl, food.photoUpdatedAt)}
                   alt={loc.name}
                   loading="lazy"
                   decoding="async"

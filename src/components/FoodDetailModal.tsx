@@ -11,7 +11,7 @@ import {
   processAndCompressImageFile,
 } from '../utils/androidMediaHelper';
 import { searchOnlineFoodImages, OnlineFoodImageCandidate } from '../services/onlineFoodImageService';
-import { FoodCategorySlug, FoodItem, Ingredient, CookingStep } from '../types';
+import { FoodCategorySlug, FoodItem, Ingredient, CookingStep, resolveFoodPhotoUrl } from '../types';
 import { tr } from '../utils/i18n';
 import { getLocalizedFood } from '../utils/zhDynamicTranslator';
 import { DishTagChips } from './DishTagChips';
@@ -99,6 +99,13 @@ export const FoodDetailModal: React.FC = () => {
     }
   }, [selectedFood?.id, isAdmin]);
 
+  // Keep editPhotoUrl synchronized whenever selectedFood.photoUrl changes outside active editing
+  useEffect(() => {
+    if (selectedFood?.photoUrl && !isEditingAdminFood && !isUploadingPhoto) {
+      setEditPhotoUrl(selectedFood.photoUrl);
+    }
+  }, [selectedFood?.photoUrl, isEditingAdminFood, isUploadingPhoto]);
+
   // Ensure speechSynthesis always stops if modal unmounts or dish changes via back button
   useEffect(() => {
     return () => {
@@ -140,12 +147,16 @@ export const FoodDetailModal: React.FC = () => {
   };
 
   const handleSelectCandidate = (cand: OnlineFoodImageCandidate) => {
+    const nowIso = new Date().toISOString();
     const updated = {
       ...selectedFood,
       photoUrl: cand.url,
+      isCustomPhoto: true,
+      photoUpdatedAt: nowIso,
       imageAuditStatus: 'verified' as const,
       imageAuditNote: `រូបភាពជ្រើសរើសពី Online (${cand.source})`,
     };
+    setEditPhotoUrl(cand.url);
     updateFood(updated);
     setSelectedFood(updated);
     showToast(
@@ -194,7 +205,7 @@ export const FoodDetailModal: React.FC = () => {
     if (!file) return;
     setIsUploadingPhoto(true);
     try {
-      const dataUrl = await processAndCompressImageFile(file, 1080, 0.85);
+      const dataUrl = await processAndCompressImageFile(file, 960, 0.82);
       setEditPhotoUrl(dataUrl);
       showToast(
         language === 'km'
@@ -315,6 +326,10 @@ export const FoodDetailModal: React.FC = () => {
         ? cleanedSteps
         : selectedFood.steps,
       photoUrl: editPhotoUrl.trim() || selectedFood.photoUrl,
+      isCustomPhoto:
+        (editPhotoUrl.trim() || selectedFood.photoUrl) !==
+        (selectedFood.originalPhotoUrl || `/foods/${selectedFood.id}.jpg`),
+      photoUpdatedAt: new Date().toISOString(),
       imageAuditStatus: 'verified',
       imageAuditNote: 'កែប្រែដោយរដ្ឋបាល (Admin Edited)',
     };
@@ -503,7 +518,7 @@ export const FoodDetailModal: React.FC = () => {
                   title={isKm ? 'ចុចដើម្បីជ្រើសរើសរូបភាពពីកុំព្យូទ័រ ឬទូរស័ព្ទ' : 'Click to choose photo from PC or phone'}
                   className="relative aspect-16/10 rounded-xl overflow-hidden bg-slate-900 border border-amber-400/50 cursor-pointer group"
                 >
-                  <img src={editPhotoUrl || selectedFood.photoUrl} alt="Preview" className="w-full h-full object-cover" />
+                  <img src={resolveFoodPhotoUrl(editPhotoUrl || selectedFood.photoUrl, selectedFood.photoUpdatedAt)} alt="Preview" className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
                     <span className="px-3 py-1.5 rounded-full bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-lg">
                       <Upload className="w-3.5 h-3.5" />
@@ -870,11 +885,7 @@ export const FoodDetailModal: React.FC = () => {
           {/* Hero Image */}
           <div className="relative h-64 sm:h-72 w-full bg-slate-800">
             <img 
-              src={
-                selectedFood.photoUrl && selectedFood.photoUrl.startsWith('/foods/') && !selectedFood.photoUrl.includes('?')
-                  ? `${selectedFood.photoUrl}?v=20261029v3`
-                  : selectedFood.photoUrl
-              } 
+              src={resolveFoodPhotoUrl(selectedFood.photoUrl, selectedFood.photoUpdatedAt)} 
               alt={loc.name}
               className="w-full h-full object-cover"
             />

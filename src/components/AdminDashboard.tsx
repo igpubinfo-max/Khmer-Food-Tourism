@@ -12,7 +12,7 @@ import {
   VipBenefitItem, TEN_VIP_BENEFITS, getDynamicVipBenefits, getAdditionalStoreFeeUsd,
   getVipFeaturedRotationConfig, getVipFeaturedRotationState,
   sanitizeManualFeaturedSchedule, getManualFeaturedSlotEndMs, ManualFeaturedSlot, MAX_MANUAL_FEATURED_SLOTS,
-  isPlaceLocationVerified
+  isPlaceLocationVerified, resolveFoodPhotoUrl
 } from '../types';
 import { getSecurityAuditLogs, SecurityAuditEntry, revokeAdminSession, getOfficialOwnershipCertificate, verifyAppOwnershipAndDomainIntegrity } from '../utils/security';
 import { FoodImageModal } from './FoodImageModal';
@@ -2260,7 +2260,7 @@ export const AdminDashboard: React.FC = () => {
                 {foods.map((food) => (
                   <div key={food.id} className="p-3 bg-white dark:bg-stone-800 rounded-2xl border border-slate-200 dark:border-slate-700 dark:border-stone-700 flex items-center justify-between">
                     <div className="flex items-center gap-3 overflow-hidden">
-                      <img src={food.photoUrl} alt="food" className="w-12 h-12 rounded-xl object-cover shrink-0 border border-slate-200 dark:border-slate-700" />
+                      <img src={resolveFoodPhotoUrl(food.photoUrl, food.photoUpdatedAt)} alt="food" className="w-12 h-12 rounded-xl object-cover shrink-0 border border-slate-200 dark:border-slate-700" />
                       <div className="overflow-hidden">
                         <h4 className="font-bold text-[#0F172A] dark:text-stone-100 font-khmer truncate">{food.nameKh}</h4>
                         <p className="text-[10px] text-stone-400 truncate">
@@ -5546,7 +5546,7 @@ export const AdminDashboard: React.FC = () => {
                       >
                         <div className="flex gap-3">
                           <img 
-                            src={food.photoUrl} 
+                            src={resolveFoodPhotoUrl(food.photoUrl, food.photoUpdatedAt)} 
                             alt={food.nameKh}
                             className="w-24 h-24 object-cover rounded-xl border border-stone-300 shadow-sm shrink-0" 
                           />
@@ -5690,7 +5690,7 @@ export const AdminDashboard: React.FC = () => {
                       className="p-3 rounded-2xl border border-slate-200 dark:border-slate-700 dark:border-stone-700 bg-white dark:bg-stone-900/50 flex gap-3 items-center hover:border-slate-300 dark:border-slate-600 transition shadow-xs"
                     >
                       <img 
-                        src={food.photoUrl} 
+                        src={resolveFoodPhotoUrl(food.photoUrl, food.photoUpdatedAt)} 
                         alt={food.nameKh}
                         className="w-16 h-16 object-cover rounded-xl border border-slate-200 dark:border-slate-700 shrink-0" 
                       />

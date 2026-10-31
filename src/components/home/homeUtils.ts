@@ -1,11 +1,11 @@
-import type { FoodCategorySlug, Language } from '../../types';
+import { resolveFoodPhotoUrl, type FoodCategorySlug, type Language } from '../../types';
 
 export const FALLBACK_IMG = '/welcome/hero-bg.webp';
 
-/** Resolves a photo URL for Home cards (cache-busts bundled /foods/ assets, falls back to the hero image). */
-export const resolveHomePhoto = (url?: string): string => {
+/** Resolves a photo URL for Home cards (dynamic revision-aware cache-busting, falls back to the hero image). */
+export const resolveHomePhoto = (url?: string, photoUpdatedAt?: string): string => {
   if (!url) return FALLBACK_IMG;
-  return url.startsWith('/foods/') && !url.includes('?') ? `${url}?v=20261029v3` : url;
+  return resolveFoodPhotoUrl(url, photoUpdatedAt) || FALLBACK_IMG;
 };
 
 export type MealSlot = 'breakfast' | 'lunch' | 'snack' | 'dinner';

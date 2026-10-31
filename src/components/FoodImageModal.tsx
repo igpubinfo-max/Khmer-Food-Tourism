@@ -1,11 +1,15 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { FoodItem } from '../types';
+import { FoodItem, resolveFoodPhotoUrl } from '../types';
 import { 
   X, Upload, Image as ImageIcon, Check, RefreshCw, 
   AlertTriangle, CheckCircle2, Eye, Sliders, Smartphone, Sparkles, Search, Globe 
 } from 'lucide-react';
 import { searchOnlineFoodImages, OnlineFoodImageCandidate } from '../services/onlineFoodImageService';
 import { normalizeAndValidateImage } from './TouristImageModal';
+import {
+  isNativeAndroidOrIosPlatform,
+  pickImageUsingNativeAndroidGallery,
+} from '../utils/androidMediaHelper';
 
 interface FoodImageModalProps {
   food: FoodItem | null;
@@ -78,6 +82,7 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
   const [auditNote, setAuditNote] = useState('');
   const [fitMode, setFitMode] = useState<'cover' | 'contain'>('cover');
   const [urlInput, setUrlInput] = useState('');
+  const [hasUnappliedUrlDraft, setHasUnappliedUrlDraft] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [isSearchingOnline, setIsSearchingOnline] = useState(false);
@@ -86,7 +91,8 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
   useEffect(() => {
     if (food) {
       setPhotoUrl(food.photoUrl || '');
-      setUrlInput(food.photoUrl || '');
+      setUrlInput(food.photoUrl && food.photoUrl.startsWith('http') ? food.photoUrl : '');
+      setHasUnappliedUrlDraft(false);
       setAuditStatus(food.imageAuditStatus || 'verified');
       setAuditNote(food.imageAuditNote || '');
       setFitMode('cover');
@@ -111,6 +117,7 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
       if (results.length > 0) {
         setPhotoUrl(results[0].url);
         setUrlInput(results[0].url);
+        setHasUnappliedUrlDraft(false);
         setAuditStatus('verified');
         setAuditNote(isKm ? `រូបភាពស្វែងរកពី Online ដោយស្វ័យប្រវត្តិ (${results[0].source})` : `Auto-matched online photo (${results[0].source})`);
       }
@@ -118,6 +125,39 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
       setErrorMsg(err.message || (isKm ? 'មិនអាចស្វែងរករូបភាពពី Online បានទេ' : 'Failed to search online food images'));
     } finally {
       setIsSearchingOnline(false);
+    }
+  };
+
+  const handlePickGalleryPhoto = async () => {
+    if (!isNativeAndroidOrIosPlatform()) {
+      fileInputRef.current?.click();
+      return;
+    }
+
+    setErrorMsg('');
+    setIsProcessing(true);
+    try {
+      const pick = await pickImageUsingNativeAndroidGallery();
+      if (pick.cancelled) {
+        return;
+      }
+      if (pick.dataUrl) {
+        setPhotoUrl(pick.dataUrl);
+        setUrlInput('');
+        setHasUnappliedUrlDraft(false);
+        setAuditStatus('verified');
+        setAuditNote(
+          isKm
+            ? `រូបភាពបានបញ្ចូលដោយរដ្ឋបាលពីទូរស័ព្ទ (${(pick.dataUrl.length / 1024).toFixed(0)} KB)`
+            : `Custom photo uploaded by admin (${(pick.dataUrl.length / 1024).toFixed(0)} KB)`
+        );
+        return;
+      }
+      fileInputRef.current?.click();
+    } catch {
+      fileInputRef.current?.click();
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -144,6 +184,7 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
       const compressedDataUrl = await compressImageFile(file);
       setPhotoUrl(compressedDataUrl);
       setUrlInput('');
+      setHasUnappliedUrlDraft(false);
       setAuditStatus('verified');
       setAuditNote(
         isKm 
@@ -165,6 +206,7 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
       return;
     }
     setPhotoUrl(check.normalizedUrl);
+    setHasUnappliedUrlDraft(false);
     setAuditStatus('verified');
     setAuditNote(isKm ? 'រូបភាពតំណភ្ជាប់ URL កំណត់ដោយរដ្ឋបាល' : 'Image URL set by administrator');
     setErrorMsg('');
@@ -173,14 +215,15 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
   const handleResetToDefault = () => {
     const defaultUrl = food.originalPhotoUrl || `/foods/${food.id}.jpg`;
     setPhotoUrl(defaultUrl);
-    setUrlInput(defaultUrl);
+    setUrlInput('');
+    setHasUnappliedUrlDraft(false);
     setAuditStatus('verified');
     setAuditNote(isKm ? 'បានកំណត់ទៅរូបភាពដើមពិតប្រាកដពី Magnific' : 'Reset to authentic food image');
   };
 
   const handleSave = () => {
     setErrorMsg('');
-    const candidate = urlInput.trim() ? urlInput.trim() : photoUrl.trim();
+    const candidate = hasUnappliedUrlDraft && urlInput.trim() ? urlInput.trim() : photoUrl.trim();
     const check = normalizeAndValidateImage(candidate, isKm);
 
     if (!check.isValid) {
@@ -188,9 +231,12 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
       return;
     }
 
+    const defaultStaticUrl = food.originalPhotoUrl || `/foods/${food.id}.jpg`;
     const updated: FoodItem = {
       ...food,
       photoUrl: check.normalizedUrl,
+      isCustomPhoto: check.normalizedUrl !== defaultStaticUrl,
+      photoUpdatedAt: new Date().toISOString(),
       imageAuditStatus: auditStatus,
       imageAuditNote: auditNote.trim() || (auditStatus === 'verified' ? (isKm ? 'បានផ្ទៀងផ្ទាត់ដោយរដ្ឋបាល' : 'Verified by admin') : (isKm ? 'រង់ចាំពិនិត្យ' : 'Pending review')),
     };
@@ -205,7 +251,7 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[90] flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
       <div 
         className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] border border-slate-200 dark:border-slate-800"
         onClick={e => e.stopPropagation()}
@@ -280,7 +326,7 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
               <div className="relative aspect-[16/10] bg-slate-900 flex items-center justify-center overflow-hidden">
                 {photoUrl ? (
                   <img 
-                    src={photoUrl} 
+                    src={resolveFoodPhotoUrl(photoUrl, food.photoUpdatedAt)} 
                     alt={food.nameKh} 
                     className={`w-full h-full transition-all duration-200 ${
                       fitMode === 'cover' ? 'object-cover' : 'object-contain'
@@ -328,7 +374,7 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
             <button
               type="button"
               disabled={isProcessing}
-              onClick={() => fileInputRef.current?.click()}
+              onClick={handlePickGalleryPhoto}
               className="w-full py-3 px-4 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold flex items-center justify-center gap-2 shadow-md shadow-emerald-950/20 transition active:scale-98 disabled:opacity-50"
             >
               <Upload className="w-4 h-4 text-emerald-300" />
@@ -388,6 +434,7 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
                         onClick={() => {
                           setPhotoUrl(cand.url);
                           setUrlInput(cand.url);
+                          setHasUnappliedUrlDraft(false);
                           setAuditStatus('verified');
                           setAuditNote(
                             isKm
@@ -428,10 +475,12 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
                 onChange={e => {
                   const val = e.target.value;
                   setUrlInput(val);
+                  setHasUnappliedUrlDraft(true);
                   setErrorMsg('');
                   const check = normalizeAndValidateImage(val, isKm);
                   if (check.isValid) {
                     setPhotoUrl(check.normalizedUrl);
+                    setHasUnappliedUrlDraft(false);
                   }
                 }}
                 placeholder="https://... ឬ data:image/webp;base64,..."

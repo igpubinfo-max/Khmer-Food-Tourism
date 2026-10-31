@@ -29,7 +29,7 @@ import {
   Soup,
   Salad,
 } from 'lucide-react';
-import { FoodItem, isGpipRegisteredRestaurant, openRestaurantGoogleExternal } from '../types';
+import { FoodItem, isGpipRegisteredRestaurant, openRestaurantGoogleExternal, resolveFoodPhotoUrl } from '../types';
 import {
   IconFoodPicks,
   IconBeveragePairing,
@@ -1253,7 +1253,7 @@ export const WhatToEatModal: React.FC = () => {
                                     >
                                       <div className="flex items-start gap-2.5">
                                         <img
-                                          src={dish.photoUrl}
+                                          src={resolveFoodPhotoUrl(dish.photoUrl, dish.photoUpdatedAt)}
                                           alt={dLoc.name}
                                           loading="lazy"
                                           className="w-16 h-16 rounded-xl object-cover shrink-0 bg-slate-200 border border-slate-200 dark:border-slate-700"
@@ -1675,7 +1675,7 @@ export const WhatToEatModal: React.FC = () => {
                             >
                               <span className="block aspect-4/3 w-full overflow-hidden bg-slate-200">
                                 <img
-                                  src={food.photoUrl}
+                                  src={resolveFoodPhotoUrl(food.photoUrl, food.photoUpdatedAt)}
                                   alt={fLoc.name}
                                   loading="lazy"
                                   decoding="async"
@@ -1752,7 +1752,7 @@ export const WhatToEatModal: React.FC = () => {
                       >
                         <div className="space-y-1">
                           <div className="relative aspect-16/10 rounded-lg overflow-hidden bg-slate-200">
-                            <img src={cDish.photoUrl} alt={cLoc.name} className="w-full h-full object-cover" />
+                            <img src={resolveFoodPhotoUrl(cDish.photoUrl, cDish.photoUpdatedAt)} alt={cLoc.name} className="w-full h-full object-cover" />
                             <button
                               type="button"
                               onClick={() => toggleCompareDish(cDish.id)}
@@ -1836,7 +1836,7 @@ export const WhatToEatModal: React.FC = () => {
                 >
                   <div className="relative aspect-16/10 w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
                     <img
-                      src={currentDish.photoUrl}
+                      src={resolveFoodPhotoUrl(currentDish.photoUrl, currentDish.photoUpdatedAt)}
                       alt={currentLoc.name}
                       className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                       loading="lazy"

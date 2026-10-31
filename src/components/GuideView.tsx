@@ -7,6 +7,7 @@ import {
   isGpipRegisteredRestaurant,
   isUserVipActive,
   openRestaurantGoogleExternal,
+  resolveFoodPhotoUrl,
   sortRestaurantsWithVipRotation,
 } from '../types';
 import { tr, translateProvince } from '../utils/i18n';
@@ -376,7 +377,7 @@ export const GuideView: React.FC = () => {
     return (
       <MiniCard
         key={f.id}
-        image={f.photoUrl}
+        image={resolveFoodPhotoUrl(f.photoUrl, f.photoUpdatedAt)}
         title={loc.name}
         subtitle={loc.category}
         rating={f.rating}
