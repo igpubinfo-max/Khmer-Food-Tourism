@@ -4,20 +4,17 @@ import {
   rankDrinkPairingDishes,
   pairingReason,
   pairingKindsLabel,
-  drinkDisclaimer,
 } from '../utils/drinkPairing';
 
 /**
- * AI Food Brain — the "smart" layer on top of the dish search.
+ * AI Food & Tourism Brain — intelligent culinary & travel understanding layer.
  *
- * When a visitor asks for something that is NOT in our dish list (Pizza, sushi, "hangover", "beer food"…),
- * the brain:
- *   1. understands the craving (foreign dishes, moods, occasions, health notes, drinks),
- *   2. bridges it to the closest Khmer dishes with a clear "why" for every pick,
- *   3. adds a surprise (fun fact / hidden gem) and practical safety tips,
- *   4. flags common allergens & raw dishes, refuses unsafe requests politely,
- *   5. offers one-tap follow-ups.
- * Everything runs on-device (no data leaves the phone) so it is fast, private and safe.
+ * Designed EXCLUSIVELY for Food & Tourism in Cambodia:
+ *   1. Understands cravings, foreign dish comparisons, flavors, meal times, and beverage pairings.
+ *   2. Bridges foreign dishes to authentic Cambodian dishes with clear culinary explanations.
+ *   3. Adds cultural & culinary fun facts and practical dining/travel tips.
+ *   4. Strictly refuses ALL medical, disease, symptom, medication, or health-recovery questions,
+ *      politely explaining that this AI Assistant is exclusively for Food & Tourism in Cambodia.
  */
 
 type T3 = [string, string, string];
@@ -36,7 +33,7 @@ export interface BrainChip {
   query: string;
 }
 
-export type BrainMode = 'bridge' | 'mood' | 'drink' | 'discover' | 'blocked';
+export type BrainMode = 'bridge' | 'mood' | 'drink' | 'discover' | 'blocked' | 'scope_notice';
 
 export interface AiBrainInsight {
   mode: BrainMode;
@@ -56,22 +53,32 @@ export interface AiBrainInsight {
   pairingCount?: number;
 }
 
-// ---------------------------------------------------------------------------------------------
-// Safety helpers
-// ---------------------------------------------------------------------------------------------
-
 export function sanitizeCravingQuery(input: string): string {
   return (input || '')
     .replace(/<[^>]*>/g, ' ')
     .replace(/[\u0000-\u001F\u007F]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim()
-    .slice(0, 80);
+    .slice(0, 160);
 }
 
 /** Illegal / dangerous / protected-wildlife requests are never answered with food ideas. */
 const UNSAFE_RE =
   /\b(cannabis|marijuana|weed|ganja|happy pizza|meth|cocaine|heroin|ecstasy|drugs?|pangolin|bushmeat|endangered|poison)\b|កញ្ឆា|ថ្នាំញៀន|សត្វកម្រ|ថ្នាំពុល|大麻|毒品|冰毒|穿山甲|野味|毒药/i;
+
+/**
+ * Strict Medical / Disease / Symptom / Health-Recovery Detector (Khmer, English, Chinese).
+ * The AI Assistant is exclusively for Food & Tourism and must NEVER answer medical/disease questions
+ * or recommend foods to cure, treat, prevent, or recover from any medical condition.
+ */
+export const MEDICAL_SCOPE_RE =
+  /\b(diabet(?:es|ic)?|blood pressure|hypertens(?:ion|ive)|hypotens(?:ion|ive)|cholesterol|kidney(?: disease| stone)?|heart disease|cardiovascular|stroke|cancer|tumor|ulcer|gastritis|acid reflux|gerd|indigestion|constipat(?:ion|ed)|diarrh(?:ea|oea)|stomach\s*(?:ache|pain|problem|issue|ulcer|flu|bug)|belly\s*ache|abdominal pain|gout|arthrit(?:is|ic)|asthma|bronchitis|pneumonia|tuberculosis|hepatitis|cirrhosis|fatty liver|anemia|thyroid|migraine|headache|dizz(?:y|iness)|vertigo|insomnia|depress(?:ion|ed)|anxiety|allerg(?:y|ies|ic)|intoleran(?:ce|t)|celiac|lactose|hangover|\bsick\b|illness|disease|disorder|syndrome|symptom|infect(?:ion|ed)|\bflu\b|influenza|\bfever\b|\bcough(?:ing)?\b|sore throat|runny nose|vomiting|nausea|pregnan(?:t|cy)|breastfeed(?:ing)?|postpartum|medicat(?:ion|e)|medicine|\bpill(?:s)?\b|tablet|capsule|antibiotic|insulin|prescript(?:ion|ive)|dosage|\bcure(?:s|d|ing)?\b|\btreat(?:ment|ing|s)?\b|\bheal(?:ing|s)?\b|remed(?:y|ies)|recover(?:y|ing)? from|therapy|medical|doctor|physician|clinic|hospital|patient|diagnos(?:e|is|tic)|prevent(?:ion|ing)? disease|lower blood sugar|lower blood pressure|immune booster)\b|ជំងឺ|ទឹកនោមផ្អែម|លើសឈាម|សម្ពាធឈាម|ខ្លាញ់ក្នុងឈាម|កូឡេស្តេរ៉ុល|ឈឺក្រពះ|រលាកក្រពះ|ដំបៅក្រពះ|បញ្ហាក្រពះ|ឈឺពោះ|រាគ|ទល់លាមក|តម្រងនោម|ក្រលៀន|បេះដូង|ថ្លើម|សួត|មហារីក|សន្លាក់|រលាកសន្លាក់|ហឺត|គ្រុន|គ្រុនក្តៅ|ផ្តាសាយ|ក្អក|ឈឺបំពង់ក|ឈឺក្បាល|វិលមុខ|ក្អួត|ចង្អោរ|អាឡែរហ្ស៊ី|អាឡែស៊ី|ប្រកាន់|មានផ្ទៃពោះ|ស្ត្រីមានផ្ទៃពោះ|ចាញ់កូន|ក្រោយសម្រាល|ស្រវឹង|បន្សាបស្រវឹង|ឈឺថ្កាត់|រោគសញ្ញា|ថ្នាំពេទ្យ|លេបថ្នាំ|វេជ្ជបញ្ជា|ព្យាបាល|បំបាត់ជំងឺ|ការពារជំងឺ|ជាសះស្បើយ|ប៉ូវសុខភាព|វេជ្ជសាស្ត្រ|គ្រូពេទ្យ|វេជ្ជបណ្ឌិត|មន្ទីរពេទ្យ|គ្លីនិក|糖尿病|高血压|低血压|血压|胆固醇|高血脂|肾病|肾结石|心脏病|心血管|中风|癌症|肿瘤|胃痛|胃病|胃炎|胃溃疡|胃酸|消化不良|肚子痛|腹痛|腹泻|拉肚子|便秘|痛风|关节炎|哮喘|肺炎|肝炎|脂肪肝|贫血|偏头痛|头痛|头晕|失眠|过敏|宿醉|解酒|感冒|发烧|发热|咳嗽|喉咙痛|恶心|呕吐|生病|疾病|病症|症状|怀孕|孕妇|坐月子|吃药|药物|处方|胰岛素|抗生素|治疗|治愈|治病|偏方|食疗|养生治病|康复|恢复健康|医疗|医学|医生|大夫|医院|诊所/i;
+
+export function isMedicalOrHealthQuery(input: string): boolean {
+  const clean = sanitizeCravingQuery(input);
+  if (!clean) return false;
+  return MEDICAL_SCOPE_RE.test(clean);
+}
 
 const ALLERGEN_LABEL: Record<AllergenId, T3> = {
   peanut: ['សណ្តែកដី', 'Peanuts', '花生'],
@@ -80,7 +87,7 @@ const ALLERGEN_LABEL: Record<AllergenId, T3> = {
   egg: ['ស៊ុត', 'Egg', '鸡蛋'],
   soy: ['សណ្តែកសៀង/ស៊ីអ៊ីវ', 'Soy', '大豆'],
   sesame: ['ល្ង', 'Sesame', '芝麻'],
-  raw: ['មានម្ហូបឆៅ', 'Raw ingredients', '含生食'],
+  raw: ['គ្រឿងស្រស់/ភ្លា', 'Fresh ceviche-style', '生腌风味'],
 };
 
 export function allergenLabel(id: AllergenId, language: Language): string {
@@ -91,9 +98,9 @@ export function allergenLabel(id: AllergenId, language: Language): string {
 export function allergyFootnote(language: Language): string {
   return tr(
     language,
-    'ប្រសិនបើអ្នកមានអាឡែរហ្ស៊ី សូមសួរអ្នកលក់មុនញ៉ាំ។ AI មិនមែនជាគ្រូពេទ្យទេ។',
-    'If you have allergies, ask the seller before eating. AI is not a medical professional.',
-    '如有过敏，请先询问商家。AI 并非医疗专业人员。'
+    'ព័ត៌មានគ្រឿងផ្សំសម្រាប់ជាឯកសារយោងនៃរសជាតិមុខម្ហូប។',
+    'Ingredient tags are provided as a culinary reference.',
+    '食材标签仅供美食风味参考。'
   );
 }
 
@@ -123,10 +130,6 @@ export function detectAllergens(food: FoodItem): AllergenId[] {
   return out;
 }
 
-// ---------------------------------------------------------------------------------------------
-// Dish "why it fits" description
-// ---------------------------------------------------------------------------------------------
-
 const FEATURES: Array<{ re: RegExp; phrase: T3; nameOnly?: boolean }> = [
   { re: /បំពង|ចៀន|ស្រួយ|crispy|fried|crunch/i, phrase: ['ស្រួយក្រៀមៗ', 'crispy & crunchy', '外酥脆'], nameOnly: true },
   { re: /អាំង|ដុត|grill|bbq|roast|charcoal/i, phrase: ['អាំងលើធ្យូងឈ្ងុយ', 'charcoal-grilled aroma', '炭火香气'], nameOnly: true },
@@ -148,32 +151,25 @@ export function describeDish(food: FoodItem, language: Language): string {
   if (food.categorySlug === 'soup' && parts.length < 2) parts.push(tr(language, 'ទឹកស៊ុបក្តៅៗ', 'warm, comforting broth', '热乎乎的汤'));
   if (food.categorySlug === 'salad' && parts.length < 2) parts.push(tr(language, 'ញាំស្រស់ស្រាយ', 'fresh & zesty', '清新爽口'));
   if (food.categorySlug === 'dessert' && parts.length < 2) parts.push(tr(language, 'ផ្អែមស្រទន់', 'gently sweet', '甜而不腻'));
-  if (typeof food.calories === 'number' && food.calories > 0 && food.calories <= 350 && parts.length < 2) {
-    parts.push(tr(language, `ស្រាលក្រពះ ${food.calories} kcal`, `light, ${food.calories} kcal`, `清淡 ${food.calories} 千卡`));
-  }
   if (parts.length === 0) parts.push(tr(language, 'រសជាតិខ្មែរពិតៗ', 'authentic Khmer flavour', '地道高棉风味'));
   return parts.join(' • ');
 }
 
-// ---------------------------------------------------------------------------------------------
-// Follow-up chips
-// ---------------------------------------------------------------------------------------------
-
 const CHIPS: Record<string, { label: T3; query: T3 }> = {
-  spicy: { label: ['ហឹរជាងនេះ', 'Spicier', '再辣一点'], query: ['ជូរហឹរ', 'spicy sour', '酸辣'] },
-  mild: { label: ['ស្រាលក្រពះ', 'Light & mild', '清淡'], query: ['អាហារមិនសូវខ្លាញ់', 'light low oil', '少油清淡'] },
-  soup: { label: ['សម្លក្តៅៗ', 'Warm soup', '热汤'], query: ['សម្លក្តៅៗ', 'warm soup', '热汤'] },
-  grilled: { label: ['សាច់អាំង', 'Grilled', '烧烤'], query: ['សាច់អាំង', 'grilled', '烧烤'] },
-  seafood: { label: ['គ្រឿងសមុទ្រ', 'Seafood', '海鲜'], query: ['គ្រឿងសមុទ្រ', 'seafood', '海鲜'] },
-  sweet: { label: ['បង្អែម', 'Something sweet', '来点甜的'], query: ['បង្អែម', 'dessert', '甜品'] },
-  noodles: { label: ['គុយទាវ & មី', 'Noodles', '粉面'], query: ['គុយទាវ', 'noodles', '粿条面食'] },
-  rice: { label: ['បាយ', 'Rice', '米饭'], query: ['បាយ', 'rice', '米饭'] },
-  drink: { label: ['ម្ហូបអមភេសជ្ជៈ (VIP)', 'Beverage Pairings (VIP)', '佐餐与饮品搭配 (VIP)'], query: ['ម្ហូបអមភេសជ្ជៈ', 'beverage pairing food', '佐餐美食'] },
-  surprise: { label: ['ភ្ញាក់ផ្អើលខ្ញុំ', 'Surprise me', '给我惊喜'], query: ['ភ្ញាក់ផ្អើល', 'surprise me', '惊喜'] },
-  cheap: { label: ['ថោក ឆ្ងាញ់', 'Cheap & tasty', '实惠美味'], query: ['ថោក', 'cheap', '实惠'] },
+  spicy: { label: ['🌶️ ជូរហឹរ', '🌶️ Spicy & Sour', '🌶️ 酸辣风味'], query: ['ជូរហឹរ', 'spicy sour', '酸辣'] },
+  soup: { label: ['🍲 សម្លក្តៅៗ', '🍲 Warm Soup', '🍲 热汤'], query: ['សម្លក្តៅៗ', 'warm soup', '热汤'] },
+  grilled: { label: ['🥩 សាច់អាំង', '🥩 Grilled', '🥩 烧烤'], query: ['សាច់អាំង', 'grilled', '烧烤'] },
+  seafood: { label: ['🦀 គ្រឿងសមុទ្រ', '🦀 Seafood', '🦀 海鲜'], query: ['គ្រឿងសមុទ្រ', 'seafood', '海鲜'] },
+  sweet: { label: ['🍨 បង្អែមខ្មែរ', '🍨 Khmer Dessert', '🍨 高棉甜品'], query: ['បង្អែម', 'dessert', '甜品'] },
+  noodles: { label: ['🍜 គុយទាវ & មី', '🍜 Noodles', '🍜 粉面'], query: ['គុយទាវ', 'noodles', '粿条面食'] },
+  rice: { label: ['🍚 បាយ', '🍚 Rice Dishes', '🍚 米饭'], query: ['បាយ', 'rice', '米饭'] },
+  tourism: { label: ['🏛️ កន្លែងដើរលេងសៀមរាប', '🏛️ Siem Reap Places', '🏛️ 暹粒景点'], query: ['កន្លែងដើរលេងសៀមរាប', 'Siem Reap attractions', '暹粒旅游景点'] },
+  drink: { label: ['🍻 ម្ហូបអមភេសជ្ជៈ (VIP)', '🍻 Beverage Pairings (VIP)', '🍻 佐餐搭配 (VIP)'], query: ['ម្ហូបអមភេសជ្ជៈ', 'beverage pairing food', '佐餐美食'] },
+  surprise: { label: ['🎁 ភ្ញាក់ផ្អើលខ្ញុំ', '🎁 Surprise Me', '🎁 给我惊喜'], query: ['ភ្ញាក់ផ្អើល', 'surprise me', '惊喜'] },
+  cheap: { label: ['💸 ម្ហូបតាមផ្លូវឆ្ងាញ់ៗ', '💸 Street Food', '💸 街头小吃'], query: ['អាហារសម្រន់', 'street food', '街头小吃'] },
 };
 
-function chipsFor(ids: string[], language: Language): BrainChip[] {
+export function chipsFor(ids: string[], language: Language): BrainChip[] {
   return ids
     .filter((id) => CHIPS[id])
     .map((id) => ({
@@ -183,10 +179,6 @@ function chipsFor(ids: string[], language: Language): BrainChip[] {
     }));
 }
 
-// ---------------------------------------------------------------------------------------------
-// Knowledge base
-// ---------------------------------------------------------------------------------------------
-
 interface BrainEntry {
   id: string;
   emoji: string;
@@ -195,18 +187,13 @@ interface BrainEntry {
   headline: T3;
   explain: T3;
   like: T3;
-  /** Strong match: the dish name itself is what the craving maps to (+120 / +55 when only in the description). */
   prefer?: RegExp;
-  /** Soft match: loosely related keywords (+40 / +15). */
   soft?: RegExp;
   cats?: string[];
   avoid?: RegExp;
-  /** Categories that must never be suggested for this craving (e.g. desserts for a diabetes note). */
   avoidCats?: string[];
-  maxCal?: number;
   surprise?: { title: T3; text: T3 };
   tips: T3[];
-  safety?: T3;
   follow: string[];
 }
 
@@ -214,37 +201,6 @@ const DID_YOU_KNOW: T3 = ['ដឹងទេ?', 'Did you know?', '您知道吗？'
 const ALWAYS_SAFE_RAW = /ភ្លា|ឆៅ|\braw\b|ceviche/i;
 
 const BRAIN_ENTRIES: BrainEntry[] = [
-  // ---- Health & safety first -----------------------------------------------------------
-  {
-    id: 'health_note',
-    emoji: '🩺',
-    mode: 'mood',
-    test: /diabet|pregnan|allerg|gout|hypertens|blood pressure|cholesterol|kidney|ulcer|gastritis|ជំងឺ|ទឹកនោមផ្អែម|មានផ្ទៃពោះ|ផ្ទៃពោះ|អាឡែរ|ប្រកាន់|糖尿病|怀孕|孕妇|过敏|痛风|高血压|胆固醇/i,
-    headline: ['AI យល់ថាអ្នកត្រូវការម្ហូបសុវត្ថិភាព 🩺', 'AI understands you need extra-safe food 🩺', 'AI 理解您需要更安全的饮食 🩺'],
-    explain: [
-      'AI បានជ្រើសរើសមុខម្ហូបស្ងោរ ចំហុយ និងស្រាល ដោយចៀសវាងម្ហូបឆៅ ហឹរខ្លាំង និងចៀនប្រេង។',
-      'AI picked gentle steamed, boiled and light dishes and avoided raw, very spicy and deep-fried food.',
-      'AI 选择了蒸、煮和清淡的菜品，并避开生食、重辣和油炸。',
-    ],
-    like: ['សមស្របព្រោះ៖', 'Gentle because:', '更温和：'],
-    prefer: /ស្ងោរ|ចំហុយ|បបរ|សម្ល|ស៊ុប|steamed|boiled|soup|porridge|congee|clear/i,
-    avoid: /ហឹរ|ម្ទេស|ចៀន|បំពង|ភ្លា|ឆៅ|ប្រហុក|raw|fried|spicy|chili|prahok|ceviche|sugar|ស្ករ|custard|pudding/i,
-    avoidCats: ['dessert', 'cake', 'drink'],
-    maxCal: 450,
-    tips: [
-      [
-        'ប្រាប់អ្នកលក់អំពីជំងឺ ឬអាឡែរហ្ស៊ី មុនបញ្ជាទិញ ហើយសុំគ្រូពេទ្យណែនាំបើមានករណីពិសេស។',
-        'Tell the seller about your condition or allergy before ordering, and ask your doctor for medical advice.',
-        '点餐前请告知商家您的健康状况或过敏情况，并咨询医生。',
-      ],
-    ],
-    safety: [
-      '⚠️ AI ផ្តល់តែគំនិតម្ហូបទូទៅប៉ុណ្ណោះ មិនមែនជាដំបូន្មានវេជ្ជសាស្ត្រទេ។',
-      '⚠️ AI only gives general food ideas — this is not medical advice.',
-      '⚠️ AI 仅提供一般饮食建议，并非医疗意见。',
-    ],
-    follow: ['mild', 'soup', 'surprise'],
-  },
   // ---- VIP Beverage-pairing menu ---------------------------------------------------------
   {
     id: 'drink_pairing',
@@ -301,12 +257,12 @@ const BRAIN_ENTRIES: BrainEntry[] = [
     },
     tips: [
       [
-        'សាកល្បងបាញ់ឆែវ៖ ហែកដាក់ស្លឹកសាឡាត់ ជីរអង្កាម រួចជ្រលក់ទឹកត្រីផ្អែម — ស្រស់ និងស្រាលជាង Pizza។',
-        'Try Banh Chao: wrap it in lettuce & herbs and dip in sweet fish sauce — fresher and lighter than pizza.',
-        '试试高棉煎饼 Banh Chao：用生菜和香草包着蘸甜鱼露，比披萨更清爽。',
+        'សាកល្បងបាញ់ឆែវ៖ ហែកដាក់ស្លឹកសាឡាត់ ជីរអង្កាម រួចជ្រលក់ទឹកត្រីផ្អែម — ស្រស់ និងស្រួយឆ្ងាញ់។',
+        'Try Banh Chao: wrap it in lettuce & herbs and dip in sweet fish sauce — crisp and fragrant.',
+        '试试高棉煎饼 Banh Chao：用生菜和香草包着蘸甜鱼露，酥脆清香。',
       ],
     ],
-    follow: ['grilled', 'spicy', 'mild', 'surprise'],
+    follow: ['grilled', 'spicy', 'surprise'],
   },
   {
     id: 'burger',
@@ -332,8 +288,8 @@ const BRAIN_ENTRIES: BrainEntry[] = [
         '摇晃牛肉 Lok Lak 以贡布胡椒爆炒，配生菜与青柠胡椒蘸汁，是外国游客最爱的高棉菜之一。',
       ],
     },
-    tips: [['សុំបន្ថែមបន្លែស្រស់ និងទឹកជ្រលក់ ដើម្បីឱ្យឆ្អែតមានតុល្យភាព។', 'Ask for extra fresh veg and dip for a balanced meal.', '可加点新鲜蔬菜和蘸酱，营养更均衡。']],
-    follow: ['grilled', 'rice', 'mild'],
+    tips: [['ញ៉ាំជាមួយបន្លែស្រស់ និងទឹកម្រេចក្រូចឆ្មា ដើម្បីឱ្យរសជាតិកាន់តែឆ្ងាញ់។', 'Pair with fresh greens and Kampot lime-pepper sauce for the best flavor.', '搭配新鲜蔬菜和贡布青柠胡椒蘸汁风味最佳。']],
+    follow: ['grilled', 'rice', 'spicy'],
   },
   {
     id: 'fried_chicken',
@@ -358,8 +314,8 @@ const BRAIN_ENTRIES: BrainEntry[] = [
         '荔枝山蜂蜜烤鸡用野蜂蜜上色，鸡皮金亮、香气微甜。',
       ],
     },
-    tips: [['ញ៉ាំជាមួយទឹកម្រេចក្រូចឆ្មា និងបន្លែជ្រក់ ដើម្បីកាត់ជាតិខ្លាញ់។', 'Pair with lime-pepper dip and pickles to cut the richness.', '配青柠胡椒蘸汁和泡菜可以解腻。']],
-    follow: ['grilled', 'spicy', 'mild'],
+    tips: [['ញ៉ាំជាមួយទឹកម្រេចក្រូចឆ្មា និងជ្រក់ល្ហុង ដើម្បីបង្កើនរសជាតិ។', 'Pair with lime-pepper dip and green papaya pickles for extra zing.', '配青柠胡椒蘸汁和木瓜泡菜更提味。']],
+    follow: ['grilled', 'spicy', 'rice'],
   },
   {
     id: 'sushi',
@@ -368,8 +324,8 @@ const BRAIN_ENTRIES: BrainEntry[] = [
     test: /sushi|sashimi|raw fish|salmon|ceviche|ស៊ូស៊ី|ត្រីឆៅ|សាស៊ីមី|寿司|刺身|生鱼片|三文鱼/i,
     headline: ['AI យល់ថាអ្នកចង់ញ៉ាំម្ហូបស្រស់បែប Sushi 🍣', 'AI thinks you want something fresh like sushi 🍣', 'AI 觉得您想吃清爽的寿司类美食 🍣'],
     explain: [
-      'ខ្មែរមានម្ហូបស្រស់បែប Ceviche ដែលហៅថា «ភ្លា» — សាច់ស្រស់ចំអិនដោយទឹកក្រូចឆ្មារ លាយជីរ និងម្ទេស។',
-      'Cambodia has its own ceviche-style “Phlea” — fresh meat or seafood “cooked” in lime juice with herbs and chili.',
+      'ខ្មែរមានម្ហូបស្រស់បែប Ceviche ដែលហៅថា «ភ្លា» — សាច់ស្រស់ចម្អិនដោយទឹកក្រូចឆ្មារ លាយជីរ និងម្ទេស។',
+      'Cambodia has its own ceviche-style “Phlea” — fresh meat or seafood marinated in lime juice with herbs and chili.',
       '柬埔寨有自己的“生腌”风味——Phlea：新鲜肉类或海鲜以青柠汁腌制，配香草和辣椒。',
     ],
     like: ['ស្រដៀង Sushi ត្រង់៖', 'Sushi-like because:', '与寿司相似：'],
@@ -380,18 +336,13 @@ const BRAIN_ENTRIES: BrainEntry[] = [
     surprise: {
       title: DID_YOU_KNOW,
       text: [
-        'ភ្លាសាច់គោ (Phlea Sach Ko) ប្រើទឹកក្រូចឆ្មារ «ចំអិន» សាច់គោស្តើងៗ មុនលាយស្លឹកជីរ និងសណ្តែកដីលីង — ម្ហូបបុរាណដែលភ្ញៀវភ្ញាក់ផ្អើលនឹងរសជាតិ។',
-        'Phlea Sach Ko “cooks” thin beef slices in lime juice before tossing with herbs and roasted peanuts — an old-school dish visitors rave about.',
-        'Phlea Sach Ko 用青柠汁“腌熟”薄牛肉片，再拌香草与烤花生，是令游客惊艳的传统名菜。',
+        'ភ្លាសាច់គោ (Phlea Sach Ko) ប្រើទឹកក្រូចឆ្មារ «ចម្អិន» សាច់គោស្តើងៗ មុនលាយស្លឹកជីរ និងសណ្តែកដីលីង — ម្ហូបបុរាណដែលភ្ញៀវភ្ញាក់ផ្អើលនឹងរសជាតិ។',
+        'Phlea Sach Ko marinates thin beef slices in lime juice before tossing with herbs and roasted peanuts — an iconic Khmer salad.',
+        'Phlea Sach Ko 用青柠汁腌制薄牛肉片，再拌香草与烤花生，是令人惊艳的高棉传统凉拌名菜。',
       ],
     },
-    tips: [['ម្ហូបឆៅ៖ ជ្រើសរើសហាងស្អាត មានអនាម័យ។ ស្ត្រីមានផ្ទៃពោះ និងកុមារគួរជៀសវាង។', 'Raw dishes: choose clean, trusted shops. Pregnant women and young children should avoid them.', '生食菜品：请选择干净可靠的店铺，孕妇和幼儿应避免食用。']],
-    safety: [
-      '⚠️ ម្ហូបឆៅអាចមានហានិភ័យចំពោះសុខភាព សូមពិចារណាមុនញ៉ាំ។',
-      '⚠️ Raw food carries some health risk — please consider before eating.',
-      '⚠️ 生食存在一定健康风险，请谨慎食用。',
-    ],
-    follow: ['seafood', 'mild', 'spicy'],
+    tips: [['រោយសណ្តែកដីលីង និងជីរស្រស់ពីលើ ដើម្បីឱ្យក្លិនកាន់តែឈ្ងុយ។', 'Top with roasted peanuts and fresh herbs for the best crunch and aroma.', '撒上烤花生和新鲜香草，口感更香脆。']],
+    follow: ['seafood', 'spicy', 'grilled'],
   },
   {
     id: 'noodle_soup_foreign',
@@ -416,8 +367,8 @@ const BRAIN_ENTRIES: BrainEntry[] = [
         '金边粿条是柬埔寨最受欢迎的早餐之一，以猪骨和鱿鱼干熬成清澈汤底，挤上青柠、加点辣椒。',
       ],
     },
-    tips: [['ដាក់បន្លែស្រស់ និងក្រូចឆ្មារបន្ថែម ដើម្បីបង្កើនរសជាតិ និងជីវជាតិ។', 'Add fresh herbs and lime to lift both flavour and freshness.', '加些新鲜香草和青柠，更提味也更清爽。']],
-    follow: ['soup', 'mild', 'spicy'],
+    tips: [['ដាក់បន្លែស្រស់ និងក្រូចឆ្មារបន្ថែម ដើម្បីបង្កើនរសជាតិឱ្យកាន់តែស្រស់ស្រាយ។', 'Add fresh herbs and lime to lift both flavour and freshness.', '加些新鲜香草和青柠，更提味也更清爽。']],
+    follow: ['soup', 'noodles', 'spicy'],
   },
   {
     id: 'pasta',
@@ -443,7 +394,7 @@ const BRAIN_ENTRIES: BrainEntry[] = [
       ],
     },
     tips: [['ញ៉ាំភ្លាមៗពេលនៅក្តៅ ដើម្បីរក្សាភាពទន់ស្វិតរបស់សរសៃ។', 'Eat it hot, straight from the wok, for the best chewy texture.', '趁热吃，口感最弹牙。']],
-    follow: ['noodles', 'spicy', 'mild'],
+    follow: ['noodles', 'spicy', 'grilled'],
   },
   {
     id: 'steak',
@@ -468,7 +419,7 @@ const BRAIN_ENTRIES: BrainEntry[] = [
         '贡布胡椒享誉世界（受地理标志保护），撒在烤肉上香气独一无二。',
       ],
     },
-    tips: [['ញ៉ាំជាមួយទឹកម្រេចក្រូចឆ្មា និងបន្លែស្រស់ ដើម្បីមានតុល្យភាព។', 'Serve with lime-pepper dip and fresh veg for balance.', '配青柠胡椒蘸汁和新鲜蔬菜更均衡。']],
+    tips: [['ញ៉ាំជាមួយទឹកម្រេចក្រូចឆ្មា ឬទឹកប្រហុក និងបន្លែស្រស់ ដើម្បីមានតុល្យភាពរសជាតិ។', 'Serve with lime-pepper dip or prahok sauce and fresh greens.', '配青柠胡椒蘸汁或波罗福酱与新鲜蔬菜更美味。']],
     follow: ['seafood', 'spicy', 'drink'],
   },
   {
@@ -493,8 +444,8 @@ const BRAIN_ENTRIES: BrainEntry[] = [
         '猪肉糯米粽 Num Ansom 以蕉叶包裹、慢煮数小时，是亡人节与高棉新年的象征美食。',
       ],
     },
-    tips: [['ម្ហូបចំហុយស្រាលជាងចៀន — សមស្របសម្រាប់មនុស្សគ្រប់វ័យ។', 'Steamed bites are lighter than fried — friendly for all ages.', '蒸制小点比油炸更清淡，老少皆宜。']],
-    follow: ['mild', 'sweet', 'surprise'],
+    tips: [['ជ្រលក់ជាមួយទឹកត្រីផ្អែមសណ្តែកដីបុក ដើម្បីបង្កើនរសជាតិ។', 'Dip in sweet peanut fish sauce for a rich, tangy finish.', '蘸花生甜鱼露风味更佳。']],
+    follow: ['cheap', 'sweet', 'surprise'],
   },
   {
     id: 'icecream',
@@ -518,8 +469,8 @@ const BRAIN_ENTRIES: BrainEntry[] = [
         '真正的高棉棕榈糖带有柔和焦糖香，与白糖不同——所以高棉甜品甜而不腻。',
       ],
     },
-    tips: [['បង្អែមផ្អែមៗ គួរញ៉ាំតិចៗ ជាពិសេសអ្នកមានជំងឺទឹកនោមផ្អែម។', 'Keep portions small with sweets — especially if you watch your sugar.', '甜品请适量，尤其需要控糖的朋友。']],
-    follow: ['sweet', 'mild', 'surprise'],
+    tips: [['ដាក់ទឹកកកឈូសបន្តិចពីលើបង្អែមខ្ទិះដូង ត្រជាក់ស្រស់ស្រាយខ្លាំងណាស់។', 'Add shaved ice on top of coconut cream desserts for a refreshing treat.', '在椰奶甜品上加一点刨冰，清凉爽口。']],
+    follow: ['sweet', 'cheap', 'surprise'],
   },
   {
     id: 'cake',
@@ -543,8 +494,8 @@ const BRAIN_ENTRIES: BrainEntry[] = [
         'Num Phlae Ai 内藏液态棕榈糖，一口咬下甜浆在口中迸发，惊喜十足。',
       ],
     },
-    tips: [['នំស្រស់ៗ ញ៉ាំល្អបំផុតក្នុងថ្ងៃតែមួយ — ជ្រើសរើសហាងស្អាត។', 'Fresh sweets taste best the same day — pick a clean, busy stall.', '新鲜糕点当天吃最美味，请选择干净、客流多的摊位。']],
-    follow: ['sweet', 'surprise', 'mild'],
+    tips: [['នំស្រស់ៗ ញ៉ាំល្អបំផុតពេលនៅក្តៅៗ ទើបលើកចេញពីចង្ក្រាន។', 'Traditional Khmer cakes taste best warm and fresh from the steamer or pan.', '传统高棉糕点刚出锅趁热吃最香。']],
+    follow: ['sweet', 'surprise', 'cheap'],
   },
   {
     id: 'coffee_drink',
@@ -553,7 +504,7 @@ const BRAIN_ENTRIES: BrainEntry[] = [
     test: /coffee|latte|espresso|\btea\b|juice|កាហ្វេ|តែ(?!រ)|ទឹកក្រូច|咖啡|奶茶|果汁/i,
     headline: ['AI យល់ថាអ្នកចង់ញ៉ាំអ្វីជាមួយភេសជ្ជៈ ☕', 'AI thinks you want a bite to go with your drink ☕', 'AI 觉得您想要搭配饮品的小点 ☕'],
     explain: [
-      'AI មិនមែនបង្ហាញតែភេសជ្ជៈទេ — AI រកនំ និងអាហារសម្រន់ខ្មែរ ដែលស័ក្តិសមជាមួយកាហ្វេ ឬតែ។',
+      'AI រកនំ និងអាហារសម្រន់ខ្មែរ ដែលស័ក្តិសមជាមួយកាហ្វេ ឬតែនាពេលព្រឹក និងរសៀល។',
       'AI picked Khmer sweets and snacks that go beautifully with coffee or tea.',
       'AI 为您挑选了适合搭配咖啡或茶的高棉甜点与小吃。',
     ],
@@ -563,13 +514,13 @@ const BRAIN_ENTRIES: BrainEntry[] = [
     surprise: {
       title: DID_YOU_KNOW,
       text: [
-        'ទឹកត្នោតស្រស់ និងទឹកអំពៅ ជាភេសជ្ជៈធម្មជាតិដ៏ពេញនិយមតាមដងផ្លូវខ្មែរ — សាកល្បងជាមួយនំបុ័ងអាំង ឬនំគ្រក់។',
+        'ទឹកត្នោតស្រស់ និងទឹកអំពៅ ជាភេសជ្ជៈធម្មជាតិដ៏ពេញនិយមតាមដងផ្លូវខ្មែរ — សាកល្បងជាមួយនំគ្រក់ ឬចេកអាំង។',
         'Fresh palm juice and sugarcane juice are classic Khmer street drinks — try them with a snack like num krok.',
         '鲜榨棕榈汁和甘蔗汁是高棉街头经典饮品——配上 Num Krok 之类的小吃很棒。',
       ],
     },
-    tips: [['ជ្រើសភេសជ្ជៈតិចស្ករ ដើម្បីរក្សាសុខភាព។', 'Choose lower-sugar drinks to stay healthy.', '选择少糖饮品更健康。']],
-    follow: ['sweet', 'surprise', 'mild'],
+    tips: [['សាកល្បងកាហ្វេទឹកដោះគោទឹកកក ជាមួយនំបុ័ងប៉ាតេ ឬនំគ្រក់ក្តៅៗ។', 'Try iced condensed-milk coffee with a warm baguette or crispy coconut pancakes.', '试试冰炼乳咖啡配热法棍或香脆椰奶煎饼。']],
+    follow: ['sweet', 'surprise', 'cheap'],
   },
   {
     id: 'korean',
@@ -593,8 +544,8 @@ const BRAIN_ENTRIES: BrainEntry[] = [
         '高棉泡菜（卷心菜、黄瓜、青木瓜）同样酸脆爽口，配米饭、烧烤或粥都很棒。',
       ],
     },
-    tips: [['ម្ហូបហឹរ — សុំកាត់បន្ថយម្ទេសបើអ្នកមិនសូវញ៉ាំហឹរ។', 'Spicy food — ask for less chili if you’re not used to heat.', '这类菜偏辣，不吃辣可请商家少放辣椒。']],
-    follow: ['grilled', 'spicy', 'mild'],
+    tips: [['ញ៉ាំសាច់អាំងផ្ទាប់ជាមួយជ្រក់ល្ហុង និងស្លឹកជីរស្រស់ កាន់តែឆ្ងាញ់។', 'Wrap grilled meat with green papaya pickle and fresh herbs for a bold bite.', '烤肉配木瓜泡菜和新鲜香草一起吃更过瘾。']],
+    follow: ['grilled', 'spicy', 'seafood'],
   },
   {
     id: 'asian_foreign',
@@ -618,7 +569,7 @@ const BRAIN_ENTRIES: BrainEntry[] = [
         '高棉酸汤（Samlor Machu）与冬阴功一样香草浓郁、酸爽，但以罗望子、圣罗勒和高棉香料泥为底。',
       ],
     },
-    tips: [['សុំកម្រិតហឹរតាមចំណូលចិត្ត មុនអ្នកលក់ចម្អិន។', 'Tell the cook your preferred spice level before they start.', '下单时告诉厨师您能接受的辣度。']],
+    tips: [['សុំកម្រិតហឹរតាមចំណូលចិត្ត មុនអ្នកលក់ចម្អិន។', 'Tell the cook your preferred spice level before they start.', '下单时告诉厨师您喜欢的辣度。']],
     follow: ['soup', 'spicy', 'surprise'],
   },
   {
@@ -643,37 +594,10 @@ const BRAIN_ENTRIES: BrainEntry[] = [
         '烤或炸牛肉丸配罗望子酱与青木瓜泡菜，是河畔傍晚的人气小吃。',
       ],
     },
-    tips: [['ជ្រើសហាងដែលចៀនប្រេងស្អាត និងមានអតិថិជនច្រើន។', 'Pick stalls with fresh oil and a steady queue of locals.', '选择油品干净、本地人排队的摊位。']],
+    tips: [['ជ្រលក់ជាមួយទឹកអំពិលទុំស្ករត្នោតម្ទេស និងជ្រក់ល្ហុងការ៉ុតស្រួយៗ។', 'Dip generously in spicy palm-sugar tamarind sauce with crunchy papaya pickles.', '蘸上香辣棕榈糖罗望子酱配脆木瓜泡菜最美味。']],
     follow: ['grilled', 'spicy', 'surprise'],
   },
-  // ---- Moods & occasions ---------------------------------------------------------------------
-  {
-    id: 'hangover',
-    emoji: '🌅',
-    mode: 'mood',
-    test: /hangover|after drinking|ស្រវឹង|ក្រោយផឹក|宿醉|醉酒/i,
-    headline: ['AI យល់ថាអ្នកត្រូវការម្ហូបស្រាលក្រពះ 🌅', 'AI thinks you need something gentle on the stomach 🌅', 'AI 觉得您需要养胃的食物 🌅'],
-    explain: [
-      'AI ជ្រើសសម្លក្តៅៗជូរស្រស់ បបរទន់ៗ និងគុយទាវទឹកថ្លា ជៀសវាងម្ហូបចៀនខ្លាញ់ និងហឹរខ្លាំង។',
-      'AI chose warm sour soups, soft porridge and clear noodle soup — and skipped greasy, very spicy food.',
-      'AI 选择了热酸汤、软糯粥和清汤粉面，避开油腻与重辣食物。',
-    ],
-    like: ['ស្រាលក្រពះព្រោះ៖', 'Gentle because:', '养胃原因：'],
-    prefer: /សម្លម្ជូរ|ម្ជូរ|sour|បបរ|porridge|congee|គុយទាវ|kuy teav|ស៊ុប|soup|ស្ងោរ/i,
-    cats: ['soup', 'noodles', 'rice'],
-    avoid: /បំពង|ចៀន|ហឹរខ្លាំង|fried|deep-fried/i,
-    maxCal: 500,
-    surprise: {
-      title: DID_YOU_KNOW,
-      text: [
-        'ក្នុងវប្បធម៌ខ្មែរ សម្លម្ជូរក្តៅៗ និងបបរ ជាអាហារដែលមនុស្សចូលចិត្តបន្ទាប់ពីជប់លៀង — ជូរស្រស់ ក្តៅទន់ ធ្វើឱ្យស្រួលខ្លួន។',
-        'In Khmer culture a hot sour soup or a bowl of porridge is the classic morning-after comfort — tangy, warm and soft.',
-        '在高棉文化里，热酸汤或一碗粥是宴席过后的经典暖胃之选——酸香、温热又软糯。',
-      ],
-    },
-    tips: [['ផឹកទឹកឱ្យបានច្រើន និងសម្រាក។ AI មិនមែនជាគ្រូពេទ្យទេ។', 'Drink plenty of water and rest. AI is not a doctor.', '多喝水、多休息。AI 并非医生。']],
-    follow: ['soup', 'mild', 'noodles'],
-  },
+  // ---- Moods & occasions (Food & Tourism only) ------------------------------------------------
   {
     id: 'cold_rain',
     emoji: '🌧️',
@@ -697,32 +621,8 @@ const BRAIN_ENTRIES: BrainEntry[] = [
         '蕉叶杯蒸鱼阿莫克保温持久、椰香四溢，最适合雨天。',
       ],
     },
-    tips: [['បន្ថែមម្រេច និងក្រូចឆ្មារ ដើម្បីរក្សារសជាតិឱ្យក្តៅ។', 'A little pepper and lime keeps the flavours bright and warming.', '加点胡椒和青柠，风味更明亮暖心。']],
-    follow: ['soup', 'noodles', 'mild'],
-  },
-  {
-    id: 'unwell',
-    emoji: '🤒',
-    mode: 'mood',
-    test: /\bsick\b|\bflu\b|cough|sore throat|fever|ឈឺ|គ្រុន|ក្អក|感冒|生病|发烧|咳嗽/i,
-    headline: ['AI សុំជូនពរឱ្យអ្នកឆាប់បាត់ឈឺ 🤒', 'AI wishes you a quick recovery 🤒', 'AI 祝您早日康复 🤒'],
-    explain: [
-      'AI ជ្រើសបបរ សម្លថ្លា និងម្ហូបទន់ៗ ងាយរំលាយ ជៀសវាងម្ហូបហឹរ ចៀន និងឆៅ។',
-      'AI chose porridge, clear soups and soft, easy-to-digest dishes — avoiding spicy, fried and raw food.',
-      'AI 选择了粥、清汤和易消化的软食，避开辛辣、油炸与生食。',
-    ],
-    like: ['ងាយបរិភោគព្រោះ៖', 'Easy to eat because:', '易入口：'],
-    prefer: /បបរ|porridge|congee|សម្លប្រហើរ|ស៊ុប|soup|ស្ងោរ|ចំហុយ|steamed|boiled/i,
-    cats: ['soup', 'rice'],
-    avoid: /ហឹរ|ម្ទេស|ចៀន|បំពង|ភ្លា|ឆៅ|raw|fried|spicy|chili/i,
-    maxCal: 400,
-    tips: [['បើរោគសញ្ញាមិនធូរស្រាល សូមទៅជួបគ្រូពេទ្យ។', 'If symptoms do not improve, please see a doctor.', '若症状未缓解，请及时就医。']],
-    safety: [
-      '⚠️ AI ផ្តល់តែគំនិតម្ហូបទូទៅប៉ុណ្ណោះ មិនមែនជាដំបូន្មានវេជ្ជសាស្ត្រទេ។',
-      '⚠️ AI only gives general food ideas — this is not medical advice.',
-      '⚠️ AI 仅提供一般饮食建议，并非医疗意见。',
-    ],
-    follow: ['soup', 'mild', 'rice'],
+    tips: [['បន្ថែមម្រេចកំពត និងក្រូចឆ្មារ ដើម្បីរក្សារសជាតិឱ្យក្តៅឈ្ងុយ។', 'A little Kampot pepper and lime keeps the flavours bright and warming.', '加点贡布胡椒和青柠，风味更明亮暖心。']],
+    follow: ['soup', 'noodles', 'grilled'],
   },
   {
     id: 'kids',
@@ -739,13 +639,8 @@ const BRAIN_ENTRIES: BrainEntry[] = [
     prefer: /បាយ|rice|ប្រហិត|meatball|មាន់|chicken|ពងទា|egg|នំ|num|ចេក|banana|បង្អែម|dessert|គុយទាវ|noodle|សម្ល/i,
     avoid: /ហឹរ|ម្ទេស|ភ្លា|ឆៅ|ប្រហុក|spicy|chili|raw|prahok|ceviche/i,
     cats: ['rice', 'noodles', 'dessert', 'cake'],
-    tips: [['សុំអ្នកលក់កុំដាក់ម្ទេស ហើយកាត់ជាដុំតូចៗ។', 'Ask the seller to skip chili and cut food into small pieces.', '请商家不放辣椒，并把食物切小块。']],
-    safety: [
-      '⚠️ កុមារគួរជៀសវាងម្ហូបឆៅ និងហឹរ។ សូមពិនិត្យអាឡែរហ្ស៊ីរបស់កូន។',
-      '⚠️ Children should avoid raw and spicy food. Check your child’s allergies.',
-      '⚠️ 儿童应避免生食和辛辣食物，请留意孩子的过敏情况。',
-    ],
-    follow: ['sweet', 'rice', 'mild'],
+    tips: [['សុំអ្នកលក់កុំដាក់ម្ទេស ហើយកាត់ជាដុំតូចៗងាយស្រួលញ៉ាំ។', 'Ask the seller to skip chili and cut food into bite-sized pieces.', '请商家不放辣椒，并把食物切小块。']],
+    follow: ['sweet', 'rice', 'noodles'],
   },
   {
     id: 'budget',
@@ -762,8 +657,7 @@ const BRAIN_ENTRIES: BrainEntry[] = [
     prefer: /បាយ|rice|គុយទាវ|kuy teav|noodle|បបរ|porridge|នំបុ័ង|num pang|នំបញ្ចុក|banh|មីឆា|លតឆា|lort/i,
     avoid: /crab|lobster|ក្តាម|ក្ដាម|prawn|បង្គា|amok|អាម៉ុក|steak/i,
     cats: ['rice', 'noodles', 'streetfood'],
-    maxCal: 650,
-    tips: [['ហាងតាមផ្លូវ និងផ្សារ ជាទូទៅថោកជាងភោជនីយដ្ឋាន ១០–៣០%។', 'Street stalls and markets are usually cheaper than restaurants.', '街边摊和市场通常比餐厅更实惠。']],
+    tips: [['ហាងតាមផ្លូវ និងផ្សារ ជាទូទៅមានតម្លៃសមរម្យ និងរសជាតិអ្នកស្រុកពិតៗ។', 'Street stalls and local markets offer authentic local flavors at great value.', '街边摊和本地市场价格亲民，味道最地道。']],
     follow: ['noodles', 'rice', 'surprise'],
   },
   {
@@ -824,9 +718,9 @@ const BRAIN_ENTRIES: BrainEntry[] = [
     test: /breakfast|morning|brunch|ពេលព្រឹក|អាហារពេលព្រឹក|早餐|早上/i,
     headline: ['AI ណែនាំអាហារពេលព្រឹកបែបខ្មែរ 🌅', 'AI suggests a proper Khmer breakfast 🌅', 'AI 推荐地道的高棉早餐 🌅'],
     explain: [
-      'ពេលព្រឹកអ្នកស្រុកញ៉ាំគុយទាវ បបរ នំបញ្ចុក និងបាយសាច់ជ្រូក — ក្តៅៗ ឆ្អែតល្អ ចាប់ផ្តើមថ្ងៃដោយថាមពល។',
-      'Locals start the day with kuy teav, porridge, num banh chok or pork rice — hot, filling and energising.',
-      '当地人早上常吃粿条、粥、米线和猪肉饭——热乎、顶饱、元气满满。',
+      'ពេលព្រឹកអ្នកស្រុកញ៉ាំគុយទាវ បបរ នំបញ្ចុក និងបាយសាច់ជ្រូក — ក្តៅៗ ឆ្អែតល្អ ចាប់ផ្តើមថ្ងៃថ្មី។',
+      'Locals start the day with kuy teav, porridge, num banh chok or pork rice — hot, filling and delicious.',
+      '当地人早上常吃粿条、粥、米线和猪肉饭——热乎、顶饱又美味。',
     ],
     like: ['ស័ក្តិសមពេលព្រឹកព្រោះ៖', 'Perfect for the morning because:', '适合早晨：'],
     prefer: /គុយទាវ|kuy teav|បបរ|porridge|នំបញ្ចុក|banh|បាយសាច់ជ្រូក|pork rice|នំបុ័ង|num pang|មី/i,
@@ -841,15 +735,14 @@ const BRAIN_ENTRIES: BrainEntry[] = [
     test: /late night|midnight|supper|night snack|ពេលយប់|យប់ជ្រៅ|宵夜|深夜/i,
     headline: ['AI ណែនាំអាហារពេលយប់ 🌙', 'AI suggests late-night bites 🌙', 'AI 推荐宵夜 🌙'],
     explain: [
-      'AI ជ្រើសបបរ គុយទាវ និងអាហារសម្រន់អាំង ដែលស្រាលក្រពះ និងមាននៅតាមផ្លូវពេលយប់។',
-      'AI picked porridge, noodles and grilled snacks — gentle enough for late hours and easy to find at night stalls.',
-      'AI 选择了粥、粉面和烧烤小吃——夜里吃不负担，夜市也容易找到。',
+      'AI ជ្រើសបបរ គុយទាវ លតឆា និងអាហារសម្រន់អាំង ដែលពេញនិយមតាមផ្លូវពេលយប់។',
+      'AI picked porridge, noodles, lort cha and grilled snacks — easy to find at night stalls.',
+      'AI 选择了粥、粉面、炒短粉和烧烤小吃——夜市最受欢迎的宵夜之选。',
     ],
     like: ['ស័ក្តិសមពេលយប់ព្រោះ៖', 'Great late at night because:', '适合夜宵：'],
     prefer: /បបរ|porridge|គុយទាវ|kuy teav|លតឆា|lort|អាំង|grill|ប្រហិត|meatball|នំបុ័ង|num pang/i,
     cats: ['noodles', 'streetfood', 'grilled'],
-    maxCal: 550,
-    tips: [['កុំញ៉ាំច្រើនពេក មុនចូលគេង ដើម្បីកុំឱ្យពិបាកក្រពះ។', 'Keep it light before bed so your stomach stays comfortable.', '睡前别吃太饱，胃会更舒服。']],
+    tips: [['បបរសត្រីងៀត ឬលតឆាក្តៅៗ ជាអាហារពេលយប់ដ៏ពេញនិយមបំផុតនៅភ្នំពេញ។', 'Teochew-Khmer rice congee or hot Lort Cha are classic Phnom Penh late-night favourites.', '白粥配咸鱼咸蛋或热炒短粉是金边经典宵夜。']],
     follow: ['soup', 'grilled', 'noodles'],
   },
   {
@@ -864,10 +757,6 @@ const BRAIN_ENTRIES: BrainEntry[] = [
     follow: ['spicy', 'sweet', 'drink'],
   },
 ];
-
-// ---------------------------------------------------------------------------------------------
-// Dish selection
-// ---------------------------------------------------------------------------------------------
 
 function textOf(food: FoodItem): { name: string; all: string } {
   const name = `${food.nameKh || ''} ${food.nameEn || ''}`;
@@ -891,7 +780,6 @@ function scoreForEntry(food: FoodItem, entry: BrainEntry): number {
   if (entry.cats && entry.cats.includes(food.categorySlug as string)) s += 40;
   if (entry.avoid && entry.avoid.test(all)) s -= 160;
   if (entry.avoidCats && entry.avoidCats.includes(food.categorySlug as string)) s -= 300;
-  if (entry.maxCal && (food.calories || 0) > entry.maxCal) s -= 90;
   s += ((food.rating || 4.5) - 4) * 25;
   return s;
 }
@@ -922,10 +810,6 @@ function pickForEntry(foods: FoodItem[], entry: BrainEntry, seed: number, langua
   return chosen.map((food) => toBrainDish(food, `${label} ${describeDish(food, language)}`));
 }
 
-// ---------------------------------------------------------------------------------------------
-// Builders
-// ---------------------------------------------------------------------------------------------
-
 function buildFromEntry(
   entry: BrainEntry,
   foods: FoodItem[],
@@ -943,14 +827,12 @@ function buildFromEntry(
     dishes: [],
     surprise: entry.surprise ? { title: t(entry.surprise.title), text: t(entry.surprise.text) } : undefined,
     tips: entry.tips.map(t),
-    safetyNote: entry.safety ? t(entry.safety) : undefined,
     followUps: chipsFor(entry.follow, language),
   };
 
   if (entry.mode === 'drink') {
     const ranked = rankDrinkPairingDishes(foods, 'all');
     base.pairingCount = ranked.length;
-    base.drinkDisclaimer = drinkDisclaimer(language);
     if (!canUseVip) {
       base.vipLock = true;
       return base;
@@ -963,15 +845,34 @@ function buildFromEntry(
   }
 
   base.dishes = pickForEntry(foods, entry, seed, language);
-  if (base.dishes.some((d) => d.allergens.includes('raw')) && !base.safetyNote) {
-    base.safetyNote = tr(
-      language,
-      '⚠️ ម្ហូបខ្លះមានគ្រឿងឆៅ — ស្ត្រីមានផ្ទៃពោះ និងកុមារគួរជៀសវាង។',
-      '⚠️ Some picks contain raw ingredients — pregnant women and young children should avoid them.',
-      '⚠️ 部分推荐含生食——孕妇和幼儿应避免食用。'
-    );
-  }
   return base;
+}
+
+/**
+ * Polite Scope Boundary Refusal when user asks any medical, symptom, or disease-related question.
+ * Never gives medical advice, health disclaimers, or food recommendations for diseases.
+ */
+export function buildMedicalScopeNotice(language: Language): AiBrainInsight {
+  return {
+    mode: 'scope_notice',
+    entryId: 'medical_scope_boundary',
+    emoji: '🍽️',
+    headline: tr(
+      language,
+      'ជំនួយការ AI សម្រាប់ម្ហូបអាហារ និងទេសចរណ៍កម្ពុជាប៉ុណ្ណោះ',
+      'AI Assistant Exclusively for Cambodia Food & Tourism',
+      '本 AI 助手专为柬埔寨美食与旅游而设计'
+    ),
+    explanation: tr(
+      language,
+      'សូមអភ័យទោស ជំនួយការ AI នេះត្រូវបានបង្កើតឡើងសម្រាប់តែការស្វែងរកមុខម្ហូបខ្មែរ រូបមន្តធ្វើម្ហូប ភោជនីយដ្ឋាន និងតំបន់ទេសចរណ៍នៅកម្ពុជាប៉ុណ្ណោះ។ យើងខ្ញុំមិនអាចឆ្លើយសំណួរអំពីជំងឺ រោគសញ្ញា ថ្នាំពេទ្យ ឬការព្យាបាលសុខភាពតាមរយៈអាហារបានទេ។ សូមសាកល្បងសួរអំពីមុខម្ហូប ឬកន្លែងដើរលេងខាងក្រោម៖',
+      'This AI Assistant is designed exclusively for discovering Cambodian cuisine, recipes, cooking methods, restaurants, and tourism in Cambodia. I cannot answer questions about diseases, medical conditions, symptoms, medications, or treating health issues through food. Feel free to ask me about delicious Khmer dishes, recipes, or travel destinations below:',
+      '抱歉，本 AI 助手专为探索柬埔寨美食、食谱做法、餐厅推荐及旅游景点而设计，无法回答有关疾病、症状、药物或食疗康复的问题。欢迎向我询问以下高棉美食或旅游景点：'
+    ),
+    dishes: [],
+    tips: [],
+    followUps: chipsFor(['soup', 'grilled', 'seafood', 'spicy', 'sweet', 'tourism'], language),
+  };
 }
 
 function buildBlocked(foods: FoodItem[], language: Language, seed: number): AiBrainInsight {
@@ -987,9 +888,9 @@ function buildBlocked(foods: FoodItem[], language: Language, seed: number): AiBr
     headline: tr(language, 'AI មិនអាចជួយរឿងនេះបានទេ 🛡️', 'AI can’t help with that 🛡️', 'AI 无法协助此请求 🛡️'),
     explanation: tr(
       language,
-      'សុវត្ថិភាពរបស់អ្នកជាអាទិភាព។ AI ណែនាំតែម្ហូបស្របច្បាប់ សុវត្ថិភាព និងគេស្គាល់ទូទៅប៉ុណ្ណោះ — នេះជាម្ហូបពេញនិយមដែលអ្នកអាចសាកល្បងជំនួស៖',
-      'Your safety comes first. AI only recommends legal, safe and well-known foods — here are popular dishes you can try instead:',
-      '您的安全最重要。AI 只推荐合法、安全且常见的食物——以下是人气美食，供您参考：'
+      'AI ណែនាំតែមុខម្ហូបខ្មែរ និងតំបន់ទេសចរណ៍ស្របច្បាប់ប៉ុណ្ណោះ — នេះជាម្ហូបពេញនិយមដែលអ្នកអាចសាកល្បងជំនួស៖',
+      'AI only recommends legal, authentic Cambodian foods and destinations — here are popular dishes you can try instead:',
+      'AI 仅推荐合法、正宗的柬埔寨美食与景点——以下是人气美食供您参考：'
     ),
     dishes: picks.map((f) =>
       toBrainDish(f, `${tr(language, 'ពេញនិយមបំផុត', 'Crowd favourite', '人气之选')} ⭐ ${f.rating} • ${describeDish(f, language)}`)
@@ -1010,7 +911,6 @@ function buildDiscover(
   const safePool = foods.filter((f) => !ALWAYS_SAFE_RAW.test(`${f.nameKh} ${f.nameEn}`));
   const byRating = [...safePool].sort((a, b) => (b.rating || 0) - (a.rating || 0));
 
-  // 1) Right-now pick: matches the time of day
   const slot =
     hour >= 5 && hour < 10
       ? { cats: ['noodles', 'rice'], label: tr(language, 'ស័ក្តិសមពេលព្រឹក', 'Perfect for this morning', '适合早晨') }
@@ -1020,25 +920,22 @@ function buildDiscover(
           ? { cats: ['dessert', 'cake', 'streetfood'], label: tr(language, 'ស័ក្តិសមពេលរសៀល', 'Great afternoon treat', '适合下午茶') }
           : hour >= 17 && hour < 22
             ? { cats: ['grilled', 'soup', 'salad'], label: tr(language, 'ស័ក្តិសមពេលល្ងាច', 'Great for dinner', '适合晚餐') }
-            : { cats: ['soup', 'noodles'], label: tr(language, 'ស្រាលក្រពះពេលយប់', 'Gentle for late night', '适合夜宵') };
+            : { cats: ['soup', 'noodles'], label: tr(language, 'ស័ក្តិសមពេលយប់', 'Great for late night', '适合夜宵') };
   const timePool = byRating.filter((f) => slot.cats.includes(f.categorySlug as string)).slice(0, 8);
   const timePick = rotate(timePool.length ? timePool : byRating, seed, 1)[0];
 
-  // 2) Hidden gem: top rating but few reviews
   const gemPool = byRating
     .filter((f) => (f.rating || 0) >= 4.7 && f.id !== timePick?.id)
     .sort((a, b) => (a.reviewCount || 0) - (b.reviewCount || 0))
     .slice(0, 8);
   const gem = rotate(gemPool, seed, 1)[0];
 
-  // 3) Crowd favourite
   const crowd = [...safePool]
     .sort((a, b) => (b.rating || 0) * Math.log((b.reviewCount || 1) + 2) - (a.rating || 0) * Math.log((a.reviewCount || 1) + 2))
     .filter((f) => f.id !== timePick?.id && f.id !== gem?.id)
     .slice(0, 8);
   const crowdPick = rotate(crowd, seed, 1)[0];
 
-  // 4) Adventurous wildcard
   const used = new Set([timePick?.id, gem?.id, crowdPick?.id]);
   const wild = rotate(
     safePool.filter((f) => !used.has(f.id) && (f.rating || 0) >= 4.5),
@@ -1074,9 +971,9 @@ function buildDiscover(
     ? tr(language, '🎁 AI ភ្ញាក់ផ្អើលអ្នកហើយ!', '🎁 AI has a surprise for you!', '🎁 AI 为您准备了惊喜！')
     : tr(
         language,
-        `🤔 AI មិនទាន់ស្គាល់ «${query}» ទេ — តែនេះជាការស្មានឆ្លាតៗ`,
-        `🤔 AI doesn’t know “${query}” yet — here are smart guesses`,
-        `🤔 AI 暂时不认识“${query}”——这是智能猜想`
+        `✨ AI ណែនាំមុខម្ហូបខ្មែរសម្រាប់ «${query}»`,
+        `✨ AI Culinary Picks for “${query}”`,
+        `✨ AI 为“${query}”精选的高棉美食`
       );
   const explanation = explicitSurprise
     ? tr(
@@ -1087,15 +984,15 @@ function buildDiscover(
       )
     : tr(
         language,
-        'ប្រាប់ AI បន្ថែម (ឧ. ហឹរ ស្រាល ក្តៅ ផ្អែម) ឬចុចជម្រើសខាងក្រោម ដើម្បីឱ្យ AI ណែនាំត្រូវចិត្តជាងនេះ។',
-        'Tell AI a bit more (spicy, light, hot, sweet…) or tap a chip below and it will get even more precise.',
-        '告诉 AI 更多偏好（辣、清淡、热、甜…）或点击下方选项，推荐会更精准。'
+        'ប្រាប់ AI បន្ថែមអំពីរសជាតិ (ជូរហឹរ សាច់អាំង សម្លក្តៅៗ បង្អែម) ឬកន្លែងដើរលេង ដើម្បីឱ្យ AI ណែនាំកាន់តែត្រូវចិត្ត។',
+        'Tell AI more about your flavor preference (spicy, grilled, soup, sweet) or travel destination for tailored picks.',
+        '告诉 AI 更多风味偏好（酸辣、烧烤、热汤、甜品）或旅游目的地，推荐会更精准。'
       );
 
   return {
     mode: 'discover',
     entryId: explicitSurprise ? 'surprise_me' : 'discover',
-    emoji: explicitSurprise ? '🎁' : '🤔',
+    emoji: explicitSurprise ? '🎁' : '✨',
     headline,
     explanation,
     dishes,
@@ -1113,18 +1010,14 @@ function buildDiscover(
     tips: [
       tr(
         language,
-        'ចុច «ប្តូរជម្រើសថ្មី» ដើម្បីឱ្យ AI ផ្តល់ការភ្ញាក់ផ្អើលថ្មីរាល់ពេល។',
-        'Tap “Refresh AI” for a brand-new surprise every time.',
-        '点击“换一批”，每次都有新惊喜。'
+        'ចុចលើជម្រើសខាងក្រោម ឬសួរ AI បន្តអំពីរូបមន្ត ហាងអាហារ និងតំបន់ទេសចរណ៍។',
+        'Tap a chip below or ask a follow-up about recipes, restaurants, and tourist attractions.',
+        '点击下方标签，或继续询问食谱、餐厅推荐与旅游景点。'
       ),
     ],
-    followUps: chipsFor(['spicy', 'mild', 'sweet', 'drink'], language),
+    followUps: chipsFor(['spicy', 'grilled', 'sweet', 'drink'], language),
   };
 }
-
-// ---------------------------------------------------------------------------------------------
-// Public API
-// ---------------------------------------------------------------------------------------------
 
 export interface BrainParams {
   foods: FoodItem[];
@@ -1132,9 +1025,7 @@ export interface BrainParams {
   language: Language;
   canUseVip: boolean;
   seed: number;
-  /** How many dishes the plain search already matched (score ≥ 25). */
   directMatchCount: number;
-  /** True when some dish name literally contains the query (exact dish search). */
   hasTitleMatch: boolean;
   hour?: number;
 }
@@ -1145,14 +1036,19 @@ export function buildAiBrainInsight(params: BrainParams): AiBrainInsight | null 
   if (!raw || foods.length === 0) return null;
   const q = raw.toLowerCase();
 
+  // 1. Strict Medical / Disease Scope Boundary Refusal (Always takes precedence!)
+  if (isMedicalOrHealthQuery(raw)) {
+    return buildMedicalScopeNotice(language);
+  }
+
+  // 2. Unsafe / illegal substance block
   if (UNSAFE_RE.test(q)) return buildBlocked(foods, language, seed);
 
-  // A literal dish-name search always wins over the brain.
+  // 3. Literal dish-name search wins over foreign-dish bridges
   if (hasTitleMatch) return null;
 
   for (const entry of BRAIN_ENTRIES) {
     if (!entry.test.test(q)) continue;
-    // Foreign-dish bridges only run when the normal search found nothing useful.
     if (entry.mode === 'bridge' && directMatchCount > 0) continue;
     if (entry.mode === 'discover') {
       return buildDiscover(foods, language, seed, raw, true, params.hour ?? new Date().getHours());

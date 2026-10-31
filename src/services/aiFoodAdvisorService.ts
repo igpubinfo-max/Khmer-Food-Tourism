@@ -2,7 +2,7 @@ import { FoodItem, Language, Restaurant } from '../types';
 import { getDishTagIds, DishTagId } from '../utils/dishTags';
 import { getLocalizedFood } from '../utils/zhDynamicTranslator';
 import { tr } from '../utils/i18n';
-import { buildAiBrainInsight, type AiBrainInsight } from './aiFoodBrain';
+import { buildAiBrainInsight, buildMedicalScopeNotice, isMedicalOrHealthQuery, type AiBrainInsight } from './aiFoodBrain';
 
 export type AdvisorGoalId =
   | 'any'
@@ -78,13 +78,13 @@ export const QUICK_CRAVING_CHIPS: QuickCravingChip[] = [
     labelZh: '🌶️ 开胃酸辣',
   },
   {
-    id: 'light',
-    queryKh: 'អាហារមិនសូវខ្លាញ់',
-    queryEn: 'light low oil',
-    queryZh: '少油清淡',
-    labelKh: '🥗 ស្រាលក្រពះ',
-    labelEn: '🥗 Light & Healthy',
-    labelZh: '🥗 少油清淡',
+    id: 'streetfood',
+    queryKh: 'អាហារសម្រន់',
+    queryEn: 'street food',
+    queryZh: '街头小吃',
+    labelKh: '🍢 អាហារសម្រន់',
+    labelEn: '🍢 Street Food',
+    labelZh: '🍢 街头小吃',
   },
   {
     id: 'dessert',
@@ -211,15 +211,13 @@ const SEMANTIC_CRAVING_RULES: SemanticRule[] = [
     },
   },
   {
-    id: 'light_healthy',
-    triggerRegex: /មិនសូវខ្លាញ់|ខ្លាញ់តិច|ស្រាលក្រពះ|ស្រាល|សុខភាព|កាឡូរីទាប|ស្ងោរ|ចំហុយ|បន្លែ|បួស|light|low oil|low fat|low calorie|healthy|diet|steamed|boiled|veggie|vegetarian|vegan|clean|清淡|少油|低脂|低卡|健康|轻食|减肥|清蒸|水煮|蔬菜|素食/i,
-    matchFood: (f, titleText, _fullText, tags) => {
+    id: 'steamed_boiled_style',
+    triggerRegex: /ស្ងោរ|ចំហុយ|បន្លែ|បួស|steamed|boiled|veggie|vegetarian|vegan|清蒸|水煮|蔬菜|素食/i,
+    matchFood: (_f, titleText, _fullText, tags) => {
       let score = 0;
-      if (tags.includes('light')) score += 90;
       if (tags.includes('steamed_boiled')) score += 80;
       if (tags.includes('vegetable_rich') || tags.includes('vegetarian_friendly')) score += 70;
       if (/ស្ងោរ|ចំហុយ|បបរ|សម្លប្រហើរ|បន្លែ|steamed|boiled|porridge|clear soup|vegetable/i.test(titleText)) score += 80;
-      if (f.calories > 0 && f.calories <= 420) score += 40;
       return score;
     },
   },
@@ -288,6 +286,19 @@ export function getAiFoodAdvisorRecommendations(params: {
   const cleanQuery = normalizeSearchText(query);
   const hasActiveQuery = cleanQuery.length > 0;
   let hasTitleMatch = false;
+
+  // Strict Medical / Disease Scope Boundary Refusal: never recommend foods for medical conditions
+  if (hasActiveQuery && isMedicalOrHealthQuery(query)) {
+    const scopeBrain = buildMedicalScopeNotice(language);
+    return {
+      dishes: [],
+      totalMatchedCount: 0,
+      shops: [],
+      hasActiveQuery: true,
+      aiSummaryText: scopeBrain.headline,
+      brain: scopeBrain,
+    };
+  }
 
   // Tokenize query into words (supporting Khmer, English, and Chinese substrings)
   const tokens = cleanQuery
@@ -541,14 +552,14 @@ function buildAiSummaryText(params: {
       '🤖 为您推荐正宗高棉家常汤品与传统名菜：',
     ],
     vip_light_cal: [
-      '🤖 ណែនាំម្ហូបស្រាលក្រពះ ខ្លាញ់តិច និងកាឡូរីទាប (<450 kcal)៖',
-      '🤖 Recommended light, low-oil & low-calorie (<450 kcal) dishes:',
-      '🤖 为您推荐少油清淡、低卡路里 (<450 千卡) 美食：',
+      '🤖 ណែនាំម្ហូបចំហុយ ស្ងោរ និងសម្លប្រហើររសជាតិដើម៖',
+      '🤖 Recommended steamed, boiled & delicate broth dishes:',
+      '🤖 为您推荐清蒸、水煮与鲜美清汤美食：',
     ],
     vip_high_protein: [
-      '🤖 ណែនាំមុខម្ហូបសម្បូរប្រូតេអ៊ីន និងប៉ូវកម្លាំង៖',
-      '🤖 Recommended high-protein & energizing dishes:',
-      '🤖 为您推荐高蛋白、补充体力的营养美食：',
+      '🤖 ណែនាំមុខម្ហូបសាច់អាំង ត្រី និងគ្រឿងសមុទ្រពិសេស៖',
+      '🤖 Recommended grilled meats, fish & seafood specialties:',
+      '🤖 为您推荐炭火烤肉、鲜鱼与海鲜特色菜：',
     ],
     vip_group_feast: [
       '🤖 ណែនាំមុខម្ហូបឈុតធំ សម្រាប់ជួបជុំគ្រួសារ និងមិត្តភក្តិ៖',

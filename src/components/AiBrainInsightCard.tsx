@@ -22,6 +22,7 @@ const MODE_STYLE: Record<AiBrainInsight['mode'], string> = {
   discover: 'from-violet-50 via-white to-amber-50 dark:from-violet-950/30 dark:via-slate-800 dark:to-amber-950/20 border-violet-300/70 dark:border-violet-700/50',
   drink: 'from-amber-50 via-orange-50 to-rose-50 dark:from-amber-950/40 dark:via-slate-800 dark:to-rose-950/30 border-amber-400/70 dark:border-amber-600/50',
   blocked: 'from-rose-50 via-white to-slate-50 dark:from-rose-950/30 dark:via-slate-800 dark:to-slate-900 border-rose-300/70 dark:border-rose-800/50',
+  scope_notice: 'from-amber-50 via-white to-emerald-50 dark:from-slate-800 dark:via-slate-800 dark:to-emerald-950/30 border-amber-400/70 dark:border-amber-600/50',
 };
 
 const ALLERGEN_ICON: Record<AllergenId, string> = {

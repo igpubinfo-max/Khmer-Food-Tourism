@@ -116,7 +116,7 @@ export const UpgradeVipModal: React.FC = () => {
   const [submittedTxnId, setSubmittedTxnId] = useState('');
   const [submissionTimestamp, setSubmissionTimestamp] = useState('');
   const [hasCopiedAccount, setHasCopiedAccount] = useState(false);
-  const [qrCodeDataUrl] = useState<string>('/images/aba_khqr_official_kimseng.png');
+  const [qrCodeDataUrl] = useState<string>('/images/aba_qr_code_only.png');
   const [customTxnRef, setCustomTxnRef] = useState<string>(() => 
     `ABA-KHQR-30D-${Date.now().toString(36).toUpperCase()}`
   );
@@ -1040,64 +1040,42 @@ export const UpgradeVipModal: React.FC = () => {
                   </span>
                 </div>
 
-                <div className="flex flex-col items-center gap-2.5">
+                <div className="flex gap-3 items-stretch">
                   <button
                     type="button"
                     onClick={handleSaveQrImage}
                     title={tr(language, 'ចុចលើរូប QR ដើម្បីរក្សាទុកទៅក្នុង Gallery / Photos', 'Tap QR code to save original image to Gallery/Photos', '点击二维码保存原图到手机相册')}
-                    className="group relative w-64 sm:w-72 max-w-full mx-auto rounded-2xl overflow-hidden shadow-md border-2 border-emerald-500/50 hover:border-emerald-500 bg-white cursor-pointer active:scale-[0.985] transition block p-0"
+                    className="w-[42%] max-w-[162px] p-1.5 bg-white rounded-2xl shadow-sm border-2 border-emerald-500/40 hover:border-emerald-500 flex items-center justify-center shrink-0 cursor-pointer active:scale-95 transition"
                   >
                     <img
                       src={qrCodeDataUrl}
-                      alt="ABA KHQR — KIMSENG CHEA"
-                      className="w-full h-auto object-contain block bg-white select-none"
+                      alt="ABA KHQR Code"
+                      className="w-full aspect-square object-contain rounded-lg select-none"
                     />
                   </button>
-                  <div
-                    onClick={handleSaveQrImage}
-                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-700/70 text-[11px] font-bold text-emerald-800 dark:text-emerald-300 cursor-pointer hover:bg-emerald-100 dark:hover:bg-emerald-900/60 transition"
-                  >
-                    <Download className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                    <span>
-                      {tr(
-                        language,
-                        'ចុចលើរូប ABA QR ដើម្បីរក្សាទុកក្នុង Gallery / Photos',
-                        'Tap ABA QR to save original image to Gallery/Photos',
-                        '点击 ABA 二维码将原图保存至手机相册'
-                      )}
-                    </span>
-                  </div>
 
-                  <div className="w-full space-y-2">
-                    <div className="px-3 py-2 rounded-2xl bg-sky-50 dark:bg-slate-800/80 border border-sky-200 dark:border-slate-700 flex items-center justify-between gap-2">
-                      <div className="text-xs font-bold text-slate-700 dark:text-slate-200 leading-snug">
-                        {tr(language, 'ឈ្មោះគណនី៖ KIMSENG CHEA', 'Account: KIMSENG CHEA', '账户：KIMSENG CHEA')}
+                  <div className="flex-1 min-w-0 flex flex-col justify-between gap-2">
+                    <div className="p-2 rounded-2xl bg-sky-50 dark:bg-slate-800/80 border border-sky-200 dark:border-slate-700">
+                      <div className="text-[11px] font-bold text-slate-700 dark:text-slate-200 leading-snug">
+                        {tr(language, 'ឈ្មោះគណនី៖ ជា គីមសេង', 'Account: CHEA KIMSENG', '账户：CHEA KIMSENG')}
                       </div>
-                      <div className="font-mono font-extrabold text-sm text-[#004B87] dark:text-sky-400 leading-tight shrink-0">
+                      <div className="font-mono font-extrabold text-sm text-[#004B87] dark:text-sky-400 leading-tight mt-0.5">
                         095 245 959
                       </div>
                     </div>
-                    <div className="grid grid-cols-3 gap-1.5">
+                    <div className="grid grid-cols-2 gap-1.5">
                       <button
                         type="button"
                         onClick={handleSaveQrImage}
-                        className="py-2.5 px-2 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center justify-center gap-1 transition active:scale-95 cursor-pointer shadow-sm"
+                        className="py-2 px-2 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-[11px] font-bold flex items-center justify-center gap-1 transition active:scale-95 cursor-pointer border border-slate-200 dark:border-slate-700"
                       >
-                        <Download className="w-3.5 h-3.5 shrink-0" />
+                        <Download className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                         <span className="truncate">{tr(language, 'រក្សាទុក QR', 'Save QR', '保存二维码')}</span>
                       </button>
                       <button
                         type="button"
-                        onClick={handleShareQrImage}
-                        className="py-2.5 px-2 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold flex items-center justify-center gap-1 transition active:scale-95 cursor-pointer border border-slate-200 dark:border-slate-700"
-                      >
-                        <Share2 className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400 shrink-0" />
-                        <span className="truncate">{tr(language, 'ចែករំលែក QR', 'Share QR', '分享二维码')}</span>
-                      </button>
-                      <button
-                        type="button"
                         onClick={handleCopyAccount}
-                        className="py-2.5 px-2 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold flex items-center justify-center gap-1 transition active:scale-95 cursor-pointer border border-slate-200 dark:border-slate-700"
+                        className="py-2 px-2 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-[11px] font-bold flex items-center justify-center gap-1 transition active:scale-95 cursor-pointer border border-slate-200 dark:border-slate-700"
                       >
                         {hasCopiedAccount ? (
                           <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
@@ -1107,7 +1085,7 @@ export const UpgradeVipModal: React.FC = () => {
                         <span className="truncate">
                           {hasCopiedAccount
                             ? tr(language, 'បានចម្លង!', 'Copied!', '已复制！')
-                            : tr(language, 'ចម្លងលេខ', 'Copy Acc', '复制账号')}
+                            : tr(language, 'ចម្លងលេខ', 'Copy number', '复制账号')}
                         </span>
                       </button>
                     </div>

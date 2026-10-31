@@ -305,22 +305,22 @@ export const AiTripPlannerModal: React.FC = () => {
     },
     {
       id: 'vip_light_cal',
-      kh: '🥗 ស្រាលក្រពះ & កាឡូរីទាប (<450 kcal)',
-      en: '🥗 Light & Low-Calorie (<450 kcal)',
-      zh: '🥗 轻食低卡 (<450 千卡)',
-      descKh: 'វិភាគតាមរូបមន្ត៖ ខ្លាញ់តិច ស្ងោរ/ចំហុយ ស្រួលរំលាយអាហារ',
-      descEn: 'AI recipe analysis: low oil, steamed/boiled & easy to digest',
-      descZh: 'AI 食谱营养分析：少油清蒸水煮、易消化',
+      kh: '🍲 ម្ហូបចំហុយ & ស្ងោរប្រពៃណី',
+      en: '🍲 Steamed & Boiled Specialties',
+      zh: '🍲 清蒸与炖汤精选',
+      descKh: 'ម្ហូបចំហុយ ស៊ុបថ្លា និងសម្លប្រពៃណីរសជាតិស្រាលឆ្ងាញ់',
+      descEn: 'Traditional steamed fish, clear soups & delicate Cambodian dishes',
+      descZh: '传统清蒸鱼、清汤与风味清雅的柬式菜肴',
       vipOnly: true,
     },
     {
       id: 'vip_high_protein',
-      kh: '💪 ប៉ូវកម្លាំង & ប្រូតេអ៊ីនខ្ពស់',
-      en: '💪 High-Protein & Energy Boost',
-      zh: '💪 高蛋白与能量补充',
-      descKh: 'សម្បូរសាច់ ត្រី ស៊ុត និងថាមពលសម្រាប់អ្នកធ្វើការ ឬហាត់ប្រាណ',
-      descEn: 'Rich in fish, lean meat & protein for active days',
-      descZh: '富含鱼肉蛋类优质蛋白，适合运动与工作补充体力',
+      kh: '🥩 សាច់អាំង & គ្រឿងសមុទ្រពិសេស',
+      en: '🥩 Grilled & Seafood Specialties',
+      zh: '🥩 炭烤与海鲜特色',
+      descKh: 'មុខម្ហូបសាច់គោអាំង ត្រីដុត បង្គា និងគ្រឿងសមុទ្រស្រស់ៗ',
+      descEn: 'Charcoal-grilled meats, roasted fish & fresh coastal seafood',
+      descZh: '炭烤牛肉、烤鱼与新鲜海鲜特色菜',
       vipOnly: true,
     },
     {
@@ -363,9 +363,9 @@ export const AiTripPlannerModal: React.FC = () => {
               <p className="text-[11px] text-emerald-100 font-khmer truncate">
                 {tr(
                   language,
-                  'ជំនួយការរើសម្ហូបប្រចាំថ្ងៃ សុខភាព និងរៀបផែនការដើរលេង AI',
-                  'Daily AI food advisor, healthy nutrition tags & route planner',
-                  '每日 AI 选餐顾问、健康营养标签与智能路线规划'
+                  'ជំនួយការរើសម្ហូបប្រចាំថ្ងៃ រូបមន្តម្ហូប និងរៀបផែនការដើរលេង AI',
+                  'Daily AI food advisor, culinary tags & route planner',
+                  '每日 AI 选餐顾问、美食分类与智能路线规划'
                 )}
               </p>
             </div>
@@ -378,7 +378,7 @@ export const AiTripPlannerModal: React.FC = () => {
           </button>
         </div>
 
-        {/* 3-Mode Switcher Bar: AI Food Advisor | VIP Healthy Menu | AI Route Planner */}
+        {/* 3-Mode Switcher Bar: AI Food Advisor | VIP Special Menu | AI Route Planner */}
         <div className="grid grid-cols-3 p-1.5 bg-slate-100 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-800 gap-1 shrink-0 font-khmer">
           <button
             type="button"
@@ -408,8 +408,8 @@ export const AiTripPlannerModal: React.FC = () => {
             }`}
           >
             <span className="flex items-center gap-1">
-              <HeartPulse className="w-3.5 h-3.5 text-amber-500" />
-              <span className="truncate">{tr(language, 'ម្ហូបសុខភាព', 'Healthy Menu', '健康菜单')}</span>
+              <ChefHat className="w-3.5 h-3.5 text-amber-500" />
+              <span className="truncate">{tr(language, 'ម្ហូបពិសេស', 'Special Menu', '特色菜单')}</span>
             </span>
             <span className="text-[9px] font-black text-amber-600 dark:text-amber-400">👑 VIP</span>
           </button>
@@ -457,9 +457,9 @@ export const AiTripPlannerModal: React.FC = () => {
                   <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
                     {tr(
                       language,
-                      'មុខងារមូលដ្ឋានឥតគិតថ្លៃ • ការវិភាគកាឡូរី និងសុខភាពសម្រាប់ VIP',
-                      'Basic daily picks are FREE • Advanced nutrition & group AI for VIP',
-                      '基础日常推荐免费使用 • 营养热量分析与聚餐定制专属 VIP'
+                      'មុខងារមូលដ្ឋានឥតគិតថ្លៃ • មុខម្ហូបពិសេស និងជួបជុំសម្រាប់ VIP',
+                      'Basic daily picks are FREE • Special culinary & group AI for VIP',
+                      '基础日常推荐免费使用 • 特色菜肴与聚餐定制专属 VIP'
                     )}
                   </p>
                 </div>
@@ -502,9 +502,9 @@ export const AiTripPlannerModal: React.FC = () => {
                       }}
                       placeholder={tr(
                         language,
-                        'ឧ. បាយ, Pizza, ក្រោយស្រវឹង, ម្ហូបអមស្រាបៀរ...',
-                        'e.g. rice, pizza, hangover, beer food...',
-                        '例如：米饭、披萨、解酒、下酒菜...'
+                        'ឧ. បាយ, គុយទាវ, សម្លម្ជូរ, សាច់អាំង, ម្ហូបអមស្រាបៀរ...',
+                        'e.g. rice, noodle soup, sour soup, grilled meat, beer food...',
+                        '例如：米饭、粿条、酸汤、烤肉、下酒菜...'
                       )}
                       className="w-full pl-3.5 pr-8 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     />

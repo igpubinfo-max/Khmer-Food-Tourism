@@ -41,8 +41,8 @@ const IMMUTABLE_SEED_DEST_MAP = new Map<string, TouristDestination>(
 const IMMUTABLE_SEED_FOOD_MAP = new Map<string, FoodItem>(
   initial200Foods.map((f) => [f.id, f])
 );
-// Timestamp of the static `/foods/food-*.jpg` and recipe ledger bake (all cloud food overrides up to 2026-10-31T04:00:00Z are already baked into /foods/food-<id>.jpg and seedFoods)
-const BAKED_STATIC_FOOD_ASSETS_MS = new Date('2026-10-31T04:00:00.000Z').getTime();
+// Timestamp of the initial static `/foods/food-*.jpg` ledger bake (any override after 2026-10-29T15:05:00Z or with a custom photo is always preserved)
+const BAKED_STATIC_FOOD_ASSETS_MS = new Date('2026-10-29T15:05:00.000Z').getTime();
 
 export const VAULT_KEYS = {
   FOODS: 'kft_permanent_food_overrides_v1',
@@ -903,9 +903,12 @@ export function applyFoodOverrides(
     const isSeedBundledStaticFoodPhoto =
       typeof seedPhotoUrl === 'string' && seedPhotoUrl.startsWith('/foods/');
     const ovTime = ov.updatedAt ? new Date(ov.updatedAt).getTime() : 0;
-    const isPreBakeOverride = ovTime > 0 && ovTime <= BAKED_STATIC_FOOD_ASSETS_MS + 1000;
+    const isPreBakeOverride = ovTime > 0 && ovTime <= BAKED_STATIC_FOOD_ASSETS_MS + 1000 && !ov.isCustomPhoto;
     const useOverrideFoodPhoto =
       !isSeedBundledStaticFoodPhoto ||
+      ov.isCustomPhoto ||
+      ov.photoUrl.startsWith('data:image/') ||
+      ov.photoUrl.startsWith('http') ||
       ov.photoUrl.startsWith('/foods/') ||
       ovTime > BAKED_STATIC_FOOD_ASSETS_MS + 1000 ||
       ovTime === 0;
@@ -922,14 +925,18 @@ export function applyFoodOverrides(
     );
 
     let nextDescriptionKh = stripLegacyFoodPhraseKh(
-      isSameDishNameAsSeed && isPreBakeOverride && seedFood?.descriptionKh
+      ov.descriptionKh
+        ? ov.descriptionKh
+        : isSameDishNameAsSeed && isPreBakeOverride && seedFood?.descriptionKh
         ? seedFood.descriptionKh
-        : ov.descriptionKh || cleanedBaseDescKh
+        : cleanedBaseDescKh
     );
     let nextDescriptionEn =
-      isSameDishNameAsSeed && isPreBakeOverride && seedFood?.descriptionEn
+      ov.descriptionEn
+        ? ov.descriptionEn
+        : isSameDishNameAsSeed && isPreBakeOverride && seedFood?.descriptionEn
         ? seedFood.descriptionEn
-        : ov.descriptionEn || f.descriptionEn;
+        : f.descriptionEn;
 
     const nextCookTime = ov.cookTime || f.cookTime;
     const nextServings = ov.servings || f.servings;
@@ -937,18 +944,18 @@ export function applyFoodOverrides(
     const nextDifficulty = ov.difficulty || f.difficulty;
 
     let nextIngredients =
-      isSameDishNameAsSeed &&
-      seedFood &&
-      (isPreBakeOverride || hasPlaceholderOrIncompleteRecipe(ov.ingredients, ov.steps))
+      Array.isArray(ov.ingredients) && ov.ingredients.length > 0 && !hasPlaceholderOrIncompleteRecipe(ov.ingredients, ov.steps)
+        ? ov.ingredients
+        : isSameDishNameAsSeed && seedFood
         ? seedFood.ingredients
         : Array.isArray(ov.ingredients) && ov.ingredients.length > 0
         ? ov.ingredients
         : f.ingredients;
 
     let nextSteps =
-      isSameDishNameAsSeed &&
-      seedFood &&
-      (isPreBakeOverride || hasPlaceholderOrIncompleteRecipe(ov.ingredients, ov.steps))
+      Array.isArray(ov.steps) && ov.steps.length > 0 && !hasPlaceholderOrIncompleteRecipe(ov.ingredients, ov.steps)
+        ? ov.steps
+        : isSameDishNameAsSeed && seedFood
         ? seedFood.steps
         : Array.isArray(ov.steps) && ov.steps.length > 0
         ? ov.steps
@@ -1075,11 +1082,14 @@ export function applyRestaurantOverrides(
         : Array.isArray(ov.menuItems)
         ? ovMenu
         : rMenu;
-    const CLEAN_STATIC_MEDIA_CUTOFF_MS = new Date('2026-10-30T16:00:00.000Z').getTime();
+    const CLEAN_STATIC_MEDIA_CUTOFF_MS = new Date('2026-10-29T15:05:00.000Z').getTime();
     const hasCleanBundledShopPhoto =
       typeof r.photoUrl === 'string' && r.photoUrl.startsWith('/Shop/');
     const useOverrideShopPhoto =
       !hasCleanBundledShopPhoto ||
+      ov.isCustomPhoto ||
+      ov.isAdminEdited ||
+      Boolean(ov.photoUrl && ov.photoUrl.startsWith('data:image/')) ||
       ovTime > CLEAN_STATIC_MEDIA_CUTOFF_MS;
     const rawOvPhoto = ov.photoUrl || ov.profileImage || '';
     const photoUrl =
@@ -1247,9 +1257,12 @@ export function applyDestinationOverrides(
     const seedTime = seedItem?.photoUpdatedAt ? new Date(seedItem.photoUpdatedAt).getTime() : 0;
     const ovTime = ov.updatedAt ? new Date(ov.updatedAt).getTime() : 0;
 
-    const CLEAN_STATIC_MEDIA_CUTOFF_MS = new Date('2026-10-30T16:00:00.000Z').getTime();
+    const CLEAN_STATIC_MEDIA_CUTOFF_MS = new Date('2026-10-29T15:05:00.000Z').getTime();
     const useOverridePhoto =
       !isSeedBundledStaticPhoto ||
+      ov.isCustomPhoto ||
+      ov.isAdminEdited ||
+      Boolean(ov.photoUrl && ov.photoUrl.startsWith('data:image/')) ||
       (ovTime > Math.max(seedTime, CLEAN_STATIC_MEDIA_CUTOFF_MS) + 1000);
 
     const effectivePhotoUrl = useOverridePhoto ? ov.photoUrl : seedPhotoUrl;
@@ -1396,6 +1409,9 @@ export function applyTrendingFoodOverrides(
         const ovTime = foodOv.updatedAt ? new Date(foodOv.updatedAt).getTime() : 0;
         const useOvPhoto =
           !seedPhotoUrl.startsWith('/foods/') ||
+          foodOv.isCustomPhoto ||
+          foodOv.photoUrl.startsWith('data:image/') ||
+          foodOv.photoUrl.startsWith('http') ||
           foodOv.photoUrl.startsWith('/foods/') ||
           ovTime > BAKED_STATIC_FOOD_ASSETS_MS + 1000 ||
           ovTime === 0;

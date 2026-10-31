@@ -732,7 +732,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               continue;
             }
 
-            // Harvest any custom photo from cached localStorage into the permanent vault if not already recorded
+            // Harvest any custom photo, name, or recipe edit from cached localStorage into the permanent vault if not already recorded
             const existingOverride = vault.foods[f.id];
             const isPhotoModifiedFromSeed =
               typeof f.photoUrl === 'string' &&
@@ -743,11 +743,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 f.photoUrl.startsWith('http://') ||
                 f.photoUrl.startsWith('https://') ||
                 (f.imageAuditNote && (f.imageAuditNote.includes('រដ្ឋបាល') || f.imageAuditNote.includes('Online'))));
+            const isContentModifiedFromSeed =
+              Boolean(f.isCustomPhoto) ||
+              (f.nameKh && f.nameKh !== seed.nameKh) ||
+              (f.imageAuditNote && f.imageAuditNote.includes('រដ្ឋបាល'));
 
-            if (isPhotoModifiedFromSeed && !existingOverride) {
+            if ((isPhotoModifiedFromSeed || isContentModifiedFromSeed) && !existingOverride) {
               vault.foods[f.id] = {
                 id: f.id,
-                photoUrl: f.photoUrl,
+                photoUrl: isPhotoModifiedFromSeed ? f.photoUrl : seed.photoUrl,
                 nameKh: f.nameKh,
                 nameEn: f.nameEn,
                 categorySlug: f.categorySlug,
@@ -755,11 +759,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 categoryEn: f.categoryEn,
                 descriptionKh: f.descriptionKh,
                 descriptionEn: f.descriptionEn,
+                cookTime: f.cookTime,
+                servings: f.servings,
+                calories: f.calories,
+                difficulty: f.difficulty,
+                ingredients: f.ingredients,
+                steps: f.steps,
                 priceRiel: f.priceRiel,
                 priceUsd: f.priceUsd,
                 imageAuditStatus: f.imageAuditStatus || 'verified',
                 imageAuditNote: f.imageAuditNote,
-                isCustomPhoto: true,
+                isCustomPhoto: Boolean(isPhotoModifiedFromSeed || f.isCustomPhoto),
                 updatedAt: f.photoUpdatedAt || new Date().toISOString(),
               };
               vaultChanged = true;

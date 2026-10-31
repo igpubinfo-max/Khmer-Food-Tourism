@@ -1093,7 +1093,7 @@ const RAW_100_NEW_DISHES: Array<{
     herbEn: 'Culantro and crushed roasted peanuts',
   },
   {
-    nameKh: 'គួងបង្គាសាច់ជ្រូកទឹកជ្រលក់សណ្តែកដី',
+    nameKh: 'គួងបង្គាសាច់ជ្រូកលាយបង្គារទឹកជ្រលក់សណ្តែកដី',
     nameEn: 'Fresh Cambodian Spring Rolls with Prawn, Pork & Peanut Sauce (Nime Chow)',
     cat: 'streetfood',
     catKh: 'អាហារសម្រន់ / គួងបង្គាស្រស់',

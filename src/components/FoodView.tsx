@@ -238,7 +238,7 @@ export const FoodView: React.FC = () => {
         <div className="flex items-center justify-between gap-2">
           <span className="text-xs sm:text-sm font-bold text-[#064E3B] dark:text-emerald-300 flex items-center gap-1.5">
             <IconHealthyLeaf className="w-4 h-4 shrink-0" />
-            <span>{tr(language, 'ស្លាកម្ហូបសុខភាព (VIP)៖', 'Healthy Dish Tags (VIP):', '健康菜品标签 (VIP)：')}</span>
+            <span>{tr(language, 'ស្លាកប្រភេទម្ហូបពិសេស (VIP)៖', 'Special Dish Tags (VIP):', '特色菜品标签 (VIP)：')}</span>
             {!canUseVip && (
               <span className="px-2 py-0.5 rounded-full bg-slate-900 text-amber-300 text-[10px] font-extrabold inline-flex items-center gap-0.5">
                 <Lock className="w-2.5 h-2.5" />
@@ -270,9 +270,9 @@ export const FoodView: React.FC = () => {
                     showToast(
                       tr(
                         language,
-                        'មុខងារស្លាកម្ហូបសុខភាពសម្រាប់គណនី VIP • សូមដំឡើង VIP!',
-                        'Healthy Dish Tags are for VIP accounts — please upgrade to VIP!',
-                        '健康菜品标签仅限 VIP 账户，请先升级 VIP！'
+                        'មុខងារស្លាកប្រភេទម្ហូបពិសេសសម្រាប់គណនី VIP • សូមដំឡើង VIP!',
+                        'Special Dish Tags are for VIP accounts — please upgrade to VIP!',
+                        '特色菜品标签仅限 VIP 账户，请先升级 VIP！'
                       ),
                       'info'
                     );
