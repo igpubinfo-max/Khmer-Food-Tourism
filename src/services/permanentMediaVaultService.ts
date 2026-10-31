@@ -716,11 +716,8 @@ export function loadLocalMediaOverrides(forceDiskRead = false): AllMediaOverride
   let evictedStaleFoodFromDisk = false;
   let evictedStaleLedgerEntry = false;
   for (const [lid, lEntry] of Object.entries(ledger)) {
-    const baselineMs = getSeedFoodPhotoBaselineMs(lid);
-    const lTime = lEntry?.updatedAt ? Date.parse(lEntry.updatedAt) || 0 : 0;
     if (
       !lEntry ||
-      (baselineMs > 0 && lTime <= baselineMs) ||
       isLegacyAutoScrapedFoodPlaceholderUrl(lEntry.cloudUrl)
     ) {
       delete ledger[lid];
@@ -2476,11 +2473,7 @@ export async function hydrateAndSyncMediaOverrides(
               localUpdatedAt = current.foods[id]?.adminApprovedAt || current.foods[id]?.updatedAt;
               hasLocalPhoto = Boolean(current.foods[id]?.photoUrl && !isObsoleteSeedPhoto(current.foods[id]?.photoUrl));
               hasUnsyncedLocalPending = Boolean(pendingQueue[`food:${id}`]);
-              const seedFood = IMMUTABLE_SEED_FOOD_MAP.get(id);
-              if (seedFood?.photoUrl?.startsWith('/foods/')) {
-                const seedPhotoMs = seedFood.photoUpdatedAt ? new Date(seedFood.photoUpdatedAt).getTime() || 0 : 0;
-                seedUpdatedAtMs = Math.max(seedPhotoMs, BAKED_STATIC_FOOD_ASSETS_MS);
-              }
+              seedUpdatedAtMs = 0;
             } else if (item.key.startsWith('kft_ov_rest_')) {
               const id = item.key.slice('kft_ov_rest_'.length);
               if (current.deletedRestaurants?.[id] || isRestaurantIdDeleted(id, undefined, current.deletedRestaurants)) {

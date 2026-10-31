@@ -220,20 +220,24 @@ export async function searchOnlineFoodImages(params: {
     })
     .sort((a, b) => b.score - a.score);
 
-  // Add top 4 authentic Cambodian dish photos from the verified catalog
-  for (const entry of scoredCatalog.slice(0, 4)) {
+  // Add top 4 authentic Cambodian dish photos from the verified catalog (excluding the dish's own old default photo)
+  for (const entry of scoredCatalog) {
     const f = entry.food;
-    const url = f.originalPhotoUrl || f.photoUrl || `/foods/${f.id}.jpg`;
     const isExact = f.nameKh.trim() === targetKh;
-    const conf = isExact ? 98 : Math.min(92, Math.max(72, 65 + Math.round(entry.score / 3)));
+    if (isExact) {
+      // Never return the dish's own default seed `/foods/food-XX.jpg` as an online search replacement!
+      continue;
+    }
+    const url = f.originalPhotoUrl || f.photoUrl || `/foods/${f.id}.jpg`;
+    if (existingSet.has(url)) continue;
+    const conf = Math.min(92, Math.max(72, 65 + Math.round(entry.score / 3)));
     addCandidate({
       url,
-      title: isExact
-        ? `✅ រូបដើមពិតប្រាកដ៖ ${f.nameKh}`
-        : `🇰🇭 ម្ហូបខ្មែរប្រហាក់ប្រហែល៖ ${f.nameKh}`,
+      title: `🇰🇭 ម្ហូបខ្មែរប្រហាក់ប្រហែល៖ ${f.nameKh}`,
       source: 'Khmer Culinary Catalog',
       confidenceScore: conf,
     });
+    if (candidates.length >= 4) break;
   }
 
   // 2. Live Wikimedia Commons Search API (Authentic Cambodian / Asian Culinary Photos)

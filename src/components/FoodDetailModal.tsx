@@ -581,13 +581,41 @@ export const FoodDetailModal: React.FC = () => {
                     <span>{isKm ? 'ជ្រើសរូបពីទូរស័ព្ទ / PC' : 'Choose from PC / Device'}</span>
                   </button>
                 </div>
+                {editPhotoUrl && editPhotoUrl !== selectedFood.photoUrl && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const nowIso = new Date().toISOString();
+                      const updated = {
+                        ...selectedFood,
+                        photoUrl: editPhotoUrl.trim(),
+                        isCustomPhoto: true,
+                        photoUpdatedAt: nowIso,
+                        updatedAt: nowIso,
+                        adminApprovedAt: nowIso,
+                        imageAuditStatus: 'verified' as const,
+                        imageAuditNote: 'រូបភាពបានរក្សាទុកដោយ Admin',
+                      };
+                      updateFood(updated);
+                      setSelectedFood(updated);
+                      showToast(
+                        isKm ? '✅ បានរក្សាទុករូបភាពនេះភ្លាមៗរួចរាល់!' : '✅ Photo saved immediately!',
+                        'success'
+                      );
+                    }}
+                    className="w-full py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md cursor-pointer"
+                  >
+                    <Save className="w-4 h-4" />
+                    <span>{isKm ? '💾 រក្សាទុករូបភាពនេះភ្លាម (Save Photo Now)' : '💾 Save Photo Now'}</span>
+                  </button>
+                )}
                 {onlineCandidates.length > 0 && (
                   <div className="grid grid-cols-3 gap-2 pt-2">
                     {onlineCandidates.map((cand, idx) => (
                       <button
                         key={`${cand.url}-${idx}`}
                         type="button"
-                        onClick={() => setEditPhotoUrl(cand.url)}
+                        onClick={() => handleSelectCandidate(cand)}
                         className={`aspect-4/3 rounded-lg overflow-hidden border-2 transition ${
                           editPhotoUrl === cand.url ? 'border-amber-500 ring-2 ring-amber-400/50' : 'border-slate-200'
                         }`}

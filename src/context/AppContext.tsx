@@ -757,11 +757,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             const candidateEffectiveMs = Math.max(
               f.photoUpdatedAt ? Date.parse(f.photoUpdatedAt) || 0 : 0,
               f.adminEditedAt ? Date.parse(f.adminEditedAt) || 0 : 0,
-              ledgerEntry?.updatedAt ? Date.parse(ledgerEntry.updatedAt) || 0 : 0
+              ledgerEntry?.updatedAt ? Date.parse(ledgerEntry.updatedAt) || 0 : 0,
+              Date.now()
             );
-            if (candidateEffectiveMs <= SEED_FOOD_PHOTO_BASELINE_MS) {
-              continue;
-            }
             const candidateHash = f.photoUrl ? computeFastPhotoSignature(f.photoUrl) : '';
             const isStaleVsLedger = Boolean(
               ledgerEntry &&

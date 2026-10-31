@@ -22,9 +22,9 @@ interface FoodImageModalProps {
 // Compress and resize images smoothly client-side
 const compressImageFile = (
   file: File, 
-  maxWidth = 900, 
-  maxHeight = 675, 
-  quality = 0.80
+  maxWidth = 720, 
+  maxHeight = 540, 
+  quality = 0.76
 ): Promise<string> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -142,15 +142,25 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
         return;
       }
       if (pick.dataUrl) {
+        const note = isKm
+          ? `រូបភាពបានបញ្ចូលដោយរដ្ឋបាលពីទូរស័ព្ទ (${(pick.dataUrl.length / 1024).toFixed(0)} KB)`
+          : `Custom photo uploaded by admin (${(pick.dataUrl.length / 1024).toFixed(0)} KB)`;
         setPhotoUrl(pick.dataUrl);
         setUrlInput('');
         setHasUnappliedUrlDraft(false);
         setAuditStatus('verified');
-        setAuditNote(
-          isKm
-            ? `រូបភាពបានបញ្ចូលដោយរដ្ឋបាលពីទូរស័ព្ទ (${(pick.dataUrl.length / 1024).toFixed(0)} KB)`
-            : `Custom photo uploaded by admin (${(pick.dataUrl.length / 1024).toFixed(0)} KB)`
-        );
+        setAuditNote(note);
+        const nowIso = new Date().toISOString();
+        onSave({
+          ...food,
+          photoUrl: pick.dataUrl,
+          isCustomPhoto: true,
+          photoUpdatedAt: nowIso,
+          updatedAt: nowIso,
+          adminApprovedAt: nowIso,
+          imageAuditStatus: 'verified',
+          imageAuditNote: note,
+        });
         return;
       }
       fileInputRef.current?.click();
@@ -182,15 +192,25 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
     setIsProcessing(true);
     try {
       const compressedDataUrl = await compressImageFile(file);
+      const note = isKm 
+        ? `រូបភាពបានបញ្ចូលដោយរដ្ឋបាលពីទូរស័ព្ទ/កុំព្យូទ័រ (${(compressedDataUrl.length / 1024).toFixed(0)} KB)` 
+        : `Custom photo uploaded by admin (${(compressedDataUrl.length / 1024).toFixed(0)} KB)`;
       setPhotoUrl(compressedDataUrl);
       setUrlInput('');
       setHasUnappliedUrlDraft(false);
       setAuditStatus('verified');
-      setAuditNote(
-        isKm 
-          ? `រូបភាពបានបញ្ចូលដោយរដ្ឋបាលពីទូរស័ព្ទ/កុំព្យូទ័រ (${(compressedDataUrl.length / 1024).toFixed(0)} KB)` 
-          : `Custom photo uploaded by admin (${(compressedDataUrl.length / 1024).toFixed(0)} KB)`
-      );
+      setAuditNote(note);
+      const nowIso = new Date().toISOString();
+      onSave({
+        ...food,
+        photoUrl: compressedDataUrl,
+        isCustomPhoto: true,
+        photoUpdatedAt: nowIso,
+        updatedAt: nowIso,
+        adminApprovedAt: nowIso,
+        imageAuditStatus: 'verified',
+        imageAuditNote: note,
+      });
     } catch (err: any) {
       setErrorMsg(err.message || 'Error processing image');
     } finally {

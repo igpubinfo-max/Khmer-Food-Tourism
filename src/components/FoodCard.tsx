@@ -105,10 +105,12 @@ const FoodCardView: React.FC<FoodCardViewProps> = React.memo(({
           <Heart className={`w-4 h-4 ${bookmarked ? 'fill-current' : ''}`} />
         </button>
 
-        {/* Reference Image Label (រូបភាពយោង) */}
-        <div className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded bg-black/55 backdrop-blur-xs text-[8px] sm:text-[9px] text-white/85 font-khmer border border-white/15 select-none pointer-events-none shadow-2xs">
-          <span>{tr(language, 'រូបភាពយោង', 'Reference photo', '参考图片')}</span>
-        </div>
+        {/* Reference Image Label (រូបភាពយោង) - hidden for custom admin-replaced photos */}
+        {!food.isCustomPhoto && food.photoUrl === `/foods/${food.id}.jpg` && (
+          <div className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded bg-black/55 backdrop-blur-xs text-[8px] sm:text-[9px] text-white/85 font-khmer border border-white/15 select-none pointer-events-none shadow-2xs">
+            <span>{tr(language, 'រូបភាពយោង', 'Reference photo', '参考图片')}</span>
+          </div>
+        )}
       </div>
 
       {/* Content */}
