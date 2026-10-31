@@ -7,6 +7,7 @@ import { useApp } from '../context/AppContext';
 import { tr, translateProvince } from '../utils/i18n';
 import { translateDynamicTextToZh, sanitizeStrictLanguageText } from '../utils/zhDynamicTranslator';
 import { getLocalSmartCache, openExternalPlaceInGoogleMaps } from '../services/googlePlacesService';
+import { ShopAvatar } from './icons/DefaultShopIcon';
 
 const DEFAULT_WISHLIST_ZH_NAMES: Record<string, string> = {
   'Places to Visit': '想去的景点',
@@ -362,11 +363,23 @@ export const WishlistsModal: React.FC = () => {
                   onClick={() => handleItemClick(item)}
                   className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer"
                 >
-                  {item.photoUrl ? (
+                  {item.type === 'restaurant' ? (
+                    <ShopAvatar
+                      restaurant={
+                        restaurants.find(r => r.id === item.id) || {
+                          isVerified: false,
+                          photoUrl: item.photoUrl,
+                          nameKh: item.nameKh,
+                          nameEn: item.nameEn,
+                        }
+                      }
+                      className="w-14 h-14 rounded-xl shrink-0"
+                    />
+                  ) : item.photoUrl ? (
                     <img src={item.photoUrl} alt="" className="w-14 h-14 rounded-xl object-cover shrink-0 bg-slate-100" />
                   ) : (
                     <div className="w-14 h-14 rounded-xl bg-emerald-50 dark:bg-slate-700 flex items-center justify-center shrink-0 text-xl">
-                      {item.type === 'food' ? '🍲' : item.type === 'restaurant' ? '🏪' : '🌄'}
+                      {item.type === 'food' ? '🍲' : '🌄'}
                     </div>
                   )}
                   <div className="min-w-0">

@@ -132,7 +132,6 @@ const MainScreen: React.FC = () => {
     selectedRestaurant ||
     selectedDestination ||
     showWelcomeScreen ||
-    !currentUser ||
     isAuthModalOpen ||
     isAddRestaurantModalOpen ||
     (isManageMenuModalOpen && Boolean(managingRestaurant)) ||
@@ -140,10 +139,10 @@ const MainScreen: React.FC = () => {
     isAdminLoginModalOpen ||
     isSupportModalOpen ||
     isExitModalOpen ||
-    (isWhatToEatModalOpen && hasVipAccess) ||
-    (isNearMeModalOpen && hasVipAccess) ||
+    isWhatToEatModalOpen ||
+    isNearMeModalOpen ||
     isDailyDiscoveriesModalOpen ||
-    (isWishlistsModalOpen && hasVipAccess) ||
+    isWishlistsModalOpen ||
     (isAiTripPlannerModalOpen && hasVipAccess) ||
     isNotificationsModalOpen ||
     isTrendingSocialModalOpen ||
@@ -194,30 +193,8 @@ const MainScreen: React.FC = () => {
         onComplete={() => {
           setShowWelcomeScreen(false);
           setActiveTab('home');
-          if (!currentUser) {
-            setIsAuthModalOpen(true);
-          }
         }}
       />
-    );
-  }
-
-  // Strict Condition: If user does not create or sign into an account, app cannot be used!
-  if (!currentUser) {
-    return (
-      <div
-        className="flex-1 min-h-0 flex flex-col w-full h-full relative overflow-y-auto overscroll-y-contain no-scrollbar bg-slate-950 items-center justify-center px-3 sm:px-4"
-        style={{
-          paddingTop: 'calc(var(--kft-safe-top, 0px) + 12px)',
-          paddingBottom: 'calc(var(--kft-safe-bottom, 0px) + 12px)',
-        }}
-      >
-        <AuthModal isMandatoryGate={true} />
-        <Suspense fallback={null}>{selectedFood && <FoodDetailModal />}</Suspense>
-        {isExitModalOpen && <ExitConfirmModal />}
-        {isAdminLoginModalOpen && <AdminLoginModal />}
-        {toast && <Toast />}
-      </div>
     );
   }
 

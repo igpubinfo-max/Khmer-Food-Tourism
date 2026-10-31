@@ -6,7 +6,7 @@ import { tr } from '../../utils/i18n';
 import { getLocalizedRestaurant } from '../../utils/zhDynamicTranslator';
 import { SectionHeader } from './SectionHeader';
 import { IconNavShop } from '../icons/HandcraftedIcons';
-import { FALLBACK_IMG } from './homeUtils';
+import { ShopAvatar } from '../icons/DefaultShopIcon';
 
 interface Props {
   language: Language;
@@ -28,8 +28,9 @@ const PopularShopsInner: React.FC<Props> = ({ language, restaurants, onOpen, onS
   const [province, setProvince] = useState('');
 
   const ranked = useMemo(() => {
-    const approved = restaurants.filter((r) => r && r.id && r.status === 'approved' && r.photoUrl);
+    const approved = restaurants.filter((r) => r && r.id && (r.status === 'approved' || !r.status));
     const score = (r: Restaurant) =>
+      (r.isVerified ? 2000 : 0) +
       (isGpipRegisteredRestaurant(r) ? 1000 : 0) +
       (r.rating || 0) * 20 +
       Math.min(r.reviewCount || 0, 200) * 0.15 +
@@ -104,18 +105,12 @@ const PopularShopsInner: React.FC<Props> = ({ language, restaurants, onOpen, onS
                 className="snap-start shrink-0 w-56 rounded-3xl overflow-hidden bg-white dark:bg-slate-800/70 border border-slate-200/80 dark:border-white/10 shadow-md text-left active:scale-[0.97] transition cursor-pointer"
               >
                 <span className="relative block h-32">
-                  <img
-                    src={rest.photoUrl || FALLBACK_IMG}
+                  <ShopAvatar
+                    restaurant={rest}
                     alt={loc.name}
-                    loading="lazy"
-                    decoding="async"
-                    onError={(e) => {
-                      e.currentTarget.onerror = null;
-                      e.currentTarget.src = FALLBACK_IMG;
-                    }}
-                    className="absolute inset-0 w-full h-full object-cover bg-slate-200 dark:bg-slate-700"
+                    className="absolute inset-0 w-full h-full rounded-none border-0"
                   />
-                  <span className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                  <span className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent pointer-events-none" />
                   {typeof rest.rating === 'number' && rest.rating > 0 && (
                     <span className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full bg-black/65 text-white text-[11px] font-bold inline-flex items-center gap-1">
                       <Star className="w-3 h-3 fill-amber-300 text-amber-300" />

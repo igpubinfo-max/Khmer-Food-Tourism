@@ -24,6 +24,10 @@ import {
   Store,
   RotateCcw,
   ExternalLink,
+  Leaf,
+  Zap,
+  Soup,
+  Salad,
 } from 'lucide-react';
 import { FoodItem, isGpipRegisteredRestaurant, openRestaurantGoogleExternal } from '../types';
 import {
@@ -34,10 +38,13 @@ import {
   IconGrillFlame,
   IconZestyCitrus,
 } from './icons/HandcraftedIcons';
+import { ShopAvatar } from './icons/DefaultShopIcon';
 import { tr } from '../utils/i18n';
 import { getLocalizedFood, getLocalizedRestaurant, getLocalizedDestination } from '../utils/zhDynamicTranslator';
 import { useBodyScrollLock } from '../utils/useBodyScrollLock';
 import { hasSpecialAndHealthyFoodVipAccess } from '../utils/smartHub';
+import { getDishTagIds, type DishTagId } from '../utils/dishTags';
+import { getMatchingRestaurantsForDish } from '../utils/foodFilters';
 import { getAiFoodAdvisorRecommendations, QUICK_CRAVING_CHIPS } from '../services/aiFoodAdvisorService';
 import { isMedicalOrHealthQuery } from '../services/aiFoodBrain';
 import {
@@ -55,7 +62,8 @@ import {
 } from '../utils/drinkPairing';
 
 type MealSlotFilter = 'auto' | 'breakfast' | 'lunch' | 'afternoon' | 'dinner';
-type MenuGroupId = 'time' | 'type' | 'craving' | 'tourism';
+type VipDietFilter = 'none' | 'light' | 'protein_rich' | 'steamed_boiled' | 'vegetable_rich';
+type MenuGroupId = 'time' | 'type' | 'craving' | 'health';
 
 const MEAL_SLOTS: Array<{ id: MealSlotFilter; kh: string; en: string; zh: string; icon: React.ComponentType<{ className?: string }> }> = [
   { id: 'auto', kh: 'ពេលនេះ', en: 'Right Now', zh: '当前时段', icon: Clock },
@@ -67,70 +75,177 @@ const MEAL_SLOTS: Array<{ id: MealSlotFilter; kh: string; en: string; zh: string
 
 const CATEGORY_OPTIONS = [
   { id: 'all', labelKh: 'ទាំងអស់', labelEn: 'All', labelZh: '全部' },
-  { id: 'soup', labelKh: 'សម្ល/ស៊ុប', labelEn: 'Soup & Curry', labelZh: '汤品/咖喱' },
-  { id: 'grilled', labelKh: 'អាំង/បំពង', labelEn: 'Grilled & Fried', labelZh: '烧烤/煎炸' },
-  { id: 'stirfry', labelKh: 'ឆា', labelEn: 'Stir-Fry', labelZh: '热炒' },
-  { id: 'salad', labelKh: 'ញាំ/ភ្លា', labelEn: 'Salads & Dips', labelZh: '凉拌/蘸酱' },
+  { id: 'rice', labelKh: 'បាយ', labelEn: 'Rice Dishes', labelZh: '米饭/炒饭' },
   { id: 'noodles', labelKh: 'គុយទាវ/នំបញ្ចុក', labelEn: 'Noodles', labelZh: '粉面' },
+  { id: 'soup', labelKh: 'សម្ល/ស៊ុប', labelEn: 'Soup & Curry', labelZh: '汤品/咖喱' },
+  { id: 'stirfry', labelKh: 'ឆា', labelEn: 'Stir-Fry', labelZh: '热炒' },
+  { id: 'grilled', labelKh: 'អាំង/បំពង', labelEn: 'Grilled & Fried', labelZh: '烧烤/煎炸' },
+  { id: 'salad', labelKh: 'ញាំ/ភ្លា', labelEn: 'Salads & Dips', labelZh: '凉拌/蘸酱' },
   { id: 'dessert', labelKh: 'បង្អែម', labelEn: 'Desserts', labelZh: '甜品' },
 ];
 
-const TOURISM_QUICK_PROMPTS = [
+const HEALTH_OPTIONS: Array<{
+  id: VipDietFilter;
+  vip: boolean;
+  labelKh: string;
+  labelEn: string;
+  labelZh: string;
+  shortKh: string;
+  shortEn: string;
+  shortZh: string;
+  icon: React.ComponentType<{ className?: string }>;
+}> = [
   {
-    id: 'sr',
-    labelKh: '🏛️ សៀមរាប & អង្គរ',
-    labelEn: '🏛️ Siem Reap & Angkor',
-    labelZh: '🏛️ 暹粒与吴哥窟',
-    queryKh: 'ណែនាំកន្លែងដើរលេង និងម្ហូបឆ្ងាញ់នៅសៀមរាប',
-    queryEn: 'Recommend top attractions and food in Siem Reap',
-    queryZh: '推荐暹粒好玩的旅游景点和特色美食',
+    id: 'none',
+    vip: false,
+    labelKh: 'ធម្មតា',
+    labelEn: 'Standard',
+    labelZh: '常规推荐',
+    shortKh: 'ធម្មតា',
+    shortEn: 'Standard',
+    shortZh: '常规',
+    icon: Sparkles,
   },
   {
-    id: 'pp',
-    labelKh: '👑 ភ្នំពេញ',
-    labelEn: '👑 Phnom Penh',
-    labelZh: '👑 金边市',
-    queryKh: 'ណែនាំកន្លែងដើរលេង និងភោជនីយដ្ឋាននៅភ្នំពេញ',
-    queryEn: 'Recommend places to visit and eat in Phnom Penh',
-    queryZh: '推荐金边旅游景点和热门餐厅',
+    id: 'light',
+    vip: true,
+    labelKh: 'ស្រាលក្រពះ (<450 kcal)',
+    labelEn: 'Light (<450 kcal)',
+    labelZh: '清淡低卡 (<450 kcal)',
+    shortKh: 'ស្រាលក្រពះ',
+    shortEn: 'Light',
+    shortZh: '清淡',
+    icon: Leaf,
   },
   {
-    id: 'kp',
-    labelKh: '🦀 កំពត & កែប',
-    labelEn: '🦀 Kampot & Kep',
-    labelZh: '🦀 贡布与白马',
-    queryKh: 'កន្លែងដើរលេង និងម្ហូបគ្រឿងសមុទ្រនៅកំពត និងកែប',
-    queryEn: 'Attractions and seafood in Kampot and Kep',
-    queryZh: '贡布与白马旅游景点及海鲜推荐',
+    id: 'protein_rich',
+    vip: true,
+    labelKh: 'ប្រូតេអ៊ីនខ្ពស់',
+    labelEn: 'High Protein',
+    labelZh: '高蛋白',
+    shortKh: 'ប្រូតេអ៊ីនខ្ពស់',
+    shortEn: 'Protein',
+    shortZh: '高蛋白',
+    icon: Zap,
   },
   {
-    id: 'shv',
-    labelKh: '🏖️ ព្រះសីហនុ & កោះរ៉ុង',
-    labelEn: '🏖️ Sihanoukville & Islands',
-    labelZh: '🏖️ 西哈努克与高龙岛',
-    queryKh: 'ណែនាំឆ្នេរសមុទ្រ និងកោះស្អាតៗនៅព្រះសីហនុ',
-    queryEn: 'Recommend beaches and islands in Preah Sihanouk',
-    queryZh: '推荐西哈努克美丽的海滩与海岛',
+    id: 'steamed_boiled',
+    vip: true,
+    labelKh: 'ស្ងោរ/ចំហុយ',
+    labelEn: 'Steamed / Boiled',
+    labelZh: '清蒸/水煮',
+    shortKh: 'ស្ងោរ/ចំហុយ',
+    shortEn: 'Steamed',
+    shortZh: '蒸/煮',
+    icon: Soup,
   },
   {
-    id: 'mdk',
-    labelKh: '🌲 មណ្ឌលគិរី & រតនគិរី',
-    labelEn: '🌲 Mondulkiri & Highlands',
-    labelZh: '🌲 蒙多基里高山瀑布',
-    queryKh: 'ណែនាំទឹកធ្លាក់ និងកន្លែងដើរលេងនៅមណ្ឌលគិរី',
-    queryEn: 'Recommend waterfalls and nature sights in Mondulkiri',
-    queryZh: '推荐蒙多基里瀑布与生态旅游景点',
-  },
-  {
-    id: 'bb',
-    labelKh: '🚂 បាត់ដំបង',
-    labelEn: '🚂 Battambang',
-    labelZh: '🚂 马德望省',
-    queryKh: 'កន្លែងដើរលេង និងម្ហូបល្បីនៅបាត់ដំបង',
-    queryEn: 'Places to visit and famous food in Battambang',
-    queryZh: '马德望旅游景点与特色美食推荐',
+    id: 'vegetable_rich',
+    vip: true,
+    labelKh: 'បន្លែច្រើន',
+    labelEn: 'Vegetable-Rich',
+    labelZh: '多蔬菜',
+    shortKh: 'បន្លែច្រើន',
+    shortEn: 'Veggies',
+    shortZh: '多蔬菜',
+    icon: Salad,
   },
 ];
+
+function matchesCategoryStrict(food: FoodItem, categoryFilter: string): boolean {
+  if (categoryFilter === 'all') return true;
+  const title = `${food.nameKh || ''} ${food.nameEn || ''}`.toLowerCase();
+  const khName = (food.nameKh || '').trim();
+  const isDessert =
+    food.categorySlug === 'dessert' ||
+    food.categorySlug === 'cake' ||
+    /^បង្អែម|ចេកខ្ទិះ|សង់ខ្យា|អន្សម|ក្រឡាន|បបរផ្អែម|បាញ់ឌុក|លតស្វិត|នំផ្លែអាយ|នំកង|នំចាក់ចុល|\bdessert\b|\bcustard\b/i.test(
+      title
+    );
+
+  switch (categoryFilter) {
+    case 'rice':
+      if (isDessert) return false;
+      return (
+        food.categorySlug === 'rice' ||
+        /^បាយ|បាយឆា|បាយសាច់|បាយមាន់|បាយក្ដាំង|បាយក្តាំង|បាយស្រូប|\bfried\s*rice\b|\bpork\s*rice\b|\bchicken\s*rice\b/i.test(
+          title
+        )
+      );
+    case 'noodles':
+      if (isDessert || /ទឹកត្រីផ្អែម|លតស្វិត|^សម្ល|^ចាដូវ|^គួង|^បាយ/i.test(khName)) return false;
+      return /^គុយទាវ|^មី|^នំបញ្ចុក|^លត|^ហ្វឺ|គុយទាវ|នំបញ្ចុក|មីឆា|មីស៊ុប|មីសួរ|មីទាញ|លតឆា|\bnoodle\b|\bkuy\s*teav\b|\bbanh\s*chok\b|\blort\b|\bpho\b|\bvermicelli\b/i.test(
+        title
+      );
+    case 'soup':
+      if (isDessert || /^គុយទាវ|^នំបញ្ចុក|^មី/i.test(khName)) return false;
+      return (
+        food.categorySlug === 'soup' ||
+        /^សម្ល|^ស៊ុប|ម្ជូរ|កកូរ|ការី|^ស្ងោរ|^អាម៉ុក|\bsoup\b|\bcurry\b|\bsamlor\b|\bamok\b|\bbroth\b/i.test(title)
+      );
+    case 'grilled':
+      if (isDessert || /^បាយ|^គុយទាវ|^មី|^លត|^សម្ល/i.test(khName)) return false;
+      return (
+        food.categorySlug === 'grilled' ||
+        /អាំង|បំពង|ចៀន|ដុត|\bgrilled\b|\bfried\b|\bcrispy\b|\broast\b|\bbbq\b/i.test(title)
+      );
+    case 'stirfry':
+      if (isDessert) return false;
+      return (
+        food.categorySlug === 'stirfry' ||
+        /^ឆា|ឡុកឡាក់|ឆាក្តៅ|ឆាខ្ញី|ឆាម្រះព្រៅ|\bstir[\s-]*fr|\blok\s*lak\b/i.test(title)
+      );
+    case 'salad':
+      if (isDessert || /^សាច់គោអាំង|^ត្រីអាំង|^មាន់អាំង/i.test(khName)) return false;
+      return (
+        food.categorySlug === 'salad' ||
+        /^ញាំ|^ភ្លា|^បុក|^ទឹកគ្រឿង|^ប្រហុក|ញាំ|ភ្លា|បុក|\bsalad\b|\bceviche\b/i.test(title)
+      );
+    case 'dessert':
+      if (/^សម្ល|^ឆា|^ស្ងោរ|^ត្រី|^សាច់|\bsoup\b|\bsour\b/i.test(title)) return false;
+      return isDessert;
+    default:
+      return food.categorySlug === categoryFilter;
+  }
+}
+
+function matchesMealSlotStrict(
+  food: FoodItem,
+  mealSlotFilter: MealSlotFilter,
+  effectiveMealSlot: Exclude<MealSlotFilter, 'auto'>
+): boolean {
+  if (mealSlotFilter === 'auto') return true;
+  const text = `${food.nameKh || ''} ${food.nameEn || ''} ${food.categorySlug || ''}`.toLowerCase();
+  if (effectiveMealSlot === 'breakfast') {
+    return (
+      food.categorySlug === 'noodles' ||
+      food.categorySlug === 'rice' ||
+      /គុយទាវ|នំបញ្ចុក|បបរ|បាយសាច់ជ្រូក|បាយមាន់|បាយឆា|មី|ហ្វឺ|លត|កាហ្វេ|នំប៉័ង|kuy\s*teav|banh\s*chok|porridge|congee|pork\s*rice|chicken\s*rice|noodle/i.test(
+        text
+      )
+    );
+  }
+  if (effectiveMealSlot === 'afternoon') {
+    return (
+      food.categorySlug === 'dessert' ||
+      food.categorySlug === 'salad' ||
+      food.categorySlug === 'grilled' ||
+      /បង្អែម|នំ|ភ្លា|ញាំ|បុក|អាំង|បំពង|ចៀន|លតឆា|មីឆា|ប្រហិត|ក្រឡាន|អន្សម|dessert|salad|grilled|street|snack/i.test(
+        text
+      )
+    );
+  }
+  if (effectiveMealSlot === 'lunch' || effectiveMealSlot === 'dinner') {
+    return food.categorySlug !== 'dessert' && food.categorySlug !== 'cake';
+  }
+  return true;
+}
+
+function matchesDietStrict(food: FoodItem, vipDietFilter: VipDietFilter): boolean {
+  if (vipDietFilter === 'none') return true;
+  const tags = getDishTagIds(food);
+  return tags.includes(vipDietFilter as DishTagId);
+}
 
 const stripLeadingSymbols = (s: string) => s.replace(/^[^\p{L}\p{N}]+/u, '').trim();
 
@@ -176,10 +291,11 @@ export const WhatToEatModal: React.FC = () => {
 
   const canUseVip = hasSpecialAndHealthyFoodVipAccess(currentUser);
 
-  // Filters: Conversational Input, Category, Meal Time
+  // Filters: Conversational Input, Category, Meal Time, Dietary / Health Style
   const [cravingQuery, setCravingQuery] = useState<string>('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [mealSlotFilter, setMealSlotFilter] = useState<MealSlotFilter>('auto');
+  const [vipDietFilter, setVipDietFilter] = useState<VipDietFilter>('none');
   const [isSpinning, setIsSpinning] = useState(false);
   const cravingInputRef = useRef<HTMLInputElement | null>(null);
   const dishCardRef = useRef<HTMLDivElement | null>(null);
@@ -322,49 +438,139 @@ export const WhatToEatModal: React.FC = () => {
     setSetPage(0);
   }, [drinkMode, drinkKind]);
 
-  // Filter candidate dishes by Craving Query, Category, and Mealtime
+  // Filter candidate dishes strictly across all 4 filter groups: Craving, Category, Mealtime, and Dietary/Health
   const matchingFoods = useMemo(() => {
     if (isMedicalRefusalActive) return [];
     if (drinkMode && canUseVip && pairingRanked.length > 0) {
       return pairingRanked.map((r) => r.food);
     }
-    if (aiCravingRecommendations && aiCravingRecommendations.dishes.length > 0) {
-      return aiCravingRecommendations.dishes;
+
+    const qTrim = cravingQuery.trim().toLowerCase();
+    let basePool: FoodItem[];
+
+    if (qTrim) {
+      const advisorAll = aiCravingRecommendations?.allMatchedDishes || [];
+      const advisorTop = aiCravingRecommendations?.dishes || [];
+      const rawPool = advisorAll.length > 0 ? advisorAll : advisorTop;
+
+      // Strictly filter preset craving chips by dish title so every preset chip returns 100% relevant dishes
+      const filterByPresetCraving = (f: FoodItem): boolean => {
+        const kh = (f.nameKh || '').trim();
+        const title = `${kh} ${f.nameEn || ''}`.toLowerCase();
+        const isDessertDish = matchesCategoryStrict(f, 'dessert');
+
+        if (qTrim === 'បាយ' || qTrim === 'rice' || qTrim === '米饭') {
+          return matchesCategoryStrict(f, 'rice');
+        }
+        if (qTrim === 'គុយទាវ' || qTrim === 'kuy teav' || qTrim === 'noodles' || qTrim === '粿条面食') {
+          return (
+            !isDessertDish &&
+            !/ទឹកត្រីផ្អែម|លតស្វិត|^សម្ល|^ចាដូវ|^គួង|^បាយ/i.test(kh) &&
+            /គុយទាវ|នំបញ្ចុក|ហ្វឺ|លត|មី|\bkuy\s*teav\b|\brice\s*noodle\b|\bbanh\s*chok\b|\blort\b|\bpho\b|\bnoodle\b/i.test(
+              title
+            )
+          );
+        }
+        if (qTrim === 'សម្លក្តៅៗ' || qTrim === 'warm soup' || qTrim === '热汤') {
+          return matchesCategoryStrict(f, 'soup') || /^បបរ|\bporridge\b|\bcongee\b/i.test(title);
+        }
+        if (qTrim === 'គ្រឿងសមុទ្រ' || qTrim === 'seafood' || qTrim === '海鲜') {
+          return (
+            !isDessertDish &&
+            /គ្រឿងសមុទ្រ|ក្តាម|ក្ដាម|បង្គា|បង្កង|មឹក|ងាវ|ខ្យង|ត្រីសមុទ្រ|\bseafood\b|\bcrab\b|\bprawn\b|\bshrimp\b|\bsquid\b|\bclam\b|\boyster\b/i.test(
+              title
+            )
+          );
+        }
+        if (qTrim === 'សាច់អាំង' || qTrim === 'grilled' || qTrim === '烧烤') {
+          return (
+            !isDessertDish &&
+            !/^ឆា|^សម្ល|^បបរ|^គុយទាវ|^នំបញ្ចុក|^ទឹក/i.test(kh) &&
+            /អាំង|បំពង|ចៀន|ដុត|ងៀត|ក្រក|\bgrilled\b|\bfried\b|\bcrispy\b|\broast\b|\bbbq\b/i.test(title)
+          );
+        }
+        if (qTrim === 'ជូរហឹរ' || qTrim === 'spicy sour' || qTrim === '酸辣') {
+          return (
+            !isDessertDish &&
+            !/^ទឹកសណ្តែក|^បង្អែម|^នំ|^បាយសាច់ជ្រូក/i.test(kh) &&
+            /ម្ជូរ|ញាំ|ភ្លា|បុក|តុំយ៉ាំ|កែងស้ม|ប្រហុក|ទឹកគ្រឿង|ម្រះព្រៅ|ឆាក្តៅ|\bsour\b|\bsalad\b|\bceviche\b|\btom\s*yum\b/i.test(
+              title
+            )
+          );
+        }
+        if (qTrim === 'អាហារសម្រន់' || qTrim === 'street food' || qTrim === '街头小吃') {
+          return (
+            !isDessertDish &&
+            !/^សម្ល|^ស្ងោរ/i.test(kh) &&
+            /នំប៉័ង|នំគ្រក់|បាញ់ឆែវ|ប្រហិត|លតឆា|មីឆា|គុយទាវឆា|គួង|ចាដូវ|ស្លាបមាន់|ពងទាកូន|ក្រឡាន|ចេកចៀន|ដំឡូង|បំពង|អាំង|\bstreet\b|\bsnack\b|\bpancake\b|\bspring\s*roll\b|\bbaguette\b/i.test(
+              title
+            )
+          );
+        }
+        if (qTrim === 'បង្អែម' || qTrim === 'dessert' || qTrim === '甜品') {
+          return isDessertDish;
+        }
+        return true;
+      };
+
+      const strictCravingPool = rawPool.filter(filterByPresetCraving);
+      basePool = strictCravingPool.length > 0 ? strictCravingPool : rawPool;
+    } else {
+      basePool = foods;
     }
 
-    const filtered = foods.filter((food) => {
-      if (categoryFilter !== 'all' && food.categorySlug !== categoryFilter) return false;
+    // 1. Strict 4-way intersection (Craving + Category + MealSlot + Diet)
+    const strictAll = basePool.filter(
+      (food) =>
+        matchesCategoryStrict(food, categoryFilter) &&
+        matchesMealSlotStrict(food, mealSlotFilter, effectiveMealSlot) &&
+        matchesDietStrict(food, vipDietFilter)
+    );
+    if (strictAll.length > 0) return strictAll;
 
-      if (mealSlotFilter !== 'auto') {
-        const text = `${food.nameKh} ${food.nameEn} ${food.categorySlug || ''}`.toLowerCase();
-        if (effectiveMealSlot === 'breakfast' && !/គុយទាវ|នំបញ្ចុក|បបរ|បាយសាច់ជ្រូក|មី|កាហ្វេ|នំ|noodles|soup|porridge|rice/.test(text)) {
-          return false;
-        }
-        if (effectiveMealSlot === 'afternoon' && !/បង្អែម|នំ|ភ្លា|ញាំ|បុក|អាំង|dessert|salad|grilled|street/.test(text)) {
-          return false;
-        }
-        if (effectiveMealSlot === 'lunch' && food.categorySlug === 'dessert') {
-          return false;
-        }
-        if (effectiveMealSlot === 'dinner' && food.categorySlug === 'dessert') {
-          return false;
-        }
-      }
+    // 2. If MealSlot made a narrow Craving+Category+Diet combination empty, relax MealSlot while keeping Craving+Category+Diet strict
+    const strictWithoutMealSlot = basePool.filter(
+      (food) =>
+        matchesCategoryStrict(food, categoryFilter) &&
+        matchesDietStrict(food, vipDietFilter)
+    );
+    if (strictWithoutMealSlot.length > 0) return strictWithoutMealSlot;
 
-      return true;
-    });
+    // 3. Keep Category + Diet strict across all foods if Craving conflicted
+    const categoryAndDietOnly = foods.filter(
+      (food) =>
+        matchesCategoryStrict(food, categoryFilter) &&
+        matchesMealSlotStrict(food, mealSlotFilter, effectiveMealSlot) &&
+        matchesDietStrict(food, vipDietFilter)
+    );
+    if (categoryAndDietOnly.length > 0) return categoryAndDietOnly;
 
-    return filtered;
-  }, [foods, aiCravingRecommendations, categoryFilter, mealSlotFilter, effectiveMealSlot, drinkMode, canUseVip, pairingRanked, isMedicalRefusalActive]);
+    return basePool;
+  }, [
+    foods,
+    cravingQuery,
+    aiCravingRecommendations,
+    categoryFilter,
+    mealSlotFilter,
+    effectiveMealSlot,
+    vipDietFilter,
+    drinkMode,
+    canUseVip,
+    pairingRanked,
+    isMedicalRefusalActive,
+  ]);
 
   // Active candidate list
   const activeDishList = isMedicalRefusalActive ? [] : matchingFoods.length > 0 ? matchingFoods : foods;
 
+  const hasStructuredFilter = Boolean(
+    cravingQuery.trim() || categoryFilter !== 'all' || mealSlotFilter !== 'auto' || vipDietFilter !== 'none' || drinkMode
+  );
+
   const pickRandomDish = (excludeId?: string): FoodItem => {
     if (activeDishList.length === 0) return foods[0];
-    if (activeDishList.length === 1) return activeDishList[0];
-
-    if ((cravingQuery.trim() || drinkMode) && !excludeId) {
+    if (activeDishList.length === 1) {
+      seenDishIdsRef.current.add(activeDishList[0].id);
       return activeDishList[0];
     }
 
@@ -378,21 +584,33 @@ export const WhatToEatModal: React.FC = () => {
     }
 
     const pool = unseenCandidates.length > 0 ? unseenCandidates : activeDishList;
-    const randomPick = cravingQuery.trim()
+    const nextPick = hasStructuredFilter
       ? pool[0]
       : pool[Math.floor(Math.random() * pool.length)];
 
-    seenDishIdsRef.current.add(randomPick.id);
-    return randomPick;
+    seenDishIdsRef.current.add(nextPick.id);
+    return nextPick;
   };
 
   useEffect(() => {
-    if (isWhatToEatModalOpen && foods.length > 0 && !isMedicalRefusalActive) {
+    if (!isWhatToEatModalOpen) {
       seenDishIdsRef.current.clear();
-      const initialPick = pickRandomDish();
+      return;
+    }
+    if (foods.length > 0 && !isMedicalRefusalActive) {
+      const initialPick = pickRandomDish(currentDishId || undefined);
       if (initialPick) setCurrentDishId(initialPick.id);
     }
-  }, [isWhatToEatModalOpen, cravingQuery, categoryFilter, mealSlotFilter, drinkMode, drinkKind, isMedicalRefusalActive]);
+  }, [
+    isWhatToEatModalOpen,
+    cravingQuery,
+    categoryFilter,
+    mealSlotFilter,
+    vipDietFilter,
+    drinkMode,
+    drinkKind,
+    isMedicalRefusalActive,
+  ]);
 
   const currentDish: FoodItem | null = useMemo(() => {
     if (isMedicalRefusalActive) return null;
@@ -408,22 +626,16 @@ export const WhatToEatModal: React.FC = () => {
     if (isMedicalRefusalActive || activeDishList.length <= 1) return [];
     const pool = activeDishList.filter((f) => f.id !== currentDish?.id);
     if (pool.length === 0) return [];
-    if (cravingQuery.trim() || drinkMode) {
+    if (hasStructuredFilter) {
       return pool.slice(0, 4);
     }
     const shuffled = [...pool].sort(() => 0.5 - Math.random());
     return shuffled.slice(0, 2);
-  }, [activeDishList, currentDish?.id, cravingQuery, drinkMode, isMedicalRefusalActive]);
+  }, [activeDishList, currentDish?.id, hasStructuredFilter, isMedicalRefusalActive]);
 
   const servingRestaurants = useMemo(() => {
     if (!currentDish) return [];
-    return restaurants
-      .filter((r) =>
-        r.signatureDishesKh?.some(
-          (d) => d.includes(currentDish.nameKh) || currentDish.nameKh.includes(d)
-        )
-      )
-      .slice(0, 2);
+    return getMatchingRestaurantsForDish(currentDish, restaurants, 2);
   }, [restaurants, currentDish]);
 
   if (!isWhatToEatModalOpen) return null;
@@ -476,6 +688,9 @@ export const WhatToEatModal: React.FC = () => {
 
   const handleResetChat = () => {
     setCravingQuery('');
+    setCategoryFilter('all');
+    setMealSlotFilter('auto');
+    setVipDietFilter('none');
     setDrinkMode(false);
     setChatMemory({
       lastDishes: [],
@@ -548,6 +763,7 @@ export const WhatToEatModal: React.FC = () => {
 
   const activeSlot = MEAL_SLOTS.find((s) => s.id === mealSlotFilter);
   const activeCategory = CATEGORY_OPTIONS.find((c) => c.id === categoryFilter);
+  const activeHealth = HEALTH_OPTIONS.find((h) => h.id === vipDietFilter);
   const menuGroups: Array<{ id: MenuGroupId; icon: React.ReactNode; label: string; value: string; active: boolean; vip: boolean }> = [
     {
       id: 'time',
@@ -580,14 +796,36 @@ export const WhatToEatModal: React.FC = () => {
       active: cravingQuery.trim().length > 0,
     },
     {
-      id: 'tourism',
-      vip: false,
-      icon: <Compass className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />,
-      label: tr(language, 'ទេសចរណ៍', 'Tourism', '旅游'),
-      value: chatMemory.activeProvinceKh || tr(language, '២៥ ខេត្ត', '25 Prov', '25省市'),
-      active: Boolean(chatMemory.activeProvinceKh),
+      id: 'health',
+      vip: true,
+      icon: <Crown className="w-4 h-4 text-amber-500" />,
+      label: tr(language, 'សុខភាព', 'Dietary', '饮食偏好'),
+      value:
+        vipDietFilter === 'none' || !activeHealth
+          ? ''
+          : tr(language, activeHealth.shortKh, activeHealth.shortEn, activeHealth.shortZh),
+      active: vipDietFilter !== 'none',
     },
   ];
+
+  // Build active filter summary label for the AI banner
+  const activeFilterParts: string[] = [];
+  if (mealSlotFilter !== 'auto' && activeSlot) {
+    activeFilterParts.push(stripLeadingSymbols(tr(language, activeSlot.kh, activeSlot.en, activeSlot.zh)));
+  }
+  if (categoryFilter !== 'all' && activeCategory) {
+    activeFilterParts.push(tr(language, activeCategory.labelKh, activeCategory.labelEn, activeCategory.labelZh));
+  }
+  if (cravingQuery.trim()) {
+    activeFilterParts.push(cravingQuery.trim());
+  }
+  if (vipDietFilter !== 'none' && activeHealth) {
+    activeFilterParts.push(tr(language, activeHealth.shortKh, activeHealth.shortEn, activeHealth.shortZh));
+  }
+  const activeCriteriaLabel =
+    activeFilterParts.length > 0
+      ? activeFilterParts.join(' • ')
+      : tr(language, currentMealInfo.labelKh, currentMealInfo.labelEn, currentMealInfo.labelZh);
 
   return (
     <div
@@ -625,6 +863,7 @@ export const WhatToEatModal: React.FC = () => {
             </div>
           </div>
           <button
+            id="kft-wte-close-btn"
             onClick={() => setIsWhatToEatModalOpen(false)}
             className="p-2 rounded-full hover:bg-white/10 text-emerald-100 hover:text-white transition cursor-pointer shrink-0"
           >
@@ -721,6 +960,7 @@ export const WhatToEatModal: React.FC = () => {
                 <button
                   key={g.id}
                   type="button"
+                  data-testid={`wte-tab-${g.id}`}
                   onClick={() => setOpenGroup((cur) => (cur === g.id ? null : g.id))}
                   className={`relative pt-3 pb-2 px-1 rounded-xl border flex flex-col items-center justify-center gap-0.5 transition cursor-pointer min-w-0 ${
                     openGroup === g.id
@@ -747,6 +987,7 @@ export const WhatToEatModal: React.FC = () => {
                       <button
                         key={slot.id}
                         type="button"
+                        data-testid={`wte-time-${slot.id}`}
                         onClick={() => {
                           setMealSlotFilter(slot.id);
                           setDrinkMode(false);
@@ -769,9 +1010,25 @@ export const WhatToEatModal: React.FC = () => {
                     <button
                       key={c.id}
                       type="button"
+                      data-testid={`wte-type-${c.id}`}
                       onClick={() => {
                         setCategoryFilter(c.id);
                         setDrinkMode(false);
+                        // Clear preset craving if it conflicts with the newly chosen category
+                        if (c.id !== 'all' && cravingQuery.trim()) {
+                          const isPresetChip = QUICK_CRAVING_CHIPS.some(
+                            (chip) =>
+                              chip.queryKh.toLowerCase() === cravingQuery.trim().toLowerCase() ||
+                              chip.queryEn.toLowerCase() === cravingQuery.trim().toLowerCase() ||
+                              chip.queryZh.toLowerCase() === cravingQuery.trim().toLowerCase()
+                          );
+                          const hasStrictIntersection = (aiCravingRecommendations?.allMatchedDishes || []).some((f) =>
+                            matchesCategoryStrict(f, c.id)
+                          );
+                          if (isPresetChip || !hasStrictIntersection) {
+                            setCravingQuery('');
+                          }
+                        }
                         setOpenGroup(null);
                       }}
                       className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition cursor-pointer ${
@@ -792,11 +1049,13 @@ export const WhatToEatModal: React.FC = () => {
                       <button
                         key={chip.id}
                         type="button"
+                        data-testid={`wte-craving-${chip.id}`}
                         onClick={() => {
                           setCravingQuery(chipQuery);
                           setDrinkMode(false);
+                          // Clear categoryFilter when selecting a preset Craving chip so they never conflict (e.g. Dessert + Grilled)
+                          setCategoryFilter('all');
                           setOpenGroup(null);
-                          sendConversationalMessage(chipQuery);
                         }}
                         className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition cursor-pointer ${
                           isChipActive
@@ -809,22 +1068,29 @@ export const WhatToEatModal: React.FC = () => {
                     );
                   })}
 
-                {openGroup === 'tourism' &&
-                  TOURISM_QUICK_PROMPTS.map((tp) => {
-                    const tpQuery = tr(language, tp.queryKh, tp.queryEn, tp.queryZh);
+                {openGroup === 'health' &&
+                  HEALTH_OPTIONS.map((opt) => {
+                    const OptIcon = opt.icon;
+                    const isOptActive = vipDietFilter === opt.id;
                     return (
                       <button
-                        key={tp.id}
+                        key={opt.id}
                         type="button"
+                        data-testid={`wte-health-${opt.id}`}
                         onClick={() => {
-                          setCravingQuery(tpQuery);
+                          setVipDietFilter(opt.id);
                           setDrinkMode(false);
                           setOpenGroup(null);
-                          sendConversationalMessage(tpQuery);
                         }}
-                        className="px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap bg-white dark:bg-slate-700/80 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-600 hover:border-emerald-500 transition cursor-pointer"
+                        className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap inline-flex items-center gap-1.5 transition cursor-pointer ${
+                          isOptActive
+                            ? 'bg-amber-400 text-slate-950 shadow-xs'
+                            : 'bg-white dark:bg-slate-700/80 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-600'
+                        }`}
                       >
-                        {tr(language, tp.labelKh, tp.labelEn, tp.labelZh)}
+                        <OptIcon className="w-3.5 h-3.5 shrink-0" />
+                        <span>{tr(language, opt.labelKh, opt.labelEn, opt.labelZh)}</span>
+                        <AccessBadge vip={opt.vip} />
                       </button>
                     );
                   })}
@@ -995,11 +1261,10 @@ export const WhatToEatModal: React.FC = () => {
                                       }}
                                       className="w-full p-1.5 rounded-xl bg-slate-50 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-700 hover:border-emerald-500 flex items-center gap-2 text-left transition cursor-pointer"
                                     >
-                                      <img
-                                        src={r.photoUrl}
+                                      <ShopAvatar
+                                        restaurant={r}
                                         alt={rLoc.name}
-                                        loading="lazy"
-                                        className="w-9 h-9 rounded-lg object-cover shrink-0 bg-slate-200"
+                                        className="w-9 h-9 rounded-lg"
                                       />
                                       <div className="min-w-0 flex-1">
                                         <div className="text-xs font-bold text-slate-900 dark:text-white truncate">{rLoc.name}</div>
@@ -1172,12 +1437,29 @@ export const WhatToEatModal: React.FC = () => {
 
             {!showSets && !isMedicalRefusalActive && currentDish && currentLoc && (
               <div
-                className={`transition-all duration-300 ${
+                className={`space-y-2.5 transition-all duration-300 ${
                   isSpinning ? 'opacity-30 scale-95' : 'opacity-100 scale-100'
                 }`}
               >
+                {/* AI Filter Match Summary Banner */}
+                <div
+                  id="kft-wte-ai-match-banner"
+                  className="p-3 rounded-2xl bg-emerald-50/90 dark:bg-emerald-950/40 border border-emerald-300/70 dark:border-emerald-700/60 text-xs font-extrabold text-[#064E3B] dark:text-emerald-200 leading-relaxed font-khmer"
+                >
+                  {tr(
+                    language,
+                    `🤖 AI បានរកឃើញមុខម្ហូបដែលត្រូវនឹង «${activeCriteriaLabel}» ចំនួន ${matchingFoods.length} មុខ សម្រាប់អ្នក៖`,
+                    `🤖 AI matched ${matchingFoods.length} dish(es) for “${activeCriteriaLabel}”:`,
+                    `🤖 AI 已为您智能匹配 ${matchingFoods.length} 道符合“${activeCriteriaLabel}”的推荐美食：`
+                  )}
+                </div>
+
                 {/* Highlight Recommended Dish Card */}
-                <div className="relative rounded-3xl overflow-hidden bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 shadow-md">
+                <div
+                  data-testid="wte-picked-dish-card"
+                  data-dish-id={currentDish.id}
+                  className="relative rounded-3xl overflow-hidden bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 shadow-md"
+                >
                   <div className="relative aspect-16/10 w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
                     <img
                       src={currentDish.photoUrl}
@@ -1206,7 +1488,10 @@ export const WhatToEatModal: React.FC = () => {
 
                     {/* Title overlay */}
                     <div className="absolute bottom-3 left-3 right-24 text-white">
-                      <h2 className="font-moul text-base sm:text-lg text-white drop-shadow leading-snug">
+                      <h2
+                        id="kft-wte-picked-dish-name"
+                        className="font-moul text-base sm:text-lg text-white drop-shadow leading-snug"
+                      >
                         {currentLoc.name}
                       </h2>
                     </div>
@@ -1283,7 +1568,11 @@ export const WhatToEatModal: React.FC = () => {
                               }}
                               className="w-full flex items-center gap-2.5 text-xs text-slate-700 dark:text-slate-200 hover:text-emerald-600 py-1 cursor-pointer"
                             >
-                              <img src={r.photoUrl} alt={rLoc.name} loading="lazy" className="w-7 h-7 rounded-lg object-cover shrink-0 bg-slate-200 dark:bg-slate-700" />
+                              <ShopAvatar
+                                restaurant={r}
+                                alt={rLoc.name}
+                                className="w-7 h-7 rounded-lg"
+                              />
                               <span className="font-bold truncate flex-1 text-left">{rLoc.name}</span>
                             </button>
                           );
@@ -1389,6 +1678,7 @@ export const WhatToEatModal: React.FC = () => {
         {/* Big Re-roll Button: «បង្ហាញម្ហូបផ្សេងទៀត» */}
         <div className="p-3 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 shrink-0">
           <button
+            id="kft-wte-next-dish-btn"
             onClick={handleShowAnother}
             disabled={isSpinning}
             className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-500 hover:from-amber-600 hover:to-amber-500 text-stone-900 font-black text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-[0.98] font-khmer cursor-pointer"

@@ -1329,7 +1329,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [selectedRestaurant, setSelectedRestaurantRaw] = useState<Restaurant | null>(null);
   const [selectedDestination, setSelectedDestinationRaw] = useState<TouristDestination | null>(null);
   
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(() => !currentUser);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isAddRestaurantModalOpen, setIsAddRestaurantModalOpen] = useState(false);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [isAdminLoginModalOpen, setIsAdminLoginModalOpen] = useState(false);
@@ -1438,7 +1438,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const setIsWishlistsModalOpen = (open: boolean) => {
-    if (open && !verifyBackendVipFeatureAccess('បញ្ជីចង់ទៅ', 'My Wishlists', '我的心愿单')) return;
     setIsWishlistsModalOpenRaw(open);
   };
 
@@ -3471,20 +3470,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const isBookmarked = useCallback((id: string) => bookmarkSet.has(id), [bookmarkSet]);
 
   const toggleBookmark = useCallback((id: string) => {
-    if (!latestSyncStateRef.current.currentUser) {
-      showToast(
-        language === 'km' 
-          ? 'សូមចុះឈ្មោះ ឬចូលគណនី ដើម្បីរក្សាទុកមុខម្ហូប និងកន្លែងដែលចូលចិត្ត' 
-          : 'Please sign in or register to save favorites',
-        'info'
-      );
-      setIsAuthModalOpen(true);
-      return;
-    }
     setBookmarks(prev => {
       const exists = prev.includes(id);
       if (!exists) recordMeaningfulAction('favorite');
       const updated = exists ? prev.filter(item => item !== id) : [...prev, id];
+      try {
+        localStorage.setItem('kft_bookmarks_v4', JSON.stringify(updated));
+      } catch {}
       showToast(
         exists 
           ? (language === 'km' ? 'បានដកចេញពីបញ្ជីចំណូលចិត្ត' : 'Removed from saved items') 
@@ -9150,9 +9142,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     showToast(language === 'km' ? `បានច្របាច់បញ្ចូលគ្នាជាមួយ «${target.nameKh}» រួចរាល់!` : `Merged with "${target.nameKh}" successfully!`, 'success');
   };
 
-  // Wishlist methods (VIP Access Controlled)
+  // Wishlist & Favorites methods (Available by default to all users without login/VIP blocking)
   const createWishlist = (nameKh: string, nameEn?: string, emoji: string = '📌') => {
-    if (!verifyBackendVipFeatureAccess('បញ្ជីចង់ទៅ', 'My Wishlists')) return;
     const newWl: Wishlist = {
       id: `wl-${Date.now()}`,
       userId: currentUser?.id || 'guest',
@@ -9172,7 +9163,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const addToWishlist = (wishlistId: string, item: Omit<WishlistItem, 'addedAt'>) => {
-    if (!verifyBackendVipFeatureAccess('បញ្ជីចង់ទៅ', 'My Wishlists')) return;
+    setBookmarks(prev => (prev.includes(item.id) ? prev : [...prev, item.id]));
     setWishlists(prev => prev.map(w => {
       if (w.id !== wishlistId) return w;
       if (w.items.some(i => i.id === item.id)) {
@@ -9216,7 +9207,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     priceDisplay?: string; 
     rating?: number 
   }) => {
-    if (!verifyBackendVipFeatureAccess('បញ្ជីចង់ទៅ', 'My Wishlists')) return;
+    setBookmarks(prev => (prev.includes(item.id) ? prev : [...prev, item.id]));
     setTargetWishlistItem({
       ...item,
       addedAt: new Date().toISOString(),

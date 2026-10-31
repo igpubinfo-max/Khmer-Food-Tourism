@@ -18,6 +18,7 @@ import {
 import { Restaurant, TouristDestination, isGpipRegisteredRestaurant, openRestaurantGoogleExternal } from '../types';
 import { tr, translateProvince } from '../utils/i18n';
 import { getLocalizedRestaurant, getLocalizedDestination } from '../utils/zhDynamicTranslator';
+import { ShopAvatar } from './icons/DefaultShopIcon';
 
 // Haversine formula for distance between 2 GPS coordinates in meters
 export function calculateDistanceMeters(lat1: number, lon1: number, lat2: number, lon2: number): number {
@@ -778,19 +779,11 @@ export const NearMeModal: React.FC = () => {
                       onClick={() => openRestaurantGoogleExternal(r, 'maps')}
                       className="px-3 py-2.5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/90 dark:border-slate-700 shadow-xs hover:border-emerald-500 transition flex items-center gap-3 cursor-pointer active:scale-[0.99]"
                     >
-                      <div className="relative w-11 h-11 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-700 shrink-0 border border-slate-200/70 dark:border-slate-600">
-                        <img
-                          src={r.photoUrl}
-                          alt={rLoc.name}
-                          className="w-full h-full object-cover"
-                          loading="lazy"
-                          onError={(e) => {
-                            const target = e.currentTarget;
-                            target.onerror = null;
-                            target.src = buildPlaceSpecificNoPhotoSvg(r.nameKh, r.provinceKh, 'restaurant');
-                          }}
-                        />
-                      </div>
+                      <ShopAvatar
+                        restaurant={r}
+                        alt={rLoc.name}
+                        className="w-11 h-11 rounded-xl border border-slate-200/70 dark:border-slate-600"
+                      />
                       <h4 className="flex-1 min-w-0 font-bold text-xs sm:text-sm text-[#0F172A] dark:text-white truncate font-khmer">
                         {rLoc.name}
                       </h4>
@@ -808,16 +801,10 @@ export const NearMeModal: React.FC = () => {
                   >
                     <div className="flex gap-3">
                       <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-slate-100 shrink-0">
-                        <img
-                          src={r.photoUrl}
+                        <ShopAvatar
+                          restaurant={r}
                           alt={rLoc.name}
-                          className="w-full h-full object-cover"
-                          loading="lazy"
-                          onError={(e) => {
-                            const target = e.currentTarget;
-                            target.onerror = null;
-                            target.src = buildPlaceSpecificNoPhotoSvg(r.nameKh, r.provinceKh, 'restaurant');
-                          }}
+                          className="w-full h-full rounded-xl"
                         />
                         <span className="absolute bottom-0.5 right-1 bg-black/65 text-white/90 text-[7px] px-1 rounded-xs">
                           {hasOfficialPhoto

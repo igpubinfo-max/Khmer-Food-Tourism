@@ -22,6 +22,8 @@ import {
   isAdminAccount,
   isUserVipActive,
   organizeAndDeduplicateFoods,
+  isGpipRegisteredRestaurant,
+  openRestaurantGoogleExternal,
 } from '../types';
 import {
   DISH_PROVINCES,
@@ -29,6 +31,7 @@ import {
   detectDishProvince,
   getProvinceOptionById,
   getMatchingRestaurantsForProvinceDish,
+  getDishSpecificWhereToFind,
 } from '../utils/foodFilters';
 import { calculateDistanceKm } from '../services/dailyDiscoveryAndNotificationService';
 import { tr } from '../utils/i18n';
@@ -765,22 +768,31 @@ export const DailyDiscoveriesModal: React.FC = () => {
                         </span>
                       </div>
 
-                      <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-snug">
-                        📍 {getProvinceWhereToFind(provMeta)}
+                      <p
+                        data-testid={`dish-where-to-find-${food.id}`}
+                        className="text-[11px] text-slate-600 dark:text-slate-300 leading-snug"
+                      >
+                        📍 {getDishSpecificWhereToFind(food, provMeta, language)}
                       </p>
 
                       {matchedRests.length > 0 && (
                         <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
                           {matchedRests.slice(0, 2).map((rest) => {
                             const rLoc = getLocalizedRestaurant(rest, language);
+                            const isGpipRest = isGpipRegisteredRestaurant(rest);
                             return (
                               <button
                                 key={rest.id}
                                 type="button"
+                                data-testid={`dish-matched-rest-${food.id}-${rest.id}`}
                                 onClick={() => {
-                                  setActiveTab('restaurants');
-                                  setSelectedRestaurant(rest);
-                                  setIsDailyDiscoveriesModalOpen(false);
+                                  if (isGpipRest) {
+                                    setActiveTab('restaurants');
+                                    setSelectedRestaurant(rest);
+                                    setIsDailyDiscoveriesModalOpen(false);
+                                  } else {
+                                    openRestaurantGoogleExternal(rest, 'maps');
+                                  }
                                 }}
                                 className="px-2.5 py-1 rounded-xl bg-white dark:bg-slate-800 hover:border-emerald-500 border border-slate-200 dark:border-slate-700 text-[10px] font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1 transition cursor-pointer"
                               >

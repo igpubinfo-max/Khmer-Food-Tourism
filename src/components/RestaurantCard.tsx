@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { tr } from '../utils/i18n';
 import { getLocalizedRestaurant } from '../utils/zhDynamicTranslator';
+import { ShopAvatar } from './icons/DefaultShopIcon';
 
 import type { Language } from '../types';
 
@@ -116,23 +117,12 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(
             : 'bg-white dark:bg-slate-800/90 hover:bg-emerald-50/40 dark:hover:bg-slate-800 border-slate-200/90 dark:border-slate-700/80 shadow-2xs'
         }`}
       >
-        {/* Left: Small clean shop thumbnail/icon (no overlaid text or icons) */}
-        <div className="w-12 h-12 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-700 shrink-0 border border-slate-200/80 dark:border-slate-600/70">
-          <img
-            src={resolvedShopPhotoUrl}
-            alt={loc.name}
-            className="w-full h-full object-cover"
-            loading="lazy"
-            decoding="async"
-            onError={(e) => {
-              const img = e.currentTarget as HTMLImageElement;
-              if (!img.dataset.fallback) {
-                img.dataset.fallback = '1';
-                img.src = '/Shop/rest-1.jpg?v=20261031v1';
-              }
-            }}
-          />
-        </div>
+        {/* Left: Verified shop photo OR uniform default storefront icon for unverified shops */}
+        <ShopAvatar
+          restaurant={{ ...restaurant, photoUrl: resolvedShopPhotoUrl }}
+          alt={loc.name}
+          className="w-12 h-12 rounded-xl border border-slate-200/80 dark:border-slate-600/70"
+        />
 
         {/* Right: Shop Name + Clear Verified / Unverified Status & Province */}
         <div className="flex-1 min-w-0">

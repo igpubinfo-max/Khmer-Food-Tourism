@@ -70,7 +70,7 @@ export const ProfileView: React.FC = () => {
   useEffect(() => {
     if (isAdmin && activeSubTab !== 'settings') {
       setActiveSubTab('settings');
-    } else if (!isVip && !isAdmin && (activeSubTab === 'wishlists' || activeSubTab === 'tripplans')) {
+    } else if (!isVip && !isAdmin && activeSubTab === 'tripplans') {
       setActiveSubTab('bookmarks');
     }
   }, [isAdmin, isVip, activeSubTab]);
@@ -1284,14 +1284,9 @@ export const ProfileView: React.FC = () => {
           <button
             type="button"
             role="tab"
+            data-testid="profile-grid-wishlists"
             aria-selected={activeSubTab === 'wishlists'}
-            onClick={() => {
-              if (!isVip && currentUser?.role !== 'admin') {
-                setIsWishlistsModalOpen(true);
-                return;
-              }
-              setActiveSubTab('wishlists');
-            }}
+            onClick={() => setActiveSubTab('wishlists')}
             className={`min-h-[70px] p-2 rounded-2xl border flex flex-col items-center justify-center gap-1 text-center transition-all cursor-pointer active:scale-95 ${
               activeSubTab === 'wishlists'
                 ? 'bg-gradient-to-br from-[#064E3B] to-[#047857] text-white border-emerald-400/60 shadow-md'
@@ -1310,7 +1305,7 @@ export const ProfileView: React.FC = () => {
             <span className="text-[11px] font-extrabold leading-tight truncate max-w-full">
               {tr(language, 'បញ្ជីហាង', 'Shop List', '店铺清单')}
               <span className="ml-1 text-[10px] opacity-80">
-                {!isVip && currentUser?.role !== 'admin' ? '🔒' : `(${wishlists.length})`}
+                ({wishlists.length})
               </span>
             </span>
           </button>
@@ -1354,6 +1349,7 @@ export const ProfileView: React.FC = () => {
           <button
             type="button"
             role="tab"
+            data-testid="profile-grid-saved"
             aria-selected={activeSubTab === 'bookmarks'}
             onClick={() => setActiveSubTab('bookmarks')}
             className={`min-h-[70px] p-2 rounded-2xl border flex flex-col items-center justify-center gap-1 text-center transition-all cursor-pointer active:scale-95 ${
@@ -1794,6 +1790,7 @@ export const ProfileView: React.FC = () => {
               {isKm ? `បញ្ជីផ្ទាល់ខ្លួនសរុប (${wishlists.length})` : `My Wishlists (${wishlists.length})`}
             </h4>
             <button
+              data-testid="profile-open-wishlists-modal"
               onClick={() => setIsWishlistsModalOpen(true)}
               className="flex items-center gap-1 px-3 py-1.5 bg-[#064E3B] text-white rounded-xl text-xs font-bold shadow-xs hover:bg-[#047857] transition"
             >

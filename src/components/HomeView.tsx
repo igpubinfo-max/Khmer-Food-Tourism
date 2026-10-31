@@ -18,6 +18,7 @@ import { TrendingFoodsRow } from './home/TrendingFoodsRow';
 import { HomeSkeleton, HomeEmptyState } from './home/HomeStates';
 import { FeatureGrid } from './home/FeatureGrid';
 import { IconNavFood, IconNavShop, IconNavTourism, IconMapRoute } from './icons/HandcraftedIcons';
+import { ShopAvatar } from './icons/DefaultShopIcon';
 import { ForYouSection } from './home/ForYouSection';
 import { PopularShops } from './home/PopularShops';
 import { PopularDestinations } from './home/PopularDestinations';
@@ -594,7 +595,11 @@ export const HomeView: React.FC = () => {
                             className="p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-700/50 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 border border-slate-200/80 dark:border-slate-600 flex items-center justify-between gap-3 cursor-pointer transition group"
                           >
                             <div className="flex items-center gap-2.5 min-w-0">
-                              <img src={rest.photoUrl} alt={locR.name} loading="lazy" decoding="async" className="w-11 h-11 rounded-xl object-cover shrink-0 border border-slate-200" />
+                              <ShopAvatar
+                                restaurant={rest}
+                                alt={locR.name}
+                                className="w-11 h-11 rounded-xl border border-slate-200"
+                              />
                               <div className="min-w-0">
                                 <div className="flex items-center gap-1.5 flex-wrap">
                                   {isGpipRest && (

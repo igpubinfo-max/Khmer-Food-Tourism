@@ -129,22 +129,21 @@ const SEMANTIC_CRAVING_RULES: SemanticRule[] = [
   {
     id: 'rice',
     triggerRegex: /(?:^|\s)(បាយ|បាយឆា|បាយសាច់|rice|fried rice|steamed rice)(?:\s|$)|米饭|炒饭|饭|白饭|猪肉饭|鸡肉饭/i,
-    matchFood: (f, titleText, fullText) => {
+    matchFood: (f, titleText) => {
       if (/^បាយ|បាយឆា|បាយសាច់|បាយមាន់|បាយក្ដាំង|បាយក្តាំង|បាយស្រូប|បាយភ្លៅ|បាយត្រី|fried rice|pork rice|chicken rice|rice with/i.test(f.nameKh + ' ' + f.nameEn)) {
-        return 180;
+        return 220;
       }
-      if (f.categorySlug === 'rice') return 150;
-      if (titleText.includes('បាយ') || /\brice\b/i.test(f.nameEn)) return 120;
-      if (f.categorySlug === 'stirfry' || f.categorySlug === 'grilled') return 35;
-      return fullText.includes('បាយ') ? 15 : 0;
+      if (f.categorySlug === 'rice') return 180;
+      if (titleText.includes('បាយ') || /\brice\b/i.test(f.nameEn)) return 150;
+      return 0;
     },
   },
   {
     id: 'porridge',
     triggerRegex: /បបរ|porridge|congee|粥|鸡肉粥|鱼粥|海鲜粥/i,
     matchFood: (f, titleText) => {
-      if (/បបរ|porridge|congee/i.test(f.nameKh + ' ' + f.nameEn)) return 190;
-      if (titleText.includes('បបរ')) return 150;
+      if (/បបរ|porridge|congee/i.test(f.nameKh + ' ' + f.nameEn)) return 210;
+      if (titleText.includes('បបរ')) return 170;
       return 0;
     },
   },
@@ -152,8 +151,8 @@ const SEMANTIC_CRAVING_RULES: SemanticRule[] = [
     id: 'noodles',
     triggerRegex: /គុយទាវ|មី|នំបញ្ចុក|លត|ហ្វឺ|សរសៃ|noodle|noodles|kuy teav|num banhchok|lort|pho|粿条|面|面条|米粉|粉面|炒面|汤面|高棉米粉/i,
     matchFood: (f, titleText) => {
-      if (f.categorySlug === 'noodles') return 170;
-      if (/គុយទាវ|មី|នំបញ្ចុក|លត|ហ្វឺ|noodle|kuy teav|banhchok|lort/i.test(titleText)) return 160;
+      if (/គុយទាវ|មី|នំបញ្ចុក|លត|ហ្វឺ|noodle|kuy teav|banhchok|lort|pho|vermicelli/i.test(titleText)) return 190;
+      if (f.categorySlug === 'noodles') return 120;
       return 0;
     },
   },
@@ -161,20 +160,21 @@ const SEMANTIC_CRAVING_RULES: SemanticRule[] = [
     id: 'soup_warm',
     triggerRegex: /សម្ល|ស៊ុប|ម្ជូរ|កកូរ|ការី|ក្តៅ|ក្ដៅ|ហុត|ទឹកស៊ុប|អាម៉ុក|soup|warm|hot soup|curry|broth|stew|samlor|amok|汤|热汤|暖|咖喱|酸汤|阿莫克|火锅/i,
     matchFood: (f, titleText) => {
+      if (/សម្ល|ស៊ុប|ម្ជូរ|កកូរ|ការី|អាម៉ុក|បបរ|ស្ងោរ|soup|curry|samlor|amok|hotpot|broth/i.test(titleText)) return 195;
       if (f.categorySlug === 'soup') return 165;
-      if (/សម្ល|ស៊ុប|ម្ជូរ|កកូរ|ការី|អាម៉ុក|បបរ|soup|curry|samlor|amok|hotpot/i.test(titleText)) return 155;
       return 0;
     },
   },
   {
     id: 'seafood',
     triggerRegex: /គ្រឿងសមុទ្រ|ត្រី|ក្តាម|ក្ដាម|បង្គា|មឹក|ងាវ|ខ្យង|អយស្ទ័រ|seafood|fish|crab|shrimp|prawn|squid|calamari|oyster|shellfish|clam|海鲜|海鮮|鱼|螃蟹|蟹|虾|蝦|鱿鱼|蛤蜊|生蚝/i,
-    matchFood: (_f, titleText, fullText) => {
-      if (/គ្រឿងសមុទ្រ|ត្រី|ក្តាម|ក្ដាម|បង្គា|មឹក|ងាវ|seafood|fish|crab|shrimp|prawn|squid|calamari|oyster/i.test(titleText)) {
-        return 170;
+    matchFood: (f, titleText, fullText) => {
+      if (f.categorySlug === 'dessert' || f.categorySlug === 'cake') return 0;
+      if (/គ្រឿងសមុទ្រ|ត្រី|ក្តាម|ក្ដាម|បង្គា|មឹក|ងាវ|ខ្យង|អយស្ទ័រ|seafood|fish|crab|shrimp|prawn|squid|calamari|oyster|clam/i.test(titleText)) {
+        return 200;
       }
-      if (/គ្រឿងសមុទ្រ|ត្រី|ក្តាម|ក្ដាម|បង្គា|មឹក|ងាវ|seafood|fish|crab|shrimp|prawn|squid/i.test(fullText)) {
-        return 90;
+      if (/គ្រឿងសមុទ្រ|ក្តាម|ក្ដាម|បង្គា|មឹក|ងាវ|seafood|crab|shrimp|prawn|squid|oyster/i.test(fullText)) {
+        return 110;
       }
       return 0;
     },
@@ -183,9 +183,10 @@ const SEMANTIC_CRAVING_RULES: SemanticRule[] = [
     id: 'grilled_crispy',
     triggerRegex: /អាំង|បំពង|ចៀន|ស្រួយ|សាច់អាំង|ដុត|grilled|grill|bbq|barbecue|fried|crispy|roast|roasted|烧烤|烤|炸|煎|香脆|脆皮|烤肉|烤鱼|烤鸡/i,
     matchFood: (f, titleText, _fullText, tags) => {
-      if (f.categorySlug === 'grilled') return 165;
-      if (/អាំង|បំពង|ចៀន|ស្រួយ|ដុត|grilled|fried|crispy|roast|bbq/i.test(titleText)) return 155;
-      if (tags.includes('grilled')) return 120;
+      if (f.categorySlug === 'dessert' || f.categorySlug === 'cake') return 0;
+      if (f.categorySlug === 'grilled') return 195;
+      if (/អាំង|បំពង|ចៀន|ស្រួយ|ដុត|grilled|fried|crispy|roast|bbq/i.test(titleText)) return 180;
+      if (tags.includes('grilled')) return 140;
       return 0;
     },
   },
@@ -193,8 +194,8 @@ const SEMANTIC_CRAVING_RULES: SemanticRule[] = [
     id: 'stirfry',
     triggerRegex: /ឆា|ឡុកឡាក់|stir[\s-]*fry|stir[\s-]*fried|lok lak|wok|炒|热炒|小炒|禄拉克/i,
     matchFood: (f, titleText) => {
-      if (f.categorySlug === 'stirfry') return 165;
-      if (/ឆា|ឡុកឡាក់|stir[\s-]*fr|lok lak/i.test(titleText)) return 155;
+      if (f.categorySlug === 'stirfry') return 190;
+      if (/ឆា|ឡុកឡាក់|stir[\s-]*fr|lok lak/i.test(titleText)) return 175;
       return 0;
     },
   },
@@ -202,11 +203,37 @@ const SEMANTIC_CRAVING_RULES: SemanticRule[] = [
     id: 'spicy_sour_salad',
     triggerRegex: /ញាំ|ភ្លា|បុក|ហឹរ|ជូរ|ជូរហឹរ|ម្រេច|កapi|កាពិ|ប្រហុក|ទឹកគ្រឿង|salad|spicy|sour|zesty|chili|pepper|papaya|prahok|凉拌|沙拉|辣|酸|酸辣|青木瓜|胡椒|波罗福/i,
     matchFood: (f, titleText, fullText) => {
-      if (f.categorySlug === 'salad') return 160;
+      if (f.categorySlug === 'dessert' || f.categorySlug === 'cake') return 0;
+      if (f.categorySlug === 'salad') return 195;
       if (/ញាំ|ភ្លា|បុក|ម្ជូរ|ហឹរ|ម្រេច|ក្តៅ|ប្រហុក|ទឹកគ្រឿង|salad|spicy|sour|pepper|prahok|papaya/i.test(titleText)) {
-        return 155;
+        return 185;
       }
-      if (/ហឹរ|ជូរ|ម្រេច|ម្ទេស|spicy|sour|chili/i.test(fullText)) return 85;
+      if (/ហឹរ|ជូរ|ម្រេច|ម្ទេស|spicy|sour|chili/i.test(fullText)) return 95;
+      return 0;
+    },
+  },
+  {
+    id: 'streetfood_snack',
+    triggerRegex: /អាហារសម្រន់|សម្រន់|street\s*food|snack|snacks|បាញ់ឆែវ|នំគ្រក់|ប្រហិត|លតឆា|នំប៉័ង|ពងទាកូន|សាច់ចង្កាក់|街头小吃|小吃/i,
+    matchFood: (f, titleText) => {
+      if (/នំប៉័ង|លតឆា|ប្រហិត|សាច់ចង្កាក់|នំគ្រក់|បាញ់ឆែវ|ចេកចៀន|ដំឡូង|ពងទាកូន|ខ្យង|ងាវ|បុកល្ហុង|ស្លាបមាន់|ក្រឡាន|គុយទាវកាត់|មីឆា|នំកಚាយ|នំបញ្ចុក|អាំង|បំពង|ចៀន|street|snack|skewer|meatball|pancake|baguette|spring roll|fritter|fried/i.test(titleText)) {
+        return 200;
+      }
+      if (f.categorySlug === 'grilled' || f.categorySlug === 'salad' || f.categorySlug === 'dessert') return 90;
+      return 0;
+    },
+  },
+  {
+    id: 'drink_pairing',
+    triggerRegex: /ម្ហូបអម|ក្លែម|ស្រាបៀរ|ភេសជ្ជៈ|beer\s*food|drink\s*pairing|bar\s*snack|下酒菜|啤酒/i,
+    matchFood: (f, titleText, _fullText, tags) => {
+      if (f.categorySlug === 'dessert' || f.categorySlug === 'cake' || f.categorySlug === 'rice') return 0;
+      if (/អាំង|បំពង|ចៀន|ភ្លា|ញាំ|បុក|ងាវ|ក្តាម|ក្ដាម|បង្គា|មឹក|ស្លាបមាន់|ឆ្អឹងជំនី|គោឡើងភ្នំ|សាច់គោ|ម្រេច|ប្រហុក|grilled|fried|crispy|wings|ribs|salad|ceviche|clam|crab|shrimp|squid|beef/i.test(titleText)) {
+        return 210;
+      }
+      if (f.categorySlug === 'grilled' || f.categorySlug === 'salad' || tags.includes('grilled') || tags.includes('spicy')) {
+        return 150;
+      }
       return 0;
     },
   },
@@ -223,10 +250,10 @@ const SEMANTIC_CRAVING_RULES: SemanticRule[] = [
   },
   {
     id: 'dessert_sweet',
-    triggerRegex: /បង្អែម|នំ|ផ្អែម|សម្រន់|ចេក|ល្ពៅ|ត្នោត|ខ្ទិះ|សង់ខ្យា|អន្សម|ក្រឡាន|dessert|desserts|sweet|sweets|cake|pastry|snack|custard|sticky rice|banana|甜品|甜点|甜點|甜|糕点|小吃|下午茶|椰奶|香蕉|南瓜|粽|竹筒饭/i,
+    triggerRegex: /បង្អែម|ផ្អែម|ចេកខ្ទិះ|ល្ពៅ|ត្នោត|ខ្ទិះ|សង់ខ្យា|អន្សម|ក្រឡាន|dessert|desserts|sweet|sweets|cake|pastry|custard|sticky rice|甜品|甜点|甜點|甜|糕点|下午茶|椰奶|南瓜|粽|竹筒饭/i,
     matchFood: (f, titleText) => {
-      if (f.categorySlug === 'dessert' || f.categorySlug === 'cake') return 175;
-      if (/បង្អែម|នំ|ចេក|ល្ពៅ|សង់ខ្យា|អន្សម|ក្រឡាន|dessert|sweet|cake|custard/i.test(titleText)) return 160;
+      if (f.categorySlug === 'dessert' || f.categorySlug === 'cake') return 210;
+      if (/^បង្អែម|^នំ(?!បញ្ចុក|ប៉័ង)|ចេកខ្ទិះ|សង់ខ្យា|អន្សម|ក្រឡាន|បបរផ្អែម|បាញ់ឌុក|dessert|sweet|cake|custard|pudding/i.test(titleText)) return 185;
       return 0;
     },
   },
@@ -261,6 +288,7 @@ const SEMANTIC_CRAVING_RULES: SemanticRule[] = [
 
 export interface AiFoodAdvisorOutput {
   dishes: FoodItem[];
+  allMatchedDishes: FoodItem[];
   totalMatchedCount: number;
   shops: Restaurant[];
   hasActiveQuery: boolean;
@@ -292,6 +320,7 @@ export function getAiFoodAdvisorRecommendations(params: {
     const scopeBrain = buildMedicalScopeNotice(language);
     return {
       dishes: [],
+      allMatchedDishes: [],
       totalMatchedCount: 0,
       shops: [],
       hasActiveQuery: true,
@@ -334,10 +363,10 @@ export function getAiFoodAdvisorRecommendations(params: {
 
       // 1. Direct query match in title (highest priority)
       if (titleText === cleanQuery || titleText.startsWith(cleanQuery)) {
-        score += 260;
+        score += 290;
         hasTitleMatch = true;
       } else if (titleText.includes(cleanQuery)) {
-        score += 200;
+        score += 240;
         hasTitleMatch = true;
       }
 
@@ -350,22 +379,17 @@ export function getAiFoodAdvisorRecommendations(params: {
       let matchedTokens = 0;
       for (const token of tokens) {
         if (titleText.includes(token)) {
-          score += 95;
-          matchedTokens++;
-        } else if (categoryText.includes(token)) {
-          score += 65;
+          score += 120;
           matchedTokens++;
         } else if (ingredientText.includes(token)) {
           score += 45;
           matchedTokens++;
-        } else if (descText.includes(token)) {
-          // If the user specifically searched for "បាយ" / "rice" / "米饭", don't over-score soups that merely say "ញ៉ាំជាមួយបាយ"
-          if (activeRules.some((r) => r.id === 'rice') && food.categorySlug !== 'rice' && !titleText.includes('បាយ')) {
-            score += 8;
-          } else {
-            score += 25;
-            matchedTokens++;
-          }
+        } else if (categoryText.includes(token) && activeRules.length === 0) {
+          score += 35;
+          matchedTokens++;
+        } else if (descText.includes(token) && activeRules.length === 0) {
+          score += 20;
+          matchedTokens++;
         }
       }
 
@@ -378,7 +402,7 @@ export function getAiFoodAdvisorRecommendations(params: {
         score += 18;
       }
 
-      if (score >= 25) {
+      if (score >= 40) {
         scoredFoods.push({ food, score });
       }
     } else {
@@ -393,7 +417,7 @@ export function getAiFoodAdvisorRecommendations(params: {
   // Sort by score descending, with deterministic seed rotation among similarly scored dishes
   scoredFoods.sort((a, b) => {
     const scoreDiff = b.score - a.score;
-    if (Math.abs(scoreDiff) > 25) return scoreDiff;
+    if (Math.abs(scoreDiff) > 15) return scoreDiff;
     const rotA = (a.food.id.charCodeAt(a.food.id.length - 1) * 7 + seed * 13) % 19;
     const rotB = (b.food.id.charCodeAt(b.food.id.length - 1) * 7 + seed * 13) % 19;
     if (rotA !== rotB) return rotA - rotB;
@@ -415,13 +439,20 @@ export function getAiFoodAdvisorRecommendations(params: {
       })
     : null;
 
+  const allMatchedDishes: FoodItem[] =
+    scoredFoods.length > 0
+      ? scoredFoods.map((item) => item.food)
+      : brain && brain.dishes.length > 0
+        ? brain.dishes.map((d) => d.food)
+        : [];
+
   // If the user typed a query that matched dishes, return up to 6 top matches (rotated by seed when Refresh is clicked)
   let topDishes: FoodItem[];
   if (brain && brain.dishes.length > 0) {
     topDishes = brain.dishes.map((d) => d.food);
   } else if (scoredFoods.length > 0) {
-    const limit = hasActiveQuery ? 5 : 4;
-    if (scoredFoods.length <= limit || seed === 1) {
+    const limit = hasActiveQuery ? 6 : 4;
+    if (scoredFoods.length <= limit || seed <= 1) {
       topDishes = scoredFoods.slice(0, limit).map((item) => item.food);
     } else {
       const poolSize = Math.min(scoredFoods.length, 15);
@@ -468,6 +499,7 @@ export function getAiFoodAdvisorRecommendations(params: {
 
   return {
     dishes: topDishes,
+    allMatchedDishes,
     totalMatchedCount,
     shops: matchedShops.length > 0 ? matchedShops : restaurants.slice(0, 2),
     hasActiveQuery,

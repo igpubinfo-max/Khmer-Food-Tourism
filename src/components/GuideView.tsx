@@ -12,6 +12,7 @@ import {
 import { tr, translateProvince } from '../utils/i18n';
 import { getLocalizedDestination, getLocalizedFood, getLocalizedRestaurant, toConciseSummary } from '../utils/zhDynamicTranslator';
 import { copyTextNativeOrWeb } from '../utils/androidMediaHelper';
+import { ShopAvatar } from './icons/DefaultShopIcon';
 import {
   BookOpen, Sparkles, MapPinned, CalendarDays, Lightbulb, Heart, Star, Store, Compass, Utensils,
   ChevronRight, Copy, Lock, CheckCircle2, Route, Navigation, Maximize2, X, PhoneCall, ShieldAlert, Clock,
@@ -79,6 +80,7 @@ const Thumb: React.FC<{ src?: string; alt: string; className?: string }> = React
 
 interface MiniCardProps {
   image?: string;
+  customMedia?: React.ReactNode;
   title: string;
   subtitle: string;
   tag?: string;
@@ -91,7 +93,7 @@ interface MiniCardProps {
 }
 
 const MiniCard: React.FC<MiniCardProps> = React.memo(
-  ({ image, title, subtitle, tag, rating, meta, saved, onToggleSave, onOpen, saveLabel }) => (
+  ({ image, customMedia, title, subtitle, tag, rating, meta, saved, onToggleSave, onOpen, saveLabel }) => (
     <div
       role="button"
       tabIndex={0}
@@ -105,7 +107,7 @@ const MiniCard: React.FC<MiniCardProps> = React.memo(
       className="group w-40 shrink-0 snap-start rounded-2xl overflow-hidden bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700/80 shadow-xs cursor-pointer active:scale-[0.98] transition"
     >
       <div className="relative aspect-[4/3] bg-slate-100 dark:bg-slate-700 overflow-hidden">
-        <Thumb src={image} alt={title} className="w-full h-full object-cover" />
+        {customMedia || <Thumb src={image} alt={title} className="w-full h-full object-cover" />}
         {tag && (
           <span className="absolute top-1.5 left-1.5 max-w-[78%] truncate px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#064E3B]/95 text-emerald-100 border border-emerald-400/30">
             {tag}
@@ -410,12 +412,17 @@ export const GuideView: React.FC = () => {
     return (
       <MiniCard
         key={r.id}
-        image={restaurantPhoto(r)}
+        customMedia={
+          <ShopAvatar
+            restaurant={{ ...r, photoUrl: restaurantPhoto(r) }}
+            alt={loc.name}
+            className="w-full h-full rounded-none border-0"
+          />
+        }
         title={loc.name}
         subtitle={loc.province}
         tag={r.isVerified ? tr(language, 'ផ្ទៀងផ្ទាត់រួច', 'Verified', '已认证') : undefined}
         rating={summary.hasReviews ? summary.averageRating : undefined}
-
         saved={bookmarkSet.has(r.id)}
         onToggleSave={() => toggleBookmark(r.id)}
         onOpen={() => openRestaurant(r)}
@@ -527,6 +534,36 @@ export const GuideView: React.FC = () => {
       {/* ------------------------------------------------------------------ */}
       {tab === 'foryou' && (
         <div className="space-y-5">
+          {/* Saved / Favorites — Available by default to all users without login or VIP blocking */}
+          <section data-testid="guide-favorites-section" className="space-y-2.5">
+            <SectionTitle
+              icon={<Heart className="w-4 h-4" />}
+              title={tr(language, 'ចំណូលចិត្តរបស់អ្នក', 'Your saved picks', '我的收藏')}
+              subtitle={
+                savedCount > 0
+                  ? tr(language, `${savedCount} ធាតុដែលអ្នកបានរក្សាទុក`, `${savedCount} items you saved`, `已收藏 ${savedCount} 项`)
+                  : tr(
+                      language,
+                      'ចុចរូបបេះដូង ❤️ ដើម្បីរក្សាទុកម្ហូប និងតំបន់ទេសចរណ៍ដែលអ្នកចូលចិត្តភ្លាមៗ (ឥតគិតថ្លៃ)',
+                      'Tap ❤️ to save your favorite food & tourism items anytime (Free)',
+                      '随时点击 ❤️ 免费收藏您喜爱的美食与旅游景点'
+                    )
+              }
+            />
+            {savedCount > 0 ? (
+              <HScroll>
+                {savedFoods.slice(0, 6).map(renderFoodCard)}
+                {savedPlaces.slice(0, 6).map(renderPlaceCard)}
+                {savedShops.slice(0, 6).map(renderShopCard)}
+              </HScroll>
+            ) : (
+              <HScroll>
+                {rankedFoods.slice(0, 3).map(renderFoodCard)}
+                {rankedDestinations.slice(0, 3).map(renderPlaceCard)}
+              </HScroll>
+            )}
+          </section>
+
           {!isAdmin && (
             <div className="grid grid-cols-2 gap-2.5">
               <button
@@ -541,9 +578,9 @@ export const GuideView: React.FC = () => {
                   <span className="block text-xs font-extrabold text-slate-900 dark:text-white truncate">
                     {tr(language, 'ផែនការដើរលេង AI', 'AI Trip Planner', 'AI 行程规划')}
                   </span>
-                  <span className="flex items-center gap-1 text-[10px] text-slate-500 dark:text-slate-400">
-                    {!isVip && <Lock className="w-3 h-3" />}
-                    <span>{isVip ? tr(language, 'បើកភ្លាមៗ', 'Open now', '立即打开') : 'VIP'}</span>
+                  <span className="flex items-center gap-1 text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">
+                    <CheckCircle2 className="w-3 h-3" />
+                    <span>{tr(language, 'បើកភ្លាមៗ • FREE', 'Open now • FREE', '免费使用')}</span>
                   </span>
                 </span>
               </button>
@@ -559,9 +596,9 @@ export const GuideView: React.FC = () => {
                   <span className="block text-xs font-extrabold text-slate-900 dark:text-white truncate">
                     {tr(language, 'នៅជិតខ្ញុំ', 'Near Me', '附近')}
                   </span>
-                  <span className="flex items-center gap-1 text-[10px] text-slate-500 dark:text-slate-400">
-                    {!isVip && <Lock className="w-3 h-3" />}
-                    <span>{isVip ? tr(language, 'តាម GPS', 'Using GPS', '使用定位') : 'VIP'}</span>
+                  <span className="flex items-center gap-1 text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">
+                    <CheckCircle2 className="w-3 h-3" />
+                    <span>{tr(language, 'តាម GPS • FREE', 'Using GPS • FREE', '免费定位')}</span>
                   </span>
                 </span>
               </button>
@@ -603,22 +640,6 @@ export const GuideView: React.FC = () => {
               </p>
             )}
           </section>
-
-          {/* Saved */}
-          {savedCount > 0 && (
-            <section className="space-y-2.5">
-              <SectionTitle
-                icon={<Heart className="w-4 h-4" />}
-                title={tr(language, 'ចំណូលចិត្តរបស់អ្នក', 'Your saved picks', '我的收藏')}
-                subtitle={tr(language, `${savedCount} ធាតុដែលអ្នកបានរក្សាទុក`, `${savedCount} items you saved`, `已收藏 ${savedCount} 项`)}
-              />
-              <HScroll>
-                {savedFoods.slice(0, 6).map(renderFoodCard)}
-                {savedPlaces.slice(0, 6).map(renderPlaceCard)}
-                {savedShops.slice(0, 6).map(renderShopCard)}
-              </HScroll>
-            </section>
-          )}
 
           {/* Dishes you may love */}
           {dishRecs.items.length > 0 && (

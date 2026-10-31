@@ -666,10 +666,175 @@ export function getDishCulturalHistory(
   return `Signature regional dish of ${prov.en} — ${prov.historyEn}`;
 }
 
+const KHMER_DISH_SUBTOKENS = [
+  'គុយទាវ',
+  'នំបញ្ចុក',
+  'លតឆា',
+  'មីឆា',
+  'មីស៊ុប',
+  'មីសួរ',
+  'អាម៉ុក',
+  'ឡុកឡាក់',
+  'សម្លកកូរ',
+  'កកូរ',
+  'សម្លម្ជូរ',
+  'ម្ជូរគ្រឿង',
+  'ម្ជូរព្រៃ',
+  'ម្ជូរ',
+  'សម្លការី',
+  'ការី',
+  'ប្រហុកខ្ទិះ',
+  'ប្រហុក',
+  'ទឹកគ្រឿង',
+  'បាយសាច់ជ្រូក',
+  'បាយមាន់',
+  'បាយឆា',
+  'បាយក្ដាំង',
+  'បាយក្តាំង',
+  'បាយ',
+  'បបរ',
+  'សាច់គោអាំង',
+  'សាច់អាំង',
+  'ឆ្អឹងជំនី',
+  'មាន់ដុត',
+  'មាន់អាំង',
+  'ត្រីអាំង',
+  'ត្រីបំពង',
+  'ក្តាម',
+  'ក្ដាម',
+  'បង្គា',
+  'បង្កង',
+  'មឹក',
+  'ងាវ',
+  'ខ្យង',
+  'ភ្លាសាច់គោ',
+  'ភ្លា',
+  'ញាំស្វាយ',
+  'ញាំ',
+  'បុកល្ហុង',
+  'បុក',
+  'ឆាក្តៅ',
+  'ឆាខ្ញី',
+  'ឆាម្រះព្រៅ',
+  'បង្អែម',
+  'ចេកខ្ទិះ',
+  'សង់ខ្យា',
+  'ក្រឡាន',
+  'អន្សម',
+  'បាញ់ឆែវ',
+  'នំគ្រក់',
+  'គ្រឿងសមុទ្រ',
+  'ត្រី',
+  'សាច់គោ',
+  'សាច់ជ្រូក',
+  'សាច់មាន់',
+  'សាច់ទា',
+] as const;
+
+function computeDishHash(food: FoodItem, seed = 0): number {
+  const str = `${food.id || ''}:${food.nameKh || ''}:${seed}`;
+  let h = 2166136261;
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return Math.abs(h);
+}
+
+/**
+ * Generates dynamic, dish-specific dining hub & market recommendations for Phnom Penh and all 25 provinces,
+ * tailored to the actual dish category and culinary style rather than repeating static text.
+ */
+export function getDishSpecificWhereToFind(
+  food: FoodItem,
+  prov: ProvinceFilterOption,
+  language: Language
+): string {
+  const text = `${food.nameKh || ''} ${food.nameEn || ''} ${food.categorySlug || ''}`.toLowerCase();
+
+  if (prov.id === 'phnom_penh') {
+    if (/គុយទាវ|មីស៊ុប|មីសួរ|ហ្វឺ|មីទាញ|kuy\s*teav|noodle\s*soup|pho/i.test(text)) {
+      if (language === 'km') return 'តំបន់គុយទាវល្បីៗ៖ មហាវិថីកម្ពុជាក្រោម សង្កាត់បឹងកេងកង១ ទួលគោក និងជុំវិញផ្សារអូរឫស្សី រាជធានីភ្នំពេញ';
+      if (language === 'zh') return '金边知名粿条街区：柬埔寨下大道、万景岗一区 (BKK1)、堆谷区及乌亚西市场周边';
+      return 'Famous Noodle Hubs: Kampuchea Krom Blvd, BKK1, Toul Kork & Orussey Market area, Phnom Penh';
+    }
+    if (/នំបញ្ចុក|banh\s*chok|vermicelli/i.test(text)) {
+      if (language === 'km') return 'តូបនំបញ្ចុកខ្មែរ៖ ផ្សារចាស់ ផ្សារកណ្តាល ផ្សារទួលទំពូង និងសង្កាត់ចតុមុខ រាជធានីភ្នំពេញ';
+      if (language === 'zh') return '高棉米粉名摊：老市场、中央集市、俄罗斯市场及四臂湾街区';
+      return 'Traditional Num Banh Chok Stalls: Old Market, Phsar Kandal, Russian Market & Chaktomuk, Phnom Penh';
+    }
+    if (/លតឆា|មីឆា|គុយទាវឆា|បាញ់ឆែវ|នំគ្រក់|នំប៉័ង|ប្រហិត|lort\s*cha|fried\s*noodle|pancake|street/i.test(text)) {
+      if (language === 'km') return 'វិថីអាហារពេលល្ងាច៖ ផ្សារអូរឫស្សី ផ្លូវសន្ធរម៉ុក សួនច្បារមាត់ទន្លេ និងផ្សារទួលទំពូង រាជធានីភ្នំពេញ';
+      if (language === 'zh') return '金边街头热炒与小吃街：乌亚西夜市、山陀莫街区、四臂湾河畔及俄罗斯市场';
+      return 'Street Food & Wok Corners: Orussey Night Stalls, Santhor Mok, Sisowath Riverside & Russian Market, Phnom Penh';
+    }
+    if (/បបរ|porridge|congee/i.test(text)) {
+      if (language === 'km') return 'ហាងបបរគ្រឿង និងបបរស៖ មហាវិថីព្រះមុនីវង្ស ផ្សារអូរឫស្សី និងផ្សារកណ្តាល រាជធានីភ្នំពេញ';
+      if (language === 'zh') return '高棉特色粥品街区：莫尼旺大道、乌亚西市场及中央集市';
+      return 'Khmer Rice Porridge Hubs: Monivong Blvd, Orussey Market & Phsar Kandal, Phnom Penh';
+    }
+    if (food.categorySlug === 'rice' || /^បាយ|បាយសាច់ជ្រូក|បាយមាន់|បាយឆា|បាយក្ដាំង|បាយក្តាំង|pork\s*rice|fried\s*rice|chicken\s*rice/i.test(text)) {
+      if (language === 'km') return 'ហាងបាយល្បីៗ៖ មហាវិថីព្រះមុនីវង្ស ផ្សារធំថ្មី ផ្សារអូឡាំពិក និងតំបន់ទួលគោក រាជធានីភ្នំពេញ';
+      if (language === 'zh') return '金边人气米饭餐饮区：莫尼旺大道、中央市场、奥林匹克市场及堆谷区';
+      return 'Popular Rice & Breakfast Spots: Monivong Blvd, Central Market, Olympic Market & Toul Kork, Phnom Penh';
+    }
+    if (food.categorySlug === 'dessert' || /បង្អែម|ចេកខ្ទិះ|លតស្វិត|សង់ខ្យា|បបរផ្អែម|ត្នោត|អន្សម|ក្រឡាន|dessert|sweet|custard/i.test(text)) {
+      if (language === 'km') return 'តូបបង្អែមខ្មែរល្បីៗ៖ ផ្សារធំថ្មី ផ្លូវលេខ១៣ (ក្បែរផ្សារចាស់) ផ្សារទួលទំពូង និងវត្តលង្កា រាជធានីភ្នំពេញ';
+      if (language === 'zh') return '金边传统高棉甜品摊：中央市场、13号路（老市场旁）、俄罗斯市场及兰卡寺街区';
+      return 'Traditional Khmer Dessert Stalls: Central Market, Street 13 (Old Market), Russian Market & Wat Langka, Phnom Penh';
+    }
+    if (/គ្រឿងសមុទ្រ|ក្តាម|ក្ដាម|បង្គា|បង្កង|មឹក|ងាវ|ខ្យង|seafood|crab|prawn|shrimp|squid|clam/i.test(text)) {
+      if (language === 'km') return 'ភោជនីយដ្ឋានមាត់ទន្លេ និងគ្រឿងសមុទ្រ៖ វិថីព្រះស៊ីសុវត្ថិ ជ្រោយចង្វារ និងទួលគោក (ផ្លូវ ៣១៥) រាជធានីភ្នំពេញ';
+      if (language === 'zh') return '金边河畔与海鲜餐厅：西索瓦河畔大道、水净华半岛及堆谷区 (315号路)';
+      return 'Riverside & Seafood Dining: Sisowath Quay, Chroy Changvar Peninsula & Toul Kork (St. 315), Phnom Penh';
+    }
+    if (food.categorySlug === 'grilled' || /សាច់អាំង|គោអាំង|ជ្រូកអាំង|មាន់ដុត|មាន់អាំង|ត្រីអាំង|ឆ្អឹងជំនី|គោឡើងភ្នំ|grilled|bbq|roast/i.test(text)) {
+      if (language === 'km') return 'តំបន់សាច់អាំង និងម្ហូបជួបជុំ៖ សង្កាត់ទន្លេបាសាក់ (ផ្លូវ ២១) កោះពេជ្រ ជ្រោយចង្វារ និងបឹងកក់ រាជធានីភ្នំពេញ';
+      if (language === 'zh') return '金边炭烤与聚餐街区：百色河区 (21号路)、钻石岛、水净华河畔及万谷湖';
+      return 'BBQ & Grill Dining: Tonle Bassac (St. 21), Koh Pich, Chroy Changvar Riverside & Boeng Kak, Phnom Penh';
+    }
+    if (food.categorySlug === 'salad' || /ភ្លា|ញាំ|បុក|ទឹកគ្រឿង|salad|ceviche/i.test(text)) {
+      if (language === 'km') return 'ហាងញាំ និងភ្លាខ្មែរ៖ ផ្សារទួលទំពូង សង្កាត់បឹងកេងកង វត្តបុទម និងមាត់ទន្លេចតុមុខ រាជធានីភ្នំពេញ';
+      if (language === 'zh') return '高棉凉拌美食区：俄罗斯市场、万景岗区、波东寺公园及四臂湾河畔';
+      return 'Khmer Salads & Zesty Dishes: Russian Market, BKK, Wat Botum Park & Chaktomuk Riverside, Phnom Penh';
+    }
+    if (food.categorySlug === 'stirfry' || /ឡុកឡាក់|ឆា|lok\s*lak|stir[\s-]*fry/i.test(text)) {
+      if (language === 'km') return 'ភោជនីយដ្ឋានម្ហូបឆា និងឡុកឡាក់៖ សង្កាត់បឹងកេងកង១ (ផ្លូវ ៣៣៤) ផ្លូវព្រះសុធារស និងទួលទំពូង រាជធានីភ្នំពេញ';
+      if (language === 'zh') return '金边特色小炒与禄拉克餐厅：万景岗一区 (334号路)、苏他罗大道及俄罗斯市场街区';
+      return 'Signature Stir-Fry & Lok Lak Kitchens: BKK1 (Street 334), Sothearos Blvd & Russian Market, Phnom Penh';
+    }
+    // Traditional Khmer soups, Amok, Samlor, Prahok
+    if (language === 'km') return 'ភោជនីយដ្ឋានម្ហូបខ្មែររសជាតិដើម៖ សង្កាត់បឹងកេងកង១ មហាវិថីព្រះនរោត្តម និងក្បែរសារមន្ទីរជាតិ (ដូនពេញ) រាជធានីភ្នំពេញ';
+    if (language === 'zh') return '正宗高棉菜馆街区：万景岗一区 (BKK1)、诺罗敦大道及国家博物馆街区（隆边区）';
+    return 'Authentic Khmer Kitchens: Boeng Keng Kang 1 (BKK1), Norodom Blvd & National Museum Quarter (Daun Penh), Phnom Penh';
+  }
+
+  // Provincial dish-specific refinement
+  const baseWhere =
+    language === 'km' ? prov.whereToFindKh : language === 'zh' ? prov.whereToFindZh : prov.whereToFindEn;
+  if (food.categorySlug === 'noodles' || /គុយទាវ|នំបញ្ចុក|បបរ|បាយសាច់ជ្រូក/i.test(text)) {
+    if (language === 'km') return `តូបអាហារពេលព្រឹក និងផ្សារក្នុងតំបន់ • ${baseWhere}`;
+    if (language === 'zh') return `当地早市与传统粉面摊 • ${baseWhere}`;
+    return `Morning Market Stalls & Local Noodle Shops • ${baseWhere}`;
+  }
+  if (food.categorySlug === 'dessert' || /បង្អែម|នំ|ក្រឡាន|អន្សម|ចេកខ្ទិះ/i.test(text)) {
+    if (language === 'km') return `តូបបង្អែមប្រពៃណី និងអាហារសម្រន់ក្នុងតំបន់ • ${baseWhere}`;
+    if (language === 'zh') return `当地传统甜品与特色小吃摊 • ${baseWhere}`;
+    return `Traditional Sweet Stalls & Local Market Treats • ${baseWhere}`;
+  }
+  if (food.categorySlug === 'grilled' || /អាំង|ដុត|បំពង/i.test(text)) {
+    if (language === 'km') return `ហាងអាហារអាំង និងកន្លែងលម្ហែមាត់ទឹក • ${baseWhere}`;
+    if (language === 'zh') return `河畔炭烤与特色风味餐厅 • ${baseWhere}`;
+    return `Charcoal Grill Spots & Waterside Eateries • ${baseWhere}`;
+  }
+  return baseWhere;
+}
+
 export function getMatchingRestaurantsForProvinceDish(
   food: FoodItem,
   prov: ProvinceFilterOption,
-  restaurants: Restaurant[]
+  restaurants: Restaurant[],
+  rotationSeed = 0
 ): Restaurant[] {
   const approved = restaurants.filter((r) => r && r.id && (r.status === 'approved' || !r.status));
   const cleanKh = prov.kh.trim();
@@ -679,23 +844,114 @@ export function getMatchingRestaurantsForProvinceDish(
       (r.provinceEn && r.provinceEn.toLowerCase().includes(prov.en.toLowerCase()))
   );
 
-  // Prioritize restaurants whose signature dishes mention this dish's keywords
-  const dishWords = (food.nameKh || '')
-    .split(/\s+/)
-    .map((w) => w.trim())
-    .filter((w) => w.length >= 3);
+  const foodNameText = `${food.nameKh || ''} ${food.nameEn || ''}`.toLowerCase();
+  const foodFullText = `${foodNameText} ${food.categoryKh || ''} ${food.categorySlug || ''} ${food.descriptionKh || ''}`.toLowerCase();
 
-  const scored = (inProvince.length > 0 ? inProvince : approved).map((r) => {
-    const sigText = `${r.nameKh || ''} ${(r.signatureDishesKh || []).join(' ')} ${r.descriptionKh || ''}`;
+  // Extract matching Khmer sub-tokens from the dish name
+  const activeSubtokens = KHMER_DISH_SUBTOKENS.filter((tok) => foodNameText.includes(tok));
+  const englishWords = (food.nameEn || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .split(/\s+/)
+    .filter((w) => w.length >= 4 && !['with', 'khmer', 'cambodian', 'style', 'fresh', 'traditional'].includes(w));
+
+  const dishHash = computeDishHash(food, rotationSeed);
+  const candidatePool = inProvince.length > 0 ? inProvince : approved;
+
+  const scored = candidatePool.map((r, idx) => {
+    const sigList = r.signatureDishesKh || [];
+    const sigText = sigList.join(' ').toLowerCase();
+    const restText = `${r.nameKh || ''} ${r.nameEn || ''} ${sigText} ${r.descriptionKh || ''} ${r.descriptionEn || ''} ${r.cuisineType || ''}`.toLowerCase();
+
     let matchScore = 0;
-    if (r.provinceKh && r.provinceKh.includes(cleanKh)) matchScore += 10;
-    for (const w of dishWords) {
-      if (sigText.includes(w)) matchScore += 5;
+
+    // 1. Exact or near-exact signature dish match
+    if (
+      sigList.some((sig) => {
+        const s = sig.trim().toLowerCase();
+        const fn = (food.nameKh || '').trim().toLowerCase();
+        return s.length >= 3 && fn.length >= 3 && (s.includes(fn) || fn.includes(s));
+      })
+    ) {
+      matchScore += 95;
     }
-    if (r.isVerified) matchScore += 2;
-    return { r, score: matchScore + (r.rating || 4.5) * 0.5 };
+
+    // 2. Khmer culinary sub-token matches in signature dishes or restaurant name/description
+    for (const tok of activeSubtokens) {
+      if (sigText.includes(tok)) {
+        matchScore += 32;
+      } else if (restText.includes(tok)) {
+        matchScore += 18;
+      }
+    }
+
+    // 3. English keyword matches
+    for (const ew of englishWords) {
+      if (restText.includes(ew)) {
+        matchScore += 14;
+      }
+    }
+
+    // 4. Category / culinary style affinity
+    if (food.categorySlug === 'grilled' || /អាំង|ដុត|bbq|grill/i.test(foodNameText)) {
+      if (/អាំង|ដុត|bbq|grill|មឹក|បង្កង|សាច់គោអាំង/i.test(restText)) matchScore += 28;
+    } else if (food.categorySlug === 'dessert' || /បង្អែម|ចេកខ្ទិះ|ត្នោត|សង់ខ្យា|dessert|sweet/i.test(foodNameText)) {
+      if (/បង្អែម|ចេកខ្ទិះ|ត្នោត|នំ|dessert|sweet|កាហ្វេ/i.test(restText)) matchScore += 32;
+    } else if (food.categorySlug === 'salad' || /ភ្លា|ញាំ|បុក|ទឹកគ្រឿង|ប្រហុក/i.test(foodNameText)) {
+      if (/ភ្លា|ញាំ|បុក|ប្រហុក|ទឹកគ្រឿង|salad|tapas/i.test(restText)) matchScore += 28;
+    } else if (food.categorySlug === 'noodles' || /គុយទាវ|នំបញ្ចុក|មី|លត/i.test(foodNameText)) {
+      if (/គុយទាវ|នំបញ្ចុក|មី|លត|ព្រឹក|noodle/i.test(restText)) matchScore += 28;
+    } else if (food.categorySlug === 'rice' || /^បាយ|ឡុកឡាក់|ឆា/i.test(foodNameText)) {
+      if (/បាយ|ឡុកឡាក់|ឆា|lok\s*lak|rice/i.test(restText)) matchScore += 26;
+    } else if (food.categorySlug === 'soup' || /សម្ល|អាម៉ុក|កកូរ|ម្ជូរ|ការី/i.test(foodFullText)) {
+      if (/សម្ល|អាម៉ុក|កកូរ|ម្ជូរ|ការី|ស៊ុប/i.test(restText)) matchScore += 24;
+    }
+
+    // 5. Strongly prioritize verified restaurants
+    if (r.isVerified) {
+      matchScore += 40;
+    }
+
+    // 6. Deterministic dish-specific tie-breaker so different dishes in the same province rotate across verified shops
+    const rotTieBreaker = ((dishHash + (idx + 1) * 37) % 23) * 0.9;
+
+    return {
+      r,
+      isVerified: Boolean(r.isVerified),
+      score: matchScore + rotTieBreaker + (r.rating || 4.5) * 0.3,
+    };
   });
 
-  scored.sort((a, b) => b.score - a.score);
-  return scored.slice(0, 3).map((x) => x.r);
+  scored.sort((a, b) => {
+    if (a.isVerified !== b.isVerified) return a.isVerified ? -1 : 1;
+    return b.score - a.score;
+  });
+
+  // Deduplicate by restaurant ID and nameKh
+  const seenNames = new Set<string>();
+  const unique: Restaurant[] = [];
+  for (const item of scored) {
+    const key = (item.r.nameKh || item.r.id).trim();
+    if (!seenNames.has(key)) {
+      seenNames.add(key);
+      unique.push(item.r);
+    }
+    if (unique.length >= 3) break;
+  }
+
+  return unique;
+}
+
+/**
+ * Finds the best-matching verified restaurants for any dish across its home province or nationwide.
+ */
+export function getMatchingRestaurantsForDish(
+  food: FoodItem,
+  restaurants: Restaurant[],
+  limit = 3,
+  rotationSeed = 0
+): Restaurant[] {
+  const provId = detectDishProvince(food);
+  const prov = getProvinceOptionById(provId);
+  return getMatchingRestaurantsForProvinceDish(food, prov, restaurants, rotationSeed).slice(0, limit);
 }
