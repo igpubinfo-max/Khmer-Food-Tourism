@@ -10,8 +10,6 @@ import { useApp } from '../context/AppContext';
 import {
   MapPin,
   Navigation,
-  CheckCircle2,
-  AlertCircle,
   Edit2,
   Trash2,
   Crown,
@@ -124,7 +122,7 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(
           className="w-12 h-12 rounded-xl border border-slate-200/80 dark:border-slate-600/70"
         />
 
-        {/* Right: Shop Name + Clear Verified / Unverified Status & Province */}
+        {/* Right: Shop Name & Province */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 min-w-0">
             <h3 className="font-bold text-sm sm:text-[15px] text-[#0F172A] dark:text-white group-hover:text-[#059669] dark:group-hover:text-emerald-400 transition truncate leading-snug font-khmer">
@@ -133,18 +131,6 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(
           </div>
 
           <div className="mt-1 flex items-center gap-1.5 flex-nowrap overflow-hidden text-[11px] font-khmer">
-            {restaurant.isVerified ? (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-bold bg-emerald-500/15 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 whitespace-nowrap shrink-0">
-                <CheckCircle2 className="w-3 h-3 shrink-0" />
-                <span>{tr(language, 'ផ្ទៀងផ្ទាត់រួច', 'Verified', '已认证')}</span>
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-semibold bg-slate-100 dark:bg-slate-700/80 text-slate-600 dark:text-slate-300 border border-slate-300/70 dark:border-slate-600 whitespace-nowrap shrink-0">
-                <AlertCircle className="w-3 h-3 shrink-0" />
-                <span>{tr(language, 'មិនទាន់ផ្ទៀងផ្ទាត់', 'Unverified', '未认证')}</span>
-              </span>
-            )}
-
             {isGpipRegistered && (
               <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full font-bold bg-amber-400/20 text-amber-800 dark:text-amber-300 border border-amber-400/40 whitespace-nowrap shrink-0">
                 <Crown className="w-2.5 h-2.5 shrink-0" />

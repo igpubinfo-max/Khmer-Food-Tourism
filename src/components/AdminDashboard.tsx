@@ -2296,7 +2296,7 @@ export const AdminDashboard: React.FC = () => {
                     {isKm ? `គ្រប់គ្រងហាងអាហារ (សរុប ${restaurants.length} ហាង)` : `Manage Restaurants (${restaurants.length} shops)`}
                   </h3>
                   <p className="text-[10px] text-stone-400 font-khmer">
-                    {isKm ? `${verifiedRestaurantsCount} ហាងផ្ទៀងផ្ទាត់ផ្លូវការ • ${restaurants.length - verifiedRestaurantsCount} គំរូសហគមន៍` : `${verifiedRestaurantsCount} verified • ${restaurants.length - verifiedRestaurantsCount} community listings`}
+                    {isKm ? `ហាងអាហារក្នុងបញ្ជីសរុប ${restaurants.length} ហាង` : `${restaurants.length} shops in directory`}
                   </p>
                 </div>
                 <button
@@ -2598,7 +2598,6 @@ export const AdminDashboard: React.FC = () => {
                               🚫 បដិសេធ
                             </span>
                           )}
-                          {rest.isVerified && <span className="text-[#059669] text-[10px] font-bold">✓ Verified</span>}
                           {rest.isPromoted && <span className="text-[#064E3B] dark:text-emerald-400 text-[10px] font-bold">★ Promoted</span>}
                         </div>
                         <p className="text-[10px] text-stone-400 truncate">

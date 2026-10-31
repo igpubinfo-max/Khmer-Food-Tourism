@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Star, MapPin, BadgeCheck } from 'lucide-react';
+import { Star, MapPin } from 'lucide-react';
 import type { Language, Restaurant } from '../../types';
 import { isRestaurantPremiumActive, isGpipRegisteredRestaurant, openRestaurantGoogleExternal } from '../../types';
 import { tr } from '../../utils/i18n';
@@ -119,7 +119,6 @@ const PopularShopsInner: React.FC<Props> = ({ language, restaurants, onOpen, onS
                   )}
                   {featured && (
                     <span className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[10px] font-black inline-flex items-center gap-1">
-                      <BadgeCheck className="w-3 h-3" />
                       {tr(language, 'ណែនាំ', 'Featured', '精选')}
                     </span>
                   )}

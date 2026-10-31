@@ -337,13 +337,6 @@ export const RestaurantDetailModal: React.FC = () => {
                   {loc.province}
                 </span>
 
-                {selectedRestaurant.isVerified && (
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-600/90 text-white border border-emerald-300/40 shadow-xs flex items-center gap-1 font-khmer">
-                    <CheckCircle2 className="w-3 h-3 text-white" />
-                    <span>{tr(language, 'ផ្ទៀងផ្ទាត់រួច', 'Verified', '已认证')}</span>
-                  </span>
-                )}
-
                 {ratingSummary.hasReviews ? (
                   <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500 text-slate-950 shadow-xs flex items-center gap-1 font-khmer">
                     <Star className="w-3 h-3 fill-current text-slate-950" />

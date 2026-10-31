@@ -3,7 +3,7 @@ import { useApp } from '../context/AppContext';
 import { RestaurantCard } from './RestaurantCard';
 import { Restaurant, sortRestaurantsWithVipRotation, isAdminAccount, getVipFeaturedRotationConfig } from '../types';
 import { shuffleForCurrentSession } from '../utils/sessionShuffle';
-import { Store, Plus, CheckCircle2, AlertCircle, Edit2, Shield, Settings, MapPin, Globe, RefreshCw, Search, X } from 'lucide-react';
+import { Store, Plus, Edit2, Shield, Settings, MapPin, Globe, RefreshCw, Search, X } from 'lucide-react';
 import { normalizeKhmerSearchText } from '../services/googlePlacesService';
 import { tr, translateProvince } from '../utils/i18n';
 
@@ -46,7 +46,6 @@ export const RestaurantView: React.FC = () => {
 
   const [priceFilter] = useState<string>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
-  const [verifiedFilter, setVerifiedFilter] = useState<'all' | 'verified' | 'unverified'>('all');
   const [shopSearchQuery, setShopSearchQuery] = useState<string>('');
   const [visibleCount, setVisibleCount] = useState<number>(RESTAURANT_BATCH_SIZE);
   const loadMoreTriggerRef = useRef<HTMLDivElement | null>(null);
@@ -117,7 +116,7 @@ export const RestaurantView: React.FC = () => {
 
   useEffect(() => {
     setVisibleCount(RESTAURANT_BATCH_SIZE);
-  }, [selectedProvince, priceFilter, categoryFilter, verifiedFilter, shopSearchQuery]);
+  }, [selectedProvince, priceFilter, categoryFilter, shopSearchQuery]);
 
   const provinces = [
     { id: '', nameKh: 'គ្រប់ទីតាំង', nameEn: 'All Locations' },
@@ -167,8 +166,6 @@ export const RestaurantView: React.FC = () => {
     const rawQueryLower = shopSearchQuery.trim().toLowerCase();
 
     return validDirectoryRestaurants.filter((r) => {
-      if (verifiedFilter === 'verified' && !r.isVerified) return false;
-      if (verifiedFilter === 'unverified' && r.isVerified) return false;
       if (cleanSelProv && !r.provinceKh.replace(/^រាជធានី|^ខេត្ត/g, '').includes(cleanSelProv)) {
         return false;
       }
@@ -187,7 +184,7 @@ export const RestaurantView: React.FC = () => {
       }
       return true;
     });
-  }, [validDirectoryRestaurants, verifiedFilter, selectedProvince, priceFilter, categoryFilter, shopSearchQuery]);
+  }, [validDirectoryRestaurants, selectedProvince, priceFilter, categoryFilter, shopSearchQuery]);
 
   const sortedRestaurants = useMemo(
     () => sortRestaurantsWithVipRotation(filteredRestaurants, users, appSettings),
@@ -216,19 +213,13 @@ export const RestaurantView: React.FC = () => {
     return () => observer.disconnect();
   }, [visibleCount, sortedRestaurants.length]);
 
-  const { totalDirectoryCount, verifiedCount, unverifiedCount, pendingCount } = useMemo(() => {
-    let v = 0;
-    for (const r of validDirectoryRestaurants) {
-      if (r.isVerified) v++;
-    }
+  const { totalDirectoryCount, pendingCount } = useMemo(() => {
     let p = 0;
     for (const r of restaurants) {
       if (r.status === 'pending') p++;
     }
     return {
       totalDirectoryCount: validDirectoryRestaurants.length,
-      verifiedCount: v,
-      unverifiedCount: validDirectoryRestaurants.length - v,
       pendingCount: p,
     };
   }, [validDirectoryRestaurants, restaurants]);
@@ -247,9 +238,9 @@ export const RestaurantView: React.FC = () => {
           <p className="text-[11px] text-slate-500 font-khmer mt-0.5">
             {tr(
               language,
-              `បង្ហាញ ${filteredRestaurants.length} / ${totalDirectoryCount} ហាង (${verifiedCount} ផ្ទៀងផ្ទាត់ • ${unverifiedCount} មិនទាន់ផ្ទៀងផ្ទាត់)`,
-              `Showing ${filteredRestaurants.length} of ${totalDirectoryCount} (${verifiedCount} verified • ${unverifiedCount} unverified)`,
-              `显示 ${filteredRestaurants.length} / ${totalDirectoryCount} 家店铺（${verifiedCount} 已认证 • ${unverifiedCount} 未认证）`
+              `បង្ហាញ ${filteredRestaurants.length} / ${totalDirectoryCount} ហាង`,
+              `Showing ${filteredRestaurants.length} of ${totalDirectoryCount} shops`,
+              `显示 ${filteredRestaurants.length} / ${totalDirectoryCount} 家店铺`
             )}
           </p>
         </div>
@@ -325,42 +316,6 @@ export const RestaurantView: React.FC = () => {
         )}
       </div>
 
-      {/* Verification Filter Switcher */}
-      <div className="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-2xl text-[11px] sm:text-xs font-khmer border border-slate-200/90 dark:border-slate-700">
-        <button
-          onClick={() => setVerifiedFilter('all')}
-          className={`flex-1 py-1.5 px-1.5 rounded-xl text-center font-bold transition-all cursor-pointer whitespace-nowrap ${
-            verifiedFilter === 'all'
-              ? 'bg-[#064E3B] text-white shadow-xs'
-              : 'text-slate-600 dark:text-slate-300 hover:text-[#064E3B]'
-          }`}
-        >
-          {tr(language, `ទាំងអស់ (${totalDirectoryCount})`, `All (${totalDirectoryCount})`, `全部 (${totalDirectoryCount})`)}
-        </button>
-        <button
-          onClick={() => setVerifiedFilter('verified')}
-          className={`flex-1 py-1.5 px-1.5 rounded-xl text-center font-bold flex items-center justify-center gap-1 transition-all cursor-pointer whitespace-nowrap ${
-            verifiedFilter === 'verified'
-              ? 'bg-[#059669] text-white shadow-xs'
-              : 'text-[#059669] dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-slate-700'
-          }`}
-        >
-          <CheckCircle2 className="w-3 h-3 shrink-0" />
-          <span>{tr(language, `ផ្ទៀងផ្ទាត់ (${verifiedCount})`, `Verified (${verifiedCount})`, `已认证 (${verifiedCount})`)}</span>
-        </button>
-        <button
-          onClick={() => setVerifiedFilter('unverified')}
-          className={`flex-1 py-1.5 px-1.5 rounded-xl text-center font-bold flex items-center justify-center gap-1 transition-all cursor-pointer whitespace-nowrap ${
-            verifiedFilter === 'unverified'
-              ? 'bg-slate-700 text-white shadow-xs'
-              : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
-          }`}
-        >
-          <AlertCircle className="w-3 h-3 shrink-0" />
-          <span>{tr(language, `មិនទាន់ផ្ទៀងផ្ទាត់ (${unverifiedCount})`, `Unverified (${unverifiedCount})`, `未认证 (${unverifiedCount})`)}</span>
-        </button>
-      </div>
-
       {/* Role-Specific Section: Admin Directory Management Panel vs Consumer/VIP Store Registration Banner */}
       {isAdmin ? (
         <div className="p-4 rounded-3xl bg-gradient-to-br from-[#022c22] via-[#064E3B] to-slate-900 text-white shadow-md border border-emerald-500/40 space-y-3 font-khmer">
@@ -389,9 +344,9 @@ export const RestaurantView: React.FC = () => {
           {/* Live Admin Shop Directory Metrics */}
           <div className="grid grid-cols-3 gap-2">
             <div className="p-2.5 rounded-2xl bg-white/10 border border-white/15 text-center">
-              <div className="text-sm font-black font-mono text-amber-300">{verifiedCount}</div>
+              <div className="text-sm font-black font-mono text-amber-300">{totalDirectoryCount}</div>
               <div className="text-[10px] font-bold text-emerald-100">
-                {tr(language, 'ផ្ទៀងផ្ទាត់ផ្លូវការ', 'Verified', '官方认证')}
+                {tr(language, 'ហាងសរុប', 'Total Shops', '店铺总数')}
               </div>
             </div>
             <div className="p-2.5 rounded-2xl bg-white/10 border border-white/15 text-center">

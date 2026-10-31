@@ -93,7 +93,7 @@ export const ShopAvatar: React.FC<ShopAvatarProps> = ({
     >
       <img
         src={photoUrl}
-        alt={alt || restaurant.nameKh || restaurant.nameEn || 'Verified Shop'}
+        alt={alt || restaurant.nameKh || restaurant.nameEn || 'Shop'}
         loading="lazy"
         decoding="async"
         draggable={false}

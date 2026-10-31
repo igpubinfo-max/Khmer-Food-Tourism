@@ -421,7 +421,6 @@ export const GuideView: React.FC = () => {
         }
         title={loc.name}
         subtitle={loc.province}
-        tag={r.isVerified ? tr(language, 'ផ្ទៀងផ្ទាត់រួច', 'Verified', '已认证') : undefined}
         rating={summary.hasReviews ? summary.averageRating : undefined}
         saved={bookmarkSet.has(r.id)}
         onToggleSave={() => toggleBookmark(r.id)}
@@ -691,12 +690,12 @@ export const GuideView: React.FC = () => {
             </section>
           )}
 
-          {/* Verified shops */}
+          {/* Recommended shops */}
           {featuredShops.length > 0 && (
             <section className="space-y-2.5">
               <SectionTitle
                 icon={<Store className="w-4 h-4" />}
-                title={tr(language, 'ហាងផ្ទៀងផ្ទាត់ដែលគួរទៅ', 'Verified shops worth a visit', '值得一去的认证店铺')}
+                title={tr(language, 'ហាងអាហារដែលគួរទៅសាក', 'Recommended shops worth a visit', '值得一去的推荐餐厅')}
                 subtitle={tr(language, 'ហាង VIP ដែលកំពុងបង្ហាញមុខគេនៅខាងមុខ', 'Currently featured VIP shops appear first', '当前置顶的 VIP 店铺优先展示')}
                 action={
                   <button
@@ -824,7 +823,6 @@ export const GuideView: React.FC = () => {
                               title={loc.name}
                               subtitle={loc.address || loc.province}
                               rating={summary.hasReviews ? summary.averageRating : undefined}
-                              badge={r.isVerified ? tr(language, 'ផ្ទៀងផ្ទាត់រួច', 'Verified', '已认证') : undefined}
                               onOpen={() => openRestaurant(r)}
                             />
                           );
