@@ -992,7 +992,7 @@ export const WhatToEatModal: React.FC = () => {
                                 setSelectedRestaurant(r);
                                 setIsWhatToEatModalOpen(false);
                               } else {
-                                openRestaurantGoogleExternal(r, 'search');
+                                openRestaurantGoogleExternal(r, 'maps');
                               }
                             }}
                             className="w-full flex items-center gap-2.5 text-xs text-slate-700 dark:text-slate-200 hover:text-emerald-600 py-1 cursor-pointer"

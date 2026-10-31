@@ -588,7 +588,7 @@ export const HomeView: React.FC = () => {
                               if (isGpipRest) {
                                 setSelectedRestaurant(rest);
                               } else {
-                                openRestaurantGoogleExternal(rest, 'search');
+                                openRestaurantGoogleExternal(rest, 'maps');
                               }
                             }}
                             className="p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-700/50 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 border border-slate-200/80 dark:border-slate-600 flex items-center justify-between gap-3 cursor-pointer transition group"

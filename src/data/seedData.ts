@@ -12,7 +12,7 @@ export const initialAppSettings: AppSettings = {
   appStoreUrl: 'https://apps.apple.com/app/khmer-food-tourism/id6826976670',
   iosAppStoreUrl: 'https://apps.apple.com/app/khmer-food-tourism/id6826976670',
   iosTestFlightUrl: 'https://testflight.apple.com/join/khmerfoodtourism',
-  supportQrImageUrl: '/donation-qr.png',
+  supportQrImageUrl: '/images/aba_khqr_official_kimseng.png',
   supportBankName: 'ABA BANK / BAKONG KHQR',
   supportAccountName: 'CHEA KIMSENG',
   supportMessageKh: 'សូមជួយគាំទ្រការអភិវឌ្ឍន៍កម្មវិធី «រសជាតិ និងទេសចរណ៍កម្ពុជា» ដើម្បីផ្សព្វផ្សាយម្ហូបអាហារ និងតំបន់ទេសចរណ៍កម្ពុជាទៅកាន់ពិភពលោក។ រាល់ការចូលរួមគាំទ្ររបស់លោកអ្នក គឺជាកម្លាំងចិត្តដ៏មានតម្លៃសម្រាប់ក្រុមការងារ!',

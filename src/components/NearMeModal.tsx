@@ -775,7 +775,7 @@ export const NearMeModal: React.FC = () => {
                   return (
                     <div
                       key={r.id}
-                      onClick={() => openRestaurantGoogleExternal(r, 'search')}
+                      onClick={() => openRestaurantGoogleExternal(r, 'maps')}
                       className="px-3 py-2.5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/90 dark:border-slate-700 shadow-xs hover:border-emerald-500 transition flex items-center gap-3 cursor-pointer active:scale-[0.99]"
                     >
                       <div className="relative w-11 h-11 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-700 shrink-0 border border-slate-200/70 dark:border-slate-600">

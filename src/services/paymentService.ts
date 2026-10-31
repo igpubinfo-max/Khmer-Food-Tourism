@@ -10,6 +10,7 @@ import {
   getDynamicVipPlans,
   getAdditionalStoreFeeUsd,
   DEFAULT_ADDITIONAL_STORE_FEE_USD,
+  parseSafeDateMs,
 } from '../types';
 
 export const VIP_ANNUAL_PRICE_USD = 24.99;
@@ -164,7 +165,7 @@ export function calculateVipDates(
   
   // If user has an active subscription, extend from the existing expiry date (renewal)
   if (existingExpiry) {
-    const existingTime = new Date(existingExpiry).getTime();
+    const existingTime = parseSafeDateMs(existingExpiry);
     if (existingTime > startTime) {
       startTime = existingTime;
     }
@@ -536,25 +537,51 @@ export async function processCardPayment(
 export function checkEligibleRestoration(
   userId: string,
   userEmail: string,
-  transactions: RegistrationTransaction[]
+  transactions: RegistrationTransaction[],
+  legacyIds?: string[],
+  userPhone?: string
 ): RegistrationTransaction | null {
+  const cleanEmail = (userEmail || '').trim().toLowerCase();
+  const cleanPhone = (userPhone || '').replace(/[\s-+()]/g, '');
+  const idSet = new Set<string>([userId, ...(Array.isArray(legacyIds) ? legacyIds : [])].filter(Boolean));
+  if (cleanEmail && cleanEmail.includes('@')) {
+    const slug = cleanEmail.replace(/[^a-z0-9]/g, '_');
+    idSet.add(`user-${slug}`);
+    idSet.add(`owner-${slug}`);
+    idSet.add(`google-${slug}`);
+  }
+
   // Look for any verified VIP subscription transaction associated with this user
-  const matching = transactions.filter(t => 
-    t.status === 'verified' &&
-    (t.type === 'user_vip_upgrade' || t.membershipTier === 'premium_vip') &&
-    (t.userId === userId || (userEmail && t.userEmail === userEmail))
-  );
+  const matching = transactions.filter(t => {
+    if (!t || t.status !== 'verified') return false;
+    if (t.type === 'additional_store_slot') return false;
+    const isVipType =
+      t.type === 'user_vip_upgrade' ||
+      t.type === 'restaurant_registration' ||
+      t.membershipTier === 'premium_vip' ||
+      t.membershipTier === 'premium';
+    if (!isVipType) return false;
+    const tEmail = (t.userEmail || '').trim().toLowerCase();
+    const tPhone = (t.phone || t.ownerPhone || '').replace(/[\s-+()]/g, '');
+    return (
+      (t.userId && idSet.has(t.userId)) ||
+      (t.ownerId && idSet.has(t.ownerId)) ||
+      (cleanEmail && tEmail === cleanEmail) ||
+      (cleanPhone.length >= 7 && tPhone === cleanPhone)
+    );
+  });
 
   if (matching.length === 0) return null;
 
-  // Find the one with latest expiry
+  // Find the one with latest future expiry
+  const nowMs = Date.now();
   const valid = matching.filter(t => {
     if (!t.expiresAt) return false;
-    return new Date(t.expiresAt).getTime() > Date.now();
+    return parseSafeDateMs(t.expiresAt) > nowMs;
   });
 
   if (valid.length === 0) return null;
 
-  valid.sort((a, b) => new Date(b.expiresAt!).getTime() - new Date(a.expiresAt!).getTime());
+  valid.sort((a, b) => parseSafeDateMs(b.expiresAt) - parseSafeDateMs(a.expiresAt));
   return valid[0];
 }

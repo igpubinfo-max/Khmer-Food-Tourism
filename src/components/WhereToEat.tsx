@@ -80,7 +80,7 @@ export const WhereToEat: React.FC<Props> = ({ food }) => {
                     setSelectedFood(null);
                     setSelectedRestaurant(r);
                   } else {
-                    openRestaurantGoogleExternal(r, 'search');
+                    openRestaurantGoogleExternal(r, 'maps');
                   }
                 }}
                 className="w-full min-h-[52px] flex items-center gap-3 px-3 py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-emerald-500/60 text-left active:scale-[0.98] transition cursor-pointer"

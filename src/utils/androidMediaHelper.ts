@@ -100,13 +100,15 @@ export async function savePngDataUrlToGallery(
         base64Data: dataUrl,
         fileName: sanitizedName
       });
-      if (result && result.saved) {
+      const isSavedOk = Boolean(result && (result.saved || (result as any).success));
+      const isDup = Boolean(result && (result.duplicate || (result as any).duplicatePrevented));
+      if (isSavedOk) {
         lastSavedDataHash = quickHash;
         lastSaveTimestamp = Date.now();
         return {
           saved: true,
-          duplicate: Boolean(result.duplicate),
-          message: result.duplicate
+          duplicate: isDup,
+          message: isDup
             ? 'រូបភាព QR ត្រូវបានរក្សាទុករួចហើយនៅក្នុង Gallery / Photos!'
             : `បានរក្សាទុករូបភាព QR ទៅក្នុង Gallery / Photos រួចរាល់ (${result.fileName || sanitizedName})!`
         };
@@ -148,6 +150,49 @@ export async function savePngDataUrlToGallery(
   } catch (err: any) {
     throw new Error(err?.message || 'មិនអាចរក្សាទុករូបភាព QR បានទេ។ សូមព្យាយាមម្ដងទៀត។');
   }
+}
+
+/**
+ * Shares the original ABA KHQR PNG image via Native Android Share Sheet or Web Share API
+ * while preserving 100% original resolution and account details.
+ */
+export async function shareQrImageNativeOrWeb(
+  imageUrl: string,
+  title: string = 'ABA KHQR — KIMSENG CHEA (095 245 959)'
+): Promise<{ shared: boolean }> {
+  if (Capacitor.isNativePlatform()) {
+    try {
+      const res = await NativeMediaLauncher.shareContent({
+        title,
+        text: `${title}\nUSD Account: 095 245 959\nKHR Account: 012 719 946`,
+        photoUrl: imageUrl,
+      });
+      if (res?.shared) {
+        return { shared: true };
+      }
+    } catch (e) {
+      console.warn('Native shareQrImage fallback:', e);
+    }
+  }
+  try {
+    const resp = await fetch(imageUrl);
+    if (resp.ok && typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
+      const blob = await resp.blob();
+      const file = new File([blob], 'ABA-KHQR-KIMSENG-CHEA.png', { type: 'image/png' });
+      if (!navigator.canShare || navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          title,
+          text: `${title}\nUSD: 095 245 959 | KHR: 012 719 946`,
+          files: [file],
+        });
+        return { shared: true };
+      }
+    }
+  } catch (e: any) {
+    if (e?.name === 'AbortError') return { shared: false };
+  }
+  await savePngDataUrlToGallery(imageUrl, 'ABA-KHQR-KIMSENG-CHEA.png');
+  return { shared: true };
 }
 
 /**

@@ -41,7 +41,7 @@ export const AdminDashboard: React.FC = () => {
     foods, addFood, updateFood, deleteFood,
     restaurants, deleteRestaurant, approveRestaurant, rejectRestaurant, toggleVerifyRestaurant,
     destinations, addDestination, updateDestination, deleteDestination,
-    users, deletedUsers, updateUserRole, cancelUserVip, restoreUserAccess, disableUserAccount, deleteUserAccount, clearAllRegisteredUsers,
+    users, deletedUsers, updateUserRole, adminGrantUserVip, cancelUserVip, restoreUserAccess, disableUserAccount, deleteUserAccount, clearAllRegisteredUsers,
     transactions, verifyTransaction, rejectTransaction, requestMorePaymentInfo, deleteTransactions, getAuthorizedPaymentProof,
     appSettings, updateAppSettings, refreshAppSettingsFromServer, setAdminPassword, currentUser, showToast,
     aiCheckIns, approveAiCheckIn, rejectAiCheckIn, mergeAiCheckIn,
@@ -3363,6 +3363,73 @@ export const AdminDashboard: React.FC = () => {
                                 </div>
                               </div>
                             ))}
+                          </div>
+
+                          {/* OPTION 0: DIRECT 1-TAP GRANT / ACTIVATE VIP */}
+                          <div className="p-3.5 rounded-2xl bg-gradient-to-br from-amber-50 to-emerald-50 dark:from-amber-950/40 dark:to-emerald-950/30 border-2 border-emerald-400 dark:border-emerald-600/80 space-y-2">
+                            <div>
+                              <h4 className="font-bold text-xs text-emerald-900 dark:text-emerald-200 flex items-center gap-1.5">
+                                <Sparkles className="w-4 h-4 text-amber-500 shrink-0" />
+                                <span>👑 បើកដំណើរការ / អនុម័ត VIP ជូនគណនីនេះភ្លាមៗ (Grant / Activate VIP)</span>
+                              </h4>
+                              <p className="text-[11px] text-emerald-800/90 dark:text-emerald-300/90 mt-0.5 leading-relaxed">
+                                {isKm
+                                  ? 'អនុម័ត និងបើកសិទ្ធិប្រើប្រាស់មុខងារ VIP ពេញលេញជូនអ្នកប្រើប្រាស់ភ្លាមៗ (Sync ទៅគ្រប់ឧបករណ៍ដោយស្វ័យប្រវត្តិ) ដោយមិនចាំបាច់ចុះឈ្មោះ ឬបង់ប្រាក់ម្តងទៀតឡើយ។'
+                                  : 'Immediately grant or extend active VIP access across all devices without requiring re-registration or repeated payment.'}
+                              </p>
+                            </div>
+                            <div className="grid grid-cols-2 gap-2">
+                              <button
+                                type="button"
+                                disabled={isDeletingUser}
+                                onClick={async () => {
+                                  setIsDeletingUser(true);
+                                  try {
+                                    const shortDays = appSettings?.vipShortDurationDays || 30;
+                                    for (const target of pendingDeleteTargets) {
+                                      await adminGrantUserVip(target.id || target.email, shortDays);
+                                    }
+                                    setSelectedUserIdsForDeletion([]);
+                                    closeDeletionModal();
+                                  } finally {
+                                    setIsDeletingUser(false);
+                                  }
+                                }}
+                                className="py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-sm transition flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                              >
+                                <CheckCircle2 className="w-4 h-4 shrink-0" />
+                                <span>
+                                  {isKm
+                                    ? `បើក VIP (${appSettings?.vipShortDurationDays || 30} ថ្ងៃ)`
+                                    : `Activate VIP (${appSettings?.vipShortDurationDays || 30}d)`}
+                                </span>
+                              </button>
+                              <button
+                                type="button"
+                                disabled={isDeletingUser}
+                                onClick={async () => {
+                                  setIsDeletingUser(true);
+                                  try {
+                                    const longDays = appSettings?.vipLongDurationDays || 60;
+                                    for (const target of pendingDeleteTargets) {
+                                      await adminGrantUserVip(target.id || target.email, longDays);
+                                    }
+                                    setSelectedUserIdsForDeletion([]);
+                                    closeDeletionModal();
+                                  } finally {
+                                    setIsDeletingUser(false);
+                                  }
+                                }}
+                                className="py-2.5 px-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-stone-950 font-extrabold text-xs shadow-sm transition flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                              >
+                                <Sparkles className="w-4 h-4 shrink-0" />
+                                <span>
+                                  {isKm
+                                    ? `បើក VIP (${appSettings?.vipLongDurationDays || 60} ថ្ងៃ)`
+                                    : `Activate VIP (${appSettings?.vipLongDurationDays || 60}d)`}
+                                </span>
+                              </button>
+                            </div>
                           </div>
 
                           {/* OPTION 1: CANCEL VIP */}

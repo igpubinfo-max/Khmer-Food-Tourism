@@ -44,9 +44,9 @@ const rotateDaily = <T,>(list: T[], take: number): T[] => {
 };
 
 const restaurantPhoto = (r: Restaurant) =>
-  r.photoUrl && !r.photoUrl.startsWith('/foods/') && !r.photoUrl.startsWith('/restaurants/')
+  r.photoUrl && !r.photoUrl.startsWith('/restaurants/')
     ? r.photoUrl
-    : r.profileImage && !r.profileImage.startsWith('/foods/') && !r.profileImage.startsWith('/restaurants/')
+    : r.profileImage && !r.profileImage.startsWith('/restaurants/')
     ? r.profileImage
     : '/Shop/rest-1.jpg';
 
@@ -253,7 +253,7 @@ export const GuideView: React.FC = () => {
       if (isGpipRegisteredRestaurant(r)) {
         setSelectedRestaurant(r);
       } else {
-        openRestaurantGoogleExternal(r, 'search');
+        openRestaurantGoogleExternal(r, 'maps');
       }
     },
     [trackRestaurantView, setSelectedRestaurant]

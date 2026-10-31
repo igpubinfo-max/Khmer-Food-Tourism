@@ -158,7 +158,7 @@ export const WishlistsModal: React.FC = () => {
           setSelectedRestaurant(r);
           setIsWishlistsModalOpen(false);
         } else {
-          openRestaurantGoogleExternal(r, 'search');
+          openRestaurantGoogleExternal(r, 'maps');
         }
         return;
       }

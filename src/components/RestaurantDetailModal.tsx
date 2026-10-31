@@ -363,11 +363,6 @@ export const RestaurantDetailModal: React.FC = () => {
                 {loc.name}
               </h2>
             </div>
-
-            {/* Reference Image Label (រូបភាពយោង) */}
-            <div className="absolute bottom-2.5 right-3 z-10 px-1.5 py-0.5 rounded bg-black/55 backdrop-blur-xs text-[8px] sm:text-[9px] text-white/85 font-khmer border border-white/15 select-none pointer-events-none shadow-2xs">
-              <span>{tr(language, 'រូបភាពយោង', 'Reference photo', '参考图片')}</span>
-            </div>
           </div>
 
           <div className="p-4 sm:p-6 space-y-5">
@@ -704,9 +699,6 @@ export const RestaurantDetailModal: React.FC = () => {
                       >
                         <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-slate-100 shrink-0 border border-slate-200 dark:border-slate-700">
                           <img src={item.photoUrl} alt={itemDisplayName} className="w-full h-full object-cover" />
-                          <span className="absolute bottom-0 right-0 bg-black/65 text-white/90 text-[7px] px-1 rounded-tl-sm font-khmer select-none">
-                            {tr(language, 'រូបភាពយោង', 'Ref', '参考图')}
-                          </span>
                         </div>
                         <div className="flex-1 min-w-0">
                           <h4 className="font-bold text-[#0F172A] dark:text-white text-sm truncate">

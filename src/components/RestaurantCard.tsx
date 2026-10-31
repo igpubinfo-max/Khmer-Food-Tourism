@@ -1,8 +1,22 @@
 import React, { useMemo } from 'react';
-import { Restaurant, getRestaurantRatingSummary, getVipFeaturedRotationState, isAdminAccount, isGpipRegisteredRestaurant, openRestaurantGoogleExternal } from '../types';
+import {
+  Restaurant,
+  getVipFeaturedRotationState,
+  isAdminAccount,
+  isGpipRegisteredRestaurant,
+  openRestaurantGoogleExternal,
+} from '../types';
 import { useApp } from '../context/AppContext';
-import { MapPin, Phone, Star, Navigation, CheckCircle2, AlertCircle, Edit2, Trash2, Heart, Crown, Utensils } from 'lucide-react';
-import { sanitizeDialablePhone, resolveRestaurantPhoneOnDemand } from '../services/googlePlacesService';
+import {
+  MapPin,
+  Navigation,
+  CheckCircle2,
+  AlertCircle,
+  Edit2,
+  Trash2,
+  Crown,
+  ChevronRight,
+} from 'lucide-react';
 import { tr } from '../utils/i18n';
 import { getLocalizedRestaurant } from '../utils/zhDynamicTranslator';
 
@@ -40,61 +54,70 @@ interface RestaurantCardProps {
 interface RestaurantCardViewProps {
   restaurant: Restaurant;
   language: Language;
-  bookmarked: boolean;
   isAdmin: boolean;
   isTopFeaturedVip: boolean;
   setSelectedRestaurant: (r: Restaurant | null) => void;
-  showToast: (msg: string, type?: 'success' | 'info' | 'warning') => void;
   openManageMyVipStore: (id?: string) => void;
   deleteRestaurant: (id: string) => void;
   trackRestaurantView: (id: string) => void;
-  trackRestaurantCall: (id: string) => void;
   trackRestaurantMap: (id: string) => void;
-  trackRestaurantShare: (id: string) => void;
-  toggleBookmark: (id: string) => void;
 }
 
-const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(({
-  restaurant,
-  language,
-  bookmarked,
-  isAdmin,
-  isTopFeaturedVip,
-  setSelectedRestaurant,
-  showToast,
-  openManageMyVipStore,
-  deleteRestaurant,
-  trackRestaurantView,
-  trackRestaurantCall,
-  trackRestaurantMap,
-  trackRestaurantShare,
-  toggleBookmark,
-}) => {
-  const ratingSummary = getRestaurantRatingSummary(restaurant);
-  const loc = useMemo(() => getLocalizedRestaurant(restaurant, language), [restaurant, language]);
-  const isGpipRegistered = useMemo(() => isGpipRegisteredRestaurant(restaurant), [restaurant]);
-  const resolvedShopPhotoUrl = useMemo(() => {
-    const raw =
-      restaurant.photoUrl && !restaurant.photoUrl.startsWith('/foods/') && !restaurant.photoUrl.startsWith('/restaurants/')
-        ? restaurant.photoUrl
-        : restaurant.profileImage && !restaurant.profileImage.startsWith('/foods/') && !restaurant.profileImage.startsWith('/restaurants/')
-        ? restaurant.profileImage
-        : '/Shop/rest-1.jpg';
-    return raw.startsWith('/Shop/') && !raw.includes('?') ? `${raw}?v=20261030v1` : raw;
-  }, [restaurant.photoUrl, restaurant.profileImage]);
+const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(
+  ({
+    restaurant,
+    language,
+    isAdmin,
+    isTopFeaturedVip,
+    setSelectedRestaurant,
+    openManageMyVipStore,
+    deleteRestaurant,
+    trackRestaurantView,
+    trackRestaurantMap,
+  }) => {
+    const loc = useMemo(() => getLocalizedRestaurant(restaurant, language), [restaurant, language]);
+    const isGpipRegistered = useMemo(() => isGpipRegisteredRestaurant(restaurant), [restaurant]);
 
-  // For non-GPIP registered restaurants: clean, compact list layout (small icon/image on the left, restaurant name on the right)
-  // Tapping opens its Google search directly.
-  if (!isGpipRegistered) {
+    const resolvedShopPhotoUrl = useMemo(() => {
+      const raw =
+        restaurant.photoUrl && !restaurant.photoUrl.startsWith('/restaurants/')
+          ? restaurant.photoUrl
+          : restaurant.profileImage && !restaurant.profileImage.startsWith('/restaurants/')
+          ? restaurant.profileImage
+          : '/Shop/rest-1.jpg';
+      if (raw.startsWith('/Shop/') && !raw.includes('?')) {
+        return `${raw}?v=20261031v1`;
+      }
+      if (raw.startsWith('/foods/') && !raw.includes('?')) {
+        return `${raw}?v=20261031v1`;
+      }
+      return raw;
+    }, [restaurant.photoUrl, restaurant.profileImage]);
+
+    const handleCardClick = () => {
+      trackRestaurantView(restaurant.id);
+      if (isGpipRegistered) {
+        setSelectedRestaurant(restaurant);
+      } else {
+        trackRestaurantMap(restaurant.id);
+        openRestaurantGoogleExternal(restaurant, 'maps');
+      }
+    };
+
     return (
       <div
-        onClick={() => {
-          trackRestaurantView(restaurant.id);
-          openRestaurantGoogleExternal(restaurant, 'search');
-        }}
-        className="group bg-white dark:bg-slate-800/90 hover:bg-emerald-50/40 dark:hover:bg-slate-800 rounded-2xl px-3 py-2.5 shadow-2xs hover:shadow-sm transition-all duration-150 cursor-pointer flex items-center gap-3 border border-slate-200/90 dark:border-slate-700/80 active:scale-[0.99]"
+        data-testid={`shop-row-${restaurant.id}`}
+        data-verified={restaurant.isVerified ? 'true' : 'false'}
+        data-registered={isGpipRegistered ? 'true' : 'false'}
+        onClick={handleCardClick}
+        className={`group rounded-2xl px-3 py-2.5 transition-all duration-150 cursor-pointer flex items-center gap-3 border active:scale-[0.99] ${
+          isGpipRegistered
+            ? 'bg-white dark:bg-slate-800/95 hover:bg-emerald-50/50 dark:hover:bg-slate-800 border-amber-400/50 dark:border-amber-400/40 shadow-xs'
+            : 'bg-white dark:bg-slate-800/90 hover:bg-emerald-50/40 dark:hover:bg-slate-800 border-slate-200/90 dark:border-slate-700/80 shadow-2xs'
+        }`}
       >
-        <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-700 shrink-0 border border-slate-200/70 dark:border-slate-600/70">
+        {/* Left: Small clean shop thumbnail/icon (no overlaid text or icons) */}
+        <div className="w-12 h-12 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-700 shrink-0 border border-slate-200/80 dark:border-slate-600/70">
           <img
             src={resolvedShopPhotoUrl}
             alt={loc.name}
@@ -102,292 +125,138 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(({
             loading="lazy"
             decoding="async"
             onError={(e) => {
-              (e.currentTarget as HTMLImageElement).src = '/Shop/rest-1.jpg?v=20261030v1';
+              const img = e.currentTarget as HTMLImageElement;
+              if (!img.dataset.fallback) {
+                img.dataset.fallback = '1';
+                img.src = '/Shop/rest-1.jpg?v=20261031v1';
+              }
             }}
           />
         </div>
 
-        <h3 className="font-bold text-sm sm:text-base text-[#0F172A] dark:text-white group-hover:text-[#059669] dark:group-hover:text-emerald-400 transition line-clamp-1 leading-snug font-khmer flex-1 min-w-0">
-          {loc.name}
-        </h3>
-
-        {isAdmin && (
-          <div className="flex items-center gap-1.5 shrink-0" onClick={(e) => e.stopPropagation()}>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                (window as any).__kft_manage_initial_tab = 'info';
-                openManageMyVipStore(restaurant.id);
-              }}
-              className="p-1.5 rounded-lg bg-amber-400 hover:bg-amber-500 text-slate-950 shadow-2xs transition active:scale-95 cursor-pointer"
-              title={tr(language, 'គ្រប់គ្រងហាងនេះ (Admin)', 'Manage Shop (Admin)', '管理店铺（管理员）')}
-            >
-              <Edit2 className="w-3.5 h-3.5" />
-            </button>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                deleteRestaurant(restaurant.id);
-              }}
-              className="p-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white shadow-2xs transition active:scale-95 cursor-pointer"
-              title={tr(language, 'លុបហាងនេះ (Admin)', 'Delete Shop (Admin)', '删除店铺（管理员）')}
-            >
-              <Trash2 className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  return (
-    <div 
-      onClick={() => {
-        setSelectedRestaurant(restaurant);
-      }}
-      className="group bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-xs hover:shadow-md transition-colors duration-150 cursor-pointer flex flex-col border border-slate-200/90 dark:border-slate-700/80"
-    >
-      {/* Cover image */}
-      <div className="relative aspect-16/9 w-full overflow-hidden bg-slate-100 dark:bg-slate-700">
-        <img 
-          src={resolvedShopPhotoUrl} 
-          alt={loc.name}
-          className="w-full h-full object-cover"
-          loading="lazy"
-          decoding="async"
-          onError={(e) => {
-            (e.currentTarget as HTMLImageElement).src = '/Shop/rest-1.jpg?v=20261030v1';
-          }}
-        />
-
-        {/* Top Bar: Left (Featured + Province) & Right (Verification + Price) with proper flex separation */}
-        <div className="absolute top-2.5 inset-x-2.5 flex items-start justify-between gap-2 z-10 pointer-events-none">
-          <div className="flex items-center gap-1.5 flex-wrap pointer-events-auto max-w-[60%]">
-            {isTopFeaturedVip && (
-              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black bg-gradient-to-r from-amber-400 to-yellow-400 text-slate-950 border border-white/80 shadow-md flex items-center gap-1 font-khmer whitespace-nowrap shrink-0">
-                <Crown className="w-3 h-3 fill-slate-950 text-slate-950 shrink-0" />
-                <span>{tr(language, 'ហាង VIP មុខគេ', 'Top Featured VIP', '置顶推荐 VIP')}</span>
-              </span>
-            )}
-            <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-[#064E3B]/95 text-emerald-100 border border-emerald-400/30 shadow-xs font-khmer whitespace-nowrap truncate max-w-full">
-              {loc.province}
-            </span>
-          </div>
-
-          {/* Verification & Price Level Badge */}
-          <div className="flex items-center gap-1.5 flex-wrap justify-end pointer-events-auto shrink-0">
-            <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold shadow-xs flex items-center gap-1 font-khmer whitespace-nowrap shrink-0 ${
-              restaurant.isVerified
-                ? 'bg-[#059669] text-white border border-emerald-300/40'
-                : 'bg-slate-800/95 text-slate-200 border border-slate-600/40'
-            }`}>
-              {restaurant.isVerified ? (
-                <>
-                  <CheckCircle2 className="w-3 h-3 text-white shrink-0" />
-                  <span>{tr(language, 'ផ្ទៀងផ្ទាត់រួច', 'Verified', '已认证')}</span>
-                </>
-              ) : (
-                <>
-                  <AlertCircle className="w-3 h-3 text-slate-300 shrink-0" />
-                  <span>{tr(language, 'មិនទាន់ផ្ទៀងផ្ទាត់', 'Unverified', '未认证')}</span>
-                </>
-              )}
-            </span>
-
-
-          </div>
-        </div>
-
-        {/* Bottom-Left Admin Actions Bar (Edit & Delete) — Dedicated row so labels never overlap */}
-        {isAdmin && (
-          <div className="absolute bottom-2 left-2.5 flex items-center gap-1.5 z-10">
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                (window as any).__kft_manage_initial_tab = 'info';
-                openManageMyVipStore(restaurant.id);
-              }}
-              className="px-3 py-1 rounded-full bg-amber-400 hover:bg-amber-500 text-slate-950 text-xs font-black shadow-md flex items-center gap-1.5 transition active:scale-95 font-khmer cursor-pointer whitespace-nowrap shrink-0 border border-amber-300/80"
-              title={tr(language, 'គ្រប់គ្រងហាងនេះ (Admin)', 'Manage Shop (Admin)', '管理店铺（管理员）')}
-            >
-              <Edit2 className="w-3.5 h-3.5 shrink-0" />
-              <span>{tr(language, 'កែប្រែ', 'Edit', '编辑')}</span>
-            </button>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                deleteRestaurant(restaurant.id);
-              }}
-              className="px-3 py-1 rounded-full bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-md flex items-center gap-1.5 transition active:scale-95 font-khmer cursor-pointer whitespace-nowrap shrink-0 border border-rose-400/50"
-              title={tr(language, 'លុបហាងនេះ (Admin)', 'Delete Shop (Admin)', '删除店铺（管理员）')}
-            >
-              <Trash2 className="w-3.5 h-3.5 shrink-0" />
-              <span>{tr(language, 'លុប', 'Delete', '删除')}</span>
-            </button>
-          </div>
-        )}
-
-        {/* Reference Image Label (រូបភាពយោង) */}
-        <div className="absolute bottom-2 right-2.5 px-1.5 py-0.5 rounded bg-black/55 backdrop-blur-xs text-[8px] sm:text-[9px] text-white/85 font-khmer border border-white/15 select-none pointer-events-none shadow-2xs z-10">
-          <span>{tr(language, 'រូបភាពយោង', 'Reference photo', '参考图片')}</span>
-        </div>
-      </div>
-
-      {/* Info */}
-      <div className="p-4 flex flex-col flex-1 justify-between">
-        <div>
-          <div className="flex items-start justify-between gap-1 mb-1.5">
-            <h3 className="font-extrabold text-base sm:text-lg text-[#0F172A] dark:text-white group-hover:text-[#059669] transition line-clamp-2 leading-snug font-khmer">
+        {/* Right: Shop Name + Clear Verified / Unverified Status & Province */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <h3 className="font-bold text-sm sm:text-[15px] text-[#0F172A] dark:text-white group-hover:text-[#059669] dark:group-hover:text-emerald-400 transition truncate leading-snug font-khmer">
               {loc.name}
             </h3>
           </div>
 
-          <div className="flex items-start gap-1 text-xs sm:text-sm text-slate-600 dark:text-slate-300 mb-2.5 line-clamp-1 font-khmer">
-            <MapPin className="w-4 h-4 text-[#059669] shrink-0 mt-0.5" />
-            <span>{loc.address}</span>
-          </div>
-
-          {/* Signature dishes tags */}
-          <div className="flex flex-wrap gap-1.5 mb-2.5">
-            {loc.signatureDishes.slice(0, 2).map((dish, i) => (
-              <span key={i} className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-slate-50 dark:bg-slate-700/60 text-slate-700 dark:text-slate-200 text-xs font-semibold border border-slate-200/80 dark:border-slate-600/60 font-khmer">
-                <Utensils className="w-3 h-3 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                <span>{dish}</span>
+          <div className="mt-1 flex items-center gap-1.5 flex-nowrap overflow-hidden text-[11px] font-khmer">
+            {restaurant.isVerified ? (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-bold bg-emerald-500/15 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 whitespace-nowrap shrink-0">
+                <CheckCircle2 className="w-3 h-3 shrink-0" />
+                <span>{tr(language, 'ផ្ទៀងផ្ទាត់រួច', 'Verified', '已认证')}</span>
               </span>
-            ))}
+            ) : (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-semibold bg-slate-100 dark:bg-slate-700/80 text-slate-600 dark:text-slate-300 border border-slate-300/70 dark:border-slate-600 whitespace-nowrap shrink-0">
+                <AlertCircle className="w-3 h-3 shrink-0" />
+                <span>{tr(language, 'មិនទាន់ផ្ទៀងផ្ទាត់', 'Unverified', '未认证')}</span>
+              </span>
+            )}
+
+            {isGpipRegistered && (
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full font-bold bg-amber-400/20 text-amber-800 dark:text-amber-300 border border-amber-400/40 whitespace-nowrap shrink-0">
+                <Crown className="w-2.5 h-2.5 shrink-0" />
+                <span>{isTopFeaturedVip ? 'VIP+' : 'VIP'}</span>
+              </span>
+            )}
+
+            {loc.province && (
+              <span className="inline-flex items-center gap-0.5 text-slate-500 dark:text-slate-400 truncate min-w-0">
+                <MapPin className="w-3 h-3 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                <span className="truncate">{loc.province}</span>
+              </span>
+            )}
           </div>
         </div>
 
-        {/* Bottom actions — Customer Rating strictly separated from VIP status & Verification */}
-        <div className="flex items-center justify-between pt-2.5 border-t border-slate-100 dark:border-slate-700/60">
-          {ratingSummary.hasReviews ? (
-            <div className="flex items-center gap-1 text-slate-700 dark:text-slate-200 font-bold text-xs sm:text-sm" title={tr(language, 'ការវាយតម្លៃពិតប្រាកដពីអតិថិជន', 'Genuine customer rating', '真实顾客评分')}>
-              <Star className="w-4 h-4 fill-current text-amber-500 shrink-0" />
-              <span>{ratingSummary.averageRating.toFixed(1)}</span>
-              <span className="text-slate-400 text-xs">({ratingSummary.reviewCount})</span>
-            </div>
-          ) : (
-            <div className="flex items-center gap-1 text-slate-400 dark:text-slate-500 text-xs font-khmer" title={tr(language, 'មិនទាន់មានអតិថិជនដាក់ផ្កាយវាយតម្លៃនៅឡើយទេ', 'No customer ratings yet', '暂无顾客评分')}>
-              <Star className="w-3.5 h-3.5 text-slate-300 dark:text-slate-600 shrink-0" />
-              <span>{tr(language, 'មិនទាន់មានការវាយតម្លៃ', 'No ratings yet', '暂无评分')}</span>
+        {/* Trailing Action Indicator + Optional Admin Controls */}
+        <div className="flex items-center gap-1.5 shrink-0">
+          {isAdmin && (
+            <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  (window as any).__kft_manage_initial_tab = 'info';
+                  openManageMyVipStore(restaurant.id);
+                }}
+                className="p-1.5 rounded-lg bg-amber-400 hover:bg-amber-500 text-slate-950 shadow-2xs transition active:scale-95 cursor-pointer"
+                title={tr(language, 'គ្រប់គ្រងហាងនេះ (Admin)', 'Manage Shop (Admin)', '管理店铺（管理员）')}
+              >
+                <Edit2 className="w-3.5 h-3.5" />
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  deleteRestaurant(restaurant.id);
+                }}
+                className="p-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white shadow-2xs transition active:scale-95 cursor-pointer"
+                title={tr(language, 'លុបហាងនេះ (Admin)', 'Delete Shop (Admin)', '删除店铺（管理员）')}
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
             </div>
           )}
 
-          <div className="flex items-center gap-1.5">
-            <button
-              type="button"
-              onClick={async (e) => {
-                e.stopPropagation();
-                trackRestaurantCall(restaurant.id);
-                const dialable = sanitizeDialablePhone(restaurant.phone);
-                if (dialable) {
-                  window.location.href = `tel:${dialable}`;
-                  return;
-                }
-                const found = await resolveRestaurantPhoneOnDemand(
-                  restaurant.nameKh || restaurant.nameEn,
-                  restaurant.provinceKh
-                );
-                const cleanFound = sanitizeDialablePhone(found);
-                if (cleanFound) {
-                  window.location.href = `tel:${cleanFound}`;
-                  return;
-                }
-                showToast(
-                  tr(
-                    language,
-                    'ហាងនេះមិនបានដាក់លេខទូរស័ព្ទលើផែនទីទេ — កំពុងបើកទីតាំងលើ Google Maps!',
-                    'Phone number not listed on map — opening Google Maps!',
-                    '该店铺未在地图上标注电话 — 正在打开 Google 地图！'
-                  ),
-                  'warning'
-                );
-                if (restaurant.mapUrl) {
-                  window.open(restaurant.mapUrl, '_blank');
-                }
-              }}
-              className="p-1.5 rounded-lg bg-emerald-50 text-[#064E3B] hover:bg-[#064E3B] hover:text-white dark:bg-emerald-950/40 dark:text-emerald-300 transition"
-              title={tr(language, 'ហៅទូរស័ព្ទទៅហាង', 'Call restaurant', '拨打餐厅电话')}
+          {isGpipRegistered ? (
+            <span
+              className="w-7 h-7 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 flex items-center justify-center border border-emerald-200/70 dark:border-emerald-700/50"
+              title={tr(language, 'មើលព័ត៌មានលម្អិតក្នុងកម្មវិធី', 'View full shop details', '查看店铺详情')}
             >
-              <Phone className="w-3.5 h-3.5" />
-            </button>
-
-            <a
-              href={restaurant.mapUrl || '#'}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={(e) => {
-                e.stopPropagation();
-                trackRestaurantMap(restaurant.id);
-              }}
-              className="p-1.5 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-600 hover:text-white dark:bg-blue-950/40 dark:text-blue-300 transition"
-              title={tr(language, 'មើលលើ Google Maps', 'Open in Google Maps', '在 Google 地图中查看')}
+              <ChevronRight className="w-4 h-4" />
+            </span>
+          ) : (
+            <span
+              className="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-300 flex items-center justify-center border border-blue-200/70 dark:border-blue-800/50"
+              title={tr(language, 'បើកទីតាំងលើ Google Maps', 'Open in Google Maps', '在 Google 地图中打开')}
             >
               <Navigation className="w-3.5 h-3.5" />
-            </a>
-
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                toggleBookmark(restaurant.id);
-              }}
-              aria-pressed={bookmarked}
-              className={`p-1.5 rounded-lg transition ${
-                bookmarked
-                  ? 'bg-rose-500 text-white'
-                  : 'bg-rose-50 text-rose-600 hover:bg-rose-100 dark:bg-rose-950/40 dark:text-rose-300'
-              }`}
-              title={tr(language, 'រក្សាទុកជាចំណូលចិត្ត', 'Save to favorites', '加入收藏')}
-            >
-              <Heart className={`w-3.5 h-3.5 ${bookmarked ? 'fill-current' : ''}`} />
-            </button>
-          </div>
+            </span>
+          )}
         </div>
       </div>
-    </div>
-  );
-}, (prev, next) =>
-  prev.restaurant === next.restaurant &&
-  prev.language === next.language &&
-  prev.bookmarked === next.bookmarked &&
-  prev.isAdmin === next.isAdmin &&
-  prev.isTopFeaturedVip === next.isTopFeaturedVip
+    );
+  },
+  (prev, next) =>
+    prev.restaurant === next.restaurant &&
+    prev.language === next.language &&
+    prev.isAdmin === next.isAdmin &&
+    prev.isTopFeaturedVip === next.isTopFeaturedVip
 );
 
 const RestaurantCardInner: React.FC<RestaurantCardProps> = ({ restaurant }) => {
-  const { 
-    language, setSelectedRestaurant, showToast, currentUser, restaurants, users, appSettings,
-    openManageMyVipStore, deleteRestaurant,
-    trackRestaurantView, trackRestaurantCall, trackRestaurantMap, trackRestaurantShare,
-    isBookmarked, toggleBookmark
+  const {
+    language,
+    setSelectedRestaurant,
+    currentUser,
+    restaurants,
+    users,
+    appSettings,
+    openManageMyVipStore,
+    deleteRestaurant,
+    trackRestaurantView,
+    trackRestaurantMap,
   } = useApp();
-  const bookmarked = isBookmarked(restaurant.id);
   const isAdmin = isAdminAccount(currentUser);
   const isTopFeaturedVip = useMemo(() => {
     const rotation = getCachedVipRotation(restaurants, users, appSettings);
     return rotation.currentlyFeaturedIds.has(restaurant.id);
   }, [restaurants, users, appSettings, restaurant.id]);
+
   return (
     <RestaurantCardView
       restaurant={restaurant}
       language={language}
-      bookmarked={bookmarked}
       isAdmin={isAdmin}
       isTopFeaturedVip={isTopFeaturedVip}
       setSelectedRestaurant={setSelectedRestaurant}
-      showToast={showToast}
       openManageMyVipStore={openManageMyVipStore}
       deleteRestaurant={deleteRestaurant}
       trackRestaurantView={trackRestaurantView}
-      trackRestaurantCall={trackRestaurantCall}
       trackRestaurantMap={trackRestaurantMap}
-      trackRestaurantShare={trackRestaurantShare}
-      toggleBookmark={toggleBookmark}
     />
   );
 };

@@ -29,6 +29,7 @@ import {
   pickMultipleImagesUsingNativeAndroidGallery,
   processAndCompressImageFile,
   batchProcessAndCompressImageFiles,
+  savePngDataUrlToGallery,
 } from '../utils/androidMediaHelper';
 import { tr } from '../utils/i18n';
 import { ShopLocationCheckInPickerModal, ShopCheckInLocationResult } from './ShopLocationCheckInPickerModal';
@@ -952,17 +953,28 @@ export const VipAddRestaurantModal: React.FC = () => {
                 <QrCode className="w-3.5 h-3.5" />
                 <span>ABA KHQR</span>
               </div>
-              <div className="p-3 bg-white rounded-3xl border-2 border-amber-400 shadow-sm w-56 h-56 sm:w-64 sm:h-64 mx-auto flex items-center justify-center">
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    const res = await savePngDataUrlToGallery('/images/aba_khqr_official_kimseng.png', 'ABA-KHQR-KIMSENG-CHEA-095245959.png');
+                    showToast(
+                      res.duplicate
+                        ? tr(language, '✅ រូបភាព ABA QR ច្បាប់ដើមមាននៅក្នុង Gallery រួចហើយ!', '✅ Original ABA QR image is already in your Gallery!', '✅ 原始 ABA 二维码图片已在相册中！')
+                        : tr(language, '✅ បានរក្សាទុករូបភាព ABA QR ច្បាប់ដើមទៅក្នុង Gallery / Photos រួចរាល់!', '✅ Saved original ABA QR image to Gallery/Photos!', '✅ 原始 ABA 二维码已保存到手机相册！'),
+                      'success'
+                    );
+                  } catch {}
+                }}
+                title={tr(language, 'ចុចលើរូប QR ដើម្បីរក្សាទុកក្នុង Gallery / Photos', 'Tap QR to save original image to Gallery/Photos', '点击二维码保存原图到相册')}
+                className="w-60 sm:w-68 max-w-full mx-auto rounded-2xl overflow-hidden border-2 border-amber-400 shadow-sm bg-white cursor-pointer active:scale-[0.985] transition block p-0"
+              >
                 <img
-                  src={appSettings.supportQrImageUrl || '/aba-khqr-499.png'}
-                  alt="ABA KHQR"
-                  className="w-full h-full object-contain rounded-xl block bg-white"
-                  style={{ imageRendering: 'crisp-edges' }}
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = '/donation-qr.png';
-                  }}
+                  src="/images/aba_khqr_official_kimseng.png"
+                  alt="ABA KHQR — KIMSENG CHEA"
+                  className="w-full h-auto object-contain block bg-white"
                 />
-              </div>
+              </button>
               <div className="space-y-1">
                 <div className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white">
                   {appSettings.supportAccountName || 'CHEA KIMSENG'} (095 245 959)

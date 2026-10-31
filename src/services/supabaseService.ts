@@ -13,7 +13,7 @@
  * - If not configured yet, safely falls back to local device storage without errors.
  */
 
-import { User, Restaurant, TouristDestination, RegistrationTransaction, DeletedUserRecord, AppSettings, SupportTicket, isSeedRestaurantId } from '../types';
+import { User, Restaurant, TouristDestination, RegistrationTransaction, DeletedUserRecord, AppSettings, SupportTicket, isSeedRestaurantId, parseSafeDateMs } from '../types';
 
 export interface CloudApiConfig {
   supabaseUrl: string;
@@ -202,6 +202,16 @@ export async function testSupabaseConnection(): Promise<{
       };
     }
 
+    if (res.status === 402) {
+      supabaseEgressCooldownUntilMs = Date.now() + 180_000;
+      return {
+        ok: false,
+        messageKh:
+          'គម្រោង Supabase Free Tier បានដល់កម្រិតទិន្នន័យទាញយកប្រចាំខែបណ្តោះអាសន្ន (HTTP 402 Egress Quota)។ ប្រព័ន្ធបានបើកមុខងារបង្រួមទំហំទិន្នន័យ 99% រួចរាល់ — កូតានឹងបើកឡើងវិញនៅដើមខែថ្មី ឬបន្ទាប់ពីបិទ Spend Cap ក្នុង Supabase Dashboard។',
+        latencyMs,
+      };
+    }
+
     return {
       ok: false,
       messageKh: `មិនអាចភ្ជាប់បានទេ (HTTP ${res.status})។ សូមពិនិត្យមើល Project URL និង Anon Key ម្ដងទៀត។`,
@@ -214,6 +224,188 @@ export async function testSupabaseConnection(): Promise<{
   }
 }
 
+// Circuit-breaker timestamp when Supabase returns HTTP 402 (exceed_egress_quota) so background syncs don't hammer the endpoint
+let supabaseEgressCooldownUntilMs = 0;
+
+export const PROOF_RECORD_PREFIX = 'kft_proof_';
+const pushedProofKeysInSession = new Set<string>();
+
+/**
+ * Strips heavy inline base64 `data:image/...` strings out of aggregate transaction payloads
+ * before pushing `kft_cloud_transactions_v1` to Supabase, storing each proof once in `kft_proof_<txnId>`.
+ * Reduces cloud sync bandwidth/egress by >99% while keeping full receipts accessible on-demand for Admin.
+ */
+export function sanitizeTransactionsForCloudPush(
+  txns: RegistrationTransaction[]
+): RegistrationTransaction[] {
+  if (!Array.isArray(txns)) return [];
+  return txns.map(t => {
+    if (!t || !t.id) return t;
+    if (typeof t.paymentProofUrl === 'string' && t.paymentProofUrl.startsWith('data:image/')) {
+      const proofKey = `${PROOF_RECORD_PREFIX}${t.id}`;
+      if (!pushedProofKeysInSession.has(proofKey) && isSupabaseConfigured()) {
+        pushedProofKeysInSession.add(proofKey);
+        pushCloudDocument(proofKey, {
+          txnId: t.id,
+          userId: t.userId || t.ownerId,
+          dataUrl: t.paymentProofUrl,
+          fileName: t.paymentProofFileName || 'aba_receipt.jpg',
+          mimeType: t.paymentProofMimeType || 'image/jpeg',
+          uploadedAt: t.paymentProofUploadedAt || t.createdAt || new Date().toISOString(),
+        }).catch(() => {});
+      }
+      return {
+        ...t,
+        paymentProofUrl: `vault:${t.id}`,
+      };
+    }
+    return t;
+  });
+}
+
+/**
+ * Strips heavy inline base64 `data:image/...` strings out of aggregate support ticket payloads
+ * before pushing `kft_cloud_support_tickets_v1`, storing each attachment once in `kft_proof_ticket_<id>`.
+ */
+export function sanitizeSupportTicketsForCloudPush(
+  tickets: SupportTicket[]
+): SupportTicket[] {
+  if (!Array.isArray(tickets)) return [];
+  return tickets.map(tk => {
+    if (!tk || !tk.id) return tk;
+    let nextTk = tk;
+    if (typeof tk.receiptUrl === 'string' && tk.receiptUrl.startsWith('data:image/')) {
+      const proofKey = `${PROOF_RECORD_PREFIX}ticket_${tk.id}`;
+      if (!pushedProofKeysInSession.has(proofKey) && isSupabaseConfigured()) {
+        pushedProofKeysInSession.add(proofKey);
+        pushCloudDocument(proofKey, {
+          ticketId: tk.id,
+          userId: tk.userId,
+          dataUrl: tk.receiptUrl,
+          uploadedAt: tk.createdAt || new Date().toISOString(),
+        }).catch(() => {});
+      }
+      nextTk = { ...nextTk, receiptUrl: `vault:ticket_${tk.id}` };
+    }
+    if (Array.isArray(nextTk.messages)) {
+      let msgChanged = false;
+      const cleanMsgs = nextTk.messages.map(m => {
+        if (m && typeof m.attachmentUrl === 'string' && m.attachmentUrl.startsWith('data:image/')) {
+          msgChanged = true;
+          const mKey = `${PROOF_RECORD_PREFIX}msg_${m.id}`;
+          if (!pushedProofKeysInSession.has(mKey) && isSupabaseConfigured()) {
+            pushedProofKeysInSession.add(mKey);
+            pushCloudDocument(mKey, { msgId: m.id, dataUrl: m.attachmentUrl }).catch(() => {});
+          }
+          return { ...m, attachmentUrl: `vault:msg_${m.id}` };
+        }
+        return m;
+      });
+      if (msgChanged) {
+        nextTk = { ...nextTk, messages: cleanMsgs };
+      }
+    }
+    return nextTk;
+  });
+}
+
+/**
+ * Fetches an individual payment proof receipt on-demand from `kft_proof_<id>` when Admin views it.
+ */
+export async function fetchPaymentProofFromCloudOnDemand(idOrVaultRef: string): Promise<string | null> {
+  if (!idOrVaultRef || !isSupabaseConfigured()) return null;
+  const cleanId = idOrVaultRef.startsWith('vault:') ? idOrVaultRef.slice(6) : idOrVaultRef;
+  if (!cleanId) return null;
+  const doc = await pullCloudDocument<{ dataUrl?: string }>(`${PROOF_RECORD_PREFIX}${cleanId}`, 8000);
+  if (doc && typeof doc.dataUrl === 'string' && doc.dataUrl.startsWith('data:image/')) {
+    return doc.dataUrl;
+  }
+  return null;
+}
+
+/**
+ * Pulls existing cloud transactions first and merges with local transactions before pushing,
+ * preventing a newly installed device from overwriting other users' verified/pending transactions.
+ */
+export async function mergeAndPushTransactionsToCloud(
+  localTxns: RegistrationTransaction[]
+): Promise<RegistrationTransaction[]> {
+  if (!isSupabaseConfigured()) return localTxns;
+  try {
+    const cloudTxns = await pullCloudDocument<RegistrationTransaction[]>('kft_cloud_transactions_v1', 8000);
+    const txnMap = new Map<string, RegistrationTransaction>();
+    for (const ct of Array.isArray(cloudTxns) ? cloudTxns : []) {
+      if (ct && ct.id) txnMap.set(ct.id, ct);
+    }
+    for (const lt of Array.isArray(localTxns) ? localTxns : []) {
+      if (!lt || !lt.id) continue;
+      const existing = txnMap.get(lt.id);
+      if (!existing) {
+        txnMap.set(lt.id, lt);
+      } else {
+        // Keep 'verified' status if either record is verified unless explicitly rejected/failed more recently
+        const localVerified = lt.status === 'verified';
+        const cloudVerified = existing.status === 'verified';
+        if (cloudVerified && !localVerified && lt.status === 'pending_verification') {
+          txnMap.set(lt.id, { ...lt, ...existing, paymentProofUrl: lt.paymentProofUrl || existing.paymentProofUrl });
+        } else {
+          txnMap.set(lt.id, { ...existing, ...lt, paymentProofUrl: lt.paymentProofUrl || existing.paymentProofUrl });
+        }
+      }
+    }
+    const merged = Array.from(txnMap.values()).sort(
+      (a, b) => (parseSafeDateMs(b.createdAt) || 0) - (parseSafeDateMs(a.createdAt) || 0)
+    );
+    await pushCloudDocument('kft_cloud_transactions_v1', merged);
+    return merged;
+  } catch {
+    await pushCloudDocument('kft_cloud_transactions_v1', localTxns);
+    return localTxns;
+  }
+}
+
+/**
+ * Pulls existing cloud support tickets first and merges with local tickets before pushing,
+ * preventing a fresh device from overwriting existing tickets or approved VIP support replies.
+ */
+export async function mergeAndPushSupportTicketsToCloud(
+  localTickets: SupportTicket[]
+): Promise<SupportTicket[]> {
+  if (!isSupabaseConfigured()) return localTickets;
+  try {
+    const cloudTickets = await pullCloudDocument<SupportTicket[]>('kft_cloud_support_tickets_v1', 8000);
+    const ticketMap = new Map<string, SupportTicket>();
+    for (const ct of Array.isArray(cloudTickets) ? cloudTickets : []) {
+      if (ct && ct.id) ticketMap.set(ct.id, ct);
+    }
+    for (const lt of Array.isArray(localTickets) ? localTickets : []) {
+      if (!lt || !lt.id) continue;
+      const existing = ticketMap.get(lt.id);
+      if (!existing) {
+        ticketMap.set(lt.id, lt);
+      } else {
+        const msgMap = new Map<string, any>();
+        for (const m of [...(existing.messages || []), ...(lt.messages || [])]) {
+          if (m && m.id) msgMap.set(m.id, m);
+        }
+        ticketMap.set(lt.id, {
+          ...existing,
+          ...lt,
+          vipApproved: Boolean(existing.vipApproved || lt.vipApproved),
+          vipApprovedAt: lt.vipApprovedAt || existing.vipApprovedAt,
+          messages: Array.from(msgMap.values()),
+        });
+      }
+    }
+    const merged = Array.from(ticketMap.values());
+    await pushCloudDocument('kft_cloud_support_tickets_v1', merged);
+    return merged;
+  } catch {
+    await pushCloudDocument('kft_cloud_support_tickets_v1', localTickets);
+    return localTickets;
+  }
+}
+
 /**
  * Push a shared key-value document to Supabase `kft_app_kv_store` table.
  * Using a unified JSONB table + structured columns makes Free Tier setup 1-click simple
@@ -223,6 +415,16 @@ export async function pushCloudDocument(key: string, payload: any, timeoutMs = 1
   if (!isSupabaseConfigured()) return false;
   const cfg = getCloudApiConfig();
   if (!cfg.enableAutoCloudSync) return false;
+  if (Date.now() < supabaseEgressCooldownUntilMs && !key.startsWith('kft_user_') && key !== 'kft_cloud_users_v2' && key !== 'kft_cloud_transactions_v1' && key !== 'kft_cloud_vip_backup_v1') {
+    return false;
+  }
+
+  let effectivePayload = payload;
+  if (key === 'kft_cloud_transactions_v1' && Array.isArray(payload)) {
+    effectivePayload = sanitizeTransactionsForCloudPush(payload);
+  } else if (key === 'kft_cloud_support_tickets_v1' && Array.isArray(payload)) {
+    effectivePayload = sanitizeSupportTicketsForCloudPush(payload);
+  }
 
   try {
     const res = await fetchWithTimeout(`${cfg.supabaseUrl}/rest/v1/kft_app_kv_store`, {
@@ -230,10 +432,17 @@ export async function pushCloudDocument(key: string, payload: any, timeoutMs = 1
       headers: getSupabaseHeaders(false),
       body: JSON.stringify({
         key,
-        payload,
+        payload: effectivePayload,
         updated_at: new Date().toISOString(),
       }),
     }, timeoutMs);
+    if (res.status === 402) {
+      supabaseEgressCooldownUntilMs = Date.now() + 180_000;
+      return false;
+    }
+    if (res.ok && supabaseEgressCooldownUntilMs > 0) {
+      supabaseEgressCooldownUntilMs = 0;
+    }
     return res.ok;
   } catch (err) {
     console.warn(`Supabase pushCloudDocument(${key}) error:`, err);
@@ -259,7 +468,14 @@ export async function pullCloudDocument<T>(key: string, timeoutMs = 10000): Prom
       },
       timeoutMs
     );
+    if (res.status === 402) {
+      supabaseEgressCooldownUntilMs = Date.now() + 180_000;
+      return null;
+    }
     if (!res.ok) return null;
+    if (supabaseEgressCooldownUntilMs > 0) {
+      supabaseEgressCooldownUntilMs = 0;
+    }
     const rows = await res.json();
     if (Array.isArray(rows) && rows.length > 0 && rows[0].payload !== undefined) {
       return rows[0].payload as T;
@@ -805,6 +1021,36 @@ export function getCanonicalUserId(u: Partial<User>): string {
   return rawId || `user-${Date.now()}`;
 }
 
+/**
+ * Returns all candidate `kft_user_<id>` atomic keys that might store a user's cloud record
+ * (covering canonical ID, raw ID, legacyIds, and email/phone provider variants).
+ */
+export function getCandidateAtomicUserKeys(u?: Partial<User> | null): string[] {
+  if (!u) return [];
+  const keys = new Set<string>();
+  const canonicalId = getCanonicalUserId(u);
+  if (canonicalId) keys.add(`${USER_RECORD_PREFIX}${canonicalId}`);
+  const rawId = String(u.id || '').trim();
+  if (rawId) keys.add(`${USER_RECORD_PREFIX}${rawId}`);
+  if (Array.isArray(u.legacyIds)) {
+    for (const lid of u.legacyIds) {
+      if (lid) keys.add(`${USER_RECORD_PREFIX}${lid}`);
+    }
+  }
+  const cleanEmail = String(u.email || '').trim().toLowerCase();
+  if (cleanEmail && cleanEmail.includes('@')) {
+    const slug = cleanEmail.replace(/[^a-z0-9]/g, '_');
+    keys.add(`${USER_RECORD_PREFIX}user-${slug}`);
+    keys.add(`${USER_RECORD_PREFIX}google-${slug}`);
+    keys.add(`${USER_RECORD_PREFIX}owner-${slug}`);
+  }
+  const cleanPhone = String(u.phone || '').replace(/[\s-+()]/g, '');
+  if (cleanPhone.length >= 7) {
+    keys.add(`${USER_RECORD_PREFIX}user-phone-${cleanPhone}`);
+  }
+  return Array.from(keys);
+}
+
 export function normalizeVipExpiryOnUser(u: User): User {
   const isAdmin =
     u.role === 'admin' ||
@@ -813,13 +1059,33 @@ export function normalizeVipExpiryOnUser(u: User): User {
     u.username === 'cheasavuth';
   if (isAdmin) return u;
   if (u.subscriptionExpiryDate) {
-    const expMs = new Date(u.subscriptionExpiryDate).getTime();
-    if (!Number.isNaN(expMs) && expMs <= Date.now()) {
+    const expMs = parseSafeDateMs(u.subscriptionExpiryDate);
+    if (expMs > 0 && expMs <= Date.now()) {
       if (u.membershipTier === 'premium_vip' || u.subscriptionStatus === 'active') {
         return {
           ...u,
           membershipTier: 'free',
           subscriptionStatus: 'expired',
+        };
+      }
+    } else if (
+      expMs > Date.now() &&
+      u.subscriptionStatus !== 'cancelled' &&
+      u.subscriptionStatus !== 'expired' &&
+      u.paymentStatus !== 'cancelled' &&
+      u.paymentStatus !== 'rejected' &&
+      (u.membershipTier === 'premium_vip' || u.subscriptionStatus === 'active')
+    ) {
+      if (
+        u.membershipTier !== 'premium_vip' ||
+        u.subscriptionStatus !== 'active' ||
+        u.paymentStatus !== 'verified'
+      ) {
+        return {
+          ...u,
+          membershipTier: 'premium_vip',
+          subscriptionStatus: 'active',
+          paymentStatus: 'verified',
         };
       }
     }
@@ -863,11 +1129,7 @@ export function mergeTwoUserRecordsCanonical(first: User, second: User): User {
   }
 
   // Earliest registration date
-  const parseValidMs = (d?: string): number => {
-    if (!d) return 0;
-    const ms = new Date(d).getTime();
-    return Number.isNaN(ms) ? 0 : ms;
-  };
+  const parseValidMs = (d?: string): number => parseSafeDateMs(d);
   const firstCreatedMs = parseValidMs(first.registeredAtIso || first.createdAt);
   const secondCreatedMs = parseValidMs(second.registeredAtIso || second.createdAt);
   let earliestCreatedIso = first.createdAt || second.createdAt || '2026-01-01';
@@ -961,12 +1223,18 @@ export function mergeTwoUserRecordsCanonical(first: User, second: User): User {
   const secondExpMs = parseValidMs(second.subscriptionExpiryDate);
 
   const isFirstValidVip =
-    first.membershipTier === 'premium_vip' &&
-    first.subscriptionStatus === 'active' &&
+    (first.membershipTier === 'premium_vip' || first.subscriptionStatus === 'active') &&
+    first.subscriptionStatus !== 'cancelled' &&
+    first.subscriptionStatus !== 'expired' &&
+    first.paymentStatus !== 'cancelled' &&
+    first.paymentStatus !== 'rejected' &&
     firstExpMs > nowMs;
   const isSecondValidVip =
-    second.membershipTier === 'premium_vip' &&
-    second.subscriptionStatus === 'active' &&
+    (second.membershipTier === 'premium_vip' || second.subscriptionStatus === 'active') &&
+    second.subscriptionStatus !== 'cancelled' &&
+    second.subscriptionStatus !== 'expired' &&
+    second.paymentStatus !== 'cancelled' &&
+    second.paymentStatus !== 'rejected' &&
     secondExpMs > nowMs;
 
   const wasSecondCancelledAfterFirstStart =
@@ -1140,9 +1408,8 @@ const lastPushedAtomicUserSigMap = new Map<string, string>();
 
 /**
  * Atomic per-user cloud persistence:
- * Immediately writes `kft_user_<canonicalId>` to Supabase.
- * Only pulls and updates the aggregate `kft_cloud_users_v2` table when `updateAggregate` is true,
- * avoiding 7-request network bursts on every profile/session touch.
+ * Pulls any existing atomic cloud record(s) for this user FIRST and merges them before pushing
+ * `kft_user_<canonicalId>` to Supabase — guaranteeing a fresh login NEVER overwrites an Admin-approved VIP record!
  */
 export async function upsertSingleUserToCloud(
   user: User,
@@ -1154,12 +1421,27 @@ export async function upsertSingleUserToCloud(
   }
   const canonicalList = deduplicateAndNormalizeUsers([user], deletedUsers);
   if (canonicalList.length === 0) return [];
-  const canonicalUser = canonicalList[0];
+  let canonicalUser = canonicalList[0];
 
   if (!isSupabaseConfigured()) return [canonicalUser];
 
   try {
-    // 1. Write atomic per-user row immediately (deduplicated within session so unchanged user state never fires redundant network requests)
+    // 1. Pull any existing atomic per-user rows first so we NEVER overwrite an approved VIP user with a blank `free` login record
+    const candidateKeys = getCandidateAtomicUserKeys(canonicalUser);
+    const existingAtomicDocs =
+      candidateKeys.length > 0 ? await pullCloudDocumentsByKeys<User>(candidateKeys, 6000) : [];
+
+    if (existingAtomicDocs.length > 0) {
+      const mergedAtomic = deduplicateAndNormalizeUsers(
+        [...existingAtomicDocs.map(d => d.payload), canonicalUser],
+        deletedUsers
+      );
+      if (mergedAtomic.length > 0) {
+        canonicalUser = mergedAtomic[0];
+      }
+    }
+
+    // 2. Write merged atomic per-user row immediately (deduplicated within session)
     const atomicKey = `${USER_RECORD_PREFIX}${canonicalUser.id}`;
     const userSig = JSON.stringify(canonicalUser);
     if (lastPushedAtomicUserSigMap.get(atomicKey) !== userSig) {
@@ -1171,7 +1453,7 @@ export async function upsertSingleUserToCloud(
       return [canonicalUser];
     }
 
-    // 2. When explicitly updating the aggregate table, pull `kft_cloud_users_v2` + `kft_cloud_deleted_users_v1` only
+    // 3. When explicitly updating the aggregate table, pull `kft_cloud_users_v2` + `kft_cloud_deleted_users_v1`
     const [cloudUsersV2, cloudDeleted] = await Promise.all([
       pullCloudDocument<User[]>('kft_cloud_users_v2'),
       pullCloudDocument<DeletedUserRecord[]>('kft_cloud_deleted_users_v1'),
@@ -1189,6 +1471,20 @@ export async function upsertSingleUserToCloud(
       ],
       allDeleted
     );
+
+    const updatedCanonical = merged.find(
+      u =>
+        u.id === canonicalUser.id ||
+        (canonicalUser.email && u.email && u.email.toLowerCase().trim() === canonicalUser.email.toLowerCase().trim())
+    );
+    if (updatedCanonical) {
+      const nextAtomicKey = `${USER_RECORD_PREFIX}${updatedCanonical.id}`;
+      const nextSig = JSON.stringify(updatedCanonical);
+      if (lastPushedAtomicUserSigMap.get(nextAtomicKey) !== nextSig) {
+        lastPushedAtomicUserSigMap.set(nextAtomicKey, nextSig);
+        await pushCloudDocument(nextAtomicKey, updatedCanonical);
+      }
+    }
 
     await pushCloudDocument('kft_cloud_users_v2', merged);
     return merged;
@@ -1251,9 +1547,9 @@ export async function syncAllAppDataWithSupabase(localState: {
     const shouldSyncPaymentProofs = shouldFetchHeavyAdminVaults;
 
     // Only fetch all 1,000 `kft_user_*` prefix documents when Admin Dashboard is open (`includeHeavyAdminVaults`);
-    // routine background syncs rely on `kft_cloud_users_v2` plus the active user's atomic row to prevent CPU/radio overheating.
-    const currentCanonicalIdForFetch =
-      !isAdminDevice && localState.currentUser ? getCanonicalUserId(localState.currentUser) : null;
+    // routine background syncs rely on `kft_cloud_users_v2` plus all candidate atomic rows for the active user.
+    const currentCandidateAtomicKeys =
+      !isAdminDevice && localState.currentUser ? getCandidateAtomicUserKeys(localState.currentUser) : [];
 
     // 1. Pull existing cloud records in a single batch (skipping heavy base64 payment proofs and 1,000-row prefix scan on background syncs)
     const [
@@ -1272,9 +1568,9 @@ export async function syncAllAppDataWithSupabase(localState: {
       pullCloudDocument<User[]>('kft_cloud_users_v2'),
       shouldFetchHeavyAdminVaults
         ? pullCloudDocumentsByPrefix<User>(USER_RECORD_PREFIX)
-        : currentCanonicalIdForFetch
-        ? pullCloudDocument<User>(`${USER_RECORD_PREFIX}${currentCanonicalIdForFetch}`).then(doc =>
-            doc ? [{ key: `${USER_RECORD_PREFIX}${currentCanonicalIdForFetch}`, payload: doc, updated_at: '' }] : []
+        : currentCandidateAtomicKeys.length > 0
+        ? pullCloudDocumentsByKeys<User>(currentCandidateAtomicKeys).then(docs =>
+            docs.map(d => ({ key: d.key, payload: d.payload, updated_at: d.updated_at || '' }))
           )
         : Promise.resolve([] as Array<{ key: string; payload: User; updated_at: string }>),
       pullCloudDocument<Record<string, Partial<User>>>('kft_cloud_vip_backup_v1'),
@@ -1359,8 +1655,10 @@ export async function syncAllAppDataWithSupabase(localState: {
       if (!uEmail && uPhone.length < 7 && !t.userName) continue;
       if (!uid && !uEmail) continue;
       if (isActivityUserDeleted(uid, uEmail, uPhone) || isActivityUserDeleted(t.ownerId, uEmail, uPhone)) continue;
-      const isGoogle = String(uid || '').startsWith('google-') || uEmail.endsWith('@gmail.com');
-      const createdDate = t.createdAt ? t.createdAt.split('T')[0] : '2026-01-01';
+      const isGoogle = String(uid || '').startsWith('google-');
+      const createdDate = t.createdAt ? t.createdAt.split('T')[0].split(' ')[0] : '2026-01-01';
+      const txnExpMs = parseSafeDateMs(t.expiresAt);
+      const isActiveVerifiedVipTxn = t.status === 'verified' && txnExpMs > Date.now();
       recoveredUsersFromActivity.push({
         id: uid || `user-${uEmail.replace(/[^a-z0-9]/g, '_')}`,
         name: t.userName || (uEmail ? uEmail.split('@')[0] : 'Member'),
@@ -1374,8 +1672,8 @@ export async function syncAllAppDataWithSupabase(localState: {
         createdAt: createdDate,
         registeredAtIso: t.createdAt || '2026-01-01T00:00:00.000Z',
         lastActiveAt: t.verifiedAt || t.createdAt,
-        membershipTier: t.status === 'verified' && t.expiresAt && new Date(t.expiresAt).getTime() > Date.now() ? 'premium_vip' : 'free',
-        subscriptionStatus: t.status === 'verified' && t.expiresAt && new Date(t.expiresAt).getTime() > Date.now() ? 'active' : 'none',
+        membershipTier: isActiveVerifiedVipTxn ? 'premium_vip' : 'free',
+        subscriptionStatus: isActiveVerifiedVipTxn ? 'active' : 'none',
         subscriptionStartDate: t.status === 'verified' ? (t.verifiedAt || t.createdAt) : undefined,
         subscriptionExpiryDate: t.status === 'verified' ? t.expiresAt : undefined,
         paymentStatus: t.status === 'verified' ? 'verified' : t.status === 'pending_verification' ? 'pending_verification' : 'unpaid',
@@ -1388,10 +1686,19 @@ export async function syncAllAppDataWithSupabase(localState: {
       if (!tk || !tk.userId || tk.userId === 'guest') continue;
       const uEmail = (tk.userEmail || '').trim().toLowerCase();
       if (isActivityUserDeleted(tk.userId, uEmail, tk.userPhone)) continue;
-      const isGoogle = String(tk.userId).startsWith('google-') || uEmail.endsWith('@gmail.com');
+      const isGoogle = String(tk.userId).startsWith('google-');
+      let tkExpiryIso: string | undefined;
+      if (tk.vipApproved && tk.status === 'resolved') {
+        const baseMs = parseSafeDateMs(tk.vipApprovedAt || tk.updatedAt || tk.createdAt) || Date.now();
+        const days = typeof tk.durationDays === 'number' && tk.durationDays >= 1 ? tk.durationDays : 30;
+        const calcExpMs = baseMs + days * 24 * 60 * 60 * 1000;
+        if (calcExpMs > Date.now()) {
+          tkExpiryIso = new Date(calcExpMs).toISOString();
+        }
+      }
       recoveredUsersFromActivity.push({
         id: tk.userId,
-        name: tk.userName || (uEmail ? uEmail.split('@')[0] : 'Member'),
+        name: tk.userName || tk.username || (uEmail ? uEmail.split('@')[0] : 'Member'),
         email: uEmail,
         phone: tk.userPhone || undefined,
         role: tk.userRole === 'owner' ? 'owner' : 'user',
@@ -1399,9 +1706,20 @@ export async function syncAllAppDataWithSupabase(localState: {
         authProvider: isGoogle ? 'google' : 'email',
         linkedProviders: [isGoogle ? 'google' : 'email'],
         isVerified: true,
-        createdAt: tk.createdAt ? tk.createdAt.split('T')[0] : '2026-01-01',
+        createdAt: tk.createdAt ? tk.createdAt.split('T')[0].split(' ')[0] : '2026-01-01',
         registeredAtIso: tk.createdAt || '2026-01-01T00:00:00.000Z',
         lastActiveAt: tk.updatedAt || tk.createdAt,
+        ...(tkExpiryIso
+          ? {
+              membershipTier: 'premium_vip' as const,
+              subscriptionStatus: 'active' as const,
+              subscriptionStartDate: tk.vipApprovedAt || tk.updatedAt || tk.createdAt,
+              subscriptionExpiryDate: tkExpiryIso,
+              paymentStatus: 'verified' as const,
+              paymentMethod: 'KHQR' as const,
+              transactionRef: tk.paymentRef,
+            }
+          : {}),
       });
     }
 
@@ -1447,29 +1765,43 @@ export async function syncAllAppDataWithSupabase(localState: {
       mergedDeletedUsers
     );
 
-    // 2b. Reconcile verified VIP transactions against mergedUsers (matching canonical ID, legacyIds, or email)
+    // 2b. Reconcile verified VIP transactions against mergedUsers (matching canonical ID, legacyIds, email, or phone)
     for (let i = 0; i < mergedUsers.length; i++) {
       const usr = mergedUsers[i];
       if (usr.role === 'admin' || usr.subscriptionStatus === 'cancelled') continue;
       const usrEmail = (usr.email || '').toLowerCase().trim();
+      const usrPhone = (usr.phone || '').replace(/[\s-+()]/g, '');
       const usrIdSet = new Set<string>([usr.id, ...(Array.isArray(usr.legacyIds) ? usr.legacyIds : [])]);
+      if (usrEmail && usrEmail.includes('@')) {
+        const slug = usrEmail.replace(/[^a-z0-9]/g, '_');
+        usrIdSet.add(`user-${slug}`);
+        usrIdSet.add(`google-${slug}`);
+        usrIdSet.add(`owner-${slug}`);
+      }
 
       const verifiedFutureTxns = allTxnsCombined.filter(t => {
-        if (!t || t.status !== 'verified' || !t.expiresAt) return false;
-        const expMs = new Date(t.expiresAt).getTime();
-        if (Number.isNaN(expMs) || expMs <= Date.now()) return false;
+        if (!t || t.status !== 'verified' || t.type === 'additional_store_slot' || !t.expiresAt) return false;
+        const expMs = parseSafeDateMs(t.expiresAt);
+        if (expMs <= Date.now()) return false;
+        const tPhone = (t.phone || t.ownerPhone || '').replace(/[\s-+()]/g, '');
         return (
           (t.userId && usrIdSet.has(t.userId)) ||
           (t.ownerId && usrIdSet.has(t.ownerId)) ||
-          (usrEmail && t.userEmail && t.userEmail.toLowerCase().trim() === usrEmail)
+          (usrEmail && t.userEmail && t.userEmail.toLowerCase().trim() === usrEmail) ||
+          (usrPhone.length >= 7 && tPhone === usrPhone)
         );
       });
       if (verifiedFutureTxns.length > 0) {
-        verifiedFutureTxns.sort((a, b) => new Date(b.expiresAt!).getTime() - new Date(a.expiresAt!).getTime());
+        verifiedFutureTxns.sort((a, b) => parseSafeDateMs(b.expiresAt) - parseSafeDateMs(a.expiresAt));
         const bestTxn = verifiedFutureTxns[0];
-        const currentExpMs = usr.subscriptionExpiryDate ? new Date(usr.subscriptionExpiryDate).getTime() : 0;
-        const txnExpMs = new Date(bestTxn.expiresAt!).getTime();
-        if (usr.membershipTier !== 'premium_vip' || usr.subscriptionStatus !== 'active' || txnExpMs > currentExpMs) {
+        const currentExpMs = parseSafeDateMs(usr.subscriptionExpiryDate);
+        const txnExpMs = parseSafeDateMs(bestTxn.expiresAt);
+        if (
+          usr.membershipTier !== 'premium_vip' ||
+          usr.subscriptionStatus !== 'active' ||
+          usr.paymentStatus !== 'verified' ||
+          txnExpMs > currentExpMs
+        ) {
           mergedUsers[i] = {
             ...usr,
             membershipTier: 'premium_vip',
@@ -1564,15 +1896,21 @@ export async function syncAllAppDataWithSupabase(localState: {
       if (!existing) {
         txnMap.set(t.id, t);
       } else {
+        const bestProofUrl =
+          t.paymentProofUrl?.startsWith('data:image/')
+            ? t.paymentProofUrl
+            : existing.paymentProofUrl?.startsWith('data:image/')
+            ? existing.paymentProofUrl
+            : t.paymentProofUrl || existing.paymentProofUrl;
         if (existing.status !== 'pending_verification' && t.status === 'pending_verification') {
-          txnMap.set(t.id, existing);
+          txnMap.set(t.id, { ...existing, paymentProofUrl: bestProofUrl });
         } else {
-          txnMap.set(t.id, { ...existing, ...t });
+          txnMap.set(t.id, { ...existing, ...t, paymentProofUrl: bestProofUrl });
         }
       }
     }
     const mergedTransactions = Array.from(txnMap.values()).sort(
-      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      (a, b) => parseSafeDateMs(b.createdAt) - parseSafeDateMs(a.createdAt)
     );
 
     // 4. Merge Custom & Google Maps Smart-Cached Restaurants by ID (excluding built-in rest-1..250 seeds, deleted users' shops, and permanently deleted shop IDs)

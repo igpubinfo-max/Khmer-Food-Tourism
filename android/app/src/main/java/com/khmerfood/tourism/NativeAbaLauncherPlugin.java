@@ -148,7 +148,9 @@ public class NativeAbaLauncherPlugin extends Plugin {
         long now = System.currentTimeMillis();
         if (now - lastSaveTimestampMs < 2500 && fileName.equals(lastSavedFileName)) {
             JSObject dupRet = new JSObject();
+            dupRet.put("saved", true);
             dupRet.put("success", true);
+            dupRet.put("duplicate", true);
             dupRet.put("duplicatePrevented", true);
             dupRet.put("fileName", fileName);
             call.resolve(dupRet);
@@ -156,17 +158,33 @@ public class NativeAbaLauncherPlugin extends Plugin {
         }
 
         try {
+            String headerPart = "";
             String cleanBase64 = base64Data;
             int commaIdx = cleanBase64.indexOf(',');
             if (commaIdx != -1) {
+                headerPart = cleanBase64.substring(0, commaIdx).toLowerCase();
                 cleanBase64 = cleanBase64.substring(commaIdx + 1);
             }
 
             byte[] decodedBytes = Base64.decode(cleanBase64, Base64.DEFAULT);
-            Bitmap bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
-            if (bitmap == null) {
+            if (decodedBytes == null || decodedBytes.length < 32) {
                 call.reject("Could not decode QR image bytes");
                 return;
+            }
+
+            // Detect original MIME type (PNG vs JPEG) and write raw bytes 100% losslessly without recompression
+            boolean isPng = headerPart.contains("image/png") ||
+                (decodedBytes.length > 8 &&
+                 (decodedBytes[0] & 0xFF) == 0x89 &&
+                 (decodedBytes[1] & 0xFF) == 0x50 &&
+                 (decodedBytes[2] & 0xFF) == 0x4E &&
+                 (decodedBytes[3] & 0xFF) == 0x47);
+            String mimeType = isPng ? "image/png" : "image/jpeg";
+            String finalFileName = fileName;
+            if (isPng && !finalFileName.toLowerCase().endsWith(".png")) {
+                finalFileName = finalFileName + ".png";
+            } else if (!isPng && !finalFileName.toLowerCase().endsWith(".jpg") && !finalFileName.toLowerCase().endsWith(".jpeg")) {
+                finalFileName = finalFileName + ".jpg";
             }
 
             ContentResolver resolver = context.getContentResolver();
@@ -174,8 +192,8 @@ public class NativeAbaLauncherPlugin extends Plugin {
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 ContentValues values = new ContentValues();
-                values.put(MediaStore.Images.Media.DISPLAY_NAME, fileName);
-                values.put(MediaStore.Images.Media.MIME_TYPE, "image/png");
+                values.put(MediaStore.Images.Media.DISPLAY_NAME, finalFileName);
+                values.put(MediaStore.Images.Media.MIME_TYPE, mimeType);
                 values.put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/KhmerFoodTourism");
                 values.put(MediaStore.Images.Media.IS_PENDING, 1);
 
@@ -186,10 +204,12 @@ public class NativeAbaLauncherPlugin extends Plugin {
                 }
 
                 try (OutputStream out = resolver.openOutputStream(savedUri)) {
-                    if (out == null || !bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)) {
-                        call.reject("Failed to write PNG stream to Gallery");
+                    if (out == null) {
+                        call.reject("Failed to open Gallery output stream");
                         return;
                     }
+                    out.write(decodedBytes);
+                    out.flush();
                 }
 
                 values.clear();
@@ -201,15 +221,15 @@ public class NativeAbaLauncherPlugin extends Plugin {
                 if (!appDir.exists()) {
                     appDir.mkdirs();
                 }
-                File imageFile = new File(appDir, fileName);
+                File imageFile = new File(appDir, finalFileName);
                 try (FileOutputStream fos = new FileOutputStream(imageFile)) {
-                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
+                    fos.write(decodedBytes);
                     fos.flush();
                 }
                 MediaScannerConnection.scanFile(
                     context,
                     new String[]{ imageFile.getAbsolutePath() },
-                    new String[]{ "image/png" },
+                    new String[]{ mimeType },
                     null
                 );
                 savedUri = Uri.fromFile(imageFile);
@@ -219,8 +239,9 @@ public class NativeAbaLauncherPlugin extends Plugin {
             lastSavedFileName = fileName;
 
             JSObject ret = new JSObject();
+            ret.put("saved", true);
             ret.put("success", true);
-            ret.put("fileName", fileName);
+            ret.put("fileName", finalFileName);
             ret.put("uri", savedUri != null ? savedUri.toString() : "");
             call.resolve(ret);
         } catch (Exception e) {
@@ -527,17 +548,17 @@ public class NativeAbaLauncherPlugin extends Plugin {
                 }
             }
 
-            File outFile = new File(shareDir, "kft_share_" + now + ".jpg");
             String trimmed = photoUrl.trim();
+            boolean isPngAsset = trimmed.toLowerCase().startsWith("data:image/png") || trimmed.toLowerCase().endsWith(".png");
+            File outFile = new File(shareDir, "kft_share_" + now + (isPngAsset ? ".png" : ".jpg"));
 
             if (trimmed.startsWith("data:image/")) {
                 int commaIdx = trimmed.indexOf(',');
                 String base64Part = commaIdx != -1 ? trimmed.substring(commaIdx + 1) : trimmed;
                 byte[] decoded = Base64.decode(base64Part, Base64.DEFAULT);
-                Bitmap bmp = BitmapFactory.decodeByteArray(decoded, 0, decoded.length);
-                if (bmp != null) {
+                if (decoded != null && decoded.length > 32) {
                     try (FileOutputStream fos = new FileOutputStream(outFile)) {
-                        bmp.compress(Bitmap.CompressFormat.JPEG, 92, fos);
+                        fos.write(decoded);
                         fos.flush();
                     }
                     return outFile;

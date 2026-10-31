@@ -1,7 +1,7 @@
 export const APP_VERSION = 'v2.5.0';
 export const APP_VERSION_NAME = '2.5.0';
 declare const __KFT_BUILD_CODE__: number | undefined;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1268;
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1269;
 export const APP_RELEASE_DATE = '2026-10-31';
 
 export interface GoogleMapsPlaceMetadata {
@@ -812,28 +812,64 @@ export const isCustomRestaurant = (restaurant?: Restaurant | null): boolean => {
   return !isSeedRestaurantId(restaurant.id);
 };
 
-// Helper to determine whether a restaurant is a GPIP / VIP registered restaurant
-// (retains full restaurant profile, photos, and detailed information) vs an unregistered directory restaurant
+// Safe cross-platform date parser (normalizes "YYYY-MM-DD HH:mm" and "YYYY-MM-DD" across strict Android/iOS WebViews)
+export const parseSafeDateMs = (raw?: string | null): number => {
+  if (!raw || typeof raw !== 'string') return 0;
+  const trimmed = raw.trim();
+  if (!trimmed) return 0;
+  let normalized = trimmed;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+    normalized = `${trimmed}T23:59:59`;
+  } else if (/^\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}(:\d{2})?$/.test(trimmed)) {
+    const withT = trimmed.replace(/\s+/, 'T');
+    normalized = withT.length === 16 ? `${withT}:00` : withT;
+  }
+  const parsed = Date.parse(normalized);
+  if (!Number.isNaN(parsed)) return parsed;
+  const fallback = new Date(trimmed).getTime();
+  return Number.isNaN(fallback) ? 0 : fallback;
+};
+
+// Helper to determine whether a restaurant is an officially registered app partner restaurant
+// (retains full restaurant profile, photos, and detailed information inside the app)
+// vs an unregistered directory / Google Maps restaurant (opens Google Maps directly on tap).
 export const isGpipRegisteredRestaurant = (restaurant?: Partial<Restaurant> | null): boolean => {
   if (!restaurant || !restaurant.id) return false;
-  if (!isSeedRestaurantId(restaurant.id)) return true;
+  const rId = String(restaurant.id);
+  const hasRealOwner =
+    Boolean(restaurant.ownerId && restaurant.ownerId !== 'owner-1' && !restaurant.ownerId.startsWith('seed-')) ||
+    Boolean(restaurant.ownerEmail && restaurant.ownerEmail.trim().length > 0);
+
   if (restaurant.dataSource === 'vip_owner') return true;
-  if (restaurant.ownerId && restaurant.ownerId !== 'owner-1') return true;
-  if (restaurant.ownerEmail && restaurant.ownerEmail.trim().length > 0) return true;
-  if (restaurant.membershipTier === 'premium' || restaurant.isPromoted) return true;
-  if (Array.isArray(restaurant.menuItems) && restaurant.menuItems.length > 0) return true;
-  if (restaurant.replacedFromRestaurantId) return true;
-  return false;
+  if (restaurant.replacedFromRestaurantId && hasRealOwner) return true;
+
+  if (isSeedRestaurantId(rId)) {
+    return hasRealOwner;
+  }
+
+  // Raw Google Maps imported directory listings without a registered app owner open Google Maps directly
+  if (
+    !hasRealOwner &&
+    (restaurant.dataSource === 'google_maps' || rId.startsWith('gmap-') || rId.startsWith('gplace'))
+  ) {
+    return false;
+  }
+
+  return true;
 };
 
 export const getRestaurantGoogleExternalUrl = (
   restaurant: Partial<Restaurant>,
-  mode: 'search' | 'maps' = 'search'
+  mode: 'search' | 'maps' = 'maps'
 ): string => {
   const name = (restaurant.nameKh || restaurant.nameEn || '').trim();
   const province = (restaurant.provinceKh || restaurant.provinceEn || '').trim();
   const query = [name, province, 'Cambodia'].filter(Boolean).join(' ');
   if (mode === 'maps') {
+    const metaUri = restaurant.googleMapsMeta?.googleMapsUri;
+    if (metaUri && metaUri.startsWith('http')) {
+      return metaUri;
+    }
     if (
       restaurant.mapUrl &&
       (restaurant.mapUrl.includes('google.com/maps') ||
@@ -842,6 +878,18 @@ export const getRestaurantGoogleExternalUrl = (
     ) {
       return restaurant.mapUrl;
     }
+    if (
+      typeof restaurant.latitude === 'number' &&
+      typeof restaurant.longitude === 'number' &&
+      Number.isFinite(restaurant.latitude) &&
+      Number.isFinite(restaurant.longitude) &&
+      Math.abs(restaurant.latitude) > 0.01 &&
+      Math.abs(restaurant.longitude) > 0.01
+    ) {
+      return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+        query || `${restaurant.latitude},${restaurant.longitude}`
+      )}`;
+    }
     return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
   }
   return `https://www.google.com/search?q=${encodeURIComponent(query)}`;
@@ -849,10 +897,17 @@ export const getRestaurantGoogleExternalUrl = (
 
 export const openRestaurantGoogleExternal = (
   restaurant: Partial<Restaurant>,
-  mode: 'search' | 'maps' = 'search'
+  mode: 'search' | 'maps' = 'maps'
 ): void => {
   const url = getRestaurantGoogleExternalUrl(restaurant, mode);
   if (typeof window !== 'undefined') {
+    const cap = (window as any).Capacitor;
+    if (cap?.isNativePlatform?.() && cap?.Plugins?.NativeAbaLauncher?.openExternalUrl) {
+      cap.Plugins.NativeAbaLauncher.openExternalUrl({ url }).catch(() => {
+        window.open(url, '_blank', 'noopener,noreferrer');
+      });
+      return;
+    }
     window.open(url, '_blank', 'noopener,noreferrer');
   }
 };
@@ -927,8 +982,8 @@ export const isRestaurantPremiumActive = (restaurant?: Restaurant | null): boole
   if (restaurant.membershipTier !== 'premium') return false;
   if (restaurant.paymentStatus !== 'verified') return false;
   if (!restaurant.membershipExpiresAt) return false;
-  const expiryTime = new Date(restaurant.membershipExpiresAt).getTime();
-  return !isNaN(expiryTime) && expiryTime > Date.now();
+  const expiryTime = parseSafeDateMs(restaurant.membershipExpiresAt);
+  return expiryTime > Date.now();
 };
 
 export type VipAccountState = 'admin' | 'approved_vip' | 'pending_vip' | 'expired_vip' | 'regular_unpaid';
@@ -954,19 +1009,22 @@ export const isUserVipActive = (user?: User | null): boolean => {
   if (user.isDisabled) {
     return false;
   }
-  // VIP users must meet ALL criteria:
-  // 1. Membership tier must be 'premium_vip'
-  // 2. Subscription status must be 'active' (NOT pending, NOT expired, NOT cancelled)
-  // 3. Payment status must be 'verified' (approved by admin / verified payment)
-  // 4. Must have a valid subscriptionExpiryDate strictly in the future (> Date.now())
   if (
-    user.membershipTier === 'premium_vip' &&
-    user.subscriptionStatus === 'active' &&
-    user.paymentStatus === 'verified' &&
-    user.subscriptionExpiryDate
+    user.subscriptionStatus === 'cancelled' ||
+    user.subscriptionStatus === 'expired' ||
+    user.paymentStatus === 'cancelled' ||
+    user.paymentStatus === 'rejected'
   ) {
-    const expiryTime = new Date(user.subscriptionExpiryDate).getTime();
-    if (!isNaN(expiryTime) && expiryTime > Date.now()) {
+    return false;
+  }
+  if (
+    user.subscriptionExpiryDate &&
+    (user.membershipTier === 'premium_vip' || user.subscriptionStatus === 'active') &&
+    (user.paymentStatus === 'verified' ||
+      (user.membershipTier === 'premium_vip' && user.subscriptionStatus === 'active'))
+  ) {
+    const expiryTime = parseSafeDateMs(user.subscriptionExpiryDate);
+    if (expiryTime > Date.now()) {
       return true;
     }
   }
@@ -982,17 +1040,7 @@ export const getVipAccountState = (user?: User | null): VipAccountState => {
   if (isUserVipActive(user)) {
     return 'approved_vip';
   }
-  // Check if expired
-  if (user.subscriptionExpiryDate) {
-    const expiryTime = new Date(user.subscriptionExpiryDate).getTime();
-    if (!isNaN(expiryTime) && expiryTime <= Date.now()) {
-      return 'expired_vip';
-    }
-  }
-  if (user.subscriptionStatus === 'expired') {
-    return 'expired_vip';
-  }
-  // Check if pending verification/approval
+  // Check if pending verification/approval (takes precedence over old expired date if user submitted a renewal!)
   if (
     user.subscriptionStatus === 'pending' ||
     user.paymentStatus === 'paid_pending_approval' ||
@@ -1001,6 +1049,16 @@ export const getVipAccountState = (user?: User | null): VipAccountState => {
   ) {
     return 'pending_vip';
   }
+  // Check if expired
+  if (user.subscriptionExpiryDate) {
+    const expiryTime = parseSafeDateMs(user.subscriptionExpiryDate);
+    if (expiryTime > 0 && expiryTime <= Date.now()) {
+      return 'expired_vip';
+    }
+  }
+  if (user.subscriptionStatus === 'expired') {
+    return 'expired_vip';
+  }
   return 'regular_unpaid';
 };
 
@@ -1008,7 +1066,7 @@ export const getVipAccountState = (user?: User | null): VipAccountState => {
 export const getVipRemainingDays = (user?: User | null): number => {
   if (!user || isAdminAccount(user)) return 0;
   if (!isUserVipActive(user) || !user?.subscriptionExpiryDate) return 0;
-  const diffMs = new Date(user.subscriptionExpiryDate).getTime() - Date.now();
+  const diffMs = parseSafeDateMs(user.subscriptionExpiryDate) - Date.now();
   return Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
 };
 

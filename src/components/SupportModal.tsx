@@ -1,7 +1,8 @@
 import React from 'react';
-import { X, Heart, ShieldCheck, Download, Smartphone, Mail } from 'lucide-react';
+import { X, Heart, ShieldCheck, Download, Smartphone, Mail, Share2 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { tr } from '../utils/i18n';
+import { savePngDataUrlToGallery, shareQrImageNativeOrWeb } from '../utils/androidMediaHelper';
 
 export const SupportModal: React.FC = () => {
   const {
@@ -14,14 +15,23 @@ export const SupportModal: React.FC = () => {
 
   if (!isSupportModalOpen) return null;
 
-  const handleDownloadQr = () => {
-    const link = document.createElement('a');
-    link.href = appSettings.supportQrImageUrl;
-    link.download = 'DiscoverCambodia-Support-KHQR.png';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    showToast(tr(language, 'បានរក្សាទុករូបភាព KHQR រួចរាល់', 'KHQR image saved', '已保存 KHQR 收款码图片'), 'success');
+  const officialQrUrl =
+    appSettings.supportQrImageUrl && appSettings.supportQrImageUrl !== '/donation-qr.png'
+      ? appSettings.supportQrImageUrl
+      : '/images/aba_khqr_official_kimseng.png';
+
+  const handleDownloadQr = async () => {
+    try {
+      const res = await savePngDataUrlToGallery(officialQrUrl, 'ABA-KHQR-KIMSENG-CHEA-095245959.png');
+      showToast(
+        res.duplicate
+          ? tr(language, '✅ រូបភាព ABA QR ច្បាប់ដើមមាននៅក្នុង Gallery / Photos រួចហើយ!', '✅ Original ABA QR image is already in Gallery/Photos!', '✅ 原始 ABA 二维码图片已在相册中！')
+          : tr(language, '✅ បានរក្សាទុករូបភាព ABA QR ច្បាប់ដើមទៅក្នុង Gallery / Photos រួចរាល់!', '✅ Saved original ABA QR image to Gallery/Photos!', '✅ 已保存原始 ABA 二维码图片到相册！'),
+        'success'
+      );
+    } catch {
+      showToast(tr(language, 'សូមថតអេក្រង់រូបភាព QR ដើម្បីរក្សាទុក', 'Please screenshot QR to save', '请截图保存二维码'), 'warning');
+    }
   };
 
   return (
@@ -82,18 +92,23 @@ export const SupportModal: React.FC = () => {
                 <span className="text-[10px] bg-red-100 text-red-700 font-bold px-2 py-0.5 rounded-full">KHR & USD</span>
               </div>
 
-              <div className="relative rounded-xl overflow-hidden border border-stone-200 bg-white p-1">
+              <button
+                type="button"
+                onClick={handleDownloadQr}
+                title={tr(language, 'ចុចលើរូប QR ដើម្បីរក្សាទុកក្នុង Gallery / Photos', 'Tap QR to save original image to Gallery/Photos', '点击二维码保存原图到相册')}
+                className="relative w-full rounded-xl overflow-hidden border border-stone-200 bg-white p-0 cursor-pointer active:scale-[0.985] transition block"
+              >
                 <img
-                  src={appSettings.supportQrImageUrl}
-                  alt="KHQR Support QR Code"
+                  src={officialQrUrl}
+                  alt="ABA KHQR — KIMSENG CHEA"
                   loading="lazy"
                   decoding="async"
-                  className="w-full h-auto object-contain rounded-lg"
+                  className="w-full h-auto object-contain rounded-lg block"
                   onError={(e) => {
-                    (e.target as HTMLImageElement).src = '/donation-qr.png';
+                    (e.target as HTMLImageElement).src = '/images/aba_khqr_official_kimseng.png';
                   }}
                 />
-              </div>
+              </button>
 
               <div className="mt-3 text-left bg-stone-50 p-2.5 rounded-xl border border-stone-100 space-y-1">
                 <div className="text-[10px] text-stone-500 font-khmer">

@@ -4,7 +4,7 @@ import {
   X, Crown, Sparkles, AlertCircle, RefreshCw, 
   ShieldCheck, Star, Clock,
   QrCode, ExternalLink, CheckCircle2,
-  Download, Copy, Check, ArrowRight, ShieldAlert, BadgeCheck,
+  Download, Copy, Check, ArrowRight, ShieldAlert, BadgeCheck, Share2,
   CheckCircle, XCircle, Upload, Image as ImageIcon, Camera, Trash2, MessageSquareWarning
 } from 'lucide-react';
 import { 
@@ -14,6 +14,7 @@ import {
 } from '../types';
 import {
   savePngDataUrlToGallery,
+  shareQrImageNativeOrWeb,
   pickImageUsingNativeAndroidGallery,
 } from '../utils/androidMediaHelper';
 import { Capacitor } from '@capacitor/core';
@@ -115,7 +116,7 @@ export const UpgradeVipModal: React.FC = () => {
   const [submittedTxnId, setSubmittedTxnId] = useState('');
   const [submissionTimestamp, setSubmissionTimestamp] = useState('');
   const [hasCopiedAccount, setHasCopiedAccount] = useState(false);
-  const [qrCodeDataUrl] = useState<string>('/images/aba_qr_code_only.png');
+  const [qrCodeDataUrl] = useState<string>('/images/aba_khqr_official_kimseng.png');
   const [customTxnRef, setCustomTxnRef] = useState<string>(() => 
     `ABA-KHQR-30D-${Date.now().toString(36).toUpperCase()}`
   );
@@ -131,16 +132,21 @@ export const UpgradeVipModal: React.FC = () => {
   const proofGalleryInputRef = useRef<HTMLInputElement | null>(null);
   const proofCameraInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Find latest VIP transaction for this user from persisted database
+  // Find latest VIP transaction for this user from persisted database (case-insensitive email & legacyIds safe)
   const userLatestVipTxn = useMemo(() => {
     if (!currentUser) return undefined;
-    return transactions.find(
-      t => t.type === 'user_vip_upgrade' && (t.userId === currentUser.id || t.userEmail === currentUser.email)
-    );
+    const curEmail = (currentUser.email || '').trim().toLowerCase();
+    const curIdSet = new Set([currentUser.id, ...(currentUser.legacyIds || [])].filter(Boolean));
+    return transactions.find(t => {
+      if (!t || t.type !== 'user_vip_upgrade') return false;
+      if (t.userId && curIdSet.has(t.userId)) return true;
+      if (t.ownerId && curIdSet.has(t.ownerId)) return true;
+      if (curEmail && t.userEmail && t.userEmail.trim().toLowerCase() === curEmail) return true;
+      return false;
+    });
   }, [transactions, currentUser]);
 
-  // Synchronize UI when modal opens: ALWAYS open cleanly into AWAITING_PAYMENT (or APPROVED if already active VIP and not renewing)
-  // Never show stale REJECTED or PAYMENT_FAILED error screens when the user clicks "Upgrade to VIP"!
+  // Synchronize UI when modal opens AND react live when Admin approves VIP in background
   useEffect(() => {
     if (!isUpgradeVipModalOpen) return;
     refreshAppSettingsFromServer(true);
@@ -161,12 +167,26 @@ export const UpgradeVipModal: React.FC = () => {
       setSubmissionTimestamp(userLatestVipTxn.createdAt);
     }
 
-    if (isUserVipActive(currentUser) && currentUser.paymentStatus === 'verified') {
+    if (isUserVipActive(currentUser)) {
       setPaymentState('APPROVED');
+    } else if (userLatestVipTxn?.status === 'needs_more_info') {
+      setPaymentState('NEEDS_MORE_INFO');
+    } else if (userLatestVipTxn?.status === 'pending_verification' && paymentState === 'PENDING_ADMIN_APPROVAL') {
+      setPaymentState('PENDING_ADMIN_APPROVAL');
     } else {
       setPaymentState('AWAITING_PAYMENT');
     }
-  }, [isUpgradeVipModalOpen, isVipRenewMode]);
+  }, [
+    isUpgradeVipModalOpen,
+    isVipRenewMode,
+    currentUser?.id,
+    currentUser?.membershipTier,
+    currentUser?.subscriptionStatus,
+    currentUser?.subscriptionExpiryDate,
+    currentUser?.paymentStatus,
+    userLatestVipTxn?.id,
+    userLatestVipTxn?.status,
+  ]);
 
   if (!isUpgradeVipModalOpen) return null;
 
@@ -237,16 +257,24 @@ export const UpgradeVipModal: React.FC = () => {
 
   const handleSaveQrImage = async () => {
     try {
-      const fileName = `ABA-KHQR-CHEA-KIMSENG-${selectedPlan.days}Days-${selectedPlan.priceUsd.toFixed(2)}.png`;
+      const fileName = `ABA-KHQR-KIMSENG-CHEA-095245959.png`;
       const result = await savePngDataUrlToGallery(qrCodeDataUrl, fileName);
       showToast(
         result.duplicate
-          ? tr(language, '✅ រូបភាពកូដ QR នេះត្រូវបានរក្សាទុករួចហើយនៅក្នុងបណ្ណាល័យរូបភាព!', '✅ QR image is already saved in your Gallery!', '✅ 二维码图片已保存在相册中！')
-          : tr(language, '✅ បានរក្សាទុករូបភាពកូដ QR ទៅក្នុងបណ្ណាល័យរូបភាពរួចរាល់!', '✅ QR saved to Gallery!', '✅ 二维码已保存到相册！'),
+          ? tr(language, '✅ រូបភាព ABA QR ច្បាប់ដើមត្រូវបានរក្សាទុករួចហើយនៅក្នុង Gallery / Photos!', '✅ Original ABA QR image is already saved in your Gallery/Photos!', '✅ 原始 ABA 二维码图片已保存在相册中！')
+          : tr(language, '✅ បានទាញយក និងរក្សាទុករូបភាព ABA QR ច្បាប់ដើមទៅក្នុង Gallery / Photos រួចរាល់!', '✅ Saved original ABA QR image directly to Gallery/Photos!', '✅ 原始 ABA 二维码已保存到手机相册！'),
         'success'
       );
     } catch (err: any) {
       showToast(err?.message || tr(language, 'សូមថតអេក្រង់រូបភាពកូដ QR ដើម្បីស្កេន', 'Please screenshot QR to scan', '请截图保存二维码进行扫描'), 'warning');
+    }
+  };
+
+  const handleShareQrImage = async () => {
+    try {
+      await shareQrImageNativeOrWeb(qrCodeDataUrl, 'ABA KHQR — KIMSENG CHEA (095 245 959)');
+    } catch {
+      handleSaveQrImage();
     }
   };
 
@@ -1012,41 +1040,64 @@ export const UpgradeVipModal: React.FC = () => {
                   </span>
                 </div>
 
-                <div className="flex flex-col items-center gap-3">
-                  <div
-                    onClick={handleLaunchAbaApp}
-                    className="relative p-3 bg-white rounded-3xl shadow-md border-2 border-emerald-500/45 w-56 h-56 sm:w-64 sm:h-64 mx-auto flex items-center justify-center cursor-pointer active:scale-98 transition"
+                <div className="flex flex-col items-center gap-2.5">
+                  <button
+                    type="button"
+                    onClick={handleSaveQrImage}
+                    title={tr(language, 'ចុចលើរូប QR ដើម្បីរក្សាទុកទៅក្នុង Gallery / Photos', 'Tap QR code to save original image to Gallery/Photos', '点击二维码保存原图到手机相册')}
+                    className="group relative w-64 sm:w-72 max-w-full mx-auto rounded-2xl overflow-hidden shadow-md border-2 border-emerald-500/50 hover:border-emerald-500 bg-white cursor-pointer active:scale-[0.985] transition block p-0"
                   >
                     <img
                       src={qrCodeDataUrl}
-                      alt="ABA KHQR"
-                      className="w-full h-full object-contain rounded-xl block bg-white"
-                      style={{ imageRendering: 'crisp-edges' }}
+                      alt="ABA KHQR — KIMSENG CHEA"
+                      className="w-full h-auto object-contain block bg-white select-none"
                     />
+                  </button>
+                  <div
+                    onClick={handleSaveQrImage}
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-700/70 text-[11px] font-bold text-emerald-800 dark:text-emerald-300 cursor-pointer hover:bg-emerald-100 dark:hover:bg-emerald-900/60 transition"
+                  >
+                    <Download className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                    <span>
+                      {tr(
+                        language,
+                        'ចុចលើរូប ABA QR ដើម្បីរក្សាទុកក្នុង Gallery / Photos',
+                        'Tap ABA QR to save original image to Gallery/Photos',
+                        '点击 ABA 二维码将原图保存至手机相册'
+                      )}
+                    </span>
                   </div>
 
                   <div className="w-full space-y-2">
                     <div className="px-3 py-2 rounded-2xl bg-sky-50 dark:bg-slate-800/80 border border-sky-200 dark:border-slate-700 flex items-center justify-between gap-2">
                       <div className="text-xs font-bold text-slate-700 dark:text-slate-200 leading-snug">
-                        {tr(language, 'ឈ្មោះគណនី៖ ជា គីមសេង', 'Account: CHEA KIMSENG', '账户：CHEA KIMSENG')}
+                        {tr(language, 'ឈ្មោះគណនី៖ KIMSENG CHEA', 'Account: KIMSENG CHEA', '账户：KIMSENG CHEA')}
                       </div>
                       <div className="font-mono font-extrabold text-sm text-[#004B87] dark:text-sky-400 leading-tight shrink-0">
                         095 245 959
                       </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-3 gap-1.5">
                       <button
                         type="button"
                         onClick={handleSaveQrImage}
-                        className="py-2.5 px-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer border border-slate-200 dark:border-slate-700"
+                        className="py-2.5 px-2 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center justify-center gap-1 transition active:scale-95 cursor-pointer shadow-sm"
                       >
-                        <Download className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                        <span className="truncate">{tr(language, 'រក្សាទុកកូដ QR', 'Save QR', '保存二维码')}</span>
+                        <Download className="w-3.5 h-3.5 shrink-0" />
+                        <span className="truncate">{tr(language, 'រក្សាទុក QR', 'Save QR', '保存二维码')}</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleShareQrImage}
+                        className="py-2.5 px-2 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold flex items-center justify-center gap-1 transition active:scale-95 cursor-pointer border border-slate-200 dark:border-slate-700"
+                      >
+                        <Share2 className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400 shrink-0" />
+                        <span className="truncate">{tr(language, 'ចែករំលែក QR', 'Share QR', '分享二维码')}</span>
                       </button>
                       <button
                         type="button"
                         onClick={handleCopyAccount}
-                        className="py-2.5 px-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer border border-slate-200 dark:border-slate-700"
+                        className="py-2.5 px-2 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold flex items-center justify-center gap-1 transition active:scale-95 cursor-pointer border border-slate-200 dark:border-slate-700"
                       >
                         {hasCopiedAccount ? (
                           <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
@@ -1056,7 +1107,7 @@ export const UpgradeVipModal: React.FC = () => {
                         <span className="truncate">
                           {hasCopiedAccount
                             ? tr(language, 'បានចម្លង!', 'Copied!', '已复制！')
-                            : tr(language, 'ចម្លង 095 245 959', 'Copy 095 245 959', '复制 095 245 959')}
+                            : tr(language, 'ចម្លងលេខ', 'Copy Acc', '复制账号')}
                         </span>
                       </button>
                     </div>

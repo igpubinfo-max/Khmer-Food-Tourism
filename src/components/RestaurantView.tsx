@@ -3,11 +3,11 @@ import { useApp } from '../context/AppContext';
 import { RestaurantCard } from './RestaurantCard';
 import { Restaurant, sortRestaurantsWithVipRotation, isAdminAccount, getVipFeaturedRotationConfig } from '../types';
 import { shuffleForCurrentSession } from '../utils/sessionShuffle';
-import { Store, Plus, CheckCircle2, AlertCircle, Edit2, Shield, Settings, MapPin, Globe, RefreshCw } from 'lucide-react';
+import { Store, Plus, CheckCircle2, AlertCircle, Edit2, Shield, Settings, MapPin, Globe, RefreshCw, Search, X } from 'lucide-react';
 import { normalizeKhmerSearchText } from '../services/googlePlacesService';
 import { tr, translateProvince } from '../utils/i18n';
 
-const RESTAURANT_BATCH_SIZE = 20;
+const RESTAURANT_BATCH_SIZE = 40;
 
 export const RestaurantView: React.FC = () => {
   const {
@@ -47,6 +47,7 @@ export const RestaurantView: React.FC = () => {
   const [priceFilter] = useState<string>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [verifiedFilter, setVerifiedFilter] = useState<'all' | 'verified' | 'unverified'>('all');
+  const [shopSearchQuery, setShopSearchQuery] = useState<string>('');
   const [visibleCount, setVisibleCount] = useState<number>(RESTAURANT_BATCH_SIZE);
   const loadMoreTriggerRef = useRef<HTMLDivElement | null>(null);
 
@@ -116,7 +117,7 @@ export const RestaurantView: React.FC = () => {
 
   useEffect(() => {
     setVisibleCount(RESTAURANT_BATCH_SIZE);
-  }, [selectedProvince, priceFilter, categoryFilter, verifiedFilter]);
+  }, [selectedProvince, priceFilter, categoryFilter, verifiedFilter, shopSearchQuery]);
 
   const provinces = [
     { id: '', nameKh: 'គ្រប់ទីតាំង', nameEn: 'All Locations' },
@@ -138,11 +139,9 @@ export const RestaurantView: React.FC = () => {
     [restaurants]
   );
 
-  const filteredRestaurants = useMemo(() => {
-    const cleanSelProv = (selectedProvince || '').replace(/^រាជធានី|^ខេត្ត/g, '').trim();
-    const seenNames = new Set<string>();
+  const validDirectoryRestaurants = useMemo(() => {
+    const seenIds = new Set<string>();
     return sessionShuffledRestaurants.filter((r) => {
-      // Strictly exclude any non-restaurant records (food dishes or tourist attractions)
       if (!r || !r.id || String(r.id).startsWith('food-') || String(r.id).startsWith('dest-')) {
         return false;
       }
@@ -155,6 +154,19 @@ export const RestaurantView: React.FC = () => {
       if (r.status !== 'approved' && currentUser?.role !== 'admin' && currentUser?.id !== r.ownerId) {
         return false;
       }
+      const idStr = String(r.id);
+      if (seenIds.has(idStr)) return false;
+      seenIds.add(idStr);
+      return true;
+    });
+  }, [sessionShuffledRestaurants, currentUser?.role, currentUser?.id]);
+
+  const filteredRestaurants = useMemo(() => {
+    const cleanSelProv = (selectedProvince || '').replace(/^រាជធានី|^ខេត្ត/g, '').trim();
+    const normQuery = normalizeKhmerSearchText(shopSearchQuery);
+    const rawQueryLower = shopSearchQuery.trim().toLowerCase();
+
+    return validDirectoryRestaurants.filter((r) => {
       if (verifiedFilter === 'verified' && !r.isVerified) return false;
       if (verifiedFilter === 'unverified' && r.isVerified) return false;
       if (cleanSelProv && !r.provinceKh.replace(/^រាជធានី|^ខេត្ត/g, '').includes(cleanSelProv)) {
@@ -166,13 +178,16 @@ export const RestaurantView: React.FC = () => {
       if (categoryFilter !== 'all' && classifyRestaurantCategory(r) !== categoryFilter) {
         return false;
       }
-      // Deduplicate by normalized Khmer+English name within the same province
-      const dedupKey = `${normalizeKhmerSearchText(r.nameKh)}|${normalizeKhmerSearchText(r.provinceKh)}`;
-      if (seenNames.has(dedupKey)) return false;
-      seenNames.add(dedupKey);
+      if (normQuery || rawQueryLower) {
+        const hayRaw = `${r.nameKh || ''} ${r.nameEn || ''} ${r.provinceKh || ''} ${r.provinceEn || ''} ${r.addressKh || ''} ${(r.signatureDishesKh || []).join(' ')}`.toLowerCase();
+        const hayNorm = normalizeKhmerSearchText(hayRaw);
+        if (!hayRaw.includes(rawQueryLower) && (!normQuery || !hayNorm.includes(normQuery))) {
+          return false;
+        }
+      }
       return true;
     });
-  }, [sessionShuffledRestaurants, currentUser?.role, currentUser?.id, verifiedFilter, selectedProvince, priceFilter, categoryFilter]);
+  }, [validDirectoryRestaurants, verifiedFilter, selectedProvince, priceFilter, categoryFilter, shopSearchQuery]);
 
   const sortedRestaurants = useMemo(
     () => sortRestaurantsWithVipRotation(filteredRestaurants, users, appSettings),
@@ -201,20 +216,27 @@ export const RestaurantView: React.FC = () => {
     return () => observer.disconnect();
   }, [visibleCount, sortedRestaurants.length]);
 
-  const { verifiedCount, sampleCount, pendingCount } = useMemo(() => {
+  const { totalDirectoryCount, verifiedCount, unverifiedCount, pendingCount } = useMemo(() => {
     let v = 0;
+    for (const r of validDirectoryRestaurants) {
+      if (r.isVerified) v++;
+    }
     let p = 0;
     for (const r of restaurants) {
-      if (r.isVerified) v++;
       if (r.status === 'pending') p++;
     }
-    return { verifiedCount: v, sampleCount: restaurants.length - v, pendingCount: p };
-  }, [restaurants]);
+    return {
+      totalDirectoryCount: validDirectoryRestaurants.length,
+      verifiedCount: v,
+      unverifiedCount: validDirectoryRestaurants.length - v,
+      pendingCount: p,
+    };
+  }, [validDirectoryRestaurants, restaurants]);
 
   const rotCfg = getVipFeaturedRotationConfig(appSettings);
 
   return (
-    <div className="max-w-md mx-auto px-4 py-3 space-y-4 pb-6">
+    <div className="max-w-md mx-auto px-4 py-3 space-y-3 pb-6">
       {/* Title Bar */}
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
@@ -225,9 +247,9 @@ export const RestaurantView: React.FC = () => {
           <p className="text-[11px] text-slate-500 font-khmer mt-0.5">
             {tr(
               language,
-              `បង្ហាញ ${filteredRestaurants.length} / ${restaurants.length} ហាង (${verifiedCount} ផ្ទៀងផ្ទាត់ផ្លូវការ)`,
-              `Showing ${filteredRestaurants.length} of ${restaurants.length} (${verifiedCount} verified)`,
-              `显示 ${filteredRestaurants.length} / ${restaurants.length} 家店铺（${verifiedCount} 家官方认证）`
+              `បង្ហាញ ${filteredRestaurants.length} / ${totalDirectoryCount} ហាង (${verifiedCount} ផ្ទៀងផ្ទាត់ • ${unverifiedCount} មិនទាន់ផ្ទៀងផ្ទាត់)`,
+              `Showing ${filteredRestaurants.length} of ${totalDirectoryCount} (${verifiedCount} verified • ${unverifiedCount} unverified)`,
+              `显示 ${filteredRestaurants.length} / ${totalDirectoryCount} 家店铺（${verifiedCount} 已认证 • ${unverifiedCount} 未认证）`
             )}
           </p>
         </div>
@@ -276,39 +298,66 @@ export const RestaurantView: React.FC = () => {
         </div>
       </div>
 
+      {/* Compact Shop Search Bar */}
+      <div className="relative">
+        <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+        <input
+          type="text"
+          value={shopSearchQuery}
+          onChange={(e) => setShopSearchQuery(e.target.value)}
+          placeholder={tr(
+            language,
+            'ស្វែងរកឈ្មោះហាង ឬខេត្ត-ក្រុង...',
+            'Search shop name or province...',
+            '搜索店铺名称或省份...'
+          )}
+          className="w-full pl-9 pr-8 py-2 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 text-xs sm:text-sm text-[#0F172A] dark:text-white placeholder:text-slate-400 font-khmer focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+        />
+        {shopSearchQuery && (
+          <button
+            type="button"
+            onClick={() => setShopSearchQuery('')}
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+            title={tr(language, 'សម្អាត', 'Clear', '清除')}
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        )}
+      </div>
+
       {/* Verification Filter Switcher */}
-      <div className="flex items-center gap-1.5 p-1 bg-slate-100 dark:bg-slate-800 rounded-2xl text-xs font-khmer border border-slate-200/90 dark:border-slate-700">
+      <div className="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-2xl text-[11px] sm:text-xs font-khmer border border-slate-200/90 dark:border-slate-700">
         <button
           onClick={() => setVerifiedFilter('all')}
-          className={`flex-1 py-1.5 px-2 rounded-xl text-center font-bold transition-all cursor-pointer ${
+          className={`flex-1 py-1.5 px-1.5 rounded-xl text-center font-bold transition-all cursor-pointer whitespace-nowrap ${
             verifiedFilter === 'all'
               ? 'bg-[#064E3B] text-white shadow-xs'
               : 'text-slate-600 dark:text-slate-300 hover:text-[#064E3B]'
           }`}
         >
-          {tr(language, `ទាំងអស់ (${restaurants.length})`, `All (${restaurants.length})`, `全部 (${restaurants.length})`)}
+          {tr(language, `ទាំងអស់ (${totalDirectoryCount})`, `All (${totalDirectoryCount})`, `全部 (${totalDirectoryCount})`)}
         </button>
         <button
           onClick={() => setVerifiedFilter('verified')}
-          className={`flex-1 py-1.5 px-2 rounded-xl text-center font-bold flex items-center justify-center gap-1 transition-all cursor-pointer ${
+          className={`flex-1 py-1.5 px-1.5 rounded-xl text-center font-bold flex items-center justify-center gap-1 transition-all cursor-pointer whitespace-nowrap ${
             verifiedFilter === 'verified'
               ? 'bg-[#059669] text-white shadow-xs'
               : 'text-[#059669] dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-slate-700'
           }`}
         >
-          <CheckCircle2 className="w-3.5 h-3.5" />
+          <CheckCircle2 className="w-3 h-3 shrink-0" />
           <span>{tr(language, `ផ្ទៀងផ្ទាត់ (${verifiedCount})`, `Verified (${verifiedCount})`, `已认证 (${verifiedCount})`)}</span>
         </button>
         <button
           onClick={() => setVerifiedFilter('unverified')}
-          className={`flex-1 py-1.5 px-2 rounded-xl text-center font-bold flex items-center justify-center gap-1 transition-all cursor-pointer ${
+          className={`flex-1 py-1.5 px-1.5 rounded-xl text-center font-bold flex items-center justify-center gap-1 transition-all cursor-pointer whitespace-nowrap ${
             verifiedFilter === 'unverified'
               ? 'bg-slate-700 text-white shadow-xs'
               : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
           }`}
         >
-          <AlertCircle className="w-3.5 h-3.5" />
-          <span>{tr(language, `ទូទៅ (${sampleCount})`, `Listed (${sampleCount})`, `收录 (${sampleCount})`)}</span>
+          <AlertCircle className="w-3 h-3 shrink-0" />
+          <span>{tr(language, `មិនទាន់ផ្ទៀងផ្ទាត់ (${unverifiedCount})`, `Unverified (${unverifiedCount})`, `未认证 (${unverifiedCount})`)}</span>
         </button>
       </div>
 
@@ -599,7 +648,7 @@ export const RestaurantView: React.FC = () => {
       </div>
 
       {/* Restaurant Cards List */}
-      <div className="space-y-3">
+      <div className="space-y-2">
         {displayedRestaurants.length > 0 ? (
           <>
             {displayedRestaurants.map((restaurant) => (
