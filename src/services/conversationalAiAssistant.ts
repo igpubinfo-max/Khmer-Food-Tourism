@@ -86,6 +86,99 @@ const RESTAURANT_INTENT_RE =
 const TOURISM_INTENT_RE =
   /ដើរលេង|ទេសចរណ៍|កន្លែងដើរលេង|រមណីយដ្ឋាន|ប្រាសាទ|ឆ្នេរ|ទឹកធ្លាក់|ទឹកជ្រោះ|ភ្នំ|កោះ|ដំណើរកម្សាន្ត|ទៅលេង|គួរទៅណា|tourism|tourist|travel|attraction|sightseeing|places to visit|where to go|temple|beach|waterfall|island|mountain|vacation|itinerary|旅游|景点|好玩|去哪玩|打卡|寺庙|海滩|海岛|瀑布|国家公园|自由行/i;
 
+type TourismCategory = 'beach' | 'temple' | 'waterfall' | 'mountain';
+
+const COASTAL_PROVINCES_KH = ['ព្រះសីហនុ', 'កែប', 'កំពត', 'កោះកុង'];
+
+/**
+ * Remove words that look like tourism keywords but are NOT tourism requests:
+ * "ភ្នំពេញ" (contains ភ្នំ = mountain), "គ្រឿងសមុទ្រ" / "seafood" / "海鲜" (contains sea),
+ * and province names that start with "កោះ" (island).
+ */
+function stripTourismHomonyms(input: string): string {
+  return input
+    .replace(/គ្រឿងសមុទ្រ|seafood|海鲜/gi, ' ')
+    .replace(/ភ្នំពេញ|phnom\s*penh|金边/gi, ' ')
+    .replace(/កោះកុង|koh\s*kong|កោះកេរ|koh\s*ker|កោះឧកញ៉ាតី/gi, ' ');
+}
+
+const TOURISM_CATEGORY_PATTERNS: Array<{ cat: TourismCategory; re: RegExp }> = [
+  { cat: 'beach', re: /សមុទ្រ|ឆ្នេរ|កោះ|beach|\bsea\b|seaside|ocean|coast|island|大海|海边|海滩|看海|海岛|岛屿/i },
+  { cat: 'waterfall', re: /ទឹកធ្លាក់|ទឹកជ្រោះ|waterfall|瀑布/i },
+  { cat: 'temple', re: /ប្រាសាទ|វត្ត|temple|pagoda|寺|庙|古迹/i },
+  { cat: 'mountain', re: /ភ្នំ|mountain|hiking|national\s*park|山|国家公园/i },
+];
+
+function detectTourismCategory(input: string): TourismCategory | null {
+  const cleaned = stripTourismHomonyms(input);
+  for (const p of TOURISM_CATEGORY_PATTERNS) {
+    if (p.re.test(cleaned)) return p.cat;
+  }
+  return null;
+}
+
+function isCoastalProvince(provinceKh?: string): boolean {
+  const p = (provinceKh || '').replace(/^រាជធានី|^ខេត្ត/, '');
+  return COASTAL_PROVINCES_KH.some((c) => p.includes(c));
+}
+
+function destinationMatchesCategory(d: TouristDestination, cat: TourismCategory): boolean {
+  const names = stripTourismHomonyms(`${d.nameKh || ''} ${d.nameEn || ''}`);
+  const fullText = stripTourismHomonyms(`${names} ${d.descriptionKh || ''} ${d.descriptionEn || ''}`);
+  switch (cat) {
+    case 'beach':
+      return (
+        d.categorySlug === 'beach' ||
+        (isCoastalProvince(d.provinceKh) && /ឆ្នេរ|កោះ|សមុទ្រ|beach|island|bay|\bsea\b|coast/i.test(names))
+      );
+    case 'temple':
+      return d.categorySlug === 'temple' || /ប្រាសាទ|វត្ត|temple|pagoda/i.test(names);
+    case 'waterfall':
+      return /ទឹកធ្លាក់|ទឹកជ្រោះ|waterfall/i.test(names) || (/ទឹកធ្លាក់|ទឹកជ្រោះ|waterfall/i.test(fullText) && d.categorySlug === 'nature');
+    case 'mountain':
+      return d.categorySlug === 'mountain' || /ភ្នំ|mountain|national\s*park/i.test(names);
+    default:
+      return false;
+  }
+}
+
+/** Rank by featured + rating, then interleave provinces so results are diverse (not 4 places from one city). */
+function rankAndDiversifyDestinations(
+  list: TouristDestination[],
+  excludeIds: Set<string>,
+  limit: number
+): TouristDestination[] {
+  const sorted = [...list].sort(
+    (a, b) => Number(Boolean(b.isFeatured)) - Number(Boolean(a.isFeatured)) || (b.rating || 0) - (a.rating || 0)
+  );
+  const fresh = sorted.filter((d) => !excludeIds.has(d.id));
+  const pool = fresh.length >= limit ? fresh : sorted;
+  const byProvince = new Map<string, TouristDestination[]>();
+  for (const d of pool) {
+    const key = d.provinceKh || d.provinceEn || '';
+    if (!byProvince.has(key)) byProvince.set(key, []);
+    byProvince.get(key)!.push(d);
+  }
+  const out: TouristDestination[] = [];
+  const queues = Array.from(byProvince.values());
+  while (out.length < limit && queues.some((q) => q.length > 0)) {
+    for (const q of queues) {
+      const next = q.shift();
+      if (next) out.push(next);
+      if (out.length >= limit) break;
+    }
+  }
+  return out;
+}
+
+const TOURISM_CATEGORY_LABELS: Record<TourismCategory | 'all', { emoji: string; km: string; en: string; zh: string }> = {
+  beach: { emoji: '🏖️', km: 'ឆ្នេរសមុទ្រ និងកោះស្អាតៗ', en: 'beautiful beaches & islands', zh: '美丽海滩与海岛' },
+  temple: { emoji: '🛕', km: 'ប្រាសាទ និងវត្តអារាមល្បីៗ', en: 'famous temples & pagodas', zh: '著名寺庙与古迹' },
+  waterfall: { emoji: '💦', km: 'ទឹកធ្លាក់ស្អាតៗ', en: 'beautiful waterfalls', zh: '美丽瀑布' },
+  mountain: { emoji: '⛰️', km: 'ភ្នំ និងឧទ្យានជាតិ', en: 'mountains & national parks', zh: '山脉与国家公园' },
+  all: { emoji: '🏛️', km: 'តំបន់ទេសចរណ៍ល្បីៗ', en: 'top tourist attractions', zh: '热门旅游景点' },
+};
+
 const DRINK_PAIRING_INTENT_RE =
   /ម្ហូបអមភេសជ្ជៈ|ម្ហូបអមស្រាបៀរ|ក្លែម|ជុំតុ|ស្រាបៀរ|beverage pairing|drink pairing|beer food|bar food|下酒菜|佐餐|配啤酒/i;
 
@@ -338,49 +431,99 @@ export function generateConversationalAiResponse(params: {
   }
 
   // 4. TOURISM / TRAVEL / ATTRACTIONS INTENT (or Province Exploration)
-  if (TOURISM_INTENT_RE.test(trimmed) || (detectedProv && !RESTAURANT_INTENT_RE.test(trimmed) && !/ញ៉ាំ|ម្ហូប|បាយ|សម្ល|គុយទាវ|eat|food|dish|吃|菜/i.test(trimmed))) {
-    const provKh = detectedProv?.kh || activeProvinceKh;
-    const normProv = provKh.replace(/ណ្ដ/g, 'ណ្ត');
-
+  // Test on homonym-stripped text so "ភ្នំពេញ" (ភ្នំ) or "គ្រឿងសមុទ្រ" (seafood) never trigger tourism by mistake.
+  const tourismText = stripTourismHomonyms(trimmed);
+  const hasFoodWords = /ញ៉ាំ|ម្ហូប|បាយ|សម្ល|គុយទាវ|eat|food|dish|吃|菜/i.test(trimmed);
+  const tourismCategory = detectTourismCategory(trimmed);
+  if (
+    TOURISM_INTENT_RE.test(tourismText) ||
+    (tourismCategory === 'beach' && !hasFoodWords && !RESTAURANT_INTENT_RE.test(trimmed)) ||
+    (detectedProv && !RESTAURANT_INTENT_RE.test(trimmed) && !hasFoodWords)
+  ) {
     const verifiedDestinations = destinations.filter((d) => isPlaceLocationVerified(d));
     const destSource = verifiedDestinations.length > 0 ? verifiedDestinations : destinations;
+    const normalize = (s?: string) => (s || '').replace(/ណ្ដ/g, 'ណ្ត');
+    const inProvince = (d: TouristDestination, prov: string) => Boolean(prov) && normalize(d.provinceKh).includes(prov);
 
-    let matchedDests = destSource.filter((d) => {
-      const dProv = (d.provinceKh || '').replace(/ណ្ដ/g, 'ណ្ត');
-      const dText = `${d.nameKh} ${d.nameEn} ${d.descriptionKh || ''} ${d.descriptionEn || ''} ${d.categoryKh || ''}`.toLowerCase();
-      if (normProv && dProv.includes(normProv)) {
-        if (/ប្រាសាទ|temple|寺/i.test(trimmed)) return /ប្រាសាទ|temple|វត្ត/i.test(dText);
-        if (/ឆ្នេរ|កោះ|beach|island|海滩|岛/i.test(trimmed)) return /ឆ្នេរ|កោះ|beach|island|សមុទ្រ/i.test(dText);
-        if (/ទឹកធ្លាក់|ទឹកជ្រោះ|waterfall|瀑布/i.test(trimmed)) return /ទឹកធ្លាក់|ទឹកជ្រោះ|waterfall/i.test(dText);
-        return true;
-      }
-      if (!normProv) {
-        if (/ប្រាសាទ|temple|寺/i.test(trimmed)) return /ប្រាសាទ|temple/i.test(dText);
-        if (/ឆ្នេរ|កោះ|beach|island|海滩|岛/i.test(trimmed)) return /ឆ្នេរ|កោះ|beach|island/i.test(dText);
-        if (/ទឹកធ្លាក់|ទឹកជ្រោះ|waterfall|瀑布/i.test(trimmed)) return /ទឹកធ្លាក់|ទឹកជ្រោះ|waterfall/i.test(dText);
-        if (/ភ្នំ|mountain|山/i.test(trimmed)) return /ភ្នំ|mountain/i.test(dText);
-      }
-      return false;
-    });
-
-    if (matchedDests.length === 0) {
-      matchedDests = normProv
-        ? destSource.filter((d) => (d.provinceKh || '').replace(/ណ្ដ/g, 'ណ្ត').includes(normProv))
-        : destSource;
+    // Province priority: explicit province in THIS message > remembered province (only if it fits the category)
+    const explicitProv = detectedProv ? normalize(detectedProv.kh) : '';
+    let normProv = explicitProv || normalize(memory.activeProvinceKh);
+    if (!explicitProv && tourismCategory === 'beach' && normProv && !isCoastalProvince(normProv)) {
+      // e.g. user talked about Phnom Penh earlier, now asks for the sea → search coastal provinces nationwide
+      normProv = '';
     }
 
-    const topDests = matchedDests.slice(0, 4);
-    const provFoods = foods
-      .filter((f) => {
-        if (!normProv) return false;
-        const fText = `${f.nameKh} ${f.nameEn} ${f.descriptionKh || ''} ${f.provinceKh || ''}`.replace(/ណ្ដ/g, 'ណ្ត');
-        return fText.includes(normProv);
-      })
-      .slice(0, 2);
+    let matchedDests: TouristDestination[] = [];
+    if (tourismCategory) {
+      const categoryMatches = destSource.filter((d) => destinationMatchesCategory(d, tourismCategory));
+      matchedDests = normProv ? categoryMatches.filter((d) => inProvince(d, normProv)) : categoryMatches;
+      if (matchedDests.length === 0 && !explicitProv) {
+        // Remembered province has no such places → fall back to the whole country for this category
+        normProv = '';
+        matchedDests = categoryMatches;
+      }
+    }
+    if (matchedDests.length === 0) {
+      matchedDests = normProv ? destSource.filter((d) => inProvince(d, normProv)) : destSource;
+    }
 
-    const provLabel = detectedProv
-      ? tr(language, detectedProv.kh, detectedProv.en, detectedProv.zh)
-      : normProv || tr(language, 'កម្ពុជា', 'Cambodia', '柬埔寨');
+    const shownIds = new Set((memory.lastDestinations || []).map((d) => d.id));
+    const topDests = rankAndDiversifyDestinations(matchedDests, shownIds, 4);
+
+    const provFoods = (
+      normProv
+        ? foods.filter((f) => normalize(`${f.nameKh} ${f.nameEn} ${f.descriptionKh || ''} ${f.provinceKh || ''}`).includes(normProv))
+        : tourismCategory === 'beach'
+          ? foods.filter((f) => {
+              const n = `${f.nameKh} ${f.nameEn}`;
+              return /គ្រឿងសមុទ្រ|ក្តាមសេះ|ក្ដាមសេះ|ក្តាមថ្ម|បង្គា|មឹក|ងាវ|seafood|blue crab|squid|shrimp|prawn|clam/i.test(n) && !/ស្រែ|field|ទឹកសាប|freshwater/i.test(n);
+            })
+          : []
+    ).slice(0, 2);
+
+    const provKh = normProv ? (detectedProv?.kh || memory.activeProvinceKh) : '';
+    const provMatch = provKh ? PROVINCE_PATTERNS.find((p) => normalize(p.kh) === normalize(provKh)) : undefined;
+    const provLabel = provMatch
+      ? tr(language, provMatch.kh, provMatch.en, provMatch.zh)
+      : provKh || tr(language, 'កម្ពុជា', 'Cambodia', '柬埔寨');
+    const catLabel = TOURISM_CATEGORY_LABELS[tourismCategory || 'all'];
+
+    const followUpChips: BrainChip[] =
+      tourismCategory === 'beach' && !provKh
+        ? [
+            {
+              id: 'beach_kep',
+              label: tr(language, '🦀 ឆ្នេរកែប & ផ្សារក្ដាម', '🦀 Kep Beach & Crab Market', '🦀 白马海滩与螃蟹市场'),
+              query: tr(language, 'ចង់ទៅលេងសមុទ្រនៅកែប', 'Beaches to visit in Kep', '白马省有哪些海滩？'),
+            },
+            {
+              id: 'beach_sihanouk',
+              label: tr(language, '🏝️ កោះរ៉ុង & ព្រះសីហនុ', '🏝️ Koh Rong & Sihanoukville', '🏝️ 高龙岛与西港'),
+              query: tr(language, 'ឆ្នេរ និងកោះស្អាតៗនៅព្រះសីហនុ', 'Beaches and islands in Sihanoukville', '西哈努克省有哪些海滩和海岛？'),
+            },
+            {
+              id: 'beach_seafood',
+              label: tr(language, '🦐 ម្ហូបគ្រឿងសមុទ្រ', '🦐 Seafood Dishes', '🦐 海鲜美食'),
+              query: tr(language, 'ណែនាំម្ហូបគ្រឿងសមុទ្រឆ្ងាញ់ៗ', 'Recommend fresh seafood dishes', '推荐新鲜海鲜菜品'),
+            },
+          ]
+        : [
+            {
+              id: 'prov_food',
+              label: tr(language, `🍲 ម្ហូបល្បីនៅ${provLabel}`, `🍲 Food in ${provLabel}`, `🍲 ${provLabel}美食`),
+              query: tr(language, `ម្ហូបឆ្ងាញ់នៅ${provKh || 'សៀមរាប'}មានអ្វីខ្លះ?`, `What food to eat in ${provMatch?.en || 'Siem Reap'}?`, `${provMatch?.zh || '暹粒'}有什么特色美食？`),
+            },
+            {
+              id: 'prov_shops',
+              label: tr(language, `🏪 ហាងអាហារនៅ${provLabel}`, `🏪 Restaurants in ${provLabel}`, `🏪 ${provLabel}餐厅`),
+              query: tr(language, `ណែនាំភោជនីយដ្ឋាននៅ${provKh || 'ភ្នំពេញ'}`, `Recommend restaurants in ${provMatch?.en || 'Phnom Penh'}`, `推荐${provMatch?.zh || '金边'}的餐厅`),
+            },
+            {
+              id: 'more_tourism',
+              label: tr(language, '🏖️ ឆ្នេរសមុទ្រ & កោះ', '🏖️ Beaches & Islands', '🏖️ 海滩与海岛'),
+              query: tr(language, 'ណែនាំឆ្នេរសមុទ្រ និងកោះស្អាតៗនៅកម្ពុជា', 'Recommend beautiful beaches and islands in Cambodia', '推荐柬埔寨美丽的海滩和海岛'),
+            },
+          ];
 
     const reply: AiAssistantMessage = {
       id: `ai-${Date.now()}`,
@@ -391,27 +534,11 @@ export function generateConversationalAiResponse(params: {
       dishes: provFoods,
       text: tr(
         language,
-        `🏛️ នេះជាតំបន់ទេសចរណ៍ល្បីៗនៅ${provLabel} ដែល AI សូមណែនាំសម្រាប់ដំណើរកម្សាន្តរបស់អ្នក${provFoods.length > 0 ? ' រួមជាមួយមុខម្ហូបប្រចាំតំបន់៖' : '៖'}`,
-        `🏛️ Here are top recommended tourist attractions in ${provLabel} for your trip${provFoods.length > 0 ? ', along with signature local dishes:' : ':'}`,
-        `🏛️ 以下是 AI 为您推荐的${provLabel}热门旅游景点${provFoods.length > 0 ? '及当地招牌美食：' : '：'}`
+        `${catLabel.emoji} នេះជា${catLabel.km}នៅ${provLabel} ដែល AI សូមណែនាំសម្រាប់ដំណើរកម្សាន្តរបស់អ្នក${provFoods.length > 0 ? ' រួមជាមួយមុខម្ហូបដែលគួរសាកល្បង៖' : '៖'}`,
+        `${catLabel.emoji} Here are ${catLabel.en} in ${provLabel} recommended for your trip${provFoods.length > 0 ? ', along with dishes worth trying:' : ':'}`,
+        `${catLabel.emoji} 以下是 AI 为您推荐的${provLabel}${catLabel.zh}${provFoods.length > 0 ? '，以及值得品尝的美食：' : '：'}`
       ),
-      followUpChips: [
-        {
-          id: 'prov_food',
-          label: tr(language, `🍲 ម្ហូបល្បីនៅ${provLabel}`, `🍲 Food in ${provLabel}`, `🍲 ${provLabel}美食`),
-          query: tr(language, `ម្ហូបឆ្ងាញ់នៅ${provKh || 'សៀមរាប'}មានអ្វីខ្លះ?`, `What food to eat in ${detectedProv?.en || 'Siem Reap'}?`, `${detectedProv?.zh || '暹粒'}有什么特色美食？`),
-        },
-        {
-          id: 'prov_shops',
-          label: tr(language, `🏪 ហាងអាហារនៅ${provLabel}`, `🏪 Restaurants in ${provLabel}`, `🏪 ${provLabel}餐厅`),
-          query: tr(language, `ណែនាំភោជនីយដ្ឋាននៅ${provKh || 'ភ្នំពេញ'}`, `Recommend restaurants in ${detectedProv?.en || 'Phnom Penh'}`, `推荐${detectedProv?.zh || '金边'}的餐厅`),
-        },
-        {
-          id: 'more_tourism',
-          label: tr(language, '🏖️ ឆ្នេរសមុទ្រ & កោះ', '🏖️ Beaches & Islands', '🏖️ 海滩与海岛'),
-          query: tr(language, 'ណែនាំឆ្នេរសមុទ្រ និងកោះស្អាតៗនៅកម្ពុជា', 'Recommend beautiful beaches and islands in Cambodia', '推荐柬埔寨美丽的海滩和海岛'),
-        },
-      ],
+      followUpChips,
     };
 
     return {
