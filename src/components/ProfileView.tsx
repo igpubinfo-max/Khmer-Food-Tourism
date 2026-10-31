@@ -9,7 +9,7 @@ import {
   User as UserIcon, Heart, Shield, Store, 
   Globe, LogOut, RefreshCw, Download, Sparkles, UtensilsCrossed, ShieldCheck, CheckCircle2,
   Bot, Bell, Compass, Calendar, Bookmark, Plus, MapPin, Trash2, Share2, Tag, Utensils, ChevronRight, ChevronLeft,
-  Edit2, Check, X as CloseIcon, Crown, Star, Zap, Award, Smartphone, Copy, ExternalLink, Clock, Lock, MessageSquare, Mail
+  Edit2, Check, X as CloseIcon, Crown, Star, Zap, Award, Smartphone, Copy, ExternalLink, Clock, Lock, MessageSquare, Mail, Settings
 } from 'lucide-react';
 import {
   isRestaurantPremiumActive, isUserVipActive, getVipAccountState, getVipRemainingDays,
@@ -477,7 +477,7 @@ export const ProfileView: React.FC = () => {
   );
 
   return (
-    <div className={isAdmin || !currentUser ? 'max-w-md mx-auto px-4 py-3 space-y-4 pb-6' : 'max-w-md mx-auto w-full h-full px-3 py-2 flex flex-col gap-2 overflow-hidden'}>
+    <div className="max-w-md mx-auto w-full px-3.5 py-3 space-y-3 pb-8">
       {/* User Header Profile Card */}
       <div className="shrink-0 p-3 rounded-3xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700/80 shadow-xs">
         {currentUser ? (
@@ -1247,59 +1247,44 @@ export const ProfileView: React.FC = () => {
         );
       })()}
 
-      {/* Cambodian Food Passport - Consumer Users Only */}
-      {!isAdmin && <FoodPassportCard compact />}
-
-      {/* Tabs: My Restaurant (for owners) / Wishlists / Saved / Trip Plans / Membership / Settings */}
+      {/* 2-Row × 3-Column Profile Menu Grid (My Shop, Shop List, Plans, Saved, Membership, Settings) */}
       {!isAdmin && (
-      <div className="relative group/tabs shrink-0">
-        {/* Left Scroll Button */}
-        {canScrollLeft && (
-          <button
-            onClick={() => scrollTabs(-150)}
-            className="absolute -left-2 top-1/2 -translate-y-1/2 z-10 p-1.5 rounded-full bg-white dark:bg-slate-800 shadow-md border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition active:scale-95 cursor-pointer"
-            title={tr(language, 'រំកិលទៅឆ្វេង', 'Scroll left', '向左滚动')}
-          >
-            <ChevronLeft className="w-3.5 h-3.5" />
-          </button>
-        )}
-
-        {/* Right Scroll Button */}
-        {canScrollRight && (
-          <button
-            onClick={() => scrollTabs(150)}
-            className="absolute -right-2 top-1/2 -translate-y-1/2 z-10 p-1.5 rounded-full bg-white dark:bg-slate-800 shadow-md border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition active:scale-95 cursor-pointer"
-            title={isKm ? 'រំកិលទៅស្តាំ (ការកំណត់ & VIP)' : 'Scroll right'}
-          >
-            <ChevronRight className="w-3.5 h-3.5" />
-          </button>
-        )}
-
-        <div 
-          ref={tabsContainerRef}
-          onScroll={checkTabsScroll}
-          onWheel={(e) => {
-            if (e.deltaY !== 0 && tabsContainerRef.current) {
-              tabsContainerRef.current.scrollLeft += e.deltaY;
-              checkTabsScroll();
-            }
-          }}
-          className="flex border-b border-slate-200 dark:border-slate-700 text-xs font-khmer overflow-x-auto scroll-smooth scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-600 px-1"
+        <div
+          role="tablist"
+          aria-label={tr(language, 'ម៉ឺនុយគណនី', 'Profile menu', '个人中心菜单')}
+          className="grid grid-cols-3 gap-2 font-khmer shrink-0"
         >
-          {isOwner && (
-            <button
-              onClick={() => setActiveSubTab('myrestaurant')}
-              className={`py-2.5 font-bold text-center border-b-2 transition whitespace-nowrap px-3 ${
+          {/* 1. My Shop */}
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeSubTab === 'myrestaurant'}
+            onClick={() => setActiveSubTab('myrestaurant')}
+            className={`min-h-[70px] p-2 rounded-2xl border flex flex-col items-center justify-center gap-1 text-center transition-all cursor-pointer active:scale-95 ${
+              activeSubTab === 'myrestaurant'
+                ? 'bg-gradient-to-br from-[#064E3B] to-[#047857] text-white border-emerald-400/60 shadow-md'
+                : 'bg-white dark:bg-slate-800/90 text-slate-700 dark:text-slate-200 border-slate-200/90 dark:border-slate-700 hover:border-emerald-500/50'
+            }`}
+          >
+            <div
+              className={`w-7 h-7 rounded-xl flex items-center justify-center ${
                 activeSubTab === 'myrestaurant'
-                  ? 'border-[#064E3B] text-[#064E3B] dark:border-emerald-400 dark:text-emerald-400'
-                  : 'border-transparent text-slate-400 hover:text-slate-700'
+                  ? 'bg-white/15 text-amber-300'
+                  : 'bg-emerald-50 dark:bg-slate-700/80 text-[#064E3B] dark:text-emerald-300'
               }`}
             >
-              {isKm ? '🏪 ហាងខ្ញុំ' : '🏪 Shop'}
-            </button>
-          )}
+              <Store className="w-4 h-4" />
+            </div>
+            <span className="text-[11px] font-extrabold leading-tight truncate max-w-full">
+              {tr(language, 'ហាងខ្ញុំ', 'My Shop', '我的店铺')}
+            </span>
+          </button>
 
+          {/* 2. Shop List */}
           <button
+            type="button"
+            role="tab"
+            aria-selected={activeSubTab === 'wishlists'}
             onClick={() => {
               if (!isVip && currentUser?.role !== 'admin') {
                 setIsWishlistsModalOpen(true);
@@ -1307,18 +1292,34 @@ export const ProfileView: React.FC = () => {
               }
               setActiveSubTab('wishlists');
             }}
-            className={`py-2.5 font-bold text-center border-b-2 transition whitespace-nowrap px-3 ${
+            className={`min-h-[70px] p-2 rounded-2xl border flex flex-col items-center justify-center gap-1 text-center transition-all cursor-pointer active:scale-95 ${
               activeSubTab === 'wishlists'
-                ? 'border-[#064E3B] text-[#064E3B] dark:border-emerald-400 dark:text-emerald-400'
-                : 'border-transparent text-slate-400 hover:text-slate-700'
+                ? 'bg-gradient-to-br from-[#064E3B] to-[#047857] text-white border-emerald-400/60 shadow-md'
+                : 'bg-white dark:bg-slate-800/90 text-slate-700 dark:text-slate-200 border-slate-200/90 dark:border-slate-700 hover:border-emerald-500/50'
             }`}
           >
-            {isKm
-              ? `📄 បញ្ជីចង់ទៅ ${!isVip && currentUser?.role !== 'admin' ? '🔒' : `(${wishlists.length})`}`
-              : `Lists ${!isVip && currentUser?.role !== 'admin' ? '🔒' : `(${wishlists.length})`}`}
+            <div
+              className={`w-7 h-7 rounded-xl flex items-center justify-center ${
+                activeSubTab === 'wishlists'
+                  ? 'bg-white/15 text-amber-300'
+                  : 'bg-teal-50 dark:bg-slate-700/80 text-teal-700 dark:text-teal-300'
+              }`}
+            >
+              <Bookmark className="w-4 h-4" />
+            </div>
+            <span className="text-[11px] font-extrabold leading-tight truncate max-w-full">
+              {tr(language, 'បញ្ជីហាង', 'Shop List', '店铺清单')}
+              <span className="ml-1 text-[10px] opacity-80">
+                {!isVip && currentUser?.role !== 'admin' ? '🔒' : `(${wishlists.length})`}
+              </span>
+            </span>
           </button>
 
+          {/* 3. Plans */}
           <button
+            type="button"
+            role="tab"
+            aria-selected={activeSubTab === 'tripplans'}
             onClick={() => {
               if (!isVip && currentUser?.role !== 'admin') {
                 setIsAiTripPlannerModalOpen(true);
@@ -1326,61 +1327,115 @@ export const ProfileView: React.FC = () => {
               }
               setActiveSubTab('tripplans');
             }}
-            className={`py-2.5 font-bold text-center border-b-2 transition whitespace-nowrap px-3 ${
+            className={`min-h-[70px] p-2 rounded-2xl border flex flex-col items-center justify-center gap-1 text-center transition-all cursor-pointer active:scale-95 ${
               activeSubTab === 'tripplans'
-                ? 'border-[#064E3B] text-[#064E3B] dark:border-emerald-400 dark:text-emerald-400'
-                : 'border-transparent text-slate-400 hover:text-slate-700'
+                ? 'bg-gradient-to-br from-[#064E3B] to-[#047857] text-white border-emerald-400/60 shadow-md'
+                : 'bg-white dark:bg-slate-800/90 text-slate-700 dark:text-slate-200 border-slate-200/90 dark:border-slate-700 hover:border-emerald-500/50'
             }`}
           >
-            {isKm
-              ? `🤖 ផែនការ AI ${!isVip && currentUser?.role !== 'admin' ? '🔒' : `(${tripPlans.length})`}`
-              : `Plans ${!isVip && currentUser?.role !== 'admin' ? '🔒' : `(${tripPlans.length})`}`}
-          </button>
-
-          <button
-            onClick={() => setActiveSubTab('bookmarks')}
-            className={`py-2.5 font-bold text-center border-b-2 transition whitespace-nowrap px-3 ${
-              activeSubTab === 'bookmarks'
-                ? 'border-[#064E3B] text-[#064E3B] dark:border-emerald-400 dark:text-emerald-400'
-                : 'border-transparent text-slate-400 hover:text-slate-700'
-            }`}
-          >
-            {isKm ? `❤️ ចំណូលចិត្ត (${savedFoods.length + savedDestinations.length + savedRestaurants.length})` : `Saved (${savedFoods.length + savedDestinations.length + savedRestaurants.length})`}
-          </button>
-
-          {currentUser?.role !== 'admin' && (
-            <button
-              onClick={() => setActiveSubTab('membership')}
-              className={`py-2.5 font-bold text-center border-b-2 transition whitespace-nowrap px-3 ${
-                activeSubTab === 'membership'
-                  ? 'border-amber-500 text-amber-600 dark:border-amber-400 dark:text-amber-400 font-extrabold'
-                  : 'border-transparent text-slate-400 hover:text-slate-700'
+            <div
+              className={`w-7 h-7 rounded-xl flex items-center justify-center ${
+                activeSubTab === 'tripplans'
+                  ? 'bg-white/15 text-amber-300'
+                  : 'bg-sky-50 dark:bg-slate-700/80 text-sky-700 dark:text-sky-300'
               }`}
             >
-              <span className="flex items-center gap-1">
-                <Crown className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-                <span>{isKm ? (isVip ? '👑 សមាជិក VIP' : '👑 សមាជិកភាព') : '👑 Membership'}</span>
+              <Compass className="w-4 h-4" />
+            </div>
+            <span className="text-[11px] font-extrabold leading-tight truncate max-w-full">
+              {tr(language, 'ផែនការ', 'Plans', '行程计划')}
+              <span className="ml-1 text-[10px] opacity-80">
+                {!isVip && currentUser?.role !== 'admin' ? '🔒' : `(${tripPlans.length})`}
               </span>
-            </button>
-          )}
+            </span>
+          </button>
 
+          {/* 4. Saved */}
           <button
-            onClick={() => setActiveSubTab('settings')}
-            className={`py-2.5 font-bold text-center border-b-2 transition whitespace-nowrap px-3 ${
-              activeSubTab === 'settings'
-                ? 'border-[#064E3B] text-[#064E3B] dark:border-emerald-400 dark:text-emerald-400'
-                : 'border-transparent text-slate-400 hover:text-slate-600'
+            type="button"
+            role="tab"
+            aria-selected={activeSubTab === 'bookmarks'}
+            onClick={() => setActiveSubTab('bookmarks')}
+            className={`min-h-[70px] p-2 rounded-2xl border flex flex-col items-center justify-center gap-1 text-center transition-all cursor-pointer active:scale-95 ${
+              activeSubTab === 'bookmarks'
+                ? 'bg-gradient-to-br from-[#064E3B] to-[#047857] text-white border-emerald-400/60 shadow-md'
+                : 'bg-white dark:bg-slate-800/90 text-slate-700 dark:text-slate-200 border-slate-200/90 dark:border-slate-700 hover:border-emerald-500/50'
             }`}
           >
-            <span>⚙️ {isKm ? 'ការកំណត់' : 'Settings'}</span>
+            <div
+              className={`w-7 h-7 rounded-xl flex items-center justify-center ${
+                activeSubTab === 'bookmarks'
+                  ? 'bg-white/15 text-rose-300'
+                  : 'bg-rose-50 dark:bg-slate-700/80 text-rose-600 dark:text-rose-400'
+              }`}
+            >
+              <Heart className="w-4 h-4" />
+            </div>
+            <span className="text-[11px] font-extrabold leading-tight truncate max-w-full">
+              {tr(language, 'រក្សាទុក', 'Saved', '已收藏')}
+              <span className="ml-1 text-[10px] opacity-80">
+                ({savedFoods.length + savedDestinations.length + savedRestaurants.length})
+              </span>
+            </span>
+          </button>
+
+          {/* 5. Membership */}
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeSubTab === 'membership'}
+            onClick={() => setActiveSubTab('membership')}
+            className={`min-h-[70px] p-2 rounded-2xl border flex flex-col items-center justify-center gap-1 text-center transition-all cursor-pointer active:scale-95 ${
+              activeSubTab === 'membership'
+                ? 'bg-gradient-to-br from-amber-500 to-amber-600 text-slate-950 border-amber-300 shadow-md'
+                : 'bg-white dark:bg-slate-800/90 text-slate-700 dark:text-slate-200 border-slate-200/90 dark:border-slate-700 hover:border-amber-400/60'
+            }`}
+          >
+            <div
+              className={`w-7 h-7 rounded-xl flex items-center justify-center ${
+                activeSubTab === 'membership'
+                  ? 'bg-slate-950/15 text-slate-950'
+                  : 'bg-amber-50 dark:bg-slate-700/80 text-amber-600 dark:text-amber-400'
+              }`}
+            >
+              <Crown className="w-4 h-4" />
+            </div>
+            <span className="text-[11px] font-extrabold leading-tight truncate max-w-full">
+              {tr(language, 'សមាជិកភាព', 'Membership', '尊享会员')}
+            </span>
+          </button>
+
+          {/* 6. Settings */}
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeSubTab === 'settings'}
+            onClick={() => setActiveSubTab('settings')}
+            className={`min-h-[70px] p-2 rounded-2xl border flex flex-col items-center justify-center gap-1 text-center transition-all cursor-pointer active:scale-95 ${
+              activeSubTab === 'settings'
+                ? 'bg-gradient-to-br from-[#064E3B] to-[#047857] text-white border-emerald-400/60 shadow-md'
+                : 'bg-white dark:bg-slate-800/90 text-slate-700 dark:text-slate-200 border-slate-200/90 dark:border-slate-700 hover:border-emerald-500/50'
+            }`}
+          >
+            <div
+              className={`w-7 h-7 rounded-xl flex items-center justify-center ${
+                activeSubTab === 'settings'
+                  ? 'bg-white/15 text-amber-300'
+                  : 'bg-slate-100 dark:bg-slate-700/80 text-slate-700 dark:text-slate-300'
+              }`}
+            >
+              <Settings className="w-4 h-4" />
+            </div>
+            <span className="text-[11px] font-extrabold leading-tight truncate max-w-full">
+              {tr(language, 'ការកំណត់', 'Settings', '设置')}
+            </span>
           </button>
         </div>
-      </div>
       )}
 
-      <div className={isAdmin || !currentUser ? '' : 'flex-1 min-h-0 overflow-y-auto no-scrollbar space-y-3 pb-3'}>
+      <div className="space-y-3 pb-3">
       {/* Tab: My Restaurant (Shop Owner Portal - Consumer VIP Only) */}
-      {!isAdmin && activeSubTab === 'myrestaurant' && isOwner && (
+      {!isAdmin && activeSubTab === 'myrestaurant' && (
         <div className="space-y-3 font-khmer">
           {myRestaurants.length === 0 ? (
             <div className="text-center py-7 bg-gradient-to-br from-amber-50 via-white to-emerald-50 dark:from-slate-800 dark:via-slate-800 dark:to-emerald-950/40 rounded-3xl border-2 border-amber-400/70 p-6 space-y-3.5 shadow-md">

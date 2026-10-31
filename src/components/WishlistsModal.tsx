@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { 
   X, Bookmark, Plus, Trash2, Check, ListPlus, Heart, ExternalLink 
 } from 'lucide-react';
-import { WishlistItem } from '../types';
+import { WishlistItem, isGpipRegisteredRestaurant, openRestaurantGoogleExternal } from '../types';
 import { useApp } from '../context/AppContext';
 import { tr, translateProvince } from '../utils/i18n';
 import { translateDynamicTextToZh, sanitizeStrictLanguageText } from '../utils/zhDynamicTranslator';
@@ -154,8 +154,12 @@ export const WishlistsModal: React.FC = () => {
     } else if (item.type === 'restaurant') {
       const r = restaurants.find(x => x.id === item.id);
       if (r) {
-        setSelectedRestaurant(r);
-        setIsWishlistsModalOpen(false);
+        if (isGpipRegisteredRestaurant(r)) {
+          setSelectedRestaurant(r);
+          setIsWishlistsModalOpen(false);
+        } else {
+          openRestaurantGoogleExternal(r, 'search');
+        }
         return;
       }
     } else if (item.type === 'destination') {

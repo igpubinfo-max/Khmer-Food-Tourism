@@ -15,7 +15,7 @@ import {
   GooglePlaceCachedItem,
   buildPlaceSpecificNoPhotoSvg,
 } from '../services/googlePlacesService';
-import { Restaurant, TouristDestination } from '../types';
+import { Restaurant, TouristDestination, isGpipRegisteredRestaurant, openRestaurantGoogleExternal } from '../types';
 import { tr, translateProvince } from '../utils/i18n';
 import { getLocalizedRestaurant, getLocalizedDestination } from '../utils/zhDynamicTranslator';
 
@@ -766,9 +766,41 @@ export const NearMeModal: React.FC = () => {
             ) : (
               filteredNearbyRestaurants.map((r) => {
                 const rLoc = getLocalizedRestaurant(r, language);
+                const isGpipRest = isGpipRegisteredRestaurant(r);
                 const hasOfficialPhoto =
                   !r.photoUrl?.startsWith('data:image/svg+xml') &&
                   (r.googleMapsMeta?.hasOfficialGooglePhoto !== false);
+
+                if (!isGpipRest) {
+                  return (
+                    <div
+                      key={r.id}
+                      onClick={() => openRestaurantGoogleExternal(r, 'search')}
+                      className="px-3 py-2.5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/90 dark:border-slate-700 shadow-xs hover:border-emerald-500 transition flex items-center gap-3 cursor-pointer active:scale-[0.99]"
+                    >
+                      <div className="relative w-11 h-11 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-700 shrink-0 border border-slate-200/70 dark:border-slate-600">
+                        <img
+                          src={r.photoUrl}
+                          alt={rLoc.name}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                          onError={(e) => {
+                            const target = e.currentTarget;
+                            target.onerror = null;
+                            target.src = buildPlaceSpecificNoPhotoSvg(r.nameKh, r.provinceKh, 'restaurant');
+                          }}
+                        />
+                      </div>
+                      <h4 className="flex-1 min-w-0 font-bold text-xs sm:text-sm text-[#0F172A] dark:text-white truncate font-khmer">
+                        {rLoc.name}
+                      </h4>
+                      <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-[#064E3B] dark:text-emerald-300 text-[11px] font-black shrink-0">
+                        📍 {formatDistanceLabel(r.distanceMeters)}
+                      </span>
+                    </div>
+                  );
+                }
+
                 return (
                   <div
                     key={r.id}
@@ -798,10 +830,6 @@ export const NearMeModal: React.FC = () => {
                         <div className="flex items-start justify-between gap-1">
                           <h4 
                             onClick={() => {
-                              if (String(r.id).startsWith('gplace_rest_')) {
-                                window.open(buildDirectionsUrl(r.latitude, r.longitude, `${r.nameKh} ${r.addressKh}`, r.mapUrl), '_blank', 'noopener,noreferrer');
-                                return;
-                              }
                               setSelectedRestaurant(r);
                               setIsNearMeModalOpen(false);
                             }}
@@ -853,10 +881,6 @@ export const NearMeModal: React.FC = () => {
 
                       <button
                         onClick={() => {
-                          if (String(r.id).startsWith('gplace_rest_')) {
-                            window.open(buildDirectionsUrl(r.latitude, r.longitude, `${r.nameKh} ${r.addressKh}`, r.mapUrl), '_blank', 'noopener,noreferrer');
-                            return;
-                          }
                           setSelectedRestaurant(r);
                           setIsNearMeModalOpen(false);
                         }}

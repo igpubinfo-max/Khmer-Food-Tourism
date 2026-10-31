@@ -21,7 +21,7 @@ import {
   Search,
   ShieldAlert,
 } from 'lucide-react';
-import { FoodItem } from '../types';
+import { FoodItem, isGpipRegisteredRestaurant, openRestaurantGoogleExternal } from '../types';
 import {
   IconFoodPicks,
   IconBeveragePairing,
@@ -982,20 +982,23 @@ export const WhatToEatModal: React.FC = () => {
                       </div>
                       {servingRestaurants.map((r) => {
                         const rLoc = getLocalizedRestaurant(r, language);
+                        const isGpipRest = isGpipRegisteredRestaurant(r);
                         return (
                           <button
                             key={r.id}
                             type="button"
                             onClick={() => {
-                              setSelectedRestaurant(r);
-                              setIsWhatToEatModalOpen(false);
+                              if (isGpipRest) {
+                                setSelectedRestaurant(r);
+                                setIsWhatToEatModalOpen(false);
+                              } else {
+                                openRestaurantGoogleExternal(r, 'search');
+                              }
                             }}
-                            className="w-full flex items-center justify-between text-xs text-slate-700 dark:text-slate-200 hover:text-emerald-600 py-0.5 cursor-pointer"
+                            className="w-full flex items-center gap-2.5 text-xs text-slate-700 dark:text-slate-200 hover:text-emerald-600 py-1 cursor-pointer"
                           >
-                            <span className="font-bold truncate">{rLoc.name}</span>
-                            <span className="text-[10px] text-emerald-600 font-bold shrink-0">
-                              {rLoc.province} →
-                            </span>
+                            <img src={r.photoUrl} alt={rLoc.name} loading="lazy" className="w-7 h-7 rounded-lg object-cover shrink-0 bg-slate-200 dark:bg-slate-700" />
+                            <span className="font-bold truncate flex-1 text-left">{rLoc.name}</span>
                           </button>
                         );
                       })}

@@ -238,13 +238,6 @@ export const QrScannerModal: React.FC = () => {
     });
   };
 
-  // Quick Test with Official ABA KHQR
-  const handleTestOfficialQr = () => {
-    const officialPayload = '00020101021129450016abaakhppxxx@abaa01090127199460208ABA Bank40600006abaP2P011232894800DA0E020901271994603090952459590404Dual5204599953031165802KH5912KIMSENG CHEA6010Phnom Penh63043CF9';
-    handleDecodedData(officialPayload);
-    showToast(isKm ? 'បានស្កេន និងផ្ទៀងផ្ទាត់កូដ ABA KHQR គំរូជោគជ័យ!' : 'Sample ABA KHQR verified successfully!', 'success');
-  };
-
   useEffect(() => {
     if (!isQrScannerModalOpen) {
       stopCamera();
@@ -374,19 +367,6 @@ export const QrScannerModal: React.FC = () => {
                   />
                 </div>
               )}
-
-              {/* Quick Sample Test */}
-              <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
-                <span className="text-slate-600 dark:text-slate-300 font-medium">
-                  {isKm ? 'តេស្តកូដ ABA KHQR ផ្លូវការ៖' : 'Test Official ABA KHQR:'}
-                </span>
-                <button
-                  onClick={handleTestOfficialQr}
-                  className="px-3 py-1.5 rounded-xl bg-sky-50 dark:bg-sky-950 text-[#004B87] dark:text-sky-300 font-bold border border-sky-300 dark:border-sky-800 hover:bg-sky-100 transition text-[11px]"
-                >
-                  {isKm ? '🧪 ដំណើរការតេស្ត' : 'Run Test'}
-                </button>
-              </div>
             </div>
           )}
 

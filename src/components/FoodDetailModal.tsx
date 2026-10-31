@@ -17,6 +17,12 @@ import { getLocalizedFood } from '../utils/zhDynamicTranslator';
 import { DishTagChips } from './DishTagChips';
 import { PassportStampButton } from './PassportStampButton';
 import { WhereToEat } from './WhereToEat';
+import {
+  generateAuthenticRecipeByDishName,
+  areIngredientsIdentical,
+  areStepsIdentical,
+  hasPlaceholderOrIncompleteRecipe,
+} from '../utils/khmerRecipeGenerator';
 
 export const FoodDetailModal: React.FC = () => {
   const { 
@@ -260,10 +266,28 @@ export const FoodDetailModal: React.FC = () => {
         ...(st.tipKh ? { tipKh: st.tipKh } : {}),
       }));
 
+    const nextNameKh = editNameKh.trim() || selectedFood.nameKh;
+    const nextNameEn = editNameEn.trim() || selectedFood.nameEn;
+    const isDishRenamed = nextNameKh !== (selectedFood.nameKh || '').trim();
+    const shouldAutoGenerateRecipe =
+      hasPlaceholderOrIncompleteRecipe(cleanedIngredients, cleanedSteps) ||
+      (isDishRenamed &&
+        (areIngredientsIdentical(cleanedIngredients, selectedFood.ingredients) ||
+          areStepsIdentical(cleanedSteps, selectedFood.steps)));
+
+    const autoRecipe = shouldAutoGenerateRecipe
+      ? generateAuthenticRecipeByDishName(
+          nextNameKh,
+          nextNameEn,
+          catSlug,
+          editDescriptionKh.trim()
+        )
+      : null;
+
     const updated: FoodItem = {
       ...selectedFood,
-      nameKh: editNameKh.trim() || selectedFood.nameKh,
-      nameEn: editNameEn.trim() || selectedFood.nameEn,
+      nameKh: nextNameKh,
+      nameEn: nextNameEn,
       categorySlug: catSlug,
       categoryKh: editCategoryKh.trim() || catKhMap[catSlug] || selectedFood.categoryKh,
       priceUsd: 0,
@@ -272,10 +296,24 @@ export const FoodDetailModal: React.FC = () => {
       servings: editServings.trim() || selectedFood.servings,
       calories: parseInt(editCalories) || selectedFood.calories,
       difficulty: editDifficulty,
-      descriptionKh: editDescriptionKh.trim() || selectedFood.descriptionKh,
-      descriptionEn: editDescriptionEn.trim() || selectedFood.descriptionEn,
-      ingredients: cleanedIngredients.length > 0 ? cleanedIngredients : selectedFood.ingredients,
-      steps: cleanedSteps.length > 0 ? cleanedSteps : selectedFood.steps,
+      descriptionKh:
+        editDescriptionKh.trim() && (!isDishRenamed || editDescriptionKh.trim() !== selectedFood.descriptionKh)
+          ? editDescriptionKh.trim()
+          : autoRecipe?.descriptionKh || editDescriptionKh.trim() || selectedFood.descriptionKh,
+      descriptionEn:
+        editDescriptionEn.trim() && (!isDishRenamed || editDescriptionEn.trim() !== selectedFood.descriptionEn)
+          ? editDescriptionEn.trim()
+          : autoRecipe?.descriptionEn || editDescriptionEn.trim() || selectedFood.descriptionEn,
+      ingredients: autoRecipe
+        ? autoRecipe.ingredients
+        : cleanedIngredients.length > 0
+        ? cleanedIngredients
+        : selectedFood.ingredients,
+      steps: autoRecipe
+        ? autoRecipe.steps
+        : cleanedSteps.length > 0
+        ? cleanedSteps
+        : selectedFood.steps,
       photoUrl: editPhotoUrl.trim() || selectedFood.photoUrl,
       imageAuditStatus: 'verified',
       imageAuditNote: 'កែប្រែដោយរដ្ឋបាល (Admin Edited)',

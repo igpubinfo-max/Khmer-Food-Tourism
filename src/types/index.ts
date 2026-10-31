@@ -1,8 +1,8 @@
 export const APP_VERSION = 'v2.5.0';
 export const APP_VERSION_NAME = '2.5.0';
 declare const __KFT_BUILD_CODE__: number | undefined;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1267;
-export const APP_RELEASE_DATE = '2026-10-30';
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1268;
+export const APP_RELEASE_DATE = '2026-10-31';
 
 export interface GoogleMapsPlaceMetadata {
   placeId: string;
@@ -810,6 +810,51 @@ export const isSeedRestaurantId = (id: string | number): boolean => {
 export const isCustomRestaurant = (restaurant?: Restaurant | null): boolean => {
   if (!restaurant || !restaurant.id) return false;
   return !isSeedRestaurantId(restaurant.id);
+};
+
+// Helper to determine whether a restaurant is a GPIP / VIP registered restaurant
+// (retains full restaurant profile, photos, and detailed information) vs an unregistered directory restaurant
+export const isGpipRegisteredRestaurant = (restaurant?: Partial<Restaurant> | null): boolean => {
+  if (!restaurant || !restaurant.id) return false;
+  if (!isSeedRestaurantId(restaurant.id)) return true;
+  if (restaurant.dataSource === 'vip_owner') return true;
+  if (restaurant.ownerId && restaurant.ownerId !== 'owner-1') return true;
+  if (restaurant.ownerEmail && restaurant.ownerEmail.trim().length > 0) return true;
+  if (restaurant.membershipTier === 'premium' || restaurant.isPromoted) return true;
+  if (Array.isArray(restaurant.menuItems) && restaurant.menuItems.length > 0) return true;
+  if (restaurant.replacedFromRestaurantId) return true;
+  return false;
+};
+
+export const getRestaurantGoogleExternalUrl = (
+  restaurant: Partial<Restaurant>,
+  mode: 'search' | 'maps' = 'search'
+): string => {
+  const name = (restaurant.nameKh || restaurant.nameEn || '').trim();
+  const province = (restaurant.provinceKh || restaurant.provinceEn || '').trim();
+  const query = [name, province, 'Cambodia'].filter(Boolean).join(' ');
+  if (mode === 'maps') {
+    if (
+      restaurant.mapUrl &&
+      (restaurant.mapUrl.includes('google.com/maps') ||
+        restaurant.mapUrl.includes('maps.app.goo.gl') ||
+        restaurant.mapUrl.includes('maps.google.com'))
+    ) {
+      return restaurant.mapUrl;
+    }
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+  }
+  return `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+};
+
+export const openRestaurantGoogleExternal = (
+  restaurant: Partial<Restaurant>,
+  mode: 'search' | 'maps' = 'search'
+): void => {
+  const url = getRestaurantGoogleExternalUrl(restaurant, mode);
+  if (typeof window !== 'undefined') {
+    window.open(url, '_blank', 'noopener,noreferrer');
+  }
 };
 
 // Helper to compute genuine customer rating & review count (VIP status never inflates rating)

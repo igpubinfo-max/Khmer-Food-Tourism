@@ -15,6 +15,7 @@ import {
 } from '../types';
 import { getSecurityAuditLogs, SecurityAuditEntry, revokeAdminSession, getOfficialOwnershipCertificate, verifyAppOwnershipAndDomainIntegrity } from '../utils/security';
 import { FoodImageModal } from './FoodImageModal';
+import { generateAuthenticRecipeByDishName } from '../utils/khmerRecipeGenerator';
 import { resolveUserAvatarUrl, handleAvatarImageError } from '../utils/avatarHelper';
 import { TouristImageModal } from './TouristImageModal';
 import { searchOnlineFoodImages, OnlineFoodImageCandidate } from '../services/onlineFoodImageService';
@@ -319,14 +320,20 @@ export const AdminDashboard: React.FC = () => {
     }
     setIsSavingNewFood(true);
     try {
+      const generatedRecipe = generateAuthenticRecipeByDishName(
+        trimmedKh,
+        newFoodNameEn.trim() || trimmedKh,
+        newFoodCategory,
+        newFoodDescKh.trim()
+      );
       addFood({
         nameKh: trimmedKh,
         nameEn: newFoodNameEn.trim() || trimmedKh,
         categorySlug: newFoodCategory,
         categoryKh: newFoodCategory === 'soup' ? 'សម្ល & អាម៉ុក' : newFoodCategory === 'grilled' ? 'ម្ហូបអាំង' : 'ម្ហូបខ្មែរ',
         categoryEn: newFoodCategory,
-        descriptionKh: newFoodDescKh.trim() || `${trimmedKh} ជាមុខម្ហូបខ្មែរដ៏ឈ្ងុយឆ្ងាញ់។`,
-        descriptionEn: newFoodDescKh.trim() || `${newFoodNameEn.trim() || trimmedKh} is a delicious traditional Khmer dish.`,
+        descriptionKh: newFoodDescKh.trim() || generatedRecipe.descriptionKh,
+        descriptionEn: newFoodDescKh.trim() || generatedRecipe.descriptionEn,
         photoUrl: newFoodPhotoUrl.trim() || '/foods/food-1.jpg',
         prepTime: '១៥ នាទី',
         cookTime: newFoodCookTime.trim() || '៣០ នាទី',
@@ -334,14 +341,8 @@ export const AdminDashboard: React.FC = () => {
         difficulty: 'medium',
         priceRiel: 0,
         priceUsd: 0,
-        ingredients: [
-          { nameKh: 'គ្រឿងផ្សំខ្មែរដើម', nameEn: 'Traditional Khmer ingredients', amount: '១ ចាន' },
-          { nameKh: 'គ្រឿងទេស និងអំបិល ស្ករ', nameEn: 'Seasonings', amount: 'តាមចំណូលចិត្ត' },
-        ],
-        steps: [
-          { stepNumber: 1, instructionKh: 'រៀបចំលាងសម្អាតគ្រឿងផ្សំឱ្យស្អាត។', instructionEn: 'Clean and prep ingredients.' },
-          { stepNumber: 2, instructionKh: 'ចម្អិនតាមលំដាប់រហូតដល់ឈ្ងុយឆ្ងាញ់។', instructionEn: 'Cook until delicious.' },
-        ],
+        ingredients: generatedRecipe.ingredients,
+        steps: generatedRecipe.steps,
       });
       setNewFoodNameKh('');
       setNewFoodNameEn('');

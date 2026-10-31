@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
-import { MapPin, Navigation, Store } from 'lucide-react';
+import { Navigation, Store } from 'lucide-react';
 import { useApp } from '../context/AppContext';
-import type { FoodItem, Restaurant } from '../types';
+import { isGpipRegisteredRestaurant, openRestaurantGoogleExternal, type FoodItem, type Restaurant } from '../types';
 import { tr } from '../utils/i18n';
 import { getLocalizedRestaurant } from '../utils/zhDynamicTranslator';
 
@@ -70,23 +70,24 @@ export const WhereToEat: React.FC<Props> = ({ food }) => {
         <div className="space-y-2">
           {matches.map((r) => {
             const loc = getLocalizedRestaurant(r, language);
+            const isRegistered = isGpipRegisteredRestaurant(r);
             return (
               <button
                 key={r.id}
                 type="button"
                 onClick={() => {
-                  setSelectedFood(null);
-                  setSelectedRestaurant(r);
+                  if (isRegistered) {
+                    setSelectedFood(null);
+                    setSelectedRestaurant(r);
+                  } else {
+                    openRestaurantGoogleExternal(r, 'search');
+                  }
                 }}
-                className="w-full min-h-[60px] flex items-center gap-3 p-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-left active:scale-[0.98] transition cursor-pointer"
+                className="w-full min-h-[52px] flex items-center gap-3 px-3 py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-emerald-500/60 text-left active:scale-[0.98] transition cursor-pointer"
               >
-                <img src={r.photoUrl} alt={loc.name} loading="lazy" className="w-12 h-12 rounded-lg object-cover shrink-0 bg-slate-100" />
+                <img src={r.photoUrl} alt={loc.name} loading="lazy" className="w-10 h-10 rounded-lg object-cover shrink-0 bg-slate-100" />
                 <span className="min-w-0 flex-1">
                   <span className="block text-sm font-bold text-slate-900 dark:text-white line-clamp-1">{loc.name}</span>
-                  <span className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
-                    <MapPin className="w-3.5 h-3.5 shrink-0" />
-                    <span className="truncate">{loc.province}</span>
-                  </span>
                 </span>
               </button>
             );

@@ -19,6 +19,12 @@ import { FoodItem, Restaurant, TouristDestination, TrendingFoodItem, RestaurantM
 import { initial100Destinations } from '../data/seedDestinations';
 import { initial200Foods } from '../data/seedFoods';
 import {
+  generateAuthenticRecipeByDishName,
+  hasPlaceholderOrIncompleteRecipe,
+  areIngredientsIdentical,
+  areStepsIdentical,
+} from '../utils/khmerRecipeGenerator';
+import {
   isSupabaseConfigured,
   pullCloudDocument,
   pushCloudDocument,
@@ -35,8 +41,8 @@ const IMMUTABLE_SEED_DEST_MAP = new Map<string, TouristDestination>(
 const IMMUTABLE_SEED_FOOD_MAP = new Map<string, FoodItem>(
   initial200Foods.map((f) => [f.id, f])
 );
-// Timestamp of the static `/foods/food-*.jpg` asset bake (all cloud food overrides up to 2026-10-29T15:05:00Z are already baked into /foods/food-<id>.jpg)
-const BAKED_STATIC_FOOD_ASSETS_MS = new Date('2026-10-29T15:05:00.000Z').getTime();
+// Timestamp of the static `/foods/food-*.jpg` and recipe ledger bake (all cloud food overrides up to 2026-10-31T04:00:00Z are already baked into /foods/food-<id>.jpg and seedFoods)
+const BAKED_STATIC_FOOD_ASSETS_MS = new Date('2026-10-31T04:00:00.000Z').getTime();
 
 export const VAULT_KEYS = {
   FOODS: 'kft_permanent_food_overrides_v1',
@@ -870,6 +876,22 @@ export function applyFoodOverrides(
     const cleanedBaseDescKh = stripLegacyFoodPhraseKh(f.descriptionKh);
     const ov = safeOverrides[f.id];
     if (!ov || !ov.photoUrl) {
+      if (hasPlaceholderOrIncompleteRecipe(f.ingredients, f.steps)) {
+        const gen = generateAuthenticRecipeByDishName(
+          f.nameKh,
+          f.nameEn,
+          f.categorySlug,
+          cleanedBaseDescKh
+        );
+        anyChanged = true;
+        return {
+          ...f,
+          descriptionKh: gen.descriptionKh,
+          descriptionEn: f.descriptionEn || gen.descriptionEn,
+          ingredients: gen.ingredients,
+          steps: gen.steps,
+        };
+      }
       if (cleanedBaseDescKh !== (f.descriptionKh || '')) {
         anyChanged = true;
         return { ...f, descriptionKh: cleanedBaseDescKh };
@@ -881,6 +903,7 @@ export function applyFoodOverrides(
     const isSeedBundledStaticFoodPhoto =
       typeof seedPhotoUrl === 'string' && seedPhotoUrl.startsWith('/foods/');
     const ovTime = ov.updatedAt ? new Date(ov.updatedAt).getTime() : 0;
+    const isPreBakeOverride = ovTime > 0 && ovTime <= BAKED_STATIC_FOOD_ASSETS_MS + 1000;
     const useOverrideFoodPhoto =
       !isSeedBundledStaticFoodPhoto ||
       ov.photoUrl.startsWith('/foods/') ||
@@ -893,14 +916,68 @@ export function applyFoodOverrides(
     const nextCategorySlug = ov.categorySlug || f.categorySlug;
     const nextCategoryKh = ov.categoryKh || f.categoryKh;
     const nextCategoryEn = ov.categoryEn || f.categoryEn;
-    const nextDescriptionKh = stripLegacyFoodPhraseKh(ov.descriptionKh || cleanedBaseDescKh);
-    const nextDescriptionEn = ov.descriptionEn || f.descriptionEn;
+
+    const isSameDishNameAsSeed = Boolean(
+      seedFood && (nextNameKh || '').trim() === (seedFood.nameKh || '').trim()
+    );
+
+    let nextDescriptionKh = stripLegacyFoodPhraseKh(
+      isSameDishNameAsSeed && isPreBakeOverride && seedFood?.descriptionKh
+        ? seedFood.descriptionKh
+        : ov.descriptionKh || cleanedBaseDescKh
+    );
+    let nextDescriptionEn =
+      isSameDishNameAsSeed && isPreBakeOverride && seedFood?.descriptionEn
+        ? seedFood.descriptionEn
+        : ov.descriptionEn || f.descriptionEn;
+
     const nextCookTime = ov.cookTime || f.cookTime;
     const nextServings = ov.servings || f.servings;
     const nextCalories = typeof ov.calories === 'number' && ov.calories > 0 ? ov.calories : f.calories;
     const nextDifficulty = ov.difficulty || f.difficulty;
-    const nextIngredients = Array.isArray(ov.ingredients) && ov.ingredients.length > 0 ? ov.ingredients : f.ingredients;
-    const nextSteps = Array.isArray(ov.steps) && ov.steps.length > 0 ? ov.steps : f.steps;
+
+    let nextIngredients =
+      isSameDishNameAsSeed &&
+      seedFood &&
+      (isPreBakeOverride || hasPlaceholderOrIncompleteRecipe(ov.ingredients, ov.steps))
+        ? seedFood.ingredients
+        : Array.isArray(ov.ingredients) && ov.ingredients.length > 0
+        ? ov.ingredients
+        : f.ingredients;
+
+    let nextSteps =
+      isSameDishNameAsSeed &&
+      seedFood &&
+      (isPreBakeOverride || hasPlaceholderOrIncompleteRecipe(ov.ingredients, ov.steps))
+        ? seedFood.steps
+        : Array.isArray(ov.steps) && ov.steps.length > 0
+        ? ov.steps
+        : f.steps;
+
+    // If a dish was newly inserted or renamed on device to a different dish name, ensure its recipe matches the new dish!
+    if (
+      hasPlaceholderOrIncompleteRecipe(nextIngredients, nextSteps) ||
+      (!isSameDishNameAsSeed &&
+        seedFood &&
+        (areIngredientsIdentical(nextIngredients, seedFood.ingredients) ||
+          areStepsIdentical(nextSteps, seedFood.steps)))
+    ) {
+      const generated = generateAuthenticRecipeByDishName(
+        nextNameKh,
+        nextNameEn,
+        nextCategorySlug,
+        nextDescriptionKh
+      );
+      nextIngredients = generated.ingredients;
+      nextSteps = generated.steps;
+      if (!nextDescriptionKh || (seedFood && nextDescriptionKh === stripLegacyFoodPhraseKh(seedFood.descriptionKh))) {
+        nextDescriptionKh = generated.descriptionKh;
+      }
+      if (!nextDescriptionEn || (seedFood && nextDescriptionEn === seedFood.descriptionEn)) {
+        nextDescriptionEn = generated.descriptionEn;
+      }
+    }
+
     const nextPriceRiel = typeof ov.priceRiel === 'number' ? ov.priceRiel : f.priceRiel;
     const nextPriceUsd = typeof ov.priceUsd === 'number' ? ov.priceUsd : f.priceUsd;
     const nextAuditStatus = ov.imageAuditStatus || 'verified';

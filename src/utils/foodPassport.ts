@@ -124,7 +124,7 @@ export interface PassportLevel {
 }
 
 export const PASSPORT_LEVELS: PassportLevel[] = [
-  { min: 0, emoji: '🍚', titleKh: 'អ្នកថ្មីថ្មោង', titleEn: 'Rice Rookie', titleZh: '美食新手' },
+  { min: 0, emoji: '🍽️', titleKh: 'អ្នកចាប់ផ្តើមភ្លក់ម្ហូប', titleEn: 'Flavor Starter', titleZh: '风味初学者' },
   { min: 5, emoji: '🥢', titleKh: 'អ្នកភ្លក់ម្ហូប', titleEn: 'Curious Taster', titleZh: '好奇尝鲜者' },
   { min: 15, emoji: '🍜', titleKh: 'អ្នកស្វែងរកម្ហូប', titleEn: 'Flavor Explorer', titleZh: '风味探索家' },
   { min: 30, emoji: '🔥', titleKh: 'អ្នកជំនាញម្ហូបខ្មែរ', titleEn: 'Khmer Food Pro', titleZh: '高棉美食达人' },

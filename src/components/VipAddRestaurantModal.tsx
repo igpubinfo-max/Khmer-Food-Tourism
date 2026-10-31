@@ -947,27 +947,30 @@ export const VipAddRestaurantModal: React.FC = () => {
               </div>
             )}
 
-            <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center gap-3">
-              <img
-                src={appSettings.supportQrImageUrl || '/aba-khqr-499.png'}
-                alt="ABA KHQR"
-                className="w-28 h-36 object-contain rounded-xl border border-amber-400 bg-white p-1 shrink-0"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = '/donation-qr.png';
-                }}
-              />
-              <div className="space-y-1 text-left">
-                <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 font-bold text-[10px]">
-                  <QrCode className="w-3 h-3" />
-                  <span>ABA KHQR</span>
-                </div>
-                <div className="font-bold text-xs text-slate-900 dark:text-white">
+            <div className="p-4 rounded-3xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex flex-col items-center gap-3 text-center">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 font-bold text-xs">
+                <QrCode className="w-3.5 h-3.5" />
+                <span>ABA KHQR</span>
+              </div>
+              <div className="p-3 bg-white rounded-3xl border-2 border-amber-400 shadow-sm w-56 h-56 sm:w-64 sm:h-64 mx-auto flex items-center justify-center">
+                <img
+                  src={appSettings.supportQrImageUrl || '/aba-khqr-499.png'}
+                  alt="ABA KHQR"
+                  className="w-full h-full object-contain rounded-xl block bg-white"
+                  style={{ imageRendering: 'crisp-edges' }}
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = '/donation-qr.png';
+                  }}
+                />
+              </div>
+              <div className="space-y-1">
+                <div className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white">
                   {appSettings.supportAccountName || 'CHEA KIMSENG'} (095 245 959)
                 </div>
-                <div className="text-xs font-black text-emerald-700 dark:text-emerald-400 font-mono">
+                <div className="text-sm font-black text-emerald-700 dark:text-emerald-400 font-mono">
                   ${quota.additionalStoreFeeUsd.toFixed(2)} USD
                 </div>
-                <p className="text-[10px] text-slate-500">
+                <p className="text-[11px] text-slate-500 max-w-xs mx-auto">
                   {tr(
                     language,
                     'ស្កេនបង់ប្រាក់ រួចភ្ជាប់រូបវិក្កយបត្រខាងក្រោមដើម្បីបើកហាងបន្ថែមថ្មី។',

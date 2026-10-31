@@ -4,7 +4,9 @@ import type { FoodItem, Language, Restaurant, TouristDestination } from '../type
 import {
   getRestaurantRatingSummary,
   isAdminAccount,
+  isGpipRegisteredRestaurant,
   isUserVipActive,
+  openRestaurantGoogleExternal,
   sortRestaurantsWithVipRotation,
 } from '../types';
 import { tr, translateProvince } from '../utils/i18n';
@@ -248,7 +250,11 @@ export const GuideView: React.FC = () => {
   const openRestaurant = useCallback(
     (r: Restaurant) => {
       trackRestaurantView(r.id);
-      setSelectedRestaurant(r);
+      if (isGpipRegisteredRestaurant(r)) {
+        setSelectedRestaurant(r);
+      } else {
+        openRestaurantGoogleExternal(r, 'search');
+      }
     },
     [trackRestaurantView, setSelectedRestaurant]
   );

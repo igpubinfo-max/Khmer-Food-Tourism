@@ -1436,8 +1436,8 @@ function buildSeasoningIngredient(
   if (item.cat === 'dessert') {
     if (id === 'food-187') {
       return {
-        nameKh: 'ទឹកត្រី ស្ករត្នោត អំបិល និងខ្សែចងនំអន្សម',
-        nameEn: 'Fish sauce, palm sugar, sea salt & natural binding twine',
+        nameKh: 'ទឹកត្រី ស្ករត្នោត អំបិល និងទឹកខ្មេះធ្វើជ្រក់ត្រសក់',
+        nameEn: 'Fish sauce, palm sugar, sea salt & vinegar for cucumber pickle',
         amount: 'តាមចំណូលចិត្ត',
       };
     }
@@ -2336,26 +2336,74 @@ function buildStepsForDish(
     }
 
     // Rice plates / Sticky rice & jerky (food-168, 172, 175)
+    if (id === 'food-168') {
+      return [
+        {
+          stepNumber: 1,
+          instructionKh: 'ហាន់សាច់ជ្រូកជាប់ខ្លាញ់ស្តើងល្មម ប្រឡាក់ជាមួយទឹកដូង ខ្ទឹមស ស្ករត្នោត និងទឹកត្រីផ្អាប់ទុក ២០ នាទី រួចដាំបាយផ្កាម្លិះឱ្យឆ្អិនក្រអូប។',
+          instructionEn: 'Slice pork shoulder with marbling, marinate in coconut water, garlic, palm sugar, and fish sauce for 20 minutes, and steam jasmine rice.',
+        },
+        {
+          stepNumber: 2,
+          instructionKh: 'ដាក់អាំង ឬចៀនសាច់ជ្រូកលើភ្លើងធ្យូងរហូតដល់ឡើងពណ៌ក្រហមមាសឈ្ងុយ និងចៀនពងទាឱ្យស្រួយគែមពណ៌លឿងស្អាត។',
+          instructionEn: 'Charcoal-grill or pan-sear the marinated pork until caramelized, and fry duck eggs with crispy golden edges.',
+        },
+        {
+          stepNumber: 3,
+          instructionKh: 'ហាន់ត្រសក់ និងការ៉ុតលាយជ្រក់ជូរផ្អែមស្រួយៗ និងរៀបចំទឹកត្រីផ្អែមម្ទេសខ្ទឹមស និងទឹកស៊ុបឆ្អឹងជ្រូកក្តៅៗ។',
+          instructionEn: 'Prepare crisp sweet-and-sour cucumber-carrot pickles, garlic-chili fish sauce, and a side bowl of hot pork broth.',
+        },
+        {
+          stepNumber: 4,
+          instructionKh: 'ដួសបាយសក្តៅៗដាក់ចាន រៀបសាច់ជ្រូកចៀន ពងទាចៀន និងជ្រក់ត្រសក់ពីលើ រោយខ្លាញ់ស្លឹកខ្ទឹម រួចទទួលទានភ្លាមៗ។',
+          instructionEn: 'Mound hot jasmine rice on a plate, top with sliced pork, fried duck egg, and cucumber pickle, drizzle with scallion oil, and serve.',
+        },
+      ];
+    }
+    if (id === 'food-172') {
+      return [
+        {
+          stepNumber: 1,
+          instructionKh: 'លាងមាន់ស្រែឱ្យស្អាត ដាក់ស្ងោរក្នុងទឹកពុះជាមួយគល់ស្លឹកគ្រៃ ខ្ញី និងអំបិលបន្តិចរហូតដល់សាច់មាន់ឆ្អិនទន់ផ្អែម និងស្បែកលឿងភ្លឺ។',
+          instructionEn: 'Poach whole free-range chicken gently with bruised lemongrass, ginger, and salt until tender and golden-skinned.',
+        },
+        {
+          stepNumber: 2,
+          instructionKh: 'យកអង្ករផ្កាម្លិះទៅឆាជាមួយខ្លាញ់មាន់ និងខ្ទឹមសឱ្យឈ្ងុយ រួចដាក់ដាំជាមួយទឹកស៊ុបស្ងោរមាន់រហូតដល់គ្រាប់បាយឆ្អិនទន់ក្រអូប។',
+          instructionEn: 'Sauté jasmine rice in rendered chicken fat and garlic, then cook in the rich poaching broth until fluffy and fragrant.',
+        },
+        {
+          stepNumber: 3,
+          instructionKh: 'បុកខ្ញីខ្ចី ខ្ទឹមស និងម្ទេស លាយជាមួយទឹកត្រី ស្ករត្នោត និងទឹកក្រូចឆ្មារឱ្យចេញជាទឹកត្រីខ្ញីពិសេសដ៏ឈ្ងុយមុត។',
+          instructionEn: 'Pound young ginger, garlic, and chilies with fish sauce, palm sugar, and fresh lime juice for the signature ginger sauce.',
+        },
+        {
+          stepNumber: 4,
+          instructionKh: 'កាប់សាច់មាន់ស្ងោររៀបលើបាយមាន់ក្តៅៗ ផ្ទាប់ជាមួយត្រសក់ ជីរវ៉ាន់ស៊ុយ ទឹកត្រីខ្ញី និងទឹកស៊ុបមាន់ក្តៅៗ។',
+          instructionEn: 'Carve the poached chicken over fragrant chicken rice and serve with cucumber slices, cilantro, ginger fish sauce, and hot broth.',
+        },
+      ];
+    }
     return [
       {
         stepNumber: 1,
-        instructionKh: `ដាំបាយ ឬចំហុយបាយដំណើបឱ្យឆ្អិនទន់ក្រអូប និងរៀបចំគ្រឿងសាច់ (${mainIngKh}) ឱ្យស្អាត។`,
-        instructionEn: `Cook fragrant rice or steam glutinous rice until tender, and prepare the protein (${mainIngEn}).`,
+        instructionKh: 'លាងត្រាំអង្ករដំណើបឱ្យទន់ រួចដាក់ចំហុយក្នុងឡាំងស៊ឹងរហូតដល់បាយដំណើបឆ្អិនទន់ស្វិតក្រអូប។',
+        instructionEn: 'Soak glutinous rice and steam in a basket steamer until soft, glossy, and aromatic.',
       },
       {
         stepNumber: 2,
-        instructionKh: 'ចម្អិនសាច់ (អាំងភ្លើងធ្យូង ស្ងោរ ឬចៀនតាមមុខម្ហូប) រហូតដល់ឆ្អិនឈ្ងុយមានរសជាតិមុតល្អ។',
-        instructionEn: 'Grill, poach, or crisp the main protein until flavorful, tender, and aromatic.',
+        instructionKh: 'យកសាច់គោងៀតប្រឡាក់គ្រឿងទៅអាំងលើភ្លើងធ្យូង ឬចៀនភ្លើងល្មមរហូតដល់ឆ្អិនក្រហមឈ្ងុយ រួចដំ ឬហាន់ជាបន្ទះល្មមញ៉ាំ។',
+        instructionEn: 'Charcoal-grill or pan-sear the marinated sun-dried beef jerky until smoky and caramelized, then slice into tender strips.',
       },
       {
         stepNumber: 3,
-        instructionKh: `រៀបចំគ្រឿងផ្ទាប់ និងទឹកជ្រលក់ ឬទឹកស៊ុប (${subIngKh}) ទុកសម្រាប់ញ៉ាំអមគ្នា។`,
-        instructionEn: `Prepare the accompanying pickles, dipping sauce, or hot side broth (${subIngEn}).`,
+        instructionKh: 'ឈូសល្ហុងខ្ចី និងការ៉ុត លាយជាមួយទឹកខ្មេះ ស្ករត្នោត និងអំបិលបន្តិចឱ្យចេញជាជ្រក់ល្ហុងស្រួយជូរផ្អែម។',
+        instructionEn: 'Toss shredded green papaya and carrot with vinegar, palm sugar, and salt into a crunchy sweet-tangy pickle.',
       },
       {
         stepNumber: 4,
-        instructionKh: `ដួសបាយដាក់ចាន រៀបសាច់ពីលើ បន្ថែម ${herbKh} រួចទទួលទានក្តៅៗ។`,
-        instructionEn: `Plate the warm rice topped with the sliced meat and ${herbEn}, and serve with the accompaniments.`,
+        instructionKh: 'ដួសបាយដំណើបក្តៅៗដាក់ចាន រៀបសាច់គោងៀតអាំង និងជ្រក់ល្ហុងពីលើ រោយខ្ទឹមបំពង និងជីរ រួចទទួលទានភ្លាមៗ។',
+        instructionEn: 'Serve warm sticky rice topped with grilled beef jerky, crunchy papaya pickle, crispy shallots, and fresh herbs.',
       },
     ];
   }
@@ -2874,6 +2922,8 @@ export const additional100Foods: FoodItem[] = RAW_100_NEW_DISHES.map((item, idx)
   const descriptionKh =
     id === 'food-173'
       ? `${item.nameKh} គឺជាបាយឆាខ្មែរដ៏ឈ្ងុយឆ្ងាញ់ ចម្អិនពី ${cleanMainKh}។`
+      : id === 'food-187'
+      ? `${item.nameKh} គឺជានំប្រពៃណីខ្មែរដ៏ឈ្ងុយឆ្ងាញ់ ចៀនស្រួយសំបកក្រៅ ទន់ស្នូលសណ្តែកលឿង និងសាច់ជ្រូកបីជាន់ (${cleanMainKh})។`
       : item.cat === 'drink'
       ? `${item.nameKh} គឺជាភេសជ្ជៈខ្មែរដ៏ស្រស់ស្រាយ ផ្សំពី ${cleanMainKh}។`
       : item.cat === 'dessert'
@@ -2883,6 +2933,8 @@ export const additional100Foods: FoodItem[] = RAW_100_NEW_DISHES.map((item, idx)
   const descriptionEn =
     id === 'food-173'
       ? `${item.nameEn} is a popular wok-fried rice dish prepared with ${cleanMainEn}.`
+      : id === 'food-187'
+      ? `${item.nameEn} is a beloved traditional Cambodian savory sticky rice cake prepared with ${cleanMainEn}.`
       : item.cat === 'drink'
       ? `${item.nameEn} is a refreshing Cambodian beverage crafted with ${cleanMainEn}.`
       : item.cat === 'dessert'

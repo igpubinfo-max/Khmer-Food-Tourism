@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Restaurant, getRestaurantRatingSummary, getVipFeaturedRotationState, isAdminAccount } from '../types';
+import { Restaurant, getRestaurantRatingSummary, getVipFeaturedRotationState, isAdminAccount, isGpipRegisteredRestaurant, openRestaurantGoogleExternal } from '../types';
 import { useApp } from '../context/AppContext';
 import { MapPin, Phone, Star, Navigation, CheckCircle2, AlertCircle, Edit2, Trash2, Heart, Crown, Utensils } from 'lucide-react';
 import { sanitizeDialablePhone, resolveRestaurantPhoneOnDemand } from '../services/googlePlacesService';
@@ -72,6 +72,7 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(({
 }) => {
   const ratingSummary = getRestaurantRatingSummary(restaurant);
   const loc = useMemo(() => getLocalizedRestaurant(restaurant, language), [restaurant, language]);
+  const isGpipRegistered = useMemo(() => isGpipRegisteredRestaurant(restaurant), [restaurant]);
   const resolvedShopPhotoUrl = useMemo(() => {
     const raw =
       restaurant.photoUrl && !restaurant.photoUrl.startsWith('/foods/') && !restaurant.photoUrl.startsWith('/restaurants/')
@@ -81,6 +82,65 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(({
         : '/Shop/rest-1.jpg';
     return raw.startsWith('/Shop/') && !raw.includes('?') ? `${raw}?v=20261030v1` : raw;
   }, [restaurant.photoUrl, restaurant.profileImage]);
+
+  // For non-GPIP registered restaurants: clean, compact list layout (small icon/image on the left, restaurant name on the right)
+  // Tapping opens its Google search directly.
+  if (!isGpipRegistered) {
+    return (
+      <div
+        onClick={() => {
+          trackRestaurantView(restaurant.id);
+          openRestaurantGoogleExternal(restaurant, 'search');
+        }}
+        className="group bg-white dark:bg-slate-800/90 hover:bg-emerald-50/40 dark:hover:bg-slate-800 rounded-2xl px-3 py-2.5 shadow-2xs hover:shadow-sm transition-all duration-150 cursor-pointer flex items-center gap-3 border border-slate-200/90 dark:border-slate-700/80 active:scale-[0.99]"
+      >
+        <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-700 shrink-0 border border-slate-200/70 dark:border-slate-600/70">
+          <img
+            src={resolvedShopPhotoUrl}
+            alt={loc.name}
+            className="w-full h-full object-cover"
+            loading="lazy"
+            decoding="async"
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).src = '/Shop/rest-1.jpg?v=20261030v1';
+            }}
+          />
+        </div>
+
+        <h3 className="font-bold text-sm sm:text-base text-[#0F172A] dark:text-white group-hover:text-[#059669] dark:group-hover:text-emerald-400 transition line-clamp-1 leading-snug font-khmer flex-1 min-w-0">
+          {loc.name}
+        </h3>
+
+        {isAdmin && (
+          <div className="flex items-center gap-1.5 shrink-0" onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                (window as any).__kft_manage_initial_tab = 'info';
+                openManageMyVipStore(restaurant.id);
+              }}
+              className="p-1.5 rounded-lg bg-amber-400 hover:bg-amber-500 text-slate-950 shadow-2xs transition active:scale-95 cursor-pointer"
+              title={tr(language, 'គ្រប់គ្រងហាងនេះ (Admin)', 'Manage Shop (Admin)', '管理店铺（管理员）')}
+            >
+              <Edit2 className="w-3.5 h-3.5" />
+            </button>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                deleteRestaurant(restaurant.id);
+              }}
+              className="p-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white shadow-2xs transition active:scale-95 cursor-pointer"
+              title={tr(language, 'លុបហាងនេះ (Admin)', 'Delete Shop (Admin)', '删除店铺（管理员）')}
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div 

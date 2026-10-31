@@ -1012,51 +1012,54 @@ export const UpgradeVipModal: React.FC = () => {
                   </span>
                 </div>
 
-                <div className="flex gap-3 items-stretch">
+                <div className="flex flex-col items-center gap-3">
                   <div
                     onClick={handleLaunchAbaApp}
-                    className="relative p-1.5 bg-white rounded-2xl shadow-sm border-2 border-emerald-500/40 w-[34%] max-w-[140px] shrink-0 cursor-pointer active:scale-98 transition self-start"
+                    className="relative p-3 bg-white rounded-3xl shadow-md border-2 border-emerald-500/45 w-56 h-56 sm:w-64 sm:h-64 mx-auto flex items-center justify-center cursor-pointer active:scale-98 transition"
                   >
                     <img
                       src={qrCodeDataUrl}
                       alt="ABA KHQR"
-                      className="w-full h-auto object-contain rounded-xl block bg-white"
+                      className="w-full h-full object-contain rounded-xl block bg-white"
+                      style={{ imageRendering: 'crisp-edges' }}
                     />
                   </div>
 
-                  <div className="flex-1 min-w-0 flex flex-col justify-between gap-1.5">
-                    <div className="px-2.5 py-1.5 rounded-xl bg-sky-50 dark:bg-slate-800/80 border border-sky-200 dark:border-slate-700">
-                      <div className="text-[11px] font-bold text-slate-700 dark:text-slate-200 leading-snug">
+                  <div className="w-full space-y-2">
+                    <div className="px-3 py-2 rounded-2xl bg-sky-50 dark:bg-slate-800/80 border border-sky-200 dark:border-slate-700 flex items-center justify-between gap-2">
+                      <div className="text-xs font-bold text-slate-700 dark:text-slate-200 leading-snug">
                         {tr(language, 'ឈ្មោះគណនី៖ ជា គីមសេង', 'Account: CHEA KIMSENG', '账户：CHEA KIMSENG')}
                       </div>
-                      <div className="font-mono font-extrabold text-sm text-[#004B87] dark:text-sky-400 leading-tight">
+                      <div className="font-mono font-extrabold text-sm text-[#004B87] dark:text-sky-400 leading-tight shrink-0">
                         095 245 959
                       </div>
                     </div>
-                    <button
-                      type="button"
-                      onClick={handleSaveQrImage}
-                      className="py-2 px-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer border border-slate-200 dark:border-slate-700"
-                    >
-                      <Download className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                      <span className="truncate">{tr(language, 'រក្សាទុក QR', 'Save QR', '保存二维码')}</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleCopyAccount}
-                      className="py-2 px-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer border border-slate-200 dark:border-slate-700"
-                    >
-                      {hasCopiedAccount ? (
-                        <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                      ) : (
-                        <Copy className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                      )}
-                      <span className="truncate">
-                        {hasCopiedAccount
-                          ? tr(language, 'បានចម្លង!', 'Copied!', '已复制！')
-                          : tr(language, 'ចម្លងលេខ', 'Copy number', '复制号码')}
-                      </span>
-                    </button>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={handleSaveQrImage}
+                        className="py-2.5 px-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer border border-slate-200 dark:border-slate-700"
+                      >
+                        <Download className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                        <span className="truncate">{tr(language, 'រក្សាទុកកូដ QR', 'Save QR', '保存二维码')}</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleCopyAccount}
+                        className="py-2.5 px-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer border border-slate-200 dark:border-slate-700"
+                      >
+                        {hasCopiedAccount ? (
+                          <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                        ) : (
+                          <Copy className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                        )}
+                        <span className="truncate">
+                          {hasCopiedAccount
+                            ? tr(language, 'បានចម្លង!', 'Copied!', '已复制！')
+                            : tr(language, 'ចម្លង 095 245 959', 'Copy 095 245 959', '复制 095 245 959')}
+                        </span>
+                      </button>
+                    </div>
                   </div>
                 </div>
 

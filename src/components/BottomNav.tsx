@@ -31,9 +31,13 @@ export const BottomNav: React.FC = () => {
   return (
     <nav
       id="kft-bottom-nav"
-      className="shrink-0 w-full z-30 bg-[#064E3B] text-white border-t border-emerald-400/20 shadow-[0_-4px_16px_rgba(0,0,0,0.28)]"
+      aria-label={tr(language, 'ម៉ឺនុយមេខាងក្រោម', 'Primary bottom navigation', '底部主导航')}
+      className="relative shrink-0 w-full z-30 bg-gradient-to-b from-[#111A2E] via-[#0C1425] to-[#070C18] text-slate-200 border-t border-slate-700/80 shadow-[0_-10px_28px_rgba(2,6,23,0.65)] select-none"
     >
-      <div className="max-w-md mx-auto grid grid-cols-6 px-1 pt-1.5 pb-0.5">
+      {/* Subtle luxury gold hairline highlight across top edge */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-amber-400/55 to-transparent" />
+
+      <div className="max-w-md mx-auto grid grid-cols-6 gap-1 px-1.5 py-1.5">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeTab === item.id;
@@ -41,6 +45,7 @@ export const BottomNav: React.FC = () => {
             <button
               key={item.id}
               type="button"
+              aria-current={isActive ? 'page' : undefined}
               onClick={() => {
                 if (activeTab === item.id) {
                   const mainEl = document.getElementById('kft-main-scroll');
@@ -49,19 +54,29 @@ export const BottomNav: React.FC = () => {
                   setActiveTab(item.id);
                 }
               }}
-              className={`relative flex flex-col items-center justify-center py-1 px-0.5 rounded-xl transition-colors duration-150 cursor-pointer ${
+              className={`group relative flex flex-col items-center justify-center py-1 px-0.5 rounded-2xl transition-all duration-200 cursor-pointer ${
                 isActive
-                  ? 'text-amber-300'
-                  : 'text-emerald-100/75 hover:text-white'
+                  ? 'bg-gradient-to-b from-amber-400/20 via-amber-500/10 to-amber-500/5 border border-amber-400/45 text-amber-300 shadow-[0_4px_14px_rgba(251,191,36,0.16)]'
+                  : 'border border-transparent text-slate-400 hover:text-slate-100 hover:bg-slate-800/60 active:scale-95'
               }`}
             >
               {isActive && (
-                <span className="absolute -top-1.5 w-6 h-1 rounded-full bg-amber-400" />
+                <span className="absolute -top-1.5 w-6 h-1 rounded-full bg-gradient-to-r from-amber-300 via-yellow-300 to-amber-500 shadow-[0_0_8px_rgba(251,191,36,0.8)]" />
               )}
-              <div className={`p-1 rounded-xl transition-colors duration-150 ${isActive ? 'bg-white/15' : ''}`}>
-                <Icon className="w-5 h-5" />
+              <div
+                className={`p-1 rounded-xl transition-transform duration-200 ${
+                  isActive
+                    ? 'text-amber-300 scale-105'
+                    : 'text-slate-400 group-hover:text-slate-200'
+                }`}
+              >
+                <Icon className="w-[19px] h-[19px]" />
               </div>
-              <span className={`text-[10px] sm:text-[11px] mt-0.5 leading-normal truncate max-w-full ${isActive ? 'font-extrabold text-amber-300' : 'font-semibold'}`}>
+              <span
+                className={`text-[10px] sm:text-[11px] mt-0.5 leading-tight truncate max-w-full tracking-tight font-khmer ${
+                  isActive ? 'font-extrabold text-amber-300' : 'font-medium text-slate-400 group-hover:text-slate-200'
+                }`}
+              >
                 {tr(language, item.labelKh, item.labelEn, item.labelZh)}
               </span>
             </button>
